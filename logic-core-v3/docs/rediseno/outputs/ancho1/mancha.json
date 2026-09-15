@@ -1,0 +1,768 @@
+[
+  {
+    "perfil": "1024x768",
+    "ancho": 1024,
+    "alto": 768,
+    "aspecto": 1.3333,
+    "procedencia": "`scripts-b4/perfiles.ts` — «justo abajo del umbral», 1024×768",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 768,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 0,
+      "titular": {
+        "x": 184,
+        "y": 244.5625,
+        "ancho": 534.65625,
+        "alto": 151.859375
+      },
+      "linea1": {
+        "x": 184,
+        "y": 244.5625,
+        "ancho": 406.640625,
+        "alto": 54.265625,
+        "tamano": "49.7976px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 184,
+        "y": 298.828125,
+        "ancho": 410.453125,
+        "alto": 97.59375,
+        "tamano": "89.547px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 184,
+        "y": 428.421875,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1024,
+        "alto": 768
+      }
+    },
+    "mancha": {
+      "hay": false,
+      "area": 0,
+      "x0": null,
+      "x1": null,
+      "y0": null,
+      "y1": null,
+      "anchoPx": 0,
+      "altoPx": 0,
+      "fraccionDelAncho": 0,
+      "fraccionDelCuadro": 0
+    },
+    "tintaHasta": 592,
+    "bordeSeguroX": null,
+    "bordeSeguroFraccion": 0,
+    "aireHastaLaMancha": null,
+    "aireHastaElBordeSeguro": null
+  },
+  {
+    "perfil": "1024x900",
+    "ancho": 1024,
+    "alto": 900,
+    "aspecto": 1.1378,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 1024,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 0,
+      "titular": {
+        "x": 184,
+        "y": 310.5625,
+        "ancho": 534.65625,
+        "alto": 151.859375
+      },
+      "linea1": {
+        "x": 184,
+        "y": 310.5625,
+        "ancho": 406.640625,
+        "alto": 54.265625,
+        "tamano": "49.7976px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 184,
+        "y": 364.828125,
+        "ancho": 410.453125,
+        "alto": 97.59375,
+        "tamano": "89.547px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 184,
+        "y": 494.421875,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1024,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": false,
+      "area": 0,
+      "x0": null,
+      "x1": null,
+      "y0": null,
+      "y1": null,
+      "anchoPx": 0,
+      "altoPx": 0,
+      "fraccionDelAncho": 0,
+      "fraccionDelCuadro": 0
+    },
+    "tintaHasta": 592,
+    "bordeSeguroX": null,
+    "bordeSeguroFraccion": 0,
+    "aireHastaLaMancha": null,
+    "aireHastaElBordeSeguro": null
+  },
+  {
+    "perfil": "1280x800",
+    "ancho": 1280,
+    "alto": 800,
+    "aspecto": 1.6,
+    "procedencia": "`src/components/layout/home-intro/introLanding.invariant.ts:48-52` — una de las tres ventanas del aterrizaje",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 800,
+      "desvios": [
+        {
+          "alto": 1641,
+          "sobra": 41
+        },
+        {
+          "alto": 896,
+          "sobra": 96
+        },
+        {
+          "alto": 878,
+          "sobra": 78
+        }
+      ]
+    },
+    "dom": {
+      "innerWidth": 1280,
+      "innerHeight": 800,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 157.4375,
+        "ancho": 414.390625,
+        "alto": 334.125
+      },
+      "linea1": {
+        "x": 188,
+        "y": 157.4375,
+        "ancho": 414.390625,
+        "alto": 119.53125,
+        "tamano": "54.8454px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 276.96875,
+        "ancho": 414.390625,
+        "alto": 214.59375,
+        "tamano": "98.441px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 523.5625,
+        "ancho": 306.796875,
+        "alto": 48
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1280,
+        "alto": 800
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 62999,
+      "x0": 606,
+      "x1": 1059,
+      "y0": 252,
+      "y1": 559,
+      "anchoPx": 454,
+      "altoPx": 308,
+      "fraccionDelAncho": 0.3546875,
+      "fraccionDelCuadro": 0.0615224609375
+    },
+    "tintaHasta": 490,
+    "bordeSeguroX": 607,
+    "bordeSeguroFraccion": 0.10714285714285714,
+    "aireHastaLaMancha": 116,
+    "aireHastaElBordeSeguro": 117
+  },
+  {
+    "perfil": "1280x900",
+    "ancho": 1280,
+    "alto": 900,
+    "aspecto": 1.4222,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 207.4375,
+        "ancho": 414.390625,
+        "alto": 334.125
+      },
+      "linea1": {
+        "x": 188,
+        "y": 207.4375,
+        "ancho": 414.390625,
+        "alto": 119.53125,
+        "tamano": "54.8454px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 326.96875,
+        "ancho": 414.390625,
+        "alto": 214.59375,
+        "tamano": "98.441px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 573.5625,
+        "ancho": 306.796875,
+        "alto": 48
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1280,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 79037,
+      "x0": 567,
+      "x1": 1073,
+      "y0": 282,
+      "y1": 625,
+      "anchoPx": 507,
+      "altoPx": 344,
+      "fraccionDelAncho": 0.39609375,
+      "fraccionDelCuadro": 0.06860850694444444
+    },
+    "tintaHasta": 490,
+    "bordeSeguroX": 568,
+    "bordeSeguroFraccion": 0.1130952380952381,
+    "aireHastaLaMancha": 77,
+    "aireHastaElBordeSeguro": 78
+  },
+  {
+    "perfil": "1440x900",
+    "ancho": 1440,
+    "alto": 900,
+    "aspecto": 1.6,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 298.203125,
+        "ancho": 478.390625,
+        "alto": 176.578125
+      },
+      "linea1": {
+        "x": 188,
+        "y": 298.203125,
+        "ancho": 473.6875,
+        "alto": 63.21875,
+        "tamano": "58.0003px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 361.421875,
+        "ancho": 476.703125,
+        "alto": 113.359375,
+        "tamano": "104px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 506.78125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1440,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 79867,
+      "x0": 682,
+      "x1": 1191,
+      "y0": 283,
+      "y1": 629,
+      "anchoPx": 510,
+      "altoPx": 347,
+      "fraccionDelAncho": 0.3541666666666667,
+      "fraccionDelCuadro": 0.06162577160493827
+    },
+    "tintaHasta": 662,
+    "bordeSeguroX": 682,
+    "bordeSeguroFraccion": 0.14606741573033707,
+    "aireHastaLaMancha": 20,
+    "aireHastaElBordeSeguro": 20
+  },
+  {
+    "perfil": "1600x900",
+    "ancho": 1600,
+    "alto": 900,
+    "aspecto": 1.7778,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": [
+        {
+          "alto": 910,
+          "sobra": 10
+        }
+      ]
+    },
+    "dom": {
+      "innerWidth": 1600,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 293.453125,
+        "ancho": 542.390625,
+        "alto": 186.078125
+      },
+      "linea1": {
+        "x": 188,
+        "y": 293.453125,
+        "ancho": 499.421875,
+        "alto": 66.65625,
+        "tamano": "61.1552px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 360.109375,
+        "ancho": 502.1875,
+        "alto": 119.421875,
+        "tamano": "109.558px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 511.53125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1600,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 80847,
+      "x0": 797,
+      "x1": 1310,
+      "y0": 286,
+      "y1": 634,
+      "anchoPx": 514,
+      "altoPx": 349,
+      "fraccionDelAncho": 0.32125,
+      "fraccionDelCuadro": 0.05614375
+    },
+    "tintaHasta": 687,
+    "bordeSeguroX": 797,
+    "bordeSeguroFraccion": 0.18617021276595744,
+    "aireHastaLaMancha": 110,
+    "aireHastaElBordeSeguro": 110
+  },
+  {
+    "perfil": "1920x900",
+    "ancho": 1920,
+    "alto": 900,
+    "aspecto": 2.1333,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": [
+        {
+          "alto": 1903,
+          "sobra": 103
+        },
+        {
+          "alto": 989,
+          "sobra": 89
+        }
+      ]
+    },
+    "dom": {
+      "innerWidth": 1920,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 283.96875,
+        "ancho": 670.390625,
+        "alto": 205.0625
+      },
+      "linea1": {
+        "x": 188,
+        "y": 283.96875,
+        "ancho": 550.953125,
+        "alto": 73.53125,
+        "tamano": "67.4648px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 357.5,
+        "ancho": 553.15625,
+        "alto": 131.53125,
+        "tamano": "120.676px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 521.03125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1920,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 83246,
+      "x0": 1025,
+      "x1": 1548,
+      "y0": 292,
+      "y1": 646,
+      "anchoPx": 524,
+      "altoPx": 355,
+      "fraccionDelAncho": 0.27291666666666664,
+      "fraccionDelCuadro": 0.04817476851851852
+    },
+    "tintaHasta": 738,
+    "bordeSeguroX": 1025,
+    "bordeSeguroFraccion": 0.14903846153846154,
+    "aireHastaLaMancha": 287,
+    "aireHastaElBordeSeguro": 287
+  },
+  {
+    "perfil": "1920x1080",
+    "ancho": 1920,
+    "alto": 1080,
+    "aspecto": 1.7778,
+    "procedencia": "el ancho de las capturas del reporte (`MEDICION-NAVEGADOR.md` §1), y el ancho en el que B1 y B2 publicaron sus tablas. Es además `--container-tope`.",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 1080,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 1920,
+      "innerHeight": 1080,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 188,
+        "y": 373.96875,
+        "ancho": 670.390625,
+        "alto": 205.0625
+      },
+      "linea1": {
+        "x": 188,
+        "y": 373.96875,
+        "ancho": 550.953125,
+        "alto": 73.53125,
+        "tamano": "67.4648px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 188,
+        "y": 447.5,
+        "ancho": 553.15625,
+        "alto": 131.53125,
+        "tamano": "120.676px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 188,
+        "y": 611.03125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 1920,
+        "alto": 1080
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 116611,
+      "x0": 956,
+      "x1": 1572,
+      "y0": 343,
+      "y1": 761,
+      "anchoPx": 617,
+      "altoPx": 419,
+      "fraccionDelAncho": 0.32135416666666666,
+      "fraccionDelCuadro": 0.05623601466049383
+    },
+    "tintaHasta": 738,
+    "bordeSeguroX": 956,
+    "bordeSeguroFraccion": 0.1346153846153846,
+    "aireHastaLaMancha": 218,
+    "aireHastaElBordeSeguro": 218
+  },
+  {
+    "perfil": "2560x900",
+    "ancho": 2560,
+    "alto": 900,
+    "aspecto": 2.8444,
+    "procedencia": "ancho de la instrucción de ANCHO-1 · alto 900: el alto de referencia de escritorio de S0, con el que se compuso todo (`_lib/__tests__/s10-referencias.ts`, `ALTOS_DECLARADOS`)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 900,
+      "desvios": [
+        {
+          "alto": 1925,
+          "sobra": 125
+        },
+        {
+          "alto": 989,
+          "sobra": 89
+        }
+      ]
+    },
+    "dom": {
+      "innerWidth": 2560,
+      "innerHeight": 900,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 476,
+        "y": 283.96875,
+        "ancho": 696,
+        "alto": 205.0625
+      },
+      "linea1": {
+        "x": 476,
+        "y": 283.96875,
+        "ancho": 550.953125,
+        "alto": 73.53125,
+        "tamano": "67.4648px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 476,
+        "y": 357.5,
+        "ancho": 553.15625,
+        "alto": 131.53125,
+        "tamano": "120.676px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 476,
+        "y": 521.03125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 2560,
+        "alto": 900
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 90095,
+      "x0": 1477,
+      "x1": 2027,
+      "y0": 309,
+      "y1": 677,
+      "anchoPx": 551,
+      "altoPx": 369,
+      "fraccionDelAncho": 0.215234375,
+      "fraccionDelCuadro": 0.03910373263888889
+    },
+    "tintaHasta": 1026,
+    "bordeSeguroX": 1477,
+    "bordeSeguroFraccion": 0.10576923076923077,
+    "aireHastaLaMancha": 451,
+    "aireHastaElBordeSeguro": 451
+  },
+  {
+    "perfil": "2560x1440",
+    "ancho": 2560,
+    "alto": 1440,
+    "aspecto": 1.7778,
+    "procedencia": "`scripts-b11/b11-comun.ts`, `PERFIL_2560` — «el ancho del peor caso del hero» (`MEDICION-NAVEGADOR.md` §1 paso 2)",
+    "entereza": {
+      "paneles": 8,
+      "tokenDelTema": "1920px",
+      "fuentes": "loaded",
+      "altoDelHero": 1440,
+      "desvios": []
+    },
+    "dom": {
+      "innerWidth": 2560,
+      "innerHeight": 1440,
+      "dpr": 1,
+      "scrollY": 0,
+      "visibilityState": "visible",
+      "escenas": 1,
+      "titular": {
+        "x": 476,
+        "y": 553.96875,
+        "ancho": 696,
+        "alto": 205.0625
+      },
+      "linea1": {
+        "x": 476,
+        "y": 553.96875,
+        "ancho": 550.953125,
+        "alto": 73.53125,
+        "tamano": "67.4648px",
+        "familia": "archivo, \"archivo Fallback\", system-ui, sans-serif"
+      },
+      "linea2": {
+        "x": 476,
+        "y": 627.5,
+        "ancho": 553.15625,
+        "alto": 131.53125,
+        "tamano": "120.676px",
+        "familia": "chivo, \"chivo Fallback\", system-ui, sans-serif"
+      },
+      "bajada": {
+        "x": 476,
+        "y": 791.03125,
+        "ancho": 328.46875,
+        "alto": 24
+      },
+      "panel": {
+        "x": 0,
+        "y": 0,
+        "ancho": 2560,
+        "alto": 1440
+      }
+    },
+    "mancha": {
+      "hay": true,
+      "area": 207594,
+      "x0": 1275,
+      "x1": 2097,
+      "y0": 457,
+      "y1": 1016,
+      "anchoPx": 823,
+      "altoPx": 560,
+      "fraccionDelAncho": 0.321484375,
+      "fraccionDelCuadro": 0.0563134765625
+    },
+    "tintaHasta": 1026,
+    "bordeSeguroX": 1275,
+    "bordeSeguroFraccion": 0.18269230769230768,
+    "aireHastaLaMancha": 249,
+    "aireHastaElBordeSeguro": 249
+  }
+]

@@ -1,0 +1,1184 @@
+{
+  "velocidades": {
+    "velocidadDelLogo": [
+      {
+        "cuadro": "1280×800",
+        "fraccion": 0.4741
+      },
+      {
+        "cuadro": "1440×900",
+        "fraccion": 0.4741
+      },
+      {
+        "cuadro": "1920×1080",
+        "fraccion": 0.498
+      },
+      {
+        "cuadro": "2560×1440",
+        "fraccion": 0.498
+      }
+    ],
+    "avanceEm": 8.172368704172666,
+    "dLogo": 0.5697236564771994,
+    "dTinta": 0.15833333333333333,
+    "dLogo2": 0.4979886745000929,
+    "dTinta2": 0.45
+  },
+  "huecos": [
+    {
+      "cuadro": "1280×800",
+      "tintaHasta": 490,
+      "bordeSeguro": 607,
+      "hueco": 117
+    },
+    {
+      "cuadro": "1440×900",
+      "tintaHasta": 662,
+      "bordeSeguro": 682,
+      "hueco": 20
+    },
+    {
+      "cuadro": "1920×1080",
+      "tintaHasta": 738,
+      "bordeSeguro": 956,
+      "hueco": 218
+    },
+    {
+      "cuadro": "2560×1440",
+      "tintaHasta": 1026,
+      "bordeSeguro": 1275,
+      "hueco": 249
+    }
+  ],
+  "escala": [
+    {
+      "escala": 0.0049,
+      "razon": 0.7,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 700.5,
+          "anchoTinta": 307.7,
+          "hueco": 210.5
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 788.1,
+          "anchoTinta": 346.2,
+          "hueco": 126.1
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1082.8,
+          "anchoTinta": 417.2,
+          "hueco": 344.8
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1443.8,
+          "anchoTinta": 556.3,
+          "hueco": 417.8
+        }
+      ]
+    },
+    {
+      "escala": 0.006,
+      "razon": 0.8571,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 651.4,
+          "anchoTinta": 376.1,
+          "hueco": 161.4
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 732.8,
+          "anchoTinta": 423.1,
+          "hueco": 70.8
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1016.4,
+          "anchoTinta": 509.7,
+          "hueco": 278.4
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1355.2,
+          "anchoTinta": 679.7,
+          "hueco": 329.2
+        }
+      ]
+    },
+    {
+      "escala": 0.007,
+      "razon": 1,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 606.8,
+          "anchoTinta": 438,
+          "hueco": 116.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 682.7,
+          "anchoTinta": 492.8,
+          "hueco": 20.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 956.1,
+          "anchoTinta": 593.6,
+          "hueco": 218.1
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1274.9,
+          "anchoTinta": 791.5,
+          "hueco": 248.9
+        }
+      ]
+    },
+    {
+      "escala": 0.008,
+      "razon": 1.1429,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 562.3,
+          "anchoTinta": 499.9,
+          "hueco": 72.3
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 632.6,
+          "anchoTinta": 562.3,
+          "hueco": -29.4
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 896,
+          "anchoTinta": 677.2,
+          "hueco": 158
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1194.6,
+          "anchoTinta": 903,
+          "hueco": 168.6
+        }
+      ]
+    },
+    {
+      "escala": 0.009,
+      "razon": 1.2857,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 517.8,
+          "anchoTinta": 561.6,
+          "hueco": 27.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 582.6,
+          "anchoTinta": 631.8,
+          "hueco": -79.4
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 835.9,
+          "anchoTinta": 760.6,
+          "hueco": 97.9
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1114.6,
+          "anchoTinta": 1014.2,
+          "hueco": 88.6
+        }
+      ]
+    },
+    {
+      "escala": 0.0105,
+      "razon": 1.5,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 451.2,
+          "anchoTinta": 653.9,
+          "hueco": -38.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 507.6,
+          "anchoTinta": 735.7,
+          "hueco": -154.4
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 746,
+          "anchoTinta": 885.4,
+          "hueco": 8
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 994.6,
+          "anchoTinta": 1180.6,
+          "hueco": -31.4
+        }
+      ]
+    }
+  ],
+  "distancia": [
+    {
+      "distancia": 14,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 512.5,
+          "anchoTinta": 568.8,
+          "hueco": 22.5
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 576.6,
+          "anchoTinta": 639.9,
+          "hueco": -85.4
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 828.6,
+          "anchoTinta": 770.4,
+          "hueco": 90.6
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1104.9,
+          "anchoTinta": 1027.2,
+          "hueco": 78.9
+        }
+      ]
+    },
+    {
+      "distancia": 16,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 555.8,
+          "anchoTinta": 508.8,
+          "hueco": 65.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 625.3,
+          "anchoTinta": 572.4,
+          "hueco": -36.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 887.2,
+          "anchoTinta": 689.3,
+          "hueco": 149.2
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1182.9,
+          "anchoTinta": 919,
+          "hueco": 156.9
+        }
+      ]
+    },
+    {
+      "distancia": 19,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 606.8,
+          "anchoTinta": 438,
+          "hueco": 116.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 682.7,
+          "anchoTinta": 492.8,
+          "hueco": 20.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 956.1,
+          "anchoTinta": 593.6,
+          "hueco": 218.1
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1274.9,
+          "anchoTinta": 791.5,
+          "hueco": 248.9
+        }
+      ]
+    },
+    {
+      "distancia": 22,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 645.9,
+          "anchoTinta": 383.8,
+          "hueco": 155.9
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 726.6,
+          "anchoTinta": 431.8,
+          "hueco": 64.6
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1009,
+          "anchoTinta": 520.3,
+          "hueco": 271
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1345.3,
+          "anchoTinta": 693.7,
+          "hueco": 319.3
+        }
+      ]
+    },
+    {
+      "distancia": 26,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 685.4,
+          "anchoTinta": 328.9,
+          "hueco": 195.4
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 771.1,
+          "anchoTinta": 370,
+          "hueco": 109.1
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1062.5,
+          "anchoTinta": 445.9,
+          "hueco": 324.5
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1416.7,
+          "anchoTinta": 594.6,
+          "hueco": 390.7
+        }
+      ]
+    },
+    {
+      "distancia": 30,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 715.3,
+          "anchoTinta": 287.5,
+          "hueco": 225.3
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 804.7,
+          "anchoTinta": 323.4,
+          "hueco": 142.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1102.9,
+          "anchoTinta": 389.8,
+          "hueco": 364.9
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1470.6,
+          "anchoTinta": 519.7,
+          "hueco": 444.6
+        }
+      ]
+    }
+  ],
+  "fov": [
+    {
+      "fov": 26,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 494,
+          "anchoTinta": 594.1,
+          "hueco": 4
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 555.7,
+          "anchoTinta": 668.4,
+          "hueco": -106.3
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 804.4,
+          "anchoTinta": 803.5,
+          "hueco": 66.4
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1072.5,
+          "anchoTinta": 1071.3,
+          "hueco": 46.5
+        }
+      ]
+    },
+    {
+      "fov": 30,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 552.4,
+          "anchoTinta": 513.2,
+          "hueco": 62.4
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 621.5,
+          "anchoTinta": 577.4,
+          "hueco": -40.5
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 883,
+          "anchoTinta": 694.7,
+          "hueco": 145
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1177.4,
+          "anchoTinta": 926.2,
+          "hueco": 151.4
+        }
+      ]
+    },
+    {
+      "fov": 35,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 606.8,
+          "anchoTinta": 438,
+          "hueco": 116.8
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 682.7,
+          "anchoTinta": 492.8,
+          "hueco": 20.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 956.1,
+          "anchoTinta": 593.6,
+          "hueco": 218.1
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1274.9,
+          "anchoTinta": 791.5,
+          "hueco": 248.9
+        }
+      ]
+    },
+    {
+      "fov": 40,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 647.7,
+          "anchoTinta": 381.5,
+          "hueco": 157.7
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 728.7,
+          "anchoTinta": 429.2,
+          "hueco": 66.7
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1011,
+          "anchoTinta": 517.8,
+          "hueco": 273
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1348,
+          "anchoTinta": 690.5,
+          "hueco": 322
+        }
+      ]
+    },
+    {
+      "fov": 46,
+      "filas": [
+        {
+          "cuadro": "1280×800",
+          "izquierda": 685.1,
+          "anchoTinta": 329.9,
+          "hueco": 195.1
+        },
+        {
+          "cuadro": "1440×900",
+          "izquierda": 770.8,
+          "anchoTinta": 371.1,
+          "hueco": 108.8
+        },
+        {
+          "cuadro": "1920×1080",
+          "izquierda": 1061.1,
+          "anchoTinta": 448.7,
+          "hueco": 323.1
+        },
+        {
+          "cuadro": "2560×1440",
+          "izquierda": 1414.8,
+          "anchoTinta": 598.3,
+          "hueco": 388.8
+        }
+      ]
+    }
+  ],
+  "s15e": {
+    "lugarEnUno": 1,
+    "controlDeHoy": [
+      {
+        "ventana": "1440×810",
+        "cuna": 35.33,
+        "deltaDeAlto": 0.145,
+        "peorEsquina": 28.3
+      },
+      {
+        "ventana": "1920×1080",
+        "cuna": 47.11,
+        "deltaDeAlto": 0.193,
+        "peorEsquina": 37.7
+      },
+      {
+        "ventana": "1280×800",
+        "cuna": 34.37,
+        "deltaDeAlto": 0.213,
+        "peorEsquina": 24.5
+      }
+    ],
+    "costos": [
+      {
+        "palanca": "fov 26",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 46.56,
+            "deltaDeAlto": 0.426,
+            "peorEsquina": 26.8
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 62.08,
+            "deltaDeAlto": 0.567,
+            "peorEsquina": 35.8
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 45.66,
+            "deltaDeAlto": 0.464,
+            "peorEsquina": 23.7
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "fov 30",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 40.67,
+            "deltaDeAlto": 0.291,
+            "peorEsquina": 27.3
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 54.23,
+            "deltaDeAlto": 0.388,
+            "peorEsquina": 36.4
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 39.76,
+            "deltaDeAlto": 0.343,
+            "peorEsquina": 23.9
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "fov 40",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 31.46,
+            "deltaDeAlto": 0.016,
+            "peorEsquina": 29.4
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 41.95,
+            "deltaDeAlto": 0.021,
+            "peorEsquina": 39.2
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 30.42,
+            "deltaDeAlto": 0.098,
+            "peorEsquina": 25.4
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "fov 46",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 28.09,
+            "deltaDeAlto": 0.123,
+            "peorEsquina": 31
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 37.45,
+            "deltaDeAlto": 0.164,
+            "peorEsquina": 41.3
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 26.95,
+            "deltaDeAlto": 0.025,
+            "peorEsquina": 26.6
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "distance 14",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 77.21,
+            "deltaDeAlto": 0.935,
+            "peorEsquina": 47.6
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 102.94,
+            "deltaDeAlto": 1.247,
+            "peorEsquina": 63.5
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 75.24,
+            "deltaDeAlto": 1.092,
+            "peorEsquina": 41.8
+          }
+        ],
+        "rojas": [
+          "1920×1080: |Δalto| sube a 1.247 px (exige < 1)",
+          "1280×800: |Δalto| sube a 1.092 px (exige < 1)"
+        ]
+      },
+      {
+        "palanca": "distance 16",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 55.28,
+            "deltaDeAlto": 0.455,
+            "peorEsquina": 37.9
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 73.71,
+            "deltaDeAlto": 0.607,
+            "peorEsquina": 50.5
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 53.83,
+            "deltaDeAlto": 0.565,
+            "peorEsquina": 33.1
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "distance 22",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 23.8,
+            "deltaDeAlto": 0.03,
+            "peorEsquina": 22
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 31.74,
+            "deltaDeAlto": 0.041,
+            "peorEsquina": 29.4
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 23.14,
+            "deltaDeAlto": 0.075,
+            "peorEsquina": 19
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "distance 26",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 15,
+            "deltaDeAlto": 0.019,
+            "peorEsquina": 16.6
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 20.01,
+            "deltaDeAlto": 0.025,
+            "peorEsquina": 22.2
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 14.57,
+            "deltaDeAlto": 0.009,
+            "peorEsquina": 14.3
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "distance 30",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 10.03,
+            "deltaDeAlto": 0.029,
+            "peorEsquina": 13.1
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 13.37,
+            "deltaDeAlto": 0.039,
+            "peorEsquina": 17.5
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 9.73,
+            "deltaDeAlto": 0.011,
+            "peorEsquina": 11.2
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "escala 0.0049",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 17.54,
+            "deltaDeAlto": 0.192,
+            "peorEsquina": 18.7
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 23.39,
+            "deltaDeAlto": 0.255,
+            "peorEsquina": 24.9
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 17.04,
+            "deltaDeAlto": 0.112,
+            "peorEsquina": 16.2
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "escala 0.006",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 26.12,
+            "deltaDeAlto": 0.052,
+            "peorEsquina": 23.5
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 34.82,
+            "deltaDeAlto": 0.069,
+            "peorEsquina": 31.4
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 25.39,
+            "deltaDeAlto": 0.025,
+            "peorEsquina": 20.4
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "escala 0.008",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 45.88,
+            "deltaDeAlto": 0.411,
+            "peorEsquina": 33.3
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 61.18,
+            "deltaDeAlto": 0.548,
+            "peorEsquina": 44.4
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 44.66,
+            "deltaDeAlto": 0.463,
+            "peorEsquina": 29
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "escala 0.009",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 57.76,
+            "deltaDeAlto": 0.748,
+            "peorEsquina": 38.7
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 77.01,
+            "deltaDeAlto": 0.997,
+            "peorEsquina": 51.5
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 56.27,
+            "deltaDeAlto": 0.778,
+            "peorEsquina": 33.7
+          }
+        ],
+        "rojas": []
+      },
+      {
+        "palanca": "escala 0.0105",
+        "filas": [
+          {
+            "ventana": "1440×810",
+            "cuna": 78.04,
+            "deltaDeAlto": 1.391,
+            "peorEsquina": 47.2
+          },
+          {
+            "ventana": "1920×1080",
+            "cuna": 104.05,
+            "deltaDeAlto": 1.855,
+            "peorEsquina": 63
+          },
+          {
+            "ventana": "1280×800",
+            "cuna": 76.11,
+            "deltaDeAlto": 1.378,
+            "peorEsquina": 41.3
+          }
+        ],
+        "rojas": [
+          "1440×810: |Δalto| sube a 1.391 px (exige < 1)",
+          "1920×1080: |Δalto| sube a 1.855 px (exige < 1)",
+          "1280×800: |Δalto| sube a 1.378 px (exige < 1)"
+        ]
+      }
+    ]
+  },
+  "clamp": [
+    {
+      "cuadro": "1280×800",
+      "recorte": 1
+    },
+    {
+      "cuadro": "1440×900",
+      "recorte": 1
+    },
+    {
+      "cuadro": "1920×1080",
+      "recorte": 1
+    },
+    {
+      "cuadro": "2560×1440",
+      "recorte": 1
+    }
+  ],
+  "diferencias": [
+    {
+      "palanca": "HOY",
+      "hueco1440": 20.7,
+      "hueco1920": 218.1,
+      "hueco2560": 248.9,
+      "diferencia": 197.5
+    },
+    {
+      "palanca": "fov 26",
+      "hueco1440": -106.3,
+      "hueco1920": 66.4,
+      "hueco2560": 46.5,
+      "diferencia": 172.6
+    },
+    {
+      "palanca": "fov 30",
+      "hueco1440": -40.5,
+      "hueco1920": 145,
+      "hueco2560": 151.4,
+      "diferencia": 185.5
+    },
+    {
+      "palanca": "fov 40",
+      "hueco1440": 66.7,
+      "hueco1920": 273,
+      "hueco2560": 322,
+      "diferencia": 206.3
+    },
+    {
+      "palanca": "fov 46",
+      "hueco1440": 108.8,
+      "hueco1920": 323.1,
+      "hueco2560": 388.8,
+      "diferencia": 214.3
+    },
+    {
+      "palanca": "distance 14",
+      "hueco1440": -85.4,
+      "hueco1920": 90.6,
+      "hueco2560": 78.9,
+      "diferencia": 176.1
+    },
+    {
+      "palanca": "distance 16",
+      "hueco1440": -36.7,
+      "hueco1920": 149.2,
+      "hueco2560": 156.9,
+      "diferencia": 185.9
+    },
+    {
+      "palanca": "distance 22",
+      "hueco1440": 64.6,
+      "hueco1920": 271,
+      "hueco2560": 319.3,
+      "diferencia": 206.4
+    },
+    {
+      "palanca": "distance 26",
+      "hueco1440": 109.1,
+      "hueco1920": 324.5,
+      "hueco2560": 390.7,
+      "diferencia": 215.4
+    },
+    {
+      "palanca": "distance 30",
+      "hueco1440": 142.7,
+      "hueco1920": 364.9,
+      "hueco2560": 444.6,
+      "diferencia": 222.2
+    },
+    {
+      "palanca": "escala 0.0049",
+      "hueco1440": 126.1,
+      "hueco1920": 344.8,
+      "hueco2560": 417.8,
+      "diferencia": 218.7
+    },
+    {
+      "palanca": "escala 0.006",
+      "hueco1440": 70.8,
+      "hueco1920": 278.4,
+      "hueco2560": 329.2,
+      "diferencia": 207.6
+    },
+    {
+      "palanca": "escala 0.008",
+      "hueco1440": -29.4,
+      "hueco1920": 158,
+      "hueco2560": 168.6,
+      "diferencia": 187.4
+    },
+    {
+      "palanca": "escala 0.009",
+      "hueco1440": -79.4,
+      "hueco1920": 97.9,
+      "hueco2560": 88.6,
+      "diferencia": 177.4
+    },
+    {
+      "palanca": "escala 0.0105",
+      "hueco1440": -154.4,
+      "hueco1920": 8,
+      "hueco2560": -31.4,
+      "diferencia": 162.4
+    }
+  ],
+  "columna": {
+    "holguras": [
+      {
+        "cuadro": "1280×800",
+        "cajaPx": 414.4,
+        "tintaPx": 302,
+        "sobra": 112.4,
+        "tamanoPx": 54.845
+      },
+      {
+        "cuadro": "1440×900",
+        "cajaPx": 478.4,
+        "tintaPx": 474,
+        "sobra": 4.4,
+        "tamanoPx": 58
+      },
+      {
+        "cuadro": "1920×1080",
+        "cajaPx": 670.4,
+        "tintaPx": 550,
+        "sobra": 120.4,
+        "tamanoPx": 67.465
+      },
+      {
+        "cuadro": "2560×1440",
+        "cajaPx": 696,
+        "tintaPx": 550,
+        "sobra": 146,
+        "tamanoPx": 67.465
+      }
+    ],
+    "arranques": [
+      {
+        "cuadro": "1280×800",
+        "arranque": 188,
+        "corrimiento": 97
+      },
+      {
+        "cuadro": "1440×900",
+        "arranque": 188,
+        "corrimiento": 0
+      },
+      {
+        "cuadro": "1920×1080",
+        "arranque": 188,
+        "corrimiento": 198
+      },
+      {
+        "cuadro": "2560×1440",
+        "arranque": 476,
+        "corrimiento": 229
+      }
+    ],
+    "pendienteDeHoy": 0.019718,
+    "pendienteNecesaria": 0.060935659234981496
+  },
+  "guardianS10": [
+    {
+      "palanca": "HOY",
+      "entra": true,
+      "peor": "1025×900 con 130.4 px de margen"
+    },
+    {
+      "palanca": "fov 26",
+      "entra": true,
+      "peor": "1025×900 con 80.8 px de margen"
+    },
+    {
+      "palanca": "fov 30",
+      "entra": true,
+      "peor": "1025×900 con 106.6 px de margen"
+    },
+    {
+      "palanca": "fov 40",
+      "entra": true,
+      "peor": "1025×900 con 148.2 px de margen"
+    },
+    {
+      "palanca": "fov 46",
+      "entra": true,
+      "peor": "1025×900 con 164.3 px de margen"
+    },
+    {
+      "palanca": "distance 14",
+      "entra": true,
+      "peor": "1025×900 con 74.9 px de margen"
+    },
+    {
+      "palanca": "distance 16",
+      "entra": true,
+      "peor": "1025×900 con 101 px de margen"
+    },
+    {
+      "palanca": "distance 22",
+      "entra": true,
+      "peor": "1025×900 con 151.9 px de margen"
+    },
+    {
+      "palanca": "distance 26",
+      "entra": true,
+      "peor": "1025×900 con 173 px de margen"
+    },
+    {
+      "palanca": "distance 30",
+      "entra": true,
+      "peor": "1025×900 con 188.5 px de margen"
+    },
+    {
+      "palanca": "escala 0.0049",
+      "entra": true,
+      "peor": "1025×900 con 178.3 px de margen"
+    },
+    {
+      "palanca": "escala 0.006",
+      "entra": true,
+      "peor": "1025×900 con 153.3 px de margen"
+    },
+    {
+      "palanca": "escala 0.008",
+      "entra": true,
+      "peor": "1025×900 con 107.5 px de margen"
+    },
+    {
+      "palanca": "escala 0.009",
+      "entra": true,
+      "peor": "1025×900 con 84.5 px de margen"
+    },
+    {
+      "palanca": "escala 0.0105",
+      "entra": true,
+      "peor": "1025×900 con 50.1 px de margen"
+    }
+  ]
+}
