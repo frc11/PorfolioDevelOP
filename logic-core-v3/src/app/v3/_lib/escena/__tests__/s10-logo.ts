@@ -15,8 +15,8 @@
  * diferencia que obliga: `cuadro.ts` fija `ASPECT = 16/9` como constante de
  * módulo, y el eje que este frente tiene que medir es justamente **la relación
  * de aspecto** (§7.6, abierto: *«en vertical el logo no entra igual»*). Acá el
- * aspecto entra por parámetro y llega hasta `camaraEnCuadro`, que es donde se
- * decide el encuadre.
+ * aspecto entra por parámetro y llega hasta `cameraAt`, que es donde se decide
+ * el encuadre.
  *
  * ── LO QUE HACE HONESTA A ESTA COPIA: dos controles de equivalencia ────────
  *
@@ -39,12 +39,14 @@
  *    ancho del cuadro en la pose de Demos**, que es justamente la pose que este
  *    frente mide—. Se publica; no se arregla acá.
  *
- *    ⚠ **Lo que SÍ cambió en SITIO-S11: el ENCUADRE ya no es el del arnés.** El
- *    recorrido sale de `camaraEnCuadro`, que lo pide a `_lib/escena/encuadre.ts`
- *    —el mismo módulo que usa el rig—, porque `harness.ts` conserva la fórmula
- *    con el codo en cero y este frente no puede escribir en `/probe-escena`. Las
- *    dos coinciden bit a bit arriba del codo, y eso se comprueba: ver el
- *    docblock de `camaraDelCuadro.ts` y los §2 y §7 del invariante.
+ *    ⚠ **El ENCUADRE sí es el del rig, y desde ENCUADRE-1 lo es en un solo
+ *    lugar.** SITIO-S11 le sacó el codo en cero a `travelX` en
+ *    `_lib/escena/encuadre.ts` y `harness.ts` se había quedado con la fórmula
+ *    vieja, así que el muestreo pasaba por `camaraEnCuadro` para pedirle el
+ *    recorrido al módulo bueno. Ahora `cameraAt` lo pide él mismo y esa
+ *    composición desapareció. El contrafactual —la cámara CON el codo— quedó en
+ *    `camaraDelCuadro.ts`, y §7 afirma las dos mitades: coinciden bit a bit
+ *    arriba del aspecto de recorrido nulo, y se separan abajo.
  * 2. **No modela las partículas, ni la sombra proyectada del logo, ni el
  *    especular.** Los tres empujan el valor del cuadro hacia abajo, o sea que
  *    todo contraste que salga de acá es un **TECHO, no un piso**.
@@ -74,6 +76,7 @@ import {
 } from '@/app/probe-escena/__tests__/frameProbe'
 import {
   TAN_HALF_V,
+  cameraAt,
   emptyPose,
   halfFovDeg,
   type Track,
@@ -81,7 +84,6 @@ import {
 } from '@/app/probe-escena/__tests__/harness'
 import { levelAt, sunDirectionAt, type ViewContext } from '@/app/probe-escena/__tests__/shading'
 import { emisionDelLogoEn } from '../logoEmision'
-import { camaraEnCuadro } from './camaraDelCuadro'
 import { shadeConEmision } from './logoEmitido'
 
 /** Una caja en coordenadas de cuadro: −1 es el borde izquierdo/inferior, +1 el otro. */
@@ -148,7 +150,7 @@ export function muestrearLogo(
   emisiva: number = emisionDelLogoEn(levelAt(progreso)),
 ): MuestraDelLogo {
   const pose = emptyPose()
-  const cam = camaraEnCuadro(pista, progreso, aspecto, pose)
+  const cam = cameraAt(pista, progreso, aspecto, pose)
   const vista: ViewContext = {
     progress: progreso,
     cameraAzimuthDeg: pose.angleDeg,

@@ -1,58 +1,53 @@
 /**
- * LA CÁMARA CON EL ENCUADRE DE PRODUCCIÓN — el arnés, apuntado con la fórmula
- * que corre en el rig y no con la copia que quedó del otro lado.
+ * LA CÁMARA CON EL CODO — el CONTRAFACTUAL de la fórmula vieja del encuadre.
  *
  * ⚠ **Este archivo NO se escanea por tokens.** Es un instrumento: sus números
  * son coordenadas de cuadro y unidades de mundo, no valores de diseño.
  *
- * ── POR QUÉ EXISTE, y es un freno declarado de SITIO-S11 ───────────────────
+ * ── ⚠️ ESTE ARCHIVO CAMBIÓ DE SUJETO: ANTES ERA LA CÁMARA BUENA ────────────
  *
- * El defecto 14 —`travelX` con un codo en cero, §7.40— se arregla en
- * `_lib/escena/encuadre.ts`, que es de donde el rig (`cameraFraming.ts` →
- * `OrbitRig.tsx`) saca su recorrido. Pero **la fórmula está escrita DOS veces en
- * el repo**: `probe-escena/__tests__/harness.ts:93-94` la reimplementa a mano,
- * con su razón escrita —importar `cameraFraming.ts` arrastraría `three` a node
- * para hacer tres productos vectoriales— y con la promesa de que *«la aritmética
- * es idéntica»*.
+ * Nació en SITIO-S11 como un freno declarado. El defecto 14 —`travelX` con un
+ * codo en cero, §7.40— se arregló en `_lib/escena/encuadre.ts`, que es de donde
+ * el rig saca su recorrido, pero **la fórmula estaba escrita DOS veces**:
+ * `probe-escena/__tests__/harness.ts` la reimplementaba a mano, y aquel frente
+ * tenía PROHIBIDO escribir en `/probe-escena`. Así que acá se componía
+ * `camaraEnCuadro` —la posición del arnés con el recorrido de producción— para
+ * poder medir con la cámara que el sitio usa de verdad, y el docblock dejaba
+ * escrito el arreglo verdadero: *«que `harness.ts` importe `recorridoDeEncuadre`
+ * de `encuadre.ts` —que es three-free justamente para eso— y que este archivo
+ * desaparezca»*.
  *
- * Arreglar una sola de las dos rompe esa promesa, y **este frente no puede
- * escribir en `/probe-escena`**: el arreglo verdadero es que `harness.ts`
- * importe `recorridoDeEncuadre` de `encuadre.ts` —que es three-free justamente
- * para eso— y que este archivo desaparezca. Queda reportado.
+ * **La primera mitad se ejecutó: `harness.ts` consume `recorridoDeEncuadre`.**
+ * La segunda no se puede: `camaraEnCuadro` sí desapareció —después de unificar
+ * era `cameraAt` con otro nombre, y afirmar que dos nombres de la misma función
+ * coinciden es verde por construcción— pero de este archivo cuelgan dos piezas
+ * que no tienen otro lugar:
  *
- * Mientras tanto, un instrumento que midiera con la fórmula vieja estaría
- * midiendo una cámara que producción ya no usa. Acá se compone: **posición y
- * pose salen de `cameraAt`, el recorrido sale de `encuadre.ts`, y la base de
- * pantalla se rearma con los MISMOS vectores primitivos que exporta el arnés**
- * (`sub`, `norm`, `cross`), en el mismo orden en que `Object3D.lookAt` construye
- * la suya.
+ *   · **`recorridoConCodo`** — el TESTIGO declarado de la fórmula vieja. Sin él,
+ *     §7 de `s10-logo` se queda sin contrafactual y su control positivo no puede
+ *     probar que el comparador ve la diferencia.
+ *   · **`mismaCamara`** — el comparador de dos cámaras, que ese mismo §7 usa.
+ *
+ * Y borrarlo pondría en rojo `test:s11-frontera`: es una de las quince ALTAS de
+ * SITIO-S11 cuya presencia en disco se afirma.
+ *
+ * Así que lo que queda acá es **la cámara del ANTES**, no la del después. Es la
+ * misma composición de siempre, con el recorrido viejo en vez del bueno, y sirve
+ * para lo único que un contrafactual sirve: que las afirmaciones del arreglo no
+ * se comparen contra sí mismas.
  *
  * ── LO QUE HACE HONESTA A LA COMPOSICIÓN: la equivalencia arriba del codo ──
  *
  * `abs(h − m/2)` y `max(0, h − m/2)` devuelven el **mismo número** siempre que
- * el argumento sea positivo, o sea en todo aspecto arriba del codo. Ahí las dos
- * cámaras tienen que dar componentes idénticas hasta el último bit, y eso es
- * comprobable: `mismaCamara` lo compara y `s10-logo.invariant.ts` §2 y §7 lo
- * afirman —a 16/9 contra `muestrearCuadro`, que sigue usando `cameraAt` tal
- * cual—. Si esta composición se hubiera equivocado en un signo o en el orden de
- * la base, esa comparación no cerraría.
+ * el argumento sea positivo, o sea en todo aspecto arriba del aspecto de
+ * recorrido nulo. Ahí `cameraAt` y `camaraConCodo` tienen que dar componentes
+ * idénticas hasta el último bit, y abajo tienen que separarse. Las dos cosas las
+ * afirma §7 de `s10-logo.invariant.ts`. Si esta composición se hubiera
+ * equivocado en un signo o en el orden de la base, la primera no cerraría.
  */
 
-import { recorridoDeEncuadre } from '../encuadre'
+import { FRAME_TRAVEL_SAFETY, LOGO_H, LOGO_W, TAN_HALF_V, cameraAt, cross, norm, sub, type CameraFrame, type Track, type Vec3 } from '@/app/probe-escena/__tests__/harness'
 import type { MutableChoreoPose } from '../choreographyTypes'
-import {
-  FRAME_TRAVEL_SAFETY,
-  LOGO_H,
-  LOGO_W,
-  TAN_HALF_V,
-  cameraAt,
-  cross,
-  norm,
-  sub,
-  type CameraFrame,
-  type Track,
-  type Vec3,
-} from '@/app/probe-escena/__tests__/harness'
 
 /**
  * La base que `Object3D.lookAt` construye — `z = normalize(eye − target)`,
@@ -67,13 +62,31 @@ function baseDeLookAt(posicion: Vec3, objetivo: Vec3) {
 }
 
 /**
- * La cámara en un progreso, apuntada con el recorrido de PRODUCCIÓN.
+ * EL RECORRIDO CON EL CODO — la fórmula VIEJA, viva sólo acá y sólo como
+ * testigo.
+ *
+ * No la usa nadie para medir: existe para que el §7 pueda publicar el antes y el
+ * después con las dos cifras al lado, y para que el control positivo pueda
+ * comprobar que el comparador **ve la diferencia** en vez de comparar la fórmula
+ * nueva consigo misma. Borrarla dejaría el arreglo sin contrafactual.
+ */
+export function recorridoConCodo(medioCuadro: number, medidaDeLaCaja: number): number {
+  return Math.max(0, medioCuadro - medidaDeLaCaja / 2) * FRAME_TRAVEL_SAFETY
+}
+
+/**
+ * LA CÁMARA DEL ANTES — `cameraAt` apuntada con el recorrido que tenía el codo.
  *
  * Misma firma y misma forma de vuelta que `cameraAt`: se puede intercambiar sin
  * tocar a quien la llama. Cuando la pose no encuadra —`frameX` y `frameY` en
- * cero— devuelve lo del arnés sin tocarlo, porque ahí no hay nada que apuntar.
+ * cero— devuelve lo del arnés sin tocarlo, porque ahí no hay nada que apuntar y
+ * las dos fórmulas son inalcanzables.
+ *
+ * ⚠ **Reproduce `cameraAt` línea por línea salvo esa llamada**, a propósito: si
+ * copiara algo más, la diferencia que §7 mide dejaría de ser atribuible al
+ * recorrido.
  */
-export function camaraEnCuadro(
+export function camaraConCodo(
   pista: Track,
   progreso: number,
   aspecto: number,
@@ -83,8 +96,8 @@ export function camaraEnCuadro(
   if (salida.frameX === 0 && salida.frameY === 0) return camara
 
   const medioAlto = TAN_HALF_V * camara.eyeDistance
-  const recorridoX = recorridoDeEncuadre(medioAlto * aspecto, LOGO_W)
-  const recorridoY = recorridoDeEncuadre(medioAlto, LOGO_H)
+  const recorridoX = recorridoConCodo(medioAlto * aspecto, LOGO_W)
+  const recorridoY = recorridoConCodo(medioAlto, LOGO_H)
 
   const base = baseDeLookAt(camara.position, [0, 0, 0])
   const mira: Vec3 = [
@@ -99,19 +112,6 @@ export function camaraEnCuadro(
     eyeDistance: camara.eyeDistance,
     pose: { ...salida },
   }
-}
-
-/**
- * EL RECORRIDO CON EL CODO — la fórmula VIEJA, viva sólo acá y sólo como
- * testigo.
- *
- * No la usa nadie para medir: existe para que el §7 pueda publicar el antes y el
- * después con las dos cifras al lado, y para que el control positivo pueda
- * comprobar que el comparador **ve la diferencia** en vez de comparar la fórmula
- * nueva consigo misma. Borrarla dejaría el arreglo sin contrafactual.
- */
-export function recorridoConCodo(medioCuadro: number, medidaDeLaCaja: number): number {
-  return Math.max(0, medioCuadro - medidaDeLaCaja / 2) * FRAME_TRAVEL_SAFETY
 }
 
 /** ¿Las dos cámaras coinciden en posición y en las tres direcciones de pantalla? */

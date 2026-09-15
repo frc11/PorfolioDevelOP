@@ -31,11 +31,11 @@
  *
  * ── Lo que NO mide, y es a propósito ──────────────────────────────────────
  *
- * **La FÓRMULA del recorrido de encuadre sigue duplicada** — `harness.ts:93-94`
- * conserva el `max(0, …)` con el codo y `scene-camera.ts` también. Ésas son las
- * dos copias que §7.44/§7.47 declaran con dueño y razón, y las censa
- * `lib/scene-encuadre-deuda.ts`. Acá se miden VALORES, no fórmulas, para no
- * escribir el mismo censo dos veces.
+ * **La FÓRMULA del recorrido de encuadre tiene su propio censo.** ENCUADRE-1
+ * cerró la copia del arnés —`cameraAt` le pide el recorrido a `encuadre.ts`— y
+ * queda una sola, la de `scene-camera.ts`, que es el preloader del sitio vivo.
+ * Eso lo censa `lib/scene-encuadre-deuda.ts` §8, con sus cuatro roles. Acá se
+ * miden VALORES, no fórmulas, para no escribir el mismo censo dos veces.
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'

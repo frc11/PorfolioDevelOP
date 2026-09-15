@@ -27,11 +27,10 @@
 
 import { CHOREO_KEYFRAMES } from '../choreography'
 // prettier-ignore
-import { angularOffset, emptyPose, halfFovDeg, makeTrack, type Track } from '@/app/probe-escena/__tests__/harness'
+import { angularOffset, cameraAt, emptyPose, halfFovDeg, makeTrack, type Track } from '@/app/probe-escena/__tests__/harness'
 import { muestrearLogo } from './s10-logo'
 import { ESCENA_REAL, cajaDelLogo, cobertura, fraccionDentro, type Ventana } from './s10-logo-lectura'
 import { PROGRESOS_DEL_HERO, CUADROS } from './s13b-encuadre'
-import { camaraEnCuadro } from './camaraDelCuadro'
 import { fuenteDe } from './s13b-soporte'
 
 /** El valor con el que V3-E empezó. Se proyecta como hipótesis, no se escribe. */
@@ -130,7 +129,7 @@ export const medioCampo = (v: Ventana): number => halfFovDeg(v.aspecto).h
  */
 export function desvioDelEje(frameX: number, v: Ventana, progreso = 0): number {
   const pose = emptyPose()
-  const cam = camaraEnCuadro(pistaCon(frameX), progreso, v.aspecto, pose)
+  const cam = cameraAt(pistaCon(frameX), progreso, v.aspecto, pose)
   return angularOffset(cam, [0, 0, 0]).h
 }
 

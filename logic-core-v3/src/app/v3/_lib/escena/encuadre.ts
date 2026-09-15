@@ -7,11 +7,19 @@
  * Porque `cameraFraming.ts` importa `three` para hacer tres productos
  * vectoriales, y **todo lo que quiera medir esta fórmula sin navegador paga ese
  * paquete entero**. Ésa es, con esas palabras, la razón por la que
- * `probe-escena/__tests__/harness.ts` la REESCRIBIÓ en vez de importarla
- * (`harness.ts:11-14`) — y una fórmula copiada es una fórmula que se arregla en
- * un lado solo. Acá queda como aritmética pura, importable desde el rig y desde
- * cualquier instrumento, para que el arreglo del defecto 14 no tenga dos
- * versiones.
+ * `probe-escena/__tests__/harness.ts` la REESCRIBIÓ en vez de importarla — y una
+ * fórmula copiada es una fórmula que se arregla en un lado solo. Acá queda como
+ * aritmética pura, importable desde el rig y desde cualquier instrumento, para
+ * que el arreglo del defecto 14 no tenga dos versiones.
+ *
+ * ✅ **Y desde ENCUADRE-1 el arnés la importa.** `cameraAt` le pide el recorrido
+ * a este módulo, así que la fórmula que mide y la que corre son la misma en
+ * `harness.ts`, en `cameraFraming.ts` y en `scene-framing.invariant.ts`. La
+ * única escritura propia que queda es la de `lib/scene-camera.ts` —el preloader
+ * del sitio vivo, §7.44— y la del TESTIGO declarado en
+ * `_lib/escena/__tests__/camaraDelCuadro.ts`, que existe para poder publicar el
+ * antes y el después. El censo de las cinco está en `lib/scene-encuadre-deuda.ts`
+ * §8, con sus cuatro roles.
  */
 
 import { FRAME_TRAVEL_SAFETY } from './probeScene'

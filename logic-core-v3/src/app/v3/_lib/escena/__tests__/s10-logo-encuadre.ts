@@ -36,7 +36,7 @@ import {
 } from '@/app/probe-escena/__tests__/harness'
 import { recorridoDeEncuadre } from '../encuadre'
 import { CHOREO_KEYFRAMES } from '../choreography'
-import { camaraEnCuadro, mismaCamara, recorridoConCodo } from './camaraDelCuadro'
+import { camaraConCodo, mismaCamara, recorridoConCodo } from './camaraDelCuadro'
 import { aCuadroX } from './s10-logo-cajas'
 import type { TablaDeSuperposicion } from './s10-logo-tablas'
 import {
@@ -234,16 +234,25 @@ export const PISTA_CON_FRAME_Y: Track = makeTrack(
 )
 
 /**
- * ¿La cámara del muestreo (`camaraEnCuadro`, con el encuadre de producción) y la
- * del arnés (`cameraAt`, con el codo) coinciden en ese aspecto?
+ * ¿La cámara de HOY (`cameraAt`, que desde ENCUADRE-1 pide el recorrido a
+ * `encuadre.ts`) y la del ANTES (`camaraConCodo`, con `max(0, …)`) coinciden en
+ * ese aspecto?
+ *
+ * ⚠ **El sujeto cambió en ENCUADRE-1 y la propiedad custodiada NO.** Antes se
+ * comparaba la cámara del muestreo contra la del arnés, porque el arnés era el
+ * que tenía la fórmula vieja; unificada, esas dos son la MISMA función y
+ * compararlas sería verde por construcción. El contrafactual pasa a ser la
+ * fórmula vieja explícita, que es lo que las dos comprobaciones de §7 siempre
+ * quisieron decir: **arriba del recorrido nulo el arreglo no movió nada, y abajo
+ * sí se ve.**
  *
  * Se compara en p=0,750, que es donde `demos` está en cuadro y `frameX` vale 1:
  * con `frameX = 0` las dos devuelven lo mismo por construcción y la comparación
  * no probaría nada.
  */
-export function coincidenLasCamaras(aspecto: number): boolean {
+export function coincidenConElCodo(aspecto: number): boolean {
   return mismaCamara(
-    camaraEnCuadro(PISTA_REAL, 0.75, aspecto, emptyPose()),
+    camaraConCodo(PISTA_REAL, 0.75, aspecto, emptyPose()),
     cameraAt(PISTA_REAL, 0.75, aspecto, emptyPose()),
   )
 }

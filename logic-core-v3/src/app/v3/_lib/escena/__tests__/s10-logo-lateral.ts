@@ -1,7 +1,7 @@
 import { afirmar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { CHOREO_KEYFRAMES } from '../choreography'
 // prettier-ignore
-import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, recorridosDe, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
+import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, aspectoDeRecorridoNulo, coincidenConElCodo, frameYMaximo, recorridosDe, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
 import { VENTANAS } from './s10-logo-lectura'
 
 /**
@@ -74,30 +74,44 @@ export function afirmarElEncuadreLateral(): void {
   )
 
   /**
-   * ⚠ **LA CÁMARA CON LA QUE SE MIDE ES LA DE PRODUCCIÓN, Y ESO SE COMPRUEBA.**
-   * `harness.ts:93-94` conserva su copia de la fórmula —con el codo— y este frente
-   * no puede escribir en `/probe-escena`, así que el muestreo pasó a
-   * `camaraEnCuadro`, que le pide el recorrido a `encuadre.ts`. Las dos tienen que
-   * coincidir **bit a bit** arriba del recorrido nulo y separarse SÓLO abajo: si
-   * coincidieran abajo, el arreglo no habría llegado al muestreo; si se separaran
-   * arriba, la composición del encuadre estaría mal armada.
+   * ⚠ **EL SUJETO DE ESTE PAR CAMBIÓ EN ENCUADRE-1; LA PROPIEDAD, NO.**
+   *
+   * Hasta acá se comparaba **la cámara del muestreo contra la del arnés**: el
+   * arnés conservaba la fórmula con el codo (`harness.ts:93-94`) y el muestreo
+   * pasaba por `camaraEnCuadro` para pedirle el recorrido a `encuadre.ts`.
+   * Unificado el arnés, esas dos son la MISMA función y compararlas sería verde
+   * por construcción — la enfermedad que `s16-arnes` acaba de cerrar del otro
+   * lado.
+   *
+   * El contrafactual pasa a ser **la fórmula vieja explícita**
+   * (`camaraConCodo`, sobre `recorridoConCodo`, el testigo declarado), y las dos
+   * mitades que este par custodia siguen siendo exactamente las mismas: arriba
+   * del recorrido nulo las dos cámaras tienen que coincidir **bit a bit** —o el
+   * arreglo habría movido una composición calibrada a ojo— y abajo tienen que
+   * separarse —o el arreglo no estaría llegando a la cámara con la que se mide—.
    */
   afirmar(
-    CUADROS_SIN_CAMBIO.length === VENTANAS.length && CUADROS_SIN_CAMBIO.every((v) => coincidenLasCamaras(v.aspecto)),
-    'la cámara del muestreo ES la del arnés donde la corrección es un no-op: coinciden bit a bit',
+    CUADROS_SIN_CAMBIO.length === VENTANAS.length && CUADROS_SIN_CAMBIO.every((v) => coincidenConElCodo(v.aspecto)),
+    'la cámara de HOY ES la del codo donde la corrección es un no-op: coinciden bit a bit',
     `posición y las tres direcciones de pantalla, en los ${CUADROS_SIN_CAMBIO.length} de ${VENTANAS.length} cuadros ` +
-      'de arriba del recorrido nulo — con la distancia vieja de `demos` eran 3 de 4',
+      'de arriba del recorrido nulo — o sea que ninguna pose calibrada a ojo se movió al unificar',
   )
   /**
-   * ⚠️ **B13 · EL CONTROL CAMBIA DE CUADRO PORQUE YA NO HAY NINGUNO ABAJO.** A
-   * distancia 14 el recorrido nulo cae en 0,798 y ningún cuadro real queda abajo,
-   * así que el control usa un aspecto hipotético más angosto: si las dos cámaras
-   * coincidieran también ahí, el arreglo de S11 no llegaría al muestreo.
+   * ⚠️ **B13 · EL CONTROL USA UN ASPECTO HIPOTÉTICO PORQUE YA NO HAY CUADRO
+   * REAL ABAJO.** A distancia 14 el recorrido nulo de `demos` cae en 0,798 y los
+   * cuatro cuadros declarados quedan arriba, así que el control baja a 0,7: si
+   * las dos cámaras coincidieran también ahí, `cameraAt` no estaría usando la
+   * fórmula corregida y toda la tabla de arriba sería una resta de un número
+   * contra sí mismo.
+   *
+   * ⚠️ En VERTICAL sí hay cuadros reales abajo: 390×844 da **0,4621**, debajo
+   * del recorrido nulo de los cinco keyframes con encuadre (0,5525 a 0,7983).
+   * Ahí las dos fórmulas se separan de verdad — ver §7.60 de `DIRECCION-ESCENA`.
    */
   controlPositivo(
-    'y NO coinciden abajo del recorrido nulo: el arreglo sí llega al muestreo',
+    'y NO coinciden abajo del recorrido nulo: `cameraAt` sí usa la fórmula corregida',
     0.7,
-    coincidenLasCamaras,
+    coincidenConElCodo,
   )
 
   /**

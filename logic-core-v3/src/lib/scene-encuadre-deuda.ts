@@ -16,6 +16,8 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { lineasDeCodigo } from '@/app/v3/_lib/__tests__/s8-largos'
+
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '@/app/v3/_lib/escena/probeScene'
 import { SCENE_LOGO_MESH_WORLD, projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 import { camaraCorregidaEn, mismaCamaraDelPreloader } from '@/lib/scene-camera-medida'
@@ -141,62 +143,80 @@ export function afirmarLaDeudaDeTravelX({ check, section }: ArnesDeComprobacion)
     'si coincidieran, toda la tabla de arriba sería una resta de un número contra sí mismo'
   )
 
-  // ── 8 · Las CINCO escrituras de `travelX`, y las dos que quedan ────────────
+  // ── 8 · Las CINCO escrituras de `travelX`, y la que queda ─────────────────
 
-  section('8 · §7.44 — las cinco copias: cuáles consumen la fuente y cuáles no')
+  section('8 · §7.44 — las cinco copias: quién es fuente, quién consume, quién es testigo')
 
   /**
-   * LA COMPROBACIÓN DE QUE LAS CINCO COINCIDEN, **QUE NO CIERRA A PROPÓSITO.**
+   * EL CENSO DE LA FÓRMULA, **QUE YA NO TIENE DOS COPIAS SINO UNA.**
    *
-   * §7.44 declara cinco escrituras de la misma fórmula. SITIO-S12 unificó las que
-   * podía y **dejó dos con copia propia, cada una con su razón**:
+   * §7.44 declara cinco escrituras de la misma aritmética. SITIO-S12 unificó las
+   * que podía y dejó dos con copia propia; **ENCUADRE-1 cerró la del arnés**
+   * —`harness.ts` importa `recorridoDeEncuadre`— y queda una sola: la del sitio
+   * vivo, que se juzga por grabación.
    *
-   *   · `probe-escena/__tests__/harness.ts` — vive en un directorio que este
-   *     sprint tiene PROHIBIDO tocar (regla 5), y además unificarlo pondría en
-   *     rojo el control positivo de `s10-logo` §7, que existe justamente porque
-   *     hay dos fórmulas.
-   *   · `lib/scene-camera.ts` — es el SITIO VIVO, y su arreglo se juzga por
-   *     grabación (§7.44, y la tabla de arriba con su número).
+   * ── ⚠️ DOS COSAS CAMBIARON ACÁ, Y NINGUNA ES «BAJAR LA VARA» ──────────────
    *
-   * La comprobación se escribe **contra la propiedad** —«ningún archivo escribe la
-   * fórmula salvo los declarados»— y no contra un conteo: el día que aparezca una
-   * sexta copia se pone en rojo sola, y el día que se arregle una de las dos hay
-   * que sacarla de la lista, que es lo que hace visible la deuda.
+   * **1 · El escáner lee CÓDIGO, no el archivo crudo — §7.25 otra vez.** La
+   * firma es una regex sobre el fuente, y tres de los cinco archivos NOMBRAN la
+   * fórmula vieja en un comentario para explicarla. Medido sobre el árbol de
+   * ENCUADRE-1: `harness.ts` daba `escribe = true` por una línea de su docblock
+   * que dice *«`cameraAt` escribía `Math.max(0, medioCuadro − caja/2)`»*, o sea
+   * que **el censo habría seguido en verde declarando una copia que ya no
+   * existía**, y `encuadre.ts` —la fuente— también matchea en crudo por el mismo
+   * motivo. Se descartan los comentarios con `lineasDeCodigo`, que es la misma
+   * pieza que usa el censo de la lente (`s16-arnes.invariant.ts` §3).
+   *
+   * **2 · El ROL reemplaza al booleano.** `camaraDelCuadro.ts` consumía la
+   * fuente y ahora no: desde ENCUADRE-1 guarda el CONTRAFACTUAL
+   * (`recorridoConCodo` + `camaraConCodo`), o sea que escribe la fórmula vieja a
+   * propósito. Con un booleano de dos valores eso sólo se podía escribir como
+   * «copia propia» —que es falso— o como «consume» —que también—. Son cuatro
+   * roles y cada uno tiene su comprobación distinta.
+   *
+   * Se afirma **contra la propiedad** y no contra un conteo: el día que aparezca
+   * una sexta escritura se pone en rojo sola, y el día que se arregle la que
+   * queda hay que sacarla de la lista, que es lo que hace visible la deuda.
    */
   const RAIZ_DEL_REPO = path.resolve(process.cwd())
-  const leerFuente = (relativo: string): string => readFileSync(path.join(RAIZ_DEL_REPO, relativo), 'utf8')
+  const codigoDe = (relativo: string): string =>
+    lineasDeCodigo(readFileSync(path.join(RAIZ_DEL_REPO, relativo), 'utf8')).join('\n')
+
+  type RolDeLaFormula = 'fuente' | 'consume' | 'testigo' | 'copiaPropia'
 
   interface SitioDeLaFormula {
     readonly ruta: string
-    readonly copiaPropia: boolean
+    readonly rol: RolDeLaFormula
     readonly razon: string
   }
 
   const LAS_CINCO: readonly SitioDeLaFormula[] = [
     {
       ruta: 'src/app/v3/_lib/escena/encuadre.ts',
-      copiaPropia: false,
-      razon: 'ES la fuente única: acá vive `recorridoDeEncuadre`',
-    },
-    {
-      ruta: 'src/app/v3/_lib/escena/__tests__/camaraDelCuadro.ts',
-      copiaPropia: false,
-      razon: 'la consume desde SITIO-S11; su `recorridoConCodo` es el TESTIGO declarado de la fórmula vieja, no una copia viva',
-    },
-    {
-      ruta: 'src/lib/scene-framing.invariant.ts',
-      copiaPropia: false,
-      razon: 'la consume desde SITIO-S12 — era la quinta, con `35` y `0.88` escritos a mano',
+      rol: 'fuente',
+      razon: 'ES la fuente única: acá vive `recorridoDeEncuadre`, y su código no escribe la vieja',
     },
     {
       ruta: 'src/app/probe-escena/__tests__/harness.ts',
-      copiaPropia: true,
-      razon: 'DEUDA — vive en `/probe-escena`, prohibido para este sprint, y unificarla pone en rojo el control positivo de `s10-logo` §7',
+      rol: 'consume',
+      razon: 'la consume desde ENCUADRE-1 — era la copia que §7.44 declaraba como deuda, y el arreglo es el que `camaraDelCuadro.ts` tenía escrito',
+    },
+    {
+      ruta: 'src/lib/scene-framing.invariant.ts',
+      rol: 'consume',
+      razon: 'la consume desde SITIO-S12 — era la quinta, con `35` y `0.88` escritos a mano',
+    },
+    {
+      ruta: 'src/app/v3/_lib/escena/__tests__/camaraDelCuadro.ts',
+      rol: 'testigo',
+      razon:
+        'TESTIGO declarado: escribe la vieja a propósito (`recorridoConCodo` + `camaraConCodo`) para que §7 de `s10-logo` tenga contrafactual. Sin él, ese control positivo compara la fórmula nueva contra sí misma',
     },
     {
       ruta: 'src/lib/scene-camera.ts',
-      copiaPropia: true,
-      razon: 'DEUDA — es el PRELOADER DEL SITIO VIVO: su arreglo mueve el aterrizaje del logo en portrait y se juzga por grabación',
+      rol: 'copiaPropia',
+      razon:
+        'DEUDA — es el PRELOADER DEL SITIO VIVO: su arreglo mueve el aterrizaje del logo en portrait y se juzga por grabación',
     },
   ]
 
@@ -204,25 +224,54 @@ export function afirmarLaDeudaDeTravelX({ check, section }: ArnesDeComprobacion)
   const FIRMA_DE_LA_COPIA = /Math\.max\(\s*0,[^)]*\/\s*2\s*\)/
 
   for (const sitio of LAS_CINCO) {
-    const fuente = leerFuente(sitio.ruta)
-    const escribe = FIRMA_DE_LA_COPIA.test(fuente)
-    const consume = /recorridoDeEncuadre/.test(fuente)
+    const codigo = codigoDe(sitio.ruta)
+    const escribe = FIRMA_DE_LA_COPIA.test(codigo)
+    const consume = /recorridoDeEncuadre/.test(codigo)
     const nombre = path.basename(sitio.ruta)
-    if (sitio.copiaPropia) {
-      check(`🔴 ${nombre} conserva su copia — ${sitio.razon}`, escribe, sitio.ruta)
+    if (sitio.rol === 'fuente') {
+      check(`${nombre} ES la fuente`, consume && !escribe, sitio.razon)
+    } else if (sitio.rol === 'consume') {
+      check(`${nombre} consume la fuente única, y no escribe la vieja`, consume && !escribe, sitio.razon)
+    } else if (sitio.rol === 'testigo') {
+      check(`${nombre} guarda el TESTIGO de la fórmula vieja`, escribe && !consume, sitio.razon)
     } else {
-      check(`${nombre} consume la fuente única`, consume, sitio.razon)
+      check(`\u{1F534} ${nombre} conserva su copia — ${sitio.razon}`, escribe, sitio.ruta)
     }
   }
+
+  /**
+   * ⚠ **EL CONTEO BAJÓ DE 2 A 1 PORQUE UNA COPIA SE CERRÓ, NO PORQUE SE AFLOJE
+   * LA VARA.** La comprobación sigue siendo la misma —«queda deuda, y ésta es»—
+   * y sigue marcada 🔴: el día que `scene-camera.ts` consuma la fuente, esta
+   * línea se pone en rojo y hay que sacarla de la lista. Es lo que hace visible
+   * que la deuda se pagó.
+   */
+  const conCopiaPropia = LAS_CINCO.filter((s) => s.rol === 'copiaPropia')
   check(
-    '🔴 LA COMPROBACIÓN DE QUE LAS CINCO COINCIDEN NO CIERRA, Y ES CORRECTO: quedan 2 con copia propia',
-    LAS_CINCO.filter((s) => s.copiaPropia).length === 2,
-    'es la deuda visible de §7.44, con dueño y razón por copia — no un número escrito al lado'
+    '\u{1F534} LA COMPROBACIÓN DE QUE LAS CINCO COINCIDEN NO CIERRA, Y ES CORRECTO: queda 1 con copia propia',
+    conCopiaPropia.length === 1 && conCopiaPropia[0].ruta === 'src/lib/scene-camera.ts',
+    'ENCUADRE-1 cerró la de `harness.ts`; la del preloader sigue abierta y se juzga por grabación'
   )
   check(
     '  control positivo — la firma de la copia vieja no está ciega, y no confunde `abs` con `max(0, ·)`',
     FIRMA_DE_LA_COPIA.test('Math.max(0, medioCuadro - medidaDeLaCaja / 2) * FRAME_TRAVEL_SAFETY') &&
       !FIRMA_DE_LA_COPIA.test('Math.abs(medioCuadro - medidaDeLaCaja / 2) * FRAME_TRAVEL_SAFETY'),
     'reconoce la vieja y rechaza la nueva'
+  )
+  /**
+   * ⚠ **EL CONTROL QUE PRUEBA QUE DESCARTAR COMENTARIOS ERA EL ARREGLO.** Sobre
+   * el archivo CRUDO, `harness.ts` matchea la firma —por su docblock— y sobre su
+   * código no. Si alguien devuelve el escáner al fuente crudo, el censo vuelve a
+   * declarar una copia que no existe, y esta línea lo dice con los dos valores.
+   */
+  const crudoDelArnes = readFileSync(
+    path.join(RAIZ_DEL_REPO, 'src/app/probe-escena/__tests__/harness.ts'),
+    'utf8'
+  )
+  check(
+    '  control positivo — el escáner lee CÓDIGO: en crudo el arnés todavía «escribe» la fórmula, en un comentario',
+    FIRMA_DE_LA_COPIA.test(crudoDelArnes) &&
+      !FIRMA_DE_LA_COPIA.test(codigoDe('src/app/probe-escena/__tests__/harness.ts')),
+    'si el censo leyera el archivo crudo daría por viva una copia borrada — §7.25, el escáner que lee el texto que lo describe'
   )
 }

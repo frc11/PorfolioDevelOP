@@ -44,7 +44,7 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import { fuenteDe } from './s8-escena-soporte'
 import { muestrearCuadro, vistaEn } from './cuadro'
 // prettier-ignore
-import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, parrafoDelDefecto7, recorridosDe, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
+import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, aspectoDeRecorridoNulo, coincidenConElCodo, frameYMaximo, palancasDeComposicion, parrafoDelDefecto7, recorridosDe, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
 import { muestrearLogo } from './s10-logo'
 // prettier-ignore
 import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, conPose, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'

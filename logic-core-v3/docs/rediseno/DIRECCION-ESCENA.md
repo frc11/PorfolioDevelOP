@@ -1965,8 +1965,8 @@ Está acá para que nadie lo dé por resuelto.
     **Lo que este ítem NO cierra, y sigue abierto:**
 
     - **§7.15** — que la caja del arnés sea `LOGO_BOX_WORLD` (7,168 × 7,168) en vez de la del mesh medido (6,863 × 4,779) es la misma decisión de siempre. Acá sólo dejó de estar escrita dos veces.
-    - **§7.44 / §7.47** — la **fórmula** del recorrido sigue duplicada: `harness.ts:93-94` conserva el `max(0, …)` con el codo, igual que `scene-camera.ts`. Las dos están declaradas con dueño y razón en `lib/scene-encuadre-deuda.ts`, y `camaraDelCuadro.ts:18-21` ya escribió el arreglo verdadero —que el arnés importe `recorridoDeEncuadre` de `encuadre.ts`, que es three-free justamente para eso, y que `camaraDelCuadro.ts` desaparezca—. **No se ejecutó acá** porque unificarla pone en rojo el control positivo de `s10-logo` §7, que existe justamente porque hay dos fórmulas. Para un sprint que mueve el encuadre POR ASPECTO esto no es cosmético: el codo depende del aspecto, y el arnés mide con la fórmula que producción ya no usa.
-    - **`ORBIT_TARGET_Y` escrito como `0` literal** dentro de la geometría de `cameraAt` (y de `camaraDelCuadro.ts:89`). Hoy es un no-op comprobado y el guardián afirma la premisa; parametrizarlo es una edición a la aritmética del arnés y no entró en este sprint.
+    - ~~**§7.44 / §7.47** — la **fórmula** del recorrido sigue duplicada.~~ **CERRADO en ENCUADRE-1 — ver §7.59.** `harness.ts` consume `recorridoDeEncuadre`; queda una sola copia propia, la de `scene-camera.ts`. Lo que ahí se anticipaba —que unificarla ponía en rojo el control positivo de `s10-logo` §7— pasó exactamente así, y el control se reescribió contra el contrafactual explícito en vez de apagarse.
+    - **`ORBIT_TARGET_Y` escrito como `0` literal** dentro de la geometría de `cameraAt` (y de `camaraConCodo`, en `camaraDelCuadro.ts`). Hoy es un no-op comprobado y el guardián afirma la premisa; parametrizarlo es una edición a la aritmética del arnés y no entró en este sprint.
 
 57. 🔴 **`s15e-intro-aterrizaje` §1 ES VERDE POR CONSTRUCCIÓN: EL ATERRIZAJE DEL PRELOADER QUEDA SIN VIGILANCIA, POR DECISIÓN (ARNES-1, 2026-09-14).**
 
@@ -1997,3 +1997,50 @@ Está acá para que nadie lo dé por resuelto.
     **2 · `_lib/escena/__tests__/s16-encuadre.invariant.ts`** (suite `s16`) — mide la composición del mismo instante (eje óptico adentro de la caja, márgenes, fracción del logo dentro del cuadro) con la cámara del arnés compuesta con el recorrido de producción (`camaraDelCuadro.ts`), sobre siete cuadros de aspecto 1,139 a 1,778. También discrimina, y es la que el reencuadre va a mover primero.
 
     **⚠ EL HUECO, que es el que importa para un sprint que mueve el encuadre POR ASPECTO.** En `scene-framing.invariant.ts` **ninguna afirmación clava la POSICIÓN horizontal del logo en un aspecto distinto de 1,7778**: las dos ventanas de §3 (1440×810 y 1920×1080) tienen el mismo aspecto, y la única comparación entre las dos —«el destino escala con el alto de la ventana»— es por eso una comparación dentro del mismo aspecto. El barrido de nueve ventanas de §4 afirma sólo una **cota de ancho** (`inkWidthPx ≤ 0,86 × w`), no una posición. La única afirmación de posición fuera de 1,7778 vive en el bloque de deuda (`scene-encuadre-deuda.ts` §7) y **clava el defecto**: `todosCentradosHoy`, o sea que en los tres teléfonos el logo aterriza en `w/2` exacto. Está marcada 🔴 y es correcto que esté — pero el sprint que reencuadre por aspecto tiene que saber que **esa comprobación se va a poner en rojo cuando el arreglo funcione**, y que fuera de 1,7778 no hay ninguna otra que lo respalde.
+
+59. ✅ **LA FÓRMULA DEL RECORRIDO, UNIFICADA — LA QUINTA COPIA CERRADA, Y EL CENSO QUE LA VIGILA ERA UN FALSO VERDE (ENCUADRE-1, 2026-09-15).**
+
+    **El defecto.** SITIO-S11 le sacó a `travelX` el codo en cero (§7.40, defecto 14) en `_lib/escena/encuadre.ts` —`max(0, h − m/2)` → `abs(h − m/2)`—, pero `probe-escena/__tests__/harness.ts:93-94` conservaba la fórmula vieja porque aquel frente tenía prohibido escribir en `/probe-escena`. Desde entonces **el instrumento medía el recorrido con una fórmula que producción ya no usa**, y el codo DEPENDE DEL ASPECTO: el sprint que reencuadra por aspecto iba a verificarse con una cámara distinta de la de la página, justo en la variable que mueve.
+
+    **La salida ejecutada es la que el repo ya tenía escrita**, no una alternativa: `camaraDelCuadro.ts:18-21` decía *«el arreglo verdadero es que `harness.ts` importe `recorridoDeEncuadre` de `encuadre.ts` —que es three-free justamente para eso— y que este archivo desaparezca»*. `cameraAt` pide el recorrido a `encuadre.ts`. `three` no entra: `encuadre.ts` sólo importa `probeScene.ts`.
+
+    **`camaraDelCuadro.ts` NO puede desaparecer, y la mitad que sí se fue.** Su docblock anticipaba el borrado entero; de él cuelgan tres cosas que no tienen otro lugar:
+
+    - **`recorridoConCodo`** — el TESTIGO declarado de la fórmula vieja. Sin él, §7 de `s10-logo` se queda sin contrafactual.
+    - **`mismaCamara`** — el comparador de dos cámaras que ese mismo §7 usa.
+    - **`test:s11-frontera`** lo nombra entre las **quince ALTAS de SITIO-S11 cuya presencia en disco se afirma**: borrarlo pone ese lane en rojo.
+
+    Lo que **sí** se fue es `camaraEnCuadro` —la cámara compuesta— junto con su `baseDeLookAt`: unificado el arnés era `cameraAt` con otro nombre, y afirmar que dos nombres de la misma función coinciden es verde por construcción. Sus tres consumidores (`s10-logo.ts`, `s16-encuadre-soporte.ts`, `s10-logo-encuadre.ts`) llaman a `cameraAt`. En su lugar queda **`camaraConCodo`**: la misma composición con el recorrido VIEJO, o sea el contrafactual. El archivo cambió de sujeto — era la cámara del después, ahora es la del antes — y su docblock lo dice.
+
+    **LOS DOS ROJOS ESPERADOS, REESCRITOS — qué custodiaba cada uno antes y qué custodia ahora:**
+
+    | | Antes | Ahora |
+    |---|---|---|
+    | **`s10-logo` §7, el par de la cámara** | que la cámara del MUESTREO (`camaraEnCuadro`, con `abs`) y la del ARNÉS (`cameraAt`, con el codo) coincidan bit a bit arriba del recorrido nulo y se separen abajo — o sea que el arreglo de S11 llegara al muestreo | que la cámara de HOY (`cameraAt`, ya con `abs`) y la del CODO (`camaraConCodo`, el contrafactual explícito) coincidan bit a bit arriba y se separen abajo — o sea que la unificación **no movió ninguna pose calibrada a ojo**, y que `cameraAt` sí usa la fórmula corregida |
+    | **`scene-encuadre-deuda.ts` §8, el censo** | cinco escrituras, dos con copia propia (`harness.ts` y `scene-camera.ts`), cada una con dueño y razón | cuatro ROLES —fuente · consume · testigo · copiaPropia— y **una sola copia propia**: `scene-camera.ts`, el preloader del sitio vivo, que se juzga por grabación |
+
+    Ninguno perdió su razón de ser: los dos afirman la misma propiedad con el sujeto corregido. El conteo del censo baja de 2 a 1 **porque una copia se cerró**, no porque se afloje la vara — y sigue marcado 🔴: el día que `scene-camera.ts` consuma la fuente, esa línea se pone en rojo y hay que sacarla de la lista.
+
+    **⚠ EL CENSO ESTABA EN VERDE POR UN COMENTARIO — §7.25 otra vez, y esta vez en el instrumento que custodia la deuda.** La firma de la copia (`/Math\.max\(\s*0,[^)]*\/\s*2\s*\)/`) se corría sobre el archivo CRUDO. Medido: con la fórmula ya borrada del código, `harness.ts` seguía dando `escribe = true` **por una línea de su propio docblock** que cita la fórmula vieja para explicar qué se sacó — o sea que el censo habría seguido declarando viva una copia que no existe. `encuadre.ts` —la fuente— matchea en crudo por lo mismo. Se pasó a escanear CÓDIGO con `lineasDeCodigo`, la misma pieza que usa el censo de la lente, y se agregó un control positivo que publica los dos valores (crudo: matchea · código: no).
+
+    **Medición: CERO cifras movidas en todo el gate.** `npm run verificar --completo` antes y después, 9912 líneas: el diff son **27 líneas y todas son las dos reescrituras** —dos etiquetas de §7, el censo, y el control positivo nuevo—. Ni un número de ninguna suite cambió. `s8e` pasa de 484 a 485 afirmaciones y de 8 a 9 controles; todo lo demás, idéntico byte a byte. 30 pasos · 0 fallas · 16 deudas, igual que antes.
+
+60. 🔴 **EL REENCUADRE VA A PONER EN ROJO `todosCentradosHoy`, Y ESE ROJO SIGNIFICA ÉXITO — NO LO "ARREGLEN" DEVOLVIENDO EL DEFECTO (ENCUADRE-1, 2026-09-15).**
+
+    **QUÉ ES.** `lib/scene-encuadre-deuda.ts` §7 afirma, sobre 375×812 · 390×844 · 393×852, que el centro de la tinta cae en `w/2` **exacto** en los tres. La etiqueta lo dice con todas las letras: *«🔴 HOY el logo aterriza EXACTAMENTE en el centro geométrico de la pantalla en los tres teléfonos: `frameX` no corre nada»*. **Es una afirmación que CLAVA EL DEFECTO de §7.44**, no una propiedad deseada: `scene-camera.ts` conserva el `max(0, …)`, debajo del codo `travelX` vale 0, el `aim` colapsa sobre el target, la cámara no rota y el `frameX` de la pose de entrada no mueve el logo ni un píxel.
+
+    **CUÁNDO SE VA A PONER EN ROJO.** El día que el reencuadre por aspecto funcione en vertical. Ese rojo **significa que el arreglo llegó**, y la acción correcta es **sacar esa afirmación y escribir la nueva**, no devolver el `max(0, …)` para volver a verde. Junto con ella caen las dos líneas vecinas: *«el codo de `scene-camera.ts` sale de SU caja»* (0,542855) y *«375×667 queda ARRIBA del codo real: ahí el arreglo es un no-op»*, que describen la geometría del defecto.
+
+    **QUÉ TAN GRANDE ES EL SALTO, MEDIDO.** Con la caja del arnés (7,168), en 390×844 (aspecto **0,4621**), el centro de la tinta se mueve así al pasar de la fórmula vieja a la corregida — los cinco keyframes con encuadre aterrizan hoy en **195,00 px exactos**, que es 390/2:
+
+    | keyframe | `frameX` | aspecto de recorrido nulo | x hoy | x con `abs` | Δ |
+    |---|---|---|---|---|---|
+    | hero | 0,50 | 0,566962 | 195,00 | 214,47 | **+19,47 px** |
+    | quiénes somos | −0,80 | 0,786347 | 195,00 | 98,68 | **−96,32 px** |
+    | números | −0,45 | 0,552519 | 195,00 | 179,89 | **−15,11 px** |
+    | trabajos | −0,85 | 0,554488 | 195,00 | 165,83 | **−29,17 px** |
+    | demos | 1,00 | 0,798279 | 195,00 | 319,83 | **+124,83 px** |
+
+    **⚠ Y FUERA DEL ASPECTO 1,7778 NO HAY NINGUNA AFIRMACIÓN QUE CLAVE LA POSICIÓN HORIZONTAL DEL LOGO.** Es el hueco que §7.58 abrió y que este ítem cuantifica: el lane entero declara aspectos de **1,1389 a 1,7778** (`s10-logo-lectura` y `s13b-encuadre`; el resto de los instrumentos del arnés fija `ASPECT = 16/9`), y los aspectos de recorrido nulo de los cinco keyframes van de **0,5525 a 0,7983** — o sea que **ningún instrumento del gate mide jamás debajo del codo**. Por eso unificar la fórmula movió CERO cifras (§7.59) y por eso la divergencia era invisible. **El reencuadre trabaja sin red en vertical:** la única afirmación de posición que existe ahí es la que clava el defecto, y cuando se la saque no queda ninguna en su lugar. Escribirla es parte del sprint, no un extra.
+
+    **La diferencia entre las dos fórmulas en escritorio es CERO, y eso también hay que decirlo claro.** En 1,7778 (1920×1080) · 1,600 (1440×900) · 1,3333 (1024×768) y 1,1389 (1025×900), `abs` y `max(0, …)` devuelven el **mismo bit** en los cinco keyframes: Δ mundo 0,0000 y Δ 0,00 px. El arnés no venía mintiendo en escritorio — **venía mintiendo sólo abajo del codo, que es exactamente donde el reencuadre trabaja.**

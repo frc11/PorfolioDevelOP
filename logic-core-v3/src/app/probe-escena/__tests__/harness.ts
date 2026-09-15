@@ -8,10 +8,26 @@
  *     npx tsx src/app/probe-escena/__tests__/s7-recorridos.invariant.ts
  *     npx tsx src/app/probe-escena/__tests__/s7-luz.invariant.ts
  *
- * Reimplementa la cámara —posición, base de pantalla y encuadre— en lugar de
- * importar `cameraFraming.ts`, por una sola razón: ese módulo importa `three`,
- * que en node arrastra el paquete entero para hacer tres productos vectoriales.
- * La aritmética es idéntica y está anotada contra su fuente.
+ * Reimplementa la cámara —posición y base de pantalla— en lugar de importar
+ * `cameraFraming.ts`, por una sola razón: ese módulo importa `three`, que en
+ * node arrastra el paquete entero para hacer tres productos vectoriales. La
+ * aritmética es idéntica y está anotada contra su fuente.
+ *
+ * ── ⚠️ EL RECORRIDO DEL ENCUADRE YA NO SE REIMPLEMENTA: SE PIDE ────────────
+ *
+ * `cameraAt` escribía `Math.max(0, medioCuadro − caja/2) × FRAME_TRAVEL_SAFETY`
+ * a mano. **Ésa es la fórmula VIEJA**: SITIO-S11 le sacó el codo en cero
+ * (defecto 14, §7.40) y la dejó como `Math.abs(…)` en `_lib/escena/encuadre.ts`,
+ * que es de donde el rig la saca vía `cameraFraming.ts`. El arnés se quedó con
+ * la vieja porque aquel frente tenía prohibido escribir en `/probe-escena`, y
+ * `camaraDelCuadro.ts` nació para tapar el agujero componiendo `cameraAt` con el
+ * recorrido bueno — su propio docblock dejó escrito el arreglo verdadero: *«que
+ * `harness.ts` importe `recorridoDeEncuadre` de `encuadre.ts` —que es three-free
+ * justamente para eso—»*. Es lo que hace esta línea.
+ *
+ * **Importa `encuadre.ts` y no `cameraFraming.ts`**: `encuadre.ts` existe
+ * exactamente para esto y su única importación es `probeScene.ts`. `three` sigue
+ * sin entrar.
  *
  * ── ⚠️ LOS VALORES DE LA LENTE YA NO SE COPIAN: SE CONSUMEN ────────────────
  *
@@ -34,6 +50,7 @@
  */
 import { buildTrack, sampleTrack } from '@/app/v3/_lib/escena/choreographySampler'
 import type { ChoreoKeyframe, MutableChoreoPose } from '@/app/v3/_lib/escena/choreographyTypes'
+import { recorridoDeEncuadre } from '@/app/v3/_lib/escena/encuadre'
 import { CAMERA_FOV, FLOOR_Y, FRAME_TRAVEL_SAFETY } from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
 
@@ -116,9 +133,12 @@ export function cameraAt(
     return { position, ...base, eyeDistance, pose: { ...out } }
   }
 
+  // El recorrido sale de `encuadre.ts`, que es el único lugar donde vive esa
+  // aritmética. Acá estaba escrito con `max(0, …)` —el codo que SITIO-S11 sacó—
+  // y era la fórmula que producción ya no usa.
   const halfHeight = TAN_HALF_V * eyeDistance
-  const travelX = Math.max(0, halfHeight * aspect - LOGO_W / 2) * FRAME_TRAVEL_SAFETY
-  const travelY = Math.max(0, halfHeight - LOGO_H / 2) * FRAME_TRAVEL_SAFETY
+  const travelX = recorridoDeEncuadre(halfHeight * aspect, LOGO_W)
+  const travelY = recorridoDeEncuadre(halfHeight, LOGO_H)
 
   const aim: Vec3 = [
     base.right[0] * -out.frameX * travelX + base.up[0] * -out.frameY * travelY,
