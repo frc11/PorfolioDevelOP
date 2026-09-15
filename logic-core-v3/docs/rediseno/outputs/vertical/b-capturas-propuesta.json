@@ -1,0 +1,87 @@
+{
+  "etiqueta": "propuesta",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "cuando": "2026-09-15T18:36:41.541Z",
+  "extension": {
+    "arriba": 0,
+    "abajo": 17011.421875,
+    "ventana": 844,
+    "alturaDoc": 17011,
+    "paneles": 8
+  },
+  "paradas": [
+    {
+      "indice": 1,
+      "keyframe": "hero",
+      "progreso": 0,
+      "scrollY": 0,
+      "progresoLogrado": 0,
+      "fase": "corriendo",
+      "bytes": 750725,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-01-hero.png"
+    },
+    {
+      "indice": 2,
+      "keyframe": "quiénes somos",
+      "progreso": 0.375,
+      "scrollY": 3804,
+      "progresoLogrado": 0.3749913019527116,
+      "fase": "corriendo",
+      "bytes": 607769,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-02-qui-nes-somos.png"
+    },
+    {
+      "indice": 3,
+      "keyframe": "números",
+      "progreso": 0.5,
+      "scrollY": 7608,
+      "progresoLogrado": 0.49999347646453374,
+      "fase": "corriendo",
+      "bytes": 486416,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-03-n-meros.png"
+    },
+    {
+      "indice": 4,
+      "keyframe": "trabajos",
+      "progreso": 0.625,
+      "scrollY": 10461,
+      "progresoLogrado": 0.6249880401849784,
+      "fase": "corriendo",
+      "bytes": 462493,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-04-trabajos.png"
+    },
+    {
+      "indice": 5,
+      "keyframe": "demos",
+      "progreso": 0.75,
+      "scrollY": 14556,
+      "progresoLogrado": 0.7500751583769446,
+      "fase": "corriendo",
+      "bytes": 714778,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-05-demos.png"
+    },
+    {
+      "indice": 6,
+      "keyframe": "cierre",
+      "progreso": 0.95,
+      "scrollY": 15845,
+      "progresoLogrado": 0.9499937059963375,
+      "fase": "corriendo",
+      "bytes": 706967,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-06-cierre.png"
+    },
+    {
+      "indice": 7,
+      "keyframe": "cierre · sostén",
+      "progreso": 1,
+      "scrollY": 16167,
+      "progresoLogrado": 0.9999345689392732,
+      "fase": "corriendo",
+      "bytes": 631106,
+      "archivo": "docs\\rediseno\\capturas\\vertical\\propuesta-07-cierre-sost-n.png"
+    }
+  ]
+}

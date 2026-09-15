@@ -21,12 +21,22 @@ import { lineasDeCodigo } from '@/app/v3/_lib/__tests__/s8-largos'
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '@/app/v3/_lib/escena/probeScene'
 import { SCENE_LOGO_MESH_WORLD, projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 import { camaraCorregidaEn, mismaCamaraDelPreloader } from '@/lib/scene-camera-medida'
-import { SCENE_ENTRY_POSE, frameSceneEntry } from '@/lib/scene-framing'
+import { SCENE_ENTRY_POSE, frameSceneEntry, frameScenePose } from '@/lib/scene-framing'
 
 /** El arnés del invariante que lo consume. No se duplica acá. */
 export interface ArnesDeComprobacion {
   readonly check: (etiqueta: string, condicion: boolean, detalle?: string) => void
   readonly section: (titulo: string) => void
+}
+
+/**
+ * El aterrizaje horizontal del PRELOADER con un `frameX` dado, en píxeles y
+ * como texto para poder contar valores distintos. Pasa por `frameScenePose`, o
+ * sea por la fórmula VIEJA de `scene-camera.ts` — que es justo lo que se mide.
+ */
+function aterrizajeCon(frameX: number, ancho: number, alto: number): string {
+  const r = frameScenePose({ ...SCENE_ENTRY_POSE, frameX }, ancho, alto)
+  return r === null ? 'null' : r.centerXPx.toFixed(4)
 }
 
 export function afirmarLaDeudaDeTravelX({ check, section }: ArnesDeComprobacion): void {
@@ -106,6 +116,39 @@ export function afirmarLaDeudaDeTravelX({ check, section }: ArnesDeComprobacion)
     '🔴 HOY el logo aterriza EXACTAMENTE en el centro geométrico de la pantalla en los tres teléfonos: `frameX` no corre nada',
     todosCentradosHoy,
     'es el defecto de §7.44, medido: con `travelX` en 0 el `aim` colapsa sobre el target y la cámara no rota'
+  )
+
+  /**
+   * ⚠️ **VERTICAL-1 · LA CONDICIÓN DE §7.60, PRECISADA CON SU MEDICIÓN.**
+   *
+   * §7.60 dice que la afirmación de arriba se pondrá en rojo *«el día que el
+   * reencuadre por aspecto funcione en vertical»*, y de ahí se lee que el sprint
+   * que componga `/v3` en vertical la va a mover. **No la mueve, y es medible:
+   * el reencuadre de `/v3` YA funciona en vertical** —lo afirma
+   * `s10-vertical.invariant.ts` §2, con recorridos de 71 a 255 px a 390×844— y
+   * esta comprobación sigue en verde.
+   *
+   * El motivo es que **no depende de `/v3` en absoluto**: depende de
+   * `lib/scene-camera.ts`, la última copia propia de la fórmula (§7.44), que
+   * conserva el `max(0, …)`. Debajo del codo su `travelX` se clava en 0, así que
+   * el aterrizaje da `w/2` **para cualquier valor de `frameX`** — y el `frameX`
+   * del hero ES `CHOREO_KEYFRAMES[0].pose.frameX`, o sea que un sprint puede
+   * moverlo y esta línea ni se entera.
+   *
+   * La condición correcta: **esto se pone en rojo el día que `scene-camera.ts`
+   * consuma `recorridoDeEncuadre`**, y ese día hay que sacarla y escribir la
+   * posición nueva. El renglón de abajo lo mide en vez de suponerlo.
+   */
+  const ATERRIZAJES = [-1, -0.5, 0, 0.5, 1].map((frameX) => aterrizajeCon(frameX, 390, 844))
+  check(
+    '  y la condición de §7.60 NO es «que /v3 componga»: `frameX` es INERTE en el preloader a 390×844',
+    new Set(ATERRIZAJES).size === 1,
+    `cinco valores de \`frameX\` dan un solo aterrizaje (${ATERRIZAJES[0]} px). Se pondrá en rojo cuando \`scene-camera.ts\` consuma \`recorridoDeEncuadre\`, no antes`
+  )
+  check(
+    '  control positivo — el MISMO lector ve que a 1440×810 el preloader SÍ se mueve con `frameX`',
+    new Set([-1, 0, 1].map((f) => aterrizajeCon(f, 1440, 810))).size === 3,
+    'si diera uno solo, el renglón de arriba estaría midiendo un lector ciego y no la inercia de la fórmula vieja'
   )
   check(
     '  y con `recorridoDeEncuadre` los tres se mueven: el arreglo NO es cosmético',

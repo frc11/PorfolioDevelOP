@@ -208,6 +208,7 @@
     "test:s10-mobile": "npx tsx src/app/v3/_lib/__tests__/s10-mobile.invariant.ts",
     "test:s10-acceso": "npx tsx src/app/v3/_lib/__tests__/s10-acceso.invariant.ts",
     "test:s10-logo": "npx tsx src/app/v3/_lib/escena/__tests__/s10-logo.invariant.ts",
+    "test:s10-vertical": "npx tsx src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
     "test:s10-raf": "npx tsx src/app/v3/_lib/__tests__/s10-raf.invariant.ts",
     "test:s10": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s10",
     "test:s13b-escena": "npx tsx src/app/v3/_lib/escena/__tests__/s13b-escena.invariant.ts",

@@ -13,11 +13,21 @@
  * libre?** Si no lo deja, esa exclusión deja de ser decisión de método y pasa a
  * ser un agujero de medición.
  *
- * ── LO PRIMERO, Y ES UN HALLAZGO: en cuatro de los cinco anchos NO APLICA ──
+ * ── ⚠️ LO PRIMERO YA NO ES LO QUE ERA, Y HAY QUE DECIR QUÉ DECÍA ──────────
  *
- * `_lib/compuerta.ts` monta el escenario sólo desde 1025 (`CONSULTA_ESCENARIO`)
- * y abajo del umbral el bundle ni se descarga: no hay logo con el que competir,
- * así que van con `noCorre` y su motivo. **El eje que sí varía y que nadie miró
+ * Decía: *«en cuatro de los cinco anchos NO APLICA — `_lib/compuerta.ts` monta
+ * el escenario sólo desde 1025 y abajo del umbral el bundle ni se descarga: no
+ * hay logo con el que competir»*. **Era cierto y dejó de serlo**: por decisión
+ * del dueño la escena se monta en TODOS los anchos, y abajo de 1025 ahora SÍ hay
+ * un logo detrás del texto.
+ *
+ * Los cuatro anchos siguen con `noCorre` y **el motivo es otro, y es más débil a
+ * propósito**: el sprint que bajó la escena tenía prohibido componer el encuadre
+ * —«que la escena se vea mal encuadrada en vertical es el resultado ESPERADO y
+ * es el insumo del sprint siguiente»—, así que medir la superposición contra una
+ * composición que se sabe provisoria no mide el sitio, mide el andamio. La
+ * medición es del sprint de composición, y hasta entonces esto lo dice en voz
+ * alta en vez de publicar una cifra que va a cambiar. **El eje que sí varía y que nadie miró
  * es la RELACIÓN DE ASPECTO** (§7.6, abierto por escrito: *«en vertical el logo
  * no entra igual»*): a 1025 con los tres altos declarados el cuadro va de 1,139
  * a 1,537, contra el 1,600 de la referencia con la que se compuso el recorrido.
@@ -61,10 +71,27 @@ const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · LA COMPUERTA — en cuatro de los cinco anchos la pregunta NO APLICA')
+titulo('1 · LA COMPUERTA — a 390 la pregunta ya está MEDIDA; los otros tres anchos siguen diferidos')
 
-const sinEscena = `abajo de ${ESCENARIO_MIN_ANCHO_PX} \`EscenarioCompuerta\` no monta el canvas (\`_lib/compuerta.ts\`, \`CONSULTA_ESCENARIO\`) y el bundle ni se descarga: no hay logo con el que competir`
-for (const a of ANCHOS.filter((w) => w < ESCENARIO_MIN_ANCHO_PX)) noCorre(`el logo contra el texto a ${a}px`, sinEscena)
+const sinEscena = `abajo de ${ESCENARIO_MIN_ANCHO_PX} la escena SÍ se monta desde MOVIL-1 (nivel \`compacta\`), así que la pregunta aplica; a 390 la contesta \`s10-vertical.invariant.ts\` y los demás anchos son de la pasada siguiente`
+/**
+ * ⚠️ **390 SALIÓ DE LA LISTA: VERTICAL-1 LO MIDIÓ.** El motivo de abajo decía
+ * «se mide en el sprint de composición, no acá», y ese sprint llegó: la posición
+ * horizontal del logo en los siete keyframes, la superposición con la columna y
+ * el hecho de que la tinta NO entra en el cuadro están afirmados en
+ * `s10-vertical.invariant.ts`, que corre en esta misma suite. Los otros tres
+ * anchos siguen diferidos, que es lo que la instrucción de aquel sprint declaró:
+ * «320, 375, 425, 768 y 1024 son de la pasada siguiente».
+ */
+const MEDIDO_EN_VERTICAL = 390
+for (const a of ANCHOS.filter((w) => w < ESCENARIO_MIN_ANCHO_PX && w !== MEDIDO_EN_VERTICAL)) {
+  noCorre(`el logo contra el texto a ${a}px`, sinEscena)
+}
+afirmar(
+  ANCHOS.includes(MEDIDO_EN_VERTICAL),
+  `  y ${MEDIDO_EN_VERTICAL} YA no está diferido: lo mide \`s10-vertical.invariant.ts\`, en esta suite`,
+  'la posición de los siete keyframes, la superposición con la columna y el ancho de la tinta contra el del cuadro',
+)
 afirmar(
   ESCENARIO_MIN_ANCHO_PX === tokenPx('--breakpoint-escritorio', 0),
   'el umbral de la compuerta y el breakpoint del tema son el MISMO número',
@@ -73,11 +100,11 @@ afirmar(
 afirmar(
   !variantesActivas(ESCENARIO_MIN_ANCHO_PX - 1).includes('escritorio') &&
     variantesActivas(ESCENARIO_MIN_ANCHO_PX).includes('escritorio'),
-  '  y la escena y la variante `escritorio:` conmutan en el mismo píxel',
+  '  y el NIVEL de calidad de la escena y la variante `escritorio:` conmutan en el mismo píxel',
   `${ESCENARIO_MIN_ANCHO_PX - 1} → sin · ${ESCENARIO_MIN_ANCHO_PX} → con`,
 )
 controlPositivo(
-  'el detector de «acá hay escena» sabe rechazar el ancho de justo abajo',
+  'el detector de «acá la escena va en calidad plena» sabe rechazar el ancho de justo abajo',
   ESCENARIO_MIN_ANCHO_PX - 1,
   (a: number) => a >= ESCENARIO_MIN_ANCHO_PX,
 )
