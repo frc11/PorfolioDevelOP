@@ -12,20 +12,47 @@
  * importar `cameraFraming.ts`, por una sola razón: ese módulo importa `three`,
  * que en node arrastra el paquete entero para hacer tres productos vectoriales.
  * La aritmética es idéntica y está anotada contra su fuente.
+ *
+ * ── ⚠️ LOS VALORES DE LA LENTE YA NO SE COPIAN: SE CONSUMEN ────────────────
+ *
+ * Hasta acá este bloque escribía `35`, `0.88`, `7.168` y `-(0.007 * 1024) / 2 -
+ * 0.72` a mano, con la razón *«se repite para no arrastrar three»*. **Esa razón
+ * era falsa y se puede comprobar en una línea:** `probeScene.ts` no importa
+ * `three` —su única importación es `@/lib/logo-footprint`, que no importa
+ * nada—, y cinco instrumentos de esta misma carpeta ya lo importan para sacar
+ * colores (`celosiaBeat.ts`, `frameProbe.ts`, `s11-piso`, `s11-sin-sol`,
+ * `shading.ts`). Lo que arrastra `three` es `cameraFraming.ts`, que es otro
+ * archivo y sigue sin importarse: la reimplementación de la CÁMARA se queda,
+ * la copia de los NÚMEROS se va.
+ *
+ * De esa copia colgaban dieciséis instrumentos —`s10-logo` y `s16-encuadre`
+ * incluidos—, así que un fov movido en `probeScene.ts` y no acá los dejaba a
+ * todos verdes midiendo la lente vieja. El guardián de que no vuelva está en
+ * `_lib/escena/__tests__/s16-arnes.invariant.ts`, con su control positivo.
+ *
+ * Los nombres y los valores no cambian: son las MISMAS constantes, al bit.
  */
 import { buildTrack, sampleTrack } from '@/app/v3/_lib/escena/choreographySampler'
 import type { ChoreoKeyframe, MutableChoreoPose } from '@/app/v3/_lib/escena/choreographyTypes'
+import { CAMERA_FOV, FLOOR_Y, FRAME_TRAVEL_SAFETY } from '@/app/v3/_lib/escena/probeScene'
+import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
 
-/** `CAMERA_FOV` de `probeScene.ts`. Se repite acá para no arrastrar three. */
-export const FOV = 35
+/** `CAMERA_FOV` de `probeScene.ts`. No se copia: se consume. */
+export const FOV = CAMERA_FOV
 export const TAN_HALF_V = Math.tan(((FOV / 2) * Math.PI) / 180)
-/** `FRAME_TRAVEL_SAFETY` de `probeScene.ts`. */
-export const FRAME_TRAVEL_SAFETY = 0.88
-/** La caja del logo extruido, medida en S6: 7,168 × 7,168 × 0,56. */
-export const LOGO_W = 7.168
-export const LOGO_H = 7.168
-/** `FLOOR_Y` de `probeScene.ts`: −LOGO_BOX_WORLD/2 − 0,72. */
-export const FLOOR_Y = -(0.007 * 1024) / 2 - 0.72
+/** `FRAME_TRAVEL_SAFETY` y `FLOOR_Y` de `probeScene.ts`, tal cual. */
+export { FLOOR_Y, FRAME_TRAVEL_SAFETY }
+/**
+ * La caja del logo extruido: el CUADRADO de 1024 del SVG llevado a mundo,
+ * 7,168 × 7,168 × 0,56.
+ *
+ * ⚠️ **Que sea `LOGO_BOX_WORLD` no cierra §7.15 de `DIRECCION-ESCENA.md`.** Ese
+ * pendiente pregunta otra cosa —si el arnés debería usar la caja del MESH
+ * medido (6,863 × 4,779), que es la que el rig le pasa a `aimWithFraming`— y
+ * sigue abierto. Acá sólo deja de estar escrito el mismo número dos veces.
+ */
+export const LOGO_W = LOGO_BOX_WORLD
+export const LOGO_H = LOGO_BOX_WORLD
 
 export type Vec3 = readonly [number, number, number]
 

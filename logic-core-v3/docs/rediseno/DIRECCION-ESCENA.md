@@ -1948,3 +1948,52 @@ Está acá para que nadie lo dé por resuelto.
 
     Salió del hero cuando el titular pasó a dos registros (`TU NEGOCIO VENDIENDO` / `LAS 24 HS`) y la bajada quedó en un renglón. **No está pendiente de redacción: está aprobada.** Lo que falta es **dónde va**. Mientras no tenga lugar, no está en ninguna pantalla y no la cuenta ningún censo de contenido.
 
+56. ✅ **LA LENTE ESTABA ESCRITA DOS VECES Y UNA DE LAS DOS NO TENÍA GUARDIÁN — CERRADO (ARNES-1, 2026-09-14).**
+
+    `probe-escena/__tests__/harness.ts:19-28` copiaba a mano **cuatro** valores de la escena: `CAMERA_FOV = 35`, `FRAME_TRAVEL_SAFETY = 0,88`, la caja `7.168 × 7.168` y el `FLOOR_Y` entero (`-(0.007 * 1024) / 2 - 0.72`). De ese bloque cuelgan **45 importadores**, `s10-logo` y `s16-encuadre` incluidos —o sea los instrumentos que juzgan el encuadre del Hero—, así que un fov movido en `probeScene.ts` y no en el arnés dejaba a esa familia entera **verde midiendo la lente vieja**.
+
+    **La razón escrita de la copia era falsa, y se comprueba en una línea.** El docblock decía *«se repite acá para no arrastrar three»*. `probeScene.ts` **no importa `three`**: su única importación es `@/lib/logo-footprint`, que no importa nada. Lo que arrastra `three` es `cameraFraming.ts`, que es otro archivo y sigue sin importarse. Además, **cinco instrumentos de esa misma carpeta ya importan `probeScene.ts`** para sacar colores (`celosiaBeat.ts`, `frameProbe.ts`, `s11-piso`, `s11-sin-sol`, `shading.ts`).
+
+    **La salida fue que la copia desapareciera**, no un espejo con guardián: el arnés consume `CAMERA_FOV`, `FRAME_TRAVEL_SAFETY` y `FLOOR_Y` de `probeScene.ts`, y `LOGO_W`/`LOGO_H` de `LOGO_BOX_WORLD`. **Los cuatro valores son bit-idénticos** (`0.007 * 1024 === 7.168` es exacto: 1024 es potencia de dos, así que el escalado no toca la mantisa), y ninguna cifra de ninguna suite se movió.
+
+    **Dos copias más del mismo valor, cerradas en el mismo barrido:** `s10-escena.invariant.ts:216` y `s11-pantalla.invariant.ts:271` escribían `-(0.007 * 1024) / 2 - 0.72` a mano —tercera y cuarta escritura de `FLOOR_Y`— aunque los dos archivos ya importaban del arnés. Ahora consumen `FLOOR_Y`.
+
+    **El guardián: `_lib/escena/__tests__/s16-arnes.invariant.ts`** (`npm run test:s16-arnes`, suite `s16`). 28 afirmaciones, 7 controles positivos. No afirma `FOV === CAMERA_FOV` como propiedad central —con la copia borrada eso es una identidad por construcción, que es exactamente la enfermedad de §7.57—: mide **el fov DESPEJADO de la proyección del sitio** (`projectScenePoint` publica `pxPerWorld = alto / (2 · tan(fov/2) · profundidad)`, y de ahí sale el tangente que la cámara de producción usa, sin que esté exportado en ningún lado), **el FUENTE del arnés** (ni una de las cuatro firmas, y `three` sin importar), **el censo del lane entero** (489 archivos en 6 raíces; cuatro dueños declarados con motivo, más los cuatro fixtures de este mismo archivo, que se declara a sí mismo en vez de excluirse — §7.25), **el pivote** (`ORBIT_TARGET_Y === 0` es la premisa que hace correcto el `[0, 0, 0]` escrito en `cameraAt`, y las dos cámaras coinciden bit a bit con la pose sin encuadrar) y **la caja** (`LOGO_BOX_WORLD === PROBE_SVG_SCALE × 1024`: el comentario `// 0.007 × 1024` era el único lugar donde las dos cuentas se relacionaban).
+
+    **Control positivo, corrido:** con `export const FOV = 36` de vuelta a mano en el arnés, §1 se pone en rojo con las dos cifras al lado (`0.324919696233` contra `0.315298788879` despejado de `pxPerWorld`) y el invariante sale con exit 1. Las firmas de §2 están atadas al valor de hoy a propósito: una copia que vuelve con el MISMO número la ve §2, una que vuelve con OTRO la ve §1. Entre las dos no queda hueco.
+
+    **Lo que este ítem NO cierra, y sigue abierto:**
+
+    - **§7.15** — que la caja del arnés sea `LOGO_BOX_WORLD` (7,168 × 7,168) en vez de la del mesh medido (6,863 × 4,779) es la misma decisión de siempre. Acá sólo dejó de estar escrita dos veces.
+    - **§7.44 / §7.47** — la **fórmula** del recorrido sigue duplicada: `harness.ts:93-94` conserva el `max(0, …)` con el codo, igual que `scene-camera.ts`. Las dos están declaradas con dueño y razón en `lib/scene-encuadre-deuda.ts`, y `camaraDelCuadro.ts:18-21` ya escribió el arreglo verdadero —que el arnés importe `recorridoDeEncuadre` de `encuadre.ts`, que es three-free justamente para eso, y que `camaraDelCuadro.ts` desaparezca—. **No se ejecutó acá** porque unificarla pone en rojo el control positivo de `s10-logo` §7, que existe justamente porque hay dos fórmulas. Para un sprint que mueve el encuadre POR ASPECTO esto no es cosmético: el codo depende del aspecto, y el arnés mide con la fórmula que producción ya no usa.
+    - **`ORBIT_TARGET_Y` escrito como `0` literal** dentro de la geometría de `cameraAt` (y de `camaraDelCuadro.ts:89`). Hoy es un no-op comprobado y el guardián afirma la premisa; parametrizarlo es una edición a la aritmética del arnés y no entró en este sprint.
+
+57. 🔴 **`s15e-intro-aterrizaje` §1 ES VERDE POR CONSTRUCCIÓN: EL ATERRIZAJE DEL PRELOADER QUEDA SIN VIGILANCIA, POR DECISIÓN (ARNES-1, 2026-09-14).**
+
+    **La identidad, citada.** `introLanding.invariant.ts` §1 compara la pose del último cuadro del vuelo contra el destino de la escena:
+
+    ```
+    const destino = frameSceneEntry(w, h)
+    const plan = planIntroFlight(w, h)        // introFlight.ts:80 → destination = frameSceneEntry(w, h)
+    const pose = sampleLogoPose(plan, T, 1)   // introFlight.ts:133 → originXPx + (destination.centerXPx − originXPx) × lugar
+    const d = Math.hypot(pose.centerXPx − destino.centerXPx, pose.centerYPx − destino.centerYPx)
+    check(..., d < 0.001)
+    ```
+
+    `planIntroFlight` saca su destino **de `frameSceneEntry`**, o sea de la misma función contra la que después se resta. Y `samplePlace(HOME_INTRO_TIMELINE, 1) === 1` **exacto**, así que `origen + (destino − origen) × 1` es `destino`. **La resta da 0 con cualquier fov, distancia o escala.** Las otras dos comprobaciones de §1 son la misma identidad: `pose.inkHeightPx` ES `plan.ink.heightPx`, que ES `destination.inkHeightPx`.
+
+    **Medido, en siete ventanas:** `d = 0` exacto en 1440×810, 1920×1080, 1280×800, 390×844, 2560×1440, 1025×900 y 3840×2160. Cero, no «menos de la tolerancia».
+
+    **Lo que eso tapa, con un caso concreto.** En **390×844** el centro que las dos partes reportan es **(195, 422)** — exactamente el centro geométrico de la pantalla. Es el defecto de §7.44 en vivo: debajo del codo `travelX` vale 0, el `aim` colapsa sobre el target y el `frameX` de la pose de entrada no corre el logo ni un píxel. **§1 está en verde sobre esa ventana**, porque las dos mitades de su resta arrastran el mismo error.
+
+    **NO SE REESCRIBE.** El preloader va a ser rehecho por decisión del dueño, y no se escribe un guardián para algo que se va a reemplazar. **Queda declarado que el aterrizaje del preloader NO TIENE VIGILANCIA** hasta que eso pase. El que lo rehaga: §1 de ese archivo no mide nada. Lo que sí discrimina ahí es §2 (la silueta), que compara las esquinas proyectadas en perspectiva contra el rectángulo del rig ortográfico —dos caminos distintos— salvo su segunda comprobación, que es `Number.isFinite(peor)`, o sea una publicación y no una afirmación.
+
+58. ⚠️ **LO QUE SÍ VIGILA LA POSE DEL HERO EN REPOSO, Y DÓNDE ESTÁ SU HUECO (ARNES-1, 2026-09-14).**
+
+    `frameSceneEntry` proyecta dos cosas: el destino del preloader (§7.57) y **la pose del Hero en reposo**, que no es del preloader y no se va a rehacer. La pregunta de qué la vigila tiene dos respuestas, y ninguna es una identidad.
+
+    **1 · `src/lib/scene-framing.invariant.ts`** (`npm run test:s8e-encuadre`, suite `s8e`) — es el dueño. §3 clava la proyección contra píxeles escritos a mano: **centro en (940, 417) ±1,5** y **tinta de 445 × 310 px ±2** en 1440×810. No son identidades: los números están escritos en el instrumento y el valor sale de correr `frameSceneEntry`. Además §2 cruza **dos mediciones independientes de la misma caja** (el path aplanado + bisel contra los 6,86 × 4,78 que el probe midió del mesh en runtime), §3 tiene un contrafactual con `frameX: 0` y su control positivo, §4 mide el clamp de ancho contra la proyección cruda, y §5 los viewports degenerados. **Discrimina.**
+
+    **2 · `_lib/escena/__tests__/s16-encuadre.invariant.ts`** (suite `s16`) — mide la composición del mismo instante (eje óptico adentro de la caja, márgenes, fracción del logo dentro del cuadro) con la cámara del arnés compuesta con el recorrido de producción (`camaraDelCuadro.ts`), sobre siete cuadros de aspecto 1,139 a 1,778. También discrimina, y es la que el reencuadre va a mover primero.
+
+    **⚠ EL HUECO, que es el que importa para un sprint que mueve el encuadre POR ASPECTO.** En `scene-framing.invariant.ts` **ninguna afirmación clava la POSICIÓN horizontal del logo en un aspecto distinto de 1,7778**: las dos ventanas de §3 (1440×810 y 1920×1080) tienen el mismo aspecto, y la única comparación entre las dos —«el destino escala con el alto de la ventana»— es por eso una comparación dentro del mismo aspecto. El barrido de nueve ventanas de §4 afirma sólo una **cota de ancho** (`inkWidthPx ≤ 0,86 × w`), no una posición. La única afirmación de posición fuera de 1,7778 vive en el bloque de deuda (`scene-encuadre-deuda.ts` §7) y **clava el defecto**: `todosCentradosHoy`, o sea que en los tres teléfonos el logo aterriza en `w/2` exacto. Está marcada 🔴 y es correcto que esté — pero el sprint que reencuadre por aspecto tiene que saber que **esa comprobación se va a poner en rojo cuando el arreglo funcione**, y que fuera de 1,7778 no hay ninguna otra que lo respalde.

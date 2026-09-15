@@ -26,6 +26,7 @@ import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
 import { MOIRE_FAR_BOTTOM, MOIRE_FAR_RADIUS, MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import {
+  FLOOR_Y,
   TAN_HALF_V,
   cameraAt,
   check,
@@ -268,7 +269,7 @@ section('El batido proyectado, en píxeles de pantalla')
     const sun = sunDirectionAt(at)
     const azimuth = sunAzimuthAt(at)
     const tangent: Vec3 = [Math.cos(azimuth), 0, -Math.sin(azimuth)]
-    const origen: Vec3 = [cam.position[0], -(0.007 * 1024) / 2 - 0.72, cam.position[2]]
+    const origen: Vec3 = [cam.position[0], FLOOR_Y, cam.position[2]]
     const g = LAYERS.map((layer) => phaseGradient(origen, sun, layer, tangent))
     sampleLightArc(at, arc)
     check(

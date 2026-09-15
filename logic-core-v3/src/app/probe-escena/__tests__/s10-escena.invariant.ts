@@ -22,7 +22,7 @@ import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
-import { check, report, section } from './harness'
+import { FLOOR_Y, check, report, section } from './harness'
 import { INK_HEIGHT, INK_WIDTH, mask, sampleFrame } from './frameProbe'
 
 const RAD = Math.PI / 180
@@ -213,7 +213,10 @@ section('La sombra se alarga, que es la otra mitad del tiempo pasando')
 
 {
   const top = INK_HEIGHT / 2
-  const floor = -(0.007 * 1024) / 2 - 0.72
+  // El piso es el de la escena: `FLOOR_Y` del arnés, que lo consume de
+  // `probeScene.ts`. Acá estaba escrito a mano —tercera copia del mismo número,
+  // sin motivo declarado— y el guardián es `s16-arnes.invariant.ts` §3.
+  const floor = FLOOR_Y
   const lengths: number[] = []
   // ⚠️ B12: el segundo progreso era `0.5` porque ésa era la noche de B8. La
   // noche ahora es la ventana `NOCHE` del arco —el pin entero— y su punto medio
