@@ -1,0 +1,50 @@
+{
+  "cuando": "2026-09-16T04:36:39.724Z",
+  "mismoObjeto": true,
+  "distanciaDeHoy": 19,
+  "distanciaPropuesta": 25.75,
+  "pitchHoy": 18.62,
+  "pitchPropuesto": 13.96,
+  "filas": [
+    {
+      "ancho": 390,
+      "alto": 844,
+      "anchoDeLaTintaHoyPx": 335.4,
+      "anchoDeLaTintaNuevaPx": 335.4,
+      "centroXHoyPx": 195,
+      "centroXNuevoPx": 204.64,
+      "saltoDeAnchoPx": 0,
+      "saltoDeCentroPx": 9.64
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "anchoDeLaTintaHoyPx": 365.5,
+      "anchoDeLaTintaNuevaPx": 345.52,
+      "centroXHoyPx": 212.5,
+      "centroXNuevoPx": 229.84,
+      "saltoDeAnchoPx": 19.98,
+      "saltoDeCentroPx": 17.34
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "anchoDeLaTintaHoyPx": 554.98,
+      "anchoDeLaTintaNuevaPx": 419.64,
+      "centroXHoyPx": 430.66,
+      "centroXNuevoPx": 460.55,
+      "saltoDeAnchoPx": 135.34,
+      "saltoDeCentroPx": 29.88
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "anchoDeLaTintaHoyPx": 418.56,
+      "anchoDeLaTintaNuevaPx": 316.95,
+      "centroXHoyPx": 645.47,
+      "centroXNuevoPx": 667.9,
+      "saltoDeAnchoPx": 101.61,
+      "saltoDeCentroPx": 22.43
+    }
+  ]
+}

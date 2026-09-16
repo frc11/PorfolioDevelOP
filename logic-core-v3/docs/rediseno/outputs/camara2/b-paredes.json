@@ -1,0 +1,65 @@
+{
+  "cuando": "2026-09-16T04:05:21.624Z",
+  "distanciaDeHoy": 19,
+  "luces": [
+    {
+      "distancia": 19,
+      "media": 204.34017366816698
+    },
+    {
+      "distancia": 22,
+      "media": 206.38638741478266
+    },
+    {
+      "distancia": 24,
+      "media": 207.4463439787397
+    },
+    {
+      "distancia": 26,
+      "media": 208.40151006141056
+    },
+    {
+      "distancia": 28,
+      "media": 209.06384300856385
+    },
+    {
+      "distancia": 30,
+      "media": 209.80925172490527
+    },
+    {
+      "distancia": 32,
+      "media": 210.45376994881096
+    },
+    {
+      "distancia": 34,
+      "media": 211.09061625222265
+    }
+  ],
+  "paredes": [
+    {
+      "pared": "batido (16/9, <5 bandas)",
+      "cruce": 25.75,
+      "fuente": "s11-pantalla.invariant.ts"
+    },
+    {
+      "pared": "batido (16/9, <6 bandas)",
+      "cruce": 28.25,
+      "fuente": "s11-pantalla.invariant.ts"
+    },
+    {
+      "pared": "techo de luz del hero (210)",
+      "cruce": 30.59,
+      "fuente": "s12-barrido.invariant.ts"
+    },
+    {
+      "pared": "capa fina del fondo",
+      "cruce": 33,
+      "fuente": "s10-fondo.invariant.ts"
+    },
+    {
+      "pared": "campo de motas",
+      "cruce": 33.39,
+      "fuente": "introParticles.invariant.ts"
+    }
+  ]
+}

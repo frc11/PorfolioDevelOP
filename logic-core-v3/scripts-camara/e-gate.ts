@@ -22,7 +22,10 @@ import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { RAIZ_DE_SALIDAS, TEMP_DEL_BANCO, argumento } from './camara-comun'
+import { RAIZ_DE_SALIDAS as SALIDAS_DE_CAMARA_1, TEMP_DEL_BANCO, argumento } from './camara-comun'
+
+/** CAMARA-2 reusa este gate; lo unico que cambia es donde cae el log. */
+const RAIZ_DE_SALIDAS = argumento('salidas', SALIDAS_DE_CAMARA_1)
 
 const ARCHIVO = 'src/app/v3/_lib/escena/choreography.ts'
 const LINEA_DEL_HERO = 'pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.5, frameY: 0 },'
@@ -45,7 +48,29 @@ function main(): void {
   let salida = ''
   try {
     writeFileSync(ARCHIVO, texto.replace(LINEA_DEL_HERO, LINEA_DEL_HERO.replace('distance: 19', `distance: ${distancia}`)), 'utf8')
-    console.log(`\n  APLICADO distance: ${distancia}. Corriendo \`npm run verificar\` (tarda)...\n`)
+    /**
+     * ⚠ **EL BUILD VA ANTES, Y NO ES OPCIONAL.** `verificar` lee de `.next`:
+     * `s5-peso` pesa el bundle desde ahí. Un dev server dejando su salida en ese
+     * directorio es como TAPADO-1 pasó en verde con el peso 12,4 B arriba del
+     * techo. Se reconstruye con `npm run build` —nunca `npx next build`— y con la
+     * llave prendida, que es la forma documentada de construir este árbol.
+     */
+    if (argumento('construir', 'si') === 'si') {
+      console.log(`\n  APLICADO distance: ${distancia}. Reconstruyendo con npm run build antes del gate...\n`)
+      const construccion = spawnSync('npm', ['run', 'build'], {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        maxBuffer: 256 * 1024 * 1024,
+        shell: true,
+        windowsHide: true,
+        env: { ...process.env, MEDIR_CON_LA_LLAVE_PRENDIDA: '1' },
+      })
+      if (construccion.status !== 0) {
+        throw new Error(`el build fallo: ${`${construccion.stdout ?? ''}${construccion.stderr ?? ''}`.slice(-1200)}`)
+      }
+      console.log('  build OK.\n')
+    }
+    console.log(`  Corriendo npm run verificar (tarda)...\n`)
     const r = spawnSync('npm', ['run', 'verificar'], {
       cwd: process.cwd(),
       encoding: 'utf8',

@@ -1,0 +1,144 @@
+{
+  "cuando": "2026-09-16T04:36:15.048Z",
+  "invariantes": [
+    "s10-vertical",
+    "s16-encuadre",
+    "s9e-composicion",
+    "s8-intro",
+    "s8-relevo",
+    "s8e-encuadre",
+    "s11e-piso",
+    "s11e-pantalla",
+    "s12e-barrido",
+    "s12e-tension",
+    "s13e-intro-particulas",
+    "s13e-intro-campo",
+    "s14e-intro-lectura",
+    "s14e-intro-escala",
+    "s15e-intro-aterrizaje",
+    "s10e-fondo",
+    "s7e-recorridos"
+  ],
+  "filas": [
+    {
+      "distancia": 19,
+      "rojos": []
+    },
+    {
+      "distancia": 20,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-tension",
+        "s14e-intro-escala"
+      ]
+    },
+    {
+      "distancia": 21,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s9e-composicion",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-barrido",
+        "s12e-tension",
+        "s14e-intro-lectura",
+        "s14e-intro-escala"
+      ]
+    },
+    {
+      "distancia": 22,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s9e-composicion",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-barrido",
+        "s12e-tension",
+        "s13e-intro-campo",
+        "s14e-intro-lectura",
+        "s14e-intro-escala"
+      ]
+    },
+    {
+      "distancia": 23,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s9e-composicion",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-barrido",
+        "s12e-tension",
+        "s14e-intro-lectura",
+        "s14e-intro-escala"
+      ]
+    },
+    {
+      "distancia": 24,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s9e-composicion",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-barrido",
+        "s12e-tension",
+        "s13e-intro-campo",
+        "s14e-intro-lectura",
+        "s14e-intro-escala",
+        "s15e-intro-aterrizaje"
+      ]
+    },
+    {
+      "distancia": 25.75,
+      "rojos": [
+        "s10-vertical",
+        "s16-encuadre",
+        "s9e-composicion",
+        "s8-intro",
+        "s8-relevo",
+        "s8e-encuadre",
+        "s11e-piso",
+        "s12e-barrido",
+        "s12e-tension",
+        "s13e-intro-particulas",
+        "s13e-intro-campo",
+        "s14e-intro-lectura",
+        "s14e-intro-escala",
+        "s15e-intro-aterrizaje"
+      ]
+    }
+  ],
+  "primera": {
+    "s10-vertical": 20,
+    "s16-encuadre": 20,
+    "s8-intro": 20,
+    "s8-relevo": 20,
+    "s8e-encuadre": 20,
+    "s11e-piso": 20,
+    "s12e-tension": 20,
+    "s14e-intro-escala": 20,
+    "s9e-composicion": 21,
+    "s12e-barrido": 21,
+    "s14e-intro-lectura": 21,
+    "s13e-intro-campo": 22,
+    "s15e-intro-aterrizaje": 24,
+    "s13e-intro-particulas": 25.75
+  },
+  "mayorLimpia": 19
+}

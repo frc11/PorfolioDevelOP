@@ -51,7 +51,22 @@ import {
   type EstadoDeCapas,
   type Ventana as VentanaTapado,
 } from '../scripts-tapado/tapado-comun'
-import { CARPETA_DE_CAPTURAS, RAIZ_DE_SALIDAS, argumento, cuatroDecimales, dosDecimales } from './camara-comun'
+import {
+  CARPETA_DE_CAPTURAS as CARPETA_DE_CAMARA_1,
+  RAIZ_DE_SALIDAS as SALIDAS_DE_CAMARA_1,
+  argumento,
+  cuatroDecimales,
+  dosDecimales,
+} from './camara-comun'
+
+/**
+ * ⚠ **CAMARA-2 reusa ESTE simulador en vez de copiarlo.** Lo único que cambia
+ * entre bloques es dónde caen las capturas y el JSON, así que eso entra por
+ * argumento. Copiar las cuarenta líneas de `medirVentana` habría dejado dos
+ * medidores que se pueden desincronizar, que es lo que el repo no quiere.
+ */
+const CARPETA_DE_CAPTURAS = argumento('carpeta', CARPETA_DE_CAMARA_1)
+const RAIZ_DE_SALIDAS = argumento('salidas', SALIDAS_DE_CAMARA_1)
 
 const ARCHIVO = 'src/app/v3/_lib/escena/choreography.ts'
 const LINEA_DEL_HERO = 'pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.5, frameY: 0 },'

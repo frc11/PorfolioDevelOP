@@ -1,0 +1,3193 @@
+{
+  "cuando": "2026-09-16T04:01:29.338Z",
+  "equivale": true,
+  "publicado": [
+    {
+      "distancia": 19,
+      "celdaPx": 108,
+      "batidoPx": 626,
+      "bandas": 3.1
+    },
+    {
+      "distancia": 40,
+      "celdaPx": 34,
+      "batidoPx": 118,
+      "bandas": 16.3
+    }
+  ],
+  "curvas": [
+    {
+      "cuadro": "1920x1080",
+      "ancho": 1920,
+      "alto": 1080,
+      "puntos": [
+        {
+          "distancia": 19,
+          "bandas": 3.07,
+          "celdaPx": 107.93,
+          "profundidad": 34
+        },
+        {
+          "distancia": 19.25,
+          "bandas": 3.12,
+          "celdaPx": 106.37,
+          "profundidad": 34.41
+        },
+        {
+          "distancia": 19.5,
+          "bandas": 3.18,
+          "celdaPx": 104.84,
+          "profundidad": 34.82
+        },
+        {
+          "distancia": 19.75,
+          "bandas": 3.24,
+          "celdaPx": 103.34,
+          "profundidad": 35.23
+        },
+        {
+          "distancia": 20,
+          "bandas": 3.3,
+          "celdaPx": 101.87,
+          "profundidad": 35.63
+        },
+        {
+          "distancia": 20.25,
+          "bandas": 3.36,
+          "celdaPx": 100.42,
+          "profundidad": 36.04
+        },
+        {
+          "distancia": 20.5,
+          "bandas": 3.42,
+          "celdaPx": 99,
+          "profundidad": 36.45
+        },
+        {
+          "distancia": 20.75,
+          "bandas": 3.48,
+          "celdaPx": 97.61,
+          "profundidad": 36.86
+        },
+        {
+          "distancia": 21,
+          "bandas": 3.54,
+          "celdaPx": 96.25,
+          "profundidad": 37.27
+        },
+        {
+          "distancia": 21.25,
+          "bandas": 3.61,
+          "celdaPx": 94.91,
+          "profundidad": 37.69
+        },
+        {
+          "distancia": 21.5,
+          "bandas": 3.67,
+          "celdaPx": 93.59,
+          "profundidad": 38.1
+        },
+        {
+          "distancia": 21.75,
+          "bandas": 3.74,
+          "celdaPx": 92.3,
+          "profundidad": 38.51
+        },
+        {
+          "distancia": 22,
+          "bandas": 3.8,
+          "celdaPx": 91.03,
+          "profundidad": 38.92
+        },
+        {
+          "distancia": 22.25,
+          "bandas": 3.87,
+          "celdaPx": 89.78,
+          "profundidad": 39.33
+        },
+        {
+          "distancia": 22.5,
+          "bandas": 3.94,
+          "celdaPx": 88.56,
+          "profundidad": 39.75
+        },
+        {
+          "distancia": 22.75,
+          "bandas": 4.01,
+          "celdaPx": 87.35,
+          "profundidad": 40.16
+        },
+        {
+          "distancia": 23,
+          "bandas": 4.09,
+          "celdaPx": 86.17,
+          "profundidad": 40.57
+        },
+        {
+          "distancia": 23.25,
+          "bandas": 4.16,
+          "celdaPx": 85,
+          "profundidad": 40.99
+        },
+        {
+          "distancia": 23.5,
+          "bandas": 4.23,
+          "celdaPx": 83.86,
+          "profundidad": 41.4
+        },
+        {
+          "distancia": 23.75,
+          "bandas": 4.31,
+          "celdaPx": 82.73,
+          "profundidad": 41.82
+        },
+        {
+          "distancia": 24,
+          "bandas": 4.39,
+          "celdaPx": 81.62,
+          "profundidad": 42.23
+        },
+        {
+          "distancia": 24.25,
+          "bandas": 4.47,
+          "celdaPx": 80.53,
+          "profundidad": 42.65
+        },
+        {
+          "distancia": 24.5,
+          "bandas": 4.55,
+          "celdaPx": 79.46,
+          "profundidad": 43.06
+        },
+        {
+          "distancia": 24.75,
+          "bandas": 4.63,
+          "celdaPx": 78.4,
+          "profundidad": 43.48
+        },
+        {
+          "distancia": 25,
+          "bandas": 4.71,
+          "celdaPx": 77.36,
+          "profundidad": 43.9
+        },
+        {
+          "distancia": 25.25,
+          "bandas": 4.8,
+          "celdaPx": 76.34,
+          "profundidad": 44.31
+        },
+        {
+          "distancia": 25.5,
+          "bandas": 4.89,
+          "celdaPx": 75.33,
+          "profundidad": 44.73
+        },
+        {
+          "distancia": 25.75,
+          "bandas": 4.98,
+          "celdaPx": 74.33,
+          "profundidad": 45.15
+        },
+        {
+          "distancia": 26,
+          "bandas": 5.07,
+          "celdaPx": 73.35,
+          "profundidad": 45.57
+        },
+        {
+          "distancia": 26.25,
+          "bandas": 5.16,
+          "celdaPx": 72.39,
+          "profundidad": 45.98
+        },
+        {
+          "distancia": 26.5,
+          "bandas": 5.25,
+          "celdaPx": 71.44,
+          "profundidad": 46.4
+        },
+        {
+          "distancia": 26.75,
+          "bandas": 5.35,
+          "celdaPx": 70.5,
+          "profundidad": 46.82
+        },
+        {
+          "distancia": 27,
+          "bandas": 5.45,
+          "celdaPx": 69.58,
+          "profundidad": 47.24
+        },
+        {
+          "distancia": 27.25,
+          "bandas": 5.55,
+          "celdaPx": 68.67,
+          "profundidad": 47.66
+        },
+        {
+          "distancia": 27.5,
+          "bandas": 5.65,
+          "celdaPx": 67.77,
+          "profundidad": 48.07
+        },
+        {
+          "distancia": 27.75,
+          "bandas": 5.76,
+          "celdaPx": 66.88,
+          "profundidad": 48.49
+        },
+        {
+          "distancia": 28,
+          "bandas": 5.87,
+          "celdaPx": 66.01,
+          "profundidad": 48.91
+        },
+        {
+          "distancia": 28.25,
+          "bandas": 5.98,
+          "celdaPx": 65.14,
+          "profundidad": 49.33
+        },
+        {
+          "distancia": 28.5,
+          "bandas": 6.09,
+          "celdaPx": 64.29,
+          "profundidad": 49.75
+        },
+        {
+          "distancia": 28.75,
+          "bandas": 6.2,
+          "celdaPx": 63.45,
+          "profundidad": 50.17
+        },
+        {
+          "distancia": 29,
+          "bandas": 6.32,
+          "celdaPx": 62.62,
+          "profundidad": 50.59
+        },
+        {
+          "distancia": 29.25,
+          "bandas": 6.44,
+          "celdaPx": 61.81,
+          "profundidad": 51.01
+        },
+        {
+          "distancia": 29.5,
+          "bandas": 6.56,
+          "celdaPx": 61,
+          "profundidad": 51.43
+        },
+        {
+          "distancia": 29.75,
+          "bandas": 6.69,
+          "celdaPx": 60.2,
+          "profundidad": 51.85
+        },
+        {
+          "distancia": 30,
+          "bandas": 6.82,
+          "celdaPx": 59.41,
+          "profundidad": 52.27
+        },
+        {
+          "distancia": 30.25,
+          "bandas": 6.95,
+          "celdaPx": 58.63,
+          "profundidad": 52.69
+        },
+        {
+          "distancia": 30.5,
+          "bandas": 7.08,
+          "celdaPx": 57.86,
+          "profundidad": 53.11
+        },
+        {
+          "distancia": 30.75,
+          "bandas": 7.22,
+          "celdaPx": 57.1,
+          "profundidad": 53.54
+        },
+        {
+          "distancia": 31,
+          "bandas": 7.36,
+          "celdaPx": 56.35,
+          "profundidad": 53.96
+        },
+        {
+          "distancia": 31.25,
+          "bandas": 7.5,
+          "celdaPx": 55.61,
+          "profundidad": 54.38
+        },
+        {
+          "distancia": 31.5,
+          "bandas": 7.65,
+          "celdaPx": 54.87,
+          "profundidad": 54.8
+        },
+        {
+          "distancia": 31.75,
+          "bandas": 7.8,
+          "celdaPx": 54.15,
+          "profundidad": 55.22
+        },
+        {
+          "distancia": 32,
+          "bandas": 7.96,
+          "celdaPx": 53.43,
+          "profundidad": 55.64
+        },
+        {
+          "distancia": 32.25,
+          "bandas": 8.12,
+          "celdaPx": 52.72,
+          "profundidad": 56.06
+        },
+        {
+          "distancia": 32.5,
+          "bandas": 8.28,
+          "celdaPx": 52.02,
+          "profundidad": 56.49
+        },
+        {
+          "distancia": 32.75,
+          "bandas": 8.45,
+          "celdaPx": 51.32,
+          "profundidad": 56.91
+        },
+        {
+          "distancia": 33,
+          "bandas": 8.62,
+          "celdaPx": 50.64,
+          "profundidad": 57.33
+        },
+        {
+          "distancia": 33.25,
+          "bandas": 8.8,
+          "celdaPx": 49.96,
+          "profundidad": 57.75
+        },
+        {
+          "distancia": 33.5,
+          "bandas": 8.98,
+          "celdaPx": 49.28,
+          "profundidad": 58.18
+        },
+        {
+          "distancia": 33.75,
+          "bandas": 9.17,
+          "celdaPx": 48.62,
+          "profundidad": 58.6
+        },
+        {
+          "distancia": 34,
+          "bandas": 9.36,
+          "celdaPx": 47.96,
+          "profundidad": 59.02
+        },
+        {
+          "distancia": 34.25,
+          "bandas": 9.56,
+          "celdaPx": 47.3,
+          "profundidad": 59.44
+        },
+        {
+          "distancia": 34.5,
+          "bandas": 9.76,
+          "celdaPx": 46.66,
+          "profundidad": 59.87
+        },
+        {
+          "distancia": 34.75,
+          "bandas": 9.97,
+          "celdaPx": 46.02,
+          "profundidad": 60.29
+        },
+        {
+          "distancia": 35,
+          "bandas": 10.18,
+          "celdaPx": 45.38,
+          "profundidad": 60.71
+        },
+        {
+          "distancia": 35.25,
+          "bandas": 10.4,
+          "celdaPx": 44.75,
+          "profundidad": 61.14
+        },
+        {
+          "distancia": 35.5,
+          "bandas": 10.63,
+          "celdaPx": 44.13,
+          "profundidad": 61.56
+        },
+        {
+          "distancia": 35.75,
+          "bandas": 10.87,
+          "celdaPx": 43.51,
+          "profundidad": 61.98
+        },
+        {
+          "distancia": 36,
+          "bandas": 11.11,
+          "celdaPx": 42.9,
+          "profundidad": 62.41
+        },
+        {
+          "distancia": 36.25,
+          "bandas": 11.36,
+          "celdaPx": 42.29,
+          "profundidad": 62.83
+        },
+        {
+          "distancia": 36.5,
+          "bandas": 11.61,
+          "celdaPx": 41.69,
+          "profundidad": 63.26
+        },
+        {
+          "distancia": 36.75,
+          "bandas": 11.88,
+          "celdaPx": 41.09,
+          "profundidad": 63.68
+        },
+        {
+          "distancia": 37,
+          "bandas": 12.15,
+          "celdaPx": 40.5,
+          "profundidad": 64.1
+        },
+        {
+          "distancia": 37.25,
+          "bandas": 12.43,
+          "celdaPx": 39.92,
+          "profundidad": 64.53
+        },
+        {
+          "distancia": 37.5,
+          "bandas": 12.73,
+          "celdaPx": 39.33,
+          "profundidad": 64.95
+        },
+        {
+          "distancia": 37.75,
+          "bandas": 13.03,
+          "celdaPx": 38.75,
+          "profundidad": 65.38
+        },
+        {
+          "distancia": 38,
+          "bandas": 13.34,
+          "celdaPx": 38.18,
+          "profundidad": 65.8
+        },
+        {
+          "distancia": 38.25,
+          "bandas": 13.66,
+          "celdaPx": 37.61,
+          "profundidad": 66.22
+        },
+        {
+          "distancia": 38.5,
+          "bandas": 14,
+          "celdaPx": 37.04,
+          "profundidad": 66.65
+        },
+        {
+          "distancia": 38.75,
+          "bandas": 14.34,
+          "celdaPx": 36.48,
+          "profundidad": 67.07
+        },
+        {
+          "distancia": 39,
+          "bandas": 14.7,
+          "celdaPx": 35.93,
+          "profundidad": 67.5
+        },
+        {
+          "distancia": 39.25,
+          "bandas": 15.07,
+          "celdaPx": 35.37,
+          "profundidad": 67.92
+        },
+        {
+          "distancia": 39.5,
+          "bandas": 15.46,
+          "celdaPx": 34.82,
+          "profundidad": 68.35
+        },
+        {
+          "distancia": 39.75,
+          "bandas": 15.86,
+          "celdaPx": 34.27,
+          "profundidad": 68.77
+        },
+        {
+          "distancia": 40,
+          "bandas": 16.28,
+          "celdaPx": 33.73,
+          "profundidad": 69.2
+        },
+        {
+          "distancia": 40.25,
+          "bandas": 16.71,
+          "celdaPx": 33.19,
+          "profundidad": 69.62
+        },
+        {
+          "distancia": 40.5,
+          "bandas": 17.16,
+          "celdaPx": 32.65,
+          "profundidad": 70.05
+        },
+        {
+          "distancia": 40.75,
+          "bandas": 17.63,
+          "celdaPx": 32.11,
+          "profundidad": 70.47
+        },
+        {
+          "distancia": 41,
+          "bandas": 18.12,
+          "celdaPx": 31.58,
+          "profundidad": 70.9
+        },
+        {
+          "distancia": 41.25,
+          "bandas": 18.63,
+          "celdaPx": 31.05,
+          "profundidad": 71.32
+        },
+        {
+          "distancia": 41.5,
+          "bandas": 19.16,
+          "celdaPx": 30.52,
+          "profundidad": 71.75
+        },
+        {
+          "distancia": 41.75,
+          "bandas": 19.72,
+          "celdaPx": 30,
+          "profundidad": 72.17
+        },
+        {
+          "distancia": 42,
+          "bandas": 20.3,
+          "celdaPx": 29.47,
+          "profundidad": 72.6
+        },
+        {
+          "distancia": 42.25,
+          "bandas": 20.9,
+          "celdaPx": 28.95,
+          "profundidad": 73.02
+        },
+        {
+          "distancia": 42.5,
+          "bandas": 21.54,
+          "celdaPx": 28.43,
+          "profundidad": 73.45
+        },
+        {
+          "distancia": 42.75,
+          "bandas": 22.21,
+          "celdaPx": 27.91,
+          "profundidad": 73.88
+        },
+        {
+          "distancia": 43,
+          "bandas": 22.91,
+          "celdaPx": 27.39,
+          "profundidad": 74.3
+        },
+        {
+          "distancia": 43.25,
+          "bandas": 23.64,
+          "celdaPx": 26.88,
+          "profundidad": 74.73
+        },
+        {
+          "distancia": 43.5,
+          "bandas": 24.42,
+          "celdaPx": 26.36,
+          "profundidad": 75.15
+        },
+        {
+          "distancia": 43.75,
+          "bandas": 25.23,
+          "celdaPx": 25.85,
+          "profundidad": 75.58
+        },
+        {
+          "distancia": 44,
+          "bandas": 26.09,
+          "celdaPx": 25.34,
+          "profundidad": 76
+        }
+      ],
+      "techoProsa": 25.75,
+      "techoAfirmado": 28.25,
+      "bandasHoy": 3.07
+    },
+    {
+      "cuadro": "390x844",
+      "ancho": 390,
+      "alto": 844,
+      "puntos": [
+        {
+          "distancia": 19,
+          "bandas": 0.71,
+          "celdaPx": 89.53,
+          "profundidad": 33.54
+        },
+        {
+          "distancia": 19.25,
+          "bandas": 0.72,
+          "celdaPx": 88.4,
+          "profundidad": 33.93
+        },
+        {
+          "distancia": 19.5,
+          "bandas": 0.73,
+          "celdaPx": 87.3,
+          "profundidad": 34.33
+        },
+        {
+          "distancia": 19.75,
+          "bandas": 0.74,
+          "celdaPx": 86.22,
+          "profundidad": 34.73
+        },
+        {
+          "distancia": 20,
+          "bandas": 0.75,
+          "celdaPx": 85.16,
+          "profundidad": 35.12
+        },
+        {
+          "distancia": 20.25,
+          "bandas": 0.76,
+          "celdaPx": 84.13,
+          "profundidad": 35.52
+        },
+        {
+          "distancia": 20.5,
+          "bandas": 0.77,
+          "celdaPx": 83.11,
+          "profundidad": 35.92
+        },
+        {
+          "distancia": 20.75,
+          "bandas": 0.78,
+          "celdaPx": 82.12,
+          "profundidad": 36.32
+        },
+        {
+          "distancia": 21,
+          "bandas": 0.79,
+          "celdaPx": 81.15,
+          "profundidad": 36.72
+        },
+        {
+          "distancia": 21.25,
+          "bandas": 0.8,
+          "celdaPx": 80.19,
+          "profundidad": 37.12
+        },
+        {
+          "distancia": 21.5,
+          "bandas": 0.81,
+          "celdaPx": 79.26,
+          "profundidad": 37.52
+        },
+        {
+          "distancia": 21.75,
+          "bandas": 0.82,
+          "celdaPx": 78.34,
+          "profundidad": 37.92
+        },
+        {
+          "distancia": 22,
+          "bandas": 0.83,
+          "celdaPx": 77.44,
+          "profundidad": 38.32
+        },
+        {
+          "distancia": 22.25,
+          "bandas": 0.84,
+          "celdaPx": 76.56,
+          "profundidad": 38.72
+        },
+        {
+          "distancia": 22.5,
+          "bandas": 0.85,
+          "celdaPx": 75.7,
+          "profundidad": 39.12
+        },
+        {
+          "distancia": 22.75,
+          "bandas": 0.86,
+          "celdaPx": 74.85,
+          "profundidad": 39.53
+        },
+        {
+          "distancia": 23,
+          "bandas": 0.87,
+          "celdaPx": 74.01,
+          "profundidad": 39.93
+        },
+        {
+          "distancia": 23.25,
+          "bandas": 0.89,
+          "celdaPx": 73.19,
+          "profundidad": 40.33
+        },
+        {
+          "distancia": 23.5,
+          "bandas": 0.9,
+          "celdaPx": 72.39,
+          "profundidad": 40.74
+        },
+        {
+          "distancia": 23.75,
+          "bandas": 0.91,
+          "celdaPx": 71.6,
+          "profundidad": 41.14
+        },
+        {
+          "distancia": 24,
+          "bandas": 0.92,
+          "celdaPx": 70.8,
+          "profundidad": 41.54
+        },
+        {
+          "distancia": 24.25,
+          "bandas": 0.93,
+          "celdaPx": 70,
+          "profundidad": 41.95
+        },
+        {
+          "distancia": 24.5,
+          "bandas": 0.94,
+          "celdaPx": 69.22,
+          "profundidad": 42.35
+        },
+        {
+          "distancia": 24.75,
+          "bandas": 0.96,
+          "celdaPx": 68.46,
+          "profundidad": 42.76
+        },
+        {
+          "distancia": 25,
+          "bandas": 0.97,
+          "celdaPx": 67.7,
+          "profundidad": 43.16
+        },
+        {
+          "distancia": 25.25,
+          "bandas": 0.98,
+          "celdaPx": 66.96,
+          "profundidad": 43.57
+        },
+        {
+          "distancia": 25.5,
+          "bandas": 1,
+          "celdaPx": 66.23,
+          "profundidad": 43.97
+        },
+        {
+          "distancia": 25.75,
+          "bandas": 1.01,
+          "celdaPx": 65.51,
+          "profundidad": 44.38
+        },
+        {
+          "distancia": 26,
+          "bandas": 1.02,
+          "celdaPx": 64.81,
+          "profundidad": 44.78
+        },
+        {
+          "distancia": 26.25,
+          "bandas": 1.04,
+          "celdaPx": 64.11,
+          "profundidad": 45.19
+        },
+        {
+          "distancia": 26.5,
+          "bandas": 1.05,
+          "celdaPx": 63.43,
+          "profundidad": 45.6
+        },
+        {
+          "distancia": 26.75,
+          "bandas": 1.06,
+          "celdaPx": 62.75,
+          "profundidad": 46
+        },
+        {
+          "distancia": 27,
+          "bandas": 1.08,
+          "celdaPx": 62.09,
+          "profundidad": 46.41
+        },
+        {
+          "distancia": 27.25,
+          "bandas": 1.09,
+          "celdaPx": 61.44,
+          "profundidad": 46.82
+        },
+        {
+          "distancia": 27.5,
+          "bandas": 1.11,
+          "celdaPx": 60.79,
+          "profundidad": 47.22
+        },
+        {
+          "distancia": 27.75,
+          "bandas": 1.12,
+          "celdaPx": 60.16,
+          "profundidad": 47.63
+        },
+        {
+          "distancia": 28,
+          "bandas": 1.13,
+          "celdaPx": 59.53,
+          "profundidad": 48.04
+        },
+        {
+          "distancia": 28.25,
+          "bandas": 1.15,
+          "celdaPx": 58.92,
+          "profundidad": 48.45
+        },
+        {
+          "distancia": 28.5,
+          "bandas": 1.16,
+          "celdaPx": 58.31,
+          "profundidad": 48.86
+        },
+        {
+          "distancia": 28.75,
+          "bandas": 1.18,
+          "celdaPx": 57.72,
+          "profundidad": 49.26
+        },
+        {
+          "distancia": 29,
+          "bandas": 1.19,
+          "celdaPx": 57.13,
+          "profundidad": 49.67
+        },
+        {
+          "distancia": 29.25,
+          "bandas": 1.21,
+          "celdaPx": 56.55,
+          "profundidad": 50.08
+        },
+        {
+          "distancia": 29.5,
+          "bandas": 1.22,
+          "celdaPx": 55.97,
+          "profundidad": 50.49
+        },
+        {
+          "distancia": 29.75,
+          "bandas": 1.24,
+          "celdaPx": 55.41,
+          "profundidad": 50.9
+        },
+        {
+          "distancia": 30,
+          "bandas": 1.26,
+          "celdaPx": 54.85,
+          "profundidad": 51.31
+        },
+        {
+          "distancia": 30.25,
+          "bandas": 1.27,
+          "celdaPx": 54.3,
+          "profundidad": 51.72
+        },
+        {
+          "distancia": 30.5,
+          "bandas": 1.29,
+          "celdaPx": 53.76,
+          "profundidad": 52.13
+        },
+        {
+          "distancia": 30.75,
+          "bandas": 1.31,
+          "celdaPx": 53.23,
+          "profundidad": 52.54
+        },
+        {
+          "distancia": 31,
+          "bandas": 1.32,
+          "celdaPx": 52.7,
+          "profundidad": 52.95
+        },
+        {
+          "distancia": 31.25,
+          "bandas": 1.34,
+          "celdaPx": 52.18,
+          "profundidad": 53.36
+        },
+        {
+          "distancia": 31.5,
+          "bandas": 1.36,
+          "celdaPx": 51.66,
+          "profundidad": 53.77
+        },
+        {
+          "distancia": 31.75,
+          "bandas": 1.37,
+          "celdaPx": 51.16,
+          "profundidad": 54.18
+        },
+        {
+          "distancia": 32,
+          "bandas": 1.39,
+          "celdaPx": 50.66,
+          "profundidad": 54.59
+        },
+        {
+          "distancia": 32.25,
+          "bandas": 1.41,
+          "celdaPx": 50.16,
+          "profundidad": 55
+        },
+        {
+          "distancia": 32.5,
+          "bandas": 1.43,
+          "celdaPx": 49.67,
+          "profundidad": 55.41
+        },
+        {
+          "distancia": 32.75,
+          "bandas": 1.44,
+          "celdaPx": 49.19,
+          "profundidad": 55.82
+        },
+        {
+          "distancia": 33,
+          "bandas": 1.46,
+          "celdaPx": 48.72,
+          "profundidad": 56.23
+        },
+        {
+          "distancia": 33.25,
+          "bandas": 1.48,
+          "celdaPx": 48.25,
+          "profundidad": 56.64
+        },
+        {
+          "distancia": 33.5,
+          "bandas": 1.5,
+          "celdaPx": 47.78,
+          "profundidad": 57.05
+        },
+        {
+          "distancia": 33.75,
+          "bandas": 1.52,
+          "celdaPx": 47.32,
+          "profundidad": 57.46
+        },
+        {
+          "distancia": 34,
+          "bandas": 1.54,
+          "celdaPx": 46.87,
+          "profundidad": 57.87
+        },
+        {
+          "distancia": 34.25,
+          "bandas": 1.56,
+          "celdaPx": 46.42,
+          "profundidad": 58.28
+        },
+        {
+          "distancia": 34.5,
+          "bandas": 1.58,
+          "celdaPx": 45.98,
+          "profundidad": 58.7
+        },
+        {
+          "distancia": 34.75,
+          "bandas": 1.6,
+          "celdaPx": 45.54,
+          "profundidad": 59.11
+        },
+        {
+          "distancia": 35,
+          "bandas": 1.62,
+          "celdaPx": 45.11,
+          "profundidad": 59.52
+        },
+        {
+          "distancia": 35.25,
+          "bandas": 1.64,
+          "celdaPx": 44.68,
+          "profundidad": 59.93
+        },
+        {
+          "distancia": 35.5,
+          "bandas": 1.66,
+          "celdaPx": 44.26,
+          "profundidad": 60.34
+        },
+        {
+          "distancia": 35.75,
+          "bandas": 1.68,
+          "celdaPx": 43.84,
+          "profundidad": 60.76
+        },
+        {
+          "distancia": 36,
+          "bandas": 1.7,
+          "celdaPx": 43.43,
+          "profundidad": 61.17
+        },
+        {
+          "distancia": 36.25,
+          "bandas": 1.73,
+          "celdaPx": 43.02,
+          "profundidad": 61.58
+        },
+        {
+          "distancia": 36.5,
+          "bandas": 1.75,
+          "celdaPx": 42.62,
+          "profundidad": 61.99
+        },
+        {
+          "distancia": 36.75,
+          "bandas": 1.77,
+          "celdaPx": 42.22,
+          "profundidad": 62.4
+        },
+        {
+          "distancia": 37,
+          "bandas": 1.79,
+          "celdaPx": 41.82,
+          "profundidad": 62.82
+        },
+        {
+          "distancia": 37.25,
+          "bandas": 1.82,
+          "celdaPx": 41.43,
+          "profundidad": 63.23
+        },
+        {
+          "distancia": 37.5,
+          "bandas": 1.84,
+          "celdaPx": 41.04,
+          "profundidad": 63.64
+        },
+        {
+          "distancia": 37.75,
+          "bandas": 1.86,
+          "celdaPx": 40.66,
+          "profundidad": 64.05
+        },
+        {
+          "distancia": 38,
+          "bandas": 1.89,
+          "celdaPx": 40.28,
+          "profundidad": 64.47
+        },
+        {
+          "distancia": 38.25,
+          "bandas": 1.91,
+          "celdaPx": 39.91,
+          "profundidad": 64.88
+        },
+        {
+          "distancia": 38.5,
+          "bandas": 1.94,
+          "celdaPx": 39.54,
+          "profundidad": 65.29
+        },
+        {
+          "distancia": 38.75,
+          "bandas": 1.96,
+          "celdaPx": 39.17,
+          "profundidad": 65.71
+        },
+        {
+          "distancia": 39,
+          "bandas": 1.99,
+          "celdaPx": 38.81,
+          "profundidad": 66.12
+        },
+        {
+          "distancia": 39.25,
+          "bandas": 2.01,
+          "celdaPx": 38.45,
+          "profundidad": 66.53
+        },
+        {
+          "distancia": 39.5,
+          "bandas": 2.04,
+          "celdaPx": 38.09,
+          "profundidad": 66.95
+        },
+        {
+          "distancia": 39.75,
+          "bandas": 2.07,
+          "celdaPx": 37.74,
+          "profundidad": 67.36
+        },
+        {
+          "distancia": 40,
+          "bandas": 2.09,
+          "celdaPx": 37.39,
+          "profundidad": 67.77
+        },
+        {
+          "distancia": 40.25,
+          "bandas": 2.12,
+          "celdaPx": 37.04,
+          "profundidad": 68.19
+        },
+        {
+          "distancia": 40.5,
+          "bandas": 2.15,
+          "celdaPx": 36.7,
+          "profundidad": 68.6
+        },
+        {
+          "distancia": 40.75,
+          "bandas": 2.18,
+          "celdaPx": 36.36,
+          "profundidad": 69.01
+        },
+        {
+          "distancia": 41,
+          "bandas": 2.21,
+          "celdaPx": 36.03,
+          "profundidad": 69.43
+        },
+        {
+          "distancia": 41.25,
+          "bandas": 2.23,
+          "celdaPx": 35.69,
+          "profundidad": 69.84
+        },
+        {
+          "distancia": 41.5,
+          "bandas": 2.26,
+          "celdaPx": 35.36,
+          "profundidad": 70.25
+        },
+        {
+          "distancia": 41.75,
+          "bandas": 2.29,
+          "celdaPx": 35.04,
+          "profundidad": 70.67
+        },
+        {
+          "distancia": 42,
+          "bandas": 2.32,
+          "celdaPx": 34.71,
+          "profundidad": 71.08
+        },
+        {
+          "distancia": 42.25,
+          "bandas": 2.36,
+          "celdaPx": 34.39,
+          "profundidad": 71.5
+        },
+        {
+          "distancia": 42.5,
+          "bandas": 2.39,
+          "celdaPx": 34.07,
+          "profundidad": 71.91
+        },
+        {
+          "distancia": 42.75,
+          "bandas": 2.42,
+          "celdaPx": 33.76,
+          "profundidad": 72.32
+        },
+        {
+          "distancia": 43,
+          "bandas": 2.45,
+          "celdaPx": 33.45,
+          "profundidad": 72.74
+        },
+        {
+          "distancia": 43.25,
+          "bandas": 2.49,
+          "celdaPx": 33.14,
+          "profundidad": 73.15
+        },
+        {
+          "distancia": 43.5,
+          "bandas": 2.52,
+          "celdaPx": 32.83,
+          "profundidad": 73.57
+        },
+        {
+          "distancia": 43.75,
+          "bandas": 2.55,
+          "celdaPx": 32.53,
+          "profundidad": 73.98
+        },
+        {
+          "distancia": 44,
+          "bandas": 2.59,
+          "celdaPx": 32.23,
+          "profundidad": 74.39
+        }
+      ],
+      "techoProsa": 44,
+      "techoAfirmado": 44,
+      "bandasHoy": 0.71
+    },
+    {
+      "cuadro": "425x844",
+      "ancho": 425,
+      "alto": 844,
+      "puntos": [
+        {
+          "distancia": 19,
+          "bandas": 0.77,
+          "celdaPx": 89.66,
+          "profundidad": 33.53
+        },
+        {
+          "distancia": 19.25,
+          "bandas": 0.78,
+          "celdaPx": 88.53,
+          "profundidad": 33.93
+        },
+        {
+          "distancia": 19.5,
+          "bandas": 0.79,
+          "celdaPx": 87.43,
+          "profundidad": 34.33
+        },
+        {
+          "distancia": 19.75,
+          "bandas": 0.8,
+          "celdaPx": 86.35,
+          "profundidad": 34.72
+        },
+        {
+          "distancia": 20,
+          "bandas": 0.81,
+          "celdaPx": 85.3,
+          "profundidad": 35.12
+        },
+        {
+          "distancia": 20.25,
+          "bandas": 0.82,
+          "celdaPx": 84.26,
+          "profundidad": 35.52
+        },
+        {
+          "distancia": 20.5,
+          "bandas": 0.83,
+          "celdaPx": 83.25,
+          "profundidad": 35.92
+        },
+        {
+          "distancia": 20.75,
+          "bandas": 0.85,
+          "celdaPx": 82.26,
+          "profundidad": 36.32
+        },
+        {
+          "distancia": 21,
+          "bandas": 0.86,
+          "celdaPx": 81.28,
+          "profundidad": 36.72
+        },
+        {
+          "distancia": 21.25,
+          "bandas": 0.87,
+          "celdaPx": 80.33,
+          "profundidad": 37.12
+        },
+        {
+          "distancia": 21.5,
+          "bandas": 0.88,
+          "celdaPx": 79.4,
+          "profundidad": 37.52
+        },
+        {
+          "distancia": 21.75,
+          "bandas": 0.89,
+          "celdaPx": 78.47,
+          "profundidad": 37.92
+        },
+        {
+          "distancia": 22,
+          "bandas": 0.9,
+          "celdaPx": 77.53,
+          "profundidad": 38.32
+        },
+        {
+          "distancia": 22.25,
+          "bandas": 0.92,
+          "celdaPx": 76.62,
+          "profundidad": 38.72
+        },
+        {
+          "distancia": 22.5,
+          "bandas": 0.93,
+          "celdaPx": 75.72,
+          "profundidad": 39.12
+        },
+        {
+          "distancia": 22.75,
+          "bandas": 0.94,
+          "celdaPx": 74.83,
+          "profundidad": 39.53
+        },
+        {
+          "distancia": 23,
+          "bandas": 0.95,
+          "celdaPx": 73.97,
+          "profundidad": 39.93
+        },
+        {
+          "distancia": 23.25,
+          "bandas": 0.97,
+          "celdaPx": 73.11,
+          "profundidad": 40.33
+        },
+        {
+          "distancia": 23.5,
+          "bandas": 0.98,
+          "celdaPx": 72.28,
+          "profundidad": 40.74
+        },
+        {
+          "distancia": 23.75,
+          "bandas": 0.99,
+          "celdaPx": 71.45,
+          "profundidad": 41.14
+        },
+        {
+          "distancia": 24,
+          "bandas": 1.01,
+          "celdaPx": 70.64,
+          "profundidad": 41.54
+        },
+        {
+          "distancia": 24.25,
+          "bandas": 1.02,
+          "celdaPx": 69.85,
+          "profundidad": 41.95
+        },
+        {
+          "distancia": 24.5,
+          "bandas": 1.03,
+          "celdaPx": 69.07,
+          "profundidad": 42.35
+        },
+        {
+          "distancia": 24.75,
+          "bandas": 1.05,
+          "celdaPx": 68.3,
+          "profundidad": 42.76
+        },
+        {
+          "distancia": 25,
+          "bandas": 1.06,
+          "celdaPx": 67.54,
+          "profundidad": 43.16
+        },
+        {
+          "distancia": 25.25,
+          "bandas": 1.08,
+          "celdaPx": 66.8,
+          "profundidad": 43.57
+        },
+        {
+          "distancia": 25.5,
+          "bandas": 1.09,
+          "celdaPx": 66.07,
+          "profundidad": 43.97
+        },
+        {
+          "distancia": 25.75,
+          "bandas": 1.11,
+          "celdaPx": 65.35,
+          "profundidad": 44.38
+        },
+        {
+          "distancia": 26,
+          "bandas": 1.12,
+          "celdaPx": 64.64,
+          "profundidad": 44.79
+        },
+        {
+          "distancia": 26.25,
+          "bandas": 1.14,
+          "celdaPx": 63.94,
+          "profundidad": 45.19
+        },
+        {
+          "distancia": 26.5,
+          "bandas": 1.15,
+          "celdaPx": 63.25,
+          "profundidad": 45.6
+        },
+        {
+          "distancia": 26.75,
+          "bandas": 1.17,
+          "celdaPx": 62.58,
+          "profundidad": 46.01
+        },
+        {
+          "distancia": 27,
+          "bandas": 1.18,
+          "celdaPx": 61.91,
+          "profundidad": 46.41
+        },
+        {
+          "distancia": 27.25,
+          "bandas": 1.2,
+          "celdaPx": 61.26,
+          "profundidad": 46.82
+        },
+        {
+          "distancia": 27.5,
+          "bandas": 1.21,
+          "celdaPx": 60.61,
+          "profundidad": 47.23
+        },
+        {
+          "distancia": 27.75,
+          "bandas": 1.23,
+          "celdaPx": 59.98,
+          "profundidad": 47.64
+        },
+        {
+          "distancia": 28,
+          "bandas": 1.24,
+          "celdaPx": 59.35,
+          "profundidad": 48.04
+        },
+        {
+          "distancia": 28.25,
+          "bandas": 1.26,
+          "celdaPx": 58.73,
+          "profundidad": 48.45
+        },
+        {
+          "distancia": 28.5,
+          "bandas": 1.28,
+          "celdaPx": 58.13,
+          "profundidad": 48.86
+        },
+        {
+          "distancia": 28.75,
+          "bandas": 1.29,
+          "celdaPx": 57.53,
+          "profundidad": 49.27
+        },
+        {
+          "distancia": 29,
+          "bandas": 1.31,
+          "celdaPx": 56.93,
+          "profundidad": 49.68
+        },
+        {
+          "distancia": 29.25,
+          "bandas": 1.33,
+          "celdaPx": 56.35,
+          "profundidad": 50.09
+        },
+        {
+          "distancia": 29.5,
+          "bandas": 1.35,
+          "celdaPx": 55.78,
+          "profundidad": 50.49
+        },
+        {
+          "distancia": 29.75,
+          "bandas": 1.36,
+          "celdaPx": 55.21,
+          "profundidad": 50.9
+        },
+        {
+          "distancia": 30,
+          "bandas": 1.38,
+          "celdaPx": 54.65,
+          "profundidad": 51.31
+        },
+        {
+          "distancia": 30.25,
+          "bandas": 1.4,
+          "celdaPx": 54.1,
+          "profundidad": 51.72
+        },
+        {
+          "distancia": 30.5,
+          "bandas": 1.42,
+          "celdaPx": 53.56,
+          "profundidad": 52.13
+        },
+        {
+          "distancia": 30.75,
+          "bandas": 1.43,
+          "celdaPx": 53.02,
+          "profundidad": 52.54
+        },
+        {
+          "distancia": 31,
+          "bandas": 1.45,
+          "celdaPx": 52.49,
+          "profundidad": 52.95
+        },
+        {
+          "distancia": 31.25,
+          "bandas": 1.47,
+          "celdaPx": 51.97,
+          "profundidad": 53.36
+        },
+        {
+          "distancia": 31.5,
+          "bandas": 1.49,
+          "celdaPx": 51.45,
+          "profundidad": 53.77
+        },
+        {
+          "distancia": 31.75,
+          "bandas": 1.51,
+          "celdaPx": 50.95,
+          "profundidad": 54.18
+        },
+        {
+          "distancia": 32,
+          "bandas": 1.53,
+          "celdaPx": 50.44,
+          "profundidad": 54.59
+        },
+        {
+          "distancia": 32.25,
+          "bandas": 1.55,
+          "celdaPx": 49.95,
+          "profundidad": 55
+        },
+        {
+          "distancia": 32.5,
+          "bandas": 1.57,
+          "celdaPx": 49.46,
+          "profundidad": 55.41
+        },
+        {
+          "distancia": 32.75,
+          "bandas": 1.59,
+          "celdaPx": 48.97,
+          "profundidad": 55.82
+        },
+        {
+          "distancia": 33,
+          "bandas": 1.61,
+          "celdaPx": 48.5,
+          "profundidad": 56.24
+        },
+        {
+          "distancia": 33.25,
+          "bandas": 1.63,
+          "celdaPx": 48.02,
+          "profundidad": 56.65
+        },
+        {
+          "distancia": 33.5,
+          "bandas": 1.65,
+          "celdaPx": 47.56,
+          "profundidad": 57.06
+        },
+        {
+          "distancia": 33.75,
+          "bandas": 1.67,
+          "celdaPx": 47.1,
+          "profundidad": 57.47
+        },
+        {
+          "distancia": 34,
+          "bandas": 1.7,
+          "celdaPx": 46.64,
+          "profundidad": 57.88
+        },
+        {
+          "distancia": 34.25,
+          "bandas": 1.72,
+          "celdaPx": 46.19,
+          "profundidad": 58.29
+        },
+        {
+          "distancia": 34.5,
+          "bandas": 1.74,
+          "celdaPx": 45.75,
+          "profundidad": 58.7
+        },
+        {
+          "distancia": 34.75,
+          "bandas": 1.76,
+          "celdaPx": 45.31,
+          "profundidad": 59.12
+        },
+        {
+          "distancia": 35,
+          "bandas": 1.78,
+          "celdaPx": 44.88,
+          "profundidad": 59.53
+        },
+        {
+          "distancia": 35.25,
+          "bandas": 1.81,
+          "celdaPx": 44.45,
+          "profundidad": 59.94
+        },
+        {
+          "distancia": 35.5,
+          "bandas": 1.83,
+          "celdaPx": 44.02,
+          "profundidad": 60.35
+        },
+        {
+          "distancia": 35.75,
+          "bandas": 1.86,
+          "celdaPx": 43.6,
+          "profundidad": 60.76
+        },
+        {
+          "distancia": 36,
+          "bandas": 1.88,
+          "celdaPx": 43.19,
+          "profundidad": 61.18
+        },
+        {
+          "distancia": 36.25,
+          "bandas": 1.9,
+          "celdaPx": 42.78,
+          "profundidad": 61.59
+        },
+        {
+          "distancia": 36.5,
+          "bandas": 1.93,
+          "celdaPx": 42.37,
+          "profundidad": 62
+        },
+        {
+          "distancia": 36.75,
+          "bandas": 1.95,
+          "celdaPx": 41.97,
+          "profundidad": 62.41
+        },
+        {
+          "distancia": 37,
+          "bandas": 1.98,
+          "celdaPx": 41.57,
+          "profundidad": 62.83
+        },
+        {
+          "distancia": 37.25,
+          "bandas": 2.01,
+          "celdaPx": 41.18,
+          "profundidad": 63.24
+        },
+        {
+          "distancia": 37.5,
+          "bandas": 2.03,
+          "celdaPx": 40.79,
+          "profundidad": 63.65
+        },
+        {
+          "distancia": 37.75,
+          "bandas": 2.06,
+          "celdaPx": 40.41,
+          "profundidad": 64.06
+        },
+        {
+          "distancia": 38,
+          "bandas": 2.09,
+          "celdaPx": 40.03,
+          "profundidad": 64.48
+        },
+        {
+          "distancia": 38.25,
+          "bandas": 2.11,
+          "celdaPx": 39.65,
+          "profundidad": 64.89
+        },
+        {
+          "distancia": 38.5,
+          "bandas": 2.14,
+          "celdaPx": 39.28,
+          "profundidad": 65.3
+        },
+        {
+          "distancia": 38.75,
+          "bandas": 2.17,
+          "celdaPx": 38.91,
+          "profundidad": 65.72
+        },
+        {
+          "distancia": 39,
+          "bandas": 2.2,
+          "celdaPx": 38.54,
+          "profundidad": 66.13
+        },
+        {
+          "distancia": 39.25,
+          "bandas": 2.23,
+          "celdaPx": 38.18,
+          "profundidad": 66.54
+        },
+        {
+          "distancia": 39.5,
+          "bandas": 2.26,
+          "celdaPx": 37.83,
+          "profundidad": 66.96
+        },
+        {
+          "distancia": 39.75,
+          "bandas": 2.29,
+          "celdaPx": 37.47,
+          "profundidad": 67.37
+        },
+        {
+          "distancia": 40,
+          "bandas": 2.32,
+          "celdaPx": 37.12,
+          "profundidad": 67.78
+        },
+        {
+          "distancia": 40.25,
+          "bandas": 2.35,
+          "celdaPx": 36.77,
+          "profundidad": 68.2
+        },
+        {
+          "distancia": 40.5,
+          "bandas": 2.38,
+          "celdaPx": 36.43,
+          "profundidad": 68.61
+        },
+        {
+          "distancia": 40.75,
+          "bandas": 2.41,
+          "celdaPx": 36.09,
+          "profundidad": 69.02
+        },
+        {
+          "distancia": 41,
+          "bandas": 2.44,
+          "celdaPx": 35.75,
+          "profundidad": 69.44
+        },
+        {
+          "distancia": 41.25,
+          "bandas": 2.48,
+          "celdaPx": 35.41,
+          "profundidad": 69.85
+        },
+        {
+          "distancia": 41.5,
+          "bandas": 2.51,
+          "celdaPx": 35.08,
+          "profundidad": 70.27
+        },
+        {
+          "distancia": 41.75,
+          "bandas": 2.54,
+          "celdaPx": 34.75,
+          "profundidad": 70.68
+        },
+        {
+          "distancia": 42,
+          "bandas": 2.58,
+          "celdaPx": 34.43,
+          "profundidad": 71.09
+        },
+        {
+          "distancia": 42.25,
+          "bandas": 2.61,
+          "celdaPx": 34.11,
+          "profundidad": 71.51
+        },
+        {
+          "distancia": 42.5,
+          "bandas": 2.65,
+          "celdaPx": 33.79,
+          "profundidad": 71.92
+        },
+        {
+          "distancia": 42.75,
+          "bandas": 2.69,
+          "celdaPx": 33.47,
+          "profundidad": 72.34
+        },
+        {
+          "distancia": 43,
+          "bandas": 2.72,
+          "celdaPx": 33.16,
+          "profundidad": 72.75
+        },
+        {
+          "distancia": 43.25,
+          "bandas": 2.76,
+          "celdaPx": 32.84,
+          "profundidad": 73.17
+        },
+        {
+          "distancia": 43.5,
+          "bandas": 2.8,
+          "celdaPx": 32.54,
+          "profundidad": 73.58
+        },
+        {
+          "distancia": 43.75,
+          "bandas": 2.84,
+          "celdaPx": 32.23,
+          "profundidad": 73.99
+        },
+        {
+          "distancia": 44,
+          "bandas": 2.88,
+          "celdaPx": 31.93,
+          "profundidad": 74.41
+        }
+      ],
+      "techoProsa": 44,
+      "techoAfirmado": 44,
+      "bandasHoy": 0.77
+    },
+    {
+      "cuadro": "768x1024",
+      "ancho": 768,
+      "alto": 1024,
+      "puntos": [
+        {
+          "distancia": 19,
+          "bandas": 1.16,
+          "celdaPx": 108.31,
+          "profundidad": 33.54
+        },
+        {
+          "distancia": 19.25,
+          "bandas": 1.17,
+          "celdaPx": 106.89,
+          "profundidad": 33.94
+        },
+        {
+          "distancia": 19.5,
+          "bandas": 1.19,
+          "celdaPx": 105.49,
+          "profundidad": 34.34
+        },
+        {
+          "distancia": 19.75,
+          "bandas": 1.21,
+          "celdaPx": 104.13,
+          "profundidad": 34.74
+        },
+        {
+          "distancia": 20,
+          "bandas": 1.23,
+          "celdaPx": 102.79,
+          "profundidad": 35.14
+        },
+        {
+          "distancia": 20.25,
+          "bandas": 1.25,
+          "celdaPx": 101.47,
+          "profundidad": 35.54
+        },
+        {
+          "distancia": 20.5,
+          "bandas": 1.27,
+          "celdaPx": 100.19,
+          "profundidad": 35.94
+        },
+        {
+          "distancia": 20.75,
+          "bandas": 1.28,
+          "celdaPx": 98.93,
+          "profundidad": 36.34
+        },
+        {
+          "distancia": 21,
+          "bandas": 1.3,
+          "celdaPx": 97.69,
+          "profundidad": 36.74
+        },
+        {
+          "distancia": 21.25,
+          "bandas": 1.32,
+          "celdaPx": 96.47,
+          "profundidad": 37.14
+        },
+        {
+          "distancia": 21.5,
+          "bandas": 1.34,
+          "celdaPx": 95.28,
+          "profundidad": 37.54
+        },
+        {
+          "distancia": 21.75,
+          "bandas": 1.36,
+          "celdaPx": 94.11,
+          "profundidad": 37.94
+        },
+        {
+          "distancia": 22,
+          "bandas": 1.38,
+          "celdaPx": 92.97,
+          "profundidad": 38.34
+        },
+        {
+          "distancia": 22.25,
+          "bandas": 1.4,
+          "celdaPx": 91.84,
+          "profundidad": 38.75
+        },
+        {
+          "distancia": 22.5,
+          "bandas": 1.42,
+          "celdaPx": 90.73,
+          "profundidad": 39.15
+        },
+        {
+          "distancia": 22.75,
+          "bandas": 1.44,
+          "celdaPx": 89.65,
+          "profundidad": 39.55
+        },
+        {
+          "distancia": 23,
+          "bandas": 1.46,
+          "celdaPx": 88.58,
+          "profundidad": 39.96
+        },
+        {
+          "distancia": 23.25,
+          "bandas": 1.48,
+          "celdaPx": 87.53,
+          "profundidad": 40.36
+        },
+        {
+          "distancia": 23.5,
+          "bandas": 1.51,
+          "celdaPx": 86.5,
+          "profundidad": 40.77
+        },
+        {
+          "distancia": 23.75,
+          "bandas": 1.53,
+          "celdaPx": 85.49,
+          "profundidad": 41.17
+        },
+        {
+          "distancia": 24,
+          "bandas": 1.55,
+          "celdaPx": 84.49,
+          "profundidad": 41.58
+        },
+        {
+          "distancia": 24.25,
+          "bandas": 1.57,
+          "celdaPx": 83.51,
+          "profundidad": 41.98
+        },
+        {
+          "distancia": 24.5,
+          "bandas": 1.59,
+          "celdaPx": 82.55,
+          "profundidad": 42.39
+        },
+        {
+          "distancia": 24.75,
+          "bandas": 1.62,
+          "celdaPx": 81.6,
+          "profundidad": 42.79
+        },
+        {
+          "distancia": 25,
+          "bandas": 1.64,
+          "celdaPx": 80.67,
+          "profundidad": 43.2
+        },
+        {
+          "distancia": 25.25,
+          "bandas": 1.66,
+          "celdaPx": 79.75,
+          "profundidad": 43.61
+        },
+        {
+          "distancia": 25.5,
+          "bandas": 1.69,
+          "celdaPx": 78.85,
+          "profundidad": 44.01
+        },
+        {
+          "distancia": 25.75,
+          "bandas": 1.71,
+          "celdaPx": 77.97,
+          "profundidad": 44.42
+        },
+        {
+          "distancia": 26,
+          "bandas": 1.73,
+          "celdaPx": 77.09,
+          "profundidad": 44.83
+        },
+        {
+          "distancia": 26.25,
+          "bandas": 1.76,
+          "celdaPx": 76.23,
+          "profundidad": 45.24
+        },
+        {
+          "distancia": 26.5,
+          "bandas": 1.78,
+          "celdaPx": 75.39,
+          "profundidad": 45.64
+        },
+        {
+          "distancia": 26.75,
+          "bandas": 1.81,
+          "celdaPx": 74.55,
+          "profundidad": 46.05
+        },
+        {
+          "distancia": 27,
+          "bandas": 1.83,
+          "celdaPx": 73.73,
+          "profundidad": 46.46
+        },
+        {
+          "distancia": 27.25,
+          "bandas": 1.86,
+          "celdaPx": 72.92,
+          "profundidad": 46.87
+        },
+        {
+          "distancia": 27.5,
+          "bandas": 1.88,
+          "celdaPx": 72.13,
+          "profundidad": 47.28
+        },
+        {
+          "distancia": 27.75,
+          "bandas": 1.91,
+          "celdaPx": 71.34,
+          "profundidad": 47.69
+        },
+        {
+          "distancia": 28,
+          "bandas": 1.94,
+          "celdaPx": 70.57,
+          "profundidad": 48.1
+        },
+        {
+          "distancia": 28.25,
+          "bandas": 1.96,
+          "celdaPx": 69.81,
+          "profundidad": 48.51
+        },
+        {
+          "distancia": 28.5,
+          "bandas": 1.99,
+          "celdaPx": 69.06,
+          "profundidad": 48.91
+        },
+        {
+          "distancia": 28.75,
+          "bandas": 2.02,
+          "celdaPx": 68.31,
+          "profundidad": 49.32
+        },
+        {
+          "distancia": 29,
+          "bandas": 2.05,
+          "celdaPx": 67.58,
+          "profundidad": 49.73
+        },
+        {
+          "distancia": 29.25,
+          "bandas": 2.08,
+          "celdaPx": 66.86,
+          "profundidad": 50.14
+        },
+        {
+          "distancia": 29.5,
+          "bandas": 2.11,
+          "celdaPx": 66.15,
+          "profundidad": 50.55
+        },
+        {
+          "distancia": 29.75,
+          "bandas": 2.13,
+          "celdaPx": 65.45,
+          "profundidad": 50.96
+        },
+        {
+          "distancia": 30,
+          "bandas": 2.16,
+          "celdaPx": 64.76,
+          "profundidad": 51.38
+        },
+        {
+          "distancia": 30.25,
+          "bandas": 2.19,
+          "celdaPx": 64.08,
+          "profundidad": 51.79
+        },
+        {
+          "distancia": 30.5,
+          "bandas": 2.23,
+          "celdaPx": 63.41,
+          "profundidad": 52.2
+        },
+        {
+          "distancia": 30.75,
+          "bandas": 2.26,
+          "celdaPx": 62.74,
+          "profundidad": 52.61
+        },
+        {
+          "distancia": 31,
+          "bandas": 2.29,
+          "celdaPx": 62.09,
+          "profundidad": 53.02
+        },
+        {
+          "distancia": 31.25,
+          "bandas": 2.32,
+          "celdaPx": 61.44,
+          "profundidad": 53.43
+        },
+        {
+          "distancia": 31.5,
+          "bandas": 2.35,
+          "celdaPx": 60.8,
+          "profundidad": 53.84
+        },
+        {
+          "distancia": 31.75,
+          "bandas": 2.38,
+          "celdaPx": 60.17,
+          "profundidad": 54.25
+        },
+        {
+          "distancia": 32,
+          "bandas": 2.42,
+          "celdaPx": 59.55,
+          "profundidad": 54.66
+        },
+        {
+          "distancia": 32.25,
+          "bandas": 2.45,
+          "celdaPx": 58.93,
+          "profundidad": 55.08
+        },
+        {
+          "distancia": 32.5,
+          "bandas": 2.49,
+          "celdaPx": 58.33,
+          "profundidad": 55.49
+        },
+        {
+          "distancia": 32.75,
+          "bandas": 2.52,
+          "celdaPx": 57.73,
+          "profundidad": 55.9
+        },
+        {
+          "distancia": 33,
+          "bandas": 2.56,
+          "celdaPx": 57.14,
+          "profundidad": 56.31
+        },
+        {
+          "distancia": 33.25,
+          "bandas": 2.59,
+          "celdaPx": 56.55,
+          "profundidad": 56.72
+        },
+        {
+          "distancia": 33.5,
+          "bandas": 2.63,
+          "celdaPx": 55.97,
+          "profundidad": 57.14
+        },
+        {
+          "distancia": 33.75,
+          "bandas": 2.66,
+          "celdaPx": 55.4,
+          "profundidad": 57.55
+        },
+        {
+          "distancia": 34,
+          "bandas": 2.7,
+          "celdaPx": 54.83,
+          "profundidad": 57.96
+        },
+        {
+          "distancia": 34.25,
+          "bandas": 2.74,
+          "celdaPx": 54.28,
+          "profundidad": 58.38
+        },
+        {
+          "distancia": 34.5,
+          "bandas": 2.78,
+          "celdaPx": 53.72,
+          "profundidad": 58.79
+        },
+        {
+          "distancia": 34.75,
+          "bandas": 2.82,
+          "celdaPx": 53.18,
+          "profundidad": 59.2
+        },
+        {
+          "distancia": 35,
+          "bandas": 2.86,
+          "celdaPx": 52.64,
+          "profundidad": 59.61
+        },
+        {
+          "distancia": 35.25,
+          "bandas": 2.9,
+          "celdaPx": 52.11,
+          "profundidad": 60.03
+        },
+        {
+          "distancia": 35.5,
+          "bandas": 2.94,
+          "celdaPx": 51.58,
+          "profundidad": 60.44
+        },
+        {
+          "distancia": 35.75,
+          "bandas": 2.98,
+          "celdaPx": 51.06,
+          "profundidad": 60.85
+        },
+        {
+          "distancia": 36,
+          "bandas": 3.02,
+          "celdaPx": 50.54,
+          "profundidad": 61.27
+        },
+        {
+          "distancia": 36.25,
+          "bandas": 3.07,
+          "celdaPx": 50.03,
+          "profundidad": 61.68
+        },
+        {
+          "distancia": 36.5,
+          "bandas": 3.11,
+          "celdaPx": 49.52,
+          "profundidad": 62.09
+        },
+        {
+          "distancia": 36.75,
+          "bandas": 3.16,
+          "celdaPx": 49.02,
+          "profundidad": 62.51
+        },
+        {
+          "distancia": 37,
+          "bandas": 3.2,
+          "celdaPx": 48.53,
+          "profundidad": 62.92
+        },
+        {
+          "distancia": 37.25,
+          "bandas": 3.25,
+          "celdaPx": 48.04,
+          "profundidad": 63.34
+        },
+        {
+          "distancia": 37.5,
+          "bandas": 3.29,
+          "celdaPx": 47.56,
+          "profundidad": 63.75
+        },
+        {
+          "distancia": 37.75,
+          "bandas": 3.34,
+          "celdaPx": 47.08,
+          "profundidad": 64.16
+        },
+        {
+          "distancia": 38,
+          "bandas": 3.39,
+          "celdaPx": 46.6,
+          "profundidad": 64.58
+        },
+        {
+          "distancia": 38.25,
+          "bandas": 3.44,
+          "celdaPx": 46.13,
+          "profundidad": 64.99
+        },
+        {
+          "distancia": 38.5,
+          "bandas": 3.49,
+          "celdaPx": 45.67,
+          "profundidad": 65.41
+        },
+        {
+          "distancia": 38.75,
+          "bandas": 3.54,
+          "celdaPx": 45.21,
+          "profundidad": 65.82
+        },
+        {
+          "distancia": 39,
+          "bandas": 3.59,
+          "celdaPx": 44.75,
+          "profundidad": 66.24
+        },
+        {
+          "distancia": 39.25,
+          "bandas": 3.65,
+          "celdaPx": 44.3,
+          "profundidad": 66.65
+        },
+        {
+          "distancia": 39.5,
+          "bandas": 3.7,
+          "celdaPx": 43.85,
+          "profundidad": 67.06
+        },
+        {
+          "distancia": 39.75,
+          "bandas": 3.75,
+          "celdaPx": 43.41,
+          "profundidad": 67.48
+        },
+        {
+          "distancia": 40,
+          "bandas": 3.81,
+          "celdaPx": 42.97,
+          "profundidad": 67.89
+        },
+        {
+          "distancia": 40.25,
+          "bandas": 3.87,
+          "celdaPx": 42.53,
+          "profundidad": 68.31
+        },
+        {
+          "distancia": 40.5,
+          "bandas": 3.92,
+          "celdaPx": 42.1,
+          "profundidad": 68.72
+        },
+        {
+          "distancia": 40.75,
+          "bandas": 3.98,
+          "celdaPx": 41.67,
+          "profundidad": 69.14
+        },
+        {
+          "distancia": 41,
+          "bandas": 4.04,
+          "celdaPx": 41.25,
+          "profundidad": 69.55
+        },
+        {
+          "distancia": 41.25,
+          "bandas": 4.1,
+          "celdaPx": 40.83,
+          "profundidad": 69.97
+        },
+        {
+          "distancia": 41.5,
+          "bandas": 4.17,
+          "celdaPx": 40.41,
+          "profundidad": 70.38
+        },
+        {
+          "distancia": 41.75,
+          "bandas": 4.23,
+          "celdaPx": 40,
+          "profundidad": 70.8
+        },
+        {
+          "distancia": 42,
+          "bandas": 4.29,
+          "celdaPx": 39.59,
+          "profundidad": 71.21
+        },
+        {
+          "distancia": 42.25,
+          "bandas": 4.36,
+          "celdaPx": 39.19,
+          "profundidad": 71.63
+        },
+        {
+          "distancia": 42.5,
+          "bandas": 4.43,
+          "celdaPx": 38.79,
+          "profundidad": 72.05
+        },
+        {
+          "distancia": 42.75,
+          "bandas": 4.5,
+          "celdaPx": 38.39,
+          "profundidad": 72.46
+        },
+        {
+          "distancia": 43,
+          "bandas": 4.57,
+          "celdaPx": 37.99,
+          "profundidad": 72.88
+        },
+        {
+          "distancia": 43.25,
+          "bandas": 4.64,
+          "celdaPx": 37.6,
+          "profundidad": 73.29
+        },
+        {
+          "distancia": 43.5,
+          "bandas": 4.71,
+          "celdaPx": 37.21,
+          "profundidad": 73.71
+        },
+        {
+          "distancia": 43.75,
+          "bandas": 4.79,
+          "celdaPx": 36.83,
+          "profundidad": 74.12
+        },
+        {
+          "distancia": 44,
+          "bandas": 4.86,
+          "celdaPx": 36.45,
+          "profundidad": 74.54
+        }
+      ],
+      "techoProsa": 44,
+      "techoAfirmado": 44,
+      "bandasHoy": 1.16
+    },
+    {
+      "cuadro": "1024x768",
+      "ancho": 1024,
+      "alto": 768,
+      "puntos": [
+        {
+          "distancia": 19,
+          "bandas": 2.18,
+          "celdaPx": 79,
+          "profundidad": 33.72
+        },
+        {
+          "distancia": 19.25,
+          "bandas": 2.21,
+          "celdaPx": 77.9,
+          "profundidad": 34.12
+        },
+        {
+          "distancia": 19.5,
+          "bandas": 2.25,
+          "celdaPx": 76.83,
+          "profundidad": 34.53
+        },
+        {
+          "distancia": 19.75,
+          "bandas": 2.29,
+          "celdaPx": 75.78,
+          "profundidad": 34.93
+        },
+        {
+          "distancia": 20,
+          "bandas": 2.33,
+          "celdaPx": 74.75,
+          "profundidad": 35.33
+        },
+        {
+          "distancia": 20.25,
+          "bandas": 2.37,
+          "celdaPx": 73.74,
+          "profundidad": 35.74
+        },
+        {
+          "distancia": 20.5,
+          "bandas": 2.41,
+          "celdaPx": 72.75,
+          "profundidad": 36.14
+        },
+        {
+          "distancia": 20.75,
+          "bandas": 2.45,
+          "celdaPx": 71.78,
+          "profundidad": 36.55
+        },
+        {
+          "distancia": 21,
+          "bandas": 2.49,
+          "celdaPx": 70.83,
+          "profundidad": 36.95
+        },
+        {
+          "distancia": 21.25,
+          "bandas": 2.53,
+          "celdaPx": 69.89,
+          "profundidad": 37.36
+        },
+        {
+          "distancia": 21.5,
+          "bandas": 2.57,
+          "celdaPx": 68.97,
+          "profundidad": 37.76
+        },
+        {
+          "distancia": 21.75,
+          "bandas": 2.61,
+          "celdaPx": 68.07,
+          "profundidad": 38.17
+        },
+        {
+          "distancia": 22,
+          "bandas": 2.65,
+          "celdaPx": 67.18,
+          "profundidad": 38.58
+        },
+        {
+          "distancia": 22.25,
+          "bandas": 2.7,
+          "celdaPx": 66.31,
+          "profundidad": 38.99
+        },
+        {
+          "distancia": 22.5,
+          "bandas": 2.74,
+          "celdaPx": 65.46,
+          "profundidad": 39.39
+        },
+        {
+          "distancia": 22.75,
+          "bandas": 2.79,
+          "celdaPx": 64.62,
+          "profundidad": 39.8
+        },
+        {
+          "distancia": 23,
+          "bandas": 2.83,
+          "celdaPx": 63.79,
+          "profundidad": 40.21
+        },
+        {
+          "distancia": 23.25,
+          "bandas": 2.88,
+          "celdaPx": 62.98,
+          "profundidad": 40.62
+        },
+        {
+          "distancia": 23.5,
+          "bandas": 2.92,
+          "celdaPx": 62.19,
+          "profundidad": 41.03
+        },
+        {
+          "distancia": 23.75,
+          "bandas": 2.97,
+          "celdaPx": 61.4,
+          "profundidad": 41.44
+        },
+        {
+          "distancia": 24,
+          "bandas": 3.02,
+          "celdaPx": 60.63,
+          "profundidad": 41.85
+        },
+        {
+          "distancia": 24.25,
+          "bandas": 3.07,
+          "celdaPx": 59.87,
+          "profundidad": 42.26
+        },
+        {
+          "distancia": 24.5,
+          "bandas": 3.12,
+          "celdaPx": 59.13,
+          "profundidad": 42.67
+        },
+        {
+          "distancia": 24.75,
+          "bandas": 3.17,
+          "celdaPx": 58.39,
+          "profundidad": 43.08
+        },
+        {
+          "distancia": 25,
+          "bandas": 3.22,
+          "celdaPx": 57.67,
+          "profundidad": 43.49
+        },
+        {
+          "distancia": 25.25,
+          "bandas": 3.27,
+          "celdaPx": 56.96,
+          "profundidad": 43.9
+        },
+        {
+          "distancia": 25.5,
+          "bandas": 3.33,
+          "celdaPx": 56.26,
+          "profundidad": 44.31
+        },
+        {
+          "distancia": 25.75,
+          "bandas": 3.38,
+          "celdaPx": 55.57,
+          "profundidad": 44.73
+        },
+        {
+          "distancia": 26,
+          "bandas": 3.44,
+          "celdaPx": 54.89,
+          "profundidad": 45.14
+        },
+        {
+          "distancia": 26.25,
+          "bandas": 3.49,
+          "celdaPx": 54.22,
+          "profundidad": 45.55
+        },
+        {
+          "distancia": 26.5,
+          "bandas": 3.55,
+          "celdaPx": 53.56,
+          "profundidad": 45.96
+        },
+        {
+          "distancia": 26.75,
+          "bandas": 3.61,
+          "celdaPx": 52.91,
+          "profundidad": 46.38
+        },
+        {
+          "distancia": 27,
+          "bandas": 3.66,
+          "celdaPx": 52.27,
+          "profundidad": 46.79
+        },
+        {
+          "distancia": 27.25,
+          "bandas": 3.72,
+          "celdaPx": 51.64,
+          "profundidad": 47.2
+        },
+        {
+          "distancia": 27.5,
+          "bandas": 3.78,
+          "celdaPx": 51.02,
+          "profundidad": 47.61
+        },
+        {
+          "distancia": 27.75,
+          "bandas": 3.85,
+          "celdaPx": 50.41,
+          "profundidad": 48.03
+        },
+        {
+          "distancia": 28,
+          "bandas": 3.91,
+          "celdaPx": 49.81,
+          "profundidad": 48.44
+        },
+        {
+          "distancia": 28.25,
+          "bandas": 3.97,
+          "celdaPx": 49.21,
+          "profundidad": 48.86
+        },
+        {
+          "distancia": 28.5,
+          "bandas": 4.04,
+          "celdaPx": 48.62,
+          "profundidad": 49.27
+        },
+        {
+          "distancia": 28.75,
+          "bandas": 4.11,
+          "celdaPx": 48.04,
+          "profundidad": 49.69
+        },
+        {
+          "distancia": 29,
+          "bandas": 4.17,
+          "celdaPx": 47.47,
+          "profundidad": 50.1
+        },
+        {
+          "distancia": 29.25,
+          "bandas": 4.24,
+          "celdaPx": 46.91,
+          "profundidad": 50.51
+        },
+        {
+          "distancia": 29.5,
+          "bandas": 4.31,
+          "celdaPx": 46.35,
+          "profundidad": 50.93
+        },
+        {
+          "distancia": 29.75,
+          "bandas": 4.38,
+          "celdaPx": 45.8,
+          "profundidad": 51.34
+        },
+        {
+          "distancia": 30,
+          "bandas": 4.46,
+          "celdaPx": 45.26,
+          "profundidad": 51.76
+        },
+        {
+          "distancia": 30.25,
+          "bandas": 4.53,
+          "celdaPx": 44.73,
+          "profundidad": 52.18
+        },
+        {
+          "distancia": 30.5,
+          "bandas": 4.61,
+          "celdaPx": 44.2,
+          "profundidad": 52.59
+        },
+        {
+          "distancia": 30.75,
+          "bandas": 4.68,
+          "celdaPx": 43.68,
+          "profundidad": 53.01
+        },
+        {
+          "distancia": 31,
+          "bandas": 4.76,
+          "celdaPx": 43.16,
+          "profundidad": 53.42
+        },
+        {
+          "distancia": 31.25,
+          "bandas": 4.84,
+          "celdaPx": 42.65,
+          "profundidad": 53.84
+        },
+        {
+          "distancia": 31.5,
+          "bandas": 4.92,
+          "celdaPx": 42.15,
+          "profundidad": 54.25
+        },
+        {
+          "distancia": 31.75,
+          "bandas": 5,
+          "celdaPx": 41.65,
+          "profundidad": 54.67
+        },
+        {
+          "distancia": 32,
+          "bandas": 5.09,
+          "celdaPx": 41.16,
+          "profundidad": 55.09
+        },
+        {
+          "distancia": 32.25,
+          "bandas": 5.18,
+          "celdaPx": 40.68,
+          "profundidad": 55.5
+        },
+        {
+          "distancia": 32.5,
+          "bandas": 5.26,
+          "celdaPx": 40.2,
+          "profundidad": 55.92
+        },
+        {
+          "distancia": 32.75,
+          "bandas": 5.35,
+          "celdaPx": 39.72,
+          "profundidad": 56.34
+        },
+        {
+          "distancia": 33,
+          "bandas": 5.45,
+          "celdaPx": 39.26,
+          "profundidad": 56.75
+        },
+        {
+          "distancia": 33.25,
+          "bandas": 5.54,
+          "celdaPx": 38.79,
+          "profundidad": 57.17
+        },
+        {
+          "distancia": 33.5,
+          "bandas": 5.64,
+          "celdaPx": 38.33,
+          "profundidad": 57.59
+        },
+        {
+          "distancia": 33.75,
+          "bandas": 5.73,
+          "celdaPx": 37.88,
+          "profundidad": 58.01
+        },
+        {
+          "distancia": 34,
+          "bandas": 5.83,
+          "celdaPx": 37.43,
+          "profundidad": 58.42
+        },
+        {
+          "distancia": 34.25,
+          "bandas": 5.93,
+          "celdaPx": 36.99,
+          "profundidad": 58.84
+        },
+        {
+          "distancia": 34.5,
+          "bandas": 6.04,
+          "celdaPx": 36.55,
+          "profundidad": 59.26
+        },
+        {
+          "distancia": 34.75,
+          "bandas": 6.15,
+          "celdaPx": 36.12,
+          "profundidad": 59.68
+        },
+        {
+          "distancia": 35,
+          "bandas": 6.25,
+          "celdaPx": 35.69,
+          "profundidad": 60.09
+        },
+        {
+          "distancia": 35.25,
+          "bandas": 6.37,
+          "celdaPx": 35.26,
+          "profundidad": 60.51
+        },
+        {
+          "distancia": 35.5,
+          "bandas": 6.48,
+          "celdaPx": 34.84,
+          "profundidad": 60.93
+        },
+        {
+          "distancia": 35.75,
+          "bandas": 6.6,
+          "celdaPx": 34.43,
+          "profundidad": 61.35
+        },
+        {
+          "distancia": 36,
+          "bandas": 6.71,
+          "celdaPx": 34.01,
+          "profundidad": 61.77
+        },
+        {
+          "distancia": 36.25,
+          "bandas": 6.84,
+          "celdaPx": 33.61,
+          "profundidad": 62.18
+        },
+        {
+          "distancia": 36.5,
+          "bandas": 6.96,
+          "celdaPx": 33.2,
+          "profundidad": 62.6
+        },
+        {
+          "distancia": 36.75,
+          "bandas": 7.09,
+          "celdaPx": 32.8,
+          "profundidad": 63.02
+        },
+        {
+          "distancia": 37,
+          "bandas": 7.22,
+          "celdaPx": 32.4,
+          "profundidad": 63.44
+        },
+        {
+          "distancia": 37.25,
+          "bandas": 7.35,
+          "celdaPx": 32.01,
+          "profundidad": 63.86
+        },
+        {
+          "distancia": 37.5,
+          "bandas": 7.49,
+          "celdaPx": 31.62,
+          "profundidad": 64.28
+        },
+        {
+          "distancia": 37.75,
+          "bandas": 7.63,
+          "celdaPx": 31.24,
+          "profundidad": 64.7
+        },
+        {
+          "distancia": 38,
+          "bandas": 7.77,
+          "celdaPx": 30.85,
+          "profundidad": 65.12
+        },
+        {
+          "distancia": 38.25,
+          "bandas": 7.92,
+          "celdaPx": 30.47,
+          "profundidad": 65.53
+        },
+        {
+          "distancia": 38.5,
+          "bandas": 8.07,
+          "celdaPx": 30.1,
+          "profundidad": 65.95
+        },
+        {
+          "distancia": 38.75,
+          "bandas": 8.23,
+          "celdaPx": 29.73,
+          "profundidad": 66.37
+        },
+        {
+          "distancia": 39,
+          "bandas": 8.39,
+          "celdaPx": 29.36,
+          "profundidad": 66.79
+        },
+        {
+          "distancia": 39.25,
+          "bandas": 8.55,
+          "celdaPx": 28.99,
+          "profundidad": 67.21
+        },
+        {
+          "distancia": 39.5,
+          "bandas": 8.72,
+          "celdaPx": 28.63,
+          "profundidad": 67.63
+        },
+        {
+          "distancia": 39.75,
+          "bandas": 8.89,
+          "celdaPx": 28.27,
+          "profundidad": 68.05
+        },
+        {
+          "distancia": 40,
+          "bandas": 9.07,
+          "celdaPx": 27.91,
+          "profundidad": 68.47
+        },
+        {
+          "distancia": 40.25,
+          "bandas": 9.25,
+          "celdaPx": 27.56,
+          "profundidad": 68.89
+        },
+        {
+          "distancia": 40.5,
+          "bandas": 9.44,
+          "celdaPx": 27.2,
+          "profundidad": 69.31
+        },
+        {
+          "distancia": 40.75,
+          "bandas": 9.63,
+          "celdaPx": 26.85,
+          "profundidad": 69.73
+        },
+        {
+          "distancia": 41,
+          "bandas": 9.83,
+          "celdaPx": 26.51,
+          "profundidad": 70.15
+        },
+        {
+          "distancia": 41.25,
+          "bandas": 10.03,
+          "celdaPx": 26.16,
+          "profundidad": 70.57
+        },
+        {
+          "distancia": 41.5,
+          "bandas": 10.24,
+          "celdaPx": 25.82,
+          "profundidad": 70.99
+        },
+        {
+          "distancia": 41.75,
+          "bandas": 10.46,
+          "celdaPx": 25.48,
+          "profundidad": 71.41
+        },
+        {
+          "distancia": 42,
+          "bandas": 10.68,
+          "celdaPx": 25.15,
+          "profundidad": 71.83
+        },
+        {
+          "distancia": 42.25,
+          "bandas": 10.91,
+          "celdaPx": 24.81,
+          "profundidad": 72.25
+        },
+        {
+          "distancia": 42.5,
+          "bandas": 11.15,
+          "celdaPx": 24.48,
+          "profundidad": 72.67
+        },
+        {
+          "distancia": 42.75,
+          "bandas": 11.39,
+          "celdaPx": 24.15,
+          "profundidad": 73.09
+        },
+        {
+          "distancia": 43,
+          "bandas": 11.64,
+          "celdaPx": 23.82,
+          "profundidad": 73.51
+        },
+        {
+          "distancia": 43.25,
+          "bandas": 11.9,
+          "celdaPx": 23.5,
+          "profundidad": 73.93
+        },
+        {
+          "distancia": 43.5,
+          "bandas": 12.17,
+          "celdaPx": 23.17,
+          "profundidad": 74.35
+        },
+        {
+          "distancia": 43.75,
+          "bandas": 12.45,
+          "celdaPx": 22.85,
+          "profundidad": 74.77
+        },
+        {
+          "distancia": 44,
+          "bandas": 12.73,
+          "celdaPx": 22.53,
+          "profundidad": 75.19
+        }
+      ],
+      "techoProsa": 31.5,
+      "techoAfirmado": 34.25,
+      "bandasHoy": 2.18
+    }
+  ],
+  "pasajes": [
+    {
+      "distanciaDelHero": 19,
+      "peorBandas": 18.09,
+      "peorProgreso": 0.13,
+      "muestras": [
+        3.1,
+        3.5,
+        15.6,
+        10.8,
+        2.6,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 22,
+      "peorBandas": 20.49,
+      "peorProgreso": 0.21,
+      "muestras": [
+        3.8,
+        4.4,
+        14.8,
+        7,
+        18.2,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 24,
+      "peorBandas": 23.61,
+      "peorProgreso": 0.12,
+      "muestras": [
+        4.4,
+        5.1,
+        14.2,
+        5.7,
+        13.4,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 26,
+      "peorBandas": 17.29,
+      "peorProgreso": 0.18,
+      "muestras": [
+        5.1,
+        6,
+        13.7,
+        4.8,
+        10.6,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 28,
+      "peorBandas": 18.03,
+      "peorProgreso": 0.23,
+      "muestras": [
+        5.9,
+        7,
+        13.1,
+        18,
+        8.8,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 31,
+      "peorBandas": 25.08,
+      "peorProgreso": 0.1,
+      "muestras": [
+        7.4,
+        9,
+        12.3,
+        10.1,
+        7,
+        6.3
+      ]
+    },
+    {
+      "distanciaDelHero": 34,
+      "peorBandas": 25.59,
+      "peorProgreso": 0.11,
+      "muestras": [
+        9.4,
+        11.8,
+        11.5,
+        7,
+        5.8,
+        6.3
+      ]
+    }
+  ]
+}
