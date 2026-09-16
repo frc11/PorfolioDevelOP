@@ -1,0 +1,1112 @@
+{
+  "etiqueta": "layout",
+  "cuando": "2026-09-16T13:37:21.442Z",
+  "instrumento": "scripts-texto/d-superposicion.ts — el cruce de TAPADO-1 (C texto sin escena x D escena sola) con una hoja !important por configuracion",
+  "advertencia": "la bajada en una linea se simula con white-space:nowrap: el texto se SALE de la caja en vez de acortarse, asi que su propio ancho no vale; el alto del bloque y la posicion del titular si",
+  "filas": [
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "configuraciones": [
+        {
+          "clave": "0-base",
+          "que": "el arbol como esta hoy — control contra a-verdad-hoy.json",
+          "regla": "",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "altoDelBloque": 424.34,
+          "topeDelBloque": 519.66,
+          "topeDelTitular": 519.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.4158,
+            "cajaSobreLogo": 0.3244,
+            "tintaBajoAA": 0.4135
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.8042,
+            "cajaSobreLogo": 0.728,
+            "tintaBajoAA": 0.802
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 617.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0044,
+            "cajaSobreLogo": 0.0967,
+            "tintaBajoAA": 0.0022
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 424.34
+            },
+            "glifos": 14216,
+            "tintaSobreLogo": 0.3646,
+            "cajaSobreLogo": 0.2579,
+            "tintaBajoAA": 0.359
+          }
+        },
+        {
+          "clave": "1-huecos-8-8",
+          "que": "los dos huecos declarados a 8px (fuera de la lista de la instruccion)",
+          "regla": "[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "altoDelBloque": 384.34,
+          "topeDelBloque": 559.66,
+          "topeDelTitular": 559.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 559.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.2223,
+            "cajaSobreLogo": 0.2847,
+            "tintaBajoAA": 0.2222
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 559.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.4315,
+            "cajaSobreLogo": 0.5157,
+            "tintaBajoAA": 0.4315
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 657.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0007,
+            "cajaSobreLogo": 0.1543,
+            "tintaBajoAA": 0.0005
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 559.66,
+              "ancho": 364,
+              "alto": 384.34
+            },
+            "glifos": 14216,
+            "tintaSobreLogo": 0.1909,
+            "cajaSobreLogo": 0.2089,
+            "tintaBajoAA": 0.1907
+          }
+        },
+        {
+          "clave": "2-bajada-1L",
+          "que": "la bajada en UNA linea",
+          "regla": "[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 1,
+          "altoDelBloque": 400.34,
+          "topeDelBloque": 543.66,
+          "topeDelTitular": 543.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.3175,
+            "cajaSobreLogo": 0.3034,
+            "tintaBajoAA": 0.3173
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.6108,
+            "cajaSobreLogo": 0.6364,
+            "tintaBajoAA": 0.6108
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 641.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0068,
+            "cajaSobreLogo": 0.1156,
+            "tintaBajoAA": 0.0064
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 400.34
+            },
+            "glifos": 14203,
+            "tintaSobreLogo": 0.2723,
+            "cajaSobreLogo": 0.2385,
+            "tintaBajoAA": 0.2722
+          }
+        },
+        {
+          "clave": "3-bajada-1L-huecos-8-8",
+          "que": "bajada en 1 linea + los dos huecos a 8px",
+          "regla": "[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 1,
+          "altoDelBloque": 360.34,
+          "topeDelBloque": 583.66,
+          "topeDelTitular": 583.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 583.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.1149,
+            "cajaSobreLogo": 0.2148,
+            "tintaBajoAA": 0.1132
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 583.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.2184,
+            "cajaSobreLogo": 0.3505,
+            "tintaBajoAA": 0.2184
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 681.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0053,
+            "cajaSobreLogo": 0.1383,
+            "tintaBajoAA": 0.0017
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 583.66,
+              "ancho": 364,
+              "alto": 360.34
+            },
+            "glifos": 14203,
+            "tintaSobreLogo": 0.0988,
+            "cajaSobreLogo": 0.1639,
+            "tintaBajoAA": 0.0973
+          }
+        },
+        {
+          "clave": "4-pisoL2-62",
+          "que": "piso de display-xl 67 -> 62 (desenvuelve la linea 2 a 768) — UNA sola palanca",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:77.4986px!important}",
+          "fsL1": 44.75,
+          "fsL2": 77.5,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 333,
+          "topeDelBloque": 611,
+          "topeDelTitular": 611,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 611,
+              "ancho": 364,
+              "alto": 182
+            },
+            "glifos": 11707,
+            "tintaSobreLogo": 0.0041,
+            "cajaSobreLogo": 0.1053,
+            "tintaBajoAA": 0.0021
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 611,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0042,
+            "cajaSobreLogo": 0.1935,
+            "tintaBajoAA": 0.004
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 708.53,
+              "ancho": 355.22,
+              "alto": 84.47
+            },
+            "glifos": 5466,
+            "tintaSobreLogo": 0.004,
+            "cajaSobreLogo": 0.0025,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 611,
+              "ancho": 364,
+              "alto": 333
+            },
+            "glifos": 13789,
+            "tintaSobreLogo": 0.0135,
+            "cajaSobreLogo": 0.1197,
+            "tintaBajoAA": 0.008
+          }
+        },
+        {
+          "clave": "5-pisoL2-62-bajada-1L-huecos-8-8",
+          "que": "la MAXIMA alcanzable con pb-20 intacto: piso L2 62 + bajada 1 linea + huecos 8/8",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:77.4986px!important}[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 77.5,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "altoDelBloque": 269,
+          "topeDelBloque": 675,
+          "topeDelTitular": 675,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 675,
+              "ancho": 364,
+              "alto": 182
+            },
+            "glifos": 11707,
+            "tintaSobreLogo": 0.1678,
+            "cajaSobreLogo": 0.1406,
+            "tintaBajoAA": 0.1422
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 675,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0062,
+            "cajaSobreLogo": 0.052,
+            "tintaBajoAA": 0.0019
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 772.53,
+              "ancho": 355.22,
+              "alto": 84.47
+            },
+            "glifos": 5466,
+            "tintaSobreLogo": 0.3522,
+            "cajaSobreLogo": 0.2436,
+            "tintaBajoAA": 0.3024
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 675,
+              "ancho": 364,
+              "alto": 269
+            },
+            "glifos": 13776,
+            "tintaSobreLogo": 0.1432,
+            "cajaSobreLogo": 0.0963,
+            "tintaBajoAA": 0.1215
+          }
+        },
+        {
+          "clave": "6-sin-pb-20",
+          "que": "la de arriba MAS pb-20 = 0 — la lectura de la instruccion; la pastilla queda encima del CTA",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:77.4986px!important}[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}[data-pantalla=\"hero\"]{padding-bottom:0!important}",
+          "fsL1": 44.75,
+          "fsL2": 77.5,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "altoDelBloque": 269,
+          "topeDelBloque": 755,
+          "topeDelTitular": 755,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 755,
+              "ancho": 364,
+              "alto": 182
+            },
+            "glifos": 11707,
+            "tintaSobreLogo": 0.053,
+            "cajaSobreLogo": 0.114,
+            "tintaBajoAA": 0.0369
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 755,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0971,
+            "cajaSobreLogo": 0.2081,
+            "tintaBajoAA": 0.067
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 852.53,
+              "ancho": 355.22,
+              "alto": 84.47
+            },
+            "glifos": 5466,
+            "tintaSobreLogo": 0.0027,
+            "cajaSobreLogo": 0.0043,
+            "tintaBajoAA": 0.0026
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 755,
+              "ancho": 364,
+              "alto": 269
+            },
+            "glifos": 13411,
+            "tintaSobreLogo": 0.047,
+            "cajaSobreLogo": 0.0783,
+            "tintaBajoAA": 0.0329
+          }
+        },
+        {
+          "clave": "7-pisoL2-64",
+          "que": "piso de display-xl 67 -> 64 — la palanca (b) mas chica que desenvuelve a 768",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:78.7606px!important}",
+          "fsL1": 44.75,
+          "fsL2": 78.76,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 334.38,
+          "topeDelBloque": 609.63,
+          "topeDelTitular": 609.63,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 609.63,
+              "ancho": 364,
+              "alto": 183.38
+            },
+            "glifos": 11906,
+            "tintaSobreLogo": 0.0039,
+            "cajaSobreLogo": 0.1098,
+            "tintaBajoAA": 0.0023
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 609.63,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0045,
+            "cajaSobreLogo": 0.202,
+            "tintaBajoAA": 0.0043
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 707.16,
+              "ancho": 361.05,
+              "alto": 85.84
+            },
+            "glifos": 5665,
+            "tintaSobreLogo": 0.0032,
+            "cajaSobreLogo": 0.0027,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 609.63,
+              "ancho": 364,
+              "alto": 334.38
+            },
+            "glifos": 13988,
+            "tintaSobreLogo": 0.0132,
+            "cajaSobreLogo": 0.1222,
+            "tintaBajoAA": 0.008
+          }
+        },
+        {
+          "clave": "8-pisoL2-58",
+          "que": "piso de display-xl 67 -> 58 — la razon entre registros baja a 1,57x",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:74.9746px!important}",
+          "fsL1": 44.75,
+          "fsL2": 74.97,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 330.23,
+          "topeDelBloque": 613.77,
+          "topeDelTitular": 613.77,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 613.77,
+              "ancho": 364,
+              "alto": 179.23
+            },
+            "glifos": 11370,
+            "tintaSobreLogo": 0.0035,
+            "cajaSobreLogo": 0.1013,
+            "tintaBajoAA": 0.0013
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 613.77,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0024,
+            "cajaSobreLogo": 0.1825,
+            "tintaBajoAA": 0.0024
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 711.3,
+              "ancho": 343.67,
+              "alto": 81.7
+            },
+            "glifos": 5129,
+            "tintaSobreLogo": 0.0049,
+            "cajaSobreLogo": 0.0022,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 613.77,
+              "ancho": 364,
+              "alto": 330.23
+            },
+            "glifos": 13452,
+            "tintaSobreLogo": 0.0132,
+            "cajaSobreLogo": 0.1177,
+            "tintaBajoAA": 0.0074
+          }
+        },
+        {
+          "clave": "9-pisoL2-50",
+          "que": "piso de display-xl 67 -> 50 — 1,35x",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:69.9268px!important}",
+          "fsL1": 44.75,
+          "fsL2": 69.93,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 324.73,
+          "topeDelBloque": 619.27,
+          "topeDelTitular": 619.27,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 619.27,
+              "ancho": 364,
+              "alto": 173.73
+            },
+            "glifos": 10698,
+            "tintaSobreLogo": 0.0029,
+            "cajaSobreLogo": 0.0954,
+            "tintaBajoAA": 0.0012
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 619.27,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0021,
+            "cajaSobreLogo": 0.1677,
+            "tintaBajoAA": 0.0021
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 716.8,
+              "ancho": 320.52,
+              "alto": 76.2
+            },
+            "glifos": 4457,
+            "tintaSobreLogo": 0.004,
+            "cajaSobreLogo": 0.0025,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 619.27,
+              "ancho": 364,
+              "alto": 324.73
+            },
+            "glifos": 12780,
+            "tintaSobreLogo": 0.0132,
+            "cajaSobreLogo": 0.1148,
+            "tintaBajoAA": 0.0077
+          }
+        },
+        {
+          "clave": "10-pisoL2-44",
+          "que": "piso de display-xl 67 -> 44 — 1,19x, el limite de que siga habiendo dos registros",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:66.1408px!important}",
+          "fsL1": 44.75,
+          "fsL2": 66.14,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 320.61,
+          "topeDelBloque": 623.39,
+          "topeDelTitular": 623.39,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 623.39,
+              "ancho": 364,
+              "alto": 169.61
+            },
+            "glifos": 10195,
+            "tintaSobreLogo": 0.0041,
+            "cajaSobreLogo": 0.0929,
+            "tintaBajoAA": 0.0017
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 623.39,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0027,
+            "cajaSobreLogo": 0.1595,
+            "tintaBajoAA": 0.0027
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 720.92,
+              "ancho": 303.19,
+              "alto": 72.08
+            },
+            "glifos": 3954,
+            "tintaSobreLogo": 0.0063,
+            "cajaSobreLogo": 0.0022,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 623.39,
+              "ancho": 364,
+              "alto": 320.61
+            },
+            "glifos": 12277,
+            "tintaSobreLogo": 0.0147,
+            "cajaSobreLogo": 0.1138,
+            "tintaBajoAA": 0.0083
+          }
+        },
+        {
+          "clave": "11-pisoL2-62-bajada-1L",
+          "que": "piso L2 62 + bajada en 1 linea, con los huecos INTACTOS",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:77.4986px!important}[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}",
+          "fsL1": 44.75,
+          "fsL2": 77.5,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "altoDelBloque": 309,
+          "topeDelBloque": 635,
+          "topeDelTitular": 635,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 635,
+              "ancho": 364,
+              "alto": 182
+            },
+            "glifos": 11707,
+            "tintaSobreLogo": 0.0073,
+            "cajaSobreLogo": 0.1187,
+            "tintaBajoAA": 0.0053
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 635,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.005,
+            "cajaSobreLogo": 0.1349,
+            "tintaBajoAA": 0.0048
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 732.53,
+              "ancho": 355.22,
+              "alto": 84.47
+            },
+            "glifos": 5466,
+            "tintaSobreLogo": 0.0099,
+            "cajaSobreLogo": 0.1005,
+            "tintaBajoAA": 0.0059
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 635,
+              "ancho": 364,
+              "alto": 309
+            },
+            "glifos": 13776,
+            "tintaSobreLogo": 0.0073,
+            "cajaSobreLogo": 0.1104,
+            "tintaBajoAA": 0.0057
+          }
+        },
+        {
+          "clave": "12-pisoL2-62-huecos-8-8",
+          "que": "piso L2 62 + huecos 8/8, con la bajada INTACTA",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:77.4986px!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 77.5,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 293,
+          "topeDelBloque": 651,
+          "topeDelTitular": 651,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 651,
+              "ancho": 364,
+              "alto": 182
+            },
+            "glifos": 11707,
+            "tintaSobreLogo": 0.0878,
+            "cajaSobreLogo": 0.156,
+            "tintaBajoAA": 0.0715
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 651,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.009,
+            "cajaSobreLogo": 0.1024,
+            "tintaBajoAA": 0.0043
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 748.53,
+              "ancho": 355.22,
+              "alto": 84.47
+            },
+            "glifos": 5466,
+            "tintaSobreLogo": 0.1778,
+            "cajaSobreLogo": 0.218,
+            "tintaBajoAA": 0.1482
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 651,
+              "ancho": 364,
+              "alto": 293
+            },
+            "glifos": 13789,
+            "tintaSobreLogo": 0.0758,
+            "cajaSobreLogo": 0.1053,
+            "tintaBajoAA": 0.0618
+          }
+        },
+        {
+          "clave": "13-pisoL2-50-bajada-1L",
+          "que": "piso L2 50 + bajada en 1 linea",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:69.9268px!important}[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}",
+          "fsL1": 44.75,
+          "fsL2": 69.93,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "altoDelBloque": 300.73,
+          "topeDelBloque": 643.27,
+          "topeDelTitular": 643.27,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 643.27,
+              "ancho": 364,
+              "alto": 173.73
+            },
+            "glifos": 10698,
+            "tintaSobreLogo": 0.0092,
+            "cajaSobreLogo": 0.1145,
+            "tintaBajoAA": 0.0057
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 643.27,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0056,
+            "cajaSobreLogo": 0.1187,
+            "tintaBajoAA": 0.0054
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 740.8,
+              "ancho": 320.52,
+              "alto": 76.2
+            },
+            "glifos": 4457,
+            "tintaSobreLogo": 0.0141,
+            "cajaSobreLogo": 0.1115,
+            "tintaBajoAA": 0.0061
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 643.27,
+              "ancho": 364,
+              "alto": 300.73
+            },
+            "glifos": 12767,
+            "tintaSobreLogo": 0.0089,
+            "cajaSobreLogo": 0.1078,
+            "tintaBajoAA": 0.006
+          }
+        },
+        {
+          "clave": "14-pisoL2-50-bajada-1L-huecos-8-8",
+          "que": "piso L2 50 + bajada 1 linea + huecos 8/8 — el corrimiento maximo con dos registros distinguibles",
+          "regla": "[data-pantalla=\"hero\"] h1 > span:nth-of-type(2){font-size:69.9268px!important}[data-pantalla=\"hero\"] [data-nivel=\"cuerpo\"]{white-space:nowrap!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 69.93,
+          "renglonesL1": 2,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "altoDelBloque": 260.73,
+          "topeDelBloque": 683.27,
+          "topeDelTitular": 683.27,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 683.27,
+              "ancho": 364,
+              "alto": 173.73
+            },
+            "glifos": 10698,
+            "tintaSobreLogo": 0.1669,
+            "cajaSobreLogo": 0.1376,
+            "tintaBajoAA": 0.1473
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 683.27,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.0024,
+            "cajaSobreLogo": 0.0353,
+            "tintaBajoAA": 0.0022
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 780.8,
+              "ancho": 320.52,
+              "alto": 76.2
+            },
+            "glifos": 4457,
+            "tintaSobreLogo": 0.3971,
+            "cajaSobreLogo": 0.2672,
+            "tintaBajoAA": 0.3505
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 683.27,
+              "ancho": 364,
+              "alto": 260.73
+            },
+            "glifos": 12767,
+            "tintaSobreLogo": 0.1405,
+            "cajaSobreLogo": 0.093,
+            "tintaBajoAA": 0.1241
+          }
+        },
+        {
+          "clave": "15-huecos-16-16",
+          "que": "los dos huecos a 16px — medio paso",
+          "regla": "[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:16px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:16px!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "altoDelBloque": 400.34,
+          "topeDelBloque": 543.66,
+          "topeDelTitular": 543.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.3175,
+            "cajaSobreLogo": 0.3034,
+            "tintaBajoAA": 0.3173
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.6108,
+            "cajaSobreLogo": 0.6364,
+            "tintaBajoAA": 0.6108
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 641.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0068,
+            "cajaSobreLogo": 0.1156,
+            "tintaBajoAA": 0.0064
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 543.66,
+              "ancho": 364,
+              "alto": 400.34
+            },
+            "glifos": 14216,
+            "tintaSobreLogo": 0.2715,
+            "cajaSobreLogo": 0.2385,
+            "tintaBajoAA": 0.2713
+          }
+        },
+        {
+          "clave": "16-caja-entera",
+          "que": "FUERA DEL ALCANCE (layout): el titular usa las 3 columnas de la medida en vez de 2",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 287.67,
+          "topeDelBloque": 656.33,
+          "topeDelTitular": 656.33,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 552,
+              "alto": 136.67
+            },
+            "glifos": 12131,
+            "tintaSobreLogo": 0.1151,
+            "cajaSobreLogo": 0.0447,
+            "tintaBajoAA": 0.1147
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 365.39,
+              "alto": 48.77
+            },
+            "glifos": 6240,
+            "tintaSobreLogo": 0.2234,
+            "cajaSobreLogo": 0.176,
+            "tintaBajoAA": 0.2231
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 705.09,
+              "ancho": 369.7,
+              "alto": 87.91
+            },
+            "glifos": 5891,
+            "tintaSobreLogo": 0.0003,
+            "cajaSobreLogo": 0.0029,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 552,
+              "alto": 287.67
+            },
+            "glifos": 14213,
+            "tintaSobreLogo": 0.1079,
+            "cajaSobreLogo": 0.0699,
+            "tintaBajoAA": 0.1039
+          }
+        },
+        {
+          "clave": "17-caja-entera-huecos-8-8",
+          "que": "FUERA DEL ALCANCE (layout): la caja entera + los dos huecos a 8px",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "altoDelBloque": 247.67,
+          "topeDelBloque": 696.33,
+          "topeDelTitular": 696.33,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 552,
+              "alto": 136.67
+            },
+            "glifos": 12131,
+            "tintaSobreLogo": 0.0691,
+            "cajaSobreLogo": 0.0945,
+            "tintaBajoAA": 0.052
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 365.39,
+              "alto": 48.77
+            },
+            "glifos": 6240,
+            "tintaSobreLogo": 0.0029,
+            "cajaSobreLogo": 0.017,
+            "tintaBajoAA": 0.0013
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 745.09,
+              "ancho": 369.7,
+              "alto": 87.91
+            },
+            "glifos": 5891,
+            "tintaSobreLogo": 0.1392,
+            "cajaSobreLogo": 0.206,
+            "tintaBajoAA": 0.1058
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 552,
+              "alto": 247.67
+            },
+            "glifos": 14213,
+            "tintaSobreLogo": 0.0602,
+            "cajaSobreLogo": 0.0595,
+            "tintaBajoAA": 0.0455
+          }
+        }
+      ]
+    }
+  ]
+}
