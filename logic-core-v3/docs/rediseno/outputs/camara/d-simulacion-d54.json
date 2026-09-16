@@ -1,0 +1,65 @@
+{
+  "cuando": "2026-09-16T03:09:38.647Z",
+  "distancia": 54,
+  "etiqueta": "d54",
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "captura": "docs\\rediseno\\capturas\\camara\\d54-320x568.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 110.31,
+          "ancho": 256,
+          "alto": 226.69
+        },
+        "glifos": 8347,
+        "tintaSobreLogo": 0.0186,
+        "cajaSobreLogo": 0.0692,
+        "tintaBajoAA": 0.0186
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 110.31,
+          "ancho": 256,
+          "alto": 377.69
+        },
+        "glifos": 10430,
+        "tintaSobreLogo": 0.0149,
+        "cajaSobreLogo": 0.0418,
+        "tintaBajoAA": 0.0149
+      }
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "captura": "docs\\rediseno\\capturas\\camara\\d54-375x667.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 322.66,
+          "ancho": 311,
+          "alto": 113.34
+        },
+        "glifos": 8305,
+        "tintaSobreLogo": 0.1479,
+        "cajaSobreLogo": 0.0889,
+        "tintaBajoAA": 0.1462
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 322.66,
+          "ancho": 311,
+          "alto": 264.34
+        },
+        "glifos": 10387,
+        "tintaSobreLogo": 0.1182,
+        "cajaSobreLogo": 0.0383,
+        "tintaBajoAA": 0.1169
+      }
+    }
+  ]
+}

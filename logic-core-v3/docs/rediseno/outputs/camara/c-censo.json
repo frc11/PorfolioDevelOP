@@ -1,0 +1,827 @@
+{
+  "cuando": "2026-09-16T03:02:14.350Z",
+  "hallazgos": [
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-logo-encuadre.ts",
+      "patron": "distancia por nombre",
+      "linea": 71,
+      "texto": "return Math.hypot(distanciaHipotetica ?? k.pose.distance, k.pose.height)"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-logo-encuadre.ts",
+      "patron": "distancia por nombre",
+      "linea": 175,
+      "texto": "`PALANCA distancia de \\`demos\\` (hoy ${CHOREO_KEYFRAMES.find((k) => k.name === 'demos')?.pose.di"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 44,
+      "texto": "import { SCENE_ENTRY_POSE, frameScenePose } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 177,
+      "texto": "const ATERRIZAJES = [-1, -0.5, 0, 0.5, 1].map((frameX) => frameScenePose({ ...SCENE_ENTRY_POSE, "
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 187,
+      "texto": "new Set([-1, 0, 1].map((frameX) => (frameScenePose({ ...SCENE_ENTRY_POSE, frameX }, w, 810)?.cen"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 226,
+      "texto": "* (`SCENE_ENTRY_POSE === CHOREO_KEYFRAMES[0].pose`)."
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 177,
+      "texto": "const ATERRIZAJES = [-1, -0.5, 0, 0.5, 1].map((frameX) => frameScenePose({ ...SCENE_ENTRY_POSE, "
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 187,
+      "texto": "new Set([-1, 0, 1].map((frameX) => (frameScenePose({ ...SCENE_ENTRY_POSE, frameX }, w, 810)?.cen"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s10-vertical.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 249,
+      "texto": "`\\`${nombre}\\` (p=${k.at.toFixed(3)}, frameX ${k.pose.frameX}) centra la tinta en ${esperado} px"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-encuadre.ts",
+      "patron": "pose de entrada",
+      "linea": 35,
+      "texto": "import { frameScenePose, SCENE_ENTRY_POSE } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-encuadre.ts",
+      "patron": "pose de entrada",
+      "linea": 128,
+      "texto": "* `SCENE_ENTRY_POSE` por su cuenta, «el destino no se movió» sería una"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-encuadre.ts",
+      "patron": "pose de entrada",
+      "linea": 131,
+      "texto": "export function destinoEn(ventana: Ventana, pose = SCENE_ENTRY_POSE): DestinoMedido | null {"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-encuadre.ts",
+      "patron": "posición del logo en px",
+      "linea": 136,
+      "texto": "centroX: frame.centerXPx,"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 68,
+      "texto": "a.pose.distance === b.pose.distance &&"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s13b-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 207,
+      "texto": "`distancia ${pose.distance.toFixed(2)} · frameX ${pose.frameX.toFixed(3)}`"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-encuadre-soporte.ts",
+      "patron": "posición del logo en px",
+      "linea": 189,
+      "texto": "marca: 'Math.abs(desktop.centerXPx - 1018) < 1.5',"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-encuadre-soporte.ts",
+      "patron": "posición del logo en px",
+      "linea": 202,
+      "texto": "marca: 'desktop.centerXPx / 1440 > 0.7',"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-encuadre.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 64,
+      "texto": "import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-encuadre.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 219,
+      "texto": "SCENE_ENTRY_POSE === CHOREO_KEYFRAMES[0].pose &&"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-encuadre.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 222,
+      "texto": "'proyectar `SCENE_ENTRY_POSE` y proyectar `CHOREO_KEYFRAMES[0].pose` dan el mismo píxel en los t"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-techo.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 58,
+      "texto": "let dAnterior = anterior.pose.distance"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-techo.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 66,
+      "texto": "acumulado += d / frameHeight((dAnterior + c.pose.distance) / 2)"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s16-techo.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 69,
+      "texto": "dAnterior = c.pose.distance"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s18-azimut.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 53,
+      "texto": "const margen = (k.pose.height - FLOOR_Y) / k.pose.distance"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s18-azimut.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 66,
+      "texto": "k.pose.height - excursionDeAltura(k.pose.distance, 1) >= FLOOR_Y,"
+    },
+    {
+      "archivo": "src/app/v3/_lib/escena/__tests__/s18-azimut.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 73,
+      "texto": "(f: number) => CHOREO_KEYFRAMES.every((k) => k.pose.height - f * k.pose.distance >= FLOOR_Y),"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/harness.ts",
+      "patron": "distancia literal",
+      "linea": 116,
+      "texto": "return { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/harness.ts",
+      "patron": "distancia por nombre",
+      "linea": 128,
+      "texto": "const position: Vec3 = [Math.sin(az) * out.distance, out.height, Math.cos(az) * out.distance]"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/harness.ts",
+      "patron": "distancia por nombre",
+      "linea": 130,
+      "texto": "const eyeDistance = Math.hypot(out.distance, out.height)"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/harness.ts",
+      "patron": "distancia por nombre",
+      "linea": 182,
+      "texto": "const da = a.pose.distance"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/harness.ts",
+      "patron": "distancia por nombre",
+      "linea": 185,
+      "texto": "const db = b.pose.distance"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s10-fondo.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 55,
+      "texto": "const farthestCamera = Math.max(...CHOREO_KEYFRAMES.map((keyframe) => keyframe.pose.distance))"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s10-particulas.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 132,
+      "texto": "const closestCamera = Math.min(...CHOREO_KEYFRAMES.map((keyframe) => keyframe.pose.distance))"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s10-particulas.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 155,
+      "texto": "const cameraHeight = pose.height + mouse * MOUSE_HEIGHT_FACTOR * pose.distance"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s10-particulas.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 161,
+      "texto": "const distance = Math.hypot(Math.hypot(x, z) - pose.distance, y + bob - cameraHeight)"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-export.invariant.ts",
+      "patron": "distancia literal",
+      "linea": 116,
+      "texto": "sucio.applyPose(sucio.keyframes[1].id, { angleDeg: 7, height: 7, distance: 7, frameX: 0, frameY:"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos-soporte.ts",
+      "patron": "distancia literal",
+      "linea": 125,
+      "texto": "{ name: 'sana', at: 0, pose: { angleDeg: 0, height: 0, distance: 9, frameX: 0, frameY: 0 } },"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos-soporte.ts",
+      "patron": "distancia literal",
+      "linea": 126,
+      "texto": "{ name: 'rota', at: 0, pose: { angleDeg: 0, height: 9e3, distance: 9e3, frameX: 4, frameY: 4 } }"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 87,
+      "texto": "pose.distance >= PROBE_RANGES.distance.min &&"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 88,
+      "texto": "pose.distance <= PROBE_RANGES.distance.max &&"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 113,
+      "texto": "live.pose.distance === distance &&"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-recorridos.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 223,
+      "texto": "keyframe.pose.height - MOUSE_HEIGHT_FACTOR * keyframe.pose.distance - FLOOR_Y"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-variantes.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 31,
+      "texto": "const eye = Math.hypot(keyframe.pose.distance, keyframe.pose.height)"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-variantes.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 91,
+      "texto": "Math.max(...byId.get('arquitectonica')!.keyframes.map((k) => k.pose.distance)) >"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-variantes.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 92,
+      "texto": "Math.max(...byId.get('calibrada')!.keyframes.map((k) => k.pose.distance))"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-variantes.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 96,
+      "texto": "Math.min(...byId.get('intima')!.keyframes.map((k) => k.pose.distance)) <"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s7-variantes.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 97,
+      "texto": "Math.min(...byId.get('calibrada')!.keyframes.map((k) => k.pose.distance))"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-composicion.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 155,
+      "texto": "const distances = keyframes.map((keyframe) => keyframe.pose.distance)"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 146,
+      "texto": "const gap = keyframe.pose.height - MOUSE_HEIGHT_FACTOR * keyframe.pose.distance - FLOOR_Y"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 189,
+      "texto": "live.distance = target.distance"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 202,
+      "texto": "live.distance = damp("
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 203,
+      "texto": "live.distance,"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 204,
+      "texto": "target.distance,"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 205,
+      "texto": "SETTLE_TAU.distance * settleScale,"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 206,
+      "texto": "SETTLE_EPSILON.distance,"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido-soporte.ts",
+      "patron": "distancia por nombre",
+      "linea": 210,
+      "texto": "const gap = live.height + mouse * MOUSE_HEIGHT_FACTOR * live.distance - FLOOR_Y"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 102,
+      "texto": "? { ...keyframe, pose: { ...keyframe.pose, distance: keyframe.pose.distance + 1 } }"
+    },
+    {
+      "archivo": "src/app/probe-escena/__tests__/s9-recorrido.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 289,
+      "texto": "? { ...keyframe, pose: { ...keyframe.pose, height: limiteDelPiso(keyframe.pose.distance) - 1 } }"
+    },
+    {
+      "archivo": "src/lib/scene-camera-medida.ts",
+      "patron": "distancia por nombre",
+      "linea": 78,
+      "texto": "Math.sin(azimut) * pose.distance,"
+    },
+    {
+      "archivo": "src/lib/scene-camera-medida.ts",
+      "patron": "distancia por nombre",
+      "linea": 80,
+      "texto": "Math.cos(azimut) * pose.distance,"
+    },
+    {
+      "archivo": "src/lib/scene-camera-medida.ts",
+      "patron": "distancia por nombre",
+      "linea": 86,
+      "texto": "const distanciaAlOjo = Math.hypot(pose.distance, pose.height - ORBIT_TARGET_Y)"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 4,
+      "texto": "import { SCENE_ENTRY_POSE, frameSceneEntry, frameScenePose } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 41,
+      "texto": "const desktop = frameSceneEntry(1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 55,
+      "texto": "const camera = sceneCameraAt(SCENE_ENTRY_POSE, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 96,
+      "texto": "sceneCameraAt(SCENE_ENTRY_POSE, 0, 0) === null"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 103,
+      "texto": "const flat = frameScenePose({ ...SCENE_ENTRY_POSE, frameX: 0, frameY: 0 }, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 61,
+      "texto": "origin.xPx === desktop.centerXPx &&"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 106,
+      "texto": "flat !== null && Math.abs(flat.centerXPx - 720) < 1e-9 && Math.abs(flat.centerYPx - 405) < 1e-9,"
+    },
+    {
+      "archivo": "src/lib/scene-camera.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 107,
+      "texto": "flat ? `(${flat.centerXPx.toFixed(1)}, ${flat.centerYPx.toFixed(1)})` : ''"
+    },
+    {
+      "archivo": "src/lib/scene-camera.ts",
+      "patron": "distancia por nombre",
+      "linea": 111,
+      "texto": "Math.sin(azimuth) * pose.distance,"
+    },
+    {
+      "archivo": "src/lib/scene-camera.ts",
+      "patron": "distancia por nombre",
+      "linea": 113,
+      "texto": "Math.cos(azimuth) * pose.distance,"
+    },
+    {
+      "archivo": "src/lib/scene-camera.ts",
+      "patron": "distancia por nombre",
+      "linea": 123,
+      "texto": "const eyeDistance = Math.hypot(pose.distance, pose.height - ORBIT_TARGET_Y)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "distancia por nombre",
+      "linea": 73,
+      "texto": "Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 24,
+      "texto": "import { SCENE_ENTRY_POSE, frameSceneEntry, frameScenePose } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 38,
+      "texto": "const r = frameScenePose({ ...SCENE_ENTRY_POSE, frameX }, ancho, alto)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 73,
+      "texto": "Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 98,
+      "texto": "const hoy = frameSceneEntry(w, h)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 99,
+      "texto": "const camara = camaraCorregidaEn(SCENE_ENTRY_POSE, w, h)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 166,
+      "texto": "const SIN_ENCUADRE = { ...SCENE_ENTRY_POSE, frameX: 0, frameY: 0 }"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 174,
+      "texto": "const arriba = sceneCameraAt(SCENE_ENTRY_POSE, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 175,
+      "texto": "const arribaCorregida = camaraCorregidaEn(SCENE_ENTRY_POSE, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 181,
+      "texto": "const abajo = sceneCameraAt(SCENE_ENTRY_POSE, 390, 844)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "pose de entrada",
+      "linea": 182,
+      "texto": "const abajoCorregida = camaraCorregidaEn(SCENE_ENTRY_POSE, 390, 844)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "posición del logo en px",
+      "linea": 39,
+      "texto": "return r === null ? 'null' : r.centerXPx.toFixed(4)"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "posición del logo en px",
+      "linea": 105,
+      "texto": "const dx = corregido.xPx - hoy.centerXPx"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "posición del logo en px",
+      "linea": 107,
+      "texto": "if (Math.abs(hoy.centerXPx - w / 2) > 1e-9) todosCentradosHoy = false"
+    },
+    {
+      "archivo": "src/lib/scene-encuadre-deuda.ts",
+      "patron": "posición del logo en px",
+      "linea": 110,
+      "texto": "`${hoy.centerXPx.toFixed(3)} · ${hoy.centerYPx.toFixed(3)}`.padEnd(26) +"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "distancia por nombre",
+      "linea": 57,
+      "texto": "const eye = Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height)"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "pose de entrada",
+      "linea": 20,
+      "texto": "import { SCENE_ENTRY_POSE, type SceneFrame, frameScenePose } from '@/lib/scene-framing'"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "pose de entrada",
+      "linea": 57,
+      "texto": "const eye = Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height)"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "pose de entrada",
+      "linea": 60,
+      "texto": "const approxX = (0.5 + (SCENE_ENTRY_POSE.frameX * travelX) / halfW / 2) * 1440"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "pose de entrada",
+      "linea": 83,
+      "texto": "const sinElevacion = frameScenePose({ ...SCENE_ENTRY_POSE, height: 0 }, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "pose de entrada",
+      "linea": 89,
+      "texto": ": `${sinElevacion.centerYPx.toFixed(4)} con altura 0 contra ${desktop.centerYPx.toFixed(4)} con "
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "posición del logo en px",
+      "linea": 64,
+      "texto": "const error = Math.hypot(desktop.centerXPx - approxX, desktop.centerYPx - 405)"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "posición del logo en px",
+      "linea": 69,
+      "texto": "`${error.toFixed(1)}px de error total · ${Math.abs(desktop.centerXPx - approxX).toFixed(1)} en X"
+    },
+    {
+      "archivo": "src/lib/scene-framing-aproximacion.ts",
+      "patron": "posición del logo en px",
+      "linea": 73,
+      "texto": "desvioY > Math.abs(desktop.centerXPx - approxX),"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 70,
+      "texto": "`\"${CHOREO_KEYFRAMES[0].name}\" · ángulo ${SCENE_ENTRY_POSE.angleDeg} · altura ${SCENE_ENTRY_POSE"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "distancia por nombre",
+      "linea": 80,
+      "texto": "(Math.atan2(SCENE_ENTRY_POSE.height, SCENE_ENTRY_POSE.distance) * 180) / Math.PI"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 33,
+      "texto": "SCENE_ENTRY_POSE,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 34,
+      "texto": "SCENE_ENTRY_VIEW,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 35,
+      "texto": "frameSceneEntry,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 68,
+      "texto": "'`SCENE_ENTRY_POSE` ES el primer keyframe, no una copia',"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 69,
+      "texto": "SCENE_ENTRY_POSE === CHOREO_KEYFRAMES[0].pose,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 70,
+      "texto": "`\"${CHOREO_KEYFRAMES[0].name}\" · ángulo ${SCENE_ENTRY_POSE.angleDeg} · altura ${SCENE_ENTRY_POSE"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 79,
+      "texto": "SCENE_ENTRY_VIEW.pitchDeg -"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 80,
+      "texto": "(Math.atan2(SCENE_ENTRY_POSE.height, SCENE_ENTRY_POSE.distance) * 180) / Math.PI"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 82,
+      "texto": "`azimut ${SCENE_ENTRY_VIEW.yawDeg}° · elevación ${SCENE_ENTRY_VIEW.pitchDeg.toFixed(1)}°`"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 123,
+      "texto": "const desktop = frameSceneEntry(1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 152,
+      "texto": "const centrado = frameScenePose({ ...SCENE_ENTRY_POSE, frameX: 0 }, 1440, 810)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 172,
+      "texto": "const big = frameSceneEntry(1920, 1080)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 185,
+      "texto": "const phone = frameSceneEntry(390, 844)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 214,
+      "texto": "const camaraDelTelefono = sceneCameraAt(SCENE_ENTRY_POSE, 390, 844)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 248,
+      "texto": "const frame = frameSceneEntry(w, h)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 263,
+      "texto": "check('0 × 0 devuelve null', frameSceneEntry(0, 0) === null)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 264,
+      "texto": "check('ancho 0 devuelve null', frameSceneEntry(0, 800) === null)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 265,
+      "texto": "check('alto 0 devuelve null', frameSceneEntry(1440, 0) === null)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "pose de entrada",
+      "linea": 266,
+      "texto": "check('negativo devuelve null', frameSceneEntry(-1440, -810) === null)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 129,
+      "texto": "Math.abs(desktop.centerXPx - 940) < 1.5 && Math.abs(desktop.centerYPx - 417) < 1.5,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 130,
+      "texto": "`(${desktop.centerXPx.toFixed(0)}, ${desktop.centerYPx.toFixed(0)})`"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 156,
+      "texto": "Math.abs(centrado.centerXPx - 720) < 0.5 &&"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 157,
+      "texto": "desktop.centerXPx > centrado.centerXPx,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 158,
+      "texto": "`${((100 * desktop.centerXPx) / 1440).toFixed(1)}% del ancho, contra ${centrado === null ? '?' :"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 162,
+      "texto": "centrado !== null && Math.abs(desktop.centerXPx - centrado.centerXPx) > 100,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 165,
+      "texto": ": `${(desktop.centerXPx - centrado.centerXPx).toFixed(1)} px de corrimiento — si diera cero, la "
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 201,
+      "texto": "* DEFECTO (SITIO-S12).** Decía `Math.abs(phone.centerXPx - 195) < 1.5` con la"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 223,
+      "texto": "phone.centerXPx === origenProyectado.xPx &&"
+    },
+    {
+      "archivo": "src/lib/scene-framing.invariant.ts",
+      "patron": "posición del logo en px",
+      "linea": 225,
+      "texto": "`x = ${phone.centerXPx.toFixed(3)} · proyección ${origenProyectado ? origenProyectado.xPx.toFixe"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "distancia por nombre",
+      "linea": 127,
+      "texto": "pitchDeg: (Math.atan2(pose.height - ORBIT_TARGET_Y, pose.distance) * 180) / Math.PI,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "distancia por nombre",
+      "linea": 169,
+      "texto": "(Math.atan2(SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y, SCENE_ENTRY_POSE.distance) * 180) /"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 144,
+      "texto": "export const SCENE_ENTRY_POSE: ChoreoPose = CHOREO_KEYFRAMES[0].pose"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 146,
+      "texto": "export function frameSceneEntry("
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 150,
+      "texto": "return frameScenePose(SCENE_ENTRY_POSE, viewportWidthPx, viewportHeightPx)"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 166,
+      "texto": "export const SCENE_ENTRY_VIEW = {"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 167,
+      "texto": "yawDeg: SCENE_ENTRY_POSE.angleDeg,"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "pose de entrada",
+      "linea": 169,
+      "texto": "(Math.atan2(SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y, SCENE_ENTRY_POSE.distance) * 180) /"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "posición del logo en px",
+      "linea": 63,
+      "texto": "readonly centerXPx: number"
+    },
+    {
+      "archivo": "src/lib/scene-framing.ts",
+      "patron": "posición del logo en px",
+      "linea": 121,
+      "texto": "centerXPx: center.xPx,"
+    }
+  ]
+}

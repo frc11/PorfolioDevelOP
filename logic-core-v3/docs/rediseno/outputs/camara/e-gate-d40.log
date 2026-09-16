@@ -1,0 +1,1433 @@
+
+> logic-core-v3@0.1.0 verificar
+> npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts
+
+
+═══ PASO 1 — package.json: JSON válido, sin conflictos, sin claves duplicadas
+  ok   sin marcadores de conflicto, JSON válido, cero claves duplicadas
+
+═══ PASO 1b — marcadores de conflicto en TODO el repo
+  excluido: src/app/v3/_lib/__tests__/s4-fixtures — los controles positivos del propio detector: un `package.json` con un marcador de conflicto y otro con una clave duplicada. Escanearlos hace fallar el gate contra su arnés.
+  ok   ningún archivo del repo tiene un merge sin resolver
+
+═══ PASO 2 — tsc --noEmit
+  ok   sin errores de tipos  (10.0s)
+
+═══ PASO 3 — los agregados de invariantes
+  suites derivadas de package.json: s1(5) · s10(8) · s10e(5) · s11e(5) · s12e(3) · s13b(1) · s13e(5) · s14e(3) · s15e(4) · s16(5) · s17(2) · s18(3) · s19(2) · s2(11) · s20(2) · s21(2) · s22(1) · s3(11) · s4(5) · s5(10) · s6(9) · s7(7) · s7e(5) · s8(9) · s8e(6) · s9(4) · s9e(2)  ·  fuera del agregado: frontera(2)
+
+═══ AGREGADO s1 — 5 invariantes, sin cortar en la primera falla
+  ok      test:s1-tokens           52 afirm · 11 ctrl+ · 0 fallas  (14.6s, exit 0)
+  ok      test:s1-fuentes          53 afirm · 5 ctrl+ · 0 fallas  (3.2s, exit 0)
+  ok      test:s1-compuerta        35 afirm · 6 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s1-superficies      50 afirm · 6 ctrl+ · 0 fallas  (2.7s, exit 0)
+  parcial test:s1-bundle           19 afirm · 3 ctrl+ · 0 fallas · 3 fuera de ventana  (8.2s, exit 0)
+
+  TOTAL s1: 5 invariantes · 209 afirmaciones · 31 controles positivos · 3 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s10 — 8 invariantes, sin cortar en la primera falla
+  ok      test:s10-banco           53 afirm · 8 ctrl+ · 0 fallas  (3.5s, exit 0)
+  ok      test:s10-medida          44 afirm · 5 ctrl+ · 0 fallas  (3.2s, exit 0)
+  ok      test:s10-lectura         30 afirm · 11 ctrl+ · 0 fallas  (3.3s, exit 0)
+  parcial test:s10-mobile          76 afirm · 17 ctrl+ · 0 fallas · 2 fuera de ventana  (3.9s, exit 0)
+  deuda   test:s10-acceso          98 afirm · 16 ctrl+ · 0 fallas · 12 deudas declaradas  (3.9s, exit 0)
+  ok      test:s10-logo            51 afirm · 14 ctrl+ · 0 fallas  (14.3s, exit 0)
+  FALLA   test:s10-vertical        52 afirm · 6 ctrl+ · 5 fallas  (7.7s, exit 1)
+
+  ── salida de test:s10-vertical ───────────────────────────────────
+  │ 
+  │ 1 · LA VENTANA Y EL CAMPO — y el control de la clase de error que ya se cometió
+  │   ok   se mide a 390×844, el viewport de layout del teléfono  — [390,844]
+  │   ok   el aspecto es 0.462085: un orden debajo de los 1,1389–1,7778 que el gate miraba
+  │   ok     y con campo ×2.6 NO: la caja es la del logo y el centro es otro  — 228.80 px contra los 228.80 px del artefacto
+  │   ok     con campo ×1, `números` da el centro geométrico EXACTO — el artefacto del recorte  — x0 -0.9967 · x1 0.9967 — la primera y la última celda
+  │   ok     y con campo ×2.6 NO: la caja es la del logo y el centro es otro  — 179.79 px contra los 195.00 px del artefacto
+  │   ok     con campo ×1, `trabajos` da el centro geométrico EXACTO — el artefacto del recorte  — x0 -0.9967 · x1 0.9967 — la primera y la última celda
+  │   ok     y con campo ×2.6 NO: la caja es la del logo y el centro es otro  — 171.34 px contra los 195.00 px del artefacto
+  │   ok   [control positivo] el detector del artefacto no está ciego: con campo ×2,6 el `hero` no da el centro exacto
+  │ 
+  │ 2 · `frameX` ESTÁ VIVO EN VERTICAL — y el preloader, al lado, NO lo está
+  │   ok   `hero`: de `frameX` −1 a +1 el logo RECORRE el cuadro  — 127.4 px → 262.6 px (135.2 px de recorrido)
+  │   ok   `quiénes somos`: de `frameX` −1 a +1 el logo RECORRE el cuadro  — 36.1 px → 279.5 px (243.4 px de recorrido)
+  │   ok   `números`: de `frameX` −1 a +1 el logo RECORRE el cuadro  — 162.9 px → 230.5 px (67.6 px de recorrido)
+  │   ok   `trabajos`: de `frameX` −1 a +1 el logo RECORRE el cuadro  — 166.3 px → 237.3 px (71.0 px de recorrido)
+  │   ok   `demos`: de `frameX` −1 a +1 el logo RECORRE el cuadro  — 27.7 px → 282.9 px (255.2 px de recorrido)
+  │   ok   [control positivo] el detector no está ciego: a 1440×810 el MISMO preloader sí se mueve con `frameX`
+  │ 
+  │ 3 · 🔴 EL LOGO NO ENTRA EN EL CUADRO — el defecto que VERTICAL-1 midió y NO arregló
+  │   ok   🔴 `quiénes somos`: la tinta es MÁS ANCHA que el cuadro  — 2.3400 contra 2,0000 — 17.0 % de más; entra el 65.8 %
+  │   ok   🔴 `números`: la tinta es MÁS ANCHA que el cuadro  — 2.3227 contra 2,0000 — 16.1 % de más; entra el 89.3 %
+  │   ok   🔴 `trabajos`: la tinta es MÁS ANCHA que el cuadro  — 2.2707 contra 2,0000 — 13.5 % de más; entra el 89.8 %
+  │   ok   🔴 `demos`: la tinta es MÁS ANCHA que el cuadro  — 2.3747 contra 2,0000 — 18.7 % de más; entra el 77.1 %
+  │   ok     y los DOS del cierre SÍ entran: el detector no dice que nada entra nunca  — hero 1.1613 · cierre 1.7507 · cierre · sostén 1.7507 — es la distancia 27, la más lejana del recorrido
+  │   ok   [control positivo] el detector de «no entra» no está ciego: con la caja del cierre daría que SÍ entra
+  │ 
+  │ 4 · LA POSICIÓN HORIZONTAL DE LOS SIETE — la que §7.60 pide, clavada
+  │   ok   `quiénes somos` (p=0.375, frameX -0.8) centra la tinta en 59.8 px  — medido 59.80 px · el centro geométrico de la pantalla es 195
+  │   ok   `números` (p=0.500, frameX -0.45) centra la tinta en 179.79 px  — medido 179.79 px · el centro geométrico de la pantalla es 195
+  │   ok   `trabajos` (p=0.625, frameX -0.85) centra la tinta en 171.34 px  — medido 171.34 px · el centro geométrico de la pantalla es 195
+  │   ok   `demos` (p=0.750, frameX 1) centra la tinta en 282.88 px  — medido 282.88 px · el centro geométrico de la pantalla es 195
+  │   ok   `cierre` (p=0.950, frameX 0) centra la tinta en 195 px  — medido 195.00 px · el centro geométrico de la pantalla es 195
+  │   ok   `cierre · sostén` (p=1.000, frameX 0) centra la tinta en 195 px  — medido 195.00 px · el centro geométrico de la pantalla es 195
+  │ 
+  │ 5 · 🔴 LA SUPERPOSICIÓN DONDE EL TEXTO ESTÁ — la cifra que este archivo publicaba mal
+  │   ok   el reparto vertical del hero no encontró una sola clase que no sepa modelar  — si aparece una, sale acá con su nombre en vez de desaparecer adentro de una cifra
+  │   span  0.0 % — «TU NEGOCIO VENDIENDO»
+  │   span  0.0 % — «LAS 24 HS»
+  │   p     0.0 % — «Tu sitio, tu chat y tu seguimiento»
+  │   span  0.0 % — «Mirá los trabajos Mirá los trabajo»
+  │   ok     y la composición de HOY —`justify-end` abajo del breakpoint— baja esa cifra  — 18.9 % → 0.0 % · peor caja: «TU NEGOCIO VENDIENDO» al 0.0 %
+  │   ok   [control positivo] el medidor de superposición REAL no está ciego: con el bloque centrado no devuelve «limpio»
+  │   ok   [control positivo]   y el barrido VIEJO SÍ estaba ciego: sobre esa misma composición su mínimo da cero
+  │   supuestos del alto:
+  │    · no modela márgenes, `flex-1`/`grow`, `h-full`, `aspect-*` ni medios con alto intrínseco: un hijo que crece se mide por su contenido
+  │    · no modela `position: absolute|fixed|sticky`: un hijo sacado de flujo se sigue midiendo como si estuviera en él
+  │    · `min-h-svh` se resuelve contra el alto de ventana que se pasa; `svh` y `dvh` se tratan igual porque el banco no tiene barra de navegador que entre y salga
+  │    · el alto de una caja de texto es el de `s10-logo-cajas.ts` —líneas × tamaño × interlineado— y hereda sus supuestos: sin márgenes y sin descuelgue de la última línea
+  │    · toda clase vertical que el modelo no conoce se DEVUELVE en `sinModelar` en vez de ignorarse en silencio
+  │ 
+  │ 5b · ¿ES EVITABLE MOVIENDO EL BLOQUE? — el barrido, con el nombre de lo que mide
+  │   ok   `hero` sobre `hero`: EVITABLE — existe una altura con superposición cero
+  │   ok   `quiénes somos` sobre `numeros`: EVITABLE — existe una altura con superposición cero
+  │   ok   `números` sobre `trabajos`: EVITABLE — existe una altura con superposición cero
+  │   ok   `trabajos` sobre `trabajos`: EVITABLE — existe una altura con superposición cero
+  │   ok   🔴 `demos` sobre `por-que-develop`: INEVITABLE — no existe una altura sin superposición  — la mínima es 5.1 % — el `h2` de esa sección mide 8 renglones a 390 y no entra en el hueco
+  │   ok   `cierre` sobre `cierre`: EVITABLE — existe una altura con superposición cero
+  │   ok   `cierre · sostén` sobre `cierre`: EVITABLE — existe una altura con superposición cero
+  │   ok     y es UNO solo: seis de los siete se pueden componer moviendo el texto, sin tocar la escena  — ["demos"]
+  │   ok   [control positivo] el medidor de superposición sabe devolver algo mayor que cero
+  │ 
+  │ 6 · POR QUÉ NO SE MOVIÓ NINGUNA PERILLA DE ESCENA — la mínima es PLANA en el barrido
+  │   ok   `hero`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok   `quiénes somos`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok   `números`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok   `trabajos`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok   `cierre`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok   `cierre · sostén`: la mínima sigue en 0 % con `frameX` −1, 0 y +1 — la perilla no la toca
+  │   ok     control — en `demos` el barrido SÍ mueve la mínima: el detector no está ciego  — 12.8 % · 12.8 % · 5.1 % para frameX −1 · 0 · +1
+  │   ok     y el `frameX` de HOY (1) ya es el mejor de los tres: moverlo sería empeorar  — hoy 5.1 % contra 12.8 % en −1
+  │ 
+  │ s10-vertical.invariant: 52 afirmaciones, 5 fallas
+  │ 
+  │ [stderr]
+  │   FALLA   con campo ×1, `hero` da el centro geométrico EXACTO — el artefacto del recorte  — x0 -0.4100 · x1 0.7567 — la primera y la última celda
+  │   FALLA 🔴 y el PRELOADER, con la misma perilla, es INERTE a 390: cinco `frameX` y un solo aterrizaje  — 123.18 px = 390/2 — es `lib/scene-camera.ts` con su `max(0, …)`, la copia que §7.44 censó
+  │   FALLA 🔴 `hero`: la tinta es MÁS ANCHA que el cuadro  — 1.1613 contra 2,0000 — -41.9 % de más; entra el 100.0 %
+  │   FALLA `hero` (p=0.000, frameX 0.5) centra la tinta en 215.28 px  — medido 228.80 px · el centro geométrico de la pantalla es 195
+  │   FALLA 🔴 CON EL BLOQUE CENTRADO — la composición de la captura del humano — el hero NO está limpio  — 18.9 % del área del texto sobre tinta del logo; el navegador midió 54,8 % de la TINTA del titular
+  │ 
+  ──
+  parcial test:s10-raf             28 afirm · 14 ctrl+ · 0 fallas · 2 fuera de ventana  (2.8s, exit 0)
+
+  TOTAL s10: 8 invariantes · 432 afirmaciones · 91 controles positivos · 4 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s10e — 5 invariantes, sin cortar en la primera falla
+  ok      test:s10e-batido         14 afirm · 3 ctrl+ · 0 fallas  (3.4s, exit 0)
+  ok      test:s10e-escena         14 afirm · 5 ctrl+ · 0 fallas  (4.0s, exit 0)
+  FALLA   test:s10e-fondo          17 afirm · 5 ctrl+ · 1 fallas  (2.6s, exit 1)
+
+  ── salida de test:s10e-fondo ─────────────────────────────────────
+  │ 
+  │ ── Las dos capas caben donde tienen que caber ────────────────────────
+  │   FALLA  la capa fina queda más lejos que la cámara más lejana del recorrido  · capa fina en 38, cámara máxima en 40
+  │   ok  control positivo — el mismo margen NO alcanza contra una cámara puesta sobre la capa  · una cámara a 37 contra una capa en 38: el margen de 5 no entra
+  │   ok  la gruesa está DETRÁS de la fina, que es lo que produce el paralaje  · 38 → 44, separación 6
+  │   ok  control positivo — el mismo buscador NO encuentra cruces con el rayo apuntando al piso  · 0 y 0 cruces hacia abajo, contra los que encuentra hacia el sol
+  │   ok  la luz llega de AFUERA: el rayo al sol sale cruzando las dos capas  · sale por y = 23.3 (r=38) y 27.7 (r=44) — las bandas van de -4 a 34 y de -2.5 a 40
+  │   ok  la capa fina entra por dentro del ciclorama en su borde inferior  · 38 contra un ciclorama en 39.0 a y=-4
+  │   ok  y la gruesa también, que es lo que le fija el borde de abajo  · 44 contra 46.2 a y=-2.5 — a y=−4 el ciclorama está en 39.0, o sea que ahí no entraría
+  │   ok  control positivo — la misma comparación VE la altura a la que la gruesa NO entra  · a y=−4 el ciclorama está en 39.0 y la capa mide 44 — es el borde que le fija el bottom
+  │ 
+  │ ── Los bordes de banda nunca entran en cuadro ────────────────────────
+  │   ok  el borde superior del cuadro nunca pasa el tope de la capa fina  · barre hasta y=28.1 contra un tope en 34
+  │   ok  ni el de la gruesa  · barre hasta y=31.8 contra un tope en 40
+  │ 
+  │ ── Las celdas: cuadradas en su superficie y cuadradas en ángulo ──────
+  │   ok  gruesa: la celda es cuadrada sobre la superficie  · 5.529 × 5.529 de mundo · 7.200° de ángulo · 7.69 filas en la banda
+  │   ok  fina: la celda es cuadrada sobre la superficie  · 2.341 × 2.341 de mundo · 3.529° de ángulo · 16.23 filas en la banda
+  │   ok  control positivo — con siete celdas de más la celda YA NO es cuadrada  · 0.6790 de mundo de diferencia contra una tolerancia de 1e-9
+  │   ok  la trama fina es el doble de la gruesa MÁS el desajuste  · 102 = 2 × 50 + 2
+  │   ok  control positivo — la MISMA cuenta con otro desajuste da otro número de celdas  · 105 contra 102 — `fineCells` lee su argumento, no devuelve una constante
+  │   ok  y el cociente de textura queda apenas corrido de 2  · 2.0400 — la lectura "cuatro cuadraditos en un cuadrado" se conserva
+  │   ok  las dos cuentas son enteras: el mosaico cierra alrededor del cilindro  · si no cerraran habría una costura vertical en el punto de empalme
+  │   ok  el slider llega hasta 0, que es donde el batido de TEXTURA desaparece  · default 2, rango 0..12
+  │ 
+  │ s10 · dónde está la envolvente: 17 en verde, 1 en rojo
+  │   ✗ la capa fina queda más lejos que la cámara más lejana del recorrido  · capa fina en 38, cámara máxima en 40
+  │ 
+  ──
+  ok      test:s10e-particulas     15 afirm · 4 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s10e-tramas         22 afirm · 5 ctrl+ · 0 fallas  (2.8s, exit 0)
+
+  TOTAL s10e: 5 invariantes · 82 afirmaciones · 22 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s11e — 5 invariantes, sin cortar en la primera falla
+  ok      test:s11e-celosia        17 afirm · 1 ctrl+ · 0 fallas  (2.7s, exit 0)
+  FALLA   test:s11e-pantalla       8 afirm · 3 ctrl+ · 1 fallas  (2.7s, exit 1)
+
+  ── salida de test:s11e-pantalla ──────────────────────────────────
+  │ 
+  │ ── Aliasing: la huella sobre el piso y el filtro que la absorbe ──────
+  │   ok  la mediana de la huella deja la celda enorme en pantalla  · mediana 0.0100 celdas/px = 100 px por celda · p99 8.1 px
+  │   ok  pero la cola rasante baja de Nyquist, y por eso el filtro NO es opcional  · peor rayo 0.6094 celdas/px = 1.6 px por celda · barra 0.48 px · 1 de 23568 rayos (0.004%) pasan media celda
+  │   ok  control positivo — con huella cero el perfil es binario: adentro 1, afuera 0  · 1.000 en el centro de la barra contra 0.000 en el hueco
+  │   ok  control positivo — con huella de una celda el patrón se reemplaza por su propia media  · 0.290 y 0.290 contra una barra de 0.29 — gris parejo en vez de titileo
+  │   ok  y el perfil duro y el filtrado son el mismo patrón donde se resuelve  · el filtro no cambia el dibujo: solo lo apaga cuando deja de caber en un píxel
+  │ 
+  │ ── El batido proyectado, en píxeles de pantalla ──────────────────────
+  │   FALLA  el batido entra en el cuadro entre dos y cinco bandas: se lee como banda, no como textura  · hero celda 34px · batido 118px = 16.3 bandas · trabajos celda 89px · batido 516px = 3.7 bandas · cierre celda 72px · batido 407px = 4.7 bandas
+  │   ok  y en la noche NO hay batido, porque la capa lejana no se cruza desde el piso: geometría, no tolerancia  · a 1.35° (nivel 0.04) la capa cercana cruza y la lejana no — el borde está en elevación 2,348° por MOIRE_FAR_BOTTOM -2.5 y MOIRE_FAR_RADIUS 44
+  │   ok    control positivo — el MISMO lector, con el sol de mediodía, devuelve las dos  · a 36.0° las dos capas dan gradiente
+  │   ok  y la celda proyectada mide decenas de píxeles: la trama del piso es GRANDE  · contra las 24,9 celdas a lo ancho del cuadro que la capa fina dibuja sobre la pared
+  │ 
+  │ s11 · la proyección en pantalla: 8 en verde, 1 en rojo
+  │   ✗ el batido entra en el cuadro entre dos y cinco bandas: se lee como banda, no como textura  · hero celda 34px · batido 118px = 16.3 bandas · trabajos celda 89px · batido 516px = 3.7 bandas · cierre celda 72px · batido 407px = 4.7 bandas
+  │ 
+  ──
+  FALLA   test:s11e-piso           15 afirm · 1 ctrl+ · 1 fallas  (3.6s, exit 1)
+
+  ── salida de test:s11e-piso ──────────────────────────────────────
+  │ 
+  │ ── El techo: cuánto puede bajar una sombra sobre este papel ──────────
+  │   ok  con el cielo abierto, apagar la key ENTERA baja el papel apenas doce puntos  · 249.4 a luz plena → 236.9 en sombra dura · 12.5 puntos · NeutralToneMapping comprime todo lo que pasa de 0,76 lineal
+  │   ok  y por eso las marcas tampoco se leen: 16% menos de albedo son cuatro puntos  · papel 249.4 contra #D7D7D5 en 245.7 — el aplastamiento no es de la celosía, es del piso
+  │   ok  con el cielo tapado la sombra se hunde y el alto casi no se mueve  · 248.3 / 218.7 = 29.6 puntos, contra 12.5 · el alto bajó 1.1
+  │   ok  la sombra PROPIA del logo gana lo mismo, y nunca fue un problema de celosía  · de 236.9 a 218.7 — 18.2 puntos más profunda, sin tocar el shadow map
+  │ 
+  │ ── El factor de cielo: forma cerrada contra la integral de hemisferio 
+  │   ok  control positivo — el instrumento se mueve: con la barra en 0 el cielo está abierto y vale 1  · sin esto, dos funciones que devolvieran siempre lo mismo pasarían el chequeo de abajo
+  │   ok  la forma cerrada reproduce la integral en TODO el rango del slider  · peor error 3.9/1000 · en la barra de diseño 1.5/1000 · cielo = 0.6743
+  │   ok  Ω se recalcula de la geometría y cambia cuando cambia el punto de vista  · en el centro Ω = 0.4366 (mismo ajuste con menos muestras: 0.4366) · en el borde de la losa 0.5413 — ésa es la simplificación declarada, ±24%
+  │   ok  y el factor de cielo baja cuando sube la barra, monótono  · 1.000 → 0.850 → 0.742 → 0.668 → 0.620 → 0.591
+  │ 
+  │ ── El valor medio del cuadro en las seis poses, contra S10 ───────────
+  │   FALLA  el instrumento sin celosía sigue reproduciendo el valor de S10 en la pose que nadie tocó: el hero (ni B8 la luz, ni B13 la cámara)  · es el control: si esto se corriera, la comparación de abajo no valdría nada
+  │   ok    B13 — y `quiénes somos` ya NO lo reproduce, por la CÁMARA y no por la luz: su nivel sigue en 1 y lo que cambió es la distancia  · quiénes somos 172 (S10) → 186 · distancia 11,5 → 14 (`choreography.ts`, B13 §2) · nivel del arco 1.00, el mismo de S9
+  │   ok    y en las cuatro que B8 volvió a iluminar NO los reproduce: la luz las movió, y se publican contra S10 con su delta  · hero 211 (S10 216, -5; celosía -11.3 a igual luz) piso 47% sombra 70% · quiénes somos 177 (S10 172, 5; celosía -8.5 a igual luz) piso 8% sombra 60% · números 11 (S10 222, -211; celosía -1.3 a igual luz) piso 73% sombra 0% · trabajos 104 (S10 208, -104; celosía -19.8 a igual luz) piso 51% sombra 73% · demos 109 (S10 136, -27; celosía -14.4 a igual luz) piso 15% sombra 79% · cierre 151 (S10 120, 31; celosía -24.3 a igual luz) piso 34% sombra 71%
+  │   ok  la celosía baja el valor medio en las seis poses, contra la MISMA luz  · hero -11.3 · quiénes somos -8.5 · números -1.3 · trabajos -19.8 · demos -14.4 · cierre -24.3
+  │   ok  y en HERO —intacto— baja de verdad; en NÚMEROS, ya en la noche, baja lo que la key deja  · hero -11.3 · números -1.3 a nivel 0.04 — a pleno sol eran −14 y −9: con la proyección sola habrían sido −5 y −3, el resto lo pone el cielo tapado
+  │ 
+  │ ── Las 48 marcas: cuánto del replanteo cae adentro de una banda ──────
+  │   ok  una marca se separa del papel SIETE veces más adentro de una banda que en la luz  · 5.0 puntos en la luz contra 30.3 en la banda · no se agregó contraste, se destapó el que ya estaba
+  │   ok  en toda pose CON LUZ y con replanteo en cuadro, una parte grande cae adentro de una banda  · hero 75% · quiénes somos 66% · números 0% (noche: sol rasante, sin proyección) · trabajos 73% · demos 91% · cierre 75%
+  │   ok    y en la noche la celosía no llega al piso: el sol rasante no proyecta nada que una marca pueda destapar  · números 0% a nivel 0.04
+  │ 
+  │ s11 · el piso: 15 en verde, 1 en rojo
+  │   ✗ el instrumento sin celosía sigue reproduciendo el valor de S10 en la pose que nadie tocó: el hero (ni B8 la luz, ni B13 la cámara)  · es el control: si esto se corriera, la comparación de abajo no valdría nada
+  │ 
+  ──
+  ok      test:s11e-proyeccion     18 afirm · 1 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s11e-sin-sol        6 afirm · 1 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s11e: 5 invariantes · 64 afirmaciones · 7 controles positivos · 0 fuera de ventana · 2 invariantes con falla
+
+═══ AGREGADO s12e — 3 invariantes, sin cortar en la primera falla
+  FALLA   test:s12e-barrido        9 afirm · 0 ctrl+ · 3 fallas  (11.9s, exit 1)
+
+  ── salida de test:s12e-barrido ───────────────────────────────────
+  │ 
+  │ ── El barrido: los seis valores medios contra 201/166/213/185/129/104 
+  │   α=0.000°  hero 211.4 (+10.4) · quiénes somos 177.0 (+11.0) · números 11.2 (-201.8) · trabajos 104.5 (-80.5) · demos 108.8 (-20.2) · cierre 151.4 (+47.4)
+  │   α=0.133°  hero 212.0 (+11.0) · quiénes somos 177.5 (+11.5) · números 11.2 (-201.8) · trabajos 104.6 (-80.4) · demos 108.8 (-20.2) · cierre 151.6 (+47.6)
+  │   α=0.266°  hero 212.6 (+11.6) · quiénes somos 178.0 (+12.0) · números 11.2 (-201.8) · trabajos 104.8 (-80.2) · demos 108.9 (-20.1) · cierre 151.9 (+47.9)
+  │   α=0.500°  hero 213.7 (+12.7) · quiénes somos 178.7 (+12.7) · números 11.2 (-201.8) · trabajos 105.2 (-79.8) · demos 109.2 (-19.8) · cierre 152.4 (+48.4)
+  │   α=0.750°  hero 214.7 (+13.7) · quiénes somos 179.4 (+13.4) · números 11.2 (-201.8) · trabajos 105.7 (-79.3) · demos 109.4 (-19.6) · cierre 152.8 (+48.8)
+  │   α=1.000°  hero 215.6 (+14.6) · quiénes somos 180.0 (+14.0) · números 11.2 (-201.8) · trabajos 106.2 (-78.8) · demos 109.7 (-19.3) · cierre 153.6 (+49.6)
+  │   α=1.500°  hero 217.0 (+16.0) · quiénes somos 180.9 (+14.9) · números 11.2 (-201.8) · trabajos 107.3 (-77.7) · demos 110.3 (-18.7) · cierre 154.8 (+50.8)
+  │   ok  el hero sube monótono con α: el parámetro devuelve contraste, y se ve cuánto  · 211.4 → 212.0 → 212.6 → 213.7 → 214.7 → 215.6 → 217.0
+  │   FALLA  el valor EMBARCADO del sol deja el hero debajo del techo de 210, con margen  · α = 0.266° da 212.6 contra el techo de 210 — -2.6 de margen
+  │   · PUBLICADO, no afirmado (decisión de V3-E): el techo de 210 se cruza en α = 0.266°, 1.0× el embarcado · en el tope del slider (1.5°) el hero llega a 217.0
+  │   ok  en el valor elegido ninguna pose se mueve más de 2,5 puntos  · hero +1.2 · quiénes somos +0.9 · números +0.0 · trabajos +0.3 · demos +0.2 · cierre +0.5
+  │   FALLA  la escena sin celosía, a la luz de hoy, reproduce el número de S10 en la única pose que nadie re-iluminó ni movió: el hero  · hero 222.7 (S10 216, +1,3 por el encuadre de V3-E)
+  │   ok    B13 — y `quiénes somos` ya NO lo reproduce: se alejó, y alejarse a la misma altura mete más sala clara en cuadro  · quiénes somos 185.6 (S10 172) — +13.6 por distancia 11,5 → 14, con su luz intacta · para comparar, lo que la LUZ le hizo a Números es -209.5
+  │   ok  ni en el tope del slider ninguna pose vuelve a la escena sin celosía, a la MISMA luz  · hero 217.0 < 222.7 · quiénes somos 180.9 < 185.6 · números 11.2 < 12.5 (noche) · trabajos 107.3 < 124.2 · demos 110.3 < 123.2 · cierre 154.8 < 175.8 · la que más se mueve en todo el rango es hero, +5.5
+  │ 
+  │ ── El barrido: portadora y batido del piso, con su control en α = 0 ──
+  │   α=0.000°  hero 13.4/20.1 (0%/0%) · números — · trabajos 20.1/22.2 (0%/0%) · cierre 44.6/56.4 (0%/0%)
+  │   α=0.133°  hero 13.3/20.1 (-1%/0%) · números — · trabajos 20.2/22.2 (0%/0%) · cierre 43.1/56.4 (-3%/-0%)
+  │   α=0.266°  hero 12.2/20.1 (-9%/0%) · números — · trabajos 20.2/22.2 (0%/0%) · cierre 42.0/56.4 (-6%/-0%)
+  │   α=0.500°  hero 9.4/20.1 (-30%/0%) · números — · trabajos 18.2/22.2 (-9%/0%) · cierre 41.1/56.4 (-8%/-0%)
+  │   α=0.750°  hero 6.3/17.3 (-53%/-14%) · números — · trabajos 16.5/22.0 (-18%/-1%) · cierre 39.6/56.4 (-11%/-0%)
+  │   α=1.000°  hero 4.7/12.8 (-65%/-37%) · números — · trabajos 15.3/20.1 (-24%/-10%) · cierre 37.7/56.3 (-15%/-0%)
+  │   α=1.500°  hero 2.9/6.4 (-79%/-68%) · números — · trabajos 13.0/16.4 (-35%/-26%) · cierre 35.6/56.3 (-20%/-0%)
+  │   ok  la portadora NO se mueve hasta 0,5° en las poses con luz: hasta ahí ablandar el borde sale gratis  · hero 0.0% · números NaN% (noche) · trabajos 0.0% · cierre -0.0%
+  │   ok    y en la noche NO hay portadora: el sol rasante no cruza la capa lejana, así que no hay banda que cuidar (B12)  · hero 20.1 · números sin portadora (noche) · trabajos 22.2 · cierre 56.4
+  │   FALLA  y en el hero —la pose de calibración— aguanta 0,75° y cae en 1°: ahí el sprint sí estaría deshaciendo a S11  · en 0,75° hero -14% · números NaN% · trabajos -1% · cierre -0% · en 1° -37%/NaN%/-10%/-0%
+  │   ok  en el valor elegido el batido no pierde más del 11% en ninguna pose con luz  · y en el hero SUBE: con el borde filoso los huecos entre barras casi no dejan pasar luz entera
+  │ 
+  │ ── El ancho de borde en cuadro, pose por pose ────────────────────────
+  │   α=0.133°  hero 0.028/0.066/0.130 celdas · números 0.060/0.087/0.133 celdas · trabajos 0.069/0.092/0.138 celdas · cierre 0.030/0.095/0.113 celdas
+  │   α=0.266°  hero 0.056/0.132/0.259 celdas · números 0.120/0.173/0.267 celdas · trabajos 0.137/0.185/0.276 celdas · cierre 0.061/0.191/0.226 celdas
+  │   α=0.500°  hero 0.105/0.248/0.488 celdas · números 0.225/0.325/0.501 celdas · trabajos 0.258/0.348/0.519 celdas · cierre 0.114/0.358/0.425 celdas
+  │   α=0.750°  hero 0.157/0.372/0.732 celdas · números 0.338/0.488/0.752 celdas · trabajos 0.387/0.522/0.779 celdas · cierre 0.171/0.537/0.637 celdas
+  │   α=1.000°  hero 0.210/0.497/0.976 celdas · números 0.451/0.651/1.003 celdas · trabajos 0.515/0.695/1.038 celdas · cierre 0.228/0.717/0.850 celdas
+  │   α=1.500°  hero 0.314/0.745/1.464 celdas · números 0.676/0.976/1.504 celdas · trabajos 0.773/1.043/1.557 celdas · cierre 0.343/1.075/1.275 celdas
+  │   ok  el ancho escala lineal con α en las cuatro poses a la vez  · mediana en el hero: 0.066 → 0.132 → 0.248 → 0.497 para α = 0,133 / 0,266 / 0,5 / 1°
+  │   ok  ⚠️ y en el tope del slider la mediana pasa media celda: ahí el moiré se lava  · hero 0.745 · números 0.976 · trabajos 1.043 · cierre 1.075 celdas con α = 1.5° · para eso llega hasta ahí el slider: para poder VER el extremo
+  │ 
+  │ s12 · el barrido del parámetro: 9 en verde, 3 en rojo
+  │   ✗ el valor EMBARCADO del sol deja el hero debajo del techo de 210, con margen  · α = 0.266° da 212.6 contra el techo de 210 — -2.6 de margen
+  │   ✗ la escena sin celosía, a la luz de hoy, reproduce el número de S10 en la única pose que nadie re-iluminó ni movió: el hero  · hero 222.7 (S10 216, +1,3 por el encuadre de V3-E)
+  │   ✗ y en el hero —la pose de calibración— aguanta 0,75° y cae en 1°: ahí el sprint sí estaría deshaciendo a S11  · en 0,75° hero -14% · números NaN% · trabajos -1% · cierre -0% · en 1° -37%/NaN%/-10%/-0%
+  │ 
+  ──
+  FALLA   test:s12e-penumbra       19 afirm · 1 ctrl+ · 1 fallas  (3.0s, exit 1)
+
+  ── salida de test:s12e-penumbra ──────────────────────────────────
+  │ 
+  │ ── Con α = 0 el gobo es el de S11, línea por línea ───────────────────
+  │   ok  control positivo — el instrumento se mueve: con el sol real el gobo cambia en el piso  · 962 de 2828 puntos de la losa cambian más de 1% · sin esto, la identidad de abajo pasaría con el modelo desconectado
+  │   ok  y con α = 0 reproduce la barra DURA de S11 en toda la losa  · peor diferencia 0.0e+0 sobre 2828 puntos — el borde filoso sigue disponible, y es el control de todo el sprint
+  │ 
+  │ ── El ancho: lineal en α, proporcional a la distancia, y con oblicuidad 
+  │   ok  doblar el radio angular dobla el ancho: la penumbra es lineal en α  · 0,133° → 0.0932 · 0,266° → 0.1863 · 0,532° → 0.3726 celdas
+  │   ok  y con α = 0 el ancho es exactamente cero, no un épsilon  · el modelo no deja un residuo de borde blando cuando la perilla está en el fondo
+  │   ok  la gruesa se ablanda MÁS en mundo, y la razón es la de los radios  · 0.505 contra 0.436 de mundo sobre el manto = ×1.158, contra 44/38 = 1.158 · t 47.0 y 54.4
+  │   ok  ⚠️ pero en FRACCIÓN DE CELDA se invierte: la gruesa queda más DURA  · 0.091 contra 0.186 celdas — la gruesa es ×2.0 más dura relativa a su banda, porque su celda es 2,4× más grande. La diferencia entre capas NO es la mitad del efecto: es 16% en mundo y se da vuelta en relativo
+  │   ok  un cruce rasante ensancha su penumbra; uno de frente no la toca  · de frente 1.000 · rasante (n·s = 0,2) 5.000 = 1/0,2 · sin el control de la izquierda, "la oblicuidad ensancha" pasaría con cualquier factor
+  │ 
+  │ ── El borde efectivo es el MAYOR de los dos, no la suma ──────────────
+  │   ok  el instrumento se mueve: ensanchar el borde cambia el perfil fuera del filo  · a 0,2 de fase (el filo está en 0.145): huella 0,02 → 0.000 contra penumbra 0,30 → 0.317
+  │   ok  con la penumbra ancha manda ella, y el resultado NO es el de la suma  · max(0.02, 0.3) → 0.3167 · la huella sola daría 0.0000 y la suma 0.3281 — sumarlos lavaría el piso lejano dos veces
+  │   ok  y en la lonja rasante, donde la celda no entra en un píxel, manda el filtro  · huella 0,9 con penumbra 0,05 → 0.3198, que es el de S11; la penumbra sola daría 0.0000 · el antialias sigue siendo el que decide ahí
+  │   ok  con la penumbra más ancha que la celda el patrón se reemplaza por su media  · 0.290 y 0.290 contra una barra de 0.29 — para la penumbra eso es literalmente cierto: más ancha que la celda ES el promedio de la trama
+  │ 
+  │ ── El GLSL: la penumbra existe, entra por max() y no agrega una rama ─
+  │   ok  el fragment calcula la penumbra del cruce a partir de su distancia  · el `t` del cruce es lo que hace que el ancho sea POR FRAGMENTO y distinto capa por capa
+  │   ok  y la combina con la huella de píxel tomando el mayor  · no la reemplaza y no la suma
+  │   ok  sin una sola rama nueva: `fwidth` sigue fuera de todo condicional  · adentro de una rama que no todos los píxeles del quad toman, `fwidth` no está definido
+  │   ok  el uniform arranca en el sol real, y es el MISMO número que usa el gemelo  · uCelosiaKnobs.w = 0.009285 = 2·tan(0.266°) · el radio angular del sol real
+  │   ok  la perilla está en el panel, arranca en el sol real y llega hasta el lavado  · 0 … 1.5°, default 0.266° · el mínimo es el control (S11) y el tope es donde el moiré del piso se lava
+  │ 
+  │ ── La variación a lo largo del piso: geométrica, y no depende de α ───
+  │   ok  el contraste cerca/lejos es el mismo para CUALQUIER α: lo fija la geometría  · 6.33× · 6.33× · 6.33× · 6.33× para α = 0,133 / 0,266 / 0,5 / 1° — α elige la escala, la variación ya estaba
+  │   ok  y es grande: el punto pegado a la celosía tiene un borde seis veces más duro  · 6.3× entre t = 7,4 y t = 47,0 · **esto** es lo que rompe la lectura de baldosa, no la diferencia entre capas
+  │   ok  en cuadro el borde varía entre dos y cuatro veces, en las cuatro poses con piso  · p=0 ×4.7 · p=0.5 ×2.2 · p=0.625 ×2.0 · p=0.95 ×3.7
+  │   FALLA  y la mediana del borde en cuadro es plana a lo largo del arco: el cierre no queda peor  · p=0 0.132 celdas (0.12–0.57 de mundo) · p=0.5 0.173 celdas (0.23–0.60 de mundo) · p=0.625 0.185 celdas (0.28–0.63 de mundo) · p=0.95 0.191 celdas (0.14–0.52 de mundo)
+  │ 
+  │ s12 · el modelo de penumbra: 19 en verde, 1 en rojo
+  │   ✗ y la mediana del borde en cuadro es plana a lo largo del arco: el cierre no queda peor  · p=0 0.132 celdas (0.12–0.57 de mundo) · p=0.5 0.173 celdas (0.23–0.60 de mundo) · p=0.625 0.185 celdas (0.28–0.63 de mundo) · p=0.95 0.191 celdas (0.14–0.52 de mundo)
+  │ 
+  ──
+  FALLA   test:s12e-tension        19 afirm · 1 ctrl+ · 2 fallas  (4.1s, exit 1)
+
+  ── salida de test:s12e-tension ───────────────────────────────────
+  │ 
+  │ ── Los seis valores medios: cuánto devuelve la penumbra de lo que S11 ganó 
+  │   ok  B13 — `quiénes somos` se movió por la DISTANCIA y no por la luz: hacia arriba, y menos que cualquiera de las cuatro que B8 re-iluminó  · quiénes somos 177.0 contra los 166 de S11 — +11.0 por distancia 11,5 → 14 (`choreography.ts`, B13 §2), con el nivel del arco en 1.00, el mismo de S9 · el menor movimiento por LUZ es 20.2
+  │   ok    y las cuatro que B8 volvió a iluminar se movieron en la dirección de la decisión: noche en Números, la VUELTA en Trabajos, Demos más bajo, el Cierre más claro  · números 11.2 (S11 213) a nivel 0.04 · trabajos 104.5 (S11 185) a nivel 0.34 · demos 108.8 (S11 129) a nivel 0.52 · cierre 151.4 (S11 104) a nivel 0.64
+  │   ok    y la VUELTA de B12 le devuelve luz a la pose de Trabajos justo antes del blanco de Servicios, hasta el borde declarado de la noche  · en 0.625 el nivel es 0.34 = RIM_NIGHT_LEVEL, contra 0.040000000000000036 en la noche
+  │   FALLA    y el hero se movió, que es lo que V3-E hizo: sólo por el encuadre, y hacia arriba  · 211.4 contra los 201 de S11 — +10.4 por `frameX` 0,68 → 0,5, la única pose cuyo encuadre V3-E tocó
+  │   ok  y el instrumento se mueve: con el sol de tamaño real la pose con piso y sol (el hero) sube  · hero 212.6 (+1.2) · quiénes somos 178.0 (+0.9) · números 11.2 (+0.0) · trabajos 104.8 (+0.3) · demos 108.9 (+0.2) · cierre 151.9 (+0.5)
+  │   ok    y en la noche no mueve nada: la penumbra es de la key, y en la noche la key está al 4 %  · números 0.00 a nivel 0.040000000000000036 — contra +1.2 en el hero
+  │   ok      y en la VUELTA sí mueve, porque ahí ya hay key: el instrumento no está ciego (B12)  · trabajos 0.32 a nivel 0.34
+  │   FALLA  la escena sin celosía, a la luz de hoy, reproduce S10 en la única pose que nadie re-iluminó ni movió: el hero  · hero 222.7 (S10 216) — la tolerancia de 2 es la de V3-E, por su `frameX`, y no se tocó
+  │   ok    B13 — y `quiénes somos` ya NO lo reproduce: se alejó, y por eso entra más sala clara en cuadro  · quiénes somos 185.6 (S10 172) — +13.6 por distancia 11,5 → 14, con su luz intacta
+  │   ok  y ninguna de las seis vuelve a la escena SIN celosía, a la MISMA luz  · hero 213 < 223 · quiénes somos 178 < 186 · números 11 < 12 (noche) · trabajos 105 < 124 · demos 109 < 123 · cierre 152 < 176
+  │ 
+  │ ── La portadora y el batido del piso, contra el control de α = 0 ─────
+  │   ok  el instrumento devuelve las poses con piso en cuadro Y con luz  · hero 13.4/20.1 · números — (noche) · trabajos 20.1/22.2 · cierre 44.6/56.4
+  │   ok    y la única que no devuelve es la de la noche: el sol rasante no cruza la capa lejana (B12)  · números en 0.5 a nivel 0.040000000000000036 — el umbral de la capa lejana es 2,348°
+  │   ok  con el sol real la PORTADORA del piso no se mueve un punto  · hero 20.1 (control 20.1) · números undefined (control undefined) · trabajos 22.2 (control 22.2) · cierre 56.4 (control 56.4)
+  │   ok  y el BATIDO sobrevive: ninguna pose CON LUZ pierde más del 15%  · hero -9% · números NaN% · trabajos 0% · cierre -6%
+  │   ok  el batido depende del tramo barrido; la portadora no  · hero con 3 / 5 / 7 períodos: batido 9.0 → 13.4 → 20.1 · portadora 20.1 → 20.1 · por eso el número absoluto no se cita solo
+  │ 
+  │ ── ⚠️ Tres cosas que el diagnóstico daba por ciertas y la medición corrige 
+  │   ok  la distancia al manto BAJA con el atardecer: es R/cos(elevación), no 1/tan  · t = 47.0 en p=0 contra 41.0 en p=1 · el rayo llega ANTES a la celosía, no después
+  │   ok  y por eso la penumbra, como fracción de la banda, se ACHICA hacia el cierre aunque en mundo se ensanche  · 0.230 → 0.176 celdas (-24%; era −32 % cerrando a 11,5°) mientras la celda se estira de 3.22 a 5.73 · en mundo ×1.4, pero es la celda la que creció debajo
+  │   ok  la diferencia ENTRE CAPAS es chica al lado de la diferencia a lo largo del piso  · entre capas ×1.16 en mundo · a lo largo del piso ×6.3 · el segundo es geométrico y no depende de α
+  │   ok  control positivo — el instrumento sí ve la penumbra: la meseta responde a α  · meseta 0.243 (α=0) → 0.238 (0,266°) → 0.332 (1°) · sin esto, lo de abajo pasaría con el parámetro desconectado. **No es monótona**: con una penumbra chica el borde blando corta un poco MÁS de lo que abre, y recién con la penumbra ancha domina el lavado
+  │   ok  la creciente de sol abierto ya tenía el borde blando, y lo pone MOIRE_FADE  · 14.20 de mundo = 6.1 celdas finas CON α = 0 · el desvanecido de banda vale 0.22
+  │   ok  y la penumbra apenas se lo mueve, de punta a punta del slider  · 14.20 → 14.20 (0.0%) con el sol real, y 14.55 (2.5%) con α = 1° · "con penumbra su borde se ablanda solo" no es lo que pasa: ya estaba blando
+  │ 
+  │ s12 · la tensión: 19 en verde, 2 en rojo
+  │   ✗   y el hero se movió, que es lo que V3-E hizo: sólo por el encuadre, y hacia arriba  · 211.4 contra los 201 de S11 — +10.4 por `frameX` 0,68 → 0,5, la única pose cuyo encuadre V3-E tocó
+  │   ✗ la escena sin celosía, a la luz de hoy, reproduce S10 en la única pose que nadie re-iluminó ni movió: el hero  · hero 222.7 (S10 216) — la tolerancia de 2 es la de V3-E, por su `frameX`, y no se tocó
+  │ 
+  ──
+
+  TOTAL s12e: 3 invariantes · 47 afirmaciones · 2 controles positivos · 0 fuera de ventana · 3 invariantes con falla
+
+═══ AGREGADO s13b — 1 invariantes, sin cortar en la primera falla
+  ok      test:s13b-escena         50 afirm · 13 ctrl+ · 0 fallas  (29.7s, exit 0)
+
+  TOTAL s13b: 1 invariantes · 50 afirmaciones · 13 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s13e — 5 invariantes, sin cortar en la primera falla
+  ok      test:s13e-intro-rig      23 afirm · 4 ctrl+ · 0 fallas  (2.7s, exit 0)
+  FALLA   test:s13e-intro-particulas 17 afirm · 4 ctrl+ · 1 fallas  (2.8s, exit 1)
+
+  ── salida de test:s13e-intro-particulas ──────────────────────────
+  │ 
+  │ ── 1 · Lo copiado de la escena sigue siendo lo mismo, leído del código 
+  │   ok  el sesgo radial del polvo es el mismo que el componente pasa  · 1.4
+  │   ok  y el recorte contra el papel también, en los dos campos  · FLOOR_Y + 0.4
+  │   ok  la opacidad del material del polvo es la del componente  · 0.9
+  │   ok  la fracción dibujada es propia del intro, y menor que la de la escena  · 900 motas contra las 2400 de la escena — el 38%
+  │   ok  y el tamaño también es propio, y mayor  · 0.17 × 2.05 = 0.3485 de mundo
+  │   ok  control positivo — el instrumento está leyendo los archivos, no el vacío  · 7357 + 5714 bytes leídos
+  │ 
+  │ ── 2 · El campo del intro contra el de la escena, en la pose inicial ─
+  │   ok  la densidad en cuadro es menor, y esa es la mitad del cambio  · 712 contra 1751 — -59.3%
+  │   ok  polvo: es el de la escena POR LA ESCALA, mota por mota y al bit  · las 622 motas de polvo emparejadas por posición · peor desvío de la razón 8.9e-16 contra la perilla en 2.05
+  │   ok  control positivo — el emparejamiento NO es vacío ni parcial: cubre todo el polvo del intro  · 622 de 622 — si el campo chico fuera otro sorteo, ninguna posición emparejaría
+  │   ok  control positivo — con OTRA escala la misma identidad da falso  · la razón medida es la perilla, no cualquier número: contra la perilla ×1,05 el predicado se cae
+  │   razones de CUANTILES (publicadas, no afirmadas — dos sorteos distintos): p10 ×1.993 · mediana ×2.020 · p90 ×1.979 · perilla 2.05
+  │   ok  bokeh · mediana: mismo diámetro en píxeles, sin escala de por medio  · 12.50 contra 12.26 px
+  │ 
+  │ ── 3 · 🔴 Misma población, distinta muestra — y la divergencia se MIDE 
+  │   ok  control positivo — el instrumento DETECTA la coincidencia si existe  · campo de la escena contra sí mismo: 100% a menos de 1 px
+  │   ok  🔴 y el campo del intro NO está en los lugares del de la escena  · 1.1% a menos de 1 px · mediana 7.8 px hasta la mota más cercana
+  │   ok  y esa divergencia es la genérica de dos muestras independientes  · mediana 7.8 px contra 6.8 de una tercera semilla
+  │ 
+  │ ── 4 · El único recorte, y sale de la regla de las dos escalas de S10 
+  │   ok  el piso de profundidad del polvo ES el diámetro del bokeh más chico  · 14.088 de profundidad → 10.02 px, el mismo disco
+  │   ok  ninguna mota de polvo del intro proyecta más que el bokeh más chico  · polvo hasta 8.57 px · bokeh desde 10.24 px
+  │   ok  la escena, en esta pose, ya lo cumple sola — no se le está imponiendo nada  · su mota más grande mide 8.90 px contra 10.02
+  │   FALLA  control positivo — el recorte cubre un caso que el campo produce de verdad  · el campo llega a radio 34 con la cámara a 40.51: una mota puede quedar a -6.51 por delante · el recorte se lleva 2 de 624 (0.32%)
+  │ 
+  │ introParticles: 17 en verde, 1 en rojo
+  │   ✗ control positivo — el recorte cubre un caso que el campo produce de verdad  · el campo llega a radio 34 con la cámara a 40.51: una mota puede quedar a -6.51 por delante · el recorte se lleva 2 de 624 (0.32%)
+  │ 
+  ──
+  ok      test:s13e-intro-campo    26 afirm · 2 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s13e-intro-particula-ritmo 20 afirm · 2 ctrl+ · 0 fallas  (4.8s, exit 0)
+  ok      test:s13e-camara         7 afirm · 2 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s13e: 5 invariantes · 93 afirmaciones · 14 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s14e — 3 invariantes, sin cortar en la primera falla
+  FALLA   test:s14e-intro-lectura  30 afirm · 5 ctrl+ · 1 fallas  (3.1s, exit 1)
+
+  ── salida de test:s14e-intro-lectura ─────────────────────────────
+  │ 
+  │ ── 1 · El punto del preloader clásico, medido en `DotMatrix.tsx` y `Hero.tsx` 
+  │   ok  control positivo — los dos archivos del clásico se leyeron de verdad  · 49629 bytes leídos · esfera r=0.025 · paso 0.95 · cámara a 15 con fov 35
+  │   ok  el punto del clásico proyecta la escala de lectura que se toma de ahí  · 4.28 px en 1440×810 · 5.71 en 1920×1080 · 4.46 en 390×844
+  │   ok  y su grilla, en el instante en que la muestra, tiene este paso  · 81.4 px · ~205 puntos en cuadro · tapa 0.22% del papel
+  │ 
+  │ ── 2 · 🔴 El reparto nuevo: menos motas, más grandes ─────────────────
+  │   ok  control positivo — la columna "antes" la produce EL MISMO constructor que la de "después"  · con las perillas de hoy da las mismas 712 motas, mota por mota — la única diferencia entre las dos columnas son `0.17` y `0.8000`
+  │   ok  control positivo — y con las perillas de S13 da OTRA cosa: las perillas no son decorativas  · 1773 contra 712 motas
+  │   el reparto de S13, RE-MEDIDO con la pose de hoy: 1683 / 90 · 1.27 / 1.69 / 2.27 px
+  │   (S13 publicó 957 / 76 · 2,09 / 3,16 / 4,97 px con `frameX: 0,68` en el hero; V3-E lo movió a 0,5 y la cámara rotó)
+  │   ok  1440×810 — el campo tiene menos motas  · 1683 + 90 = 1773  →  622 + 90 = 712  (-60%)
+  │   ok  1440×810 — y cada una es más grande, en los tres cuantiles  · p10 1.27→2.59 · mediana 1.69→3.46 · p90 2.27→4.52 px
+  │   ok  1440×810 — el bokeh no se movió ni un píxel  · 90 motas · mediana 12.50 px
+  │   ok  1440×810 — el paso medio se abre, y no queda ralo  · 25.6 → 40.5 px · el clásico, 81.4
+  │   ok  1440×810 — y la tinta sobre el papel se queda en el mismo orden  · 0.39% → 0.57% del cuadro, con 712 `drawImage` por cuadro en vez de 1773
+  │   ok  1920×1080 — el campo tiene menos motas  · 1683 + 90 = 1773  →  622 + 90 = 712  (-60%)
+  │   ok  1920×1080 — y cada una es más grande, en los tres cuantiles  · p10 1.69→3.45 · mediana 2.26→4.61 · p90 3.03→6.02 px
+  │   ok  1920×1080 — el bokeh no se movió ni un píxel  · 90 motas · mediana 16.66 px
+  │   ok  1920×1080 — el paso medio se abre, y no queda ralo  · 34.2 → 54.0 px · el clásico, 108.5
+  │   ok  1920×1080 — y la tinta sobre el papel se queda en el mismo orden  · 0.39% → 0.57% del cuadro, con 712 `drawImage` por cuadro en vez de 1773
+  │   ok  390×844 — el campo tiene menos motas  · 969 + 80 = 1049  →  362 + 80 = 442  (-58%)
+  │   ok  390×844 — y cada una es más grande, en los tres cuantiles  · p10 1.32→2.70 · mediana 1.71→3.51 · p90 2.17→4.42 px
+  │   ok  390×844 — el bokeh no se movió ni un píxel  · 80 motas · mediana 12.56 px
+  │   ok  390×844 — el paso medio se abre, y no queda ralo  · 17.7 → 27.3 px · el clásico, 84.8
+  │   ok  390×844 — y la tinta sobre el papel se queda en el mismo orden  · 0.78% → 1.18% del cuadro, con 442 `drawImage` por cuadro en vez de 1049
+  │   ok  la escala es un factor, no otra distribución: los tres cuantiles se mueven igual  · p10 ×2.04 · mediana ×2.04 · p90 ×1.99 — contra ×2.05 de la perilla
+  │   ok  ralear por concha deja la rampa de color intacta de punta a punta  · escalón mínimo / mediano / máximo: 0 · 7 · 23 antes, 0 · 7 · 23 después
+  │ 
+  │ ── 3 · 🔴 Cuántas motas superan el umbral de visibilidad, antes y después 
+  │   ok  control positivo — la mitad del CONTRASTE discrimina: rechaza al bokeh entero  · una mota de bokeh mide 13.3 px —pasa el tamaño de sobra— con 1.131:1 contra los 3:1 que pide WCAG 1.4.11
+  │   ok  control positivo — la mitad del TAMAÑO discrimina: en el campo de S13 rechaza 574  · 1074 motas de S13 pasan 3:1 de contraste y NO llegan a los 4.28 px del clásico
+  │   FALLA  🔴 y en el campo nuevo no rechaza a ninguna: el tamaño dejó de ser el cuello  · 365 motas con tinta y sin tamaño, contra 1074 de S13
+  │   ok  1440×810 — 🔴 más motas superan el umbral, con menos motas en total  · 0 de 1773  →  41 de 712  (+Infinity% de visibles con -60% de motas) · umbral 4.28 px
+  │   ok  1920×1080 — 🔴 más motas superan el umbral, con menos motas en total  · 0 de 1773  →  41 de 712  (+Infinity% de visibles con -60% de motas) · umbral 5.71 px
+  │   ok  390×844 — 🔴 más motas superan el umbral, con menos motas en total  · 0 de 1049  →  17 de 442  (+Infinity% de visibles con -58% de motas) · umbral 4.46 px
+  │   ok  1440×810 — el contraste de la mota mediana contra el papel  · 6.12:1 sobre 1.69 px  →  5.41:1 sobre 3.46 px
+  │   ok  1920×1080 — el contraste de la mota mediana contra el papel  · 6.12:1 sobre 2.26 px  →  5.41:1 sobre 4.61 px
+  │   ok  390×844 — el contraste de la mota mediana contra el papel  · 6.30:1 sobre 1.71 px  →  5.20:1 sobre 3.51 px
+  │ 
+  │ introParticleReading: 30 en verde, 1 en rojo
+  │   ✗ 🔴 y en el campo nuevo no rechaza a ninguna: el tamaño dejó de ser el cuello  · 365 motas con tinta y sin tamaño, contra 1074 de S13
+  │ 
+  ──
+  FALLA   test:s14e-intro-escala   10 afirm · 2 ctrl+ · 3 fallas  (17.5s, exit 1)
+
+  ── salida de test:s14e-intro-escala ──────────────────────────────
+  │ 
+  │ ── 1 · 🔴 `INTRO_DUST_SCALE` es una banda, no un valor: se decide mirando 
+  │   ok  control positivo — el instrumento del recorte ve desaparecer motas al agrandar  · 900 de polvo dibujadas de 3000 · 624 en cuadro sin recorte · 622 con el default · 4.8% con escala 4
+  │   FALLA  el default cae en la banda  · 2.05 → mediana 3.46 px contra 4.28 del clásico · p10 2.59 · recorte 0.32%
+  │   FALLA  y los dos vecinos anotados también  · 1,35 → mediana 2.28 px, recorte 0.16% · 2,4 → mediana 4.04 px, p25 3.57, recorte 0.48%
+  │   ok  control negativo — el reparto de S13 no llega a la escala del clásico  · 1,0 → mediana 1.69 px contra 4.28: la mitad del campo por debajo del punto del clásico
+  │   FALLA  control negativo — y con 3,0 la regla de las dos escalas se come el campo  · 3,0 → mediana 5.03 px pero recorte 1.76%, contra el 2% de la banda · con la escala de S13 el recorte era 0.00%
+  │   ok  la banda es monótona en la perilla, así que rechaza por el lado que dice  · mediana 1.69 < 2.28 < 4.04 · recorte 0.00% < 0.48% < 1.76%
+  │ 
+  │ ── 2 · 🔴 Qué mueve el margen, y qué no: la escala no, la población sí 
+  │   ok  🔴 con la misma población, la escala NO mueve el instante ni un microsegundo  · escala 1,0 → 4.181s · escala 2.05 → 4.181s — el mismo número, 0.0e+0 s de diferencia
+  │   ok  control positivo — y sí lo mueve ralear, que es lo que cambia la población  · 4.1812s con 0.8 de reparto → 4.1790s con 0.3 · 2.2 ms ANTES
+  │   ok  y el campo de S14 hereda exactamente ese instante, no otro  · 4.1790s · el margen contra la escena solo puede CRECER, nunca achicarse
+  │   ok  más grande sí es más visible: la tinta que pasa el umbral crece con el área  · 0.00% → 0.06% del cuadro en motas que se leen
+  │ 
+  │ ── 3 · El tamaño del polvo es lo único que se movió ──────────────────
+  │   ok  la escala entra donde tiene que entrar: el tamaño de mundo del polvo  · 0.17 × 2.05 = 0.3485 contra los 0.17 de la escena
+  │   ok  el color no depende del tamaño: sale del radio, y todos siguen siendo los de S13  · 183 colores en el campo nuevo, los 220 de S13 los contienen
+  │   ok  y la opacidad del material tampoco: son las dos del componente de la escena  · 0.2 y 0.9
+  │ 
+  │ introParticleScale: 10 en verde, 3 en rojo
+  │   ✗ el default cae en la banda  · 2.05 → mediana 3.46 px contra 4.28 del clásico · p10 2.59 · recorte 0.32%
+  │   ✗ y los dos vecinos anotados también  · 1,35 → mediana 2.28 px, recorte 0.16% · 2,4 → mediana 4.04 px, p25 3.57, recorte 0.48%
+  │   ✗ control negativo — y con 3,0 la regla de las dos escalas se come el campo  · 3,0 → mediana 5.03 px pero recorte 1.76%, contra el 2% de la banda · con la escala de S13 el recorte era 0.00%
+  │ 
+  ──
+  ok      test:s14e-intro-tinte    4 afirm · 1 ctrl+ · 0 fallas  (2.7s, exit 0)
+
+  TOTAL s14e: 3 invariantes · 44 afirmaciones · 8 controles positivos · 0 fuera de ventana · 2 invariantes con falla
+
+═══ AGREGADO s15e — 4 invariantes, sin cortar en la primera falla
+  ok      test:s15e-intro-relevo   77 afirm · 3 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s15e-intro-aterrizaje 18 afirm · 3 ctrl+ · 0 fallas  (2.6s, exit 0)
+  FALLA   test:s15e-intro-acomodo  22 afirm · 6 ctrl+ · 1 fallas  (2.8s, exit 1)
+
+  ── salida de test:s15e-intro-acomodo ─────────────────────────────
+  │ 
+  │ ── 1 · El destino es el campo de la ESCENA, no una nube parecida ─────
+  │   ok  el campo de la escena se construye con SU semilla y SU reparto, no con los del intro  · 1751 motas de la escena en cuadro contra 712 del intro — 1039 destinos de sobra
+  │   ok  las dos especies tienen destino propio: el polvo no aterriza en un bokeh  · polvo 622 → 1661 · bokeh 90 → 90
+  │   ok  y cada una aterriza en su MISMA concha: el morfeo de tamaño y color es el chico  · la concha es una banda de radio, y de ahí salen el diámetro y el color
+  │ 
+  │ ── 2 · 🔴 Vecino más cercano contra rango de radio: acomodarse, no mudarse 
+  │   ok  🔴 el vecino más cercano deja el viaje en unos pocos diámetros  · mediana 13px contra 276px por rango — ×21.0 más corto
+  │   ok    y el reparto entero, no sólo la mediana  · p10 5px · p50 13px · p90 34px · máximo 131px
+  │   ok  control positivo — la asignación es una BIYECCIÓN, no un vecino repetido  · 712 destinos distintos para 712 motas
+  │   ok  control positivo — y es determinista: dos corridas dan el mismo destino  · sin `Math.random` y sin reloj: el campo es el mismo en cada carga
+  │ 
+  │ ── 3 · 🔴 La deriva del campo de la escena: la diferencia contra la vía (a) 
+  │   ok  🔴 el campo de la escena DERIVA mientras el intro lo tapa, y ésta es la cifra  · 4.26 px por segundo de mediana sobre motas de 1.71 px — 2.5 diámetros por segundo
+  │   ok    y crece con el reloj, así que la vía (a) exige conocer su fase  · 1 s → 4px · 4 s → 16px · 8 s → 32px
+  │   ok    la ventana en la que sí es despreciable es el MARGEN, no el reloj entero  · en los ~100 ms de margen entre las dos poblaciones el campo se corre 0px, menos de un radio
+  │   ok  control positivo — con el reloj en cero la deriva es exactamente cero  · si el instrumento devolviera ruido, esto no daría 0
+  │   ok  🔴 y el interruptor NO existe: `driftShells` corre fuera del gate de física  · apagarlo con la retención es una línea en `_lib/escena/OrbitRig.tsx` — zona de otro frente
+  │ 
+  │ ── 4 · Al llegar, la mota ES una mota de la escena: tamaño y color ───
+  │   ok  el polvo entra con la escala del intro y termina con la de la escena  · mediana 3.46 px (×2.05) → 1.67 px contra 1.71 px de la escena entera
+  │   ok    y cada mota, una por una, aterriza con el diámetro EXACTO de su gemela  · no es un promedio que coincide: es el mismo número, mota por mota
+  │   ok  y el bokeh no cambia de tamaño, porque nunca lo tuvo distinto  · mediana del cambio -0.15 px sobre 12.5 px · 1.2 es el mismo de los dos lados
+  │   FALLA  el color se corre poco, que es la consecuencia de respetar la concha  · p50 2 escalones · p90 5 · máximo 8 de 24
+  │ 
+  │ ── 5 · `SCENE_DUST_SHARE` es el de la escena, leído de `probeStore.ts` 
+  │   ok  el reparto de la escena sale de su default y no de un literal inventado  · probeStore.ts declara particleCount 2400 de 3000 = 0.8
+  │   ok  control positivo — el detector lee el archivo de verdad y encuentra el número  · 17591 bytes leídos
+  │ 
+  │ ── 6 · 🔴 Lo que la vía elegida NO da, dicho con su número ───────────
+  │   ok  🔴 la mota NO sobrevive al relevo sobre el mismo píxel, y ésta es la distancia  · con 2 s de reloj de la escena, su gemela está a 8px — 4.9 diámetros
+  │   ok    lo que SÍ sobrevive: la forma, la densidad, el tamaño y el color del campo  · el campo del intro aterriza como un subconjunto exacto del de la escena, rotado por la deriva
+  │   ok    y el requisito duro no depende de la identidad: es de ORDEN  · el campo del intro termina antes de 4.250s, que es cuando el fondo empieza a irse — el margen lo mide introParticleTiming §4
+  │   ok  control positivo — el reparto del intro y el de la escena NO son el mismo campo  · si compartieran semilla y escala, la comparación de arriba sería una resta de un número contra sí mismo · 40.7% de la población, ×2.02 de tamaño
+  │   ok  control positivo — el tamaño de mundo del polvo de la escena es el que se cita  · 0.17 de la escena contra 0.3485 del intro
+  │ 
+  │ introParticleSettle: 22 en verde, 1 en rojo
+  │   ✗ el color se corre poco, que es la consecuencia de respetar la concha  · p50 2 escalones · p90 5 · máximo 8 de 24
+  │ 
+  ──
+  ok      test:s15e-intro-muestreo 8 afirm · 1 ctrl+ · 0 fallas  (4.9s, exit 0)
+
+  TOTAL s15e: 4 invariantes · 125 afirmaciones · 13 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s16 — 5 invariantes, sin cortar en la primera falla
+  FALLA   test:s16-encuadre        21 afirm · 8 ctrl+ · 3 fallas  (24.3s, exit 1)
+
+  ── salida de test:s16-encuadre ───────────────────────────────────
+  │ 
+  │ 1 · LA PREMISA — «el logo queda cortado» NO se reproduce con 0,68
+  │   ok   con `frameX: 0.68` el logo YA entraba ENTERO en las 21 muestras  — siete cuadros × tres progresos · 100,00% dentro · ninguna celda de tinta en el anillo de la grilla extendida, que es lo que avisaría que el total está truncado
+  │   ok   [control positivo] y el medidor sabe ver un logo que se sale: con la distancia VIEJA de `demos` (9) no da 100%
+  │   ok   LO QUE SÍ FALLABA, y son dos cosas: la puntería y cuál era el margen más chico  — el eje óptico caía 0.3553 AFUERA de la caja · aires en ancho de cuadro: izq 0.6777 · der 0.1663 · abajo 0.2181 · arriba 0.2380
+  │   ok   LA SALA QUE SE PIERDE DEL LADO DEL LOGO, que es la frase del dueño en grados  — desvío del eje 15.760° → 11.728° sobre un medio campo de 29.272° · la sala visible de ese lado sube de 13.512° a 17.544°, un 29.8% más
+  │   ok   [control positivo] y el desvío no es una constante disfrazada: con `frameX` en 0 la cámara apunta al logo y da exactamente 0°
+  │ 
+  │ 2 · EL ENCUADRE DE HOY — las 21 muestras con el valor que el archivo declara
+  │   cuadro       aspecto    p       dentro   cobert     x0       x1      izq     der     abajo   arriba
+  │   1440×810    1.7778  0.0000  100.00%    1.39%   0.2167 0.5287  0.6083  0.2357  0.2247  0.2380
+  │   1440×810    1.7778  0.0625  100.00%    1.52%   0.1300 0.4420  0.5650  0.2790  0.2247  0.2314
+  │   1440×810    1.7778  0.1250  100.00%    2.17%  -0.1647 0.0607  0.4177  0.4697  0.2048  0.2114
+  │   1920×1080   1.7778  0.0000  100.00%    1.39%   0.2167 0.5287  0.6083  0.2357  0.2247  0.2380
+  │   1920×1080   1.7778  0.0625  100.00%    1.52%   0.1300 0.4420  0.5650  0.2790  0.2247  0.2314
+  │   1920×1080   1.7778  0.1250  100.00%    2.17%  -0.1647 0.0607  0.4177  0.4697  0.2048  0.2114
+  │   2560×1440   1.7778  0.0000  100.00%    1.39%   0.2167 0.5287  0.6083  0.2357  0.2247  0.2380
+  │   2560×1440   1.7778  0.0625  100.00%    1.52%   0.1300 0.4420  0.5650  0.2790  0.2247  0.2314
+  │   2560×1440   1.7778  0.1250  100.00%    2.17%  -0.1647 0.0607  0.4177  0.4697  0.2048  0.2114
+  │   1025×667    1.5367  0.0000  100.00%    1.52%   0.1820 0.5287  0.5910  0.2357  0.2600  0.2754
+  │   1025×667    1.5367  0.0625  100.00%    1.74%   0.0953 0.4593  0.5477  0.2703  0.2600  0.2677
+  │   1025×667    1.5367  0.1250  100.00%    2.55%  -0.1820 0.0953  0.4090  0.4523  0.2369  0.2369
+  │   1025×844    1.2145  0.0000  100.00%    1.93%   0.1300 0.5633  0.5650  0.2183  0.3387  0.3387
+  │   1025×844    1.2145  0.0625  100.00%    2.16%   0.0433 0.4940  0.5217  0.2530  0.3290  0.3387
+  │   1025×844    1.2145  0.1250  100.00%    3.18%  -0.2167 0.1473  0.3917  0.4263  0.2998  0.2998
+  │   1025×900    1.1389  0.0000  100.00%    1.98%   0.0953 0.5633  0.5477  0.2183  0.3612  0.3612
+  │   1025×900    1.1389  0.0625  100.00%    2.29%   0.0087 0.4940  0.5043  0.2530  0.3508  0.3612
+  │   1025×900    1.1389  0.1250  100.00%    3.37%  -0.2167 0.1473  0.3917  0.4263  0.3197  0.3197
+  │   1440×900    1.6000  0.0000  100.00%    1.52%   0.1993 0.5287  0.5997  0.2357  0.2497  0.2645
+  │   1440×900    1.6000  0.0625  100.00%    1.72%   0.1127 0.4593  0.5563  0.2703  0.2497  0.2571
+  │   1440×900    1.6000  0.1250  100.00%    2.42%  -0.1820 0.0780  0.4090  0.4610  0.2276  0.2276
+  │   ok   con `frameX: 0.5` el logo SIGUE entrando entero en las 21 muestras  — el margen derecho más chico de las 21 es 0.2183 del ancho, en 1025×844 — con 0,68 era 0.1577
+  │   ok   [control positivo] el criterio del eje no da verde contra cualquier valor: con `frameX` 1 el eje queda afuera
+  │   ok   [control positivo] y el del margen tampoco: con `frameX` 1 el derecho vuelve a ser el más chico
+  │ 
+  │ 3 · POR QUÉ 0,5 — la barrida, y dónde cruzan las dos condiciones
+  │   frameX     x0       der      abajo    arriba   desvío    eje adentro   der no aprieta
+  │   0.40      0.1473  0.2790   0.2247   0.2314    9.431°   NO            sí
+  │   0.44      0.1820  0.2617   0.2247   0.2380   10.354°   NO            sí
+  │   0.48      0.2167  0.2443   0.2247   0.2380   11.271°   NO            sí
+  │   0.50      0.2167  0.2357   0.2247   0.2380   11.728°   NO            NO
+  │   0.54      0.2513  0.2183   0.2247   0.2380   12.636°   NO            NO
+  │   0.58      0.2860  0.2097   0.2247   0.2380   13.537°   NO            NO
+  │   0.62      0.3033  0.1923   0.2181   0.2380   14.432°   NO            NO
+  │   0.68      0.3553  0.1663   0.2181   0.2380   15.760°   NO            NO
+  │   fino 0.50  x0  0.217286  der 0.235357  arriba 0.233683  NO cumple
+  │   fino 0.51  x0  0.224714  der 0.229786  arriba 0.233683  NO cumple
+  │   fino 0.52  x0  0.232143  der 0.226071  arriba 0.233683  NO cumple
+  │   ok     y el valor que el archivo declara es el que se midió: no hay una segunda fuente  — `CHOREO_KEYFRAMES[0]` es «hero» con frameX 0.5
+  │   ok   [control positivo] la barrida no dice que sí a todo: con 0,68 el criterio compuesto es falso
+  │ 
+  │ 4 · EL DESTINO DEL PRELOADER — cuánto se movió, y que se sigue derivando
+  │   1440×810    centro (1085.4, 421.0) → (988.8, 413.8) px · tinta 225.8×157.1 → 221.9×154.4 · se movió 96.6 px
+  │   1920×1080   centro (1447.2, 561.3) → (1318.4, 551.7) px · tinta 301.1×209.5 → 295.9×205.8 · se movió 128.8 px
+  │   2560×1440   centro (1929.6, 748.5) → (1757.8, 735.7) px · tinta 401.4×279.3 → 394.5×274.4 · se movió 171.7 px
+  │   ok   EL DESTINO SE MOVIÓ, y ésta es la cifra que el relevo del preloader tiene que seguir  — 1440×810: 96.6 px · 1920×1080: 128.8 px · 2560×1440: 171.7 px
+  │   ok     y lo sigue: `scene-framing.ts` proyecta el keyframe vivo, no una constante escrita  — proyectar `SCENE_ENTRY_POSE` y proyectar `CHOREO_KEYFRAMES[0].pose` dan el mismo píxel en los tres cuadros — el relevo al bit lo mide `introLanding.invariant.ts`
+  │   ok   [control positivo] el comparador de destinos no devuelve cero contra cualquier par: ve el corrimiento de arriba
+  │ 
+  │ 5 · EL CONTRASTE DE LA TINTA DEL HERO SOBRE LA ESCENA, con el encuadre nuevo
+  │   p=0.00000  peor píxel del cuadro: 11.40:1
+  │   p=0.03125  peor píxel del cuadro: 11.40:1
+  │   p=0.06250  peor píxel del cuadro: 11.05:1
+  │   p=0.09375  peor píxel del cuadro: 10.38:1
+  │   p=0.12500  peor píxel del cuadro: 9.42:1
+  │   ok   LA TINTA PASA AA Y AAA sobre la escena real en p=0 con el encuadre nuevo  — 11.40:1 contra 4.5:1 de AA y 7:1 de AAA — era 9,73:1 con 0,68, citado de `test:s8-tinta` §2 corrido antes de la edición
+  │   ok     y en toda la ventana en que el Hero se ve, que es donde la pregunta existe  — peor de [0 · 0,125]: 9.42:1 — la misma cifra que publicaba §4 de `s8-tinta` con 0,68
+  │   ok   [control positivo] el medidor de contraste sabe reprobar: en la noche de Trabajos la misma escena no llega a AA
+  │ 
+  │ 6 · LO QUE V3-E DEJÓ FUERA DE LA ZONA DE ESTE FRENTE, detectado y con su arreglo
+  │   ok   los 4 archivos de la lista existen y se leen: la lista no se vacía por no encontrarlos  — 7 pendientes declarados · 0 siguen abiertos · 7 ya se aplicaron
+  │   ok   [control positivo] y el detector no encuentra una marca que no está: no da «abierto» contra cualquier cosa
+  │ 
+  │ s16-encuadre.invariant: 21 afirmaciones, 3 fallas
+  │ 
+  │ [stderr]
+  │   FALLA EL EJE ÓPTICO VUELVE A APUNTAR AL LOGO: cae adentro de su caja  — x0 0.3553 → 0.2167 · el eje es x=0 por definición, así que un x0 negativo ES el eje adentro
+  │   FALLA   y el margen derecho pasa de ser el MÁS CHICO a ser el MÁS GRANDE de los tres que aprietan  — der 0.1663 → 0.2357 · abajo 0.2181 → 0.2247 · arriba 0.2380 → 0.2380
+  │   FALLA 0.5 CUMPLE LAS DOS Y 0,52 NO: el cruce cae entre 0,51 y 0,52  — 0,51 cumple por 0.224714 de coordenada, menos de media celda (0.001857): por eso el valor elegido es 0.5 y no 0,51
+  │ 
+  ──
+  ok      test:s16-tipografia      38 afirm · 10 ctrl+ · 0 fallas  (3.3s, exit 0)
+  ok      test:s16-anclaje         29 afirm · 12 ctrl+ · 0 fallas  (21.4s, exit 0)
+  ok      test:s16-techo           16 afirm · 3 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s16-arnes           28 afirm · 7 ctrl+ · 0 fallas  (2.9s, exit 0)
+
+  TOTAL s16: 5 invariantes · 132 afirmaciones · 40 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s17 — 2 invariantes, sin cortar en la primera falla
+  ok      test:s17-revelado        35 afirm · 5 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s17-marca           41 afirm · 4 ctrl+ · 0 fallas  (3.2s, exit 0)
+
+  TOTAL s17: 2 invariantes · 76 afirmaciones · 9 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s18 — 3 invariantes, sin cortar en la primera falla
+  ok      test:s18-modulacion      28 afirm · 4 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s18-azimut          32 afirm · 3 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s18-compuertas      46 afirm · 6 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s18: 3 invariantes · 106 afirmaciones · 13 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s19 — 2 invariantes, sin cortar en la primera falla
+  ok      test:s19-sincronia       78 afirm · 4 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s19-lente           26 afirm · 5 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s19: 2 invariantes · 104 afirmaciones · 9 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s2 — 11 invariantes, sin cortar en la primera falla
+  ok      test:s2-curvas           38 afirm · 3 ctrl+ · 0 fallas  (2.5s, exit 0)
+  ok      test:s2-traduccion       54 afirm · 4 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s2-cronograma       38 afirm · 3 ctrl+ · 0 fallas  (2.9s, exit 0)
+  ok      test:s2-anclas           31 afirm · 3 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s2-epoca            21 afirm · 2 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s2-lineas           19 afirm · 5 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s2-reducido         76 afirm · 4 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s2-tokens           26 afirm · 8 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s2-bundle           37 afirm · 3 ctrl+ · 0 fallas  (3.6s, exit 0)
+  ok      test:s2-css              3 afirm · 1 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s2-galeria          55 afirm · 2 ctrl+ · 0 fallas  (3.0s, exit 0)
+
+  TOTAL s2: 11 invariantes · 398 afirmaciones · 38 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s20 — 2 invariantes, sin cortar en la primera falla
+  ok      test:s20-arco            41 afirm · 5 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s20-brillo          19 afirm · 2 ctrl+ · 0 fallas  (2.7s, exit 0)
+
+  TOTAL s20: 2 invariantes · 60 afirmaciones · 7 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s21 — 2 invariantes, sin cortar en la primera falla
+  ok      test:s21-fotos           28 afirm · 4 ctrl+ · 0 fallas  (4.5s, exit 0)
+  ok      test:s21-llave           92 afirm · 10 ctrl+ · 0 fallas  (4.1s, exit 0)
+
+  TOTAL s21: 2 invariantes · 120 afirmaciones · 14 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s22 — 1 invariantes, sin cortar en la primera falla
+  deuda   test:s22-emision         42 afirm · 6 ctrl+ · 0 fallas · 1 deudas declaradas  (7.8s, exit 0)
+
+  TOTAL s22: 1 invariantes · 42 afirmaciones · 6 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s3 — 11 invariantes, sin cortar en la primera falla
+  ok      test:s3-tokens           27 afirm · 12 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s3-layout           30 afirm · 5 ctrl+ · 0 fallas  (2.9s, exit 0)
+  ok      test:s3-tipografia       45 afirm · 11 ctrl+ · 0 fallas  (3.5s, exit 0)
+  ok      test:s3-cta              34 afirm · 6 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s3-navegacion       38 afirm · 2 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s3-cursor           34 afirm · 5 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s3-foco             63 afirm · 9 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s3-imagen           20 afirm · 3 ctrl+ · 0 fallas  (2.7s, exit 0)
+  parcial test:s3-peso             20 afirm · 6 ctrl+ · 0 fallas · 1 fuera de ventana  (3.1s, exit 0)
+  ok      test:s3-codigo           18 afirm · 5 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s3-papel            19 afirm · 4 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s3: 11 invariantes · 348 afirmaciones · 68 controles positivos · 1 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s4 — 5 invariantes, sin cortar en la primera falla
+  ok      test:s4-agregado         17 afirm · 4 ctrl+ · 0 fallas  (15.8s, exit 0)
+  ok      test:s4-cobertura        19 afirm · 7 ctrl+ · 0 fallas  (2.6s, exit 0)
+  parcial test:s4-heredado         4 afirm · 1 ctrl+ · 0 fallas · 1 fuera de ventana  (2.6s, exit 0)
+  ok      test:s4-paquete          21 afirm · 5 ctrl+ · 0 fallas  (6.2s, exit 0)
+  ok      test:s4-ventana          30 afirm · 3 ctrl+ · 0 fallas  (10.4s, exit 0)
+
+  TOTAL s4: 5 invariantes · 91 afirmaciones · 20 controles positivos · 1 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s5 — 10 invariantes, sin cortar en la primera falla
+  ok      test:s5-codigo           40 afirm · 13 ctrl+ · 0 fallas  (2.9s, exit 0)
+  ok      test:s5-tokens           26 afirm · 8 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s5-ritmo            11 afirm · 3 ctrl+ · 0 fallas  (2.9s, exit 0)
+  ok      test:s5-contenido        63 afirm · 12 ctrl+ · 0 fallas  (3.1s, exit 0)
+  ok      test:s5-compacto         50 afirm · 6 ctrl+ · 0 fallas  (3.4s, exit 0)
+  FALLA   test:s5-peso             23 afirm · 2 ctrl+ · 2 fallas  (2.7s, exit 1)
+
+  ── salida de test:s5-peso ────────────────────────────────────────
+  │ 
+  │ 1 · La ruta existe en el build, y la partición no está vacía
+  │   ok   la ruta /v3 está prerenderizada en el build
+  │   ok   su carga inicial son 26 archivos
+  │   ok     y la del home 24, contra la que se parte
+  │ 
+  │ 2 · La cifra, con su reparto
+  │   /v3 entero  1184.6 KiB crudo · 383.3 KiB gzip — 26 archivos
+  │     heredado del layout raíz : 21 archivos · 1114.2 KiB crudo
+  │     propio de /v3            : 5 archivos · 70.4 KiB crudo · 22.2 KiB gzip
+  │       · static/chunks/193-1b35fef0c87a1a6f.js
+  │       · static/chunks/3786-428f318a4396e665.js
+  │       · static/chunks/5930-af798c1dc7ede469.js
+  │       · static/chunks/app/v3/layout-ab5ad10e57926585.js
+  │       · static/chunks/app/v3/page-9661d175263f89d5.js
+  │   DE QUIÉN ES lo heredado: el layout RAÍZ importa estáticamente el chrome viejo.
+  │   Estos sprints tienen PROHIBIDO tocarlo. Se publica, no se afirma (regla 13).
+  │   ok   lo propio pesa más de cero bytes: las ocho secciones existen en el build
+  │   ok   y el heredado se pudo medir: la partición no está vacía
+  │ 
+  │ 3 · EL PRESUPUESTO PROPIO, con la cuenta a la vista
+  │   HEREDADO Y PUBLICADO (regla 13): 1.7 KiB de preámbulo de `@sentry/nextjs` en los 5 chunks propios
+  │     — 348 B por chunk, inyectados por la integración de Sentry de la configuración RAÍZ, que estos sprints tienen PROHIBIDA.
+  │     — el mismo preámbulo pesa 5.1 KiB en los 21 chunks heredados. Es del build, no del lane.
+  │   ⚠️ Es EXACTAMENTE el desvío que B2 publicó (61,3 contra 60): 1,36 KiB. El techo no se movió por eso.
+  │   ok     y el detector del preámbulo NO está ciego: lo encontró en 5 de los 5 chunks propios
+  │   EL TECHO: 64.49 KiB = 60 del lane + 1.25 que B4-A monta (la marca en sus tres superficies + la meseta) + 0.55 que B7 arregla (el proveedor de `prefers-reduced-motion`, 0,52 medidos A/B) + 0.25 que B6-A monta (la cuarta superficie: 225 B medidos entre dos builds) + -0.09 que B8 monta (el arco con la noche, el contraluz atado y el brillo de las partículas) + 0.31 que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces) + 0.03 que B11 monta (el texto corrido de donde pasa el logo y dos tintas a plena: 25 B netos medidos A/B entre dos builds del mismo árbol, atribuidos byte a byte) + 1.36 que B12 monta (la GOTA de entrada a la noche, 1.304 B, y la BANDA local del pie, 176 B, contra −87 B que devuelve todo el resto del bloque: 1.393 B netos, apagando cada pieza y restaurándola byte a byte) + 0.69 que monta el TITULAR rehecho (los DOS niveles nuevos de la escala, el quinto peso, las dos cadenas de clase y el atributo del CTA, contra lo que devuelven la bajada, el cepillo y la pieza quieta: 706 B de desvio en dos pasadas (614 + 91,6) medidos por este mismo invariante contra el techo que fijo el build de B12) + 0.04 que MOVIL-1 monta (la compuerta de la escena partida en dos: 31 B de desvio medidos A/B entre dos builds del mismo arbol, con los cinco archivos de producto devueltos a HEAD por git show y restaurados con sha256 verificado) + 0.1 HEREDADOS y publicados con su dueño.
+  │     EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados 0.1.
+  │     ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un árbol SIN B9. El candidato —el producto que B9 tocó fuera de los 13 literales del rango— está escrito con su número en `s5-presupuesto-recibos-del-merge.ts`, sin apropiárselo.
+  │     B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: declaró su montaje con su A/B, su reparto byte a byte y su alternativa escrita (`s5-presupuesto-recibos-de-b11.ts`). El 60 no se movió.
+  │     B12 es la línea más grande que este techo llevó, y las DOS piezas que la componen son nuevas y pedidas por su nombre: la gota («un efecto de gota o algo exótico y deluxe») y el velo local del pie. El resto del bloque DEVUELVE 87 B (`s5-presupuesto-recibos-de-b12.ts`).
+  │     EL TITULAR es la primera linea cuyo REPARTO POR PIEZA no esta medido, y se declara: el total son 706 B medidos, el inventario tiene 8 piezas derivadas del codigo, y cerrarlo cuesta 7 builds. El precio del pendiente esta escrito en s5-presupuesto-recibos-del-titular.ts.
+  │     Y los dos `.woff2` nuevos (21.352 B) NO entran en esta cuenta: `conjuntoInicial()` mide los `<script src>` de la ruta, o sea SOLO JavaScript. Las dos fuentes de S0 tampoco estan. Se publican aparte, en el reporte y en `scripts-titular/manifiesto-fuentes.json`.
+  │     Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los CUATRO archivos de recibos: por eso cada una es revocable por separado.
+  │     🟡 PROPUESTA SIN APLICAR, para la parada: subir ESTA línea de 0.69 a 0.7 KiB. Razón en una línea: con 0.69 el aire queda en 0.6 B —más chico que el ruido de redondeo del propio build— y con 0.7 queda en 10.8 B, el mismo orden que B11 (8,6) y B12 (8,2). El techo de 60 NO se mueve; cuesta 10.2 B de techo que este sprint no usa.
+  │     El umbral de aire útil declarado son 8 B y hoy la línea del titular deja 0.6 B: es la PRIMERA que cae abajo. No se aplica nada sin aprobación.
+  │   ⚠️ LA LLAVE (B12 §4): 4.2 KiB de contenido INVENTADO se restan APARTE del techo del lane — 68.7 KiB escritos, 64.5 KiB sin el andamio.
+  │     No es un montaje y no entra en `MONTAJES_DECLARADOS_KIB`: el techo no se movió por §4. Reparto en `s5-presupuesto-recibos-de-la-llave.ts`.
+  │     ⚠️ Y apagar la llave devuelve 0 bytes, medido: lo que devuelve los bytes es borrar las veinte entradas de `_contrato/inventado.ts` (1.064 B).
+  │   ok   ⚠️ el techo del lane es EXACTAMENTE el 60 del original más las líneas con nombre: 64.49 KiB, sin un centésimo sin dueño  — "64.49"
+  │   ok     y el 60 NO se movió: las nueve líneas se le SUMAN y se pueden revocar una por una  — 60
+  │   ok     la línea de la llave la sostiene su recibo: 4 renglones medidos que suman 4303 B  — 4303
+  │   ok     y el modelo y la línea no se contradicen: -2.2 B de diferencia, publicados y no apropiados
+  │   ⚠️ LO QUE DESCARGA UN TELÉFONO (MOVIL-1, fuera de este techo): 543.8 KiB antes → 803.6 KiB después = +259.8 KiB a 390×844, con la caché apagada.
+  │     Repartido en 11 renglones, el mayor 98.0 KiB (el chunk más grande que baja: el grueso de `three`). Recibo: `s5-presupuesto-recibos-de-movil.ts`.
+  │     NO se suma a `MONTAJES_DECLARADOS_KIB`: el techo mide la carga inicial y esto es descarga diferida. Sumarlo dejaría el gate sin capacidad de fallar.
+  │   ok     y el reparto de la descarga CIERRA sin residuo: 11 renglones suman los 266066 B medidos  — 266066
+  │   ok     y las dos mediciones del A/B reconstruyen el delta publicado  — 266066
+  │   ok   [control positivo] el presupuesto no se cumple solo: con un techo de 1 KiB, lo propio de hoy NO entra
+  │   ok   [control positivo] y la resta no es un cheque en blanco: sin restar el preámbulo, el número publicado es OTRO
+  │ 
+  │ 4 · LA DEUDA QUE ESTE INVARIANTE DECLARÓ, PAGADA
+  │   ok   `salida-fuerte` NO está en la carga inicial de /v3 — la deuda de este lane, pagada
+  │   ok   `atado-al-scroll` NO está en la carga inicial de /v3 — la deuda de este lane, pagada
+  │   ok   `simetrica-suave` NO está en la carga inicial de /v3 — la deuda de este lane, pagada
+  │   ok   `data-lineas-piezas` NO está en la carga inicial de /v3 — la deuda de este lane, pagada
+  │   ok   `bottom-=240px` NO está en la carga inicial de /v3 — la deuda de este lane, pagada
+  │   el chunk de la coreografía se pesa en `test:s7-compuerta`, que es de quien la construyó.
+  │ 
+  │ 5 · La ruta que este invariante medía ya no existe
+  │   ok   `/v3/secciones-a` no está en el build: se borró al componer el home  — las secciones 1 a 4 en orden, con sus superficies — borrada al componer el home
+  │   ok   `/v3/secciones-b` no está en el build: se borró al componer el home  — las secciones 5 a 8, para juzgarlas antes de componer el home — borrada al componerlo
+  │ 
+  │ s5-peso.invariant: 23 afirmaciones, 2 fallas
+  │ 
+  │ [stderr]
+  │   FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.49 KiB crudo  — 64.5 KiB — -12.4 B de aire · 70.4 KiB con el preámbulo heredado adentro
+  │   FALLA   y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los 4.49 KiB de líneas con nombre, el lane entra en 60 KiB  — 60.012 KiB — es la cifra que la afirmación mira: lo escrito, menos el andamio de la llave, menos las líneas con nombre, y tiene que quedar abajo de 60
+  │ 
+  ──
+  ok      test:s5-hero             124 afirm · 30 ctrl+ · 0 fallas  (3.2s, exit 0)
+  ok      test:s5-quienes-somos    87 afirm · 20 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s5-numeros          100 afirm · 27 ctrl+ · 0 fallas  (2.9s, exit 0)
+  ok      test:s5-trabajos         142 afirm · 31 ctrl+ · 0 fallas  (3.0s, exit 0)
+
+  TOTAL s5: 10 invariantes · 666 afirmaciones · 152 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s6 — 9 invariantes, sin cortar en la primera falla
+  ok      test:s6-contrato         60 afirm · 12 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s6-tokens           34 afirm · 13 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s6-lane             44 afirm · 10 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s6-render           40 afirm · 11 ctrl+ · 0 fallas  (3.3s, exit 0)
+  ok      test:s6-contraste        14 afirm · 0 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s6-servicios        123 afirm · 30 ctrl+ · 0 fallas  (3.1s, exit 0)
+  ok      test:s6-tu-panel         97 afirm · 20 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s6-por-que-develop  77 afirm · 19 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s6-cierre           119 afirm · 31 ctrl+ · 0 fallas  (3.0s, exit 0)
+
+  TOTAL s6: 9 invariantes · 608 afirmaciones · 146 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s7 — 7 invariantes, sin cortar en la primera falla
+  ok      test:s7-integracion      87 afirm · 7 ctrl+ · 0 fallas  (3.2s, exit 0)
+  ok      test:s7-arboles          45 afirm · 3 ctrl+ · 0 fallas  (3.4s, exit 0)
+  ok      test:s7-ritmo            16 afirm · 5 ctrl+ · 0 fallas  (3.1s, exit 0)
+  ok      test:s7-contrato         29 afirm · 9 ctrl+ · 0 fallas  (2.8s, exit 0)
+  ok      test:s7-pedido           84 afirm · 5 ctrl+ · 0 fallas  (3.2s, exit 0)
+  ok      test:s7-cn               33 afirm · 3 ctrl+ · 0 fallas  (3.6s, exit 0)
+  ok      test:s7-compuerta        26 afirm · 1 ctrl+ · 0 fallas  (3.7s, exit 0)
+
+  TOTAL s7: 7 invariantes · 320 afirmaciones · 33 controles positivos · 0 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s7e — 5 invariantes, sin cortar en la primera falla
+  ok      test:s7e-export-sprites  11 afirm · 6 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s7e-modelado        7 afirm · 3 ctrl+ · 0 fallas  (2.6s, exit 0)
+  FALLA   test:s7e-recorridos      48 afirm · 5 ctrl+ · 1 fallas  (2.9s, exit 1)
+
+  ── salida de test:s7e-recorridos ─────────────────────────────────
+  │ 
+  │ ── Todos los recorridos son reproducibles ────────────────────────────
+  │   ok  control positivo — el detector de `at` crecientes VE uno que no avanza
+  │   ok  control positivo — y el de rangos VE una pose fuera de los sliders, sin señalar la sana  · señala "rota"
+  │   ok  definitiva: los `at` son estrictamente crecientes  · 7 keyframes
+  │   ok  definitiva: arranca en 0 y termina en 1
+  │   FALLA  definitiva: todas las poses caben en los rangos de los sliders  · hero
+  │   ok  definitiva: `buildTrack` no tira
+  │   ok  definitiva: la vuelta entera sobrevive  · ángulo desenvuelto final 360
+  │   ok  calibrada a mano: los `at` son estrictamente crecientes  · 30 keyframes
+  │   ok  calibrada a mano: arranca en 0 y termina en 1
+  │   ok  calibrada a mano: todas las poses caben en los rangos de los sliders  · height, distance y encuadre
+  │   ok  calibrada a mano: `buildTrack` no tira
+  │   ok  calibrada a mano: la vuelta entera sobrevive  · ángulo desenvuelto final 360
+  │   ok  íntima: los `at` son estrictamente crecientes  · 24 keyframes
+  │   ok  íntima: arranca en 0 y termina en 1
+  │   ok  íntima: todas las poses caben en los rangos de los sliders  · height, distance y encuadre
+  │   ok  íntima: `buildTrack` no tira
+  │   ok  íntima: la vuelta entera sobrevive  · ángulo desenvuelto final 360
+  │   ok  arquitectónica: los `at` son estrictamente crecientes  · 28 keyframes
+  │   ok  arquitectónica: arranca en 0 y termina en 1
+  │   ok  arquitectónica: todas las poses caben en los rangos de los sliders  · height, distance y encuadre
+  │   ok  arquitectónica: `buildTrack` no tira
+  │   ok  arquitectónica: la vuelta entera sobrevive  · ángulo desenvuelto final 360
+  │   ok  dramática: los `at` son estrictamente crecientes  · 28 keyframes
+  │   ok  dramática: arranca en 0 y termina en 1
+  │   ok  dramática: todas las poses caben en los rangos de los sliders  · height, distance y encuadre
+  │   ok  dramática: `buildTrack` no tira
+  │   ok  dramática: la vuelta entera sobrevive  · ángulo desenvuelto final 360
+  │ 
+  │ ── Ni S7 ni S9 tocaron una sola pose calibrada ───────────────────────
+  │   ok  la calibrada sin los siete arcos tiene exactamente los 23 keyframes de S6  · 23 contra 23
+  │   ok  las 23 poses de S6 están intactas, `at` incluido  · nombre, at y los cinco canales
+  │   ok  control positivo — la misma comparación VE una referencia con 1 mm corrido  · señala "entrada · mirada alta" y ninguna otra de las 23
+  │ 
+  │ ── Los siete arcos de curvatura ──────────────────────────────────────
+  │   ok  los siete están en el archivo  · 7 encontrados
+  │   ok  los siete van marcados `derived: true`
+  │   ok  ninguno cae dentro del tramo Demos  · Demos va de 0.625 a 0.75
+  │   ok  hero · arco de bajada: curva de verdad  · desvío de la recta 0.00 → 2.77 de mundo
+  │   ok  quiénes somos · arco de entrada: curva de verdad  · desvío de la recta 0.00 → 1.39 de mundo
+  │   ok  números · arco de caída: curva de verdad  · desvío de la recta 0.00 → 1.08 de mundo
+  │   ok  números · deriva en arco: curva de verdad  · desvío de la recta 0.00 → 1.24 de mundo
+  │   ok  portfolio · arco de aproximación: curva de verdad  · desvío de la recta 1.15 → 3.03 de mundo
+  │   ok  final · arco de subida: curva de verdad  · desvío de la recta 0.00 → 2.01 de mundo
+  │   ok  cierre · arco de retirada: curva de verdad  · desvío de la recta 0.00 → 2.46 de mundo
+  │   ok  control positivo — el mismo medidor da CERO de ganancia sobre un tramo sin arco  · desvío 0.00 contra sí mismo — el umbral de "curva de verdad" es 1 de mundo
+  │   ok  el tirón más grande del recorrido BAJA con los arcos  · 73.2 (final · gira) → 70.4 (portfolio · sostén)
+  │   ok  la velocidad DENTRO de Demos es idéntica a la de S6
+  │   ok  control positivo — el mismo comparador VE la diferencia en el tramo que el arco SÍ cambió  · entre p=0,06 y p=0,12, donde vive el arco de bajada del hero
+  │ 
+  │ ── Composición: la cámara contra el papel ────────────────────────────
+  │   ok  definitiva: la cámara no se mete abajo del papel ni con el mouse al máximo  · holgura mínima 0.074 en "quiénes somos"
+  │   ok  calibrada a mano: la holgura contra el papel es la que dejó S6  · holgura mínima -0.001 en "números · baja la altura" — heredada, no se tocó
+  │   ok  íntima: la cámara no se mete abajo del papel ni con el mouse al máximo  · holgura mínima 0.407 en "demos · giro ¾"
+  │   ok  arquitectónica: la cámara no se mete abajo del papel ni con el mouse al máximo  · holgura mínima 0.187 en "demos · giro ¾"
+  │   ok  dramática: la cámara no se mete abajo del papel ni con el mouse al máximo  · holgura mínima 0.017 en "demos · giro ½"
+  │ 
+  │ s7 · recorridos: 48 en verde, 1 en rojo
+  │   ✗ definitiva: todas las poses caben en los rangos de los sliders  · hero
+  │ 
+  ──
+  ok      test:s7e-sol             19 afirm · 6 ctrl+ · 0 fallas  (2.7s, exit 0)
+  ok      test:s7e-variantes       30 afirm · 4 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s7e: 5 invariantes · 115 afirmaciones · 24 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ AGREGADO s8 — 9 invariantes, sin cortar en la primera falla
+  ok      test:s8-montaje          63 afirm · 16 ctrl+ · 0 fallas  (4.9s, exit 0)
+  ok      test:s8-escena           36 afirm · 10 ctrl+ · 0 fallas  (6.2s, exit 0)
+  deuda   test:s8-tinta            30 afirm · 4 ctrl+ · 0 fallas · 3 deudas declaradas  (12.0s, exit 0)
+  ok      test:s8-tres             24 afirm · 1 ctrl+ · 0 fallas  (3.4s, exit 0)
+  FALLA   test:s8-intro            56 afirm · 20 ctrl+ · 1 fallas  (3.0s, exit 1)
+
+  ── salida de test:s8-intro ───────────────────────────────────────
+  │ 
+  │ 1 · El home lo monta, y el import es ESTÁTICO
+  │   ok   el módulo existe: `src/app/v3/_intro/IntroDelHome.tsx`
+  │   ok   el módulo del preloader son 36 archivos
+  │   ok   el home pide `./_intro/IntroDelHome` con un import ESTÁTICO de valor
+  │   ok     y por el nombre `IntroDelHome`, no por defecto
+  │   ok     y lo monta, sin props
+  │   ok   [control positivo] el detector NO llama estático a un `dynamic(() => import(…))`
+  │   ok   [control positivo] ni a un `import type`, que se borra al compilar y no pone nada en el HTML
+  │   ok   [control positivo] y no lo encuentra en un archivo que no lo importa
+  │ 
+  │ 2 · `IntroDelHome` CONSUME la pieza terminada — no la copia
+  │   ok   el montaje importa UN solo módulo, y es `@/components/layout/HomeIntro`  — ["@/components/layout/HomeIntro"]
+  │   ok     y monta `<HomeIntro />` tal cual, sin props
+  │   ok     con export nombrado `IntroDelHome` y sin props
+  │   ok     y sin export por defecto
+  │   ok   el montaje no nombra una sola pieza interna del preloader: es un enchufe, no una copia  — []
+  │   ok     y el contrapeso: el MISMO detector encuentra varias en `HomeIntro.tsx`  — useIntroEngine · IntroOverlay · useReducedMotion · usePreloader · HOME_INTRO_TIMELINE · setIntroStage · dynamic
+  │   ok   [control positivo] el detector de piezas internas ve una copia disfrazada
+  │   ok   [control positivo] y no la ve cuando sólo está nombrada en un comentario
+  │ 
+  │ 3 · Las SEIS condiciones de §1.2, leídas del código que ya existe
+  │ 
+  │   3.1 · Solo la primera visita de la sesión — `sessionStorage`
+  │   ok   los 3 texto(s) que la sostienen están  — []
+  │   ok   [control positivo] el lector de textos no encuentra lo que no está
+  │ 
+  │   3.2 · Nunca bloquea el scroll, ni un frame
+  │   ok   los 4 texto(s) que la sostienen están  — []
+  │   ok   [control positivo] el lector de textos no encuentra lo que no está
+  │   ok   ninguno de los 36 archivos lo rompe  — []
+  │   ok   [control positivo] el buscador ve la violación cuando existe de verdad
+  │   ok   [control positivo] y no la ve cuando el docblock la nombra para negarla
+  │ 
+  │   3.3 · No espera a que cargue nada — cero `await`, cero gate
+  │   ok   los 1 texto(s) que la sostienen están  — []
+  │   ok   [control positivo] el lector de textos no encuentra lo que no está
+  │   ok   ninguno de los 36 archivos lo rompe  — []
+  │   ok   [control positivo] el buscador ve la violación cuando existe de verdad
+  │   ok   [control positivo] y no la ve cuando el docblock la nombra para negarla
+  │ 
+  │   3.4 · Sin sonido
+  │   ok   ninguno de los 36 archivos lo rompe  — []
+  │   ok   [control positivo] el buscador ve la violación cuando existe de verdad
+  │   ok   [control positivo] y no la ve cuando el docblock la nombra para negarla
+  │ 
+  │   3.5 · Honra `prefers-reduced-motion`: ahí no se monta la secuencia
+  │   ok   los 3 texto(s) que la sostienen están  — []
+  │   ok   [control positivo] el lector de textos no encuentra lo que no está
+  │ 
+  │   3.6 · El logo NUNCA cambia de tamaño
+  │   ok   el alto de la tinta es UNO solo en los 401 instantes de la secuencia  — 154.36 px
+  │   ok     y es el del destino: nace con el tamaño que va a tener en la escena  — 221.9×154.4 px · centro X 988.8 px sobre 1440×810
+  │   ok   [control positivo] el muestreador no da el mismo alto para cualquier plan: sin ventana medible da 0
+  │ 
+  │ 4 · Los DOS contextos congelados no se editaron — contra el disco
+  │   ok   los dos congelados del contrato son los dos que se miden  — ["src/context/PreloaderContext.tsx","src/context/TransitionContext.tsx"]
+  │   ok   `src/context/PreloaderContext.tsx` intacto  — 8664d01dd44be214
+  │   ok   `src/context/TransitionContext.tsx` intacto  — 75adc80403677b57
+  │   ok   `HomeIntro` consume `PreloaderContext` de la única forma correcta: la fase salta a `done`
+  │   ok   y ningún archivo del preloader importa `TransitionContext`  — []
+  │   ok   [control positivo] el hash ve un archivo alterado por un solo carácter
+  │   ok   [control positivo] y el mismo hasher reconoce el contenido intacto — no está ciego
+  │ 
+  │ 5 · El gate pre-paint arma — en `/` y ahora también en `/v3`
+  │   ok   las dos rutas, con `/` primero: el sitio vivo no cambia  — ["/","/v3"]
+  │   ok   la condición del script pre-paint nombra `/v3`  — ["/","/v3"].indexOf(location.pathname)>=0
+  │   ok     y usa `indexOf`: el script corre antes de cualquier polyfill
+  │   ok     y el script la consume: una sola definición
+  │   ok   el layout raíz inyecta el script pre-paint
+  │   ok   y la regla que esconde el overlay sin la marca sigue en `globals.css`
+  │   ok   `PreloaderProvider` envuelve `{children}`: `/v3` tiene proveedor y `usePreloader` no tira
+  │   ok   [control positivo] el lector de la lista ve una que no tiene `/v3`
+  │ 
+  │ 6 · EL PESO — lo que se puede medir sin build, y lo que no
+  │   ok   carga inicial medida: /v3 26 archivos · / 24
+  │   ok   el chunk del overlay YA viaja en la carga inicial de /v3  — static/chunks/6861-d31f0cc1d2d85290.js — 21.9 KiB crudo · 8.8 KiB gzip
+  │   ok     y es el MISMO archivo que pide `/`: cuenta como HEREDADO, no como propio de /v3
+  │   lo propio de /v3: 5 archivos · 70.4 KiB crudo · presupuesto 60 KiB — ⚠️ sobre ESTE build
+  │   ok   [control positivo] el buscador no encuentra una huella que no existe
+  │ 
+  │ s8-intro.invariant: 56 afirmaciones, 1 fallas
+  │ 
+  │ [stderr]
+  │   FALLA   con la elevación de entrada de S9  — 9.0903° · yaw 0°
+  │ 
+  ──
+  FALLA   test:s8-relevo           35 afirm · 7 ctrl+ · 4 fallas  (5.6s, exit 1)
+
+  ── salida de test:s8-relevo ──────────────────────────────────────
+  │ 
+  │ 1 · EL INSTRUMENTO, ANTES QUE EL NÚMERO
+  │   ok   el sombreador reproduce los cuatro números del papel que S11 publicó  — 249.4 · 248.3 · 236.9 · 218.7
+  │   ok   la vista de la pose de entrada sale del track y coincide con la que se usó a mano  — {"progress":0,"cameraAzimuthDeg":0,"cameraHeight":6.4}
+  │   ok   cara frontal — reproduce §7.11: 1.68 → 1.28  — 1.6766 → 1.2836 · escalón 0.3930
+  │   ok     cara frontal — el mínimo es una MESETA: el contraluz está clampeado en cero  — 2940 de 5880 combinaciones dan el mismo valor al bit
+  │   ok   canto superior — reproduce §7.11: 1.34 → 1.01  — 1.3445 → 1.0106 · escalón 0.3339
+  │   ok     canto superior — el mínimo es una MESETA: el contraluz está clampeado en cero  — 2520 de 5880 combinaciones dan el mismo valor al bit
+  │   ok   canto inferior — reproduce §7.11: 0.7 → 0.44  — 0.6987 → 0.4439 · escalón 0.2547
+  │   ok     canto inferior — el mínimo es una MESETA: el contraluz está clampeado en cero  — 3360 de 5880 combinaciones dan el mismo valor al bit
+  │   ok     canto derecho — el mínimo es una MESETA: el contraluz está clampeado en cero  — 2940 de 5880 combinaciones dan el mismo valor al bit
+  │   ok     canto izquierdo — el mínimo es una MESETA: el contraluz está clampeado en cero  — 2940 de 5880 combinaciones dan el mismo valor al bit
+  │   ok   [control positivo] el MISMO barrido CON el contraluz puesto no reproduce §7.11 en el canto superior
+  │   ok   [control positivo] y el barrido no está midiendo cero: con el cielo abierto da otro número
+  │   ok   el umbral del contrato es el del instrumento existente  — 1.1
+  │ 
+  │ 2 · EL ESCALÓN DE AMBIENTE AL CORTE ES CERO — por construcción
+  │   ok   el factor de cielo del intro ES el de la escena, no una copia  — 0.6743
+  │   ok   [control positivo] con la celosía abierta el factor vuelve a 1, que es el estado del que §7.11 hablaba
+  │ 
+  │ 3 · 🔴 CUÁNTO VALDRÍA ESE ESCALÓN CON LA SALA DETRÁS — el número nuevo
+  │   media del cuadro con cielo ABIERTO: 226.32
+  │   media del cuadro con la celosía   : 219.43
+  │   escalón EN EL CUADRO              : 6.89 puntos sRGB de 255
+  │   contra los 0.39 que §7.11 mide sobre la tinta sola: ×17.7
+  │   ok   el cuadro se muestreó: 1.37% de tinta · 47.5% de piso
+  │   ok   🔴 con la sala detrás el escalón es MUCHO más grande que los 0,39 de la tinta sola  — 6.89 puntos · §7.11 corrigió los −15 del cuadro por 0,39 mirando sólo el logo, y eso deja de valer cuando hay sala
+  │   ok     y aun así es menor que los −15 que §7.11 declaraba: la corrección apuntaba bien, no tanto
+  │   ok   [control positivo] el medidor no inventa un escalón donde no lo hay: mismo cielo en las dos ramas da cero
+  │ 
+  │ 4 · 🔴 EL ESCALÓN QUE SÍ SOBREVIVE AL CORTE — y no es el que estaba anotado
+  │   la celosía deja pasar 38.9% del sol sobre la tinta (8203 muestras, mín 0.00 máx 1.00)
+  │   cara frontal · intro 1.2836
+  │                + contraluz 1.2836  (0.0000)
+  │                + celosía   0.6711  (-0.6126)
+  │                + niebla    16.5942  (15.9232)
+  │   cara frontal     intro 1.2836 · escena 16.5942 · paso 15.3106
+  │   canto superior   intro 1.0106 · escena 16.6397 · paso 15.6291
+  │   canto inferior   intro 0.4439 · escena 16.3823 · paso 15.9383
+  │   canto derecho    intro 0.5063 · escena 16.8921 · paso 16.3858
+  │   canto izquierdo  intro 0.8991 · escena 16.4121 · paso 15.5130
+  │   ok   el contraluz —la diferencia ANOTADA— aporta CERO en la pose de entrada
+  │   ok   🔴 la que existe es LA CELOSÍA, y no estaba anotada en ningún lado  — 15.3106 puntos sRGB sobre la cara frontal — más que los 0,39 que §7.11 corrigió
+  │   ok   [control positivo] el diferenciador da cero cuando los dos lados son el mismo rig
+  │ 
+  │ 5 · 🔴 EL MARGEN DE LAS PARTÍCULAS, REMEDIDO CON LA POBLACIÓN REAL
+  │   ok   control positivo — las del intro SÍ son legibles mientras tienen que serlo  — las 712 cruzan el umbral · contraste máximo 6.60:1
+  │   ok   la última del intro deja de ser legible adentro de su ventana, sin derramarse  — 4.1790 s contra el cierre en 4190.0 ms · línea de base 4.166 con la caída de S13, +13.0 ms
+  │   ok   y el par de la LÍNEA DE BASE reproduce sus 4,278 s: los dos números son comparables  — 4.2783 s · contraste pleno 5.135:1
+  │   polvo cercano sobre papel a luz plena    6.683:1 · 4.2752 s
+  │   polvo lejano sobre papel a luz plena     1.322:1 · 4.3831 s
+  │   bokeh sobre papel a luz plena            1.061:1 · nunca cruza
+  │   polvo cercano sobre papel bajo una barra 5.338:1 · 4.2800 s
+  │   polvo lejano sobre papel bajo una barra  1.038:1 · nunca cruza
+  │   bokeh sobre papel bajo una barra         1.008:1 · nunca cruza
+  │   polvo cercano sobre media del cuadro     5.369:1 · 4.2799 s
+  │   polvo lejano sobre media del cuadro      1.044:1 · nunca cruza
+  │   bokeh sobre media del cuadro             1.010:1 · nunca cruza
+  │   ok   control positivo — alguna de la escena SÍ se vuelve legible al irse el velo  — la primera es «polvo cercano sobre papel a luz plena» a los 4.2752 s
+  │   ok     y otras NO cruzan nunca: el instrumento distingue, no dice que sí a todo
+  │ 
+  │   última del intro    4.1790 s   (línea de base 4.166)
+  │   primera de la escena 4.2752 s   (línea de base 4.278)
+  │   MARGEN               96.3 ms      (línea de base 112.4 ms)
+  │   la escena se vuelve legible 25.2 ms después de que el velo arranca
+  │   ok   🔴 LAS DOS POBLACIONES NO SE SOLAPAN — la del intro se va antes de que la escena se lea  — 96.3 ms de margen, contra 112.4 ms de la línea de base (-16.1 ms)
+  │   ok   antes de que el velo arranque, NINGÚN par de la escena aporta contraste: es exactamente 1
+  │   ok     y por eso el margen tiene un piso que no depende de la escena  — 71.0 ms — el margen medido son 96.3 ms
+  │   ok   control negativo — si la salida se derramara adentro del velo, se solaparían  — saldría a 4.5290 s, 253.7 ms DESPUÉS de que la escena ya se lee
+  │ 
+  │ s8-relevo.invariant: 35 afirmaciones, 4 fallas
+  │ 
+  │ [stderr]
+  │   FALLA   y el logo está a esa distancia de la cámara  — 40.509 · la niebla arranca en 20
+  │   FALLA   y la niebla tampoco: el logo está justo en su borde  — 15.9232 puntos a 40.51 de distancia
+  │   FALLA   y aun así no llega a UN byte: en pantalla ni siquiera puede cambiar de valor entero
+  │   FALLA   y pesado por la tinta en cuadro, no mueve la media  — 1.37% del cuadro × 15.311 = 0.210 puntos
+  │ 
+  ──
+  ok      test:s8-chrome           85 afirm · 19 ctrl+ · 0 fallas  (3.6s, exit 0)
+  parcial test:s8-diferido         57 afirm · 12 ctrl+ · 0 fallas · 2 fuera de ventana  (2.8s, exit 0)
+  ok      test:s8-peso             45 afirm · 8 ctrl+ · 0 fallas  (2.9s, exit 0)
+
+  TOTAL s8: 9 invariantes · 431 afirmaciones · 97 controles positivos · 2 fuera de ventana · 2 invariantes con falla
+
+═══ AGREGADO s8e — 6 invariantes, sin cortar en la primera falla
+  ok      test:s8e-intro-timeline  112 afirm · 0 ctrl+ · 0 fallas  (2.6s, exit 0)
+  ok      test:s8e-intro-muestreo  166 afirm · 4 ctrl+ · 0 fallas  (3.9s, exit 0)
+  FALLA   test:s8e-intro-vuelo     91 afirm · 0 ctrl+ · 1 fallas  (2.6s, exit 1)
+
+  ── salida de test:s8e-intro-vuelo ────────────────────────────────
+  │ 
+  │ ── 🔴 el alto de la tinta es el mismo en toda la secuencia ───────────
+  │   ok  desktop 1440×810 / default
+  │   ok  desktop 1440×810 / corto
+  │   ok  desktop 1440×810 / largo
+  │   ok  desktop 1440×810 / solo trazo corto
+  │   ok  desktop 1440×810 / solo relleno largo
+  │   ok  desktop 1440×810 / solo espera corta
+  │   ok  desktop 1440×810 / solo color brevísimo
+  │   ok  desktop 1440×810 / solo color larguísimo
+  │   ok  desktop 1440×810 / solo letra lenta
+  │   ok  desktop 1440×810 / solo fondo lento
+  │   ok  desktop 1440×810 / solo acomodo larguísimo
+  │   ok  desktop 1920×1080 / default
+  │   ok  desktop 1920×1080 / corto
+  │   ok  desktop 1920×1080 / largo
+  │   ok  desktop 1920×1080 / solo trazo corto
+  │   ok  desktop 1920×1080 / solo relleno largo
+  │   ok  desktop 1920×1080 / solo espera corta
+  │   ok  desktop 1920×1080 / solo color brevísimo
+  │   ok  desktop 1920×1080 / solo color larguísimo
+  │   ok  desktop 1920×1080 / solo letra lenta
+  │   ok  desktop 1920×1080 / solo fondo lento
+  │   ok  desktop 1920×1080 / solo acomodo larguísimo
+  │   ok  mobile 390×844 / default
+  │   ok  mobile 390×844 / corto
+  │   ok  mobile 390×844 / largo
+  │   ok  mobile 390×844 / solo trazo corto
+  │   ok  mobile 390×844 / solo relleno largo
+  │   ok  mobile 390×844 / solo espera corta
+  │   ok  mobile 390×844 / solo color brevísimo
+  │   ok  mobile 390×844 / solo color larguísimo
+  │   ok  mobile 390×844 / solo letra lenta
+  │   ok  mobile 390×844 / solo fondo lento
+  │   ok  mobile 390×844 / solo acomodo larguísimo
+  │ 
+  │ ── y ese tamaño es el que el logo va a tener en la escena ────────────
+  │   ok  desktop 1440×810 — la tinta mide lo que mide el destino  · 222px×154px
+  │   ok  desktop 1920×1080 — la tinta mide lo que mide el destino  · 296px×206px
+  │   ok  mobile 390×844 — la tinta mide lo que mide el destino  · 226px×157px
+  │ 
+  │ ── el texto se deriva del logo, no de la ventana ─────────────────────
+  │   ok  desktop 1440×810 — el lockup entra cómodo en la ventana  · 234px de 810px · 29%
+  │   ok  desktop 1440×810 — la proporción texto/logo no depende de la resolución
+  │   ok  desktop 1920×1080 — el lockup entra cómodo en la ventana  · 312px de 1080px · 29%
+  │   ok  desktop 1920×1080 — la proporción texto/logo no depende de la resolución
+  │   ok  mobile 390×844 — el lockup entra cómodo en la ventana  · 239px de 844px · 28%
+  │   ok  mobile 390×844 — la proporción texto/logo no depende de la resolución
+  │ 
+  │ ── 🔴 el desplazamiento y la rotación son el MISMO número ────────────
+  │   ok  desktop 1440×810 / default — camino y giro en lockstep
+  │   ok  desktop 1440×810 / corto — camino y giro en lockstep
+  │   ok  desktop 1440×810 / largo — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo trazo corto — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo relleno largo — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo espera corta — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo color brevísimo — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo color larguísimo — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo letra lenta — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo fondo lento — camino y giro en lockstep
+  │   ok  desktop 1440×810 / solo acomodo larguísimo — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / default — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / corto — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / largo — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo trazo corto — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo relleno largo — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo espera corta — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo color brevísimo — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo color larguísimo — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo letra lenta — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo fondo lento — camino y giro en lockstep
+  │   ok  desktop 1920×1080 / solo acomodo larguísimo — camino y giro en lockstep
+  │   ok  mobile 390×844 / default — camino y giro en lockstep
+  │   ok  mobile 390×844 / corto — camino y giro en lockstep
+  │   ok  mobile 390×844 / largo — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo trazo corto — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo relleno largo — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo espera corta — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo color brevísimo — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo color larguísimo — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo letra lenta — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo fondo lento — camino y giro en lockstep
+  │   ok  mobile 390×844 / solo acomodo larguísimo — camino y giro en lockstep
+  │ 
+  │ ── arrancan juntos y terminan juntos ─────────────────────────────────
+  │   ok  desktop 1440×810 — el primer frame es el mismo
+  │   ok  desktop 1440×810 — y el último frame llega al destino  · (989px, 414px)
+  │   ok  desktop 1920×1080 — el primer frame es el mismo
+  │   ok  desktop 1920×1080 — y el último frame llega al destino  · (1318px, 552px)
+  │   ok  mobile 390×844 — el primer frame es el mismo
+  │   ok  mobile 390×844 — y el último frame llega al destino  · (231px, 422px)
+  │ 
+  │ ── antes del acomodamiento el logo está quieto y de frente ───────────
+  │   ok  desktop 1440×810 — centrado, sin girar
+  │   ok  desktop 1920×1080 — centrado, sin girar
+  │   ok  mobile 390×844 — centrado, sin girar
+  │ 
+  │ ── 🔴 no hay ni un transform de escala en el lockup ──────────────────
+  │   ok  ningún `scale:` en IntroLockup.tsx  · el logo no cambia de tamaño: no hay dónde escribirlo
+  │   ok  el texto sale de las proporciones y no de la ventana
+  │   ok  y el único transform es el desplazamiento
+  │ 
+  │ ── pestaña oculta: sin destino no hay nada ───────────────────────────
+  │   ok  no hay destino
+  │   ok  la tinta mide 0
+  │   ok  el logo no se mueve ni gira
+  │ 
+  │ ── mobile: el clamp de ancho actúa ───────────────────────────────────
+  │   FALLA  el destino se recortó por ancho  · clamp 1.000
+  │   ok  y la tinta entra en la pantalla  · 226px
+  │ 
+  │ introFlight: 91 en verde, 1 en rojo
+  │   ✗ el destino se recortó por ancho  · clamp 1.000
+  │ 
+  ──
+  ok      test:s8e-intro-color     14 afirm · 0 ctrl+ · 0 fallas  (2.6s, exit 0)
+  FALLA   test:s8e-intro-silueta   58 afirm · 0 ctrl+ · 2 fallas  (2.6s, exit 1)
+
+  ── salida de test:s8e-intro-silueta ──────────────────────────────
+  │ 
+  │ ── 🔴 el cuadro anterior y el posterior al apagado tienen la MISMA silueta 
+  │   ok  default — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  default — y la silueta es idéntica
+  │   ok  corto — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  corto — y la silueta es idéntica
+  │   ok  largo — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  largo — y la silueta es idéntica
+  │   ok  solo trazo corto — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo trazo corto — y la silueta es idéntica
+  │   ok  solo relleno largo — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo relleno largo — y la silueta es idéntica
+  │   ok  solo espera corta — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo espera corta — y la silueta es idéntica
+  │   ok  solo color brevísimo — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo color brevísimo — y la silueta es idéntica
+  │   ok  solo color larguísimo — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo color larguísimo — y la silueta es idéntica
+  │   ok  solo letra lenta — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo letra lenta — y la silueta es idéntica
+  │   ok  solo fondo lento — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo fondo lento — y la silueta es idéntica
+  │   ok  solo acomodo larguísimo — los dos cuadros straddlean el apagado  · si no, la comprobación no estaría mirando el momento
+  │   ok  solo acomodo larguísimo — y la silueta es idéntica
+  │ 
+  │ ── y no cambia en ningún otro instante tampoco ───────────────────────
+  │   ok  default — lo pintado nunca sale del path
+  │   ok  corto — lo pintado nunca sale del path
+  │   ok  largo — lo pintado nunca sale del path
+  │   ok  solo trazo corto — lo pintado nunca sale del path
+  │   ok  solo relleno largo — lo pintado nunca sale del path
+  │   ok  solo espera corta — lo pintado nunca sale del path
+  │   ok  solo color brevísimo — lo pintado nunca sale del path
+  │   ok  solo color larguísimo — lo pintado nunca sale del path
+  │   ok  solo letra lenta — lo pintado nunca sale del path
+  │   ok  solo fondo lento — lo pintado nunca sale del path
+  │   ok  solo acomodo larguísimo — lo pintado nunca sale del path
+  │ 
+  │ ── 🔴 la silueta rellena sigue calzando con el mesh 3D ───────────────
+  │   ok  el SVG pinta exactamente el path  · desfase 0 unidades de viewBox
+  │   ok  el mesh asoma solo su bisel  · 1 unidad de viewBox por lado — geometría real del objeto
+  │   ok  desktop 1440×810 — la diferencia es sub-píxel  · 0.23 px con la tinta de 154 px
+  │   ok  desktop 1920×1080 — la diferencia es sub-píxel  · 0.30 px con la tinta de 206 px
+  │   ok  mobile 390×844 — la diferencia es sub-píxel  · 0.23 px con la tinta de 157 px
+  │   ok  y el arreglo no la tocó: el mesh escala igual que antes  · mapea el PATH a inkHeightPx, que es lo que scene-framing proyecta como destino
+  │ 
+  │ ── 🔴 el contorno está realmente clipeado contra la silueta ──────────
+  │   ok  hay un <clipPath>
+  │   ok  y recorta con el MISMO path que rellena  · relleno + contorno + recorte
+  │   ok  el contorno está adentro del grupo recortado
+  │   ok  usa el ancho declarado del módulo
+  │   ok  y ya no necesita overflow visible  · nada se pinta fuera de la caja
+  │ 
+  │ ── el grosor aparente del hairline no cambió ─────────────────────────
+  │   ok  se ve la mitad del ancho declarado  · 7 unidades, las mismas que antes del arreglo
+  │   ok  desktop 1440×810 — hairline de 1.59 px
+  │   ok  desktop 1920×1080 — hairline de 2.12 px
+  │   ok  mobile 390×844 — hairline de 1.62 px
+  │ 
+  │ ── control negativo — el contorno centrado, que es lo que fallaba ────
+  │   ok  centrado 7 — detecta que la silueta cambiaba al apagar el contorno  · 3.5 unidades de viewBox por lado
+  │   FALLA  centrado 7 / desktop 1440×810 — el salto era visible  · 0.79 px por lado · 1.59 px de ancho total
+  │   ok  centrado 7 / desktop 1920×1080 — el salto era visible  · 1.06 px por lado · 2.12 px de ancho total
+  │   FALLA  centrado 7 / mobile 390×844 — el salto era visible  · 0.81 px por lado · 1.62 px de ancho total
+  │   ok  centrado 14 — detecta que la silueta cambiaba al apagar el contorno  · 7 unidades de viewBox por lado
+  │   ok  centrado 14 / desktop 1440×810 — el salto era visible  · 1.59 px por lado · 3.17 px de ancho total
+  │   ok  centrado 14 / desktop 1920×1080 — el salto era visible  · 2.12 px por lado · 4.23 px de ancho total
+  │   ok  centrado 14 / mobile 390×844 — el salto era visible  · 1.62 px por lado · 3.24 px de ancho total
+  │   ok  mientras que el modelo vigente no salta
+  │ 
+  │ ── la regla del apagado, sola ────────────────────────────────────────
+  │   ok  con el relleno a medias el contorno está
+  │   ok  y en cuanto termina, se va
+  │   ok  sin estados intermedios
+  │ 
+  │ introSilhouette: 58 en verde, 2 en rojo
+  │   ✗ centrado 7 / desktop 1440×810 — el salto era visible  · 0.79 px por lado · 1.59 px de ancho total
+  │   ✗ centrado 7 / mobile 390×844 — el salto era visible  · 0.81 px por lado · 1.62 px de ancho total
+  │ 
+  ──
+  FALLA   test:s8e-encuadre        32 afirm · 5 ctrl+ · 11 fallas  (2.6s, exit 1)
+
+  ── salida de test:s8e-encuadre ───────────────────────────────────
+  │ 
+  │ ── 1 · El destino sale del recorrido, y del recorrido ACTIVO ─────────
+  │   ok  el recorrido activo es el definitivo — el atajo de `scene-framing` sigue valiendo  · activo: definitiva
+  │   ok  `SCENE_ENTRY_POSE` ES el primer keyframe, no una copia  · "hero" · ángulo 0 · altura 6.4 · distancia 40 · frameX 0.5
+  │   ok  el primer keyframe está en el progreso 0
+  │   ok  la pose de revelación sale de la misma pose: elevación = atan(altura / distancia)  · azimut 0° · elevación 9.1°
+  │ 
+  │ ── 2 · La caja de la tinta: el path aplanado contra el mesh medido ───
+  │   ok  aplanar el path + bisel da los 6,86 × 4,78 que `PROBE-ESCENA.md` publica del mesh  · 6.863 × 4.779
+  │   ok  `SCENE_LOGO_MESH_WORLD` se deriva del bisel, no está copiado
+  │   ok  la tinta NO está centrada en el cuadrado de 1024 — por eso el viewBox va recortado  · centro en y = 545.1 · desvío 33.1 unidades
+  │ 
+  │ ── 3 · La proyección en 1440×810, con la pose de entrada de S9 ───────
+  │   FALLA  el centro cae en (940, 417)  · (989, 414)
+  │   FALLA  la tinta mide 445 × 310 px — un 15% más chica que con la calibrada  · 222 × 154px, contra 523 × 364
+  │   ok  el logo NO cae centrado: la composición lo manda a la derecha  · 68.7% del ancho, contra 50.0% con `frameX: 0`
+  │   ok  control positivo — el contrafactual NO se compara consigo mismo: con `frameX: 0` el destino ES el centro  · 268.8 px de corrimiento — si diera cero, la afirmación de arriba sería una comparación de un número contra sí mismo
+  │   ok  en desktop el clamp no hace falta
+  │   ok  el destino escala con el alto de la ventana, no con la resolución  · 0.1906 del alto en las dos
+  │ 
+  │ ── 4 · El clamp de ancho: solo donde hace falta, y con el número correcto 
+  │   FALLA  en 390×844 el clamp SÍ actúa — sin él el logo desbordaría  · ×1.000
+  │   FALLA  y deja la tinta justo en el margen  · 226px = 0.86 × 390
+  │   FALLA  el clamp achica, NO mueve: el centro ES la proyección del origen, sin pasar por el clamp  · x = 230.912 · proyección 230.912 · clamp ×1.000
+  │   FALLA    y el clamp SÍ mueve el TAMAÑO, que es lo único que le toca: la tinta cruda no es la publicada  · cruda 226px contra 226px publicados
+  │   ok  el ancho de la tinta nunca pasa del margen, en ninguna ventana razonable  · 9 ventanas
+  │   ok  el margen es el mismo `LOGO_WIDTH_MARGIN` de la calibración A
+  │ 
+  │ ── 5 · Ventana degenerada: `null`, no basura ─────────────────────────
+  │   ok  0 × 0 devuelve null
+  │   ok  ancho 0 devuelve null
+  │   ok  alto 0 devuelve null
+  │   ok  negativo devuelve null
+  │ 
+  │ ── 6 · Control negativo: la proyección no es la aproximación lineal ──
+  │   ok  la proyección real NO coincide con la aproximación lineal  · 8.8px de error total · 0.1 en X, 8.8 en Y
+  │   ok  y el grueso del error es el corrimiento vertical que la aproximación no ve  · real y = 413.8 contra el centro de pantalla 405 — 100.0% del error total
+  │   ok  control positivo — con la elevación en CERO la proyección real SÍ cae en el medio: el desvío es la elevación, no ruido  · 405.0000 con altura 0 contra 413.8124 con la altura viva (6.4)
+  │ 
+  │ ── 7 · §7.44 — dónde aterriza HOY el logo del preloader, y dónde aterrizaría 
+  │   FALLA  el codo de `scene-camera.ts` sale de SU caja, y NO es el 0,567 que publica §7.44  · 0.268674 con la caja del mesh (6.863213) contra 0,566964 con la del arnés (7,168)
+  │   ok    y 375×667 —uno de los dos pares que §7.44 manda medir— queda ARRIBA del codo real: ahí el arreglo es un no-op  · 0.562219 contra 0.268674
+  │   ventana     aspecto   HOY (centro de la tinta)   CON `abs`         Δx        Δ del ancho
+  │   375×812     0.461823  222.004 · 406.148          222.004 · 406.148 +0.00px   0.00%
+  │   390×844     0.462085  230.912 · 422.154          230.912 · 422.154 +0.00px   0.00%
+  │   393×852     0.461268  232.599 · 426.154          232.599 · 426.154 +0.00px   0.00%
+  │   FALLA  🔴 HOY el logo aterriza EXACTAMENTE en el centro geométrico de la pantalla en los tres teléfonos: `frameX` no corre nada  · es el defecto de §7.44, medido: con `travelX` en 0 el `aim` colapsa sobre el target y la cámara no rota
+  │   FALLA    y la condición de §7.60 NO es «que /v3 componga»: `frameX` es INERTE en el preloader a 390×844  · cinco valores de `frameX` dan un solo aterrizaje (123.1775 px). Se pondrá en rojo cuando `scene-camera.ts` consuma `recorridoDeEncuadre`, no antes
+  │   ok    control positivo — el MISMO lector ve que a 1440×810 el preloader SÍ se mueve con `frameX`  · si diera uno solo, el renglón de arriba estaría midiendo un lector ciego y no la inercia de la fórmula vieja
+  │   FALLA    y con `recorridoDeEncuadre` los tres se mueven: el arreglo NO es cosmético  · por eso §7.44 lo deja para una grabación en un teléfono y no para un invariante
+  │   ok  la cámara corregida ES la de producción cuando la pose no encuadra: coinciden bit a bit  · `frameX: 0` — ninguna de las dos apunta, así que no hay recorrido que pueda diferir
+  │   ok    y también ARRIBA del codo, donde la corrección es un no-op por construcción  · 1440×810 da aspecto 1.778, muy arriba de 0.269
+  │   FALLA    control positivo — y NO coinciden debajo del codo: el contrafactual no se compara consigo mismo  · si coincidieran, toda la tabla de arriba sería una resta de un número contra sí mismo
+  │ 
+  │ ── 8 · §7.44 — las cinco copias: quién es fuente, quién consume, quién es testigo 
+  │   ok  encuadre.ts ES la fuente  · ES la fuente única: acá vive `recorridoDeEncuadre`, y su código no escribe la vieja
+  │   ok  harness.ts consume la fuente única, y no escribe la vieja  · la consume desde ENCUADRE-1 — era la copia que §7.44 declaraba como deuda, y el arreglo es el que `camaraDelCuadro.ts` tenía escrito
+  │   ok  scene-framing.invariant.ts consume la fuente única, y no escribe la vieja  · la consume desde SITIO-S12 — era la quinta, con `35` y `0.88` escritos a mano
+  │   ok  camaraDelCuadro.ts guarda el TESTIGO de la fórmula vieja  · TESTIGO declarado: escribe la vieja a propósito (`recorridoConCodo` + `camaraConCodo`) para que §7 de `s10-logo` tenga contrafactual. Sin él, ese control positivo compara la fórmula nueva contra sí misma
+  │   ok  🔴 scene-camera.ts conserva su copia — DEUDA — es el PRELOADER DEL SITIO VIVO: su arreglo mueve el aterrizaje del logo en portrait y se juzga por grabación  · src/lib/scene-camera.ts
+  │   ok  🔴 LA COMPROBACIÓN DE QUE LAS CINCO COINCIDEN NO CIERRA, Y ES CORRECTO: queda 1 con copia propia  · ENCUADRE-1 cerró la de `harness.ts`; la del preloader sigue abierta y se juzga por grabación
+  │   ok    control positivo — la firma de la copia vieja no está ciega, y no confunde `abs` con `max(0, ·)`  · reconoce la vieja y rechaza la nueva
+  │   ok    control positivo — el escáner lee CÓDIGO: en crudo el arnés todavía «escribe» la fórmula, en un comentario  · si el censo leyera el archivo crudo daría por viva una copia borrada — §7.25, el escáner que lee el texto que lo describe
+  │ 
+  │ scene-framing: 32 en verde, 11 en rojo
+  │   ✗ el centro cae en (940, 417)  · (989, 414)
+  │   ✗ la tinta mide 445 × 310 px — un 15% más chica que con la calibrada  · 222 × 154px, contra 523 × 364
+  │   ✗ en 390×844 el clamp SÍ actúa — sin él el logo desbordaría  · ×1.000
+  │   ✗ y deja la tinta justo en el margen  · 226px = 0.86 × 390
+  │   ✗ el clamp achica, NO mueve: el centro ES la proyección del origen, sin pasar por el clamp  · x = 230.912 · proyección 230.912 · clamp ×1.000
+  │   ✗   y el clamp SÍ mueve el TAMAÑO, que es lo único que le toca: la tinta cruda no es la publicada  · cruda 226px contra 226px publicados
+  │   ✗ el codo de `scene-camera.ts` sale de SU caja, y NO es el 0,567 que publica §7.44  · 0.268674 con la caja del mesh (6.863213) contra 0,566964 con la del arnés (7,168)
+  │   ✗ 🔴 HOY el logo aterriza EXACTAMENTE en el centro geométrico de la pantalla en los tres teléfonos: `frameX` no corre nada  · es el defecto de §7.44, medido: con `travelX` en 0 el `aim` colapsa sobre el target y la cámara no rota
+  │   ✗   y la condición de §7.60 NO es «que /v3 componga»: `frameX` es INERTE en el preloader a 390×844  · cinco valores de `frameX` dan un solo aterrizaje (123.1775 px). Se pondrá en rojo cuando `scene-camera.ts` consuma `recorridoDeEncuadre`, no antes
+  │   ✗   y con `recorridoDeEncuadre` los tres se mueven: el arreglo NO es cosmético  · por eso §7.44 lo deja para una grabación en un teléfono y no para un invariante
+  │   ✗   control positivo — y NO coinciden debajo del codo: el contrafactual no se compara consigo mismo  · si coincidieran, toda la tabla de arriba sería una resta de un número contra sí mismo
+  │ 
+  ──
+
+  TOTAL s8e: 6 invariantes · 473 afirmaciones · 9 controles positivos · 0 fuera de ventana · 3 invariantes con falla
+
+═══ AGREGADO s9 — 4 invariantes, sin cortar en la primera falla
+  ok      test:s9-anclaje          46 afirm · 7 ctrl+ · 0 fallas  (3.0s, exit 0)
+  ok      test:s9-visibilidad      88 afirm · 12 ctrl+ · 0 fallas  (2.7s, exit 0)
+  parcial test:s9-sentry           39 afirm · 12 ctrl+ · 0 fallas · 1 fuera de ventana  (3.9s, exit 0)
+  parcial test:s9-instrumentos     63 afirm · 17 ctrl+ · 0 fallas · 1 fuera de ventana  (3.0s, exit 0)
+
+  TOTAL s9: 4 invariantes · 236 afirmaciones · 48 controles positivos · 2 fuera de ventana · 0 invariantes con falla
+
+═══ AGREGADO s9e — 2 invariantes, sin cortar en la primera falla
+  FALLA   test:s9e-composicion     12 afirm · 3 ctrl+ · 3 fallas  (2.7s, exit 1)
+
+  ── salida de test:s9e-composicion ────────────────────────────────
+  │ 
+  │ ── El instrumento de oclusión DETECTA una oclusión ───────────────────
+  │   ok  control positivo — con una losa sintética delante, la oclusión del logo es TOTAL  · 100% de la silueta tapada por sintético en 0° a radio 9
+  │   ok  control positivo — con una losa angosta tapa una PARTE: el instrumento discrimina  · 43% de la silueta
+  │   ok  control positivo — una losa en el fondo le come el cono libre  · ±0° con la losa contra ±29.3° sin ella
+  │ 
+  │ ── La escena vaciada: el logo nunca queda tapado ─────────────────────
+  │   ok  la lista de ocluyentes de la escena está vacía, y es la intención  · S10 borró los once planos suspendidos, la retícula aérea y los pilares
+  │   ok  nada cruza por delante del logo en ningún punto del recorrido  · 0% del recorrido, contra el 9,7% en cinco pasadas que publicó S9
+  │   ok  y tampoco en las ocho poses  · oclusión 0% en las ocho entradas
+  │ 
+  │ ── El corredor que hereda el efecto Star Wars ────────────────────────
+  │   ok  el cuadro entero queda libre hacia el fondo en TODO el recorrido, no solo en Trabajos  · cono libre mínimo ±29.3° (medio cuadro horizontal es ±29.3°), peor punto p=0.000
+  │   ok  y la profundidad del corredor la limita la envolvente o el piso, nunca una masa  · hero 30.0 (piso) · quiénes somos 38.6 (envolvente) · números 13.1 (piso) · trabajos 16.5 (piso) · demos 38.1 (envolvente) · cierre 38.1 (envolvente)
+  │ 
+  │ ── Amplitud: el mix contra los cinco recorridos ──────────────────────
+  │   ok  el salto de altura entre poses vecinas es el más grande de los cinco  · 12.6 contra calibrada a mano 7.8 · íntima 5.6 · arquitectónica 5.8 · dramática 11.4
+  │   ok  B13 — y la cámara nunca se acerca tanto como en ninguno de los otros cuatro: nuestro MÍNIMO es el mayor de los cinco  · 14.0 contra calibrada a mano 7.0 · íntima 6.4 · arquitectónica 11.5 · dramática 7.0
+  │   FALLA    y el rango de distancias YA NO es el mayor, porque se retiró su punta cercana: se publica, no se afirma  · 26.0 (era 18,0 con las poses de S9) contra calibrada a mano 9.0 · íntima 5.1 · arquitectónica 17.5 · dramática 12.5
+  │ 
+  │ ── Velocidad: menos pico y menos tirón que la calibrada ──────────────
+  │   ok  el pico de velocidad instantánea baja a menos de la mitad  · 193.8 → 71.9 alturas de cuadro por unidad de progreso
+  │   ok  y el mayor tirón entre segmentos, también a menos de la mitad  · 70.4 → 18.4
+  │   FALLA  la cámara recorre el MISMO camino que en la calibrada  · 151.7 contra 119.1 unidades de mundo — o sea que el pico no bajó recortando recorrido
+  │   FALLA  pero repartido: la pantalla más cargada se lleva menos del recorrido  · 33% del camino en su pantalla más cargada, contra 32% en la calibrada
+  │ 
+  │ s9 · el recorrido contra la escena: 12 en verde, 3 en rojo
+  │   ✗   y el rango de distancias YA NO es el mayor, porque se retiró su punta cercana: se publica, no se afirma  · 26.0 (era 18,0 con las poses de S9) contra calibrada a mano 9.0 · íntima 5.1 · arquitectónica 17.5 · dramática 12.5
+  │   ✗ la cámara recorre el MISMO camino que en la calibrada  · 151.7 contra 119.1 unidades de mundo — o sea que el pico no bajó recortando recorrido
+  │   ✗ pero repartido: la pantalla más cargada se lleva menos del recorrido  · 33% del camino en su pantalla más cargada, contra 32% en la calibrada
+  │ 
+  ──
+  ok      test:s9e-recorrido       22 afirm · 4 ctrl+ · 0 fallas  (2.6s, exit 0)
+
+  TOTAL s9e: 2 invariantes · 34 afirmaciones · 7 controles positivos · 0 fuera de ventana · 1 invariantes con falla
+
+═══ PASO 4 — resumen
+  ok     1 · package.json       limpio
+  ok     1b · conflictos        limpio
+  ok     2 · tsc --noEmit       10.0s
+  ok     3 · agregado s1        5 invariantes · 209 afirmaciones · 31 controles positivos · 3 fuera de ventana · 0 deudas declaradas · 0 con falla
+  FALLA  3 · agregado s10       8 invariantes · 432 afirmaciones · 91 controles positivos · 4 fuera de ventana · 12 deudas declaradas · 1 con falla
+  FALLA  3 · agregado s10e      5 invariantes · 82 afirmaciones · 22 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  FALLA  3 · agregado s11e      5 invariantes · 64 afirmaciones · 7 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 2 con falla
+  FALLA  3 · agregado s12e      3 invariantes · 47 afirmaciones · 2 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 3 con falla
+  ok     3 · agregado s13b      1 invariantes · 50 afirmaciones · 13 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  FALLA  3 · agregado s13e      5 invariantes · 93 afirmaciones · 14 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  FALLA  3 · agregado s14e      3 invariantes · 44 afirmaciones · 8 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 2 con falla
+  FALLA  3 · agregado s15e      4 invariantes · 125 afirmaciones · 13 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  FALLA  3 · agregado s16       5 invariantes · 132 afirmaciones · 40 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  ok     3 · agregado s17       2 invariantes · 76 afirmaciones · 9 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s18       3 invariantes · 106 afirmaciones · 13 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s19       2 invariantes · 104 afirmaciones · 9 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s2        11 invariantes · 398 afirmaciones · 38 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s20       2 invariantes · 60 afirmaciones · 7 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s21       2 invariantes · 120 afirmaciones · 14 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s22       1 invariantes · 42 afirmaciones · 6 controles positivos · 0 fuera de ventana · 1 deudas declaradas · 0 con falla
+  ok     3 · agregado s3        11 invariantes · 348 afirmaciones · 68 controles positivos · 1 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s4        5 invariantes · 91 afirmaciones · 20 controles positivos · 1 fuera de ventana · 0 deudas declaradas · 0 con falla
+  FALLA  3 · agregado s5        10 invariantes · 666 afirmaciones · 152 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  ok     3 · agregado s6        9 invariantes · 608 afirmaciones · 146 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  ok     3 · agregado s7        7 invariantes · 320 afirmaciones · 33 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 0 con falla
+  FALLA  3 · agregado s7e       5 invariantes · 115 afirmaciones · 24 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+  FALLA  3 · agregado s8        9 invariantes · 431 afirmaciones · 97 controles positivos · 2 fuera de ventana · 3 deudas declaradas · 2 con falla
+  FALLA  3 · agregado s8e       6 invariantes · 473 afirmaciones · 9 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 3 con falla
+  ok     3 · agregado s9        4 invariantes · 236 afirmaciones · 48 controles positivos · 2 fuera de ventana · 0 deudas declaradas · 0 con falla
+  FALLA  3 · agregado s9e       2 invariantes · 34 afirmaciones · 7 controles positivos · 0 fuera de ventana · 0 deudas declaradas · 1 con falla
+
+  verificar: 30 pasos, 13 con falla — 3 · agregado s10, 3 · agregado s10e, 3 · agregado s11e, 3 · agregado s12e, 3 · agregado s13e, 3 · agregado s14e, 3 · agregado s15e, 3 · agregado s16, 3 · agregado s5, 3 · agregado s7e, 3 · agregado s8, 3 · agregado s8e, 3 · agregado s9e
+  · los checks de frontera NO corren acá: `npm run test:frontera`, y va ANTES del commit.

@@ -1,0 +1,181 @@
+{
+  "cuando": "2026-09-16T03:07:13.948Z",
+  "distancia": 40,
+  "etiqueta": "d40",
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-320x568.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 110.31,
+          "ancho": 256,
+          "alto": 226.69
+        },
+        "glifos": 8347,
+        "tintaSobreLogo": 0.066,
+        "cajaSobreLogo": 0.1309,
+        "tintaBajoAA": 0.0648
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 110.31,
+          "ancho": 256,
+          "alto": 377.69
+        },
+        "glifos": 10430,
+        "tintaSobreLogo": 0.055,
+        "cajaSobreLogo": 0.0819,
+        "tintaBajoAA": 0.0524
+      }
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-375x667.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 322.66,
+          "ancho": 311,
+          "alto": 113.34
+        },
+        "glifos": 8305,
+        "tintaSobreLogo": 0.2026,
+        "cajaSobreLogo": 0.1569,
+        "tintaBajoAA": 0.1996
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 322.66,
+          "ancho": 311,
+          "alto": 264.34
+        },
+        "glifos": 10387,
+        "tintaSobreLogo": 0.162,
+        "cajaSobreLogo": 0.0724,
+        "tintaBajoAA": 0.1596
+      }
+    },
+    {
+      "ancho": 390,
+      "alto": 844,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-390x844.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 498.78,
+          "ancho": 326,
+          "alto": 114.22
+        },
+        "glifos": 8527,
+        "tintaSobreLogo": 0.0198,
+        "cajaSobreLogo": 0.022,
+        "tintaBajoAA": 0.0143
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 498.78,
+          "ancho": 326,
+          "alto": 265.22
+        },
+        "glifos": 10609,
+        "tintaSobreLogo": 0.0159,
+        "cajaSobreLogo": 0.0095,
+        "tintaBajoAA": 0.0115
+      }
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-425x844.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 520.7,
+          "ancho": 361,
+          "alto": 116.3
+        },
+        "glifos": 8802,
+        "tintaSobreLogo": 0.0027,
+        "cajaSobreLogo": 0.0169,
+        "tintaBajoAA": 0.002
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 520.7,
+          "ancho": 361,
+          "alto": 243.3
+        },
+        "glifos": 10871,
+        "tintaSobreLogo": 0.0022,
+        "cajaSobreLogo": 0.0081,
+        "tintaBajoAA": 0.0017
+      }
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-768x1024.png",
+      "titular": {
+        "caja": {
+          "x": 184,
+          "y": 519.66,
+          "ancho": 364,
+          "alto": 273.34
+        },
+        "glifos": 12134,
+        "tintaSobreLogo": 0.0055,
+        "cajaSobreLogo": 0.089,
+        "tintaBajoAA": 0.004
+      },
+      "bloque": {
+        "caja": {
+          "x": 184,
+          "y": 519.66,
+          "ancho": 364,
+          "alto": 424.34
+        },
+        "glifos": 14216,
+        "tintaSobreLogo": 0.0047,
+        "cajaSobreLogo": 0.0574,
+        "tintaBajoAA": 0.0034
+      }
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "captura": "docs\\rediseno\\capturas\\camara\\d40-1024x768.png",
+      "titular": {
+        "caja": {
+          "x": 184,
+          "y": 409.14,
+          "ancho": 534.66,
+          "alto": 151.86
+        },
+        "glifos": 14887,
+        "tintaSobreLogo": 0.0016,
+        "cajaSobreLogo": 0.0343,
+        "tintaBajoAA": 0.0013
+      },
+      "bloque": {
+        "caja": {
+          "x": 184,
+          "y": 409.14,
+          "ancho": 534.66,
+          "alto": 278.86
+        },
+        "glifos": 16956,
+        "tintaSobreLogo": 0.0014,
+        "cajaSobreLogo": 0.0187,
+        "tintaBajoAA": 0.0012
+      }
+    }
+  ]
+}

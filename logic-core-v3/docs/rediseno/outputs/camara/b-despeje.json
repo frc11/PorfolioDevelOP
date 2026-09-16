@@ -1,0 +1,2461 @@
+{
+  "cuando": "2026-09-16T02:59:42.808Z",
+  "umbrales": {
+    "unDigito": 0.1,
+    "limpio": 0.01
+  },
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.333,
+        "cobertura": 0.172,
+        "anchoDeLaTinta": 1.962,
+        "tintaHastaPx": 386
+      },
+      "aUnDigito": {
+        "distancia": 40,
+        "superposicion": 0.096,
+        "cobertura": 0.04,
+        "anchoDeLaTinta": 0.957,
+        "tintaHastaPx": 336
+      },
+      "limpia": null,
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.333,
+          "cobertura": 0.172,
+          "anchoDeLaTinta": 1.962,
+          "tintaHastaPx": 386
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.322,
+          "cobertura": 0.156,
+          "anchoDeLaTinta": 1.867,
+          "tintaHastaPx": 380
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.306,
+          "cobertura": 0.141,
+          "anchoDeLaTinta": 1.785,
+          "tintaHastaPx": 376
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.291,
+          "cobertura": 0.13,
+          "anchoDeLaTinta": 1.702,
+          "tintaHastaPx": 373
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.27,
+          "cobertura": 0.119,
+          "anchoDeLaTinta": 1.643,
+          "tintaHastaPx": 370
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.253,
+          "cobertura": 0.11,
+          "anchoDeLaTinta": 1.572,
+          "tintaHastaPx": 366
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0.236,
+          "cobertura": 0.101,
+          "anchoDeLaTinta": 1.513,
+          "tintaHastaPx": 366
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0.222,
+          "cobertura": 0.094,
+          "anchoDeLaTinta": 1.454,
+          "tintaHastaPx": 363
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0.207,
+          "cobertura": 0.087,
+          "anchoDeLaTinta": 1.395,
+          "tintaHastaPx": 360
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0.194,
+          "cobertura": 0.082,
+          "anchoDeLaTinta": 1.347,
+          "tintaHastaPx": 356
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0.181,
+          "cobertura": 0.076,
+          "anchoDeLaTinta": 1.312,
+          "tintaHastaPx": 356
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0.171,
+          "cobertura": 0.071,
+          "anchoDeLaTinta": 1.265,
+          "tintaHastaPx": 353
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0.159,
+          "cobertura": 0.067,
+          "anchoDeLaTinta": 1.229,
+          "tintaHastaPx": 349
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0.151,
+          "cobertura": 0.063,
+          "anchoDeLaTinta": 1.182,
+          "tintaHastaPx": 349
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0.141,
+          "cobertura": 0.059,
+          "anchoDeLaTinta": 1.146,
+          "tintaHastaPx": 346
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0.134,
+          "cobertura": 0.056,
+          "anchoDeLaTinta": 1.111,
+          "tintaHastaPx": 346
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0.126,
+          "cobertura": 0.053,
+          "anchoDeLaTinta": 1.087,
+          "tintaHastaPx": 343
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0.118,
+          "cobertura": 0.049,
+          "anchoDeLaTinta": 1.052,
+          "tintaHastaPx": 343
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0.112,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 1.028,
+          "tintaHastaPx": 339
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0.107,
+          "cobertura": 0.045,
+          "anchoDeLaTinta": 1.005,
+          "tintaHastaPx": 339
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0.101,
+          "cobertura": 0.042,
+          "anchoDeLaTinta": 0.969,
+          "tintaHastaPx": 336
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0.096,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 0.957,
+          "tintaHastaPx": 336
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0.091,
+          "cobertura": 0.038,
+          "anchoDeLaTinta": 0.922,
+          "tintaHastaPx": 336
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0.087,
+          "cobertura": 0.036,
+          "anchoDeLaTinta": 0.91,
+          "tintaHastaPx": 333
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0.083,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.886,
+          "tintaHastaPx": 333
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0.079,
+          "cobertura": 0.033,
+          "anchoDeLaTinta": 0.875,
+          "tintaHastaPx": 333
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0.076,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.839,
+          "tintaHastaPx": 329
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0.073,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.827,
+          "tintaHastaPx": 329
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0.069,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.804,
+          "tintaHastaPx": 329
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0.066,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.792,
+          "tintaHastaPx": 326
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0.064,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.768,
+          "tintaHastaPx": 326
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0.063,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.756,
+          "tintaHastaPx": 326
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0.059,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.745,
+          "tintaHastaPx": 326
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0.056,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.721,
+          "tintaHastaPx": 323
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0.055,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.721,
+          "tintaHastaPx": 323
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0.052,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.709,
+          "tintaHastaPx": 323
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0.051,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.697,
+          "tintaHastaPx": 323
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0.049,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.674,
+          "tintaHastaPx": 323
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0.047,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.662,
+          "tintaHastaPx": 319
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0.046,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.662,
+          "tintaHastaPx": 319
+        }
+      ]
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.281,
+        "cobertura": 0.172,
+        "anchoDeLaTinta": 1.962,
+        "tintaHastaPx": 454
+      },
+      "aUnDigito": {
+        "distancia": 33,
+        "superposicion": 0.091,
+        "cobertura": 0.059,
+        "anchoDeLaTinta": 1.146,
+        "tintaHastaPx": 406
+      },
+      "limpia": null,
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.281,
+          "cobertura": 0.172,
+          "anchoDeLaTinta": 1.962,
+          "tintaHastaPx": 454
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.257,
+          "cobertura": 0.156,
+          "anchoDeLaTinta": 1.867,
+          "tintaHastaPx": 446
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.237,
+          "cobertura": 0.142,
+          "anchoDeLaTinta": 1.785,
+          "tintaHastaPx": 442
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.216,
+          "cobertura": 0.13,
+          "anchoDeLaTinta": 1.702,
+          "tintaHastaPx": 438
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.197,
+          "cobertura": 0.119,
+          "anchoDeLaTinta": 1.643,
+          "tintaHastaPx": 434
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.183,
+          "cobertura": 0.111,
+          "anchoDeLaTinta": 1.572,
+          "tintaHastaPx": 430
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0.166,
+          "cobertura": 0.101,
+          "anchoDeLaTinta": 1.513,
+          "tintaHastaPx": 430
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0.156,
+          "cobertura": 0.095,
+          "anchoDeLaTinta": 1.454,
+          "tintaHastaPx": 426
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0.143,
+          "cobertura": 0.088,
+          "anchoDeLaTinta": 1.406,
+          "tintaHastaPx": 422
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0.132,
+          "cobertura": 0.082,
+          "anchoDeLaTinta": 1.359,
+          "tintaHastaPx": 418
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0.122,
+          "cobertura": 0.076,
+          "anchoDeLaTinta": 1.312,
+          "tintaHastaPx": 418
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0.114,
+          "cobertura": 0.071,
+          "anchoDeLaTinta": 1.265,
+          "tintaHastaPx": 414
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0.105,
+          "cobertura": 0.067,
+          "anchoDeLaTinta": 1.229,
+          "tintaHastaPx": 410
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0.101,
+          "cobertura": 0.064,
+          "anchoDeLaTinta": 1.182,
+          "tintaHastaPx": 410
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0.091,
+          "cobertura": 0.059,
+          "anchoDeLaTinta": 1.146,
+          "tintaHastaPx": 406
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0.088,
+          "cobertura": 0.056,
+          "anchoDeLaTinta": 1.123,
+          "tintaHastaPx": 406
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0.082,
+          "cobertura": 0.053,
+          "anchoDeLaTinta": 1.087,
+          "tintaHastaPx": 402
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0.076,
+          "cobertura": 0.049,
+          "anchoDeLaTinta": 1.052,
+          "tintaHastaPx": 402
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0.07,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 1.028,
+          "tintaHastaPx": 399
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0.067,
+          "cobertura": 0.045,
+          "anchoDeLaTinta": 1.005,
+          "tintaHastaPx": 399
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0.063,
+          "cobertura": 0.042,
+          "anchoDeLaTinta": 0.969,
+          "tintaHastaPx": 395
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0.06,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 0.957,
+          "tintaHastaPx": 395
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0.055,
+          "cobertura": 0.038,
+          "anchoDeLaTinta": 0.934,
+          "tintaHastaPx": 395
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0.052,
+          "cobertura": 0.036,
+          "anchoDeLaTinta": 0.91,
+          "tintaHastaPx": 391
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0.048,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.886,
+          "tintaHastaPx": 391
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0.047,
+          "cobertura": 0.033,
+          "anchoDeLaTinta": 0.875,
+          "tintaHastaPx": 391
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0.044,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.839,
+          "tintaHastaPx": 387
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0.041,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.827,
+          "tintaHastaPx": 387
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0.039,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.804,
+          "tintaHastaPx": 387
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0.036,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.792,
+          "tintaHastaPx": 383
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0.035,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.78,
+          "tintaHastaPx": 383
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0.033,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.756,
+          "tintaHastaPx": 383
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0.032,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.745,
+          "tintaHastaPx": 383
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0.029,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.721,
+          "tintaHastaPx": 379
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0.027,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.721,
+          "tintaHastaPx": 379
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0.026,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.709,
+          "tintaHastaPx": 379
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0.025,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.697,
+          "tintaHastaPx": 379
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0.025,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.674,
+          "tintaHastaPx": 379
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0.024,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.674,
+          "tintaHastaPx": 375
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0.022,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.662,
+          "tintaHastaPx": 375
+        }
+      ]
+    },
+    {
+      "ancho": 390,
+      "alto": 844,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.051,
+        "cobertura": 0.18,
+        "anchoDeLaTinta": 2.387,
+        "tintaHastaPx": 574
+      },
+      "aUnDigito": {
+        "distancia": 19,
+        "superposicion": 0.051,
+        "cobertura": 0.18,
+        "anchoDeLaTinta": 2.387,
+        "tintaHastaPx": 574
+      },
+      "limpia": {
+        "distancia": 28,
+        "superposicion": 0.007,
+        "cobertura": 0.099,
+        "anchoDeLaTinta": 1.655,
+        "tintaHastaPx": 529
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.051,
+          "cobertura": 0.18,
+          "anchoDeLaTinta": 2.387,
+          "tintaHastaPx": 574
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.042,
+          "cobertura": 0.172,
+          "anchoDeLaTinta": 2.269,
+          "tintaHastaPx": 569
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.034,
+          "cobertura": 0.163,
+          "anchoDeLaTinta": 2.175,
+          "tintaHastaPx": 559
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.029,
+          "cobertura": 0.155,
+          "anchoDeLaTinta": 2.08,
+          "tintaHastaPx": 554
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.023,
+          "cobertura": 0.145,
+          "anchoDeLaTinta": 1.997,
+          "tintaHastaPx": 549
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.019,
+          "cobertura": 0.134,
+          "anchoDeLaTinta": 1.915,
+          "tintaHastaPx": 544
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0.015,
+          "cobertura": 0.124,
+          "anchoDeLaTinta": 1.844,
+          "tintaHastaPx": 539
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0.014,
+          "cobertura": 0.116,
+          "anchoDeLaTinta": 1.773,
+          "tintaHastaPx": 539
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0.011,
+          "cobertura": 0.107,
+          "anchoDeLaTinta": 1.702,
+          "tintaHastaPx": 534
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0.007,
+          "cobertura": 0.099,
+          "anchoDeLaTinta": 1.655,
+          "tintaHastaPx": 529
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0.003,
+          "cobertura": 0.093,
+          "anchoDeLaTinta": 1.584,
+          "tintaHastaPx": 524
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0.003,
+          "cobertura": 0.087,
+          "anchoDeLaTinta": 1.536,
+          "tintaHastaPx": 524
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0,
+          "cobertura": 0.081,
+          "anchoDeLaTinta": 1.489,
+          "tintaHastaPx": 519
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0,
+          "cobertura": 0.077,
+          "anchoDeLaTinta": 1.442,
+          "tintaHastaPx": 519
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0,
+          "cobertura": 0.072,
+          "anchoDeLaTinta": 1.406,
+          "tintaHastaPx": 514
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0,
+          "cobertura": 0.068,
+          "anchoDeLaTinta": 1.359,
+          "tintaHastaPx": 514
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0,
+          "cobertura": 0.064,
+          "anchoDeLaTinta": 1.324,
+          "tintaHastaPx": 509
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0,
+          "cobertura": 0.06,
+          "anchoDeLaTinta": 1.288,
+          "tintaHastaPx": 509
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0,
+          "cobertura": 0.057,
+          "anchoDeLaTinta": 1.265,
+          "tintaHastaPx": 504
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0,
+          "cobertura": 0.054,
+          "anchoDeLaTinta": 1.229,
+          "tintaHastaPx": 504
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0,
+          "cobertura": 0.051,
+          "anchoDeLaTinta": 1.194,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0,
+          "cobertura": 0.049,
+          "anchoDeLaTinta": 1.158,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 1.135,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0,
+          "cobertura": 0.044,
+          "anchoDeLaTinta": 1.099,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0,
+          "cobertura": 0.043,
+          "anchoDeLaTinta": 1.075,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 1.052,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0,
+          "cobertura": 0.039,
+          "anchoDeLaTinta": 1.028,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0,
+          "cobertura": 0.037,
+          "anchoDeLaTinta": 1.016,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.981,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0,
+          "cobertura": 0.034,
+          "anchoDeLaTinta": 0.969,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0,
+          "cobertura": 0.033,
+          "anchoDeLaTinta": 0.945,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.934,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.91,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.886,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.875,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.851,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.839,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.827,
+          "tintaHastaPx": 474
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.815,
+          "tintaHastaPx": 474
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.804,
+          "tintaHastaPx": 474
+        }
+      ]
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.033,
+        "cobertura": 0.181,
+        "anchoDeLaTinta": 2.186,
+        "tintaHastaPx": 574
+      },
+      "aUnDigito": {
+        "distancia": 19,
+        "superposicion": 0.033,
+        "cobertura": 0.181,
+        "anchoDeLaTinta": 2.186,
+        "tintaHastaPx": 574
+      },
+      "limpia": {
+        "distancia": 23,
+        "superposicion": 0.008,
+        "cobertura": 0.134,
+        "anchoDeLaTinta": 1.832,
+        "tintaHastaPx": 549
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.033,
+          "cobertura": 0.181,
+          "anchoDeLaTinta": 2.186,
+          "tintaHastaPx": 574
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.022,
+          "cobertura": 0.171,
+          "anchoDeLaTinta": 2.092,
+          "tintaHastaPx": 564
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.017,
+          "cobertura": 0.158,
+          "anchoDeLaTinta": 1.997,
+          "tintaHastaPx": 559
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.012,
+          "cobertura": 0.145,
+          "anchoDeLaTinta": 1.915,
+          "tintaHastaPx": 554
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.008,
+          "cobertura": 0.134,
+          "anchoDeLaTinta": 1.832,
+          "tintaHastaPx": 549
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.004,
+          "cobertura": 0.123,
+          "anchoDeLaTinta": 1.749,
+          "tintaHastaPx": 544
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0,
+          "cobertura": 0.114,
+          "anchoDeLaTinta": 1.69,
+          "tintaHastaPx": 539
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0,
+          "cobertura": 0.105,
+          "anchoDeLaTinta": 1.619,
+          "tintaHastaPx": 539
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0,
+          "cobertura": 0.098,
+          "anchoDeLaTinta": 1.572,
+          "tintaHastaPx": 534
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0,
+          "cobertura": 0.091,
+          "anchoDeLaTinta": 1.513,
+          "tintaHastaPx": 529
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0,
+          "cobertura": 0.085,
+          "anchoDeLaTinta": 1.454,
+          "tintaHastaPx": 524
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0,
+          "cobertura": 0.08,
+          "anchoDeLaTinta": 1.406,
+          "tintaHastaPx": 524
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0,
+          "cobertura": 0.075,
+          "anchoDeLaTinta": 1.371,
+          "tintaHastaPx": 519
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0,
+          "cobertura": 0.07,
+          "anchoDeLaTinta": 1.324,
+          "tintaHastaPx": 519
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0,
+          "cobertura": 0.066,
+          "anchoDeLaTinta": 1.288,
+          "tintaHastaPx": 514
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0,
+          "cobertura": 0.063,
+          "anchoDeLaTinta": 1.253,
+          "tintaHastaPx": 514
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0,
+          "cobertura": 0.059,
+          "anchoDeLaTinta": 1.217,
+          "tintaHastaPx": 509
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0,
+          "cobertura": 0.056,
+          "anchoDeLaTinta": 1.182,
+          "tintaHastaPx": 509
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0,
+          "cobertura": 0.052,
+          "anchoDeLaTinta": 1.146,
+          "tintaHastaPx": 504
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0,
+          "cobertura": 0.05,
+          "anchoDeLaTinta": 1.111,
+          "tintaHastaPx": 504
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 1.099,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0,
+          "cobertura": 0.045,
+          "anchoDeLaTinta": 1.064,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0,
+          "cobertura": 0.043,
+          "anchoDeLaTinta": 1.04,
+          "tintaHastaPx": 499
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 1.016,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0,
+          "cobertura": 0.039,
+          "anchoDeLaTinta": 0.981,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0,
+          "cobertura": 0.037,
+          "anchoDeLaTinta": 0.969,
+          "tintaHastaPx": 494
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.945,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0,
+          "cobertura": 0.034,
+          "anchoDeLaTinta": 0.922,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.898,
+          "tintaHastaPx": 489
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0,
+          "cobertura": 0.031,
+          "anchoDeLaTinta": 0.886,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.875,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.851,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.839,
+          "tintaHastaPx": 484
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.815,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.804,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.792,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.768,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.756,
+          "tintaHastaPx": 479
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.745,
+          "tintaHastaPx": 474
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.733,
+          "tintaHastaPx": 474
+        }
+      ]
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.111,
+        "cobertura": 0.129,
+        "anchoDeLaTinta": 1.465,
+        "tintaHastaPx": 697
+      },
+      "aUnDigito": {
+        "distancia": 20,
+        "superposicion": 0.095,
+        "cobertura": 0.117,
+        "anchoDeLaTinta": 1.395,
+        "tintaHastaPx": 691
+      },
+      "limpia": {
+        "distancia": 37,
+        "superposicion": 0.009,
+        "cobertura": 0.035,
+        "anchoDeLaTinta": 0.78,
+        "tintaHastaPx": 612
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.111,
+          "cobertura": 0.129,
+          "anchoDeLaTinta": 1.465,
+          "tintaHastaPx": 697
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.095,
+          "cobertura": 0.117,
+          "anchoDeLaTinta": 1.395,
+          "tintaHastaPx": 691
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.079,
+          "cobertura": 0.107,
+          "anchoDeLaTinta": 1.335,
+          "tintaHastaPx": 684
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.065,
+          "cobertura": 0.098,
+          "anchoDeLaTinta": 1.288,
+          "tintaHastaPx": 678
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.055,
+          "cobertura": 0.089,
+          "anchoDeLaTinta": 1.217,
+          "tintaHastaPx": 672
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.048,
+          "cobertura": 0.083,
+          "anchoDeLaTinta": 1.17,
+          "tintaHastaPx": 666
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0.041,
+          "cobertura": 0.077,
+          "anchoDeLaTinta": 1.135,
+          "tintaHastaPx": 660
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0.037,
+          "cobertura": 0.071,
+          "anchoDeLaTinta": 1.087,
+          "tintaHastaPx": 654
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0.03,
+          "cobertura": 0.066,
+          "anchoDeLaTinta": 1.052,
+          "tintaHastaPx": 648
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0.027,
+          "cobertura": 0.061,
+          "anchoDeLaTinta": 1.005,
+          "tintaHastaPx": 642
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0.026,
+          "cobertura": 0.057,
+          "anchoDeLaTinta": 0.969,
+          "tintaHastaPx": 642
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0.024,
+          "cobertura": 0.054,
+          "anchoDeLaTinta": 0.945,
+          "tintaHastaPx": 636
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0.019,
+          "cobertura": 0.05,
+          "anchoDeLaTinta": 0.922,
+          "tintaHastaPx": 630
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0.019,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 0.886,
+          "tintaHastaPx": 630
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0.015,
+          "cobertura": 0.044,
+          "anchoDeLaTinta": 0.863,
+          "tintaHastaPx": 624
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0.015,
+          "cobertura": 0.042,
+          "anchoDeLaTinta": 0.839,
+          "tintaHastaPx": 624
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0.012,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 0.815,
+          "tintaHastaPx": 618
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0.012,
+          "cobertura": 0.038,
+          "anchoDeLaTinta": 0.792,
+          "tintaHastaPx": 618
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0.009,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.78,
+          "tintaHastaPx": 612
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0.009,
+          "cobertura": 0.033,
+          "anchoDeLaTinta": 0.745,
+          "tintaHastaPx": 612
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0.008,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.733,
+          "tintaHastaPx": 612
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0.006,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.709,
+          "tintaHastaPx": 606
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0.006,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.697,
+          "tintaHastaPx": 606
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0.004,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.674,
+          "tintaHastaPx": 600
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0.004,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.662,
+          "tintaHastaPx": 600
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0.004,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.65,
+          "tintaHastaPx": 600
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0.002,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.626,
+          "tintaHastaPx": 594
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0.002,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.615,
+          "tintaHastaPx": 594
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0.002,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.615,
+          "tintaHastaPx": 594
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0.002,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.591,
+          "tintaHastaPx": 594
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.579,
+          "tintaHastaPx": 588
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.567,
+          "tintaHastaPx": 588
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.567,
+          "tintaHastaPx": 588
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0,
+          "cobertura": 0.018,
+          "anchoDeLaTinta": 0.544,
+          "tintaHastaPx": 588
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.532,
+          "tintaHastaPx": 582
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.532,
+          "tintaHastaPx": 582
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0,
+          "cobertura": 0.016,
+          "anchoDeLaTinta": 0.52,
+          "tintaHastaPx": 582
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0,
+          "cobertura": 0.016,
+          "anchoDeLaTinta": 0.508,
+          "tintaHastaPx": 582
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.496,
+          "tintaHastaPx": 576
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.496,
+          "tintaHastaPx": 576
+        }
+      ]
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0.087,
+        "cobertura": 0.074,
+        "anchoDeLaTinta": 0.827,
+        "tintaHastaPx": 527
+      },
+      "aUnDigito": {
+        "distancia": 19,
+        "superposicion": 0.087,
+        "cobertura": 0.074,
+        "anchoDeLaTinta": 0.827,
+        "tintaHastaPx": 527
+      },
+      "limpia": {
+        "distancia": 37,
+        "superposicion": 0.01,
+        "cobertura": 0.021,
+        "anchoDeLaTinta": 0.437,
+        "tintaHastaPx": 463
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0.087,
+          "cobertura": 0.074,
+          "anchoDeLaTinta": 0.827,
+          "tintaHastaPx": 527
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0.077,
+          "cobertura": 0.067,
+          "anchoDeLaTinta": 0.792,
+          "tintaHastaPx": 522
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0.067,
+          "cobertura": 0.062,
+          "anchoDeLaTinta": 0.756,
+          "tintaHastaPx": 518
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0.059,
+          "cobertura": 0.056,
+          "anchoDeLaTinta": 0.721,
+          "tintaHastaPx": 513
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0.05,
+          "cobertura": 0.051,
+          "anchoDeLaTinta": 0.685,
+          "tintaHastaPx": 509
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0.046,
+          "cobertura": 0.048,
+          "anchoDeLaTinta": 0.674,
+          "tintaHastaPx": 504
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0.039,
+          "cobertura": 0.044,
+          "anchoDeLaTinta": 0.638,
+          "tintaHastaPx": 500
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0.035,
+          "cobertura": 0.041,
+          "anchoDeLaTinta": 0.615,
+          "tintaHastaPx": 495
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0.029,
+          "cobertura": 0.038,
+          "anchoDeLaTinta": 0.591,
+          "tintaHastaPx": 491
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0.026,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.567,
+          "tintaHastaPx": 491
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0.023,
+          "cobertura": 0.033,
+          "anchoDeLaTinta": 0.555,
+          "tintaHastaPx": 486
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0.018,
+          "cobertura": 0.031,
+          "anchoDeLaTinta": 0.544,
+          "tintaHastaPx": 482
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0.018,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.52,
+          "tintaHastaPx": 482
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0.017,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.508,
+          "tintaHastaPx": 477
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0.015,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.485,
+          "tintaHastaPx": 472
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0.013,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.473,
+          "tintaHastaPx": 472
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0.011,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.461,
+          "tintaHastaPx": 468
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0.011,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.449,
+          "tintaHastaPx": 468
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0.01,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.437,
+          "tintaHastaPx": 463
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0.008,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.425,
+          "tintaHastaPx": 463
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0.007,
+          "cobertura": 0.018,
+          "anchoDeLaTinta": 0.402,
+          "tintaHastaPx": 463
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0.007,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.402,
+          "tintaHastaPx": 459
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0.007,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.39,
+          "tintaHastaPx": 459
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0.006,
+          "cobertura": 0.016,
+          "anchoDeLaTinta": 0.39,
+          "tintaHastaPx": 454
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0.006,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.378,
+          "tintaHastaPx": 454
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0.004,
+          "cobertura": 0.014,
+          "anchoDeLaTinta": 0.366,
+          "tintaHastaPx": 454
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0.003,
+          "cobertura": 0.014,
+          "anchoDeLaTinta": 0.355,
+          "tintaHastaPx": 450
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0.003,
+          "cobertura": 0.014,
+          "anchoDeLaTinta": 0.355,
+          "tintaHastaPx": 450
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0.003,
+          "cobertura": 0.013,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 450
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0.003,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 445
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0.003,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.319,
+          "tintaHastaPx": 445
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0.003,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.319,
+          "tintaHastaPx": 445
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0.002,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.319,
+          "tintaHastaPx": 445
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0.001,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 441
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0.001,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 441
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0.001,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 441
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0.001,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.284,
+          "tintaHastaPx": 441
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0.001,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.284,
+          "tintaHastaPx": 436
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0.001,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.284,
+          "tintaHastaPx": 436
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0.001,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 436
+        }
+      ]
+    },
+    {
+      "ancho": 1440,
+      "alto": 900,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.062,
+        "anchoDeLaTinta": 0.697,
+        "tintaHastaPx": 628
+      },
+      "aUnDigito": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.062,
+        "anchoDeLaTinta": 0.697,
+        "tintaHastaPx": 628
+      },
+      "limpia": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.062,
+        "anchoDeLaTinta": 0.697,
+        "tintaHastaPx": 628
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0,
+          "cobertura": 0.062,
+          "anchoDeLaTinta": 0.697,
+          "tintaHastaPx": 628
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0,
+          "cobertura": 0.057,
+          "anchoDeLaTinta": 0.662,
+          "tintaHastaPx": 618
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0,
+          "cobertura": 0.052,
+          "anchoDeLaTinta": 0.626,
+          "tintaHastaPx": 612
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0,
+          "cobertura": 0.048,
+          "anchoDeLaTinta": 0.615,
+          "tintaHastaPx": 607
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0,
+          "cobertura": 0.044,
+          "anchoDeLaTinta": 0.579,
+          "tintaHastaPx": 602
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 0.555,
+          "tintaHastaPx": 596
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0,
+          "cobertura": 0.037,
+          "anchoDeLaTinta": 0.544,
+          "tintaHastaPx": 591
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0,
+          "cobertura": 0.035,
+          "anchoDeLaTinta": 0.508,
+          "tintaHastaPx": 586
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0,
+          "cobertura": 0.032,
+          "anchoDeLaTinta": 0.496,
+          "tintaHastaPx": 580
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0,
+          "cobertura": 0.03,
+          "anchoDeLaTinta": 0.473,
+          "tintaHastaPx": 580
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0,
+          "cobertura": 0.028,
+          "anchoDeLaTinta": 0.461,
+          "tintaHastaPx": 575
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0,
+          "cobertura": 0.026,
+          "anchoDeLaTinta": 0.449,
+          "tintaHastaPx": 570
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.437,
+          "tintaHastaPx": 564
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0,
+          "cobertura": 0.023,
+          "anchoDeLaTinta": 0.425,
+          "tintaHastaPx": 564
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.414,
+          "tintaHastaPx": 559
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.39,
+          "tintaHastaPx": 559
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.39,
+          "tintaHastaPx": 554
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.378,
+          "tintaHastaPx": 554
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.355,
+          "tintaHastaPx": 548
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.355,
+          "tintaHastaPx": 548
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 543
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 543
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0,
+          "cobertura": 0.014,
+          "anchoDeLaTinta": 0.331,
+          "tintaHastaPx": 538
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0,
+          "cobertura": 0.013,
+          "anchoDeLaTinta": 0.319,
+          "tintaHastaPx": 538
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0,
+          "cobertura": 0.013,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 538
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 532
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 532
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.295,
+          "tintaHastaPx": 532
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.295,
+          "tintaHastaPx": 527
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 527
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 527
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 522
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 522
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 522
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 522
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.248,
+          "tintaHastaPx": 516
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 516
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 516
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 516
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0,
+          "cobertura": 0.007,
+          "anchoDeLaTinta": 0.225,
+          "tintaHastaPx": 511
+        }
+      ]
+    },
+    {
+      "ancho": 1920,
+      "alto": 1080,
+      "techoDeLaSala": 58.01,
+      "hoy": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.057,
+        "anchoDeLaTinta": 0.638,
+        "tintaHastaPx": 760
+      },
+      "aUnDigito": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.057,
+        "anchoDeLaTinta": 0.638,
+        "tintaHastaPx": 760
+      },
+      "limpia": {
+        "distancia": 19,
+        "superposicion": 0,
+        "cobertura": 0.057,
+        "anchoDeLaTinta": 0.638,
+        "tintaHastaPx": 760
+      },
+      "curva": [
+        {
+          "distancia": 19,
+          "superposicion": 0,
+          "cobertura": 0.057,
+          "anchoDeLaTinta": 0.638,
+          "tintaHastaPx": 760
+        },
+        {
+          "distancia": 20,
+          "superposicion": 0,
+          "cobertura": 0.052,
+          "anchoDeLaTinta": 0.603,
+          "tintaHastaPx": 747
+        },
+        {
+          "distancia": 21,
+          "superposicion": 0,
+          "cobertura": 0.047,
+          "anchoDeLaTinta": 0.579,
+          "tintaHastaPx": 741
+        },
+        {
+          "distancia": 22,
+          "superposicion": 0,
+          "cobertura": 0.043,
+          "anchoDeLaTinta": 0.544,
+          "tintaHastaPx": 735
+        },
+        {
+          "distancia": 23,
+          "superposicion": 0,
+          "cobertura": 0.04,
+          "anchoDeLaTinta": 0.532,
+          "tintaHastaPx": 728
+        },
+        {
+          "distancia": 24,
+          "superposicion": 0,
+          "cobertura": 0.037,
+          "anchoDeLaTinta": 0.508,
+          "tintaHastaPx": 722
+        },
+        {
+          "distancia": 25,
+          "superposicion": 0,
+          "cobertura": 0.034,
+          "anchoDeLaTinta": 0.485,
+          "tintaHastaPx": 716
+        },
+        {
+          "distancia": 26,
+          "superposicion": 0,
+          "cobertura": 0.031,
+          "anchoDeLaTinta": 0.461,
+          "tintaHastaPx": 709
+        },
+        {
+          "distancia": 27,
+          "superposicion": 0,
+          "cobertura": 0.029,
+          "anchoDeLaTinta": 0.449,
+          "tintaHastaPx": 703
+        },
+        {
+          "distancia": 28,
+          "superposicion": 0,
+          "cobertura": 0.027,
+          "anchoDeLaTinta": 0.425,
+          "tintaHastaPx": 696
+        },
+        {
+          "distancia": 29,
+          "superposicion": 0,
+          "cobertura": 0.025,
+          "anchoDeLaTinta": 0.425,
+          "tintaHastaPx": 690
+        },
+        {
+          "distancia": 30,
+          "superposicion": 0,
+          "cobertura": 0.024,
+          "anchoDeLaTinta": 0.414,
+          "tintaHastaPx": 690
+        },
+        {
+          "distancia": 31,
+          "superposicion": 0,
+          "cobertura": 0.022,
+          "anchoDeLaTinta": 0.39,
+          "tintaHastaPx": 684
+        },
+        {
+          "distancia": 32,
+          "superposicion": 0,
+          "cobertura": 0.021,
+          "anchoDeLaTinta": 0.378,
+          "tintaHastaPx": 677
+        },
+        {
+          "distancia": 33,
+          "superposicion": 0,
+          "cobertura": 0.02,
+          "anchoDeLaTinta": 0.378,
+          "tintaHastaPx": 677
+        },
+        {
+          "distancia": 34,
+          "superposicion": 0,
+          "cobertura": 0.019,
+          "anchoDeLaTinta": 0.355,
+          "tintaHastaPx": 671
+        },
+        {
+          "distancia": 35,
+          "superposicion": 0,
+          "cobertura": 0.018,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 671
+        },
+        {
+          "distancia": 36,
+          "superposicion": 0,
+          "cobertura": 0.017,
+          "anchoDeLaTinta": 0.343,
+          "tintaHastaPx": 664
+        },
+        {
+          "distancia": 37,
+          "superposicion": 0,
+          "cobertura": 0.016,
+          "anchoDeLaTinta": 0.331,
+          "tintaHastaPx": 664
+        },
+        {
+          "distancia": 38,
+          "superposicion": 0,
+          "cobertura": 0.015,
+          "anchoDeLaTinta": 0.319,
+          "tintaHastaPx": 658
+        },
+        {
+          "distancia": 39,
+          "superposicion": 0,
+          "cobertura": 0.014,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 658
+        },
+        {
+          "distancia": 40,
+          "superposicion": 0,
+          "cobertura": 0.013,
+          "anchoDeLaTinta": 0.307,
+          "tintaHastaPx": 652
+        },
+        {
+          "distancia": 41,
+          "superposicion": 0,
+          "cobertura": 0.013,
+          "anchoDeLaTinta": 0.295,
+          "tintaHastaPx": 652
+        },
+        {
+          "distancia": 42,
+          "superposicion": 0,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.295,
+          "tintaHastaPx": 645
+        },
+        {
+          "distancia": 43,
+          "superposicion": 0,
+          "cobertura": 0.012,
+          "anchoDeLaTinta": 0.295,
+          "tintaHastaPx": 645
+        },
+        {
+          "distancia": 44,
+          "superposicion": 0,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 645
+        },
+        {
+          "distancia": 45,
+          "superposicion": 0,
+          "cobertura": 0.011,
+          "anchoDeLaTinta": 0.272,
+          "tintaHastaPx": 639
+        },
+        {
+          "distancia": 46,
+          "superposicion": 0,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 639
+        },
+        {
+          "distancia": 47,
+          "superposicion": 0,
+          "cobertura": 0.01,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 639
+        },
+        {
+          "distancia": 48,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.26,
+          "tintaHastaPx": 633
+        },
+        {
+          "distancia": 49,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.248,
+          "tintaHastaPx": 633
+        },
+        {
+          "distancia": 50,
+          "superposicion": 0,
+          "cobertura": 0.009,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 633
+        },
+        {
+          "distancia": 51,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 633
+        },
+        {
+          "distancia": 52,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.236,
+          "tintaHastaPx": 626
+        },
+        {
+          "distancia": 53,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.225,
+          "tintaHastaPx": 626
+        },
+        {
+          "distancia": 54,
+          "superposicion": 0,
+          "cobertura": 0.008,
+          "anchoDeLaTinta": 0.225,
+          "tintaHastaPx": 626
+        },
+        {
+          "distancia": 55,
+          "superposicion": 0,
+          "cobertura": 0.007,
+          "anchoDeLaTinta": 0.225,
+          "tintaHastaPx": 626
+        },
+        {
+          "distancia": 56,
+          "superposicion": 0,
+          "cobertura": 0.007,
+          "anchoDeLaTinta": 0.225,
+          "tintaHastaPx": 620
+        },
+        {
+          "distancia": 57,
+          "superposicion": 0,
+          "cobertura": 0.007,
+          "anchoDeLaTinta": 0.213,
+          "tintaHastaPx": 620
+        },
+        {
+          "distancia": 58,
+          "superposicion": 0,
+          "cobertura": 0.007,
+          "anchoDeLaTinta": 0.213,
+          "tintaHastaPx": 620
+        }
+      ]
+    }
+  ]
+}
