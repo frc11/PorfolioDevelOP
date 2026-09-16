@@ -20,14 +20,23 @@
  * ── ⚠️ Y QUÉ **NO** HACE, QUE ES LA MITAD DE LA DECISIÓN ──────────────────
  *
  * **No mueve un solo `frameX`.** VERTICAL-1 salió a componer con esa perilla y
- * la medición dijo que no es la perilla: los §3, §5 y §6 de abajo son por qué, y
+ * la medición dijo que no es la perilla: los §3, §5b y §6 de abajo son por qué, y
  * cada uno es una afirmación que puede fallar el día que alguien lo arregle.
  *
- * Los tres 🔴 de este archivo son **defectos declarados, no propiedades
- * deseadas**. La diferencia con `todosCentradosHoy` —la afirmación que §7.60
- * manda sacar— es exactamente ésa: aquélla afirmaba que un valor producido por
- * un `max(0, …)` roto era el valor correcto; éstas dicen «esto está mal, mide
- * tanto, y esta línea se pone en rojo cuando deje de estarlo».
+ * Los 🔴 de este archivo son **defectos declarados, no propiedades deseadas**. La
+ * diferencia con `todosCentradosHoy` —la afirmación que §7.60 manda sacar— es
+ * exactamente ésa: aquélla afirmaba que un valor producido por un `max(0, …)`
+ * roto era el valor correcto; éstas dicen «esto está mal, mide tanto, y esta
+ * línea se pone en rojo cuando deje de estarlo».
+ *
+ * ── ⚠️ TAPADO-1 · EL §5 DE ESTE ARCHIVO PUBLICABA UNA CIFRA QUE NO ERA ────
+ *
+ * Decía «LA SUPERPOSICIÓN CON LA COLUMNA — 0 % en seis de siete» y lo que medía
+ * era el MÍNIMO sobre posiciones verticales hipotéticas. El humano vio el logo
+ * tapando el titular entero en una captura mientras esto estaba en verde. El §5
+ * de hoy mide en la posición REAL del bloque (derivada en `s10-logo-alto.ts`) y
+ * el barrido bajó al §5b con el nombre de lo que contesta: si la superposición
+ * es EVITABLE. La historia completa está en el docblock del §5.
  */
 
 import { CHOREO_KEYFRAMES } from '../choreography'
@@ -38,6 +47,8 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__
 import { aCuadroAlto, aCuadroX } from './s10-logo-cajas'
 import { muestrearLogo } from './s10-logo'
 import { ESCENA_REAL, barridoVertical, cajaDelLogo, fraccionDentro, mayorCaja } from './s10-logo-lectura'
+// prettier-ignore
+import { SUPUESTOS_DEL_ALTO, conDistribucion, repartoVertical, superposicionReal } from './s10-logo-alto'
 
 // ── El banco ────────────────────────────────────────────────────────────────
 
@@ -74,6 +85,7 @@ function caja(progreso: number, pista: Track, campo = CAMPO, col = COL, fil = FI
 }
 
 const enPx = (centroNdc: number): number => ((centroNdc + 1) / 2) * ANCHO
+const pct = (v: number): string => `${(v * 100).toFixed(1)} %`
 
 /** La sección TRANSPARENTE que llena el cuadro en un progreso, si la hay. */
 function seccionQueLlena(progreso: number): string | null {
@@ -240,7 +252,99 @@ for (const [nombre, esperado] of POSICIONES) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · LA SUPERPOSICIÓN CON LA COLUMNA — 0 % en seis de siete, y `frameX` no la toca')
+titulo('5 · 🔴 LA SUPERPOSICIÓN DONDE EL TEXTO ESTÁ — la cifra que este archivo publicaba mal')
+
+/**
+ * ⚠️ **ACÁ HABÍA UN 0 % QUE LA PANTALLA DESMENTÍA, Y ESTE BLOQUE ES SU
+ * ARREGLO.**
+ *
+ * Lo que §5 publicaba, con el título «LA SUPERPOSICIÓN CON LA COLUMNA — 0 % en
+ * seis de siete», era `barridoVertical(...).minima`: el **mínimo sobre todas las
+ * posiciones verticales que la caja podría ocupar**. La línea de cada afirmación
+ * lo decía —*«existe una altura con superposición CERO»*— y era verdad. Lo que
+ * no era verdad es la lectura que el título inducía, porque **el bloque no está
+ * en esa altura**: estaba donde lo ponía `justify-center`, o sea el medio de la
+ * pantalla, o sea exactamente donde está el logo.
+ *
+ * La causa, con su línea: `minimaEn` —abajo en este mismo archivo— devolvía
+ * `.minima` de `barridoVertical` (`s10-logo-lectura.ts`), y **la posición
+ * vertical del bloque no se derivaba en ningún lado**: `s10-logo-cajas.ts` lo
+ * declaraba como su supuesto 4. El instrumento se fabricaba la posición
+ * favorable y después afirmaba sobre ella, que es la falla que este repo llama
+ * «verde por arnés».
+ *
+ * El discriminador empírico, medido sobre el píxel con
+ * `scripts-tapado/a-verdad.ts` en la misma ventana donde esto decía 0 %:
+ * **54,8 % de la tinta del titular sobre la masa negra del logo, con el 54,7 %
+ * de ella por debajo de AA**. El humano lo vio antes que el instrumento.
+ *
+ * Lo que sigue mide en la posición REAL, derivada en `s10-logo-alto.ts` con las
+ * mismas clases que el reparto horizontal ya leía. El barrido no se borra: baja
+ * al §5b con el nombre de la pregunta que sí contesta.
+ */
+const REPARTO_DE_HOY = repartoVertical('hero', ANCHO, ALTO)
+const MUESTRA_DEL_HERO = muestrearLogo(0, ASPECTO, ESCENA_REAL, COL, FIL, 1)
+const REAL_HOY = superposicionReal(MUESTRA_DEL_HERO, REPARTO_DE_HOY)
+const REAL_CENTRADO = superposicionReal(
+  MUESTRA_DEL_HERO,
+  repartoVertical('hero', ANCHO, ALTO, { clasesDe: conDistribucion('center') }),
+)
+
+afirmar(
+  REPARTO_DE_HOY.sinModelar.length === 0,
+  'el reparto vertical del hero no encontró una sola clase que no sepa modelar',
+  'si aparece una, sale acá con su nombre en vez de desaparecer adentro de una cifra',
+)
+for (const c of REAL_HOY.porCaja) {
+  console.log(`  ${c.etiqueta.padEnd(5)} ${pct(c.fraccion)} — «${c.texto.slice(0, 34)}»`)
+}
+afirmar(
+  REAL_CENTRADO.fraccion > 0.2,
+  '🔴 CON EL BLOQUE CENTRADO — la composición de la captura del humano — el hero NO está limpio',
+  `${pct(REAL_CENTRADO.fraccion)} del área del texto sobre tinta del logo; el navegador midió 54,8 % de la TINTA del titular`,
+)
+afirmar(
+  REAL_HOY.fraccion < REAL_CENTRADO.fraccion,
+  '  y la composición de HOY —`justify-end` abajo del breakpoint— baja esa cifra',
+  `${pct(REAL_CENTRADO.fraccion)} → ${pct(REAL_HOY.fraccion)} · peor caja: «${REAL_HOY.peor?.texto.slice(0, 26) ?? 'n/d'}» al ${pct(REAL_HOY.peor?.fraccion ?? 0)}`,
+)
+/**
+ * ⚠️ **EL CONTROL POSITIVO ES LA COMPOSICIÓN DE LA CAPTURA DEL HUMANO.** Le da
+ * de comer al medidor el hero CENTRADO —el estado en el que el logo se come el
+ * titular entero— y exige que NO lo lea como limpio. El segundo control corre el
+ * instrumento VIEJO sobre esa misma composición y comprueba que sí estaba ciego:
+ * su mínimo da 0 % ahí. Los dos juntos son lo que impide que alguien vuelva a
+ * publicar un mínimo con el nombre de una superposición.
+ */
+controlPositivo(
+  'el medidor de superposición REAL no está ciego: con el bloque centrado no devuelve «limpio»',
+  'center',
+  (como: string) =>
+    superposicionReal(
+      MUESTRA_DEL_HERO,
+      repartoVertical('hero', ANCHO, ALTO, { clasesDe: conDistribucion(como) }),
+    ).fraccion < 0.01,
+)
+controlPositivo(
+  '  y el barrido VIEJO SÍ estaba ciego: sobre esa misma composición su mínimo da cero',
+  0.01,
+  (umbral: number) => {
+    const c = mayorCaja('hero', ANCHO)
+    return (
+      barridoVertical(
+        MUESTRA_DEL_HERO,
+        aCuadroX(c.banda.izquierda, ANCHO),
+        aCuadroX(c.banda.izquierda + c.banda.ancho, ANCHO),
+        aCuadroAlto(c.altoPx, ALTO),
+        100,
+      ).minima > umbral
+    )
+  },
+)
+console.log(`  supuestos del alto:\n${SUPUESTOS_DEL_ALTO.map((x) => `   · ${x}`).join('\n')}`)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5b · ¿ES EVITABLE MOVIENDO EL BLOQUE? — el barrido, con el nombre de lo que mide')
 
 /**
  * El criterio (b) era *«cero superposición con la columna de texto»*. A 390 la
@@ -248,6 +352,12 @@ titulo('5 · LA SUPERPOSICIÓN CON LA COLUMNA — 0 % en seis de siete, y `frame
  * viewport— y el logo es MÁS ANCHO que el cuadro, así que **la columna está
  * siempre adentro del rango horizontal del logo**: la única separación posible
  * es vertical, y ésa la mide `barridoVertical`, no `frameX`.
+ *
+ * ⚠️ **UN 0 % ACÁ NO DICE «NO SE SUPERPONE»: DICE «SE PUEDE EVITAR».** Es el
+ * mínimo sobre todas las alturas que la caja podría ocupar, no sobre la que
+ * ocupa. Cuánto se superpone de verdad está arriba, en §5. Los dos hacen falta y
+ * ninguno reemplaza al otro: éste dice si mover el texto alcanza, aquél dice
+ * cuánto hay que moverlo.
  */
 const MINIMAS = CHOREO_KEYFRAMES.map((k) => {
   const id = seccionQueLlena(k.at)
@@ -256,11 +366,11 @@ const MINIMAS = CHOREO_KEYFRAMES.map((k) => {
 for (const m of MINIMAS) {
   if (m.id === null) continue
   if (m.minima < 1e-6) {
-    afirmar(true, `\`${m.nombre}\` sobre \`${m.id}\`: existe una altura con superposición CERO`)
+    afirmar(true, `\`${m.nombre}\` sobre \`${m.id}\`: EVITABLE — existe una altura con superposición cero`)
   } else {
     afirmar(
       m.minima > 0,
-      `🔴 \`${m.nombre}\` sobre \`${m.id}\`: NO existe una altura sin superposición`,
+      `🔴 \`${m.nombre}\` sobre \`${m.id}\`: INEVITABLE — no existe una altura sin superposición`,
       `la mínima es ${(m.minima * 100).toFixed(1)} % — el \`h2\` de esa sección mide 8 renglones a 390 y no entra en el hueco`,
     )
   }
@@ -281,7 +391,7 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · POR QUÉ NO SE MOVIÓ NINGUNA PERILLA — la mínima es PLANA en el barrido')
+titulo('6 · POR QUÉ NO SE MOVIÓ NINGUNA PERILLA DE ESCENA — la mínima es PLANA en el barrido')
 
 /**
  * La prueba de que `frameX` no es la palanca de (b): barriendo la perilla de −1

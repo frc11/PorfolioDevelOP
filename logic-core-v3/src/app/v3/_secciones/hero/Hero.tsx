@@ -158,10 +158,36 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
         {/* `min-h-svh` y no `h-svh`: si el titular se parte en más líneas de las
             previstas —otro copy, otro idioma— la pantalla crece en vez de
             recortar el texto. El alto declarado de la sección es un MÍNIMO en
-            `Panel`, así que las dos cajas dicen lo mismo. */}
+            `Panel`, así que las dos cajas dicen lo mismo.
+
+            ⚠️ **`justify-end` ABAJO DEL BREAKPOINT, Y ES LA ÚNICA COSA QUE ESTE
+            SPRINT MUEVE.** Decisión del dueño mirando la referencia: en vertical
+            el logo va arriba y el texto abajo. El motivo medido: con el bloque
+            centrado, el logo —que en esos anchos es MÁS ANCHO QUE EL CUADRO y
+            cae en el medio de la pantalla— se come el titular. Medido sobre el
+            píxel con `scripts-tapado/a-verdad.ts`, tinta del titular sobre la
+            masa negra del logo: **56,2 % a 375 · 54,8 % a 390 · 48,1 % a 425 ·
+            56,8 % a 768 · 20,6 % a 1024**, contra **0,6 % a 1440 y 0,1 % a
+            1920**. Los dos anchos de escritorio están bien compuestos y por eso
+            conservan `justify-center` — es lo que hace la variante.
+
+            El bloque entero baja: titular, bajada y CTA. El orden interno no
+            cambia, y ninguna otra clase se toca. `pb-20` sigue siendo el que
+            reserva los 72 px de la pastilla (`soporte.ts` lo afirma contra
+            `DESCUENTO_NACIMIENTO_PX`), así que `justify-end` apoya el bloque
+            exactamente en ese borde y no debajo de la pastilla.
+
+            ⚠ **A 320 esto NO alcanza, y está medido.** Ahí el bloque ocupa el
+            66 % del viewport contra una masa de logo del 37 %: la suma pasa de
+            100, así que **no existe ninguna posición en la que no se toquen**.
+            El barrido de la mejor posición posible da 21,8 % pegado al borde de
+            arriba; medido en pantalla, `justify-end` deja 31,5 % contra el
+            30,7 % de antes. No es una regresión de este cambio: es que a ese
+            ancho no existe una posición limpia. Los números están en
+            `s10-logo-composicion.ts` y la salida no es de acá. */}
         <div
           data-pantalla="hero"
-          className="flex min-h-svh w-full flex-col justify-center pt-20 pb-20"
+          className="flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center"
         >
           <Grilla columnas="lateral">
             {/* ⚠️ LA COLUMNA LATERAL SE QUEDA VACÍA, Y NO ES UN `MarcaDeSeccion`

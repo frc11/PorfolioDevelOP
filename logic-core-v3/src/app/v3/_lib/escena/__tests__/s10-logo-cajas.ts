@@ -31,11 +31,23 @@
  *
  * ── ⚠ LOS SUPUESTOS, declarados (regla 10: esto es CÁLCULO, no medición) ───
  *
- * Están en `SUPUESTOS_DE_LAS_CAJAS` y se imprimen al lado de toda cifra. El más
- * grande es el vertical: **este archivo no decide a qué altura de la pantalla
- * cae un bloque.** Da el ancho de su banda y el alto que su texto ocupa; quién
- * mide la superposición barre la posición vertical entera (`barridoVertical`) y
- * publica el rango, en vez de inventar una.
+ * Están en `SUPUESTOS_DE_LAS_CAJAS` y se imprimen al lado de toda cifra.
+ *
+ * ⚠️ **EL SUPUESTO VERTICAL DEJÓ DE SER UN SUPUESTO, Y LA RAZÓN ES UN DEFECTO
+ * MEDIDO.** Decía: *«este archivo no decide a qué altura de la pantalla cae un
+ * bloque … quien mide la superposición barre la posición vertical entera y
+ * publica el rango»*. Barrer y publicar el rango es honesto; **publicar el
+ * MÍNIMO de ese rango como si fuera la superposición, no**. Eso es lo que
+ * `s10-vertical.invariant.ts` §5 hacía, y por eso el hero a 390 reportaba 0 %
+ * mientras la pantalla mostraba el titular entero debajo de la masa negra
+ * —54,8 % de su tinta, medido en `scripts-tapado/a-verdad.ts`—.
+ *
+ * El reparto VERTICAL vive ahora en `s10-logo-alto.ts` y consume el árbol que
+ * este archivo arma (`arbolDeLaSeccion`), por la misma razón por la que el
+ * horizontal vive acá: el alto de un bloque tampoco es un dato, es la
+ * consecuencia de `min-h-svh`, del `justify-*` de su contenedor y de sus
+ * paddings. El corte entre los dos archivos es el eje, y ninguno duplica el
+ * recorrido del marcado.
  */
 
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../../tipografia'
@@ -76,7 +88,7 @@ export const SUPUESTOS_DE_LAS_CAJAS: readonly string[] = [
   'el reparto horizontal es exacto para grillas; un contenedor `flex` da a sus hijos el ancho entero, así que `items-start` —que encoge— sobreestima la caja del CTA, y sobreestimar la caja sobreestima la superposición: es el lado conservador',
   'el alto de una caja es `líneas × tamaño × interlineado`; no modela márgenes, `gap` entre cajas ni el descuelgue de la última línea',
   'las líneas salen de `lineasDeTexto`, que usa la instancia POR DEFECTO de la fuente variable: un texto en peso medio o fuerte es más ancho, así que el conteo es un PISO',
-  'la posición VERTICAL del bloque no se deriva: quien mide barre todas las posiciones que caben en la pantalla y publica el rango',
+  'la posición VERTICAL del bloque SÍ se deriva desde TAPADO-1, en `s10-logo-alto.ts`, con sus propios supuestos declarados ahí; el barrido de todas las posiciones sigue existiendo y contesta otra pregunta — si la superposición es EVITABLE moviendo el bloque, no cuánta hay',
   'el viewport de CSS no descuenta la barra de scroll, y el canvas es `fixed inset-0`, así que el cuadro de la escena mide exactamente el viewport',
 ]
 
@@ -239,6 +251,47 @@ function interletradoEm(clases: readonly string[]): number {
  * el área del mismo texto.
  */
 export function cajasDeLaSeccion(id: string, ancho: number): CajaMedida[] {
+  return [...arbolDeLaSeccion(id, ancho).cajaDe.values()]
+}
+
+/**
+ * EL ÁRBOL DE LA SECCIÓN, con el reparto horizontal ya hecho.
+ *
+ * Existe porque el reparto VERTICAL (`s10-logo-alto.ts`) necesita **el mismo
+ * recorrido**: qué nodo cuelga de cuál, qué clases efectivas tiene cada uno y
+ * qué nodos son cajas de texto. Recorrer el marcado por segunda vez en el otro
+ * archivo sería la duplicación de lógica que la política del repo prohíbe, y
+ * peor: dos recorridos que se pueden desincronizar dan dos layouts distintos
+ * para la misma sección sin que nada lo vea.
+ *
+ * `cajasDeLaSeccion` queda como la lectura de siempre y no cambia ni un valor.
+ */
+export interface ArbolDeSeccion {
+  readonly html: string
+  readonly nodos: readonly Nodo[]
+  /** El índice del padre de cada nodo, o −1 para la raíz. */
+  readonly padre: readonly number[]
+  readonly hijos: readonly (readonly number[])[]
+  /** La banda horizontal de CONTENIDO de cada nodo. */
+  readonly interno: readonly BandaPx[]
+  /** Las clases efectivas de cada nodo, ya resueltas contra el ancho. */
+  readonly clases: readonly (readonly string[])[]
+  /** Nodo → caja de texto medida, en orden de documento. */
+  readonly cajaDe: ReadonlyMap<number, CajaMedida>
+}
+
+const arboles = new Map<string, ArbolDeSeccion>()
+
+export function arbolDeLaSeccion(id: string, ancho: number): ArbolDeSeccion {
+  const clave = `${id}|${ancho}`
+  const guardado = arboles.get(clave)
+  if (guardado !== undefined) return guardado
+  const nuevo = derivarArbol(id, ancho)
+  arboles.set(clave, nuevo)
+  return nuevo
+}
+
+function derivarArbol(id: string, ancho: number): ArbolDeSeccion {
   const html = marcadoDeSeccion(id, 'quieta')
   const nodos = nodosDe(html)
   const clasesDe = (n: Nodo): string[] => clasesEfectivas(atributo(n, 'class') ?? '', ancho)
@@ -295,44 +348,56 @@ export function cajasDeLaSeccion(id: string, ancho: number): CajaMedida[] {
     .filter((c) => c.clases.some((k) => TAMANOS.has(k)))
     .filter((c) => textoDe(html, c.n).trim().length > 0)
 
-  return candidatos
-    .filter((c) => !candidatos.some((o) => o !== c && o.n.desde >= c.n.desde && o.n.hasta <= c.n.hasta))
-    .map(({ n, i, clases }): CajaMedida => {
-      const claseDeTamano = ultima(clases, (k) => TAMANOS.has(k))!
-      const nivel = TAMANOS.get(claseDeTamano)!
-      const token = claseDeTamano.startsWith('text-fluido-')
-        ? `--text-fluido-${claseDeTamano.slice('text-fluido-'.length)}`
-        : `--text-${claseDeTamano.slice('text-'.length)}`
-      const claseDeLeading = ultima(clases, (k) => k.startsWith('leading-'))
-      const interlineado = tokenPx(
-        claseDeLeading === undefined
-          ? `--leading-${NIVELES_TIPOGRAFICOS[nivel].interlineado}`
-          : `--${claseDeLeading}`,
-        ancho,
-      )
-      const tamanoPx = tokenPx(token, ancho)
-      /** El texto y la cara salen de las CLASES, no del contenido crudo. Las dos
-       *  decisiones están arriba, en `textoComoSePinta` y `caraDeLaClase`, para
-       *  que el control positivo pueda correr las mismas funciones. */
-      const crudo = textoDe(html, n)
-      const texto = textoComoSePinta(crudo, clases)
-      const fuente = caraDeLaClase(clases)
-      const tracking = interletradoEm(clases)
-      const lineas = lineasDeTexto(leerAvancesDe(fuente), texto, interno[i].ancho, tamanoPx, tracking)
-      return {
-        etiqueta: n.etiqueta,
-        texto,
-        crudo,
-        clases: clases.join(' '),
-        banda: interno[i],
-        tamanoPx,
-        interlineado,
-        interletradoEm: tracking,
-        fuente,
-        lineas,
-        altoPx: lineas * tamanoPx * interlineado,
-      }
-    })
+  const cajaDe = new Map<number, CajaMedida>()
+  for (const { n, i, clases } of candidatos
+    .filter((c) => !candidatos.some((o) => o !== c && o.n.desde >= c.n.desde && o.n.hasta <= c.n.hasta))) {
+    cajaDe.set(i, medirLaCaja(html, n, i, clases, interno, ancho))
+  }
+  return { html, nodos, padre, hijos, interno, clases: nodos.map((_, i) => clasesDe(nodos[i])), cajaDe }
+}
+
+function medirLaCaja(
+  html: string,
+  n: Nodo,
+  i: number,
+  clases: readonly string[],
+  interno: readonly BandaPx[],
+  ancho: number,
+): CajaMedida {
+  const claseDeTamano = ultima(clases, (k) => TAMANOS.has(k))!
+  const nivel = TAMANOS.get(claseDeTamano)!
+  const token = claseDeTamano.startsWith('text-fluido-')
+    ? `--text-fluido-${claseDeTamano.slice('text-fluido-'.length)}`
+    : `--text-${claseDeTamano.slice('text-'.length)}`
+  const claseDeLeading = ultima(clases, (k) => k.startsWith('leading-'))
+  const interlineado = tokenPx(
+    claseDeLeading === undefined
+      ? `--leading-${NIVELES_TIPOGRAFICOS[nivel].interlineado}`
+      : `--${claseDeLeading}`,
+    ancho,
+  )
+  const tamanoPx = tokenPx(token, ancho)
+  /** El texto y la cara salen de las CLASES, no del contenido crudo. Las dos
+   *  decisiones están arriba, en `textoComoSePinta` y `caraDeLaClase`, para
+   *  que el control positivo pueda correr las mismas funciones. */
+  const crudo = textoDe(html, n)
+  const texto = textoComoSePinta(crudo, clases)
+  const fuente = caraDeLaClase(clases)
+  const tracking = interletradoEm(clases)
+  const lineas = lineasDeTexto(leerAvancesDe(fuente), texto, interno[i].ancho, tamanoPx, tracking)
+  return {
+    etiqueta: n.etiqueta,
+    texto,
+    crudo,
+    clases: clases.join(' '),
+    banda: interno[i],
+    tamanoPx,
+    interlineado,
+    interletradoEm: tracking,
+    fuente,
+    lineas,
+    altoPx: lineas * tamanoPx * interlineado,
+  }
 }
 
 /** Una coordenada horizontal en píxeles, pasada a coordenada de cuadro (−1…1). */

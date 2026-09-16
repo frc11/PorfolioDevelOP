@@ -1,0 +1,3905 @@
+{
+  "etiqueta": "hoy",
+  "composicion": "hoy",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844,
+    "procedencia": "s10-referencias.VIEWPORTS_MEDIDOS — el telefono que S0 midio",
+    "movil": true
+  },
+  "pasos": 41,
+  "cuando": "2026-09-16T01:47:33.124Z",
+  "instrumento": "scripts-tapado/b-cruce.ts — barrido de scroll con dos capas por parada",
+  "maximo": 16167,
+  "extensionDeLasSecciones": {
+    "arriba": 0,
+    "abajo": 17011.421875
+  },
+  "resumen": [
+    {
+      "id": "hero",
+      "enPantallaDesde": 0,
+      "enPantallaHasta": 0.025,
+      "pantallasDeTramo": 0.48,
+      "paradas": 2,
+      "superposicionMediana": 0.1197,
+      "superposicionPeor": 0.1197,
+      "peorEn": 0,
+      "paradasSobre5": 2,
+      "paradasSobre20": 0,
+      "pantallasDeCruce": 0.48,
+      "bajoAAMediano": 0.1362
+    },
+    {
+      "id": "quienes-somos",
+      "enPantallaDesde": 0.025,
+      "enPantallaHasta": 0.175,
+      "pantallasDeTramo": 2.87,
+      "paradas": 7,
+      "superposicionMediana": 0.0783,
+      "superposicionPeor": 0.5153,
+      "peorEn": 0.15,
+      "paradasSobre5": 5,
+      "paradasSobre20": 3,
+      "pantallasDeCruce": 2.39,
+      "bajoAAMediano": 0.0936
+    },
+    {
+      "id": "numeros",
+      "enPantallaDesde": 0.2,
+      "enPantallaHasta": 0.375,
+      "pantallasDeTramo": 3.35,
+      "paradas": 8,
+      "superposicionMediana": 0.1879,
+      "superposicionPeor": 0.9028,
+      "peorEn": 0.375,
+      "paradasSobre5": 6,
+      "paradasSobre20": 3,
+      "pantallasDeCruce": 3.35,
+      "bajoAAMediano": 0.666
+    },
+    {
+      "id": "trabajos",
+      "enPantallaDesde": 0.375,
+      "enPantallaHasta": 0.55,
+      "pantallasDeTramo": 3.35,
+      "paradas": 8,
+      "superposicionMediana": 0,
+      "superposicionPeor": 0.5508,
+      "peorEn": 0.475,
+      "paradasSobre5": 1,
+      "paradasSobre20": 1,
+      "pantallasDeCruce": 0,
+      "bajoAAMediano": 0.3823
+    },
+    {
+      "id": "servicios",
+      "enPantallaDesde": 0.55,
+      "enPantallaHasta": 0.75,
+      "pantallasDeTramo": 3.83,
+      "paradas": 9,
+      "superposicionMediana": 0.171,
+      "superposicionPeor": 0.3197,
+      "peorEn": 0.7,
+      "paradasSobre5": 7,
+      "paradasSobre20": 4,
+      "pantallasDeCruce": 2.87,
+      "bajoAAMediano": 0.6322
+    },
+    {
+      "id": "tu-panel",
+      "enPantallaDesde": 0.75,
+      "enPantallaHasta": 0.9,
+      "pantallasDeTramo": 2.87,
+      "paradas": 7,
+      "superposicionMediana": 0.1528,
+      "superposicionPeor": 0.3808,
+      "peorEn": 0.8,
+      "paradasSobre5": 6,
+      "paradasSobre20": 3,
+      "pantallasDeCruce": 2.39,
+      "bajoAAMediano": 0.5417
+    },
+    {
+      "id": "por-que-develop",
+      "enPantallaDesde": 0.875,
+      "enPantallaHasta": 0.975,
+      "pantallasDeTramo": 1.92,
+      "paradas": 5,
+      "superposicionMediana": 0.1296,
+      "superposicionPeor": 0.3512,
+      "peorEn": 0.9,
+      "paradasSobre5": 3,
+      "paradasSobre20": 1,
+      "pantallasDeCruce": 0.96,
+      "bajoAAMediano": 0.633
+    },
+    {
+      "id": "cierre",
+      "enPantallaDesde": 0.95,
+      "enPantallaHasta": 1,
+      "pantallasDeTramo": 0.96,
+      "paradas": 3,
+      "superposicionMediana": 0.1272,
+      "superposicionPeor": 0.3561,
+      "peorEn": 0.975,
+      "paradasSobre5": 2,
+      "paradasSobre20": 1,
+      "pantallasDeCruce": 0.48,
+      "bajoAAMediano": 0.4353
+    }
+  ],
+  "paradas": [
+    {
+      "t": 0,
+      "scrollY": 0,
+      "pantalla": 0,
+      "progreso": 0,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": true,
+          "glifos": 11062,
+          "sobreElLogo": 1324,
+          "fraccion": 0.11968902549267764,
+          "bajoAA": 0.13623214608569878,
+          "union": {
+            "x": 5.285541534423828,
+            "y": 498.78125,
+            "ancho": 352.7144584655762,
+            "alto": 283.04669189453125
+          }
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 261,
+        "hasta": 574
+      },
+      "centroDelLogoPx": 196.27128742867723,
+      "pixelesDeLogo": 59413
+    },
+    {
+      "t": 0.025,
+      "scrollY": 404,
+      "pantalla": 0.4786729857819905,
+      "progreso": 0.05310061224588413,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": true,
+          "glifos": 11062,
+          "sobreElLogo": 675,
+          "fraccion": 0.06101970710540589,
+          "bajoAA": 0.06409329235219671,
+          "union": {
+            "x": 5.285541534423828,
+            "y": 94.78125,
+            "ancho": 352.7144584655762,
+            "alto": 283.0467224121094
+          }
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 4004,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.0012487512487512488,
+          "union": {
+            "x": 32,
+            "y": 783.90625,
+            "ancho": 326,
+            "alto": 52.90625
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 254,
+        "hasta": 583
+      },
+      "centroDelLogoPx": 195.62175700188047,
+      "pixelesDeLogo": 60091
+    },
+    {
+      "t": 0.05,
+      "scrollY": 808,
+      "pantalla": 0.957345971563981,
+      "progreso": 0.10620122449176826,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 7041,
+          "sobreElLogo": 2236,
+          "fraccion": 0.31756852719784123,
+          "bajoAA": 0.3053543530748473,
+          "union": {
+            "x": 32,
+            "y": 379.90625,
+            "ancho": 326,
+            "alto": 396.875
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 236,
+        "hasta": 616
+      },
+      "centroDelLogoPx": 211.92823734818458,
+      "pixelesDeLogo": 78467
+    },
+    {
+      "t": 0.075,
+      "scrollY": 1213,
+      "pantalla": 1.4372037914691944,
+      "progreso": 0.14795551593111791,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 13208,
+          "sobreElLogo": 400,
+          "fraccion": 0.03028467595396729,
+          "bajoAA": 0.35766202301635375,
+          "union": {
+            "x": 32,
+            "y": -25.09375,
+            "ancho": 326,
+            "alto": 866.078125
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 201,
+        "hasta": 636
+      },
+      "centroDelLogoPx": 186.301108807356,
+      "pixelesDeLogo": 55465
+    },
+    {
+      "t": 0.1,
+      "scrollY": 1617,
+      "pantalla": 1.9158767772511849,
+      "progreso": 0.18335592409504067,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 9174,
+          "sobreElLogo": 2683,
+          "fraccion": 0.2924569435360802,
+          "bajoAA": 0,
+          "union": {
+            "x": 32,
+            "y": 316.984375,
+            "ancho": 326,
+            "alto": 503.78125
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 173,
+        "hasta": 640
+      },
+      "centroDelLogoPx": 126.44335530392654,
+      "pixelesDeLogo": 53253
+    },
+    {
+      "t": 0.125,
+      "scrollY": 2021,
+      "pantalla": 2.3945497630331753,
+      "progreso": 0.2187563322589634,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 17046,
+          "sobreElLogo": 1334,
+          "fraccion": 0.07825882905080371,
+          "bajoAA": 0.0936290038718761,
+          "union": {
+            "x": 32,
+            "y": -87.015625,
+            "ancho": 326,
+            "alto": 503.78125
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 156,
+        "hasta": 639
+      },
+      "centroDelLogoPx": 109.35266147642837,
+      "pixelesDeLogo": 78866
+    },
+    {
+      "t": 0.15,
+      "scrollY": 2425,
+      "pantalla": 2.873222748815166,
+      "progreso": 0.25415674042288616,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 5069,
+          "sobreElLogo": 2612,
+          "fraccion": 0.5152890116393766,
+          "bajoAA": 0.7496547642533044,
+          "union": {
+            "x": 32,
+            "y": -9.234375,
+            "ancho": 326,
+            "alto": 670.9375
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 149,
+        "hasta": 641
+      },
+      "centroDelLogoPx": 120.11029669317489,
+      "pixelesDeLogo": 77083
+    },
+    {
+      "t": 0.175,
+      "scrollY": 2829,
+      "pantalla": 3.3518957345971563,
+      "progreso": 0.2895571485868089,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": true,
+          "glifos": 3867,
+          "sobreElLogo": 241,
+          "fraccion": 0.06232221360227567,
+          "bajoAA": 0.07525213343677269,
+          "union": {
+            "x": 32,
+            "y": 77.5625,
+            "ancho": 326,
+            "alto": 180.140625
+          }
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 146,
+        "hasta": 642
+      },
+      "centroDelLogoPx": 122.60112928546108,
+      "pixelesDeLogo": 78988
+    },
+    {
+      "t": 0.2,
+      "scrollY": 3233,
+      "pantalla": 3.830568720379147,
+      "progreso": 0.3249575567507317,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 4338,
+          "sobreElLogo": 1817,
+          "fraccion": 0.41885661595205165,
+          "bajoAA": 0.4665744582757031,
+          "union": {
+            "x": 32,
+            "y": 515.765625,
+            "ancho": 326,
+            "alto": 138.453125
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 147,
+        "hasta": 642
+      },
+      "centroDelLogoPx": 123.41100496942371,
+      "pixelesDeLogo": 80291
+    },
+    {
+      "t": 0.225,
+      "scrollY": 3638,
+      "pantalla": 4.31042654028436,
+      "progreso": 0.3604455896873374,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 4338,
+          "sobreElLogo": 499,
+          "fraccion": 0.11502996772706316,
+          "bajoAA": 0.13992623328722914,
+          "union": {
+            "x": 32,
+            "y": 110.765625,
+            "ancho": 326,
+            "alto": 138.453125
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 148,
+        "hasta": 643
+      },
+      "centroDelLogoPx": 123.6821690085098,
+      "pixelesDeLogo": 80848
+    },
+    {
+      "t": 0.25,
+      "scrollY": 4042,
+      "pantalla": 4.789099526066351,
+      "progreso": 0.38281724919422255,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 1063,
+          "sobreElLogo": 703,
+          "fraccion": 0.6613358419567262,
+          "bajoAA": 0.6660395108184384,
+          "union": {
+            "x": 32,
+            "y": 445.546875,
+            "ancho": 326,
+            "alto": 348.90625
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 150,
+        "hasta": 643
+      },
+      "centroDelLogoPx": 124.80688075089613,
+      "pixelesDeLogo": 81183
+    },
+    {
+      "t": 0.275,
+      "scrollY": 4446,
+      "pantalla": 5.267772511848341,
+      "progreso": 0.3960924022556936,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 3311,
+          "sobreElLogo": 143,
+          "fraccion": 0.04318936877076412,
+          "bajoAA": 0.8740561763817578,
+          "union": {
+            "x": 32,
+            "y": 41.546875,
+            "ancho": 326,
+            "alto": 348.90625
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 163,
+        "hasta": 642
+      },
+      "centroDelLogoPx": 134.67994652728433,
+      "pixelesDeLogo": 83033
+    },
+    {
+      "t": 0.3,
+      "scrollY": 4850,
+      "pantalla": 5.746445497630332,
+      "progreso": 0.4093675553171646,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 1490,
+          "sobreElLogo": 280,
+          "fraccion": 0.18791946308724833,
+          "bajoAA": 0.6053691275167785,
+          "union": {
+            "x": 32,
+            "y": 486.3125,
+            "ancho": 326,
+            "alto": 339.34375
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 197,
+        "hasta": 642
+      },
+      "centroDelLogoPx": 161.3382835124333,
+      "pixelesDeLogo": 83566
+    },
+    {
+      "t": 0.325,
+      "scrollY": 5254,
+      "pantalla": 6.225118483412322,
+      "progreso": 0.42264270837863566,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 810,
+          "sobreElLogo": 85,
+          "fraccion": 0.10493827160493827,
+          "bajoAA": 0.15432098765432098,
+          "union": {
+            "x": 32,
+            "y": 82.3125,
+            "ancho": 326,
+            "alto": 339.34375
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 228,
+        "hasta": 617
+      },
+      "centroDelLogoPx": 188.75792910447763,
+      "pixelesDeLogo": 72896
+    },
+    {
+      "t": 0.35,
+      "scrollY": 5658,
+      "pantalla": 6.703791469194313,
+      "progreso": 0.4359178614401067,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 1426,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.9298737727910238,
+          "union": {
+            "x": 32,
+            "y": 6.65625,
+            "ancho": 326,
+            "alto": 709.75
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 243,
+        "hasta": 592
+      },
+      "centroDelLogoPx": 193.1764339831049,
+      "pixelesDeLogo": 64279
+    },
+    {
+      "t": 0.375,
+      "scrollY": 6063,
+      "pantalla": 7.1836492890995265,
+      "progreso": 0.44922587379133383,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": true,
+          "glifos": 463,
+          "sobreElLogo": 418,
+          "fraccion": 0.9028077753779697,
+          "bajoAA": 0.9330453563714903,
+          "union": {
+            "x": 32,
+            "y": 262.578125,
+            "ancho": 326,
+            "alto": 48.828125
+          }
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 4169,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.2115615255456944,
+          "union": {
+            "x": 32,
+            "y": 745,
+            "ancho": 326,
+            "alto": 143.65625
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 255,
+        "hasta": 577
+      },
+      "centroDelLogoPx": 193.5341596768175,
+      "pixelesDeLogo": 61637
+    },
+    {
+      "t": 0.4,
+      "scrollY": 6467,
+      "pantalla": 7.662322274881516,
+      "progreso": 0.46250102685280486,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 216,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 1,
+          "union": {
+            "x": 32,
+            "y": 341,
+            "ancho": 326,
+            "alto": 487.671875
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 263,
+        "hasta": 569
+      },
+      "centroDelLogoPx": 192.7224960031645,
+      "pixelesDeLogo": 60673
+    },
+    {
+      "t": 0.425,
+      "scrollY": 6871,
+      "pantalla": 8.140995260663507,
+      "progreso": 0.4757761799142759,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 17871,
+          "sobreElLogo": 507,
+          "fraccion": 0.028369984891724022,
+          "bajoAA": 0.964523529740921,
+          "union": {
+            "x": 32,
+            "y": -15.34375,
+            "ancho": 326,
+            "alto": 475.59375
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 265,
+        "hasta": 565
+      },
+      "centroDelLogoPx": 191.88629311918234,
+      "pixelesDeLogo": 60269
+    },
+    {
+      "t": 0.45,
+      "scrollY": 7275,
+      "pantalla": 8.619668246445498,
+      "progreso": 0.489051332975747,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 1896,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.9857594936708861,
+          "union": {
+            "x": 32,
+            "y": 0.671875,
+            "ancho": 283.46875,
+            "alto": 55.578125
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 266,
+        "hasta": 563
+      },
+      "centroDelLogoPx": 191.58693298239186,
+      "pixelesDeLogo": 60029
+    },
+    {
+      "t": 0.475,
+      "scrollY": 7679,
+      "pantalla": 9.098341232227488,
+      "progreso": 0.5031019813829573,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 472,
+          "sobreElLogo": 260,
+          "fraccion": 0.5508474576271186,
+          "bajoAA": 0.012711864406779662,
+          "union": {
+            "x": 32,
+            "y": 452.671875,
+            "ancho": 264.71875,
+            "alto": 55.578125
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 266,
+        "hasta": 563
+      },
+      "centroDelLogoPx": 191.49052515791402,
+      "pixelesDeLogo": 60001
+    },
+    {
+      "t": 0.5,
+      "scrollY": 8084,
+      "pantalla": 9.578199052132701,
+      "progreso": 0.5208459978512602,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 756,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.38227513227513227,
+          "union": {
+            "x": 32,
+            "y": 47.671875,
+            "ancho": 264.71875,
+            "alto": 55.578125
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 265,
+        "hasta": 564
+      },
+      "centroDelLogoPx": 191.52144743178837,
+      "pixelesDeLogo": 60217
+    },
+    {
+      "t": 0.525,
+      "scrollY": 8488,
+      "pantalla": 10.056872037914692,
+      "progreso": 0.5385462019332216,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 469,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": {
+            "x": 32,
+            "y": 520.96875,
+            "ancho": 311.828125,
+            "alto": 20
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 262,
+        "hasta": 569
+      },
+      "centroDelLogoPx": 191.28300267388505,
+      "pixelesDeLogo": 60586
+    },
+    {
+      "t": 0.55,
+      "scrollY": 8892,
+      "pantalla": 10.535545023696683,
+      "progreso": 0.5562464060151829,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": true,
+          "glifos": 469,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.031982942430703626,
+          "union": {
+            "x": 32,
+            "y": 116.96875,
+            "ancho": 311.828125,
+            "alto": 20
+          }
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 5416,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 1,
+          "union": {
+            "x": 32,
+            "y": 699.65625,
+            "ancho": 326,
+            "alto": 154.0625
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 261,
+        "hasta": 572
+      },
+      "centroDelLogoPx": 190.28891094021336,
+      "pixelesDeLogo": 60465
+    },
+    {
+      "t": 0.575,
+      "scrollY": 9296,
+      "pantalla": 11.014218009478673,
+      "progreso": 0.5739466100971443,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 13905,
+          "sobreElLogo": 3320,
+          "fraccion": 0.23876303487953973,
+          "bajoAA": 0.9884214311398778,
+          "union": {
+            "x": 32,
+            "y": 295.65625,
+            "ancho": 326,
+            "alto": 560.0625
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 261,
+        "hasta": 573
+      },
+      "centroDelLogoPx": 189.33776922311088,
+      "pixelesDeLogo": 60266
+    },
+    {
+      "t": 0.6,
+      "scrollY": 9700,
+      "pantalla": 11.492890995260664,
+      "progreso": 0.5916468141791057,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 19017,
+          "sobreElLogo": 3103,
+          "fraccion": 0.16316979544617974,
+          "bajoAA": 0.8394594310353893,
+          "union": {
+            "x": 32,
+            "y": 6.1875,
+            "ancho": 326,
+            "alto": 823.78125
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 262,
+        "hasta": 574
+      },
+      "centroDelLogoPx": 188.64661279058166,
+      "pixelesDeLogo": 60138
+    },
+    {
+      "t": 0.625,
+      "scrollY": 10104,
+      "pantalla": 11.971563981042655,
+      "progreso": 0.6093470182610671,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 18739,
+          "sobreElLogo": 2912,
+          "fraccion": 0.15539783339559207,
+          "bajoAA": 0.8746998238966861,
+          "union": {
+            "x": 32,
+            "y": -8.28125,
+            "ancho": 326,
+            "alto": 861.40625
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 262,
+        "hasta": 574
+      },
+      "centroDelLogoPx": 188.42686174639636,
+      "pixelesDeLogo": 60078
+    },
+    {
+      "t": 0.65,
+      "scrollY": 10509,
+      "pantalla": 12.451421800947868,
+      "progreso": 0.6264571383744035,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 19345,
+          "sobreElLogo": 4134,
+          "fraccion": 0.2136986301369863,
+          "bajoAA": 0.5904368053760661,
+          "union": {
+            "x": 32,
+            "y": -1.03125,
+            "ancho": 326,
+            "alto": 855.59375
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 262,
+        "hasta": 574
+      },
+      "centroDelLogoPx": 188.33324456576014,
+      "pixelesDeLogo": 60082
+    },
+    {
+      "t": 0.675,
+      "scrollY": 10913,
+      "pantalla": 12.930094786729859,
+      "progreso": 0.6387915325575025,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 19336,
+          "sobreElLogo": 3306,
+          "fraccion": 0.1709764170459247,
+          "bajoAA": 0.6321886636326024,
+          "union": {
+            "x": 32,
+            "y": -11.875,
+            "ancho": 326,
+            "alto": 866.40625
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 260,
+        "hasta": 576
+      },
+      "centroDelLogoPx": 188.2298983475454,
+      "pixelesDeLogo": 62271
+    },
+    {
+      "t": 0.7,
+      "scrollY": 11317,
+      "pantalla": 13.408767772511847,
+      "progreso": 0.6511259267406017,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 17480,
+          "sobreElLogo": 5588,
+          "fraccion": 0.3196796338672769,
+          "bajoAA": 0.4931922196796339,
+          "union": {
+            "x": 32,
+            "y": -1.0625,
+            "ancho": 326,
+            "alto": 838.59375
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 253,
+        "hasta": 582
+      },
+      "centroDelLogoPx": 188.84624637373523,
+      "pixelesDeLogo": 70665
+    },
+    {
+      "t": 0.725,
+      "scrollY": 11721,
+      "pantalla": 13.887440758293838,
+      "progreso": 0.6634603209237007,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 14194,
+          "sobreElLogo": 3820,
+          "fraccion": 0.26912780047907564,
+          "bajoAA": 0.6103987600394533,
+          "union": {
+            "x": 32,
+            "y": 4.53125,
+            "ancho": 326,
+            "alto": 711.25
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 236,
+        "hasta": 597
+      },
+      "centroDelLogoPx": 208.68890785460448,
+      "pixelesDeLogo": 71474
+    },
+    {
+      "t": 0.75,
+      "scrollY": 12125,
+      "pantalla": 14.366113744075829,
+      "progreso": 0.6757947151067997,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": true,
+          "glifos": 7654,
+          "sobreElLogo": 326,
+          "fraccion": 0.042592108701332634,
+          "bajoAA": 0.6137967076038673,
+          "union": {
+            "x": 32,
+            "y": 5.53125,
+            "ancho": 326,
+            "alto": 306.25
+          }
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 11861,
+          "sobreElLogo": 797,
+          "fraccion": 0.06719500885254194,
+          "bajoAA": 0.1932383441531068,
+          "union": {
+            "x": 32,
+            "y": 491.78125,
+            "ancho": 326,
+            "alto": 361.0625
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 202,
+        "hasta": 615
+      },
+      "centroDelLogoPx": 228.90529588098147,
+      "pixelesDeLogo": 27021
+    },
+    {
+      "t": 0.775,
+      "scrollY": 12529,
+      "pantalla": 14.84478672985782,
+      "progreso": 0.6881291092898988,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 22965,
+          "sobreElLogo": 6529,
+          "fraccion": 0.2843021989984759,
+          "bajoAA": 0.8404093185281951,
+          "union": {
+            "x": 32,
+            "y": 87.78125,
+            "ancho": 326,
+            "alto": 751.0625
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 177,
+        "hasta": 630
+      },
+      "centroDelLogoPx": 235.74847988774556,
+      "pixelesDeLogo": 68416
+    },
+    {
+      "t": 0.8,
+      "scrollY": 12934,
+      "pantalla": 15.324644549763033,
+      "progreso": 0.7004940341516689,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 16239,
+          "sobreElLogo": 6184,
+          "fraccion": 0.38081162633167065,
+          "bajoAA": 0.8736991194039042,
+          "union": {
+            "x": 32,
+            "y": 32.84375,
+            "ancho": 326,
+            "alto": 855.828125
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 163,
+        "hasta": 638
+      },
+      "centroDelLogoPx": 244.70667322511886,
+      "pixelesDeLogo": 91485
+    },
+    {
+      "t": 0.825,
+      "scrollY": 13338,
+      "pantalla": 15.803317535545023,
+      "progreso": 0.712828428334768,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 18521,
+          "sobreElLogo": 2032,
+          "fraccion": 0.10971329841801199,
+          "bajoAA": 0.5416554181739647,
+          "union": {
+            "x": 32,
+            "y": 18.84375,
+            "ancho": 326,
+            "alto": 805.828125
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 157,
+        "hasta": 643
+      },
+      "centroDelLogoPx": 236.59122386900523,
+      "pixelesDeLogo": 92706
+    },
+    {
+      "t": 0.85,
+      "scrollY": 13742,
+      "pantalla": 16.281990521327014,
+      "progreso": 0.7251628225178671,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 22682,
+          "sobreElLogo": 3465,
+          "fraccion": 0.1527643064985451,
+          "bajoAA": 0.4294153954677718,
+          "union": {
+            "x": 32,
+            "y": 32.671875,
+            "ancho": 326,
+            "alto": 813
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 154,
+        "hasta": 646
+      },
+      "centroDelLogoPx": 236.16388560324435,
+      "pixelesDeLogo": 94688
+    },
+    {
+      "t": 0.875,
+      "scrollY": 14146,
+      "pantalla": 16.760663507109005,
+      "progreso": 0.7374972167009661,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 8737,
+          "sobreElLogo": 2766,
+          "fraccion": 0.31658464003662584,
+          "bajoAA": 0.6475907061920567,
+          "union": {
+            "x": 32,
+            "y": -31.328125,
+            "ancho": 326,
+            "alto": 473
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": true,
+          "glifos": 11870,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.20935130581297387,
+          "union": {
+            "x": 32,
+            "y": 605.671875,
+            "ancho": 326,
+            "alto": 316.25
+          }
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 153,
+        "hasta": 648
+      },
+      "centroDelLogoPx": 235.3181755793697,
+      "pixelesDeLogo": 94715
+    },
+    {
+      "t": 0.9,
+      "scrollY": 14550,
+      "pantalla": 17.239336492890995,
+      "progreso": 0.7498316108840652,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": true,
+          "glifos": 2650,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": {
+            "x": 32,
+            "y": -10.328125,
+            "ancho": 326,
+            "alto": 48
+          }
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": true,
+          "glifos": 24228,
+          "sobreElLogo": 8510,
+          "fraccion": 0.3512464916625392,
+          "bajoAA": 0.8630097407957735,
+          "union": {
+            "x": 32,
+            "y": 201.671875,
+            "ancho": 326,
+            "alto": 672.296875
+          }
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 153,
+        "hasta": 648
+      },
+      "centroDelLogoPx": 235.09366222466264,
+      "pixelesDeLogo": 94702
+    },
+    {
+      "t": 0.925,
+      "scrollY": 14954,
+      "pantalla": 17.718009478672986,
+      "progreso": 0.8118033057411946,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": true,
+          "glifos": 41480,
+          "sobreElLogo": 5374,
+          "fraccion": 0.12955641272902604,
+          "bajoAA": 0.3668032786885246,
+          "union": {
+            "x": 32,
+            "y": -202.328125,
+            "ancho": 326,
+            "alto": 1103.1875
+          }
+        },
+        {
+          "id": "cierre",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 262,
+        "hasta": 573
+      },
+      "centroDelLogoPx": 199.18570951585977,
+      "pixelesDeLogo": 59900
+    },
+    {
+      "t": 0.95,
+      "scrollY": 15359,
+      "pantalla": 18.1978672985782,
+      "progreso": 0.8746171240389867,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": true,
+          "glifos": 20592,
+          "sobreElLogo": 3149,
+          "fraccion": 0.1529234654234654,
+          "bajoAA": 0.6329642579642579,
+          "union": {
+            "x": 32,
+            "y": -7.03125,
+            "ancho": 326,
+            "alto": 536.515625
+          }
+        },
+        {
+          "id": "cierre",
+          "enPantalla": true,
+          "glifos": 3961,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": {
+            "x": 32,
+            "y": 709.484375,
+            "ancho": 326,
+            "alto": 79.0625
+          }
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 293,
+        "hasta": 548
+      },
+      "centroDelLogoPx": 198.13268655275607,
+      "pixelesDeLogo": 41436
+    },
+    {
+      "t": 0.975,
+      "scrollY": 15763,
+      "pantalla": 18.67654028436019,
+      "progreso": 0.9372758464891298,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": true,
+          "glifos": 16993,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0.9587477196492673,
+          "union": {
+            "x": 49,
+            "y": -4.140625,
+            "ancho": 309,
+            "alto": 129.625
+          }
+        },
+        {
+          "id": "cierre",
+          "enPantalla": true,
+          "glifos": 7661,
+          "sobreElLogo": 2728,
+          "fraccion": 0.3560892833833703,
+          "bajoAA": 0.43532175956141494,
+          "union": {
+            "x": 4.965435028076172,
+            "y": 305.484375,
+            "ancho": 353.0345649719238,
+            "alto": 542.6875
+          }
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 302,
+        "hasta": 540
+      },
+      "centroDelLogoPx": 197.75822599773838,
+      "pixelesDeLogo": 36257
+    },
+    {
+      "t": 1,
+      "scrollY": 16167,
+      "pantalla": 19.15521327014218,
+      "progreso": 0.9999345689392732,
+      "secciones": [
+        {
+          "id": "hero",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "quienes-somos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "numeros",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "trabajos",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "servicios",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "tu-panel",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "por-que-develop",
+          "enPantalla": false,
+          "glifos": 0,
+          "sobreElLogo": 0,
+          "fraccion": 0,
+          "bajoAA": 0,
+          "union": null
+        },
+        {
+          "id": "cierre",
+          "enPantalla": true,
+          "glifos": 8601,
+          "sobreElLogo": 1094,
+          "fraccion": 0.12719451226601558,
+          "bajoAA": 0.4883153121730031,
+          "union": {
+            "x": 4.965435028076172,
+            "y": 36.546875,
+            "ancho": 353.0345649719238,
+            "alto": 727.875
+          }
+        }
+      ],
+      "bandaDelLogo": {
+        "desde": 303,
+        "hasta": 540
+      },
+      "centroDelLogoPx": 197.59894789579158,
+      "pixelesDeLogo": 35928
+    }
+  ]
+}

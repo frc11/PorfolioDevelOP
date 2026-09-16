@@ -21,16 +21,14 @@
  * del dueño la escena se monta en TODOS los anchos, y abajo de 1025 ahora SÍ hay
  * un logo detrás del texto.
  *
- * Los cuatro anchos siguen con `noCorre` y **el motivo es otro, y es más débil a
- * propósito**: el sprint que bajó la escena tenía prohibido componer el encuadre
- * —«que la escena se vea mal encuadrada en vertical es el resultado ESPERADO y
- * es el insumo del sprint siguiente»—, así que medir la superposición contra una
- * composición que se sabe provisoria no mide el sitio, mide el andamio. La
- * medición es del sprint de composición, y hasta entonces esto lo dice en voz
- * alta en vez de publicar una cifra que va a cambiar. **El eje que sí varía y que nadie miró
- * es la RELACIÓN DE ASPECTO** (§7.6, abierto por escrito: *«en vertical el logo
- * no entra igual»*): a 1025 con los tres altos declarados el cuadro va de 1,139
- * a 1,537, contra el 1,600 de la referencia con la que se compuso el recorrido.
+ * **Y el diferimiento también se venció.** Los cuatro anchos seguían con `noCorre`
+ * porque *«medir la superposición contra una composición que se sabe provisoria no
+ * mide el sitio, mide el andamio: la medición es del sprint de composición»*. Ese
+ * sprint llegó (TAPADO-1) y §1b publica la tabla de los ocho anchos. **El eje que
+ * nadie había mirado es la RELACIÓN DE ASPECTO** (§7.6, abierto por escrito: *«en
+ * vertical el logo no entra igual»*): a 1025 con los tres altos declarados el
+ * cuadro va de 1,139 a 1,537, contra el 1,600 de la referencia con la que se
+ * compuso el recorrido, y abajo de 1025 baja hasta 0,462.
  *
  * **Regla 13:** se **afirma** lo que es propiedad del instrumento o geometría
  * estable, y se **publica con `console.log`** todo juicio de composición que
@@ -45,7 +43,7 @@
  * esa decisión hay que escribirla, igual que §7.29 hizo con `s8-tinta`.
  */
 
-import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, razonDeContraste, titulo } from '../../__tests__/afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../__tests__/afirmar'
 import { ANCHOS } from '../../__tests__/s10-banco'
 import { tokenPx, variantesActivas } from '../../__tests__/s10-css'
 import { TINTA_HEX } from '../../superficies'
@@ -61,6 +59,7 @@ import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, conPose, fraccionDentro, muestra
 import { SUPUESTOS_DE_LAS_CAJAS, cajasDeLaSeccion, renglonesEnLaCaja } from './s10-logo-cajas'
 import { afirmarLaPalancaDeLayout } from './s10-logo-columna'
 import { afirmarElEncuadreLateral } from './s10-logo-lateral'
+import { afirmarLaComposicionDelHero } from './s10-logo-composicion'
 // prettier-ignore
 import { INVERTIDAS_TRANSPARENTES, MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraEnElBloque, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
@@ -71,26 +70,26 @@ const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · LA COMPUERTA — a 390 la pregunta ya está MEDIDA; los otros tres anchos siguen diferidos')
+titulo('1 · LA COMPUERTA — y el diferimiento que TAPADO-1 levanta')
 
-const sinEscena = `abajo de ${ESCENARIO_MIN_ANCHO_PX} la escena SÍ se monta desde MOVIL-1 (nivel \`compacta\`), así que la pregunta aplica; a 390 la contesta \`s10-vertical.invariant.ts\` y los demás anchos son de la pasada siguiente`
 /**
- * ⚠️ **390 SALIÓ DE LA LISTA: VERTICAL-1 LO MIDIÓ.** El motivo de abajo decía
- * «se mide en el sprint de composición, no acá», y ese sprint llegó: la posición
- * horizontal del logo en los siete keyframes, la superposición con la columna y
- * el hecho de que la tinta NO entra en el cuadro están afirmados en
- * `s10-vertical.invariant.ts`, que corre en esta misma suite. Los otros tres
- * anchos siguen diferidos, que es lo que la instrucción de aquel sprint declaró:
- * «320, 375, 425, 768 y 1024 son de la pasada siguiente».
+ * ⚠️ **LOS CINCO ANCHOS SALIERON DE `noCorre`, Y EL MOTIVO ES QUE SU CONDICIÓN
+ * SE CUMPLIÓ.** El diferimiento decía, textual: *«medir la superposición contra
+ * una composición que se sabe provisoria no mide el sitio, mide el andamio. La
+ * medición es del sprint de composición»*. Éste es ese sprint: el hero tiene su
+ * composición en vertical decidida y `s10-logo-composicion.ts` publica la tabla
+ * de los ocho anchos, derivada y contrastada contra el recibo del navegador.
+ *
+ * Que el diferimiento fuera honesto no lo salva de lo que tapó: mientras estuvo
+ * puesto, la ÚNICA cifra de superposición que existía abajo del breakpoint era el
+ * `0 %` que `s10-vertical` publicaba, y ese 0 no medía la pantalla. La lección no
+ * es «no diferir»: es que **un `noCorre` al lado de una cifra verde hace que la
+ * cifra parezca respaldada por lo que no se midió**.
  */
-const MEDIDO_EN_VERTICAL = 390
-for (const a of ANCHOS.filter((w) => w < ESCENARIO_MIN_ANCHO_PX && w !== MEDIDO_EN_VERTICAL)) {
-  noCorre(`el logo contra el texto a ${a}px`, sinEscena)
-}
 afirmar(
-  ANCHOS.includes(MEDIDO_EN_VERTICAL),
-  `  y ${MEDIDO_EN_VERTICAL} YA no está diferido: lo mide \`s10-vertical.invariant.ts\`, en esta suite`,
-  'la posición de los siete keyframes, la superposición con la columna y el ancho de la tinta contra el del cuadro',
+  ANCHOS.filter((w) => w < ESCENARIO_MIN_ANCHO_PX).length > 0,
+  'ABAJO del breakpoint la pregunta APLICA: desde MOVIL-1 la escena se monta en todo ancho',
+  `${ANCHOS.filter((w) => w < ESCENARIO_MIN_ANCHO_PX).join(' · ')} — en nivel \`compacta\`, con logo detrás del texto`,
 )
 afirmar(
   ESCENARIO_MIN_ANCHO_PX === tokenPx('--breakpoint-escritorio', 0),
@@ -110,6 +109,8 @@ controlPositivo(
 )
 console.log(`  los cuadros medidos: ${VENTANAS.map((v) => `${v.etiqueta} (${v.aspecto.toFixed(3)})`).join(' · ')}`)
 console.log(`  supuestos de las cajas:\n${SUPUESTOS_DE_LAS_CAJAS.map((s) => `   · ${s}`).join('\n')}`)
+
+afirmarLaComposicionDelHero()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · EL CONTROL DE EQUIVALENCIA — este muestreador ES el de S8/S10/S11')
