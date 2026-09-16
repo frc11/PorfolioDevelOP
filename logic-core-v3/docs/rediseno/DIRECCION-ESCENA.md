@@ -2044,3 +2044,31 @@ Está acá para que nadie lo dé por resuelto.
     **⚠ Y FUERA DEL ASPECTO 1,7778 NO HAY NINGUNA AFIRMACIÓN QUE CLAVE LA POSICIÓN HORIZONTAL DEL LOGO.** Es el hueco que §7.58 abrió y que este ítem cuantifica: el lane entero declara aspectos de **1,1389 a 1,7778** (`s10-logo-lectura` y `s13b-encuadre`; el resto de los instrumentos del arnés fija `ASPECT = 16/9`), y los aspectos de recorrido nulo de los cinco keyframes van de **0,5525 a 0,7983** — o sea que **ningún instrumento del gate mide jamás debajo del codo**. Por eso unificar la fórmula movió CERO cifras (§7.59) y por eso la divergencia era invisible. **El reencuadre trabaja sin red en vertical:** la única afirmación de posición que existe ahí es la que clava el defecto, y cuando se la saque no queda ninguna en su lugar. Escribirla es parte del sprint, no un extra.
 
     **La diferencia entre las dos fórmulas en escritorio es CERO, y eso también hay que decirlo claro.** En 1,7778 (1920×1080) · 1,600 (1440×900) · 1,3333 (1024×768) y 1,1389 (1025×900), `abs` y `max(0, …)` devuelven el **mismo bit** en los cinco keyframes: Δ mundo 0,0000 y Δ 0,00 px. El arnés no venía mintiendo en escritorio — **venía mintiendo sólo abajo del codo, que es exactamente donde el reencuadre trabaja.**
+
+61. 🔴 **EL GATE PUEDE PUBLICAR VERDE SOBRE UN `.next` QUE NO ES EL DEL ÁRBOL — Y EL DEV SERVER NO ERA LA CAUSA (PESO-1, 2026-09-16).**
+
+    **EL HECHO.** TAPADO-1 cerró con `npm run verificar` en **30 pasos · 0 fallas** y el lane **12,4 B arriba del techo**. Las dos cosas son verdad al mismo tiempo. Es la misma familia que el instrumento de §7.55 —el que reportaba 0 % de superposición del hero mientras el logo tapaba el titular entero—: **un número correcto sobre una entrada equivocada.** Ahí la entrada equivocada eran posiciones hipotéticas; acá es un directorio.
+
+    **LA CAUSA QUE SE DABA POR BUENA NO SE REPRODUCE.** La explicación que circulaba —y que la instrucción de este sprint repite— era que un `next dev` corriendo en paralelo contamina `.next` y por eso el peso salió verde. Se midió con `scripts-peso/b-contaminacion.ts`, que lee el lane contra el build de producción, levanta un `next dev`, lo hace servir `/v3`, lo mata y **vuelve a leer el lane sin reconstruir**:
+
+    | entrada | veredicto | aire | fallas |
+    |---|---|---|---|
+    | build de producción | **ROJO** | −2,2 B | 2 |
+    | el mismo `.next`, después de que `next dev` sirviera `/v3` (200 en ~4 s) | **ROJO** | −2,2 B | 2 |
+
+    **Ni un bit de diferencia.** Y se sabe por qué: `s5-peso` saca TODO de `DIST` (`.next`), y lo que mide sale de `htmlDe()`, que lee `.next/server/app/v3.html`, y de `conjuntoInicial()`, que extrae los `<script src>` de ese HTML. **`next dev` no prerenderiza a `.next/server/app/*.html`** — renderiza al vuelo. Después de servir `/v3`, `v3.html` conservaba el mtime del build de producción (`08:11:32`) mientras el dev había corrido a las `08:16`. El dev server no toca el artefacto que el gate lee.
+
+    **LA CAUSA REAL ES MÁS SIMPLE Y PEOR: `.next` VIEJO.** `exigirBuild()` (`s3-bundle.ts:25`) comprueba **una sola cosa: que el directorio exista**. No comprueba que corresponda al árbol. Y como `s5-peso` no lee NUNCA el código fuente, un `.next` construido antes del cambio publica el número de antes — que es un número correcto, de otro árbol. En TAPADO-1 el orden de la sesión fue `verificar` **y después** `build`: el `.next` que el gate leyó era anterior al cambio de `Hero.tsx`.
+
+    **CON SU NÚMERO, porque el A/B de este sprint lo mide exactamente.** `scripts-peso/a-atribuir.ts` construyó los dos árboles en la misma máquina:
+
+    | `.next` | lo que ESCRIBE el lane | aire | veredicto |
+    |---|---|---|---|
+    | build del árbol con `Hero.tsx` en `cdd7ae03` | 66.027,2 B | **+20,8 B** | **verde** |
+    | build del árbol de hoy | 66.050,2 B | **−2,2 B** | **rojo** |
+
+    Los **23,0 B** de diferencia son de TAPADO-1. Un gate corrido contra el primer `.next` con el segundo árbol en disco reporta verde **y no se equivoca en nada de lo que midió**.
+
+    **EL PAPEL QUE SÍ TIENE EL DEV SERVER, y por qué la explicación sonaba bien.** No corrompe el número: **hace que el árbol parezca construido**. La página contesta, `.next` tiene archivos recientes, todo se ve vivo — y el artefacto del que depende el gate quedó intacto desde antes. Es un encubridor, no el autor.
+
+    **LA SALIDA, que este sprint NO aplica porque no es suya.** El guardián que falta es que `exigirBuild()` pueda decir *«este `.next` es de este árbol»*: una huella de los fuentes del lane escrita en el build y comparada al leer. Mientras no exista, la única defensa es de procedimiento —**reconstruir antes de correr el gate**, que es lo que la instrucción de este sprint manda— y una defensa de procedimiento no es un invariante: no puede fallar sola.

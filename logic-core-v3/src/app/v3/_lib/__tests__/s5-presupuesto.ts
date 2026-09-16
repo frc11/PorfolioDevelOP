@@ -176,17 +176,63 @@ export const MONTAJE_DE_B12_KIB = 1.36
  *
  * ⚠️ **Y el techo de 60 NO se movió**, como en B11 y B12: esto es una línea con
  * nombre que se le resta. Al centésimo de arriba, con la convención de B8, B10,
- * B11 y B12: 706 / 1024 = 0,6895 → **0,69**, que deja **0,6 B de aire**.
+ * B11 y B12: 706 / 1024 = 0,6895 → 0,69, que dejaba **0,6 B de aire**.
  *
  * ⚠️⚠️ **ES LA SEGUNDA VEZ QUE ESTA LÍNEA SE MUEVE, Y SE DICE.** La primera
  * pasada la dejó en 0,60 con 0,4 B de aire; el ajuste de la línea 2 se la comió
  * entera y 91,2 B más. Que el margen vuelva a quedar en menos de un byte NO es
  * un descuido de método: es la convención del centésimo de arriba cayendo dos
- * veces seguidas del lado malo. La propuesta de subirla a **0,70** —10,8 B de
- * aire, el orden de B11 y B12— sigue SIN APLICAR y sigue esperando la parada,
- * con su criterio declarado en `s5-presupuesto-recibos-del-titular.ts`.
+ * veces seguidas del lado malo.
+ *
+ * ✅ **LA TERCERA VEZ ES LA APROBADA: 0,69 → 0,70, en la parada de PESO-1.** El
+ * aire pasa de 0,6 B a **10,8 B**, el orden de B11 (8,6) y B12 (8,2) y por encima
+ * del umbral de aire útil de 8 B que `s5-presupuesto-recibos-del-titular.ts`
+ * declara. **El techo de 60 sigue sin moverse**: lo que sube es esta línea con
+ * nombre, y sigue siendo revocable sola. Cuesta 10,2 B de techo que este hilo no
+ * usa, y esa deuda se declara ahí mismo.
+ *
+ * ⚠️ **Lo que esta línea NO arregla, y hay que decirlo:** el lane estaba **12,4 B
+ * arriba del techo**, y estos 10,24 B no alcanzan. Los 2,2 B que quedan **no son
+ * de este hilo**: son de TAPADO-1, que cambió producto (`Hero.tsx`) y no declaró
+ * su línea. La medición y la propuesta están en
+ * `s5-presupuesto-recibos-de-tapado.ts`, esperando su parada.
  */
-export const MONTAJE_DEL_TITULAR_KIB = 0.69
+export const MONTAJE_DEL_TITULAR_KIB = 0.7
+
+/**
+ * **+0,04 KiB** — lo que MOVIL-1 monta en la CARGA INICIAL al bajar la escena
+ * abajo de 1025. **31,0 B**, medidos A/B entre dos builds de producción del
+ * MISMO árbol en la MISMA máquina, con una sola variable: los cinco archivos de
+ * producto devueltos a `HEAD` con `git show` para el «antes» y restaurados desde
+ * una copia fuera del árbol, verificados byte a byte con sha256 antes de
+ * construir. `s5-peso` leyó **0,6 B de aire** en el «antes» y **−30,4 B** en el
+ * «después».
+ *
+ * ⚠️ **31 BYTES POR UN CUARTO DE MEGA, Y NO ES UN ERROR DE UNIDADES.** Lo que la
+ * escena le suma a un teléfono son **259,83 KiB**, y esta línea dice 31 B porque
+ * **este techo mide otra cosa**: la carga inicial, o sea los `<script src>` del
+ * HTML servido. El chunk de la escena **sigue siendo diferido** —`ssr: false` y
+ * `import()`, sin tocar— así que no entra en esa cuenta ni antes ni después. Los
+ * 31 B son la compuerta misma: el `import` de `calidad.ts`, la llamada a
+ * `calidadPorAncho` y el `key`.
+ *
+ * La cifra grande está medida, repartida chunk por chunk y publicada en cada
+ * corrida de `s5-peso` **como línea propia y sin sumarse a este techo**, con el
+ * porqué desarrollado: sumarla dejaría el gate con 260 KiB de aire y sin
+ * capacidad de ponerse en rojo. Todo el recibo —las dos cifras, el método del
+ * swap, la trampa del `>` que truncó cinco archivos y el defecto de caché que
+ * hizo bajar 79 KiB una medición— está en
+ * `s5-presupuesto-recibos-de-movil.ts`.
+ *
+ * Al centésimo de arriba, con la convención de B8, B10, B11, B12 y el titular:
+ * 31,0 / 1024 = 0,0303 → **0,04**, que deja **10,0 B de aire**, el mismo orden
+ * que B11 (8,6) y B12 (8,2) y por encima del umbral de aire útil de 8 B.
+ *
+ * ⚠️ **Y el techo de 60 NO se movió.** Es una línea con nombre que se le resta, y
+ * es revocable sola: revocarla es devolver el `return null` a la compuerta, que
+ * es exactamente la decisión que el dueño dio vuelta.
+ */
+export const MONTAJE_DE_MOVIL_KIB = 0.04
 
 /**
  * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
@@ -245,8 +291,9 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  *
- * ⚠️ Son **los SIETE montajes más el heredado**, sin repetir ni faltar; la novena
+ * ⚠️ Son **los OCHO montajes más el heredado**, sin repetir ni faltar; la décima
  * línea con nombre es el techo de 60, y se la suma `PRESUPUESTO_PROPIO_KIB`.
+ * MOVIL-1 agregó la suya en el mismo acto en que la declaró.
  * El merge de las cuatro ramas dejó este sumatorio con la forma que traía B8
  * —que se escribió cuando B9 todavía no estaba en el árbol— y **`MONTAJE_DE_B9_KIB`
  * quedó afuera**: la constante existía, con su valor de origen, y no se sumaba.
@@ -261,5 +308,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B11_KIB +
   MONTAJE_DE_B12_KIB +
   MONTAJE_DEL_TITULAR_KIB +
+  MONTAJE_DE_MOVIL_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

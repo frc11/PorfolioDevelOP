@@ -51,12 +51,21 @@ import {
   aireDe,
 } from './s5-presupuesto-recibos-del-titular'
 import {
+  DESCARGA_ANTES_BYTES,
+  DESCARGA_DELTA_BYTES,
+  DESCARGA_DESPUES_BYTES,
+  DESCARGA_REPARTIDA_BYTES,
+  DESVIO_DE_MOVIL_BYTES,
+  RECIBOS_DE_LA_DESCARGA,
+} from './s5-presupuesto-recibos-de-movil'
+import {
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
   MONTAJE_DE_B11_KIB,
   MONTAJE_DE_B12_KIB,
   MONTAJE_DEL_TITULAR_KIB,
+  MONTAJE_DE_MOVIL_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
@@ -66,7 +75,20 @@ import {
   PRESUPUESTO_PROPIO_KIB,
 } from './s5-presupuesto'
 import { DIST, conjuntoInicial, exigirBuild, htmlDe, kib, partirCargaInicial, pesar } from './s3-bundle'
+import {
+  AIRE_DE_LA_PROPUESTA_BYTES,
+  DESVIO_DE_TAPADO_BYTES,
+  PROPUESTA_DE_TAPADO_KIB,
+} from './s5-presupuesto-recibos-de-tapado'
 import { RUTAS_BORRADAS } from './s4-rutas-de-demo'
+
+/**
+ * El valor que la línea del titular tenía ANTES de la parada de PESO-1. Vive acá
+ * y no en el recibo porque su único uso es ser la entrada equivocada del control
+ * positivo de abajo: un control que se alimentara de la constante de verdad no
+ * probaría nada.
+ */
+const LINEA_VIEJA_DEL_TITULAR_KIB = 0.69
 
 exigirBuild()
 
@@ -139,6 +161,7 @@ console.log(
     ` + ${MONTAJE_DE_B11_KIB} que B11 monta (el texto corrido de donde pasa el logo y dos tintas a plena: 25 B netos medidos A/B entre dos builds del mismo árbol, atribuidos byte a byte)` +
     ` + ${MONTAJE_DE_B12_KIB} que B12 monta (la GOTA de entrada a la noche, 1.304 B, y la BANDA local del pie, 176 B, contra −87 B que devuelve todo el resto del bloque: 1.393 B netos, apagando cada pieza y restaurándola byte a byte)` +
     ` + ${MONTAJE_DEL_TITULAR_KIB} que monta el TITULAR rehecho (los DOS niveles nuevos de la escala, el quinto peso, las dos cadenas de clase y el atributo del CTA, contra lo que devuelven la bajada, el cepillo y la pieza quieta: 706 B de desvio en dos pasadas (614 + 91,6) medidos por este mismo invariante contra el techo que fijo el build de B12)` +
+    ` + ${MONTAJE_DE_MOVIL_KIB} que MOVIL-1 monta (la compuerta de la escena partida en dos: ${DESVIO_DE_MOVIL_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con los cinco archivos de producto devueltos a HEAD por git show y restaurados con sha256 verificado)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
 console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
@@ -147,23 +170,37 @@ console.log('    B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: de
 console.log('    B12 es la línea más grande que este techo llevó, y las DOS piezas que la componen son nuevas y pedidas por su nombre: la gota («un efecto de gota o algo exótico y deluxe») y el velo local del pie. El resto del bloque DEVUELVE 87 B (`s5-presupuesto-recibos-de-b12.ts`).')
 console.log(`    EL TITULAR es la primera linea cuyo REPARTO POR PIEZA no esta medido, y se declara: el total son ${DESVIO_DEL_TITULAR_BYTES} B medidos, el inventario tiene ${INVENTARIO_DEL_TITULAR.length} piezas derivadas del codigo, y cerrarlo cuesta ${BUILDS_QUE_FALTAN_PARA_EL_REPARTO} builds. El precio del pendiente esta escrito en s5-presupuesto-recibos-del-titular.ts.`)
 console.log('    Y los dos `.woff2` nuevos (21.352 B) NO entran en esta cuenta: `conjuntoInicial()` mide los `<script src>` de la ruta, o sea SOLO JavaScript. Las dos fuentes de S0 tampoco estan. Se publican aparte, en el reporte y en `scripts-titular/manifiesto-fuentes.json`.')
-console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los CUATRO archivos de recibos: por eso cada una es revocable por separado.')
+console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los SIETE archivos de recibos: por eso cada una es revocable por separado.')
+console.log('    El séptimo (`s5-presupuesto-recibos-de-tapado.ts`) es el único SIN línea: mide bytes que ya están en el lane y cuya parada no pasó. Por eso el techo no los cubre y esta corrida lo dice en rojo.')
 /**
- * 🟡 **UNA PROPUESTA, IMPRESA Y NO APLICADA.** El aire de una línea es la parte
- * ÚTIL del redondeo al centésimo de arriba, y la del titular cayó en 0,4 B por
- * dónde quedó el 614 respecto del límite del centésimo. Se publica acá —en la
- * salida que alguien lee cuando corre `verificar`— en vez de esconderse en un
- * archivo, porque una propuesta que nadie ve no es una propuesta. **La constante
- * NO entra en `MONTAJES_DECLARADOS_KIB`: el techo de hoy sigue siendo el de
- * 0,60.** El recibo está al lado del actual.
+ * ✅ **LA PROPUESTA DEL TITULAR ESTÁ APLICADA, y por eso dejó de imprimirse y
+ * pasó a AFIRMARSE.**
+ *
+ * El aire de una línea es la parte ÚTIL del redondeo al centésimo de arriba, y la
+ * del titular había caído en 0,6 B —dos pasadas seguidas del lado malo del
+ * centésimo—. El humano aprobó subirla a 0,70 en la parada de PESO-1.
+ *
+ * Mientras estuvo pendiente esto era un `console.log`, porque una propuesta que
+ * nadie ve no es una propuesta. **Aplicada, un `console.log` sería peor que
+ * nada**: diría que algo está bien sin que nada lo vigile. Lo que queda son dos
+ * afirmaciones y su control —que la línea sea la que el recibo propuso, y que su
+ * aire esté por encima del umbral declarado—, así que el día que alguien la
+ * devuelva a 0,69 el gate lo dice con el número.
  */
-console.log(
-  `    🟡 PROPUESTA SIN APLICAR, para la parada: subir ESTA línea de ${MONTAJE_DEL_TITULAR_KIB} a ${PROPUESTA_DEL_TITULAR_KIB} KiB. ` +
-    `Razón en una línea: con ${MONTAJE_DEL_TITULAR_KIB} el aire queda en ${aireDe(MONTAJE_DEL_TITULAR_KIB).toFixed(1)} B —más chico que el ruido de redondeo del propio build— y con ${PROPUESTA_DEL_TITULAR_KIB} queda en ${aireDe(PROPUESTA_DEL_TITULAR_KIB).toFixed(1)} B, ` +
-    `el mismo orden que B11 (8,6) y B12 (8,2). El techo de ${PRESUPUESTO_DEL_LANE_KIB} NO se mueve; cuesta ${(aireDe(PROPUESTA_DEL_TITULAR_KIB) - aireDe(MONTAJE_DEL_TITULAR_KIB)).toFixed(1)} B de techo que este sprint no usa.`,
+afirmar(
+  MONTAJE_DEL_TITULAR_KIB === PROPUESTA_DEL_TITULAR_KIB,
+  '✅ la línea del titular es la que su recibo propuso: la parada la aprobó',
+  `${MONTAJE_DEL_TITULAR_KIB} KiB — el techo de ${PRESUPUESTO_DEL_LANE_KIB} no se movió, y la línea sigue siendo revocable sola`,
 )
-console.log(
-  `    El umbral de aire útil declarado son ${AIRE_MINIMO_UTIL_BYTES} B y hoy la línea del titular deja ${aireDe(MONTAJE_DEL_TITULAR_KIB).toFixed(1)} B: es la PRIMERA que cae abajo. No se aplica nada sin aprobación.`,
+afirmar(
+  aireDe(MONTAJE_DEL_TITULAR_KIB) >= AIRE_MINIMO_UTIL_BYTES,
+  '  y su aire vuelve a cumplir su función: está arriba del umbral declarado',
+  `${aireDe(MONTAJE_DEL_TITULAR_KIB).toFixed(1)} B contra un umbral de ${AIRE_MINIMO_UTIL_BYTES} B — era ${aireDe(LINEA_VIEJA_DEL_TITULAR_KIB).toFixed(1)} B, el orden de B11 (8,6) y B12 (8,2)`,
+)
+controlPositivo(
+  'el lector de aire no está ciego: con la línea VIEJA (0,69) el aire cae debajo del umbral',
+  LINEA_VIEJA_DEL_TITULAR_KIB,
+  (kib: number) => aireDe(kib) >= AIRE_MINIMO_UTIL_BYTES,
 )
 /**
  * ⚠️ **EL PESO DE LA LLAVE SE RESTA APARTE, Y EN VOZ ALTA (B12 §4).**
@@ -199,6 +236,32 @@ afirmar(
 )
 
 /**
+ * 🟡 **UNA PROPUESTA MÁS, IMPRESA Y NO APLICADA — y ésta es la que tiene el lane
+ * en rojo.**
+ *
+ * La línea del titular se aprobó y se aplicó, y **no alcanzó**: daba 10,24 B de
+ * techo contra 12,4 B de excedente. Los 2,2 B que sobran no son suyos. Se midió
+ * de quién son, con un A/B de dos builds del mismo árbol
+ * (`scripts-peso/a-atribuir.ts`): son de **TAPADO-1**, que cambió producto
+ * —`Hero.tsx`— y no declaró su línea.
+ *
+ * Se publica acá, en la salida que alguien lee cuando corre `verificar` y a dos
+ * renglones del número rojo, en vez de esconderse en un archivo. **La constante
+ * NO entra en `MONTAJES_DECLARADOS_KIB`: el techo de hoy no la tiene.** Por eso
+ * la afirmación de arriba falla, y tiene que fallar: subir un montaje es del
+ * humano en su parada, y ésta todavía no pasó.
+ */
+console.log(
+  `    🟡 PROPUESTA SIN APLICAR, para la parada: una línea NUEVA, \`MONTAJE_DE_TAPADO_KIB = ${PROPUESTA_DE_TAPADO_KIB}\`. ` +
+    `Razón en una línea: TAPADO-1 le sumó ${DESVIO_DE_TAPADO_BYTES} B al lane con \`Hero.tsx\` y no declaró nada, así que sus bytes se los comió el techo de los demás. ` +
+    `Medido con un A/B de dos builds del mismo árbol; el recibo está en \`s5-presupuesto-recibos-de-tapado.ts\`. El techo de ${PRESUPUESTO_DEL_LANE_KIB} NO se mueve.`,
+)
+console.log(
+  `    Con ella el lane pasa de ${(PRESUPUESTO_PROPIO_KIB * 1024 - escritoSinLaLlave).toFixed(1)} B de aire a ${(PRESUPUESTO_PROPIO_KIB * 1024 - escritoSinLaLlave + PROPUESTA_DE_TAPADO_KIB * 1024).toFixed(1)} B y esta afirmación vuelve a verde. ` +
+    `⚠️ Su propio aire de línea quedaría en ${AIRE_DE_LA_PROPUESTA_BYTES.toFixed(1)} B, ${(AIRE_MINIMO_UTIL_BYTES - AIRE_DE_LA_PROPUESTA_BYTES).toFixed(1)} B DEBAJO del umbral de ${AIRE_MINIMO_UTIL_BYTES} B: nace siendo la más apretada del tablero.`,
+)
+
+/**
  * ⚠️ **EL TECHO PASÓ DE 63,76 A 64,36 Y LA DIFERENCIA ES UNA LÍNEA CON NOMBRE.**
  *
  * Este renglón afirmaba que §4 de B12 no había movido el techo ni un centésimo,
@@ -227,6 +290,36 @@ afirmarIgual(PESO_DE_LA_LLAVE_EN_BYTES, 4303, `  la línea de la llave la sostie
 afirmar(
   Math.abs(PESO_DE_LA_LLAVE_EN_BYTES - PESO_DE_LA_LLAVE_KIB * 1024) < 64,
   `  y el modelo y la línea no se contradicen: ${(PESO_DE_LA_LLAVE_KIB * 1024 - PESO_DE_LA_LLAVE_EN_BYTES).toFixed(1)} B de diferencia, publicados y no apropiados`,
+)
+
+/**
+ * ⚠️ **LA OTRA CIFRA DE MOVIL-1 — la que este techo NO mide, publicada al lado.**
+ *
+ * El techo de arriba gobierna la CARGA INICIAL. Lo que un teléfono DESCARGA al
+ * abrir `/v3` es otra cosa: la carga inicial más lo que el `import()` diferido
+ * pide después de hidratar. Hasta MOVIL-1 no había nada diferido que contar
+ * abajo de 1025 —la compuerta no ejecutaba el import— y por eso ningún
+ * instrumento del repo miraba este número.
+ *
+ * **No se le suma al techo, y el porqué está desarrollado en el recibo**: con
+ * 259,83 KiB adentro, el gate quedaría con un cuarto de mega de aire y dejaría
+ * de poder ponerse en rojo. Es la forma que B12 §4 le dio al peso de la llave.
+ */
+console.log(
+  `  ⚠️ LO QUE DESCARGA UN TELÉFONO (MOVIL-1, fuera de este techo): ${kib(DESCARGA_ANTES_BYTES)} antes → ${kib(DESCARGA_DESPUES_BYTES)} después = +${kib(DESCARGA_DELTA_BYTES)} a 390×844, con la caché apagada.`,
+)
+console.log(`    Repartido en ${RECIBOS_DE_LA_DESCARGA.length} renglones, el mayor ${kib(RECIBOS_DE_LA_DESCARGA[0][1])} (${RECIBOS_DE_LA_DESCARGA[0][2]}). Recibo: \`s5-presupuesto-recibos-de-movil.ts\`.`)
+console.log('    NO se suma a `MONTAJES_DECLARADOS_KIB`: el techo mide la carga inicial y esto es descarga diferida. Sumarlo dejaría el gate sin capacidad de fallar.')
+
+afirmarIgual(
+  DESCARGA_REPARTIDA_BYTES,
+  DESCARGA_DELTA_BYTES,
+  `  y el reparto de la descarga CIERRA sin residuo: ${RECIBOS_DE_LA_DESCARGA.length} renglones suman los ${DESCARGA_DELTA_BYTES} B medidos`,
+)
+afirmarIgual(
+  DESCARGA_DESPUES_BYTES - DESCARGA_ANTES_BYTES,
+  DESCARGA_DELTA_BYTES,
+  '  y las dos mediciones del A/B reconstruyen el delta publicado',
 )
 
 controlPositivo(

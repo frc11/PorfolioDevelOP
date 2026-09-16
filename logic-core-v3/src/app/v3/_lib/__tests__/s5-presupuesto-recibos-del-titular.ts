@@ -159,11 +159,19 @@ export const INVENTARIO_DEL_TITULAR: readonly PiezaDelTitular[] = [
 export const BUILDS_QUE_FALTAN_PARA_EL_REPARTO = 7
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🟡 LA PROPUESTA — NO APLICADA. La aprueba el humano en la parada.
+// ✅ LA PROPUESTA — APLICADA en la parada de PESO-1. El humano la aprobó.
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * **PROPUESTA: `MONTAJE_DEL_TITULAR_KIB` de 0,69 a 0,70.**
+ * **APLICADA: `MONTAJE_DEL_TITULAR_KIB` de 0,69 a 0,70.** El texto de abajo es
+ * el de la propuesta, INTACTO, porque el criterio con el que se aprobó es lo que
+ * hay que poder leer después. Lo único que cambió es el estado.
+ *
+ * ⚠ **Y una consecuencia que la propuesta no prometía:** subir esta línea da
+ * **+10,24 B de techo** y el lane estaba **12,4 B arriba**. No alcanza por 2,2 B.
+ * Eso NO es un defecto de esta propuesta —habla del aire de SU línea, que era
+ * 0,6 B y ahora es 10,8—: el excedente lo puso otro sprint, y su medición está
+ * en `s5-presupuesto-recibos-de-tapado.ts`.
  *
  * La razón, en una línea: **con 0,69 el aire queda en 0,6 B —más chico que el
  * ruido de redondeo del propio build— y con 0,70 queda en 10,8 B, el mismo
