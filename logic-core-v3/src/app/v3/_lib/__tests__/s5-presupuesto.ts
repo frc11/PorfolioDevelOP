@@ -235,6 +235,36 @@ export const MONTAJE_DEL_TITULAR_KIB = 0.7
 export const MONTAJE_DE_MOVIL_KIB = 0.04
 
 /**
+ * **+0,04 KiB** — lo que TAPADO-1 monta al bajar el texto del hero abajo del
+ * breakpoint. **23,0 B**, medidos A/B entre dos builds de producción del MISMO
+ * árbol en la MISMA máquina, con una sola variable: `_secciones/hero/Hero.tsx`
+ * devuelto a `cdd7ae03` con `git show` y restaurado desde una copia guardada
+ * FUERA del árbol, con el sha256 verificado. Lo que viaja es la cadena de clases
+ * `justify-end … escritorio:justify-center` y las utilidades que Tailwind emite
+ * por ella. Recibo completo en `s5-presupuesto-recibos-de-tapado.ts`.
+ *
+ * ⚠️ **ESTA LÍNEA LLEGA TARDE, y ésa es la mitad de lo que enseña.** TAPADO-1
+ * cambió producto y no declaró nada, así que sus 23 B se los comió el techo de
+ * los demás: el lane quedó 2,2 B en rojo y la línea del titular —que hablaba de
+ * OTRA cuenta— pareció no alcanzar. La atribución costó dos builds
+ * (`scripts-peso/a-atribuir.ts`). Un sprint que toca producto declara su línea
+ * en el mismo acto, como hicieron B11 y MOVIL-1.
+ *
+ * 🔴 **Y ES LA PRIMERA LÍNEA QUE NACE CON LA REGLA DEL AIRE ÚTIL.** Al centésimo
+ * de arriba, 23,0 / 1024 = 0,0225 → 0,03, que deja **7,7 B de aire: 0,3 B DEBAJO**
+ * del umbral de `AIRE_MINIMO_UTIL_BYTES` (8 B). La parada de PAPEL-1 la subió al
+ * centésimo siguiente —**0,04, con 17,96 B de aire**— y escribió la regla que lo
+ * autoriza: *una línea nueva no nace por debajo del umbral de aire útil; si el
+ * centésimo de arriba la deja abajo, se sube al siguiente y se dice*. La regla,
+ * con su alcance y con lo que NO autoriza, está en el recibo.
+ *
+ * ⚠️ **El techo de 60 NO se movió.** Es una línea con nombre que se le suma, y es
+ * revocable sola: revocarla es devolver `justify-center` a todos los anchos, que
+ * es exactamente la composición que TAPADO-1 midió y descartó.
+ */
+export const MONTAJE_DE_TAPADO_KIB = 0.04
+
+/**
  * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
  *
  * Es lo que agrega el contenido inventado de B12 §4: las veinte casillas
@@ -291,9 +321,12 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  *
- * ⚠️ Son **los OCHO montajes más el heredado**, sin repetir ni faltar; la décima
- * línea con nombre es el techo de 60, y se la suma `PRESUPUESTO_PROPIO_KIB`.
+ * ⚠️ Son **los NUEVE montajes más el heredado**, sin repetir ni faltar; la
+ * undécima línea con nombre es el techo de 60, y se la suma
+ * `PRESUPUESTO_PROPIO_KIB`.
  * MOVIL-1 agregó la suya en el mismo acto en que la declaró.
+ * La de TAPADO-1 la agregó la parada de PAPEL-1, dos sprints tarde: el porqué
+ * —y lo que costó— está en el docblock de `MONTAJE_DE_TAPADO_KIB`.
  * El merge de las cuatro ramas dejó este sumatorio con la forma que traía B8
  * —que se escribió cuando B9 todavía no estaba en el árbol— y **`MONTAJE_DE_B9_KIB`
  * quedó afuera**: la constante existía, con su valor de origen, y no se sumaba.
@@ -309,5 +342,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B12_KIB +
   MONTAJE_DEL_TITULAR_KIB +
   MONTAJE_DE_MOVIL_KIB +
+  MONTAJE_DE_TAPADO_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB
