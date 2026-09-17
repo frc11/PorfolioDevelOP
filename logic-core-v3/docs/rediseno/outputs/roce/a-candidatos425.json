@@ -1,0 +1,221 @@
+{
+  "etiqueta": "candidatos425",
+  "cuando": "2026-09-17T18:14:59.735Z",
+  "instrumento": "scripts-roce/a-barrido.ts — el corrimiento vertical como variable, con las dos mascaras de TAPADO-1 (C y D) y la E de COMPO-2",
+  "palanca": "padding-bottom del hero (y, pasados los 72 px, el margin-bottom de la grilla)",
+  "filas": [
+    {
+      "ancho": 425,
+      "alto": 844,
+      "margenBase": 0,
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 20,
+          "hasta": 20,
+          "alto": 1
+        },
+        {
+          "desde": 53,
+          "hasta": 53,
+          "alto": 1
+        },
+        {
+          "desde": 66,
+          "hasta": 66,
+          "alto": 1
+        },
+        {
+          "desde": 68,
+          "hasta": 68,
+          "alto": 1
+        },
+        {
+          "desde": 81,
+          "hasta": 84,
+          "alto": 4
+        },
+        {
+          "desde": 105,
+          "hasta": 108,
+          "alto": 4
+        },
+        {
+          "desde": 118,
+          "hasta": 119,
+          "alto": 2
+        },
+        {
+          "desde": 150,
+          "hasta": 151,
+          "alto": 2
+        },
+        {
+          "desde": 154,
+          "hasta": 155,
+          "alto": 2
+        },
+        {
+          "desde": 162,
+          "hasta": 164,
+          "alto": 3
+        },
+        {
+          "desde": 182,
+          "hasta": 183,
+          "alto": 2
+        },
+        {
+          "desde": 252,
+          "hasta": 252,
+          "alto": 1
+        },
+        {
+          "desde": 261,
+          "hasta": 575,
+          "alto": 315
+        },
+        {
+          "desde": 650,
+          "hasta": 651,
+          "alto": 2
+        },
+        {
+          "desde": 659,
+          "hasta": 690,
+          "alto": 32
+        },
+        {
+          "desde": 804,
+          "hasta": 805,
+          "alto": 2
+        }
+      ],
+      "filas": [
+        {
+          "corrimiento": 0,
+          "rellenoAbajo": 80,
+          "margenDeLaGrilla": 0,
+          "columna": {
+            "arriba": 517.72,
+            "abajo": 764,
+            "alto": 246.28
+          },
+          "aireBajoElBloque": 80,
+          "desborda": false,
+          "cajaDelTitular": {
+            "x": 32,
+            "y": 517.71875,
+            "ancho": 361,
+            "alto": 157.6875
+          },
+          "cruces": {
+            "titular": {
+              "glifos": 8794,
+              "sobreLaEscena": 0.0114,
+              "detrasDelTexto": 0.009,
+              "tintaBajoAA": 0.0055,
+              "contrasteMediano": 14.84
+            },
+            "registro1": {
+              "glifos": 4486,
+              "sobreLaEscena": 0.004,
+              "detrasDelTexto": 0.002,
+              "tintaBajoAA": 0.0036,
+              "contrasteMediano": 16.26
+            },
+            "registro2": {
+              "glifos": 4308,
+              "sobreLaEscena": 0.019,
+              "detrasDelTexto": 0.0162,
+              "tintaBajoAA": 0.0074,
+              "contrasteMediano": 14.01
+            },
+            "bajada": {
+              "glifos": 745,
+              "sobreLaEscena": 0.0081,
+              "detrasDelTexto": 0.0228,
+              "tintaBajoAA": 0.0013,
+              "contrasteMediano": 8.97
+            },
+            "cta": {
+              "glifos": 1165,
+              "sobreLaEscena": 0.0052,
+              "detrasDelTexto": 0.0215,
+              "tintaBajoAA": 0.0052,
+              "contrasteMediano": 13.87
+            },
+            "columna": {
+              "glifos": 10704,
+              "sobreLaEscena": 0.0105,
+              "detrasDelTexto": 0.0113,
+              "tintaBajoAA": 0.0051,
+              "contrasteMediano": 14.13
+            }
+          }
+        },
+        {
+          "corrimiento": 72,
+          "rellenoAbajo": 8,
+          "margenDeLaGrilla": 0,
+          "columna": {
+            "arriba": 589.72,
+            "abajo": 836,
+            "alto": 246.28
+          },
+          "aireBajoElBloque": 8,
+          "desborda": false,
+          "cajaDelTitular": {
+            "x": 32,
+            "y": 589.71875,
+            "ancho": 361,
+            "alto": 157.6875
+          },
+          "cruces": {
+            "titular": {
+              "glifos": 8794,
+              "sobreLaEscena": 0.0227,
+              "detrasDelTexto": 0.0244,
+              "tintaBajoAA": 0.0142,
+              "contrasteMediano": 14
+            },
+            "registro1": {
+              "glifos": 4486,
+              "sobreLaEscena": 0.0123,
+              "detrasDelTexto": 0.0103,
+              "tintaBajoAA": 0.0053,
+              "contrasteMediano": 14.95
+            },
+            "registro2": {
+              "glifos": 4308,
+              "sobreLaEscena": 0.0337,
+              "detrasDelTexto": 0.0392,
+              "tintaBajoAA": 0.0234,
+              "contrasteMediano": 13.87
+            },
+            "bajada": {
+              "glifos": 745,
+              "sobreLaEscena": 0,
+              "detrasDelTexto": 0.0094,
+              "tintaBajoAA": 0,
+              "contrasteMediano": 13.87
+            },
+            "cta": {
+              "glifos": 2680,
+              "sobreLaEscena": 0.006,
+              "detrasDelTexto": 0.6593,
+              "tintaBajoAA": 0.006,
+              "contrasteMediano": 2
+            },
+            "columna": {
+              "glifos": 12241,
+              "sobreLaEscena": 0.0176,
+              "detrasDelTexto": 0.1643,
+              "tintaBajoAA": 0.0115,
+              "contrasteMediano": 13.87
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

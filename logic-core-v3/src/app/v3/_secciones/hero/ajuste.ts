@@ -43,7 +43,7 @@ import { medidaDelTitular } from '../../_lib/__tests__/s3-banda-consecuencias'
 
 import { CONTENIDO, PEDIDO } from './contenido'
 import { FACTOR_DEL_PESO_700, tamanoDeLaFila3 } from './composicion'
-import { GEOMETRIA, TIPOGRAFIA_DEL_TITULAR } from './geometria'
+import { CORRIMIENTO_DEL_ROCE_EN_768_PX, GEOMETRIA, TIPOGRAFIA_DEL_TITULAR } from './geometria'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const RAIZ = path.resolve(AQUI, '../../../../..')
@@ -337,29 +337,40 @@ export function afirmarElAjusteDeCompo2(quieto: string): void {
    * cercano habría dejado al bloque 1,6 px corrido y nadie habría sabido por
    * qué. Acá se afirma que el `calc()` y la cuenta dicen el mismo número.
    */
+  /**
+   * ⚠️ **ROCE-1 LE AGREGA UN SEGUNDO TÉRMINO, Y LA AFIRMACIÓN ES QUE SON DOS.**
+   * El valor de la banda de 768 ya no es un renglón: es el renglón MENOS el
+   * corrimiento que despega la tinta del registro 1 de la silueta del logo
+   * (0,62 % → 0,00 %, barrido de a un píxel en `outputs/roce/a-logo768fino.json`).
+   * Los dos términos se afirman por separado contra su procedencia —el primero
+   * contra los tokens, el segundo contra la constante medida— para que nadie
+   * pueda tocar uno creyendo que toca el otro.
+   */
   const RENGLON_DE_LA_BAJADA = tokenPx('--text-base', 768) * LEADING_TEXTO
+  const CLASE_DE_LA_BANDA_DE_768 = `tablet:mb-[calc(var(--text-base)*var(--leading-texto)-${CORRIMIENTO_DEL_ROCE_EN_768_PX}px)]`
   const CLASES_DEL_AIRE = GEOMETRIA.claseDelAireDelPieEnPortatil.split(/\s+/)
   afirmarIgual(
     CLASES_DEL_AIRE,
-    ['tablet:mb-[calc(var(--text-base)*var(--leading-texto))]', 'medio:mb-4', 'escritorio:mb-0'],
-    `el aire del pie tiene TRES bandas y las tres están escritas: 768–859 el renglón devuelto (${RENGLON_DE_LA_BAJADA.toFixed(2)} px), 860–1024 el \`--spacing-4\` de COMPO-1, y de 1025 para arriba nada`,
+    [CLASE_DE_LA_BANDA_DE_768, 'medio:mb-4', 'escritorio:mb-0'],
+    `el aire del pie tiene TRES bandas y las tres están escritas: 768–859 el renglón devuelto (${RENGLON_DE_LA_BAJADA.toFixed(2)} px) menos el corrimiento del roce (${CORRIMIENTO_DEL_ROCE_EN_768_PX} px) = ${(RENGLON_DE_LA_BAJADA - CORRIMIENTO_DEL_ROCE_EN_768_PX).toFixed(2)} px, 860–1024 el \`--spacing-4\` de COMPO-1, y de 1025 para arriba nada`,
   )
   afirmar(
     RENGLON_DE_LA_BAJADA === tokenPx('--text-base', 320) * LEADING_TEXTO,
     `  y ese renglón vale lo mismo en todos los anchos (${RENGLON_DE_LA_BAJADA.toFixed(2)} px): \`--text-base\` es fijo, así que lo que la regla global saca es una constante`,
   )
   afirmar(
-    quieto.includes('tablet:mb-[calc(var(--text-base)*var(--leading-texto))]'),
-    '  y la banda nueva llega al marcado real',
+    CORRIMIENTO_DEL_ROCE_EN_768_PX > 0 && CORRIMIENTO_DEL_ROCE_EN_768_PX < RENGLON_DE_LA_BAJADA,
+    `  y el corrimiento del roce (${CORRIMIENTO_DEL_ROCE_EN_768_PX} px) se le RESTA al renglón sin comérselo: el margen queda en ${(RENGLON_DE_LA_BAJADA - CORRIMIENTO_DEL_ROCE_EN_768_PX).toFixed(2)} px, o sea que el bloque sigue arriba de donde lo dejaría la regla global sola`,
+    `un corrimiento de ${RENGLON_DE_LA_BAJADA.toFixed(2)} px anularía el margen y metería el registro 2 en la segunda masa (8,53 % medido en COMPO-2)`,
   )
+  afirmar(quieto.includes(CLASE_DE_LA_BANDA_DE_768), '  y la banda nueva llega al marcado real')
   afirmar(
-    CLASES_DEL_AIRE.indexOf('tablet:mb-[calc(var(--text-base)*var(--leading-texto))]') <
-      CLASES_DEL_AIRE.indexOf('medio:mb-4'),
+    CLASES_DEL_AIRE.indexOf(CLASE_DE_LA_BANDA_DE_768) < CLASES_DEL_AIRE.indexOf('medio:mb-4'),
     '  ⚠ y la de 768 va ANTES que la de 860 en la cadena: las variantes `min-width` se pisan en orden de breakpoint, así que a 1024 tiene que ganar `medio:`',
   )
   controlPositivo(
     'el chequeo del aire ve una cadena a la que le falta la banda de 860',
-    ['tablet:mb-[calc(var(--text-base)*var(--leading-texto))]', 'escritorio:mb-0'],
+    [CLASE_DE_LA_BANDA_DE_768, 'escritorio:mb-0'],
     (cs: string[]) => cs.includes('medio:mb-4'),
   )
 
@@ -383,7 +394,7 @@ export function afirmarElAjusteDeCompo2(quieto: string): void {
   const DE_BANDA_ALTA = [
     { clase: 'tablet:text-display-r1-portatil', apaga: 'escritorio:text-fluido-display', donde: TIPOGRAFIA_DEL_TITULAR },
     {
-      clase: 'tablet:mb-[calc(var(--text-base)*var(--leading-texto))]',
+      clase: CLASE_DE_LA_BANDA_DE_768,
       apaga: 'escritorio:mb-0',
       donde: GEOMETRIA.claseDelAireDelPieEnPortatil,
     },

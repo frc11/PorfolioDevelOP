@@ -370,9 +370,49 @@ export const GEOMETRIA = {
    * ⚠️ **La banda es 768–859 y NO llega a 1024**, porque `medio:mb-4` la pisa
    * en 860: ahí manda la derivación de COMPO-1, que sigue viva porque a 1024 la
    * pastilla se queda (§4a). Dos bandas, dos motivos, los dos escritos.
+   *
+   * ── ⚠️ ROCE-1 · EL VALOR PASA A SER UNA RESTA, Y EL TÉRMINO NUEVO ES UN
+   *    CORRIMIENTO MEDIDO CONTRA LA SILUETA DEL LOGO. [medido] ──────────────
+   *
+   * **El defecto:** a 768 la tinta del registro 1 toca la silueta del logo. No
+   * lo dice una mirada: lo dice la máscara ANALÍTICA del logo cruzada con la
+   * tinta dibujada del titular — **0,62 % de la tinta del titular sobre el
+   * logo**, toda ella del registro 1 (0,89 % del suyo). El borde inferior del
+   * lóbulo izquierdo del isotipo baja hasta la fila 698 y la primera fila del
+   * registro 1 nace en 595,88: lo que se toca es ese lóbulo por arriba, no la
+   * cola.
+   *
+   * **El corrimiento es el MÍNIMO que lleva esa cifra a cero, barrido de a un
+   * píxel** (`scripts-roce/a-barrido.ts`, salida `outputs/roce/a-logo768fino.json`):
+   *
+   *     baja   0 px → 0,62 %      baja   4 px → 0,11 %
+   *     baja   1 px → 0,47 %      baja   5 px → 0,04 %
+   *     baja   2 px → 0,31 %      baja   6 px → **0,00 %**  ← el mínimo
+   *     baja   3 px → 0,19 %      baja   7 px → 0,00 %
+   *
+   * La serie es monótona y **reproducible al centésimo entre dos corridas**: la
+   * silueta sale del muestreador analítico con el progreso de reposo y la tinta
+   * de una captura sin escena, así que ninguno de los dos términos tiene el
+   * ruido de motas que sí tiene la lectura por luminancia.
+   *
+   * **Por qué el valor se escribe como `− 6px` y no como un escalón:** los dos
+   * términos son cosas distintas y cada uno tiene su procedencia. El primero es
+   * el renglón que la regla global le sacó al bloque (`--text-base ×
+   * --leading-texto`); el segundo es cuánto hay que bajarlo para despegarlo del
+   * lóbulo. Sumarlos en un número redondo escondería las dos derivaciones.
+   * `ajuste.ts` §16d afirma la resta contra `CORRIMIENTO_DEL_ROCE_EN_768_PX`.
+   *
+   * ⚠️ **Y SON 6 px, NO 72: la segunda masa no se toca.** COMPO-2 dejó medido
+   * que bajar el bloque 25,6 px a este ancho mete el registro 2 adentro de la
+   * segunda masa de la escena (filas 800–838) y su superposición por luminancia
+   * salta a 8,53 %. Con 6 px el titular pasa de **3,35 % a 3,52 %** por
+   * luminancia (+0,17 puntos, dentro del ruido de tres corridas del mismo
+   * árbol, que COMPO-2 midió en 0,2 puntos) y a 0,00 % contra el logo. El techo
+   * de ese ancho está en 72 px con el pie en su piso —y en 105,59 gastando
+   * además este margen—, así que 6 px queda a un doceavo del techo.
    */
   claseDelAireDelPieEnPortatil:
-    'tablet:mb-[calc(var(--text-base)*var(--leading-texto))] medio:mb-4 escritorio:mb-0',
+    'tablet:mb-[calc(var(--text-base)*var(--leading-texto)-6px)] medio:mb-4 escritorio:mb-0',
   /**
    * ── COMPO-1 · §4 · LA SANGRÍA DEL CTA, CANCELADA. [medido] ──────────────
    *
@@ -678,6 +718,27 @@ export const GEOMETRIA = {
    */
   claseDeLaCeldaLateralEnPapel: 'max-chico:hidden',
 } as const
+
+/**
+ * ROCE-1 · CUÁNTO BAJA EL BLOQUE A 768 PARA DESPEGARSE DEL LOGO. [medido]
+ *
+ * El mínimo, barrido de a un píxel, que lleva a **0,00 %** la tinta del titular
+ * sobre la **silueta analítica** del logo a 768×1024. Un píxel menos publica
+ * 0,04 % y la serie completa —con su control positivo a 425, donde subir el
+ * bloque 20 px hace aparecer el roce que hoy no existe— está en
+ * `outputs/roce/a-logo768fino.json` y `a-control425.json`.
+ *
+ * ⚠️ **No es un token de espaciado y no se lo puede disfrazar de uno.** Es la
+ * distancia entre la tinta de «TU NEGOCIO» y el borde inferior del lóbulo del
+ * isotipo en un ancho concreto: una propiedad de la escena y de la caja del
+ * titular, no del ritmo de la página. El escalón más cercano (`--spacing-2`, 8
+ * px) pasaría 2 px del mínimo, y el sprint pide el mínimo.
+ *
+ * ⚠️ **Vive acá y no en el `calc()` solo** para que `ajuste.ts` §16d afirme la
+ * resta contra este número en vez de contra un literal copiado: la clase y la
+ * cuenta que la custodia leen el mismo valor.
+ */
+export const CORRIMIENTO_DEL_ROCE_EN_768_PX = 6
 
 /**
  * LA TIPOGRAFÍA DE LA LÍNEA 1 — la cara de display, en mayúsculas.

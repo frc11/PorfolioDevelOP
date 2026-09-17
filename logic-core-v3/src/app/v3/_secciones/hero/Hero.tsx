@@ -354,7 +354,18 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
               3,35 % a 8,53 % sin que nadie toque el titular. El margen le
               devuelve exactamente lo que la regla le sacó —de ahí que el valor
               sea `calc(var(--text-base) * var(--leading-texto))` y no un
-              escalón— y la medición vuelve a dar 3,35 %. */}
+              escalón— y la medición vuelve a dar 3,35 %.
+
+              ⚠️ **ROCE-1 le resta 6 px a ese valor, y es la ÚNICA cosa que este
+              sprint mueve.** Contra la silueta analítica del logo —no contra
+              «lo que está oscuro»— la tinta del titular a 768 publica 0,62 %,
+              toda del registro 1, porque su primera fila nace 103 px arriba del
+              borde de abajo del lóbulo. Bajar el bloque 6 px lo lleva a 0,00 %
+              y es el mínimo que lo hace (5 px publica 0,04 %). No hay clase
+              nueva: cambia un término del `calc()` que ya existía, así que la
+              banda sigue siendo 768–859 y los otros siete anchos no se enteran.
+              El barrido y su control positivo están en `geometria.ts`, al lado
+              del valor. */}
           <Grilla
             columnas="lateral"
             className={cn(GEOMETRIA.claseDeLaColumnaLateral, GEOMETRIA.claseDelAireDelPieEnPortatil)}
