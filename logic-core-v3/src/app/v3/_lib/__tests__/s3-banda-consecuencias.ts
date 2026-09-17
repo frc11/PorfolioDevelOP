@@ -43,34 +43,49 @@ import { atributo, nodosDe } from './s10-recorrido'
  *
  * `Envoltorio` (a sangre, relleno lateral FIJO, contenido topado en
  * `--container-tope`) → `Grilla columnas="lateral"` (140px fijos + una fluida,
- * y colapsa abajo de `tablet`) → `Grilla columnas={5}` (que **no existe** abajo
- * de `escritorio`) → el bloque de `GEOMETRIA.columnasDeLaMedida` de 5.
+ * y **en el Hero colapsa abajo de `escritorio`**, no de `tablet`: ver adentro)
+ * → `Grilla columnas={5}` (que **no existe** abajo de `escritorio`) → el bloque
+ * de `GEOMETRIA.columnasDeLaMedida` de 5.
  *
  * ⚠ Supuesto declarado: la canaleta es la del modo `conmutado`, que es el
- * defecto de `Grilla` y el que las dos grillas del Hero usan.
+ * defecto de `Grilla` y el que las dos grillas del Hero usan. Desde COMPO-1 la
+ * rama que sobrevive es sólo la de escritorio, así que la única canaleta que
+ * entra en la cuenta es `--grilla-canal-amplio`.
  */
 export function medidaDelTitular(ancho: number): number {
   const contenido = anchoDeContenido(ancho)
-  if (ancho < BREAKPOINTS.tablet) return contenido
-  const canal = tokenPx(
-    ancho >= BREAKPOINTS.escritorio ? '--grilla-canal-amplio' : '--grilla-canal-compacto',
-    0,
-  )
+  /**
+   * ⚠️ **COMPO-1 · LA COLUMNA LATERAL DEL HERO COLAPSA EN 1025, NO EN 768.**
+   * Hasta este sprint el corte estaba en `tablet` —el que `Grilla` emite para
+   * `columnas="lateral"`— y esta función lo copiaba. El Hero lo corrió a
+   * `escritorio` con `GEOMETRIA.claseDeLaColumnaLateral`, porque a 768 y a 1024
+   * esa celda está VACÍA y sus 152 px empujaban el texto adentro del logo.
+   * Abajo de 1025 la medida es, entonces, **el ancho de contenido entero**.
+   */
+  if (ancho < BREAKPOINTS.escritorio) return contenido
+  const canal = tokenPx('--grilla-canal-amplio', 0)
   const fluida = contenido - tokenPx('--columna-lateral', 0) - canal
-  if (ancho < BREAKPOINTS.escritorio) return fluida
   const columna = (fluida - (GEOMETRIA.columnasTotales - 1) * canal) / GEOMETRIA.columnasTotales
   const n = GEOMETRIA.columnasDeLaMedida
   return n * columna + (n - 1) * canal
 }
 
 /**
- * EL TEXTO QUE MIDE EL TITULAR — la línea 1, no las dos.
+ * EL TEXTO QUE MIDE EL TITULAR — el registro 1, no los dos.
  *
  * Desde el rehecho el titular son dos registros tipográficos y esta pieza mide
  * UNO: el dominante, el que fija la caja y el que decide si entra en una línea.
- * La línea 2 va en otro nivel (`titulo-l`), con otra cara y otro peso, y sumar
- * los dos textos daría una «tinta en una sola línea» que no corresponde a
- * ninguna línea que exista.
+ * El registro 2 va en otro nivel, con otra cara y otro peso, y sumar los dos
+ * textos daría una «tinta en una sola línea» que no corresponde a ninguna línea
+ * que exista.
+ *
+ * ⚠️ **COMPO-1 · SIGUE SIENDO UNA CADENA AUNQUE EL CONTENIDO SEAN DOS.** El
+ * registro 1 se parte en dos filas abajo de 1025, pero **de 1025 para arriba
+ * las dos vuelven a compartir renglón**, y ésta es la pregunta de escritorio:
+ * si el registro entero entra en una línea en su caja. Así que se arman las dos
+ * filas con el mismo espacio que el marcado deja en medio. Medir sólo la fila 1
+ * contestaría otra cosa —una línea que arriba de 1025 no existe— y daría un
+ * margen que no es el de nadie.
  *
  * ⚠ Se mide en MAYÚSCULAS porque así se pinta —`uppercase` está en
  * `TIPOGRAFIA_DEL_TITULAR`— y en Archivo las mayúsculas son más anchas que las
@@ -78,7 +93,7 @@ export function medidaDelTitular(ancho: number): number {
  * hecho, **no tiene minúsculas**, así que medir el dato crudo daría el avance
  * del `.notdef`.
  */
-export const TEXTO_DEL_TITULAR = HERO.titularLinea1.toUpperCase()
+export const TEXTO_DEL_TITULAR = `${HERO.titularFila1} ${HERO.titularFila2}`.toUpperCase()
 
 export interface TitularMedido {
   readonly ancho: number

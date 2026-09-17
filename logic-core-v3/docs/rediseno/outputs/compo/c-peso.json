@@ -1,0 +1,88 @@
+{
+  "cuando": "2026-09-17T03:14:11.178Z",
+  "archivos": [
+    {
+      "disco": "src/app/theme-develop.css",
+      "fuente": "respaldo",
+      "viaja": true,
+      "sha256DeHoy": "b8373309d80d7f5a59bab5b309b43849441defe6fee5af6907dd4de8312d447a"
+    },
+    {
+      "disco": "src/lib/utils.ts",
+      "fuente": "git",
+      "viaja": true,
+      "sha256DeHoy": "63c0fe06866ee5280aea150747deb4585a0d7c6dca0115b62a2525ff780ee80b"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/contenido.ts",
+      "fuente": "respaldo",
+      "viaja": true,
+      "sha256DeHoy": "30d46dae2f38703f8e1afec4f7bb7c85cd7febeffb8d85fde981adf64e4ccafd"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/Hero.tsx",
+      "fuente": "respaldo",
+      "viaja": true,
+      "sha256DeHoy": "baa4ccacdf626f948dc019206155f44b41dbbe3200ba2a7c30e9de016f74fe42"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/geometria.ts",
+      "fuente": "respaldo",
+      "viaja": true,
+      "sha256DeHoy": "55bc7fa5457a5a41fdee3a3c366aa886e05d45096e3900efa195837f3f496b45"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/soporte.ts",
+      "fuente": "respaldo",
+      "viaja": false,
+      "sha256DeHoy": "4b725eb3e21ba6cecae20befe21c4931814b449a3ed06defde5ba9a915a972a1"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/hero.invariant.tsx",
+      "fuente": "respaldo",
+      "viaja": false,
+      "sha256DeHoy": "d53ba360be6b67c337ee78915dcfd42604991098a22ca5fa9113bdb38c4fd32e"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/composicion.ts",
+      "fuente": "nuevo",
+      "viaja": false,
+      "sha256DeHoy": "7ea7a549f4b76df3a7cb5352a00edc8304af0b984c4cd320f3bf38dbdb19907e"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/s3-banda-consecuencias.ts",
+      "fuente": "respaldo",
+      "viaja": false,
+      "sha256DeHoy": "6986c4dac0bd6d25bd517fc20794b764d1da2fb7329ae2f486809a02291e7ef1"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/padron-de-tokens.ts",
+      "fuente": "respaldo",
+      "viaja": false,
+      "sha256DeHoy": "415ad4a63f2b96ddb678208459999fbcb36b3e4aaef7065ad3a01819de83eab5"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/tokens.invariant.ts",
+      "fuente": "respaldo",
+      "viaja": false,
+      "sha256DeHoy": "a899622266e7a46762daca4d0681bd0098a909d3662eb3d43dbe3f6357d2ef4c"
+    }
+  ],
+  "laneAlCerrarTexto3": 66306.2,
+  "desvioDelControl": 0,
+  "antes": {
+    "bytesDelLane": 66306.22,
+    "aireB": 642.9,
+    "linea": "ok   lo que ESCRIBE el lane, sin el andamio de la llave, entra en 65.38 KiB crudo  — 64.8 KiB — 642.9 B de aire · 70.7 KiB con el preámbulo heredado adentro"
+  },
+  "despues": {
+    "bytesDelLane": 66895.22,
+    "aireB": 53.9,
+    "linea": "ok   lo que ESCRIBE el lane, sin el andamio de la llave, entra en 65.38 KiB crudo  — 65.3 KiB — 53.9 B de aire · 71.2 KiB con el preámbulo heredado adentro"
+  },
+  "deltaBytes": 589,
+  "alCentesimoDeArriba": 0.58,
+  "aireDelCentesimoDeArribaBytes": 4.9,
+  "propuestaKib": 0.59,
+  "aireDeLaPropuestaBytes": 15.2
+}

@@ -21,6 +21,14 @@
  * ⚠ Se llaman EN SU LUGAR desde el invariante, no al final, para que la salida
  * siga leyéndose §1 → §13 de arriba a abajo. Un lector del reporte no tiene por
  * qué saber que el archivo se partió.
+ *
+ * ⚠️ **COMPO-1 abrió un TERCER archivo, `composicion.ts`, y no engordó éste.**
+ * Sus cinco cuentas (§14a–§14e) son de otro sprint y este archivo también estaba
+ * cerca del límite: meterlas acá habría empujado a los dos. El corte sigue
+ * siendo por tema —cuentas contra marcado— y lo que cambia es que las cuentas
+ * ahora viven en dos archivos, uno por sprint. Lo único que se comparte es
+ * `FACTOR_DEL_PESO_700`, que se declara UNA vez allá porque §12b y §14b hacen la
+ * misma cuenta a dos anchos distintos.
  */
 
 import { readFileSync } from 'node:fs'
@@ -37,6 +45,7 @@ import { ANCLAS, progresoEnRango, rangoDeScroll } from '../../_lib/motion/anclas
 import { ALTO_PASTILLA_PX, DESCUENTO_NACIMIENTO_PX } from '../../_lib/navegacion'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, TINTA_HEX } from '../../_lib/superficies'
 
+import { FACTOR_DEL_PESO_700 } from './composicion'
 import { GEOMETRIA } from './geometria'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
@@ -142,8 +151,9 @@ export function afirmarElAjusteDeLaLinea1(): void {
     afirmar(margen > 0, `la línea 1 entra con ${margen.toFixed(2)} px de margen en el peso por defecto`)
     /** El peso REAL con el que se pinta es 700 y `hmtx` publica el 600, así que
      *  la afirmación que importa es la del peso pintado. El factor está MEDIDO
-     *  sobre el mismo binario, instanciando el eje, y se declara acá. */
-    const FACTOR_DEL_PESO_700 = 8.567 / 8.475
+     *  sobre el mismo binario, instanciando el eje, y desde COMPO-1 se declara
+     *  UNA vez en `composicion.ts` porque §14b hace la misma cuenta a 320:
+     *  escrito dos veces, cambiarlo en un solo lado dejaba dos modelos. */
     const anchoEn700 = emDelDefecto * FACTOR_DEL_PESO_700 * CAJA_DEL_TITULAR.tamanoPx + huecos * CAJA_DEL_TITULAR.interletradoEm * CAJA_DEL_TITULAR.tamanoPx
     const margen700 = CAJA_DEL_TITULAR.banda.ancho - anchoEn700
     afirmar(margen700 > 0, `y en el peso 700 —el que se pinta— entra con ${margen700.toFixed(2)} px`, `factor del eje ${FACTOR_DEL_PESO_700.toFixed(4)} medido sobre el mismo binario`)

@@ -23,6 +23,11 @@
  * bloque: `el.getClientRects()` sobre ellos devolvería UNO solo y contaría 1
  * línea siempre. Por eso el rango va sobre el CONTENIDO y no sobre el elemento.
  *
+ * ⚠️ **COMPO-1 · Y SOBRE LOS NODOS DE TEXTO, no sobre el contenido del
+ * elemento.** Un rango sobre el contenido de un elemento CON HIJOS devuelve
+ * además la caja de borde de cada hijo, así que un elemento de dos filas
+ * publicaba cuatro rectángulos. El detalle está al lado del código.
+ *
  * ── ⚠️ SE MIDE CON LA PESTAÑA VISIBLE, Y LO VERIFICA `enLaVentana` ───────
  *
  * Reusa la apertura de `scripts-tapado/tapado-comun.ts` entera —una pestaña
@@ -96,25 +101,39 @@ export interface Desglose {
  *
  * ⚠ `bajada` se busca por `[data-nivel="cuerpo"]` y cae a `p`: es el mismo
  * selector que usa `scripts-tapado/a-verdad.ts`, para que las dos mediciones
- * hablen de la misma pieza.
+ * hablen de la misma pieza. ⚠ COMPO-1 le agregó `[data-nivel="base"]` en el
+ * medio, porque la bajada subió un escalón: sin eso el lector caía al `p` por
+ * accidente y el día que el Hero tenga otro párrafo mediría el equivocado.
  */
 export const LECTOR = `(() => {
   const pantalla = document.querySelector('[data-pantalla="hero"]')
   if (pantalla === null) return null
   const h1 = pantalla.querySelector('h1')
   const piezas = h1 === null ? [] : [...h1.children]
-  const bajada = pantalla.querySelector('[data-nivel="cuerpo"]') ?? pantalla.querySelector('p')
+  const bajada = pantalla.querySelector('[data-nivel="cuerpo"]') ?? pantalla.querySelector('[data-nivel="base"]') ?? pantalla.querySelector('p')
   const cta = pantalla.querySelector('a')
   const caja = (el) => {
     if (el === null || el === undefined) return null
     const r = el.getBoundingClientRect()
     return { x: r.x, y: r.y, ancho: r.width, alto: r.height }
   }
+  // ⚠️ COMPO-1: EL RANGO VA SOBRE LOS NODOS DE TEXTO, NO SOBRE EL ELEMENTO.
+  // Un \`Range\` sobre el contenido de un elemento con hijos devuelve TAMBIÉN la
+  // caja de borde de cada hijo. Mientras las piezas del titular fueran hojas de
+  // texto eso daba el mismo número; desde que el registro 1 se parte en dos
+  // \`<span>\` adentro de un envoltorio, un elemento de DOS filas publicaba
+  // CUATRO rectángulos y por lo tanto hasta cuatro topes. Recorriendo los nodos
+  // de texto se mide exactamente lo que se dibuja, en los dos casos.
   const renglones = (el) => {
     if (el === null || el === undefined) return null
-    const rango = document.createRange()
-    rango.selectNodeContents(el)
-    const rects = [...rango.getClientRects()].filter((r) => r.width > 0.5 && r.height > 0.5)
+    const caminante = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+    const rects = []
+    for (let n = caminante.nextNode(); n !== null; n = caminante.nextNode()) {
+      if ((n.textContent ?? '').trim() === '') continue
+      const rango = document.createRange()
+      rango.selectNodeContents(n)
+      for (const r of rango.getClientRects()) if (r.width > 0.5 && r.height > 0.5) rects.push(r)
+    }
     if (rects.length === 0) return null
     const topes = [...new Set(rects.map((r) => Math.round(r.top * 100) / 100))]
     return {

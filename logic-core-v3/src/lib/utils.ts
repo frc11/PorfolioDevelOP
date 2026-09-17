@@ -80,6 +80,25 @@ const V3_FONT_SIZE_CLASSES = [
   // El décimo nivel, la línea 2 del titular. Mismo motivo que el noveno.
   'text-display-xl',
   'text-fluido-display-xl',
+  // COMPO-1: el décimo nivel resuelto en la banda angosta (320–374), donde la
+  // fila 3 del titular no entra en un renglón. No es un nivel más de la escala
+  // —no está en `NIVELES`— pero SÍ es un `--text-*`, así que sin esta entrada
+  // `tailwind-merge` lo clasificaría como color y `cn()` se comería el tamaño
+  // o la tinta. Es el mismo defecto que las dos listas de arriba existen para
+  // evitar, y `test:s7-cn` §1 lo exige leyendo el tema.
+  'text-display-xl-angosto',
+  // PAPEL-2: el registro 1 igualado al registro 2 en la banda de papel, en sus
+  // dos regímenes (abajo de 390 y abajo de 375). Mismo motivo que la entrada de
+  // arriba: no son niveles de `NIVELES` pero SÍ son `--text-*`, así que sin
+  // ellas `tailwind-merge` los toma por color. Y acá el riesgo es CONCRETO: las
+  // tres clases de tamaño del registro 1 viajan juntas en el mismo `cn()`.
+  'text-display-r1-papel',
+  'text-display-r1-papel-angosto',
+  // COMPO-2: el registro 1 en la banda portátil (768–1024), con los dos techos
+  // medidos sobre el píxel. Mismo motivo que las tres de arriba, y el mismo
+  // riesgo concreto: ahora son CINCO clases de tamaño del registro 1 viajando
+  // en el mismo `cn()`.
+  'text-display-r1-portatil',
 ] as const
 
 /**
