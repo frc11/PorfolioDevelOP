@@ -1,0 +1,39 @@
+{
+  "etiqueta": "01-dpr-1-repeticion",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:29:44.013Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4005,
+    "tareas": 881,
+    "gpuMs": 77.946,
+    "ocupacion": 0.019462172284644193,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.2589568106312292,
+    "peorTareaMs": 0.371,
+    "webglTareas": 881,
+    "webglMs": 68.763,
+    "webglPorCuadroMs": 0.22844850498338873
+  },
+  "barrido": {
+    "paredMs": 8013,
+    "tareas": 1481,
+    "gpuMs": 189.748,
+    "ocupacion": 0.023680019967552726,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.315720465890183,
+    "peorTareaMs": 1.619,
+    "webglTareas": 1230,
+    "webglMs": 112.514,
+    "webglPorCuadroMs": 0.18721131447587352
+  }
+}

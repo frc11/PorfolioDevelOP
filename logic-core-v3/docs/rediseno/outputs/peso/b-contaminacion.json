@@ -1,0 +1,17 @@
+{
+  "cuando": "2026-09-16T11:17:27.676Z",
+  "puerto": 3399,
+  "produccion": {
+    "linea": "FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.5 KiB crudo  — 64.5 KiB — -2.2 B de aire · 70.4 KiB con el preámbulo heredado adentro",
+    "verde": false,
+    "aireB": -2.2,
+    "fallas": 2
+  },
+  "contaminado": {
+    "linea": "FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.5 KiB crudo  — 64.5 KiB — -2.2 B de aire · 70.4 KiB con el preámbulo heredado adentro",
+    "verde": false,
+    "aireB": -2.2,
+    "fallas": 2
+  },
+  "cambio": false
+}

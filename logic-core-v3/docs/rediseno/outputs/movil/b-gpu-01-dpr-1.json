@@ -1,0 +1,39 @@
+{
+  "etiqueta": "01-dpr-1",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:28:01.689Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4004,
+    "tareas": 869,
+    "gpuMs": 78.119,
+    "ocupacion": 0.01951023976023976,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.259531561461794,
+    "peorTareaMs": 0.333,
+    "webglTareas": 869,
+    "webglMs": 68.962,
+    "webglPorCuadroMs": 0.22910963455149502
+  },
+  "barrido": {
+    "paredMs": 8014,
+    "tareas": 1465,
+    "gpuMs": 187.82,
+    "ocupacion": 0.023436486149238833,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.31251247920133113,
+    "peorTareaMs": 1.609,
+    "webglTareas": 1223,
+    "webglMs": 111.578,
+    "webglPorCuadroMs": 0.1856539101497504
+  }
+}

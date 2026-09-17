@@ -1,0 +1,39 @@
+{
+  "etiqueta": "99-final-quieto-r1",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T15:31:50.499Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4013,
+    "tareas": 814,
+    "gpuMs": 101.55,
+    "ocupacion": 0.025305257911786692,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.337375415282392,
+    "peorTareaMs": 0.442,
+    "webglTareas": 814,
+    "webglMs": 91.064,
+    "webglPorCuadroMs": 0.3025382059800664
+  },
+  "barrido": {
+    "paredMs": 8008,
+    "tareas": 1371,
+    "gpuMs": 479.514,
+    "ocupacion": 0.05987937062937063,
+    "cuadros": 581,
+    "gpuPorCuadroMs": 0.8253253012048193,
+    "peorTareaMs": 213.237,
+    "webglTareas": 1118,
+    "webglMs": 129.312,
+    "webglPorCuadroMs": 0.22256798623063687
+  }
+}

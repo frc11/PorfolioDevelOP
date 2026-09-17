@@ -5,7 +5,9 @@ import { useCallback, useRef, useState } from 'react'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { introEnteredClean, useIntroStage } from '@/components/layout/home-intro/introHandoff'
 
+import { ajustesDe } from './ajustes'
 import { useEscenaAtadaAlScroll } from './ataduraAlScroll'
+import type { NivelDeCalidad } from './calidad'
 import { CLASES_DE_LA_ESCENA } from './contrato'
 import { MARCA_ESCENA } from '../marcaEscena'
 import { EscudoDeLaEscena } from './EscudoDeLaEscena'
@@ -36,9 +38,18 @@ import {
  * ── Las cinco condiciones del contrato, y dónde se cumple cada una ─────────
  *
  * 1. **Entra por la compuerta que ya existe.** No hay una línea de compuerta
- *    acá: la de 1025 vive en `_componentes/EscenarioCompuerta.tsx` y este
- *    módulo es lo que ella pide con `import()`. Abajo del umbral nada de esto
- *    se descarga.
+ *    acá: vive en `_componentes/EscenarioCompuerta.tsx` y este módulo es lo que
+ *    ella pide con `import()`.
+ *
+ *    ⚠️ **ESTA CONDICIÓN CAMBIÓ, Y HAY QUE DECIR QUÉ DECÍA ANTES.** Decía
+ *    *«abajo del umbral nada de esto se descarga»*, y era cierto: la compuerta
+ *    devolvía `null` abajo de 1025 y el `import()` no corría. **Ya no.** La
+ *    escena se monta en TODO ancho —decisión del dueño, y es lo que hace la
+ *    referencia— y lo que el umbral decide ahora es el NIVEL de calidad, que
+ *    entra por el prop `calidad`. El `import()` sigue siendo diferido y el
+ *    chunk sigue sin viajar en la carga inicial: lo que cambió es **quién lo
+ *    pide**, no cómo. La coreografía, el cursor y el scroll suave siguen
+ *    colgando de 1025 sin moverse.
  * 2. **Fuera del flujo del documento.** El envoltorio lleva
  *    `CLASES_DE_LA_ESCENA` —`fixed inset-0 z-0 pointer-events-none`—, que es la
  *    razón por la que montar o desmontar no puede mover un panel.
@@ -88,11 +99,19 @@ import {
  * escrito para esto.
  */
 
-export default function EscenaDelHome() {
+export default function EscenaDelHome({ calidad }: { readonly calidad: NivelDeCalidad }) {
   // `useState` con inicializador perezoso y sin setter: la forma garantizada de
   // crear cada store una sola vez sin escribir un ref durante el render. Es la
   // misma que usa `ProbeEscena.tsx`.
-  const [store] = useState(() => createNumericStore<ProbeParams>(PROBE_DEFAULTS))
+  //
+  // ⚠️ El nivel entra por acá, y es el ÚNICO campo del store que no sale de
+  // `PROBE_DEFAULTS`. `particleCount` no es una perilla estética: `DepthParticles`
+  // lo aplica con `setDrawRange` por concha, o sea sin reasignar un buffer. En
+  // `plena` el valor es exactamente el default, así que arriba de 1025 nada
+  // cambia.
+  const [store] = useState(() =>
+    createNumericStore<ProbeParams>({ ...PROBE_DEFAULTS, particleCount: ajustesDe(calidad).motas }),
+  )
   const [stats] = useState(() => createNumericStore<ProbeStats>(PROBE_STATS_DEFAULTS))
   const [rig] = useState(() => createNumericStore<ProbeRig>(PROBE_RIG_DEFAULTS))
   const [pista] = useState(() => crearPistaDelHome())
@@ -157,6 +176,8 @@ export default function EscenaDelHome() {
           autoOrbit={false}
           keyFollowsCamera={false}
           onReady={alEstarLista}
+          // El presupuesto de píxel del escalón. Los números, en `ajustes.ts`.
+          calidad={calidad}
         />
       </EscudoDeLaEscena>
     </div>

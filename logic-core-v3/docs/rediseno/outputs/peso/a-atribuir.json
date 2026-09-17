@@ -1,0 +1,18 @@
+{
+  "cuando": "2026-09-16T11:11:46.659Z",
+  "archivo": "src/app/v3/_secciones/hero/Hero.tsx",
+  "commitDeReferencia": "cdd7ae03",
+  "antes": {
+    "bytesDelLane": 66027.2,
+    "aireB": 20.8,
+    "linea": "ok   lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.5 KiB crudo  — 64.5 KiB — 20.8 B de aire · 70.4 KiB con el preámbulo heredado adentro"
+  },
+  "despues": {
+    "bytesDelLane": 66050.2,
+    "aireB": -2.2,
+    "linea": "FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.5 KiB crudo  — 64.5 KiB — -2.2 B de aire · 70.4 KiB con el preámbulo heredado adentro"
+  },
+  "deltaBytes": 23,
+  "propuestaKib": 0.03,
+  "aireQueDejaBytes": 7.7
+}

@@ -2,11 +2,12 @@
 
 import { Canvas } from '@react-three/fiber'
 
+import { ajustesDe } from './ajustes'
+import type { NivelDeCalidad } from './calidad'
 import {
   CAMARA_DEL_CANVAS,
-  CONTEXTO_DEL_CANVAS,
-  DPR_DEL_CANVAS,
   SOMBRAS_DEL_CANVAS,
+  contextoDe,
 } from './configuracionDelCanvas'
 import { Suspense, useMemo, useRef } from 'react'
 import * as THREE from 'three'
@@ -24,11 +25,9 @@ import {
   FOG_NEAR,
   SHADOW_BIAS,
   SHADOW_FAR,
-  SHADOW_MAP_SIZE,
   SHADOW_NEAR,
   SHADOW_NORMAL_BIAS,
   SHADOW_ORTHO,
-  SHADOW_RADIUS,
 } from './probeAtmosphere'
 import { ProbeLogo } from './ProbeLogo'
 import { StudioFloor } from './StudioFloor'
@@ -115,6 +114,14 @@ type ProbeStageProps = {
    */
   eventSource?: HTMLElement
   eventPrefix?: 'client'
+  /**
+   * ⚠️ **EL PRESUPUESTO DE PÍXEL, POR ESCALÓN.** Opcional y con default
+   * `'plena'` a propósito: el probe no lo pasa y se comporta **exactamente**
+   * como siempre, que es la condición para que catorce sprints de calibración
+   * sigan midiendo lo que midieron. Los números de cada nivel y el porqué de
+   * cada corte están en `ajustes.ts`; acá sólo se cablean.
+   */
+  calidad?: NivelDeCalidad
 }
 
 export default function ProbeStage({
@@ -133,7 +140,9 @@ export default function ProbeStage({
   frameloop = 'always',
   eventSource,
   eventPrefix,
+  calidad = 'plena',
 }: ProbeStageProps) {
+  const ajustes = ajustesDe(calidad)
   const keyLightRef = useRef<THREE.DirectionalLight>(null)
   const fillLightRef = useRef<THREE.DirectionalLight>(null)
   const rimLightRef = useRef<THREE.DirectionalLight>(null)
@@ -177,8 +186,11 @@ export default function ProbeStage({
       // con sus razones. Salieron de acá en B5 sin cambiar un valor.
       shadows={SOMBRAS_DEL_CANVAS}
       camera={CAMARA_DEL_CANVAS}
-      gl={CONTEXTO_DEL_CANVAS}
-      dpr={DPR_DEL_CANVAS}
+      // `gl` y `dpr` salen del NIVEL. Los dos son referencias estables: la tabla
+      // de `ajustes.ts` y la de contextos están congeladas a nivel de módulo, así
+      // que el mismo nivel devuelve siempre el mismo objeto.
+      gl={contextoDe(calidad)}
+      dpr={ajustes.dpr}
     >
       {/*
         Fondo y niebla salen de la MISMA constante, y el rig les escribe el mismo
@@ -209,7 +221,7 @@ export default function ProbeStage({
         <directionalLight
           ref={keyLightRef}
           castShadow
-          shadow-mapSize={[SHADOW_MAP_SIZE, SHADOW_MAP_SIZE]}
+          shadow-mapSize={[ajustes.sombraPx, ajustes.sombraPx]}
           shadow-camera-near={SHADOW_NEAR}
           shadow-camera-far={SHADOW_FAR}
           shadow-camera-left={-SHADOW_ORTHO}
@@ -218,7 +230,7 @@ export default function ProbeStage({
           shadow-camera-bottom={-SHADOW_ORTHO}
           shadow-bias={SHADOW_BIAS}
           shadow-normalBias={SHADOW_NORMAL_BIAS}
-          shadow-radius={SHADOW_RADIUS}
+          shadow-radius={ajustes.sombraRadio}
         />
 
         <directionalLight ref={fillLightRef} />

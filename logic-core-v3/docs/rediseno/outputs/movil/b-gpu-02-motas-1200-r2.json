@@ -1,0 +1,39 @@
+{
+  "etiqueta": "02-motas-1200-r2",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:36:51.714Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4005,
+    "tareas": 874,
+    "gpuMs": 76.833,
+    "ocupacion": 0.019184269662921347,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.2552591362126246,
+    "peorTareaMs": 1.451,
+    "webglTareas": 860,
+    "webglMs": 66.292,
+    "webglPorCuadroMs": 0.2202392026578073
+  },
+  "barrido": {
+    "paredMs": 8007,
+    "tareas": 1479,
+    "gpuMs": 179.087,
+    "ocupacion": 0.02236630448357687,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.297981697171381,
+    "peorTareaMs": 1.662,
+    "webglTareas": 1231,
+    "webglMs": 106.078,
+    "webglPorCuadroMs": 0.17650249584026623
+  }
+}

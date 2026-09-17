@@ -1,0 +1,39 @@
+{
+  "etiqueta": "00-plena-control-r1",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:47:01.184Z",
+  "lienzo": {
+    "ancho": 585,
+    "alto": 1266,
+    "factor": 1.5
+  },
+  "reposo": {
+    "paredMs": 4014,
+    "tareas": 865,
+    "gpuMs": 77.324,
+    "ocupacion": 0.019263577478824116,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.25689036544850496,
+    "peorTareaMs": 1.352,
+    "webglTareas": 851,
+    "webglMs": 66.991,
+    "webglPorCuadroMs": 0.22256146179401992
+  },
+  "barrido": {
+    "paredMs": 8013,
+    "tareas": 1462,
+    "gpuMs": 180.27,
+    "ocupacion": 0.022497192062897794,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.29995008319467553,
+    "peorTareaMs": 1.644,
+    "webglTareas": 1215,
+    "webglMs": 106.115,
+    "webglPorCuadroMs": 0.17656405990016638
+  }
+}

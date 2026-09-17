@@ -18,6 +18,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { CLASES_FUERA_DE_FLUJO, CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
+import { calidadPorAncho } from '../escena/calidad'
 import { IMPORT_DE_LA_ESCENA } from '../escena/contrato'
 import { EscenarioCompuerta } from '../../_componentes/EscenarioCompuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
@@ -108,7 +109,46 @@ controlPositivo(
   `import EscenaDelHome from '${IMPORT_DE_LA_ESCENA}'`,
   (f: string) => f.includes(`dynamic(() => import('${IMPORT_DE_LA_ESCENA}')`),
 )
-afirmar(compuerta.includes('return null'), 'abajo del umbral devuelve `null`, no un placeholder con caja')
+/**
+ * ⚠️ **ESTA AFIRMACIÓN DECÍA LO CONTRARIO, Y HAY QUE DECIR QUÉ DECÍA.**
+ *
+ * Decía: *«abajo del umbral devuelve `null`, no un placeholder con caja»*, y era
+ * la mitad estructural de la compuerta de S1 — sin ese `null` el `import()` se
+ * ejecutaba y el chunk se pedía en todo ancho.
+ *
+ * **La decisión del dueño la dio vuelta**: la escena de fondo va en TODOS los
+ * anchos, y sólo la coreografía sigue colgando de 1025. Así que lo que este
+ * renglón tiene que proteger ya no es el `null`: es que **no haya vuelto a
+ * aparecer uno**, que es el modo de falla de hoy — un `return null` que se cuele
+ * dejaría a mobile sin escena otra vez, en silencio y sin que nadie lo vea,
+ * porque un chunk que no se descarga no se prueba a ojo.
+ *
+ * No se afloja: sigue habiendo una afirmación sobre la misma línea de código,
+ * con su control positivo, y sigue pudiendo fallar. Lo que cambió es de qué
+ * lado.
+ *
+ * ⚠️ **Y la propiedad que el `null` sostenía —cero salto de layout— NO se apoya
+ * en él y por eso no se perdió.** La sostiene `CLASES_FUERA_DE_FLUJO`
+ * (`fixed inset-0`), que el §4 de abajo afirma clase por clase: un escenario que
+ * no ocupa lugar en el flujo no puede mover un panel, exista o no exista.
+ */
+afirmar(!/return null/.test(compuerta), 'la escena se monta en TODO ancho: NO hay un `return null` que la apague')
+controlPositivo(
+  'el detector de `return null` no está ciego',
+  'if (!arribaDelUmbral) return null',
+  (fuente: string) => !/return null/.test(fuente),
+)
+
+afirmar(
+  compuerta.includes('calidadPorAncho(arribaDelUmbral)'),
+  '  y lo que el umbral decide ahora es el NIVEL de calidad, con el MISMO hook y la MISMA consulta',
+)
+afirmarIgual(calidadPorAncho(true), 'plena', '  arriba del umbral: calidad plena — los valores de hoy, sin mover uno')
+afirmarIgual(calidadPorAncho(false), 'compacta', '  abajo del umbral: calidad compacta')
+afirmar(
+  calidadPorAncho(true) !== calidadPorAncho(false),
+  '  y las dos ramas son distintas: la lectura del ancho sigue significando algo',
+)
 
 controlPositivo(
   'el chequeo de import perezoso ve un import estático',

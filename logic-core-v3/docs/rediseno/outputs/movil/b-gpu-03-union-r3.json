@@ -1,0 +1,39 @@
+{
+  "etiqueta": "03-union-r3",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:43:39.690Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4005,
+    "tareas": 848,
+    "gpuMs": 68.605,
+    "ocupacion": 0.017129837702871412,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.22792358803986712,
+    "peorTareaMs": 1.353,
+    "webglTareas": 834,
+    "webglMs": 58.605,
+    "webglPorCuadroMs": 0.19470099667774085
+  },
+  "barrido": {
+    "paredMs": 8016,
+    "tareas": 1450,
+    "gpuMs": 166.352,
+    "ocupacion": 0.02075249500998004,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.2767920133111481,
+    "peorTareaMs": 1.495,
+    "webglTareas": 1208,
+    "webglMs": 95.127,
+    "webglPorCuadroMs": 0.15828119800332777
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "etiqueta": "antes",
+  "origen": "http://localhost:3000",
+  "cuando": "2026-09-15T14:05:06.448Z",
+  "presencia": {
+    "canvas": false,
+    "escena": false,
+    "marca": ""
+  },
+  "pedidos": 35,
+  "transferidoTotal": 556802,
+  "transferidoJs": 360319,
+  "archivosJs": 25,
+  "recursos": [
+    {
+      "url": "http://localhost:3000/v3",
+      "tipo": "document",
+      "transferido": 15738,
+      "descomprimido": 107553
+    },
+    {
+      "url": "http://localhost:3000/_next/static/css/cc10f52a1a08cc2d.css",
+      "tipo": "link",
+      "transferido": 933,
+      "descomprimido": 2556
+    },
+    {
+      "url": "http://localhost:3000/_next/static/css/226f4571965e8b3e.css",
+      "tipo": "link",
+      "transferido": 756,
+      "descomprimido": 456
+    },
+    {
+      "url": "http://localhost:3000/_next/static/css/acf1458272726ef8.css",
+      "tipo": "link",
+      "transferido": 67703,
+      "descomprimido": 526689
+    },
+    {
+      "url": "http://localhost:3000/_next/static/css/81a5663356887f98.css",
+      "tipo": "link",
+      "transferido": 2938,
+      "descomprimido": 13291
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/webpack-70fe8896decfdd85.js",
+      "tipo": "link",
+      "transferido": 3815,
+      "descomprimido": 7284
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/4bd1b696-6eaa2cedfc308a4d.js",
+      "tipo": "script",
+      "transferido": 63318,
+      "descomprimido": 200218
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/7149-198a402c18cf2650.js",
+      "tipo": "script",
+      "transferido": 145776,
+      "descomprimido": 477877
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/main-app-a7ec6b42694ccd6e.js",
+      "tipo": "script",
+      "transferido": 2888,
+      "descomprimido": 8624
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/5681-4842ffa115d7eb5b.js",
+      "tipo": "script",
+      "transferido": 2994,
+      "descomprimido": 5744
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/5354-5635e3d3364e25ea.js",
+      "tipo": "script",
+      "transferido": 44050,
+      "descomprimido": 131869
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/8500-975c2913d78cf40b.js",
+      "tipo": "script",
+      "transferido": 2327,
+      "descomprimido": 4642
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/6609-c1cd5c7dca01854d.js",
+      "tipo": "script",
+      "transferido": 9740,
+      "descomprimido": 33943
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/4210-3019a11558e98a0c.js",
+      "tipo": "script",
+      "transferido": 3516,
+      "descomprimido": 7527
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/8437-73cac7b3801b6f65.js",
+      "tipo": "script",
+      "transferido": 5858,
+      "descomprimido": 14214
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/9752-6d99b73d8d47623a.js",
+      "tipo": "script",
+      "transferido": 5920,
+      "descomprimido": 19181
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/2229-3a11874c3981dbd4.js",
+      "tipo": "script",
+      "transferido": 4256,
+      "descomprimido": 8644
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/657-17f8bdd6fe7e5b20.js",
+      "tipo": "script",
+      "transferido": 3025,
+      "descomprimido": 5772
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/4610-668f86cdac0089f3.js",
+      "tipo": "script",
+      "transferido": 3375,
+      "descomprimido": 8188
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/6861-d31f0cc1d2d85290.js",
+      "tipo": "script",
+      "transferido": 9302,
+      "descomprimido": 22449
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/layout-8c538a1f7d6aae1f.js",
+      "tipo": "script",
+      "transferido": 11509,
+      "descomprimido": 34223
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/error-dfa71f084f4090b9.js",
+      "tipo": "script",
+      "transferido": 1700,
+      "descomprimido": 2904
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/not-found-cdc1e8f59702daad.js",
+      "tipo": "script",
+      "transferido": 2223,
+      "descomprimido": 4607
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/5930-ed0b544011857bd2.js",
+      "tipo": "script",
+      "transferido": 1086,
+      "descomprimido": 1575
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/v3/layout-4ca8a0d04024cee9.js",
+      "tipo": "script",
+      "transferido": 2379,
+      "descomprimido": 5863
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/global-error-3dc9c032975aca70.js",
+      "tipo": "script",
+      "transferido": 1245,
+      "descomprimido": 1770
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/193-1b35fef0c87a1a6f.js",
+      "tipo": "script",
+      "transferido": 2946,
+      "descomprimido": 6963
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/8409-70da2dd8abb785bd.js",
+      "tipo": "script",
+      "transferido": 9252,
+      "descomprimido": 28627
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/3786-428f318a4396e665.js",
+      "tipo": "script",
+      "transferido": 1264,
+      "descomprimido": 2282
+    },
+    {
+      "url": "http://localhost:3000/_next/static/chunks/app/v3/page-7786985b6101346a.js",
+      "tipo": "script",
+      "transferido": 16555,
+      "descomprimido": 55354
+    },
+    {
+      "url": "http://localhost:3000/_next/static/media/f04c3881ee3d9785-s.p.woff2",
+      "tipo": "css",
+      "transferido": 33552,
+      "descomprimido": 33252
+    },
+    {
+      "url": "http://localhost:3000/_next/static/media/7b3846c9320680e1-s.p.woff2",
+      "tipo": "css",
+      "transferido": 10480,
+      "descomprimido": 10180
+    },
+    {
+      "url": "http://localhost:3000/_next/static/media/a5e4757d442ccf46-s.p.woff2",
+      "tipo": "css",
+      "transferido": 11472,
+      "descomprimido": 11172
+    },
+    {
+      "url": "http://localhost:3000/_next/static/media/86a4519c88efbac0-s.p.woff2",
+      "tipo": "css",
+      "transferido": 26680,
+      "descomprimido": 26380
+    },
+    {
+      "url": "http://localhost:3000/favicon.ico?603d046c9a6fdfbb",
+      "tipo": "other",
+      "transferido": 26231,
+      "descomprimido": 25931
+    }
+  ]
+}

@@ -82,13 +82,39 @@ afirmar(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Las tres compuertas son de MONTAJE, no de CSS')
+titulo('3 · DOS compuertas de MONTAJE, y la escena que dejó de ser una')
 
+/**
+ * ⚠️ **ESTA SECCIÓN SE LLAMABA «LAS TRES COMPUERTAS», Y HAY QUE DECIR QUÉ
+ * AFIRMABA.** Las tres pedían su módulo con `dynamic(…, { ssr: false })` y las
+ * tres devolvían `null` abajo del umbral, que era lo que hacía que el chunk no
+ * se pidiera.
+ *
+ * **La decisión del dueño sacó a la escena de ese grupo**: la escena de fondo va
+ * en TODOS los anchos y sólo la coreografía —el cursor y Lenis incluidos— sigue
+ * colgando de 1025.
+ *
+ * Lo que las tres SIGUEN compartiendo, y por eso siguen recorriéndose juntas, es
+ * la otra mitad: **el módulo se pide diferido y nunca de forma estática**. Esa
+ * propiedad nunca dependió del umbral.
+ *
+ * Lo que se parte en dos es la tercera afirmación, y **ninguna de las dos
+ * mitades afloja la que había**:
+ *
+ *   · las dos de MONTAJE siguen exigiendo el `return null` — sin él el cursor y
+ *     Lenis se construirían en un teléfono, que es lo que el umbral impide;
+ *   · la escena exige lo CONTRARIO, que NO haya `return null`. Un `null` que se
+ *     cuele ahí deja a mobile sin escena en silencio, y un chunk que no se
+ *     descarga no se prueba a ojo.
+ */
 const PEREZOSOS: readonly [string, string, string][] = [
   ['escenario', 'src/app/v3/_componentes/EscenarioCompuerta.tsx', '../_lib/escena/EscenaDelHome'],
   ['cursor', 'src/app/v3/_componentes/chrome/CursorCompuerta.tsx', './CursorPropio'],
   ['scroll suave', 'src/app/v3/_componentes/CompuertaDelScrollSuave.tsx', './ScrollSuaveDeV3'],
 ]
+/** Las que SIGUEN siendo compuertas de montaje: abajo del umbral no se montan. */
+const DE_MONTAJE: readonly string[] = ['cursor', 'scroll suave']
+
 for (const [nombre, archivo, modulo] of PEREZOSOS) {
   const fuente = quitarComentarios(leer(archivo))
   afirmar(
@@ -99,8 +125,18 @@ for (const [nombre, archivo, modulo] of PEREZOSOS) {
     !fuente.includes(`from '${modulo}'`),
     `  y NO lo importa de forma estática: con \`null\` el chunk no se pide`,
   )
-  afirmar(/return null/.test(fuente), `  y devuelve \`null\` abajo del umbral`)
+  if (DE_MONTAJE.includes(nombre)) {
+    afirmar(/return null/.test(fuente), `  y devuelve \`null\` abajo del umbral: sigue siendo compuerta de MONTAJE`)
+  } else {
+    afirmar(!/return null/.test(fuente), `  y NO devuelve \`null\` en ningún ancho: la escena se monta también abajo de 1025`)
+    afirmar(/calidadPorAncho/.test(fuente), `  lo que el umbral le decide es el NIVEL, con el mismo hook y la misma consulta`)
+  }
 }
+controlPositivo(
+  'el detector de `return null` no está ciego, y el mismo sirve para las dos direcciones',
+  'if (!arribaDelUmbral) return null',
+  (f: string) => !/return null/.test(f),
+)
 controlPositivo(
   'el detector de import estático no está ciego',
   "import CursorPropio from './CursorPropio'",

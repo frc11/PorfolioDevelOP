@@ -5,19 +5,43 @@
  * importan y la verifican sin montar nada ni tocar el DOM. Un número que solo
  * existe adentro de un JSX no se puede afirmar.
  *
- * ── Qué es la compuerta ────────────────────────────────────────────────────
+ * ── ⚠️ QUÉ GOBIERNA HOY, Y QUÉ GOBERNABA — LA COMPUERTA SE PARTIÓ EN DOS ───
  *
- * NO es una clase de CSS que esconde el escenario abajo del umbral: **el
- * bundle no se importa**. El componente que la implementa
- * (`_componentes/EscenarioCompuerta.tsx`) devuelve `null` abajo de 1025 y el
- * `import()` perezoso nunca se ejecuta, así que el navegador no pide el chunk.
+ * Hasta MOVIL-1 este número decidía DOS cosas con una sola lectura: **si la
+ * escena se montaba** y **si la coreografía se descargaba**. Este docblock
+ * decía, textual: *«NO es una clase de CSS que esconde el escenario abajo del
+ * umbral: el bundle no se importa … `EscenarioCompuerta` devuelve `null` abajo
+ * de 1025 y el `import()` perezoso nunca se ejecuta»*. Era cierto durante todo
+ * el rediseño.
  *
- * Se verifica sobre la SALIDA DEL BUILD, nunca mirando la página: un chunk que
- * no se descarga no se prueba a ojo. El instrumento es
+ * **La decisión del dueño lo partió.** Escena de fondo en TODOS los anchos;
+ * animaciones de texto sólo arriba de 1025. Es lo que hace la referencia: manda
+ * el mundo a 390 y no manda la coreografía.
+ *
+ * Lo que este número gobierna HOY:
+ *
+ *   · **la coreografía** — `_secciones/CompuertaDelHome.tsx`. Abajo del umbral
+ *     el árbol animado no se descarga. Sin cambios.
+ *   · **el cursor propio** — `_lib/cursor.ts`. Sin cambios.
+ *   · **el scroll suave** — `_lib/scrollSuave.ts`. Sin cambios.
+ *   · **el NIVEL de calidad de la escena** — `_lib/escena/calidad.ts`. Esto es
+ *     lo nuevo: la escena existe de los dos lados, y lo que cambia es con cuánto
+ *     presupuesto de píxel corre. El componente ya no devuelve `null`.
+ *   · y sigue siendo `--breakpoint-escritorio` en `theme-develop.css`, atado por
+ *     invariante.
+ *
+ * ⚠️ **CONSECUENCIA SOBRE EL NOMBRE, DECLARADA.** `ESCENARIO_MIN_ANCHO_PX` ya
+ * no es el ancho mínimo del escenario. Renombrarlo es de 19 archivos y no mueve
+ * un byte; queda anotado en `_lib/escena/calidad.ts` con su cuenta. Lo que el
+ * nombre sí sigue describiendo, y es verdadero, es el breakpoint de escritorio
+ * del sistema.
+ *
+ * Que el chunk de la escena siga FUERA DE LA CARGA INICIAL —que es otra cosa
+ * que «no se descarga»— se verifica sobre la SALIDA DEL BUILD, nunca mirando la
+ * página: un chunk que no se descarga no se prueba a ojo. El instrumento es
  * `__tests__/bundle.invariant.ts`, y tiene control positivo — la ruta gemela
  * `/v3/control-estatico` importa el mismo módulo de forma estática y la
- * comprobación TIENE que encontrarlo ahí. Sin ese control, el check pasa en
- * verde aunque el escenario no exista todavía, que es exactamente el caso hoy.
+ * comprobación TIENE que encontrarlo ahí.
  *
  * ── Por ancho, no por táctil ───────────────────────────────────────────────
  *
@@ -28,7 +52,12 @@
  *
  * ── Qué cruza el umbral y qué no ───────────────────────────────────────────
  *
- * Abajo de 1025: sin canvas y sin coreografía. **Lo que cruza es el MECANISMO,
+ * ⚠️ **«Abajo de 1025: sin canvas y sin coreografía» — LA PRIMERA MITAD YA NO
+ * VALE.** Desde MOVIL-1 abajo del umbral HAY canvas, en calidad `compacta`. Lo
+ * que sigue sin cruzar es la coreografía, y todo lo que este párrafo mide sobre
+ * los pines se midió sobre el `sticky` de CSS, que nunca dependió del canvas.
+ *
+ * Abajo de 1025: sin coreografía. **Lo que cruza es el MECANISMO,
  * no el pin.** `position: sticky` es CSS y no depende de JavaScript, así que
  * abajo del umbral sigue existiendo y sigue funcionando sin bajar un byte de
  * más. Lo que NO cruza es el efecto: de los dos pines del recorrido, mobile no

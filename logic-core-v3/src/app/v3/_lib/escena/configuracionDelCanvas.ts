@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { AJUSTES } from './ajustes'
+import type { NivelDeCalidad } from './calidad'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR } from './probeScene'
 import { PROBE_DEFAULTS } from './probeStore'
 
@@ -39,22 +41,49 @@ export const CAMARA_DEL_CANVAS = {
   position: [0, PROBE_DEFAULTS.height, PROBE_DEFAULTS.distance] as [number, number, number],
 }
 
-export const CONTEXTO_DEL_CANVAS = {
+/**
+ * EL CONTEXTO, UNO POR NIVEL DE CALIDAD.
+ *
+ * ⚠️ **Son DOS objetos congelados a nivel de módulo y no uno armado en el
+ * render, y es por la misma razón que el docblock de arriba da para los otros
+ * tres**: `<Canvas>` recibe `gl` como prop, y un objeto nuevo por render le
+ * daría una identidad nueva a algo que nunca cambia. Con la tabla de niveles
+ * indexada, `contextoDe` devuelve siempre la MISMA referencia para el mismo
+ * nivel.
+ *
+ * Lo único que difiere entre los dos es `antialias`; el resto es idéntico y se
+ * escribe una vez en `COMUN`.
+ */
+const COMUN = {
   /** Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás. */
   alpha: false,
-  /**
-   * El hero lo tiene en false. Acá va en true a propósito: lo que se juzga son
-   * los cantos de un objeto negro contra papel blanco, y sin antialias el
-   * escalonado del borde se confunde con el objeto.
-   */
-  antialias: true,
   powerPreference: 'high-performance' as const,
   /**
    * r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el blanco
    * del papel y mantiene el matiz de la luz de color al mover la temperatura.
    */
   toneMapping: THREE.NeutralToneMapping,
+} as const
+
+/**
+ * El hero lo tiene en false. En `plena` va en true a propósito: lo que se juzga
+ * son los cantos de un objeto negro contra papel blanco, y sin antialias el
+ * escalonado del borde se confunde con el objeto. Lo que `compacta` hace con
+ * ese true lo decide `ajustes.ts`, con su medición.
+ */
+const CONTEXTOS: Readonly<Record<NivelDeCalidad, typeof COMUN & { readonly antialias: boolean }>> = {
+  plena: { ...COMUN, antialias: AJUSTES.plena.antialias },
+  compacta: { ...COMUN, antialias: AJUSTES.compacta.antialias },
 }
 
-/** El techo de la regla del repo: `dpr={[1, 1.5]}` máximo, nunca 2 en producción. */
-export const DPR_DEL_CANVAS: [number, number] = [1, 1.5]
+export function contextoDe(nivel: NivelDeCalidad): (typeof CONTEXTOS)[NivelDeCalidad] {
+  return CONTEXTOS[nivel]
+}
+
+/**
+ * ⚠️ **SE MUDÓ A `ajustes.ts` Y ACÁ QUEDA LA RE-EXPORTACIÓN.** El valor no
+ * cambió —sigue siendo el techo de la regla del repo, `[1, 1.5]`, nunca 2 en
+ * producción— y sigue habiendo UNA sola definición. Se mudó porque este archivo
+ * importa `three` y `ajustes.ts` tiene que poder leerse sin arrastrarlo.
+ */
+export const DPR_DEL_CANVAS: [number, number] = AJUSTES.plena.dpr

@@ -1,0 +1,48 @@
+{
+  "etiqueta": "dpr-1.0",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "cuando": "2026-09-15T14:32:07.599Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "cssAncho": 390,
+    "factor": 1
+  },
+  "alto": 16167,
+  "paradas": [
+    {
+      "id": "a-hero",
+      "fraccion": 0,
+      "que": "el hero — la pose de entrada",
+      "y": 0,
+      "logrado": 0,
+      "fase": "corriendo",
+      "bytes": 757526,
+      "archivo": "docs\\rediseno\\capturas\\movil\\dpr-1.0-a-hero.png"
+    },
+    {
+      "id": "b-medio",
+      "fraccion": 0.5,
+      "que": "la mitad del recorrido",
+      "y": 8084,
+      "logrado": 8084,
+      "fase": "corriendo",
+      "bytes": 472212,
+      "archivo": "docs\\rediseno\\capturas\\movil\\dpr-1.0-b-medio.png"
+    },
+    {
+      "id": "c-diferencial",
+      "fraccion": 0.75,
+      "que": "el progreso 0,750, donde el diferencial llena el cuadro",
+      "y": 12125,
+      "logrado": 12125,
+      "fase": "suspendida",
+      "bytes": 1443890,
+      "archivo": "docs\\rediseno\\capturas\\movil\\dpr-1.0-c-diferencial.png"
+    }
+  ]
+}

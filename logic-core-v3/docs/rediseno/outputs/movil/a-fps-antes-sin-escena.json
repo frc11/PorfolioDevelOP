@@ -1,0 +1,73 @@
+{
+  "etiqueta": "antes-sin-escena",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "duracionDeReposoMs": 3000,
+  "duracionDelBarridoMs": 8000,
+  "cuando": "2026-09-15T14:06:54.133Z",
+  "filas": [
+    {
+      "regimen": "cpu1",
+      "nombreDelRegimen": "sin estrangular (1×)",
+      "lienzo": {
+        "hay": false,
+        "ancho": 0,
+        "alto": 0,
+        "cssAncho": 0,
+        "cssAlto": 0,
+        "factorAplicado": 0,
+        "fase": "(sin escena)"
+      },
+      "alturaDoc": 17011,
+      "reposo": {
+        "cuadros": 226,
+        "msTotal": 3001.7,
+        "fps": 74.95752406969385,
+        "p50Ms": 13.300000000001091,
+        "p95Ms": 13.400000000001455,
+        "peorMs": 13.800000000000182
+      },
+      "barrido": {
+        "cuadros": 601,
+        "msTotal": 8003.4,
+        "fps": 74.96813854112003,
+        "p50Ms": 13.300000000001091,
+        "p95Ms": 13.400000000001455,
+        "peorMs": 13.699999999998909
+      }
+    },
+    {
+      "regimen": "cpu4",
+      "nombreDelRegimen": "mid-tier mobile (4×)",
+      "lienzo": {
+        "hay": false,
+        "ancho": 0,
+        "alto": 0,
+        "cssAncho": 0,
+        "cssAlto": 0,
+        "factorAplicado": 0,
+        "fase": "(sin escena)"
+      },
+      "alturaDoc": 17011,
+      "reposo": {
+        "cuadros": 227,
+        "msTotal": 3006.0460000000003,
+        "fps": 75.18181691165071,
+        "p50Ms": 13.300000000001091,
+        "p95Ms": 13.400000000001455,
+        "peorMs": 13.5
+      },
+      "barrido": {
+        "cuadros": 601,
+        "msTotal": 8004.300000000001,
+        "fps": 74.95970915632846,
+        "p50Ms": 13.30000000000291,
+        "p95Ms": 13.400000000001455,
+        "peorMs": 15.5
+      }
+    }
+  ]
+}

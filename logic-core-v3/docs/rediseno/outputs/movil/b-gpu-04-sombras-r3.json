@@ -1,0 +1,39 @@
+{
+  "etiqueta": "04-sombras-r3",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "devicePixelRatioEmulado": 3,
+  "regimen": "cpu1",
+  "cuando": "2026-09-15T14:54:24.270Z",
+  "lienzo": {
+    "ancho": 390,
+    "alto": 844,
+    "factor": 1
+  },
+  "reposo": {
+    "paredMs": 4006,
+    "tareas": 849,
+    "gpuMs": 82.278,
+    "ocupacion": 0.020538691962056915,
+    "cuadros": 301,
+    "gpuPorCuadroMs": 0.27334883720930236,
+    "peorTareaMs": 1.573,
+    "webglTareas": 835,
+    "webglMs": 71.193,
+    "webglPorCuadroMs": 0.23652159468438538
+  },
+  "barrido": {
+    "paredMs": 8014,
+    "tareas": 1459,
+    "gpuMs": 183.3,
+    "ocupacion": 0.02287247317194909,
+    "cuadros": 601,
+    "gpuPorCuadroMs": 0.30499168053244596,
+    "peorTareaMs": 1.613,
+    "webglTareas": 1204,
+    "webglMs": 108.072,
+    "webglPorCuadroMs": 0.17982029950083195
+  }
+}
