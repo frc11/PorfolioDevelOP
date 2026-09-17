@@ -58,7 +58,12 @@ import {
   DESVIO_DE_MOVIL_BYTES,
   RECIBOS_DE_LA_DESCARGA,
 } from './s5-presupuesto-recibos-de-movil'
+import { DESVIO_DE_COMPO1_BYTES } from './s5-presupuesto-recibos-de-compo1'
+import { DESVIO_DE_TEXTO2_BYTES } from './s5-presupuesto-recibos-de-texto2'
+import { DESVIO_DE_TEXTO3_BYTES } from './s5-presupuesto-recibos-de-texto3'
 import {
+  LINEAS_CON_NOMBRE,
+  MONTAJE_DE_COMPO1_KIB,
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
@@ -67,6 +72,8 @@ import {
   MONTAJE_DEL_TITULAR_KIB,
   MONTAJE_DE_MOVIL_KIB,
   MONTAJE_DE_TAPADO_KIB,
+  MONTAJE_DE_TEXTO2_KIB,
+  MONTAJE_DE_TEXTO3_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
@@ -84,6 +91,7 @@ import {
   aireDeTapado,
 } from './s5-presupuesto-recibos-de-tapado'
 import { RUTAS_BORRADAS } from './s4-rutas-de-demo'
+import { afirmarLasLineasDeclaradasEnElMismoActo } from './s5-peso-lineas'
 
 /**
  * El valor que la línea del titular tenía ANTES de la parada de PESO-1. Vive acá
@@ -166,6 +174,9 @@ console.log(
     ` + ${MONTAJE_DEL_TITULAR_KIB} que monta el TITULAR rehecho (los DOS niveles nuevos de la escala, el quinto peso, las dos cadenas de clase y el atributo del CTA, contra lo que devuelven la bajada, el cepillo y la pieza quieta: 706 B de desvio en dos pasadas (614 + 91,6) medidos por este mismo invariante contra el techo que fijo el build de B12)` +
     ` + ${MONTAJE_DE_MOVIL_KIB} que MOVIL-1 monta (la compuerta de la escena partida en dos: ${DESVIO_DE_MOVIL_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con los cinco archivos de producto devueltos a HEAD por git show y restaurados con sha256 verificado)` +
     ` + ${MONTAJE_DE_TAPADO_KIB} que TAPADO-1 monta (el texto del hero abajo del breakpoint: ${DESVIO_DE_TAPADO_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con Hero.tsx devuelto a cdd7ae03 por git show y restaurado con sha256 verificado)` +
+    ` + ${MONTAJE_DE_TEXTO2_KIB} que TEXTO-2 monta (el alcance del col-span del titular, los dos huecos abajo de 1025 y la bajada mas corta: ${DESVIO_DE_TEXTO2_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con los CUATRO archivos del hero devueltos a HEAD por git show y restaurados con sha256 verificado)` +
+    ` + ${MONTAJE_DE_TEXTO3_KIB} que TEXTO-3 monta (la banda angosta del Hero: ${DESVIO_DE_TEXTO3_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con nueve archivos devueltos al arbol de TEXTO-2 —cinco por git show y dos por el respaldo de aquel sprint con sha256 verificado— y con el «antes» reproduciendo su cierre al decimo de byte)` +
+    ` + ${MONTAJE_DE_COMPO1_KIB} que COMPO-1 monta (diez ajustes de composicion del Hero, seis de ellos con bytes: ${DESVIO_DE_COMPO1_BYTES} B de desvio medidos A/B entre dos builds del mismo arbol, con once archivos devueltos al arbol de TEXTO-3 —ocho por respaldo con sha256 publicado, uno por git show y uno borrado porque no existia— y con el «antes» reproduciendo su cierre al decimo de byte)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
 console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
@@ -276,6 +287,20 @@ controlPositivo(
 )
 
 /**
+ * ⚠️ **LAS TRES ÚLTIMAS LÍNEAS VIVEN EN `s5-peso-lineas.ts`, Y EL CORTE ES DE
+ * COMPO-1.** Este archivo llegó a **311 líneas de código** al declararse la
+ * cuarta línea seguida «en el mismo acto», y `s5-codigo` §8 lo puso en rojo —
+ * que es exactamente para lo que existe. El corte no es por tamaño: es por
+ * TEMA. Acá quedan la partición del bundle, el techo y las líneas que se
+ * declararon DESPUÉS de su sprint; allá van las que cada sprint declara CON su
+ * A/B ya hecho, que son un bloque de la misma forma repetido cuatro veces.
+ *
+ * ⚠ TAPADO-1 se queda acá a propósito: es la que NO cumplió la regla y por eso
+ * la estrenó, y su bloque se lee junto al techo que la obligó a existir.
+ */
+afirmarLasLineasDeclaradasEnElMismoActo()
+
+/**
  * ⚠️ **EL TECHO PASÓ DE 63,76 A 64,36 Y LA DIFERENCIA ES UNA LÍNEA CON NOMBRE.**
  *
  * Este renglón afirmaba que §4 de B12 no había movido el techo ni un centésimo,
@@ -295,7 +320,10 @@ afirmarIgual(
   (PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB).toFixed(2),
   `⚠️ el techo del lane es EXACTAMENTE el 60 del original más las líneas con nombre: ${PRESUPUESTO_PROPIO_KIB.toFixed(2)} KiB, sin un centésimo sin dueño`,
 )
-afirmarIgual(PRESUPUESTO_DEL_LANE_KIB, 60, '  y el 60 NO se movió: las nueve líneas se le SUMAN y se pueden revocar una por una')
+/** ⚠ COMPO-1: la cuenta de líneas era un literal («las nueve») y hacía ya tres
+ *  sprints que estaba vieja. Ahora sale de `LINEAS_CON_NOMBRE`, que se deriva
+ *  del propio presupuesto: una línea nueva la mueve sola. */
+afirmarIgual(PRESUPUESTO_DEL_LANE_KIB, 60, `  y el 60 NO se movió: las ${LINEAS_CON_NOMBRE.length} líneas se le SUMAN y se pueden revocar una por una`)
 afirmarIgual(PESO_DE_LA_LLAVE_EN_BYTES, 4303, `  la línea de la llave la sostiene su recibo: ${RECIBOS_DE_LA_LLAVE.length} renglones medidos que suman ${PESO_DE_LA_LLAVE_EN_BYTES} B`)
 /** ⚠ La suma de los renglones es un MODELO del reparto —cada A/B se midió
  *  sobre un árbol intermedio distinto— y **la cifra que manda es la del árbol

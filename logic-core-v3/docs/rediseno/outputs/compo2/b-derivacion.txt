@@ -1,0 +1,60 @@
+═══ COMPO-2 · REGLA 0 · LA BAJADA EN UN RENGLON ═══
+
+«Tu sitio, tu chat y tu seguimiento.» — 35 caracteres · 15.32600 em (Chivo, tracking -0.01)
+
+ancho  tamaño  tinta modelada  tinta MEDIDA  caja de la bajada  margen   ¿entra?
+  320   16.00          245.22        243.34             256.00   12.66   SI   (hoy 2 renglones · techo 36 caracteres)
+  375   16.00          245.22        243.34             311.00   67.66   SI   (hoy 2 renglones · techo 44 caracteres)
+  390   16.00          245.22        243.34             326.00   82.66   SI   (hoy 2 renglones · techo 46 caracteres)
+  425   16.00          245.22        243.34             361.00  117.66   SI   (hoy 2 renglones · techo 51 caracteres)
+  768   16.00          245.22        243.34             346.00  102.66   SI   (hoy 2 renglones · techo 49 caracteres)
+ 1024   16.00          245.22        243.34             474.00  230.66   SI   (hoy 2 renglones · techo 68 caracteres)
+ 1440   16.00          245.22        243.34             354.80  111.46   SI   (hoy 1 renglones · techo 51 caracteres)
+ 1920   16.00          245.22        243.34             498.80  255.46   SI   (hoy 1 renglones · techo 71 caracteres)
+
+el ancho que MANDA es el mas angosto: 320 px, con 12.66 px de margen
+
+═══ COMPO-2 · §1 · LA MARCA, EL CENTRADO Y EL ALTO ═══
+
+avance de «TU NEGOCIO» (display 700): 4.12429 em
+avance de «VENDIENDO» (display 700): 3.93223 em
+avance de «LAS 24 HS» (italica 300): 4.57900 em
+avance de «develOP» (romana 600): 3.67100 em
+razon del viewBox del isotipo: 1.43749  ·  --leading-titulo 1.09  ·  hueco 8 px
+
+FACTOR DE LA MARCA = 4.12429 / (1.09 x 1.43749) = 2.63219
+
+@320x568
+   util HOY (pt-20 + pb-2):                    480.00 px
+   util con el aire SIMETRICO (pt-2 + pb-2):   552.00 px
+   bloque de texto HOY (medido):               307.22 px
+   bloque de texto con la REGLA 0 (medido):    281.63 px   (-25.59)
+   la marca HOY: palabra 11.98 + hueco 8 + isotipo 66.55 = 86.53 px
+   TECHOS del factor:
+      por ALTO con el aire simetrico y un respiro de 8 px por lado: x3.1373
+      por ALTO si se dejara `pt-20`:                                     x2.2204
+      por ANCHO (el isotipo en la caja de 256.00 px):                  x2.6760
+   FACTOR APLICADO x2.63219
+      isotipo 175.17 px de alto x 251.81 de ancho  (hoy 66.55 x 95.67)
+      palabra 28.95 px  (hoy 11.00)
+      columna 504.34 px de 552.00 utiles  ->  sobrante 47.66 px
+      aire arriba 31.83 px · aire abajo 31.83 px  ENTRA
+
+@375x667
+   util HOY (pt-20 + pb-2):                    579.00 px
+   util con el aire SIMETRICO (pt-2 + pb-2):   651.00 px
+   bloque de texto HOY (medido):               349.36 px
+   bloque de texto con la REGLA 0 (medido):    323.77 px   (-25.59)
+   la marca HOY: palabra 11.98 + hueco 8 + isotipo 81.08 = 101.06 px
+   TECHOS del factor:
+      por ALTO con el aire simetrico y un respiro de 8 px por lado: x3.2584
+      por ALTO si se dejara `pt-20`:                                     x2.4847
+      por ANCHO (el isotipo en la caja de 311.00 px):                  x2.6683
+   FACTOR APLICADO x2.63219
+      isotipo 213.42 px de alto x 306.79 de ancho  (hoy 81.08 x 116.55)
+      palabra 28.95 px  (hoy 11.00)
+      columna 584.72 px de 651.00 utiles  ->  sobrante 66.28 px
+      aire arriba 41.14 px · aire abajo 41.14 px  ENTRA
+
+el techo COMUN a los dos anchos es x2.6683 y el factor derivado es x2.63219 — queda por debajo
+

@@ -1,0 +1,1432 @@
+{
+  "etiqueta": "pastilla",
+  "cuando": "2026-09-17T12:15:20.318Z",
+  "sim": "pastilla",
+  "valores": [],
+  "instrumento": "scripts-compo2/a-medir.ts — la columna entera con sus renglones y el cruce de TAPADO-1 con las dos mascaras de fondo",
+  "filas": [
+    {
+      "ancho": 425,
+      "alto": 844,
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 20,
+          "hasta": 20,
+          "alto": 1
+        },
+        {
+          "desde": 53,
+          "hasta": 53,
+          "alto": 1
+        },
+        {
+          "desde": 66,
+          "hasta": 66,
+          "alto": 1
+        },
+        {
+          "desde": 68,
+          "hasta": 68,
+          "alto": 1
+        },
+        {
+          "desde": 81,
+          "hasta": 84,
+          "alto": 4
+        },
+        {
+          "desde": 105,
+          "hasta": 108,
+          "alto": 4
+        },
+        {
+          "desde": 118,
+          "hasta": 119,
+          "alto": 2
+        },
+        {
+          "desde": 150,
+          "hasta": 151,
+          "alto": 2
+        },
+        {
+          "desde": 154,
+          "hasta": 155,
+          "alto": 2
+        },
+        {
+          "desde": 162,
+          "hasta": 164,
+          "alto": 3
+        },
+        {
+          "desde": 182,
+          "hasta": 183,
+          "alto": 2
+        },
+        {
+          "desde": 252,
+          "hasta": 252,
+          "alto": 1
+        },
+        {
+          "desde": 261,
+          "hasta": 575,
+          "alto": 315
+        },
+        {
+          "desde": 650,
+          "hasta": 651,
+          "alto": 2
+        },
+        {
+          "desde": 659,
+          "hasta": 690,
+          "alto": 32
+        },
+        {
+          "desde": 804,
+          "hasta": 805,
+          "alto": 2
+        }
+      ],
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 80
+          },
+          "utilDeLaPantalla": 684,
+          "columna": {
+            "arriba": 492.13,
+            "abajo": 764,
+            "alto": 271.88
+          },
+          "holgura": 412.13,
+          "fraccionDelViewport": 32.21,
+          "bloqueDeTexto": {
+            "arriba": 492.13,
+            "abajo": 764,
+            "alto": 271.88
+          },
+          "celdaDelTitular": 361,
+          "celdaDeLaBajada": 361,
+          "pastillaVisible": true,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.05,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 37.99,
+              "renglones": 2,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 149.58,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 533.52,
+                "ancho": 149.58,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 68.74,
+              "renglones": 1,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 82,
+              "caja": {
+                "x": 32,
+                "y": 574.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 361,
+                "alto": 157.69
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 657.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 717,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 361,
+                "alto": 157.69
+              },
+              "glifos": 8794,
+              "sobreLaEscena": 0.0433,
+              "tintaBajoAA": 0.0411,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0408,
+                "tintaBajoAA": 0.0408,
+                "contrasteMediano": 14.01
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              },
+              "glifos": 4486,
+              "sobreLaEscena": 0.0782,
+              "tintaBajoAA": 0.078,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0771,
+                "tintaBajoAA": 0.0771,
+                "contrasteMediano": 14.01
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 574.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              },
+              "glifos": 4308,
+              "sobreLaEscena": 0.007,
+              "tintaBajoAA": 0.0026,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.003,
+                "tintaBajoAA": 0.003,
+                "contrasteMediano": 14.01
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 492.13,
+                "ancho": 369,
+                "alto": 271.88
+              },
+              "glifos": 10682,
+              "sobreLaEscena": 0.0437,
+              "tintaBajoAA": 0.0392,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0418,
+                "tintaBajoAA": 0.039,
+                "contrasteMediano": 14.01
+              }
+            }
+          }
+        },
+        {
+          "clave": "sin-pastilla",
+          "que": "la pastilla desmontada, el pie INTACTO",
+          "regla": "[data-parte=\"pastilla\"]{display:none!important}",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 80
+          },
+          "utilDeLaPantalla": 684,
+          "columna": {
+            "arriba": 492.13,
+            "abajo": 764,
+            "alto": 271.88
+          },
+          "holgura": 412.13,
+          "fraccionDelViewport": 32.21,
+          "bloqueDeTexto": {
+            "arriba": 492.13,
+            "abajo": 764,
+            "alto": 271.88
+          },
+          "celdaDelTitular": 361,
+          "celdaDeLaBajada": 361,
+          "pastillaVisible": false,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.05,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 37.99,
+              "renglones": 2,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 149.58,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 533.52,
+                "ancho": 149.58,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 68.74,
+              "renglones": 1,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 82,
+              "caja": {
+                "x": 32,
+                "y": 574.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 361,
+                "alto": 157.69
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 657.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 717,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 361,
+                "alto": 157.69
+              },
+              "glifos": 8794,
+              "sobreLaEscena": 0.0433,
+              "tintaBajoAA": 0.0411,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0408,
+                "tintaBajoAA": 0.0408,
+                "contrasteMediano": 14.01
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 492.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              },
+              "glifos": 4486,
+              "sobreLaEscena": 0.0782,
+              "tintaBajoAA": 0.078,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0771,
+                "tintaBajoAA": 0.0771,
+                "contrasteMediano": 14.01
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 574.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              },
+              "glifos": 4308,
+              "sobreLaEscena": 0.007,
+              "tintaBajoAA": 0.0026,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.003,
+                "tintaBajoAA": 0.003,
+                "contrasteMediano": 14.01
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 492.13,
+                "ancho": 369,
+                "alto": 271.88
+              },
+              "glifos": 10682,
+              "sobreLaEscena": 0.0437,
+              "tintaBajoAA": 0.0392,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0418,
+                "tintaBajoAA": 0.039,
+                "contrasteMediano": 14.01
+              }
+            }
+          }
+        },
+        {
+          "clave": "sin-pastilla-y-sin-reserva",
+          "que": "la pastilla desmontada Y el pie a 8 px: lo que HARIA caer al bloque",
+          "regla": "[data-parte=\"pastilla\"]{display:none!important}[data-pantalla=\"hero\"]{padding-bottom:8px!important}",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 8
+          },
+          "utilDeLaPantalla": 756,
+          "columna": {
+            "arriba": 564.13,
+            "abajo": 836,
+            "alto": 271.88
+          },
+          "holgura": 484.13,
+          "fraccionDelViewport": 32.21,
+          "bloqueDeTexto": {
+            "arriba": 564.13,
+            "abajo": 836,
+            "alto": 271.88
+          },
+          "celdaDelTitular": 361,
+          "celdaDeLaBajada": 361,
+          "pastillaVisible": false,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.05,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 37.99,
+              "renglones": 2,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 564.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 156.75,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 564.13,
+                "ancho": 156.75,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 37.99,
+              "renglones": 1,
+              "anchoDeTinta": 149.58,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 605.52,
+                "ancho": 149.58,
+                "alto": 41.39
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 68.74,
+              "renglones": 1,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 82,
+              "caja": {
+                "x": 32,
+                "y": 646.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 315.06,
+              "altoDeLinea": 41,
+              "caja": {
+                "x": 32,
+                "y": 564.13,
+                "ancho": 361,
+                "alto": 157.69
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 729.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 789,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 564.13,
+                "ancho": 361,
+                "alto": 157.69
+              },
+              "glifos": 8794,
+              "sobreLaEscena": 0.1482,
+              "tintaBajoAA": 0.1175,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.1473,
+                "tintaBajoAA": 0.1172,
+                "contrasteMediano": 13.87
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 564.13,
+                "ancho": 156.75,
+                "alto": 82.78
+              },
+              "glifos": 4486,
+              "sobreLaEscena": 0.0011,
+              "tintaBajoAA": 0.0009,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0002,
+                "tintaBajoAA": 0.0002,
+                "contrasteMediano": 15.94
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 646.91,
+                "ancho": 315.06,
+                "alto": 74.91
+              },
+              "glifos": 4308,
+              "sobreLaEscena": 0.3013,
+              "tintaBajoAA": 0.2389,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.3004,
+                "tintaBajoAA": 0.2391,
+                "contrasteMediano": 7.12
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 564.13,
+                "ancho": 369,
+                "alto": 271.88
+              },
+              "glifos": 12219,
+              "sobreLaEscena": 0.1079,
+              "tintaBajoAA": 0.0858,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.2529,
+                "tintaBajoAA": 0.2305,
+                "contrasteMediano": 13.37
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 73,
+          "hasta": 73,
+          "alto": 1
+        },
+        {
+          "desde": 85,
+          "hasta": 86,
+          "alto": 2
+        },
+        {
+          "desde": 100,
+          "hasta": 102,
+          "alto": 3
+        },
+        {
+          "desde": 127,
+          "hasta": 127,
+          "alto": 1
+        },
+        {
+          "desde": 129,
+          "hasta": 129,
+          "alto": 1
+        },
+        {
+          "desde": 131,
+          "hasta": 131,
+          "alto": 1
+        },
+        {
+          "desde": 183,
+          "hasta": 184,
+          "alto": 2
+        },
+        {
+          "desde": 197,
+          "hasta": 199,
+          "alto": 3
+        },
+        {
+          "desde": 316,
+          "hasta": 699,
+          "alto": 384
+        },
+        {
+          "desde": 800,
+          "hasta": 838,
+          "alto": 39
+        },
+        {
+          "desde": 893,
+          "hasta": 893,
+          "alto": 1
+        }
+      ],
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 80
+          },
+          "utilDeLaPantalla": 864,
+          "columna": {
+            "arriba": 644.38,
+            "abajo": 944,
+            "alto": 299.63
+          },
+          "holgura": 564.38,
+          "fraccionDelViewport": 29.26,
+          "bloqueDeTexto": {
+            "arriba": 644.38,
+            "abajo": 944,
+            "alto": 299.63
+          },
+          "celdaDelTitular": 704,
+          "celdaDeLaBajada": 346,
+          "pastillaVisible": true,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.37,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 44.75,
+              "renglones": 2,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 176.19,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 693.14,
+                "ancho": 176.19,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 80.65,
+              "renglones": 1,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 96,
+              "caja": {
+                "x": 32,
+                "y": 741.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 704,
+                "alto": 185.44
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 837.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 897,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 704,
+                "alto": 185.44
+              },
+              "glifos": 12132,
+              "sobreLaEscena": 0.0335,
+              "tintaBajoAA": 0.0299,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0328,
+                "tintaBajoAA": 0.0295,
+                "contrasteMediano": 14.03
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              },
+              "glifos": 6241,
+              "sobreLaEscena": 0.0079,
+              "tintaBajoAA": 0.0075,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0091,
+                "tintaBajoAA": 0.009,
+                "contrasteMediano": 14
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 741.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              },
+              "glifos": 5891,
+              "sobreLaEscena": 0.0606,
+              "tintaBajoAA": 0.0536,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0579,
+                "tintaBajoAA": 0.0513,
+                "contrasteMediano": 14.55
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 644.38,
+                "ancho": 712,
+                "alto": 299.63
+              },
+              "glifos": 14020,
+              "sobreLaEscena": 0.0294,
+              "tintaBajoAA": 0.0263,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.029,
+                "tintaBajoAA": 0.026,
+                "contrasteMediano": 14
+              }
+            }
+          }
+        },
+        {
+          "clave": "sin-pastilla",
+          "que": "la pastilla desmontada, el pie INTACTO",
+          "regla": "[data-parte=\"pastilla\"]{display:none!important}",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 80
+          },
+          "utilDeLaPantalla": 864,
+          "columna": {
+            "arriba": 644.38,
+            "abajo": 944,
+            "alto": 299.63
+          },
+          "holgura": 564.38,
+          "fraccionDelViewport": 29.26,
+          "bloqueDeTexto": {
+            "arriba": 644.38,
+            "abajo": 944,
+            "alto": 299.63
+          },
+          "celdaDelTitular": 704,
+          "celdaDeLaBajada": 346,
+          "pastillaVisible": false,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.37,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 44.75,
+              "renglones": 2,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 176.19,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 693.14,
+                "ancho": 176.19,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 80.65,
+              "renglones": 1,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 96,
+              "caja": {
+                "x": 32,
+                "y": 741.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 704,
+                "alto": 185.44
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 837.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 897,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 704,
+                "alto": 185.44
+              },
+              "glifos": 12132,
+              "sobreLaEscena": 0.0335,
+              "tintaBajoAA": 0.0299,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0328,
+                "tintaBajoAA": 0.0295,
+                "contrasteMediano": 14.03
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 644.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              },
+              "glifos": 6241,
+              "sobreLaEscena": 0.0079,
+              "tintaBajoAA": 0.0075,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0091,
+                "tintaBajoAA": 0.009,
+                "contrasteMediano": 14
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 741.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              },
+              "glifos": 5891,
+              "sobreLaEscena": 0.0606,
+              "tintaBajoAA": 0.0536,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0579,
+                "tintaBajoAA": 0.0513,
+                "contrasteMediano": 14.55
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 644.38,
+                "ancho": 712,
+                "alto": 299.63
+              },
+              "glifos": 14020,
+              "sobreLaEscena": 0.0294,
+              "tintaBajoAA": 0.0263,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.029,
+                "tintaBajoAA": 0.026,
+                "contrasteMediano": 14
+              }
+            }
+          }
+        },
+        {
+          "clave": "sin-pastilla-y-sin-reserva",
+          "que": "la pastilla desmontada Y el pie a 8 px: lo que HARIA caer al bloque",
+          "regla": "[data-parte=\"pastilla\"]{display:none!important}[data-pantalla=\"hero\"]{padding-bottom:8px!important}",
+          "justificado": "flex-end",
+          "relleno": {
+            "arriba": 80,
+            "abajo": 8
+          },
+          "utilDeLaPantalla": 936,
+          "columna": {
+            "arriba": 716.38,
+            "abajo": 1016,
+            "alto": 299.63
+          },
+          "holgura": 636.38,
+          "fraccionDelViewport": 29.26,
+          "bloqueDeTexto": {
+            "arriba": 716.38,
+            "abajo": 1016,
+            "alto": 299.63
+          },
+          "celdaDelTitular": 704,
+          "celdaDeLaBajada": 346,
+          "pastillaVisible": false,
+          "fondoDelPanel": "rgba(0, 0, 0, 0)",
+          "piezas": [
+            {
+              "clave": "logotipo",
+              "fontSize": 11.37,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "isotipo",
+              "fontSize": 16,
+              "renglones": 0,
+              "anchoDeTinta": 0,
+              "altoDeLinea": 0,
+              "caja": {
+                "x": 0,
+                "y": 0,
+                "ancho": 0,
+                "alto": 0
+              }
+            },
+            {
+              "clave": "registro1",
+              "fontSize": 44.75,
+              "renglones": 2,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 716.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              }
+            },
+            {
+              "clave": "fila1",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 184.64,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 716.38,
+                "ancho": 184.64,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "fila2",
+              "fontSize": 44.75,
+              "renglones": 1,
+              "anchoDeTinta": 176.19,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 765.14,
+                "ancho": 176.19,
+                "alto": 48.77
+              }
+            },
+            {
+              "clave": "registro2",
+              "fontSize": 80.65,
+              "renglones": 1,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 96,
+              "caja": {
+                "x": 32,
+                "y": 813.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              }
+            },
+            {
+              "clave": "titular",
+              "fontSize": 16,
+              "renglones": 3,
+              "anchoDeTinta": 369.7,
+              "altoDeLinea": 48,
+              "caja": {
+                "x": 32,
+                "y": 716.38,
+                "ancho": 704,
+                "alto": 185.44
+              }
+            },
+            {
+              "clave": "bajada",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 126.5,
+              "altoDeLinea": 19,
+              "caja": {
+                "x": 32,
+                "y": 909.81,
+                "ancho": 126.5,
+                "alto": 51.19
+              }
+            },
+            {
+              "clave": "cta",
+              "fontSize": 16,
+              "renglones": 2,
+              "anchoDeTinta": 160.17,
+              "altoDeLinea": 18,
+              "caja": {
+                "x": 24,
+                "y": 969,
+                "ancho": 175.47,
+                "alto": 47
+              }
+            }
+          ],
+          "cruces": {
+            "titular": {
+              "caja": {
+                "x": 32,
+                "y": 716.38,
+                "ancho": 704,
+                "alto": 185.44
+              },
+              "glifos": 12132,
+              "sobreLaEscena": 0.0287,
+              "tintaBajoAA": 0.0242,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0264,
+                "tintaBajoAA": 0.023,
+                "contrasteMediano": 15.37
+              }
+            },
+            "registro1": {
+              "caja": {
+                "x": 32,
+                "y": 716.38,
+                "ancho": 184.64,
+                "alto": 97.53
+              },
+              "glifos": 6241,
+              "sobreLaEscena": 0.0111,
+              "tintaBajoAA": 0.0104,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0072,
+                "tintaBajoAA": 0.0069,
+                "contrasteMediano": 16.68
+              }
+            },
+            "registro2": {
+              "caja": {
+                "x": 32,
+                "y": 813.91,
+                "ancho": 369.7,
+                "alto": 87.91
+              },
+              "glifos": 5891,
+              "sobreLaEscena": 0.0474,
+              "tintaBajoAA": 0.0387,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.0467,
+                "tintaBajoAA": 0.0401,
+                "contrasteMediano": 13.87
+              }
+            },
+            "columna": {
+              "caja": {
+                "x": 24,
+                "y": 716.38,
+                "ancho": 712,
+                "alto": 299.63
+              },
+              "glifos": 15557,
+              "sobreLaEscena": 0.0255,
+              "tintaBajoAA": 0.0195,
+              "detrasDelTexto": {
+                "tintaSobreMasa": 0.1365,
+                "tintaBajoAA": 0.1334,
+                "contrasteMediano": 13.87
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

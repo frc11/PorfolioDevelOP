@@ -1,0 +1,153 @@
+{
+  "avances": {
+    "fila1": 4.124290265486726,
+    "fila2": 3.9322277286135696,
+    "fila3": 4.579000000000001,
+    "logotipo": 3.671,
+    "bajadaEntera": 15.326
+  },
+  "razonDelIsotipo": 1.437493939794614,
+  "leadingTitulo": 1.09,
+  "leadingTexto": 1.6,
+  "hueco": 8,
+  "factorDeLaMarca": 2.6321867747730465,
+  "techoComun": 2.668336681905479,
+  "regla0": [
+    {
+      "ancho": 320,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 256,
+      "margen": 12.659999999999997,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 36
+    },
+    {
+      "ancho": 375,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 311,
+      "margen": 67.66,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 44
+    },
+    {
+      "ancho": 390,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 326,
+      "margen": 82.66,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 46
+    },
+    {
+      "ancho": 425,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 361,
+      "margen": 117.66,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 51
+    },
+    {
+      "ancho": 768,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 346,
+      "margen": 102.66,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 49
+    },
+    {
+      "ancho": 1024,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 474,
+      "margen": 230.66,
+      "entra": true,
+      "renglonesHoy": 2,
+      "techoDeCaracteres": 68
+    },
+    {
+      "ancho": 1440,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 354.8,
+      "margen": 111.46000000000001,
+      "entra": true,
+      "renglonesHoy": 1,
+      "techoDeCaracteres": 51
+    },
+    {
+      "ancho": 1920,
+      "tamano": 16,
+      "tintaModelada": 245.216,
+      "tintaMedida": 243.34,
+      "caja": 498.8,
+      "margen": 255.46,
+      "entra": true,
+      "renglonesHoy": 1,
+      "techoDeCaracteres": 71
+    }
+  ],
+  "presupuestos": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "utilHoy": 480,
+      "utilSimetrico": 552,
+      "bloqueDeTextoHoy": 307.22,
+      "bloqueDeTextoConRegla0": 281.63,
+      "logotipoHoy": 11.98,
+      "isotipoHoy": 66.55,
+      "marcaHoy": 86.53,
+      "techoPorAlto": 3.1372723799821722,
+      "techoPorAncho": 2.675998607107652,
+      "techoPorAltoConPtHoy": 2.2204253151661786,
+      "factor": 2.6321867747730465,
+      "isotipoAlto": 175.17202986114623,
+      "isotipoAncho": 251.80873134691888,
+      "logotipoTamano": 28.95405452250351,
+      "columna": 504.33562742292736,
+      "sobrante": 47.66437257707264,
+      "aireArriba": 31.83218628853632,
+      "aireAbajo": 31.83218628853632,
+      "cajaDelTitular": 256
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "utilHoy": 579,
+      "utilSimetrico": 651,
+      "bloqueDeTextoHoy": 349.36,
+      "bloqueDeTextoConRegla0": 323.77,
+      "logotipoHoy": 11.98,
+      "isotipoHoy": 81.08,
+      "marcaHoy": 101.06,
+      "techoPorAlto": 3.2584354180098862,
+      "techoPorAncho": 2.668336681905479,
+      "techoPorAltoConPtHoy": 2.484741027294219,
+      "factor": 2.6321867747730465,
+      "isotipoAlto": 213.41770369859861,
+      "isotipoAncho": 306.7866557116181,
+      "logotipoTamano": 28.95405452250351,
+      "columna": 584.7213012603797,
+      "sobrante": 66.27869873962027,
+      "aireArriba": 41.139349369810134,
+      "aireAbajo": 41.139349369810134,
+      "cajaDelTitular": 311
+    }
+  ]
+}
