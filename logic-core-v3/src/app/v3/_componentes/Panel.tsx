@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 import { SECCIONES, type Seccion } from '../_lib/secciones'
-import { SUPERFICIES } from '../_lib/superficies'
+import { CLASES_DE_LA_BANDA_ANGOSTA, SUPERFICIES } from '../_lib/superficies'
 import { idDelTitularDeSeccion } from './tipografia/Titular'
 
 /**
@@ -98,11 +98,35 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
        */
       data-panel={seccion.id}
       data-superficie={seccion.superficie}
+      /**
+       * ⚠ **EL ANCHO EN EL QUE ESO DEJA DE SER CIERTO, dicho en el marcado.**
+       * Sin esto, `data-superficie` diría `papel-transparente` a 320 y la
+       * pantalla mostraría papel opaco: un atributo que miente es peor que uno
+       * que falta, y los bancos de medición leen atributos. Sale sólo en la
+       * sección que declara las dos, y dice cuál rige abajo de 375.
+       */
+      data-superficie-angosta={seccion.superficieAngosta}
       // El mecanismo de S0: redefine --color-fondo y --color-tinta, y el
       // anillo de foco se da vuelta solo porque --color-foco ES la tinta.
       data-seccion={superficie.invertida ? 'invertida' : undefined}
-      // `relative z-10`: los paneles van ARRIBA del escenario, que es `z-0`.
-      className={cn('relative z-10 w-full', superficie.clases)}
+      /**
+       * `relative z-10`: los paneles van ARRIBA del escenario, que es `z-0`.
+       *
+       * ⚠ La tercera clase es la de la BANDA ANGOSTA y sale sólo si la sección
+       * declara una segunda superficie. Es una media query —`max-angosto:`, la
+       * única del lane que mira hacia abajo— y no una rama de JS, porque este
+       * componente corre en el SERVIDOR y el hook que lee el ancho devuelve
+       * `false` durante la hidratación: decidirlo en JS pintaría el primer
+       * cuadro con la superficie equivocada. El porqué entero, con las cifras
+       * de por qué el Hero la necesita, está en `CLASES_DE_LA_BANDA_ANGOSTA`.
+       */
+      className={cn(
+        'relative z-10 w-full',
+        superficie.clases,
+        seccion.superficieAngosta === undefined
+          ? undefined
+          : CLASES_DE_LA_BANDA_ANGOSTA[seccion.superficieAngosta],
+      )}
       style={{ minHeight: seccion.alto }}
     >
       {children}

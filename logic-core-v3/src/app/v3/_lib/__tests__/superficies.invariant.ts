@@ -36,6 +36,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Panel } from '../../_componentes/Panel'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA, type Seccion } from '../secciones'
 import {
+  CLASES_DE_LA_BANDA_ANGOSTA,
   COLORES_DEL_CANVAS_DE_PRUEBA,
   SUPERFICIES,
   TINTA_HEX,
@@ -134,6 +135,107 @@ controlPositivo(
   'el chequeo de "sin hex suelto" ve un hex',
   '<section style="background:#ff0000">',
   (html) => !/#[0-9a-fA-F]{3,8}\b/.test(html),
+)
+
+// ─────────────────────────────────────────────────────────────────────────
+titulo('1b · La banda angosta: la MISMA superficie, otro ancho (TEXTO-3)')
+
+/**
+ * ⚠️ **LO QUE ESTA SECCIÓN IMPIDE, y por qué no alcanza con mirar la clase.**
+ *
+ * `superficieAngosta` es el primer campo del recorrido que depende del ANCHO, y
+ * tiene un modo de falla propio: una media query pinta clases pero **no escribe
+ * atributos**, así que `data-seccion="invertida"` no se puede condicionar. Una
+ * banda angosta oscura pintaría el fondo invertido con la tinta sin invertir —
+ * tinta negra sobre fondo negro, que es la peor falla posible y además silenciosa
+ * en el gate porque compila. El tipo ya lo prohíbe; acá se afirma que el tipo y
+ * la tabla de clases dicen lo mismo, que es lo que el tipo solo no puede.
+ */
+const modosAngostos = Object.keys(CLASES_DE_LA_BANDA_ANGOSTA).sort()
+/**
+ * ⚠️ **PAPEL-2 · EL PREFIJO DE LA BANDA SE DERIVA DEL TOKEN, NO SE ESCRIBE.**
+ *
+ * La banda pasó de `max-angosto:` (375) a `max-chico:` (390) porque COMPO-1
+ * midió que a 375 la composición EMPEORA a 40,59 % de tinta sobre la masa del
+ * logo y que faltan 134,86 px que ninguna palanca de layout devuelve. Las dos
+ * derivaciones —por qué DOS cortes y no uno movido— están en el tema.
+ *
+ * El prefijo sale del nombre del breakpoint y no de una cadena escrita acá: así
+ * el día que la banda se mueva otra vez, esta comprobación se mueve con ella y
+ * lo que falla es la clase que quedó vieja, que es lo que uno quiere que falle.
+ */
+const BREAKPOINT_DE_LA_BANDA = 'chico'
+const PREFIJO_DE_LA_BANDA = `max-${BREAKPOINT_DE_LA_BANDA}:`
+
+afirmarIgual(modosAngostos, ['papel-opaco', 'papel-transparente'], 'la banda angosta admite SÓLO los dos modos claros')
+afirmar(
+  modosAngostos.every((m) => !SUPERFICIES[m as ModoSuperficie].invertida),
+  '  y ninguno es invertido: una media query pinta clases, no escribe `data-seccion`',
+)
+afirmarIgual(
+  Object.entries(CLASES_DE_LA_BANDA_ANGOSTA)
+    .filter(([m]) => !SUPERFICIES[m as ModoSuperficie].dejaVerElCanvas)
+    .map(([, clase]) => clase),
+  ['max-chico:bg-fondo'],
+  'el modo que NO deja ver la sala pinta `bg-fondo` acotado con `max-chico:` — PAPEL-2 movió la banda de «abajo de 375» a «abajo de 390», o sea que 375 pasa a papel',
+)
+afirmarIgual(
+  Object.entries(CLASES_DE_LA_BANDA_ANGOSTA)
+    .filter(([m]) => SUPERFICIES[m as ModoSuperficie].dejaVerElCanvas)
+    .map(([, clase]) => clase),
+  [''],
+  '  y el que sí la deja no pinta nada: la ausencia de clase ES la transparencia',
+)
+afirmar(
+  Object.values(CLASES_DE_LA_BANDA_ANGOSTA).every((c) => c === '' || c.startsWith(PREFIJO_DE_LA_BANDA)),
+  `todas las clases de la banda van acotadas con \`${PREFIJO_DE_LA_BANDA}\`: ni una pinta en todo ancho`,
+)
+controlPositivo(
+  'el chequeo del acotado ve una clase sin variante',
+  { 'papel-opaco': 'bg-fondo', 'papel-transparente': '' },
+  (t: Record<string, string>) => Object.values(t).every((c) => c === '' || c.startsWith(PREFIJO_DE_LA_BANDA)),
+)
+controlPositivo(
+  'y el de la inversión vería un modo oscuro en la banda',
+  ['oscuro-opaco'],
+  (lista: string[]) => lista.every((m) => !SUPERFICIES[m as ModoSuperficie].invertida),
+)
+
+/** UNA sola sección declara dos superficies, y es el Hero. Si mañana son dos,
+ *  esto se cae y quien la agregue tiene que venir a escribir por qué. */
+const conBandaAngosta = SECCIONES.filter((s) => s.superficieAngosta !== undefined)
+afirmarIgual(
+  conBandaAngosta.map((s) => [s.id, s.superficie, s.superficieAngosta]),
+  [['hero', 'papel-transparente', 'papel-opaco']],
+  'una sola sección declara banda angosta: el Hero, transparente de 390 para arriba y papel abajo',
+)
+afirmar(
+  SECCIONES.every((s) => s.superficieAngosta === undefined || s.superficieAngosta !== s.superficie),
+  '  y ninguna fila la declara IGUAL a su superficie: eso sería ruido, no una decisión',
+)
+controlPositivo(
+  'el chequeo de la banda redundante ve una fila que repite su superficie',
+  [{ superficie: 'papel-opaco', superficieAngosta: 'papel-opaco' }],
+  (lista: { superficie: string; superficieAngosta?: string }[]) =>
+    lista.every((s) => s.superficieAngosta === undefined || s.superficieAngosta !== s.superficie),
+)
+
+/** Y el marcado real: el Hero emite la clase acotada y el atributo que dice
+ *  cuál rige abajo. Un `data-superficie` que mintiera a 320 sería peor que uno
+ *  ausente, porque los bancos de medición leen atributos. */
+const heroHtml = renderToStaticMarkup(
+  createElement(Panel, { seccion: SECCIONES.find((s) => s.id === 'hero') as Seccion }, null),
+)
+afirmar(heroHtml.includes('max-chico:bg-fondo'), 'el Hero emite `max-chico:bg-fondo` en el marcado real')
+afirmar(!heroHtml.includes('max-angosto:bg-fondo'), '  y ya NO emite el `max-angosto:bg-fondo` viejo: la banda se mudó entera, no se duplicó')
+afirmar(heroHtml.includes('data-superficie-angosta="papel-opaco"'), '  y el atributo que declara cuál superficie rige abajo de 390')
+afirmar(
+  !/(^|[\s"])bg-fondo\b/.test(heroHtml),
+  '  sin un `bg-fondo` suelto: de 390 para arriba sigue sin pintar nada',
+)
+afirmar(
+  !salida['papel-transparente'].includes('data-superficie-angosta'),
+  'y una sección SIN banda angosta no emite el atributo: el campo ausente no deja rastro',
 )
 
 titulo('2 · Las ocho secciones y su recorrido de superficies')

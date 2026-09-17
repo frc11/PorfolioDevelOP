@@ -1,0 +1,78 @@
+{
+  "cuando": "2026-09-16T22:03:49.307Z",
+  "archivos": [
+    {
+      "disco": "src/app/theme-develop.css",
+      "fuente": "git",
+      "viaja": true,
+      "sha256DeHoy": "5637c1ae5134e6ca49ae92245c56783baba653877e07bc841af541cec6fe9c96"
+    },
+    {
+      "disco": "src/app/v3/_lib/superficies.ts",
+      "fuente": "git",
+      "viaja": true,
+      "sha256DeHoy": "b32647e509b036730dd38202b7693fd40237f7f82a1a93c7cfe2bf1ff095feed"
+    },
+    {
+      "disco": "src/app/v3/_lib/secciones.ts",
+      "fuente": "git",
+      "viaja": true,
+      "sha256DeHoy": "042e2eddf475c2eee35f04206d8cd53542a45e933f1c8e28e7688b761e2478e4"
+    },
+    {
+      "disco": "src/app/v3/_componentes/Panel.tsx",
+      "fuente": "git",
+      "viaja": true,
+      "sha256DeHoy": "995cd8d346a6dcc51656569ca51a61b7c536357a3029511e46840ce9e51b2138"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/contenido.ts",
+      "fuente": "temp",
+      "sha256": "a05883c4be82fbd5256d4443e9339092f398cb0c77437a724e7968c3af772378",
+      "viaja": true,
+      "sha256DeHoy": "74624254fde21ff472967d50469371aa0ee31f7892d4a6cecac39f89dd56a0f1"
+    },
+    {
+      "disco": "src/app/v3/_secciones/hero/hero.invariant.tsx",
+      "fuente": "temp",
+      "sha256": "7f5e035bba4008a9c31d1aed087bb472bffc9d644551b0c76ab2822bab3d1aab",
+      "viaja": false,
+      "sha256DeHoy": "a8536647f363c48af1af6925e0884fbb3206c24b50190496ddbd2c4f388b5753"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/superficies.invariant.ts",
+      "fuente": "git",
+      "viaja": false,
+      "sha256DeHoy": "5e45067ba7251e15f21b875e84f14a1a8d9d7dc7d24fdf3f733b5f98c51e7206"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/tokens.invariant.ts",
+      "fuente": "git",
+      "viaja": false,
+      "sha256DeHoy": "c56f1e8f34389015d3f4b6b2140dbdaac36f6864c5e8b2ad054f565b09d04110"
+    },
+    {
+      "disco": "src/app/v3/_lib/__tests__/padron-de-tokens.ts",
+      "fuente": "git",
+      "viaja": false,
+      "sha256DeHoy": "d24d992d262b2f9576d8cac55f2d2c21e1ca95eabeef3dabc4076b51a42c9a5c"
+    }
+  ],
+  "laneAlCerrarTexto2": 66090.2,
+  "desvioDelControl": 0,
+  "antes": {
+    "bytesDelLane": 66090.16,
+    "aireB": 50,
+    "linea": "ok   lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.59 KiB crudo  — 64.5 KiB — 50.0 B de aire · 70.4 KiB con el preámbulo heredado adentro"
+  },
+  "despues": {
+    "bytesDelLane": 66306.16,
+    "aireB": -166,
+    "linea": "FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.59 KiB crudo  — 64.8 KiB — -166.0 B de aire · 70.7 KiB con el preámbulo heredado adentro"
+  },
+  "deltaBytes": 216,
+  "alCentesimoDeArriba": 0.22,
+  "aireDelCentesimoDeArribaBytes": 9.3,
+  "propuestaKib": 0.22,
+  "aireDeLaPropuestaBytes": 9.3
+}

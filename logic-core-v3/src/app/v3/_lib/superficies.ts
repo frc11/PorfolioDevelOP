@@ -124,6 +124,86 @@ export const SUPERFICIES: Readonly<Record<ModoSuperficie, DefinicionSuperficie>>
 }
 
 /**
+ * ⚠️ **LA SUPERFICIE DE LA BANDA ANGOSTA — la MISMA superficie, otro ancho.**
+ *
+ * ── Qué problema resuelve, con su número ──────────────────────────────────
+ *
+ * A **320** el Hero no tiene composición limpia y está medido hasta el fondo:
+ * el bloque de texto ocupa el 51 % del viewport y la masa del logo otro 37 %,
+ * **la suma pasa de 100**, así que no existe ninguna posición en la que no se
+ * toquen (`s10-logo-composicion.ts`). TEXTO-1 barrió **16 configuraciones de
+ * tipografía** y la de entonces era la mejor de las 16; TEXTO-2 lo empeoró de
+ * 31,6 % a 46,7 % al bajar el bloque, porque ahí bajar mete la línea 1 adentro
+ * de la masa (6,1 % → 54,0 %). Las palancas de escena están todas descartadas
+ * con número. La decisión del dueño es la única que quedaba: **a ese ancho el
+ * Hero no muestra escena.**
+ *
+ * ── Por qué es CSS y no puede ser otra cosa ───────────────────────────────
+ *
+ * `Panel.tsx` es un **componente de servidor**: no hay ancho en su render. Y el
+ * hook que sí lo lee (`useAnchoMinimo`) devuelve `false` en el servidor **y en
+ * la hidratación** a propósito, así que decidir por JS pintaría el primer cuadro
+ * SIN la superficie y la metería después — un parpadeo de exactamente el defecto
+ * que esto viene a tapar. O sea que la única puerta es una media query.
+ *
+ * ── ⚠️ LO QUE ESTO NO PUEDE HACER, y por eso el tipo lo prohíbe ──────────
+ *
+ * Una media query puede pintar una clase; **no puede escribir un atributo**.
+ * `data-seccion="invertida"` —el mecanismo de S0 que da vuelta `--color-fondo`
+ * y `--color-tinta`— se decide en el servidor y no tiene forma condicional. Por
+ * eso la banda angosta sólo admite los DOS modos claros: cambiar a un oscuro
+ * pintaría el fondo invertido con la tinta sin invertir, que es tinta negra
+ * sobre fondo negro. `superficies.invariant` §1b lo afirma con control positivo.
+ *
+ * ── Y lo que queda declarado y NO resuelto ────────────────────────────────
+ *
+ * `dejaVerElCanvas` sigue siendo una propiedad del MODO, no del ancho, así que
+ * `TRANSPARENTES` —y todo lo que se deriva de ella: el mapeo de la escena, el
+ * anclaje, las ventanas de tinta— sigue diciendo que el Hero deja ver la sala.
+ * **Eso es verdad de 390 para arriba y falso abajo** —PAPEL-2 movió el corte y
+ * con él el alcance de esta deuda: eran 55 px de banda y ahora son 70—, y ningún
+ * modelo derivado lo sabe. No se arregla acá porque arreglarlo es volver
+ * ancho-dependiente media docena de modelos de escena, y este sprint tiene la escena prohibida. Queda
+ * como deuda escrita, con su alcance: afecta a lo DERIVADO, no a lo medido —
+ * las mediciones de pantalla se sacan por ancho y ven la superficie real.
+ */
+export type ModoSuperficieAngosta = Extract<ModoSuperficie, 'papel-opaco' | 'papel-transparente'>
+
+/**
+ * Lo que cada modo pinta **sólo abajo de `--breakpoint-chico`** (390px).
+ *
+ * `max-chico:` es la variante que Tailwind emite para ese token. La clase va
+ * escrita ENTERA y literal por la razón de siempre — Tailwind escanea el fuente
+ * y una clase armada no la ve nadie.
+ *
+ * El transparente pinta cadena vacía y no se omite del mapa: que los dos modos
+ * admitidos estén acá es lo que hace que `Panel` no tenga una rama.
+ *
+ * ── ⚠️ PAPEL-2 · LA BANDA PASÓ DE «ABAJO DE 375» A «ABAJO DE 390» ────────
+ *
+ * TEXTO-3 la abrió con `max-angosto:` porque el único ancho medido sin
+ * composición limpia era 320. COMPO-1 midió 375 después de agregarle dos filas
+ * al titular y le encontró **40,59 % de tinta sobre la masa del logo** —contra
+ * 16,22 % antes—, con el bloque apoyado abajo y 134,86 px de faltante: ninguna
+ * palanca de layout lo cierra. Así que 375 entra a la banda.
+ *
+ * **Y entra por un corte NUEVO, no por moverle el número al viejo.**
+ * `--breakpoint-angosto` (375) tiene el otro consumidor —el registro 2 a 55 px—
+ * cuya banda medida es 320–374 y no la del papel. Los dos cortes y sus dos
+ * derivaciones están escritos al lado de `--breakpoint-chico` en el tema.
+ *
+ * ⚠ **El nombre de la constante se queda**, y no es descuido: `ANGOSTA` acá
+ * nombra a la banda de esta tabla —«los anchos donde el Hero no deja ver la
+ * sala»—, no al token `--breakpoint-angosto`. Renombrarla tocaría `Panel.tsx`,
+ * `superficies.invariant`, `s7-integracion` y `s18-compuertas` para cambiar una
+ * palabra que ya significaba lo correcto.
+ */
+export const CLASES_DE_LA_BANDA_ANGOSTA: Readonly<Record<ModoSuperficieAngosta, string>> = {
+  'papel-opaco': 'max-chico:bg-fondo',
+  'papel-transparente': '',
+}
+
+/**
  * Los colores que pinta el canvas de prueba, en orden de aparición.
  *
  * Están acá y no en el componente porque son la entrada de la cuenta de

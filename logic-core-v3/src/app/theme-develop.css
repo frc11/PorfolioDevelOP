@@ -585,6 +585,183 @@
 
   --text-display-xl: 104px;
 
+  /* ═══ COMPO-1 · EL MISMO NIVEL, EN LA BANDA ANGOSTA — 55 px. [derivado] ══
+   *
+   * **No es un nivel nuevo de la escala: es el décimo nivel resuelto en el
+   * único ancho donde no entra.** El titular pasa a TRES filas abajo de 1025 y
+   * la tercera —«LAS 24 HS», el registro 2— tiene que entrar en UN renglón en
+   * todos los anchos de 320 a 1024. El mismo método de siempre, con los dos
+   * números medidos y ninguno elegido:
+   *
+   *   caja del titular a 320    256,00 px   (`Envoltorio` deja 320 − 2×32; la
+   *                                          grilla de la medida ya colapsó)
+   *   avance de la fila 3         4,58406 em  (medido EN EL NAVEGADOR con la
+   *                                          cara, el peso, el estilo y el
+   *                                          interletrado con los que se pinta:
+   *                                          `scripts-compo/b-ajuste.ts`)
+   *
+   *   55 × 4,58406 = 252,12 px  →  entra, con 3,88 px de margen
+   *   56 × 4,58406 = 256,71 px  →  se pasa
+   *
+   * ⚠ Los 4,58406 em reproducen los **4,58409** con los que se derivó el 104
+   * —desvío 3×10⁻⁵ em— y ésa es la comprobación de que las dos cuentas hablan
+   * de la misma cadena con la misma cara.
+   *
+   * ── ⚠️ POR QUÉ NO ALCANZA CON BAJAR EL PISO DEL `clamp()`, Y ESTÁ MEDIDO ─
+   *
+   * Lo natural sería bajar el piso de `--text-fluido-display-xl`. **No sirve, y
+   * no es una preferencia:** a 320 el `clamp()` NO está gobernado por su piso
+   * sino por su recta. El término lineal vale
+   *
+   *   3,3732rem + 3,4742vw  →  53,9712 + 3,4742 × 3,20 = **65,09 px**
+   *
+   * o sea 9,24 px por arriba del techo de 55,85 que la caja admite. Ningún valor
+   * del piso puede bajar de ahí: el piso sólo manda cuando la recta queda por
+   * DEBAJO de él. Mover la recta significaría mover el ancla de 375 o la de
+   * 1440, y las dos están fuera de este sprint.
+   *
+   * ── Y por qué la banda es exactamente 320–374 ────────────────────────────
+   *
+   * Porque de 372 px de ventana para arriba el nivel YA entra, medido: la caja
+   * vale `ancho − 64`, así que 67 px de tipografía entran cuando
+   * `ancho − 64 ≥ 67 × 4,58406`, o sea desde **371,13 px**. A 375 la fila 3 mide
+   * 307,13 px en una caja de 311,00 y entra con 3,87 de margen —el mismo margen
+   * que a 320 con 55—. `--breakpoint-angosto` (375) es el corte declarado más
+   * chico del sistema y contiene entero el tramo que falla.
+   *
+   * ⚠ Es un valor FIJO y no una recta: en 55 px de banda una recta no compra
+   * nada, y el Hero ya conmuta de régimen en ese mismo píxel —abajo de 375
+   * pinta `papel-opaco` (TEXTO-3)—. La conmutación de tamaño viaja con la de
+   * superficie, en el mismo corte y por la misma razón: abajo de 375 no existe
+   * composición limpia. */
+
+  --text-display-xl-angosto: 55px;
+
+  /* ═══ PAPEL-2 · EL REGISTRO 1 IGUALADO AL REGISTRO 2. [derivado] ════════
+   *
+   * **Ninguno de los dos es un tamaño: son el MISMO tamaño dicho dos veces**,
+   * uno por cada régimen en el que se pinta el registro 2. Y no llevan un
+   * número propio, llevan una RAZÓN — que es exactamente lo que el pedido dice.
+   *
+   * ── El pedido, y por qué la respuesta es una razón y no un valor ────────
+   *
+   * El §3 pide que «TU NEGOCIO» / «VENDIENDO» dejen de ser más angostos que
+   * «LAS 24 HS»: que el ancho de TINTA del más ancho de los dos IGUALE el de la
+   * fila 3, con 2 px de tolerancia. Dos cadenas igualan su tinta cuando
+   *
+   *     tamaño₁ × avance₁  =  tamaño₃ × avance₃
+   *
+   * o sea `tamaño₁ = tamaño₃ × (avance₃ / avance₁)`. El factor no depende del
+   * ancho de pantalla: **depende sólo de las dos caras**, así que el registro 1
+   * se declara como el registro 2 multiplicado por él y la igualdad se cumple
+   * en TODO el tramo, no sólo en los dos anchos que se midieron.
+   *
+   * ── Los tres números, medidos contra los binarios que se sirven ─────────
+   *
+   *   avance de «TU NEGOCIO»   4,12429 em   (Archivo wdth 62 · wght 700, con
+   *                                          `--tracking-display` −0,02 em y
+   *                                          el factor del eje de peso que
+   *                                          `hero/composicion.ts` derivó)
+   *   avance de «VENDIENDO»    3,93223 em   (la misma cara — NO es la que
+   *                                          manda: la razón la fija la MÁS
+   *                                          ANCHA de las dos filas)
+   *   avance de «LAS 24 HS»    4,57900 em   (Chivo Light itálica, con
+   *                                          `--tracking-titulo` −0,03 em)
+   *
+   *   4,57900 / 4,12429 = **1,11025**
+   *
+   * Lo que eso da, y el escalón que cierra:
+   *
+   *     ancho   fila 3      registro 1 HOY        registro 1 PEDIDO
+   *     320     55,00 px    37,00 → 152,60 px     61,06 → 251,85 px  (era −99,25)
+   *     375     67,00 px    37,00 → 152,60 px     74,39 → 306,79 px  (era −154,19)
+   *
+   * **Desvío contra la fila 3: 0,0000 px en los dos.** No es suerte: es lo que
+   * una razón hace y un valor elegido no.
+   *
+   * ⚠ **Y entra en la caja, que es la otra mitad.** El techo que la caja del
+   * titular admite para «TU NEGOCIO» es 62,07 px a 320 y 75,41 a 375; los dos
+   * pedidos quedan abajo. Tiene que ser así por construcción —la tinta del
+   * registro 1 pasa a ser la del registro 2, que ya entraba— y el invariante lo
+   * afirma igual, porque «tiene que ser así» no es una medición.
+   *
+   * ⚠ **El 1,11025 está escrito DOS VECES a propósito.** `calc()` no puede leer
+   * el token del otro régimen sin saber cuál manda, así que cada uno multiplica
+   * al suyo. Es la misma forma que `--breakpoint-angosto` y `--fluido-piso` ya
+   * tienen —dos literales de UN hecho medido— y se ata igual: `hero.invariant`
+   * §15a recalcula la razón contra los dos `.woff2` y afirma que los dos
+   * `calc()` dicen ese número. Si alguien mueve uno solo, se pone en rojo.
+   *
+   * ⚠ **Sólo viven en la banda de papel (abajo de `--breakpoint-chico`).** De
+   * 390 para arriba el registro 1 sigue siendo `--text-fluido-display` y no se
+   * mueve un décimo: el dueño aprobó esa composición y el §6 del sprint la
+   * declara intocable. */
+
+  --text-display-r1-papel: calc(var(--text-fluido-display-xl) * 1.11025);
+  --text-display-r1-papel-angosto: calc(var(--text-display-xl-angosto) * 1.11025);
+
+  /* ═══ COMPO-2 · EL REGISTRO 1 EN PORTÁTIL — DOS TECHOS MEDIDOS. [medido] ═
+   *
+   * **No es un tamaño elegido y no es una razón: son DOS TECHOS medidos sobre
+   * el píxel, y la recta que los une.** El §3 y el §4 del sprint piden lo
+   * mismo con dos palabras distintas —«lo más grande posible antes de tocar el
+   * logo» a 768 y «casi del ancho de LAS 24 HS» a 1024— y en los dos casos el
+   * criterio es el MISMO: el tamaño más grande con el que la tinta del titular
+   * que cae sobre la masa del logo no sube de lo que ya es hoy.
+   *
+   * ── Cómo se midieron los dos techos ─────────────────────────────────────
+   *
+   * Barrido en el navegador con `scripts-compo2/a-medir.ts`: una hoja
+   * `!important` por candidato sobre la MISMA página —una sola variable
+   * cambiada— y la cifra es el cruce de TAPADO-1 (la tinta del `h1` contra la
+   * masa negra de la escena, con las dos máscaras de fondo).
+   *
+   *     ancho   hoy      candidato   superposición   ¿pasa?
+   *     768     3,35 %   66 px       3,07 %          sí
+   *     768              **67 px**   **3,35 %**      sí — el techo
+   *     768              68 px       3,58 %          no
+   *     1024    0,51 %   **95 px**   **0,52 %**      sí — el techo
+   *     1024             96 px       0,58 %          no
+   *     1024             99,5 px     0,87 %          no
+   *
+   * ⚠️ **El techo de 768 se midió CON el bloque en su lugar de hoy.** La regla
+   * global del sprint —la bajada en un renglón— le saca 25,59 px al bloque, y
+   * como el bloque se apoya abajo eso lo BAJA: a 768 mete el registro 2 adentro
+   * de la SEGUNDA masa de la escena (filas 800–838) y la superposición salta de
+   * 3,35 % a 8,53 % sin que nadie toque el titular. Por eso el Hero le devuelve
+   * ese renglón como margen en la banda `tablet`, y el barrido corre sobre el
+   * bloque devuelto a su posición —medido: 3,35 %, el mismo número de hoy—. El
+   * detalle está en `hero/geometria.ts`, `claseDelAireDelPieEnPortatil`.
+   *
+   * ── Por qué una recta entre los dos y no dos valores fijos ──────────────
+   *
+   * Porque el set de anchos tiene 768 y 1024 y NADA en el medio, así que entre
+   * los dos techos no hay medición posible: dos valores fijos pondrían un salto
+   * de 28 px en un píxel cualquiera (860) que nadie midió, y una recta pone el
+   * mismo error repartido. Es el método de las ocho expresiones fluidas del
+   * sistema —dos anclas medidas y la recta entre ellas— con las anclas de esta
+   * banda:
+   *
+   *     a = (95 − 67) / (1024 − 768) = 0,109375   →  10,9375vw
+   *     b = 67 − 0,109375 × 768 = −17 px          →  −1,0625rem
+   *
+   * El piso y el techo del `clamp()` clavan los dos extremos al valor medido.
+   *
+   * ⚠ **La banda es 768–1024 y ninguna de las dos puntas se puede correr.**
+   * Abajo de 768 manda `--text-fluido-display` y ahí están 390 y 425, que el §5
+   * declara intocable el primero y el §2 resuelve por posición el segundo. De
+   * 1025 para arriba el registro 1 vuelve a ser UN renglón con las dos palabras
+   * inline, o sea otra composición, y 1440 y 1920 también son intocables. La
+   * clase lo dice con sus dos mitades (`tablet:` prende, `escritorio:` apaga),
+   * que es la lección que COMPO-1 §6 dejó escrita.
+   *
+   * ⚠ El escalón que esto deja en 768 —de 44,75 px a 67— cae EXACTAMENTE en el
+   * píxel donde la composición ya conmuta: `tablet:` es donde la grilla de la
+   * caja del titular pasa de una columna a tres y donde `claseDelTitular` pasa
+   * a `col-span-3`. No se agrega un corte: se usa el que ya estaba. */
+
+  --text-display-r1-portatil: clamp(67px, -1.0625rem + 10.9375vw, 95px);
+
   /* Seis expresiones fluidas [medido, transferido]. Transferidas sin tocar.
    * Método, verificado en este sprint reproduciendo las seis publicadas:
    *   a = (max − min) / (1440 − 375)   →  pendiente, ×100 para vw
@@ -856,6 +1033,82 @@
    * y transiciones nativas.
    * ------------------------------------------------------------------- */
 
+  /* ⚠️ TEXTO-3 · EL CUARTO, Y EL PRIMERO QUE MIRA HACIA ABAJO. [medido]
+   *
+   * 375px es el MISMO número que `--fluido-piso`, que está doce bloques más
+   * abajo y que hasta este sprint decía, textual: «No son breakpoints: no hay
+   * media query en ninguno de los dos». Ahora hay UNA, y es ésta. El valor no
+   * se eligió: es el piso de la banda fluida, o sea **el ancho más angosto al
+   * que el sistema tipográfico se midió**, y por eso «abajo de angosto» quiere
+   * decir «más angosto que cualquier cosa que se haya medido».
+   *
+   * Nació por un solo consumidor, escrito y acotado: `max-angosto:bg-fondo` en
+   * el Hero, que a 320 tapa la escena porque ahí el bloque de texto y la masa
+   * del logo suman más del 100 % de la pantalla y NO existe posición limpia
+   * (`TEXTO-1` barrió 16 configuraciones de tipografía; `TEXTO-3` §2 tiene las
+   * cifras y las palancas descartadas).
+   *
+   * ⚠️ **PAPEL-2 · ESE CONSUMIDOR YA NO ES SUYO, Y EL TOKEN SE QUEDA CON UNO
+   * SOLO.** La superficie del Hero se mudó a `max-chico:` —el corte nuevo, 390,
+   * el único que cubre 375— y acá queda **`max-angosto:text-display-xl-angosto`
+   * y nada más**: la banda medida 320–374, que es donde el décimo nivel no
+   * entra en un renglón. El porqué de que sean dos cortes y no uno movido está
+   * escrito entero al lado de `--breakpoint-chico`. Tampoco es ya el único
+   * `max-` del lane: son dos, y los otros tres breakpoints se siguen usando
+   * siempre hacia arriba.
+   *
+   * ⚠ No se declara como `var(--fluido-piso)` aunque sea el mismo número: un
+   * `@media` no puede leer una custom property, así que el literal es
+   * obligatorio. Lo que ata las dos puntas es `tokens.invariant` §7b, que
+   * afirma que los dos dicen 375. */
+  --breakpoint-angosto: 375px;
+
+  /* ⚠️ PAPEL-2 · EL QUINTO, Y EL SEGUNDO QUE MIRA HACIA ABAJO. [derivado]
+   *
+   * ── Por qué NO alcanzaba con mover el 375 ───────────────────────────────
+   *
+   * El §1 del sprint pide que el papel opaco del Hero **cubra 375 y no cubra
+   * 390**. Con `max-angosto:` eso no pasa: Tailwind emite `@media (width <
+   * 375px)` y 375 queda AFUERA. Lo natural sería subirle el número a
+   * `--breakpoint-angosto`, y no se hizo, porque ese token tiene **DOS
+   * consumidores con bandas distintas y sólo uno es éste**:
+   *
+   *   `max-angosto:bg-fondo`                   la superficie del Hero
+   *   `max-angosto:text-display-xl-angosto`    el registro 2 a 55 px
+   *
+   * La banda del segundo está MEDIDA y es exactamente **320–374**: de 371,13 px
+   * de ventana para arriba el décimo nivel ya entra solo en la caja del titular
+   * (su derivación está arriba, al lado del token). Subir `--breakpoint-angosto`
+   * a 390 arrastraría el registro 2 a 55 px en 375–389, donde entra a 67 con
+   * 4,21 px de margen: el titular de 375 se achicaría un 18 % **sin una sola
+   * medición que lo pida**, y el propio token quedaría contradiciendo su
+   * derivación escrita. Y de yapa rompería `tokens.invariant` §7b, que ata el
+   * 375 del breakpoint al 375 de `--fluido-piso` —el ancho más angosto al que
+   * se midió el sistema tipográfico— cuya prosa YA se corrigió una vez por esto.
+   *
+   * **Dos preguntas distintas, dos cortes.** `angosto` contesta «¿dónde deja de
+   * entrar el décimo nivel en un renglón?». Éste contesta «¿dónde deja de haber
+   * composición limpia sobre la escena?».
+   *
+   * ── De dónde sale el 390 ────────────────────────────────────────────────
+   *
+   * Del mismo lugar de donde salió el 375: **es el primer ancho del set donde la
+   * regla deja de aplicar.** Medido en COMPO-1 §9.1, tinta del titular sobre la
+   * masa negra del logo: **43,76 % a 320 y 40,59 % a 375**, contra **2,71 % a
+   * 390**. El salto está entre 375 y 390 y el corte lo nombra por arriba, que es
+   * lo que un `max-` hace.
+   *
+   * ⚠️ **Y el 390 es un PROXY, dicho con todas las letras.** Lo que hunde a 375
+   * no es su ancho: es su ALTO. El set aparea 320×568 y 375×667 contra 390×844,
+   * así que los dos anchos que necesitan papel son los dos **viewports cortos**,
+   * y el bloque —apoyado abajo— sube hasta meterse en el logo justamente porque
+   * le falta alto. Una media query de ancho no puede preguntar eso. Queda
+   * declarado: una ventana de 390×600 caería del lado equivocado del corte.
+   *
+   * ⚠ Los DOS sentidos tienen consumidor, y no es casualidad: `max-chico:` pinta
+   * el papel, achica el pie y baja el registro 1; `chico:` esconde la marca y la
+   * pastilla de 390 para arriba. Es el mismo corte leído desde sus dos lados. */
+  --breakpoint-chico: 390px;
   --breakpoint-tablet: 768px;
   --breakpoint-medio: 860px;
   --breakpoint-escritorio: 1025px;
@@ -958,8 +1211,27 @@
   --grilla-canal-compacto: 12px;
   --grilla-canal-amplio: 16px;
 
-  /* LAS DOS ANCLAS MEDIDAS de la banda fluida [derivado]. No son breakpoints:
-   * no hay media query en ninguno de los dos.
+  /* LAS DOS ANCLAS MEDIDAS de la banda fluida [derivado].
+   *
+   * ⚠️ **TEXTO-3 · `--fluido-piso` YA NO ES «sin media query», y se dice acá.**
+   * Hasta este sprint esta línea decía «No son breakpoints: no hay media query
+   * en ninguno de los dos», y era cierta. Ahora `--breakpoint-angosto` declara
+   * el MISMO 375 arriba, con una media query y un solo consumidor. Los dos
+   * números siguen siendo el mismo hecho medido —el ancho más angosto al que se
+   * midió el sistema— y por eso no se inventó uno nuevo; lo que cambió es que
+   * ese hecho ahora también decide un píxel. `--fluido-techo` sigue sin ninguna.
+   *
+   * ⚠️ **PAPEL-2 · Y EL PAR SIGUE SIENDO UN PAR, que es justamente por lo que
+   * el corte nuevo NO se hizo moviéndole el número.** El §1 de ese sprint
+   * necesitaba una media query que cubriera 375, y subir `--breakpoint-angosto`
+   * habría desincronizado estos dos literales —el detector de abajo es el que
+   * lo habría cazado— y además habría arrastrado al registro 2 fuera de su
+   * banda medida. Se declaró `--breakpoint-chico` (390) aparte, y este par
+   * quedó exactamente como estaba.
+   *
+   * Por qué son DOS declaraciones y no una: un `@media` no puede leer una
+   * custom property, así que el breakpoint necesita su propio literal.
+   * `tokens.invariant` §7b afirma que los dos dicen 375.
    *
    * ⚠️ **`--fluido-techo` dejó de ser «donde el clamp() deja de interpolar» en
    * V3-C, y no cambió de valor: cambió de sentido.** Los dos siguen siendo los

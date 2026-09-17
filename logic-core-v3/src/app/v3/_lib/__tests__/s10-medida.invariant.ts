@@ -110,11 +110,40 @@ controlPositivo('y con un token inventado', '--text-inventado', (t: string) => N
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Las variantes de ancho salen de los `--breakpoint-*`, no de un número')
 
-afirmarIgual(Object.keys(BREAKPOINTS).sort(), ['escritorio', 'medio', 'tablet'], 'los tres breakpoints se leen del tema')
-afirmarIgual(variantesActivas(375), [], 'a 375 no hay ninguna variante activa')
-afirmarIgual(variantesActivas(768), ['tablet'], 'a 768 entra `tablet` — el breakpoint es inclusivo')
-afirmarIgual(variantesActivas(1024), ['tablet', 'medio'], 'a 1024 todavía NO hay `escritorio:`')
-afirmarIgual(variantesActivas(1025), ['tablet', 'medio', 'escritorio'], 'y a 1025 sí: es el salto que separa los dos sitios')
+/**
+ * ⚠️ **SON CINCO DESDE PAPEL-2, Y LOS DOS ÚLTIMOS SON DE OTRA ESPECIE.**
+ *
+ * `angosto` (375) y `chico` (390) no se agregaron para usarse hacia arriba como
+ * los otros tres: se agregaron para poder escribir **`max-angosto:`** y
+ * **`max-chico:`**, las dos únicas variantes `max-` del lane. Y son DOS y no una
+ * porque contestan preguntas distintas, las dos medidas:
+ *
+ *   `angosto` 375   dónde el décimo nivel deja de entrar en UN renglón
+ *                   (banda 320–374: de 371,13 px para arriba entra solo)
+ *   `chico`   390   dónde deja de haber composición limpia sobre la escena
+ *                   (banda 320–389: 43,76 % de tinta sobre el logo a 320 y
+ *                   40,59 % a 375, contra 2,71 % a 390)
+ *
+ * El valor del cuarto es el mismo número que `--fluido-piso` —el ancho más
+ * angosto al que se midió el sistema— y `tokens.invariant` §7b ata los dos
+ * literales; §7c afirma que el quinto NO se ata a ninguno, porque es otro hecho.
+ *
+ * ⚠️ **`chico` es el ÚNICO con consumidores en los DOS sentidos**, y por eso su
+ * cara `min-width` de abajo dejó de ser teórica: `chico:hidden` es lo que apaga
+ * la marca del Hero y la pastilla de navegación de 390 para arriba.
+ *
+ * Los cinco aparecen en esta tabla y en `variantesActivas`, porque Tailwind emite
+ * las DOS caras de todo breakpoint, y **374 se agrega como ancho de prueba**
+ * porque es el único de la banda donde ninguno de los dos entró todavía.
+ */
+afirmarIgual(Object.keys(BREAKPOINTS).sort(), ['angosto', 'chico', 'escritorio', 'medio', 'tablet'], 'los CINCO breakpoints se leen del tema')
+afirmarIgual(variantesActivas(374), [], 'a 374 no hay ninguna variante activa: es la banda donde el Hero pinta papel y el décimo nivel baja a 55')
+afirmarIgual(variantesActivas(375), ['angosto'], 'a 375 entra `angosto` — el breakpoint es inclusivo, y es el primer ancho donde el décimo nivel entra en un renglón')
+afirmarIgual(variantesActivas(389), ['angosto'], '  y a 389 sigue siendo el único: `chico` todavía no entró, o sea que el Hero sigue en papel')
+afirmarIgual(variantesActivas(390), ['angosto', 'chico'], 'a 390 entra `chico` — el primer ancho donde la escena se ve y la marca del Hero se apaga')
+afirmarIgual(variantesActivas(768), ['angosto', 'chico', 'tablet'], 'a 768 entra `tablet`')
+afirmarIgual(variantesActivas(1024), ['angosto', 'chico', 'tablet', 'medio'], 'a 1024 todavía NO hay `escritorio:`')
+afirmarIgual(variantesActivas(1025), ['angosto', 'chico', 'tablet', 'medio', 'escritorio'], 'y a 1025 sí: es el salto que separa los dos sitios')
 afirmarIgual(
   clasesEfectivas('grid-cols-1 escritorio:grid-cols-5 hover:opacity-50', 1024),
   ['grid-cols-1', 'hover:opacity-50'],

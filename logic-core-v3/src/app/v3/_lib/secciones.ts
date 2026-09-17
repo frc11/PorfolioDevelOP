@@ -27,7 +27,7 @@
  * entre bloques. Ningún panel declara margen.
  */
 
-import { SUPERFICIES, type ModoSuperficie } from './superficies'
+import { SUPERFICIES, type ModoSuperficie, type ModoSuperficieAngosta } from './superficies'
 
 export interface Seccion {
   /** Ancla y `data-panel`. Estable: la coreografía va a apuntar acá. */
@@ -38,6 +38,24 @@ export interface Seccion {
   readonly nombre: string
   /** La superficie. El recorrido entero está abajo, en el docblock de la tabla. */
   readonly superficie: ModoSuperficie
+  /**
+   * LA SUPERFICIE ABAJO DE 375px, cuando es OTRA. Opcional, y hoy la declara una
+   * sola sección.
+   *
+   * Está acá —en el DATO— y no adentro del componente por la misma razón que
+   * `superficie`: qué panel deja ver la sala es una decisión de recorrido, no de
+   * marcado, y cambiarla tiene que ser editar esta tabla. Lo que agrega es que
+   * la decisión puede depender del ancho, que hasta TEXTO-3 no podía.
+   *
+   * Sin declarar, la sección pinta su `superficie` en todo ancho — o sea que el
+   * campo ausente y el campo igual a `superficie` significan lo mismo, y el
+   * invariante afirma que ninguna fila escribe el segundo caso.
+   *
+   * El porqué del tipo restringido —sólo los dos modos claros— está en
+   * `CLASES_DE_LA_BANDA_ANGOSTA`: una media query pinta clases y no escribe
+   * atributos, así que `data-seccion="invertida"` no se puede condicionar.
+   */
+  readonly superficieAngosta?: ModoSuperficieAngosta
   /**
    * EL ALTO MÍNIMO del bloque. **NO es su alto: es su piso.** (B1)
    *
@@ -224,7 +242,32 @@ const PASOS_DE_TRABAJOS = 3
 const PASOS_DE_SERVICIOS = 3
 
 export const SECCIONES: readonly Seccion[] = [
-  { id: 'hero', numero: '01', nombre: 'Hero', superficie: 'papel-transparente', alto: '100svh' },
+  /**
+   * ⚠️ **EL HERO ES LA ÚNICA FILA CON DOS SUPERFICIES, y la decidió el dueño.**
+   *
+   * `papel-transparente` de **390** para arriba —la sala se ve a través del
+   * panel, que es lo que esta pantalla tiene y ninguna otra— y `papel-opaco`
+   * abajo, donde no hay composición posible: el bloque de texto ocupa el 51 %
+   * del viewport y la masa del logo otro 37 %, y TEXTO-1 barrió 16
+   * configuraciones de tipografía sin encontrar una limpia. El porqué entero,
+   * con las palancas descartadas y sus cifras, está en
+   * `CLASES_DE_LA_BANDA_ANGOSTA`.
+   *
+   * ⚠️ **PAPEL-2 · LA FILA NO CAMBIÓ — CAMBIÓ SU CONDICIÓN DE ANCHO.** El
+   * corte era 375 y ahora es 390, o sea que 375 pasa a papel. Lo que lo mueve
+   * NO es esta tabla: es la clase de `CLASES_DE_LA_BANDA_ANGOSTA`, que pasó de
+   * `max-angosto:` a `max-chico:`. Esta fila dice QUÉ pinta cada régimen; el
+   * ancho en el que conmutan es del CSS, porque `Panel` es un componente de
+   * servidor y no tiene ancho en su render.
+   */
+  {
+    id: 'hero',
+    numero: '01',
+    nombre: 'Hero',
+    superficie: 'papel-transparente',
+    superficieAngosta: 'papel-opaco',
+    alto: '100svh',
+  },
   /**
    * QUIÉNES SOMOS — 200svh. ⚠️ **B1 INTENTÓ BAJARLO A 100 Y SE FRENÓ, CON LOS
    * NÚMEROS. No se reabre sin leer esto.**

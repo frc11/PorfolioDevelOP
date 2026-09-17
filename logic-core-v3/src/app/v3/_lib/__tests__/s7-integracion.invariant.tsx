@@ -26,7 +26,7 @@ import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { ATRIBUTO_DE_SECCION, IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../secciones'
-import { SUPERFICIES } from '../superficies'
+import { CLASES_DE_LA_BANDA_ANGOSTA, SUPERFICIES } from '../superficies'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { RUTAS_BORRADAS, RUTAS_DE_DEMO } from './s4-rutas-de-demo'
@@ -85,7 +85,24 @@ for (let i = 0; i < REGISTRO.length; i++) {
     afirmar(!html.includes('data-seccion="invertida"'), `  y NO da vuelta el tema`)
   }
   if (definicion.dejaVerElCanvas) {
-    afirmar(!html.includes('bg-fondo'), `  y no pinta fondo: el canvas se ve a través`)
+    /**
+     * ⚠️ **SIN CONDICIÓN, desde TEXTO-3.** Antes bastaba con que la cadena
+     * `bg-fondo` no apareciera. Ahora el Hero pinta `max-angosto:bg-fondo` —papel
+     * abajo de 375, donde no hay composición limpia— y esa clase CONTIENE la
+     * cadena. Lo que hay que seguir impidiendo es un `bg-fondo` **suelto**, que
+     * es el que taparía la sala en todo ancho; el acotado viene precedido de `:`
+     * y es una decisión declarada en `secciones.ts`.
+     *
+     * Y la sección que declara banda angosta tiene que traer la clase: sin ella
+     * el dato diría una cosa y la pantalla otra.
+     */
+    afirmar(!/(^|[\s"])bg-fondo/.test(html), `  y no pinta fondo SIN CONDICIÓN: el canvas se ve a través`)
+    if (seccion.superficieAngosta !== undefined) {
+      afirmar(
+        html.includes(CLASES_DE_LA_BANDA_ANGOSTA[seccion.superficieAngosta]),
+        `  y abajo de 375 pinta \`${seccion.superficieAngosta}\`, que es lo que su fila declara`,
+      )
+    }
   }
 
   afirmarIgual((html.match(/<section[\s>]/g) ?? []).length, 1, `  y emite exactamente UNA <section>`)

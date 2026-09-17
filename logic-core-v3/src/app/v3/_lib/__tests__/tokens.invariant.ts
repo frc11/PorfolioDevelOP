@@ -160,6 +160,24 @@ async function principal(): Promise<void> {
     '--text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);',
   ]
   const ESPERADO_DENTRO = [
+    // ⚠ AGREGADO POR TEXTO-3: el cuarto breakpoint, y el primero que se usa
+    // hacia abajo. Mismo número que `--fluido-piso` —el ancho más angosto al
+    // que se midió el sistema—. Su motivo entero está en
+    // `padron-de-tokens.AGREGADOS`, y §7b ata las dos declaraciones de 375 para
+    // que no se puedan desincronizar.
+    // ⚠️ PAPEL-2 le sacó el consumidor con el que nació: la superficie del
+    // Hero se mudó a `max-chico:`, y acá queda sólo el registro 2 a 55 px, cuya
+    // banda medida es 320–374 y no la del papel.
+    '--breakpoint-angosto: 375px;',
+    // ⚠ AGREGADO POR PAPEL-2: el QUINTO breakpoint, 390 px, y el segundo que
+    // se usa hacia abajo. Nace porque el papel del Hero tiene que cubrir 375 y
+    // `max-angosto:` emite `width < 375`, que lo deja afuera. NO se hizo
+    // moviéndole el número al cuarto: ese token tiene otro consumidor con una
+    // banda MEDIDA distinta (320–374), y moverlo lo habría sacado de ella y
+    // habría desincronizado el par de §7b. El 390 sale de donde salió el 375:
+    // es el primer ancho del set donde la regla deja de aplicar — 43,76 % de
+    // tinta sobre el logo a 320 y 40,59 % a 375 contra 2,71 % a 390.
+    '--breakpoint-chico: 390px;',
     '@theme static {',
     '--font-titulo: var(--font-v3-chivo), system-ui, sans-serif;',
     '--font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;',
@@ -202,6 +220,33 @@ async function principal(): Promise<void> {
     '--text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 38.3107px);',
     '--text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 53.0141px);',
     '--text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 65.0141px);',
+    // ⚠ AGREGADO POR COMPO-1: el décimo nivel resuelto en la banda angosta, el
+    // único ancho donde la fila 3 del titular no entra en un renglón. Es el
+    // SEGUNDO consumidor de `--breakpoint-angosto` y no un nivel más de la
+    // escala: no está en `NIVELES`. Su motivo entero —incluida la refutación de
+    // la salida obvia, bajar el piso del `clamp()`, que a 320 no gobierna— está
+    // en `padron-de-tokens.AGREGADOS`, y `hero.invariant` §14a corre las tres
+    // cuentas contra el `.woff2` itálico.
+    '--text-display-xl-angosto: 55px;',
+    // ⚠ AGREGADOS POR PAPEL-2: el registro 1 del titular IGUALADO al registro
+    // 2 en la banda de papel, en los dos regímenes en que el registro 2 se
+    // pinta. No llevan un número sino una RAZÓN — 4,57900 em / 4,12429 em =
+    // 1,11025, los avances medidos de «LAS 24 HS» y «TU NEGOCIO» con sus dos
+    // interletrados— y por eso la igualdad de tinta se cumple en TODO el tramo
+    // y no sólo en los dos anchos medidos. Son DOS porque un `calc()` no puede
+    // elegir cuál token del registro 2 manda: esa elección es una media query.
+    // `hero.invariant` §15a recalcula la razón contra los dos `.woff2`.
+    '--text-display-r1-papel: calc(var(--text-fluido-display-xl) * 1.11025);',
+    '--text-display-r1-papel-angosto: calc(var(--text-display-xl-angosto) * 1.11025);',
+    // ⚠ AGREGADO POR COMPO-2: el registro 1 del titular en la banda portátil
+    // (768–1024). NO es un nivel de la escala y NO es una razón: son DOS TECHOS
+    // medidos sobre el píxel —el mayor tamaño con el que la tinta del titular
+    // sobre la masa del logo no sube de lo que ya es, 67 px a 768 y 95 a 1024—
+    // y la recta que los une, con el método de las ocho expresiones fluidas del
+    // sistema. El piso y el techo del `clamp()` clavan los dos extremos al valor
+    // medido. Su motivo entero, con la tabla del barrido, está en
+    // `padron-de-tokens.AGREGADOS` y al lado del token en el tema.
+    '--text-display-r1-portatil: clamp(67px, -1.0625rem + 10.9375vw, 95px);',
     // ⚠ SITIO-S11 — las OTRAS DOS TINTAS, dadas vuelta en la sección
     // invertida. Los nombres ya existían en S0 (con su valor claro, que no se
     // tocó); lo que entra son las dos REDEFINICIONES del bloque
@@ -532,6 +577,89 @@ async function principal(): Promise<void> {
       const m = css.match(/--breakpoint-escritorio:\s*(\d+)px/)
       return (m ? Number.parseInt(m[1], 10) : 0) === ESCENARIO_MIN_ANCHO_PX
     },
+  )
+
+  // ─────────────────────────────────────────────────────────────────────────
+  titulo('7b · El breakpoint angosto y el piso de la banda fluida dicen lo mismo')
+
+  /**
+   * ⚠️ **375 ESTÁ DECLARADO DOS VECES, Y NO SE PUEDE EVITAR.** `--fluido-piso`
+   * lo trae desde S0 como el ancho más angosto al que se midió el sistema
+   * tipográfico; `--breakpoint-angosto` lo repite porque **una media query no
+   * puede leer una custom property** y necesita su propio literal. ⚠️ PAPEL-2
+   * necesitó un corte que cubriera 375 y declaró `--breakpoint-chico` (390)
+   * aparte en vez de mover éste, justamente para que este par siga siendo un
+   * par; §7c lo comprueba. Lo natural
+   * sería `@media (max-width: var(--fluido-piso))` y eso no existe en CSS.
+   *
+   * Dos literales del mismo hecho es exactamente la forma en que un número se
+   * desincroniza en silencio: alguien mueve el piso de la banda fluida y el
+   * Hero sigue tapando la escena en el ancho viejo. Esto lo ata.
+   */
+  const angosto = enElRepo.match(/--breakpoint-angosto:\s*(\d+)px/)
+  const piso = enElRepo.match(/--fluido-piso:\s*(\d+)px/)
+  const leerPx = (m: RegExpMatchArray | null): number | null => (m ? Number.parseInt(m[1], 10) : null)
+  afirmarIgual(leerPx(angosto), 375, '`--breakpoint-angosto` = 375px')
+  afirmarIgual(
+    leerPx(angosto),
+    leerPx(piso),
+    '  y es EXACTAMENTE `--fluido-piso`: el mismo hecho medido, dos literales porque un @media no lee var()',
+  )
+
+  controlPositivo(
+    'el comparador de los dos 375 ve una desincronización',
+    enElRepo.replace('--breakpoint-angosto: 375px', '--breakpoint-angosto: 390px'),
+    (css) => {
+      const a = css.match(/--breakpoint-angosto:\s*(\d+)px/)
+      const p = css.match(/--fluido-piso:\s*(\d+)px/)
+      return leerPx(a) === leerPx(p)
+    },
+  )
+
+  // ─────────────────────────────────────────────────────────────────────────
+  titulo('7c · PAPEL-2 · Los DOS cortes hacia abajo, y por qué son dos')
+
+  /**
+   * ⚠️ **ESTO ES LO QUE EL CONTROL POSITIVO DE ARRIBA YA VENÍA GRITANDO.** Su
+   * caso de falla era, literal, «`--breakpoint-angosto` pasa a 390»: la forma
+   * obvia de hacer que el papel del Hero cubra 375. PAPEL-2 la necesitó y NO la
+   * tomó, y estas afirmaciones son la razón escrita como comprobación.
+   *
+   * Los dos cortes contestan preguntas distintas y por eso valen distinto:
+   *
+   *   `angosto` 375   ¿dónde el décimo nivel deja de entrar en UN renglón?
+   *                   Banda medida 320–374: de 371,13 px para arriba entra solo.
+   *   `chico`   390   ¿dónde deja de haber composición limpia sobre la escena?
+   *                   Banda medida 320–389: 43,76 % de tinta sobre el logo a
+   *                   320 y 40,59 % a 375, contra 2,71 % a 390.
+   *
+   * Si alguien los unifica, una de las dos bandas queda mintiendo. Esto lo caza.
+   */
+  const chico = enElRepo.match(/--breakpoint-chico:\s*(\d+)px/)
+  afirmarIgual(leerPx(chico), 390, '`--breakpoint-chico` = 390px')
+  afirmar(
+    (leerPx(chico) ?? 0) > (leerPx(angosto) ?? 0),
+    '  y es ESTRICTAMENTE mayor que `angosto`: `max-chico:` cubre 375 y `max-angosto:` no, que es todo el punto',
+    `${leerPx(angosto)} → ${leerPx(chico)}`,
+  )
+  afirmar(
+    (leerPx(chico) ?? 0) > 375 && (leerPx(chico) ?? 0) <= 390,
+    '  y cae en la ventana que el pedido deja: cubre 375 y NO cubre 390',
+    `375 < ${leerPx(chico)} ≤ 390`,
+  )
+  afirmar(
+    leerPx(chico) !== leerPx(piso),
+    '  y NO es el piso de la banda fluida: son dos hechos medidos distintos y no se los ata',
+  )
+  controlPositivo(
+    'el chequeo de la ventana ve un corte que NO cubriría 375',
+    375,
+    (px: number) => px > 375 && px <= 390,
+  )
+  controlPositivo(
+    '  y uno que se comería 390',
+    391,
+    (px: number) => px > 375 && px <= 390,
   )
 
   cerrar('tokens.invariant')

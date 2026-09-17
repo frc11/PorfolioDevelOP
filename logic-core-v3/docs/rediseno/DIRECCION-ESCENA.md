@@ -2072,3 +2072,163 @@ Está acá para que nadie lo dé por resuelto.
     **EL PAPEL QUE SÍ TIENE EL DEV SERVER, y por qué la explicación sonaba bien.** No corrompe el número: **hace que el árbol parezca construido**. La página contesta, `.next` tiene archivos recientes, todo se ve vivo — y el artefacto del que depende el gate quedó intacto desde antes. Es un encubridor, no el autor.
 
     **LA SALIDA, que este sprint NO aplica porque no es suya.** El guardián que falta es que `exigirBuild()` pueda decir *«este `.next` es de este árbol»*: una huella de los fuentes del lane escrita en el build y comparada al leer. Mientras no exista, la única defensa es de procedimiento —**reconstruir antes de correr el gate**, que es lo que la instrucción de este sprint manda— y una defensa de procedimiento no es un invariante: no puede fallar sola.
+
+62. 🔴 **UN MODELO QUE SE EQUIVOCA DE SIGNO ES PEOR QUE NINGUNO: A 320 EL MODELO DE COMPOSICIÓN PREDICE LO CONTRARIO DE LA PANTALLA (TEXTO-2/TEXTO-3, 2026-09-16).**
+
+    **EL HECHO.** `s10-logo-composicion.ts` compara el bloque de texto centrado contra el apoyado abajo. A **320**, con la composición de TEXTO-2:
+
+    | | centrado → hoy | veredicto |
+    |---|---|---|
+    | el modelo derivado | 37,1 % → **33,2 %** | **baja** |
+    | el navegador, medido | 40,2 % → **46,6 %** | **sube** |
+
+    No difieren en magnitud: **difieren en el signo**. Un modelo que dice «esto mejora» donde la pantalla empeora 6,4 puntos no es un modelo impreciso — es uno que habilita exactamente la decisión equivocada, y con más confianza que no tener ninguno.
+
+    **POR QUÉ SE DETECTÓ, Y ES LO ÚNICO QUE LO SALVÓ.** Porque ese archivo mide **las dos cosas**: tiene un modelo derivado que corre en el gate y un recibo del navegador al lado, y su tesis escrita es que *«un modelo sin recibo es una cuenta que nadie comprobó; un recibo sin modelo es un número que el gate no puede volver a mirar»*. Con el modelo solo, esto era invisible y quedaba en verde.
+
+    **LO QUE SE HIZO.** Las dos afirmaciones sobre la composición —«bajan cinco de los seis anchos» y «el sexto es 320»— **pasaron de alimentarse del modelo a alimentarse del recibo**. El enunciado no cambió y sobre el píxel sigue siendo cierto; lo que cambió es de dónde sale el dato. La divergencia del modelo queda **declarada y no afirmada**, que es la segunda de este archivo: la otra es 768, donde el modelo y el navegador cuentan distinta cantidad de renglones del titular.
+
+    **LA REGLA QUE DEJA.** Una afirmación sobre la PANTALLA se alimenta del recibo. El modelo derivado sirve para lo que un recibo no puede —correr en el gate sin navegador, barrer configuraciones que nadie montó— y para nada más. Donde los dos se contradigan, gana el recibo y la contradicción se publica.
+
+63. 🔴 **LAS PALANCAS DE COMPOSICIÓN NO SON ADITIVAS: DE ACÁ EN MÁS SE MIDE LA COMBINACIÓN, NO LAS PARTES (TEXTO-2, 2026-09-16).**
+
+    **EL HECHO, a 768**, tinta del titular sobre la masa del logo, las tres configuraciones medidas sobre el MISMO árbol:
+
+    | configuración | tinta |
+    |---|---|
+    | hoy | 41,5 % |
+    | + el `col-span` acotado a escritorio (PASO 1 solo) | **11,8 %** |
+    | + los dos huecos a 8 px (PASO 1 + PASO 3) | **7,0 %** |
+    | + la bajada en un renglón (los TRES) | **16,3 %** |
+
+    **La tercera palanca deshace más de la mitad de lo que las dos primeras compraron.** No es ruido y la causa está medida: la bajada corta acorta el bloque 24 px más, el bloque está apoyado abajo, y la línea 2 del titular **aterriza sobre la SEGUNDA masa** del logo —la que arranca en 0,781 del alto (`TEXTO-1` §4)—. La superposición **no es monótona en el corrimiento**: el bloque atraviesa la masa, y hasta que no sale del otro lado, moverlo hunde más tinta.
+
+    **Y a 375 la misma palanca hace lo contrario:** ahí los dos huecos SOLOS empeoran (47,0 → 49,4 %) y lo que los vuelve buenos es justamente la bajada corta (→ 16,3 %). La misma palanca vale +33 puntos en un ancho y −9 en otro.
+
+    **LA REGLA QUE DEJA.** Ninguna palanca de composición se juzga sola, y una tabla de palancas medidas por separado **no se puede sumar**. Lo que se mide es la configuración que se va a aplicar, entera, en todos los anchos. El sprint que barra palancas publica la combinación o no publica nada.
+
+64. ✅ **EL HERO A 320 PASA A `papel-opaco`: LA COMPOSICIÓN SE RINDE Y LA SUPERFICIE LO TAPA (TEXTO-3, 2026-09-16).**
+
+    **POR QUÉ, con las palancas descartadas y su cifra.** A 320 el bloque de texto ocupa el **51 %** del viewport y la masa del logo otro **37 %**: la suma pasa de 100, así que **no existe ninguna posición en la que no se toquen** (`s10-logo-composicion.ts`, y el barrido de la mejor posición posible da 21,8 % pegado al borde de arriba). Lo demás está todo cerrado con número:
+
+    | palanca | veredicto | cifra |
+    |---|---|---|
+    | posición del bloque | descartada | ninguna posición limpia; la suma pasa de 100 |
+    | tipografía del titular | descartada | **16 configuraciones** barridas en TEXTO-1; la de entonces era la mejor de las 16 |
+    | bajar el bloque (TEXTO-2) | **empeoró** | 31,6 % → **46,7 %**; la línea 1 pasa de 6,1 % a 54,0 % |
+    | escena, cámara, anclaje | descartadas | con número en §7.55 y siguientes |
+
+    **LA DECISIÓN.** En 320, y sólo en 320, el Hero no muestra escena: `superficieAngosta: 'papel-opaco'` en `secciones.ts`.
+
+    **EL MECANISMO, y por qué es CSS y no puede ser otra cosa.** `Panel.tsx` es un componente de SERVIDOR: no hay ancho en su render. Y el hook que sí lo lee (`useAnchoMinimo`) devuelve `false` en el servidor **y durante la hidratación**, a propósito, así que decidirlo en JS pintaría el primer cuadro sin la superficie y la metería después — un parpadeo de exactamente el defecto que esto viene a tapar. La única puerta es una media query: `max-angosto:bg-fondo`, sobre el token nuevo `--breakpoint-angosto: 375px`.
+
+    **⚠ EL COSTO, que la instrucción daba por inexistente.** *«Queda abajo de todos los breakpoints, así que no hace falta inventar un corte»* — es al revés: **estar abajo de todos los breakpoints es exactamente por qué hubo que inventar uno**. El lane no tenía **una sola media query de ancho** fuera de las tres `min-width` de Tailwind, y cero variantes `max-`. El 375 no se eligió —es el mismo número que `--fluido-piso`, el ancho más angosto al que se midió el sistema tipográfico— pero la declaración es nueva, y `--fluido-piso` decía textualmente *«No son breakpoints: no hay media query en ninguno de los dos»*. Ahora hay una.
+
+    **⚠ LO QUE QUEDA ABIERTO, declarado y no resuelto.** `dejaVerElCanvas` sigue siendo propiedad del MODO y no del ancho, así que `TRANSPARENTES` —y todo lo derivado de ella: el mapeo de la escena, el anclaje, las ventanas de tinta— sigue diciendo que el Hero deja ver la sala. **Es verdad de 375 para arriba y falso abajo, y ningún modelo derivado lo sabe.** No se arregló acá porque arreglarlo es volver ancho-dependiente media docena de modelos de escena. Afecta a lo DERIVADO, no a lo medido: las mediciones de pantalla se sacan por ancho y ven la superficie real.
+
+65. 🔴 **CON EL BLOQUE APOYADO ABAJO, CRECER ES SUBIR — Y 375 PASÓ DE 16,2 % A 40,6 % (COMPO-1, 2026-09-16).**
+
+    **EL HECHO.** El dueño pidió el titular en TRES filas y la bajada en DOS, las dos abajo de 1025. Las dos cosas agregan renglones, y el bloque del Hero está apoyado abajo (`justify-end` + `pb-20`), así que **cada renglón nuevo sube el tope del bloque**. Medido, tinta del titular sobre la masa del logo:
+
+    | ancho | alto del bloque | tope del bloque | masa del logo termina en | tinta antes → después |
+    |---|---|---|---|---|
+    | 320 | 313,7 → **254,8** | 174,3 → 233,2 | 386 | 46,65 → **43,73 %** |
+    | **375** | 200,3 → **267,9** | 386,7 → **319,1** | **454** | 16,22 → **40,59 %** |
+    | 390 | 201,2 → 269,1 | 562,8 → 495,0 | 575 | 4,86 → **2,83 %** |
+    | 425 | 203,3 → 271,9 | 560,7 → 492,1 | 575 | 5,06 → **4,13 %** |
+    | 768 | 223,7 → 299,6 | 720,3 → 644,4 | 699 | 16,26 → **3,29 %** |
+    | 1024 | 238,9 → 320,3 | 449,1 → 351,7 | 531 | 1,41 → **0,51 %** |
+
+    **320 MEJORA porque el quiebre declarado le SACA un renglón** —ahí el titular envolvía solo y eran cuatro— y **375 empeora porque se los AGREGA**. Los dos son el mismo cambio.
+
+    **Por qué 375 y no 390 ni 425, que son más anchos.** Porque no es el ancho: es el ALTO. 375×667 es el viewport más corto del set —667 px contra 844— así que el bloque arranca mucho más cerca de la masa. A 390 y a 425 el tope queda en 495 y 492 con la masa terminando en 575: las dos filas nuevas del registro 1 caen en la franja donde el logo es sólo su cola, y además son **angostas** (152 y 146 px contra los 302 del renglón único de antes), así que no la alcanzan. **Partir un renglón largo en dos cortos cambia las dos cosas a la vez, y en 375 gana la vertical.**
+
+    **CUÁNTO FALTA a 375, con el número:** el bloque tendría que medir **133 px** para que su tope cayera debajo de la masa; mide 267,9. Faltan **134,9 px**, o lo mismo dicho al revés: el bloque tendría que bajar 134,9 px, y abajo sólo hay 8 px libres antes de la pastilla.
+
+    **LA REGLA QUE DEJA.** Con un bloque apoyado abajo, **toda palanca que agregue un renglón es una palanca VERTICAL**, aunque se la pida por motivos tipográficos. Se mide contra la masa del logo en los ocho anchos ANTES de aplicarla, y el ancho que manda es el de menor ALTO, no el más angosto.
+
+66. ✅ **LOS 152 PX DE NADA: LA COLUMNA LATERAL VACÍA ERA EL DEFECTO DE 768, Y SE CIERRA DE 16,3 % A 3,3 % (COMPO-1, 2026-09-16).**
+
+    **EL HECHO.** `Grilla columnas="lateral"` reserva 140 px fijos más su canaleta desde `tablet` (768). **En el Hero esa celda está VACÍA** —es un `<div>` que sólo reserva—, así que a 768 y a 1024 el texto arrancaba en x 184 con 152 px de nada a su izquierda, mientras el logo está centrado y es más ancho que el cuadro. Medido con `scripts-compo/a-composicion.ts`: borde de caja en **x 184** a 768 y a 1024, contra **x 32** en los cuatro anchos de abajo, donde la grilla ya colapsaba sola.
+
+    Corriendo ese colapso de 768 a 1025 —`tablet:grid-cols-1 escritorio:grid-cols-[…]` sobre la Grilla del Hero— el texto arranca en x 32 en los seis anchos de abajo del breakpoint y la superposición cae **16,26 → 3,29 %** a 768 y **1,41 → 0,51 %** a 1024.
+
+    **LA REGLA QUE DEJA.** Una celda de grilla VACÍA no es neutra: reserva ancho. Antes de mover un bloque, mirar si lo que lo empuja es una celda que no dibuja nada — y el instrumento que lo ve es el borde izquierdo de la CAJA, que en este caso valía 184 donde el ojo esperaba 32.
+
+67. 🔴 **EL PISO DE UN `clamp()` NO GOBIERNA ABAJO DE SU ANCLA SI LA RECTA PASA POR ARRIBA (COMPO-1, 2026-09-16).**
+
+    **EL HECHO.** La instrucción decía: *«Hoy su piso es 67 px a 375 y ahí envuelve en dos: tiene que bajar.»* Las dos mitades son falsas, y las dos se midieron:
+
+    - **A 375 no envuelve.** «LAS 24 HS» mide 306,79 px a 67 px en una caja de 311,00: entra con **4,21 px**. El ancho donde empieza a entrar es **371,13 px**, así que la banda que falla es 320–371.
+    - **A 320, que es donde sí envuelve, el piso NO es el que manda.** El término preferido del `clamp()` vale ahí `3,3732rem + 3,4742 × 3,20 = 65,09 px`, o sea **por debajo** del piso de 67 — por eso el piso gobierna. Bajarlo a 55 devolvería **65,09**, que sigue sin entrar en los 256 px de caja (el techo es 55,85). **Ningún valor del piso arregla 320.**
+
+    La salida fue un token acotado a la banda, `--text-display-xl-angosto: 55px` con `max-angosto:`, derivado como el mayor entero que entra: 55 × 4,58406 em = 251,84 px contra 256 de caja, y con 56 son 256,42 y se pasa.
+
+    **LA REGLA QUE DEJA.** Antes de mover el piso de un `clamp()` para arreglar un ancho, **evaluar la RECTA en ese ancho**. El piso sólo manda donde la recta queda por debajo de él; donde la recta manda, el piso es inerte y moverlo cambia otro ancho sin arreglar el que duele.
+
+68. ✅ **LAS CUATRO CAJAS ESTABAN ALINEADAS AL PÍXEL Y LA TINTA NO — Y EL DISCRIMINADOR ES SI LA SANGRÍA ESCALA CON EL CUERPO (COMPO-1, 2026-09-16).**
+
+    **EL HECHO.** El dueño veía el CTA corrido a la derecha. La instrucción preguntaba si era real o ilusión de la itálica. **Las dos cosas, y se separan midiendo los DOS bordes** —el de la caja, con `getBoundingClientRect`, y el de la tinta, leyendo la primera columna de píxeles dibujados sobre la captura del texto sin escena—:
+
+    | pieza | caja | tinta | sangría | ¿escala con el cuerpo? |
+    |---|---|---|---|---|
+    | fila 1 del titular | x 32 | x 33 | **+1** | sí (1 a 320 y a 1920) |
+    | fila 3 (la itálica) | x 32 | x 36 | **+4 → +7** | **sí** (4 a 320, 7 a 1920) |
+    | bajada | x 32 | x 32 | 0 | — |
+    | **CTA** | x 32 | x 40 | **+8** | **NO: 8 exactos en los ocho anchos** |
+
+    **Las cajas coinciden al píxel en los ocho anchos.** Lo que corre al CTA es `padding: var(--spacing-2)` en `_estilos/cta.css`, y se reconoce porque **el número no se mueve un décimo entre 320 y 1920** mientras el tamaño del rótulo tampoco. Las sangrías del titular, en cambio, crecen con el cuerpo: eso es la banda lateral del glifo, o sea óptica.
+
+    Se corrigió UNA: la del CTA, con `-ml-2` —el mismo token en negativo— y el invariante afirma que el escalón del relleno y el de la sangría son el mismo, leyendo los dos de `cta.css`. Las otras dos se reportan y no se tocan: compensarlas es compensación óptica, que es otra decisión.
+
+    **LA REGLA QUE DEJA.** «Desalineado» no es una sola pregunta. Se miden los dos bordes, y **la derivada respecto del tamaño separa las dos causas**: una sangría constante en px es layout y se arregla; una que escala con el cuerpo es el glifo y se decide.
+
+69. 🔴 **UNA VARIANTE DE ANCHO ES `min-width` Y NO SE APAGA SOLA: UNA CLASE ACOTADA A UNA BANDA SE ESCRIBE COMO PAR (COMPO-1, 2026-09-16).**
+
+    **EL HECHO.** El §6 del sprint pedía aire entre el CTA y la pastilla **a 1024**, y el §10 prohibía mover 1440 y 1920 por cualquier motivo que no fuera el tamaño de la bajada. Se escribió `medio:mb-4` —`--breakpoint-medio` son 860 px— creyendo que acotaba la banda 860–1024. **No la acota: `medio:` se prende en 860 y no se apaga nunca.** Medido en el navegador, tope del bloque:
+
+    | ancho | antes del sprint | con `medio:mb-4` solo | con el par `medio:mb-4 escritorio:mb-0` |
+    |---|---|---|---|
+    | 1440 | 298,20 | **289,41** | 297,41 |
+    | 1920 | 373,97 | **365,17** | 373,17 |
+
+    Arriba de 1025 el bloque va CENTRADO, así que un margen abajo lo corre **la mitad** para arriba: 8,8 px en los dos anchos que este sprint tenía congelados. Lo que queda (−0,8 px) es la consecuencia del §3, la bajada un escalón más grande, y de eso sí se lo autorizó.
+
+    **La medición lo encontró; el modelo no lo habría visto**, porque el modelo de cajas resuelve variantes contra un ancho pero no las mira en cascada.
+
+    **LA REGLA QUE DEJA.** Toda clase que quiera valer en una BANDA y no de un corte para arriba **se escribe como par** —`medio:x escritorio:x-neutro`— y el invariante afirma las dos mitades juntas, igual que `hero.invariant` §1 ya hace con el fondo de la banda angosta. Una sola mitad es una clase que dice dónde empieza y no dice dónde termina.
+
+70. ✅ **EL 65 SE CIERRA TAPANDO, NO ARREGLANDO — Y LA PALANCA QUE LO DIO VUELTA NO ERA TIPOGRÁFICA NI DE ESCENA (PAPEL-2, 2026-09-17).**
+
+    **EL HECHO.** El 65 dejó a 375 en 40,59 % de tinta sobre la masa del logo, con 134,9 px de faltante y las tres palancas conocidas descartadas (escena, cámara, anclaje). PAPEL-2 no lo arregló: **lo tapó**, extendiendo el papel opaco del Hero a 375. Lo que se ve ahí ahora es **0,00 %**, medido con la segunda máscara, y el contraste es **17,60:1**, la razón tinta/papel del sistema.
+
+    **Y ADEMÁS, SIN BUSCARLO, LA COMPOSICIÓN DE ABAJO DEL PAPEL MEJORÓ.** Medido sobre la máscara de escena sola, o sea debajo del papel: **320 pasó de 47,5 % a 31,5 % y 375 de 48,0 % a 34,9 %**. Y 320 era, desde TAPADO-1 y reforzado por TEXTO-2, **el único ancho de los seis donde la superposición SUBÍA**. Dejó de serlo: bajan los seis.
+
+    **Qué lo dio vuelta, y es lo que hay que leer.** Ninguna de las dos palancas que el 65 daba como únicas salidas —la escena o la tipografía del titular—. Fue **el ALTO disponible**: la marca entró arriba del titular (empuja el bloque hacia arriba) y la pastilla de navegación se desmontó en esos dos anchos, lo que devolvió **72 px** de recorrido al pie (`pb-20` → `pb-2`, el sobrante que el 69 ya había nombrado). El titular sale de la masa por donde nadie había mirado.
+
+    **LA REGLA QUE DEJA.** Cuando un bloque apoyado abajo no entra, la lista de palancas no es sólo *achicar el contenido* o *mover la escena*: está también **liberar el pie**. Un elemento de chrome que reserva alto —una pastilla, una barra— es una palanca vertical de su tamaño entero, y se puede pedir prestado. El 65 la tenía a la vista (`pb-20` reserva 72 px) y la descartó porque el §8 de aquel sprint la congelaba; no era una imposibilidad, era un permiso.
+
+71. 🔴 **UN CORTE `max-` NO SE MUEVE SI EL TOKEN TIENE DOS CONSUMIDORES CON BANDAS DISTINTAS (PAPEL-2, 2026-09-17).**
+
+    **EL HECHO.** Para que el papel del Hero cubriera 375 hacía falta una media query que lo incluyera, y `max-angosto:` emite `@media (width < 375px)`. Lo natural era subirle el número a `--breakpoint-angosto`. **No se podía**, y el motivo es que ese token tenía DOS consumidores:
+
+    | consumidor | banda | de dónde sale |
+    |---|---|---|
+    | `max-angosto:bg-fondo` | la superficie del Hero | 320, y ahora 375 |
+    | `max-angosto:text-display-xl-angosto` | el registro 2 a 55 px | **320–374**, medido |
+
+    La segunda termina en 374 porque de **371,13 px** de ventana para arriba el décimo nivel ya entra solo en un renglón. Subir el token a 390 habría achicado el registro 2 de 375 un **18 %** sin una medición que lo pida, habría dejado al token contradiciendo su propia derivación escrita, y habría desincronizado el par `--breakpoint-angosto` / `--fluido-piso` que `tokens.invariant` §7b ata.
+
+    **LA REGLA QUE DEJA.** Un breakpoint no es un número: es **una pregunta con una banda medida**. Antes de moverlo hay que enumerar sus consumidores y comprobar que todos contestan la MISMA pregunta. Si contestan dos, son dos cortes. `--breakpoint-chico` (390) nació de eso y es el primero del lane con consumidores en los dos sentidos.
+
+    **⚠ Y EL CORTE NUEVO ES UN PROXY, DECLARADO.** Lo que hunde a 375 no es su ancho: es su ALTO. El set aparea 320×568 y 375×667 contra 390×844, así que la banda de papel son los dos **viewports cortos**. Una media query de ancho no puede preguntar eso: **una ventana de 390×600 cae del lado equivocado del corte.**
+
+72. 🔴 **UN INVARIANTE DE DOS MITADES SE PONE VERDE SI LAS DOS ENVEJECEN JUNTAS (PAPEL-2, 2026-09-17).**
+
+    **EL HECHO.** `s10-logo` §1b compara un MODELO de la composición del Hero contra un RECIBO medido en el navegador, y afirma que el desvío entre los dos es constante. Estaba en verde con **0,1 px de dispersión**. PAPEL-2 tuvo que regenerar el recibo —cambió la composición— y la reconciliación se abrió a **155,6 px, en anchos que el sprint no tocó**.
+
+    Al mirar: el recibo publicaba la pantalla **anterior a COMPO-1** (su `arribaHoy` a 390 era 562,8, que es el «antes» que aquel sprint publica), y **el modelo tampoco veía a COMPO-1**: a 390 cuenta el registro 1 como UN renglón de 40,7 px y la bajada como UNO de 25,6, cuando en pantalla son dos y dos. Los dos renglones que faltan son los ~81 px de diferencia. La causa es del medidor de cajas: cuenta los renglones que una cadena **necesita** para entrar, y un quiebre DECLARADO no los necesita, los impone.
+
+    **Las dos mitades estaban igual de viejas y por eso coincidían.** El verde no decía «el sitio está bien»: decía «mi patrón y mi medida se movieron juntos».
+
+    **LA REGLA QUE DEJA.** Un invariante que contrasta un derivado contra un medido **sólo vale si el medido se regenera en el mismo sprint que cambia lo medido**. Y el discriminador es barato: cuando la reconciliación se abre en anchos que el sprint NO tocó, el culpable no es el sprint — es una de las dos mitades que venía vieja. Se arregla regenerando la que mide, nunca restaurando la vieja para devolver el verde.
