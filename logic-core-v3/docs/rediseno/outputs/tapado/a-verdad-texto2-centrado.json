@@ -1,0 +1,1882 @@
+{
+  "etiqueta": "texto2-centrado",
+  "composicion": "centrado",
+  "cuando": "2026-09-16T15:58:50.514Z",
+  "instrumento": "scripts-tapado/a-verdad.ts — Page.captureScreenshot x3 (A vista, C texto sin escena, D escena sola) + getBoundingClientRect",
+  "umbrales": {
+    "masa": 130.93,
+    "glifo": "derivado por caja: (moda del fondo de C + tinta) / 2"
+  },
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "procedencia": "PAR DE ESTE SPRINT — 320x568 es el viewport de layout del iPhone SE de 1.a gen; este repo no lo tenia",
+      "ventanaReportada": {
+        "ancho": 320,
+        "alto": 568
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-320x568.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 133.16,
+          "ancho": 256,
+          "alto": 226.69
+        },
+        "glifos": 8347,
+        "sobreElLogo": 3354,
+        "tintaSobreLogo": 0.4018,
+        "areaDeLaCaja": 58112,
+        "cajaSobreLogo": 0.441,
+        "luzMedianaBajoElGlifo": 238.71,
+        "contrasteMediano": 16.38,
+        "tintaBajoAA": 0.3992,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 32,
+          "y": 133.16,
+          "ancho": 256,
+          "alto": 80.66
+        },
+        "glifos": 4271,
+        "sobreElLogo": 1489,
+        "tintaSobreLogo": 0.3486,
+        "areaDeLaCaja": 20736,
+        "cajaSobreLogo": 0.3509,
+        "luzMedianaBajoElGlifo": 242.92,
+        "contrasteMediano": 17.01,
+        "tintaBajoAA": 0.3456,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 32,
+          "y": 213.81,
+          "ancho": 256,
+          "alto": 146.03
+        },
+        "glifos": 4076,
+        "sobreElLogo": 1865,
+        "tintaSobreLogo": 0.4576,
+        "areaDeLaCaja": 37632,
+        "cajaSobreLogo": 0.4941,
+        "luzMedianaBajoElGlifo": 221.78,
+        "contrasteMediano": 14.01,
+        "tintaBajoAA": 0.4553,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 32,
+          "y": 367.84,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 127,
+        "tintaSobreLogo": 0.1957,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.1486,
+        "luzMedianaBajoElGlifo": 221.78,
+        "contrasteMediano": 14.01,
+        "tintaBajoAA": 0.1957,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 32,
+          "y": 399.84,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 2,
+        "tintaSobreLogo": 0.0017,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.027,
+        "luzMedianaBajoElGlifo": 221.78,
+        "contrasteMediano": 14.01,
+        "tintaBajoAA": 0.0017,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 133.16,
+          "ancho": 256,
+          "alto": 313.69
+        },
+        "glifos": 10161,
+        "sobreElLogo": 3483,
+        "tintaSobreLogo": 0.3428,
+        "areaDeLaCaja": 80384,
+        "cajaSobreLogo": 0.3359,
+        "luzMedianaBajoElGlifo": 229.71,
+        "contrasteMediano": 15.09,
+        "tintaBajoAA": 0.3406,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 55,
+          "hasta": 57,
+          "alto": 3
+        },
+        {
+          "desde": 73,
+          "hasta": 73,
+          "alto": 1
+        },
+        {
+          "desde": 102,
+          "hasta": 102,
+          "alto": 1
+        },
+        {
+          "desde": 105,
+          "hasta": 105,
+          "alto": 1
+        },
+        {
+          "desde": 110,
+          "hasta": 111,
+          "alto": 2
+        },
+        {
+          "desde": 176,
+          "hasta": 386,
+          "alto": 211
+        },
+        {
+          "desde": 444,
+          "hasta": 464,
+          "alto": 21
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 54,
+          "alto": 55
+        },
+        {
+          "desde": 58,
+          "hasta": 72,
+          "alto": 15
+        },
+        {
+          "desde": 74,
+          "hasta": 101,
+          "alto": 28
+        },
+        {
+          "desde": 103,
+          "hasta": 104,
+          "alto": 2
+        },
+        {
+          "desde": 106,
+          "hasta": 109,
+          "alto": 4
+        },
+        {
+          "desde": 112,
+          "hasta": 175,
+          "alto": 64
+        },
+        {
+          "desde": 387,
+          "hasta": 443,
+          "alto": 57
+        },
+        {
+          "desde": 465,
+          "hasta": 567,
+          "alto": 103
+        }
+      ],
+      "mayorHueco": {
+        "desde": 465,
+        "hasta": 567,
+        "alto": 103
+      },
+      "histogramaDeLaEscenaSola": [
+        29757,
+        486,
+        293,
+        366,
+        178,
+        524,
+        1003,
+        1950,
+        1036,
+        1586,
+        2706,
+        5956,
+        15438,
+        42784,
+        29338,
+        48359
+      ]
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "procedencia": "scripts-b4/perfiles.ts — iPhone SE 2.a/3.a gen",
+      "ventanaReportada": {
+        "ancho": 375,
+        "alto": 667
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-375x667.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 239.33,
+          "ancho": 311,
+          "alto": 113.34
+        },
+        "glifos": 8305,
+        "sobreElLogo": 4280,
+        "tintaSobreLogo": 0.5154,
+        "areaDeLaCaja": 35454,
+        "cajaSobreLogo": 0.4777,
+        "luzMedianaBajoElGlifo": 61.93,
+        "contrasteMediano": 1.76,
+        "tintaBajoAA": 0.5131,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 32,
+          "y": 239.33,
+          "ancho": 302.19,
+          "alto": 40.33
+        },
+        "glifos": 4230,
+        "sobreElLogo": 2915,
+        "tintaSobreLogo": 0.6891,
+        "areaDeLaCaja": 12423,
+        "cajaSobreLogo": 0.668,
+        "luzMedianaBajoElGlifo": 1.93,
+        "contrasteMediano": 1.1,
+        "tintaBajoAA": 0.6856,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 32,
+          "y": 279.66,
+          "ancho": 307.14,
+          "alto": 73.02
+        },
+        "glifos": 4075,
+        "sobreElLogo": 1365,
+        "tintaSobreLogo": 0.335,
+        "areaDeLaCaja": 22792,
+        "cajaSobreLogo": 0.3595,
+        "luzMedianaBajoElGlifo": 239.71,
+        "contrasteMediano": 16.53,
+        "tintaBajoAA": 0.334,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 32,
+          "y": 360.67,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 557,
+        "tintaSobreLogo": 0.8582,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.8779,
+        "luzMedianaBajoElGlifo": 1,
+        "contrasteMediano": 1.11,
+        "tintaBajoAA": 0.8582,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 32,
+          "y": 392.67,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 12,
+        "tintaSobreLogo": 0.0103,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.1241,
+        "luzMedianaBajoElGlifo": 222,
+        "contrasteMediano": 14.04,
+        "tintaBajoAA": 0.0103,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 239.33,
+          "ancho": 311,
+          "alto": 200.34
+        },
+        "glifos": 10119,
+        "sobreElLogo": 4849,
+        "tintaSobreLogo": 0.4792,
+        "areaDeLaCaja": 62511,
+        "cajaSobreLogo": 0.495,
+        "luzMedianaBajoElGlifo": 221.71,
+        "contrasteMediano": 14,
+        "tintaBajoAA": 0.4773,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 57,
+          "hasta": 57,
+          "alto": 1
+        },
+        {
+          "desde": 67,
+          "hasta": 69,
+          "alto": 3
+        },
+        {
+          "desde": 88,
+          "hasta": 89,
+          "alto": 2
+        },
+        {
+          "desde": 101,
+          "hasta": 101,
+          "alto": 1
+        },
+        {
+          "desde": 121,
+          "hasta": 121,
+          "alto": 1
+        },
+        {
+          "desde": 124,
+          "hasta": 126,
+          "alto": 3
+        },
+        {
+          "desde": 132,
+          "hasta": 132,
+          "alto": 1
+        },
+        {
+          "desde": 148,
+          "hasta": 148,
+          "alto": 1
+        },
+        {
+          "desde": 206,
+          "hasta": 454,
+          "alto": 249
+        },
+        {
+          "desde": 458,
+          "hasta": 458,
+          "alto": 1
+        },
+        {
+          "desde": 518,
+          "hasta": 518,
+          "alto": 1
+        },
+        {
+          "desde": 521,
+          "hasta": 546,
+          "alto": 26
+        },
+        {
+          "desde": 587,
+          "hasta": 587,
+          "alto": 1
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 56,
+          "alto": 57
+        },
+        {
+          "desde": 58,
+          "hasta": 66,
+          "alto": 9
+        },
+        {
+          "desde": 70,
+          "hasta": 87,
+          "alto": 18
+        },
+        {
+          "desde": 90,
+          "hasta": 100,
+          "alto": 11
+        },
+        {
+          "desde": 102,
+          "hasta": 120,
+          "alto": 19
+        },
+        {
+          "desde": 122,
+          "hasta": 123,
+          "alto": 2
+        },
+        {
+          "desde": 127,
+          "hasta": 131,
+          "alto": 5
+        },
+        {
+          "desde": 133,
+          "hasta": 147,
+          "alto": 15
+        },
+        {
+          "desde": 149,
+          "hasta": 205,
+          "alto": 57
+        },
+        {
+          "desde": 455,
+          "hasta": 457,
+          "alto": 3
+        },
+        {
+          "desde": 459,
+          "hasta": 517,
+          "alto": 59
+        },
+        {
+          "desde": 519,
+          "hasta": 520,
+          "alto": 2
+        },
+        {
+          "desde": 547,
+          "hasta": 586,
+          "alto": 40
+        },
+        {
+          "desde": 588,
+          "hasta": 666,
+          "alto": 79
+        }
+      ],
+      "mayorHueco": {
+        "desde": 588,
+        "hasta": 666,
+        "alto": 79
+      },
+      "histogramaDeLaEscenaSola": [
+        41036,
+        635,
+        433,
+        492,
+        254,
+        792,
+        1506,
+        2545,
+        1443,
+        2130,
+        3719,
+        8048,
+        21418,
+        57321,
+        41314,
+        67039
+      ]
+    },
+    {
+      "ancho": 390,
+      "alto": 844,
+      "procedencia": "s10-referencias.VIEWPORTS_MEDIDOS — el telefono que S0 midio",
+      "ventanaReportada": {
+        "ancho": 390,
+        "alto": 844
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-390x844.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 327.39,
+          "ancho": 326,
+          "alto": 114.22
+        },
+        "glifos": 8527,
+        "sobreElLogo": 2714,
+        "tintaSobreLogo": 0.3183,
+        "areaDeLaCaja": 37490,
+        "cajaSobreLogo": 0.2929,
+        "luzMedianaBajoElGlifo": 240.71,
+        "contrasteMediano": 16.68,
+        "tintaBajoAA": 0.3169,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 32,
+          "y": 327.39,
+          "ancho": 304.55,
+          "alto": 40.64
+        },
+        "glifos": 4390,
+        "sobreElLogo": 1671,
+        "tintaSobreLogo": 0.3806,
+        "areaDeLaCaja": 12810,
+        "cajaSobreLogo": 0.359,
+        "luzMedianaBajoElGlifo": 239.92,
+        "contrasteMediano": 16.56,
+        "tintaBajoAA": 0.3788,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 32,
+          "y": 368.03,
+          "ancho": 309.52,
+          "alto": 73.58
+        },
+        "glifos": 4137,
+        "sobreElLogo": 1043,
+        "tintaSobreLogo": 0.2521,
+        "areaDeLaCaja": 22940,
+        "cajaSobreLogo": 0.2753,
+        "luzMedianaBajoElGlifo": 240.71,
+        "contrasteMediano": 16.68,
+        "tintaBajoAA": 0.2511,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 32,
+          "y": 449.61,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 597,
+        "tintaSobreLogo": 0.9199,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.9161,
+        "luzMedianaBajoElGlifo": 0.93,
+        "contrasteMediano": 1.11,
+        "tintaBajoAA": 0.9199,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 32,
+          "y": 481.61,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 289,
+        "tintaSobreLogo": 0.2481,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.3374,
+        "luzMedianaBajoElGlifo": 221.78,
+        "contrasteMediano": 14.01,
+        "tintaBajoAA": 0.2481,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 327.39,
+          "ancho": 326,
+          "alto": 201.22
+        },
+        "glifos": 10341,
+        "sobreElLogo": 3600,
+        "tintaSobreLogo": 0.3481,
+        "areaDeLaCaja": 65852,
+        "cajaSobreLogo": 0.458,
+        "luzMedianaBajoElGlifo": 235.71,
+        "contrasteMediano": 15.94,
+        "tintaBajoAA": 0.347,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 14,
+          "hasta": 15,
+          "alto": 2
+        },
+        {
+          "desde": 22,
+          "hasta": 22,
+          "alto": 1
+        },
+        {
+          "desde": 54,
+          "hasta": 55,
+          "alto": 2
+        },
+        {
+          "desde": 69,
+          "hasta": 71,
+          "alto": 3
+        },
+        {
+          "desde": 82,
+          "hasta": 86,
+          "alto": 5
+        },
+        {
+          "desde": 107,
+          "hasta": 110,
+          "alto": 4
+        },
+        {
+          "desde": 120,
+          "hasta": 120,
+          "alto": 1
+        },
+        {
+          "desde": 152,
+          "hasta": 152,
+          "alto": 1
+        },
+        {
+          "desde": 155,
+          "hasta": 157,
+          "alto": 3
+        },
+        {
+          "desde": 163,
+          "hasta": 166,
+          "alto": 4
+        },
+        {
+          "desde": 254,
+          "hasta": 254,
+          "alto": 1
+        },
+        {
+          "desde": 261,
+          "hasta": 577,
+          "alto": 317
+        },
+        {
+          "desde": 651,
+          "hasta": 653,
+          "alto": 3
+        },
+        {
+          "desde": 658,
+          "hasta": 691,
+          "alto": 34
+        },
+        {
+          "desde": 718,
+          "hasta": 718,
+          "alto": 1
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 13,
+          "alto": 14
+        },
+        {
+          "desde": 16,
+          "hasta": 21,
+          "alto": 6
+        },
+        {
+          "desde": 23,
+          "hasta": 53,
+          "alto": 31
+        },
+        {
+          "desde": 56,
+          "hasta": 68,
+          "alto": 13
+        },
+        {
+          "desde": 72,
+          "hasta": 81,
+          "alto": 10
+        },
+        {
+          "desde": 87,
+          "hasta": 106,
+          "alto": 20
+        },
+        {
+          "desde": 111,
+          "hasta": 119,
+          "alto": 9
+        },
+        {
+          "desde": 121,
+          "hasta": 151,
+          "alto": 31
+        },
+        {
+          "desde": 153,
+          "hasta": 154,
+          "alto": 2
+        },
+        {
+          "desde": 158,
+          "hasta": 162,
+          "alto": 5
+        },
+        {
+          "desde": 167,
+          "hasta": 253,
+          "alto": 87
+        },
+        {
+          "desde": 255,
+          "hasta": 260,
+          "alto": 6
+        },
+        {
+          "desde": 578,
+          "hasta": 650,
+          "alto": 73
+        },
+        {
+          "desde": 654,
+          "hasta": 657,
+          "alto": 4
+        },
+        {
+          "desde": 692,
+          "hasta": 717,
+          "alto": 26
+        },
+        {
+          "desde": 719,
+          "hasta": 843,
+          "alto": 125
+        }
+      ],
+      "mayorHueco": {
+        "desde": 719,
+        "hasta": 843,
+        "alto": 125
+      },
+      "histogramaDeLaEscenaSola": [
+        56368,
+        1078,
+        639,
+        601,
+        327,
+        1055,
+        2141,
+        3977,
+        2210,
+        3199,
+        5648,
+        8985,
+        29484,
+        71490,
+        51986,
+        89972
+      ]
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "procedencia": "PAR DE ESTE SPRINT — 425 es el preset «Mobile L» de DevTools y el ancho que el humano capturo; el alto se toma del par de 390 para que la unica variable sea el ancho",
+      "ventanaReportada": {
+        "ancho": 425,
+        "alto": 844
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-425x844.png",
+      "titular": {
+        "caja": {
+          "x": 32,
+          "y": 326.34,
+          "ancho": 361,
+          "alto": 116.3
+        },
+        "glifos": 8802,
+        "sobreElLogo": 3120,
+        "tintaSobreLogo": 0.3545,
+        "areaDeLaCaja": 42237,
+        "cajaSobreLogo": 0.3254,
+        "luzMedianaBajoElGlifo": 239,
+        "contrasteMediano": 16.42,
+        "tintaBajoAA": 0.3522,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 32,
+          "y": 326.34,
+          "ancho": 310.19,
+          "alto": 41.39
+        },
+        "glifos": 4494,
+        "sobreElLogo": 1762,
+        "tintaSobreLogo": 0.3921,
+        "areaDeLaCaja": 13062,
+        "cajaSobreLogo": 0.3927,
+        "luzMedianaBajoElGlifo": 238.92,
+        "contrasteMediano": 16.41,
+        "tintaBajoAA": 0.3901,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 32,
+          "y": 367.73,
+          "ancho": 315.06,
+          "alto": 74.91
+        },
+        "glifos": 4308,
+        "sobreElLogo": 1358,
+        "tintaSobreLogo": 0.3152,
+        "areaDeLaCaja": 24016,
+        "cajaSobreLogo": 0.3025,
+        "luzMedianaBajoElGlifo": 239.71,
+        "contrasteMediano": 16.53,
+        "tintaBajoAA": 0.3127,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 32,
+          "y": 450.64,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 603,
+        "tintaSobreLogo": 0.9291,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.9137,
+        "luzMedianaBajoElGlifo": 0.93,
+        "contrasteMediano": 1.11,
+        "tintaBajoAA": 0.9291,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 32,
+          "y": 482.64,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 250,
+        "tintaSobreLogo": 0.2146,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.3252,
+        "luzMedianaBajoElGlifo": 221.78,
+        "contrasteMediano": 14.01,
+        "tintaBajoAA": 0.2137,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 32,
+          "y": 326.34,
+          "ancho": 361,
+          "alto": 203.3
+        },
+        "glifos": 10616,
+        "sobreElLogo": 3973,
+        "tintaSobreLogo": 0.3742,
+        "areaDeLaCaja": 73644,
+        "cajaSobreLogo": 0.4688,
+        "luzMedianaBajoElGlifo": 232.71,
+        "contrasteMediano": 15.51,
+        "tintaBajoAA": 0.3723,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 22,
+          "hasta": 22,
+          "alto": 1
+        },
+        {
+          "desde": 68,
+          "hasta": 70,
+          "alto": 3
+        },
+        {
+          "desde": 72,
+          "hasta": 72,
+          "alto": 1
+        },
+        {
+          "desde": 82,
+          "hasta": 86,
+          "alto": 5
+        },
+        {
+          "desde": 108,
+          "hasta": 110,
+          "alto": 3
+        },
+        {
+          "desde": 120,
+          "hasta": 120,
+          "alto": 1
+        },
+        {
+          "desde": 151,
+          "hasta": 152,
+          "alto": 2
+        },
+        {
+          "desde": 155,
+          "hasta": 157,
+          "alto": 3
+        },
+        {
+          "desde": 164,
+          "hasta": 165,
+          "alto": 2
+        },
+        {
+          "desde": 261,
+          "hasta": 575,
+          "alto": 315
+        },
+        {
+          "desde": 652,
+          "hasta": 652,
+          "alto": 1
+        },
+        {
+          "desde": 659,
+          "hasta": 691,
+          "alto": 33
+        },
+        {
+          "desde": 805,
+          "hasta": 805,
+          "alto": 1
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 21,
+          "alto": 22
+        },
+        {
+          "desde": 23,
+          "hasta": 67,
+          "alto": 45
+        },
+        {
+          "desde": 71,
+          "hasta": 71,
+          "alto": 1
+        },
+        {
+          "desde": 73,
+          "hasta": 81,
+          "alto": 9
+        },
+        {
+          "desde": 87,
+          "hasta": 107,
+          "alto": 21
+        },
+        {
+          "desde": 111,
+          "hasta": 119,
+          "alto": 9
+        },
+        {
+          "desde": 121,
+          "hasta": 150,
+          "alto": 30
+        },
+        {
+          "desde": 153,
+          "hasta": 154,
+          "alto": 2
+        },
+        {
+          "desde": 158,
+          "hasta": 163,
+          "alto": 6
+        },
+        {
+          "desde": 166,
+          "hasta": 260,
+          "alto": 95
+        },
+        {
+          "desde": 576,
+          "hasta": 651,
+          "alto": 76
+        },
+        {
+          "desde": 653,
+          "hasta": 658,
+          "alto": 6
+        },
+        {
+          "desde": 692,
+          "hasta": 804,
+          "alto": 113
+        },
+        {
+          "desde": 806,
+          "hasta": 843,
+          "alto": 38
+        }
+      ],
+      "mayorHueco": {
+        "desde": 692,
+        "hasta": 804,
+        "alto": 113
+      },
+      "histogramaDeLaEscenaSola": [
+        61998,
+        1098,
+        634,
+        608,
+        320,
+        1156,
+        2201,
+        4004,
+        2335,
+        3210,
+        5757,
+        10134,
+        32062,
+        79753,
+        56835,
+        96595
+      ]
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "procedencia": "scripts-b4/perfiles.ts — iPad en retrato",
+      "ventanaReportada": {
+        "ancho": 768,
+        "alto": 1024
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-768x1024.png",
+      "titular": {
+        "caja": {
+          "x": 184,
+          "y": 400.16,
+          "ancho": 552,
+          "alto": 136.67
+        },
+        "glifos": 12131,
+        "sobreElLogo": 4276,
+        "tintaSobreLogo": 0.3525,
+        "areaDeLaCaja": 75624,
+        "cajaSobreLogo": 0.4105,
+        "luzMedianaBajoElGlifo": 238.92,
+        "contrasteMediano": 16.41,
+        "tintaBajoAA": 0.3508,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 184,
+          "y": 400.16,
+          "ancho": 365.39,
+          "alto": 48.77
+        },
+        "glifos": 6240,
+        "sobreElLogo": 2698,
+        "tintaSobreLogo": 0.4324,
+        "areaDeLaCaja": 17934,
+        "cajaSobreLogo": 0.431,
+        "luzMedianaBajoElGlifo": 237,
+        "contrasteMediano": 16.13,
+        "tintaBajoAA": 0.4303,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 184,
+          "y": 448.92,
+          "ancho": 369.7,
+          "alto": 87.91
+        },
+        "glifos": 5891,
+        "sobreElLogo": 1578,
+        "tintaSobreLogo": 0.2679,
+        "areaDeLaCaja": 32930,
+        "cajaSobreLogo": 0.3676,
+        "luzMedianaBajoElGlifo": 240.64,
+        "contrasteMediano": 16.66,
+        "tintaBajoAA": 0.2667,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 184,
+          "y": 544.83,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 649,
+        "tintaSobreLogo": 1,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.9962,
+        "luzMedianaBajoElGlifo": 0.93,
+        "contrasteMediano": 1.11,
+        "tintaBajoAA": 1,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 184,
+          "y": 576.83,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 592,
+        "tintaSobreLogo": 0.5082,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.5769,
+        "luzMedianaBajoElGlifo": 85.71,
+        "contrasteMediano": 2.56,
+        "tintaBajoAA": 0.5082,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 184,
+          "y": 400.16,
+          "ancho": 552,
+          "alto": 223.67
+        },
+        "glifos": 13945,
+        "sobreElLogo": 5517,
+        "tintaSobreLogo": 0.3956,
+        "areaDeLaCaja": 123648,
+        "cajaSobreLogo": 0.5093,
+        "luzMedianaBajoElGlifo": 232.92,
+        "contrasteMediano": 15.54,
+        "tintaBajoAA": 0.3942,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 18,
+          "hasta": 18,
+          "alto": 1
+        },
+        {
+          "desde": 101,
+          "hasta": 105,
+          "alto": 5
+        },
+        {
+          "desde": 128,
+          "hasta": 129,
+          "alto": 2
+        },
+        {
+          "desde": 132,
+          "hasta": 134,
+          "alto": 3
+        },
+        {
+          "desde": 184,
+          "hasta": 186,
+          "alto": 3
+        },
+        {
+          "desde": 190,
+          "hasta": 190,
+          "alto": 1
+        },
+        {
+          "desde": 200,
+          "hasta": 201,
+          "alto": 2
+        },
+        {
+          "desde": 309,
+          "hasta": 309,
+          "alto": 1
+        },
+        {
+          "desde": 316,
+          "hasta": 699,
+          "alto": 384
+        },
+        {
+          "desde": 800,
+          "hasta": 838,
+          "alto": 39
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 17,
+          "alto": 18
+        },
+        {
+          "desde": 19,
+          "hasta": 100,
+          "alto": 82
+        },
+        {
+          "desde": 106,
+          "hasta": 127,
+          "alto": 22
+        },
+        {
+          "desde": 130,
+          "hasta": 131,
+          "alto": 2
+        },
+        {
+          "desde": 135,
+          "hasta": 183,
+          "alto": 49
+        },
+        {
+          "desde": 187,
+          "hasta": 189,
+          "alto": 3
+        },
+        {
+          "desde": 191,
+          "hasta": 199,
+          "alto": 9
+        },
+        {
+          "desde": 202,
+          "hasta": 308,
+          "alto": 107
+        },
+        {
+          "desde": 310,
+          "hasta": 315,
+          "alto": 6
+        },
+        {
+          "desde": 700,
+          "hasta": 799,
+          "alto": 100
+        },
+        {
+          "desde": 839,
+          "hasta": 1023,
+          "alto": 185
+        }
+      ],
+      "mayorHueco": {
+        "desde": 839,
+        "hasta": 1023,
+        "alto": 185
+      },
+      "histogramaDeLaEscenaSola": [
+        97515,
+        1578,
+        995,
+        793,
+        521,
+        2214,
+        3974,
+        6238,
+        3698,
+        5641,
+        10723,
+        23145,
+        57934,
+        216342,
+        140023,
+        215098
+      ]
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "procedencia": "scripts-b4/perfiles.ts — un pixel abajo del umbral",
+      "ventanaReportada": {
+        "ancho": 1024,
+        "alto": 768
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-1024x768.png",
+      "titular": {
+        "caja": {
+          "x": 184,
+          "y": 264.56,
+          "ancho": 808,
+          "alto": 151.86
+        },
+        "glifos": 14887,
+        "sobreElLogo": 2986,
+        "tintaSobreLogo": 0.2006,
+        "areaDeLaCaja": 123624,
+        "cajaSobreLogo": 0.2998,
+        "luzMedianaBajoElGlifo": 230,
+        "contrasteMediano": 15.13,
+        "tintaBajoAA": 0.2,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 184,
+          "y": 264.56,
+          "ancho": 406.64,
+          "alto": 54.27
+        },
+        "glifos": 7586,
+        "sobreElLogo": 2220,
+        "tintaSobreLogo": 0.2926,
+        "areaDeLaCaja": 22385,
+        "cajaSobreLogo": 0.2568,
+        "luzMedianaBajoElGlifo": 224.78,
+        "contrasteMediano": 14.41,
+        "tintaBajoAA": 0.2922,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 184,
+          "y": 318.83,
+          "ancho": 410.45,
+          "alto": 97.59
+        },
+        "glifos": 7301,
+        "sobreElLogo": 766,
+        "tintaSobreLogo": 0.1049,
+        "areaDeLaCaja": 40689,
+        "cajaSobreLogo": 0.1652,
+        "luzMedianaBajoElGlifo": 233.64,
+        "contrasteMediano": 15.64,
+        "tintaBajoAA": 0.1042,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 184,
+          "y": 424.42,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 649,
+        "sobreElLogo": 4,
+        "tintaSobreLogo": 0.0062,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.0061,
+        "luzMedianaBajoElGlifo": 237.71,
+        "contrasteMediano": 16.23,
+        "tintaBajoAA": 0.0015,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 184,
+          "y": 456.42,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1165,
+        "sobreElLogo": 0,
+        "tintaSobreLogo": 0,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.0077,
+        "luzMedianaBajoElGlifo": 243.64,
+        "contrasteMediano": 17.11,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 184,
+          "y": 264.56,
+          "ancho": 808,
+          "alto": 238.86
+        },
+        "glifos": 16701,
+        "sobreElLogo": 2990,
+        "tintaSobreLogo": 0.179,
+        "areaDeLaCaja": 193920,
+        "cajaSobreLogo": 0.2795,
+        "luzMedianaBajoElGlifo": 231.71,
+        "contrasteMediano": 15.37,
+        "tintaBajoAA": 0.1784,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 81,
+          "hasta": 81,
+          "alto": 1
+        },
+        {
+          "desde": 100,
+          "hasta": 101,
+          "alto": 2
+        },
+        {
+          "desde": 239,
+          "hasta": 531,
+          "alto": 293
+        },
+        {
+          "desde": 605,
+          "hasta": 635,
+          "alto": 31
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 80,
+          "alto": 81
+        },
+        {
+          "desde": 82,
+          "hasta": 99,
+          "alto": 18
+        },
+        {
+          "desde": 102,
+          "hasta": 238,
+          "alto": 137
+        },
+        {
+          "desde": 532,
+          "hasta": 604,
+          "alto": 73
+        },
+        {
+          "desde": 636,
+          "hasta": 767,
+          "alto": 132
+        }
+      ],
+      "mayorHueco": {
+        "desde": 102,
+        "hasta": 238,
+        "alto": 137
+      },
+      "histogramaDeLaEscenaSola": [
+        55733,
+        906,
+        543,
+        554,
+        290,
+        1545,
+        2830,
+        4220,
+        2648,
+        5485,
+        10790,
+        25164,
+        38329,
+        253320,
+        157563,
+        226512
+      ]
+    },
+    {
+      "ancho": 1440,
+      "alto": 900,
+      "procedencia": "scripts-b4/perfiles.ts — el ancho donde el proyecto define el ritmo",
+      "ventanaReportada": {
+        "ancho": 1440,
+        "alto": 900
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-1440x900.png",
+      "titular": {
+        "caja": {
+          "x": 188,
+          "y": 298.2,
+          "ancho": 478.39,
+          "alto": 176.58
+        },
+        "glifos": 20523,
+        "sobreElLogo": 104,
+        "tintaSobreLogo": 0.0051,
+        "areaDeLaCaja": 84783,
+        "cajaSobreLogo": 0.006,
+        "luzMedianaBajoElGlifo": 225.78,
+        "contrasteMediano": 14.55,
+        "tintaBajoAA": 0.0042,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 188,
+          "y": 298.2,
+          "ancho": 473.69,
+          "alto": 63.22
+        },
+        "glifos": 10653,
+        "sobreElLogo": 43,
+        "tintaSobreLogo": 0.004,
+        "areaDeLaCaja": 30336,
+        "cajaSobreLogo": 0.0064,
+        "luzMedianaBajoElGlifo": 230.71,
+        "contrasteMediano": 15.23,
+        "tintaBajoAA": 0.0025,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 188,
+          "y": 361.42,
+          "ancho": 476.7,
+          "alto": 113.36
+        },
+        "glifos": 9870,
+        "sobreElLogo": 61,
+        "tintaSobreLogo": 0.0062,
+        "areaDeLaCaja": 54378,
+        "cajaSobreLogo": 0.0058,
+        "luzMedianaBajoElGlifo": 222.78,
+        "contrasteMediano": 14.14,
+        "tintaBajoAA": 0.0061,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 188,
+          "y": 506.78,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 618,
+        "sobreElLogo": 0,
+        "tintaSobreLogo": 0,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.005,
+        "luzMedianaBajoElGlifo": 231.71,
+        "contrasteMediano": 15.37,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 188,
+          "y": 554.78,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1169,
+        "sobreElLogo": 0,
+        "tintaSobreLogo": 0,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0.002,
+        "luzMedianaBajoElGlifo": 220.78,
+        "contrasteMediano": 13.87,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 188,
+          "y": 298.2,
+          "ancho": 478.39,
+          "alto": 303.58
+        },
+        "glifos": 22310,
+        "sobreElLogo": 104,
+        "tintaSobreLogo": 0.0047,
+        "areaDeLaCaja": 145616,
+        "cajaSobreLogo": 0.0057,
+        "luzMedianaBajoElGlifo": 224.78,
+        "contrasteMediano": 14.41,
+        "tintaBajoAA": 0.0039,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 270,
+          "hasta": 273,
+          "alto": 4
+        },
+        {
+          "desde": 318,
+          "hasta": 318,
+          "alto": 1
+        },
+        {
+          "desde": 384,
+          "hasta": 385,
+          "alto": 2
+        },
+        {
+          "desde": 421,
+          "hasta": 424,
+          "alto": 4
+        },
+        {
+          "desde": 525,
+          "hasta": 527,
+          "alto": 3
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 269,
+          "alto": 270
+        },
+        {
+          "desde": 274,
+          "hasta": 317,
+          "alto": 44
+        },
+        {
+          "desde": 319,
+          "hasta": 383,
+          "alto": 65
+        },
+        {
+          "desde": 386,
+          "hasta": 420,
+          "alto": 35
+        },
+        {
+          "desde": 425,
+          "hasta": 524,
+          "alto": 100
+        },
+        {
+          "desde": 528,
+          "hasta": 899,
+          "alto": 372
+        }
+      ],
+      "mayorHueco": {
+        "desde": 528,
+        "hasta": 899,
+        "alto": 372
+      },
+      "histogramaDeLaEscenaSola": [
+        77755,
+        1260,
+        762,
+        722,
+        416,
+        2184,
+        4159,
+        5980,
+        4382,
+        9389,
+        17214,
+        43949,
+        55330,
+        413403,
+        266084,
+        393011
+      ]
+    },
+    {
+      "ancho": 1920,
+      "alto": 1080,
+      "procedencia": "scripts-b4/perfiles.ts — --container-tope",
+      "ventanaReportada": {
+        "ancho": 1920,
+        "alto": 1080
+      },
+      "clasesDeLaPantalla": "flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center",
+      "captura": "docs\\rediseno\\capturas\\tapado\\texto2-centrado-1920x1080.png",
+      "titular": {
+        "caja": {
+          "x": 188,
+          "y": 373.97,
+          "ancho": 670.39,
+          "alto": 205.06
+        },
+        "glifos": 27393,
+        "sobreElLogo": 24,
+        "tintaSobreLogo": 0.0009,
+        "areaDeLaCaja": 138897,
+        "cajaSobreLogo": 0.0043,
+        "luzMedianaBajoElGlifo": 226.71,
+        "contrasteMediano": 14.67,
+        "tintaBajoAA": 0.0002,
+        "fondoDeC": 247
+      },
+      "linea1": {
+        "caja": {
+          "x": 188,
+          "y": 373.97,
+          "ancho": 550.95,
+          "alto": 73.53
+        },
+        "glifos": 14088,
+        "sobreElLogo": 7,
+        "tintaSobreLogo": 0.0005,
+        "areaDeLaCaja": 41325,
+        "cajaSobreLogo": 0.0027,
+        "luzMedianaBajoElGlifo": 227,
+        "contrasteMediano": 14.71,
+        "tintaBajoAA": 0.0004,
+        "fondoDeC": 247
+      },
+      "linea2": {
+        "caja": {
+          "x": 188,
+          "y": 447.5,
+          "ancho": 553.16,
+          "alto": 131.53
+        },
+        "glifos": 13305,
+        "sobreElLogo": 17,
+        "tintaSobreLogo": 0.0013,
+        "areaDeLaCaja": 73682,
+        "cajaSobreLogo": 0.0034,
+        "luzMedianaBajoElGlifo": 225.78,
+        "contrasteMediano": 14.55,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "bajada": {
+        "caja": {
+          "x": 188,
+          "y": 611.03,
+          "ancho": 223.81,
+          "alto": 24
+        },
+        "glifos": 618,
+        "sobreElLogo": 4,
+        "tintaSobreLogo": 0.0065,
+        "areaDeLaCaja": 5600,
+        "cajaSobreLogo": 0.0034,
+        "luzMedianaBajoElGlifo": 220.78,
+        "contrasteMediano": 13.87,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "cta": {
+        "caja": {
+          "x": 188,
+          "y": 659.03,
+          "ancho": 175.47,
+          "alto": 47
+        },
+        "glifos": 1169,
+        "sobreElLogo": 0,
+        "tintaSobreLogo": 0,
+        "areaDeLaCaja": 8448,
+        "cajaSobreLogo": 0,
+        "luzMedianaBajoElGlifo": 243.71,
+        "contrasteMediano": 17.12,
+        "tintaBajoAA": 0,
+        "fondoDeC": 247
+      },
+      "bloque": {
+        "caja": {
+          "x": 188,
+          "y": 373.97,
+          "ancho": 670.39,
+          "alto": 332.06
+        },
+        "glifos": 29180,
+        "sobreElLogo": 28,
+        "tintaSobreLogo": 0.001,
+        "areaDeLaCaja": 224114,
+        "cajaSobreLogo": 0.0042,
+        "luzMedianaBajoElGlifo": 227.71,
+        "contrasteMediano": 14.81,
+        "tintaBajoAA": 0.0002,
+        "fondoDeC": 247
+      },
+      "bandasDeMasaEnLaColumna": [
+        {
+          "desde": 325,
+          "hasta": 325,
+          "alto": 1
+        },
+        {
+          "desde": 505,
+          "hasta": 506,
+          "alto": 2
+        },
+        {
+          "desde": 628,
+          "hasta": 629,
+          "alto": 2
+        },
+        {
+          "desde": 833,
+          "hasta": 833,
+          "alto": 1
+        }
+      ],
+      "huecosEnLaColumna": [
+        {
+          "desde": 0,
+          "hasta": 324,
+          "alto": 325
+        },
+        {
+          "desde": 326,
+          "hasta": 504,
+          "alto": 179
+        },
+        {
+          "desde": 507,
+          "hasta": 627,
+          "alto": 121
+        },
+        {
+          "desde": 630,
+          "hasta": 832,
+          "alto": 203
+        },
+        {
+          "desde": 834,
+          "hasta": 1079,
+          "alto": 246
+        }
+      ],
+      "mayorHueco": {
+        "desde": 0,
+        "hasta": 324,
+        "alto": 325
+      },
+      "histogramaDeLaEscenaSola": [
+        113635,
+        1840,
+        1102,
+        893,
+        572,
+        3161,
+        6133,
+        8720,
+        7291,
+        16103,
+        26610,
+        72148,
+        82193,
+        684769,
+        428436,
+        619994
+      ]
+    }
+  ]
+}

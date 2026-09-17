@@ -1,0 +1,342 @@
+{
+  "cuando": "2026-09-16T15:09:52.080Z",
+  "instrumento": "scripts-texto/f-bajada.ts — cada candidata puesta en el parrafo real y contada con un Range; el ancho disponible se lee del PADRE porque la caja del parrafo se encoge (items-start)",
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 2,
+          "anchoDelTexto": 244.89,
+          "anchoDisponible": 256,
+          "margen": 11.11,
+          "avancePorCaracter": 4.9978,
+          "techoDeCaracteres": 51,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 256,
+          "margen": 27.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 39,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 256,
+          "margen": 32.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 37,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 2,
+          "anchoDelTexto": 266.08,
+          "anchoDisponible": 311,
+          "margen": 44.92,
+          "avancePorCaracter": 5.4302,
+          "techoDeCaracteres": 57,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 311,
+          "margen": 82.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 47,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 311,
+          "margen": 87.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 45,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 390,
+      "alto": 844,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 2,
+          "anchoDelTexto": 266.08,
+          "anchoDisponible": 326,
+          "margen": 59.92,
+          "avancePorCaracter": 5.4302,
+          "techoDeCaracteres": 60,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 326,
+          "margen": 97.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 50,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 326,
+          "margen": 102.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 48,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 1,
+          "anchoDelTexto": 328.47,
+          "anchoDisponible": 361,
+          "margen": 32.53,
+          "avancePorCaracter": 6.7034,
+          "techoDeCaracteres": 53,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 361,
+          "margen": 132.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 55,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 361,
+          "margen": 137.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 53,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 2,
+          "anchoDelTexto": 266.08,
+          "anchoDisponible": 270,
+          "margen": 3.92,
+          "avancePorCaracter": 5.4302,
+          "techoDeCaracteres": 49,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 270,
+          "margen": 41.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 41,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 270,
+          "margen": 46.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 39,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 1,
+          "anchoDelTexto": 328.47,
+          "anchoDisponible": 398,
+          "margen": 69.53,
+          "avancePorCaracter": 6.7034,
+          "techoDeCaracteres": 59,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 398,
+          "margen": 169.89,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 61,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 398,
+          "margen": 174.19,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 58,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 1440,
+      "alto": 900,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 1,
+          "anchoDelTexto": 328.47,
+          "anchoDisponible": 354.8,
+          "margen": 26.33,
+          "avancePorCaracter": 6.7034,
+          "techoDeCaracteres": 52,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 354.8,
+          "margen": 126.69,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 54,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 354.8,
+          "margen": 130.98,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 52,
+          "cuerpo": 15
+        }
+      ]
+    },
+    {
+      "ancho": 1920,
+      "alto": 1080,
+      "candidatas": [
+        {
+          "clave": "hoy-49",
+          "texto": "Tu sitio, tu chat y tu seguimiento en un sistema.",
+          "caracteres": 49,
+          "renglones": 1,
+          "anchoDelTexto": 328.47,
+          "anchoDisponible": 498.8,
+          "margen": 170.33,
+          "avancePorCaracter": 6.7034,
+          "techoDeCaracteres": 74,
+          "cuerpo": 15
+        },
+        {
+          "clave": "A-35",
+          "texto": "Tu sitio, tu chat y tu seguimiento.",
+          "caracteres": 35,
+          "renglones": 1,
+          "anchoDelTexto": 228.11,
+          "anchoDisponible": 498.8,
+          "margen": 270.69,
+          "avancePorCaracter": 6.5174,
+          "techoDeCaracteres": 76,
+          "cuerpo": 15
+        },
+        {
+          "clave": "B-33",
+          "texto": "Sitio, chat y seguimiento en uno.",
+          "caracteres": 33,
+          "renglones": 1,
+          "anchoDelTexto": 223.81,
+          "anchoDisponible": 498.8,
+          "margen": 274.98,
+          "avancePorCaracter": 6.7822,
+          "techoDeCaracteres": 73,
+          "cuerpo": 15
+        }
+      ]
+    }
+  ]
+}

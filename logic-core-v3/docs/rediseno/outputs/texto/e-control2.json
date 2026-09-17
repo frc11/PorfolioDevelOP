@@ -1,0 +1,91 @@
+{
+  "etiqueta": "control2",
+  "cuando": "2026-09-16T15:05:06.278Z",
+  "instrumento": "scripts-texto/e-antes-despues.ts — el cruce de TAPADO-1 (C texto sin escena x D escena sola) sobre EL ARBOL, sin reglas encima salvo las simulaciones declaradas",
+  "huecoDeReferencia": "el hueco LIBRE sale de a-verdad-hoy.json: entre el fin de la masa 1 y el arranque de la masa 2 (bandas de 15 px o mas). No es lo que sobra hasta el borde.",
+  "filas": [
+    {
+      "ancho": 1920,
+      "alto": 1080,
+      "hueco": {
+        "ancho": 1920,
+        "alto": 1080,
+        "masa1Hasta": 628,
+        "masa2Desde": null,
+        "huecoLibre": null,
+        "huecoHastaElBorde": 451
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 67.46,
+          "fsL2": 120.68,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 670.39,
+          "anchoDeLaCajaDeLaBajada": 223.81,
+          "anchoMaximoDeLaBajada": 223.81,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 332.06,
+          "topeDelBloque": 373.97,
+          "fondoDelBloque": 706.03,
+          "topeDelTitular": 373.97,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 205.06
+            },
+            "glifos": 27393,
+            "tintaSobreLogo": 0.0007,
+            "cajaSobreLogo": 0.0043,
+            "tintaBajoAA": 0.0007
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 550.95,
+              "alto": 73.53
+            },
+            "glifos": 14088,
+            "tintaSobreLogo": 0.0011,
+            "cajaSobreLogo": 0.0026,
+            "tintaBajoAA": 0.0011
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 447.5,
+              "ancho": 553.16,
+              "alto": 131.53
+            },
+            "glifos": 13305,
+            "tintaSobreLogo": 0.0002,
+            "cajaSobreLogo": 0.0036,
+            "tintaBajoAA": 0.0002
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 332.06
+            },
+            "glifos": 29180,
+            "tintaSobreLogo": 0.0006,
+            "cajaSobreLogo": 0.0042,
+            "tintaBajoAA": 0.0006
+          }
+        }
+      ]
+    }
+  ]
+}

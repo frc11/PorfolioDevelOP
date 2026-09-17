@@ -82,7 +82,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 ### Valentino — 25
 
-- **01 · Hero** · `bajada` — EL renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Bajó de dos renglones a uno en el rehecho del titular, porque el titular ahora dice en dos registros lo que la segunda oración decía en prosa.
+- **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
 - **02 · Quiénes somos** · `titular` — La frase que abre la sección. Una idea, dos líneas, dicha como la decís vos.
 - **02 · Quiénes somos** · `bajada` — Qué es develOP, en tres o cuatro renglones. Sin plazos ni porcentajes.
@@ -133,7 +133,7 @@ Se edita en `src/app/v3/_secciones/hero/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| *(prosa)* | `bajada` | Valentino | EL renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Bajó de dos renglones a uno en el rehecho del titular, porque el titular ahora dice en dos registros lo que la segunda oración decía en prosa. | UN renglón, 53 caracteres COMO MÁXIMO — es el largo que entra en una línea en media medida (354,80 px a 1440, medido en el navegador: 6,682 px por carácter). Texto plano. |
+| *(prosa)* | `bajada` | Valentino | El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta. | UN renglón, 36 caracteres COMO MÁXIMO. El techo lo pone el ancho MÁS ANGOSTO y no el más ancho: la caja de la bajada mide 256 px a 320, contra los 498,80 de media medida a 1920. Medido en el navegador sobre la cadena real al tamaño de la bajada (16 px): 243,34 px de renglón, o sea 6,952 px por carácter, y 36 × 6,952 = 250,3 entra en 256 mientras 37 se pasa. ⚠ El avance por carácter es propiedad de CADA frase y no de la fuente: una con más mayúsculas no entra en 36, y el instrumento vuelve a medir la que llegue. Texto plano. |
 | *(prosa)* | `cta.rotulo` | Valentino | Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover. | Tres palabras como máximo. Texto plano. |
 
 

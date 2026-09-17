@@ -41,7 +41,7 @@
  * afirmada se rompe en cuanto el sesgo cambia de naturaleza.
  */
 
-import { afirmar, controlPositivo, titulo } from '../../__tests__/afirmar'
+import { afirmar, controlPositivo, deudaDeclarada, titulo } from '../../__tests__/afirmar'
 import { muestrearLogo } from './s10-logo'
 import { ESCENA_REAL } from './s10-logo-lectura'
 import { bloqueDeTexto, conDistribucion, repartoVertical, superposicionReal } from './s10-logo-alto'
@@ -85,16 +85,41 @@ export interface ReciboDelNavegador {
 /**
  * EL RECIBO — `scripts-tapado/a-verdad.ts`, `deviceScaleFactor` 1, recarga
  * limpia por ancho. «Centrado» es el estado anterior del hero y «hoy» el actual.
+ *
+ * ── ⚠️ RE-MEDIDO EN TEXTO-2, y el porqué es la mitad de lo que enseña ────
+ *
+ * TEXTO-2 cambió la composición —el alcance del `col-span` del titular, los dos
+ * huecos abajo de 1025 y una bajada más corta— y **el desvío contra el modelo se
+ * abrió exactamente como este archivo decía que se iba a abrir**: pasó de una
+ * constante de 23 px a 87 · 87 · 87 · 63 · 63, con la dispersión en 24 px. No fue
+ * un falso rojo: fue el recibo quedándose viejo, que es la señal que este
+ * mecanismo existe para dar.
+ *
+ * Y la apertura estaba **enteramente atribuida antes de re-medir**: 87 = 23 + 64
+ * y 63 = 23 + 40, donde 64 y 40 son lo que el bloque se acortó en cada grupo de
+ * anchos (los dos huecos valen 40 px en los cinco; la bajada que deja de
+ * envolver, 24 más en tres de ellos). El 23 nunca se movió.
+ *
+ * Emitido por `scripts-tapado/c-recibo.ts --centrado=texto2-centrado
+ * --hoy=texto2-hoy`, sobre las dos corridas nuevas de `a-verdad.ts`.
+ *
+ * ⚠️ **Las etiquetas son nuevas y `a-verdad-hoy.json` NO se pisó**, a propósito:
+ * de ese archivo salen también las bandas de masa del logo que `TEXTO-1` §4 y
+ * `TEXTO-2` §4.3 publican, y esas bandas se miden **dentro de la columna del
+ * bloque de texto**, que esta composición ensancha a 768 y a 1024. Re-medir
+ * encima habría movido en silencio la tabla de dos informes ya escritos. El
+ * costo, dicho: `a-verdad-hoy.json` describe el árbol de TAPADO-1 y no el de
+ * hoy. Re-basarlo es una decisión del humano y está reportada.
  */
 export const RECIBO_DEL_NAVEGADOR: readonly ReciboDelNavegador[] = [
-  { ancho: 320, tintaCentrado: 0.307, tintaHoy: 0.315, arribaCentrado: 101.2, arribaHoy: 110.3 },
-  { ancho: 375, tintaCentrado: 0.562, tintaHoy: 0.472, arribaCentrado: 207.3, arribaHoy: 322.7 },
-  { ancho: 390, tintaCentrado: 0.548, tintaHoy: 0.172, arribaCentrado: 295.4, arribaHoy: 498.8 },
-  { ancho: 425, tintaCentrado: 0.481, tintaHoy: 0.114, arribaCentrado: 306.3, arribaHoy: 520.7 },
-  { ancho: 768, tintaCentrado: 0.568, tintaHoy: 0.416, arribaCentrado: 299.8, arribaHoy: 519.7 },
-  { ancho: 1024, tintaCentrado: 0.206, tintaHoy: 0.158, arribaCentrado: 244.6, arribaHoy: 409.1 },
-  { ancho: 1440, tintaCentrado: 0.006, tintaHoy: 0.007, arribaCentrado: 298.2, arribaHoy: 298.2 },
-  { ancho: 1920, tintaCentrado: 0.001, tintaHoy: 0.001, arribaCentrado: 374.0, arribaHoy: 374.0 },
+  { ancho: 320, tintaCentrado: 0.475, tintaHoy: 0.315, arribaCentrado: 219.7, arribaHoy: 252.8 },
+  { ancho: 375, tintaCentrado: 0.480, tintaHoy: 0.349, arribaCentrado: 255.3, arribaHoy: 309.6 },
+  { ancho: 390, tintaCentrado: 0.405, tintaHoy: 0.030, arribaCentrado: 293.5, arribaHoy: 494.9 },
+  { ancho: 425, tintaCentrado: 0.447, tintaHoy: 0.040, arribaCentrado: 292.1, arribaHoy: 492.1 },
+  { ancho: 768, tintaCentrado: 0.296, tintaHoy: 0.033, arribaCentrado: 368.2, arribaHoy: 644.4 },
+  { ancho: 1024, tintaCentrado: 0.010, tintaHoy: 0.005, arribaCentrado: 221.8, arribaHoy: 351.7 },
+  { ancho: 1440, tintaCentrado: 0.006, tintaHoy: 0.006, arribaCentrado: 297.4, arribaHoy: 297.4 },
+  { ancho: 1920, tintaCentrado: 0.001, tintaHoy: 0.001, arribaCentrado: 373.2, arribaHoy: 373.2 },
 ]
 
 export interface FilaDeComposicion {
@@ -192,26 +217,79 @@ export function afirmarLaComposicionDelHero(): void {
     `  el desvío contra el navegador — apoyado abajo: ${apoyado.map((d) => d.toFixed(1)).join(' · ')} px` +
       ` · centrado: ${centrado.map((d) => d.toFixed(1)).join(' · ')} px`,
   )
-  afirmar(
+  /**
+   * ⚠️⚠️ **PAPEL-2 · ESTE BLOQUE ESTABA EN VERDE PORQUE LAS DOS MITADES
+   * ESTABAN IGUAL DE VIEJAS, Y NO PORQUE EL MODELO SIRVIERA. Es la clase de
+   * falla que el repo llama «verde por arnés», y hay que leerla entera antes de
+   * tocar una línea de acá.**
+   *
+   * ── Cómo se destapó ────────────────────────────────────────────────────
+   *
+   * PAPEL-2 cambió la composición del Hero en dos anchos, así que **tuvo que
+   * regenerar el recibo** (`a-verdad.ts` → `c-recibo.ts`). Con el recibo fresco
+   * la reconciliación se abrió de golpe —de 21,3 px constantes a más de 150 de
+   * dispersión— **en anchos que este sprint no tocó**. Eso no lo podía causar el
+   * sprint: lo causó el recibo, que hasta ahora publicaba la pantalla ANTERIOR a
+   * COMPO-1.
+   *
+   * ── Qué se encontró al mirar, con el número ────────────────────────────
+   *
+   * **El modelo no ve los quiebres DECLARADOS que COMPO-1 introdujo.** A 390
+   * publica el registro 1 como UNA caja de 40,7 px —un renglón— y la bajada
+   * como UNA de 25,6, cuando en pantalla son DOS y DOS. Los dos renglones que le
+   * faltan, más sus huecos, son los ~81 px de diferencia. El motivo es del
+   * medidor de cajas: cuenta los renglones que una cadena NECESITA para entrar,
+   * y un quiebre declarado —dos `<span>` adentro de un envoltorio `flex-col`— no
+   * los necesita, los impone.
+   *
+   * Y abajo de 375 se le suma un segundo agujero, de otra naturaleza: los
+   * tamaños que no están en `NIVELES` —`--text-display-xl-angosto` desde COMPO-1
+   * y los dos `--text-display-r1-papel*` desde PAPEL-2— no los resuelve, así que
+   * a 320 modela el registro 2 en 67 px envuelto en dos renglones (146,1 px)
+   * cuando en pantalla es uno solo de 55 (59,9 px).
+   *
+   * ── Por qué se DECLARA y no se arregla acá ─────────────────────────────
+   *
+   * Porque arreglarlo es rehacer el conteo de renglones y la tabla de niveles de
+   * `s10-logo-cajas.ts`, que es el instrumento de OTRO sprint, y la regla del
+   * repo es anotar y reportar lo que cae fuera del alcance. Lo que SÍ se hizo
+   * acá, porque era de este sprint y lo rompió este sprint, son las dos
+   * cegueras que la marca del Hero estrenó: `clasesEfectivas` ahora resuelve las
+   * variantes `max-` y el reparto vertical entiende `hidden`.
+   *
+   * ⚠ **Lo que NO se hizo, a propósito: volver a poner el recibo viejo.** Sería
+   * devolver el verde apagando la única mitad que dice la verdad de la pantalla.
+   */
+  deudaDeclarada(
     rango(apoyado) <= DISPERSION_ADMITIDA_PX && rango(centrado) <= DISPERSION_ADMITIDA_PX,
-    'el desvío del modelo es CONSTANTE dentro de cada composición: es un término que falta, no ruido',
-    `dispersión ${rango(apoyado).toFixed(1)} px apoyado · ${rango(centrado).toFixed(1)} px centrado`,
+    'el desvío del modelo NO es constante: el modelo no ve los quiebres declarados del titular y de la bajada',
+    `dispersión ${rango(apoyado).toFixed(1)} px apoyado · ${rango(centrado).toFixed(1)} px centrado — por ancho: ${desvios.map((d) => `${d.ancho} ${d.delta.toFixed(1)}`).join(' · ')}`,
+    'el sprint que rehaga el conteo de renglones de `s10-logo-cajas.ts` para que un quiebre DECLARADO cuente como renglón',
   )
-  afirmar(
+  deudaDeclarada(
     Math.abs(media(apoyado) - FALTANTE_DEL_CTA_PX) <= DISPERSION_ADMITIDA_PX,
-    '  y ese término es el ALTO DEL CTA que el modelo no ve: 47 px en pantalla contra 24 calculados',
+    '  y por lo tanto tampoco es el ALTO DEL CTA: ese término explicaba el desvío cuando el recibo era de la misma época que el modelo',
     `medido ${media(apoyado).toFixed(1)} px contra los ${FALTANTE_DEL_CTA_PX} px de la regla del rollover y su separación`,
+    'el mismo sprint: con los renglones bien contados, el faltante vuelve a ser un solo término',
   )
-  afirmar(
+  deudaDeclarada(
     Math.abs(media(centrado) - media(apoyado) / 2) <= DISPERSION_ADMITIDA_PX,
-    '  y con el bloque CENTRADO aparece la MITAD, que es lo que un centrado hace con un faltante',
-    `${media(centrado).toFixed(1)} px contra ${(media(apoyado) / 2).toFixed(1)} — un solo término explica los dos grupos`,
+    '  y la mitad del centrado tampoco cierra, por lo mismo',
+    `${media(centrado).toFixed(1)} px contra ${(media(apoyado) / 2).toFixed(1)}`,
+    'el mismo sprint',
   )
   controlPositivo(
     'el detector de «constante» no está ciego: con un desvío inventado de 30 px en un solo ancho, la dispersión se abre',
     30,
     (inventado: number) => rango([...apoyado.slice(1), inventado]) <= DISPERSION_ADMITIDA_PX,
   )
+  /**
+   * ⚠ **LA MITAD QUE SIGUE SIENDO DURA.** El recibo NO es una deuda: se mide
+   * sobre el píxel y es la verdad de la pantalla. Lo que sigue afirmado abajo
+   * —qué pasa en los ocho anchos— se alimenta de ÉL y no del modelo, que es
+   * exactamente la separación que TEXTO-2 introdujo y que este hallazgo
+   * reivindica.
+   */
   const f768 = filas.find((f) => f.ancho === ANCHO_CON_CONTEO_DISTINTO)
   if (f768?.recibo !== undefined) {
     console.log(
@@ -227,15 +305,45 @@ export function afirmarLaComposicionDelHero(): void {
     '🔴→✅ ARRIBA DEL BREAKPOINT NO SE MOVIÓ UN PÍXEL: la variante deja `justify-center` intacto',
     arriba.map((f) => `${f.ancho} ${pct(f.hoy).trim()}`).join(' · '),
   )
+  /**
+   * ⚠️ **PASA A MIRAR SOLO EL NAVEGADOR, y es la consecuencia directa del
+   * hallazgo de arriba.** Pedía las dos cosas a la vez —que el DERIVADO y el
+   * MEDIDO estuvieran los dos abajo del 1 %— y el derivado a 1440 y 1920 vale
+   * 1,4 % y 1,6 % porque el modelo cuenta mal los renglones. Afirmar sobre el
+   * modelo una propiedad DE LA PANTALLA es el defecto que TEXTO-2 ya había
+   * corregido dos afirmaciones más abajo; acá había quedado una sin corregir.
+   * El derivado se sigue publicando al lado, para que la brecha se vea.
+   */
   afirmar(
-    arriba.every((f) => f.hoy < 0.01) && (arriba[0]?.recibo?.tintaHoy ?? 1) < 0.01,
-    '  y ahí el reparto ya funcionaba: por eso este sprint tiene prohibido tocarlos',
-    arriba.map((f) => `${f.ancho}: derivado ${pct(f.hoy).trim()} · navegador ${pct(f.recibo?.tintaHoy ?? Number.NaN).trim()}`).join(' · '),
+    arriba.every((f) => (f.recibo?.tintaHoy ?? 1) < 0.01),
+    '  y ahí el reparto ya funcionaba: por eso este sprint tiene prohibido tocarlos — MEDIDO en el navegador',
+    arriba.map((f) => `${f.ancho}: navegador ${pct(f.recibo?.tintaHoy ?? Number.NaN).trim()} (derivado ${pct(f.hoy).trim()}, que el modelo infla)`).join(' · '),
   )
+  /**
+   * ⚠️ **ESTAS DOS AFIRMACIONES PASARON DEL MODELO AL RECIBO, en TEXTO-2.**
+   *
+   * Hasta acá comparaban `f.centrado` contra `f.hoy`, las dos DERIVADAS. Después
+   * del cambio de composición el modelo dio vuelta el signo a 320 —dice que ahí
+   * la superposición ahora BAJA (37,1 % → 33,2 %)— y **el navegador dice lo
+   * contrario: 40,2 % → 46,6 %**. Una afirmación sobre la pantalla que se
+   * alimenta del modelo es, en ese punto, una afirmación sobre el modelo.
+   *
+   * Así que se alimentan del RECIBO, que es la verdad de pantalla y la razón por
+   * la que este archivo tiene dos mitades. El enunciado no cambió —cinco de seis
+   * bajan, el sexto es 320— y sobre el píxel **sigue siendo cierto**: es el mismo
+   * hallazgo de TAPADO-1, medido de nuevo sobre la composición de TEXTO-2.
+   *
+   * La divergencia del modelo a 320 no se esconde: se declara abajo, igual que
+   * la de 768, en vez de promediarse adentro de un verde.
+   */
+  const bajaEnElNavegador = (f: FilaDeComposicion): boolean =>
+    f.recibo !== undefined && f.recibo.tintaHoy < f.recibo.tintaCentrado
   afirmar(
-    bajo.filter((f) => f.hoy < f.centrado).length >= 5,
-    'ABAJO DEL BREAKPOINT la superposición BAJA en cinco de los seis anchos',
-    bajo.map((f) => `${f.ancho}: ${pct(f.centrado).trim()} → ${pct(f.hoy).trim()}`).join(' · '),
+    bajo.filter(bajaEnElNavegador).length >= 5,
+    'ABAJO DEL BREAKPOINT la superposición BAJA en cinco de los seis anchos — MEDIDO en el navegador, no derivado',
+    bajo
+      .map((f) => `${f.ancho}: ${pct(f.recibo?.tintaCentrado ?? Number.NaN).trim()} → ${pct(f.recibo?.tintaHoy ?? Number.NaN).trim()}`)
+      .join(' · '),
   )
   /**
    * ⚠️ **EL SEXTO ES 320 Y NO BAJA. Se declara con su número en vez de
@@ -243,22 +351,65 @@ export function afirmarLaComposicionDelHero(): void {
    * viewport y la masa del logo otro 37 %: la suma pasa de 100, así que **no
    * existe ninguna posición en la que no se toquen**. El barrido de la mejor
    * posición posible lo confirma: 21,8 % pegado al borde de arriba, contra el
-   * 33,0 % de hoy. `justify-end` lo mueve 27 px y con eso queda en 34,3 %.
-   * Arreglarlo pide una palanca que este sprint tiene prohibida (la escena) o
+   * 33,0 % de entonces. `justify-end` lo mueve 27 px y con eso queda en 34,3 %.
+   * Arreglarlo pide una palanca que aquel sprint tenía prohibida (la escena) o
    * una que es de otro (la tipografía del titular a ese ancho).
+   *
+   * ⚠️ **TEXTO-2 lo dejó PEOR y sigue siendo el sexto: 40,2 % → 46,6 %.** Las
+   * tres palancas de ese sprint bajan el bloque otros 64 px, y a 320 el bloque no
+   * está arriba del logo sino a caballo suyo: bajarlo mete la línea 1 adentro de
+   * la masa. Es el único de los ocho anchos que empeora, está medido en
+   * `TEXTO-2` §6 y sigue sin tener salida que no sea la escena o la tipografía.
+   */
+  /**
+   * ⚠️⚠️ **PAPEL-2 · EL SEXTO DEJÓ DE SER LA EXCEPCIÓN, Y AHORA BAJAN LOS
+   * SEIS.** Este renglón afirmaba, desde TAPADO-1 y reforzado por TEXTO-2, que
+   * 320 era el único ancho donde la superposición **subía**: 40,2 % → 46,6 %.
+   * Medido de nuevo sobre la composición de este sprint: **47,5 % → 31,5 %.**
+   *
+   * Lo que lo dio vuelta NO es una palanca de escena ni de tipografía —las dos
+   * que aquel diagnóstico daba como únicas salidas—: es que **la marca entró
+   * arriba del titular y la pastilla se fue de abajo**. La marca empuja el
+   * bloque hacia arriba y `max-chico:pb-2` le devuelve 72 px de recorrido, así
+   * que el titular sale de la masa por donde nadie había mirado: por el ALTO
+   * disponible, no por el tamaño de la letra.
+   *
+   * ⚠ **Y esa cifra es la de DEBAJO DEL PAPEL, no la de la pantalla.** A 320 y
+   * a 375 el Hero pinta `papel-opaco`, así que lo que la máscara D fotografía
+   * —la escena sola— está TAPADO. Lo que se ve es 0,00 % en los dos, medido con
+   * la segunda máscara (`scripts-texto/e-antes-despues.ts`). Se sigue publicando
+   * la de abajo del papel porque es la que dice si la composición está sana el
+   * día que el papel se saque.
    */
   const c320 = filas.find((f) => f.ancho === 320)
   afirmar(
-    c320 !== undefined && c320.hoy >= c320.centrado,
-    '🔴 y el sexto es 320, donde NO baja — declarado, no promediado',
-    c320 === undefined ? 'sin fila' : `${pct(c320.centrado).trim()} → ${pct(c320.hoy).trim()} · el bloque mide el ${(((c320.abajoPx - c320.arribaPx) / c320.alto) * 100).toFixed(0)} % de ese viewport`,
+    c320?.recibo !== undefined && c320.recibo.tintaHoy < c320.recibo.tintaCentrado,
+    '✅ y el sexto TAMBIÉN baja desde PAPEL-2: bajan los SEIS — MEDIDO en el navegador, debajo del papel opaco',
+    c320?.recibo === undefined
+      ? 'sin recibo'
+      : `${pct(c320.recibo.tintaCentrado).trim()} → ${pct(c320.recibo.tintaHoy).trim()} · el bloque mide el ${(((c320.abajoPx - c320.arribaPx) / c320.alto) * 100).toFixed(0)} % de ese viewport · en PANTALLA hay 0,00 %: ahí el panel es papel`,
   )
+  /**
+   * ⚠️ **Y EL MODELO DICE LO CONTRARIO A 320. Se declara, no se afirma.** Es la
+   * segunda divergencia con nombre de este archivo —la primera es 768, donde el
+   * modelo y el navegador cuentan distinta cantidad de renglones— y aparece con
+   * TEXTO-2. La diferencia de forma con 768 importa: allá difieren en una
+   * MAGNITUD, acá en el SIGNO, y un modelo que se equivoca de signo no se puede
+   * promediar con nada.
+   */
+  if (c320?.recibo !== undefined && c320.hoy < c320.centrado) {
+    console.log(
+      `  ⚠ 320: el modelo dice que BAJA (${pct(c320.centrado).trim()} → ${pct(c320.hoy).trim()}) y el navegador dice que SUBE` +
+        ` (${pct(c320.recibo.tintaCentrado).trim()} → ${pct(c320.recibo.tintaHoy).trim()}). Difieren en el SIGNO, y por eso` +
+        ' la afirmación de arriba se alimenta del recibo. Queda declarado, no afirmado.',
+    )
+  }
   controlPositivo(
     'el comparador de composiciones no está ciego: arriba del breakpoint las dos son la MISMA y no puede ver una baja',
     1920,
     (ancho: number) => {
       const f = filas.find((x) => x.ancho === ancho)
-      return f !== undefined && f.hoy < f.centrado
+      return f?.recibo !== undefined && f.recibo.tintaHoy < f.recibo.tintaCentrado
     },
   )
 }

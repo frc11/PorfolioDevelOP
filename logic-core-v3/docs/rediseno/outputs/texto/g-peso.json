@@ -1,0 +1,31 @@
+{
+  "cuando": "2026-09-16T15:53:21.432Z",
+  "archivos": [
+    "src/app/v3/_secciones/hero/Hero.tsx",
+    "src/app/v3/_secciones/hero/geometria.ts",
+    "src/app/v3/_secciones/hero/contenido.ts",
+    "src/app/v3/_secciones/hero/hero.invariant.tsx"
+  ],
+  "commitDeReferencia": "HEAD",
+  "sha256": {
+    "src/app/v3/_secciones/hero/Hero.tsx": "81039bd0dcfe2b6a3b67f729f936d576fa7facbf830bb59d6713b21c1506ad8f",
+    "src/app/v3/_secciones/hero/geometria.ts": "63a43b32f1ed4ed32c7305656a926265059c6c6a4a856351e8e09f9a5e6d2386",
+    "src/app/v3/_secciones/hero/contenido.ts": "a05883c4be82fbd5256d4443e9339092f398cb0c77437a724e7968c3af772378",
+    "src/app/v3/_secciones/hero/hero.invariant.tsx": "7f5e035bba4008a9c31d1aed087bb472bffc9d644551b0c76ab2822bab3d1aab"
+  },
+  "antes": {
+    "bytesDelLane": 66050.16,
+    "aireB": 38.8,
+    "linea": "ok   lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.54 KiB crudo  — 64.5 KiB — 38.8 B de aire · 70.4 KiB con el preámbulo heredado adentro"
+  },
+  "despues": {
+    "bytesDelLane": 66090.16,
+    "aireB": -1.2,
+    "linea": "FALLA lo que ESCRIBE el lane, sin el andamio de la llave, entra en 64.54 KiB crudo  — 64.5 KiB — -1.2 B de aire · 70.4 KiB con el preámbulo heredado adentro"
+  },
+  "deltaBytes": 40,
+  "alCentesimoDeArriba": 0.04,
+  "aireDelCentesimoDeArribaBytes": 1,
+  "propuestaKib": 0.05,
+  "aireDeLaPropuestaBytes": 11.2
+}

@@ -1,0 +1,1776 @@
+{
+  "etiqueta": "antes",
+  "cuando": "2026-09-16T14:55:01.848Z",
+  "instrumento": "scripts-texto/e-antes-despues.ts — el cruce de TAPADO-1 (C texto sin escena x D escena sola) sobre EL ARBOL, sin reglas encima salvo las simulaciones declaradas",
+  "huecoDeReferencia": "el hueco LIBRE sale de a-verdad-hoy.json: entre el fin de la masa 1 y el arranque de la masa 2 (bandas de 15 px o mas). No es lo que sobra hasta el borde.",
+  "filas": [
+    {
+      "ancho": 320,
+      "alto": 568,
+      "hueco": {
+        "ancho": 320,
+        "alto": 568,
+        "masa1Hasta": 386,
+        "masa2Desde": 444,
+        "huecoLibre": 57,
+        "huecoHastaElBorde": 181
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 256,
+          "anchoDeLaCajaDeLaBajada": 256,
+          "anchoMaximoDeLaBajada": 244.89,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 377.69,
+          "topeDelBloque": 110.31,
+          "fondoDelBloque": 488,
+          "topeDelTitular": 110.31,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 226.69
+            },
+            "glifos": 8347,
+            "tintaSobreLogo": 0.316,
+            "cajaSobreLogo": 0.4198,
+            "tintaBajoAA": 0.3133
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 80.66
+            },
+            "glifos": 4271,
+            "tintaSobreLogo": 0.0611,
+            "cajaSobreLogo": 0.1024,
+            "tintaBajoAA": 0.0588
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 190.97,
+              "ancho": 256,
+              "alto": 146.03
+            },
+            "glifos": 4076,
+            "tintaSobreLogo": 0.5832,
+            "cajaSobreLogo": 0.5968,
+            "tintaBajoAA": 0.58
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 377.69
+            },
+            "glifos": 10430,
+            "tintaSobreLogo": 0.2969,
+            "cajaSobreLogo": 0.3012,
+            "tintaBajoAA": 0.2887
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 256,
+          "anchoDeLaCajaDeLaBajada": 256,
+          "anchoMaximoDeLaBajada": 244.89,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 377.69,
+          "topeDelBloque": 110.31,
+          "fondoDelBloque": 488,
+          "topeDelTitular": 110.31,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 226.69
+            },
+            "glifos": 8347,
+            "tintaSobreLogo": 0.316,
+            "cajaSobreLogo": 0.4198,
+            "tintaBajoAA": 0.3133
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 80.66
+            },
+            "glifos": 4271,
+            "tintaSobreLogo": 0.0611,
+            "cajaSobreLogo": 0.1024,
+            "tintaBajoAA": 0.0588
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 190.97,
+              "ancho": 256,
+              "alto": 146.03
+            },
+            "glifos": 4076,
+            "tintaSobreLogo": 0.5832,
+            "cajaSobreLogo": 0.5968,
+            "tintaBajoAA": 0.58
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 110.31,
+              "ancho": 256,
+              "alto": 377.69
+            },
+            "glifos": 10430,
+            "tintaSobreLogo": 0.2969,
+            "cajaSobreLogo": 0.3012,
+            "tintaBajoAA": 0.2887
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 256,
+          "anchoDeLaCajaDeLaBajada": 256,
+          "anchoMaximoDeLaBajada": 244.89,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 337.69,
+          "topeDelBloque": 150.31,
+          "fondoDelBloque": 488,
+          "topeDelTitular": 150.31,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 150.31,
+              "ancho": 256,
+              "alto": 226.69
+            },
+            "glifos": 8347,
+            "tintaSobreLogo": 0.3964,
+            "cajaSobreLogo": 0.4531,
+            "tintaBajoAA": 0.3944
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 150.31,
+              "ancho": 256,
+              "alto": 80.66
+            },
+            "glifos": 4271,
+            "tintaSobreLogo": 0.4641,
+            "cajaSobreLogo": 0.4831,
+            "tintaBajoAA": 0.461
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 230.97,
+              "ancho": 256,
+              "alto": 146.03
+            },
+            "glifos": 4076,
+            "tintaSobreLogo": 0.3256,
+            "cajaSobreLogo": 0.4363,
+            "tintaBajoAA": 0.3246
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 150.31,
+              "ancho": 256,
+              "alto": 337.69
+            },
+            "glifos": 10430,
+            "tintaSobreLogo": 0.3502,
+            "cajaSobreLogo": 0.3362,
+            "tintaBajoAA": 0.343
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 375,
+      "alto": 667,
+      "hueco": {
+        "ancho": 375,
+        "alto": 667,
+        "masa1Hasta": 454,
+        "masa2Desde": 521,
+        "huecoLibre": 66,
+        "huecoHastaElBorde": 212
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 311,
+          "anchoDeLaCajaDeLaBajada": 311,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 264.34,
+          "topeDelBloque": 322.66,
+          "fondoDelBloque": 587,
+          "topeDelTitular": 322.66,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 311,
+              "alto": 113.34
+            },
+            "glifos": 8305,
+            "tintaSobreLogo": 0.4704,
+            "cajaSobreLogo": 0.5193,
+            "tintaBajoAA": 0.4659
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 302.19,
+              "alto": 40.33
+            },
+            "glifos": 4230,
+            "tintaSobreLogo": 0.5111,
+            "cajaSobreLogo": 0.5813,
+            "tintaBajoAA": 0.5047
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 362.98,
+              "ancho": 307.14,
+              "alto": 73.02
+            },
+            "glifos": 4075,
+            "tintaSobreLogo": 0.4282,
+            "cajaSobreLogo": 0.4879,
+            "tintaBajoAA": 0.4255
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 311,
+              "alto": 264.34
+            },
+            "glifos": 10387,
+            "tintaSobreLogo": 0.3775,
+            "cajaSobreLogo": 0.2743,
+            "tintaBajoAA": 0.3736
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 311,
+          "anchoDeLaCajaDeLaBajada": 311,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 264.34,
+          "topeDelBloque": 322.66,
+          "fondoDelBloque": 587,
+          "topeDelTitular": 322.66,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 311,
+              "alto": 113.34
+            },
+            "glifos": 8305,
+            "tintaSobreLogo": 0.4704,
+            "cajaSobreLogo": 0.5193,
+            "tintaBajoAA": 0.4659
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 302.19,
+              "alto": 40.33
+            },
+            "glifos": 4230,
+            "tintaSobreLogo": 0.5111,
+            "cajaSobreLogo": 0.5813,
+            "tintaBajoAA": 0.5047
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 362.98,
+              "ancho": 307.14,
+              "alto": 73.02
+            },
+            "glifos": 4075,
+            "tintaSobreLogo": 0.4282,
+            "cajaSobreLogo": 0.4879,
+            "tintaBajoAA": 0.4255
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 322.66,
+              "ancho": 311,
+              "alto": 264.34
+            },
+            "glifos": 10387,
+            "tintaSobreLogo": 0.3775,
+            "cajaSobreLogo": 0.2743,
+            "tintaBajoAA": 0.3736
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 37,
+          "fsL2": 67,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 311,
+          "anchoDeLaCajaDeLaBajada": 311,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 224.34,
+          "topeDelBloque": 362.66,
+          "fondoDelBloque": 587,
+          "topeDelTitular": 362.66,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 362.66,
+              "ancho": 311,
+              "alto": 113.34
+            },
+            "glifos": 8305,
+            "tintaSobreLogo": 0.4944,
+            "cajaSobreLogo": 0.3417,
+            "tintaBajoAA": 0.4944
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 362.66,
+              "ancho": 302.19,
+              "alto": 40.33
+            },
+            "glifos": 4230,
+            "tintaSobreLogo": 0.847,
+            "cajaSobreLogo": 0.7596,
+            "tintaBajoAA": 0.847
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 402.98,
+              "ancho": 307.14,
+              "alto": 73.02
+            },
+            "glifos": 4075,
+            "tintaSobreLogo": 0.1283,
+            "cajaSobreLogo": 0.1142,
+            "tintaBajoAA": 0.1283
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 362.66,
+              "ancho": 311,
+              "alto": 224.34
+            },
+            "glifos": 10387,
+            "tintaSobreLogo": 0.3965,
+            "cajaSobreLogo": 0.2194,
+            "tintaBajoAA": 0.3965
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 390,
+      "alto": 844,
+      "hueco": {
+        "ancho": 390,
+        "alto": 844,
+        "masa1Hasta": 575,
+        "masa2Desde": 659,
+        "huecoLibre": 83,
+        "huecoHastaElBorde": 268
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 37.3,
+          "fsL2": 67.52,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 326,
+          "anchoDeLaCajaDeLaBajada": 326,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 265.22,
+          "topeDelBloque": 498.78,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 498.78,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 326,
+              "alto": 114.22
+            },
+            "glifos": 8527,
+            "tintaSobreLogo": 0.1711,
+            "cajaSobreLogo": 0.1624,
+            "tintaBajoAA": 0.1697
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 304.55,
+              "alto": 40.64
+            },
+            "glifos": 4390,
+            "tintaSobreLogo": 0.2474,
+            "cajaSobreLogo": 0.2884,
+            "tintaBajoAA": 0.2446
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 539.42,
+              "ancho": 309.52,
+              "alto": 73.58
+            },
+            "glifos": 4137,
+            "tintaSobreLogo": 0.0902,
+            "cajaSobreLogo": 0.1014,
+            "tintaBajoAA": 0.0902
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 326,
+              "alto": 265.22
+            },
+            "glifos": 10609,
+            "tintaSobreLogo": 0.1462,
+            "cajaSobreLogo": 0.1297,
+            "tintaBajoAA": 0.141
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 37.3,
+          "fsL2": 67.52,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 326,
+          "anchoDeLaCajaDeLaBajada": 326,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 265.22,
+          "topeDelBloque": 498.78,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 498.78,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 326,
+              "alto": 114.22
+            },
+            "glifos": 8527,
+            "tintaSobreLogo": 0.1711,
+            "cajaSobreLogo": 0.1624,
+            "tintaBajoAA": 0.1697
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 304.55,
+              "alto": 40.64
+            },
+            "glifos": 4390,
+            "tintaSobreLogo": 0.2474,
+            "cajaSobreLogo": 0.2884,
+            "tintaBajoAA": 0.2446
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 539.42,
+              "ancho": 309.52,
+              "alto": 73.58
+            },
+            "glifos": 4137,
+            "tintaSobreLogo": 0.0902,
+            "cajaSobreLogo": 0.1014,
+            "tintaBajoAA": 0.0902
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 498.78,
+              "ancho": 326,
+              "alto": 265.22
+            },
+            "glifos": 10609,
+            "tintaSobreLogo": 0.1462,
+            "cajaSobreLogo": 0.1297,
+            "tintaBajoAA": 0.141
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 37.3,
+          "fsL2": 67.52,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 326,
+          "anchoDeLaCajaDeLaBajada": 326,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 225.22,
+          "topeDelBloque": 538.78,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 538.78,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 538.78,
+              "ancho": 326,
+              "alto": 114.22
+            },
+            "glifos": 8527,
+            "tintaSobreLogo": 0.1147,
+            "cajaSobreLogo": 0.0643,
+            "tintaBajoAA": 0.1136
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 538.78,
+              "ancho": 304.55,
+              "alto": 40.64
+            },
+            "glifos": 4390,
+            "tintaSobreLogo": 0.22,
+            "cajaSobreLogo": 0.1811,
+            "tintaBajoAA": 0.22
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 579.42,
+              "ancho": 309.52,
+              "alto": 73.58
+            },
+            "glifos": 4137,
+            "tintaSobreLogo": 0.0029,
+            "cajaSobreLogo": 0.004,
+            "tintaBajoAA": 0.0007
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 538.78,
+              "ancho": 326,
+              "alto": 225.22
+            },
+            "glifos": 10609,
+            "tintaSobreLogo": 0.1433,
+            "cajaSobreLogo": 0.1024,
+            "tintaBajoAA": 0.1401
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 425,
+      "alto": 844,
+      "hueco": {
+        "ancho": 425,
+        "alto": 844,
+        "masa1Hasta": 575,
+        "masa2Desde": 659,
+        "huecoLibre": 83,
+        "huecoHastaElBorde": 268
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 37.99,
+          "fsL2": 68.74,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 361,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 243.3,
+          "topeDelBloque": 520.7,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 520.7,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 361,
+              "alto": 116.3
+            },
+            "glifos": 8802,
+            "tintaSobreLogo": 0.1142,
+            "cajaSobreLogo": 0.0829,
+            "tintaBajoAA": 0.1122
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 310.19,
+              "alto": 41.39
+            },
+            "glifos": 4494,
+            "tintaSobreLogo": 0.2163,
+            "cajaSobreLogo": 0.1971,
+            "tintaBajoAA": 0.2158
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 562.09,
+              "ancho": 315.06,
+              "alto": 74.91
+            },
+            "glifos": 4308,
+            "tintaSobreLogo": 0.0077,
+            "cajaSobreLogo": 0.0388,
+            "tintaBajoAA": 0.0042
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 361,
+              "alto": 243.3
+            },
+            "glifos": 10871,
+            "tintaSobreLogo": 0.1386,
+            "cajaSobreLogo": 0.0983,
+            "tintaBajoAA": 0.1306
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 37.99,
+          "fsL2": 68.74,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 361,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 243.3,
+          "topeDelBloque": 520.7,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 520.7,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 361,
+              "alto": 116.3
+            },
+            "glifos": 8802,
+            "tintaSobreLogo": 0.1142,
+            "cajaSobreLogo": 0.0829,
+            "tintaBajoAA": 0.1122
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 310.19,
+              "alto": 41.39
+            },
+            "glifos": 4494,
+            "tintaSobreLogo": 0.2163,
+            "cajaSobreLogo": 0.1971,
+            "tintaBajoAA": 0.2158
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 562.09,
+              "ancho": 315.06,
+              "alto": 74.91
+            },
+            "glifos": 4308,
+            "tintaSobreLogo": 0.0077,
+            "cajaSobreLogo": 0.0388,
+            "tintaBajoAA": 0.0042
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 520.7,
+              "ancho": 361,
+              "alto": 243.3
+            },
+            "glifos": 10871,
+            "tintaSobreLogo": 0.1386,
+            "cajaSobreLogo": 0.0983,
+            "tintaBajoAA": 0.1306
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 37.99,
+          "fsL2": 68.74,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 361,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 203.3,
+          "topeDelBloque": 560.7,
+          "fondoDelBloque": 764,
+          "topeDelTitular": 560.7,
+          "titular": {
+            "caja": {
+              "x": 32,
+              "y": 560.7,
+              "ancho": 361,
+              "alto": 116.3
+            },
+            "glifos": 8802,
+            "tintaSobreLogo": 0.05,
+            "cajaSobreLogo": 0.0935,
+            "tintaBajoAA": 0.0434
+          },
+          "linea1": {
+            "caja": {
+              "x": 32,
+              "y": 560.7,
+              "ancho": 310.19,
+              "alto": 41.39
+            },
+            "glifos": 4494,
+            "tintaSobreLogo": 0.0708,
+            "cajaSobreLogo": 0.076,
+            "tintaBajoAA": 0.0708
+          },
+          "linea2": {
+            "caja": {
+              "x": 32,
+              "y": 602.09,
+              "ancho": 315.06,
+              "alto": 74.91
+            },
+            "glifos": 4308,
+            "tintaSobreLogo": 0.0283,
+            "cajaSobreLogo": 0.1237,
+            "tintaBajoAA": 0.0149
+          },
+          "bloque": {
+            "caja": {
+              "x": 32,
+              "y": 560.7,
+              "ancho": 361,
+              "alto": 203.3
+            },
+            "glifos": 10871,
+            "tintaSobreLogo": 0.041,
+            "cajaSobreLogo": 0.0843,
+            "tintaBajoAA": 0.0357
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 768,
+      "alto": 1024,
+      "hueco": {
+        "ancho": 768,
+        "alto": 1024,
+        "masa1Hasta": 699,
+        "masa2Desde": 800,
+        "huecoLibre": 100,
+        "huecoHastaElBorde": 324
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 2,
+          "renglonesL2": 2,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 364,
+          "anchoDeLaCajaDeLaBajada": 270,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 424.34,
+          "topeDelBloque": 519.66,
+          "fondoDelBloque": 944,
+          "topeDelTitular": 519.66,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 273.34
+            },
+            "glifos": 12134,
+            "tintaSobreLogo": 0.4153,
+            "cajaSobreLogo": 0.3242,
+            "tintaBajoAA": 0.414
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 97.53
+            },
+            "glifos": 6241,
+            "tintaSobreLogo": 0.8045,
+            "cajaSobreLogo": 0.7276,
+            "tintaBajoAA": 0.8023
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 617.19,
+              "ancho": 364,
+              "alto": 175.81
+            },
+            "glifos": 5893,
+            "tintaSobreLogo": 0.0031,
+            "cajaSobreLogo": 0.0966,
+            "tintaBajoAA": 0.0029
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 519.66,
+              "ancho": 364,
+              "alto": 424.34
+            },
+            "glifos": 14216,
+            "tintaSobreLogo": 0.3644,
+            "cajaSobreLogo": 0.2579,
+            "tintaBajoAA": 0.3599
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 552,
+          "anchoDeLaCajaDeLaBajada": 270,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 287.67,
+          "topeDelBloque": 656.33,
+          "fondoDelBloque": 944,
+          "topeDelTitular": 656.33,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 552,
+              "alto": 136.67
+            },
+            "glifos": 12131,
+            "tintaSobreLogo": 0.1181,
+            "cajaSobreLogo": 0.0447,
+            "tintaBajoAA": 0.1157
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 365.39,
+              "alto": 48.77
+            },
+            "glifos": 6240,
+            "tintaSobreLogo": 0.225,
+            "cajaSobreLogo": 0.1761,
+            "tintaBajoAA": 0.225
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 705.09,
+              "ancho": 369.7,
+              "alto": 87.91
+            },
+            "glifos": 5891,
+            "tintaSobreLogo": 0.0049,
+            "cajaSobreLogo": 0.0027,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 656.33,
+              "ancho": 552,
+              "alto": 287.67
+            },
+            "glifos": 14213,
+            "tintaSobreLogo": 0.1108,
+            "cajaSobreLogo": 0.07,
+            "tintaBajoAA": 0.1053
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 44.75,
+          "fsL2": 80.65,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 2,
+          "anchoDeLaCajaDelTitular": 552,
+          "anchoDeLaCajaDeLaBajada": 270,
+          "anchoMaximoDeLaBajada": 266.08,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 247.67,
+          "topeDelBloque": 696.33,
+          "fondoDelBloque": 944,
+          "topeDelTitular": 696.33,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 552,
+              "alto": 136.67
+            },
+            "glifos": 12131,
+            "tintaSobreLogo": 0.0698,
+            "cajaSobreLogo": 0.0946,
+            "tintaBajoAA": 0.0538
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 365.39,
+              "alto": 48.77
+            },
+            "glifos": 6240,
+            "tintaSobreLogo": 0.0035,
+            "cajaSobreLogo": 0.0175,
+            "tintaBajoAA": 0.0032
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 745.09,
+              "ancho": 369.7,
+              "alto": 87.91
+            },
+            "glifos": 5891,
+            "tintaSobreLogo": 0.14,
+            "cajaSobreLogo": 0.2058,
+            "tintaBajoAA": 0.1075
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 696.33,
+              "ancho": 552,
+              "alto": 247.67
+            },
+            "glifos": 14213,
+            "tintaSobreLogo": 0.0604,
+            "cajaSobreLogo": 0.0596,
+            "tintaBajoAA": 0.0468
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 1024,
+      "alto": 768,
+      "hueco": {
+        "ancho": 1024,
+        "alto": 768,
+        "masa1Hasta": 531,
+        "masa2Desde": 605,
+        "huecoLibre": 73,
+        "huecoHastaElBorde": 236
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 49.8,
+          "fsL2": 89.55,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 534.66,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 278.86,
+          "topeDelBloque": 409.14,
+          "fondoDelBloque": 688,
+          "topeDelTitular": 409.14,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 534.66,
+              "alto": 151.86
+            },
+            "glifos": 14887,
+            "tintaSobreLogo": 0.1564,
+            "cajaSobreLogo": 0.1884,
+            "tintaBajoAA": 0.1562
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 406.64,
+              "alto": 54.27
+            },
+            "glifos": 7586,
+            "tintaSobreLogo": 0.3029,
+            "cajaSobreLogo": 0.2706,
+            "tintaBajoAA": 0.3027
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 463.41,
+              "ancho": 410.45,
+              "alto": 97.59
+            },
+            "glifos": 7301,
+            "tintaSobreLogo": 0.0041,
+            "cajaSobreLogo": 0.0062,
+            "tintaBajoAA": 0.0041
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 534.66,
+              "alto": 278.86
+            },
+            "glifos": 16956,
+            "tintaSobreLogo": 0.1379,
+            "cajaSobreLogo": 0.1327,
+            "tintaBajoAA": 0.1378
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}",
+          "fsL1": 49.8,
+          "fsL2": 89.55,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 808,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 278.86,
+          "topeDelBloque": 409.14,
+          "fondoDelBloque": 688,
+          "topeDelTitular": 409.14,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 808,
+              "alto": 151.86
+            },
+            "glifos": 14887,
+            "tintaSobreLogo": 0.1564,
+            "cajaSobreLogo": 0.1766,
+            "tintaBajoAA": 0.1562
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 406.64,
+              "alto": 54.27
+            },
+            "glifos": 7586,
+            "tintaSobreLogo": 0.3029,
+            "cajaSobreLogo": 0.2706,
+            "tintaBajoAA": 0.3027
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 463.41,
+              "ancho": 410.45,
+              "alto": 97.59
+            },
+            "glifos": 7301,
+            "tintaSobreLogo": 0.0041,
+            "cajaSobreLogo": 0.0062,
+            "tintaBajoAA": 0.0041
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 409.14,
+              "ancho": 808,
+              "alto": 278.86
+            },
+            "glifos": 16956,
+            "tintaSobreLogo": 0.1379,
+            "cajaSobreLogo": 0.1173,
+            "tintaBajoAA": 0.1378
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "[data-pantalla=\"hero\"] [class*=\"col-span-2\"]{grid-column:1/-1!important}[data-pantalla=\"hero\"] div[class*=\"gap-8\"]{gap:8px!important}[data-pantalla=\"hero\"] div[class*=\"gap-6\"]{gap:8px!important}",
+          "fsL1": 49.8,
+          "fsL2": 89.55,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 808,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 8,
+            "bajadaACta": 8
+          },
+          "altoDelBloque": 238.86,
+          "topeDelBloque": 449.14,
+          "fondoDelBloque": 688,
+          "topeDelTitular": 449.14,
+          "titular": {
+            "caja": {
+              "x": 184,
+              "y": 449.14,
+              "ancho": 808,
+              "alto": 151.86
+            },
+            "glifos": 14887,
+            "tintaSobreLogo": 0.0149,
+            "cajaSobreLogo": 0.0661,
+            "tintaBajoAA": 0.0127
+          },
+          "linea1": {
+            "caja": {
+              "x": 184,
+              "y": 449.14,
+              "ancho": 406.64,
+              "alto": 54.27
+            },
+            "glifos": 7586,
+            "tintaSobreLogo": 0.0228,
+            "cajaSobreLogo": 0.0537,
+            "tintaBajoAA": 0.0206
+          },
+          "linea2": {
+            "caja": {
+              "x": 184,
+              "y": 503.41,
+              "ancho": 410.45,
+              "alto": 97.59
+            },
+            "glifos": 7301,
+            "tintaSobreLogo": 0.0067,
+            "cajaSobreLogo": 0.0053,
+            "tintaBajoAA": 0.0045
+          },
+          "bloque": {
+            "caja": {
+              "x": 184,
+              "y": 449.14,
+              "ancho": 808,
+              "alto": 238.86
+            },
+            "glifos": 16956,
+            "tintaSobreLogo": 0.0136,
+            "cajaSobreLogo": 0.066,
+            "tintaBajoAA": 0.0117
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 1440,
+      "alto": 900,
+      "hueco": {
+        "ancho": 1440,
+        "alto": 900,
+        "masa1Hasta": 421,
+        "masa2Desde": null,
+        "huecoLibre": null,
+        "huecoHastaElBorde": 478
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 58,
+          "fsL2": 104,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 478.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 303.58,
+          "topeDelBloque": 298.2,
+          "fondoDelBloque": 601.78,
+          "topeDelTitular": 298.2,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 176.58
+            },
+            "glifos": 20523,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.006
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 473.69,
+              "alto": 63.22
+            },
+            "glifos": 10653,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0061,
+            "tintaBajoAA": 0.0054
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 361.42,
+              "ancho": 476.7,
+              "alto": 113.36
+            },
+            "glifos": 9870,
+            "tintaSobreLogo": 0.007,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0067
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 303.58
+            },
+            "glifos": 22582,
+            "tintaSobreLogo": 0.0066,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0056
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "",
+          "fsL1": 58,
+          "fsL2": 104,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 478.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 303.58,
+          "topeDelBloque": 298.2,
+          "fondoDelBloque": 601.78,
+          "topeDelTitular": 298.2,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 176.58
+            },
+            "glifos": 20523,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.006
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 473.69,
+              "alto": 63.22
+            },
+            "glifos": 10653,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0061,
+            "tintaBajoAA": 0.0054
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 361.42,
+              "ancho": 476.7,
+              "alto": 113.36
+            },
+            "glifos": 9870,
+            "tintaSobreLogo": 0.007,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0067
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 303.58
+            },
+            "glifos": 22582,
+            "tintaSobreLogo": 0.0066,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0056
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "",
+          "fsL1": 58,
+          "fsL2": 104,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 478.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 303.58,
+          "topeDelBloque": 298.2,
+          "fondoDelBloque": 601.78,
+          "topeDelTitular": 298.2,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 176.58
+            },
+            "glifos": 20523,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.006
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 473.69,
+              "alto": 63.22
+            },
+            "glifos": 10653,
+            "tintaSobreLogo": 0.0071,
+            "cajaSobreLogo": 0.0061,
+            "tintaBajoAA": 0.0054
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 361.42,
+              "ancho": 476.7,
+              "alto": 113.36
+            },
+            "glifos": 9870,
+            "tintaSobreLogo": 0.007,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0067
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 298.2,
+              "ancho": 478.39,
+              "alto": 303.58
+            },
+            "glifos": 22582,
+            "tintaSobreLogo": 0.0066,
+            "cajaSobreLogo": 0.0058,
+            "tintaBajoAA": 0.0056
+          }
+        }
+      ]
+    },
+    {
+      "ancho": 1920,
+      "alto": 1080,
+      "hueco": {
+        "ancho": 1920,
+        "alto": 1080,
+        "masa1Hasta": 628,
+        "masa2Desde": null,
+        "huecoLibre": null,
+        "huecoHastaElBorde": 451
+      },
+      "configuraciones": [
+        {
+          "clave": "0-arbol",
+          "que": "el arbol como esta, sin una sola regla encima",
+          "regla": "",
+          "fsL1": 67.46,
+          "fsL2": 120.68,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 670.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 332.06,
+          "topeDelBloque": 373.97,
+          "fondoDelBloque": 706.03,
+          "topeDelTitular": 373.97,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 205.06
+            },
+            "glifos": 27393,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0044,
+            "tintaBajoAA": 0.0003
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 550.95,
+              "alto": 73.53
+            },
+            "glifos": 14088,
+            "tintaSobreLogo": 0.0006,
+            "cajaSobreLogo": 0.0027,
+            "tintaBajoAA": 0.0006
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 447.5,
+              "ancho": 553.16,
+              "alto": 131.53
+            },
+            "glifos": 13305,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0036,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 332.06
+            },
+            "glifos": 29452,
+            "tintaSobreLogo": 0.0007,
+            "cajaSobreLogo": 0.0042,
+            "tintaBajoAA": 0.0003
+          }
+        },
+        {
+          "clave": "sim-caja-entera",
+          "que": "PASO 1 simulado: el titular usa las 3 columnas de la medida, solo abajo de 1025",
+          "regla": "",
+          "fsL1": 67.46,
+          "fsL2": 120.68,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 670.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 332.06,
+          "topeDelBloque": 373.97,
+          "fondoDelBloque": 706.03,
+          "topeDelTitular": 373.97,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 205.06
+            },
+            "glifos": 27393,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0044,
+            "tintaBajoAA": 0.0003
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 550.95,
+              "alto": 73.53
+            },
+            "glifos": 14088,
+            "tintaSobreLogo": 0.0006,
+            "cajaSobreLogo": 0.0027,
+            "tintaBajoAA": 0.0006
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 447.5,
+              "ancho": 553.16,
+              "alto": 131.53
+            },
+            "glifos": 13305,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0036,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 332.06
+            },
+            "glifos": 29452,
+            "tintaSobreLogo": 0.0007,
+            "cajaSobreLogo": 0.0042,
+            "tintaBajoAA": 0.0003
+          }
+        },
+        {
+          "clave": "sim-caja-y-huecos",
+          "que": "PASO 1 + PASO 3 simulados: la caja entera y los dos huecos a 8 px, solo abajo de 1025",
+          "regla": "",
+          "fsL1": 67.46,
+          "fsL2": 120.68,
+          "renglonesL1": 1,
+          "renglonesL2": 1,
+          "renglonesBajada": 1,
+          "anchoDeLaCajaDelTitular": 670.39,
+          "anchoDeLaCajaDeLaBajada": 328.47,
+          "anchoMaximoDeLaBajada": 328.47,
+          "huecos": {
+            "titularABajada": 32,
+            "bajadaACta": 24
+          },
+          "altoDelBloque": 332.06,
+          "topeDelBloque": 373.97,
+          "fondoDelBloque": 706.03,
+          "topeDelTitular": 373.97,
+          "titular": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 205.06
+            },
+            "glifos": 27393,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0044,
+            "tintaBajoAA": 0.0003
+          },
+          "linea1": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 550.95,
+              "alto": 73.53
+            },
+            "glifos": 14088,
+            "tintaSobreLogo": 0.0006,
+            "cajaSobreLogo": 0.0027,
+            "tintaBajoAA": 0.0006
+          },
+          "linea2": {
+            "caja": {
+              "x": 188,
+              "y": 447.5,
+              "ancho": 553.16,
+              "alto": 131.53
+            },
+            "glifos": 13305,
+            "tintaSobreLogo": 0.0005,
+            "cajaSobreLogo": 0.0036,
+            "tintaBajoAA": 0
+          },
+          "bloque": {
+            "caja": {
+              "x": 188,
+              "y": 373.97,
+              "ancho": 670.39,
+              "alto": 332.06
+            },
+            "glifos": 29452,
+            "tintaSobreLogo": 0.0007,
+            "cajaSobreLogo": 0.0042,
+            "tintaBajoAA": 0.0003
+          }
+        }
+      ]
+    }
+  ]
+}

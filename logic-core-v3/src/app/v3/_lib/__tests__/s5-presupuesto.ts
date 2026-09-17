@@ -265,6 +265,209 @@ export const MONTAJE_DE_MOVIL_KIB = 0.04
 export const MONTAJE_DE_TAPADO_KIB = 0.04
 
 /**
+ * **+0,05 KiB** — lo que TEXTO-2 monta al corregir el alcance del `col-span` del
+ * titular, bajar los dos huecos del bloque abajo de 1025 y acortar la bajada.
+ * **40,0 B**, medidos A/B entre dos builds de producción del MISMO árbol en la
+ * MISMA máquina, con una sola variable: los cuatro archivos del hero devueltos a
+ * `HEAD` (`4009d327`) con `git show` y restaurados desde copias guardadas FUERA
+ * del árbol, con los cuatro sha256 verificados. `s5-peso` leyó **38,8 B de aire**
+ * en el «antes» y **−1,2 B** en el «después». Recibo completo, con el inventario
+ * derivado y con el control que cierra la cadena hasta TAPADO-1, en
+ * `s5-presupuesto-recibos-de-texto2.ts`.
+ *
+ * ⚠️ **Ninguna de las cinco clases nuevas estrena una regla de CSS**, y está
+ * verificado sobre el `.css` construido: `tablet:col-span-3`,
+ * `escritorio:col-span-2`, `gap-2`, `escritorio:gap-8` y `escritorio:gap-6` ya se
+ * emitían para otras secciones. Lo que viaja son cadenas más largas en el chunk
+ * y una clave más en `GEOMETRIA`, contra los 16 caracteres que devuelve la
+ * bajada.
+ *
+ * 🔴 **Es la SEGUNDA línea que nace con la regla del aire útil**, y el caso es
+ * más claro que el de TAPADO-1: al centésimo de arriba —0,04, la convención sin
+ * excepciones— quedan **0,96 B de aire**, 7,04 B debajo del umbral de 8. Al
+ * siguiente —0,05— quedan **11,2 B**, el mismo orden que B11 (8,6), B12 (8,2),
+ * el titular (10,8) y MOVIL-1 (10,0).
+ *
+ * ⚠️ **El techo de 60 NO se movió.** Es una línea con nombre que se le suma, y es
+ * revocable sola: revocarla es devolver `tablet:col-span-2`, los dos huecos a
+ * 32/24 en todos los anchos y la bajada de 49 caracteres.
+ */
+export const MONTAJE_DE_TEXTO2_KIB = 0.05
+
+/**
+ * **+0,22 KiB** — lo que TEXTO-3 monta al tapar la escena en la banda angosta.
+ * **216,0 B**, medidos A/B entre dos builds de producción del MISMO árbol en la
+ * MISMA máquina, con una sola variable: nueve archivos devueltos al árbol de
+ * TEXTO-2 —cinco desde `HEAD` y dos desde el respaldo que aquel sprint dejó
+ * fuera del árbol, con su sha256 verificado contra el recibo—. `s5-peso` leyó
+ * **50,0 B de aire** en el «antes» y **−166,0 B** en el «después».
+ *
+ * ⚠️ **Y el «antes» reproduce el cierre de TEXTO-2 al décimo de byte** (66.090,2
+ * contra 66.090,2, desvío −0,0), que es lo que prueba que la resta aísla ESTE
+ * sprint y no arrastra el anterior. Recibo completo, con el método de las dos
+ * fuentes, en `s5-presupuesto-recibos-de-texto3.ts`.
+ *
+ * ⚠️ **Son muchos bytes para lo que compran, y se dice:** un fondo que se pinta
+ * en una banda de 55 px de ancho cuesta la quinta línea más grande del tablero.
+ * Lo que se paga es el MECANISMO —un campo en el tipo del recorrido, una tabla
+ * de clases, una rama en el panel y un atributo—, no la decisión: la segunda
+ * sección que declare banda angosta ya lo encuentra pago.
+ *
+ * ⚠ El token `--breakpoint-angosto` y su regla NO están en esta cuenta: son CSS,
+ * y este techo mide sólo los `<script src>` de la ruta.
+ *
+ * Al centésimo de arriba: 216,0 / 1024 = 0,2109 → **0,22**, que deja **9,3 B de
+ * aire**, arriba del umbral de 8. Es la primera de las tres últimas líneas que
+ * no necesita la regla del aire útil.
+ *
+ * ⚠️ **El techo de 60 NO se movió.** Revocarla es sacar `superficieAngosta` de la
+ * fila del Hero: la escena vuelve a verse a 320, que es la composición que este
+ * sprint midió y descartó.
+ */
+export const MONTAJE_DE_TEXTO3_KIB = 0.22
+
+/**
+ * **+0,59 KiB** — lo que COMPO-1 monta: **diez ajustes de composición del Hero
+ * pedidos por el dueño mirando el sitio**, de los cuales seis dejan bytes en la
+ * carga inicial (el titular en tres filas, la bajada en dos y un escalón más
+ * grande, el CTA alineado, la columna lateral colapsada abajo de 1025 y el aire
+ * del pie en portátil).
+ *
+ * **589,0 B**, medidos A/B entre dos builds de producción del MISMO árbol en la
+ * MISMA máquina, con una sola variable: once archivos devueltos al árbol de
+ * TEXTO-3 —ocho desde el respaldo que este sprint copió fuera del árbol antes de
+ * tocar nada, uno desde `HEAD` con su `git status` publicado, y uno que se
+ * borra porque en el «antes» no existía—. ⚠ El A/B se corrió DOS veces: la
+ * primera dio 573 B y la medición del navegador encontró después que
+ * `medio:mb-4` llegaba a 1440 y a 1920 (una variante de ancho es `min-width` y
+ * no se apaga sola), así que la corrección agregó 16 B. Lo que sostiene la línea
+ * es la RESTA, que no depende del techo.
+ *
+ * ⚠️ **Y el «antes» reproduce el cierre de TEXTO-3 al décimo de byte** (66.306,2
+ * contra 66.306,2, desvío 0,0), que es lo que prueba que la resta aísla ESTE
+ * sprint y no arrastra los tres sin commitear que tiene debajo. Recibo completo
+ * en `s5-presupuesto-recibos-de-compo1.ts`, con el inventario derivado y con los
+ * sha256 del árbol de TEXTO-3 para el sprint que venga.
+ *
+ * ⚠️ **Es la CUARTA línea más grande del tablero —detrás de B12, B4-A y el
+ * titular—, y se dice por qué.** No es un
+ * mecanismo nuevo: son seis cadenas de clase y ocho claves de geometría adentro
+ * de un objeto que viaja entero. **Y se dice también qué se podría haber
+ * achicado**: tres de esas ocho claves las lee sólo el invariante y sacarlas
+ * ahorraría ~84 B, el 15 %; no se hizo porque volverlas literales escritos a
+ * mano es el defecto que `padron-de-tokens.ts` documenta.
+ *
+ * ⚠ El token `--text-display-xl-angosto` y su regla NO están en esta cuenta: son
+ * CSS, y este techo mide sólo los `<script src>` de la ruta.
+ *
+ * Al centésimo de arriba: 589,0 / 1024 = 0,5752 → 0,58, que deja **4,9 B** de
+ * aire, **3,1 B debajo** del umbral de 8. Así que se aplica la regla del aire
+ * útil —la que estrenó TAPADO-1— y la línea sube un centésimo: **0,59**, con
+ * **15,2 B**.
+ *
+ * ⚠️ **El techo de 60 NO se movió.** Revocarla es deshacer los seis cambios que
+ * viajan, o sea volver exactamente a la pantalla que el dueño pidió cambiar.
+ */
+export const MONTAJE_DE_COMPO1_KIB = 0.59
+
+/**
+ * **+0,76 KiB** — lo que PAPEL-2 monta: **la marca arriba del titular en los
+ * anchos de papel**, más el papel extendido a 375, el registro 1 igualado al
+ * registro 2 y la pastilla apagada. **764,0 B** de desvío medidos A/B entre dos
+ * builds del mismo árbol.
+ *
+ * ── ⚠️ EL REPARTO ES MEDIDO, NO DERIVADO, Y PARTE LA LÍNEA EN DOS ─────────
+ *
+ * Se corrió un TERCER build —el árbol de cierre con la marca quitada— para que
+ * la pieza cara se pueda revocar sola sin adivinar cuánto vale:
+ *
+ *     «antes» (árbol de COMPO-1)              66.895,2 B
+ *     sin la marca (§1 + §3 + §5)             67.063,2 B   +168,0
+ *     cierre (todo)                           67.659,2 B   +764,0
+ *     → LA MARCA SOLA (§2)                                  596,0 B
+ *
+ * O sea que **el 78 % de esta línea es la marca**, y adentro de ella manda una
+ * sola cosa: los **493 caracteres** de `LOGO_PATH_D`, el path de
+ * `public/logodevelOP.svg`. Un path vectorial es una cadena y un minificador no
+ * la puede achicar.
+ *
+ * ⚠️ **Lo que se podría haber achicado, dicho con el número.** La marca viaja en
+ * el chunk de cliente porque `Hero.tsx` lleva `'use client'`; montada desde un
+ * componente de SERVIDOR costaría 0 B de JS (es lo que B12 midió para la marca
+ * en pantalla). No se hizo porque pasarla por el contrato de secciones es
+ * cambiarle la forma a las ocho, y eso no es de este sprint. **Queda como la
+ * primera palanca para quien necesite estos 596 B.**
+ *
+ * ⚠ La alternativa barata —`<img src="/logodevelOP.svg">`— cuesta ~40 B de
+ * marcado pero pierde `currentColor` (el path no declara `fill`, así que sale
+ * negro y hay que invertirlo con un filtro), agrega un request y deja un hueco
+ * mientras baja. Es lo que `LogoMark.tsx` documenta y por eso el sitio no la usa.
+ *
+ * ⚠️ **Y el «antes» reproduce el cierre de COMPO-1 al décimo de byte** (66.895,2
+ * contra 66.895,2, desvío 0,0), que es lo que prueba que la resta aísla ESTE
+ * sprint y no arrastra los cuatro sin commitear que tiene debajo. El «antes» se
+ * RECONSTRUYÓ —no se copió de `HEAD` ni se sacó de un `stash`, que con
+ * `core.autocrlf=true` reescribiría el árbol en CRLF— quitando de cada archivo
+ * exactamente lo que el sprint le puso, con un `assert` por quite:
+ * `scripts-papel/b-antes.mjs`, con los sha256 publicados.
+ *
+ * ⚠ Los tres tokens nuevos —`--breakpoint-chico`, `--text-display-r1-papel` y su
+ * hermano angosto— y sus reglas NO están en esta cuenta: son CSS, y este techo
+ * mide sólo los `<script src>` de la ruta.
+ *
+ * Al centésimo de arriba: 764,0 / 1024 = 0,7461 → 0,75, que deja **4,0 B** de
+ * aire, **4,0 B debajo** del umbral de 8. Así que se aplica la regla del aire
+ * útil —la que estrenó TAPADO-1— y la línea sube un centésimo: **0,76**, con
+ * **14,2 B**.
+ *
+ * ⚠️ **El techo de 60 NO se movió.** Revocarla entera es volver a la pantalla que
+ * el dueño pidió cambiar; revocar sólo la marca son 596,0 B y deja el resto en
+ * pie, que es para lo que el tercer build existe.
+ */
+export const MONTAJE_DE_PAPEL2_KIB = 0.76
+
+/**
+ * **+0,19 KiB** — lo que COMPO-2 monta: **cinco ajustes de composición y una
+ * regla global**. La marca del Hero ×2,63 y el bloque centrado en la banda de
+ * papel, el registro 1 del titular crecido en 768 y en 1024 hasta sus dos
+ * techos medidos, el renglón que la regla global le saca al bloque devuelto
+ * como margen en 768–859, y la pastilla apagada hasta 860. **186,0 B** de
+ * desvío medidos A/B entre dos builds del mismo árbol.
+ *
+ * ── ⚠️ ES LA LÍNEA MÁS CHICA DEL TABLERO DESPUÉS DE TAPADO-1, Y NO ES SUERTE
+ *
+ * Porque **la regla global DEVUELVE bytes**: la bajada deja de ser dos `<span>`
+ * con un separador adentro de un envoltorio que conmutaba y pasa a ser un nodo
+ * de texto, lo que saca **70 B** del chunk. Sin esa devolución la línea habría
+ * sido 256 B. Es la segunda vez en el tablero que un sprint devuelve peso —la
+ * primera fue B13— y por el mismo motivo: sacó marcado, no lo agregó.
+ *
+ * ⚠️ **Y el «antes» reproduce el cierre de PAPEL-2 al décimo de byte** (71.960,0
+ * contra 71.960,0, desvío 0,0), **en un `distDir` distinto**, que es lo que
+ * prueba a la vez que la reconstrucción es fiel y que el directorio de build no
+ * mueve la cifra. El «antes» se RECONSTRUYÓ —no se copió de `HEAD` ni se sacó
+ * de un `stash`, que con `core.autocrlf=true` reescribiría el árbol en CRLF—
+ * quitando de cada archivo exactamente lo que el sprint le puso, con un
+ * `assert` por quite: `scripts-compo2/c-antes.mjs`, con los sha256 publicados.
+ *
+ * ⚠ El ruido entre dos builds del MISMO árbol está medido y declarado: **9,0 B**
+ * (72.155,0 en `.next-compo2` contra 72.146,0 en `.next`). La línea se calcula
+ * con el par que el gate lee y el otro queda publicado en el recibo.
+ *
+ * ⚠ El token `--text-display-r1-portatil` y sus reglas NO están en esta cuenta:
+ * son CSS, y este techo mide sólo los `<script src>` de la ruta.
+ *
+ * Al centésimo de arriba: 186,0 / 1024 = 0,1816 → **0,19**, que deja **8,6 B**
+ * de aire, **por encima** del umbral de 8. Es la primera línea en cinco que NO
+ * necesita la regla del aire útil.
+ *
+ * ⚠️ **El techo de 60 NO se movió.** El reparto completo, con el inventario
+ * derivado y sus 15 B sin atribuir, está en
+ * `s5-presupuesto-recibos-de-compo2.ts`.
+ */
+export const MONTAJE_DE_COMPO2_KIB = 0.19
+
+/**
  * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
  *
  * Es lo que agrega el contenido inventado de B12 §4: las veinte casillas
@@ -321,8 +524,8 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  *
- * ⚠️ Son **los NUEVE montajes más el heredado**, sin repetir ni faltar; la
- * undécima línea con nombre es el techo de 60, y se la suma
+ * ⚠️ Son **los ONCE montajes más el heredado**, sin repetir ni faltar; la
+ * decimotercera línea con nombre es el techo de 60, y se la suma
  * `PRESUPUESTO_PROPIO_KIB`.
  * MOVIL-1 agregó la suya en el mismo acto en que la declaró.
  * La de TAPADO-1 la agregó la parada de PAPEL-1, dos sprints tarde: el porqué
@@ -332,6 +535,34 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * quedó afuera**: la constante existía, con su valor de origen, y no se sumaba.
  * B10 la volvió a poner. B11 agregó la suya en el mismo acto en que la declaró.
  */
+/**
+ * ⚠️ **COMPO-1 · LAS LÍNEAS CON NOMBRE, ENUMERADAS — para que la CUENTA deje de
+ * ser un literal.** `s5-peso` publicaba «las nueve líneas» escrito a mano y hacía
+ * tres sprints que estaba viejo. La lista de acá es la misma que la suma de
+ * abajo, en el mismo orden, y el instrumento cuenta sobre ella: una línea nueva
+ * mueve el número sola.
+ *
+ * ⚠ `HEREDADO_SIN_DECLARAR_KIB` NO entra: no es una línea con nombre de nadie —
+ * es lo heredado que se vigila y se publica con atribución, que es otra cosa.
+ */
+export const LINEAS_CON_NOMBRE: readonly (readonly [string, number])[] = [
+  ['B4-A', MONTAJE_DE_B4A_KIB],
+  ['B7', ARREGLO_DE_B7_KIB],
+  ['B6-A', MONTAJE_DE_B6A_KIB],
+  ['B9', MONTAJE_DE_B9_KIB],
+  ['B8', MONTAJE_DE_B8_KIB],
+  ['B11', MONTAJE_DE_B11_KIB],
+  ['B12', MONTAJE_DE_B12_KIB],
+  ['TITULAR', MONTAJE_DEL_TITULAR_KIB],
+  ['MOVIL-1', MONTAJE_DE_MOVIL_KIB],
+  ['TAPADO-1', MONTAJE_DE_TAPADO_KIB],
+  ['TEXTO-2', MONTAJE_DE_TEXTO2_KIB],
+  ['TEXTO-3', MONTAJE_DE_TEXTO3_KIB],
+  ['COMPO-1', MONTAJE_DE_COMPO1_KIB],
+  ['PAPEL-2', MONTAJE_DE_PAPEL2_KIB],
+  ['COMPO-2', MONTAJE_DE_COMPO2_KIB],
+]
+
 export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B4A_KIB +
   ARREGLO_DE_B7_KIB +
@@ -343,5 +574,10 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DEL_TITULAR_KIB +
   MONTAJE_DE_MOVIL_KIB +
   MONTAJE_DE_TAPADO_KIB +
+  MONTAJE_DE_TEXTO2_KIB +
+  MONTAJE_DE_TEXTO3_KIB +
+  MONTAJE_DE_COMPO1_KIB +
+  MONTAJE_DE_PAPEL2_KIB +
+  MONTAJE_DE_COMPO2_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB
