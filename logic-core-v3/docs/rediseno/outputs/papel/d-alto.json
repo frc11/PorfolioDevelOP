@@ -1,0 +1,426 @@
+[
+  {
+    "ancho": 320,
+    "alto": 568,
+    "ventana": {
+      "ancho": 320,
+      "alto": 568
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 8
+    },
+    "conMarca": true,
+    "pastillaVisible": false,
+    "fondoDelPanel": "rgb(247, 247, 245)",
+    "columna": {
+      "arriba": 158.25,
+      "abajo": 560,
+      "alto": 401.75
+    },
+    "utilDeLaPantalla": 480,
+    "holgura": 78.25,
+    "fraccionDelViewport": 70.73,
+    "piezas": [
+      {
+        "clave": "logotipo",
+        "x": 32,
+        "y": 158.25,
+        "ancho": 40.77,
+        "alto": 11.98,
+        "tamano": 11
+      },
+      {
+        "clave": "isotipo",
+        "x": 32,
+        "y": 178.23,
+        "ancho": 95.66,
+        "alto": 66.55,
+        "tamano": 16
+      },
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 252.78,
+        "ancho": 256,
+        "alto": 193.03,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 453.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 513,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 375,
+    "alto": 667,
+    "ventana": {
+      "ancho": 375,
+      "alto": 667
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 8
+    },
+    "conMarca": true,
+    "pastillaVisible": false,
+    "fondoDelPanel": "rgb(247, 247, 245)",
+    "columna": {
+      "arriba": 200.58,
+      "abajo": 659,
+      "alto": 458.42
+    },
+    "utilDeLaPantalla": 579,
+    "holgura": 120.58,
+    "fraccionDelViewport": 68.73,
+    "piezas": [
+      {
+        "clave": "logotipo",
+        "x": 32,
+        "y": 200.58,
+        "ancho": 40.77,
+        "alto": 11.98,
+        "tamano": 11
+      },
+      {
+        "clave": "isotipo",
+        "x": 32,
+        "y": 220.56,
+        "ancho": 116.55,
+        "alto": 81.08,
+        "tamano": 16
+      },
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 309.64,
+        "ancho": 311,
+        "alto": 235.17,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 552.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 612,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 390,
+    "alto": 844,
+    "ventana": {
+      "ancho": 390,
+      "alto": 844
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 494.95,
+      "abajo": 764,
+      "alto": 269.05
+    },
+    "utilDeLaPantalla": 684,
+    "holgura": 414.95,
+    "fraccionDelViewport": 31.88,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 494.95,
+        "ancho": 326,
+        "alto": 154.86,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 657.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 717,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 425,
+    "alto": 844,
+    "ventana": {
+      "ancho": 425,
+      "alto": 844
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 492.13,
+      "abajo": 764,
+      "alto": 271.88
+    },
+    "utilDeLaPantalla": 684,
+    "holgura": 412.13,
+    "fraccionDelViewport": 32.21,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 492.13,
+        "ancho": 361,
+        "alto": 157.69,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 657.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 717,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 768,
+    "alto": 1024,
+    "ventana": {
+      "ancho": 768,
+      "alto": 1024
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 644.38,
+      "abajo": 944,
+      "alto": 299.63
+    },
+    "utilDeLaPantalla": 864,
+    "holgura": 564.38,
+    "fraccionDelViewport": 29.26,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 644.38,
+        "ancho": 704,
+        "alto": 185.44,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 837.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 897,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 1024,
+    "alto": 768,
+    "ventana": {
+      "ancho": 1024,
+      "alto": 768
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 351.69,
+      "abajo": 672,
+      "alto": 320.31
+    },
+    "utilDeLaPantalla": 608,
+    "holgura": 287.69,
+    "fraccionDelViewport": 41.71,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 32,
+        "y": 351.69,
+        "ancho": 960,
+        "alto": 206.13,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 32,
+        "y": 565.81,
+        "ancho": 126.5,
+        "alto": 51.19,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 24,
+        "y": 625,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 1440,
+    "alto": 900,
+    "ventana": {
+      "ancho": 1440,
+      "alto": 900
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 297.41,
+      "abajo": 602.58,
+      "alto": 305.17
+    },
+    "utilDeLaPantalla": 740,
+    "holgura": 434.83,
+    "fraccionDelViewport": 33.91,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 188,
+        "y": 297.41,
+        "ancho": 478.39,
+        "alto": 176.58,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 188,
+        "y": 505.98,
+        "ancho": 243.34,
+        "alto": 25.59,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 180,
+        "y": 555.58,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  },
+  {
+    "ancho": 1920,
+    "alto": 1080,
+    "ventana": {
+      "ancho": 1920,
+      "alto": 1080
+    },
+    "relleno": {
+      "arriba": 80,
+      "abajo": 80
+    },
+    "conMarca": false,
+    "pastillaVisible": true,
+    "fondoDelPanel": "rgba(0, 0, 0, 0)",
+    "columna": {
+      "arriba": 373.17,
+      "abajo": 706.83,
+      "alto": 333.66
+    },
+    "utilDeLaPantalla": 920,
+    "holgura": 586.34,
+    "fraccionDelViewport": 30.89,
+    "piezas": [
+      {
+        "clave": "titular",
+        "x": 188,
+        "y": 373.17,
+        "ancho": 670.39,
+        "alto": 205.06,
+        "tamano": 16
+      },
+      {
+        "clave": "bajada",
+        "x": 188,
+        "y": 610.23,
+        "ancho": 243.34,
+        "alto": 25.59,
+        "tamano": 16
+      },
+      {
+        "clave": "cta",
+        "x": 180,
+        "y": 659.83,
+        "ancho": 175.47,
+        "alto": 47,
+        "tamano": 16
+      }
+    ]
+  }
+]

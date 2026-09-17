@@ -194,3 +194,18 @@ src/modules/chatbot/evals/reports/
 # baja para producir las dos caras del titular. Son INSUMO, no evidencia: el
 # manifiesto publica su sha256 y `subsetear-fuentes.py` los vuelve a bajar solo.
 /scripts-titular/_upstream/
+# `.next-papel/`: build aislado de PAPEL-2 (la composicion de los anchos de
+# papel), para el A/B de peso entre el arbol de COMPO-1 y el de este sprint sin
+# pisar el `.next/` del build de cierre. Se agrega ACA ANTES de correr el build,
+# por la leccion de `distDir` fuera de `.gitignore`: un directorio de build no
+# ignorado envenena la auto-deteccion de fuentes de Tailwind 4 y rompe rutas
+# enteras con un error que apunta a un archivo sano.
+/.next-papel/
+# `.next-compo2/` y `.next-compo2-antes/`: los DOS builds del A/B de peso de
+# COMPO-2 (los cinco ajustes de composicion), el arbol de este sprint y el de
+# PAPEL-2 reconstruido. Se agregan ACA ANTES de correr los builds, por la
+# leccion de `distDir` fuera de `.gitignore`: un directorio de build no ignorado
+# envenena la auto-deteccion de fuentes de Tailwind 4 y rompe rutas enteras con
+# un error que apunta a un archivo sano.
+/.next-compo2/
+/.next-compo2-antes/

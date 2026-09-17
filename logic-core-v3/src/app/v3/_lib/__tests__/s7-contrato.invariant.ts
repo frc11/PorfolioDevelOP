@@ -184,9 +184,31 @@ afirmar(
 )
 afirmar(/ssr:\s*false/.test(sinComentarios), '  con `ssr: false`, que es lo que emite el chunk aparte')
 
-/** Ninguna sección consulta la compuerta por su cuenta. */
+/**
+ * Ninguna sección consulta la compuerta por su cuenta.
+ *
+ * ⚠️ **PAPEL-2 · SE MIRA EL CÓDIGO Y NO EL ARCHIVO, Y LO ENSEÑÓ UN FALSO
+ * POSITIVO.** Este filtro buscaba `useAnchoMinimo` en el fuente ENTERO, así que
+ * se puso en rojo el día que un docblock EXPLICÓ por qué una clase es una media
+ * query y no una rama de JS —o sea, exactamente por escribir la razón de no
+ * consultar la compuerta—. Un detector que castiga la documentación de su propia
+ * regla está midiendo la palabra, no la propiedad.
+ *
+ * Es el mismo defecto que `s10-mobile-pastilla` ya había cazado en su chequeo de
+ * breakpoints («buscaba `escritorio` en el archivo entero, así que se habría
+ * puesto roja el día que alguien la escribiera en un comentario») y se arregla
+ * igual: se saca el comentario antes de preguntar. Lo que se protege no cambia
+ * ni un poco — una consulta de verdad vive en el código.
+ */
+const soloCodigo = (fuente: string): string =>
+  fuente
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .split('\n')
+    .filter((l) => !/^\s*\/\//.test(l))
+    .join('\n')
+
 const consultan = PRODUCTO.filter(
-  (a) => a !== `${SECCIONES}/CompuertaDelHome.tsx` && /useAnchoMinimo|CONSULTA_ESCENARIO/.test(leer(a)),
+  (a) => a !== `${SECCIONES}/CompuertaDelHome.tsx` && /useAnchoMinimo|CONSULTA_ESCENARIO/.test(soloCodigo(leer(a))),
 )
 afirmarIgual(consultan, [], 'ninguna sección consulta la compuerta: se resuelve una vez, arriba')
 
@@ -194,6 +216,15 @@ controlPositivo(
   'el chequeo del umbral ve un componente que declara el suyo',
   'const MIO = 1025',
   (fuente: string) => !/1025/.test(fuente),
+)
+controlPositivo(
+  'el de la consulta NO está ciego: ve un `useAnchoMinimo` en el código',
+  'const ancho = useAnchoMinimo(1025)',
+  (fuente: string) => !/useAnchoMinimo|CONSULTA_ESCENARIO/.test(soloCodigo(fuente)),
+)
+afirmar(
+  !/useAnchoMinimo/.test(soloCodigo('/* habla de useAnchoMinimo en prosa */\nconst a = 1')),
+  '  y NO se lo cree por un comentario: la palabra en prosa no es una consulta',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

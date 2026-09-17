@@ -1,3 +1,4 @@
+import { LOGO_INK_VIEWBOX_ATTR, LOGO_PATH_D } from '@/components/ui/LogoMark'
 import { cn } from '@/lib/utils'
 
 import { LOGOTIPO } from './sistema'
@@ -32,6 +33,54 @@ export function Logotipo({
     <Como data-pieza="logotipo" className={cn('font-titulo tracking-titulo leading-titulo font-semi', className)}>
       {LOGOTIPO}
     </Como>
+  )
+}
+
+/**
+ * EL ISOTIPO — la marca dibujada, en 2D y en el DOM. **La cuarta pieza.**
+ *
+ * ── ⚠️ DE DÓNDE SALE EL DIBUJO, Y POR QUÉ NO ES UNA COPIA MÁS ─────────────
+ *
+ * Del `LOGO_PATH_D` que ya exporta `components/ui/LogoMark.tsx`, que a su vez es
+ * el path de `public/logodevelOP.svg` —**el asset canónico de marca**, el mismo
+ * que el mesh 3D extrude por `SVGLoader`—. Ese archivo documenta que el path
+ * está copiado en CUATRO lugares del repo y que si la marca cambia hay que
+ * tocar los cuatro; esta pieza **no agrega el quinto**: importa la constante.
+ *
+ * Es también la razón por la que NO se captura el 3D ni se lee el canvas: el
+ * dibujo ya existe como datos, y el preloader nuevo (`IntroLogoStroke`) ya lo
+ * usa exactamente así —SVG inline en el DOM, sin WebGL— como su camino de
+ * respaldo declarado. Esta pieza es ese mismo camino, quieto.
+ *
+ * ── Por qué el `viewBox` es el de la TINTA y no el cuadrado de 1024 ───────
+ *
+ * Porque `LOGO_INK_VIEWBOX` mide la tinta real —978,5 × 680,7— y dice que **no
+ * llena el cuadrado y no está centrada en él: su centro cae 33 unidades por
+ * debajo**. Con el cuadrado, un alto declarado de 81 px pintaría 54 de marca y
+ * 27 de aire mudo, con la pieza corrida para abajo. Con el `viewBox` recortado,
+ * el alto que se le pide es el alto que se ve. Es la misma decisión que
+ * `IntroLogoStroke` toma para el trazo del preloader, y por el mismo motivo.
+ *
+ * ── Lo que NO declara, a propósito ────────────────────────────────────────
+ *
+ * Ni tamaño ni color. `fill="currentColor"` hereda la tinta del contexto —así
+ * la marca se da vuelta sola con `data-seccion="invertida"` sin una clase
+ * condicional— y la caja la pone quien la monta, que es el único que sabe con
+ * qué la está alineando. `role="presentation"`: la palabra `develOP` va en
+ * texto al lado, así que el dibujo no agrega un dato, agrega un registro.
+ */
+export function Isotipo({ className }: { readonly className?: string }): React.JSX.Element {
+  return (
+    <svg
+      data-pieza="isotipo"
+      viewBox={LOGO_INK_VIEWBOX_ATTR}
+      className={cn('w-auto shrink-0', className)}
+      fill="currentColor"
+      role="presentation"
+      focusable="false"
+    >
+      <path d={LOGO_PATH_D} />
+    </svg>
   )
 }
 

@@ -14,6 +14,7 @@ import { atributo, nodosDe } from './s10-recorrido'
 import { esRolDeLandmark } from './s10-acceso'
 import { imprimirLandmarks, publicar } from './s10-acceso-tablas'
 import { RAMAS } from './s10-banco'
+import { CLASE_DE_LA_PASTILLA_APAGADA } from '../../_chrome/contrato'
 
 export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMAS)[number]) => string): void {
   titulo('5 · LOS LANDMARKS — los que hay, y los que no llegan a serlo')
@@ -52,6 +53,55 @@ export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMA
    */
   const bannerEsPrimero = LANDMARKS[0].rol === 'banner'
   afirmar(bannerEsPrimero, 'el `banner` EXISTE y abre el documento — el `<header>` es el envoltorio de la pastilla, hermano del `<main>`', LANDMARKS.map((l) => l.rol).join(' · '))
+  /**
+   * ⚠️⚠️ **ESTA CUENTA ES DE MARCADO, Y ABAJO DE 860 LA PANTALLA TIENE DOS
+   * LANDMARKS MENOS. Se declara acá porque este censo es el único lugar del
+   * repo donde alguien va a buscar el número.**
+   *
+   * `ChromeDelHome` monta la pastilla con `max-medio:hidden` —pedido del dueño:
+   * va a rehacer la navegación y quiere planificar las vistas angostas sin
+   * ella, y la decisión está declarada como TEMPORAL en `_chrome/contrato.ts`—.
+   * Un `display:none` saca el elemento del árbol de accesibilidad, así que
+   * abajo de 860 se van el `banner` —que ES ese envoltorio— y la `navigation`
+   * que cuelga de él: quedan **9 de los 11**, y el `<main>` pasa a abrir el
+   * documento.
+   *
+   * ⚠️ **LA BANDA CRECIÓ EN COMPO-2 Y EL INVARIANTE NO SE BORRÓ: SE REESCRIBIÓ
+   * CON LA BANDA NUEVA.** PAPEL-2 la apagaba abajo de 390 —dos anchos del set,
+   * 320 y 375—; el §2 y el §3 de COMPO-2 la apagan también en 425 y en 768, así
+   * que el corte pasa a `--breakpoint-medio` (860) y los anchos del set
+   * afectados pasan de **dos a cinco**. Lo que se pierde por ancho es lo mismo;
+   * lo que cambió es en cuántos.
+   *
+   * **El censo NO lo ve y no se lo hace ver.** Lee el marcado estático, que no
+   * tiene ancho; una media query no se puede contar desde un HTML. Lo que se
+   * hace es afirmar lo que SÍ es comprobable desde acá —que el `banner` viaja
+   * con la clase que lo apaga, o sea que la pérdida está acotada a esa banda y
+   * no es un descuido— y dejar el número escrito.
+   *
+   * ⚠ `SaltarAlContenido` NO se tocó y sigue siendo el primer foco de la
+   * página, así que el atajo de teclado que importa sigue estando en los ocho
+   * anchos.
+   *
+   * **Esto es una regresión de accesibilidad y se declara como tal.** Cierra
+   * cuando la navegación nueva se monte; si tampoco aparece abajo de 860, el
+   * reemplazo tiene que traer su propio landmark.
+   */
+  afirmar(
+    QUIETA.includes(CLASE_DE_LA_PASTILLA_APAGADA),
+    `  ⚠ y ABAJO DE 860 no está: el envoltorio del \`banner\` lleva \`${CLASE_DE_LA_PASTILLA_APAGADA}\` — ahí el documento tiene ${LANDMARKS.length - 2} landmarks y el \`main\` lo abre (PAPEL-2 §5 + COMPO-2 §2b/§3a, TEMPORAL)`,
+    `${LANDMARKS.length} en el marcado · ${LANDMARKS.length - 2} en pantalla abajo de 860 — 5 de los 8 anchos del set`,
+  )
+  afirmarIgual(
+    CLASE_DE_LA_PASTILLA_APAGADA,
+    'max-medio:hidden',
+    '  y la banda es la del corte declarado que separa 768 de 1024, no un corte nuevo: el dueño quiere la pastilla a 1024',
+  )
+  controlPositivo(
+    'el chequeo de la banda ve una pastilla apagada en TODO ancho, que sería otra cosa',
+    '<header class="hidden" data-pieza="navegacion">',
+    (h: string) => h.includes(CLASE_DE_LA_PASTILLA_APAGADA),
+  )
   const navAnidado = nodosDe(QUIETA).filter((n) => n.etiqueta === 'nav' && n.ancestros.includes('main'))
   afirmarIgual(navAnidado.length, 0, '  y el `navigation` YA NO está anidado en el `main`: un «saltar al contenido» sí saltea la navegación')
   const mains = nodosDe(QUIETA).filter((n) => n.etiqueta === 'main')

@@ -63,7 +63,13 @@
     ".next-b12/types/**/*.ts",
     ".next-b12/dev/types/**/*.ts",
     ".next-b12llave/types/**/*.ts",
-    ".next-b12llave/dev/types/**/*.ts"
+    ".next-b12llave/dev/types/**/*.ts",
+    ".next-papel/types/**/*.ts",
+    ".next-papel/dev/types/**/*.ts",
+    ".next-compo2/types/**/*.ts",
+    ".next-compo2/dev/types/**/*.ts",
+    ".next-compo2-antes/types/**/*.ts",
+    ".next-compo2-antes/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

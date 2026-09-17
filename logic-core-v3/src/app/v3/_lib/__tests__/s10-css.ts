@@ -212,6 +212,31 @@ export function variantesActivas(anchoDeViewport: number): string[] {
  * conservan con su prefijo: no dependen del viewport y sacarlas convertiría un
  * estado en un permanente. Una variante de ancho que no llega se descarta
  * entera, que es lo que hace el navegador con una media query que no coincide.
+ *
+ * ── ⚠️ PAPEL-2 · AHORA TAMBIÉN RESUELVE LAS `max-`, Y ERA UNA DEUDA ESCRITA ─
+ *
+ * Hasta este sprint los prefijos `max-*` caían en la rama de «no es de ancho» y
+ * se conservaban ENTEROS, o sea que ninguna de las dos formas se resolvía: una
+ * `max-angosto:text-display-xl-angosto` seguía entera a 320 —donde SÍ aplica— y
+ * seguía entera a 1920 —donde no—. `hero/composicion.ts` lo declaraba como
+ * límite y resolvía su único caso a mano, con el comentario «`clasesEfectivas`
+ * no sabe de variantes `max-`».
+ *
+ * **PAPEL-2 lo volvió insostenible**: el Hero pasa a llevar `max-chico:pb-2` al
+ * lado de `pb-20` y dos tamaños `max-` en la tipografía del titular. Con la
+ * rama vieja el modelo del reparto vertical leía `pb-20` en los OCHO anchos —y
+ * por lo tanto ubicaba mal el bloque en los dos donde la pastilla no está—.
+ *
+ * La regla es la del navegador y no una nuestra: **`max-<bp>:` aplica cuando el
+ * viewport es ESTRICTAMENTE menor que el breakpoint**, que es lo que Tailwind
+ * emite (`@media (width < Npx)`). Un `max-` de un nombre que no es breakpoint
+ * sigue cayéndose a la rama de siempre: no es una variante de ancho.
+ *
+ * ⚠ El ORDEN de salida se conserva, y eso es portante: quien lee estas clases
+ * se queda con la ÚLTIMA que coincide, y así en 320 —donde `max-chico:` y
+ * `max-angosto:` aplican las dos— gana la del breakpoint más chico, que es
+ * exactamente lo que hace la cascada del CSS emitido (`hero.invariant` §15b lo
+ * afirma leyendo el build).
  */
 export function clasesEfectivas(clases: string, anchoDeViewport: number): string[] {
   const activas = new Set(variantesActivas(anchoDeViewport))
@@ -223,6 +248,15 @@ export function clasesEfectivas(clases: string, anchoDeViewport: number): string
       continue
     }
     const prefijo = clase.slice(0, corte)
+    if (prefijo.startsWith('max-')) {
+      const bp = prefijo.slice(4)
+      if (!(bp in BREAKPOINTS)) {
+        salida.push(clase)
+        continue
+      }
+      if (anchoDeViewport < BREAKPOINTS[bp]) salida.push(clase.slice(corte + 1))
+      continue
+    }
     if (!(prefijo in BREAKPOINTS)) {
       salida.push(clase)
       continue

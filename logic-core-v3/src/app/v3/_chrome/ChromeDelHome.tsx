@@ -1,7 +1,7 @@
 import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
 import { Navegacion } from '../_componentes/chrome/Navegacion'
 
-import { CURSOR_PROPIO_EN_EL_HOME } from './contrato'
+import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 
 /**
@@ -130,7 +130,27 @@ export function ChromeDelHome(): React.JSX.Element {
        * alrededor de todo—, que es la otra mitad del mismo defecto: el `<nav>`
        * deja de estar anidado en el contenido principal.
        */}
-      <Navegacion como="header" />
+      {/**
+       * ⏳ **LA PASTILLA NO ESTÁ ABAJO DE 860, Y ES TEMPORAL.** Pedido del
+       * dueño: va a rehacer la navegación —«hamburguesa»— y quiere planificar
+       * las vistas angostas sin ella. PAPEL-2 la apagó abajo de 390 y COMPO-2
+       * extiende la MISMA banda a 425 y a 768, con el mismo pedido. La clase,
+       * por qué es una media query y no una rama, de dónde sale el 860 y los
+       * DOS landmarks que esto se lleva están escritos enteros en
+       * `contrato.ts`, al lado de `PASTILLA_APAGADA_ABAJO_DE_MEDIO`.
+       *
+       * Va en el punto de MONTAJE y no en la pieza: `/v3/componentes` monta la
+       * misma `Navegacion` en su galería, y ahí no hay ninguna razón para que
+       * desaparezca. Lo que se apaga es la pastilla DEL HOME.
+       *
+       * ⚠ **Los 72 px que libera se cobran en DOS anchos y en tres no.** Abajo
+       * de 390 son el presupuesto con el que entra la marca del Hero y el Hero
+       * los cobra con `max-chico:pb-2`; en 425 y en 768 el dueño pidió
+       * explícitamente que el bloque NO se moviera, así que `pb-20` se queda y
+       * los 72 px quedan como aire muerto a propósito. La medición de las dos
+       * salidas está en `contrato.ts`.
+       */}
+      <Navegacion como="header" className={CLASE_DE_LA_PASTILLA_APAGADA} />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

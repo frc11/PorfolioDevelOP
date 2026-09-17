@@ -91,6 +91,84 @@
  */
 export const CURSOR_PROPIO_EN_EL_HOME = true
 
+/**
+ * ⏳ **LA PASTILLA, APAGADA DE 859 PARA ABAJO — Y SIGUE SIENDO TEMPORAL.**
+ *
+ * ── Qué es y quién lo pidió ───────────────────────────────────────────────
+ *
+ * El dueño va a **rehacer la navegación** y quiere planificar las vistas
+ * angostas sin ella. El pedido de PAPEL-2 fue literal: «desmontala en los
+ * anchos de papel; no la rediseñes, no la conviertas en hamburguesa: sólo que
+ * no esté». **COMPO-2 extiende esa misma banda a 425 y a 768** con el mismo
+ * pedido y la misma salida —«el dueño va a poner hamburguesa»—, así que acá
+ * sigue sin haber ningún rediseño: hay una pieza que deja de estar en cinco
+ * anchos del set y una constante que declara que eso es provisorio.
+ *
+ * ── ⚠️ POR QUÉ LA CONSTANTE CAMBIÓ DE NOMBRE ────────────────────────────
+ *
+ * Se llamaba `PASTILLA_APAGADA_EN_PAPEL` y la banda ERA la del papel. Ya no lo
+ * es: el papel opaco del Hero sigue viviendo abajo de `--breakpoint-chico`
+ * (390) y la pastilla pasa a apagarse abajo de `--breakpoint-medio` (860). Un
+ * nombre que dice «en papel» sobre una banda que no es la del papel es la clase
+ * de dato que se lee mal una sola vez y alcanza. Es el mismo criterio con el
+ * que COMPO-1 renombró `TIPOGRAFIA_DE_LA_SEGUNDA_LINEA` cuando dejó de haber
+ * una segunda línea.
+ *
+ * ── De dónde sale 860, y por qué no hay corte nuevo ──────────────────────
+ *
+ * La banda que el pedido describe es «320, 375, 390, 425 y 768 sin pastilla;
+ * 1024, 1440 y 1920 con pastilla» —el §4 del sprint dice textual que a 1024 el
+ * dueño la quiere—. El único corte declarado que cae entre 768 y 1024 es
+ * `--breakpoint-medio` (860), que ya existía y que COMPO-1 estrenó para el aire
+ * del pie. `max-medio:` emite `@media (width < 860px)`, que es exactamente esa
+ * partición. **No se declara un breakpoint nuevo porque no hace falta uno.**
+ *
+ * ── Por qué es una clase y no una rama ────────────────────────────────────
+ *
+ * `ChromeDelHome` es un componente de SERVIDOR: no tiene ancho en su render, y
+ * el hook que sí lo lee devuelve `false` en el servidor y en la hidratación a
+ * propósito. Una rama de JS pintaría el primer cuadro CON la pastilla y la
+ * sacaría después. Es el mismo argumento con el que `superficies.ts` justifica
+ * que la banda de papel sea CSS: **la única puerta es una media query**.
+ *
+ * `hidden` y no `visibility`: el envoltorio es `sticky` con `block-size: 0`,
+ * así que lo que hay que apagar no es su caja —ya mide cero— sino la pastilla
+ * `absolute` que cuelga de él y las cinco paradas de tabulación que trae.
+ * `display:none` se lleva las dos cosas y además saca la pieza del árbol de
+ * accesibilidad, que es lo correcto para algo que no está.
+ *
+ * ── ⚠️ LO QUE ESTO SE LLEVA, DICHO Y NO ESCONDIDO ────────────────────────
+ *
+ * Abajo de 860 el documento **pierde dos landmarks**: el `banner` —que es este
+ * envoltorio con `como="header"`— y la `navigation` que cuelga de él. Quedan 9
+ * de los 11 que `s10-acceso-landmarks` cuenta, y el `<main>` pasa a abrir el
+ * documento. `SaltarAlContenido` NO se toca y sigue siendo el primer foco de la
+ * página, así que el atajo de teclado que importa sigue estando.
+ *
+ * **Eso es una regresión de accesibilidad, ahora en CINCO anchos del set en vez
+ * de dos, y se declara como tal.** Es aceptable sólo porque es temporal y
+ * porque la navegación que la repara es el sprint que viene. El día que la
+ * pastilla se rehaga, esta constante y su clase se van juntas — y si la
+ * navegación nueva tampoco aparece abajo de 860, entonces el reemplazo tiene
+ * que traer su propio landmark.
+ *
+ * ── ⚠️ Y LO QUE **NO** SE LLEVA: LOS 72 px DEL PIE DEL HERO ──────────────
+ *
+ * PAPEL-2 cobró esos 72 px abajo de 390 (`max-chico:pb-2`) porque los
+ * necesitaba para la marca. **En 425 y en 768 no se cobran, y es una
+ * instrucción explícita del dueño: el bloque se queda donde está hoy.** Medido
+ * con la pastilla apagada y `pb-20` intacto, el tope de la columna no se mueve
+ * un centésimo (425: 492,13 px con y sin ella; 768: 644,38 con y sin ella), y
+ * si se soltaran los 72 el bloque caería y la superposición a 425 pasaría de
+ * 4,33 % a 14,82 %. Así que acá los 72 px quedan como aire muerto a propósito.
+ */
+export const PASTILLA_APAGADA_ABAJO_DE_MEDIO = true
+
+/** La clase que la apaga. Va acá y no en el JSX para que la constante de arriba
+ *  y el mecanismo se lean juntos, y para que el instrumento afirme la MISMA
+ *  cadena que se renderiza. */
+export const CLASE_DE_LA_PASTILLA_APAGADA = 'max-medio:hidden'
+
 /** El módulo que se monta, con su ruta exacta. Para poder afirmar que existe. */
 export const MODULO_DEL_CHROME = 'src/app/v3/_chrome/ChromeDelHome.tsx'
 

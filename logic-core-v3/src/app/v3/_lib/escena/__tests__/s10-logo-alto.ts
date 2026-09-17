@@ -219,6 +219,23 @@ export function repartoVertical(
     const c = clases[i]
     for (const k of NO_MODELADAS) if (c.includes(k)) sinModelar.add(k)
 
+    /**
+     * ⚠️ **PAPEL-2 · UN NODO APAGADO NO OCUPA, Y EL MODELO NO LO SABÍA.**
+     *
+     * `display:none` saca el elemento del flujo: no mide, y en una columna flex
+     * deja de ser ítem, o sea que **también se lleva su hueco**. Hasta este
+     * sprint ningún nodo del lane se apagaba por ancho y el modelo no tenía por
+     * qué saberlo; la marca del Hero —`chico:hidden`, presente en el marcado de
+     * los ocho anchos y visible en dos— lo estrena.
+     *
+     * Sin esto el modelo le sumaba la marca a los SEIS anchos donde no se ve, y
+     * el efecto no era teórico: movía el bloque derivado de 1440 y de 1920, que
+     * son los dos que este sprint tiene prohibido mover. La clase llega acá ya
+     * resuelta por `clasesEfectivas`, así que preguntar por `hidden` pelado es
+     * preguntar «está apagado A ESTE ancho».
+     */
+    if (c.includes('hidden')) return 0
+
     const caja = cajaDe.get(i)
     if (caja !== undefined) return caja.altoPx
     const misHijos = hijos[i]
@@ -300,8 +317,22 @@ export function repartoVertical(
   const raiz = nodos.findIndex((_, i) => arbol.padre[i] === -1)
   if (raiz >= 0) colocar(raiz, 0)
 
+  /**
+   * ⚠️ **PAPEL-2 · LA SEGUNDA MITAD DEL APAGADO.** Volver 0 el alto de un nodo
+   * `hidden` lo saca de la CUENTA, pero su caja de texto sigue en `cajaDe` con
+   * una posición, y `bloqueDeTexto` —que es la envolvente de todas las cajas—
+   * la seguía contando. Medido a 390: la palabra de la marca apareció como una
+   * caja de 12 px en el tope del bloque, o sea en un ancho donde no se dibuja.
+   * Un nodo apagado apaga también a sus DESCENDIENTES, así que se sube por el
+   * árbol.
+   */
+  const apagado = (i: number): boolean => {
+    for (let k: number = i; k >= 0; k = arbol.padre[k]) if (clases[k].includes('hidden')) return true
+    return false
+  }
   const cajas: CajaEnPantalla[] = []
   for (const [nodo, caja] of cajaDe) {
+    if (apagado(nodo)) continue
     cajas.push({ nodo, caja, arribaPx: arribaDe[nodo], altoPx: altoDe[nodo] })
   }
   return {

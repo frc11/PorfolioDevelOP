@@ -1,0 +1,52 @@
+═══ PAPEL-2 · §3 · EL TAMAÑO DEL REGISTRO 1, DERIVADO ═══
+
+avance de «TU NEGOCIO» (display 700, tracking -0.02): 4.12429 em
+avance de «VENDIENDO» (display 700, tracking -0.02): 3.93223 em
+avance de «LAS 24 HS» (itálica 300, tracking -0.03): 4.57900 em
+la fila MÁS ANCHA del registro 1 es «TU NEGOCIO»
+
+@320  caja 256.00 px
+   fila 3: 55.00 px → tinta 251.85 px
+   registro 1 HOY: 37.00 px → tinta 152.60 px  (escalón de 99.25 px)
+   registro 1 PEDIDO: 61.06 px  (razón 1.11025 × 55.00)
+     «TU NEGOCIO» → 251.85 px · «VENDIENDO» → 240.12 px
+     desvío contra la fila 3: 0.0000 px  (tolerancia 2)
+     ¿entra en la caja? SÍ — techo de la caja 62.07 px
+
+@375  caja 311.00 px
+   fila 3: 67.00 px → tinta 306.79 px
+   registro 1 HOY: 37.00 px → tinta 152.60 px  (escalón de 154.19 px)
+   registro 1 PEDIDO: 74.39 px  (razón 1.11025 × 67.00)
+     «TU NEGOCIO» → 306.79 px · «VENDIENDO» → 292.51 px
+     desvío contra la fila 3: 0.0000 px  (tolerancia 2)
+     ¿entra en la caja? SÍ — techo de la caja 75.41 px
+
+═══ PAPEL-2 · §4 · EL PRESUPUESTO DE ALTO ═══
+
+--leading-titulo 1.09 · --leading-texto 1.6 · hueco 8 px
+DESCUENTO_NACIMIENTO_PX (lo que la pastilla ocupa) = 72 px
+
+@320×568
+   disponible HOY (pt-20 + pb-20):            408.00 px
+   disponible SIN pastilla (pb baja a 8):  480.00 px
+   bloque HOY:                                255.81 px
+   bloque con el §3:                          308.27 px   (+52.46)
+      registro 1 133.12 · registro 2 59.95 · bajada 51.20 · CTA 40.00 · huecos 24.00
+   SOBRANTE para la marca (palabra + logo + 2 huecos): 171.73 px
+   la marca del §2 mide 94.55 px: palabra 11.99 + hueco 8 + isotipo 66.56 (× 95.68 de ancho) + hueco 8
+   TOTAL con la marca:                        402.82 px
+      holgura CON la pastilla (pb-20):        5.18 px  
+      holgura SIN la pastilla (pb-2):         77.18 px  ✓ ENTRA
+
+@375×667
+   disponible HOY (pt-20 + pb-20):            507.00 px
+   disponible SIN pastilla (pb baja a 8):  579.00 px
+   bloque HOY:                                268.89 px
+   bloque con el §3:                          350.39 px   (+81.50)
+      registro 1 162.16 · registro 2 73.03 · bajada 51.20 · CTA 40.00 · huecos 24.00
+   SOBRANTE para la marca (palabra + logo + 2 huecos): 228.61 px
+   la marca del §2 mide 109.07 px: palabra 11.99 + hueco 8 + isotipo 81.08 (× 116.55 de ancho) + hueco 8
+   TOTAL con la marca:                        459.47 px
+      holgura CON la pastilla (pb-20):        47.53 px  
+      holgura SIN la pastilla (pb-2):         119.53 px  ✓ ENTRA
+
