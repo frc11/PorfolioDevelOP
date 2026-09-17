@@ -29,14 +29,18 @@ export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 const V3 = 'src/app/v3'
 
-/** Las cinco hojas del chrome: todo el movimiento de estado vive acá. La del
- *  velo de B6-A se fue en B8: la oscuridad la da la luz, no un fondo. */
+/** Las hojas del chrome: todo el movimiento de estado vive acá. La del velo de
+ *  B6-A se fue en B8 —la oscuridad la da la luz, no un fondo— y **DESLIZAR-1
+ *  trajo otra, que no es la misma cosa**: aquélla era una superficie del panel y
+ *  ésta es el apagado del `<main>` durante el deslizamiento del CTA, con su
+ *  estado en un atributo. Son seis. */
 export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/cta.css`,
   `${V3}/_estilos/navegacion.css`,
   `${V3}/_estilos/cursor.css`,
   `${V3}/_estilos/pie.css`,
   `${V3}/_estilos/foco.css`,
+  `${V3}/_estilos/deslizamiento.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

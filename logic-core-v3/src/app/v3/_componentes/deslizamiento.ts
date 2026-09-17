@@ -1,0 +1,170 @@
+import { isSceneHeld, type IntroStage } from '@/components/layout/home-intro/introHandoff'
+
+import { ATRIBUTO_DE_PANEL, IDS_DE_SECCION } from '../_secciones/_contrato/forma'
+
+/**
+ * EL DESLIZAMIENTO DEL CTA DEL HERO — los datos y las compuertas, sin React.
+ *
+ * Vive aparte del efecto por la misma razón que `scrollSuave.ts` y
+ * `compuerta.ts`: una decisión que sólo existe adentro de un `if` de un
+ * `useEffect` **no se puede afirmar sin montar React con un DOM**, y montar un
+ * DOM para comprobar una tabla de verdad de cuatro filas es una comprobación
+ * peor que la lógica que comprueba.
+ *
+ * ── QUÉ HACE EL SPRINT, EN UNA LÍNEA ──────────────────────────────────────
+ *
+ * El CTA del hero apunta a `#trabajos` y hoy salta. Desde acá **se desliza**:
+ * dos segundos de scroll animado, con el `<main>` apagado para que lo que se vea
+ * durante el viaje sea la escena.
+ *
+ * ── ⚠️ EL DESTINO NO SE ESCRIBE ACÁ, Y ES LA DECISIÓN CENTRAL ─────────────
+ *
+ * El deslizamiento **no calcula a dónde va**: le pasa a Lenis el mismo destino
+ * que el `<a>` lleva en su `href` y deja que lo resuelva `scrollTo`, que sobre
+ * `lenis@1.3.25` hace —`lenis.mjs:770-778`— exactamente lo que hace el
+ * navegador con un ancla:
+ *
+ *     target = rect.top + animatedScroll
+ *            − getComputedStyle(node).scrollMarginTop
+ *            − getComputedStyle(rootElement).scrollPaddingTop
+ *
+ * y `rootElement` es `document.documentElement` cuando el `wrapper` es `window`
+ * (`lenis.mjs:938-940`), que es el caso: `OPCIONES_DE_LENIS` no declara
+ * `wrapper`. O sea que **lee los 72 px de `_estilos/navegacion.css`**, los mismos
+ * que despejan los quince enlaces del sitio, los mismos que
+ * `BORDE_INFERIOR_EN_REPOSO_PX` deriva de los cuatro tokens de la pastilla.
+ *
+ * Es la diferencia entre frenar en el borde crudo de la sección y frenar donde
+ * el ancla frena. A 1080 son **8.568 px y no 8.640**.
+ *
+ * ⚠️ **Y la consecuencia de esos 72 px, numerada como hallazgo propio:** el
+ * destino cae ADENTRO del atardecer —el único tramo de una pantalla donde la luz
+ * de la escena se va de 1 a 0,04—, así que **la luz de llegada depende del alto
+ * de la ventana**. No es algo que este sprint introduzca: es una propiedad del
+ * mecanismo de anclas que ya gobernaba los quince enlaces. Se mide en
+ * `scripts-deslizar/a-llegada.ts` y está numerada en `DIRECCION-ESCENA.md` §7.
+ *
+ * ── ⚠️ POR QUÉ ES UN SOLO ENLACE Y NO LOS QUINCE ──────────────────────────
+ *
+ * Porque el mecanismo compartido no aterriza igual en todos. Con la misma curva
+ * y el mismo destino calculado por `scrollTo`, `#por-que-develop` y `#cierre`
+ * cruzan DOS VECES la banda en la que la escena se suspende —`visibilidad.ts`,
+ * `pantalla ∈ (11,125 · 14,875)`— y `#tu-panel` aterriza adentro. Un
+ * deslizamiento que atraviesa una banda suspendida muestra un `<main>` apagado
+ * sobre una escena que no dibuja. El hero no tiene ese problema: va de la
+ * pantalla 0 a la 8 y **las dos puntas y todo el medio están en zona de dibujo**.
+ *
+ * Los otros catorce siguen siendo el ancla nativa, y siguen andando.
+ */
+
+/**
+ * LA DURACIÓN, EN SEGUNDOS — decisión del dueño, no una medición.
+ *
+ * `scrollTo` la recibe en segundos porque Lenis trabaja en segundos
+ * (`lenis.d.ts:96-98`, *"The duration of the scroll animation (in s)"*), no en
+ * milisegundos. Se declara acá y no en el efecto para que el instrumento la
+ * pueda leer sin montar nada.
+ */
+export const DURACION_DEL_DESLIZAMIENTO_S = 2
+
+/**
+ * LA CURVA NO SE DECLARA ACÁ, Y ESO ES A PROPÓSITO.
+ *
+ * El dueño pidió `expoOut`, y `OPCIONES_DE_LENIS.easing` —la configuración del
+ * sitio vivo, la que `ScrollSuaveDeV3` ya importa— **ES** un expoOut: la forma
+ * `min(1, 1,001 − 2^(−10t))`, que es la de la librería y la del vocabulario de
+ * GSAP para `expo.out`. `scrollTo` la hereda sola cuando no se le pasa una
+ * (`lenis.mjs:746`, `easing = programmatic ? this.options.easing : void 0`).
+ *
+ * Escribir la fórmula acá daría DOS definiciones de la misma curva y una se
+ * quedaría vieja. Lo que sí se afirma —en `s18-deslizamiento.invariant.ts` §2—
+ * es que la curva que se hereda tiene la forma de un expoOut, muestreándola
+ * contra la forma cerrada. Si alguien recalibra el sitio vivo a otra familia, el
+ * invariante lo dice en vez de que este sprint se entere por la pantalla.
+ */
+
+/**
+ * EL ATRIBUTO DEL VELO — el que el efecto escribe en el `<main>` mientras vuela.
+ *
+ * Va como ATRIBUTO y no como clase por dos razones, y la segunda es la que
+ * manda:
+ *
+ *   1. **No colisiona con React.** El `<main>` lo pinta `page.tsx`, que es un
+ *      componente de SERVIDOR y un archivo PROHIBIDO por la frontera de S3.
+ *      Toquetearle el `className` desde un efecto sería pisar el valor que el
+ *      reconciliador cree que tiene; un atributo que React no conoce, no.
+ *   2. **Es el idioma que /v3 ya usa para esto.** `ScrollSuaveDeV3` marca el
+ *      `<html>` con `data-v3-scroll-suave` y el intro con `data-home-intro`. Un
+ *      estado efímero que una hoja de estilos lee se dice con un atributo.
+ */
+export const ATRIBUTO_DEL_VELO = 'data-v3-deslizando'
+
+/**
+ * EL `<main>`, acotado al árbol de /v3.
+ *
+ * Hay exactamente uno y lo pinta `page.tsx:69`; `s10-banco` §2 lo afirma sobre
+ * el documento compuesto, en las dos ramas. La marca `data-v3` la pone el
+ * envoltorio de `layout.tsx:270` y acota la búsqueda al árbol nuevo: sin ella,
+ * un `<main>` del sitio viejo entraría si algún día compartieran documento.
+ */
+export const SELECTOR_DEL_MAIN = '[data-v3] main'
+
+/**
+ * EL CTA DEL HERO, Y NADA MÁS.
+ *
+ * Se arma de dos piezas y ninguna es un literal suelto:
+ *
+ *   · `[data-panel="hero"]` sale de `ATRIBUTO_DE_PANEL` y de `IDS_DE_SECCION[0]`
+ *     —la primera fila de `secciones.ts`—, que es de dónde `Panel` saca el `id`
+ *     del `<section>`. Si alguien reordena la tabla, esto se mueve con ella;
+ *   · `a[data-pieza="cta"]` es la forma que EMITE `Cta.tsx:127`. Ese `data-pieza`
+ *     es un literal en el marcado y no hay constante que lo publique, así que
+ *     `s18-deslizamiento.invariant.ts` §1 afirma que la cadena de acá aparece
+ *     LITERALMENTE en el fuente de `Cta.tsx`. Es el mismo remedio que
+ *     `trabajos.invariant.tsx` §1b le aplica al `data-panel` de `Panel.tsx`.
+ *
+ * El `<a>` del Cierre también lleva `data-pieza="cta"` —apunta a `#servicios`—
+ * y queda afuera por el ancestro, no por el `href`.
+ */
+export const SELECTOR_DEL_CTA_DEL_HERO = `[${ATRIBUTO_DE_PANEL}="${IDS_DE_SECCION[0]}"] a[data-pieza="cta"]`
+
+/**
+ * 🔴 LA COMPUERTA DEL INTRO — el requisito, como función pura.
+ *
+ * ── El defecto que cierra ─────────────────────────────────────────────────
+ *
+ * Durante los ~7,1 s del intro el CTA **es clickeable**: el overlay es
+ * `pointer-events-none`. Y en ese rato la escena está retenida en la pose 0
+ * (`retencion.ts`) y `markIntroEntry()` todavía no muestreó el scroll —lo hace
+ * UNA sola vez, en el instante en que la capa empieza a irse
+ * (`HomeIntro.tsx:171-102`)—. Un deslizamiento ahí le pisa el dato al muestreo:
+ * `introEnteredClean()` leería «el visitante se movió» por un click que el
+ * visitante dio sobre una pantalla que todavía estaba tapada.
+ *
+ * ── ⚠️ POR QUÉ NO ES `etapa === 'clear'`, CON LA EVIDENCIA ────────────────
+ *
+ * La instrucción del sprint pide gatear sobre `getIntroStage() === 'clear'`.
+ * **Esa forma rompe el pedido en toda visita repetida**, y la prueba está en el
+ * propio contrato del intro:
+ *
+ *   · `markIntroPlayed()` publica `'clear'` **sólo si la escena estaba
+ *     retenida** (`introBoot.tsx:91`, `if (isSceneHeld()) setIntroStage('clear')`);
+ *   · cuando el intro NO corre —visita repetida, `prefers-reduced-motion`, o
+ *     automatización— la etapa se queda en `'idle'` para siempre, y el comentario
+ *     de `HomeIntro.tsx` lo escribe con esas palabras: *«`idle` significa "no hay
+ *     intro", no "el intro terminó"»*.
+ *
+ * O sea que `=== 'clear'` dejaría el deslizamiento muerto en la segunda visita
+ * de la sesión, y muerto también en toda medición automatizada (el gate
+ * pre-paint no arma el intro con `navigator.webdriver`), que es la clase de
+ * defecto que este repo ya cazó una vez: *«la escena congelada en la visita
+ * repetida»*, catorce sprints invisible por esa misma razón.
+ *
+ * Lo que la instrucción quiere impedir es el click **mientras la capa tapa o se
+ * está yendo**, y ése es exactamente `isSceneHeld`: el booleano que el propio
+ * módulo publica para esa pregunta (`introHandoff.ts:124-126`). Se consume, no
+ * se reescribe.
+ */
+export function deberiaDeslizar(etapa: IntroStage): boolean {
+  return !isSceneHeld(etapa)
+}

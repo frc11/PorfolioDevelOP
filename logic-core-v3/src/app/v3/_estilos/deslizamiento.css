@@ -1,0 +1,56 @@
+/* ── EL VELO DEL DESLIZAMIENTO (DESLIZAR-1) ──────────────────────────────────
+ *
+ * Dos reglas y ninguna decisión: el estado lo pone `useDeslizamientoDelCta` con
+ * un atributo en el `<main>`, y acá está sólo lo que ese atributo significa en
+ * pantalla.
+ *
+ * ── Por qué una hoja y no una utilidad ──────────────────────────────────────
+ *
+ * Porque el `<main>` lo pinta `page.tsx`, que es un ARCHIVO PROHIBIDO por la
+ * frontera de S3 y además un componente de servidor: no hay dónde escribirle una
+ * clase condicional. Y meterle clases desde el efecto sería pisar el `className`
+ * que el reconciliador de React cree que tiene. Un atributo que React no conoce
+ * más una hoja que lo lee es el idioma que /v3 ya usa para el estado efímero
+ * —`cursor.css` con `data-pieza`, `cta.css` con `data-parte`— y es lo que
+ * `_estilos/` declara ser: *«las hojas del chrome: todo el movimiento de estado
+ * vive acá»*.
+ *
+ * ── Por qué la transición vive en la regla de REPOSO ────────────────────────
+ *
+ * Porque así el velo es **reversible por construcción**, que es un requisito del
+ * sprint y no una comodidad. Con la `transition` declarada en el estado apagado,
+ * sacar el atributo devuelve la opacidad con la misma curva y el mismo tiempo con
+ * los que se fue — sin que nadie tenga que acordarse de animar la vuelta, y sin
+ * depender de que dispare un `onComplete` que en una cancelación no dispara
+ * nunca (`useDeslizamientoDelCta`, «las cinco salidas»).
+ *
+ * Si estuviera declarada adentro de `[data-v3-deslizando]`, la ida se animaría y
+ * la vuelta sería un corte.
+ *
+ * ── Los valores, todos del tema ─────────────────────────────────────────────
+ *
+ * `--duracion-rapida` (300 ms) y `--ease-salida` son tokens de
+ * `theme-develop.css`. La hoja no declara una sola propiedad de componente
+ * propia: no hay nada que registrar en `s3-registro-de-tokens.ts` y el censo de
+ * §4 de `s3-tokens` no se mueve.
+ *
+ * 300 ms contra los 2.000 del viaje: el velo se va en el 15 % del recorrido, que
+ * es justo la parte en la que la curva heredada ya cubrió el 62 % del camino
+ * —`expoOut` arranca a velocidad máxima—. La escena se ve durante la parte del
+ * viaje en la que hay algo que ver.
+ *
+ * ⚠ `will-change` va SÓLO en el estado prendido, y es deliberado. La regla del
+ * repo pide `will-change` en lo que se anima; dejarlo puesto en reposo promovería
+ * una capa de compositing del tamaño del documento entero, para siempre, por dos
+ * segundos de uso. Puesto en el estado, el navegador lo lee cuando el atributo
+ * entra y lo suelta cuando sale.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+[data-v3] main {
+  transition: opacity var(--duracion-rapida) var(--ease-salida);
+}
+
+[data-v3] main[data-v3-deslizando] {
+  opacity: 0;
+  will-change: opacity;
+}

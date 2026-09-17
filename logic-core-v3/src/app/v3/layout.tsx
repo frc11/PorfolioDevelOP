@@ -5,8 +5,8 @@ import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
 import { ProveedorDeMovimiento } from './_lib/motion/ProveedorDeMovimiento'
 import { MarcaDeLaLlave } from './_secciones/_contrato/MarcaDeLaLlave'
 
-/* ── LAS HOJAS DEL CHROME (S3) ───────────────────────────────────────────────
- * Cinco archivos y no uno: la regla del repo parte a las 300 líneas, y cada
+/* ── LAS HOJAS DEL CHROME (S3, + el velo de DESLIZAR-1) ──────────────────────
+ * Seis archivos y no uno: la regla del repo parte a las 300 líneas, y cada
  * pieza se revisa entera de una sentada. Se importan acá y no desde los
  * componentes por dos razones. La primera es de alcance: son las hojas del
  * árbol de /v3 y este layout es su frontera. La segunda es de instrumentos —
@@ -23,6 +23,7 @@ import './_estilos/navegacion.css'
 import './_estilos/cursor.css'
 import './_estilos/pie.css'
 import './_estilos/foco.css'
+import './_estilos/deslizamiento.css'
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

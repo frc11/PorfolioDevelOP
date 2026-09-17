@@ -2232,3 +2232,23 @@ Está acá para que nadie lo dé por resuelto.
     **Las dos mitades estaban igual de viejas y por eso coincidían.** El verde no decía «el sitio está bien»: decía «mi patrón y mi medida se movieron juntos».
 
     **LA REGLA QUE DEJA.** Un invariante que contrasta un derivado contra un medido **sólo vale si el medido se regenera en el mismo sprint que cambia lo medido**. Y el discriminador es barato: cuando la reconciliación se abre en anchos que el sprint NO tocó, el culpable no es el sprint — es una de las dos mitades que venía vieja. Se arregla regenerando la que mide, nunca restaurando la vieja para devolver el verde.
+
+73. 🔴 **EL MECANISMO DE ANCLAS DEL SITIO ATERRIZA CON UNA LUZ QUE DEPENDE DE LA VENTANA (DESLIZAR-1, 2026-09-17).**
+
+    **EL HECHO.** `#trabajos` empieza en la pantalla **8** de las 18 del documento, o sea en `8 × ventana`. Pero un ancla no aterriza en el borde: despeja el `scroll-padding-top` de /v3 —**72 px**, los cuatro tokens de la pastilla, `navegacion.css:63`— y frena en `8 × ventana − 72`. A 1080 son **8.568 px y no 8.640**.
+
+    Esos 72 px caen **adentro del ATARDECER**, que es el único tramo de UNA pantalla donde la luz de la escena se va de 1 a 0,04 (`lightArc.ts`, `ATARDECER = {desde: 0,46875, hasta: 0,5}`). Medido con las funciones puras del árbol (`scripts-deslizar/a-llegada.ts`):
+
+    | ventana | tope de `#trabajos` | el ancla frena en | progreso | **luz** |
+    |---|---|---|---|---|
+    | 800 | 6.400 | **6.328** | 0,4971875 | **0,1264** |
+    | 1080 | 8.640 | **8.568** | 0,4979167 | **0,1040** |
+    | 1200 | 9.600 | **9.528** | 0,4981250 | **0,0976** |
+
+    Sin el descuento del ancla, las tres ventanas aterrizan en **0,0400** — la noche plena, idéntica. Los 72 px son toda la dispersión: **un 29,5 % de diferencia de luz entre 800 y 1200**, por una constante que no tiene nada que ver con la escena.
+
+    **NO ES DEL SPRINT QUE LO ENCONTRÓ, y por eso se numera acá.** La propiedad la tienen los **quince enlaces del sitio** desde SITIO-S9, que es cuando `/v3` declaró su propio `scroll-padding-top`: cualquiera que hoy haga click en `#trabajos` en la pastilla o en el pie aterriza en esa misma luz variable. DESLIZAR-1 no la introduce —consume el mismo `scrollTo` que resuelve el ancla, a propósito— la vuelve **visible**, porque un salto instantáneo no deja ver con qué luz se llegó y dos segundos de viaje sí.
+
+    **LO QUE ESTO ACOTA.** Toda afirmación de luminancia, todo golden image y toda medición de contraste clavada en `y = 8568` es **frágil por construcción**: es el punto más sensible a la ventana de todo el recorrido. 400 px de alto de ventana mueven la sala de 0,1264 a 0,0976. Un instrumento que mida ahí tiene que declarar su ventana al lado de su número, o no significa nada.
+
+    **LAS SALIDAS, SIN ELEGIR NINGUNA.** (a) Dejarlo: es el mecanismo del sitio y es coherente con los otros catorce enlaces. (b) Correr el borde del atardecer para que los 72 px caigan afuera — mueve `lightArc.ts`, que es la escena, y arrastra el arco entero. (c) Darle a `#trabajos` un `scroll-margin-top` que compense los 72 px — aterriza en el borde crudo y la luz se vuelve idéntica en las tres ventanas, al precio de que **esa** sección deje de despejar la pastilla. Las tres son decisión del dueño; ninguna es de este sprint.

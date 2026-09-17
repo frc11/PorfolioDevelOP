@@ -165,14 +165,27 @@ titulo('3b · Lo único que podría apagar el `sticky`, y por qué no puede pasa
  * Y se verifica ADEMÁS sobre el `<html>` vivo, en los cuatro casos de
  * `scripts-b5/c-reducido.ts`: `lenis-stopped` ausente y `overflow: visible`.
  */
+/**
+ * ⚠️ **DESLIZAR-1 LE AGREGÓ DOS ARCHIVOS AL MOTOR, Y POR ESO ENTRAN ACÁ.**
+ *
+ * Eran tres. El deslizamiento del CTA cuelga de la MISMA instancia —vive adentro
+ * del módulo perezoso que esta compuerta monta— y es el primer código del repo
+ * que llama a `scrollTo`. Si sus dos archivos se quedaran afuera de este
+ * barrido, la garantía de abajo tendría un agujero **exactamente del tamaño del
+ * único lugar nuevo desde donde se podría llamar `stop()`**. El invariante propio
+ * del sprint (`s18-deslizamiento` §7) afirma la otra mitad: que esta lista los
+ * nombra.
+ */
 const ARBOL_DEL_MOTOR = [
   'src/app/v3/_componentes/CompuertaDelScrollSuave.tsx',
   'src/app/v3/_componentes/ScrollSuaveDeV3.tsx',
   'src/app/v3/_lib/scrollSuave.ts',
+  'src/app/v3/_componentes/deslizamiento.ts',
+  'src/app/v3/_componentes/useDeslizamientoDelCta.ts',
 ]
 afirmar(
   ARBOL_DEL_MOTOR.every((a) => leer(a).length > 0),
-  'el motor de /v3 vive en tres archivos propios, con la decisión afuera del componente',
+  `el motor de /v3 vive en ${ARBOL_DEL_MOTOR.length} archivos propios, con las decisiones afuera de los componentes`,
 )
 const FUENTE_DEL_MOTOR = ARBOL_DEL_MOTOR.map((a) => quitarComentarios(leer(a))).join('\n')
 afirmar(
