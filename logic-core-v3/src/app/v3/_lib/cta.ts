@@ -13,14 +13,18 @@
  * ángulos, las traslaciones y el `clip-path` son mediciones —`COMPONENTS.md`
  * §3.2 y §3.3— y las reproducimos porque son la forma del movimiento.
  *
- * Dos números que la referencia tiene y NO se transfieren, con su razón:
+ * Tres cosas que la referencia tiene y NO se transfieren, con su razón:
  *
  *   · El subrayado de **120 px** de ancho es el ancho de SU rótulo, no una
  *     medida del sistema. Acá el subrayado mide el 100% de la ventana de
  *     recorte, o sea el ancho de NUESTRO rótulo. Copiarlo daría una raya que
  *     no termina donde termina la palabra.
- *   · La **imagen revelada** de 150×33,44 px es contenido. Este sprint no
- *     tiene contenido.
+ *   · La **imagen revelada** de 150×33,44 px es contenido, y BOTON-1 §3 midió
+ *     que ES el brillo: un archivo de imagen que un lerp de JavaScript deja
+ *     sobre el puntero. No transfiere — su sala es negra y la nuestra es
+ *     papel, así que un resplandor sobre blanco no enciende nada.
+ *   · El **color** de su raya (un verde de alta luminancia). El CTA es siempre
+ *     tinta: decisión cerrada de la paleta.
  *
  * ── El defecto que no heredamos ────────────────────────────────────────────
  *
@@ -54,8 +58,51 @@ export const ROLLOVER_MEDIDO = {
   },
   /** La ventana de recorte: `overflow: hidden` que crece. */
   ventana: { altoReposoPx: 24.5, altoHoverPx: 28.5 },
-  /** El subrayado que aparece en paralelo. */
-  subrayado: { altoPx: 3, duracionMs: 600, retardoMs: 400 },
+  /**
+   * EL SUBRAYADO — DOS capas, y el hueco que viaja entre ellas.
+   *
+   * ⚠️ **Estos tres números cambiaron en BOTON-1, y el motivo importa más que
+   * los números.** Hasta ese bloque decían `duracionMs: 600, retardoMs: 400`,
+   * tomados de la fila «CTA · subrayado» de `COMPONENTS.md` §3.2. BOTON-1
+   * midió la serie por cuadro de la referencia y encontró que **esa fila no
+   * describe su subrayado**: describe el envoltorio de la imagen de su brillo
+   * —120×3 px, `scale(0)` → `scale(1)`, `translate(−30,0)`, 600 ms con 400 de
+   * retardo—, cuyas cuatro cifras coinciden una por una con ese otro nodo. La
+   * transferencia estaba bien hecha; la atribución de §3.2 estaba mal.
+   *
+   * El subrayado real son **dos capas de 0,7 s con 0,1 s de desfase**, sobre
+   * `--ease-principal` y no sobre `--ease-salida`. `duracionMs` y `desfaseMs`
+   * son esos dos, verificados contra la curva declarada con un desvío máximo
+   * de 0,0251 y 0,0220 sobre 35 y 38 muestras (`BOTON-1.md` §2.3).
+   *
+   * `desfaseMs` NO es un retardo del gesto —el gesto arranca en el instante
+   * cero— sino **la distancia entre las dos capas**, y es lo único que produce
+   * el hueco: las dos recorren la misma curva y la que llega va 100 ms atrás
+   * de la que se va, así que el hueco es esa curva evaluada con 100 ms de
+   * diferencia. De ahí sale que abra pegado al borde izquierdo, llegue al
+   * 51,9 % del ancho a los 420 ms y cierre contra el derecho a los 800.
+   *
+   * `altoPx` es el ÚNICO de los cuatro que NO se corrigió, y se declara: la
+   * raya de la referencia mide 1 px (`BOTON-1.md` §2.1) y estos 3 salían de la
+   * misma fila rota. Se dejan porque ya son parte de la composición aprobada
+   * del hero —COMPO-1, COMPO-2, PAPEL-2 y ROCE-1 corrieron con ellos— y
+   * porque 1 px de tinta sobre papel es una decisión de peso visual que nadie
+   * midió para nuestra paleta.
+   */
+  subrayado: {
+    altoPx: 3,
+    duracionMs: 700,
+    desfaseMs: 100,
+    /**
+     * El ancho MÁXIMO del hueco, en % del ancho de la raya, medido sobre la
+     * serie por cuadro de la referencia (`BOTON-1.md` §2.4). Es la cifra que
+     * cierra el círculo: `s3-cta.invariant` deriva el hueco de NUESTROS dos
+     * números —0,7 s y 0,1 s sobre `--ease-principal`— y tiene que volver a
+     * dar éste. Si alguien mueve la curva o el desfase, la coreografía deja de
+     * reproducir lo medido y el instrumento lo dice.
+     */
+    huecoMaximoPorciento: 51.92,
+  },
   /** Duraciones del intercambio y del alto de la ventana. */
   duraciones: { intercambioMs: 1300, ventanaMs: 300 },
 } as const

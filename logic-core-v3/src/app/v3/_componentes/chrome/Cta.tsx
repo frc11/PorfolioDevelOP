@@ -10,6 +10,25 @@ import type { VarianteCta } from '../../_lib/cta'
  * tiempos— vive en `_estilos/cta.css`, con cada número etiquetado. Acá está
  * la estructura y **la corrección de accesibilidad**.
  *
+ * ── Los dos gestos, en una línea cada uno ─────────────────────────────────
+ *
+ * **El rótulo se desliza y SE QUEDA.** Al entrar, las dos copias se
+ * intercambian en 1,3 s; al soltar, el reposo vuelve en UN CUADRO. Y no se ve
+ * ningún salto, porque la copia B termina el hover exactamente donde arrancó
+ * la copia A. El mecanismo entero es dónde está declarada la duración, y vive
+ * en `cta.css`: en la regla de ESTADO y no en la base.
+ *
+ * **El subrayado se parte y el hueco viaja.** La raya está entera en reposo;
+ * al entrar, una capa se retrae hacia la derecha y otra crece desde la
+ * izquierda 100 ms más tarde, y el hueco entre las dos abre en el borde
+ * izquierdo, llega a la mitad del ancho y se cierra contra el derecho. Las dos
+ * capas son el `::before` y el `::after` del mismo `<span>` que ya existía:
+ * **el gesto no agrega un solo nodo al marcado**.
+ *
+ * Los dos gestos están medidos en `docs/rediseno/outputs/BOTON-1.md` y sus
+ * números viven en `_lib/cta.ts`, contrastados uno por uno por
+ * `s3-cta.invariant.tsx`.
+ *
  * ── El defecto de la referencia que no heredamos ──────────────────────────
  *
  * El rollover necesita DOS copias del rótulo en el DOM. En la referencia las
@@ -59,15 +78,21 @@ export type EstadoForzado = 'hover' | 'foco'
  *
  *   `cuerpo`  el medido: `--text-cuerpo` 15 px, `--tracking-texto`, peso semi.
  *             De ahí sale el alto de reposo de la ventana (15 × 1,6 = 24 px).
- *   `rotulo`  mayúsculas, `--tracking-micro` —el único interletrado positivo
- *             del sistema— y **la regla horizontal visible en reposo**. Es el
- *             registro con el que el CTA del hero deja de parecer un enlace de
- *             párrafo y pasa a ser un pie de bloque.
+ *   `rotulo`  mayúsculas y `--tracking-micro`, el único interletrado positivo
+ *             del sistema. Es el registro con el que el CTA del hero deja de
+ *             parecer un enlace de párrafo y pasa a ser un pie de bloque.
  *
- * ⚠ `rotulo` **apaga el crecimiento del subrayado**, y se declara: la raya ya
- * está en `scaleX(1)` en reposo, así que no tiene a dónde crecer. El rollover
- * de las dos copias —que es el gesto principal— sigue entero. Cambia una
- * animación paralela, no el componente.
+ * ⚠ **`rotulo` ya NO bifurca el subrayado, y eso es nuevo.** Hasta BOTON-1
+ * este registro era además el único con la regla horizontal visible en reposo,
+ * y para lograrlo APAGABA la animación del subrayado: una raya ya entera no
+ * tenía a dónde crecer. El gesto de dos capas dejó esa excepción sin motivo,
+ * porque **necesita** la raya entera en reposo para poder partirla. La raya en
+ * reposo pasó a ser del componente y los dos ejemplares —el hero y el Cierre—
+ * hacen hoy exactamente la misma coreografía, como los 26 de la referencia.
+ *
+ * 🔴 La consecuencia de composición, que hay que mirar: el CTA del Cierre, en
+ * registro `cuerpo`, antes no mostraba raya en reposo y ahora sí. Está
+ * desarrollado al pie de `cta.css`, con la regla que lo revierte.
  */
 export type RegistroDeCta = 'cuerpo' | 'rotulo'
 
@@ -141,6 +166,14 @@ export function CtaEnlace({
  * La ventana lleva la tipografía medida del rollover —`text.cuerpo`,
  * `tracking.texto`, peso semi— y no la del botón, que es `text.base`. De ahí
  * sale el alto de reposo: 15px × 1,6 = 24px, la caja de línea exacta.
+ *
+ * ⚠ El `<span>` del subrayado **no pinta**: es el contenedor posicionado de
+ * las dos capas que sí pintan, que son su `::before` y su `::after`. Van como
+ * pseudo-elementos y no como dos `<span>` más por peso — este componente viaja
+ * adentro de dos componentes de cliente, así que su marcado SÍ cuenta contra el
+ * presupuesto de `/v3`, y el gesto entero terminó costando cero bytes de
+ * JavaScript. El precio está declarado en `cta.css`: un pseudo-elemento no se
+ * puede congelar para fotografiarlo.
  */
 function ContenidoDelCta({ rotulo }: { rotulo: string }) {
   return (

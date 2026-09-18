@@ -28,6 +28,7 @@
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
+import { cubicBezierEase } from '../escena/bezier'
 import { Cta, CtaEnlace } from '../../_componentes/chrome/Cta'
 import {
   CRECIMIENTO_VENTANA_PX,
@@ -39,7 +40,7 @@ import {
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { leer } from './s3-archivos'
-import { customPropsDe, resolver, tokensDelTema } from './s3-css'
+import { customPropsDe, declaracionesDe, reglas, resolver, tokensDelTema } from './s3-css'
 
 ;(globalThis as unknown as { React: typeof React }).React = React
 
@@ -129,12 +130,12 @@ afirmarIgual(
 afirmarIgual(
   resolverDelCta('--cta-subrayado-duracion'),
   ROLLOVER_MEDIDO.subrayado.duracionMs,
-  'el subrayado, a los 600ms',
+  'cada capa del subrayado, a los 700ms (BOTON-1 §2.3)',
 )
 afirmarIgual(
-  resolverDelCta('--cta-subrayado-retardo'),
-  ROLLOVER_MEDIDO.subrayado.retardoMs,
-  'y su retardo, a los 400ms',
+  resolverDelCta('--cta-subrayado-desfase'),
+  ROLLOVER_MEDIDO.subrayado.desfaseMs,
+  'y el desfase entre las dos capas, a los 100ms',
 )
 afirmarIgual(
   resolver('var(--duracion-rapida)', tokens)?.n,
@@ -193,6 +194,206 @@ controlPositivo(
   'el buscador de acento vería uno si estuviera',
   '[data-v3] [data-pieza="cta"] { color: var(--color-acento); }',
   (css) => [...css.matchAll(/--color-acento/g)].length === 0,
+)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · El intercambio se anima al ENTRAR y se repone en UN CUADRO al salir')
+
+/**
+ * La diferencia entera entre «el rótulo vuelve» y «el rótulo se queda» es
+ * DÓNDE se declara la duración. Con la transición en la regla base, la vuelta
+ * se anima igual que la ida —98 cuadros medidos en `/v3`—. Con la transición
+ * en la regla de ESTADO, al soltar la duración vuelve a su valor inicial
+ * (`0s`), el navegador cancela la transición en curso y repone el reposo en un
+ * cuadro: es lo que hace la referencia, y BOTON-1 §1.2 lo midió en una sola
+ * muestra, a +4,4 ms del `mouseleave`.
+ *
+ * Esto NO se puede afirmar leyendo un valor: hay que saber en qué REGLA está
+ * escrito. Por eso acá se parsea la hoja y se separan las declaraciones que
+ * aplican en reposo de las que aplican sólo en estado.
+ */
+const bloquesDeLaHoja = reglas(hoja)
+
+/**
+ * ⚠ El corte por coma NO sirve para separar un selector: el de estado lleva
+ * `:is(a, b)` y partirlo por todas las comas rompería el grupo en dos partes
+ * que no son selectores. Se parte por comas de NIVEL CERO.
+ */
+function partirEnNivelCero(selector: string): string[] {
+  const partes: string[] = []
+  let profundidad = 0
+  let actual = ''
+  for (const c of selector) {
+    if (c === '(') profundidad += 1
+    if (c === ')') profundidad -= 1
+    if (c === ',' && profundidad === 0) {
+      partes.push(actual.trim())
+      actual = ''
+      continue
+    }
+    actual += c
+  }
+  if (actual.trim().length > 0) partes.push(actual.trim())
+  return partes
+}
+
+/** Las declaraciones que la hoja le da a un selector, en reposo o en estado. */
+function declaracionesPara(
+  coincide: (parte: string) => boolean,
+  enEstado: boolean,
+): Map<string, string> {
+  const salida = new Map<string, string>()
+  for (const r of bloquesDeLaHoja) {
+    if (!partirEnNivelCero(r.selector).some(coincide)) continue
+    if (r.selector.includes(':not(:disabled)') !== enEstado) continue
+    for (const d of declaracionesDe(r.cuerpo)) salida.set(d.prop, d.valor)
+  }
+  return salida
+}
+
+const laCopiaA = (p: string): boolean => p.includes('[data-parte="copia-a"]')
+const copiasEnReposo = declaracionesPara(laCopiaA, false)
+const copiasEnEstado = declaracionesPara(laCopiaA, true)
+
+for (const prop of ['transition-property', 'transition-duration', 'transition-timing-function']) {
+  afirmarIgual(copiasEnReposo.get(prop), undefined, `las copias NO declaran ${prop} en reposo`)
+  afirmar(copiasEnEstado.get(prop) !== undefined, `  y SÍ la declaran en la regla de estado`)
+}
+afirmarIgual(
+  copiasEnEstado.get('transition-duration'),
+  'var(--cta-intercambio)',
+  'la duración del intercambio vive en el estado, que es lo que hace instantánea la vuelta',
+)
+
+// La ventana es la excepción MEDIDA: su vuelta sí se anima (15 muestras en la
+// referencia contra 1 de las copias), así que su transición se queda en la base.
+const laVentana = (p: string): boolean => p.endsWith('[data-parte="ventana"]')
+afirmar(
+  declaracionesPara(laVentana, false).get('transition-duration') !== undefined,
+  'la ventana, en cambio, conserva su transición en la base: su vuelta SÍ se anima',
+)
+
+controlPositivo(
+  'el separador de reglas no confunde una declaración de estado con una de reposo',
+  '[data-v3] [data-pieza="cta"]:not(:disabled):is(:hover) [data-parte="copia-a"] { transition-duration: 9s; }',
+  (css) => !reglas(css)[0].selector.includes(':not(:disabled)'),
+)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('7 · El subrayado son DOS capas con orígenes opuestos, y el hueco viaja')
+
+const laQueSeVa = (p: string): boolean => p.endsWith('[data-parte="subrayado"]::before')
+const laQueLlega = (p: string): boolean => p.endsWith('[data-parte="subrayado"]::after')
+
+const seVaEnReposo = declaracionesPara(laQueSeVa, false)
+const llegaEnReposo = declaracionesPara(laQueLlega, false)
+const seVaEnEstado = declaracionesPara(laQueSeVa, true)
+const llegaEnEstado = declaracionesPara(laQueLlega, true)
+
+afirmarIgual(seVaEnReposo.get('transform-origin'), 'right center', 'la capa que se va tiene su origen en el borde derecho')
+afirmarIgual(llegaEnReposo.get('transform-origin'), 'left center', 'y la que llega, en el izquierdo — opuestos, que es lo que abre el hueco')
+afirmarIgual(seVaEnReposo.get('transform'), 'scaleX(1)', 'en reposo la raya está ENTERA: la capa que se va vale 1')
+afirmarIgual(llegaEnReposo.get('transform'), 'scaleX(0)', '  y la que llega está plegada')
+afirmarIgual(seVaEnEstado.get('transform'), 'scaleX(0)', 'en el hover la que se va se pliega')
+afirmarIgual(llegaEnEstado.get('transform'), 'scaleX(1)', '  y la que llega se despliega')
+afirmarIgual(
+  seVaEnReposo.get('transition-timing-function'),
+  'var(--ease-principal)',
+  'las dos corren sobre --ease-principal, la curva medida del subrayado',
+)
+
+// El desfase SÓLO en el estado: al salir las dos vuelven a la vez y la raya
+// queda entera todo el camino. Medido: la vuelta de la referencia no tiene hueco.
+afirmarIgual(seVaEnReposo.get('transition-delay'), '0s', 'sin desfase en reposo')
+afirmarIgual(llegaEnEstado.get('transition-delay'), 'var(--cta-subrayado-desfase)', 'y el desfase sólo al entrar')
+afirmarIgual(seVaEnEstado.get('transition-delay'), undefined, '  y sólo en la capa que llega, no en las dos')
+
+// ── EL HUECO, DERIVADO DE NUESTROS NÚMEROS ────────────────────────────────
+/**
+ * La coreografía construida tiene que REPRODUCIR la medida. Acá se deriva, de
+ * los dos números de la hoja y de la curva del sistema, qué tramo del ancho
+ * pinta cada capa en cada instante, y de ahí el hueco. El máximo derivado se
+ * compara contra el máximo MEDIDO en la referencia (`BOTON-1.md` §2.4).
+ */
+function leerCubicBezier(valor: string): readonly [number, number, number, number] {
+  const m = /^cubic-bezier\(([^)]+)\)$/.exec(valor.trim())
+  if (m === null) return [0, 0, 1, 1]
+  const n = m[1].split(',').map((x) => Number(x.trim()))
+  return n.length === 4 && n.every((x) => Number.isFinite(x)) ? [n[0], n[1], n[2], n[3]] : [0, 0, 1, 1]
+}
+
+const curvaPrincipal = leerCubicBezier(tokens.get('--ease-principal') ?? '')
+
+/**
+ * Los tramos del ancho que pinta cada capa, en fracción de 0 a 1. Con el
+ * origen a la derecha, una capa escalada a `s` pinta `[1 − s, 1]`; con el
+ * origen a la izquierda, `[0, s]`.
+ */
+function tramosEn(
+  ms: number,
+  origenDeLaQueSeVa: 'derecha' | 'izquierda',
+): readonly (readonly [number, number])[] {
+  const avance = (t: number): number =>
+    cubicBezierEase(curvaPrincipal, Math.min(1, Math.max(0, t / ROLLOVER_MEDIDO.subrayado.duracionMs)))
+  const escalaSeVa = 1 - avance(ms)
+  const escalaLlega = avance(ms - ROLLOVER_MEDIDO.subrayado.desfaseMs)
+  const seVa: readonly [number, number] =
+    origenDeLaQueSeVa === 'derecha' ? [1 - escalaSeVa, 1] : [0, escalaSeVa]
+  return [seVa, [0, escalaLlega]]
+}
+
+/** El agujero INTERIOR: el que tiene raya de los dos lados. Si no hay, cero. */
+function huecoInterior(tramos: readonly (readonly [number, number])[]): {
+  readonly ancho: number
+  readonly centro: number
+} {
+  const vivos = tramos.filter(([a, b]) => b - a > 1e-9).slice().sort((x, y) => x[0] - y[0])
+  if (vivos.length === 0) return { ancho: 0, centro: 0 }
+  let borde = vivos[0][1]
+  for (let i = 1; i < vivos.length; i += 1) {
+    if (vivos[i][0] > borde + 1e-9) {
+      return { ancho: vivos[i][0] - borde, centro: (borde + vivos[i][0]) / 2 }
+    }
+    borde = Math.max(borde, vivos[i][1])
+  }
+  return { ancho: 0, centro: 0 }
+}
+
+const finDelGesto = ROLLOVER_MEDIDO.subrayado.duracionMs + ROLLOVER_MEDIDO.subrayado.desfaseMs
+let huecoMaximo = 0
+let cuandoElMaximo = 0
+let centroAnterior = -1
+let siempreHaciaLaDerecha = true
+for (let t = 0; t <= finDelGesto; t += 1) {
+  const { ancho, centro } = huecoInterior(tramosEn(t, 'derecha'))
+  if (ancho > huecoMaximo) {
+    huecoMaximo = ancho
+    cuandoElMaximo = t
+  }
+  if (ancho > 0) {
+    if (centro < centroAnterior - 1e-9) siempreHaciaLaDerecha = false
+    centroAnterior = centro
+  }
+}
+
+afirmar(
+  Math.abs(huecoMaximo * 100 - ROLLOVER_MEDIDO.subrayado.huecoMaximoPorciento) < 0.3,
+  `el hueco derivado llega al ${(huecoMaximo * 100).toFixed(2)}% del ancho, contra el ${ROLLOVER_MEDIDO.subrayado.huecoMaximoPorciento}% medido en la referencia`,
+  `el máximo cae a los ${cuandoElMaximo} ms`,
+)
+afirmar(siempreHaciaLaDerecha, 'y su centro sólo avanza: el hueco viaja de IZQUIERDA A DERECHA, nunca al revés')
+afirmarIgual(huecoInterior(tramosEn(0, 'derecha')).ancho, 0, 'en el instante cero la raya está entera')
+afirmarIgual(huecoInterior(tramosEn(finDelGesto, 'derecha')).ancho, 0, 'y al final se volvió a unir')
+
+controlPositivo(
+  'con las dos capas apoyadas en el MISMO borde no hay hueco que medir',
+  'izquierda' as const,
+  (origen) => {
+    for (let t = 0; t <= finDelGesto; t += 5) {
+      if (huecoInterior(tramosEn(t, origen)).ancho > 1e-9) return true
+    }
+    return false
+  },
 )
 
 cerrar('s3-cta.invariant')

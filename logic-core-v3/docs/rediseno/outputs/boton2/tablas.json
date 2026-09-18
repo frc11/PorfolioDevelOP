@@ -1,0 +1,2821 @@
+{
+  "instrumento": "scripts-boton/c-tabla.ts",
+  "cuando": "2026-09-17T23:11:38.987Z",
+  "botones": [
+    {
+      "id": "hero",
+      "nombre": "/v3 · el CTA del hero (registro «rotulo»)",
+      "papeles": {
+        "copias": [
+          "a>span[0]>span[0]",
+          "a>span[0]>span[1]"
+        ],
+        "ventana": "a>span[0]",
+        "subrayado": [
+          "a>span[1]::before",
+          "a>span[1]::after"
+        ],
+        "brillo": []
+      },
+      "inventario": [
+        {
+          "clave": "a",
+          "etiqueta": "a",
+          "texto": "",
+          "caja": "180 · 555.58 · 175.47 · 47",
+          "papel": "raíz"
+        },
+        {
+          "clave": "a>span[0]",
+          "etiqueta": "span",
+          "texto": "",
+          "caja": "188 · 563.58 · 159.47 · 24",
+          "papel": "ventana"
+        },
+        {
+          "clave": "a>span[0]>span[0]",
+          "etiqueta": "span",
+          "texto": "Mirá los trabajos",
+          "caja": "188 · 563.58 · 159.47 · 24",
+          "papel": "copia A"
+        },
+        {
+          "clave": "a>span[0]>span[1]",
+          "etiqueta": "span",
+          "texto": "Mirá los trabajos",
+          "caja": "153.29 · 569.08 · 161.21 · 51.33",
+          "papel": "copia B"
+        },
+        {
+          "clave": "a>span[1]",
+          "etiqueta": "span",
+          "texto": "",
+          "caja": "188 · 591.58 · 159.47 · 3",
+          "papel": ""
+        },
+        {
+          "clave": "a>span[1]::before",
+          "etiqueta": "span::before",
+          "texto": "\"\"",
+          "caja": "(pseudo)",
+          "papel": "subrayado"
+        },
+        {
+          "clave": "a>span[1]::after",
+          "etiqueta": "span::after",
+          "texto": "\"\"",
+          "caja": "(pseudo)",
+          "papel": "subrayado"
+        }
+      ],
+      "estados": {
+        "reposo": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "matrix(0.984808, 0.173648, -0.173648, 0.984808, -33.842, 19.1645)",
+            "giro": "10°",
+            "escalaX": "1",
+            "traslacion": "-33.842 · 19.1645",
+            "opacity": "0",
+            "clipPath": "inset(80% 0px 0px)",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "159.469px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          }
+        ],
+        "hoverPleno": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "matrix(0.994522, 0.104528, -0.104528, 0.994522, 23.4183, -31.4745)",
+            "giro": "6°",
+            "escalaX": "1",
+            "traslacion": "23.4183 · -31.4745",
+            "opacity": "0",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "28px",
+            "transformOrigin": "79.7344px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform, opacity, clip-path 1.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "inset(0px)",
+            "width": "159.469px",
+            "height": "28px",
+            "transformOrigin": "79.7344px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform, opacity, clip-path 1.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "28px",
+            "transformOrigin": "79.7344px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "159.469px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0.1s"
+          }
+        ],
+        "despuesDeSalir": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "matrix(0.984808, 0.173648, -0.173648, 0.984808, -33.842, 19.1645)",
+            "giro": "10°",
+            "escalaX": "1",
+            "traslacion": "-33.842 · 19.1645",
+            "opacity": "0",
+            "clipPath": "inset(80% 0px 0px)",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "24px",
+            "transformOrigin": "79.7344px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "159.469px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "159.469px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          }
+        ]
+      },
+      "declaradas": [
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "duracion": 300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clip-path",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "duracion": 700,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.77, 0, 0.175, 1)"
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "duracion": 700,
+          "retardo": 100.00000000000003,
+          "curva": "cubic-bezier(0.77, 0, 0.175, 1)"
+        }
+      ],
+      "entrada": [
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "arranca": 2.9,
+          "termina": 1304.4,
+          "duracion": 1301.5,
+          "muestras": 99,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 98,
+            "desvioMaximo": 0.0069,
+            "desvioMedio": 0.0022,
+            "arranqueRelativo": -8,
+            "enCuartos": [
+              {
+                "t": 325.6,
+                "observado": 0.1404,
+                "esperado": 0.1377
+              },
+              {
+                "t": 658.7,
+                "observado": 0.8588,
+                "esperado": 0.8528
+              },
+              {
+                "t": 978.9,
+                "observado": 0.9772,
+                "esperado": 0.9762
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "arranca": 12.8,
+          "termina": 1304.4,
+          "duracion": 1291.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 97,
+            "desvioMaximo": 0.0013,
+            "desvioMedio": 0.0002,
+            "arranqueRelativo": -3,
+            "enCuartos": [
+              {
+                "t": 333.6,
+                "observado": 0.1464,
+                "esperado": 0.1466
+              },
+              {
+                "t": 653.7,
+                "observado": 0.8489,
+                "esperado": 0.849
+              },
+              {
+                "t": 987.2,
+                "observado": 0.9776,
+                "esperado": 0.9776
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "height",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "arranca": 12.8,
+          "termina": 1304.4,
+          "duracion": 1291.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 96,
+            "desvioMaximo": 0.0103,
+            "desvioMedio": 0.0032,
+            "arranqueRelativo": -10,
+            "enCuartos": [
+              {
+                "t": 327.6,
+                "observado": 0.1436,
+                "esperado": 0.1399
+              },
+              {
+                "t": 660.7,
+                "observado": 0.8632,
+                "esperado": 0.8543
+              },
+              {
+                "t": 980.9,
+                "observado": 0.978,
+                "esperado": 0.9766
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transformOrigin",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "arranca": 12.8,
+          "termina": 1304.4,
+          "duracion": 1291.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 97,
+            "desvioMaximo": 0.0013,
+            "desvioMedio": 0.0002,
+            "arranqueRelativo": -3,
+            "enCuartos": [
+              {
+                "t": 333.6,
+                "observado": 0.1464,
+                "esperado": 0.1466
+              },
+              {
+                "t": 653.7,
+                "observado": 0.8489,
+                "esperado": 0.849
+              },
+              {
+                "t": 987.2,
+                "observado": 0.9776,
+                "esperado": 0.9776
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clipPath",
+          "arranca": 12.8,
+          "termina": 1304.4,
+          "duracion": 1291.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "height",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "arranca": 12.8,
+          "termina": 304.7,
+          "duracion": 291.9,
+          "muestras": 22,
+          "declarada": "300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "arranca": 12.8,
+          "termina": 704.4,
+          "duracion": 691.6,
+          "muestras": 53,
+          "declarada": "700 ms + 0 ms · cubic-bezier(0.77, 0, 0.175, 1)",
+          "contraste": {
+            "muestras": 52,
+            "desvioMaximo": 0.0048,
+            "desvioMedio": 0.0006,
+            "arranqueRelativo": -3,
+            "enCuartos": [
+              {
+                "t": 187.4,
+                "observado": 0.0626,
+                "esperado": 0.0632
+              },
+              {
+                "t": 360.4,
+                "observado": 0.652,
+                "esperado": 0.6533
+              },
+              {
+                "t": 533.8,
+                "observado": 0.9613,
+                "esperado": 0.9615
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "arranca": 104.4,
+          "termina": 797.5,
+          "duracion": 693.1,
+          "muestras": 53,
+          "declarada": "700 ms + 100.00000000000003 ms · cubic-bezier(0.77, 0, 0.175, 1)",
+          "contraste": {
+            "muestras": 52,
+            "desvioMaximo": 0.0025,
+            "desvioMedio": 0.0004,
+            "arranqueRelativo": -3,
+            "enCuartos": [
+              {
+                "t": 280.7,
+                "observado": 0.057,
+                "esperado": 0.0574
+              },
+              {
+                "t": 453.6,
+                "observado": 0.6161,
+                "esperado": 0.6171
+              },
+              {
+                "t": 627.1,
+                "observado": 0.9575,
+                "esperado": 0.9576
+              }
+            ]
+          }
+        }
+      ],
+      "salida": [
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "arranca": 2.2,
+          "termina": 2.2,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "arranca": 2.2,
+          "termina": 2.2,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "height",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "arranca": 2.2,
+          "termina": 2.2,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "arranca": 2.2,
+          "termina": 2.2,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clipPath",
+          "arranca": 2.2,
+          "termina": 2.2,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "height",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "arranca": 27.5,
+          "termina": 293.6,
+          "duracion": 266.1,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "arranca": 27.5,
+          "termina": 720.5,
+          "duracion": 693,
+          "muestras": 53,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "arranca": 27.5,
+          "termina": 720.5,
+          "duracion": 693,
+          "muestras": 53,
+          "instantaneo": false
+        }
+      ],
+      "subrayado": {
+        "capas": [
+          {
+            "clave": "a>span[1]::before",
+            "ancho": 159.469,
+            "origenX": 159.469
+          },
+          {
+            "clave": "a>span[1]::after",
+            "ancho": 159.469,
+            "origenX": 0
+          }
+        ],
+        "muestrasDelHueco": [
+          {
+            "t": 0,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 60,
+            "cubierto": [
+              "0.4–100.0"
+            ],
+            "huecos": [
+              "0.0–0.4"
+            ],
+            "anchoDelHueco": 0.361,
+            "centroDelHueco": 0.181
+          },
+          {
+            "t": 120,
+            "cubierto": [
+              "2.1–100.0"
+            ],
+            "huecos": [
+              "0.0–2.1"
+            ],
+            "anchoDelHueco": 2.134,
+            "centroDelHueco": 1.067
+          },
+          {
+            "t": 180,
+            "cubierto": [
+              "0.0–0.7",
+              "5.2–100.0"
+            ],
+            "huecos": [
+              "0.7–5.2"
+            ],
+            "anchoDelHueco": 4.455,
+            "centroDelHueco": 2.942
+          },
+          {
+            "t": 240,
+            "cubierto": [
+              "0.0–3.1",
+              "12.8–100.0"
+            ],
+            "huecos": [
+              "3.1–12.8"
+            ],
+            "anchoDelHueco": 9.72,
+            "centroDelHueco": 7.92
+          },
+          {
+            "t": 300,
+            "cubierto": [
+              "0.0–6.9",
+              "26.2–100.0"
+            ],
+            "huecos": [
+              "6.9–26.2"
+            ],
+            "anchoDelHueco": 19.332,
+            "centroDelHueco": 16.538
+          },
+          {
+            "t": 360,
+            "cubierto": [
+              "0.0–16.6",
+              "65.2–100.0"
+            ],
+            "huecos": [
+              "16.6–65.2"
+            ],
+            "anchoDelHueco": 48.603,
+            "centroDelHueco": 40.897
+          },
+          {
+            "t": 420,
+            "cubierto": [
+              "0.0–35.5",
+              "82.6–100.0"
+            ],
+            "huecos": [
+              "35.5–82.6"
+            ],
+            "anchoDelHueco": 47.013,
+            "centroDelHueco": 59.048
+          },
+          {
+            "t": 480,
+            "cubierto": [
+              "0.0–73.6",
+              "92.1–100.0"
+            ],
+            "huecos": [
+              "73.6–92.1"
+            ],
+            "anchoDelHueco": 18.562,
+            "centroDelHueco": 82.845
+          },
+          {
+            "t": 540,
+            "cubierto": [
+              "0.0–86.2",
+              "96.1–100.0"
+            ],
+            "huecos": [
+              "86.2–96.1"
+            ],
+            "anchoDelHueco": 9.892,
+            "centroDelHueco": 91.186
+          },
+          {
+            "t": 600,
+            "cubierto": [
+              "0.0–93.9",
+              "98.8–100.0"
+            ],
+            "huecos": [
+              "93.9–98.8"
+            ],
+            "anchoDelHueco": 4.91,
+            "centroDelHueco": 96.356
+          },
+          {
+            "t": 700,
+            "cubierto": [
+              "0.0–98.6"
+            ],
+            "huecos": [
+              "98.6–100.0"
+            ],
+            "anchoDelHueco": 1.373,
+            "centroDelHueco": 99.313
+          },
+          {
+            "t": 800,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 900,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 1000,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          }
+        ]
+      },
+      "brillo": [],
+      "pixeles": [
+        {
+          "estado": "1-reposo",
+          "instante": null,
+          "fila": 76,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -40.5,
+          "picoEnLaBanda": 247.9,
+          "picoEnX": 163
+        },
+        {
+          "estado": "2-mitad",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 156,
+          "signo": "clara",
+          "tramos": [
+            "64-219",
+            "274-277"
+          ],
+          "tramosEnPorciento": [
+            "0–98.1"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.7,
+          "luzEnX": 24,
+          "luzEnXPorciento": -25.3,
+          "picoEnLaBanda": 247.7,
+          "picoEnX": 58
+        },
+        {
+          "estado": "3-hover-pleno",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 228,
+          "luzEnXPorciento": 103.8,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 236
+        },
+        {
+          "estado": "4-despues-de-salir",
+          "instante": null,
+          "fila": 76,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -40.5,
+          "picoEnLaBanda": 247.9,
+          "picoEnX": 105
+        },
+        {
+          "estado": "tira-libre-00",
+          "instante": null,
+          "fila": 76,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222",
+            "232-235"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.3–108.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.9,
+          "luzEnX": 26,
+          "luzEnXPorciento": -24.1,
+          "picoEnLaBanda": 247.9,
+          "picoEnX": 56
+        },
+        {
+          "estado": "tira-libre-01",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 83,
+          "signo": "clara",
+          "tramos": [
+            "64-82",
+            "141-223"
+          ],
+          "tramosEnPorciento": [
+            "0–11.4",
+            "48.7–100.6"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.9,
+          "luzEnX": 160,
+          "luzEnXPorciento": 60.8,
+          "picoEnLaBanda": 247.9,
+          "picoEnX": 189
+        },
+        {
+          "estado": "tira-libre-02",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 150,
+          "signo": "clara",
+          "tramos": [
+            "64-213",
+            "221-223"
+          ],
+          "tramosEnPorciento": [
+            "0–94.3",
+            "99.4–100.6"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.7,
+          "luzEnX": 227,
+          "luzEnXPorciento": 103.2,
+          "picoEnLaBanda": 247.7,
+          "picoEnX": 78
+        },
+        {
+          "estado": "tira-libre-03",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.7,
+          "luzEnX": 221,
+          "luzEnXPorciento": 99.4,
+          "picoEnLaBanda": 247.7,
+          "picoEnX": 260
+        },
+        {
+          "estado": "tira-libre-04",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 41,
+          "luzEnXPorciento": -14.6,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-05",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "11-13",
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 48,
+          "luzEnXPorciento": -10.1,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-06",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 231,
+          "luzEnXPorciento": 105.7,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-07",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 232,
+          "luzEnXPorciento": 106.3,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-08",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 232,
+          "luzEnXPorciento": 106.3,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-09",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 247.6,
+          "luzEnX": 233,
+          "luzEnXPorciento": 107,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-10",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 246.9,
+          "luzEnX": 231,
+          "luzEnXPorciento": 105.7,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-11",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 246.6,
+          "luzEnX": 228,
+          "luzEnXPorciento": 103.8,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-12",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222",
+            "280-282"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.7,
+          "luzEnX": 49,
+          "luzEnXPorciento": -9.5,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-13",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.7,
+          "luzEnX": 49,
+          "luzEnXPorciento": -9.5,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-14",
+          "instante": null,
+          "fila": 79,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.9,
+          "luzEnX": 47,
+          "luzEnXPorciento": -10.8,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-15",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.7,
+          "luzEnX": 49,
+          "luzEnXPorciento": -9.5,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-16",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.7,
+          "luzEnX": 49,
+          "luzEnXPorciento": -9.5,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-17",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 159,
+          "signo": "clara",
+          "tramos": [
+            "64-222"
+          ],
+          "tramosEnPorciento": [
+            "0–100"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 245.7,
+          "luzEnX": 49,
+          "luzEnXPorciento": -9.5,
+          "picoEnLaBanda": 247.6,
+          "picoEnX": 0
+        }
+      ],
+      "regreso": {
+        "anclas": {
+          "entrada1": 706.7,
+          "salida1": 3718.5,
+          "entrada2": 7094.2
+        },
+        "segundaEntradaTrasLaPrimera": 6387.5,
+        "propiedadesQueNoVolvieron": 0,
+        "detalle": [],
+        "cuadros": 996,
+        "dtP50": 13.3,
+        "dtP95": 13.5,
+        "dtMax": 32
+      }
+    },
+    {
+      "id": "cierre",
+      "nombre": "/v3 · el CTA del Cierre (registro «cuerpo»)",
+      "papeles": {
+        "copias": [
+          "a>span[0]>span[0]",
+          "a>span[0]>span[1]"
+        ],
+        "ventana": "a>span[0]",
+        "subrayado": [
+          "a>span[1]::before",
+          "a>span[1]::after"
+        ],
+        "brillo": []
+      },
+      "inventario": [
+        {
+          "clave": "a",
+          "etiqueta": "a",
+          "texto": "",
+          "caja": "32 · 378.81 · 133.33 · 47",
+          "papel": "raíz"
+        },
+        {
+          "clave": "a>span[0]",
+          "etiqueta": "span",
+          "texto": "",
+          "caja": "40 · 386.81 · 117.33 · 24",
+          "papel": "ventana"
+        },
+        {
+          "clave": "a>span[0]>span[0]",
+          "etiqueta": "span",
+          "texto": "Ver los servicios",
+          "caja": "40 · 386.81 · 117.33 · 24",
+          "papel": "copia A"
+        },
+        {
+          "clave": "a>span[0]>span[1]",
+          "etiqueta": "span",
+          "texto": "Ver los servicios",
+          "caja": "4.97 · 395.97 · 119.71 · 44.01",
+          "papel": "copia B"
+        },
+        {
+          "clave": "a>span[1]",
+          "etiqueta": "span",
+          "texto": "",
+          "caja": "40 · 414.81 · 117.33 · 3",
+          "papel": ""
+        },
+        {
+          "clave": "a>span[1]::before",
+          "etiqueta": "span::before",
+          "texto": "\"\"",
+          "caja": "(pseudo)",
+          "papel": "subrayado"
+        },
+        {
+          "clave": "a>span[1]::after",
+          "etiqueta": "span::after",
+          "texto": "\"\"",
+          "caja": "(pseudo)",
+          "papel": "subrayado"
+        }
+      ],
+      "estados": {
+        "reposo": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "matrix(0.984808, 0.173648, -0.173648, 0.984808, -33.842, 19.1645)",
+            "giro": "10°",
+            "escalaX": "1",
+            "traslacion": "-33.842 · 19.1645",
+            "opacity": "0",
+            "clipPath": "inset(80% 0px 0px)",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "117.328px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          }
+        ],
+        "hoverPleno": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "matrix(0.994522, 0.104528, -0.104528, 0.994522, 23.4183, -31.4745)",
+            "giro": "6°",
+            "escalaX": "1",
+            "traslacion": "23.4183 · -31.4745",
+            "opacity": "0",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "28px",
+            "transformOrigin": "58.6641px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform, opacity, clip-path 1.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "inset(0px)",
+            "width": "117.328px",
+            "height": "28px",
+            "transformOrigin": "58.6641px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform, opacity, clip-path 1.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "28px",
+            "transformOrigin": "58.6641px 14px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "117.328px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0.1s"
+          }
+        ],
+        "despuesDeSalir": [
+          {
+            "nodo": "a>span[0]>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]>span[1]",
+            "transform": "matrix(0.984808, 0.173648, -0.173648, 0.984808, -33.842, 19.1645)",
+            "giro": "10°",
+            "escalaX": "1",
+            "traslacion": "-33.842 · 19.1645",
+            "opacity": "0",
+            "clipPath": "inset(80% 0px 0px)",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "all 0s ease 0s"
+          },
+          {
+            "nodo": "a>span[0]",
+            "transform": "none",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "24px",
+            "transformOrigin": "58.6641px 12px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "block-size 0.3s cubic-bezier(0.64, 0.1, 0, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::before",
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "1",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "117.328px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          },
+          {
+            "nodo": "a>span[1]::after",
+            "transform": "matrix(0, 0, 0, 1, 0, 0)",
+            "giro": "0°",
+            "escalaX": "0",
+            "traslacion": "0 · 0",
+            "opacity": "1",
+            "clipPath": "none",
+            "width": "117.328px",
+            "height": "3px",
+            "transformOrigin": "0px 1.5px",
+            "borderBottom": "0px solid rgb(17, 17, 17)",
+            "backgroundColor": "rgb(17, 17, 17)",
+            "boxShadow": "none",
+            "filter": "none",
+            "transition": "transform 0.7s cubic-bezier(0.77, 0, 0.175, 1) 0s"
+          }
+        ]
+      },
+      "declaradas": [
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "duracion": 300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clip-path",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "duracion": 1300,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.64, 0.1, 0, 1)"
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "duracion": 700,
+          "retardo": 0,
+          "curva": "cubic-bezier(0.77, 0, 0.175, 1)"
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "duracion": 700,
+          "retardo": 100.00000000000003,
+          "curva": "cubic-bezier(0.77, 0, 0.175, 1)"
+        }
+      ],
+      "entrada": [
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "arranca": 1.1,
+          "termina": 1319.9,
+          "duracion": 1318.8,
+          "muestras": 99,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 97,
+            "desvioMaximo": 0.0077,
+            "desvioMedio": 0.0024,
+            "arranqueRelativo": 8,
+            "enCuartos": [
+              {
+                "t": 338.1,
+                "observado": 0.1555,
+                "esperado": 0.1518
+              },
+              {
+                "t": 658.2,
+                "observado": 0.8587,
+                "esperado": 0.8524
+              },
+              {
+                "t": 978.4,
+                "observado": 0.9772,
+                "esperado": 0.9761
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "arranca": 26.3,
+          "termina": 1319.9,
+          "duracion": 1293.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 97,
+            "desvioMaximo": 0.0016,
+            "desvioMedio": 0.0002,
+            "arranqueRelativo": 13,
+            "enCuartos": [
+              {
+                "t": 333.1,
+                "observado": 0.1464,
+                "esperado": 0.146
+              },
+              {
+                "t": 653.2,
+                "observado": 0.8488,
+                "esperado": 0.8486
+              },
+              {
+                "t": 986.8,
+                "observado": 0.9776,
+                "esperado": 0.9776
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "height",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "arranca": 26.3,
+          "termina": 1319.9,
+          "duracion": 1293.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 96,
+            "desvioMaximo": 0.0099,
+            "desvioMedio": 0.0031,
+            "arranqueRelativo": 5,
+            "enCuartos": [
+              {
+                "t": 327.9,
+                "observado": 0.1436,
+                "esperado": 0.1402
+              },
+              {
+                "t": 661.2,
+                "observado": 0.8631,
+                "esperado": 0.8547
+              },
+              {
+                "t": 981.4,
+                "observado": 0.9781,
+                "esperado": 0.9767
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transformOrigin",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "arranca": 26.3,
+          "termina": 1319.9,
+          "duracion": 1293.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": {
+            "muestras": 97,
+            "desvioMaximo": 0.0016,
+            "desvioMedio": 0.0002,
+            "arranqueRelativo": 13,
+            "enCuartos": [
+              {
+                "t": 333.1,
+                "observado": 0.1464,
+                "esperado": 0.146
+              },
+              {
+                "t": 653.2,
+                "observado": 0.8488,
+                "esperado": 0.8486
+              },
+              {
+                "t": 986.8,
+                "observado": 0.9776,
+                "esperado": 0.9776
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clipPath",
+          "arranca": 26.3,
+          "termina": 1319.9,
+          "duracion": 1293.6,
+          "muestras": 98,
+          "declarada": "1300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "height",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": null,
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "arranca": 26.3,
+          "termina": 319.7,
+          "duracion": 293.4,
+          "muestras": 22,
+          "declarada": "300 ms + 0 ms · cubic-bezier(0.64, 0.1, 0, 1)",
+          "contraste": null
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "arranca": 26.3,
+          "termina": 719.8,
+          "duracion": 693.5,
+          "muestras": 53,
+          "declarada": "700 ms + 0 ms · cubic-bezier(0.77, 0, 0.175, 1)",
+          "contraste": {
+            "muestras": 52,
+            "desvioMaximo": 0.0022,
+            "desvioMedio": 0.0004,
+            "arranqueRelativo": 13,
+            "enCuartos": [
+              {
+                "t": 186.8,
+                "observado": 0.0626,
+                "esperado": 0.0626
+              },
+              {
+                "t": 359.7,
+                "observado": 0.6519,
+                "esperado": 0.6498
+              },
+              {
+                "t": 533.1,
+                "observado": 0.9613,
+                "esperado": 0.9611
+              }
+            ]
+          }
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "arranca": 119.7,
+          "termina": 812.9,
+          "duracion": 693.2,
+          "muestras": 53,
+          "declarada": "700 ms + 100.00000000000003 ms · cubic-bezier(0.77, 0, 0.175, 1)",
+          "contraste": {
+            "muestras": 53,
+            "desvioMaximo": 0.0022,
+            "desvioMedio": 0.0004,
+            "arranqueRelativo": 13,
+            "enCuartos": [
+              {
+                "t": 279.8,
+                "observado": 0.0569,
+                "esperado": 0.0567
+              },
+              {
+                "t": 453.2,
+                "observado": 0.6166,
+                "esperado": 0.6148
+              },
+              {
+                "t": 626.5,
+                "observado": 0.9574,
+                "esperado": 0.9572
+              }
+            ]
+          }
+        }
+      ],
+      "salida": [
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transform",
+          "arranca": 2.4,
+          "termina": 2.4,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "opacity",
+          "arranca": 2.4,
+          "termina": 2.4,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[0]",
+          "propiedad": "height",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transform",
+          "arranca": 2.4,
+          "termina": 2.4,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "opacity",
+          "arranca": 2.4,
+          "termina": 2.4,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "clipPath",
+          "arranca": 2.4,
+          "termina": 2.4,
+          "duracion": 0,
+          "muestras": 1,
+          "instantaneo": true
+        },
+        {
+          "nodo": "a>span[0]>span[1]",
+          "propiedad": "height",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "transformOrigin",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[0]",
+          "propiedad": "height",
+          "arranca": 27.3,
+          "termina": 293.9,
+          "duracion": 266.6,
+          "muestras": 21,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[1]::before",
+          "propiedad": "transform",
+          "arranca": 27.3,
+          "termina": 720.3,
+          "duracion": 693,
+          "muestras": 53,
+          "instantaneo": false
+        },
+        {
+          "nodo": "a>span[1]::after",
+          "propiedad": "transform",
+          "arranca": 27.3,
+          "termina": 720.3,
+          "duracion": 693,
+          "muestras": 53,
+          "instantaneo": false
+        }
+      ],
+      "subrayado": {
+        "capas": [
+          {
+            "clave": "a>span[1]::before",
+            "ancho": 117.328,
+            "origenX": 117.328
+          },
+          {
+            "clave": "a>span[1]::after",
+            "ancho": 117.328,
+            "origenX": 0
+          }
+        ],
+        "muestrasDelHueco": [
+          {
+            "t": 0,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 60,
+            "cubierto": [
+              "0.2–100.0"
+            ],
+            "huecos": [
+              "0.0–0.2"
+            ],
+            "anchoDelHueco": 0.197,
+            "centroDelHueco": 0.099
+          },
+          {
+            "t": 120,
+            "cubierto": [
+              "1.6–100.0"
+            ],
+            "huecos": [
+              "0.0–1.6"
+            ],
+            "anchoDelHueco": 1.629,
+            "centroDelHueco": 0.814
+          },
+          {
+            "t": 180,
+            "cubierto": [
+              "0.0–0.5",
+              "4.2–100.0"
+            ],
+            "huecos": [
+              "0.5–4.2"
+            ],
+            "anchoDelHueco": 3.759,
+            "centroDelHueco": 2.343
+          },
+          {
+            "t": 240,
+            "cubierto": [
+              "0.0–2.4",
+              "10.7–100.0"
+            ],
+            "huecos": [
+              "2.4–10.7"
+            ],
+            "anchoDelHueco": 8.315,
+            "centroDelHueco": 6.572
+          },
+          {
+            "t": 300,
+            "cubierto": [
+              "0.0–5.7",
+              "21.7–100.0"
+            ],
+            "huecos": [
+              "5.7–21.7"
+            ],
+            "anchoDelHueco": 15.991,
+            "centroDelHueco": 13.683
+          },
+          {
+            "t": 360,
+            "cubierto": [
+              "0.0–13.9",
+              "57.6–100.0"
+            ],
+            "huecos": [
+              "13.9–57.6"
+            ],
+            "anchoDelHueco": 43.684,
+            "centroDelHueco": 35.782
+          },
+          {
+            "t": 420,
+            "cubierto": [
+              "0.0–28.9",
+              "79.5–100.0"
+            ],
+            "huecos": [
+              "28.9–79.5"
+            ],
+            "anchoDelHueco": 50.564,
+            "centroDelHueco": 54.191
+          },
+          {
+            "t": 480,
+            "cubierto": [
+              "0.0–68.3",
+              "90.7–100.0"
+            ],
+            "huecos": [
+              "68.3–90.7"
+            ],
+            "anchoDelHueco": 22.391,
+            "centroDelHueco": 79.54
+          },
+          {
+            "t": 540,
+            "cubierto": [
+              "0.0–83.9",
+              "95.3–100.0"
+            ],
+            "huecos": [
+              "83.9–95.3"
+            ],
+            "anchoDelHueco": 11.436,
+            "centroDelHueco": 89.608
+          },
+          {
+            "t": 600,
+            "cubierto": [
+              "0.0–92.8",
+              "98.4–100.0"
+            ],
+            "huecos": [
+              "92.8–98.4"
+            ],
+            "anchoDelHueco": 5.662,
+            "centroDelHueco": 95.594
+          },
+          {
+            "t": 700,
+            "cubierto": [
+              "0.0–98.2"
+            ],
+            "huecos": [
+              "98.2–100.0"
+            ],
+            "anchoDelHueco": 1.793,
+            "centroDelHueco": 99.104
+          },
+          {
+            "t": 800,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 900,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          },
+          {
+            "t": 1000,
+            "cubierto": [
+              "0.0–100.0"
+            ],
+            "huecos": [],
+            "anchoDelHueco": 0,
+            "centroDelHueco": null
+          }
+        ]
+      },
+      "brillo": [],
+      "pixeles": [
+        {
+          "estado": "1-reposo",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 170,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 171,
+          "picoEnX": 0
+        },
+        {
+          "estado": "2-mitad",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 155,
+          "signo": "clara",
+          "tramos": [
+            "14-168"
+          ],
+          "tramosEnPorciento": [
+            "-18.7–92.1"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 164.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 167.9,
+          "picoEnX": 0
+        },
+        {
+          "estado": "3-hover-pleno",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-196"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 185.9,
+          "picoEnX": 233
+        },
+        {
+          "estado": "4-despues-de-salir",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 134,
+          "signo": "clara",
+          "tramos": [
+            "23-156"
+          ],
+          "tramosEnPorciento": [
+            "-12.2–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 170.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 171,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-00",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 167.7,
+          "luzEnX": 2,
+          "luzEnXPorciento": -27.3,
+          "picoEnLaBanda": 169,
+          "picoEnX": 16
+        },
+        {
+          "estado": "tira-libre-01",
+          "instante": null,
+          "fila": 85,
+          "corridaMasLarga": 93,
+          "signo": "clara",
+          "tramos": [
+            "40-47",
+            "64-156"
+          ],
+          "tramosEnPorciento": [
+            "0–5",
+            "17.3–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 161.1,
+          "luzEnX": 162,
+          "luzEnXPorciento": 87.8,
+          "picoEnLaBanda": 197.9,
+          "picoEnX": 127
+        },
+        {
+          "estado": "tira-libre-02",
+          "instante": null,
+          "fila": 79,
+          "corridaMasLarga": 101,
+          "signo": "clara",
+          "tramos": [
+            "40-140",
+            "152-157"
+          ],
+          "tramosEnPorciento": [
+            "0–71.9",
+            "80.6–84.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 160.1,
+          "luzEnX": 150,
+          "luzEnXPorciento": 79.1,
+          "picoEnLaBanda": 197.9,
+          "picoEnX": 84
+        },
+        {
+          "estado": "tira-libre-03",
+          "instante": null,
+          "fila": 79,
+          "corridaMasLarga": 118,
+          "signo": "clara",
+          "tramos": [
+            "28-31",
+            "39-156",
+            "204-216",
+            "220-222"
+          ],
+          "tramosEnPorciento": [
+            "-8.6–-6.5",
+            "-0.7–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 166.9,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-04",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 164.1,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 198.6,
+          "picoEnX": 38
+        },
+        {
+          "estado": "tira-libre-05",
+          "instante": null,
+          "fila": 79,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156",
+            "235-237"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 198.6,
+          "picoEnX": 28
+        },
+        {
+          "estado": "tira-libre-06",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156",
+            "229-237"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 0,
+          "luzEnXPorciento": -28.8,
+          "picoEnLaBanda": 198.6,
+          "picoEnX": 21
+        },
+        {
+          "estado": "tira-libre-07",
+          "instante": null,
+          "fila": 78,
+          "corridaMasLarga": 117,
+          "signo": "clara",
+          "tramos": [
+            "40-156"
+          ],
+          "tramosEnPorciento": [
+            "0–83.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 8,
+          "luzEnXPorciento": -23,
+          "picoEnLaBanda": 195.9,
+          "picoEnX": 17
+        },
+        {
+          "estado": "tira-libre-08",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 143,
+          "signo": "clara",
+          "tramos": [
+            "40-182",
+            "190-196"
+          ],
+          "tramosEnPorciento": [
+            "0–102.2",
+            "107.9–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 6,
+          "luzEnXPorciento": -24.5,
+          "picoEnLaBanda": 195.9,
+          "picoEnX": 13
+        },
+        {
+          "estado": "tira-libre-09",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 142,
+          "signo": "clara",
+          "tramos": [
+            "40-181",
+            "189-193"
+          ],
+          "tramosEnPorciento": [
+            "0–101.4",
+            "107.2–110.1"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 4,
+          "luzEnXPorciento": -25.9,
+          "picoEnLaBanda": 196.6,
+          "picoEnX": 10
+        },
+        {
+          "estado": "tira-libre-10",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 141,
+          "signo": "clara",
+          "tramos": [
+            "40-180",
+            "189-193"
+          ],
+          "tramosEnPorciento": [
+            "0–100.7",
+            "107.2–110.1"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 160.1,
+          "luzEnX": 90,
+          "luzEnXPorciento": 36,
+          "picoEnLaBanda": 198.8,
+          "picoEnX": 7
+        },
+        {
+          "estado": "tira-libre-11",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "189-194"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "107.2–110.8"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 161.9,
+          "luzEnX": 51,
+          "luzEnXPorciento": 7.9,
+          "picoEnLaBanda": 189,
+          "picoEnX": 4
+        },
+        {
+          "estado": "tira-libre-12",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-195"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–111.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 162.9,
+          "luzEnX": 15,
+          "luzEnXPorciento": -18,
+          "picoEnLaBanda": 196.9,
+          "picoEnX": 2
+        },
+        {
+          "estado": "tira-libre-13",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-195"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–111.5"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 195.9,
+          "picoEnX": 0
+        },
+        {
+          "estado": "tira-libre-14",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-196"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 165.9,
+          "picoEnX": 3
+        },
+        {
+          "estado": "tira-libre-15",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-196"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 165.9,
+          "picoEnX": 3
+        },
+        {
+          "estado": "tira-libre-16",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-196"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 165.9,
+          "picoEnX": 3
+        },
+        {
+          "estado": "tira-libre-17",
+          "instante": null,
+          "fila": 80,
+          "corridaMasLarga": 140,
+          "signo": "clara",
+          "tramos": [
+            "40-179",
+            "188-196"
+          ],
+          "tramosEnPorciento": [
+            "0–100",
+            "106.5–112.2"
+          ],
+          "sinRaya": false,
+          "luzEnLaFila": 163.9,
+          "luzEnX": 3,
+          "luzEnXPorciento": -26.6,
+          "picoEnLaBanda": 165.9,
+          "picoEnX": 3
+        }
+      ],
+      "regreso": {
+        "anclas": {
+          "entrada1": 689.8,
+          "salida1": 3703.5,
+          "entrada2": 7065.6
+        },
+        "segundaEntradaTrasLaPrimera": 6375.8,
+        "propiedadesQueNoVolvieron": 0,
+        "detalle": [],
+        "cuadros": 994,
+        "dtP50": 13.3,
+        "dtP95": 13.5,
+        "dtMax": 15.7
+      }
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "instrumento": "scripts-boton/d-hueco.ts — el rango de x sale del DOM y la fila se elige con el tope de 3 corridas",
+  "cuando": "2026-09-17T23:25:02.861Z",
+  "lecturas": [
+    {
+      "boton": "hero",
+      "estado": "1-reposo",
+      "fila": 79,
+      "cubiertoPorciento": 99.38,
+      "tramos": [
+        "0–99.37"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    },
+    {
+      "boton": "hero",
+      "estado": "2b-hueco-maximo",
+      "fila": 81,
+      "cubiertoPorciento": 50.63,
+      "tramos": [
+        "0–19.5",
+        "59.12–59.75",
+        "71.07–100"
+      ],
+      "huecoPorciento": 51.57,
+      "desdeElHover": [
+        319.9,
+        586.1
+      ]
+    },
+    {
+      "boton": "hero",
+      "estado": "2-mitad",
+      "fila": 81,
+      "cubiertoPorciento": 97.5,
+      "tramos": [
+        "0–96.86"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": [
+        602.4,
+        864
+      ]
+    },
+    {
+      "boton": "hero",
+      "estado": "3-hover-pleno",
+      "fila": 81,
+      "cubiertoPorciento": 99.38,
+      "tramos": [
+        "0–99.37"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    },
+    {
+      "boton": "hero",
+      "estado": "4-despues-de-salir",
+      "fila": 79,
+      "cubiertoPorciento": 99.38,
+      "tramos": [
+        "0–99.37"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    },
+    {
+      "boton": "cierre",
+      "estado": "1-reposo",
+      "fila": 81,
+      "cubiertoPorciento": 99.15,
+      "tramos": [
+        "0–99.15"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    },
+    {
+      "boton": "cierre",
+      "estado": "2b-hueco-maximo",
+      "fila": 83,
+      "cubiertoPorciento": 53.39,
+      "tramos": [
+        "0–23.08",
+        "70.94–100"
+      ],
+      "huecoPorciento": 47.86,
+      "desdeElHover": [
+        318.8,
+        558.2
+      ]
+    },
+    {
+      "boton": "cierre",
+      "estado": "2-mitad",
+      "fila": 82,
+      "cubiertoPorciento": 100,
+      "tramos": [
+        "0–100"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": [
+        585.6,
+        827.5
+      ]
+    },
+    {
+      "boton": "cierre",
+      "estado": "3-hover-pleno",
+      "fila": 81,
+      "cubiertoPorciento": 99.15,
+      "tramos": [
+        "0–99.15"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    },
+    {
+      "boton": "cierre",
+      "estado": "4-despues-de-salir",
+      "fila": 81,
+      "cubiertoPorciento": 99.15,
+      "tramos": [
+        "0–99.15"
+      ],
+      "huecoPorciento": 0,
+      "desdeElHover": null
+    }
+  ]
+}

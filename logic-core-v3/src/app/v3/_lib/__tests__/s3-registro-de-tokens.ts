@@ -55,15 +55,17 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   },
   {
     nombre: '--cta-subrayado-duracion',
-    valor: 'calc(2 * var(--duracion-rapida))',
-    evidencia: 'derivado',
-    procedencia: '0,6s medidos = 2×300',
+    valor: 'var(--duracion-muy-lenta)',
+    evidencia: 'medido',
+    procedencia:
+      'BOTON-1.md §2.3 — 0,7s por capa en la serie por cuadro de la referencia, con desvío máximo 0,0251 contra la curva declarada. Cae EXACTO sobre --duracion-muy-lenta (700ms), así que no hay cuenta. Antes valía 0,6s por la fila mal atribuida de COMPONENTS.md §3.2, que describía el brillo.',
   },
   {
-    nombre: '--cta-subrayado-retardo',
-    valor: 'var(--duracion-media)',
+    nombre: '--cta-subrayado-desfase',
+    valor: 'calc(var(--duracion-media) - var(--duracion-rapida))',
     evidencia: 'derivado',
-    procedencia: '0,4s medidos = --duracion-media exacto',
+    procedencia:
+      'BOTON-1.md §2.3 — 0,1s de desfase entre las dos capas = 400 − 300, las dos duraciones del sistema. NO es un retardo del gesto: es lo único que produce el hueco.',
   },
   {
     nombre: '--cta-ventana-reposo',

@@ -13,8 +13,16 @@
  *   copia A sale   rotando +6°  y trasladándose (+20, −33,75) px, opacidad → 0
  *   copia B entra  desde +10°   y (−30, +24,75) px, con clip-path de
  *                  inset(80% 0 0) a inset(0), opacidad → 1
- *   en paralelo    un subrayado, 0,6s con 0,4s de retardo
  *   el intercambio 1,3s con --ease-salida
+ *   y al SOLTAR    el reposo vuelve EN UN CUADRO, sin animación de vuelta
+ *
+ * En paralelo, el subrayado —que en reposo está ENTERO— se parte, el hueco
+ * viaja de izquierda a derecha y la raya se vuelve a unir al llegar al final:
+ *
+ *   la capa que se va    scaleX 1 → 0 con el origen en el borde DERECHO
+ *   la capa que llega    scaleX 0 → 1 con el origen en el IZQUIERDO, 100ms
+ *                        más tarde
+ *   las dos              0,7s con --ease-principal
  *
  * ── De dónde sale cada número ─────────────────────────────────────────────
  *
@@ -22,6 +30,16 @@
  * Ni un selector, ni un nombre de clase, ni un bloque de CSS de la referencia.
  * Cada propiedad personalizada de abajo lleva su etiqueta de evidencia, y
  * `s3-cta.invariant.ts` contrasta las derivadas contra `_lib/cta.ts`.
+ *
+ * ⚠️ **BOTON-1 CORRIGIÓ LA PROCEDENCIA DE LOS TIEMPOS DEL SUBRAYADO.** Hasta
+ * ese bloque, la duración y el retardo salían de la fila «CTA · subrayado» de
+ * `COMPONENTS.md` §3.2 —0,6s con 0,4s de retardo—. BOTON-1 midió la serie por
+ * cuadro y encontró que **esa fila no describe el subrayado de la referencia
+ * sino el envoltorio de la imagen de su brillo**: las cuatro cifras de la fila
+ * (scale(0) → scale(1), translate(−30,0), 120×3 px, 600+400) corresponden una
+ * por una a ese otro nodo. El subrayado real son DOS capas de 0,7s con 0,1s de
+ * desfase y la OTRA curva. Los números de abajo son los corregidos; la fila
+ * vieja quedó anotada en `BOTON-1.md` §6.
  *
  * ── El foco dispara lo mismo que el hover ─────────────────────────────────
  *
@@ -46,13 +64,23 @@
   --cta-recorte-final: inset(0);
 
   /* --- Tiempos. [derivado] de las cuatro duraciones del sistema ---------
-   * 1,3s y 0,6s no son tokens y no se inventa ninguno: se COMPONEN.
-   *   700 + 2×300 = 1300ms   ·   2×300 = 600ms   ·   400ms es un token exacto.
+   * 1,3s no es un token y no se inventa ninguno: se COMPONE.
+   *   700 + 2×300 = 1300ms   ·   400 − 300 = 100ms   ·   700ms es un token.
    * El instrumento resuelve las tres cuentas y las compara contra la
    * medición, así que si alguien mueve una duración del sistema, falla. */
   --cta-intercambio: calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida));
-  --cta-subrayado-duracion: calc(2 * var(--duracion-rapida));
-  --cta-subrayado-retardo: var(--duracion-media);
+
+  /* Los 0,7s por capa que BOTON-1 §2.3 midió en la referencia caen EXACTO
+   * sobre `--duracion-muy-lenta`. No hay cuenta que hacer: es el token. */
+  --cta-subrayado-duracion: var(--duracion-muy-lenta);
+
+  /* ⚠️ NO es un retardo del gesto: es el DESFASE entre las dos capas, y es
+   * lo único que produce el hueco. Las dos corren 0,7s sobre la misma curva;
+   * la que llega arranca 0,1s después que la que se va, así que en cada
+   * instante el hueco es esa misma curva evaluada con 100ms de diferencia.
+   * Por eso el hueco abre pegado al borde izquierdo, engorda hasta la mitad
+   * del ancho y se cierra contra el derecho. */
+  --cta-subrayado-desfase: calc(var(--duracion-media) - var(--duracion-rapida));
 
   /* --- La ventana. [derivado] de NUESTRA tipografía ---------------------
    * Ellos miden 24,5 → 28,5 px. Los extremos dependen de la familia; lo que
@@ -65,7 +93,16 @@
   /* --- El subrayado. [derivado] -----------------------------------------
    * Su ancho medido es 120px, que es el ancho de SU rótulo, no una medida
    * del sistema: acá vale el 100% de la ventana, o sea el ancho del nuestro.
-   * El alto sí transfiere: 3px = tres filetes. */
+   *
+   * ⚠️ Y el ALTO se deja en tres filetes A PROPÓSITO, aunque BOTON-1 §2.1
+   * haya medido que la raya de la referencia es de UN píxel. Los 3px salían
+   * de la misma fila mal atribuida que los tiempos —eran el alto de la caja
+   * del brillo—, pero a diferencia de los tiempos **este número ya es parte
+   * de la composición aprobada del hero** (COMPO-1, COMPO-2, PAPEL-2 y ROCE-1
+   * se corrieron con la raya de 3px puesta) y una raya de 1px de tinta sobre
+   * papel es una decisión de peso visual que nadie midió para NUESTRA paleta.
+   * Queda anotado y sin tocar: es el cuarto número con la procedencia rota y
+   * el único que este bloque no cambia. */
   --cta-subrayado-alto: calc(var(--border-hairline) * 3);
 
   display: inline-flex;
@@ -88,7 +125,11 @@
   inline-size: 100%;
 }
 
-/* --- La ventana de recorte ---------------------------------------------- */
+/* --- La ventana de recorte ----------------------------------------------
+ * ⚠️ SU transición se queda en la regla base, y eso NO es una omisión: la
+ * ventana SÍ vuelve animada. Medido en la referencia (BOTON-1 §1.2): al
+ * soltar, su ventana recorre los 300ms de vuelta en 15 muestras mientras las
+ * dos copias saltan en una sola. Lo que salta es el rótulo, no la caja. */
 [data-v3] [data-pieza="cta"] [data-parte="ventana"] {
   position: relative;
   display: inline-flex;
@@ -99,14 +140,29 @@
   transition-timing-function: var(--ease-salida);
 }
 
-/* --- Las dos copias ----------------------------------------------------- */
+/* --- Las dos copias -----------------------------------------------------
+ * ⚠️ **ACÁ NO HAY `transition`, Y ES TODO EL GESTO QUE EL DUEÑO PIDIÓ.**
+ *
+ * La transición del intercambio vive en la regla de ESTADO, más abajo. Al
+ * entrar, esa regla aporta la duración y las copias se intercambian en 1,3s.
+ * Al salir, la regla deja de aplicar, la duración vuelve a su valor inicial
+ * —`0s`— y el navegador **cancela la transición en curso y repone el reposo
+ * en un cuadro**. No hay vuelta que mirar.
+ *
+ * Y el resultado no es un salto visible, que es lo que lo vuelve correcto: la
+ * copia B termina el hover EXACTAMENTE donde arrancó la copia A —giro 0,
+ * traslación 0, opacidad 1—, así que el estado al que se salta es
+ * indistinguible del que se estaba viendo. Medido en la referencia: una sola
+ * muestra a +4,4ms del `mouseleave`, contra las 98 que tardaba la vuelta
+ * animada de acá (`BOTON-1.md` §1.2 y §1.3).
+ *
+ * Es el mismo mecanismo de la referencia y por el mismo camino: ella declara
+ * `transition-duration: 0s` en su regla de reposo; acá simplemente no se
+ * declara, que es el mismo `0s` por valor inicial. */
 [data-v3] [data-pieza="cta"] [data-parte="copia-a"],
 [data-v3] [data-pieza="cta"] [data-parte="copia-b"] {
   display: block;
   white-space: nowrap;
-  transition-property: transform, opacity, clip-path;
-  transition-duration: var(--cta-intercambio);
-  transition-timing-function: var(--ease-salida);
 }
 
 [data-v3] [data-pieza="cta"] [data-parte="copia-b"] {
@@ -118,21 +174,64 @@
   clip-path: var(--cta-recorte-inicial);
 }
 
-/* --- El subrayado ------------------------------------------------------- */
+/* --- El subrayado: DOS capas, una por sentido ---------------------------
+ *
+ * La raya está ENTERA en reposo y se parte en el hover. Eso sólo se puede
+ * hacer con dos capas: una que se retrae hacia la derecha y otra que crece
+ * desde la izquierda, con el hueco entre las dos. Con una sola capa —lo que
+ * había acá antes— no hay hueco posible, sólo una raya que crece.
+ *
+ * ⚠️ **Van como pseudo-elementos y no como dos `<span>`, por peso.** El
+ * `<span data-parte="subrayado">` ya existía y sigue siendo el mismo nodo:
+ * ahora es el contenedor posicionado y las dos capas son su `::before` y su
+ * `::after`. Así el cambio **no agrega un solo byte al chunk del cliente** —
+ * `Cta.tsx` viaja adentro de dos componentes de cliente (`Hero` y `Cierre`), y
+ * el presupuesto de `/v3` se mide en bytes: `s5-presupuesto.ts` documenta un
+ * margen que llegó a ser de 8,6 B—. Dos `<span>` más habrían costado marcado
+ * en las dos secciones, y este cambio cuesta CERO: el único archivo de
+ * producto con bytes es esta hoja, y ese techo mide sólo los `<script src>`
+ * de la ruta.
+ *
+ * El precio, declarado: un pseudo-elemento no se puede congelar para
+ * fotografiarlo (`BOTON-1.md` §0.3, el instrumento no pinta su transform
+ * pausado). Una tira de cuadros de esta raya hay que sacarla por
+ * `Page.startScreencast` o leyendo la serie por cuadro, no congelando. */
 [data-v3] [data-pieza="cta"] [data-parte="subrayado"] {
+  position: relative;
   display: block;
   inline-size: 100%;
   block-size: var(--cta-subrayado-alto);
+}
+
+[data-v3] [data-pieza="cta"] [data-parte="subrayado"]::before,
+[data-v3] [data-pieza="cta"] [data-parte="subrayado"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* EL CTA ES SIEMPRE TINTA. Las dos capas son la misma tinta: el hueco es
+     ausencia de raya, no un segundo color. */
   background-color: var(--color-tinta);
-  transform: scaleX(0);
-  transform-origin: left center;
   transition-property: transform;
   transition-duration: var(--cta-subrayado-duracion);
-  transition-timing-function: var(--ease-salida);
-  /* Sin retardo al SALIR: el retardo vive en la regla de estado, así que
-     sólo se aplica al entrar. Con el retardo acá, la raya se quedaría 0,4s
-     colgada después de sacar el puntero. */
+  transition-timing-function: var(--ease-principal);
+  /* Sin desfase al SALIR: vive en la regla de estado, así que sólo se aplica
+     al entrar. Con el desfase acá, las dos capas volverían corridas y el
+     hueco aparecería también en la vuelta — y medido en la referencia la
+     vuelta NO tiene hueco: las dos se invierten a la vez y la raya queda
+     entera todo el camino (`BOTON-1.md` §2.5). */
   transition-delay: 0s;
+}
+
+/* LA CAPA QUE SE VA — entera en reposo, se pliega hacia su borde derecho. */
+[data-v3] [data-pieza="cta"] [data-parte="subrayado"]::before {
+  transform: scaleX(1);
+  transform-origin: right center;
+}
+
+/* LA CAPA QUE LLEGA — plegada en reposo, crece desde su borde izquierdo. */
+[data-v3] [data-pieza="cta"] [data-parte="subrayado"]::after {
+  transform: scaleX(0);
+  transform-origin: left center;
 }
 
 /* =========================================================================
@@ -148,6 +247,24 @@
   )
   [data-parte="ventana"] {
   block-size: var(--cta-ventana-hover);
+}
+
+/* ⚠️ LA TRANSICIÓN DEL INTERCAMBIO, declarada en el estado y no en la base.
+ * Ver el comentario de las dos copias: es lo que hace que la ida se anime y
+ * la vuelta no. Va en una regla propia y para las dos copias juntas porque es
+ * el MISMO tiempo para las dos; los valores de destino, que sí difieren, van
+ * en las dos reglas de abajo. */
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  :is([data-parte="copia-a"], [data-parte="copia-b"]) {
+  transition-property: transform, opacity, clip-path;
+  transition-duration: var(--cta-intercambio);
+  transition-timing-function: var(--ease-salida);
 }
 
 [data-v3]
@@ -175,6 +292,9 @@
   clip-path: var(--cta-recorte-final);
 }
 
+/* El hueco, en dos reglas: la capa de la derecha se pliega desde el instante
+   cero y la de la izquierda crece 100ms después. El desfase es lo único que
+   las separa — misma duración, misma curva. */
 [data-v3]
   [data-pieza="cta"]:not(:disabled):is(
     :hover,
@@ -182,16 +302,27 @@
     [data-forzado~="hover"],
     [data-forzado~="foco"]
   )
-  [data-parte="subrayado"] {
-  transform: scaleX(1);
-  transition-delay: var(--cta-subrayado-retardo);
+  [data-parte="subrayado"]::before {
+  transform: scaleX(0);
 }
 
-/* ═══ EL REGISTRO `rotulo` — mayúsculas, interletrado abierto y la regla ═══
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="subrayado"]::after {
+  transform: scaleX(1);
+  transition-delay: var(--cta-subrayado-desfase);
+}
+
+/* ═══ EL REGISTRO `rotulo` — mayúsculas e interletrado abierto ════════════
  *
- * Dos reglas y ni un valor nuevo: las tres cosas que pide salen de tokens que el
- * sistema ya declara. No hay una propiedad de alcance de componente nueva, así
- * que el padrón de `s3-registro-de-tokens.ts` no se mueve.
+ * Dos propiedades y ni un valor nuevo: las dos salen de tokens que el sistema
+ * ya declara. No hay una propiedad de alcance de componente nueva, así que el
+ * padrón de `s3-registro-de-tokens.ts` no se mueve.
  *
  *   `text-transform`  mayúsculas. Se pone acá y no por utilidad heredada
  *                     porque la ventana declara su propio interletrado y las
@@ -201,26 +332,27 @@
  *                     existe para arreglar.
  *   `letter-spacing`  `--tracking-micro`, 0,025 em — el ÚNICO positivo del
  *                     sistema, el mismo que llevan las etiquetas de sección.
- *   la regla          `scaleX(1)` en reposo, o sea el subrayado que ya
- *                     existía, en tinta (`--color-tinta`) y con su alto
- *                     medido (3 filetes). Cero color, cero degradado, cero
- *                     brillo: es la raya que el componente ya tenía, siempre
- *                     puesta.
  *
- * ⚠ `transform` y no `inline-size`: el subrayado ya mide el 100 % de la
- * ventana y su `transform-origin` es el borde izquierdo, así que soltar la
- * escala lo deja terminando donde termina la palabra. Tocar el ancho en vez de
- * la escala habría dejado dos formas de decir lo mismo. */
+ * ⚠️ **LA TERCERA COSA QUE ESTE REGISTRO HACÍA SE FUE A LA BASE.** Hasta
+ * BOTON-1, `rotulo` era además el único registro con «la regla horizontal
+ * visible en reposo», y para lograrlo APAGABA el subrayado (`scaleX(1)` fijo
+ * y `transition-property: none`), porque una raya ya entera no tenía a dónde
+ * crecer. Con el gesto de dos capas esa excepción se quedó sin motivo: el
+ * nuevo subrayado **necesita** estar entero en reposo para poder partirse, así
+ * que la raya en reposo pasó a ser del componente y el registro dejó de
+ * bifurcar la coreografía. Los dos ejemplares —el hero y el Cierre— hacen hoy
+ * exactamente el mismo gesto, que es lo que hace la referencia en sus 26.
+ *
+ * 🔴 **La consecuencia, que es de composición y hay que mirarla:** el CTA del
+ * Cierre, que en registro `cuerpo` no mostraba raya en reposo, ahora la
+ * muestra. Es lo mismo que hace la referencia (raya entera en reposo, 182 de
+ * 182 px medidos en BOTON-1 §2.1) y es lo que el registro `cuerpo` —«el
+ * medido»— debería haber tenido desde el principio. Volver atrás sólo en el
+ * Cierre es UNA regla: `[data-registro="cuerpo"] [data-parte="subrayado"]::before
+ * { transform: scaleX(0) }`, y con ella vuelve la raya que crece sin hueco. */
 [data-v3] [data-pieza="cta"][data-registro="rotulo"] [data-parte="ventana"] {
   text-transform: uppercase;
   letter-spacing: var(--tracking-micro);
-}
-
-/* La regla, ya puesta. Sin `transition` que la mueva: el rollover de las dos
-   copias sigue entero y esta raya deja de participar. */
-[data-v3] [data-pieza="cta"][data-registro="rotulo"] [data-parte="subrayado"] {
-  transform: scaleX(1);
-  transition-property: none;
 }
 
 /* --- Deshabilitado ------------------------------------------------------

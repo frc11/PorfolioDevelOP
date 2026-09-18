@@ -1,0 +1,51 @@
+{
+  "instrumento": "scripts-boton/a-referencia.ts — una navegación, puntero por Input.dispatchMouseEvent",
+  "origen": "https://www.nk.studio",
+  "rotuloBuscado": "EXPLORE OUR UNIVERSE",
+  "criterioQueGano": "EXPLORE OUR UNIVERSE",
+  "aciertos": [
+    {
+      "etiqueta": "a",
+      "texto": "Explore our universeExplore our universe",
+      "rect": [
+        212,
+        523.64,
+        184.44,
+        24.5
+      ],
+      "hijos": 8
+    },
+    {
+      "etiqueta": "button",
+      "texto": "Explore our universeExplore our universe",
+      "rect": [
+        204,
+        515.64,
+        200.44,
+        40.5
+      ],
+      "hijos": 7
+    }
+  ],
+  "rotulosVisiblesEnLaPagina": 79,
+  "cuandoSeMidio": "2026-09-17T21:00:50.665Z",
+  "crudo": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\boton-1/nk-crudo.json",
+  "caja": [
+    204,
+    515.64,
+    200.44,
+    40.5
+  ],
+  "recorte": {
+    "x": 148,
+    "y": 475,
+    "width": 329,
+    "height": 154
+  },
+  "nodos": 10,
+  "cuadros": 748,
+  "dtP50": 17.5,
+  "dtP95": 21.6,
+  "animacionesAlEntrar": 10,
+  "tiraCongelada": true
+}

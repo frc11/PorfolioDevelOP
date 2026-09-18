@@ -1,0 +1,41 @@
+{
+  "instrumento": "scripts-boton/b-nuestro.ts — el MISMO protocolo que la referencia",
+  "origen": "http://localhost:3000",
+  "cuandoSeMidio": "2026-09-17T23:18:16.787Z",
+  "botones": [
+    {
+      "id": "hero",
+      "nombre": "/v3 · el CTA del hero (registro «rotulo»)",
+      "crudo": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\boton-1/hero-crudo.json",
+      "caja": [
+        180,
+        555.58,
+        175.47,
+        47
+      ],
+      "nodos": 7,
+      "cuadros": 996,
+      "dtP50": 13.3,
+      "dtP95": 13.5,
+      "animacionesAlEntrar": 8,
+      "tiraCongelada": false
+    },
+    {
+      "id": "cierre",
+      "nombre": "/v3 · el CTA del Cierre (registro «cuerpo»)",
+      "crudo": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\boton-1/cierre-crudo.json",
+      "caja": [
+        32,
+        378.81,
+        133.33,
+        47
+      ],
+      "nodos": 7,
+      "cuadros": 995,
+      "dtP50": 13.3,
+      "dtP95": 13.5,
+      "animacionesAlEntrar": 8,
+      "tiraCongelada": false
+    }
+  ]
+}
