@@ -209,3 +209,12 @@ src/modules/chatbot/evals/reports/
 # un error que apunta a un archivo sano.
 /.next-compo2/
 /.next-compo2-antes/
+# `.next-deslizar/`: el distDir del DEV SERVER de DESLIZAR-1 (el deslizamiento
+# del CTA del hero). No es un build de medicion: es para que los tres controles
+# positivos de reversibilidad corran contra un servidor propio SIN pisar el
+# `.next` de produccion, que es el que `s5-peso` y el gate leen. Se agrega ACA
+# ANTES de levantar el servidor, por la leccion de `distDir` fuera de
+# `.gitignore`: un directorio de build no ignorado envenena la auto-deteccion de
+# fuentes de Tailwind 4 y rompe rutas enteras con un error que apunta a un
+# archivo sano.
+/.next-deslizar/

@@ -69,7 +69,9 @@
     ".next-compo2/types/**/*.ts",
     ".next-compo2/dev/types/**/*.ts",
     ".next-compo2-antes/types/**/*.ts",
-    ".next-compo2-antes/dev/types/**/*.ts"
+    ".next-compo2-antes/dev/types/**/*.ts",
+    ".next-deslizar/types/**/*.ts",
+    ".next-deslizar/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

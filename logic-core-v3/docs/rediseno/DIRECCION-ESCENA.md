@@ -2232,3 +2232,52 @@ Está acá para que nadie lo dé por resuelto.
     **Las dos mitades estaban igual de viejas y por eso coincidían.** El verde no decía «el sitio está bien»: decía «mi patrón y mi medida se movieron juntos».
 
     **LA REGLA QUE DEJA.** Un invariante que contrasta un derivado contra un medido **sólo vale si el medido se regenera en el mismo sprint que cambia lo medido**. Y el discriminador es barato: cuando la reconciliación se abre en anchos que el sprint NO tocó, el culpable no es el sprint — es una de las dos mitades que venía vieja. Se arregla regenerando la que mide, nunca restaurando la vieja para devolver el verde.
+
+73. 🔴 **EL MECANISMO DE ANCLAS DEL SITIO ATERRIZA CON UNA LUZ QUE DEPENDE DE LA VENTANA (DESLIZAR-1, 2026-09-17).**
+
+    **EL HECHO.** `#trabajos` empieza en la pantalla **8** de las 18 del documento, o sea en `8 × ventana`. Pero un ancla no aterriza en el borde: despeja el `scroll-padding-top` de /v3 —**72 px**, los cuatro tokens de la pastilla, `navegacion.css:63`— y frena en `8 × ventana − 72`. A 1080 son **8.568 px y no 8.640**.
+
+    Esos 72 px caen **adentro del ATARDECER**, que es el único tramo de UNA pantalla donde la luz de la escena se va de 1 a 0,04 (`lightArc.ts`, `ATARDECER = {desde: 0,46875, hasta: 0,5}`). Medido con las funciones puras del árbol (`scripts-deslizar/a-llegada.ts`):
+
+    | ventana | tope de `#trabajos` | el ancla frena en | progreso | **luz** |
+    |---|---|---|---|---|
+    | 800 | 6.400 | **6.328** | 0,4971875 | **0,1264** |
+    | 1080 | 8.640 | **8.568** | 0,4979167 | **0,1040** |
+    | 1200 | 9.600 | **9.528** | 0,4981250 | **0,0976** |
+
+    Sin el descuento del ancla, las tres ventanas aterrizan en **0,0400** — la noche plena, idéntica. Los 72 px son toda la dispersión: **un 29,5 % de diferencia de luz entre 800 y 1200**, por una constante que no tiene nada que ver con la escena.
+
+    **NO ES DEL SPRINT QUE LO ENCONTRÓ, y por eso se numera acá.** La propiedad la tienen los **quince enlaces del sitio** desde SITIO-S9, que es cuando `/v3` declaró su propio `scroll-padding-top`: cualquiera que hoy haga click en `#trabajos` en la pastilla o en el pie aterriza en esa misma luz variable. DESLIZAR-1 no la introduce —consume el mismo `scrollTo` que resuelve el ancla, a propósito— la vuelve **visible**, porque un salto instantáneo no deja ver con qué luz se llegó y dos segundos de viaje sí.
+
+    **LO QUE ESTO ACOTA.** Toda afirmación de luminancia, todo golden image y toda medición de contraste clavada en `y = 8568` es **frágil por construcción**: es el punto más sensible a la ventana de todo el recorrido. 400 px de alto de ventana mueven la sala de 0,1264 a 0,0976. Un instrumento que mida ahí tiene que declarar su ventana al lado de su número, o no significa nada.
+
+    **LAS SALIDAS, SIN ELEGIR NINGUNA.** (a) Dejarlo: es el mecanismo del sitio y es coherente con los otros catorce enlaces. (b) Correr el borde del atardecer para que los 72 px caigan afuera — mueve `lightArc.ts`, que es la escena, y arrastra el arco entero. (c) Darle a `#trabajos` un `scroll-margin-top` que compense los 72 px — aterriza en el borde crudo y la luz se vuelve idéntica en las tres ventanas, al precio de que **esa** sección deje de despejar la pastilla. Las tres son decisión del dueño; ninguna es de este sprint.
+
+74. 🔴 **EL VIAJE PROGRAMÁTICO TIENE SU PROPIA CURVA, Y LA RUEDA NO — DOS CURVAS A PROPÓSITO (DESLIZAR-2, 2026-09-17).**
+
+    **LO QUE SE ROMPE, DICHO PRIMERO.** DESLIZAR-1 construyó el deslizamiento del CTA **sin declarar curva**: `scrollTo` hereda `OPCIONES_DE_LENIS.easing` cuando no se le pasa una, y eso compraba una propiedad que vale — *no tener dos definiciones de la misma curva*. DESLIZAR-2 le da una propia al viaje. **La propiedad se pierde y se numera acá en vez de esconderse.**
+
+    **POR QUÉ NO ALCANZABA CON ALARGAR LA QUE HABÍA.** `expoOut` pone el **82,4 % del camino en el primer cuarto del tiempo** y el 97,0 % en la mitad; el peor tramo de 700 ms se lleva el **91,2 %**, y arranca en `t = 0`. Eso es exactamente lo que el dueño vio en la grabación: *«el tumbo grande dura 700 ms y después hay 1,25 s de deriva casi quieta»*. Alargarlo **empeora** ese reparto: suma tiempo de casi-quieto sin mover el 82,4 %.
+
+    Y hay un segundo motivo, ya medido en DESLIZAR-1 §5.2: **`expoOut` arranca a velocidad MÁXIMA.** Su derivada en `t = 0` vale `10 ln 2 = 6,9315` —contra una media de 1— y por eso el primer cuadro saltaba 1,43 alturas de cuadro, 46,6× el pico de un diente de rueda.
+
+    **LAS DOS CURVAS, Y POR QUÉ SON DOS Y NO UNA DUPLICADA.**
+
+    | | curva | pico / media | en `t = 0` | 25 % / 50 % / 75 % del tiempo | peor tramo de 700 ms |
+    |---|---|---|---|---|---|
+    | **la RUEDA** | `expoOut`, `OPCIONES_DE_LENIS` | 6,9314 | **máxima** | 82,4 / 97,0 / 99,5 % | 91,2 % |
+    | **el VIAJE** | `power1.inOut`, `CURVAS.simetrica` | 2,0000 | **cero** | 12,5 / 50,0 / 87,5 % | 31,9 % |
+
+    Las dos miden **0,6992** de distancia máxima sobre los 21 puntos del criterio de SCROLL.md §9.2 — para comparar, el par de curvas distintas más parecido del catálogo mide 0,028. **No son la misma curva dos veces: son dos curvas.**
+
+    **Y la razón de fondo es que son DOS COSAS.** Un gesto tiene que responder en el primer cuadro, y para eso arrancar a velocidad máxima es lo correcto; un viaje programático es **un movimiento de cámara**, y una cámara que arranca de golpe se lee como un tirón. El repo ya tenía escrito que hay dos vocabularios de easing separados y medidos (`_lib/motion/curvas.ts`: *«son OTRO VOCABULARIO»*); esto es la misma distinción una capa más abajo.
+
+    **LO QUE ACOTA EL COSTO.** La curva del viaje **no es nueva**: es una de las **seis del vocabulario de develOP**, la que la referencia usa en 11 de sus 278 tweens, y se **importa** de `curvas.ts`. Así que sigue habiendo una sola definición de cada una de las dos. Lo que se perdió no es «una definición única» — es «una sola curva en todo el camino».
+
+    ⚠ **Y por qué `simetrica` y no `simetrica-suave`:** los nombres son una trampa de lectura. `simetrica-suave` es `power2.inOut`, una CÚBICA, y su pico vale **3**: aprieta MÁS el medio, no menos. `simetrica` es la cuadrática, pico **2**, y de las dos es la más parecida a la lineal, o sea la que reparte más parejo.
+
+    ⚠ **Y por qué no `sine.inOut`, que sería todavía más plana (pico 1,571):** `curvas.ts` la declara explícitamente **fuera** del vocabulario y la tiene por una sola razón — ser el control externo con el que se verifica que nuestra `simetrica` es la curva que dice ser (SCROLL.md §9.2 publica la distancia medida entre las dos, 0,028). Usarla como curva de producto le sacaría al proyecto su vara de medición. El invariante afirma que no se usó.
+
+    **EL GUARDIÁN.** `s18-deslizamiento.invariant` §4 no borró la afirmación vieja: **la partió en dos y las dos son más fuertes**. §4a afirma que la rueda sigue con la del sitio —leyendo la línea exacta del fuente de `SmoothScroll.tsx`— y que el sprint no la reasigna. §4b afirma que la del viaje es una de las seis, que se importa y no se copia, que **arranca en velocidad cero** (0,000002 medido) y que las dos son distintas con el número. Si alguien vuelve a unificarlas, se pone rojo por los dos lados.
+
+    **LA CONSECUENCIA EN TIEMPO, declarada.** El recorrido pasa de 2,0 a **4,0 s**, y el 4 no se eligió: `power1.inOut` tiene pico exactamente 2× su media, así que `2 × 2,0 s` hace que **el instante más rápido del viaje nuevo corra exactamente igual que el promedio del viejo**. Con el preludio de 600 ms el total desde el click son **4,6 s**. El pico de cámara por cuadro baja de **1,4254 a 0,1086 alturas** (13,1×), y contra un diente de rueda de 46,6× a **6,8×**.

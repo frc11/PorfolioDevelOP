@@ -468,6 +468,40 @@ export const MONTAJE_DE_PAPEL2_KIB = 0.76
 export const MONTAJE_DE_COMPO2_KIB = 0.19
 
 /**
+ * ⚠️ **+0,08 KiB — EL DESLIZAMIENTO DEL CTA DEL HERO (DESLIZAR-1).**
+ *
+ * Es la línea más chica del techo, y la más fácil de explicar: **el código del
+ * sprint cuesta CERO en la carga inicial** y los 68 B medidos son UNA línea de
+ * `import` en el chunk del layout.
+ *
+ * El deslizamiento vive adentro de `ScrollSuaveDeV3`, el módulo que
+ * `CompuertaDelScrollSuave` pide con `dynamic(…, { ssr: false })`, así que sus
+ * dos archivos viajan en un chunk asíncrono —`437.*.js`, 4.151 B— que **la carga
+ * inicial de `/v3` no nombra**. Lo único que entra al techo es la registración de
+ * `_estilos/deslizamiento.css`, las dos reglas del velo, y eso está medido con
+ * una tercera corrida que desconecta la hoja y deja todo lo demás intacto.
+ *
+ *     +68 B   la línea `import './_estilos/deslizamiento.css'` en el layout
+ *       0 B   el módulo, el hook y la `ref`: diferidos
+ *       0 B   sin atribuir — 68 de 68 con dueño
+ *
+ * Al centésimo de arriba: 68,0 / 1024 = 0,0664 → 0,07, que deja 3,68 B de aire,
+ * **abajo** del umbral de 8. Se aplica la regla del aire útil y la línea nace en
+ * **0,08**, con 13,92 B. Es la cuarta vez que esa regla se usa.
+ *
+ * ⚠️ Los 4.151 B del chunk diferido se publican en el recibo y NO se suman acá,
+ * con el mismo criterio con el que `MOVIL-1` publicó sus 259,8 KiB aparte: este
+ * techo mide la carga inicial, y sumarle carga diferida lo dejaría sin capacidad
+ * de fallar.
+ *
+ * ⚠️ **El techo de 60 NO se movió** — y declarar 0,08 por 68 B medidos le
+ * AGRANDA el margen, de 99,2 B a 113,1 B. El reparto completo, con los tres
+ * builds y el sha256 del layout restaurado, está en
+ * `s5-presupuesto-recibos-de-deslizar.ts`.
+ */
+export const MONTAJE_DE_DESLIZAR_KIB = 0.08
+
+/**
  * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
  *
  * Es lo que agrega el contenido inventado de B12 §4: las veinte casillas
@@ -561,6 +595,7 @@ export const LINEAS_CON_NOMBRE: readonly (readonly [string, number])[] = [
   ['COMPO-1', MONTAJE_DE_COMPO1_KIB],
   ['PAPEL-2', MONTAJE_DE_PAPEL2_KIB],
   ['COMPO-2', MONTAJE_DE_COMPO2_KIB],
+  ['DESLIZAR-1', MONTAJE_DE_DESLIZAR_KIB],
 ]
 
 export const MONTAJES_DECLARADOS_KIB =
@@ -579,5 +614,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_COMPO1_KIB +
   MONTAJE_DE_PAPEL2_KIB +
   MONTAJE_DE_COMPO2_KIB +
+  MONTAJE_DE_DESLIZAR_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB
