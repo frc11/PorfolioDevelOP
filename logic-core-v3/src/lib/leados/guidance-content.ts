@@ -600,6 +600,79 @@ export const GUIA_BRIEF = {
       label: 'Concepto',
       hint: 'La idea central que propone el Gem, en una o dos líneas.',
     },
+    // ── P40 · la dirección visual que el bloque de construcción no llevaba ──
+    tono: {
+      label: 'Tono',
+      hint: 'Cómo escriben los textos de la demo, en una línea.',
+      ejemplo: 'Cercano y de barrio, con tuteo y frases cortas',
+    },
+    paleta: {
+      label: 'Paleta',
+      hint: 'Un color de fondo, uno para el botón y a lo sumo uno de apoyo, con su código (#…).',
+      ejemplo: 'neutro #F4EFE6 / acento #C2410C / apoyo #111111',
+    },
+    tipografia: {
+      label: 'Tipografía',
+      hint: 'Una fuente para los títulos y otra para el cuerpo.',
+      ejemplo: 'títulos Bebas Neue / cuerpo Inter',
+    },
+    // ── P40 · lo que el setter pega en cada vuelta con el Gem ───────────────
+    lecturaRespuesta: {
+      label: 'Lo que devolvió el Gem — vuelta 1',
+      hint: 'Pegala entera. Si algo no es así, corregilo acá mismo o anotalo en el campo de corrección.',
+    },
+    lecturaCorreccion: {
+      label: 'Lo que corregiste — vuelta 1',
+      hint: 'Opcional. Viaja en el mensaje de la vuelta 2.',
+    },
+    decisionesRespuesta: {
+      label: 'Lo que devolvió el Gem — vuelta 2',
+      hint: 'Las seis decisiones enteras: ángulo, secciones, botón, tono, paleta y tipografía.',
+    },
+    decisionesCorreccion: {
+      label: 'Lo que corregiste — vuelta 2',
+      hint: 'Opcional. Viaja en el mensaje de la vuelta 3.',
+    },
+    especificacionRespuesta: {
+      label: 'Lo que devolvió el Gem — vuelta 3',
+      hint: 'El borrador del documento. Queda guardado hasta que pegues el definitivo, que lo reemplaza.',
+    },
+    especificacionCorreccion: {
+      label: 'Lo que corregiste — vuelta 3',
+      hint: 'Opcional. Viaja en el mensaje de la vuelta 4.',
+    },
+    documento: {
+      label: 'El documento definitivo — vuelta 4',
+      hint: 'Pegalo desde la línea ANGULO: hasta el final. Se guarda y viaja entero a la construcción; la pantalla lee sus seis primeras líneas.',
+    },
+    documentoCorreccion: {
+      label: 'Lo que corregiste — vuelta 4',
+      hint: 'Opcional. Viaja con el documento a la construcción, y manda sobre lo que dice el documento.',
+    },
+  },
+  // P40 — Las cuatro vueltas con el Gem, en el orden del recorrido. El número lo
+  // pone el componente; las llaves casan con `VUELTA_IDS` (`brief-vueltas.ts`).
+  grupos: {
+    lectura: {
+      titulo: 'Lectura estética',
+      intro:
+        'El Gem mira cómo se ve el negocio hoy, en quince líneas. Mandale el mensaje junto con tres a cinco capturas del Instagram, el logo y dos o tres fotos del local: sin imágenes, inventa una estética de rubro.',
+    },
+    decisiones: {
+      titulo: 'Decisiones',
+      intro:
+        'Con la lectura que aprobaste, el Gem decide el ángulo, las secciones, el botón, el tono, la paleta y la tipografía. El mensaje ya lleva la lectura que pegaste, con tu corrección.',
+    },
+    especificacion: {
+      titulo: 'Especificación',
+      intro:
+        'El Gem escribe el borrador del documento de construcción. El mensaje ya lleva las decisiones que pegaste, con tu corrección.',
+    },
+    huecos: {
+      titulo: 'Caza de huecos',
+      intro:
+        'El Gem lee su borrador como si tuviera que construir con eso y nada más, tapa lo que quedó sin decir y te devuelve el documento definitivo. Ese es el que viaja a la construcción.',
+    },
   },
   gate: {
     titulo: 'Esperando la respuesta del primer contacto',
@@ -630,6 +703,81 @@ export const GUIA_BRIEF = {
     },
   ],
 } satisfies PasoGuia
+
+/**
+ * P40 — Lo que la pantalla del brief le dice al setter después de leer el
+ * encabezado del documento de la vuelta 4 (`encabezado-documento.ts`). Qué
+ * falta, por qué importa y qué hacer, en idioma del setter: las listas y los
+ * nombres de campo los compone `explicarLectura` (`brief-vueltas.ts`); acá solo
+ * las palabras. Nada de esto frena el guardado — por eso cada caso dice que el
+ * brief se guarda igual.
+ */
+export const GUIA_LECTURA_DOCUMENTO = {
+  titulo: {
+    completo: 'Leí el encabezado del documento',
+    incompleto: 'Al principio del documento falta algo',
+    sinEncabezado: 'Este documento no trae el encabezado',
+  },
+  completo: 'Están las líneas que la construcción necesita.',
+  /** Por qué importa cada obligatoria, dicho corto. */
+  porQueImporta: {
+    SECCIONES: 'sin las secciones la demo no se puede construir',
+    PALETA: 'sin la paleta, Claude Design elige los colores por su cuenta',
+    TIPOGRAFIA: 'sin la tipografía, Claude Design elige la fuente por su cuenta',
+  },
+  faltaPrefijo: 'Falta la línea ',
+  queHacerIncompleto:
+    'Pedile al Gem que te mande el documento de nuevo, empezando por las seis líneas (ANGULO, SECCIONES, CTA, TONO, PALETA, TIPOGRAFIA), o escribí lo que falta en su campo. El brief se guarda igual.',
+  sinEncabezado:
+    'No encontré las seis líneas del principio: ANGULO, SECCIONES, CTA, TONO, PALETA y TIPOGRAFIA, cada una seguida de dos puntos. No se pierde nada: el documento se guarda y viaja entero a la construcción.',
+  queHacerSinEncabezado:
+    'Escribí vos las secciones, la paleta y la tipografía en sus campos, o pedile al Gem que te mande el documento de nuevo empezando por esas seis líneas. El brief se guarda igual.',
+  opcionalesPrefijo: 'No vino ',
+  opcionalesSufijo: '. No hace falta para construir; si lo tenés, escribilo en su campo.',
+  completadosPrefijo: 'Completé con lo que leí: ',
+  diferenciaPrefijo: 'Lo que escribiste en ',
+  diferenciaMedio: ' no coincide con el documento, que dice ',
+  diferenciaSufijo: '. Quedó lo tuyo.',
+  antesPrefijo: 'Antes del encabezado hay ',
+  antesSufijo:
+    ' con texto (la caza de huecos, un saludo del Gem). Viajan con el documento: si no son parte de él, borralos del pegado.',
+  otrasPrefijo: 'También vino, y queda en el documento aunque la pantalla no lo use: ',
+  repetidasPrefijo: 'Vino dos veces, y usé la primera: ',
+} as const
+
+/**
+ * P40 — Las palabras del recorrido de las cuatro vueltas en m6 que no son de un
+ * campo: el mensaje copiable de cada vuelta, la línea de estado de cada cabecera
+ * y el rótulo de lo que viaja a la construcción. Qué vuelta está completa lo
+ * decide `brief-vueltas.ts`.
+ */
+export const GUIA_VUELTAS_GEM = {
+  recorrido: 'Las cuatro vueltas con el Gem de diseño',
+  mensajeTitulo: 'Mensaje para el Gem — vuelta ',
+  instruccionPrimera: 'Copialo y pegalo en el Gem de diseño, junto con las capturas y las fotos del negocio.',
+  instruccionSiguiente: 'Copialo y pegalo en el mismo chat del Gem, cuando haya terminado la vuelta anterior.',
+  estado: {
+    pegada: 'Pegada',
+    pendiente: 'Falta pegar lo que devolvió el Gem',
+    reemplazada: 'Cumplida: la reemplaza el documento de la vuelta 4',
+    documentoPendiente: 'Falta el documento definitivo',
+    documentoLeido: 'Documento pegado · encabezado leído',
+    documentoSinEncabezado: 'Documento pegado · no trae el encabezado',
+    documentoFaltaPrefijo: 'Documento pegado · falta ',
+  },
+  loQueViaja: 'Lo que viaja a la construcción',
+  loQueViajaDetalle:
+    'Con el documento de la vuelta 4, las secciones, el tono, la paleta y la tipografía se completan solas. Revisalas: es lo que va a leer Claude Design.',
+  resumen: {
+    documento: 'Ver el documento de construcción',
+    vueltas: 'Ver las vueltas con el Gem',
+    lectura: 'Vuelta 1 · lectura estética',
+    decisiones: 'Vuelta 2 · decisiones',
+    borrador: 'Vuelta 3 · borrador',
+    documento4: 'Vuelta 4 · documento definitivo',
+    correccion: 'Lo que corrigió el setter',
+  },
+} as const
 
 // ── Contenido: pasos que enseñan el «por qué» (FG-1.2) ───────────────────────
 

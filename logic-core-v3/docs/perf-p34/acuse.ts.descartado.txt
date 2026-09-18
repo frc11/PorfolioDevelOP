@@ -1,0 +1,98 @@
+/**
+ * LeadOS — EL ACUSE DE RECIBO, FUERA DE LA TRANSICIÓN (P34).
+ *
+ * Reemplaza a `import { toast } from 'sonner'` en toda la superficie del setter.
+ * La API es la misma —`toast.success` / `toast.error` / `toast.warning` /
+ * `toast.message`, mismos argumentos— así que los call-sites no cambian: lo
+ * único que cambia es CUÁNDO se programa la actualización que monta el cartel.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ⚠️  POR QUÉ NO SE IMPORTA `sonner` DERECHO: EL ACUSE SE PERDÍA.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Medido en P33, tres corridas con server nuevo, y reproducido en P34 (2 de 6
+ * pasadas): el setter apretaba «Ya la envié — registrar», el servidor persistía
+ * (`enviadaAt` en la base), y en 841 muestras a lo largo de 14 segundos continuos
+ * NO SE MONTABA NINGÚN CARTEL — ni de éxito ni de error, sin filtrar por texto.
+ * Ni acuse, ni pantalla nueva. Silencio.
+ *
+ * La cadena, cerrada entre P30 y P33:
+ *
+ *   1. `useStepAction.run()` despacha la server action. Next envuelve ese
+ *      despacho en `React.startTransition` SIEMPRE (`callServer`, en
+ *      `next/dist/client/app-call-server.js`) — producto no puede evitarlo.
+ *   2. El estado del router queda en una promesa que `AppRouter` consume con
+ *      `use()`, así que el render de esa transición SUSPENDE:
+ *      `root.suspendedLanes |= 0x200` y `root.warmLanes |= 0x200`.
+ *   3. La action responde (~0,9 s) y React entrega EXACTAMENTE UN ping. Si en
+ *      ese reintento el árbol RSC revalidado todavía no resolvió, se re-suspende
+ *      — y de esa segunda suspensión NO LLEGA NINGÚN PING MÁS: `getNextLanes`
+ *      no vuelve a elegir un lane marcado «warm».
+ *   4. `startTransition(async () => …)` mantiene el contexto de transición VIVO
+ *      a través del `await`. Así que un `toast.success()` escrito después del
+ *      await es una actualización DE ESE LANE. Si el lane no commitea, el
+ *      cartel no se monta.
+ *   5. Y el cartel era lo único que despertaba al lane (su auto-cierre a los
+ *      4000 ms llama `markRootUpdated`, que limpia `suspendedLanes` y
+ *      `warmLanes`). Lo que iba a destrabarlo quedaba atrapado adentro de lo
+ *      que hay que destrabar.
+ *
+ * El acuse y el reflejo son DOS PROBLEMAS DISTINTOS, y esta pieza sólo resuelve
+ * el primero: el setter tiene que saber que su acción entró, y eso no puede
+ * depender de que un árbol de servidor resuelva a tiempo. El reflejo puede
+ * llegar tarde — es la limitación aceptada y documentada en
+ * `src/lib/leados/reflejo-del-arbol.invariant.ts`.
+ *
+ * ── Por qué un macrotask, y por qué no alcanza con `queueMicrotask` ──────────
+ * El contexto de transición de React vive en `ReactSharedInternals.T`, que React
+ * setea alrededor de la ejecución síncrona del scope y RESTAURA cuando la
+ * función async reanuda después de cada `await`. Un callback de `setTimeout` es
+ * una tarea nueva del event loop: corre con `T === null`, así que
+ * `requestUpdateLane` le da un lane de prioridad normal en vez del lane de la
+ * transición. Ese lane no está suspendido, commitea solo, y además —al llamar
+ * `markRootUpdated`— limpia el lane que sí lo estaba.
+ *
+ * `queueMicrotask` NO sirve acá: los microtasks corren dentro de la misma tarea
+ * en la que la función async se reanuda, y pueden quedar bajo el mismo `T`.
+ *
+ * ── Lo que este diferimiento NO hace ────────────────────────────────────────
+ * NO adelanta el acuse. El cartel se sigue emitiendo cuando la acción RESOLVIÓ
+ * —después de la confirmación del servidor y del chequeo de `success`—, nunca
+ * cuando se disparó. Lo único que se mueve es la prioridad de la actualización,
+ * un tick del event loop después.
+ *
+ * ── Ojo con volver a importar `sonner` derecho ──────────────────────────────
+ * Un `import { toast } from 'sonner'` nuevo en la superficie del setter vuelve a
+ * meter el acuse adentro de la transición, y el defecto vuelve EN SILENCIO: la
+ * acción entra igual, la base guarda igual, y la pantalla no dice nada sólo a
+ * veces. Lo vigila `npm run check:invariant:acuse-fuera-de-transicion`.
+ * El `<Toaster>` de `src/app/layout.tsx` sí importa de `sonner`, y tiene que
+ * hacerlo: es el componente, no la emisión.
+ */
+import { toast as sonner } from 'sonner'
+
+type Mensaje = Parameters<typeof sonner.success>[0]
+type Opciones = Parameters<typeof sonner.success>[1]
+
+/**
+ * Programa la emisión en una tarea nueva del event loop, fuera de cualquier
+ * transición en curso. No devuelve el id del cartel a propósito: el id de sonner
+ * sólo existe una vez emitido, y devolver una promesa haría que un call-site
+ * pudiera `await`ear el acuse — que es justo lo que no queremos, porque volvería
+ * a atarlo al scope de la transición. Hoy ningún call-site usa el retorno
+ * (verificado), y el invariante vigila que siga siendo así.
+ */
+function fueraDeLaTransicion(emitir: () => void): void {
+  setTimeout(emitir, 0)
+}
+
+export const toast = {
+  success: (mensaje: Mensaje, opciones?: Opciones): void =>
+    fueraDeLaTransicion(() => sonner.success(mensaje, opciones)),
+  error: (mensaje: Mensaje, opciones?: Opciones): void =>
+    fueraDeLaTransicion(() => sonner.error(mensaje, opciones)),
+  warning: (mensaje: Mensaje, opciones?: Opciones): void =>
+    fueraDeLaTransicion(() => sonner.warning(mensaje, opciones)),
+  message: (mensaje: Mensaje, opciones?: Opciones): void =>
+    fueraDeLaTransicion(() => sonner.message(mensaje, opciones)),
+}

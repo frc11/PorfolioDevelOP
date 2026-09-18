@@ -1,0 +1,203 @@
+import type { Page } from '@playwright/test'
+
+/**
+ * P35 · LA SONDA DEL ALCANCE — instrumento compartido del probe.
+ *
+ * NO es una suite de regresión y no se shipea: vive en un worktree descartable
+ * junto con la variante diagnóstica de `src/lib/use-step-action.ts`.
+ *
+ * ── Qué mide, y por qué así ─────────────────────────────────────────────────
+ * P34 dejó un discriminador de 21/21: **si nace un documento DESPUÉS del
+ * despacho de la action, el acuse no se pide** (`await action()` nunca vuelve,
+ * la continuación se va con el documento). Lo que P34 NO midió es con qué
+ * frecuencia eso le pasa a un setter que entra por el panel, con navegación
+ * blanda, en vez de por URL directa sobre la raíz del lead.
+ *
+ * Para separar blando de duro hacen falta DOS series, y ninguna alcanza sola:
+ *
+ *   · `nac`  — un renglón por DOCUMENTO nuevo (el `addInitScript` corre una vez
+ *              por documento). Es la única señal de navegación DURA.
+ *   · `urls` — un renglón por cambio de `location.pathname`, muestreado por
+ *              `requestAnimationFrame`. Un cambio de pathname SIN documento
+ *              nuevo es navegación BLANDA.
+ *
+ * Deducirlo del tipo de componente (`<Link>` ⇒ blando) es exactamente el error
+ * que este probe existe para no cometer: la cadena de `redirect()` corre del
+ * lado del servidor y puede convertir una entrada blanda en dura aguas abajo.
+ *
+ * ── Todo por sessionStorage, y no es un detalle ─────────────────────────────
+ * Un contador en `window` muere con el documento y publica un falso «no pasó
+ * nada acá». El delator es `t0 === 0`. Mismo remedio que P33 y P34.
+ */
+
+export const VENTANA_MS = 14_000
+
+export type Cosecha = {
+  instrumentado: boolean
+  t0: number
+  /** Nacimientos de documento: `+Nms <pathname>` relativo a t0. */
+  nacimientos: string[]
+  /** Timeline de pathname (blandos incluidos): `+Nms <pathname>`. */
+  rutas: string[]
+  documentos: number
+  muestras: number
+  carteles: number
+  /** Etapas de `run()`, relativas a t0. */
+  etapas: string[]
+  /** Momento del despacho relativo a t0, o null si run() ni arrancó. */
+  despachoMs: number | null
+  /** Documentos nacidos DESPUÉS del despacho — el discriminador de P34. */
+  docsPostDespacho: string[]
+  pidioAcuse: boolean
+}
+
+/** Instala la sonda. Va antes de cualquier `goto`. */
+export async function instalarSonda(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    type Estado = {
+      t0: number | null
+      docs: number
+      nac: string[]
+      urls: string[]
+      muestras: number
+      carteles: number
+      ultima: string
+    }
+    const vacio = (): Estado => ({
+      t0: null,
+      docs: 0,
+      nac: [],
+      urls: [],
+      muestras: 0,
+      carteles: 0,
+      ultima: '',
+    })
+    const leer = (): Estado => {
+      try {
+        const crudo = sessionStorage.getItem('__p35')
+        if (crudo) return JSON.parse(crudo) as Estado
+      } catch {
+        /* noop */
+      }
+      return vacio()
+    }
+    const estado = leer()
+    const ruta = () => location.pathname
+    estado.docs++
+    estado.nac.push(`${Date.now()}|${ruta()}`)
+    const guardar = () => {
+      try {
+        sessionStorage.setItem('__p35', JSON.stringify(estado))
+      } catch {
+        /* noop */
+      }
+    }
+    guardar()
+
+    const cuadro = () => {
+      if (estado.t0 === null) return
+      estado.muestras++
+      const r = ruta()
+      if (r !== estado.ultima) {
+        estado.ultima = r
+        estado.urls.push(`${Date.now()}|${r}`)
+      }
+      const n = document.querySelectorAll('[data-sonner-toast]').length
+      if (n > estado.carteles) estado.carteles = n
+      guardar()
+      if (Date.now() - estado.t0 < 14_000) requestAnimationFrame(cuadro)
+    }
+    // Se reanuda sola en el documento siguiente: una navegación dura no puede
+    // dejar un hueco en la serie sin que se note.
+    if (estado.t0 !== null && Date.now() - estado.t0 < 14_000) requestAnimationFrame(cuadro)
+    ;(window as unknown as { __arrancar?: () => void }).__arrancar = () => {
+      estado.t0 = Date.now()
+      estado.docs = 1
+      estado.muestras = 0
+      estado.carteles = 0
+      estado.nac = [`${Date.now()}|${ruta()}`]
+      estado.urls = []
+      estado.ultima = ''
+      guardar()
+      try {
+        sessionStorage.removeItem('__runDiag')
+      } catch {
+        /* noop */
+      }
+      requestAnimationFrame(cuadro)
+    }
+  })
+}
+
+/** Pone el cronómetro en cero. Va JUSTO antes del gesto que se quiere medir. */
+export async function arrancar(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const w = window as unknown as { __arrancar?: () => void }
+    if (!w.__arrancar) throw new Error('la sonda no está instalada')
+    w.__arrancar()
+  })
+}
+
+/** Cosecha la serie. Si `instrumentado` es false, la corrida no dice nada. */
+export async function cosechar(page: Page): Promise<Cosecha> {
+  return page.evaluate(() => {
+    const leerJson = <T,>(llave: string, porDefecto: T): T => {
+      try {
+        const crudo = sessionStorage.getItem(llave)
+        return crudo ? (JSON.parse(crudo) as T) : porDefecto
+      } catch {
+        return porDefecto
+      }
+    }
+    type Estado = {
+      t0: number | null
+      docs: number
+      nac: string[]
+      urls: string[]
+      muestras: number
+      carteles: number
+    }
+    const p = leerJson<Estado>('__p35', {
+      t0: 0,
+      docs: 0,
+      nac: [],
+      urls: [],
+      muestras: 0,
+      carteles: 0,
+    })
+    const runDiag = leerJson<string[]>('__runDiag', [])
+    let instrumentado = false
+    try {
+      instrumentado = sessionStorage.getItem('__p35Build') === 'p35-diag'
+    } catch {
+      /* noop */
+    }
+    const t0 = p.t0 ?? 0
+    const rel = (abs: number) => abs - t0
+    const par = (m: string) => {
+      const i = m.indexOf('|')
+      return { abs: Number(m.slice(0, i)), txt: m.slice(i + 1) }
+    }
+    const etapasAbs = runDiag.map((m) => {
+      const i = m.lastIndexOf('@')
+      return { campo: m.slice(0, i), abs: Number(m.slice(i + 1)) }
+    })
+    const despacho = etapasAbs.find((e) => e.campo === 'despacho')
+    const nacAbs = p.nac.map(par)
+    return {
+      instrumentado,
+      t0,
+      nacimientos: nacAbs.map((n) => `+${rel(n.abs)}ms ${n.txt}`),
+      rutas: p.urls.map(par).map((u) => `+${rel(u.abs)}ms ${u.txt}`),
+      documentos: p.docs,
+      muestras: p.muestras,
+      carteles: p.carteles,
+      etapas: etapasAbs.map((e) => `${e.campo}+${rel(e.abs)}ms`),
+      despachoMs: despacho ? rel(despacho.abs) : null,
+      docsPostDespacho: despacho
+        ? nacAbs.filter((n) => n.abs > despacho.abs).map((n) => `+${rel(n.abs)}ms ${n.txt}`)
+        : [],
+      pidioAcuse: etapasAbs.some((e) => e.campo === 'pidio-exito'),
+    }
+  })
+}

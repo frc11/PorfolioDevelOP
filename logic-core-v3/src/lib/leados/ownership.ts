@@ -30,9 +30,38 @@ export async function getOwnedLead(
   })
 }
 
+/**
+ * P41 — Lo que el panel del setter lee del dossier, y nada más.
+ *
+ * Hasta P41 la cartera traía el dossier ENTERO de cada lead en cada carga del
+ * panel (`dossier: true`): el brief, el chequeo final y el progreso de
+ * construcción incluidos, que el panel no lee. Con el documento de cuatro vueltas
+ * de P40 el brief pasa a pesar ~10 KB, y viajaba por cada lead de la cartera.
+ *
+ * Estos ocho son el censo de P41; quién lee cada uno está en
+ * `tests/leados/consulta-cartera.spec.ts`, que falla si la consulta trae uno de
+ * más o uno de menos. Los blobs Json viajan enteros: sus lectores los validan
+ * enteros con zod.
+ *
+ * El tipo sale de este mismo objeto, así que un consumidor nuevo que lea un campo
+ * que no está acá NO compila. El arreglo es sumar el campo acá y al censo — nunca
+ * ensanchar el tipo: un tipo que promete un campo que la consulta no trae lee
+ * `undefined` sin avisar.
+ */
+export const DOSSIER_DEL_PANEL = {
+  stage: true,
+  fichaJson: true,
+  evaluacionJson: true,
+  rechazos: true,
+  agendaJson: true,
+  finalUrl: true,
+  enviadaAt: true,
+  updatedAt: true,
+} as const satisfies Prisma.OsLeadDossierSelect
+
 export type OwnedLeadWithDossier = Prisma.OsLeadGetPayload<{
   include: {
-    dossier: true
+    dossier: { select: typeof DOSSIER_DEL_PANEL }
     _count: { select: { activities: true } }
     setterMetas: true
   }
@@ -53,7 +82,7 @@ export async function listOwnedLeads(userId: string): Promise<OwnedLeadWithDossi
   return prisma.osLead.findMany({
     where: ownedListWhere(userId),
     include: {
-      dossier: true,
+      dossier: { select: DOSSIER_DEL_PANEL },
       // `contactos` del home (agrupado) = contactos comerciales reales; el
       // rastro de reasignación (SISTEMA) NO cuenta — si lo contara, un lead
       // recién reasignado saltaría de grupo sin que el setter lo trabajara.

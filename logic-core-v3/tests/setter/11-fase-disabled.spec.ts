@@ -16,6 +16,12 @@ import { getSetterQa, createLead, newTracker, teardown, disconnect, type SmokeTr
  * sin agregar casos: que los TRES tildes de la pantalla siguen existiendo (los
  * seis se conservan, 3+3 — no se fusionaron en dos) y que una dirección vieja
  * (m9) redirige a la pantalla actual en vez de romper.
+ *
+ * P42 — «Construir» (mc1) pasó a UN tilde, por diseño: con un prompt único hay
+ * una sola cosa que marcar. Las fases siguen siendo tres por dentro (la llave del
+ * progreso). Lo que estos tests fijaban se conserva donde sigue siendo verdad:
+ * mc1 afirma su tilde único y «Refinar» (mc2) sus tres, 1↔1 con su fase — y ahí
+ * se sigue probando que tildar una fase no arrastra a las otras.
  */
 
 const tracker: SmokeTracker = newTracker()
@@ -90,11 +96,19 @@ test('B-07 · BRIEF: el tilde está disabled y muestra el motivo', async ({ page
     'acá arriba',
   )
 
-  // P6-B: los tres tildes de la pantalla, uno por fase — no un tilde fusionado.
-  await expect(page.locator('main section[aria-label="Registro"] button[aria-pressed]')).toHaveCount(3)
+  // P42: «Construir» tiene UN tilde (antes P6-B fijaba tres acá).
+  await expect(page.locator('main section[aria-label="Registro"] button[aria-pressed]')).toHaveCount(1)
 
   // El CTA «Arrancar construcción» sigue existiendo, sin bloquear nada más de la pantalla.
   await expect(firstVisible(page.getByRole('button', { name: 'Arrancar construcción' }))).toBeVisible()
+
+  // P6-B, donde sigue siendo verdad: «Refinar» conserva los tres tildes, uno por
+  // fase, también apagados en BRIEF.
+  await page.goto(`/setter/leads/${briefLeadId}/manual/mc2`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/mc2$/)
+  const deRefinar = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
+  await expect(deRefinar).toHaveCount(3)
+  await expect(firstVisible(deRefinar)).toBeDisabled()
 
   // P6-B: una dirección vieja (m9, retirada del registro) no rompe — la guardia
   // del server la rescata a la pantalla actual (mismo mecanismo que el m3 de P4).
@@ -111,20 +125,35 @@ test('C-08 · CONSTRUCCION: el tilde funciona normal', async ({ page }) => {
   await page.goto(`/setter/leads/${construccionLeadId}/manual/mc1`, { waitUntil: 'domcontentloaded' })
   await expect(page).toHaveURL(/\/manual\/mc1$/)
 
-  // P6-B: los tres tildes de la pantalla, cada uno 1↔1 con su fase.
-  const tildes = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
-  await expect(tildes).toHaveCount(3)
-
-  const tilde = firstVisible(tildes)
+  // P42: «Construir» tiene UN tilde, y funciona normal.
+  const tildeUnico = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
+  await expect(tildeUnico).toHaveCount(1)
+  const tilde = firstVisible(tildeUnico)
   await expect(tilde).toBeVisible()
   await expect(tilde).toBeEnabled()
-  await expect(tilde).toContainText('Marcá esta fase cuando la termines')
+  await expect(tilde).toContainText('Marcala cuando Claude Design haya terminado')
 
   await tilde.click()
   await expect(tilde).toHaveAttribute('aria-pressed', 'true')
-  await expect(tilde).toContainText('Fase marcada como hecha')
+  await expect(tilde).toContainText('Marcada como hecha.')
+  // Que la marca quede escrita antes de salir: la pantalla siguiente arranca del blob del server.
+  await expect(
+    firstVisible(page.locator('main').getByRole('status').filter({ hasText: 'Guardado' })),
+  ).toBeVisible({ timeout: 20_000 })
 
-  // Tildar UNA fase no arrastra a las otras dos: el progreso sigue siendo por fase.
+  // P6-B, donde sigue siendo verdad: en «Refinar» los tres tildes, cada uno 1↔1
+  // con su fase, y tildar UNA no arrastra a las otras dos.
+  await page.goto(`/setter/leads/${construccionLeadId}/manual/mc2`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/mc2$/)
+  const tildes = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
+  await expect(tildes).toHaveCount(3)
+  const primero = firstVisible(tildes)
+  await expect(primero).toBeEnabled()
+  await expect(primero).toContainText('Marcá esta fase cuando la termines')
+
+  await primero.click()
+  await expect(primero).toHaveAttribute('aria-pressed', 'true')
+  await expect(primero).toContainText('Fase marcada como hecha')
   await expect(tildes.nth(1)).toHaveAttribute('aria-pressed', 'false')
   await expect(tildes.nth(2)).toHaveAttribute('aria-pressed', 'false')
 

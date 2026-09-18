@@ -1,0 +1,130 @@
+/**
+ * P36 Fase 1 — Qué se pierde la cola, medido contra la cartera REAL.
+ *
+ * NO re-deriva el criterio: lee el tier a través de `motivoOrden`, que es la
+ * traducción 1:1 del `trabajoTier` real (switch exhaustivo). Re-escribir el
+ * tier acá sería medir una copia y no el producto.
+ *
+ * Uso: npx tsx <este archivo>
+ */
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.local' })
+loadEnv({ path: '.env' })
+
+const DEV_BRANCH_HOST = 'ep-quiet-waterfall-acv0fpll'
+if (!process.env.DATABASE_URL?.includes(DEV_BRANCH_HOST)) {
+  console.error('ABORT: DATABASE_URL no apunta a la branch Neon dev.')
+  process.exit(1)
+}
+
+async function main() {
+  const { prisma } = await import('@/lib/prisma')
+  const { listOwnedLeads } = await import('@/lib/leados/ownership')
+  const { buildHomeLeads } = await import('@/lib/leados/home')
+  const { particionarCartera, motivoOrden } = await import('@/lib/leados/flow')
+  const { seleccionarFoco } = await import('@/lib/leados/foco')
+  const { armarCola, TOPE_COLA } = await import('@/lib/leados/cola')
+
+  // ── Quién es el setter de la cartera real ────────────────────────────────
+  const setters = await prisma.user.findMany({
+    where: { role: { in: ['ORG_MEMBER', 'SETTER', 'CLIENT'] as never } },
+    select: { id: true, email: true, name: true, role: true },
+  })
+  const conLeads: Array<{ id: string; email: string; role: string; n: number }> = []
+  for (const s of setters) {
+    const n = await prisma.osLead.count({ where: { assignedToId: s.id } })
+    if (n > 0) conLeads.push({ id: s.id, email: s.email ?? '(sin email)', role: String(s.role), n })
+  }
+  conLeads.sort((a, b) => b.n - a.n)
+  console.log('=== SETTERS CON CARTERA ===')
+  for (const s of conLeads) console.log(`  ${String(s.n).padStart(4)} leads · ${s.email} · ${s.role} · ${s.id}`)
+  if (conLeads.length === 0) { console.log('  (ninguno)'); await prisma.$disconnect(); return }
+
+  const target = conLeads[0]
+  console.log(`\n=== CARTERA MEDIDA: ${target.email} (${target.n} leads) ===\n`)
+
+  // ── La cadena real del panel ─────────────────────────────────────────────
+  const filas = await listOwnedLeads(target.id)
+  const home = buildHomeLeads(filas)
+  const part = particionarCartera(home)
+  const trabajar = part.grupos.trabajar
+  const sel = seleccionarFoco(trabajar, null)
+  const cola = armarCola(sel.foco, sel.resto, TOPE_COLA)
+
+  console.log(`TOTAL cartera .............. ${home.length}`)
+  console.log(`  grupos.trabajar .......... ${trabajar.length}`)
+  console.log(`  grupos.revision .......... ${part.grupos.revision.length}`)
+  console.log(`  grupos.seguimiento ....... ${part.grupos.seguimiento.length}`)
+  console.log(`  grupos.agendadas ......... ${part.grupos.agendadas.length}`)
+  console.log(`  grupos.archivo ........... ${part.grupos.archivo.length}`)
+  console.log(`  fijados (no accionables) . ${part.fijados.length}`)
+  console.log(`  pausados ................. ${part.pausados.length}`)
+  console.log(`\nACCIONABLES (lead.accionable===true, toda la cartera) ... ${home.filter(l => l.accionable).length}`)
+  console.log(`ACCIONABLES dentro de 'trabajar' ....................... ${trabajar.filter(l => l.accionable).length}`)
+  console.log(`NO accionables que igual caen en 'trabajar' ............ ${trabajar.filter(l => !l.accionable).length}`)
+  console.log(`\nCOLA: tope=${TOPE_COLA} · items=${cola.items.length} · total=${cola.total} · ocultos=${cola.ocultos}`)
+
+  // ── El tier leído por su rótulo (no re-derivado) ─────────────────────────
+  const ROTULO_TIER: Record<string, string> = {
+    'Fijado por vos — va primero': 'PIN',
+    'Pasó el filtro y le falta la demo — construila': '0 CONSTRUIR',
+    'La demo está lista para mandar': '2 CONTACTAR_CON_DEMO',
+    'Todavía no sabés si sirve — evalualo': '3 EVALUAR',
+    'Todavía no hay demo que mostrar': '4 CONTACTO_SIN_DEMO',
+  }
+  const tierDe = (l: { grupo: string }) => {
+    const m = motivoOrden(l as never)
+    if (m === null) return '(fuera de trabajar)'
+    return ROTULO_TIER[m] ?? `1 ESPERA_TU_ACCION [${m}]`
+  }
+
+  const porTier = new Map<string, number>()
+  for (const l of trabajar) porTier.set(tierDe(l), (porTier.get(tierDe(l)) ?? 0) + 1)
+  console.log('\n=== COMPOSICIÓN DE «trabajar» POR TIER ===')
+  for (const [t, n] of [...porTier].sort()) console.log(`  ${String(n).padStart(3)} × ${t}`)
+
+  const enCola = new Set(cola.items.map(i => i.lead.id))
+  console.log('\n=== LOS QUE ENTRAN (la cola visible) ===')
+  cola.items.forEach((it, i) => {
+    const l = it.lead
+    console.log(`  ${i + 1}. ${it.esFoco ? '[FOCO] ' : '       '}${l.businessName.slice(0, 38).padEnd(38)} | ${tierDe(l).padEnd(24)} | ${l.status}/${l.stage ?? '—'} | acc=${l.accionable}`)
+  })
+
+  const afuera = trabajar.filter(l => !enCola.has(l.id))
+  console.log(`\n=== LOS QUE QUEDAN AFUERA DE LA COLA: ${afuera.length} ===`)
+  const afueraPorTier = new Map<string, typeof afuera>()
+  for (const l of afuera) {
+    const t = tierDe(l)
+    if (!afueraPorTier.has(t)) afueraPorTier.set(t, [])
+    afueraPorTier.get(t)!.push(l)
+  }
+  for (const [t, ls] of [...afueraPorTier].sort()) {
+    console.log(`\n  ── ${t} (${ls.length}) ──`)
+    for (const l of ls) {
+      console.log(`     ${l.businessName.slice(0, 40).padEnd(40)} | ${String(l.status).padEnd(14)} | ${String(l.stage ?? '—').padEnd(13)} | acc=${String(l.accionable).padEnd(5)} | link=${l.finalUrl ? 'sí' : 'NO'} | env=${l.demoEnviada ? 'sí' : 'no'} | resp=${['RESPONDIO','INTERESADO','CALL_AGENDADA','NEGOCIANDO'].includes(String(l.status)) ? 'sí' : 'no'}`)
+    }
+  }
+
+  // ── El lead del hallazgo: APROBADA + respondió + finalUrl + no enviada ───
+  console.log('\n=== EL LEAD DEL HALLAZGO (APROBADA + finalUrl + !enviada + gate abierto) ===')
+  const hallazgo = home.filter(l => l.stage === 'APROBADA' && l.finalUrl !== null && !l.demoEnviada && l.gateAbierto)
+  if (hallazgo.length === 0) console.log('  (ninguno en esta cartera)')
+  for (const l of hallazgo) {
+    const idx = trabajar.findIndex(x => x.id === l.id)
+    console.log(`  ${l.businessName}`)
+    console.log(`     grupo=${l.grupo} · accionable=${l.accionable} · tier=${tierDe(l)}`)
+    console.log(`     posición en 'trabajar' = ${idx + 1} de ${trabajar.length}  →  ${enCola.has(l.id) ? 'ENTRA a la cola' : 'FUERA de la cola (tope ' + TOPE_COLA + ')'}`)
+    console.log(`     proximaAccion: "${l.proximaAccion}"`)
+  }
+
+  // ── Otros estados caros que quedan afuera ───────────────────────────────
+  console.log('\n=== APROBADA: el censo completo (todas las ramas) ===')
+  const aprob = home.filter(l => l.stage === 'APROBADA')
+  for (const l of aprob) {
+    console.log(`  ${l.businessName.slice(0, 34).padEnd(34)} | grupo=${String(l.grupo).padEnd(12)} | acc=${String(l.accionable).padEnd(5)} | link=${l.finalUrl ? 'sí' : 'NO'} | env=${l.demoEnviada ? 'sí' : 'no'} | fuV=${l.followUpVencido} | ${enCola.has(l.id) ? 'EN COLA' : 'fuera'}`)
+  }
+
+  await prisma.$disconnect()
+}
+
+main().catch((e) => { console.error(e); process.exit(1) })

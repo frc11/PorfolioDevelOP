@@ -1,0 +1,595 @@
+{
+  "medidoEn": "2026-09-15T10:50:11.133Z",
+  "tresCapasDisponible": false,
+  "base": {
+    "briefs": 49,
+    "formas": {
+      "sin-documento:con-pegado-del-gem": 29,
+      "sin-documento": 20
+    },
+    "viejo": {
+      "caracteres": {
+        "n": 49,
+        "min": 529,
+        "mediana": 543,
+        "p90": 1135,
+        "max": 2270
+      },
+      "palabras": {
+        "n": 49,
+        "min": 83,
+        "mediana": 83,
+        "p90": 173,
+        "max": 394
+      }
+    },
+    "tresCapas": null
+  },
+  "ejemplo": {
+    "documentoSolo": {
+      "caracteres": 4275,
+      "bytes": 4402,
+      "palabras": 780,
+      "renglones": 62
+    },
+    "viejo": {
+      "caracteres": 6236,
+      "bytes": 6446,
+      "palabras": 1111,
+      "renglones": 113
+    },
+    "tresCapas": null,
+    "capas": null
+  },
+  "techo": {
+    "viejo": {
+      "caracteres": 79018,
+      "bytes": 79057,
+      "palabras": 206,
+      "renglones": 65
+    },
+    "tresCapas": null,
+    "nota": "cada campo de texto en 5000, el documento en 15000, 12 secciones, direcciones de 500"
+  },
+  "filas": [
+    {
+      "leadId": "cmqaxmka500019fkohgqi2txw",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 1135,
+        "bytes": 1194,
+        "palabras": 180,
+        "renglones": 32
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqaxxtlh00019fp4k89zlfum",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 551,
+        "bytes": 566,
+        "palabras": 90,
+        "renglones": 21
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqb33b0400019fvklbgoc55q",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 862,
+        "bytes": 881,
+        "palabras": 144,
+        "renglones": 31
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvbysb0001uprctlb4nbpn",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 963,
+        "bytes": 985,
+        "palabras": 150,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvc15d0005uprc414gmboj",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 947,
+        "bytes": 968,
+        "palabras": 151,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvc2nr0009uprc87ztga41",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 910,
+        "bytes": 932,
+        "palabras": 142,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvc4ls000duprcowqxqseb",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 943,
+        "bytes": 961,
+        "palabras": 147,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvc6h1000huprcr97k8iil",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 947,
+        "bytes": 967,
+        "palabras": 141,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmqhvc89q000luprcjwvjx1g6",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 934,
+        "bytes": 955,
+        "palabras": 148,
+        "renglones": 33
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035ekl000h9fl8l7hn1j7r",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 724,
+        "bytes": 743,
+        "palabras": 122,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035epe000l9fl87zbo742h",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 730,
+        "bytes": 748,
+        "palabras": 122,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035eu2000p9fl84dk0f450",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 740,
+        "bytes": 759,
+        "palabras": 125,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035eyw000t9fl8qzhjluhh",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 740,
+        "bytes": 759,
+        "palabras": 124,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035f3q000x9fl84hnv2s8b",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 741,
+        "bytes": 761,
+        "palabras": 124,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr035f8m00119fl8d87obbrh",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 728,
+        "bytes": 747,
+        "palabras": 122,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr5oflep000f9fpks86dxmwu",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 626,
+        "bytes": 643,
+        "palabras": 104,
+        "renglones": 27
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmr5oflle000j9fpkf138gszr",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 627,
+        "bytes": 644,
+        "palabras": 104,
+        "renglones": 27
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn63s001l9f1453pbvax3",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 536,
+        "bytes": 545,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn6e0001o9f14pu737q2p",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 542,
+        "bytes": 551,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn6mn001r9f14ci08qo1l",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 532,
+        "bytes": 541,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn6v8001u9f14i8dxjme6",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 530,
+        "bytes": 539,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn75j001x9f14rxgh4ucu",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 531,
+        "bytes": 540,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn7ea00209f14j3n6u26b",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 530,
+        "bytes": 539,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn7mt00239f1405fjnlzv",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 530,
+        "bytes": 539,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn7vd00269f14tg1ugxbp",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 531,
+        "bytes": 540,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn84100299f14u7gpv207",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 537,
+        "bytes": 546,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn8ec002c9f14i7x0jeml",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 530,
+        "bytes": 539,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn8nb002f9f14n4d8sxzf",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 539,
+        "bytes": 548,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn8xm002i9f14a1ukz8ur",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 540,
+        "bytes": 549,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn965002l9f14nt6onav3",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 534,
+        "bytes": 543,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn9gj002o9f143290jha2",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 532,
+        "bytes": 541,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn9oz002r9f14rcqsntzg",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 534,
+        "bytes": 543,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndn9z8002u9f1414mhzcbo",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 534,
+        "bytes": 543,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndna7x002x9f1468rqdyug",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 536,
+        "bytes": 545,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnaid00309f147xjcrthr",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 543,
+        "bytes": 552,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnar900339f144uc2ytl8",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 543,
+        "bytes": 552,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnb0000369f14l9cotdhz",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 529,
+        "bytes": 538,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnbah00399f145839supy",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 532,
+        "bytes": 541,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnc9d003c9f14bz1lgtf7",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 531,
+        "bytes": 540,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnclh003f9f14oqq3h3xn",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 532,
+        "bytes": 541,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndndgy003t9f14gzct3knp",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 538,
+        "bytes": 547,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndne74003z9f14qwcxvrjw",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 542,
+        "bytes": 551,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsndnefq00429f14t0svmv1j",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 542,
+        "bytes": 551,
+        "palabras": 83,
+        "renglones": 24
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmsoscikq00019fuof3t8xut8",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 1719,
+        "bytes": 1768,
+        "palabras": 287,
+        "renglones": 47
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmthfoi2k00019f5c2if8w71d",
+      "forma": "sin-documento:con-pegado-del-gem",
+      "viejo": {
+        "caracteres": 2270,
+        "bytes": 2308,
+        "palabras": 394,
+        "renglones": 50
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "cmtj66opx000h9fgw3qvpuwyi",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 744,
+        "bytes": 764,
+        "palabras": 125,
+        "renglones": 28
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "osv2-lead-centro-pilates-armonia",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 1244,
+        "bytes": 1271,
+        "palabras": 182,
+        "renglones": 36
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "osv2-lead-clinica-dental-omega",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 1363,
+        "bytes": 1389,
+        "palabras": 189,
+        "renglones": 38
+      },
+      "tresCapas": null
+    },
+    {
+      "leadId": "osv2-lead-studio-yoga-balance",
+      "forma": "sin-documento",
+      "viejo": {
+        "caracteres": 1182,
+        "bytes": 1204,
+        "palabras": 173,
+        "renglones": 35
+      },
+      "tresCapas": null
+    }
+  ]
+}

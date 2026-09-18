@@ -32,7 +32,9 @@
  * harness ts-node lo carga sin Neon y sin tsconfig-paths.
  */
 import assert from 'node:assert/strict'
-import { motivoOrden, particionarCartera, type HomeLead } from './flow.ts'
+import { armarCola, idsEnCola, TOPE_COLA } from './cola.ts'
+import { seleccionarFoco } from './foco.ts'
+import { filtrarYOrdenarCartera, motivoOrden, particionarCartera, type HomeLead } from './flow.ts'
 
 /**
  * Fixture de un `HomeLead` YA clasificado (`particionarCartera` opera sobre la
@@ -118,41 +120,101 @@ assert.equal(
   'un fijado fuera de `trabajar` no muestra rótulo de orden',
 )
 
-// ── P8: el foco prioriza CONSTRUIR, no contactar ─────────────────────────────
-// El criterio nuevo se verifica por la superficie pública (el orden que sale de
-// `particionarCartera` y el rótulo de `motivoOrden`), no por el tier interno.
+// ── P37: la cola ordena por URGENCIA — la clase de trabajo ya NO decide el lugar ──
+// P8 había puesto `trabajoTier` como criterio primario (construir → espera →
+// contactar con demo → evaluar → contacto sin demo). P36 midió lo que eso hacía con
+// el tope: el nivel más poblado consumía la cola entera y 4 de 6 niveles quedaban
+// inalcanzables. Decisión de Franco (P37): la cola usa el orden «urgencia» de la
+// cartera. Se verifica por la superficie pública (el orden que sale de
+// `particionarCartera`), no por el comparador interno.
 
-/** Los cinco tiers, cada uno en su estado mínimo, cargados en desorden. */
-const construir = lead({ id: 'construir', stage: 'CONSTRUCCION' })
-const esperaTuAccion = lead({ id: 'espera', stage: 'RECHAZADA' })
-const contactarConDemo = lead({ id: 'con-demo', stage: 'APROBADA' })
-const evaluarNuevo = lead({ id: 'evaluar', stage: 'FICHA' })
-const contactoSinDemo = lead({ id: 'sin-demo', stage: 'EVALUADA', gateAbierto: false })
+/**
+ * Las cinco clases, cada una en su estado mínimo, con una urgencia que CONTRADICE
+ * el orden de P8 (el orden de P8 las pondría exactamente al revés). Se cargan EN
+ * el orden de P8: un sort que no mirara la urgencia las dejaría así y fallaría.
+ */
+const construir = lead({ id: 'construir', stage: 'CONSTRUCCION', createdAt: new Date('2026-01-04T00:00:00.000Z') })
+const esperaTuAccion = lead({ id: 'espera', stage: 'RECHAZADA', createdAt: new Date('2026-01-03T00:00:00.000Z') })
+const contactarConDemo = lead({ id: 'con-demo', stage: 'APROBADA', createdAt: new Date('2026-01-02T00:00:00.000Z') })
+const evaluarNuevo = lead({ id: 'evaluar', stage: 'FICHA', caliente: true })
+const contactoSinDemo = lead({ id: 'sin-demo', stage: 'EVALUADA', gateAbierto: false, status: 'RESPONDIO' })
 
-const colaP8 = particionarCartera([
-  contactoSinDemo,
-  evaluarNuevo,
-  contactarConDemo,
-  esperaTuAccion,
-  construir,
-])
+const colaP37 = particionarCartera([construir, esperaTuAccion, contactarConDemo, evaluarNuevo, contactoSinDemo])
 assert.deepEqual(
-  colaP8.grupos.trabajar.map((l) => l.id),
-  ['construir', 'espera', 'con-demo', 'evaluar', 'sin-demo'],
-  'el orden del foco es construir → espera tu acción → contactar con demo → evaluar → contacto sin demo',
+  colaP37.grupos.trabajar.map((l) => l.id),
+  ['sin-demo', 'evaluar', 'con-demo', 'espera', 'construir'],
+  'el orden de la cola es la urgencia (respondió → caliente → antigüedad), no la clase de trabajo',
 )
 
-// ── P8.a — construir le gana al contacto, aunque el contacto sea "más urgente" ──
-// El caso exacto que el sprint viene a arreglar: con el criterio viejo
-// (respondió → caliente → resto) el prospecto caliente sin evaluar era la cima y
-// la demo a medio construir quedaba última.
+// ── P37.a — la cola y la cartera ordenan IGUAL, lead por lead ───────────────────
+// P36 encontró el mismo lead 9º en la cartera y 97º en la cola: dos superficies,
+// dos criterios. Se barre una mezcla con todos los ejes que el orden mira (pin,
+// respondió, caliente, antigüedad) y las cinco clases.
+const mezclaP37: HomeLead[] = []
+const STAGES_P37 = ['CONSTRUCCION', 'RECHAZADA', 'APROBADA', 'FICHA', 'EVALUADA', 'BRIEF', null] as const
+let dia = 1
+for (const stage of STAGES_P37) {
+  for (const status of ['PROSPECTO', 'RESPONDIO'] as const) {
+    for (const caliente of [false, true]) {
+      for (const pinned of [false, true]) {
+        mezclaP37.push(
+          lead({
+            id: `m-${stage}-${status}-${caliente}-${pinned}`,
+            stage,
+            status,
+            caliente,
+            pinned,
+            // Antigüedades cruzadas: ni el orden de carga ni el de la clase coinciden con ella.
+            createdAt: new Date(Date.UTC(2026, 0, 1 + ((dia++ * 7) % 53))),
+          }),
+        )
+      }
+    }
+  }
+}
+assert.deepEqual(
+  particionarCartera([...mezclaP37]).grupos.trabajar.map((l) => l.id),
+  filtrarYOrdenarCartera([...mezclaP37], '', 'todos', 'urgencia').map((l) => l.id),
+  'la cola del panel y la cartera en orden «urgencia» son la misma lista, en el mismo orden',
+)
+
+// ── P37.b — un nivel escaso no queda enterrado debajo de uno abundante ──────────
+// El caso medido en P36: doce leads para construir, fríos y más viejos, y una demo
+// aprobada cuyo negocio respondió. Con la clase como criterio primario la demo
+// caía en la fila 13 y la cola de TOPE_COLA no la mostraba nunca.
+const abundantes = Array.from({ length: 12 }, (_, i) =>
+  lead({ id: `construir-${i}`, stage: 'CONSTRUCCION', createdAt: new Date(Date.UTC(2026, 0, 1 + i)) }),
+)
+const demoLista = lead({
+  id: 'demo-lista',
+  stage: 'APROBADA',
+  status: 'RESPONDIO',
+  createdAt: new Date('2026-03-01T00:00:00.000Z'),
+})
+const ordenEscaso = particionarCartera([...abundantes, demoLista]).grupos.trabajar
+const seleccionEscaso = seleccionarFoco(ordenEscaso, null)
+const colaEscaso = armarCola(seleccionEscaso.foco, seleccionEscaso.resto, TOPE_COLA)
+assert.ok(
+  idsEnCola(colaEscaso).includes('demo-lista'),
+  `la demo lista para mandar entra en la cola de ${TOPE_COLA} aunque haya 12 para construir más viejos`,
+)
+assert.equal(
+  motivoOrden(demoLista),
+  'La demo está lista para mandar',
+  'y conserva el rótulo de su clase: la clase nombra el trabajo aunque ya no decida el lugar',
+)
+
+// ── P37.c — el caliente sin evaluar sube, pero NUNCA se sugiere construirlo ──────
+// Es el caso que P8.a fijaba al revés (la demo fría era la cima). Con la urgencia
+// el caliente va primero; lo que no se negocia es su rótulo: evaluar, no construir.
 const calienteSinEvaluar = lead({ id: 'caliente-crudo', caliente: true, stage: null })
 const demoFria = lead({ id: 'demo-fria', stage: 'CONSTRUCCION', status: 'PROSPECTO' })
-const duelo = particionarCartera([calienteSinEvaluar, demoFria])
+const duelo = particionarCartera([demoFria, calienteSinEvaluar])
+assert.equal(duelo.grupos.trabajar[0].id, 'caliente-crudo', 'el caliente sin evaluar va arriba de la demo fría')
 assert.equal(
-  duelo.grupos.trabajar[0].id,
-  'demo-fria',
-  'la demo a medio construir es el foco, por encima del caliente sin evaluar',
+  motivoOrden(duelo.grupos.trabajar[0]),
+  'Todavía no sabés si sirve — evalualo',
+  'arriba sí, pero rotulado para evaluar: subir no es sugerir construir',
 )
 
 // ── P8.b — RESTRICCIÓN DEL PREMORTEM: nunca construir sin veredicto ──
@@ -215,16 +277,17 @@ assert.equal(
 
 // ── P8.e — ningún estado accionable queda sin lugar ni sin rótulo ──
 // Todo lead de `trabajar` cae en algún tier y tiene rótulo: nadie queda mudo.
-for (const l of colaP8.grupos.trabajar) {
+for (const l of [...colaP37.grupos.trabajar, ...particionarCartera([...mezclaP37]).grupos.trabajar]) {
   assert.ok(motivoOrden(l), `todo lead de la cola tiene rótulo de orden (${l.id})`)
 }
 
 console.log(
   '✓ invariante OK: A-05 — el pin ordena el foco, no lo excluye (un fijado ' +
     'accionable sube a la cima y nunca deja el foco falsamente vacío; uno en vuelo ' +
-    'o pausado sigue aparte). P8 — el foco prioriza CONSTRUIR: construir → espera ' +
-    'tu acción → contactar con demo → evaluar → contacto sin demo, y un lead SIN ' +
-    'VEREDICTO jamás se sugiere para construir (barrido de todo el eje: caliente, ' +
-    'respondió, fijado, gate abierto). Es derivación (cola + orden + rótulo), no ' +
-    'motor: status/stages y el gate del brief intactos.',
+    'o pausado sigue aparte). P37 — la cola ordena por URGENCIA (pin → respondió → ' +
+    'caliente → antigüedad), idéntica lead por lead a la cartera en orden «urgencia», ' +
+    'y un nivel escaso ya no queda enterrado bajo uno abundante. La clase de trabajo ' +
+    'queda como rótulo, y un lead SIN VEREDICTO jamás se sugiere para construir ' +
+    '(barrido de todo el eje: caliente, respondió, fijado, gate abierto). Es derivación ' +
+    '(cola + orden + rótulo), no motor: status/stages y el gate del brief intactos.',
 )

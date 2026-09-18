@@ -8,10 +8,10 @@ import type { ReactNode } from 'react'
 import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
 import { adminHoverCls } from '@/lib/hover'
 import { Callout } from '@/components/ui'
+import { faltaLaSalidaDelGem } from '@/lib/leados/brief-vueltas'
 import type { Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
-import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
-import { faltaPorHerramientaSinLink } from '@/lib/leados/herramientas'
+import { GUIA_BRIEF, GUIA_VUELTAS_GEM } from '@/lib/leados/guidance-content'
 import { FichaAccordion } from './ficha-accordion'
 
 const IG_MANEJADO_LABELS: Record<(typeof IG_MANEJADO_POR_VALUES)[number], string> = {
@@ -121,6 +121,27 @@ export function BriefPanel({ brief }: { brief: Brief | null }) {
               <span className="font-medium text-zinc-300">CTA:</span> {brief.cta}
             </p>
           ) : null}
+          {/* P40 — La dirección visual que ahora viaja a la construcción: es con
+              lo que Franco compara los colores y la fuente de la demo. */}
+          {(['tono', 'paleta', 'tipografia'] as const).map((campo) =>
+            brief[campo] ? (
+              <p key={campo} className="text-xs leading-5 text-zinc-400">
+                <span className="font-medium text-zinc-300">{GUIA_BRIEF.campos[campo].label}:</span>{' '}
+                {brief[campo]}
+              </p>
+            ) : null,
+          )}
+          {brief.documento ? (
+            <details className="group rounded-2xl border border-white/10 bg-black/20 p-3">
+              <summary className="cursor-pointer list-none text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
+                {GUIA_VUELTAS_GEM.resumen.documento} ›
+              </summary>
+              <p className="mt-2 max-h-72 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                {brief.documento}
+              </p>
+            </details>
+          ) : null}
+          {brief.vueltas ? <VueltasDelGem vueltas={brief.vueltas} /> : null}
           {brief.pegadoGem ? (
             <details className="group rounded-2xl border border-white/10 bg-black/20 p-3">
               <summary className="cursor-pointer list-none text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
@@ -130,10 +151,11 @@ export function BriefPanel({ brief }: { brief: Brief | null }) {
                 {brief.pegadoGem}
               </p>
             </details>
-          ) : faltaPorHerramientaSinLink('gemDiseno', brief.pegadoGem) ? (
+          ) : faltaLaSalidaDelGem(brief) ? (
             /* El pegado del Gem dejó de ser obligatorio mientras la herramienta no
                tenga link. Ausente y en silencio, la revisión no distingue «el setter
-               no lo trajo» de «no lo podía traer»: acá se nombra. */
+               no lo trajo» de «no lo podía traer»: acá se nombra. P40: un brief con
+               el documento de las cuatro vueltas SÍ trae lo del Gem — no se nombra. */
             <p className="rounded-2xl border border-amber-400/20 bg-amber-500/[0.06] p-3 text-xs leading-5 text-amber-200/80">
               {GUIA_BRIEF.campos.pegadoGem.faltante}
             </p>
@@ -141,6 +163,47 @@ export function BriefPanel({ brief }: { brief: Brief | null }) {
         </div>
       )}
     </Panel>
+  )
+}
+
+/**
+ * P40 — Lo que quedó guardado de las vueltas con el Gem: la lectura, las
+ * decisiones, el borrador si no llegó el documento, y lo que el setter corrigió.
+ * Es el proceso detrás del documento, para cuando la demo no se parece a lo que
+ * el negocio es y hay que ver en qué vuelta se torció.
+ */
+function VueltasDelGem({ vueltas }: { vueltas: NonNullable<Brief['vueltas']> }) {
+  const textos = GUIA_VUELTAS_GEM.resumen
+  const partes = [
+    { id: 'lectura', titulo: textos.lectura, respuesta: vueltas.lectura?.respuesta, correccion: vueltas.lectura?.correccion },
+    { id: 'decisiones', titulo: textos.decisiones, respuesta: vueltas.decisiones?.respuesta, correccion: vueltas.decisiones?.correccion },
+    { id: 'especificacion', titulo: textos.borrador, respuesta: vueltas.especificacion?.respuesta, correccion: vueltas.especificacion?.correccion },
+    { id: 'huecos', titulo: textos.documento4, respuesta: undefined, correccion: vueltas.huecos?.correccion },
+  ].filter((parte) => parte.respuesta || parte.correccion)
+  if (partes.length === 0) return null
+  return (
+    <details className="group rounded-2xl border border-white/10 bg-black/20 p-3">
+      <summary className="cursor-pointer list-none text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 [&::-webkit-details-marker]:hidden">
+        {textos.vueltas} ›
+      </summary>
+      <div className="mt-2 space-y-3">
+        {partes.map((parte) => (
+          <div key={parte.id} className="space-y-1">
+            <p className="text-xs font-medium text-zinc-300">{parte.titulo}</p>
+            {parte.respuesta ? (
+              <p className="max-h-48 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                {parte.respuesta}
+              </p>
+            ) : null}
+            {parte.correccion ? (
+              <p className="whitespace-pre-wrap text-xs leading-5 text-zinc-400">
+                <span className="font-medium text-zinc-300">{textos.correccion}:</span> {parte.correccion}
+              </p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </details>
   )
 }
 

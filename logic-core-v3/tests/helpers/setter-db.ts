@@ -1,6 +1,7 @@
 import { PrismaClient, type Prisma, type DossierStage, type LeadStatus } from '@prisma/client'
 import dotenv from 'dotenv'
 import { HARD_CHECKS } from '../../src/lib/leados/flow'
+import { anotarBajas, listaAnotada } from './siembra-registro'
 
 // El proceso de test necesita DATABASE_URL (Prisma) y AUTH_SECRET (minteo de
 // cookie del 2º setter). No hay .env, solo .env.local. Idempotente: dotenv no
@@ -134,10 +135,21 @@ export function progresoJsonCon(completadas: readonly string[]): Prisma.InputJso
 export type SmokeTracker = {
   leadIds: string[]
   userIds: string[]
+  /**
+   * P39 — avisos que ningún borrado por lead ni por setter alcanza: los que el
+   * PRODUCTO emite sin lead a un setter que la prueba no creó (la reasignación
+   * saliente a `setter-qa`). Se registran por id después de la acción que los emite.
+   */
+  avisoIds: string[]
 }
 
+/**
+ * P39 — cada lista anota sus ids en el registro de siembra al momento del `push`
+ * (solo en las corridas que lo activan: ver `siembra-registro.ts`). Es lo que le
+ * permite a la corrida siguiente borrar lo que una interrumpida no llegó a borrar.
+ */
 export function newTracker(): SmokeTracker {
-  return { leadIds: [], userIds: [] }
+  return { leadIds: listaAnotada('lead'), userIds: listaAnotada('usuario'), avisoIds: listaAnotada('aviso') }
 }
 
 /** El setter persona-QA (setter-qa@develop.test). Falla claro si no está seedeado. */
@@ -360,21 +372,44 @@ export async function createNotice(opts: {
   return notice.id
 }
 
-/** Teardown por id EXACTO. Orden: notices (SetNull no las borra en cascade) → leads → users creados. */
-export async function teardown(tracker: SmokeTracker): Promise<void> {
-  if (tracker.leadIds.length > 0) {
-    await prisma.osSetterNotice.deleteMany({ where: { leadId: { in: tracker.leadIds } } })
+/**
+ * Borrado por id EXACTO — el del teardown y el de la limpieza al arrancar (P39),
+ * que así no pueden divergir. Orden: avisos por id → avisos de esos leads (SetNull
+ * no los borra en cascade) → avisos de esos usuarios → leads → usuarios creados.
+ */
+export async function borrarPorIdentidad(ids: {
+  leadIds: readonly string[]
+  userIds: readonly string[]
+  avisoIds: readonly string[]
+}): Promise<{ avisos: number; leads: number; usuarios: number }> {
+  let avisos = 0
+  if (ids.avisoIds.length > 0) {
+    avisos += (await prisma.osSetterNotice.deleteMany({ where: { id: { in: [...ids.avisoIds] } } })).count
   }
-  if (tracker.userIds.length > 0) {
-    await prisma.osSetterNotice.deleteMany({ where: { setterId: { in: tracker.userIds } } })
+  if (ids.leadIds.length > 0) {
+    avisos += (await prisma.osSetterNotice.deleteMany({ where: { leadId: { in: [...ids.leadIds] } } })).count
   }
-  if (tracker.leadIds.length > 0) {
+  if (ids.userIds.length > 0) {
+    avisos += (await prisma.osSetterNotice.deleteMany({ where: { setterId: { in: [...ids.userIds] } } })).count
+  }
+  let leads = 0
+  if (ids.leadIds.length > 0) {
     // Cascade: dossier, activities, setterMetas, demos mueren con el lead.
-    await prisma.osLead.deleteMany({ where: { id: { in: tracker.leadIds } } })
+    leads = (await prisma.osLead.deleteMany({ where: { id: { in: [...ids.leadIds] } } })).count
   }
-  if (tracker.userIds.length > 0) {
-    await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })
+  let usuarios = 0
+  if (ids.userIds.length > 0) {
+    usuarios = (await prisma.user.deleteMany({ where: { id: { in: [...ids.userIds] } } })).count
   }
+  return { avisos, leads, usuarios }
+}
+
+/** Teardown por id EXACTO; lo borrado se da de baja en el registro de siembra. */
+export async function teardown(tracker: SmokeTracker): Promise<void> {
+  await borrarPorIdentidad(tracker)
+  anotarBajas('aviso', tracker.avisoIds)
+  anotarBajas('lead', tracker.leadIds)
+  anotarBajas('usuario', tracker.userIds)
 }
 
 export async function disconnect(): Promise<void> {

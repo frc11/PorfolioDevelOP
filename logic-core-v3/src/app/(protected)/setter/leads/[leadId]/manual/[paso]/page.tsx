@@ -20,6 +20,7 @@ import {
   ConstruccionRegistro,
   ReentradaMunicion,
 } from '../_components/m-construccion'
+import { ConstruirRegistro } from '../_components/mc1-construir'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
 import { M5Contexto, M5Municion, M5Registro } from '../_components/m5-seguimiento'
@@ -271,33 +272,60 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                     brief={manual.brief}
                     capturando={manual.stage === 'EVALUADA'}
                     stage={manual.stage}
+                    lead={manual.leadCopy}
+                    ficha={manual.ficha}
+                    evaluacion={manual.evaluacion}
                   />
                 ),
               }
             : esConstruccion
-              ? {
-                  contexto: (
-                    <ConstruccionContexto
-                      lead={manual.leadCopy}
-                      brief={manual.brief}
-                      ficha={manual.ficha}
-                    />
-                  ),
-                  municion: <ConstruccionMunicion fases={fasesConstruccion} />,
-                  captura: (
-                    <ConstruccionRegistro
-                      leadId={leadId}
-                      fases={fasesConstruccion}
-                      completadas={manual.progreso.completadas}
-                      stage={manual.stage}
-                      draftUrl={manual.draftUrl}
-                      escaladoAt={manual.escaladoAt}
-                      escaladoNota={manual.escaladoNota}
-                      correccionesAccesible={alcanzable('mr')}
-                      chequeoAccesible={chequeoAccesible}
-                    />
-                  ),
-                }
+              ? pantalla.id === 'mc1'
+                ? {
+                    // P42 — «Construir» es un solo paso: pegá el bloque y esperá.
+                    // El bloque deja de ser contexto y pasa a ser la carga: va en
+                    // el bloque de trabajo, entero, con la herramienta pegada al
+                    // botón y el tilde único. Sin slots de contexto ni munición,
+                    // esas zonas no se montan. mc2 sigue igual.
+                    captura: (
+                      <ConstruirRegistro
+                        leadId={leadId}
+                        lead={manual.leadCopy}
+                        brief={manual.brief}
+                        ficha={manual.ficha}
+                        fases={fasesConstruccion}
+                        completadas={manual.progreso.completadas}
+                        stage={manual.stage}
+                        draftUrl={manual.draftUrl}
+                        escaladoAt={manual.escaladoAt}
+                        escaladoNota={manual.escaladoNota}
+                        correccionesAccesible={alcanzable('mr')}
+                        chequeoAccesible={chequeoAccesible}
+                      />
+                    ),
+                  }
+                : {
+                    contexto: (
+                      <ConstruccionContexto
+                        lead={manual.leadCopy}
+                        brief={manual.brief}
+                        ficha={manual.ficha}
+                      />
+                    ),
+                    municion: <ConstruccionMunicion fases={fasesConstruccion} />,
+                    captura: (
+                      <ConstruccionRegistro
+                        leadId={leadId}
+                        fases={fasesConstruccion}
+                        completadas={manual.progreso.completadas}
+                        stage={manual.stage}
+                        draftUrl={manual.draftUrl}
+                        escaladoAt={manual.escaladoAt}
+                        escaladoNota={manual.escaladoNota}
+                        correccionesAccesible={alcanzable('mr')}
+                        chequeoAccesible={chequeoAccesible}
+                      />
+                    ),
+                  }
               : pantalla.id === 'mr'
                 ? {
                     // Reentrada: el brief re-servido para retrabajar contra él

@@ -1,0 +1,18 @@
+diff --git a/logic-core-v3/src/lib/use-step-action.ts b/logic-core-v3/src/lib/use-step-action.ts
+index f0f3de9e..7afa02ec 100644
+--- a/logic-core-v3/src/lib/use-step-action.ts
++++ b/logic-core-v3/src/lib/use-step-action.ts
+@@ -60,11 +60,8 @@ export function useStepAction() {
+         return
+       }
+       onSuccess?.(result.data)
+-      if (successToast !== undefined) {
+-        toast.success(
+-          typeof successToast === 'function' ? successToast(result.data) : successToast,
+-        )
+-      }
++      // P30 · VARIANTE B (sin cartel) — instrumento, no producto.
++      void successToast
+     })
+   }
+ 

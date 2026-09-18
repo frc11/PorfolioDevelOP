@@ -1,0 +1,72 @@
+'use client'
+
+import { Check, Info } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+/**
+ * P29 — EL ACUSE DE RECIBO, EN LA PANTALLA.
+ *
+ * La pieza que dice QUÉ pasó después de una acción con registro, y lo dice
+ * DONDE se hizo el clic. Es la hermana discreta de `<AutosaveStatus>`: misma
+ * región (`role="status"` + `aria-live="polite"`), mismo tamaño, misma
+ * disciplina de callar cuando no hay nada que decir. Lo que cambia es el
+ * sujeto — `AutosaveStatus` habla de una escritura CONTINUA («Guardado»,
+ * «Sin guardar»), esto habla del resultado de UN acto terminado.
+ *
+ * ── Por qué existe, y por qué no alcanzaba el aviso flotante ─────────────────
+ * La regla 14 del brief pide que toda acción acuse recibo «donde se hizo el
+ * clic». Un cartel en la esquina de la pantalla no es donde se hizo el clic:
+ * cumple la letra (hay acuse) y no el espíritu (está en otro lado, y se va
+ * solo a los cuatro segundos).
+ *
+ * Y había un costo medido encima del principio. P28 dejó cronometrado que en
+ * las acciones que muestran aviso flotante y no navegan, la pantalla tarda en
+ * reflejar el estado nuevo EXACTAMENTE lo que dura el aviso: `reflejo ≈
+ * acuseResultado + 4000 ms`, con la constante de sonner, en nueve pantallas.
+ * Las que ya acusaban en pantalla —los tres tildes, con `<AutosaveStatus>`—
+ * reflejaban en ~0,5 s. La familia que no espera es la que no monta un toast.
+ *
+ * ── `data-acuse` no es decoración ────────────────────────────────────────────
+ * Es la marca por la que el instrumento de latencia (`tests/perf/_instrumento`)
+ * y el helper de las suites (`expectAcuse`) reconocen la señal 2. Sin un
+ * marcador propio, verificar «acusó» obligaría a buscar la frase sobre la
+ * pantalla entera — que es el falso verde que `expectToast` ya documentó para
+ * los toasts (una copy de la pantalla satisfacía la aserción antes del clic).
+ */
+
+export type TonoAcuse = 'ok' | 'aviso'
+
+const TONOS: Record<TonoAcuse, { color: string; Icono: typeof Check }> = {
+  ok: { color: 'text-emerald-400', Icono: Check },
+  // Para el resultado que ENTRÓ pero con una salvedad que el setter tiene que
+  // leer (el escalamiento que se registró y cuyo aviso por Telegram no salió).
+  // No es un error: el error tiene su propio `role="alert"`, que es otra cosa.
+  aviso: { color: 'text-amber-300', Icono: Info },
+}
+
+export function AcuseAccion({
+  mensaje,
+  tono = 'ok',
+  className,
+}: {
+  mensaje: string
+  tono?: TonoAcuse
+  className?: string
+}) {
+  const { color, Icono } = TONOS[tono]
+  return (
+    <p
+      data-acuse={tono}
+      role="status"
+      aria-live="polite"
+      className={cn(
+        'inline-flex min-w-0 items-start gap-1.5 text-[11px] font-medium leading-snug',
+        color,
+        className,
+      )}
+    >
+      <Icono size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" aria-hidden />
+      <span className="min-w-0">{mensaje}</span>
+    </p>
+  )
+}

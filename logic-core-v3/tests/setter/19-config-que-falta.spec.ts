@@ -51,6 +51,14 @@ let briefId: string
  * link») y la pantalla se va sola de m16 apenas hidrata.
  */
 let agendaId: string
+/**
+ * P38 — El brief que Franco revisa en B1c, sembrado por B1c y no heredado de B1b.
+ * Hasta P38 B1c tomaba el lead que B1b había dejado guardado sin el pegado: corrido
+ * solo (o con B1b en rojo) no tenía brief que revisar y caía por otra cosa. Que el
+ * paso GUARDA sin el pegado lo afirma B1b contra la base; acá se afirma que la
+ * revisión lo NOMBRA — cada uno con su propio lead.
+ */
+let revisionSinPegadoId: string
 
 test.beforeAll(async () => {
   const setter = await getSetterQa()
@@ -72,6 +80,30 @@ test.beforeAll(async () => {
     enviada: true,
   })
   agendaId = agenda.id
+
+  // El MISMO estado que B1c revisaba cuando heredaba el lead de B1b: un brief
+  // guardado sin el pegado del Gem (la forma que deja el paso cuando la herramienta
+  // no tiene link — B1b lo verifica en la base) y llevado a revisión por la base,
+  // sin borrador. Se siembra en BRIEF y se mueve, en vez de sembrar EN_REVISION:
+  // esa semilla trae un borrador que la revisión enmarca, y no es lo que se revisa.
+  const revision = await createLead(tracker, {
+    setterId,
+    businessName: 'Config Revision Sin Pegado',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+  revisionSinPegadoId = revision.id
+  await prisma.osLeadDossier.update({
+    where: { leadId: revisionSinPegadoId },
+    data: {
+      stage: 'EN_REVISION',
+      briefJson: {
+        titulo: 'Landing demo — negocio local',
+        concepto: 'One-page mobile-first con CTA de WhatsApp',
+        secciones: ['Hero', 'Productos', 'Cómo pedir'],
+      },
+    },
+  })
 })
 
 test.afterAll(async () => {
@@ -167,15 +199,16 @@ test('B1b · el paso se completa sin el pegado, y el dato faltante queda marcado
 test('B1c · Franco ve el faltante en la revisión del dossier', async ({ page }) => {
   const guard = attachConsoleGuard(page)
 
-  // El brief de B1b ya quedó sin pegado; se lo lleva a revisión por la base para
-  // no re-hacer el camino entero (este spec no verifica el envío).
-  await prisma.osLeadDossier.update({
-    where: { leadId: briefId },
-    data: { stage: 'EN_REVISION' },
-  })
+  // P38 — su propio lead (ver `revisionSinPegadoId`): ya no depende de que B1b haya
+  // corrido antes y haya guardado.
+  const dossier = await getDossier(revisionSinPegadoId)
+  const brief = dossier?.briefJson as { pegadoGem?: string; titulo?: string } | null
+  expect(dossier?.stage, 'el lead sembrado está en revisión').toBe('EN_REVISION')
+  expect(brief?.titulo, 'con brief: la revisión tiene qué mostrar').toBeTruthy()
+  expect(brief?.pegadoGem, 'y sin el pegado del Gem, que es lo que se revisa').toBeUndefined()
 
   await qaLogin(page, 'super-admin')
-  await page.goto(`/admin/leados/${briefId}`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`/admin/leados/${revisionSinPegadoId}`, { waitUntil: 'domcontentloaded' })
 
   await expect(
     firstVisible(page.getByText(GUIA_BRIEF.campos.pegadoGem.faltante!)),
@@ -187,10 +220,38 @@ test('B1c · Franco ve el faltante en la revisión del dossier', async ({ page }
 
 // ── B2 · el mensaje que hablaba en jerga ────────────────────────────────────
 
+/*
+ * ⚠ PREMISA INTRÍNSECA — DECLARADA EN P38. Este test NO se puede volver independiente.
+ *
+ * Qué necesita: que la agenda de Franco NO esté conectada. `getCalConfigLeadOS`
+ * (`src/lib/leados/agenda.ts`) la resuelve leyendo TODAS las Organization con
+ * `calComUsername` cargado — un dato global de la base, que además comparte el
+ * módulo agenda-inteligente de los CLIENTES. El test no lo siembra ni lo puede
+ * sembrar: para garantizar «cero agendas» tendría que borrarle la configuración a
+ * organizaciones que no son suyas.
+ *
+ * Qué lo pone rojo sin que nada se rompa: que alguien conecte una agenda en la base
+ * de desarrollo. Con UNA org completa el gate deja pasar y el buscador sale a
+ * Cal.com; con DOS o más el aviso es otro (el de la agenda ambigua).
+ *
+ * Por eso los asertos del aviso llevan la premisa en su mensaje, con el conteo leído
+ * de la base al arrancar: si el rojo dice «organizaciones con agenda: 1» (o más), no
+ * hay regresión que buscar — cambió la configuración y el test pide actualizarse. No
+ * es un aserto aparte a propósito: una sola org a medio cargar también da este aviso,
+ * y exigir cero pondría rojo un caso que el producto resuelve bien.
+ */
 test('B2 · el gate de la agenda habla en idioma de negocio y dice a quién avisarle', async ({
   page,
 }) => {
   const guard = attachConsoleGuard(page)
+
+  const agendasConectadas = await prisma.organization.count({
+    where: { calComUsername: { not: null } },
+  })
+  const premisa =
+    ` [PREMISA: la agenda de Franco sin conectar — organizaciones con calComUsername: ${agendasConectadas}. ` +
+    'Con una o más, mirar primero la configuración de la base, no el producto]'
+
   await qaLogin(page, 'setter')
 
   await page.goto(`/setter/leads/${agendaId}/manual/m16`, { waitUntil: 'domcontentloaded' })
@@ -211,7 +272,7 @@ test('B2 · el gate de la agenda habla en idioma de negocio y dice a quién avis
 
   // El aviso del gate, VISIBLE (`role="alert"` del form, no el toast que se va).
   const aviso = firstVisible(main(page).locator('[role="alert"]'))
-  await expect(aviso).toBeVisible()
+  await expect(aviso, `el gate de la agenda avisa${premisa}`).toBeVisible()
 
   // 1) Los tres asserts que fallan contra el código viejo, uno por cada cosa que
   //    el mensaje le decía a un setter no técnico.
@@ -220,7 +281,7 @@ test('B2 · el gate de la agenda habla en idioma de negocio y dice a quién avis
   await expect(aviso, 'no le pide al setter lo que no puede hacer').not.toContainText('cargá')
 
   // 2) Y dice lo que sí sirve: qué pasa y a quién pedírselo.
-  await expect(aviso).toContainText('agenda de Franco')
+  await expect(aviso, `nombra la agenda de Franco${premisa}`).toContainText('agenda de Franco')
   await expect(aviso, 'la misma salida que ya usa la píldora de las herramientas').toContainText(
     'Avisale a Franco',
   )

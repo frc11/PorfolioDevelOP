@@ -1,0 +1,47 @@
+══ P34 · ENTRADA DURA vs BLANDA ══════════════════════════════════════════════
+
+── CADENA · pasada 1
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 243ms top …/manual | 1217ms top …/manual/m15]
+   etapas de run(): [despacho+1800ms | dentro-transicion+1800ms | resuelta:ok+3639ms | post-onSuccess+3639ms | pidio-exito+3639ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── CADENA · pasada 2
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 215ms top …/manual | 742ms top …/manual/m15]
+   etapas de run(): [despacho+907ms | dentro-transicion+907ms | resuelta:ok+1819ms | post-onSuccess+1819ms | pidio-exito+1819ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── CADENA · pasada 3
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 220ms top …/manual | 714ms top …/manual/m15]
+   etapas de run(): [despacho+879ms | dentro-transicion+880ms | resuelta:ok+1837ms | post-onSuccess+1837ms | pidio-exito+1837ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── DIRECTA · pasada 1
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar]
+   etapas de run(): [despacho+50ms | dentro-transicion+50ms | resuelta:ok+971ms | post-onSuccess+971ms | pidio-exito+971ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── DIRECTA · pasada 2
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar]
+   etapas de run(): [despacho+42ms | dentro-transicion+42ms | resuelta:ok+1063ms | post-onSuccess+1063ms | pidio-exito+1063ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── DIRECTA · pasada 3
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar]
+   etapas de run(): [despacho+35ms | dentro-transicion+35ms | resuelta:ok+951ms | post-onSuccess+951ms | pidio-exito+951ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+   CADENA: 3/3 con acuse · 0 perdidos
+
+   DIRECTA: 3/3 con acuse · 0 perdidos
+
+════════════════════════════════════════════════════════════════════════════════
+
+  ok 1 [desktop] › tests\perf\p34-entrada-dura-vs-blanda.spec.ts:173:5 › la misma acción, entrando duro y entrando blando (1.4m)
+
+  1 passed (1.4m)

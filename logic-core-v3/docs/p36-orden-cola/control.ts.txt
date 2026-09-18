@@ -1,0 +1,34 @@
+/** P36 — CONTROL: ¿el defecto sobrevive a una cartera SIN artefactos de suites? */
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.local' }); loadEnv({ path: '.env' })
+if (!process.env.DATABASE_URL?.includes('ep-quiet-waterfall-acv0fpll')) { console.error('ABORT'); process.exit(1) }
+async function main() {
+  const { prisma } = await import('@/lib/prisma')
+  const { listOwnedLeads } = await import('@/lib/leados/ownership')
+  const { buildHomeLeads } = await import('@/lib/leados/home')
+  const { particionarCartera, motivoOrden } = await import('@/lib/leados/flow')
+  const { seleccionarFoco } = await import('@/lib/leados/foco')
+  const { armarCola, TOPE_COLA } = await import('@/lib/leados/cola')
+  const home = buildHomeLeads(await listOwnedLeads('cmq9zt64w00009f54psdq8wc8'))
+  const ROT: Record<string, string> = { 'Fijado por vos — va primero': 'PIN', 'Pasó el filtro y le falta la demo — construila': 'T0 CONSTRUIR', 'La demo está lista para mandar': 'T2 CONTACTAR', 'Todavía no sabés si sirve — evalualo': 'T3 EVALUAR', 'Todavía no hay demo que mostrar': 'T4 CONTACTO_SIN_DEMO' }
+  const tierDe = (l: never) => { const m = motivoOrden(l); return m === null ? '—' : (ROT[m] ?? 'T1 ESPERA') }
+  const esRuido = (n: string) => /^(SMOKE-SETTER|M0-GAL|CORRIDA|DEMO )\b/.test(n)
+
+  for (const [etiqueta, leads] of [['CARTERA COMPLETA (224)', home], ['CARTERA SIN ARTEFACTOS DE SUITES', home.filter(l => !esRuido(l.businessName))]] as const) {
+    const trabajar = particionarCartera([...leads]).grupos.trabajar
+    const sel = seleccionarFoco(trabajar, null)
+    const cola = armarCola(sel.foco, sel.resto, TOPE_COLA)
+    const enCola = new Set(cola.items.map(i => i.lead.id))
+    console.log(`\n${'='.repeat(72)}\n${etiqueta} — leads=${leads.length} · trabajar=${trabajar.length} · ocultos=${cola.ocultos}\n${'='.repeat(72)}`)
+    cola.items.forEach((it, i) => console.log(`  fila ${i + 1}: ${tierDe(it.lead as never).padEnd(20)} | ${it.lead.businessName.slice(0, 42)}`))
+    const t2 = trabajar.filter(l => tierDe(l as never) === 'T2 CONTACTAR')
+    console.log(`  ── T2 CONTACTAR_CON_DEMO (el del hallazgo): ${t2.length} leads, ${t2.filter(l => enCola.has(l.id)).length} EN la cola, ${t2.filter(l => !enCola.has(l.id)).length} AFUERA`)
+    const tiers = ['PIN', 'T0 CONSTRUIR', 'T1 ESPERA', 'T2 CONTACTAR', 'T3 EVALUAR', 'T4 CONTACTO_SIN_DEMO']
+    let acum = 0
+    const inalcanzables: string[] = []
+    for (const t of tiers) { const n = trabajar.filter(l => tierDe(l as never) === t).length; if (acum + 1 > TOPE_COLA && n > 0) inalcanzables.push(`${t}(${n})`); acum += n }
+    console.log(`  ── tiers INALCANZABLES: ${inalcanzables.length ? inalcanzables.join(', ') : 'ninguno'}`)
+  }
+  await prisma.$disconnect()
+}
+main().catch(e => { console.error(e); process.exit(1) })

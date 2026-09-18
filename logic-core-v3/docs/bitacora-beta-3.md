@@ -12067,3 +12067,2269 @@ del acuse admite, y que este sprint no tocó.
 - **Si la herramienta se siente más rápida.** Los números dicen que el servidor trabaja un tercio
   menos por acción y que el reflejo no se movió. Lo cierra Franco usándola.
 - **La decisión sobre el aviso** (§5). Está medida, no tomada.
+
+---
+
+## P29 · El acuse donde se hizo el clic — y la causalidad que estaba al revés
+
+**Rama:** `p25/rafaga-tildes` · **Base:** `4f8c00a2` (P28) · **Estado: FRENADO. El producto quedó como estaba.**
+
+Este sprint iba a mudar el acuse de recibo del cartel flotante a la pantalla, y de paso
+cobrarse los 4 segundos que P28 había dejado medidos. Se construyó entero, se midió, y la
+medición **refutó la premisa**. Lo que sigue es el hallazgo, la evidencia y por qué no se
+shippeó.
+
+### 1 · La premisa, y por qué era razonable
+
+P28 dejó cronometrado que en nueve pantallas el reflejo caía exactamente 4.000 ms después
+del aviso —la duración de sonner— y que bajarle la duración al aviso bajaba el reflejo uno
+a uno. La lectura fue: **la pantalla espera a que el aviso se vaya**. Con eso, mover el
+acuse a la pantalla mataba dos pájaros: cumplía la regla 14 del brief («acusa donde se hizo
+el clic») y sacaba la espera.
+
+La medición de partida de este sprint reprodujo la de P28 sin desvíos —mismo equipo, mismo
+commit, corrida propia (`docs/perf-p29/antes.json`, 17 acciones × 3 pasadas)—: **las mismas
+nueve por encima de los 2 s**, cada una con ~3,7 s de residual sin explicar.
+
+| acción | acuse (ms) | reflejo (ms) | acuse + 4.000 |
+|---|---|---|---|
+| m1-ficha | 673 | 4.681 | 4.673 |
+| m1-veredicto | 704 | 4.718 | 4.704 |
+| m4-opener | 1.169 | 5.184 | 5.169 |
+| m5-postergar | 512 | 4.532 | 4.512 |
+| m6-brief | 1.055 | 5.070 | 5.055 |
+| mc-arrancar | 793 | 4.801 | 4.793 |
+| mc-escalar | 788 | 4.798 | 4.788 |
+| m14-enviar | 1.133 | 5.139 | 5.133 |
+| m15-envio | 1.343 | 4.950 | 5.343 |
+
+Ocho de las nueve caen dentro de ±20 ms de `acuse + 4.000`. La novena (`m15-envio`) se
+va 393 ms, y no es una excepción del fenómeno sino del aritmético: cada columna es la
+MEDIANA de las tres pasadas por separado, así que sumar dos medianas no reconstruye
+ninguna pasada. La constante es tan limpia que la conclusión parecía inevitable.
+
+### 2 · El censo de las diecisiete (Paso 1, entregado)
+
+Antes de tocar nada. `→ barra` = el control se pinta en la barra de acción fija (P18), o
+sea que **el clic ocurre en la barra**; ése es el «lugar natural» de esas doce.
+
+| # | acción · pantalla | cómo acusa hoy | qué dice | ¿navega? | lugar natural | reflejo |
+|---|---|---|---|---|---|---|
+| 1 | alta · `/setter/nuevo` | toast + push | «Prospecto cargado — completá la ficha…» | **sí** | fila botón+hint (se va con el push) | 1.399 |
+| 2 | foco · panel | **navegación sola** | — | **sí** | la fila de la cola, sin footer | 1.545 |
+| 3 | m1-ficha · m1 | toast + `<AutosaveStatus>` | «Ficha guardada…» / «Borrador guardado…» | no | **la fila del propio botón**, junto al chip | 4.681 |
+| 4 | m1-veredicto · m1 | `successToast` | «Evaluación registrada…» (3 ramas) | no | → barra | 4.718 |
+| 5 | m4-opener · m4 | toast | «Opener registrado — próximo toque…» | no | → barra | 5.184 |
+| 6 | m5-respondio · m5 | `successToast` | «Respondió 🎉 — se abrió el brief.» | no | → barra | 1.211 |
+| 7 | m5-postergar · m5 | `successToast` | «Postergado — el panel lo retoma…» | no | → barra | 4.532 |
+| 8 | m6-brief · m6 | `successToast` + chip | «Brief guardado — dale una leída…» | no | → barra (y una fila que hoy sólo tiene el chip) | 5.070 |
+| 9 | mc-arrancar · mc1 | `successToast` | «Construcción arrancada — seguí la guía.» | no | → barra (el componente no pinta nada) | 4.801 |
+| 10 | mc1-tilde · mc1 | **`<AutosaveStatus>`** | «Guardado» | no | ya lo tiene, al lado de los tildes | **0** |
+| 11 | mc2-tilde · mc2 | **`<AutosaveStatus>`** | «Guardado» | no | ya lo tiene | **0** |
+| 12 | mc-escalar · mc1 | toast / toast.warning | «Le avisamos a Franco…» / «…Telegram no salió» | no (sí `refresh`) | el banner «Ya avisaste» — pero **no dice si el Telegram salió** | 4.798 |
+| 13 | m13-borrador · m13 | toast | «Borrador guardado.» | no | → barra (declara `null` al terminar) | 791 · **texto 4.551** |
+| 14 | m14-tilde · m14 | **`<AutosaveStatus>`** | «Guardado» | no | ya lo tiene | **0** |
+| 15 | m14-enviar · m14 | `successToast` | «Demo enviada a revisión…» | no | → barra | 5.139 |
+| 16 | m15-envio · m15 | `successToast` | «Demo enviada registrada 🚀…» | no | → barra (y una franja emerald con `Rocket`) | 4.950 |
+| 17 | mr-reabrir · mr | `successToast` | «Construcción reabierta…» | no | → barra: **es toda su superficie** (P19 le disolvió el Registro) | 1.299 |
+
+**Las que no tenían lugar propio, y qué se propuso:**
+
+- **`foco`** y **`alta`**: navegan. La navegación ES el acuse (la vía que el invariante ya
+  admite). No se tocaban.
+- **`mc-escalar`**: el escalamiento sí tiene lugar —el banner «Ya avisaste a Franco»—, pero
+  **el resultado del envío por Telegram no**. Es lo único de los diecisiete que el aviso
+  flotante decía y la pantalla no puede decir. Se resolvió con un acuse de tono `aviso`
+  para la rama «no salió», que es información que el banner nunca dio.
+- **`m1-ficha`**: única cuyo botón NO vive en la barra. Su acuse iba en su propia fila,
+  junto al chip de autoguardado.
+
+### 3 · EL HALLAZGO: el aviso no demoraba el reflejo — lo disparaba
+
+Con el acuse mudado y el cartel fuera, la sonda de serie temporal
+(`tests/perf/commit-del-arbol.spec.ts`, cuadro a cuadro desde el clic real) dio esto:
+
+**Con cartel** (el producto de hoy):
+
+```
+   pre-clic  {frase:true,  tildeOk:0, acuse:1, toast:0}
+   1.463 ms  {frase:true,  tildeOk:0, acuse:1, toast:1}   ← aparece el cartel
+   5.476 ms  {frase:false, tildeOk:3, acuse:1, toast:1}   ← LA PANTALLA CAMBIA
+   5.674 ms  {frase:false, tildeOk:3, acuse:1, toast:0}   ← recién ahora se va el cartel
+```
+
+**La pantalla cambia 198 ms ANTES de que el aviso se desmonte.** No lo estaba esperando.
+
+**Sin cartel** (el acuse en pantalla, la mudanza de este sprint):
+
+```
+   pre-clic  {frase:true, tildeOk:0, acuse:0, toast:0}
+   1.347 ms  {frase:true, tildeOk:0, acuse:1, toast:0}   ← aparece el acuse
+   (…y nada más en 10 segundos)
+```
+
+**La pantalla no cambia en los 10 s que dura la observación.** `frase` sigue en true y
+`tildeOk` en 0 mientras el dossier ya está en `CONSTRUCCION` en la base. Si commitea más
+tarde, no lo vi — y a los 10 segundos la distinción ya no le sirve a nadie.
+
+La causalidad estaba al revés. El árbol que devuelve el POST de la server action se aplica
+como actualización **de transición** y en estas pantallas no commitea solo. Lo desatascaba
+el `flushSync` interno de sonner al empezar a desmontar el cartel —
+`setTimeout(() => flushSync(() => setToasts(...)))`, sonner 2.0.7, verificado en
+`node_modules`—. Los 4.000 ms no eran una espera: eran **cuándo llegaba el empujón**.
+
+Y explica de paso por qué los tildes reflejan en 0 ms sin cartel: su reflejo es estado
+local del cliente (el tilde pintándose), no el árbol del servidor.
+
+### 4 · Cuatro empujones probados, cuatro refutados
+
+Un build y una corrida de la sonda cada uno. Ninguno hizo commitear el árbol:
+
+| intento | resultado |
+|---|---|
+| `flushSync` alrededor del acuse, dentro de la transición | la pantalla no cambia |
+| `router.refresh()` restaurado en `useStepAction` (el que sacó P28) | la pantalla no cambia |
+| El acuse fuera de la transición (`setTimeout(…, 0)`, prioridad normal) | la pantalla no cambia |
+| La receta EXACTA de sonner: `setTimeout(() => flushSync(() => …))` | la pantalla no cambia |
+
+El tercero y el cuarto son lo mismo que hace sonner, en el mismo orden, y no alcanzan. Lo
+que queda es que **la presencia del cartel montado** —no su desmonte— es parte del
+mecanismo, y eso ya es una interacción de Next/React que este sprint no puede cerrar sin
+entenderla.
+
+### 5 · Por qué se frenó, y qué quedó
+
+Shippear la mudanza sola habría dejado **la pantalla congelada**: verde para el invariante
+del acuse (que se cumple: hay acuse, y en su sitio) y rota para el setter, que registra algo
+y no ve pasar nada. Eso es peor que los 4 segundos. Se aplicó la regla del encargo —«si se
+pone en rojo, es información: reportalo y frená»— al caso equivalente.
+
+**El producto quedó exactamente como estaba.** `git status` sobre `src/` y `tests/` no
+tiene una sola línea: todo lo del acuse se revirtió por ruta explícita.
+
+Lo que queda en el árbol, y no toca producto:
+
+- `docs/perf-p29/antes.json` — la tabla de partida, 17 acciones × 3 pasadas.
+- `docs/perf-p29/pliegue.json` y `franja.json` — las dos superficies fijas de esta corrida.
+- `docs/perf-p29/acuse-en-pantalla.patch` — **el sprint entero, listo para reaplicar**:
+  la pieza `<AcuseAccion>` (`role="status"`, `data-acuse`), `useAcusar()` en la barra de
+  acción, los doce call-sites mudados, la tercera señal del invariante del acuse con su
+  exigencia de enganche, el helper `expectAcuse` con sus cuatro casos de probe, y el spec
+  `31-acuse-en-pantalla`.
+- `tests/perf/commit-del-arbol.spec.ts` — la sonda, para reproducir el hallazgo en una
+  corrida en vez de re-descubrirlo.
+
+**Lo que el patch ya tiene resuelto y no hay que rehacer:** el acuse vive en el proveedor
+de la barra (por encima del contenido que el server reemplaza), así que sobrevive al swap
+del árbol; la barra se levanta con el acuse solo, para las que quedan sin acción principal
+por haber tenido éxito (m13, m14); el invariante exige que el componente esté enganchado a
+`useAcusar()`/`<AcuseAccion>` y no acepta un `acusar(` suelto —probado con tres sabotajes,
+los tres en rojo en el aserto correcto—; y el instrumento de latencia descuenta el acuse de
+«la pantalla cambió», para que la pieza que el sprint agrega no se firme sola el reflejo.
+
+### 6 · Lo que este hallazgo le corrige a P28
+
+P28 sacó el `router.refresh()` de `useStepAction` con el argumento de que «la respuesta del
+POST ya trae el árbol y React lo aplica sola», y lo verificó midiendo que la pantalla seguía
+cambiando (`cambió 3/3` en las diecisiete). **Esa verificación estaba apoyada en el cartel**:
+lo que aplicaba el árbol era el `flushSync` de sonner, no React sola. La conclusión de P28
+sobre los viajes de red sigue en pie (un POST en vez de POST+GET, medido); lo que no se
+sostiene es la parte que dice que el árbol se aplica solo.
+
+### 7 · Estado
+
+| chequeo | resultado |
+|---|---|
+| `tsc --noEmit` | **exit 0** |
+| `check:invariants` | 57 descubiertos · 1 excluido · 56 corridos · **56 pasaron** · 0 fallaron |
+| `test:setter` | **191 + 2** — las dos rojas son el flake documentado (abajo) |
+| `test:leados` | **41 pasados** |
+| `test:helpers` | **28 pasados** |
+| `npm run build` | **verde** |
+| `npx prisma migrate status` | **schema up to date, sin drift** |
+
+**Las dos rojas de `test:setter`, caracterizadas.** `01-flow` **B3** y **B4**, las dos con la
+firma textual que P26 dejó documentada — el aserto no mide mal, su SUJETO se lo lleva puesta
+una navegación concurrente:
+
+```
+Locator: locator('[data-sonner-toast]').filter({ hasText: /Opener registrado/i })…
+Expected: visible — Error: element(s) not found
+Call log:
+  - waiting for ".../manual/m4" navigation to finish...
+  - navigated to ".../manual/m4"
+```
+
+`npm run test:setter` levanta un server FRÍO por corrida, que es la condición donde el flake
+vive. Verificación contra un server ya levantado, 5 corridas × 2 tests:
+
+| corrida | resultado |
+|---|---|
+| 1 (primer toque de esas rutas en el server recién arrancado) | **B4 roja**, misma firma |
+| 2 · 3 · 4 · 5 | **8/8 verdes** |
+
+O sea **9 de 10 ejecuciones tibias en verde, y la única roja fue la primera visita a la ruta**.
+Eso afina la caracterización de P26: no es «server frío» en general, es **el primer render de
+CADA RUTA** —que en `next start` paga su compilación— lo que abre la ventana. No se tocó
+ninguno de los dos tests: aflojarlos taparía el defecto, y este sprint acaba de mostrar que el
+defecto es de producto, no del test.
+
+**Superficies fijas: corridas, no deducidas.** `medir-pliegue-manual` y `capturar-franja`
+contra el build de este árbol → los dos JSON salen **idénticos a los de P28 salvo el campo
+`base`** (`3003` acá, `3005` allá: el puerto donde se midió). Ni una fila distinta.
+
+### 8 · Las dos observaciones de la Fase 0 (reportadas, sin tocar)
+
+**a) La franja del recorrido en las pantallas completadas — NO se reprodujo, y ahora está
+medido.** El censo de `medir-pliegue-manual` cuenta los pasos de la franja por pantalla, y a
+1440 las **catorce** la renderizan con sus **9 pasos** y sus 26 px de alto — incluidas las
+terminales (`espera`, `revision`, `archivo`) y la reentrada (`mr`):
+
+```
+m1 9 · m4 9 · m5 9 · m6 9 · mc1 9 · mc2 9 · m13 9 · m14 9
+m15 9 · m16 9 · mr 9 · espera 9 · revision 9 · archivo 9      (126 pasos en total)
+```
+
+Coincide con la lectura del código: `FranjaRecorrido` no tiene early-return y se monta sin
+condición en las tres cáscaras (`pantalla-manual.tsx:155`, `estado-manual.tsx:106`,
+`archivo-manual.tsx:55`). **Salvedad honesta:** el censo corre sobre los leads de la seed, y
+ninguno deja m4 en el estado exacto «opener ya registrado» de la captura que originó la
+observación. No hay camino de código que pueda soltar la franja ahí —es el mismo
+`PantallaManual`, con el `OpenerResumen` entrando como slot—, pero ese estado puntual no lo
+fotografié. Lo más probable sigue siendo el pliegue: este repo ya tiene anotado que las
+capturas del manual salen parciales si no se agranda el viewport.
+
+**b) El rail de herramientas nombra una fase que ya no existe — CONFIRMADO.**
+`src/lib/leados/herramientas.ts:59`: la herramienta `evaluador` declara
+`dondeSeUsa: 'Evaluación'`. D15-bis fusionó m1 y m2, así que «Evaluación» dejó de ser una
+pantalla del manual —el veredicto vive dentro de la ficha—. Es configuración de Franco (su
+`url` sigue en `null`, con el TODO esperando el link). **No se tocó.**
+
+### Lo que queda para la verificación humana
+
+- **La decisión de fondo, que ahora es otra.** No es «¿mover el acuse o acortar el aviso?»:
+  es **«¿cómo hacemos que la pantalla se actualice sin depender de un cartel?»**. Mientras
+  eso no esté, el aviso flotante es infraestructura, no sólo copy.
+- **Un camino barato mientras tanto, si el reflejo molesta más que la duplicación:** el
+  patch del acuse + el cartel con `duration` corta (~1.200 ms). El acuse queda donde se hizo
+  el clic y persiste; el cartel queda sólo como el empujón, y el reflejo bajaría de ~4,8 s a
+  ~1,5 s. Es un híbrido con una dependencia rara y documentada — **no lo shippeé porque el
+  encargo pedía sacar el cartel del camino del acuse, no convertirlo en un mecanismo
+  interno**. Es decisión tuya, no mía.
+
+---
+
+## P30 — El árbol no espera al cartel: espera a que algo, cualquier cosa, despierte a React
+
+**No se arregló nada.** Corrida de entendimiento: la causa, medida, y las opciones con su
+costo. Reporte completo y el instrumento en `docs/perf-p30/`. Cero líneas de producto —
+`git diff` sobre `src/`, `prisma/`, `package.json` y el lock: vacío. Worktree propio
+(`C:\tmp\wt-p30-commit`, puerto 3006, distDir `.next-p30`), destruido al cerrar.
+**3 variantes de 12**: todo lo demás se midió sin recompilar.
+
+### La causa
+
+El instrumento de P29 medía el DOM. El DOM no distingue «React no programó el trabajo» de
+«React lo renderizó y no lo commitea». P30 le agregó **la máquina de estados de React**: los
+campos del FiberRoot (`suspendedLanes`, `pingedLanes`, `warmLanes`, `cancelPendingCommit`)
+sobreviven a la minificación del build de producción de react-dom 19.2.3.
+
+Con eso a la vista, la secuencia es ésta:
+
+1. Next pone el estado del router **en una promesa** y el `AppRouter` la consume con `use()`
+   (`use-action-queue.js`, `app-router-instance.js:113-125`). El render de la transición
+   **suspende**: `suspendedLanes |= 0x200`, `warmLanes |= 0x200`.
+2. La action responde (~0,9 s) y React entrega **exactamente un ping**. Reintenta.
+3. Si en ese instante el árbol RSC revalidado todavía no terminó de resolverse, el render
+   **se re-suspende — y de esa segunda suspensión no llega ningún ping más**. El lane queda
+   suspendido y «warm», y `getNextLanes` no lo vuelve a elegir. **Para siempre**: 75
+   segundos de ventana, cero transiciones.
+4. `markRootUpdated` pone `suspendedLanes = 0` y `warmLanes = 0` ante **cualquier**
+   actualización no-idle en el mismo root. React reintenta, y con los datos ya listos,
+   commitea.
+5. En producción esa primera actualización es **el auto-cierre del cartel de sonner, a los
+   4000 ms exactos** (Δ medido cartel→pantalla: 4010 / 4015 / 4028 ms; el `<Toaster>` no
+   pasa `duration`, así que corre con el default de 4 s).
+
+### Lo que corrige de P29
+
+**No es el `flushSync`.** P29 infirió que lo destrababa la receta interna de sonner
+(`setTimeout(() => flushSync(...))`) y gastó cuatro builds en replicarla. Probado por
+sustitución, sin tocar producto: el `<Toaster>` tiene un listener global de teclado que hace
+`setExpanded(true)` — un `useState` pelado, **sin flushSync**. Alt+T (el hotkey) commitea
+**3/3** a 18-43 ms; Alt+Y (no es el hotkey, no hay `setState`) **no commitea 0/3**. Mismo
+evento, mismo foco: lo único que los separa es si hubo una actualización.
+
+Y hay un segundo motivo por el que los cuatro empujones de P29 fallaron: **disparaban entre
+~0,6 y ~1,0 s, adentro de la ventana de la carrera**. El barrido del momento del empujón:
+
+```
+200 ms  no   ·  500 ms  no   ·  800 ms  no
+1100 ms SÍ   ·  1500 ms SÍ   ·  2500 ms SÍ   ·  6000 ms SÍ
+```
+
+**Ojo con el híbrido que P29 dejó propuesto** (acuse en pantalla + cartel con
+`duration: 1200`): 1200 ms cae **apenas por encima** del umbral medido, con 800 ms fallando
+siempre. Funcionaría hoy, en esta máquina, por 100 ms de margen sobre una carrera. No es un
+umbral: es suerte con buena cara.
+
+### Lo que NO es (medido, no leído)
+
+- **No es un commit suspendido por recursos.** `cancelPendingCommit === null` en el 100 % de
+  las muestras; y `SUSPENSEY_STYLESHEET_TIMEOUT` vale **60 s**, que una ventana de 75 s
+  habría destapado.
+- **No es la transición de `useStepAction`.** Variante C (el hook sin transición propia):
+  4/5 atascadas igual. La transición la pone **Next**: `callServer` envuelve el despacho en
+  `React.startTransition` incondicionalmente. Producto no puede evitarla.
+- **No lo arregla subir React.** Variante D con **react-dom 19.2.8** (la última 19.x
+  publicada, swap quirúrgico sobre el árbol exacto del lockfile): **6/6 atascadas**, mismo
+  lane. El poke sigue destrabándolo.
+- **No es la primera visita a la ruta.** Frío 4/5 atascadas · caché caliente **5/5**.
+  Calentar no ayuda.
+
+### No son «las diecisiete», y tampoco «las que no navegan»
+
+Es una **carrera**, y cae distinto en cada acción. 17 casos × 3 pasadas sobre el build sin
+cartel: **7 se atascan siempre, 11 se atascan al menos una vez de tres**, y **las 4 que
+navegan salieron limpias 3/3** — la navegación es un despacho nuevo al router, o sea un
+empujón natural. **Las 17 commitean tras el empujón, 3/3.**
+
+**Falso verde propio, declarado.** El barrido corrido **una vez** dijo que `mc-arrancar`
+reflejaba a los 960 ms; repetido, se atascó 2 de 3. Y el criterio de P28 (`cambioTexto` sobre
+`main`) **cuenta el estado local optimista**: en `m14-tilde` el texto cambia 3/3 y el lane
+queda sucio 3/3. La señal honesta es el lane, no el texto.
+
+Al margen: los call-sites de `useStepAction.run(` son **9**, no 17. El 17 de P28 es
+9 `run(` + 4 `startTransition(` + 4 `useAutosave({save})`.
+
+### Lo que queda sin medir
+
+**Desarrollo.** Chromium recibe `ERR_CONNECTION_REFUSED` contra `next dev` en dos puertos
+distintos, mientras `curl` y un Chromium pelado alcanzan ese mismo servidor. No lo
+diagnostiqué y no afirmo nada sobre dev.
+
+### Lo que queda para la verificación humana
+
+La **elección entre las seis opciones** de la tabla del reporte (§5). Aceptar el mecanismo
+actual y documentarlo es una decisión legítima y probablemente la más barata — **pero
+entonces el invariante no es opcional**: hoy no hay nada que proteja el reflejo de las nueve
+acciones. Las pruebas esperan por condición, y la condición se cumple porque el cartel está.
+Cualquier cambio en sonner —sacarlo, pasarle `duration`, quitarle el `successToast` a una
+acción (`ofrecerHorarios` **ya no lo tiene**)— rompe el reflejo de todas a la vez, en
+silencio, con todos los gates en verde.
+
+## P31 · La limitación aceptada, vigilada — 2026-09-08
+
+P30 midió la causa y dejó la decisión abierta. La decisión fue la **opción 1: aceptar el
+mecanismo, documentarlo y vigilarlo** — con la condición que el propio P30 escribió, que el
+invariante entonces no es opcional. Este sprint construye esa red. **Cero cambios de
+conducta**: ni un `toast` nuevo, ni un empujón, ni una línea de runtime.
+
+### El sprint arrancó con una premisa falsa, y la sonda la volteó
+
+El encargo decía: *«Una acción ya no emite el cartel. Sin cartel no hay reflejo — no a los
+cuatro segundos: nunca. Esa pantalla ya está rota y nadie lo vio.»* Venía de una línea del
+cierre de P30 (*«`ofrecerHorarios` **ya no lo tiene**»*), escrita como ejemplo de lo que
+rompe el reflejo, sin medir esa pantalla.
+
+**Medido, la pantalla anda: 4 de 4 pasadas, a ~0,7 s, con cero carteles.** Y el mismo build
+midió el control (`iniciarConstruccion`) mostrando la firma de los cuatro segundos 3 de 4 —
+así que no es que la sonda no distinga.
+
+Por qué anda, y son dos razones que van juntas:
+
+- **`ofrecerHorarios` no revalida.** Es la **única de las nueve**. Sin `revalidatePath` no hay
+  árbol de servidor esperando commit, así que no hay carrera que perder.
+- Su `onSuccess` hace `setOferta(...)` — un `setState` local, que **es** una actualización y
+  por lo tanto su propio empujón. Justo el `markRootUpdated` que P30 identificó.
+
+Y no era un descuido que no tuviera cartel: está **eximida a propósito** en `EXIMIDAS` de
+`acuse-recibo.invariant.ts` desde F3, con motivo escrito y con una `prueba` que verifica que
+el mecanismo in-place siga vivo (`onSuccess: (…) => setOferta(`).
+
+**Así que no se le agregó el cartel.** Habría sido un cambio de conducta gratuito sobre una
+pantalla que anda, y —peor— habría dejado escrito un modelo equivocado de por qué anda.
+
+### La regla que sí es cierta
+
+> **La acción que REVALIDA depende del empujón externo y tiene que emitir el cartel. La que
+> no revalida, no.**
+
+El censo de las nueve la confirma sin excepciones: **8 revalidan y las 8 anuncian; 1 no
+revalida y es la única sin cartel.** La correspondencia es exacta porque es la misma razón
+las dos veces.
+
+### Los dos guardianes, cada uno demostrado fallando
+
+**1 · `check:invariant:reflejo`** — la FORMA. Cuatro guardianes: el `<Toaster>` montado en el
+root layout · sin `duration` por debajo del piso · toda acción que revalida anuncia (o
+navega) **en su propio bloque de `run(`** · y un censo congelado de quién puede no anunciar.
+
+| sabotaje | resultado |
+|---|---|
+| sacarle el `successToast` a `iniciarConstruccion` | 🔴 con el archivo, el componente y **el nombre de la acción** |
+| `<Toaster duration={800}>` | 🔴 explicando que el cartel commitea al CERRARSE |
+| sacarle el `revalidatePath` a `iniciarConstruccion` (el atajo para "aprobarlo") | 🔴 por el censo congelado |
+| **control**: reescribir el TEXTO del cartel | ✅ verde |
+
+El cuarto es el que impide ganarle al invariante por el lado fácil: sin él, la forma más
+barata de poner esto en verde sería sacar la revalidación, que no arregla el reflejo — lo
+empeora.
+
+**2 · `tests/setter/31-reflejo-del-arbol.spec.ts`** — la CONDUCTA. Es la única que distingue
+el mecanismo. Espera por condición (`toBeEnabled`) con un tope que separa «tarda» de «no pasa
+nunca», y primero afirma que la escritura llegó a la base: sin eso, un rojo no distinguiría
+«la pantalla no refleja» de «la acción falló».
+
+**El aserto es `toBeEnabled`, no `toBeVisible`, y eso se midió antes de escribirlo:** los tres
+tildes de fase **ya están en pantalla y visibles** antes de arrancar la construcción, apagados
+con su motivo. Un `toBeVisible()` acá es verdadero antes Y después — una aserción vacua, verde
+contra el defecto que viene a cubrir. El test afirma también el estado previo (visible +
+deshabilitado), así que si algún día llegaran habilitados nos enteramos por rojo.
+
+### El primer sabotaje del `duration` no falló, y eso resultó ser el hallazgo
+
+`duration={800}` — el valor elegido «por debajo del umbral» — **dio verde**. La regla del
+sprint decía que si el segundo sabotaje no falla, la prueba no distingue el mecanismo y hay
+que decirlo. Antes de darla por floja, se midió con la sonda. Y no era la prueba:
+
+| `duration` | el cartel cierra a | ¿commitea? |
+|---|---|---|
+| 4000 (el default de hoy) | ~4,65 s | **sí** 4/4 |
+| 800 | ~1,43 s | **sí** 3/3 |
+| **150** | — | **NO. Nunca.** `susp=0x200` al cerrar la ventana de 12 s |
+
+Lo que decide no es cuándo APARECE el cartel sino **cuándo se cierra**: con 800 ms el cierre
+cae a ~1,43 s, todavía por ENCIMA del punto donde el árbol ya resolvió, así que el mecanismo
+sigue funcionando y la pantalla commitea — más rápido, no peor. **El acantilado está entre 150
+y 800 ms.** Con 150 ms la prueba de conducta se puso 🔴.
+
+Que con el **mismo cartel presente** dé verde con 800 y rojo con 150 es exactamente lo que
+prueba que mira el MECANISMO y no la presencia del cartel — que era el riesgo declarado.
+
+**El piso del invariante (3000 ms) es margen declarado, no el acantilado**, y está escrito
+así en el código: a 800 ms el producto anda hoy y el chequeo igual lo pone en rojo, a
+propósito, porque el momento en que el árbol resuelve **no es una constante** — se movió entre
+0,62 s y 1,44 s entre corridas de la misma máquina.
+
+### Dónde quedó documentado
+
+- **`src/lib/use-step-action.ts`** — la cadena completa junto al mecanismo, con el aviso de
+  que `successToast` no es sólo el acuse: es lo que hace que la pantalla se actualice.
+- **`src/app/layout.tsx`** — sobre el `<Toaster>`, que es donde alguien va a ir a tocarlo.
+- **`AGENTS.md`**, en Reglas absolutas — qué lo rompe, cómo verificarlo, y que la regla
+  simplificada («toda acción emite cartel») es falsa.
+- **`docs/perf-p31/`** — mediciones crudas, la sonda, los stubs y el reporte upstream.
+
+Los cuatro dicen lo mismo: **es una limitación aceptada a propósito**, con el enlace a
+`docs/perf-p30/REPORTE.md` donde están las alternativas descartadas con su evidencia.
+
+### Reporte upstream — PREPARADO, NO PUBLICADO
+
+`docs/perf-p31/REPORTE-UPSTREAM.md`: caso reducido, pasos, lo medido, versiones exactas y lo
+descartado con evidencia (incluido **react-dom 19.2.8, que se atasca 6/6**). Sin nada del
+producto adentro.
+
+Recomendación escrita: va primero a la discusión que ya existe
+([vercel/next.js#88767](https://github.com/vercel/next.js/discussions/88767)), que describe el
+síntoma sin mecanismo ni medición. Un issue en `facebook/react` es defendible pero más
+discutible, y el reporte dice por qué. **Queda para Franco.**
+
+### Las dos mediciones fijas
+
+**Sin empeorar.** La franja salió con las **28 filas idénticas**. El pliegue salió con las 28
+filas idénticas en **las 23 columnas medidas**; lo único que se movió es el NOMBRE del lead que
+el script eligió para dos filas de m4 (`QA-W Postergado Vencido` → `QA-W Postergado Futuro`,
+dos semillas equivalentes) y el puerto que el JSON registra (3003 → 3010). Ninguna geometría.
+
+### Anotado, no hecho
+
+- **`acuse-recibo.invariant.ts` no se refactorizó.** Su `bloqueBalanceado`/`envoltorioDe` hace
+  lo mismo que el `bloqueDeParentesis` que este sprint sumó a `invariant-call-site.ts`. Tocarlo
+  quedaba fuera de scope y arriesgaba un invariante que hoy protege.
+- **Un `duration` corto pasado por cartel** (`toast.success(msg, { duration })`) no lo ve el
+  invariante. Hoy no existe ninguno en el repo —verificado— y `useStepAction` no ofrece por
+  dónde pasarlo, así que el agujero es teórico. Está escrito en el archivo.
+- **`next dev` sigue sin medir**, igual que en P30, y por la misma razón.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** (58 descubiertos, 1 excluido; la cuenta de
+`run-invariants.mjs` sube 57 → 58 en este mismo commit) · `test:setter` **194/194** (193 de
+base + el nuevo, servidor frío, sin flake) · `test:leados` **41/41** · `test:helpers` **28/28**
+· `build` **exit 0** · `migrate status` **sin drift**.
+
+Sin cambios de schema, de transiciones ni de llaves de datos. **Cero líneas de runtime**: lo
+único que se tocó de producto son comentarios. Ningún test borrado, salteado ni aflojado, y
+ningún invariante debilitado. Worktree de la sonda destruido (junction desarmada antes de
+borrar; `node_modules` real verificado en 760 entradas y react-dom 19.2.3 después). Servidores
+bajados por PID. Nada pusheado.
+
+**Para la verificación humana:** publicar el reporte upstream. Y la decisión de fondo, abierta
+a propósito: si en uso real los ~4,7 s molestan, el empujón deliberado se revisita — pero con
+la medición de una red lenta, no con el número de esta máquina.
+
+---
+
+## P32 · Los que se firman de más — seis atados a lo que dicen proteger — 2026-09-09
+
+Base: `4f8c00a2` con el WIP de P31 en el árbol (el invariante del reflejo, `bloqueDeParentesis`
+y `sinComentarios`). 58 descubiertos, 57 corridos.
+
+### 0 · Dos correcciones al enunciado, antes de nada
+
+**El censo es de P26, no de P27.** Vive en `docs/censo-invariantes-p26.md`, corrido sobre
+`130492e8`. P27 es el sprint que *cerró* nueve de los que ese censo marcó.
+
+**Quedan 23, no 24.** La aritmética `33 − 9 = 24` deja afuera que P27 también cerró
+`acuse-recibo` (forma «afirma por archivo», con sabotaje por mudanza de la señal a un componente
+hermano del mismo archivo — su tabla de demostraciones tiene once filas, no nueve). Y el propio
+censo doble-cuenta `enlaces-manual`, que cae en dos formas: por eso los conteos por forma suman
+34 sobre 33 invariantes. El número honesto es **23**.
+
+### 1 · Las formas, con los nombres del censo
+
+No inventé una taxonomía nueva: el censo ya tiene la suya, y no coincide con la del enunciado.
+Las seis, textuales, con cuántos quedan vivos:
+
+| forma | del censo | vivos hoy |
+|---|---|---|
+| Helper suelto sin call-site atado | 9 | **0** — los cerró P27 |
+| Fixture derivada de la constante vigilada | 7 | 7 |
+| Aguja demasiado ancha | 5 | 5 |
+| Espejo a mano de un sujeto que nunca se lee | 5 | 5 |
+| Afirma por archivo | 5 | 4 (P27 cerró `acuse-recibo`) |
+| Tautología o round-trip de la propia fixture | 3 | 3 |
+
+No existen en el censo las formas «fragmento exportado» ni «runner en vez de aserción» que el
+enunciado nombra. **No apareció una séptima forma.** Lo que sí apareció es otra cosa, y va abajo.
+
+### 2 · El triaje de los 23, por lo que se pierde
+
+Ordenado por la cuarta columna, no por la quinta.
+
+| # | invariante | qué se pierde si el defecto entra | forma | costo | estado |
+|---|---|---|---|---|---|
+| 1 | `modules` | **cross-tenant**: la vitrina le lista a un cliente qué módulos contrató cada una de las otras organizaciones | tautología (mal clasificada: es helper suelto) | bajo — hay herramienta | **fortalecido** |
+| 2 | `lead-status-rules` | el sello del primer contacto se pisa en cada tap, o se borra al deshacer. Dato histórico, **no se recupera**; falsea la métrica de velocidad de respuesta | espejo a mano | bajo | **fortalecido** |
+| 3 | `pantallas-construccion` | `FASE_IDS` es la llave del progreso persistido: podar una fase deja huérfano lo que el setter ya marcó, y el blob entero deja de parsear | fixture derivada | bajo | **fortalecido** |
+| 4 | `cola` | el tope vuelve a 1 y el panel esconde 48 accionables sin decirlo — la conducta exacta que P21 vino a matar | fixture derivada | bajo | **fortalecido** |
+| 5 | `executive-report-plan` | la card de perfil le promete al cliente un reporte que el motor no manda (o le esconde uno que sí) | espejo a mano | bajo | **fortalecido** |
+| 6 | `upsell-dedup` | el dedup queda apagado: cada revisita genera otro lead inbound idéntico, con su alerta y sus notificaciones | fixture derivada | bajo | **fortalecido** |
+| 7 | `self-check-gate` | — | — | — | **re-clasificado: NO es sobre-satisfacible** (ver §4) |
+| 8 | `ficha-bloques` | el gate de señal mínima se despega del mapa de bloques: se aprueban fichas incompletas | fixture derivada | medio | sin tocar |
+| 9 | `lead-scoring-gate` | una ausencia de substring sobre el header del CSV: la firma cualquier header sin ese rótulo, incluido uno truncado por un fallo del builder | aguja ancha | medio | sin tocar |
+| 10 | `aprobada-sin-link` | el guard de descubrimiento es por archivo: una mención de `finalUrl` en un comentario mantiene al archivo en el conjunto congelado aunque haya perdido la distinción | por archivo | medio | sin tocar |
+| 11 | `client-monthly-report` | round-trip de una fixture propia: al ensamblador le alcanza con devolver lo que el test le pasó | tautología | medio | sin tocar |
+| 12 | `brief-input` | el brief ejecutivo describe crecimiento con deltas negativos — le miente al cliente; y las métricas se cuentan contra un `4` a mano | espejo a mano | medio | sin tocar |
+| 13 | `enlaces-manual` | todo itera una tabla de enlaces escrita a mano: un salto real del JSX que nadie declare deja el barrido verde sin mirarlo | espejo + por archivo | alto — doble forma | sin tocar |
+| 14 | `notifications-brevo` | «el motor es Brevo» lo firma un string de error del camino no configurado: pasa sin que se ejerza un envío | aguja ancha | medio | sin tocar |
+| 15 | `turno` | la unicidad se barre sólo sobre los campos que el mapa tenga: dos situaciones distintas pueden mostrar el mismo texto | fixture derivada | medio | sin tocar |
+| 16 | `recommendations` | las fixtures se derivan de los umbrales: moverlos a 1 o a 10.000 mueve la fixture con ellos | fixture derivada | medio | sin tocar |
+| 17 | `contador-dms` | la sección 3 arma el objeto dentro del propio invariante (la aserción principal **sí** está anclada) | tautología | bajo | sin tocar |
+| 18 | `executive-report-prefs` | un schema que aceptara 6, 8 o 3.5 pasa; las opciones reales del select nunca se leen | espejo a mano | bajo | sin tocar |
+| 19 | `client-notifications` | el banner de urgencia se afirma con un `includes` de una sola palabra sobre todo el HTML | aguja ancha | bajo | sin tocar |
+| 20 | `lead-detail` | prohíbe cuatro fragmentos en inglés: seis strings en castellano cualesquiera —o placeholders— las firman | aguja ancha | bajo | sin tocar |
+| 21 | `draft-url-mensaje` | el único filtro de idioma es que el mensaje no empiece con `Invalid` | aguja ancha | bajo | sin tocar |
+| 22 | `copy-sin-jerga` | universo acotado a mano: copy nueva fuera del ámbito es invisible | por archivo | alto | sin tocar |
+| 23 | `copy-sin-ubicacion` | regex cerrada de 16 frases: «al pie», «en el header» pasan sin marcar | por archivo | alto | sin tocar |
+
+**Ninguno tapaba un defecto vivo.** Verificado en los seis que toqué: el `where: { organizationId }`
+está, el spread condicional del sello está, `FASE_IDS` tiene las seis, `TOPE_COLA` es 5, el gate
+de `build.ts` coincide con el helper y la ventana del dedup es de 24 h. **No hubo frenada.**
+
+### 3 · Los seis, uno por uno
+
+Cada bloque incluye lo que el enunciado no pedía y sin lo cual el resto no vale: **la corrida del
+mismo sabotaje contra el invariante ORIGINAL**. Un aserto nuevo que se pone rojo no prueba nada si
+el viejo ya veía el defecto.
+
+---
+
+**1 · `modules` — la vitrina que no podía cruzar tenant**
+
+```
+PROTEGE   que un cliente no vea qué módulos contrataron las otras organizaciones
+LA FORMA  la sección 3 se llama ANTI-IDOR y es verdadera POR CONSTRUCCIÓN: `buildShowroom`
+          recibe el mapa de UNA org ya armado. Se le pasa el de A y devuelve lo de A haga lo
+          que haga por dentro. El aislamiento real vive en el `where` de la consulta que arma
+          ese mapa, y el invariante nunca lo miraba.
+          (El censo lo clasificó como «tautología»; es «helper suelto», el de los nueve de P27.)
+SABOTAJE  services/page.tsx — `where: { organizationId }` → `where: {}`
+ANTES     verde
+ORIGINAL  verde CON EL SABOTAJE PUESTO, imprimiendo «vitrina org-scoped que no cruza tenant»
+DESPUÉS   ROJO, por `assert.match(where, /\borganizationId\b/)`
+CONTROL   reordenar `select`/`where` + renombrar la variable del `.map` → verde
+```
+
+Ata la promesa al call-site con la herramienta de P27 (`cuerpoDeFuncion` + `bloqueDeParentesis`
++ `valorDeClave`). Recorta el `where:` entero en vez de matchear texto, así reordenar claves no
+lo mueve. Barre **toda** consulta al modelo en esa página, no la que hay hoy, y lleva piso de
+descubrimiento: si la consulta se muda, el bucle recorrería cero y saldría verde sobre nada.
+
+---
+
+**2 · `lead-status-rules` — el sello del primer contacto**
+
+```
+PROTEGE   `firstContactedAt`: histórico inmutable del primer contacto. Es de donde sale la
+          métrica de velocidad de respuesta, y pisado no vuelve.
+LA FORMA  la sección 4 dice «modela el cómputo del data del action» — y es una
+          re-implementación LOCAL (`applyTransition`) escrita en el propio invariante.
+SABOTAJE  updateLeadStatus.ts, dos formas independientes:
+          (a) `firstContactedAt: new Date()` siempre        → pisa el histórico
+          (b) `firstContactedAt: sealFirstContact ? … : null` → deshacer lo borra
+ANTES     verde
+ORIGINAL  verde con (a) puesto
+DESPUÉS   ROJO las dos, por el aserto del spread condicional gobernado
+CONTROL   renombrar la bandera (`sealFirstContact` → `debeSellar`) + reordenar el payload → verde
+```
+
+El aserto **captura** el nombre de la bandera en vez de fijarlo — por eso el renombre no lo
+rompe. Y prohíbe una segunda escritura del sello fuera del spread, sin prohibir leerlo: un
+`select: { firstContactedAt: true }` sigue permitido.
+
+---
+
+**3 · `pantallas-construccion` — la llave del progreso persistido**
+
+```
+PROTEGE   `FASE_IDS`: `ProgresoSchema.completadas` es `z.array(z.enum(FASE_IDS))`. Sacar un id
+          deja huérfano lo que el setter ya marcó y el blob entero deja de parsear.
+LA FORMA  los dos lados de la igualdad de la sección 5 salen de la MISMA lista.
+SABOTAJE  poda COORDINADA: sacar 'mobile' de FASE_IDS y de PANTALLA_DE_FASE a la vez
+ANTES     verde
+ORIGINAL  verde con la fase podada — y su propio mensaje de éxito lo delata:
+          «las 5 fases de FASE_IDS…». Se adaptó solo.
+DESPUÉS   ROJO, por el censo congelado de FASE_IDS
+CONTROL   agregar un campo opcional nuevo a ProgresoSchema → verde
+```
+
+Suma el gemelo que le faltaba al congelado de `PANTALLAS_CONSTRUCCION` que ya existía, más el
+espejo de `self-check-gate` §7: **un progreso guardado ayer tiene que seguir parseando**. Ésa es
+la que mide el daño en vez de describirlo.
+
+---
+
+**4 · `cola` — el tope que se adaptaba solo**
+
+```
+PROTEGE   que el panel no vuelva a mostrar UN accionable callándose los otros 48
+LA FORMA  el caso de las 49 usa `TOPE_COLA` en las dos puntas: como expectativa y como resta
+SABOTAJE  cola.ts — `TOPE_COLA = 5` → `1`
+ANTES     verde (1632 combinaciones)
+ORIGINAL  verde con el tope en 1
+DESPUÉS   ROJO, por el censo congelado del tope
+CONTROL   renombrar `cupo` → `cupoVisible` dentro de `armarCola` → verde
+```
+
+Le había puesto además un piso semántico (`TOPE_COLA >= 3`). **Lo saqué**: el review lo marcó
+y tiene razón — `assert/strict` corta en la primera falla, así que si el `equal` de arriba
+pasó, los dos valores son idénticos y el piso es `5 >= 3`, siempre verdadero cuando llega a
+ejecutarse. Se comprobó contra la corrida del sabotaje: el mensaje fue «TOPE_COLA cambió (1
+en vez de 5)» y el piso nunca corrió. El gemelo en `pantallas-construccion`
+(`FASE_IDS.length >= FASE_IDS_CONGELADAS.length`) tenía el mismo defecto y salió también.
+
+**Y una aserción que escribí, medí, y saqué.** Había diagnosticado
+`assert.deepEqual(idsEnCola(c), ids)` como tautología vacua: `idsEnCola` *es*
+`items.map(i => i.lead.id)` y el otro lado es esa misma expresión. Escribí un reemplazo que
+mide el dedup contra la **entrada** en vez de contra sí mismo. Después lo medí:
+
+| sabotaje | original | con mi bloque |
+|---|---|---|
+| el dedup nombra sólo al foco | **ROJO** | ROJO |
+| `TOPE_COLA = 1` | VERDE | **ROJO** |
+
+Mi bloque **no discriminaba nada nuevo**: la cadena existente ya ata `items` a la entrada
+(sección 4) y el `deepEqual` ata `idsEnCola` a `items`, así que transitivamente ya estaba atado.
+Lo removí. La regla del sprint es explícita —ninguna aserción vacua— y aplica también a las que
+escribo yo. Mi diagnóstico era el error: la expectativa vive en el test y la implementación en
+producción, así que **sí** puede fallar. «Parece tautología» no es «es vacuo»; hay que medirlo.
+
+---
+
+**5 · `executive-report-plan` — el espejo de un sujeto que nunca se leía**
+
+```
+PROTEGE   que la card de /dashboard/cuenta/perfil le diga al cliente lo mismo que el motor hace
+LA FORMA  promete coincidir «EXACTAMENTE con el gate real de build.ts» y compara contra tres
+          literales a mano. build.ts nunca entraba al proceso. El propio helper lo admite en un
+          comentario: «si ese gate cambia alguna vez, actualizar también acá» — eso es una nota.
+SABOTAJE  build.ts, dos:
+          (a) el gate deja de mandarle el reporte a PRO
+          (b) los leads destacados dejan de ser exclusivos de BUSINESS
+ANTES     verde
+ORIGINAL  verde con los dos
+DESPUÉS   ROJO los dos
+CONTROL   renombrar `plan` → `planDeLaOrg` en build.ts → verde
+```
+
+**El control falló DOS veces, y las dos encontraron un sobre-fortalecimiento propio.**
+(a) Los recortes exigían `plan.key` literal, así que renombrar un local daba rojo — aflojados
+a `.key`. (b) El gate se ataba a su `return` por distancia (`{0,120}` caracteres hasta el
+`reason: 'PLAN'`), así que meter un log entre los dos también daba rojo — reemplazado por
+**unicidad**: se exige que haya exactamente UNA condición de plan en la función, y por
+separado que el `reason: 'PLAN'` siga existiendo. Con cero o con dos, falla ruidoso en vez
+de elegir una.
+
+Eso es exactamente lo que el control existe para atrapar — un invariante que se pone rojo
+ante un cambio inocuo entrena a ignorarlo. Los controles finales del gate son **tres**, los
+tres verdes: renombrar el local, meter un log entre el `if` y el `return`, y que prettier
+parta la condición en varias líneas. El spread de `lead-status-rules` se probó contra ese
+mismo formateo multilínea, también verde.
+
+La expectativa deja de estar escrita a mano: sale del `if` del motor. El universo de planes sale
+del `enum PlanKey` de `schema.prisma` (fuente independiente, sin cargar el runtime de Prisma), no
+de una lista de tres — un plan nuevo entra al barrido solo. Y usa `sinComentarios` de P31 por un
+motivo medido: arriba del gate hay un comentario que dice «solo PRO y BUSINESS reciben el
+reporte», y un escaneo que lo lea encuentra la respuesta correcta aunque el código diga otra cosa.
+
+---
+
+**6 · `upsell-dedup` — la ventana que seguía a su propia fixture**
+
+```
+PROTEGE   que una revisita del cliente no vuelva a generar el mismo lead inbound, con su alerta
+          y sus notificaciones (el agujero que P5.2 vino a tapar: 5 clicks = 5 leads)
+LA FORMA  las secciones 2 y 3 usan `UPSELL_DEDUP_WINDOW_MS` en las dos puntas. El único piso
+          real es el rage-click de la sección 4, con clicks a 1,5 s: la ventana puede bajar a
+          unos seis segundos con el archivo entero en verde.
+SABOTAJE  dedup.ts — ventana 24 h → 10 s
+ANTES     verde
+ORIGINAL  verde con la ventana en 10 s
+DESPUÉS   ROJO
+CONTROL   renombrar el parámetro `lastRequestedAt` → `ultimaSolicitud` → verde
+```
+
+La aserción nueva no habla de milisegundos: habla de **la revisita**. El docstring del módulo
+promete que la ventana «cubre el rage-click y la revisita en el día», y de las dos cosas sólo la
+primera estaba probada. Una revisita a las seis horas no puede crear.
+
+### 4 · El hallazgo que no es una forma nueva: el censo sobre-cuenta
+
+`self-check-gate` está marcado «sí» en el censo. Hoy **no** es sobre-satisfacible: tiene un censo
+congelado de los diez hard-checks (§6), un blob guardado a mano que tiene que seguir aprobando
+(§7) y la unicidad de `nombre` e `id` como llave (§8). Verifiqué que el archivo **no cambió**
+desde `130492e8` — o sea que esos dientes ya estaban cuando se hizo el censo. La propia columna
+del censo lo insinúa («lo único que ve el drift es un censo congelado a mano») y lo marca «sí»
+igual, porque mira las fixtures §1-5 y no el diente que las respalda.
+
+El censo lo dice de sí mismo, y hay que leerlo:
+
+> Tampoco se ejecutó ningún sabotaje: la columna «de más» es lectura de código, no medición.
+
+Ésa es la lección operativa, y me tocó a mí también en `cola` (§3.4): **la lista de 33 es una
+lista de sospechosos, no de condenados.** Cada uno necesita su sabotaje antes de tocarlo. Por eso
+los seis bloques de arriba traen la fila `ORIGINAL` — sin ella, «mi aserto se pone rojo» no
+distingue un hueco cerrado de trabajo decorativo sobre uno que ya estaba tapado.
+
+### 5 · Lo que queda: 16, con su triaje hecho
+
+Están en la tabla de §2 (filas 8-23) con las cinco columnas, para que el que los retome no
+arranque de cero. Los cuatro que más pesan, por si el próximo sprint toma sólo cuatro:
+
+1. **`ficha-bloques`** — el gate de señal mínima; se aprueban fichas incompletas.
+2. **`lead-scoring-gate`** — feature de plan pago; el chequeo es una ausencia de substring.
+3. **`aprobada-sin-link`** — guard de descubrimiento por archivo, que un comentario firma.
+4. **`enlaces-manual`** — el más caro y el único con dos formas a la vez.
+
+Los tres «por archivo» que quedan (`copy-sin-jerga`, `copy-sin-ubicacion`, `enlaces-manual`)
+comparten una barrera: su ámbito es una lista de rutas escrita a mano, así que fortalecerlos de
+verdad pide resolver **el descubrimiento**, no la aserción. Eso es un sprint propio.
+
+Que queden 16 sin fortalecer es información, no un fracaso: los seis que entraron son los seis
+donde lo que se pierde es aislamiento, datos o dinero.
+
+### 6 · El review, y dos aserciones vacuas más (mías)
+
+Pasé los seis diffs por `code-reviewer` con una consigna acotada: regex que se rompan ante
+un cambio **inocuo**, y aserciones que no puedan fallar. Encontró cinco cosas reales y las
+cinco se arreglaron:
+
+| hallazgo | qué edición inocua lo rompía | arreglo |
+|---|---|---|
+| `lead-status-rules`: `cuerpoDeFuncion` conserva los comentarios | un `// firstContactedAt: se sella una sola vez` hacía fallar el `doesNotMatch` | envuelto en `sinComentarios` |
+| `modules`: idem, más `indexOf('(')` sin chequear `-1` | un `// TODO: sumar prisma.organizationModule.updateMany()` entraba al bucle y el recorte agarraba el paréntesis de otro código | `sinComentarios` + guard explícito del índice |
+| `executive-report-plan`: el parseo del enum | `BUSINESS // ver pricing doc` en `schema.prisma` sacaba el plan del censo y el piso se caía | `l.split('//')[0]` antes del trim |
+| **piso vacuo** en `cola` | — | removido |
+| **piso vacuo** en `pantallas-construccion` | — | removido |
+
+Los dos últimos son el hallazgo que más me interesa, porque son **míos y del mismo tipo que
+el sprint persigue**. `assert/strict` corta en la primera falla: un `assert.ok(X >= Y)`
+puesto DESPUÉS de un `assert.equal(X, Y)` no puede dar un veredicto distinto — o no se
+ejecuta, o compara un valor con sí mismo. Son verdes por construcción. Es la tercera vez en
+este sprint que escribo algo que no discrimina (las otras dos: el bloque del dedup en `cola`
+y los dos sobre-fortalecimientos del gate), y las tres las agarró una medición, no la
+lectura. Ésa es la lección, y vale contra el propio método: **el que audita aserciones
+escribe aserciones igual de malas si no las mide.**
+
+El review también marcó que `gateDelMotor` no toleraba una reescritura a
+`!['PRO','BUSINESS'].includes(plan.key)`. Es cierto de la versión que revisó; la forma final
+ya no ata el `if` a su `return` y, ante esa reescritura, falla con el mensaje que nombra el
+caso («un helper, un `switch`, un `.includes()`») en vez de con un `null` sin explicar. Un
+rojo ruidoso y explicado ahí es lo correcto: cambiar la forma del gate **debe** pedir que se
+re-ate el recorte.
+
+### 7 · Un incidente, y lo que costó
+
+Al correr la batería de sabotajes automatizada escribí el revert como
+`git checkout -- src/ prisma/`. Eso revirtió el archivo saboteado **y todo lo demás bajo
+`src/`**: mis seis invariantes y —peor— el WIP de P31 sin commitear (`invariant-call-site.ts`,
+`layout.tsx`, `use-step-action.ts`). La batería lo delató sola: los siete sabotajes pasaron a
+dar VERDE de golpe, que es imposible si los invariantes siguen ahí.
+
+Recuperado completo, y verificado contra los `numstat` que tenía anotados del arranque:
+
+- `invariant-call-site.ts` (**76/0**) — reconstruido del `git diff` que estaba en la sesión.
+- `layout.tsx` (**18/3**) y `use-step-action.ts` (**51/0**) — nunca los había leído, así que
+  no había de dónde reconstruirlos. Salieron de los `sourcesContent` de los source maps que
+  el `npm run build` del cierre había dejado en `.next/server/**/*.map`, que embeben el
+  fuente original. Los tres numstat coinciden exactamente con los del arranque y
+  `check:invariant:reflejo` volvió a verde.
+
+La regla del sprint decía «`git add` por ruta explícita; nunca `-A`». Vale igual para
+`checkout`, y ahí no la apliqué. La batería final revierte por lista explícita de los ocho
+archivos de producto que toca.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** (58 descubiertos, 1 excluido) · `test:setter` **194/194** ·
+`test:leados` **41/41** · `test:helpers` **28/28** · `build` **exit 0** · `migrate status` **sin
+drift**.
+
+**Cero líneas de producto.** Lo único modificado son seis archivos `.invariant.ts`: **+373 / −1**,
+y la única línea borrada es un `import` fusionado (`{ FASE_IDS }` → `{ FASE_IDS, ProgresoSchema }`)
+— revisada una por una con `git diff -U0`. Ninguna aserción perdida: el conteo de `assert` sube
+de 107 a 128 en los seis. La batería final son **18 casos**: 7 sabotajes en rojo y 11 controles
+en verde, cada invariante con al menos uno de cada. Todos los sabotajes se revirtieron con
+`git checkout --` y el árbol de producto quedó limpio, verificado archivo por archivo después de
+cada uno. El WIP de P31 que estaba en el árbol no se tocó.
+
+Sin cambios de schema, de transiciones ni de llaves de datos. Las dos superficies fijas no se
+tocaron. Nada pusheado.
+
+**Para la verificación humana:** nada visual — este sprint no cambia una sola pantalla. Lo que
+cambia es cuánto vale el verde de los 57.
+
+**Nota de terreno — el flake de P26 apareció una vez.** De las tres corridas de `test:setter`
+en esta sesión, dos dieron 194/194 y una dio 193 + 1 rojo:
+`01-flow.spec.ts:247 › B4 · respuesta del negocio abre el BRIEF (gate) + transición
+EVALUADA→BRIEF`. Re-corrido el spec entero: **11/11**. Re-corrida la suite completa: **194/194,
+exit 0**. Es el flake que P26 caracterizó (sólo con servidor frío), no una regresión — y no
+puede serlo: los seis archivos que este sprint tocó tienen **cero importadores** en `src/`
+(verificado con grep, uno por uno), así que no entran al grafo de runtime de la app.
+
+**Nota de terreno:** el enunciado daba las tres suites como «194, 41 y 28». La tercera es
+`test:helpers`; de paso medí `test:perf` (**2/2**) e `test:integration` (**60/60**), las dos en
+verde. La corrida de `test:perf` deja un `tests/perf/.ultima-medicion.json` sin trackear que no
+es de este sprint.
+
+
+## P33 · El cartel que no llega — el flake es un bug de producto, medido — 2026-09-09
+
+**FRENADO por regla del encargo.** El Paso 1 no confirmó la hipótesis: la refutó, y en el camino
+destapó que el rojo intermitente de la suite del setter es un **defecto de producto**. Cero líneas
+de producto tocadas. Lo único que se escribió son comentarios en dos archivos de test y el
+instrumento que lo reproduce.
+
+### 1 · El censo de los que fallaron — y NO todos tienen la misma forma
+
+| sprint | test | forma del aserto | gracia | condición esperada |
+|---|---|---|---|---|
+| P25 | `26-cola-de-trabajo` P21-4 | navega y afirma ausencia + presencia | 15 s | `toHaveCount(0)` + `toBeVisible` sobre dos `section` |
+| P25 | `16-municiones-salida` m5 | despliega y afirma ausencia | 15 s | `toBeHidden()` a nivel `page` |
+| P26 | `01-flow` **B4** | clic → espera el CARTEL | 15 s | `[data-sonner-toast]` filtrado por texto, `toBeVisible` |
+| P28 | `01-flow` **B1** · **B8** | ídem | 15 s | ídem |
+| P29 | `01-flow` **B3** · **B4** | ídem | 15 s | ídem |
+| P32 | `01-flow` **B4** | ídem | 15 s | ídem |
+
+Son **seis tests distintos**, no cinco, y **dos familias**, no una. Cuatro (B1/B3/B4/B8) esperan el
+cartel de sonner. Los dos de P25 son otra cosa: strict mode por el DOM que el manual duplica para
+responsive — y uno de ellos (m5) ya lo arregló P28.
+
+**Candidatos: 10 tests · 12 asertos**, todos en `tests/setter` (`01-flow` ×7 con 8 asertos,
+`20-veredicto-abre-construir` ×1, `21-ficha-por-fuentes` ×2). Cero en `test:leados` y en
+`test:helpers`.
+
+### 2 · El discriminador no es temporal, es estructural
+
+Los cuatro que flakearon navegan a la **raíz** del lead (`/setter/leads/{id}`), que redirige en
+cadena hasta la pantalla derivada. Los que entran directo con `pantalla(leadId, 'mX')` no fallaron
+nunca. Siete de siete:
+
+| test | navega a | ¿flakeó? |
+|---|---|---|
+| B1 ficha · B3 opener · B4 brief · B8 envío | **raíz** | **sí** |
+| B5 construcción | **raíz** | todavía no |
+| B2 veredicto · B6 borrador · B6 revisión | pantalla directa | nunca |
+
+Eso además **refuta una tabla propia**. Cruzando `.ultima-medicion.json` con los 4.000 ms del
+cartel salía que los que flakean son los que reflejan ~10 ms DESPUÉS de que el cartel muere. Encaja
+con los cuatro… y se cae con B2, que comparte acción y texto de cartel con un caso de margen −9 ms
+y no flakea nunca. La diferencia entre B2 y los otros no es el margen: es por dónde entra.
+
+### 3 · La hipótesis del encargo, refutada con medición
+
+> «Un test que actúa y espera el reflejo se queda sin tiempo de gracia antes de que React commitee.»
+
+**No.** El instrumento (`tests/perf/carrera-del-cartel.spec.ts`, cuatro versiones; la primera perdió
+el registro entero en 2 de 6 pasadas y se rehízo con `addInitScript` + `Date.now()` para cruzar la
+navegación) muestrea la pantalla por cuadro desde el clic. En la pasada roja:
+
+```
+click 1621 ms · aserto 15016 ms · ROJO · 841 muestras · EN BASE: SÍ
+carteles (0):
+rutas: 12ms /leads/X | 270ms …/manual | 974ms …/manual/m15
+```
+
+**841 muestras a lo largo de 14 s continuos, cero carteles montados** — y sin filtrar por texto: de
+cualquier texto, ni de éxito ni de error. El aserto no llega tarde a un cartel que se fue. **No hay
+cartel.** Subir el timeout no alcanza a un sujeto que no nació.
+
+Y se refutó también la explicación de repuesto (que el clic cayera sobre un árbol que la cadena de
+redirecciones iba a reemplazar): con freno de CPU ×6, `click()` tarda 2.817–5.041 ms —Playwright
+espera accionabilidad— y la cadena termina a 1.777–2.962 ms. El clic **siempre** llega después.
+6 de 6 verdes con freno.
+
+### 4 · EL HALLAZGO: la acción corre, persiste, y no acusa
+
+Tres corridas con server nuevo cada una, dos pasadas cada una, midiendo la verdad durable:
+
+| corrida | pasada roja | muestras | carteles | `enviadaAt` en la base |
+|---|---|---|---|---|
+| 1 | 1ª | 841 | **0** | **SÍ** |
+| 2 | 1ª | 842 | **0** | **SÍ** |
+| 3 | **2ª** | 841 | **0** | **SÍ** |
+
+**Tres de tres.** El setter aprieta, el servidor persiste, y no hay ni acuse ni reflejo. Que en la
+corrida 3 la roja cayera en la segunda pasada afina la caracterización de P29: no es «la primera
+visita a la ruta», es una **carrera** que la primera visita pierde más seguido.
+
+### 5 · Por qué pasa — la cadena de P30, cerrada
+
+`useStepAction.run()` (`src/lib/use-step-action.ts:106-119`) mete la acción **y su
+`toast.success`** dentro del MISMO `startTransition`:
+
+```ts
+startTransition(async () => {
+  const result = await action()
+  …
+  toast.success(…)      // ← esta actualización pertenece al lane de la transición
+})
+```
+
+P30 midió el resto: el render de esa transición suspende (`suspendedLanes |= 0x200`,
+`warmLanes |= 0x200`); la action responde y React entrega **exactamente un ping**; si en ese
+reintento el árbol RSC revalidado todavía no resolvió, se re-suspende y **no llega ningún ping
+más**. El `toast.success` es una actualización de ese lane: **si el lane no commitea, el cartel no
+se monta.**
+
+Y el cartel era lo único que despertaba al lane. **Lo que iba a destrabarlo quedó atrapado adentro
+de lo que hay que destrabar.** Cuando la carrera se pierde no hay quien empuje a nadie: ni acuse,
+ni pantalla nueva. Por eso el rojo, y por eso el reflejo tampoco llega.
+
+Eso explica las tres cosas que el encargo pedía explicar: **por qué es un test distinto cada vez**
+(hay 10 candidatos y la carrera cae en cualquiera), **por qué depende de la primera visita a la
+ruta** (ahí el árbol tarda más y el ping llega antes de tiempo), y **por qué desaparece corriendo
+el spec solo** (menos carga, el árbol resuelve antes del ping).
+
+### 6 · Lo que corrige de P26
+
+P26 leyó el call log (`waiting for …/manual/m6 navigation to finish`) y concluyó que el aserto
+llegaba tarde a un cartel que una navegación concurrente se llevaba puesto, y dejó abierta la
+pregunta que decidía de quién era el defecto: *«si el toast se pierde para el test, ¿se pierde
+también para el setter?»*. **Sí.** Y no porque una navegación lo tape: porque no se emite.
+
+También corrige el consuelo de P28 —«el acuse dura 4 s y el reflejo llega justo cuando se va, así
+que el humano lo alcanza a leer; el que no lo alcanza es el test»—. Eso vale cuando el cartel se
+monta. Cuando la carrera se pierde, el humano tampoco tiene nada que leer.
+
+**Salvedad honesta, medida:** bajo test el cartel casi nunca se autocierra a los 4.000 ms — sigue
+visible a los 14 s en 6 de 6 pasadas con freno, y en 4 de 6 sin freno. Sonner pausa su temporizador
+cuando la ventana no tiene foco, así que **el empujón de 4 s que P30 midió como lo único que
+destraba el árbol no está ocurriendo bajo test**. Eso no cambia el hallazgo de este sprint (el
+cartel que no se monta no puede empujar nada), pero sí toca la decisión abierta sobre el empujón
+deliberado, y conviene medirlo con foco antes de apoyarse en ese número.
+
+### 7 · Cuarentena: marcados, no aflojados
+
+**Ningún test se borró, se salteó ni se aflojó. `git diff` sobre los dos archivos de test: ninguna
+línea de código, sólo comentarios** (verificado filtrando el diff). Los 8 asertos de `expectToast`
+de `01-flow` siguen textuales.
+
+- La marca de P26 sobre B4 se reescribió con el diagnóstico medido, la reproducción y la razón por
+  la que no se toca.
+- B1, B3 y B8 llevan ahora una marca de dos líneas que apunta a esa.
+- `tests/helpers/setter-ui.ts` — el helper `expectToast` lleva la nota central: subirle el
+  `timeout` no lo arregla, y envolver el aserto taparía el único síntoma que hoy denuncia el
+  defecto.
+- `tests/perf/carrera-del-cartel.spec.ts` — el instrumento queda, para que el sprint que lo retome
+  no lo re-descubra.
+
+**Firma para reconocerlo:**
+
+```
+Locator: locator('[data-sonner-toast]').filter({ hasText: /…/i })…
+Expected: visible — Error: element(s) not found
+Call log:
+  - waiting for ".../manual/mX" navigation to finish...
+  - navigated to ".../manual/mX"
+```
+
+Reproducción: `npx playwright test --config=playwright.perf.config.ts carrera-del-cartel` (server
+nuevo por corrida) — 3 de 3 dieron una roja con `EN BASE: SÍ` y `carteles (0)`. Contra server
+tibio: 6 de 6 verdes.
+
+### 8 · Lo que queda para la verificación humana
+
+**La decisión es de producto y es de Franco.** El defecto: hay un camino real en que el setter
+aprieta, el servidor persiste y la pantalla no dice nada. La familia es exactamente la que P25
+arregló para los tildes, y ahora tiene un sprint propio esperando.
+
+Lo que ese sprint tiene que resolver, con lo medido acá: **sacar el `toast` del `startTransition`**
+—hoy el acuse depende de que commitee el mismo lane que el acuse tenía que despertar—. P29 probó
+cuatro empujones y los cuatro fallaron, pero los cuatro disparaban DENTRO de la ventana de la
+carrera (P30 midió que el umbral está entre 800 y 1.100 ms); emitir el acuse **fuera** de la
+transición no se probó todavía.
+
+Y el corolario que el encargo pedía escribir, más grave de lo que anticipaba: el mecanismo del
+reflejo no sólo le cuesta cuatro segundos al setter y confianza a la suite. **A veces le cuesta el
+acuse entero**, y el rojo intermitente que cinco sprints trataron como ruido de infraestructura era
+la única alarma que había.
+
+## P34 · El acuse no muere en el lane — muere con el documento — 2026-09-09
+
+**FRENADO, y con el producto intacto.** El Paso 1 se construyó, se midió y **no movió el
+número**: 2 de 6 pasadas perdían el acuse antes, 2 de 6 lo perdían después. Al medir por qué,
+la causa que el encargo daba por sentada quedó **refutada**. Cero líneas de producto
+shippeadas — `git diff` sobre `src/` vuelve exactamente al WIP con el que arrancó la sesión.
+
+### 0 · Terreno
+
+| | |
+|---|---|
+| HEAD | `4f8c00a2` — *P28: un render de servidor por acción* |
+| Rama | `p25/rafaga-tildes` |
+| Worktrees | 28 al arrancar · **28 al cerrar** (ninguno propio) |
+| Stashes | 2 — **no tocados** |
+| Disco | 31 GB libres de 925 GB al arrancar |
+| Procesos node ajenos | 6, censados por PID (9196, 12528, 16244, 26708, 31100, 47116) — no tocados |
+| Build/puerto propios | `E2E_DIST_DIR=.next-perf`, puerto 3005, servidores levantados y bajados **por PID** |
+| Gates al arrancar | `tsc` exit 0 · invariantes **57/57** (58 descubiertos, 1 excluido declarado) · `migrate status` sin drift |
+| Gates al cerrar | `tsc` exit 0 · invariantes **57/57** · `next build` exit 0 |
+
+### 1 · Las dos verificaciones de la Fase 1
+
+#### 1.1 · La contradicción: **las dos tenían razón, sobre preguntas distintas**
+
+P30 §3 lista «el acuse fuera de la transición (`setTimeout(…, 0)`)» entre las cuatro
+refutadas. P33 §8 dice que emitirlo fuera de la transición «no se probó todavía». Resuelto
+yendo a la evidencia de las dos:
+
+- **Las cuatro de P29 existen sólo como afirmación en un docstring**
+  (`tests/perf/commit-del-arbol.spec.ts:58-69`). No hay tabla de mediciones: ni en la spec,
+  ni en `docs/perf-p29/`, y P30 dice textual «Refutadas por P29, **no repetidas**».
+- **El criterio era otro.** P29 las juzgó por «¿hizo commitear el árbol?» — textual:
+  *«Ninguno hizo commitear el árbol»*. Nunca preguntó «¿llegó el acuse?». De hecho su propia
+  medición anota **el acuse apareciendo a los 1.347 ms** con el árbol congelado para siempre.
+- **Y el sujeto era otro.** Verificado contra la lista de archivos del parche de 78 KB:
+  `src/lib/use-step-action.ts` **no está en `acuse-en-pantalla.patch`**. El parche
+  *reemplazaba* `successToast:` por `onSuccess: () => acusar(...)` — un `<AcuseAccion>` en
+  pantalla, **sin ningún `toast` en el build**. P29 nunca sacó `toast.success` de la
+  transición: lo eliminó.
+
+**Conclusión: no era el mismo experimento**, y el sprint no llegaba muerto. Pero el hallazgo
+de P29 sí valía como restricción y se lo tomó como tal: mover el acuse no iba a arreglar el
+reflejo.
+
+#### 1.2 · El temporizador: **P33 nombró mal el mecanismo, y el efecto no reproduce**
+
+P33 anotó que sonner «pausa su temporizador cuando la ventana no tiene foco». Leído en el
+sonner instalado (2.0.7), el mecanismo es otro:
+
+```
+dist/index.mjs:605   if (expanded || interacting || isDocumentHidden) pauseTimer()
+dist/index.mjs:109   const useIsDocumentHidden = () => { … document.hidden … 'visibilitychange' }
+```
+
+Es **`document.hidden`** — la Page Visibility API —, **no el foco de ventana**. Son cosas
+distintas: una ventana puede perder el foco del sistema operativo y seguir visible.
+
+Medido con la sonda `tests/perf/fase1-visibilidad.spec.ts`, 6 pasadas × 841 muestras =
+**5.046 muestras**, dos brazos (con y sin `bringToFront` + `window.focus()`):
+
+| | sin foco (3) | CON foco (3) |
+|---|---|---|
+| `document.hidden` | **false en el 100 %** | **false en el 100 %** |
+| `document.hasFocus()` | **true en el 100 %** | **true en el 100 %** |
+| ¿el cartel se autocierra? | **sí, 3/3** | **sí, 3/3** |
+| vida del cartel | 4.200 · 4.200 · 4.183 ms | 4.197 · 4.184 · 4.198 ms |
+| reflejo (`tildeOk` 0→3) | 5.566 · 4.716 · 4.731 ms | 4.708 · 4.659 · 4.705 ms |
+
+**El modelo de P30/P31 VALE bajo prueba.** El empujón de 4 s sí ocurre: el reflejo cae
+siempre ~180 ms antes de que el cartel salga del DOM — que es exactamente el `deleteToast()`
+commiteando y el elemento quedándose su animación de salida. Los dos brazos son
+indistinguibles porque **la página de Playwright ya está visible y con foco**: no hay
+condición «sin foco» contra la cual contrastar.
+
+Lo que no reproduce es la salvedad de P33. No es frenada: el mecanismo se comporta **como lo
+documentado por P30/P31**, que es lo que las mediciones de este sprint necesitaban.
+
+### 2 · El defecto, reproducido antes de tocar nada
+
+`carrera-del-cartel`, 3 corridas con server nuevo cada una, 2 pasadas cada una:
+
+| corrida | rojas | firma |
+|---|---|---|
+| 1 | 0 / 2 | — |
+| 2 | 1 / 2 | `carteles (0)` · 842 muestras · **EN BASE: SÍ** |
+| 3 | 1 / 2 | `carteles (0)` · 841 muestras · **EN BASE: SÍ** |
+
+**2 de 6.** (P33 midió 3 de 3; es una carrera y la tasa cae donde cae.)
+
+### 3 · El Paso 1, construido y medido: **no movió el número**
+
+Se construyó `src/lib/acuse.ts` —mismo API que sonner, emisión diferida a un macrotask— y se
+cambió el import en los 13 archivos de la superficie del setter (una línea por archivo, diff
+verificado). Compiló, `tsc` exit 0, build verde.
+
+`carrera-del-cartel`, otra vez 3 corridas con server nuevo:
+
+| | antes | después |
+|---|---|---|
+| pasadas que **pierden el acuse** | **2 / 6** | **2 / 6** |
+
+Idéntico. Y las dos pérdidas de después, con la misma firma: `carteles (0)`, `EN BASE: SÍ`.
+
+### 4 · EL HALLAZGO: el acuse no se pierde, **no se ejecuta**
+
+Se instrumentó la cadena entera —etapas de `run()` y contadores de emisión, todo por
+`sessionStorage` porque este camino cruza navegaciones duras— y se midió la **hora de
+nacimiento de cada documento**.
+
+En las pasadas que pierden el acuse:
+
+```
+documentos: [0ms top arrancar | 704ms top …/manual | 2206ms top …/manual/m15]
+etapas de run(): [despacho+1554ms | dentro-transicion+1554ms]
+acuse pedido: NO · carteles=0 · EN BASE: SÍ
+```
+
+`run()` entra en la transición a los 1.554 ms. **`await action()` nunca vuelve.** No hay
+`resuelta:`, no hay `post-onSuccess`, no hay `pidio-exito`. El `toast.success` **nunca se
+llama**. Y a los 2.206 ms **nace un documento nuevo**.
+
+**El discriminador, 21 de 21 pasadas:**
+
+| | último documento | acuse |
+|---|---|---|
+| pierde (5) | **después** del despacho | **NO se pide** |
+| llega (16) | **antes** del despacho | sí |
+
+Sin una sola excepción, en tres corridas independientes. Todos los documentos son `top`
+(`window.top === window.self`) — no son iframes.
+
+**La cadena real:**
+
+1. `/setter/leads/{id}` → `redirect()` de server component (`page.tsx:23`) → `/manual`
+2. `/manual` → `redirect()` de server component (`manual/page.tsx:21`) → `/manual/m{n}`
+3. Cada salto **nace como documento nuevo** — contexto JS nuevo, `addInitScript` corriendo de
+   cero.
+4. Playwright clickea apenas el botón es accionable, que puede ser sobre el documento
+   **intermedio** (`…/manual`), porque esa pantalla ya dibuja el control.
+5. La action sale, el servidor **persiste**.
+6. El último salto aterriza y **se lleva puesto el documento** con la promesa en vuelo
+   adentro.
+7. La continuación —`onSuccess` y el acuse— no corre nunca.
+
+### 5 · Qué refuta
+
+- **La causa del encargo, refutada.** *«El acuse es una actualización de ese lane: si no
+  commitea, el cartel no se monta»*. No: el cartel **no se pide**. Está aguas abajo de una
+  promesa cuyo contexto se destruyó.
+- **P33 §5, refutado.** Misma atribución al lane suspendido, con la misma consecuencia.
+- **Y P33 se refutó a sí mismo al revés:** su «explicación de repuesto» —que el clic cayera
+  sobre un árbol que la cadena iba a reemplazar— **era la correcta**. La descartó midiéndola
+  con freno de CPU ×6, donde la cadena siempre termina antes del clic. Sin freno, y con
+  server frío, el último salto llega tarde. Lo que sí hay que corregirle a P33 es la
+  conclusión que sacó de esa rama: la llamó «defecto del TEST · el clic se perdió». **El clic
+  no se perdió: entró, y el servidor lo guardó.** Lo que se perdió es el acuse.
+- **Por eso fallaron los cuatro empujones de P29 y el de este sprint.** Ninguno podía
+  funcionar: todos viven en la continuación que nunca corre.
+
+### 6 · Por qué no se shippeó igual
+
+`acuse.ts` compilaba, no rompía nada y era defendible en abstracto. No se shippeó porque:
+
+1. **No mueve el número que el sprint existe para mover** — 2/6 antes, 2/6 después, medido.
+2. **Habría dejado escrito un modelo equivocado** en un docstring prominente y en un
+   invariante nuevo, justo sobre el mecanismo que este sprint acaba de refutar. Esa es la
+   forma exacta de falso verde que este repo ya pagó varias veces.
+
+El módulo descartado queda en `docs/perf-p34/acuse.ts.descartado.txt` por si el diagnóstico
+cambia.
+
+### 7 · Qué se tocó
+
+- **Producto: nada.** `git diff` sobre `src/` vuelve al WIP de inicio; en
+  `use-step-action.ts` el diff son **sólo líneas de comentario** preexistentes, cero código.
+- **Nuevo, todo instrumento:** `tests/perf/fase1-visibilidad.spec.ts`,
+  `tests/perf/p34-donde-muere-el-acuse.spec.ts`,
+  `tests/perf/p34-entrada-dura-vs-blanda.spec.ts`, y `docs/perf-p34/` con las corridas crudas.
+- **Ninguna prueba borrada, salteada ni aflojada.** La cuarentena de P33 queda como estaba:
+  **no se desmarcó nada**, porque el defecto que la justifica sigue vivo.
+- Servidores por PID; ningún worktree creado ni destruido; nada pusheado.
+
+### 8 · Lo que queda para la verificación humana
+
+**La decisión es de producto y es de Franco.** El defecto está localizado y es distinto del
+que se creía:
+
+> Un salto de la cadena de redirecciones que aterriza con una action en vuelo destruye el
+> documento y con él el acuse. El trabajo queda guardado; el setter no se entera.
+
+Tres caminos, y no son intercambiables:
+
+1. **Que la cadena no haga navegación dura.** Ataca la causa. Es el más limpio y el que
+   además debería acelerar la entrada al lead. Es una decisión de routing.
+2. **Que el control no se dibuje hasta que la ruta canónica esté asentada.** Ataca la
+   ventana, no la causa. Barato.
+3. **Que el acuse sobreviva al cambio de documento** (persistirlo y re-emitirlo). Es el más
+   caro y el más riesgoso: emitiría un acuse sobre un resultado que el cliente nunca vio,
+   contra la regla de que un acuse sobre algo que después falla es peor que ninguno.
+
+**La pregunta abierta que decide el alcance, y que NO medí:** un setter real entra con
+`router.push()` desde «Trabajar» (`trabajar-lead-button.tsx:32`), que es navegación **blanda**.
+Si con entrada blanda no nace un documento, esto sólo alcanza a quien llega por **F5, marcador
+o deep link** sobre la raíz del lead — que existe y es alcanzable, pero es otra frecuencia. El
+intento de medirlo no encontró el botón «Trabajar» en el panel para un lead en
+APROBADA/RESPONDIO y se descartó en vez de dejarlo a medias. El control por URL canónica se
+corrió (12 pasadas) y salió **inconcluso**: no hubo pérdidas en ninguno de los dos brazos, así
+que no discrimina.
+
+### 9 · Lo que este sprint NO hizo, y por qué
+
+Los Pasos 3 y 4 no se ejecutaron, y no por falta de tiempo: **el Paso 1 no produjo un cambio
+que shippear**, así que no hay prueba nueva que demostrar fallando contra él, ni invariante
+que enseñarle un mecanismo nuevo, ni recorrido de las 17 que verificar sobre algo distinto de
+lo que ya corre. Escribir esa red alrededor de `acuse.ts` habría sido escribir la red del
+modelo equivocado. Las tres suites (194 · 41 · 28) tampoco se re-corrieron: con el diff de
+producto vacío, su resultado es el de la sesión anterior, y correrlas sólo habría vuelto a
+tirar los dados del flake que este sprint acaba de explicar.
+
+---
+
+## P35 · El alcance — el defecto no vive en el camino del setter — 2026-09-11
+
+**Probe de MEDICIÓN, y el producto quedó intacto.** No se arregló nada, no se recomienda un
+camino, y no se concluye que el defecto no importe. `git diff` sobre `src/` vuelve exactamente
+al WIP con el que arrancó la sesión: md5 `11986102e79daf9e07f7c8421eef6551` antes y después.
+Reporte completo y datos crudos en `docs/perf-p35/`.
+
+### 0 · Terreno
+
+| | |
+|---|---|
+| HEAD | `4f8c00a2` — *P28: un render de servidor por acción* |
+| Rama | `p25/rafaga-tildes` (sin tocar) · worktree propio `p35/alcance-entrada` |
+| Worktrees | 28 al arrancar → 29 durante → **28 al cerrar** |
+| Stashes | 2 — **no tocados** |
+| Disco | 29 GB libres de 925 al arrancar |
+| Procesos node ajenos | 6, censados por PID (9304, 11660, 26776, 8692, 14284, 27064) — no tocados |
+| Build/puerto propios | `E2E_DIST_DIR=.next-p35`, puerto 3007; servidores bajados **por PID del socket** |
+| Build | `npm run build` **exit 0** |
+| Pasadas | **60** — 48 de alcance + 6 de control positivo + 6 de reproducción; más 6 de costeo |
+
+**Pozo del camino, anotado:** `npx next build` **falla** en un worktree con `node_modules`
+junctioneado — Turbopack rechaza el junction («*Symlink [project]/node_modules is invalid, it
+points out of the filesystem root*»). El script del repo es `next build --webpack` y anda.
+Regla: en worktree va `npm run build`, nunca `npx next build`.
+
+### 1 · El instrumento tuvo que probar que sabe dar distinto de cero
+
+El arm del alcance dio **cero acuses perdidos en los ocho caminos**. Un cero así es
+indistinguible de «hoy esta sonda no ve nada» si no se prueba antes que ve. Se hicieron los dos
+controles:
+
+- **Reproducción natural** (la forma exacta de P34: entrada fría a la raíz, sin panel previo,
+  server frío por ronda): **0 de 6**. P34 lo vio 2/6 y 1/3 en esta misma máquina. Es una
+  carrera, y hoy no salió. Se informa así, no como «ya no pasa».
+- **Control positivo FORZADO**, que no depende de la suerte: entrada canónica a m15 (el botón
+  ya está), se despacha, y a los 200/600 ms se fuerza un documento nuevo. **6 de 6 perdieron
+  el acuse**, con la firma exacta de P34 — `[despacho | dentro-transicion]` y nada más, cero
+  carteles en 14 s de muestreo, **y el dato igual escrito en la base**.
+
+**El discriminador de P34 (21/21) se replicó 60/60**: nace documento después del despacho → 6
+pasadas, 6 pierden el acuse. No nace → 54 pasadas, 0 pierden.
+
+### 2 · El censo: los cinco controles apuntan a la RAÍZ, y los cinco son BLANDOS
+
+Cinco controles llevan a un lead desde fuera del manual, todos a `/setter/leads/[id]` y ninguno
+a la canónica: foco (`foco-surface.tsx:90`), fila de cola (`trabajar-lead-button.tsx:31`),
+novedades (`novedades-abrir-foco.tsx:47`), cartera (`home-sections.tsx:69`, único `<Link>`) y
+alta (`nuevo-prospecto-form.tsx:98`). Cuatro `router.push`, un `<Link>`, cero `window.location`.
+
+La sonda lleva **dos series**: nacimientos de documento (`addInitScript`, una vez por
+documento) y timeline de `pathname` por `rAF`. Un cambio de ruta sin documento nuevo es blando.
+Sin las dos, «`<Link>` ⇒ blando» era una deducción — y la raíz encadena dos `redirect()` de
+servidor aguas abajo.
+
+**El mismo tramo de URLs, las dos formas de llegar:**
+
+```
+C · cola (blanda)   documentos: +0ms /setter
+                    rutas:      +5ms /setter | +583ms … | +616ms …/manual | +981ms …/manual/m15
+
+A · URL a la raíz   documentos: +0ms /setter | +389ms … | +697ms …/manual | +1705ms …/manual/m15
+    (dura)          rutas:      +7ms /setter | +408ms … | +715ms …/manual | +1711ms …/manual/m15
+```
+
+En el duro, las dos series coinciden uno a uno. En el blando, el pathname recorre los mismos
+tres destinos y **la serie de documentos no se mueve**.
+
+### 3 · EL NÚMERO: **0 de 30**
+
+Un setter que entra por el camino real —foco, cola, cartera, novedades, franja, seis pasadas
+cada uno, server frío por ronda— **pierde el acuse en 0 de 30 pasadas**. Y no por suerte: en
+los cinco hay **un solo documento**, nacido antes del clic. No hay nada en vuelo que pueda
+matar la promesa.
+
+Conteos invariantes en las seis rondas: A=4 documentos · B..F=**1** · G=2 · H=2.
+
+**El margen** (`despacho − último documento`) dice por qué no es cuestión de milisegundos sino
+de forma: B..F entre **+984 y +2954 ms**, A entre **+190 y +612 ms**. A es el único camino con
+**cadena** — tres documentos en fila — y por eso el único donde el margen puede darse vuelta.
+
+**Qué cambia:** la urgencia. El defecto **no es del camino principal**; queda acotado a **F5,
+marcador y deep link sobre la raíz**. **Qué no cambia:** que existe, y que esos son caminos
+reales de un setter, no artefactos de test. **Y explica el rojo de las suites:** las pruebas
+entran con `page.goto()` a la raíz, el único camino con cadena. Ven el defecto porque entran
+por donde el setter casi nunca entra.
+
+### 4 · El hallazgo que trabó al intento anterior: hay un estado sin camino desde el panel
+
+Contra la cartera real de `setter-qa` (**172 leads**), un lead `APROBADA` + `RESPONDIO` +
+`finalUrl` —el que aterriza en m15, la pantalla del acuse— entra a `grupos.trabajar`
+(`flow.ts:440`) pero con `trabajoTier = CONTACTAR_CON_DEMO (2)`, debajo de `CONSTRUIR (0)` y
+`ESPERA_TU_ACCION (1)`: con el tope de 5 (`cola.ts:38`) **no llega al foco ni a ninguna fila**.
+Sólo se alcanza desde la **cartera** (colapsada por default, `cartera-view.tsx:42`) y desde
+**Novedades**.
+
+Eso es lo que trabó a P34 («no encontró el botón»): no era el selector, **el control no está**.
+Para medir igual el foco y la cola sin inventar un camino, el probe usa los dos mecanismos que
+el producto ya tiene para ordenar —el `pinned` (`flow.ts:771`) y el **sticky** del foco
+(`foco.ts:61`, la cookie que escribe `anclarFoco()`, la misma action que corren los dos
+botones)—. Ninguno cambia el control ni la navegación. *(El pin solo no alcanzaba: la cartera
+de QA ya trae leads pinchados que se quedan con el foco.)*
+
+### 5 · Los cuatro caminos re-costeados — y una hipótesis barata que se midió y FALLÓ
+
+**Camino 1 (que la cadena no sea dura).** Tenía una implementación candidata de dos archivos:
+cada escalón de la cadena tiene un `loading.tsx`, que obliga a Next a flushear el shell antes
+de llegar al `redirect()` — con los headers mandados el redirect no puede ser un 307. Se
+sacaron los dos, rebuild `exit 0`, misma sonda, mismo arm frío:
+
+| | documentos | margen peor | `hastaBoton` mediana | peor |
+|---|---|---|---|---|
+| CON `loading.tsx` | **3** | +170 ms | 1208 ms | 2928 ms |
+| SIN `loading.tsx` | **3** | +185 ms | 1351 ms | 2969 ms |
+
+**Sin cambio, y la latencia no mejora.** El `loading.tsx` **no** es la causa. Camino 1 queda
+**sin implementación conocida**: de dónde sale la dureza en Next 16 no está aislado, y aislarlo
+es un probe propio. Las alternativas que quedan son caras (que la raíz renderice en vez de
+redirigir pierde la URL canónica por paso; el rewrite en middleware necesita la base; apuntar
+los enlaces del panel a la canónica no toca el F5 ni el marcador, que es el caso que queda).
+
+**Camino 2 (que el control no se dibuje hasta que la ruta asiente).** Hay señal honesta
+—`usePathname()` contra la canónica, sin timeout mágico—, pero **en las 12 pasadas de entrada
+dura el botón nunca apareció antes del último documento** (margen positivo 12/12). Protegería
+de una condición que acá no se observó; la roja de P34 sí la tuvo, y **sobre qué documento
+estaba dibujado ese botón no quedó aislado**. Toca 10 call-sites de `useAccionPrincipal`, y
+vuelve condicional la barra fija que P18 puso para que la acción esté siempre a la vista.
+
+**Camino 3 (que el acuse sobreviva al documento).** El módulo de P34 ya medido no mueve el
+número (2/6 → 2/6): el problema no es cuándo se programa el cartel, es que la continuación
+nunca corre — este probe lo confirma desde el otro lado (`run()` muere en `dentro-transicion`).
+Lo que haría falta es anotar la intención **antes** del despacho y emitirla en el documento
+siguiente, o sea **acusar sin haber visto la respuesta**. Acá el servidor persistió 60/60
+(incluidas las 6 que perdieron el acuse), pero eso es una observación, no una garantía: un
+error del servidor da el mismo silencio y el acuse mentiría. Superficie: 18 `successToast`, 15
+usos de `useStepAction`. Cubre el acuse; **no cubre el reflejo**.
+
+**Camino 4 (no arreglarlo y documentarlo con cuarentena).** Cero producto. No cubre nada del
+defecto: cubre la **confusión** — que el próximo rojo de `expectToast` en B1/B3/B4/B8 se lea
+como conocido y nadie afloje el aserto, que es lo único que hoy lo denuncia. La cuarentena
+tiene que decir el aporte de este probe: **las pruebas lo ven porque entran por donde el setter
+casi nunca entra.** Deja afuera el F5, el marcador y el deep link, que son reales.
+
+### 6 · Lo que este probe NO puede afirmar
+
+- Que el defecto «ya no pasa»: la reproducción natural dio 0/6 hoy y P34 dio 2/6 acá mismo.
+- Sobre qué documento estaba dibujado el botón en las pasadas que P34 perdió — el mecanismo que
+  decide si el Camino 2 sirve.
+- El alcance en otras pantallas: se midió **una** acción (m15). Hay 15 usos de `useStepAction`.
+- El alcance con otra latencia: los márgenes son de esta máquina.
+
+**Qué queda para la verificación humana:** elegir el camino con el alcance a la vista. Hoy la
+decisión se tomaría sin saber si el defecto toca al setter o sólo a las pruebas, y esa
+diferencia cambia cuál de los cuatro es el correcto.
+
+---
+
+## P36 · El orden de la cola — cuatro de seis niveles son inalcanzables — 2026-09-12
+
+**FRENADO en la Fase 1, por dos de las tres condiciones del sprint.** No se tocó una línea de
+runtime. Lo que sigue es la medición, el orden propuesto y la decisión del tope planteada.
+
+### 1 · Lo que se midió
+
+Cartera de `setter-qa` — **224 leads** hoy (172 cuando P35 anotó el hallazgo; la serie del mismo
+setter es 76 → 78 → 84 → 172 → 224). El instrumento lee el tier a través de `motivoOrden`
+(`flow.ts:611`), traducción 1:1 del `trabajoTier` real: re-derivar el criterio en el script
+habría medido una copia y no el producto.
+
+| | |
+|---|---|
+| `grupos.trabajar` | **179**, los 179 con `accionable === true` |
+| cola visible (`TOPE_COLA = 5`, `cola.ts:38`) | **5** |
+| ocultos | **174** |
+
+Confirmado operando `/setter` en build de producción: chip `179 para trabajar`, pie
+`Quedan 174 más para trabajar, en tu cartera.`
+
+| Nivel | n | Primera fila que ocuparía | ¿Llega? |
+|---|---|---|---|
+| PIN | 2 | 1 | ✓ |
+| 0 `CONSTRUIR` | 75 | 3 | ✓ |
+| 1 `ESPERA_TU_ACCION` | 19 | 78 | ✗ |
+| 2 `CONTACTAR_CON_DEMO` | 5 | 97 | ✗ |
+| 3 `EVALUAR` | 68 | 102 | ✗ |
+| 4 `CONTACTO_SIN_DEMO` | 10 | 170 | ✗ |
+
+**El hallazgo era más chico que el defecto.** No es que el aprobado-con-link caiga en el tier 2
+y no entre: es que **cuatro de los seis niveles son inalcanzables por construcción**. La cola de
+hoy es 2 PIN + 3 `CONSTRUIR` y no llega a nada más.
+
+### 2 · El control: no es el volumen, es el mecanismo
+
+Los 179 accionables **no sirven para decidir nada**: 165 son artefactos de suites
+(`SMOKE-SETTER`, `M0-GAL`, `CORRIDA`) que las corridas dejaron y nadie limpió. Medido otra vez
+sin ellos — 28 leads, 12 accionables, **7 ocultos**:
+
+| | 1 | 2 | 3 | 4 | 5 | Inalcanzables |
+|---|---|---|---|---|---|---|
+| completa (179 acc.) | PIN | PIN | T0 | T0 | T0 | T1, T2, T3, T4 |
+| sin artefactos (12 acc.) | PIN | PIN | T0 | T1 | T1 | **T2, T3, T4** |
+
+Con doce accionables y siete ocultos el lead del hallazgo **sigue afuera** y siguen tres niveles
+sin llegar. El defecto no es del volumen.
+
+### 3 · La causa
+
+`ordenFoco` (`flow.ts:770-776`) es un **orden total estricto** y la cola corta duro en 5. El
+primer nivel con cinco o más leads consume la cola entera: lo de abajo no es improbable,
+es **inalcanzable**.
+
+Y arriba está el nivel más poblado del embudo por naturaleza. Censo sobre todos los dossiers:
+
+| | n |
+|---|---|
+| `BRIEF` + `CONSTRUCCION` → `CONSTRUIR` | **67** |
+| `APROBADA` + `finalUrl` + sin enviar → `CONTACTAR_CON_DEMO` | **6** |
+| ratio | **11,2 ×** |
+
+El embudo se angosta hacia la reunión: muchos construyendo, pocos listos para mandar.
+**Se puso arriba el tier abundante.**
+
+### 4 · Dónde está hoy el lead del hallazgo
+
+`QA-W Aprobada Gate Abierto` (`RESPONDIO` + `APROBADA` + `finalUrl`, sin enviar), medido en la
+app: **no** está en el foco, **no** en la cola, **no** en novedades (0 filas en
+`OsSetterNotice`), y en el DOM del panel hay **0 nodos** — el único match del nombre era el
+payload RSC dentro de un `<script>`. Se llega con **1 clic** («Ver toda la cartera») y
+**1,6 pantallas** de scroll.
+
+**Y ahí aparece una divergencia entre las dos superficies:** en la cartera el mismo lead está
+**9º de 187**, porque la cartera ordena con `filtrarYOrdenarCartera` → `ordenUrgencia`
+(respondió → caliente → antigüedad) y no con `trabajoTier`. La superficie secundaria lo pone
+noveno; la principal, en el puesto 97. El criterio viejo acierta donde el nuevo entierra.
+
+### 5 · El orden propuesto (NO implementado — es de Franco)
+
+Por distancia a la reunión, contada en pasos de producto:
+
+| Posición | Tier | Fundamento medido |
+|---|---|---|
+| 0 | `CONTACTAR_CON_DEMO` ⬆ (de 2) | A **un paso** de la reunión, con los 30 min de la demo ya gastados y el negocio respondiendo. Y **escaso por naturaleza** (6 en el sistema): arriba no puede monopolizar. |
+| 1 | `ESPERA_TU_ACCION` = | Su rama más cara también está a un paso (demo enviada + toque vencido). |
+| 2 | `CONSTRUIR` ⬇ (de 0) | **Lo que baja.** A 4 pasos y **11,2× más poblado**: arriba monopoliza por construcción. |
+| 3 | `EVALUAR` = | Nada pago todavía; puede morir en el filtro. |
+| 4 | `CONTACTO_SIN_DEMO` = | El paso no depende del setter. |
+
+Esto revierte en parte una decisión deliberada de P8 (`flow.ts:709-723`), que puso `CONSTRUIR`
+primero porque «es el trabajo que produce valor y el que antes no se sugería». Ese razonamiento
+sigue en pie; lo que P8 no contemplaba es que el tier más poblado en la cima vuelve inalcanzable
+a todo lo demás.
+
+### 6 · Y el reorden solo NO alcanza — medido
+
+| | 1 | 2 | 3 | 4 | 5 | Resultado |
+|---|---|---|---|---|---|---|
+| hoy | PIN | PIN | T0 | T0 | T0 | T1·T2·T3·T4 inalcanzables |
+| con T2 arriba | PIN | PIN | T2 | T2 | T2 | **`CONSTRUIR` inalcanzable** |
+
+Se cambia quién monopoliza, no la monopolización.
+
+### 7 · El tope: la tercera salida de la tabla
+
+**Un tope fijo es el mecanismo equivocado** — y no por la razón que la tabla anticipaba (que los
+accionables varíen por día), sino porque **un orden total cortado en N hace que el primer nivel
+con N leads consuma la cola entera**. Con 12 accionables ya pasa.
+
+Propuesto, a decidir: **representación por nivel** — una fila reservada por nivel poblado,
+recorriendo los niveles en el orden de arriba, y las filas sobrantes repartidas por ese mismo
+orden. Con 5 filas y 6 niveles quedaría PIN · CONTACTAR · ESPERA · CONSTRUIR · EVALUAR, y el
+único que no entra es `CONTACTO_SIN_DEMO`, el que menos rinde. Ningún nivel queda inalcanzable
+—que es el defecto medido— y el tope vuelve a significar lo que dice `cola.ts:29-37`: cuánto se
+lee de un vistazo, en vez de decidir en silencio qué clases de trabajo no existen.
+
+### 8 · Por qué se frenó
+
+Dos de las tres condiciones del sprint se cumplen:
+
+- **«La cantidad de accionables supera tanto al tope que reordenar no alcanza»** — probado con la
+  simulación: cualquier orden total estricto deja niveles enteros afuera.
+- **«El orden actual es correcto y el problema es otro»** — parcialmente: el orden no está
+  «mal», está incompleto como mecanismo. El problema es la forma del orden, no sus posiciones.
+
+Cambiar el mecanismo cambia qué ve el setter al abrir el día, y el orden es criterio comercial.
+Las dos son de Franco.
+
+### Anotado, no hecho
+
+- **La cartera de QA acumula semillas de cada corrida** — 165 de 179 accionables son artefactos.
+  Higiene de la DB de QA; fuera de scope.
+- **`OsSetterNotice` no cubre «demo aprobada con link»** — 4 de los 5 leads de ese tier no tienen
+  aviso. Hoy la única superficie que los nombra es la cartera.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** (58 descubiertos, 1 excluido) · `test:setter` **194/194**
+(8,3 min, sin flake) · `test:leados` **41/41** · `test:helpers` **28/28** · `build` **exit 0** ·
+`migrate status` **sin drift**.
+
+**Las dos mediciones fijas: sin empeorar — byte-idénticas.** La franja salió con las **28 filas**
+y **196/196 celdas** iguales al baseline de P31; el pliegue con las **28 filas** y **672/672
+celdas** iguales, en las 25 columnas. Cero diferencias incluso en `lead` y `url` (en P31 se
+habían movido dos nombres). Lo único que cambia es el puerto que el JSON registra (3010 → 3001),
+que es del instrumento.
+
+**Cero líneas de runtime.** Lo único que agrega este sprint es `docs/p36-orden-cola/`: la
+medición, la propuesta, las dos capturas del estado actual y los cinco instrumentos como `.txt`.
+Ningún cambio de schema, de transiciones ni de llaves de datos. Ningún test borrado, salteado ni
+aflojado; ningún invariante debilitado. Servidores bajados por PID. Nada pusheado.
+
+**Para la verificación humana:** las tres decisiones del punto 5 y 7 —el orden, el mecanismo y
+el tope—. Y la pregunta de fondo del sprint, que hoy tiene respuesta medida y es que **no**: al
+abrir el panel, lo primero que ve el setter son cinco leads de los dos únicos niveles que la
+cola puede alcanzar.
+
+---
+
+## P37 · La cola por urgencia, y la cartera que se puede medir — 2026-09-12
+
+Reporte completo, capturas e instrumentos en `docs/p37-cola-urgencia/` (`REPORTE.md`). Sin commitear, como
+P29–P36. Nada pusheado.
+
+### 0 · Terreno y base
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 30 GB libres · procesos node
+ajenos (chrome-devtools-mcp, un vite de otro proyecto), no tocados; servidores propios bajados por PID del socket.
+
+**Base: la branch Neon de desarrollo, `ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`** — el único
+host en `.env`/`.env.local`, y cada script de P37 aborta si no es ese.
+
+Fase 0: `tsc` 0 · invariantes 57/57 · `test:leados` 41/41 · `test:helpers` 28/28 · `test:setter` 194/194 ·
+franja 224/224 celdas y pliegue 1062/1062 iguales a P36. **Ninguna de las tres suites deja filas** (259 → 259).
+
+### 1 · La línea
+
+`ordenFoco` (`flow.ts`): `pin || trabajoTier || urgencia` → **`pin || urgencia`**, idéntico al orden «urgencia»
+de la cartera. `trabajoTier` queda como rótulo. Fijados primero; la demo aprobada de la fila 97 a la **4**; salen
+exactamente dos, los dos de `CONSTRUIR` (en la sucia, B4 y B5 como midió P36; en la limpia, `M0-GAL 12` y
+`DEMO Web · Noir Dining`, porque B4/B5 eran siembra); **4 de 6** niveles.
+
+### 2 · El censo
+
+| Categoría | Criterio | Filas | Accionables `setter-qa` | La usa |
+|---|---|---|---|---|
+| `CORRIDA_AUTOMATICA` | `/\d{13}/` en el nombre | 154 | 137 | **nadie** |
+| `QA_CURADA` | `/^QA-/` | 26 | 12 | mediciones fijas (`capturar-franja.ts:115`, `medir-pliegue-manual.ts:477`) |
+| `GALERIA_M0` | `/^M0-GAL /` | 40 | 27 | galería (`captura.spec.ts:122`) |
+| `CORRIDA_MANUAL` | `/^CORRIDA\d* /` | 4 | 1 | recorridos a mano |
+| `DEMO_WEB` | `/^DEMO Web · /` | 6 | 2 | catálogo de demos |
+| `SIN_PREFIJO` | ninguno | 29 | 0 | seed agency-os / chatbot |
+
+Las tres suites **no leen siembra ajena por nombre**: crean todo con `createLead` (`setter-db.ts:269`) y lo
+borran por id en `afterAll`. Los 154 salieron de: `tests/perf/_casos.ts:136` caso `alta`, que **nunca registra
+el lead en el tracker** (51); corridas matadas antes del `afterAll` (50 de perf, 8 de 01-flow, 4 de 18-quinta,
+3 de un usuario huérfano); y `medir-rafaga-progreso.ts:331`, con el teardown fuera de `finally` (38).
+
+**Leads reales: cero** en la cartera de `setter-qa`. Lo más parecido en toda la base son 21 del seed de
+agency-os asignados a Franco y Valentino.
+
+### 3 · El borrado — y la suite que se cayó
+
+Respaldo probado de ida y vuelta antes de confiar en él: borrar (A) → restaurar → borrar (B); **A = B columna
+por columna**, y la cola restaurada idéntica lead por lead.
+
+**Intento 1 (código viejo): `test:setter` 193/194.** Cayó `28-veredicto-y-ciclo` N6. Discriminador con el mismo
+build: cartera limpia → rojo 2/2; **restaurada → verde**. El lead del test entraba a la fila 5 de la cola, la
+cola deduplica sus avisos fuera de Novedades, y el `.first()` agarraba el aviso de otro lead. **N6 pasaba gracias
+a la basura. Se restauró la categoría completa.**
+
+**Intento 2 (código final), protocolo completo:** 259 → **105** (respaldo C, idéntico a A). Por categoría:
+`CORRIDA_AUTOMATICA` 154 → 0; las otras cinco sin cambio. `setter-qa`: 224 → 73 leads, **179 → 42
+accionables**. Después: `test:leados` **43/43** · `test:helpers` **28/28** · `test:setter` **194/194**, y la
+base sigue en 105. Respaldos fuera del repo en `C:\tmp\p37-siembra\`.
+
+La revisión de código (sin CRITICAL/HIGH) pidió tipar la restauración y verificar las seis colecciones del
+respaldo antes de borrar; corregido, y re-probado de ida y vuelta (restaurar C → borrar con respaldo D, **D = A**,
+mismas 105 ids). Por ser otro borrado, las tres suites de nuevo: **43/43 · 28/28 · 194/194**.
+
+**Mecanismo.** Hecho: `scripts/dev/limpiar-siembra-corridas.mts` (ensayo por defecto, solo esta categoría,
+guarda de 120 min por las corridas en curso de otros worktrees, respaldo obligatorio, `--restaurar`).
+Propuesto, no hecho porque toca suites: registrar en el tracker el lead del caso `alta` de perf; `finally` en
+`medir-rafaga-progreso`; un `globalSetup` con la limpieza en las configs de setter y perf para las corridas
+matadas; y un setter propio para N6, que sigue dependiendo de la composición de la cartera.
+
+### 4 · La cola, antes y después, con la cartera limpia (operada a 1440 y 390)
+
+| # | ANTES | DESPUÉS |
+|---|---|---|
+| 1 | QA-W Evaluada Gate Abierto · fijado | QA-W Evaluada Gate Abierto · fijado |
+| 2 | QA-W Brief · fijado | QA-W Brief · fijado |
+| 3 | QA-W Construccion · construir | QA-W Construccion · construir |
+| 4 | M0-GAL 12-m6-brief-abierto · construir | **QA-W Aprobada Gate Abierto · lista para mandar** |
+| 5 | DEMO Web · Noir Dining · construir | **QA-W Rechazada · te toca a vos** |
+
+2 → **4 de 6**. No llegan `EVALUAR` (fila **13**) ni `CONTACTO_SIN_DEMO` (fila **16**). La demo aprobada: antes
+solo en la cartera, sin aviso; ahora fila 4. Un setter sin trabajo: sin cola, «No hay nada para trabajar ahora
+mismo» + «Cargá un prospecto nuevo», igual antes y después. La cola del producto es la cartera en orden
+«urgencia» lead por lead (42/42).
+
+### 5 · Los dos niveles de arranque
+
+Con la urgencia, un lead nuevo y frío entra **al fondo** por construcción (`flow.ts:672-681`). Drenando la cola:
+cartera sucia (179) → `EVALUAR` aparece tras despachar 32 y `SIN_DEMO` tras 35; limpia (42) → tras **8** y
+**11**; vacía → fila 1. **Hoy no seca el embudo de esta cartera** (los 7 de arranque que existen son viejos y
+suben), pero **es estructural**: con cinco o más leads en curso más viejos, uno recién cargado no aparece en la
+cola (hoy, fila 43 de 43). Se arranca por «Cargá un prospecto» o por la cartera, no desde la cola. No se arregló.
+
+### 6 · Accionables reales y el tope
+
+**42**, y siguen siendo semillas (12 QA, 27 galería, 2 demos, 1 corrida manual). **Propuesta: tope 5.** La fila 6
+es otro `CONSTRUIR`; para que lleguen los de arranque haría falta tope 16, una segunda cartera. El tope no es la
+palanca de esos niveles.
+
+### 7 · Tests, demostrados fallando
+
+- `particion.invariant.ts` con `trabajoTier` de vuelta: rojo por «el orden de la cola es la urgencia…»; los tres
+  bloques nuevos, aislados, los tres rojos (la demo cae en la fila 13).
+- `tests/leados/cola-urgencia.spec.ts` (nuevo): P37-1 rojo por «la demo aprobada … entra en la cola de 5». P37-2
+  con `ownedListWhere` sin filtro: rojo **por su aserto de aislamiento**, con el lead ajeno en la **fila 2** de
+  la cola visible — adentro del tope, no escondido por él.
+- `18-quinta` 1a acotado, contra un build con el aprobado sin link invitando a mandarlo: rojo en el aserto de la
+  tarjeta (el positivo que precede a los de ausencia).
+
+### 8 · Pruebas existentes que cambiaron
+
+- **`particion.invariant.ts`**: salen el orden completo de P8 y P8.a (codificaban la decisión revertida); entran
+  el orden por urgencia con fixtures que lo contradicen, cola = cartera sobre 56 leads, el nivel escaso no
+  enterrado y el caliente que sube sin sugerir construir. Pin, premortem, gate y rótulos: intactos.
+- **`18-quinta` 1a**: la ausencia se medía sobre la página y pasaba porque ninguna demo con link llegaba a la
+  cola — el defecto de P36 como precondición. Ahora se mide sobre la tarjeta del lead sin link, con control
+  positivo de que existe y es única.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** · `test:leados` **43/43** · `test:helpers` **28/28** · `test:setter`
+**194/194** (después de borrar) · `build` **exit 0** · `migrate status` **86 migraciones, sin drift**. Franja
+**224/224** y pliegue **1062/1062**, iguales a Fase 0 y a P36. Ningún cambio de schema, transición ni llave de
+datos; ninguna prueba borrada ni salteada; `cola.invariant.ts` y su tope congelado, sin tocar.
+
+**Para la verificación humana:** que la cola muestre lo que harías primero; el tope, con el 42 a la vista; y si
+los niveles de arranque tienen que llegar a la cola — eso decide si el setter empieza leads nuevos desde el panel
+o solo continúa los que ya tiene.
+
+---
+
+## P38 · La premisa de casualidad — el censo, y las que dejaron de depender de la cartera — 2026-09-13
+
+Reporte completo, instrumentos y controles en `docs/p38-premisas/` (`REPORTE.md`). Sin commitear, como P29–P37. Nada
+pusheado. **Cero líneas de producto**: cambiaron siete specs y se sumaron tres instrumentos en `scripts/`.
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 28,9 GB libres · 12 procesos
+`node` ajenos (chrome-devtools-mcp), ningún servidor en 3000–3099 · WIP ajeno anotado (`numstat` + copia) y `src/`
+byte a byte igual al cerrar. `tsc` 0 · invariantes 57/57 · `test:setter` 194/194 · `test:leados` 43/43 ·
+`test:helpers` 28/28 · franja 224/224 · pliegue 1062/1062. Cartera: 105 leads; `setter-qa` **73 / 42 accionables**,
+80 avisos sin leer. Universo: **265 pruebas**, no 263.
+
+### 1 · El censo
+
+Discriminador: ¿la prueba **prepara** el estado del que depende, o lo **encuentra**? Tres vías: forma (lectura de todo
+aserto sobre superficies agregadas, conteos, ausencias sobre la página, `.first()`, configuración global, `if` que
+decide si se verifica), experimento (tres carteras distintas) y dependencia (lectura + **cada prueba corrida sola**).
+
+Descartadas con fundamento: 28 de helpers (sin base), 43 de leados (setter propio; 43/43 solas), 20 de setter con
+setter propio, 145 sobre la pantalla de UN lead (136/136 ids verdes solas). Quedan **29 que tocan lo compartido**:
+
+| | |
+|---|---|
+| **Premisa operante** | **12** — 11 independizadas, 1 declarada |
+| Premisa presente, sin modo de falla práctico | 11 (anotadas con su porqué) |
+| Visitan lo compartido sin afirmar nada de su contenido | 6 |
+
+Las 12: `01-flow` B7 y B10 (el `>= 1` de avisos contaba toda la bandeja de `setter-qa`, que ya traía 3 y 3: el aviso
+de la decisión de Franco no se verificaba) · `28` N6 (el calibre: su lead fuera de la cola por siembra ajena) ·
+`18-quinta` 1b (la presencia la satisfacía la fila 4 de la cola) y 2a (ausencias sobre la página) · `03-cabina` D1
+(con la cartera vacía el foco muestra el nombre y la búsqueda deja de verificarse), D2 (un sobrante de corrida matada
+fija el lead equivocado), D3 (un `if` que salteaba «Saltar») · `19` B1c (dependía del brief que dejó B1b) y **B2**
+(cero agendas de Cal.com en TODA la base: intrínseca, **declarada**) · `17-datos` 1a (ausencia sobre la página) ·
+`02-isolation` C4 (cambio de sesión en la misma página: ver §3).
+
+### 2 · Los experimentos, antes
+
+| Cartera | `test:setter` | Caen de verdad |
+|---|---|---|
+| Menos (73 leads + 80 avisos + 4 metas estacionados, una columna cada uno) | 191/194 · 193/194 | N6 (2/2) · C4 (1/2; 2/3 contando la repetición) · B3 = flake de P33 |
+| Otro orden (`createdAt` espejado; la cola cambia 3 de 5) | 193/194 | ninguna · `26` P21-4 = *strict mode* por streaming, setter propio, fuera de clase |
+| Más (siembra de P37 restaurada: 259 leads) | 194/194 | ninguna |
+
+`test:leados` 43/43 en las tres. Toda escritura con vuelta atrás probada: aplicar → restaurar (**exacta, columna por
+columna**) → aplicar → respaldos idénticos → correr → restaurar exacta; el verificador, contra el experimento
+aplicado, marca 157 diferencias en la columna movida y ninguna más. «Más»: dos borrados con respaldo **= D** de P37,
+las mismas 105 ids al final.
+
+**El experimento encontró dos de las doce.** Las otras diez no se caen con la cartera cambiada: o el dato que las
+rompe no está en la cartera de hoy (se sembró por id y se borró: avisos caducos, un postergado sin fecha, un sobrante de
+corrida, dos agendas), o la premisa no decide si pasan sino **si ven** — y un aserto ciego sigue verde. Esas salen
+cruzando sabotaje con cartera.
+
+### 3 · C4, el hallazgo que no estaba en la lista
+
+Con la cartera vacía, la navegación que el test hace **como B** dibujaba el panel de `setter-qa`. No es un defecto de
+aislamiento: el proxy de Auth.js re-firma la cookie de sesión en cada respuesta, y una respuesta que la página de A
+tenía en vuelo llegaba después de `clearCookies()` y reinstalaba a A. La cartera vacía abría la ventana: el panel
+«Tu cartera está vacía» precarga sus dos enlaces justo en ese instante (5 pedidos contra 1 con la cartera llena).
+Forzado (respuestas de A demoradas 2,5 s): en la misma página B se pierde siempre; en contexto propio, nunca. Arreglo: B
+en su propio contexto de navegador. En el antes la había anotado como «no reproducida»; volvió a caer en la
+repetición, con la captura guardada.
+
+### 4 · Arregladas, con demostración y control
+
+Diez sabotajes reales en tres builds aparte (`.next-perf`, :3006), reemplazo literal de una ocurrencia, fuente con
+md5 idéntico al terminar cada build, servidores bajados por PID, build borrado.
+
+| Prueba | Demostración (vieja → nueva) | Control |
+|---|---|---|
+| B7 · B10 | s2 × cartera: vieja **verde** con la de hoy, roja con la vacía → nueva roja en las dos | s2 (el aviso no se emite) → roja |
+| N6 | cartera vacía: roja → verde (pausada, filas por nombre, control positivo de 2 avisos) | s1 (ninguna orden caduca) → roja |
+| 1b · 2a | dos avisos caducos sembrados: rojas («Received 1») → verdes | s3 (la tarjeta no dice su acción) → rojas; vieja 1b **verde** con s3 |
+| D1 | s4 × cartera vacía: vieja **verde** → nueva roja | s4 (búsqueda con tildes) → roja |
+| D2 | sobrante sembrado: roja (fijó el sobrante) → verde | s5 (el pin no persiste) → roja |
+| D3 | s6: vieja **verde** (el `if` lo salteaba) → nueva roja | s6 (nunca hay próximo) → roja |
+| B1c | sola: roja → verde | s7 (la revisión no nombra el faltante) → roja |
+| 17 · 1a | postergado sin fecha con aviso: roja → verde | s9 (la fecha no viaja) → roja |
+| C4 | cartera vacía: 2/3 rojas → verde; forzado: misma página roja / contexto propio verde | s10 (novedades sin filtro de destinatario) → roja |
+| **B2 (declarada)** | dos agendas sembradas: roja **con la premisa y el conteo en el mensaje**; la vieja, roja sin pista | s8 (vuelve la jerga) → roja |
+
+**Ninguna tapaba un defecto de producto**: cada arreglada pasó primero contra el build limpio. Lo tapado era la
+capacidad de detectar.
+
+### 5 · El experimento, después
+
+| Cartera | antes | **después** |
+|---|---|---|
+| Menos | 191 · 193 · 193 /194 | **194/194 · 194/194** |
+| Otro orden | 193/194 (flake de streaming) | **194/194** |
+| Más | 194/194 | **194/194** |
+
+`test:leados` 43/43 en las tres. **No cae ninguna.** La declarada, por nombre: **B2**, verde en las tres porque su
+premisa vive en `Organization`, no en la cartera; con dos agendas sembradas cae diciendo su premisa. Vueltas exactas;
+105 leads y las mismas 105 ids que en Fase 0.
+
+### 6 · Anotado, no hecho
+
+- **Quinta fuga de siembra**: `07-admin-assign-caliente` G1 deja un `LEAD_REASIGNADO_SALIENTE` en `setter-qa` por
+  corrida (`leadId: null` por diseño; el teardown no lo alcanza): 73 antes del sprint, 85 al cerrar. Ya sacaron del
+  tope de lectura de 50 cuatro de los seis avisos de semilla.
+- `26` P21-4: selector sin `main` → *strict mode* intermitente por el contenedor de streaming.
+- `07` G1 y `26` P21-3 cambian de sesión en la misma página como C4; sin disparador de cartera, nunca cayeron.
+- La máquina se suspendió dos veces durante la corrida «cada prueba sola»: dos rojos de `01-flow` (repetidos 2/2
+  verdes) y un lead huérfano, borrado con la herramienta de P37 y respaldo.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** · `test:leados` **43/43** · `test:helpers` **28/28** · `test:setter` **194/194**
+(cartera limpia) · `build` **exit 0** · `migrate status` **86 migraciones, sin drift** · franja **224/224** y pliegue
+**1062/1062**, iguales a Fase 0 y a P36 · 105 leads con las mismas ids · WIP ajeno byte a byte igual. Ninguna prueba
+borrada, salteada ni aflojada; ningún archivo de producto; ningún invariante; nada agregado a git.
+
+**Para la verificación humana:** nada visual. Que un rojo de estas doce deje de aparecer cuando alguien limpia la base
+o arregla un orden; y la decisión sobre la quinta fuga (07-G1), que va a dejar el panel de novedades de `setter-qa`
+con un solo pliegue en pocas corridas más.
+
+---
+
+## P39 · Las fugas — cinco cerradas, y la base que vuelve a su estado — 2026-09-14
+
+Reporte completo, instrumentos y diagnóstico en `docs/p39-fugas/` (`REPORTE.md`). Sin commitear, como P29–P38. Nada
+pusheado. **Cero líneas de producto.**
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 31 GB libres · 21 procesos `node` ajenos
+(chrome-devtools-mcp), ningún servidor en 3000–3099 · WIP ajeno copiado con md5 (162 archivos): al cerrar, 161 idénticos y
+distinto solo `28-veredicto` (lo toca P39) · base: **`ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech`**. `tsc` 0
+· invariantes 57/57 · `test:leados` 43/43 · `test:helpers` 28/28 · `test:setter` 194/194 · franja 224/224 · pliegue 1062/1062.
+
+Instrumento nuevo: `scripts/p39-censo-base.mts` fotografía las **63 tablas** contadas, leads/usuarios/avisos por id y
+categoría, y el panel de `setter-qa` con la llamada del page; `--comparar` nombra por id lo que apareció. Al arrancar: 105
+leads · 21 usuarios · 91 avisos (**85 de la fuga de 07-G1** + 6 de semilla; 1 de 6 dentro de los 50 que lee el panel).
+**Las tres suites, código original: la única tabla con delta es `OsSetterNotice` +1, el aviso de G1.**
+
+### 1 · 07-G1
+
+La reasignación real avisa al dueño previo con `leadId: null` (diseño) y el teardown borra por lead o por setter creado. Ahora
+G1 anota los avisos salientes de `setter-qa` antes del clic y, después, registra por id el que no existía y nombra a su lead
+(stamp); el teardown lo borra (`avisoIds`, campo nuevo del tracker). 07 sola: **antes +1 aviso · después ninguna tabla con
+delta**.
+
+### 2 · Los acumulados
+
+Censo: **87** (85 + 2 de mis «antes»), de 15 días de corridas, todos con la copia exacta, sin leer, emitidos 1,9–4,2 s
+después del stamp de su lead, ninguno con su lead vivo. Ninguna prueba los lee (C4, 26 y leados siembran los suyos; y con la
+fuga, el aserto del lado A de C4 se cumplía aunque su aviso no se dibujara). Lista de ids escrita antes de borrar; la firma
+se re-verifica como control. Herramienta nueva `scripts/dev/borrar-por-identidad.mts`, probada primero con 7 leads de las
+demostraciones. Con los 87: borrar A → restaurar **exacta** → borrar B → **A = B idénticos** columna por columna; el
+comparador marca una columna alterada; A = C en la tercera vuelta. Panel de `setter-qa`: semillas en la lectura **0 → 6 de 6**;
+dibujado en navegador real **1 fila («Te reasignaron un lead ×50», 0 semillas) → 4 filas, las 4 de semilla** (las otras 2
+se deduplican contra la cola, por diseño). Suites después de borrar: **43/43 · 28/28 · 194/194**, sin delta.
+
+### 3 · Las otras cuatro
+
+| Fuga | Arreglo | Antes | Después |
+|---|---|---|---|
+| perf `alta` no registraba el lead que crea | `Caso.adoptarCreado`: el id de la URL destino al tracker, después de medir | +1 lead por pasada | ninguna tabla con delta |
+| `medir-rafaga-progreso` con la limpieza fuera de `finally` | teardown y cierre del navegador al `finally` | error inducido: +1 lead +1 dossier | mismo error, «limpieza: 1», sin delta; la medición real anda (ventana 0 ms, 18 borrados) |
+| corridas matadas | **registro de siembra** (`tests/helpers/siembra-registro.ts`): cada `push` al tracker escribe el id en un archivo del proceso; el teardown anota bajas. `globalSetup` (`limpieza-al-arrancar.ts`) en setter/leados/perf borra por id lo pendiente de procesos muertos; los vivos no se tocan. Solo anota si la corrida lo activa (la siembra de la galería usa el mismo tracker y no borra) | `03-cabina` matada: +5 leads; la corrida siguiente no los borra | registro con 5 altas; la siguiente borra esos 5; ida y vuelta sin delta · control: corrida viva en paralelo no se toca, 5/5 |
+| `28` N6 en la bandeja compartida | setter propio | verde; con 50 avisos más nuevos en `setter-qa`: **roja** («Expected 2 · Received 0») | verde y verde · control s1 → roja en el aserto |
+
+Hueco encontrado en el camino y cerrado: `dossier-gates.spec.ts:284` saca un id del tracker con `splice` → registro con un
+pendiente fantasma. La lista anotada da de baja lo que sale por `splice`.
+
+### 4 · `26` P21-4
+
+Acotados a `main` P21-4 y, por el mismo riesgo (*strict mode* o conteo positivo), el helper `cola` y `novedades`; las
+ausencias `toHaveCount(0)` quedan sobre la página. Diez corridas: **antes 10/10 tibio + 10/10 frío · después 10/10 + 10/10 —
+el flake no se reprodujo antes, dicho así.** El mecanismo, medido con un observador temporal: 40 cargas, **4 con dos copias
+simultáneas** en el documento (una fuera de `main`), **0 con más de una dentro de `main`**; la doble se cierra ~0,5 ms antes de
+`DOMContentLoaded`. Control en build aparte (md5 restaurado, servidor por PID, build borrado): sE (sin bloque de espera) →
+P21-4 roja en el selector acotado; sC (sin cola) → P21-1/2/3 rojas.
+
+### 5 · Ida y vuelta
+
+Primer intento: base sin delta, `test:setter` 193/194 — `01-flow` B1, el cartel en frío que el propio test marca (P33/P34),
+con el servidor recién levantado; tibio, `01-flow` 3/3. Repetición: **105 / 21 / 6 antes, después de cada suite y al final;
+cero tablas con delta**; 43/43 · 28/28 · 194/194.
+
+### Cierre
+
+`tsc` **0** (y scripts nuevos con tsconfig temporal, 0) · invariantes **57/57** · suites **43 · 28 · 194** · `build` **exit 0**
+· `migrate status` **86, sin drift** · franja **224/224** · pliegue **1062/1062**. Ningún archivo de producto, ninguna prueba
+aflojada (G1 suma exigir su aviso), ningún invariante, superficies fijas intactas, ninguna suite cayó al borrar.
+
+Revisión de código (subagente): aprobado, sin CRITICAL/HIGH; el MEDIUM (navegador de la ráfaga fuera del `finally`) corregido y
+re-verificado; el LOW (Ctrl+C sobre la ráfaga, fuera del registro) declarado.
+
+**Advertencia anotada:** `19` B2 depende de que ninguna `Organization` tenga `calComUsername`, resuelto globalmente. El día
+que se conecte Cal.com se pone roja: no va a ser una regresión, va a ser su premisa cumpliéndose al revés. Anotado también,
+sin tocar: el usuario huérfano `smoke-setter-EXP-1786459764476` (otra clase).
+
+**Para la verificación humana:** nada visual; la próxima medición se hace sobre datos reales.
+
+---
+
+## P40 · El brief en cuatro vueltas — el contrato del encabezado, y la dirección visual que viaja — 2026-09-14
+
+Reporte completo, instrumentos y 28 capturas en `docs/p40-brief/` (`REPORTE.md`). Sin commitear, como P29–P39. Nada
+pusheado ni agregado a git.
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 28,7 GB libres · 21 `node` ajenos
+(chrome-devtools-mcp, un vitest de otro proyecto), ningún servidor en 3000–3099 · WIP ajeno copiado con md5 (180 archivos).
+`tsc` 0 · invariantes 57/57 · `test:leados` 43/43 · `test:helpers` 28/28 · `test:setter` 194/194 · franja 224/224 · pliegue
+1062/1062 · base 105 leads / 21 usuarios / 6 avisos, `setter-qa` 73 leads y 42 accionables · las tres suites sin delta en las
+63 tablas (código de partida).
+
+### 1 · Las tres decisiones, medidas
+
+**Dónde vive el documento → campo propio `documento`, techo 15.000.** `pegadoGem` lo leen cinco lugares del producto y es el
+campo de la regla del guardado con link (tocarlo era condición de frenada); `TEXTO_LIBRE_MAX` lo comparten 19 campos de 5
+blobs, leídos enteros-o-nada. Hoy un pegado de más de 5.000 moría en el servidor como «No se pudo guardar el brief».
+
+**Qué guarda cada fase → lectura, decisiones, las cuatro correcciones y el documento; el borrador solo sin documento.** La home
+del setter (`listOwnedLeads`) carga el dossier ENTERO de cada lead: `setter-qa` trae 43 briefs por carga (140,7 KB). A 1.200
+palabras, las cuatro enteras pesan 17,4 KB por brief contra 8,7 del documento solo — el doble —; lectura + decisiones suman
+1,6 KB (+18 %). El borrador pesa lo mismo que el documento y el contrato del Gem lo descarta: se guarda solo mientras es lo único
+escrito. Transferencia medida para 43 filas: 60 ms hoy · 65 solo documento · 67 lo elegido · 72 las cuatro. Va un paso más allá
+del sí/no del encargo, y se declara: «solo la última» es cambiar `vueltasParaGuardar`.
+
+**Qué tan estricto es el lector → obligatorias SECCIONES, PALETA, TIPOGRAFIA; nada frena; lo que no matchea se conserva.**
+Obligatoria = si falta vuelve el defecto (no construible, o Claude Design elige colores y fuente). Si falta, la pantalla dice
+cuál, por qué importa y qué hacer, y que el brief se guarda igual. El documento se guarda y viaja entero; lo que hay antes del
+encabezado, las etiquetas ajenas y las repetidas se cuentan y se muestran. Encabezado = al menos dos etiquetas seguidas.
+
+### 2 · El contrato del encabezado (lo que el Gem tiene que cumplir)
+
+```
+ANGULO: <qué le mostramos al dueño para que piense «esto es lo que necesito», en una línea>
+SECCIONES: <las secciones de la página, en orden, separadas por · >
+CTA: <el texto exacto del botón principal>
+TONO: <cómo escribe la demo, en una línea>
+PALETA: <neutro / acento / apoyo, con hex>
+TIPOGRAFIA: <títulos / cuerpo>
+```
+
+Una etiqueta por línea, en mayúsculas, al principio del documento definitivo de la vuelta 4; una línea en blanco y el resto en
+texto libre. ANGULO→concepto, SECCIONES→secciones, CTA→cta, TONO→tono, PALETA→paleta, TIPOGRAFIA→tipografia. Se tolera:
+tildes y minúsculas, adornos de formato (`**PALETA:**`, `- CTA:`, `## TONO:`, `1. SECCIONES:`), espacios y dos puntos de más,
+`ÁNGULO WOW` y `LLAMADO A LA ACCIÓN`, SECCIONES con `·` `•` `|` `;` ` / `, comas o en lista, comillas o corchetes, otro orden,
+texto antes. Fuente de verdad: `src/lib/leados/encabezado-documento.ts`; los mensajes del Gem de la pantalla enseñan esas seis
+etiquetas en la vuelta 3 y las piden en la 4 (una prueba lee el molde con el lector).
+
+### 3 · FRENÉ en un punto, y las condiciones de frenada
+
+«El paso no se cierra hasta que la cuarta esté», en forma fuerte, es un campo nuevo que gatea la construcción (regla 2), y hoy
+el Gem no tiene link: solo se cumpliría inventando su salida — lo que `19` B1b prohíbe. Construido como recorrido (la cabecera
+de la cuarta dice «Falta el documento definitivo»; el avance no la saltea), sin trabar «Guardar brief». Propuesta: atarlo al
+registro de herramientas, como `pegadoGem`. Decisión de Franco.
+
+Condiciones, medidas en negativo: los 49 briefs de la base parsean igual con el código nuevo (0 roturas, control con una fila
+alterada → detectada); BRIEF→CONSTRUCCION no mira ningún campo tocado (`git diff` vacío en dossier, acciones, stage, manual,
+flow-content y schema); el bloque tiene un consumidor (mc1/mc2/mr) y los 49 bloques reales salen idénticos byte por byte. No
+hay invariante que vigile la forma del bloque (el encargo lo suponía): se declara.
+
+### 4 · Lo construido
+
+Las cuatro vueltas sobre el MISMO acordeón de la ficha (`BloquesSecuenciales`, sin tocarlo; lógica en `brief-vueltas.ts`):
+cada una con su mensaje copiable —que trae lo pegado en la anterior, con la corrección—, dónde pegar lo que vuelve y un campo
+para lo corregido; la siguiente se abre sola; volver no pierde nada. Los mensajes son los prompts del paquete del Gem con tres
+ajustes declarados (`prompts-gem-diseno.ts`). Tono, paleta y tipografía: opcionales, en el formulario y en el bloque de
+construcción después del CTA. El documento completa solos los campos del brief sin pisar lo del setter; «Lo que leí del
+documento» lo dice. Lo leído llega al bloque (mc1/mc2 sin tocar), a «El brief pedía» de m13/m14 y a la revisión de Franco.
+Tocado fuera de m6, con motivo: `BriefPanel` de la revisión (sin eso decía «Sin la respuesta del Gem» sobre todo brief de
+cuatro vueltas) y la copia del Gem en `herramientas.ts`.
+
+### 5 · Verificación operando la app (1440 y 390) — `scripts/p40-capturas.mts`
+
+Las cuatro vueltas (`01`–`06`), documento completo leído y campos completados (`03`, `04`), sin encabezado (`08`), falta PALETA
+(`09`), brief viejo abre y guarda con sus mismas claves + la editada (`10`, `11`), bloque de mc1 con TONO/PALETA/TIPOGRAFÍA
+(`12`), m14 y revisión (`13`, `14`). Base sin delta. `visual-qa` sobre las 28 capturas: sin ❌ ni ❓. Dos correcciones salieron de
+mirar: tono/paleta/tipografía a dos renglones (la paleta se cortaba) y la instrucción del contexto de m6 acortada (+16 px a 390).
+
+### 6 · Pruebas, demostradas fallando
+
+`tests/leados/encabezado-documento.spec.ts` (27) · `tests/leados/brief-cuatro-vueltas.spec.ts` (25) ·
+`tests/setter/32-brief-cuatro-vueltas.spec.ts` (8). Contra el código de partida: la del setter **8/8 rojas** en su primera
+aserción propia; la del lector **no carga** (no existe el módulo); la del brief con `contracts`/`schemas`/`copy-blocks` de
+partida, **6 rojas** en su aserto y 19 verdes (guardias y módulos nuevos). Siete sabotajes con restauración md5 idéntica, los
+siete rojos en su aserto: un campo nuevo obligatorio (7/7 formas de la base), la paleta dentro de CONCEPTO, el lector sin sacar
+adornos, una etiqueta como encabezado, una etiqueta del cuerpo en el encabezado, el borrador guardado siempre, el autollenado
+pisando al setter. Falso rojo propio medido: un `fill` antes de hidratar quedaba en el DOM y no en el estado — ahora cada
+pegado espera a que la cabecera diga «Pegada».
+
+### 7 · Mediciones fijas y la base
+
+Franja **224/224**. Pliegue **1048/1062**: las 14 distintas son de m6 — `captura` **mejoró** 25 px a los dos anchos (la
+cabecera de la vuelta 1 arranca antes que el textarea de antes), y crecen el alto del bloque de trabajo y el censo de controles
+por las cuatro vueltas. Sin cambios en m6: pliegue, barra, primer accionable, acción principal a la vista arriba y abajo, cromo,
+superficies, rótulos. Las otras trece pantallas, idénticas. Nuevas líneas de base en `docs/p40-brief/`.
+
+Ida y vuelta con el código final: 105 / 21 / 6 antes, tras `test:leados` **95/95**, tras `test:helpers` **28/28**, tras
+`test:setter` **202/202** — **ninguna tabla con delta**.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** · suites **95 · 28 · 202** · `build` **exit 0** · `migrate status` **86, sin drift** · franja
+224/224 · pliegue 1048/1062 (m6, declarado) · delta cero. Revisión de código (subagente): aprobado, 0 CRITICAL/HIGH/MEDIUM; LOW
+corregido (el pegado del documento mezcla solo lo que el lector cambió) y LOW teórico declarado (`vueltas: {}` por payload
+manual). WIP ajeno 180/180 idéntico antes de esta entrada. Servidores propios bajados por PID; `.next-p40` borrado;
+`tsconfig.json` restaurado por ruta explícita.
+
+**Para la verificación humana:** que las cuatro vueltas se sientan como una conversación y no como cuatro formularios
+(capturas `01`, `02`, `06`); y el contrato del encabezado — la prueba de fuego es correr el Gem de verdad con un negocio real y
+pegar lo que devuelve: si sale «incompleto» o «sin encabezado» con un documento que a ojo está bien, el contrato está mal. Y las
+dos decisiones abiertas: la de gate (§3) y «solo la última» vs lo elegido (§1).
+
+---
+
+## P41 · La consulta de la pantalla del día — el dossier que el panel lee, y nada más — 2026-09-14
+
+Reporte completo, instrumentos, sabotajes y capturas en `docs/p41-consulta/` (`REPORTE.md`). Sin commitear, como P29–P40. Nada
+pusheado ni agregado a git.
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 27,5 GB libres · 21 `node` ajenos
+(chrome-devtools-mcp), ningún servidor en 3000–3099 · WIP ajeno copiado con md5 (236 archivos). `tsc` 0 · invariantes 57/57 ·
+`test:leados` 95/95 · `test:helpers` 28/28 · `test:setter` 202/202 · franja 224/224 · pliegue 1062/1062 · base 105 / 21 / 6, las tres
+suites sin delta en las 63 tablas · peso con `p40-peso-brief.mts`: `setter-qa` 73 leads, 43 con brief, **140,7 KB por carga**, 173 ms.
+
+### 1 · El censo
+
+`listOwnedLeads` alimenta cuatro funciones y nada más (`buildHomeLeads`, `derivarMisNumeros`, `getNovedadesSetter` →
+`derivarColaRevision`, `getProgresoSemana` → `derivarProgresoSemana`). **De las 18 columnas del dossier la cadena del panel lee 8**:
+`stage` (grupo, orden, turno, revisión, descartados), `fichaJson` (el rótulo de FICHA), `evaluacionJson` (motivo del archivo, «Mis
+números», descartados de la semana), `rechazos` (el cartel «Franco pidió cambios»), `agendaJson` (nota del cierre, reuniones y
+perdidos), `finalUrl` (aprobada sin link: grupo, turno, gate), `enviadaAt` (demo enviada), `updatedAt` («hace cuánto» de la
+revisión). **Las otras 10 no las lee nadie**: `briefJson`, `selfCheckJson`, `progresoJson`, `draftUrl`, `aprobadaAt`, `escaladoAt`,
+`escaladoNota`, `id`, `leadId`, `createdAt`. Consumo indirecto: las cuatro reciben el lead entero y leen por nombre; los cuatro blobs
+que quedan se validan ENTEROS con zod (por eso viajan enteros); cinco derivaciones miran existencia —`enviadaAt`, `finalUrl`,
+`updatedAt`, `stage` y la fila del dossier— y **todas sobre campos que quedan**. Ninguna serialización genérica. Tabla con las cinco
+columnas y archivo:línea en el reporte (§1).
+
+Condiciones de frenada, medidas en negativo: ningún consumidor necesita el objeto entero; ninguna derivación por existencia mira un
+campo que se va; el tipo lo importan tres módulos del panel y `tsc` compila sin tocarlos. No frené.
+
+### 2 · El recorte
+
+`ownership.ts`: `DOSSIER_DEL_PANEL` (los 8, `as const satisfies Prisma.OsLeadDossierSelect`), el tipo `OwnedLeadWithDossier` sale de
+`typeof` esa constante, y la consulta pasa de `dossier: true` a `dossier: { select: DOSSIER_DEL_PANEL }`. El `where`
+(`ownedListWhere`), el `_count` y `setterMetas` no se tocan (diff en el reporte). Las columnas del lead, tampoco (anotado).
+
+El censo congelado de consultas (`aislamiento-consultas`) no pidió cambio: la fila sigue siendo `osLead.findMany`, `HELPER`. **Se
+puso rojo otro**: `aprobada-sin-link`, cuyo guard congela los archivos que nombran `finalUrl` — `ownership.ts` ahora lo nombra
+(antes venía escondido en `dossier: true`). Siguiendo su propia instrucción: no deriva nada del aprobado, transporta el campo que
+`home.ts` necesita → sumado a `ARCHIVOS_CENSADOS` con ese motivo. Lo refuerza: sacar `finalUrl` del select (S8) ahora lo marca
+«desaparecido: la distinción se PERDIÓ»; antes no lo veía.
+
+### 3 · Nada cambió, lead por lead
+
+`scripts/p41-superficies.mts`: la cadena del page para **los 6 setters con leads (98 leads)**, con el reloj congelado en el
+instante de la foto de partida: foco (y con cada accionable como sticky), cola, cartera (los `HomeLead` y los grupos en los cuatro
+órdenes), avisos (filas, ocultos, resumen de revisión, sin leer) y contadores. **Datos iguales, cero diferencias.** Controles: sin
+`updatedAt` el resumen «10 demos esperando revisión» pasa a `null`; sin `fichaJson` cambian cola y cartera en cinco setters.
+
+`scripts/p41-panel.mts`, el panel dibujado de `setter-qa` a 1440 y 390, build de partida contra build nuevo: cola entera, los siete
+grupos desplegados con sus conteos y las 73 tarjetas, avisos, números — **cero diferencias**. Capturas: 17/19 idénticas por md5
+(el panel entero y un lead por estado); las 2 restantes difieren solo en los puntos `animate-ping` de «CALIENTE» (máscara de
+diferencias).
+
+### 4 · Lo ganado
+
+| `setter-qa` | Partida | Recortada |
+|---|---|---|
+| Bytes por carga | 140,7 KB | **93,5 KB (−33,5 %)** |
+| Tiempo (mediana de 21, intercaladas) | 170 ms | 170 ms — **no se mueve**: lo pagan los cuatro viajes a Neon, no 48 KB |
+| Proyectado, medido en la base: copia de la cartera con los 43 briefs llenos (documento de 1.200 palabras + lectura + decisiones, 11,3 KB c/u) | **600,7 KB · 182 ms** | **90,1 KB · 169 ms** |
+
+Proyección sembrada en un setter temporal y borrada por id; base sin delta. Con el recorte, el brief no viaja en la carga del panel.
+
+### 5 · Pruebas, demostradas fallando
+
+`tests/leados/consulta-cartera.spec.ts` (4): el dossier trae exactamente el censo y el valor de la fila (sobre una fila con las 18
+columnas llenas, control afirmado); la cartera de un setter no muestra leads de otro; un consumidor que lea un campo recortado no
+compila (`TIPO_HONESTO` + `@ts-expect-error` en las 10 lecturas) y hoy leería `undefined`; cada campo del censo tiene lector.
+Contra el código de partida: casos 1 y 3 rojos en su aserto, `tsc` rojo en `TIPO_HONESTO` y las diez directivas. Sabotajes con
+restauración md5: S1 consulta ancha → solo la prueba en ejecución lo ve; **S2 sin filtro → las dos pruebas de aislamiento rojas por
+`not.toContain(leadDeB)`**; S3 consumidor nuevo → `TS2339` en `home.ts`; S4 tipo ensanchado → `TS2322` en `ownership.ts` y
+`TIPO_HONESTO`, la prueba en ejecución verde (solo `tsc` lo ve); S5 recorta `updatedAt` → `TS2339` en `novedades.ts` y «faltan»; S6
+trae `draftUrl` → «sobran»; S7 lector falso → caso 4; S8 sin `finalUrl` → `aprobada-sin-link`. Límite dicho: `tsc` no ve a un
+consumidor que declare el campo opcional en un tipo propio, ni una lectura por clave dinámica.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** (tras el alta en `aprobada-sin-link`) · suites **99 · 28 · 202** · `build` **exit 0** · `migrate
+status` **86, sin drift** · franja **224/224** · pliegue **1062/1062** · base 105 / 21 / 6, **delta cero** en la ida y vuelta y en
+cada corrida suelta (prueba nueva, proyección ×2, sabotajes, corrida matada). Revisión de código (subagente): aprobado, 0
+CRITICAL/HIGH; MEDIUM corregido y verificado (la limpieza de `--proyectar` ahora anota en el registro de siembra: matada con 24 leads
+sembrados, la suite siguiente los borró por id) y MEDIUM declarado (`p40-peso-brief.mts`, abajo). `visual-qa`: ✅ sin ❌ ni ❓. WIP
+ajeno 236/236 idéntico antes de esta entrada. Servidores propios bajados por PID; `tsconfig.json` intacto.
+
+**Anotado:** ninguna otra consulta de listas trae el dossier entero (las ocho de admin y `setter-carga` ya seleccionan); el próximo
+peso del panel es lo que viaja al navegador (`CarteraView`/`FocoSurface` reciben los `HomeLead` enteros: 83,5 KB en `setter-qa`, 22,6
+de fichas y 13,1 de evaluaciones que el navegador casi no lee); las columnas del lead que el panel no lee (23,9 KB);
+`p40-peso-brief.mts` cuenta ahora 0 briefs en la carga y su bloque de transferencia mide sobre 0 filas.
+
+**Para la verificación humana:** que el panel se vea igual — capturas `antes/` y `despues/` en `docs/p41-consulta/capturas/`. Y la
+decisión que esto destraba: guardar las cuatro vueltas del brief ya no pesa en cada carga de la cartera.
+
+---
+
+## P42 · «Construir» en un paso — el bloque de tres capas, el piso de calidad y un tilde — 2026-09-15
+
+Reporte completo —el bloque entero, el piso entero, instrumentos, sabotajes y capturas— en `docs/p42-construccion/` (`REPORTE.md`).
+Sin commitear, como P29–P41. Nada pusheado ni agregado a git.
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 30,3 GiB libres · 9 `node` ajenos
+(chrome-devtools-mcp), ningún servidor en 3000–3005 · WIP ajeno copiado con md5 (306 archivos). `tsc` 0 · invariantes 57/57 ·
+`test:leados` 99/99 · `test:helpers` 28/28 · `test:setter` 201/202 en frío (el rojo, `01-flow` B3, uno de los cuatro marcados como
+flake de servidor frío; en caliente 3/3) · franja 224/224 · pliegue 1062/1062 · base 105 / 21 / 6, sin delta · la llave del progreso
+serializada (`scripts/p42-llave-progreso.mts`, md5 `9968d310…`).
+
+### 1 · El censo
+
+El bloque es `buildConstruccionBlock` (`copy-blocks.ts:184-284`): 17 secciones, de `BRIEF DE DEMO — {nombre}` a `CORRECCIONES DEL
+SETTER AL DOCUMENTO`, sacadas del lead, del brief y de la ficha (tabla con archivo:línea en el reporte, §1.1). **Lo consumen tres
+pantallas** —mc1, **mc2** y **mr**, por `ConstruccionContexto`— más dos pruebas y el golden de P40: por eso no se lo tocó, se lo envuelve.
+Mide hoy: los 49 briefs de la base (ninguno con documento) mediana **543** caracteres, máx 2.270; con el documento de ejemplo 6.236;
+con un documento de 1.200 palabras 8.551. La pantalla mostraba el bloque **plegado** (abierto, 224 px con scroll propio), un badge,
+**nueve puntos** y tres tildes («Marcá esta fase cuando la termines» ×3, un `FaseAutoReporte` por fase adentro de `RegistroFases`).
+**De los nueve puntos, dos no viajaban en ninguna capa** («No agregues secciones que el brief no pide» y «Nombre, rubro y zona reales
+en el hero y el pie»): se agregaron y una prueba fija los nueve. Tilde único medido gratis: de los 15 `progresoJson` de la base, uno solo
+tiene «Construir» a medias.
+
+### 2 · Las tres capas
+
+`armarBloqueConstruccion` (`src/lib/leados/bloque-construccion.ts`): **1 · INSTRUCCIONES** —`PROMPT_BASE`, el texto cerrado de mc1 con
+cinco ajustes declarados (entre ellos «si la sección del Gem dice otra cosa sobre una decisión confirmada, manda la decisión» y «las
+secciones que pide el documento, en ese orden, y ninguna más»)—; **2 · EL DOCUMENTO** —`buildConstruccionBlock` entero, con un
+`AVISO SOBRE ESTE DOCUMENTO` adelante solo si le falta algo—; **3 · PISO DE CALIDAD** —`PISO_DE_CALIDAD`—. Rótulos adentro del texto;
+el setter copia una sola cosa. Con encabezado, sus campos viajan dos veces (decisiones del brief y documento tal cual). Sin encabezado,
+con una línea obligatoria de menos, o sin documento (los 49 de hoy), el bloque se arma igual y lo dice, a la herramienta y al setter;
+si la decisión no está en ningún lado, pide tomarla por el camino conservador y declararla. Nada frena.
+
+**Tamaño:** ejemplo del contrato **12.563** caracteres (2.262 palabras, 12.971 B; antes 6.236); documento al tope del Gem **14.878**
+(2.682 palabras); documento en su techo de validación 23.288; los 49 de la base, mediana 7.239. Las capas fijas suman 6.327 a cada
+bloque. **No verificado contra Claude Design** (sin link): S-30 sigue abierto.
+
+### 3 · El piso de calidad
+
+Del piso anti-slop del paquete del Gem (§6) y del criterio de rechazo del chequeo final, reescrito como instrucción ejecutable —«un
+único elemento con el tamaño más grande por sección», «por lo menos 80 px entre secciones», «cargalas de verdad; si una fuente no carga,
+elegí otra», «tres colores como máximo; el acento solo en el botón principal y sus repeticiones»— más la regla del menú (cada link a
+una sección de la misma página que existe; si no hace falta, sin menú). Siempre piso: mínimos y máximos, nunca un estilo. Entero en
+el reporte, §3. La revisión de código encontró una contradicción (JERARQUÍA «el único elemento con el acento» contra COLOR «y sus
+repeticiones», con el botón repetido al pie): corregida y fijada con un aserto.
+
+### 4 · La pantalla
+
+Un solo bloque de trabajo, en una columna: «Bloque para Claude Design» con **un** botón · la guía de Claude Design («Link pendiente —
+pedíselo a Franco») pegada al botón · el aviso del documento · **el bloque entero** · «Mientras trabaja» / «Cuando termine» (la lista
+que devuelve, y las secciones del brief para compararla) · **un tilde**, «La demo quedó construida». Se van los nueve puntos, el badge,
+las zonas de contexto y munición y la explicación por fases. **Medido por qué la guía va pegada al botón:** en su zona de munición, a 390
+«Copiar bloque» arrancaba en 694 px con el pliegue en 631; pegada, en 518. El tilde vive en el MISMO dueño del progreso de P25
+(`RegistroFases`, prop `tildeUnico`): marca/desmarca las tres fases juntas con el mismo criterio que la derivación (atado a
+`derivarPantalla` en los 64 subconjuntos) y nunca toca las de «Refinar». Tocado fuera de mc1, con motivo: `m-construccion.tsx` y
+`registro-fases.tsx` (props opcionales; mc2 y mr con el mismo render y el mismo pliegue), `flow-content.ts` (los nueve `items` vacíos;
+dos `arreglo` de m14 que nombraban fases que ya no se ven; ningún `id` ni `nombre`), `manual.ts` (solo la bajada de mc1).
+
+### 5 · Verificación operando la app (1440 y 390) — `scripts/p42-capturas.mts`
+
+Siete estados antes y después. Un botón de copiar; **portapapeles = pantalla = producto** a los dos anchos; con encabezado, los campos
+adentro; brief viejo, sin encabezado y falta PALETA, cada uno con su aviso; sin link, la salida pegada al botón y dentro del pliegue,
+nada apagado; el tilde: a medias se lee sin marcar y la base no se reescribe al abrir, marcar suma dos, recargar lo muestra, desmarcar
+deja las de «Refinar». `visual-qa`: sin ❌ ni ❓, dos pasadas. Un falso rojo propio medido: el portapapeles de Windows devuelve CRLF
+(sondeado sin la app); se normaliza solo eso.
+
+### 6 · Pruebas, demostradas fallando
+
+`tests/leados/bloque-construccion.spec.ts` (19) · `tests/setter/33-construir-un-paso.spec.ts` (8). Contra la partida: la del lector **no
+carga**; la del setter **8/8 rojas** en su primer aserto. Catorce sabotajes con restauración md5 idéntica, los catorce rojos en su aserto
+(doce sobre la pura; dos en un build aparte: el botón copiando sin el piso, el tilde pisando «Refinar»). Pruebas existentes cambiadas,
+sin borrar ni saltear, cada una conservando lo que protegía donde sigue siendo verdad: `11` (los tres tildes por fase y «tildar uno no
+arrastra», ahora en mc2), `17` (clase 2 sobre mc1 y mc2), `29` (las ráfagas de P25 en mc2), `30` (tildar una fase, en mc2), `31`
+(locator al nombre del tilde único), `32` F (el bloque donde vive). **Rojo intermitente ajeno, medido:** `32-brief-cuatro-vueltas` B
+cae 3/8 contra la partida y 4/8 contra el nuevo; con un `MutationObserver` en la página, el DOM nunca tuvo dos vueltas abiertas (0/12 y
+0/12) y la lectura en serie del helper «vio» dos en 3 y 4 de 12: lo fabrica el instrumento de P40. No tocado; anotado.
+
+### 7 · Mediciones fijas y la base
+
+Franja **224/224**. Pliegue **1034/1062**: las 28 distintas son de mc1 (las otras trece pantallas, mc2 y mr incluidas, idénticas). En
+mc1 el primer control de trabajo pasa de 1209/1452 a **415/518** y **entra en el primer pliegue a los dos anchos** (antes en ninguno);
+«Copiar bloque» queda 2 y 30 px más abajo (adentro de la tarjeta), dentro del pliegue; el alto total crece a 4.822/6.987 por el bloque
+entero. Nuevas líneas de base en `docs/p42-construccion/`. Ida y vuelta: 105 / 21 / 6 antes, tras `test:leados` **118/118**, tras
+`test:helpers` **28/28**, tras `test:setter` **210/210** — **ninguna tabla con delta**; y cada corrida suelta, medida.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** · suites **118 · 28 · 210** · `build` **exit 0** · `migrate status` **86, sin drift** · franja 224/224 ·
+pliegue 1034/1062 (mc1, declarado) · delta cero · **la llave del progreso, serializada al cierre, idéntica a la Fase 0** (md5 `9968d310…`;
+`contracts.ts` con diff vacío). Revisión de código (subagente): aprobado, 0 CRITICAL/HIGH; MEDIUM (el acento) y LOW (el botón copia el
+texto del producto) corregidos. WIP ajeno 303/306 idéntico antes de esta entrada (los tres distintos, previstos). Servidores propios
+bajados por PID; `.next-perf-base` y `.next-perf-a` borrados; `tsconfig.json` y `next-env.d.ts` idénticos a la Fase 0.
+
+**Anotado:** S-25 a S-30 no están en `supuestos-a-probar.md`; la copia de Claude Design en `herramientas.ts` y el texto de
+`NavConstruccion` hablan todavía de fases (se ven también en mc2: van con ese sprint); el título del caso de perf «Tildar una fase
+(mc1)»; la galería 14–17 sin regenerar; el arreglo del helper de `32` B (un solo `evaluate`).
+
+**Para la verificación humana:** el piso de calidad, entero —es lo único del producto que decide si una demo se ve bien y ninguna prueba
+lo valida—; el bloque completo, que es lo que la herramienta va a recibir; y el tamaño: ~14.900 caracteres con un documento en el tope
+del contrato, a verificar pegándolo en Claude Design antes de que el setter lo descubra.
+
+---
+
+## P43 · «Refinar» — FRENÉ en la reconciliación: los dos pisos no dicen lo mismo — 2026-09-15
+
+Reporte completo —la comparación de los dos pisos línea por línea, la reconciliación del documento fuente, el censo de mc2 y lo que
+queda para decidir— en `docs/p43-refinar/` (`REPORTE.md`). Sin commitear, como P29–P42. Nada pusheado ni agregado a git. **Ningún archivo
+de producto ni de pruebas tocado.**
+
+### 0 · Terreno
+
+HEAD `4f8c00a2`, rama `p25/rafaga-tildes` · 28 worktrees y 2 stashes, no tocados · 26,3 GB libres · 21 `node` ajenos (18 de
+chrome-devtools-mcp, 3 de un vitest de otro proyecto), ningún servidor en 3000–3019 · WIP ajeno copiado con md5 (402 archivos). `tsc` 0 ·
+invariantes 57/57 · `test:leados` 118/118 · `test:helpers` 28/28 · `test:setter` 208/210 en frío: `01-flow` B3 (el flake de servidor frío,
+3/3 verde en caliente) y `32-brief-cuatro-vueltas` B (el helper que lee en serie: 3 de 8 rojas, igual que P42 contra la partida) · franja
+224/224 · pliegue 1054/1054 contra P42 · base 105 / 21 / 6, sin delta en ocho fotos · la llave del progreso con el md5 de P42
+(`9968d310…`) · `migrate status` 86, sin drift · 56 briefs en la base, **0 con documento del Gem**. Los dos documentos fuente ya estaban en
+`docs/decisiones-oslead-vii/`, byte por byte.
+
+### 1 · Frené por la primera condición del encargo
+
+**Los dos pisos divergen en tres cosas que cambian qué demo sale.** Escrito = §6 del paquete del Gem; construido = `PISO_DE_CALIDAD` de
+P42. De 41 filas: 15 iguales, 12 afiladas, 6 cambiadas, 5 agregadas, 3 sacadas. Las tres: **D1** manda el título en cada sección (el escrito
+no dice qué, y el documento del Gem lo decide); **D5** sin fotos reales, sección sin imagen — y la herramienta recibe direcciones, no
+archivos, ningún supuesto registrado dice que pueda bajarlas, y P42 convirtió el paso del setter «Insertalas donde Claude Design puso
+imágenes genéricas» en una prohibición que ningún prompt de mc2 repone; **D6** el menú opcional, «mejor sin menú» — contradice el formato
+DECIDIDO del brief v4 §5 y el prompt base del mismo bloque. Con uno u otro piso, los prompts 2, 3, 4 y 5 se adaptan distinto. Más débiles
+(no frenan solas): D2 cuerpo a la izquierda, D3 «sacá contenido», D4 columna de 1200 px, D7 solo animaciones de entrada; y cinco menores.
+
+**El prompt 1 reescribe los textos que el documento del Gem dicta** (título y línea de la primera pantalla, textos de cada sección): coincide
+al pie de la letra con la segunda condición, pero **sola no hubiera frenado** — el choque es de diseño (la cadena cerró m6 antes que mc2, y mc2
+justifica el prompt 1 contra el copy derivado de la spec) y hay una adaptación que le conserva el propósito (dejar exactos el título y la línea,
+como el botón). Va a la misma decisión.
+
+**No frenó la llave:** un tilde para mc2 usa `alternarPantalla` sobre `cta`, `calidad` y `mobile`, como mc1; ningún id cambia.
+
+**Verificación adversarial** (subagente de solo lectura, cada hallazgo verificado contra los archivos antes de aceptarlo): la frenada queda en
+pie, pero la primera versión del reporte decía siete divergencias y dos frenadas. Corrigió D7 (había leído `decisiones-por-pantalla.md:114-117`
+como mc1 contra mc2; es la frontera con la pasada de Franco), dos citas de líneas, la fuente de D5 y el alcance de §1f; sumó tres
+contradicciones de prompts y un bug del instrumento (la guía de la herramienta salía `null`), corregido y re-medido.
+
+### 2 · Lo que dejó el censo (solo lectura, `scripts/p43-censo-refinar.mts`)
+
+mc2 hoy: cuatro copiables (el bloque y tres prompts), badge, nueve puntos, tres tildes, la explicación del auto-reporte dos veces (una en
+Registro y otra en la navegación de Construcción, que es layout fijo). **Con el mismo lead, mc1 copia 7.426 caracteres con instrucciones
+y piso, y mc2 copia 730 sin ninguno**: la razón del documento para dejar el bloque de solo lectura pesa más que cuando se escribió. El
+bloque lo arma `ConstruccionContexto`, compartido con «Correcciones». El prompt de celular viejo lo usa también el chequeo final, y tres
+arreglos de m14 nombran fases de mc2. Once contradicciones de los prompts se corrigen con cualquier piso (el acento «para nada más», «la
+misma tipografía», «si es formal, es formal» contra el voseo, «desplazamiento» vs «posición», el cierre de tres contra cuatro, entre otras).
+S-19 a S-30 siguen fuera de `supuestos-a-probar.md`.
+
+### Cierre
+
+`tsc` **0** · invariantes **57/57** · suites **118 · 28 · 208/210** (los dos rojos, ajenos y caracterizados) · franja 224/224 · pliegue
+1054/1054 · delta cero · la llave, idéntica · `contracts.ts` sin diff contra la Fase 0 · WIP ajeno 402/402 idéntico antes de esta entrada ·
+los dos arranques del servidor propio bajados por PID · `tsconfig.json` y `next-env.d.ts` iguales a la Fase 0 (el build reescribe el
+segundo; restaurado) · `tsc` e invariantes corridos de nuevo después del arreglo del instrumento: 0 y 57/57.
+
+**Para decidir (Franco):** qué piso queda, fila por fila (§8.1 del reporte); qué textos mandan después de construir (§8.2); y si la
+libertad del prompt 2 alcanza a la dirección visual del documento. Hasta eso, los pasos 2 a 4 no arrancan.

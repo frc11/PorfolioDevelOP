@@ -1,0 +1,231 @@
+import { test, expect } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible, expectAcuse, vis } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  getDossier,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+
+/**
+ * P29 — EL ACUSE ESTÁ EN LA PANTALLA, Y EL REFLEJO NO LO ESPERA.
+ *
+ * Dos cosas distintas, un test cada una, y la segunda es la que prueba el
+ * sprint.
+ *
+ * ── 1. Dónde está el acuse ───────────────────────────────────────────────────
+ * Que el resultado se anuncie DENTRO de `main` —la banda de acción, donde está
+ * el botón que se tocó— y no en el portal flotante de sonner. Se afirma por la
+ * marca de la pieza (`[data-acuse]`), no por buscar la frase en la página: el
+ * acuse vive entre el resto del texto de la pantalla, así que una copy que
+ * contenga la frase satisfaría un `getByText` antes del clic. Ese falso verde
+ * ya se pagó una vez con `expectToast` (ver la nota en `helpers/setter-ui.ts`).
+ *
+ * ── 2. Que el reflejo no espere ──────────────────────────────────────────────
+ * Ésta es la afirmación del sprint, y no lleva umbral de milisegundos.
+ *
+ * P28 midió que con aviso flotante la pantalla mostraba el estado nuevo
+ * EXACTAMENTE cuando el aviso se iba: `reflejo ≈ acuse + 4.000 ms`, la duración
+ * de sonner, en nueve pantallas. El mecanismo, entonces, es que la pantalla
+ * ESPERABA a que un cartel se desmontara.
+ *
+ * Un primer intento de este test afirmaba «cuando aparece el acuse, la pantalla
+ * ya muestra el estado nuevo», y una sonda lo refutó: acá el acuse sale a los
+ * ~785 ms y el árbol del servidor aterriza a los ~1.137 ms. No es el mismo
+ * commit — el acuse va ~350 ms adelante. La afirmación era más fuerte que el
+ * hecho, y se cambió por el hecho.
+ *
+ * Lo que sí se afirma, y es exactamente el mecanismo: **la pantalla se
+ * actualiza sin que haya existido ningún cartel flotante que esperar**. Se
+ * instala un vigía ANTES del clic que anota si en algún momento se montó un
+ * `[data-sonner-toast]`; se espera por CONDICIÓN a que la pantalla muestre el
+ * estado nuevo; y ahí se afirma que el vigía no vio ninguno. Un reflejo no
+ * puede estar esperando a un aviso que nunca existió.
+ *
+ * Por qué así y no con un umbral de ms: un umbral publica la suerte de la
+ * corrida y se convierte en un rojo permanente el día que la máquina esté
+ * cargada. Los números viven en la tabla del instrumento (`npm run test:perf`),
+ * que es donde se comparan; acá vive la propiedad estructural.
+ *
+ * ⚠ Y el aserto de «la pantalla cambió» NO puede ser «hay tildes de fase»: los
+ * tildes se renderizan también en BRIEF, deshabilitados. Ese aserto pasaba
+ * ANTES de arrancar la construcción — era verde sobre la nada. Va contra dos
+ * hechos que sólo son ciertos después: la copy de «todavía no arrancaste» se
+ * fue, y los tildes quedaron habilitados.
+ *
+ * ── 3. Que se llegue a leer ──────────────────────────────────────────────────
+ * El riesgo opuesto, y el que el encargo nombra: un acuse que parpadea es peor
+ * que el cartel de hoy. Acá SÍ hay una espera por tiempo, y es a propósito:
+ * probar que algo PERSISTE exige dejar pasar tiempo. No es la espera frágil que
+ * este repo ya pagó (esperar por reloj a que algo APAREZCA): esta es monótona —
+ * cuanto más se espere, más fuerte es la afirmación, y sólo puede fallar si el
+ * acuse desaparece de verdad. El umbral es el que importa: los 4.000 ms que
+ * duraba el aviso flotante.
+ */
+
+const DURACION_DEL_AVISO_VIEJO_MS = 4000
+
+/** La pantalla del manual, DIRECTA. */
+const pantalla = (leadId: string, paso: string) => `/setter/leads/${leadId}/manual/${paso}`
+
+/**
+ * Se entra por la URL de la pantalla y no por la raíz del lead, y se espera la
+ * hidratación antes de tocar nada. Las dos cosas por el mismo motivo, y las dos
+ * están medidas en este repo:
+ *
+ *  · La raíz encadena DOS redirecciones de servidor (`/leads/:id` → `/manual` →
+ *    `/manual/:paso`). Clickear con esa cadena todavía asentándose mete una
+ *    navegación en el medio de la acción — es la familia del flake que P26 dejó
+ *    documentada en `01-flow` («su SUJETO se lo lleva puesto una navegación
+ *    concurrente»). Acá se vio en vivo: el mismo caso pasó una vez y falló la
+ *    otra, por el lado de la carrera y no por el del producto.
+ *  · Un clic antes de que React enganche los handlers no dispara nada, y el
+ *    test saldría midiendo la nada. Es la misma guarda que usa el instrumento
+ *    de latencia (`tests/perf/recorrido-latencia.spec.ts`).
+ *
+ * Ninguna de las dos afloja lo que se afirma: sacan del medio una navegación
+ * ajena a la acción. Y es además cómo el setter llega de verdad a la pantalla.
+ */
+async function abrirPantalla(page: import('@playwright/test').Page, url: string): Promise<void> {
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => {
+    const nodos = Array.from(document.querySelectorAll('main button, main input, main a'))
+    return nodos.some((nodo) =>
+      Object.keys(nodo).some(
+        (llave) => llave.startsWith('__reactProps$') || llave.startsWith('__reactFiber$'),
+      ),
+    )
+  })
+}
+
+const tracker: SmokeTracker = newTracker()
+let setterId: string
+
+test.beforeAll(async () => {
+  const setter = await getSetterQa()
+  setterId = setter.id
+})
+
+test.afterAll(async () => {
+  await teardown(tracker)
+  await disconnect()
+})
+
+test('P29-1 · el acuse se pinta DENTRO de la pantalla, y sin cartel flotante', async ({ page }) => {
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P29 Acuse en pantalla',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+
+  await qaLogin(page, 'setter')
+  await abrirPantalla(page, pantalla(leadId, 'mc1'))
+
+  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+  await expectAcuse(page, /Construcción arrancada/i)
+
+  // Dentro del área de trabajo, no en un portal de `body`.
+  expect(
+    await page.locator('main [data-acuse]').count(),
+    'el acuse vive dentro de `main` — es la diferencia entera con el toast',
+  ).toBe(1)
+
+  // Y no quedó además un cartel flotante: el acuse se MUDÓ, no se duplicó.
+  expect(
+    await page.locator('[data-sonner-toast]').count(),
+    'esta acción ya no monta un aviso flotante',
+  ).toBe(0)
+
+  // La escritura ocurrió: sin esto, un acuse lindo podría ser el de una acción
+  // que no hizo nada.
+  expect((await getDossier(leadId))?.stage).toBe('CONSTRUCCION')
+})
+
+test('P29-2 · la pantalla se actualiza sin ningún cartel flotante que esperar', async ({ page }) => {
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P29 Reflejo sin espera',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+
+  await qaLogin(page, 'setter')
+  await abrirPantalla(page, pantalla(leadId, 'mc1'))
+
+  // EL VIGÍA, antes del clic: anota si alguna vez se montó un aviso flotante.
+  // Va por MutationObserver y no por muestreo, así un cartel que aparezca y se
+  // vaya entre dos lecturas no se escapa.
+  await page.evaluate(() => {
+    const w = window as unknown as { __vioToast?: boolean }
+    w.__vioToast = document.querySelector('[data-sonner-toast]') !== null
+    new MutationObserver(() => {
+      if (document.querySelector('[data-sonner-toast]')) w.__vioToast = true
+    }).observe(document.documentElement, { subtree: true, childList: true })
+  })
+
+  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+
+  // Espera POR CONDICIÓN a que la pantalla muestre el estado nuevo: la copy de
+  // «todavía no arrancaste» se fue Y los tildes quedaron habilitados. Las dos
+  // cosas son falsas antes de la acción, así que esto no puede pasar de arriba.
+  // `vis(...)` + scope a `main`, y las dos cosas por lecciones ya pagadas de este
+  // repo: el manual se DUPLICA para responsive, así que la frase matchea dos
+  // veces y la copia oculta del otro brazo queda en el DOM para siempre. A nivel
+  // page y sin filtrar visibles, esto no llega a cero nunca — se midió acá: 15 s
+  // reintentando contra un nodo que jamás se iba. Lo que se afirma es «ninguna
+  // copia VISIBLE en el área de trabajo», que es lo que el setter ve.
+  await expect(vis(page.locator('main').getByText(/El brief está listo — arrancá la construcción/i)))
+    .toHaveCount(0)
+  await expect(
+    firstVisible(
+      page.locator('main section[aria-label="Registro"] button[aria-pressed]:not([disabled])'),
+    ),
+  ).toBeVisible()
+
+  // Y el acuse está — la pantalla no lo tuvo que esperar ni él se fue antes.
+  await expectAcuse(page, /Construcción arrancada/i)
+
+  const vioToast = await page.evaluate(
+    () => (window as unknown as { __vioToast: boolean }).__vioToast,
+  )
+  expect(
+    vioToast,
+    'la pantalla llegó al estado nuevo sin que se montara ningún aviso flotante: no hay nada ' +
+      'que esperar. Con el cartel puesto, el reflejo lo seguía a los 4.000 ms',
+  ).toBe(false)
+
+  expect((await getDossier(leadId))?.stage).toBe('CONSTRUCCION')
+})
+
+test('P29-3 · el acuse se queda: sigue en pantalla después de lo que duraba el cartel', async ({
+  page,
+}) => {
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P29 Acuse que se lee',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+
+  await qaLogin(page, 'setter')
+  await abrirPantalla(page, pantalla(leadId, 'mc1'))
+
+  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+  await expectAcuse(page, /Construcción arrancada/i)
+
+  const desde = Date.now()
+  await page.waitForTimeout(DURACION_DEL_AVISO_VIEJO_MS + 1000)
+  const esperado = Date.now() - desde
+
+  // Sin reintento: o está, o el acuse se fue solo.
+  expect(
+    await page.locator('main [data-acuse]').filter({ hasText: /Construcción arrancada/i }).count(),
+    `el acuse tiene que seguir en pantalla tras ${esperado} ms — el aviso flotante que reemplaza ` +
+      `duraba ${DURACION_DEL_AVISO_VIEJO_MS} ms y se iba solo`,
+  ).toBe(1)
+})

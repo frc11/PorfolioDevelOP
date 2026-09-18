@@ -1,0 +1,35 @@
+══ P34 · DÓNDE MUERE EL ACUSE (delay=0 ms) ══════════════════════════════
+
+── B8 raíz · pasada 1
+   pedidos=0 · emitidos=0 · carteles=0 · 843 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 704ms top …/manual | 2206ms top …/manual/m15]
+   etapas de run(): [despacho+1554ms | dentro-transicion+1554ms]
+   marcas de acuse: []
+   veredicto: el acuse NI SE PIDIÓ — run() llegó hasta: dentro-transicion+1554ms
+
+── B8 raíz · pasada 2
+   pedidos=1 · emitidos=1 · carteles=1 · 842 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 196ms top …/manual | 571ms top …/manual/m15]
+   etapas de run(): [despacho+737ms | dentro-transicion+737ms | resuelta:ok+1727ms | post-onSuccess+1727ms | pidio-exito+1727ms]
+   marcas de acuse: [pedidos+1727ms | emitidos+1727ms]
+   veredicto: cartel montado
+
+── B8 raíz · pasada 3
+   pedidos=0 · emitidos=0 · carteles=0 · 840 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 223ms top …/manual | 1646ms top …/manual/m15]
+   etapas de run(): [despacho+1067ms | dentro-transicion+1067ms]
+   marcas de acuse: []
+   veredicto: el acuse NI SE PIDIÓ — run() llegó hasta: dentro-transicion+1067ms
+
+── B8 raíz · pasada 4
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 214ms top …/manual | 648ms top …/manual/m15]
+   etapas de run(): [despacho+813ms | dentro-transicion+813ms | resuelta:ok+1785ms | post-onSuccess+1785ms | pidio-exito+1785ms]
+   marcas de acuse: [pedidos+1785ms | emitidos+1785ms]
+   veredicto: cartel montado
+
+════════════════════════════════════════════════════════════════════════════════
+
+  ok 1 [desktop] › tests\perf\p34-donde-muere-el-acuse.spec.ts:99:5 › B8 desde la raíz — dónde se corta la cadena del acuse (1.1m)
+
+  1 passed (1.1m)

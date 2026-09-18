@@ -1,8 +1,9 @@
 import { test, expect, type Page } from '@playwright/test'
-import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
+import { qaLogin, mintSessionCookie, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
 import { firstVisible, vis } from '../helpers/setter-ui'
 import {
   getSetterQa,
+  createSetter,
   createLead,
   createNotice,
   fichaConSenal,
@@ -30,6 +31,7 @@ let esperaLeadId: string
 let fichaLeadId: string
 let avisoLeadId: string
 let avisoLeadNombre: string
+let avisosSetterId: string
 
 test.beforeAll(async () => {
   const setter = await getSetterQa()
@@ -64,23 +66,42 @@ test.beforeAll(async () => {
   // El lead de los dos avisos contradictorios: hoy está en CONSTRUCCION, así que
   // NI «enviá el link» NI «reabrí la construcción» corresponden. Es la forma
   // exacta que tenía en la cartera medida.
+  //
+  // P38 — PAUSADO POR EL SETTER, y no por adorno. Los avisos de un lead que está
+  // en la cola visible no se muestran en Novedades (el dedup de P21): este test
+  // solo tiene sujeto si su lead queda FUERA de la cola. Hasta P38 eso lo ponía la
+  // cartera compartida — hacían falta tres o más leads RESPONDIO más viejos
+  // delante — y con la cartera vacía el lead pasaba a ser el foco y el test caía
+  // sin que nada se rompiera. La pausa lo saca de la cola por construcción; la
+  // vigencia del aviso (`vigenciaDeAviso`) no mira la pausa, así que el texto que
+  // se afirma es el mismo.
+  //
+  // P39 — y en la bandeja de un SETTER PROPIO, no en la de setter-qa. El panel lee
+  // los 50 avisos sin leer más nuevos del setter: en la bandeja compartida, 50
+  // avisos más nuevos que los de este lead —otra corrida en paralelo sobre la misma
+  // persona, o la fuga de 07-G1 acumulada— lo dejaban sin sujeto (medido: «Expected
+  // 2 · Received 0»). Con su propio setter, lo único que hay en la bandeja es lo que
+  // este test siembra.
+  const setterDeAvisos = await createSetter(tracker, 'n6-avisos')
+  avisosSetterId = setterDeAvisos.id
   const conAvisos = await createLead(tracker, {
-    setterId,
+    setterId: avisosSetterId,
     businessName: 'P23 Avisos Contradictorios',
     stage: 'CONSTRUCCION',
     status: 'RESPONDIO',
+    meta: { snoozedUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
   })
   avisoLeadId = conAvisos.id
   avisoLeadNombre = conAvisos.businessName
   await createNotice({
-    setterId,
+    setterId: avisosSetterId,
     leadId: avisoLeadId,
     kind: 'DEMO_RECHAZADA',
     title: 'Franco pidió cambios',
     body: `${avisoLeadNombre}: la demo volvió con correcciones. Reabrí la construcción y rehacé.`,
   })
   await createNotice({
-    setterId,
+    setterId: avisosSetterId,
     leadId: avisoLeadId,
     kind: 'DEMO_APROBADA',
     title: 'Franco aprobó tu demo',
@@ -237,17 +258,34 @@ test('N1 · salir con el veredicto cargado avisa, y la promesa de autoguardado n
 
 test('N6 · dos avisos del mismo lead: el que ya no corresponde deja de dar la orden', async ({
   page,
+  baseURL,
 }) => {
   const guard = attachConsoleGuard(page)
-  await qaLogin(page, 'setter')
+  // P39 — la bandeja del setter propio del lead (ver `beforeAll`), no la de setter-qa.
+  await mintSessionCookie(page.context(), baseURL ?? 'http://127.0.0.1:3003', {
+    userId: avisosSetterId,
+    email: 'irrelevant',
+    role: 'SETTER',
+  })
 
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
   const panel = page.locator('main [aria-label="Novedades de tu cartera"]')
   await panel.waitFor({ state: 'visible' })
 
+  // P38 — las filas se toman por el NOMBRE de este lead (con su stamp), no por la
+  // frase de la orden. La frase la repiten los avisos de cualquier otro lead de la
+  // bandeja compartida: con `.first()` sobre el panel entero, en P37 el aserto se
+  // quedó con el aviso de otro lead y cayó sobre un producto sano.
+  const delLead = panel.locator('li').filter({ hasText: avisoLeadNombre })
+  await expect(
+    delLead,
+    'los DOS avisos de este lead tienen que estar en el panel. Si faltan, lo primero a mirar es ' +
+      'si su lead entró a la cola visible (ahí se deduplican): por eso el lead está pausado',
+  ).toHaveCount(2)
+
   // El lead está en CONSTRUCCION: NINGUNA de las dos órdenes corresponde hoy.
-  const aprobada = panel.locator('li').filter({ hasText: 'Enviá el link ya' }).first()
-  const rechazada = panel.locator('li').filter({ hasText: 'Reabrí la construcción' }).first()
+  const aprobada = delLead.filter({ hasText: 'Enviá el link ya' })
+  const rechazada = delLead.filter({ hasText: 'Reabrí la construcción' })
 
   for (const [nombre, fila] of [
     ['la aprobación', aprobada],

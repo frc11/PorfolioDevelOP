@@ -1,0 +1,88 @@
+import { test } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { getSetterQa, newTracker, teardown, disconnect, type SmokeTracker } from '../helpers/setter-db'
+import { CASOS } from './_casos'
+import { armarPagina } from './_instrumento'
+
+/**
+ * P30 · barrido — ¿el árbol se queda sin commitear en las diecisiete, o sólo
+ * en las que no navegan?
+ *
+ * Corre SOBRE EL BUILD SIN CARTEL (variante B): con el cartel puesto, sonner
+ * despierta el root a los 4 s y TODAS reflejarían — el barrido mediría el
+ * cartel, no el mecanismo.
+ *
+ * Por caso, en una sola pasada:
+ *   SOLA   — ¿cambió `main` en ESPERA_MS sin que nadie toque nada?
+ *   POKE   — y si no, ¿cambia tras un Alt+T (un `setState` ajeno en el mismo
+ *            root, vía el listener de teclado del `<Toaster>`)?
+ *   URL    — ¿la acción movió la ruta?
+ */
+
+const ESPERA_MS = Number(process.env.ESPERA_MS ?? 6000)
+const TRAS_POKE_MS = 2500
+
+const tracker: SmokeTracker = newTracker()
+let setterId: string
+
+test.beforeAll(async () => { setterId = (await getSetterQa()).id })
+test.afterAll(async () => { await teardown(tracker); await disconnect() })
+
+const leerRoot = `(() => {
+  const buscar = () => {
+    for (const nodo of [document, document.documentElement, document.body]) {
+      const k = Object.keys(nodo).find((x) => x.startsWith('__reactContainer$'))
+      if (k) return nodo[k].stateNode
+    }
+    return null
+  }
+  const r = buscar()
+  const p = window.__p28
+  return {
+    cambio: p ? p.cambioTexto : null,
+    t0: p ? p.t0 : null,
+    susp: r ? '0x' + (r.suspendedLanes >>> 0).toString(16) : 'n/a',
+    pend: r ? '0x' + (r.pendingLanes >>> 0).toString(16) : 'n/a',
+    commitSusp: r ? (r.cancelPendingCommit == null ? 0 : 1) : 'n/a',
+  }
+})()`
+
+for (const caso of CASOS) {
+  test(`P30 barrido · ${caso.clave}`, async ({ page }) => {
+    test.setTimeout(180_000)
+    const prep = await caso.sembrar(tracker, setterId)
+    await qaLogin(page, 'setter')
+    await page.goto(prep.url, { waitUntil: 'domcontentloaded' })
+    await page.waitForFunction(() =>
+      Array.from(document.querySelectorAll('main button')).some((n) =>
+        Object.keys(n).some((k) => k.startsWith('__reactFiber$')),
+      ),
+    )
+    await caso.alistar?.(page, prep)
+    await armarPagina(page)
+
+    const urlAntes = page.url()
+    await caso.actuar(page, prep)
+    await page.waitForTimeout(ESPERA_MS)
+    const sola = (await page.evaluate(leerRoot)) as Record<string, unknown>
+    const urlTrasSola = page.url()
+
+    await page.keyboard.press('Alt+KeyT')
+    await page.waitForTimeout(TRAS_POKE_MS)
+    const post = (await page.evaluate(leerRoot)) as Record<string, unknown>
+
+    const escribio = await caso.verificar(prep.leadId)
+    const navego = urlTrasSola !== urlAntes
+    const ms = (v: unknown, t0: unknown) =>
+      typeof v === 'number' && typeof t0 === 'number' ? `${Math.round(v - t0)}ms` : '—'
+
+    console.log(
+      `P30BARRIDO | ${caso.clave.padEnd(14)}` +
+        ` | escribio=${escribio ? 'si' : 'NO'}` +
+        ` | navego=${navego ? 'SI' : 'no'}` +
+        ` | SOLA=${sola.cambio === null ? 'NO REFLEJA' : 'refleja ' + ms(sola.cambio, sola.t0)}` +
+        ` | TRAS-POKE=${post.cambio === null ? 'NO REFLEJA' : 'refleja ' + ms(post.cambio, post.t0)}` +
+        ` | susp=${sola.susp}->${post.susp} | commitSusp=${sola.commitSusp}`,
+    )
+  })
+}

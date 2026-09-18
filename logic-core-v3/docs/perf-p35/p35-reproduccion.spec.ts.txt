@@ -1,0 +1,138 @@
+import { appendFileSync } from 'node:fs'
+import { test } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  getDossier,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+import { instalarSonda, arrancar, cosechar, VENTANA_MS } from './_p35-sonda'
+
+/**
+ * P35 · LA REPRODUCCION — el control POSITIVO del probe.
+ *
+ * El probe del alcance mide ocho caminos y todos arrancan parados en `/setter`.
+ * Si ninguno perdiera el acuse, la conclusion «los caminos blandos estan a
+ * salvo» seria indistinguible de «hoy, en esta maquina, el instrumento no ve
+ * nada» — un falso verde con forma de veredicto. Antes de leer un cero hay que
+ * probar que el instrumento SABE dar distinto de cero.
+ *
+ * Por eso este arm replica la forma EXACTA de P34, que perdio el acuse 2/6:
+ * login, y de una `goto()` a la RAIZ del lead sin pasar por el panel. Sin
+ * precalentar `/setter`, que es lo que hace el otro arm y lo que le acorta la
+ * cadena: el layout, la sesion y el pool de Prisma ya estan tibios cuando
+ * empieza la carrera.
+ *
+ * Es, ademas, el caso REAL del F5 / el marcador / el deep link: el setter llega
+ * a la raiz con todo frio.
+ *
+ *   P35_RONDA=n PERF_EXTERNAL_SERVER=1 PERF_PORT=3007 \
+ *     npx playwright test --config=playwright.perf.config.ts p35-reproduccion
+ */
+
+const RONDA = Number(process.env.P35_RONDA ?? 1)
+const PASADAS = Number(process.env.P35_PASADAS ?? 3)
+const SALIDA = process.env.P35_SALIDA ?? 'tests/perf/.p35-reproduccion.jsonl'
+
+const tracker: SmokeTracker = newTracker()
+const acumulado: unknown[] = []
+
+test.afterAll(async () => {
+  for (const l of acumulado) appendFileSync(SALIDA, JSON.stringify(l) + '\n', 'utf8')
+  await teardown(tracker)
+  await disconnect()
+})
+
+test(`P35 reproduccion ronda ${RONDA} — entrada FRIA a la raiz`, async ({ page, context }) => {
+  test.setTimeout(PASADAS * 140_000)
+  const setterId = (await getSetterQa()).id
+  await instalarSonda(page)
+
+  for (let i = 1; i <= PASADAS; i++) {
+    await context.clearCookies()
+    await qaLogin(page, 'setter')
+
+    const { id: leadId } = await createLead(tracker, {
+      setterId,
+      businessName: `P35 repro r${RONDA} p${i}`,
+      stage: 'APROBADA',
+      status: 'RESPONDIO',
+      finalUrl: 'https://sonda-p35.develop.com.ar',
+    })
+
+    // La forma de P34, al pie de la letra: directo a la RAIZ, sin panel previo.
+    // `msHastaBoton` es el reloj de pared del setter: cuanto tarda la cadena en
+    // ponerle la accion enfrente. Es la moneda con la que se paga cualquier
+    // cambio en la cadena, asi que se mide siempre, no solo cuando interesa.
+    const t0Pared = Date.now()
+    await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
+    await arrancar(page)
+
+    let ok = true
+    let nota = ''
+    let msHastaBoton = -1
+    try {
+      const boton = firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i }))
+      await boton.waitFor({ state: 'visible', timeout: 30_000 })
+      msHastaBoton = Date.now() - t0Pared
+      await boton.click()
+    } catch (e) {
+      ok = false
+      nota = String(e).split('\n')[0].slice(0, 180)
+    }
+
+    if (!ok) {
+      acumulado.push({
+        ronda: RONDA,
+        turno: i,
+        camino: 'A2-raiz-fria',
+        rotulo: 'A2 · URL directa a la RAIZ, entrada FRIA (forma de P34)',
+        esperado: 'DURA',
+        callSite: '(barra de direcciones, sin panel previo)',
+        ok,
+        nota,
+        cosecha: null,
+        enBase: false,
+        reflejo: false,
+        rutaFinal: page.url(),
+      })
+      continue
+    }
+
+    await page.waitForTimeout(VENTANA_MS)
+    const cosecha = await cosechar(page)
+    const dossier = await getDossier(leadId)
+    const reflejo =
+      (await page
+        .getByRole('button', { name: /Ya la envié — registrar/i })
+        .filter({ visible: true })
+        .count()) === 0
+
+    const linea = {
+      ronda: RONDA,
+      turno: i,
+      camino: 'A2-raiz-fria',
+      rotulo: 'A2 · URL directa a la RAIZ, entrada FRIA (forma de P34)',
+      esperado: 'DURA',
+      callSite: '(barra de direcciones, sin panel previo)',
+      ok: true,
+      nota: '',
+      cosecha,
+      msHastaBoton,
+      enBase: dossier?.enviadaAt != null,
+      reflejo,
+      rutaFinal: page.url().replace(/^.*\/leads\/[^/]+/, '...'),
+    }
+    acumulado.push(linea)
+    console.log(
+      `   [r${RONDA} p${i}] docs=${cosecha.documentos} post=${cosecha.docsPostDespacho.length} ` +
+        `despacho+${cosecha.despachoMs}ms acuse=${cosecha.pidioAcuse ? 'SI' : 'NO'} ` +
+        `hastaBoton=${msHastaBoton}ms carteles=${cosecha.carteles} base=${linea.enBase ? 'SI' : 'NO'} reflejo=${reflejo ? 'SI' : 'NO'}`,
+    )
+  }
+})

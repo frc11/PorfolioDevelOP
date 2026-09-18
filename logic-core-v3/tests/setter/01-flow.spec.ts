@@ -6,7 +6,6 @@ import {
   createLead,
   fichaConSenal,
   getDossier,
-  countNoticesFor,
   prisma,
   newTracker,
   teardown,
@@ -40,6 +39,16 @@ import { HARD_CHECKS } from '../../src/lib/leados/flow'
 
 /** URL de una pantalla del manual — la guardia del server la valida al navegar. */
 const pantalla = (leadId: string, paso: string) => `/setter/leads/${leadId}/manual/${paso}`
+
+/**
+ * P38 — Los avisos de la decisión de Franco se cuentan sobre EL LEAD del test, no
+ * sobre la bandeja entera del setter. `setter-qa` es una persona compartida: su
+ * bandeja ya traía avisos DEMO_APROBADA y DEMO_RECHAZADA de otros leads (3 y 3,
+ * medidos), así que un `>= 1` sobre todo el setter estaba satisfecho ANTES de que
+ * Franco decidiera nada — un producto que dejara de avisar pasaba igual.
+ */
+const avisosDelLead = (setterId: string, leadId: string, kind: 'DEMO_APROBADA' | 'DEMO_RECHAZADA') =>
+  prisma.osSetterNotice.count({ where: { setterId, leadId, kind } })
 
 const tracker: SmokeTracker = newTracker()
 let setterId: string
@@ -109,6 +118,8 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
 
     // Guardar → toast + persistencia en DB.
     await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
+    // ⚠ Mismo flake conocido que B4 (la marca larga está arriba de B4): en la
+    // primera visita en frío la acción persiste y el cartel no se monta. NO aflojar.
     await expectToast(page, /Ficha guardada — ya tenés señal/i)
 
     const dossier = await getDossier(leadId)
@@ -198,6 +209,8 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await expect(registrar).toBeEnabled()
     await expect(gateAlert).toHaveCount(0)
     await registrar.click()
+    // ⚠ Mismo flake conocido que B4 (la marca larga está arriba de B4): en la
+    // primera visita en frío la acción persiste y el cartel no se monta. NO aflojar.
     await expectToast(page, /Opener registrado/i)
 
     // DB: exactamente 1 actividad comercial.
@@ -213,36 +226,46 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
   })
 
   /*
-   * ⚠ FLAKE CONOCIDO — P26. NO está apagado ni aflojado: corre como todos y su
-   * aserto es el mismo. Esto es la marca, para que el próximo rojo acá no cueste
-   * un sprint de atribución.
+   * ⚠ FLAKE CONOCIDO — P26, RE-DIAGNOSTICADO EN P33. NO está apagado ni
+   * aflojado: corre como todos y su aserto es el mismo. Esto es la marca, para
+   * que el próximo rojo acá no cueste un sprint de atribución.
    *
    * Qué falla: `expectToast(page, /Brief guardado/i)` de la línea de abajo, con
-   * «element(s) not found» tras 15 s. En el call log de Playwright se ve por qué:
+   * «element(s) not found» tras 15 s. Le pasa igual a B1, B3 y B8 — los cuatro
+   * tests de este archivo que navegan a la RAÍZ del lead. Los que entran directo
+   * con `pantalla(leadId, 'mX')` (B2, B6) no fallaron nunca.
    *
-   *     - waiting for ".../manual/m6" navigation to finish...
-   *     - navigated to ".../manual/m6"
+   * ── Lo que P26 creyó, y lo que P33 midió ────────────────────────────────────
+   * P26 leyó el call log («waiting for …/manual/m6 navigation to finish») y
+   * concluyó que el aserto llegaba tarde a un cartel que una navegación
+   * concurrente se llevaba puesto. P33 lo midió y NO es eso: en la pasada roja
+   * hay 841 muestras a lo largo de 14 s continuos y CERO carteles montados — de
+   * cualquier texto, no sólo del que pide el test. No hay cartel que llegue
+   * tarde: no hay cartel.
    *
-   * El toast es efímero y `useStepAction` hace `router.refresh()` después de
-   * mostrarlo; el refresh re-deriva el wizard y lo manda a m6. El aserto no mide
-   * mal: su SUJETO se lo lleva puesto una navegación concurrente.
+   * Y la acción SÍ corrió: `enviadaAt` quedó escrito en la base en las TRES
+   * corridas rojas medidas. O sea el setter apretó, el servidor persistió, y no
+   * hubo acuse ni reflejo.
    *
-   * Cuándo aparece (medido en P26, mismo build y mismo código):
-   *   · 8 corridas con UN server ya caliente (SETTER_EXTERNAL_SERVER=1):
-   *     1.528 ejecuciones, 0 rojas. Nunca.
-   *   · 2 corridas en modo webServer (build + `next start` nuevos por corrida):
-   *     1 roja de 2. Y las frías corren 30-45% más lento (392-446 s contra
-   *     290-310 s) — cada ruta paga su primer render, y ahí se abre la ventana.
+   * ── Por qué pasa (la cadena, medida en P30 y cerrada en P33) ────────────────
+   * `useStepAction.run()` mete la acción Y su `toast.success` dentro del mismo
+   * `startTransition`. El render de esa transición suspende (lane 0x200); React
+   * entrega UN ping cuando la action responde, y si el árbol RSC revalidado
+   * todavía no resolvió, se re-suspende y no llega ningún ping más. El
+   * `toast.success` es una actualización DE ESE LANE: si el lane no commitea, el
+   * cartel no se monta. Y el cartel era lo único que despertaba al lane (P30).
+   * Cuando la carrera se pierde, lo que iba a destrabarlo quedó atrapado adentro
+   * de lo que hay que destrabar: ni acuse, ni pantalla nueva.
    *
-   * Para reproducirlo: `npm run test:setter` a secas (modo webServer). Para NO
-   * verlo: server aparte + SETTER_EXTERNAL_SERVER=1.
+   * Reproducción (P33): `npx playwright test --config=playwright.perf.config.ts
+   * carrera-del-cartel` — server nuevo por corrida. 3 de 3 dieron una roja, con
+   * `EN BASE: SÍ` y `carteles (0)`. Contra server tibio: 6 de 6 verdes.
    *
-   * Por qué no se arregló acá: envolver el aserto o cambiarlo por la navegación
-   * lo AFLOJA (de «hay exactamente esto» a «hay algo»), y hacerlo sin decidir
-   * antes si el setter TAMBIÉN pierde ese acuse sería taparlo. Esa decisión es de
-   * producto —el toast que una navegación se come es la familia de defecto que
-   * P25 arregló para los tildes— y el encargo de P26 prohíbe tocar producto.
-   * Queda para su sprint. Detalle y evidencia en docs/bitacora-beta-3.md (P26).
+   * Por qué NO se arregló acá: arreglarlo es tocar producto, y el encargo lo
+   * prohíbe — «significaría que el flake es un bug real y es otro sprint». Lo
+   * es. Aflojar el aserto (envolverlo, cambiarlo por la navegación, esperar la
+   * DB en vez del aviso) taparía un defecto que hoy este rojo es lo único que
+   * denuncia. Detalle y medición en docs/bitacora-beta-3.md (P33).
    */
   test('B4 · respuesta del negocio abre el BRIEF (gate) + transición EVALUADA→BRIEF', async ({ page }) => {
     // Lead EVALUADO que YA respondió (status RESPONDIO abre gateBriefAbierto).
@@ -367,8 +390,8 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
       const dossier = await getDossier(leadId)
       expect(dossier?.stage).toBe('APROBADA')
       expect(dossier?.finalUrl).toBeTruthy()
-      const aprobadas = await countNoticesFor(setterId, 'DEMO_APROBADA')
-      expect(aprobadas, 'novedad "Franco aprobó tu demo" emitida').toBeGreaterThanOrEqual(1)
+      const aprobadas = await avisosDelLead(setterId, leadId, 'DEMO_APROBADA')
+      expect(aprobadas, 'novedad "Franco aprobó tu demo" emitida para ESTE lead').toBeGreaterThanOrEqual(1)
     }).toPass({ timeout: 15_000 })
   })
 
@@ -391,6 +414,8 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     // código vivo — es casi una tautología — y el `.catch()` se comía el fallo
     // aunque no apareciera ningún aviso. `/Demo enviada registrada/i` tiene UNA
     // (el toast de `envio-form.tsx`), y sin el `.catch()` la aserción afirma.
+    // ⚠ Mismo flake conocido que B4 (la marca larga está arriba de B4): en la
+    // primera visita en frío la acción persiste y el cartel no se monta. NO aflojar.
     await expectToast(page, /Demo enviada registrada/i)
 
     await expect(async () => {
@@ -473,7 +498,10 @@ test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió 
   // flakiness (la cuenta suelta afuera leía 0 bajo carga del suite).
   await expect(async () => {
     expect((await getDossier(lead.id))?.stage, 'reject → RECHAZADA (no CONSTRUCCION)').toBe('RECHAZADA')
-    expect(await countNoticesFor(setterId, 'DEMO_RECHAZADA')).toBeGreaterThanOrEqual(1)
+    expect(
+      await avisosDelLead(setterId, lead.id, 'DEMO_RECHAZADA'),
+      'novedad "Franco pidió cambios" emitida para ESTE lead',
+    ).toBeGreaterThanOrEqual(1)
   }).toPass({ timeout: 15_000 })
 })
 

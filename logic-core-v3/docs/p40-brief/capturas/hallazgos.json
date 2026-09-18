@@ -1,0 +1,60 @@
+{
+  "1440.vueltaAlEntrar": "1 · Lectura estética",
+  "1440.mensajeVuelta2TraeLaLectura": true,
+  "1440.lecturaCompleta": "Leí el encabezado del documento Están las líneas que la construcción necesita. Completé con lo que leí: «Concepto», «Secciones de la demo», «Llamado a la acción (CTA)», «Tono», «Paleta» y «Tipografía».",
+  "1440.cabecera4": "4 · Caza de huecos Documento pegado · encabezado leído",
+  "1440.camposCompletados": {
+    "secciones": true,
+    "tono": true,
+    "paleta": true,
+    "tipografia": true,
+    "cta": true
+  },
+  "1440.volverConservaLoPegado": true,
+  "1440.sin-encabezado": "Este documento no trae el encabezado No encontré las seis líneas del principio: ANGULO, SECCIONES, CTA, TONO, PALETA y TIPOGRAFIA, cada una seguida de dos puntos. No se pierde nada: el documento se guarda y viaja entero a la construcción. Qué hacer: Escribí vos las secciones, la paleta y la tipografía en sus campos, o pedile al Gem que te mande el documento de nuevo empezando por esas seis líneas. El brief se guarda igual.",
+  "1440.sin-encabezado.cabecera4": "4 · Caza de huecos Documento pegado · no trae el encabezado",
+  "1440.falta-paleta": "Al principio del documento falta algo Falta la línea PALETA: sin la paleta, Claude Design elige los colores por su cuenta. Completé con lo que leí: «Concepto», «Secciones de la demo», «Llamado a la acción (CTA)», «Tono» y «Tipografía». Qué hacer: Pedile al Gem que te mande el documento de nuevo, empezando por las seis líneas (ANGULO, SECCIONES, CTA, TONO, PALETA, TIPOGRAFIA), o escribí lo que falta en su campo. El brief se guarda igual.",
+  "1440.falta-paleta.cabecera4": "4 · Caza de huecos Documento pegado · falta PALETA",
+  "1440.briefViejoClaves": [
+    "concepto",
+    "cta",
+    "pegadoGem",
+    "secciones",
+    "titulo"
+  ],
+  "1440.bloqueLlevaLosTres": [
+    true,
+    true,
+    true
+  ],
+  "1440.revisionSinFaltanteFalso": true,
+  "390.vueltaAlEntrar": "1 · Lectura estética",
+  "390.mensajeVuelta2TraeLaLectura": true,
+  "390.lecturaCompleta": "Leí el encabezado del documento Están las líneas que la construcción necesita. Completé con lo que leí: «Concepto», «Secciones de la demo», «Llamado a la acción (CTA)», «Tono», «Paleta» y «Tipografía».",
+  "390.cabecera4": "4 · Caza de huecos Documento pegado · encabezado leído",
+  "390.camposCompletados": {
+    "secciones": true,
+    "tono": true,
+    "paleta": true,
+    "tipografia": true,
+    "cta": true
+  },
+  "390.volverConservaLoPegado": true,
+  "390.sin-encabezado": "Este documento no trae el encabezado No encontré las seis líneas del principio: ANGULO, SECCIONES, CTA, TONO, PALETA y TIPOGRAFIA, cada una seguida de dos puntos. No se pierde nada: el documento se guarda y viaja entero a la construcción. Qué hacer: Escribí vos las secciones, la paleta y la tipografía en sus campos, o pedile al Gem que te mande el documento de nuevo empezando por esas seis líneas. El brief se guarda igual.",
+  "390.sin-encabezado.cabecera4": "4 · Caza de huecos Documento pegado · no trae el encabezado",
+  "390.falta-paleta": "Al principio del documento falta algo Falta la línea PALETA: sin la paleta, Claude Design elige los colores por su cuenta. Completé con lo que leí: «Concepto», «Secciones de la demo», «Llamado a la acción (CTA)», «Tono» y «Tipografía». Qué hacer: Pedile al Gem que te mande el documento de nuevo, empezando por las seis líneas (ANGULO, SECCIONES, CTA, TONO, PALETA, TIPOGRAFIA), o escribí lo que falta en su campo. El brief se guarda igual.",
+  "390.falta-paleta.cabecera4": "4 · Caza de huecos Documento pegado · falta PALETA",
+  "390.briefViejoClaves": [
+    "concepto",
+    "cta",
+    "pegadoGem",
+    "secciones",
+    "titulo"
+  ],
+  "390.bloqueLlevaLosTres": [
+    true,
+    true,
+    true
+  ],
+  "390.revisionSinFaltanteFalso": true
+}

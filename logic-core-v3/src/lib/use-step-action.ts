@@ -25,6 +25,57 @@
  * qué hacer con sus errores (per-campo, primer mensaje, abrir un modal).
  * `erroresPorCampo` es solo el mapeo ZodError → primer mensaje por campo que
  * los steps con errores per-campo copiaban idéntico.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ⚠️  EL `successToast` NO ES SÓLO EL ACUSE: ES LO QUE HACE QUE LA PANTALLA SE
+ *     ACTUALICE. Sacarlo deja la pantalla congelada en el estado viejo.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Suena raro y está medido (P29 · P30 · P31). La cadena completa:
+ *
+ *   1. `run()` despacha la action. Next envuelve ese despacho en
+ *      `React.startTransition` SIEMPRE (`callServer`, en
+ *      `next/dist/client/app-call-server.js`): producto no puede evitarlo.
+ *   2. El estado del router queda en una promesa que `AppRouter` consume con
+ *      `use()`, así que el render de la transición SUSPENDE
+ *      (`root.suspendedLanes |= 0x200`, `root.warmLanes |= 0x200`).
+ *   3. La action responde (~0,9 s) y React entrega EXACTAMENTE UN ping. Si en
+ *      ese reintento el árbol RSC revalidado todavía no resolvió, el render se
+ *      re-suspende — y de esa segunda suspensión NO LLEGA NINGÚN PING MÁS:
+ *      `getNextLanes` no vuelve a elegir un lane marcado «warm».
+ *   4. Sólo una actualización de estado no-idle en el mismo root lo destraba:
+ *      `markRootUpdated` pone `suspendedLanes = 0` y `warmLanes = 0`, React
+ *      reintenta, y con los datos ya listos COMMITEA.
+ *   5. Hoy, en producción, esa actualización es EL AUTO-CIERRE DEL CARTEL de
+ *      sonner, a los 4000 ms de haberse montado. Por eso el setter ve el
+ *      resultado de su acción a los ~4,7 s y no al segundo.
+ *
+ * Medido: sin cartel, `mc1` no refleja NUNCA — 75 s con el dossier ya escrito en
+ * la base y un único ping a los 973 ms.
+ *
+ * QUÉ LO ROMPE (las cuatro, en silencio y con todos los gates en verde):
+ *   · sacar el `<Toaster>` de `app/layout.tsx`;
+ *   · pasarle un `duration` corto (medido: 800 ms anda —cierra a ~1,4 s—, 150 ms
+ *     NO: el cierre cae adentro de la ventana de la carrera y no commitea nunca);
+ *   · quitarle el `successToast` a una acción que revalida;
+ *   · migrar de sonner a otra librería de avisos que no monte/desmonte con
+ *     `setState` en este mismo root.
+ *
+ * CÓMO VERIFICARLO — hacen falta los dos, y ninguno alcanza solo:
+ *   npm run check:invariant:reflejo   (la FORMA: Toaster montado, duration,
+ *                                      cartel en cada acción que revalida)
+ *   npm run test:setter -- 31-reflejo (la CONDUCTA: que la pantalla commitee)
+ *
+ * ES UNA LIMITACIÓN ACEPTADA A PROPÓSITO, no un descuido. Las alternativas se
+ * midieron y se descartaron con evidencia —empujón deliberado (el umbral es una
+ * carrera, 800-1100 ms), estado optimista (cambia QUÉ ve el setter), subir React
+ * (19.2.8 se atasca 6/6), volver a `router.refresh()` (refutado, y devuelve el
+ * render de servidor que P28 sacó)—. Todo en `docs/perf-p30/REPORTE.md`.
+ *
+ * OJO con la regla simplificada: NO es «toda acción emite cartel». La que no
+ * revalida no lo necesita, porque no hay árbol de servidor esperando commit —
+ * `ofrecerHorarios` (m16) es ese caso, medido: refleja 4/4 a ~0,7 s sin ningún
+ * cartel, empujada por su propio `setState` en `onSuccess`.
  */
 import { useTransition } from 'react'
 import { toast } from 'sonner'

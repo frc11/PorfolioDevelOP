@@ -1,0 +1,39 @@
+######## CONTROL POSITIVO FORZADO ########
+
+--- corte +200ms ---
+   server FRIO arriba
+   exit=0
+   [cp p1] docs=2 post=1 despacho+45ms acuse=NO carteles=0 base=SI reflejo=NO etapas=[despacho+45ms | dentro-transicion+46ms]
+   [cp p2] docs=2 post=1 despacho+47ms acuse=NO carteles=0 base=SI reflejo=NO etapas=[despacho+47ms | dentro-transicion+47ms]
+   [cp p3] docs=2 post=1 despacho+28ms acuse=NO carteles=0 base=SI reflejo=NO etapas=[despacho+28ms | dentro-transicion+28ms]
+
+--- corte +600ms ---
+   server matado (pid 29048)
+   server FRIO arriba
+   exit=0
+   [cp p1] docs=2 post=1 despacho+49ms acuse=NO carteles=0 base=SI reflejo=NO etapas=[despacho+49ms | dentro-transicion+49ms]
+   [cp p2] docs=2 post=1 despacho+36ms acuse=NO carteles=0 base=SI reflejo=SI etapas=[despacho+36ms | dentro-transicion+36ms]
+   [cp p3] docs=2 post=1 despacho+28ms acuse=NO carteles=0 base=SI reflejo=SI etapas=[despacho+28ms | dentro-transicion+28ms]
+
+######## REPRODUCCION NATURAL (forma P34) ########
+
+--- repro ronda 1 ---
+   server matado (pid 29464)
+   server FRIO arriba
+   exit=0
+   [r1 p1] docs=3 post=0 despacho+1850ms acuse=SI hastaBoton=2920ms carteles=1 base=SI reflejo=SI
+   [r1 p2] docs=3 post=0 despacho+791ms acuse=SI hastaBoton=1198ms carteles=1 base=SI reflejo=SI
+   [r1 p3] docs=3 post=0 despacho+835ms acuse=SI hastaBoton=1086ms carteles=1 base=SI reflejo=SI
+
+--- repro ronda 2 ---
+   server matado (pid 24296)
+   server FRIO arriba
+   exit=0
+   [r2 p1] docs=3 post=0 despacho+1883ms acuse=SI hastaBoton=2928ms carteles=1 base=SI reflejo=SI
+   [r2 p2] docs=3 post=0 despacho+785ms acuse=SI hastaBoton=1208ms carteles=1 base=SI reflejo=SI
+   [r2 p3] docs=3 post=0 despacho+785ms acuse=SI hastaBoton=1190ms carteles=1 base=SI reflejo=SI
+   server matado (pid 6880)
+
+######## FIN CONTROLES ########
+control: 6 lineas
+repro:   6 lineas

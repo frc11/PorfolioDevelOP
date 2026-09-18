@@ -47,6 +47,9 @@ import { ownedLeadCreateData } from '../../src/lib/leados/isolation'
  *   - `escrituraSola`: el MISMO camino de dominio que la action usa para
  *     escribir, corrido en proceso contra un lead gemelo sembrado igual. Es la
  *     columna «la base, sola».
+ *   - `adoptarCreado` (P39): solo para el caso cuya acción CREA la fila en vez
+ *     de recibirla sembrada. La registra en el tracker para que el teardown la
+ *     borre. Corre después de la medición, así que no la toca.
  */
 
 export type PreparacionCaso = { leadId: string; url: string; nombre?: string }
@@ -60,6 +63,7 @@ export type Caso = {
   actuar: (page: Page, prep: PreparacionCaso) => Promise<void>
   verificar: (leadId: string) => Promise<boolean>
   escrituraSola: (leadId: string, setterId: string) => Promise<void>
+  adoptarCreado?: (page: Page, tracker: SmokeTracker) => Promise<void>
 }
 
 const pantallaUrl = (leadId: string, paso: string) => `/setter/leads/${leadId}/manual/${paso}`
@@ -142,6 +146,15 @@ export const CASOS: readonly Caso[] = [
     },
     // El lead lo crea la acción: la prueba es que la URL destino ya es su ficha.
     verificar: async () => true,
+    // P39 — el lead lo creó el formulario, así que nadie lo había registrado: uno
+    // por pasada quedaba en la cartera de setter-qa para siempre (51 hasta P37). Su
+    // id es el de la URL destino — la ficha a la que la acción redirige.
+    adoptarCreado: async (page, tracker) => {
+      await page.waitForURL(/\/setter\/leads\/[^/?#]+/, { timeout: 30_000 })
+      const id = /\/setter\/leads\/([^/?#]+)/.exec(new URL(page.url()).pathname)?.[1]
+      if (!id) throw new Error(`alta: la URL destino no trae el id del lead creado (${page.url()})`)
+      tracker.leadIds.push(id)
+    },
     escrituraSola: async (_leadId, setterId) => {
       const creado = await prisma.osLead.create({
         data: ownedLeadCreateData(

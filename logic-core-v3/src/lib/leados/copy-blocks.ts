@@ -4,10 +4,10 @@
  * Puro string-building, sin dependencias: legible por humanos e IA. Las
  * herramientas viven AFUERA del panel; acá solo se arma el input.
  */
+import { faltaLaSalidaDelGem } from '@/lib/leados/brief-vueltas'
 import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { formatFechaHora } from '@/lib/leados/flow'
 import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
-import { faltaPorHerramientaSinLink } from '@/lib/leados/herramientas'
 
 export type CopyBlockLead = {
   businessName: string
@@ -173,6 +173,13 @@ export function buildHorariosMensajeBlock(slots: string[]): string {
  * habla el negocio de sí mismo. Sin esto los campos nuevos se cargaban y no
  * llegaban a la construcción. Degradación igual que siempre: lo vacío se OMITE,
  * nunca se rellena ni se anuncia como faltante.
+ *
+ * P40: suma la DIRECCIÓN VISUAL que el bloque no llevaba —tono, paleta y
+ * tipografía—, pegada a las decisiones de la demo (concepto, secciones, CTA),
+ * y el documento de construcción de las cuatro vueltas del Gem. Aditivo y con
+ * la misma regla: una sección nueva vacía se OMITE, así que un brief guardado
+ * antes de P40 arma exactamente el mismo bloque que antes, byte por byte; y
+ * ninguna sección vieja cambió de título ni de lugar relativo.
  */
 export function buildConstruccionBlock(
   lead: CopyBlockLead,
@@ -217,6 +224,12 @@ export function buildConstruccionBlock(
       ? `SECCIONES (en este orden)\n${brief.secciones.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
       : null,
     seccion('LLAMADO A LA ACCIÓN', brief.cta),
+    // P40 — La dirección visual, junto a las otras decisiones de la demo. Sin
+    // estas tres, Claude Design elige tono, colores y fuente por su cuenta: el
+    // mecanismo por el que las demos se parecían entre sí.
+    seccion('TONO (así escriben los textos de la demo)', brief.tono),
+    seccion('PALETA (usá estos colores y ningún otro; el acento, solo en el botón principal)', brief.paleta),
+    seccion('TIPOGRAFÍA (usá estas fuentes, nunca la del sistema)', brief.tipografia),
     seccion('NOTAS DE MARCA', brief.notasMarca),
     seccion('RESEÑAS REALES (usalas textuales como prueba social)', resenasBloque || undefined),
     seccion('CONTENIDO Y TONO REAL (logo / fotos / estilo)', ficha?.contenidoReal),
@@ -246,14 +259,24 @@ export function buildConstruccionBlock(
     // cargado. Omitirlo en silencio manda a Claude Design un bloque más corto
     // sin decir que le falta la pieza — y el setter, que lee este mismo bloque,
     // tampoco se entera. Un campo que el setter dejó vacío A PROPÓSITO sigue
-    // omitiéndose: `faltaPorHerramientaSinLink` solo es cierto cuando la
-    // herramienta es la que no está.
+    // omitiéndose: el faltante solo es cierto cuando la herramienta es la que
+    // no está.
+    //
+    // P40 — Con las cuatro vueltas, lo que devuelve el Gem es el DOCUMENTO de
+    // la vuelta 4: si está, va él (tal cual se pegó, encabezado incluido) y el
+    // faltante no se anuncia —el Gem sí aportó—. Mismo título y mismo lugar: lo
+    // único que cambió es de qué campo sale para un brief que lo trae.
     seccion(
       'BRIEF COMPLETO DEL GEM DE DISEÑO',
-      brief.pegadoGem ||
-        (faltaPorHerramientaSinLink('gemDiseno', brief.pegadoGem)
-          ? GUIA_BRIEF.campos.pegadoGem.faltante
-          : undefined),
+      brief.documento ||
+        brief.pegadoGem ||
+        (faltaLaSalidaDelGem(brief) ? GUIA_BRIEF.campos.pegadoGem.faltante : undefined),
+    ),
+    // P40 — Lo que el setter le corrigió al documento. Va DESPUÉS del documento
+    // y manda sobre él: es lo último que el setter decidió. Solo con documento.
+    seccion(
+      'CORRECCIONES DEL SETTER AL DOCUMENTO (mandan sobre lo que dice el documento)',
+      brief.documento ? brief.vueltas?.huecos?.correccion : undefined,
     ),
   ]
 

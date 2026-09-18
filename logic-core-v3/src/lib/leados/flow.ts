@@ -593,11 +593,12 @@ function proximaAccionPara(
 }
 
 /**
- * P8 — Rótulo INFORMATIVO de por qué una card ocupa su lugar en el carril
- * "trabajar". NO recalcula nada: lee el MISMO `trabajoTier` que ordena la cola,
- * traducido al idioma del setter. Solo aplica a "trabajar" — el único lane
- * ordenado por prioridad; los demás van por antigüedad, ya visible en la meta
- * "hace X días". Devuelve null cuando no hay rótulo que mostrar.
+ * P8 — Rótulo INFORMATIVO de qué hay que hacer con una card del carril
+ * "trabajar". NO recalcula nada: lee `trabajoTier`, traducido al idioma del
+ * setter. Desde P37 la clase ya NO decide el lugar en la cola (ver `ordenFoco`),
+ * así que el rótulo nombra el trabajo, no explica la posición — salvo el del pin,
+ * que sí la explica. Solo aplica a "trabajar"; los demás van por antigüedad, ya
+ * visible en la meta "hace X días". Devuelve null cuando no hay rótulo que mostrar.
  *
  * Sincronía POR CONSTRUCCIÓN (antes era por disciplina): el `switch` es
  * exhaustivo sobre `TrabajoTier`, así que agregar un tier al criterio no compila
@@ -683,16 +684,14 @@ function ordenUrgencia(a: HomeLead, b: HomeLead): number {
 // ── P8: qué es "trabajo pendiente" ahora que el recorrido se dio vuelta ───────
 
 /**
- * P8 — El criterio del FOCO. El recorrido cambió: antes el setter contactaba
- * primero y construía si el negocio respondía; ahora llega con la demo hecha. El
- * orden viejo (`urgenciaTier`: respondió → caliente → resto) razonaba con el
- * recorrido anterior — no miraba el stage en ningún momento, así que una demo a
- * medio construir quedaba en el último tier detrás de cualquier prospecto frío
- * marcado caliente. Este tier lo reemplaza COMO CRITERIO PRIMARIO de la cola
- * `trabajar`; la urgencia vieja sobrevive como DESEMPATE dentro del tier (ver
- * `ordenFoco`), donde sigue siendo señal útil sin poder dominar.
+ * P8 — La CLASE DE TRABAJO de un lead accionable. P8 la introdujo como criterio
+ * primario del orden de la cola; **P37 la sacó de la comparación** (ver
+ * `ordenFoco`): puesta arriba, la clase más poblada monopolizaba la cola. Hoy
+ * alimenta solo el rótulo (`motivoOrden`) — qué hay que hacer con el lead.
  *
- * Números bajos = más prioritario. El orden es el del sprint:
+ * Los números ya no ordenan leads entre sí. Lo que sigue importando es el orden de
+ * los `if` de `trabajoTier`: decide qué rótulo gana cuando un lead califica para
+ * dos clases. La numeración es la que P8 escribió:
  *   0 CONSTRUIR            — pasó la evaluación y todavía no tiene demo. Es el
  *                            trabajo que produce valor y el que antes no se sugería.
  *   1 ESPERA_TU_ACCION     — algo quedó trabado esperándolo a él: correcciones de
@@ -756,23 +755,24 @@ function trabajoTier(lead: HomeLead): TrabajoTier {
 }
 
 /**
- * A-05 + P8 — Comparador del foco (cola `trabajar`). Tres niveles, en orden:
+ * A-05 + P37 — Comparador del foco (cola `trabajar`). Dos niveles, en orden:
  *   1. el fijado va PRIMERO (A-05: el pin es preferencia de ORDEN, no exclusión —
- *      sube el lead a la cima de la cola accionable en vez de sacarlo de ella,
- *      mismo patrón `Number(b.pinned) - Number(a.pinned)` que `filtrarYOrdenarCartera`);
- *   2. a igualdad de pin manda `trabajoTier` — el criterio nuevo (construir primero);
- *   3. a igualdad de tier, la urgencia de siempre (respondió → caliente → antigüedad),
- *      que queda como desempate: sigue siendo señal, ya no es el criterio.
+ *      sube el lead a la cima de la cola accionable en vez de sacarlo de ella);
+ *   2. a igualdad de pin, la urgencia (respondió → caliente → antigüedad).
  *
- * `ordenUrgencia` NO cambió: la cartera (orden "urgencia") y los `fijados` en vuelo
- * conservan exactamente el orden que tenían. Lo que cambia es la cola del foco.
+ * Es EXACTAMENTE el orden «urgencia» de la cartera (`filtrarYOrdenarCartera`): la
+ * superficie principal y la secundaria no pueden volver a divergir.
+ *
+ * P37 — `trabajoTier` SALIÓ de la comparación. P8 lo había puesto como criterio
+ * primario, y un orden total estricto cortado en `TOPE_COLA` hace que el primer
+ * nivel con cinco leads consuma la cola entera: `CONSTRUIR`, el más poblado del
+ * embudo, dejaba 4 de los 6 niveles inalcanzables (P36, medido: la demo aprobada
+ * lista para mandar caía en la fila 97). Con la urgencia llegan 4 de 6 y el pin se
+ * conserva. El nivel sigue existiendo como RÓTULO (`motivoOrden`): nombra qué hay
+ * que hacer con el lead, ya no decide su lugar.
  */
 function ordenFoco(a: HomeLead, b: HomeLead): number {
-  return (
-    Number(b.pinned) - Number(a.pinned) ||
-    trabajoTier(a) - trabajoTier(b) ||
-    ordenUrgencia(a, b)
-  )
+  return Number(b.pinned) - Number(a.pinned) || ordenUrgencia(a, b)
 }
 
 /** Partición de la cartera con la organización propia del setter por encima. */

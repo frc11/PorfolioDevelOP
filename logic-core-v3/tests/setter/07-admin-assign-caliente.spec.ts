@@ -83,6 +83,16 @@ test('G1 · admin asigna a B + caliente (acción real) → B gana y el gate del 
   await pickSelect(page, 'Setter asignado', bName)
   // Marcar caliente (switch) y guardar.
   await firstVisible(page.getByRole('switch', { name: /Marcar como caliente/i })).click()
+  // P39 — los avisos salientes que A ya tenía, ANTES de la acción: lo que aparezca
+  // después es lo que emitió esta asignación.
+  const salientesPrevios = new Set(
+    (
+      await prisma.osSetterNotice.findMany({
+        where: { setterId: aId, kind: 'LEAD_REASIGNADO_SALIENTE', leadId: null },
+        select: { id: true },
+      })
+    ).map((aviso) => aviso.id),
+  )
   await firstVisible(page.getByRole('button', { name: /Guardar asignación/i })).click()
 
   // Verdad de la acción real: el lead quedó en B y caliente (poll a la DB).
@@ -93,6 +103,28 @@ test('G1 · admin asigna a B + caliente (acción real) → B gana y el gate del 
     })
     expect(row?.assignedToId).toBe(bId)
     expect(row?.caliente).toBe(true)
+  }).toPass({ timeout: 15_000 })
+
+  // P39 — la reasignación real le avisa al dueño previo (A = setter-qa) con
+  // `leadId: null`, por diseño (`lead.actions.ts`): el teardown borra por lead y por
+  // setter creado, y a ese aviso no lo alcanzaba ninguno. Quedaba uno por corrida
+  // en la bandeja compartida — 85 acumulados, y el panel lee solo los 50 más
+  // nuevos. Se registra por ID, recién emitido: el que no existía antes de la
+  // acción y nombra a ESTE lead (su nombre lleva el stamp de la corrida). Una
+  // corrida en paralelo que reasigne otro lead no entra.
+  await expect(async () => {
+    const nuevos = await prisma.osSetterNotice.findMany({
+      where: {
+        setterId: aId,
+        kind: 'LEAD_REASIGNADO_SALIENTE',
+        leadId: null,
+        id: { notIn: [...salientesPrevios] },
+        body: { startsWith: `${businessName} ` },
+      },
+      select: { id: true },
+    })
+    expect(nuevos, 'el aviso saliente de ESTA asignación, para poder borrarlo por id').toHaveLength(1)
+    tracker.avisoIds.push(nuevos[0]!.id)
   }).toPass({ timeout: 15_000 })
 
   // ── 2) B (SETTER, minteado) GANA el lead en su portal ──

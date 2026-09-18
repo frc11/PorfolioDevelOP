@@ -46,37 +46,35 @@ export type ShellFase = {
  * Esta constante es la ÚNICA copia del contenido del shell: la UI la consume
  * tal cual, así Franco reemplaza la secuencia por la validada editando SOLO
  * este array, sin tocar componentes.
+ *
+ * P42 — Las tres fases de «Construir» (estructura, personalización, assets) se
+ * quedaron SIN items. Sus nueve puntos eran instrucciones para la herramienta
+ * dichas al setter, y ahora viajan adentro del bloque que se pega: el orden y
+ * las secciones del brief en el documento; no agregar secciones, no inventar
+ * datos y usar lo real en las instrucciones (`PROMPT_BASE`); fotos reales, nada
+ * de stock y el nombre tipografiado si no hay logo en el piso de calidad
+ * (`PISO_DE_CALIDAD`, `prompt-construccion.ts`). Mostrarlos en pantalla era
+ * pedirle al setter que leyera dos veces lo mismo. Los ids y los títulos quedan:
+ * los ids son la llave del progreso guardado y los títulos nombran las fases.
  */
 export const SHELL_CONSTRUCCION: ShellFase[] = [
   {
     id: 'estructura',
     titulo: 'Estructura',
     detalle: 'Generá el esqueleto de la demo en Claude Design a partir del brief.',
-    items: [
-      'Copiá el bloque «para Claude Design» y pegalo ahí como primer mensaje.',
-      'Pedile una landing de una sola página con las secciones del brief, en ese orden.',
-      'No agregues secciones que el brief no pide — el brief es el plano.',
-    ],
+    items: [],
   },
   {
     id: 'personalizacion',
     titulo: 'Personalización con datos del negocio',
     detalle: 'Reemplazá todo texto genérico por la realidad del negocio.',
-    items: [
-      'Nombre, rubro y zona reales en el hero y el pie.',
-      'Usá frases de las reseñas reales como prueba social (las tenés en la ficha).',
-      'Horarios, dirección y servicios tal como los publica el negocio.',
-    ],
+    items: [],
   },
   {
     id: 'assets',
     titulo: 'Assets reales',
     detalle: 'Logo y fotos del negocio, no placeholders. Este sub-paso no se saltea.',
-    items: [
-      'Bajá el logo y 3–5 fotos del Instagram o Google Maps del negocio.',
-      'Insertalas donde Claude Design puso imágenes genéricas o de stock.',
-      'Si el negocio no tiene logo, usá el nombre tipografiado — nunca un logo inventado.',
-    ],
+    items: [],
   },
   {
     id: 'cta',
@@ -188,7 +186,9 @@ export const HARD_CHECKS: HardCheck[] = [
     id: 'sinRelleno',
     nombre: 'No hay lorem ipsum ni textos de relleno',
     comoVerificar: 'Leé la página entera buscando texto de mentira o puesto para llenar espacio.',
-    arreglo: 'Reemplazá cada relleno con datos reales del negocio («Construir», fase Personalización).',
+    // P42 — decía «(«Construir», fase Personalización)»: «Construir» ya no muestra
+    // fases. El `arreglo` no se persiste; el `nombre` (la llave) no se toca.
+    arreglo: 'Reemplazá cada relleno con datos reales del negocio («Construir»).',
     grupo: 'setter',
   },
   {
@@ -215,7 +215,8 @@ export const HARD_CHECKS: HardCheck[] = [
     nombre: 'Usa los datos y assets reales del negocio',
     comoVerificar:
       'Logo, fotos, nombre y dirección del negocio de verdad — nada bajado de un banco de imágenes.',
-    arreglo: 'Insertá los assets del negocio («Construir», fase Assets reales) y re-publicá.',
+    // P42 — decía «(«Construir», fase Assets reales)», por el mismo motivo.
+    arreglo: 'Insertá los assets del negocio («Construir») y re-publicá.',
     grupo: 'setter',
   },
   {

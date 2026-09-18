@@ -122,9 +122,24 @@ export default function RootLayout({
           <PublicOnlyComponents>
             <Preloader />
           </PublicOnlyComponents>
-          <Toaster 
-            theme="dark" 
-            position="bottom-right" 
+          {/*
+            ⚠️ NO ES SÓLO COSMÉTICO. Este <Toaster> es hoy lo que hace que las
+            pantallas del recorrido del setter SE ACTUALICEN después de una
+            acción: el auto-cierre del cartel (4000 ms, el default de sonner que
+            se conserva a propósito NO pasando la prop) es el `setState` que
+            destraba el lane suspendido de React donde quedó el árbol revalidado.
+
+            Sacarlo, o pasarle un `duration` corto, congela varias pantallas del
+            setter en el estado viejo — sin error, sin log, y con todos los gates
+            en verde. Medido: con `duration={150}` la pantalla no commitea nunca.
+
+            Antes de tocarlo: src/lib/use-step-action.ts (la cadena completa),
+            docs/perf-p30/REPORTE.md (la medición y las alternativas descartadas),
+            npm run check:invariant:reflejo + npm run test:setter -- 31-reflejo.
+          */}
+          <Toaster
+            theme="dark"
+            position="bottom-right"
             toastOptions={{
               style: {
                 background: '#090a0f',

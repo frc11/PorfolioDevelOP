@@ -1,0 +1,65 @@
+{
+ "base": "http://127.0.0.1:3003",
+ "medidoEn": "2026-09-15T00:20:41.832Z",
+ "email": "m0-gal-foco-construir@develop.test",
+ "anchos": [
+  {
+   "ancho": "1440",
+   "colaSeccion": "Tu cola de hoy | 2 para trabajar | TU FOCO AHORA | M0-GAL 37-home-foco-construir | gastronomia · Centro | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Ir a trabajarlo | Pausar | Saltar | ? | M0-GAL 37b-home-foco-construir-proximo | Completá la ficha | Todavía no sabés si sirve — evalualo | gastronomia · Centro | Trabajar",
+   "cola": [
+    "M0-GAL 37b-home-foco-construir-proximo | Completá la ficha | Todavía no sabés si sirve — evalualo | gastronomia · Centro | Trabajar"
+   ],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 2",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 37-home-foco-construir",
+       "texto": "M0-GAL 37-home-foco-construir | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 37b-home-foco-construir-proximo",
+       "texto": "M0-GAL 37b-home-foco-construir-proximo | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Completá la ficha | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": null,
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  },
+  {
+   "ancho": "390",
+   "colaSeccion": "Tu cola de hoy | 2 para trabajar | TU FOCO AHORA | M0-GAL 37-home-foco-construir | gastronomia · Centro | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Ir a trabajarlo | Pausar | Saltar | ? | M0-GAL 37b-home-foco-construir-proximo | Completá la ficha | Todavía no sabés si sirve — evalualo | gastronomia · Centro | Trabajar",
+   "cola": [
+    "M0-GAL 37b-home-foco-construir-proximo | Completá la ficha | Todavía no sabés si sirve — evalualo | gastronomia · Centro | Trabajar"
+   ],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 2",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 37-home-foco-construir",
+       "texto": "M0-GAL 37-home-foco-construir | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 37b-home-foco-construir-proximo",
+       "texto": "M0-GAL 37b-home-foco-construir-proximo | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Completá la ficha | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": null,
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  }
+ ]
+}

@@ -1,0 +1,53 @@
+{
+ "base": "http://127.0.0.1:3003",
+ "medidoEn": "2026-09-15T00:20:59.048Z",
+ "email": "m0-gal-nada-para-trabajar@develop.test",
+ "anchos": [
+  {
+   "ancho": "1440",
+   "colaSeccion": null,
+   "cola": [],
+   "enEspera": "No hay nada para trabajar ahora mismo. | Tu trabajo está en vuelo: el lead vuelve a tu foco cuando el negocio conteste, Franco resuelva lo suyo o se venza una postergación. | 1 | esperando a Franco | Tu cartera completa sigue disponible. | ¿Querés adelantar? Cargá un prospecto nuevo",
+   "toggleCartera": "Ver toda la cartera | 1",
+   "grupos": [
+    {
+     "label": "Esperando revisión",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 40-home-nada-para-trabajar",
+       "texto": "M0-GAL 40-home-nada-para-trabajar | gastronomia · Centro · hace 35 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": "Novedades | Qué cambió desde tu última visita | TUS DEMOS ESPERANDO A FRANCO | 1 demo esperando revisión de Franco · hace 35 días. | Las ves en tu cartera → filtro «Esperando revisión».",
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  },
+  {
+   "ancho": "390",
+   "colaSeccion": null,
+   "cola": [],
+   "enEspera": "No hay nada para trabajar ahora mismo. | Tu trabajo está en vuelo: el lead vuelve a tu foco cuando el negocio conteste, Franco resuelva lo suyo o se venza una postergación. | 1 | esperando a Franco | Tu cartera completa sigue disponible. | ¿Querés adelantar? Cargá un prospecto nuevo",
+   "toggleCartera": "Ver toda la cartera | 1",
+   "grupos": [
+    {
+     "label": "Esperando revisión",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 40-home-nada-para-trabajar",
+       "texto": "M0-GAL 40-home-nada-para-trabajar | gastronomia · Centro · hace 35 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": "Novedades | TUS DEMOS ESPERANDO A FRANCO | 1 demo esperando revisión de Franco · hace 35 días. | Las ves en tu cartera → filtro «Esperando revisión».",
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  }
+ ]
+}

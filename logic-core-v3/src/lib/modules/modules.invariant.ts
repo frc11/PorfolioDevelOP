@@ -18,6 +18,12 @@
 import assert from 'node:assert/strict'
 import { buildShowroom, classifyModuleState } from './showroom.ts'
 import { rankModuleDemand, type ModuleDemandRow } from './demand.ts'
+import {
+  bloqueDeParentesis,
+  cuerpoDeFuncion,
+  sinComentarios,
+  valorDeClave,
+} from '../invariant-call-site.ts'
 
 // ── 1. classifyModuleState: los tres estados, con precedencia de tenencia ─────
 {
@@ -119,6 +125,77 @@ const catalog: Mod[] = [
   // Sin demanda → ranking vacío (no inventa nada).
   assert.deepEqual(rankModuleDemand([]), [], 'sin filas → []')
 }
+
+// ── 5. P32 — Y ADEMÁS: la tenencia que alimenta la vitrina sale de una consulta
+//    FILTRADA POR ORG ────────────────────────────────────────────────────────
+// La sección 3 se llama ANTI-IDOR y no puede fallar. El censo de P26 lo midió: el
+// aislamiento lo firma la FIRMA de `buildShowroom`, que recibe el mapa de UNA org
+// ya armado. Se le pasa el mapa de A y devuelve lo de A — haga lo que haga por
+// dentro. No existe entrada que la haga cruzar tenant, así que ninguna aserción
+// sobre ella discrimina: las cuatro de la sección 3 son verdaderas por construcción.
+//
+// El aislamiento real vive UN NIVEL MÁS ARRIBA, en el `where` de la consulta que
+// arma ese mapa. Si ese `where` pierde el `organizationId`, el mapa se llena con
+// las filas de todas las organizaciones y la vitrina le muestra a un cliente qué
+// módulos contrató cada uno de los otros. Las aserciones de arriba siguen verdes:
+// prueban la función, no la consulta.
+//
+// Es la forma «helper suelto» que P27 cerró para los nueve del aislamiento, con la
+// misma herramienta: leer la fuente de la consulta REAL, acotada a su función.
+const PAGINA_VITRINA = ['src', 'app', '(protected)', 'dashboard', 'services', 'page.tsx'] as const
+const CTX_VITRINA = 'la consulta de tenencia de la vitrina (ServicesPage)'
+// `sinComentarios` blanquea los comentarios y deja los literales intactos. Sin él,
+// un `// TODO: sumar prisma.organizationModule.updateMany()` entra al bucle como si
+// fuera una consulta y el recorte agarra el paréntesis de OTRO código: rojo, pero
+// acusando a la consulta equivocada.
+const servicesPage = sinComentarios(cuerpoDeFuncion(PAGINA_VITRINA, 'ServicesPage'))
+
+// TODA consulta al modelo de tenencia en esa página, no sólo la que hay hoy: una
+// segunda consulta sin filtro, agregada mañana, tiene que caerse acá también.
+const MARCA_TENENCIA = 'prisma.organizationModule.'
+let consultasDeTenencia = 0
+for (
+  let i = servicesPage.indexOf(MARCA_TENENCIA);
+  i !== -1;
+  i = servicesPage.indexOf(MARCA_TENENCIA, i + 1)
+) {
+  const abre = servicesPage.indexOf('(', i)
+  assert.notEqual(
+    abre,
+    -1,
+    `${CTX_VITRINA}: se encontró \`${MARCA_TENENCIA}\` sin ningún paréntesis después. La ` +
+      'fuente quedó ilegible para el recorte; arreglalo junto con el cambio en vez de dejar ' +
+      'que `bloqueDeParentesis` recorte desde un índice inválido.',
+  )
+  const llamada = bloqueDeParentesis(servicesPage, abre, CTX_VITRINA)
+  // `valorDeClave` recorta el `where:` entero, así que reordenar las claves del
+  // objeto o sumarle un `select` no mueve esta aserción — sólo la pierde quien
+  // saque el filtro, que es exactamente lo que tiene que doler.
+  const where = valorDeClave(llamada, 'where', CTX_VITRINA)
+  assert.match(
+    where,
+    /\borganizationId\b/,
+    'una consulta a `organizationModule` en la página de la vitrina dejó de filtrar por\n' +
+      '  `organizationId`. Eso es cross-tenant: el mapa de tenencia se arma con las filas de\n' +
+      '  TODAS las organizaciones, y la vitrina le muestra a un cliente qué módulos contrató\n' +
+      '  cada uno de los otros. La sección 3 de este archivo NO lo ve: le pasa a\n' +
+      '  `buildShowroom` un mapa de una sola org escrito a mano, así que su «no cruza tenant»\n' +
+      '  es verdadero por construcción. Si la consulta cambió de forma, atá el filtro nuevo\n' +
+      '  acá en el mismo commit.',
+  )
+  consultasDeTenencia += 1
+}
+
+// Piso de descubrimiento: sin esto, mudar o renombrar la consulta deja el bucle
+// recorriendo cero y la sección entera sale verde sobre nada — el mismo modo de
+// fallar que el guard de cuenta de `run-invariants` ya documentó.
+assert.ok(
+  consultasDeTenencia >= 1,
+  'no se encontró ninguna consulta a `organizationModule` en `ServicesPage`. La vitrina la\n' +
+    '  necesita para distinguir «ya lo tenés» de «disponible para contratar»: si se mudó a\n' +
+    '  otra función o a otro archivo, se llevó el filtro de org con ella y este chequeo dejó\n' +
+    '  de mirarlo. Apuntá `PAGINA_VITRINA` al lugar nuevo en el mismo commit.',
+)
 
 console.log(
   '✓ modules invariants OK: tres estados (owned/available/coming_soon), demanda (INACTIVE) ' +

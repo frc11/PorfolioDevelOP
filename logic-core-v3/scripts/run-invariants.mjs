@@ -86,7 +86,16 @@
 // pueden cubrir: cada uno de ellos mira SU call-site, así que una consulta NUEVA
 // sin filtro —escrita en otra función— no la ve ninguno. Falla en las dos
 // direcciones (una consulta nueva sin censar y una censada que desapareció).
-const INVARIANTES_ESPERADOS = 57;
+// 58 desde P31 («la limitación aceptada, vigilada»): suma
+// `check:invariant:reflejo` — que las pantallas del recorrido SIGAN
+// ACTUALIZÁNDOSE después de una acción. Hoy eso depende de que el `<Toaster>` de
+// sonner esté montado y su auto-cierre (4000 ms) produzca el `setState` que
+// destraba el lane suspendido donde React dejó el árbol revalidado. Vigila las
+// tres formas de romperlo en silencio: sacar el `<Toaster>`, acortarle el
+// `duration`, o quitarle el `successToast` a una acción que revalida. Su gemelo
+// de conducta es `tests/setter/31-reflejo-del-arbol.spec.ts`; ninguno alcanza
+// solo — el estático no puede ver si la pantalla commitea.
+const INVARIANTES_ESPERADOS = 58;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

@@ -1,0 +1,28 @@
+══ P34 · DÓNDE MUERE EL ACUSE (delay=0 ms) ══════════════════════════════
+
+── B8 raíz · pasada 1
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos nacidos en: [0ms | 271ms | 1291ms]
+   etapas de run(): [despacho+1877ms | dentro-transicion+1877ms | resuelta:ok+3720ms | post-onSuccess+3720ms | pidio-exito+3720ms]
+   marcas de acuse: [pedidos+3720ms | emitidos+3720ms]
+   veredicto: cartel montado
+
+── B8 raíz · pasada 2
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos nacidos en: [0ms | 223ms | 722ms]
+   etapas de run(): [despacho+897ms | dentro-transicion+897ms | resuelta:ok+1821ms | post-onSuccess+1821ms | pidio-exito+1821ms]
+   marcas de acuse: [pedidos+1821ms | emitidos+1821ms]
+   veredicto: cartel montado
+
+── B8 raíz · pasada 3
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos nacidos en: [0ms | 223ms | 613ms]
+   etapas de run(): [despacho+776ms | dentro-transicion+776ms | resuelta:ok+1718ms | post-onSuccess+1718ms | pidio-exito+1718ms]
+   marcas de acuse: [pedidos+1718ms | emitidos+1718ms]
+   veredicto: cartel montado
+
+════════════════════════════════════════════════════════════════════════════════
+
+  ok 1 [desktop] › tests\perf\p34-donde-muere-el-acuse.spec.ts:99:5 › B8 desde la raíz — dónde se corta la cadena del acuse (49.4s)
+
+  1 passed (50.9s)

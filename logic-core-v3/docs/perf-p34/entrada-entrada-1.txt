@@ -1,0 +1,51 @@
+══ P34 · ENTRADA DURA vs BLANDA ══════════════════════════════════════════════
+
+── DURA · pasada 1
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 247ms top …/manual | 1207ms top …/manual/m15]
+   etapas de run(): [despacho+1782ms | dentro-transicion+1783ms | resuelta:ok+3661ms | post-onSuccess+3661ms | pidio-exito+3662ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── DURA · pasada 2
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 258ms top …/manual | 574ms top …/manual/m15]
+   etapas de run(): [despacho+744ms | dentro-transicion+744ms | resuelta:ok+1650ms | post-onSuccess+1650ms | pidio-exito+1650ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+── DURA · pasada 3
+   documentos después del despacho: 0
+   documentos: [0ms top arrancar | 212ms top …/manual | 512ms top …/manual/m15]
+   etapas de run(): [despacho+666ms | dentro-transicion+666ms | resuelta:ok+1654ms | post-onSuccess+1654ms | pidio-exito+1654ms]
+   acuse pedido: SÍ · carteles=1 · EN BASE: SÍ
+
+   DURA: 3/3 con acuse · 0 perdidos
+
+   BLANDA: 0/0 con acuse · 0 perdidos
+
+════════════════════════════════════════════════════════════════════════════════
+
+  x  1 [desktop] › tests\perf\p34-entrada-dura-vs-blanda.spec.ts:170:5 › la misma acción, entrando duro y entrando blando (1.1m)
+
+
+  1) [desktop] › tests\perf\p34-entrada-dura-vs-blanda.spec.ts:170:5 › la misma acción, entrando duro y entrando blando 
+
+    TimeoutError: locator.click: Timeout 20000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /Trabajar P34 BLANDA 0/i }).filter({ visible: true }).first()
+
+
+      192 |         await firstVisible(
+      193 |           page.getByRole('button', { name: new RegExp(`Trabajar P34 ${entrada} ${i}`, 'i') }),
+    > 194 |         ).click()
+          |           ^
+      195 |         await page.waitForURL(/\/setter\/leads\/[^/]+\/manual/, { timeout: 30_000 })
+      196 |       }
+      197 |
+        at C:\Users\franc\Desktop\PorfolioDevelOP\logic-core-v3\tests\perf\p34-entrada-dura-vs-blanda.spec.ts:194:11
+
+    Error Context: test-results\p34-entrada-dura-vs-blanda-e2ca3-ando-duro-y-entrando-blando-desktop\error-context.md
+
+    Error Context: test-results\p34-entrada-dura-vs-blanda-e2ca3-ando-duro-y-entrando-blando-desktop\error-context.md
+
+  1 failed
+    [desktop] › tests\perf\p34-entrada-dura-vs-blanda.spec.ts:170:5 › la misma acción, entrando duro y entrando blando 

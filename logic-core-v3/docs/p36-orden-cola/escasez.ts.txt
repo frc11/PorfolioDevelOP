@@ -1,0 +1,27 @@
+/** P36 — ¿qué tiers son escasos POR NATURALEZA? Un tier abundante arriba monopoliza siempre. */
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.local' }); loadEnv({ path: '.env' })
+if (!process.env.DATABASE_URL?.includes('ep-quiet-waterfall-acv0fpll')) { console.error('ABORT'); process.exit(1) }
+async function main() {
+  const { prisma } = await import('@/lib/prisma')
+  // Censo por stage sobre TODOS los leads del sistema (no solo setter-qa): la forma del embudo.
+  const porStage = await prisma.osLeadDossier.groupBy({ by: ['stage'], _count: { _all: true } })
+  const sinDossier = await prisma.osLead.count({ where: { dossier: null } })
+  console.log('=== FORMA DEL EMBUDO (todos los leads del sistema) ===')
+  console.log(`  (sin dossier / FICHA implícita) .. ${sinDossier}`)
+  for (const r of porStage.sort((a, b) => b._count._all - a._count._all)) {
+    console.log(`  ${String(r.stage).padEnd(14)} .. ${r._count._all}`)
+  }
+  console.log('\n=== EL EMBUDO SE ANGOSTA: cuántos llegan a tener demo aprobada ===')
+  const aprobadas = await prisma.osLeadDossier.count({ where: { stage: 'APROBADA' } })
+  const conLink = await prisma.osLeadDossier.count({ where: { stage: 'APROBADA', finalUrl: { not: null } } })
+  const sinEnviar = await prisma.osLeadDossier.count({ where: { stage: 'APROBADA', finalUrl: { not: null }, enviadaAt: null } })
+  const construyendo = await prisma.osLeadDossier.count({ where: { stage: { in: ['BRIEF', 'CONSTRUCCION'] } } })
+  console.log(`  stage APROBADA .................... ${aprobadas}`)
+  console.log(`  ... con finalUrl cargado .......... ${conLink}`)
+  console.log(`  ... y todavía SIN enviar .......... ${sinEnviar}   ← el tier CONTACTAR_CON_DEMO`)
+  console.log(`  stage BRIEF|CONSTRUCCION .......... ${construyendo}   ← el tier CONSTRUIR`)
+  console.log(`\n  ratio CONSTRUIR : CONTACTAR = ${construyendo} : ${sinEnviar}  (${sinEnviar ? (construyendo / sinEnviar).toFixed(1) : '∞'}×)`)
+  await prisma.$disconnect()
+}
+main().catch(e => { console.error(e); process.exit(1) })

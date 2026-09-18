@@ -157,6 +157,30 @@ assert.deepEqual(
   'y el resto conserva su orden original debajo',
 )
 
+// ── P32: EL CENSO CONGELADO DEL TOPE ────────────────────────────────────────
+// El caso de las 49 usa `TOPE_COLA` importado de producción en las dos puntas de
+// la igualdad: como expectativa y como resta. El censo de P26 lo midió — si el
+// tope volviera a 1, «la cola muestra 1 de 49» y «ocultos = 48» siguen siendo
+// ciertas y las tres aserciones se adaptan solas. Y una cola de uno es
+// exactamente la conducta que P21 vino a matar: la superficie mostraba un lead y
+// no decía nada de los otros 48.
+//
+// El número está escrito a mano acá porque es la única fuente independiente que
+// existe: todo lo demás en este archivo deriva del tope y lo sigue a donde vaya.
+// Que actualizarlo cueste un renglón es el punto — es el renglón donde alguien
+// tiene que mirar el número nuevo y decidir si sigue siendo una COLA o volvió a
+// ser el foco con otro nombre.
+const TOPE_COLA_CONGELADO = 5
+
+assert.equal(
+  TOPE_COLA,
+  TOPE_COLA_CONGELADO,
+  `TOPE_COLA cambió (${TOPE_COLA} en vez de ${TOPE_COLA_CONGELADO}). El caso de las 49 lo usa ` +
+    'en las dos puntas, así que se adapta solo y no lo ve nadie. Si el cambio es a propósito, ' +
+    'actualizá TOPE_COLA_CONGELADO en este mismo commit — y mirá el número nuevo: con 1 o 2 el ' +
+    'panel vuelve a la conducta que P21 mató (un accionable a la vista, 48 callados).',
+)
+
 console.log(
   `✓ invariante OK (${casos} combinaciones de cola × tope × sticky): la cola de ` +
     'trabajo NO duplica al foco (lo encabeza: exactamente un ítem destacado, cero ' +

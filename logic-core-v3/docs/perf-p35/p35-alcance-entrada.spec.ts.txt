@@ -1,0 +1,411 @@
+import { appendFileSync } from 'node:fs'
+import { test, type Page } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  createNotice,
+  getDossier,
+  newTracker,
+  teardown,
+  disconnect,
+  prisma,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+import { instalarSonda, arrancar, cosechar, VENTANA_MS, type Cosecha } from './_p35-sonda'
+
+/**
+ * P35 · EL ALCANCE — ¿a cuántas pasadas de un setter REAL le pasa?
+ *
+ * P34 dejó el mecanismo cerrado con un discriminador de 21/21: si nace un
+ * documento DESPUÉS del despacho de la action, `await action()` nunca vuelve y
+ * el acuse ni se pide. Lo que NO midió es el ALCANCE: lo probó entrando por URL
+ * directa sobre la RAÍZ del lead — F5, marcador, deep link. Un setter entra
+ * desde el panel.
+ *
+ * Este probe mide LA MISMA ACCIÓN (`Ya la envié — registrar`, m15) entrando por
+ * cada camino que el producto ofrece de verdad, censados con archivo:línea.
+ * No arregla nada. La salida es una tabla y un número.
+ *
+ * ── UNA PASADA POR CAMINO POR RONDA, Y NO ES UN DETALLE ─────────────────────
+ * P26 dejó medido que el flake SOLO existe con server FRÍO: 8 corridas contra un
+ * server tibio dieron 1.528 ejecuciones y CERO rojas. Si este probe corriera las
+ * seis pasadas del camino A y después las seis del B, el A se quedaría con toda
+ * la temperatura fría y los demás saldrían verdes por tibios, no por sanos — un
+ * falso verde con forma de conclusión.
+ *
+ * Por eso la unidad es la RONDA: el driver reinicia el server, corre UNA pasada
+ * de cada camino, y rota el orden de arranque (`RONDA`) para que ningún camino
+ * se quede siempre con el turno más frío. Seis rondas = seis pasadas por camino.
+ *
+ * ── Por qué los leads van con `pinned` ──────────────────────────────────────
+ * Medido en el recon contra la cartera real de `setter-qa` (172 leads): un lead
+ * APROBADA + RESPONDIO + finalUrl entra a `grupos.trabajar` pero con
+ * `trabajoTier = CONTACTAR_CON_DEMO (2)`, por debajo de CONSTRUIR (0) y
+ * ESPERA_TU_ACCION (1) — y NO alcanza el top-5 de la cola (`cola.ts:38`). El pin
+ * es preferencia de ORDEN del propio setter (`flow.ts:771`): no cambia ni el
+ * control ni el mecanismo de navegación, sube el mismo botón a la cima. Sin él
+ * los caminos del foco y de la cola no serían medibles — y ESO también es un
+ * hallazgo, anotado en el reporte.
+ *
+ *   P35_RONDA=1 PERF_EXTERNAL_SERVER=1 PERF_PORT=3007 \
+ *     npx playwright test --config=playwright.perf.config.ts
+ */
+
+const RONDA = Number(process.env.P35_RONDA ?? 1)
+const SOLO = process.env.P35_SOLO ?? ''
+const SALIDA = process.env.P35_SALIDA ?? 'tests/perf/.p35-lineas.jsonl'
+
+type Dureza = 'DURA' | 'BLANDA'
+
+type Ctx = { leadId: string; nombre: string }
+
+type Camino = {
+  clave: string
+  rotulo: string
+  /** Lo que el censo dice que es, ANTES de medirlo. La medición lo confirma o lo refuta. */
+  esperado: Dureza
+  callSite: string
+  /** Deja al setter parado en m15, arrancando la sonda en el momento justo. */
+  entrar: (page: Page, ctx: Ctx) => Promise<void>
+}
+
+const M15_URL = (id: string) => `/setter/leads/${id}/manual/m15`
+const RAIZ_URL = (id: string) => `/setter/leads/${id}`
+
+function escapar(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+async function esperarM15(page: Page): Promise<void> {
+  await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).waitFor({
+    state: 'visible',
+    timeout: 30_000,
+  })
+}
+
+const CAMINOS: Camino[] = [
+  {
+    clave: 'A-raiz-url',
+    rotulo: 'A · URL directa a la RAIZ (F5 / marcador / deep link)',
+    esperado: 'DURA',
+    callSite: '(barra de direcciones)',
+    entrar: async (page, { leadId }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      await arrancar(page)
+      await page.goto(RAIZ_URL(leadId), { waitUntil: 'commit' })
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'B-foco',
+    rotulo: 'B · Foco del panel - «Ir a trabajarlo»',
+    esperado: 'BLANDA',
+    callSite: 'foco-surface.tsx:90 · router.push(raiz)',
+    entrar: async (page, { nombre }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      const boton = firstVisible(page.getByRole('button', { name: /Ir a trabajarlo/i }))
+      await boton.waitFor({ state: 'visible', timeout: 30_000 })
+      // El card del foco no tiene data-slot propio: se verifica POR DESCARTE.
+      // `Trabajar {nombre}` SOLO existe en las FILAS (trabajar-lead-button.tsx),
+      // asi que si aparece, el foco es OTRO lead y esta pasada mediria otra
+      // cosa. Se anota NO MEDIDA en vez de medir mal.
+      const enFila = await page
+        .getByRole('button', { name: new RegExp(`Trabajar ${escapar(nombre)}`, 'i') })
+        .count()
+      if (enFila > 0) throw new Error('el lead quedo en una FILA, no en el foco')
+      if (!(await page.getByText(nombre, { exact: false }).first().isVisible())) {
+        throw new Error('el foco no muestra el lead sembrado')
+      }
+      await arrancar(page)
+      await boton.click()
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'C-cola',
+    rotulo: 'C · Fila de la cola - «Trabajar {nombre}»',
+    esperado: 'BLANDA',
+    callSite: 'trabajar-lead-button.tsx:31 · router.push(raiz)',
+    entrar: async (page, { nombre }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      const boton = firstVisible(
+        page.getByRole('button', { name: new RegExp(`Trabajar ${escapar(nombre)}`, 'i') }),
+      )
+      await boton.waitFor({ state: 'visible', timeout: 30_000 })
+      await arrancar(page)
+      await boton.click()
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'D-cartera',
+    rotulo: 'D · Cartera - tarjeta del lead (<Link>)',
+    esperado: 'BLANDA',
+    callSite: 'home-sections.tsx:69 · <Link href={raiz}>',
+    entrar: async (page, { nombre }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      await firstVisible(page.getByRole('button', { name: /Ver toda la cartera/i })).click()
+      const tarjeta = firstVisible(
+        page.getByRole('link', { name: new RegExp(escapar(nombre), 'i') }),
+      )
+      await tarjeta.waitFor({ state: 'visible', timeout: 30_000 })
+      await tarjeta.scrollIntoViewIfNeeded()
+      await arrancar(page)
+      await tarjeta.click()
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'E-novedades',
+    rotulo: 'E · Novedades - «Abrir»',
+    esperado: 'BLANDA',
+    callSite: 'novedades-abrir-foco.tsx:47 · router.push(raiz)',
+    entrar: async (page, { nombre }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      // El aviso propio lleva el nombre del lead como titulo; «Abrir» es el
+      // boton de esa misma fila.
+      const fila = page.locator('li').filter({ hasText: nombre }).first()
+      const abrir = firstVisible(fila.getByRole('button', { name: /^Abrir$/i }))
+      await abrir.waitFor({ state: 'visible', timeout: 30_000 })
+      await abrir.scrollIntoViewIfNeeded()
+      await arrancar(page)
+      await abrir.click()
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'F-franja',
+    rotulo: 'F · Franja del recorrido - chip a la canonica (<Link>)',
+    esperado: 'BLANDA',
+    callSite: 'franja-recorrido.tsx:185 · <Link href={rutaManual(...)}>',
+    entrar: async (page, { leadId }) => {
+      await page.goto(M15_URL(leadId), { waitUntil: 'domcontentloaded' })
+      await esperarM15(page)
+      // Salta a otro paso por la franja y vuelve: la VUELTA es la entrada medida.
+      const otro = page
+        .locator('[data-slot="franja-recorrido"]')
+        .getByRole('link')
+        .filter({ hasNotText: /Env[ií]o/i })
+        .first()
+      await otro.click()
+      await page.waitForTimeout(3_000)
+      const volver = page
+        .locator('[data-slot="franja-recorrido"]')
+        .getByRole('link', { name: /Env[ií]o/i })
+        .first()
+      await volver.waitFor({ state: 'visible', timeout: 30_000 })
+      await arrancar(page)
+      await volver.click()
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'G-canonica-url',
+    rotulo: 'G · URL directa a la CANONICA m15 (control)',
+    esperado: 'DURA',
+    callSite: '(barra de direcciones)',
+    entrar: async (page, { leadId }) => {
+      await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+      await arrancar(page)
+      await page.goto(M15_URL(leadId), { waitUntil: 'commit' })
+      await esperarM15(page)
+    },
+  },
+  {
+    clave: 'H-recarga',
+    rotulo: 'H · Recarga (F5) parado en la canonica m15',
+    esperado: 'DURA',
+    callSite: '(F5)',
+    entrar: async (page, { leadId }) => {
+      await page.goto(M15_URL(leadId), { waitUntil: 'domcontentloaded' })
+      await esperarM15(page)
+      await arrancar(page)
+      await page.reload({ waitUntil: 'commit' })
+      await esperarM15(page)
+    },
+  },
+]
+
+/** Rota el orden para que ningun camino se quede siempre con el turno mas frio. */
+function ordenDeRonda(): Camino[] {
+  const n = CAMINOS.length
+  const corte = (RONDA - 1) % n
+  return [...CAMINOS.slice(corte), ...CAMINOS.slice(0, corte)]
+}
+
+export type Linea = {
+  ronda: number
+  turno: number
+  camino: string
+  rotulo: string
+  esperado: Dureza
+  callSite: string
+  ok: boolean
+  nota: string
+  cosecha: Cosecha | null
+  enBase: boolean
+  reflejo: boolean
+  rutaFinal: string
+}
+
+const tracker: SmokeTracker = newTracker()
+const lineas: Linea[] = []
+let setterId = ''
+
+test.beforeAll(async () => {
+  setterId = (await getSetterQa()).id
+})
+
+test.afterAll(async () => {
+  for (const l of lineas) appendFileSync(SALIDA, JSON.stringify(l) + '\n', 'utf8')
+  console.log(`\n== RONDA ${RONDA} — ${lineas.length} lineas escritas en ${SALIDA}`)
+  for (const l of lineas) {
+    if (!l.ok || !l.cosecha) {
+      console.log(`   ${l.camino.padEnd(16)} NO MEDIDA — ${l.nota}`)
+      continue
+    }
+    const c = l.cosecha
+    console.log(
+      `   ${l.camino.padEnd(16)} docs=${c.documentos} post=${c.docsPostDespacho.length} ` +
+        `acuse=${c.pidioAcuse ? 'SI' : 'NO'} carteles=${c.carteles} ` +
+        `base=${l.enBase ? 'SI' : 'NO'} reflejo=${l.reflejo ? 'SI' : 'NO'}` +
+        (c.instrumentado ? '' : '  << SIN INSTRUMENTAR'),
+    )
+  }
+  await teardown(tracker)
+  await disconnect()
+})
+
+test(`P35 ronda ${RONDA} — una pasada por camino`, async ({ page, context }) => {
+  const orden = ordenDeRonda().filter((c) => !SOLO || c.clave.startsWith(SOLO))
+  test.setTimeout(orden.length * 140_000)
+  await instalarSonda(page)
+
+  for (let turno = 0; turno < orden.length; turno++) {
+    const camino = orden[turno]
+    // Cookie del foco limpia: el sticky de la pasada anterior elegiria el foco
+    // de esta (`foco.ts:61`) y la medicion dejaria de ser del camino.
+    await context.clearCookies()
+    await qaLogin(page, 'setter')
+
+    // Despinchar lo sembrado antes: el pin gana sobre TODO en `ordenFoco`
+    // (`flow.ts:771`), asi que un lead pinchado de una pasada previa se queda
+    // con el foco de esta y la medicion pasa a ser de otro lead.
+    if (tracker.leadIds.length > 0) {
+      await prisma.osLeadSetterMeta.updateMany({
+        where: { leadId: { in: tracker.leadIds } },
+        data: { pinned: false },
+      })
+    }
+
+    // El señuelo ocupa el foco para que el lead medido caiga en una FILA.
+    if (camino.clave === 'C-cola') {
+      await createLead(tracker, {
+        setterId,
+        businessName: `P35 senuelo r${RONDA}`,
+        stage: 'APROBADA',
+        status: 'RESPONDIO',
+        finalUrl: 'https://senuelo-p35.develop.com.ar',
+        meta: { pinned: true },
+      })
+    }
+
+    const enPanel = ['B-foco', 'C-cola', 'D-cartera'].includes(camino.clave)
+    const { id: leadId, businessName: nombre } = await createLead(tracker, {
+      setterId,
+      businessName: `P35 ${camino.clave} r${RONDA}`,
+      stage: 'APROBADA',
+      status: 'RESPONDIO',
+      finalUrl: 'https://sonda-p35.develop.com.ar',
+      ...(enPanel ? { meta: { pinned: true } } : {}),
+    })
+
+    // ── El foco: el sticky, no el pin ──────────────────────────────────────
+    // Medido (recon 2): la cartera de `setter-qa` YA tiene leads pinchados
+    // («QA-W Evaluada Gate Abierto», «QA-W Brief»), asi que un lead recien
+    // pinchado cae en una FILA, nunca en el card del foco. El mecanismo del
+    // producto para decidir el foco es el STICKY (`foco.ts:61`, cookie
+    // `leados-foco-v1`), que escribe `anclarFoco()` — la misma action que
+    // corren el boton del foco Y el de la fila. Un setter que toco «Trabajar X»
+    // y vuelve al panel ve X como foco: esto reproduce ese estado, sin tocar la
+    // DB ni despinchar leads del fixture.
+    if (camino.clave === 'B-foco') {
+      await context.addCookies([
+        {
+          name: 'leados-foco-v1',
+          value: leadId,
+          domain: '127.0.0.1',
+          path: '/',
+          httpOnly: true,
+          sameSite: 'Lax',
+        },
+      ])
+    }
+
+    if (camino.clave === 'E-novedades') {
+      await createNotice({
+        setterId,
+        leadId,
+        kind: 'DEMO_APROBADA',
+        title: nombre,
+        body: `P35 aviso r${RONDA} - la demo esta aprobada, manda el link.`,
+      })
+    }
+
+    const base = {
+      ronda: RONDA,
+      turno: turno + 1,
+      camino: camino.clave,
+      rotulo: camino.rotulo,
+      esperado: camino.esperado,
+      callSite: camino.callSite,
+    }
+
+    let ok = true
+    let nota = ''
+    try {
+      await camino.entrar(page, { leadId, nombre })
+    } catch (e) {
+      ok = false
+      nota = String(e).split('\n')[0].slice(0, 180)
+    }
+
+    if (!ok) {
+      lineas.push({
+        ...base,
+        ok,
+        nota,
+        cosecha: null,
+        enBase: false,
+        reflejo: false,
+        rutaFinal: page.url(),
+      })
+      continue
+    }
+
+    await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).click()
+    await page.waitForTimeout(VENTANA_MS)
+
+    const cosecha = await cosechar(page)
+    const dossier = await getDossier(leadId)
+    // El reflejo: con el envio registrado, `posicionDe` deriva m16 y la barra
+    // deja de ofrecer «Ya la envie». Si el arbol no commitea, el boton sigue.
+    const reflejo =
+      (await page
+        .getByRole('button', { name: /Ya la envié — registrar/i })
+        .filter({ visible: true })
+        .count()) === 0
+
+    lineas.push({
+      ...base,
+      ok: true,
+      nota: '',
+      cosecha,
+      enBase: dossier?.enviadaAt != null,
+      reflejo,
+      rutaFinal: page.url().replace(/^.*\/leads\/[^/]+/, '...'),
+    })
+  }
+})

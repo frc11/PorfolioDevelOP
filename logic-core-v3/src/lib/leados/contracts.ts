@@ -19,11 +19,29 @@ const emptyStringToUndefined = (value: unknown) => {
 
 // P3#3: techo de sanidad contra blobs sin fin (pegado de IA, copy-paste
 // accidental) — no es un límite de UX, es una cota de rendering/storage.
-const TEXTO_LIBRE_MAX = 5000
+export const TEXTO_LIBRE_MAX = 5000
 
 const textoLibre = z.preprocess(
   emptyStringToUndefined,
   z.string().max(TEXTO_LIBRE_MAX).optional(),
+)
+
+/**
+ * P40: el techo PROPIO del documento de construcción (y de su borrador). El
+ * documento de la vuelta 4 del Gem apunta a unos 7.000 caracteres —de 800 a
+ * 1.200 palabras más el encabezado— y no entra en `TEXTO_LIBRE_MAX`.
+ *
+ * Por qué un techo aparte y no subir el general: `TEXTO_LIBRE_MAX` lo comparten
+ * diecinueve campos de cinco blobs (la ficha, la evaluación, el brief, los
+ * rechazos y la agenda), y todos se leen enteros-o-nada. Subirlo movía la cota de
+ * todos para darle lugar a uno. Mismo criterio de sanidad: el doble del largo
+ * esperado, no un límite de UX.
+ */
+export const TEXTO_DOCUMENTO_MAX = 15_000
+
+const textoDocumento = z.preprocess(
+  emptyStringToUndefined,
+  z.string().max(TEXTO_DOCUMENTO_MAX).optional(),
 )
 
 /**
@@ -109,6 +127,40 @@ export const EvaluacionSchema = z.object({
 
 // ── Brief de diseño (insumo de la construcción de la demo) ──────────────────
 
+/** Una vuelta con el Gem: lo que devolvió y lo que el setter le corrigió. */
+const VueltaGemSchema = z.object({
+  respuesta: textoLibre,
+  correccion: textoLibre,
+})
+
+/**
+ * P40 — Las vueltas con el Gem de diseño que se GUARDAN, para que Franco vea el
+ * proceso cuando revisa. No son las cuatro enteras, y es una decisión medida:
+ *
+ *   · la lectura (1) y las decisiones (2) se guardan: son cortas —la 1 entra en
+ *     quince líneas— y son las que dicen si la demo sale de ESTE negocio;
+ *   · el borrador (3) se guarda SOLO mientras no llegó el documento (4): el
+ *     contrato del Gem lo descarta apenas existe el definitivo, pesa lo mismo que
+ *     él, y guardar los dos duplicaba el brief. Mientras no hay documento es lo
+ *     único escrito, y tirarlo sería perder trabajo;
+ *   · de la 4 se guarda la corrección: la respuesta ES `documento`, el campo de
+ *     afuera, que es lo que viaja a la construcción.
+ *
+ * La regla la aplica `vueltasParaGuardar` (`brief-vueltas.ts`). Todo opcional:
+ * un brief anterior a P40 no trae la clave y parsea igual.
+ */
+export const VueltasBriefSchema = z.object({
+  lectura: VueltaGemSchema.optional(),
+  decisiones: VueltaGemSchema.optional(),
+  especificacion: z
+    .object({
+      respuesta: textoDocumento,
+      correccion: textoLibre,
+    })
+    .optional(),
+  huecos: z.object({ correccion: textoLibre }).optional(),
+})
+
 export const BriefSchema = z.object({
   titulo: z.string().trim().min(1),
   concepto: textoLibre,
@@ -117,6 +169,18 @@ export const BriefSchema = z.object({
   cta: textoLibre,
   referenciasFicha: textoLibre,
   pegadoGem: textoLibre, // B3: respuesta cruda del Gem de diseño, tal como la pegó el setter
+  // P40 — La dirección visual que el bloque de construcción no llevaba: sin
+  // estos tres, Claude Design elegía fuente y colores por su cuenta. Opcionales:
+  // un brief guardado antes no los trae y sigue parseando.
+  tono: textoLibre,
+  paleta: textoLibre,
+  tipografia: textoLibre,
+  // P40 — El documento de construcción de la vuelta 4, tal cual lo pegó el
+  // setter (con su encabezado, que lee `encabezado-documento.ts`). Campo propio
+  // con techo propio: `pegadoGem` guarda la respuesta cruda de una sola vuelta y
+  // conserva su techo y sus seis lectores.
+  documento: textoDocumento,
+  vueltas: VueltasBriefSchema.optional(),
 })
 
 // ── Self-check del setter antes de mandar a revisión ────────────────────────
@@ -235,6 +299,7 @@ export const AgendaSchema = z.object({
 export type Ficha = z.infer<typeof FichaSchema>
 export type Evaluacion = z.infer<typeof EvaluacionSchema>
 export type Brief = z.infer<typeof BriefSchema>
+export type VueltasBrief = z.infer<typeof VueltasBriefSchema>
 export type SelfCheck = z.infer<typeof SelfCheckSchema>
 export type Progreso = z.infer<typeof ProgresoSchema>
 export type Rechazo = z.infer<typeof RechazoSchema>

@@ -1,0 +1,57 @@
+diff --git a/logic-core-v3/src/lib/use-step-action.ts b/logic-core-v3/src/lib/use-step-action.ts
+index f0f3de9e..5f54d2ab 100644
+--- a/logic-core-v3/src/lib/use-step-action.ts
++++ b/logic-core-v3/src/lib/use-step-action.ts
+@@ -44,6 +44,23 @@ export type StepActionOptions<TData> = {
+   onSuccess?: (data: TData) => void
+ }
+ 
++
++/**
++ * ⚠ P35 · SOLO INSTRUMENTACION DE WORKTREE. No existe en el producto.
++ */
++function p35Marcar(etapa: string): void {
++  if (typeof window === 'undefined') return
++  try {
++    const crudo = sessionStorage.getItem('__runDiag')
++    const arr = crudo ? (JSON.parse(crudo) as string[]) : []
++    arr.push(`${etapa}@${Date.now()}`)
++    sessionStorage.setItem('__runDiag', JSON.stringify(arr))
++    sessionStorage.setItem('__p35Build', 'p35-diag')
++  } catch {
++    /* noop */
++  }
++}
++
+ export function useStepAction() {
+   const [isPending, startTransition] = useTransition()
+ 
+@@ -52,18 +69,28 @@ export function useStepAction() {
+     options: StepActionOptions<TData> = {},
+   ): void {
+     const { successToast, onError, onSuccess } = options
++    // ⚠ P35 · VARIANTE DIAGNOSTICA — instrumentacion temporal de worktree.
++    // Anota cada etapa de run() en sessionStorage (NO en window: el camino
++    // cruza navegaciones duras y un contador en window muere con el documento).
++    // NO SE SHIPEA. El worktree se destruye al cerrar el probe.
++    p35Marcar('despacho')
+     startTransition(async () => {
++      p35Marcar('dentro-transicion')
+       const result = await action()
++      p35Marcar(result.success ? 'resuelta:ok' : 'resuelta:err')
+       if (!result.success) {
+         onError?.(result.error, result.code)
+         toast.error(result.error)
++        p35Marcar('pidio-error')
+         return
+       }
+       onSuccess?.(result.data)
++      p35Marcar('post-onSuccess')
+       if (successToast !== undefined) {
+         toast.success(
+           typeof successToast === 'function' ? successToast(result.data) : successToast,
+         )
++        p35Marcar('pidio-exito')
+       }
+     })
+   }

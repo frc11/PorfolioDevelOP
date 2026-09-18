@@ -64,6 +64,45 @@ assert.equal(
 // ── 5. Ventana configurable: 0 ms desactiva el dedup (borde) ─────────────────
 assert.equal(shouldCreateUpsellSubmission(now, now, 0), true, 'ventana 0 → siempre crea (dedup off)')
 
+// ── 6. P32 — LA VENTANA, medida contra la promesa y no contra sí misma ───────
+// Las secciones 2 y 3 usan `UPSELL_DEDUP_WINDOW_MS` en las DOS puntas: el caso se
+// construye desde la constante que se vigila (`within(VENTANA - 1)`,
+// `within(VENTANA)`). El censo de P26 lo midió: achicar la ventana mueve los
+// casos con ella y las seis aserciones se adaptan solas. El único piso real es la
+// sección 4, y sus clicks están a 1,5 s de distancia — así que la ventana puede
+// bajar hasta unos seis segundos con el archivo entero en verde.
+//
+// Y con eso el dedup queda apagado sin que nadie se entere: el docstring del
+// módulo dice que la ventana «cubre el rage-click y la revisita en el día», y de
+// las dos cosas sólo la primera está probada. Cada revisita del cliente vuelve a
+// generar un `ContactSubmission` + su alerta + sus notificaciones, que es
+// exactamente el agujero que P5.2 vino a tapar: 5 leads inbound idénticos.
+//
+// Esta aserción no habla de milisegundos: habla de la revisita. Es la mitad de la
+// promesa que no tenía dueño.
+const SEIS_HORAS_MS = 6 * 60 * 60 * 1000
+assert.equal(
+  shouldCreateUpsellSubmission(within(SEIS_HORAS_MS), now),
+  false,
+  'una revisita del mismo cliente al mismo módulo SEIS HORAS después volvió a generar un\n' +
+    '  `ContactSubmission`. La ventana se achicó lo suficiente como para cubrir sólo el\n' +
+    '  rage-click, que es lo único que las secciones 2-4 prueban de verdad (sus casos se\n' +
+    '  derivan de la propia ventana, así que la siguen a donde vaya). El dedup queda apagado\n' +
+    '  para el caso que motivó P5.2: el equipo comercial vuelve a recibir el mismo lead\n' +
+    '  inbound una vez por visita, con su alerta y sus notificaciones.',
+)
+
+// Y el censo congelado del número, que es la única fuente independiente que hay.
+const VENTANA_CONGELADA_MS = 24 * 60 * 60 * 1000
+assert.equal(
+  UPSELL_DEDUP_WINDOW_MS,
+  VENTANA_CONGELADA_MS,
+  `UPSELL_DEDUP_WINDOW_MS cambió (${UPSELL_DEDUP_WINDOW_MS} ms en vez de ` +
+    `${VENTANA_CONGELADA_MS}). Todos los casos de arriba la usan como fuente, así que se ` +
+    'mueven con ella. Si el cambio es a propósito, actualizá VENTANA_CONGELADA_MS en este ' +
+    'mismo commit y revisá que la aserción de la revisita siga expresando la promesa.',
+)
+
 console.log(
   '✓ upsell-dedup invariants OK: primera solicitud crea, rage-click dentro de ventana no ' +
     'duplica, interés renovado fuera de ventana vuelve a crear.',

@@ -1,0 +1,104 @@
+// P38 · harness de sabotaje del PRODUCTO para los controles. Vive en el scratchpad, no en el repo.
+// Reemplazo LITERAL: exige exactamente UNA ocurrencia y falla ruidoso si no.
+// Uso (desde logic-core-v3):
+//   node <este> --aplicar     → guarda originales + md5, aplica los 8 sabotajes, verifica marcas
+//   node <este> --restaurar   → copia los originales de vuelta y verifica md5 byte a byte
+import fs from 'fs'
+import path from 'path'
+import crypto from 'crypto'
+
+const AQUI = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))
+const ORIG = path.join(AQUI, 'originales')
+const md5 = (p) => crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex')
+
+const SABOTAJES = [
+  {
+    id: 's1', archivo: 'src/lib/leados/novedades-vigencia.ts',
+    buscar: '  return enPie ? { vigente: true } : { vigente: false, enSuLugar: estado.proximaAccion }',
+    poner: "  const sabotajeP38 = Number('1') === 1 // P38-SABOTAJE s1: ninguna orden caduca\r\n  return enPie || sabotajeP38 ? { vigente: true } : { vigente: false, enSuLugar: estado.proximaAccion }",
+  },
+  {
+    id: 's2', archivo: 'src/app/(protected)/admin/leados/_actions/revision.actions.ts',
+    buscar: '    if (!lead) return',
+    poner: "    if (!lead || Number('1') === 1) return // P38-SABOTAJE s2: Franco decide y el setter no se entera",
+  },
+  {
+    id: 's3', archivo: 'src/app/(protected)/setter/_components/home-sections.tsx',
+    buscar: '<span className="min-w-0">{lead.proximaAccion}</span>',
+    poner: "<span className=\"min-w-0\">{lead.stage === 'APROBADA' ? 'Demo aprobada' : lead.proximaAccion /* P38-SABOTAJE s3 */}</span>",
+  },
+  {
+    id: 's4', archivo: 'src/lib/leados/flow.ts',
+    buscar: '  return campos.some((campo) => campo != null && normalizar(campo).includes(queryNorm))',
+    poner: '  return campos.some((campo) => campo != null && campo.toLowerCase().includes(queryNorm)) // P38-SABOTAJE s4: sensible a tildes',
+  },
+  {
+    id: 's5', archivo: 'src/app/(protected)/setter/_actions/cartera.actions.ts',
+    buscar: '    await upsertSetterMeta(owned.leadId, owned.userId, { pinned: pin.data })',
+    poner: "    if (Number('1') !== 1) await upsertSetterMeta(owned.leadId, owned.userId, { pinned: pin.data }) // P38-SABOTAJE s5: el pin no persiste",
+  },
+  {
+    id: 's6', archivo: 'src/lib/leados/foco.ts',
+    buscar: '    proximo: resto[0] ?? null,',
+    poner: "    proximo: Number('1') === 1 ? null : (resto[0] ?? null), // P38-SABOTAJE s6: nunca hay próximo",
+  },
+  {
+    id: 's7', archivo: 'src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx',
+    buscar: '              {GUIA_BRIEF.campos.pegadoGem.faltante}',
+    poner: "              {Number('1') === 1 ? null : GUIA_BRIEF.campos.pegadoGem.faltante /* P38-SABOTAJE s7 */}",
+  },
+  {
+    id: 's9', archivo: 'src/lib/leados/flow.ts',
+    buscar: '        ? `Postergado — vuelve el ${fecha}`',
+    poner: "        ? 'Postergado — se retoma cuando se reactive' /* P38-SABOTAJE s9: la fecha no viaja */",
+  },
+  {
+    id: 's10', archivo: 'src/lib/leados/isolation.ts',
+    buscar: '): Prisma.OsSetterNoticeWhereInput {\r\n  return { setterId: userId }',
+    poner: "): Prisma.OsSetterNoticeWhereInput {\r\n  return Number('1') === 1 ? {} : { setterId: userId } // P38-SABOTAJE s10: el feed de novedades deja de filtrar por destinatario",
+  },
+  {
+    id: 's8', archivo: 'src/lib/leados/agenda.ts',
+    buscar: "  'La agenda de Franco todavía no está conectada, así que los horarios no se pueden buscar desde acá. ' +",
+    poner: "  'Setup B7.0 pendiente: cargá calComUsername y calComEmbedUrl. ' + // P38-SABOTAJE s8: vuelve la jerga",
+  },
+]
+
+const modo = process.argv[2]
+// Sin lista: s1..s8 (la primera tanda). Con lista (`--aplicar s9`): solo esos.
+const pedidos = process.argv.slice(3)
+const elegidos = pedidos.length > 0 ? SABOTAJES.filter((s) => pedidos.includes(s.id)) : SABOTAJES.filter((s) => !['s9', 's10'].includes(s.id))
+if (modo === '--aplicar') {
+  if (fs.existsSync(ORIG)) throw new Error('ya hay originales guardados: restaurar primero')
+  if (pedidos.length > 0 && elegidos.length !== pedidos.length) throw new Error(`sabotajes desconocidos: ${pedidos.join(',')}`)
+  const manifiesto = []
+  for (const s of elegidos) {
+    const destino = path.join(ORIG, s.archivo)
+    fs.mkdirSync(path.dirname(destino), { recursive: true })
+    fs.copyFileSync(s.archivo, destino)
+    const texto = fs.readFileSync(s.archivo, 'utf8')
+    const n = texto.split(s.buscar).length - 1
+    if (n !== 1) throw new Error(`${s.id}: se esperaba UNA ocurrencia en ${s.archivo}, hay ${n}`)
+    fs.writeFileSync(s.archivo, texto.replace(s.buscar, s.poner))
+    const marca = `P38-SABOTAJE ${s.id}`
+    if (!fs.readFileSync(s.archivo, 'utf8').includes(marca)) throw new Error(`${s.id}: la marca no quedó`)
+    manifiesto.push({ id: s.id, archivo: s.archivo, md5Original: md5(destino), md5Saboteado: md5(s.archivo) })
+    console.log(`${s.id} aplicado · ${s.archivo}`)
+  }
+  fs.writeFileSync(path.join(AQUI, 'manifiesto.json'), JSON.stringify(manifiesto, null, 2))
+} else if (modo === '--restaurar') {
+  const manifiesto = JSON.parse(fs.readFileSync(path.join(AQUI, 'manifiesto.json'), 'utf8'))
+  let bien = true
+  for (const m of manifiesto) {
+    fs.copyFileSync(path.join(ORIG, m.archivo), m.archivo)
+    const ok = md5(m.archivo) === m.md5Original
+    if (!ok) bien = false
+    console.log(`${m.id} restaurado · md5 ${ok ? 'IGUAL al original' : 'DISTINTO'} · ${m.archivo}`)
+  }
+  if (!bien) process.exit(1)
+  fs.rmSync(ORIG, { recursive: true, force: true })
+  console.log('originales verificados y retirados del scratchpad')
+} else {
+  console.error('--aplicar | --restaurar')
+  process.exit(1)
+}

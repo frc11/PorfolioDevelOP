@@ -1,0 +1,502 @@
+{
+  "01-con-encabezado-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5827,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "01-con-encabezado-1440-entera.altoDelScroller": 1871,
+  "02-brief-viejo-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 551,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "02-brief-viejo-1440-entera.altoDelScroller": 1871,
+  "03-sin-encabezado-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 4787,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "03-sin-encabezado-1440-entera.altoDelScroller": 1871,
+  "04-falta-paleta-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5532,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "04-falta-paleta-1440-entera.altoDelScroller": 1871,
+  "05-por-arrancar-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5825,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "05-por-arrancar-1440-entera.altoDelScroller": 1886,
+  "06-a-medias-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Desmarcar «Estructura» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 548,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "06-a-medias-1440.dbAlCargar": [
+    "calidad",
+    "cta",
+    "estructura"
+  ],
+  "06-a-medias-1440-entera.altoDelScroller": 1871,
+  "07-construida-1440.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Desmarcar «Estructura» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Desmarcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Desmarcar «Assets reales» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 550,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "07-construida-1440-entera.altoDelScroller": 1934,
+  "01-con-encabezado-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5827,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "01-con-encabezado-390-entera.altoDelScroller": 2276,
+  "02-brief-viejo-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 551,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "02-brief-viejo-390-entera.altoDelScroller": 2276,
+  "03-sin-encabezado-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 4787,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "03-sin-encabezado-390-entera.altoDelScroller": 2276,
+  "04-falta-paleta-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5532,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "04-falta-paleta-390-entera.altoDelScroller": 2276,
+  "05-por-arrancar-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Marcar «Estructura» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": true
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 5825,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "05-por-arrancar-390-entera.altoDelScroller": 2256,
+  "06-a-medias-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Desmarcar «Estructura» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      },
+      {
+        "nombre": "Marcar «Assets reales» como hecha",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 548,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "06-a-medias-390.dbAlCargar": [
+    "calidad",
+    "cta",
+    "estructura"
+  ],
+  "06-a-medias-390-entera.altoDelScroller": 2276,
+  "07-construida-390.pantalla": {
+    "zonas": [
+      "Contexto del lead",
+      "Munición",
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "Desmarcar «Estructura» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Desmarcar «Personalización con datos del negocio» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      },
+      {
+        "nombre": "Desmarcar «Assets reales» como hecha",
+        "pulsado": "true",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 9,
+    "zonaDelBloque": "Contexto del lead",
+    "bloqueCaracteres": 550,
+    "bloquePlegado": true,
+    "bloqueAltoVisible": 224,
+    "bloqueConScrollPropio": true,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": true
+  },
+  "07-construida-390-entera.altoDelScroller": 2390
+}

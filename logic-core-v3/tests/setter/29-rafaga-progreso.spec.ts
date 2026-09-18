@@ -44,6 +44,13 @@ import { parseProgreso, parseSelfCheck, HARD_CHECKS } from '../../src/lib/leados
  * parientes): una ausencia se satisface antes de que la página termine de
  * renderizar y ya dio falso verde dos veces en esta suite. Acá todo lo que se
  * afirma es una PRESENCIA con número exacto.
+ *
+ * ── P42: la ráfaga de tres tildes se mide en «Refinar» ─────────────────────
+ * «Construir» (mc1) pasó a UN tilde que marca sus tres fases juntas. Los tres
+ * tildes por fase —el caso donde la carrera perdía dos marcas de tres— siguen en
+ * «Refinar» (mc2), con el MISMO dueño (`RegistroFases`) y la misma escritura: las
+ * dos ráfagas se miden ahí, sin aflojar nada. La ráfaga sobre el tilde único la
+ * fija `33-construir-un-paso` F.
  */
 
 const tracker: SmokeTracker = newTracker()
@@ -88,10 +95,13 @@ async function rafaga(page: Page, indices: number[], intervaloMs: number): Promi
   )
 }
 
+/** P42 — cuántos tildes muestra cada pantalla: uno en «Construir», uno por fase en «Refinar». */
+const TILDES_POR_PANTALLA = { mc1: 1, mc2: 3 } as const
+
 async function abrirConstruccion(page: Page, leadId: string, paso: 'mc1' | 'mc2'): Promise<void> {
   await page.goto(`/setter/leads/${leadId}/manual/${paso}`, { waitUntil: 'domcontentloaded' })
   await expect(page).toHaveURL(new RegExp(`/manual/${paso}$`))
-  await expect(page.locator(TILDES)).toHaveCount(3)
+  await expect(page.locator(TILDES)).toHaveCount(TILDES_POR_PANTALLA[paso])
   // Los tildes tienen que estar VIVOS antes de la ráfaga: un click sobre un
   // botón todavía deshabilitado (o pre-hidratación) no dispara nada, y el test
   // quedaría midiendo la nada en verde.
@@ -109,7 +119,7 @@ test('ráfaga de tres: tres clics seguidos guardan TRES marcas (releído de la b
   })
 
   await qaLogin(page, 'setter')
-  await abrirConstruccion(page, leadId, 'mc1')
+  await abrirConstruccion(page, leadId, 'mc2')
 
   expect(await completadasEnDb(leadId), 'arranca sin nada marcado').toEqual([])
 
@@ -149,7 +159,7 @@ test('diez clics ciclando (tildes y destildes mezclados) componen EXACTO', async
   })
 
   await qaLogin(page, 'setter')
-  await abrirConstruccion(page, leadId, 'mc1')
+  await abrirConstruccion(page, leadId, 'mc2')
 
   // Diez golpes ciclando sobre los tres tildes: 0,1,2,0,1,2,0,1,2,0.
   // Por paridad el tilde 0 recibe CUATRO (queda apagado) y los tildes 1 y 2
@@ -195,9 +205,9 @@ test('las dos pantallas de Construcción: las marcas de mc1 y mc2 conviven', asy
 
   await qaLogin(page, 'setter')
 
-  // Ráfaga de tres en mc1...
+  // El tilde único de mc1 (P42) marca sus tres fases de un clic...
   await abrirConstruccion(page, leadId, 'mc1')
-  await rafaga(page, [0, 1, 2], 0)
+  await rafaga(page, [0], 0)
   await expect.poll(() => completadasEnDb(leadId), { timeout: 20_000 }).toHaveLength(3)
 
   // ...y ráfaga de tres en mc2. Las seis fases son la unidad persistida (P6-B):

@@ -120,7 +120,7 @@ test('C3 · la nota privada de A no la hereda B al reasignar el lead', async ({ 
   await expect(page.getByText(A_NOTE), 'B nunca ve la nota de A').toHaveCount(0)
 })
 
-test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasignaron" SIN link', async ({ page, baseURL }) => {
+test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasignaron" SIN link', async ({ page, browser, baseURL }) => {
   // Sembrar las dos caras del handoff (leadId tracked → se limpia en teardown).
   await createNotice({ setterId: bId, leadId: bLeadId, kind: 'LEAD_ASIGNADO', title: 'Te asignaron un lead', body: `${B_ONLY} entró a tu cartera. Arrancá por la ficha.` })
   await createNotice({ setterId: aId, leadId: aLeadId, kind: 'LEAD_REASIGNADO_SALIENTE', title: 'Te reasignaron un lead', body: `${A_ONLY} pasó a otro setter. Ya no está en tu cartera.` })
@@ -142,17 +142,32 @@ test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasig
   //
   // Lo que este test garantiza no cambió: el handoff LLEGA a B, dirigido, y no
   // se cruza con el de A. Sólo se movió la superficie donde se afirma.
-  await page.context().clearCookies()
-  await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
-  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
-  const colaDeB = page.locator('section[aria-label="Tu cola de hoy"]')
-  await expect(firstVisible(colaDeB.getByText(B_ONLY)), 'el lead asignado le llega a B como trabajo').toBeVisible()
-  // Y el aviso sigue existiendo y contándose sin leer (el badge del topbar lo
-  // refleja): dedup es presentación, no borrado.
-  expect(await countNoticesFor(bId, 'LEAD_ASIGNADO'), 'el aviso dirigido a B existe').toBe(1)
-  // A's saliente novedad no aparece en el feed de B (aislamiento por setterId).
-  // Ojo: NO se afirma acá que B no vea el NEGOCIO de A — C3, arriba, reasigna
-  // ese lead a B a propósito, así que a esta altura del archivo es suyo. La
-  // cartera de A frente a B ya la cubre C2, con su fixture intacta.
-  await expect(page.getByText('Te reasignaron un lead'), 'B no ve la novedad de A').toHaveCount(0)
+  //
+  // P38 — B entra en su PROPIO contexto de navegador, no en la página de A con las
+  // cookies cambiadas. El proxy re-firma la cookie de sesión en CADA pedido, así que
+  // una respuesta que la página de A todavía tenía en vuelo llegaba después del
+  // cambio y reinstalaba la sesión de A: la navegación «de B» dibujaba el panel de
+  // setter-qa y el test caía sin que nada se rompiera. Con la cartera compartida
+  // llena la ventana casi no existía (un pedido en vuelo); vacía, el panel de A es
+  // «Tu cartera está vacía» y sus dos enlaces se precargan justo en ese momento
+  // (cinco pedidos). Cayó 2 de 3 corridas completas con la cartera vacía; forzando
+  // la demora de esas respuestas cae siempre, y con contexto propio no cae nunca.
+  const contextoB = await browser.newContext({ baseURL, viewport: page.viewportSize() ?? undefined })
+  try {
+    await mintSessionCookie(contextoB, baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
+    const paginaB = await contextoB.newPage()
+    await paginaB.goto('/setter', { waitUntil: 'domcontentloaded' })
+    const colaDeB = paginaB.locator('section[aria-label="Tu cola de hoy"]')
+    await expect(firstVisible(colaDeB.getByText(B_ONLY)), 'el lead asignado le llega a B como trabajo').toBeVisible()
+    // Y el aviso sigue existiendo y contándose sin leer (el badge del topbar lo
+    // refleja): dedup es presentación, no borrado.
+    expect(await countNoticesFor(bId, 'LEAD_ASIGNADO'), 'el aviso dirigido a B existe').toBe(1)
+    // A's saliente novedad no aparece en el feed de B (aislamiento por setterId).
+    // Ojo: NO se afirma acá que B no vea el NEGOCIO de A — C3, arriba, reasigna
+    // ese lead a B a propósito, así que a esta altura del archivo es suyo. La
+    // cartera de A frente a B ya la cubre C2, con su fixture intacta.
+    await expect(paginaB.getByText('Te reasignaron un lead'), 'B no ve la novedad de A').toHaveCount(0)
+  } finally {
+    await contextoB.close()
+  }
 })

@@ -36,7 +36,7 @@
  * tsconfig-paths.
  */
 import assert from 'node:assert/strict'
-import { FASE_IDS } from './contracts.ts'
+import { FASE_IDS, ProgresoSchema } from './contracts.ts'
 import {
   derivarPantalla,
   esPantallaId,
@@ -228,6 +228,63 @@ for (let corte = 0; corte <= FASE_IDS.length; corte += 1) {
   )
 }
 
+// ── 8. P32 — EL CENSO CONGELADO DE `FASE_IDS`, y el progreso ya guardado ─────
+// Todo lo de arriba itera `FASE_IDS` o compara contra ella. El censo de P26 lo
+// midió: los dos lados de la igualdad de la sección 5 salen de la MISMA lista, así
+// que sacarle una fase a `FASE_IDS` y a la pantalla que la contiene mueve los dos
+// operandos juntos y sale verde. Vaciarla del todo deja los bucles recorriendo
+// cero: seis aserciones que no se ejecutan no son seis aserciones que pasan.
+//
+// La sección 4 ya congela `PANTALLAS_CONSTRUCCION` («mc1, mc2») por esta misma
+// razón. `FASE_IDS` quedó sin su gemelo, y es la que más caro sale: el encabezado
+// de este archivo la llama «la llave del progreso persistido», y lo es
+// literalmente — `ProgresoSchema.completadas` es `z.array(z.enum(FASE_IDS))`.
+//
+// Este censo está escrito A MANO y es la única fuente independiente que existe.
+// Por eso es la única que puede fallar.
+const FASE_IDS_CONGELADAS = [
+  'estructura',
+  'personalizacion',
+  'assets',
+  'cta',
+  'calidad',
+  'mobile',
+] as const
+
+assert.deepEqual(
+  [...FASE_IDS],
+  [...FASE_IDS_CONGELADAS],
+  'FASE_IDS cambió (se agregó, se borró, se renombró o se reordenó una fase). Es la llave del\n' +
+    '  progreso persistido: las secciones 1, 5 y 6 la recorren, y todas se adaptan solas al\n' +
+    '  cambio. Si es a propósito, actualizá FASE_IDS_CONGELADAS en este mismo commit — y leé\n' +
+    '  la aserción de abajo antes, porque un renombre además invalida lo que los setters ya\n' +
+    '  tienen guardado.',
+)
+
+// El daño concreto de un renombre, medido en vez de descrito: un progreso guardado
+// con los ids de hoy tiene que seguir parseando mañana. `ProgresoSchema` valida
+// `completadas` contra `z.enum(FASE_IDS)`, así que si un id se va o cambia, el
+// blob guardado deja de ser válido y el setter pierde las fases que ya marcó —
+// sin ningún error visible, igual que el self-check de `self-check-gate` §7.
+const PROGRESO_GUARDADO_AYER = {
+  completadas: [
+    'estructura',
+    'personalizacion',
+    'assets',
+    'cta',
+    'calidad',
+    'mobile',
+  ],
+}
+
+assert.ok(
+  ProgresoSchema.safeParse(PROGRESO_GUARDADO_AYER).success,
+  'un progreso de Construcción guardado con los ids vigentes DEJÓ DE PARSEAR. Se renombró o\n' +
+    '  se borró una fase y todo el trabajo que los setters ya marcaron quedó huérfano:\n' +
+    '  `completadas` se valida contra `z.enum(FASE_IDS)`, así que un id que ya no existe\n' +
+    '  invalida el blob entero. El setter vuelve a la construcción y encuentra el checklist\n' +
+    '  en blanco, sin nada que le explique por qué.',
+)
 console.log(
   '✓ invariante OK: el eslabón pantalla↔fase está atado en las DOS direcciones — ' +
     `las ${FASE_IDS.length} fases de FASE_IDS tienen su pantalla de Construcción y ninguna de ` +

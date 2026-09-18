@@ -1,0 +1,205 @@
+import { test } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  getDossier,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+
+/**
+ * P30 — El instrumento de P29, con la máquina de estados de React adentro.
+ *
+ * P29 midió el DOM y encontró que la pantalla no cambia sin el aviso flotante.
+ * El DOM solo no distingue «React no programó el trabajo» de «React lo renderizó
+ * y no lo commitea». Esta sonda lee el FiberRoot: los nombres de sus campos
+ * (`pendingLanes`, `suspendedLanes`, `pingedLanes`, `finishedWork`,
+ * `cancelPendingCommit`) SOBREVIVEN a la minificación del build de producción
+ * de react-dom 19.2.3 — verificado por grep sobre el bundle instalado.
+ *
+ *   VENTANA_MS=75000 PERF_EXTERNAL_SERVER=1 PERF_PORT=3006 \
+ *     npx playwright test --config=playwright.perf.config.ts p30-mecanismo
+ */
+
+const VENTANA_MS = Number(process.env.VENTANA_MS ?? 12_000)
+const ETIQUETA = process.env.ETIQUETA ?? 'sin-etiqueta'
+/**
+ * Poke: a los N ms del clic, Alt+T. El `<Toaster>` de sonner tiene un listener
+ * global de keydown que hace `setExpanded(true)` (sonner 2.0.7, dist:1049-1052)
+ * — una actualizacion de estado REAL en el MISMO root de React, sin tocar una
+ * sola linea de producto y sin nada visible cuando no hay carteles montados.
+ */
+const POKE_MS = process.env.POKE_MS ? Number(process.env.POKE_MS) : 0
+// CONTROL: con una tecla que NO es el hotkey, sonner no llama setExpanded y no
+// hay actualizacion ninguna — el mismo evento de teclado, sin el update.
+const POKE_TECLA = process.env.POKE_TECLA ?? 'Alt+KeyT'
+/** Cantidad de pokes, cada POKE_MS. 1 = un solo poke (el barrido). */
+const POKE_VECES = Number(process.env.POKE_VECES ?? 1)
+
+const tracker: SmokeTracker = newTracker()
+let setterId: string
+
+test.beforeAll(async () => {
+  setterId = (await getSetterQa()).id
+})
+test.afterAll(async () => {
+  await teardown(tracker)
+  await disconnect()
+})
+
+test('P30 · serie temporal: DOM + FiberRoot tras «Arrancar construcción»', async ({ page }) => {
+  test.setTimeout(VENTANA_MS + 120_000)
+
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P30 mecanismo',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+
+  await qaLogin(page, 'setter')
+  const destino = `/setter/leads/${leadId}/manual/mc1`
+  // PREVISITA: una carga previa de la MISMA ruta deja el cache HTTP del browser
+  // (chunks JS, RSC) caliente. El contexto de Playwright arranca frio en cada
+  // corrida; un setter real navegando no.
+  if (process.env.PREVISITA === '1') {
+    await page.goto(destino, { waitUntil: 'load' })
+  }
+  await page.goto(destino, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll('main button')).some((nodo) =>
+      Object.keys(nodo).some((llave) => llave.startsWith('__reactFiber$')),
+    ),
+  )
+
+  await page.evaluate(() => {
+    const w = window as unknown as {
+      __log?: string[]
+      __t0?: number
+      __root?: Record<string, unknown> | null
+      __diag?: string
+    }
+    w.__log = []
+
+    // ── El FiberRoot ──────────────────────────────────────────────────────
+    // Next hidrata sobre `document`. La llave `__reactContainer$<n>` cuelga del
+    // nodo contenedor y vale el fiber HostRoot; su `stateNode` es el FiberRoot.
+    const buscarRoot = (): Record<string, unknown> | null => {
+      const candidatos: Node[] = [document, document.documentElement, document.body]
+      for (const nodo of candidatos) {
+        const llave = Object.keys(nodo).find((k) => k.startsWith('__reactContainer$'))
+        if (llave) {
+          const fiber = (nodo as unknown as Record<string, { stateNode?: unknown }>)[llave]
+          if (fiber && typeof fiber === 'object' && 'stateNode' in fiber) {
+            return fiber.stateNode as Record<string, unknown>
+          }
+        }
+      }
+      // Camino alterno: subir por `return` desde cualquier fiber del árbol.
+      const conFiber = document.querySelector('main button')
+      if (conFiber) {
+        const llave = Object.keys(conFiber).find((k) => k.startsWith('__reactFiber$'))
+        if (llave) {
+          let f = (conFiber as unknown as Record<string, { return?: unknown; stateNode?: unknown }>)[llave] as
+            | { return?: unknown; stateNode?: unknown; tag?: number }
+            | undefined
+          while (f && f.return) f = f.return as typeof f
+          if (f && f.stateNode) return f.stateNode as Record<string, unknown>
+        }
+      }
+      return null
+    }
+    w.__root = buscarRoot()
+    w.__diag = w.__root ? 'root OK · campos: ' + ['pendingLanes','suspendedLanes','pingedLanes','finishedWork','cancelPendingCommit']
+      .filter((c) => c in (w.__root as object)).join(',') : 'ROOT NO ENCONTRADO'
+
+    const hex = (n: unknown) => (typeof n === 'number' ? '0x' + n.toString(16) : '?')
+
+    let previo = ''
+    document.addEventListener('click', () => { if (w.__t0 === undefined) w.__t0 = performance.now() }, true)
+
+    const tick = (): void => {
+      const main = document.querySelector('main')
+      const r = w.__root
+      const hojas = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      const estado = JSON.stringify({
+        // ── DOM: las mismas cuatro señales de P29 ──
+        frase: /El brief está listo/.test(main?.textContent ?? ''),
+        tildeOk: document.querySelectorAll(
+          'main section[aria-label="Registro"] button[aria-pressed]:not([disabled])',
+        ).length,
+        acuse: document.querySelectorAll('[data-acuse]').length,
+        toast: document.querySelectorAll('[data-sonner-toast]').length,
+        // ── React: qué está haciendo el root ──
+        pend: r ? hex(r.pendingLanes) : 'n/a',
+        susp: r ? hex(r.suspendedLanes) : 'n/a',
+        ping: r ? hex(r.pingedLanes) : 'n/a',
+        // `warmLanes`: React marca asi el lane que ya intento renderizar entero
+        // y quedo suspendido. `markRootUpdated` lo limpia junto con
+        // `suspendedLanes` — mismo gesto que destraba la pantalla.
+        warm: r ? hex(r.warmLanes) : 'n/a',
+        ent: r ? hex(r.entangledLanes) : 'n/a',
+        // ¿hay un render TERMINADO esperando commit?
+        fin: r ? (r.finishedWork === null ? 0 : 1) : 'n/a',
+        // ¿ese commit está SUSPENDIDO esperando recursos (hojas/imágenes)?
+        commitSusp: r ? (r.cancelPendingCommit === null || r.cancelPendingCommit === undefined ? 0 : 1) : 'n/a',
+        // hojas de estilo: total y cuántas todavía no resolvieron
+        css: hojas.length,
+        cssPend: hojas.filter((h) => {
+          try { return (h as HTMLLinkElement).sheet === null } catch { return true }
+        }).length,
+      })
+      if (estado !== previo) {
+        previo = estado
+        const t = w.__t0 === undefined ? 'pre-clic' : `${Math.round(performance.now() - w.__t0)}ms`
+        w.__log!.push(`${t.padStart(9)} ${estado}`)
+      }
+    }
+    // Dos muestreadores sobre la MISMA funcion: rAF (un cuadro) y setTimeout 0
+    // (~4 ms). El ping se pone y se consume dentro de un mismo cuadro y rAF lo
+    // pierde. Leer campos del root NO agenda trabajo en React.
+    const porCuadro = () => { tick(); requestAnimationFrame(porCuadro) }
+    const fino = () => { tick(); setTimeout(fino, 0) }
+    requestAnimationFrame(porCuadro)
+    setTimeout(fino, 0)
+  })
+
+  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+
+  if (POKE_MS > 0) {
+    for (let n = 0; n < POKE_VECES; n++) {
+      await page.waitForTimeout(POKE_MS)
+      await page.keyboard.press(POKE_TECLA)
+    }
+    await page.waitForTimeout(Math.max(0, VENTANA_MS - POKE_MS * POKE_VECES))
+  } else {
+    await page.waitForTimeout(VENTANA_MS)
+  }
+
+  const { log, diag } = await page.evaluate(() => ({
+    log: (window as unknown as { __log: string[] }).__log,
+    diag: (window as unknown as { __diag: string }).__diag,
+  }))
+  console.log(`\n── P30 [${ETIQUETA}] ventana=${VENTANA_MS}ms · ${diag} ──`)
+  for (const linea of log) console.log('   ', linea)
+  const red = await page.evaluate(() => {
+    const w = window as unknown as { __t0?: number }
+    return performance
+      .getEntriesByType('resource')
+      .filter((e) => (e as PerformanceResourceTiming).initiatorType === 'fetch')
+      .map((e) => {
+        const t0 = w.__t0 ?? 0
+        return `POST inicio ${Math.round(e.startTime - t0)}ms · fin ${Math.round(
+          e.startTime + e.duration - t0,
+        )}ms · ${Math.round(e.duration)}ms`
+      })
+  })
+  for (const linea of red) console.log('    red:', linea)
+  if (POKE_MS > 0) console.log(`    poke: ${POKE_TECLA} a los ${POKE_MS}ms`)
+  console.log('   dossier en la base:', (await getDossier(leadId))?.stage)
+  console.log('')
+})

@@ -420,3 +420,79 @@ export function consultasPrismaEn(
   }
   return salida
 }
+
+// ── Recortes que necesita el invariante del REFLEJO (P31) ────────────────────
+
+/**
+ * Desde el paréntesis de apertura en `desde`, el texto hasta su cierre
+ * (inclusive), salteando literales y comentarios.
+ *
+ * Es el gemelo por paréntesis de `bloqueDeLlaves`, y existe por lo mismo: el
+ * sujeto de un invariante sobre call-sites es LA LLAMADA —`run(…)`,
+ * `startTransition(…)`—, no el archivo. Buscar en el archivo entero le deja a
+ * una acción muda que le firme la señal el `successToast` de la acción de al
+ * lado; es el falso verde por granularidad que P25 y P27 ya cerraron dos veces
+ * en `acuse-recibo`.
+ */
+export function bloqueDeParentesis(fuente: string, desde: number, contexto: string): string {
+  let nivel = 0
+  for (let i = desde; i < fuente.length; ) {
+    const salto = saltarLiteral(fuente, i)
+    if (salto !== i) {
+      i = salto
+      continue
+    }
+    const c = fuente[i]
+    if (c === '(') nivel += 1
+    else if (c === ')') {
+      nivel -= 1
+      if (nivel === 0) return fuente.slice(desde, i + 1)
+    }
+    i += 1
+  }
+  throw new Error(
+    `${contexto}: el bloque no cierra paréntesis — la fuente quedó ilegible para el invariante. ` +
+      'Arreglá el recorte junto con el cambio; un bloque que no se puede leer no protege nada.',
+  )
+}
+
+/**
+ * La misma fuente con los COMENTARIOS reemplazados por espacios — mismos
+ * índices, mismo largo, y los literales INTACTOS.
+ *
+ * Lo pide un censo que pregunta «¿esta acción revalida?»: `ofrecerHorarios`
+ * tiene escrito en un comentario «Sin revalidatePath: este sprint es backend
+ * puro», y un `grep` lo cuenta como que SÍ revalida — exactamente al revés de lo
+ * que dice. Medido: el primer censo de P31 la marcó revalidando por esa línea.
+ *
+ * ── Por qué los literales quedan intactos, y por qué igual hay que saltearlos ─
+ * Blanquearlos también parecía más prolijo, y rompió al primer uso: un chequeo
+ * que busca `from 'sonner'` o `<Toaster` deja de encontrarlos si el contenido de
+ * las comillas pasó a ser espacios. Pero SALTEARLOS no es opcional: `'https://…'`
+ * tiene un `//` adentro, y un escáner que no reconozca el literal se come el
+ * resto del renglón creyendo que arrancó un comentario. Este repo tiene URLs en
+ * literales (`'https://smoke-draft.netlify.app'`), así que ese borrado sería
+ * silencioso.
+ */
+export function sinComentarios(fuente: string): string {
+  const salida = fuente.split('')
+  for (let i = 0; i < fuente.length; ) {
+    const c = fuente[i]
+    if (c === "'" || c === '"' || c === '`') {
+      i = saltarLiteral(fuente, i)
+      continue
+    }
+    if (c === '/' && (fuente[i + 1] === '/' || fuente[i + 1] === '*')) {
+      const fin = saltarLiteral(fuente, i)
+      // Los saltos de línea se conservan para que los números de renglón de los
+      // mensajes de error sigan siendo los del archivo real.
+      for (let k = i; k < Math.min(fin, fuente.length); k += 1) {
+        if (salida[k] !== '\n') salida[k] = ' '
+      }
+      i = fin
+      continue
+    }
+    i += 1
+  }
+  return salida.join('')
+}

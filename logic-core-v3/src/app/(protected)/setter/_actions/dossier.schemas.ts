@@ -5,7 +5,7 @@
  * acá solo se agregan mensajes amigables y reglas de captura.
  */
 import { z } from 'zod'
-import { VEREDICTO_VALUES } from '@/lib/leados/contracts'
+import { TEXTO_DOCUMENTO_MAX, TEXTO_LIBRE_MAX, VEREDICTO_VALUES } from '@/lib/leados/contracts'
 import { herramientaSinLink } from '@/lib/leados/herramientas'
 
 export const LeadIdSchema = z.string().trim().min(1, 'Lead inválido')
@@ -75,7 +75,56 @@ export type EvaluacionInput = z.infer<typeof EvaluacionInputSchema>
  * se transcriben del Gem — son el plano que el setter puede escribir solo (el
  * título arranca con el nombre del negocio; las secciones tienen sus ejemplos en
  * el hint), y `secciones` es lo único que hace construible la demo.
+ *
+ * P40 — Los campos de las cuatro vueltas con el Gem entran TODOS opcionales y no
+ * tocan ni la regla del pegado ni `titulo`/`secciones`: lo que hoy se exige para
+ * guardar el brief se sigue exigiendo igual, y nada más. Lo único que suman es el
+ * TECHO de cada texto, con un mensaje que dice qué hacer — el mismo techo que el
+ * contrato persistido, así un pegado largo rebota acá con su motivo en vez de
+ * morir en el servidor con un «No se pudo guardar el brief».
  */
+const MILES = new Intl.NumberFormat('es-AR')
+
+function textoOpcional(max: number, mensaje: string) {
+  return z.string().trim().max(max, mensaje).optional()
+}
+
+const CORRECCION = textoOpcional(
+  TEXTO_LIBRE_MAX,
+  `Lo que corregiste pasa los ${MILES.format(TEXTO_LIBRE_MAX)} caracteres — resumilo en lo que cambia`,
+)
+
+const VueltasInputSchema = z.object({
+  lectura: z
+    .object({
+      respuesta: textoOpcional(
+        TEXTO_LIBRE_MAX,
+        `La lectura de la vuelta 1 pasa los ${MILES.format(TEXTO_LIBRE_MAX)} caracteres: tiene que entrar en quince líneas. Pedile al Gem que la acorte`,
+      ),
+      correccion: CORRECCION,
+    })
+    .optional(),
+  decisiones: z
+    .object({
+      respuesta: textoOpcional(
+        TEXTO_LIBRE_MAX,
+        `Las decisiones de la vuelta 2 pasan los ${MILES.format(TEXTO_LIBRE_MAX)} caracteres. Pedile al Gem que las mande cortas, una línea por decisión`,
+      ),
+      correccion: CORRECCION,
+    })
+    .optional(),
+  especificacion: z
+    .object({
+      respuesta: textoOpcional(
+        TEXTO_DOCUMENTO_MAX,
+        `El borrador de la vuelta 3 pasa los ${MILES.format(TEXTO_DOCUMENTO_MAX)} caracteres. Pedile al Gem que lo acorte`,
+      ),
+      correccion: CORRECCION,
+    })
+    .optional(),
+  huecos: z.object({ correccion: CORRECCION }).optional(),
+})
+
 export function briefInputSchemaPara(gemConLink: boolean) {
   return z
     .object({
@@ -87,6 +136,14 @@ export function briefInputSchemaPara(gemConLink: boolean) {
       notasMarca: z.string().trim().optional(),
       cta: z.string().trim().optional(),
       pegadoGem: z.string().trim(),
+      tono: textoOpcional(TEXTO_LIBRE_MAX, 'El tono va en una línea — acortalo'),
+      paleta: textoOpcional(TEXTO_LIBRE_MAX, 'La paleta va en una línea — acortala'),
+      tipografia: textoOpcional(TEXTO_LIBRE_MAX, 'La tipografía va en una línea — acortala'),
+      documento: textoOpcional(
+        TEXTO_DOCUMENTO_MAX,
+        `El documento pasa los ${MILES.format(TEXTO_DOCUMENTO_MAX)} caracteres. Pegá solo el documento definitivo, sin la caza de huecos, o pedile al Gem que lo acorte`,
+      ),
+      vueltas: VueltasInputSchema.optional(),
     })
     .superRefine((value, ctx) => {
       if (!gemConLink) return

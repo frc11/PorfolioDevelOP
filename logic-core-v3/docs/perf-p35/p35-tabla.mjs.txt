@@ -1,0 +1,130 @@
+// P35 · imprime la tabla de seis columnas y EL NUMERO desde el .jsonl.
+//   node tests/_p35-guardados/p35-tabla.mjs [archivo.jsonl ...]
+import { readFileSync, existsSync } from 'node:fs'
+
+const archivos = process.argv.slice(2)
+if (archivos.length === 0) archivos.push('tests/perf/.p35-lineas.jsonl')
+
+const lineas = []
+for (const a of archivos) {
+  if (!existsSync(a)) {
+    console.error(`!! falta ${a}`)
+    continue
+  }
+  for (const l of readFileSync(a, 'utf8').split('\n')) {
+    if (l.trim()) lineas.push(JSON.parse(l))
+  }
+}
+
+const claves = [...new Set(lineas.map((l) => l.camino))].sort()
+const rotulo = new Map(lineas.map((l) => [l.camino, l.rotulo]))
+const site = new Map(lineas.map((l) => [l.camino, l.callSite]))
+const esperado = new Map(lineas.map((l) => [l.camino, l.esperado]))
+
+const R = '='.repeat(112)
+console.log('\n' + R)
+console.log('P35 · TABLA — una fila por pasada')
+console.log(R)
+
+const cab = [
+  'camino'.padEnd(15),
+  'rnd'.padEnd(3),
+  'trn'.padEnd(3),
+  'docs'.padEnd(4),
+  'despacho'.padEnd(9),
+  'docs POST-despacho'.padEnd(22),
+  'acuse'.padEnd(5),
+  'emit'.padEnd(4),
+  'base'.padEnd(4),
+  'refl',
+].join('|')
+console.log(cab)
+console.log('-'.repeat(cab.length))
+
+for (const l of lineas.sort((a, b) =>
+  a.camino === b.camino ? a.ronda - b.ronda : a.camino < b.camino ? -1 : 1,
+)) {
+  const c = l.cosecha
+  if (!c) {
+    console.log(
+      `${l.camino.padEnd(15)}|${String(l.ronda).padEnd(3)}|${String(l.turno).padEnd(3)}| NO MEDIDA — ${l.nota}`,
+    )
+    continue
+  }
+  const post = c.docsPostDespacho.length
+    ? `${c.docsPostDespacho.length} -> ${c.docsPostDespacho[0]}`
+    : '0'
+  console.log(
+    [
+      l.camino.padEnd(15),
+      String(l.ronda).padEnd(3),
+      String(l.turno).padEnd(3),
+      String(c.documentos).padEnd(4),
+      `+${c.despachoMs ?? '?'}ms`.padEnd(9),
+      post.slice(0, 22).padEnd(22),
+      (c.pidioAcuse ? 'SI' : 'NO').padEnd(5),
+      String(c.carteles).padEnd(4),
+      (l.enBase ? 'SI' : 'NO').padEnd(4),
+      l.reflejo ? 'SI' : 'NO',
+    ].join('|'),
+  )
+}
+
+console.log('\n' + R)
+console.log('EL NUMERO — por camino')
+console.log(R)
+console.log(
+  `${'camino'.padEnd(15)}| ${'medidas'.padEnd(8)}| ${'DURA'.padEnd(7)}| ${'docs post'.padEnd(10)}| ` +
+    `${'ACUSE PERDIDO'.padEnd(14)}| ${'sin cartel'.padEnd(11)}| ${'sin base'.padEnd(9)}| sin reflejo`,
+)
+console.log('-'.repeat(112))
+
+let sinInstrumentar = 0
+for (const k of claves) {
+  const propias = lineas.filter((l) => l.camino === k)
+  const med = propias.filter((l) => l.ok && l.cosecha)
+  const nm = propias.length - med.length
+  sinInstrumentar += med.filter((l) => !l.cosecha.instrumentado).length
+  if (med.length === 0) {
+    console.log(`${k.padEnd(15)}| 0 de ${propias.length} — TODAS NO MEDIDAS`)
+    continue
+  }
+  const dura = med.filter((l) => l.cosecha.documentos > 1).length
+  const post = med.filter((l) => l.cosecha.docsPostDespacho.length > 0).length
+  const perdido = med.filter((l) => !l.cosecha.pidioAcuse).length
+  const sinCartel = med.filter((l) => l.cosecha.carteles === 0).length
+  const sinBase = med.filter((l) => !l.enBase).length
+  const sinRefl = med.filter((l) => !l.reflejo).length
+  console.log(
+    `${k.padEnd(15)}| ${`${med.length}/${propias.length}`.padEnd(8)}| ` +
+      `${`${dura}/${med.length}`.padEnd(7)}| ${`${post}/${med.length}`.padEnd(10)}| ` +
+      `${`${perdido}/${med.length}`.padEnd(14)}| ${`${sinCartel}/${med.length}`.padEnd(11)}| ` +
+      `${`${sinBase}/${med.length}`.padEnd(9)}| ${sinRefl}/${med.length}` +
+      (nm ? `   (${nm} no medidas)` : ''),
+  )
+}
+
+if (sinInstrumentar > 0) {
+  console.log(
+    `\n!! ${sinInstrumentar} pasadas SIN la variante diagnostica: sus columnas de acuse no dicen nada.`,
+  )
+}
+
+// El discriminador de P34, recontado sobre esta corrida.
+const med = lineas.filter((l) => l.ok && l.cosecha)
+const conPost = med.filter((l) => l.cosecha.docsPostDespacho.length > 0)
+const sinPost = med.filter((l) => l.cosecha.docsPostDespacho.length === 0)
+console.log('\n' + R)
+console.log('EL DISCRIMINADOR DE P34, RECONTADO')
+console.log(R)
+console.log(
+  `nace documento DESPUES del despacho: ${conPost.length} pasadas · de ellas pierden el acuse ${
+    conPost.filter((l) => !l.cosecha.pidioAcuse).length
+  }`,
+)
+console.log(
+  `NO nace documento despues:           ${sinPost.length} pasadas · de ellas pierden el acuse ${
+    sinPost.filter((l) => !l.cosecha.pidioAcuse).length
+  }`,
+)
+console.log(R + '\n')

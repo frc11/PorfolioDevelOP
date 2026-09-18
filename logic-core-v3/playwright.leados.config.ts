@@ -26,6 +26,9 @@ dotenv.config({ path: '.env.local' })
 
 export default defineConfig({
   testDir: './tests/leados',
+  // P39 — borra lo que dejó una corrida interrumpida (por id, desde su registro) y
+  // activa el registro para esta. Ver `tests/helpers/siembra-registro.ts`.
+  globalSetup: './tests/helpers/limpieza-al-arrancar.ts',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,

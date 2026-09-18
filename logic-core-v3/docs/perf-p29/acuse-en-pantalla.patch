@@ -1,0 +1,1531 @@
+diff --git a/logic-core-v3/src/app/(protected)/setter/_components/acuse-accion.tsx b/logic-core-v3/src/app/(protected)/setter/_components/acuse-accion.tsx
+new file mode 100644
+index 00000000..75f097d1
+--- /dev/null
++++ b/logic-core-v3/src/app/(protected)/setter/_components/acuse-accion.tsx
+@@ -0,0 +1,72 @@
++'use client'
++
++import { Check, Info } from 'lucide-react'
++import { cn } from '@/lib/utils'
++
++/**
++ * P29 — EL ACUSE DE RECIBO, EN LA PANTALLA.
++ *
++ * La pieza que dice QUÉ pasó después de una acción con registro, y lo dice
++ * DONDE se hizo el clic. Es la hermana discreta de `<AutosaveStatus>`: misma
++ * región (`role="status"` + `aria-live="polite"`), mismo tamaño, misma
++ * disciplina de callar cuando no hay nada que decir. Lo que cambia es el
++ * sujeto — `AutosaveStatus` habla de una escritura CONTINUA («Guardado»,
++ * «Sin guardar»), esto habla del resultado de UN acto terminado.
++ *
++ * ── Por qué existe, y por qué no alcanzaba el aviso flotante ─────────────────
++ * La regla 14 del brief pide que toda acción acuse recibo «donde se hizo el
++ * clic». Un cartel en la esquina de la pantalla no es donde se hizo el clic:
++ * cumple la letra (hay acuse) y no el espíritu (está en otro lado, y se va
++ * solo a los cuatro segundos).
++ *
++ * Y había un costo medido encima del principio. P28 dejó cronometrado que en
++ * las acciones que muestran aviso flotante y no navegan, la pantalla tarda en
++ * reflejar el estado nuevo EXACTAMENTE lo que dura el aviso: `reflejo ≈
++ * acuseResultado + 4000 ms`, con la constante de sonner, en nueve pantallas.
++ * Las que ya acusaban en pantalla —los tres tildes, con `<AutosaveStatus>`—
++ * reflejaban en ~0,5 s. La familia que no espera es la que no monta un toast.
++ *
++ * ── `data-acuse` no es decoración ────────────────────────────────────────────
++ * Es la marca por la que el instrumento de latencia (`tests/perf/_instrumento`)
++ * y el helper de las suites (`expectAcuse`) reconocen la señal 2. Sin un
++ * marcador propio, verificar «acusó» obligaría a buscar la frase sobre la
++ * pantalla entera — que es el falso verde que `expectToast` ya documentó para
++ * los toasts (una copy de la pantalla satisfacía la aserción antes del clic).
++ */
++
++export type TonoAcuse = 'ok' | 'aviso'
++
++const TONOS: Record<TonoAcuse, { color: string; Icono: typeof Check }> = {
++  ok: { color: 'text-emerald-400', Icono: Check },
++  // Para el resultado que ENTRÓ pero con una salvedad que el setter tiene que
++  // leer (el escalamiento que se registró y cuyo aviso por Telegram no salió).
++  // No es un error: el error tiene su propio `role="alert"`, que es otra cosa.
++  aviso: { color: 'text-amber-300', Icono: Info },
++}
++
++export function AcuseAccion({
++  mensaje,
++  tono = 'ok',
++  className,
++}: {
++  mensaje: string
++  tono?: TonoAcuse
++  className?: string
++}) {
++  const { color, Icono } = TONOS[tono]
++  return (
++    <p
++      data-acuse={tono}
++      role="status"
++      aria-live="polite"
++      className={cn(
++        'inline-flex min-w-0 items-start gap-1.5 text-[11px] font-medium leading-snug',
++        color,
++        className,
++      )}
++    >
++      <Icono size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" aria-hidden />
++      <span className="min-w-0">{mensaje}</span>
++    </p>
++  )
++}
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx
+index 69122b8f..ae290717 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx
+@@ -1,6 +1,6 @@
+ 'use client'
+ 
+-import { useMemo, useState } from 'react'
++import { useEffect, useMemo, useState } from 'react'
+ import { Button, Field, Input, TextArea } from '@/components/ui'
+ import { fail } from '@/lib/action-utils'
+ import type { Brief } from '@/lib/leados/contracts'
+@@ -12,7 +12,7 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+ import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
+ import { BriefInputSchema, type BriefInput } from '@/app/(protected)/setter/_actions/dossier.schemas'
+ import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
+-import { useAccionPrincipal } from '../manual/_components/barra-accion'
++import { useAccionPrincipal, useAcusar } from '../manual/_components/barra-accion'
+ 
+ /**
+  * El REGISTRO del brief (5.3, patrón 4.2/5.1/5.2). Extraído SIN cambio de
+@@ -100,6 +100,7 @@ export function BriefForm({
+   const [errors, setErrors] = useState<FormErrors>({})
+   const [serverError, setServerError] = useState<string | null>(null)
+   const { isPending, run } = useStepAction()
++  const acusar = useAcusar()
+ 
+   const briefValido = useMemo(() => BriefInputSchema.safeParse(aPayloadBrief(form)).success, [form])
+ 
+@@ -124,6 +125,15 @@ export function BriefForm({
+   // captura inicial en EVALUADA, que el autosave no cubre.
+   useUnsavedGuard(autosave.isDirty)
+ 
++  // P29 — el acuse persiste SIN temporizador, pero deja de ser cierto en cuanto
++  // el setter vuelve a escribir: ahí el chip de al lado ya dice «Sin guardar», y
++  // dos indicadores diciendo cosas distintas del mismo brief es peor que uno
++  // solo. Es la contracara de «no se va solo si el estado sigue siendo cierto»:
++  // cuando deja de serlo, se va.
++  useEffect(() => {
++    if (autosave.isDirty) acusar(null)
++  }, [autosave.isDirty, acusar])
++
+   const set = <Campo extends keyof BriefFormState>(campo: Campo, valor: string) => {
+     setForm((actual) => ({ ...actual, [campo]: valor }))
+   }
+@@ -141,8 +151,10 @@ export function BriefForm({
+       onSuccess: () => {
+         autosave.markSaved()
+         onSaved?.()
++        // P29 — el acuse va a la banda del botón que se tocó (P18 lo mudó a la
++        // barra fija), no a un cartel que se va solo a los cuatro segundos.
++        acusar('Brief guardado — dale una leída antes de seguir.')
+       },
+-      successToast: 'Brief guardado — dale una leída antes de seguir.',
+     })
+   }
+ 
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx
+index 8414e65f..ad9fab2f 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx
+@@ -6,6 +6,7 @@ import { toast } from 'sonner'
+ import { LifeBuoy } from 'lucide-react'
+ import { Button, Field, Modal, TextArea } from '@/components/ui'
+ import { escalarConstruccion } from '@/app/(protected)/setter/_actions/dossier.actions'
++import { useAcusar } from '../manual/_components/barra-accion'
+ import { EscalamientoInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+ 
+ /**
+@@ -13,8 +14,17 @@ import { EscalamientoInputSchema } from '@/app/(protected)/setter/_actions/dossi
+  * persiste la marca en el dossier (Franco la ve en el panel) y además manda un
+  * Telegram con el contexto del lead (negocio, etapa, draft si hay) + lo que el
+  * setter describe. Si Telegram falla, el flujo sigue: el pedido ya quedó
+- * registrado y el toast le dice al setter que escriba directo, nunca un error
++ * registrado y el acuse le dice al setter que escriba directo, nunca un error
+  * crudo. `reescalar` solo cambia el rótulo cuando ya hay un escalamiento vigente.
++ *
++ * ── P29: el acuse deja de flotar ─────────────────────────────────────────────
++ * El resultado se anuncia en la banda de acción de la pantalla, no en un cartel
++ * de la esquina. Es el único de los diecisiete cuyo submit vive en el footer de
++ * un MODAL: al cerrarse, el ojo vuelve a la pantalla, y ahí está la banda —
++ * fija abajo, siempre a la vista. La marca durable la sigue dando el banner «Ya
++ * avisaste a Franco» que el `router.refresh()` de abajo trae del server; lo que
++ * el banner NO puede decir es si el Telegram salió, y eso es exactamente lo que
++ * el acuse aporta (`tono: 'aviso'` cuando no salió).
+  */
+ export function EscalarModal({
+   leadId,
+@@ -32,6 +42,7 @@ export function EscalarModal({
+   const [descripcion, setDescripcion] = useState(reescalar ? (notaPrevia ?? '') : '')
+   const [error, setError] = useState<string | null>(null)
+   const [isPending, startTransition] = useTransition()
++  const acusar = useAcusar()
+ 
+   const escalar = () => {
+     const parsed = EscalamientoInputSchema.safeParse({ descripcion })
+@@ -55,12 +66,13 @@ export function EscalarModal({
+       // al instante — la action no revalida el path, el refresh cierra ese hueco.
+       router.refresh()
+       if (result.data.enviado) {
+-        toast.success(
++        acusar(
+           'Le avisamos a Franco por Telegram y quedó registrado en el panel. Seguí con otro lead mientras te responde.',
+         )
+       } else {
+-        toast.warning(
++        acusar(
+           'Guardamos tu pedido — Franco lo ve en el panel. El aviso por Telegram no salió: si es urgente, escribile directo.',
++          'aviso',
+         )
+       }
+     })
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx
+index 1d5482a7..b8e68fd2 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx
+@@ -14,7 +14,7 @@ import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.a
+ import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+ import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+ import { cn } from '@/lib/utils'
+-import { useAccionPrincipal } from '../manual/_components/barra-accion'
++import { useAccionPrincipal, useAcusar } from '../manual/_components/barra-accion'
+ 
+ /**
+  * El REGISTRO del veredicto (5.1, patrón 4.2): score + veredicto + razonamiento
+@@ -90,6 +90,7 @@ export function EvaluacionForm({
+   const [serverError, setServerError] = useState<string | null>(null)
+   const [confirmOpen, setConfirmOpen] = useState(false)
+   const { isPending, run } = useStepAction()
++  const acusar = useAcusar()
+ 
+   // A-24: a diferencia de Ficha/Brief (autosave), la Evaluación es un
+   // formulario de una sola pasada sin borrador — cerrar la pestaña a mitad
+@@ -124,18 +125,20 @@ export function EvaluacionForm({
+     setErrors({})
+     run(() => registrarEvaluacion(leadId, parsed.data), {
+       onError: setServerError,
+-      onSuccess: () => {
++      onSuccess: (data) => {
+         setConfirmOpen(false)
+         // El veredicto ENTRÓ: baja la marca antes de que la revalidación
+         // navegue, para no preguntar por trabajo que ya está registrado.
+         olvidarTrabajoSinRegistrar()
++        // P29 — y el acuse va a la banda del botón, no a un cartel flotante.
++        acusar(
++          data.descartado
++            ? 'Lead descartado. Bien filtrado: a otra cosa.'
++            : data.gateAbierto
++              ? 'Evaluación registrada — el brief quedó habilitado.'
++              : 'Evaluación registrada. El brief arranca cuando el negocio responda.',
++        )
+       },
+-      successToast: (data) =>
+-        data.descartado
+-          ? 'Lead descartado. Bien filtrado: a otra cosa.'
+-          : data.gateAbierto
+-            ? 'Evaluación registrada — el brief quedó habilitado.'
+-            : 'Evaluación registrada. El brief arranca cuando el negocio responda.',
+     })
+   }
+ 
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx
+index 72e8c320..e4242cd4 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx
+@@ -1,6 +1,6 @@
+ 'use client'
+ 
+-import { useMemo, useRef, useState, useTransition, type ReactNode } from 'react'
++import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react'
+ import { toast } from 'sonner'
+ import { Save } from 'lucide-react'
+ import { Button, Field, Input, Select, TextArea } from '@/components/ui'
+@@ -25,6 +25,7 @@ import { useAutosave } from '@/lib/use-autosave'
+ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+ import { guardarFicha } from '@/app/(protected)/setter/_actions/dossier.actions'
+ import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
++import { AcuseAccion } from '@/app/(protected)/setter/_components/acuse-accion'
+ import {
+   BloquesSecuenciales,
+   type BloqueSecuencial,
+@@ -164,6 +165,19 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
+   const [form, setForm] = useState<FichaFormState>(() => estadoInicial(ficha))
+   const [serverError, setServerError] = useState<string | null>(null)
+   const [isPending, startTransition] = useTransition()
++  /*
++   * P29 — EL ACUSE, EN LA FILA DEL BOTÓN.
++   *
++   * De las diecisiete acciones con registro, ésta es la única cuyo control NO
++   * vive en la barra fija: el «Guardar ficha» está al pie del formulario, al
++   * lado del chip de autoguardado. Así que su acuse va ahí y no en la banda —
++   * la regla es acusar DONDE se hizo el clic, y acá el clic es acá.
++   *
++   * No lo cubre `<AutosaveStatus>`: ése habla de la escritura continua
++   * («Guardado»), y lo que el guardado manual tiene para decir es si la ficha
++   * ya juntó señal mínima o si quedó a medio llenar. Son dos sujetos.
++   */
++  const [acuse, acusar] = useState<string | null>(null)
+   // Nudges de CALIDAD por campo: true = "este input quedó flojo, mostrá cómo
+   // mejorarlo". Estado SEPARADO del form a propósito — no toca el autosave (que
+   // observa `form`) ni los gates. Solo pinta el mensaje de `CampoMejora`.
+@@ -271,7 +285,7 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
+         toast.error(result.error)
+         return
+       }
+-      toast.success(
++      acusar(
+         result.data.faltantes.length === 0
+           ? 'Ficha guardada — ya tenés señal para dejar tu veredicto'
+           : 'Borrador guardado — podés volver cuando quieras',
+@@ -283,6 +297,13 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
+     })
+   }
+ 
++  // El acuse persiste sin temporizador, pero deja de ser cierto en cuanto se
++  // vuelve a escribir: ahí el chip de al lado pasa a «Sin guardar» y sostener
++  // «Ficha guardada» al lado sería contradecirlo.
++  useEffect(() => {
++    if (autosave.isDirty) acusar(null)
++  }, [autosave.isDirty])
++
+   // ── Los campos, dibujados desde el censo ───────────────────────────────────
+ 
+   /** Un campo de texto: mismos label/hint/ejemplo y mismo nudge que siempre. */
+@@ -451,6 +472,7 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
+           Guardar ficha
+         </Button>
+         <AutosaveStatus phase={autosave.phase} isDirty={autosave.isDirty} busy={isPending} />
++        {acuse && <AcuseAccion mensaje={acuse} />}
+         {/* P23 — la promesa NOMBRA su sujeto. Esta fila vive debajo del acordeón
+             entero, y el último bloque es el veredicto, que NO tiene autosave: sin
+             el sujeto, «se guarda solo» se leía como que también lo cubría a él, y
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx
+index 6d6e1936..4446b6f1 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx
+@@ -12,7 +12,7 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+ import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
+ import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+ import { EnlacePantalla } from '../manual/_components/enlace-pantalla'
+-import { useAccionPrincipal } from '../manual/_components/barra-accion'
++import { useAccionPrincipal, useAcusar } from '../manual/_components/barra-accion'
+ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+ 
+ /**
+@@ -30,6 +30,7 @@ export function OpenerForm({ leadId }: { leadId: string }) {
+   const [mensaje, setMensaje] = useState('')
+   const [error, setError] = useState<string | null>(null)
+   const [isPending, startTransition] = useTransition()
++  const acusar = useAcusar()
+ 
+   const largo = mensaje.trim().length
+   const pasadoDeLargo = largo > CANAL_INSTAGRAM.openerMaxCaracteres
+@@ -55,7 +56,10 @@ export function OpenerForm({ leadId }: { leadId: string }) {
+         toast.error(result.error)
+         return
+       }
+-      toast.success(
++      // P29 — el acuse va a la banda del botón que se tocó, no a un cartel en
++      // la esquina. Acá el botón vive en la barra fija (P18), así que ése es
++      // literalmente el lugar del clic.
++      acusar(
+         result.data.proximoToque
+           ? `Opener registrado — próximo toque el ${formatFechaCorta(result.data.proximoToque)}.`
+           : 'Opener registrado — quedó en seguimiento.',
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx
+index 1045922b..e412cde2 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx
+@@ -13,6 +13,7 @@ import {
+ import { Button } from '@/components/ui'
+ import type { ButtonVariant } from '@/components/ui/Button'
+ import { zIndex } from '@/lib/design-tokens'
++import { AcuseAccion, type TonoAcuse } from '@/app/(protected)/setter/_components/acuse-accion'
+ 
+ /**
+  * LA BARRA DE ACCIÓN del manual (P18) — un solo mecanismo para las catorce.
+@@ -73,15 +74,34 @@ type Declarador = (caja: CajaAccion | null, clave: string) => void
+ const DeclararCtx = createContext<Declarador | null>(null)
+ const AccionCtx = createContext<{ caja: CajaAccion; clave: string } | null>(null)
+ 
++/** El acuse vigente de la pantalla — ver `useAcusar` y `ProveedorAccion`. */
++export type Acuse = { mensaje: string; tono: TonoAcuse }
++type Acusar = (mensaje: string | null, tono?: TonoAcuse) => void
++
++const AcusarCtx = createContext<Acusar | null>(null)
++const AcuseCtx = createContext<Acuse | null>(null)
++
+ /**
+  * Envuelve el contenido de la pantalla. Va en `PantallaManual`, no en cada
+  * pantalla: el mecanismo es uno solo para las catorce.
+  *
+- * Dos contextos y no uno: los formularios consumen `DeclararCtx` (estable — no
+- * se re-renderizan cuando cambia la acción) y sólo la barra consume `AccionCtx`.
++ * Cuatro contextos y no uno, por el mismo motivo en dos pares: los formularios
++ * consumen los ESTABLES (`DeclararCtx`, `AcusarCtx` — no se re-renderizan
++ * cuando cambia lo que la barra pinta) y sólo la barra consume los que cambian
++ * (`AccionCtx`, `AcuseCtx`).
++ *
++ * ── P29: por qué el acuse vive ACÁ y no en cada formulario ───────────────────
++ * Porque tiene que sobrevivir al árbol nuevo. Casi todas estas acciones mueven
++ * la posición derivada, y con eso el server manda una pantalla distinta: el
++ * componente que disparó la acción se DESMONTA (`ArrancarConstruccion` deja de
++ * existir en cuanto el stage pasa a CONSTRUCCION). Un acuse guardado en el
++ * estado de ese componente se iría con él —un parpadeo, que es peor que el
++ * aviso de hoy—. El proveedor está por encima del contenido que el server
++ * reemplaza, así que conserva su estado a través del swap.
+  */
+ export function ProveedorAccion({ children }: { children: ReactNode }) {
+   const [estado, setEstado] = useState<{ caja: CajaAccion; clave: string } | null>(null)
++  const [acuse, setAcuse] = useState<Acuse | null>(null)
+ 
+   const declarar = useCallback<Declarador>((caja, clave) => {
+     setEstado((previo) => {
+@@ -91,13 +111,42 @@ export function ProveedorAccion({ children }: { children: ReactNode }) {
+     })
+   }, [])
+ 
++  const acusar = useCallback<Acusar>((mensaje, tono = 'ok') => {
++    setAcuse(mensaje === null ? null : { mensaje, tono })
++  }, [])
++
+   return (
+     <DeclararCtx.Provider value={declarar}>
+-      <AccionCtx.Provider value={estado}>{children}</AccionCtx.Provider>
++      <AcusarCtx.Provider value={acusar}>
++        <AccionCtx.Provider value={estado}>
++          <AcuseCtx.Provider value={acuse}>{children}</AcuseCtx.Provider>
++        </AccionCtx.Provider>
++      </AcusarCtx.Provider>
+     </DeclararCtx.Provider>
+   )
+ }
+ 
++/**
++ * Acusa el resultado de una acción con registro EN LA PANTALLA, en la banda
++ * donde está el botón que se tocó. `acusar(null)` lo borra — lo que hace el
++ * formulario cuando su propio estado deja de ser el que el acuse describe (una
++ * edición nueva después de guardar).
++ *
++ * Devuelve una función ESTABLE: se puede llamar desde dentro del bloque de la
++ * transición sin re-render de por medio, que es donde el invariante del acuse
++ * la busca (es la señal 2 del call-site, igual que el toast que reemplaza).
++ *
++ * Fuera de una `PantallaManual` no hay barra donde pintar: en vez de romper,
++ * queda inerte. Sólo la usan los formularios del manual, que siempre viven
++ * dentro del proveedor; el invariante verifica que el mecanismo esté montado.
++ */
++export function useAcusar(): Acusar {
++  const acusar = useContext(AcusarCtx)
++  return acusar ?? noop
++}
++
++const noop: Acusar = () => {}
++
+ /**
+  * Declara la acción principal de la pantalla. La llama el formulario que ya era
+  * dueño del botón, con los MISMOS valores que le pasaba.
+@@ -144,9 +193,14 @@ export function useAccionPrincipal(accion: AccionPrincipal | null) {
+ }
+ 
+ /**
+- * La banda. Sólo se renderiza si hay acción declarada: una pantalla sin acción
+- * principal —los tres estados terminales, y m13 en su rama de consulta— no
+- * muestra una barra vacía ni un botón apagado por defecto.
++ * La banda. Se renderiza si hay acción declarada O si hay un acuse que mostrar:
++ * una pantalla sin ninguna de las dos —los tres estados terminales— no muestra
++ * una barra vacía ni un botón apagado por defecto.
++ *
++ * P29 — que el ACUSE también la levante no es un detalle. Varias de estas
++ * acciones dejan la pantalla sin acción principal justo por haber tenido éxito
++ * (m13 pasa a su rama de consulta, m14 al estado «en revisión»): con la barra
++ * atada sólo a la acción, el acuse de esas nacía invisible.
+  *
+  * `sticky bottom-0` y no `fixed`: al llegar al final del scroll la barra
+  * aterriza en su lugar del flujo en vez de quedar flotando encima, así el
+@@ -155,12 +209,14 @@ export function useAccionPrincipal(accion: AccionPrincipal | null) {
+  */
+ export function BarraAccion() {
+   const estado = useContext(AccionCtx)
++  const acuse = useContext(AcuseCtx)
++  const acusar = useContext(AcusarCtx)
+   const idMotivo = useId()
+   const accion = estado?.caja.current ?? null
+-  if (!accion) return null
++  if (!accion && !acuse) return null
+ 
+-  const bloqueada = Boolean(accion.disabled)
+-  const motivo = bloqueada ? (accion.motivo?.trim() ?? '') || null : null
++  const bloqueada = Boolean(accion?.disabled)
++  const motivo = bloqueada ? (accion?.motivo?.trim() ?? '') || null : null
+ 
+   return (
+     <div
+@@ -169,26 +225,37 @@ export function BarraAccion() {
+       className="sticky bottom-0 -mb-8 border-t border-white/[0.08] bg-zinc-950/85 px-1 py-2.5 backdrop-blur-[20px] backdrop-saturate-[180%]"
+     >
+       <div className="flex items-center justify-end gap-3">
++        {/* Acuse y motivo son HERMANOS, no un bloque envuelto: así la aparición
++            del acuse agrega exactamente UN nodo —el `<p data-acuse>`— y el
++            instrumento de latencia puede descontarlo del «la pantalla cambió»
++            sin descontar de paso el motivo, que sí es estado de pantalla. */}
++        {acuse && <AcuseAccion mensaje={acuse.mensaje} tono={acuse.tono} className="min-w-0 flex-1" />}
+         {motivo && (
+-          <p
+-            id={idMotivo}
+-            className="min-w-0 flex-1 text-[11px] leading-snug text-amber-200/85"
+-          >
++          <p id={idMotivo} className="min-w-0 flex-1 text-[11px] leading-snug text-amber-200/85">
+             {motivo}
+           </p>
+         )}
+-        <Button
+-          data-accion="principal"
+-          onClick={() => estado?.caja.current?.onClick()}
+-          disabled={bloqueada}
+-          loading={accion.loading}
+-          icon={accion.icon}
+-          variant={accion.variant ?? 'primary'}
+-          aria-describedby={motivo ? idMotivo : undefined}
+-          className="shrink-0 rounded-xl px-4 py-2 text-sm"
+-        >
+-          {accion.etiqueta}
+-        </Button>
++        {accion && (
++          <Button
++            data-accion="principal"
++            onClick={() => {
++              // El acuse de la acción ANTERIOR se va acá, al arrancar la
++              // siguiente: es el único instante en que deja de ser cierto sin
++              // que nadie más se entere. No hay temporizador — un acuse que se
++              // borra solo a los N segundos es el defecto que este sprint saca.
++              acusar?.(null)
++              estado?.caja.current?.onClick()
++            }}
++            disabled={bloqueada}
++            loading={accion.loading}
++            icon={accion.icon}
++            variant={accion.variant ?? 'primary'}
++            aria-describedby={motivo ? idMotivo : undefined}
++            className="shrink-0 rounded-xl px-4 py-2 text-sm"
++          >
++            {accion.etiqueta}
++          </Button>
++        )}
+       </div>
+     </div>
+   )
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx
+index e77c028a..71ab60b5 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx
+@@ -9,7 +9,7 @@ import { GUIA_DRAFT } from '@/lib/leados/guidance-content'
+ import { guardarDraftUrl } from '@/app/(protected)/setter/_actions/dossier.actions'
+ import { DraftUrlInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+ import { EnlaceChequeoFinal } from './enlace-chequeo'
+-import { useAccionPrincipal } from './barra-accion'
++import { useAccionPrincipal, useAcusar } from './barra-accion'
+ 
+ /**
+  * M13 — la captura del borrador (5.4, tramo Borrador). Presentación del manual
+@@ -46,6 +46,7 @@ export function BorradorForm({
+   const [errores, setErrores] = useState<ErroresBorrador>({})
+   const [editando, setEditando] = useState(false)
+   const [isPending, startTransition] = useTransition()
++  const acusar = useAcusar()
+   const confirmoCargaId = useId()
+   const errorConfirmoId = `${confirmoCargaId}-error`
+ 
+@@ -79,10 +80,14 @@ export function BorradorForm({
+         return
+       }
+       // El acuse dice lo que PASÓ. Nombrar acá el chequeo final era nombrar un
+-      // destino sin poder enlazarlo: un toast no lleva a ninguna parte y se va
+-      // solo a los pocos segundos. El paso siguiente vive abajo, en el panel que
+-      // este mismo guardado deja en pantalla — nombrado Y enlazado.
+-      toast.success('Borrador guardado.')
++      // destino sin poder enlazarlo: el paso siguiente vive abajo, en el panel
++      // que este mismo guardado deja en pantalla — nombrado Y enlazado.
++      //
++      // P29 — y ahora tampoco se va solo. Era un toast, y con el borrador ya
++      // publicado esta pantalla declara `null` como acción: la barra la levanta
++      // el acuse. Medido: el TEXTO de la pantalla no cambiaba hasta los 4.534 ms,
++      // que es exactamente cuando el cartel se desmontaba.
++      acusar('Borrador guardado.')
+       setEditando(false)
+       setConfirmoCarga(false)
+       // P28 — Sin `router.refresh()`: la respuesta del POST de la action (que
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx
+index 6d05191d..200aec04 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx
+@@ -14,7 +14,7 @@ import { enviarARevision, guardarSelfCheck } from '@/app/(protected)/setter/_act
+ import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
+ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+ import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+-import { useAccionPrincipal } from './barra-accion'
++import { useAccionPrincipal, useAcusar } from './barra-accion'
+ 
+ /**
+  * M14 — el chequeo final (5.4, tramo Chequeo). Presentación del manual sobre el
+@@ -136,6 +136,7 @@ export function ChequeoForm({
+   // el setter se quedaba sin saber por qué no salió el envío.
+   const [serverError, setServerError] = useState<string | null>(null)
+   const accion = useStepAction()
++  const acusar = useAcusar()
+ 
+   const todosDurosOk = HARD_CHECKS.every((check) => duros[check.id])
+   const faltantesDuros = HARD_CHECKS.filter((check) => !duros[check.id]).length
+@@ -175,7 +176,10 @@ export function ChequeoForm({
+       },
+       {
+         onError: setServerError,
+-        successToast: 'Demo enviada a revisión — Franco la ve en su cola.',
++        // P29 — el acuse va a la banda del botón que se tocó, no a un cartel
++        // flotante. La pantalla pasa al estado «en revisión» y ahí ya no hay
++        // acción principal: la barra la levanta el acuse (ver `BarraAccion`).
++        onSuccess: () => acusar('Demo enviada a revisión — Franco la ve en su cola.'),
+       },
+     )
+   }
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx
+index 27942d2b..0e5cf78e 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx
+@@ -6,7 +6,7 @@ import {
+   iniciarConstruccion,
+   reabrirConstruccion,
+ } from '@/app/(protected)/setter/_actions/dossier.actions'
+-import { useAccionPrincipal } from './barra-accion'
++import { useAccionPrincipal, useAcusar } from './barra-accion'
+ 
+ /**
+  * 5.6 — Las dos transiciones de Construcción que vivían SOLO en el wizard
+@@ -23,15 +23,23 @@ import { useAccionPrincipal } from './barra-accion'
+  * componente no devuelve nada: sigue marcando DÓNDE vive la acción en el árbol
+  * (y con qué texto de alrededor), pero el control se dibuja en la barra.
+  * Ninguna de las dos se bloquea nunca — no hay motivo que mostrar.
++ *
++ * P29 — y por eso mismo el acuse va en la barra: es el ÚNICO lugar de estas dos
++ * pantallas donde el setter hizo un clic. `mr` no tiene siquiera zona de
++ * Registro (P19 la disolvió), así que la banda es toda su superficie de acción.
++ * Con el aviso flotante, además, «Arrancar construcción» era de las peores:
++ * 4.587 ms hasta que la pantalla mostraba el estado nuevo, y 4.000 de esos
++ * eran la duración del cartel.
+  */
+ 
+ export function ArrancarConstruccion({ leadId }: { leadId: string }) {
+   const { isPending, run } = useStepAction()
++  const acusar = useAcusar()
+   useAccionPrincipal({
+     etiqueta: 'Arrancar construcción',
+     onClick: () =>
+       run(() => iniciarConstruccion(leadId), {
+-        successToast: 'Construcción arrancada — seguí la guía.',
++        onSuccess: () => acusar('Construcción arrancada — seguí la guía.'),
+       }),
+     loading: isPending,
+     icon: <Hammer size={14} strokeWidth={1.5} />,
+@@ -41,11 +49,12 @@ export function ArrancarConstruccion({ leadId }: { leadId: string }) {
+ 
+ export function ReabrirConstruccion({ leadId }: { leadId: string }) {
+   const { isPending, run } = useStepAction()
++  const acusar = useAcusar()
+   useAccionPrincipal({
+     etiqueta: 'Reabrir construcción',
+     onClick: () =>
+       run(() => reabrirConstruccion(leadId), {
+-        successToast: 'Construcción reabierta — guiate por el rechazo.',
++        onSuccess: () => acusar('Construcción reabierta — guiate por el rechazo.'),
+       }),
+     loading: isPending,
+     icon: <Hammer size={14} strokeWidth={1.5} />,
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx
+index 96f5c6d3..11fc10b6 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx
+@@ -8,7 +8,7 @@ import { useStepAction } from '@/lib/use-step-action'
+ import { enviarDemoAprobada } from '@/app/(protected)/setter/_actions/outreach.actions'
+ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+ import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+-import { useAccionPrincipal } from './barra-accion'
++import { useAccionPrincipal, useAcusar } from './barra-accion'
+ 
+ /**
+  * M15 — la acción de envío, presentada en el manual (5.4, tramo Envío). Es
+@@ -33,15 +33,21 @@ export function EnvioForm({
+   // 4.1: el rebote del gate queda FIJO acá (el toast se va y el setter no sabía
+   // por qué el envío no se registró). El gate en sí no cambia: lo decide el server.
+   const [serverError, setServerError] = useState<string | null>(null)
++  // P29 — el acuse del ÉXITO, por el mismo motivo y en la banda del botón que
++  // se tocó. El rebote de arriba ya estaba fijo en pantalla desde 4.1; lo que
++  // seguía flotando —y se llevaba 4 s del reflejo— era el camino feliz.
++  const acusar = useAcusar()
+ 
+   const registrarEnvioDemo = () => {
+     setServerError(null)
+     envio.run(() => enviarDemoAprobada(leadId), {
+       onError: setServerError,
+-      successToast: (data) =>
+-        data.yaEnviada
+-          ? 'Ese envío ya estaba registrado — no se duplica nada.'
+-          : 'Demo enviada registrada 🚀 — ahora el objetivo es la reunión.',
++      onSuccess: (data) =>
++        acusar(
++          data.yaEnviada
++            ? 'Ese envío ya estaba registrado — no se duplica nada.'
++            : 'Demo enviada registrada 🚀 — ahora el objetivo es la reunión.',
++        ),
+     })
+   }
+ 
+diff --git a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx
+index 4d889fa3..6ee3bd97 100644
+--- a/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx
++++ b/logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx
+@@ -9,7 +9,7 @@ import {
+ } from '@/app/(protected)/setter/_actions/outreach.schemas'
+ import { useStepAction } from '@/lib/use-step-action'
+ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+-import { useAccionPrincipal } from './barra-accion'
++import { useAccionPrincipal, useAcusar } from './barra-accion'
+ 
+ /**
+  * M5 — El REGISTRO de un toque de la conversación (5.5, tramo Seguimiento). Es
+@@ -57,7 +57,14 @@ const OPCIONES: OpcionResultado[] = [
+   },
+ ]
+ 
+-function toastDeResultado(resultado: string, proximoToque: string | null): string {
++/**
++ * Qué decir según lo que se registró. P29 lo saca del cartel flotante y lo pone
++ * en la banda del botón: el `onSuccess` de acá LIMPIA el formulario (vuelve a
++ * la grilla vacía), así que sin el acuse el único cambio visible era que todo
++ * se despintaba — «parece que no pasó nada», que es literalmente el bache B-B2
++ * que duplicó una postergación.
++ */
++function acuseDeResultado(resultado: string, proximoToque: string | null): string {
+   switch (resultado) {
+     case 'SIN_RESPUESTA':
+       return proximoToque
+@@ -84,6 +91,7 @@ export function SeguimientoForm({
+   const [fechaReactivacion, setFechaReactivacion] = useState('')
+   const [error, setError] = useState<string | null>(null)
+   const registro = useStepAction()
++  const acusar = useAcusar()
+   const opciones = cadenciaAgotada
+     ? OPCIONES.filter((opcion) => opcion.valor !== 'SIN_RESPUESTA')
+     : OPCIONES
+@@ -115,12 +123,12 @@ export function SeguimientoForm({
+     }
+     registro.run(() => registrarResultado(leadId, parsed.data), {
+       onError: setError,
+-      onSuccess: () => {
++      onSuccess: (data) => {
+         setResultado(null)
+         setNota('')
+         setFechaReactivacion('')
++        acusar(acuseDeResultado(data.resultado, data.proximoToque))
+       },
+-      successToast: (data) => toastDeResultado(data.resultado, data.proximoToque),
+     })
+   }
+ 
+diff --git a/logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts b/logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts
+index 5d4ba391..d5e4294d 100644
+--- a/logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts
++++ b/logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts
+@@ -27,11 +27,34 @@
+  * (`startTransition(…)` / `run(…)`), no contra el archivo entero.
+  *
+  * Qué cuenta como señal 2 en un bloque, en orden de fuerza:
+- *   a. Anuncia — `toast.*` / `successToast:` adentro del bloque.
++ *   a. Acusa en la pantalla — `acusar(` adentro del bloque (P29). Es la forma
++ *      FUERTE: el resultado se pinta donde se hizo el clic y no se va solo.
+  *   b. Navega — `router.push(` adentro del bloque: la pantalla entera cambia,
+  *      y un cartel encima de eso sería ruido (regla 3 del sprint).
+- *   c. Pinta en el lugar — sólo las de `EXIMIDAS`, con motivo escrito y con la
++ *   c. Anuncia flotando — `toast.*` / `successToast:` adentro del bloque. Sigue
++ *      valiendo: el aviso flotante NO se fue del producto, y es lo correcto para
++ *      lo que no tiene lugar propio en la pantalla (las palancas del panel).
++ *   d. Pinta en el lugar — sólo las de `EXIMIDAS`, con motivo escrito y con la
+  *      `prueba` de que el motivo SIGUE siendo cierto en el archivo.
++ *
++ * ── P29: LA TERCERA SEÑAL, Y POR QUÉ NO ES UN AFLOJE ─────────────────────────
++ * Hasta acá sólo (a) y (b) contaban, así que la única manera de acusar sin
++ * navegar era un cartel flotante. Y eso tenía dos problemas, uno de principio y
++ * otro medido:
++ *
++ *   · De principio: la regla 14 pide acusar «donde se hizo el clic». Una esquina
++ *     de la pantalla no es donde se hizo el clic.
++ *   · Medido (P28): en las acciones que muestran aviso flotante y no navegan, la
++ *     pantalla tarda en mostrar el estado nuevo EXACTAMENTE lo que dura el aviso
++ *     — `reflejo ≈ acuseResultado + 4000 ms`, la constante de sonner, en nueve
++ *     pantallas. Las que ya acusaban en pantalla reflejaban en ~0,5 s.
++ *
++ * `acusar(` NO se admite a secas: aceptar cualquier llamada con ese nombre sería
++ * exactamente el afloje que este archivo existe para no hacer. Se exige ADEMÁS
++ * que el componente esté enganchado a un acuse REAL — `useAcusar()` (que lo
++ * pinta en la barra de acción) o un `<AcuseAccion>` propio —, igual que a la
++ * escritura continua se le exige su `<AutosaveStatus>`. Y el §4 verifica que el
++ * mecanismo exista y esté montado, como ya hacía con el hook y el Toaster.
+  */
+ import assert from 'node:assert/strict'
+ import { readFileSync, readdirSync } from 'node:fs'
+@@ -144,6 +167,16 @@ const RESPONDE_EN_EL_ACTO = [/useStepAction\s*\(/, /useTransition\s*\(/]
+  */
+ const ANUNCIA = [/toast\s*\.\s*(success|warning|message)\s*\(/, /successToast\s*:/]
+ const NAVEGA = /router\s*\.\s*push\s*\(/
++/**
++ * P29 — el acuse EN LA PANTALLA. Un solo verbo para las dos formas en uso, que
++ * es lo que lo hace verificable: `acusar(…)` del hook `useAcusar()` (lo pinta la
++ * barra de acción, donde está el botón que se tocó) y el `acusar` que un
++ * formulario con botón propio se declara al lado de su `<AcuseAccion>` (la
++ * ficha, la única de las diecisiete cuyo control no vive en la barra).
++ */
++const ACUSA_EN_PANTALLA = /(?<![\w.])acusar\s*\(/
++/** El enganche al mecanismo real — sin esto, `acusar(` sería una palabra suelta. */
++const MECANISMO_DE_ACUSE = [/useAcusar\s*\(/, /<AcuseAccion/]
+ 
+ /**
+  * Las que no anuncian NI navegan, a propósito: pintan el resultado en el lugar.
+@@ -279,12 +312,42 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
+ 
+       const anuncia = ANUNCIA.some((patron) => patron.test(envoltorio.texto))
+       const navega = NAVEGA.test(envoltorio.texto)
++      const acusaEnPantalla = ACUSA_EN_PANTALLA.test(envoltorio.texto)
++
++      /*
++       * P29 — EL ENGANCHE, que es lo que separa esta señal de una palabra suelta.
++       *
++       * `acusar(` sólo cuenta si el componente está atado a un acuse que EXISTE
++       * y se PINTA: o consume `useAcusar()` —y entonces lo dibuja la barra de
++       * acción, que es donde está el botón que se tocó— o renderiza su propio
++       * `<AcuseAccion>` al lado de su control (la ficha, única de las diecisiete
++       * cuyo botón no vive en la barra).
++       *
++       * Es la misma exigencia, palabra por palabra, que la escritura continua ya
++       * tenía con su `<AutosaveStatus>`: la señal 2 la da el componente que
++       * pinta la pantalla, no un helper que se llame parecido. Sin esto, migrar
++       * del toast a la pantalla habría sido cambiar una verificación real por la
++       * presencia de un identificador.
++       */
++      if (acusaEnPantalla) {
++        assert.ok(
++          MECANISMO_DE_ACUSE.some((patron) => patron.test(componente.texto)),
++          `${ambito}: llama a acusar() pero su componente no está enganchado al mecanismo — ` +
++            'no consume `useAcusar()` ni renderiza `<AcuseAccion>`.\n' +
++            '  Un `acusar(` suelto no acusa nada: el nombre no pinta pantalla. O tomá el hook ' +
++            '(y el resultado sale en la barra de acción, donde está el botón), o montá tu ' +
++            'propio `<AcuseAccion>` junto al control que disparó la escritura.',
++        )
++      }
++
+       assert.ok(
+-        anuncia || navega,
+-        `${clave} escribe y NO acusa recibo: en su bloque no hay toast/successToast ni router.push. ` +
+-          'Ése es el bache que duplicó una postergación (B-B2) — el setter no sabe si quedó, recarga ' +
+-          'y lo hace de nuevo. Sumá el toast del patrón, o eximila en EXIMIDAS si la pantalla ya lo ' +
+-          'muestra sola (con el motivo y su prueba)',
++        anuncia || navega || acusaEnPantalla,
++        `${clave} escribe y NO acusa recibo: en su bloque no hay acusar(), ni router.push, ni ` +
++          'toast/successToast. Ése es el bache que duplicó una postergación (B-B2) — el setter no ' +
++          'sabe si quedó, recarga y lo hace de nuevo. Lo preferible es el acuse EN LA PANTALLA ' +
++          '(`useAcusar()`), que es donde se hizo el clic; el toast sigue valiendo para lo que no ' +
++          'tiene lugar propio ahí. O eximila en EXIMIDAS si la pantalla ya lo muestra sola (con ' +
++          'el motivo y su prueba)',
+       )
+     }
+   }
+@@ -312,20 +375,70 @@ for (const clave of Object.keys(EXIMIDAS)) {
+ 
+   // La región donde se lee: sonner montado UNA vez en el root layout. Sin esto
+   // los toasts no llegan a ningún `aria-live` y las dos señales son una sola.
++  // Sigue exigiéndose: el aviso flotante NO se fue del producto — P29 lo sacó
++  // del camino del acuse de registro, no del sistema (las palancas del panel y
++  // los errores globales lo siguen usando, y son su lugar correcto).
+   const layout = readFileSync(join(process.cwd(), 'src', 'app', 'layout.tsx'), 'utf8')
+   assert.ok(
+     /<Toaster/.test(layout) && /from ["']sonner["']/.test(layout),
+     'el Toaster de sonner no está montado en el root layout: sin su región aria-live, ningún ' +
+       'toast del setter se anuncia y el patrón queda a media máquina',
+   )
++
++  /*
++   * P29 — Y EL MECANISMO DEL ACUSE EN PANTALLA, con la misma vara.
++   *
++   * Tres cosas, y las tres son la diferencia entre una señal y una promesa:
++   *   1. La pieza existe y es una región que un lector de pantalla anuncia.
++   *   2. La barra de acción la RENDERIZA y expone el hook que la alimenta.
++   *   3. La barra se levanta con el acuse SOLO, sin acción declarada. Esto
++   *      último no es un detalle de estilo: varias de estas acciones dejan la
++   *      pantalla sin acción principal justo por haber tenido éxito (m13 pasa a
++   *      su rama de consulta, m14 al estado «en revisión»). Con la barra atada
++   *      únicamente a la acción, el acuse de esas nacía invisible — verde en el
++   *      chequeo y mudo en la pantalla, que es el falso verde de siempre.
++   */
++  const acusePieza = readFileSync(
++    join(SETTER_DIR, '_components', 'acuse-accion.tsx'),
++    'utf8',
++  )
++  assert.ok(
++    /role="status"/.test(acusePieza) && /aria-live="polite"/.test(acusePieza),
++    '`acuse-accion.tsx` perdió su región `role="status"` + `aria-live="polite"`: sin eso el ' +
++      'acuse se ve pero no se anuncia, y deja de ser señal 2 para quien no mira la pantalla',
++  )
++  assert.ok(
++    /data-acuse/.test(acusePieza),
++    '`acuse-accion.tsx` perdió su marca `data-acuse`: es por donde el instrumento de latencia y ' +
++      'el helper `expectAcuse` de las suites reconocen la señal. Sin marca propia, verificar ' +
++      '«acusó» obliga a buscar la frase sobre la pantalla entera — el falso verde que ' +
++      '`expectToast` ya documentó',
++  )
++
++  const barra = readFileSync(
++    join(SETTER_DIR, 'leads', '[leadId]', 'manual', '_components', 'barra-accion.tsx'),
++    'utf8',
++  )
++  assert.ok(
++    /export function useAcusar/.test(barra) && /<AcuseAccion/.test(barra),
++    'la barra de acción dejó de exponer `useAcusar()` o de renderizar `<AcuseAccion>`: los ' +
++      'call-sites que acusan por el hook quedarían llamando a una función que no pinta nada',
++  )
++  assert.ok(
++    /if\s*\(\s*!accion\s*&&\s*!acuse\s*\)\s*return null/.test(barra),
++    'la barra volvió a renderizarse sólo cuando hay acción declarada. Las acciones que dejan la ' +
++      'pantalla SIN acción principal por haber tenido éxito (m13, m14) perderían su acuse: ' +
++      'estaría en el estado y no en la pantalla',
++  )
+ }
+ 
+ console.log(
+   '✓ invariante OK: toda acción que escribe acusa recibo DONDE el setter hizo el clic — las ' +
+     `${ACCIONES.size} acciones de _actions/*.actions.ts, en sus ${callSites} llamadas repartidas en ` +
+     `${revisados.size} componentes, dan las dos señales del patrón. Se mide por CALL-SITE, no por ` +
+-    'archivo: cada llamada anuncia (toast/successToast) o navega (router.push) dentro de SU bloque ' +
+-    'de transición, y el autosave acusa con <AutosaveStatus>. ' +
++    'archivo: cada llamada acusa en la pantalla (acusar(), y su componente enganchado a ' +
++    'useAcusar()/<AcuseAccion>), navega (router.push) o anuncia flotando (toast/successToast) ' +
++    'dentro de SU bloque de transición, y el autosave acusa con <AutosaveStatus>. ' +
+     // El número SALE de la lista, no está escrito al lado: estaba fijo en «2», la
+     // lista bajó a una y el mensaje siguió diciendo dos. Es el mismo modo de
+     // fallar que el piso de `run-invariants` ya había mostrado — un número a
+diff --git a/logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts b/logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts
+index 9d37eb7e..d718664d 100644
+--- a/logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts
++++ b/logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts
+@@ -5,6 +5,7 @@ import {
+   pickSelect,
+   fieldControl,
+   expectToast,
++  expectAcuse,
+   expandCartera,
+   expandirGruposCartera,
+ } from '../helpers/setter-ui'
+@@ -88,6 +89,63 @@ test('expectToast · SABOTAJE: el aviso llegó pero dice OTRA cosa', async ({ pa
+   )
+ })
+ 
++// ─────────────────────────────────────────────────────────────────────────────
++// expectAcuse — el acuse EN LA PANTALLA (P29)
++//
++// El helper hermano nace con la lección ya aprendida: se afirma sobre la PIEZA
++// (`[data-acuse]`), no sobre la página. Y acá el riesgo es MAYOR que con los
++// toasts, porque el acuse vive dentro de `main`, entre el texto de la pantalla:
++// un `getByText` lo confundiría con la copy que lo rodea. Los tres sabotajes
++// son los tres modos de pasar en verde sin que el setter se haya enterado de
++// nada.
++// ─────────────────────────────────────────────────────────────────────────────
++
++/** La banda de acción con su acuse, tal como la monta `BarraAccion`. */
++function bandaConAcuse(mensaje: string | null): string {
++  const acuse = mensaje
++    ? `<p data-acuse="ok" role="status" aria-live="polite">${mensaje}</p>`
++    : ''
++  return `<div data-slot="barra-accion">${acuse}<button data-accion="principal">Arrancar construcción</button></div>`
++}
++
++test('expectAcuse · CONDUCTA: el acuse está en la pieza del acuse', async ({ page }) => {
++  await montar(page, `<main><p>Nada que ver acá.</p>${bandaConAcuse(AVISO_CONSTRUCCION)}</main>`)
++  await expectAcuse(page, /Construcción arrancada/i, { timeout: 3_000 })
++})
++
++test('expectAcuse · SABOTAJE: la frase es copy de la pantalla y NO hubo acuse', async ({ page }) => {
++  await montar(page, `<main><p>${SENUELO_CONSTRUCCION}</p>${bandaConAcuse(null)}</main>`)
++  await debeFallar('la acción no acusó; la frase es copy de la pantalla', () =>
++    expectAcuse(page, /Construcción arrancada/i, { timeout: 3_000 }),
++  )
++})
++
++test('expectAcuse · SABOTAJE: acusó, pero de OTRA cosa', async ({ page }) => {
++  await montar(
++    page,
++    `<main><p>${SENUELO_CONSTRUCCION}</p>${bandaConAcuse('Borrador guardado.')}</main>`,
++  )
++  await debeFallar('el único acuse en pantalla habla de otra acción', () =>
++    expectAcuse(page, /Construcción arrancada/i, { timeout: 3_000 }),
++  )
++})
++
++test('expectAcuse · SABOTAJE: la frase la pone el chip del autoguardado, no el acuse', async ({
++  page,
++}) => {
++  // `<AutosaveStatus>` es otro `role="status"` y comparte fila con el acuse en
++  // la ficha y en el chequeo. Afirmar por ROL los confundiría: son dos sujetos
++  // —la escritura continua y el resultado de un acto— y por eso el helper va
++  // por `[data-acuse]` y no por `getByRole('status')`.
++  await montar(
++    page,
++    `<main><span role="status" aria-live="polite">Construcción arrancada — seguí la guía.</span>${bandaConAcuse(null)}</main>`,
++  )
++  await debeFallar('eso es un role="status" ajeno, no el acuse de la acción', () =>
++    expectAcuse(page, /Construcción arrancada/i, { timeout: 3_000 }),
++  )
++})
++
+ test('expectToast · SABOTAJE: la frase vive en el <select> espejo sr-only', async ({ page }) => {
+   // `<Select>` monta un `<select aria-hidden sr-only>` con TODAS las opciones.
+   // No está en el árbol de accesibilidad, pero `getByText` lo ve igual.
+diff --git a/logic-core-v3/tests/helpers/setter-ui.ts b/logic-core-v3/tests/helpers/setter-ui.ts
+index eb635e57..cb08a59f 100644
+--- a/logic-core-v3/tests/helpers/setter-ui.ts
++++ b/logic-core-v3/tests/helpers/setter-ui.ts
+@@ -104,6 +104,32 @@ export async function expectToast(
+   await expect(firstVisible(aviso)).toBeVisible({ timeout: opts.timeout ?? 15_000 })
+ }
+ 
++/**
++ * Espera el ACUSE EN LA PANTALLA por su texto (P29).
++ *
++ * Hermano de `expectToast`, y con la misma disciplina que le costó un sprint
++ * aprender: el ámbito es la PIEZA del acuse (`[data-acuse]`, ver
++ * `_components/acuse-accion.tsx`), nunca la página. Una copy de la pantalla que
++ * contenga la frase no lo puede satisfacer — que es exactamente el falso verde
++ * que `expectToast` documenta arriba, y que acá sería MÁS fácil de pisar: el
++ * acuse vive dentro de `main`, entre el resto del texto de la pantalla, no en
++ * un portal aparte.
++ *
++ * Por qué no se afirma `getByRole('status')`: el manual monta además el
++ * `<AutosaveStatus>`, que es otro `role="status"` del mismo tamaño y a veces en
++ * la misma fila. Afirmar por rol confundiría un acuse con el chip del
++ * autoguardado — dos sujetos distintos.
++ */
++export async function expectAcuse(
++  page: Page,
++  text: string | RegExp,
++  opts: { timeout?: number } = {},
++): Promise<void> {
++  const { expect } = await import('@playwright/test')
++  const acuse = page.locator('[data-acuse]').filter({ hasText: text })
++  await expect(firstVisible(acuse)).toBeVisible({ timeout: opts.timeout ?? 15_000 })
++}
++
+ /**
+  * LeadOS 2.1a — La cartera completa quedó SECUNDARIA al foco: vive colapsada bajo
+  * el toggle "Ver toda la cartera". El buscador, los filtros, el orden y las cards
+diff --git a/logic-core-v3/tests/perf/_instrumento.ts b/logic-core-v3/tests/perf/_instrumento.ts
+index 507d440b..ccefd7ca 100644
+--- a/logic-core-v3/tests/perf/_instrumento.ts
++++ b/logic-core-v3/tests/perf/_instrumento.ts
+@@ -100,6 +100,9 @@ declare global {
+   interface Window {
+     __p28?: EstadoPagina
+     __p28off?: () => void
++    /** El texto de `main` descontando el acuse — lo arma `armarPagina` y lo
++     *  relee `cosechar`, que corre en OTRO `evaluate` y no ve su scope. */
++    __p28texto?: () => string
+   }
+ }
+ 
+@@ -113,6 +116,8 @@ export async function armarPagina(page: Page): Promise<void> {
+     window.__p28off?.()
+ 
+     const estado: EstadoPagina = {
++      // Se arma antes de declarar `textoDeTrabajo`, así que acá todavía no hay
++      // acuse en pantalla (el clic no ocurrió): `textContent` alcanza.
+       textoInicial: document.querySelector('main')?.textContent ?? '',
+       cambioTexto: null,
+       t0: null,
+@@ -130,11 +135,64 @@ export async function armarPagina(page: Page): Promise<void> {
+     document.addEventListener('input', marcarT0, true)
+ 
+     const hayResultadoAnunciado = (): boolean => {
++      // P29 — el acuse EN LA PANTALLA, reconocido por su marca propia y no por
++      // su frase: cada acción dice algo distinto, y buscar textos a mano por
++      // acción sería el instrumento afirmando lo que ya sabe.
++      if (document.querySelector('[data-acuse]')) return true
+       if (document.querySelector('[data-sonner-toast]')) return true
+       const estados = Array.from(document.querySelectorAll('[role="status"]'))
+       return estados.some((nodo) => /Guardado/.test(nodo.textContent ?? ''))
+     }
+ 
++    /*
++     * P29 — EL ACUSE NO ES «LA PANTALLA MOSTRANDO EL ESTADO NUEVO».
++     *
++     * Es señal 2, y ahora vive DENTRO de `main` (antes flotaba en un portal de
++     * `body`, así que quedaba afuera solo). Contarlo como reflejo haría que una
++     * pantalla que sólo pintó su acuse se leyera como reflejada — exactamente
++     * el error que este instrumento ya había corregido con el toast, y encima
++     * en la dirección que le conviene al sprint que introdujo el acuse. Se
++     * descuenta por marca (`data-acuse`), en las dos vías por las que aparece:
++     * como target de una mutación, y como nodo agregado/sacado.
++     */
++    const esDelAcuse = (registro: MutationRecord): boolean => {
++      const objetivo = registro.target
++      const elemento =
++        objetivo.nodeType === 1 ? (objetivo as Element) : objetivo.parentElement
++      if (elemento?.closest('[data-acuse]')) return true
++      const movidos = [...registro.addedNodes, ...registro.removedNodes]
++      return (
++        movidos.length > 0 &&
++        movidos.every(
++          (nodo) => nodo.nodeType === 1 && (nodo as Element).matches('[data-acuse]'),
++        )
++      )
++    }
++
++    /**
++     * El texto de `main` SIN el acuse — la línea de base del reflejo.
++     *
++     * Se descuenta por reemplazo del texto de cada `[data-acuse]`, no clonando
++     * el árbol: esto corre en cada ráfaga de mutaciones (Framer Motion escribe
++     * a 60 fps) y un clon de `main` por cuadro distorsionaría lo que se está
++     * midiendo. Si la frase del acuse apareciera además en otro lado de la
++     * pantalla, el reemplazo saca la primera y el texto queda distinto del
++     * inicial: se leería «cambió» antes de tiempo. Ese error va EN CONTRA de
++     * este sprint (adelanta el reflejo del brazo viejo tanto como el del
++     * nuevo), que es el lado por el que conviene equivocarse.
++     */
++    const textoDeTrabajo = (): string => {
++      const main = document.querySelector('main')
++      if (!main) return ''
++      let texto = main.textContent ?? ''
++      for (const nodo of Array.from(main.querySelectorAll('[data-acuse]'))) {
++        const propio = nodo.textContent ?? ''
++        if (propio) texto = texto.replace(propio, '')
++      }
++      return texto
++    }
++    window.__p28texto = textoDeTrabajo
++
+     // Solo cuenta como «la pantalla» lo que muta DENTRO de `main`. Medido: el
+     // toast de sonner se anima con mutaciones continuas durante ~2 s desde un
+     // portal en `body`; contándolas, todo el intervalo quedaba en UNA sola
+@@ -148,13 +206,14 @@ export async function armarPagina(page: Page): Promise<void> {
+     const observer = new MutationObserver((registros) => {
+       if (estado.t0 === null) return
+       const ahora = performance.now()
+-      if (registros.some((registro) => enAreaDeTrabajo(registro.target))) {
++      if (
++        registros.some(
++          (registro) => enAreaDeTrabajo(registro.target) && !esDelAcuse(registro),
++        )
++      ) {
+         estado.mutaciones.push(ahora)
+         if (estado.acuseControl === null) estado.acuseControl = ahora
+-        if (
+-          estado.cambioTexto === null &&
+-          (document.querySelector('main')?.textContent ?? '') !== estado.textoInicial
+-        ) {
++        if (estado.cambioTexto === null && textoDeTrabajo() !== estado.textoInicial) {
+           estado.cambioTexto = ahora
+         }
+       }
+@@ -170,6 +229,7 @@ export async function armarPagina(page: Page): Promise<void> {
+     })
+ 
+     window.__p28off = () => {
++      delete window.__p28texto
+       observer.disconnect()
+       document.removeEventListener('click', marcarT0, true)
+       document.removeEventListener('input', marcarT0, true)
+@@ -294,7 +354,7 @@ export async function cosechar(page: Page, red: Red, topeMs = 30_000): Promise<M
+         acuseControl: estado.acuseControl,
+         acuseResultado: estado.acuseResultado,
+         mutaciones: estado.mutaciones.slice(),
+-        cambioPantalla: (document.querySelector('main')?.textContent ?? '') !== estado.textoInicial,
++        cambioPantalla: (window.__p28texto?.() ?? '') !== estado.textoInicial,
+         cambioTexto: estado.cambioTexto,
+       }
+     },
+diff --git a/logic-core-v3/tests/setter/01-flow.spec.ts b/logic-core-v3/tests/setter/01-flow.spec.ts
+index f6ec3ea0..4816aaa2 100644
+--- a/logic-core-v3/tests/setter/01-flow.spec.ts
++++ b/logic-core-v3/tests/setter/01-flow.spec.ts
+@@ -1,6 +1,6 @@
+ import { test, expect } from '@playwright/test'
+ import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
+-import { firstVisible, fieldControl, pickSelect, expectToast, vis } from '../helpers/setter-ui'
++import { firstVisible, fieldControl, pickSelect, expectAcuse, vis } from '../helpers/setter-ui'
+ import {
+   getSetterQa,
+   createLead,
+@@ -109,7 +109,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+ 
+     // Guardar → toast + persistencia en DB.
+     await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
+-    await expectToast(page, /Ficha guardada — ya tenés señal/i)
++    await expectAcuse(page, /Ficha guardada — ya tenés señal/i)
+ 
+     const dossier = await getDossier(leadId)
+     expect(dossier?.stage).toBe('FICHA')
+@@ -165,7 +165,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     await firstVisible(fieldControl(page, 'Razonamiento')).fill('Negocio con presencia y reseñas reales — buen fit para una demo.')
+ 
+     await firstVisible(page.getByRole('button', { name: /^Registrar evaluación$/i })).click()
+-    await expectToast(page, /Evaluación registrada/i)
++    await expectAcuse(page, /Evaluación registrada/i)
+ 
+     const dossier = await getDossier(leadId)
+     expect(dossier?.stage, 'FICHA→EVALUADA por la vía legal').toBe('EVALUADA')
+@@ -198,7 +198,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     await expect(registrar).toBeEnabled()
+     await expect(gateAlert).toHaveCount(0)
+     await registrar.click()
+-    await expectToast(page, /Opener registrado/i)
++    await expectAcuse(page, /Opener registrado/i)
+ 
+     // DB: exactamente 1 actividad comercial.
+     const count1 = await prisma.osLeadActivity.count({ where: { leadId, channel: { not: 'SISTEMA' } } })
+@@ -257,7 +257,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     await firstVisible(fieldControl(page, 'Secciones de la demo')).fill('Hero\nServicios\nReseñas\nContacto')
+ 
+     await firstVisible(page.getByRole('button', { name: 'Guardar brief' })).click()
+-    await expectToast(page, /Brief guardado/i)
++    await expectAcuse(page, /Brief guardado/i)
+ 
+     const dossier = await getDossier(leadId)
+     expect(dossier?.stage, 'EVALUADA→BRIEF por la vía legal (gate)').toBe('BRIEF')
+@@ -271,7 +271,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
+ 
+     await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+-    await expectToast(page, /Construcción arrancada/i)
++    await expectAcuse(page, /Construcción arrancada/i)
+     expect((await getDossier(leadId))?.stage).toBe('CONSTRUCCION')
+ 
+     // Escalamiento: "me trabé" → modal → enviar.
+@@ -310,7 +310,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     await firstVisible(fieldControl(page, 'URL del borrador')).fill('https://smoke-demo.netlify.app')
+     await firstVisible(page.getByRole('switch', { name: /Confirmo que abrí el link y carga/i })).click()
+     await firstVisible(page.getByRole('button', { name: 'Guardar borrador' })).click()
+-    await expectToast(page, /Borrador guardado/i)
++    await expectAcuse(page, /Borrador guardado/i)
+     expect((await getDossier(leadId))?.draftUrl).toBeTruthy()
+ 
+     // El chequeo final vive en m14 (se habilita con el borrador publicado).
+@@ -341,7 +341,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     const enviar = firstVisible(page.getByRole('button', { name: 'Enviar a revisión' }))
+     await expect(enviar).toBeEnabled()
+     await enviar.click()
+-    await expectToast(page, /enviada a revisión/i)
++    await expectAcuse(page, /enviada a revisión/i)
+ 
+     const dossier = await getDossier(leadId)
+     expect(dossier?.stage, 'CONSTRUCCION→EN_REVISION').toBe('EN_REVISION')
+@@ -391,7 +391,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', ()
+     // código vivo — es casi una tautología — y el `.catch()` se comía el fallo
+     // aunque no apareciera ningún aviso. `/Demo enviada registrada/i` tiene UNA
+     // (el toast de `envio-form.tsx`), y sin el `.catch()` la aserción afirma.
+-    await expectToast(page, /Demo enviada registrada/i)
++    await expectAcuse(page, /Demo enviada registrada/i)
+ 
+     await expect(async () => {
+       const dossier = await getDossier(leadId)
+diff --git a/logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts b/logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts
+index eecdc647..58b87852 100644
+--- a/logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts
++++ b/logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts
+@@ -1,6 +1,6 @@
+ import { test, expect } from '@playwright/test'
+ import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
+-import { firstVisible, fieldControl, pickSelect, expectToast } from '../helpers/setter-ui'
++import { firstVisible, fieldControl, pickSelect, expectAcuse } from '../helpers/setter-ui'
+ import {
+   getSetterQa,
+   createLead,
+@@ -132,7 +132,7 @@ test('el veredicto es lo que abre: registrarlo con el gate abierto habilita el b
+     'Dueña visible, IG activo y la misma queja repetida en reseñas: hay dolor concreto.',
+   )
+   await firstVisible(page.getByRole('button', { name: /^Registrar evaluación$/i })).click()
+-  await expectToast(page, /Evaluación registrada/i)
++  await expectAcuse(page, /Evaluación registrada/i)
+ 
+   // La transición ocurrió igual que siempre — FICHA→EVALUADA, por la vía legal.
+   await expect(async () => {
+diff --git a/logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts b/logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts
+index b2c83d21..fe6426fb 100644
+--- a/logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts
++++ b/logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts
+@@ -1,6 +1,6 @@
+ import { test, expect, type Page } from '@playwright/test'
+ import { qaLogin } from '../helpers/setter-auth'
+-import { firstVisible, fieldControl, pickSelect, expectToast, vis } from '../helpers/setter-ui'
++import { firstVisible, fieldControl, pickSelect, expectAcuse, vis } from '../helpers/setter-ui'
+ import {
+   getSetterQa,
+   createLead,
+@@ -215,7 +215,7 @@ test('el avance no se come el click: apretar Guardar guarda Y avanza', async ({
+ 
+   await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
+ 
+-  await expectToast(page, /Borrador guardado|Ficha guardada/i)
++  await expectAcuse(page, /Borrador guardado|Ficha guardada/i)
+   const dossier = await getDossier(leadId)
+   expect(dossier?.fichaJson, 'el click llegó al servidor').toBeTruthy()
+   await expect
+@@ -310,7 +310,7 @@ test('un negocio sin web se sigue con un click, no queda encerrado', async ({ pa
+     'IG con dos posteos del año pasado. No tienen web. Maps sin reclamar.',
+   )
+   await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
+-  await expectToast(page, /Ficha guardada — ya tenés señal/i)
++  await expectAcuse(page, /Ficha guardada — ya tenés señal/i)
+ 
+   // Llegó al veredicto sin haber escrito una línea sobre una web que no existe.
+   const dossier = await getDossier(leadId)
+diff --git a/logic-core-v3/tests/setter/31-acuse-en-pantalla.spec.ts b/logic-core-v3/tests/setter/31-acuse-en-pantalla.spec.ts
+new file mode 100644
+index 00000000..74c0a5b4
+--- /dev/null
++++ b/logic-core-v3/tests/setter/31-acuse-en-pantalla.spec.ts
+@@ -0,0 +1,231 @@
++import { test, expect } from '@playwright/test'
++import { qaLogin } from '../helpers/setter-auth'
++import { firstVisible, expectAcuse, vis } from '../helpers/setter-ui'
++import {
++  getSetterQa,
++  createLead,
++  getDossier,
++  newTracker,
++  teardown,
++  disconnect,
++  type SmokeTracker,
++} from '../helpers/setter-db'
++
++/**
++ * P29 — EL ACUSE ESTÁ EN LA PANTALLA, Y EL REFLEJO NO LO ESPERA.
++ *
++ * Dos cosas distintas, un test cada una, y la segunda es la que prueba el
++ * sprint.
++ *
++ * ── 1. Dónde está el acuse ───────────────────────────────────────────────────
++ * Que el resultado se anuncie DENTRO de `main` —la banda de acción, donde está
++ * el botón que se tocó— y no en el portal flotante de sonner. Se afirma por la
++ * marca de la pieza (`[data-acuse]`), no por buscar la frase en la página: el
++ * acuse vive entre el resto del texto de la pantalla, así que una copy que
++ * contenga la frase satisfaría un `getByText` antes del clic. Ese falso verde
++ * ya se pagó una vez con `expectToast` (ver la nota en `helpers/setter-ui.ts`).
++ *
++ * ── 2. Que el reflejo no espere ──────────────────────────────────────────────
++ * Ésta es la afirmación del sprint, y no lleva umbral de milisegundos.
++ *
++ * P28 midió que con aviso flotante la pantalla mostraba el estado nuevo
++ * EXACTAMENTE cuando el aviso se iba: `reflejo ≈ acuse + 4.000 ms`, la duración
++ * de sonner, en nueve pantallas. El mecanismo, entonces, es que la pantalla
++ * ESPERABA a que un cartel se desmontara.
++ *
++ * Un primer intento de este test afirmaba «cuando aparece el acuse, la pantalla
++ * ya muestra el estado nuevo», y una sonda lo refutó: acá el acuse sale a los
++ * ~785 ms y el árbol del servidor aterriza a los ~1.137 ms. No es el mismo
++ * commit — el acuse va ~350 ms adelante. La afirmación era más fuerte que el
++ * hecho, y se cambió por el hecho.
++ *
++ * Lo que sí se afirma, y es exactamente el mecanismo: **la pantalla se
++ * actualiza sin que haya existido ningún cartel flotante que esperar**. Se
++ * instala un vigía ANTES del clic que anota si en algún momento se montó un
++ * `[data-sonner-toast]`; se espera por CONDICIÓN a que la pantalla muestre el
++ * estado nuevo; y ahí se afirma que el vigía no vio ninguno. Un reflejo no
++ * puede estar esperando a un aviso que nunca existió.
++ *
++ * Por qué así y no con un umbral de ms: un umbral publica la suerte de la
++ * corrida y se convierte en un rojo permanente el día que la máquina esté
++ * cargada. Los números viven en la tabla del instrumento (`npm run test:perf`),
++ * que es donde se comparan; acá vive la propiedad estructural.
++ *
++ * ⚠ Y el aserto de «la pantalla cambió» NO puede ser «hay tildes de fase»: los
++ * tildes se renderizan también en BRIEF, deshabilitados. Ese aserto pasaba
++ * ANTES de arrancar la construcción — era verde sobre la nada. Va contra dos
++ * hechos que sólo son ciertos después: la copy de «todavía no arrancaste» se
++ * fue, y los tildes quedaron habilitados.
++ *
++ * ── 3. Que se llegue a leer ──────────────────────────────────────────────────
++ * El riesgo opuesto, y el que el encargo nombra: un acuse que parpadea es peor
++ * que el cartel de hoy. Acá SÍ hay una espera por tiempo, y es a propósito:
++ * probar que algo PERSISTE exige dejar pasar tiempo. No es la espera frágil que
++ * este repo ya pagó (esperar por reloj a que algo APAREZCA): esta es monótona —
++ * cuanto más se espere, más fuerte es la afirmación, y sólo puede fallar si el
++ * acuse desaparece de verdad. El umbral es el que importa: los 4.000 ms que
++ * duraba el aviso flotante.
++ */
++
++const DURACION_DEL_AVISO_VIEJO_MS = 4000
++
++/** La pantalla del manual, DIRECTA. */
++const pantalla = (leadId: string, paso: string) => `/setter/leads/${leadId}/manual/${paso}`
++
++/**
++ * Se entra por la URL de la pantalla y no por la raíz del lead, y se espera la
++ * hidratación antes de tocar nada. Las dos cosas por el mismo motivo, y las dos
++ * están medidas en este repo:
++ *
++ *  · La raíz encadena DOS redirecciones de servidor (`/leads/:id` → `/manual` →
++ *    `/manual/:paso`). Clickear con esa cadena todavía asentándose mete una
++ *    navegación en el medio de la acción — es la familia del flake que P26 dejó
++ *    documentada en `01-flow` («su SUJETO se lo lleva puesto una navegación
++ *    concurrente»). Acá se vio en vivo: el mismo caso pasó una vez y falló la
++ *    otra, por el lado de la carrera y no por el del producto.
++ *  · Un clic antes de que React enganche los handlers no dispara nada, y el
++ *    test saldría midiendo la nada. Es la misma guarda que usa el instrumento
++ *    de latencia (`tests/perf/recorrido-latencia.spec.ts`).
++ *
++ * Ninguna de las dos afloja lo que se afirma: sacan del medio una navegación
++ * ajena a la acción. Y es además cómo el setter llega de verdad a la pantalla.
++ */
++async function abrirPantalla(page: import('@playwright/test').Page, url: string): Promise<void> {
++  await page.goto(url, { waitUntil: 'domcontentloaded' })
++  await page.waitForFunction(() => {
++    const nodos = Array.from(document.querySelectorAll('main button, main input, main a'))
++    return nodos.some((nodo) =>
++      Object.keys(nodo).some(
++        (llave) => llave.startsWith('__reactProps$') || llave.startsWith('__reactFiber$'),
++      ),
++    )
++  })
++}
++
++const tracker: SmokeTracker = newTracker()
++let setterId: string
++
++test.beforeAll(async () => {
++  const setter = await getSetterQa()
++  setterId = setter.id
++})
++
++test.afterAll(async () => {
++  await teardown(tracker)
++  await disconnect()
++})
++
++test('P29-1 · el acuse se pinta DENTRO de la pantalla, y sin cartel flotante', async ({ page }) => {
++  const { id: leadId } = await createLead(tracker, {
++    setterId,
++    businessName: 'P29 Acuse en pantalla',
++    stage: 'BRIEF',
++    status: 'RESPONDIO',
++  })
++
++  await qaLogin(page, 'setter')
++  await abrirPantalla(page, pantalla(leadId, 'mc1'))
++
++  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
++  await expectAcuse(page, /Construcción arrancada/i)
++
++  // Dentro del área de trabajo, no en un portal de `body`.
++  expect(
++    await page.locator('main [data-acuse]').count(),
++    'el acuse vive dentro de `main` — es la diferencia entera con el toast',
++  ).toBe(1)
++
++  // Y no quedó además un cartel flotante: el acuse se MUDÓ, no se duplicó.
++  expect(
++    await page.locator('[data-sonner-toast]').count(),
++    'esta acción ya no monta un aviso flotante',
++  ).toBe(0)
++
++  // La escritura ocurrió: sin esto, un acuse lindo podría ser el de una acción
++  // que no hizo nada.
++  expect((await getDossier(leadId))?.stage).toBe('CONSTRUCCION')
++})
++
++test('P29-2 · la pantalla se actualiza sin ningún cartel flotante que esperar', async ({ page }) => {
++  const { id: leadId } = await createLead(tracker, {
++    setterId,
++    businessName: 'P29 Reflejo sin espera',
++    stage: 'BRIEF',
++    status: 'RESPONDIO',
++  })
++
++  await qaLogin(page, 'setter')
++  await abrirPantalla(page, pantalla(leadId, 'mc1'))
++
++  // EL VIGÍA, antes del clic: anota si alguna vez se montó un aviso flotante.
++  // Va por MutationObserver y no por muestreo, así un cartel que aparezca y se
++  // vaya entre dos lecturas no se escapa.
++  await page.evaluate(() => {
++    const w = window as unknown as { __vioToast?: boolean }
++    w.__vioToast = document.querySelector('[data-sonner-toast]') !== null
++    new MutationObserver(() => {
++      if (document.querySelector('[data-sonner-toast]')) w.__vioToast = true
++    }).observe(document.documentElement, { subtree: true, childList: true })
++  })
++
++  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
++
++  // Espera POR CONDICIÓN a que la pantalla muestre el estado nuevo: la copy de
++  // «todavía no arrancaste» se fue Y los tildes quedaron habilitados. Las dos
++  // cosas son falsas antes de la acción, así que esto no puede pasar de arriba.
++  // `vis(...)` + scope a `main`, y las dos cosas por lecciones ya pagadas de este
++  // repo: el manual se DUPLICA para responsive, así que la frase matchea dos
++  // veces y la copia oculta del otro brazo queda en el DOM para siempre. A nivel
++  // page y sin filtrar visibles, esto no llega a cero nunca — se midió acá: 15 s
++  // reintentando contra un nodo que jamás se iba. Lo que se afirma es «ninguna
++  // copia VISIBLE en el área de trabajo», que es lo que el setter ve.
++  await expect(vis(page.locator('main').getByText(/El brief está listo — arrancá la construcción/i)))
++    .toHaveCount(0)
++  await expect(
++    firstVisible(
++      page.locator('main section[aria-label="Registro"] button[aria-pressed]:not([disabled])'),
++    ),
++  ).toBeVisible()
++
++  // Y el acuse está — la pantalla no lo tuvo que esperar ni él se fue antes.
++  await expectAcuse(page, /Construcción arrancada/i)
++
++  const vioToast = await page.evaluate(
++    () => (window as unknown as { __vioToast: boolean }).__vioToast,
++  )
++  expect(
++    vioToast,
++    'la pantalla llegó al estado nuevo sin que se montara ningún aviso flotante: no hay nada ' +
++      'que esperar. Con el cartel puesto, el reflejo lo seguía a los 4.000 ms',
++  ).toBe(false)
++
++  expect((await getDossier(leadId))?.stage).toBe('CONSTRUCCION')
++})
++
++test('P29-3 · el acuse se queda: sigue en pantalla después de lo que duraba el cartel', async ({
++  page,
++}) => {
++  const { id: leadId } = await createLead(tracker, {
++    setterId,
++    businessName: 'P29 Acuse que se lee',
++    stage: 'BRIEF',
++    status: 'RESPONDIO',
++  })
++
++  await qaLogin(page, 'setter')
++  await abrirPantalla(page, pantalla(leadId, 'mc1'))
++
++  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
++  await expectAcuse(page, /Construcción arrancada/i)
++
++  const desde = Date.now()
++  await page.waitForTimeout(DURACION_DEL_AVISO_VIEJO_MS + 1000)
++  const esperado = Date.now() - desde
++
++  // Sin reintento: o está, o el acuse se fue solo.
++  expect(
++    await page.locator('main [data-acuse]').filter({ hasText: /Construcción arrancada/i }).count(),
++    `el acuse tiene que seguir en pantalla tras ${esperado} ms — el aviso flotante que reemplaza ` +
++      `duraba ${DURACION_DEL_AVISO_VIEJO_MS} ms y se iba solo`,
++  ).toBe(1)
++})

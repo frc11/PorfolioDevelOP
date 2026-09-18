@@ -1,0 +1,112 @@
+diff --git a/logic-core-v3/src/lib/integrations/cal-com-v2.ts b/logic-core-v3/src/lib/integrations/cal-com-v2.ts
+index 30d0d3bc..6c7f8777 100644
+--- a/logic-core-v3/src/lib/integrations/cal-com-v2.ts
++++ b/logic-core-v3/src/lib/integrations/cal-com-v2.ts
+@@ -48,41 +48,19 @@ type GetSlotsInput = {
+ }
+ 
+ export async function getSlots(input: GetSlotsInput): Promise<SlotsPorDia> {
+-  const params = new URLSearchParams({
+-    username: input.username,
+-    eventTypeSlug: input.eventTypeSlug,
+-    start: input.start,
+-    end: input.end,
+-    timeZone: TIMEZONE_AGENDA,
+-  })
+-
+-  const res = await fetchCal(`${BASE_URL}/slots?${params.toString()}`, {
+-    method: 'GET',
+-    headers: { 'cal-api-version': SLOTS_API_VERSION },
+-  })
+-
+-  if (!res.ok) {
+-    throw await mapearError(res, 'No se pudieron pedir los horarios a Cal.com')
+-  }
+-
+-  const body = (await res.json()) as { status?: string; data?: unknown }
+-  const data = body.data
+-  if (body.status !== 'success' || data === null || typeof data !== 'object') {
+-    throw new CalComV2Error('red', 'Cal.com devolvió una respuesta de slots inesperada')
+-  }
+-
+-  const slots: SlotsPorDia = {}
+-  for (const [dia, lista] of Object.entries(data as Record<string, unknown>)) {
+-    if (!Array.isArray(lista)) continue
+-    slots[dia] = lista
+-      .map((slot) =>
+-        slot && typeof slot === 'object' && typeof (slot as { start?: unknown }).start === 'string'
+-          ? { start: (slot as { start: string }).start }
+-          : null,
+-      )
+-      .filter((slot): slot is { start: string } => slot !== null)
++  // P31 SONDA (worktree descartable): slots fijos, sin salir a la red.
++  void input
++  const base = Date.now() + 24 * 60 * 60 * 1000
++  const salida: SlotsPorDia = {}
++  for (let d = 0; d < 3; d++) {
++    const dia = new Date(base + d * 24 * 60 * 60 * 1000)
++    dia.setUTCHours(14, 0, 0, 0)
++    salida[dia.toISOString().slice(0, 10)] = [
++      { start: dia.toISOString() },
++      { start: new Date(dia.getTime() + 3600000).toISOString() },
++    ]
+   }
+-  return slots
++  return salida
+ }
+ 
+ type CreateBookingInput = {
+diff --git a/logic-core-v3/src/lib/leados/agenda.ts b/logic-core-v3/src/lib/leados/agenda.ts
+index c747f44f..262fbd52 100644
+--- a/logic-core-v3/src/lib/leados/agenda.ts
++++ b/logic-core-v3/src/lib/leados/agenda.ts
+@@ -55,45 +55,10 @@ const AGENDA_NO_CONECTADA =
+  * en el calendario equivocado. Nunca explota: devuelve el motivo legible.
+  */
+ export async function getCalConfigLeadOS(): Promise<CalConfigLeadOS> {
+-  const orgs = await prisma.organization.findMany({
+-    where: { calComUsername: { not: null } },
+-    select: { slug: true, calComUsername: true, calComEmbedUrl: true },
+-  })
+-
+-  if (orgs.length === 0) {
+-    console.warn(
+-      '[leados agenda] Cal.com sin configurar: ninguna Organization tiene calComUsername. ' +
+-        'Cargar calComUsername + calComEmbedUrl (slug pelado o URL https://cal.com/usuario/slug) en la org de develOP.',
+-    )
+-    return { ok: false, motivo: AGENDA_NO_CONECTADA }
+-  }
+-  if (orgs.length > 1) {
+-    // El detalle (cuántas y cuáles) es diagnóstico de Franco, no del setter: va
+-    // al log del servidor. En pantalla queda el riesgo concreto —reservar en el
+-    // calendario equivocado— y a quién avisarle.
+-    console.warn(
+-      `[leados agenda] Cal.com ambiguo: ${orgs.length} organizaciones con calComUsername ` +
+-        `(${orgs.map((org) => org.slug).join(', ')}). LeadOS necesita UNA sola.`,
+-    )
+-    return {
+-      ok: false,
+-      motivo:
+-        'Hay más de una agenda conectada y el panel no sabe cuál es la de Franco: si agenda, la reunión puede ' +
+-        'caer en el calendario equivocado. Avisale a Franco antes de seguir — él lo deja en una sola.',
+-    }
+-  }
+-
+-  const [org] = orgs
+-  const username = org.calComUsername?.trim()
+-  const eventTypeSlug = parseEventTypeSlug(org.calComEmbedUrl)
+-  if (!username || !eventTypeSlug) {
+-    console.warn(
+-      `[leados agenda] Cal.com incompleto en la org "${org.slug}": ` +
+-        `calComUsername=${username ? 'ok' : 'FALTA'}, calComEmbedUrl=${eventTypeSlug ? 'ok' : 'FALTA'}.`,
+-    )
+-    return { ok: false, motivo: AGENDA_NO_CONECTADA }
+-  }
+-  return { ok: true, username, eventTypeSlug }
++  // P31 SONDA (worktree descartable): sin tocar la DB compartida.
++  void AGENDA_NO_CONECTADA
++  void prisma
++  return { ok: true, username: 'p31-probe', eventTypeSlug: 'reunion-probe' }
+ }
+ 
+ /** Acepta el slug pelado ("reunion-develop") o la URL completa de Cal.com. */

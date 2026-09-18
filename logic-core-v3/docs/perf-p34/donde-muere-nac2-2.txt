@@ -1,0 +1,35 @@
+══ P34 · DÓNDE MUERE EL ACUSE (delay=0 ms) ══════════════════════════════
+
+── B8 raíz · pasada 1
+   pedidos=1 · emitidos=1 · carteles=1 · 843 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 254ms top …/manual | 1187ms top …/manual/m15]
+   etapas de run(): [despacho+1754ms | dentro-transicion+1754ms | resuelta:ok+3617ms | post-onSuccess+3617ms | pidio-exito+3617ms]
+   marcas de acuse: [pedidos+3617ms | emitidos+3617ms]
+   veredicto: cartel montado
+
+── B8 raíz · pasada 2
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 220ms top …/manual | 724ms top …/manual/m15]
+   etapas de run(): [despacho+897ms | dentro-transicion+897ms | resuelta:ok+1871ms | post-onSuccess+1871ms | pidio-exito+1871ms]
+   marcas de acuse: [pedidos+1871ms | emitidos+1871ms]
+   veredicto: cartel montado
+
+── B8 raíz · pasada 3
+   pedidos=0 · emitidos=0 · carteles=0 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 217ms top …/manual | 1745ms top …/manual/m15]
+   etapas de run(): [despacho+1072ms | dentro-transicion+1072ms]
+   marcas de acuse: []
+   veredicto: el acuse NI SE PIDIÓ — run() llegó hasta: dentro-transicion+1072ms
+
+── B8 raíz · pasada 4
+   pedidos=1 · emitidos=1 · carteles=1 · 841 muestras en 3 documento(s) · EN BASE: SÍ
+   documentos: [0ms top arrancar | 211ms top …/manual | 522ms top …/manual/m15]
+   etapas de run(): [despacho+679ms | dentro-transicion+679ms | resuelta:ok+1672ms | post-onSuccess+1672ms | pidio-exito+1672ms]
+   marcas de acuse: [pedidos+1672ms | emitidos+1672ms]
+   veredicto: cartel montado
+
+════════════════════════════════════════════════════════════════════════════════
+
+  ok 1 [desktop] › tests\perf\p34-donde-muere-el-acuse.spec.ts:99:5 › B8 desde la raíz — dónde se corta la cadena del acuse (1.1m)
+
+  1 passed (1.1m)

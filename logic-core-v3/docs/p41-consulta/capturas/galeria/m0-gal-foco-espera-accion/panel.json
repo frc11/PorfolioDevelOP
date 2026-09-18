@@ -1,0 +1,53 @@
+{
+ "base": "http://127.0.0.1:3003",
+ "medidoEn": "2026-09-15T00:20:50.166Z",
+ "email": "m0-gal-foco-espera-accion@develop.test",
+ "anchos": [
+  {
+   "ancho": "1440",
+   "colaSeccion": "Tu cola de hoy | 1 para trabajar | TU FOCO AHORA | M0-GAL 38-home-foco-espera-accion | gastronomia · Centro | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Ir a trabajarlo | Pausar | Saltar | ?",
+   "cola": [],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 1",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 38-home-foco-espera-accion",
+       "texto": "M0-GAL 38-home-foco-espera-accion | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": null,
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  },
+  {
+   "ancho": "390",
+   "colaSeccion": "Tu cola de hoy | 1 para trabajar | TU FOCO AHORA | M0-GAL 38-home-foco-espera-accion | gastronomia · Centro | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Ir a trabajarlo | Pausar | Saltar | ?",
+   "cola": [],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 1",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "M0-GAL 38-home-foco-espera-accion",
+       "texto": "M0-GAL 38-home-foco-espera-accion | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [],
+   "novedadesSeccion": null,
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 1 | evaluada · 0% descarte | 0 descartes · 1 avances | Últimos 30 días: 0 evaluadas",
+   "avance": null
+  }
+ ]
+}

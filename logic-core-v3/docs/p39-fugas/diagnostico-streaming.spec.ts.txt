@@ -1,0 +1,66 @@
+import { test, expect, type Page } from '@playwright/test'
+import { mintSessionCookie } from '../helpers/setter-auth'
+import { createSetter, createLead, newTracker, teardown, disconnect, type SmokeTracker } from '../helpers/setter-db'
+
+/**
+ * P39 — DIAGNÓSTICO TEMPORAL (se borra al terminar). ¿Cuántas copias de la sección
+ * que busca `26` P21-4 existen A LA VEZ mientras la página streamea, y dónde?
+ * Mismo estado que P21-4: setter propio con un solo lead EN_REVISION.
+ */
+
+const SELECTOR = 'section[aria-label="Nada para trabajar ahora"]'
+const tracker: SmokeTracker = newTracker()
+let setterId = ''
+
+test.beforeAll(async () => {
+  const setter = await createSetter(tracker, 'p39-diag')
+  setterId = setter.id
+  await createLead(tracker, { setterId, businessName: 'P39 Diag EnVuelo', stage: 'EN_REVISION', status: 'RESPONDIO' })
+})
+
+test.afterAll(async () => {
+  await teardown(tracker)
+  await disconnect()
+})
+
+async function instalarObservador(page: Page): Promise<void> {
+  await page.addInitScript((selector: string) => {
+    const w = window as unknown as { __p39: { maxDoc: number; maxMain: number; maxFuera: number; muestras: number; dcl: number | null; ultimaDoble: number | null } }
+    w.__p39 = { maxDoc: 0, maxMain: 0, maxFuera: 0, muestras: 0, dcl: null, ultimaDoble: null }
+    const medir = () => {
+      const todas = Array.from(document.querySelectorAll(selector))
+      const enMain = todas.filter((el) => el.closest('main') !== null).length
+      const st = w.__p39
+      st.muestras += 1
+      st.maxDoc = Math.max(st.maxDoc, todas.length)
+      st.maxMain = Math.max(st.maxMain, enMain)
+      st.maxFuera = Math.max(st.maxFuera, todas.length - enMain)
+      if (todas.length > 1) st.ultimaDoble = performance.now()
+    }
+    new MutationObserver(medir).observe(document, { childList: true, subtree: true })
+    document.addEventListener('DOMContentLoaded', () => {
+      w.__p39.dcl = performance.now()
+    })
+  }, SELECTOR)
+}
+
+test('observador · 20 cargas', async ({ page, baseURL }) => {
+  test.setTimeout(240_000)
+  await instalarObservador(page)
+  await mintSessionCookie(page.context(), baseURL ?? 'http://127.0.0.1:3003', { userId: setterId, email: 'irrelevant', role: 'SETTER' })
+  let conDoble = 0
+  let maxMain = 0
+  let dobleDespuesDeDcl = 0
+  for (let i = 0; i < 20; i += 1) {
+    await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+    await expect(page.locator(`main ${SELECTOR}`)).toBeVisible()
+    await page.waitForTimeout(500)
+    const st = (await page.evaluate(() => (window as unknown as { __p39: unknown }).__p39)) as {
+      maxDoc: number; maxMain: number; dcl: number | null; ultimaDoble: number | null
+    }
+    if (st.maxDoc > 1) conDoble += 1
+    if (st.ultimaDoble !== null && st.dcl !== null && st.ultimaDoble > st.dcl) dobleDespuesDeDcl += 1
+    maxMain = Math.max(maxMain, st.maxMain)
+  }
+  console.log(`P39-DIAG 20 cargas · con dos copias en el documento: ${conDoble} · doble después de DCL: ${dobleDespuesDeDcl} · máximo dentro de main: ${maxMain}`)
+})

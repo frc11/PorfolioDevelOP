@@ -10,7 +10,7 @@
  * Este módulo NO clasifica, NO prioriza y NO transiciona. Es POSICIONAL, igual
  * que `foco.ts`: recibe el foco ya elegido y `resto` (la misma cola ordenada,
  * sin el foco) y arma la lista que el panel muestra. El criterio de orden vive
- * en `flow.ts` (`trabajoTier`/`ordenFoco`) y el de selección en `foco.ts`;
+ * en `flow.ts` (`ordenFoco`) y el de selección en `foco.ts`;
  * cambiar cualquiera de los dos NO toca este archivo.
  *
  * El FOCO ES EL PRIMER ÍTEM DE LA COLA — no un bloque aparte que la duplique.

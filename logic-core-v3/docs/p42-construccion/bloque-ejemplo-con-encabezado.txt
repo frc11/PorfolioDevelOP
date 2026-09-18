@@ -1,0 +1,217 @@
+═══ 1 de 3 · INSTRUCCIONES ═══
+
+Construí una página web de una sola página (one-page) siguiendo el documento que viene a continuación. El documento es la especificación completa: tiene todo lo que necesitás.
+
+CÓMO TRABAJAR
+
+Construí la página entera de una sola vez, completa y funcionando. No la armes por partes ni me vayas mostrando avances parciales.
+
+Construí las secciones que pide el documento, en ese orden, y ninguna más.
+
+No me hagas preguntas. Quien te está pegando esto no es diseñador ni programador y no va a poder contestarlas. Si algo del documento te queda ambiguo, tomá la decisión más conservadora, seguí adelante y anotala al final.
+
+Todo va en una sola página. El menú lleva a secciones de esta misma página y funciona; nunca lleva a otra página.
+
+No inventes datos. Si el documento no trae un dato, no lo completes: dejalo afuera y anotalo al final. Un precio, un horario o una reseña inventada es lo primero que el dueño detecta.
+
+El documento trae primero las decisiones de la demo que ya se confirmaron (secciones, llamado a la acción, tono, paleta y tipografía) y después el material real del negocio. Si la sección BRIEF COMPLETO DEL GEM DE DISEÑO dice otra cosa sobre una de esas decisiones, manda la decisión.
+
+Al final de este mensaje hay un PISO DE CALIDAD no negociable. Leelo antes de escribir una línea. Si algo del documento lo contradice, gana el piso.
+
+CUANDO TERMINES
+
+Devolveme, en una lista corta:
+- Las secciones que construiste, en orden.
+- Lo que el documento pedía y no pudiste hacer, con el motivo.
+- Los datos que te faltaron.
+- Las decisiones que tomaste vos porque el documento no las definía.
+
+═══ 2 de 3 · EL DOCUMENTO ═══
+
+BRIEF DE DEMO — Barbería El Faro
+
+Rubro: Barbería · Zona: Yerba Buena, Tucumán
+
+CONCEPTO
+Turno sin esperar en la vereda: la agenda del día a la vista y el botón para reservar por WhatsApp.
+
+SECCIONES (en este orden)
+1. Hero
+2. Cortes y precios
+3. El local
+4. Lo que dicen los clientes
+5. Cómo llegar
+
+LLAMADO A LA ACCIÓN
+Reservá tu turno
+
+TONO (así escriben los textos de la demo)
+Cercano y de barrio, tuteo, frases cortas y directas, sin emojis de más.
+
+PALETA (usá estos colores y ningún otro; el acento, solo en el botón principal)
+neutro #F4EFE6 (arena) / acento #C2410C (naranja faro, solo en el botón) / apoyo #111111 (negro mate)
+
+TIPOGRAFÍA (usá estas fuentes, nunca la del sistema)
+títulos Bebas Neue / cuerpo Inter
+
+RESEÑAS REALES (usalas textuales como prueba social)
+★★★★★ "Marcos es un crack, te deja el corte como te gusta sin que se lo expliques dos veces." — Julián R.
+★★★★★ "El mejor degradé de Yerba Buena. Lo único: reservá antes porque se llena." — Santiago M.
+★★★★★ "Llevo a mi hijo desde los 4 años, ya es parte de la familia." — Pablo G.
+
+Se leen acá: https://maps.google.com/?cid=123456789&reviews
+
+CONTENIDO Y TONO REAL (logo / fotos / estilo)
+Logo: faro blanco sobre negro. Fotos de cortes con luz cálida. Flyers de Canva.
+
+QUÉ VENDE Y A QUÉ PRECIO (usá estos datos reales, no inventes)
+Corte clásico $9.000 · Corte y barba $12.500 · Barba $5.000 · Corte infantil $7.000
+
+CÓMO HABLA EL NEGOCIO DE SÍ MISMO (escribí los textos en ESTA voz, no en una genérica)
+"Barbería de barrio desde 2016. Te conocemos por el nombre." (bio de Instagram)
+
+SEÑALES OPERATIVAS (horarios, delivery, turnos — reflejalos en la demo)
+Martes a sábados de 10 a 20 h. Turnos por WhatsApp. Promo 2x1 padre e hijo martes y miércoles.
+
+DE DÓNDE BAJAR EL LOGO Y LAS FOTOS REALES
+Logo y fotos: https://instagram.com/barberiaelfaro
+Instagram: https://instagram.com/barberiaelfaro
+Google Maps: https://maps.google.com/?cid=123456789
+
+BRIEF COMPLETO DEL GEM DE DISEÑO
+ANGULO: Turno sin esperar en la vereda: la agenda del día a la vista y el botón para reservar por WhatsApp.
+SECCIONES: Hero · Cortes y precios · El local · Lo que dicen los clientes · Cómo llegar
+CTA: Reservá tu turno
+TONO: Cercano y de barrio, tuteo, frases cortas y directas, sin emojis de más.
+PALETA: neutro #F4EFE6 (arena) / acento #C2410C (naranja faro, solo en el botón) / apoyo #111111 (negro mate)
+TIPOGRAFIA: títulos Bebas Neue / cuerpo Inter
+
+EL NEGOCIO
+Barbería El Faro es una barbería de barrio en Yerba Buena, Tucumán, abierta desde 2016 por Marcos Díaz. Le corta el pelo a hombres de 25 a 60 años del barrio y a sus hijos: el 2x1 de padre e hijo de martes y miércoles es su promo más conocida. Lo que la hace distinta es el oficio y el trato: los clientes vuelven porque Marcos se acuerda de cómo les gusta el corte. El problema que se repite en las reseñas es otro: "venís y está lleno, esperás media hora en la vereda".
+
+CONTACTO REAL
+El botón principal lleva a WhatsApp: https://wa.me/5493815550000?text=Hola%20Marcos%2C%20quiero%20reservar%20un%20turno
+El número es el que figura en el Instagram del negocio. No hay formulario ni sistema de reservas: el turno se confirma por WhatsApp.
+
+LO PRIMERO QUE SE VE
+En la primera pantalla de un celular, sin scrollear:
+- Título: "Tu corte, sin esperar en la vereda."
+- La línea que va debajo del título: "Reservá por WhatsApp y te esperamos con el sillón libre."
+- El botón "Reservá tu turno", grande, en naranja faro.
+- De fondo, la foto real de la vidriera con el faro pintado, oscurecida para que el texto se lea.
+
+SECCIÓN POR SECCIÓN
+
+1. Hero
+Muestra la vidriera real y el título. Texto: "Tu corte, sin esperar en la vereda." / "Reservá por WhatsApp y te esperamos con el sillón libre." Imagen: la foto de la vidriera del perfil de Instagram (publicación del 12 de marzo). Tiene que sentir: "esta es mi barbería, pero más fácil".
+
+2. Cortes y precios
+Muestra los seis servicios con su precio real, en dos columnas en escritorio y una en celular.
+- Corte clásico — $9.000
+- Corte y barba — $12.500
+- Barba — $5.000
+- Corte infantil — $7.000
+- Padre e hijo (martes y miércoles) — $14.000
+- Diseño con navaja — $3.000 extra
+Texto de apertura: "Precios claros, sin sorpresas." Tiene que sentir que no hay letra chica.
+
+3. El local
+Muestra tres fotos reales: el sillón de cuero, la pared de madera con el faro y Marcos cortando. Texto: "Desde 2016 en la misma esquina de Yerba Buena. El mismo sillón, el mismo oficio." Tiene que sentir confianza de barrio.
+
+4. Lo que dicen los clientes
+Tres reseñas reales de Google, textuales, con nombre y estrellas:
+- "Marcos es un crack, te deja el corte como te gusta sin que se lo expliques dos veces." — Julián R. ★★★★★
+- "El mejor degradé de Yerba Buena. Lo único: reservá antes porque se llena." — Santiago M. ★★★★★
+- "Llevo a mi hijo desde los 4 años, ya es parte de la familia." — Pablo G. ★★★★★
+Tiene que sentir que otros como él ya confían.
+
+5. Cómo llegar
+Dirección, horario y el botón de WhatsApp repetido. Texto: "Av. Aconquija 1450, Yerba Buena. Martes a sábados de 10 a 20 h." Mapa: el link de Google Maps del negocio. Botón final: "Reservá tu turno".
+
+DIRECCIÓN VISUAL
+Fondo arena (#F4EFE6) en toda la página, con el hero y el pie en negro mate (#111111). El naranja faro (#C2410C) va solamente en los botones de reservar: en ningún título, ningún ícono, ningún borde. Títulos en Bebas Neue, grandes y en mayúsculas, como el cartel pintado de la vidriera. Todo el cuerpo en Inter, 16 px en celular, con buen interlineado. Mucho aire entre secciones. En cada sección manda una sola cosa: en precios, la lista; en el local, las fotos.
+
+LO QUE NO VA
+- Fotos de stock de barberías con tatuajes y barbas enormes: no es su cliente. Van las fotos reales del perfil.
+- Barra de navegación con efecto vidrio: la barra es sólida, negra.
+- Un logo inventado: el negocio tiene logo (el faro blanco) y se usa ese.
+- "Contactanos" o "Más información": el botón dice "Reservá tu turno".
+
+LO QUE SE DEJA AFUERA A PROPÓSITO
+- No hay sistema de turnos online: el turno se confirma por WhatsApp, como hoy.
+- No hay galería de treinta cortes: tres fotos del local alcanzan para la demo.
+- No hay tienda: Marcos vende pomadas en el local, pero no es lo que la demo tiene que mostrar.
+
+═══ 3 de 3 · PISO DE CALIDAD ═══
+
+No negociable. Aplica siempre, aunque el documento no lo mencione, y si el documento dice otra cosa, gana esto.
+
+IDIOMA
+- Todo el texto en español rioplatense, con voseo: «reservá», «escribinos», «vení». Nada de «tú» ni de español neutro: es un negocio argentino y su cliente también.
+
+JERARQUÍA
+- En cada sección manda una sola cosa: un único elemento con el tamaño más grande, su título. Nada más de la sección llega a ese tamaño.
+- El título de la primera pantalla es el texto más grande de toda la página.
+- Tres tamaños de texto bien separados: título, subtítulo y cuerpo. El título mide por lo menos el doble que el cuerpo.
+- El botón principal resalta del resto: es lo único que lleva el color de acento, también donde se repite.
+- Nunca todo centrado y del mismo tamaño: el cuerpo de texto va alineado a la izquierda.
+
+AIRE
+- La misma separación vertical entre todas las secciones: por lo menos 80 px en computadora y 56 px en el celular.
+- Márgenes laterales de por lo menos 24 px en el celular. En computadora, el contenido en una columna de 1200 px como máximo, centrada.
+- Ningún texto, botón o imagen pegado al borde de la pantalla ni a otro elemento.
+- Si algo no entra con ese aire, sacá contenido: no achiques los espacios.
+
+TIPOGRAFÍA
+- Dos familias como máximo: una con carácter para los títulos y una neutra y legible para el cuerpo. Si el documento las nombra, usá esas.
+- Cargalas de verdad (por ejemplo, desde Google Fonts). Nunca la fuente por defecto del sistema: si una fuente no carga, elegí otra que sí.
+- Cuerpo de 16 px como mínimo, con interlineado de 1,5 y renglones de 75 caracteres como máximo.
+
+COLOR
+- Tres colores como máximo: un neutro dominante para los fondos, un acento y un apoyo. Si el documento trae la paleta, usá esos colores y ningún otro.
+- El acento va solo en el botón principal y en sus repeticiones.
+- Contraste alto entre texto y fondo: 4,5 a 1 como mínimo en el cuerpo. Nunca gris claro sobre blanco.
+
+ALINEACIÓN Y CONSISTENCIA
+- Todo alineado a una misma grilla, con los mismos márgenes en todas las secciones.
+- Todos los botones con el mismo estilo, el mismo radio de esquina y la misma altura.
+
+IMÁGENES
+- Primero las fotos reales del negocio, de las direcciones que trae el documento. Nunca fotos de banco, ilustraciones genéricas ni imágenes generadas.
+- Si no podés usar las fotos reales, no pongas otras: armá la sección sin foto y anotalo entre los datos que te faltaron.
+- Nunca deformes ni estires una imagen: recortala manteniendo la proporción.
+- Si el negocio no tiene logo, va el nombre del negocio escrito con la fuente de los títulos. Nunca un logo inventado.
+
+CONTENIDO
+- El nombre del negocio va en la primera pantalla y en el pie, con su rubro y su zona.
+- Todo el texto habla de este negocio: su nombre, lo que vende, sus precios si están, frases de sus reseñas reales.
+- Cero texto de relleno, cero lorem ipsum, cero frases que le servirían igual a cualquier otro negocio del rubro.
+
+BOTÓN PRINCIPAL
+- El texto nombra la acción y lo que la persona consigue: «Reservá tu turno», «Pedí tu presupuesto». Si el documento trae el texto del botón, usá ese.
+- Nunca «Contactanos», «Más información», «Enviar» ni «Click acá».
+- Visible sin bajar, en el celular y en la computadora, y repetido al final de la página.
+- Si el documento trae el link de WhatsApp, el botón lo abre. Si no lo trae, no inventes un número: dejá el botón sin link y anotalo entre los datos que te faltaron.
+
+MENÚ
+- Si hay menú, cada link lleva a una sección de esta misma página, y esa sección existe. Ninguno lleva a otra página, a un «#» vacío ni a una dirección inventada.
+- Tocar un link lleva a su sección; en el celular, además, cierra el menú.
+- Sólido: sin efecto vidrio ni desenfoque detrás.
+- Un menú que no funciona es lo primero que delata que la página salió de un prompt. Si la página no lo necesita, mejor sin menú.
+
+CELULAR
+- Diseñala primero para un celular de 390 px de ancho: nada cortado, nada que se salga de costado, textos legibles sin agrandar.
+- El botón principal, alcanzable con el pulgar.
+
+MOVIMIENTO
+- Solo animaciones sutiles de entrada, de menos de medio segundo. Nada que maree, parpadee o haga esperar para leer.
+
+PROHIBIDO — lo que delata que salió de un prompt
+- Efecto vidrio o desenfoque en la barra de navegación.
+- Sombras, degradados y brillos repartidos por toda la página.
+- Todo centrado y del mismo tamaño.
+- Más de dos fuentes, o la fuente por defecto del sistema.
+- Cuatro o más colores fuertes.
+- Imágenes pixeladas, deformadas o de banco.
+- Muros de texto sin aire ni jerarquía.
+- Un menú con links que no llevan a ningún lado.

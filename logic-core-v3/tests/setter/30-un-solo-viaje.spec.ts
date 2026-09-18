@@ -50,6 +50,12 @@ import { parseProgreso } from '../../src/lib/leados/flow'
  * (`Next-Router-Prefetch`). No están en el camino crítico —la pantalla ya se
  * pintó— y se cuentan aparte: mezclarlos daba números de 1+10 que no significan
  * nada.
+ *
+ * ── P42 ──────────────────────────────────────────────────────────────────────
+ * «Construir» (mc1) tiene un tilde único que marca sus tres fases. El caso de
+ * «tildar UNA fase» se mide en «Refinar» (mc2), donde el tilde sigue siendo de
+ * una fase: es el mismo componente y la misma escritura, y el aserto sigue siendo
+ * exacto (una fase guardada). El de «Arrancar» sigue en mc1, con su tilde único.
  */
 
 const tracker: SmokeTracker = newTracker()
@@ -121,11 +127,11 @@ test('P28-1 · «Arrancar construcción» hace UN viaje de escritura, sin pedir 
   // Condición positiva 1: la transición quedó en la base.
   await esperarEnLaBase(leadId, (d) => d?.stage === 'CONSTRUCCION', 'BRIEF→CONSTRUCCION persistido')
 
-  // Condición positiva 2: la pantalla muestra el estado nuevo — los tildes de
-  // Construcción, que en BRIEF están apagados, quedan vivos. Es una PRESENCIA
-  // (un control habilitado), no la ausencia del CTA anterior.
+  // Condición positiva 2: la pantalla muestra el estado nuevo — el tilde de
+  // Construcción, que en BRIEF está apagado, queda vivo. Es una PRESENCIA
+  // (un control habilitado), no la ausencia del CTA anterior. P42: uno, no tres.
   const tildes = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
-  await expect(tildes).toHaveCount(3)
+  await expect(tildes).toHaveCount(1)
   await expect(firstVisible(tildes), 'los tildes vivos: la pantalla ya es la de Construcción').toBeEnabled({
     timeout: 20_000,
   })
@@ -152,7 +158,8 @@ test('P28-2 · tildar una fase hace UN viaje de escritura, sin pedir el árbol d
   })
 
   await qaLogin(page, 'setter')
-  await page.goto(`/setter/leads/${leadId}/manual/mc1`, { waitUntil: 'domcontentloaded' })
+  // P42 — en «Refinar», donde el tilde sigue siendo de UNA fase (ver encabezado).
+  await page.goto(`/setter/leads/${leadId}/manual/mc2`, { waitUntil: 'domcontentloaded' })
 
   const tildes = page.locator('main section[aria-label="Registro"] button[aria-pressed]')
   await expect(tildes).toHaveCount(3)

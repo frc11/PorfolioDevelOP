@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# P35 · driver del probe del alcance.
+#
+# Una RONDA = server reiniciado + una pasada de cada camino, con el orden de
+# arranque rotado. Seis rondas = seis pasadas por camino, y ningun camino se
+# queda siempre con el turno mas frio (P26: el flake SOLO existe con server
+# frio; correr los seis del camino A de un tiron y despues los del B daria
+# verdes por tibios, no por sanos).
+set -u
+
+RAIZ="/c/tmp/wt-p35-alcance/logic-core-v3"
+SCRATCH="/c/Users/franc/AppData/Local/Temp/claude/C--Users-franc-Desktop-PorfolioDevelOP/41cdd376-edb5-47ab-9930-2b96dcf9f6c7/scratchpad"
+PUERTO=3007
+RONDAS="${P35_RONDAS:-6}"
+SALIDA="$RAIZ/tests/perf/.p35-lineas.jsonl"
+
+cd "$RAIZ" || exit 1
+: > "$SALIDA"
+
+matar_servidor() {
+  # Por PID del socket, NUNCA por nombre: hay node.exe del harness corriendo.
+  local pid
+  pid=$(powershell.exe -NoProfile -Command \
+    "Get-NetTCPConnection -LocalPort $PUERTO -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess" \
+    2>/dev/null | tr -d '\r\n ')
+  if [ -n "$pid" ]; then
+    powershell.exe -NoProfile -Command "Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue" >/dev/null 2>&1
+    echo "   server viejo matado (pid $pid)"
+  fi
+}
+
+arrancar_servidor() {
+  E2E_DIST_DIR=.next-p35 QA_ALLOW_LOCALHOST=1 \
+    node node_modules/next/dist/bin/next start -p "$PUERTO" > "$SCRATCH/server-r$1.log" 2>&1 &
+  local i=0
+  while [ $i -lt 60 ]; do
+    if [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:$PUERTO/" 2>/dev/null)" != "000" ]; then
+      local pid
+      pid=$(powershell.exe -NoProfile -Command \
+        "Get-NetTCPConnection -LocalPort $PUERTO -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess" \
+        2>/dev/null | tr -d '\r\n ')
+      echo "   server FRIO arriba (pid $pid)"
+      return 0
+    fi
+    i=$((i + 1))
+  done
+  echo "   !! el server no levanto"
+  return 1
+}
+
+for r in $(seq 1 "$RONDAS"); do
+  echo ""
+  echo "############ RONDA $r / $RONDAS ############"
+  matar_servidor
+  arrancar_servidor "$r" || exit 1
+  P35_RONDA="$r" PERF_EXTERNAL_SERVER=1 PERF_PORT="$PUERTO" \
+    npx playwright test --config=playwright.perf.config.ts \
+    > "$SCRATCH/ronda-$r.log" 2>&1
+  echo "   playwright exit=$?"
+  sed -n '/== RONDA/,$p' "$SCRATCH/ronda-$r.log" | head -14
+done
+
+echo ""
+echo "############ FIN — lineas: $(grep -c '^' "$SALIDA") ############"
+matar_servidor

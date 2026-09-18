@@ -17,10 +17,13 @@ export function BriefSanity({
   leadId,
   businessName,
   brief,
+  bloqueFicha,
 }: {
   leadId: string
   businessName: string
   brief: Brief
+  /** P40 — el bloque de la ficha que lleva el mensaje de la vuelta 1 al re-pegar. */
+  bloqueFicha: string | null
 }) {
   const [editando, setEditando] = useState(false)
   const [sanityOk, setSanityOk] = useState(false)
@@ -31,6 +34,7 @@ export function BriefSanity({
         leadId={leadId}
         businessName={businessName}
         brief={brief}
+        bloqueFicha={bloqueFicha}
         autosaveEnabled
         onCancel={() => setEditando(false)}
         onSaved={() => {
@@ -43,7 +47,7 @@ export function BriefSanity({
 
   return (
     <div className="space-y-4">
-      <BriefResumen brief={brief} />
+      <BriefResumen brief={brief} conVueltas />
 
       {sanityOk ? (
         <p className="flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] p-3 text-xs font-medium text-emerald-300">

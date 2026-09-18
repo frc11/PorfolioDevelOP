@@ -3,10 +3,12 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { FASE_IDS, type FaseId } from '@/lib/leados/contracts'
+import { alternarPantalla, pantallaMarcada } from '@/lib/leados/progreso-pantalla'
 import { useAutosave } from '@/lib/use-autosave'
 import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
 import { FaseAutoReporte } from './fase-auto-reporte'
+import { TildeConstruccion } from './tilde-construccion'
 
 /**
  * P25 — EL DUEÑO del progreso de Construcción.
@@ -65,6 +67,13 @@ import { FaseAutoReporte } from './fase-auto-reporte'
  * el instrumento de P28 (`npm run test:perf`), que compara el texto de `main`
  * antes y después del tilde: sin el refresh la pantalla sigue cambiando en las
  * tres pasadas, con un viaje menos.
+ *
+ * ── P42: un tilde para toda la pantalla ────────────────────────────────────
+ * «Construir» (mc1) muestra UN tilde que marca y desmarca sus tres fases juntas
+ * (`tildeUnico`). Es el MISMO dueño y la MISMA escritura: el clic modifica el
+ * conjunto con el updater funcional (`alternarPantalla`) y el autoguardado se
+ * lleva el blob entero. Lo único que cambia es la presentación. «Refinar» (mc2)
+ * sigue con un tilde por fase.
  */
 export function RegistroFases({
   leadId,
@@ -72,6 +81,7 @@ export function RegistroFases({
   completadas,
   titulos,
   puedeGuardar,
+  tildeUnico = false,
 }: {
   leadId: string
   /** Las fases de ESTA pantalla (mc1 o mc2) — las que se renderizan. */
@@ -80,6 +90,8 @@ export function RegistroFases({
   completadas: FaseId[]
   titulos: Record<string, string>
   puedeGuardar: boolean
+  /** P42 — un solo tilde que marca las fases de la pantalla juntas (mc1). */
+  tildeUnico?: boolean
 }) {
   // El estado arranca en orden canónico de `FASE_IDS` y se mantiene así en cada
   // toggle: sin eso, agregar y quitar la misma fase devolvería el mismo conjunto
@@ -125,29 +137,46 @@ export function RegistroFases({
     })
   }, [])
 
+  // P42 — el clic del tilde único: la misma base funcional, sobre todas las
+  // fases de la pantalla a la vez. Las de las otras pantallas no se tocan.
+  const alternarTodas = useCallback(() => {
+    setMarcadas((actual) => alternarPantalla(actual, fases))
+  }, [fases])
+
+  const reintento = tildeUnico ? 'tocá de nuevo el tilde para reintentar' : 'tocá de nuevo la fase para reintentar'
+
   return (
     <>
-      <ul className="space-y-2">
-        {fases.map((faseId) => (
-          <li key={faseId}>
-            <FaseAutoReporte
-              faseId={faseId}
-              titulo={titulos[faseId] ?? faseId}
-              marcada={marcadas.includes(faseId)}
-              guardando={autosave.phase === 'saving' && ultimoTocado === faseId}
-              puedeGuardar={puedeGuardar}
-              onToggle={toggle}
-            />
-          </li>
-        ))}
-      </ul>
+      {tildeUnico ? (
+        <TildeConstruccion
+          marcada={pantallaMarcada(marcadas, fases)}
+          guardando={autosave.phase === 'saving'}
+          puedeGuardar={puedeGuardar}
+          onToggle={alternarTodas}
+        />
+      ) : (
+        <ul className="space-y-2">
+          {fases.map((faseId) => (
+            <li key={faseId}>
+              <FaseAutoReporte
+                faseId={faseId}
+                titulo={titulos[faseId] ?? faseId}
+                marcada={marcadas.includes(faseId)}
+                guardando={autosave.phase === 'saving' && ultimoTocado === faseId}
+                puedeGuardar={puedeGuardar}
+                onToggle={toggle}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* El rebote del server queda FIJO junto a los tildes: el toast se va solo
           y el setter se quedaba sin saber por qué no entró la marca. Mismo
           criterio que el `serverError` del chequeo. */}
       {errorGuardado && (
         <p role="alert" className="text-xs leading-relaxed text-red-400">
-          {errorGuardado} — tocá de nuevo la fase para reintentar.
+          {errorGuardado} — {reintento}.
         </p>
       )}
 
@@ -164,7 +193,7 @@ export function RegistroFases({
         <AutosaveStatus
           phase={autosave.phase}
           isDirty={autosave.isDirty}
-          errorLabel="No se pudo guardar — tocá de nuevo la fase para reintentar"
+          errorLabel={`No se pudo guardar — ${reintento}`}
         />
       )}
     </>

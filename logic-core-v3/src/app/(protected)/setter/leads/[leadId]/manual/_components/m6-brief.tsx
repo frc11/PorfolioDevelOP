@@ -22,9 +22,20 @@ import { BriefSanity } from './brief-sanity'
  * posición se RE-DERIVA sola en el próximo request (el motor).
  */
 
-/** Instrucción propia de M6: el bloque re-servido es el input del Gem de diseño. */
+/**
+ * Instrucción propia de M6: el bloque re-servido es el input del Gem de diseño.
+ * P40 — ya viaja adentro del mensaje de la vuelta 1; decía «copialas, pegalas ahí
+ * y que arme el brief», que era el pegado único de antes. No más larga que la
+ * vieja a propósito: a 390 un renglón más corría 16 px el primer accionable
+ * (medido con `medir-pliegue-manual.ts`).
+ */
 const INSTRUCCION_BLOQUE_M6 =
-  'Ficha + evaluación juntas: el input completo del Gem de diseño — copialas, pegalas ahí y que arme el brief.'
+  'Ficha + evaluación juntas: ya viajan dentro del mensaje de la vuelta 1. Quedan acá para consultarlas.'
+
+/** P40 — El bloque de la ficha que lleva el mensaje de la vuelta 1, o nada si falta el dato. */
+function bloqueFichaDe(lead: CopyBlockLead, ficha: Ficha | null, evaluacion: Evaluacion | null) {
+  return ficha && evaluacion ? buildBriefInputBlock(lead, ficha, evaluacion) : null
+}
 
 /** Contexto: el bloque del Gem de diseño, re-servido y listo para copiar — el
  * MISMO paquete ficha+evaluación que arma el input del brief en el wizard. */
@@ -63,13 +74,17 @@ export function M6Municion() {
 /** Registro: el form compartido del brief (captura, EVALUADA), el sanity-check
  * del wizard mientras el dossier sigue en BRIEF (5.6: ¿quedó genérico? →
  * re-pegar reabre el MISMO form), o el brief de consulta (`BriefResumen`) en
- * los stages posteriores. */
+ * los stages posteriores. P40: el form trae las cuatro vueltas con el Gem, y la
+ * consulta, lo que quedó guardado de ellas. */
 export function M6Registro({
   leadId,
   businessName,
   brief,
   capturando,
   stage,
+  lead,
+  ficha,
+  evaluacion,
 }: {
   leadId: string
   businessName: string
@@ -77,15 +92,27 @@ export function M6Registro({
   /** true en la captura (stage EVALUADA); false al volver a la pantalla completada. */
   capturando: boolean
   stage: DossierStage | null
+  /** P40 — lo que arma el mensaje de la vuelta 1 (la ficha y la evaluación). */
+  lead: CopyBlockLead
+  ficha: Ficha | null
+  evaluacion: Evaluacion | null
 }) {
+  const bloqueFicha = bloqueFichaDe(lead, ficha, evaluacion)
   if (!capturando && brief) {
     return stage === 'BRIEF' ? (
-      <BriefSanity leadId={leadId} businessName={businessName} brief={brief} />
+      <BriefSanity
+        leadId={leadId}
+        businessName={businessName}
+        brief={brief}
+        bloqueFicha={bloqueFicha}
+      />
     ) : (
-      <BriefResumen brief={brief} />
+      <BriefResumen brief={brief} conVueltas />
     )
   }
   // El form solo llega acá en el tramo editable real: la guardia del server no
   // habilita m6 como captura fuera de EVALUADA con gate abierto.
-  return <BriefForm leadId={leadId} businessName={businessName} brief={brief} />
+  return (
+    <BriefForm leadId={leadId} businessName={businessName} brief={brief} bloqueFicha={bloqueFicha} />
+  )
 }

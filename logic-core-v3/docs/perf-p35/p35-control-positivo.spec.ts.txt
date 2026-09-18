@@ -1,0 +1,131 @@
+import { appendFileSync } from 'node:fs'
+import { test } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  getDossier,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+import { instalarSonda, arrancar, cosechar, VENTANA_MS } from './_p35-sonda'
+
+/**
+ * P35 · CONTROL POSITIVO FORZADO — el acantilado que el cero tiene que cruzar.
+ *
+ * El arm del alcance mide ocho caminos y puede dar cero acuses perdidos. Un cero
+ * sólo vale si el instrumento SABE dar distinto de cero: sin eso, «los caminos
+ * blandos estan a salvo» es indistinguible de «hoy esta sonda no ve nada».
+ *
+ * El arm de la reproduccion (`p35-reproduccion`) intenta pescar el flake natural
+ * — pero es una carrera, y una carrera puede no darse en seis pasadas. Este arm
+ * no depende de la suerte: FUERZA la condicion exacta que P34 aislo como
+ * discriminador (21/21) y verifica que la sonda la reporta.
+ *
+ * La condicion, textual de P34: «si nace un documento DESPUES del despacho, el
+ * acuse no se pide — la continuacion se va con el documento». Aca se entra por la
+ * URL canonica (m15, sin cadena: el boton ya esta), se despacha la accion, y a
+ * los `P35_CORTE` ms se fuerza una navegacion dura. El documento muere con la
+ * promesa adentro.
+ *
+ * Que se espera, y que significa cada resultado:
+ *   · docsPostDespacho >= 1 y acuse=NO  -> la sonda distingue. El cero del otro
+ *                                          arm es un cero medido.
+ *   · docsPostDespacho >= 1 y acuse=SI  -> el corte cayo despues de que run()
+ *                                          termino: subir P35_CORTE no alcanza,
+ *                                          bajarlo.
+ *   · EN BASE=NO                        -> el corte mato tambien al request: el
+ *                                          caso no es el de P34 y no prueba nada.
+ *
+ * Lo artificial es COMO nace el documento (un reload, no un redirect de la
+ * cadena). El mecanismo bajo prueba —la promesa muere con el documento— es el
+ * mismo, y es lo unico que este control afirma.
+ *
+ *   P35_CORTE=300 PERF_EXTERNAL_SERVER=1 PERF_PORT=3007 \
+ *     npx playwright test --config=playwright.perf.config.ts
+ */
+
+const PASADAS = Number(process.env.P35_PASADAS ?? 3)
+const CORTE = Number(process.env.P35_CORTE ?? 300)
+const SALIDA = process.env.P35_SALIDA ?? 'tests/perf/.p35-control.jsonl'
+
+const tracker: SmokeTracker = newTracker()
+const acumulado: unknown[] = []
+
+test.afterAll(async () => {
+  for (const l of acumulado) appendFileSync(SALIDA, JSON.stringify(l) + '\n', 'utf8')
+  await teardown(tracker)
+  await disconnect()
+})
+
+test(`P35 control positivo — documento forzado a +${CORTE}ms del despacho`, async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(PASADAS * 140_000)
+  const setterId = (await getSetterQa()).id
+  await instalarSonda(page)
+
+  for (let i = 1; i <= PASADAS; i++) {
+    await context.clearCookies()
+    await qaLogin(page, 'setter')
+
+    const { id: leadId } = await createLead(tracker, {
+      setterId,
+      businessName: `P35 control p${i}`,
+      stage: 'APROBADA',
+      status: 'RESPONDIO',
+      finalUrl: 'https://sonda-p35.develop.com.ar',
+    })
+
+    // Entrada CANONICA: sin cadena, el boton ya esta y no hay documentos en
+    // vuelo. Lo unico que va a nacer despues del despacho es el que forzamos.
+    const canonica = `/setter/leads/${leadId}/manual/m15`
+    await page.goto(canonica, { waitUntil: 'domcontentloaded' })
+    await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).waitFor({
+      state: 'visible',
+      timeout: 30_000,
+    })
+    await arrancar(page)
+
+    await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).click()
+    await page.waitForTimeout(CORTE)
+    // El documento nuevo. `commit` para no esperar a que termine de cargar: lo
+    // que importa es el instante en que el documento viejo deja de existir.
+    await page.goto(canonica, { waitUntil: 'commit' }).catch(() => {})
+    await page.waitForTimeout(VENTANA_MS)
+
+    const cosecha = await cosechar(page)
+    const dossier = await getDossier(leadId)
+    const reflejo =
+      (await page
+        .getByRole('button', { name: /Ya la envié — registrar/i })
+        .filter({ visible: true })
+        .count()) === 0
+
+    const linea = {
+      ronda: 0,
+      turno: i,
+      camino: 'CP-forzado',
+      rotulo: `CP · control positivo — documento forzado a +${CORTE}ms`,
+      esperado: 'DURA',
+      callSite: '(forzado por el probe, no por producto)',
+      ok: true,
+      nota: '',
+      cosecha,
+      enBase: dossier?.enviadaAt != null,
+      reflejo,
+      rutaFinal: page.url().replace(/^.*\/leads\/[^/]+/, '...'),
+    }
+    acumulado.push(linea)
+    console.log(
+      `   [cp p${i}] docs=${cosecha.documentos} post=${cosecha.docsPostDespacho.length} ` +
+        `despacho+${cosecha.despachoMs}ms acuse=${cosecha.pidioAcuse ? 'SI' : 'NO'} ` +
+        `carteles=${cosecha.carteles} base=${linea.enBase ? 'SI' : 'NO'} ` +
+        `reflejo=${reflejo ? 'SI' : 'NO'} etapas=[${cosecha.etapas.join(' | ')}]`,
+    )
+  }
+})

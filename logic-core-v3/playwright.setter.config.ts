@@ -45,6 +45,9 @@ const externalServer = process.env.SETTER_EXTERNAL_SERVER === '1'
 
 export default defineConfig({
   testDir: './tests/setter',
+  // P39 — borra lo que dejó una corrida interrumpida (por id, desde su registro) y
+  // activa el registro para esta. Ver `tests/helpers/siembra-registro.ts`.
+  globalSetup: './tests/helpers/limpieza-al-arrancar.ts',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,

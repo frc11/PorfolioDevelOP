@@ -364,6 +364,13 @@ const ARCHIVOS_CENSADOS: readonly string[] = [
   'src/lib/leados/guidance-content.ts',
   'src/lib/leados/home.ts',
   'src/lib/leados/manual.ts',
+  // P41 — la consulta de la cartera (`listOwnedLeads`). NO deriva nada del
+  // aprobado —no tiene entrada en el censo de arriba—: TRAE `finalUrl` para que
+  // `home.ts` distinga. Hasta P41 lo traía sin nombrarlo, dentro de
+  // `dossier: true`; con el recorte lo nombra en su `select`. Censarlo es lo que
+  // hace que sacar `finalUrl` de esa consulta ponga esto en rojo como
+  // «desaparecido»: la distinción se perdería antes de llegar a `home.ts`.
+  'src/lib/leados/ownership.ts',
   'src/lib/leados/paso-admitido.ts',
   'src/lib/leados/novedades-vigencia.ts',
   'src/lib/leados/paso.ts',

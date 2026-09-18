@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
 import { firstVisible, expandCartera } from '../helpers/setter-ui'
 import { formatFechaCorta } from '../../src/lib/leados/flow'
@@ -43,9 +43,25 @@ const DIA_MS = 24 * 60 * 60 * 1000
 
 let setterId: string
 let aprobadaConLinkId: string
+let aprobadaConLinkNombre: string
 let aprobadaSinLinkId: string
+let aprobadaSinLinkNombre: string
 let esperaSinLinkId: string
+let esperaSinLinkNombre: string
 let postergadoId: string
+
+/**
+ * P38 — La tarjeta de cartera de UN lead, por su nombre EXACTO (con el stamp de
+ * `createLead`): la misma forma con la que P37 acotó 1a. Los asertos de las
+ * tarjetas se miden acá adentro y no sobre la página: la página también dibuja la
+ * cola de hoy y las novedades, y ahí aparecen las mismas frases por OTROS leads de
+ * la cartera compartida.
+ */
+function tarjetaDe(page: Page, nombreExacto: string) {
+  return page
+    .locator('main [data-slot="tarjeta-cartera"]')
+    .filter({ has: page.getByRole('heading', { name: nombreExacto, exact: true }) })
+}
 
 const FINAL_URL = 'https://q5-con-link.example.com'
 const volvioEl = new Date(Date.now() - 3 * DIA_MS)
@@ -69,6 +85,7 @@ test.beforeAll(async () => {
     finalUrl: FINAL_URL,
   })
   aprobadaConLinkId = conLink.id
+  aprobadaConLinkNombre = conLink.businessName
 
   const sinLink = await createLead(tracker, {
     setterId,
@@ -78,6 +95,7 @@ test.beforeAll(async () => {
     sinFinalUrl: true,
   })
   aprobadaSinLinkId = sinLink.id
+  aprobadaSinLinkNombre = sinLink.businessName
 
   // ── El caso del CONTADOR: gate cerrado, así que el lead está en vuelo ───────
   // (con el gate abierto el aprobado es trabajo y no llega al conteo). Antes los
@@ -90,6 +108,7 @@ test.beforeAll(async () => {
     sinFinalUrl: true,
   })
   esperaSinLinkId = esperaSinLink.id
+  esperaSinLinkNombre = esperaSinLink.businessName
   await registerActivity(esperaSinLinkId, 'INSTAGRAM_DM', 'SIN_RESPUESTA', setterId, 'opener')
 
   // ── Microsprint: el postergado cuya fecha se decía dos veces ────────────────
@@ -130,14 +149,25 @@ test('1a · la tarjeta de un aprobado SIN link no invita a mandar un link que no
     'Q5 Optica Sin Link',
   )
 
+  // P37 — los asertos se miden sobre la TARJETA de este lead, no sobre la página.
+  // Medidos sobre la página pasaban solo porque ningún aprobado CON link llegaba
+  // nunca a la cola de arriba (el defecto de P36). Con la cola por urgencia uno
+  // llega, y su fila dice —con razón— «Demo aprobada — mandá el link al negocio»:
+  // la ausencia a nivel página ya no hablaba de este lead.
+  const tarjeta = page
+    .locator('main [data-slot="tarjeta-cartera"]')
+    .filter({ has: page.getByRole('heading', { name: aprobadaSinLinkNombre, exact: true }) })
+  await expect(tarjeta, 'la búsqueda deja UNA tarjeta: la del aprobado sin link').toHaveCount(1)
+  await expect(tarjeta).toBeVisible()
+
   // Dice de quién es el turno y qué falta — con las MISMAS palabras que el envío.
   await expect(
-    firstVisible(page.getByText(`${TEXTO_TURNO.franco.titulo} — ${FALTA_LINK_PERMANENTE}`)),
+    tarjeta.getByText(`${TEXTO_TURNO.franco.titulo} — ${FALTA_LINK_PERMANENTE}`),
   ).toBeVisible()
   // Y no pide lo imposible.
-  await expect(page.getByText('Demo aprobada — mandá el link al negocio')).toHaveCount(0)
+  await expect(tarjeta.getByText('Demo aprobada — mandá el link al negocio')).toHaveCount(0)
   // El rótulo de orden tampoco: fuera de la cola de trabajo no hay orden que explicar.
-  await expect(page.getByText('La demo está lista para mandar')).toHaveCount(0)
+  await expect(tarjeta.getByText('La demo está lista para mandar')).toHaveCount(0)
 
   expectNoConsoleErrors(guard)
 })
@@ -152,10 +182,16 @@ test('1b · con el link cargado la tarjeta SÍ manda a enviarlo', async ({ page 
     'Q5 Taller Con Link',
   )
 
-  await expect(
-    firstVisible(page.getByText('Demo aprobada — mandá el link al negocio')),
-  ).toBeVisible()
-  await expect(page.getByText(FALTA_LINK_PERMANENTE)).toHaveCount(0)
+  // P38 — medido sobre la TARJETA de este lead. Sobre la página, el «mandá el link»
+  // lo pinta también la fila de la cola de cualquier aprobado con link de la
+  // cartera compartida (hoy `QA-W Aprobada Gate Abierto`, fila 4): el aserto pasaba
+  // aunque esta tarjeta no lo dijera.
+  const tarjeta = tarjetaDe(page, aprobadaConLinkNombre)
+  await expect(tarjeta, 'la búsqueda deja UNA tarjeta: la del aprobado con link').toHaveCount(1)
+  await expect(tarjeta).toBeVisible()
+
+  await expect(tarjeta.getByText('Demo aprobada — mandá el link al negocio')).toBeVisible()
+  await expect(tarjeta.getByText(FALTA_LINK_PERMANENTE)).toHaveCount(0)
 
   expectNoConsoleErrors(guard)
 })
@@ -243,11 +279,21 @@ test('2a · el panel no cuenta como espera del negocio una demo que espera a Fra
   // Es un lead EN VUELO (gate cerrado, no accionable) y su turno es de Franco.
   // La tarjeta y el contador leen la MISMA derivación: si acá dijera «le toca al
   // negocio», el chip del panel diría lo mismo.
+  //
+  // P38 — sobre la TARJETA de este lead. Las dos frases son `proximaAccion`, y la
+  // página la dibuja también en las novedades («Ahora: …» de un aviso caducado) de
+  // cualquier lead de la cartera compartida: la presencia podía venir de otro lead
+  // y la ausencia dependía de que ningún aprobado esperando al negocio tuviera un
+  // aviso a la vista.
+  const tarjeta = tarjetaDe(page, esperaSinLinkNombre)
+  await expect(tarjeta, 'la búsqueda deja UNA tarjeta: la del aprobado que espera el link').toHaveCount(1)
+  await expect(tarjeta).toBeVisible()
+
   await expect(
-    firstVisible(page.getByText(`${TEXTO_TURNO.franco.titulo} — ${FALTA_LINK_PERMANENTE}`)),
+    tarjeta.getByText(`${TEXTO_TURNO.franco.titulo} — ${FALTA_LINK_PERMANENTE}`),
   ).toBeVisible()
   await expect(
-    page.getByText(`${TEXTO_TURNO.negocio.titulo} — la demo está aprobada`),
+    tarjeta.getByText(`${TEXTO_TURNO.negocio.titulo} — la demo está aprobada`),
   ).toHaveCount(0)
 
   expectNoConsoleErrors(guard)

@@ -186,38 +186,55 @@ test('clase 2 · el bloque copiable que la munición nombra está donde dice', a
   const guard = attachConsoleGuard(page)
   await qaLogin(page, 'setter')
 
-  await page.goto(`/setter/leads/${construyendoId}/manual/mc1`, {
-    waitUntil: 'domcontentloaded',
-  })
-  await expect(page).toHaveURL(/\/manual\/mc1$/)
+  // P42 — «Construir» (mc1) dejó de servir el bloque como contexto: es lo único que
+  // se manda, así que vive en el bloque de trabajo («Registro»), entero, con la guía
+  // de la herramienta —la que lo nombra— pegada a su botón. «Refinar» (mc2) lo
+  // sigue sirviendo en «Contexto del lead», nombrado desde «Munición». La clase se
+  // afirma en las dos: el nombre que usa la guía es el del bloque, y los dos están
+  // donde el layout de cada pantalla los pone.
+  const PANTALLAS_CON_BLOQUE = [
+    { paso: 'mc1', zonaDelBloque: 'Registro', zonaQueLoNombra: 'Registro' },
+    { paso: 'mc2', zonaDelBloque: 'Contexto del lead', zonaQueLoNombra: 'Munición' },
+  ] as const
 
-  // El bloque vive en «Contexto del lead» y la munición lo NOMBRA. Hasta P23 la
-  // instrucción además decía dónde estaba («está acá arriba»); el sprint retiró
-  // esa mitad porque una ubicación sobrevive a la mudanza que la vuelve falsa
-  // —P18 movió la acción principal a una barra sticky y la copy siguió apuntando
-  // hacia arriba—. Lo que se afirma es lo que importa: el nombre coincide.
-  await expect(zona(page, 'Contexto del lead')).toContainText('Bloque para Claude Design')
-  await expect(zona(page, 'Munición')).toContainText('«para Claude Design»')
-  await expect(
-    zona(page, 'Munición'),
-    'la munición no puede volver a ubicar el bloque',
-  ).not.toContainText('acá arriba')
-  await expect(zona(page, 'Munición')).not.toContainText('está acá abajo')
+  for (const { paso, zonaDelBloque, zonaQueLoNombra } of PANTALLAS_CON_BLOQUE) {
+    await page.goto(`/setter/leads/${construyendoId}/manual/${paso}`, {
+      waitUntil: 'domcontentloaded',
+    })
+    await expect(page).toHaveURL(new RegExp(`/manual/${paso}$`))
 
-  // Y se prueba la dirección, no solo la palabra: el contexto precede a la
-  // munición en el orden del documento.
-  const orden = await main(page).evaluate((nodo) => {
-    const seccion = (etiqueta: string) => nodo.querySelector(`section[aria-label="${etiqueta}"]`)
-    const contexto = seccion('Contexto del lead')
-    const municion = seccion('Munición')
-    if (!contexto || !municion) return 'falta-una-zona'
-    return contexto.compareDocumentPosition(municion) & Node.DOCUMENT_POSITION_FOLLOWING
-      ? 'contexto-primero'
-      : 'municion-primero'
-  })
-  expect(orden, 'el bloque que la munición nombra está por encima de ella').toBe(
-    'contexto-primero',
-  )
+    // El bloque vive en su zona y la guía lo NOMBRA. Hasta P23 la instrucción
+    // además decía dónde estaba («está acá arriba»); el sprint retiró esa mitad
+    // porque una ubicación sobrevive a la mudanza que la vuelve falsa —P18 movió
+    // la acción principal a una barra sticky y la copy siguió apuntando hacia
+    // arriba—, y P42 lo volvió a confirmar mudando el bloque de mc1 de zona. Lo
+    // que se afirma es lo que importa: el nombre coincide.
+    await expect(zona(page, zonaDelBloque), `${paso}: el bloque está`).toContainText('Bloque para Claude Design')
+    await expect(zona(page, zonaQueLoNombra), `${paso}: la guía lo nombra`).toContainText('«para Claude Design»')
+    await expect(
+      zona(page, zonaQueLoNombra),
+      'la guía no puede volver a ubicar el bloque',
+    ).not.toContainText('acá arriba')
+    await expect(zona(page, zonaQueLoNombra)).not.toContainText('está acá abajo')
+
+    // Y se prueba el orden del documento, no solo la palabra: donde el bloque y su
+    // nombre viven en zonas distintas (mc2), el bloque va primero.
+    if (zonaDelBloque !== zonaQueLoNombra) {
+      const orden = await main(page).evaluate(
+        (nodo, [etiquetaDelBloque, etiquetaQueLoNombra]) => {
+          const seccion = (etiqueta: string) => nodo.querySelector(`section[aria-label="${etiqueta}"]`)
+          const bloque = seccion(etiquetaDelBloque)
+          const nombra = seccion(etiquetaQueLoNombra)
+          if (!bloque || !nombra) return 'falta-una-zona'
+          return bloque.compareDocumentPosition(nombra) & Node.DOCUMENT_POSITION_FOLLOWING
+            ? 'bloque-primero'
+            : 'nombre-primero'
+        },
+        [zonaDelBloque, zonaQueLoNombra] as const,
+      )
+      expect(orden, `${paso}: el bloque que la munición nombra está por encima de ella`).toBe('bloque-primero')
+    }
+  }
 
   expectNoConsoleErrors(guard)
 })

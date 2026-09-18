@@ -1,0 +1,39 @@
+/** P36 — capturas del estado ANTES: la cola a 1440 y a 390, con la cartera real. */
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.local' }); loadEnv({ path: '.env' })
+import { chromium } from '@playwright/test'
+import { mkdirSync } from 'node:fs'
+
+const BASE = 'http://127.0.0.1:3001'
+const OUT = 'docs/p36-orden-cola'
+
+async function main() {
+  mkdirSync(OUT, { recursive: true })
+  const browser = await chromium.launch()
+  for (const [tag, w, h] of [['1440', 1440, 900], ['390', 390, 844]] as const) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } })
+    const page = await ctx.newPage()
+    await page.goto(`${BASE}/api/qa/login`)
+    await page.evaluate(() => fetch('/api/qa/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ persona: 'setter' }) }))
+    await page.goto(`${BASE}/setter`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(1500)
+    await page.screenshot({ path: `${OUT}/antes-cola-${tag}.png` })
+    // censo textual junto a la captura
+    const censo = await page.evaluate(() => {
+      const main = document.querySelector('main')!
+      const t = main.innerText
+      return {
+        chip: (t.match(/\d+ para trabajar/) || [])[0] ?? null,
+        pie: (t.match(/Quedan \d+ m[aá]s[^\n]*/) || [])[0] ?? null,
+        hallazgo_visible: t.includes('QA-W Aprobada Gate Abierto'),
+        filas: [...main.querySelectorAll('*')].filter(e => e.children.length === 0 && /^(QA-|SMOKE-SETTER|M0-GAL|DEMO |CORRIDA )/.test((e.textContent || '').trim())).slice(0, 6).map(e => e.textContent!.trim().slice(0, 44)),
+      }
+    })
+    console.log(`\n── ${tag} ──`)
+    console.log(JSON.stringify(censo, null, 2))
+    await ctx.close()
+  }
+  await browser.close()
+  console.log(`\nCapturas en ${OUT}/`)
+}
+main().catch(e => { console.error(e); process.exit(1) })

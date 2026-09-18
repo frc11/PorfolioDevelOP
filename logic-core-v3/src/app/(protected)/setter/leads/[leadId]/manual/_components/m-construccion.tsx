@@ -196,24 +196,26 @@ function MotivoDelTilde({
   leadId,
   stage,
   correccionesAccesible,
+  tildeUnico,
 }: {
   leadId: string
   stage: DossierStage | null
   correccionesAccesible: boolean
+  /** P42 — «Construir» tiene un solo tilde: la frase va en singular. */
+  tildeUnico: boolean
 }) {
+  const sujeto = tildeUnico ? 'El tilde se abre' : 'Los tildes se abren'
   if (stage === 'BRIEF') {
     return (
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        Los tildes se abren cuando arranques la construcción, con el botón
-        «Arrancar construcción».
+        {sujeto} cuando arranques la construcción, con el botón «Arrancar construcción».
       </p>
     )
   }
   if (stage === 'RECHAZADA') {
     return (
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        Los tildes se abren cuando reabrís la construcción — el botón «Reabrir construcción»
-        está en{' '}
+        {sujeto} cuando reabrís la construcción — el botón «Reabrir construcción» está en{' '}
         <EnlacePantalla
           leadId={leadId}
           destino="mr"
@@ -227,7 +229,9 @@ function MotivoDelTilde({
   }
   return (
     <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-      Las fases se marcan mientras la demo está en construcción.
+      {tildeUnico
+        ? 'La demo se marca como construida mientras está en construcción.'
+        : 'Las fases se marcan mientras la demo está en construcción.'}
     </p>
   )
 }
@@ -246,7 +250,14 @@ function MotivoDelTilde({
  * cambia de forma ni de semántica, y destildar sigue borrando UNA fase (con dos
  * tildes, destildar «Construir» borraría tres de un saque sin mostrar cuáles).
  * La explicación del auto-reporte va UNA vez, arriba del grupo: repetida en cada
- * tilde era el mismo párrafo tres veces. */
+ * tilde era el mismo párrafo tres veces.
+ *
+ * P42 — «Construir» deja de tener tres tildes (`tildeUnico`). Las tres fases eran
+ * de cuando construir era artesanal; con un prompt único hay una sola cosa que
+ * marcar: que la demo quedó construida. Las fases SIGUEN siendo la unidad
+ * persistida —el tilde las marca y las desmarca juntas, y destildarlo saca las
+ * tres, que es lo que afirma—. «Refinar» (mc2) conserva un tilde por fase: con el
+ * default, esta pieza renderiza para mc2 exactamente lo que renderizaba. */
 export function ConstruccionRegistro({
   leadId,
   fases,
@@ -257,6 +268,7 @@ export function ConstruccionRegistro({
   escaladoNota,
   correccionesAccesible,
   chequeoAccesible,
+  tildeUnico = false,
 }: {
   leadId: string
   fases: readonly FaseId[]
@@ -270,6 +282,8 @@ export function ConstruccionRegistro({
   draftUrl: string | null
   escaladoAt: string | null
   escaladoNota: string | null
+  /** P42 — un solo tilde para las fases de la pantalla («Construir»). */
+  tildeUnico?: boolean
 }) {
   const puedeGuardar = stage === 'CONSTRUCCION'
   return (
@@ -278,7 +292,10 @@ export function ConstruccionRegistro({
         <div className="space-y-3">
           <p className="max-w-xl text-xs leading-relaxed text-zinc-300">
             El brief está listo — arrancá la construcción para habilitar el registro del
-            borrador. Tildar fases no la arranca sola.
+            borrador.{' '}
+            {tildeUnico
+              ? 'Marcar la demo como construida no la arranca sola.'
+              : 'Tildar fases no la arranca sola.'}
           </p>
           <ArrancarConstruccion leadId={leadId} />
         </div>
@@ -289,10 +306,23 @@ export function ConstruccionRegistro({
           leadId={leadId}
           stage={stage}
           correccionesAccesible={correccionesAccesible}
+          tildeUnico={tildeUnico}
         />
       )}
 
-      {puedeGuardar && (
+      {puedeGuardar && tildeUnico && (
+        <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+          Marcarla no bloquea nada ni te hace avanzar: lo único que frena el envío es{' '}
+          <EnlaceChequeoFinal
+            leadId={leadId}
+            draftUrl={draftUrl}
+            destinoAccesible={chequeoAccesible}
+          />
+          .
+        </p>
+      )}
+
+      {puedeGuardar && !tildeUnico && (
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
           Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el
           orden que te sirva. El único chequeo que gatea es{' '}
@@ -316,6 +346,7 @@ export function ConstruccionRegistro({
         completadas={completadas}
         titulos={titulosDeFases(fases)}
         puedeGuardar={puedeGuardar}
+        tildeUnico={tildeUnico}
       />
 
       {stage === 'CONSTRUCCION' && (

@@ -34,8 +34,8 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
   const meta = [lead.industry, lead.zone, diasDesde(lead.createdAt)]
     .filter(Boolean)
     .join(' · ')
-  // Por qué esta card está donde está: lee el criterio de orden ya calculado
-  // (mismos tiers que el sort), no lo recalcula. Neutral por disciplina B9:
+  // Qué hay que hacer con esta card: lee la clase de trabajo ya calculada, no la
+  // recalcula (desde P37 la clase no decide el lugar, ver `ordenFoco`). Neutral por disciplina B9:
   // es informativo, el cyan queda para lo accionable.
   const ordenLabel = motivoOrden(lead)
   // A-09: por qué causa real está archivado — visible sin abrir el lead.

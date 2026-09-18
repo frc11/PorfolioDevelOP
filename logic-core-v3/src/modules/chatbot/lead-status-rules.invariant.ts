@@ -24,6 +24,7 @@ import {
   shouldSealFirstContact,
   leadBelongsToOrg,
 } from './lead-status-rules.ts'
+import { cuerpoDeFuncion, sinComentarios } from '../../lib/invariant-call-site.ts'
 
 const ALL_STATUSES: ChatbotLeadStatus[] = ['NEW', 'CONTACTED', 'IN_NEGOTIATION', 'WON', 'LOST']
 
@@ -126,5 +127,80 @@ const ALL_STATUSES: ChatbotLeadStatus[] = ['NEW', 'CONTACTED', 'IN_NEGOTIATION',
   assert.equal(leadBelongsToOrg(null, null), false, 'ambos null → rechazado')
   assert.equal(leadBelongsToOrg(undefined, undefined), false, 'ambos undefined → rechazado')
 }
+
+// ── 6. P32 — Y ADEMÁS: que el ACTION real selle así ──────────────────────────
+// La sección 4 dice «modela el cómputo del data del action», y ahí está el hueco
+// que midió el censo de P26: `applyTransition` es una re-implementación LOCAL,
+// escrita en este archivo. Prueba que la REGLA es correcta, no que el action la
+// use. Si `updateLeadStatus` dejara de consultar `shouldSealFirstContact` y
+// escribiera `firstContactedAt: new Date()` en cada cambio de estado, los quince
+// asertos de arriba seguirían verdes con el sello pisándose en cada tap.
+//
+// Y lo que se pierde es irrecuperable: `firstContactedAt` es el histórico del
+// primer contacto — el dato del que sale la métrica de velocidad de respuesta.
+// Pisarlo no da un error, da un número más lindo; y el valor viejo no vuelve.
+// Hay dos formas de romperlo sin que se note, y las dos se cierran acá: escribir
+// la fecha siempre (pisa) y escribir `null` cuando no sella (borra).
+const ACTION_SELLADO = ['src', 'modules', 'chatbot', 'server', 'admin', 'updateLeadStatus.ts'] as const
+// `sinComentarios` blanquea los comentarios y deja los literales intactos. Sin
+// el, un comentario de documentacion que mencione el campo con dos puntos
+// -- `// firstContactedAt: se sella una sola vez` -- hace fallar el
+// `doesNotMatch` de abajo sin que cambie una sola linea ejecutable.
+const updateLeadStatusSrc = sinComentarios(cuerpoDeFuncion(ACTION_SELLADO, 'updateLeadStatus'))
+
+// 6a. La decisión sale del helper, y mirando las dos cosas que tiene que mirar:
+//     el estado al que va y el sello que YA tiene. Con cualquiera de las dos de
+//     menos, la regla que prueban las secciones 2-4 deja de ser la que corre.
+const decisionDelSello =
+  /const\s+([A-Za-z_$][\w$]*)\s*=\s*shouldSealFirstContact\(([^)]*)\)/.exec(updateLeadStatusSrc)
+assert.ok(
+  decisionDelSello,
+  '`updateLeadStatus` dejó de decidir el sello con `shouldSealFirstContact`. Toda la lógica\n' +
+    '  que este invariante prueba vive en ese helper: sin la llamada, las secciones 2-4 pasan\n' +
+    '  a describir código que ya no corre.',
+)
+const banderaDelSello = decisionDelSello[1]
+assert.match(
+  decisionDelSello[2],
+  /parsed\.status/,
+  'la decisión del sello dejó de mirar el estado al que va el lead (`parsed.status`).',
+)
+assert.match(
+  decisionDelSello[2],
+  /lead\.firstContactedAt/,
+  'la decisión del sello dejó de mirar el sello PREVIO (`lead.firstContactedAt`): sin ese\n' +
+    '  argumento no puede distinguir el primer contacto de los siguientes, y vuelve a sellar\n' +
+    '  cada vez. Es exactamente el caso 3c de arriba, que acá quedaría sin dueño.',
+)
+
+// 6b. La ÚNICA escritura del sello está gobernada por esa bandera, y nunca es
+//     `null`. El spread condicional es lo que hace que «deshacer» preserve el
+//     histórico: cuando no sella, la clave no viaja en el payload.
+const escrituraGobernada = new RegExp(
+  '\\.\\.\\.\\(\\s*' + banderaDelSello + '\\s*\\?\\s*\\{\\s*firstContactedAt:\\s*new Date\\(\\)\\s*,?\\s*\\}\\s*:\\s*\\{\\s*\\}\\s*\\)',
+)
+assert.match(
+  updateLeadStatusSrc,
+  escrituraGobernada,
+  'el payload del update dejó de escribir `firstContactedAt` con el spread condicional\n' +
+    '  gobernado por `' + banderaDelSello + '`. Esa forma es la garantía de que cuando no\n' +
+    '  sella la clave NO VIAJA: es lo que hace que «deshacer» (volver a NEW) preserve el\n' +
+    '  primer contacto en vez de borrarlo. Si cambiaste la forma de armar el payload, atá\n' +
+    '  la forma nueva acá en el mismo commit.',
+)
+
+// Fuera de ese spread no puede quedar ninguna otra escritura del sello. Un
+// `select: { firstContactedAt: true }` es una LECTURA y sigue permitido — lo que
+// se prohíbe es asignarle un valor por otro camino.
+const restoDelAction = updateLeadStatusSrc.replace(escrituraGobernada, '')
+assert.doesNotMatch(
+  restoDelAction,
+  /firstContactedAt\s*:\s*(?!true\b|false\b)/,
+  'hay una segunda escritura de `firstContactedAt` en `updateLeadStatus`, fuera del spread\n' +
+    '  condicional. Las dos maneras de romper el histórico son ésta: asignarle la fecha\n' +
+    '  siempre (cada cambio de estado pisa el primer contacto) o asignarle `null` cuando no\n' +
+    '  sella (deshacer lo borra). Ninguna da error y las dos falsean la métrica de velocidad\n' +
+    '  de respuesta con un dato que no se puede recuperar.',
+)
 
 console.log('✓ lead-status-rules invariants OK')

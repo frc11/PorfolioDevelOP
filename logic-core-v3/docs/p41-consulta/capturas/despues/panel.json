@@ -1,0 +1,719 @@
+{
+ "base": "http://127.0.0.1:3003",
+ "medidoEn": "2026-09-15T00:17:52.389Z",
+ "email": "setter-qa@develop.test",
+ "anchos": [
+  {
+   "ancho": "1440",
+   "colaSeccion": "Tu cola de hoy | 42 para trabajar | TU FOCO AHORA | QA-W Evaluada Gate Abierto | Veterinaria · Yerba Buena | Decidí cómo va a ser la demo | Fijado por vos — va primero | Ir a trabajarlo | Pausar | Saltar | ? | QA-W Brief | Brief listo — arrancá la construcción de la demo | Fijado por vos — va primero | Barbería · Las Talitas | Trabajar | QA-W Construccion | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Pilates · Yerba Buena | Trabajar | QA-W Aprobada Gate Abierto | Demo aprobada — mandá el link al negocio | La demo está lista para mandar | Estética · Yerba Buena | Trabajar | QA-W Rechazada | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Florería · Yerba Buena | Trabajar | Quedan 37 más para trabajar, en tu cartera.",
+   "cola": [
+    "QA-W Brief | Brief listo — arrancá la construcción de la demo | Fijado por vos — va primero | Barbería · Las Talitas | Trabajar",
+    "QA-W Construccion | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Pilates · Yerba Buena | Trabajar",
+    "QA-W Aprobada Gate Abierto | Demo aprobada — mandá el link al negocio | La demo está lista para mandar | Estética · Yerba Buena | Trabajar",
+    "QA-W Rechazada | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Florería · Yerba Buena | Trabajar"
+   ],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 73",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "42",
+     "tarjetas": [
+      {
+       "nombre": "QA-W Evaluada Gate Abierto",
+       "texto": "QA-W Evaluada Gate Abierto | Veterinaria · Yerba Buena · hace 76 días | Fijado por vos — va primero | Decidí cómo va a ser la demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Brief",
+       "texto": "QA-W Brief | Barbería · Las Talitas · hace 76 días | Fijado por vos — va primero | Brief listo — arrancá la construcción de la demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Construccion",
+       "texto": "QA-W Construccion | Pilates · Yerba Buena · hace 76 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Aprobada Gate Abierto",
+       "texto": "QA-W Aprobada Gate Abierto | Estética · Yerba Buena · hace 76 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Rechazada",
+       "texto": "QA-W Rechazada | Florería · Yerba Buena · hace 76 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: La prueba social no es real | Dónde: Sección \"Reseñas\" | Arreglo: Reemplazá los textos por las reseñas reales del negocio (están en la ficha) y re-publicá el draft. | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 12-m6-brief-abierto",
+       "texto": "M0-GAL 12-m6-brief-abierto | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Decidí cómo va a ser la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 27-m15-envio-abierto",
+       "texto": "M0-GAL 27-m15-envio-abierto | gastronomia · Centro · hace 35 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 33-m5-post-envio",
+       "texto": "M0-GAL 33-m5-post-envio | gastronomia · Centro · hace 35 días | Te toca a vos | Demo enviada — te toca un toque | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B6 Gimnasio Atlas",
+       "texto": "QA-B6 Gimnasio Atlas | CALIENTE | Gimnasio · Yerba Buena · hace 94 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Zero Protocol",
+       "texto": "DEMO Web · Zero Protocol | CALIENTE | Software · San Miguel de Tucumán · hace 89 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: Esta todo pal pingo ql | Dónde: en todo | Arreglo: no servis ni pa mierda | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Noir Dining",
+       "texto": "DEMO Web · Noir Dining | CALIENTE | Gastronomía · Yerba Buena · hace 89 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Ficha Incompleta",
+       "texto": "QA-W Ficha Incompleta | Bazar · Yerba Buena · hace 76 días | Te toca a vos | Completá la ficha | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Ficha Completa",
+       "texto": "QA-W Ficha Completa | Cafetería · San Miguel de Tucumán · hace 76 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Postergado Vencido",
+       "texto": "QA-W Postergado Vencido | Heladería · Las Talitas · hace 76 días | Te toca a vos | Se venció el 17/8 — retomá el contacto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Postergado Futuro",
+       "texto": "QA-W Postergado Futuro | Librería · Yerba Buena · hace 76 días | Te toca a vos | Se venció el 8/9 — retomá el contacto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B6 Pizzería Don Carlo",
+       "texto": "QA-B6 Pizzería Don Carlo | Pizzería · Barrio Norte · hace 72 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-M5 Toque",
+       "texto": "QA-M5 Toque | QA · Tucumán · hace 72 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 01-m1-ficha-vacia",
+       "texto": "M0-GAL 01-m1-ficha-vacia | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Completá la ficha | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 02-m1-ficha-cargada",
+       "texto": "M0-GAL 02-m1-ficha-cargada | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 03-m2-al-evaluador",
+       "texto": "M0-GAL 03-m2-al-evaluador | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 04-m2-veredicto-registrado",
+       "texto": "M0-GAL 04-m2-veredicto-registrado | gastronomia · Centro · hace 35 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 06-m4-opener-pendiente",
+       "texto": "M0-GAL 06-m4-opener-pendiente | gastronomia · Centro · hace 35 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 07-m4-opener-enviado",
+       "texto": "M0-GAL 07-m4-opener-enviado | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 08-espera-post-opener",
+       "texto": "M0-GAL 08-espera-post-opener | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 09-m5-toque-vencido",
+       "texto": "M0-GAL 09-m5-toque-vencido | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 11-m5-charla-poblada",
+       "texto": "M0-GAL 11-m5-charla-poblada | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 13-m6-brief-guardado",
+       "texto": "M0-GAL 13-m6-brief-guardado | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Brief listo — arrancá la construcción de la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 14-mc1-tilde-deshabilitado",
+       "texto": "M0-GAL 14-mc1-tilde-deshabilitado | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Brief listo — arrancá la construcción de la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 15-mc1-construir",
+       "texto": "M0-GAL 15-mc1-construir | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 16-mc1-parcial",
+       "texto": "M0-GAL 16-mc1-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 17-mc1-completa",
+       "texto": "M0-GAL 17-mc1-completa | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 18-mc2-refinar",
+       "texto": "M0-GAL 18-mc2-refinar | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 19-mc2-parcial",
+       "texto": "M0-GAL 19-mc2-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 20-mc2-completa",
+       "texto": "M0-GAL 20-mc2-completa | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 21-m13-borrador-vacio",
+       "texto": "M0-GAL 21-m13-borrador-vacio | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22-m14-chequeo",
+       "texto": "M0-GAL 22-m14-chequeo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22b-m14-chequeo-parcial",
+       "texto": "M0-GAL 22b-m14-chequeo-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22c-m14-chequeo-completo",
+       "texto": "M0-GAL 22c-m14-chequeo-completo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 24-error-chequeo",
+       "texto": "M0-GAL 24-error-chequeo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 25-mr-correccion-1",
+       "texto": "M0-GAL 25-mr-correccion-1 | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 26-mr-correccion-2",
+       "texto": "M0-GAL 26-mr-correccion-2 | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA Bicicleteria La Rueda",
+       "texto": "CORRIDA Bicicleteria La Rueda | Bicicleteria · Tafi Viejo · hace 14 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "En seguimiento",
+     "conteo": "11",
+     "tarjetas": [
+      {
+       "nombre": "QA-M16 Abierta",
+       "texto": "QA-M16 Abierta | QA · Tucumán · hace 72 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 29-m15-espera-sin-final-url",
+       "texto": "M0-GAL 29-m15-espera-sin-final-url | gastronomia · Centro · hace 35 días | Le toca a Franco — todavía no cargó su link permanente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 30-m16-virgen",
+       "texto": "M0-GAL 30-m16-virgen | gastronomia · Centro · hace 35 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 31-m16-ofrecidos",
+       "texto": "M0-GAL 31-m16-ofrecidos | gastronomia · Centro · hace 35 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Demo Enviada",
+       "texto": "QA-W Demo Enviada | Odontología · San Miguel de Tucumán · hace 13 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B7 Estética Bella Vista",
+       "texto": "QA-B7 Estética Bella Vista | Estética · Centro · hace 94 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Evaluada Gate Cerrado",
+       "texto": "QA-W Evaluada Gate Cerrado | Panadería · Tafí Viejo · hace 76 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Aprobada Gate Cerrado",
+       "texto": "QA-W Aprobada Gate Cerrado | Ferretería · Tafí Viejo · hace 76 días | Le toca a Franco — todavía no cargó su link permanente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-M5 Agotada",
+       "texto": "QA-M5 Agotada | QA · Tucumán · hace 72 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 10-m5-cadencia-agotada",
+       "texto": "M0-GAL 10-m5-cadencia-agotada | gastronomia · Centro · hace 35 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 28-m15-espera-sin-respuesta",
+       "texto": "M0-GAL 28-m15-espera-sin-respuesta | gastronomia · Centro · hace 35 días | Le toca al negocio — la demo está aprobada y el link sale cuando conteste | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Esperando revisión",
+     "conteo": "10",
+     "tarjetas": [
+      {
+       "nombre": "QA-B3 Panadería Doña Rosa",
+       "texto": "QA-B3 Panadería Doña Rosa | Panadería · Tafí Viejo · hace 94 días | Le toca a Franco — está revisando tu demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W En Revision",
+       "texto": "QA-W En Revision | Gimnasio · San Miguel de Tucumán · hace 76 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "Gimnasio Nova Fit",
+       "texto": "Gimnasio Nova Fit | Gimnasio · Yerba Buena · hace 34 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B3 Café La Esquina",
+       "texto": "QA-B3 Café La Esquina | CALIENTE | Cafetería · Yerba Buena · hace 94 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · The Ethereal Resort",
+       "texto": "DEMO Web · The Ethereal Resort | CALIENTE | Hotelería · Tafí del Valle · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Skyline Estates",
+       "texto": "DEMO Web · Skyline Estates | CALIENTE | Inmobiliaria · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · NEXO Bold",
+       "texto": "DEMO Web · NEXO Bold | CALIENTE | Agencia creativa · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · YAKU Nebula",
+       "texto": "DEMO Web · YAKU Nebula | CALIENTE | SaaS · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B4 Barbería El Faro",
+       "texto": "QA-B4 Barbería El Faro | Barbería · Yerba Buena · hace 94 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 23-revision-franco",
+       "texto": "M0-GAL 23-revision-franco | gastronomia · Centro · hace 35 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Agendadas",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "QA-M16 Agendada",
+       "texto": "QA-M16 Agendada | QA · Tucumán · hace 72 días | Le toca a Franco — la reunión la corre él | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 32-m16-agendada",
+       "texto": "M0-GAL 32-m16-agendada | gastronomia · Centro · hace 35 días | Le toca a Franco — la reunión la corre él | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Postergados por el negocio",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "CORRIDA Panaderia San Cayetano",
+       "texto": "CORRIDA Panaderia San Cayetano | Panaderia · Yerba Buena · hace 14 días | Postergado — vuelve el 15/9 | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Descartados (antes de la demo)",
+     "conteo": "5",
+     "tarjetas": [
+      {
+       "nombre": "QA-B3 Ferretería El Tornillo",
+       "texto": "QA-B3 Ferretería El Tornillo | Ferretería · San Miguel de Tucumán · hace 94 días | Motivo: Negocio digitalmente inactivo hace 7 meses, sin dolor visible ni intención. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Descartada",
+       "texto": "QA-W Descartada | Kiosco · San Miguel de Tucumán · hace 76 días | Motivo: IG abandonado hace meses y el local figura cerrado en Maps. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 05-m2-veredicto-descartado",
+       "texto": "M0-GAL 05-m2-veredicto-descartado | gastronomia · Centro · hace 35 días | Motivo: Sin presencia ni materia prima suficiente | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA Kiosco 24hs El Puente",
+       "texto": "CORRIDA Kiosco 24hs El Puente | Kiosco · Banda del Rio Sali · hace 14 días | Motivo: Kiosco sin ninguna presencia digital: no hay material para construir una demo ni forma de llegar al dueno. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA2 Kiosco El Trebol",
+       "texto": "CORRIDA2 Kiosco El Trebol | Kiosco · Tafi Viejo · hace 10 días | Motivo: Sin presencia digital de ningun tipo: no hay material real para construir la demo. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Perdidos (cerrados por Franco)",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "QA-B7 Vivero El Aromo",
+       "texto": "QA-B7 Vivero El Aromo | Vivero · Camino del Perú · hace 94 días | Perdido — sin acción pendiente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 34-archivo-perdido",
+       "texto": "M0-GAL 34-archivo-perdido | gastronomia · Centro · hace 35 días | Perdido — sin acción pendiente | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [
+    "Franco pidió cambios | QA-W En Revision: la demo volvió con correcciones. Reabrí la construcción y rehacé. | Ahora: Le toca a Franco — está revisando tu demo | hace 10 días | Abrir",
+    "Franco aprobó tu demo | QA-W Ficha Incompleta: la demo está aprobada. Enviá el link ya, recién aprobada. | Ahora: Completá la ficha | hace 10 días | Abrir",
+    "Franco aprobó tu demo | CORRIDA Panaderia San Cayetano: la demo está aprobada. Enviá el link ya, recién aprobada. | Ahora: Postergado — vuelve el 15/9 | hace 14 días | Abrir",
+    "Franco pidió cambios | CORRIDA Panaderia San Cayetano: la demo volvió con correcciones. Reabrí la construcción y rehacé. | Ahora: Postergado — vuelve el 15/9 | hace 14 días | Abrir"
+   ],
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 67 | evaluadas · 7% descarte | 5 descartes · 62 avances | Últimos 30 días: 20 evaluadas · 15% descarte",
+   "avance": null
+  },
+  {
+   "ancho": "390",
+   "colaSeccion": "Tu cola de hoy | 42 para trabajar | TU FOCO AHORA | QA-W Evaluada Gate Abierto | Veterinaria · Yerba Buena | Decidí cómo va a ser la demo | Fijado por vos — va primero | Ir a trabajarlo | Pausar | Saltar | ? | QA-W Brief | Brief listo — arrancá la construcción de la demo | Fijado por vos — va primero | Barbería · Las Talitas | Trabajar | QA-W Construccion | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Pilates · Yerba Buena | Trabajar | QA-W Aprobada Gate Abierto | Demo aprobada — mandá el link al negocio | La demo está lista para mandar | Estética · Yerba Buena | Trabajar | QA-W Rechazada | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Florería · Yerba Buena | Trabajar | Quedan 37 más para trabajar, en tu cartera.",
+   "cola": [
+    "QA-W Brief | Brief listo — arrancá la construcción de la demo | Fijado por vos — va primero | Barbería · Las Talitas | Trabajar",
+    "QA-W Construccion | Demo en construcción — publicá el borrador y pasá el chequeo final | Pasó el filtro y le falta la demo — construila | Pilates · Yerba Buena | Trabajar",
+    "QA-W Aprobada Gate Abierto | Demo aprobada — mandá el link al negocio | La demo está lista para mandar | Estética · Yerba Buena | Trabajar",
+    "QA-W Rechazada | Franco pidió correcciones — reabrí la construcción y rehacé | Te toca a vos | Florería · Yerba Buena | Trabajar"
+   ],
+   "enEspera": null,
+   "toggleCartera": "Ver toda la cartera | 73",
+   "grupos": [
+    {
+     "label": "Para trabajar",
+     "conteo": "42",
+     "tarjetas": [
+      {
+       "nombre": "QA-W Evaluada Gate Abierto",
+       "texto": "QA-W Evaluada Gate Abierto | Veterinaria · Yerba Buena · hace 76 días | Fijado por vos — va primero | Decidí cómo va a ser la demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Brief",
+       "texto": "QA-W Brief | Barbería · Las Talitas · hace 76 días | Fijado por vos — va primero | Brief listo — arrancá la construcción de la demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Construccion",
+       "texto": "QA-W Construccion | Pilates · Yerba Buena · hace 76 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Aprobada Gate Abierto",
+       "texto": "QA-W Aprobada Gate Abierto | Estética · Yerba Buena · hace 76 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Rechazada",
+       "texto": "QA-W Rechazada | Florería · Yerba Buena · hace 76 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: La prueba social no es real | Dónde: Sección \"Reseñas\" | Arreglo: Reemplazá los textos por las reseñas reales del negocio (están en la ficha) y re-publicá el draft. | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 12-m6-brief-abierto",
+       "texto": "M0-GAL 12-m6-brief-abierto | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Decidí cómo va a ser la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 27-m15-envio-abierto",
+       "texto": "M0-GAL 27-m15-envio-abierto | gastronomia · Centro · hace 35 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 33-m5-post-envio",
+       "texto": "M0-GAL 33-m5-post-envio | gastronomia · Centro · hace 35 días | Te toca a vos | Demo enviada — te toca un toque | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B6 Gimnasio Atlas",
+       "texto": "QA-B6 Gimnasio Atlas | CALIENTE | Gimnasio · Yerba Buena · hace 94 días | La demo está lista para mandar | Demo aprobada — mandá el link al negocio | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Zero Protocol",
+       "texto": "DEMO Web · Zero Protocol | CALIENTE | Software · San Miguel de Tucumán · hace 89 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: Esta todo pal pingo ql | Dónde: en todo | Arreglo: no servis ni pa mierda | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Noir Dining",
+       "texto": "DEMO Web · Noir Dining | CALIENTE | Gastronomía · Yerba Buena · hace 89 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Ficha Incompleta",
+       "texto": "QA-W Ficha Incompleta | Bazar · Yerba Buena · hace 76 días | Te toca a vos | Completá la ficha | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Ficha Completa",
+       "texto": "QA-W Ficha Completa | Cafetería · San Miguel de Tucumán · hace 76 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Postergado Vencido",
+       "texto": "QA-W Postergado Vencido | Heladería · Las Talitas · hace 76 días | Te toca a vos | Se venció el 17/8 — retomá el contacto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Postergado Futuro",
+       "texto": "QA-W Postergado Futuro | Librería · Yerba Buena · hace 76 días | Te toca a vos | Se venció el 8/9 — retomá el contacto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B6 Pizzería Don Carlo",
+       "texto": "QA-B6 Pizzería Don Carlo | Pizzería · Barrio Norte · hace 72 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-M5 Toque",
+       "texto": "QA-M5 Toque | QA · Tucumán · hace 72 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 01-m1-ficha-vacia",
+       "texto": "M0-GAL 01-m1-ficha-vacia | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Completá la ficha | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 02-m1-ficha-cargada",
+       "texto": "M0-GAL 02-m1-ficha-cargada | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 03-m2-al-evaluador",
+       "texto": "M0-GAL 03-m2-al-evaluador | gastronomia · Centro · hace 35 días | Todavía no sabés si sirve — evalualo | Dejá tu veredicto | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 04-m2-veredicto-registrado",
+       "texto": "M0-GAL 04-m2-veredicto-registrado | gastronomia · Centro · hace 35 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 06-m4-opener-pendiente",
+       "texto": "M0-GAL 06-m4-opener-pendiente | gastronomia · Centro · hace 35 días | Todavía no hay demo que mostrar | Mandá el opener | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 07-m4-opener-enviado",
+       "texto": "M0-GAL 07-m4-opener-enviado | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 08-espera-post-opener",
+       "texto": "M0-GAL 08-espera-post-opener | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 09-m5-toque-vencido",
+       "texto": "M0-GAL 09-m5-toque-vencido | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 11-m5-charla-poblada",
+       "texto": "M0-GAL 11-m5-charla-poblada | gastronomia · Centro · hace 35 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 13-m6-brief-guardado",
+       "texto": "M0-GAL 13-m6-brief-guardado | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Brief listo — arrancá la construcción de la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 14-mc1-tilde-deshabilitado",
+       "texto": "M0-GAL 14-mc1-tilde-deshabilitado | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Brief listo — arrancá la construcción de la demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 15-mc1-construir",
+       "texto": "M0-GAL 15-mc1-construir | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 16-mc1-parcial",
+       "texto": "M0-GAL 16-mc1-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 17-mc1-completa",
+       "texto": "M0-GAL 17-mc1-completa | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 18-mc2-refinar",
+       "texto": "M0-GAL 18-mc2-refinar | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 19-mc2-parcial",
+       "texto": "M0-GAL 19-mc2-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 20-mc2-completa",
+       "texto": "M0-GAL 20-mc2-completa | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 21-m13-borrador-vacio",
+       "texto": "M0-GAL 21-m13-borrador-vacio | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22-m14-chequeo",
+       "texto": "M0-GAL 22-m14-chequeo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22b-m14-chequeo-parcial",
+       "texto": "M0-GAL 22b-m14-chequeo-parcial | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 22c-m14-chequeo-completo",
+       "texto": "M0-GAL 22c-m14-chequeo-completo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 24-error-chequeo",
+       "texto": "M0-GAL 24-error-chequeo | gastronomia · Centro · hace 35 días | Pasó el filtro y le falta la demo — construila | Demo en construcción — publicá el borrador y pasá el chequeo final | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 25-mr-correccion-1",
+       "texto": "M0-GAL 25-mr-correccion-1 | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 26-mr-correccion-2",
+       "texto": "M0-GAL 26-mr-correccion-2 | gastronomia · Centro · hace 35 días | Te toca a vos | Franco pidió correcciones — reabrí la construcción y rehacé | Franco pidió cambios | Qué: El hero sigue sin los datos reales del negocio | Dónde: Hero | Arreglo: Poner nombre, dirección y fotos reales en el hero | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA Bicicleteria La Rueda",
+       "texto": "CORRIDA Bicicleteria La Rueda | Bicicleteria · Tafi Viejo · hace 14 días | Te toca a vos | Te toca un toque — mandalo y registralo | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "En seguimiento",
+     "conteo": "11",
+     "tarjetas": [
+      {
+       "nombre": "QA-M16 Abierta",
+       "texto": "QA-M16 Abierta | QA · Tucumán · hace 72 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 29-m15-espera-sin-final-url",
+       "texto": "M0-GAL 29-m15-espera-sin-final-url | gastronomia · Centro · hace 35 días | Le toca a Franco — todavía no cargó su link permanente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 30-m16-virgen",
+       "texto": "M0-GAL 30-m16-virgen | gastronomia · Centro · hace 35 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 31-m16-ofrecidos",
+       "texto": "M0-GAL 31-m16-ofrecidos | gastronomia · Centro · hace 35 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Demo Enviada",
+       "texto": "QA-W Demo Enviada | Odontología · San Miguel de Tucumán · hace 13 días | Le toca al negocio — ya tiene la demo — registrá lo que pase en la conversación | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B7 Estética Bella Vista",
+       "texto": "QA-B7 Estética Bella Vista | Estética · Centro · hace 94 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Evaluada Gate Cerrado",
+       "texto": "QA-W Evaluada Gate Cerrado | Panadería · Tafí Viejo · hace 76 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Aprobada Gate Cerrado",
+       "texto": "QA-W Aprobada Gate Cerrado | Ferretería · Tafí Viejo · hace 76 días | Le toca a Franco — todavía no cargó su link permanente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-M5 Agotada",
+       "texto": "QA-M5 Agotada | QA · Tucumán · hace 72 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 10-m5-cadencia-agotada",
+       "texto": "M0-GAL 10-m5-cadencia-agotada | gastronomia · Centro · hace 35 días | Se enfría — el cierre lo decide Franco | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 28-m15-espera-sin-respuesta",
+       "texto": "M0-GAL 28-m15-espera-sin-respuesta | gastronomia · Centro · hace 35 días | Le toca al negocio — la demo está aprobada y el link sale cuando conteste | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Esperando revisión",
+     "conteo": "10",
+     "tarjetas": [
+      {
+       "nombre": "QA-B3 Panadería Doña Rosa",
+       "texto": "QA-B3 Panadería Doña Rosa | Panadería · Tafí Viejo · hace 94 días | Le toca a Franco — está revisando tu demo | Fijado | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W En Revision",
+       "texto": "QA-W En Revision | Gimnasio · San Miguel de Tucumán · hace 76 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "Gimnasio Nova Fit",
+       "texto": "Gimnasio Nova Fit | Gimnasio · Yerba Buena · hace 34 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B3 Café La Esquina",
+       "texto": "QA-B3 Café La Esquina | CALIENTE | Cafetería · Yerba Buena · hace 94 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · The Ethereal Resort",
+       "texto": "DEMO Web · The Ethereal Resort | CALIENTE | Hotelería · Tafí del Valle · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · Skyline Estates",
+       "texto": "DEMO Web · Skyline Estates | CALIENTE | Inmobiliaria · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · NEXO Bold",
+       "texto": "DEMO Web · NEXO Bold | CALIENTE | Agencia creativa · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "DEMO Web · YAKU Nebula",
+       "texto": "DEMO Web · YAKU Nebula | CALIENTE | SaaS · San Miguel de Tucumán · hace 89 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-B4 Barbería El Faro",
+       "texto": "QA-B4 Barbería El Faro | Barbería · Yerba Buena · hace 94 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 23-revision-franco",
+       "texto": "M0-GAL 23-revision-franco | gastronomia · Centro · hace 35 días | Le toca a Franco — está revisando tu demo | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Agendadas",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "QA-M16 Agendada",
+       "texto": "QA-M16 Agendada | QA · Tucumán · hace 72 días | Le toca a Franco — la reunión la corre él | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 32-m16-agendada",
+       "texto": "M0-GAL 32-m16-agendada | gastronomia · Centro · hace 35 días | Le toca a Franco — la reunión la corre él | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Postergados por el negocio",
+     "conteo": "1",
+     "tarjetas": [
+      {
+       "nombre": "CORRIDA Panaderia San Cayetano",
+       "texto": "CORRIDA Panaderia San Cayetano | Panaderia · Yerba Buena · hace 14 días | Postergado — vuelve el 15/9 | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Descartados (antes de la demo)",
+     "conteo": "5",
+     "tarjetas": [
+      {
+       "nombre": "QA-B3 Ferretería El Tornillo",
+       "texto": "QA-B3 Ferretería El Tornillo | Ferretería · San Miguel de Tucumán · hace 94 días | Motivo: Negocio digitalmente inactivo hace 7 meses, sin dolor visible ni intención. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "QA-W Descartada",
+       "texto": "QA-W Descartada | Kiosco · San Miguel de Tucumán · hace 76 días | Motivo: IG abandonado hace meses y el local figura cerrado en Maps. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 05-m2-veredicto-descartado",
+       "texto": "M0-GAL 05-m2-veredicto-descartado | gastronomia · Centro · hace 35 días | Motivo: Sin presencia ni materia prima suficiente | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA Kiosco 24hs El Puente",
+       "texto": "CORRIDA Kiosco 24hs El Puente | Kiosco · Banda del Rio Sali · hace 14 días | Motivo: Kiosco sin ninguna presencia digital: no hay material para construir una demo ni forma de llegar al dueno. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "CORRIDA2 Kiosco El Trebol",
+       "texto": "CORRIDA2 Kiosco El Trebol | Kiosco · Tafi Viejo · hace 10 días | Motivo: Sin presencia digital de ningun tipo: no hay material real para construir la demo. | Descartado tras evaluación — bien filtrado | Fijar | Pausar | Nota"
+      }
+     ]
+    },
+    {
+     "label": "Perdidos (cerrados por Franco)",
+     "conteo": "2",
+     "tarjetas": [
+      {
+       "nombre": "QA-B7 Vivero El Aromo",
+       "texto": "QA-B7 Vivero El Aromo | Vivero · Camino del Perú · hace 94 días | Perdido — sin acción pendiente | Fijar | Pausar | Nota"
+      },
+      {
+       "nombre": "M0-GAL 34-archivo-perdido",
+       "texto": "M0-GAL 34-archivo-perdido | gastronomia · Centro · hace 35 días | Perdido — sin acción pendiente | Fijar | Pausar | Nota"
+      }
+     ]
+    }
+   ],
+   "avisos": [
+    "Franco pidió cambios | QA-W En Revision: la demo volvió con correcciones. Reabrí la construcción y rehacé. | Ahora: Le toca a Franco — está revisando tu demo | hace 10 días | Abrir",
+    "Franco aprobó tu demo | QA-W Ficha Incompleta: la demo está aprobada. Enviá el link ya, recién aprobada. | Ahora: Completá la ficha | hace 10 días | Abrir",
+    "Franco aprobó tu demo | CORRIDA Panaderia San Cayetano: la demo está aprobada. Enviá el link ya, recién aprobada. | Ahora: Postergado — vuelve el 15/9 | hace 14 días | Abrir",
+    "Franco pidió cambios | CORRIDA Panaderia San Cayetano: la demo volvió con correcciones. Reabrí la construcción y rehacé. | Ahora: Postergado — vuelve el 15/9 | hace 14 días | Abrir"
+   ],
+   "misNumeros": "MIS NÚMEROS | Mi criterio · descarte vs avance | 67 | evaluadas · 7% descarte | 5 descartes · 62 avances | Últimos 30 días: 20 evaluadas · 15% descarte",
+   "avance": null
+  }
+ ]
+}

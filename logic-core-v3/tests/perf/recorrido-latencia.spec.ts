@@ -158,6 +158,7 @@ test('P28 · la tabla de latencia de las diecisiete acciones con registro', asyn
       red.soltar()
 
       const registrado = await esperarRegistro(caso, prep.leadId)
+      await caso.adoptarCreado?.(page, tracker)
       muestras.push({ ...medicion, registrado })
     }
 

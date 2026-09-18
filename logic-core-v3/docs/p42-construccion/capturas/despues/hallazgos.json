@@ -1,0 +1,405 @@
+{
+  "01-con-encabezado-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12154,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5143,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "01-con-encabezado-1440-entera.altoDelScroller": 6696,
+  "01-con-encabezado-1440.copia": {
+    "portapapelesIgualAPantalla": true,
+    "portapapelesIgualAlProducto": true,
+    "caracteres": 12154,
+    "rotulos": [
+      "═══ 1 de 3 · INSTRUCCIONES ═══",
+      "═══ 2 de 3 · EL DOCUMENTO ═══",
+      "═══ 3 de 3 · PISO DE CALIDAD ═══"
+    ],
+    "ordenDeLasCapasEnLaCopia": [
+      0,
+      1643,
+      7503
+    ]
+  },
+  "02-brief-viejo-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7247,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 3252,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "02-brief-viejo-1440-entera.altoDelScroller": 4832,
+  "02-brief-viejo-1440.copia": {
+    "portapapelesIgualAPantalla": true,
+    "portapapelesIgualAlProducto": true,
+    "caracteres": 7247,
+    "rotulos": [
+      "═══ 1 de 3 · INSTRUCCIONES ═══",
+      "═══ 2 de 3 · EL DOCUMENTO ═══",
+      "═══ 3 de 3 · PISO DE CALIDAD ═══"
+    ],
+    "ordenDeLasCapasEnLaCopia": [
+      0,
+      1643,
+      2596
+    ]
+  },
+  "03-sin-encabezado-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 11516,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 4753,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "03-sin-encabezado-1440-entera.altoDelScroller": 6310,
+  "04-falta-paleta-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12125,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5143,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "04-falta-paleta-1440-entera.altoDelScroller": 6747,
+  "05-por-arrancar-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": true
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12152,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5143,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "05-por-arrancar-1440-entera.altoDelScroller": 6712,
+  "06-a-medias-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7244,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 3252,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "06-a-medias-1440.dbAlCargar": [
+    "calidad",
+    "cta",
+    "estructura"
+  ],
+  "06-a-medias-1440-entera.altoDelScroller": 4832,
+  "06-a-medias-1440.dbTrasTildar": [
+    "assets",
+    "calidad",
+    "cta",
+    "estructura",
+    "personalizacion"
+  ],
+  "06-a-medias-1440.pulsadoTrasRecargar": "true",
+  "06-a-medias-1440.dbTrasDestildar": [
+    "calidad",
+    "cta"
+  ],
+  "07-construida-1440.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "true",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7246,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 3252,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "07-construida-1440-entera.altoDelScroller": 4896,
+  "01-con-encabezado-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12154,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 8411,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "01-con-encabezado-390-entera.altoDelScroller": 10275,
+  "01-con-encabezado-390.copia": {
+    "portapapelesIgualAPantalla": true,
+    "portapapelesIgualAlProducto": true,
+    "caracteres": 12154,
+    "rotulos": [
+      "═══ 1 de 3 · INSTRUCCIONES ═══",
+      "═══ 2 de 3 · EL DOCUMENTO ═══",
+      "═══ 3 de 3 · PISO DE CALIDAD ═══"
+    ],
+    "ordenDeLasCapasEnLaCopia": [
+      0,
+      1643,
+      7503
+    ]
+  },
+  "02-brief-viejo-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7247,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5096,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "02-brief-viejo-390-entera.altoDelScroller": 7027,
+  "02-brief-viejo-390.copia": {
+    "portapapelesIgualAPantalla": true,
+    "portapapelesIgualAlProducto": true,
+    "caracteres": 7247,
+    "rotulos": [
+      "═══ 1 de 3 · INSTRUCCIONES ═══",
+      "═══ 2 de 3 · EL DOCUMENTO ═══",
+      "═══ 3 de 3 · PISO DE CALIDAD ═══"
+    ],
+    "ordenDeLasCapasEnLaCopia": [
+      0,
+      1643,
+      2596
+    ]
+  },
+  "03-sin-encabezado-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 11516,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 7885,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "03-sin-encabezado-390-entera.altoDelScroller": 9772,
+  "04-falta-paleta-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12125,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 8411,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "04-falta-paleta-390-entera.altoDelScroller": 10326,
+  "05-por-arrancar-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": true
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 12152,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 8411,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "05-por-arrancar-390-entera.altoDelScroller": 10294,
+  "06-a-medias-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "false",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7244,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5096,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "06-a-medias-390.dbAlCargar": [
+    "calidad",
+    "cta"
+  ],
+  "06-a-medias-390-entera.altoDelScroller": 7027,
+  "07-construida-390.pantalla": {
+    "zonas": [
+      "Registro"
+    ],
+    "tildes": [
+      {
+        "nombre": "La demo quedó construida",
+        "pulsado": "true",
+        "apagado": false
+      }
+    ],
+    "botonesCopiar": 1,
+    "nuevePuntosEnPantalla": 0,
+    "zonaDelBloque": "Registro",
+    "bloqueCaracteres": 7246,
+    "bloquePlegado": false,
+    "bloqueAltoVisible": 5096,
+    "bloqueConScrollPropio": false,
+    "linkPendiente": true,
+    "salida": true,
+    "badgeProvisorio": false
+  },
+  "07-construida-390-entera.altoDelScroller": 7122
+}

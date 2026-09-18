@@ -1,0 +1,187 @@
+import { test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { qaLogin } from '../helpers/setter-auth'
+import { firstVisible } from '../helpers/setter-ui'
+import {
+  getSetterQa,
+  createLead,
+  newTracker,
+  teardown,
+  disconnect,
+  type SmokeTracker,
+} from '../helpers/setter-db'
+
+/**
+ * P31 — ¿La pantalla de la acción SIN cartel refleja, o no?
+ *
+ * Sonda descartable (worktree `wt-p31-reflejo`, con Cal.com stubeado). Mide dos
+ * acciones en EL MISMO BUILD:
+ *
+ *   · SUJETO   `ofrecerHorarios` (m16) — la única de las nueve sin `successToast`.
+ *   · CONTROL  `iniciarConstruccion` (mc1) — la que P30 midió atascada, que acá
+ *              sirve de discriminador: si el sujeto refleja rápido y el control
+ *              muestra la firma de los 4 s, el instrumento distingue. Si los dos
+ *              reflejaran rápido, «refleja» no probaría nada.
+ */
+
+const VENTANA_MS = Number(process.env.VENTANA_MS ?? 12_000)
+
+const tracker: SmokeTracker = newTracker()
+let setterId: string
+
+test.beforeAll(async () => {
+  setterId = (await getSetterQa()).id
+})
+test.afterAll(async () => {
+  await teardown(tracker)
+  await disconnect()
+})
+
+/** Instala el muestreador de P30: DOM + FiberRoot, anotando sólo los cambios. */
+async function observar(page: Page, señalesJs: string): Promise<void> {
+  await page.evaluate(
+    ({ señales }) => {
+      const w = window as unknown as {
+        __log?: string[]
+        __t0?: number
+        __root?: Record<string, unknown> | null
+        __diag?: string
+      }
+      w.__log = []
+      const buscarRoot = (): Record<string, unknown> | null => {
+        for (const nodo of [document, document.documentElement, document.body] as Node[]) {
+          const llave = Object.keys(nodo).find((k) => k.startsWith('__reactContainer$'))
+          if (llave) {
+            const fiber = (nodo as unknown as Record<string, { stateNode?: unknown }>)[llave]
+            if (fiber && typeof fiber === 'object' && 'stateNode' in fiber) {
+              return fiber.stateNode as Record<string, unknown>
+            }
+          }
+        }
+        return null
+      }
+      w.__root = buscarRoot()
+      w.__diag = w.__root ? 'root OK' : 'ROOT NO ENCONTRADO'
+      const hex = (n: unknown) => (typeof n === 'number' ? '0x' + n.toString(16) : '?')
+      const medir = new Function('main', 'return (' + señales + ')') as (
+        main: Element | null,
+      ) => Record<string, unknown>
+
+      let previo = ''
+      document.addEventListener(
+        'click',
+        () => {
+          if (w.__t0 === undefined) w.__t0 = performance.now()
+        },
+        true,
+      )
+      const tick = (): void => {
+        const r = w.__root
+        const estado = JSON.stringify({
+          ...medir(document.querySelector('main')),
+          toast: document.querySelectorAll('[data-sonner-toast]').length,
+          pend: r ? hex(r.pendingLanes) : 'n/a',
+          susp: r ? hex(r.suspendedLanes) : 'n/a',
+          ping: r ? hex(r.pingedLanes) : 'n/a',
+          warm: r ? hex(r.warmLanes) : 'n/a',
+          fin: r ? (r.finishedWork === null ? 0 : 1) : 'n/a',
+        })
+        if (estado !== previo) {
+          previo = estado
+          const t = w.__t0 === undefined ? 'pre-clic' : `${Math.round(performance.now() - w.__t0)}ms`
+          w.__log!.push(`${t.padStart(9)} ${estado}`)
+        }
+      }
+      const porCuadro = () => {
+        tick()
+        requestAnimationFrame(porCuadro)
+      }
+      const fino = () => {
+        tick()
+        setTimeout(fino, 0)
+      }
+      requestAnimationFrame(porCuadro)
+      setTimeout(fino, 0)
+    },
+    { señales: señalesJs },
+  )
+}
+
+async function volcar(page: Page, etiqueta: string): Promise<void> {
+  const { log, diag } = await page.evaluate(() => ({
+    log: (window as unknown as { __log: string[] }).__log,
+    diag: (window as unknown as { __diag: string }).__diag,
+  }))
+  console.log(`\n── P31 [${etiqueta}] ventana=${VENTANA_MS}ms · ${diag} ──`)
+  for (const linea of log) console.log('   ', linea)
+  console.log('')
+}
+
+/** Espera a que React haya enganchado los handlers (hidratación real). */
+async function hidratado(page: Page): Promise<void> {
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll('main button')).some((nodo) =>
+      Object.keys(nodo).some((llave) => llave.startsWith('__reactFiber$')),
+    ),
+  )
+}
+
+test('P31 · SUJETO — ofrecerHorarios (m16), la acción sin cartel', async ({ page }) => {
+  test.setTimeout(VENTANA_MS + 120_000)
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P31 agenda sin cartel',
+    stage: 'APROBADA',
+    status: 'RESPONDIO',
+    enviada: true,
+  })
+
+  await qaLogin(page, 'setter')
+  await page.goto(`/setter/leads/${leadId}/manual/m16`, { waitUntil: 'domcontentloaded' })
+  await hidratado(page)
+
+  // El botón de búsqueda está `disabled` hasta tildar el decisor. Va ANTES del
+  // observador: es preparación, no el acto medido.
+  await firstVisible(
+    page.getByRole('checkbox', { name: 'Estoy hablando con el dueño o quien decide' }),
+  ).check()
+
+  await observar(
+    page,
+    `{
+      buscar: /Buscar horarios libres de Franco/.test(main?.textContent ?? ''),
+      horarios: /Horarios libres \(hora Argentina\)/.test(main?.textContent ?? ''),
+      slots: main ? main.querySelectorAll('button[aria-pressed]').length : -1,
+    }`,
+  )
+
+  await firstVisible(page.getByRole('button', { name: 'Buscar horarios libres de Franco' })).click()
+  await page.waitForTimeout(VENTANA_MS)
+  await volcar(page, 'SUJETO ofrecerHorarios · m16')
+})
+
+test('P31 · CONTROL — iniciarConstruccion (mc1), la que P30 midió atascada', async ({ page }) => {
+  test.setTimeout(VENTANA_MS + 120_000)
+  const { id: leadId } = await createLead(tracker, {
+    setterId,
+    businessName: 'P31 control construccion',
+    stage: 'BRIEF',
+    status: 'RESPONDIO',
+  })
+
+  await qaLogin(page, 'setter')
+  await page.goto(`/setter/leads/${leadId}/manual/mc1`, { waitUntil: 'domcontentloaded' })
+  await hidratado(page)
+
+  await observar(
+    page,
+    `{
+      frase: /El brief está listo/.test(main?.textContent ?? ''),
+      tildeOk: main ? main.querySelectorAll('section[aria-label="Registro"] button[aria-pressed]:not([disabled])').length : -1,
+    }`,
+  )
+
+  await firstVisible(page.getByRole('button', { name: 'Arrancar construcción' })).click()
+  await page.waitForTimeout(VENTANA_MS)
+  await volcar(page, 'CONTROL iniciarConstruccion · mc1')
+})

@@ -85,6 +85,14 @@ border-radius: 1rem; /* rounded-2xl */
 
 🔴 **`triggerTransition()`** para navegación entre secciones de landing (NO `router.push()` directo).
 
+🔴 **El `<Toaster>` de sonner sostiene el reflejo de las pantallas del setter.** No es cosmético: hoy es lo único que hace que una pantalla del recorrido muestre el estado nuevo después de una acción. Medido (P29 · P30 · P31), la cadena es: Next envuelve el despacho de toda server action en `startTransition`, el render suspende, la action responde y React entrega **un solo ping**; si el árbol RSC revalidado todavía no resolvió, el render se re-suspende y ese lane queda marcado «warm» — y React **no lo vuelve a elegir nunca**. Lo destraba la próxima actualización de estado, que en producción es el **auto-cierre del cartel a los 4000 ms**. Por eso el setter ve el resultado a los ~4,7 s.
+
+**Rompen el reflejo de varias pantallas a la vez, en silencio y con todos los gates en verde:** sacar el `<Toaster>` de `app/layout.tsx` · pasarle un `duration` corto (800 ms anda; **150 ms no commitea nunca**) · quitarle el `successToast` a una acción **que revalida** · migrar a otra librería de avisos.
+
+**No es «toda acción emite cartel»:** la que **no revalida** no lo necesita, porque no hay árbol de servidor esperando commit. `ofrecerHorarios` (m16) es ese caso y está medido — refleja 4/4 a ~0,7 s sin ningún cartel, empujada por su propio `setState` en `onSuccess`.
+
+**Verificación (hacen falta las dos):** `npm run check:invariant:reflejo` (la forma) · `npm run test:setter -- 31-reflejo` (la conducta). Es una **limitación aceptada a propósito**, no un descuido: las alternativas se midieron y se descartaron con evidencia en `docs/perf-p30/REPORTE.md`. La cadena completa está comentada en `src/lib/use-step-action.ts`.
+
 ## Estructura de carpetas relevante
 
 ```

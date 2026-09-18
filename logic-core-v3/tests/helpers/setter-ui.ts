@@ -90,6 +90,23 @@ export function fieldControl(page: Page, label: string): Locator {
  * `app/layout.tsx`). La copy de la pantalla ya no lo puede satisfacer, y un
  * aviso de ERROR con otro texto tampoco.
  *
+ * ── ⚠ EL ROJO QUE ESTE HELPER PRODUCE Y NO ES SUYO (P33) ────────────────────
+ * Cuando este aserto falla con «element(s) not found» en `01-flow` (B1, B3, B4,
+ * B8 — los cuatro que navegan a la RAÍZ del lead), lo más probable es que no
+ * haya nada que esperar. P33 lo midió con 841 muestras a lo largo de 14 s
+ * continuos en la pasada roja: CERO carteles montados, de cualquier texto. Y la
+ * acción sí había corrido — el campo quedó escrito en la base, 3 corridas de 3.
+ *
+ * La causa está en producto: `useStepAction.run()` mete la acción y su
+ * `toast.success` en el MISMO `startTransition`, cuyo lane puede quedar
+ * suspendido sin más pings (P30). Si no commitea, el cartel no se monta — y el
+ * cartel era lo único que despertaba al lane. Ni acuse ni reflejo.
+ *
+ * O sea: subirle el `timeout` NO lo arregla, y envolver el aserto para que
+ * tolere la ausencia TAPARÍA el único síntoma que hoy denuncia ese defecto.
+ * Antes de tocar nada acá, leer docs/bitacora-beta-3.md (P33) y correr
+ * `tests/perf/carrera-del-cartel.spec.ts`, que lo reproduce.
+ *
  * `timeout` existe para el probe de helpers (`tests/helpers-probe`), donde los
  * casos de SABOTAJE esperan a propósito un fallo: sin la perilla, cada uno se
  * come los 15s completos. Los tests reales no lo pasan y conservan los 15s.

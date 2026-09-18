@@ -1,0 +1,81 @@
+/** P36 Fase 1 (2/2) — señal vs ruido, monopolización por tier, y novedades. */
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.local' }); loadEnv({ path: '.env' })
+if (!process.env.DATABASE_URL?.includes('ep-quiet-waterfall-acv0fpll')) { console.error('ABORT: no es dev'); process.exit(1) }
+
+async function main() {
+  const { prisma } = await import('@/lib/prisma')
+  const { listOwnedLeads } = await import('@/lib/leados/ownership')
+  const { buildHomeLeads } = await import('@/lib/leados/home')
+  const { particionarCartera, motivoOrden } = await import('@/lib/leados/flow')
+  const { seleccionarFoco } = await import('@/lib/leados/foco')
+  const { armarCola, TOPE_COLA } = await import('@/lib/leados/cola')
+
+  const SETTER = 'cmq9zt64w00009f54psdq8wc8'
+  const home = buildHomeLeads(await listOwnedLeads(SETTER))
+  const trabajar = particionarCartera(home).grupos.trabajar
+  const cola = armarCola(...(() => { const s = seleccionarFoco(trabajar, null); return [s.foco, s.resto, TOPE_COLA] as const })())
+  const enCola = new Set(cola.items.map(i => i.lead.id))
+
+  const ROT: Record<string, string> = {
+    'Fijado por vos — va primero': 'PIN',
+    'Pasó el filtro y le falta la demo — construila': 'T0 CONSTRUIR',
+    'La demo está lista para mandar': 'T2 CONTACTAR_CON_DEMO',
+    'Todavía no sabés si sirve — evalualo': 'T3 EVALUAR',
+    'Todavía no hay demo que mostrar': 'T4 CONTACTO_SIN_DEMO',
+  }
+  const tierDe = (l: never) => { const m = motivoOrden(l); return m === null ? '—' : (ROT[m] ?? 'T1 ESPERA_TU_ACCION') }
+
+  // ── 1. Señal vs ruido: qué parte de la cartera es artefacto de suites ──
+  const esRuido = (n: string) => /^(SMOKE-SETTER|M0-GAL|CORRIDA)\b/.test(n)
+  const ruido = trabajar.filter(l => esRuido(l.businessName))
+  const senal = trabajar.filter(l => !esRuido(l.businessName))
+  console.log('=== CARTERA: SEÑAL vs RUIDO DE SUITES ===')
+  console.log(`  'trabajar' total ........ ${trabajar.length}`)
+  console.log(`  artefactos de suites .... ${ruido.length}  (SMOKE-SETTER / M0-GAL / CORRIDA)`)
+  console.log(`  el resto (QA-* / DEMO) .. ${senal.length}`)
+  const porTier = (ls: typeof trabajar) => { const m = new Map<string, number>(); for (const l of ls) m.set(tierDe(l as never), (m.get(tierDe(l as never)) ?? 0) + 1); return [...m].sort() }
+  console.log('\n  Composición SOLO del resto (sin artefactos):')
+  for (const [t, n] of porTier(senal)) console.log(`     ${String(n).padStart(3)} × ${t}`)
+
+  // ── 2. LA MONOPOLIZACIÓN: cuántos hacen falta arriba para tapar un tier ──
+  console.log('\n=== MONOPOLIZACIÓN: acumulado por posición de tier ===')
+  const orden = ['PIN', 'T0 CONSTRUIR', 'T1 ESPERA_TU_ACCION', 'T2 CONTACTAR_CON_DEMO', 'T3 EVALUAR', 'T4 CONTACTO_SIN_DEMO']
+  let acum = 0
+  for (const t of orden) {
+    const n = trabajar.filter(l => tierDe(l as never) === t).length
+    const primeraFila = acum + 1
+    acum += n
+    const alcanza = primeraFila <= TOPE_COLA
+    console.log(`  ${t.padEnd(24)} n=${String(n).padStart(3)} · primera fila que ocuparía = ${String(primeraFila).padStart(3)} · ${alcanza ? '✓ LLEGA a la cola' : '✗ INALCANZABLE (tope ' + TOPE_COLA + ')'}`)
+  }
+
+  // ── 3. Los estados CAROS que quedan afuera (cerca de la reunión) ──
+  console.log('\n=== ESTADOS CAROS FUERA DE LA COLA (stage APROBADA = demo ya existe y aprobada) ===')
+  const caros = trabajar.filter(l => l.stage === 'APROBADA' && !enCola.has(l.id))
+  for (const l of caros) {
+    const clase = !l.demoEnviada ? 'A) demo lista, NO mandada' : (l.followUpVencido ? 'B) demo mandada, toque VENCIDO' : 'C) otra')
+    console.log(`  ${l.businessName.slice(0, 36).padEnd(36)} | ${tierDe(l as never).padEnd(22)} | ${String(l.status).padEnd(12)} | ${clase}`)
+  }
+  console.log(`  → total estados APROBADA fuera de la cola: ${caros.length}`)
+
+  // ── 4. ¿Aparece en Novedades el lead del hallazgo? ──
+  console.log('\n=== ¿EL DEL HALLAZGO APARECE EN NOVEDADES? ===')
+  const hallazgo = trabajar.filter(l => l.stage === 'APROBADA' && l.finalUrl !== null && !l.demoEnviada && l.gateAbierto)
+  for (const l of hallazgo) {
+    const notices = await prisma.osSetterNotice.findMany({ where: { leadId: l.id, setterId: SETTER }, select: { title: true, read: true, createdAt: true } })
+    console.log(`  ${l.businessName.padEnd(38)} | notices=${notices.length} ${notices.length ? '→ ' + notices.map(n => `${n.title}${n.read ? "(leido)" : "(SIN LEER)"}`).join(', ') : '→ NO aparece en novedades tampoco'}`)
+  }
+
+  // ── 5. SIMULACIÓN: qué pasaría con cupo por tier (representación) ──
+  console.log('\n=== SIMULACIÓN A: orden actual (tier estricto) — la cola de hoy ===')
+  cola.items.forEach((it, i) => console.log(`  ${i + 1}. ${tierDe(it.lead as never).padEnd(22)} | ${it.lead.businessName.slice(0, 40)}`))
+
+  console.log('\n=== SIMULACIÓN B: CONTACTAR_CON_DEMO movido al tier más alto ===')
+  const rank = (l: never) => { const t = tierDe(l); return t === 'PIN' ? 0 : t === 'T2 CONTACTAR_CON_DEMO' ? 1 : t === 'T1 ESPERA_TU_ACCION' ? 2 : t === 'T0 CONSTRUIR' ? 3 : t === 'T3 EVALUAR' ? 4 : 5 }
+  const simB = [...trabajar].sort((a, b) => rank(a as never) - rank(b as never) || a.createdAt.getTime() - b.createdAt.getTime()).slice(0, TOPE_COLA)
+  simB.forEach((l, i) => console.log(`  ${i + 1}. ${tierDe(l as never).padEnd(22)} | ${l.businessName.slice(0, 40)}`))
+
+  await prisma.$disconnect()
+}
+main().catch(e => { console.error(e); process.exit(1) })

@@ -117,9 +117,18 @@ test.afterAll(async () => {
   await disconnect()
 })
 
-/** El bloque de la cola. Todo aserto de contenido se scopea acá adentro. */
+/**
+ * El bloque de la cola. Todo aserto de contenido se scopea acá adentro.
+ *
+ * P39 — dentro de `main`. Mientras la página streamea, React arma el contenido en
+ * un contenedor aparte colgado de `body` (`div[id^="S:"]`) y lo mueve a su lugar:
+ * durante ese instante hay DOS copias de la sección en el documento — medido: 4 de
+ * 40 cargas, siempre una sola dentro de `main`. Un aserto que cae ahí sobre el
+ * selector suelto rompe por *strict mode* (`toBeVisible`, `evaluate`) o cuenta el
+ * doble (`toHaveCount(n)`), sin que nada se haya roto.
+ */
 const cola = (page: import('@playwright/test').Page) =>
-  page.locator('section[aria-label="Tu cola de hoy"]')
+  page.locator('main section[aria-label="Tu cola de hoy"]')
 
 test('P21-1 · el trabajo del día se VE como lista, con su acción y su control', async ({
   page,
@@ -181,7 +190,8 @@ test('P21-2 · lo que subió a la cola NO se repite en novedades; la noticia se 
   })
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
-  const novedades = page.locator('section[aria-label="Novedades de tu cartera"]')
+  // P39 — dentro de `main`, por la copia del streaming (ver `cola`).
+  const novedades = page.locator('main section[aria-label="Novedades de tu cartera"]')
 
   // El aviso de la demo aprobada y el del rechazo YA no viven abajo: su lead es
   // una tarea arriba. Contra el código viejo los dos están (el dedup alcanzaba
@@ -292,7 +302,9 @@ test('P21-4 · un setter sin trabajo pendiente ve algo útil, no una cola en bla
   // Sin nada accionable la cola no se dibuja vacía: el "todo en espera" (2.1b)
   // ocupa su lugar y dice a quién se está esperando.
   await expect(cola(page), 'sin trabajo no hay cola vacía colgada').toHaveCount(0)
-  const espera = page.locator('section[aria-label="Nada para trabajar ahora"]')
+  // P39 — dentro de `main`: el selector suelto rompía por *strict mode* de forma
+  // intermitente contra la copia del streaming (P38 lo vio caer; ver `cola`).
+  const espera = page.locator('main section[aria-label="Nada para trabajar ahora"]')
   await expect(espera).toBeVisible()
   await expect(firstVisible(espera.getByText(/No hay nada para trabajar ahora/i))).toBeVisible()
 })

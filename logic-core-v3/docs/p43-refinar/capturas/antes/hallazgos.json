@@ -1,0 +1,497 @@
+{
+  "medidoEn": "2026-09-15T20:30:26.949Z",
+  "base": "http://127.0.0.1:3003",
+  "mc2-construccion-1440": {
+    "lead": "QA-W Construccion",
+    "stage": "CONSTRUCCION",
+    "progresoJson": null,
+    "url": "http://127.0.0.1:3003/setter/leads/cmr035epe000l9fl87zbo742h/manual/mc2",
+    "altoDelScroller": 2259,
+    "pantalla": {
+      "titulo": "Refiná la demo antes de publicarla",
+      "bajada": "Con la demo ya en pantalla: verificá lo que hiciste y pulí el detalle.",
+      "zonas": {
+        "contexto": true,
+        "municion": true,
+        "registro": true
+      },
+      "copiables": [
+        {
+          "zona": "Contexto del lead",
+          "fase": null,
+          "titulo": "Bloque para Claude Design",
+          "instruccion": "El brief + los materiales reales, listos para pegar como primer mensaje.",
+          "plegable": "Ver el texto que vas a copiar (28 líneas)",
+          "caracteres": 730,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Pulí la estética",
+          "instruccion": "Cuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 525,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Mejorá el motion y los estados",
+          "instruccion": "Animaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 543,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Mobile",
+          "titulo": "Adaptá a mobile",
+          "instruccion": "Para que se vea impecable en el celular — donde la abre la mayoría de los dueños.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 457,
+          "traeInstrucciones": false,
+          "traePiso": false
+        }
+      ],
+      "totalCopiar": 4,
+      "contextoCopiable": true,
+      "badgeProvisorio": true,
+      "gruposDeFase": [
+        {
+          "fase": "CTA de WhatsApp",
+          "puntos": [
+            "Botón de WhatsApp con el número real del negocio (formato wa.me/549...).",
+            "Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".",
+            "Probá el link: tiene que abrir el chat correcto."
+          ],
+          "prompts": 0
+        },
+        {
+          "fase": "Calidad y motion",
+          "puntos": [
+            "Máximo 2–3 colores, tomados de la marca del negocio.",
+            "Espaciados consistentes y jerarquía clara (un solo título grande por sección).",
+            "Animaciones sutiles si Claude Design las ofrece — nada que maree."
+          ],
+          "prompts": 2
+        },
+        {
+          "fase": "Mobile",
+          "puntos": [
+            "Achicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).",
+            "Nada cortado, nada desbordado, textos legibles sin hacer zoom.",
+            "El botón de WhatsApp tiene que quedar alcanzable con el pulgar."
+          ],
+          "prompts": 1
+        }
+      ],
+      "tildes": [
+        {
+          "nombre": "Marcar «CTA de WhatsApp» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "CTA de WhatsAppMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Calidad y motion» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "Calidad y motionMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Mobile» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "MobileMarcá esta fase cuando la termines"
+        }
+      ],
+      "parrafosAutoReporte": [
+        {
+          "texto": "Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el chequeo final.",
+          "dentroDe": "Registro"
+        },
+        {
+          "texto": "Las fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.",
+          "dentroDe": "Fases de la construcción — navegación libre"
+        }
+      ],
+      "guiaHerramienta": "Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoMunicion": "MuniciónGuía preliminar — en validaciónCTA de WhatsAppBotón de WhatsApp con el número real del negocio (formato wa.me/549...).Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".Probá el link: tiene que abrir el chat correcto.Calidad y motionMáximo 2–3 colores, tomados de la marca del negocio.Espaciados consistentes y jerarquía clara (un solo título grande por sección).Animaciones sutiles si Claude Design las ofrece — nada que maree.Pulí la estéticaCuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.Copiar bloqueVer el texto que vas a copiar (8 líneas)Subile el nivel de diseño a esta demo sin cambiar el contenido ni las secciones: - Limitá la paleta a 2–3 colores tomados de la marca del negocio; sacá los colores sueltos que no aportan. - Jerarquía clara: un solo título grande por sección, con subtítulos y cuerpo bien diferenciados. - Espaciados consistentes entre secciones y dentro de cada bloque — nada apretado, nada disperso. - Alineaciones prolijas y márgenes parejos en toda la página. Es solo pulido visual: no agregues secciones nuevas ni reescribas los textos.Mejorá el motion y los estadosAnimaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.Copiar bloqueVer el texto que vas a copiar (8 líneas)Sumá motion y estados interactivos sutiles, sin distraer del mensaje: - Animaciones de entrada suaves al hacer scroll (fade o slide cortos), nada que maree ni tarde. - Estados de hover y focus diseñados en botones y links — que se note que responden al mouse y al teclado. - Transiciones cortas y consistentes; preferí transform y opacity, no animar el layout. - Respetá «reduce motion»: si el sistema del usuario lo pide, bajá o sacá las animaciones. El motion tiene que aclarar el flujo, no decorar: nada de efectos llamativos por agregar.MobileAchicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).Nada cortado, nada desbordado, textos legibles sin hacer zoom.El botón de WhatsApp tiene que quedar alcanzable con el pulgar.Adaptá a mobilePara que se vea impecable en el celular — donde la abre la mayoría de los dueños.Copiar bloqueVer el texto que vas a copiar (8 líneas)Revisá y arreglá la versión mobile de esta demo (la mayoría la abre desde el celular): - Nada cortado ni desbordado: todo el contenido entra en el ancho de la pantalla. - Textos legibles sin hacer zoom; títulos que no se parten de forma rara. - Imágenes que escalan bien, sin estirarse ni deformarse. - El botón de contacto siempre visible y alcanzable con el pulgar. Mantené el mismo contenido y el mismo orden de secciones: es solo el ajuste responsive.Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoRegistro": "RegistroEs auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el chequeo final.CTA de WhatsAppMarcá esta fase cuando la terminesCalidad y motionMarcá esta fase cuando la terminesMobileMarcá esta fase cuando la termines¿Algo no sale como la guía dice?Me trabé — avisar a Franco",
+      "navConstruccion": "Construcción — navegación libreLas fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.1Construir2Refinar"
+    }
+  },
+  "mc2-construccion-390": {
+    "lead": "QA-W Construccion",
+    "stage": "CONSTRUCCION",
+    "progresoJson": null,
+    "url": "http://127.0.0.1:3003/setter/leads/cmr035epe000l9fl87zbo742h/manual/mc2",
+    "altoDelScroller": 2840,
+    "pantalla": {
+      "titulo": "Refiná la demo antes de publicarla",
+      "bajada": "Con la demo ya en pantalla: verificá lo que hiciste y pulí el detalle.",
+      "zonas": {
+        "contexto": true,
+        "municion": true,
+        "registro": true
+      },
+      "copiables": [
+        {
+          "zona": "Contexto del lead",
+          "fase": null,
+          "titulo": "Bloque para Claude Design",
+          "instruccion": "El brief + los materiales reales, listos para pegar como primer mensaje.",
+          "plegable": "Ver el texto que vas a copiar (28 líneas)",
+          "caracteres": 730,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Pulí la estética",
+          "instruccion": "Cuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 525,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Mejorá el motion y los estados",
+          "instruccion": "Animaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 543,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Mobile",
+          "titulo": "Adaptá a mobile",
+          "instruccion": "Para que se vea impecable en el celular — donde la abre la mayoría de los dueños.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 457,
+          "traeInstrucciones": false,
+          "traePiso": false
+        }
+      ],
+      "totalCopiar": 4,
+      "contextoCopiable": true,
+      "badgeProvisorio": true,
+      "gruposDeFase": [
+        {
+          "fase": "CTA de WhatsApp",
+          "puntos": [
+            "Botón de WhatsApp con el número real del negocio (formato wa.me/549...).",
+            "Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".",
+            "Probá el link: tiene que abrir el chat correcto."
+          ],
+          "prompts": 0
+        },
+        {
+          "fase": "Calidad y motion",
+          "puntos": [
+            "Máximo 2–3 colores, tomados de la marca del negocio.",
+            "Espaciados consistentes y jerarquía clara (un solo título grande por sección).",
+            "Animaciones sutiles si Claude Design las ofrece — nada que maree."
+          ],
+          "prompts": 2
+        },
+        {
+          "fase": "Mobile",
+          "puntos": [
+            "Achicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).",
+            "Nada cortado, nada desbordado, textos legibles sin hacer zoom.",
+            "El botón de WhatsApp tiene que quedar alcanzable con el pulgar."
+          ],
+          "prompts": 1
+        }
+      ],
+      "tildes": [
+        {
+          "nombre": "Marcar «CTA de WhatsApp» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "CTA de WhatsAppMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Calidad y motion» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "Calidad y motionMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Mobile» como hecha",
+          "pulsado": "false",
+          "deshabilitado": false,
+          "textoVisible": "MobileMarcá esta fase cuando la termines"
+        }
+      ],
+      "parrafosAutoReporte": [
+        {
+          "texto": "Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el chequeo final.",
+          "dentroDe": "Registro"
+        },
+        {
+          "texto": "Las fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.",
+          "dentroDe": "Fases de la construcción — navegación libre"
+        }
+      ],
+      "guiaHerramienta": "Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoMunicion": "MuniciónGuía preliminar — en validaciónCTA de WhatsAppBotón de WhatsApp con el número real del negocio (formato wa.me/549...).Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".Probá el link: tiene que abrir el chat correcto.Calidad y motionMáximo 2–3 colores, tomados de la marca del negocio.Espaciados consistentes y jerarquía clara (un solo título grande por sección).Animaciones sutiles si Claude Design las ofrece — nada que maree.Pulí la estéticaCuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.Copiar bloqueVer el texto que vas a copiar (8 líneas)Subile el nivel de diseño a esta demo sin cambiar el contenido ni las secciones: - Limitá la paleta a 2–3 colores tomados de la marca del negocio; sacá los colores sueltos que no aportan. - Jerarquía clara: un solo título grande por sección, con subtítulos y cuerpo bien diferenciados. - Espaciados consistentes entre secciones y dentro de cada bloque — nada apretado, nada disperso. - Alineaciones prolijas y márgenes parejos en toda la página. Es solo pulido visual: no agregues secciones nuevas ni reescribas los textos.Mejorá el motion y los estadosAnimaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.Copiar bloqueVer el texto que vas a copiar (8 líneas)Sumá motion y estados interactivos sutiles, sin distraer del mensaje: - Animaciones de entrada suaves al hacer scroll (fade o slide cortos), nada que maree ni tarde. - Estados de hover y focus diseñados en botones y links — que se note que responden al mouse y al teclado. - Transiciones cortas y consistentes; preferí transform y opacity, no animar el layout. - Respetá «reduce motion»: si el sistema del usuario lo pide, bajá o sacá las animaciones. El motion tiene que aclarar el flujo, no decorar: nada de efectos llamativos por agregar.MobileAchicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).Nada cortado, nada desbordado, textos legibles sin hacer zoom.El botón de WhatsApp tiene que quedar alcanzable con el pulgar.Adaptá a mobilePara que se vea impecable en el celular — donde la abre la mayoría de los dueños.Copiar bloqueVer el texto que vas a copiar (8 líneas)Revisá y arreglá la versión mobile de esta demo (la mayoría la abre desde el celular): - Nada cortado ni desbordado: todo el contenido entra en el ancho de la pantalla. - Textos legibles sin hacer zoom; títulos que no se parten de forma rara. - Imágenes que escalan bien, sin estirarse ni deformarse. - El botón de contacto siempre visible y alcanzable con el pulgar. Mantené el mismo contenido y el mismo orden de secciones: es solo el ajuste responsive.Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoRegistro": "RegistroEs auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el chequeo final.CTA de WhatsAppMarcá esta fase cuando la terminesCalidad y motionMarcá esta fase cuando la terminesMobileMarcá esta fase cuando la termines¿Algo no sale como la guía dice?Me trabé — avisar a Franco",
+      "navConstruccion": "Construcción — navegación libreLas fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.1Construir2Refinar"
+    }
+  },
+  "mc2-brief-1440": {
+    "lead": "QA-W Brief",
+    "stage": "BRIEF",
+    "progresoJson": null,
+    "url": "http://127.0.0.1:3003/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc2",
+    "altoDelScroller": 2275,
+    "pantalla": {
+      "titulo": "Refiná la demo antes de publicarla",
+      "bajada": "Con la demo ya en pantalla: verificá lo que hiciste y pulí el detalle.",
+      "zonas": {
+        "contexto": true,
+        "municion": true,
+        "registro": true
+      },
+      "copiables": [
+        {
+          "zona": "Contexto del lead",
+          "fase": null,
+          "titulo": "Bloque para Claude Design",
+          "instruccion": "El brief + los materiales reales, listos para pegar como primer mensaje.",
+          "plegable": "Ver el texto que vas a copiar (28 líneas)",
+          "caracteres": 724,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Pulí la estética",
+          "instruccion": "Cuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 525,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Mejorá el motion y los estados",
+          "instruccion": "Animaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 543,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Mobile",
+          "titulo": "Adaptá a mobile",
+          "instruccion": "Para que se vea impecable en el celular — donde la abre la mayoría de los dueños.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 457,
+          "traeInstrucciones": false,
+          "traePiso": false
+        }
+      ],
+      "totalCopiar": 4,
+      "contextoCopiable": true,
+      "badgeProvisorio": true,
+      "gruposDeFase": [
+        {
+          "fase": "CTA de WhatsApp",
+          "puntos": [
+            "Botón de WhatsApp con el número real del negocio (formato wa.me/549...).",
+            "Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".",
+            "Probá el link: tiene que abrir el chat correcto."
+          ],
+          "prompts": 0
+        },
+        {
+          "fase": "Calidad y motion",
+          "puntos": [
+            "Máximo 2–3 colores, tomados de la marca del negocio.",
+            "Espaciados consistentes y jerarquía clara (un solo título grande por sección).",
+            "Animaciones sutiles si Claude Design las ofrece — nada que maree."
+          ],
+          "prompts": 2
+        },
+        {
+          "fase": "Mobile",
+          "puntos": [
+            "Achicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).",
+            "Nada cortado, nada desbordado, textos legibles sin hacer zoom.",
+            "El botón de WhatsApp tiene que quedar alcanzable con el pulgar."
+          ],
+          "prompts": 1
+        }
+      ],
+      "tildes": [
+        {
+          "nombre": "Marcar «CTA de WhatsApp» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "CTA de WhatsAppMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Calidad y motion» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "Calidad y motionMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Mobile» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "MobileMarcá esta fase cuando la termines"
+        }
+      ],
+      "parrafosAutoReporte": [
+        {
+          "texto": "Las fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.",
+          "dentroDe": "Fases de la construcción — navegación libre"
+        }
+      ],
+      "guiaHerramienta": "Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoMunicion": "MuniciónGuía preliminar — en validaciónCTA de WhatsAppBotón de WhatsApp con el número real del negocio (formato wa.me/549...).Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".Probá el link: tiene que abrir el chat correcto.Calidad y motionMáximo 2–3 colores, tomados de la marca del negocio.Espaciados consistentes y jerarquía clara (un solo título grande por sección).Animaciones sutiles si Claude Design las ofrece — nada que maree.Pulí la estéticaCuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.Copiar bloqueVer el texto que vas a copiar (8 líneas)Subile el nivel de diseño a esta demo sin cambiar el contenido ni las secciones: - Limitá la paleta a 2–3 colores tomados de la marca del negocio; sacá los colores sueltos que no aportan. - Jerarquía clara: un solo título grande por sección, con subtítulos y cuerpo bien diferenciados. - Espaciados consistentes entre secciones y dentro de cada bloque — nada apretado, nada disperso. - Alineaciones prolijas y márgenes parejos en toda la página. Es solo pulido visual: no agregues secciones nuevas ni reescribas los textos.Mejorá el motion y los estadosAnimaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.Copiar bloqueVer el texto que vas a copiar (8 líneas)Sumá motion y estados interactivos sutiles, sin distraer del mensaje: - Animaciones de entrada suaves al hacer scroll (fade o slide cortos), nada que maree ni tarde. - Estados de hover y focus diseñados en botones y links — que se note que responden al mouse y al teclado. - Transiciones cortas y consistentes; preferí transform y opacity, no animar el layout. - Respetá «reduce motion»: si el sistema del usuario lo pide, bajá o sacá las animaciones. El motion tiene que aclarar el flujo, no decorar: nada de efectos llamativos por agregar.MobileAchicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).Nada cortado, nada desbordado, textos legibles sin hacer zoom.El botón de WhatsApp tiene que quedar alcanzable con el pulgar.Adaptá a mobilePara que se vea impecable en el celular — donde la abre la mayoría de los dueños.Copiar bloqueVer el texto que vas a copiar (8 líneas)Revisá y arreglá la versión mobile de esta demo (la mayoría la abre desde el celular): - Nada cortado ni desbordado: todo el contenido entra en el ancho de la pantalla. - Textos legibles sin hacer zoom; títulos que no se parten de forma rara. - Imágenes que escalan bien, sin estirarse ni deformarse. - El botón de contacto siempre visible y alcanzable con el pulgar. Mantené el mismo contenido y el mismo orden de secciones: es solo el ajuste responsive.Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoRegistro": "RegistroEl brief está listo — arrancá la construcción para habilitar el registro del borrador. Tildar fases no la arranca sola.Los tildes se abren cuando arranques la construcción, con el botón «Arrancar construcción».CTA de WhatsAppMarcá esta fase cuando la terminesCalidad y motionMarcá esta fase cuando la terminesMobileMarcá esta fase cuando la termines",
+      "navConstruccion": "Construcción — navegación libreLas fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.1Construir2Refinar"
+    }
+  },
+  "mc2-brief-390": {
+    "lead": "QA-W Brief",
+    "stage": "BRIEF",
+    "progresoJson": null,
+    "url": "http://127.0.0.1:3003/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc2",
+    "altoDelScroller": 2767,
+    "pantalla": {
+      "titulo": "Refiná la demo antes de publicarla",
+      "bajada": "Con la demo ya en pantalla: verificá lo que hiciste y pulí el detalle.",
+      "zonas": {
+        "contexto": true,
+        "municion": true,
+        "registro": true
+      },
+      "copiables": [
+        {
+          "zona": "Contexto del lead",
+          "fase": null,
+          "titulo": "Bloque para Claude Design",
+          "instruccion": "El brief + los materiales reales, listos para pegar como primer mensaje.",
+          "plegable": "Ver el texto que vas a copiar (28 líneas)",
+          "caracteres": 724,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Pulí la estética",
+          "instruccion": "Cuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 525,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Calidad y motion",
+          "titulo": "Mejorá el motion y los estados",
+          "instruccion": "Animaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 543,
+          "traeInstrucciones": false,
+          "traePiso": false
+        },
+        {
+          "zona": "Munición",
+          "fase": "Mobile",
+          "titulo": "Adaptá a mobile",
+          "instruccion": "Para que se vea impecable en el celular — donde la abre la mayoría de los dueños.",
+          "plegable": "Ver el texto que vas a copiar (8 líneas)",
+          "caracteres": 457,
+          "traeInstrucciones": false,
+          "traePiso": false
+        }
+      ],
+      "totalCopiar": 4,
+      "contextoCopiable": true,
+      "badgeProvisorio": true,
+      "gruposDeFase": [
+        {
+          "fase": "CTA de WhatsApp",
+          "puntos": [
+            "Botón de WhatsApp con el número real del negocio (formato wa.me/549...).",
+            "Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".",
+            "Probá el link: tiene que abrir el chat correcto."
+          ],
+          "prompts": 0
+        },
+        {
+          "fase": "Calidad y motion",
+          "puntos": [
+            "Máximo 2–3 colores, tomados de la marca del negocio.",
+            "Espaciados consistentes y jerarquía clara (un solo título grande por sección).",
+            "Animaciones sutiles si Claude Design las ofrece — nada que maree."
+          ],
+          "prompts": 2
+        },
+        {
+          "fase": "Mobile",
+          "puntos": [
+            "Achicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).",
+            "Nada cortado, nada desbordado, textos legibles sin hacer zoom.",
+            "El botón de WhatsApp tiene que quedar alcanzable con el pulgar."
+          ],
+          "prompts": 1
+        }
+      ],
+      "tildes": [
+        {
+          "nombre": "Marcar «CTA de WhatsApp» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "CTA de WhatsAppMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Calidad y motion» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "Calidad y motionMarcá esta fase cuando la termines"
+        },
+        {
+          "nombre": "Marcar «Mobile» como hecha",
+          "pulsado": "false",
+          "deshabilitado": true,
+          "textoVisible": "MobileMarcá esta fase cuando la termines"
+        }
+      ],
+      "parrafosAutoReporte": [
+        {
+          "texto": "Las fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.",
+          "dentroDe": "Fases de la construcción — navegación libre"
+        }
+      ],
+      "guiaHerramienta": "Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoMunicion": "MuniciónGuía preliminar — en validaciónCTA de WhatsAppBotón de WhatsApp con el número real del negocio (formato wa.me/549...).Mensaje pre-cargado simple: \"Hola! Vi la página y quiero hacer una consulta\".Probá el link: tiene que abrir el chat correcto.Calidad y motionMáximo 2–3 colores, tomados de la marca del negocio.Espaciados consistentes y jerarquía clara (un solo título grande por sección).Animaciones sutiles si Claude Design las ofrece — nada que maree.Pulí la estéticaCuando la demo ya está armada pero se ve floja: apretá paleta, jerarquía y espaciado.Copiar bloqueVer el texto que vas a copiar (8 líneas)Subile el nivel de diseño a esta demo sin cambiar el contenido ni las secciones: - Limitá la paleta a 2–3 colores tomados de la marca del negocio; sacá los colores sueltos que no aportan. - Jerarquía clara: un solo título grande por sección, con subtítulos y cuerpo bien diferenciados. - Espaciados consistentes entre secciones y dentro de cada bloque — nada apretado, nada disperso. - Alineaciones prolijas y márgenes parejos en toda la página. Es solo pulido visual: no agregues secciones nuevas ni reescribas los textos.Mejorá el motion y los estadosAnimaciones sutiles y estados de hover/focus que se sientan diseñados, sin marear.Copiar bloqueVer el texto que vas a copiar (8 líneas)Sumá motion y estados interactivos sutiles, sin distraer del mensaje: - Animaciones de entrada suaves al hacer scroll (fade o slide cortos), nada que maree ni tarde. - Estados de hover y focus diseñados en botones y links — que se note que responden al mouse y al teclado. - Transiciones cortas y consistentes; preferí transform y opacity, no animar el layout. - Respetá «reduce motion»: si el sistema del usuario lo pide, bajá o sacá las animaciones. El motion tiene que aclarar el flujo, no decorar: nada de efectos llamativos por agregar.MobileAchicá la ventana al ancho de un celular (o usá la vista mobile de Claude Design).Nada cortado, nada desbordado, textos legibles sin hacer zoom.El botón de WhatsApp tiene que quedar alcanzable con el pulgar.Adaptá a mobilePara que se vea impecable en el celular — donde la abre la mayoría de los dueños.Copiar bloqueVer el texto que vas a copiar (8 líneas)Revisá y arreglá la versión mobile de esta demo (la mayoría la abre desde el celular): - Nada cortado ni desbordado: todo el contenido entra en el ancho de la pantalla. - Textos legibles sin hacer zoom; títulos que no se parten de forma rara. - Imágenes que escalan bien, sin estirarse ni deformarse. - El botón de contacto siempre visible y alcanzable con el pulgar. Mantené el mismo contenido y el mismo orden de secciones: es solo el ajuste responsive.Claude DesignLink pendienteTodavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.Ver para qué sirve, qué le das y qué te devuelveLa herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.Qué le das: El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.Qué te devuelve: La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».",
+      "textoRegistro": "RegistroEl brief está listo — arrancá la construcción para habilitar el registro del borrador. Tildar fases no la arranca sola.Los tildes se abren cuando arranques la construcción, con el botón «Arrancar construcción».CTA de WhatsAppMarcá esta fase cuando la terminesCalidad y motionMarcá esta fase cuando la terminesMobileMarcá esta fase cuando la termines",
+      "navConstruccion": "Construcción — navegación libreLas fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea a otra.1Construir2Refinar"
+    }
+  },
+  "mc1-construccion-1440-bloque": {
+    "caracteres": 7426,
+    "traeInstrucciones": true,
+    "traePiso": true
+  }
+}

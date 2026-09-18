@@ -38,6 +38,7 @@ const DIA_MS = 24 * 60 * 60 * 1000
 
 let setterId: string
 let postergadoFuturoId: string
+let postergadoFuturoNombre: string
 let postergadoVencidoId: string
 let enRevisionId: string
 let aprobadaSinLinkId: string
@@ -70,6 +71,7 @@ test.beforeAll(async () => {
     nextFollowUpAt: proximoToqueEl,
   })
   postergadoFuturoId = futuro.id
+  postergadoFuturoNombre = futuro.businessName
   await registerActivity(postergadoFuturoId, 'INSTAGRAM_DM', 'SIN_RESPUESTA', setterId, 'opener')
   await prisma.osLead.update({
     where: { id: postergadoFuturoId },
@@ -158,8 +160,18 @@ test('1a · la tarjeta de cartera dice CUÁNDO vuelve el postergado, no «cuando
     'DV17 Postergado Futuro',
   )
 
-  await expect(firstVisible(page.getByText(`Postergado — vuelve el ${FECHA_FUTURA}`))).toBeVisible()
-  await expect(page.getByText('se retoma cuando se reactive')).toHaveCount(0)
+  // P38 — sobre la TARJETA de este lead (nombre exacto, con stamp). La frase vieja
+  // la sigue produciendo el producto para un postergado SIN fecha, y la página la
+  // dibuja en Novedades («Ahora: …») si ese lead tiene un aviso caducado: la
+  // ausencia sobre la página entera dependía de que ningún lead así tuviera uno.
+  const tarjeta = page
+    .locator('main [data-slot="tarjeta-cartera"]')
+    .filter({ has: page.getByRole('heading', { name: postergadoFuturoNombre, exact: true }) })
+  await expect(tarjeta, 'la búsqueda deja UNA tarjeta: la del postergado futuro').toHaveCount(1)
+  await expect(tarjeta).toBeVisible()
+
+  await expect(tarjeta.getByText(`Postergado — vuelve el ${FECHA_FUTURA}`)).toBeVisible()
+  await expect(tarjeta.getByText('se retoma cuando se reactive')).toHaveCount(0)
 
   expectNoConsoleErrors(guard)
 })

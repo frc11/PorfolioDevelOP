@@ -1,0 +1,15 @@
+══ P33 · LA CARRERA DEL CARTEL (freno CPU ×1) ══════════════════════════════════
+
+── B8 raíz · pasada 1
+   click 1819 ms · aserto 2398 ms · VERDE · 843 muestras · EN BASE: SÍ
+   carteles (1):
+     [3768→7965 ms · visible] Demo enviada registrada 🚀 — ahora el objetivo es la reunión.
+   rutas: 0ms …  |  279ms …/manual  |  1222ms …/manual/m15
+
+── B8 raíz · pasada 2
+   click 831 ms · aserto 1341 ms · VERDE · 841 muestras · EN BASE: SÍ
+   carteles (1):
+     [1805→6005 ms · visible] Demo enviada registrada 🚀 — ahora el objetivo es la reunión.
+   rutas: 13ms …  |  281ms …/manual  |  666ms …/manual/m15
+
+── SALDO: 2 verdes · 0 rojas

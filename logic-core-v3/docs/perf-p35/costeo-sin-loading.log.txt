@@ -1,0 +1,25 @@
+== sacando los dos loading.tsx de la cadena ==
+ D logic-core-v3/src/app/(protected)/setter/leads/[leadId]/loading.tsx
+ D logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx
+== build (distDir propio .next-p35) ==
+   build exit=0
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+###### SIN-LOADING RONDA 1 / 2 ######
+   server FRIO arriba
+   playwright exit=0
+   [r1 p1] docs=3 post=0 despacho+1547ms acuse=SI hastaBoton=2950ms carteles=1 base=SI reflejo=SI
+   [r1 p2] docs=3 post=0 despacho+815ms acuse=SI hastaBoton=1249ms carteles=1 base=SI reflejo=SI
+   [r1 p3] docs=3 post=0 despacho+837ms acuse=SI hastaBoton=1111ms carteles=1 base=SI reflejo=SI
+
+###### SIN-LOADING RONDA 2 / 2 ######
+   server FRIO arriba
+   playwright exit=0
+   [r2 p1] docs=3 post=0 despacho+1853ms acuse=SI hastaBoton=2969ms carteles=1 base=SI reflejo=SI
+   [r2 p2] docs=3 post=0 despacho+904ms acuse=SI hastaBoton=1351ms carteles=1 base=SI reflejo=SI
+   [r2 p3] docs=3 post=0 despacho+901ms acuse=SI hastaBoton=1177ms carteles=1 base=SI reflejo=SI
+
+###### FIN SIN-LOADING — lineas: 6 ######
+   loading.tsx restaurados

@@ -203,12 +203,15 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
   // ¿esto se hace mirando el brief, o mirando la demo ya construida? Las tres
   // primeras son lead-específicas y no tienen prompt (`FASE_PROMPTS`); las tres
   // últimas se verifican y pulen sobre algo que ya existe.
+  // P42 — un solo paso: la bajada decía «con el brief y los materiales a la vista,
+  // armá la demo», que era la construcción artesanal de las tres fases. Ahora la
+  // arma Claude Design con lo que se le pega. Id, título y rótulo corto, iguales.
   mc1: {
     id: 'mc1',
     tipo: 'manual',
     fase: 'construccion',
     titulo: 'Construí la demo en Claude Design',
-    detalle: 'Con el brief y los materiales del negocio a la vista, armá la demo.',
+    detalle: 'Pegale el bloque entero y esperá a que termine: la demo sale de ahí, de una vez.',
     corto: 'Construir',
   },
   mc2: {
