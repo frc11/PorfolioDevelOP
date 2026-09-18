@@ -756,7 +756,7 @@ Está acá para que nadie lo dé por resuelto.
     | `src/app/v3/_lib/escena/probeStore.ts` | **406** | 352 | heredado; S11 sumó 26, **S12 sumó 28** (la perilla del radio angular y su porqué, más la corrección de la cifra sin instrumento) |
     | `src/app/v3/_lib/escena/lightRig.ts` | **357** | 319 (ya cruzado por S10) | heredado; S11 sumó 26, **S12 sumó 12** (el canal del radio angular) |
 
-    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `src/app/v3/_lib/escena/celosiaPenumbra.ts` (163), `src/app/probe-escena/__tests__/celosiaBeat.ts` (188), `src/app/probe-escena/__tests__/s12-penumbra.invariant.ts` (297) y `src/app/probe-escena/__tests__/s12-tension.invariant.ts` (266), remedidos en SITIO-S8 sobre el disco de hoy. **La conclusión aguanta y el margen no:** `s12-penumbra.invariant.ts` está a tres líneas del corte, y el archivo de penumbra se fue con la escena mientras las tres suites se quedaron del lado del probe.
+    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `src/app/v3/_lib/escena/celosiaPenumbra.ts` (163), `src/app/probe-escena/__tests__/celosiaBeat.ts` (188) y `src/app/probe-escena/__tests__/s12-penumbra.invariant.ts` (297), remedidos en SITIO-S8 sobre el disco de hoy. **La conclusión aguanta y el margen no:** `s12-penumbra.invariant.ts` está a tres líneas del corte, y el archivo de penumbra se fue con la escena mientras las otras dos suites se quedaron del lado del probe. ⚠️ **Modo pulido borró `s12-tension.invariant.ts` entero** (era ENTERO composición): salía de esta lista igual, y se retira para no apuntar a un fantasma.
 
     ⚠️ **SITIO-S9 ESCRIBIÓ LAS RUTAS ENTERAS, Y ÉSA ERA LA DEUDA.** Este bloque nombraba sus archivos por el nombre pelado —`OrbitRig.tsx`, `probeStore.ts`— y con prefijos cortos —`escena/…`, `_components/…`— que después de la mudanza de SITIO-S8 **no resuelven contra nada del disco**. Un pendiente que apunta a una ruta inexistente no se puede verificar, y es exactamente así como éste se venció la primera vez: la mudanza cambió la carpeta y el documento se quedó donde estaba, sin que nada se quejara. Ahora cada ruta es repo-relativa y `src/app/v3/_lib/__tests__/s9-instrumentos.invariant.ts` §3 **afirma que todas existen en el disco**, con un control positivo que exige que una ruta inventada haga fallar al detector. Los doce largos que este bloque nombra se remidieron con `contarLineas` de `s8-largos.ts` sobre el disco de hoy: **ninguno se movió** — los seis heredados dan exactamente los de `LARGOS_HEREDADOS` y los seis restantes, los que el propio texto declara.
 
@@ -2281,3 +2281,22 @@ Está acá para que nadie lo dé por resuelto.
     **EL GUARDIÁN.** `s18-deslizamiento.invariant` §4 no borró la afirmación vieja: **la partió en dos y las dos son más fuertes**. §4a afirma que la rueda sigue con la del sitio —leyendo la línea exacta del fuente de `SmoothScroll.tsx`— y que el sprint no la reasigna. §4b afirma que la del viaje es una de las seis, que se importa y no se copia, que **arranca en velocidad cero** (0,000002 medido) y que las dos son distintas con el número. Si alguien vuelve a unificarlas, se pone rojo por los dos lados.
 
     **LA CONSECUENCIA EN TIEMPO, declarada.** El recorrido pasa de 2,0 a **4,0 s**, y el 4 no se eligió: `power1.inOut` tiene pico exactamente 2× su media, así que `2 × 2,0 s` hace que **el instante más rápido del viaje nuevo corra exactamente igual que el promedio del viejo**. Con el preludio de 600 ms el total desde el click son **4,6 s**. El pico de cámara por cuadro baja de **1,4254 a 0,1086 alturas** (13,1×), y contra un diente de rueda de 46,6× a **6,8×**.
+
+75. ⚠️ **MODO PULIDO DESARMÓ LA VERIFICACIÓN DE COMPOSICIÓN — 33 invariantes enteros y la mitad de composición de 47 mixtos, cero cambios en `/v3`.**
+
+    **Lo que se pierde.** Ningún instrumento vuelve a decir por sí solo si un elemento se movió en pantalla: posiciones y anchos en px, contraste bajo una luz o una superficie puesta, el ancho de un hueco o de una penumbra, cuánto ocupa el logo en cuadro, la curvatura de una cámara. Eso era justamente lo que esas afirmaciones medían, y las corridas para sostenerlas costaban más que el cambio que verificaban (BOTON-2: 1h07 para 40 líneas de CSS). Lo que sigue afirmado y en verde es el resto: contrato de props, arquitectura, tipos, existencia de archivos/rutas, accesibilidad por atributo, censo de tokens.
+
+    **Cómo se mitiga.** Revisión humana por captura, sección por sección, contra lo que hoy se ve en `/v3` — no hay reemplazo automatizado. Es la decisión explícita del sprint, no un olvido: un instrumento que cuesta más que el defecto que atrapa deja de pagarse solo.
+
+76. ⚠️ **DIEZ DEUDAS DEJARON DE CONTARSE EN `verificar` AL BORRAR SU INSTRUMENTO (Modo pulido) — el problema no se tocó, sólo el que lo medía.** `verificar` pasó de declarar deudas a declarar CERO: `s8-tinta.invariant.ts` y `s10-acceso-contraste.ts` (ENTERO) y `s22-emision.invariant.ts` §5 (MIXTO) se borraron por ser composición, y con ellos los `deudaDeclarada()` que seguían estas diez, todas abiertas al momento de borrarse:
+
+    - `D-B8.1` — Números: la tinta oscura del atardecer no llega a AA (1,06:1).
+    - `D-B8.2` — Trabajos: la tinta clara sobre la sala a pleno sol no llega a AA.
+    - `D-B8.3` — Por qué develOP: la tinta oscura del amanecer no llega a AA en el ancla (1,11:1), medida por dos instrumentos y los dos se borraron.
+    - `D-B5.1` — Por qué develOP: el cuerpo sobre la pared de la sala, 18–49 % del tiempo bajo AA.
+    - `D-B11.1` — Hero: piso de motas bajo AA, 0,42–0,58 % del cuadro.
+    - `D-B11.2` — Quiénes somos: piso de motas y celosía bajo AA.
+    - `D-B11.3` — Números: piso de motas bajo AA.
+    - `D-B11.4` — Trabajos: partículas que brillan bajo la tinta clara.
+    - `D-B13.1` — la vuelta: logo y sala cruzan valor, 1,08:1 en p≈0,599.
+    - `D-B13.3` — Cierre: 7–8 bloques del pie bajo AA sin la banda que B13 sacó.

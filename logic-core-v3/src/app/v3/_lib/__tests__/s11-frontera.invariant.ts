@@ -69,13 +69,15 @@ const existe = (relativo: string): boolean => {
 const ALTAS_DE_S11: readonly string[] = [
   'docs/rediseno/sprints/SITIO-S11-arreglos.md',
   'src/app/v3/_chrome/SaltarAlContenido.tsx',
-  'src/app/v3/_lib/__tests__/s10-acceso-contraste.ts',
+  // `s10-acceso-contraste.ts` era 100% composición (Modo pulido lo desarmó):
+  // el padrón se retira, no se deja apuntando a un fantasma (regla de §2).
   'src/app/v3/_lib/__tests__/s10-acceso-landmarks.ts',
-  'src/app/v3/_lib/__tests__/s10-mobile-escala.ts',
-  'src/app/v3/_lib/__tests__/s10-mobile-pastilla.ts',
+  // `s10-mobile-escala.ts` y `s10-mobile-pastilla.ts` eran 100% composición
+  // (Modo pulido los desarmó): mismo retiro que el de arriba.
   'src/app/v3/_lib/__tests__/s10-mobile-peso.ts',
   'src/app/v3/_lib/__tests__/s9-acoplamiento.ts',
-  'src/app/v3/_lib/__tests__/s9-scrollPadding.ts',
+  // `s9-scrollPadding.ts` era 100% composición (Modo pulido lo desarmó): mismo
+  // retiro que los de arriba.
   'src/app/v3/_lib/escena/__tests__/camaraDelCuadro.ts',
   'src/app/v3/_lib/escena/__tests__/s10-logo-encuadre.ts',
   'src/app/v3/_lib/escena/__tests__/s10-logo-tablas.ts',

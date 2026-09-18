@@ -70,16 +70,16 @@ export const FRENTES: readonly FrenteDeS8[] = [
     id: 'escena',
     titulo: 'La escena 3D — la mudanza y el montaje',
     carpeta: ESCENA,
+    // `s8-tinta.invariant.ts` era ENTERO composición: Modo pulido lo borró
+    // entero. El padrón se retira con él, no se deja apuntando a un fantasma.
     entregables: [
       `${ESCENA}/contrato.ts`,
       `${ESCENA}/EscenaDelHome.tsx`,
       `${ESCENA}/__tests__/s8-escena.invariant.ts`,
-      `${ESCENA}/__tests__/s8-tinta.invariant.ts`,
       `${ESCENA}/__tests__/s8-tres.invariant.ts`,
     ],
     instrumentos: [
       `${ESCENA}/__tests__/s8-escena.invariant.ts`,
-      `${ESCENA}/__tests__/s8-tinta.invariant.ts`,
       `${ESCENA}/__tests__/s8-tres.invariant.ts`,
     ],
     fueraDeLaCarpeta: [
@@ -96,15 +96,15 @@ export const FRENTES: readonly FrenteDeS8[] = [
     id: 'intro',
     titulo: 'El preloader — montarlo en el home nuevo',
     carpeta: INTRO,
+    // `s8-relevo.invariant.ts` era ENTERO composición: Modo pulido lo borró
+    // entero. El padrón se retira con él, no se deja apuntando a un fantasma.
     entregables: [
       `${INTRO}/contrato.ts`,
       `${INTRO}/IntroDelHome.tsx`,
       `${INTRO}/__tests__/s8-intro.invariant.ts`,
-      `${INTRO}/__tests__/s8-relevo.invariant.ts`,
     ],
     instrumentos: [
       `${INTRO}/__tests__/s8-intro.invariant.ts`,
-      `${INTRO}/__tests__/s8-relevo.invariant.ts`,
     ],
     fueraDeLaCarpeta: [],
   },
@@ -214,10 +214,8 @@ export const PUEDEN_IMPORTAR_LA_MARCA: readonly string[] = [
 /** Todos los scripts que la Fase 0 declaró, con el archivo al que apuntan. */
 export const SCRIPTS_DECLARADOS: Readonly<Record<string, string>> = {
   'test:s8-escena': `${ESCENA}/__tests__/s8-escena.invariant.ts`,
-  'test:s8-tinta': `${ESCENA}/__tests__/s8-tinta.invariant.ts`,
   'test:s8-tres': `${ESCENA}/__tests__/s8-tres.invariant.ts`,
   'test:s8-intro': `${INTRO}/__tests__/s8-intro.invariant.ts`,
-  'test:s8-relevo': `${INTRO}/__tests__/s8-relevo.invariant.ts`,
   'test:s8-chrome': `${CHROME}/__tests__/s8-chrome.invariant.ts`,
   'test:s8-diferido': `${PESO}/__tests__/s8-diferido.invariant.ts`,
   'test:s8-peso': `${PESO}/__tests__/s8-peso.invariant.ts`,

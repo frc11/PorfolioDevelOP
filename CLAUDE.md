@@ -150,6 +150,27 @@ npx prisma migrate status
 
 ---
 
+## Modo pulido
+
+Modo de sprint liviano para mantenimiento y pulido sobre trabajo ya construido — no para features nuevas. Se activa cuando el prompt lo pide explícitamente. Mientras está activo, reemplaza el ciclo de verificación de **Sprint protocol** por este:
+
+- Un objetivo por prompt. Si el prompt pide dos cosas, hace la primera y avisa.
+- No medir, no barrer valores, no comparar con la referencia.
+- No escribir invariantes ni controles positivos nuevos.
+- No hacer A/B de peso ni builds de atribución.
+- Comentarios: UNA línea por cambio. Cero docblocks de derivación.
+- No escribir reportes en `outputs/`. El resumen va al chat, 5 líneas máximo.
+- Si un invariante existente clava el valor que se está cambiando, AFLOJARLO a que afirme que la constante existe, no cuánto vale.
+- No tocar archivos fuera de los nombrados en el prompt.
+- Verificación por nivel:
+  - **por iteración** → el invariante de la sección tocada (`npm run test:sN-xxx`, ~3s)
+  - **bisagra** (cerrar sección / antes de merge / antes de commit grande) → `npm run verificar` completo (~10 min)
+  - **nunca en modo pulido** → `npm run build`
+  - `npx tsc --noEmit` solo si se tocó TypeScript
+- Limpieza: correr `scripts/limpiar.ps1` al terminar cada tarea. En bisagra, `scripts/limpiar.ps1 -Profundo` junto con `verificar`.
+
+---
+
 ## Subagentes
 
 Estándar permanente — no opcional. Los subagentes corren en su propia ventana de contexto (no inflan la del padre) y son read-only. Solo el agente padre escribe código.

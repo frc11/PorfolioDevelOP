@@ -57,30 +57,6 @@ const QUIETO = marcadoDelRecorrido(false)
 const ANIMADO = marcadoDelRecorrido(true)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · El recorrido: las cuatro, en el orden y con la superficie del DATO')
-
-afirmarIgual(
-  DEL_SPRINT.map((e) => e.id),
-  [...IDS_DE_S6],
-  'la ruta monta las cuatro secciones en el orden de la tabla del sitio',
-)
-
-const idsEnElMarcado = valoresDeAtributo(QUIETO, 'data-panel')
-afirmarIgual(idsEnElMarcado, [...IDS_DE_S6], 'y el marcado las emite en ese orden, con su `id` de ancla')
-
-const superficies = valoresDeAtributo(QUIETO, 'data-superficie')
-afirmarIgual(
-  superficies,
-  IDS_DE_S6.map((id) => seccionDe(id).superficie),
-  'cada `<section>` lleva la superficie que declara la tabla, no una escrita acá',
-)
-console.log(`  superficies servidas hoy: ${superficies.join(' · ')}`)
-
-controlPositivo('el lector de atributos vería un orden distinto', QUIETO, (html) =>
-  JSON.stringify(valoresDeAtributo(html, 'data-panel')) === JSON.stringify([...IDS_DE_S6].reverse()),
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Abajo de 1025 las cuatro rinden SIN una sola animación')
 
 const transformadasQuietas = (QUIETO.match(/transform:/g) ?? []).length

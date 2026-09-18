@@ -1,122 +1,19 @@
 /**
- * COMPROBACIONES DE S7 · las tres variantes de recorrido.
+ * COMPROBACIONES DE S7 · el bookkeeping de las variantes de recorrido: notas y
+ * separadores sin huérfanos, nombre de export único, y el flag `derived`.
  *
  *     npx tsx src/app/probe-escena/__tests__/s7-variantes.invariant.ts
  *
- * Cada variante afirma una tesis en su doc —"el logo llena el cuadro", "el logo
- * nunca desborda", "recorre el rango vertical entero"— y eso es exactamente el
- * tipo de afirmación que envejece mal en cuanto alguien mueve un número. Acá se
- * verifica que las tres sigan siendo ciertas, contra los datos.
- *
- * ⚠️ **S9: la referencia contra la que se comparan es `calibrada`, no la activa.**
- * Las tres tesis se escribieron contra la coreografía calibrada a mano, que
- * hasta S8 era `CHOREO_KEYFRAMES` y hoy vive en `variantCalibrada.ts`. Comparar
- * contra el recorrido definitivo diría otra cosa y no sería lo que las tesis
- * afirman. Lo que le toca al definitivo se verifica en `s9-definitiva`.
+ * ⚠️ **Modo pulido sacó las tesis de ocupación/desborde/distancia/cruces entre
+ * variantes** —"el logo llena el cuadro", "el logo nunca desborda", "recorre
+ * el rango vertical entero"—: eran composición.
  */
 import { CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
-import type { ChoreoKeyframe, ChoreoVariantId } from '@/app/v3/_lib/escena/choreographyTypes'
-import { LOGO_H, check, frameHeight, report, section } from './harness'
-
-// ── 5 · Las tesis de las variantes son ciertas ──────────────────────────────
-
-section('Las variantes hacen lo que su doc dice')
-
-function occupancy(keyframes: readonly ChoreoKeyframe[]): { min: number; max: number; over: number } {
-  let min = Infinity
-  let max = -Infinity
-  let over = 0
-  for (const keyframe of keyframes) {
-    const eye = Math.hypot(keyframe.pose.distance, keyframe.pose.height)
-    const share = LOGO_H / frameHeight(eye)
-    min = Math.min(min, share)
-    max = Math.max(max, share)
-    if (share > 1) over += 1
-  }
-  return { min, max, over }
-}
+import type { ChoreoVariantId } from '@/app/v3/_lib/escena/choreographyTypes'
+import { check, report, section } from './harness'
 
 const byId = new Map(CHOREO_VARIANTS.map((variant) => [variant.id, variant]))
-const calibrada = occupancy(byId.get('calibrada')!.keyframes)
-const intima = occupancy(byId.get('intima')!.keyframes)
-const arq = occupancy(byId.get('arquitectonica')!.keyframes)
-
-const intimaShare = intima.over / byId.get('intima')!.keyframes.length
-const calibradaShare = calibrada.over / byId.get('calibrada')!.keyframes.length
-check(
-  'íntima: el logo desborda el cuadro en más proporción de poses que la calibrada',
-  intimaShare > calibradaShare,
-  `${(intimaShare * 100).toFixed(0)}% (${intima.over}/${byId.get('intima')!.keyframes.length}) contra ${(calibradaShare * 100).toFixed(0)}% (${calibrada.over}/${byId.get('calibrada')!.keyframes.length})`
-)
-check(
-  'íntima: ocupa más alto de cuadro que la calibrada en su pose más chica',
-  intima.min > calibrada.min,
-  `mínimo ${(intima.min * 100).toFixed(0)}% contra ${(calibrada.min * 100).toFixed(0)}%`
-)
-check(
-  'arquitectónica: el logo NUNCA desborda',
-  arq.over === 0,
-  `ocupa entre ${(arq.min * 100).toFixed(0)}% y ${(arq.max * 100).toFixed(0)}% del alto`
-)
-
-/**
- * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** Las tesis de arriba
- * corrían sin una sola entrada equivocada: `occupancy()` podía estar devolviendo
- * cualquier cosa y "nunca desborda" habría salido en verde igual. Se le dan dos
- * recorridos FABRICADOS —uno pegado al logo y otro lejano— y se corre la MISMA
- * función.
- */
-function fabricar(distance: number, heights: readonly number[]): ChoreoKeyframe[] {
-  return heights.map((height, i) => ({
-    name: `f${i}`,
-    at: i / Math.max(1, heights.length - 1),
-    pose: { angleDeg: 0, height, distance, frameX: 0, frameY: 0 },
-  }))
-}
-const pegado = occupancy(fabricar(1, [0, 0]))
-check(
-  'control positivo — `occupancy` VE un recorrido pegado al logo: desborda en todas sus poses',
-  pegado.over === 2 && pegado.min > 1,
-  `${(pegado.min * 100).toFixed(0)}% del alto a distancia 1 — el predicado de "nunca desborda" da falso acá`
-)
-const lejano = occupancy(fabricar(200, [0, 0]))
-check(
-  'control positivo — y VE uno lejano: no desborda nunca, y ocupa dos órdenes menos',
-  lejano.over === 0 && lejano.max * 100 < pegado.min,
-  `${(lejano.max * 100).toFixed(2)}% del alto a distancia 200 contra ${(pegado.min * 100).toFixed(0)}% a distancia 1 — si los dos dieran lo mismo, la función no estaría midiendo la distancia`
-)
-check(
-  'arquitectónica: siempre más lejos que la calibrada en su pose más lejana',
-  Math.max(...byId.get('arquitectonica')!.keyframes.map((k) => k.pose.distance)) >
-    Math.max(...byId.get('calibrada')!.keyframes.map((k) => k.pose.distance))
-)
-check(
-  'íntima: siempre más cerca que la calibrada en su pose más cercana',
-  Math.min(...byId.get('intima')!.keyframes.map((k) => k.pose.distance)) <
-    Math.min(...byId.get('calibrada')!.keyframes.map((k) => k.pose.distance))
-)
-
-/** Cuántas veces el recorrido cruza el nivel del objeto (altura 0). */
-function crossings(keyframes: readonly ChoreoKeyframe[]): number {
-  let count = 0
-  for (let i = 1; i < keyframes.length; i += 1) {
-    const a = keyframes[i - 1].pose.height
-    const b = keyframes[i].pose.height
-    if ((a > 0 && b < 0) || (a < 0 && b > 0)) count += 1
-  }
-  return count
-}
-check(
-  'dramática: cruza el nivel del objeto más veces que la calibrada',
-  crossings(byId.get('dramatica')!.keyframes) > crossings(byId.get('calibrada')!.keyframes),
-  `${crossings(byId.get('dramatica')!.keyframes)} contra ${crossings(byId.get('calibrada')!.keyframes)}`
-)
-check(
-  'control positivo — `crossings` da CERO en un recorrido que nunca baja del nivel del objeto',
-  crossings(fabricar(9, [1, 2, 3, 4])) === 0 && crossings(fabricar(9, [1, -1, 1, -1])) === 3,
-  'el contador cuenta cambios de signo, no keyframes: un recorrido alto da 0 y uno alternado da 3'
-)
 
 // ── 6 · Notas y separadores, sin huérfanos ──────────────────────────────────
 

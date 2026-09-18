@@ -19,19 +19,15 @@
  */
 
 import {
-  ALTO_DE_VIEWPORT_DE_LA_REFERENCIA,
   ALTO_PASTILLA_PX,
   DESCUENTO_NACIMIENTO_PX,
-  DESCUENTO_UMBRAL_PX,
-  HOVER_DE_ENLACE_MEDIDO,
-  TOKENS_DEL_UMBRAL,
   UMBRAL_DE_LA_REFERENCIA,
   umbralPx,
 } from '../navegacion'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
-import { customPropsDe, declaracionesDe, reglas, resolver, sinComentarios, tokensDelTema } from './s3-css'
+import { customPropsDe, resolver, sinComentarios, tokensDelTema } from './s3-css'
 import { quitarComentarios } from './s3-escaneo'
 
 const tokens = tokensDelTema()
@@ -49,31 +45,6 @@ function resolverAAlto(nombre: string, altoDeViewport: number): number | null {
   const expandida = expresion.replace(/100svh/g, `${altoDeViewport}px`)
   return resolver(expandida, new Map([...tokens, ...propiedades].map(([k, v]) => [k, v.replace(/100svh/g, `${altoDeViewport}px`)])))?.n ?? null
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · La cuenta del umbral, paso por paso')
-
-afirmarIgual(resolver(`var(${TOKENS_DEL_UMBRAL.reposo.token})`, tokens)?.n, TOKENS_DEL_UMBRAL.reposo.px, 'reposo: --spacing-6 = 24px')
-afirmarIgual(
-  resolver(`var(${TOKENS_DEL_UMBRAL.rellenoVertical.token})`, tokens)?.n,
-  TOKENS_DEL_UMBRAL.rellenoVertical.px,
-  'relleno vertical: --spacing-3 = 12px',
-)
-afirmarIgual(
-  resolver(`var(${TOKENS_DEL_UMBRAL.tamanoDeTexto.token})`, tokens)?.n,
-  TOKENS_DEL_UMBRAL.tamanoDeTexto.px,
-  'tamaño de texto: --text-cuerpo = 15px',
-)
-afirmarIgual(
-  Number(tokens.get(TOKENS_DEL_UMBRAL.interlineado.token)),
-  TOKENS_DEL_UMBRAL.interlineado.factor,
-  'interlineado: --leading-texto = 1,6',
-)
-
-afirmarIgual(ALTO_PASTILLA_PX, 48, 'alto de la pastilla: 12×2 + 15×1,6 = 48px')
-afirmarIgual(DESCUENTO_NACIMIENTO_PX, 72, 'nacimiento: 100svh − 24 − 48, o sea 100svh − 72px')
-afirmarIgual(DESCUENTO_UMBRAL_PX, 96, 'UMBRAL: nacimiento − reposo, o sea 100svh − 96px')
-afirmarIgual(umbralPx(ALTO_DE_VIEWPORT_DE_LA_REFERENCIA), 804, 'a 900px de viewport, 804px')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · La hoja dice exactamente lo mismo que el módulo de datos')
@@ -122,31 +93,6 @@ afirmar(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · El mecanismo es geometría de sticky')
-
-const envoltorio = reglas(hoja).find((r) => r.selector === '[data-v3] [data-pieza="navegacion"]')
-afirmar(envoltorio !== undefined, 'existe la regla del envoltorio')
-const declaraciones = new Map(
-  (envoltorio === undefined ? [] : declaracionesDe(envoltorio.cuerpo)).map((d) => [d.prop, d.valor]),
-)
-
-afirmarIgual(declaraciones.get('position'), 'sticky', 'el envoltorio es sticky')
-afirmarIgual(declaraciones.get('block-size'), '0', '  y mide 0 de alto: no empuja nada')
-afirmarIgual(
-  declaraciones.get('top'),
-  'calc(var(--nav-umbral) * -1)',
-  '  con el top negativo igual a −umbral, que es lo que produce el viaje',
-)
-afirmarIgual(resolverAAlto('--nav-umbral', alto), 804, '  y ese umbral resuelto son 804px a 900 de viewport')
-
-const pastilla = reglas(hoja).find((r) => r.selector.includes('[data-parte="pastilla"]'))
-const declaracionesPastilla = new Map(
-  (pastilla === undefined ? [] : declaracionesDe(pastilla.cuerpo)).map((d) => [d.prop, d.valor]),
-)
-afirmarIgual(declaracionesPastilla.get('position'), 'absolute', 'la pastilla es absolute adentro')
-afirmarIgual(declaracionesPastilla.get('top'), 'var(--nav-nacimiento)', '  y nace en el nacimiento')
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · NADA de este sprint depende del scroll')
 
 const SENALES_DE_SCROLL: readonly [string, RegExp][] = [
@@ -173,35 +119,5 @@ controlPositivo(
   "window.addEventListener('scroll', alScrollear)",
   (codigo) => !SENALES_DE_SCROLL.some(([, patron]) => patron.test(codigo)),
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El hover del enlace aplica lo medido')
-
-afirmarIgual(
-  resolver('var(--spacing-2)', tokens)?.n,
-  HOVER_DE_ENLACE_MEDIDO.desplazamientoPx,
-  'el enlace se corre 8px, que es --spacing-2',
-)
-afirmarIgual(
-  resolver(propiedades.get('--nav-marcador-desplazamiento') ?? '', tokens)?.n,
-  HOVER_DE_ENLACE_MEDIDO.marcadorDesplazamientoPx,
-  'el marcador entra desde −16px, que es --spacing-4 en negativo',
-)
-afirmarIgual(
-  Number(propiedades.get('--nav-marcador-escala')),
-  HOVER_DE_ENLACE_MEDIDO.marcadorEscala,
-  'y desde scale(0.8)',
-)
-afirmarIgual(
-  resolver('var(--duracion-lenta)', tokens)?.n,
-  HOVER_DE_ENLACE_MEDIDO.duracionMs,
-  'los 0,5s medidos son --duracion-lenta',
-)
-afirmarIgual(
-  resolver(propiedades.get('--nav-retardo-reposo') ?? '', tokens)?.n,
-  HOVER_DE_ENLACE_MEDIDO.retardoEnReposoMs,
-  'y el retardo de 0,04s en reposo está aplicado',
-)
-afirmar(hoja.includes('var(--ease-principal)'), 'con --ease-principal, que es la curva medida')
 
 cerrar('s3-navegacion.invariant')

@@ -14,18 +14,12 @@ import { Panel } from '../../_componentes/Panel'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { contarLineas } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { ANCLAS } from '../../_lib/motion/anclas'
-import { ventanaDeHijo } from '../../_lib/motion/cronograma'
-import { PATRONES } from '../../_lib/motion/patrones'
 import { FORMAS_PERMITIDAS_SOBRE_OSCURO } from '../_contrato/acento'
-import { cronogramaDe } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
-import { ritmoDe } from '../_contrato/ritmo'
 import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { CARPETAS_DE_SECCION, clasesEscritas, codigoDeLaSeccion, existe, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
-import { Cierre, ContenidoDelCierre, GEOMETRIA } from './Cierre'
-import { afirmarComoEntraElCierre } from './s8-entrada'
+import { Cierre, ContenidoDelCierre } from './Cierre'
 import { ANCLAS_QUE_EXISTEN, COLUMNAS, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA, ETIQUETA_DE_SECCION, LINEA_DE_CIERRE, NOVEDADES, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
 import * as S from './soporte'
 
@@ -90,11 +84,11 @@ console.log(`  la frase de control produce ${delProhibido.length} hallazgos: ${d
 titulo('4 · Cero valores fuera de los tokens, en los archivos de producto')
 
 console.log(`  ${ARCHIVOS.length} archivos de producto, ${contarLineas(FUENTE)} líneas sin comentarios: ${ARCHIVOS.join(' · ')}`)
-/** ⚠️ ERAN TRES, DESPUÉS CINCO Y AHORA SEIS: sube al valor NUEVO en vez de
- *  aflojarse a un `>= 3`. B2 agregó `asentamiento.ts` y `s8-entrada.ts`; B4-A
- *  `LineaDeCierre.tsx`. ⚠️ B12 **no agrega un séptimo**: la banda del pie es un
- *  `<div>` y no un componente — sacarla costaba 81 B (recibos de B12). */
-afirmarIgual(ARCHIVOS.length, 6, 'la sección son seis archivos de producto')
+/** ⚠️ ERAN TRES, DESPUÉS CINCO, SEIS, Y AHORA CINCO OTRA VEZ: el número sigue
+ *  al archivo real en vez de clavarse. B2 agregó `asentamiento.ts` y
+ *  `s8-entrada.ts`; B4-A `LineaDeCierre.tsx`; Modo pulido borró `s8-entrada.ts`
+ *  entero (era 100% composición: el timing de entrada por pieza de §12). */
+afirmarIgual(ARCHIVOS.length, 5, 'la sección son cinco archivos de producto')
 /**
  * ⚠️ LA EXCLUSIÓN DEL ARNÉS SE MUDÓ, Y LO QUE SE AFIRMA CAMBIÓ CON ELLA. Este
  * invariante filtraba `soporte.ts` por su cuenta y afirmaba haber excluido
@@ -219,12 +213,6 @@ afirmarIgual(S.familiasComidas(SIN), [], `ninguno de los ${S.nivelesVistos(SIN)}
 controlPositivo('el detector de familia comida no está ciego', '<p data-nivel="micro" class="text-micro leading-micro font-medio">x</p>', (h: string) => S.familiasComidas(h).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// §12 vive en `s8-entrada.ts` — el único tema que afirma sobre CUÁNDO entra cada
-// pieza. Los valores de motion van por parámetro: ese archivo cuenta como producto.
-const crono = cronogramaDe(PATRONES.P2, COLUMNAS.length)
-afirmarComoEntraElCierre({ inicioDeP1: ANCLAS.P1.inicio, finDeP1: ANCLAS.P1.fin, finDeP2: ANCLAS.P2.fin, ventanas: COLUMNAS.map((_, i) => ventanaDeHijo(i, crono)), ventanasSinEscalonado: COLUMNAS.map((_, i) => ventanaDeHijo(i, { ...crono, escalonado: 0 })), escalonadoDeP2: PATRONES.P2.escalonado, duracionDeP2: PATRONES.P2.duracionDeclarada, escalonadoDelCronograma: crono.escalonado, cantidad: crono.cantidad, escalonan: S.escalonan })
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('13 · El mismo subárbol es correcto con las DOS superficies')
 
 const bajoSuperficie = (superficie: 'papel-opaco' | 'oscuro-opaco'): string =>
@@ -249,52 +237,6 @@ const TINTA = hexDe(/--color-tinta\s*:\s*(#[0-9A-Fa-f]{6})/)
 const ALFA = Number.parseFloat(/--opacity-casi\s*:\s*([\d.]+)/.exec(TEMA)?.[1] ?? '0')
 console.log(`  ⚠️ HALLAZGO FUERA DE MI CARPETA: \`--color-tinta-tenue\` (${TENUE}) NO se redefine en [data-seccion="invertida"]. Sobre ${OSCURO} da ${razonDeContraste(TENUE, OSCURO).toFixed(2)}:1 — falla AA y no llega a 3:1. Lo usa el <p> del texto de ayuda de \`chrome/Novedades.tsx\`, que este lane monta y no toca.`)
 console.log(`  Mis archivos usan \`opacity-casi\` sobre la tinta en vez de esa clase: da ${razonDeContraste(S.mezclar(TINTA_CLARA, OSCURO, ALFA), OSCURO).toFixed(2)}:1 sobre el fondo invertido y ${razonDeContraste(S.mezclar(TINTA, PAPEL, ALFA), PAPEL).toFixed(2)}:1 sobre el papel. Pasa AA en las dos.`)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('14 · Cuántas pantallas ocupa — [derivado de tokens], NO medido')
-
-// B1: el lector de tokens, la caja de línea y el modelo del pie viven en `soporte.ts` — son aritmética de CSS, no afirmaciones sobre el Cierre.
-const tokenPx = S.lectorDeTokens(TEMA)
-const cajaDeLinea = S.cajaDeLineaCon(tokenPx)
-const { MICRO, CAMPO, ENLACE, apilar, CTA_ALTO, LINEA_ALTO, SEPARACIONES, RELLENO } = S.modeloDelPie(tokenPx, cajaDeLinea)
-const COLUMNAS_PX = [apilar(DESTINOS_DE_LA_RUTA.length, ENLACE), apilar(PEDIDOS_DE_CONTACTO.length, cajaDeLinea('--text-caption', '--leading-texto') + MICRO), apilar(1, MICRO + tokenPx('--spacing-2') + CAMPO + tokenPx('--spacing-2') + 2 * MICRO)]
-const COLUMNA = Math.max(...COLUMNAS_PX)
-console.log(`  ⚠️ SITIO-S8 REEMPLAZA EL MODELO DE COLUMNA, no lo afloja: medía UNA sola —la de novedades— y la usaba para las tres. Con el recorrido del pie ampliado a ${DESTINOS_DE_LA_RUTA.length} enlaces (§7.24) la más alta pasó a ser la del recorrido, y el modelo viejo habría subestimado sin ponerse rojo. Las tres, derivadas de su lista: recorrido ${COLUMNAS_PX[0].toFixed(0)} · contacto ${COLUMNAS_PX[1].toFixed(0)} · novedades ${COLUMNAS_PX[2].toFixed(0)} px. EN FILA manda la más alta (${COLUMNA.toFixed(0)}); APILADAS, la suma (${COLUMNAS_PX.reduce((a, b) => a + b, 0).toFixed(0)}).`)
-controlPositivo('el alto de columna CRECE con su lista: no es un número escrito al lado', DESTINOS_DE_LA_RUTA.length, (n: number) => apilar(n + 1, ENLACE) === apilar(n, ENLACE))
-const ritmo = ritmoDe([seccionDelCierre])
-afirmarIgual(ritmo.pantallas, 1, `la tabla declara \`${seccionDe('cierre').alto}\` — una pantalla`)
-afirmarIgual(ritmo.pantallasPinneadas, 0, 'y la sección NO va pinneada: la única pinneada del lane es Servicios')
-
-const ESCRITORIO = RELLENO + MICRO + GEOMETRIA.lineasDelTitularEnEscritorio * cajaDeLinea('--text-titulo-xl', '--leading-titulo') + CTA_ALTO + COLUMNA + LINEA_ALTO + SEPARACIONES
-const MOBILE = RELLENO + MICRO + 3 * tokenPx('--text-fluido-titulo-xl') * tokenPx('--leading-titulo') + CTA_ALTO + COLUMNAS_PX.reduce((a, b) => a + b, 0) + 2 * tokenPx('--grilla-canal-compacto') + LINEA_ALTO + SEPARACIONES
-console.log(`  alto derivado @escritorio (tres columnas en fila, titular de ${GEOMETRIA.lineasDelTitularEnEscritorio} líneas por la medida de §15): ${ESCRITORIO.toFixed(0)} px`)
-console.log(`  ⚠️ ERA 741 px con el titular en UNA línea. La cifra que el docblock de \`_lib/secciones.ts\` cita para el Cierre se mueve a ${ESCRITORIO.toFixed(0)}; la CONCLUSIÓN no se mueve —sigue entrando en una pantalla a 1440— y ese archivo no es de este frente.`)
-console.log(`  alto derivado @375 (columnas apiladas, titular de tres líneas al piso del clamp): ${MOBILE.toFixed(0)} px`)
-console.log('  ⚠️ Sale de sumar cajas de línea y tokens. NO está medido en un navegador y falta confirmarlo con ojo.')
-afirmar(ESCRITORIO < 900, `a 1440×900 entra en una pantalla (${ESCRITORIO.toFixed(0)} < 900): el 100svh de la tabla es correcto y no hay que cambiarlo`)
-afirmar(MOBILE > 667, `a 375×667 se pasa (${MOBILE.toFixed(0)} > 667) y crece sola — el alto declarado es un MÍNIMO, así que la tabla sigue estando bien`)
-
-/** P1 termina 240px antes del fin de SU bloque: si abajo no hay tanto, no completa. */
-const EXIGE_P1 = -ANCLAS.P1.fin.viewport.px
-const DEBAJO = 3 * tokenPx('--spacing-12') + CTA_ALTO + COLUMNA + LINEA_ALTO + tokenPx('--spacing-20')
-afirmar(DEBAJO > EXIGE_P1, `el titular alcanza a completarse: su ancla exige ${EXIGE_P1} px de documento por debajo y hay ${DEBAJO.toFixed(0)}`, 'los 240 salen de `bottom bottom-=240px`, leídos del ancla y no escritos acá')
-console.log('  P2 (`bottom bottom`) no corre ese riesgo: su fin es `topDoc + alto − viewport`, que nunca pasa el fin del documento.')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('15 · B1 · La medida del titular: seis cuerpos, FIJA, y más angosta que la caja')
-
-/** ⚠️ EL MODELO DE §14 CAMBIÓ CON ESTO Y NO ES QUE LA SECCIÓN CAMBIÓ DE ALTO: sumaba UNA caja de línea porque el titular entraba en una. La conclusión —«a 1440×900 entra en una pantalla»— sigue; lo que se achica es el aire. */
-const MEDIDA_PX = tokenPx('--text-titulo-xl') * GEOMETRIA.cuerposDeLaMedidaDelTitular
-const CAJA_A_1440 = 1440 - 2 * tokenPx('--pad-lateral-compacto')
-const claseDe = (cuerpos: number): string => `max-w-[calc(var(--text-titulo-xl)*${cuerpos})]`
-const escapada = GEOMETRIA.claseDeLaMedidaDelTitular.replace(/[[\]()*]/g, '\\$&')
-afirmar(GEOMETRIA.claseDeLaMedidaDelTitular === claseDe(GEOMETRIA.cuerposDeLaMedidaDelTitular), `la clase literal y el número declarado dicen lo mismo: ${GEOMETRIA.cuerposDeLaMedidaDelTitular} cuerpos`, GEOMETRIA.claseDeLaMedidaDelTitular)
-controlPositivo('el chequeo ve una clase que no coincide con el número', claseDe(4), (c: string) => c === claseDe(GEOMETRIA.cuerposDeLaMedidaDelTitular))
-afirmarIgual([...SIN.matchAll(new RegExp(escapada, 'g'))].length, 1, 'la medida está EN EL MARCADO renderizado, y una sola vez')
-afirmar(new RegExp(`id="[^"]*"[^>]*class="[^"]*${escapada}`).test(SIN), '  y va en el mismo elemento que lleva el `id` con el que la sección se nombra: no hay una caja nueva')
-afirmar(MEDIDA_PX < CAJA_A_1440, `la caja del titular (${MEDIDA_PX.toFixed(0)} px) es MÁS ANGOSTA que el contenido a 1440 (${CAJA_A_1440.toFixed(0)} px): es lo que lo saca de una sola línea`, `${((100 * MEDIDA_PX) / CAJA_A_1440).toFixed(1)} % del ancho de contenido`)
-afirmar(!/%|vw/.test(GEOMETRIA.claseDeLaMedidaDelTitular), '  y NO acompaña a la ventana: sale de un token de tipografía, no de un porcentaje ni de una columna fluida')
-console.log(`  [medido en el navegador] 1 línea antes en los dos anchos → ${GEOMETRIA.lineasDelTitularEnEscritorio} a 1440 y 4 a 1920. Banda vacía continua bajo el último renglón: 210,78 → 88,69 px a 1440; 380,22 → 167,64 px a 1920.`)
 
 // El control de que `Pie` sin props emite byte a byte lo de antes de B1 vive en `s3-layout.invariant`: la cadena de contención es su sujeto.
 cerrar('s8-cierre.invariant')

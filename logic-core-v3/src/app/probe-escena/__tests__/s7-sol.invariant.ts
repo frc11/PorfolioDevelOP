@@ -19,11 +19,13 @@
  * Y la sección 4, que medía dónde vivía el cuerpo, pasó a verificar que el rayo al
  * sol **cruce las dos capas** desde el piso — y se mudó a
  * `s11-proyeccion.invariant.ts`, que es donde vive la proyección.
+ *
+ * ⚠️ **Modo pulido sacó el resto** (la forma del arco de un día, el alcance del
+ * mapa de sombra, el radio de partícula contra el fondo): era composición.
  */
 import * as THREE from 'three'
 
 import { createCelosiaUniforms } from '@/app/v3/_lib/escena/celosiaShader'
-import { LIGHT_ARC } from '@/app/v3/_lib/escena/choreography'
 import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
 import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
@@ -32,11 +34,8 @@ import {
   createLightRigInput,
   createLightRigTargets,
 } from '@/app/v3/_lib/escena/lightRig'
-import { KEY_DISTANCE, KEY_ELEVATION_DEG } from '@/app/v3/_lib/escena/probeLighting'
-import { SHADOW_FAR, SHADOW_NEAR } from '@/app/v3/_lib/escena/probeAtmosphere'
-import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '@/app/v3/_lib/escena/probeMoire'
-import { PARTICLE_R_MAX } from '@/app/v3/_lib/escena/probeParticles'
-import { FLOOR_Y, check, report, section } from './harness'
+import { KEY_DISTANCE } from '@/app/v3/_lib/escena/probeLighting'
+import { check, report, section } from './harness'
 
 const RAD = Math.PI / 180
 const arc: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
@@ -128,179 +127,5 @@ section('La celosía y la luz principal comparten eje')
     'la afirmación "el vector es unitario" mide la longitud, no la asume'
   )
 }
-
-// ── 2 · El arco: una tabla, dos curvas que no pueden contradecirse ──────────
-
-section('El arco del sol')
-
-const EL0 = KEY_ELEVATION_DEG
-let relationOk = true
-const relation: string[] = []
-for (const stop of LIGHT_ARC) {
-  const expected = (Math.asin(stop.level * Math.sin(EL0 * RAD)) * 180) / Math.PI
-  relation.push(`${stop.level.toFixed(2)}→${stop.elevationDeg}°`)
-  if (Math.abs(expected - stop.elevationDeg) > 0.06) relationOk = false
-}
-check(
-  'la elevación SALE del nivel: nivel = sin(elev)/sin(36°)',
-  relationOk,
-  relation.join(' · ')
-)
-
-check(
-  'el arco arranca en la elevación que S6 calibró para la key',
-  LIGHT_ARC[0].elevationDeg === KEY_ELEVATION_DEG,
-  `${LIGHT_ARC[0].elevationDeg}°`
-)
-
-/**
- * Los dos detectores de monotonía, con nombre y sobre una lista que entra por
- * parámetro: es lo único que permite correrlos contra un arco FABRICADO que las
- * viola. Sin eso, "la elevación nunca sube" sale en verde también con el bucle
- * roto — que es exactamente la clase de defecto que un control positivo ve.
- */
-type Tramo = { readonly elevationDeg: number; readonly azimuthDeg: number }
-/**
- * ⚠️ **B8 · CUSTODIABA «la elevación nunca sube: el sol baja y no vuelve».** Era
- * la forma del arco viejo —una tarde monótona hasta 0,34— y B8 la cambió por
- * decisión del humano: la sala se apaga en Trabajos y vuelve a tener luz en el
- * cierre. La propiedad que queda es la de UN DÍA: la elevación baja una vez
- * hasta la noche, la sostiene, sube una vez, y nunca vuelve al mediodía del
- * arranque. Un arco que subiera antes de la noche, o que tuviera dos noches,
- * sería un péndulo, y el detector tiene que verlos. `s20-arco.invariant.ts`
- * afirma lo mismo desde el lado del nivel; acá se mira la elevación, que es lo
- * que la key y la celosía reciben.
- */
-const unaNoche = (arco: readonly Tramo[]): boolean => {
-  const piso = Math.min(...arco.map((s) => s.elevationDeg))
-  const a = arco.findIndex((s) => s.elevationDeg === piso)
-  const b = arco.length - 1 - [...arco].reverse().findIndex((s) => s.elevationDeg === piso)
-  const cae = (t: readonly Tramo[]): boolean => t.every((s, i) => i === 0 || s.elevationDeg <= t[i - 1].elevationDeg)
-  const sube = (t: readonly Tramo[]): boolean => t.every((s, i) => i === 0 || s.elevationDeg >= t[i - 1].elevationDeg)
-  return (
-    cae(arco.slice(0, a + 1)) &&
-    sube(arco.slice(b)) &&
-    arco.slice(a, b + 1).every((s) => s.elevationDeg === piso) &&
-    arco[arco.length - 1].elevationDeg < arco[0].elevationDeg
-  )
-}
-const barreEnUnSentido = (arco: readonly Tramo[]): boolean =>
-  arco.every((stop, i) => i === 0 || stop.azimuthDeg >= arco[i - 1].azimuthDeg)
-const sobreElHorizonte = (arco: readonly Tramo[]): boolean =>
-  arco.every((stop) => stop.elevationDeg > 0)
-
-check(
-  'la elevación baja UNA vez, sostiene la noche y sube UNA vez sin volver al mediodía: un día con una noche, no un péndulo (B8)',
-  unaNoche(LIGHT_ARC),
-  LIGHT_ARC.map((s) => `${s.elevationDeg}°`).join(' → ')
-)
-check('el azimut barre en un solo sentido: es un día, no un péndulo', barreEnUnSentido(LIGHT_ARC))
-check(
-  'el sol nunca baja del horizonte',
-  sobreElHorizonte(LIGHT_ARC),
-  `mínimo ${Math.min(...LIGHT_ARC.map((s) => s.elevationDeg))}°`
-)
-
-/** Un arco fabricado que viola las tres a la vez. Los tres detectores lo ven. */
-const ARCO_ROTO: readonly Tramo[] = [
-  { elevationDeg: 10, azimuthDeg: 0 },
-  { elevationDeg: 20, azimuthDeg: -30 },
-  { elevationDeg: -5, azimuthDeg: 90 },
-]
-/** Dos noches: baja, sube, vuelve a bajar y vuelve a subir. Es lo que «un día» no puede ser. */
-const DOS_NOCHES: readonly Tramo[] = [
-  { elevationDeg: 36, azimuthDeg: 0 },
-  { elevationDeg: 3, azimuthDeg: 40 },
-  { elevationDeg: 20, azimuthDeg: 80 },
-  { elevationDeg: 3, azimuthDeg: 120 },
-  { elevationDeg: 20, azimuthDeg: 160 },
-]
-check('control positivo — el detector VE un sol que sube antes de la noche', !unaNoche(ARCO_ROTO))
-check('control positivo — y VE un arco con DOS noches', !unaNoche(DOS_NOCHES), 'baja, sube, baja y sube: cada mitad es monótona y el conjunto no es un día')
-check('control positivo — el del barrido VE un azimut que se devuelve', !barreEnUnSentido(ARCO_ROTO))
-check('control positivo — y el del horizonte VE un sol bajo tierra', !sobreElHorizonte(ARCO_ROTO), 'el tramo del medio está en −5°')
-
-/**
- * ⚠️ **S9 subió el techo de 115° a 180°, y no es aflojar una regla: es que la
- * razón de la vieja dejó de existir.**
- *
- * S7 acotó el barrido porque en su recorrido **la cámara vivía en azimut 0
- * durante más de medio track**, así que un sol que barriera de más dejaba tramos
- * enteros con la cara vista a oscuras. El recorrido definitivo lee contenido en
- * seis azimuts repartidos por toda la vuelta, y con la cámara barriendo 360° el
- * ángulo relativo recorre 180° sí o sí.
- *
- * Lo que sigue siendo la regla —y es la que este check protege— es que **el sol
- * no dé una vuelta**: 180° es un día, de un horizonte al otro.
- *
- * **S11 le agregó un segundo significado a este número**: como el patrón de la
- * celosía está anclado al azimut del sol, esos 180° son también cuánto rota la
- * proyección sobre el piso — 51 celdas finas de fase pasando por un punto fijo.
- * El barrido de las bandas ES el barrido del arco.
- */
-const sweep =
-  Math.max(...LIGHT_ARC.map((s) => s.azimuthDeg)) - Math.min(...LIGHT_ARC.map((s) => s.azimuthDeg))
-check('el barrido es un DÍA, no una vuelta', sweep <= 180, `${sweep}° en todo el recorrido`)
-
-// ── 3 · La sombra entra en el mapa ──────────────────────────────────────────
-
-section('La sombra del sol bajo')
-
-{
-  const top = 3.584
-  let worstDepth = 0
-  let worstElevation = 0
-  let reach = 0
-  for (let i = 0; i <= 200; i += 1) {
-    sampleLightArc(i / 200, arc)
-    const elevation = arc.elevationDeg * RAD
-    const shadow = (top - FLOOR_Y) / Math.tan(elevation)
-    const depth = KEY_DISTANCE + shadow * Math.cos(elevation) - FLOOR_Y * Math.sin(elevation)
-    if (depth > worstDepth) {
-      worstDepth = depth
-      worstElevation = arc.elevationDeg
-      reach = shadow
-    }
-  }
-  check(
-    'la punta de la sombra más larga entra en el rango del shadow map',
-    worstDepth < SHADOW_FAR,
-    `a ${worstElevation.toFixed(1)}° la sombra mide ${reach.toFixed(1)} y su profundidad es ${worstDepth.toFixed(1)} contra un FAR de ${SHADOW_FAR}`
-  )
-  check(
-    'el objeto sigue entrando por el lado cercano del rango',
-    KEY_DISTANCE - 5.08 > SHADOW_NEAR,
-    `el punto más cercano del logo está a ${(KEY_DISTANCE - 5.08).toFixed(1)} y NEAR es ${SHADOW_NEAR}`
-  )
-}
-
-/**
- * ⚠️ **La sección 4 se mudó a `s11-proyeccion.invariant.ts`.**
- *
- * Medía que el rayo al sol cruzara las dos capas desde el piso, que es lo que
- * reemplazó a "dónde vive el cuerpo del sol". Es una afirmación sobre la
- * PROYECCIÓN y no sobre el arco, así que vive con las otras — junto con el
- * control positivo que la destapó: la celosía tiene alcance, y ese alcance se
- * abre con el atardecer.
- */
-
-// ── 5 · El orden de dibujo después de borrar el sol ─────────────────────────
-
-section('Los transparentes, sin el sol en el medio')
-
-/**
- * ⚠️ **Reemplaza al chequeo de "ninguna partícula más lejos que el sol".**
- *
- * Aquel protegía el orden entre el cuerpo del sol y el polvo. Sin cuerpo no hay
- * nada que proteger ahí, pero el problema de fondo sigue: three ordena los
- * transparentes por la posición del OBJETO y los cilindros están centrados en el
- * origen. Lo que garantiza que ninguna mota se dibuje delante de la envolvente es
- * que el campo entero viva por DENTRO de los dos radios.
- */
-check(
-  'el campo de partículas vive por dentro de las dos capas',
-  PARTICLE_R_MAX < MOIRE_NEAR_RADIUS && PARTICLE_R_MAX < MOIRE_FAR_RADIUS,
-  `polvo hasta ${PARTICLE_R_MAX} contra capas en ${MOIRE_NEAR_RADIUS} y ${MOIRE_FAR_RADIUS}`
-)
 
 report('s7 · el sol')

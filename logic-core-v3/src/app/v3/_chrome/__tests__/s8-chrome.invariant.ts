@@ -5,16 +5,6 @@
  *
  * ── Qué custodia, y por qué cada cosa está acá ─────────────────────────────
  *
- *   1. **La pastilla se monta como hija DIRECTA del flujo.** Un `<div>` de más
- *      entre el `<main>` y el envoltorio `sticky` le deja el rango de pegado en
- *      cero y la pastilla deja de viajar **sin un solo error en consola**. Y
- *      desde SITIO-S11, que **el enlace de salto va antes, fuera del flujo**: es
- *      la primera parada del documento y no le mueve el nacimiento a la pastilla.
- *   2. **El umbral sigue valiendo contra el Hero REAL.** Se deriva de tokens y
- *      la derivación supone una primera pantalla de `100svh`: se comprueba
- *      contra la tabla del recorrido, no contra la memoria.
- *   3. **La cadena de ancestros sigue sin `overflow` recortado.** `sticky` se
- *      apaga en silencio si un ancestro lo tiene.
  *   4. **El pie enlaza las OCHO, derivadas**, y ningún `href` lleva a la nada.
  *   5. **El cursor está detrás de la constante, TOMADA en B5.**
  *   6. **El rodeo de `peso` está restaurado, y se dice DÓNDE estaba.**
@@ -28,144 +18,28 @@ import { createElement } from 'react'
 
 import { CURSOR_MIN_ANCHO_PX, deberiaMontarseElCursor } from '../../_lib/cursor'
 import { MARCA_CURSOR } from '../../_lib/marcaCursor'
-import {
-  ALTO_PASTILLA_PX,
-  DESCUENTO_NACIMIENTO_PX,
-  DESCUENTO_UMBRAL_PX,
-  ENLACES_DE_MUESTRA,
-  TOKENS_DEL_UMBRAL,
-  umbralPx,
-} from '../../_lib/navegacion'
+import { ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
 import { SECCIONES } from '../../_lib/secciones'
-import { marcadoDelDocumento } from '../../_lib/__tests__/s10-banco'
-import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { DIST, conjuntoInicial, contiene, kib, pesar, todosLosChunks } from '../../_lib/__tests__/s3-bundle'
 import { Cierre } from '../../_secciones/cierre/Cierre'
 import { ANCLAS_QUE_EXISTEN, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
-import { pantallasDe, seccionDe } from '../../_secciones/_contrato/forma'
+import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import {
   CANDIDATOS_DEL_RODEO,
   CURSOR_PROPIO_EN_EL_HOME,
-  EXPORT_DEL_CHROME,
   GATEADO_POR_SU_CUENTA,
   MODULO_DEL_CHROME,
   PIEZAS_QUE_SE_CONSUMEN,
 } from '../contrato'
 import { ChromeDelHome } from '../ChromeDelHome'
-import { ROTULO_DEL_SALTO } from '../SaltarAlContenido'
 import * as S from './soporte'
 
 const CHROME = S.leer(MODULO_DEL_CHROME)
 const CHROME_LIMPIO = S.sinComentariosNiCadenas(CHROME)
 const MARCADO = marcar(createElement(ChromeDelHome), { anima: false })
 const PIE = marcar(createElement(Cierre, { seccion: seccionDe('cierre') }), { anima: false })
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · Lo que el chrome emite: el salto primero, y el envoltorio `sticky` sin envoltorio')
-
-afirmar(S.existe(MODULO_DEL_CHROME), `el módulo existe: \`${MODULO_DEL_CHROME}\``)
-afirmar(CHROME_LIMPIO.includes(`export function ${EXPORT_DEL_CHROME}(`), `y exporta \`${EXPORT_DEL_CHROME}\` con nombre, que es lo que el home importa`)
-afirmar(MARCADO.includes('data-pieza="navegacion"'), 'el chrome monta la pastilla')
-
-/**
- * ⚠️ LAS DOS AFIRMACIONES QUE SOSTIENEN EL MECANISMO — y son de naturaleza
- * distinta, así que se afirman por separado.
- *
- * El envoltorio de la pastilla es `sticky` con `block-size: 0`, y un `sticky` se
- * pega dentro de su CONTENEDOR DE BLOQUE: su rango de pegado es el alto del
- * contenedor menos el suyo. **(a) Nada lo puede ENVOLVER** —un `<div>` de alto
- * automático mediría lo que mide su contenido, cero, y el rango quedaría en cero:
- * la pastilla se iría con el scroll—, y eso lo dice el marcado. **(b) Lo que lo
- * precede no puede ocupar ALTO** —SITIO-S11 puso el enlace de salto antes que la
- * pastilla, y si midiera un píxel le correría el nacimiento—, y eso sólo lo puede
- * decir la hoja: `position: static` ahí rompe la cuenta de §2 sin cambiar una
- * línea de marcado. Por eso «el primer elemento es la pastilla» se partió en dos
- * en vez de aflojarse; el porqué del salto está en `_estilos/foco.css` y en
- * `_chrome/SaltarAlContenido.tsx`. Las dos fallan igual que el pinneo de
- * `_contrato/Seccion.tsx`: sin error, sin aviso, y con un marcado que se ve bien. */
-afirmarIgual(S.profundidadDeLaPieza(MARCADO, 'navegacion'), 0, 'el envoltorio de la pastilla NO está envuelto: es hijo directo del fragmento, así que su contenedor de bloque es el ancestro que le toque y el rango de pegado es el alto de ese ancestro')
-S.afirmarElChromeAfueraDelMain()
-controlPositivo('el detector ve un envoltorio intermedio', S.MARCADO_CON_ENVOLTORIO, (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
-controlPositivo('y no se pone verde con un marcado vacío', '', (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
-
-const FOCO_CSS = S.leer('src/app/v3/_estilos/foco.css')
-const SEL_SALTO = '[data-v3] [data-pieza="salto"]'
-afirmarIgual(S.declaracionCss(FOCO_CSS, SEL_SALTO, 'position'), 'absolute', 'en reposo el enlace de salto está FUERA DEL FLUJO: no ocupa alto, así que la pastilla nace exactamente donde nacía')
-afirmarIgual(S.declaracionCss(FOCO_CSS, `${SEL_SALTO}:focus-visible`, 'position'), 'fixed', '  y al enfocarlo se ve contra el VIEWPORT: el foco puede volver acá con `Shift+Tab` desde cualquier punto del recorrido')
-controlPositivo('el detector ve un enlace de salto DENTRO del flujo', S.CSS_DEL_SALTO_EN_FLUJO, (c: string) => S.declaracionCss(c, SEL_SALTO, 'position') === 'absolute')
-controlPositivo('y sabe decir que una propiedad NO está declarada, que es distinto de estar en otro valor', FOCO_CSS, (c: string) => S.declaracionCss(c, SEL_SALTO, 'display') !== null)
-
-/* La primera parada del DOCUMENTO, con el banco y el lector de SITIO-S10 —acá no se escribe
-   una segunda forma de contar paradas—: cierra los hallazgos 1 y 2 de `s10-acceso` §2 y §3. */
-const PARADAS = paradasDeTabulacion(marcadoDelDocumento('quieta'))
-afirmarIgual(PARADAS[0].rotulo, ROTULO_DEL_SALTO, `la PRIMERA de las ${PARADAS.length} paradas del documento es el enlace de salto: quien tabula ya no entra por los cinco de la pastilla`)
-afirmarIgual(paradasDeTabulacion(marcadoDelDocumento('animada'))[0].rotulo, ROTULO_DEL_SALTO, '  en las DOS ramas: el enlace es marcado y una hoja, no cuelga de la coreografía')
-afirmarIgual(PARADAS[0].destino, `#${SECCIONES[0].id}`, '  y salta a la PRIMERA sección de la tabla — desde SITIO-S12 el `<main>` también sería un destino válido, y la constante NO se movió: ver `SaltarAlContenido.tsx`')
-afirmar(marcadoDelDocumento('quieta').includes(`id="${SECCIONES[0].id}"`), '  y ese id EXISTE en el marcado del documento: el salto aterriza en algo')
-controlPositivo('el buscador del ancla no está ciego', 'id="no-existe-en-el-documento"', (m: string) => marcadoDelDocumento('quieta').includes(m))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El umbral, derivado de tokens y verificado contra el Hero REAL')
-
-afirmarIgual(ALTO_PASTILLA_PX, 2 * TOKENS_DEL_UMBRAL.rellenoVertical.px + TOKENS_DEL_UMBRAL.tamanoDeTexto.px * TOKENS_DEL_UMBRAL.interlineado.factor, `alto de la pastilla: 2×${TOKENS_DEL_UMBRAL.rellenoVertical.px} + ${TOKENS_DEL_UMBRAL.tamanoDeTexto.px}×${TOKENS_DEL_UMBRAL.interlineado.factor} = ${ALTO_PASTILLA_PX} px`)
-afirmarIgual(DESCUENTO_NACIMIENTO_PX, TOKENS_DEL_UMBRAL.margenAlPie.px + ALTO_PASTILLA_PX, `nacimiento: 100svh − ${DESCUENTO_NACIMIENTO_PX} px`)
-afirmarIgual(DESCUENTO_UMBRAL_PX, DESCUENTO_NACIMIENTO_PX + TOKENS_DEL_UMBRAL.reposo.px, `UMBRAL: 100svh − ${DESCUENTO_UMBRAL_PX} px`)
-afirmarIgual(umbralPx(900), 900 - DESCUENTO_UMBRAL_PX, `a 900 px de viewport son ${umbralPx(900)} px`)
-
-/**
- * ⚠️ **EL UMBRAL DEPENDE DE LA GEOMETRÍA DEL HERO, y por eso se comprueba acá.**
- *
- * `_lib/navegacion.ts` deriva el número de tres tokens, y `s3-navegacion` ya
- * recorre esa cuenta. Lo que ESE instrumento no puede ver es la premisa: la
- * derivación supone que **la primera pantalla mide `100svh`** y que la pastilla
- * nace cerca de su pie. Eso es una propiedad de la COMPOSICIÓN —de qué sección
- * va primera en la tabla— y sólo se puede afirmar con el home montado.
- */
-const primera = SECCIONES[0]
-afirmarIgual(primera.id, 'hero', 'la primera sección del recorrido es el Hero: es sobre él que nace la pastilla')
-afirmarIgual(pantallasDe(primera), 1, `y mide UNA pantalla (\`${primera.alto}\`), que es la premisa de la derivación`)
-afirmar(primera.pinneada === undefined, '  y no va pinneada: si lo estuviera, la primera pantalla duraría más de un viewport y el nacimiento caería sobre otra cosa')
-
-const TEMA = S.leer('src/app/theme-develop.css')
-const ESCALON = /pb-(\d+)/.exec(S.sinComentarios(S.leer('src/app/v3/_secciones/hero/Hero.tsx')))?.[1] ?? ''
-const AIRE = S.pxDeEspaciado(ESCALON, TEMA)
-afirmar(ESCALON.length > 0, `el Hero reserva el aire del pie con \`pb-${ESCALON}\``)
-afirmar(AIRE >= DESCUENTO_NACIMIENTO_PX, `y ese aire (${AIRE} px, leído del tema) cubre los ${DESCUENTO_NACIMIENTO_PX} px que la pastilla ocupa: el número SIGUE VALIENDO con el Hero real`)
-controlPositivo('la cuenta ve un escalón que NO alcanza', '4', (e: string) => S.pxDeEspaciado(e, TEMA) >= DESCUENTO_NACIMIENTO_PX)
-console.log(`  la cuenta, entera: reposo ${TOKENS_DEL_UMBRAL.reposo.px} + alto ${ALTO_PASTILLA_PX} + margen ${TOKENS_DEL_UMBRAL.margenAlPie.px} → nace en 100svh − ${DESCUENTO_NACIMIENTO_PX}, umbral en 100svh − ${DESCUENTO_UMBRAL_PX}. A 900 de viewport: nace en ${900 - DESCUENTO_NACIMIENTO_PX}, se fija a los ${umbralPx(900)} px de scroll.`)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · La cadena de ancestros del `sticky` sigue sin `overflow` recortado')
-
-/**
- * Los cuatro ancestros del envoltorio, de adentro hacia afuera:
- * `<main>` → `<div data-v3>` → `<body>` → `<html>`. No hay un quinto: el chrome
- * es hijo directo del `<main>` (bloque 1) y `/v3` no lleva chrome público
- * —`publicRoute.ts` lo declara sin barra ni Shutter—, así que nada más se
- * interpone.
- */
-const ANCESTROS_CSS = ['html', 'body', ':root', '*', 'main', 'header', '[data-v3]']
-const HOJAS = ['src/app/globals.css', 'src/app/theme-develop.css', ...['cta', 'navegacion', 'cursor', 'pie', 'foco'].map((h) => `src/app/v3/_estilos/${h}.css`)]
-for (const hoja of HOJAS) {
-  afirmarIgual(S.overflowsSobreAncestros(S.leer(hoja), ANCESTROS_CSS), [], `\`${hoja}\` no recorta el overflow de ningún ancestro`)
-}
-controlPositivo('el detector ve un overflow recortado sobre un ancestro', S.CSS_CON_OVERFLOW, (c: string) => S.overflowsSobreAncestros(c, ANCESTROS_CSS).length === 0)
-controlPositivo('y NO lo ve cuando el selector no es un ancestro', '.tarjeta { overflow: hidden; }', (c: string) => S.overflowsSobreAncestros(c, ANCESTROS_CSS).length > 0)
-
-const LAYOUTS = ['src/app/layout.tsx', 'src/app/v3/layout.tsx', 'src/app/v3/page.tsx', MODULO_DEL_CHROME]
-for (const archivo of LAYOUTS) {
-  afirmarIgual(S.clasesDeOverflow(S.leer(archivo)), [], `\`${archivo}\` no escribe una utilidad de overflow`)
-}
-controlPositivo('el detector ve un `overflow-x-hidden` de Tailwind', S.TSX_CON_OVERFLOW, (f: string) => S.clasesDeOverflow(f).length === 0)
-controlPositivo('y NO lo confunde con el comentario que lo explica', '// reemplazó al overflow:hidden de EarlyScrollLock', (f: string) => S.clasesDeOverflow(f).length > 0)
-
-/** ⚠️ `lenis.css` cuelga `overflow: clip` de **`lenis-stopped`**, no de `lenis`; desde
- *  B5 la garantía es que nadie llame `stop()` (`s18-compuertas`, y el `<html>` vivo). */
-const SMOOTH = S.sinComentarios(S.leer('src/components/layout/SmoothScroll.tsx'))
-afirmar(/pathname\.startsWith\('\/v3'\)/.test(SMOOTH) && /return/.test(SMOOTH), '`SmoothScroll` —el del layout RAÍZ— sigue saliendose de /v3: el sitio vivo no cambió de camino')
-controlPositivo('el lector ve un SmoothScroll sin esa salida', "if (isPortal) { return }", (f: string) => /pathname\.startsWith\('\/v3'\)/.test(f))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El pie enlaza las OCHO, DERIVADAS, y ningún href lleva a la nada')

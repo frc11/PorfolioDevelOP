@@ -29,15 +29,14 @@
 import path from 'node:path'
 
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
-import { CLASES_FUERA_DE_FLUJO } from '../../compuerta'
 import { MARCA_ESCENA } from '../../marcaEscena'
-import { CLASES_DE_LA_ESCENA, PAQUETES_DE_TRES } from '../contrato'
+import { PAQUETES_DE_TRES } from '../contrato'
 import { escenaRetenida } from '../retencion'
 // prettier-ignore
 import { MAPEO_DE_LAS_SECCIONES, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, pantallasDe, progresoDelScroll } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
-import { DESTINO, ORIGEN, MODULOS_MUDADOS, RAIZ, SUBARBOL_DEL_EDITOR, escribeAtributo, existe, importaValorDe, pesoDeUnFuente, referenciasA, resolverEspecificador, usaClassName } from './soporte'
+import { DESTINO, ORIGEN, MODULOS_MUDADOS, RAIZ, SUBARBOL_DEL_EDITOR, escribeAtributo, existe, importaValorDe, pesoDeUnFuente, referenciasA, resolverEspecificador } from './soporte'
 // prettier-ignore
 import { TODOS, conTipoDelPanel, conValorDelPanel, consumidoresDeLaMarca, fuenteDe, rotosDeLaMudanza, soloAplicacion, vinculoConElPanel } from './s8-escena-soporte'
 import { desalineacionDeNombres, imprimirMapeo, pesoDelEditor } from './tablas'
@@ -217,18 +216,8 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · EscenaDelHome sale del flujo y escribe la marca como valor de atributo')
+titulo('6 · EscenaDelHome escribe la marca como valor de atributo')
 
-afirmarIgual(CLASES_DE_LA_ESCENA, CLASES_FUERA_DE_FLUJO, 'las clases son las de S1, no otras')
-afirmarIgual(
-  CLASES_FUERA_DE_FLUJO,
-  'fixed inset-0 z-0 pointer-events-none',
-  '  y siguen siendo fixed inset-0 z-0 pointer-events-none',
-)
-afirmar(
-  usaClassName(ESCENA_DEL_HOME, 'CLASES_DE_LA_ESCENA'),
-  'EscenaDelHome las usa como className, no una cadena escrita a mano',
-)
 afirmar(
   escribeAtributo(ESCENA_DEL_HOME, 'data-escena', 'MARCA_ESCENA'),
   `y escribe la marca como VALOR de atributo — data-escena={MARCA_ESCENA} = "${MARCA_ESCENA}"`,

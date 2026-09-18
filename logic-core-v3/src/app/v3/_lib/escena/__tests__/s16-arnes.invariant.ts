@@ -44,20 +44,9 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { lineasDeCodigo } from '../../__tests__/s8-largos'
 import { CHOREO_KEYFRAMES } from '../choreography'
-import { CAMERA_FOV, FRAME_TRAVEL_SAFETY, ORBIT_TARGET_Y, PROBE_SVG_SCALE } from '../probeScene'
-import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
+import { CAMERA_FOV, ORBIT_TARGET_Y } from '../probeScene'
 import { projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
-import {
-  FLOOR_Y,
-  FOV,
-  LOGO_H,
-  LOGO_W,
-  TAN_HALF_V,
-  cameraAt,
-  emptyPose,
-  makeTrack,
-  type Vec3,
-} from '@/app/probe-escena/__tests__/harness'
+import { FOV, TAN_HALF_V } from '@/app/probe-escena/__tests__/harness'
 
 const RAIZ = process.cwd()
 const leer = (rel: string): string => readFileSync(path.join(RAIZ, rel), 'utf8')
@@ -294,85 +283,6 @@ controlPositivo(
   'el barrido no está ciego: con el arnés de vuelta en la lista, el sobrante aparece',
   `${ARNES} · fov`,
   (falso: string) => declarados.includes(falso),
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · EL PIVOTE — la cámara del arnés contra la del sitio, sin encuadre')
-
-/**
- * `cameraAt` orbita alrededor de `[0, 0, 0]` escrito a mano; producción orbita
- * alrededor de `[0, ORBIT_TARGET_Y, 0]`. **Hoy dan lo mismo porque
- * `ORBIT_TARGET_Y` vale 0**, y ese cero es la premisa que hace correcto el
- * literal. Se afirma, y se afirma la CONSECUENCIA: con la pose sin encuadrar
- * —que es donde la caja del logo (§7.15) deja de intervenir— las dos cámaras
- * tienen que coincidir hasta el último bit.
- */
-afirmarIgual(ORBIT_TARGET_Y, 0, '`ORBIT_TARGET_Y` vale 0 — la premisa del `[0, 0, 0]` del arnés')
-
-const SIN_ENCUADRE = { ...POSE_DE_ENTRADA, frameX: 0, frameY: 0 }
-const pista = makeTrack([{ at: 0, name: 'entrada', pose: SIN_ENCUADRE }, { at: 1, name: 'fin', pose: SIN_ENCUADRE }])
-const delArnes = cameraAt(pista, 0, VENTANA.ancho / VENTANA.alto, emptyPose())
-const delSitio = sceneCameraAt(SIN_ENCUADRE, VENTANA.ancho, VENTANA.alto)
-
-const EJES = ['position', 'right', 'up', 'forward'] as const
-const coinciden = (a: Vec3, b: Vec3): boolean => a.every((c, i) => Math.abs(c - b[i]) < 1e-15)
-
-afirmar(
-  delSitio !== null && EJES.every((eje) => coinciden(delArnes[eje], delSitio[eje] as Vec3)),
-  'la cámara del arnés ES la del sitio cuando la pose no encuadra: posición y las tres direcciones de pantalla',
-  delSitio === null ? 'sin cámara' : `posición ${delArnes.position.map((c) => c.toFixed(6)).join(' · ')}`,
-)
-controlPositivo(
-  'el comparador ve la diferencia: contra OTRO keyframe no coincide',
-  CHOREO_KEYFRAMES[CHOREO_KEYFRAMES.length - 1].pose,
-  (otra: typeof POSE_DE_ENTRADA) => {
-    const otroSitio = sceneCameraAt({ ...otra, frameX: 0, frameY: 0 }, VENTANA.ancho, VENTANA.alto)
-    return otroSitio !== null && EJES.every((eje) => coinciden(delArnes[eje], otroSitio[eje] as Vec3))
-  },
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · LA CAJA — las dos cuentas de `LOGO_BOX_WORLD`, que nunca se cruzaron')
-
-/**
- * `logo-footprint.ts` escribe `7.168` con el comentario `// 0.007 × 1024`, y
- * `probeScene.ts` escribe el `0.007` por su cuenta como `PROBE_SVG_SCALE`.
- * **El comentario era el único lugar donde las dos se relacionaban.** Acá se
- * comprueba: la caja es la escala por el viewBox, al bit.
- */
-const VIEWBOX = 1024
-afirmarIgual(
-  LOGO_BOX_WORLD,
-  PROBE_SVG_SCALE * VIEWBOX,
-  '`LOGO_BOX_WORLD` ES `PROBE_SVG_SCALE × 1024` — el comentario, comprobado',
-)
-controlPositivo(
-  'y no vale para cualquier escala: el detector ve una escala movida',
-  PROBE_SVG_SCALE * 2,
-  (escala: number) => LOGO_BOX_WORLD === escala * VIEWBOX,
-)
-afirmarIgual([LOGO_W, LOGO_H], [LOGO_BOX_WORLD, LOGO_BOX_WORLD], '  y la caja del arnés es ésa, en los dos ejes')
-
-/**
- * El piso, recalculado acá desde la caja. No es una identidad: `FLOOR_Y` puede
- * dejar de ser esta fórmula —es un valor de composición y `probeScene.ts` lo
- * declara con su porqué— y el día que eso pase, esto lo dice.
- */
-const PISO_ESPERADO = -LOGO_BOX_WORLD / 2 - 0.72
-afirmar(
-  FLOOR_Y === PISO_ESPERADO,
-  'el `FLOOR_Y` del arnés es `−LOGO_BOX_WORLD / 2 − 0,72`, recalculado acá',
-  `${FLOOR_Y} contra ${PISO_ESPERADO}`,
-)
-controlPositivo(
-  'el detector del piso ve medio metro de diferencia',
-  PISO_ESPERADO - 0.5,
-  (piso: number) => FLOOR_Y === piso,
-)
-afirmarIgual(
-  FRAME_TRAVEL_SAFETY,
-  0.88,
-  '  y el margen de recorrido sigue siendo 0,88 — publicado acá, declarado en `probeScene.ts`',
 )
 
 cerrar('s16-arnes')

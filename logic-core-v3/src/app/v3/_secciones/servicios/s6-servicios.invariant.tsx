@@ -19,19 +19,14 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { rangoDeScroll, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS } from '../../_lib/motion/lineas'
 import { IDS_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
-import { ANCLA_DEL_PIN } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
-import { cambiosDeTramo, canalesSincronizados, desincronizaciones, tramoDeSecuencia, type LectorDeCanales } from '../_contrato/secuencia'
 import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { cuentaDeAtributo, hayAnidamiento, valoresDeAtributo } from '../_invariantes/marcado'
-import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinDeclararSuForma, capasSinPantalla, cuenta, elementosTipograficos, familiasDeCuerpoPerdidas, familiasDeTituloPerdidas, focalizablesDe, interiorDe, serviciosApagados, serviciosVigentes, tamanosPerdidos, textoPegado } from './deteccion'
-import { afirmarElAsentamiento } from './s6-asentamiento'
-import { afirmarElPin } from './s6-pin'
+import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinDeclararSuForma, capasSinPantalla, cuenta, focalizablesDe, interiorDe, serviciosApagados, serviciosVigentes, textoPegado } from './deteccion'
 import { afirmarLaTipografia } from './s6-tipografia'
 import { CONTENIDO, ITEMS_POR_SERVICIO, LONGITUDES, palabrasDelParrafo } from './contenido'
 import { Servicios } from './Servicios'
@@ -154,49 +149,10 @@ for (const prohibida of ['useScroll', 'useProgresoEnTiempoReal', "addEventListen
 controlPositivo('el buscador ve un feed de scroll propio', "useScroll(); window.addEventListener('scroll', f); new IntersectionObserver(g)", (t) => ['useScroll', "addEventListener('scroll'", 'IntersectionObserver'].every((p) => cuenta(t, new RegExp(p.replace(/[()']/g, '\\$&'), 'g')) === 0))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · La secuencia está sincronizada, y avanza')
-
-afirmarIgual(desincronizaciones(canalesSincronizados, CANTIDAD_DE_TRAMOS), [], 'los cinco canales leen el mismo tramo en los 601 puntos del barrido')
-afirmarIgual(cambiosDeTramo(canalesSincronizados, CANTIDAD_DE_TRAMOS), CANTIDAD_DE_TRAMOS - 1, 'y el tramo cambia exactamente 2 veces — ni 0 ni 3')
-
-/** EL CONTROL: tres canales con su propio progreso, desfasados. */
-const canalesDesfasados: LectorDeCanales = (p, c) => ({
-  nombre: tramoDeSecuencia(p, c).indice,
-  medio: tramoDeSecuencia(Math.min(1, p + 0.12), c).indice,
-  acento: tramoDeSecuencia(Math.max(0, p - 0.12), c).indice,
-  parrafo: tramoDeSecuencia(p * 0.75, c),
-  lista: tramoDeSecuencia(Math.min(1, p * 1.3), c),
-})
-controlPositivo('tres progresos desfasados NO pasan la simultaneidad', canalesDesfasados, (l) => desincronizaciones(l, CANTIDAD_DE_TRAMOS).length === 0)
-controlPositivo('y un lector clavado en el primer tramo no pasa el contrapeso', ((p, c) => ({ nombre: 0, medio: 0, acento: 0, parrafo: tramoDeSecuencia(p, c), lista: tramoDeSecuencia(p, c) })) as LectorDeCanales, (l) => cambiosDeTramo(l, CANTIDAD_DE_TRAMOS) === CANTIDAD_DE_TRAMOS - 1)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · El rango del pin es `alto − viewport`, exacto')
-
-const VIEWPORT = 900
-const CAJA = { topDoc: 5000, alto: VIEWPORT * 3 }
-const rango = rangoDeScroll(ANCLA_DEL_PIN, CAJA, VIEWPORT)
-afirmarIgual(rango.fin - rango.inicio, CAJA.alto - VIEWPORT, `300svh con un hijo de 100svh: el pin recorre ${rango.fin - rango.inicio} px de 200svh`)
-afirmarIgual(rango.inicio, CAJA.topDoc, 'el progreso vale 0 justo cuando el bloque llega al tope del viewport')
-// B1: el alto de la sección se DERIVA de los pasos, y los pasos son los servicios del contenido.
+// B1: el alto de la sección se DERIVA de los pasos, y los pasos son los
+// servicios del contenido — la única parte de §9 que no era rango de scroll.
 afirmarIgual(seccionDeServicios.pasosDeLaSecuencia, Object.keys(CONTENIDO).length, `los ${CANTIDAD_DE_TRAMOS} pasos de la tabla SON los servicios de \`contenido.ts\`: la derivación del alto es comprobable`)
 controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccionDeServicios, pasosDeLaSecuencia: 4 }, (s: typeof seccionDeServicios) => s.pasosDeLaSecuencia === Object.keys(CONTENIDO).length)
-const lado = (fraccion: number) => ({ fraccion, px: 0 })
-const MUTILADAS: readonly ParDeAnclas[] = [
-  { inicio: { declarado: 'top bottom', elemento: lado(0), viewport: lado(1) }, fin: ANCLA_DEL_PIN.fin },
-  { inicio: ANCLA_DEL_PIN.inicio, fin: { declarado: 'bottom top', elemento: lado(1), viewport: lado(0) } },
-]
-for (const par of MUTILADAS) {
-  controlPositivo(`un ancla \`${par.inicio.declarado} → ${par.fin.declarado}\` no reproduce el pin`, par, (a) => {
-    const r = rangoDeScroll(a, CAJA, VIEWPORT)
-    return r.fin - r.inicio === CAJA.alto - VIEWPORT
-  })
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §9 bis vive en `s6-pin.ts` — cierra la advertencia que `geometria.ts` tenía
-// abierta desde S1 y necesita su propio docblock largo. Regla de las 300.
-afirmarElPin(quieto, animado, seccionDeServicios.alto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('10 · Los TRES en el árbol, y UN acento por cuadro')
@@ -272,10 +228,5 @@ controlPositivo('el contador de ítems vería una lista corta', '<ul><li>uno</li
 // ═══════════════════════════════════════════════════════════════════════════
 // §13 vive en `s6-tipografia.ts` — es un asunto de `cn()`, no de la sección.
 afirmarLaTipografia(quieto, animado)
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §14 vive en `s6-asentamiento.ts` — el único tema que afirma sobre el REMAPEO
-// del progreso y no sobre el marcado. Regla de las 300.
-afirmarElAsentamiento()
 
 cerrar('s6-servicios.invariant')

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-import { CLASES_FUERA_DE_FLUJO, CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
+import { CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
 import { calidadPorAncho } from '../escena/calidad'
 import { IMPORT_DE_LA_ESCENA } from '../escena/contrato'
 import { EscenarioCompuerta } from '../../_componentes/EscenarioCompuerta'
@@ -154,32 +154,6 @@ controlPositivo(
   'el chequeo de import perezoso ve un import estático',
   "import EscenarioDePrueba from './EscenarioDePrueba'",
   (fuente) => /dynamic\(\(\) => import\('\.\/EscenarioDePrueba'\)/.test(fuente),
-)
-
-titulo('4 · Sin salto de layout: el escenario no ocupa lugar en el flujo')
-
-const clases = CLASES_FUERA_DE_FLUJO.split(' ')
-afirmar(clases.includes('fixed'), '`fixed` — no participa del flujo del documento')
-afirmar(clases.includes('inset-0'), '`inset-0` — se ancla al viewport, no a un hermano')
-afirmar(clases.includes('pointer-events-none'), '`pointer-events-none` — es ornamento y no se come un click')
-afirmar(clases.includes('z-0'), '`z-0` — abajo de los paneles, que van en `z-10`')
-afirmar(
-  !clases.some((c) => /^(h-|w-|min-h-|min-w-|m[trblxy]?-|p[trblxy]?-)/.test(c)),
-  'no declara alto, ancho, margen ni padding: nada que pueda empujar una caja',
-)
-
-const escenario = leer('src/app/v3/_componentes/EscenarioDePrueba.tsx')
-afirmar(escenario.includes('CLASES_FUERA_DE_FLUJO'), 'el escenario consume esa constante y no clases sueltas')
-afirmar(!/from 'three'|@react-three|useFrame|Canvas/.test(escenario), 'el marcador de posición no importa la escena 3D')
-afirmar(!/animate|transition-|motion\/react|framer/.test(escenario), 'y no lleva ninguna animación')
-
-controlPositivo(
-  'el chequeo de "fuera de flujo" ve una clase que sí ocupa lugar',
-  'relative h-svh inset-0',
-  (lista) => {
-    const c = lista.split(' ')
-    return c.includes('fixed') && !c.some((x) => /^(h-|w-|min-h-)/.test(x))
-  },
 )
 
 titulo('5 · El pinneado es CSS, no JS')

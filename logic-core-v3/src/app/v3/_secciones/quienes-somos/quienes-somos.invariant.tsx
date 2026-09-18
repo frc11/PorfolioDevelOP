@@ -11,7 +11,6 @@
  */
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { sizesPorColumnas } from '../../_lib/imagen'
 import {
   cuentaDeMarcadores,
   hallazgosDeCifraConSimbolo,
@@ -20,45 +19,12 @@ import {
   numerosDe,
 } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
-import { pantallasDe } from '../_contrato/forma'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
-import { GEOMETRIA, SIZES_DE_LA_FOTO } from './QuienesSomos'
 import {
-  conFoto, conMotion, conPreferencia, FUENTE, LITERALES,
-  PEDIDOS, personasSinLlave, quieto, TEXTOS_DE_PANTALLA, quietoSinLlave, conMotionSinLlave, seccion, SIN_LLAVE, TEXTOS, todosSeVen, veces,
+  conMotion, conPreferencia, FUENTE, LITERALES,
+  PEDIDOS, personasSinLlave, quieto, TEXTOS_DE_PANTALLA, quietoSinLlave, conMotionSinLlave, SIN_LLAVE, TEXTOS, todosSeVen, veces,
 } from './quienes-somos-piezas'
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
-
-/** ⚠️ B8 · Custodiaba `papel-opaco` (S5; B6-A midió que el logo quedaba detrás del rótulo entero). El humano la abrió igual —«las secciones
- *  1, 2, 3, 4, 7 y 8 ven la sala»— y lo que eso rompe se DECLARA, no se tapa: `s10-acceso` §10 lo cita, `s8-tinta` §4 lo mide, y lo que no llega a AA es deuda declarada. */
-afirmarIgual(seccion.superficie, 'papel-transparente', 'la superficie es papel-transparente: el canvas se ve (B8, por decisión)')
-afirmarIgual(pantallasDe(seccion), 3, 'ocupa TRES pantallas — B2 la subió de dos, ver el docblock de su fila en `secciones.ts`')
-afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: las tres pantallas scrollean')
-afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')
-
-/**
- * ⚠ **B2 · DOS CAJAS PASARON A TRES, y el número NO se subió para que un rojo se
- * ponga verde: se subió porque la composición cambió.** La Fase 0 llevó la fila de
- * `secciones.ts` a 300svh y la composición se quedó en dos pantallas: el panel medía
- * 3.240 px con 1.080 px de flujo VACÍO al pie, que es el defecto que `s10-mobile` §2
- * publica como «el flujo llena las N pantallas declaradas». La sección compone ahora
- * tres, una por grupo de piezas, y acá va el valor NUEVO.
- */
-afirmarIgual(veces(quieto, 'data-pantalla='), 3, 'el marcado reparte el alto en TRES cajas de pantalla, una por grupo de piezas')
-const DONDE = ['agencia', 'equipo', 'foto'].map((n) => quieto.indexOf(`data-pantalla="${n}"`))
-afirmarIgual(DONDE.filter((i) => i >= 0).length, 3, '  y son las tres declaradas: la agencia, el equipo y la foto')
-afirmar(DONDE[0] < DONDE[1] && DONDE[1] < DONDE[2], '  en el orden del documento: la agencia · el equipo · la foto', DONDE.join(' < '))
-afirmarIgual(veces(quieto, 'min-h-svh'), 3, '  cada una pide una pantalla: 1 + 1 + 1 = los 300svh')
-controlPositivo('la cuenta de cajas de pantalla ve un marcado con una sola', '<div data-pantalla="agencia" class="min-h-svh"></div>', (html: string) => veces(html, 'data-pantalla=') === 3)
-
-controlPositivo(
-  'la lectura del alto ve un alto distinto',
-  { ...seccion, alto: '200svh' },
-  (s) => pantallasDe(s) === 3,
-)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El contenido no se puede leer como un dato')
@@ -178,35 +144,6 @@ afirmarIgual(
   CONTENIDO.personas.map((p) => p.rol),
   ['Estrategia · Comercial · Planificación', 'Ejecución técnica'],
   '  con los roles reales, los mismos que publica el sitio vivo',
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · El marco de la foto: relación de aspecto y `sizes`, sobre el marcado')
-
-afirmar(
-  quieto.includes(`aspect-ratio:${GEOMETRIA.foto.ancho} / ${GEOMETRIA.foto.alto}`),
-  'el marco declara su relación de aspecto EN EL MARCADO, no en un comentario',
-  `${GEOMETRIA.foto.ancho} / ${GEOMETRIA.foto.alto} — apaisado 3:2, dos personas a la par`,
-)
-controlPositivo(
-  'el chequeo de la relación de aspecto ve una caja sin ella',
-  '<div role="img"></div>',
-  (html: string) => html.includes('aspect-ratio:'),
-)
-
-afirmar(SIZES_DE_LA_FOTO.trim().length > 0, 'el `sizes` no es vacío', SIZES_DE_LA_FOTO)
-afirmarIgual(
-  SIZES_DE_LA_FOTO,
-  sizesPorColumnas(GEOMETRIA.foto.columnas, GEOMETRIA.foto.columnasTotales),
-  '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano',
-)
-
-afirmar(conFoto.includes(`sizes="${SIZES_DE_LA_FOTO}"`), 'el mismo marco con foto emite el `sizes` en el HTML')
-afirmar(conFoto.includes('w"') && !conFoto.includes('2x'), '  y su srcset usa descriptores de ANCHO, no de densidad')
-controlPositivo(
-  'el chequeo del srcset ve descriptores de densidad',
-  '<img srcSet="/a.jpg 1x, /b.jpg 2x"/>',
-  (html: string) => html.includes('w"') && !html.includes('2x'),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

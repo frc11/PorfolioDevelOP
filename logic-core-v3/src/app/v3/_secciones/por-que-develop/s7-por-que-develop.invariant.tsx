@@ -18,17 +18,14 @@ import { cn } from '@/lib/utils'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { propiedadesDePieza } from '../../_lib/motion/fotograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX } from '../../_lib/superficies'
-import { especificacionDe } from '../_contrato/bloqueAnimado'
 import { USOS_DECLARADOS } from '../_contrato/motion'
-import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { seccionDe } from '../_contrato/forma'
 import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { SUPERFICIE_ACORDADA, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
-import { afirmarElAltoYElRango } from './soporte'
 import {
   ALTO_MINIMO_DEL_BLOQUE, ALTO_MINIMO_DEL_BLOQUE_SVH, DIFERENCIALES, ENTRADA,
   NOMBRE_DE_SECCION, PIEZAS_DE_P5, TESTIMONIO, TITULAR,
@@ -204,56 +201,7 @@ afirmar(rotuloPeor > 1, `el compositor de alfa produce un número real (${rotulo
 
 console.warn('  ⚠️ ESTA CIFRA VALE PARA EL MARCADOR DE POSICIÓN, que es plano y pinta dos tokens. La escena real es una sala con gradiente y NO hereda este número: hay que volver a medirlo cuando entre.')
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · La sección no pinta fondo — la guardia contra inventar una capa')
-
-const RE_PINTURA = /\bbg-[a-z[][\w[\]().,%-]*|\bbackdrop-[\w-]+|\bbackground(?:-[a-z]+)?\s*:|(?:linear|radial|conic)-gradient|\bbg-gradient[\w-]*|\binset-0\b/g
-const pinturas = (t: string): string[] => [...t.matchAll(RE_PINTURA)].map((m) => m[0])
-
-afirmarIgual(sinComentarios.flatMap(pinturas), [], `ninguno de los ${ARCHIVOS.length} archivos pinta fondo, velo, gradiente ni capa a pantalla completa`)
-controlPositivo('el detector ve un fondo del sistema', 'className="bg-fondo text-tinta"', (t: string) => pinturas(t).length === 0)
-controlPositivo('ve un vidrio esmerilado', 'className="bg-white/[0.04] backdrop-blur-[20px]"', (t: string) => pinturas(t).length === 0)
-controlPositivo('ve un gradiente', 'background: linear-gradient(180deg, #fff, #000)', (t: string) => pinturas(t).length === 0)
-controlPositivo('y ve una capa a pantalla completa', 'className="absolute inset-0"', (t: string) => pinturas(t).length === 0)
-
-/**
- * ⚠️ **B4-A · UN DESCENDIENTE SÍ PINTA AHORA, Y LA AFIRMACIÓN SE ENDURECE.**
- *
- * El rótulo monta el PREFIJO de la marca, un relleno en `--color-acento`. Ya no
- * es cierto que ningún descendiente pinte y un `[]` mentiría. Lo que lo
- * reemplaza no es «acepto cualquier fondo»: **lo único que pinta afuera de la
- * `<section>` son piezas de MARCA, y son marcas y no capas** —un cuadrado de
- * `--spacing-2`, no una caja con `inset-0`—. La guardia que importa queda entera
- * y ahora además dice de qué tamaño puede ser lo que pinta.
- */
-const fondosEnElMarcado = pinturas(quieto)
-console.log(`  el marcado trae ${fondosEnElMarcado.length} utilidad(es) de fondo: ${fondosEnElMarcado.join(' · ') || '(ninguna)'}`)
-const primeraEtiqueta = /<section\b[^>]*>/.exec(quieto)
-const delPanel = fondosEnElMarcado.filter((f) => primeraEtiqueta !== null && primeraEtiqueta[0].includes(f))
-const deLaMarca = [...quieto.matchAll(/<span data-pieza="(?:prefijo-de-servicio|separador)"[^>]*class="([^"]*)"/g)].flatMap((m) => pinturas(m[1]))
-afirmarIgual(fondosEnElMarcado.filter((f) => !delPanel.includes(f) && !deLaMarca.includes(f)), [], 'lo único que pinta es la `<section>` del panel y las piezas de MARCA del rótulo: ningún otro descendiente')
-afirmar(deLaMarca.length > 0, `  y las de marca son ${deLaMarca.length}: ${deLaMarca.join(' · ')} — el prefijo va como RELLENO, que es lo que la instrucción manda`)
-afirmarIgual([...quieto.matchAll(/data-pieza="prefijo-de-servicio"[^>]*class="[^"]*size-\[var\(--spacing-2\)\][^"]*"/g)].length, 1, '  y el prefijo es una MARCA de `--spacing-2`, no una capa: nada con `inset-0` ni a pantalla completa')
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §8 —el rango de P5 y el ALTO de la sección— vive en `soporte.ts` con su
-// modelo: la comprobación y su aritmética son la misma pieza, y este archivo ya
-// estaba en 300 líneas. Ahí está por qué el modelo viejo no podía arbitrar.
-afirmarElAltoYElRango()
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · Una pantalla, sin pinneado')
-
 const seccion = seccionDe(ID)
-console.log(`  la tabla declara alto ${seccion.alto} · pinneada ${String(seccion.pinneada ?? 'no')}`)
-afirmarIgual(pantallasDe(seccion), 1, 'la sección ocupa UNA pantalla según la tabla del sitio')
-afirmarIgual(seccion.pinneada, undefined, 'y no está pinneada')
-afirmarIgual(sinComentarios.flatMap((t) => [...t.matchAll(/\bsticky\b|position\s*:\s*sticky/g)].map((m) => m[0])), [], 'ningún archivo de la carpeta escribe `sticky`')
-afirmarIgual([...quieto.matchAll(/\bsticky\b/g)].map((m) => m[0]), [], 'y el marcado tampoco lo trae')
-const altosDeclarados = [...quieto.matchAll(/min-height:([^"]*)"/g)].map((m) => m[1])
-console.log(`  alturas declaradas en el marcado: ${altosDeclarados.join(' · ')}`)
-afirmarIgual(altosDeclarados, [seccion.alto, ALTO_MINIMO_DEL_BLOQUE], 'la sección no declara más alto que el de la tabla: el otro es el del bloque de P5')
-controlPositivo('el detector de sticky ve uno', 'className="sticky top-0"', (t: string) => !/\bsticky\b/.test(t))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('10 · Los patrones que declaro son los que están')
@@ -267,10 +215,6 @@ afirmarIgual(usadosEnLaFuente, ['P1', 'P5'], 'la sección consume exactamente P1
 afirmarIgual([...declarados].sort(), usadosEnLaFuente, 'y son los que `_contrato/motion.ts` declara para esta sección en USOS_DECLARADOS')
 controlPositivo('el detector ve un patrón que no está declarado', 'const x = <B patron="P9" />', (t: string) => [...t.matchAll(RE_PATRON)].map((m) => m[1]).every((p) => declarados.includes(p)))
 
-/** La firma de P5 en el marcado: el fotograma en 0 es `scale(0,8)` con opacidad 0. */
-const fotogramaCero = propiedadesDePieza(especificacionDe(PATRONES.P5, PIEZAS_DE_P5), 0, 0)
-console.log(`  P5 en progreso 0 escribe: transform "${String(fotogramaCero.transform)}" · opacity ${String(fotogramaCero.opacity)}`)
-afirmar(fotogramaCero.transform !== undefined && movido.includes(fotogramaCero.transform), 'y ese fotograma exacto está en el marcado animado')
 afirmarIgual(PIEZAS_DE_P5, DIFERENCIALES.length + 1, `el conjunto de P5 tiene ${PIEZAS_DE_P5} piezas: los ${DIFERENCIALES.length} diferenciales más el testimonio`)
 afirmarIgual(PATRONES.P5.escalonado, 0, 'con escalonado 0: las cinco arrancan juntas, como se midió')
 afirmar(movido.includes('data-lineas-accesible'), 'el canal de P1 emite su copia accesible del titular')

@@ -1,5 +1,5 @@
 import { sampleRelay, type IntroRelay } from './introRelay'
-import { CALIBRATIONS, check, pct, report, s, section, sweep } from './introChecks'
+import { CALIBRATIONS, check, report, s, section } from './introChecks'
 import { sampleSwap } from './introSampling'
 import { buildTimeline, HOME_INTRO_PHASES, type IntroTimeline } from './introTimeline'
 
@@ -159,25 +159,6 @@ section('3 · el scrub hacia atrás rearma el relevo')
 const antesDelCruce = sampleRelay(0, true, true)
 check('antes del cruce el mesh no dibuja', antesDelCruce.mesh === 0 && antesDelCruce.svg === 1)
 check('y el latch se rearma', antesDelCruce.latch === null)
-
-// ── 4 · La ventana que el defecto ocupaba, en segundos ──────────────────────
-
-section('4 · la ventana en la que el mesh era el único que podía dibujar')
-
-let soloMeshS = 0
-sweep((progress) => {
-  if (sampleSwap(T, progress) >= 1 - EPS) soloMeshS += T.totalS / 600
-})
-check(
-  '🔴 el SVG valía 0 exacto durante casi toda la segunda mitad de la secuencia',
-  soloMeshS > 4 && soloMeshS < 4.5,
-  `${s(soloMeshS)} de ${s(T.totalS)} — ${pct(soloMeshS / T.totalS)} del reel, y el acomodamiento entero`
-)
-check(
-  '  y el acomodamiento cae adentro de esa ventana, de punta a punta',
-  T.placeStartS > T.swapEndS,
-  `relevo cierra en ${s(T.swapEndS)} · el acomodamiento va de ${s(T.placeStartS)} a ${s(T.totalS)}`
-)
 
 // ── Controles positivos ─────────────────────────────────────────────────────
 

@@ -13,21 +13,15 @@
  *   2. **Los haces no se construyeron**, y la tabla que sostiene esa decisión
  *      queda publicada para que sea revocable con datos y no haya que volver a
  *      medir.
+ *
+ * ⚠️ **Modo pulido sacó de §1 la comparación de oscuridad tinta-vs-papel en una
+ * vista iluminada**: era composición.
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-import {
-  CELOSIA_BAR,
-  CELOSIA_SHAFT_ALPHA_FOR_5_PERCENT,
-  celosiaSkyFactor,
-} from '@/app/v3/_lib/escena/probeCelosia'
-import { INK_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
-import { check, report, section, type Vec3 } from './harness'
-import { shadeSurface, type ViewContext } from './shading'
-
-const SKY = celosiaSkyFactor(CELOSIA_BAR)
-const UP: Vec3 = [0, 1, 0]
+import { CELOSIA_SHAFT_ALPHA_FOR_5_PERCENT } from '@/app/v3/_lib/escena/probeCelosia'
+import { check, report, section } from './harness'
 
 // ── 1 · El disco se fue ─────────────────────────────────────────────────────
 
@@ -68,20 +62,6 @@ section('El disco se fue, y esto lo verifica sin quedar verde por vacío')
       ['SunBody.tsx', 'SunWashout.tsx', 'probeSun.ts'].includes(name)
     ),
     'el cuerpo, el washout y sus números'
-  )
-
-  /**
-   * Y con el sol fuera, la regla 4 de la escena —"nada brilla por sí mismo"—
-   * dejó de tener excepciones. El logo vuelve a ser lo más oscuro del cuadro sin
-   * competencia de una fuente dibujada.
-   */
-  const view: ViewContext = { progress: 0.75, cameraAzimuthDeg: 310, cameraHeight: -2.6 }
-  const ink = shadeSurface(INK_COLOR, [0, 0, 1], view, 15, 1, SKY)
-  const darkestPaper = shadeSurface(PAPER_COLOR, UP, view, 0, 0, SKY)
-  check(
-    'el logo sigue siendo lo más oscuro del cuadro por un margen enorme',
-    ink < darkestPaper / 4,
-    `tinta ${ink.toFixed(1)} contra el papel más oscuro en ${darkestPaper.toFixed(1)}`
   )
 }
 

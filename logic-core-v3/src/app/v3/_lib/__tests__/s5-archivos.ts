@@ -147,33 +147,9 @@ export const ARCHIVOS_DE_APOYO = [
   // caja) y `soporte.ts` las cuatro cuentas. §11 del invariante escanea el primero, y lo dice.
   `${RAIZ_DE_SECCIONES}/hero/geometria.ts`,
   `${RAIZ_DE_SECCIONES}/hero/soporte.ts`,
-  // COMPO-1 · `composicion.ts`: las CINCO cuentas de este sprint (§14a–§14e).
-  // Sale aparte y no adentro de `soporte.ts` por el mismo corte que aquél usó:
-  // el invariante ya estaba en el límite y `soporte.ts` también, así que las
-  // cuentas NUEVAS abren su propio archivo en vez de empujar a los dos. Es un
-  // instrumento —abre el `.woff2` itálico y lee `cta.css`— y por eso va acá y
-  // no en `ARCHIVOS_DE_PIEZA`.
-  `${RAIZ_DE_SECCIONES}/hero/composicion.ts`,
-  // PAPEL-2 · `papel.ts`: las CUATRO cuentas de este sprint (§15a–§15d) — la
-  // razón que iguala los dos registros, el orden de las dos variantes `max-`
-  // leído del CSS CONSTRUIDO, el presupuesto de alto con la marca adentro y la
-  // pastilla apagada. Abre su propio archivo por el mismo corte con el que
-  // COMPO-1 abrió el suyo: las cuentas de un sprint por archivo, y el marcado
-  // en el invariante. Es un instrumento —abre los dos `.woff2` y lee el tema y
-  // el build— y por eso va acá y no en `ARCHIVOS_DE_PIEZA`.
-  `${RAIZ_DE_SECCIONES}/hero/papel.ts`,
-  // COMPO-2 · `ajuste.ts`: las CINCO cuentas de este sprint (§16a–§16e) — la
-  // regla global (la bajada en UN renglón y el techo de caracteres re-derivado
-  // para una frase entera), el factor de la marca recalculado contra el binario
-  // y el `viewBox`, el registro 1 en la banda portátil con sus dos techos
-  // medidos y las dos mitades de su clase, el renglón que la regla global le
-  // saca al bloque devuelto como margen en 768–859, y los tres anchos
-  // intocables afirmados como propiedad. Abre su propio archivo por el mismo
-  // corte con el que COMPO-1 y PAPEL-2 abrieron los suyos: las cuentas de un
-  // sprint por archivo, y el marcado en el invariante. Es un instrumento —abre
-  // los tres `.woff2`, lee el tema, el build y `LOGO_INK_VIEWBOX`— y por eso va
-  // acá y no en `ARCHIVOS_DE_PIEZA`.
-  `${RAIZ_DE_SECCIONES}/hero/ajuste.ts`,
+  // `composicion.ts` (COMPO-1), `papel.ts` (PAPEL-2) y `ajuste.ts` (COMPO-2)
+  // eran 100% composición: Modo pulido los desarmó enteros. El padrón se
+  // retira con ellos, no se deja apuntando a un fantasma.
 ]
 
 /**

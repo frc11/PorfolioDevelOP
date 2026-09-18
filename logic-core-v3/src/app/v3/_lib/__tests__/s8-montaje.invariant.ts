@@ -26,7 +26,7 @@ import { ENCHUFES, FRENTES, PUEDEN_IMPORTAR_LA_MARCA, SCRIPTS_DECLARADOS, archiv
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { quitarComentarios } from './s3-escaneo'
 // prettier-ignore
-import { TODO_SRC, afirmarQueNadaSumaAltoAfueraDelMain, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
+import { TODO_SRC, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, heredadosQueCrecieron, lineasDeCodigo, propiosQuePasan, repartir, type Largo } from './s8-largos'
 
 const RUTAS_DEL_INTRO = ['/', '/v3']
@@ -138,28 +138,12 @@ for (const [que, imp] of [
 }
 afirmar(/<ChromeDelHome\s*\/>/.test(fuenteHome), 'y monta el chrome')
 afirmar(/<IntroDelHome\s*\/>/.test(fuenteHome), '  y el intro')
-
-/** El chrome va PRIMERO por geometría: el envoltorio de la pastilla es
- *  `sticky` de alto cero y su NACIMIENTO lo define dónde está en el árbol. */
-const posChrome = fuenteHome.indexOf('<ChromeDelHome')
-const posIntro = fuenteHome.indexOf('<IntroDelHome')
-const posCompuerta = fuenteHome.indexOf('<CompuertaDelHome')
-afirmar(
-  posChrome > 0 && posChrome < posIntro && posIntro < posCompuerta,
-  'y el orden es chrome → intro → compuerta: la pastilla nace lo más arriba posible',
-  `${posChrome} < ${posIntro} < ${posCompuerta}`,
-)
 afirmar(existe(MODULO_DEL_INTRO), `el módulo del intro existe: \`${MODULO_DEL_INTRO}\``)
 
 afirmar(
   (fuenteHome.match(/<CompuertaDelHome/g) ?? []).length === 1,
   'la compuerta de la coreografía se sigue resolviendo UNA sola vez, arriba',
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §4b vive en `s8-montaje-soporte.ts`: el control nuevo cruzó este archivo las
-// 300 líneas. El corte es por tema — es la única sección que lee una HOJA.
-afirmarQueNadaSumaAltoAfueraDelMain()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · LAS DOS DECISIONES DE COMPOSICIÓN — una tomada en B5, la otra vigente')

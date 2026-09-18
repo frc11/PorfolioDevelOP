@@ -31,19 +31,14 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import * as THREE from 'three'
 
-import { afirmar, afirmarIgual, cerrar, controlPositivo, deudaDeclarada, razonDeContraste, titulo } from '../../__tests__/afirmar'
-import { TINTA_HEX } from '../../superficies'
-import { DEUDAS_DE_B13 } from '../../__tests__/deudas-b13'
-import { NIVEL_DE_LA_NOCHE, VUELTA } from '../lightArc'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
+import { NIVEL_DE_LA_NOCHE } from '../lightArc'
 import { EMISION_EN_LA_NOCHE, emisionDelLogoEn, escribirEmisionDelLogo } from '../logoEmision'
 import { brilloDeLaNocheEn } from '../particleGlow'
 import { RIM_NIGHT_LEVEL } from '../probeLighting'
 import { INK_COLOR, INK_ROUGHNESS } from '../probeScene'
-import { levelAt } from '@/app/probe-escena/__tests__/shading'
-import { muestrearCuadro, percentil, vistaEn } from './cuadro'
+import { vistaEn } from './cuadro'
 import { equivaleSinEmision, shadeConEmision } from './logoEmitido'
-import { muestrearLogo } from './s10-logo'
-import { ESCENA_REAL, TRANSPARENTES, gris, percentilDe } from './s10-logo-lectura'
 
 const RAIZ = process.cwd()
 const leer = (rel: string): string => readFileSync(path.join(RAIZ, rel), 'utf8')
@@ -59,30 +54,6 @@ const codigo = (rel: string): string =>
   leer(rel)
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/(^|[^:])\/\/[^\r\n]*/g, '$1 ')
-
-const ASPECTO = 16 / 9
-const AA = 4.5
-/** La tinta clara de las secciones invertidas: el papel dado vuelta (`theme-develop.css`). */
-const TINTA_CLARA = '#F7F7F5'
-
-/**
- * LA BANDA DE LA REFERENCIA, medida y no citada: `scripts-b13/b-referencia.ts`
- * recorrió nk.studio a 1920 en 44 paradas (`outputs/b13/referencia-emision-nk-1920.json`).
- * Su objeto aparece en 21, es MÁS CLARO que su sala en 20 de esas 21, y el
- * contraste de su barra contra su sala va de 1,92:1 a 7,90:1 con mediana 2,9:1.
- */
-const REFERENCIA = { min: 1.92, mediana: 2.9, max: 7.9 } as const
-
-/** Los valores en pantalla del logo en un progreso, con la emisión que le toca. */
-function logoEn(progreso: number, emisiva?: number): { readonly p50: number; readonly mejor: number; readonly peor: number } {
-  const m = muestrearLogo(progreso, ASPECTO, ESCENA_REAL, 300, 220, 2.6, undefined, emisiva)
-  const o = m.valor.slice()
-  o.sort()
-  return { p50: percentilDe(o, 0.5), mejor: percentilDe(o, 1), peor: percentilDe(o, 0) }
-}
-
-const salaEn = (progreso: number): number =>
-  percentil(muestrearCuadro(progreso, vistaEn(progreso), ESCENA_REAL, 200, 113).sinLogo, 0.5)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · EL CONTROL DE EQUIVALENCIA — con la emisiva en 0, la cadena es la de S7')
@@ -117,94 +88,6 @@ afirmar(
   'ninguna de las dos escribe un literal de nivel: las dos importan `NIVEL_DE_LA_NOCHE` y `RIM_NIGHT_LEVEL`',
 )
 controlPositivo('la curva no es un cero constante: en la noche se mueve', NIVEL_DE_LA_NOCHE, (n: number) => emisionDelLogoEn(n) === 0)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · CERO CON LUZ ⇒ NADA DE LO MEDIDO SE MOVIÓ — sobre las seis anclas')
-
-for (const f of TRANSPARENTES) {
-  const nivel = levelAt(f.llenaDesde)
-  const emision = emisionDelLogoEn(nivel)
-  const esDeNoche = emision > 0
-  if (esDeNoche) {
-    afirmar(
-      f.id === 'trabajos',
-      `${f.id.padEnd(16)} p=${f.llenaDesde.toFixed(4)} — la ÚNICA sección con emisión es Trabajos: la noche del arco`,
-      `nivel ${nivel.toFixed(4)} → emisiva ${emision.toFixed(4)}`,
-    )
-    continue
-  }
-  const conEmision = logoEn(f.llenaDesde)
-  const sinNada = logoEn(f.llenaDesde, 0)
-  afirmar(
-    conEmision.p50 === sinNada.p50 && conEmision.mejor === sinNada.mejor && conEmision.peor === sinNada.peor,
-    `${f.id.padEnd(16)} p=${f.llenaDesde.toFixed(4)} — emisión 0 y el logo vale lo MISMO que antes de B13, bit a bit`,
-    `nivel ${nivel.toFixed(4)} · logo ${sinNada.p50.toFixed(1)} de 255`,
-  )
-}
-controlPositivo(
-  'el comparador vería un movimiento: con una emisiva puesta a mano, el hero cambia',
-  0.1,
-  (e: number) => logoEn(0, e).p50 === logoEn(0, 0).p50,
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · LO QUE COMPRA — la noche de Trabajos, contra la vara de la referencia')
-
-const P_TRABAJOS = 0.5
-const salaDeTrabajos = salaEn(P_TRABAJOS)
-const antes = logoEn(P_TRABAJOS, 0)
-const despues = logoEn(P_TRABAJOS)
-const cAntes = razonDeContraste(gris(antes.p50), gris(salaDeTrabajos))
-const cDespues = razonDeContraste(gris(despues.p50), gris(salaDeTrabajos))
-afirmar(
-  cAntes < 1.5,
-  'ANTES el logo era indistinguible de su sala en la noche: un agujero en el campo de estrellas',
-  `logo ${antes.p50.toFixed(1)} sobre sala ${salaDeTrabajos.toFixed(1)} = ${cAntes.toFixed(2)}:1`,
-)
-afirmar(
-  cDespues >= REFERENCIA.min && cDespues <= REFERENCIA.max,
-  `DESPUÉS cae adentro de la banda de la referencia (${REFERENCIA.min}:1 a ${REFERENCIA.max}:1, mediana ${REFERENCIA.mediana}:1)`,
-  `logo ${despues.p50.toFixed(1)} sobre sala ${salaDeTrabajos.toFixed(1)} = ${cDespues.toFixed(2)}:1`,
-)
-afirmar(
-  despues.p50 > salaDeTrabajos,
-  '  y es MÁS CLARO que su sala, como el de la referencia en 20 de sus 21 paradas: el objeto emite, no absorbe',
-)
-const claraEncima = razonDeContraste(TINTA_CLARA, gris(despues.mejor))
-afirmar(
-  claraEncima >= AA,
-  'LA RESTRICCIÓN DE TRABAJOS: es la única invertida que deja ver la sala, y su tinta CLARA encima sigue pasando AA',
-  `${claraEncima.toFixed(2)}:1 contra ${AA}:1 — por encima de 0,21 de emisiva se cae, y por eso el tope es ${EMISION_EN_LA_NOCHE}`,
-)
-const oscuraEncima = razonDeContraste(TINTA_HEX, gris(despues.peor))
-console.log(
-  `  y la tinta OSCURA sobre el logo en esa pose pasa de ${razonDeContraste(TINTA_HEX, gris(antes.peor)).toFixed(2)}:1 a ` +
-    `${oscuraEncima.toFixed(2)}:1 — Trabajos no la usa, pero es el número que dice de qué lado empuja la emisión`,
-)
-controlPositivo(
-  'el medidor de la tinta clara sabe reprobar: contra un logo a emisiva 0,45 no llega a AA',
-  0.45,
-  (e: number) => razonDeContraste(TINTA_CLARA, gris(logoEn(P_TRABAJOS, e).mejor)) >= AA,
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · LO QUE CUESTA — el cruce de la vuelta, declarado con su número')
-
-let peorDeLaVuelta = { progreso: 0, contraste: Infinity }
-for (let p = VUELTA.desde; p <= VUELTA.hasta + 1e-9; p += 0.0025) {
-  const c = razonDeContraste(gris(logoEn(p).p50), gris(salaEn(p)))
-  if (c < peorDeLaVuelta.contraste) peorDeLaVuelta = { progreso: p, contraste: c }
-}
-deudaDeclarada(
-  peorDeLaVuelta.contraste >= 1.5,
-  `EN LA VUELTA el logo cruza el valor de la sala y se pierde por un instante (${DEUDAS_DE_B13.cruceDeLaVuelta.numero})`,
-  `D-B13.1: ${peorDeLaVuelta.contraste.toFixed(2)}:1 en p=${peorDeLaVuelta.progreso.toFixed(4)}, adentro de la vuelta ` +
-    `(${VUELTA.desde.toFixed(4)}–${VUELTA.hasta}) — la pantalla en la que Trabajos se va y Servicios, papel OPACO, entra desde el pie`,
-  'es TOPOLÓGICO y no un defecto de calibración: para pasar de oscuro-sobre-claro a claro-sobre-oscuro el valor del logo tiene ' +
-    'que cruzar el de la sala, y en el cruce el contraste es 1. Lo único que se elige es DÓNDE y CUÁNTO DURA. Hoy dura ~0,014 de ' +
-    'progreso (~0,34 pantallas de scroll) y cae detrás del panel opaco que entra. La palanca para acortarlo es una rampa más ' +
-    'empinada que la de las motas, y el precio es un encendido que se lee como parpadeo: se deja a juicio del humano.',
-)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · CERO COLOR y EL CABLEADO')

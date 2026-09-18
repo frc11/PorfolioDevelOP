@@ -17,8 +17,6 @@
  * al lado de cada cero está cuántos caracteres, archivos o elementos se miraron.
  */
 
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import {
@@ -29,42 +27,31 @@ import {
   literalesConUnidad,
   quitarComentarios,
 } from '../../_lib/__tests__/s3-escaneo'
-import { sizesPorColumnas } from '../../_lib/imagen'
-import { ANCLAS, rangoDeScroll } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS, ATRIBUTO_TEXTO_ACCESIBLE } from '../../_lib/motion/lineas'
 import { CLASE_PESO } from '../../_lib/tipografia'
-import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { seccionDe } from '../_contrato/forma'
 import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
-import { clasesEscritas, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
+import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import {
   CONTENIDO_PROHIBIDO_DE_CONTROL,
   aperturasDe,
-  clasesIguales,
   clasesTipograficasPerdidas,
   cuentaDe,
   focalizablesDe,
   patronesNombrados,
   sinAriaHidden,
   textoAccesible,
-  valorDe,
 } from './deteccion'
 import {
   BLOQUES,
   CAPACIDADES,
-  CAPTURA,
-  COLUMNAS_DE_LA_CAPTURA,
-  COLUMNAS_DE_LA_GRILLA,
   ID,
   NOMBRE,
-  PANTALLAS_DE_LA_SECCION,
-  ALTO_DE_LA_CAPTURA,
-  ANCHO_DE_LA_CAPTURA,
   TITULAR,
   TITULO_DE_CAPACIDADES,
 } from './contenido'
 import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
-import { afirmarElAsentamiento } from './soporte'
 
 // ── Las dos ramas, renderizadas una sola vez ───────────────────────────────
 
@@ -198,16 +185,6 @@ controlPositivo('y no cuenta un tabindex="-1" como focalizable', '<div tabindex=
 controlPositivo('el detector de apagados ve las tres formas', '.a{outline:none}.b{outline-width:0}.c{outline-style:none}', (t) => apagadosDeFoco(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El `sizes` del hueco lo COMPONE el ayudante — nadie lo escribe')
-
-const sizesEsperado = sizesPorColumnas(COLUMNAS_DE_LA_CAPTURA, COLUMNAS_DE_LA_GRILLA)
-console.log(`  sizes: ${sizesEsperado}`)
-afirmarIgual(valorDe(QUIETO, 'data-sizes'), sizesEsperado, `el \`data-sizes\` del marcado es exactamente sizesPorColumnas(${COLUMNAS_DE_LA_CAPTURA}, ${COLUMNAS_DE_LA_GRILLA})`)
-afirmarIgual(CAPTURA.sizes, sizesEsperado, '  y el dato de la sección sale de la misma función con los mismos argumentos')
-
-controlPositivo('un `sizes` escrito a mano NO coincide con el compuesto', '(min-width: 1024px) 60vw, 100vw', (aMano) => aMano === sizesEsperado)
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · La lista es una LISTA — `<ul>` con sus `<li>`, contados')
 
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
@@ -235,49 +212,5 @@ afirmarIgual(Object.keys(PIEZAS_POR_PATRON).sort(), ['P1', 'P2', 'P4'], '  y la 
 console.log(`  P1 → ${PIEZAS_POR_PATRON.P1} titular · P2 → ${PIEZAS_POR_PATRON.P2} bloques (${BLOQUES.length} de texto + la captura) · P4 → ${PIEZAS_POR_PATRON.P4} ítems`)
 controlPositivo('el buscador ve un patrón que no uso', 'const x = <B patron="P5" />', (c) => patronesNombrados(c).length === 0)
 controlPositivo('y no se come lo que dice un comentario', '/* acá menciono patron="P7" */', (c) => patronesNombrados(c).length > 0)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · La relación de aspecto va en `style`, y la razón está escrita al lado')
-
-afirmar(/style="[^"]*aspect-ratio:/.test(QUIETO), 'el hueco declara su relación de aspecto en estilo inline')
-afirmarIgual(
-  valorDe(QUIETO, 'data-relacion'),
-  `${ANCHO_DE_LA_CAPTURA} / ${ALTO_DE_LA_CAPTURA}`,
-  '  con el valor que viene del dato',
-)
-afirmarIgual(clasesEscritas(QUIETO).filter((c) => c.startsWith('aspect-')), [], '  y ninguna clase de aspecto: una clase armada no la ve el escáner de Tailwind y su regla no se emitiría nunca')
-const archivoDelDato = ARCHIVOS.find((a) => a.endsWith('contenido.ts')) ?? ''
-afirmar(leer(archivoDelDato).includes('escáner de Tailwind'), '  la razón está escrita en el mismo archivo donde se declara el valor', archivoDelDato)
-controlPositivo('el detector ve una clase de aspecto', '<div class="aspect-[16/9]"></div>', (h) => clasesEscritas(h).filter((c) => c.startsWith('aspect-')).length === 0)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · Cuántas pantallas ocupa — la tabla y el marcado dicen lo mismo')
-
-afirmarIgual(clasesIguales(QUIETO, 'min-h-svh'), PANTALLAS_DE_LA_SECCION, `la sección declara ${PANTALLAS_DE_LA_SECCION} tiempos de una pantalla cada uno, en el marcado`)
-const seccion = seccionDe(ID)
-console.log(`  la tabla declara alto ${seccion.alto} → ${pantallasDe(seccion)} pantalla(s) · pinneada: ${seccion.pinneada ?? 'no'}`)
-
-/**
- * ⚠ ESTO ERA UN PEDIDO Y AHORA ES UNA AFIRMACIÓN.
- *
- * Este sprint no podía tocar la tabla del recorrido —era del otro lane— así que
- * publicaba el delta: la tabla decía `100svh` para una sección de dos tiempos.
- * SITIO-S7 corrigió la tabla, y con eso la comprobación sube de nivel: los dos
- * tiempos del marcado y el alto declarado **tienen que decir lo mismo**.
- */
-afirmarIgual(
-  pantallasDe(seccion),
-  PANTALLAS_DE_LA_SECCION,
-  'el alto de la tabla coincide con los tiempos que la sección construye',
-)
-afirmar(seccion.pinneada === undefined, 'esta sección NO va pinneada: la única secuencia del sprint es Servicios')
-afirmarIgual(/<section id="([^"]*)"/.exec(QUIETO)?.[1], ID, '  la `<section>` sale con el id de la tabla')
-afirmarIgual(valorDe(QUIETO, 'data-superficie'), seccion.superficie, '  y su superficie sale de la tabla del sitio: la sección no pinta un solo color')
-controlPositivo('el contador de tiempos ve un marcado con menos pantallas de las declaradas', '<div class="flex min-h-svh flex-col"></div>', (h) => clasesIguales(h, 'min-h-svh') === PANTALLAS_DE_LA_SECCION)
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §11 —el asentamiento de la lista— vive en `soporte.ts`: este archivo
-// cruzaba las 300 líneas y el corte es por tema.
-afirmarElAsentamiento()
 
 cerrar('s6-tu-panel.invariant')

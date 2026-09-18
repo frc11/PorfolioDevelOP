@@ -26,9 +26,9 @@
  * EXACTAMENTE el que se publica** — si aparece uno nuevo, esto se pone en rojo.
  *
  * ⚠️ **SITIO-S11 lo partió.** Dar vuelta el censo lo llevó arriba de las 300
- * líneas del repo, así que §5 (los landmarks) vive en `./s10-acceso-landmarks` y
- * §10 (el contraste) en `./s10-acceso-contraste`, que es la única sección que
- * resuelve COLOR. El corte es por tema, no por tamaño.
+ * líneas del repo, así que §5 (los landmarks) vive en `./s10-acceso-landmarks`.
+ * El corte es por tema, no por tamaño. El contraste de texto y del anillo de
+ * foco contra la escena era composición y se desarmó (Modo pulido).
  *
  * ⚠️ **B7 lo partió otra vez, por lo mismo.** Arreglar el punto ciego del censo
  * de marcadores volvió a cruzar las 300 líneas, así que §7 —y los dos controles
@@ -49,7 +49,6 @@ import { COLOR, razon } from './s10-acceso-color'
 import {
   imprimirArbol, imprimirInventario, imprimirParadas, publicados, publicar,
  afirmarElInventario } from './s10-acceso-tablas'
-import { afirmarElContraste, afirmarElFoco } from './s10-acceso-contraste'
 import { afirmarLosLandmarks } from './s10-acceso-landmarks'
 import { deberiaAnimar } from '../../_secciones/_contrato/motion'
 import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
@@ -267,15 +266,6 @@ publicar({
   dueño: 'el banco compartido — `s10-banco.ts`, `marcadoConMovimientoReducido()`. ✅ ARREGLADO en la integración de este mismo sprint',
   que: `ese helper forzaba \`anima: true\` con \`MotionConfig reducedMotion="always"\` y devolvía 52 transformadas y 52 \`will-change\`: un estado que producción NUNCA sirve, porque la compuerta que apaga el movimiento vive en \`CompuertaDelHome\` y con la preferencia puesta no instala una sola primitiva animada. La integración lo hizo devolver el árbol QUIETO —hoy da ${transformadasDe(marcadoConMovimientoReducido()).length} transformadas y ${willChangeDe(marcadoConMovimientoReducido()).length} \`will-change\`— y dejó el estado imposible aparte, como \`marcadoAnimadoConPreferenciaForzada()\`, declarado como control y no como respuesta`,
 })
-
-// ═════════════════════════════════════════════════════════════════════════
-// §9 vive en `s10-acceso-contraste.ts`, con §10: el anillo también es una razón
-// de contraste y consume los mismos colores leídos del tema.
-afirmarElFoco()
-
-// ═════════════════════════════════════════════════════════════════════════
-// §10 vive en `s10-acceso-contraste.ts`: es la única sección que resuelve COLOR.
-afirmarElContraste(QUIETA)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §11 vive en `s10-acceso-tablas.ts`, con el registro que lo alimenta: el censo

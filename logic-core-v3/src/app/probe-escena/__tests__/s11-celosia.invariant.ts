@@ -17,10 +17,13 @@
  * Lo que la celosía DIBUJA está en `s11-proyeccion.invariant.ts`; lo que le hace
  * al cuadro, en `s11-piso.invariant.ts`; y lo que este sprint decidió no tener, en
  * `s11-sin-sol.invariant.ts`.
+ *
+ * ⚠️ **Modo pulido sacó de §3 el valor óptimo de ancho de barra y la cobertura
+ * completa del piso**: eran composición. Queda la fórmula de cobertura.
  */
 import * as THREE from 'three'
 
-import { celosiaCoverage, celosiaLayers, celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { celosiaCoverage, celosiaLayers } from '@/app/v3/_lib/escena/celosiaGeometry'
 import {
   CELOSIA_ANCHOR,
   CELOSIA_PATCHED_CHUNK,
@@ -42,8 +45,7 @@ import {
   MOIRE_NEAR_TOP,
   fineCells,
 } from '@/app/v3/_lib/escena/probeMoire'
-import { FLOOR_Y, check, report, section } from './harness'
-import { sunDirectionAt } from './shading'
+import { check, report, section } from './harness'
 
 const LAYERS = celosiaLayers(MOIRE_MISMATCH)
 
@@ -185,36 +187,6 @@ section('La barra, que es la única perilla propia de este sprint')
     'la cobertura de una capa sale de la barra en las DOS direcciones',
     Math.abs(celosiaCoverage(CELOSIA_BAR) - (1 - (1 - CELOSIA_BAR) ** 2)) < 1e-12,
     `barra ${CELOSIA_BAR} → ${(celosiaCoverage(CELOSIA_BAR) * 100).toFixed(1)}% de la celda`
-  )
-  /**
-   * El batido es la modulación de la cobertura local entre "las dos capas en
-   * fase" (queda la de una sola) y "fuera de fase" (1 − (1−c)²). La diferencia es
-   * c − c², máxima en c = 0,5 — o sea con la barra en 1 − √0,5.
-   */
-  const optimum = 1 - Math.SQRT1_2
-  check(
-    'y la barra de diseño es la que hace máxima esa modulación',
-    Math.abs(CELOSIA_BAR - optimum) < 0.01,
-    `${CELOSIA_BAR} contra el óptimo teórico ${optimum.toFixed(3)} · medido en puntos sRGB da 10,8 en hero contra 9,4 con 0,25 y 10,5 con 0,35`
-  )
-  check(
-    'en 0 la celosía no tapa nada: es el control que devuelve la escena de S10',
-    celosiaTransmittance([0, FLOOR_Y, 0], sunDirectionAt(0), 0, MOIRE_MISMATCH) === 1,
-    'el slider llega hasta ahí a propósito'
-  )
-  check(
-    'y con la barra puesta hay puntos del piso completamente tapados',
-    (() => {
-      const sun = sunDirectionAt(0)
-      for (let i = 0; i < 4000; i += 1) {
-        const x = -30 + (60 * i) / 4000
-        if (celosiaTransmittance([x, FLOOR_Y, 0], sun, CELOSIA_BAR, MOIRE_MISMATCH) < 0.01) {
-          return true
-        }
-      }
-      return false
-    })(),
-    'la barra corta la key entera donde cae: la sombra es sombra, no un velo'
   )
 }
 

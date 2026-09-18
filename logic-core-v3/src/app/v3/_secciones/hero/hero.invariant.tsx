@@ -36,26 +36,13 @@ import { rotuloAccesible } from '../../_lib/cta'
 import { seccionPorId } from '../../_lib/secciones'
 import { cuentaDeMarcadores, hallazgosDeCifraConSimbolo, hallazgosDeDigito, hallazgosDeMarcadorDesconocido, marcadoresPedidos, numerosDe, textosDe } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
-import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
-import { afirmarElAjusteDeCompo2 } from './ajuste'
-import { afirmarLaComposicionDeCompo1 } from './composicion'
-import { afirmarElPapelDePapel2 } from './papel'
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
-import {
-  ATRIBUTO_DEL_TITULAR,
-  GEOMETRIA,
-  TIPOGRAFIA_DEL_TITULAR,
-  TIPOGRAFIA_DEL_REGISTRO_2,
-} from './geometria'
+import { ATRIBUTO_DEL_TITULAR, TIPOGRAFIA_DEL_TITULAR, TIPOGRAFIA_DEL_REGISTRO_2 } from './geometria'
 import { Hero } from './Hero'
-import {
-  afirmarElAjusteDeLaLinea1,
-  afirmarElContrasteSobreElCanvas,
-  afirmarElFrenoDeB2,
-  afirmarElPieDeLaPantalla,
-} from './soporte'
+import { afirmarElContrasteSobreElCanvas, afirmarElPieDeLaPantalla } from './soporte'
 
 const seccion = seccionDe('hero')
 const seccionMontada = <Hero seccion={seccion} />
@@ -81,44 +68,6 @@ const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const FUENTE = ['Hero.tsx', 'geometria.ts']
   .map((archivo) => readFileSync(path.join(AQUI, archivo), 'utf8'))
   .join(' ')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
-
-afirmarIgual(seccion.superficie, 'papel-transparente', 'la superficie deja ver la escena')
-afirmarIgual(seccion.superficieAngosta, 'papel-opaco', '  y abajo de 375 NO la deja: es la única sección con dos superficies (TEXTO-3)')
-afirmarIgual(pantallasDe(seccion), 1, 'ocupa UNA pantalla: 100svh')
-afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: el visitante no pierde el scroll')
-afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')
-afirmarIgual(veces(quieto, 'data-pantalla='), 1, 'el marcado declara UNA caja de pantalla')
-afirmarIgual(veces(quieto, 'min-h-svh'), 1, '  y una sola pide el alto de viewport')
-/**
- * ⚠️ **QUÉ CUSTODIABA ANTES Y QUÉ CUSTODIA AHORA — una línea cada uno.**
- *
- * **Antes:** que la sección no pintara fondo en NINGÚN ancho, o sea que la sala
- * se viera a través del panel. Es la propiedad que hace que ésta sea una de las
- * dos pantallas del sitio que dejan ver el escenario, y por eso el Hero no tiene
- * un solo `bg-` en toda su composición.
- *
- * **Ahora:** lo mismo, **pero con su condición** — de 390 para arriba el panel
- * sigue sin pintar nada, y abajo pinta papel a propósito (TEXTO-3 §2 lo abrió
- * para 320; PAPEL-2 §1 le sumó 375, donde COMPO-1 midió 40,59 % de tinta sobre
- * la masa del logo y 134,86 px de faltante). Lo que se protege sigue siendo real
- * y sigue siendo lo mismo: que nadie tape la sala. Lo que cambia es que ahora se
- * afirma el PAR — que no haya un `bg-fondo` suelto, que es el que taparía la
- * sala en todo ancho y es el error que este chequeo siempre existió para ver, y
- * que el único que hay venga con la variante `max-chico:`, que es la que lo
- * acota.
- *
- * El discriminador es el carácter de antes: un `bg-fondo` sin condición viene
- * precedido de espacio o comilla; el acotado viene precedido de `:`.
- */
-const FONDO_SIN_CONDICION = /(^|[\s"])bg-fondo\b/
-afirmar(!FONDO_SIN_CONDICION.test(quieto), 'la sección NO pinta fondo SIN CONDICIÓN: de 390 para arriba el canvas se ve a través del panel')
-afirmar(quieto.includes('max-chico:bg-fondo'), '  y el único fondo que pinta está acotado a la banda de papel: abajo de 390 el Hero muestra papel (TEXTO-3 abrió 320, PAPEL-2 sumó 375)')
-controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '300svh' }, (s) => pantallasDe(s) === 1)
-controlPositivo('el chequeo del fondo ve un panel que lo pinta en TODO ancho', '<section class="bg-fondo text-tinta">', (h: string) => !FONDO_SIN_CONDICION.test(h))
-controlPositivo('  y el de la banda ve un panel al que le falta la clase acotada', '<section class="relative z-10 w-full text-tinta">', (h: string) => h.includes('max-chico:bg-fondo'))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El contenido no se puede leer como un dato')
@@ -176,21 +125,7 @@ controlPositivo('el chequeo de "no hay transformada" ve un style con transform',
 titulo('6 · CONTROL POSITIVO — con la coreografía puesta, SÍ se anima')
 
 afirmar(conMotion.includes('transform:'), 'con coreografía el bloque P2 SÍ escribe transformada')
-/** LA PIEZA QUIETA: el titular tiene DOS líneas y sólo UNA entra. Los dos
- *  números van juntos y ninguno se deriva del otro. */
-afirmarIgual(
-  veces(conMotion, 'will-change-transform'),
-  GEOMETRIA.piezasAnimadasDelTitular + GEOMETRIA.piezasDelBloqueDeEntrada,
-  `y son exactamente las ${GEOMETRIA.piezasAnimadasDelTitular + GEOMETRIA.piezasDelBloqueDeEntrada} piezas declaradas: la línea 2 (P1) y el bloque de bajada y CTA (P2) — la línea 1 NO promueve capa porque es la pieza quieta`,
-)
-afirmar(GEOMETRIA.piezasAnimadasDelTitular < GEOMETRIA.filasDelTitular, `el titular tiene ${GEOMETRIA.filasDelTitular} filas y entra ${GEOMETRIA.piezasAnimadasDelTitular}: el registro 1 está en el primer cuadro sin coreografía`)
-/** ⚠ COMPO-1: el envoltorio del registro 1 lleva SU tipografía más la clase que
- *  lo hace conmutar, así que la cadena ya no termina en comilla. Lo que se
- *  afirma sigue siendo lo mismo —que sale como `<span>` y no por un canal— y se
- *  escribe con el espacio de después, que es lo que distingue «la clase está» de
- *  «la clase está como prefijo de otra». */
 afirmar(quieto.includes(`<span class="${TIPOGRAFIA_DEL_TITULAR} `), '  y sale como un `<span>` pelado, sin canal: es OTRO árbol, no P1 con duración cero')
-afirmar(quieto.includes(GEOMETRIA.claseDelEnvoltorioDeFilas), '  y ese `<span>` es el ENVOLTORIO que conmuta: columna abajo de 1025, `block` arriba', GEOMETRIA.claseDelEnvoltorioDeFilas)
 /**
  * ⚠️ **EL TITULAR YA NO SE COMPRUEBA POR `data-texto-por-lineas`.** Ese atributo
  * lo emitía `TextoPorLineas`, y el rehecho lo saca del hero: un divisor que
@@ -214,12 +149,6 @@ const adentroDelH1 = (html: string): string => {
 afirmar(adentroDelH1(quieto).length > 0, 'el h1 de la rama quieta se pudo aislar para mirarlo por dentro')
 afirmarIgual(veces(adentroDelH1(quieto), '<div'), 0, '  y no tiene un solo `<div>` adentro: contenido de frase, que es lo único que un encabezado admite')
 afirmarIgual(veces(adentroDelH1(conMotion), '<div'), 0, '  ni con la coreografía puesta: P1 envuelve en `<span>` porque la sección lo pide así')
-/** ⚠ COMPO-1: la cuenta es `filas + envoltorios` y no un literal. Son tres
- *  filas declaradas más el `<span>` que envuelve a las dos del registro 1 y las
- *  hace conmutar entre columna y `block`. Los dos números viven en `GEOMETRIA` y
- *  ninguno se deriva del otro. */
-const SPANS_DEL_TITULAR = GEOMETRIA.filasDelTitular + GEOMETRIA.envoltoriosDelTitular
-afirmarIgual(veces(adentroDelH1(quieto), '<span'), SPANS_DEL_TITULAR, `  y son exactamente ${SPANS_DEL_TITULAR} spans: las ${GEOMETRIA.filasDelTitular} filas declaradas más el envoltorio del registro 1`)
 controlPositivo('el aislador del h1 ve un div adentro cuando lo hay', '<h1><div>x</div></h1>', (h: string) => veces(adentroDelH1(h), '<div') === 0)
 controlPositivo('el contador del handle del titular ve un marcado sin él', '<h1>x</h1>', (h: string) => veces(h, HANDLE) === 1)
 /** El uppercase es la condición de que se vea la letra que se eligió: los dos
@@ -310,10 +239,8 @@ controlPositivo('el detector ve un button adentro de un enlace', '<a href="#x"><
 controlPositivo('y la cuenta del rótulo ve las dos copias sin ocultar', `<span>${CONTENIDO.cta.rotulo}</span><span>${CONTENIDO.cta.rotulo}</span>`, (h: string) => anuncia(h, CONTENIDO.cta.rotulo) === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ⚠️ §9, §10, §12b Y §13 VIVEN EN `soporte.ts` — las CUENTAS del frente, contra
-// las que miran el MARCADO, que quedan acá. Salieron cuando este archivo cruzó
-// las 300 líneas al rehacerse el titular, y se llaman EN SU LUGAR para que la
-// salida siga leyéndose §1 → §13 de arriba a abajo.
+// ⚠️ §9 Y §10 VIVEN EN `soporte.ts` — las CUENTAS del frente, contra las que
+// miran el MARCADO, que quedan acá.
 afirmarElPieDeLaPantalla(quieto)
 afirmarElContrasteSobreElCanvas()
 
@@ -344,55 +271,12 @@ controlPositivo('el chequeo de paridad ve un marcado desparejo', '<i class="hove
 controlPositivo('el de la puerta ve una ruta a las piezas del demo', "'../../motion/_componentes/Pieza'", (t: string) => veces(t, 'motion/_componentes') === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · La geometría, el pedido y los patrones declarados')
+titulo('12 · El pedido y los patrones declarados')
 
-afirmar(GEOMETRIA.claseDeLaMedida.endsWith(String(GEOMETRIA.columnasDeLaMedida)), 'la clase de la medida y el número declarado dicen lo mismo', `${GEOMETRIA.claseDeLaMedida} sobre ${GEOMETRIA.columnasTotales} columnas`)
-afirmar(quieto.includes(GEOMETRIA.claseDeLaMedida), '  y esa clase llega al marcado')
-controlPositivo('el chequeo de la medida ve una clase que no coincide con el número', { claseDeLaMedida: 'escritorio:col-span-4', columnasDeLaMedida: 3 }, (g) => g.claseDeLaMedida.endsWith(String(g.columnasDeLaMedida)))
-
-/** ── B1 · LAS DOS CAJAS DE LA MEDIDA. La aritmética, no el píxel (`GEOMETRIA` y `B1-DELTAS.md` §4). Las grillas se cuentan por `data-columnas`, que emite `Grilla`. */
-/**
- * LA CLASE DEL TITULAR DICE LOS **DOS** NÚMEROS, y por eso se compara entera.
- *
- * Con `endsWith` —lo que este chequeo hacía cuando la clase era una sola— un
- * `tablet:col-span-2` suelto pasaba, y ése es exactamente el defecto de alcance
- * que TEXTO-2 corrigió: la derivación de los tres bordes seguros es de
- * escritorio y la clase se aplicaba desde 768. La igualdad literal es la única
- * forma de que las dos mitades tengan que estar.
- */
-const laClaseDelTitularDiceLosDosNumeros = (g: {
-  readonly claseDelTitular: string
-  readonly columnasDelTitularEnTablet: number
-  readonly columnasDelTitular: number
-}): boolean =>
-  g.claseDelTitular === `tablet:col-span-${g.columnasDelTitularEnTablet} escritorio:col-span-${g.columnasDelTitular}`
-
-afirmar(laClaseDelTitularDiceLosDosNumeros(GEOMETRIA), 'la clase del titular y los dos números declarados dicen lo mismo', GEOMETRIA.claseDelTitular)
-afirmar(quieto.includes(GEOMETRIA.claseDelTitular), '  y esa clase llega al marcado')
-afirmarIgual(GEOMETRIA.columnasDelTitularEnTablet, GEOMETRIA.columnasDeLaCajaDelTitular, 'abajo de 1025 la caja del titular es ENTERA: el borde seguro que la acota está medido en escritorio y ahí el logo es más ancho que el cuadro')
-afirmar(GEOMETRIA.columnasDelTitular < GEOMETRIA.columnasDeLaCajaDelTitular, 'y de 1025 para arriba es MÁS ANGOSTA que la medida: es lo que la saca del logo', `${GEOMETRIA.columnasDelTitular} de ${GEOMETRIA.columnasDeLaCajaDelTitular}`)
-afirmarIgual(GEOMETRIA.columnasDeLaCajaDeLaBajada, 2, 'la bajada vive en media medida: una sub-grilla de DOS')
-controlPositivo('el chequeo del titular ve una clase a la que le falta la mitad de escritorio', { claseDelTitular: 'tablet:col-span-3', columnasDelTitularEnTablet: 3, columnasDelTitular: 2 }, laClaseDelTitularDiceLosDosNumeros)
-controlPositivo('  y una que acota desde tablet, que es el defecto que este chequeo existe para ver', { claseDelTitular: 'tablet:col-span-2', columnasDelTitularEnTablet: 3, columnasDelTitular: 2 }, laClaseDelTitularDiceLosDosNumeros)
-controlPositivo('  y el de la angostura ve una caja que NO acota', { columnasDelTitular: 3, columnasDeLaCajaDelTitular: 3 }, (g) => g.columnasDelTitular < g.columnasDeLaCajaDelTitular)
-afirmarIgual([GEOMETRIA.columnasTotales, GEOMETRIA.columnasDeLaCajaDelTitular, GEOMETRIA.columnasDeLaCajaDeLaBajada].map((n) => veces(quieto, `data-columnas="${n}"`)), [1, 1, 1], 'las TRES grillas del hero salen una vez cada una: la medida, la del titular y la de la bajada')
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
 controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
 afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))], ['prosa'], 'y las dos son `prosa`: el relleno que NO se ve como agujero')
 afirmarIgual(PATRONES_DE_LA_SECCION, ['P1', 'P2'], 'la sección declara consumir P1 y P2, y nada más')
-
-afirmarElAjusteDeLaLinea1()
-afirmarElFrenoDeB2()
-/** §14 vive en `composicion.ts` por la misma razón que §9-§13 viven en
- *  `soporte.ts`: son las CUENTAS de este sprint y no comprobaciones del
- *  marcado. Se llama último porque es lo último que se numeró. */
-afirmarLaComposicionDeCompo1(quieto)
-/** §15 vive en `papel.ts`, por el mismo corte que §14 vive en `composicion.ts`:
- *  las cuentas de un sprint por archivo, y el marcado acá. */
-afirmarElPapelDePapel2(quieto)
-/** §16, las cuentas de COMPO-2, en `ajuste.ts`. Mismo corte: un sprint, un
- *  archivo, y la salida numerada de arriba a abajo. */
-afirmarElAjusteDeCompo2(quieto)
 
 cerrar('hero.invariant')

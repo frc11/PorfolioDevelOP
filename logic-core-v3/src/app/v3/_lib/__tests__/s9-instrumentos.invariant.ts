@@ -2,10 +2,13 @@
  * SITIO-S9 · LA DEUDA DE INSTRUMENTOS — cuatro pendientes que SITIO-S8 dejó
  * anotados, cada uno con el instrumento que lo mide.
  *
- * ⚠️ **TRES DE LAS CUATRO SECCIONES VIVEN EN SU PROPIO MÓDULO**, por la regla de
+ * ⚠️ **DOS DE LAS TRES SECCIONES VIVEN EN SU PROPIO MÓDULO**, por la regla de
  * las 300 líneas y con el corte siempre por tema: §1 en `s9-censoDelLane.ts`
- * (V3-E), §2 en `s9-acoplamiento.ts` (SITIO-S11) y §4 en `s9-scrollPadding.ts`.
- * La razón completa de cada una está en su módulo.
+ * (V3-E) y §2 en `s9-acoplamiento.ts` (SITIO-S11). La razón completa de cada
+ * una está en su módulo.
+ *
+ * ⚠️ **Modo pulido sacó §4** (`s9-scrollPadding.ts`, el desvío en px del
+ * aterrizaje de anclas contra el borde de la pastilla): era composición.
  *
  * ── Qué custodia, en una línea por tarea ───────────────────────────────────
  *
@@ -17,8 +20,6 @@
  *   2. **El acoplamiento de TIPO hacia `/probe-escena`** — CERRADO en S11.
  *   3. **§7.13 apunta a rutas que existen**, que es lo que la mudanza de S8 le
  *      había roto.
- *   4. **El `scroll-padding-top` del sitio viejo aplica a `/v3`**, con el desvío
- *      en píxeles y las dos varas contra las que se lo puede medir.
  */
 
 import path from 'node:path'
@@ -28,7 +29,6 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirma
 import { LARGOS_HEREDADOS, heredadosQueCrecieron, medir, type Largo } from './s8-largos'
 import { afirmarElAcoplamientoCerrado } from './s9-acoplamiento'
 import { afirmarElCensoDelLane } from './s9-censoDelLane'
-import { afirmarElScrollPadding } from './s9-scrollPadding'
 import { bloque713, contarLineas, existe, leer, rutasQueNombra } from './s9-instrumentos'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -129,11 +129,5 @@ controlPositivo(
   'a\nb\n',
   (texto: string) => contarLineas(texto) === 3,
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ═════════════════════════════════════════════════════════════════════════
-// §4 vive en `s9-scrollPadding.ts`, por el mismo corte que §2: la reescritura
-// del acoplamiento hizo cruzar las 300 líneas a este archivo.
-afirmarElScrollPadding()
 
 cerrar('s9-instrumentos')

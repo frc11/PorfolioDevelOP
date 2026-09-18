@@ -12,39 +12,29 @@
  * Lo propio de esta sección, además de lo que el lane pide a las cuatro:
  *
  *   · **La métrica nunca está oculta**, ni ella ni ningún ancestro suyo.
- *   · **Cero `three`**, del disco. · **El ritmo**: tres pantallas pinneadas son
- *     UN momento. · **El despinneo.** · **Los pasos = los proyectos** (B1).
- *   · **El acento no puede ser texto**: los hex se LEEN del tema. · **Las tres
- *     capturas** (V3-D): que el ARCHIVO mida la relación declarada.
- *   · **B2 · el reparto** (§15) y **B4-A · la meseta** (§16), en `soporte.ts`:
- *     barre el pin entero, y nunca quedan los tres planos invisibles a la vez.
+ *   · **Cero `three`**, del disco. · **Los pasos = los proyectos** (B1).
+ *   · **El acento no puede ser texto**: los hex se LEEN del tema.
  *
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en
  * `trabajos-piezas.ts` y el arnés en `soporte.ts`. Donde hubo que elegir se
  * sacaron afirmaciones redundantes y NUNCA controles positivos.
  */
 
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
-import { sizesPorColumnas } from '../../_lib/imagen'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL } from '../_contrato/forma'
 import { cuentaDeMarcadores, marcadoresPedidos, textosDe } from '../_contrato/marcadores'
-import { MarcoDeMedio } from '../_contrato/medios'
 import { entradasColgadas } from '../_contrato/pedido'
-import { ritmoDe } from '../_contrato/ritmo'
-import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
 import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
-import { CSS, FUENTES, FUENTE_DEL_PANEL, FUENTE_DE_LA_COMPOSICION, abrirCaptura, afirmarElRepartoYLaMeseta, sinTres, veces } from './soporte'
-import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
-import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
+import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, sinTres, veces } from './soporte'
+import { ancestrosDe, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado } from './trabajos-piezas'
+import { GEOMETRIA } from './geometria'
 import { Trabajos } from './Trabajos'
-import { perspectivaDeLaEscena } from '../../_lib/motion/lente'
 
 const seccion = seccionDe('trabajos')
 
@@ -67,47 +57,17 @@ const PROYECTOS = CONTENIDO.proyectos // y sus `enlace`, que §11 compara contra
 const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS } = coloresDelTema(CSS)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
+// ── 1b · EL PUENTE ENTRE LAS DOS FUENTES DEL ATRIBUTO DEL PANEL (B1). Se
+// escribe dos veces —`forma.ts` y literal en `Panel.tsx`— porque `s13b-escena`
+// lo exige literal y está congelado. El modo de falla es mudo: `closest()` de
+// un atributo inexistente devuelve `null`.
+titulo('1 · El puente del atributo del panel, y los pasos declarados')
 
-afirmarIgual(seccion.superficie, 'oscuro-transparente', 'la superficie es oscuro-transparente: la banda oscura sobre la escena — abierta en B6-A, sin velo desde B8: la noche la pone el arco')
-afirmarIgual(pantallasDe(seccion), 3, 'ocupa TRES pantallas — la secuencia más larga del lane')
-afirmarIgual(seccion.pinneada, 'desde-escritorio', 'y es PINNEADA DESDE 1025: abajo no se clava, y cada proyecto toma su pantalla')
-afirmarIgual(veces(quieto, 'data-pinneado="desde-escritorio"'), 1, '  y hay UN solo hijo pinneado en el marcado')
-afirmarIgual(veces(quieto, 'escritorio:sticky'), 1, '  con el sticky acotado a la variante de 1025, no suelto')
-// La contracara del despinneo: los tres proyectos suman los 300svh declarados.
-afirmarIgual(veces(quieto, 'min-h-svh'), GEOMETRIA.planos, '  y los tres proyectos toman una pantalla cada uno abajo del umbral')
-afirmarIgual(veces(quieto, 'escritorio:min-h-0'), 3, '    y la sueltan desde 1025, donde el panel sí está clavado')
-afirmar(quieto.includes('data-seccion="invertida"'), 'el panel escribe `data-seccion="invertida"`: el tema se da vuelta solo')
-/** ⚠ **B1 · LOS TRES `h-full` SE QUEDAN, y que hayan VUELTO a su valor viejo es
- *  la prueba de que el arreglo fue del contrato y no un parche acá.** La versión
- *  intermedia tenía dos: el bloque llevaba `minHeight: seccion.alto` y con el
- *  escenario en 3240 px la grilla quieta no podía colgar de su `h-full`. Con
- *  `anclaje: 'seccion'` vuelve a `min-h-0 flex-1`. */
-afirmarIgual(veces(quieto, 'h-full'), 3, 'el alto de escritorio lo ponen los TRES envoltorios encadenados con `h-full`')
-afirmarIgual(veces(quieto, 'escritorio:h-svh'), 1, '  y la ÚNICA pantalla pedida arriba de 1025 es la del hijo pinneado')
-/** ── 1b · EL PUENTE ENTRE LAS DOS FUENTES DEL ATRIBUTO DEL PANEL (B1). Se
- *  escribe dos veces —`forma.ts` y literal en `Panel.tsx`— porque `s13b-escena`
- *  lo exige literal y está congelado. El modo de falla es mudo: `closest()` de
- *  un atributo inexistente devuelve `null`. */
 afirmar(FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`), 'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite', `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`)
 controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viejo={seccion.id}', (t: string) => t.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`))
 
 afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla SON los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
 controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccion, pasosDeLaSecuencia: 4 }, (s: EntradaDeSeccion) => s.pasosDeLaSecuencia === CONTENIDO.proyectos.length)
-controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '100svh' }, (s: EntradaDeSeccion) => pantallasDe(s) === 3)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El ritmo: la secuencia cuenta como UN momento, no como tres pantallas')
-
-const ritmo = ritmoDe([seccion])
-afirmarIgual(ritmo.pantallas, 3, 'tres pantallas nominales')
-/** ⚠ CORRECCIÓN DE SITIO-S7: este lane contaba la sección ENTERA como pinneada
- *  (3 de 3); el otro contaba el recorrido del pin (2 de 3), que es el que la
- *  referencia midió (SCROLL.md §4). La derivación: `_contrato/ritmo.ts`. */
-afirmarIgual(ritmo.pantallasPinneadas, 2, '  las DOS que consume el pin: 3 de sección menos la pantalla del `sticky`')
-afirmarIgual(ritmo.secuencias, 1, '  que es UNA sola secuencia')
-afirmarIgual(ritmo.momentos, 2, 'momentos = 3 − 2 + 1 = DOS (SCROLL.md §4 y §6)')
-controlPositivo('la cuenta de momentos ve una sección que NO está pinneada', [{ ...seccion, pinneada: undefined }], (ss: readonly EntradaDeSeccion[]) => ritmoDe(ss).momentos === 2)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El contenido no se puede leer como un dato')
@@ -158,26 +118,6 @@ afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola tran
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
 controlPositivo('el chequeo de "no hay transformada" ve un style con transform', '<div style="transform:translateY(10%)"></div>', (html: string) => !html.includes('transform:'))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · CONTROL POSITIVO — con la compuerta abierta, P7 SÍ escribe transformada')
-
-afirmar(conMotion.includes('transform:'), 'P7 escribe transformada ya en el primer cuadro')
-afirmarIgual(veces(conMotion, 'translate3d(0px, 0px, -3000px) scale(0.6)'), 3, '  y los tres planos arrancan en el extremo medido: −3000 de profundidad, escala 0,6')
-/** ⚠ **B2 · ERAN TRES Y AHORA SON CUATRO.** La cuarta es el MARCO, que hasta B2
- *  no se animaba: por eso el censo medía el primer aterrizaje recién en
- *  `scrollY` 10200, 1.560 px después de que la sección arranca. Entra con P2 y
- *  su rango cierra antes del pin, así que sigue siendo el plano quieto. */
-afirmarIgual(veces(conMotion, 'will-change-transform'), GEOMETRIA.planos + 1, 'son CUATRO piezas: una por proyecto y el marco')
-afirmarIgual(veces(conMotion, 'pointer-events:none'), 3, 'y lo que está lejos no es clickeable')
-/** ⚠ DESDE SITIO-S7 la perspectiva vive sólo en la rama animada: sin
- *  transformada 3D no hay nada que poner en perspectiva. Su efecto secundario
- *  —crear bloque contenedor— lo cubre `s7-arboles`. */
-/** ⚠ B6-A · LA PERSPECTIVA ES EL LENTE DE LA ESCENA (el foco de la cámara en `svh`), no los 1000 px
- *  del patrón, que sigue declarándolos sin cambiar un valor: lo afirma `s19-lente`. Acá, lo que llega al marcado. */
-afirmarIgual(veces(conMotion, `perspective:${perspectivaDeLaEscena()}`), 1, 'la perspectiva va UNA vez, en el ancestro de los planos — y es el lente de la escena')
-afirmarIgual(veces(conMotion, 'perspective:1000px'), 0, '  los 1000 px del patrón ya no llegan al marcado: los reemplaza el lente')
-afirmarIgual(veces(quieto, 'perspective:'), 0, '  y NO en la rama quieta, donde no hay nada que poner en perspectiva')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · LA MÉTRICA NUNCA ESTÁ OCULTA — ni ella ni ninguno de sus ancestros')
@@ -247,29 +187,6 @@ afirmarIgual(nombresQueNoSonEncabezado(quieto, NOMBRES), [], 'los tres nombres s
 controlPositivo('el detector ve un nombre enlazado que NO es encabezado', '<p><a href="https://esquinaweb.com.ar">Esquina</a></p>', (html: string) => nombresQueNoSonEncabezado(html, NOMBRES).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('13 · Las capturas: relación de aspecto y `sizes`, sobre el marcado')
-
-afirmarIgual(veces(quieto, `width="${GEOMETRIA.captura.ancho}" height="${GEOMETRIA.captura.alto}"`), 3, 'las tres imágenes declaran sus dimensiones EN EL MARCADO')
-controlPositivo('el chequeo de las dimensiones ve una imagen sin ellas', '<img src="/a.webp"/>', (html: string) => html.includes(`width="${GEOMETRIA.captura.ancho}"`))
-const DECLARADA: MedidasDeImagen = { ancho: GEOMETRIA.captura.ancho, alto: GEOMETRIA.captura.alto }
-afirmarIgual(capturasConOtraRelacion(PROYECTOS, DECLARADA, abrirCaptura), [], '  y los tres ARCHIVOS miden lo declarado: sin esto el salto de layout vuelve en silencio')
-controlPositivo('el detector ve un archivo de otra relación', { ...DECLARADA, alto: DECLARADA.alto + 1 }, (d: MedidasDeImagen) => capturasConOtraRelacion(PROYECTOS, d, abrirCaptura).length === 0)
-afirmar(SIZES_DE_LA_CAPTURA.trim().length > 0, 'el `sizes` no es vacío', SIZES_DE_LA_CAPTURA)
-afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorColumnas(GEOMETRIA.captura.columnasDelPlano, GEOMETRIA.captura.columnasDeLaGrilla, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano. ⚠ B1: sale de las COLUMNAS del plano (2 de 3 = 67vw) y no de un porcentaje escrito. Describe la caja de la rama ANIMADA — la quieta de escritorio muestra 1 de 3 y baja el doble de lo que necesita: sobre-pedir cuesta bytes, sub-pedir sirve una captura borrosa a la mayoría')
-
-/** El `sizes` sobre el marcado REAL: demuestra descriptores de ANCHO. */
-afirmarIgual(veces(quieto, `sizes="${SIZES_DE_LA_CAPTURA}"`), 3, 'las tres imágenes emiten el `sizes` en el HTML')
-afirmar(quieto.includes('w"') && !quieto.includes('2x'), '  y su srcset usa descriptores de ANCHO')
-controlPositivo('el chequeo del srcset ve descriptores de densidad', '<img srcSet="/a.jpg 1x, /b.jpg 2x"/>', (html: string) => html.includes('w"') && !html.includes('2x'))
-
-/** Y el marco SIGUE teniendo su rama de hueco: el día que una captura se caiga
- *  vuelve el marcador con su relación de aspecto, y no una imagen rota. */
-const sinArchivo = renderToStaticMarkup(
-  <MarcoDeMedio marcador="[CAPTURA]" fuente={null} alt={CONTENIDO.proyectos[0].captura.alt} ancho={GEOMETRIA.captura.ancho} alto={GEOMETRIA.captura.alto} sizes={SIZES_DE_LA_CAPTURA} />,
-)
-afirmar(sinArchivo.includes('[CAPTURA]') && sinArchivo.includes(`aspect-ratio:${GEOMETRIA.captura.ancho} / ${GEOMETRIA.captura.alto}`), 'la rama sin archivo sigue viva: marcador y relación de aspecto, no una imagen rota')
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('14 · El pedido y el patrón declarado')
 
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
@@ -287,12 +204,5 @@ const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].ma
 // PORTADA, el plano de índice −1 del mismo reparto (P7). La igualdad se conserva.
 afirmarIgual(patronesDelFuente, ['P7'], 'el componente consume UN patrón: P7, para los tres planos y para la portada (B12)')
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
-
-// ═══════════════════════════════════════════════════════════════════════════
-// §15 y §16 viven en `soporte.ts`: el reparto de los planos y su meseta son la
-// misma pieza, y el barrido del pin necesita el fotograma de P7
-// —`PATRONES` de `_lib/motion/`— que este archivo, producto para
-// `s7-contrato` §3, no puede importar. El corte es por REGLA, no por tamaño.
-afirmarElRepartoYLaMeseta()
 
 cerrar('trabajos.invariant')

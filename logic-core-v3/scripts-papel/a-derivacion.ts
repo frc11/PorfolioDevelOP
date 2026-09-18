@@ -47,7 +47,10 @@ import { tracking } from '../src/app/v3/_lib/__tests__/s10-mobile'
 import { medidaDelTitular } from '../src/app/v3/_lib/__tests__/s3-banda-consecuencias'
 import { DESCUENTO_NACIMIENTO_PX } from '../src/app/v3/_lib/navegacion'
 import { CONTENIDO } from '../src/app/v3/_secciones/hero/contenido'
-import { FACTOR_DEL_PESO_700 } from '../src/app/v3/_secciones/hero/composicion'
+
+/** `hero/composicion.ts` se desarmó (Modo pulido); el factor queda inline
+ *  para que este script histórico (PAPEL-2) siga reproduciendo su salida. */
+const FACTOR_DEL_PESO_700 = 8.567 / 8.475
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const RAIZ = path.resolve(AQUI, '..')

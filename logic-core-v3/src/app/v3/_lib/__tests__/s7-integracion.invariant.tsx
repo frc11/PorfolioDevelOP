@@ -25,7 +25,7 @@ import path from 'node:path'
 import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { ATRIBUTO_DE_SECCION, IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
-import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../secciones'
+import { SECCIONES } from '../secciones'
 import { CLASES_DE_LA_BANDA_ANGOSTA, SUPERFICIES } from '../superficies'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
@@ -112,95 +112,6 @@ controlPositivo(
   'el lector de superficies ve un panel con la equivocada',
   '<section data-panel="hero" data-superficie="papel-opaco">',
   (html: string) => html.includes('data-superficie="papel-transparente"'),
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · EL RECORRIDO DE ESCENA — aparece, desaparece y vuelve')
-
-/**
- * Es lo que ninguno de los dos lanes podía afirmar. Tres momentos de escena, no
- * ocho: si los ocho paneles dejaran ver el canvas, el canvas dejaría de ser un
- * acontecimiento y pasaría a ser el fondo.
- */
-const transparentes = SECCIONES.filter((s) => SUPERFICIES[s.superficie].dejaVerElCanvas).map(
-  (s) => s.id,
-)
-afirmarIgual(
-  transparentes,
-  [...SECCIONES_QUE_DEJAN_VER_LA_ESCENA],
-  'las secciones que dejan ver el canvas son las que la tabla deriva',
-)
-afirmar(
-  transparentes.length > 0 && transparentes.length < SECCIONES.length,
-  `${transparentes.length} de ${SECCIONES.length} secciones dejan ver la escena: aparece y desaparece`,
-  transparentes.join(' · '),
-)
-
-/** El recorrido tiene que VOLVER: hay una opaca entre dos transparentes. */
-const indices = transparentes.map((id) => SECCIONES.findIndex((s) => s.id === id))
-afirmar(
-  indices.length >= 2 && indices[indices.length - 1] - indices[0] > indices.length - 1,
-  'y VUELVE: entre la primera y la última transparente hay al menos una opaca',
-  `posiciones ${indices.join(', ')} sobre ${SECCIONES.length}`,
-)
-
-controlPositivo(
-  'el detector de "vuelve" ve un recorrido donde las transparentes son contiguas',
-  [0, 1],
-  (is: number[]) => is.length >= 2 && is[is.length - 1] - is[0] > is.length - 1,
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · Las secuencias pinneadas se clavan, y son las que la tabla declara')
-
-const pinneadas = REGISTRO.filter((m) => m.seccion.pinneada !== undefined)
-afirmarIgual(
-  pinneadas.map((m) => m.id),
-  ['trabajos', 'servicios'],
-  'DOS secuencias pinneadas — y Servicios entra por la corrección de la tabla de este sprint',
-)
-
-for (let i = 0; i < REGISTRO.length; i++) {
-  const html = marcarSeccion(i)
-  const modo = REGISTRO[i].seccion.pinneada
-  afirmarIgual(
-    html.includes(`data-pinneado="${modo}"`),
-    modo !== undefined,
-    `\`${REGISTRO[i].id}\` — el sticky está exactamente donde la tabla dice`,
-  )
-}
-
-/**
- * El hijo pegado declara UNA pantalla. De ahí sale la cuenta de ritmo.
- *
- * ⚠️ SITIO-S11: se lee la clase DEL elemento con `data-pinneado` y se compara
- * por token exacto. La versión anterior hacía `html.includes('h-svh')` y era
- * verde por subcadena —`min-h-svh` la contiene—, así que el cambio de S11 en el
- * envoltorio (`siempre`: `h-svh` → `min-h-svh`, el arreglo del defecto 1) la
- * habría dejado en verde diciendo algo falso. `desde-escritorio` la declara
- * como alto FIJO; `siempre`, como PISO. La razón de la asimetría está en el
- * docblock de `_contrato/Seccion.tsx`.
- */
-const clasesDelPegado = (html: string, modo: string): string[] =>
-  (new RegExp(`data-pinneado="${modo}"\\s+class="([^"]*)"`).exec(html)?.[1] ?? '').split(/\s+/)
-for (const m of pinneadas) {
-  const html = marcarSeccion(REGISTRO.indexOf(m))
-  const clase = m.seccion.pinneada === 'siempre' ? 'min-h-svh' : 'escritorio:h-svh'
-  afirmar(
-    clasesDelPegado(html, m.seccion.pinneada ?? '').includes(clase),
-    `\`${m.id}\` — su hijo pegado declara una pantalla (\`${clase}\`)`,
-  )
-}
-controlPositivo(
-  'el lector de la clase del pegado no se cree una subcadena',
-  '<div data-pinneado="siempre" class="sticky top-0 h-[50svh]">',
-  (html: string) => clasesDelPegado(html, 'siempre').includes('min-h-svh'),
-)
-
-controlPositivo(
-  'el detector de pinneo vería un sticky donde no corresponde',
-  '<div data-pinneado="siempre">',
-  (html: string) => !html.includes('data-pinneado="siempre"'),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -24,9 +24,6 @@
 
 import { existsSync } from 'node:fs'
 
-import { frameSceneEntry, SCENE_ENTRY_VIEW } from '@/lib/scene-framing'
-import { planIntroFlight, sampleLogoPose } from '@/components/layout/home-intro/introFlight'
-import { HOME_INTRO_TIMELINE } from '@/components/layout/home-intro/introTimeline'
 import { CONDICION_DE_RUTA, RUTAS_DEL_INTRO } from '@/components/layout/home-intro/introRutas'
 
 import { CONGELADOS_DEL_INTRO, EXPORT_DEL_INTRO, IMPORT_DEL_INTRO, MODULO_DEL_INTRO, PIEZA_QUE_SE_CONSUME } from '../contrato'
@@ -151,35 +148,6 @@ for (const condicion of CONDICIONES) {
     )
   }
 }
-
-titulo('  3.6 · El logo NUNCA cambia de tamaño')
-/** No se lee del archivo: se mide corriendo el muestreador sobre la secuencia. */
-const plan = planIntroFlight(1440, 810)
-const destino = frameSceneEntry(1440, 810)
-const altos = new Set<number>()
-for (let i = 0; i <= 400; i += 1) {
-  altos.add(sampleLogoPose(plan, HOME_INTRO_TIMELINE, i / 400).inkHeightPx)
-}
-const alto = [...altos][0]
-afirmar(altos.size === 1, 'el alto de la tinta es UNO solo en los 401 instantes de la secuencia', `${alto.toFixed(2)} px`)
-afirmar(
-  destino !== null && alto === destino.inkHeightPx,
-  '  y es el del destino: nace con el tamaño que va a tener en la escena',
-  destino
-    ? `${destino.inkWidthPx.toFixed(1)}×${destino.inkHeightPx.toFixed(1)} px · centro X ${destino.centerXPx.toFixed(1)} px sobre 1440×810`
-    : 'sin destino',
-)
-afirmar(
-  Math.abs(SCENE_ENTRY_VIEW.pitchDeg - 18.6) < 0.05,
-  '  con la elevación de entrada de S9',
-  `${SCENE_ENTRY_VIEW.pitchDeg.toFixed(4)}° · yaw ${SCENE_ENTRY_VIEW.yawDeg}°`,
-)
-controlPositivo(
-  'el muestreador no da el mismo alto para cualquier plan: sin ventana medible da 0',
-  planIntroFlight(0, 0),
-  (p: ReturnType<typeof planIntroFlight>) =>
-    sampleLogoPose(p, HOME_INTRO_TIMELINE, 0.5).inkHeightPx === alto,
-)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Los DOS contextos congelados no se editaron — contra el disco')

@@ -78,16 +78,21 @@ import {
  * y afirmaciones sin un solo control positivo. No es un problema de marcador: no
  * existen»*— y SITIO-S10 cerró diez de los que estaban. **V3-E cerró uno más,
  * `scene-framing.invariant.ts`**, al reescribir sus tres afirmaciones contra la
- * pose nueva del hero: la lista lo publicó como sobrante en la misma corrida en
- * que dejó de deberlo, que es exactamente para lo que se declara por nombre.
- * Quedan cinco.
+ * pose nueva del hero.
+ *
+ * ⚠️ **Modo pulido lo reabrió, por el motivo opuesto, y cerró otros cuatro por
+ * borrado.** Las secciones que llevaban los controles positivos de
+ * `scene-framing.invariant.ts` eran composición (destino/clamp) y se
+ * desarmaron; lo que queda (§2 y §5) nunca necesitó uno propio, así que vuelve
+ * a la lista con su razón. Y `s12-barrido.invariant.ts`, `introFlight.
+ * invariant.ts`, `introSilhouette.invariant.ts` e `introTimeline.invariant.ts`
+ * eran ENTERO composición: se borraron enteros, así que salen de esta lista
+ * por la misma regla que un padrón de archivos — no se deja apuntando a un
+ * fantasma.
  */
 export const SIN_CONTROL_DECLARADO: readonly string[] = [
-  'src/app/probe-escena/__tests__/s12-barrido.invariant.ts',
-  'src/components/layout/home-intro/introFlight.invariant.ts',
   'src/components/layout/home-intro/introShading.invariant.ts',
-  'src/components/layout/home-intro/introSilhouette.invariant.ts',
-  'src/components/layout/home-intro/introTimeline.invariant.ts',
+  'src/lib/scene-framing.invariant.ts',
 ]
 
 /** Lo que está en una lista y no en la otra, en los dos sentidos. */

@@ -14,8 +14,9 @@
  *
  * ⚠ **B4-A: el montaje YA no es del sprint paralelo.** Decía que dónde se montan
  * las piezas en el home vivo iba al reporte y no acá; B4-A las montó en el rótulo
- * de sección, en el pie y en la pastilla, así que §6 lo AFIRMA sobre el home
- * entero renderizado, y §7 cuenta las apariciones de Instrument Serif.
+ * de sección, en el pie y en la pastilla. Cuántas veces aparece cada pieza es
+ * composición y se dejó de afirmar acá (Modo pulido); §7 sigue contando las
+ * apariciones de Instrument Serif sobre el home renderizado.
  */
 
 import { readFileSync } from 'node:fs'
@@ -32,7 +33,6 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirma
 import { ALIAS_DE_ACENTO, CLASE_PREFIJO, CLASE_SEPARADOR, INSTRUMENT_SERIF_PROPUESTA, LOGOTIPO } from '../../_componentes/marca/sistema'
 import { Logotipo, MarcaLockup, PrefijoDeServicio, Separador } from '../../_componentes/marca/Marca'
 import { Home } from '../../_secciones/Home'
-import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { marcar } from '../../_secciones/_invariantes/render'
 
 const RAIZ = process.cwd()
@@ -134,111 +134,9 @@ afirmar(FUENTE_GALERIA.includes('GaleriaMarca'), 'la galería de componentes mon
 const FUENTE_BLOQUE = leer('src/app/v3/componentes/_bloques/GaleriaMarca.tsx')
 afirmar(FUENTE_BLOQUE.includes('data-seccion="invertida"'), '  y la muestra sobre papel Y sobre la sección invertida: la regla del acento sólo se ve con los dos fondos')
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · B4-A · LAS PIEZAS ESTÁN MONTADAS EN EL HOME VIVO')
-
-/**
- * B3 dejó las tres construidas y **sin montar**: las superficies de marca del
- * home caían en `_secciones/` y en la geometría de la pastilla, que eran del
- * sprint paralelo. Acá se afirma que ya no: se renderiza el home entero, en las
- * dos ramas, y se cuenta dónde aparece cada registro.
- */
+// El home renderizado, en las dos ramas: §7 lo necesita para contar Instrument Serif.
 const HOME = [false, true].map((anima) => marcar(<Home />, { anima }))
 const [QUIETO, ANIMADO] = HOME
-const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
-
-/**
- * ⚠️ **LAS SECCIONES SIN MARCA SE NOMBRAN UNA POR UNA, NO SE BAJA EL PISO.**
- *
- * Este renglón afirmaba «al menos una por cada una de las 8 secciones», y el
- * ajuste de estructura del hero lo puso en rojo: la rama animada pasó de 8 a 7.
- * Bajar el número a 7 habría dejado la comprobación pasando por una razón que
- * nadie puede leer. Lo que se declara es la EXCEPCIÓN, con su motivo, y el piso
- * se deriva de ella — así que una segunda sección que pierda su marca sin
- * declararse vuelve a poner esto en rojo.
- *
- * El cuadrado de `--color-acento` de la columna lateral del hero se sacó por
- * pedido del humano («muy afuera de la columna»). La pieza NO se tocó: las
- * otras tres secciones que la montaban y el pie la siguen mostrando, y la
- * columna de 140 px del hero sigue reservada con un `<div>` vacío, porque es la
- * que sostiene el cierre estructural de B11.
- */
-const SECCIONES_SIN_MARCA = ['hero'] as const
-
-/**
- * LAS SUPERFICIES DEL HOME QUE MONTAN LA PALABRA `develOP`, con su motivo.
- *
- * Es la lista de la que sale el número que se afirma abajo. Está acá y no como
- * un literal para que agregar una aparición obligue a escribir POR QUÉ, que es
- * la diferencia entre un padrón y un contador.
- */
-const SUPERFICIES_CON_LOGOTIPO = [
-  { donde: 'el pie', motivo: 'la firma del documento, desde S17' },
-  { donde: 'el Hero', motivo: 'PAPEL-2 §2 — la marca arriba del titular, visible sólo en los anchos de papel (320 y 375), donde el panel es opaco y la sala no se ve' },
-] as const
-const PISO_DEL_PREFIJO = REGISTRO.length - SECCIONES_SIN_MARCA.length
-
-for (const [rama, html] of [['quieta', QUIETO], ['animada', ANIMADO]] as const) {
-  afirmar(veces(html, 'data-pieza="prefijo-de-servicio"') >= PISO_DEL_PREFIJO, `rama ${rama}: el PREFIJO aparece ${veces(html, 'data-pieza="prefijo-de-servicio"')} veces — al menos una por cada una de las ${PISO_DEL_PREFIJO} secciones que lo montan (${REGISTRO.length} menos ${SECCIONES_SIN_MARCA.join(', ')}, declarada arriba) más el pie`)
-  afirmar(veces(html, 'data-pieza="separador"') > 0, `  el SEPARADOR aparece ${veces(html, 'data-pieza="separador"')} veces: los rótulos con número y nombre contiguos, más el pie`)
-  /**
-   * ⚠️ **PAPEL-2 · SON DOS, Y LA SEGUNDA ESTÁ DECLARADA CON SU CONDICIÓN.**
-   *
-   * Hasta este sprint el pie era la única superficie del home con el logotipo.
-   * Ahora el Hero monta la marca arriba del titular —la palabra y el isotipo—
-   * porque en 320 y 375 pinta papel opaco, o sea que la sala NO se ve y la
-   * pantalla se queda sin lo único que la distinguía de las otras siete.
-   *
-   * **El número no se sube y ya: se DERIVA de una lista de superficies con su
-   * motivo**, igual que `SECCIONES_SIN_MARCA` deriva el piso del prefijo. Una
-   * tercera aparición sin declararse vuelve a poner esto en rojo, que es para lo
-   * que la comprobación existe.
-   *
-   * ⚠ El logotipo del Hero está en el marcado de los OCHO anchos y **se ve en
-   * dos**: `chico:hidden` lo apaga de 390 para arriba. Esta cuenta es de marcado,
-   * así que lo cuenta igual — y eso es correcto, porque lo que cuesta bytes es
-   * estar, no verse. Lo que se ve por ancho lo mide `hero.invariant` §15c.
-   */
-  afirmarIgual(
-    veces(html, 'data-pieza="logotipo"'),
-    SUPERFICIES_CON_LOGOTIPO.length,
-    `  y el LOGOTIPO aparece ${SUPERFICIES_CON_LOGOTIPO.length} veces: ${SUPERFICIES_CON_LOGOTIPO.map((s) => s.donde).join(' · ')}`,
-  )
-  afirmarIgual(
-    veces(html, 'data-pieza="isotipo"'),
-    1,
-    `  y el ISOTIPO UNA sola: el dibujo de la marca sólo lo monta el Hero, y sólo se VE abajo de 390`,
-  )
-}
-
-/** ⚠️ **EL DEFECTO QUE EL MONTAJE ARREGLA, afirmado sobre el marcado.** La marca
- *  del pie viajaba como texto adentro de un `Caption` con `uppercase`, así que
- *  el sitio decía «DEVELOP». La pieza trae `normal-case` y la palabra sobrevive.
- *
- *  ⚠️ **PAPEL-2 · SE BUSCA EL ÚLTIMO Y NO EL PRIMERO, Y ES UNA CORRECCIÓN DEL
- *  DETECTOR.** Este renglon tomaba `indexOf`, o sea la PRIMERA aparición del
- *  logotipo del documento, y eso valía mientras el pie fuera la única. Con la
- *  marca del Hero —que abre el documento— la primera pasó a ser otra y el
- *  chequeo se puso en rojo midiendo la pieza equivocada. El pie CIERRA el
- *  documento, así que `lastIndexOf` lo encuentra por una propiedad estructural
- *  y no por un orden que el próximo sprint pueda volver a mover.
- *
- *  Y la del Hero no necesita `normal-case` porque no hereda caja alta de nadie:
- *  vive ARRIBA del `h1`, que es el único `uppercase` de esa columna. Eso se
- *  afirma abajo como lo que es — una propiedad del árbol, no una confianza. */
-const enElPie = QUIETO.slice(QUIETO.lastIndexOf('data-pieza="logotipo"'))
-afirmar(/normal-case/.test(enElPie.slice(0, 300)), 'el logotipo del pie lleva `normal-case`: la caja alta heredada no se come la `d` minúscula ni el `OP`')
-afirmar(
-  QUIETO.indexOf('data-pieza="logotipo"') < QUIETO.indexOf('data-titular="dos-registros"'),
-  '  y el del Hero está AFUERA del `h1`: no puede heredar su `uppercase`, y por eso no lleva `normal-case`',
-)
-afirmarIgual(
-  veces(QUIETO, `>${LOGOTIPO}<`),
-  SUPERFICIES_CON_LOGOTIPO.length,
-  `  y las ${SUPERFICIES_CON_LOGOTIPO.length} apariciones llegan al marcado sin transformar: «${LOGOTIPO}»`,
-)
-afirmar(QUIETO.includes(`>${LOGOTIPO}<`), `y la palabra llega al marcado sin transformar: «${LOGOTIPO}»`)
-controlPositivo('el detector vería el logotipo sin la protección', '<span data-pieza="logotipo" class="uppercase">develOP</span>', (h: string) => /normal-case/.test(h))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · INSTRUMENT SERIF sigue sin montarse — contado sobre el árbol renderizado')

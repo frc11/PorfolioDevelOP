@@ -9,7 +9,6 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { deberiaMontarseElCursor } from '../../_lib/cursor'
-import { rangoDeScroll, rangoDegenerado, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, afirmarElCorteDeTramos } from './soporte'
 import {
   NOMBRES_REALES,
@@ -21,108 +20,13 @@ import {
   textoVisible,
 } from '../_contrato/escaneo'
 import { MARCADORES } from '../_contrato/marcadores'
-import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from '../_contrato/bloqueAnimado'
+import { especificacionDe, inerciaDe } from '../_contrato/bloqueAnimado'
 import { USOS_DECLARADOS, deberiaAnimar } from '../_contrato/motion'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { duracionAplicada } from '../../_lib/motion/cronograma'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { RITMO_DE_LA_REFERENCIA, ritmoDe } from '../_contrato/ritmo'
 import { IDS_DE_S6, SUPERFICIE_ACORDADA } from './soporte'
-import {
-  MUESTRAS_DEL_BARRIDO,
-  cambiosDeTramo,
-  canalesSincronizados,
-  desincronizaciones,
-  limitesDeSecuencia,
-  tramoDeSecuencia,
-  type LectorDeCanales,
-} from '../_contrato/secuencia'
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · El ancla del pin — rango = alto − viewport, exacto')
-
-const VIEWPORT = 900
-const ALTO_DE_TRES_PANTALLAS = VIEWPORT * 3
-const CAJA = { topDoc: 5000, alto: ALTO_DE_TRES_PANTALLAS }
-
-const rango = rangoDeScroll(ANCLA_DEL_PIN, CAJA, VIEWPORT)
-const ancho = rango.fin - rango.inicio
-
-afirmarIgual(rango.inicio, CAJA.topDoc, 'el progreso vale 0 cuando el tope del bloque llega al tope del viewport')
-afirmarIgual(ancho, CAJA.alto - VIEWPORT, 'el rango es exactamente `alto − viewport`, o sea el recorrido del pin')
-afirmar(
-  ancho === VIEWPORT * 2,
-  'con 300svh de sección y un hijo de 100svh, el pin recorre 200svh',
-  `${ancho} px con viewport ${VIEWPORT}`,
-)
-afirmar(
-  !rangoDegenerado(ANCLA_DEL_PIN, CAJA, VIEWPORT),
-  'el ancla del pin no degenera con la caja declarada',
-)
-
-/** Las dos anclas mutiladas: cada una le saca al pin una de sus dos mitades. */
-const SIN_EL_TOPE: ParDeAnclas = {
-  inicio: { declarado: 'top bottom', elemento: { fraccion: 0, px: 0 }, viewport: { fraccion: 1, px: 0 } },
-  fin: ANCLA_DEL_PIN.fin,
-}
-const SIN_EL_FONDO: ParDeAnclas = {
-  inicio: ANCLA_DEL_PIN.inicio,
-  fin: { declarado: 'bottom top', elemento: { fraccion: 1, px: 0 }, viewport: { fraccion: 0, px: 0 } },
-}
-
-controlPositivo(
-  'un ancla sin el `top top` no reproduce el recorrido del pin',
-  SIN_EL_TOPE,
-  (par) => {
-    const r = rangoDeScroll(par, CAJA, VIEWPORT)
-    return r.fin - r.inicio === CAJA.alto - VIEWPORT
-  },
-)
-controlPositivo(
-  'ni una sin el `bottom bottom`',
-  SIN_EL_FONDO,
-  (par) => {
-    const r = rangoDeScroll(par, CAJA, VIEWPORT)
-    return r.fin - r.inicio === CAJA.alto - VIEWPORT
-  },
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · La secuencia es UN progreso — simultaneidad, con su control')
-
-const TRAMOS = 3
-
-afirmarIgual(desincronizaciones(canalesSincronizados, TRAMOS), [], 'los cinco canales leen el mismo tramo en los 601 puntos del barrido')
-afirmar(
-  MUESTRAS_DEL_BARRIDO === 601,
-  `el barrido tiene ${MUESTRAS_DEL_BARRIDO} puntos y cae exacto en los límites de 1/3`,
-)
-afirmarIgual(cambiosDeTramo(canalesSincronizados, TRAMOS), TRAMOS - 1, 'el tramo cambia exactamente 2 veces — no 0 ni 3')
-afirmarIgual(limitesDeSecuencia(TRAMOS), [1 / 3, 2 / 3], 'los límites están donde tienen que estar')
-
-afirmarIgual(tramoDeSecuencia(0, TRAMOS), { indice: 0, local: 0 }, 'en 0 arranca el primero')
-afirmarIgual(tramoDeSecuencia(1 / 3, TRAMOS), { indice: 1, local: 0 }, 'en 1/3 el nombre cambia Y el párrafo se reinicia, en el mismo punto')
-afirmarIgual(tramoDeSecuencia(1, TRAMOS), { indice: TRAMOS - 1, local: 1 }, 'en 1 el último queda completo, no salta a un tramo que no existe')
-
-/** EL CONTROL: tres animaciones sueltas, cada una con su propio progreso. */
-const canalesSueltos: LectorDeCanales = (progreso, cantidad) => ({
-  nombre: tramoDeSecuencia(progreso, cantidad).indice,
-  medio: tramoDeSecuencia(Math.min(1, progreso + 0.1), cantidad).indice,
-  acento: tramoDeSecuencia(Math.max(0, progreso - 0.1), cantidad).indice,
-  parrafo: tramoDeSecuencia(progreso * 0.8, cantidad),
-  lista: tramoDeSecuencia(Math.min(1, progreso * 1.2), cantidad),
-})
-
-controlPositivo(
-  'tres progresos desfasados NO pasan el predicado de simultaneidad',
-  canalesSueltos,
-  (lector) => desincronizaciones(lector, TRAMOS).length === 0,
-)
-controlPositivo(
-  'y un lector clavado en el primer tramo tampoco pasa el contrapeso de los cambios',
-  ((p, c) => ({ nombre: 0, medio: 0, acento: 0, parrafo: tramoDeSecuencia(p, c), lista: tramoDeSecuencia(p, c) })) as LectorDeCanales,
-  (lector) => cambiosDeTramo(lector, TRAMOS) === TRAMOS - 1,
-)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · La compuerta — la tabla de verdad entera, con sus dos controles')

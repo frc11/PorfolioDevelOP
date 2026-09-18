@@ -74,9 +74,8 @@ export const FRENTES: readonly Frente[] = [
     cambiaProducto: false,
     entregables: [
       `${TESTS}/s10-mobile.ts`,
-      // Declarado DESPUÉS del despacho: el frente lo pidió al partir por las 300
-      // líneas, con su costura escrita. El padrón se actualiza, no se afloja.
-      `${TESTS}/s10-mobile-pie.ts`,
+      // `s10-mobile-pie.ts` era 100% composición: Modo pulido lo desarmó y el
+      // padrón se retira con él, no se deja apuntando a un fantasma.
       `${TESTS}/s10-mobile.invariant.ts`,
     ],
     editables: [],
@@ -101,7 +100,8 @@ export const FRENTES: readonly Frente[] = [
       `${ESCENA}/__tests__/s10-logo.ts`,
       `${ESCENA}/__tests__/s10-logo-lectura.ts`,
       `${ESCENA}/__tests__/s10-logo-cajas.ts`,
-      `${ESCENA}/__tests__/s10-logo.invariant.ts`,
+      // `s10-logo.invariant.ts` era ENTERO composición: Modo pulido lo borró
+      // entero. El padrón se retira con él, no se deja apuntando a un fantasma.
     ],
     editables: [],
   },

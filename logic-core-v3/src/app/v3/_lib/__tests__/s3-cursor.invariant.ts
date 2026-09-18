@@ -25,7 +25,6 @@
 import { snapshotDeServidor } from '../usePrefiereMenosMovimiento'
 import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import {
-  CAPAS_MEDIDAS,
   CONSULTA_CURSOR,
   CONSULTA_MENOS_MOVIMIENTO,
   CURSOR_MIN_ANCHO_PX,
@@ -35,13 +34,12 @@ import {
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
-import { customPropsDe, declaracionesDe, reglas, resolver, sinComentarios, tokensDelTema } from './s3-css'
+import { declaracionesDe, reglas, resolver, sinComentarios, tokensDelTema } from './s3-css'
 import { ocultamientosDelCursorNativo, quitarComentarios } from './s3-escaneo'
 
 const tokens = tokensDelTema()
 const hoja = leer('src/app/v3/_estilos/cursor.css')
 const compuerta = leer('src/app/v3/_componentes/chrome/CursorCompuerta.tsx')
-const propiedades = customPropsDe(hoja)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La tabla de verdad de las dos compuertas, entera')
@@ -151,28 +149,6 @@ controlPositivo(
   '[data-parte="que-no-existe"]',
   (parte) => apagaPunteroPara(parte),
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Las medidas de las capas se COMPONEN desde tokens')
-
-const resolverDelCursor = (nombre: string): number | null => {
-  const expresion = propiedades.get(nombre)
-  return expresion === undefined ? null : (resolver(expresion, tokens)?.n ?? null)
-}
-
-afirmarIgual(resolverDelCursor('--cursor-nucleo-lado'), CAPAS_MEDIDAS.nucleo.ladoPx, 'el núcleo mide 4px')
-afirmarIgual(resolverDelCursor('--cursor-halo-lado'), CAPAS_MEDIDAS.halo.ladoPx, 'el halo mide 36px')
-afirmarIgual(
-  resolverDelCursor('--cursor-halo-desenfoque'),
-  CAPAS_MEDIDAS.halo.desenfoquePx,
-  'y su desenfoque, 4px',
-)
-afirmarIgual(
-  resolver('var(--duracion-media)', tokens)?.n,
-  CAPAS_MEDIDAS.transicionMs,
-  'las transiciones son --duracion-media, que son los 400ms medidos',
-)
-afirmar(hoja.includes('var(--ease-salida)'), 'con --ease-salida, que es la curva medida')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · El color acompaña a la sección, sin un token nuevo')

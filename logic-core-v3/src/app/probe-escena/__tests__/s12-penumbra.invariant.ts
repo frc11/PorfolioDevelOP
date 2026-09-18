@@ -15,6 +15,10 @@
  *
  * Lo que este modelo le hace al cuadro —los seis valores medios, la portadora y
  * el batido— está en `s12-tension.invariant.ts`.
+ *
+ * ⚠️ **Modo pulido sacó de §5 la variación de ancho de borde "en cuadro" sobre
+ * cuatro poses reales**: era composición. Queda la variación geométrica en el
+ * piso, que no depende de dónde mira la cámara.
  */
 import {
   celosiaBarAt,
@@ -35,7 +39,7 @@ import { MOIRE_MISMATCH, MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '@/app/v3/_l
 import { PROBE_DEFAULTS, PROBE_PARAM_ORDER, PROBE_RANGES } from '@/app/v3/_lib/escena/probeStore'
 
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
-import { floorPenumbraAt, framePenumbraSpread } from './celosiaFloor'
+import { floorPenumbraAt } from './celosiaFloor'
 import { sunDirectionAt } from './shading'
 
 const LAYERS = celosiaLayers(MOIRE_MISMATCH)
@@ -269,28 +273,6 @@ section('La variación a lo largo del piso: geométrica, y no depende de α')
     'y es grande: el punto pegado a la celosía tiene un borde seis veces más duro',
     ratios[0] > 5,
     `${ratios[0].toFixed(1)}× entre t = 7,4 y t = 47,0 · **esto** es lo que rompe la lectura de baldosa, no la diferencia entre capas`
-  )
-
-  /**
-   * ⚠️ **Y AHORA DONDE EL OJO LO VE.** La losa entera no es el cuadro: la cámara
-   * ve un pedazo, así que la variación que llega a pantalla es menor que ese
-   * 6,3×. Éste es el número que hay que citar cuando se hable de la lectura de
-   * baldosa, y el que dice que el CIERRE no queda peor que el hero.
-   */
-  const frames = [0, 0.5, 0.625, 0.95].map((at) => ({ at, spread: framePenumbraSpread(at, SPREAD) }))
-  check(
-    'en cuadro el borde varía entre dos y cuatro veces, en las cuatro poses con piso',
-    frames.every((row) => row.spread !== null && row.spread.max / row.spread.min > 1.8),
-    frames
-      .map((row) => `p=${row.at} ×${row.spread ? (row.spread.max / row.spread.min).toFixed(1) : '—'}`)
-      .join(' · ')
-  )
-  check(
-    'y la mediana del borde en cuadro es plana a lo largo del arco: el cierre no queda peor',
-    frames.every((row) => row.spread !== null && row.spread.median > 0.16 && row.spread.median < 0.23),
-    frames
-      .map((row) => `p=${row.at} ${row.spread?.median.toFixed(3)} celdas (${row.spread?.minWorld.toFixed(2)}–${row.spread?.maxWorld.toFixed(2)} de mundo)`)
-      .join(' · ')
   )
 }
 
