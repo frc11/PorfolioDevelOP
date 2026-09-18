@@ -1,5 +1,6 @@
 import { isSceneHeld, type IntroStage } from '@/components/layout/home-intro/introHandoff'
 
+import { CURVAS, NOMBRE_EN_GSAP, type Curva, type NombreDeCurva } from '../_lib/motion/curvas'
 import { ATRIBUTO_DE_PANEL, IDS_DE_SECCION } from '../_secciones/_contrato/forma'
 
 /**
@@ -57,31 +58,102 @@ import { ATRIBUTO_DE_PANEL, IDS_DE_SECCION } from '../_secciones/_contrato/forma
  * Los otros catorce siguen siendo el ancla nativa, y siguen andando.
  */
 
-/**
- * LA DURACIÓN, EN SEGUNDOS — decisión del dueño, no una medición.
- *
- * `scrollTo` la recibe en segundos porque Lenis trabaja en segundos
- * (`lenis.d.ts:96-98`, *"The duration of the scroll animation (in s)"*), no en
- * milisegundos. Se declara acá y no en el efecto para que el instrumento la
- * pueda leer sin montar nada.
- */
-export const DURACION_DEL_DESLIZAMIENTO_S = 2
+/* ── LOS CUATRO TIEMPOS DEL DESLIZAMIENTO. Se tocan a mano, en ms. ────────── */
+
+/** Desde el click hasta que el `<main>` empieza a irse. */
+export const RETARDO_ANTES_DE_DESAPARECER_MS = 0
+
+/** Cuánto tarda en desaparecer. ⚠ Espeja el `--duracion-rapida` de la hoja. */
+export const DURACION_DE_DESAPARICION_MS = 300
+
+/** Quieto en la escena, ya sin texto, antes de arrancar el recorrido. */
+export const PAUSA_MS = 300
+
+/** El recorrido: del hero a Trabajos. */
+export const DURACION_DEL_VIAJE_MS = 3000
+
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/** Del click al arranque del recorrido. Derivado de los tres primeros. */
+export const PRELUDIO_MS = RETARDO_ANTES_DE_DESAPARECER_MS + DURACION_DE_DESAPARICION_MS + PAUSA_MS
+
+/** El recorrido en SEGUNDOS, que es la unidad que `scrollTo` espera. */
+export const DURACION_DEL_DESLIZAMIENTO_S = DURACION_DEL_VIAJE_MS / 1000
+
+/** Del click al frenazo. Lo consume el reloj de seguridad. */
+export const TOTAL_DEL_DESLIZAMIENTO_MS = PRELUDIO_MS + DURACION_DEL_VIAJE_MS
 
 /**
- * LA CURVA NO SE DECLARA ACÁ, Y ESO ES A PROPÓSITO.
+ * 🔴 **LA CURVA DEL VIAJE — Y ESTE SPRINT LE DA UNA PROPIA, QUE ES UN COSTO.**
  *
- * El dueño pidió `expoOut`, y `OPCIONES_DE_LENIS.easing` —la configuración del
- * sitio vivo, la que `ScrollSuaveDeV3` ya importa— **ES** un expoOut: la forma
- * `min(1, 1,001 − 2^(−10t))`, que es la de la librería y la del vocabulario de
- * GSAP para `expo.out`. `scrollTo` la hereda sola cuando no se le pasa una
- * (`lenis.mjs:746`, `easing = programmatic ? this.options.easing : void 0`).
+ * ── Lo que DESLIZAR-1 hacía, y por qué estaba bien ────────────────────────
  *
- * Escribir la fórmula acá daría DOS definiciones de la misma curva y una se
- * quedaría vieja. Lo que sí se afirma —en `s18-deslizamiento.invariant.ts` §2—
- * es que la curva que se hereda tiene la forma de un expoOut, muestreándola
- * contra la forma cerrada. Si alguien recalibra el sitio vivo a otra familia, el
- * invariante lo dice en vez de que este sprint se entere por la pantalla.
+ * No declaraba curva: `scrollTo` hereda `OPCIONES_DE_LENIS.easing` cuando no se
+ * le pasa una (`lenis.mjs:746`), y esa configuración —la del sitio vivo— **es un
+ * expoOut**. La razón era buena: no tener dos definiciones de la misma curva.
+ *
+ * ── Lo que la grabación mostró, y por qué alargar el expoOut no servía ────
+ *
+ * `expoOut` pone el 90 % del camino en los primeros 662 ms de los 2.000 y deja
+ * 1,25 s de deriva casi quieta. Alargarlo **empeora justo eso**: suma más tiempo
+ * de casi-quieto sin repartir el movimiento. El pedido era *«que baje un poco más
+ * despacio, apreciando toda la escena»*, y eso pide una curva que reparta parejo
+ * en el medio, no la misma curva más larga.
+ *
+ * Y hay un segundo motivo, medido en DESLIZAR-1 §5.2: **`expoOut` arranca a
+ * velocidad MÁXIMA** —su derivada en `t = 0` vale `10 ln 2 = 6,93`— y por eso el
+ * primer cuadro salta 1,43 alturas de cuadro, 46,6× el pico de un diente de
+ * rueda. Una curva que **arranca en velocidad cero** lo elimina de raíz.
+ *
+ * ⚠ La duración ya no se deriva de la curva: son los cuatro tiempos de arriba.
+ *
+ * ── 🔴 EL COSTO, DECLARADO: SON DOS CURVAS, NO UNA DUPLICADA ──────────────
+ *
+ * Darle curva propia al viaje rompe la propiedad que DESLIZAR-1 cuidaba, y eso se
+ * escribe en vez de esconderse (está numerado en `DIRECCION-ESCENA.md` §7.74).
+ * Lo que hace el costo pagable es que **no son dos definiciones de la MISMA
+ * curva: son dos curvas distintas, cada una con una sola definición, y el repo ya
+ * documenta que son dos vocabularios separados** (`_lib/motion/curvas.ts`: *«son
+ * OTRO VOCABULARIO. La referencia mantiene dos sistemas de easing separados y
+ * medidos»*).
+ *
+ *   · **la RUEDA sigue con la del sitio**, `OPCIONES_DE_LENIS.easing`, y tiene que
+ *     seguir: un gesto tiene que responder al instante, y para eso un arranque a
+ *     velocidad máxima es lo correcto. Este sprint **no la toca**;
+ *   · **el VIAJE usa `CURVAS.simetrica`**, que es `power1.inOut` — y no es una
+ *     curva nueva: es una de las **seis del vocabulario de develOP**, la que la
+ *     referencia usa en 11 de sus 278 tweens. Se IMPORTA de `curvas.ts`, no se
+ *     reescribe, así que sigue habiendo una sola definición de ella también.
+ *
+ * `s18-deslizamiento.invariant` §4 afirma las dos mitades: que la rueda sigue con
+ * la del sitio (leyendo el fuente de `SmoothScroll.tsx`) y que el viaje tiene la
+ * suya, **y que las dos son distintas de verdad** (con la distancia medida entre
+ * ellas, que es 0,4 y no un redondeo).
+ *
+ * ── Por qué `simetrica` y no `simetrica-suave` ────────────────────────────
+ *
+ * Los nombres del vocabulario son una trampa de lectura: `simetrica-suave` es
+ * `power2.inOut` —una CÚBICA— y su pico vale 3, o sea que es **más** apretada en
+ * el medio, no menos. `simetrica` es `power1.inOut`, la cuadrática, con pico 2:
+ * de las dos simétricas es **la más parecida a la lineal**, y por lo tanto la que
+ * reparte más parejo. Los números están en el instrumento.
+ *
+ * ⚠ Y `sine.inOut` sería todavía más plana (pico 1,571), pero **no se puede
+ * usar**: `curvas.ts` la declara explícitamente fuera del vocabulario y la tiene
+ * por una sola razón —ser el control externo con el que se verifica que nuestra
+ * `simetrica` es la curva que dice ser—. Usarla como curva de producto le sacaría
+ * al proyecto su vara de medición.
  */
+// Más cola al final sin arrancar de golpe: `power2.inOut` deja el 6,25 % del camino
+// para el último cuarto del tiempo contra el 12,5 % de `simetrica`, y sigue arrancando
+// en velocidad cero. Es la de más cola de las seis que no arrancan de golpe.
+export const NOMBRE_DE_LA_CURVA_DEL_VIAJE: NombreDeCurva = 'simetrica-suave'
+
+/** La curva del viaje, importada del vocabulario. No hay una segunda copia. */
+export const CURVA_DEL_VIAJE: Curva = CURVAS[NOMBRE_DE_LA_CURVA_DEL_VIAJE]
+
+/** Su nombre en GSAP, para que el reporte se pueda cruzar contra SCROLL.md §9.4. */
+export const CURVA_DEL_VIAJE_EN_GSAP: string = NOMBRE_EN_GSAP[NOMBRE_DE_LA_CURVA_DEL_VIAJE]
 
 /**
  * EL ATRIBUTO DEL VELO — el que el efecto escribe en el `<main>` mientras vuela.

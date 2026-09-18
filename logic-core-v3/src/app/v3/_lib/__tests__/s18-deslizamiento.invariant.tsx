@@ -6,11 +6,22 @@ import { RAIZ } from './s4-corrida'
 import { quitarComentarios } from './s3-escaneo'
 import {
   ATRIBUTO_DEL_VELO,
+  CURVA_DEL_VIAJE,
+  CURVA_DEL_VIAJE_EN_GSAP,
   DURACION_DEL_DESLIZAMIENTO_S,
+  DURACION_DEL_VIAJE_MS,
+  DURACION_DE_DESAPARICION_MS,
+  NOMBRE_DE_LA_CURVA_DEL_VIAJE,
+  PAUSA_MS,
+  PRELUDIO_MS,
+  RETARDO_ANTES_DE_DESAPARECER_MS,
+  TOTAL_DEL_DESLIZAMIENTO_MS,
   SELECTOR_DEL_CTA_DEL_HERO,
   SELECTOR_DEL_MAIN,
   deberiaDeslizar,
 } from '../../_componentes/deslizamiento'
+import { CURVAS, NOMBRES_DE_CURVA, NOMBRE_EN_GSAP, SINE_IN_OUT_PARA_CONTROL, errorMaximo } from '../motion/curvas'
+import { tokensDelTema } from './s3-css'
 import { deberiaCorrerElScrollSuave } from '../scrollSuave'
 import { BORDE_INFERIOR_EN_REPOSO_PX } from '../navegacion'
 import type { IntroStage } from '@/components/layout/home-intro/introHandoff'
@@ -20,9 +31,11 @@ import { Hero } from '../../_secciones/hero/Hero'
 import { CONTENIDO } from '../../_secciones/hero/contenido'
 import { seccionPorId } from '../secciones'
 import {
-  CURVA_DEL_DESLIZAMIENTO,
+  CURVA_DE_LA_RUEDA,
   EXPO_OUT_CANONICO,
   LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO,
+  picoDeVelocidad,
+  velocidadDe,
 } from './s18-curva'
 
 /**
@@ -67,6 +80,10 @@ const LIBRERIA = 'node_modules/lenis/dist/lenis.mjs'
 const veces = (texto: string, aguja: string): number => texto.split(aguja).length - 1
 
 const quieto = marcar(<Hero seccion={seccionDe('hero')} />, { anima: false })
+
+/** El fuente del sprint, para los barridos de §4a, §5 y §7. */
+const FUENTE_DEL_SPRINT = [MODULO, EFECTO, MOTOR].map((a) => quitarComentarios(leer(a))).join('\n')
+const CSS = leer(HOJA)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · UN solo enlace: el CTA del hero, y el selector no es un literal suelto')
@@ -202,47 +219,173 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · La curva y la duración: `expoOut` heredado, T = 2,0 s')
+titulo('4 · DOS curvas, el preludio derivado, y el reloj que crece con el total')
 
-afirmarIgual(DURACION_DEL_DESLIZAMIENTO_S, 2, 'la duración son 2,0 SEGUNDOS — la unidad que `scrollTo` espera')
-afirmar(
-  quitarComentarios(leer(EFECTO)).includes('duration: DURACION_DEL_DESLIZAMIENTO_S'),
-  '  y el efecto la consume del módulo, no escribe un 2',
-)
-afirmar(
-  !/easing/.test(quitarComentarios(leer(MODULO)) + quitarComentarios(leer(EFECTO))),
-  'el deslizamiento NO declara curva: `scrollTo` hereda la de `OPCIONES_DE_LENIS` cuando no se le pasa una',
-)
+/**
+ * 🔴 **LA AFIRMACION DE DESLIZAR-1 NO SE BORRO: CAMBIO DE SUJETO.**
+ *
+ * Aquel sprint afirmaba *«el deslizamiento NO declara curva: hereda la de
+ * `OPCIONES_DE_LENIS`»*. DESLIZAR-2 le da una propia al viaje, asi que esa
+ * afirmacion no puede quedar como estaba — y tampoco se borra. Se parte en dos y
+ * las dos son mas fuertes que la que habia:
+ *
+ *   §4a · la RUEDA sigue con la del sitio, y el sprint NO la movio;
+ *   §4b · el VIAJE tiene la suya, importada del vocabulario, y es OTRA curva.
+ */
+
+// -- §4a · la rueda ---------------------------------------------------------
 afirmar(
   leer(SITIO_VIVO).includes(LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO),
-  '  y la que hereda es la del sitio vivo, con esta línea exacta',
+  '§4a · la RUEDA sigue con la curva del sitio vivo, con esta línea exacta',
   LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO,
 )
-/**
- * ⚠ Que la línea diga eso no prueba que sea un expoOut: lo prueba muestrearla.
- * Se compara la forma de la librería contra el expoOut CANÓNICO en toda la
- * ventana abierta. El `1,001` y el `min` le hacen tocar el 1 antes del final, y
- * ése es todo el desvío: acotado, y medido.
- */
-let desvioMaximo = 0
+afirmar(
+  !/OPCIONES_DE_LENIS\s*(=|\.\s*easing\s*=)/.test(FUENTE_DEL_SPRINT),
+  '  y el sprint NO la reasigna ni la parchea: un gesto tiene que responder en el primer cuadro',
+)
+let desvioDelExpo = 0
 for (let i = 0; i <= 100; i += 1) {
   const t = i / 100
-  desvioMaximo = Math.max(desvioMaximo, Math.abs(CURVA_DEL_DESLIZAMIENTO(t) - EXPO_OUT_CANONICO(t)))
+  desvioDelExpo = Math.max(desvioDelExpo, Math.abs(CURVA_DE_LA_RUEDA(t) - EXPO_OUT_CANONICO(t)))
 }
 afirmar(
-  desvioMaximo < 0.002,
-  '  y muestreada ES un expoOut: pega con la forma cerrada en las 101 muestras',
-  `desvío máximo ${desvioMaximo.toFixed(6)} — es el \`1,001\` de escala de la librería, nada más`,
+  desvioDelExpo < 0.002,
+  '  y muestreada sigue siendo un expoOut: pega con la forma cerrada en las 101 muestras',
+  `desvío máximo ${desvioDelExpo.toFixed(6)} — es el \`1,001\` de escala de la librería`,
 )
-afirmarIgual(CURVA_DEL_DESLIZAMIENTO(1), 1, '  y llega exactamente a 1: el viaje no se queda corto')
+const ARRANQUE_DE_LA_RUEDA = velocidadDe(CURVA_DE_LA_RUEDA, 0)
+afirmar(
+  ARRANQUE_DE_LA_RUEDA > 6.9,
+  '  y arranca a velocidad MÁXIMA, que es lo correcto para un gesto y el motivo por el que el viaje no la quiere',
+  `${ARRANQUE_DE_LA_RUEDA.toFixed(4)} contra la media 1 — es \`10 ln 2\` = ${(10 * Math.LN2).toFixed(4)}`,
+)
+
+// -- §4b · el viaje ---------------------------------------------------------
+afirmar(
+  NOMBRES_DE_CURVA.includes(NOMBRE_DE_LA_CURVA_DEL_VIAJE),
+  '§4b · la curva del VIAJE es una de las SEIS del vocabulario de develOP, no una séptima inventada',
+  `\`${NOMBRE_DE_LA_CURVA_DEL_VIAJE}\` = ${CURVA_DEL_VIAJE_EN_GSAP}`,
+)
+afirmarIgual(CURVA_DEL_VIAJE_EN_GSAP, NOMBRE_EN_GSAP[NOMBRE_DE_LA_CURVA_DEL_VIAJE], '  y su nombre en GSAP sale de la tabla del vocabulario, no de un literal')
+afirmar(
+  CURVA_DEL_VIAJE === CURVAS[NOMBRE_DE_LA_CURVA_DEL_VIAJE],
+  '  y se IMPORTA de `curvas.ts`: es la misma referencia, no una copia con la misma forma',
+)
+afirmar(
+  !/Math\.pow|Math\.cos|Math\.min\(1/.test(quitarComentarios(leer(MODULO))),
+  '  el módulo no escribe una sola fórmula de easing: si la escribiera, habría dos definiciones de la MISMA curva',
+)
+/** 🔴 Que sean DOS curvas y no la misma dos veces, con el número. */
+const DISTANCIA_ENTRE_LAS_DOS = errorMaximo(CURVA_DEL_VIAJE, CURVA_DE_LA_RUEDA)
+afirmar(
+  DISTANCIA_ENTRE_LAS_DOS > 0.1,
+  '  🔴 y las dos curvas son DISTINTAS de verdad, no un redondeo de la misma',
+  `distancia máxima ${DISTANCIA_ENTRE_LAS_DOS.toFixed(4)} sobre los 21 puntos del criterio — el par más parecido del catálogo mide 0,028`,
+)
+/** El rasgo por el que se eligió: arranca en velocidad CERO. */
+const ARRANQUE_DEL_VIAJE = velocidadDe(CURVA_DEL_VIAJE, 0)
+afirmar(
+  ARRANQUE_DEL_VIAJE < 0.01,
+  '  🔴 y ARRANCA EN VELOCIDAD CERO: es lo que elimina el salto de 1,43 alturas de cuadro del primer cuadro',
+  `${ARRANQUE_DEL_VIAJE.toFixed(6)} contra ${ARRANQUE_DE_LA_RUEDA.toFixed(4)} de la rueda`,
+)
+const FRENO_DEL_VIAJE = velocidadDe(CURVA_DEL_VIAJE, 1)
+afirmar(FRENO_DEL_VIAJE < 0.01, '  y frena en velocidad cero también: la curva es simétrica', `${FRENO_DEL_VIAJE.toFixed(6)}`)
+/** El pico sobre la media, muestreado. El valor lo elige el dueño con la curva. */
+const PICO_DEL_VIAJE = picoDeVelocidad(CURVA_DEL_VIAJE)
+afirmar(
+  PICO_DEL_VIAJE.pico > 1 && Math.abs(PICO_DEL_VIAJE.en - 0.5) < 0.01,
+  '  y pica en el MEDIO del recorrido, que es lo que hace a una curva simétrica',
+  `${PICO_DEL_VIAJE.pico.toFixed(4)} en t=${PICO_DEL_VIAJE.en.toFixed(3)}`,
+)
+/** Cuánto camino QUEDA para el último cuarto del tiempo: menos = más asentamiento. */
+const RESTO_DEL_ULTIMO_CUARTO = 1 - CURVA_DEL_VIAJE(0.75)
+afirmar(
+  RESTO_DEL_ULTIMO_CUARTO <= 1 - CURVAS.simetrica(0.75) + 1e-9,
+  '  y le deja MENOS camino al último cuarto del tiempo que `simetrica`: más cola, o sea más desaceleración al final',
+  `${(RESTO_DEL_ULTIMO_CUARTO * 100).toFixed(2)} % contra ${((1 - CURVAS.simetrica(0.75)) * 100).toFixed(2)} % de \`simetrica\``,
+)
+/** Y que NO se usó la vara de medición del proyecto como curva de producto. */
+afirmar(
+  !quitarComentarios(leer(MODULO)).includes('SINE_IN_OUT_PARA_CONTROL'),
+  '  ⚠ y NO se usó `sine.inOut`, que sería más plana pero es el control externo con el que el repo verifica a `simetrica`',
+  `su pico sería ${picoDeVelocidad(SINE_IN_OUT_PARA_CONTROL).pico.toFixed(3)} — usarla de producto le sacaría al proyecto su vara`,
+)
 controlPositivo(
-  'el comparador de familia no está ciego: una curva LINEAL no pasa por expoOut',
-  (t: number) => t,
-  (otra: (t: number) => number) => {
-    let peor = 0
-    for (let i = 0; i <= 100; i += 1) peor = Math.max(peor, Math.abs(otra(i / 100) - EXPO_OUT_CANONICO(i / 100)))
-    return peor < 0.002
-  },
+  'el lector de arranque no está ciego: la curva de la RUEDA no pasa el umbral de velocidad cero',
+  CURVA_DE_LA_RUEDA,
+  (curva: (t: number) => number) => velocidadDe(curva, 0) < 0.01,
+)
+
+// -- §4c · el preludio, derivado de dos escalas medidas --------------------
+/**
+ * ⚠️ AFLOJADO: los cuatro tiempos los toca el dueño a mano, así que acá se afirma
+ * que EXISTEN y que el preludio los suma — no cuánto valen.
+ */
+const TEMA_DE_V3 = tokensDelTema()
+afirmar(TEMA_DE_V3.get('--duracion-rapida') !== undefined, '§4c · `--duracion-rapida` sigue declarado en `theme-develop.css`')
+afirmar(CSS.includes('var(--duracion-rapida)'), '  y la hoja consume ESE token y no un literal')
+for (const [nombre, valor] of [
+  ['RETARDO_ANTES_DE_DESAPARECER_MS', RETARDO_ANTES_DE_DESAPARECER_MS],
+  ['DURACION_DE_DESAPARICION_MS', DURACION_DE_DESAPARICION_MS],
+  ['PAUSA_MS', PAUSA_MS],
+  ['DURACION_DEL_VIAJE_MS', DURACION_DEL_VIAJE_MS],
+] as const) {
+  afirmar(Number.isFinite(valor) && valor >= 0, `  \`${nombre}\` existe y es un tiempo en ms`, `${valor} ms`)
+}
+afirmarIgual(
+  PRELUDIO_MS,
+  RETARDO_ANTES_DE_DESAPARECER_MS + DURACION_DE_DESAPARICION_MS + PAUSA_MS,
+  '  y el preludio es la SUMA de los tres primeros: si el dueño mueve uno, se mueve solo',
+)
+afirmarIgual(
+  TOTAL_DEL_DESLIZAMIENTO_MS,
+  PRELUDIO_MS + DURACION_DEL_VIAJE_MS,
+  '  y el total es el preludio más el recorrido',
+)
+controlPositivo(
+  'el lector del tema no está ciego: no encuentra un token que no existe',
+  '--duracion-inventada',
+  (nombre: string) => TEMA_DE_V3.get(nombre) !== undefined,
+)
+
+// -- §4d · la duración, y el reloj que TIENE que crecer con ella -----------
+// ⚠️ AFLOJADO: la duración la toca el dueño; acá se afirma la conversión, no el valor.
+afirmarIgual(
+  DURACION_DEL_DESLIZAMIENTO_S,
+  DURACION_DEL_VIAJE_MS / 1000,
+  '§4d · el recorrido se le pasa a `scrollTo` en SEGUNDOS, derivados de los ms que el dueño toca',
+)
+const FUENTE_DEL_EFECTO = quitarComentarios(leer(EFECTO))
+afirmar(
+  FUENTE_DEL_EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S'),
+  '  el efecto la consume del módulo, no escribe un 4',
+)
+afirmar(
+  FUENTE_DEL_EFECTO.includes('easing: CURVA_DEL_VIAJE'),
+  '  y le pasa la curva del viaje EXPLÍCITA: sin eso `scrollTo` volvería a heredar la de la rueda',
+)
+/**
+ * 🔴 EL RELOJ TIENE QUE CUBRIR EL TOTAL, Y SI QUEDA CORTO ABORTA UN VIAJE VALIDO.
+ *
+ * Se afirma sobre el FUENTE porque el numero no existe como constante sola: es
+ * una suma, y lo que hay que custodiar es que los tres terminos esten.
+ */
+afirmar(
+  FUENTE_DEL_EFECTO.includes('const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS'),
+  '  🔴 el reloj de seguridad sale del TOTAL: si se olvidara el preludio, abortaría un viaje válido a mitad de camino',
+)
+afirmar(
+  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), RELOJ_DE_SEGURIDAD_MS)'),
+  '  y es ese total el que se le pasa al reloj, no una cuenta escrita de nuevo',
+)
+afirmar(
+  /window\.clearTimeout\(relojDeArranque\)/.test(FUENTE_DEL_EFECTO),
+  '  🔴 y `terminar` cancela el reloj de ARRANQUE: sin esa línea una rueda en los primeros 600 ms apagaría el velo y el scroll saldría de viaje igual',
+)
+afirmar(
+  FUENTE_DEL_EFECTO.includes('}, PRELUDIO_MS)'),
+  '  el viaje arranca a los `PRELUDIO_MS`, no en el mismo cuadro que el velo: es la pausa que el dueño pidió',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -252,7 +395,6 @@ afirmar(
   quitarComentarios(leer(EFECTO)).includes('lenis.scrollTo(seccion, {'),
   '`scrollTo` recibe el ELEMENTO: el destino lo calcula la librería, no el sprint',
 )
-const FUENTE_DEL_SPRINT = [MODULO, EFECTO, MOTOR].map((a) => quitarComentarios(leer(a))).join('\n')
 afirmar(!/router\.push|useRouter/.test(FUENTE_DEL_SPRINT), '  y no hay `router.push` ni `useRouter` en el sprint')
 afirmar(
   !/triggerTransition|TransitionContext/.test(FUENTE_DEL_SPRINT),
@@ -300,7 +442,6 @@ titulo('6 · EL VELO — reversible por construcción, y con el `inert` acotado 
 
 afirmarIgual(ATRIBUTO_DEL_VELO, 'data-v3-deslizando', 'el velo es un ATRIBUTO del `<main>`, no una clase')
 afirmarIgual(SELECTOR_DEL_MAIN, '[data-v3] main', '  y el `<main>` se busca acotado al árbol de /v3')
-const CSS = leer(HOJA)
 /**
  * La `transition` va en la regla de REPOSO y no en la del estado. Es lo que hace
  * que sacar el atributo devuelva la opacidad con la misma curva: el velo se
@@ -340,7 +481,7 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · LA REVERSIBILIDAD: cinco salidas, una función, y nadie llama `stop()`')
 
-const EFECTO_LIMPIO = quitarComentarios(leer(EFECTO))
+const EFECTO_LIMPIO = FUENTE_DEL_EFECTO
 afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función que apaga el velo')
 afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 5, '  y exactamente CINCO sitios la llaman: una por salida, ni una suelta')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')

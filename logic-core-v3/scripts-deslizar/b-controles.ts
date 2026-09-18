@@ -38,12 +38,26 @@ import { cerrarChrome, lanzarChrome, perfilDeChrome } from '../scripts-b4/cdp'
 import { perfilPorId } from '../scripts-b4/perfiles'
 import type { Pagina } from '../scripts-b4/navegador'
 import { MARCA_DE_INTRO, PUENTE_DE_AUTOMATIZACION, SIN_MARCA_DE_INTRO } from '../scripts-b5/b5-comun'
-import { ATRIBUTO_DEL_VELO, SELECTOR_DEL_CTA_DEL_HERO } from '../src/app/v3/_componentes/deslizamiento'
-import { DURACION_DEL_DESLIZAMIENTO_S } from '../src/app/v3/_componentes/deslizamiento'
+import {
+  ATRIBUTO_DEL_VELO,
+  DURACION_DEL_DESLIZAMIENTO_S,
+  PRELUDIO_MS,
+  SELECTOR_DEL_CTA_DEL_HERO,
+} from '../src/app/v3/_componentes/deslizamiento'
 
 /** 3007: el puerto de ESTE worktree. El 3000 es del lane de `rediseno/home`. */
 const ORIGEN = process.env.ORIGEN_DESLIZAR ?? 'http://localhost:3007'
 const PERFIL = perfilPorId('1440')
+
+/** Lo que dura todo, desde el click. Sale de las constantes, no de un numero. */
+const TOTAL_MS = PRELUDIO_MS + DURACION_DEL_DESLIZAMIENTO_S * 1000
+/** La mitad del RECORRIDO, que es donde la curva nueva va mas rapido. */
+const MITAD_DEL_VIAJE_MS = PRELUDIO_MS + (DURACION_DEL_DESLIZAMIENTO_S * 1000) / 2
+/**
+ * 🔴 Y el instante TEMPRANO, adentro del preludio: con una curva que arranca
+ * suave, una rueda aca cancela un viaje que todavia no movio un pixel.
+ */
+const TEMPRANO_MS = 100
 
 interface Muestra {
   readonly t: number
@@ -61,6 +75,12 @@ interface Corrida {
   readonly yAlClickear: number
   /** El velo leido en la MISMA vuelta del bucle: mide si el escucha ya estaba. */
   readonly veloSincronico: boolean
+  readonly altoDeLaVentana: number
+  readonly altoDeLaSeccion: number
+  /** Que % del viewport ocupa `#trabajos` al frenar, medido sobre su rect. */
+  readonly fraccionDelViewport: number
+  /** Cuantos px de la seccion quedan por ENCIMA del borde de arriba. */
+  readonly recorteDeArriba: number
   readonly hash: string
   readonly focoAlFinal: string
   readonly largoDelHistorial: number
@@ -109,11 +129,20 @@ function fuenteDelMuestreo(msTotal: number, msDeLaInterrupcion: number, interrup
       requestAnimationFrame(cuadro)
     })
     const activo = document.activeElement
+    // EL ATERRIZAJE, medido sobre el rect REAL y no sobre la tabla: la regla del
+    // repo es que el alto de la tabla es un min-height y el natural puede ser otro.
+    const destino = document.getElementById('trabajos')
+    const caja = destino === null ? null : destino.getBoundingClientRect()
+    const visible = caja === null ? 0 : Math.max(0, Math.min(window.innerHeight, caja.bottom) - Math.max(0, caja.top))
     return {
       muestras,
       tDelClick,
       yAlClickear,
       veloSincronico,
+      altoDeLaVentana: window.innerHeight,
+      altoDeLaSeccion: caja === null ? 0 : Math.round(caja.height),
+      fraccionDelViewport: Math.round((visible / window.innerHeight) * 1000) / 10,
+      recorteDeArriba: caja === null ? 0 : Math.round(Math.max(0, -caja.top)),
       hash: location.hash,
       focoAlFinal: activo === null ? 'ninguno' : (activo.tagName.toLowerCase() + (activo.id === '' ? '' : '#' + activo.id)),
       largoDelHistorial: history.length,
@@ -195,7 +224,7 @@ async function correr(
         })()`,
       )
 
-      const msTotal = DURACION_DEL_DESLIZAMIENTO_S * 1000 + 1200
+      const msTotal = TOTAL_MS + 1200
       const pedido = medir<Corrida>(p, fuenteDelMuestreo(msTotal, msDeLaInterrupcion, interrupcion))
       if (interrupcion === 'rueda') {
         await new Promise((r) => setTimeout(r, msDeLaInterrupcion))
@@ -233,7 +262,11 @@ function informar(c: Corrida): void {
       : `  INERT: puesto en ${conInerte.length} cuadros · suelto al final: ${!(c.muestras[c.muestras.length - 1]?.inerte ?? false)}`,
   )
   console.log(`  SCROLL: 0 → ${c.yFinal} px   ·   hash "${c.hash}"   ·   foco "${c.focoAlFinal}"`)
-  const hitos = [0, 400, 800, 1200, 2000, 2600].map((ms) => {
+  console.log(
+    `  ATERRIZAJE: \`#trabajos\` mide ${c.altoDeLaSeccion} px y ocupa ${c.fraccionDelViewport} % de los ${c.altoDeLaVentana} px del viewport` +
+      ` · ${c.recorteDeArriba} px por encima del borde`,
+  )
+  const hitos = [0, 300, 600, 1000, 2600, 4600, 5400].map((ms) => {
     const m = c.muestras.find((x) => x.t >= ms)
     return m === undefined ? `${ms}:—` : `${ms}:${m.y}`
   })
@@ -243,9 +276,25 @@ function informar(c: Corrida): void {
 async function principal(): Promise<void> {
   const corridas: Corrida[] = []
   corridas.push(await correr('0 · EL VIAJE — click y nada más'))
-  corridas.push(await correr('1 · CANCELAR A MITAD — una rueda a los 800 ms', { interrupcion: 'rueda' }))
-  corridas.push(await correr('2 · EL BOTÓN DE ATRÁS — a los 800 ms', { interrupcion: 'atras' }))
-  corridas.push(await correr('3 · CLICK DURANTE EL INTRO — la capa puesta', { conIntro: true, msDeLaInterrupcion: 99_999 }))
+  corridas.push(
+    await correr(`1 · CANCELAR A MITAD — una rueda a los ${MITAD_DEL_VIAJE_MS} ms`, {
+      interrupcion: 'rueda',
+      msDeLaInterrupcion: MITAD_DEL_VIAJE_MS,
+    }),
+  )
+  corridas.push(
+    await correr(`1b · 🔴 LA RUEDA TEMPRANA — a los ${TEMPRANO_MS} ms, ADENTRO del preludio`, {
+      interrupcion: 'rueda',
+      msDeLaInterrupcion: TEMPRANO_MS,
+    }),
+  )
+  corridas.push(
+    await correr(`2 · EL BOTÓN DE ATRÁS — a los ${MITAD_DEL_VIAJE_MS} ms`, {
+      interrupcion: 'atras',
+      msDeLaInterrupcion: MITAD_DEL_VIAJE_MS,
+    }),
+  )
+  corridas.push(await correr('3 · CLICK DURANTE EL INTRO — la capa puesta', { conIntro: true, msDeLaInterrupcion: 999_999 }))
 
   for (const c of corridas) informar(c)
 
@@ -253,14 +302,28 @@ async function principal(): Promise<void> {
   console.log('── LA LECTURA ──────────────────────────────────────────────')
   const viaje = corridas[0]
   const rueda = corridas[1]
-  const atras = corridas[2]
-  const intro = corridas[3]
-  console.log(`  el viaje llegó a ${viaje?.yFinal} px; la rueda lo dejó en ${rueda?.yFinal}; atrás en ${atras?.yFinal}`)
+  const temprana = corridas[2]
+  const atras = corridas[3]
+  const intro = corridas[4]
+
+  /** ¿Se movio el scroll durante el preludio? Es LA medicion de la pausa. */
+  const enElPreludio = (c: Corrida | undefined): number => {
+    if (c === undefined) return -1
+    const m = c.muestras.filter((x) => x.t <= PRELUDIO_MS)
+    return m.reduce((peor, x) => Math.max(peor, Math.abs(x.y - (c.muestras[0]?.y ?? 0))), 0)
+  }
+  console.log(`  🔴 LA PAUSA: el scroll se movio ${enElPreludio(viaje)} px en los primeros ${PRELUDIO_MS} ms del viaje (tiene que ser 0)`)
+  console.log(`  el viaje llegó a ${viaje?.yFinal} px; la rueda a mitad lo dejó en ${rueda?.yFinal}; la temprana en ${temprana?.yFinal}; atrás en ${atras?.yFinal}`)
   console.log(
-    `  velo prendido: viaje ${viaje?.muestras.filter((m) => m.velo).length} cuadros · rueda ${rueda?.muestras.filter((m) => m.velo).length} · atrás ${atras?.muestras.filter((m) => m.velo).length} · intro ${intro?.muestras.filter((m) => m.velo).length}`,
+    `  velo prendido: viaje ${viaje?.muestras.filter((m) => m.velo).length} cuadros · rueda ${rueda?.muestras.filter((m) => m.velo).length} · temprana ${temprana?.muestras.filter((m) => m.velo).length} · atrás ${atras?.muestras.filter((m) => m.velo).length} · intro ${intro?.muestras.filter((m) => m.velo).length}`,
   )
-  console.log(`  velo APAGADO al final en las cuatro: ${corridas.every((c) => !(c.muestras[c.muestras.length - 1]?.velo ?? true))}`)
-  console.log(`  inert SUELTO al final en las cuatro: ${corridas.every((c) => !(c.muestras[c.muestras.length - 1]?.inerte ?? true))}`)
+  console.log(`  velo APAGADO al final en las CINCO: ${corridas.every((c) => !(c.muestras[c.muestras.length - 1]?.velo ?? true))}`)
+  console.log(`  inert SUELTO al final en las CINCO: ${corridas.every((c) => !(c.muestras[c.muestras.length - 1]?.inerte ?? true))}`)
+  console.log(
+    `  🔴 LA RUEDA TEMPRANA: velo apagado ${!(temprana?.muestras[temprana.muestras.length - 1]?.velo ?? true)}` +
+      ` · el viaje NO salio despues de cancelar: llego a ${temprana?.yFinal} px de los ${viaje?.yFinal} del viaje completo`,
+  )
+  console.log(`  ATERRIZAJE del viaje: ${viaje?.fraccionDelViewport} % del viewport`)
 }
 
 void principal()

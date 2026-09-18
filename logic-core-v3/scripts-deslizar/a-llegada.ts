@@ -40,28 +40,41 @@ import { progresoDePantalla, progresoDelScroll } from '../src/app/v3/_lib/escena
 import { TECHO_DE_VELOCIDAD } from '../src/app/v3/_lib/escena/techoDeVelocidad'
 import { makeTrack, speedAt } from '../src/app/probe-escena/__tests__/harness'
 import { BORDE_INFERIOR_EN_REPOSO_PX } from '../src/app/v3/_lib/navegacion'
-import { DURACION_DEL_DESLIZAMIENTO_S } from '../src/app/v3/_componentes/deslizamiento'
+import {
+  CURVA_DEL_VIAJE,
+  CURVA_DEL_VIAJE_EN_GSAP,
+  DURACION_DEL_DESLIZAMIENTO_S,
+  PRELUDIO_MS,
+} from '../src/app/v3/_componentes/deslizamiento'
 import { CONTENIDO } from '../src/app/v3/_secciones/hero/contenido'
-import { CURVA_DEL_DESLIZAMIENTO, LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO, laCurvaSigueSiendoLaDelSitioVivo } from '../src/app/v3/_lib/__tests__/s18-curva'
+import {
+  CURVA_DE_LA_RUEDA,
+  LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO,
+  laCurvaSigueSiendoLaDelSitioVivo,
+  picoDeVelocidad,
+} from '../src/app/v3/_lib/__tests__/s18-curva'
 
 /** El destino sale del `href` del CTA, que es la unica fuente que hay. */
 const ID_DEL_DESTINO = CONTENIDO.cta.destino.slice(1)
 
 const PISTA = makeTrack(CHOREO_KEYFRAMES)
-const VENTANAS = [800, 1080, 1200] as const
+const VENTANAS = [800, 900, 1080, 1200] as const
 /** El reloj con el que se muestrea el deslizamiento. 60 Hz es el cuadro nominal. */
 const HZ = 60
 
 /**
- * La curva del deslizamiento ES la del sitio vivo, pero no se puede IMPORTAR:
- * `SmoothScroll.tsx` hace `import 'lenis/dist/lenis.css'` y `tsx` no sabe qué
- * hacer con una hoja de estilos —es el límite que `v3/layout.tsx` ya declara
- * para los instrumentos—. Así que se lee del fuente y se verifica ahí mismo.
+ * ⚠️ DOS CURVAS, Y LA COMPARACION ES EL PUNTO DE ESTE INSTRUMENTO.
+ *
+ * `curva` es la del VIAJE —`power1.inOut`, importada del vocabulario— y
+ * `CURVA_DE_LA_RUEDA` es la del sitio vivo, la que DESLIZAR-1 heredaba. La
+ * segunda no se puede importar (`SmoothScroll.tsx` arrastra una hoja de estilos
+ * y `tsx` no la puede cargar), asi que se lee del fuente y se verifica aca mismo.
  */
 if (!laCurvaSigueSiendoLaDelSitioVivo()) {
-  throw new Error(`la curva de \`OPCIONES_DE_LENIS\` cambió: ya no dice \`${LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO}\``)
+  throw new Error(`la curva de la RUEDA cambio: ya no dice \`${LINEA_DE_LA_CURVA_EN_EL_SITIO_VIVO}\``)
 }
-const curva = CURVA_DEL_DESLIZAMIENTO
+const curva = CURVA_DEL_VIAJE
+const DURACION_VIEJA_S = 2
 
 function luzEn(progreso: number): MutableLightLevels {
   const salida: MutableLightLevels = { level: 0, kelvin: 0, azimuthDeg: 0, elevationDeg: 0 }
@@ -77,7 +90,35 @@ console.log('DESLIZAR-1 · A — la llegada\n')
 console.log(`  el documento mide ${ANCLAJE.pantallasDelDocumento} pantallas · el recorrido ${ANCLAJE.pantallasDeScroll}`)
 console.log(`  \`#${ID_DEL_DESTINO}\` empieza en la pantalla ${destino.desdePantalla} y termina en la ${destino.hastaPantalla}`)
 console.log(`  el ancla despeja ${BORDE_INFERIOR_EN_REPOSO_PX} px (el \`scroll-padding-top\` de /v3)`)
-console.log(`  la curva del deslizamiento: e(0)=${curva(0).toFixed(6)} · e(1)=${curva(1).toFixed(6)} · T=${DURACION_DEL_DESLIZAMIENTO_S} s\n`)
+console.log(`  el preludio son ${PRELUDIO_MS} ms (velo + pausa) y despues arranca el recorrido`)
+console.log(`  la curva del VIAJE: ${CURVA_DEL_VIAJE_EN_GSAP} · T=${DURACION_DEL_DESLIZAMIENTO_S} s · pico/media ${picoDeVelocidad(curva).pico.toFixed(4)}`)
+console.log(`  la curva de la RUEDA: expoOut · pico/media ${picoDeVelocidad(CURVA_DE_LA_RUEDA).pico.toFixed(4)} — arranca a velocidad maxima`)
+console.log(`  TOTAL desde el click: ${(PRELUDIO_MS + DURACION_DEL_DESLIZAMIENTO_S * 1000).toFixed(0)} ms\n`)
+
+// ── EL REPARTO DEL CAMINO, que es lo que el dueño pidio reportar ──────────
+console.log('EL REPARTO DEL CAMINO — % recorrido en cada cuarto del tiempo')
+console.log('              25 %      50 %      75 %   |  el peor tramo de 700 ms')
+for (const [nombre, c, T] of [
+  ['VIAJE  (power1.inOut, 4,0 s)', curva, DURACION_DEL_DESLIZAMIENTO_S],
+  ['RUEDA  (expoOut, 2,0 s)     ', CURVA_DE_LA_RUEDA, DURACION_VIEJA_S],
+] as const) {
+  // El tramo de 700 ms que mas camino se lleva: la ventana que el dueño midio.
+  const ancho = 0.7 / T
+  let peor = 0
+  let peorEn = 0
+  for (let i = 0; i <= 1000; i += 1) {
+    const a = (i / 1000) * (1 - ancho)
+    const trozo = c(a + ancho) - c(a)
+    if (trozo > peor) {
+      peor = trozo
+      peorEn = a
+    }
+  }
+  console.log(
+    `  ${nombre}  ${(c(0.25) * 100).toFixed(1).padStart(6)} %  ${(c(0.5) * 100).toFixed(1).padStart(6)} %  ${(c(0.75) * 100).toFixed(1).padStart(6)} %   |  ${(peor * 100).toFixed(1).padStart(5)} % (desde t=${(peorEn * T * 1000).toFixed(0)} ms)`,
+  )
+}
+console.log()
 
 for (const ventana of VENTANAS) {
   const abajo = ANCLAJE.pantallasDelDocumento * ventana
@@ -128,7 +169,7 @@ for (const ventana of VENTANAS) {
     if (dPx > picoPxPorCuadro) picoPxPorCuadro = dPx
     anterior = yCuadro
   }
-  console.log(`  CÁMARA · pico ${picoPorCuadro.toFixed(4)} alturas de cuadro POR CUADRO (a los ${tPicoMs.toFixed(0)} ms)`)
+  console.log(`  CÁMARA · pico ${picoPorCuadro.toFixed(4)} alturas de cuadro POR CUADRO (a los ${tPicoMs.toFixed(0)} ms del arranque del recorrido)`)
   console.log(`           = ${(picoPorCuadro * HZ).toFixed(2)} alturas de cuadro por segundo a ${HZ} Hz`)
   console.log(`           pico ${picoPorPantalla.toFixed(4)} alturas de cuadro POR PANTALLA DE SCROLL (techo declarado: ${TECHO_DE_VELOCIDAD})`)
   console.log(`           el scroll salta hasta ${picoPxPorCuadro.toFixed(1)} px por cuadro = ${(picoPxPorCuadro / ventana).toFixed(4)} pantallas`)
@@ -147,6 +188,20 @@ for (const ventana of VENTANAS) {
   console.log(
     `  VARA · un diente de rueda (${DIENTE_DE_RUEDA_PX} px en ${DURACION_DEL_SITIO_VIVO_S} s) pica a ${pxPorCuadroDelGesto.toFixed(1)} px/cuadro` +
       ` — el deslizamiento pica ${(picoPxPorCuadro / pxPorCuadroDelGesto).toFixed(1)} veces mas rapido`,
+  )
+
+  /**
+   * EL ATERRIZAJE — que fraccion del viewport ocupa `#trabajos` al frenar.
+   *
+   * Al parar, el viewport abarca [y, y + ventana] y la seccion abarca
+   * [tope, tope + alto]. La interseccion es [tope, y + ventana], o sea
+   * `ventana - 72`: los 72 px de arriba son el despeje del ancla, y ahi es donde
+   * vive la pastilla. Es derivado de la tabla; la fase C lo mide en el navegador.
+   */
+  const alturaVisibleDeLaSeccion = ventana - BORDE_INFERIOR_EN_REPOSO_PX
+  console.log(
+    `  ATERRIZAJE · \`#${ID_DEL_DESTINO}\` ocupa ${alturaVisibleDeLaSeccion} de ${ventana} px = ${((alturaVisibleDeLaSeccion / ventana) * 100).toFixed(1)} % del viewport` +
+      `  ·  los ${BORDE_INFERIOR_EN_REPOSO_PX} px de arriba son el despeje del ancla, donde vive la pastilla`,
   )
 
   // El progreso recorrido y los tramos que cruza.

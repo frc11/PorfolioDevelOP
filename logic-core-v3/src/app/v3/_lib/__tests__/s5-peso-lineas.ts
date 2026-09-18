@@ -44,7 +44,10 @@ import {
   DESVIO_DE_DESLIZAR_BYTES,
   ESCRITO_ANTES_DE_DESLIZAR_BYTES,
   ESCRITO_DESPUES_DE_DESLIZAR_BYTES,
+  CHUNK_DIFERIDO_DE_DESLIZAR_1_BYTES,
+  CHUNK_DIFERIDO_DE_DESLIZAR_2_BYTES,
   COSTO_DE_LA_HOJA_BYTES,
+  ESCRITO_DESPUES_DE_DESLIZAR_2_BYTES,
   INVENTARIO_DE_DESLIZAR,
   PROPUESTA_DE_DESLIZAR_KIB,
   RESTO_DEL_LADO_DEL_JS_BYTES,
@@ -304,5 +307,20 @@ export function afirmarLasLineasDeclaradasEnElMismoActo(): void {
     'el lector de aire ve el centésimo de ABAJO, con el que la línea deja 3,68 B y no llega al umbral',
     CENTESIMO_DE_ABAJO_DE_DESLIZAR_KIB,
     (kib: number) => aireDeDeslizar(kib) >= AIRE_MINIMO_UTIL_BYTES,
+  )
+
+  /**
+   * ⚠️ DESLIZAR-2 NO ABRE LÍNEA, y eso también se afirma: un sprint que no cuesta
+   * tiene que poder demostrarlo, o la próxima resta arrastra un desvío sin dueño.
+   */
+  afirmar(
+    Math.abs(ESCRITO_DESPUES_DE_DESLIZAR_2_BYTES - ESCRITO_DESPUES_DE_DESLIZAR_BYTES) <= RUIDO_ENTRE_BUILDS_BYTES,
+    '  ⚠️ y DESLIZAR-2 NO movió la línea: su medición cae adentro del piso de ruido, así que no abre recibo',
+    `${ESCRITO_DESPUES_DE_DESLIZAR_2_BYTES} contra ${ESCRITO_DESPUES_DE_DESLIZAR_BYTES} B — ${(ESCRITO_DESPUES_DE_DESLIZAR_2_BYTES - ESCRITO_DESPUES_DE_DESLIZAR_BYTES).toFixed(1)} B, contra un piso de ${RUIDO_ENTRE_BUILDS_BYTES} B`,
+  )
+  afirmar(
+    CHUNK_DIFERIDO_DE_DESLIZAR_2_BYTES > CHUNK_DIFERIDO_DE_DESLIZAR_1_BYTES,
+    '  y la razón está medida: lo que agregó creció el chunk DIFERIDO, que la carga inicial no nombra',
+    `${CHUNK_DIFERIDO_DE_DESLIZAR_1_BYTES} → ${CHUNK_DIFERIDO_DE_DESLIZAR_2_BYTES} B (+${CHUNK_DIFERIDO_DE_DESLIZAR_2_BYTES - CHUNK_DIFERIDO_DE_DESLIZAR_1_BYTES}) detrás de la compuerta de 1025`,
   )
 }

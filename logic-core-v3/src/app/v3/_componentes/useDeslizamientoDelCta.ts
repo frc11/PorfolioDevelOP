@@ -7,9 +7,13 @@ import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
 
 import {
   ATRIBUTO_DEL_VELO,
+  CURVA_DEL_VIAJE,
   DURACION_DEL_DESLIZAMIENTO_S,
+  PRELUDIO_MS,
+  RETARDO_ANTES_DE_DESAPARECER_MS,
   SELECTOR_DEL_CTA_DEL_HERO,
   SELECTOR_DEL_MAIN,
+  TOTAL_DEL_DESLIZAMIENTO_MS,
   deberiaDeslizar,
 } from './deslizamiento'
 
@@ -17,14 +21,22 @@ import {
  * EL MARGEN DEL RELOJ DE SEGURIDAD, en milisegundos.
  *
  * No es una duración de animación: es cuánto se le perdona al reloj antes de
- * declarar que el viaje no reportó su final. La curva heredada toca el 1 a los
- * 1.993 ms de los 2.000 —`min(1, 1,001 − 2^(−10t))` llega al techo antes del
- * final, medido en `scripts-deslizar/a-llegada.ts`—, así que `onComplete` llega
- * holgado adentro de la ventana cuando el reloj de cuadros corre. Medio segundo
- * cubre el jitter de `setTimeout` sin que una pestaña tapada se quede con la
- * página en blanco más de lo necesario.
+ * declarar que el viaje no reportó su final. Medio segundo cubre el jitter de
+ * `setTimeout` sin que una pestaña tapada se quede con la página en blanco más de
+ * lo necesario.
+ *
+ * ⚠️ **Y lo que NO es este número es el total.** El reloj tiene que cubrir
+ * `preludio + recorrido + margen`, y el preludio nació en este bloque: si alguien
+ * agranda la pausa y el reloj no crece con ella, **el reloj aborta un viaje
+ * válido** —levanta el velo a mitad de camino y devuelve el foco al CTA mientras
+ * el scroll sigue viajando—. Por eso el total se arma abajo de constantes
+ * importadas y no se escribe a mano, y por eso `s18-deslizamiento.invariant` §4
+ * afirma que la suma da lo que tiene que dar.
  */
 const MARGEN_DEL_RELOJ_MS = 500
+
+/** El total del reloj: el del deslizamiento más el margen. Derivado. */
+const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS
 
 /**
  * EL DESLIZAMIENTO, EN UN EFECTO — el escucha delegado, el velo y las salidas.
@@ -85,7 +97,8 @@ const MARGEN_DEL_RELOJ_MS = 500
  *   1. `onComplete` — llegó. El foco va al destino.
  *   2. `virtual-scroll` con delta — la rueda canceló. El foco vuelve al CTA.
  *   3. `popstate` — apretaron atrás (o adelante) a mitad de vuelo.
- *   4. el reloj de seguridad — ver abajo, no es cinturón de más.
+ *   4. el reloj de seguridad — ver abajo, no es cinturón de más. Cubre
+ *      `preludio + recorrido + margen`, no sólo el recorrido.
  *   5. la limpieza del efecto — desmontar no puede dejar un `<main>` inerte.
  *
  * ⚠ **El reloj arregla un defecto que este repo ya documentó.** Con la pestaña
@@ -118,6 +131,11 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
     let destino: HTMLElement | null = null
     let enVuelo = false
     let soltarLaRueda: (() => void) | null = null
+    /** El reloj que prende el velo, cuando el retardo del click terminó. */
+    let relojDelVelo: number | undefined
+    /** El reloj que ARRANCA el viaje cuando el preludio terminó. */
+    let relojDeArranque: number | undefined
+    /** Y el de seguridad, que lo aborta si nadie reportó el final. */
     let reloj: number | undefined
 
     /**
@@ -131,6 +149,17 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
     const terminar = (llego: boolean): void => {
       if (!enVuelo) return
       enVuelo = false
+      if (relojDelVelo !== undefined) {
+        window.clearTimeout(relojDelVelo)
+        relojDelVelo = undefined
+      }
+      if (relojDeArranque !== undefined) {
+        // 🔴 Si la cancelación llegó durante el preludio, el viaje NO tiene que
+        // arrancar después. Es la única línea que impide que una rueda en los
+        // primeros 600 ms apague el velo y el scroll salga igual de viaje.
+        window.clearTimeout(relojDeArranque)
+        relojDeArranque = undefined
+      }
       if (reloj !== undefined) {
         window.clearTimeout(reloj)
         reloj = undefined
@@ -218,7 +247,11 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       origen = enlace
       destino = seccion
       enVuelo = true
-      zona.setAttribute(ATRIBUTO_DEL_VELO, '')
+
+      // El velo espera `RETARDO_ANTES_DE_DESAPARECER_MS`; con 0 va en el mismo cuadro.
+      const encenderElVelo = (): void => {
+        relojDelVelo = undefined
+        zona.setAttribute(ATRIBUTO_DEL_VELO, '')
       /**
        * 🔴 `opacity: 0` NO ALCANZA. Un `<main>` transparente sigue estando en el
        * orden de tabulación: quien tabula durante el viaje enfoca enlaces que no
@@ -230,7 +263,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
        * invisible y el foco manejado en las dos salidas. Y no lo sufre quien más
        * lo sentiría: con `prefers-reduced-motion` este archivo no se monta.
        */
-      zona.inert = true
+        zona.inert = true
+      }
+      if (RETARDO_ANTES_DE_DESAPARECER_MS === 0) encenderElVelo()
+      else relojDelVelo = window.setTimeout(encenderElVelo, RETARDO_ANTES_DE_DESAPARECER_MS)
 
       // El vigía de la cancelación. `virtual-scroll` se emite en la PRIMERA línea
       // de `onVirtualScroll` (`lenis.mjs:579`), antes de todas las guardas, así
@@ -242,17 +278,39 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
         terminar(false)
       })
 
-      reloj = window.setTimeout(() => terminar(false), DURACION_DEL_DESLIZAMIENTO_S * 1000 + MARGEN_DEL_RELOJ_MS)
+      reloj = window.setTimeout(() => terminar(false), RELOJ_DE_SEGURIDAD_MS)
 
-      lenis.scrollTo(seccion, {
-        duration: DURACION_DEL_DESLIZAMIENTO_S,
-        // ⚠ Va explícito aunque sea el default: ES la decisión que hace al viaje
-        // cancelable. Con `lock: true` la rueda entraría a `onVirtualScroll` y
-        // saldría por la guarda de `isLocked` con un `preventDefault()`, y el
-        // visitante quedaría encerrado dos segundos.
-        lock: false,
-        onComplete: () => terminar(true),
-      })
+      /**
+       * 🔴 LA PAUSA. El viaje NO arranca en el mismo cuadro que el velo: espera
+       * el preludio —el fundido del velo más el silencio— y recién después
+       * scrollea. Es lo que hace que se lea *«desaparece todo, y LUEGO baja»*.
+       *
+       * ⚠ Durante el preludio el viaje ya está EN VUELO a todos los efectos: el
+       * velo está puesto, el `<main>` es inerte, el vigía de la rueda está
+       * escuchando y el reloj de seguridad corre. Una rueda ahí cancela un viaje
+       * que todavía no se movió un píxel, y `terminar` limpia este reloj para
+       * que el `scrollTo` de abajo no se ejecute nunca.
+       */
+      relojDeArranque = window.setTimeout(() => {
+        relojDeArranque = undefined
+        lenis.scrollTo(seccion, {
+          duration: DURACION_DEL_DESLIZAMIENTO_S,
+          /**
+           * 🔴 La curva PROPIA del viaje — `power1.inOut` del vocabulario de
+           * develOP, importada. La rueda sigue con la del sitio, que es la que
+           * `OPCIONES_DE_LENIS` declara y este sprint no toca. El costo de tener
+           * dos está declarado en `deslizamiento.ts` y numerado en
+           * `DIRECCION-ESCENA.md` §7.74.
+           */
+          easing: CURVA_DEL_VIAJE,
+          // ⚠ Va explícito aunque sea el default: ES la decisión que hace al viaje
+          // cancelable. Con `lock: true` la rueda entraría a `onVirtualScroll` y
+          // saldría por la guarda de `isLocked` con un `preventDefault()`, y el
+          // visitante quedaría encerrado los cuatro segundos.
+          lock: false,
+          onComplete: () => terminar(true),
+        })
+      }, PRELUDIO_MS)
     }
 
     const alHistorial = (): void => terminar(false)

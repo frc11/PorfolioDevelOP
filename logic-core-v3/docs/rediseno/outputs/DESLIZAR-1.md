@@ -1,6 +1,8 @@
-# DESLIZAR-1 — el deslizamiento del CTA del hero hasta Trabajos
+# DESLIZAR-1 · DESLIZAR-2 — el deslizamiento del CTA del hero hasta Trabajos
 
-**Construido y medido. NO commiteado.** El árbol queda listo para que el dueño lo revise y lo commitee.
+**DESLIZAR-1 está commiteado** (`5aaec533`). **DESLIZAR-2 está construido y medido, sin commitear.**
+
+> **DESLIZAR-2** son los tres cambios que el dueño pidió mirando la grabación: **la pausa**, **la curva** y **la verificación del aterrizaje**. Están en §12, §13 y §14, y todo lo que mueven está actualizado en el resto del documento. Lo de DESLIZAR-1 que dejó de ser cierto se dice dónde, no se borra.
 
 ---
 
@@ -60,6 +62,8 @@ El `<a>` del Cierre lleva **el mismo** `data-pieza="cta"` (apunta a `#servicios`
 ⚠ Y el `event.target` **nunca es el `<a>`**: `Cta.tsx` mete dos copias del rótulo y un subrayado adentro, así que el click aterriza en un `<span data-parte="…">`. Va `closest()`, no `matches()`.
 
 ### 2.3 · `expoOut`, T = 2,0 s — y la curva no se declara
+
+> ⚠️ **DESLIZAR-2 DIO VUELTA ESTA SECCIÓN.** El viaje ya no hereda la curva: tiene la suya, `power1.inOut`, y dura 4,0 s con 600 ms de preludio delante. Lo de abajo describe **la curva de la RUEDA**, que sigue intacta y sigue siendo la del sitio. El porqué del cambio, con las dos curvas medidas, está en **§13**.
 
 `DURACION_DEL_DESLIZAMIENTO_S = 2` está en el módulo puro. **La curva no está en ninguna parte del sprint**, y eso es la decisión: `scrollTo` hereda `this.options.easing` cuando no se le pasa una (`lenis.mjs:746`), y `OPCIONES_DE_LENIS.easing` —la configuración del sitio vivo, la que `ScrollSuaveDeV3` ya importaba— **ES** un expoOut: `min(1, 1,001 − 2^(−10t))`.
 
@@ -184,6 +188,8 @@ Lo que el deslizamiento cambia es **pantallas por segundo**. Medido muestreando 
 
 **En la unidad que el sprint sí mueve, la cámara salta 1,43 alturas de cuadro en UN cuadro** (a los 33 ms), o 85,5 por segundo. La vara: un diente de rueda —100 px animados con la misma curva y la duración del sitio vivo, 1,1 s— pica a **10,5 px/cuadro**. El deslizamiento pica **46,6 veces más rápido** a 1080. Es inherente a un `expoOut` que arranca desde quieto a velocidad máxima: la derivada en `t = 0` vale `10 ln 2 = 6,93`.
 
+> ⚠️ **DESLIZAR-2 CERRÓ ESTO, y fue una de las dos razones del cambio de curva.** Con `power1.inOut` a 4,0 s el pico por cuadro baja de **1,4254 a 0,1086 alturas** (13,1×) y contra el diente de rueda de 46,6× a **6,8×**, porque la curva nueva **arranca en velocidad cero** — medido, 0,000002. Los números están en §13.
+
 **Esto es un dato para el dueño, no una objeción a su decisión.** La curva y la duración son decisión tomada; lo que el sprint aporta es el número. `TECHO_DE_VELOCIDAD = 1` sigue siendo un presupuesto sobre la pista, custodiado por `s16-techo`, y no un clamp del bucle de render: no hay nada que se ponga rojo.
 
 ### 5.3 · ⚠️ La cifra de la instrucción que NO reproduce
@@ -307,6 +313,7 @@ src/app/v3/_lib/__tests__/s18-curva.ts
 src/app/v3/_lib/__tests__/s5-presupuesto-recibos-de-deslizar.ts
 scripts-deslizar/a-llegada.ts
 scripts-deslizar/b-controles.ts
+scripts-deslizar/c-aterrizaje.ts          ← DESLIZAR-2
 ```
 
 **Modificados (10):**
@@ -320,7 +327,7 @@ src/app/v3/_lib/__tests__/s5-presupuesto.ts        la constante, la fila y el t�
 src/app/v3/_lib/__tests__/s5-peso-lineas.ts        el bloque de 7 afirmaciones
 package.json                                       el script del invariante
 .gitignore                                          /.next-deslizar/, con su motivo
-docs/rediseno/DIRECCION-ESCENA.md                   §7.73
+docs/rediseno/DIRECCION-ESCENA.md                   §7.73 y §7.74
 tsconfig.json                                       ⚠ lo tocó NEXT, no yo — ver abajo
 ```
 
@@ -345,3 +352,219 @@ tsconfig.json                                       ⚠ lo tocó NEXT, no yo —
 **Una instrucción puede traer una referencia de línea vencida y la sustancia intacta.** `hero.invariant.tsx:268` no habla del CTA; la que fuerza la arquitectura delegada es la 338. La forma de no tropezar fue **ir a leer la línea** en vez de confiar en la cita, y la del sprint que venga es la misma: una referencia `archivo:línea` de una instrucción se verifica como cualquier otra medición.
 
 **Y un requisito puede estar bien y su forma mal, y hay que separarlos.** El gate del intro era un requisito correcto —el click durante la capa rompe el muestreo— con una forma que lo rompía en la rama más frecuente. Lo que permitió verlo no fue desconfiar de la instrucción: fue **leer el contrato del módulo que la instrucción nombraba** (`introBoot.tsx:91`, y el comentario de `HomeIntro.tsx` que dice `idle` significa «no hay intro», no «el intro terminó»). Cuando una instrucción nombra un símbolo, el símbolo tiene la última palabra sobre qué significa.
+
+---
+
+# DESLIZAR-2 — los tres cambios pedidos mirando la grabación
+
+## 12 · LA PAUSA — y la duración se derivó, no se eligió
+
+**El pedido:** *«apretás el botón, se queda quieto en la escena, desaparece todo, y LUEGO baja.»* Hoy el velo y el viaje arrancaban en el mismo cuadro, así que el «luego» no existía.
+
+**Lo construido:** el viaje arranca **después** de un preludio. El velo se apaga, hay un silencio, y recién ahí empieza el scroll.
+
+### De dónde sale el número
+
+La pausa **arranca cuando el velo terminó de apagarse** — o sea a los `--duracion-rapida` = **300 ms**, que es lo que la hoja declara y lo que el invariante verifica contra `theme-develop.css` (el par CSS↔JS es de los que se desincronizan en silencio, así que se custodia como el de `navegacion.ts`/`navegacion.css`).
+
+Lo que **dura** salió de dos escalas que el proyecto ya tiene medidas, y las dos dieron un candidato:
+
+| | valor | de dónde sale |
+|---|---|---|
+| **A — aplicada** | **300 ms** | `--duracion-rapida`, **el beat del propio velo**. Es el PISO de la derivación: una espera más corta que el fundido se leería como su cola y no como un silencio. El preludio son **dos beats iguales**. |
+| B | 400 ms | `ROLLOVER_MEDIDO.subrayado.retardoMs` — **el retardo que el CTA ya sostiene**, medido sobre la referencia: es lo que espera su subrayado antes de crecer. El preludio del viaje respiraría al mismo tiempo que el rollover del botón que lo disparó. |
+
+**Queda aplicada la más corta**, por instrucción. La otra vive en `PAUSA_CANDIDATA_LARGA_MS` para que la parada del dueño sea cambiar una línea, y el invariante afirma que las dos son valores del sistema y no números sueltos.
+
+### ⚠️ Lo que la pausa arrastró
+
+**El total pasa de 2,0 a 4,6 s desde el click** (600 de preludio + 4.000 de recorrido), y eso cambió tres cosas que se movieron con él:
+
+- 🔴 **el reloj de seguridad**, que ahora suma `PRELUDIO + recorrido + margen`. Si se hubiera quedado en el recorrido, **abortaría un viaje válido** a mitad de camino: levantaría el velo y devolvería el foco mientras el scroll sigue viajando. El invariante afirma la suma **sobre el fuente**, término por término;
+- 🔴 **un reloj nuevo**, el de arranque, con su propia línea de cancelación. Durante los 600 ms del preludio el viaje ya está *en vuelo* —velo puesto, `<main>` inerte, vigía escuchando— pero el scroll no se movió. Si una rueda cancela ahí y nadie cancela ese reloj, **el velo se apaga y el `scrollTo` sale de viaje igual**. Es el control 1b de §14;
+- los tiempos de los cinco controles.
+
+**Medido:** el scroll se movió **0 px en los primeros 600 ms** del viaje. La pausa existe y dura lo que dice.
+
+---
+
+## 13 · 🔴 LA CURVA — dos, a propósito, y el costo declarado
+
+**El pedido:** *«que baje un poco más despacio, apreciando toda la escena.»*
+
+**Alargar `expoOut` no lo resolvía**, y el número lo dice: pone el **82,4 % del camino en el primer cuarto del tiempo**, y su peor tramo de 700 ms se lleva el **91,2 %**. Alargarlo suma tiempo de casi-quieto sin mover ese 82,4 % — es exactamente la deriva que el dueño midió en la grabación.
+
+### Las dos curvas, medidas
+
+| | curva | pico / media | en `t = 0` | **25 % / 50 % / 75 %** del tiempo | peor tramo de 700 ms |
+|---|---|---|---|---|---|
+| **la RUEDA** | `expoOut` (`OPCIONES_DE_LENIS`) | 6,9314 | **máxima** | 82,4 / 97,0 / 99,5 % | **91,2 %** |
+| **el VIAJE** | `power1.inOut` (`CURVAS.simetrica`) | 2,0000 | **cero** | **12,5 / 50,0 / 87,5 %** | **31,9 %** |
+
+Perfectamente simétrica, y el peor tramo de 700 ms cae del 91,2 % al 31,9 %.
+
+### El pico de cámara, que es lo que el dueño pidió reportar
+
+| ventana | fh **por cuadro** — DESLIZAR-1 | fh **por cuadro** — DESLIZAR-2 | contra un diente de rueda |
+|---|---|---|---|
+| 800 | 1,4198 | **0,1084** | 46,6× → **5,0×** |
+| 900 | — | **0,1085** | **5,6×** |
+| 1080 | **1,4254** | **0,1086** | 46,6× → **6,8×** |
+| 1200 | 1,4269 | **0,1087** | **7,5×** |
+
+**El pico por cuadro baja de 1,4254 a 0,1086 alturas: 13,1 veces.** Y cambia de lugar: ya no cae en el cuadro 1 sino a los **983 ms**, en el medio del viaje, que es donde una curva simétrica tiene que picar.
+
+En la unidad del techo (`fh` por **pantalla de scroll**) el viaje mide 3,4097 contra el 3,4126 de hoy: sigue sin superarlo, y sigue sin poder — esa unidad no tiene tiempo adentro.
+
+### 🔴 El costo, declarado y numerado
+
+DESLIZAR-1 **no declaraba curva a propósito**: heredaba `OPCIONES_DE_LENIS.easing` para no tener dos definiciones de la misma curva. **Darle una propia rompe eso**, y está numerado en `DIRECCION-ESCENA.md` **§7.74** como decisión, con las dos curvas nombradas.
+
+**Lo que acota el costo:** no son dos definiciones de la misma curva, son **dos curvas distintas**, y la distancia entre ellas está medida: **0,6992** sobre los 21 puntos del criterio de SCROLL.md §9.2 — para comparar, el par de curvas distintas más parecido del catálogo mide 0,028.
+
+Y la del viaje **no es nueva**: es una de las **seis del vocabulario de develOP**, la que la referencia usa en 11 de sus 278 tweens, **importada** de `curvas.ts`. Sigue habiendo una sola definición de cada una.
+
+**La razón de fondo es que son dos cosas.** Un gesto tiene que responder en el primer cuadro, y para eso arrancar a velocidad máxima es lo correcto. Un viaje programático es un movimiento de cámara, y una cámara que arranca de golpe se lee como un tirón.
+
+### ⚠️ Dos curvas que NO se usaron, con su motivo
+
+- **`simetrica-suave`** (`power2.inOut`): el nombre es una trampa de lectura — es una **cúbica**, su pico vale **3**, y aprieta MÁS el medio. `simetrica` es la cuadrática, pico 2, y de las dos es la más parecida a la lineal.
+- **`sine.inOut`**: sería todavía más plana (pico **1,571**), y **no se puede usar**. `curvas.ts` la declara explícitamente fuera del vocabulario y la tiene por una sola razón: ser **el control externo** con el que se verifica que nuestra `simetrica` es la curva que dice ser. Usarla de producto le sacaría al proyecto su vara de medición. El invariante afirma que no se usó.
+
+### El invariante no se borró: se partió en dos
+
+`s18-deslizamiento` §4 afirmaba *«el deslizamiento NO declara curva: hereda la de `OPCIONES_DE_LENIS`»*. Ahora son **§4a** (la rueda sigue con la del sitio, leyendo la línea exacta del fuente, y el sprint no la reasigna) y **§4b** (la del viaje es una de las seis, se importa y no se copia, **arranca en velocidad cero** — 0,000002 medido — y las dos son distintas con el número). Si alguien vuelve a unificarlas, se pone rojo por los dos lados.
+
+### La duración: el 4 sale de una igualdad
+
+`power1.inOut` tiene **pico exactamente 2× su media**. Así que `2 × 2,0 s` hace que **el instante más rápido del viaje nuevo corra exactamente igual que el promedio del viejo**:
+
+```
+pico nuevo = 2 · D / 4,0 = D / 2,0 = media vieja
+```
+
+No es una analogía, es una igualdad, y cae adentro de la banda de 3–4 s que el dueño pidió. El invariante la afirma como `DURACION === PICO × DURACION_VIEJA`, y muestrea el pico en vez de creerle al comentario.
+
+---
+
+## 14 · EL ATERRIZAJE — verificado, no cambiado
+
+El dueño comparó el último cuadro de la grabación contra su captura: *«parece correcto ya»*. **No se cambió nada.** Se verificó, con `scripts-deslizar/c-aterrizaje.ts`, corriendo **el viaje entero** —no un `scrollTo` a mano— y leyendo el **rect real** de la sección, no la tabla:
+
+| perfil | y al frenar | tope de la sección | visible / viewport | derivado |
+|---|---|---|---|---|
+| 1280×800 | 6.328 | **72 px** | 728 / 800 = **91,0 %** | 91,0 % |
+| 1440×900 | 7.128 | **72 px** | 828 / 900 = **92,0 %** | 92,0 % |
+| 1920×1080 | **8.568** | **72 px** | 1008 / 1080 = **93,3 %** | 93,3 % |
+
+**En ningún alto queda corta.** Los tres pasan del 90 %, y el medido pega con el derivado en los tres.
+
+Los **72 px** que faltan para el 100 % **son el despeje del ancla** —y es donde vive la pastilla—, así que la composición es la de la captura del dueño: la sección desde su primer píxel, con la pastilla arriba.
+
+⚠ Se midió el rect en vez de derivarlo por una regla del repo: **`alto` en `secciones.ts` es un `min-height`, no un alto**, y su docblock publica que el natural de Trabajos es 1.080 px contra los 3.240 declarados. Medido: la sección mide **2.400 / 2.700 / 3.240 px**, o sea exactamente 3 × ventana. Hoy declarado y natural coinciden; si el contenido creciera, esta cuenta se movería sin que nada se pusiera rojo, y por eso el instrumento lee el rect.
+
+---
+
+## 15 · LOS CINCO CONTROLES DE DESLIZAR-2
+
+Los cuatro de DESLIZAR-1 enteros, **con los tiempos nuevos**, más uno que la curva nueva hizo necesario.
+
+| control | velo | scroll | hash | foco |
+|---|---|---|---|---|
+| **0 · el viaje** | 14 → **4.587 ms** (344 cuadros), apagado | 0 → **7.128** | `#trabajos` | `section#trabajos` |
+| **1 · cancelar a mitad** (rueda a los 2.600 ms) | 14 → **2.627 ms**, apagado | 0 → 3.782 | `#trabajos` | el CTA |
+| **1b · 🔴 la rueda TEMPRANA** (100 ms, dentro del preludio) | 12 → **132 ms** (10 cuadros), apagado | 0 → **120** | `#trabajos` | el CTA |
+| **2 · el botón de atrás** (2.600 ms) | 250 → **2.612 ms**, apagado | → 7.128 | **`""`** | el CTA |
+| **3 · click durante el intro** | **nunca se prendió** | ya en 7.128 en el cuadro 0 | `#trabajos` | body |
+
+**`inert` suelto al final en las cinco**, muestreado cuadro por cuadro.
+
+**Lo que los números nuevos prueban:**
+
+- **la pausa existe** — `y por hito: 0:0 · 300:0 · 600:0 · 1000:152`. El scroll está **clavado en 0 durante 600 ms** y recién después arranca;
+- **la curva es la que se pidió** — a los 2.600 ms (`t = 0,5` del recorrido) el scroll está en **3.567 px de 7.128, o sea el 50,0 % exacto**; a los 1.000 ms (`t = 0,1`) está en 152 px = 2,1 %, y `power1.inOut` en 0,1 vale 2 %. La curva hace lo que la tabla de §13 dice;
+- 🔴 **la rueda temprana no deja salir el viaje** — es el control que la instrucción pidió. Con una curva que arranca suave, una rueda a los 100 ms cancela un viaje que no se movió un píxel. Medido: el velo se apaga a los **132 ms** y el scroll termina en **120 px** — los 120 del propio diente de rueda, **no los 7.128 del viaje**. La línea que lo sostiene es el `clearTimeout(relojDeArranque)` de `terminar`, y el invariante la afirma;
+- **cancelar a mitad sigue andando** con el total nuevo: el velo se va **27 ms** después de la rueda;
+- **atrás y el intro** se comportan igual que en DESLIZAR-1.
+
+---
+
+## 16 · EL PESO DE DESLIZAR-2 — no sube
+
+| | escrito por el lane |
+|---|---|
+| DESLIZAR-1 | 72.212,0 B |
+| **DESLIZAR-2** | **72.211,0 B** |
+
+**−1,0 B**, adentro del piso de ruido de 9,0. **No se abre línea ni recibo nuevo**, y `MONTAJE_DE_DESLIZAR_KIB` se queda en 0,08.
+
+La razón está medida: **todo lo que DESLIZAR-2 agrega cayó del lado diferido.** El chunk asíncrono del deslizamiento pasó de **4.151 a 4.817 B (+666)** —las constantes del preludio, el `import` de `CURVAS`, el segundo reloj y el `easing` del `scrollTo`— y **sigue sin aparecer en los 26 `<script src>` de `/v3`**. El chunk del layout se movió 1 byte y el de la página ninguno.
+
+Es la propiedad que DESLIZAR-1 publicó, medida una segunda vez y con un cambio más grande adentro: **la carga inicial no se entera de lo que pasa detrás de la compuerta de 1025.**
+
+El invariante afirma las dos mitades: que la medición cae adentro del ruido, y que el chunk diferido creció.
+
+---
+
+## 17 · EL GATE DE DESLIZAR-2
+
+`npm run verificar` → **30 pasos · 0 con falla · 19 deudas declaradas** (las mismas que traía el árbol: 15 en `s10`, 3 en `s8`, 1 en `s22`). Siguen siendo 30 pasos: DESLIZAR-2 no agregó un invariante, **reescribió §4 del que ya existía**.
+
+La suite `s18` pasó de 179 a **202 afirmaciones · 21 controles positivos · 0 fallas**; el invariante propio de 73 a **96 afirmaciones y 8 controles positivos**. `s5` de 836 a 838.
+
+`npx tsc --noEmit` → exit 0. ESLint limpio sobre los cuatro archivos tocados. Cero `any`, cero `router.push`, cero `triggerTransition`, y el build fue `npm run build` con `MEDIR_CON_LA_LLAVE_PRENDIDA=1` y `--max-old-space-size=8192`.
+
+### ⚠️ `test:s3-frontera` pasó a FUERA DE VENTANA, y es correcto
+
+Reporta **0 fallas y 10 comprobaciones que NO CORREN**, donde en DESLIZAR-1 corrían. No es una regresión: **es que su ventana se cerró cuando DESLIZAR-1 se commiteó.** El check vale mientras su sprint esté sin commitear y lo prueba con testigos —los archivos que el sprint dio de alta—; con los 37 testigos del padrón de S3 ya en HEAD, el diff contra HEAD es vacío y el check se declara sin base en vez de dar un verde por vacío. Su propio texto lo dice: *«sin diff contra HEAD, `git status` no distingue "no lo toqué" de "ya está commiteado"»*.
+
+**Lo que ese check ya no puede afirmar se verificó a mano**, que es lo que corresponde cuando un instrumento se declara fuera de ventana. Contra `HEAD` (o sea contra el commit de DESLIZAR-1), los cinco intocables están **intactos**:
+
+```
+intacto   src/components/3d/HeroArtifact.tsx        (congelado)
+intacto   src/context/TransitionContext.tsx         (congelado)
+intacto   src/app/v3/page.tsx                       (prohibido por la frontera de S3)
+intacto   src/app/v3/_secciones/hero/Hero.tsx       (lo corre el sprint de `rediseno/home`)
+intacto   src/app/v3/_secciones/hero/geometria.ts   (idem)
+```
+
+---
+
+## 18 · ARCHIVOS DE DESLIZAR-2
+
+**Nuevo (1):**
+
+```
+scripts-deslizar/c-aterrizaje.ts          la verificación del aterrizaje en los tres altos
+```
+
+**Modificados (9):**
+
+```
+src/app/v3/_componentes/deslizamiento.ts               el preludio derivado, la duración y la curva del viaje
+src/app/v3/_componentes/useDeslizamientoDelCta.ts      la pausa, el segundo reloj y el `easing` del viaje
+src/app/v3/_lib/__tests__/s18-deslizamiento.invariant.tsx  §4 reescrito en cuatro partes (§4a–§4d)
+src/app/v3/_lib/__tests__/s18-curva.ts                 pasa a ser la curva de la RUEDA, más los dos medidores
+src/app/v3/_lib/__tests__/s5-presupuesto-recibos-de-deslizar.ts  la medición de DESLIZAR-2 y el chunk diferido
+src/app/v3/_lib/__tests__/s5-peso-lineas.ts            las dos afirmaciones de «no movió la línea»
+scripts-deslizar/a-llegada.ts                          el reparto del camino y el aterrizaje derivado
+scripts-deslizar/b-controles.ts                        los tiempos nuevos y el control 1b
+docs/rediseno/DIRECCION-ESCENA.md                      §7.74
+docs/rediseno/outputs/DESLIZAR-1.md                    §12 a §18
+```
+
+**No se tocó:** `Hero.tsx`, `geometria.ts`, `HeroArtifact.tsx`, `TransitionContext.tsx`, `page.tsx`, los otros catorce enlaces, `_estilos/deslizamiento.css`, `layout.tsx`, `package.json`, `.gitignore`, `theme-develop.css`, ni el destino (sigue siendo el ancla nativa con sus 72 px).
+
+---
+
+## 19 · LO QUE QUEDA ABIERTO DESPUÉS DE DESLIZAR-2
+
+Lo de DESLIZAR-1 que sigue abierto (§10) menos lo que este sprint cerró, más lo nuevo:
+
+1. **La pausa tiene un segundo candidato aplicable en una línea**: 400 ms, el retardo que el subrayado del CTA ya sostiene. Quedó aplicada la de 300. Lo elige el dueño mirando.
+2. **La duración son 4,0 s por una igualdad**, y la igualdad es una elección de criterio: «el pico del viaje nuevo = el promedio del viejo». Si el dueño quiere 3,0 o 3,5, la tabla de §13 se recalcula sola y el invariante que la custodia es la misma línea (`DURACION === PICO × DURACION_VIEJA`) — habría que reescribir ese criterio, no sólo el número.
+3. 🔴 **Sigue abierta la forma del gate del intro** (§3): `!isSceneHeld` contra el `=== 'clear'` literal.
+4. **Atrás apaga el velo pero no congela el viaje** — sin cambios, y sigue siendo fidelidad al comportamiento de hoy.
+5. **Los 9,0 B sin atribuir de DESLIZAR-1** siguen sin separarse del ruido.
+6. **Los otros catorce enlaces siguen frenados** por la banda suspendida de la escena.
+7. ⚠️ **`test:s3-frontera` queda fuera de ventana mientras DESLIZAR-2 no cree un archivo del padrón de S3.** No es un problema de este sprint —es cómo el check está diseñado— pero conviene saberlo: **de ahora en más, los intocables hay que verificarlos a mano** (§17) hasta que un sprint dé de alta un archivo de ese padrón.

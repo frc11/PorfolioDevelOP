@@ -119,6 +119,38 @@ export const RUIDO_ENTRE_BUILDS_BYTES = 9.0
 export const CIERRE_PUBLICADO_DE_COMPO2_BYTES = 72_146.0
 
 /**
+ * ⚠️ **DESLIZAR-2 NO MOVIÓ LA LÍNEA, Y ACÁ ESTÁ SU MEDICIÓN.**
+ *
+ * El segundo sprint del deslizamiento —la pausa, la curva propia del viaje y la
+ * duración de 4 s— se midió con el mismo instrumento sobre el mismo árbol:
+ *
+ *     DESLIZAR-1   72.212,0 B
+ *     DESLIZAR-2   72.211,0 B      →   −1,0 B
+ *
+ * **Devuelve un byte**, o sea que no se mueve: −1,0 está adentro del piso de
+ * ruido de 9,0 B y no se puede llamar ni ahorro ni costo. La línea se queda en
+ * `0,08` y el sprint no abre un recibo nuevo.
+ *
+ * ── Por qué no costó nada, con el número que lo explica ──────────────────
+ *
+ * Porque **todo lo que DESLIZAR-2 agrega cae del lado diferido**: el chunk
+ * asíncrono del deslizamiento pasó de **4.151 a 4.817 B (+666)** —ahí viven las
+ * dos constantes del preludio, el `import` de `CURVAS`, el segundo reloj y la
+ * llamada a `scrollTo` con `easing`— y **sigue sin aparecer en los 26
+ * `<script src>` de `/v3`**. El chunk del layout se movió de 5.962 a 5.961 y el
+ * de la página no se movió un byte.
+ *
+ * Es la misma propiedad que DESLIZAR-1 publicó, medida una segunda vez y con un
+ * cambio más grande adentro: **la carga inicial no se entera de lo que pasa
+ * detrás de la compuerta de 1025.**
+ */
+export const ESCRITO_DESPUES_DE_DESLIZAR_2_BYTES = 72_211.0
+
+/** El chunk diferido, antes y después. Se publica y no se suma, como en §7. */
+export const CHUNK_DIFERIDO_DE_DESLIZAR_1_BYTES = 4_151
+export const CHUNK_DIFERIDO_DE_DESLIZAR_2_BYTES = 4_817
+
+/**
  * EL INVENTARIO — **MEDIDO con tres builds**, no derivado del código. Las dos
  * primeras filas salen de una resta entre corridas; las tres del medio dicen
  * cero porque su chunk no está en la carga inicial; la última dice lo que no se
