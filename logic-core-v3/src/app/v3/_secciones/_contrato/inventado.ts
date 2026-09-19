@@ -95,17 +95,11 @@ export const INVENTOS = {
   trabajosGarage: { marcador: '[MÉTRICA]', pedido: '[MÉTRICA]', mentira: 'de 2 a 11 visitas agendadas' },
   trabajosBanu: { marcador: '[MÉTRICA]', pedido: '[MÉTRICA]', mentira: 'de 40 a 260 pedidos al mes' },
 
-  // ── Quiénes somos · qué hace cada uno en un proyecto ─────────────────────
-  equipoFranco: {
-    marcador: '[TEXTO]',
-    pedido: '[TEXTO]',
-    mentira: 'Habla con el cliente, arma el alcance y sigue las entregas.',
-  },
-  equipoValentino: {
-    marcador: '[TEXTO]',
-    pedido: '[TEXTO]',
-    mentira: 'Escribe el sistema, lo pone a andar y lo mantiene.',
-  },
+  // ⚠️ Quiénes somos tenía acá las dos frases de «qué hace cada uno en un proyecto».
+  // Se fueron con los recuadros punteados que las mostraban: la ficha de cada persona
+  // pasó a una descripción sobre la foto, y ninguna de las dos mentiras se consume.
+  // No es sólo higiene — `equipoValentino` decía «Escribe el sistema, lo pone a andar y
+  // lo mantiene.», que es una frase del texto NUEVO, y la restauración se la comía.
 
   // ── Servicios · la frase de prueba de cada uno de los tres frentes ───────
   serviciosWeb: {

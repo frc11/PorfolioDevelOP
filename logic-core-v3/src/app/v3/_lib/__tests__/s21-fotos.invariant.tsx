@@ -136,10 +136,10 @@ titulo('5 · ⚠️ SE VEN COMO PLACEHOLDERS: el marcador queda escrito ENCIMA')
 
 const conFoto = marcar(
   <MarcoDeMedio
-    marcador={CONTENIDO_QUIENES.equipo.marcador}
+    marcador={CONTENIDO_QUIENES.equipo.seria.marcador}
     fuente={CONTENIDO_QUIENES.equipo.fuente}
     provisional
-    alt={CONTENIDO_QUIENES.equipo.alt}
+    alt={CONTENIDO_QUIENES.equipo.seria.leyenda}
     ancho={GEOMETRIA.foto.ancho}
     alto={GEOMETRIA.foto.alto}
     sizes={SIZES_DE_LA_FOTO}
@@ -148,7 +148,7 @@ const conFoto = marcar(
 )
 
 afirmar(conFoto.includes('data-medio="placeholder"'), 'el marco provisional se declara `placeholder` y no `marcador`: hay archivo, y no es la foto')
-afirmar(textoVisible(conFoto).includes(CONTENIDO_QUIENES.equipo.marcador), `  y ${CONTENIDO_QUIENES.equipo.marcador} se lee ENCIMA de la imagen, en texto`)
+afirmar(textoVisible(conFoto).includes(CONTENIDO_QUIENES.equipo.seria.marcador), `  y ${CONTENIDO_QUIENES.equipo.seria.marcador} se lee ENCIMA de la imagen, en texto`)
 afirmar(conFoto.includes(encodeURIComponent(CONTENIDO_QUIENES.equipo.fuente)), '  con la imagen de verdad abajo, con su peso y su `sizes`')
 afirmar(conFoto.includes(`data-sizes="${SIZES_DE_LA_FOTO}"`), '  y el `sizes` escrito, que es lo que el día de la foto no hay que volver a pensar')
 afirmar(/<img[^>]*alt=""/.test(conFoto), '  ⚠️ el `alt` de la imagen va VACÍO: contarle a quien no ve una foto que no existe sería la misma mentira que este contrato evita')
@@ -157,7 +157,7 @@ afirmar(conFoto.includes('border-dashed'), '  y el borde punteado, que es el len
 controlPositivo(
   'el chequeo del marcador encima vería un marco sin él',
   '<figure data-medio="placeholder"><img src="/x.png" alt=""/></figure>',
-  (html: string) => textoVisible(html).includes(CONTENIDO_QUIENES.equipo.marcador),
+  (html: string) => textoVisible(html).includes(CONTENIDO_QUIENES.equipo.seria.marcador),
 )
 afirmar(POSTER_PROVISIONAL === 'public/placeholders/poster.png'.replace('public', ''), 'y el póster de Servicios apunta al archivo servido, no a uno de disco', POSTER_PROVISIONAL)
 

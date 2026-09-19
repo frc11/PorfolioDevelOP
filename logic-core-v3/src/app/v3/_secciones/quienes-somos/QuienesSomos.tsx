@@ -4,16 +4,19 @@ import { cn } from '@/lib/utils'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Caption, Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
+import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { sizesPorColumnas } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDeUnaPieza, TextoPorLineas } from '../_contrato/canales'
-import { MarcoDeMedio } from '../_contrato/medios'
-import { MarcaDeSeccion, Seccion } from '../_contrato/Seccion'
+import { CanalDePieza, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado, SignoDistinto, Trazo } from '../_contrato/canales'
+import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
-import { CONTENIDO } from './contenido'
+import { CONTENIDO, TRAMOS_DEL_TITULAR } from './contenido'
+import { CLASES_DEL_REPARTO, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
+import { MarcoDeDosTomas } from './marco'
+
+/** Se re-exportan para que quien ya las importaba de acá —los instrumentos— no cambie de puerta. */
+export { GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
 
 /**
  * 02 · QUIÉNES SOMOS — TRES pantallas de papel, sin canvas y sin pinneo.
@@ -68,85 +71,6 @@ import { CONTENIDO } from './contenido'
  * cuadro) lleva número en `deudas-b11.ts` (D-B11.2); las dos tintas al 0,6, ver `Persona`.
  */
 
-/** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los decide quien la construye y no cambian con la foto real. */
-export const GEOMETRIA = {
-  foto: {
-    /** 3:2 apaisado — [decidido]. Es una foto de DOS personas una al lado de la
-     *  otra: el encuadre que pide es horizontal y de plano medio. 16:9 deja
-     *  aire o corta las cabezas; 1:1 obliga a apilarlas, que es lo que la
-     *  sección no quiere decir. 1800 × 1200 es el ARCHIVO, no una caja. */
-    ancho: 1800,
-    alto: 1200,
-    /**
-     * Cuántas columnas ocupa, de cuántas. **Es la entrada del `sizes`**, y por
-     * eso la grilla de la tercera pantalla es de CINCO: `sizesPorColumnas` compone
-     * su condición desde el breakpoint de escritorio (1025) y de las grillas del
-     * sistema **la de 5 es la única que colapsa ahí** (las de 2, 3 y 4 colapsan en
-     * 768, y el `sizes` MENTIRÍA entre 768 y 1024).
-     * ⚠ **B1 · de 3 a 4 [medido]; B11 · de 4 a 3, en c3–c5 [medido].** Con 3 la
-     * caja valía 1107,2 px a 1920 y la foto 738,1 en 1080: 310 px de hueco que B1
-     * cerró con 4 (1481,6 / 987,7). B11 midió las columnas 1 y 2 bajo el logo el
-     * 100 % del tramo en los tres anchos y la 3 entre el 34 y el 60 %: con 3 en
-     * c3–c5 el marcador queda en la 4 (0–1 %). Los 310 px vuelven (PARADA 1). */
-    columnas: 3,
-    columnasTotales: 5,
-    claseDeLaCaja: 'escritorio:col-start-3 escritorio:col-span-3', // literal: Tailwind escanea el fuente
-  },
-  /**
-   * LA MEDIDA DE LECTURA — una sola para las tres piezas de texto. [medido]
-   *
-   * ⚠ **No es un ancho de columna: es un TOPE.** La columna sigue siendo fluida
-   * y el tope sólo manda arriba de ~1025, donde se vuelve demasiado ancha para
-   * una línea (la referencia: *la caja de texto no acompaña al viewport*).
-   * `--fluido-piso` menos un escalón: 375 − 48 = 327 px, de comparar a 1920 los
-   * altos que produce cada tope, que es lo que decide cuánta tinta se reparte:
-   *
-   *     tope   titular   bajada   cómo   tinta    juntura
-   *     375     288,91       96     96   519,8      93,4
-   *     343     288,91       96    120   543,8      89,4
-   *     327     346,69      120    120   617,6      77,1
-   *
-   * Y no deja el texto fuera de registro: 327 px sobre un titular de 53 px son 6,2
-   * em de línea, contra los 6,67 em de la referencia (480 px sobre 72). */
-  medida: 'max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]',
-  /**
-   * EL REPARTO de las dos pantallas de texto: doce columnas como primitiva de
-   * posición, una fila por pieza (el instrumento de Números; las cadenas van
-   * enteras porque Tailwind escanea el fuente). La columna 9 no es una preferencia:
-   * a 1920 la pastilla ocupa de x 658 a x 1262 y una caja que arranca en la 9
-   * empieza en x 1332, afuera en todo su recorrido; por eso **la última fila de
-   * cada pantalla arranca en la 9**, contra el pie del cuadro con `content-evenly`.
-   * ⚠ B11: en la pantalla del equipo, «cómo trabajamos» (fila 1) y la primera
-   * persona (fila 2) arrancan en la 7, la primera columna que el logo deja libre
-   * ahí (c7–c10 ≤ 10 % en los tres anchos); la segunda sigue en la 9 (pastilla).
-   */
-  reparto: {
-    // ⚠️ B12: la fila 1 quedó vacía —era el rótulo— y su celda se borra con él.
-    // Las otras NO se re-numeran: correrlas movería lo que B11 acomodó.
-    titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
-    bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
-    lugar: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-4',
-    comoTrabajamos: 'escritorio:col-start-7 escritorio:col-span-4 escritorio:row-start-1',
-    primeraPersona: 'escritorio:col-start-7 escritorio:col-span-4 escritorio:row-start-2',
-    segundaPersona: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-3',
-  },
-  /** Cuántas líneas promete el titular. Inerte para P1 (`LineasDeTexto` mide); va
-   *  declarado para compararla con el rango del patrón (1 a 6): cinco a 1920, cuatro a 1440. */
-  lineasDelTitular: 5,
-} as const
-
-/** El `sizes` real de la foto, exportado para que el instrumento afirme el MISMO valor que recibe el marco. */
-export const SIZES_DE_LA_FOTO = sizesPorColumnas(GEOMETRIA.foto.columnas, GEOMETRIA.foto.columnasTotales)
-
-/** LA GRILLA DE LAS DOS PANTALLAS DE TEXTO — doce columnas desde 1025, UNA abajo, y el
- *  hueco repartido en vez de acumulado: `grow` + `content-evenly` crece hasta el alto de
- *  la pantalla y reparte lo que sobra **por igual entre las junturas** (por eso `gap-y` se apaga arriba de 1025). */
-const CLASES_DEL_REPARTO = cn(
-  'grid w-full grow grid-cols-1 content-evenly items-start gap-y-12',
-  'escritorio:grid-cols-12 escritorio:gap-y-0',
-  'gap-x-[var(--grilla-canal-compacto)] escritorio:gap-x-[var(--grilla-canal-amplio)]',
-)
-
 /** El contenedor de una pantalla de texto. `escritorio:py-0` y no un relleno fijo: arriba de 1025 el borde lo pone el reparto. */
 function Pantalla(props: {
   readonly nombre: string
@@ -162,24 +86,34 @@ function Pantalla(props: {
   )
 }
 
-/** Una persona: nombre en h3, rol real, y el hueco rotulado al lado del rol (el borde punteado es el lenguaje de `MarcoDeMedio`).
- *  ⚠ B11: el rótulo del pedido y «Tucumán, Argentina» van a tinta PLENA, no a `opacity-casi` (la palanca de B6-A, PARADA 2): al 0,6 sobre
- *  el gris de la pared daban mediana 4,06–4,30 con TODO el glifo bajo AA; a plena, mediana 7,4–13,2 y 5–21 px de ~550 bajo AA: motas. §6. */
-function Persona({
-  persona,
-  rotulo,
+
+/**
+ * LA CALLE DERECHA — del 50 % del viewport al margen derecho. Todo el bloque
+ * El Equipo —el rótulo, las dos personas y la foto del equipo— vive adentro:
+ * la mitad izquierda es del logo, siempre.
+ *
+ * `data-pantalla` es hijo directo de `Envoltorio`, cuyo padding es SIMÉTRICO
+ * (32px por lado, `Envoltorio.tsx`) y cuya caja de contenido se centra con
+ * `mx-auto`: el punto medio de esa caja coincide EXACTO con el 50 % del
+ * viewport, a cualquier ancho, sin importar cuánto mida el padding. Por eso
+ * la calle se arma con `w-1/2` sobre esa caja simétrica y no con una cuenta
+ * en `vw`: `w-1/2` de una caja centrada en el viewport ES el 50vw real, sin
+ * un solo número hardcodeado. `justify-end` empuja la calle contra el borde
+ * derecho de esa misma caja, que es el margen que ya usa el resto del sitio.
+ *
+ * Sólo de escritorio para arriba: abajo no hay escena que esquivar y el
+ * bloque sigue a ancho completo, como estaba.
+ */
+function CalleDerecha({
+  children,
+  className,
 }: {
-  readonly persona: (typeof CONTENIDO.personas)[number]
-  readonly rotulo: string
+  readonly children: React.ReactNode
+  readonly className?: string
 }): React.JSX.Element {
   return (
-    <div data-pieza-a="persona" className="flex flex-col gap-2">
-      <Titular nivel="titulo-s" como="h3">{persona.nombre}</Titular>
-      <Caption como="p">{persona.rol}</Caption>
-      <p className="border-borde-fuerte flex flex-wrap items-baseline gap-2 border border-dashed px-3 py-2">
-        <Micro como="span" className="uppercase">{rotulo}</Micro>
-        <Micro como="span" className="font-codigo uppercase">{persona.enUnProyecto}</Micro>
-      </p>
+    <div className={cn('w-full escritorio:flex escritorio:justify-end', className)}>
+      <div className="w-full escritorio:w-1/2">{children}</div>
     </div>
   )
 }
@@ -190,99 +124,250 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Pantalla nombre="agencia">
       <Grilla columnas="lateral" className="grow">
-        <MarcaDeSeccion />
+        {/* Modo pulido: se pidió sacar el cuadrado de acento de esta pantalla. La columna se queda (B11/Rotulo.tsx), como en ElEquipo. */}
+        <div />
         <div data-composicion="agencia" className={CLASES_DEL_REPARTO}>
-          {/* ⚠️ B12: el rótulo y su celda se fueron; el titular NO se mueve. */}          <Bloque patron="P1" rango="ventana-visible" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
-            {(progreso) => (
-              <TextoPorLineas
-                texto={CONTENIDO.titular}
-                progreso={progreso}
-                patron="P1"
-                como="h2"
-                className="font-titulo text-fluido-titulo-l leading-titulo tracking-titulo"
-                // El `h2` que nombra la región de la sección (S11, defecto 10).
-                id={idDelTitularDeSeccion(seccion.id)}
-              />
+          {/* ⚠️ B12: el rótulo y su celda se fueron; el titular NO se mueve. */}          {/* ⚠️ EL TITULAR DEJÓ `TextoPorLineas`, por el mismo motivo que el del Hero: ese
+              divisor reparte UNA cadena con UNA métrica y acá hay dos tramos con raya
+              propia. El patrón no cambia —sigue siendo P1, con su ancla y sus claves—,
+              cambia que la pieza es una sola. El Bloque de adentro no mide para entrar:
+              mide la ventana en la que los trazos SE DIBUJAN, que es otra. */}
+          <Bloque
+            patron="P1"
+            rango={GEOMETRIA.rangoDeLaMascara}
+            className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.tipografiaDelTitular, GEOMETRIA.medidaDelTitular)}
+            style={GEOMETRIA.estilos.titular}
+          >
+            {(progresoDeEntrada) => (
+              <Bloque patron="P1" rango="ventana-del-trazo">
+                {(progresoDelTrazo) => (
+                  <>
+                    {/* El encabezado real, con la frase entera: es lo único que entra al árbol de accesibilidad. */}
+                    <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
+                      {CONTENIDO.titular}
+                    </h2>
+                    {/* ⚠️ LA MÁSCARA, AHORA POR RENGLÓN. P1 mueve `yPercent 120 → 0`
+                        —«cada línea sube desde una altura de sí misma»— y con UNA sola
+                        caja los dos renglones salían del mismo piso, el del bloque. Con
+                        una ventana por renglón cada uno sale de SU línea, y de paso P1
+                        recupera su escalonado: son dos piezas, no una.
+                        El contenedor es `flex` a propósito — ahí los márgenes negativos
+                        de las ventanas NO colapsan, así que la holgura del recorte sigue
+                        aportando cero al layout, igual que en `LineasDeTexto`. */}
+                    <div aria-hidden="true" className="flex flex-col">
+                      {TRAMOS_DEL_TITULAR.map((renglon, indice) => (
+                        <span key={renglon.marcado} className={GEOMETRIA.ventanaDelTexto}>
+                          <CanalDePieza
+                            progreso={progresoDeEntrada}
+                            patron="P1"
+                            cantidad={TRAMOS_DEL_TITULAR.length}
+                            indice={indice}
+                            como="span"
+                            className="block"
+                          >
+                            {renglon.antes}{' '}
+                            <Trazo
+                              progreso={progresoDelTrazo}
+                              tipo={renglon.tipo}
+                              className={GEOMETRIA.pesosDelTitular[renglon.tipo]}
+                            >
+                              {renglon.marcado}
+                            </Trazo>
+                            {renglon.cierre}
+                          </CanalDePieza>
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </Bloque>
             )}
           </Bloque>
 
-          <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.reparto.bajada, GEOMETRIA.medida)}>
+          {/* El ≠ lleva la tipografía del titular sin escribir texto: de ahí salen su `em` y su medida, y con ellas el alto y el centrado. */}
+          <Bloque
+            patron="P1"
+            rango="ventana-del-trazo"
+            className={cn(
+              GEOMETRIA.reparto.signo,
+              GEOMETRIA.tipografiaDelTitular,
+              GEOMETRIA.medidaDelTitular,
+            )}
+            style={GEOMETRIA.estilos.titular}
+          >
+            {(progresoDelSigno) => <SignoDistinto progreso={progresoDelSigno} />}
+          </Bloque>
+
+          <Bloque
+            patron="P2"
+            rango="ventana-visible"
+            className={cn(GEOMETRIA.reparto.bajada, GEOMETRIA.medidaAgencia)}
+            style={GEOMETRIA.estilos.bajada}
+          >
             {(progreso) => (
               <CanalDeUnaPieza progreso={progreso} patron="P2">
-                <Cuerpo>{CONTENIDO.bajada}</Cuerpo>
+                <p className={GEOMETRIA.cuerpoDeLaBajada}>{CONTENIDO.bajada}</p>
               </CanalDeUnaPieza>
             )}
           </Bloque>
 
-          <Caption como="p" className={GEOMETRIA.reparto.lugar}>{CONTENIDO.lugar}</Caption>
         </div>
       </Grilla>
     </Pantalla>
   )
 }
 
-/** PANTALLA 2 · EL EQUIPO — cómo trabajamos, y quiénes son «la misma gente de punta
- *  a punta» que ese párrafo nombra. Las dos personas llegan en filas distintas (cada
- *  una resuelve su ancla contra su caja: dos aterrizajes, no uno). El `div` vacío de
- *  la columna lateral reserva los 156 px que en la pantalla 1 lleva el número. */
+/**
+ * PANTALLA 2 · EL EQUIPO — el rótulo gigante y las dos personas, en zigzag.
+ *
+ * ⚠️ Modo pulido: todo el contenido vive adentro de `CalleDerecha`. El `@container`
+ * del rótulo mide ahora el ancho de la CALLE y no el de contenido —nadie tocó el
+ * número, 17,2cqw sigue siendo el mismo cálculo, sólo cambió contra qué caja
+ * resuelve—, y pasa a `text-right`: antes el tercio libre quedaba a la derecha
+ * porque la caja entera era el límite; ahora el límite es la calle, así que el
+ * hueco se corre a la izquierda, que es aire de más antes del 50 %. Franco queda
+ * pegado al borde izquierdo de la calle por `items-start` (el defecto); Valentino
+ * no se tocó: su `items-end` + `self-end` ya apuntaba al margen derecho, que es
+ * el mismo antes y después de este cambio.
+ *
+ * `justify-start` y no `justify-center`: el bloque arranca arriba, que es lo que deja
+ * el hueco que se fue con «Tucumán, Argentina». Y el alto es el del contenido así
+ * que `min-h-svh` acá es un piso y no una caja.
+ *
+ * La entrada de los retratos es el recorte de `LineasDeTexto` aplicado a una foto:
+ * `overflow-hidden` afuera y P2 adentro, que sube la pieza desde su media altura con
+ * su opacidad. Ni una duración ni una curva nuevas: el patrón las trae.
+ */
 function ElEquipo(): React.JSX.Element {
   return (
-    <Pantalla nombre="equipo">
-      <Grilla columnas="lateral" className="grow">
-        <div />
-        <div data-composicion="equipo" className={CLASES_DEL_REPARTO}>
-          <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.reparto.comoTrabajamos, GEOMETRIA.medida)}>
+    <div data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
+      <CalleDerecha className="grow">
+        <div data-composicion="equipo" className="flex w-full flex-col gap-[var(--spacing-12)]">
+          <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="@container w-full" style={GEOMETRIA.estilos.tituloDelEquipo}>
             {(progreso) => (
-              <CanalDeUnaPieza progreso={progreso} patron="P2">
-                <Cuerpo>{CONTENIDO.comoTrabajamos}</Cuerpo>
-              </CanalDeUnaPieza>
+              <span className={GEOMETRIA.ventanaDelTexto}>
+                <CanalDeUnaPieza progreso={progreso} patron="P2" como="span" className="block">
+                  <h3 className={GEOMETRIA.tituloDelEquipo}>{CONTENIDO.tituloDelEquipo}</h3>
+                </CanalDeUnaPieza>
+              </span>
             )}
           </Bloque>
 
-          {CONTENIDO.personas.map((persona, indice) => (
-            <Bloque key={persona.nombre} patron="P2" rango="ventana-visible" className={indice === 0 ? GEOMETRIA.reparto.primeraPersona : GEOMETRIA.reparto.segundaPersona}>
-              {(progreso) => (
-                <CanalDeUnaPieza progreso={progreso} patron="P2">
-                  <Persona persona={persona} rotulo={CONTENIDO.rotuloDelPedido} />
-                </CanalDeUnaPieza>
-              )}
-            </Bloque>
-          ))}
+          {CONTENIDO.personas.map((persona, indice) => {
+            const aLaDerecha = indice === 1
+            return (
+              <div key={persona.nombre} data-pieza-a="persona" className={GEOMETRIA.fila.caja}>
+                <div
+                  className={cn(
+                    GEOMETRIA.fila.texto,
+                    aLaDerecha ? GEOMETRIA.fila.textoADerecha : GEOMETRIA.fila.textoAIzquierda,
+                  )}
+                >
+                  <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="w-full">
+                    {(progreso) => (
+                      <span className={GEOMETRIA.ventanaDelTexto}>
+                        <CanalDeUnaPieza progreso={progreso} patron="P2" como="span" className="block">
+                          <Titular nivel="titulo-m" como="h4">{persona.nombre}</Titular>
+                        </CanalDeUnaPieza>
+                      </span>
+                    )}
+                  </Bloque>
+
+                  {/* La descripción usa la llegada del cuerpo de arriba —P2 sin máscara—
+                      y no la del nombre: son dos registros distintos, y el pedido lo dice. */}
+                  <Bloque patron="P2" rango="ventana-visible" className="w-full">
+                    {(progreso) => (
+                      <CanalDeUnaPieza progreso={progreso} patron="P2">
+                        <Cuerpo como="p">{persona.descripcion}</Cuerpo>
+                      </CanalDeUnaPieza>
+                    )}
+                  </Bloque>
+
+                  {/* El renglón de rol dejó el reposo: su lugar es el hover de la foto.
+                      Queda en `sr-only` porque un dato que sólo existe al pasar el mouse
+                      no existe para quien no tiene mouse. */}
+                  <Caption como="p" className="sr-only">{persona.rol}</Caption>
+                </div>
+
+                <div
+                  className={cn(
+                    GEOMETRIA.fila.foto,
+                    aLaDerecha ? GEOMETRIA.fila.fotoAIzquierda : GEOMETRIA.fila.fotoADerecha,
+                  )}
+                >
+                  {/* La llegada es scrubbeada y va sin recorte: el recorrido es en curva y
+                      con giro, y una máscara le cortaría las esquinas al girar. */}
+                  <Bloque patron="P2" rango="llegada-de-la-foto" className="w-full">
+                    {(progreso) => (
+                      <ProgresoAmortiguado progreso={progreso}>
+                        {(perseguido) => (
+                      <LlegadaEnCurva
+                        progreso={perseguido}
+                        sentido={aLaDerecha ? 'desde-la-derecha' : 'desde-la-izquierda'}
+                        className="block"
+                      >
+                        <MarcoDeDosTomas
+                          seria={persona.seria}
+                          suelta={persona.suelta}
+                          texto={persona.rol}
+                          registro="rotulo"
+                          ancho={GEOMETRIA.retrato.ancho}
+                          alto={GEOMETRIA.retrato.alto}
+                          sizes={SIZES_DEL_RETRATO}
+                        />
+                      </LlegadaEnCurva>
+                        )}
+                      </ProgresoAmortiguado>
+                    )}
+                  </Bloque>
+                </div>
+              </div>
+            )
+          })}
         </div>
-      </Grilla>
-    </Pantalla>
+      </CalleDerecha>
+    </div>
   )
 }
 
-/** PANTALLA 3 · LA FOTO — tres columnas de cinco, en c3–c5, y su epígrafe, solos.
- *  `escritorio:py-2` es un hilo medido con 4 columnas (1.019,64 px en 1.080); con 3
- *  (B11) la caja mide ~757 y lo que sobra es hueco, publicado arriba. ⚠ B11: el
- *  epígrafe va a la derecha desde 1025 y no es estética: sus 372 px arrancaban en
- *  la columna 3 (el logo la tapa hasta el 60 % del tramo) y a la derecha viven en
- *  c4–c5, libres. Abajo de 1025 no hay escena y sigue a la izquierda. */
+/**
+ * PANTALLA 3 · LA FOTO — la foto del equipo, adentro de la misma calle derecha.
+ *
+ * ⚠️ Modo pulido: era 65 % del ancho de contenido, centrada; ahora es el 100 % de
+ * la CALLE —«ocupa el ancho de la calle», textual—, pegada al margen derecho por
+ * `CalleDerecha` y no por `mx-auto`. Abajo de 1025 no hay calle —no hay escena que
+ * esquivar— así que ahí se queda en 65 % centrada, como estaba: `--foto-ancho` sigue
+ * viva para ese único caso.
+ */
 function LaFoto(): React.JSX.Element {
   return (
     <div data-pantalla="foto" className="flex min-h-svh w-full flex-col justify-center py-20 escritorio:py-2">
-      <Grilla columnas={GEOMETRIA.foto.columnasTotales}>
-        <Bloque patron="P2" rango="ventana-visible" className={GEOMETRIA.foto.claseDeLaCaja}>
+      <CalleDerecha>
+        {/* La entrada es la que esta pantalla ya tenía —P2 sin recorte— y no la de los
+            retratos: el pedido la deja como está. */}
+        <Bloque patron="P2" rango="ventana-visible" className="w-full">
           {(progreso) => (
             <CanalDeUnaPieza progreso={progreso} patron="P2">
-              <figure className="flex flex-col gap-3">
-                <MarcoDeMedio
-                  marcador={CONTENIDO.equipo.marcador}
-                  fuente={CONTENIDO.equipo.fuente}
-                  provisional
-                  alt={CONTENIDO.equipo.alt}
+              <figure
+                style={GEOMETRIA.estilos.fotoDelEquipo}
+                className="mx-auto flex w-[var(--foto-ancho)] flex-col gap-[var(--spacing-3)] escritorio:mx-0 escritorio:w-full"
+              >
+                <MarcoDeDosTomas
+                  seria={CONTENIDO.equipo.seria}
+                  suelta={CONTENIDO.equipo.suelta}
+                  texto={CONTENIDO.equipo.descripcion}
+                  registro="cuerpo"
                   ancho={GEOMETRIA.foto.ancho}
                   alto={GEOMETRIA.foto.alto}
                   sizes={SIZES_DE_LA_FOTO}
                 />
                 <figcaption><Caption como="p" className="escritorio:text-right">{CONTENIDO.equipo.pie}</Caption></figcaption>
+                <Cuerpo como="p" className="escritorio:sr-only">{CONTENIDO.equipo.descripcion}</Cuerpo>
               </figure>
             </CanalDeUnaPieza>
           )}
         </Bloque>
-      </Grilla>
+      </CalleDerecha>
     </div>
   )
 }

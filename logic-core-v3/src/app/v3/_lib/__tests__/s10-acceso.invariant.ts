@@ -209,7 +209,9 @@ const arbolDe = (html: string): string[] => {
   const nodos = nodosDe(html)
   return encabezados(html).map((h) => `h${h.nivel} ${textoAnunciado(html, nodos[h.indice])}`)
 }
-afirmarIgual(encabezados(QUIETA).length, 27, 'la rama quieta publica 27 encabezados: los 26 de S10 más el que nombra a Servicios')
+// 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
+// `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
+afirmarIgual(encabezados(QUIETA).length, 28, 'la rama quieta publica 28 encabezados: los 27 de S11 más el rótulo del bloque del equipo')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +

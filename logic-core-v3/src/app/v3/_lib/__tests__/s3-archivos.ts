@@ -41,6 +41,7 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/pie.css`,
   `${V3}/_estilos/foco.css`,
   `${V3}/_estilos/deslizamiento.css`,
+  `${V3}/_estilos/trazo.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

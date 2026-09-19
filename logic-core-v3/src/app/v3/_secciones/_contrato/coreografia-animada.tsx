@@ -1,9 +1,12 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { motion, useMotionValueEvent, useSpring, useTransform } from 'motion/react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { Titular } from '../../_componentes/tipografia/Titular'
+import { acotar01 } from '../../_lib/acotar'
 import type { ParDeAnclas } from '../../_lib/motion/anclas'
+import { CURVAS } from '../../_lib/motion/curvas'
 import { perspectivaDeLaEscena, useOrigenDeLaLente } from '../../_lib/motion/lente'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { useProgresoDePatron } from '../../_lib/motion/useProgresoDePatron'
@@ -11,16 +14,21 @@ import { LineasDeTexto } from '../../motion/_componentes/LineasDeTexto'
 import { Pieza } from '../../motion/_componentes/Pieza'
 import { Piezas } from '../../motion/_componentes/Piezas'
 
+import { TRAZOS_DEL_SIGNO } from './canales'
 import type {
   CanalDePiezaProps,
   CanalDePiezasProps,
   CanalDeTitularProps,
+  LlegadaEnCurvaProps,
+  ProgresoAmortiguadoProps,
+  SignoDistintoProps,
   TextoPorLineasProps,
+  TrazoProps,
 } from './canales'
 import type { BloqueProps, PrimitivasDeCoreografia } from './coreografia'
 import { ATRIBUTO_DE_PANEL } from './forma'
 import { MARCA_COREOGRAFIA_DEL_HOME } from './marcaCoreografia'
-import { ANCLA_DEL_PIN, ANCLA_DE_LA_VENTANA_VISIBLE, especificacionDe, inerciaDe } from './bloqueAnimado'
+import { ANCLA_DEL_PIN, ANCLA_DEL_TRAZO, ANCLA_DE_LA_LLEGADA, ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, CORTE_DE_LA_VENTANA_DEL_TRAZO, DESFASE_DE_LAS_BARRAS, LLEGADA_EN_CURVA, PERSECUCION_DEL_SCROLL, especificacionDe, inerciaDe } from './bloqueAnimado'
 
 /**
  * LAS PRIMITIVAS ANIMADAS — el único módulo del home que importa el sistema.
@@ -73,6 +81,9 @@ import { ANCLA_DEL_PIN, ANCLA_DE_LA_VENTANA_VISIBLE, especificacionDe, inerciaDe
 function anclasDe(props: BloqueProps): ParDeAnclas {
   if (props.patron === 'pin') return ANCLA_DEL_PIN
   if (props.rango === 'ventana-visible') return ANCLA_DE_LA_VENTANA_VISIBLE
+  if (props.rango === 'ventana-del-trazo') return ANCLA_DEL_TRAZO
+  if (props.rango === 'ventana-de-la-mascara') return ANCLA_DE_LA_MASCARA
+  if (props.rango === 'llegada-de-la-foto') return ANCLA_DE_LA_LLEGADA
   return PATRONES[props.patron].anclas
 }
 
@@ -272,6 +283,136 @@ function TextoPorLineasAnimado(props: TextoPorLineasProps): React.JSX.Element {
 }
 
 /**
+ * EL TRAZO ANIMADO — la raya se dibuja con el scroll, en los dos sentidos.
+ *
+ * No hay disparo ni estado: `scaleX` es una función del progreso, así que al
+ * volver para arriba la raya se desdibuja por el mismo camino. Los dos tramos
+ * son SECUENCIALES: la ventana se parte en `CORTE_DE_LA_VENTANA_DEL_TRAZO` y el
+ * tachado no empieza hasta que el subrayado llegó a 1.
+ *
+ * El mismo `avance` sale por dos puertas: `scaleX` en la raya y
+ * `--trazo-despinte` en el tramo, que es lo que despinta el texto tachado en la
+ * hoja. Un solo valor, así que no pueden desincronizarse.
+ */
+function TrazoAnimado(props: TrazoProps): React.JSX.Element {
+  const progreso = props.progreso
+  if (progreso === null) throw new Error('Trazo animado sin progreso')
+  const corte = CORTE_DE_LA_VENTANA_DEL_TRAZO
+  const esTachado = props.tipo === 'tachado'
+  const avance = useTransform(progreso, (p) =>
+    CURVAS.principal(acotar01(esTachado ? (p - corte) / (1 - corte) : p / corte)),
+  )
+
+  /**
+   * El despinte viaja por una propiedad personalizada y no por `style` de motion:
+   * quien lo consume es la hoja, que mezcla los DOS tokens de tinta con
+   * `color-mix`. Así el color sigue siendo del sistema y acá no se escribe ninguno.
+   */
+  const tramo = useRef<HTMLSpanElement | null>(null)
+  const escribirDespinte = useCallback((valor: number) => {
+    tramo.current?.style.setProperty('--trazo-despinte', String(valor))
+  }, [])
+  useMotionValueEvent(avance, 'change', escribirDespinte)
+  useEffect(() => escribirDespinte(avance.get()), [avance, escribirDespinte])
+
+  return (
+    <span ref={tramo} data-trazo={props.tipo} className={props.className}>
+      {props.children}
+      <motion.span data-parte="linea" style={{ scaleX: avance }} />
+    </span>
+  )
+}
+
+/**
+ * LA LLEGADA EN CURVA ANIMADA — el camino curvo sale de las dos curvas, no de una
+ * trayectoria escrita.
+ *
+ * `x` recorre con `principal` (power1.out) y `y` con `salida-fuerte` (power4.out):
+ * la vertical frena mucho antes que la horizontal, así que en cada instante el punto
+ * está más arriba de lo que estaría en una recta — y eso, dibujado, es un arco. Las
+ * dos son curvas que el sistema ya declara; ninguna es nueva.
+ *
+ * La escala y el giro van con `principal`, la misma que la horizontal: el enderezado
+ * acompaña al desplazamiento en vez de competir con él.
+ */
+function LlegadaEnCurvaAnimada(props: LlegadaEnCurvaProps): React.JSX.Element {
+  const progreso = props.progreso
+  if (progreso === null) throw new Error('LlegadaEnCurva animada sin progreso')
+  const signo = props.sentido === 'desde-la-izquierda' ? -1 : 1
+  const ejeX = useTransform(progreso, (p) => signo * LLEGADA_EN_CURVA.x * (1 - CURVAS.principal(p)))
+  const ejeY = useTransform(progreso, (p) => LLEGADA_EN_CURVA.y * (1 - CURVAS['salida-fuerte'](p)))
+  const escala = useTransform(
+    progreso,
+    (p) => LLEGADA_EN_CURVA.escala + (1 - LLEGADA_EN_CURVA.escala) * CURVAS.principal(p),
+  )
+  const giro = useTransform(progreso, (p) => signo * LLEGADA_EN_CURVA.giro * (1 - CURVAS.principal(p)))
+  return (
+    <motion.span className={props.className} style={{ x: ejeX, y: ejeY, scale: escala, rotate: giro }}>
+      {props.children}
+    </motion.span>
+  )
+}
+
+/**
+ * EL SIGNO ≠ ANIMADO — cada trazo crece desde SU origen, no se dibuja de punta a punta.
+ *
+ * Las dos barras del «=» nacen en su punto medio y se extienden a los dos lados
+ * a la vez (`scaleX` con el origen en el centro de cada una). La diagonal hace
+ * lo inverso y va PARTIDA en dos: cada mitad nace en su extremo de afuera y
+ * crece hasta encontrarse en el centro (`scale` con el origen en ese extremo).
+ *
+ * Las barras van en la primera mitad de la ventana —con el subrayado, la de
+ * arriba adelantada `DESFASE_DE_LAS_BARRAS`— y la diagonal lleva la MISMA
+ * cuenta del tachado: mismo corte, misma curva, mismo arranque y mismo final.
+ *
+ * `vector-effect: non-scaling-stroke` en la hoja es lo que deja el grosor quieto
+ * mientras el grupo escala, y el remate a ras evita que un trazo en escala cero
+ * deje un punto pintado en el centro.
+ */
+function SignoDistintoAnimado(props: SignoDistintoProps): React.JSX.Element {
+  const progreso = props.progreso
+  if (progreso === null) throw new Error('SignoDistinto animado sin progreso')
+  const corte = CORTE_DE_LA_VENTANA_DEL_TRAZO
+  const tramoDeLaBarra = corte * (1 - DESFASE_DE_LAS_BARRAS)
+  const arriba = useTransform(progreso, (p) => CURVAS.principal(acotar01(p / tramoDeLaBarra)))
+  const abajo = useTransform(progreso, (p) =>
+    CURVAS.principal(acotar01((p - corte * DESFASE_DE_LAS_BARRAS) / tramoDeLaBarra)),
+  )
+  const diagonal = useTransform(progreso, (p) => CURVAS.principal(acotar01((p - corte) / (1 - corte))))
+  const { lado, barras, mitadesDeLaDiagonal: mitades } = TRAZOS_DEL_SIGNO
+  const avances = [arriba, abajo]
+  return (
+    <svg data-signo="distinto" aria-hidden="true" viewBox={`0 0 ${lado} ${lado}`} className={props.className}>
+      {barras.map((t, i) => (
+        <motion.g key={t.clave} data-parte="barra" style={{ originX: t.origenX, originY: t.origenY, scaleX: avances[i] }}>
+          <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+        </motion.g>
+      ))}
+      {mitades.map((t) => (
+        <motion.g key={t.clave} data-parte="diagonal" style={{ originX: t.origenX, originY: t.origenY, scale: diagonal }}>
+          <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+        </motion.g>
+      ))}
+    </svg>
+  )
+}
+
+/**
+ * EL PROGRESO AMORTIGUADO — el scroll mueve el objetivo y el resorte lo persigue.
+ *
+ * `useSpring` sobre el progreso crudo: lo que sale es un progreso que va atrás y
+ * que sigue viajando cuando el scroll se detiene. La calibración está en
+ * `PERSECUCION_DEL_SCROLL` —0,5 s de asentamiento, sin rebote— y vive ahí y no
+ * acá porque es la forma de la persecución y no de esta primitiva.
+ */
+function ProgresoAmortiguadoAnimado(props: ProgresoAmortiguadoProps): React.JSX.Element {
+  const progreso = props.progreso
+  if (progreso === null) throw new Error('ProgresoAmortiguado animado sin progreso')
+  const perseguido = useSpring(progreso, PERSECUCION_DEL_SCROLL)
+  return <>{props.children(perseguido)}</>
+}
+
+/**
  * El juego completo. Es lo que el instalador mete en el contexto, y lo que un
  * instrumento puede pasarle al proveedor para renderizar la rama animada sin
  * navegador ni compuerta.
@@ -282,4 +423,8 @@ export const PRIMITIVAS_ANIMADAS: PrimitivasDeCoreografia = {
   CanalDePiezas: CanalDePiezasAnimado,
   CanalDeTitular: CanalDeTitularAnimado,
   TextoPorLineas: TextoPorLineasAnimado,
+  Trazo: TrazoAnimado,
+  SignoDistinto: SignoDistintoAnimado,
+  ProgresoAmortiguado: ProgresoAmortiguadoAnimado,
+  LlegadaEnCurva: LlegadaEnCurvaAnimada,
 }

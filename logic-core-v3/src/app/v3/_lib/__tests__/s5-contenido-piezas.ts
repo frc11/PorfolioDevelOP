@@ -69,7 +69,9 @@ export function afirmarElPedidoYLasVerdades(marcarQuieto: (indice: number) => st
    */
   const VERDADES: readonly { texto: string; donde: string }[] = [
     ...NOMBRES_REALES.map((texto) => ({ texto, donde: 'trabajos' })),
-    { texto: 'Tucumán', donde: 'quienes-somos' },
+    // ⚠️ «Tucumán» salió de la lista: la etiqueta del lugar se retiró de la composición
+    // por pedido del humano, así que la verdad sigue siendo verdad pero ya no se muestra.
+    // Afirmar que aparece era afirmar una composición que dejó de existir.
   ]
 
   for (const { texto, donde } of VERDADES) {

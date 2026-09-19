@@ -123,6 +123,93 @@ export const ANCLA_DE_LA_VENTANA_VISIBLE: ParDeAnclas = {
 }
 
 /**
+ * EL ANCLA DEL TRAZO — `top 95%` → `top 35%`, la ventana en la que un trazo se
+ * dibuja. Modo pulido: la misma ventana corrida entera hacia arriba. Con
+ * `75% → 10%` el último tramo caía con el titular saliendo por arriba —se
+ * dibujaba donde nadie lo mira—; arrancando al 95% empieza apenas el titular
+ * entra por abajo y termina con él todavía en la mitad de arriba del cuadro.
+ */
+const anclaDelTrazoInicio: Ancla = {
+  declarado: 'top 95%',
+  elemento: LADO_TOPE,
+  viewport: { fraccion: 0.95, px: 0 },
+}
+const anclaDelTrazoFin: Ancla = {
+  declarado: 'top 35%',
+  elemento: LADO_TOPE,
+  viewport: { fraccion: 0.35, px: 0 },
+}
+
+export const ANCLA_DEL_TRAZO: ParDeAnclas = { inicio: anclaDelTrazoInicio, fin: anclaDelTrazoFin }
+
+/** La ventana que estrenó el trazo —`top 80%` → `top 45%`— y que las máscaras de renglón siguen usando: al trazo se le amplió y a ellas no. */
+export const ANCLA_DE_LA_MASCARA: ParDeAnclas = {
+  inicio: { declarado: 'top 80%', elemento: LADO_TOPE, viewport: { fraccion: 0.8, px: 0 } },
+  fin: { declarado: 'top 45%', elemento: LADO_TOPE, viewport: { fraccion: 0.45, px: 0 } },
+}
+
+/**
+ * La llegada de una foto: empieza cuando su borde superior entra por abajo del
+ * cuadro y termina cuando ESE MISMO borde llega al 55% del alto.
+ *
+ * Modo pulido: el fin era `center 55%`, que le sumaba media altura de la pieza
+ * al recorrido (259 px en un retrato a 1920). Con el borde superior el rango es
+ * sólo `0,45 · viewport` y no depende del alto: entra en dos scrolls, que es lo
+ * que hace falta para que el resorte de `ProgresoAmortiguado` se note.
+ */
+export const ANCLA_DE_LA_LLEGADA: ParDeAnclas = {
+  inicio: { declarado: 'top bottom', elemento: LADO_TOPE, viewport: LADO_FONDO },
+  fin: { declarado: 'top 55%', elemento: LADO_TOPE, viewport: { fraccion: 0.55, px: 0 } },
+}
+
+/**
+ * EL RESORTE CON EL QUE UNA PIEZA PERSIGUE AL SCROLL.
+ *
+ * El scroll mueve un OBJETIVO y la pieza lo persigue: al soltar, sigue viajando
+ * y recién ahí se asienta. `duration` es el tiempo de asentamiento —0,5 s, el
+ * medio de los 0,4–0,6 pedidos— y `bounce: 0` lo deja críticamente amortiguado:
+ * llega y para, no se pasa y vuelve.
+ */
+export const PERSECUCION_DEL_SCROLL = { duration: 0.5, bounce: 0 } as const
+
+/**
+ * Dónde se parte la ventana del trazo. Los dos tramos van SECUENCIALES y no
+ * superpuestos: el subrayado ocupa la primera mitad y llega a 1 justo cuando el
+ * tachado arranca. Primero se afirma lo que hacemos y recién después se tacha lo otro.
+ */
+export const CORTE_DE_LA_VENTANA_DEL_TRAZO = 0.5
+
+/** Cuánto se atrasa la barra de abajo del signo respecto de la de arriba, en fracción de la primera mitad. «Apenas antes», no una escalera. */
+export const DESFASE_DE_LAS_BARRAS = 0.15
+
+/**
+ * DE DÓNDE LLEGA UNA FOTO, Y CÓMO. [medido sobre el video de la referencia]
+ *
+ * Arranca lejos —abajo y al costado de su lugar, mucho más chica y bien torcida— y
+ * viaja hasta quedar exactamente donde va. **La curva no se declara: SALE de usar dos
+ * curvas del sistema DISTINTAS para las dos coordenadas.** Con la misma en las dos el
+ * recorrido sería una recta diagonal; la diferencia entre una y otra ES la curvatura, y
+ * por eso no hace falta inventar ninguna curva nueva para tener un camino curvo.
+ *
+ * ⚠️ Los cuatro valores subieron fuerte: con los anteriores —40/80 px, 0,8 y 7°— la
+ * foto llegaba casi puesta y sólo se reacomodaba; el viaje no se leía al 100 % de zoom.
+ * El desplazamiento dejó de derivarse de `ENTRADA_EN_CUADRO_PX` porque ya no es un
+ * umbral de entrada: es la distancia del viaje, y se pidió medida.
+ *
+ * `x` y `giro` llevan SIGNO: cada persona entra desde su lado —el que le deja libre su
+ * mitad de la fila— y el giro acompaña a la dirección en vez de cruzarla.
+ */
+export const LLEGADA_EN_CURVA = {
+  x: 140,
+  y: 280,
+  escala: 0.6,
+  giro: 12,
+} as const
+
+/** Desde qué lado entra una foto. El signo lo aplica la primitiva a `x` y a `giro`. */
+export type SentidoDeLlegada = 'desde-la-izquierda' | 'desde-la-derecha'
+
+/**
  * El cronograma de un patrón con N piezas, en sus valores medidos.
  *
  * La duración APLICADA no es ésta: es `duracionDeclarada + escalonado·(N−1)`, y

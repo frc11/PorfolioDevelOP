@@ -129,6 +129,13 @@ export const ARCHIVOS_DE_INVARIANTE = CARPETAS_DE_SECCION.map((c) => c.invariant
  */
 export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/quienes-somos/quienes-somos-piezas.tsx`,
+  // `marco.tsx` salió de `QuienesSomos.tsx` al pasar las 300 líneas: el mismo corte
+  // que Trabajos y el Hero ya tienen, y por tema — allá la composición de la sección,
+  // acá una pieza con su gesto propio, que no sabe en qué sección la montan.
+  `${RAIZ_DE_SECCIONES}/quienes-somos/marco.tsx`,
+  // `geometria.ts` salió del mismo archivo al entrar el ≠: los números por un lado
+  // y la composición por el otro, igual que en Trabajos y en el Hero.
+  `${RAIZ_DE_SECCIONES}/quienes-somos/geometria.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
   // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
   // `geometria.ts` son los números de la sección —el mismo corte que Servicios

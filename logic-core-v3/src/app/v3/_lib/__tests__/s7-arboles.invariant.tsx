@@ -193,9 +193,11 @@ afirmar(
 )
 
 const partidos = (html: string): number => (html.match(/data-texto-por-lineas="partido"/g) ?? []).length
+// Modo pulido: ninguna sección consume ya el divisor —el titular de quienes-somos era el
+// último y pasó a tramos con trazo—, así que queda la mitad que sigue cuidando algo.
 afirmar(
-  partidos(marcadoQuieto) === 0 && partidos(marcadoAnimado) > 0,
-  `y el divisor de líneas parte ${partidos(marcadoAnimado)} titular(es) sólo en la animada`,
+  partidos(marcadoQuieto) === 0,
+  `y el divisor de líneas no parte un solo titular en la quieta (${partidos(marcadoAnimado)} en la animada)`,
 )
 
 controlPositivo(

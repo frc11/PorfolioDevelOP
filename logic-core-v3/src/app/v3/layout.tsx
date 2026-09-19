@@ -24,6 +24,7 @@ import './_estilos/cursor.css'
 import './_estilos/pie.css'
 import './_estilos/foco.css'
 import './_estilos/deslizamiento.css'
+import './_estilos/trazo.css'
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

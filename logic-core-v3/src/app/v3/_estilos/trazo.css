@@ -1,0 +1,91 @@
+/* =========================================================================
+ * EL TRAZO QUE SE DIBUJA CON EL SCROLL
+ * =========================================================================
+ * Reusa el ASPECTO del subrayado del CTA —grosor, separación de la línea de
+ * base, filete recto— y NO su mecanismo: aquel es un rollover con `transition`,
+ * éste se dibuja ligado a la posición de scroll y se desdibuja al volver.
+ *
+ * La línea es un elemento propio y no un `::after` —al revés que el CTA— por
+ * una razón concreta: la rama animada le escribe `scaleX` desde `motion`, y a
+ * un pseudo-elemento no se le puede escribir desde JS. En reposo vale 1, así
+ * que la rama quieta y `prefers-reduced-motion` la muestran YA DIBUJADA sin
+ * escribir una sola transformada en el marcado.
+ * ========================================================================= */
+
+[data-v3] [data-trazo] {
+  position: relative;
+  /* El tramo no se parte en dos renglones: la línea cubre UNA caja. */
+  display: inline-block;
+  white-space: nowrap;
+}
+
+[data-v3] [data-trazo] [data-parte="linea"] {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  /* El grosor del subrayado del CTA: tres filetes. */
+  block-size: calc(var(--border-hairline) * 3);
+  /* Remate apenas redondeado. Sin glow, sin blur y sin sombra: sobre papel claro no funcionan. */
+  border-radius: var(--border-hairline);
+  /* Un tono más claro que la letra, que es `--color-tinta`. */
+  background-color: var(--color-tinta-media);
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* La separación de la línea de base es la del CTA: `--spacing-1`. */
+[data-v3] [data-trazo="subrayado"] [data-parte="linea"] {
+  inset-block-end: calc(var(--spacing-1) * -1);
+}
+
+/* El tachado se pasa del texto en las dos puntas: `--spacing-1`, 4 px por lado. */
+[data-v3] [data-trazo="tachado"] [data-parte="linea"] {
+  inset-inline: calc(var(--spacing-1) * -1);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+}
+
+/* El tramo tachado se DESPINTA con el mismo progreso con el que se tacha. El
+   fallback del var vale 1, así que en la rama quieta —y con
+   `prefers-reduced-motion`— arranca ya despintado y sin animación. */
+[data-v3] [data-trazo="tachado"] {
+  color: color-mix(
+    in srgb,
+    var(--color-tinta-media),
+    var(--color-tinta) calc((1 - var(--trazo-despinte, 1)) * 100%)
+  );
+}
+
+/* =========================================================================
+ * EL SIGNO ≠ — tres trazos, con la MISMA raya del subrayado.
+ * ========================================================================= */
+
+/* El alto son dos renglones del titular y lo declara la sección, que es donde
+   vive el cuerpo del que se derivan. */
+[data-v3] [data-signo="distinto"] {
+  display: block;
+  block-size: var(--signo-alto);
+  aspect-ratio: 1;
+  /* Centrado en el ancho de la columna de texto, que es la medida del titular. */
+  margin-inline: auto;
+  overflow: visible;
+}
+
+/* `non-scaling-stroke`: el grosor queda quieto mientras el grupo escala. Y el
+   remate va a ras y no redondeado: con escala cero un remate redondo deja un
+   punto pintado justo donde el trazo todavía no nació. */
+[data-v3] [data-signo="distinto"] line {
+  fill: none;
+  stroke-width: calc(var(--border-hairline) * 4.5);
+  stroke-linecap: butt;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Las dos barras del «=» van en tinta plena; la diagonal se queda en el tono del subrayado. */
+[data-v3] [data-signo="distinto"] [data-parte="barra"] line {
+  stroke: var(--color-tinta);
+}
+
+[data-v3] [data-signo="distinto"] [data-parte="diagonal"] line {
+  stroke: var(--color-tinta-media);
+}

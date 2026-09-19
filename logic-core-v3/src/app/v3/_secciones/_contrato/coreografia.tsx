@@ -9,7 +9,11 @@ import type {
   CanalDePiezaProps,
   CanalDePiezasProps,
   CanalDeTitularProps,
+  LlegadaEnCurvaProps,
+  ProgresoAmortiguadoProps,
+  SignoDistintoProps,
   TextoPorLineasProps,
+  TrazoProps,
 } from './canales'
 import { MARCA_HOME_QUIETO } from './marcaHomeQuieto'
 
@@ -39,6 +43,10 @@ export interface PrimitivasDeCoreografia {
   readonly CanalDePiezas: (props: CanalDePiezasProps) => React.JSX.Element
   readonly CanalDeTitular: (props: CanalDeTitularProps) => React.JSX.Element
   readonly TextoPorLineas: (props: TextoPorLineasProps) => React.JSX.Element
+  readonly Trazo: (props: TrazoProps) => React.JSX.Element
+  readonly LlegadaEnCurva: (props: LlegadaEnCurvaProps) => React.JSX.Element
+  readonly SignoDistinto: (props: SignoDistintoProps) => React.JSX.Element
+  readonly ProgresoAmortiguado: (props: ProgresoAmortiguadoProps) => React.JSX.Element
 }
 
 const Contexto = createContext<PrimitivasDeCoreografia | null>(null)
@@ -157,6 +165,8 @@ export type AnclajeDelBloque = 'propia' | 'seccion'
  *                        patrón por patrón.
  *   `'ventana-visible'`  `ANCLA_DE_LA_VENTANA_VISIBLE`: arranca cuando la caja
  *                        entra en cuadro y llega antes de que salga.
+ *   `'ventana-del-trazo'` `ANCLA_DEL_TRAZO`: de `top 80%` a `top 45%` del
+ *                        viewport — la ventana en la que se dibuja un `Trazo`.
  *
  * ── Por qué es una propiedad APARTE de `anclaje`, y no un valor suyo ──────
  *
@@ -186,7 +196,14 @@ export type AnclajeDelBloque = 'propia' | 'seccion'
  * número— vive en `_invariantes/s19-sincronia.invariant.ts`, no en un
  * comentario.
  */
-export type RangoDelBloque = 'del-patron' | 'ventana-visible'
+export type RangoDelBloque =
+  | 'del-patron'
+  | 'ventana-visible'
+  | 'ventana-del-trazo'
+  /** `ANCLA_DE_LA_MASCARA`: la ventana vieja del trazo (`top 80%` → `top 45%`), que las máscaras de renglón conservan. */
+  | 'ventana-de-la-mascara'
+  /** `ANCLA_DE_LA_LLEGADA`: de `top bottom` a `center 55%` — el viaje entero con la pieza a la vista. */
+  | 'llegada-de-la-foto'
 
 export interface BloqueProps {
   /** Qué mide. Por NOMBRE: ningún objeto del sistema cruza el seam. */

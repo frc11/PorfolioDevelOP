@@ -35,13 +35,13 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**46 cosas pendientes** en las ocho secciones, de las cuales **33** se ven hoy en la pantalla como un marcador y 13 son prosa de relleno que no se ve como agujero.
+**50 cosas pendientes** en las ocho secciones, de las cuales **36** se ven hoy en la pantalla como un marcador y 14 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
 |---|---:|
 | 01 · Hero | 2 |
-| 02 · Quiénes somos | 9 |
+| 02 · Quiénes somos | 13 |
 | 03 · Números | 7 |
 | 04 · Trabajos | 6 |
 | 05 · Servicios | 9 |
@@ -56,13 +56,15 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 | quién | cuántas |
 |---|---:|
-| Franco (o un cliente) | 17 |
-| Valentino | 25 |
+| Franco (o un cliente) | 19 |
+| Valentino | 27 |
 | Una decisión, antes que un dato | 4 |
 
-### Franco (o un cliente) — 17
+### Franco (o un cliente) — 19
 
-- **02 · Quiénes somos** · `personas[0].enUnProyecto` — Qué hace Franco, concretamente, adentro de un proyecto.
+- **02 · Quiénes somos** · `personas[0].seria.marcador` — El retrato SERIO de Franco: es el que se ve en reposo.
+- **02 · Quiénes somos** · `personas[0].suelta.marcador` — El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.
+- **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
 - **03 · Números** · `cifras[0].valor` — Cuántos proyectos se entregaron y se cerraron, contados de una lista real. Si el rótulo no nombra un dato que exista, cambiá el rótulo o sacá la casilla entera.
 - **03 · Números** · `cifras[1].valor` — Cuántos clientes están activos hoy, con el corte de "activo" que uses vos.
 - **03 · Números** · `cifras[3].valor` — Cuánto se tarda en contestar el primer mensaje, medido sobre los mensajes que entraron de verdad y no sobre la intención de contestar rápido.
@@ -80,18 +82,20 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
-### Valentino — 25
+### Valentino — 27
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
 - **02 · Quiénes somos** · `titular` — La frase que abre la sección. Una idea, dos líneas, dicha como la decís vos.
 - **02 · Quiénes somos** · `bajada` — Qué es develOP, en tres o cuatro renglones. Sin plazos ni porcentajes.
-- **02 · Quiénes somos** · `comoTrabajamos` — Cómo trabajan: desde dónde, con quién y con qué forma. Mismo largo.
-- **02 · Quiénes somos** · `equipo.marcador` — La foto de los dos, en el lugar donde trabajan. Es la única foto de persona del sitio.
-- **02 · Quiénes somos** · `equipo.alt` — Qué se ve en la foto del equipo, para quien no la puede ver.
-- **02 · Quiénes somos** · `equipo.pie` — El epígrafe de la foto. Un renglón.
-- **02 · Quiénes somos** · `rotuloDelPedido` — Cómo se titula la línea que describe a cada uno dentro de un proyecto.
-- **02 · Quiénes somos** · `personas[1].enUnProyecto` — Qué hace Valentino, concretamente, adentro de un proyecto.
+- **02 · Quiénes somos** · `tituloDelEquipo` — Cómo se titula el bloque del equipo. Va en tipografía gigante, así que dos palabras cortas.
+- **02 · Quiénes somos** · `personas[1].seria.marcador` — El retrato SERIO de Valentino: es el que se ve en reposo.
+- **02 · Quiénes somos** · `personas[1].suelta.marcador` — El retrato DESCONTRACTURADO de Valentino: aparece al pasar el mouse, encima del serio.
+- **02 · Quiénes somos** · `personas[1].descripcion` — Cómo es Valentino y de qué se ocupa. Se lee sobre la foto, así que corto.
+- **02 · Quiénes somos** · `equipo.seria.marcador` — La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.
+- **02 · Quiénes somos** · `equipo.suelta.marcador` — La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.
+- **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
+- **02 · Quiénes somos** · `equipo.pie` — El epígrafe de la foto del equipo. Un renglón.
 - **03 · Números** · `titulo` — El título de la sección, dos o tres palabras. El que está puesto es relleno.
 - **03 · Números** · `entrada` — La bajada, una o dos líneas: qué mira develOP y por qué son pocos números.
 - **04 · Trabajos** · `titular` — La frase que abre la sección. Una idea, una línea, dicha como la decís vos.
@@ -145,13 +149,17 @@ Se edita en `src/app/v3/_secciones/quienes-somos/contenido.ts`.
 |---|---|---|---|---|
 | *(prosa)* | `titular` | Valentino | La frase que abre la sección. Una idea, dos líneas, dicha como la decís vos. | Dos líneas, ~110 caracteres. Texto plano. |
 | *(prosa)* | `bajada` | Valentino | Qué es develOP, en tres o cuatro renglones. Sin plazos ni porcentajes. | Tres o cuatro renglones, ~280 caracteres. Texto plano. |
-| *(prosa)* | `comoTrabajamos` | Valentino | Cómo trabajan: desde dónde, con quién y con qué forma. Mismo largo. | Tres o cuatro renglones, ~280 caracteres. Texto plano. |
-| `[FOTO DEL EQUIPO]` | `equipo.marcador` | Valentino | La foto de los dos, en el lugar donde trabajan. Es la única foto de persona del sitio. | JPG o WEBP, 1600 × 1000 px (8:5), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`. |
-| *(prosa)* | `equipo.alt` | Valentino | Qué se ve en la foto del equipo, para quien no la puede ver. | Un renglón, ~90 caracteres. Texto plano. |
-| *(prosa)* | `equipo.pie` | Valentino | El epígrafe de la foto. Un renglón. | Un renglón, ~90 caracteres. Texto plano. |
-| *(prosa)* | `rotuloDelPedido` | Valentino | Cómo se titula la línea que describe a cada uno dentro de un proyecto. | Tres o cuatro palabras. Texto plano. |
-| `[TEXTO]` | `personas[0].enUnProyecto` | Franco (o un cliente) | Qué hace Franco, concretamente, adentro de un proyecto. | Una frase corta, ~60 caracteres. Texto plano. |
-| `[TEXTO]` | `personas[1].enUnProyecto` | Valentino | Qué hace Valentino, concretamente, adentro de un proyecto. | Una frase corta, ~60 caracteres. Texto plano. |
+| *(prosa)* | `tituloDelEquipo` | Valentino | Cómo se titula el bloque del equipo. Va en tipografía gigante, así que dos palabras cortas. | Dos palabras. Texto plano. |
+| `[FOTO]` | `personas[0].seria.marcador` | Franco (o un cliente) | El retrato SERIO de Franco: es el que se ve en reposo. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. |
+| `[FOTO]` | `personas[0].suelta.marcador` | Franco (o un cliente) | El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio. |
+| *(prosa)* | `personas[0].descripcion` | Franco (o un cliente) | Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto. | Una o dos frases, ~90 caracteres. Texto plano. |
+| `[FOTO]` | `personas[1].seria.marcador` | Valentino | El retrato SERIO de Valentino: es el que se ve en reposo. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. |
+| `[FOTO]` | `personas[1].suelta.marcador` | Valentino | El retrato DESCONTRACTURADO de Valentino: aparece al pasar el mouse, encima del serio. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio. |
+| *(prosa)* | `personas[1].descripcion` | Valentino | Cómo es Valentino y de qué se ocupa. Se lee sobre la foto, así que corto. | Una o dos frases, ~90 caracteres. Texto plano. |
+| `[FOTO DEL EQUIPO]` | `equipo.seria.marcador` | Valentino | La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`. |
+| `[FOTO]` | `equipo.suelta.marcador` | Valentino | La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que la seria. |
+| *(prosa)* | `equipo.descripcion` | Valentino | Cómo empezó el equipo. Se lee sobre la foto, así que corto. | Dos o tres frases, ~150 caracteres. Texto plano. |
+| *(prosa)* | `equipo.pie` | Valentino | El epígrafe de la foto del equipo. Un renglón. | Un renglón, ~90 caracteres. Texto plano. |
 
 
 ## 03 · Números

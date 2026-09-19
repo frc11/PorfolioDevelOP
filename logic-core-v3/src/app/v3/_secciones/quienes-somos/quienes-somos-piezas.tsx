@@ -106,7 +106,8 @@ export const PEDIDOS = marcadoresPedidos(SIN_LLAVE)
 export const todosSeVen = (html: string): boolean => PEDIDOS.every((m) => html.includes(m))
 
 /** Lo verdadero declarado por el sprint: tiene que estar escrito, literal. */
-export const LITERALES = ['Franco', 'Valentino', 'Tucumán']
+// «Tucumán» salió con la etiqueta del lugar: lo verdadero que queda son los nombres.
+export const LITERALES = ['Franco', 'Valentino']
 
 /**
  * El `sizes` sobre el marcado, no sobre la intención. Con `fuente={null}` la
@@ -118,9 +119,9 @@ export const LITERALES = ['Franco', 'Valentino', 'Tucumán']
  */
 export const conFoto = renderToStaticMarkup(
   <MarcoDeMedio
-    marcador={CONTENIDO.equipo.marcador}
+    marcador={CONTENIDO.equipo.seria.marcador}
     fuente="/prueba-de-invariante.jpg"
-    alt={CONTENIDO.equipo.alt}
+    alt={CONTENIDO.equipo.seria.leyenda}
     ancho={GEOMETRIA.foto.ancho}
     alto={GEOMETRIA.foto.alto}
     sizes={SIZES_DE_LA_FOTO}

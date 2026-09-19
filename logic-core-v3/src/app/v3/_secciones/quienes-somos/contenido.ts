@@ -47,7 +47,6 @@
  */
 
 import type { IdDePatron } from '../../_lib/motion/patrones'
-import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -68,24 +67,69 @@ import type { EntradaDePedido } from '../_contrato/pedido'
  */
 export const ROTULO_DE_SECCION_RETIRADO = 'Quiénes somos'
 
-export const CONTENIDO = {
-  /** [verdad] Primera mitad de `UBICACION` del sitio vivo. */
-  lugar: 'Tucumán, Argentina',
+/**
+ * LOS TRAMOS DEL TITULAR, AGRUPADOS POR RENGLÓN. Dos llevan raya —`subrayado` y
+ * `tachado`— y el resto es el texto que los une.
+ *
+ * ⚠️ **El corte pasó a ser DECLARADO, y no cambia dónde cae.** La máscara del
+ * titular es ahora por renglón —cada uno sale de SU línea, no del piso del
+ * bloque— y para eso cada renglón tiene que ser su propio elemento: una caja que
+ * recorta no puede adivinar dónde el navegador va a partir una sola cadena. El
+ * corte declarado cae exactamente donde caía el natural, porque la caja del
+ * titular se mide en `ch` y el `ch` escala con la letra: la proporción entre la
+ * frase y su caja es la misma a cualquier ancho, así que la partición ya era la
+ * misma en todos lados. Lo que se gana es que ahora P1 puede escalonar los dos.
+ *
+ * Va AFUERA de `CONTENIDO` a propósito: `textosDe` lo contaría como varios
+ * textos y `CONTENIDO.titular` —que es el que el pedido nombra y el que tiene
+ * que leerse entero— se arma abajo concatenándolos, así que la frase y sus
+ * tramos no pueden desincronizarse.
+ */
+export const TRAMOS_DEL_TITULAR = [
+  { antes: 'Queremos hacer', marcado: 'algo distinto', tipo: 'subrayado', cierre: ',' },
+  { antes: 'no', marcado: 'lo mismo de siempre', tipo: 'tachado', cierre: '' },
+] as const
 
-  /** [relleno] El h2. Dos líneas, que es el largo que P1 sabe coreografiar. */
-  titular: 'Somos dos personas y las dos trabajan en tu proyecto.',
+export const CONTENIDO = {
+  /** [relleno] El h2, armado con sus renglones: es el nombre accesible de la sección. */
+  titular: TRAMOS_DEL_TITULAR.map((r) => `${r.antes} ${r.marcado}${r.cierre}`).join(' '),
 
   /** [relleno] Qué es la agencia. */
   bajada:
-    'develOP es una agencia chica, y eso es una decisión y no una etapa. ' +
-    'No hay un ejecutivo de cuentas entre lo que pedís y quien lo construye: ' +
-    'lo que hablás con nosotros es lo que se escribe.',
+    'develOP es una agencia de software innovadora que viene a plantar bandera ' +
+    'en el marco de la innovación. Estamos cansados de las mismas páginas de ' +
+    'siempre, los mismos productos sencillos. Nuestro estándar apunta a ' +
+    'acercarse a la perfección de un producto.',
 
-  /** [relleno] De dónde es y cómo trabaja. */
-  comoTrabajamos:
-    'Trabajamos desde Tucumán, con clientes de todo el país y en remoto. ' +
-    'El relevamiento, la construcción y la entrega los hace la misma gente de ' +
-    'punta a punta, así que nada se pierde en el pase de una mano a otra.',
+  /** [relleno] El rótulo del bloque, en tipografía gigante: su tamaño sale del ancho. */
+  tituloDelEquipo: 'El equipo',
+
+  /**
+   * [verdad los nombres] Las dos personas. Cada una pide DOS tomas —la seria,
+   * que es la de reposo, y la descontracturada, que entra en el hover— y por eso
+   * hay dos leyendas distintas: con la misma se vería el intercambio como un
+   * parpadeo y no se podría afirmar que cambió la imagen.
+   */
+  personas: [
+    {
+      nombre: 'Franco',
+      /** [verdad] El mismo rol que publica el sitio vivo. Vuelve como primera parte del hover. */
+      rol: 'Estrategia · Comercial · Planificación',
+      seria: { marcador: '[FOTO]', leyenda: 'Franco, retrato serio' },
+      suelta: { marcador: '[FOTO]', leyenda: 'Franco, retrato descontracturado' },
+      /** [relleno] Lo que se lee sobre la foto en el hover, después del puesto. */
+      descripcion: 'Enfocado, creativo, perfeccionista. Encargado de toda la estructura de develOP.',
+    },
+    {
+      nombre: 'Valentino',
+      /** [verdad] El mismo rol que publica el sitio vivo. Vuelve como primera parte del hover. */
+      rol: 'Ejecución técnica',
+      seria: { marcador: '[FOTO]', leyenda: 'Valentino, retrato serio' },
+      suelta: { marcador: '[FOTO]', leyenda: 'Valentino, retrato descontracturado' },
+      /** [relleno] Lo que se lee sobre la foto en el hover, después del puesto. */
+      descripcion: 'Obsesivo, curioso, inconformista. Escribe el sistema, lo pone a andar y lo mantiene.',
+    },
+  ],
 
   equipo: {
     /**
@@ -94,7 +138,8 @@ export const CONTENIDO = {
      * pedido a Franco, y un marcador que sólo viviera en el `.tsx` no entraría
      * en esa lista. El componente se lo pasa a `MarcoDeMedio` desde acá.
      */
-    marcador: '[FOTO DEL EQUIPO]',
+    seria: { marcador: '[FOTO DEL EQUIPO]', leyenda: 'Franco y Valentino, juntos, en el lugar donde trabajan' },
+    suelta: { marcador: '[FOTO]', leyenda: 'Franco y Valentino, fuera del estudio' },
     /**
      * ⚠️ **B12 §4.3 · EL PLACEHOLDER, no la foto.** Es un archivo PROPIO
      * —generado por `scripts-b12/placeholders.ts`, rayado y grano en escala de
@@ -102,37 +147,18 @@ export const CONTENIDO = {
      * que la composición y la carga se puedan juzgar. Se ve como lo que es y el
      * marcador sigue escrito encima. El día de la foto, esta ruta cambia y
      * `provisional` se va. Ninguna imagen de terceros: regla 6.
+     *
+     * Lo comparten los SEIS huecos: el archivo es el mismo rayado y lo que
+     * distingue a cada toma es su leyenda.
      */
     fuente: '/placeholders/equipo.png',
-    /** [relleno] Describe lo que va a haber. Va al `alt` y al nombre accesible. */
-    alt: 'Franco y Valentino, juntos, en el lugar donde trabajan.',
-    /** [relleno] El epígrafe. */
-    pie: 'Los dos, en Tucumán. No hay un tercero al que derivarle el trabajo.',
+    /** [relleno] Lo que se lee sobre la foto en el hover. */
+    descripcion:
+      'Nos conocimos en el colegio. Siempre tuvimos el sueño de estudiar esta ' +
+      'carrera y, ya con oficio, decidimos emprender juntos.',
+    /** [relleno] El epígrafe, debajo de la foto. */
+    pie: 'Franco y Valentino, el equipo detrás de esta agencia.',
   },
-
-  /**
-   * [relleno] El rótulo del hueco que queda al lado de cada rol. Sin él,
-   * `[TEXTO]` sería un corchete suelto en la pantalla y en el lector de
-   * pantalla: el marcador dice que FALTA algo, el rótulo dice QUÉ falta.
-   */
-  rotuloDelPedido: 'Qué hace en un proyecto',
-
-  /**
-   * [verdad] Las dos personas, con los nombres y los roles publicados hoy.
-   * `enUnProyecto` es lo único que no sabemos, y va declarado ausente.
-   */
-  personas: [
-    {
-      nombre: 'Franco',
-      rol: 'Estrategia · Comercial · Planificación',
-      enUnProyecto: conLlave(INVENTOS.equipoFranco),
-    },
-    {
-      nombre: 'Valentino',
-      rol: 'Ejecución técnica',
-      enUnProyecto: conLlave(INVENTOS.equipoValentino),
-    },
-  ],
 } as const
 
 /**
@@ -165,60 +191,92 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     formato: 'Tres o cuatro renglones, ~280 caracteres. Texto plano.',
   },
   {
-    ruta: 'comoTrabajamos',
+    ruta: 'tituloDelEquipo',
     clase: 'prosa',
     marcador: null,
     quienLoTrae: 'valentino',
-    que: 'Cómo trabajan: desde dónde, con quién y con qué forma. Mismo largo.',
-    formato: 'Tres o cuatro renglones, ~280 caracteres. Texto plano.',
+    que: 'Cómo se titula el bloque del equipo. Va en tipografía gigante, así que dos palabras cortas.',
+    formato: 'Dos palabras. Texto plano.',
   },
   {
-    ruta: 'equipo.marcador',
+    ruta: 'personas[0].seria.marcador',
+    clase: 'foto',
+    marcador: '[FOTO]',
+    quienLoTrae: 'franco',
+    que: 'El retrato SERIO de Franco: es el que se ve en reposo.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal.',
+  },
+  {
+    ruta: 'personas[0].suelta.marcador',
+    clase: 'foto',
+    marcador: '[FOTO]',
+    quienLoTrae: 'franco',
+    que: 'El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio.',
+  },
+  {
+    ruta: 'personas[0].descripcion',
+    clase: 'prosa',
+    marcador: null,
+    quienLoTrae: 'franco',
+    que: 'Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.',
+    formato: 'Una o dos frases, ~90 caracteres. Texto plano.',
+  },
+  {
+    ruta: 'personas[1].seria.marcador',
+    clase: 'foto',
+    marcador: '[FOTO]',
+    quienLoTrae: 'valentino',
+    que: 'El retrato SERIO de Valentino: es el que se ve en reposo.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal.',
+  },
+  {
+    ruta: 'personas[1].suelta.marcador',
+    clase: 'foto',
+    marcador: '[FOTO]',
+    quienLoTrae: 'valentino',
+    que: 'El retrato DESCONTRACTURADO de Valentino: aparece al pasar el mouse, encima del serio.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio.',
+  },
+  {
+    ruta: 'personas[1].descripcion',
+    clase: 'prosa',
+    marcador: null,
+    quienLoTrae: 'valentino',
+    que: 'Cómo es Valentino y de qué se ocupa. Se lee sobre la foto, así que corto.',
+    formato: 'Una o dos frases, ~90 caracteres. Texto plano.',
+  },
+  {
+    ruta: 'equipo.seria.marcador',
     clase: 'foto',
     marcador: '[FOTO DEL EQUIPO]',
     quienLoTrae: 'valentino',
-    que: 'La foto de los dos, en el lugar donde trabajan. Es la única foto de persona del sitio.',
-    formato: 'JPG o WEBP, 1600 × 1000 px (8:5), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`.',
+    que: 'La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`.',
   },
   {
-    ruta: 'equipo.alt',
+    ruta: 'equipo.suelta.marcador',
+    clase: 'foto',
+    marcador: '[FOTO]',
+    quienLoTrae: 'valentino',
+    que: 'La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.',
+    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que la seria.',
+  },
+  {
+    ruta: 'equipo.descripcion',
     clase: 'prosa',
     marcador: null,
     quienLoTrae: 'valentino',
-    que: 'Qué se ve en la foto del equipo, para quien no la puede ver.',
-    formato: 'Un renglón, ~90 caracteres. Texto plano.',
+    que: 'Cómo empezó el equipo. Se lee sobre la foto, así que corto.',
+    formato: 'Dos o tres frases, ~150 caracteres. Texto plano.',
   },
   {
     ruta: 'equipo.pie',
     clase: 'prosa',
     marcador: null,
     quienLoTrae: 'valentino',
-    que: 'El epígrafe de la foto. Un renglón.',
+    que: 'El epígrafe de la foto del equipo. Un renglón.',
     formato: 'Un renglón, ~90 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'rotuloDelPedido',
-    clase: 'prosa',
-    marcador: null,
-    quienLoTrae: 'valentino',
-    que: 'Cómo se titula la línea que describe a cada uno dentro de un proyecto.',
-    formato: 'Tres o cuatro palabras. Texto plano.',
-  },
-  {
-    ruta: 'personas[0].enUnProyecto',
-    clase: 'prosa',
-    marcador: '[TEXTO]',
-    quienLoTrae: 'franco',
-    que: 'Qué hace Franco, concretamente, adentro de un proyecto.',
-    formato: 'Una frase corta, ~60 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'personas[1].enUnProyecto',
-    clase: 'prosa',
-    marcador: '[TEXTO]',
-    quienLoTrae: 'valentino',
-    que: 'Qué hace Valentino, concretamente, adentro de un proyecto.',
-    formato: 'Una frase corta, ~60 caracteres. Texto plano.',
   },
 ]
 

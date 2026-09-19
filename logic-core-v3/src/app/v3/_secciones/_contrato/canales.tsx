@@ -207,3 +207,159 @@ export function TextoPorLineas(props: TextoPorLineasProps): React.JSX.Element {
  * cambiar.
  */
 export const ATRIBUTO_TEXTO_POR_LINEAS = 'data-texto-por-lineas'
+
+export interface LlegadaEnCurvaProps {
+  readonly progreso: Progreso
+  /** Desde qué lado entra. Sin declararlo, entra desde la derecha. */
+  readonly sentido?: 'desde-la-izquierda' | 'desde-la-derecha'
+  readonly className?: string
+  readonly children: ReactNode
+}
+
+/**
+ * LA LLEGADA EN CURVA — una foto que entra desde abajo y a la derecha, más chica
+ * y torcida, y viaja en curva hasta su lugar mientras crece y se endereza.
+ *
+ * ── Scrubbeada, y esta vez a propósito ────────────────────────────────────
+ *
+ * Va atada al scroll y no a un umbral: el usuario que vuelve para arriba ve la
+ * foto DESHACER el camino por la misma curva. Por eso toma `progreso` —el mismo
+ * `MotionValue` que mueve al resto del sitio, desde `useProgresoDePatron`— y no
+ * un `whileInView`. Lo que hace que se PERCIBA, y que la versión anterior no
+ * tenía, es la ventana: con el ancla de la mitad del cuadro el recorrido entero
+ * cabe en un tercio de pantalla, no en `alto + 160` px de scroll.
+ *
+ * Los cuatro valores y la razón de las dos curvas están en `LLEGADA_EN_CURVA`.
+ *
+ * Con `progreso === null` —abajo de 1025 y con `prefers-reduced-motion`— no se
+ * monta nada: la foto sale en su lugar, como el resto de los canales.
+ */
+export function LlegadaEnCurva(props: LlegadaEnCurvaProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null && props.progreso !== null) return <primitivas.LlegadaEnCurva {...props} />
+  return <span className={props.className}>{props.children}</span>
+}
+
+/** Qué se dibuja sobre el tramo: la raya debajo, o la raya que lo tacha. */
+export type TipoDeTrazo = 'subrayado' | 'tachado'
+
+export interface TrazoProps {
+  readonly progreso: Progreso
+  readonly tipo: TipoDeTrazo
+  /** El peso del tramo. La raya es del sistema; el peso lo decide la sección. */
+  readonly className?: string
+  /** El tramo de texto que lleva la raya. */
+  readonly children: ReactNode
+}
+
+/**
+ * UN TRAMO DE TEXTO CON SU RAYA, dibujada por el scroll.
+ *
+ * El aspecto vive en `_estilos/trazo.css` y la raya es un elemento propio, no
+ * un pseudo-elemento: la rama animada le escribe `scaleX` y a un
+ * pseudo-elemento no se le escribe desde JS.
+ *
+ * **La rama quieta la muestra YA DIBUJADA y sin una transformada en el
+ * marcado** —`scaleX(1)` lo pone la hoja—, que es lo que hace que
+ * `prefers-reduced-motion` no necesite un tercer camino: con la preferencia
+ * puesta la compuerta no instala la coreografía y acá se cae en este mismo
+ * árbol.
+ */
+export function Trazo(props: TrazoProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null && props.progreso !== null) return <primitivas.Trazo {...props} />
+  return (
+    <span data-trazo={props.tipo} className={props.className}>
+      {props.children}
+      <span data-parte="linea" />
+    </span>
+  )
+}
+
+/**
+ * EL SIGNO ≠ — tres trazos, no el carácter de la fuente.
+ *
+ * Va como SVG y no como glifo porque los tres trazos se dibujan por separado y
+ * en dos tiempos: las dos barras con el subrayado, la diagonal con el tachado.
+ * La caja es cuadrada y el alto lo pone quien lo monta.
+ */
+export const TRAZOS_DEL_SIGNO = {
+  /** El lado de la caja, en unidades de usuario. El trazo NO escala con ella: lo fija `vector-effect`. */
+  lado: 100,
+  /**
+   * El origen de cada trazo va en FRACCIONES de su propia caja y no en unidades
+   * del `viewBox`: `motion` fuerza `transform-box: fill-box` en un SVG y pisa
+   * cualquier `transform-origin` que se le escriba, así que el único origen que
+   * respeta es el suyo (`originX` / `originY`).
+   */
+  /** Las dos barras del «=». Nacen en su punto medio —el centro de su caja— y se extienden a los dos lados a la vez. */
+  barras: [
+    { clave: 'arriba', origenX: 0.5, origenY: 0.5, x1: 8, y1: 38, x2: 92, y2: 38 },
+    { clave: 'abajo', origenX: 0.5, origenY: 0.5, x1: 8, y1: 62, x2: 92, y2: 62 },
+  ],
+  /** La diagonal, PARTIDA: cada mitad nace en su extremo de AFUERA —una esquina de su caja— y crece hasta encontrarse en el centro. */
+  mitadesDeLaDiagonal: [
+    { clave: 'baja', origenX: 0, origenY: 1, x1: 24, y1: 84, x2: 50, y2: 50 },
+    { clave: 'alta', origenX: 1, origenY: 0, x1: 76, y1: 16, x2: 50, y2: 50 },
+  ],
+} as const
+
+export interface SignoDistintoProps {
+  readonly progreso: Progreso
+  readonly className?: string
+}
+
+/**
+ * El signo con su animación de dibujado, atado al MISMO progreso del trazo del
+ * titular. La rama quieta —y `prefers-reduced-motion`— lo muestra ya dibujado,
+ * sin un solo `stroke-dashoffset` en el marcado.
+ */
+export function SignoDistinto(props: SignoDistintoProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null && props.progreso !== null) return <primitivas.SignoDistinto {...props} />
+  const { lado, barras, mitadesDeLaDiagonal: mitades } = TRAZOS_DEL_SIGNO
+  return (
+    <svg
+      data-signo="distinto"
+      aria-hidden="true"
+      viewBox={`0 0 ${lado} ${lado}`}
+      className={props.className}
+    >
+      {barras.map((t) => (
+        <g key={t.clave} data-parte="barra">
+          <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+        </g>
+      ))}
+      {mitades.map((t) => (
+        <g key={t.clave} data-parte="diagonal">
+          <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+/**
+ * EL PROGRESO QUE PERSIGUE AL SCROLL — la primitiva de la persecución.
+ *
+ * Una transformación atada al scroll es una FUNCIÓN del scroll: se frena cuando
+ * el dedo se frena. Acá el scroll mueve un OBJETIVO y la pieza lo persigue con
+ * retardo, así que al soltar sigue viajando y recién ahí se asienta. Es lo que
+ * hace que en dos scrolls se vea todo el movimiento en vez de un pedazo.
+ *
+ * Va como primitiva del seam y no adentro de una foto **porque es un
+ * transformador de progreso y no un gesto**: cualquier canal puede envolverse
+ * en ella. La rama quieta entrega `null`, que es lo mismo que entrega un bloque
+ * sin coreografía — abajo de 1025 y con `prefers-reduced-motion` no hay nada
+ * que perseguir.
+ */
+export interface ProgresoAmortiguadoProps {
+  readonly progreso: Progreso
+  readonly children: (progreso: Progreso) => ReactNode
+}
+
+export function ProgresoAmortiguado(props: ProgresoAmortiguadoProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null && props.progreso !== null) return <primitivas.ProgresoAmortiguado {...props} />
+  return <>{props.children(null)}</>
+}

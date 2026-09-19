@@ -82,6 +82,7 @@ export const MARCADORES = [
   '[NOMBRE]',
   '[TEXTO]',
   // Archivos que no existen.
+  '[FOTO]',
   '[FOTO DEL EQUIPO]',
   '[CAPTURA]',
   '[CAPTURA DEL PANEL]',
