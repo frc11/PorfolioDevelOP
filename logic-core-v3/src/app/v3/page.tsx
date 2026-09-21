@@ -66,7 +66,10 @@ export default function PaginaV3() {
       <ChromeDelHome />
       <IntroDelHome />
       <CompuertaDelHome>
-        <main className="relative z-10">
+        {/* `max-escritorio:z-auto`: abajo del corte de composición el `<main>` no puede abrir contexto de
+            apilamiento propio, o la bajada de «Quienes somos» mezclaria contra un grupo
+            que no tiene la escena adentro. Arriba del umbral queda igual. */}
+        <main className="relative z-10 max-escritorio:z-auto">
           <Home />
         </main>
       </CompuertaDelHome>

@@ -1,0 +1,264 @@
+{
+  "anchos": [
+    {
+      "ventana": 320,
+      "rayaDelTitular": "rgb(247, 247, 245)",
+      "barraDelSigno": "rgb(247, 247, 245)",
+      "diagonalDelSigno": "rgb(247, 247, 245)",
+      "mezclaDelTitularDelHero": "difference",
+      "mezclaDelCta": "difference",
+      "mezclaDelTitularDeQs": "difference",
+      "fondoDelHero": "rgba(0, 0, 0, 0)",
+      "hayMarcaEnElHero": false,
+      "respiran": 3,
+      "avisos": 0,
+      "ctaConMezcla": "marcado rgb(247, 247, 245)",
+      "hero": {
+        "tamano": "16px",
+        "alto": 193,
+        "desdeElPie": 97,
+        "pantalla": 568
+      },
+      "subrayadoDelCta": "rgb(247, 247, 245) / rgb(247, 247, 245)",
+      "signo": {
+        "x": 93,
+        "ancho": 135,
+        "margen": 32
+      },
+      "fotoDelEquipo": {
+        "ancho": 261,
+        "alto": 195,
+        "desdeValentino": 224,
+        "pieVisible": 5
+      },
+      "renglonesDelTitular": 4,
+      "signoCentrado": "60.5px",
+      "laFoto": {
+        "titulo": "Nosotros",
+        "descripcionVisible": true,
+        "claseDeLaDescripcion": "font-cuerpo text-cuerpo leading-texto tr"
+      },
+      "botones": 3,
+      "botonesQuePintan": 3,
+      "qs": {
+        "titular": "36px",
+        "bajada": "17px",
+        "equipo": "36px",
+        "nombre": "24px",
+        "descripcion": "15px",
+        "anchoDelTitular": 256,
+        "anchoDeLaBajada": 256,
+        "anchoDeLaDescripcion": 256
+      },
+      "topDeQuienesSomos": 568
+    },
+    {
+      "ventana": 375,
+      "rayaDelTitular": "rgb(247, 247, 245)",
+      "barraDelSigno": "rgb(247, 247, 245)",
+      "diagonalDelSigno": "rgb(247, 247, 245)",
+      "mezclaDelTitularDelHero": "difference",
+      "mezclaDelCta": "difference",
+      "mezclaDelTitularDeQs": "difference",
+      "fondoDelHero": "rgba(0, 0, 0, 0)",
+      "hayMarcaEnElHero": false,
+      "respiran": 3,
+      "avisos": 0,
+      "ctaConMezcla": "marcado rgb(247, 247, 245)",
+      "hero": {
+        "tamano": "16px",
+        "alto": 235,
+        "desdeElPie": 97,
+        "pantalla": 667
+      },
+      "subrayadoDelCta": "rgb(247, 247, 245) / rgb(247, 247, 245)",
+      "signo": {
+        "x": 120,
+        "ancho": 135,
+        "margen": 32
+      },
+      "fotoDelEquipo": {
+        "ancho": 317,
+        "alto": 211,
+        "desdeValentino": 200,
+        "pieVisible": 5
+      },
+      "renglonesDelTitular": 4,
+      "signoCentrado": "88px",
+      "laFoto": {
+        "titulo": "Nosotros",
+        "descripcionVisible": true,
+        "claseDeLaDescripcion": "font-cuerpo text-cuerpo leading-texto tr"
+      },
+      "botones": 3,
+      "botonesQuePintan": 3,
+      "qs": {
+        "titular": "36.0005px",
+        "bajada": "17px",
+        "equipo": "36.0005px",
+        "nombre": "24.0005px",
+        "descripcion": "15px",
+        "anchoDelTitular": 311,
+        "anchoDeLaBajada": 311,
+        "anchoDeLaDescripcion": 311
+      },
+      "topDeQuienesSomos": 667
+    },
+    {
+      "ventana": 425,
+      "rayaDelTitular": "rgb(247, 247, 245)",
+      "barraDelSigno": "rgb(247, 247, 245)",
+      "diagonalDelSigno": "rgb(247, 247, 245)",
+      "mezclaDelTitularDelHero": "difference",
+      "mezclaDelCta": "difference",
+      "mezclaDelTitularDeQs": "difference",
+      "fondoDelHero": "rgba(0, 0, 0, 0)",
+      "hayMarcaEnElHero": false,
+      "respiran": 3,
+      "avisos": 0,
+      "ctaConMezcla": "marcado rgb(247, 247, 245)",
+      "hero": {
+        "tamano": "16px",
+        "alto": 241,
+        "desdeElPie": 97,
+        "pantalla": 844
+      },
+      "subrayadoDelCta": "rgb(247, 247, 245) / rgb(247, 247, 245)",
+      "signo": {
+        "x": 143,
+        "ancho": 139,
+        "margen": 32
+      },
+      "fotoDelEquipo": {
+        "ancho": 368,
+        "alto": 245,
+        "desdeValentino": 201,
+        "pieVisible": 5
+      },
+      "renglonesDelTitular": 4,
+      "signoCentrado": "111.234px",
+      "laFoto": {
+        "titulo": "Nosotros",
+        "descripcionVisible": true,
+        "claseDeLaDescripcion": "font-cuerpo text-cuerpo leading-texto tr"
+      },
+      "botones": 3,
+      "botonesQuePintan": 3,
+      "qs": {
+        "titular": "36.9395px",
+        "bajada": "17px",
+        "equipo": "36.9395px",
+        "nombre": "24.9395px",
+        "descripcion": "15px",
+        "anchoDelTitular": 361,
+        "anchoDeLaBajada": 361,
+        "anchoDeLaDescripcion": 361
+      },
+      "topDeQuienesSomos": 844
+    },
+    {
+      "ventana": 768,
+      "rayaDelTitular": "rgb(247, 247, 245)",
+      "barraDelSigno": "rgb(247, 247, 245)",
+      "diagonalDelSigno": "rgb(247, 247, 245)",
+      "mezclaDelTitularDelHero": "difference",
+      "mezclaDelCta": "difference",
+      "mezclaDelTitularDeQs": "difference",
+      "fondoDelHero": "rgba(0, 0, 0, 0)",
+      "hayMarcaEnElHero": false,
+      "respiran": 3,
+      "avisos": 0,
+      "ctaConMezcla": "marcado rgb(247, 247, 245)",
+      "hero": {
+        "tamano": "16px",
+        "alto": 234,
+        "desdeElPie": 116,
+        "pantalla": 1024
+      },
+      "subrayadoDelCta": "rgb(247, 247, 245) / rgb(247, 247, 245)",
+      "signo": {
+        "x": 32,
+        "ancho": 163,
+        "margen": 32
+      },
+      "fotoDelEquipo": {
+        "ancho": 718,
+        "alto": 479,
+        "desdeValentino": 122,
+        "pieVisible": 5
+      },
+      "renglonesDelTitular": 2,
+      "signoCentrado": "0px",
+      "laFoto": {
+        "titulo": "Nosotros",
+        "descripcionVisible": true,
+        "claseDeLaDescripcion": "font-cuerpo text-cuerpo leading-texto tr"
+      },
+      "botones": 3,
+      "botonesQuePintan": 3,
+      "qs": {
+        "titular": "43.3807px",
+        "bajada": "17px",
+        "equipo": "43.3807px",
+        "nombre": "31.3807px",
+        "descripcion": "15px",
+        "anchoDelTitular": 0,
+        "anchoDeLaBajada": 640,
+        "anchoDeLaDescripcion": 600
+      },
+      "topDeQuienesSomos": 1024
+    },
+    {
+      "ventana": 1440,
+      "rayaDelTitular": "rgb(83, 83, 83)",
+      "barraDelSigno": "rgb(17, 17, 17)",
+      "diagonalDelSigno": "rgb(83, 83, 83)",
+      "mezclaDelTitularDelHero": "normal",
+      "mezclaDelCta": "normal",
+      "mezclaDelTitularDeQs": "normal",
+      "fondoDelHero": "rgba(0, 0, 0, 0)",
+      "hayMarcaEnElHero": false,
+      "respiran": 3,
+      "avisos": 0,
+      "ctaConMezcla": "marcado rgb(17, 17, 17)",
+      "hero": {
+        "tamano": "16px",
+        "alto": 177,
+        "desdeElPie": 426,
+        "pantalla": 900
+      },
+      "subrayadoDelCta": "rgb(17, 17, 17) / rgb(17, 17, 17)",
+      "signo": {
+        "x": 386,
+        "ancho": 143,
+        "margen": 32
+      },
+      "fotoDelEquipo": {
+        "ancho": 688,
+        "alto": 459,
+        "desdeValentino": 547,
+        "pieVisible": 5
+      },
+      "renglonesDelTitular": 2,
+      "signoCentrado": "197.5px",
+      "laFoto": {
+        "titulo": "Nosotros",
+        "descripcionVisible": true,
+        "claseDeLaDescripcion": "font-cuerpo text-cuerpo leading-texto tr"
+      },
+      "botones": 3,
+      "botonesQuePintan": 3,
+      "qs": {
+        "titular": "38px",
+        "bajada": "17px",
+        "equipo": "63.296px",
+        "nombre": "32.0006px",
+        "descripcion": "15px",
+        "anchoDelTitular": 0,
+        "anchoDeLaBajada": 480,
+        "anchoDeLaDescripcion": 160
+      },
+      "topDeQuienesSomos": 900
+    }
+  ]
+}

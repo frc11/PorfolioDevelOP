@@ -265,7 +265,8 @@ export const SECCIONES: readonly Seccion[] = [
     numero: '01',
     nombre: 'Hero',
     superficie: 'papel-transparente',
-    superficieAngosta: 'papel-opaco',
+    // El papel opaco de abajo de 390 se fue: lo reemplaza la mezcla de la banda
+    // movil (`MEZCLA_DE_LA_BANDA_MOVIL`), que resuelve la lectura SIN tapar la sala.
     alto: '100svh',
   },
   /**

@@ -35,13 +35,13 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**50 cosas pendientes** en las ocho secciones, de las cuales **36** se ven hoy en la pantalla como un marcador y 14 son prosa de relleno que no se ve como agujero.
+**49 cosas pendientes** en las ocho secciones, de las cuales **36** se ven hoy en la pantalla como un marcador y 13 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
 |---|---:|
 | 01 · Hero | 2 |
-| 02 · Quiénes somos | 13 |
+| 02 · Quiénes somos | 12 |
 | 03 · Números | 7 |
 | 04 · Trabajos | 6 |
 | 05 · Servicios | 9 |
@@ -57,7 +57,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 | quién | cuántas |
 |---|---:|
 | Franco (o un cliente) | 19 |
-| Valentino | 27 |
+| Valentino | 26 |
 | Una decisión, antes que un dato | 4 |
 
 ### Franco (o un cliente) — 19
@@ -82,7 +82,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
-### Valentino — 27
+### Valentino — 26
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -95,7 +95,6 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `equipo.seria.marcador` — La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.
 - **02 · Quiénes somos** · `equipo.suelta.marcador` — La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.
 - **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
-- **02 · Quiénes somos** · `equipo.pie` — El epígrafe de la foto del equipo. Un renglón.
 - **03 · Números** · `titulo` — El título de la sección, dos o tres palabras. El que está puesto es relleno.
 - **03 · Números** · `entrada` — La bajada, una o dos líneas: qué mira develOP y por qué son pocos números.
 - **04 · Trabajos** · `titular` — La frase que abre la sección. Una idea, una línea, dicha como la decís vos.
@@ -159,7 +158,6 @@ Se edita en `src/app/v3/_secciones/quienes-somos/contenido.ts`.
 | `[FOTO DEL EQUIPO]` | `equipo.seria.marcador` | Valentino | La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`. |
 | `[FOTO]` | `equipo.suelta.marcador` | Valentino | La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria. | JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que la seria. |
 | *(prosa)* | `equipo.descripcion` | Valentino | Cómo empezó el equipo. Se lee sobre la foto, así que corto. | Dos o tres frases, ~150 caracteres. Texto plano. |
-| *(prosa)* | `equipo.pie` | Valentino | El epígrafe de la foto del equipo. Un renglón. | Un renglón, ~90 caracteres. Texto plano. |
 
 
 ## 03 · Números

@@ -63,14 +63,23 @@ import { ATRIBUTO_DE_PANEL, IDS_DE_SECCION } from '../_secciones/_contrato/forma
 /** Desde el click hasta que el `<main>` empieza a irse. */
 export const RETARDO_ANTES_DE_DESAPARECER_MS = 0
 
-/** Cuánto tarda en desaparecer. ⚠ Espeja el `--duracion-rapida` de la hoja. */
-export const DURACION_DE_DESAPARICION_MS = 300
+/**
+ * Cuánto tarda en desaparecer.
+ *
+ * ⚠ **YA NO ESPEJA `--duracion-rapida` (300 ms), y hay que decirlo.** La hoja
+ * sigue fundiendo el velo en 300; este número bajó a 180 porque el arranque se
+ * sentía tarde. La consecuencia es que **el viaje arranca antes de que el velo
+ * termine de irse**: los últimos 120 ms del fundido corren ya en movimiento. Es
+ * deliberado —es lo que saca la sensación de espera— y es reversible subiendo
+ * este número a 300.
+ */
+export const DURACION_DE_DESAPARICION_MS = 180
 
 /** Quieto en la escena, ya sin texto, antes de arrancar el recorrido. */
-export const PAUSA_MS = 300
+export const PAUSA_MS = 120
 
 /** El recorrido: del hero a Trabajos. */
-export const DURACION_DEL_VIAJE_MS = 3000
+export const DURACION_DEL_VIAJE_MS = 2600
 
 /* ────────────────────────────────────────────────────────────────────────── */
 

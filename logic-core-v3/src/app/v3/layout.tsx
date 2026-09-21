@@ -1,5 +1,6 @@
 import localFont from 'next/font/local'
 
+import { CompuertaDelDeslizamiento } from './_componentes/CompuertaDelDeslizamiento'
 import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
 import { ProveedorDeMovimiento } from './_lib/motion/ProveedorDeMovimiento'
@@ -25,6 +26,7 @@ import './_estilos/pie.css'
 import './_estilos/foco.css'
 import './_estilos/deslizamiento.css'
 import './_estilos/trazo.css'
+import './_estilos/banda.css'
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.
@@ -270,9 +272,36 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
     <ProveedorDeMovimiento>
       <div
         data-v3=""
-        className={`${chivo.variable} ${chivoMono.variable} ${archivo.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
+        className={`${chivo.variable} ${chivoMono.variable} ${archivo.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh max-escritorio:bg-transparent max-escritorio:isolate`}
       >
+        {/**
+         * EL PISO DE PAPEL, y por que existe SOLO abajo de 1025.
+         *
+         * De 1025 para arriba el papel lo pinta este mismo envoltorio con
+         * `bg-fondo`, como siempre. Abajo del umbral no puede: ahi el envoltorio
+         * es el GRUPO DE MEZCLA de la bajada de «Quienes somos»
+         * (`max-escritorio:isolate`) y el canvas de la escena baja a `-z-10` para
+         * quedar debajo del texto — y una capa de z negativo se pinta DEBAJO del
+         * fondo de su propio elemento, asi que el papel taparia la escena.
+         *
+         * BLEND-1 resolvia eso mudando el papel a `body`. Medido, no sirve: `body`
+         * esta AFUERA del grupo, y donde el canvas es transparente el texto mezcla
+         * contra la nada y pinta blanco — 100 % del glifo bajo AA sobre papel,
+         * cuando `247 - 247 = 0` tenia que dar casi 20:1. La salida medida es esta:
+         * un piso ADENTRO del grupo, en `-z-20`, o sea debajo del canvas y arriba
+         * de nada. El orden de pintado queda papel -> escena -> texto, los tres en
+         * el mismo grupo, que es la condicion para que `difference` vea lo que se ve.
+         *
+         * Arriba de 1025 no pinta: sin `isolate` esta capa cae en el contexto de la
+         * raiz y se dibuja antes que el fondo del envoltorio, y ademas su color solo
+         * entra con la variante. Cuesta un div y cero pixeles.
+         */}
+        <div aria-hidden="true" className="fixed inset-0 -z-20 max-escritorio:bg-fondo" />
         <CompuertaDelScrollSuave />
+        {/* La otra mitad del eje: abajo de 1025 no hay Lenis, y el deslizamiento
+            del CTA no tiene por qué morirse con él. Las dos compuertas leen la
+            MISMA consulta y no se pisan. */}
+        <CompuertaDelDeslizamiento />
         <EscenarioCompuerta />
         {children}
         <MarcaDeLaLlave />

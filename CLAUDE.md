@@ -168,6 +168,11 @@ Modo de sprint liviano para mantenimiento y pulido sobre trabajo ya construido �
   - **nunca en modo pulido** → `npm run build`
   - `npx tsc --noEmit` solo si se tocó TypeScript
 - Limpieza: correr `scripts/limpiar.ps1` al terminar cada tarea. En bisagra, `scripts/limpiar.ps1 -Profundo` junto con `verificar`.
+- **quienes-somos abajo de 1025 usa `mix-blend-mode` en la bajada.** NO agregar `transform`, `filter`, `opacity<1`, `mask` ni `will-change` a ninguno de sus ancestros: corta la cadena de mezcla sin tirar error y el texto queda invisible. Lo cuida el invariante de la cadena de mezcla (`npm run test:s7-mezcla`).
+- **El escaneo de Tailwind 4 lee TODOS los archivos que `.gitignore` no excluye**, incluidos invariantes, scripts de banco y COMENTARIOS. Cualquier clase arbitraria deletreada literalmente —en código o en prosa— se emite como regla real y puede romper el build apuntando a un archivo sano (`globals.css`, típicamente). Si un error de build señala un archivo que verificaste intacto, es contaminación del escaneo.
+- **Regla:** en controles positivos y en sus docblocks, NUNCA escribir una clase arbitraria entera. Construirla partida, como `Seccion.tsx:208`, y en la prosa DESCRIBIRLA en vez de escribirla.
+- Y no alcanza con reconstruir encima: hay que borrar `.next` entero.
+- **Nunca correr `prettier` sobre este repo:** no está formateado con prettier y reformatea el archivo entero (comillas, punto y coma), lo que falla el check incluso en un archivo intacto. La sangría se arregla a mano.
 
 ---
 

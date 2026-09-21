@@ -204,6 +204,37 @@ export const CLASES_DE_LA_BANDA_ANGOSTA: Readonly<Record<ModoSuperficieAngosta, 
 }
 
 /**
+ * LA MEZCLA — lo que reemplaza al papel opaco en la banda movil.
+ *
+ * El papel opaco existia porque abajo de 390 el texto del hero y la masa del
+ * logo no tenian posicion limpia: 43,76 % de tinta sobre el logo a 320. Tapar la
+ * sala con papel resolvia la lectura y perdia la escena. La mezcla resuelve las
+ * dos: `difference` con la tinta del PAPEL da `|fondo - 247|`, o sea negro pleno
+ * donde hay papel y casi papel donde hay logo, con borde duro y sin depender de
+ * ninguna captura.
+ *
+ * ⚠️ **ES UNA SOLA CONSTANTE, Y EL ALCANCE ES «DONDE LA COMPOSICIÓN NO ES DE
+ * ESCRITORIO».** Nació partida en dos —1025 para «Quiénes somos», 768 para el
+ * hero— y eso era un accidente de dos sprints, no una distinción: el gesto
+ * corresponde exactamente donde el texto se apoya sobre la escena, que es todo el
+ * tramo de abajo del corte de composición. `max-escritorio:` ES ese tramo, así que
+ * la constante es una y el corte la sigue solo cuando el corte se mueve.
+ *
+ * ⚠️ **El motivo que se había escrito para frenarla en 768 era falso, y está
+ * medido.** Decía que de 768 para arriba «la cadena no se destraba por el
+ * `transform` inline de `Pieza.tsx`»; ese `transform` sólo existe cuando la
+ * coreografía está instalada, o sea ARRIBA del umbral, y `j-hero.ts` leyó la
+ * cadena llegando al canvas en los tres anchos de la banda. La bajada de «Quiénes
+ * somos» ya mezclaba a 768 desde el sprint anterior, sin defecto.
+ *
+ * ⚠️ **Y va como literal a propósito.** Componerla (`${prefijo}:text-fondo`) la
+ * volvería invisible para el escaneo de Tailwind y las reglas no se emitirían — el
+ * mismo mecanismo que `Seccion.tsx:208` usa para ESCONDER una clase, que acá sería
+ * el defecto.
+ */
+export const MEZCLA_SOBRE_LA_ESCENA = 'max-escritorio:text-fondo max-escritorio:mix-blend-difference'
+
+/**
  * Los colores que pinta el canvas de prueba, en orden de aparición.
  *
  * Están acá y no en el componente porque son la entrada de la cuenta de

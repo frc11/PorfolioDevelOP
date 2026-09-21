@@ -6,8 +6,8 @@ import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Isotipo, Logotipo } from '../../_componentes/marca/Marca'
 import { TextoBase } from '../../_componentes/tipografia/Textos'
+import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
 import { Seccion } from '../_contrato/Seccion'
@@ -155,50 +155,19 @@ import {
  * dejaría de terminar donde termina la palabra.
  */
 /**
- * LA MARCA ARRIBA DEL TITULAR — la palabra y el dibujo, sólo sobre papel.
+ * ⚠️ **SE FUE LA MARCA DE ARRIBA DEL TITULAR, Y CON ELLA SU MOTIVO.**
  *
- * ── ⚠️ PAPEL-2 · POR QUÉ ESTA PIEZA EXISTE, Y SÓLO EN DOS ANCHOS ─────────
+ * PAPEL-2 la puso porque abajo de 390 el Hero pintaba `papel-opaco`: la sala no
+ * se veía y la pantalla se quedaba sin lo único que la distinguía de las otras
+ * siete. La marca era ese reemplazo, y por eso vivía exactamente en los dos
+ * anchos donde el papel estaba.
  *
- * En 320 y 375 el Hero pinta `papel-opaco`: la sala NO se ve, así que la
- * pantalla se queda sin la única cosa que la distinguía de las otras siete. La
- * marca es lo que la vuelve a distinguir, y por eso va exactamente donde el
- * papel está y en ningún otro lado — `GEOMETRIA.claseDeLaMarcaDelHero` la apaga
- * de 390 para arriba, que es el mismo píxel en el que la sala vuelve.
- *
- * ── El orden es del pedido, y las dos piezas ya existían ─────────────────
- *
- * Primero la palabra (`Logotipo`, la pieza de `marca/Marca.tsx` que ya monta el
- * pie y la galería) y después el dibujo (`Isotipo`, la pieza nueva, que importa
- * el path de `LogoMark` en vez de copiarlo por quinta vez). Ninguna de las dos
- * trae color: las dos heredan `--color-tinta` del panel.
- *
- * ⚠ **El separador de espacio va entre las dos y NO se ve.** Las dos son ítems
- * de la columna flex de afuera, así que el aire lo pone su `gap-2`; el `' '`
- * que las separaría en el documento no hace falta porque no forman una frase.
- *
- * ⚠ **No lleva canal de coreografía, y no es un olvido.** Abajo de 1025
- * `BloqueDeSeccion` entrega `progreso: null` y la sección entera renderiza su
- * variante quieta — la marca vive SÓLO abajo de 390, o sea siempre adentro de
- * ese régimen. Un `Bloque` acá montaría una primitiva que no se puede mover.
+ * Con la mezcla el papel opaco no existe más: la sala se ve en los tres anchos de
+ * la banda y la pantalla vuelve a distinguirse por lo mismo que en los otros seis.
+ * La pieza que la reemplazaba ya no reemplaza nada. `Logotipo` e `Isotipo` siguen
+ * en `marca/Marca.tsx` con sus otros consumidores —el pie y la galería—; lo que se
+ * fue es este uso y las dos clases que lo colocaban.
  */
-function MarcaDelHero(): React.JSX.Element {
-  return (
-    // ⚠ Las dos piezas van adentro de UN envoltorio y no sueltas en la columna,
-    // y eso es lo que hace que apagarlas sea gratis: `display:none` sobre un
-    // solo ítem se lleva a los dos y a su hueco de una vez. Sueltas harían falta
-    // dos clases y el hueco de la columna entre ellas seguiría contando.
-    //
-    // `items-start`: el `<svg>` es un ítem de flex y sin esto se estiraría al
-    // ancho de la columna, que es exactamente lo que `w-auto` viene a evitar.
-    <div className={cn('flex flex-col items-start gap-2', GEOMETRIA.claseDeLaMarcaDelHero)}>
-      {/* `como="span"` es el default y se deja: el nombre accesible de la
-          región lo da el `h1`, y un segundo bloque de texto con jerarquía
-          arriba suyo sería un encabezado que compite con él. */}
-      <Logotipo className={GEOMETRIA.claseDelLogotipoDelHero} />
-      <Isotipo className={GEOMETRIA.claseDelIsotipo} />
-    </div>
-  )
-}
 
 function BajadaYCta(): React.JSX.Element {
   return (
@@ -239,7 +208,7 @@ function BajadaYCta(): React.JSX.Element {
           ⚠ Que entre no es un supuesto: medido en el navegador en los ocho, el
           renglón mide 243,34 px y la caja más chica es 256 (a 320), o sea 12,66
           px de margen en el peor. La tabla entera está en `contenido.ts`. */}
-      <TextoBase>{CONTENIDO.bajada}</TextoBase>
+      <TextoBase className={MEZCLA_SOBRE_LA_ESCENA}>{CONTENIDO.bajada}</TextoBase>
       {/* Un enlace nativo, nunca un div con manejador, y NUNCA adentro de otro
           interactivo: la referencia envuelve su botón en un enlace y eso son dos
           paradas de tabulación para un solo control. `Cta` (botón) y `CtaEnlace`
@@ -264,7 +233,8 @@ function BajadaYCta(): React.JSX.Element {
         href={CONTENIDO.cta.destino}
         rotulo={CONTENIDO.cta.rotulo}
         registro="rotulo"
-        className={GEOMETRIA.claseDeLaSangriaDelCta}
+        mezcla
+        className={cn(GEOMETRIA.claseDeLaSangriaDelCta, MEZCLA_SOBRE_LA_ESCENA)}
       />
     </>
   )
@@ -329,11 +299,18 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
             reemplazos, igual que hizo PAPEL-2 con el pie. */}
         <div
           data-pantalla="hero"
+          /* ⚠️ **SE FUERON LAS TRES CONDICIONES DE LA BANDA DE PAPEL.** El
+             centrado del bloque (`justify-center`) y el aire de arriba
+             recortado (`pt-2`) existían porque abajo de 390 el hero tapaba la
+             sala con papel y la composición era otra: bloque al medio, sin
+             calle. Con la mezcla el texto se apoya sobre la escena y vuelve la
+             composición grande — bloque ABAJO y a la izquierda, logo arriba, la
+             misma relación que a 768 y a 1024 puesta a lo alto. `pb-2` se queda:
+             su motivo es otro y está medido —abajo de 390 la pastilla de
+             navegación no está y el pie no tiene que reservarle 72 px—. */
           className={cn(
             'flex min-h-svh w-full flex-col justify-end pt-20 pb-20 escritorio:justify-center',
             GEOMETRIA.claseDelPieSinPastilla,
-            GEOMETRIA.claseDelAireDeArribaEnPapel,
-            GEOMETRIA.claseDelBloqueCentradoEnPapel,
           )}
         >
           {/* ⚠️ **COMPO-1 · DOS CLASES, DOS PEDIDOS, Y LAS DOS ACOTADAS.**
@@ -402,7 +379,8 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                 abajo. `chico:` y no otra banda: de 390 para arriba el bloque
                 vuelve a apoyarse abajo y ahí la fila fantasma sigue sin costar
                 nada — medido, el fondo del bloque no se mueve una centésima. */}
-            <div className={GEOMETRIA.claseDeLaCeldaLateralEnPapel} />
+            {/* La celda lateral vacía se queda: apagarla tenía sentido con el bloque centrado (corría la columna 6 px del centro) y con el bloque apoyado abajo no cuesta nada, medido. */}
+            <div />
             <Grilla columnas={GEOMETRIA.columnasTotales}>
               {/* ⚠️ **LOS DOS HUECOS VALEN 8 px ABAJO DE 1025 Y NO SE TOCAN
                   ARRIBA.** `gap-8` (32) entre el titular y la bajada y `gap-6`
@@ -427,7 +405,6 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                     `display:none`, deja de ser ítem de flex y se lleva su hueco
                     con él: los seis anchos que el §6 declara intocables no ven
                     ni un píxel de esto. */}
-                <MarcaDelHero />
                 {/* La caja del titular: **2 de 3 de la medida de 1025 para
                     arriba, y las 3 enteras abajo**. El porqué —los tres bordes
                     seguros medidos sobre el píxel, todos en escritorio, y lo que
@@ -449,7 +426,10 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                       <h1
                         id={idDelTitularDeSeccion(seccion.id)}
                         data-titular="dos-registros"
-                        className="flex flex-col items-start"
+                        // La mezcla va en el `h1` y no por renglon: asi el titular
+                        // entero compone como UN grupo y despues mezcla, que es lo
+                        // que da el borde duro parejo en las dos filas.
+                        className={cn('flex flex-col items-start', MEZCLA_SOBRE_LA_ESCENA)}
                       >
                         {/* ⚠️ **EL REGISTRO 1 ES LA PIEZA QUIETA, Y NO PASA POR
                             UN CANAL.** Sin coreografía de entrada, presente en

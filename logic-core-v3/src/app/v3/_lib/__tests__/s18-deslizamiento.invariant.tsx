@@ -483,7 +483,23 @@ titulo('7 · LA REVERSIBILIDAD: cinco salidas, una función, y nadie llama `stop
 
 const EFECTO_LIMPIO = FUENTE_DEL_EFECTO
 afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función que apaga el velo')
-afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 5, '  y exactamente CINCO sitios la llaman: una por salida, ni una suelta')
+/**
+ * ⚠️ **SIETE LLAMADAS Y SIGUEN SIENDO CINCO SALIDAS.** Eran cinco llamadas para
+ * cinco salidas hasta que el viaje tuvo DOS motores: arriba del umbral lo mueve
+ * Lenis y abajo `viajeSinLenis`, y dos de las cinco salidas necesitan una gemela
+ * porque el motor de abajo no emite los eventos del de arriba —
+ *
+ *   · **la llegada**: con Lenis es su `onComplete`; sin Lenis es el `alTerminar`
+ *     del animador propio;
+ *   · **el gesto que cancela**: con Lenis es `virtual-scroll`; sin Lenis son
+ *     `wheel`/`touchstart`/`keydown`, que se agrupan en UNA sola llamada.
+ *
+ * Las otras tres —`popstate`, el reloj de seguridad y la limpieza del efecto—
+ * son del documento y no del motor, así que siguen siendo una sola cada una.
+ * Lo que esta afirmación cuida no es el número sino que no haya una llamada
+ * suelta: 5 + 2 gemelas = 7, y cada una tiene su renglón arriba.
+ */
+afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 7, '  y exactamente SIETE sitios la llaman: cinco salidas, dos con gemela por el segundo motor')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')
 afirmar(EFECTO_LIMPIO.includes('onComplete: () => terminar(true)'), '  salida 1 — llegó')
 afirmar(EFECTO_LIMPIO.includes("lenis.on('virtual-scroll'"), '  salida 2 — la rueda: el evento se emite ANTES de todas las guardas de `onVirtualScroll`')

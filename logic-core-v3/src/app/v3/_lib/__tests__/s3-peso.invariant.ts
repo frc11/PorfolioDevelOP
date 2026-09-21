@@ -37,6 +37,7 @@
  *   5. Que las utilidades del sistema que el sprint escribe existen.
  */
 
+import { COMPOSICION_MIN_ANCHO_PX } from '../compuerta'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
@@ -244,7 +245,10 @@ const sinRegla = CLASES_DEL_SPRINT.filter((c) => !tieneRegla(c))
 afirmarIgual(sinRegla, [], `las ${CLASES_DEL_SPRINT.length} utilidades del sistema tienen regla emitida`)
 
 // Y los dos breakpoints que las variantes del sprint usan.
-for (const ancho of [768, 1025]) {
+// ⚠️ El segundo se LEE del tema y no se escribe: bajó de 1025 a 1024 cuando el
+// corte de composición se separó de la compuerta de coreografía, y un literal
+// acá habría hecho fallar al invariante por un cambio que era correcto.
+for (const ancho of [768, COMPOSICION_MIN_ANCHO_PX]) {
   afirmar(
     new RegExp(`@media\\s*\\(\\s*(?:min-)?width\\s*[:>=]+\\s*${ancho}px\\s*\\)`).test(cssDeTodo),
     `la variante de ${ancho}px emitió su media query`,

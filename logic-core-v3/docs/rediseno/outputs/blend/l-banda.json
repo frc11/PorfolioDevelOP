@@ -1,0 +1,916 @@
+{
+  "anchos": [
+    {
+      "ancho": 320,
+      "antes": {
+        "ventana": 320,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 278,
+            "ancho": 256,
+            "alto": 193
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 479,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 256,
+          "sobra": 13
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 628,
+            "ancho": 256,
+            "alto": 225
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 1084,
+            "ancho": 256,
+            "alto": 245
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 30,
+          "y": 2423,
+          "ancho": 261,
+          "alto": 196
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 161,
+          "y": 2521
+        },
+        "visible": false,
+        "topDocumento": 2423
+      },
+      "enPose": {
+        "ventana": 320,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2025,
+            "ancho": 256,
+            "alto": 193
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1824,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 256,
+          "sobra": 13
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1675,
+            "ancho": 256,
+            "alto": 225
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1219,
+            "ancho": 256,
+            "alto": 245
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 32,
+          "y": 122,
+          "ancho": 256,
+          "alto": 192
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 160,
+          "y": 218
+        },
+        "visible": true,
+        "topDocumento": 2425
+      },
+      "abierto": {
+        "ventana": 320,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2025,
+            "ancho": 256,
+            "alto": 193
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1824,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 256,
+          "sobra": 13
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1675,
+            "ancho": 256,
+            "alto": 225
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1219,
+            "ancho": 256,
+            "alto": 245
+          },
+          "util": 256,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 32,
+          "y": 122,
+          "ancho": 256,
+          "alto": 192
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 32,
+          "y": 172,
+          "ancho": 256,
+          "alto": 142
+        },
+        "centroDeLaFoto": {
+          "x": 160,
+          "y": 218
+        },
+        "visible": true,
+        "topDocumento": 2425
+      }
+    },
+    {
+      "ancho": 375,
+      "antes": {
+        "ventana": 375,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 335,
+            "ancho": 311,
+            "alto": 235
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 578,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 311,
+          "sobra": 68
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 727,
+            "ancho": 311,
+            "alto": 180
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 1138,
+            "ancho": 311,
+            "alto": 218
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 29,
+          "y": 2535,
+          "ancho": 316,
+          "alto": 211
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 187,
+          "y": 2641
+        },
+        "visible": false,
+        "topDocumento": 2535
+      },
+      "enPose": {
+        "ventana": 375,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2080,
+            "ancho": 311,
+            "alto": 235
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1837,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 311,
+          "sobra": 68
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1688,
+            "ancho": 311,
+            "alto": 180
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1277,
+            "ancho": 311,
+            "alto": 218
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 29,
+          "y": 120,
+          "ancho": 316,
+          "alto": 211
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 187,
+          "y": 226
+        },
+        "visible": true,
+        "topDocumento": 2535
+      },
+      "abierto": {
+        "ventana": 375,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2080,
+            "ancho": 311,
+            "alto": 235
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1837,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 311,
+          "sobra": 68
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1688,
+            "ancho": 311,
+            "alto": 180
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1277,
+            "ancho": 311,
+            "alto": 218
+          },
+          "util": 311,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 32,
+          "y": 122,
+          "ancho": 311,
+          "alto": 207
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 32,
+          "y": 206,
+          "ancho": 311,
+          "alto": 123
+        },
+        "centroDeLaFoto": {
+          "x": 188,
+          "y": 226
+        },
+        "visible": true,
+        "topDocumento": 2537
+      }
+    },
+    {
+      "ancho": 425,
+      "antes": {
+        "ventana": 425,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 506,
+            "ancho": 361,
+            "alto": 241
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 755,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 361,
+          "sobra": 118
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 983,
+            "ancho": 361,
+            "alto": 185
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 1434,
+            "ancho": 361,
+            "alto": 190
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 29,
+          "y": 2969,
+          "ancho": 368,
+          "alto": 245
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 213,
+          "y": 3092
+        },
+        "visible": false,
+        "topDocumento": 2969
+      },
+      "enPose": {
+        "ventana": 425,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2343,
+            "ancho": 361,
+            "alto": 241
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2094,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 361,
+          "sobra": 118
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1866,
+            "ancho": 361,
+            "alto": 185
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1415,
+            "ancho": 361,
+            "alto": 190
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 30,
+          "y": 120,
+          "ancho": 365,
+          "alto": 244
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 213,
+          "y": 242
+        },
+        "visible": true,
+        "topDocumento": 2969
+      },
+      "abierto": {
+        "ventana": 425,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2343,
+            "ancho": 361,
+            "alto": 241
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2094,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 361,
+          "sobra": 118
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1866,
+            "ancho": 361,
+            "alto": 185
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1415,
+            "ancho": 361,
+            "alto": 190
+          },
+          "util": 361,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 32,
+          "y": 122,
+          "ancho": 361,
+          "alto": 241
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 32,
+          "y": 240,
+          "ancho": 361,
+          "alto": 123
+        },
+        "centroDeLaFoto": {
+          "x": 213,
+          "y": 243
+        },
+        "visible": true,
+        "topDocumento": 2971
+      }
+    },
+    {
+      "ancho": 768,
+      "antes": {
+        "ventana": 768,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 674,
+            "ancho": 704,
+            "alto": 234
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 916,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 346,
+          "sobra": 103
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 1291,
+            "ancho": 704,
+            "alto": 217
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": 1850,
+            "ancho": 640,
+            "alto": 109
+          },
+          "util": 640,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 151,
+          "y": 3873,
+          "ancho": 466,
+          "alto": 311
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 384,
+          "y": 4029
+        },
+        "visible": false,
+        "topDocumento": 3873
+      },
+      "enPose": {
+        "ventana": 768,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -3079,
+            "ancho": 704,
+            "alto": 234
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2837,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 346,
+          "sobra": 103
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2462,
+            "ancho": 704,
+            "alto": 217
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1903,
+            "ancho": 640,
+            "alto": 109
+          },
+          "util": 640,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 154,
+          "y": 122,
+          "ancho": 461,
+          "alto": 307
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 0,
+          "y": 0,
+          "ancho": 0,
+          "alto": 0
+        },
+        "centroDeLaFoto": {
+          "x": 385,
+          "y": 276
+        },
+        "visible": true,
+        "topDocumento": 3875
+      },
+      "abierto": {
+        "ventana": 768,
+        "heroFondo": "rgba(0, 0, 0, 0)",
+        "heroTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -3079,
+            "ancho": 704,
+            "alto": 234
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "heroBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2837,
+            "ancho": 243,
+            "alto": 26
+          },
+          "util": 346,
+          "sobra": 103
+        },
+        "qsTitular": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -2462,
+            "ancho": 704,
+            "alto": 217
+          },
+          "util": 704,
+          "sobra": 0
+        },
+        "qsBajada": {
+          "color": "rgb(247, 247, 245)",
+          "blend": "difference",
+          "caja": {
+            "x": 32,
+            "y": -1903,
+            "ancho": 640,
+            "alto": 109
+          },
+          "util": 640,
+          "sobra": 0
+        },
+        "marcos": 3,
+        "avisos": 0,
+        "avisoTexto": null,
+        "avisoAnimacion": null,
+        "fotoDelEquipo": {
+          "x": 155,
+          "y": 123,
+          "ancho": 458,
+          "alto": 305
+        },
+        "avisoCaja": null,
+        "veloContenido": {
+          "x": 155,
+          "y": 324,
+          "ancho": 458,
+          "alto": 104
+        },
+        "centroDeLaFoto": {
+          "x": 384,
+          "y": 276
+        },
+        "visible": true,
+        "topDocumento": 3876
+      }
+    }
+  ]
+}

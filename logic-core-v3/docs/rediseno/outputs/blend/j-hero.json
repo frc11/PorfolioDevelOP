@@ -1,0 +1,316 @@
+{
+  "anchos": [
+    {
+      "ventana": 320,
+      "titular": {
+        "hay": true,
+        "texto": "Tu negocio vendiendo las 24 hs",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 255,
+          "ancho": 256,
+          "alto": 193
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "bajada": {
+        "hay": true,
+        "texto": "Tu sitio, tu chat y tu seguimiento.",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 456,
+          "ancho": 243,
+          "alto": 26
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "hayCanvas": true,
+      "escenaVisible": "visible z=-10",
+      "superficieDelHero": "papel-transparente bg=rgb(247, 247, 245)"
+    },
+    {
+      "ventana": 375,
+      "titular": {
+        "hay": true,
+        "texto": "Tu negocio vendiendo las 24 hs",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 302,
+          "ancho": 311,
+          "alto": 235
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "bajada": {
+        "hay": true,
+        "texto": "Tu sitio, tu chat y tu seguimiento.",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 545,
+          "ancho": 243,
+          "alto": 26
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "hayCanvas": true,
+      "escenaVisible": "visible z=-10",
+      "superficieDelHero": "papel-transparente bg=rgb(247, 247, 245)"
+    },
+    {
+      "ventana": 425,
+      "titular": {
+        "hay": true,
+        "texto": "Tu negocio vendiendo las 24 hs",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 518,
+          "ancho": 361,
+          "alto": 158
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "bajada": {
+        "hay": true,
+        "texto": "Tu sitio, tu chat y tu seguimiento.",
+        "color": "rgb(17, 17, 17)",
+        "blend": "normal",
+        "caja": {
+          "x": 32,
+          "y": 683,
+          "ancho": 243,
+          "alto": 26
+        },
+        "corta": {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "razones": [
+            {
+              "propiedad": "isolation",
+              "valor": "isolate"
+            }
+          ],
+          "contieneElCanvas": true
+        },
+        "llegaAlCanvas": true,
+        "cortantes": [
+          {
+            "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+            "razones": [
+              {
+                "propiedad": "isolation",
+                "valor": "isolate"
+              }
+            ],
+            "contieneElCanvas": true
+          },
+          {
+            "nodo": "html.__variable_9299cd.__variable_46b309",
+            "razones": [
+              {
+                "propiedad": "(raíz)",
+                "valor": "documentElement"
+              },
+              {
+                "propiedad": "view-transition-name",
+                "valor": "root"
+              }
+            ],
+            "contieneElCanvas": true
+          }
+        ]
+      },
+      "hayCanvas": true,
+      "escenaVisible": "visible z=-10",
+      "superficieDelHero": "papel-transparente bg=rgba(0, 0, 0, 0)"
+    }
+  ]
+}

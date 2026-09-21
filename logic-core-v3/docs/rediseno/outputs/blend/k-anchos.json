@@ -1,0 +1,397 @@
+{
+  "anchos": [
+    {
+      "ventana": 320,
+      "piezas": {
+        "hero titular": {
+          "hay": true,
+          "texto": "Tu negocio vendiendo las 24 hs",
+          "x": 32,
+          "ancho": 256,
+          "alto": 193,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "hero bajada": {
+          "hay": true,
+          "texto": "Tu sitio, tu chat y tu seguimi",
+          "x": 32,
+          "ancho": 243,
+          "alto": 26,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 13
+        },
+        "qs titular": {
+          "hay": true,
+          "texto": "Queremos hacer algo distinto,n",
+          "x": 32,
+          "ancho": 255,
+          "alto": 45,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 255,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "qs bajada": {
+          "hay": true,
+          "texto": "develOP es una agencia de soft",
+          "x": 32,
+          "ancho": 134,
+          "alto": 544,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 134,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo caja": {
+          "hay": true,
+          "texto": "El equipoFrancoEnfocado, creat",
+          "x": 32,
+          "ancho": 256,
+          "alto": 761,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo titulo": {
+          "hay": true,
+          "texto": "El equipo",
+          "x": 32,
+          "ancho": 256,
+          "alto": 26,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo persona": {
+          "hay": true,
+          "texto": "FrancoEnfocado, creativo, perf",
+          "x": 32,
+          "ancho": 256,
+          "alto": 320,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "div[data-composicion]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo nombre": {
+          "hay": true,
+          "texto": "Franco",
+          "x": 32,
+          "ancho": 256,
+          "alto": 36,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo foto": {
+          "hay": true,
+          "texto": "[FOTO]Franco, retrato serio[FO",
+          "x": 32,
+          "ancho": 256,
+          "alto": 192,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 256,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        }
+      }
+    },
+    {
+      "ventana": 375,
+      "piezas": {
+        "hero titular": {
+          "hay": true,
+          "texto": "Tu negocio vendiendo las 24 hs",
+          "x": 32,
+          "ancho": 311,
+          "alto": 235,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "hero bajada": {
+          "hay": true,
+          "texto": "Tu sitio, tu chat y tu seguimi",
+          "x": 32,
+          "ancho": 243,
+          "alto": 26,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 68
+        },
+        "qs titular": {
+          "hay": true,
+          "texto": "Queremos hacer algo distinto,n",
+          "x": 32,
+          "ancho": 255,
+          "alto": 45,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 255,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "qs bajada": {
+          "hay": true,
+          "texto": "develOP es una agencia de soft",
+          "x": 32,
+          "ancho": 158,
+          "alto": 489,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 158,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 1
+        },
+        "equipo caja": {
+          "hay": true,
+          "texto": "El equipoFrancoEnfocado, creat",
+          "x": 32,
+          "ancho": 311,
+          "alto": 801,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo titulo": {
+          "hay": true,
+          "texto": "El equipo",
+          "x": 32,
+          "ancho": 311,
+          "alto": 31,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo persona": {
+          "hay": true,
+          "texto": "FrancoEnfocado, creativo, perf",
+          "x": 32,
+          "ancho": 311,
+          "alto": 337,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "div[data-composicion]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo nombre": {
+          "hay": true,
+          "texto": "Franco",
+          "x": 32,
+          "ancho": 311,
+          "alto": 36,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo foto": {
+          "hay": true,
+          "texto": "[FOTO]Franco, retrato serio[FO",
+          "x": 32,
+          "ancho": 311,
+          "alto": 233,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 311,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        }
+      }
+    },
+    {
+      "ventana": 425,
+      "piezas": {
+        "hero titular": {
+          "hay": true,
+          "texto": "Tu negocio vendiendo las 24 hs",
+          "x": 32,
+          "ancho": 361,
+          "alto": 158,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "hero bajada": {
+          "hay": true,
+          "texto": "Tu sitio, tu chat y tu seguimi",
+          "x": 32,
+          "ancho": 243,
+          "alto": 26,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 118
+        },
+        "qs titular": {
+          "hay": true,
+          "texto": "Queremos hacer algo distinto,n",
+          "x": 32,
+          "ancho": 264,
+          "alto": 47,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 264,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "qs bajada": {
+          "hay": true,
+          "texto": "develOP es una agencia de soft",
+          "x": 32,
+          "ancho": 179,
+          "alto": 381,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 179,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 1
+        },
+        "equipo caja": {
+          "hay": true,
+          "texto": "El equipoFrancoEnfocado, creat",
+          "x": 32,
+          "ancho": 361,
+          "alto": 882,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "div"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo titulo": {
+          "hay": true,
+          "texto": "El equipo",
+          "x": 32,
+          "ancho": 361,
+          "alto": 36,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo persona": {
+          "hay": true,
+          "texto": "FrancoEnfocado, creativo, perf",
+          "x": 32,
+          "ancho": 361,
+          "alto": 375,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "div[data-composicion]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo nombre": {
+          "hay": true,
+          "texto": "Franco",
+          "x": 32,
+          "ancho": 361,
+          "alto": 36,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "div[data-arbol]"
+          },
+          "sobraDerecha": 0
+        },
+        "equipo foto": {
+          "hay": true,
+          "texto": "[FOTO]Franco, retrato serio[FO",
+          "x": 32,
+          "ancho": 361,
+          "alto": 271,
+          "maxWidth": "none",
+          "contenedor": {
+            "ancho": 361,
+            "x": 32,
+            "quien": "span"
+          },
+          "sobraDerecha": 0
+        }
+      }
+    }
+  ]
+}

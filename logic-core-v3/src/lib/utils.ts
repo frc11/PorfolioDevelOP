@@ -87,6 +87,8 @@ const V3_FONT_SIZE_CLASSES = [
   // o la tinta. Es el mismo defecto que las dos listas de arriba existen para
   // evitar, y `test:s7-cn` §1 lo exige leyendo el tema.
   'text-display-xl-angosto',
+  // RENGLON: el registro 2 atado a su columna, para que «LAS 24 HS» no se parta.
+  'text-display-xl-columna',
   // PAPEL-2: el registro 1 igualado al registro 2 en la banda de papel, en sus
   // dos regímenes (abajo de 390 y abajo de 375). Mismo motivo que la entrada de
   // arriba: no son niveles de `NIVELES` pero SÍ son `--text-*`, así que sin

@@ -32,7 +32,7 @@
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
 import { ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
 import { enElRepo, esAlta, git, rutasDadasDeAlta, rutasTocadas, tokensDeclaradosEn } from './s3-git'
-import { AGREGADOS } from './padron-de-tokens'
+import { AGREGADOS, INTOCABLES_TOCADOS, MOVIDOS } from './padron-de-tokens'
 import { encabezadoDeFrontera, evaluarVentana } from './s4-ventana'
 
 const tocados = rutasTocadas()
@@ -98,8 +98,20 @@ const propiosVistosPorGit = TESTIGOS.filter((ruta) =>
   tocados.some((t) => t === ruta || (t.endsWith('/') && ruta.startsWith(t))),
 )
 
+/**
+ * ⚠️ **LOS TOCADOS CON PERMISO SALEN DE LA LISTA, Y NO ES LO MISMO QUE IGNORARLOS.**
+ * El esperado deja de ser `[]` y pasa a ser «los declarados en el padrón»: un
+ * intocable que aparezca sin entrada rompe igual, y una entrada que sobre —el
+ * archivo volvió atrás y nadie limpió el padrón— también, porque la comparación
+ * es por conjunto y no por contención.
+ */
+const tocadosConPermiso = INTOCABLES_TOCADOS.map((i) => enElRepo(i.archivo)).sort()
 if (ventana.dentro) {
-  afirmarIgual(prohibidosTocados, [], `ninguno de los ${PROHIBIDOS.length} archivos prohibidos fue tocado`)
+  afirmarIgual(
+    [...prohibidosTocados].sort(),
+    tocadosConPermiso,
+    `de los ${PROHIBIDOS.length} archivos prohibidos, los tocados son exactamente los ${INTOCABLES_TOCADOS.length} declarados en el padrón`,
+  )
   /**
    * EL CONTRAPESO, y es el que encontró el error de prefijo.
    *
@@ -151,7 +163,21 @@ const aprobadosPendientes = CORRECCION_APROBADA.filter((token) => !temaAntes.has
 if (ventana.dentro) {
   afirmarIgual(nombresNuevos, aprobadosPendientes, 'los tokens nuevos contra HEAD son exactamente los agregados aprobados que HEAD no tenía')
   afirmarIgual(nombresPerdidos, [], 'no se perdió ninguno')
-  afirmarIgual(valoresMovidos, [], 'y ningún valor previo se movió')
+  /**
+   * ⚠️ **ACÁ DECÍA `[]` Y AHORA DICE «los declarados».** No es un aflojamiento:
+   * el esperado sale del padrón con `antes` y `ahora` escritos, así que un valor
+   * que se mueva sin declararse —o que se mueva a otro número— rompe igual. Lo
+   * único que cambió es que ahora existe una forma de aprobarlo, que antes no
+   * existía y obligaba a elegir entre mentir o no mover un token nunca.
+   */
+  const movidosAprobados = MOVIDOS.filter((m) => temaAntes.get(m.token) === m.antes)
+    .map((m) => ({ token: m.token, antes: m.antes, ahora: m.ahora }))
+    .sort((a, b) => a.token.localeCompare(b.token))
+  afirmarIgual(
+    [...valoresMovidos].sort((a, b) => a.token.localeCompare(b.token)),
+    movidosAprobados,
+    'y los valores que se movieron son exactamente los declarados en el padrón',
+  )
 } else {
   noCorre(
     `el único token nuevo es la corrección declarada [${CORRECCION_APROBADA.join(' ')}]`,

@@ -17,3 +17,5 @@ audit/
 # rompen el clone. Se ignoran para que no se puedan re-stagear por accidente.
 audit-clean/
 logic-core-runtime/
+
+docs/rediseno/outputs/**/*.png

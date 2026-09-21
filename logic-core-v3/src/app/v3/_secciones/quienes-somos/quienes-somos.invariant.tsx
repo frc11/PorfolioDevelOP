@@ -108,10 +108,14 @@ afirmar(conMotion.includes('transform:'), 'con coreografía los bloques P2 SÍ e
 // mueve `LlegadaEnCurva` con `motion`, que no escribe la clase del sistema.
 // NUEVE: el titular pasó a tener una pieza POR RENGLÓN —su máscara es por renglón, así
 // que P1 vuelve a escalonar dos— y eso suma una a las ocho de antes.
+// TRECE: el titular se reparte DOS veces —cuatro renglones hasta la banda de tablet y
+// los dos de siempre arriba—, y el marcado trae los dos porque el que no corresponde se
+// esconde con `medio:hidden` / `max-medio:hidden`. O sea 2 + 4 = 6 renglones en vez de 2,
+// y 9 + 4 = 13. El que se ve sigue siendo UNO: esto cuenta marcado, no pantalla.
 afirmarIgual(
   veces(conMotion, 'will-change-transform'),
-  9,
-  'y son nueve: los DOS renglones del titular (P1), el rótulo del equipo, la bajada, la foto y los dos nombres con sus dos descripciones',
+  13,
+  'y son trece: los SEIS renglones de los dos repartos del titular (P1), el rótulo del equipo, la bajada, la foto y los dos nombres con sus dos descripciones',
 )
 // Modo pulido: el handle ya no puede ser `data-texto-por-lineas` —el titular no usa ese
 // primitivo—, así que las dos afirmaciones se aflojan a la propiedad que seguían cuidando.
@@ -158,7 +162,10 @@ afirmarIgual(veces(conMotion, '<h2'), 1, '  y sigue siendo uno con la coreograf�
 // El bloque nuevo mete un nivel: «El Equipo» es el h3 que cuelga del titular, y cada
 // persona es un h4 adentro de él. Los nombres siguen siendo encabezados, no párrafos
 // con tamaño de título, que es lo que esta afirmación cuida.
-afirmarIgual(veces(quieto, '<h3'), 1, 'un solo h3: el rótulo del bloque del equipo')
+// BANDA-4: DOS. Al rótulo del bloque del equipo se le suma el título de la foto
+// («Nosotros»), que reemplazó al epígrafe: el epígrafe era un `<p>` debajo de la
+// imagen y el título es el encabezado que la nombra, en su `figcaption`.
+afirmarIgual(veces(quieto, '<h3'), 2, 'dos h3: el rótulo del bloque del equipo y el título de la foto')
 afirmar(new RegExp(`<h3[^>]*>${CONTENIDO.tituloDelEquipo}</h3>`).test(quieto), `  y es «${CONTENIDO.tituloDelEquipo}»`)
 afirmarIgual(veces(quieto, '<h4'), 2, 'y dos h4: uno por persona')
 for (const persona of CONTENIDO.personas) {
@@ -196,15 +203,25 @@ controlPositivo('el chequeo del px suelto ve un p-[7px]', '<i class="p-[7px]">',
  */
 const hovers = veces(quieto, 'hover:')
 afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su gemela `focus-visible:`')
-// 12: cuatro por marco —la toma que crece, el velo, y las dos clases de estado del
-// único texto que quedó en el hover— por los tres marcos. Bajó de 23 cuando el revelado
-// dejó de tener dos partes escalonadas: ahora es el puesto, solo, con su máscara. Lo
-// que esta afirmación cuida no es el número sino la de arriba: ninguna viaja sin gemela.
-// 24: ocho por marco, por los tres. Por marco: el acercamiento de la toma seria (escala
-// y duración), la suelta que crece (recorte y duración), el velo (opacidad) y el texto
-// (subida, duración y el retardo que lo hace arrancar cuando la imagen ya se reveló).
-afirmarIgual(hovers, 24, '  y en esta sección son 24: ocho por cada uno de los tres marcos')
-afirmarIgual(veces(quieto, '<button'), 0, 'cero botones')
+// ⚠️ 24, y es el MISMO número que antes de BANDA-4 aunque el camino fue largo: el
+// hover salió entero («un clic en los ocho anchos»), volvió por CAPACIDAD DE PUNTERO
+// —`(hover: hover)`, no por ancho— y llegó a 30, y ahora baja a 24 por el arreglo del
+// revelado. El velo dejó de cambiar de `display` con el disparo: estaba en `hidden`
+// hasta que se disparaba, y CSS no transiciona un elemento que no estaba renderizado
+// el cuadro anterior, así que el texto de adentro aparecía puesto en vez de viajar
+// (medido: 0 cuadros en vuelo sobre 105). Ahora la caja existe siempre en `opacity: 0`
+// y lo único que el disparador le cambia es la opacidad — una clase donde había tres.
+// Ocho por marco: acercamiento 2, suelta 2, velo 1, texto 3. 8 × 3 marcos.
+afirmarIgual(
+  hovers,
+  24,
+  '  y en esta sección son 24: ocho por marco —acercamiento 2, suelta 2, velo 1, texto 3—, por los tres',
+)
+// Modo pulido: TRES botones, uno por marco. Son el control del toque de abajo de
+// 1025. Están en el marcado en los dos lados —el corte es `escritorio:hidden` y no
+// una rama de JS, porque la compuerta se resuelve una vez arriba (`s7-contrato` §5)—
+// y arriba del umbral el `display: none` los saca del orden de tabulación.
+afirmarIgual(veces(quieto, '<button'), 3, 'tres botones: el control del toque, uno por marco')
 afirmarIgual(veces(quieto, '<a '), 0, 'cero enlaces')
 afirmarIgual(veces(FUENTE, 'onClick'), 0, 'y cero `onClick` en la fuente: ningún div haciendo de botón')
 controlPositivo(

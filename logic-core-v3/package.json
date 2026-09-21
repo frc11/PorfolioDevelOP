@@ -178,6 +178,7 @@
     "test:s7-integracion": "npx tsx src/app/v3/_lib/__tests__/s7-integracion.invariant.tsx",
     "test:s7-arboles": "npx tsx src/app/v3/_lib/__tests__/s7-arboles.invariant.tsx",
     "test:s7-contrato": "npx tsx src/app/v3/_lib/__tests__/s7-contrato.invariant.ts",
+    "test:s7-mezcla": "npx tsx src/app/v3/_lib/__tests__/s7-mezcla.invariant.ts",
     "test:s7-pedido": "npx tsx src/app/v3/_lib/__tests__/s7-pedido.invariant.tsx",
     "test:s7-cn": "npx tsx src/app/v3/_lib/__tests__/s7-cn.invariant.ts",
     "test:s7-compuerta": "npx tsx src/app/v3/_lib/__tests__/s7-compuerta.invariant.ts",

@@ -23,7 +23,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { Imagen, type ImagenProps } from '../../_componentes/medios/Imagen'
-import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
+import { COMPOSICION_MIN_ANCHO_PX, ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import {
   ANCHO_TABLET_PX,
   CLAVE_DE_OVERRIDE_DE_ESCALERA,
@@ -116,19 +116,25 @@ titulo('4 · Los `sizes` se componen desde el breakpoint del sistema')
 
 afirmarIgual(
   sizesPorViewport(33),
-  `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px) 33vw, 100vw`,
+  `(min-width: ${COMPOSICION_MIN_ANCHO_PX}px) 33vw, 100vw`,
   'dos tramos, con el corte estructural',
 )
-afirmarIgual(sizesPorColumnas(1, 3), `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px) 33vw, 100vw`, 'una de tres columnas')
+afirmarIgual(sizesPorColumnas(1, 3), `(min-width: ${COMPOSICION_MIN_ANCHO_PX}px) 33vw, 100vw`, 'una de tres columnas')
 afirmarIgual(
   sizesPorTresTramos(33, 50),
-  `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px) 33vw, (min-width: ${ANCHO_TABLET_PX}px) 50vw, 100vw`,
+  `(min-width: ${COMPOSICION_MIN_ANCHO_PX}px) 33vw, (min-width: ${ANCHO_TABLET_PX}px) 50vw, 100vw`,
   'tres tramos, con los dos cortes medidos',
 )
 
+/**
+ * ⚠️ El `sizes` promete un ANCHO, y el ancho lo decide la grilla: por eso se ata
+ * al corte de COMPOSICIÓN (1024) y no al de coreografía (1025), que gobierna qué
+ * se monta. Eran el mismo número hasta el sprint que los separó.
+ */
+afirmarIgual(ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX, 1, 'los dos umbrales están a un píxel: composición 1024, coreografía 1025')
 afirmarIgual(
   resolver('var(--breakpoint-escritorio)', tokens)?.n,
-  ESCENARIO_MIN_ANCHO_PX,
+  COMPOSICION_MIN_ANCHO_PX,
   'el 1025 de los `sizes` es el token del sistema',
 )
 afirmarIgual(resolver('var(--breakpoint-tablet)', tokens)?.n, ANCHO_TABLET_PX, 'y el 768, también')

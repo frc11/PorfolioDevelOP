@@ -1,0 +1,141 @@
+{
+  "brilloDePrueba": 2.2,
+  "anchos": [
+    {
+      "ancho": "375",
+      "scrollY": 848,
+      "rectDelBloque": {
+        "x": 32,
+        "y": 87,
+        "ancho": 158,
+        "alto": 490
+      },
+      "renglones": 18,
+      "pixelesDeGlifo": 12161,
+      "blend": {
+        "cortaEn": "section[data-panel][data-superficie].relative.z-10.w-full",
+        "razones": [
+          {
+            "propiedad": "position+z-index",
+            "valor": "relative / 10"
+          }
+        ],
+        "llegaAlCanvas": false,
+        "coincidenciaHoy": 0.03,
+        "coincidenciaDestrabado": 23.65,
+        "discriminantes": 9810,
+        "destrabeTomo": true,
+        "destrabeVolvio": true
+      },
+      "backdrop": {
+        "root": "html.__variable_9299cd.__variable_46b309",
+        "razones": [
+          {
+            "propiedad": "(raiz)",
+            "valor": "documentElement"
+          }
+        ],
+        "veElCanvas": true,
+        "brillo": 2.2,
+        "ajuste": {
+          "pixeles": 77420,
+          "cumplen": 76119,
+          "cumplenPct": 98.32,
+          "oscuros": 21775,
+          "oscurosQueCumplen": 20890,
+          "oscurosPct": 95.94,
+          "ejemplo": "entrada 80 -> salida 255 (esperado 176)"
+        }
+      },
+      "cadena": [
+        {
+          "nodo": "div",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-arbol].escritorio:col-start-1.escritorio:col-span-6.escritorio:row-start-4",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-composicion].grid.w-full.grow",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-pieza][data-columnas][data-canal].grid.w-full.grid-cols-1",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-pantalla].flex.min-h-svh.w-full",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-parte].mx-auto.w-full.max-w-tope",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-pieza].w-full.max-w-full.px-[var(--pad-lateral-compacto)]",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-seccion-id].w-full",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "section[data-panel][data-superficie].relative.z-10.w-full",
+          "apila": [
+            "position+z-index=relative / 10"
+          ],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "main.relative.z-10",
+          "apila": [
+            "position+z-index=relative / 10"
+          ],
+          "backdropRoot": [],
+          "contieneElCanvas": false
+        },
+        {
+          "nodo": "div[data-v3].__variable_d28a8c.__variable_912422.__variable_77c6bb",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": true
+        },
+        {
+          "nodo": "body.antialiased",
+          "apila": [],
+          "backdropRoot": [],
+          "contieneElCanvas": true
+        },
+        {
+          "nodo": "html.__variable_9299cd.__variable_46b309",
+          "apila": [
+            "(raíz)=documentElement",
+            "view-transition-name=root"
+          ],
+          "backdropRoot": [
+            "(raiz)=documentElement"
+          ],
+          "contieneElCanvas": true
+        }
+      ]
+    }
+  ]
+}

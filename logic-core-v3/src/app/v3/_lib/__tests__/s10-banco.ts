@@ -178,6 +178,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
     },
   ],
   [
+    'CompuertaDelDeslizamiento',
+    {
+      emite: null,
+      porQue:
+        'la mitad de abajo del eje del deslizamiento del CTA. Dos ceros por dos razones, como su hermana: `ssr: false`, y además el módulo perezoso (`DeslizamientoSinScrollSuave`) devuelve `null` porque todo lo que hace vive en un efecto. ⚠️ Y un tercero propio: arriba del umbral devuelve `null` ANTES de pedir el `import()`, porque ahí el deslizamiento ya lo monta `ScrollSuaveDeV3` y dos escuchas del mismo click serían un defecto',
+    },
+  ],
+  [
     'Navegacion',
     {
       emite: () => createElement(Navegacion, {}),

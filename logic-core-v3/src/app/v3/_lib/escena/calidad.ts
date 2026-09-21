@@ -35,9 +35,14 @@
  * que no hace. Renombrarlo es mecánico y es de 19 archivos —10 de producto y 9
  * de instrumentos, varios de los cuales afirman el literal
  * `'ESCENARIO_MIN_ANCHO_PX'` sobre el FUENTE— y **no movería un byte de
- * comportamiento**. Este sprint no lo hace: la constante sigue atada por
- * invariante a `--breakpoint-escritorio` (`tokens.invariant.ts`) y ése es el
- * significado que le queda, que es verdadero. Queda anotado para quien lo tome.
+ * comportamiento**. Este sprint no lo hace.
+ *
+ * ⚠️ **Y el argumento que sostenía la deuda se cayó:** decía que la constante
+ * «sigue atada por invariante a `--breakpoint-escritorio`, y ése es el
+ * significado que le queda». Ya no está atada. El corte de composición bajó a
+ * 1024 y esta constante se quedó en 1025, que es el umbral de lo que se MONTA
+ * —escena, cursor, scroll suave—. O sea que el nombre volvió a ser casi
+ * correcto: `ESCENARIO_` describe justamente eso. La deuda queda, más chica.
  */
 
 /**

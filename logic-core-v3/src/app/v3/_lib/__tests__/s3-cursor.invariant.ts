@@ -23,7 +23,7 @@
  */
 
 import { snapshotDeServidor } from '../usePrefiereMenosMovimiento'
-import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
+import { COMPOSICION_MIN_ANCHO_PX, ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import {
   CONSULTA_CURSOR,
   CONSULTA_MENOS_MOVIMIENTO,
@@ -89,10 +89,30 @@ afirmarIgual(
   ESCENARIO_MIN_ANCHO_PX,
   '  el mismo que la compuerta del escenario: una sola definición en el repo',
 )
+/**
+ * 🔴 **ACÁ SE AFIRMABA QUE EL CURSOR Y EL TOKEN DECÍAN LO MISMO. YA NO.**
+ *
+ * El cursor cuelga de `ESCENARIO_MIN_ANCHO_PX` porque es una de las tres cosas
+ * que se MONTAN con el escenario (las otras dos son la escena y el scroll
+ * suave), y ése es el umbral que B6.1 midió: 1025. `--breakpoint-escritorio` es
+ * otra cosa —cómo se COMPONE la página— y bajó a 1024 para que el iPad apaisado
+ * y la notebook caigan del lado de escritorio.
+ *
+ * La afirmación no se afloja: se parte. Se sigue comprobando que el cursor tenga
+ * UNA sola definición y que sea la del escenario, y además que esté exactamente
+ * un píxel ARRIBA del corte de composición — que es la relación medida, no una
+ * casualidad tolerada. Si alguien mueve cualquiera de los dos, esto se pone
+ * rojo igual que antes.
+ */
 afirmarIgual(
   resolver('var(--breakpoint-escritorio)', tokens)?.n,
-  CURSOR_MIN_ANCHO_PX,
-  '  y el mismo que --breakpoint-escritorio en el sistema',
+  COMPOSICION_MIN_ANCHO_PX,
+  '  y --breakpoint-escritorio es el corte de COMPOSICIÓN, que es otro: 1024',
+)
+afirmarIgual(
+  CURSOR_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX,
+  1,
+  '  el cursor queda UN píxel arriba del corte de composición: a 1024 se compone como escritorio y todavía no hay cursor propio',
 )
 afirmarIgual(CONSULTA_CURSOR, '(min-width: 1025px)', 'la consulta de ancho está bien armada')
 afirmarIgual(

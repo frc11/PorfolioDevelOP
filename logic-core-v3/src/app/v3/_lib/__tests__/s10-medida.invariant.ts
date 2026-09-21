@@ -30,6 +30,7 @@
  * lector, y los dos tienen que leer el mismo `unitsPerEm`.
  */
 
+import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ANCHOS } from './s10-banco'
 import {
@@ -136,27 +137,65 @@ titulo('2 · Las variantes de ancho salen de los `--breakpoint-*`, no de un núm
  * las DOS caras de todo breakpoint, y **374 se agrega como ancho de prueba**
  * porque es el único de la banda donde ninguno de los dos entró todavía.
  */
-afirmarIgual(Object.keys(BREAKPOINTS).sort(), ['angosto', 'chico', 'escritorio', 'medio', 'tablet'], 'los CINCO breakpoints se leen del tema')
+afirmarIgual(
+  Object.keys(BREAKPOINTS).sort(),
+  ['angosto', 'chico', 'escritorio', 'hasta-tablet', 'medio', 'movil', 'tablet'],
+  'los SIETE breakpoints se leen del tema: los cinco de siempre más los dos que cierran una banda por arriba',
+)
 afirmarIgual(variantesActivas(374), [], 'a 374 no hay ninguna variante activa: es la banda donde el Hero pinta papel y el décimo nivel baja a 55')
 afirmarIgual(variantesActivas(375), ['angosto'], 'a 375 entra `angosto` — el breakpoint es inclusivo, y es el primer ancho donde el décimo nivel entra en un renglón')
 afirmarIgual(variantesActivas(389), ['angosto'], '  y a 389 sigue siendo el único: `chico` todavía no entró, o sea que el Hero sigue en papel')
 afirmarIgual(variantesActivas(390), ['angosto', 'chico'], 'a 390 entra `chico` — el primer ancho donde la escena se ve y la marca del Hero se apaga')
-afirmarIgual(variantesActivas(768), ['angosto', 'chico', 'tablet'], 'a 768 entra `tablet`')
-afirmarIgual(variantesActivas(1024), ['angosto', 'chico', 'tablet', 'medio'], 'a 1024 todavía NO hay `escritorio:`')
-afirmarIgual(variantesActivas(1025), ['angosto', 'chico', 'tablet', 'medio', 'escritorio'], 'y a 1025 sí: es el salto que separa los dos sitios')
+afirmarIgual(variantesActivas(425), ['angosto', 'chico'], 'a 425 `movil` todavía NO entró: `max-movil:` cubre ESE ancho, que es el punto del token')
+afirmarIgual(variantesActivas(426), ['angosto', 'chico', 'movil'], '  y a 426 sí: ahí la banda móvil termina')
+afirmarIgual(variantesActivas(769), ['angosto', 'chico', 'movil', 'tablet', 'hasta-tablet'], 'a 769 entra `hasta-tablet`: `max-hasta-tablet:` cubre el 768 y `max-tablet:` no')
+/**
+ * ⚠️ **LAS DOS CARAS `min-width` DE LOS CORTES DE UN SENTIDO APARECEN ACÁ, Y NO
+ * TIENEN CONSUMIDOR.** Tailwind emite las dos caras de todo breakpoint, así que
+ * `--breakpoint-movil` (426) y `--breakpoint-hasta-tablet` (769) suman su cara de
+ * arriba a esta lista aunque el lane use sólo la de abajo. Es lo mismo que ya
+ * pasaba con `angosto` y `chico`: la tabla dice qué EMITE el tema, no qué se usa.
+ */
+afirmarIgual(variantesActivas(768), ['angosto', 'chico', 'movil', 'tablet'], 'a 768 entra `tablet`, y `movil` ya venía de 426')
+/**
+ * 🔴 **EL SALTO SE MUDÓ UN PÍXEL, y no es un ajuste cosmético del test.**
+ * `escritorio:` entraba a 1025 porque el token valía 1025 y el token era también
+ * la compuerta de coreografía. El sprint que bajó la composición a 1024 los
+ * separó: la variante entra a 1024 —iPad apaisado y notebook componen como
+ * escritorio— y la coreografía se quedó arriba. Por eso acá se afirma 1023 y
+ * 1024, y el 1025 pasó a ser el borde del OTRO umbral, que no vive en el tema.
+ */
 afirmarIgual(
-  clasesEfectivas('grid-cols-1 escritorio:grid-cols-5 hover:opacity-50', 1024),
-  ['grid-cols-1', 'hover:opacity-50'],
-  'una clase `escritorio:` se descarta entera abajo del umbral y el `hover:` se conserva',
+  variantesActivas(1023),
+  ['angosto', 'chico', 'movil', 'tablet', 'hasta-tablet', 'medio'],
+  'a 1023 todavía NO hay `escritorio:`',
 )
 afirmarIgual(
-  clasesEfectivas('grid-cols-1 escritorio:grid-cols-5 hover:opacity-50', 1025),
+  variantesActivas(1024),
+  ['angosto', 'chico', 'movil', 'tablet', 'hasta-tablet', 'medio', 'escritorio'],
+  'y a 1024 sí: es el salto de COMPOSICIÓN, que ya no coincide con el de coreografía',
+)
+afirmarIgual(
+  ESCENARIO_MIN_ANCHO_PX - BREAKPOINTS.escritorio,
+  1,
+  '  y el de coreografía queda un píxel arriba, en 1025: la franja entre los dos es de UN píxel',
+)
+// ⚠️ 1023 y no 1024: el corte de composición bajó un píxel, así que 1024 pasó a
+// ser el primer ancho donde `escritorio:` SÍ entra. El par de abajo prueba los
+// dos lados del corte nuevo, y el control positivo usa el lado que descarta.
+afirmarIgual(
+  clasesEfectivas('grid-cols-1 escritorio:grid-cols-5 hover:opacity-50', 1023),
+  ['grid-cols-1', 'hover:opacity-50'],
+  'una clase `escritorio:` se descarta entera abajo del corte y el `hover:` se conserva',
+)
+afirmarIgual(
+  clasesEfectivas('grid-cols-1 escritorio:grid-cols-5 hover:opacity-50', 1024),
   ['grid-cols-1', 'grid-cols-5', 'hover:opacity-50'],
-  '  y arriba entra con el prefijo sacado',
+  '  y a 1024 entra con el prefijo sacado: portátil compone como escritorio',
 )
 controlPositivo(
   'el filtro de clases no deja pasar una variante de ancho que no llega',
-  1024,
+  1023,
   (ancho: number) => clasesEfectivas('escritorio:sticky', ancho).includes('sticky'),
 )
 console.log(`  ancho de contenido por ancho: ${ANCHOS.map((a) => `${a}→${anchoDeContenido(a)}`).join(' · ')}`)

@@ -64,6 +64,64 @@ export interface Agregado {
 }
 
 /**
+ * ⚠️ **LA TERCERA CLASE DE CAMBIO APROBADO, Y NACIÓ PORQUE HIZO FALTA.**
+ *
+ * El padrón tenía dos: RENOMBRES (sale uno, entra uno) y AGREGADOS (entra uno).
+ * Faltaba la que este sprint necesitó: un token que se queda con su nombre y
+ * **cambia de valor**. `s3-frontera` §1b afirma que ningún valor previo se
+ * mueve, y esa afirmación es de las buenas —un token que cambia en silencio es
+ * el peor cambio que puede haber—, así que la salida NO fue aflojarla sino
+ * nombrar la excepción, que es lo que el repo ya hace con las otras dos.
+ *
+ * Con `antes` y `ahora` escritos, la afirmación sigue siendo filosa: un valor
+ * que se mueva y no esté acá, o que se mueva a un número distinto del
+ * declarado, la rompe igual.
+ */
+export interface Movido {
+  readonly token: string
+  readonly antes: string
+  readonly ahora: string
+  readonly sprint: string
+  readonly motivo: string
+}
+
+/**
+ * ⚠️ **LA CUARTA CLASE: UN ARCHIVO PROHIBIDO QUE SÍ SE TOCÓ, CON MOTIVO.**
+ *
+ * `s3-frontera` §1 afirma que los ocho intocables están intactos, y esa
+ * afirmación no se afloja: se le nombra la excepción, igual que a los tokens.
+ * Cada entrada dice QUÉ se le cambió y POR QUÉ no había otra forma — si lo
+ * hubiera, la entrada no debería existir y el archivo debería volver atrás.
+ */
+export interface Intocable {
+  readonly archivo: string
+  readonly queCambio: string
+  readonly sprint: string
+  readonly motivo: string
+}
+
+export const INTOCABLES_TOCADOS: readonly Intocable[] = [
+  {
+    archivo: 'src/app/v3/page.tsx',
+    queCambio: 'UNA clase en el `<main>`: `max-escritorio:z-auto`, más su comentario.',
+    sprint: 'BLEND',
+    motivo:
+      'Era necesario y no había otra forma. `mix-blend-mode` mezcla contra el CONTEXTO DE APILAMIENTO más cercano, y `<main className="relative z-10">` abre uno propio que NO tiene la escena adentro —la escena es hermana del `<main>`, no descendiente—, así que la bajada de «Quiénes somos» mezclaba contra un grupo vacío y el texto quedaba invisible. Sacarle el contexto al `<main>` abajo del corte es lo único que deja que la mezcla alcance al grupo que sí contiene la escena. [medido] 716 de 716 lecturas cortaban antes del cambio. ⚠️ Arriba del corte no cambia NADA: la clase lleva la variante `max-escritorio:`, así que el `z-10` de escritorio queda exactamente como estaba, y ésa es la razón por la que la excepción es de una línea y no del archivo.',
+  },
+]
+
+export const MOVIDOS: readonly Movido[] = [
+  {
+    token: '--breakpoint-escritorio',
+    antes: '1025px',
+    ahora: '1024px',
+    sprint: 'PORTATIL',
+    motivo:
+      'El corte de COMPOSICIÓN bajó un píxel para que 1024 —iPad apaisado y notebook, no tablet— caiga del lado de escritorio: ahí entran la calle lateral, el ≠ en la columna de texto y los tres rótulos en la calle derecha. [decidido] La compuerta de COREOGRAFÍA se quedó en 1025, que es donde B6.1 la midió, así que los dos umbrales dejaron de ser el mismo número y viven separados en `_lib/compuerta.ts` con la franja de un píxel declarada. Medido después del cambio: a 1023 la grilla lateral no existe y la mezcla es `difference`; a 1024 la grilla es `140px 804px`, la mezcla es `normal` y la escena vuelve a `z-0`, igual que a 1440. La pose de la cámara es la misma en los tres, o sea que el logo no se movió.',
+  },
+]
+
+/**
  * Los renombres aprobados. NO mueven la cardinalidad: sale uno, entra uno.
  */
 export const RENOMBRES: readonly Renombre[] = [
@@ -139,6 +197,24 @@ export const AGREGADOS: readonly Agregado[] = [
     sprint: 'PAPEL-2',
     motivo:
       'El QUINTO breakpoint, 390 px, y el segundo que el lane usa hacia ABAJO. [derivado] Nace porque el §1 pide que el papel opaco del Hero cubra 375 y NO cubra 390, y `max-angosto:` emite `@media (width < 375px)`, que deja 375 afuera. NO se hizo subiéndole el número a `--breakpoint-angosto`, y el motivo está medido: ese token tiene DOS consumidores con bandas distintas —`max-angosto:bg-fondo` (la superficie) y `max-angosto:text-display-xl-angosto` (el registro 2 a 55 px)— y la banda del segundo es exactamente 320–374, porque de 371,13 px de ventana para arriba el décimo nivel ya entra solo en la caja del titular. Moverlo a 390 habría achicado el registro 2 de 375 un 18 % sin una medición que lo pida, habría dejado al token contradiciendo su propia derivación escrita y habría desincronizado `tokens.invariant` §7b, que ata ese 375 al de `--fluido-piso`. El 390 sale del mismo lugar que salió el 375: es el primer ancho del set donde la regla deja de aplicar — tinta del titular sobre la masa del logo, medida en COMPO-1 §9.1: 43,76 % a 320 y 40,59 % a 375 contra 2,71 % a 390. ⚠️ Es un PROXY declarado: lo que hunde a 375 es su ALTO y no su ancho (el set aparea 320×568 y 375×667 contra 390×844, o sea que la banda son los dos viewports CORTOS), y una media query de ancho no puede preguntar eso. Es el único breakpoint del lane con consumidores en los DOS sentidos: `max-chico:` pinta el papel, achica el pie y baja el registro 1; `chico:` esconde la marca del Hero y la pastilla de navegación.',
+  },
+  {
+    token: '--text-display-xl-columna',
+    sprint: 'RENGLON',
+    motivo:
+      'NO es un nivel nuevo de la escala —no entra en `NIVELES` y `s3-tipografia` §6 no lo mira—: es el registro 2 del titular atado a SU COLUMNA en vez de al viewport, y no lleva un número sino una RAZÓN. [derivado] El defecto: «LAS 24 HS» se partía en dos renglones a 1024, con 410,45 px de tinta en una caja de 312. Y la cuenta muestra que no era sólo 1024 — `--text-fluido-display-xl` crece con 3,4742vw mientras la caja del h1 crece con `0,4w − 97,6`, así que la tinta entra recién desde 1433 px: la banda 1024–1432 entera estaba rota y 1440 zafaba por 1,69 px. La corrección conserva la razón con la que el titular llena su columna a 1440 —476,70 / 478,39 = 0,21740— y la aplica a la caja de cualquier ancho: `(0,4w − 97,6) × 0,21740 = 8,696vw − 21,22px`. Por construcción **1440 y 1920 no se mueven un píxel** (104,00 y el tope 120,6761) y todo ancho intermedio queda tan holgado como la referencia. El piso y el techo son los de `--text-fluido-display-xl`, sin inventar; el piso no llega a morder porque la recta ya vale 67,83 a 1024. Se aplica con `escritorio:`, o sea sólo arriba del corte de composición: abajo la caja es `w − 64` y el nivel fluido ya entraba en los cuatro anchos medidos.',
+  },
+  {
+    token: '--breakpoint-movil',
+    sprint: 'BANDA-4',
+    motivo:
+      'El SEXTO breakpoint, 426 px, y el tercero que el lane usa hacia ABAJO. [decidido] Nace por una razón mecánica y no estética: Tailwind emite `max-<nombre>:` como `width < valor`, así que una banda que termina EN un ancho necesita su token en el ancho SIGUIENTE. La banda móvil del mapa de cortes termina en 425 —el preset «Mobile L» de DevTools, el ancho que el dueño mira—, así que el token vale 426 y `max-movil:` la cubre exacta. Sin él, la regla que lo necesitaba se estiró al borde disponible más cercano y se vio: el reparto del titular de «Quiénes somos» en CUATRO renglones llegaba hasta 859 px (`medio:`, que es el token de 860) en vez de 425, o sea 434 px de más en los que el titular se partía sin motivo. ⚠️ Su cara `min-width` no tiene consumidor y no se le inventa uno: es un corte de UN solo sentido, como `--breakpoint-angosto` y `--breakpoint-chico`.',
+  },
+  {
+    token: '--breakpoint-hasta-tablet',
+    sprint: 'BANDA-4',
+    motivo:
+      'El SÉPTIMO breakpoint, 769 px, y el cuarto que el lane usa hacia ABAJO. [decidido] Mismo mecanismo que `--breakpoint-movil` y el caso que lo vuelve obvio: `--breakpoint-tablet` vale 768 y `max-tablet:` emite `width < 768`, o sea que deja AFUERA justamente el 768, que es el ancho de la banda. Por eso «hasta tablet» necesita 769. Sin él, la regla que lo necesitaba se estiró al corte de composición: el ≠ a la izquierda tomaba hasta 1024 en vez de terminar en 768, o sea 256 px de más. ⚠️ No reemplaza a `--breakpoint-tablet`: ése tiene consumidores hacia ARRIBA —`tablet:grid-cols-3`, `tablet:col-span-3`, el colapso de la columna lateral— y este otro sólo hacia abajo. Son el mismo corte leído desde sus dos lados, y por eso son dos tokens y no uno con dos usos.',
   },
   {
     token: '--text-display-r1-papel',

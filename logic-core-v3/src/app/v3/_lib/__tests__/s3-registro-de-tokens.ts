@@ -86,6 +86,7 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
     procedencia: '3px medidos = tres filetes de --border-hairline',
   },
 
+  // ── Respiro de la foto ─────────────────────────────────────────────────
   // ── Navegación ─────────────────────────────────────────────────────────
   { nombre: '--nav-reposo', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: '24px, igual que el reposo medido de la referencia, y token exacto del sistema' },
   {

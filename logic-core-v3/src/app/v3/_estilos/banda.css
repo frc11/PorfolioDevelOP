@@ -1,0 +1,155 @@
+/* =========================================================================
+ * LO QUE LA BANDA DE ABAJO DEL CORTE NECESITA — y por qué está todo junto
+ * =========================================================================
+ * Tres reglas que no tienen nada que ver entre sí salvo una cosa: las tres
+ * necesitan el corte de composición como condición, y ninguna se puede escribir
+ * con una utilidad de Tailwind. Están en UN archivo con UNA media query porque la
+ * alternativa era sembrar la misma excepción en tres hojas.
+ *
+ * ── ⚠️ POR QUÉ NO SON CLASES, QUE ES LA PREGUNTA OBVIA ────────────────────
+ *
+ * Porque las tres pisan reglas de hoja de estilo, y una utilidad pierde por
+ * especificidad: `[data-v3] [data-pieza="cta"]` es 0-2-0 y `.text-fondo` es
+ * 0-1-0. La salida sería `!important`, que es peor.
+ *
+ * ── ⚠️ Y POR QUÉ EL CORTE VA COMO LITERAL ────────────────────────────────
+ *
+ * Se probaron las tres formas que no lo son y ninguna sirve:
+ *
+ *   · **la variante** (`@variant max-escritorio`) no compila — Tailwind 4
+ *     contesta `Cannot use @variant with variant` y la ruta cae en 500;
+ *   · **`theme(--breakpoint-escritorio)`** compila y NO resuelve: estas hojas son
+ *     CSS plano que `layout.tsx` importa, y `theme()` sólo resuelve donde
+ *     Tailwind tiene contexto. La hoja emitida sale con la función textual, el
+ *     navegador no la parsea y tira el bloque en silencio — verificado leyendo la
+ *     hoja servida, con los trazos todavía en `rgb(83, 83, 83)` a 375;
+ *   · **una utilidad**, por lo de arriba.
+ *
+ * Así que va el número, `s3-tokens` §6 lo excluye por archivo y con motivo, y
+ * `s7-mezcla` §8 lo ata: lee este literal y lo compara contra
+ * `--breakpoint-escritorio`. Es el patrón que el repo ya usa para el 375 de
+ * `--breakpoint-angosto` contra `--fluido-piso`, por la misma razón: una media
+ * query no puede leer una custom property.
+ * ========================================================================= */
+
+@media (width < 1024px) {
+  /* ── 1 · LOS TRAZOS SIGUEN AL TEXTO ────────────────────────────────────
+   * El subrayado, el tachado y los tres trazos del ≠ se pintan con
+   * `--color-tinta` EXPLÍCITO y no con `currentColor`, así que la mezcla del
+   * envoltorio no los alcanza sola. Sin esto el texto invierte y las rayas se
+   * quedan en tinta oscura sobre el logo oscuro: el defecto que la mezcla existe
+   * para sacar, y encima justo en el renglón que la lleva.
+   *
+   * Los dos tonos se vuelven uno, y es correcto: bajo `difference` lo que decide
+   * el resultado es la distancia al fondo, y dos fuentes distintas darían dos
+   * inversiones distintas sobre el mismo logo. */
+  [data-v3] [data-trazo] [data-parte='linea'] {
+    background-color: var(--color-fondo);
+  }
+
+  [data-v3] [data-trazo='tachado'] {
+    color: var(--color-fondo);
+  }
+
+  [data-v3] [data-signo='distinto'] [data-parte='barra'] line,
+  [data-v3] [data-signo='distinto'] [data-parte='diagonal'] line {
+    stroke: var(--color-fondo);
+  }
+
+  /* ── 2 · EL CTA QUE MEZCLA USA LA TINTA DEL PAPEL ──────────────────────
+   * `difference` sólo da negro pleno sobre papel si la fuente ES el papel. El CTA
+   * declara `color: var(--color-tinta)` como regla cerrada de la paleta, así que
+   * bajo mezcla pintaba `|247 − 17| = 230` sobre papel —gris lavado— y
+   * `|15 − 17| = 2` sobre el logo —negro invisible—: descolorido de los dos
+   * lados, que es exactamente el síntoma.
+   *
+   * ⚠️ Va con `[data-mezcla]` y no con `[data-pieza="cta"]` a secas, y eso no es
+   * prolijidad: el CTA del Cierre NO mezcla, y pintarlo con el papel lo dejaría
+   * blanco sobre blanco. El atributo lo pone sólo la instancia que lleva la
+   * mezcla. */
+  [data-v3] [data-pieza='cta'][data-mezcla] {
+    color: var(--color-fondo);
+  }
+
+  /* ⚠️ **Y SU SUBRAYADO, que es el MISMO caso que los trazos del titular.** Las
+   * dos capas del rollover se pintan con `background-color: var(--color-tinta)`
+   * explícito, no con `currentColor`, así que arreglar el rótulo las dejaba
+   * atrás: la raya quedaba en tinta oscura debajo de un rótulo invertido. Van
+   * las dos —`::before` y `::after`— porque el hueco del rollover es ausencia de
+   * raya y no un segundo color: si sólo se repintara una, el hueco pasaría a ser
+   * un cambio de color y el gesto diría otra cosa. */
+  [data-v3] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::before,
+  [data-v3] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
+    background-color: var(--color-fondo);
+  }
+}
+
+/* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse
+ * ─────────────────────────────────────────────────────────────────────────
+ * `marco.tsx` monta SIEMPRE el `<button data-toque="marco">` que cubre la foto
+ * entera y escribe `data-abierto` al activarse. Eso es correcto para el
+ * dispositivo sin hover —no tiene otra forma de pedir el revelado— y sería un
+ * defecto en uno CON hover: un clic de mouse dejaría `data-abierto="true"`
+ * pegado, y al alejar el mouse el revelado seguiría abierto porque
+ * `group-data-[abierto=true]:` no depende de estar posado.
+ *
+ * `pointer-events: none` bajo `(hover: hover)` cierra esa puerta: el mouse ya
+ * no puede hacer clic en el botón, así que el estado nunca se escribe desde ahí
+ * y el revelado queda gobernado por `:hover`/`:focus-visible`, que sí se sueltan
+ * solos al dejar de posar o de tener el foco.
+ *
+ * ⚠️ **Esto NO apaga el teclado.** `pointer-events` sólo afecta el puntero —un
+ * mouse o un dedo—; el foco por Tab y la activación con Enter/Espacio en un
+ * `<button>` son mecanismos del teclado y siguen intactos. Si alguien llega con
+ * Enter en un dispositivo con hover, el resultado visual es el mismo que ya
+ * muestra `:focus-visible` en ese botón: no hay nada que se vea distinto. */
+@media (hover: hover) {
+  [data-v3] [data-toque='marco'] {
+    pointer-events: none;
+  }
+}
+
+/* ── EL ≠ A LA IZQUIERDA, EXACTO EN LA BANDA DE TABLET ─────────────────────
+ * `trazo.css` lo centra con `margin-inline: auto`, y centrado le cae encima al
+ * logo: medido, a 768 arrancaba en x=303 con el margen del texto en 32. Pegado al
+ * margen izquierdo deja de cruzarlo y además se alinea con el titular y el cuerpo,
+ * que es donde el ojo ya está.
+ *
+ * ⚠️ **LA BANDA ES 426–768 Y NI UN PÍXEL MÁS.** En móvil el ≠ se queda centrado
+ * —ahí el bloque es angosto y no hay calle que respetar— y de 769 para arriba la
+ * composición no se toca. Nació estirada hasta 1024 porque el tema no tenía corte
+ * en 768 inclusive; ahora lo tiene y los dos bordes son tokens:
+ * `--breakpoint-movil` (426) abre y `--breakpoint-hasta-tablet` (769) cierra.
+ * `s7-mezcla` §8 ata los dos literales. */
+@media (width >= 426px) and (width < 769px) {
+  [data-v3] [data-signo='distinto'] {
+    margin-inline: 0;
+  }
+}
+
+/* ── LA DESCRIPCIÓN DEL EQUIPO NO SE REPITE ────────────────────────────
+ * «Nosotros» abre el bloque, y en la banda móvil (≤425) la descripción va
+ * SIEMPRE VISIBLE debajo del título —`sr-only max-movil:not-sr-only` en
+ * `QuienesSomos.tsx`—, porque ahí se lee cómoda. El MISMO texto sigue adentro
+ * del revelado de la foto —`data-parte="revelado-texto"`—, así que sin esta
+ * regla se leería dos veces: una siempre y otra al tocar.
+ *
+ * Lo que sale es el TEXTO, no el gesto: el intercambio de imagen y el velo que
+ * oscurece se quedan intactos, tocar la foto sigue cambiando la toma. Sólo el
+ * párrafo duplicado se apaga.
+ *
+ * ⚠️ **`[data-descripcion-afuera]` acota el efecto a la foto del equipo.** Los
+ * retratos de Franco y Valentino muestran su puesto SOLO adentro del revelado
+ * —nunca afuera, en ningún ancho— así que no llevan el atributo y esta regla no
+ * los toca: seguirían necesitando el texto ahí adentro.
+ *
+ * ⚠️ **El literal es 426px y no está atado por invariante.** Es el mismo umbral
+ * que `max-movil:not-sr-only` ya usa del lado de React —`--breakpoint-movil`—,
+ * pero acá no hay una custom property que leer: es una condición de contenido
+ * (¿el texto ya se lee afuera?), no una propiedad del tema. Si `--breakpoint-movil`
+ * se mueve, hay que mover el número de acá a mano. */
+@media (width < 426px) {
+  [data-v3] [data-marco='dos-tomas'][data-descripcion-afuera] [data-parte='revelado-texto'] {
+    display: none;
+  }
+}

@@ -24,13 +24,22 @@
  *
  * ── Por qué las condiciones de `sizes` se ARMAN y no se escriben ──────────
  *
- * Un `sizes` escrito a mano trae `(min-width: 1025px)` literal, que es el
+ * Un `sizes` escrito a mano trae `(min-width: 1024px)` literal, que es el
  * breakpoint del sistema copiado a mano en un string. Acá se compone desde
  * `ESCENARIO_MIN_ANCHO_PX`, que ya está atado por invariante a
  * `--breakpoint-escritorio`. El número aparece una sola vez en el repo.
  */
 
-import { ESCENARIO_MIN_ANCHO_PX } from './compuerta'
+/**
+ * ⚠️ **EL `sizes` CUELGA DEL CORTE DE COMPOSICIÓN Y NO DEL DE COREOGRAFÍA.**
+ * Hasta el sprint que los separó era el mismo número y daba igual cuál se
+ * importara. Ya no: un `sizes` dice qué ANCHO va a tener la imagen, y ese ancho
+ * lo decide la grilla —o sea la composición—, que conmuta en 1024. Con el otro
+ * umbral, a 1024 exactos la grilla daría tres columnas y el `sizes` seguiría
+ * prometiendo `100vw`: el navegador bajaría un archivo del triple de lo que la
+ * caja necesita, en el ancho más común de notebook.
+ */
+import { COMPOSICION_MIN_ANCHO_PX } from './compuerta'
 
 /** El breakpoint tablet del sistema, en número, desde el mismo lugar que el
  *  resto. `--breakpoint-tablet` vale 768px y el instrumento lo relee del CSS. */
@@ -66,7 +75,7 @@ export const CLAVE_DE_OVERRIDE_DE_ESCALERA = 'deviceSizes'
 export function sizesPorViewport(porcentajeEscritorio: number, porcentajeCompacto = 100): string {
   validarPorcentaje(porcentajeEscritorio)
   validarPorcentaje(porcentajeCompacto)
-  return `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px) ${porcentajeEscritorio}vw, ${porcentajeCompacto}vw`
+  return `(min-width: ${COMPOSICION_MIN_ANCHO_PX}px) ${porcentajeEscritorio}vw, ${porcentajeCompacto}vw`
 }
 
 /**
@@ -86,7 +95,7 @@ export function sizesPorTresTramos(
   validarPorcentaje(porcentajeMedio)
   validarPorcentaje(porcentajeCompacto)
   return [
-    `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px) ${porcentajeEscritorio}vw`,
+    `(min-width: ${COMPOSICION_MIN_ANCHO_PX}px) ${porcentajeEscritorio}vw`,
     `(min-width: ${ANCHO_TABLET_PX}px) ${porcentajeMedio}vw`,
     `${porcentajeCompacto}vw`,
   ].join(', ')

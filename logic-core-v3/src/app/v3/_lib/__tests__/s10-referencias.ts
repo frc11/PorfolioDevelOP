@@ -36,8 +36,17 @@ export const ANCHOS_DE_REFERENCIA: readonly AnchoDeReferencia[] = [
   { px: 375, porQue: 'el PISO de la banda fluida (`--fluido-piso`): los seis niveles llegan a su mínimo' },
   { px: 390, porQue: 'el teléfono que S0 midió — `LAYOUT.md` publica sus doce volcados a 390' },
   { px: 768, porQue: 'tablet, y el primer breakpoint del sistema (`--breakpoint-tablet`)' },
-  { px: 1024, porQue: 'justo ABAJO del umbral de la escena: sin coreografía y sin `escritorio:`' },
-  { px: 1025, porQue: 'justo ARRIBA: `--breakpoint-escritorio`, donde la escena y la coreografía existen' },
+  // ⚠️ **ESTOS DOS DEJARON DE SER EL MISMO BORDE VISTO DE LOS DOS LADOS.** Eran
+  // «justo abajo» y «justo arriba» de un umbral único. El corte de composición
+  // bajó a 1024 y la compuerta de coreografía se quedó en 1025, así que ahora
+  // cada uno nombra una cosa distinta y los dos son bordes de verdad: 1024 es el
+  // primer ancho que compone como escritorio, y 1025 el primero que monta el
+  // cursor y el scroll suave. ⚠️ NO se agrega 1023 a esta lista aunque sea el
+  // borde de abajo de la composición: la lista la consumen los bancos de S10 y
+  // cada ancho nuevo pide recibos nuevos en todos ellos. El corte se afirma en
+  // `s10-medida` con `clasesEfectivas(…, 1023)`, que no cuesta un banco.
+  { px: 1024, porQue: 'EL CORTE de composición (`--breakpoint-escritorio`): iPad apaisado y notebook, ya con `escritorio:`' },
+  { px: 1025, porQue: 'el umbral de COREOGRAFÍA (`ESCENARIO_MIN_ANCHO_PX`): recién acá montan el cursor y el scroll suave' },
 ]
 
 export const ANCHOS: readonly number[] = ANCHOS_DE_REFERENCIA.map((a) => a.px)

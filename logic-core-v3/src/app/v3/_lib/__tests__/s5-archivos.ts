@@ -133,6 +133,15 @@ export const ARCHIVOS_DE_APOYO = [
   // que Trabajos y el Hero ya tienen, y por tema — allá la composición de la sección,
   // acá una pieza con su gesto propio, que no sabe en qué sección la montan.
   `${RAIZ_DE_SECCIONES}/quienes-somos/marco.tsx`,
+  // ── Los DOS de la SEGUNDA vez que el archivo pasó las 300 líneas ─────────
+  // El corte volvió a ser por tema, no por tamaño: `QuienesSomos.tsx` se quedó con
+  // la AGENCIA —el titular, el ≠ y la bajada— y con la composición de las tres
+  // pantallas, `equipo.tsx` se llevó las dos pantallas de las PERSONAS (el bloque
+  // del equipo y la foto) y `pantalla.tsx` las dos primitivas que las tres
+  // comparten. La puerta no se movió: quien importaba de `QuienesSomos.tsx` sigue
+  // importando de ahí, y los dos nuevos son internos de la sección.
+  `${RAIZ_DE_SECCIONES}/quienes-somos/equipo.tsx`,
+  `${RAIZ_DE_SECCIONES}/quienes-somos/pantalla.tsx`,
   // `geometria.ts` salió del mismo archivo al entrar el ≠: los números por un lado
   // y la composición por el otro, igual que en Trabajos y en el Hero.
   `${RAIZ_DE_SECCIONES}/quienes-somos/geometria.ts`,

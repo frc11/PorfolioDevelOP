@@ -762,6 +762,28 @@
 
   --text-display-r1-portatil: clamp(67px, -1.0625rem + 10.9375vw, 95px);
 
+  /* ⚠️ EL REGISTRO 2 ARRIBA DEL CORTE, ATADO A SU COLUMNA Y NO AL VIEWPORT.
+   * [derivado] No es un nivel nuevo de la escala —no entra en `NIVELES` y
+   * `s3-tipografia` §6 no lo mira—: es el MISMO tamaño de 1440 y de 1920,
+   * reexpresado para que la regla que lo produjo valga en toda la banda.
+   *
+   * El problema, medido: «LAS 24 HS» se partía en dos renglones a 1024 —410,45
+   * px de tinta en una caja de 312— y la cuenta dice que no era sólo 1024:
+   * `--text-fluido-display-xl` crece con 3,4742vw y la caja del h1 crece con
+   * 0,4w − 97,6, así que la tinta entra recién desde **1433 px**. Toda la banda
+   * 1024–1432 estaba rota; 1440 zafaba por 1,69 px.
+   *
+   * La corrección no elige un tamaño: mantiene la RAZÓN con la que el titular
+   * llena su columna a 1440 —476,70 de 478,39, o sea 0,21740— y la aplica a la
+   * caja de cualquier ancho. `0,4w − 97,6` por 0,21740 da `8,696vw − 21,22px`,
+   * y de ahí salen los dos números de abajo. Consecuencia buscada: **a 1440 y a
+   * 1920 no se mueve un píxel** (104,00 y el tope de 120,6761), y todo ancho
+   * intermedio queda exactamente tan holgado como la referencia.
+   *
+   * El piso y el techo son los de `--text-fluido-display-xl`, sin inventar: el
+   * piso no llega a morder porque la recta ya vale 67,83 a 1024. */
+  --text-display-xl-columna: clamp(67px, -1.32625rem + 8.696vw, 120.6761px);
+
   /* Seis expresiones fluidas [medido, transferido]. Transferidas sin tocar.
    * Método, verificado en este sprint reproduciendo las seis publicadas:
    *   a = (max − min) / (1440 − 375)   →  pendiente, ×100 para vw
@@ -1028,9 +1050,14 @@
 
   /* =====================================================================
    * BREAKPOINTS [medido, transferido]
-   * 1025px es además la compuerta estructural de coreografía decidida en
-   * B6.1: arriba, experiencia completa; abajo, HTML, CSS, tipografía fluida
-   * y transiciones nativas.
+   *
+   * ⚠️ `--breakpoint-escritorio` vale **1024 y ya no 1025**, y la diferencia de
+   * un píxel con la compuerta de coreografía es deliberada: 1024 es el iPad
+   * apaisado y la notebook, que del lado de la COMPOSICIÓN son escritorio, y del
+   * lado de lo que se MONTA siguen abajo del umbral que B6.1 midió en 1025. Los
+   * dos números viven juntos y con su motivo en `_lib/compuerta.ts`; acá está
+   * sólo el de composición, que es el que gobierna las variantes `escritorio:` y
+   * `max-escritorio:` de Tailwind.
    * ------------------------------------------------------------------- */
 
   /* ⚠️ TEXTO-3 · EL CUARTO, Y EL PRIMERO QUE MIRA HACIA ABAJO. [medido]
@@ -1109,9 +1136,33 @@
    * el papel, achica el pie y baja el registro 1; `chico:` esconde la marca y la
    * pastilla de 390 para arriba. Es el mismo corte leído desde sus dos lados. */
   --breakpoint-chico: 390px;
+
+  /* =====================================================================
+   * LOS DOS CORTES QUE CIERRAN UNA BANDA POR ARRIBA [decidido]
+   * =====================================================================
+   * Existen por una razón mecánica: Tailwind emite `max-<nombre>:` como
+   * `width < valor`, o sea que una banda que termina EN un ancho necesita un
+   * token en el ancho SIGUIENTE. `--breakpoint-tablet` vale 768 y `max-tablet:`
+   * cubre hasta 767 — justo deja afuera el 768, que es el ancho de la banda.
+   *
+   * Sin estos dos, dos reglas del sprint anterior se estiraron al borde
+   * disponible más cercano y eso se vio: el reparto del titular en cuatro
+   * renglones llegaba hasta **859** (`medio:`) en vez de 425, y el ≠ a la
+   * izquierda tomaba hasta **1024** (el corte de composición) en vez de 768.
+   *
+   * ⚠ Los dos se usan SÓLO hacia abajo, como `--breakpoint-angosto` y
+   * `--breakpoint-chico`: su cara `min-width` no tiene consumidor y no se
+   * inventa uno. Y el valor no se eligió: es el ancho del pedido más uno.
+   *
+   *     --breakpoint-movil          426   `max-movil:` = la banda móvil, ≤ 425
+   *     --breakpoint-hasta-tablet   769   `max-hasta-tablet:` = hasta tablet, ≤ 768
+   * ===================================================================== */
+  --breakpoint-movil: 426px;
+  --breakpoint-hasta-tablet: 769px;
+
   --breakpoint-tablet: 768px;
   --breakpoint-medio: 860px;
-  --breakpoint-escritorio: 1025px;
+  --breakpoint-escritorio: 1024px;
 
   /* =====================================================================
    * RECUPERADOS DEL BLOQUE "SIN UTILIDAD" [medido]

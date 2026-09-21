@@ -1,0 +1,283 @@
+{
+  "coberturaDeNucleo": 0.9,
+  "anchos": [
+    {
+      "ancho": "768",
+      "porParada": {
+        "cruce": {
+          "scrollY": 1262,
+          "pixelesDeGlifo": 13718,
+          "tinta": [
+            247,
+            247,
+            245
+          ],
+          "zonaMuerta": {
+            "pctAA": 1.22,
+            "pctNucleo": 0.52,
+            "fondoMediano": 1.33
+          },
+          "v0": {
+            "pixeles": 13718,
+            "peor": 1.01,
+            "p1": 1.04,
+            "mediana": 19.43,
+            "bajoAA": 5248,
+            "bajoAAPct": 38.26
+          },
+          "v0Pintado": {
+            "pixeles": 13718,
+            "peor": 1,
+            "p1": 1.22,
+            "mediana": 8.51,
+            "bajoAA": 4277,
+            "bajoAAPct": 31.18,
+            "discriminantes": 5364,
+            "coincidencia": 20.99
+          },
+          "v0PorCobertura": {
+            "nucleo": 1688,
+            "nucleoPct": 53.67,
+            "borde": 3676,
+            "bordePct": 0.73,
+            "bajoAADelNucleo": 92,
+            "bajoAADelNucleoPct": 2.11
+          },
+          "pintado": {
+            "pixeles": 13718,
+            "peor": 1,
+            "p1": 1.21,
+            "mediana": 8.46,
+            "bajoAA": 4355,
+            "bajoAAPct": 31.75,
+            "discriminantes": 5409,
+            "coincidencia": 16.84
+          },
+          "derivado": {
+            "pixeles": 13718,
+            "peor": 1.11,
+            "p1": 3.65,
+            "mediana": 20.63,
+            "bajoAA": 170,
+            "bajoAAPct": 1.24
+          },
+          "cobertura": {
+            "nucleo": 1700,
+            "nucleoPct": 51.76,
+            "borde": 3709,
+            "bordePct": 0.84,
+            "bajoAADelNucleo": 159,
+            "bajoAADelNucleoPct": 3.64
+          },
+          "destrabe": "el arbol ya lo trae (--aplicado)"
+        },
+        "limpio": {
+          "scrollY": 1262,
+          "pixelesDeGlifo": 13718,
+          "tinta": [
+            247,
+            247,
+            245
+          ],
+          "zonaMuerta": {
+            "pctAA": 0,
+            "pctNucleo": 0,
+            "fondoMediano": 246.33
+          },
+          "v0": {
+            "pixeles": 13718,
+            "peor": 1,
+            "p1": 1,
+            "mediana": 1,
+            "bajoAA": 13718,
+            "bajoAAPct": 100
+          },
+          "v0Pintado": {
+            "pixeles": 13718,
+            "peor": 1.28,
+            "p1": 1.28,
+            "mediana": 10.13,
+            "bajoAA": 4395,
+            "bajoAAPct": 32.04,
+            "discriminantes": 13718,
+            "coincidencia": 20.41
+          },
+          "v0PorCobertura": {
+            "nucleo": 4368,
+            "nucleoPct": 55.24,
+            "borde": 9350,
+            "bordePct": 0,
+            "bajoAADelNucleo": 0,
+            "bajoAADelNucleoPct": 0
+          },
+          "pintado": {
+            "pixeles": 13718,
+            "peor": 1.28,
+            "p1": 1.28,
+            "mediana": 10.13,
+            "bajoAA": 4395,
+            "bajoAAPct": 32.04,
+            "discriminantes": 13718,
+            "coincidencia": 17.59
+          },
+          "derivado": {
+            "pixeles": 13718,
+            "peor": 18.66,
+            "p1": 18.66,
+            "mediana": 18.66,
+            "bajoAA": 0,
+            "bajoAAPct": 0
+          },
+          "cobertura": {
+            "nucleo": 4368,
+            "nucleoPct": 55.24,
+            "borde": 9350,
+            "bordePct": 0,
+            "bajoAADelNucleo": 0,
+            "bajoAADelNucleoPct": 0
+          },
+          "destrabe": "el arbol ya lo trae (--aplicado)"
+        }
+      }
+    },
+    {
+      "ancho": "375",
+      "porParada": {
+        "cruce": {
+          "scrollY": 848,
+          "pixelesDeGlifo": 13724,
+          "tinta": [
+            247,
+            247,
+            245
+          ],
+          "zonaMuerta": {
+            "pctAA": 5.89,
+            "pctNucleo": 0.78,
+            "fondoMediano": 204
+          },
+          "v0": {
+            "pixeles": 13724,
+            "peor": 1,
+            "p1": 1,
+            "mediana": 1.49,
+            "bajoAA": 10966,
+            "bajoAAPct": 79.9
+          },
+          "v0Pintado": {
+            "pixeles": 13724,
+            "peor": 1,
+            "p1": 1.22,
+            "mediana": 5.75,
+            "bajoAA": 5728,
+            "bajoAAPct": 41.74,
+            "discriminantes": 11051,
+            "coincidencia": 22.56
+          },
+          "v0PorCobertura": {
+            "nucleo": 3553,
+            "nucleoPct": 65.44,
+            "borde": 7498,
+            "bordePct": 0.39,
+            "bajoAADelNucleo": 251,
+            "bajoAADelNucleoPct": 5.73
+          },
+          "pintado": {
+            "pixeles": 13724,
+            "peor": 1,
+            "p1": 1.21,
+            "mediana": 5.63,
+            "bajoAA": 5795,
+            "bajoAAPct": 42.23,
+            "discriminantes": 11049,
+            "coincidencia": 20.36
+          },
+          "derivado": {
+            "pixeles": 13724,
+            "peor": 1.01,
+            "p1": 2.25,
+            "mediana": 10.43,
+            "bajoAA": 820,
+            "bajoAAPct": 5.97
+          },
+          "cobertura": {
+            "nucleo": 3540,
+            "nucleoPct": 62.99,
+            "borde": 7509,
+            "bordePct": 0.27,
+            "bajoAADelNucleo": 273,
+            "bajoAADelNucleoPct": 6.23
+          },
+          "destrabe": "el arbol ya lo trae (--aplicado)"
+        },
+        "limpio": {
+          "scrollY": 848,
+          "pixelesDeGlifo": 13724,
+          "tinta": [
+            247,
+            247,
+            245
+          ],
+          "zonaMuerta": {
+            "pctAA": 0,
+            "pctNucleo": 0,
+            "fondoMediano": 246.33
+          },
+          "v0": {
+            "pixeles": 13724,
+            "peor": 1,
+            "p1": 1,
+            "mediana": 1,
+            "bajoAA": 13724,
+            "bajoAAPct": 100
+          },
+          "v0Pintado": {
+            "pixeles": 13724,
+            "peor": 1.28,
+            "p1": 1.28,
+            "mediana": 9.82,
+            "bajoAA": 4451,
+            "bajoAAPct": 32.43,
+            "discriminantes": 13724,
+            "coincidencia": 20.92
+          },
+          "v0PorCobertura": {
+            "nucleo": 4382,
+            "nucleoPct": 55.96,
+            "borde": 9342,
+            "bordePct": 0,
+            "bajoAADelNucleo": 0,
+            "bajoAADelNucleoPct": 0
+          },
+          "pintado": {
+            "pixeles": 13724,
+            "peor": 1.28,
+            "p1": 1.28,
+            "mediana": 9.82,
+            "bajoAA": 4451,
+            "bajoAAPct": 32.43,
+            "discriminantes": 13724,
+            "coincidencia": 17.87
+          },
+          "derivado": {
+            "pixeles": 13724,
+            "peor": 18.66,
+            "p1": 18.66,
+            "mediana": 18.66,
+            "bajoAA": 0,
+            "bajoAAPct": 0
+          },
+          "cobertura": {
+            "nucleo": 4382,
+            "nucleoPct": 55.96,
+            "borde": 9342,
+            "bordePct": 0,
+            "bajoAADelNucleo": 0,
+            "bajoAADelNucleoPct": 0
+          },
+          "destrabe": "el arbol ya lo trae (--aplicado)"
+        }
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import {
   ATRIBUTO_DEL_VELO,
   CURVA_DEL_VIAJE,
   DURACION_DEL_DESLIZAMIENTO_S,
+  DURACION_DEL_VIAJE_MS,
   PRELUDIO_MS,
   RETARDO_ANTES_DE_DESAPARECER_MS,
   SELECTOR_DEL_CTA_DEL_HERO,
@@ -16,6 +17,7 @@ import {
   TOTAL_DEL_DESLIZAMIENTO_MS,
   deberiaDeslizar,
 } from './deslizamiento'
+import { destinoDelAncla, viajarSinLenis } from './viajeSinLenis'
 
 /**
  * EL MARGEN DEL RELOJ DE SEGURIDAD, en milisegundos.
@@ -46,22 +48,34 @@ const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS
  * `deslizamiento.ts` como datos y como función pura. Acá está sólo lo que
  * necesita un documento vivo.
  *
- * ── ⚠️ POR QUÉ ES UN HOOK Y LO LLAMA `ScrollSuaveDeV3` ────────────────────
+ * ── ⚠️ QUIÉN LO LLAMA, Y POR QUÉ AHORA SON DOS ───────────────────────────
  *
- * Porque **las dos compuertas que el sprint necesita son las que ya gatean a
- * Lenis**, y colgarse de ahí las consume en vez de reescribirlas:
+ * Nació colgado de la compuerta de Lenis, y la razón escrita era ésta:
  *
  *   · abajo de 1025 no hay instancia, no hay canvas y no hay escena que mirar
  *     durante el viaje: el pedido no existe ahí;
  *   · con `prefers-reduced-motion` un scroll interpolado ES movimiento que nadie
  *     pidió.
  *
- * `deberiaCorrerElScrollSuave(arribaDelUmbral, prefiereMenosMovimiento)` ya
- * contesta las dos, y `CompuertaDelScrollSuave` ya la consume. Al vivir adentro
- * del módulo perezoso que esa compuerta monta, **el deslizamiento hereda la
- * tabla de verdad entera sin una condición nueva**: si da `false`, este archivo
- * no se descarga, el escucha no se instala y el click es el ancla nativa — salto
- * instantáneo, que es el comportamiento de hoy.
+ * 🔴 **La primera envejeció en sus dos tercios del medio.** El dueño dio vuelta
+ * la compuerta del escenario —`EscenarioCompuerta`: «se monta siempre, no hay
+ * `return null`»— así que abajo de 1025 HAY canvas y HAY escena, y la cámara
+ * sigue al scroll igual que arriba (verificado: renderer dibujando en 375, 768,
+ * 1024 y 1440). Lo único que no había era **quién mueve el scroll despacio**, y
+ * eso costaba un teletransporte medido: `EN VUELO 0` cuadros abajo del umbral
+ * contra 128 arriba.
+ *
+ * Así que ahora el hook tiene DOS llamadores y UNA sola secuencia:
+ *
+ *   · **arriba de 1025** lo llama `ScrollSuaveDeV3`, con la instancia de Lenis;
+ *   · **abajo** lo llama `DeslizamientoSinScrollSuave`, con una `ref` vacía, y
+ *     el viaje lo mueve `viajeSinLenis.ts`.
+ *
+ * La pregunta «¿hay Lenis?» se contesta leyendo `instancia.current` EN EL CLICK
+ * —nunca en el montaje—, así que no hace falta un booleano nuevo ni una segunda
+ * tabla de verdad. La segunda razón sigue intacta y sigue siendo un no rotundo:
+ * las DOS compuertas consultan `prefers-reduced-motion` y con la preferencia
+ * puesta el click vuelve a ser el ancla nativa.
  *
  * Y de paso resuelve el acceso a la instancia sin publicarla: `ScrollSuaveDeV3`
  * documenta que **no la expone por contexto** porque nadie la consumía. Ahora la
@@ -131,6 +145,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
     let destino: HTMLElement | null = null
     let enVuelo = false
     let soltarLaRueda: (() => void) | null = null
+    /** El cancelador del viaje sin Lenis. Con Lenis se queda en `null`. */
+    let cancelarElViaje: (() => void) | null = null
     /** El reloj que prende el velo, cuando el retardo del click terminó. */
     let relojDelVelo: number | undefined
     /** El reloj que ARRANCA el viaje cuando el preludio terminó. */
@@ -167,6 +183,12 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       if (soltarLaRueda !== null) {
         soltarLaRueda()
         soltarLaRueda = null
+      }
+      // Con Lenis no hay nada que cancelar acá: su animación se reemplaza sola
+      // cuando la rueda entra, que es lo que documentan «las cinco salidas».
+      if (cancelarElViaje !== null) {
+        cancelarElViaje()
+        cancelarElViaje = null
       }
       zona.removeAttribute(ATRIBUTO_DEL_VELO)
       // El orden importa: mientras el `<main>` sea inerte, `focus()` adentro no
@@ -216,8 +238,11 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       const seccion = document.getElementById(ancla.slice(1))
       if (seccion === null) return
 
+      // ⚠️ **SIN INSTANCIA YA NO SE SALE.** Acá había un `return`, y era la
+      // línea que hacía que abajo de 1025 el CTA se teletransportara: sin Lenis
+      // no había quién moviera el scroll despacio. Desde este sprint hay dos
+      // motores y UNA sola secuencia — ver el bloque de abajo.
       const lenis = instancia.current
-      if (lenis === null) return
 
       // Un click a mitad de vuelo: el `<main>` ya es inerte, así que no debería
       // llegar. Si llegara por otro camino, se ignora en vez de encimar dos
@@ -273,10 +298,41 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       // que ve la rueda que después va a reemplazar la animación. Se filtra el
       // delta cero, que es el `touchstart` sin gesto —el mismo `isClickOrTap` que
       // la librería descarta dos líneas más abajo.
-      soltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {
-        if (deltaX === 0 && deltaY === 0) return
-        terminar(false)
-      })
+      /**
+       * ⚠️ **EL VIGÍA TIENE DOS FORMAS PORQUE HAY DOS MOTORES, y las dos dicen
+       * lo mismo: «el visitante retomó el control».**
+       *
+       * Con Lenis se escucha `virtual-scroll`, que se emite en la PRIMERA línea
+       * de `onVirtualScroll` (`lenis.mjs:579`), antes de todas las guardas, así
+       * que ve la rueda que después va a reemplazar la animación. Se filtra el
+       * delta cero, que es el `touchstart` sin gesto.
+       *
+       * Sin Lenis no hay ese evento, así que se escuchan los gestos crudos:
+       * `wheel`, `touchstart` y `keydown`. ⚠️ **No se puede escuchar `scroll`**:
+       * el viaje sin Lenis mueve el scroll con `window.scrollTo`, o sea que
+       * dispararía su propia cancelación en el primer cuadro. `wheel` y
+       * `touchstart` los produce una persona, nunca el animador.
+       */
+      if (lenis !== null) {
+        soltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {
+          if (deltaX === 0 && deltaY === 0) return
+          terminar(false)
+        })
+      } else {
+        const alGesto = (): void => terminar(false)
+        window.addEventListener('wheel', alGesto, { passive: true })
+        window.addEventListener('touchstart', alGesto, { passive: true })
+        window.addEventListener('keydown', alGesto)
+        soltarLaRueda = () => {
+          window.removeEventListener('wheel', alGesto)
+          window.removeEventListener('touchstart', alGesto)
+          window.removeEventListener('keydown', alGesto)
+          if (cancelarElViaje !== null) {
+            cancelarElViaje()
+            cancelarElViaje = null
+          }
+        }
+      }
 
       reloj = window.setTimeout(() => terminar(false), RELOJ_DE_SEGURIDAD_MS)
 
@@ -293,6 +349,23 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
        */
       relojDeArranque = window.setTimeout(() => {
         relojDeArranque = undefined
+        /**
+         * 🔴 **LOS DOS MOTORES, Y LA SECUENCIA ES UNA SOLA.** Lo que cambia entre
+         * las dos ramas es QUIÉN mueve el scroll; el retardo, el fundido, la
+         * pausa, la duración, la curva, el destino y las cinco salidas son los
+         * mismos objetos en las dos. Por eso las constantes se leen de
+         * `deslizamiento.ts` en los dos lados y no hay un segundo juego de
+         * tiempos que pueda desincronizarse.
+         */
+        if (lenis === null) {
+          cancelarElViaje = viajarSinLenis(
+            destinoDelAncla(seccion),
+            DURACION_DEL_VIAJE_MS,
+            CURVA_DEL_VIAJE,
+            () => terminar(true),
+          )
+          return
+        }
         lenis.scrollTo(seccion, {
           duration: DURACION_DEL_DESLIZAMIENTO_S,
           /**

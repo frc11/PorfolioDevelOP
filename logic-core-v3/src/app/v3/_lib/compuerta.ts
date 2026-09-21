@@ -110,10 +110,40 @@
  */
 
 /**
+ * 🔴 **DOS UMBRALES QUE ESTUVIERON PEGADOS Y AHORA SE SEPARAN POR UN PÍXEL.**
+ *
+ * Hasta este sprint había UN número, 1025, haciendo dos trabajos: decidir qué se
+ * MONTA (escena, cursor, scroll suave) y decidir cómo se COMPONE la página. Que
+ * coincidieran era cómodo y cinco invariantes lo afirmaban como si fuera una
+ * propiedad. **No lo era: era una coincidencia con dos dueños distintos.**
+ *
+ * Lo que la separa es 1024, que no es un número cualquiera: es el iPad apaisado
+ * y es la notebook. Del lado de la COMPOSICIÓN eso es escritorio sin discusión
+ * —hay ancho de sobra para la calle lateral, para el ≠ en el margen y para los
+ * tres nombres en la calle derecha—. Del lado de lo que se MONTA la respuesta es
+ * la contraria y ya estaba medida: a 1024 la experiencia completa (escena a
+ * calidad alta, cursor propio, motor de scroll) es una apuesta sobre una máquina
+ * que puede ser táctil, y B6.1 la decidió en 1025 con la referencia en la mano.
+ *
+ * Así que los dos números se quedan, cada uno con su dueño:
+ *
+ *     COMPOSICION_MIN_ANCHO_PX   1024   cómo se ve      → `--breakpoint-escritorio`
+ *     ESCENARIO_MIN_ANCHO_PX     1025   qué se monta    → escena, cursor, scroll suave
+ *
+ * ⚠️ **La franja de un píxel es real y hay que saber qué pasa ahí.** A 1024
+ * exactos la página se compone como escritorio y monta como abajo del umbral: la
+ * escena está —se monta siempre desde que el dueño dio vuelta
+ * `EscenarioCompuerta`— pero con la calidad del lado angosto, sin cursor propio
+ * y sin Lenis. Ninguna de esas tres cosas es de composición, y por eso la franja
+ * no se ve: se mide.
+ */
+export const COMPOSICION_MIN_ANCHO_PX = 1024
+
+/**
  * 1025px exactos. Medido, no interpolado: es el ancho al que la referencia
- * conmuta, y es además `--breakpoint-escritorio` en `theme-develop.css`.
- * Las dos definiciones tienen que decir lo mismo y hay un invariante que lo
- * comprueba leyendo el CSS — si alguien mueve una y no la otra, falla.
+ * conmuta. ⚠️ **Ya NO es `--breakpoint-escritorio`**: ése bajó a 1024 con el
+ * sprint que movió la composición, y el invariante que los ataba se partió en
+ * dos —uno por umbral— en vez de aflojarse. Ver el bloque de arriba.
  */
 export const ESCENARIO_MIN_ANCHO_PX = 1025
 

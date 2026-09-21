@@ -1,0 +1,106 @@
+{
+  "anchos": [
+    {
+      "ancho": 320,
+      "parada": 95,
+      "paradas": [
+        {
+          "y": 0,
+          "oscuro": 3807
+        },
+        {
+          "y": 47,
+          "oscuro": 4035
+        },
+        {
+          "y": 95,
+          "oscuro": 4187
+        },
+        {
+          "y": 142,
+          "oscuro": 3867
+        },
+        {
+          "y": 189,
+          "oscuro": 3940
+        }
+      ],
+      "pixelesDeGlifo": 17261,
+      "tinta": [
+        247,
+        247,
+        245
+      ],
+      "pintado": {
+        "pixeles": 17261,
+        "peor": 1,
+        "p1": 1.38,
+        "mediana": 18.75,
+        "bajoAA": 1891,
+        "bajoAAPct": 10.96,
+        "discriminantes": 8771,
+        "coincidencia": 68.37
+      },
+      "zonaMuerta": {
+        "pctAA": 1.84,
+        "pctNucleo": 0.97,
+        "fondoMediano": 87.67
+      }
+    },
+    {
+      "ancho": 425,
+      "parada": 70,
+      "paradas": [
+        {
+          "y": 0,
+          "oscuro": 1583
+        },
+        {
+          "y": 70,
+          "oscuro": 1946
+        },
+        {
+          "y": 141,
+          "oscuro": 1937
+        },
+        {
+          "y": 211,
+          "oscuro": 1758
+        },
+        {
+          "y": 281,
+          "oscuro": 1457
+        },
+        {
+          "y": 352,
+          "oscuro": 1394
+        },
+        {
+          "y": 422,
+          "oscuro": 1370
+        }
+      ],
+      "pixelesDeGlifo": 11138,
+      "tinta": [
+        247,
+        247,
+        245
+      ],
+      "pintado": {
+        "pixeles": 11138,
+        "peor": 1.04,
+        "p1": 1.51,
+        "mediana": 13.27,
+        "bajoAA": 1608,
+        "bajoAAPct": 14.44,
+        "discriminantes": 7190,
+        "coincidencia": 62.18
+      },
+      "zonaMuerta": {
+        "pctAA": 0.81,
+        "pctNucleo": 0.36,
+        "fondoMediano": 221
+      }
+    }
+  ]
+}

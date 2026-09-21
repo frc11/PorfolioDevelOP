@@ -111,6 +111,9 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
       data-seccion={superficie.invertida ? 'invertida' : undefined}
       /**
        * `relative z-10`: los paneles van ARRIBA del escenario, que es `z-0`.
+       * Abajo de 1025 el reparto cambia y el resultado es el mismo: ahí el
+       * escenario baja a `-z-10` y la sección suelta su `z-index`, para que la
+       * bajada de «Quiénes somos» pueda mezclar contra la escena. Sigue arriba.
        *
        * ⚠ La tercera clase es la de la BANDA ANGOSTA y sale sólo si la sección
        * declara una segunda superficie. Es una media query —`max-angosto:`, la
@@ -121,7 +124,9 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
        * de por qué el Hero la necesita, está en `CLASES_DE_LA_BANDA_ANGOSTA`.
        */
       className={cn(
-        'relative z-10 w-full',
+        // `max-escritorio:z-auto`: abajo de 1025 la seccion no abre contexto de
+        // apilamiento. Es el corte que `s7-mezcla` custodia — ver su docblock.
+        'relative z-10 max-escritorio:z-auto w-full',
         superficie.clases,
         seccion.superficieAngosta === undefined
           ? undefined

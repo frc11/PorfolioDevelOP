@@ -11,6 +11,7 @@
 import { cn } from '@/lib/utils'
 
 import { sizesPorViewport } from '../../_lib/imagen'
+import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
 /** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los decide quien la construye y no cambian con la foto real. */
 export const GEOMETRIA = {
@@ -49,7 +50,22 @@ export const GEOMETRIA = {
   fila: {
     caja: cn(
       'flex w-full flex-col gap-[var(--spacing-6)]',
-      'escritorio:grid escritorio:grid-cols-4 escritorio:items-start',
+      'escritorio:grid escritorio:items-start',
+      /**
+       * ⚠️ **LAS DOS COLUMNAS DE LOS EXTREMOS NO BAJAN DE LO QUE MIDE EL NOMBRE.**
+       * Era `grid-cols-4` a secas, o sea cuatro cuartos: a 1024 eso deja 108 px
+       * de columna y «Valentino» mide 115,67 —se cortaba—. El `minmax()` le pone
+       * piso a las columnas 1 y 4, que son las DOS donde el zigzag puede poner el
+       * texto, y por eso va simétrico: cualquier otra forma de ensanchar una sola
+       * rompería la alternancia. La foto sigue ocupando tres columnas de los dos
+       * lados y suma lo mismo de los dos lados.
+       *
+       * ⚠️ Y **no cambia nada arriba de 1120**: el piso sólo muerde cuando un
+       * cuarto de la calle queda abajo de él, y la calle es `0,5w − 32`, así que
+       * la condición es `w < 1120`. Medido: a 1440 la columna sigue en 160 y a
+       * 1920 en 220, idénticas.
+       */
+      'escritorio:grid-cols-[minmax(var(--nombre-piso),1fr)_1fr_1fr_minmax(var(--nombre-piso),1fr)]',
       'escritorio:gap-x-[var(--grilla-canal-amplio)]',
     ),
     texto: 'flex flex-col gap-[var(--spacing-3)] escritorio:row-start-1',
@@ -88,7 +104,15 @@ export const GEOMETRIA = {
    * Alineado a la izquierda —el defecto, nadie le pone `text-left`—, contra el borde
    * izquierdo de la calle, que es el 50 % del viewport.
    */
-  tituloDelEquipo: 'font-titulo text-[length:var(--equipo-titulo-tamano)] leading-titulo tracking-titulo',
+  /**
+   * ⚠️ **`9.2cqw` NO ES UN ESCALÓN, Y A 768 ROMPÍA LA JERARQUÍA.** Es un porcentaje
+   * del ancho del contenedor: con la calle entera daba **64,8 px a 768**, o sea más
+   * grande que el titular. Abajo del corte pasa a `titulo-xl`, el MISMO escalón que
+   * el titular: son los dos rótulos grandes de la sección y el pedido los quiere
+   * parejos. Arriba del corte el `cqw` se queda: ahí la calle es la mitad del cuadro
+   * y el valor está medido.
+   */
+  tituloDelEquipo: 'font-titulo text-[length:var(--equipo-titulo-tamano)] max-escritorio:text-fluido-titulo-xl leading-titulo tracking-titulo',
   /**
    * DÓNDE ARRANCA UNA MÁSCARA DE RENGLÓN. Con `ventana-visible` el gesto empezaba con
    * la pieza 80 px adentro del borde de abajo: para cuando el ojo llegaba al renglón,
@@ -120,7 +144,19 @@ export const GEOMETRIA = {
    * em de línea, contra los 6,67 em de la referencia (480 px sobre 72). */
   medida: 'max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]',
   /** Modo pulido: titular+bajada ensanchan a 30rem, sin pasar el 42% del viewport. */
-  medidaAgencia: 'max-w-[var(--agencia-medida)]',
+  /**
+   * ⚠️ **EL CUERPO NO VA A ANCHO COMPLETO, Y ES LA CORRECCIÓN DE UN EXCESO MÍO.**
+   *
+   * `--agencia-medida` vale `min(30rem, 42vw)`, y ese `42vw` era la columna angosta
+   * con medio viewport vacío a la derecha: medido, la bajada daba 134 px de 256 a
+   * 320 y 158 de 311 a 375. El sprint anterior lo soltó a ancho completo, y a 768
+   * eso da renglones del orden de 100 caracteres, que se leen mal. Abajo del corte
+   * la medida pasa a `--medida-movil`: en la banda angosta no llega a morder
+   * —65ch son más que el ancho disponible— y a 768 acota donde hace falta.
+   */
+  medidaAgencia: 'max-w-[var(--agencia-medida)] max-escritorio:max-w-[var(--medida-movil)]',
+  /** La misma medida cómoda para la descripción de cada persona: mismo registro, mismo renglón. */
+  medidaMovilDelCuerpo: 'max-escritorio:max-w-[var(--medida-movil)]',
   /**
    * LOS VALORES A MEDIDA, COMO PROPIEDADES Y NO COMO LITERALES.
    *
@@ -131,6 +167,14 @@ export const GEOMETRIA = {
    * CTA. Cada grupo se declara en el elemento que lo consume y hereda hacia adentro.
    */
   estilos: {
+    /**
+     * ⚠️ `--nombre-piso` es el piso de la columna del nombre. [derivado]
+     * «Valentino» es la palabra más larga de las dos y mide **115,67 px a
+     * 1024**, el único ancho donde la columna se le quedaba corta; 120 es el
+     * primer múltiplo de 8 —la unidad del sistema— que la contiene con margen.
+     * Va como propiedad de alcance de componente y no como token del tema
+     * porque es una medida de ESTA composición, igual que `--medida-movil`.
+     */
     titular: {
       '--titular-tamano-escritorio': '38px',
       '--titular-medida': '23ch',
@@ -144,6 +188,15 @@ export const GEOMETRIA = {
       '--cuerpo-interlineado': '1.6',
     } as React.CSSProperties,
     tituloDelEquipo: { '--equipo-titulo-tamano': '9.2cqw' } as React.CSSProperties,
+    /**
+     * LA MEDIDA CÓMODA DE LA BANDA, declarada UNA vez en la sección.
+     *
+     * La usan la bajada y las descripciones de las personas, que son el mismo
+     * registro y tienen que arrancar en el mismo margen y cortar a lo mismo.
+     * Va en la raíz de la sección y no en cada consumidor: dos declaraciones del
+     * mismo 65 se desincronizan el día que una se toque.
+     */
+    seccion: { '--medida-movil': '65ch', '--nombre-piso': '120px' } as React.CSSProperties,
     /** `--foto-ancho` sólo gobierna abajo de 1025: de ahí para arriba la foto pasa a
      *  `escritorio:w-full` (de la calle), una utilidad del sistema y no un valor a medida. */
     fotoDelEquipo: { '--foto-ancho': '65%' } as React.CSSProperties,
@@ -157,13 +210,33 @@ export const GEOMETRIA = {
    * cualquier tamaño. Por eso la tipografía va en este mismo envoltorio: `ch` resuelve
    * contra el `font-size` del elemento que lo declara, y el `span` de adentro hereda.
    */
-  medidaDelTitular: 'max-w-[var(--titular-medida)]',
+  /**
+   * Los `23ch` no acotan abajo del corte: el titular es display y la medida larga
+   * no molesta. La variante es `max-escritorio:` y no `max-tablet:` —que excluía
+   * justamente 768, donde el pedido lo quiere a ancho completo—. Lo comparte el
+   * signo, que se alinea a la izquierda de su caja y no se mueve.
+   */
+  medidaDelTitular: 'max-w-[var(--titular-medida)] max-escritorio:max-w-none',
   /** 38px fijo de escritorio para arriba (ningún escalón de la escala cae ahí), fluido abajo. Interlineado 1,25 y no `--leading-titulo` (1,09): apretado, el subrayado del primer renglón se apoyaba sobre las mayúsculas del segundo. */
-  tipografiaDelTitular: 'font-titulo text-fluido-titulo-m escritorio:text-[length:var(--titular-tamano-escritorio)] leading-[var(--titular-interlineado)] tracking-titulo',
+  /**
+   * ⚠️ **ABAJO DEL CORTE EL TITULAR SUBE DOS ESCALONES, Y ERA UN DEFECTO.**
+   *
+   * Estaba en `text-fluido-titulo-m`, que a 375 vale su piso —18 px— contra un
+   * cuerpo de 17: el titular medía **1,06 veces** el cuerpo y no se leía como
+   * título. La referencia pide del orden de 2,2. `titulo-xl` da **36 px a 375
+   * (2,12×)** y **43,4 a 768 (2,55×)**, los dos con los escalones de la escala
+   * fluida que ya existen. De 1025 para arriba no cambia nada: ahí gobierna
+   * `--titular-tamano-escritorio`.
+   */
+  tipografiaDelTitular: 'font-titulo text-fluido-titulo-xl escritorio:text-[length:var(--titular-tamano-escritorio)] leading-[var(--titular-interlineado)] tracking-titulo',
   /** El cuerpo de la bajada. **No pasa por `<Cuerpo>`**: ese componente declara un NIVEL
    *  (`data-nivel="cuerpo"`) y pisarle el tamaño le saca su clase de escala, que es
    *  justo lo que `s5-compacto` caza. Acá el nivel no se declara porque no es ése. */
-  cuerpoDeLaBajada: 'font-cuerpo tracking-texto text-[length:var(--cuerpo-tamano)] leading-[var(--cuerpo-interlineado)]',
+  /** La mezcla sale de `MEZCLA_SOBRE_LA_ESCENA`: una sola definición para las nueve piezas que se apoyan en la escena. */
+  cuerpoDeLaBajada: cn(
+    'font-cuerpo tracking-texto text-[length:var(--cuerpo-tamano)] leading-[var(--cuerpo-interlineado)]',
+    MEZCLA_SOBRE_LA_ESCENA,
+  ),
   /**
    * Los pesos de los dos tramos marcados. **Sin itálica, y es una restricción medida:**
    * la familia tiene una cara itálica de verdad, pero su binario trae sólo las 68
@@ -190,6 +263,30 @@ export const GEOMETRIA = {
     signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-4',
   },
+  /**
+   * LA PROPORCIÓN DE LA FOTO DEL EQUIPO EN LA BANDA MÁS ANGOSTA. [medido]
+   *
+   * El archivo es 3:2 apaisado y la decisión de ese encuadre está escrita arriba:
+   * son dos personas una al lado de la otra. Con el ancho de contenido entero eso
+   * alcanza a 375 (207 px de alto contra 154 que pide el texto revelado, 53 de
+   * sobra) y a 425 (241 contra 134, 107 de sobra), y **no alcanza a 320**: 171
+   * contra 176, se desborda por 5 px. `aspect-4/3` a ese ancho da 192 y entra con
+   * 16 px. Es el recorte más chico que resuelve el desborde: 11 % del ancho del
+   * archivo, 5,5 % por lado.
+   *
+   * ⚠️ La variante es `max-angosto:` —abajo de 375— y no `max-chico:`, que habría
+   * cobrado el recorte también a 375, donde 3:2 ya entraba con 53 px de sobra. La
+   * banda es exactamente el ancho que lo necesita, y de 375 para arriba el
+   * encuadre del archivo queda intacto.
+   */
+  proporcionDeLaFotoEnPapel: 'max-angosto:aspect-4/3',
+  /**
+   * LA COLUMNA LATERAL, COLAPSADA HASTA EL CORTE. Es la misma clase que el hero usa
+   * desde COMPO-1 §5 y por el mismo motivo: `lateral` abre su celda de 140 px en
+   * `tablet:`, y a 768 esa celda está vacía — reservaba 152 px con la canaleta y
+   * dejaba el titular en 552 de 704.
+   */
+  claseDeLaColumnaLateral: 'tablet:grid-cols-1 escritorio:grid-cols-[var(--columna-lateral)_minmax(0,1fr)]',
   /** Cuántos renglones promete el titular. Dos a 1440 y a 1920, cortando después de «distinto,». */
   lineasDelTitular: 2,
 } as const

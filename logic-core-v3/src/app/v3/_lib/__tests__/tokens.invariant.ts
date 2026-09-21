@@ -23,13 +23,14 @@
  *   5. Una sola colisión de nombre contra `globals.css`, y está resuelta.
  *   6. Los nueve `--spacing-*` en rem computan el MISMO píxel que los px de S0
  *      con raíz 16, y las quince utilidades afectadas también.
- *   7. El umbral de la compuerta y `--breakpoint-escritorio` dicen lo mismo.
+ *   7. Los DOS umbrales —composición y coreografía— contra su dueño, y la
+ *      franja de un píxel que los separa.
  */
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
+import { COMPOSICION_MIN_ANCHO_PX, ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import {
   AGREGADOS,
@@ -126,6 +127,11 @@ async function principal(): Promise<void> {
   const soloEnRepo = declRepo.filter((l) => !declS0.includes(l))
 
   const ESPERADO_FUERA = [
+    // PORTATIL: el corte de composición bajó de 1025 a 1024 —iPad apaisado y
+    // notebook son escritorio del lado del layout— y la compuerta de coreografía
+    // se quedó en 1025. El número que sale es el viejo; el que entra, dos listas
+    // más abajo, es el nuevo. Los dos umbrales, con su motivo, en `compuerta.ts`.
+    '--breakpoint-escritorio: 1025px;',
     '@theme {',
     '--font-titulo: "Chivo", system-ui, sans-serif;',
     '--font-cuerpo: "Chivo", system-ui, sans-serif;',
@@ -178,6 +184,16 @@ async function principal(): Promise<void> {
     // es el primer ancho del set donde la regla deja de aplicar — 43,76 % de
     // tinta sobre el logo a 320 y 40,59 % a 375 contra 2,71 % a 390.
     '--breakpoint-chico: 390px;',
+    // BANDA-4: los dos cortes que cierran una banda POR ARRIBA, y existen por
+    // mecánica y no por estética: `max-<nombre>:` emite `width < valor`, así que
+    // una banda que termina EN un ancho necesita su token en el ancho siguiente.
+    // `max-tablet:` deja afuera el 768, que es justo el ancho de la banda.
+    // Sin ellos dos reglas se estiraron al borde más cercano y se vio: el titular
+    // en cuatro renglones llegaba a 859 en vez de 425, y el ≠ a la izquierda a
+    // 1024 en vez de 768. Los dos se usan SÓLO hacia abajo.
+    '--breakpoint-escritorio: 1024px;',
+    '--breakpoint-movil: 426px;',
+    '--breakpoint-hasta-tablet: 769px;',
     '@theme static {',
     '--font-titulo: var(--font-v3-chivo), system-ui, sans-serif;',
     '--font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;',
@@ -247,6 +263,8 @@ async function principal(): Promise<void> {
     // medido. Su motivo entero, con la tabla del barrido, está en
     // `padron-de-tokens.AGREGADOS` y al lado del token en el tema.
     '--text-display-r1-portatil: clamp(67px, -1.0625rem + 10.9375vw, 95px);',
+    // RENGLON: el registro 2 atado a su columna, para que «LAS 24 HS» no se parta.
+    '--text-display-xl-columna: clamp(67px, -1.32625rem + 8.696vw, 120.6761px);',
     // ⚠ SITIO-S11 — las OTRAS DOS TINTAS, dadas vuelta en la sección
     // invertida. Los nombres ya existían en S0 (con su valor claro, que no se
     // tocó); lo que entra son las dos REDEFINICIONES del bloque
@@ -565,18 +583,45 @@ async function principal(): Promise<void> {
   )
 
   // ─────────────────────────────────────────────────────────────────────────
-  titulo('7 · El umbral de la compuerta y el token dicen lo mismo')
+  titulo('7 · LOS DOS umbrales, cada uno contra su dueño, y la franja entre ellos')
 
+  /**
+   * 🔴 **ESTA SECCIÓN AFIRMABA QUE HABÍA UN SOLO NÚMERO, Y AHORA HAY DOS.**
+   *
+   * Decía `--breakpoint-escritorio === ESCENARIO_MIN_ANCHO_PX` como si fuera una
+   * propiedad del sistema. Era una COINCIDENCIA con dos dueños: uno decide cómo
+   * se COMPONE la página y el otro qué se MONTA. El sprint que bajó la
+   * composición a 1024 —porque 1024 es iPad apaisado y notebook, y del lado del
+   * layout eso es escritorio— los separó por un píxel.
+   *
+   * ⚠️ **La salida NO fue aflojar la afirmación a que no diga nada.** Son tres
+   * afirmaciones donde había una, y la tercera es la que cuida de verdad: la
+   * distancia entre los dos umbrales es EXACTAMENTE 1, así que si alguien mueve
+   * uno de los dos sin el otro, esto se pone rojo igual que antes. Lo que dejó de
+   * afirmarse es que sean iguales; lo que se afirma ahora es la relación medida.
+   */
   const breakpoint = enElRepo.match(/--breakpoint-escritorio:\s*(\d+)px/)
-  afirmarIgual(breakpoint ? Number.parseInt(breakpoint[1], 10) : null, ESCENARIO_MIN_ANCHO_PX, '`--breakpoint-escritorio` = ESCENARIO_MIN_ANCHO_PX = 1025')
+  const valorDelBreakpoint = breakpoint ? Number.parseInt(breakpoint[1], 10) : null
+  afirmarIgual(valorDelBreakpoint, COMPOSICION_MIN_ANCHO_PX, '`--breakpoint-escritorio` = COMPOSICION_MIN_ANCHO_PX = 1024 — el corte de composición')
+  afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1025, '  y la compuerta de coreografía sigue en 1025: es otro dueño y otra decisión (B6.1)')
+  afirmarIgual(
+    ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX,
+    1,
+    '  y la franja entre los dos es de UN píxel exacto: a 1024 se compone como escritorio y se monta como abajo',
+  )
 
   controlPositivo(
     'el comparador de umbral ve una desincronización',
-    enElRepo.replace('--breakpoint-escritorio: 1025px', '--breakpoint-escritorio: 1024px'),
+    enElRepo.replace('--breakpoint-escritorio: 1024px', '--breakpoint-escritorio: 980px'),
     (css) => {
       const m = css.match(/--breakpoint-escritorio:\s*(\d+)px/)
-      return (m ? Number.parseInt(m[1], 10) : 0) === ESCENARIO_MIN_ANCHO_PX
+      return (m ? Number.parseInt(m[1], 10) : 0) === COMPOSICION_MIN_ANCHO_PX
     },
+  )
+  controlPositivo(
+    'y el de la franja ve los dos umbrales pegados otra vez',
+    { composicion: 1025, escenario: 1025 },
+    (par: { composicion: number; escenario: number }) => par.escenario - par.composicion === 1,
   )
 
   // ─────────────────────────────────────────────────────────────────────────

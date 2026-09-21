@@ -43,6 +43,13 @@ export interface EnvoltorioProps {
   readonly className?: string
   /** Clases para la caja de contenido (la topada en 1920px). */
   readonly claseDeContenido?: string
+  /**
+   * Propiedades de alcance para la caja A SANGRE. Existe para declarar una medida
+   * de sección UNA vez y que la hereden sus consumidores, en vez de repetir el
+   * mismo valor en cada uno. No lleva estilo de presentación: para eso están las
+   * clases.
+   */
+  readonly style?: React.CSSProperties
 }
 
 export function Envoltorio({
@@ -50,10 +57,12 @@ export function Envoltorio({
   como: Etiqueta = 'div',
   className,
   claseDeContenido,
+  style,
 }: EnvoltorioProps) {
   return (
     <Etiqueta
       data-pieza="envoltorio"
+      style={style}
       // `w-full max-w-full`: a sangre. El padding lateral es el token FIJO.
       className={cn('w-full max-w-full px-[var(--pad-lateral-compacto)]', className)}
     >

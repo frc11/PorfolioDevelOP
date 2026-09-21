@@ -102,6 +102,18 @@ interface CtaComun {
   /** El registro tipográfico. Por defecto el medido. */
   readonly registro?: RegistroDeCta
   readonly forzado?: EstadoForzado
+  /**
+   * ⚠️ **QUE ESTA INSTANCIA MEZCLA, dicho en el marcado.**
+   *
+   * `difference` sólo da negro pleno sobre papel si la fuente ES el papel, y el
+   * CTA declara `color: var(--color-tinta)` como regla cerrada de la paleta —lo
+   * que bajo mezcla pintaba `|247 − 17| = 230` sobre papel y `|15 − 17| = 2`
+   * sobre el logo: lavado de los dos lados—. `banda.css` lo repinta, y necesita
+   * poder distinguir A CUÁL: **el CTA del Cierre no mezcla**, y pintarlo con el
+   * papel lo dejaría blanco sobre blanco. Una clase no alcanza porque la regla
+   * del CTA es 0-2-0 y una utilidad 0-1-0; el atributo sí.
+   */
+  readonly mezcla?: boolean
   readonly className?: string
 }
 
@@ -117,6 +129,7 @@ export function Cta({
   forzado,
   deshabilitado = false,
   type = 'button',
+  mezcla = false,
   className,
 }: CtaProps) {
   return (
@@ -126,6 +139,7 @@ export function Cta({
       data-variante={variante}
       data-registro={registro}
       data-forzado={forzado}
+      {...(mezcla ? { 'data-mezcla': '' } : {})}
       disabled={deshabilitado}
       className={cn('text-base', className)}
     >
@@ -144,6 +158,7 @@ export function CtaEnlace({
   variante = 'linea',
   registro = 'cuerpo',
   forzado,
+  mezcla = false,
   className,
 }: CtaEnlaceProps) {
   return (
@@ -153,6 +168,7 @@ export function CtaEnlace({
       data-variante={variante}
       data-registro={registro}
       data-forzado={forzado}
+      {...(mezcla ? { 'data-mezcla': '' } : {})}
       className={cn('text-base no-underline', className)}
     >
       <ContenidoDelCta rotulo={rotulo} />

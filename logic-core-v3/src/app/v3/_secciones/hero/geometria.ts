@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils'
+
 /**
  * HERO — LA GEOMETRÍA Y LOS DOS REGISTROS DEL TITULAR.
  *
@@ -637,7 +639,16 @@ export const GEOMETRIA = {
    * «entra» deja de depender de la precisión del modelo. Las dos cuentas están
    * en `scripts-papel/a-derivacion.ts`.
    */
-  claseDelPieSinPastilla: 'max-chico:pb-2',
+  /**
+   * ⚠️ **LA BANDA ERA LA EQUIVOCADA, Y SE VEÍA.** Esta clase libera los 72 px que el
+   * pie le reserva a la pastilla de navegación, y estaba atada a `max-chico:` —abajo
+   * de 390—. Pero la pastilla se apaga en `max-medio:` (`CLASE_DE_LA_PASTILLA_APAGADA`,
+   * abajo de 860): a 425 no había pastilla y el pie le seguía reservando el lugar. El
+   * resultado, medido: el titular caía a **97 px del pie a 320 y 375 y a 169 a 425**,
+   * o sea tres composiciones distintas en la misma banda. Con la clase en la banda de
+   * su propio motivo, los cuatro anchos de abajo del corte apoyan igual.
+   */
+  claseDelPieSinPastilla: 'max-medio:pb-2',
   /**
    * ── COMPO-2 · §1 · EL BLOQUE CENTRADO EN LA BANDA DE PAPEL. [pedido] ─────
    *
@@ -820,7 +831,7 @@ export const CORRIMIENTO_DEL_ROCE_EN_768_PX = 6
  * al lado desaparece uno, en silencio.
  */
 export const TIPOGRAFIA_DEL_TITULAR =
-  'font-display text-fluido-display max-chico:text-display-r1-papel max-angosto:text-display-r1-papel-angosto tablet:text-display-r1-portatil escritorio:text-fluido-display leading-titulo tracking-display font-fuerte uppercase'
+  'font-display text-fluido-display max-tablet:text-display-r1-papel max-angosto:text-display-r1-papel-angosto tablet:text-display-r1-portatil escritorio:text-fluido-display leading-titulo tracking-display font-fuerte uppercase'
 
 /**
  * LA TIPOGRAFÍA DEL REGISTRO 2 — Chivo Light itálica, y el nivel MÁS GRANDE.
@@ -865,8 +876,14 @@ export const TIPOGRAFIA_DEL_TITULAR =
  * registros del titular llevan interletrados distintos porque son dos caras
  * distintas, y cada número sale de su propia cuenta.
  */
-export const TIPOGRAFIA_DEL_REGISTRO_2 =
-  'font-titulo text-fluido-display-xl max-angosto:text-display-xl-angosto leading-titulo tracking-titulo font-liviano italic uppercase'
+export const TIPOGRAFIA_DEL_REGISTRO_2 = cn(
+  'font-titulo text-fluido-display-xl max-angosto:text-display-xl-angosto',
+  // 🔴 REGLA DURA: «LAS 24 HS» no se parte NUNCA, de 320 a 2560. Son las dos
+  // mitades de la misma regla — el no-quiebre impide el corte y el nivel de
+  // columna impide que, sin corte, se desborde. Una sola no alcanza.
+  'whitespace-nowrap escritorio:text-display-xl-columna',
+  'leading-titulo tracking-titulo font-liviano italic uppercase',
+)
 
 /** El handle estable del titular de dos registros. Lo busca el instrumento
  *  para encontrar la pieza sin depender del texto, que va a cambiar. Es el

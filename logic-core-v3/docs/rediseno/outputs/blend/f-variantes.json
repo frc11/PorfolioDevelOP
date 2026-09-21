@@ -1,0 +1,608 @@
+{
+  "brillos": [
+    2.2,
+    4,
+    8
+  ],
+  "opacidades": [
+    1,
+    0.9,
+    0.8,
+    0.6,
+    0.4
+  ],
+  "anchos": [
+    {
+      "ancho": "768",
+      "paradas": {
+        "cruce": {
+          "nombre": "cruce",
+          "scrollY": 1262,
+          "planicieDelRect": {
+            "medio": 144.22,
+            "minimo": 0.33,
+            "pctOscuro": 74.43
+          }
+        },
+        "limpio": {
+          "nombre": "limpio",
+          "scrollY": 1262,
+          "planicieDelRect": {
+            "medio": 246.33,
+            "minimo": 246.33,
+            "pctOscuro": 0
+          }
+        }
+      },
+      "laParadaLimpiaNoExisteComoScroll": {
+        "masPlanaValida": {
+          "y": 1262,
+          "pctOscuro": 75.12,
+          "medio": 141.61,
+          "dentro": true
+        },
+        "validas": 3
+      },
+      "barrido": [
+        {
+          "y": 238,
+          "pctOscuro": null,
+          "medio": null,
+          "dentro": false
+        },
+        {
+          "y": 443,
+          "pctOscuro": null,
+          "medio": null,
+          "dentro": false
+        },
+        {
+          "y": 648,
+          "pctOscuro": 52.47,
+          "medio": 226.03,
+          "dentro": false
+        },
+        {
+          "y": 852,
+          "pctOscuro": 67.75,
+          "medio": 208.74,
+          "dentro": false
+        },
+        {
+          "y": 1057,
+          "pctOscuro": 75.56,
+          "medio": 167.04,
+          "dentro": true
+        },
+        {
+          "y": 1262,
+          "pctOscuro": 75.12,
+          "medio": 141.61,
+          "dentro": true
+        },
+        {
+          "y": 1467,
+          "pctOscuro": 98.85,
+          "medio": 172.72,
+          "dentro": true
+        },
+        {
+          "y": 1672,
+          "pctOscuro": 99.6,
+          "medio": 165.51,
+          "dentro": false
+        },
+        {
+          "y": 1876,
+          "pctOscuro": 98.81,
+          "medio": 135.71,
+          "dentro": false
+        },
+        {
+          "y": 2081,
+          "pctOscuro": null,
+          "medio": null,
+          "dentro": false
+        },
+        {
+          "y": 2286,
+          "pctOscuro": null,
+          "medio": null,
+          "dentro": false
+        }
+      ],
+      "geometria": {
+        "solidoHasta": 78,
+        "kBloque": 1.9,
+        "kAnchoRenglon": 1.45,
+        "kAltoRenglon": 3
+      },
+      "porParada": {
+        "cruce": {
+          "scrollY": 1262,
+          "rectDelBloque": {
+            "x": 184,
+            "y": 403,
+            "ancho": 323,
+            "alto": 218
+          },
+          "rectDeLaNube": {
+            "x": 38,
+            "y": 305,
+            "ancho": 614,
+            "alto": 414
+          },
+          "renglones": 8,
+          "pixelesDeGlifo": 12160,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "zonaMuerta": {
+            "pctAA": 0.96,
+            "pctNucleo": 0.41,
+            "fondoMediano": 1
+          },
+          "blendPuesto": true,
+          "destrabeTomo": true,
+          "derivadoDelBlend": {
+            "pixeles": 12160,
+            "peor": 1.17,
+            "p1": 4.65,
+            "mediana": 20.7,
+            "bajoAA": 113,
+            "bajoAAPct": 0.93
+          },
+          "filas": [
+            {
+              "variante": "V0 tinta",
+              "detalle": "zona muerta AA 0.96% | nucleo 0.41% | fondo mediano 1",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1.01,
+                "p1": 1.09,
+                "mediana": 1.11,
+                "bajoAA": 7489,
+                "bajoAAPct": 61.59
+              },
+              "marca": null
+            },
+            {
+              "variante": "V3 cortado",
+              "detalle": "lo que el arbol de hoy pinta | coincidencia 0.15%",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1,
+                "p1": 1.04,
+                "mediana": 5.43,
+                "bajoAA": 5750,
+                "bajoAAPct": 47.29,
+                "discriminantes": 4780,
+                "coincidencia": 0.15
+              },
+              "marca": null
+            },
+            {
+              "variante": "V3 pintado",
+              "detalle": "cadena destrabada | coincidencia 19.41% | derivado 0.93%",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1,
+                "p1": 1.64,
+                "mediana": 10.88,
+                "bajoAA": 2594,
+                "bajoAAPct": 21.33,
+                "discriminantes": 4760,
+                "coincidencia": 19.41
+              },
+              "marca": null
+            },
+            {
+              "variante": "V4 x2.2",
+              "detalle": "rect del bloque 323x218",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1.01,
+                "p1": 1.06,
+                "mediana": 1.1,
+                "bajoAA": 7377,
+                "bajoAAPct": 60.67
+              },
+              "marca": {
+                "maximo": 255,
+                "media": 19.06,
+                "pctMovido": 49.89,
+                "enElBorde": 253,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V4 x4",
+              "detalle": "rect del bloque 323x218",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1,
+                "p1": 1.01,
+                "mediana": 1.09,
+                "bajoAA": 7320,
+                "bajoAAPct": 60.2
+              },
+              "marca": {
+                "maximo": 255,
+                "media": 15.54,
+                "pctMovido": 99.58,
+                "enElBorde": 255,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V4 x8",
+              "detalle": "rect del bloque 323x218",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1,
+                "p1": 1.01,
+                "mediana": 1.06,
+                "bajoAA": 7322,
+                "bajoAAPct": 60.21
+              },
+              "marca": {
+                "maximo": 255,
+                "media": 24.56,
+                "pctMovido": 100,
+                "enElBorde": 255,
+                "deja": true,
+                "derivaAfuera": 247
+              }
+            },
+            {
+              "variante": "V5A a1",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 17.45,
+                "p1": 17.45,
+                "mediana": 17.6,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 83.36,
+                "pctMovido": 77.45,
+                "enElBorde": 215,
+                "deja": true,
+                "derivaAfuera": 215
+              }
+            },
+            {
+              "variante": "V5A a0.9",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 14.02,
+                "p1": 14.02,
+                "mediana": 14.15,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 75.61,
+                "pctMovido": 78.57,
+                "enElBorde": 244,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5A a0.8",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 10.92,
+                "p1": 10.92,
+                "mediana": 11.04,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 69.73,
+                "pctMovido": 79,
+                "enElBorde": 245,
+                "deja": true,
+                "derivaAfuera": 245
+              }
+            },
+            {
+              "variante": "V5A a0.6",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 6.21,
+                "p1": 6.21,
+                "mediana": 6.3,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 53.87,
+                "pctMovido": 76.4,
+                "enElBorde": 215,
+                "deja": true,
+                "derivaAfuera": 215
+              }
+            },
+            {
+              "variante": "V5A a0.4",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 3.14,
+                "p1": 3.14,
+                "mediana": 3.19,
+                "bajoAA": 7398,
+                "bajoAAPct": 60.84
+              },
+              "marca": {
+                "maximo": 246,
+                "media": 36.76,
+                "pctMovido": 72.83,
+                "enElBorde": 242,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5B a1",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 17.3,
+                "p1": 17.45,
+                "mediana": 17.6,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 103,
+                "pctMovido": 77.25,
+                "enElBorde": 232,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5B a0.9",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 14.02,
+                "p1": 14.02,
+                "mediana": 16.89,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 248,
+                "media": 98.8,
+                "pctMovido": 78.3,
+                "enElBorde": 230,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5B a0.8",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 10.92,
+                "p1": 10.92,
+                "mediana": 15.82,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 91.78,
+                "pctMovido": 76.35,
+                "enElBorde": 230,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5B a0.6",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 6.21,
+                "p1": 6.22,
+                "mediana": 11.75,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 247,
+                "media": 77.57,
+                "pctMovido": 75.52,
+                "enElBorde": 230,
+                "deja": true,
+                "derivaAfuera": 246
+              }
+            },
+            {
+              "variante": "V5B a0.4",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 3.14,
+                "p1": 3.14,
+                "mediana": 6.96,
+                "bajoAA": 2712,
+                "bajoAAPct": 22.3
+              },
+              "marca": {
+                "maximo": 246,
+                "media": 55.77,
+                "pctMovido": 72.55,
+                "enElBorde": 229,
+                "deja": true,
+                "derivaAfuera": 247
+              }
+            }
+          ]
+        },
+        "limpio": {
+          "scrollY": 1262,
+          "rectDelBloque": {
+            "x": 184,
+            "y": 403,
+            "ancho": 323,
+            "alto": 218
+          },
+          "rectDeLaNube": {
+            "x": 38,
+            "y": 305,
+            "ancho": 614,
+            "alto": 414
+          },
+          "renglones": 8,
+          "pixelesDeGlifo": 12160,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "zonaMuerta": {
+            "pctAA": 0,
+            "pctNucleo": 0,
+            "fondoMediano": 246.33
+          },
+          "blendPuesto": true,
+          "destrabeTomo": true,
+          "derivadoDelBlend": {
+            "pixeles": 12160,
+            "peor": 18.66,
+            "p1": 18.66,
+            "mediana": 18.66,
+            "bajoAA": 0,
+            "bajoAAPct": 0
+          },
+          "filas": [
+            {
+              "variante": "V0 tinta",
+              "detalle": "zona muerta AA 0% | nucleo 0% | fondo mediano 246.33",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 17.6,
+                "p1": 17.6,
+                "mediana": 17.6,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": null
+            },
+            {
+              "variante": "V3 cortado",
+              "detalle": "lo que el arbol de hoy pinta | coincidencia 0%",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1.02,
+                "p1": 1.02,
+                "mediana": 1.06,
+                "bajoAA": 12160,
+                "bajoAAPct": 100,
+                "discriminantes": 12160,
+                "coincidencia": 0
+              },
+              "marca": null
+            },
+            {
+              "variante": "V3 pintado",
+              "detalle": "cadena destrabada | coincidencia 0% | derivado 0%",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 1.02,
+                "p1": 1.02,
+                "mediana": 1.06,
+                "bajoAA": 12160,
+                "bajoAAPct": 100,
+                "discriminantes": 12160,
+                "coincidencia": 0
+              },
+              "marca": null
+            },
+            {
+              "variante": "V4 x2.2",
+              "detalle": "rect del bloque 323x218",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 18.88,
+                "p1": 18.88,
+                "mediana": 18.88,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 10,
+                "media": 10,
+                "pctMovido": 100,
+                "enElBorde": 10,
+                "deja": true,
+                "derivaAfuera": 92
+              }
+            },
+            {
+              "variante": "V5A a1",
+              "detalle": "1 nube de 614x414",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 17.45,
+                "p1": 17.45,
+                "mediana": 17.6,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 2,
+                "media": 0.17,
+                "pctMovido": 0,
+                "enElBorde": 1,
+                "deja": false,
+                "derivaAfuera": 92
+              }
+            },
+            {
+              "variante": "V5B a1",
+              "detalle": "8 nubes de 416x61",
+              "lectura": {
+                "pixeles": 12160,
+                "peor": 17.3,
+                "p1": 17.45,
+                "mediana": 17.6,
+                "bajoAA": 0,
+                "bajoAAPct": 0
+              },
+              "marca": {
+                "maximo": 2,
+                "media": 0.13,
+                "pctMovido": 0,
+                "enElBorde": 1,
+                "deja": false,
+                "derivaAfuera": 92
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

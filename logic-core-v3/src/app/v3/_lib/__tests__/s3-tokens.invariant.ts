@@ -175,6 +175,10 @@ function selectoresFueraDeAlcance(css: string): string[] {
   const acotada = (parte: string): boolean =>
     parte.startsWith('[data-v3]') || parte === CONTENEDOR_DE_SCROLL_DE_V3
   return reglas(css)
+    // Un PASO de `@keyframes` (`0%, 100%`) no es un selector y no alcanza a nadie:
+    // sólo existe adentro de su propia regla. Sin este filtro, el detector los
+    // leía como selectores globales.
+    .filter((r) => !r.contexto.startsWith('@keyframes'))
     .map((r) => r.selector)
     .filter((s) => !s.startsWith('@'))
     .filter((s) => partesDeSelector(s).some((parte) => !acotada(parte)))
@@ -227,8 +231,35 @@ function mediasConLiteral(css: string): string[] {
     .filter((s) => literalesConUnidad(s).length > 0)
 }
 
-const mediasSospechosas = ARCHIVOS_DE_ESTILO.flatMap((a) => mediasConLiteral(leer(a)))
+/**
+ * ⚠️ **UNA EXCLUSIÓN, CON MOTIVO Y CON RED.** `banda.css` junta las tres reglas que
+ * necesitan el corte de composición como condición y no se pueden escribir con una
+ * utilidad —el repintado de los trazos, la tinta del CTA que mezcla, el ≠ de la
+ * banda de tablet y la descripción del equipo que no se repite—, porque pisan
+ * reglas de hoja de estilo y una utilidad pierde por
+ * especificidad (0-3-0 contra 0-1-0). Las otras dos formas se probaron y
+ * ninguna sirve — `@variant max-escritorio` no compila (`Cannot use @variant with
+ * variant`) y `theme()` no resuelve en estas hojas, que son CSS plano. Queda el
+ * literal, y el riesgo que esta regla protege —el umbral escrito dos veces— lo tapa
+ * `s7-mezcla` §8, que lee el número de ese archivo y lo compara contra
+ * `--breakpoint-escritorio`. La exclusión se enumera por archivo y con motivo: la
+ * regla sigue viva para las otras nueve hojas.
+ */
+const CON_MEDIA_DECLARADA: readonly string[] = ['banda.css']
+
+const mediasSospechosas = ARCHIVOS_DE_ESTILO.filter(
+  (a) => !CON_MEDIA_DECLARADA.includes(a.split('/').pop() ?? ''),
+).flatMap((a) => mediasConLiteral(leer(a)))
 afirmarIgual([...new Set(mediasSospechosas)], [], 'los breakpoints entran por las variantes, no por una media query escrita')
+afirmar(
+  ARCHIVOS_DE_ESTILO.filter((a) => CON_MEDIA_DECLARADA.includes(a.split('/').pop() ?? '')).length ===
+    CON_MEDIA_DECLARADA.length,
+  `  y la única excepción declarada sigue existiendo: ${CON_MEDIA_DECLARADA.join(', ')}`,
+)
+afirmar(
+  CON_MEDIA_DECLARADA.every((n) => mediasConLiteral(leer(ARCHIVOS_DE_ESTILO.find((a) => a.endsWith(n)) ?? '')).length > 0),
+  '  y la usa de verdad: si dejara de necesitarla, la excepción tiene que salir de la lista',
+)
 
 controlPositivo(
   'el detector ve un breakpoint escrito a mano',

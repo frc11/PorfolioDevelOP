@@ -112,8 +112,24 @@ imprimirParadas(QUIETA, PARADAS)
  * intercalan donde vive la sección 04. Lo que la sección 3 afirma sobre la
  * pastilla y el enlace de salto sigue en pie, y se comprueba abajo.
  */
-afirmarIgual(PARADAS.length, 19, 'el home entero tiene 19 paradas de tabulación: las 16 de S11 más los tres sitios de Trabajos')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 19, '  y la rama animada tiene las mismas 19')
+/**
+ * ⚠️ **TRES PARADAS MÁS EN MODO PULIDO, Y SÓLO SON PARADAS ABAJO DE 1025.**
+ *
+ * Los tres marcos de «Quiénes somos» ganaron un control de toque: abajo del
+ * umbral el intercambio de foto se abre y se cierra con un clic, porque ahí no
+ * hay hover. El control es un `<button>` que `marco.tsx` monta SIEMPRE —el corte
+ * de ancho no puede ser una rama de JS: `s7-contrato` §5 prohíbe que una sección
+ * consulte la compuerta— y que `escritorio:hidden` apaga de 1025 para arriba.
+ *
+ * Este censo lee el MARCADO, donde una clase de ancho no se aplica, así que los
+ * ve siempre: son 22 en el papel. En el navegador, arriba del umbral el botón
+ * está en `display: none`, que no es esconder sino sacar del árbol de
+ * accesibilidad y del orden de tabulación — o sea que el escritorio sigue
+ * teniendo las 19 de V3-D, y las tres de más son exactamente el gesto que sólo
+ * existe del otro lado.
+ */
+afirmarIgual(PARADAS.length, 22, 'el home entero tiene 22 paradas: las 19 de V3-D más los tres controles de toque de Quiénes somos')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 22, '  y la rama animada tiene las mismas 22')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -211,7 +227,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 28, 'la rama quieta publica 28 encabezados: los 27 de S11 más el rótulo del bloque del equipo')
+afirmarIgual(encabezados(QUIETA).length, 29, 'la rama quieta publica 29 encabezados: los 27 de S11, el rótulo del bloque del equipo y el título de la foto')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +

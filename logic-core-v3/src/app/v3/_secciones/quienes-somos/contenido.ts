@@ -23,7 +23,8 @@
  *     ⚠️ B12: se retiró de `CONTENIDO` — ver `ROTULO_DE_SECCION_RETIRADO`.
  *
  * Relleno, y por eso va TODO en `PEDIDO` con clase `prosa`: `titular`,
- * `bajada`, `comoTrabajamos`, `equipo.alt`, `equipo.pie` y `rotuloDelPedido`.
+ * `bajada`, `comoTrabajamos`, `equipo.alt` y `rotuloDelPedido`. [El epígrafe de la
+ * foto se fue en BANDA-4: lo reemplazó el título del bloque, que no es relleno.]
  * Tienen la longitud y la estructura retórica que la composición necesita para
  * poder juzgarse —la agencia, de dónde es, cómo trabaja— y ninguna de las seis
  * es el texto definitivo.
@@ -88,6 +89,35 @@ export const ROTULO_DE_SECCION_RETIRADO = 'Quiénes somos'
 export const TRAMOS_DEL_TITULAR = [
   { antes: 'Queremos hacer', marcado: 'algo distinto', tipo: 'subrayado', cierre: ',' },
   { antes: 'no', marcado: 'lo mismo de siempre', tipo: 'tachado', cierre: '' },
+] as const
+
+/**
+ * LOS MISMOS RENGLONES, PARTIDOS EN CUATRO — hasta la banda de tablet.
+ *
+ * ── ⚠️ EL TACHADO CAMBIA DE ALCANCE, Y ES EL MOTIVO DEL SPRINT ────────────
+ *
+ * Arriba tacha «lo mismo de siempre», que en dos renglones entra en uno. Acá la
+ * frase ocupa dos —«no lo mismo» y «de siempre»— y un tachado partido en dos
+ * renglones **no se lee como un tachado: se lee como un defecto de render**. Así
+ * que tacha SÓLO «de siempre». El subrayado no se mueve: «algo distinto» sigue
+ * entrando entero en su renglón.
+ *
+ * ── Por qué son cuatro entradas y no un `<br>` ────────────────────────────
+ *
+ * Porque el corte está atado a la BANDA y no al texto. Un `<br>` en el contenido
+ * cortaría igual en los ocho anchos y volvería irreversible una decisión de
+ * composición; cuatro entradas son cuatro renglones que la banda muestra o
+ * esconde, y arriba de ella siguen siendo dos.
+ *
+ * ⚠️ `tipo: null` es un renglón SIN marca. La frase se reparte entre los cuatro y
+ * dos de ellos no llevan trazo: sin el `null` habría que inventar un trazo vacío,
+ * que es un elemento que existe para no hacer nada.
+ */
+export const TRAMOS_DEL_TITULAR_EN_LA_BANDA = [
+  { antes: 'Queremos hacer', marcado: '', tipo: null, cierre: '' },
+  { antes: '', marcado: 'algo distinto', tipo: 'subrayado', cierre: ',' },
+  { antes: 'no lo mismo', marcado: '', tipo: null, cierre: '' },
+  { antes: '', marcado: 'de siempre', tipo: 'tachado', cierre: '' },
 ] as const
 
 export const CONTENIDO = {
@@ -156,8 +186,17 @@ export const CONTENIDO = {
     descripcion:
       'Nos conocimos en el colegio. Siempre tuvimos el sueño de estudiar esta ' +
       'carrera y, ya con oficio, decidimos emprender juntos.',
-    /** [relleno] El epígrafe, debajo de la foto. */
-    pie: 'Franco y Valentino, el equipo detrás de esta agencia.',
+    /**
+     * ⚠️ **SE FUE EL EPÍGRAFE Y ENTRÓ UN TÍTULO.** Era «Franco y Valentino, el
+     * equipo detrás de esta agencia.», un renglón debajo de la foto que decía en
+     * prosa lo que la foto ya muestra y lo que la descripción cuenta mejor. Ahora
+     * el bloque abre con un título y la descripción hace de epígrafe en la banda
+     * móvil y de revelado de 426 para arriba: una sola pieza de texto en vez de
+     * dos que se repetían.
+     *
+     * [verdad] No es relleno: es el nombre del bloque.
+     */
+    titulo: 'Nosotros',
   },
 } as const
 
@@ -269,14 +308,6 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     quienLoTrae: 'valentino',
     que: 'Cómo empezó el equipo. Se lee sobre la foto, así que corto.',
     formato: 'Dos o tres frases, ~150 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'equipo.pie',
-    clase: 'prosa',
-    marcador: null,
-    quienLoTrae: 'valentino',
-    que: 'El epígrafe de la foto del equipo. Un renglón.',
-    formato: 'Un renglón, ~90 caracteres. Texto plano.',
   },
 ]
 

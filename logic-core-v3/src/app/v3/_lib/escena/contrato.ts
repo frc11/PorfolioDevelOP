@@ -130,7 +130,7 @@ export const HUELLAS_DE_TRES: readonly string[] = [
 ]
 
 /** Las clases con las que la escena sale del flujo. Una sola definición. */
-export const CLASES_DE_LA_ESCENA = CLASES_FUERA_DE_FLUJO
+export const CLASES_DE_LA_ESCENA = `${CLASES_FUERA_DE_FLUJO} max-escritorio:-z-10`
 
 /** La consulta de la compuerta. Una sola definición, la de S1. */
 export const CONSULTA_DE_LA_ESCENA = CONSULTA_ESCENARIO
