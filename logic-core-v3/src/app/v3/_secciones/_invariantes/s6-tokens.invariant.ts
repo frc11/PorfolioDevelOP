@@ -109,12 +109,25 @@ interface Familia {
 }
 
 const FAMILIAS: readonly Familia[] = [
-  { nombre: 'bg-', re: /^bg-([a-z0-9-]+)$/, validos: COLORES, estructurales: ['transparent', 'current'] },
+  /**
+   * ⚠️ `clip-text` es MODO DE RECORTE, no un color. Entró cuando el párrafo de
+   * `servicios` pasó a pintarse con un frente continuo: el borde blando del
+   * frente es una zona de mezcla entre dos colores, y eso sólo se puede hacer
+   * con un degradado recortado al glifo. No hay token que lo respalde porque no
+   * hay valor que tokenizar — declarar su alcance no es aflojar el gate.
+   */
+  { nombre: 'bg-', re: /^bg-([a-z0-9-]+)$/, validos: COLORES, estructurales: ['transparent', 'current', 'clip-text', 'clip-border', 'clip-padding'] },
   {
     nombre: 'text-',
     re: /^text-([a-z0-9-]+)$/,
     validos: new Set([...COLORES, ...TEXTOS]),
-    estructurales: ['left', 'right', 'center', 'justify', 'balance', 'pretty', 'wrap', 'nowrap'],
+    /**
+     * ⚠️ `transparent` va con `bg-clip-text`: es la otra mitad del mismo
+     * mecanismo —el texto se apaga para que se vea el degradado recortado— y
+     * tampoco es un valor de diseño. `bg-` ya lo tenía declarado por el mismo
+     * motivo; que a `text-` le faltara era una asimetría, no una regla.
+     */
+    estructurales: ['left', 'right', 'center', 'justify', 'balance', 'pretty', 'wrap', 'nowrap', 'transparent'],
   },
   {
     nombre: 'border-',

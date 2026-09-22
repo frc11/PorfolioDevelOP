@@ -16,6 +16,9 @@
  * los `*.invariant.*`; la exclusión es la que S3 dejó declarada.
  */
 
+import { useMotionValue } from 'motion/react'
+import { renderToStaticMarkup } from 'react-dom/server'
+
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
@@ -28,9 +31,16 @@ import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from 
 import { cuentaDeAtributo, hayAnidamiento, quitarSubarbolesConAtributo, valoresDeAtributo } from '../_invariantes/marcado'
 import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinPantalla, cuenta, focalizablesDe, interiorDe, srOnlyQueTapanContenido, textoPegado } from './deteccion'
 import { afirmarLaTipografia } from './s6-tipografia'
-import { CONTENIDO, LONGITUDES, ROTULO_DE_LA_INTRO, palabrasDelParrafo } from './contenido'
+import { CONTENIDO, CTA_POR_SERVICIO, LONGITUDES, ROTULO_DE_LA_INTRO, palabrasDelParrafo } from './contenido'
+import { CtaQueRota } from './CtaQueRota'
 import { CANTIDAD_DE_ESTADOS } from './RodilloDeEstados'
-import { CLASE_DE_LA_RANURA, CURVA_DEL_DISPARO, DURACION_DEL_DISPARO } from './geometria'
+import {
+  CLASE_DE_LA_CAJA_DEL_RODILLO,
+  CLASE_DE_LA_RANURA,
+  CLASE_DE_LA_RANURA_DE_ENTRADA,
+  CURVA_DEL_DISPARO,
+  DURACION_DEL_DISPARO,
+} from './geometria'
 import { Servicios } from './Servicios'
 
 /** La frase que este lane existe para no escribir. Vive acá y no en el
@@ -38,6 +48,13 @@ import { Servicios } from './Servicios'
  *  su propio arnés. */
 const CONTENIDO_PROHIBIDO_DE_CONTROL =
   'Crecimos +340% en 3 meses, con planes desde $99.000 por mes y ×2 de leads.'
+
+/** El CTA montado con el 01 puesto: es el único estado en el que existe. */
+function SondaDelCta(): React.JSX.Element {
+  const posicion = useMotionValue(1)
+  return <CtaQueRota posicion={posicion} />
+}
+const ETIQUETAS_DEL_CTA = IDS_DE_SERVICIO.map((id) => CTA_POR_SERVICIO[id])
 
 const seccionDeServicios = seccionDe('servicios')
 const montada = <Servicios seccion={seccionDeServicios} />
@@ -260,10 +277,37 @@ afirmar(intro.includes(ROTULO_DE_LA_INTRO), `  y su rótulo propio («${ROTULO_D
 afirmarIgual(cuenta(intro, /-acento/g), 0, '  y NADA de acento: su rótulo y su subrayado son tinta, no el color de un servicio')
 controlPositivo('el detector vería el acento colado en la intro', '<span class="bg-acento"></span>', (h) => cuenta(h, /-acento/g) === 0)
 
-/** ⚠️ **EL SUBRAYADO ES LA LÍNEA FIJA, y por eso la ranura ancla ABAJO.** Con
- *  el bloque apoyado arriba, un nombre de dos renglones empujaba el subrayado
- *  una línea para abajo y los cuatro estados lo tenían a alturas distintas. */
-afirmar(CLASE_DE_LA_RANURA.includes('justify-end'), 'la ranura apoya el bloque ABAJO: el subrayado no se mueve y el título crece hacia arriba')
+/**
+ * ⚠️ **LAS DOS PROPIEDADES DEL RODILLO VIVEN EN LAS CLASES DE LA RANURA, y se
+ * pelearían si no fuera por cómo están armadas.**
+ *
+ *   el subrayado no se mueve   cada ranura apoya su FONDO contra el fondo de
+ *                              la caja, y el subrayado es el último hijo
+ *   el hueco es constante      la ranura reserva el hueco ARRIBA, con padding,
+ *                              en vez de dejar que sea el sobrante de un alto fijo
+ *
+ * Con ranuras del mismo alto sólo se podía tener la primera: lo que quedaba
+ * arriba del bloque era lo que sobraba, y sobraba distinto según cuántos
+ * renglones tuviera el título. El padding lo vuelve una decisión y no un resto.
+ */
+afirmar(CLASE_DE_LA_RANURA.includes('pt-['), 'la ranura reserva el hueco ARRIBA con padding: es una decisión, no el sobrante de un alto fijo')
+
+/** ⚠️ **Y la ranura de entrada tiene que medir EXACTAMENTE la caja**, o el
+ *  primer cuadro sale corrido: el traslado del estado 0 vale cero mientras la
+ *  medida no llegó, y eso sólo es correcto si su fondo ya coincide con el de la
+ *  caja. La cuenta está escrita en los dos lados porque Tailwind escanea el
+ *  fuente; acá se afirma que siguen diciendo lo mismo. */
+/** La cuenta de una clase arbitraria, sin expresión regular: las barras
+ *  invertidas de un patrón no sobreviven a todos los caminos de edición. */
+const calcDe = (clase: string): string => {
+  const desde = clase.indexOf('calc(')
+  if (desde < 0) return ''
+  const hasta = clase.indexOf(']', desde)
+  return hasta < 0 ? '' : clase.slice(desde, hasta)
+}
+afirmar(calcDe(CLASE_DE_LA_RANURA_DE_ENTRADA).length > 0, "la ranura de entrada declara su alto con una cuenta de tokens")
+afirmarIgual(calcDe(CLASE_DE_LA_RANURA_DE_ENTRADA), calcDe(CLASE_DE_LA_CAJA_DEL_RODILLO), "  y es la MISMA que la de la caja: si se separan, el estado 0 nace fuera de lugar")
+controlPositivo('el comparador vería dos cuentas distintas', 'min-h-[calc(var(--spacing-1))]', (c: string) => calcDe(c) === calcDe(CLASE_DE_LA_CAJA_DEL_RODILLO))
 
 // ── EL ACOTAMIENTO DEL `sr-only`, que es la puerta por la que volvió tres veces ──
 afirmarIgual(srOnlyQueTapanContenido(animado), [], 'ningún `sr-only` envuelve contenido: sólo el rótulo anunciado, rubro y nombre')
@@ -375,13 +419,25 @@ const fuenteDe = (sufijo: string): string => {
   return quitarComentarios(leer(ruta))
 }
 const MAQUINA_DEL_DISPARO = /\banimate\(|useMotionValueEvent\(/g
+const fuenteDelDisparo = fuenteDe('disparo.ts')
 const fuenteDelRodillo = fuenteDe('RodilloDeEstados.tsx')
 const fuenteDeLaTira = fuenteDe('TiraDeServicios.tsx')
 const fuenteDelPanel = fuenteDe('ServiciosEnSecuencia.tsx')
 
-afirmarIgual(cuenta(fuenteDelRodillo, /\banimate\(/g), 1, 'el disparo es UNO y vive en `RodilloDeEstados`')
-afirmarIgual(cuenta(fuenteDeLaTira, MAQUINA_DEL_DISPARO), 0, '  `TiraDeServicios` no nombra la máquina del disparo: la tira no se entera de que el rodillo rota')
-afirmarIgual(cuenta(fuenteDelPanel, MAQUINA_DEL_DISPARO), 0, '  ni el panel, que sólo le pasa el progreso y las fronteras')
+/** ⚠️ **EL DISPARO SE MUDÓ, Y LA AFIRMACIÓN SE ENDURECIÓ.** Vivía adentro del
+ *  rodillo y la afirmación era «el disparo vive en `RodilloDeEstados`». Ahora
+ *  rotan TRES cosas con el mismo cambio de estado —el rodillo, la torta y el
+ *  CTA— y la instrucción es explícita: la torta usa el mismo disparo, no un
+ *  reloj propio. Tres consumidores con tres relojes se desincronizan en cuanto
+ *  alguien toque una duración; leyendo el mismo `MotionValue`, no pueden.
+ *
+ *  Así que lo que se afirma ya no es en qué archivo está, sino que hay UNO: una
+ *  sola máquina y una sola llamada que la arma. */
+afirmarIgual(cuenta(fuenteDelDisparo, /\banimate\(/g), 1, 'el disparo es UNO y vive en `disparo.ts`')
+afirmarIgual(cuenta(fuenteDelRodillo, MAQUINA_DEL_DISPARO), 0, '  y el rodillo ya no la arma: la recibe resuelta')
+afirmarIgual(cuenta(fuenteDelPanel, /useEstadoDisparado\(/g), 1, '  el panel la arma UNA vez y se la reparte a los tres que rotan')
+afirmarIgual(cuenta(fuenteDeLaTira, MAQUINA_DEL_DISPARO), 0, '`TiraDeServicios` no nombra la máquina: la tira no se entera de que el rodillo rota')
+afirmarIgual(cuenta(fuenteDeLaTira, /useEstadoDisparado\(/g), 0, '  ni la recibe: su `y` sigue siendo una función lineal del progreso del pin')
 afirmarIgual(cuenta(fuenteDeLaTira, /\buseState\(/g) + cuenta(fuenteDelPanel, /\buseState\(/g), 0, '  y ninguno de los dos guarda estado de React: la medición vive en `useMedidaDeLaTira`')
 controlPositivo('el detector vería la máquina colada en otro archivo', 'animate(posicion, 2)', (t) => cuenta(t, MAQUINA_DEL_DISPARO) === 0)
 
@@ -421,9 +477,170 @@ for (const { id } of SERVICIOS) {
   const rehecho = textoPegado(interiorDe(bloque, 'data-canal', 'parrafo'))
   afirmarIgual(rehecho, CONTENIDO[id].parrafo, `  ${id}: sin coreografía las piezas reconstruyen el mismo párrafo, carácter por carácter`)
 }
-afirmarIgual(cuenta(animado, /bg-clip-text|text-transparent/g), 0, 'las dos clases del barrido viejo se fueron — eran las que `s6-tokens` tenía en rojo')
-controlPositivo('el contador de palabras vería una pieza de más', `${animado}<span data-pieza="palabra">x</span>`, (h) => cuenta(h, /data-pieza="palabra"/g) === PALABRAS_DE_LOS_TRES)
-controlPositivo('y el detector vería el recorte viejo', '<p class="bg-clip-text text-transparent">x</p>', (h) => cuenta(h, /bg-clip-text|text-transparent/g) === 0)
+/**
+ * ⚠️ **`bg-clip-text` Y `text-transparent` VOLVIERON, Y ESTÁ AUTORIZADO.**
+ *
+ * El sprint anterior las sacó y celebró que `s6-tokens` se pusiera verde. Este
+ * las trae de vuelta, porque el borde BLANDO del frente es una zona de mezcla
+ * entre dos colores y eso no se puede hacer con una propiedad de color, que
+ * vale una sola cosa por elemento: hace falta un degradado recortado al glifo.
+ *
+ * Lo que cambia respecto del barrido viejo —y es lo que esta afirmación
+ * protege— es DE QUÉ es el degradado. Antes era UNO, del ancho del párrafo, y
+ * por eso pintaba la primera palabra del segundo renglón junto con la del
+ * primero: el orden era el de la CAJA y no el de lectura. Ahora hay uno POR
+ * PALABRA. Así que no alcanza con contar las clases: hay que afirmar que el
+ * recorte está en las piezas y **nunca en el contenedor del párrafo**, que es
+ * exactamente la forma que tendría el barrido viejo si volviera.
+ */
+afirmarIgual(cuenta(animado, /bg-clip-text/g), PALABRAS_DE_LOS_TRES, `el recorte al glifo está en las ${PALABRAS_DE_LOS_TRES} piezas de palabra, una por una`)
+const parrafosEnCurso = [...animado.matchAll(/<p [^>]*data-pintado="en-curso"[^>]*>/g)].map((m) => m[0])
+afirmarIgual(parrafosEnCurso.length, SERVICIOS.length, `  y los ${SERVICIOS.length} párrafos en curso están, uno por servicio`)
+afirmarIgual(parrafosEnCurso.filter((p) => p.includes('bg-clip-text')), [], '  y NINGUNO lo lleva en su contenedor: el degradado del ancho del párrafo no volvió')
+controlPositivo('el detector vería el barrido viejo, recortado en el contenedor', '<p data-pintado="en-curso" class="bg-clip-text">x</p>', (h) => [...h.matchAll(/<p [^>]*data-pintado="en-curso"[^>]*>/g)].every((m) => !m[0].includes('bg-clip-text')))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('16 · La torta y el CTA, que el marcado estático NO muestra')
+
+/**
+ * ⚠️ **DOS PIEZAS QUE NINGÚN INVARIANTE DE MARCADO VE, Y POR ESO SE SONDEAN.**
+ *
+ * El CTA aparece recién con el 01 —«no hay servicio que querer antes»— así que
+ * en el render estático, donde la posición disparada vale 0, **no existe**.
+ * Contarlo en `animado` daría cero y todo pasaría en verde sin que nadie lo
+ * haya mirado: exactamente la clase de falla que este repo tiene anotada como
+ * «verde por arnés». Así que se monta aparte, con la posición forzada, que es
+ * el único estado en el que la pieza existe.
+ *
+ * La torta sí está en el marcado, pero su estado también depende de la posición
+ * disparada, así que se afirma lo que el marcado sí puede decir: que publica
+ * una porción por servicio, que cada una lleva su `[data-servicio]` —de ahí
+ * saca el acento, sin que este lane nombre un color— y que no escribe ninguno.
+ */
+const ctaSondeado = renderToStaticMarkup(<SondaDelCta />)
+afirmar(cuentaDeAtributo(ctaSondeado, 'data-pieza') > 0, 'con el 01 puesto, el CTA existe')
+afirmar(
+  ETIQUETAS_DEL_CTA.some((e) => textoVisible(ctaSondeado).includes(e)),
+  '  y dice una de las tres etiquetas reales, no una inventada',
+  textoVisible(ctaSondeado),
+)
+afirmarIgual(focalizablesDe(ctaSondeado).length, 1, '  y es UNA parada de teclado: es un botón de verdad, no un cartel')
+/** ⚠️ **CINCO piezas decorativas, y las cinco tienen que estarlo.** Dos son del
+ *  propio `Cta` —la copia que el intercambio usa para relevar la etiqueta, y el
+ *  subrayado— y TRES son los fantasmas que fijan el ancho de la ventana: las
+ *  tres etiquetas en la misma celda, para que la caja mida la más larga y no
+ *  cambie de tamaño al relevar.
+ *
+ *  Que vayan `aria-hidden` no es prolijidad: sin eso el botón anunciaría las
+ *  tres etiquetas a la vez y su nombre accesible sería una sopa. */
+afirmarIgual(cuenta(ctaSondeado, /aria-hidden="true"/g), 2 + SERVICIOS.length, `  con sus ${2 + SERVICIOS.length} piezas decorativas: la copia que releva, el subrayado y los ${SERVICIOS.length} fantasmas del ancho`)
+afirmarIgual(ETIQUETAS_DEL_CTA.filter((e) => ctaSondeado.includes(e)).length, ETIQUETAS_DEL_CTA.length, '  y los fantasmas traen las TRES etiquetas: la ventana mide la más larga, no la visible')
+controlPositivo('el detector vería una ventana armada con una sola etiqueta', ETIQUETAS_DEL_CTA[0], (h: string) => ETIQUETAS_DEL_CTA.filter((e) => h.includes(e)).length === ETIQUETAS_DEL_CTA.length)
+afirmarIgual(cuenta(ctaSondeado, /data-parte="copia-b"/g), 1, '  y la que se releva es exactamente una')
+controlPositivo('el detector de paradas vería un cartel en vez de un botón', '<span>Quiero</span>', (h) => focalizablesDe(h).length === 1)
+
+/** ⚠️ **El CTA es el ÚNICO focalizable de la sección, y llega tarde.** §6 afirma
+ *  cero paradas de teclado sobre el marcado estático, y sigue siendo cierto
+ *  ahí. Queda dicho que a partir del 01 hay una, para que nadie lea ese cero
+ *  como «esta sección no tiene nada que enfocar». */
+console.log(`  ⚠️ el CTA agrega 1 parada de teclado a partir del estado 1, invisible para §6`)
+
+/** La pieza que lleva el giro, y las etiquetas donde motion deriva el origen. */
+const PIEZA_DEL_GIRO = 'giro-de-la-torta'
+const ETIQUETAS_DE_SVG = ['svg', 'g', 'circle', 'path', 'mask', 'rect', 'line']
+
+/** Una porción que abre con su ancla: un círculo sin pintar antes que nada. */
+const ANCLA_DE_LA_PORCION = /<g data-servicio="[^"]*"[^>]*><circle [^>]*fill="none"[^>]*>/g
+
+/** De dónde saca el CTA el servicio con el que se tiñe. */
+const EXPRESION_DEL_ACENTO = /\[ATRIBUTO_DE_SERVICIO\]:\s*SERVICIOS\[([^\]]+)\]/
+
+const fuenteDelCta = fuenteDe('CtaQueRota.tsx')
+const torta = interiorDe(animado, 'data-pieza', 'torta')
+afirmar(torta.length > 0, 'la torta está en el marcado, aunque su estado dependa de la posición')
+afirmarIgual(valoresDeAtributo(torta, 'data-servicio'), [...IDS_DE_SERVICIO], '  con una porción por servicio, en el orden de la secuencia')
+afirmarIgual(hexEncontrados(torta), [], '  y sin un solo color escrito: el acento entra por el atributo, como en todo el lane')
+afirmarIgual(funcionesDeColorEncontradas(torta).filter((f) => !f.startsWith('color-mix')), [], '  ni una función de color que traiga un valor')
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('17 · Lo que el traspaso rompió y no se ve en una meseta')
+
+/**
+ * ⚠️ **LAS CINCO DE ESTA SECCIÓN SE ROMPIERON MIENTRAS EL SITIO SE VEÍA BIEN
+ * QUIETO.** Todas pasaron una verificación anterior que midió los estados de
+ * reposo y las dio por buenas. Se afirman acá porque ninguna deja rastro en una
+ * parada: sólo existen a lo largo del cambio.
+ */
+
+/** Con qué etiqueta se publica la pieza que gira. Cadena vacía si no está. */
+function etiquetaDelGiro(html: string): string {
+  const i = html.indexOf(`data-pieza="${PIEZA_DEL_GIRO}"`)
+  if (i < 0) return ''
+  const abre = html.lastIndexOf('<', i)
+  return html.slice(abre + 1, i).trim()
+}
+
+/** ⚠️ **EL GIRO NO PUEDE COLGAR DE UN ELEMENTO SVG, Y ES UNA REGLA DE MOTION.**
+ *  Motion le pone `transform-box: fill-box` a todo SVG y le calcula el origen
+ *  desde su CAJA DE CONTENIDO. La caja de un `<g>` se la fijan sus hijos YA
+ *  transformados, y acá los hijos son las porciones, que en el traspaso se
+ *  despegan y crecen: medido, la caja pasaba de 241,68 a 259,85 y arrancaba
+ *  8,145 más arriba, así que **el origen del giro se movía mientras el giro
+ *  corría** y el centro del disco orbitaba 38,34 px. La caja de un elemento de
+ *  HTML no depende de su contenido, así que ahí el 50 %/50 % es su centro pase
+ *  lo que pase adentro. Lo que se afirma es la propiedad y no el elemento: por
+ *  eso va también la lista de las etiquetas donde la trampa existe. */
+afirmarIgual(etiquetaDelGiro(animado), 'div', 'la pieza que gira es de HTML: su caja no la fija su contenido, así que el origen del giro no se mueve')
+afirmar(!ETIQUETAS_DE_SVG.includes(etiquetaDelGiro(animado)), '  y no es ninguna de las de SVG, donde motion deriva el origen de la caja de contenido')
+controlPositivo('el detector vería el giro puesto sobre un `<g>`, que es de donde se lo sacó', `<g data-pieza="${PIEZA_DEL_GIRO}"></g>`, (h: string) => etiquetaDelGiro(h) === 'div')
+
+/** ⚠️ **Y CADA PORCIÓN LLEVA SU ANCLA, por la misma razón un piso más abajo.**
+ *  Sin ella el `scale` de la porción vigente crece desde el centro de SU caja de
+ *  contenido —que no es el centro de la torta— y el vértice se despega del
+ *  medio. Es un círculo sin pintar del tamaño del `viewBox`: no se ve, y sacarlo
+ *  no rompe nada que se note quieto. */
+afirmarIgual(cuenta(torta, ANCLA_DE_LA_PORCION), SERVICIOS.length, `las ${SERVICIOS.length} porciones abren con su ancla: el crecimiento sale del centro de la torta y no del de cada una`)
+controlPositivo('el detector vería una porción que abre sin ancla', '<g data-servicio="web"><mask id="m"></mask></g>', (h: string) => cuenta(h, ANCLA_DE_LA_PORCION) === 1)
+
+/** ⚠️ **Y NINGUNA PORCIÓN SE DIBUJA DOS VECES CORRIDA.** Ésa era la «sombra»:
+ *  un canto corrido que la máscara del relleno no cubría, así que las porciones
+ *  sin llenar dejaban un disco gris atrás para siempre. No estaba mal calibrado
+ *  — un disco corrido no puede volver. */
+afirmarIgual(cuenta(torta, /translate\(/g), 0, 'ninguna pieza de la torta se corre: no hay un segundo disco atrás')
+controlPositivo('el detector vería el canto que se sacó', '<circle transform="translate(0 13)"></circle>', (h: string) => cuenta(h, /translate\(/g) === 0)
+
+/** ⚠️ **EL RODILLO SE MIDE CON EL RECT, NO CON `offsetHeight`.** Un entero por
+ *  ranura acumula ~0,14 px de error, y con el bloque apoyado abajo eso sale por
+ *  arriba: el subrayado del estado ANTERIOR asomaba 0,11 px en `web` y 0,25 px
+ *  en `software`. El margen que queda es de 0,05 px por construcción —el hueco
+ *  de 48 px es casi exactamente un renglón de `titulo-l`—, así que el
+ *  instrumento no puede redondear. */
+afirmarIgual(cuenta(fuenteDelRodillo, /\.offsetHeight\b/g), 0, 'el rodillo no mide con `offsetHeight`: devuelve enteros y el error acumulado asoma el subrayado anterior')
+afirmar(cuenta(fuenteDelRodillo, /getBoundingClientRect\(\)\.height/g) > 0, '  mide con el alto del rect, que es fraccionario')
+controlPositivo('el detector vería la medición vieja', 'acumulado += ranura.offsetHeight', (f: string) => cuenta(f, /\.offsetHeight\b/g) === 0)
+
+/** ⚠️ **EL ACENTO DEL CTA CUELGA DE ADONDE VA, NO DE LO QUE DICE.** Colgaba de
+ *  `mostrado`, que recién se mueve cuando el intercambio termina: medido, el
+ *  color cambiaba a los 1.600 ms de un traspaso que arranca a los 200. Lo que se
+ *  afirma no es qué variable se usa, sino que la que tiñe esté DEFINIDA a partir
+ *  de `destino`, el mismo estado que enciende el relevo. */
+const quienTine = EXPRESION_DEL_ACENTO.exec(fuenteDelCta)?.[1] ?? ''
+afirmar(quienTine !== '' && quienTine !== 'mostrado', `el acento del CTA sale de \`${quienTine}\`, no de lo que el botón dice`)
+afirmar(new RegExp(`(const|let)\\s+${quienTine}\\s*=\\s*destino`).test(fuenteDelCta), '  y ésa sale de `destino`: color y etiqueta cuelgan del mismo estado, así que no se pueden separar')
+controlPositivo('el detector vería el acento colgado de lo que queda después', '{...{ [ATRIBUTO_DE_SERVICIO]: SERVICIOS[mostrado].id }}', (f: string) => (EXPRESION_DEL_ACENTO.exec(f)?.[1] ?? '') !== 'mostrado')
+
+/** ⚠️ **Y LA CURVA DEL DISPARO NO ARRANCA NI FRENA DE GOLPE.** Se afirma la
+ *  PROPIEDAD y no los cuatro números, para que se la pueda seguir afinando: una
+ *  cúbica sale con pendiente `y1 / x1` y llega con `(1 − y2) / (1 − x2)`, así
+ *  que `y1 = 0` y `y2 = 1` es «sale del reposo sin saltar y se posa sin clavar».
+ *  La curva anterior era la de las revelaciones de sección, que sale con
+ *  pendiente 1,84 — sobre un giro eso se lee como un tirón. */
+afirmarIgual(CURVA_DEL_DISPARO[1], 0, 'la curva del disparo sale del reposo con pendiente 0: no salta')
+afirmar(CURVA_DEL_DISPARO[0] > 0, '  con su punto de control adentro del tramo, que es lo que hace que la pendiente exista')
+afirmarIgual(CURVA_DEL_DISPARO[3], 1, '  y llega con pendiente 0: no clava el final')
+afirmar(CURVA_DEL_DISPARO[2] < 1, '  ídem del otro lado')
+controlPositivo('el detector vería la curva de las revelaciones, que sale con pendiente 1,84', [0.25, 0.46, 0.45, 0.94], (c: readonly number[]) => c[1] === 0 && c[3] === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §13 vive en `s6-tipografia.ts` — es un asunto de `cn()`, no de la sección.

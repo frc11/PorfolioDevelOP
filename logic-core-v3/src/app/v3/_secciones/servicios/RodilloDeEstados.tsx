@@ -1,21 +1,13 @@
 'use client'
 
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-  useTransform,
-  type MotionValue,
-} from 'motion/react'
-import { useEffect } from 'react'
+import { motion, useTransform, type MotionValue } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 
 import { SERVICIOS } from '../_contrato/acento'
 import {
   CLASE_DE_LA_CAJA_DEL_RODILLO,
   CLASE_DE_LA_RANURA,
-  CURVA_DEL_DISPARO,
-  DURACION_DEL_DISPARO,
+  CLASE_DE_LA_RANURA_DE_ENTRADA,
 } from './geometria'
 import { RotuloDeLaIntro, RotuloDeServicio } from './RotuloDeServicio'
 
@@ -27,105 +19,153 @@ import { RotuloDeLaIntro, RotuloDeServicio } from './RotuloDeServicio'
  *     2   02 · Software a medida
  *     3   03 · Integraciones de IA y Automatizaciones
  *
- * ── ⚠️ DISPARA, NO SE BARRE — y esto deshace a propósito una garantía ─────
+ * Cada estado es un bloque que viaja ENTERO —rótulo, número, nombre y
+ * subrayado—: ninguna de las cuatro piezas se posiciona sola.
  *
- * Hasta acá la rotación era `useTransform(progreso, …)`: colgaba del scroll, así
- * que **sólo se movía mientras el dedo se movía**. Frenar a mitad de camino
- * dejaba el rodillo a mitad de camino. Eso es un scrub, no un rodillo.
+ * ── ⚠️ LAS RANURAS DEJARON DE SER IGUALES, Y ES EL PUNTO DEL SPRINT ──────
  *
- * Ahora cruzar una frontera DISPARA una animación por TIEMPO, que corre sola
- * hasta posarse aunque la persona frene. El costo declarado: este archivo deja
- * de ser una función pura del progreso.
+ * Eran cuatro ranuras del mismo alto y el traslado era `-estado · 25 %`: un
+ * porcentaje de la propia caja, sin medir nada. Tenía una consecuencia que en
+ * pantalla se veía y en la cuenta no: con los bloques apoyados ABAJO de una
+ * ranura fija, **el hueco que queda ARRIBA de cada bloque es lo que sobra**, y
+ * lo que sobra depende de cuántos renglones tenga su título. Entre el subrayado
+ * azul y el rótulo de «Software a medida» quedaban ~48 px; entre el violeta y
+ * el de «Integraciones» —que ocupa dos renglones y llenaba su ranura— quedaba 0.
  *
- * **Lo que NO se pierde, y es la mitad que importa:** la tira sigue siendo
- * continua y lineal, y **el estado del rodillo no la toca**. Todo lo que este
- * componente necesita —el objetivo, la posición, la animación— vive en
- * `MotionValue`s de acá adentro; no hay un `useState` que suba, así que un
- * cambio de estado no re-renderiza ni a la tira ni al panel. `s6-servicios`
- * afirma esa separación leyendo el fuente: la máquina del rodillo tiene que
- * estar en este archivo y en ninguno de los dos de la derecha.
+ * Ahora cada ranura mide **su bloque más un hueco constante**, y el traslado
+ * apoya el FONDO de la ranura vigente contra el fondo de la caja. Con eso salen
+ * las dos cosas a la vez, que antes se peleaban:
  *
- * ── No encola: va al más nuevo desde donde esté ───────────────────────────
+ *   · el subrayado cae siempre en la misma `y` —es el fondo de su ranura—, que
+ *     es lo que el sprint anterior consiguió y no se toca;
+ *   · y el hueco entre un subrayado y el rótulo siguiente es el MISMO en los
+ *     cuatro pasos, porque es ese hueco y nada más.
  *
- * `animate()` sobre el MISMO `MotionValue` interrumpe lo que estuviera
- * corriendo y arranca del valor ACTUAL. Así que cruzar dos fronteras de un saque
- * no reproduce dos rotaciones: va al estado más nuevo desde donde quedó. Y
- * scrolleando hacia arriba es la misma animación con el objetivo más bajo.
+ * ── ⚠️ Y eso obliga a medir, con una salvedad que lo hace seguro ──────────
  *
- * ── ⚠️ EL TRASLADO ES UN PORCENTAJE DE SU PROPIA CAJA ─────────────────────
+ * Un alto que depende del contenido no se puede escribir en porcentajes, así
+ * que los fondos se acumulan de los `offsetHeight` de las ranuras. Medir
+ * después del primer render es justo lo que produce el parpadeo de un cuadro
+ * —la medida vale cero, la transformada vale cero, la pieza se pinta en reposo
+ * y recién al cuadro siguiente salta—, y acá **no puede pasar**: la ranura del
+ * estado 0 es `h-full`, o sea que mide exactamente la caja, así que su fondo
+ * coincide con el fondo de la caja y el traslado correcto para el estado 0 es
+ * **cero**. El primer cuadro es el que sale sin medir.
  *
- * Cuatro ranuras del alto de la caja, una tira del 400 %, y `-estado · 25 %`. Un
- * porcentaje de la propia caja **no necesita medir nada**: se resuelve en el
- * primer render, en el servidor incluso, así que la pieza nace en su lugar. Con
- * una medida que llega después del primer render, el estado entrante no tiene
- * estado «de antes» —la medida vale cero, la transformada vale cero— y se pinta
- * UN CUADRO en reposo antes de saltar. Es una lección ya pagada acá.
+ * Y se acumulan alturas en vez de leer `offsetTop`, por la misma razón que en
+ * la tira: la tira del rodillo lleva un `transform`, así que ELLA es el
+ * `offsetParent` de sus hijos y restarle su propio `offsetTop` descuenta de más.
  *
- * Las cadenas se arman (`${n}%`) y no se escriben: enteras serían literales con
- * unidad y el escáner de tokens de la sección los rechaza, con razón.
+ * ── ⚠️ Y SE MIDE CON EL RECT, NO CON `offsetHeight`: son 0,14 px que se ven ──
  *
- * ── Por qué TODO el rodillo va `aria-hidden` ──────────────────────────────
+ * `offsetHeight` devuelve un ENTERO. Una ranura de 141,14 px se lee 141, y el
+ * error se acumula fondo a fondo, así que el traslado deja la ranura vigente
+ * unas décimas más abajo de donde va. Con el bloque apoyado abajo, esas décimas
+ * salen por arriba: **el subrayado del estado ANTERIOR asomaba 0,11 px en
+ * `web` y 0,25 px en `software`** —una línea negra sobre «DIGITALIZÁ TU
+ * NEGOCIO»— y con ese error había 88 cuadros del traspaso con dos subrayados
+ * adentro de la caja.
  *
- * Porque es la copia VISUAL. Lo que se anuncia vive en la tira de la derecha,
- * adentro del bloque de cada servicio, que es el único orden que coincide con el
- * de la rama apilada. Si el rodillo anunciara, la rama pinneada diría los tres
- * rótulos juntos y después los tres contenidos, y las tres afirmaciones de
- * igualdad de texto entre ramas —`s6-servicios` §3, `s6-render` §3 y
- * `s10-acceso` §7— se pondrían en rojo por ORDEN, sin que falte una palabra.
+ * `getBoundingClientRect().height` es fraccionario. La advertencia del repo
+ * —que el rect lo contamina la transformada— vale para la POSICIÓN y para la
+ * escala; acá el único ancestro transformado es la propia tira y su
+ * transformada es una TRASLACIÓN, que no cambia un alto.
+ *
+ * ⚠️ **Y el margen que queda es de 0,05 px, por construcción.** La caja tiene
+ * que medir al menos el bloque más alto (141,09) y menos que la ranura más
+ * corta (48 + 93,14 = 141,14), y esa ventana mide lo que sobra de restarle al
+ * hueco la diferencia entre un título de dos renglones y uno de uno: 48 −
+ * 47,96 = 0,05. El hueco de 48 px es, casi exactamente, UN renglón de
+ * `titulo-l`. Funciona, y es frágil: si el hueco baja de un renglón, no hay
+ * encuadre que esconda el subrayado anterior.
  */
 
 /** Los cuatro estados. El 0 es el titular de la sección; los otros, servicios. */
 export const CANTIDAD_DE_ESTADOS = SERVICIOS.length + 1
 
-/** El alto de una ranura, en porcentaje de la tira. Armado, no escrito. */
-const ALTO_DE_RANURA = `${100 / CANTIDAD_DE_ESTADOS}%`
+interface MedidaDelRodillo {
+  /** El alto de la caja: lo que se ve por la máscara. */
+  readonly alto: number
+  /** El fondo acumulado de cada ranura, en orden. */
+  readonly fondos: readonly number[]
+}
 
-/** El alto de la tira, en porcentaje de la caja. Cuatro ranuras, una por estado. */
-const ALTO_DE_LA_TIRA = `${CANTIDAD_DE_ESTADOS * 100}%`
+const SIN_MEDIR: MedidaDelRodillo = { alto: 0, fondos: [] }
 
-/** En qué estado toca estar, según cuántas fronteras quedaron atrás. */
-function estadoSegun(progreso: number, fronteras: readonly number[]): number {
-  let n = 0
-  for (const frontera of fronteras) {
-    if (progreso > frontera) n += 1
-  }
-  return n
+function useMedidaDelRodillo(
+  caja: React.RefObject<HTMLDivElement | null>,
+  tira: React.RefObject<HTMLDivElement | null>,
+): MedidaDelRodillo {
+  const [medida, setMedida] = useState<MedidaDelRodillo>(SIN_MEDIR)
+
+  useEffect(() => {
+    const marco = caja.current
+    const dentro = tira.current
+    if (marco === null || dentro === null) return
+
+    const medir = (): void => {
+      const fondos: number[] = []
+      let acumulado = 0
+      for (const ranura of Array.from(dentro.children)) {
+        if (ranura instanceof HTMLElement) {
+          acumulado += ranura.getBoundingClientRect().height
+          fondos.push(acumulado)
+        }
+      }
+      setMedida({ alto: marco.getBoundingClientRect().height, fondos })
+    }
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(marco)
+    observador.observe(dentro)
+    return () => observador.disconnect()
+  }, [caja, tira])
+
+  return medida
+}
+
+/**
+ * Dónde tiene que estar la tira para que la ranura `v` apoye su fondo contra el
+ * fondo de la caja. Entre dos estados interpola, que es lo que el disparo anima.
+ */
+function trasladoDe(v: number, medida: MedidaDelRodillo): number {
+  if (medida.fondos.length < CANTIDAD_DE_ESTADOS) return 0
+  const acotado = Math.min(CANTIDAD_DE_ESTADOS - 1, Math.max(0, v))
+  const i = Math.floor(acotado)
+  const j = Math.min(CANTIDAD_DE_ESTADOS - 1, i + 1)
+  const f = acotado - i
+  const desde = medida.alto - medida.fondos[i]
+  const hasta = medida.alto - medida.fondos[j]
+  return desde + (hasta - desde) * f
 }
 
 export interface RodilloDeEstadosProps {
-  /** El progreso del pin, crudo. Este componente lo lee; nadie más lo remapea. */
-  readonly progreso: MotionValue<number>
-  /** Dónde está cada frontera, derivada del tope medido de cada bloque. */
-  readonly fronteras: readonly number[]
+  /**
+   * La posición DISPARADA, de `useEstadoDisparado`. El rodillo ya no arma su
+   * propia máquina: la torta y el CTA rotan con la MISMA, y tres relojes se
+   * desincronizan en cuanto alguien toque una duración.
+   */
+  readonly posicion: MotionValue<number>
 }
 
-export function RodilloDeEstados({
-  progreso,
-  fronteras,
-}: RodilloDeEstadosProps): React.JSX.Element {
-  const objetivo = useTransform(progreso, (p) => estadoSegun(p, fronteras))
-  const posicion = useMotionValue(0)
-  const y = useTransform(posicion, (v) => `${(-v * 100) / CANTIDAD_DE_ESTADOS}%`)
-
-  // El disparo. `animate` sobre el mismo valor interrumpe lo anterior y sale del
-  // valor actual, que es justo «no encola, va al más nuevo desde donde esté».
-  useMotionValueEvent(objetivo, 'change', (destino) => {
-    animate(posicion, destino, { duration: DURACION_DEL_DISPARO, ease: [...CURVA_DEL_DISPARO] })
-  })
-
-  // Al montar, el rodillo se posa donde el scroll ya esté: entrar a la sección
-  // por un ancla o recargar a mitad del pin no puede dejarlo en el estado 0.
-  useEffect(() => {
-    posicion.set(objetivo.get())
-  }, [posicion, objetivo])
+export function RodilloDeEstados({ posicion }: RodilloDeEstadosProps): React.JSX.Element {
+  const caja = useRef<HTMLDivElement>(null)
+  const tira = useRef<HTMLDivElement>(null)
+  const medida = useMedidaDelRodillo(caja, tira)
+  const y = useTransform(posicion, (v) => trasladoDe(v, medida))
 
   return (
-    <div aria-hidden="true" data-rodillo="estados" className={CLASE_DE_LA_CAJA_DEL_RODILLO}>
-      <motion.div
-        className="flex w-full flex-col will-change-transform"
-        style={{ height: ALTO_DE_LA_TIRA, y }}
-      >
-        <div data-estado="intro" className={CLASE_DE_LA_RANURA} style={{ height: ALTO_DE_RANURA }}>
+    <div
+      ref={caja}
+      aria-hidden="true"
+      data-rodillo="estados"
+      className={CLASE_DE_LA_CAJA_DEL_RODILLO}
+    >
+      <motion.div ref={tira} className="flex w-full flex-col will-change-transform" style={{ y }}>
+        {/* ⚠️ La ranura de entrada mide la CAJA entera, y de eso depende que el
+            primer cuadro salga bien sin haber medido: su fondo ya coincide con
+            el fondo de la caja, así que el traslado del estado 0 es cero. */}
+        <div data-estado="intro" className={CLASE_DE_LA_RANURA_DE_ENTRADA}>
           <RotuloDeLaIntro />
         </div>
         {SERVICIOS.map((servicio) => (
@@ -134,7 +174,6 @@ export function RodilloDeEstados({
             data-servicio={servicio.id}
             data-estado="servicio"
             className={CLASE_DE_LA_RANURA}
-            style={{ height: ALTO_DE_RANURA }}
           >
             <RotuloDeServicio servicio={servicio} decorativo />
           </div>

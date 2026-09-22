@@ -52,8 +52,19 @@ const RECIBO = `${SALIDAS}/pin-1440-cuadros.json`
 /** Cuadros por segundo de la película. 12 deja los 130 cuadros en ~11 s. */
 const FPS = 12
 
-/** Cuántos cuadros. 130 a 1440 dan ~37 px de scroll por cuadro. */
+/** Cuántos cuadros de IDA. 130 a 1440 dan ~37 px de scroll por cuadro. */
 const CUADROS = 130
+
+/**
+ * Cuántos cuadros de VUELTA, subiendo.
+ *
+ * ⚠️ La vuelta no es un lujo de la grabación: la torta **despinta y rota al
+ * revés**, y el rodillo dispara con el objetivo más bajo. Eso sólo se ve
+ * subiendo, así que una grabación de una sola dirección no muestra la mitad
+ * del gesto. Van menos cuadros que la ida —el paso es más grande— porque lo
+ * que hay que ver es que reversa, no volver a leer los párrafos.
+ */
+const CUADROS_DE_VUELTA = 65
 
 /**
  * Cuánto se muestra ANTES y DESPUÉS del pin.
@@ -101,9 +112,18 @@ async function principal(): Promise<void> {
     const desde = seccion.top - ANTES_PX
     const hasta = seccion.top + pin + DESPUES_PX
 
-    const filas: unknown[] = []
+    // La ida entera, y después la vuelta hasta el arranque del pin.
+    const recorrido: number[] = []
     for (let i = 0; i < CUADROS; i += 1) {
-      const pedido = Math.round(desde + ((hasta - desde) * i) / (CUADROS - 1))
+      recorrido.push(Math.round(desde + ((hasta - desde) * i) / (CUADROS - 1)))
+    }
+    for (let i = 1; i <= CUADROS_DE_VUELTA; i += 1) {
+      recorrido.push(Math.round(hasta - ((hasta - desde) * i) / CUADROS_DE_VUELTA))
+    }
+
+    const filas: unknown[] = []
+    for (let i = 0; i < recorrido.length; i += 1) {
+      const pedido = recorrido[i]
       const logrado = await scrollA(pagina, pedido)
       // Un cuadro más: el rodillo y la columna cuelgan de un progreso
       // amortiguado y siguen moviéndose después de que el scroll se soltó.
@@ -137,6 +157,8 @@ async function principal(): Promise<void> {
           desde,
           hasta,
           pasoPx: Math.round((hasta - desde) / (CUADROS - 1)),
+          cuadrosDeIda: CUADROS,
+          cuadrosDeVuelta: CUADROS_DE_VUELTA,
           filas,
         },
         null,
@@ -144,7 +166,7 @@ async function principal(): Promise<void> {
       )}\n`,
       'utf8',
     )
-    console.log(`${CUADROS} cuadros → ${PELICULA} — scroll ${desde} → ${hasta}, pin de ${pin} px`)
+    console.log(`${recorrido.length} cuadros (${CUADROS} de ida + ${CUADROS_DE_VUELTA} de vuelta) → ${PELICULA} — scroll ${desde} → ${hasta} → ${desde}, pin de ${pin} px`)
   } finally {
     await cerrarChrome(chrome)
     rmSync(cuadros, { recursive: true, force: true })

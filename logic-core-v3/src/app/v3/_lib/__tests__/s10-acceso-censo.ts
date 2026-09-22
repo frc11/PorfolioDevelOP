@@ -106,14 +106,17 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   const animada = sinLoInventadoEnMarcado(marcadoAnimado)
   const marcas = marcadoresAnunciados(quieta)
   imprimirMarcadores(marcas)
-  afirmarIgual(marcas.length, 40, 'son 40 marcadores ANUNCIADOS en la rama quieta — eran 43 hasta que V3-D cerró las tres capturas')
+  // 43 → 40 cuando V3-D cerró las tres capturas, y 40 → 34 cuando Servicios se
+  // quedó sin sus tres [MÉTRICA] y sus tres [CIFRA]: el dueño confirmó que no
+  // va a haber cifras de clientes, así que esos seis pedidos no están abiertos.
+  afirmarIgual(marcas.length, 34, 'son 34 marcadores ANUNCIADOS en la rama quieta')
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
   )
   afirmarIgual(
     marcadoresAnunciados(animada).map((m) => m.marcador).sort(), marcas.map((m) => m.marcador).sort(),
-    'y los MISMOS 40 en la animada, marcador por marcador: no falta ninguno',
+    'y los MISMOS en la animada, marcador por marcador: no falta ninguno',
   )
   afirmarIgual(
     marcas.map((m) => m.marcador).filter((m) => !(MARCADORES as readonly string[]).includes(m)), [],

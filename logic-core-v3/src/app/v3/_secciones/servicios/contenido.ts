@@ -107,6 +107,20 @@ export const TITULAR = 'Nuestros servicios'
  */
 export const ROTULO_DE_LA_INTRO = 'lo que nosotros hacemos'
 
+/**
+ * LA ETIQUETA DEL CTA, por servicio.
+ *
+ * Es la misma frase en primera persona del cliente para los tres, con el
+ * servicio cambiado: lo que rota es el objeto, no el verbo. Por eso el botón
+ * puede relevar la etiqueta con su propio intercambio sin que el gesto se lea
+ * como «apareció otro botón».
+ */
+export const CTA_POR_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
+  web: 'Quiero mi desarrollo web',
+  software: 'Quiero mi software a medida',
+  'ia-automatizacion': 'Quiero mi integración con IA',
+}
+
 export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = {
   web: {
     rubro: 'Digitalizá tu negocio',

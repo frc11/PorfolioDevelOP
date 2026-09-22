@@ -241,6 +241,18 @@ export function altoDeSecuenciaPinneada(pasos: number): string {
 const PASOS_DE_TRABAJOS = 3
 const PASOS_DE_SERVICIOS = 3
 
+/**
+ * ⚠️ SERVICIOS SE ESTIRÓ: su alto ya NO es `pasos × 100svh`.
+ *
+ * Los pasos y el alto son dos conceptos distintos y por eso son dos constantes:
+ * cuántos tramos hay, y sobre cuánto recorrido se reparten.
+ *
+ * El recorrido del pin fue **200svh → 400svh** cuando todo pasaba demasiado
+ * rápido. Subió a 600 mientras existió un paso cero y volvió a 400 cuando ese
+ * paso se sacó: con tres tramos, cada uno se lleva 133svh.
+ */
+const PANTALLAS_DE_SERVICIOS = 5
+
 export const SECCIONES: readonly Seccion[] = [
   /**
    * ⚠️ **EL HERO ES LA ÚNICA FILA CON DOS SUPERFICIES, y la decidió el dueño.**
@@ -394,7 +406,7 @@ export const SECCIONES: readonly Seccion[] = [
     numero: '05',
     nombre: 'Servicios',
     superficie: 'papel-opaco',
-    alto: altoDeSecuenciaPinneada(PASOS_DE_SERVICIOS),
+    alto: altoDeSecuenciaPinneada(PANTALLAS_DE_SERVICIOS),
     pinneada: 'siempre',
     pasosDeLaSecuencia: PASOS_DE_SERVICIOS,
   },

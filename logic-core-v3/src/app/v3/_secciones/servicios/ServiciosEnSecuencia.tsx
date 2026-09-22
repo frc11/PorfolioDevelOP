@@ -9,12 +9,16 @@ import { ContenidoDeSeccion } from '../_contrato/Seccion'
 import { ID_DEL_TITULAR } from './CabeceraDeServicios'
 import { TITULAR } from './contenido'
 import {
+  CLASE_DEL_HUECO_DE_LA_TORTA,
   CLASE_DEL_STICKY,
   CLASE_DE_LA_COLUMNA_FIJA,
   CLASE_DE_LA_COLUMNA_QUE_AVANZA,
   NIVEL_DEL_TITULAR_DE_SECCION,
 } from './geometria'
+import { CtaQueRota } from './CtaQueRota'
+import { GraficoDeTorta } from './GraficoDeTorta'
 import { RodilloDeEstados } from './RodilloDeEstados'
+import { useEstadoDisparado } from './disparo'
 import { TiraDeServicios, fronterasDeEstado, useMedidaDeLaTira } from './TiraDeServicios'
 
 /**
@@ -80,6 +84,8 @@ export function PanelDeSecuencia({ progreso }: ServiciosEnSecuenciaProps): React
   // Sólo las fronteras: el rodillo lee el progreso y arma su propia máquina.
   // Nada de su estado sube hasta acá, así que un disparo no re-renderiza la tira.
   const fronteras = fronterasDeEstado(medida)
+  // UN disparo para los tres que rotan: el rodillo, la torta y el CTA.
+  const posicion = useEstadoDisparado(progreso, fronteras)
 
   return (
     <div className={CLASE_DEL_STICKY}>
@@ -95,7 +101,16 @@ export function PanelDeSecuencia({ progreso }: ServiciosEnSecuenciaProps): React
       >
         <Grilla columnas={3} className="min-h-0 flex-1">
           <div className={CLASE_DE_LA_COLUMNA_FIJA}>
-            <RodilloDeEstados progreso={progreso} fronteras={fronteras} />
+            <RodilloDeEstados posicion={posicion} />
+            {/* La torta va centrada en el hueco, no colgada del flujo: así no
+                se mueve cuando el bloque del título cambia de alto. */}
+            <div className={CLASE_DEL_HUECO_DE_LA_TORTA}>
+              <GraficoDeTorta progreso={progreso} medida={medida} posicion={posicion} />
+            </div>
+            {/* `mt-auto` y no un hueco: el CTA se apoya en el borde de abajo del
+                panel y se queda ahí todo el pin, sin empujar a la torta ni
+                depender de cuánto mida el bloque del título en cada estado. */}
+            <CtaQueRota posicion={posicion} />
           </div>
           <div className={CLASE_DE_LA_COLUMNA_QUE_AVANZA}>
             <TiraDeServicios

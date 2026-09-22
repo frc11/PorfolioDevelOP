@@ -363,11 +363,23 @@ export const LINEA_DE_REFERENCIA = 0.72
  * persona frene el scroll en el medio. Más lenta que el barrido que reemplaza
  * —que sólo se movía mientras el dedo se movía— porque un gesto que se completa
  * solo se lee mejor lento.
+ *
+ * ⚠️ La duración y la curva se leen JUNTAS, y son las dos perillas del traspaso:
+ * las mueve el rodillo, la torta y el CTA a la vez, porque los tres cuelgan de la
+ * misma máquina.
  */
-export const DURACION_DEL_DISPARO = 0.9
+export const DURACION_DEL_DISPARO = 1.4
 
-/** La curva del disparo: sale rápido y se posa. Es la del vocabulario del sitio. */
-export const CURVA_DEL_DISPARO = [0.25, 0.46, 0.45, 0.94] as const
+/**
+ * LA CURVA DEL DISPARO, y por qué dejó de ser la del vocabulario del sitio.
+ *
+ * Era la de las revelaciones de sección, que arranca con pendiente 1,84: **salta**
+ * del reposo, y sobre un giro eso se lee como un tirón. Ésta es simétrica y sus
+ * dos pendientes de borde valen 0, así que no hay arranque ni frenada: ni el
+ * primer cuadro ni el último se despegan del reposo. Lo rápido queda en el medio,
+ * que es donde el giro se mira.
+ */
+export const CURVA_DEL_DISPARO = [0.5, 0, 0.5, 1] as const
 
 /**
  * LA ENTRADA ATENUADA — cuánto contraste tiene el bloque 01 antes del pin.
@@ -386,18 +398,78 @@ export const OPACIDAD_ATENUADA = 0.28
 /** En cuánto del pin pasa de atenuado a pleno. Corto: es un encendido, no un viaje. */
 export const UMBRAL_DE_ACTIVACION = 0.015
 
+/**
+ * EL ANCHO DE LA TORTA en la columna izquierda. Experimental, a mano.
+ *
+ * Va como clase y no como número suelto porque el SVG escala con su caja: su
+ * `viewBox` es fijo y lo que decide el tamaño en pantalla es esto.
+ *
+ * ⚠️ Cuatro veces `--spacing-20` (320 px) y no un token nuevo: el tema es
+ * superficie compartida y de otro dueño, y una torta experimental no justifica
+ * meterle una variable. Derivado de la escala, el escáner lo acepta y el día
+ * que la escala cambie, la torta la sigue.
+ */
+export const CLASE_DE_LA_TORTA = 'w-[calc(var(--spacing-20)*4)] max-w-full'
+
+/**
+ * LA CAJA DONDE VIVE LA TORTA — centrada en el hueco, y quieta.
+ *
+ * `flex-1` se come lo que sobra entre el rodillo y el CTA, y el centrado pone
+ * la torta en el medio de ESE hueco. Antes colgaba del flujo justo abajo del
+ * rodillo, así que su posición dependía de cuántos renglones tuviera el título
+ * del estado vigente: con el nombre largo bajaba, con los cortos subía.
+ */
+export const CLASE_DEL_HUECO_DE_LA_TORTA = 'flex min-h-0 flex-1 items-center justify-center'
+
+/**
+ * LA VENTANA DEL CTA — una grilla de UNA celda, del ancho de la etiqueta más larga.
+ *
+ * ⚠️ El botón recorta lo que no entra: su `[data-parte="ventana"]` es
+ * `inline-flex` con `overflow: hidden`, y su ancho lo fija la copia que se ve.
+ * Cuando la copia que ENTRA dice una etiqueta más larga, se corta. Con las tres
+ * en la misma celda, la celda mide la más larga y el ancho **no cambia** al
+ * relevar — que es lo que el punto pedía.
+ */
+export const CLASE_DE_LA_VENTANA_DEL_CTA = 'grid w-fit justify-items-start'
+
+/**
+ * UN FANTASMA: ocupa el ancho de su etiqueta y no se ve ni se anuncia.
+ *
+ * ⚠️ **Tiene que medir lo que mide el BOTÓN con esa etiqueta, no lo que mide el
+ * texto.** La primera versión usó `text-base` y sin padding, y quedó 2,4 px
+ * corta justo en la etiqueta más larga: el botón crecía al relevarla, que es
+ * exactamente lo que el fantasma existe para evitar. La tipografía es la de la
+ * copia del rótulo (`text-cuerpo`, `font-semi`, `tracking-texto`) y el padding
+ * es el del botón (`--spacing-2`), los dos leídos de `Cta.tsx` y `cta.css`.
+ */
+export const CLASE_DEL_FANTASMA_DEL_CTA =
+  'invisible col-start-1 row-start-1 whitespace-nowrap p-[var(--spacing-2)] text-cuerpo font-semi tracking-texto leading-texto'
+
 /** Cuánto del alto de la ventana ocupa el desvanecido de arriba. */
 export const FRACCION_DEL_DESVANECIDO = 0.16
 
 /**
- * Dónde TERMINA de pintarse un párrafo, en fracción del alto de la ventana.
+ * DÓNDE TERMINA de pintarse un párrafo, en fracción del alto de la ventana.
  *
- * Está más abajo que la banda del difuminado a propósito: es lo que garantiza
- * que el párrafo llegue al 100 % ANTES de que su borde de arriba empiece a
- * desvanecerse, y lo garantiza a cualquier alto de pin porque las dos son
- * fracciones de la misma ventana.
+ * ⚠️ **Ya no es un número elegido: se DERIVA de la banda más un margen en
+ * renglones**, que es el criterio nuevo. La pintura tiene que llegar a 1,00
+ * justo antes de que el tope del bloque entre en el difuminado, con al menos
+ * un renglón de aire — ni antes, porque entonces el párrafo pasa la mitad de
+ * su vida ya pintado, ni después, porque se apagaría mientras todavía escribe.
+ *
+ * Estaba en 0,24, que dejaba 63 px de margen: casi dos renglones, o sea que
+ * terminaba temprano. Con 1,2 renglones el margen baja a ~42 px y la pintura
+ * se estira todo lo que el criterio permite.
  */
-export const LINEA_DE_FIN_DE_PINTURA = 0.24
+
+/** Cuántos renglones de aire quedan entre el fin de la pintura y la banda. */
+const MARGEN_DE_PINTURA_EN_RENGLONES = 1.2
+
+/** Cuánto mide un renglón del párrafo en fracción de la ventana, a 1440. */
+const RENGLON_EN_FRACCION_DE_LA_VENTANA = 0.0443
+
+export const LINEA_DE_FIN_DE_PINTURA =
+  FRACCION_DEL_DESVANECIDO + MARGEN_DE_PINTURA_EN_RENGLONES * RENGLON_EN_FRACCION_DE_LA_VENTANA
 
 /**
  * LA CAJA DEL RODILLO — su alto es el del estado MÁS ALTO, y sale de tokens.
@@ -421,20 +493,39 @@ export const CLASE_DE_LA_CAJA_DEL_RODILLO =
   'relative w-full overflow-hidden h-[calc(var(--text-fluido-caption)*var(--leading-texto)+var(--spacing-3)*2+var(--text-fluido-titulo-l)*var(--leading-titulo)*2+var(--foco-grosor))]'
 
 /**
- * UNA RANURA DEL RODILLO — y el bloque se apoya ABAJO, no arriba.
+ * EL HUECO ENTRE UN SUBRAYADO Y EL RÓTULO SIGUIENTE — el mismo en los cuatro.
  *
- * ⚠️ **`justify-end` es el punto 1 del sprint, y es un cambio de ANCLAJE.**
- * Con el bloque apoyado arriba, el subrayado colgaba del final del título: el
- * nombre de dos renglones lo empujaba una línea para abajo y los cuatro
- * estados tenían el subrayado a alturas distintas.
- *
- * Apoyado abajo se invierte: **el subrayado es la línea fija** —la misma `y`
- * en los cuatro estados, la que tenía el caso de dos renglones— y el título
- * CRECE HACIA ARRIBA desde ahí. Lo que cambia entre estados no es dónde
- * termina el bloque sino dónde empieza, y el rótulo y el número acompañan al
- * nombre en vez de tener una `y` propia.
+ * ⚠️ **Es la corrección del sprint, y el defecto era geométrico.** Con ranuras
+ * del mismo alto y los bloques apoyados abajo, lo que quedaba arriba de cada
+ * bloque era el SOBRANTE de su ranura — y el sobrante depende de cuántos
+ * renglones tenga el título. Un nombre de un renglón dejaba ~48 px; el de dos
+ * llenaba la ranura y dejaba 0. Ahora la ranura mide su bloque MÁS este hueco,
+ * así que el hueco es el hueco y no un resto.
  */
-export const CLASE_DE_LA_RANURA = 'flex w-full flex-col justify-end'
+export const CLASE_DE_LA_RANURA = 'w-full pt-[var(--spacing-12)]'
+
+/**
+ * LA RANURA DEL ESTADO 0 mide la CAJA ENTERA, y no es una excepción de estilo.
+ *
+ * Es lo que hace que el primer cuadro salga bien SIN haber medido: si su fondo
+ * coincide con el fondo de la caja, el traslado del estado 0 vale cero, que es
+ * exactamente lo que la transformada devuelve mientras la medida no llegó. Sin
+ * esto, la pieza se pintaría un cuadro fuera de lugar y saltaría al siguiente.
+ */
+/**
+ * ⚠️ **`min-h` con la MISMA cuenta que la caja, y no `h-full`.** La primera
+ * versión usó `h-full`, y no resolvió: la tira es un `flex-col` de alto
+ * AUTOMÁTICO —tiene que crecer con sus ranuras— y un porcentaje contra un padre
+ * sin alto definido resuelve a `auto`. La ranura medía su contenido (93,14 px)
+ * en vez de la caja (141,11), así que el traslado correcto para el estado 0 no
+ * era cero y el primer cuadro salía 48 px corrido, saltando al llegar la
+ * medida. Es exactamente el parpadeo que este archivo existe para no tener.
+ *
+ * La cuenta está escrita dos veces a propósito: Tailwind escanea el fuente y
+ * una clase compuesta no la ve nadie. Van pegadas para que se muevan juntas.
+ */
+export const CLASE_DE_LA_RANURA_DE_ENTRADA =
+  'flex w-full flex-col justify-end min-h-[calc(var(--text-fluido-caption)*var(--leading-texto)+var(--spacing-3)*2+var(--text-fluido-titulo-l)*var(--leading-titulo)*2+var(--foco-grosor))]'
 
 /** La tira de la derecha: los bloques en columna, sin hueco entre ellos. */
 export const CLASE_DE_LA_TIRA = 'flex w-full flex-col will-change-transform'

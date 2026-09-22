@@ -176,7 +176,16 @@ titulo('5 · El acento: por alias, uno por contexto, y nunca texto sobre oscuro'
  * ninguno adentro de otro.
  */
 const servicios = valoresDeAtributo(ANIMADO, 'data-servicio')
-afirmarIgual(servicios, [...IDS_DE_SERVICIO, ...IDS_DE_SERVICIO], 'con coreografía hay SEIS `[data-servicio]`: los tres del rodillo y los tres de la tira, cada terna en orden')
+/** ⚠️ **NUEVE, y el número sube cada vez que una pieza NUEVA necesita el
+ *  acento.** Fueron tres (una capa por servicio), después seis (el rodillo
+ *  agregó su rótulo) y ahora nueve: la torta pone una porción por servicio y
+ *  cada una toma su color del atributo, que es el mecanismo de la paleta.
+ *
+ *  Se afirma la terna REPETIDA y no la cuenta: `[web, software, ia] × 3`
+ *  comprueba además que las tres piezas recorren los servicios en el MISMO
+ *  orden, que es lo que un número solo no diría. */
+const TERNA = [...IDS_DE_SERVICIO]
+afirmarIgual(servicios, [...TERNA, ...TERNA, ...TERNA], 'con coreografía hay NUEVE `[data-servicio]`: el rodillo, la tira y la torta, cada uno con su terna en orden')
 afirmarIgual(srOnlyQueTapanContenido(ANIMADO), [], '  y ningún `sr-only` envuelve contenido: la puerta por la que volvía el modelo de capas queda cerrada')
 controlPositivo('el detector vería un `sr-only` tapando un bloque de servicio', '<div class="sr-only"><div data-servicio="web"><p data-canal="parrafo">x</p></div></div>', (h: string) => srOnlyQueTapanContenido(h).length === 0)
 const serviciosQuietos = valoresDeAtributo(QUIETO, 'data-servicio')
