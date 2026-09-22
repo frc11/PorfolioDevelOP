@@ -33,8 +33,34 @@ import { marcar } from '../_invariantes/render'
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
 import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
 import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, sinTres, veces } from './soporte'
-import { coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, nombresQueNoSonEncabezado } from './trabajos-piezas'
-import { DISPARO_DE_LA_NOCHE } from './geometria'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+import { caminoDeLaPersecucion, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, medidasDeWebp, nombresQueNoSonEncabezado, pxDelTema } from './trabajos-piezas'
+import {
+  ARRANQUE_DE_DEMOS,
+  CARTEL,
+  DISPARO_DE_LA_NOCHE,
+  MEDIDAS_DE_LAS_CAPTURAS,
+  PANTALLAS_DE_LA_SECCION,
+  VENTANA_DEL_TUNEL,
+  progresoDeLaVentana,
+} from './geometria'
+import {
+  ANCHO_AL_APARECER,
+  ANCHO_DEL_LIMITE,
+  ANCHO_DEL_RELEVO,
+  ASENTAMIENTO_DEL_TUNEL_MS,
+  BANDA_DEL_ROTULO,
+  RESTO_AL_ASENTARSE,
+  TAU_DEL_TUNEL_MS,
+  anchoDeLaCaptura,
+  anchoFinalDeLaPrimera,
+  avanceDelNacimiento,
+  avanceQueCompletaElTunel,
+  opacidadDelRotulo,
+  perseguir,
+} from './tunel'
 import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
@@ -125,15 +151,15 @@ const RUTAS_DE_ARCHIVO = new Set(TEXTOS.filter((h) => h.valor.startsWith('/')).m
 const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => !RUTAS_DE_ARCHIVO.has(h.ruta))
 // ⚠️ Ahora SÍ hay rutas de archivo en el contenido —las seis, reales— y por eso
 // se eximen de «todo texto llega a la pantalla»: una ruta no es algo que se lea.
-afirmarIgual(RUTAS_DE_ARCHIVO.size, 6, 'las SEIS rutas de archivo del contenido se eximen del censo de texto: un `/capturas/...` no es algo que alguien lea en pantalla')
+afirmarIgual(RUTAS_DE_ARCHIVO.size, 3, 'las TRES rutas de archivo del contenido se eximen del censo de texto: un `/capturas/...` no es algo que alguien lea en pantalla')
 afirmarIgual(TEXTOS_DE_PANTALLA.filter((h) => !quieto.includes(h.valor)).map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
 afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee: el título toma su lugar (B12, regla 15 — la cadena no se borra, se da vuelta)`)
 controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Trabajos</div>', (html: string) => TEXTOS_DE_PANTALLA.every((h) => html.includes(h.valor)))
-// ⚠️ Las seis imágenes llegan a las DOS ramas, y es lo correcto desde que son
-// reales: abajo de 1025 la sección es una lista de trabajos, y una lista de
-// trabajos sin las capturas no es la misma información con otro ritmo, es menos.
-afirmarIgual(veces(quieto, '<img'), 6, 'las seis imágenes reales llegan a la rama quieta')
-afirmarIgual(veces(conMotion, '<img'), 6, '  y las mismas seis con la coreografía puesta')
+// ⚠️ Las TRES capturas llegan a las dos ramas, y es lo correcto: abajo de 1025 la
+// sección es una lista de trabajos, y una lista de trabajos sin las capturas no
+// es la misma información con otro ritmo, es menos.
+afirmarIgual(veces(quieto, '<img'), 3, 'las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más')
+afirmarIgual(veces(conMotion, '<img'), 3, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
@@ -181,19 +207,25 @@ afirmarIgual(veces(quieto, 'outline-none'), 0, 'cero `outline-none`: el anillo d
 afirmar(!/#[0-9a-fA-F]{3,8}\b/.test(quieto), 'cero color fuera de los tokens: ni un hex suelto')
 afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbitrario de clase')
 controlPositivo('el chequeo del hex ve un hex', '<i style="color:#ff0000">', (html: string) => !/#[0-9a-fA-F]{3,8}\b/.test(html))
-controlPositivo('el chequeo del px suelto ve un p-[7px]', '<i class="p-[7px]">', (html: string) => !/-\[\d+(px|rem)\]/.test(html))
+// ⚠️ La clase de prueba se ARMA y no se escribe: el escaneo de Tailwind 4 lee
+// este archivo —comentarios incluidos— y una clase arbitraria deletreada entera
+// se emite como regla real, capaz de romper el build apuntando a `globals.css`.
+// Es la regla del CLAUDE.md, y acá estaba escrita entera desde antes.
+const CLASE_DE_PRUEBA = 'p-' + '[' + '7px' + ']'
+controlPositivo('el chequeo del px suelto ve una clase con un valor en px', `<i class="${CLASE_DE_PRUEBA}">`, (html: string) => !/-\[\d+(px|rem)\]/.test(html))
 
 const hovers = veces(quieto, 'hover:')
 afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su gemela `focus-visible:`')
 afirmarIgual(hovers, 0, '  y en esta sección son cero: el énfasis de puntero queda pedido, no escrito suelto')
 afirmarIgual(veces(quieto, '<button'), 0, 'cero botones')
-// ⚠️ DOCE, y son cuatro por proyecto a propósito: el nombre, el rubro, el logo y
-// la captura llevan al sitio del cliente. Cuatro anclas al mismo destino son
-// cuatro paradas de teclado, así que las tres que no son el nombre declaran su
-// `aria-label`: sin eso, tres paradas seguidas se anuncian con el mismo texto.
-afirmarIgual(veces(quieto, '<a '), 12, 'DOCE enlaces: las cuatro piezas de cada proyecto llevan a su sitio')
-afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 12, '  las doce abren afuera sin darle al otro sitio acceso a esta ventana ni el referente')
-afirmarIgual(veces(conMotion, '<a '), 12, '  y las mismas doce con la coreografía puesta: el recorrido de teclado no cambia con el ancho')
+// ⚠️ SEIS, y son DOS por proyecto a propósito. Eran cuatro —nombre, rubro, logo
+// y captura—: el logo se fue con el rediseño del tramo y el rubro dejó de ser
+// ancla, porque tres paradas seguidas al mismo destino se anuncian tres veces
+// igual. Quedan las dos que hacen falta: el nombre, que es lo que se lee, y la
+// captura, que es lo que se ve. La de la imagen declara su `aria-label`.
+afirmarIgual(veces(quieto, '<a '), 6, 'SEIS enlaces: el nombre y la captura de cada proyecto llevan a su sitio')
+afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 6, '  los seis abren afuera sin darle al otro sitio acceso a esta ventana ni el referente')
+afirmarIgual(veces(conMotion, '<a '), 6, '  y los mismos seis con la coreografía puesta: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(enlacesFueraDelContenido(quieto, PROYECTOS.map((p) => p.enlace)), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada acá')
 afirmarIgual(enlacesConNombreSucio(quieto, PROYECTOS), [], '  el nombre accesible de cada uno es el del cliente y nada más: la métrica queda AFUERA')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.enlace)).length === 0)
@@ -237,17 +269,17 @@ afirmarIgual(patronesDelFuente, ['P3', 'P7'], 'el componente consume DOS patrone
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
 // ════════════════════════════════════════════════════════════════════════════
-titulo('16 · Las doce piezas son paradas de teclado de verdad, con su lugar puesto')
+titulo('16 · Las seis anclas son paradas de teclado de verdad, con su lugar puesto')
 
 /**
  * ⚠️ **«ES UN ENLACE» NO ES «SE PUEDE LLEGAR CON EL TECLADO», y la diferencia
  * la hace el LUGAR — por eso esto se monta con la posición escrita.**
  *
- * Contar `<a ` (§11) dice que hay doce marcas en el papel. Lo que decide si son
+ * Contar `<a ` (§11) dice que hay seis marcas en el papel. Lo que decide si son
  * paradas es otra cosa: que lleven `href`, que nadie les ponga `tabindex="-1"`,
  * que no estén escondidas de los lectores, y que tengan un nombre —tres de las
  * cuatro piezas de un proyecto van al MISMO destino, así que sin nombre propio
- * suenan tres veces igual—. Eso se lee del marcado real, con las doce piezas
+ * suenan dos veces igual—. Eso se lee del marcado real, con las capturas
  * posicionadas por el túnel: `left/top/width/height` y su punto interior.
  *
  * ⚠️ **Y el límite se afirma en vez de esconderse.** Arriba de 1025 las piezas
@@ -255,22 +287,268 @@ titulo('16 · Las doce piezas son paradas de teclado de verdad, con su lugar pue
  * del orden de tabulación mientras dure: ahí una pieza es parada **sólo mientras
  * está pintada**, que es lo mismo que le pasa a cualquier cosa de un tramo
  * gobernado por el scroll. La garantía incondicional es la de abajo de 1025, y es
- * la que esta sección afirma: ahí las doce están puestas desde el primer cuadro.
+ * la que esta sección afirma: ahí las seis están puestas desde el primer cuadro.
  */
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, 12, 'abajo de 1025 las doce piezas son paradas de teclado: ninguna se quedó en marca de papel')
-afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a').map((p) => p.etiqueta), [], '  las doce son anclas —no un `div` con un manejador—, que es lo que las hace parada sin escribir un `tabindex`')
-afirmarIgual(PARADAS.filter((p) => p.destino === null || !PROYECTOS.some((x) => x.enlace === p.destino)).map((p) => p.destino), [], '  las doce llevan a un `enlace` del contenido: un ancla sin `href` no es parada, y una URL de otro lado no es de nadie')
-afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y las doce se anuncian con algo: tres van al mismo sitio por proyecto, así que el nombre propio es lo único que las distingue')
+afirmarIgual(PARADAS.length, 6, 'abajo de 1025 las seis anclas son paradas de teclado: ninguna se quedó en marca de papel')
+afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a').map((p) => p.etiqueta), [], '  las seis son anclas —no un `div` con un manejador—, que es lo que las hace parada sin escribir un `tabindex`')
+afirmarIgual(PARADAS.filter((p) => p.destino === null || !PROYECTOS.some((x) => x.enlace === p.destino)).map((p) => p.destino), [], '  las seis llevan a un `enlace` del contenido: un ancla sin `href` no es parada, y una URL de otro lado no es de nadie')
+afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y las seis se anuncian con algo: dos van al mismo sitio por proyecto, así que el nombre propio es lo único que las distingue')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
 afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto en toda la rama quieta es la capa del barrido, que es decoración y lo declara')
-afirmarIgual(paradasDeTabulacion(conMotion).length, 12, 'y con la coreografía puesta son las mismas doce: el recorrido no lo cambia el ancho')
-// El LUGAR, que es la otra mitad: trece cajas posicionadas —las doce piezas y el
+afirmarIgual(paradasDeTabulacion(conMotion).length, 6, 'y con la coreografía puesta son las mismas seis: el recorrido no lo cambia el ancho')
+// El LUGAR, que es la otra mitad: el punto interior del cartel, que es el único
 // cartel— y cada una con su punto interior, desde el marcado y no desde un efecto.
-afirmarIgual(veces(conMotion, 'transform-origin:'), 13, '  las trece cajas del tramo traen su punto interior ESCRITO en el primer render: doce piezas y el cartel')
-afirmarIgual(veces(conMotion, 'data-pieza-de='), 12, '  y las doce piezas se identifican una por una')
+afirmarIgual(veces(conMotion, 'transform-origin:'), 1, '  UN solo punto interior escrito, y es el del cartel: el túnel crece desde el centro y no necesita ninguno')
+afirmarIgual(veces(conMotion, 'data-captura='), 3, '  y las tres capturas se identifican una por una')
 controlPositivo('el chequeo de las paradas ve un ancla sin `href`', '<a>El Garage</a>', (html: string) => paradasDeTabulacion(html).length === 1)
 controlPositivo('  y ve una parada sin nombre', '<a href="https://esquinaestudio.com.ar"></a>', (html: string) => paradasDeTabulacion(html).every((p) => p.rotulo.trim() !== ''))
 
 // ════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('17 · El túnel: sus constantes son la medición de la referencia')
+
+/**
+ * ⚠️ **ESTE BLOQUE NO COMPRUEBA QUE EL TÚNEL SE VEA BIEN. Comprueba que sus
+ * números sigan siendo los que se midieron, y que lo que se deriva se derive.**
+ *
+ * La mecánica salió de medir heatbureau.com con `scripts-b4/` a 1440 × 900,
+ * cuadro por cuadro. Las tres cifras que gobiernan la composición —el relevo, el
+ * desborde y el ritmo— entraron desde esa medición y no desde una preferencia, y
+ * lo que este bloque cuida es que nadie las mueva sin darse cuenta.
+ */
+
+// ── La primera captura nace MIENTRAS el cartel huye, y es una igualdad ──────
+afirmarIgual(
+  VENTANA_DEL_TUNEL.desde,
+  progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1),
+  'el túnel arranca en el instante EXACTO en que el cartel empieza a huir: el paso 2 de la secuencia es una derivación y no dos números escritos aparte',
+)
+afirmarIgual(VENTANA_DEL_TUNEL.hasta, ARRANQUE_DE_DEMOS, '  y termina donde empieza el tramo de demos, que es la única punta declarada de las dos')
+controlPositivo(
+  'el chequeo del arranque vería un túnel desenganchado del cartel',
+  { desde: 0.5, hasta: ARRANQUE_DE_DEMOS },
+  (v: { desde: number; hasta: number }) => v.desde === progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1),
+)
+
+// ── EL RELEVO — al nacer una, la anterior mide exactamente el relevo ────────
+for (let i = 1; i < PROYECTOS.length; i += 1) {
+  const alNacer = avanceDelNacimiento(i)
+  afirmarIgual(
+    (anchoDeLaCaptura(i - 1, alNacer) ?? 0).toFixed(4),
+    ANCHO_DEL_RELEVO.toFixed(4),
+    `  al nacer la captura ${i + 1}, la anterior mide ${ANCHO_DEL_RELEVO} anchos de cuadro — la referencia medía 29 %, 36 % y 29 %`,
+  )
+  afirmarIgual(anchoDeLaCaptura(i, alNacer), null, `    y la que nace todavía no se dibuja: por debajo de ${ANCHO_AL_APARECER} es un punto, no una imagen`)
+}
+
+// ── EL DESBORDE de la primera cae adentro de la banda MEDIDA ───────────────
+/**
+ * La referencia dejaba a sus imágenes entre 1,17 y 1,68 anchos de cuadro cuando
+ * llegaban a su tope. Acá nadie puso un tope: el desborde es lo que queda de
+ * `(n−1) × relevo + 1`. Que caiga adentro de esa banda es la comprobación de que
+ * el modelo reproduce la composición y no sólo el gesto.
+ */
+const DESBORDE_MEDIDO = { minimo: 1.17, maximo: 1.68 } as const
+const desborde = anchoFinalDeLaPrimera(PROYECTOS.length)
+afirmar(
+  desborde >= DESBORDE_MEDIDO.minimo && desborde <= DESBORDE_MEDIDO.maximo,
+  `la primera captura termina en ${desborde.toFixed(4)} anchos de cuadro, adentro de los ${DESBORDE_MEDIDO.minimo}–${DESBORDE_MEDIDO.maximo} que se midieron en la referencia`,
+)
+controlPositivo(
+  'la banda del desborde vería un túnel de una sola captura',
+  1,
+  (n: number) => anchoFinalDeLaPrimera(n) >= DESBORDE_MEDIDO.minimo,
+)
+
+// ── EL RITMO: anchos de cuadro por cada 1000 px de scroll ───────────────────
+/**
+ * La referencia avanzaba 1,15 anchos de cuadro por cada 1000 px de scroll
+ * (mediana de las tres imágenes que recorrieron su vida entera dentro del tramo
+ * grabado: 1,149 · 0,998 · 1,450). Acá el ritmo no se elige: sale de cuánto
+ * scroll le toca al túnel —la mitad de una sección de tres pantallas— y de
+ * cuánto avance hay que recorrer. Que caiga cerca es la corroboración.
+ */
+const RITMO_DE_LA_REFERENCIA = 1.15
+const pxDelTramo = (VENTANA_DEL_TUNEL.hasta - VENTANA_DEL_TUNEL.desde) * PANTALLAS_DE_LA_SECCION * 900
+const ritmo = avanceQueCompletaElTunel(PROYECTOS.length) / (pxDelTramo / 1000)
+afirmar(
+  Math.abs(ritmo / RITMO_DE_LA_REFERENCIA - 1) < 0.25,
+  `el túnel avanza ${ritmo.toFixed(3)} anchos de cuadro cada 1000 px de scroll contra los ${RITMO_DE_LA_REFERENCIA} de la referencia: ${((ritmo / RITMO_DE_LA_REFERENCIA - 1) * 100).toFixed(1)} % de diferencia sobre ${pxDelTramo.toFixed(0)} px de tramo`,
+)
+
+// ── LA PERSECUCIÓN: su ley, y que no dependa de los cuadros por segundo ────
+/**
+ * ⚠️ **La comprobación que importa no es el 99 %: es que el mismo tiempo dé el
+ * mismo resultado a 60 y a 144 cuadros por segundo.**
+ *
+ * Es el defecto clásico de una persecución escrita como `actual += (falta) * k`
+ * con `k` fijo: la constante se vuelve «por cuadro» y el gesto dura la mitad en
+ * un monitor de 120 Hz. Acá el paso es `1 − e^(−dt/τ)`, así que los dos caminos
+ * llegan al mismo número — y eso es lo que se afirma.
+ */
+const enPersecucion = (v: number, dt: number): number => perseguir(v, 1, dt)
+const a60 = caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, 1000 / 60, enPersecucion)
+const a144 = caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, 1000 / 144, enPersecucion)
+afirmar(
+  a60 >= 1 - RESTO_AL_ASENTARSE,
+  `a los ${ASENTAMIENTO_DEL_TUNEL_MS} ms la persecución recorrió el ${(a60 * 100).toFixed(2)} % del camino: eso es «ya frenó»`,
+)
+afirmar(
+  Math.abs(a60 - a144) < 1e-3,
+  `y el mismo tiempo da el mismo resultado a 60 y a 144 cuadros por segundo: ${a60.toFixed(6)} contra ${a144.toFixed(6)} — la constante es de TIEMPO y no de cuadro`,
+)
+// ⚠️ El factor del control es 0,002 y no uno cualquiera: con un factor grande
+// las DOS corridas saturan en 1 dentro de la ventana y el control se queda ciego
+// —medido: con 0,05 la diferencia cae a 1e-4 y el predicado no ve nada—. Tiene
+// que ser lo bastante chico para que a 3 s las dos sigan a mitad de camino.
+controlPositivo(
+  'el chequeo de los cuadros por segundo vería una persecución por factor fijo',
+  0.002,
+  (k: number) => {
+    const porFactorFijo = (v: number): number => v + (1 - v) * k
+    const corre = (dt: number): number => caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, dt, porFactorFijo)
+    return Math.abs(corre(1000 / 60) - corre(1000 / 144)) < 1e-3
+  },
+)
+afirmarIgual(TAU_DEL_TUNEL_MS.toFixed(1), (ASENTAMIENTO_DEL_TUNEL_MS / Math.log(1 / RESTO_AL_ASENTARSE)).toFixed(1), '  y la constante de tiempo se DERIVA del asentamiento: no hay dos números que mantener de acuerdo')
+
+// ── EL RÓTULO: su banda son las dos constantes de arriba, no una tercera ───
+afirmarIgual(
+  [BANDA_DEL_ROTULO.desde, BANDA_DEL_ROTULO.hasta],
+  [ANCHO_DEL_RELEVO, ANCHO_DEL_LIMITE],
+  'la banda en la que el rótulo se lee son el relevo y el límite de la pantalla: cero constantes nuevas para el texto',
+)
+afirmarIgual(opacidadDelRotulo(ANCHO_DEL_RELEVO), 0, '  al tamaño del relevo el rótulo todavía no se ve')
+afirmarIgual(opacidadDelRotulo(ANCHO_DEL_LIMITE), 0, '  y cuando la captura llena el cuadro ya se fue')
+afirmar(
+  opacidadDelRotulo((ANCHO_DEL_RELEVO + ANCHO_DEL_LIMITE) / 2) === 1,
+  '  y en el medio de la banda se ve entero: es donde el proyecto «se lee bien»',
+)
+
+// ── EL CLIC: las anclas del túnel tienen que RECIBIRLO ─────────────────────
+/**
+ * ⚠️ **Un defecto medido en el sprint anterior, cerrado acá.** La capa del túnel
+ * se monta sin eventos de puntero —si no, taparía el scroll de la sección—, y con
+ * eso las anclas tomaban foco pero **el clic las atravesaba**. Se veían, se
+ * tabulaban, y no llevaban a ningún lado. El arreglo es devolverle los eventos a
+ * lo que se puede clickear y a nada más.
+ */
+afirmar(conMotion.includes('pointer-events-none'), 'la capa del túnel se monta sin eventos de puntero: el aire no tapa el scroll')
+afirmarIgual(
+  veces(conMotion, 'pointer-events-auto'),
+  PROYECTOS.length * 2,
+  '  y se los devuelve a lo clickeable: la captura y el rótulo de cada proyecto, y nada más',
+)
+afirmarIgual(veces(quieto, 'pointer-events-auto'), 0, '  abajo de 1025 no hace falta ninguno: ahí la lista está en el flujo')
+
+// ── LAS TRES CAPTURAS MIDEN LO QUE LA GEOMETRÍA DECLARA ────────────────────
+/**
+ * ⚠️ **El lector de WEBP existía y no lo llamaba nadie.** `medidasDeWebp` quedó
+ * huérfano cuando el contenido renombró su campo, así que la comprobación que
+ * evitaba un salto de layout dejó de correr en silencio. Acá vuelve, y ahora
+ * importa más que antes: el túnel SÓLO escala, así que dos relaciones distintas
+ * se leerían como dos gestos distintos.
+ */
+for (const [i, proyecto] of PROYECTOS.entries()) {
+  const declarada = MEDIDAS_DE_LAS_CAPTURAS[i]
+  const real = medidasDeWebp(new Uint8Array(readFileSync(join('public', proyecto.pagina.fuente))))
+  afirmarIgual(
+    [real.ancho, real.alto],
+    [declarada.ancho, declarada.alto],
+    `«${proyecto.nombre}» — el archivo en disco mide lo que declara \`MEDIDAS_DE_LAS_CAPTURAS\``,
+  )
+}
+afirmarIgual(
+  [...new Set(MEDIDAS_DE_LAS_CAPTURAS.map((m) => (m.ancho / m.alto).toFixed(6)))],
+  [(16 / 9).toFixed(6)],
+  '  y las tres comparten relación: por eso las tres crecen igual sin que nadie lo declare',
+)
+afirmarIgual(
+  MEDIDAS_DE_LAS_CAPTURAS.length,
+  PROYECTOS.length,
+  '  y hay exactamente una medida por proyecto: un cuarto proyecto sin su medida tira al montar, no tres cuadros después',
+)
+
+// ── EL RECORTE: sin él, el desborde le da al SITIO una barra horizontal ────
+/**
+ * ⚠️ **Un defecto medido, y de los que no se ven mirando la sección.** La primera
+ * captura llega a 1,64 anchos de cuadro; centrada sobre 1.440, su borde derecho
+ * cae en 1.898 px. Sin recorte eso no queda en la sección: `document.scrollWidth`
+ * pasaba de 1.440 a **1.899** y el sitio entero ganaba una barra de scroll
+ * horizontal a mitad del tramo. Con el recorte puesto se midió 1.440 en los tres
+ * puntos del recorrido, con las capturas igual de grandes.
+ *
+ * Por eso esto se afirma sobre el MARCADO y no sobre una cuenta: lo único que lo
+ * sostiene es una clase, y una clase se borra sin querer.
+ */
+afirmar(
+  conMotion.includes('overflow:clip'),
+  'la capa del túnel recorta al cuadro: sin eso el desborde de la primera captura le da al sitio 459 px de scroll horizontal',
+)
+afirmar(
+  conMotion.includes('overflow-clip-margin'),
+  '  y recorta con margen: `hidden` se comería el anillo de foco de las seis anclas, que se dibuja 2 px por afuera',
+)
+/**
+ * ⚠️ **EL MARGEN DEL RECORTE, ATADO A LOS DOS TOKENS DEL ANILLO.** En el
+ * componente es una longitud a mano —`calc()` con variables computa 0px en esta
+ * propiedad, medido— así que la derivación se comprueba de este lado: el margen
+ * tiene que ser el desplazamiento del anillo MÁS su grosor, leídos del tema. Si
+ * el tema engorda el anillo y nadie toca la capa, esto se pone rojo.
+ */
+const px = (nombre: string): number => pxDelTema(CSS, nombre)
+const margenDelAnillo = px('foco-desplazamiento') + px('foco-grosor')
+const margenEscrito = Number(/overflow-clip-margin:\s*(\d+(?:\.\d+)?)px/.exec(conMotion)?.[1] ?? NaN)
+afirmarIgual(
+  margenEscrito,
+  margenDelAnillo,
+  `  y el margen son los ${margenDelAnillo} px del anillo —desplazamiento ${px('foco-desplazamiento')} más grosor ${px('foco-grosor')}—, leídos del tema y no elegidos acá`,
+)
+afirmarIgual(
+  veces(conMotion, 'overflow-hidden'),
+  0,
+  '  y NO usa `overflow-hidden`: es lo que el invariante de la compacta prohíbe encima de un focalizable, y tiene razón',
+)
+
+// ── EL TECLADO: se esconde por ESCALA, porque `visibility` saca del foco ───
+/**
+ * ⚠️ **El defecto que esto cuida se midió con Tab de verdad, no con una cuenta.**
+ *
+ * Las paradas de §16 se cuentan sobre el marcado, y ahí las seis están siempre.
+ * En el navegador no estaban: la capa escondía cada captura con
+ * `visibility: hidden`, y eso saca del foco secuencial a TODO su subárbol —el
+ * navegador no le da Tab a lo que no se renderiza—. Como arriba de 1025 la lista
+ * no existe, **los tres enlaces a los sitios de los clientes no se alcanzaban
+ * con el teclado**: el foco saltaba de Quiénes somos a Servicios. Medido
+ * despachando Tab por CDP desde el tope de la página.
+ *
+ * La corrección son dos mitades y las dos se afirman acá: esconder con
+ * `scale(0)` —que no pinta, no recibe clic y SÍ es parada— y un piso: mientras
+ * el foco esté adentro de una captura, el avance no baja del tamaño del relevo.
+ * Con las dos puestas, las tres se alcanzan y cada una aparece a 461 px sobre un
+ * cuadro de 1440, que es exactamente `ANCHO_DEL_RELEVO`.
+ */
+const FUENTE_DEL_TUNEL = FUENTES.find((f) => f.archivo.includes('CapaDelTunel'))?.texto ?? ''
+afirmar(FUENTE_DEL_TUNEL.length > 0, 'se leyó del disco la fuente de la capa del túnel')
+afirmarIgual(
+  veces(FUENTE_DEL_TUNEL, "setProperty('visibility'"),
+  0,
+  'la capa NO esconde con `visibility`: eso sacaría del recorrido de teclado a las seis anclas del túnel',
+)
+afirmarIgual(
+  veces(conMotion, 'scale(0)'),
+  PROYECTOS.length,
+  `  las ${PROYECTOS.length} capturas nacen en escala cero —no escondidas— ya en el primer render`,
+)
+afirmar(
+  FUENTE_DEL_TUNEL.includes('focusin') && FUENTE_DEL_TUNEL.includes('pisoDelFoco'),
+  '  y hay un piso del foco: una parada que no se ve no sirve, así que enfocar una captura la muestra',
+)
+controlPositivo(
+  'el detector vería una capa que vuelve a esconder con `visibility`',
+  "el.style.setProperty('visibility', 'hidden')",
+  (src: string) => veces(src, "setProperty('visibility'") === 0,
+)
+
 cerrar('trabajos.invariant')

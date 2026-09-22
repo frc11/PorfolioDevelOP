@@ -1,6 +1,5 @@
 'use client'
 
-import { ProgresoAmortiguado } from '../_contrato/canales'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
@@ -15,36 +14,37 @@ import { PortadaDeTrabajos, RamaQuieta } from './piezas'
  * ── Los tres tiempos, en el orden en que se leen ─────────────────────────
  *
  * 1. **La conversión.** No es un tramo de scroll: es un GATILLO, y lo dispara el
- *    final de Quiénes somos. Un círculo de borde suave entra ya grande desde
- *    fuera del encuadre y cierra en medio segundo; al terminar **se va**, y lo
- *    que queda es la sala con los colores de la noche. Scrolleando para arriba
- *    la misma animación corre al revés (`gota.ts`, `nocheDisparada.ts`).
+ *    final de Quiénes somos. Una banda diagonal cruza el cuadro en 760 ms y la
+ *    sala queda con los colores de la noche. Scrolleando para arriba la misma
+ *    animación corre al revés (`gota.ts`, `nocheDisparada.ts`).
  * 2. **El cartel.** «Portfolio» y su bajada, creciendo desde su esquina de arriba
  *    a la izquierda. El cuerpo se pinta palabra por palabra en la meseta, y
  *    después el cartel HUYE — se aleja en z y se desvanece.
- * 3. **La cadena.** Las fotos nacen una en la esquina de la anterior y crecen sin
- *    moverse de lugar; el texto de cada trabajo crece con ellas, a la misma
- *    escala normalizada, y huye como el cartel. Las fotos no huyen: se quedan
- *    hasta que la siguiente las tapa entera, y ahí se retiran en silencio.
+ * 3. **El túnel.** Mientras el cartel huye nace la primera captura, centrada, y
+ *    crece. Al llegar al tamaño en que el proyecto se lee, nace la siguiente
+ *    adentro; la anterior sigue creciendo y se sale del cuadro por los bordes,
+ *    donde sigue viéndose. Cuando la última llega al límite de la pantalla,
+ *    empieza el tramo de demos.
  *
  * El recorrido de cámara que precede a todo esto **no vive acá**: lo lleva
- * Números, que es de quién es ese tramo de la coreografía. Por qué no se puede
- * mudar adentro de esta sección está escrito en `PANTALLAS_DE_NUMEROS`.
+ * Números, que es de quién es ese tramo de la coreografía.
  *
  * ── El orden del marcado ES el orden de pintura ───────────────────────────
  *
- * Hermanos posicionados se pintan en orden de documento: la portada primero,
- * después el túnel que la cubre al crecer, y los nombres arriba de todo, que es
- * lo que los deja legibles sobre una imagen que desborda el cuadro. La gota va
- * al final y **afuera del bloque**: tapa el cuadro entero durante el disparo,
- * contenido incluido, que es lo que hace que el relevo no se vea.
+ * Hermanos posicionados se pintan en orden de documento: el cartel primero,
+ * después el túnel que lo cubre al crecer, y adentro del túnel las capturas en
+ * su orden, así que **la que acaba de nacer queda arriba de las viejas** — que es
+ * lo que hace cierto «nace adentro de la anterior». La gota va al final y
+ * **afuera del bloque**: tapa el cuadro entero durante el disparo, contenido
+ * incluido, que es lo que hace que el relevo no se vea.
  *
- * ── ⚠️ La persecución envuelve SÓLO al túnel ──────────────────────────────
+ * ── ⚠️ EL TÚNEL YA NO PASA POR `ProgresoAmortiguado`, Y ES A PROPÓSITO ────
  *
- * `ProgresoAmortiguado` es un transformador de progreso, no un gesto: el túnel
- * lo necesita —para que el movimiento siga después de soltar el scroll— y la
- * gota no, porque una conversión que se pasa de largo y vuelve sería un
- * parpadeo. Los nombres lo usan adentro, sólo para su llegada.
+ * Lo envolvía un `useSpring` de 0,5 s —la persecución compartida del sistema, que
+ * Quiénes somos sigue usando—. El túnel ahora lleva la suya adentro, con su
+ * propia constante declarada: lo que el humano mide al soltar el scroll es UN
+ * número y tiene que haber UN número en el código. Dos amortiguaciones en serie
+ * habrían dado un tiempo que no es ninguna de las dos.
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
@@ -63,16 +63,10 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
           return (
             <>
               <PortadaDeTrabajos seccion={seccion} progreso={progreso} />
-              <ProgresoAmortiguado progreso={progreso}>
-                {(perseguido) =>
-                  perseguido === null ? null : (
-                    <CapaDelTunel
-                      progreso={perseguido}
-                      className="pointer-events-none absolute inset-0"
-                    />
-                  )
-                }
-              </ProgresoAmortiguado>
+              {/* El recorte del túnel NO va acá: va adentro, como estilo, porque
+                  necesita un margen de recorte y eso no es una clase. Ver el
+                  docblock de `RECORTE_DEL_TUNEL` en `CapaDelTunel.tsx`. */}
+              <CapaDelTunel progreso={progreso} className="pointer-events-none absolute inset-0" />
             </>
           )
         }}

@@ -130,17 +130,19 @@ imprimirParadas(QUIETA, PARADAS)
  * existe del otro lado.
  */
 /**
- * ⚠️ **NUEVE PARADAS MÁS, Y SON LAS CUATRO PIEZAS DE CADA TRABAJO.**
+ * ⚠️ **TRES PARADAS MÁS, Y SON LAS DOS ANCLAS DE CADA TRABAJO.**
  *
- * Cada proyecto de Portfolio ponía UNA parada —el nombre— y hoy pone CUATRO: el
- * nombre, el rubro, el logo y la captura llevan al sitio del cliente. Tres de
- * más por proyecto, por tres proyectos: +9 sobre las 22. Que sean cuatro anclas
- * al mismo destino es una decisión de la sección —clic en cualquier parte de un
- * trabajo— y el precio es este: tres paradas seguidas que van al mismo lado, y
- * por eso las tres que no son el nombre declaran su `aria-label`.
+ * Cada proyecto de Portfolio ponía UNA parada —el nombre— y hoy pone DOS: el
+ * nombre y la captura llevan al sitio del cliente. Una de más por proyecto, por
+ * tres proyectos: +3 sobre las 22.
+ *
+ * Llegó a ser CUATRO por proyecto —nombre, rubro, logo y captura— y se bajó: el
+ * logo se fue con el rediseño del tramo y el rubro dejó de ser ancla, porque tres
+ * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
+ * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-afirmarIgual(PARADAS.length, 31, 'el home entero tiene 31 paradas: las 22 de antes más las tres piezas que cada trabajo sumó al enlazarse entero')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 31, '  y la rama animada tiene las mismas 31: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 25, 'el home entero tiene 25 paradas: las 22 de antes más la captura que cada trabajo sumó al enlazarse')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 25, '  y la rama animada tiene las mismas 25: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

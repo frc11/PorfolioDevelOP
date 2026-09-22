@@ -39,9 +39,10 @@
  *
  * ── Lo que NO sabemos, declarado ausente ───────────────────────────────────
  *
- * **Tres cosas por proyecto**, y son el pedido entero de esta sección: el
- * **logo**, la **captura** y el **rubro**. Las tres van con marcador visible y
- * las tres están en `PEDIDO` con su formato y su dueño.
+ * **Nada. El pedido de esta sección está cerrado.** Tuvo nueve casillas —tres
+ * logos, tres capturas y tres rubros— y las nueve se llenaron. Los logos además
+ * ya no son contenido de esta sección: el tramo muestra UNA imagen por proyecto
+ * y ésa es la captura.
  *
  * `[MÉTRICA]` ya NO está: era «qué cambió» y se cerró por la puerta de adelante
  * —no hay nada medible en estos tres trabajos y no lo va a haber—. El que se
@@ -114,59 +115,49 @@ export const CONTENIDO = {
    */
 
   /**
-   * [verdad] Los tres, en el orden en que entran. Tres es la cantidad que el
-   * patrón anima —`piezas={3}` en el componente— y la cantidad de clientes que
-   * el sprint declara verdaderos. No hay un cuarto de relleno: un cliente
-   * inventado en una vitrina es exactamente la deuda que este sprint no repite.
+   * [verdad] Los tres, en el orden en que entran. Tres es la cantidad de
+   * clientes que el sprint declara verdaderos. No hay un cuarto de relleno: un
+   * cliente inventado en una vitrina es exactamente la deuda que no se repite.
    *
-   * Cada uno declara DOS medios —la marca y el sitio— y DOS textos: el nombre,
-   * que es verdad y va literal, y el RUBRO, que no lo sabemos.
+   * Cada uno declara UN medio —la captura de su sitio— y TRES textos: el
+   * nombre, el rubro y el enlace.
    *
-   * ⚠️ **El rubro entra como PEDIDO y no como dato.** La zona central del tramo
-   * tiene cuatro ranuras y una es para «qué hace este cliente». Escribir
-   * «Automotriz» o «Perfumería» sería inventar un hecho sobre un cliente REAL,
-   * que es justo lo que la cabecera de este archivo prohibe con todas las letras
-   * («sin agregarles rubro, ciudad ni fecha: todo eso lo tendríamos que
-   * inventar»). Así que la ranura muestra `[TEXTO]` —marcador que ya estaba en el
-   * conjunto cerrado de `marcadores.ts`, no hubo que abrirlo— y el dato se pide.
-   * **No hay una entrada nueva en INVENTOS**: un pedido no es una mentira.
-   */
-  /**
-   * [verdad] Los tres, en el orden en que entran. Cada uno trae CUATRO cosas y
-   * las cuatro son reales: el nombre, el rubro, el logo y la captura del sitio.
+   * ⚠️ **LOS LOGOS SE FUERON, y con ellos tres problemas de una vez.** Estaban
+   * como segundo medio de cada proyecto. El zoom inmersivo muestra UNA imagen
+   * por proyecto y el logo no era esa: al sacarlos se resolvieron solos los tres
+   * defectos visuales que la grabación anterior había dejado abiertos —el rubro
+   * ilegible sobre el logo de la escena, el aire del PNG de Banú, y el nombre
+   * del cliente dicho dos veces en El Garage, una como texto y otra como marca—.
+   * Los archivos siguen en `public/logos/` sin que nadie los pida.
    *
    * ⚠️ **Los rubros los dictó el dueño y por eso NO son un invento.** Se
    * escribieron desde los hechos que dijo, sin adornar y sin agregar nada que no
    * estuviera ahí. No van a `INVENTOS` —esa lista es para cifras falsas— ni a
    * `PEDIDO`: un dato que llegó sale de la lista de lo que falta.
    *
-   * ⚠️ **Acá va la RUTA y el texto alternativo; las medidas NO.** Los tres logos
-   * tienen relaciones distintas y hay que conocerlas para que entren sin
-   * deformarse, pero un ancho y un alto son geometría y este archivo no lleva un
-   * solo número —`s5-contenido` lo afirma seccion por sección—. Viven en
-   * `MEDIDAS_DE_LOS_MEDIOS`, en `geometria.ts`, que es donde el propio docblock
-   * de arriba dice que viven la relación de aspecto y el `sizes`.
+   * ⚠️ **Acá va la RUTA y el texto alternativo; las medidas NO.** Un ancho y un
+   * alto son geometría y este archivo no lleva un solo número —`s5-contenido` lo
+   * afirma sección por sección—. Viven en `MEDIDAS_DE_LAS_CAPTURAS`, en
+   * `geometria.ts`, que es donde el propio docblock de arriba dice que viven la
+   * relación de aspecto y el `sizes`.
    */
   proyectos: [
     {
       nombre: 'El Garage',
       enlace: 'https://elgarageautomoviles.com.ar',
       rubro: 'Concesionaria con un catálogo de muchos filtros.',
-      logo: { fuente: '/logos/ElGarageLogo-Modificado.png', alt: 'Logo de El Garage' },
       pagina: { fuente: '/capturas/el-garage.webp', alt: 'La página de El Garage' },
     },
     {
       nombre: 'Banú Scents',
       enlace: 'https://banuscents.com.ar',
       rubro: 'Vende perfumes árabes. Le hicimos una página simple pero bonita.',
-      logo: { fuente: '/logos/logoC.png', alt: 'Logo de Banú Scents' },
       pagina: { fuente: '/capturas/banu.webp', alt: 'La página de Banú Scents' },
     },
     {
       nombre: 'Esquina Estudio',
       enlace: 'https://esquinaestudio.com.ar',
       rubro: 'Equipo de branding. Le hicimos una página acorde a su estética y su marca.',
-      logo: { fuente: '/logos/logo-header-blanco.png', alt: 'Logo de Esquina Estudio' },
       pagina: { fuente: '/capturas/esquina.webp', alt: 'La página de Esquina Estudio' },
     },
   ],
@@ -192,7 +183,9 @@ export const CONTENIDO = {
  * queda tildada, desaparece», dice el bloque de arriba. Esta sección tenía nueve
  * casillas: seis medios y tres rubros. Llegaron los seis archivos
  * (`public/capturas/` y `public/logos/`) y el dueño dictó los tres rubros, así
- * que no queda ninguna. La lista vacía no es un descuido: es lo que dice que
+ * que no queda ninguna. Después el rediseño del tramo dejó de pedir los logos,
+ * así que de los seis medios hoy se muestran TRES; los archivos siguen en disco
+ * y nadie los referencia. La lista vacía no es un descuido: es lo que dice que
  * Trabajos ya no le debe nada a nadie.
  */
 export const PEDIDO: readonly EntradaDePedido[] = []

@@ -1,28 +1,29 @@
-import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { MarcoDeMedio } from '../_contrato/medios'
 
 import { CONTENIDO } from './contenido'
-import { MEDIDAS_DE_LOS_MEDIOS, SIZES_DE_LA_RANURA } from './geometria'
+import { MEDIDAS_DE_LAS_CAPTURAS, SIZES_DE_LA_CAPTURA } from './geometria'
 
 type ProyectoDeContenido = (typeof CONTENIDO.proyectos)[number]
-type MedioDeContenido = ProyectoDeContenido['logo'] | ProyectoDeContenido['pagina']
 
 /**
- * UN TRABAJO, QUIETO — el nombre, el rubro y sus dos medios, en el orden del
- * documento.
+ * UN TRABAJO, QUIETO — el nombre, el rubro y su captura, en orden de documento.
  *
- * ⚠️ **Es de la rama QUIETA y de ninguna otra.** Arriba de 1025 las cuatro
- * piezas viven en la zona central (`CapaDelTunel`); acá no hay coreografía, así
- * que la sección se lee como lo que es: una lista. Por eso este archivo no
+ * ⚠️ **Es de la rama QUIETA y de ninguna otra.** Arriba de 1025 la captura vive
+ * en el túnel de zoom (`CapaDelTunel`); acá no hay coreografía, así que la
+ * sección se lee como lo que es: una lista apilada. Por eso este archivo no
  * importa una sola primitiva de movimiento y **no escribe una transformada ni un
- * `absolute`** — que es lo que `s7-arboles` §4 exige de esta rama.
+ * `absolute`** — que es lo que `s7-arboles` exige de esta rama.
  *
- * ⚠️ **Las cuatro piezas llevan el MISMO enlace que arriba de 1025**, y por la
- * misma razón: `s10-acceso` compara el texto anunciado de las dos ramas carácter
- * por carácter, y una parada de teclado que sólo exista en una de las dos sería
- * un recorrido distinto según el ancho.
+ * ⚠️ **Las dos anclas son las MISMAS que arriba de 1025**, y por la misma razón:
+ * `s10-acceso` compara el texto anunciado de las dos ramas carácter por carácter
+ * y cuenta las paradas de teclado del home entero. Una parada que sólo exista de
+ * un lado del umbral sería un recorrido distinto según el ancho.
+ *
+ * ⚠️ **El rubro NO es un ancla, y es una decisión.** Tres anclas al mismo destino
+ * por proyecto se anuncian tres veces seguidas igual; dos ya son las que hacen
+ * falta —el nombre, que es lo que se lee, y la imagen, que es lo que se ve—.
  */
 function AlSitio({
   proyecto,
@@ -47,25 +48,22 @@ function AlSitio({
   )
 }
 
-/** Un medio real, entero y sin recortar: su propia relación manda. */
-function Medio({
-  medio,
+/** La captura real, entera y sin recortar: su propia relación manda. */
+function Captura({
+  proyecto,
   medida,
-  className,
 }: {
-  readonly medio: MedioDeContenido
+  readonly proyecto: ProyectoDeContenido
   readonly medida: { readonly ancho: number; readonly alto: number }
-  readonly className?: string
 }): React.JSX.Element {
   return (
     <MarcoDeMedio
       marcador="[CAPTURA]"
-      fuente={medio.fuente}
-      alt={medio.alt}
+      fuente={proyecto.pagina.fuente}
+      alt={proyecto.pagina.alt}
       ancho={medida.ancho}
       alto={medida.alto}
-      sizes={SIZES_DE_LA_RANURA}
-      className={className}
+      sizes={SIZES_DE_LA_CAPTURA}
     />
   )
 }
@@ -77,7 +75,6 @@ export function Proyecto({
   readonly proyecto: ProyectoDeContenido
   readonly indice: number
 }): React.JSX.Element {
-  const medidas = MEDIDAS_DE_LOS_MEDIOS[indice]
   return (
     <article data-proyecto={proyecto.nombre} className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -86,21 +83,12 @@ export function Proyecto({
             {proyecto.nombre}
           </a>
         </Titular>
-        <AlSitio proyecto={proyecto}>
-          <Cuerpo como="span">{proyecto.rubro}</Cuerpo>
-        </AlSitio>
+        <Cuerpo como="p">{proyecto.rubro}</Cuerpo>
       </div>
 
-      {/* Un tercio para la marca, dos para la pantalla. Celdas distintas: a
-          tamaño completo no hay superposición posible. */}
-      <Grilla columnas={3} canal="compacto" className="items-end">
-        <AlSitio proyecto={proyecto} nombreAccesible={proyecto.logo.alt}>
-          <Medio medio={proyecto.logo} medida={medidas.logo} className="self-start" />
-        </AlSitio>
-        <AlSitio proyecto={proyecto} nombreAccesible={proyecto.pagina.alt}>
-          <Medio medio={proyecto.pagina} medida={medidas.pagina} className="tablet:col-span-2" />
-        </AlSitio>
-      </Grilla>
+      <AlSitio proyecto={proyecto} nombreAccesible={proyecto.pagina.alt}>
+        <Captura proyecto={proyecto} medida={MEDIDAS_DE_LAS_CAPTURAS[indice]} />
+      </AlSitio>
     </article>
   )
 }

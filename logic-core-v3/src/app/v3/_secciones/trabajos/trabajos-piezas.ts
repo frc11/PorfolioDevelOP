@@ -279,3 +279,32 @@ export function desviosDelContrato(
   }
   return fuera
 }
+
+/**
+ * Un número en píxeles declarado por el tema, por nombre de token. Vive acá y no
+ * en el invariante por la regla de las 300 líneas del lane: es un detector puro.
+ */
+export function pxDelTema(css: string, nombre: string): number {
+  const m = new RegExp(String.raw`--${nombre}:\s*(\d+(?:\.\d+)?)px`).exec(css)
+  if (m === null) throw new Error(`no se encontró --${nombre} en el tema`)
+  return Number(m[1])
+}
+
+/**
+ * Cuánto camino recorre una persecución en `msTotal`, avanzando de a `dtPorCuadro`.
+ *
+ * Existe para comprobar lo único que importa de una constante de tiempo: que el
+ * mismo tiempo dé el mismo resultado con cuadros distintos. Toma el paso como
+ * argumento para poder medir también una persecución MAL escrita —por factor
+ * fijo— que es lo que el control positivo del invariante le pasa.
+ */
+export function caminoDeLaPersecucion(
+  msTotal: number,
+  dtPorCuadro: number,
+  paso: (actual: number, dt: number) => number,
+): number {
+  let v = 0
+  for (let t = 0; t < msTotal; t += dtPorCuadro) v = paso(v, dtPorCuadro)
+  return v
+}
+
