@@ -22,18 +22,21 @@
  * ejemplo.** El único número visible es el `05` del rótulo: estructura del
  * recorrido, declarada en `NUMEROS_PERMITIDOS`.
  *
- * ── Los párrafos entran en la banda MEDIDA de P3 ──────────────────────────
+ * ── Los párrafos entran en la banda medida de P3 ──────────────────────────
  *
- * P3 se midió entre 17 y 33 targets, y son palabras, no líneas. Los tres
- * párrafos miden 33, 33 y 31: entran en la banda medida y en el rango de 30 a
- * 45 que pide la instrucción. `LONGITUDES` las publica y el instrumento las
- * imprime, en vez de recalcularlas de otra forma.
+ * P3 se midió entre 17 y 33 targets, y son palabras, no líneas. El dueño
+ * confirmó que no hay ni va a haber cifras reales de ningún cliente: la frase
+ * de métrica inventada que colgaba al final de cada párrafo —detrás de la
+ * llave— se sacó entera, de acá y de `inventado.ts` (era una promesa que no
+ * debía existir, no un hueco esperando un dato). El copy real del dueño mide
+ * 26, 27 y 23 palabras: entra en la banda sin nada más colgado. `LONGITUDES`
+ * las publica y el instrumento las imprime, en vez de recalcularlas de otra
+ * forma.
  */
 
 import { sizesPorTresTramos } from '../../_lib/imagen'
 import { palabrasDe } from '../../_lib/palabras'
 import { IDS_DE_SERVICIO, type IdDeServicio } from '../_contrato/acento'
-import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -92,14 +95,38 @@ const CASO =
  * `EncabezadoDeSeccion`—; el titular es contenido y se edita acá, como el de
  * las otras siete.
  */
-export const TITULAR = 'Tres frentes, y el mismo equipo detrás de los tres.'
+export const TITULAR = 'Nuestros servicios'
+
+/**
+ * EL RÓTULO DEL ESTADO QUE ABRE EL RODILLO.
+ *
+ * El estado 0 tiene la misma anatomía que los tres servicios —número, nombre,
+ * subrayado y rótulo— así que necesita su rótulo. Dice lo que la sección es,
+ * no lo que vende: los tres rubros de abajo son categorías comerciales, éste
+ * es la frase que las junta.
+ */
+export const ROTULO_DE_LA_INTRO = 'lo que nosotros hacemos'
+
+/**
+ * LA ETIQUETA DEL CTA, por servicio.
+ *
+ * Es la misma frase en primera persona del cliente para los tres, con el
+ * servicio cambiado: lo que rota es el objeto, no el verbo. Por eso el botón
+ * puede relevar la etiqueta con su propio intercambio sin que el gesto se lea
+ * como «apareció otro botón».
+ */
+export const CTA_POR_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
+  web: 'Quiero mi desarrollo web',
+  software: 'Quiero mi software a medida',
+  'ia-automatizacion': 'Quiero mi integración con IA',
+}
 
 export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = {
   web: {
-    rubro: 'Sitios y tiendas',
+    rubro: 'Digitalizá tu negocio',
     parrafo:
-      'Sitios que cargan rápido y se leen igual en un teléfono que en un escritorio. ' +
-      'Diseñamos, escribimos y medimos: ' + conLlave(INVENTOS.serviciosWeb),
+      'Ponemos tu negocio online con una página que se entiende sola y que podés ' +
+      'manejar vos. No arrancamos de una plantilla: arrancamos de lo que vendés.',
     items: [
       'Diseño y maquetado a medida',
       'Sitio institucional o tienda',
@@ -117,11 +144,11 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
     caso: CASO,
   },
   'ia-automatizacion': {
-    rubro: 'Asistentes y procesos',
+    rubro: 'Innovando con la última tecnología',
     parrafo:
-      'Automatizamos lo que hoy alguien copia y pega: turnos, seguimientos, avisos. ' +
-      'El asistente responde con los datos de tu negocio y deriva cuando corresponde. ' +
-      conLlave(INVENTOS.serviciosIa),
+      'Chatbots y bots de WhatsApp que atienden, responden y levantan pedidos sin ' +
+      'que estés del otro lado. Se paga la implementación una vez y un abono ' +
+      'mensual.',
     items: [
       'Asistente entrenado con tus datos',
       'Respuestas en el sitio y en WhatsApp',
@@ -139,11 +166,10 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
     caso: CASO,
   },
   software: {
-    rubro: 'Sistemas internos',
+    rubro: 'Una solución a tus problemas',
     parrafo:
-      'Cuando la planilla ya no alcanza, construimos el sistema que tu operación necesita: ' +
-      'stock, remitos, permisos por rol, historial de cada cambio. ' +
-      conLlave(INVENTOS.serviciosSoftware),
+      'Nos contás lo que hoy se hace a mano y lo convertimos en una herramienta ' +
+      'hecha para tu operación. Primero entendemos, después presupuestamos.',
     items: [
       'Relevamiento de tu operación actual',
       'Modelo de datos y permisos por rol',
@@ -225,54 +251,6 @@ for (const id of IDS_DE_SERVICIO) {
  * dos agujeros a la vista y fuera de la lista que se le manda a Franco.
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
-  {
-    ruta: 'CONTENIDO.web.parrafo',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'valentino',
-    que: 'Qué se mide en un sitio entregado —velocidad— y contra qué se compara.',
-    formato: 'Frase con su número y su unidad, adentro del párrafo. Ej.: `1,2 s de carga`.',
-  },
-  {
-    ruta: 'CONTENIDO.web.parrafo',
-    clase: 'cifra',
-    marcador: '[CIFRA]',
-    quienLoTrae: 'franco',
-    que: 'La conversión de un sitio entregado, medida sobre datos del cliente.',
-    formato: 'Un número con su unidad, adentro del párrafo.',
-  },
-  {
-    ruta: 'CONTENIDO.ia-automatizacion.parrafo',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'valentino',
-    que: 'Cuántas consultas resuelve el bot sin intervención, sobre conversaciones reales.',
-    formato: 'Un número con su unidad, adentro del párrafo.',
-  },
-  {
-    ruta: 'CONTENIDO.ia-automatizacion.parrafo',
-    clase: 'cifra',
-    marcador: '[CIFRA]',
-    quienLoTrae: 'franco',
-    que: 'Cuántas horas por semana deja de dedicarle el equipo del cliente a lo que el asistente resuelve.',
-    formato: 'Un número con su unidad, adentro del párrafo.',
-  },
-  {
-    ruta: 'CONTENIDO.software.parrafo',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'franco',
-    que: 'Cuántos procesos se migraron, contados de una lista real.',
-    formato: 'Un número entero, adentro del párrafo.',
-  },
-  {
-    ruta: 'CONTENIDO.software.parrafo',
-    clase: 'cifra',
-    marcador: '[CIFRA]',
-    quienLoTrae: 'franco',
-    que: 'Cuántos errores dejó de tener la operación desde que el sistema entró, contados contra lo de antes.',
-    formato: 'Un número entero, adentro del párrafo.',
-  },
   {
     ruta: 'CASO_DE_REFERENCIA',
     clase: 'testimonio',

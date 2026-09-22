@@ -47,8 +47,6 @@
 /** Los tres servicios. El `id` ES el valor del atributo `data-servicio`. */
 export type IdDeServicio = 'web' | 'ia-automatizacion' | 'software'
 
-export const IDS_DE_SERVICIO: readonly IdDeServicio[] = ['web', 'ia-automatizacion', 'software']
-
 /** El atributo por el que entra el acento. Una sola fuente para el nombre. */
 export const ATRIBUTO_DE_SERVICIO = 'data-servicio'
 
@@ -105,12 +103,40 @@ export interface Servicio {
  */
 export const SERVICIOS: readonly Servicio[] = [
   { id: 'web', nombre: 'Desarrollo web' },
-  { id: 'ia-automatizacion', nombre: 'IA y automatización' },
   { id: 'software', nombre: 'Software a medida' },
+  { id: 'ia-automatizacion', nombre: 'Integraciones de IA y Automatizaciones' },
 ]
+
+/** Los ids, DERIVADOS del orden de arriba: dos listas a mano se desvían solas. */
+export const IDS_DE_SERVICIO: readonly IdDeServicio[] = SERVICIOS.map((s) => s.id)
 
 export function servicioDe(id: IdDeServicio): Servicio {
   const encontrado = SERVICIOS.find((s) => s.id === id)
   if (encontrado === undefined) throw new Error(`secciones-b: servicio desconocido "${id}"`)
   return encontrado
+}
+
+/**
+ * EL FORMATO del número de la secuencia: dos dígitos, con cero adelante.
+ *
+ * Existe aparte de `numeroDeServicio` porque hay un número que NO es de un
+ * servicio: el `00` del estado que abre el rodillo, que nombra a la sección.
+ * Con dos formateadores, el día que el formato cambie uno se queda viejo.
+ */
+export function numeroEnLaSecuencia(indice: number): string {
+  return String(indice).padStart(2, '0')
+}
+
+/**
+ * EL NÚMERO VISIBLE de un servicio — `01`, `02`, `03`. DERIVADO del orden.
+ *
+ * La misma lista que fija el orden de la secuencia fija el número, así que
+ * reordenar los tres servicios renumera solo. Escritos a mano serían una
+ * segunda lista capaz de desviarse sola, que es el defecto que
+ * `IDS_DE_SERVICIO` ya evita para los ids.
+ */
+export function numeroDeServicio(id: IdDeServicio): string {
+  const indice = SERVICIOS.findIndex((s) => s.id === id)
+  if (indice < 0) throw new Error(`secciones-b: servicio desconocido "${id}"`)
+  return numeroEnLaSecuencia(indice + 1)
 }

@@ -32,13 +32,10 @@
  * si un día crece, se ve.
  */
 
-import { useMotionValue } from 'motion/react'
-
 import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { textoVisible } from '../../_secciones/_contrato/escaneo'
 import { marcar } from '../../_secciones/_invariantes/render'
-import { SERVICIOS } from '../../_secciones/_contrato/acento'
-import { PanelDeSecuencia } from '../../_secciones/servicios/ServiciosEnSecuencia'
+import { quitarSubarbolesConAtributo } from '../../_secciones/_invariantes/marcado'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -79,37 +76,44 @@ interface Rama {
  * lectura no.
  *
  * Lo que hay que comparar no es un instante contra un instante: es **todo lo
- * que la rama quieta dice** contra **todo lo que la animada llega a decir**. Por
- * eso una sección en secuencia enumera sus tramos, y la unión de los tres es su
- * vocabulario.
+ * que la rama quieta dice** contra **todo lo que la animada llega a decir**.
  *
- * `PanelDeSecuencia` se exporta justamente para esto: el estado del tramo está
- * izado, así que el instrumento lo puede fijar sin inventar un atributo de
- * forzado en el producto.
+ * ⚠️ **`servicios` dejó de enumerar estados, y el caso especial se fue.** Su
+ * rama animada montaba un servicio por vez, así que había que renderizar los
+ * tres tramos y unir sus vocabularios para saber todo lo que llegaba a decir.
+ * Desde que la sección es UNA tira continua con los tres bloques siempre en
+ * flujo, un solo render ya los dice a los tres: enumerar tramos publicaría el
+ * vocabulario TRES VECES y el delta de conteo dejaría de significar algo.
+ * Ahora las ocho secciones se miden igual, con un render por rama.
  */
-function SondaDeTramo({ activo }: { readonly activo: number }): React.JSX.Element {
-  const progreso = useMotionValue(0)
-  return <PanelDeSecuencia activo={activo} progreso={progreso} />
-}
+/**
+ * ⚠️ **SE COMPARA LO ANUNCIADO, NO EL CRUDO — y es un endurecimiento.**
+ *
+ * Comparaba `textoVisible` a secas, y eso cuenta como «palabra que la animada
+ * dice» cualquier copia DECORATIVA. `servicios` tiene una: su rodillo es la
+ * copia visual de los rótulos, entera bajo `aria-hidden`, porque lo que se
+ * anuncia vive en la tira para que el ORDEN coincida con el de la rama apilada.
+ * Con el crudo, ese rodillo aparecía como vocabulario de más.
+ *
+ * Podar los subárboles `aria-hidden` no afloja nada: **una copia decorativa no
+ * es algo que la página diga**, y lo que esta comprobación busca es justamente
+ * que una rama no diga algo que la otra no. Es la misma decisión que ya habían
+ * tomado `s6-render` §3 y `s10-acceso` §7, que podan antes de comparar; este
+ * archivo era el único de los tres que miraba el crudo. El contrapeso es la
+ * afirmación de abajo: el podador TIENE que sacar algo, o estaríamos
+ * comparando dos cadenas vacías.
+ */
+const anunciado = (html: string): string => textoVisible(quitarSubarbolesConAtributo(html, 'aria-hidden'))
 
-/** Las secciones cuya rama animada es una SECUENCIA, con sus estados. */
-const EN_SECUENCIA: Readonly<Record<string, readonly React.JSX.Element[]>> = {
-  servicios: SERVICIOS.map((_, i) => <SondaDeTramo key={i} activo={i} />),
-}
+const RAMAS: readonly Rama[] = REGISTRO.map(({ id, Componente, seccion }) => ({
+  id,
+  quieto: anunciado(marcar(<Componente seccion={seccion} />, { anima: false })),
+  animado: anunciado(marcar(<Componente seccion={seccion} />, { anima: true })),
+  estados: 1,
+}))
 
-const RAMAS: readonly Rama[] = REGISTRO.map(({ id, Componente, seccion }) => {
-  const tramos = EN_SECUENCIA[id]
-  const animados =
-    tramos === undefined
-      ? [marcar(<Componente seccion={seccion} />, { anima: true })]
-      : tramos.map((tramo) => marcar(tramo, { anima: true }))
-  return {
-    id,
-    quieto: textoVisible(marcar(<Componente seccion={seccion} />, { anima: false })),
-    animado: animados.map(textoVisible).join(' '),
-    estados: animados.length,
-  }
-})
+/** El contrapeso del podador: si no sacara nada, la igualdad sería por vacío. */
+const CRUDO_ANIMADO = REGISTRO.map(({ Componente, seccion }) => marcar(<Componente seccion={seccion} />, { anima: true })).join(' ')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alcance: las ocho, en las dos ramas, y ninguna vacía')
@@ -138,8 +142,14 @@ for (const { id, quieto, animado } of RAMAS) {
   const vq = vocabulario(quieto)
   const va = vocabulario(animado)
   afirmarIgual(diferencia(vq, va), [], `\`${id}\` — nada que diga la rama quieta falta en la animada`)
-  afirmarIgual(diferencia(va, vq), [], `  ni al revés: la coreografía no agrega ni una palabra`)
+  afirmarIgual(diferencia(va, vq), [], `  ni al revés: la coreografía no agrega ni una palabra ANUNCIADA`)
 }
+afirmar(
+  anunciado(CRUDO_ANIMADO).length < textoVisible(CRUDO_ANIMADO).length,
+  `el contrapeso: el podador saca ${textoVisible(CRUDO_ANIMADO).length - anunciado(CRUDO_ANIMADO).length} caracteres de copia decorativa`,
+  'si no sacara nada, las igualdades de arriba podrían estar comparando dos vacíos',
+)
+controlPositivo('y el podador no deja pasar texto oculto', '<p>visible</p><span aria-hidden="true"><span>tapado</span></span>', (h: string) => anunciado(h).includes('tapado'))
 
 /**
  * La diferencia de CONTEO, publicada. Es la copia `sr-only` del divisor de
@@ -147,7 +157,7 @@ for (const { id, quieto, animado } of RAMAS) {
  * que nadie lo note en una pantalla.
  */
 console.log('  palabras por rama. El delta positivo es la copia `sr-only` del divisor de líneas;')
-console.log('  en una sección en secuencia también entra la repetición entre tramos.')
+console.log('  en `servicios`, la copia `aria-hidden` que el rodillo hace del rótulo.')
 for (const { id, quieto, animado, estados } of RAMAS) {
   const delta = palabras(animado).length - palabras(quieto).length
   console.log(

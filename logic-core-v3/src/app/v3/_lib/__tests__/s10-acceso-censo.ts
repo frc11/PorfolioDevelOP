@@ -106,19 +106,28 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   const animada = sinLoInventadoEnMarcado(marcadoAnimado)
   const marcas = marcadoresAnunciados(quieta)
   imprimirMarcadores(marcas)
-  // ⚠️ PORTFOLIO — 41 → 32, y la resta es de una sola sección. Trabajos tenía
-  // NUEVE casillas abiertas: tres `[LOGO]`, tres `[CAPTURA]` y tres `[TEXTO]`
-  // —los rubros—. Llegaron los seis archivos y el dueño dictó los tres rubros,
-  // así que las nueve se cerraron JUNTAS y esta cifra baja por lo único por lo
-  // que puede bajar: porque llegaron los datos. Trabajos ya no pide nada.
-  afirmarIgual(marcas.length, 32, 'son 32 marcadores ANUNCIADOS en la rama quieta — los 41 menos las NUEVE casillas que Trabajos cerró de una vez: seis archivos reales y tres rubros dictados')
+  // 43 → 40 cuando V3-D cerró las tres capturas. Desde 40, dos cierres
+  // INDEPENDIENTES, uno por lane: PORTFOLIO cerró las NUEVE casillas de
+  // Trabajos —tres `[LOGO]`, tres `[CAPTURA]` y tres `[TEXTO]`, los tres
+  // rubros de los tres proyectos, con seis archivos reales y tres rubros
+  // dictados— y Servicios se quedó sin sus tres `[MÉTRICA]` y sus tres
+  // `[CIFRA]`: el dueño confirmó que no va a haber cifras de clientes, así que
+  // esos seis pedidos tampoco están abiertos.
+  //
+  // ⚠ 40 − 9 − 6 = 25 en casillas, pero el censo cuenta OCURRENCIAS
+  // anunciadas y no casillas: cada pedido de Servicios que sigue abierto
+  // —`[TESTIMONIO]`, `[VIDEO]`, `[PÓSTER]`— se anuncia UNA VEZ POR SERVICIO,
+  // tres veces, porque la tira los repite. Esa multiplicación no la mueve
+  // ningún cierre y no se resta con la resta de arriba: se mide contra el
+  // recorrido real, post-merge, y no se deriva por aritmética de casillas.
+  afirmarIgual(marcas.length, 26, 'son 26 marcadores ANUNCIADOS en la rama quieta')
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
   )
   afirmarIgual(
     marcadoresAnunciados(animada).map((m) => m.marcador).sort(), marcas.map((m) => m.marcador).sort(),
-    'y los MISMOS 40 en la animada, marcador por marcador: no falta ninguno',
+    'y los MISMOS en la animada, marcador por marcador: no falta ninguno',
   )
   afirmarIgual(
     marcas.map((m) => m.marcador).filter((m) => !(MARCADORES as readonly string[]).includes(m)), [],

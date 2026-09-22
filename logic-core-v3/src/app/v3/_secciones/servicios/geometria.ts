@@ -148,115 +148,429 @@ export const CLASE_DE_BLOQUE_DE_SERVICIO = 'flex min-h-svh w-full items-center'
  * instrumento no encuentra el elemento y **falla**, en lugar de medir cero y
  * llamarlo defecto: es exactamente el modo de falla que B7 vino a cerrar.
  */
+// El panel pasa de `min-h-svh` a ALTO FIJO y recorta: la columna derecha ahora
+// avanza adentro de una máscara, y una máscara necesita una caja acotada. Sin
+// esto el panel crecía con el contenido (1.122 px contra 900) y el pie del
+// servicio caía abajo del pliegue, que es el defecto que este sprint cierra.
+// El tope va con `--spacing-20` (80 px) y no con `--spacing-8`: la pastilla de
+// navegación flota sobre las ocho secciones y mide ~72 px, así que con 32 el
+// primer renglón de cada paso le quedaba DEBAJO. Con la cabecera arriba del
+// panel eso tapaba media línea; con la cinta, el paso cero entero.
 export const CLASE_DEL_STICKY =
-  'sticky top-0 flex min-h-svh w-full flex-col justify-center gap-[var(--spacing-8)]'
+  'sticky top-0 flex h-svh w-full flex-col gap-[var(--spacing-8)] overflow-hidden pt-[var(--spacing-20)] pb-[var(--spacing-8)]'
 
 /**
- * LA PILA — los TRES servicios en la MISMA celda, uno pintado y dos apagados.
+ * ⚠️ **ACÁ VIVÍA EL MODELO DE CAPAS, Y SE FUE ENTERO.**
  *
- * ⚠️ **Es el arreglo del defecto 1 de SITIO-S10, mitad de arriba, y la razón por
- * la que existe.** Arriba de 1025 la secuencia montaba `SERVICIOS[indice]`: UNO
- * por vez. Visualmente correcto —así fue diseñada— y para un lector de pantalla
- * catastrófico: `s10-acceso` §4 midió que el árbol pasaba de 26 encabezados a 24
- * y de 43 marcadores anunciados a 33. Quien navega por encabezados sin
- * scrollear no alcanzaba dos tercios de la sección.
+ * Eran `CLASE_DE_LA_PILA` —una grilla de UNA celda—, `CLASE_DE_CAPA`,
+ * `CLASE_DE_CAPA_APAGADA = sr-only`, `CAPA_VIGENTE`/`CAPA_APAGADA` y las dos
+ * funciones que decidían qué clase le tocaba a cada capa. Con eso la rama
+ * pinneada montaba los tres servicios en la misma celda, pintaba uno y apagaba
+ * dos.
  *
- * La pila pone a los tres en el DOM al mismo tiempo y deja que la secuencia
- * elija cuál se PINTA. La secuencia visual no cambia: se sigue viendo uno, y
- * sigue siendo el del tramo activo.
+ * El arreglo de SITIO-S11 —los tres en el árbol, dos con `sr-only`— era
+ * correcto para el defecto que atacaba (26 encabezados contra 24) y dejaba
+ * intacto el de fondo: **un intercambio no tiene traspaso**. La capa que entra
+ * nace en su lugar, así que por más que se afine la curva, el servicio nuevo
+ * aparece en vez de llegar. Ésa era la teletransportación.
  *
- * ── Por qué es una grilla de UNA celda ────────────────────────────────────
- *
- * Porque las tres capas se declaran en `col-start-1 row-start-1`: la que está
- * en flujo ocupa la celda y las que no —ver las dos formas, acá abajo— no
- * empujan una fila nueva ni aparecen debajo. Sin la grilla, el día que las tres
- * vuelvan a estar en flujo se apilarían una atrás de otra y la sección mediría
- * el triple.
- *
- * ⚠️ **El panel mide la capa PINTADA, no la más alta de las tres**, porque las
- * apagadas salen del flujo. Es a propósito y es lo conservador: es exactamente
- * el alto por tramo que tenía la versión aprobada por grabación, cuando la
- * secuencia montaba un servicio por vez. Medir la más alta habría emparejado el
- * alto entre tramos —probablemente mejor— pero es un cambio de composición, y
- * este sprint arregla defectos.
+ * Lo reemplaza `TiraDeServicios`: los tres bloques SIEMPRE en flujo, una sola
+ * traslación continua, y nada que se prenda ni se apague. El árbol de
+ * accesibilidad queda mejor que con `sr-only` —no hay nada escondido— y el
+ * traspaso existe porque el contenido efectivamente viaja.
  */
-export const CLASE_DE_LA_PILA = 'grid w-full'
+/** La columna FIJA: un tercio del ancho, con el número y el nombre. */
+export const CLASE_DE_LA_COLUMNA_FIJA = 'flex w-full flex-col gap-[var(--spacing-6)]'
 
 /**
- * LAS DOS FORMAS DE UNA CAPA, Y POR QUÉ EL APAGADO ES `sr-only`.
+ * EL NIVEL DEL NOMBRE DEL SERVICIO, y por qué NO entra en un renglón.
  *
- * El apagado tiene que sacar la capa de la PANTALLA sin sacarla del ÁRBOL DE
- * ACCESIBILIDAD, que es exactamente lo que el defecto pedía. Eso descarta,
- * una por una, todas las formas habituales de esconder algo:
+ * ── ✅ MEDIDO a 1440, con la cara real y el interletrado del nivel ────────
  *
- *   `display:none` / `hidden`     la saca del árbol. Es el defecto otra vez.
- *   `visibility:hidden`           lo mismo, y además reserva el espacio.
- *   `aria-hidden="true"`          la saca del árbol A PROPÓSITO. Es lo contrario.
- *   `inert`                       la saca del árbol en los navegadores que lo
- *                                 implementan. Tampoco sirve.
- *   `content-visibility:hidden`   la saca del árbol.
+ * El pedido era que «Integraciones de IA y Automatizaciones» —el más largo de
+ * los tres— entrara en UNA línea bajando el tamaño, el mismo para los tres.
+ * Medido a 1440 con la cara y el interletrado reales (−0,03 em), contra la caja
+ * que el renglón le deja al nombre: la columna fija mide 448 px y el número más
+ * su hueco se llevan 31,69, así que **quedan 416,31 px**.
+ * `docs/rediseno/outputs/servicios/renglon-del-nombre.json`:
  *
- * Quedan dos que SÍ dejan el nodo entero para un lector de pantalla: `opacity:
- * 0` y `sr-only`. **Va `sr-only`, y la razón es medida:** el apagado por opacidad
- * pedía las utilidades `opacity-0` y `opacity-100`, y este lane sólo admite
- * valores del tema — `test:s6-tokens` las rechazó las dos («`opacity-` — 3 en
- * uso, todas de token → obtenido ["opacity-100","opacity-0"]»), porque el tema
- * declara `--opacity-tenue|media|alta|casi` y **ninguna de las dos puntas**. Un
- * token nuevo habría sido tocar `theme-develop.css`, que es superficie
- * compartida y de otro dueño.
+ *     nivel        tamaño @1440   ancho del nombre   ¿entra en 416,31?
+ *     titulo-xl       56,00 px         995,42 px      no  (2,39 ×)
+ *     titulo-l        44,00 px         782,13 px      no  (1,88 ×)
+ *     titulo-m        32,00 px         568,81 px      no  (1,37 ×)
+ *     titulo-s        20,00 px         355,52 px      sí  (0,85 ×)
  *
- * Y `sr-only` no es el premio consuelo: es **la utilidad que este sistema ya usa
- * para exactamente esto** —la copia que el divisor de líneas deja para que el
- * titular partido se anuncie entero, la misma que `s7-arboles` publica como el
- * delta legítimo entre las dos ramas—. Dice en el marcado lo que la capa es: un
- * contenido para lectores, no para la pantalla.
+ * El ancho es lineal en el tamaño, así que el mayor que entra en un renglón es
+ * **23,42 px** — y no es un nivel de la escala. El único nivel que entra es
+ * `titulo-s`, **20 px**: el cuerpo de un metadato, y sólo cuatro píxeles arriba
+ * del `base` con el que se lee la columna derecha. Un nombre de servicio del
+ * tamaño de su propia descripción dejó de ser un título.
  *
- * ⚠️ **Es una decisión de CSS que ningún instrumento del banco de S10 puede
- * ver**, y va declarado: `s10-recorrido.ts` lee marcado y no hoja de estilos, así
- * que para él las tres capas están en el árbol —que es la mitad que este arreglo
- * necesita que sea cierta— y ninguna está pintada de más. La otra mitad, que se
- * pinte UNA SOLA, se afirma acá en el lane: `s6-servicios` §10.
+ * Control positivo de la misma medición: «Desarrollo web» en `titulo-xl` mide
+ * 384,47 px y SÍ entra, o sea que la caja no está mal leída — lo que no entra
+ * es el nombre largo.
  *
- * ── Por qué la forma se declara en un atributo Y en la clase ──────────────
+ * ── ⚠️ Y BAJA IGUAL, por un motivo que la instrucción no previó ───────────
  *
- * La clase es lo que ESCONDE; el atributo `data-capa` es lo que la capa DICE ser.
- * Tenerlos separados permite lo que ninguno de los dos solo permite: cazar la
- * mentira. `capasDeServicio` de `deteccion.ts` sólo cuenta una capa como apagada
- * si dice serlo y además lleva la clase, y como vigente si dice serlo y NO la
- * lleva; cualquier desacuerdo cae en `capasSinDeclararSuForma`, que se afirma
- * vacío. Con la clase sola, una capa a la que le borren el apagado se leería
- * como vigente sin que nadie levante la mano.
+ * Un renglón era inalcanzable, así que el plan era quedarse en `titulo-xl` y
+ * reservar la altura. **La grabación lo desmintió: a 56 px el tercer nombre se
+ * CORTA contra el borde de la columna.** Un texto envuelve por palabras, y la
+ * palabra más larga de los tres nombres es «Automatizaciones»
+ * (`palabra-mas-larga.json`):
  *
- * ⚠️ El acento sigue siendo UNO por cuadro. `--color-acento` cuelga de
- * `[data-servicio]`, que ahora hay tres — pero dos están recortadas a un píxel
- * fuera del flujo, así que en la pantalla nunca hay más de un acento vigente. La
- * propiedad no se perdió: cambió de «un atributo en el marcado» a «una capa
- * pintada», que es lo que siempre quiso decir.
+ *     nivel        tamaño    «Automatizaciones»   ¿entra en 416,31?   renglones
+ *     titulo-xl    56,00 px        452,06 px       NO, se pasa 35,75      3
+ *     titulo-l     44,00 px        355,20 px       sí, sobran 61,11       2
+ *     titulo-m     32,00 px        258,33 px       sí, sobran 157,98      2
+ *
+ * Una palabra no se parte, así que a 56 px la caja del `h3` no puede bajar de
+ * 452 y lo que sobra se lo come el `overflow-hidden` del panel: se veía
+ * «Integraciones de» y «Automatizacione» sin la última letra. No es un ajuste
+ * de gusto, es contenido perdido.
+ *
+ * Por eso **el nivel baja a `titulo-l`, 44 px** — el mayor de la escala en el
+ * que la palabra más larga entera entra en la columna. Sigue sin ser un
+ * renglón: son DOS, y esos dos son los que se reservan.
  */
-export const CLASE_DE_CAPA_APAGADA = 'sr-only'
-
-/** Lo que una capa DICE ser, en `data-capa`. Ver la nota de arriba. */
-export const CAPA_VIGENTE = 'vigente'
-export const CAPA_APAGADA = 'apagada'
-export type FormaDeCapa = typeof CAPA_VIGENTE | typeof CAPA_APAGADA
+export const NIVEL_DEL_NOMBRE = 'titulo-l' as const
 
 /**
- * El lugar de una capa en la pila. Lo lleva SÓLO la vigente: sobre una capa
- * apagada, `w-full` le ganaría el ancho a `sr-only` —Tailwind emite `w-*`
- * después— y quedaría una caja de una pantalla de ancho recortada por
- * `clip-path`, que es esconder algo por accidente y no por declaración.
+ * EL RENGLÓN DEL NOMBRE — sólo el guardia del corte. **Sin reserva de altura.**
+ *
+ * ── ⚠️ Acá vivía una reserva de dos renglones, y se sacó ──────────────────
+ *
+ * La reserva existía para que el subrayado no bajara de golpe en el traspaso
+ * 02 → 03, cuando el nombre largo pasa de uno a dos renglones. Funcionaba —el
+ * barrido del pin daba dispersión 0,00 px— y el precio era que en los dos
+ * estados cortos el subrayado quedaba colgado un renglón abajo del texto, con
+ * un hueco que no significaba nada.
+ *
+ * Con el rodillo el problema desapareció por otro lado: **cada estado viaja
+ * entero adentro de su ranura**, así que un cambio de alto entre estados no es
+ * un salto, es parte del rollo. Cada bloque conserva el alto de su propio
+ * título y el subrayado queda pegado a su texto. Si el subrayado igual saltara,
+ * el problema sería el rodillo y no la altura.
+ *
+ * `min-w-0` se queda, y no es lo mismo: es el guardia del CORTE. Un hijo de
+ * flex no baja de su ancho de mínimo contenido salvo que se lo permitan, así
+ * que sin esto el `h3` vuelve a medir lo que mida su palabra más larga y a
+ * desbordar la columna en silencio el día que entre un nombre nuevo — que ya
+ * pasó una vez, con «Automatizaciones» a 56 px contra una caja de 416,31.
  */
-const CLASE_DE_CAPA = 'col-start-1 row-start-1 w-full'
+export const CLASE_DEL_RENGLON_DEL_NOMBRE = 'min-w-0'
 
-/** Las clases de una capa de la pila, según se pinte o no. */
-export function clasesDeCapa(vigente: boolean): string {
-  return vigente ? CLASE_DE_CAPA : CLASE_DE_CAPA_APAGADA
-}
+/**
+ * EL NIVEL DEL PÁRRAFO DE LA COLUMNA DERECHA — la PERILLA, subila o bajala acá.
+ *
+ * ── Por qué `titulo-m`, y por qué el criterio NO es «el mayor que entra» ───
+ *
+ * El criterio es una PROPORCIÓN, la de la referencia: el párrafo se lee
+ * claramente más grande que un cuerpo de texto y claramente más chico que el
+ * nombre del servicio. Eso lo acota por los dos lados y no deja lugar a gusto:
+ *
+ *     nombre del servicio   `titulo-l`    44 px   ← el techo
+ *     …                     `titulo-m`    32 px   ← parte el intervalo
+ *     …                     `titulo-s`    20 px   a 4 px del cuerpo
+ *     cuerpo del panel      `base`        16 px   ← el piso
+ *
+ * `titulo-s` está a cuatro píxeles del cuerpo: nadie lo lee «claramente más
+ * grande». Y hacia arriba el techo no es la caja sino el sentido: `display`
+ * (58 px) le da al párrafo más cuerpo que al nombre del servicio y lo convierte
+ * en un cartel — entra en la ventana y aun así está mal. Queda `titulo-m`.
+ *
+ * ⚠️ Es una constante con nombre a propósito: es la perilla de esta decisión.
+ * Cambiarla acá alcanza; no hay un segundo lugar que la repita.
+ */
+export const NIVEL_DEL_PARRAFO: Nivel = 'titulo-m'
 
-/** Lo que la capa declara ser. Tiene que coincidir con lo que la clase hace. */
-export function formaDeCapa(vigente: boolean): FormaDeCapa {
-  return vigente ? CAPA_VIGENTE : CAPA_APAGADA
-}
+/** El nivel del `h2` que nombra la sección. Lo consumen las DOS ramas. */
+export const NIVEL_DEL_TITULAR_DE_SECCION = 'titulo-l' as const
+
+/** La columna que AVANZA: los otros DOS tercios. La línea va arriba, fija. */
+export const CLASE_DE_LA_COLUMNA_QUE_AVANZA =
+  'col-span-2 flex h-full min-h-0 w-full flex-col gap-[var(--spacing-6)]'
+
+/**
+ * ═══ EL MODELO NUEVO: una TIRA continua a la derecha, un RODILLO a la izquierda ═══
+ *
+ * Las dos cosas que se mueven adentro del pin tienen naturalezas distintas y no
+ * comparten un solo mecanismo. Escrito acá porque las constantes de las dos
+ * viven abajo, y separadas no se entienden.
+ *
+ *   DERECHA · CONTINUA   UNA tira con los tres bloques apilados, que se
+ *                        traslada LINEALMENTE con el progreso del pin. Nunca
+ *                        conmuta, nunca monta ni desmonta, nunca reinicia.
+ *   IZQUIERDA · DISCRETA Un rodillo de CUATRO estados —el titular de la sección
+ *                        y los tres servicios— que se posa en uno y pasa rápido
+ *                        al siguiente.
+ *
+ * **El acoplamiento va en UNA dirección: la posición de la tira decide el estado
+ * del rodillo. Nunca al revés.** Por eso las fronteras no se escriben: se
+ * derivan del tope medido de cada bloque dentro de la tira.
+ *
+ * ⚠️ **Lo que esto reemplaza, y por qué el reemplazo es del MECANISMO.** Hasta
+ * acá la derecha montaba tres capas por servicio, pintaba una y apagaba dos con
+ * `sr-only`, y le pasaba el progreso LOCAL del tramo sólo a la vigente. Cada
+ * frontera de paso reiniciaba ese local de 1 a 0 y cambiaba cuál capa estaba en
+ * flujo: ahí nacía todo salto. No era un valor mal calibrado.
+ */
+
+/**
+ * EL VACÍO DE ENTRADA — la PERILLA de cuánto blanco queda arriba del bloque 01.
+ *
+ * La tira arranca con un tramo vacío arriba del primer bloque. Va en fracción de
+ * pantalla y no en píxeles para que escale, y no se mide para que el primer
+ * cuadro sea correcto sin esperar a un efecto.
+ *
+ * ── ⚠️ VOLVIÓ A 0,55, Y EL MOTIVO CAMBIÓ DE SIGNO ────────────────────────
+ *
+ * Estuvo en 0,55, subió a 1 y volvió. No es una indecisión: es que lo que este
+ * número tiene que garantizar se dio vuelta.
+ *
+ *   antes   el estado 0 tenía que DURAR, así que el vacío tenía un PISO: si era
+ *           más corto que `LINEA_DE_REFERENCIA` el bloque 01 nacía ya cruzado y
+ *           el rodillo saltaba al 01 apenas arrancaba el pin.
+ *   ahora   eso es exactamente lo pedido —«cuando el tope de la sección llega al
+ *           tope de la página, el rodillo pasa a Desarrollo web»— y el estado 0
+ *           se ve durante la APROXIMACIÓN, que es un viewport entero de scroll.
+ *           Lo que el número tiene ahora es un TECHO: con una pantalla entera la
+ *           ventana queda en blanco en el instante en que arranca el pin, y
+ *           «la entrada no puede estar vacía».
+ *
+ * A 1440×900 esto deja 495 px de vacío contra una ventana de 788: se ven ~293 px
+ * del bloque 01 —su párrafo entero— atenuado, mientras el rodillo todavía dice
+ * «Nuestros servicios». Abajo de ~0,3 la entrada deja de leerse como entrada y
+ * arriba de ~0,75 vuelve a ser una pantalla en blanco.
+ */
+export const ALTO_DEL_VACIO_DE_ENTRADA = 0.55
+
+/**
+ * LA LÍNEA DE REFERENCIA que decide qué bloque es el vigente, en fracción del
+ * alto de la ventana. Un bloque toma el rodillo cuando su TOPE la cruza.
+ *
+ * ⚠️ **Va ABAJO, no arriba, y la primera versión lo tuvo al revés.** Con 0,32
+ * el rodillo rotaba al 01 recién cuando el bloque ya había subido dos tercios
+ * de la ventana — o sea con el párrafo YÉNDOSE, que es exactamente lo que el
+ * pedido señalaba como defecto. El nombre tiene que aparecer cuando su párrafo
+ * está ENTRANDO, así que la línea vive cerca del borde de abajo.
+ */
+export const LINEA_DE_REFERENCIA = 0.72
+
+/**
+ * CUÁNTO TARDA EL RODILLO EN ROTAR, en segundos. **Es tiempo, no scroll.**
+ *
+ * Cruzar una frontera DISPARA la rotación; de ahí en más corre sola, aunque la
+ * persona frene el scroll en el medio. Más lenta que el barrido que reemplaza
+ * —que sólo se movía mientras el dedo se movía— porque un gesto que se completa
+ * solo se lee mejor lento.
+ *
+ * ⚠️ La duración y la curva se leen JUNTAS, y son las dos perillas del traspaso:
+ * las mueve el rodillo, la torta y el CTA a la vez, porque los tres cuelgan de la
+ * misma máquina.
+ */
+export const DURACION_DEL_DISPARO = 1.4
+
+/**
+ * LA CURVA DEL DISPARO, y por qué dejó de ser la del vocabulario del sitio.
+ *
+ * Era la de las revelaciones de sección, que arranca con pendiente 1,84: **salta**
+ * del reposo, y sobre un giro eso se lee como un tirón. Ésta es simétrica y sus
+ * dos pendientes de borde valen 0, así que no hay arranque ni frenada: ni el
+ * primer cuadro ni el último se despegan del reposo. Lo rápido queda en el medio,
+ * que es donde el giro se mira.
+ */
+export const CURVA_DEL_DISPARO = [0.5, 0, 0.5, 1] as const
+
+/**
+ * LA ENTRADA ATENUADA — cuánto contraste tiene el bloque 01 antes del pin.
+ *
+ * Mientras la sección se acerca, el progreso del pin vale 0 —está acotado— así
+ * que no hace falta una segunda señal para saber que todavía no llegó: **el
+ * propio 0 ES la aproximación.** El bloque 01 se ve ahí, atenuado, y gana
+ * contraste pleno en cuanto el tope de la sección toca el tope de la página.
+ *
+ * ⚠️ Atenuar es BAJAR CONTRASTE, no oscurecer: la página es clara, así que la
+ * tinta se acerca al papel en vez de alejarse. Por eso es opacidad y no un
+ * color: un gris más oscuro sobre papel claro tiene MÁS contraste, no menos.
+ */
+export const OPACIDAD_ATENUADA = 0.28
+
+/** En cuánto del pin pasa de atenuado a pleno. Corto: es un encendido, no un viaje. */
+export const UMBRAL_DE_ACTIVACION = 0.015
+
+/**
+ * EL ANCHO DE LA TORTA en la columna izquierda. Experimental, a mano.
+ *
+ * Va como clase y no como número suelto porque el SVG escala con su caja: su
+ * `viewBox` es fijo y lo que decide el tamaño en pantalla es esto.
+ *
+ * ⚠️ Cuatro veces `--spacing-20` (320 px) y no un token nuevo: el tema es
+ * superficie compartida y de otro dueño, y una torta experimental no justifica
+ * meterle una variable. Derivado de la escala, el escáner lo acepta y el día
+ * que la escala cambie, la torta la sigue.
+ */
+export const CLASE_DE_LA_TORTA = 'w-[calc(var(--spacing-20)*4)] max-w-full'
+
+/**
+ * LA CAJA DONDE VIVE LA TORTA — centrada en el hueco, y quieta.
+ *
+ * `flex-1` se come lo que sobra entre el rodillo y el CTA, y el centrado pone
+ * la torta en el medio de ESE hueco. Antes colgaba del flujo justo abajo del
+ * rodillo, así que su posición dependía de cuántos renglones tuviera el título
+ * del estado vigente: con el nombre largo bajaba, con los cortos subía.
+ */
+export const CLASE_DEL_HUECO_DE_LA_TORTA = 'flex min-h-0 flex-1 items-center justify-center'
+
+/**
+ * LA VENTANA DEL CTA — una grilla de UNA celda, del ancho de la etiqueta más larga.
+ *
+ * ⚠️ El botón recorta lo que no entra: su `[data-parte="ventana"]` es
+ * `inline-flex` con `overflow: hidden`, y su ancho lo fija la copia que se ve.
+ * Cuando la copia que ENTRA dice una etiqueta más larga, se corta. Con las tres
+ * en la misma celda, la celda mide la más larga y el ancho **no cambia** al
+ * relevar — que es lo que el punto pedía.
+ */
+export const CLASE_DE_LA_VENTANA_DEL_CTA = 'grid w-fit justify-items-start'
+
+/**
+ * UN FANTASMA: ocupa el ancho de su etiqueta y no se ve ni se anuncia.
+ *
+ * ⚠️ **Tiene que medir lo que mide el BOTÓN con esa etiqueta, no lo que mide el
+ * texto.** La primera versión usó `text-base` y sin padding, y quedó 2,4 px
+ * corta justo en la etiqueta más larga: el botón crecía al relevarla, que es
+ * exactamente lo que el fantasma existe para evitar. La tipografía es la de la
+ * copia del rótulo (`text-cuerpo`, `font-semi`, `tracking-texto`) y el padding
+ * es el del botón (`--spacing-2`), los dos leídos de `Cta.tsx` y `cta.css`.
+ */
+/**
+ * LAS CLASES QUE LE ENTRAN AL BOTÓN DESDE AFUERA — y qué compra cada una.
+ *
+ * `Cta` es compartido con el Hero y el Cierre, así que no se toca: todo lo que
+ * esta sección necesita de él entra por `className`, apuntando a sus partes con
+ * variantes, y **con sus propios tokens**, que resuelven adentro suyo porque es
+ * ahí donde están declarados.
+ *
+ *   · el ancho mínimo de la ventana, para que la celda de la grilla mande;
+ *   · **el alto de la ventana clavado en su valor CRECIDO** y el subrayado
+ *     subido por la diferencia entre los dos altos.
+ *
+ * ── ⚠️ POR QUÉ ESAS DOS ÚLTIMAS, Y POR QUÉ VAN JUNTAS ─────────────────────
+ *
+ * La ventana del botón CRECE al relevar. Son 4 px, y el botón es el último de
+ * una columna donde la torta ocupa el sobrante y se centra en él: cada píxel que
+ * el botón crece le saca uno al sobrante y **corre la torta medio**. Medido: el
+ * disco bajaba 2,0 px a los 745 ms del traspaso, que es justo cuando el botón
+ * releva, y con una curva —no era el giro, era esto.
+ *
+ * Clavar la ventana en su alto crecido deja la caja quieta, pero sola baja el
+ * subrayado 4 px y el botón de esta sección dejaría de parecerse al del Hero.
+ * Por eso la segunda: le devuelve al subrayado exactamente la diferencia entre
+ * los dos altos, escrita como esa resta y no como el número, así que si alguien
+ * cambia el crecimiento las dos se mueven juntas. El alto total del botón y la
+ * posición de su subrayado quedan **idénticos a los de hoy**, y constantes.
+ */
+export const CLASE_DEL_BOTON_ROTATIVO =
+  'col-start-1 row-start-1 w-full [&_[data-parte=ventana]]:min-w-full [&_[data-parte=ventana]]:min-h-[var(--cta-ventana-hover)] [&_[data-parte=subrayado]]:mt-[calc(var(--cta-ventana-reposo)-var(--cta-ventana-hover))]'
+
+export const CLASE_DEL_FANTASMA_DEL_CTA =
+  'invisible col-start-1 row-start-1 whitespace-nowrap p-[var(--spacing-2)] text-cuerpo font-semi tracking-texto leading-texto'
+
+/** Cuánto del alto de la ventana ocupa el desvanecido de arriba. */
+export const FRACCION_DEL_DESVANECIDO = 0.16
+
+/**
+ * DÓNDE TERMINA de pintarse un párrafo, en fracción del alto de la ventana.
+ *
+ * ⚠️ **Ya no es un número elegido: se DERIVA de la banda más un margen en
+ * renglones**, que es el criterio nuevo. La pintura tiene que llegar a 1,00
+ * justo antes de que el tope del bloque entre en el difuminado, con al menos
+ * un renglón de aire — ni antes, porque entonces el párrafo pasa la mitad de
+ * su vida ya pintado, ni después, porque se apagaría mientras todavía escribe.
+ *
+ * Estaba en 0,24, que dejaba 63 px de margen: casi dos renglones, o sea que
+ * terminaba temprano. Con 1,2 renglones el margen baja a ~42 px y la pintura
+ * se estira todo lo que el criterio permite.
+ */
+
+/** Cuántos renglones de aire quedan entre el fin de la pintura y la banda. */
+const MARGEN_DE_PINTURA_EN_RENGLONES = 1.2
+
+/** Cuánto mide un renglón del párrafo en fracción de la ventana, a 1440. */
+const RENGLON_EN_FRACCION_DE_LA_VENTANA = 0.0443
+
+export const LINEA_DE_FIN_DE_PINTURA =
+  FRACCION_DEL_DESVANECIDO + MARGEN_DE_PINTURA_EN_RENGLONES * RENGLON_EN_FRACCION_DE_LA_VENTANA
+
+/**
+ * LA CAJA DEL RODILLO — su alto es el del estado MÁS ALTO, y sale de tokens.
+ *
+ * Tiene que ser un alto DEFINIDO por dos motivos a la vez: la tira interna mide
+ * un porcentaje de ella (400 %), y un porcentaje contra un padre de alto
+ * automático resuelve a `auto` y se desarma en silencio. Y no puede ser
+ * `h-full` de la columna: con ~788 px por ranura el traspaso sería un scroll de
+ * página y no un rodillo.
+ *
+ * La cuenta es la del estado más alto, sumando lo que el bloque realmente pone:
+ * el rótulo, dos huecos, DOS renglones de título —el caso del nombre largo— y el
+ * subrayado. Todo en `var()`, que es el idiom de `CLASE_DEL_RENGLON_DEL_NOMBRE`
+ * y lo que deja pasar al escáner de §5; los multiplicadores no llevan unidad.
+ *
+ * ⚠️ Cada estado conserva su alto NATURAL adentro de la ranura, alineado al
+ * tope. El sobrante de los estados cortos cae DEBAJO del subrayado y no lo
+ * empuja — que es la diferencia con la reserva de dos renglones que se sacó.
+ */
+export const CLASE_DE_LA_CAJA_DEL_RODILLO =
+  'relative w-full overflow-hidden h-[calc(var(--text-fluido-caption)*var(--leading-texto)+var(--spacing-3)*2+var(--text-fluido-titulo-l)*var(--leading-titulo)*2+var(--foco-grosor))]'
+
+/**
+ * EL HUECO ENTRE UN SUBRAYADO Y EL RÓTULO SIGUIENTE — el mismo en los cuatro.
+ *
+ * ⚠️ **Es la corrección del sprint, y el defecto era geométrico.** Con ranuras
+ * del mismo alto y los bloques apoyados abajo, lo que quedaba arriba de cada
+ * bloque era el SOBRANTE de su ranura — y el sobrante depende de cuántos
+ * renglones tenga el título. Un nombre de un renglón dejaba ~48 px; el de dos
+ * llenaba la ranura y dejaba 0. Ahora la ranura mide su bloque MÁS este hueco,
+ * así que el hueco es el hueco y no un resto.
+ */
+export const CLASE_DE_LA_RANURA = 'w-full pt-[var(--spacing-12)]'
+
+/**
+ * LA RANURA DEL ESTADO 0 mide la CAJA ENTERA, y no es una excepción de estilo.
+ *
+ * Es lo que hace que el primer cuadro salga bien SIN haber medido: si su fondo
+ * coincide con el fondo de la caja, el traslado del estado 0 vale cero, que es
+ * exactamente lo que la transformada devuelve mientras la medida no llegó. Sin
+ * esto, la pieza se pintaría un cuadro fuera de lugar y saltaría al siguiente.
+ */
+/**
+ * ⚠️ **`min-h` con la MISMA cuenta que la caja, y no `h-full`.** La primera
+ * versión usó `h-full`, y no resolvió: la tira es un `flex-col` de alto
+ * AUTOMÁTICO —tiene que crecer con sus ranuras— y un porcentaje contra un padre
+ * sin alto definido resuelve a `auto`. La ranura medía su contenido (93,14 px)
+ * en vez de la caja (141,11), así que el traslado correcto para el estado 0 no
+ * era cero y el primer cuadro salía 48 px corrido, saltando al llegar la
+ * medida. Es exactamente el parpadeo que este archivo existe para no tener.
+ *
+ * La cuenta está escrita dos veces a propósito: Tailwind escanea el fuente y
+ * una clase compuesta no la ve nadie. Van pegadas para que se muevan juntas.
+ */
+export const CLASE_DE_LA_RANURA_DE_ENTRADA =
+  'flex w-full flex-col justify-end min-h-[calc(var(--text-fluido-caption)*var(--leading-texto)+var(--spacing-3)*2+var(--text-fluido-titulo-l)*var(--leading-titulo)*2+var(--foco-grosor))]'
+
+/** La tira de la derecha: los bloques en columna, sin hueco entre ellos. */
+export const CLASE_DE_LA_TIRA = 'flex w-full flex-col will-change-transform'
+
+/**
+ * Un bloque de la tira. `min-h-svh` y no un alto automático: es lo que sostiene
+ * la mitad estructural de la regla del acento —cada bloque ocupa al menos una
+ * pantalla, así que nunca hay dos acentos posados en el mismo cuadro— y es la
+ * misma caja que declara la rama apilada. `capasSinPantalla` la comprueba.
+ */
+export const CLASE_DE_BLOQUE_DE_LA_TIRA =
+  'flex min-h-svh w-full flex-col gap-[var(--spacing-6)]'
+
+/** La máscara por la que asoma la columna derecha mientras recorre. */
+export const CLASE_DE_LA_VENTANA = 'min-h-0 flex-1 overflow-hidden'
 
 /**
  * Las clases de un nivel tipográfico, como CADENA.

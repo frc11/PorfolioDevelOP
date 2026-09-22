@@ -83,6 +83,11 @@ export interface Seccion {
    * O sea: **la resta de una sección se hace en su composición**, y bajar este
    * número sólo cambia algo donde no hay caja interna que lo sostenga.
    *
+   * ⚠️ La fila de **servicios es una foto de cuando declaraba 300svh**, y ya no
+   * vale: hoy declara 800 (ver `PANTALLAS_DE_SERVICIOS`), muy por encima de sus
+   * 3 cajas internas, así que ahí manda la columna y no la composición. Las
+   * otras siete no se volvieron a medir.
+   *
    * ── ⚠️ POR QUÉ NO SE LLAMA `altoMinimo`, que es lo que es ────────────────
    *
    * Porque `_lib/escena/anclajeDerivacion.ts:182` lee `s.alto` para derivar el
@@ -287,6 +292,46 @@ const PASOS_DE_SERVICIOS = 3
  */
 export const PANTALLAS_DE_NUMEROS = 2
 
+/**
+ * ⚠️ SERVICIOS SE ESTIRÓ: su alto ya NO es `pasos × 100svh`.
+ *
+ * Los pasos y el alto son dos conceptos distintos y por eso son dos constantes:
+ * cuántos tramos hay, y sobre cuánto recorrido se reparten.
+ *
+ * El recorrido del pin fue 200svh → 400svh cuando todo pasaba demasiado rápido.
+ * Subió a 600 mientras existió un paso cero y volvió a 400 cuando ese paso se
+ * sacó.
+ *
+ * ── ⚠️ 400svh → 700svh, Y EL NÚMERO SALE DE LA RUEDA ──────────────────────
+ *
+ * Cruzar una frontera dispara una rotación **por tiempo**, de
+ * `DURACION_DEL_DISPARO` segundos, que corre igual aunque el scroll siga. Así
+ * que el tramo tiene que ser más largo que lo que la página recorre mientras esa
+ * rotación dura, o la rotación llega tarde: se la come la frontera siguiente.
+ *
+ * Cuánto recorre la página se midió en el navegador, sobre el scroll suave del
+ * propio sitio: **la rueda entrega 100 px por golpe y Lenis los pasa derecho**,
+ * así que la velocidad es 100 × golpes por segundo. A un ritmo de lectura —10
+ * golpes/s— son **1.000 px/s**, y en los 1,4 s de la rotación la página recorre
+ * **1.400 px**.
+ *
+ * El tramo más corto NO es ninguno de los dos primeros: es el ÚLTIMO, lo que
+ * queda del pin después de la tercera frontera. Con 400svh medía **1.015 px**,
+ * o sea 385 menos de los que la rotación necesita — la tercera rotación se
+ * cortaba contra el final del pin, y ése es el defecto, con número.
+ *
+ * Con 700svh los tres tramos pasan a 2.168 · 2.355 · **1.776** px: el más corto
+ * supera los 1.400 por **376 px, un 27 %**. Y el pintado de cada párrafo, que es
+ * una fracción fija del pin, se estira de 927 a 1.622 px sin tocar una línea.
+ *
+ * ⚠️ El estado 00 no se toca ni se rompe: su frontera cae en el arranque mismo
+ * del pin —el vacío de entrada mide 55svh y la línea de referencia cae en 567
+ * px, así que el primer bloque ya la pasó cuando el panel engancha— y donde se
+ * lee es en la APROXIMACIÓN, con el progreso acotado en 0, que dura un viewport
+ * entero y no depende del largo del pin.
+ */
+const PANTALLAS_DE_SERVICIOS = 8
+
 export const SECCIONES: readonly Seccion[] = [
   /**
    * ⚠️ **EL HERO ES LA ÚNICA FILA CON DOS SUPERFICIES, y la decidió el dueño.**
@@ -444,7 +489,7 @@ export const SECCIONES: readonly Seccion[] = [
     numero: '05',
     nombre: 'Servicios',
     superficie: 'papel-opaco',
-    alto: altoDeSecuenciaPinneada(PASOS_DE_SERVICIOS),
+    alto: altoDeSecuenciaPinneada(PANTALLAS_DE_SERVICIOS),
     pinneada: 'siempre',
     pasosDeLaSecuencia: PASOS_DE_SERVICIOS,
   },

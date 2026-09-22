@@ -35,7 +35,7 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**36 cosas pendientes** en las ocho secciones, de las cuales **28** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
+**30 cosas pendientes** en las ocho secciones, de las cuales **22** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
@@ -44,7 +44,7 @@ el archivo que la fila nombra.
 | 02 · Quiénes somos | 12 |
 | 03 · Números | 0 |
 | 04 · Trabajos | 0 |
-| 05 · Servicios | 9 |
+| 05 · Servicios | 3 |
 | 06 · Tu panel | 4 |
 | 07 · Por qué develOP | 4 |
 | 08 · Cierre | 5 |
@@ -56,26 +56,22 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 | quién | cuántas |
 |---|---:|
-| Franco (o un cliente) | 12 |
-| Valentino | 21 |
+| Franco (o un cliente) | 8 |
+| Valentino | 19 |
 | Una decisión, antes que un dato | 3 |
 
-### Franco (o un cliente) — 12
+### Franco (o un cliente) — 8
 
 - **02 · Quiénes somos** · `personas[0].seria.marcador` — El retrato SERIO de Franco: es el que se ve en reposo.
 - **02 · Quiénes somos** · `personas[0].suelta.marcador` — El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
-- **05 · Servicios** · `CONTENIDO.web.parrafo` — La conversión de un sitio entregado, medida sobre datos del cliente.
-- **05 · Servicios** · `CONTENIDO.ia-automatizacion.parrafo` — Cuántas horas por semana deja de dedicarle el equipo del cliente a lo que el asistente resuelve.
-- **05 · Servicios** · `CONTENIDO.software.parrafo` — Cuántos procesos se migraron, contados de una lista real.
-- **05 · Servicios** · `CONTENIDO.software.parrafo` — Cuántos errores dejó de tener la operación desde que el sistema entró, contados contra lo de antes.
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 - **07 · Por qué develOP** · `DIFERENCIALES[2].cuerpo` — Cuántos negocios trabajan así hoy. Contados, no estimados.
 - **07 · Por qué develOP** · `DIFERENCIALES[3].cuerpo` — Cuánto más rápido es el camino de develOP, medido sobre entregas reales.
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
-### Valentino — 21
+### Valentino — 19
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -88,8 +84,6 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `equipo.seria.marcador` — La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.
 - **02 · Quiénes somos** · `equipo.suelta.marcador` — La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.
 - **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
-- **05 · Servicios** · `CONTENIDO.web.parrafo` — Qué se mide en un sitio entregado —velocidad— y contra qué se compara.
-- **05 · Servicios** · `CONTENIDO.ia-automatizacion.parrafo` — Cuántas consultas resuelve el bot sin intervención, sobre conversaciones reales.
 - **05 · Servicios** · `CONTENIDO.<servicio>.medio` — El video del frente: qué se ve, en veinte segundos y sin audio necesario.
 - **05 · Servicios** · `CONTENIDO.<servicio>.medio` — El primer cuadro del video, para que no arranque negro.
 - **06 · Tu panel** · `BLOQUES[1].texto` — Qué muestra el panel al día: el dato que se mira todos los días.
@@ -166,12 +160,6 @@ Se edita en `src/app/v3/_secciones/servicios/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| `[MÉTRICA]` | `CONTENIDO.web.parrafo` | Valentino | Qué se mide en un sitio entregado —velocidad— y contra qué se compara. | Frase con su número y su unidad, adentro del párrafo. Ej.: `1,2 s de carga`. |
-| `[CIFRA]` | `CONTENIDO.web.parrafo` | Franco (o un cliente) | La conversión de un sitio entregado, medida sobre datos del cliente. | Un número con su unidad, adentro del párrafo. |
-| `[MÉTRICA]` | `CONTENIDO.ia-automatizacion.parrafo` | Valentino | Cuántas consultas resuelve el bot sin intervención, sobre conversaciones reales. | Un número con su unidad, adentro del párrafo. |
-| `[CIFRA]` | `CONTENIDO.ia-automatizacion.parrafo` | Franco (o un cliente) | Cuántas horas por semana deja de dedicarle el equipo del cliente a lo que el asistente resuelve. | Un número con su unidad, adentro del párrafo. |
-| `[MÉTRICA]` | `CONTENIDO.software.parrafo` | Franco (o un cliente) | Cuántos procesos se migraron, contados de una lista real. | Un número entero, adentro del párrafo. |
-| `[CIFRA]` | `CONTENIDO.software.parrafo` | Franco (o un cliente) | Cuántos errores dejó de tener la operación desde que el sistema entró, contados contra lo de antes. | Un número entero, adentro del párrafo. |
 | `[TESTIMONIO]` | `CASO_DE_REFERENCIA` | Franco (o un cliente) | El caso de referencia de cada frente, con el cliente que corresponda y qué cambió. | Dos o tres renglones, con el nombre del cliente. Texto plano. |
 | `[VIDEO]` | `CONTENIDO.<servicio>.medio` | Valentino | El video del frente: qué se ve, en veinte segundos y sin audio necesario. | MP4 (h264), 1920 × 1080 px (16:9), ≤ 20 s, ≤ 4 MB. Sin audio obligatorio. |
 | `[PÓSTER]` | `CONTENIDO.<servicio>.medio` | Valentino | El primer cuadro del video, para que no arranque negro. | JPG o WEBP, 1920 × 1080 px (16:9). |

@@ -75,8 +75,13 @@ export interface Invento {
 }
 
 /**
- * ⚠️ LAS VEINTE CASILLAS. La clave nombra la ruta para que un hallazgo sea
- * accionable sin buscar, y el orden es el del recorrido.
+ * ⚠️ LAS CASILLAS. La clave nombra la ruta para que un hallazgo sea accionable
+ * sin buscar, y el orden es el del recorrido.
+ *
+ * ⚠ El conteo NO se escribe acá a propósito — este archivo ya bajó de veinte a
+ * dieciocho sin que el comentario se enterara, y subió el riesgo de que vuelva
+ * a pasar. `Object.keys(INVENTOS).length` (o `LISTA_DE_INVENTOS.length`, lo
+ * mismo) es la única fuente; `s21-llave` lo imprime cada corrida.
  *
  * Todas las cifras son **inventadas** y ninguna se midió. Lo que sí es verdad y
  * queda escrito derecho, sin pasar por acá: los tres clientes, las dos personas
@@ -103,25 +108,11 @@ export const INVENTOS = {
   // No es sólo higiene — `equipoValentino` decía «Escribe el sistema, lo pone a andar y
   // lo mantiene.», que es una frase del texto NUEVO, y la restauración se la comía.
 
-  // ── Servicios · la frase de prueba de cada uno de los tres frentes ───────
-  serviciosWeb: {
-    marcador: '[MÉTRICA]',
-    pedido: '[MÉTRICA] de velocidad y [CIFRA] de conversión quedan a la vista en tu panel.',
-    mentira:
-      'la carga baja a 1,2 s y 3 de cada 100 visitas terminan en una consulta, y las dos quedan a la vista en tu panel.',
-  },
-  serviciosIa: {
-    marcador: '[MÉTRICA]',
-    pedido: '[MÉTRICA] de consultas resueltas y [CIFRA] de horas devueltas.',
-    mentira:
-      '7 de cada 10 consultas las cierra el asistente solo, y eso le devuelve unas 12 horas por semana al equipo.',
-  },
-  serviciosSoftware: {
-    marcador: '[MÉTRICA]',
-    pedido: '[MÉTRICA] de procesos migrados y [CIFRA] de errores evitados.',
-    mentira:
-      '6 procesos que vivían en planillas ya corren adentro del sistema, y los errores de carga bajaron a la mitad.',
-  },
+  // ⚠️ Servicios tenía acá las tres frases de métrica de cada frente. El dueño
+  // confirmó que no hay ni va a haber cifras reales de ningún cliente: no eran
+  // huecos esperando un dato, eran promesas que no debían existir — la misma
+  // deuda que este archivo existe para no repetir. Se sacaron las tres, de acá
+  // y de `contenido.ts`, sin dejar un consumidor huérfano.
 
   // ── Tu panel · las dos casillas de dato adentro de la prosa ──────────────
   panelFechas: {
