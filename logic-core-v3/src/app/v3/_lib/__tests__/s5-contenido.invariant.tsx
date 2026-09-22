@@ -244,9 +244,19 @@ for (let i = 0; i < REGISTRO.length; i++) {
   const { id, pedido } = REGISTRO[i]
   const html = sinLoInventadoEnMarcado(marcarQuieto(i))
   const esperados = cuentaDeMarcadores(contenidoRestaurado(id))
+  /**
+   * ⚠️ **AFLOJADA PARA QUE UNA SECCIÓN PUEDA ESTAR TERMINADA.** Pedía que cada
+   * sección tuviera marcadores O entradas de pedido, o sea que TODAS debieran
+   * algo — cierto mientras ninguna estuviera completa. Trabajos es la primera que
+   * no debe nada: llegaron sus seis archivos y el dueño dictó sus tres rubros, así
+   * que su `PEDIDO` quedó vacío y sus marcadores desaparecieron. Lo que sigue
+   * afirmado es la propiedad que importa y que no depende de eso: **un marcador
+   * en pantalla sin una entrada que lo reclame es un pedido que nadie va a
+   * cumplir.** Cero y cero es una sección terminada; marcadores sin pedido, no.
+   */
   afirmar(
-    esperados.size > 0 || pedido.length > 0,
-    `\`${id}\` — lo provisional está pedido: ${esperados.size} clase(s) de marcador y ${pedido.length} entrada(s) de pedido`,
+    esperados.size === 0 || pedido.length > 0,
+    `\`${id}\` — todo marcador tiene quien lo reclame: ${esperados.size} clase(s) de marcador y ${pedido.length} entrada(s) de pedido`,
   )
   for (const [marcador, cuantos] of esperados) {
     const enPantalla = html.split(marcador).length - 1

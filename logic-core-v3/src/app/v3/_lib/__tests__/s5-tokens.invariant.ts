@@ -223,10 +223,28 @@ titulo('T4 · Los valores arbitrarios: cada uno con su token adentro')
  * Las unidades de viewport que el demo de motion sí admitía **acá no van**: la
  * geometría de scroll de una sección la declara `secciones.ts`, no una clase
  * suelta adentro de un componente.
+ *
+ * ⚠️ **Y UNA SOLA PALABRA MÁS, ENUMERADA CON SU MOTIVO.**
+ *
+ * Lo que esta regla persigue es un VALOR escrito a mano donde debería haber un
+ * token: un número, una medida, un color. `inherit` no es ninguna de las tres
+ * —no dice cuánto, dice «el que ya se declaró arriba»— y es justamente lo que el
+ * párrafo de arriba pide: la altura de una sección la fija `secciones.ts` y la
+ * cadena de adentro la HEREDA en vez de repetirla. Tailwind 4 no trae una
+ * utilidad propia para esa palabra —su lista de tamaños es full/svw/lvw/dvw/
+ * svh/lvh/dvh/min/max/fit, comprobado en el paquete instalado—, así que la
+ * puerta de escape es el único camino.
+ *
+ * Va como lista de EXCLUSIONES con su razón y no como un patrón más permisivo:
+ * cualquier otra palabra, y cualquier número, siguen en rojo.
  */
+const PALABRAS_SIN_VALOR: ReadonlySet<string> = new Set(['inherit'])
 const arbitrarios = [...new Set(textoDeTodo.match(/[a-z-]+-\[[^\]]+\]/g) ?? [])].sort()
-const noJustificados = arbitrarios.filter((a) => !/var\(--[a-z0-9-]+\)/.test(a))
-afirmarIgual(noJustificados, [], `los ${arbitrarios.length} valores arbitrarios son var(--token)`)
+const adentroDelCorchete = (a: string): string => a.slice(a.indexOf('[') + 1, -1)
+const noJustificados = arbitrarios.filter(
+  (a) => !/var\(--[a-z0-9-]+\)/.test(a) && !PALABRAS_SIN_VALOR.has(adentroDelCorchete(a)),
+)
+afirmarIgual(noJustificados, [], `los ${arbitrarios.length} valores arbitrarios son var(--token), salvo ${PALABRAS_SIN_VALOR.size} palabra(s) enumerada(s) arriba`)
 console.log(`  arbitrarios en uso: ${arbitrarios.length === 0 ? '(ninguno)' : arbitrarios.join(' · ')}`)
 
 controlPositivo(

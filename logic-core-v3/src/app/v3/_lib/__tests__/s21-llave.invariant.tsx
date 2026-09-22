@@ -138,8 +138,12 @@ afirmarIgual(
   [],
   'ninguna mentira matchea adentro de otra: la restauración no depende del orden de la lista',
 )
+// ⚠️ El ejemplo era una métrica de Trabajos —«de 3 a 14 consultas por semana»—
+// y esa casilla se cerró (PORTFOLIO). La PROPIEDAD que probaba no cambió, así
+// que el ejemplo pasa a ser una cadena que no es de nadie: lo que se afirma es
+// que ningún dígito suelto de la lista se come el dígito de un número más largo.
 afirmar(
-  sinLoInventado('de 3 a 14 consultas por semana', LISTA_DE_INVENTOS) === '[MÉTRICA]',
+  sinLoInventado('14 consultas por semana', LISTA_DE_INVENTOS) === '14 consultas por semana',
   '⚠️ y el límite de palabra hace su trabajo: el `4` de «14» NO es la casilla `[CIFRA]` que vale `4`',
   'sin el límite, una casilla de un dígito se comería el dígito de otra',
 )
@@ -252,10 +256,27 @@ for (const { id, texto } of TEXTO_DE_LAS_OCHO) {
     `  y los ${aca.length} marcadores de \`${id}\` volvieron: ${[...new Set(aca.map((i) => i.marcador))].join(' ')}`,
   )
 }
+/**
+ * ⚠️ NÚMEROS — DESCONECTADA (PORTFOLIO, etapa 2 de 3). Sus cinco casillas
+ * siguen DECLARADAS y siguen USADAS —`numeros/contenido.ts` no se tocó, sigue
+ * llamando a `conLlave(INVENTOS.numerosX)` las cinco veces— pero `registro.ts`
+ * ya no monta `Numeros`, así que su HTML no entra a `TEXTO_DE_LAS_OCHO` y estas
+ * cinco mentiras no pueden aparecer en ninguna de las ocho. No es un agujero
+ * del escáner: es la consecuencia exacta de que la sección no renderiza. El
+ * resto de la lista —13 casillas— sigue exigido entero.
+ */
+const DESCONECTADAS: ReadonlySet<Invento> = new Set([
+  INVENTOS.numerosProyectos,
+  INVENTOS.numerosClientes,
+  INVENTOS.numerosAnios,
+  INVENTOS.numerosRespuesta,
+  INVENTOS.numerosProcesos,
+])
+const EXIGIDAS_EN_PANTALLA = LISTA_DE_INVENTOS.filter((i) => !DESCONECTADAS.has(i))
 afirmarIgual(
-  LISTA_DE_INVENTOS.filter((i) => !enPantalla.has(i.mentira)).map((i) => i.mentira),
+  EXIGIDAS_EN_PANTALLA.filter((i) => !enPantalla.has(i.mentira)).map((i) => i.mentira),
   [],
-  `las ${LISTA_DE_INVENTOS.length} casillas LLEGAN A LA PANTALLA: ninguna mentira declarada que no se vea`,
+  `las ${EXIGIDAS_EN_PANTALLA.length} casillas de las secciones montadas LLEGAN A LA PANTALLA: ninguna mentira declarada que no se vea (las ${DESCONECTADAS.size} de Números quedan afuera, desconectada)`,
 )
 
 controlPositivo(

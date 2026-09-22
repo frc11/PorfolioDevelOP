@@ -39,15 +39,15 @@
  *
  * ── Lo que NO sabemos, declarado ausente ───────────────────────────────────
  *
- * **Una sola cosa por proyecto**, y es el pedido entero de esta sección:
- * **`metrica: '[MÉTRICA]'`** — el dato que dice qué cambió. Es LA pieza medida
- * de esta sección: en la referencia la métrica va pegada al nombre. Acá va
- * igual de pegada y **siempre visible**; el componente no la esconde detrás de
- * ningún hover, porque esconder la métrica es esconder el pedido.
+ * **Tres cosas por proyecto**, y son el pedido entero de esta sección: el
+ * **logo**, la **captura** y el **rubro**. Las tres van con marcador visible y
+ * las tres están en `PEDIDO` con su formato y su dueño.
  *
- * `[CAPTURA]` ya no está: los tres archivos llegaron y `captura.fuente` los
- * nombra. El marcador vuelve solo el día que una fuente sea `null` —
- * `MarcoDeMedio` tiene las dos ramas escritas y el componente elige por el dato.
+ * `[MÉTRICA]` ya NO está: era «qué cambió» y se cerró por la puerta de adelante
+ * —no hay nada medible en estos tres trabajos y no lo va a haber—. El que se
+ * abrió en su lugar es `[TEXTO]`, el rubro, y por una razón distinta: **eso sí
+ * se puede saber, sólo que no lo sabemos nosotros.** Un pedido que se puede
+ * cumplir no es lo mismo que uno que no.
  *
  * ── Los tres `alt` ya no dicen lo mismo, y es por la misma razón ───────────
  *
@@ -75,7 +75,6 @@
  */
 
 import type { IdDePatron } from '../../_lib/motion/patrones'
-import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -97,56 +96,78 @@ import type { EntradaDePedido } from '../_contrato/pedido'
 export const ROTULO_DE_SECCION_RETIRADO = 'Trabajos'
 
 export const CONTENIDO = {
-  /** [relleno] El h2. Una línea, que es lo que entra arriba de una secuencia. */
-  titular: 'Tres proyectos, y al lado de cada nombre la medida de lo que cambió.',
+  /** El h2. Una palabra: la sección se nombra a sí misma. */
+  titular: 'Portfolio',
 
-  /** [relleno] Qué falta y por qué falta. */
+  /** Qué se está mirando. */
   bajada:
-    'Los nombres son reales y el trabajo también. Lo que todavía no está es el ' +
-    'dato: qué mejoró en cada negocio desde que salió, dicho con una medida y ' +
-    'no con un adjetivo.',
+    'Cada uno de estos proyectos se pensó desde cero para el negocio que lo ' +
+    'iba a usar. Acá abajo no hay plantillas.',
 
   /**
-   * [relleno] El rótulo del hueco que va pegado a cada nombre. Sin él,
-   * `[MÉTRICA]` sería un corchete suelto en la pantalla y en el lector de
-   * pantalla: el marcador dice que FALTA algo, el rótulo dice QUÉ falta.
-   * Es la misma pieza que `rotuloDelPedido` en Quiénes somos.
+   * ⚠️ **LA MÉTRICA SE FUE, Y CON ELLA SU RÓTULO (PORTFOLIO).** Eran una
+   * pastilla al lado de cada nombre —«Lo que cambió · [MÉTRICA]»— y el pedido
+   * que las sostenía se cerró por la puerta de adelante: **no hay nada medible
+   * y no lo va a haber.** Se fueron las dos puntas, no una: la casilla de acá y
+   * su entrada en `INVENTOS`, para que no quede una mentira declarada que nadie
+   * consume. Lo que queda al lado del nombre es el nombre.
    */
-  rotuloDeLaMetrica: 'Lo que cambió',
 
   /**
    * [verdad] Los tres, en el orden en que entran. Tres es la cantidad que el
    * patrón anima —`piezas={3}` en el componente— y la cantidad de clientes que
    * el sprint declara verdaderos. No hay un cuarto de relleno: un cliente
    * inventado en una vitrina es exactamente la deuda que este sprint no repite.
+   *
+   * Cada uno declara DOS medios —la marca y el sitio— y DOS textos: el nombre,
+   * que es verdad y va literal, y el RUBRO, que no lo sabemos.
+   *
+   * ⚠️ **El rubro entra como PEDIDO y no como dato.** La zona central del tramo
+   * tiene cuatro ranuras y una es para «qué hace este cliente». Escribir
+   * «Automotriz» o «Perfumería» sería inventar un hecho sobre un cliente REAL,
+   * que es justo lo que la cabecera de este archivo prohibe con todas las letras
+   * («sin agregarles rubro, ciudad ni fecha: todo eso lo tendríamos que
+   * inventar»). Así que la ranura muestra `[TEXTO]` —marcador que ya estaba en el
+   * conjunto cerrado de `marcadores.ts`, no hubo que abrirlo— y el dato se pide.
+   * **No hay una entrada nueva en INVENTOS**: un pedido no es una mentira.
+   */
+  /**
+   * [verdad] Los tres, en el orden en que entran. Cada uno trae CUATRO cosas y
+   * las cuatro son reales: el nombre, el rubro, el logo y la captura del sitio.
+   *
+   * ⚠️ **Los rubros los dictó el dueño y por eso NO son un invento.** Se
+   * escribieron desde los hechos que dijo, sin adornar y sin agregar nada que no
+   * estuviera ahí. No van a `INVENTOS` —esa lista es para cifras falsas— ni a
+   * `PEDIDO`: un dato que llegó sale de la lista de lo que falta.
+   *
+   * ⚠️ **Acá va la RUTA y el texto alternativo; las medidas NO.** Los tres logos
+   * tienen relaciones distintas y hay que conocerlas para que entren sin
+   * deformarse, pero un ancho y un alto son geometría y este archivo no lleva un
+   * solo número —`s5-contenido` lo afirma seccion por sección—. Viven en
+   * `MEDIDAS_DE_LOS_MEDIOS`, en `geometria.ts`, que es donde el propio docblock
+   * de arriba dice que viven la relación de aspecto y el `sizes`.
    */
   proyectos: [
     {
-      nombre: 'Esquina',
-      enlace: 'https://esquinaweb.com.ar',
-      metrica: conLlave(INVENTOS.trabajosEsquina),
-      captura: {
-        fuente: '/capturas/esquina.webp',
-        alt: 'Sitio de Esquina, un estudio de diseño: pantalla clara, casi vacía, con la marca escrita a mano arriba a la izquierda y una frase grande en el centro.',
-      },
-    },
-    {
       nombre: 'El Garage',
       enlace: 'https://elgarageautomoviles.com.ar',
-      metrica: conLlave(INVENTOS.trabajosGarage),
-      captura: {
-        fuente: '/capturas/el-garage.webp',
-        alt: 'Sitio de El Garage, una concesionaria: una camioneta sobre una ruta costera al atardecer ocupa la pantalla entera, con el nombre en letras grandes encima.',
-      },
+      rubro: 'Concesionaria con un catálogo de muchos filtros.',
+      logo: { fuente: '/logos/ElGarageLogo-Modificado.png', alt: 'Logo de El Garage' },
+      pagina: { fuente: '/capturas/el-garage.webp', alt: 'La página de El Garage' },
     },
     {
-      nombre: 'Banú',
-      enlace: 'https://banupage.com.ar',
-      metrica: conLlave(INVENTOS.trabajosBanu),
-      captura: {
-        fuente: '/capturas/banu.webp',
-        alt: 'Sitio de Banú, una tienda de perfumes: fondo oscuro, un frasco de vidrio tallado iluminado en el centro y un botón para ver el catálogo.',
-      },
+      nombre: 'Banú Scents',
+      enlace: 'https://banuscents.com.ar',
+      rubro: 'Vende perfumes árabes. Le hicimos una página simple pero bonita.',
+      logo: { fuente: '/logos/logoC.png', alt: 'Logo de Banú Scents' },
+      pagina: { fuente: '/capturas/banu.webp', alt: 'La página de Banú Scents' },
+    },
+    {
+      nombre: 'Esquina Estudio',
+      enlace: 'https://esquinaestudio.com.ar',
+      rubro: 'Equipo de branding. Le hicimos una página acorde a su estética y su marca.',
+      logo: { fuente: '/logos/logo-header-blanco.png', alt: 'Logo de Esquina Estudio' },
+      pagina: { fuente: '/capturas/esquina.webp', alt: 'La página de Esquina Estudio' },
     },
   ],
 } as const
@@ -154,71 +175,28 @@ export const CONTENIDO = {
 /**
  * LO QUE FALTA, dicho por el propio contenido.
  *
- * **Seis entradas, y eran doce.** V3-D cerró las seis de las capturas: las tres
- * imágenes llegaron y los tres `alt` se escribieron mirándolas, así que dejaron
- * de faltar. Una casilla que se llena **sale de esta lista** — no queda tildada,
+ * Una casilla que se llena **sale de esta lista** — no queda tildada,
  * desaparece— y por eso el documento que produce `s7-documento` no necesita una
  * columna de "hecho": lo que está acá es lo que falta.
  *
- * Las tres de `prosa` son la clase de relleno que **no se ve como agujero**. Un
+ * Las de `prosa` son la clase de relleno que **no se ve como agujero**. Un
  * `[MÉTRICA]` en la pantalla se nota; un párrafo con la cadencia correcta se lee
  * igual que uno definitivo, y ése es el mismo mecanismo de la deuda que este
  * sprint no repite, aplicado a las palabras en vez de a los números.
  *
  * Los marcadores NO se listan acá: los extrae `marcadoresPedidos()` del propio
- * contenido, que hoy devuelve `[MÉTRICA]` y nada más, con su cuenta de tres.
- * Listarlos a mano sería una segunda fuente que se desincroniza.
+ * contenido.
  */
-export const PEDIDO: readonly EntradaDePedido[] = [
-  {
-    ruta: 'titular',
-    clase: 'prosa',
-    marcador: null,
-    quienLoTrae: 'valentino',
-    que: 'La frase que abre la sección. Una idea, una línea, dicha como la decís vos.',
-    formato: 'Una línea, ~90 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'bajada',
-    clase: 'prosa',
-    marcador: null,
-    quienLoTrae: 'valentino',
-    que: 'Qué se muestra acá y qué se promete, en dos o tres renglones. Sin plazos ni porcentajes.',
-    formato: 'Dos o tres renglones, ~220 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'rotuloDeLaMetrica',
-    clase: 'prosa',
-    marcador: null,
-    quienLoTrae: 'valentino',
-    que: 'Cómo se titula el dato que va al lado de cada nombre. Dos o tres palabras.',
-    formato: 'Dos o tres palabras. Texto plano.',
-  },
-  {
-    ruta: 'proyectos[0].metrica',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'franco',
-    que: 'Qué cambió en Esquina, con el número que lo dice y de dónde sale.',
-    formato: 'Frase corta con su número, ~30 caracteres. Ej.: `de 4 a 19 pedidos por día`.',
-  },
-  {
-    ruta: 'proyectos[1].metrica',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'franco',
-    que: 'Qué cambió en El Garage, con el número que lo dice y de dónde sale.',
-    formato: 'Frase corta con su número, ~30 caracteres.',
-  },
-  {
-    ruta: 'proyectos[2].metrica',
-    clase: 'metrica',
-    marcador: '[MÉTRICA]',
-    quienLoTrae: 'franco',
-    que: 'Qué cambió en Banú, con el número que lo dice y de dónde sale.',
-    formato: 'Frase corta con su número, ~30 caracteres.',
-  },
-]
+/**
+ * ⚠️ **VACÍO, Y ES EL PUNTO.** «Una casilla que se llena SALE de esta lista — no
+ * queda tildada, desaparece», dice el bloque de arriba. Esta sección tenía nueve
+ * casillas: seis medios y tres rubros. Llegaron los seis archivos
+ * (`public/capturas/` y `public/logos/`) y el dueño dictó los tres rubros, así
+ * que no queda ninguna. La lista vacía no es un descuido: es lo que dice que
+ * Trabajos ya no le debe nada a nadie.
+ */
+export const PEDIDO: readonly EntradaDePedido[] = []
+
 
 /**
  * LOS PATRONES QUE ESTA SECCIÓN CONSUME — declarados, no inferidos.
@@ -243,4 +221,9 @@ export const PEDIDO: readonly EntradaDePedido[] = [
  * la tabla al día esas dos publicaciones vuelven a ser UNA afirmación de
  * igualdad.
  */
-export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P7']
+// ⚠️ DOS, y P2 se fue. El vocabulario del tramo pasó a ser el de `tunel.ts`
+// —nacer y crecer desde una esquina, huir en z— así que ni el cartel ni los
+// nombres llegan ya por un patrón del sistema. Queda P3, que pinta el cuerpo de
+// la bajada palabra por palabra, y P7, que es el patrón del BLOQUE: de ahí sale
+// la perspectiva de la cámara, que es lo que hace visible la huida.
+export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P3', 'P7']

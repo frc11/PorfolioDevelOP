@@ -1,3 +1,5 @@
+import { PANTALLAS_DE_NUMEROS } from '../secciones'
+
 import type { LightStop } from './choreographyTypes'
 import { KEY_ELEVATION_DEG, RIM_NIGHT_LEVEL } from './probeLighting'
 
@@ -190,14 +192,18 @@ export const NIVEL_DE_LA_MANANA = 0.643
 export const NIVEL_DE_LA_VUELTA: number = RIM_NIGHT_LEVEL
 
 /**
- * Dónde atardece: de la pantalla 7 a la 8, o sea mientras Trabajos entra por el
- * pie del cuadro. **No se movió en B12**: la noche llega exactamente cuando la
- * sección llena el cuadro y cuando la gota termina de cubrirlo
- * (`trabajos/geometria.ts`, `VENTANA_DE_LA_GOTA.expansionHasta` = 1/3 del
- * recorrido del bloque, que es esta misma pantalla). Lo que cambió es a QUÉ
- * nivel llega.
+ * Dónde atardece: **en la última pantalla de Números**, o sea mientras Trabajos
+ * entra por el pie del cuadro. No se movió en B12 y no se mueve acá: la noche
+ * llega exactamente cuando la sección llena el cuadro.
+ *
+ * ⚠️ **Deja de ser un literal.** Valía 0,46875 = 0,5 − 0,125/4 mientras Números
+ * midiera cuatro pantallas; PORTFOLIO la dejó en tres y el literal habría
+ * quedado apuntando a la penúltima sin que nadie se enterara. Derivada, el
+ * atardecer **sigue durando una pantalla de scroll** mida lo que mida la
+ * sección, que es la propiedad que se quiere y no el número.
  */
-export const ATARDECER = { desde: 0.46875, hasta: 0.5 } as const
+const PANTALLA_EN_EL_TRAMO_DE_NUMEROS = (0.5 - 0.375) / PANTALLAS_DE_NUMEROS
+export const ATARDECER = { desde: 0.5 - PANTALLA_EN_EL_TRAMO_DE_NUMEROS, hasta: 0.5 } as const
 
 /**
  * ⚠️ **B12 · UNA PANTALLA DE PROGRESO, DERIVADA Y NO ELEGIDA.** Los nudos del
@@ -261,9 +267,10 @@ export const LIGHT_ARC: readonly LightStop[] = [
   // o sea luz plana en la primera pantalla del sitio. V3-B re-midió la razón:
   // γ en la ventana del hero da 40,8–95,2° con él y 34,3–63,7° sin él.
   parada(0.125, 1, 6500, -42, 'linear'),
-  // La meseta de luz llega hasta que Trabajos toca el pie del cuadro (pantalla
-  // 7). El azimut sigue la recta de S9: −42 → 115 entre 0,125 y 0,5.
-  parada(ATARDECER.desde, 1, 6500, 101.9167, 'linear'),
+  // La meseta de luz llega hasta la última pantalla de Números. El azimut sigue
+  // la MISMA recta de S9 —−42 → 115 entre 0,125 y 0,5— leída en el `at` nuevo:
+  // (0,4375 − 0,125)/0,375 = 5/6 del camino, o sea −42 + 5/6·157 = 88,8333.
+  parada(ATARDECER.desde, 1, 6500, 88.8333, 'linear'),
   // Atardece en una pantalla de scroll: Trabajos trae la noche, y la gota
   // termina de cubrir el cuadro exactamente acá.
   parada(ATARDECER.hasta, NIVEL_DE_LA_NOCHE, 6500, 115, 'linear'),

@@ -35,15 +35,15 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**49 cosas pendientes** en las ocho secciones, de las cuales **36** se ven hoy en la pantalla como un marcador y 13 son prosa de relleno que no se ve como agujero.
+**36 cosas pendientes** en las ocho secciones, de las cuales **28** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
 |---|---:|
 | 01 · Hero | 2 |
 | 02 · Quiénes somos | 12 |
-| 03 · Números | 7 |
-| 04 · Trabajos | 6 |
+| 03 · Números | 0 |
+| 04 · Trabajos | 0 |
 | 05 · Servicios | 9 |
 | 06 · Tu panel | 4 |
 | 07 · Por qué develOP | 4 |
@@ -56,22 +56,15 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 | quién | cuántas |
 |---|---:|
-| Franco (o un cliente) | 19 |
-| Valentino | 26 |
-| Una decisión, antes que un dato | 4 |
+| Franco (o un cliente) | 12 |
+| Valentino | 21 |
+| Una decisión, antes que un dato | 3 |
 
-### Franco (o un cliente) — 19
+### Franco (o un cliente) — 12
 
 - **02 · Quiénes somos** · `personas[0].seria.marcador` — El retrato SERIO de Franco: es el que se ve en reposo.
 - **02 · Quiénes somos** · `personas[0].suelta.marcador` — El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
-- **03 · Números** · `cifras[0].valor` — Cuántos proyectos se entregaron y se cerraron, contados de una lista real. Si el rótulo no nombra un dato que exista, cambiá el rótulo o sacá la casilla entera.
-- **03 · Números** · `cifras[1].valor` — Cuántos clientes están activos hoy, con el corte de "activo" que uses vos.
-- **03 · Números** · `cifras[3].valor` — Cuánto se tarda en contestar el primer mensaje, medido sobre los mensajes que entraron de verdad y no sobre la intención de contestar rápido.
-- **03 · Números** · `cifras[4].valor` — Cuántos procesos automatizados están corriendo hoy en clientes.
-- **04 · Trabajos** · `proyectos[0].metrica` — Qué cambió en Esquina, con el número que lo dice y de dónde sale.
-- **04 · Trabajos** · `proyectos[1].metrica` — Qué cambió en El Garage, con el número que lo dice y de dónde sale.
-- **04 · Trabajos** · `proyectos[2].metrica` — Qué cambió en Banú, con el número que lo dice y de dónde sale.
 - **05 · Servicios** · `CONTENIDO.web.parrafo` — La conversión de un sitio entregado, medida sobre datos del cliente.
 - **05 · Servicios** · `CONTENIDO.ia-automatizacion.parrafo` — Cuántas horas por semana deja de dedicarle el equipo del cliente a lo que el asistente resuelve.
 - **05 · Servicios** · `CONTENIDO.software.parrafo` — Cuántos procesos se migraron, contados de una lista real.
@@ -82,7 +75,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
-### Valentino — 26
+### Valentino — 21
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -95,11 +88,6 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `equipo.seria.marcador` — La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.
 - **02 · Quiénes somos** · `equipo.suelta.marcador` — La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.
 - **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
-- **03 · Números** · `titulo` — El título de la sección, dos o tres palabras. El que está puesto es relleno.
-- **03 · Números** · `entrada` — La bajada, una o dos líneas: qué mira develOP y por qué son pocos números.
-- **04 · Trabajos** · `titular` — La frase que abre la sección. Una idea, una línea, dicha como la decís vos.
-- **04 · Trabajos** · `bajada` — Qué se muestra acá y qué se promete, en dos o tres renglones. Sin plazos ni porcentajes.
-- **04 · Trabajos** · `rotuloDeLaMetrica` — Cómo se titula el dato que va al lado de cada nombre. Dos o tres palabras.
 - **05 · Servicios** · `CONTENIDO.web.parrafo` — Qué se mide en un sitio entregado —velocidad— y contra qué se compara.
 - **05 · Servicios** · `CONTENIDO.ia-automatizacion.parrafo` — Cuántas consultas resuelve el bot sin intervención, sobre conversaciones reales.
 - **05 · Servicios** · `CONTENIDO.<servicio>.medio` — El video del frente: qué se ve, en veinte segundos y sin audio necesario.
@@ -111,20 +99,16 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **08 · Cierre** · `PEDIDOS_DE_CONTACTO[1]` — Las redes, una por red, con el perfil real.
 - **08 · Cierre** · `LINEA_DE_CIERRE.piezas` — El año del pie de página.
 
-### Una decisión, antes que un dato — 4
+### Una decisión, antes que un dato — 3
 
-- **03 · Números** · `cifras[2].valor` — Hace cuánto existe develOP. Si te parece poco para mostrarlo, sacá la casilla: es mejor que redondear para arriba.
 - **08 · Cierre** · `PEDIDOS_DE_CONTACTO[0]` — La dirección de contacto: mail, WhatsApp o el destino que corresponda.
 - **08 · Cierre** · `LINEA_DE_CIERRE.piezas` — La razón social, si va a figurar.
 - **08 · Cierre** · `LINEA_DE_CIERRE.piezas` — Los legales del pie: a dónde llevan y si van a existir.
 
 ## Lo que conviene pedir primero
 
-**Estas 6, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
+**Estas 3, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
 
-- **04 · Trabajos** · `proyectos[0].metrica` — Qué cambió en Esquina, con el número que lo dice y de dónde sale.
-- **04 · Trabajos** · `proyectos[1].metrica` — Qué cambió en El Garage, con el número que lo dice y de dónde sale.
-- **04 · Trabajos** · `proyectos[2].metrica` — Qué cambió en Banú, con el número que lo dice y de dónde sale.
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
@@ -166,13 +150,6 @@ Se edita en `src/app/v3/_secciones/numeros/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| *(prosa)* | `titulo` | Valentino | El título de la sección, dos o tres palabras. El que está puesto es relleno. | Dos o tres palabras. Texto plano. |
-| *(prosa)* | `entrada` | Valentino | La bajada, una o dos líneas: qué mira develOP y por qué son pocos números. | Una o dos líneas, ~180 caracteres. Texto plano. |
-| `[CIFRA]` | `cifras[0].valor` | Franco (o un cliente) | Cuántos proyectos se entregaron y se cerraron, contados de una lista real. Si el rótulo no nombra un dato que exista, cambiá el rótulo o sacá la casilla entera. | Un número entero, sin símbolo. Ej.: `14`. |
-| `[CIFRA]` | `cifras[1].valor` | Franco (o un cliente) | Cuántos clientes están activos hoy, con el corte de "activo" que uses vos. | Un número entero, sin símbolo. |
-| `[CIFRA]` | `cifras[2].valor` | Una decisión, antes que un dato | Hace cuánto existe develOP. Si te parece poco para mostrarlo, sacá la casilla: es mejor que redondear para arriba. | Un número entero de años, sin el signo `+`. |
-| `[CIFRA]` | `cifras[3].valor` | Franco (o un cliente) | Cuánto se tarda en contestar el primer mensaje, medido sobre los mensajes que entraron de verdad y no sobre la intención de contestar rápido. | Número más unidad, ej. `4 h`. Es la única casilla con unidad. |
-| `[CIFRA]` | `cifras[4].valor` | Franco (o un cliente) | Cuántos procesos automatizados están corriendo hoy en clientes. | Un número entero, sin símbolo. |
 
 
 ## 04 · Trabajos
@@ -181,12 +158,6 @@ Se edita en `src/app/v3/_secciones/trabajos/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| *(prosa)* | `titular` | Valentino | La frase que abre la sección. Una idea, una línea, dicha como la decís vos. | Una línea, ~90 caracteres. Texto plano. |
-| *(prosa)* | `bajada` | Valentino | Qué se muestra acá y qué se promete, en dos o tres renglones. Sin plazos ni porcentajes. | Dos o tres renglones, ~220 caracteres. Texto plano. |
-| *(prosa)* | `rotuloDeLaMetrica` | Valentino | Cómo se titula el dato que va al lado de cada nombre. Dos o tres palabras. | Dos o tres palabras. Texto plano. |
-| `[MÉTRICA]` | `proyectos[0].metrica` | Franco (o un cliente) | Qué cambió en Esquina, con el número que lo dice y de dónde sale. | Frase corta con su número, ~30 caracteres. Ej.: `de 4 a 19 pedidos por día`. |
-| `[MÉTRICA]` | `proyectos[1].metrica` | Franco (o un cliente) | Qué cambió en El Garage, con el número que lo dice y de dónde sale. | Frase corta con su número, ~30 caracteres. |
-| `[MÉTRICA]` | `proyectos[2].metrica` | Franco (o un cliente) | Qué cambió en Banú, con el número que lo dice y de dónde sale. | Frase corta con su número, ~30 caracteres. |
 
 
 ## 05 · Servicios

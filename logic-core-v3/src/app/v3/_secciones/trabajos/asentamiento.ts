@@ -69,50 +69,20 @@
  * medida de B2 que esta instrucción manda respetar.
  */
 
-import { ALTO_DE_CALIBRACION, CORTE_DE_TRAMOS, FUSION_DEL_CENSO, saturarEn } from '../_contrato/asentamiento'
-import { pantallasDe, seccionDe } from '../_contrato/forma'
-
-/** El id de la sección, para leer su alto de la tabla del recorrido. */
-export const ID_DE_LA_SECCION = 'trabajos'
+import { CORTE_DE_TRAMOS } from '../_contrato/asentamiento'
 
 /** El corte llegada/salida de P7, intermediado por el contrato. La sección no
  *  lee `_lib/motion/`: `s7-contrato` §3 lo prohíbe y la regla no se afloja. */
 export const CORTE_DE_P7 = CORTE_DE_TRAMOS.P7
 
-/** Lo que produce la derivación, junto, para que el instrumento lo publique. */
-export interface MesetaDeLosPlanos {
-  /** Cuánto scroll mide el tramo de UN plano, a la altura de calibración. */
-  readonly tramoEnPx: number
-  readonly fraccionDeLaMeseta: number
-  readonly fraccionDeLaLlegada: number
-  readonly fraccionDeLaSalida: number
-  /** De la posición dentro del tramo al progreso local de P7. */
-  readonly remapear: (u: number) => number
-}
-
 /**
- * LA DERIVACIÓN. `planos` entra como parámetro y no se lee de `geometria.ts`
- * para que no haya un ciclo entre los dos módulos: allá vive el reparto, acá el
- * asentamiento, y el reparto es el que llama.
+ * ⚠️ **PORTFOLIO · LA MESETA DE LOS PLANOS SE FUE CON LOS PLANOS.**
+ *
+ * `mesetaDeLosPlanos` repartía el recorrido entre tres planos de P7 y le daba a
+ * cada uno su llegada, su meseta y su salida. Ya no hay tres planos: hay un
+ * TÚNEL de seis imágenes que es una función continua del scroll, y las dos
+ * piezas que sí necesitan meseta —Portfolio y el nombre de cada trabajo— la
+ * piden por ventana y no por índice (`localDeLaPieza`, en `geometria.ts`). Lo
+ * único que sobrevive de este archivo es el corte de tramos de P7, que es lo
+ * que esas dos piezas usan como «pose posada».
  */
-export function mesetaDeLosPlanos(planos: number): MesetaDeLosPlanos {
-  if (!Number.isInteger(planos) || planos < 1) {
-    throw new Error(`meseta: los planos tienen que ser un entero ≥ 1, vino ${planos}`)
-  }
-  const tramoEnPx = (pantallasDe(seccionDe(ID_DE_LA_SECCION)) * ALTO_DE_CALIBRACION) / planos
-  const fraccionDeLaMeseta = FUSION_DEL_CENSO / tramoEnPx
-  const fraccionDeLaLlegada = 1 - fraccionDeLaMeseta
-  const fraccionDeLaSalida = (fraccionDeLaLlegada * (1 - CORTE_DE_P7)) / CORTE_DE_P7
-  const llegada = saturarEn(fraccionDeLaLlegada)
-  const salida = saturarEn(fraccionDeLaSalida)
-  return {
-    tramoEnPx,
-    fraccionDeLaMeseta,
-    fraccionDeLaLlegada,
-    fraccionDeLaSalida,
-    // Los dos `saturarEn` del contrato, sumados: el primero lleva el `local` de
-    // 0 al corte y ahí se clava —eso ES la meseta—; el segundo no arranca hasta
-    // que `u` pasa 1, o sea hasta el tramo siguiente, y lo lleva del corte a 1.
-    remapear: (u: number): number => CORTE_DE_P7 * llegada(u) + (1 - CORTE_DE_P7) * salida(u - 1),
-  }
-}

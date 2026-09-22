@@ -1,11 +1,10 @@
-import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
+import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import type { IdDePatron } from '../../_lib/motion/patrones'
+import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { Cierre } from '../cierre/Cierre'
 import { PEDIDO as PEDIDO_CIERRE } from '../cierre/contenido'
 import { Hero } from '../hero/Hero'
 import { PEDIDO as PEDIDO_HERO } from '../hero/contenido'
-import { Numeros } from '../numeros/Numeros'
-import { PEDIDO as PEDIDO_NUMEROS } from '../numeros/contenido'
 import { PorQueDevelop } from '../por-que-develop/PorQueDevelop'
 import { PEDIDO as PEDIDO_POR_QUE } from '../por-que-develop/contenido'
 import { QuienesSomos } from '../quienes-somos/QuienesSomos'
@@ -20,6 +19,34 @@ import { PEDIDO as PEDIDO_TU_PANEL } from '../tu-panel/contenido'
 import { IDS_DE_SECCION, seccionDe, type PropsDeSeccion } from './forma'
 import { USOS_DECLARADOS } from './motion'
 import type { EntradaDePedido } from './pedido'
+import { Seccion } from './Seccion'
+
+/**
+ * ⚠️ NÚMEROS — EL MARCADOR SIN CONTENIDO (PORTFOLIO, etapa 2 de 3).
+ *
+ * `Numeros` —el componente real, en `../numeros/Numeros.tsx`— NO se importa
+ * más acá: es la mitad de "sale del registro" (la otra mitad es el `alto` de
+ * `secciones.ts`). Sus archivos siguen intactos; reconectarla es volver a
+ * importarlo y devolverle esta entrada de `COMPONENTE_POR_ID`.
+ *
+ * Sigue habiendo un `<Panel>` —con su `data-panel="numeros"` y su región con
+ * nombre accesible— porque `derivarAnclaje` necesita la sección para el tramo
+ * `números` de la coreografía (ver el comentario en `secciones.ts`) y porque
+ * los instrumentos que miden «las ocho secciones» como hermanas contiguas
+ * (`extensionDeLasSecciones.ts`) siguen esperando ocho paneles en el DOM. Lo
+ * único que cambia es que adentro no hay nada que ver: el `h2` existe para que
+ * `aria-labelledby` no apunte a un id que no está, y va `sr-only` porque no hay
+ * nada que anunciar.
+ */
+function NumerosDesconectada({ seccion }: PropsDeSeccion): React.JSX.Element {
+  return (
+    <Seccion seccion={seccion}>
+      <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
+        {seccion.nombre}
+      </h2>
+    </Seccion>
+  )
+}
 
 /**
  * EL REGISTRO DE LAS OCHO — uno, no dos.
@@ -76,7 +103,7 @@ export interface SeccionRegistrada {
 const COMPONENTE_POR_ID: Readonly<Record<string, (props: PropsDeSeccion) => React.JSX.Element>> = {
   hero: Hero,
   'quienes-somos': QuienesSomos,
-  numeros: Numeros,
+  numeros: NumerosDesconectada,
   trabajos: Trabajos,
   servicios: Servicios,
   'tu-panel': TuPanel,
@@ -92,7 +119,8 @@ const COMPONENTE_POR_ID: Readonly<Record<string, (props: PropsDeSeccion) => Reac
 const PEDIDO_POR_ID: Readonly<Record<string, readonly EntradaDePedido[]>> = {
   hero: PEDIDO_HERO,
   'quienes-somos': PEDIDO_QUIENES,
-  numeros: PEDIDO_NUMEROS,
+  // Desconectada: nada renderiza, nada se pide.
+  numeros: [],
   trabajos: PEDIDO_TRABAJOS,
   servicios: PEDIDO_SERVICIOS,
   'tu-panel': PEDIDO_TU_PANEL,

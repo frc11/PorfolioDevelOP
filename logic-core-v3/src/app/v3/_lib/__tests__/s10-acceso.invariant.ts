@@ -122,14 +122,25 @@ imprimirParadas(QUIETA, PARADAS)
  * consulte la compuerta— y que `escritorio:hidden` apaga de 1025 para arriba.
  *
  * Este censo lee el MARCADO, donde una clase de ancho no se aplica, así que los
- * ve siempre: son 22 en el papel. En el navegador, arriba del umbral el botón
+ * ve siempre: son 22 en el papel —las de esa cuenta—. En el navegador, arriba
+ * del umbral el botón
  * está en `display: none`, que no es esconder sino sacar del árbol de
  * accesibilidad y del orden de tabulación — o sea que el escritorio sigue
  * teniendo las 19 de V3-D, y las tres de más son exactamente el gesto que sólo
  * existe del otro lado.
  */
-afirmarIgual(PARADAS.length, 22, 'el home entero tiene 22 paradas: las 19 de V3-D más los tres controles de toque de Quiénes somos')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 22, '  y la rama animada tiene las mismas 22')
+/**
+ * ⚠️ **NUEVE PARADAS MÁS, Y SON LAS CUATRO PIEZAS DE CADA TRABAJO.**
+ *
+ * Cada proyecto de Portfolio ponía UNA parada —el nombre— y hoy pone CUATRO: el
+ * nombre, el rubro, el logo y la captura llevan al sitio del cliente. Tres de
+ * más por proyecto, por tres proyectos: +9 sobre las 22. Que sean cuatro anclas
+ * al mismo destino es una decisión de la sección —clic en cualquier parte de un
+ * trabajo— y el precio es este: tres paradas seguidas que van al mismo lado, y
+ * por eso las tres que no son el nombre declaran su `aria-label`.
+ */
+afirmarIgual(PARADAS.length, 31, 'el home entero tiene 31 paradas: las 22 de antes más las tres piezas que cada trabajo sumó al enlazarse entero')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 31, '  y la rama animada tiene las mismas 31: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

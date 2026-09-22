@@ -80,7 +80,26 @@ export function idDelTitularDeSeccion(id: string): string {
   return `titular-${id}`
 }
 
-export type NivelDeTitular = 'titulo-s' | 'titulo-m' | 'titulo-l' | 'titulo-xl'
+/**
+ * ⚠️ **`display-xl` ENTRÓ Y `display` NO, y la diferencia es la CARA.**
+ *
+ * La unión tenía los cuatro niveles de título mientras la tabla
+ * (`_lib/tipografia.ts`) tenía diez. El cartel de Portfolio pide el más grande y
+ * este componente era el techo, así que se sube el techo — pero de a uno:
+ *
+ *   · **`display-xl` (104 px) entra.** Su interletrado por defecto es `titulo` y
+ *     es con ese registro que se derivaron sus 104: la cara que `Titular`
+ *     emite —`font-titulo`— es la misma con la que se midió.
+ *   · **`display` (58 px) NO.** Es el único nivel de la tabla que se pinta con
+ *     `--font-display` y sus 58 px salieron de un avance de 8,5670 em de esa
+ *     cara. Emitido con `font-titulo` saldría con el tamaño derivado de una
+ *     tipografía y el dibujo de otra. Entra el día que el componente sepa elegir
+ *     la cara, que es otro cambio.
+ *
+ * Los dos son `Nivel` válidos y los dos tienen contraparte fluida, así que esto
+ * no relaja nada: acota a lo que este componente puede pintar bien.
+ */
+export type NivelDeTitular = 'titulo-s' | 'titulo-m' | 'titulo-l' | 'titulo-xl' | 'display-xl'
 type EtiquetaDeTitular = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div'
 
 export interface TitularProps {

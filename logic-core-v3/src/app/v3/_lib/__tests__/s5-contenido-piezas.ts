@@ -17,6 +17,25 @@ import { entradasColgadas, pedidoPorClase, type EntradaDePedido } from '../../_s
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
+/**
+ * ⚠️ **LAS SECCIONES QUE NO DEBEN NADA — enumeradas, con el motivo.**
+ *
+ * «Declara al menos una entrada» atrapaba a una sección que se olvidara de
+ * escribir su pedido, y eso sigue siendo valioso: hoy `hero` y `numeros` piden
+ * prosa sin emitir un solo marcador, así que el marcado NO alcanza para
+ * distinguir «terminó» de «se olvidó». Lo único que los separa es una decisión,
+ * y una decisión se escribe.
+ *
+ * Por eso esto es una lista de EXCLUSIONES con su razón y no una condición
+ * derivada: vaciar el pedido de cualquier otra sección la sigue poniendo roja, y
+ * para que deje de estarlo hay que venir acá y decir por qué. Que la lista tenga
+ * que crecer a mano es la propiedad, no el costo.
+ *
+ *   · `trabajos` — cerró sus nueve casillas de una vez: los seis medios reales
+ *     (tres logos y tres capturas) y los tres rubros, que dictó el dueño.
+ */
+const SIN_PEDIDO: ReadonlySet<string> = new Set(['trabajos'])
+
 /** Los dos bloques, en orden. Recibe el renderizador del invariante para no
  *  montar las secciones dos veces. */
 export function afirmarElPedidoYLasVerdades(marcarQuieto: (indice: number) => string): void {
@@ -29,7 +48,10 @@ export function afirmarElPedidoYLasVerdades(marcarQuieto: (indice: number) => st
       [],
       `\`${id}\` — cada entrada del pedido apunta a una ruta que existe en el contenido`,
     )
-    afirmar(pedido.length > 0, `  y declara ${pedido.length} entrada(s) de pedido`)
+    afirmar(
+      pedido.length > 0 || SIN_PEDIDO.has(id),
+      `  y declara ${pedido.length} entrada(s) de pedido${SIN_PEDIDO.has(id) ? ' — y está bien que sean cero: la sección se completó y lo declara arriba' : ''}`,
+    )
   }
 
   controlPositivo(

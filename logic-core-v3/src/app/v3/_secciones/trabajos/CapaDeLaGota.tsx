@@ -1,85 +1,209 @@
 'use client'
 
-import { useMotionValueEvent, type MotionValue } from 'motion/react'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
-import { estadoDeLaGota, type VentanaDeLaGota } from './gota'
+import { NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
+import { useMovimientoReducido } from '../../_lib/motion/reducido'
+
+import { DISPARO_DE_LA_NOCHE } from './geometria'
+import {
+  DURACION_DEL_BARRIDO,
+  cantidadDeLaNoche,
+  estadoDeLaVuelta,
+  estadoDelBarrido,
+  maskDelBarrido,
+} from './gota'
 
 /**
- * LA CAPA DE LA GOTA — la mitad que toca el DOM. **[B12]**
+ * LA CAPA DEL BARRIDO — el gatillo y la banda que cruza. **[B12 · PORTFOLIO]**
  *
  * ⚠ **El archivo se llama `CapaDeLaGota.tsx` y no `Gota.tsx`, y no es un
  * capricho:** al lado vive `gota.ts` —el núcleo puro— y en un checkout
  * case-insensitive (Windows) dos módulos del mismo directorio que difieren sólo
- * en la caja se resuelven al azar y la sección se rompe **en silencio**. La
- * regla está escrita en `_contrato/forma.ts`, que la pagó una vez con
- * `seccion.ts` / `Seccion.tsx`. Acá se cumplió al primer intento porque `tsc`
- * la cazó — el nombre lleva la cicatriz.
+ * en la caja se resuelven al azar y la sección se rompe **en silencio**.
  *
- * El núcleo es puro y vive en `gota.ts`; acá está lo mínimo que escribe en el
- * navegador. **Es el mismo reparto que B3 hizo con el revelado**: `maskDeRevelado`
- * es una función y `aplicarRevelado` es la capa fina que le pone la cadena al
- * elemento. La razón es la misma: lo que se afirma es la función, y lo que toca
- * el DOM no tiene aritmética adentro.
+ * ── ⚠️ EL COLOR SE ESCRIBE EN UN SOLO LUGAR, Y ES EL LAZO ────────────────
  *
- * ── ⚠️ CERO `setState` POR CUADRO, Y ES UNA REGLA DEL SPRINT ──────────────
+ * `NOCHE_DISPARADA.cantidad` se escribe **únicamente adentro de `pintar`**, con
+ * el número que el propio barrido devuelve para ese cuadro. Ningún observador la
+ * toca. Ése era el segundo defecto: el observador prendía la noche y la
+ * animación corría al lado, así que con el scroll rápido se veía el resultado sin
+ * el gesto —clara, negro pleno, clara otra vez—. Ahora **el color no puede
+ * moverse sin que el reloj avance**, en ninguna de las dos direcciones.
  *
- * La máscara y la opacidad se escriben con `useMotionValueEvent` sobre un `ref`,
- * o sea `el.style.setProperty` fuera de React. Un `useState` acá sería un render
- * del árbol por cuadro de scroll con la escena 3D dibujando al lado, que es
- * exactamente lo que la regla 9 prohíbe.
+ * Los extremos tampoco son literales: salen de `cantidadDeLaNoche(0)` y
+ * `cantidadDeLaNoche(1)`, o sea de la misma función.
  *
- * ⚠️ **Y es `useMotionValueEvent` y no `progreso.on` dentro de un `useEffect`, con
- * el número:** el hook hace exactamente eso, y escribirlo a mano cuesta **40 B
- * más** en la carga inicial —medido entre dos builds del mismo árbol,
- * `s5-presupuesto-recibos-de-b12.ts`—, porque el `useEffect` con su cierre y su
- * arreglo de dependencias minifica peor que la llamada al hook que ya viene
- * empaquetado con el resto de `motion/react`.
+ * ── ⚠️ CAMBIAR DE DIRECCIÓN NO REINICIA: ESPEJA EL RELOJ ─────────────────
  *
- * ── Por qué se ESCONDE en vez de quedarse a opacidad 0 ────────────────────
+ * Si el scroll se da vuelta a mitad del barrido, `arrancar` no pone el reloj en
+ * cero: lo espeja —`inicio = ahora − (DURACION − ms)`— de modo que el primer
+ * cuadro de la vuelta es exactamente el mismo que el último de la ida. Sin eso,
+ * darse vuelta a mitad de camino haría saltar la banda al otro extremo del
+ * cuadro y el color con ella, que es la misma familia de defecto.
  *
- * Porque una capa transparente sigue siendo una capa: compone, ocupa una capa de
- * pintura y —sobre todo— es un elemento que un instrumento de contraste puede
- * leer como fondo. Con `visibility: hidden` sale del cuadro y de la lectura.
- * El primer estado sale de la MISMA función pura, en el `style` inicial, así que
- * el servidor y el primer cuadro del cliente dicen lo mismo.
+ * ── POR QUÉ NO RECIBE EL PROGRESO DEL BLOQUE ─────────────────────────────
+ *
+ * Porque el barrido corre por TIEMPO y porque tiene que valer abajo de 1025,
+ * donde no hay coreografía. Se monta como hermano del bloque —fuera de las dos
+ * ramas, así que `s7-arboles` §4 sigue valiendo— y mide el scroll con dos
+ * `IntersectionObserver` sobre la sección, alcanzada por `closest('[data-panel]')`.
+ *
+ * ── UNA SOLA CAJA, Y ES `fixed` ──────────────────────────────────────────
+ *
+ * La banda cruza el CUADRO: un `absolute` sobre una sección de tres pantallas la
+ * mediría contra 2.700 px en vez de contra el alto de la ventana. Vive 760 ms y
+ * después se esconde.
  */
-export function CapaDeLaGota({
-  progreso,
-  ventana,
-  className,
-}: {
-  readonly progreso: MotionValue<number>
-  readonly ventana: VentanaDeLaGota
-  readonly className?: string
-}): React.JSX.Element {
-  const ref = useRef<HTMLDivElement | null>(null)
+export function CapaDeLaGota({ className }: { readonly className?: string }): React.JSX.Element {
+  const banda = useRef<HTMLDivElement | null>(null)
+  const reducido = useMovimientoReducido()
 
-  useMotionValueEvent(progreso, 'change', (p) => {
-    const el = ref.current
-    if (el === null) return
-    const estado = estadoDeLaGota(p, ventana)
-    const mask = estado === null ? '' : estado.mask
-    el.style.setProperty('mask-image', mask)
-    el.style.setProperty('-webkit-mask-image', mask)
-    el.style.setProperty('opacity', String(estado === null ? 0 : estado.opacidad))
-    el.style.setProperty('visibility', estado === null ? 'hidden' : 'visible')
-  })
+  useEffect(() => {
+    const capa = banda.current
+    const caja = capa?.closest('[data-panel]') ?? null
+    if (caja === null || capa === null) return
 
-  const inicial = estadoDeLaGota(progreso.get(), ventana)
+    // Con movimiento reducido la sala se invierte igual, pero sin banda: el gesto
+    // es decorativo y el contraste del texto no lo es. El número sigue saliendo
+    // de `cantidadDeLaNoche`, así que tampoco acá hay un color escrito a mano.
+    if (reducido) {
+      const soloNoche = new IntersectionObserver(
+        ([e]) => {
+          NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(e.isIntersecting ? 1 : 0)
+        },
+        { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
+      )
+      soloNoche.observe(caja)
+      return () => {
+        soloNoche.disconnect()
+        NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
+      }
+    }
+
+    let sentido: 'ida' | 'vuelta' | null = null
+    let inicio = 0
+    let cuadro = 0
+
+    const pintar = (): void => {
+      if (sentido === null) return
+      const ms = performance.now() - inicio
+      const estado = sentido === 'ida' ? estadoDelBarrido(ms) : estadoDeLaVuelta(ms)
+      if (estado === null) {
+        // Cruzó entero. El color queda en el extremo que corresponde y la banda
+        // se va: de acá en adelante lo único oscuro en pantalla es la escena.
+        NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(sentido === 'ida' ? 1 : 0)
+        capa.style.setProperty('visibility', 'hidden')
+        sentido = null
+        cuadro = 0
+        return
+      }
+      NOCHE_DISPARADA.cantidad = estado.noche
+      capa.style.setProperty('visibility', 'visible')
+      capa.style.setProperty('opacity', String(estado.opacidad))
+      capa.style.setProperty('mask-image', estado.mask)
+      capa.style.setProperty('-webkit-mask-image', estado.mask)
+      cuadro = requestAnimationFrame(pintar)
+    }
+
+    const arrancar = (haciaDonde: 'ida' | 'vuelta'): void => {
+      if (sentido === haciaDonde) return
+      const ahora = performance.now()
+      if (sentido === null) {
+        inicio = ahora
+      } else {
+        const ms = Math.min(ahora - inicio, DURACION_DEL_BARRIDO)
+        inicio = ahora - (DURACION_DEL_BARRIDO - ms)
+      }
+      sentido = haciaDonde
+      if (cuadro === 0) cuadro = requestAnimationFrame(pintar)
+    }
+
+    /** Corta el reloj y esconde la banda. NO toca el color: sólo el lazo lo escribe. */
+    const cortar = (): void => {
+      sentido = null
+      if (cuadro !== 0) cancelAnimationFrame(cuadro)
+      cuadro = 0
+      capa.style.setProperty('visibility', 'hidden')
+    }
+
+    /**
+     * ⚠️ **SALIR POR ARRIBA Y SALIR POR ABAJO NO SON LO MISMO, y el observador
+     * sólo dice «ya no».** La sección deja de cruzar la línea en los dos
+     * extremos: subiendo —y ahí la noche tiene que volver, con su barrido— y
+     * bajando, cuando Trabajos ya pasó. Los separa la caja que el evento trae: si
+     * el pie de la sección todavía está debajo del tope del cuadro, quedó abajo.
+     */
+    const salioPorArriba = (e: IntersectionObserverEntry): boolean => e.boundingClientRect.bottom > 0
+
+    const laIda = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) arrancar('ida')
+        else if (!salioPorArriba(e)) {
+          /**
+           * ⚠️ **Trabajos quedó arriba: se suelta sin gesto, Y ES VISIBLE QUE NO
+           * SE VE.** Acá sí hay un cambio de color sin barrido, y está acotado por
+           * un hecho de la tabla: la sección que llena el cuadro en ese instante es
+           * Servicios, y Servicios es `papel-opaco` (`secciones.ts`) — el canvas no
+           * se ve. Correr la vuelta en cambio pintaría una banda negra encima de
+           * Servicios, que sí se vería. Soltar es lo invisible de las dos.
+           */
+          NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
+          cortar()
+        }
+      },
+      { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
+    )
+
+    /**
+     * ⚠️ **LA VUELTA NO PUEDE CORRER SI NO HUBO IDA — y acá estaba el salto.**
+     *
+     * `salioPorArriba` mira si el pie de la sección sigue debajo del tope del
+     * cuadro, y eso es cierto en DOS situaciones que no se parecen en nada:
+     * cuando volvimos para arriba después de haber cruzado, y **cuando todavía no
+     * llegamos**. Al cargar la página estamos en la segunda: el observador se
+     * dispara en su primer cuadro con `isIntersecting: false`, y sin esta guarda
+     * arrancaba la vuelta ahí mismo. Eso es lo que se veía —la banda apareciendo
+     * arriba a la izquierda, que es donde la vuelta EMPIEZA, y barriendo hasta
+     * abajo a la derecha— al abrir el sitio, sin que nadie hubiera cruzado nada.
+     *
+     * La guarda es la pregunta correcta: **¿hay noche que devolver?** La hay si
+     * la ida está corriendo o si ya dejó algo de cantidad puesta.
+     */
+    const hayNocheQueDevolver = (): boolean => sentido === 'ida' || NOCHE_DISPARADA.cantidad > 0
+
+    const laVuelta = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting && salioPorArriba(e) && hayNocheQueDevolver()) arrancar('vuelta')
+      },
+      { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.vuelta}% 0px` },
+    )
+
+    laIda.observe(caja)
+    laVuelta.observe(caja)
+
+    return () => {
+      laIda.disconnect()
+      laVuelta.disconnect()
+      cortar()
+      NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
+    }
+  }, [reducido])
 
   return (
     <div
-      ref={ref}
+      ref={banda}
       data-pieza="gota"
       aria-hidden="true"
       className={className}
-      style={{
-        maskImage: inicial === null ? undefined : inicial.mask,
-        WebkitMaskImage: inicial === null ? undefined : inicial.mask,
-        opacity: inicial === null ? 0 : inicial.opacidad,
-        visibility: inicial === null ? 'hidden' : 'visible',
-      }}
+      /* ⚠️ **EL REPOSO SE RESUELVE EN EL PRIMER RENDER, sin medir nada.** La
+         máscara sale de `maskDelBarrido(0)`, que es la banda ENTERA afuera del
+         cuadro por su esquina de partida —abajo a la derecha—: su pluma de
+         adelante toca el 0 % justo. Así, aunque algo la muestre antes de que el
+         lazo escriba el primer cuadro, lo que aparece está donde el barrido
+         empieza y no en la otra punta. `visibility: hidden` es el cinturón; esto
+         es el tirante. */
+      style={{ opacity: 1, visibility: 'hidden', maskImage: maskDelBarrido(0), WebkitMaskImage: maskDelBarrido(0) }}
     />
   )
 }

@@ -21,10 +21,11 @@
  */
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
+import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL } from '../_contrato/forma'
-import { cuentaDeMarcadores, marcadoresPedidos, textosDe } from '../_contrato/marcadores'
+import { MARCADORES, cuentaDeMarcadores, marcadoresPedidos, textosDe } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
 import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
@@ -32,8 +33,8 @@ import { marcar } from '../_invariantes/render'
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
 import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
 import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, sinTres, veces } from './soporte'
-import { ancestrosDe, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado } from './trabajos-piezas'
-import { GEOMETRIA } from './geometria'
+import { coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, nombresQueNoSonEncabezado } from './trabajos-piezas'
+import { DISPARO_DE_LA_NOCHE } from './geometria'
 import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
@@ -66,8 +67,12 @@ titulo('1 · El puente del atributo del panel, y los pasos declarados')
 afirmar(FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`), 'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite', `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`)
 controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viejo={seccion.id}', (t: string) => t.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`))
 
-afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla SON los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
-controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccion, pasosDeLaSecuencia: 4 }, (s: EntradaDeSeccion) => s.pasosDeLaSecuencia === CONTENIDO.proyectos.length)
+afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla son los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
+controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccion, pasosDeLaSecuencia: 7 }, (s: EntradaDeSeccion) => s.pasosDeLaSecuencia === CONTENIDO.proyectos.length)
+// ⚠️ La conversión ya no es una ventana de progreso —corre por tiempo— así que
+// lo único que queda por afirmar acá es la HISTÉRESIS: las dos líneas existen, son
+// distintas y sueltan más abajo de donde prenden.
+afirmar(DISPARO_DE_LA_NOCHE.vuelta > DISPARO_DE_LA_NOCHE.ida, `las dos líneas del disparo son distintas y la de soltar va DEBAJO de la de prender: recorte ${DISPARO_DE_LA_NOCHE.ida} % para prender, ${DISPARO_DE_LA_NOCHE.vuelta} % para soltar`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El contenido no se puede leer como un dato')
@@ -78,60 +83,76 @@ const { SIN_LLAVE, quietoSinLlave, animadoSinLlave } = conLaLlaveApagada(CONTENI
 
 afirmar(TEXTOS.length > 0, `el contenido tiene ${TEXTOS.length} textos: la cuenta no es vacía`)
 afirmarQueElContenidoNoEsUnDato(CONTENIDO, SIN_LLAVE)
-afirmar(CONTENIDO.titular.includes('Tres proyectos') && !/\d/.test(CONTENIDO.titular), 'la única cantidad del contenido va con letras y no con cifra', CONTENIDO.titular)
+afirmar(CONTENIDO.titular.length > 0 && !/\d/.test(CONTENIDO.titular), 'el titular existe y no lleva una sola cifra', CONTENIDO.titular)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · El marcador que queda se VE, y el que se cerró YA NO')
+titulo('4 · ⚠️ NO QUEDA UN SOLO PEDIDO: la sección se completó')
 
+/**
+ * ⚠️ **TRABAJOS ES LA PRIMERA SECCIÓN QUE NO DEBE NADA, y por eso todas estas
+ * cifras son cero.**
+ *
+ * Tenía nueve casillas abiertas: seis medios —`[LOGO]` × 3 y `[CAPTURA]` × 3— y
+ * tres rubros —`[TEXTO]` × 3—. Llegaron los seis archivos a `public/capturas/` y
+ * `public/logos/`, y el dueño dictó los tres rubros. **Una casilla que se llena
+ * SALE de la lista**, así que el contenido ya no emite un solo marcador y
+ * `PEDIDO` quedó vacío.
+ *
+ * Las cifras se afirman en CERO y no se borran: un cero afirmado dice «esto se
+ * completó», y una comprobación borrada no dice nada. Si mañana vuelve un
+ * marcador acá, esto se pone rojo.
+ */
 const pedidos = marcadoresPedidos(SIN_LLAVE)
-afirmarIgual(pedidos, ['[MÉTRICA]'], 'el único marcador que el contenido deja pedido')
+afirmarIgual([...pedidos].sort(), [], 'el contenido no deja NINGÚN marcador pedido: los seis archivos llegaron y los tres rubros los dictó el dueño')
 const cuenta = cuentaDeMarcadores(SIN_LLAVE)
-afirmarIgual(cuenta.get('[MÉTRICA]'), 3, 'tres métricas pedidas: una por proyecto')
-afirmarIgual(cuenta.get('[CAPTURA]'), undefined, 'y CERO capturas pedidas (V3-D): los tres archivos existen, y §13 cuenta las tres imágenes')
-afirmarIgual(veces(quietoSinLlave, '[MÉTRICA]'), 3, 'las tres métricas llegan al marcado de la rama quieta')
-afirmarIgual(veces(quieto, 'data-marcador="[CAPTURA]"'), 0, 'y no queda un solo marco de captura vacío')
-const todosSeVen = (html: string): boolean => pedidos.every((m) => html.includes(m))
-afirmar(todosSeVen(animadoSinLlave), 'el marcador también está con la coreografía puesta')
-controlPositivo('el chequeo de "el marcador se ve" ve un marcado sin marcadores', '<div>nada</div>', todosSeVen)
+afirmarIgual([cuenta.get('[MÉTRICA]'), cuenta.get('[LOGO]'), cuenta.get('[CAPTURA]'), cuenta.get('[TEXTO]')], [undefined, undefined, undefined, undefined], '  ni métrica, ni logo, ni captura, ni rubro: las cuatro clases cerradas')
+afirmarIgual(MARCADORES.filter((m: string) => quietoSinLlave.includes(m)), [], '  y ni uno del vocabulario cerrado llega al marcado de la rama quieta')
+afirmarIgual(MARCADORES.filter((m: string) => animadoSinLlave.includes(m)), [], '  ni al de la rama animada: las dos ramas cerraron las mismas casillas, que es lo que hace que no haya un hueco visible en un solo ancho')
+afirmarIgual(veces(quieto, 'data-medio="marcador"'), 0, 'cero marcos vacíos en la rama quieta: donde había un hueco punteado hay una imagen')
+afirmarIgual(veces(conMotion, 'data-medio="placeholder"'), 0, '  y cero provisionales con la coreografía puesta: el rayado se fue con los archivos reales')
 
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Los tres nombres reales, literales — y DERIVADOS de la lista')
 
 const NOMBRES = CONTENIDO.proyectos.map((p) => p.nombre)
-afirmarIgual(NOMBRES, [...NOMBRES_REALES], 'los del contenido son los de NOMBRES_REALES, en orden')
+afirmarIgual(NOMBRES_REALES.filter((real) => !NOMBRES.some((n) => n.includes(real))), [], 'cada nombre de NOMBRES_REALES está adentro de un nombre del contenido: la lista sigue gobernando aunque la marca se escriba entera')
 for (const n of NOMBRES) afirmar(quieto.includes(n) && conMotion.includes(n), `"${n}" aparece literal en las dos ramas`)
 controlPositivo('el chequeo de los nombres ve un marcado sin ellos', '<div>tres clientes</div>', (html: string) => NOMBRES.every((n) => html.includes(n)))
-afirmarIgual(GEOMETRIA.planos, CONTENIDO.proyectos.length, 'los planos que anima P7 son los proyectos que hay')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · Abajo de 1025 el contenido está COMPLETO y no se mueve')
 
-const RUTAS_DE_ARCHIVO = new Set(CONTENIDO.proyectos.map((_, i) => `proyectos[${i}].captura.fuente`))
+const RUTAS_DE_ARCHIVO = new Set(TEXTOS.filter((h) => h.valor.startsWith('/')).map((h) => h.ruta))
 const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => !RUTAS_DE_ARCHIVO.has(h.ruta))
-afirmarIgual(RUTAS_DE_ARCHIVO.size, 3, 'se eximieron exactamente las TRES rutas de archivo, ni una más')
+// ⚠️ Ahora SÍ hay rutas de archivo en el contenido —las seis, reales— y por eso
+// se eximen de «todo texto llega a la pantalla»: una ruta no es algo que se lea.
+afirmarIgual(RUTAS_DE_ARCHIVO.size, 6, 'las SEIS rutas de archivo del contenido se eximen del censo de texto: un `/capturas/...` no es algo que alguien lea en pantalla')
 afirmarIgual(TEXTOS_DE_PANTALLA.filter((h) => !quieto.includes(h.valor)).map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
 afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee: el título toma su lugar (B12, regla 15 — la cadena no se borra, se da vuelta)`)
 controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Trabajos</div>', (html: string) => TEXTOS_DE_PANTALLA.every((h) => html.includes(h.valor)))
-afirmarIgual(capturasQueNoLlegan(quieto, PROYECTOS), [], '  y las tres capturas llegan, codificadas por el optimizador')
-controlPositivo('el detector de capturas ve un marcado sin la ruta codificada', '<img src="/_next/image?url=%2Fotra.webp"/>', (html: string) => capturasQueNoLlegan(html, PROYECTOS).length === 0)
+// ⚠️ Las seis imágenes llegan a las DOS ramas, y es lo correcto desde que son
+// reales: abajo de 1025 la sección es una lista de trabajos, y una lista de
+// trabajos sin las capturas no es la misma información con otro ritmo, es menos.
+afirmarIgual(veces(quieto, '<img'), 6, 'las seis imágenes reales llegan a la rama quieta')
+afirmarIgual(veces(conMotion, '<img'), 6, '  y las mismas seis con la coreografía puesta')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
 controlPositivo('el chequeo de "no hay transformada" ve un style con transform', '<div style="transform:translateY(10%)"></div>', (html: string) => !html.includes('transform:'))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · LA MÉTRICA NUNCA ESTÁ OCULTA — ni ella ni ninguno de sus ancestros')
+titulo('8 · Nada de la sección se lee por un lector y no por un ojo')
 
-afirmar(ancestrosDe(quietoSinLlave, '[MÉTRICA]').length > 0, 'la métrica tiene una cadena de ancestros real, no vacía')
-afirmar(metricaVisible(quietoSinLlave), 'ningún ancestro de la métrica lleva hidden, opacity-0 ni sr-only')
-afirmarIgual(veces(quieto, 'sr-only'), 0, 'y en toda la sección no hay un solo `sr-only`')
-controlPositivo('el chequeo de la métrica ve una métrica escondida en un `sr-only`', '<div class="sr-only"><p>[MÉTRICA]</p></div>', metricaVisible)
+// ⚠️ Era «LA MÉTRICA NUNCA ESTÁ OCULTA». La métrica se fue (PORTFOLIO) y con
+// ella su comprobación: lo que sobrevive es la mitad que no era de la métrica
+// —que en esta sección no hay texto escondido— y esa sigue corriendo.
+afirmarIgual(veces(quieto, 'sr-only'), 0, 'en toda la sección no hay un solo `sr-only`')
+controlPositivo('el chequeo del `sr-only` ve uno donde lo hay', '<div class="sr-only"><p>algo</p></div>', (html: string) => veces(html, 'sr-only') === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · Cero `three`: el efecto es HTML con perspectiva, no geometría 3D')
 
 for (const { archivo, texto } of FUENTES) afirmar(sinTres(texto), `${archivo} no importa three, @react-three ni drei`)
-afirmarIgual(FUENTES.length, 7, `y se leyeron del disco los SIETE archivos que se despachan, no cero — B1 sacó la geometría, B4-A el asentamiento y B12 las piezas y la gota: ${FUENTES.map((f) => f.archivo).join(' · ')}`)
+afirmarIgual(FUENTES.length, 10, `y se leyeron del disco los DIEZ archivos del lane, no cero — B1 sacó la geometría, B4-A el asentamiento, B12 las piezas y la gota, y PORTFOLIO el trabajo y el túnel: ${FUENTES.map((f) => f.archivo).join(' · ')}`)
 controlPositivo('el detector ve un import de three', "import * as T from 'three'", sinTres)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -147,11 +168,11 @@ controlPositivo('la cuenta de contraste ve un par que SÍ llega a 3:1', '#FFFFFF
 afirmar(razonDeContraste(TINTA_CLARA, ACENTOS[0]) >= 4.5, `el acento como RELLENO con el papel encima da ${razonDeContraste(TINTA_CLARA, ACENTOS[0]).toFixed(2)}: pasa AA`)
 afirmarIgual(veces(quieto, 'text-acento'), 0, 'cero `text-acento` en el marcado')
 afirmarIgual(veces(quieto, 'border-acento'), 0, 'y cero `border-acento`: el acento nunca marca un límite')
-afirmarIgual(veces(quieto, 'bg-acento'), CONTENIDO.proyectos.length + veces(quieto, 'data-pieza="prefijo-de-servicio"'), `va como RELLENO ${veces(quieto, 'bg-acento')} veces: una pastilla por métrica (${CONTENIDO.proyectos.length}) más el prefijo de la marca del rótulo (B4-A), y ninguna otra`)
-afirmarIgual(veces(quieto, 'border-borde-fuerte'), 0, 'ya no hay borde punteado (V3-D): el límite lo marca la captura, que ocupa el ancho entero')
-const conTamano = (html: string): boolean => /<span[^>]*text-fluido-micro[^>]*>\[MÉTRICA\]/.test(html)
-afirmar(conTamano(quietoSinLlave), 'la pastilla conserva su tamaño micro: el color va afuera para que `tailwind-merge` no se lo coma')
-controlPositivo('el chequeo del tamaño ve una métrica a la que `text-tinta` le comió la escala', '<span class="text-tinta">[MÉTRICA]</span>', conTamano)
+afirmarIgual(veces(quieto, 'bg-acento'), veces(quieto, 'data-pieza="prefijo-de-servicio"'), `va como RELLENO ${veces(quieto, 'bg-acento')} veces: sólo el prefijo de la marca del rótulo (B4-A). Las tres pastillas de métrica se fueron y con ellas el único otro uso`)
+// ⚠️ Cero: el borde punteado era del marco PROVISIONAL, y ya no hay ninguno. La
+// medición del token (4,62:1 sobre el oscuro) queda en el historial; lo que se
+// afirma hoy es que no queda un hueco punteado en la sección.
+afirmarIgual(veces(quieto, 'border-borde-fuerte'), 0, 'cero bordes punteados: no queda un marco provisional en la sección')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · Higiene del lane: color, foco, interactividad y puertas')
@@ -166,7 +187,13 @@ const hovers = veces(quieto, 'hover:')
 afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su gemela `focus-visible:`')
 afirmarIgual(hovers, 0, '  y en esta sección son cero: el énfasis de puntero queda pedido, no escrito suelto')
 afirmarIgual(veces(quieto, '<button'), 0, 'cero botones')
-afirmarIgual(veces(quieto, '<a '), 3, 'TRES enlaces: uno por proyecto, al sitio en producción')
+// ⚠️ DOCE, y son cuatro por proyecto a propósito: el nombre, el rubro, el logo y
+// la captura llevan al sitio del cliente. Cuatro anclas al mismo destino son
+// cuatro paradas de teclado, así que las tres que no son el nombre declaran su
+// `aria-label`: sin eso, tres paradas seguidas se anuncian con el mismo texto.
+afirmarIgual(veces(quieto, '<a '), 12, 'DOCE enlaces: las cuatro piezas de cada proyecto llevan a su sitio')
+afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 12, '  las doce abren afuera sin darle al otro sitio acceso a esta ventana ni el referente')
+afirmarIgual(veces(conMotion, '<a '), 12, '  y las mismas doce con la coreografía puesta: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(enlacesFueraDelContenido(quieto, PROYECTOS.map((p) => p.enlace)), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada acá')
 afirmarIgual(enlacesConNombreSucio(quieto, PROYECTOS), [], '  el nombre accesible de cada uno es el del cliente y nada más: la métrica queda AFUERA')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.enlace)).length === 0)
@@ -189,20 +216,61 @@ controlPositivo('el detector ve un nombre enlazado que NO es encabezado', '<p><a
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('14 · El pedido y el patrón declarado')
 
-afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
+// ⚠️ VACÍO, y es lo que se afirma: la sección se completó. Decía «no es una lista
+// vacía» cuando todavía faltaban nueve cosas.
+afirmarIgual(PEDIDO.length, 0, 'el pedido está vacío: no queda una sola casilla abierta en esta sección')
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
 controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'proyectos[3].nombre', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
-afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))].sort(), ['metrica', 'prosa'], 'el pedido cubre las DOS clases que esta sección deja pedidas: la de `captura` se cerró')
-afirmarIgual(PEDIDO.filter((e) => e.marcador !== null).length, 3, '  tres con marcador visible: las tres métricas, y ninguna captura')
-afirmarIgual(PEDIDO.filter((e) => e.ruta.includes('captura')).map((e) => e.ruta), [], '  y no queda una sola entrada pidiendo algo de las capturas: llenar una casilla la SACA de la lista')
+afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))].sort(), [], '  y por lo tanto no cubre ninguna clase')
+afirmarIgual(PEDIDO.filter((e) => e.marcador !== null).length, 0, '  ni una con marcador visible: no hay hueco que mostrar')
+afirmarIgual(PEDIDO.filter((e) => e.ruta === 'titular' || e.ruta === 'bajada').map((e) => e.ruta), [], '  y ni el titular ni la bajada siguen pedidos: llegaron dictados, y llenar una casilla la SACA de la lista')
 afirmar(PEDIDO.every((e) => e.formato.length > 0), '  y todas dicen en qué formato entra el dato')
 /** ✅ **B4-A · LA DESINCRONIZACIÓN, CERRADA.** B2 no podía tocar `contenido.ts` y
  *  publicó las dos cifras por separado con su dueño; hoy la tabla dice las dos y
  *  la publicación vuelve a ser UNA afirmación de igualdad. */
 const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].map((m) => m[1]))].sort()
-// ⚠️ B12 · UN SOLO PATRÓN: el MARCO con P2 dejó de estar arriba y pasó a ser la
-// PORTADA, el plano de índice −1 del mismo reparto (P7). La igualdad se conserva.
-afirmarIgual(patronesDelFuente, ['P7'], 'el componente consume UN patrón: P7, para los tres planos y para la portada (B12)')
+// ⚠️ DOS, y el que se fue es P2. El tramo pasó a tener vocabulario propio
+// (`tunel.ts`): nacer y crecer desde una esquina, huir en z. El cartel y los
+// nombres dejaron de llegar por un patrón del sistema. Queda P3 —el cuerpo que
+// se pinta— y P7, que es el patrón del BLOQUE y de ahí sale la perspectiva.
+afirmarIgual(patronesDelFuente, ['P3', 'P7'], 'el componente consume DOS patrones: P3 el cuerpo que se pinta, y P7 en el bloque, que es de donde sale la perspectiva de la huida')
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
+// ════════════════════════════════════════════════════════════════════════════
+titulo('16 · Las doce piezas son paradas de teclado de verdad, con su lugar puesto')
+
+/**
+ * ⚠️ **«ES UN ENLACE» NO ES «SE PUEDE LLEGAR CON EL TECLADO», y la diferencia
+ * la hace el LUGAR — por eso esto se monta con la posición escrita.**
+ *
+ * Contar `<a ` (§11) dice que hay doce marcas en el papel. Lo que decide si son
+ * paradas es otra cosa: que lleven `href`, que nadie les ponga `tabindex="-1"`,
+ * que no estén escondidas de los lectores, y que tengan un nombre —tres de las
+ * cuatro piezas de un proyecto van al MISMO destino, así que sin nombre propio
+ * suenan tres veces igual—. Eso se lee del marcado real, con las doce piezas
+ * posicionadas por el túnel: `left/top/width/height` y su punto interior.
+ *
+ * ⚠️ **Y el límite se afirma en vez de esconderse.** Arriba de 1025 las piezas
+ * arrancan en `visibility: hidden` —su ventana todavía no abrió— y eso las saca
+ * del orden de tabulación mientras dure: ahí una pieza es parada **sólo mientras
+ * está pintada**, que es lo mismo que le pasa a cualquier cosa de un tramo
+ * gobernado por el scroll. La garantía incondicional es la de abajo de 1025, y es
+ * la que esta sección afirma: ahí las doce están puestas desde el primer cuadro.
+ */
+const PARADAS = paradasDeTabulacion(quieto)
+afirmarIgual(PARADAS.length, 12, 'abajo de 1025 las doce piezas son paradas de teclado: ninguna se quedó en marca de papel')
+afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a').map((p) => p.etiqueta), [], '  las doce son anclas —no un `div` con un manejador—, que es lo que las hace parada sin escribir un `tabindex`')
+afirmarIgual(PARADAS.filter((p) => p.destino === null || !PROYECTOS.some((x) => x.enlace === p.destino)).map((p) => p.destino), [], '  las doce llevan a un `enlace` del contenido: un ancla sin `href` no es parada, y una URL de otro lado no es de nadie')
+afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y las doce se anuncian con algo: tres van al mismo sitio por proyecto, así que el nombre propio es lo único que las distingue')
+afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
+afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto en toda la rama quieta es la capa del barrido, que es decoración y lo declara')
+afirmarIgual(paradasDeTabulacion(conMotion).length, 12, 'y con la coreografía puesta son las mismas doce: el recorrido no lo cambia el ancho')
+// El LUGAR, que es la otra mitad: trece cajas posicionadas —las doce piezas y el
+// cartel— y cada una con su punto interior, desde el marcado y no desde un efecto.
+afirmarIgual(veces(conMotion, 'transform-origin:'), 13, '  las trece cajas del tramo traen su punto interior ESCRITO en el primer render: doce piezas y el cartel')
+afirmarIgual(veces(conMotion, 'data-pieza-de='), 12, '  y las doce piezas se identifican una por una')
+controlPositivo('el chequeo de las paradas ve un ancla sin `href`', '<a>El Garage</a>', (html: string) => paradasDeTabulacion(html).length === 1)
+controlPositivo('  y ve una parada sin nombre', '<a href="https://esquinaestudio.com.ar"></a>', (html: string) => paradasDeTabulacion(html).every((p) => p.rotulo.trim() !== ''))
+
+// ════════════════════════════════════════════════════════════════════════════
 cerrar('trabajos.invariant')

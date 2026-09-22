@@ -241,6 +241,52 @@ export function altoDeSecuenciaPinneada(pasos: number): string {
 const PASOS_DE_TRABAJOS = 3
 const PASOS_DE_SERVICIOS = 3
 
+/**
+ * ⚠️ **LAS PANTALLAS DE NÚMEROS — recorrido de cámara sin contenido, y
+ * por qué el recorrido NO puede vivir adentro de Trabajos.**
+ *
+ * Números está desconectada: no renderiza nada. Pero el tramo `números` de la
+ * coreografía sigue existiendo —`derivarAnclaje` exige los seis— y lleva una
+ * pose de cámara entera, de `CHOREO_KEYFRAMES` en 0,375 a la de 0,5. Con la
+ * sección en `1svh` ese tramo se cruzaba en nueve píxeles: **la cámara se
+ * teletransportaba** en la costura Quiénes somos → Trabajos.
+ *
+ * PORTFOLIO intentó mudar ese recorrido a un preludio adentro de Trabajos. No
+ * alcanza, y la razón es estructural: **un tramo sólo avanza sobre el scroll de
+ * SU sección.** Mudarlo pide o fusionar dos tramos —rompe cinco archivos de
+ * calibración de `probe-escena`— o correr el borde `to` del tramo —rompe
+ * «cada tramo cierra en su pose», `s9-recorrido`—. Las dos rompen el
+ * esqueleto de la coreografía para mover un recorrido que esta sección ya sabe
+ * llevar. Así que lo lleva ella, vacía: lo que se ve mientras dura es la sala
+ * moviéndose, que es exactamente lo que el tramo tenía que mostrar.
+ *
+ * ⚠️ **DOS, Y EL NÚMERO NO SE ELIGIÓ: LO PONE EL TECHO DE VELOCIDAD.**
+ *
+ * Eran cuatro (la calibración de B2, para una sección con seis piezas que leer),
+ * después tres, y el pasaje seguía siendo largo. Lo que impide seguir bajando es
+ * una propiedad que el repo ya mide y ya afirma: `s13b-escena` exige que **el
+ * arranque siga siendo el tramo más rápido del recorrido**, en alturas de cuadro
+ * por PANTALLA de scroll. Medido con `perfilDeSegmentos` sobre la pista de hoy:
+ *
+ *     arranque (hero)   3,4126   ← el techo
+ *     cierre            2,7427
+ *     números con 3     1,8574   (54,4 % del arranque)
+ *     números con 2     2,7860   (81,6 % del arranque)
+ *     números con 1,75  3,1840   (93,3 %)
+ *     números con 1,5   3,7147   ROMPE el techo
+ *
+ * El piso teórico está en **1,6328 pantallas**, que es donde el tramo empataría
+ * al arranque. Dos es el entero más chico que entra, y entra con 18,4 % de
+ * margen; 1,75 entraría con 6,7 %, que es margen para que lo rompa la próxima
+ * recomposición de una pose. **Dos, entonces, y por eso.**
+ *
+ * Se exporta porque hay otros dos que necesitan la cuenta y ninguno puede
+ * inventarla: `lightArc.ts` corta el atardecer en la última de estas pantallas, y
+ * `trabajos/geometria.ts` deriva de acá **dónde se dispara la noche** — el
+ * disparo tiene que caer al EMPEZAR este tramo, no al terminarlo.
+ */
+export const PANTALLAS_DE_NUMEROS = 2
+
 export const SECCIONES: readonly Seccion[] = [
   /**
    * ⚠️ **EL HERO ES LA ÚNICA FILA CON DOS SUPERFICIES, y la decidió el dueño.**
@@ -340,25 +386,27 @@ export const SECCIONES: readonly Seccion[] = [
    */
   { id: 'quienes-somos', numero: '02', nombre: 'Quiénes somos', superficie: 'papel-transparente', alto: '300svh' },
   /**
-   * NÚMEROS — 400svh. **B2 la subió de 100, y las dos mitades del número están
-   * medidas.** El detalle entero, con sus instrumentos, en `B2-DELTAS.md` §3.
+   * ⚠️ NÚMEROS — DESCONECTADA, PERO CON SU SCROLL. No renderiza: no hay cifras
+   * reales y no las va a haber (`DIRECCION-ESCENA.md` §7.34), así que `registro`
+   * monta acá un marcador sin contenido. El componente, sus archivos y
+   * `PEDIDO_NUMEROS` NO se tocaron: sólo salieron del registro.
    *
-   * 1. **El techo de velocidad de la cámara.** El tramo `números` mueve la
-   *    cámara **2,179 alturas de cuadro** (arco medido con `speedAt`, el mismo
-   *    instrumento de `s13b-soporte.ts`). Con UNA pantalla eso son 2,179
-   *    alturas por pantalla de scroll, **el segmento más rápido del recorrido**
-   *    y 2,31× el ritmo parejo. Con el techo en 1,0 el tramo pide 3 pantallas.
-   * 2. **La densidad de acontecimientos.** La sección tiene seis piezas que
-   *    pueden llegar por separado —el titular con su entrada, más las cinco
-   *    cifras— y a **0,67 pantallas por acontecimiento**, que es el hueco más
-   *    chico medido en la referencia, seis piezas piden **4,0 pantallas**.
+   * El alto se queda porque **el scroll no es de la sección, es del tramo**:
+   * acá corre la pose de cámara que va de 0,375 a 0,5, y sin píxeles que
+   * recorrer la cámara salta. Por qué DOS, y por qué no se puede mudar a
+   * Trabajos: `PANTALLAS_DE_NUMEROS`.
    *
-   * Manda el mayor de los dos, y es el segundo. ⚠️ Con 100svh esta sección
-   * medía **cero acontecimientos** —barrido de estilos en línea a 1920, paso de
-   * 120 px— y era la mitad del hueco de 2,44 pantallas sin que pase nada, el
-   * peor del sitio contra 1,56 de la referencia.
+   * `papel-transparente`: el panel no pinta fondo, así que lo que se ve mientras
+   * dura es la sala. Devolver la sección a como estaba es una línea acá y otra
+   * en `registro.tsx`.
    */
-  { id: 'numeros', numero: '03', nombre: 'Números', superficie: 'papel-transparente', alto: '400svh' },
+  {
+    id: 'numeros',
+    numero: '03',
+    nombre: 'Números',
+    superficie: 'papel-transparente',
+    alto: altoDeSecuenciaPinneada(PANTALLAS_DE_NUMEROS),
+  },
   /**
    * TRABAJOS — la segunda secuencia pinneada, y la primera con contenido.
    *
@@ -375,6 +423,8 @@ export const SECCIONES: readonly Seccion[] = [
     // noche detrás: el arco del sol baja a 0,08 mientras esta sección entra
     // (`_lib/escena/lightArc.ts`). Los tres proyectos vienen del fondo oscuro.
     superficie: 'oscuro-transparente',
+    // Sin preludio: las tres pantallas son los tres proyectos. El recorrido de
+    // cámara lo lleva Números, que es de quién es el tramo.
     alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
     pinneada: 'desde-escritorio',
     pasosDeLaSecuencia: PASOS_DE_TRABAJOS,

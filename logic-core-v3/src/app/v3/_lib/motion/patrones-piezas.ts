@@ -120,7 +120,12 @@ export const P7: Patron = {
       hasta: 1,
       curva: 'entrada',
       claves: [
-        { clave: 'translateZ', desde: 0, hasta: 1000 },
+        // ⚠️ PORTFOLIO · HACIA ATRÁS, NO HACIA ADELANTE. Salía en `+1000`, o sea
+        // creciendo hacia el ojo, y lo que el texto tiene que hacer al entregar
+        // el cuadro es ALEJARSE. Es un signo y nada más: la curva, la duración y
+        // el corte de tramos no se tocan. P7 lo consume una sola sección
+        // —Trabajos— así que el cambio no viaja a ninguna otra.
+        { clave: 'translateZ', desde: 0, hasta: -1000 },
         { clave: 'autoAlpha', desde: 1, hasta: 0 },
         { clave: 'scale', desde: 1, hasta: 1 },
       ],
@@ -129,7 +134,7 @@ export const P7: Patron = {
   ],
   piezas: { min: 12, max: 12, nota: '12 rutas ancladas resueltas contra el DOM vivo' },
   elementos: 'div, h2, img, a — DOM, no objetos de three.js',
-  efecto: 'los planos vienen desde muy atrás, llegan, y siguen de largo hacia adelante',
+  efecto: 'las piezas vienen desde muy atrás, llegan, y se alejan otra vez al fondo',
   perspectivaPx: 1000,
 }
 

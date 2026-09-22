@@ -61,6 +61,7 @@ import { celosiaSunSpread } from './celosiaPenumbra'
 import { writeCelosiaLayers, type CelosiaUniforms } from './celosiaShader'
 import type { MoireHandle } from './MoireScreen'
 import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
+import { nivelConLaNocheDisparada } from './nocheDisparada'
 import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
@@ -356,6 +357,8 @@ export function OrbitRig({
       const progress = rigValues.progress
       sampleTrack(track, progress, target)
       sampleLightArc(progress, arc)
+      // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.
+      arc.level = nivelConLaNocheDisparada(arc.level)
 
       // 1b · Al ENTRAR al modo, la pose amortiguada arranca desde donde estaban
       //      los sliders: el cambio de modo desliza en vez de saltar.

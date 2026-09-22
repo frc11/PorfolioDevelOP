@@ -90,10 +90,12 @@ export const INVENTOS = {
   numerosRespuesta: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '6 h' },
   numerosProcesos: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '31' },
 
-  // ── Trabajos · la métrica al lado de cada nombre. Los NOMBRES son reales ─
-  trabajosEsquina: { marcador: '[MÉTRICA]', pedido: '[MÉTRICA]', mentira: 'de 3 a 14 consultas por semana' },
-  trabajosGarage: { marcador: '[MÉTRICA]', pedido: '[MÉTRICA]', mentira: 'de 2 a 11 visitas agendadas' },
-  trabajosBanu: { marcador: '[MÉTRICA]', pedido: '[MÉTRICA]', mentira: 'de 40 a 260 pedidos al mes' },
+  // ⚠️ PORTFOLIO · Trabajos tenía acá las TRES métricas que iban al lado de cada
+  // nombre. Se fueron con la pastilla que las mostraba: no hay nada medible en
+  // esos tres trabajos y no lo va a haber, así que el pedido se cierra en vez de
+  // quedar abierto para siempre. Es la misma razón —y la misma forma— con la que
+  // Quiénes somos retiró sus dos frases: **una casilla que nadie consume es una
+  // mentira que sigue declarada.**
 
   // ⚠️ Quiénes somos tenía acá las dos frases de «qué hace cada uno en un proyecto».
   // Se fueron con los recuadros punteados que las mostraban: la ficha de cada persona

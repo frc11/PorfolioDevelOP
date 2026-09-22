@@ -39,8 +39,15 @@ export const FUENTES: readonly { readonly archivo: string; readonly texto: strin
   // B12: las piezas y la capa de la gota salieron de `Trabajos.tsx` al mudar el
   // título y la bajada al escenario. Se despachan igual, así que se leen igual.
   'piezas.tsx',
+  // El trabajo con sus dos medios: la etapa 1 del portfolio lo volvió pieza de
+  // composición, así que entra a la fuente que el instrumento lee.
+  'Proyecto.tsx',
   'CapaDeLaGota.tsx',
   'gota.ts',
+  // PORTFOLIO: el túnel, con el mismo reparto que la gota — el núcleo puro y la
+  // capa fina que lo escribe.
+  'CapaDelTunel.tsx',
+  'tunel.ts',
   'geometria.ts',
   'asentamiento.ts',
   'contenido.ts',
@@ -48,7 +55,7 @@ export const FUENTES: readonly { readonly archivo: string; readonly texto: strin
 
 /** El fuente de la COMPOSICIÓN y el de las PIEZAS, juntos: desde B12 los
  *  `patron="…"` viven en el segundo y el marcado de la sección en los dos. */
-export const FUENTE_DE_LA_COMPOSICION: string = FUENTES.filter((f) => f.archivo === 'Trabajos.tsx' || f.archivo === 'piezas.tsx')
+export const FUENTE_DE_LA_COMPOSICION: string = FUENTES.filter((f) => f.archivo === 'Trabajos.tsx' || f.archivo === 'piezas.tsx' || f.archivo === 'Proyecto.tsx' || f.archivo === 'CapaDelTunel.tsx')
   .map((f) => f.texto)
   .join(String.fromCharCode(10))
 

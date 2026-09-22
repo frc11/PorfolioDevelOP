@@ -1,175 +1,175 @@
 'use client'
 
-import { useTransform, type MotionValue } from 'motion/react'
+import { useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
+import { useRef } from 'react'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { CanalDePieza } from '../_contrato/canales'
+import { palabrasDe } from '../../_lib/palabras'
+import { CanalDePiezas } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MarcaDeSeccion } from '../_contrato/Seccion'
 
 import { CONTENIDO } from './contenido'
-import { CAJA_DE_LA_CAPTURA, GEOMETRIA, localDeLaPortada, localDelPlano } from './geometria'
+import {
+  CAJA_DEL_CARTEL,
+  CARTEL,
+  ORIGEN_DEL_CARTEL,
+  MEDIDA_DEL_CUERPO_CH,
+  VENTANA_DE_LA_PINTURA,
+  clasesDelCuerpoDelCartel,
+  enLaVentana,
+} from './geometria'
 import { Proyecto } from './Proyecto'
+import { estiloDelLugar, poseDelGesto, transformDeLaPose } from './tunel'
 
 /**
- * LAS PIEZAS QUE EL ESCENARIO MONTA — un plano, la portada y la rama quieta.
+ * LAS PIEZAS DE TEXTO QUE EL ESCENARIO MONTA — el cartel y la rama quieta.
  *
- * ── Por qué viven acá y no en `Trabajos.tsx` (B12) ────────────────────────
- *
- * Porque ese archivo pasó las 300 líneas al mudar el título y la bajada al
- * escenario, y la regla del repo es que se parte. **El corte es por TEMA y no
- * por tamaño**, el mismo que `geometria.ts` ya usó: allá viven los números,
- * en `Trabajos.tsx` la COMPOSICIÓN —qué monta la sección y en qué orden— y acá
- * las PIEZAS que esa composición monta. Quien cambia qué entra abre aquél;
- * quien cambia cómo se ve una pieza abre éste.
- *
- * Las tres comparten una propiedad y por eso están juntas: **cada una es una
- * caja `absolute inset-0` que se consume con el progreso del bloque de P7**, o
- * su equivalente quieto. Ninguna sabe dónde cae en el recorrido; eso lo decide
- * `geometria.ts`, que es quien reparte.
+ * Los nombres de los proyectos ya NO están acá: se mudaron a `CapaDelTunel`, que
+ * es donde viven los elementos anclados a una esquina. Era la última pieza que
+ * resolvía su entrada con otro vocabulario —llegaba de la profundidad con P7 y por
+ * el eje vertical con P2— y el tramo tiene dos verbos, no cuatro.
  */
 
-/**
- * UN PLANO — el proyecto `indice`, con SU tercio del recorrido. **[B2]**
- *
- * El progreso del bloque es uno solo y los tres planos cuelgan de él; lo que
- * cambia es que cada uno lo lee por `localDelPlano`, que le da su tramo. Es el
- * mismo mecanismo que Servicios usa para su secuencia —un número, N canales— y
- * la cuenta vive en `geometria.ts`, con la medición que la fuerza.
- *
- * `cantidad = 1` e `indice = 0` en el canal: **el escalonado de P7 queda inerte
- * a propósito** (`cantidad − 1 = 0`), porque el reparto ya no es del cronograma
- * sino del scroll. Ningún valor de P7 se toca.
- *
- * ⚠ Un componente y no un `useTransform` adentro del `children` del bloque: ese
- * `children` corre durante el render de OTRO componente, así que un hook ahí
- * sería un hook condicional del bloque. Acá cada plano tiene el suyo, en orden
- * fijo y con cantidad fija.
- */
-export function PlanoDelProyecto({
-  progreso,
-  indice,
-  proyecto,
-}: {
-  readonly progreso: MotionValue<number>
-  readonly indice: number
-  readonly proyecto: (typeof CONTENIDO.proyectos)[number]
-}): React.JSX.Element {
-  const local = useTransform(progreso, (p) => localDelPlano(p, indice))
-  return (
-    <CanalDePieza progreso={local} patron="P7" cantidad={1} indice={0} className="absolute inset-0 flex items-center">
-      {/* La MISMA grilla de tres, y el plano ocupa DOS de sus tres columnas
-          —ver `columnasDelPlano`—: con una sola, la tarjeta medía 394 px adentro
-          de una pantalla que le deja 825 y quedaban 463 px de banda vacía
-          debajo. La clase va literal porque Tailwind escanea el fuente. */}
-      {/* ⚠️ B12 · LA MISMA MEDIDA, AHORA CENTRADA. Era una celda de 2 en una
-          `Grilla` de 3 —o sea pegada a la izquierda— y el humano pidió *«que
-          esté centrado todo lo del portfolio»*. El ANCHO no cambia: la clase
-          reconstruye 2 de 3 columnas con los tokens de la propia grilla. El
-          `Envoltorio` de acá adentro es el que trae el relleno lateral y el tope
-          de 1920 que antes ponía el de la sección. */}
-      <Envoltorio>
-        <div className={GEOMETRIA.claseDeLaMedidaDelPlano}>
-          <Proyecto proyecto={proyecto} rotulo={CONTENIDO.rotuloDeLaMetrica} caja={CAJA_DE_LA_CAPTURA} />
-        </div>
-      </Envoltorio>
-    </CanalDePieza>
-  )
-}
+/** Las palabras de la bajada, partidas una sola vez. El espacio va ADENTRO de la
+ *  pieza y adelante de la palabra: dos piezas vecinas sin él se anuncian pegadas,
+ *  y `s10-acceso` §8 compara el texto anunciado de las dos ramas carácter por
+ *  carácter. Así la concatenación devuelve la bajada exacta de la rama quieta. */
+const PALABRAS_DE_LA_BAJADA = palabrasDe(CONTENIDO.bajada)
 
 /**
- * LA PORTADA — el título y la bajada de la sección, en el escenario. **[B12]**
+ * EL CARTEL — «Portfolio» y su bajada, anclados arriba y a la derecha del logo.
  *
- * > *«Que no haya info arriba de eso, sino que la info venga como las imágenes.»*
+ * ── ⚠️ NACE Y CRECE, Y DESPUÉS HUYE. Los dos verbos, y ninguno más ───────
  *
- * ── El defecto que arregla, en una línea ──────────────────────────────────
+ * Subía desde abajo con P2 y se hundía un 60 % de su propio alto para irse. Las
+ * dos mitades se jubilan: ahora **crece desde su esquina de arriba a la
+ * izquierda**, que queda clavada, y **se va alejándose en z mientras se
+ * desvanece** — al mismo tiempo que la primera foto nace. Deslizarse hacia abajo
+ * para desaparecer ya no existe en este tramo.
  *
- * El título y la bajada estaban CLAVADOS en el tope del hijo pinneado: dos
- * pantallas enteras de scroll con un bloque de texto quieto arriba y las
- * tarjetas entrando debajo. El humano lo grabó y pidió las dos cosas juntas: que
- * el portfolio esté centrado, y que la info **venga como las imágenes** en vez
- * de estar antes que ellas.
+ * Y con eso se cierra solo el margen de 1 px que el hundido dejaba contra el pie
+ * del cuadro: el cartel ya no baja, así que no hay nada que pueda asomar.
  *
- * ── ⚠️ CÓMO LLEGA Y CÓMO SE VA, SIN TOCAR UN VALOR DE P7 ──────────────────
+ * ── El cuerpo se pinta, y por eso no pasa por `<Cuerpo>` ────────────────
  *
- * La portada es **el plano de índice −1** del mismo reparto: `localDeLaPortada`
- * es `localDelPlano(progreso, -1)`, la MISMA función pura, con el índice
- * inmediatamente anterior al primer proyecto. Consecuencias, todas derivadas y
- * ninguna elegida:
+ * Se enciende palabra por palabra con `CanalDePiezas` y el patrón **P3**
+ * —`opacity 0,3 → 1`, sin mover nada de lugar—, el mismo canal del contrato que
+ * usa Servicios. No se copió nada de ese lane: el canal vive en
+ * `_contrato/canales`, el partidor en `_lib/palabras`, los dos compartidos.
  *
- *   · En `progreso = 0` su local vale el CORTE de P7, o sea la pose aterrizada:
- *     la portada ya está compuesta cuando la sección asoma por el pie del cuadro.
- *   · Entre 0 y 1/3 corre su SALIDA —del corte a 1—, o sea se va por delante de
- *     la cámara con el mismo gesto con el que se irán los tres proyectos.
- *   · Su salida se **superpone con la llegada del primer plano** exactamente
- *     como la de un plano con la del siguiente. Es el cruce que la meseta de
- *     B4-A ya garantiza entre consecutivos, aplicado un índice antes.
+ * La pintura corre exactamente en la MESETA (`VENTANA_DE_LA_PINTURA`): el único
+ * tramo en que el cartel no está escalando ni alejándose.
  *
- * **Nada de esto toca lo calibrado**: `GEOMETRIA.planos` sigue siendo 3, la
- * meseta se deriva de 3, el barrido de §16 recorre el pin —donde la portada ya
- * no está— y el reparto en tercios de B2 no se mueve un bit. La portada no es un
- * cuarto paso: es el índice −1 de los tres que ya había.
+ * ── Por qué escribe el estilo a mano y no por un canal ─────────────────
  *
- * ── El `h2` sigue nombrando la región ─────────────────────────────────────
- *
- * `idDelTitularDeSeccion` va acá, en la caja que contiene el titular. Que la
- * portada se vaya de la vista no le saca el nombre a la `<section>`: el elemento
- * sigue en el árbol —P7 mueve `transform` y `opacity`, no lo desmonta— y el
- * nombre accesible se computa igual.
+ * Porque el gesto es el de `tunel.ts` y no el de un patrón del sistema: la misma
+ * función de pose que mueve las fotos y los nombres mueve esto. Que las tres
+ * cosas compartan `poseDelGesto` **es** el requisito de un vocabulario único.
  */
 export function PortadaDeTrabajos({
   seccion,
   progreso,
 }: PropsDeSeccion & { readonly progreso: MotionValue<number> }): React.JSX.Element {
-  const local = useTransform(progreso, localDeLaPortada)
+  const cartel = useRef<HTMLDivElement | null>(null)
+  const pintura = useTransform(progreso, (p) =>
+    enLaVentana(enLaVentana(p, CARTEL), VENTANA_DE_LA_PINTURA),
+  )
+
+  useMotionValueEvent(progreso, 'change', (p) => {
+    const el = cartel.current
+    if (el === null) return
+    const pose = poseDelGesto(enLaVentana(p, CARTEL), CARTEL)
+    if (pose === null) {
+      el.style.setProperty('visibility', 'hidden')
+      return
+    }
+    el.style.setProperty('visibility', 'visible')
+    el.style.setProperty('opacity', pose.opacidad.toFixed(4))
+    el.style.setProperty('transform', transformDeLaPose(pose))
+  })
+
+  const inicial = poseDelGesto(enLaVentana(progreso.get(), CARTEL), CARTEL)
+  const lugar = estiloDelLugar(CAJA_DEL_CARTEL, ORIGEN_DEL_CARTEL)
+
   return (
-    <CanalDePieza progreso={local} patron="P7" cantidad={1} indice={0} className="absolute inset-0 flex items-center">
-      <Envoltorio>
-        <div className={GEOMETRIA.claseDeLaMedidaDelPlano}>
-          <div className="flex flex-col gap-4">
-            <Titular nivel="titulo-m" como="h2" id={idDelTitularDeSeccion(seccion.id)}>
-              {CONTENIDO.titular}
-            </Titular>
-            <Cuerpo>{CONTENIDO.bajada}</Cuerpo>
-          </div>
-        </div>
-      </Envoltorio>
-    </CanalDePieza>
+    <div
+      ref={cartel}
+      data-pieza="cartel"
+      className="absolute flex flex-col gap-6 will-change-transform"
+      style={
+        inicial === null
+          ? { ...lugar, visibility: 'hidden' }
+          : {
+              ...lugar,
+              visibility: 'visible',
+              opacity: inicial.opacidad,
+              transform: transformDeLaPose(inicial),
+            }
+      }
+    >
+      <Titular nivel="display-xl" como="h2" id={idDelTitularDeSeccion(seccion.id)}>
+        {CONTENIDO.titular}
+      </Titular>
+      {/* La medida va como estilo en línea y no como clase arbitraria: el número
+          vive en `geometria.ts`, que es donde se decide, y así no hay una medida
+          deletreada en ningún fuente que el escaneo de Tailwind pueda levantar. */}
+      <div style={{ maxWidth: `${MEDIDA_DEL_CUERPO_CH}ch` }}>
+        <CanalDePiezas
+          progreso={pintura}
+          patron="P3"
+          cantidad={PALABRAS_DE_LA_BAJADA.length}
+          como="span"
+          contenedor={clasesDelCuerpoDelCartel()}
+          render={(i) => (i === 0 ? PALABRAS_DE_LA_BAJADA[i] : ` ${PALABRAS_DE_LA_BAJADA[i]}`)}
+        />
+      </div>
+    </div>
   )
 }
 
 /**
- * LA RAMA QUIETA — el MISMO proyecto, en fila, y la portada arriba.
+ * LA RAMA QUIETA — la misma sección, leída como lista.
  *
- * Abajo de 1025 y con `prefers-reduced-motion` no hay coreografía, así que no
- * hay «venir como las imágenes»: no hay imágenes que vengan. La portada vuelve a
- * ser un encabezado y los tres proyectos se apilan, cada uno con su pantalla.
- * **Se declara como asimetría deliberada** y no se disimula: la rama quieta es
- * la que tiene que poder leerse sin movimiento, y un título que aparece y
- * desaparece sin gesto sería un título que se perdió.
+ * Abajo de 1025 no hay coreografía: no hay preludio que recorrer, no hay
+ * conversión que mirar y no hay túnel. Queda el encabezado y los tres trabajos,
+ * repartidos sobre el alto que la tabla declara —`min-h-[inherit]` hereda el
+ * `min-height` del panel, que es el único lugar donde ese número vive— para que
+ * el preludio no deje una pantalla vacía. La oscuridad la pinta la sección; acá
+ * no hay velo que poner.
  */
 export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
-    <Envoltorio className="py-4 escritorio:pt-16 escritorio:pb-8" claseDeContenido="flex h-full flex-col gap-8">
+    <Envoltorio
+      className="max-escritorio:min-h-[inherit] py-12"
+      claseDeContenido="flex max-escritorio:min-h-[inherit] flex-col justify-between gap-12"
+    >
       <Grilla columnas="lateral" className="shrink-0">
         <MarcaDeSeccion />
         <div className="flex flex-col gap-2">
-          <Titular nivel="titulo-m" como="h2" id={idDelTitularDeSeccion(seccion.id)} className="max-w-[var(--breakpoint-medio)]">
+          <Titular
+            nivel="titulo-m"
+            como="h2"
+            id={idDelTitularDeSeccion(seccion.id)}
+            className="max-w-[var(--breakpoint-medio)]"
+          >
             {CONTENIDO.titular}
           </Titular>
           <Cuerpo className="max-w-[var(--breakpoint-medio)]">{CONTENIDO.bajada}</Cuerpo>
         </div>
       </Grilla>
-      <Grilla columnas={1} className="content-center escritorio:h-full escritorio:grid-cols-3">
-        {CONTENIDO.proyectos.map((proyecto) => (
-          <div key={proyecto.nombre} className="flex min-h-svh flex-col justify-center escritorio:min-h-0">
-            <Proyecto proyecto={proyecto} rotulo={CONTENIDO.rotuloDeLaMetrica} caja={CAJA_DE_LA_CAPTURA} />
-          </div>
-        ))}
-      </Grilla>
+      {/* Una pantalla por trabajo, como antes del preludio. Con el `min-h-svh`
+          puesto el reparto de `justify-between` tiene que estirar tres pantallas
+          entre cuatro huecos y no siete entre cuatro: el ritmo de la lista se
+          parece al de una pantalla por proyecto en vez de al de un hueco. */}
+      {CONTENIDO.proyectos.map((proyecto, i) => (
+        <div key={proyecto.nombre} className="flex min-h-svh flex-col justify-center">
+          <Proyecto proyecto={proyecto} indice={i} />
+        </div>
+      ))}
     </Envoltorio>
   )
 }

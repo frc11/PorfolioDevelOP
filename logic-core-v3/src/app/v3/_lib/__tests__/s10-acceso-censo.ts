@@ -106,7 +106,12 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   const animada = sinLoInventadoEnMarcado(marcadoAnimado)
   const marcas = marcadoresAnunciados(quieta)
   imprimirMarcadores(marcas)
-  afirmarIgual(marcas.length, 40, 'son 40 marcadores ANUNCIADOS en la rama quieta — eran 43 hasta que V3-D cerró las tres capturas')
+  // ⚠️ PORTFOLIO — 41 → 32, y la resta es de una sola sección. Trabajos tenía
+  // NUEVE casillas abiertas: tres `[LOGO]`, tres `[CAPTURA]` y tres `[TEXTO]`
+  // —los rubros—. Llegaron los seis archivos y el dueño dictó los tres rubros,
+  // así que las nueve se cerraron JUNTAS y esta cifra baja por lo único por lo
+  // que puede bajar: porque llegaron los datos. Trabajos ya no pide nada.
+  afirmarIgual(marcas.length, 32, 'son 32 marcadores ANUNCIADOS en la rama quieta — los 41 menos las NUEVE casillas que Trabajos cerró de una vez: seis archivos reales y tres rubros dictados')
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
