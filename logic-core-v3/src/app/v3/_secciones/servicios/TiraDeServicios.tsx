@@ -129,6 +129,36 @@ function progresoEnLaLinea(medida: MedidaDeLaTira, indice: number, fraccion: num
 export function fronterasDeEstado(medida: MedidaDeLaTira): number[] {
   return SERVICIOS.map((_, i) => progresoEnLaLinea(medida, i, LINEA_DE_REFERENCIA))
 }
+
+/**
+ * ⚠️ **HAY UNA FRONTERA POR SERVICIO Y NI UNA MÁS, Y ESO ES UNA REGLA.**
+ *
+ * Hubo un intento de devolver la última porción de la torta a su tamaño
+ * agregando acá una frontera de más, «sin rótulo detrás»: el rodillo llegaba a
+ * un estado para el que no existe ranura. Costó tres clamps —el traslado, las
+ * vueltas del giro y el servicio del botón— y **aun así rompió la sección**: con
+ * las ranuras apagándose salvo las que participan del relevo, en ese estado no
+ * quedaba ninguna encendida y el bloque del título entero desaparecía.
+ *
+ * La lección es de forma, no de calibración: **un estado de la secuencia es una
+ * ranura del rodillo, y al revés.** Lo que no tiene rótulo no es un estado. La
+ * vuelta de la torta cuelga ahora del punto de pintura directamente
+ * (`cierreDeLaPintura`), que es donde el pedido la había puesto siempre.
+ *
+ * `s6-traspaso` §18 lo afirma por los dos lados: que las fronteras más una sean
+ * exactamente las ranuras, y que en todo el recorrido haya siempre una ranura
+ * encendida.
+ */
+
+/**
+ * Dónde termina de pintarse la ÚLTIMA porción. Es el punto en el que la torta
+ * empieza a volver a su tamaño: el mismo rango que gobierna su párrafo, así que
+ * los dos no se pueden separar.
+ */
+export function cierreDeLaPintura(medida: MedidaDeLaTira): number {
+  return rangoDePintura(medida, SERVICIOS.length - 1)[1]
+}
+
 /** Dónde empieza y dónde termina de pintarse el párrafo del bloque `i`. */
 export function rangoDePintura(medida: MedidaDeLaTira, indice: number): [number, number] {
   // Empieza cuando el tope del bloque entra por el borde de ABAJO (fracción 1).

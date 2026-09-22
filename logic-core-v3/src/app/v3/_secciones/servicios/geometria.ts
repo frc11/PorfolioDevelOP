@@ -442,6 +442,36 @@ export const CLASE_DE_LA_VENTANA_DEL_CTA = 'grid w-fit justify-items-start'
  * copia del rótulo (`text-cuerpo`, `font-semi`, `tracking-texto`) y el padding
  * es el del botón (`--spacing-2`), los dos leídos de `Cta.tsx` y `cta.css`.
  */
+/**
+ * LAS CLASES QUE LE ENTRAN AL BOTÓN DESDE AFUERA — y qué compra cada una.
+ *
+ * `Cta` es compartido con el Hero y el Cierre, así que no se toca: todo lo que
+ * esta sección necesita de él entra por `className`, apuntando a sus partes con
+ * variantes, y **con sus propios tokens**, que resuelven adentro suyo porque es
+ * ahí donde están declarados.
+ *
+ *   · el ancho mínimo de la ventana, para que la celda de la grilla mande;
+ *   · **el alto de la ventana clavado en su valor CRECIDO** y el subrayado
+ *     subido por la diferencia entre los dos altos.
+ *
+ * ── ⚠️ POR QUÉ ESAS DOS ÚLTIMAS, Y POR QUÉ VAN JUNTAS ─────────────────────
+ *
+ * La ventana del botón CRECE al relevar. Son 4 px, y el botón es el último de
+ * una columna donde la torta ocupa el sobrante y se centra en él: cada píxel que
+ * el botón crece le saca uno al sobrante y **corre la torta medio**. Medido: el
+ * disco bajaba 2,0 px a los 745 ms del traspaso, que es justo cuando el botón
+ * releva, y con una curva —no era el giro, era esto.
+ *
+ * Clavar la ventana en su alto crecido deja la caja quieta, pero sola baja el
+ * subrayado 4 px y el botón de esta sección dejaría de parecerse al del Hero.
+ * Por eso la segunda: le devuelve al subrayado exactamente la diferencia entre
+ * los dos altos, escrita como esa resta y no como el número, así que si alguien
+ * cambia el crecimiento las dos se mueven juntas. El alto total del botón y la
+ * posición de su subrayado quedan **idénticos a los de hoy**, y constantes.
+ */
+export const CLASE_DEL_BOTON_ROTATIVO =
+  'col-start-1 row-start-1 w-full [&_[data-parte=ventana]]:min-w-full [&_[data-parte=ventana]]:min-h-[var(--cta-ventana-hover)] [&_[data-parte=subrayado]]:mt-[calc(var(--cta-ventana-reposo)-var(--cta-ventana-hover))]'
+
 export const CLASE_DEL_FANTASMA_DEL_CTA =
   'invisible col-start-1 row-start-1 whitespace-nowrap p-[var(--spacing-2)] text-cuerpo font-semi tracking-texto leading-texto'
 

@@ -31,6 +31,7 @@ import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from 
 import { cuentaDeAtributo, hayAnidamiento, quitarSubarbolesConAtributo, valoresDeAtributo } from '../_invariantes/marcado'
 import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinPantalla, cuenta, focalizablesDe, interiorDe, srOnlyQueTapanContenido, textoPegado } from './deteccion'
 import { afirmarLaTipografia } from './s6-tipografia'
+import { afirmarElTraspaso } from './s6-traspaso'
 import { CONTENIDO, CTA_POR_SERVICIO, LONGITUDES, ROTULO_DE_LA_INTRO, palabrasDelParrafo } from './contenido'
 import { CtaQueRota } from './CtaQueRota'
 import { CANTIDAD_DE_ESTADOS } from './RodilloDeEstados'
@@ -86,14 +87,26 @@ afirmar(cuenta(animado, /transform:/g) > 0, `CONTROL: con coreografía hay ${cue
 // encima del mismo contenido — que era el defecto.
 afirmarIgual(cuenta(animado, /will-change-transform/g), 2, '  y 2 capas promovidas, una por cosa que se mueve: la tira y el rodillo')
 controlPositivo('el contador vería una capa promovida de más', '<div class="will-change-transform"></div>', (h) => cuenta(h, /will-change-transform/g) === 0)
-// ⚠️ **UNA SOLA OPACIDAD, Y ES LA ENTRADA ATENUADA.** Esta afirmación pidió
-// «más de cero» (P3 y P4), después «exactamente cero» cuando el párrafo pasó a
-// pintarse con un degradado, y ahora UNA: la de la tira, que entra con poco
-// contraste mientras la sección se acerca y se enciende cuando el pin arranca.
-// El número importa porque el modo de falla es el contrario del que parece: no
-// es que sobre una opacidad, es que APAREZCAN varias — una por bloque sería el
-// apagado por capa entrando otra vez por la ventana.
-afirmarIgual(cuenta(animado, /opacity:/g), 1, '  y UNA sola opacidad escrita: la entrada atenuada de la tira, no un apagado por bloque')
+// ⚠️ **LAS OPACIDADES, CONTADAS POR DUEÑO — y el reparto ES la afirmación.**
+//
+// Pidió «más de cero» (P3 y P4), después «exactamente cero» cuando el párrafo
+// pasó a pintarse con un degradado, y después UNA: la de la tira, que entra con
+// poco contraste mientras la sección se acerca. El modo de falla que vigila es
+// el contrario del que parece: no es que sobre una opacidad, es que APAREZCAN
+// varias sobre el contenido — una por bloque sería el apagado por capa entrando
+// otra vez por la ventana.
+//
+// Ahora hay cinco, y por eso se cuentan **separadas**. Las cuatro nuevas son del
+// RODILLO, una por ranura, y no apagan contenido: apagan los rótulos que no
+// participan del relevo, que es lo que impide que el subrayado del estado
+// anterior se asome por el borde de arriba. La puerta que la afirmación cuidaba
+// —la tira— sigue cerrada con su UNA, y ahora se afirma sin que el rodillo la
+// pueda tapar.
+const rodilloParaContar = interiorDe(animado, 'data-rodillo', 'estados')
+const fueraDelRodillo = animado.replace(rodilloParaContar, '')
+afirmarIgual(cuenta(fueraDelRodillo, /opacity:/g), 1, '  y UNA sola opacidad fuera del rodillo: la entrada atenuada de la tira, no un apagado por bloque')
+afirmarIgual(cuenta(rodilloParaContar, /opacity:/g), CANTIDAD_DE_ESTADOS, `  y ${CANTIDAD_DE_ESTADOS} adentro, una por ranura: las que no participan del relevo no se pintan`)
+controlPositivo('el contador vería una opacidad colada en la tira', `${fueraDelRodillo}<div style="opacity:0"></div>`, (h: string) => cuenta(h, /opacity:/g) === 1)
 controlPositivo('el contador vería una opacidad por bloque', '<div style="opacity:0.3"></div><div style="opacity:0.3"></div>', (h) => cuenta(h, /opacity:/g) === 1)
 afirmar(cuenta(animado, /background-position|mask-image/g) > 0, `  CONTROL: lo que sí escribe son ${cuenta(animado, /background-position|mask-image/g)} valores de pintura y máscara`)
 
@@ -545,16 +558,6 @@ controlPositivo('el detector de paradas vería un cartel en vez de un botón', '
  *  como «esta sección no tiene nada que enfocar». */
 console.log(`  ⚠️ el CTA agrega 1 parada de teclado a partir del estado 1, invisible para §6`)
 
-/** La pieza que lleva el giro, y las etiquetas donde motion deriva el origen. */
-const PIEZA_DEL_GIRO = 'giro-de-la-torta'
-const ETIQUETAS_DE_SVG = ['svg', 'g', 'circle', 'path', 'mask', 'rect', 'line']
-
-/** Una porción que abre con su ancla: un círculo sin pintar antes que nada. */
-const ANCLA_DE_LA_PORCION = /<g data-servicio="[^"]*"[^>]*><circle [^>]*fill="none"[^>]*>/g
-
-/** De dónde saca el CTA el servicio con el que se tiñe. */
-const EXPRESION_DEL_ACENTO = /\[ATRIBUTO_DE_SERVICIO\]:\s*SERVICIOS\[([^\]]+)\]/
-
 const fuenteDelCta = fuenteDe('CtaQueRota.tsx')
 const torta = interiorDe(animado, 'data-pieza', 'torta')
 afirmar(torta.length > 0, 'la torta está en el marcado, aunque su estado dependa de la posición')
@@ -564,83 +567,8 @@ afirmarIgual(funcionesDeColorEncontradas(torta).filter((f) => !f.startsWith('col
 
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('17 · Lo que el traspaso rompió y no se ve en una meseta')
-
-/**
- * ⚠️ **LAS CINCO DE ESTA SECCIÓN SE ROMPIERON MIENTRAS EL SITIO SE VEÍA BIEN
- * QUIETO.** Todas pasaron una verificación anterior que midió los estados de
- * reposo y las dio por buenas. Se afirman acá porque ninguna deja rastro en una
- * parada: sólo existen a lo largo del cambio.
- */
-
-/** Con qué etiqueta se publica la pieza que gira. Cadena vacía si no está. */
-function etiquetaDelGiro(html: string): string {
-  const i = html.indexOf(`data-pieza="${PIEZA_DEL_GIRO}"`)
-  if (i < 0) return ''
-  const abre = html.lastIndexOf('<', i)
-  return html.slice(abre + 1, i).trim()
-}
-
-/** ⚠️ **EL GIRO NO PUEDE COLGAR DE UN ELEMENTO SVG, Y ES UNA REGLA DE MOTION.**
- *  Motion le pone `transform-box: fill-box` a todo SVG y le calcula el origen
- *  desde su CAJA DE CONTENIDO. La caja de un `<g>` se la fijan sus hijos YA
- *  transformados, y acá los hijos son las porciones, que en el traspaso se
- *  despegan y crecen: medido, la caja pasaba de 241,68 a 259,85 y arrancaba
- *  8,145 más arriba, así que **el origen del giro se movía mientras el giro
- *  corría** y el centro del disco orbitaba 38,34 px. La caja de un elemento de
- *  HTML no depende de su contenido, así que ahí el 50 %/50 % es su centro pase
- *  lo que pase adentro. Lo que se afirma es la propiedad y no el elemento: por
- *  eso va también la lista de las etiquetas donde la trampa existe. */
-afirmarIgual(etiquetaDelGiro(animado), 'div', 'la pieza que gira es de HTML: su caja no la fija su contenido, así que el origen del giro no se mueve')
-afirmar(!ETIQUETAS_DE_SVG.includes(etiquetaDelGiro(animado)), '  y no es ninguna de las de SVG, donde motion deriva el origen de la caja de contenido')
-controlPositivo('el detector vería el giro puesto sobre un `<g>`, que es de donde se lo sacó', `<g data-pieza="${PIEZA_DEL_GIRO}"></g>`, (h: string) => etiquetaDelGiro(h) === 'div')
-
-/** ⚠️ **Y CADA PORCIÓN LLEVA SU ANCLA, por la misma razón un piso más abajo.**
- *  Sin ella el `scale` de la porción vigente crece desde el centro de SU caja de
- *  contenido —que no es el centro de la torta— y el vértice se despega del
- *  medio. Es un círculo sin pintar del tamaño del `viewBox`: no se ve, y sacarlo
- *  no rompe nada que se note quieto. */
-afirmarIgual(cuenta(torta, ANCLA_DE_LA_PORCION), SERVICIOS.length, `las ${SERVICIOS.length} porciones abren con su ancla: el crecimiento sale del centro de la torta y no del de cada una`)
-controlPositivo('el detector vería una porción que abre sin ancla', '<g data-servicio="web"><mask id="m"></mask></g>', (h: string) => cuenta(h, ANCLA_DE_LA_PORCION) === 1)
-
-/** ⚠️ **Y NINGUNA PORCIÓN SE DIBUJA DOS VECES CORRIDA.** Ésa era la «sombra»:
- *  un canto corrido que la máscara del relleno no cubría, así que las porciones
- *  sin llenar dejaban un disco gris atrás para siempre. No estaba mal calibrado
- *  — un disco corrido no puede volver. */
-afirmarIgual(cuenta(torta, /translate\(/g), 0, 'ninguna pieza de la torta se corre: no hay un segundo disco atrás')
-controlPositivo('el detector vería el canto que se sacó', '<circle transform="translate(0 13)"></circle>', (h: string) => cuenta(h, /translate\(/g) === 0)
-
-/** ⚠️ **EL RODILLO SE MIDE CON EL RECT, NO CON `offsetHeight`.** Un entero por
- *  ranura acumula ~0,14 px de error, y con el bloque apoyado abajo eso sale por
- *  arriba: el subrayado del estado ANTERIOR asomaba 0,11 px en `web` y 0,25 px
- *  en `software`. El margen que queda es de 0,05 px por construcción —el hueco
- *  de 48 px es casi exactamente un renglón de `titulo-l`—, así que el
- *  instrumento no puede redondear. */
-afirmarIgual(cuenta(fuenteDelRodillo, /\.offsetHeight\b/g), 0, 'el rodillo no mide con `offsetHeight`: devuelve enteros y el error acumulado asoma el subrayado anterior')
-afirmar(cuenta(fuenteDelRodillo, /getBoundingClientRect\(\)\.height/g) > 0, '  mide con el alto del rect, que es fraccionario')
-controlPositivo('el detector vería la medición vieja', 'acumulado += ranura.offsetHeight', (f: string) => cuenta(f, /\.offsetHeight\b/g) === 0)
-
-/** ⚠️ **EL ACENTO DEL CTA CUELGA DE ADONDE VA, NO DE LO QUE DICE.** Colgaba de
- *  `mostrado`, que recién se mueve cuando el intercambio termina: medido, el
- *  color cambiaba a los 1.600 ms de un traspaso que arranca a los 200. Lo que se
- *  afirma no es qué variable se usa, sino que la que tiñe esté DEFINIDA a partir
- *  de `destino`, el mismo estado que enciende el relevo. */
-const quienTine = EXPRESION_DEL_ACENTO.exec(fuenteDelCta)?.[1] ?? ''
-afirmar(quienTine !== '' && quienTine !== 'mostrado', `el acento del CTA sale de \`${quienTine}\`, no de lo que el botón dice`)
-afirmar(new RegExp(`(const|let)\\s+${quienTine}\\s*=\\s*destino`).test(fuenteDelCta), '  y ésa sale de `destino`: color y etiqueta cuelgan del mismo estado, así que no se pueden separar')
-controlPositivo('el detector vería el acento colgado de lo que queda después', '{...{ [ATRIBUTO_DE_SERVICIO]: SERVICIOS[mostrado].id }}', (f: string) => (EXPRESION_DEL_ACENTO.exec(f)?.[1] ?? '') !== 'mostrado')
-
-/** ⚠️ **Y LA CURVA DEL DISPARO NO ARRANCA NI FRENA DE GOLPE.** Se afirma la
- *  PROPIEDAD y no los cuatro números, para que se la pueda seguir afinando: una
- *  cúbica sale con pendiente `y1 / x1` y llega con `(1 − y2) / (1 − x2)`, así
- *  que `y1 = 0` y `y2 = 1` es «sale del reposo sin saltar y se posa sin clavar».
- *  La curva anterior era la de las revelaciones de sección, que sale con
- *  pendiente 1,84 — sobre un giro eso se lee como un tirón. */
-afirmarIgual(CURVA_DEL_DISPARO[1], 0, 'la curva del disparo sale del reposo con pendiente 0: no salta')
-afirmar(CURVA_DEL_DISPARO[0] > 0, '  con su punto de control adentro del tramo, que es lo que hace que la pendiente exista')
-afirmarIgual(CURVA_DEL_DISPARO[3], 1, '  y llega con pendiente 0: no clava el final')
-afirmar(CURVA_DEL_DISPARO[2] < 1, '  ídem del otro lado')
-controlPositivo('el detector vería la curva de las revelaciones, que sale con pendiente 1,84', [0.25, 0.46, 0.45, 0.94], (c: readonly number[]) => c[1] === 0 && c[3] === 1)
+// §17 y §18 viven en `s6-traspaso.ts` — misma regla de 300 líneas que §13.
+afirmarElTraspaso(animado, torta, fuenteDelRodillo, fuenteDelCta, fuenteDeLaTira, fuenteDe('GraficoDeTorta.tsx'))
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §13 vive en `s6-tipografia.ts` — es un asunto de `cn()`, no de la sección.

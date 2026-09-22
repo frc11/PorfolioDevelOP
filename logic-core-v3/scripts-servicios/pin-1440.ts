@@ -52,8 +52,16 @@ const RECIBO = `${SALIDAS}/pin-1440-cuadros.json`
 /** Cuadros por segundo de la película. 12 deja los 130 cuadros en ~11 s. */
 const FPS = 12
 
-/** Cuántos cuadros de IDA. 130 a 1440 dan ~37 px de scroll por cuadro. */
-const CUADROS = 130
+/**
+ * Cuántos cuadros de IDA.
+ *
+ * ⚠️ **Subió con el pin.** Eran 130 sobre un recorrido de 4.800 px —~37 px por
+ * cuadro—; el pin pasó de 400svh a 700svh y el recorrido total a 7.500, así que
+ * 130 dejarían 58 px por cuadro y la película se saltearía la mitad del gesto.
+ * 200 devuelven los mismos ~37 px por cuadro que la grabación anterior, o sea
+ * que las dos se pueden comparar cuadro contra cuadro.
+ */
+const CUADROS = 200
 
 /**
  * Cuántos cuadros de VUELTA, subiendo.
@@ -64,7 +72,7 @@ const CUADROS = 130
  * del gesto. Van menos cuadros que la ida —el paso es más grande— porque lo
  * que hay que ver es que reversa, no volver a leer los párrafos.
  */
-const CUADROS_DE_VUELTA = 65
+const CUADROS_DE_VUELTA = 100
 
 /**
  * Cuánto se muestra ANTES y DESPUÉS del pin.

@@ -7,7 +7,11 @@ import { Cta } from '../../_componentes/chrome/Cta'
 import { ROLLOVER_MEDIDO } from '../../_lib/cta'
 import { ATRIBUTO_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
 import { CTA_POR_SERVICIO } from './contenido'
-import { CLASE_DE_LA_VENTANA_DEL_CTA, CLASE_DEL_FANTASMA_DEL_CTA } from './geometria'
+import {
+  CLASE_DE_LA_VENTANA_DEL_CTA,
+  CLASE_DEL_BOTON_ROTATIVO,
+  CLASE_DEL_FANTASMA_DEL_CTA,
+} from './geometria'
 
 /**
  * EL CTA QUE ROTA — y rota con el PROPIO intercambio del botón, no con uno nuevo.
@@ -52,15 +56,26 @@ import { CLASE_DE_LA_VENTANA_DEL_CTA, CLASE_DEL_FANTASMA_DEL_CTA } from './geome
  * `:hover` vuelve a matchear solo y **la animación que corre es la del relevo**.
  * El mismo gesto sirve para las dos cosas, que es lo que el punto pedía.
  *
- * ── ⚠️ EL COLOR SALE DEL DESTINO, NO DE LO QUE EL BOTÓN DICE ──────────────
+ * ── ⚠️ EL COLOR CAMBIA EN EL CRUCE DE LAS COPIAS, NI ANTES NI DESPUÉS ─────
  *
  * El contenedor lleva `[data-servicio]`, así que `--color-acento` se retiñe solo.
- * Y colgaba de `mostrado`, que es lo que el botón DICE: como `mostrado` recién se
- * mueve cuando el intercambio termina, el botón conservaba el acento viejo todo el
- * relevo —medido: el color cambiaba a los 1.600 ms de un traspaso que arranca a los
- * 200—. Cuelga de `destino`, que se escribe en el mismo cuadro en que se le escribe
- * la etiqueta nueva a la copia entrante y en que se enciende el relevo: una sola
- * fuente para las dos cosas, así que no se pueden volver a separar.
+ * De QUÉ estado cuelga ese atributo es todo el asunto, y los dos extremos ya se
+ * probaron y los dos se ven mal:
+ *
+ *   · de `mostrado` —lo que el botón DICE—, el color llega **al final**: medido,
+ *     cambiaba a los 1.600 ms de un traspaso que arranca a los 200;
+ *   · de `destino`, llega **al principio**, antes de que la animación corra, y el
+ *     cartel viejo se queda un rato pintado del color nuevo.
+ *
+ * El instante correcto es el del medio: aquel en que el cartel cambia, que es
+ * cuando las dos copias se cruzan. Por eso el color tiene su propio estado y su
+ * propio reloj —`MS_DEL_CRUCE_DE_COPIAS`, derivado de la curva del sistema y
+ * verificado en el navegador—, colgado del MISMO disparador que la etiqueta.
+ *
+ * ── Y el alto del botón no se mueve ───────────────────────────────────────
+ *
+ * La ventana del botón crece al relevar, y eso corría la torta 2 px. Se arregla
+ * desde afuera, con los tokens del propio botón: ver `CLASE_DEL_BOTON_ROTATIVO`.
  * Y como el subrayado del botón resuelve `var(--color-tinta)` en su propia regla,
  * alcanza con **re-aliasar la tinta al acento en este contenedor**: es un
  * override de token acotado a esta caja, no un color escrito, y es la única
@@ -81,6 +96,29 @@ function etiquetaDe(indice: number): string {
 /** Lo que tarda el subrayado en volver a reposo. Es el dato, no una copia. */
 const REVERSION_MS = ROLLOVER_MEDIDO.subrayado.duracionMs
 const INTERCAMBIO_MS = ROLLOVER_MEDIDO.duraciones.intercambioMs
+
+/**
+ * DÓNDE, DENTRO DEL INTERCAMBIO, SE CRUZAN LAS DOS COPIAS.
+ *
+ * Las dos corren la MISMA duración y la MISMA curva —`--ease-salida`, que es
+ * `cubic-bezier(0.64, 0.1, 0, 1)`— en sentidos opuestos: la que sale va de
+ * opacidad 1 a 0 y la que entra de 0 a 1. O sea que el instante en que se
+ * cambia el cartel es aquel en el que la curva vale **0,5**, y eso no es la
+ * mitad del tiempo: esta curva arranca plana y después se apura.
+ *
+ * Resolviendo la cúbica para `y = 0,5` sale el parámetro 0,4737, y su `x` —que
+ * es la fracción de TIEMPO— vale **0,3582**. Sobre los 1.300 ms del
+ * intercambio, el cruce cae a los 466 ms.
+ *
+ * ⚠️ **Medido en el navegador, y coincide.** Muestreando por cuadro las dos
+ * opacidades computadas durante un relevo: el intercambio arranca a los 777 ms
+ * del salto de scroll y las dos se cruzan a los 1.242 —**465 ms después**—,
+ * contra los 465,7 que da la cuenta. `s6-servicios` §18 vuelve a resolver la
+ * cúbica leyendo el token de `theme-develop.css`, así que mover la curva del
+ * sistema pone esta constante en rojo en vez de desincronizar el color.
+ */
+export const FRACCION_DEL_CRUCE_DE_COPIAS = 0.3582
+const MS_DEL_CRUCE_DE_COPIAS = Math.round(INTERCAMBIO_MS * FRACCION_DEL_CRUCE_DE_COPIAS)
 
 export interface CtaQueRotaProps {
   readonly posicion: MotionValue<number>
@@ -105,6 +143,11 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
    * respuesta importa.
    */
   const [porPuntero, setPorPuntero] = useState(false)
+  /**
+   * De qué color está el botón. No sigue a `destino` ni a `mostrado`: cambia en
+   * el CRUCE de las dos copias, que es el instante en que el cartel cambia.
+   */
+  const [tenido, setTenido] = useState<number | null>(mostrado)
 
   const escribirEntrante = (indice: number): void => {
     const entrante = caja.current?.querySelector('[data-parte="copia-b"]')
@@ -118,6 +161,7 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
     // Aparecer o desaparecer no es un relevo: no hay etiqueta que intercambiar.
     if (siguiente === null || mostrado === null) {
       setMostrado(siguiente)
+      setTenido(siguiente)
       return
     }
     const boton = caja.current?.querySelector('[data-pieza="cta"]')
@@ -142,23 +186,33 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
   }, [revirtiendo, destino])
 
   const relevando = destino !== null && mostrado !== null && destino !== mostrado
+  /** El intercambio de copias está corriendo: el reloj del color cuelga de acá. */
+  const intercambiando = relevando && !revirtiendo
 
   useEffect(() => {
-    if (!relevando || revirtiendo) return
+    if (!intercambiando) return
     const reloj = setTimeout(() => setMostrado(destino), INTERCAMBIO_MS)
     return () => clearTimeout(reloj)
-  }, [relevando, revirtiendo, destino])
+  }, [intercambiando, destino])
+
+  // El color, en el cruce. Mismo disparador que la etiqueta y el mismo reloj:
+  // si el intercambio se corta antes, el `clearTimeout` se lleva los dos.
+  useEffect(() => {
+    if (!intercambiando) return
+    const reloj = setTimeout(() => setTenido(destino), MS_DEL_CRUCE_DE_COPIAS)
+    return () => clearTimeout(reloj)
+  }, [intercambiando, destino])
 
   if (mostrado === null) return null
-  // El acento es el del DESTINO. `destino` sólo es `null` cuando `mostrado`
-  // también lo es —desaparecer se aplica de una—, así que acá nunca cae al `??`.
-  const teñido = destino ?? mostrado
+  // `tenido` sólo es `null` cuando `mostrado` también lo es —aparecer y
+  // desaparecer se aplican de una—, así que acá nunca cae al `??`.
+  const acento = tenido ?? mostrado
 
   return (
     <div
       ref={caja}
       data-pieza="cta-que-rota"
-      {...{ [ATRIBUTO_DE_SERVICIO]: SERVICIOS[teñido].id }}
+      {...{ [ATRIBUTO_DE_SERVICIO]: SERVICIOS[acento].id }}
       // El acento entra por el atributo; acá sólo se re-aliasa la tinta a él,
       // que es lo que el subrayado del botón resuelve en su propia regla.
       style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}
@@ -178,7 +232,7 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
         <Cta
           rotulo={etiquetaDe(mostrado)}
           forzado={relevando && !revirtiendo && !porPuntero ? 'hover' : undefined}
-          className="col-start-1 row-start-1 w-full [&_[data-parte=ventana]]:min-w-full"
+          className={CLASE_DEL_BOTON_ROTATIVO}
         />
       </div>
     </div>

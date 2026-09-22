@@ -5,7 +5,7 @@ import { useId } from 'react'
 
 import { ATRIBUTO_DE_SERVICIO, SERVICIOS, type Servicio } from '../_contrato/acento'
 import { CLASE_DE_LA_TORTA } from './geometria'
-import { rangoDePintura, type MedidaDeLaTira } from './TiraDeServicios'
+import { cierreDeLaPintura, rangoDePintura, type MedidaDeLaTira } from './TiraDeServicios'
 
 /**
  * EL GRÁFICO DE TORTA — EXPERIMENTAL, y por eso todos sus números están a mano.
@@ -120,6 +120,28 @@ const GIRO_DESDE = 0.42
 /** Hasta dónde gira. Antes de que empiece la entrada de la porción nueva. */
 const GIRO_HASTA = 0.7
 
+/**
+ * CUÁNTO DEL PIN OCUPA LA VUELTA DE LA ÚLTIMA PORCIÓN.
+ *
+ * Las dos primeras porciones vuelven solas: el traspaso al servicio siguiente
+ * las devuelve. La tercera no tiene traspaso después, así que su vuelta cuelga
+ * del punto en el que **termina de pintarse** —`cierreDeLaPintura`, el mismo
+ * rango que gobierna su párrafo— y no de un estado del rodillo. Eso último ya se
+ * probó y rompía la sección: un estado sin ranura apaga el bloque del título.
+ *
+ * El número sale de igualar los tiempos. Una porción vuelve en
+ * `SALIDA_DE_LA_PORCION` del traspaso, o sea 0,4 × 1,4 s = **0,56 s**. Con el
+ * pin en 6.300 px y la rueda del sitio a los 1.000 px/s medidos a ritmo de
+ * lectura, 0,09 del pin son 567 px, que se recorren en **0,57 s**. La vuelta del
+ * cierre dura lo mismo que las otras dos, y es lo único que se le pide.
+ *
+ * ⚠️ Es scroll y no tiempo, y eso es a propósito: lo que la dispara —el llenado
+ * de la porción— también es scroll, así que las dos cosas que la persona está
+ * mirando avanzan con el mismo dedo. Y termina en 0,974 del pin, con 164 px de
+ * sobra antes de que el panel se despegue.
+ */
+const CIERRE_DE_LA_TORTA = 0.09
+
 const TINTA = 'var(--color-tinta)'
 const ACENTO = 'var(--color-acento)'
 const PAPEL = 'var(--color-fondo)'
@@ -188,6 +210,7 @@ function Porcion({
   progreso,
   medida,
   posicion,
+  cierre,
   idDeLaMascara,
 }: {
   readonly servicio: Servicio
@@ -195,6 +218,7 @@ function Porcion({
   readonly progreso: MotionValue<number>
   readonly medida: MedidaDeLaTira
   readonly posicion: MotionValue<number>
+  readonly cierre: MotionValue<number>
   readonly idDeLaMascara: string
 }): React.JSX.Element {
   // ⚠️ El MISMO rango que usa el párrafo de este servicio, de la MISMA función.
@@ -203,10 +227,17 @@ function Porcion({
   const [inicio, fin] = rangoDePintura(medida, indice)
   const llenado = useTransform(progreso, [inicio, fin], [0, 1])
 
+  // ⚠️ La prominencia va MULTIPLICADA por el cierre, y eso alcanza para las
+  // tres: cuando el cierre empieza a bajar, las dos primeras ya valen 0 —su
+  // traspaso las devolvió— así que el factor sólo se nota en la última.
   const bisectriz = ((arranqueDe(indice) + GRADOS_POR_PORCION / 2) * Math.PI) / 180
-  const x = useTransform(posicion, (v) => SEPARACION * prominenciaDe(v, indice) * Math.cos(bisectriz))
-  const y = useTransform(posicion, (v) => SEPARACION * prominenciaDe(v, indice) * Math.sin(bisectriz))
-  const scale = useTransform(posicion, (v) => 1 + CRECIMIENTO * prominenciaDe(v, indice))
+  const prominencia = useTransform(
+    [posicion, cierre],
+    ([v, c]: number[]) => prominenciaDe(v, indice) * c,
+  )
+  const x = useTransform(prominencia, (p) => SEPARACION * p * Math.cos(bisectriz))
+  const y = useTransform(prominencia, (p) => SEPARACION * p * Math.sin(bisectriz))
+  const scale = useTransform(prominencia, (p) => 1 + CRECIMIENTO * p)
 
   const trazo = {
     r: RADIO_DEL_TRAZO,
@@ -269,6 +300,9 @@ export function GraficoDeTorta({
 }: GraficoDeTortaProps): React.JSX.Element {
   const base = useId()
   const rotate = useTransform(posicion, giroDe)
+  // Dónde termina de pintarse la última porción, y la rampa de su vuelta.
+  const finDeLaPintura = cierreDeLaPintura(medida)
+  const cierre = useTransform(progreso, [finDeLaPintura, finDeLaPintura + CIERRE_DE_LA_TORTA], [1, 0])
 
   return (
     <motion.div data-pieza="giro-de-la-torta" style={{ rotate }} className={CLASE_DE_LA_TORTA}>
@@ -281,6 +315,7 @@ export function GraficoDeTorta({
             progreso={progreso}
             medida={medida}
             posicion={posicion}
+            cierre={cierre}
             idDeLaMascara={`${base}-${servicio.id}`}
           />
         ))}

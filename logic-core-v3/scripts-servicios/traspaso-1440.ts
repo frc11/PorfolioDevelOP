@@ -123,7 +123,20 @@ const SONDA = `function () {
   const m = svg === null ? null : svg.getScreenCTM()
   const cs = giro === null ? null : getComputedStyle(giro)
   const reglas = caja === null ? [] : Array.from(caja.querySelectorAll('[data-fila="rotulo"] > span:last-child'))
+  const boton = document.querySelector('[data-pieza="cta-que-rota"] [data-pieza="cta"]')
+  const copiaA = document.querySelector('[data-pieza="cta-que-rota"] [data-parte="copia-a"]')
+  const copiaB = document.querySelector('[data-pieza="cta-que-rota"] [data-parte="copia-b"]')
+  const porciones = Array.from(document.querySelectorAll('[data-pieza="torta"] > g[data-servicio]'))
   return {
+    altoDelBoton: boton === null ? 0 : +boton.getBoundingClientRect().height.toFixed(3),
+    copias: [
+      copiaA === null ? -1 : +getComputedStyle(copiaA).opacity,
+      copiaB === null ? -1 : +getComputedStyle(copiaB).opacity,
+    ],
+    escalas: porciones.map(function (g) {
+      const m = new DOMMatrix(getComputedStyle(g).transform)
+      return +Math.hypot(m.a, m.b).toFixed(4)
+    }),
     centro: m === null ? null : [+m.e.toFixed(4), +m.f.toFixed(4)],
     borde: m === null ? null : [+(m.a * ${RADIO_SONDA} + m.e).toFixed(4), +(m.b * ${RADIO_SONDA} + m.f).toFixed(4)],
     transform: cs === null ? null : cs.transform,
@@ -152,6 +165,9 @@ interface Muestra {
   readonly servicioDelCta: string | null
   readonly colorDelCta: string | null
   readonly reglas: readonly Regla[]
+  readonly altoDelBoton: number
+  readonly copias: readonly [number, number]
+  readonly escalas: readonly number[]
 }
 
 interface Seccion {
@@ -197,6 +213,48 @@ async function muestrear(pagina: Pagina, destino: number): Promise<readonly Mues
       return filas
     })()`,
   )
+}
+
+/**
+ * ⚠️ **EL BARRIDO QUE FALTÓ, Y POR QUÉ ES SU PROPIA FUNCIÓN.**
+ *
+ * El sprint anterior midió el final de la sección mirando la torta y el atributo
+ * del botón, y los dos dieron bien — mientras **el bloque del título entero
+ * había desaparecido**. El defecto no deja rastro en ninguna meseta anterior ni
+ * en ninguna de las cosas que el recibo ya miraba: hay que preguntarle
+ * explícitamente al rodillo cuántas ranuras está pintando, y hay que
+ * preguntárselo en TODO el recorrido, no en cuatro paradas.
+ *
+ * Va sin asentar a propósito: lo que se busca es un hueco, y un hueco puede caer
+ * en el medio de un traspaso tanto como en una meseta.
+ */
+async function recorridoDelRodillo(
+  pagina: Pagina,
+  desde: number,
+  hasta: number,
+  paso: number,
+): Promise<readonly { y: number; pintadas: number; texto: string }[]> {
+  const filas: { y: number; pintadas: number; texto: string }[] = []
+  for (let y = desde; y <= hasta; y += paso) {
+    await scrollA(pagina, y)
+    const fila = await medir<{ pintadas: number; texto: string }>(
+      pagina,
+      `(() => {
+        const caja = document.querySelector('[data-rodillo="estados"]')
+        if (caja === null) return { pintadas: -1, texto: '' }
+        const tira = caja.querySelector(':scope > div')
+        const encendidas = Array.from(tira.children).filter(function (h) {
+          return +getComputedStyle(h).opacity > 0
+        })
+        return {
+          pintadas: encendidas.length,
+          texto: encendidas.map(function (h) { return (h.textContent || '').trim().slice(0, 40) }).join(' | '),
+        }
+      })()`,
+    )
+    filas.push({ y, ...fila })
+  }
+  return filas
 }
 
 /** La dispersión de una serie: cuánto se movió entre su mínimo y su máximo. */
@@ -415,6 +473,24 @@ async function principal(): Promise<void> {
         },
         rodillo: { msDelPrimerCambio: msDelCambioDeRodillo },
         cta: { servicios, colores, msDelCambioDeColor },
+        // El botón: su caja no se puede mover, o la torta se corre la mitad.
+        boton: {
+          altos: [...new Set(muestras.map((m) => m.altoDelBoton))],
+          dispersion: +dispersion(muestras.map((m) => m.altoDelBoton)).toFixed(4),
+        },
+        // El color contra el cartel: cuándo cambia cada uno, medido aparte.
+        color: {
+          msDelCambioDeColor,
+          msDelCruceDeCopias:
+            muestras.find((m) => m.copias[1] >= m.copias[0] && m.copias[0] >= 0)?.ms ?? null,
+          msDelArranqueDelIntercambio: muestras.find((m) => m.copias[1] > 0.002)?.ms ?? null,
+        },
+        // Las escalas de las tres porciones: la última tiene que volver a 1.
+        escalas: {
+          primera: muestras[0].escalas,
+          ultima: muestras[muestras.length - 1].escalas,
+          maxima: +Math.max(...muestras.flatMap((m) => m.escalas)).toFixed(4),
+        },
         subrayados: {
           cuadrosConMasDeUno: dosReglas.length,
           maximoSimultaneo: Math.max(...muestras.map((m) => m.reglas.filter((r) => r.dentro > 0).length)),
@@ -438,6 +514,51 @@ async function principal(): Promise<void> {
           `subrayados de más ${dosReglas.length}, color cambia a los ${msDelCambioDeColor ?? '—'} ms`,
       )
     }
+
+    // ── El barrido del rodillo: nunca puede quedarse sin bloque pintado ────
+    const PASO_DEL_RECORRIDO = 60
+    const recorrido = await recorridoDelRodillo(pagina, arranque - 900, final + 500, PASO_DEL_RECORRIDO)
+    const sinBloque = recorrido.filter((f) => f.pintadas < 1)
+    console.log(
+      `recorrido del rodillo: ${recorrido.length} paradas cada ${PASO_DEL_RECORRIDO} px · ` +
+        `ranuras pintadas min ${Math.min(...recorrido.map((f) => f.pintadas))} max ${Math.max(...recorrido.map((f) => f.pintadas))} · ` +
+        `paradas SIN bloque: ${sinBloque.length}`,
+    )
+    if (sinBloque.length > 0) console.log(`  primeras sin bloque: ${sinBloque.slice(0, 6).map((f) => f.y).join(', ')}`)
+    console.log(`  lo ultimo que se ve: ${recorrido[recorrido.length - 1].texto}`)
+
+    // ── Punto 1: al SALIR de la sección la torta tiene que estar chica ─────
+    const alSalir = await medir<{
+      escalas: readonly number[]
+      servicioDelCta: string | null
+      rotuloPintado: string
+    }>(
+      pagina,
+      `(async () => {
+        window.scrollTo(0, ${final} + 400)
+        await new Promise((r) => setTimeout(r, 2200))
+        const porciones = Array.from(document.querySelectorAll('[data-pieza="torta"] > g[data-servicio]'))
+        const cta = document.querySelector('[data-pieza="cta-que-rota"]')
+        const caja = document.querySelector('[data-rodillo="estados"]')
+        const tira = caja === null ? null : caja.querySelector(':scope > div')
+        const encendidas = tira === null ? [] : Array.from(tira.children).filter(function (h) {
+          return +getComputedStyle(h).opacity > 0
+        })
+        return {
+          escalas: porciones.map(function (g) {
+            const m = new DOMMatrix(getComputedStyle(g).transform)
+            return +Math.hypot(m.a, m.b).toFixed(4)
+          }),
+          servicioDelCta: cta === null ? null : cta.getAttribute('data-servicio'),
+          rotuloPintado: encendidas.map(function (h) { return (h.textContent || '').trim().slice(0, 60) }).join(' | '),
+        }
+      })()`,
+    )
+    console.log(
+      `al salir de la seccion: escalas ${alSalir.escalas.join(' · ')} · el CTA dice ${alSalir.servicioDelCta}` +
+        `
+  y el rodillo muestra: ${alSalir.rotuloPintado}`,
+    )
 
     // La huella pintada, en el MEDIO de un giro: ahí la torta es un disco limpio.
     const ultima = fronteras[fronteras.length - 1]
@@ -487,6 +608,8 @@ async function principal(): Promise<void> {
           barrido,
           msDelMuestreo: MS_DEL_MUESTREO,
           huellaDeLaTorta: huella,
+          alSalirDeLaSeccion: alSalir,
+          recorridoDelRodillo: recorrido,
           filas,
         },
         null,
