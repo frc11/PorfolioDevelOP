@@ -32,7 +32,8 @@ import { escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } 
 import { Cierre } from '../cierre/Cierre'
 // Los detectores de capa son de Servicios y se consumen tal cual: una segunda
 // lectura del mismo marcado se desviaría de la de la sección sin que nada avise.
-import { capasSinDeclararSuForma, serviciosApagados, serviciosVigentes } from '../servicios/deteccion'
+import { IDS_DE_SERVICIO } from '../_contrato/acento'
+import { capasSinPantalla, srOnlyQueTapanContenido } from '../servicios/deteccion'
 import { marcar } from './render'
 import { IDS_DE_S6 } from './soporte'
 import { cuentaDeAtributo, hayAnidamiento, quitarSubarbolesConAtributo, valoresDeAtributo } from './marcado'
@@ -149,26 +150,41 @@ controlPositivo('y el escáner la vería aunque llegara adentro del marcado', `<
 titulo('5 · El acento: por alias, uno por contexto, y nunca texto sobre oscuro')
 
 /**
- * ⚠️ **LA VOZ ÚNICA CAMBIÓ DE SUJETO EN SITIO-S11, Y LA AFIRMACIÓN ES MÁS
- * FUERTE, NO MÁS FLOJA.** Decía «con coreografía hay EXACTAMENTE un
- * `[data-servicio]`», y era cierta **por un defecto**: la secuencia montaba un
- * servicio por vez, así que arriba de 1025 los otros dos no existían ni para un
- * lector de pantalla (§7.39, defecto 3). S11 puso los tres en el árbol y dejó
- * que la secuencia elija cuál se PINTA, que es lo que la regla del acento
- * siempre quiso decir: lo que no puede haber son dos acentos EN EL MISMO CUADRO,
- * no dos nodos en el documento. Por eso ahora son varias afirmaciones y no una:
- * la de la capa pintada es la que impide que la primera afloje la regla.
+ * ⚠️ **LA VOZ ÚNICA CAMBIÓ DE SUJETO DOS VECES, Y LAS DOS SE ENDURECIÓ.**
+ *
+ * Decía «con coreografía hay EXACTAMENTE un `[data-servicio]`», y era cierta
+ * **por un defecto**: la secuencia montaba un servicio por vez, así que arriba
+ * de 1025 los otros dos no existían ni para un lector de pantalla (§7.39,
+ * defecto 3). S11 puso los tres en el árbol y afirmó que exactamente UNA capa
+ * se pintaba, con las otras dos en `sr-only`.
+ *
+ * Eso también se fue, y con el mismo argumento un piso más abajo: apagar con
+ * `sr-only` es un INTERCAMBIO, y un intercambio no tiene traspaso —la capa que
+ * entra nace en su lugar—, que es exactamente por qué los servicios se
+ * teletransportaban. Ahora la sección es UNA tira continua: los tres bloques
+ * están siempre en flujo y lo único que cambia es cuánto se corrió la tira.
+ *
+ * Lo que se afirma ahora es la propiedad ESTRUCTURAL que sostiene la regla del
+ * acento sin depender de ningún apagado: los contenedores son hermanos, nunca
+ * anidados, y cada bloque de la tira pide al menos una pantalla — así que dos
+ * acentos no pueden estar posados en el mismo cuadro. Es la misma forma que el
+ * contrato ya declaraba para la rama SIN coreografía; ahora vale para las dos.
+ *
+ * ⚠️ Con coreografía son SEIS y no tres: cada servicio aparece una vez en la
+ * tira (el contenido) y otra en el rodillo (el rótulo que se ve), y los dos
+ * necesitan el atributo porque el acento entra por el ancestro. Seis hermanos,
+ * ninguno adentro de otro.
  */
 const servicios = valoresDeAtributo(ANIMADO, 'data-servicio')
-afirmarIgual(servicios.length, 3, 'con coreografía los TRES `[data-servicio]` están en el árbol: la secuencia elige cuál se PINTA, no cuál existe')
-afirmarIgual(serviciosVigentes(ANIMADO).length, 1, '  y exactamente UNA capa declara estar pintada — un acento por cuadro, que es la regla')
-afirmarIgual(serviciosApagados(ANIMADO).length, 2, '  y las otras dos, apagadas sin salir del árbol')
-afirmarIgual(capasSinDeclararSuForma(ANIMADO), [], '  y ninguna se contradice: lo que dice ser y lo que su clase hace coinciden')
-controlPositivo('el detector de la capa pintada vería DOS acentos en el mismo cuadro', '<div data-servicio="web" data-capa="vigente" class="w-full"></div><div data-servicio="software" data-capa="vigente" class="w-full"></div>', (h: string) => serviciosVigentes(h).length === 1)
+afirmarIgual(servicios, [...IDS_DE_SERVICIO, ...IDS_DE_SERVICIO], 'con coreografía hay SEIS `[data-servicio]`: los tres del rodillo y los tres de la tira, cada terna en orden')
+afirmarIgual(srOnlyQueTapanContenido(ANIMADO), [], '  y ningún `sr-only` envuelve contenido: la puerta por la que volvía el modelo de capas queda cerrada')
+controlPositivo('el detector vería un `sr-only` tapando un bloque de servicio', '<div class="sr-only"><div data-servicio="web"><p data-canal="parrafo">x</p></div></div>', (h: string) => srOnlyQueTapanContenido(h).length === 0)
 const serviciosQuietos = valoresDeAtributo(QUIETO, 'data-servicio')
 afirmarIgual(serviciosQuietos.length, 3, 'sin coreografía hay uno por servicio, hermanos')
 afirmar(!hayAnidamiento(QUIETO, 'data-servicio'), 'y ninguno está anidado adentro de otro')
 afirmar(!hayAnidamiento(ANIMADO, 'data-servicio'), '  tampoco con coreografía')
+afirmarIgual(capasSinPantalla(QUIETO), [], 'y cada bloque apilado pide al menos una pantalla: nunca dos acentos en el mismo cuadro')
+controlPositivo('el lector de la caja ve un bloque sin su pantalla', '<div data-servicio="web" class="flex w-full"></div>', (h: string) => capasSinPantalla(h).length === 0)
 
 controlPositivo('el detector de anidamiento lo vería', '<div data-servicio="web"><div data-servicio="software"></div></div>', (html) =>
   !hayAnidamiento(html, 'data-servicio'),

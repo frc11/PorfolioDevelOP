@@ -1,171 +1,116 @@
 'use client'
 
-import { useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
-import { useState } from 'react'
+import type { MotionValue } from 'motion/react'
+import { useRef } from 'react'
 
-import { SERVICIOS } from '../_contrato/acento'
-import { tramoDeSecuencia } from '../_contrato/secuencia'
-import { asentar } from './asentamiento'
-import { CabeceraDeServicios } from './CabeceraDeServicios'
-import { ContenidoDeServicio } from './ContenidoDeServicio'
-import { CLASE_DEL_STICKY, CLASE_DE_LA_PILA, clasesDeCapa, formaDeCapa } from './geometria'
+import { Grilla } from '../../_componentes/layout/Grilla'
+import { Titular } from '../../_componentes/tipografia/Titular'
+import { ContenidoDeSeccion } from '../_contrato/Seccion'
+import { ID_DEL_TITULAR } from './CabeceraDeServicios'
+import { TITULAR } from './contenido'
+import {
+  CLASE_DEL_STICKY,
+  CLASE_DE_LA_COLUMNA_FIJA,
+  CLASE_DE_LA_COLUMNA_QUE_AVANZA,
+  NIVEL_DEL_TITULAR_DE_SECCION,
+} from './geometria'
+import { RodilloDeEstados } from './RodilloDeEstados'
+import { TiraDeServicios, fronterasDeEstado, useMedidaDeLaTira } from './TiraDeServicios'
 
 /**
- * LA SECUENCIA — un progreso, cinco canales, un solo `sticky`.
+ * EL PANEL PINNEADO — dos movimientos, una medición, y UN progreso.
  *
- * ⚠️ «Un solo `sticky`» es de ESTE componente, y hay que decirlo con esa
- * precisión: el marcado de la sección emite DOS. El otro es el envoltorio que
- * `Seccion.tsx` le pone a una `pinneada: 'siempre'`, y es INERTE —llena a su
- * padre, recorrido cero por construcción—. **El que pinea es el de acá**, y
- * está medido: 2.160 px de recorrido a 1920, pegado entre scrollY 11.882 y
- * 14.040 (`scripts-b7/b-pin.ts` → `docs/rediseno/outputs/b7/b-pin.json`). La
- * distinción no es cosmética: medir el otro fue el defecto D2 de B4-B.
+ * ── ⚠️ QUÉ SE FUE DE ACÁ, Y POR QUÉ ERA EL MECANISMO Y NO UN VALOR ────────
  *
- * ── Dos números derivados, no un objeto ───────────────────────────────────
+ * Este archivo montaba TRES CAPAS por servicio, pintaba una y apagaba dos con
+ * `sr-only`, y partía el progreso del pin en tercios con `tramoDeSecuencia` para
+ * pasarle a la capa vigente su progreso LOCAL. Cada frontera de paso hacía dos
+ * cosas a la vez: reiniciaba ese local de 1 a 0 y cambiaba cuál capa estaba en
+ * flujo. Ahí nacía todo salto que tres intentos persiguieron como si fuera una
+ * curva mal calibrada.
  *
- * `indice` y `local` salen de dos `useTransform` separados sobre el MISMO
- * progreso, y no de uno solo que devuelva `{ indice, local }`. La razón es la
- * mecánica de `MotionValue`: solo avisa a sus suscriptores cuando el valor
- * CAMBIA (`updateAndNotify`: `if (this.current !== this.prev)`), y un objeto
- * nuevo por cuadro nunca es igual al anterior — así que avisaría siempre. Con
- * dos números, `indice` notifica DOS veces en todo el recorrido y es el único
- * que toca estado de React; `local` es el que corre, y no dispara ni un render.
+ * Con esto se fueron también el `useState` y el `useMotionValueEvent` que
+ * sincronizaban el índice: **la sección ya no re-renderiza durante el pin**.
+ * Todo lo que se mueve es un `useTransform` sobre el mismo `MotionValue`. Nada
+ * se monta, nada se desmonta, nada conmuta. No es que los saltos estén
+ * calibrados: es que no existe el mecanismo que los producía.
  *
- * Esa es toda la diferencia entre una secuencia y un `setState` por cuadro.
+ * ── Las dos cosas que se mueven, y por qué no comparten nada ──────────────
  *
- * ── EL ASENTAMIENTO: cada servicio ATERRIZA y se queda quieto (B2 · frente C) ──
+ *   DERECHA · CONTINUA   `TiraDeServicios` — una tira con los tres bloques,
+ *                        trasladada LINEALMENTE por el progreso del pin.
+ *   IZQUIERDA · DISCRETA `RodilloDeEstados` — cuatro estados, posado en uno.
  *
- * `local` ya no es el progreso pelado del tramo: pasa por `asentar`, que lo
- * satura en la mitad del tramo. La armada de los tres canales ocupa esa primera
- * mitad y la segunda es **el servicio terminado, quieto y legible**.
+ * **El acoplamiento va en una sola dirección.** La tira mide dónde está cada
+ * bloque y de ahí sale el estado del rodillo; el rodillo no le dice nada a la
+ * tira. Por eso las fronteras no están escritas en ningún lado: son el tope
+ * medido de cada bloque contra la línea de referencia de la ventana.
  *
- * Antes no lo estaba nunca, y está medido: las ventanas de P2, P3 y P4 cierran
- * todas en `local = 1`, que es el píxel exacto donde la secuencia cambia de
- * servicio. A 1920×1080, en el primer tramo, la palabra 33 de 33 se terminaba
- * de encender a 20 px del reemplazo. El censo de acontecimientos leía la
- * secuencia entera como **UN** aterrizaje de 2.040 px con 131 piezas — porque
- * nada se detenía nunca.
+ * ── Por qué la medición vive ACÁ y no adentro de la tira ──────────────────
  *
- * De dónde sale la mitad —del paso y del umbral de fusión del censo, no de un
- * gusto— y por qué esto NO cambia un valor de ningún patrón: `asentamiento.ts`.
+ * Porque sus dos consumidores están en columnas distintas de la grilla, y una
+ * medición leída dos veces se desvía sola. Este componente tiene los `ref`,
+ * corre el `ResizeObserver` una vez y reparte: el `y` a la tira, el estado al
+ * rodillo. Es el mismo criterio por el que `s6-render` consume los detectores
+ * de Servicios en vez de escribir los suyos.
  *
- * ── Por qué el tramo activo SÍ es estado de React ─────────────────────────
+ * ── El `h2` va `sr-only`, y no es un rodeo ────────────────────────────────
  *
- * Porque cambia el ÁRBOL, no un estilo: otro nombre, otro rubro, otro párrafo,
- * otros once ítems, otro pedido de video y otro valor de `data-servicio`. Nada
- * de eso se puede escribir desde un `MotionValue`, que solo sabe empujar `style`
- * al DOM. Y no es caro: son dos renders en 200svh de scroll.
- *
- * ── LOS TRES SERVICIOS ESTÁN SIEMPRE EN EL ÁRBOL, Y SE VE UNO (SITIO-S11) ──
- *
- * Hasta S10 este componente renderizaba `SERVICIOS[indice]`: **uno por vez**.
- * Visualmente era correcto y así fue diseñado. Para un lector de pantalla los
- * otros dos NO EXISTÍAN, y `s10-acceso` lo midió sobre el documento entero:
- * el árbol pasaba de **26 encabezados a 24** y de **43 marcadores anunciados a
- * 33** al pasar de la rama quieta a la animada. Los que faltaban eran los de
- * esta sección, y quien navega por encabezados sin scrollear no alcanzaba dos
- * tercios de ella. Era el hallazgo 3, gravedad alta, con esta sección de dueña.
- *
- * Ahora la pila monta los TRES y la secuencia elige cuál se PINTA
- * (`clasesDeCapa`, en `geometria.ts`, con las cinco formas de esconder que NO
- * sirven enumeradas ahí). **Lo que se ve es idéntico**: un servicio a la vez,
- * el del tramo activo, cambiando en el mismo punto del recorrido. El mecanismo
- * tampoco cambió — sigue habiendo un `sticky` largo que pinea, UN progreso y
- * los cinco canales colgando de él. Lo único que cambió es de dónde sale el que se ve:
- * antes del montaje, ahora de la pintura.
- *
- * ── El progreso lo recibe SÓLO la capa vigente, y no es un detalle ────────
- *
- * Las otras dos reciben `null`, o sea su rama quieta: cero transformadas, cero
- * `will-change` y cero suscripciones al `MotionValue`. Por eso la sección sigue
- * promoviendo **14 capas de composición y no 42** —lo afirma `s6-servicios`
- * §2— y por eso montar tres no es tres veces el costo de animar uno.
- *
- * ── Un acento por cuadro, con tres `[data-servicio]` ──────────────────────
- *
- * El atributo bajó del `sticky` a cada capa: son tres, hermanos, en el orden de
- * la secuencia. La regla de la voz única de la paleta —un acento por contexto,
- * nunca los tres— **no se perdió, se midió mejor**: dos de las tres capas están
- * apagadas con `sr-only`, o sea recortadas a un píxel y fuera del flujo, así que
- * en la pantalla nunca hay más de un acento vigente. El instrumento dejó de
- * contar ocurrencias del atributo (que era una aproximación buena mientras
- * hubiera una sola capa) y ahora cuenta **capas pintadas**, que es lo que la
- * regla siempre quiso decir.
- *
- * ── Por qué `PanelDeSecuencia` se exporta ─────────────────────────────────
- *
- * Para que el instrumento pueda renderizar los TRES tramos sin inventar un
- * atributo de forzado en el producto. `activo` es una propiedad porque el
- * estado está izado un nivel más arriba, que es donde vive el `MotionValue` que
- * lo mueve; que además sirva para sondear los tres tramos es una consecuencia
- * de haberlo puesto donde va, no una concesión al instrumento.
+ * «Nuestros servicios» dejó de ser un cartel fijo arriba del panel: ahora es el
+ * estado 0 del rodillo, en el mismo lugar donde después aparecen los servicios.
+ * Pero el rodillo entero es `aria-hidden` —es la copia visual— así que el
+ * encabezado REAL de la sección tiene que estar en otro lado: acá, `sr-only`,
+ * con el `id` al que apunta el `aria-labelledby` de la `<section>`. Un
+ * `aria-labelledby` que apunta a un `id` que no existe deja a la región SIN
+ * nombre, que es peor que no ponerlo. Es el precedente de
+ * `quienes-somos/QuienesSomos.tsx:57-59`, y deja el árbol de encabezados de las
+ * dos ramas idéntico: un `h2` y tres `h3`, en el mismo orden.
  */
 
-/** Los tramos son los servicios. No hay un cuarto. */
-export const CANTIDAD_DE_TRAMOS = SERVICIOS.length
-
-export interface PanelDeSecuenciaProps {
-  /** El tramo activo, de 0 a `CANTIDAD_DE_TRAMOS − 1`. */
-  readonly activo: number
-  /** El progreso DENTRO del tramo, o `null` cuando no hay coreografía. */
-  readonly progreso: MotionValue<number> | null
+export interface ServiciosEnSecuenciaProps {
+  /** El progreso del PIN, 0 → 1 sobre `alto − viewport`. Crudo, sin tramos. */
+  readonly progreso: MotionValue<number>
 }
 
-export function PanelDeSecuencia({ activo, progreso }: PanelDeSecuenciaProps): React.JSX.Element {
-  // Acotado y no validado con una excepción: el índice viene de un
-  // `MotionValue` que ya está acotado por `tramoDeSecuencia`, y una sección que
-  // tira en el render por un borde de coma flotante es peor que una que muestra
-  // el último tramo.
-  const indice = Math.min(Math.max(activo, 0), CANTIDAD_DE_TRAMOS - 1)
+export function PanelDeSecuencia({ progreso }: ServiciosEnSecuenciaProps): React.JSX.Element {
+  const ventana = useRef<HTMLDivElement>(null)
+  const tira = useRef<HTMLDivElement>(null)
+
+  const medida = useMedidaDeLaTira(ventana, tira)
+  // Sólo las fronteras: el rodillo lee el progreso y arma su propia máquina.
+  // Nada de su estado sube hasta acá, así que un disparo no re-renderiza la tira.
+  const fronteras = fronterasDeEstado(medida)
 
   return (
     <div className={CLASE_DEL_STICKY}>
-      <CabeceraDeServicios />
-      <div className={CLASE_DE_LA_PILA}>
-        {SERVICIOS.map((servicio, i) => (
-          <div
-            key={servicio.id}
-            data-servicio={servicio.id}
-            // Las dos mitades de la misma decisión: `data-capa` es lo que la
-            // capa DICE ser y la clase es lo que HACE. `capasDeServicio` las
-            // cruza y no acepta que se contradigan. El orden en el que salgan
-            // al marcado es indiferente: el instrumento lee la etiqueta entera.
-            data-capa={formaDeCapa(i === indice)}
-            className={clasesDeCapa(i === indice)}
-          >
-            <ContenidoDeServicio
-              servicio={servicio}
-              // Sólo la capa que se ve consume el progreso. Ver la nota de
-              // arriba: las otras dos se montan en su rama quieta.
-              progreso={i === indice ? progreso : null}
+      <Titular nivel={NIVEL_DEL_TITULAR_DE_SECCION} como="h2" id={ID_DEL_TITULAR} className="sr-only">
+        {TITULAR}
+      </Titular>
+      {/* La contención lateral del sitio. Sin esto el panel sangra a los dos
+          bordes de la pantalla: el pin ya no pasa por `ContenidoDeServicio`,
+          que era quien la ponía cuando la unidad de montaje era «un servicio». */}
+      <ContenidoDeSeccion
+        className="min-h-0 flex-1"
+        claseDeContenido="flex h-full min-h-0 w-full flex-col"
+      >
+        <Grilla columnas={3} className="min-h-0 flex-1">
+          <div className={CLASE_DE_LA_COLUMNA_FIJA}>
+            <RodilloDeEstados progreso={progreso} fronteras={fronteras} />
+          </div>
+          <div className={CLASE_DE_LA_COLUMNA_QUE_AVANZA}>
+            <TiraDeServicios
+              progreso={progreso}
+              medida={medida}
+              refDeLaVentana={ventana}
+              refDeLaTira={tira}
             />
           </div>
-        ))}
-      </div>
+        </Grilla>
+      </ContenidoDeSeccion>
     </div>
   )
 }
 
-export interface ServiciosEnSecuenciaProps {
-  /** El progreso del PIN, 0 cuando se clava y 1 cuando se suelta. */
-  readonly progreso: MotionValue<number>
-}
-
-export function ServiciosEnSecuencia({
-  progreso,
-}: ServiciosEnSecuenciaProps): React.JSX.Element {
-  const indice = useTransform(progreso, (p) => tramoDeSecuencia(p, CANTIDAD_DE_TRAMOS).indice)
-  // ⚠️ **`asentar` se aplica ACÁ y en ningún otro lado, y es la condición de que
-  // la secuencia siga siendo UNA.** Los cinco canales cuelgan de este único
-  // número: remapearlo una vez los mueve a los cinco a la vez. Remapear canal
-  // por canal daría cinco relojes que se ven parecidos y no lo son — que es
-  // exactamente el control positivo que `s6-servicios` §8 ya corre.
-  const local = useTransform(progreso, (p) =>
-    asentar(tramoDeSecuencia(p, CANTIDAD_DE_TRAMOS).local),
-  )
-  const [activo, setActivo] = useState(0)
-
-  useMotionValueEvent(indice, 'change', setActivo)
-
-  return <PanelDeSecuencia activo={activo} progreso={local} />
+export function ServiciosEnSecuencia({ progreso }: ServiciosEnSecuenciaProps): React.JSX.Element {
+  return <PanelDeSecuencia progreso={progreso} />
 }

@@ -15,8 +15,6 @@
 
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../../_lib/tipografia'
 import { valoresDeAcentoDelTema } from '../_invariantes/soporte'
-import { CAPA_APAGADA, CAPA_VIGENTE, CLASE_DE_CAPA_APAGADA } from './geometria'
-
 /** Cuántas veces casa una expresión en un texto. */
 export function cuenta(texto: string, aguja: RegExp): number {
   return (texto.match(aguja) ?? []).length
@@ -207,63 +205,93 @@ export function familiasDeCuerpoPerdidas(html: string): string[] {
 export interface CapaDeServicio {
   readonly id: string
   readonly clases: readonly string[]
-  /** Dice `vigente` y no lleva la clase que esconde: es la que se ve. */
-  readonly vigente: boolean
-  /** Dice `apagada` y lleva la clase: está en el árbol y no se pinta. */
-  readonly apagada: boolean
 }
 
 /**
- * La etiqueta de apertura de una capa, entera. Se lee el TAG y no una pareja de
- * atributos pegados: el orden en el que React los emite es el del JSX, y atarse
- * a él dejaba al instrumento ciego ante un reordenamiento inofensivo.
+ * La etiqueta de apertura de un contenedor de servicio, entera. Se lee el TAG y
+ * no una pareja de atributos pegados: el orden en el que React los emite es el
+ * del JSX, y atarse a él dejaba al instrumento ciego ante un reordenamiento
+ * inofensivo.
  */
 const ETIQUETA_DE_CAPA = /<[a-z][a-z0-9]*\b[^>]*\bdata-servicio="([^"]*)"[^>]*>/gi
 
-/** Las capas de servicio de un marcado, en orden del documento. */
+/** Los contenedores de servicio de un marcado, en orden del documento. */
 export function capasDeServicio(html: string): CapaDeServicio[] {
-  return [...html.matchAll(ETIQUETA_DE_CAPA)].map((m) => {
-    const clases = (/\bclass="([^"]*)"/.exec(m[0])?.[1] ?? '').split(/\s+/)
-    const dice = /\bdata-capa="([^"]*)"/.exec(m[0])?.[1] ?? ''
-    const esconde = clases.includes(CLASE_DE_CAPA_APAGADA)
-    return {
-      id: m[1],
-      clases,
-      vigente: dice === CAPA_VIGENTE && !esconde,
-      apagada: dice === CAPA_APAGADA && esconde,
-    }
-  })
-}
-
-/** Los servicios que se PINTAN. En la rama pinneada tiene que ser exactamente uno. */
-export function serviciosVigentes(html: string): string[] {
-  return capasDeServicio(html).filter((c) => c.vigente).map((c) => c.id)
-}
-
-/** Los servicios que están en el árbol y NO se pintan. */
-export function serviciosApagados(html: string): string[] {
-  return capasDeServicio(html).filter((c) => c.apagada).map((c) => c.id)
+  return [...html.matchAll(ETIQUETA_DE_CAPA)].map((m) => ({
+    id: m[1],
+    clases: (/\bclass="([^"]*)"/.exec(m[0])?.[1] ?? '').split(/\s+/),
+  }))
 }
 
 /**
- * Las capas que no declaran NINGUNA de las dos formas, o declaran las DOS. Es el
- * contrapeso de las dos de arriba: sin esto, una capa a la que alguien le borre
- * las clases se caería de las dos listas y las dos seguirían pareciendo
- * correctas. Vacío o hay defecto.
- */
-export function capasSinDeclararSuForma(html: string): string[] {
-  return capasDeServicio(html)
-    .filter((c) => c.vigente === c.apagada)
-    .map((c) => `${c.id}: "${c.clases.join(' ')}"`)
-}
-
-/**
- * Las capas que no piden al menos una pantalla de alto. Se mide sobre las TRES
- * CAJAS y no sobre todo el marcado: contar `min-h-svh` en el documento ataría
- * esta sección a las clases de su envoltorio, que no son suyas.
+ * Los bloques que no piden al menos una pantalla de alto.
+ *
+ * Es la mitad ESTRUCTURAL de la regla del acento —«nunca dos acentos posados en
+ * el mismo cuadro»—: lo que un instrumento puede leer del marcado es que cada
+ * bloque ocupa al menos una pantalla; que de ahí se siga lo otro es una
+ * implicación declarada, no una medición.
+ *
+ * ⚠️ Se mide sobre los CONTENEDORES de servicio y no sobre todo el marcado:
+ * contar `min-h-svh` en el documento ataría esta sección a las clases de su
+ * envoltorio, que no son suyas. Y se le pasa el interior de la TIRA, no el
+ * documento entero: las ranuras del rodillo también llevan `data-servicio` —lo
+ * necesitan para que el acento entre por el ancestro— y miden un rótulo, no una
+ * pantalla.
  */
 export function capasSinPantalla(html: string): string[] {
   return capasDeServicio(html).filter((c) => !c.clases.includes('min-h-svh')).map((c) => c.id)
+}
+
+/** El subárbol que arranca en `desde`, contando profundidad. */
+function subarbolDesde(html: string, desde: number): string {
+  const re = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)\b([^>]*)>/g
+  re.lastIndex = desde
+  let profundidad = 1
+  let m = re.exec(html)
+  while (m !== null) {
+    if (m[1] === '/') {
+      profundidad -= 1
+      if (profundidad === 0) return html.slice(desde, m.index)
+    } else if (!ETIQUETAS_VACIAS.has(m[2].toLowerCase()) && !m[3].trimEnd().endsWith('/')) {
+      profundidad += 1
+    }
+    m = re.exec(html)
+  }
+  return html.slice(desde)
+}
+
+/**
+ * LOS `sr-only` QUE ENVUELVEN MÁS QUE UN RÓTULO — la puerta que queda cerrada.
+ *
+ * ⚠️ **Existe porque el modelo de capas volvió por acá tres veces.** `sr-only`
+ * es la única forma de esconder algo sin sacarlo del árbol de accesibilidad, y
+ * justamente por eso es la tentación: envolver un bloque entero con él y
+ * «apagar» servicios es un INTERCAMBIO disfrazado de accesibilidad, y un
+ * intercambio no tiene traspaso —la pieza que entra nace en su lugar— que es
+ * exactamente por qué los servicios se teletransportaban.
+ *
+ * En la columna derecha el `sr-only` está permitido para UNA cosa: la copia
+ * anunciada del rótulo, que es lo que mantiene el orden del texto igual al de
+ * la rama apilada. Para nada más. Este detector devuelve qué se coló adentro.
+ */
+const PROHIBIDO_ADENTRO_DE_SR_ONLY: readonly { readonly aguja: RegExp; readonly que: string }[] = [
+  { aguja: /\bdata-canal="parrafo"/, que: 'un parrafo' },
+  { aguja: /\bdata-fila="medio"/, que: 'un medio' },
+  { aguja: /\bdata-fila="caso"/, que: 'una linea de caso' },
+  { aguja: /\bdata-servicio="/, que: 'un bloque de servicio entero' },
+  { aguja: /<img\b/i, que: 'una imagen' },
+]
+
+export function srOnlyQueTapanContenido(html: string): string[] {
+  const salida: string[] = []
+  const apertura = /<([a-z][a-z0-9]*)\b[^>]*\bclass="[^"]*\bsr-only\b[^"]*"[^>]*>/gi
+  for (const m of html.matchAll(apertura)) {
+    const dentro = subarbolDesde(html, (m.index ?? 0) + m[0].length)
+    for (const forma of PROHIBIDO_ADENTRO_DE_SR_ONLY) {
+      if (forma.aguja.test(dentro)) salida.push('un sr-only envuelve ' + forma.que)
+    }
+  }
+  return salida
 }
 
 /**

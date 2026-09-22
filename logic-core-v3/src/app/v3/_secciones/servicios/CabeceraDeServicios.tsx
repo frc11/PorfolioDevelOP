@@ -4,6 +4,7 @@ import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Ti
 import { seccionDe } from '../_contrato/forma'
 import { CabeceraDeSeccion, ContenidoDeSeccion } from '../_contrato/Seccion'
 import { TITULAR } from './contenido'
+import { NIVEL_DEL_TITULAR_DE_SECCION } from './geometria'
 
 /**
  * LA CABECERA DE SERVICIOS — el encabezado que NOMBRA a la sección.
@@ -90,14 +91,19 @@ const SECCION = seccionDe('servicios')
  */
 export const ID_DEL_TITULAR = idDelTitularDeSeccion(SECCION.id)
 
-export function CabeceraDeServicios(): React.JSX.Element {
+export function CabeceraDeServicios({
+  conMarca = true,
+}: {
+  /** El panel la apaga: el punto de acento sale de la rama pinneada. */
+  readonly conMarca?: boolean
+} = {}): React.JSX.Element {
   return (
     <ContenidoDeSeccion claseDeContenido="flex w-full flex-col gap-[var(--spacing-4)]">
       {/* ⚠️ B12: era `EncabezadoDeSeccion` con el `05` y «Servicios». Los dos se
           fueron de las ocho; queda la columna lateral con la marca, que es lo
           que mantiene la composición en su lugar (ver `Rotulo.tsx`). */}
-      <CabeceraDeSeccion />
-      <Titular nivel="titulo-l" como="h2" id={ID_DEL_TITULAR}>
+      {conMarca ? <CabeceraDeSeccion /> : null}
+      <Titular nivel={NIVEL_DEL_TITULAR_DE_SECCION} como="h2" id={ID_DEL_TITULAR}>
         {TITULAR}
       </Titular>
     </ContenidoDeSeccion>

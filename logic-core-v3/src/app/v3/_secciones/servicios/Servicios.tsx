@@ -112,7 +112,7 @@ function ServiciosApilados(): React.JSX.Element {
       <CabeceraDeServicios />
       {SERVICIOS.map((servicio) => (
         <div key={servicio.id} data-servicio={servicio.id} className={CLASE_DE_BLOQUE_DE_SERVICIO}>
-          <ContenidoDeServicio servicio={servicio} progreso={null} />
+          <ContenidoDeServicio servicio={servicio} />
         </div>
       ))}
     </div>
