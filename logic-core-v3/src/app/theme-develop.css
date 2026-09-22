@@ -335,6 +335,20 @@
 
   --color-acento: var(--color-acento-web);
 
+  /* ⚠️ **LOS TRES DEL SEMÁFORO — y NO son de la paleta del sistema.**
+   *
+   * Son los tres círculos de la barra de una ventana de macOS, y existen para que
+   * el CTA de Trabajos se lea como lo que imita. No participan del sistema de
+   * color: no tienen par de contraste declarado, no se usan en texto, no entran
+   * en la rotación de acentos y no se usan en ninguna otra superficie. Están acá
+   * y no como hex suelto porque el repo prohíbe un hex en el marcado, y con razón:
+   * un color sin nombre es un color que nadie puede encontrar después.
+   *
+   * Los valores son los del cromo de macOS Sonoma, tomados tal cual. */
+  --color-semaforo-rojo: #FF5F57;
+  --color-semaforo-amarillo: #FEBC2E;
+  --color-semaforo-verde: #28C840;
+
   /* =====================================================================
    * TIPOGRAFÍA — familia y pesos
    *
@@ -950,6 +964,12 @@
   --leading-texto: 1.6;
   --leading-titulo: 1.09;
   --leading-micro: 1.1;
+  /* ⚠️ El interlineado de CARTEL — por debajo de 1, que es donde un titular deja
+   * de ser un renglón y pasa a ser una masa. Lo pide el CTA de Trabajos, que es
+   * un póster adentro de una ventana de navegador: con 1,09 los tres renglones se
+   * leen como un párrafo y con 0,9 se leen como una sola pieza. Es el único
+   * interlineado del tema por debajo de 1 y no se usa en texto corrido. */
+  --leading-cartel: 0.9;
 
   /* =====================================================================
    * TIPOGRAFÍA — interletrado [medido, transferido]

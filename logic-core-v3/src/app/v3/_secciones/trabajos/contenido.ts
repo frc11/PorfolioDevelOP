@@ -75,7 +75,6 @@
  * mismo criterio con el que Quiénes somos escribe "dos personas".
  */
 
-import type { IdDePatron } from '../../_lib/motion/patrones'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -115,8 +114,13 @@ export const CONTENIDO = {
    */
 
   /**
-   * [verdad] Los tres, en el orden en que entran. Tres es la cantidad de
-   * clientes que el sprint declara verdaderos. No hay un cuarto de relleno: un
+   * [verdad] Los tres, en el orden en que entran — y el orden es una decisión del
+   * dueño, no el alfabético ni el cronológico: **El Garage, Esquina, Banú**. El
+   * motivo es de composición y por eso vive acá y no en la geometría: el CTA que
+   * cierra el túnel es una ventana de papel claro, y la captura de Banú es la más
+   * oscura de las tres, así que dejarla última es lo que le da contraste.
+   *
+   * Tres es la cantidad de clientes que el sprint declara verdaderos. No hay un cuarto de relleno: un
    * cliente inventado en una vitrina es exactamente la deuda que no se repite.
    *
    * Cada uno declara UN medio —la captura de su sitio— y TRES textos: el
@@ -149,16 +153,16 @@ export const CONTENIDO = {
       pagina: { fuente: '/capturas/el-garage.webp', alt: 'La página de El Garage' },
     },
     {
-      nombre: 'Banú Scents',
-      enlace: 'https://banuscents.com.ar',
-      rubro: 'Vende perfumes árabes. Le hicimos una página simple pero bonita.',
-      pagina: { fuente: '/capturas/banu.webp', alt: 'La página de Banú Scents' },
-    },
-    {
       nombre: 'Esquina Estudio',
       enlace: 'https://esquinaestudio.com.ar',
       rubro: 'Equipo de branding. Le hicimos una página acorde a su estética y su marca.',
       pagina: { fuente: '/capturas/esquina.webp', alt: 'La página de Esquina Estudio' },
+    },
+    {
+      nombre: 'Banú Scents',
+      enlace: 'https://banuscents.com.ar',
+      rubro: 'Vende perfumes árabes. Le hicimos una página simple pero bonita.',
+      pagina: { fuente: '/capturas/banu.webp', alt: 'La página de Banú Scents' },
     },
   ],
 
@@ -233,4 +237,4 @@ export const PEDIDO: readonly EntradaDePedido[] = []
 // nombres llegan ya por un patrón del sistema. Queda P3, que pinta el cuerpo de
 // la bajada palabra por palabra, y P7, que es el patrón del BLOQUE: de ahí sale
 // la perspectiva de la cámara, que es lo que hace visible la huida.
-export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P3', 'P7']
+export const PATRONES_DE_LA_SECCION = ['P1', 'P3', 'P7'] as const

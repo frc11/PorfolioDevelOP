@@ -234,6 +234,28 @@ export const AGREGADOS: readonly Agregado[] = [
     motivo:
       'NO es un nivel nuevo de la escala —no entra en `NIVELES` y `s3-tipografia` §6 no lo mira— y tampoco es una RAZÓN como los dos de PAPEL-2: son **DOS TECHOS medidos sobre el píxel** y la recta que los une. [medido] El §3 y el §4 del sprint piden que «TU NEGOCIO VENDIENDO» crezca en 768 y en 1024, con el mismo criterio dicho con dos palabras distintas —«lo más grande posible antes de tocar el logo» y «casi del ancho de LAS 24 HS»—: el mayor tamaño con el que la tinta del titular que cae sobre la masa negra de la escena no sube de lo que ya es hoy. Barrido en el navegador con `scripts-compo2/a-medir.ts`, una hoja `!important` por candidato sobre la MISMA página y la cifra del cruce de TAPADO-1: a 768, con el bloque devuelto a su posición de hoy, 66 px dan 3,07 %, **67 px dan 3,35 % — exactamente lo de hoy—** y 68 px dan 3,58 %; a 1024, **95 px dan 0,52 % contra los 0,51 % de hoy** y 96 px dan 0,58 %. ⚠️ El techo de 768 se midió CON el bloque en su lugar: la regla global del sprint (la bajada en un renglón) le saca 25,6 px al bloque y, como se apoya abajo, lo BAJA —a 768 eso mete el registro 2 adentro de la SEGUNDA masa de la escena (filas 800–838) y la superposición salta sola de 3,35 % a 8,53 %—, así que el Hero le devuelve ese renglón como margen en la banda `tablet` y el barrido corre sobre el bloque devuelto. ⚠ Es una RECTA y no dos valores fijos porque el set tiene 768 y 1024 y nada en el medio: dos valores fijos pondrían un salto de 28 px en un píxel que nadie midió (860) y la recta reparte el mismo error — a = (95 − 67) / (1024 − 768) = 0,109375 → 10,9375vw; b = 67 − 0,109375 × 768 = −17 px → −1,0625rem. ⚠ La banda es 768–1024 y ninguna punta se puede correr: abajo de 768 están 390 y 425 (el primero intocable por el §5, el segundo resuelto por posición en el §2) y de 1025 para arriba el registro 1 vuelve a ser UN renglón con las dos palabras inline, o sea otra composición. La clase lo dice con sus dos mitades —`tablet:` prende y `escritorio:` apaga—, que es la lección que COMPO-1 §6 dejó escrita midiendo 8,8 px de corrimiento en 1440 y 1920. El escalón que deja en 768 (44,75 → 67 px) cae en el MISMO píxel donde la composición ya conmuta: `tablet:` es donde la grilla de la caja del titular pasa de una columna a tres. `hero.invariant` §16c evalúa la recta en sus dos anclas y afirma las dos mitades de la clase.',
   },
+  {
+    token: '--leading-cartel',
+    sprint: 'CARTEL',
+    motivo:
+      'El primer interlineado del tema por DEBAJO de 1, y no es un nivel nuevo de la escala: no entra en `INTERLINEADOS` como registro de texto corrido. [decidido] Lo pide el CTA de Trabajos, que es un póster editorial adentro de una ventana de navegador: la frase va en `display-xl` a la izquierda, ocupando casi todo el ancho de la ventana en tres renglones. Con `--leading-titulo` (1,09) esos tres renglones se leen como un párrafo —hay más aire entre línea y línea que tinta— y con 0,9 se leen como UNA masa, que es lo que un cartel es. Es el único uso y no se usa en texto corrido: un interlineado por debajo de 1 hace que las colas de la g y la p toquen el renglón de abajo, y eso en un párrafo es un defecto y en un titular de tres líneas es el efecto.',
+  },
+  {
+    token: '--color-semaforo-rojo',
+    sprint: 'CARTEL',
+    motivo:
+      'Uno de los tres círculos de la barra de una ventana de macOS. [tomado] NO participa del sistema de color: no tiene par de contraste declarado porque no lleva texto encima ni debajo, no entra en la rotación de acentos, y su único uso es un círculo de 12 px en el cromo del CTA de Trabajos. Existe como token y no como hex suelto porque el repo prohíbe un hex en el marcado —`s5-trabajos` §11— y porque un color sin nombre es un color que nadie puede encontrar después. El valor es el del cromo de macOS Sonoma, tomado tal cual: lo que hace reconocible al gesto es exactamente ese trío y no una interpretación de él.',
+  },
+  {
+    token: '--color-semaforo-amarillo',
+    sprint: 'CARTEL',
+    motivo: 'El segundo de los tres del semáforo. Mismo motivo y mismas condiciones que `--color-semaforo-rojo`.',
+  },
+  {
+    token: '--color-semaforo-verde',
+    sprint: 'CARTEL',
+    motivo: 'El tercero de los tres del semáforo. Mismo motivo y mismas condiciones que `--color-semaforo-rojo`.',
+  },
 ]
 
 /** Los tokens que declara el original de S0, leídos del archivo. */

@@ -22,7 +22,6 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
-import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL } from '../_contrato/forma'
 import { MARCADORES, cuentaDeMarcadores, marcadoresPedidos, textosDe } from '../_contrato/marcadores'
@@ -32,10 +31,11 @@ import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
 import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
-import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, afirmarElTunel, afirmarLasCuatroEntradas, sinTres, veces } from './soporte'
+import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, afirmarElTunel, afirmarLasCuatroEntradas, sinTres, sumaDeLosTramos, veces } from './soporte'
 import { coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, nombresQueNoSonEncabezado } from './trabajos-piezas'
 import {
   DESTINO_DEL_CTA,
+  PX_DE_LA_SECCION,
   DISPARO_DE_LA_NOCHE,
 } from './geometria'
 import { Trabajos } from './Trabajos'
@@ -70,8 +70,27 @@ titulo('1 · El puente del atributo del panel, y los pasos declarados')
 afirmar(FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`), 'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite', `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`)
 controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viejo={seccion.id}', (t: string) => t.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`))
 
-afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla son los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
-controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccion, pasosDeLaSecuencia: 7 }, (s: EntradaDeSeccion) => s.pasosDeLaSecuencia === CONTENIDO.proyectos.length)
+/**
+ * ⚠️ **EL ALTO DE LA SECCIÓN DEJÓ DE SALIR DEL CONTENIDO Y SALE DEL RECORRIDO.**
+ *
+ * Decía «los pasos son los proyectos» y era cierto cuando la sección mostraba una
+ * pantalla por cliente. Con el túnel de zoom eso se cayó: **cuánto scroll pide el
+ * tramo sale del ritmo relativo, del tamaño de nacimiento y del relevo**, y no de
+ * cuántos clientes hay. La igualdad vieja se habría vuelto una mentira cómoda.
+ *
+ * Lo que la reemplaza es más fuerte, no más débil: la suma de los cinco tramos
+ * —cartel, túnel, CTA, levantada y demos— tiene que ENTRAR en el alto declarado,
+ * y el sobrante tiene que ser el tramo de demos y no un hueco anónimo.
+ */
+afirmar(
+  sumaDeLosTramos(CONTENIDO.proyectos.length) <= PX_DE_LA_SECCION,
+  `los cinco tramos entran en el alto declarado: piden ${sumaDeLosTramos(CONTENIDO.proyectos.length).toFixed(0)} px de los ${PX_DE_LA_SECCION} que dan las ${seccion.pasosDeLaSecuencia ?? 0} pantallas`,
+)
+controlPositivo(
+  'la cuenta del alto vería una sección de tres pantallas, que es la que tenía',
+  3 * 900,
+  (px: number) => sumaDeLosTramos(CONTENIDO.proyectos.length) <= px,
+)
 // ⚠️ La conversión ya no es una ventana de progreso —corre por tiempo— así que
 // lo único que queda por afirmar acá es la HISTÉRESIS: las dos líneas existen, son
 // distintas y sueltan más abajo de donde prenden.
@@ -238,11 +257,13 @@ afirmar(PEDIDO.every((e) => e.formato.length > 0), '  y todas dicen en qué form
  *  publicó las dos cifras por separado con su dueño; hoy la tabla dice las dos y
  *  la publicación vuelve a ser UNA afirmación de igualdad. */
 const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].map((m) => m[1]))].sort()
-// ⚠️ DOS, y el que se fue es P2. El tramo pasó a tener vocabulario propio
+// ⚠️ TRES desde que Portfolio llega con el gesto de la casa: P1 entró cuando el
+// cartel dejó de crecer desde un punto y pasó a subir renglón por renglón.
+// ⚠️ El que se fue en su momento es P2. El tramo pasó a tener vocabulario propio
 // (`tunel.ts`): nacer y crecer desde una esquina, huir en z. El cartel y los
 // nombres dejaron de llegar por un patrón del sistema. Queda P3 —el cuerpo que
 // se pinta— y P7, que es el patrón del BLOQUE y de ahí sale la perspectiva.
-afirmarIgual(patronesDelFuente, ['P3', 'P7'], 'el componente consume DOS patrones: P3 el cuerpo que se pinta, y P7 en el bloque, que es de donde sale la perspectiva de la huida')
+afirmarIgual(patronesDelFuente, ['P1', 'P3', 'P7'], 'el componente consume TRES patrones: P1 el titular que llega renglón por renglón —el gesto de la casa—, P3 el cuerpo que se pinta, y P7 en el bloque, de donde sale la perspectiva del vuelo')
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
 // ════════════════════════════════════════════════════════════════════════════

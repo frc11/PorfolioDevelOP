@@ -166,6 +166,18 @@ async function principal(): Promise<void> {
     '--text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);',
   ]
   const ESPERADO_DENTRO = [
+    // ⚠️ AGREGADOS POR CARTEL: el primer interlineado por debajo de 1 y los tres
+    // del semáforo de una ventana de macOS. Los cuatro tienen su motivo entero en
+    // `padron-de-tokens.AGREGADOS`. Los tres colores NO participan del sistema:
+    // no tienen par de contraste porque no llevan texto, no entran en la rotación
+    // de acentos, y su único uso son tres círculos de 12 px en el cromo del CTA
+    // de Trabajos. Están como token y no como hex suelto porque el marcado no
+    // admite un hex — `s5-trabajos` §11 — y porque un color sin nombre no se
+    // encuentra después.
+    '--leading-cartel: 0.9;',
+    '--color-semaforo-rojo: #FF5F57;',
+    '--color-semaforo-amarillo: #FEBC2E;',
+    '--color-semaforo-verde: #28C840;',
     // ⚠ AGREGADO POR TEXTO-3: el cuarto breakpoint, y el primero que se usa
     // hacia abajo. Mismo número que `--fluido-piso` —el ancho más angosto al
     // que se midió el sistema—. Su motivo entero está en

@@ -68,30 +68,39 @@ function acotar01(v: number): number {
 // ===========================================================================
 
 /**
- * LA ESCALA CON LA QUE NACE EL CARTEL. Un 4 % de su tamaño final: sobre su caja
- * son unos 25 px de ancho a 1440, o sea un punto.
+ * ⚠️ **EL CARTEL YA NO CRECE: LLEGA CON EL GESTO DE LA CASA.**
+ *
+ * Nacía en un punto interior de su caja y crecía desde ahí —una escala de 0,04 a
+ * 1—. Eso se cayó: el sitio tiene un gesto propio para que un titular entre, y es
+ * **P1, el revelado línea por línea** —142 instancias, el 58 % del corpus de la
+ * referencia, y su propio archivo dice que si se reproduce un solo efecto es ése—.
+ * El texto se parte en líneas, cada una arranca desplazada una altura de sí misma
+ * y sube hasta su lugar, tapada por su propia caja: **la línea base desde la que
+ * salen las palabras es el borde de esa caja**.
+ *
+ * Reusarlo en vez de escribir otro es la regla del sprint, y de paso borra código:
+ * la rampa de escala y su constante de nacimiento se fueron con él.
+ *
+ * Lo que le queda a este módulo del cartel es la SALIDA, que P1 no cubre.
  */
-export const ESCALA_DE_NACIMIENTO = 0.04
 
 /**
- * ⚠️ **LA DISTANCIA Y LA CURVA DE LA HUIDA — son las de la SALIDA de P7.**
+ * ⚠️ **LA SALIDA DEL CARTEL VA HACIA ADELANTE, hacia el espectador.**
  *
- * `translateZ: 0 → −1000` con la curva `entrada` (`power1.in`, t al cuadrado) y
- * `autoAlpha` de 1 a 0 en el mismo tramo. Escritas y no importadas: ver arriba.
+ * Iba hacia atrás —`translateZ` negativo, achicándose— y ahora va al revés: se
+ * agranda y pasa de largo. La distancia no es un número suelto: es **la mitad del
+ * foco de la cámara de la escena**, que a 900 de alto vale 1.427 px. Con la mitad,
+ * el cartel llega a `1427 / (1427 − 713) = 2,0` veces su tamaño justo cuando
+ * termina de desvanecerse. Pasarse de ese foco lo mandaría a infinito.
+ *
+ * ⚠️ Es el ÚNICO gesto en z del tramo. Las capturas y el CTA ya no huyen: se
+ * levantan y salen por arriba, que es otra cosa y vive en `CapaDelTunel`.
  */
-export const DISTANCIA_DE_LA_HUIDA = 1000
-export const CURVA_DE_LA_HUIDA = (t: number): number => t * t
+export const FOCO_DE_LA_ESCENA_PX = 1427
+export const DISTANCIA_DEL_VUELO = FOCO_DE_LA_ESCENA_PX / 2
 
-/**
- * La rampa de crecimiento del cartel: exponencial de `ESCALA_DE_NACIMIENTO` a 1.
- *
- * Exponencial y no recta porque **crecer es una propiedad de RAZÓN**: con una
- * recta el elemento se despega del punto al primer píxel de scroll y después se
- * arrastra; con una potencia el ritmo relativo es constante y se lee como un zoom.
- */
-export function escalaDelCrecimiento(u: number): number {
-  return ESCALA_DE_NACIMIENTO ** (1 - acotar01(u))
-}
+/** La curva de la salida: `power1.in`, t al cuadrado. Es la de P7, escrita acá. */
+export const CURVA_DEL_VUELO = (t: number): number => t * t
 
 /** Cuándo termina de crecer y desde cuándo huye, en fracción de su ventana. */
 export interface TiemposDelGesto {
@@ -113,9 +122,8 @@ export interface PoseDelElemento {
  *   · `u ≤ 0` — no existe. ⚠️ El corte es ESTRICTO: fuera de su ventana el
  *     progreso SATURA en 0, así que con `< 0` el elemento quedaría pintado en su
  *     escala de nacimiento durante todo lo que viene antes.
- *   · hasta `crecerHasta` — CRECE hacia afuera desde su punto interior.
- *   · hasta `huirDesde` — MESETA. Quieto y entero: es el tramo en que se lee.
- *   · de ahí en adelante — HUYE: z y opacidad a la vez, la escala clavada en 1.
+ *   · hasta `huirDesde` — QUIETO. Llega con P1 adentro y después se lee.
+ *   · de ahí en adelante — VUELA HACIA ADELANTE: z positivo y opacidad a la vez.
  */
 export function poseDelGesto(u: number, tiempos: TiemposDelGesto): PoseDelElemento | null {
   const { crecerHasta, huirDesde } = tiempos
@@ -126,15 +134,14 @@ export function poseDelGesto(u: number, tiempos: TiemposDelGesto): PoseDelElemen
     throw new Error(`huirDesde inválido: ${huirDesde} contra crecerHasta ${crecerHasta}`)
   }
   if (u <= 0) return null
-  if (u < crecerHasta) {
-    return { escala: escalaDelCrecimiento(u / crecerHasta), z: 0, opacidad: 1 }
-  }
+  // Mientras LLEGA y mientras se lee, la caja está quieta y entera: lo que se
+  // mueve adentro es P1, renglón por renglón, y eso no lo dibuja esta función.
   if (huirDesde === null || u < huirDesde) {
     return { escala: 1, z: 0, opacidad: 1 }
   }
-  const t = CURVA_DE_LA_HUIDA(Math.min(1, (u - huirDesde) / (1 - huirDesde)))
+  const t = CURVA_DEL_VUELO(Math.min(1, (u - huirDesde) / (1 - huirDesde)))
   if (t >= 1) return null
-  return { escala: 1, z: -DISTANCIA_DE_LA_HUIDA * t, opacidad: 1 - t }
+  return { escala: 1, z: DISTANCIA_DEL_VUELO * t, opacidad: 1 - t }
 }
 
 /** El estilo del LUGAR del cartel: su caja final y su punto interior. */
@@ -229,11 +236,15 @@ export const AVANCE_POR_PX = Math.log(RITMO_POR_CIEN_PX) / 100
  * nada y crecen en recta, que es justamente lo que acá se descartó.
  *
  * Con crecimiento exponencial el cero no existe, así que el tamaño de nacimiento
- * es una decisión, y es la que fija cuánto scroll pide el túnel: con el ritmo de
- * arriba y el relevo de abajo, las tres capturas entran en 1.009 px de scroll, o
- * sea adentro de la sección tal como está. Nacer más chico multiplicaría eso.
+ * es una decisión, y es la que fija cuánto scroll pide el túnel.
+ *
+ * ⚠️ **Era 0,44 y bajó a 0,10, que son 144 px sobre un cuadro de 1.440.** A 0,44
+ * la primera captura aparecía ya grande y el tramo se leía como tres saltos; a
+ * 0,10 se la ve venir de lejos y tarda **1.032 px de scroll** en llenar el cuadro.
+ * El precio está declarado y pagado: el túnel pasó de pedir 1.009 px a pedir
+ * **3.001**, y la sección creció de tres pantallas a seis para dárselos.
  */
-export const ANCHO_AL_NACER = 0.44
+export const ANCHO_AL_NACER = 0.1
 
 /**
  * ⚠️ **EL RELEVO — la siguiente nace cuando la anterior CASI llena el cuadro.**
@@ -458,13 +469,22 @@ export const RELACION_DEL_CTA = { ancho: 16, alto: 10 } as const
 /**
  * ⚠️ **EL TIPEO CUELGA DEL CRECIMIENTO Y NO DE UN RELOJ PROPIO.**
  *
- * Cuántas letras se ven es una función del avance de la ventana y de nada más:
- * cuando la ventana llega a su tamaño, la frase está completa, por construcción.
+ * Cuántas letras se ven es una función del avance de la ventana y de nada más.
  * Un reloj propio tendría que mantenerse de acuerdo con el crecimiento, y dos
  * relojes que tienen que coincidir es la forma de que un día no coincidan.
+ *
+ * ⚠️ **La frase termina ANTES que el crecimiento, y por eso hay una fracción.**
+ * Terminaba justo en el final —`u = 1`— y el resultado medido fue que con la
+ * ventana ya grande todavía se leía «¿El próximo proyecto so». Un cartel que
+ * termina de escribirse en el último píxel no se alcanza a leer nunca: para
+ * cuando está completo, ya hay que seguir. Con 0,72 la frase está entera con la
+ * ventana en tres cuartos, y el último cuarto del crecimiento es tiempo de
+ * lectura. No es un reloj nuevo: es la misma cuenta, dividida.
  */
+export const FRACCION_DEL_TIPEO = 0.72
+
 export function letrasEscritas(u: number, total: number): number {
-  return Math.round(acotar01(u) * total)
+  return Math.round(acotar01(u / FRACCION_DEL_TIPEO) * total)
 }
 
 /**
@@ -494,4 +514,15 @@ export const DURACION_DEL_FRENO_MS = 900
  * por encima el tramo se lee como un corte a negro.
  */
 export const VELO_DEL_CTA = 0.55
+
+/**
+ * ⚠️ **CUÁNTO SUBE LA CAPA PARA SALIR DEL CUADRO, en alturas de ventana.**
+ *
+ * No alcanza con una: la primera captura llega a 1,68 anchos de cuadro y, sobre
+ * un 16:9, eso son 1.361 px de alto centrados en una ventana de 900 — o sea que
+ * asoma 230 px por arriba. Con 1,3 alturas el borde de abajo de lo más alto queda
+ * por encima del tope del cuadro, con margen. Medido sobre el ancho máximo y la
+ * relación de las capturas, no elegido.
+ */
+export const ALTURAS_DE_LA_LEVANTADA = 1.3
 

@@ -7,20 +7,22 @@
  * Mezclarlos con el contenido obligaría a exceptuarlos del escáner de cifras, y
  * una excepción es por donde vuelve a entrar la primera cifra inventada.
  *
- * ── ⚠️ PORTFOLIO · LA SECCIÓN SE LEE EN CUATRO TIEMPOS ────────────────────
+ * ── ⚠️ LA SECCIÓN SE LEE EN CINCO TRAMOS, Y SE MIDEN EN PÍXELES ──────────
  *
- * Todo lo de abajo cuelga de UNA cuenta —las pantallas que la tabla le da a la
- * sección— y de UNA decisión —cuántas de esas pantallas son preludio—. Las dos
- * viven en `secciones.ts`, así que acá no se elige ninguna: se derivan.
+ * El reparto dejó de escribirse en fracciones del progreso el día que la sección
+ * cambió de alto: una fracción fija de una sección que crece le da a su tramo más
+ * scroll sin que nadie lo haya decidido. Ahora cada tramo pide lo suyo en píxeles
+ * y las fracciones se derivan, así que mover el alto no desarma la composición.
  *
- *     el cartel   p ∈ [0 · 0,52]     Portfolio nace, se lee y empieza a huir
- *     el túnel    p ∈ [0,34 · 0,84]  las capturas, encimadas con la huida
- *     los demos   p ∈ [0,84 · 1]     el espacio reservado, hoy vacío
+ *     el cartel      1.200 px   llega con el gesto de la casa, se lee, y vuela
+ *     el túnel       3.001 px   sale del ritmo, del nacimiento y del relevo
+ *     el CTA           324 px   la ventana crece y la frase se escribe
+ *     la levantada     450 px   todo sube y sale por arriba del cuadro
+ *     los demos     el resto    la sala de noche sola
  *
- * **El `+1` de la cuenta no es un ajuste**: el par de anclas de P7 es
- * `top bottom → bottom bottom`, o sea que el progreso arranca cuando el tope de
- * la sección toca el PIE del cuadro. Entre ese instante y el pin hay exactamente
- * una pantalla, y por eso la pantalla `k` del pin cae en `(k+1)/pantallas`.
+ * **La suma tiene que entrar en el alto declarado**, y eso lo afirma el
+ * invariante: es lo que reemplazó a «los pasos son los proyectos», que dejó de
+ * ser cierto cuando el alto pasó a salir del recorrido y no del contenido.
  */
 
 import { sizesPorViewport } from '../../_lib/imagen'
@@ -42,6 +44,28 @@ export interface CajaDeLaCaptura {
 
 /** Las pantallas que la tabla le da a la sección, leídas de la tabla. */
 export const PANTALLAS_DE_LA_SECCION = pantallasDe(seccionDe('trabajos'))
+
+/**
+ * ⚠️ **EL ALTO CON EL QUE SE CUENTAN LOS PÍXELES DEL RITMO — y no es nuestro.**
+ *
+ * El ritmo del túnel está declarado por cada 100 px de SCROLL, y el scroll que
+ * una sección de tres pantallas ofrece depende del alto de la ventana. Se cuenta
+ * contra 900, que es el alto de referencia con el que se compuso todo. En una
+ * ventana más alta la sección da más píxeles y el mismo tramo se recorre un poco
+ * más lento: a 1.080 el ritmo real es ×1,205 en vez de ×1,25 — 4 % —, y eso queda
+ * declarado en vez de corregido, porque corregirlo pediría medir la ventana para
+ * decidir una ventana de progreso, y este archivo no mide nada.
+ *
+ * El 900 no se escribe acá: es `ALTO_DE_VIEWPORT_DE_LA_REFERENCIA`, que el lane de
+ * navegación ya declara como el alto con el que se compuso el sitio.
+ */
+export const PX_DE_LA_SECCION = PANTALLAS_DE_LA_SECCION * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
+
+/** Una fracción del progreso de la sección, a partir de píxeles de scroll. */
+export function fraccionDeScroll(px: number): number {
+  return px / PX_DE_LA_SECCION
+}
+
 
 /**
  * ⚠️ **LAS DOS LÍNEAS DEL BARRIDO, en porcentaje del alto de la ventana.**
@@ -164,15 +188,62 @@ export function progresoDeLaVentana(ventana: VentanaDelGesto, u: number): number
 }
 
 /**
- * ⚠️ **EL CARTEL — se adelanta, y lo que lo frena es la ENTRADA.**
+ * ⚠️ **EL CARTEL, EN PÍXELES DE SCROLL COMO TODO LO DEMÁS DEL TRAMO.**
  *
- * Termina de crecer en 0,10 y empieza a huir en 0,34. El techo de cuánto más se
- * puede adelantar no es una preferencia: hasta `p = 1/3` la sección todavía está
- * ENTRANDO —el hijo pegado sube con la página— así que el cartel, por temprano
- * que crezca, sube con ella. Lo que se gana adelantándolo es que ya esté ENTERO
- * cuando asoma, en vez de terminar de armarse a mitad del recorrido.
+ * Estaba escrito en fracciones del progreso —`gesto(0, 0.52, …)`— y eso dejó de
+ * servir el día que la sección cambió de alto: una fracción fija de una sección
+ * que crece de tres pantallas a seis le da al cartel el doble de scroll sin que
+ * nadie lo haya decidido. Ahora pide lo suyo en píxeles y la fracción se deriva.
+ *
+ * 1.200 px son un tercio del tramo del túnel: alcanza para que el cartel llegue
+ * con el gesto de la casa, se lea, y se vaya.
  */
-export const CARTEL = gesto(0, 0.52, 0.1, 0.34)
+export const PX_DEL_CARTEL = 1200
+
+/**
+ * Las tres partes del cartel, en fracción de SU ventana. Llega en el primer
+ * tercio, se lee en el medio —que es cuando el cuerpo se pinta— y se va en el
+ * último. Los dos cortes van como dato porque son una decisión de ritmo.
+ */
+export const CORTES_DEL_CARTEL = { llega: 0.35, seVa: 0.62 } as const
+
+/**
+ * ⚠️ **EL PROGRESO DE ESTA SECCIÓN ARRANCA UN VIEWPORT ANTES DE LA SECCIÓN, Y
+ * ESE TRAMO NO SE PUEDE USAR.**
+ *
+ * `Trabajos.tsx` monta su `<Bloque patron="P7" anclaje="seccion">`: el progreso
+ * lo resuelve el ANCLA DE P7 sobre la caja de la `<section>`, y esa ancla abre
+ * cuando el tope de la sección cruza el BORDE DE ABAJO del viewport —no el de
+ * arriba, como haría el ancla del pin—. O sea que el progreso ya lleva un
+ * viewport recorrido cuando el panel recién termina de entrar.
+ *
+ * **Medido, no leído** (`scripts-b4/s4-cartel.ts`, perfil 1440×900, con la
+ * sección en `top 5.433`): el cartel vale `u = 0` en `y = 4.533` —exactamente
+ * `top − 900`— y vale `u = 0,75` en `y = 5.433`, que es donde el panel queda
+ * puesto. O sea: **los primeros 900 px del progreso transcurren con el panel
+ * todavía subiendo**, con su caja a `top 1.017` —abajo del cuadro— al abrir.
+ *
+ * Eso convertía al gesto de la casa en un gesto invisible: el cartel llegaba
+ * renglón por renglón mientras su caja estaba abajo del borde, quedaba quieto
+ * mientras subía a la vista, y para cuando el panel se poseó ya estaba huyendo
+ * —opacidad 0,88 en el primer píxel de la sección, escondido 300 px después—.
+ * En la grabación a 1440 son ~150 cuadros en blanco donde el cartel debería
+ * estar llegando.
+ *
+ * Así que el recorrido entero arranca DESPUÉS de ese tramo. No es un número
+ * elegido: es un viewport, y el viewport con el que se cuenta es el mismo con el
+ * que se cuenta el ritmo del túnel. La deriva en una ventana más alta es la ya
+ * declarada arriba y de la misma clase: a 1.080 el panel se posa 180 px más
+ * tarde que donde este número lo pone.
+ */
+export const PX_DE_LA_APROXIMACION = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
+
+export const CARTEL = gesto(
+  fraccionDeScroll(PX_DE_LA_APROXIMACION),
+  fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL),
+  fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL * CORTES_DEL_CARTEL.llega),
+  fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL * CORTES_DEL_CARTEL.seVa),
+)
 
 /**
  * ⚠️ **LA VENTANA DE LA PINTURA ES LA MESETA DEL CARTEL.**
@@ -182,6 +253,15 @@ export const CARTEL = gesto(0, 0.52, 0.1, 0.34)
  * moviendo, y pintar palabra por palabra algo que además escala o se aleja es
  * pedirle dos cosas al ojo al mismo tiempo. Derivada del gesto del cartel.
  */
+/**
+ * ⚠️ **LA VENTANA DE LA LLEGADA — el tramo en que el cartel entra con P1.**
+ *
+ * En fracción de la ventana del cartel, igual que la pintura. Es el primer corte
+ * declarado: mientras dura, el titular sube renglón por renglón desde la línea
+ * que lo recorta. Después queda quieto y se lee.
+ */
+export const VENTANA_DE_LA_LLEGADA = { desde: 0, hasta: CORTES_DEL_CARTEL.llega } as const
+
 export const VENTANA_DE_LA_PINTURA = {
   desde: CARTEL.crecerHasta,
   hasta: CARTEL.huirDesde ?? 1,
@@ -204,27 +284,6 @@ export const ORIGEN_DEL_CARTEL: PuntoDelCuadro = { x: 0.08, y: 0.12 }
 // ===========================================================================
 // EL TÚNEL Y LOS DEMOS — las dos ventanas que quedan, y una deriva de la otra
 // ===========================================================================
-
-/**
- * ⚠️ **EL ALTO CON EL QUE SE CUENTAN LOS PÍXELES DEL RITMO — y no es nuestro.**
- *
- * El ritmo del túnel está declarado por cada 100 px de SCROLL, y el scroll que
- * una sección de tres pantallas ofrece depende del alto de la ventana. Se cuenta
- * contra 900, que es el alto de referencia con el que se compuso todo. En una
- * ventana más alta la sección da más píxeles y el mismo tramo se recorre un poco
- * más lento: a 1.080 el ritmo real es ×1,205 en vez de ×1,25 — 4 % —, y eso queda
- * declarado en vez de corregido, porque corregirlo pediría medir la ventana para
- * decidir una ventana de progreso, y este archivo no mide nada.
- *
- * El 900 no se escribe acá: es `ALTO_DE_VIEWPORT_DE_LA_REFERENCIA`, que el lane de
- * navegación ya declara como el alto con el que se compuso el sitio.
- */
-export const PX_DE_LA_SECCION = PANTALLAS_DE_LA_SECCION * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
-
-/** Una fracción del progreso de la sección, a partir de píxeles de scroll. */
-export function fraccionDeScroll(px: number): number {
-  return px / PX_DE_LA_SECCION
-}
 
 /**
  * ⚠️ **LA VENTANA DEL TÚNEL NO SE ELIGE: ARRANCA CON LA HUIDA DEL CARTEL Y DURA
@@ -250,34 +309,35 @@ export function ventanaDelTunel(cuantas: number): { readonly desde: number; read
  *
  *   · **el CTA** crece mientras se escribe la frase. 324 px son un tercio de
  *     pantalla: alcanza para leer veintinueve caracteres sin que se sienta lento.
- *   · **la huida** se lleva las capturas y el CTA. 216 px, un cuarto de pantalla:
- *     es un gesto, no un tramo.
+ *   · **la levantada** sube todo y lo saca por arriba del cuadro. 450 px, medio
+ *     tramo de pantalla: tiene que leerse como scroll y no como un truco, así que
+ *     necesita más recorrido que un gesto.
  *   · **los demos** son lo que queda, y no se declara: es el resto. Así la suma
  *     cierra siempre en 1 y nadie tiene que mantener cuatro números de acuerdo.
  */
 export const PX_DEL_CTA = 324
-export const PX_DE_LA_HUIDA = 216
+export const PX_DE_LA_LEVANTADA = 450
 
 export function ventanaDelCta(cuantas: number): { readonly desde: number; readonly hasta: number } {
   const desde = ventanaDelTunel(cuantas).hasta
   return { desde, hasta: desde + fraccionDeScroll(PX_DEL_CTA) }
 }
 
-export function ventanaDeLaHuida(cuantas: number): { readonly desde: number; readonly hasta: number } {
+export function ventanaDeLaLevantada(cuantas: number): { readonly desde: number; readonly hasta: number } {
   const desde = ventanaDelCta(cuantas).hasta
-  return { desde, hasta: desde + fraccionDeScroll(PX_DE_LA_HUIDA) }
+  return { desde, hasta: desde + fraccionDeScroll(PX_DE_LA_LEVANTADA) }
 }
 
 /**
- * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y ahora es un RESTO, no un número.**
+ * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y es un RESTO, no un número.**
  *
- * Empieza cuando la huida termina de llevarse todo, y de ahí al final de la
- * sección queda la sala de noche sola: el fondo 3D en negro, sin nada encima. Es
- * el espacio reservado, y sigue vacío por dentro — lo que va adentro es contenido
- * y todavía no lo sabemos.
+ * Empieza cuando la levantada terminó de sacar todo por arriba del cuadro, y de
+ * ahí al final de la sección queda la sala de noche sola: el fondo 3D en negro,
+ * sin nada encima. Es el espacio reservado, y sigue vacío por dentro — lo que va
+ * adentro es contenido y todavía no lo sabemos.
  */
 export function arranqueDeDemos(cuantas: number): number {
-  return ventanaDeLaHuida(cuantas).hasta
+  return ventanaDeLaLevantada(cuantas).hasta
 }
 
 /**

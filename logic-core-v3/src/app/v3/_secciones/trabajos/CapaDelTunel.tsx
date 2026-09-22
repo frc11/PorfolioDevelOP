@@ -12,15 +12,13 @@ import {
   MEDIDAS_DE_LAS_CAPTURAS,
   SIZES_DE_LA_CAPTURA,
   enLaVentana,
-  ventanaDeLaHuida,
+  ventanaDeLaLevantada,
   ventanaDelCta,
   ventanaDelTunel,
 } from './geometria'
 import { VentanaDelCta } from './piezas'
 import {
-  ANCHO_DEL_CTA,
-  CURVA_DE_LA_HUIDA,
-  DISTANCIA_DE_LA_HUIDA,
+  ALTURAS_DE_LA_LEVANTADA,
   DURACION_DEL_FRENO_MS,
   ENTRADA_DEL_NACIMIENTO,
   VELO_DEL_CTA,
@@ -116,7 +114,7 @@ const CAPTURAS: readonly ProyectoDeContenido[] = CONTENIDO.proyectos
 
 const VENTANA_DEL_TUNEL = ventanaDelTunel(CAPTURAS.length)
 const VENTANA_DEL_CTA = ventanaDelCta(CAPTURAS.length)
-const VENTANA_DE_LA_HUIDA = ventanaDeLaHuida(CAPTURAS.length)
+const VENTANA_DE_LA_LEVANTADA = ventanaDeLaLevantada(CAPTURAS.length)
 const LETRAS_DE_LA_FRASE = [...CONTENIDO.cta.frase.replace(/ /g, '')].length
 
 function medidaDe(indice: number): { readonly ancho: number; readonly alto: number } {
@@ -211,7 +209,12 @@ export function CapaDelTunel({
     const uCta = enLaVentana(p, VENTANA_DEL_CTA)
     const ventana = ventanaCta.current
     if (ventana !== null) {
-      ventana.style.setProperty('transform', transformDeLaCaptura(ANCHO_DEL_CTA * uCta))
+      // ⚠️ La escala va de 0 a 1 y el ANCHO lo pone el layout, no la escala. Al
+      // revés —una caja del ancho del cuadro escalada a 0,62— todo lo de adentro
+      // salía multiplicado por 0,62: la URL declarada en 10 px llegaba a la
+      // pantalla en 6,2 y era ilegible. Con la caja ya del tamaño final, los
+      // tamaños tipográficos declarados son los que se ven.
+      ventana.style.setProperty('transform', transformDeLaCaptura(uCta))
     }
     const velo = veloCta.current
     if (velo !== null) velo.style.setProperty('opacity', (VELO_DEL_CTA * uCta).toFixed(3))
@@ -232,12 +235,23 @@ export function CapaDelTunel({
       }
     }
 
-    // ── LA HUIDA: se lleva todo y deja la sala de noche sola ─────────────
-    const caja = contenedor.current
-    if (caja !== null) {
-      const t = CURVA_DE_LA_HUIDA(enLaVentana(p, VENTANA_DE_LA_HUIDA))
-      caja.style.setProperty('transform', `translateZ(${(-DISTANCIA_DE_LA_HUIDA * t).toFixed(1)}px)`)
-      caja.style.setProperty('opacity', (1 - t).toFixed(3))
+    /**
+     * ── LA LEVANTADA: nada desaparece, todo sube y sale por arriba ────────
+     *
+     * ⚠️ **Acá NO hay huida.** Era un `translateZ` negativo con desvanecido, y
+     * eso se lee como «esto se borra». Lo que tiene que pasar es lo que pasaría
+     * con cualquier página: el contenido se va para arriba y detrás queda lo que
+     * sigue. Así que es UNA traslación, lineal con el scroll —sin curva, porque
+     * un scroll no tiene curva— y **sin tocar la opacidad**: nada se desvanece.
+     *
+     * El porcentaje se mide sobre la caja de la capa, que es exactamente el
+     * cuadro, así que `-130 %` son 1,3 alturas de ventana: alcanza para sacar
+     * también a la primera captura, que desborda el cuadro por arriba y por abajo.
+     */
+    const capa = contenedor.current
+    if (capa !== null) {
+      const subida = ALTURAS_DE_LA_LEVANTADA * 100 * enLaVentana(p, VENTANA_DE_LA_LEVANTADA)
+      capa.style.setProperty('transform', `translateY(${(-subida).toFixed(2)}%)`)
     }
   }, [])
 
@@ -365,7 +379,15 @@ export function CapaDelTunel({
   return (
     // ⚠️ SIN `aria-hidden`: las capturas y el CTA son CONTENIDO, y `s10-acceso`
     // compara el texto anunciado de las dos ramas carácter por carácter.
-    <div ref={contenedor} data-pieza="tunel" className={className} style={RECORTE_DEL_TUNEL}>
+    <div
+      ref={contenedor}
+      data-pieza="tunel"
+      /* `will-change` acá y no sólo en los hijos: desde la levantada, la caja que
+         se transforma es ÉSTA, y la regla del repo pide la capa de composición
+         sobre el elemento que efectivamente se mueve. */
+      className={`${className ?? ''} will-change-transform`}
+      style={RECORTE_DEL_TUNEL}
+    >
       {CAPTURAS.map((proyecto, i) => (
         <div
           key={proyecto.nombre}

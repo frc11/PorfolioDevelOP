@@ -243,7 +243,30 @@ export function altoDeSecuenciaPinneada(pasos: number): string {
 /** Los pasos de las dos secuencias pinneadas. Su `contenido.ts` es la fuente y
  *  el invariante de cada sección afirma la igualdad; acá viven para que la
  *  tabla no importe contenido, que es la regla que la ordena. */
-const PASOS_DE_TRABAJOS = 3
+/**
+ * ⚠️ **TRABAJOS DEJA DE SER «UNA PANTALLA POR PROYECTO» — y el número ya no sale
+ * del contenido sino del RECORRIDO.**
+ *
+ * Eran tres, uno por proyecto, y la igualdad con `contenido.ts` era comprobable.
+ * Dejó de serlo cuando la sección pasó a ser un túnel de zoom con ritmo relativo
+ * constante: **cuánto scroll pide el tramo sale del ritmo, del tamaño de
+ * nacimiento y del relevo**, no de cuántos clientes hay. Con las capturas naciendo
+ * al 10 % del cuadro el túnel solo pide 3.001 px, y con el cartel, el CTA y la
+ * levantada la cuenta da 4.975.
+ *
+ * ⚠️ **Y hay un quinto sumando que no es un gesto: la APROXIMACIÓN.** El
+ * progreso de esta sección lo resuelve el ancla de P7 sobre la caja de la
+ * `<section>`, que abre cuando su tope cruza el borde de ABAJO del viewport, no
+ * el de arriba. Medido en 1440×900: cuando el panel queda puesto el progreso ya
+ * lleva 900 px —un viewport— recorridos, con el cartel a esa altura ya huyendo.
+ * Ese tramo se gasta aunque no se use, así que entra en la cuenta: 5.875, y con
+ * lo que queda para los demos la sección cierra en 6.300 — siete pantallas.
+ *
+ * El reparto vive en `trabajos/geometria.ts`, en píxeles, y su invariante afirma
+ * que la suma entra acá. O sea: la igualdad que se perdió se reemplazó por otra
+ * comprobable, y no por nada.
+ */
+const PASOS_DE_TRABAJOS = 7
 const PASOS_DE_SERVICIOS = 3
 
 /**
@@ -468,8 +491,9 @@ export const SECCIONES: readonly Seccion[] = [
     // noche detrás: el arco del sol baja a 0,08 mientras esta sección entra
     // (`_lib/escena/lightArc.ts`). Los tres proyectos vienen del fondo oscuro.
     superficie: 'oscuro-transparente',
-    // Sin preludio: las tres pantallas son los tres proyectos. El recorrido de
-    // cámara lo lleva Números, que es de quién es el tramo.
+    // Sin preludio. Las siete pantallas NO son los proyectos: son lo que pide el
+    // recorrido —aproximación, cartel, túnel, CTA, levantada y demos—, en píxeles en
+    // `trabajos/geometria.ts`. El recorrido de cámara lo lleva Números.
     alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
     pinneada: 'desde-escritorio',
     pasosDeLaSecuencia: PASOS_DE_TRABAJOS,

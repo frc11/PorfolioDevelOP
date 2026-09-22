@@ -99,7 +99,7 @@ export interface UsoDePatron {
 export const USOS_DECLARADOS: readonly UsoDePatron[] = [
   { patron: 'P2', seccion: 'servicios', para: 'las filas de la secuencia — 60 de sus 77 instancias están en esta página' },
   { patron: 'P3', seccion: 'servicios', para: 'el resaltado progresivo del párrafo, palabra por palabra' },
-  { patron: 'P4', seccion: 'servicios', para: 'la lista de cada servicio, ítem por ítem, muy frenada' },
+  { patron: 'P4', seccion: 'servicios', para: 'la llegada del CTA — entra desde 100 px abajo y muy frenado, cuando el 01 toma el panel' },
   { patron: 'P1', seccion: 'tu-panel', para: 'el titular, línea por línea' },
   { patron: 'P2', seccion: 'tu-panel', para: 'los bloques' },
   { patron: 'P4', seccion: 'tu-panel', para: 'la lista de capacidades' },

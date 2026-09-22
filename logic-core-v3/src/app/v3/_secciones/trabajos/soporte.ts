@@ -22,16 +22,22 @@ import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
+
 import { CONTENIDO } from './contenido'
 import {
   CARTEL,
   DESTINO_DEL_CTA,
   MEDIDAS_DE_LAS_CAPTURAS,
+  PX_DEL_CARTEL,
+  PX_DE_LA_APROXIMACION,
+  PX_DEL_CTA,
+  PX_DE_LA_LEVANTADA,
   PX_DE_LA_SECCION,
   arranqueDeDemos,
   enLaVentana,
   progresoDeLaVentana,
-  ventanaDeLaHuida,
+  ventanaDeLaLevantada,
   ventanaDelCta,
   ventanaDelTunel,
 } from './geometria'
@@ -40,6 +46,7 @@ import {
   ANCHO_AL_NACER,
   ANCHO_DEL_CTA,
   ANCHO_DEL_RELEVO,
+  ALTURAS_DE_LA_LEVANTADA,
   ANCHO_MAXIMO,
   ASENTAMIENTO_DEL_TUNEL_MS,
   AVANCE_POR_PX,
@@ -166,6 +173,25 @@ export function afirmarLasCuatroEntradas(): void {
 }
 
 /**
+ * LO QUE PIDE EL RECORRIDO ENTERO, en píxeles de scroll.
+ *
+ * Es la cuenta que reemplazó a «los pasos son los proyectos»: el alto de la
+ * sección ya no sale del contenido sino de esto. Vive en el arnés porque es
+ * plomería —sumar constantes— y no una afirmación.
+ *
+ * ⚠️ **LA APROXIMACIÓN SUMA aunque no sea un tramo del recorrido.** El progreso
+ * de esta sección abre un viewport antes de que el panel quede puesto, y ese
+ * tramo se gasta igual: si no entrara en la cuenta, el alto declarado alcanzaría
+ * para los cuatro gestos y el último se cortaría contra el final del progreso.
+ * Su motivo, con la medición que lo encontró, está en `PX_DE_LA_APROXIMACION`.
+ */
+export function sumaDeLosTramos(cuantas: number): number {
+  return (
+    PX_DE_LA_APROXIMACION + PX_DEL_CARTEL + pxQuePideElTunel(cuantas) + PX_DEL_CTA + PX_DE_LA_LEVANTADA
+  )
+}
+
+/**
  * ⚠️ **§17 DEL INVARIANTE — el túnel, su ritmo y el CTA. Mudado acá por la regla
  * de las 300 líneas, sin tocar una afirmación.**
  *
@@ -243,7 +269,7 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
   // ── LAS CUATRO VENTANAS ENTRAN EN LA SECCIÓN, EN ORDEN Y SIN PISARSE ────
   const tunel = ventanaDelTunel(cuantas)
   const cta = ventanaDelCta(cuantas)
-  const huida = ventanaDeLaHuida(cuantas)
+  const levantada = ventanaDeLaLevantada(cuantas)
   const demos = arranqueDeDemos(cuantas)
   afirmarIgual(
     tunel.desde,
@@ -251,9 +277,9 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     'el túnel arranca en el instante EXACTO en que el cartel empieza a huir: es una derivación, no dos números escritos aparte',
   )
   afirmarIgual(
-    [tunel.hasta, cta.hasta, huida.hasta].map((v) => v.toFixed(4)),
-    [cta.desde, huida.desde, demos].map((v) => v.toFixed(4)),
-    '  y las cuatro ventanas se tocan sin huecos: túnel → CTA → huida → demos',
+    [tunel.hasta, cta.hasta, levantada.hasta].map((v) => v.toFixed(4)),
+    [cta.desde, levantada.desde, demos].map((v) => v.toFixed(4)),
+    '  y las cuatro ventanas se tocan sin huecos: túnel → CTA → levantada → demos',
   )
   afirmar(
     demos < 1,
@@ -311,13 +337,43 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     (src: string) => veces(src, "setProperty('visibility'") === 0,
   )
 
-  // ── LA HUIDA DESPEJA EL TRAMO DE DEMOS ──────────────────────────────────
+  // ── LA LEVANTADA DESPEJA EL TRAMO DE DEMOS, Y NADA DESAPARECE ──────────
+  /**
+   * ⚠️ **Lo que se afirma acá cambió de signo.** Antes la capa se iba con una
+   * huida —z negativo y desvanecido— y lo que se comprobaba era que la opacidad
+   * llegara a cero. Eso estaba mal pedido: nada tiene que desaparecer. Ahora sube
+   * y sale por arriba, así que lo que se comprueba es la TRASLACIÓN, y que la
+   * fuente **no toque la opacidad** en ese tramo.
+   */
   afirmarIgual(
-    enLaVentana(demos, huida),
+    enLaVentana(demos, levantada),
     1,
-    'cuando empiezan los demos la huida ya terminó: el tramo queda con la sala de noche sola, que es lo que estaba tapado',
+    'cuando empiezan los demos la levantada ya sacó todo por arriba: el tramo queda con la sala de noche sola',
   )
-  afirmarIgual(enLaVentana(huida.desde, huida), 0, '  y arranca recién cuando el CTA terminó de leerse')
+  afirmarIgual(enLaVentana(levantada.desde, levantada), 0, '  y arranca recién cuando el CTA terminó de leerse')
+  /**
+   * ⚠️ **Cuánto hay que subir, con la cuenta hecha y no a ojo.** Lo más alto del
+   * tramo es la primera captura a `ANCHO_MAXIMO`: sobre un cuadro de 1.440 × 900
+   * son 2.419 px de ancho y, con la relación de las capturas, 1.361 de alto.
+   * Centrada, su borde de abajo queda en `450 + 680 = 1.130` px. Subir 1,3
+   * alturas son 1.170: el borde pasa el tope del cuadro con 39 px de sobra.
+   */
+  const altoDeLaMasAlta = ANCHO_MAXIMO * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA * (16 / 9) * (9 / 16)
+  const bordeDeAbajo = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA / 2 + (altoDeLaMasAlta * (9 / 16)) / 2
+  afirmar(
+    ALTURAS_DE_LA_LEVANTADA * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA >= bordeDeAbajo,
+    `  y sube ${ALTURAS_DE_LA_LEVANTADA} alturas de ventana = ${(ALTURAS_DE_LA_LEVANTADA * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA).toFixed(0)} px, contra los ${bordeDeAbajo.toFixed(0)} px que hay hasta el borde de abajo de lo más alto`,
+  )
+  /**
+   * ⚠️ **Y NADA SE DESVANECE, que es el punto del cambio.** La fuente no puede
+   * escribir opacidad sobre la capa en este tramo: si lo hiciera, volvería a ser
+   * una huida con otro nombre.
+   */
+  afirmarIgual(
+    veces(FUENTES.find((f) => f.archivo.includes('CapaDelTunel'))?.texto ?? '', "capa.style.setProperty('opacity'"),
+    0,
+    '  y la capa NO toca su opacidad al levantarse: nada desaparece, todo sale por arriba — la variable se llama `capa` justo para que esto se pueda afirmar',
+  )
 
   // ── EL RECORTE Y SU MARGEN ──────────────────────────────────────────────
   afirmar(conMotion.includes('overflow:clip'), 'la capa recorta al cuadro: sin eso el desborde le da al sitio 459 px de scroll horizontal')

@@ -12,12 +12,22 @@
  *        y la curva del disparo.
  *   §18  el estado que cierra la secuencia —el que no tiene ranura—, el instante
  *        exacto en que cambia el color y la caja del botón, que dejó de moverse.
+ *   §19  la llegada del botón: que no aparezca puesto, que el gesto sea uno de
+ *        los nueve del sistema y que su ventana la fije el redondeo y no un
+ *        número elegido.
  */
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { SERVICIOS } from '../_contrato/acento'
 import { leer } from '../_invariantes/soporte'
-import { FRACCION_DEL_CRUCE_DE_COPIAS, servicioDelCta } from './CtaQueRota'
+import {
+  FRACCION_DEL_CRUCE_DE_COPIAS,
+  PATRON_DE_LA_LLEGADA_DEL_CTA,
+  POSICION_DEL_NACIMIENTO_DEL_CTA,
+  POSICION_DEL_PRIMER_SERVICIO,
+  llegadaDelCta,
+  servicioDelCta,
+} from './CtaQueRota'
 import { CANTIDAD_DE_ESTADOS, ranuraVisible } from './RodilloDeEstados'
 import { cuenta } from './deteccion'
 import { CLASE_DEL_BOTON_ROTATIVO, CURVA_DEL_DISPARO } from './geometria'
@@ -258,5 +268,48 @@ export function afirmarElTraspaso(
     '  CONTROL: los dos altos difieren en UNA unidad del sistema, que es lo que esa resta vale',
   )
   controlPositivo('el detector vería la clase vieja, sin reserva de alto', 'col-start-1 row-start-1 w-full [&_[data-parte=ventana]]:min-w-full', (c: string) => c.includes('min-h-[var(--cta-ventana-hover)]'))
+
+  // ════════════════════════════════════════════════════════════════════════════
+  titulo('19 · El botón no aparece puesto: llega, y con un patrón del sistema')
+
+  /**
+   * ⚠️ **LA VENTANA DE LA LLEGADA NO ES UN NÚMERO ELEGIDO: LA FIJA EL REDONDEO.**
+   *
+   * `servicioDelCta` redondea, así que el CTA empieza a existir medio estado
+   * antes de que el 01 quede puesto. Ese medio estado ES la ventana. Lo que se
+   * afirma no es la resta —eso sería volver a escribirla— sino las dos
+   * propiedades que la resta tiene que cumplir, preguntándoselas a la función
+   * que manda: que en el nacimiento el botón YA exista con la llegada en cero, y
+   * que un pelo antes no exista todavía.
+   */
+  afirmarIgual(servicioDelCta(POSICION_DEL_NACIMIENTO_DEL_CTA), 0, 'el CTA nace donde el redondeo lo hace existir, no donde alguien eligió')
+  afirmarIgual(servicioDelCta(POSICION_DEL_NACIMIENTO_DEL_CTA - 0.001), null, '  y un pelín antes todavía no existe: el nacimiento es esa frontera')
+  afirmarIgual(llegadaDelCta(POSICION_DEL_NACIMIENTO_DEL_CTA), 0, '  al nacer no llegó nada: sale de abajo y apagado')
+  afirmarIgual(llegadaDelCta(POSICION_DEL_PRIMER_SERVICIO), 1, '  y termina de llegar cuando el 01 queda puesto, ni antes ni después')
+  afirmarIgual(llegadaDelCta(POSICION_DEL_PRIMER_SERVICIO + 2), 1, '  y no se pasa: de ahí en más se queda')
+  afirmarIgual(llegadaDelCta(0), 0, '  CONTROL: en el estado 00 la llegada vale cero, aunque el botón ni exista')
+  controlPositivo(
+    'el detector vería una llegada que ya nace puesta',
+    (p: number) => (p >= POSICION_DEL_NACIMIENTO_DEL_CTA ? 1 : 0),
+    (falsa: (p: number) => number) => falsa(POSICION_DEL_NACIMIENTO_DEL_CTA) === 0,
+  )
+
+  /**
+   * ⚠️ **Y EL GESTO ES UNO DE LOS NUEVE, NO UNO ESCRITO A MANO.**
+   *
+   * P4 —«lista frenada»— es `y` de 100 px a 0 con `opacity` de 0 a 1 y la curva
+   * `salida-fuerte`: literalmente «entra desde 100 px abajo, muy frenado al
+   * final». `USOS_DECLARADOS` ya se lo asignaba a esta sección y había quedado
+   * declarado sin usar cuando la lista de once ítems salió de la columna
+   * derecha; esta llegada lo vuelve a hacer verdad.
+   *
+   * Lo que se afirma es que el fuente monte el canal del sistema y NO escriba
+   * su propia traslación: un `translateY` a mano en este archivo sería una
+   * décima primitiva.
+   */
+  afirmar(fuenteDelCta.includes('<CanalDeUnaPieza'), 'la llegada entra por el canal del sistema, no por un estilo escrito acá')
+  afirmarIgual(PATRON_DE_LA_LLEGADA_DEL_CTA, 'P4', '  y el patrón es P4, el que el padrón ya le daba a esta sección')
+  afirmarIgual(cuenta(fuenteDelCta, /translateY|yPercent|animate\s*\(/g), 0, '  y el archivo no escribe ni una traslación ni un reloj propio: la llegada cuelga del disparo')
+  controlPositivo('el detector vería una traslación escrita a mano', 'style={{ transform: `translateY(${y}px)` }}', (t: string) => cuenta(t, /translateY|yPercent|animate\s*\(/g) === 0)
 
 }

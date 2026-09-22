@@ -1,11 +1,13 @@
 'use client'
 
-import { useMotionValueEvent, type MotionValue } from 'motion/react'
+import { useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Cta } from '../../_componentes/chrome/Cta'
+import { acotar01 } from '../../_lib/acotar'
 import { ROLLOVER_MEDIDO } from '../../_lib/cta'
 import { ATRIBUTO_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
+import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CTA_POR_SERVICIO } from './contenido'
 import {
   CLASE_DE_LA_VENTANA_DEL_CTA,
@@ -93,6 +95,56 @@ function etiquetaDe(indice: number): string {
   return CTA_POR_SERVICIO[SERVICIOS[indice].id]
 }
 
+/**
+ * EL BOTON NO APARECE DE LA NADA: LLEGA DESDE ABAJO, Y CON UN PATRON DE LA CASA.
+ *
+ * Hasta acá el CTA se montaba puesto. El estado 00 no lo tiene, el 01 sí, y en
+ * el cuadro del cambio aparecía entero en su lugar — el único gesto de la
+ * sección que no viajaba.
+ *
+ * ── Cuál primitiva, y por qué ésta ────────────────────────────────────────
+ *
+ * `P4`, «lista frenada»: `y` de 100 px a 0 y `opacity` de 0 a 1, con la curva
+ * `salida-fuerte`. Es literalmente «entra desde 100 px abajo, muy frenado al
+ * final», que es lo que el punto pide, y no hace falta inventar nada: entra por
+ * `CanalDeUnaPieza`, el mismo envoltorio que los tres bloques de contenido ya
+ * usan para P2.
+ *
+ * Las otras dos candidatas se descartaron con motivo. `P2` sube media altura
+ * propia pero NO apaga, así que el botón se vería entero en el estado 00, que es
+ * justo lo que no puede pasar. `P1` —el efecto de la casa para tipografía— sube
+ * una altura entera, pero su invisibilidad de antes la pone la ventana recortada
+ * que `LineasDeTexto` abre por línea, y acá el contenido es un `<a>`: recortar
+ * la caja de un focalizable se come su anillo de foco, que es exactamente lo que
+ * `s5-compacto` vigila. P4 no recorta nada porque apaga de verdad.
+ *
+ * ── Y va scrubbeado, no con un reloj propio ───────────────────────────────
+ *
+ * La llegada cuelga de `posicion`, el MISMO disparo que mueve al rodillo, a la
+ * torta y a la etiqueta. Subiendo el botón llega; bajando se va por el mismo
+ * camino y a la misma velocidad. No hay un segundo `animate(` —§14 lo prohíbe—
+ * ni un `setTimeout` que pueda desincronizarse del traspaso.
+ *
+ * ⚠️ El nacimiento no es un número elegido: `servicioDelCta` REDONDEA, así que
+ * el CTA empieza a existir medio estado antes de que el 01 quede puesto. La
+ * ventana de la llegada es exactamente ese medio estado, así que el botón
+ * termina de llegar en el mismo instante en que el rodillo termina de relevar.
+ * §19 vuelve a preguntárselo a `servicioDelCta` en vez de confiar en la resta.
+ */
+export const PATRON_DE_LA_LLEGADA_DEL_CTA = 'P4'
+
+/** Dónde da vuelta el redondeo de `servicioDelCta`. */
+const MEDIO_ESTADO = 0.5
+/** La posición del 01, que es el primer estado con servicio. */
+export const POSICION_DEL_PRIMER_SERVICIO = 1
+/** Y la del nacimiento: medio estado antes, por el redondeo. */
+export const POSICION_DEL_NACIMIENTO_DEL_CTA = POSICION_DEL_PRIMER_SERVICIO - MEDIO_ESTADO
+
+/** Cuánto de la llegada lleva recorrido el botón en esta posición. */
+export function llegadaDelCta(posicion: number): number {
+  return acotar01((posicion - POSICION_DEL_NACIMIENTO_DEL_CTA) / MEDIO_ESTADO)
+}
+
 /** Lo que tarda el subrayado en volver a reposo. Es el dato, no una copia. */
 const REVERSION_MS = ROLLOVER_MEDIDO.subrayado.duracionMs
 const INTERCAMBIO_MS = ROLLOVER_MEDIDO.duraciones.intercambioMs
@@ -148,6 +200,8 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
    * el CRUCE de las dos copias, que es el instante en que el cartel cambia.
    */
   const [tenido, setTenido] = useState<number | null>(mostrado)
+  /** Cuánto de la llegada lleva recorrido. Cuelga del disparo, no de un reloj. */
+  const llegada = useTransform(posicion, llegadaDelCta)
 
   const escribirEntrante = (indice: number): void => {
     const entrante = caja.current?.querySelector('[data-parte="copia-b"]')
@@ -218,23 +272,29 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
       style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}
       className={className}
     >
-      {/* ⚠️ LA VENTANA NO CAMBIA DE TAMAÑO AL CAMBIAR LA ETIQUETA. Las tres van
-          como fantasmas en la MISMA celda de la grilla, así que el ancho de la
-          celda es el de la más larga y no el de la que se está viendo. Medido y
-          no adivinado: la más larga no es la de más caracteres en toda tipografía.
-          Van `aria-hidden` porque no dicen nada que el botón no diga. */}
-      <div className={CLASE_DE_LA_VENTANA_DEL_CTA} style={revirtiendo ? { pointerEvents: 'none' } : undefined}>
-        {SERVICIOS.map((servicio) => (
-          <span key={servicio.id} aria-hidden="true" className={CLASE_DEL_FANTASMA_DEL_CTA}>
-            {CTA_POR_SERVICIO[servicio.id]}
-          </span>
-        ))}
-        <Cta
-          rotulo={etiquetaDe(mostrado)}
-          forzado={relevando && !revirtiendo && !porPuntero ? 'hover' : undefined}
-          className={CLASE_DEL_BOTON_ROTATIVO}
-        />
-      </div>
+      {/* La llegada envuelve a la ventana y no al contenedor: el contenedor es
+          quien lleva `[data-servicio]`, y de ese atributo cuelga `--color-acento`
+          para todo lo de adentro. Moverlo adentro del canal no cambiaría el
+          color, pero sí dejaría al teñido colgando de un nodo que se traslada. */}
+      <CanalDeUnaPieza progreso={llegada} patron={PATRON_DE_LA_LLEGADA_DEL_CTA}>
+        {/* ⚠️ LA VENTANA NO CAMBIA DE TAMAÑO AL CAMBIAR LA ETIQUETA. Las tres van
+            como fantasmas en la MISMA celda de la grilla, así que el ancho de la
+            celda es el de la más larga y no el de la que se está viendo. Medido y
+            no adivinado: la más larga no es la de más caracteres en toda tipografía.
+            Van `aria-hidden` porque no dicen nada que el botón no diga. */}
+        <div className={CLASE_DE_LA_VENTANA_DEL_CTA} style={revirtiendo ? { pointerEvents: 'none' } : undefined}>
+          {SERVICIOS.map((servicio) => (
+            <span key={servicio.id} aria-hidden="true" className={CLASE_DEL_FANTASMA_DEL_CTA}>
+              {CTA_POR_SERVICIO[servicio.id]}
+            </span>
+          ))}
+          <Cta
+            rotulo={etiquetaDe(mostrado)}
+            forzado={relevando && !revirtiendo && !porPuntero ? 'hover' : undefined}
+            className={CLASE_DEL_BOTON_ROTATIVO}
+          />
+        </div>
+      </CanalDeUnaPieza>
     </div>
   )
 }
