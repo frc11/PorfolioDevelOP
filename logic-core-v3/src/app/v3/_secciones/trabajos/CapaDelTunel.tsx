@@ -8,14 +8,30 @@ import { Titular } from '../../_componentes/tipografia/Titular'
 import { MarcoDeMedio } from '../_contrato/medios'
 
 import { CONTENIDO } from './contenido'
-import { MEDIDAS_DE_LAS_CAPTURAS, SIZES_DE_LA_CAPTURA, VENTANA_DEL_TUNEL } from './geometria'
 import {
-  ANCHO_DEL_RELEVO,
+  MEDIDAS_DE_LAS_CAPTURAS,
+  SIZES_DE_LA_CAPTURA,
+  enLaVentana,
+  ventanaDeLaHuida,
+  ventanaDelCta,
+  ventanaDelTunel,
+} from './geometria'
+import { VentanaDelCta } from './piezas'
+import {
+  ANCHO_DEL_CTA,
+  CURVA_DE_LA_HUIDA,
+  DISTANCIA_DE_LA_HUIDA,
+  DURACION_DEL_FRENO_MS,
+  ENTRADA_DEL_NACIMIENTO,
+  VELO_DEL_CTA,
   anchoDeLaCaptura,
   avanceDelNacimiento,
   avanceObjetivo,
+  letrasEscritas,
+  opacidadDeLaCaptura,
   opacidadDelRotulo,
   perseguir,
+  progresoDelAvance,
   transformDeLaCaptura,
   transformDelRotulo,
 } from './tunel'
@@ -23,40 +39,38 @@ import {
 /**
  * EL TÚNEL — la mitad que toca el DOM. **[PORTFOLIO]**
  *
- * El modelo puro vive en `tunel.ts` §2 y los lugares y los tiempos en
- * `geometria.ts`. Acá está lo mínimo que escribe en el navegador: cero `setState`
- * por cuadro, cada captura es un `style.setProperty` sobre un `ref`.
+ * El modelo puro vive en `tunel.ts` y las ventanas en `geometria.ts`. Acá está lo
+ * mínimo que escribe en el navegador: cero `setState` por cuadro, todo es
+ * `style.setProperty` sobre un `ref`.
  *
- * ── ⚠️ ÉSTE ES EL ÚNICO TRAMO DEL SITIO QUE NO CUELGA DEL SCROLL ─────────
+ * ── ⚠️ UN SOLO RELOJ PARA TODO EL TRAMO, Y ES UN PROGRESO CON RETRASO ────
  *
- * Todo lo demás de `/v3` dibuja una función pura del progreso: mismo scroll,
- * mismo cuadro. Acá no. El scroll mueve un OBJETIVO y lo que se dibuja lo
- * persigue con retraso, así que **el mismo scroll puede dar dos cuadros
- * distintos** según de dónde venga y cuánto tiempo haya pasado. Ésa es
- * exactamente la sensación que el tramo viene a producir —soltás y la imagen
- * sigue metiéndose— y por eso el lazo es de `requestAnimationFrame` y no una
- * suscripción al `MotionValue`: un valor que cambia con el TIEMPO necesita que
- * alguien mire el reloj aunque el scroll esté quieto.
+ * Lo que se persigue no es el zoom: es **el progreso de la sección**. De ese
+ * progreso lento salen las cuatro cosas que pasan acá —el avance del túnel, el
+ * crecimiento del CTA, el tipeo de la frase y la huida—, así que las cuatro
+ * heredan la misma inercia sin que haya un segundo reloj que mantener de acuerdo.
+ * Perseguir el progreso y después mapear es lo mismo que mapear y después
+ * perseguir, porque el mapeo es lineal, y de las dos formas equivalentes ésta
+ * tiene un solo estado.
  *
- * La consecuencia práctica, escrita para el que venga a medir: **una captura
- * hecha justo después de mover el scroll no muestra el estado final.** Hay que
- * esperar a que la persecución se asiente —`ASENTAMIENTO_DEL_TUNEL_MS`— o se mide
- * el instrumento en vez del sitio.
+ * **Éste es el único tramo del sitio que no dibuja una función pura del scroll**:
+ * el mismo scroll puede dar dos cuadros distintos según de dónde venga y cuánto
+ * tiempo pasó. Para el que venga a medir: una captura hecha justo después de
+ * mover el scroll NO muestra el estado final; hay que esperar el asentamiento.
  *
  * ── ⚠️ EL LAZO SE APAGA FUERA DE PANTALLA, Y AL VOLVER NO ANIMA ──────────
  *
- * Un `IntersectionObserver` sobre el panel prende y apaga el lazo, que es la
- * regla de rendimiento del repo. Al apagarlo el avance se lleva **de un salto**
- * al objetivo: si no, al volver a entrar se vería correr tres segundos de
- * persecución hacia un estado que ya debería estar puesto.
+ * Un `IntersectionObserver` sobre el panel lo prende y lo apaga. Al apagarlo el
+ * progreso lento se lleva **de un salto** al real: si no, al volver a entrar se
+ * verían tres segundos de persecución hacia un estado que ya debería estar puesto.
+ * `arrancar` siembra por la misma razón, y es simétrico a propósito.
  *
- * ── ⚠️ TODO CRECE DESDE EL CENTRO, y el centrado está en el `transform` ──
+ * ── ⚠️ TODO CRECE DESDE EL CENTRO ───────────────────────────────────────
  *
- * Cada captura se posiciona en el medio del cuadro y su `transform` lleva
+ * Cada captura se posiciona en el medio y su `transform` lleva
  * `translate(-50%, -50%)` antes de la escala. Los porcentajes de `translate` se
- * miden sobre la caja SIN escalar, así que el centro de la imagen cae en el
- * centro del cuadro valga su escala lo que valga. No hay un `transform-origin`
- * que mantener sincronizado con nada.
+ * miden sobre la caja SIN escalar, así que el centro cae en el centro del cuadro
+ * valga la escala lo que valga.
  */
 
 type ProyectoDeContenido = (typeof CONTENIDO.proyectos)[number]
@@ -67,35 +81,28 @@ const ESCONDIDO = 'scale(0)'
 /**
  * ⚠️ **EL RECORTE DEL TÚNEL — `clip` con margen, y las dos mitades son medidas.**
  *
- * **Por qué hay que recortar:** la primera captura llega a 1,64 anchos de cuadro
- * y, centrada sobre 1.440, su borde derecho cae en 1.898 px. Sin recorte eso no
- * queda en la sección: `document.scrollWidth` pasaba de 1.440 a **1.899** y el
- * sitio entero ganaba una barra de scroll HORIZONTAL a mitad del tramo.
+ * **Por qué hay que recortar:** la primera captura llega a 1,70 anchos de cuadro
+ * y, centrada sobre 1.440, su borde derecho cae fuera. Sin recorte eso no queda
+ * en la sección: `document.scrollWidth` pasaba de 1.440 a 1.899 y el sitio entero
+ * ganaba una barra de scroll HORIZONTAL a mitad del tramo.
  *
- * **Por qué NO es `overflow: hidden`:** adentro del túnel viven seis anclas, y el
- * anillo de foco del sistema se dibuja con desplazamiento POSITIVO —`2px`—, o
- * sea por FUERA del elemento. Un ancestro con `hidden` se lo come entero y la
- * parada de teclado queda sin señal visible. Lo dice el invariante de la
- * compacta con todas las letras, y tiene razón: acá se probó y lo marcó en rojo.
+ * **Por qué NO es `overflow: hidden`:** adentro viven siete anclas, y el anillo de
+ * foco del sistema se dibuja con desplazamiento POSITIVO, o sea por FUERA del
+ * elemento. Un ancestro con `hidden` se lo come entero. Lo dice el invariante de
+ * la compacta con todas las letras, y tiene razón: acá se probó y lo marcó en rojo.
  *
  * **La salida:** `overflow: clip` recorta igual pero no crea un contenedor de
- * scroll, y `overflow-clip-margin` le deja pintar unos píxeles POR AFUERA.
+ * scroll, y `overflow-clip-margin` le deja pintar unos píxeles por afuera.
  *
- * ⚠️ **El margen va en píxeles a mano y NO como `calc()` de los tokens, y eso se
- * midió:** escrito como `calc(var(--foco-desplazamiento) + var(--foco-grosor))`
- * —que es la misma suma que `navegacion.css` ya hace para esta misma razón— el
- * navegador lo computa en **0px**, o sea que no recorta con margen ninguno y el
- * anillo se pierde igual; con una longitud directa computa lo que dice. Blink no
- * acepta `calc()` en esta propiedad. La suma queda derivada igual, pero del otro
- * lado: `s5-trabajos` §17 lee los dos tokens del tema y afirma que dan esto.
+ * ⚠️ El margen va en píxeles a mano y NO como `calc()` de los tokens, y eso se
+ * midió: escrito como `calc()` el navegador lo computa en **0px**; con una
+ * longitud directa computa lo que dice. Blink no acepta `calc()` acá. La suma
+ * queda derivada del otro lado: `s5-trabajos` lee los dos tokens del tema y
+ * afirma que dan esto.
  *
- * ⚠️ **Lo que el margen deja sin cerrar, dicho con su número.** El margen también
- * es desborde: con él puesto, `document.scrollWidth` mide **1.444** contra 1.440
- * de ventana. Son 4 px de scroll horizontal contra los **459** que había sin
- * recortar —115 veces menos— y es el precio de que el anillo de foco exista. Las
- * dos perillas para llevarlo a cero están a la vista y ninguna es gratis: bajar
- * el margen a cero se come el anillo, y recortar un nivel más arriba mete a la
- * sección entera en una caja recortada.
+ * ⚠️ Lo que el margen deja sin cerrar, con su número: `document.scrollWidth` mide
+ * **1.444** contra 1.440 de ventana. Son 4 px contra los 459 que había sin
+ * recortar, y es el precio de que el anillo de foco exista.
  */
 const MARGEN_DEL_RECORTE_PX = 4
 
@@ -106,6 +113,11 @@ const RECORTE_DEL_TUNEL = {
 
 /** Las tres, en el orden en que entran. El índice ES su lugar en el túnel. */
 const CAPTURAS: readonly ProyectoDeContenido[] = CONTENIDO.proyectos
+
+const VENTANA_DEL_TUNEL = ventanaDelTunel(CAPTURAS.length)
+const VENTANA_DEL_CTA = ventanaDelCta(CAPTURAS.length)
+const VENTANA_DE_LA_HUIDA = ventanaDeLaHuida(CAPTURAS.length)
+const LETRAS_DE_LA_FRASE = [...CONTENIDO.cta.frase.replace(/ /g, '')].length
 
 function medidaDe(indice: number): { readonly ancho: number; readonly alto: number } {
   const medida = MEDIDAS_DE_LAS_CAPTURAS[indice]
@@ -127,7 +139,14 @@ export function CapaDelTunel({
   const contenedor = useRef<HTMLDivElement | null>(null)
   const capturas = useRef<(HTMLDivElement | null)[]>([])
   const rotulos = useRef<(HTMLDivElement | null)[]>([])
-  const avance = useRef(0)
+  const anclas = useRef<(HTMLAnchorElement | null)[]>([])
+  const ventanaCta = useRef<HTMLDivElement | null>(null)
+  const fraseCta = useRef<HTMLDivElement | null>(null)
+  const veloCta = useRef<HTMLDivElement | null>(null)
+  /** El progreso perseguido. Es el único estado del tramo. */
+  const lento = useRef(0)
+  /** Los dos tokens del anillo de foco, leídos del tema una vez. */
+  const anillo = useRef<{ grosor: number; desplazamiento: number } | null>(null)
 
   const montarCaptura = useCallback(
     (i: number) => (el: HTMLDivElement | null) => {
@@ -141,33 +160,84 @@ export function CapaDelTunel({
     },
     [],
   )
+  const montarAncla = useCallback(
+    (i: number) => (el: HTMLAnchorElement | null) => {
+      anclas.current[i] = el
+    },
+    [],
+  )
 
   /**
-   * Escribe el cuadro entero desde un avance. Es lo único que toca el DOM.
+   * Escribe el cuadro entero desde un progreso. Es lo único que toca el DOM.
    *
    * ⚠️ **ESCONDE CON `scale(0)` Y NO CON `visibility` — y es una corrección de
-   * accesibilidad, no un gusto.** Con `visibility: hidden` sobre la caja de una
-   * captura, sus dos anclas salen del foco secuencial: el navegador no le da Tab
-   * a lo que no se renderiza. Como arriba de 1025 la lista no existe, el
-   * resultado medido era que **los tres enlaces a los sitios de los clientes no
-   * se podían alcanzar con el teclado** —el foco saltaba de Quiénes somos a
-   * Servicios—, mientras `s10-acceso` afirmaba que el recorrido no cambia con el
-   * ancho. Un elemento en `scale(0)` no pinta un píxel, no recibe un clic —su
-   * caja mide cero— y **sigue siendo una parada**. Lo que lo hace visible cuando
-   * le toca el turno es el piso de abajo.
+   * accesibilidad.** Con `visibility: hidden` sobre la caja de una captura, sus
+   * dos anclas salen del foco secuencial: el navegador no le da Tab a lo que no
+   * se renderiza. Como arriba de 1025 la lista no existe, el resultado medido era
+   * que **los enlaces a los sitios de los clientes no se podían alcanzar con el
+   * teclado**. Un elemento en `scale(0)` no pinta, no recibe clic —su caja mide
+   * cero— y **sigue siendo una parada**.
    */
-  const pintar = useCallback((cuanto: number): void => {
+  const pintar = useCallback((p: number): void => {
+    const avance = avanceObjetivo(p, VENTANA_DEL_TUNEL, CAPTURAS.length)
     for (let i = 0; i < CAPTURAS.length; i += 1) {
       const caja = capturas.current[i]
-      const rotulo = rotulos.current[i]
-      const ancho = anchoDeLaCaptura(i, cuanto)
+      const ancho = anchoDeLaCaptura(i, avance)
       if (caja !== null && caja !== undefined) {
-        caja.style.setProperty('transform', transformDeLaCaptura(ancho ?? 0))
+        caja.style.setProperty('transform', ancho === null ? ESCONDIDO : transformDeLaCaptura(ancho))
+        caja.style.setProperty('opacity', opacidadDeLaCaptura(i, avance).toFixed(3))
       }
+      /**
+       * ⚠️ **EL ANILLO DE FOCO SE DIBUJA EN EL ESPACIO YA ESCALADO**, así que la
+       * escala lo multiplica: con la captura chica salía sub-píxel y con la
+       * captura desbordada salía grueso. No se arregla moviendo el ancla: se
+       * arregla redefiniendo sobre ella **los dos tokens con los que el tema lo
+       * dibuja**, divididos por la escala. Los valores salen del tema.
+       */
+      const ancla = anclas.current[i]
+      const tokens = anillo.current
+      if (ancla !== null && ancla !== undefined && tokens !== null && ancho !== null && ancho > 0) {
+        ancla.style.setProperty('--foco-grosor', `${(tokens.grosor / ancho).toFixed(4)}px`)
+        ancla.style.setProperty('--foco-desplazamiento', `${(tokens.desplazamiento / ancho).toFixed(4)}px`)
+      }
+      const rotulo = rotulos.current[i]
       if (rotulo === null || rotulo === undefined) continue
       const cuantoSeVe = ancho === null ? 0 : opacidadDelRotulo(ancho)
       rotulo.style.setProperty('opacity', cuantoSeVe.toFixed(3))
       rotulo.style.setProperty('transform', cuantoSeVe <= 0 || ancho === null ? ESCONDIDO : transformDelRotulo(ancho))
+    }
+
+    // ── EL CTA: la ventana crece y la frase se escribe con ella ──────────
+    const uCta = enLaVentana(p, VENTANA_DEL_CTA)
+    const ventana = ventanaCta.current
+    if (ventana !== null) {
+      ventana.style.setProperty('transform', transformDeLaCaptura(ANCHO_DEL_CTA * uCta))
+    }
+    const velo = veloCta.current
+    if (velo !== null) velo.style.setProperty('opacity', (VELO_DEL_CTA * uCta).toFixed(3))
+    const frase = fraseCta.current
+    if (frase !== null) {
+      // El tipeo es un RECORTE por palabra —ver el docblock de `VentanaDelCta`—:
+      // se reparten las letras escritas entre las palabras, en orden, y cada una
+      // se descubre de izquierda a derecha en la fracción que le tocó.
+      let restan = letrasEscritas(uCta, LETRAS_DE_LA_FRASE)
+      const palabras = frase.querySelectorAll('[data-palabra]')
+      for (let k = 0; k < palabras.length; k += 1) {
+        const el = palabras[k] as HTMLElement
+        const largo = (el.getAttribute('data-palabra') ?? '').length
+        const visibles = Math.max(0, Math.min(largo, restan))
+        restan -= visibles
+        const oculto = largo === 0 ? 0 : (1 - visibles / largo) * 100
+        el.style.setProperty('clip-path', `inset(0 ${oculto.toFixed(2)}% 0 0)`)
+      }
+    }
+
+    // ── LA HUIDA: se lleva todo y deja la sala de noche sola ─────────────
+    const caja = contenedor.current
+    if (caja !== null) {
+      const t = CURVA_DE_LA_HUIDA(enLaVentana(p, VENTANA_DE_LA_HUIDA))
+      caja.style.setProperty('transform', `translateZ(${(-DISTANCIA_DE_LA_HUIDA * t).toFixed(1)}px)`)
+      caja.style.setProperty('opacity', (1 - t).toFixed(3))
     }
   }, [])
 
@@ -176,83 +246,90 @@ export function CapaDelTunel({
     const panel = caja?.closest('[data-panel]') ?? null
     if (caja === null || panel === null) return
 
+    // Los dos tokens del anillo, del tema y no de acá.
+    const px = (nombre: string): number =>
+      Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue(nombre)) || 0
+    anillo.current = { grosor: px('--foco-grosor'), desplazamiento: px('--foco-desplazamiento') }
+
     let cuadro = 0
     let anterior = 0
+    let enfocada: number | null = null
+    let frenoHasta = 0
+    let yaFreno = false
 
     /**
-     * ⚠️ **EL PISO DEL FOCO — la otra mitad de la corrección de arriba.**
-     *
-     * Una parada de teclado que no se ve no sirve de nada. Mientras el foco esté
-     * adentro de una captura, el avance no puede bajar del que la deja en el
-     * tamaño del relevo, que es donde el rótulo se lee: tabular hasta un trabajo
-     * LO MUESTRA. El resto lo pone el navegador solo —al dar foco a algo, hace
-     * scroll para traerlo al cuadro, y eso arranca el lazo—.
-     *
-     * Al salir el foco, el piso desaparece y la persecución vuelve sola al
-     * scroll, con su mismo retraso. No hay un modo nuevo: hay un mínimo.
+     * ⚠️ **EL PISO DEL FOCO.** Una parada de teclado que no se ve no sirve de
+     * nada. Mientras el foco esté adentro de una captura, el progreso no puede
+     * bajar del que la deja nacida y entera. El resto lo pone el navegador: al dar
+     * foco a algo hace scroll para traerlo al cuadro, y eso arranca el lazo.
      */
-    let enfocada: number | null = null
-
     const pisoDelFoco = (): number =>
-      enfocada === null ? 0 : avanceDelNacimiento(enfocada) + ANCHO_DEL_RELEVO
+      enfocada === null
+        ? 0
+        : progresoDelAvance(avanceDelNacimiento(enfocada) + ENTRADA_DEL_NACIMIENTO, VENTANA_DEL_TUNEL, CAPTURAS.length)
 
-    const objetivoDeAhora = (): number =>
-      Math.max(avanceObjetivo(progreso.get(), VENTANA_DEL_TUNEL, CAPTURAS.length), pisoDelFoco())
+    const objetivoDeAhora = (): number => Math.max(progreso.get(), pisoDelFoco())
 
-    const alEntrarElFoco = (e: FocusEvent): void => {
-      const dueña = (e.target as HTMLElement | null)?.closest('[data-captura]') ?? null
-      const indice = dueña === null ? -1 : CAPTURAS.findIndex((c) => c.nombre === dueña.getAttribute('data-captura'))
-      enfocada = indice < 0 ? null : indice
-      // ⚠️ El piso se toma de UN SALTO y no persiguiéndolo. Medido: con la
-      // persecución puesta, a los 340 ms de tabular la captura enfocada iba por
-      // 190 px de los 922 que le tocan, y llegar tardaba los tres segundos
-      // enteros. Un foco que aparece de a poco no es un foco: se muestra ya. Al
-      // salir sí vale la persecución, porque ahí nadie está esperando nada.
-      const piso = pisoDelFoco()
-      if (avance.current < piso) {
-        avance.current = piso
-        pintar(avance.current)
+    /**
+     * ⚠️ **EL FRENO — lo que se detiene es el GESTO, no el scroll.**
+     *
+     * Cuando la frase termina de escribirse, el progreso lento se queda quieto
+     * `DURACION_DEL_FRENO_MS` para que se alcance a leer. La página sigue
+     * scrolleando normal: **nadie queda atrapado, ni con rueda ni con teclado**, y
+     * no se detiene el motor de scroll suave ni se cancela un solo evento — el
+     * repo tiene dos invariantes que prohíben lo primero y la doctrina escrita de
+     * que el gesto del visitante siempre gana. Al soltar, la persecución de tres segundos se
+     * encarga de que el reencuentro con el scroll no sea un salto.
+     */
+    const frenaSiCorresponde = (ahora: number): boolean => {
+      const uCta = enLaVentana(lento.current, VENTANA_DEL_CTA)
+      if (uCta <= 0) yaFreno = false
+      if (!yaFreno && uCta >= 1) {
+        yaFreno = true
+        frenoHasta = ahora + DURACION_DEL_FRENO_MS
       }
-    }
-    const alSalirElFoco = (): void => {
-      enfocada = null
+      return ahora < frenoHasta
     }
 
     const paso = (ahora: number): void => {
       const dt = anterior === 0 ? 0 : ahora - anterior
       anterior = ahora
-      avance.current = perseguir(avance.current, objetivoDeAhora(), dt)
-      pintar(avance.current)
+      if (!frenaSiCorresponde(ahora)) {
+        lento.current = perseguir(lento.current, objetivoDeAhora(), dt)
+      }
+      pintar(lento.current)
       cuadro = requestAnimationFrame(paso)
     }
 
-    /**
-     * ⚠️ **SIEMBRA EL AVANCE, y por la misma razón por la que `frenar` lo hace.**
-     *
-     * El lazo puede empezar con la sección YA a la vista: la compuerta de 1025
-     * vuelve a montar este componente entero al cruzar el umbral con un zoom del
-     * navegador o al dar vuelta `prefers-reduced-motion`, y ahí el observador
-     * entrega `isIntersecting: true` de una. Sin sembrar, `avance` arranca en 0
-     * contra un objetivo que puede valer 1,64: la pantalla queda vacía un cuadro
-     * y después el túnel entero se vuelve a dibujar desde cero durante tres
-     * segundos, sin que nadie haya scrolleado. Bajando normalmente esto no hace
-     * nada —el panel empieza a intersecar mucho antes de la ventana del túnel,
-     * donde el objetivo es cero—, que es lo que lo hace seguro.
-     */
     const arrancar = (): void => {
       if (cuadro !== 0) return
       anterior = 0
-      avance.current = objetivoDeAhora()
-      pintar(avance.current)
+      lento.current = objetivoDeAhora()
+      pintar(lento.current)
       cuadro = requestAnimationFrame(paso)
     }
 
-    /** Frena el lazo y deja el avance DONDE CORRESPONDE, sin animar la vuelta. */
+    /** Frena el lazo y deja el progreso DONDE CORRESPONDE, sin animar la vuelta. */
     const frenar = (): void => {
       if (cuadro !== 0) cancelAnimationFrame(cuadro)
       cuadro = 0
-      avance.current = objetivoDeAhora()
-      pintar(avance.current)
+      lento.current = objetivoDeAhora()
+      pintar(lento.current)
+    }
+
+    const alEntrarElFoco = (e: FocusEvent): void => {
+      const dueña = (e.target as HTMLElement | null)?.closest('[data-captura]') ?? null
+      const indice = dueña === null ? -1 : CAPTURAS.findIndex((c) => c.nombre === dueña.getAttribute('data-captura'))
+      enfocada = indice < 0 ? null : indice
+      // El piso se toma de UN SALTO: un foco que aparece de a poco no es un foco.
+      const piso = pisoDelFoco()
+      if (lento.current < piso) {
+        lento.current = piso
+        pintar(lento.current)
+      }
+    }
+    const alSalirElFoco = (): void => {
+      enfocada = null
     }
 
     const observador = new IntersectionObserver(([entrada]) => {
@@ -272,24 +349,22 @@ export function CapaDelTunel({
   }, [pintar, progreso])
 
   /**
-   * El primer cuadro sale del servidor con el avance en cero: la sección está a
-   * tres pantallas de la carga y nadie la ve, así que no hace falta adivinar un
-   * progreso. Lo que sí hace falta es que las tres nazcan en cero y no a tamaño
-   * completo, que es lo que se vería por un cuadro sin esto — y que nazcan en
-   * ESCALA cero y no escondidas, por lo que dice el docblock de `pintar`.
+   * El primer cuadro sale del servidor con el progreso en cero: la sección está a
+   * tres pantallas de la carga y nadie la ve. Lo que sí hace falta es que las tres
+   * nazcan en ESCALA cero y no escondidas, por lo que dice el docblock de `pintar`.
    */
   const estiloInicial = (indice: number): React.CSSProperties => {
     const medida = medidaDe(indice)
     return {
       aspectRatio: `${medida.ancho} / ${medida.alto}`,
-      transform: transformDeLaCaptura(0),
+      transform: ESCONDIDO,
+      opacity: 0,
     }
   }
 
   return (
-    // ⚠️ SIN `aria-hidden`: las tres capturas son CONTENIDO —los trabajos que
-    // esta sección viene a mostrar— y `s10-acceso` compara el texto anunciado de
-    // las dos ramas carácter por carácter.
+    // ⚠️ SIN `aria-hidden`: las capturas y el CTA son CONTENIDO, y `s10-acceso`
+    // compara el texto anunciado de las dos ramas carácter por carácter.
     <div ref={contenedor} data-pieza="tunel" className={className} style={RECORTE_DEL_TUNEL}>
       {CAPTURAS.map((proyecto, i) => (
         <div
@@ -299,22 +374,10 @@ export function CapaDelTunel({
           className="absolute top-1/2 left-1/2 w-full will-change-transform"
           style={estiloInicial(i)}
         >
-          {/* ⚠️ **EL RÓTULO VA PRIMERO EN EL MARCADO, y no es cosmético.** La rama
-              quieta anuncia nombre → rubro → imagen, y `s10-acceso` compara el texto
-              anunciado de las dos ramas; con el rótulo después del ancla, arriba de
-              1025 se anunciaba imagen → nombre → rubro. El orden de PINTURA no se
-              pierde: el rótulo es `absolute` y lo posicionado pinta arriba de lo que
-              está en flujo, venga antes o después. */}
-          {/* El rótulo viaja pegado a la esquina de abajo a la izquierda de SU
-              captura y deshace su escala, así que no cambia de tamaño mientras la
-              imagen crece. Se ve sólo en la banda declarada en `tunel.ts`.
-
-              ⚠️ **Va sobre el papel de la sección y no suelto sobre la imagen.**
-              Medido: sobre la captura de Banú —oscura— el texto se leía, y sobre
-              la de Esquina —una página blanca— desaparecía. Una captura es una
-              superficie que no controlamos, así que el rótulo trae la suya: el
-              par tinta/fondo del tema, que es el único contraste que esta sección
-              puede prometer en las tres. */}
+          {/* ⚠️ **EL RÓTULO VA PRIMERO EN EL MARCADO.** La rama quieta anuncia
+              nombre → rubro → imagen, y `s10-acceso` compara el texto anunciado de
+              las dos ramas. El orden de PINTURA no se pierde: el rótulo es
+              `absolute` y lo posicionado pinta arriba de lo que está en flujo. */}
           <div
             ref={montarRotulo(i)}
             data-rotulo={proyecto.nombre}
@@ -329,15 +392,16 @@ export function CapaDelTunel({
             <Cuerpo como="p">{proyecto.rubro}</Cuerpo>
           </div>
           {/* ⚠️ `pointer-events-auto` sobre el ancla y no sobre la capa: la capa
-              entera con eventos taparía el scroll de la sección, y la capa entera
-              sin ellos —como estaba— deja el ancla INERTE al clic aunque tome
-              foco. Una captura visible se puede clickear; el aire, no. */}
+              entera con eventos taparía el scroll de la sección, y sin ellos deja
+              el ancla INERTE al clic aunque tome foco. */}
           <a
+            ref={montarAncla(i)}
             href={proyecto.enlace}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={proyecto.pagina.alt}
             data-pieza="enlace-de-proyecto"
+            data-anillo="sin-escala"
             className="pointer-events-auto block"
           >
             <MarcoDeMedio
@@ -351,6 +415,17 @@ export function CapaDelTunel({
           </a>
         </div>
       ))}
+      <VentanaDelCta
+        refVentana={(el) => {
+          ventanaCta.current = el
+        }}
+        refFrase={(el) => {
+          fraseCta.current = el
+        }}
+        refVelo={(el) => {
+          veloCta.current = el
+        }}
+      />
     </div>
   )
 }

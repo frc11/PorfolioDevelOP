@@ -25,11 +25,12 @@
 
 import { sizesPorViewport } from '../../_lib/imagen'
 import { CLASE_INTERLETRADO, CLASE_INTERLINEADO, NIVELES_TIPOGRAFICOS } from '../../_lib/tipografia'
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA, ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
 import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 
-import { type Caja, type PuntoDelCuadro, type TiemposDelGesto } from './tunel'
+import { pxQuePideElTunel, type Caja, type PuntoDelCuadro, type TiemposDelGesto } from './tunel'
 
 /** Lo que hay que PEDIR de un medio (ancho × alto) más el `sizes` con el que se
  *  sirve. Vive acá porque es geometría y no contenido. */
@@ -205,31 +206,79 @@ export const ORIGEN_DEL_CARTEL: PuntoDelCuadro = { x: 0.08, y: 0.12 }
 // ===========================================================================
 
 /**
- * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS. Es la única punta declarada de las dos.**
+ * ⚠️ **EL ALTO CON EL QUE SE CUENTAN LOS PÍXELES DEL RITMO — y no es nuestro.**
  *
- * El último 16 % de la sección —media pantalla de las tres— queda para los demos:
- * «un espacio, sin mucho scroll», con el fondo 3D en negro y **vacío por dentro**.
- * Hoy no monta nada: lo que hay es el espacio y el enganche. No se inventa qué va
- * adentro porque eso es contenido y todavía no lo sabemos.
+ * El ritmo del túnel está declarado por cada 100 px de SCROLL, y el scroll que
+ * una sección de tres pantallas ofrece depende del alto de la ventana. Se cuenta
+ * contra 900, que es el alto de referencia con el que se compuso todo. En una
+ * ventana más alta la sección da más píxeles y el mismo tramo se recorre un poco
+ * más lento: a 1.080 el ritmo real es ×1,205 en vez de ×1,25 — 4 % —, y eso queda
+ * declarado en vez de corregido, porque corregirlo pediría medir la ventana para
+ * decidir una ventana de progreso, y este archivo no mide nada.
+ *
+ * El 900 no se escribe acá: es `ALTO_DE_VIEWPORT_DE_LA_REFERENCIA`, que el lane de
+ * navegación ya declara como el alto con el que se compuso el sitio.
  */
-export const ARRANQUE_DE_DEMOS = 0.84
+export const PX_DE_LA_SECCION = PANTALLAS_DE_LA_SECCION * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
+
+/** Una fracción del progreso de la sección, a partir de píxeles de scroll. */
+export function fraccionDeScroll(px: number): number {
+  return px / PX_DE_LA_SECCION
+}
 
 /**
- * ⚠️ **LA VENTANA DEL TÚNEL NO SE ELIGE: ES EL HUECO QUE DEJAN LOS OTROS DOS.**
+ * ⚠️ **LA VENTANA DEL TÚNEL NO SE ELIGE: ARRANCA CON LA HUIDA DEL CARTEL Y DURA
+ * LO QUE EL RITMO PIDE.**
  *
  * Empieza en el instante exacto en que el cartel arranca a huir —el paso 2 de la
- * secuencia, «mientras huye nace la primera captura», dicho como una derivación y
- * no como una coincidencia de dos números escritos aparte— y termina donde
- * empiezan los demos. Si el cartel se mueve, el túnel lo sigue solo.
- *
- * ⚠️ **Es la ventana del OBJETIVO, no la del dibujo.** Lo que se ve va atrás, con
- * su propio retraso, y por eso el túnel todavía está creciendo un rato después de
- * que el progreso llegó a `ARRANQUE_DE_DEMOS`. Ver `perseguir` en `tunel.ts`.
+ * secuencia, dicho como derivación y no como coincidencia— y su largo sale de
+ * `pxQuePideElTunel`, que a su vez sale del ritmo, del relevo y del tamaño de
+ * nacimiento. Si cualquiera de los tres cambia, la ventana se mueve sola y lo que
+ * viene después se corre con ella.
  */
-export const VENTANA_DEL_TUNEL = {
-  desde: progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1),
-  hasta: ARRANQUE_DE_DEMOS,
-} as const
+export function ventanaDelTunel(cuantas: number): { readonly desde: number; readonly hasta: number } {
+  const desde = progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1)
+  return { desde, hasta: desde + fraccionDeScroll(pxQuePideElTunel(cuantas)) }
+}
+
+/**
+ * ⚠️ **LO QUE LE TOCA AL CTA, A LA HUIDA Y A LOS DEMOS, en píxeles de scroll.**
+ *
+ * Los tres van en píxeles y no en fracciones de progreso porque es la unidad en
+ * la que se piensan: cuánto scroll tarda el visitante en recorrerlos. Se
+ * convierten a progreso con la misma cuenta que el túnel.
+ *
+ *   · **el CTA** crece mientras se escribe la frase. 324 px son un tercio de
+ *     pantalla: alcanza para leer veintinueve caracteres sin que se sienta lento.
+ *   · **la huida** se lleva las capturas y el CTA. 216 px, un cuarto de pantalla:
+ *     es un gesto, no un tramo.
+ *   · **los demos** son lo que queda, y no se declara: es el resto. Así la suma
+ *     cierra siempre en 1 y nadie tiene que mantener cuatro números de acuerdo.
+ */
+export const PX_DEL_CTA = 324
+export const PX_DE_LA_HUIDA = 216
+
+export function ventanaDelCta(cuantas: number): { readonly desde: number; readonly hasta: number } {
+  const desde = ventanaDelTunel(cuantas).hasta
+  return { desde, hasta: desde + fraccionDeScroll(PX_DEL_CTA) }
+}
+
+export function ventanaDeLaHuida(cuantas: number): { readonly desde: number; readonly hasta: number } {
+  const desde = ventanaDelCta(cuantas).hasta
+  return { desde, hasta: desde + fraccionDeScroll(PX_DE_LA_HUIDA) }
+}
+
+/**
+ * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y ahora es un RESTO, no un número.**
+ *
+ * Empieza cuando la huida termina de llevarse todo, y de ahí al final de la
+ * sección queda la sala de noche sola: el fondo 3D en negro, sin nada encima. Es
+ * el espacio reservado, y sigue vacío por dentro — lo que va adentro es contenido
+ * y todavía no lo sabemos.
+ */
+export function arranqueDeDemos(cuantas: number): number {
+  return ventanaDeLaHuida(cuantas).hasta
+}
 
 /**
  * ⚠️ **LAS MEDIDAS DE LOS TRES ARCHIVOS, leídas del disco y no elegidas.**
@@ -261,3 +310,20 @@ export const MEDIDAS_DE_LAS_CAPTURAS: readonly { readonly ancho: number; readonl
  * 0,64 anchos, con la imagen ya desbordada y en movimiento. Queda declarado.
  */
 export const SIZES_DE_LA_CAPTURA = sizesPorViewport(100)
+
+/**
+ * ⚠️ **A DÓNDE LLEVA EL CTA — al mismo lugar que dice la navegación, no a una
+ * cadena escrita acá.**
+ *
+ * «Contacto» es la sección de cierre, y su destino vive en la tabla de la
+ * navegación. Escribirlo de nuevo sería un segundo lugar donde mantenerlo. Si
+ * mañana contacto deja de ser una sección del home, la tabla lo dice y el CTA la
+ * sigue sin que nadie se acuerde de este archivo.
+ */
+export const DESTINO_DEL_CTA = (():
+  string => {
+  const entrada = ENLACES_DE_MUESTRA.find((e) => e.id === 'cierre')
+  if (entrada === undefined) throw new Error('la navegación ya no declara la sección de cierre')
+  return entrada.destino
+})()
+

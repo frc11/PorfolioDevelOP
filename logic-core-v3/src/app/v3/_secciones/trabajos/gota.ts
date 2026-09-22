@@ -166,3 +166,75 @@ export function estadoDelBarrido(ms: number): EstadoDelBarrido | null {
 export function estadoDeLaVuelta(ms: number): EstadoDelBarrido | null {
   return estadoDelBarrido(DURACION_DEL_BARRIDO - ms)
 }
+
+// ===========================================================================
+// LAS CUATRO ENTRADAS AL TRAMO - y en cuales corre el barrido
+// ===========================================================================
+
+/**
+ * ⚠️ **UN OBSERVADOR SOLO DICE «YA NO» O «YA SÍ», Y ESO ES LA MITAD DEL DATO.**
+ *
+ * El tramo tiene DOS fronteras y se puede cruzar cada una en los dos sentidos, o
+ * sea **cuatro** maneras de entrar o salir. Un `IntersectionObserver` entrega un
+ * booleano que junta las cuatro de a pares, y ahí estuvo el defecto: `isIntersecting`
+ * es cierto tanto al llegar desde Quiénes somos —bajando— como al volver desde
+ * Servicios —subiendo—, así que el barrido se disparaba también en la vuelta,
+ * a pantalla completa y encima de las capturas del túnel.
+ *
+ * Es la misma clase de defecto que `salioPorArriba` ya había dejado ver: una
+ * guarda que es cierta en dos situaciones que no se parecen en nada. La salida es
+ * la misma: **no preguntar «cruza?» sino «por dónde y hacia dónde».**
+ *
+ * El discriminador sale de la caja que el propio evento trae, y no hace falta
+ * recordar nada del cuadro anterior:
+ *
+ *   · entra **y su tope sigue por debajo del cero** → apareció por el borde de
+ *     ARRIBA, o sea vino subiendo la página hacia nosotros: bajando.
+ *   · entra **con el tope ya pasado** → volvimos a alcanzarlo desde abajo.
+ *   · sale **con el pie todavía abajo del cero** → se fue por arriba: subiendo.
+ *   · sale **con el pie pasado** → quedó atrás: bajando.
+ */
+export const ENTRADAS_AL_TRAMO = [
+  'arriba-bajando',
+  'arriba-subiendo',
+  'abajo-bajando',
+  'abajo-subiendo',
+] as const
+export type EntradaAlTramo = (typeof ENTRADAS_AL_TRAMO)[number]
+
+/** Lo úNICO que el barrido puede hacer ante un cruce. */
+export type GestoDelBarrido = 'ida' | 'vuelta' | 'nada'
+
+/** La caja que el observador trae, reducida a lo que decide. */
+export interface CruceObservado {
+  readonly cruza: boolean
+  /** `boundingClientRect.top` del panel, en coordenadas del cuadro. */
+  readonly tope: number
+  /** `boundingClientRect.bottom` del panel, en las mismas. */
+  readonly pie: number
+}
+
+/**
+ * QUÉ CRUCE ES, de los cuatro. Función total: las cuatro ramas son excluyentes y
+ * no hay una quinta, que es lo que permite afirmarlas una por una sin navegador.
+ */
+export function cruceDelTramo(c: CruceObservado): EntradaAlTramo {
+  if (c.cruza) return c.tope > 0 ? 'arriba-bajando' : 'abajo-subiendo'
+  return c.pie > 0 ? 'arriba-subiendo' : 'abajo-bajando'
+}
+
+/**
+ * ⚠️ **EL BARRIDO CORRE SÓLO EN LA FRONTERA CON QUIÉNES SOMOS.** Bajando
+ * enciende la noche, subiendo la devuelve, y en la otra frontera no hace nada.
+ *
+ * Por qué la de abajo no hace NADA en ninguno de los dos sentidos: bajando, la
+ * noche se queda puesta —Servicios es papel opaco y el canvas no se ve, así que
+ * apagarla no se notaría, pero volver a encenderla al regresar SÍ se nota—; y
+ * subiendo, se entra a un estado que ya está puesto, sin gesto ninguno.
+ */
+export function gestoDelCruce(entrada: EntradaAlTramo): GestoDelBarrido {
+  if (entrada === 'arriba-bajando') return 'ida'
+  if (entrada === 'arriba-subiendo') return 'vuelta'
+  return 'nada'
+}
+

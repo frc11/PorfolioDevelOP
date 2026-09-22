@@ -134,15 +134,17 @@ imprimirParadas(QUIETA, PARADAS)
  *
  * Cada proyecto de Portfolio ponía UNA parada —el nombre— y hoy pone DOS: el
  * nombre y la captura llevan al sitio del cliente. Una de más por proyecto, por
- * tres proyectos: +3 sobre las 22.
+ * tres proyectos: +3 sobre las 22. Y una cuarta: el CTA con el que termina el
+ * túnel, que abajo de 1025 es un enlace al final de la lista y arriba es una
+ * ventana de navegador —la misma parada, dibujada distinto—.
  *
  * Llegó a ser CUATRO por proyecto —nombre, rubro, logo y captura— y se bajó: el
  * logo se fue con el rediseño del tramo y el rubro dejó de ser ancla, porque tres
  * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-afirmarIgual(PARADAS.length, 25, 'el home entero tiene 25 paradas: las 22 de antes más la captura que cada trabajo sumó al enlazarse')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 25, '  y la rama animada tiene las mismas 25: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26, 'el home entero tiene 26 paradas: las 22 de antes, la captura de cada trabajo y el CTA del final del túnel')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26, '  y la rama animada tiene las mismas 26: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

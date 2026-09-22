@@ -12,6 +12,8 @@
  * escáneres persiguen.
  */
 
+import type { CruceObservado, EntradaAlTramo } from './gota'
+
 import { tramoDeSecuencia } from '../_contrato/secuencia'
 
 /** Los elementos que no cierran, para que la pila de ancestros no se desbalancee. */
@@ -308,3 +310,42 @@ export function caminoDeLaPersecucion(
   return v
 }
 
+/**
+ * EL CENSO DE LOS CUATRO CRUCES DEL TRAMO, con una caja de ejemplo para cada uno.
+ *
+ * Vive acá y no en el invariante por la regla de las 300 líneas del lane. Las
+ * cajas son coordenadas de cuadro reales para una sección de 3.240 px sobre una
+ * ventana de 900: lo único que importa de cada una es el SIGNO de `tope` y de
+ * `pie`, que es lo que separa una frontera de la otra.
+ */
+export const CRUCES_DEL_TRAMO: readonly {
+  entrada: EntradaAlTramo
+  caja: CruceObservado
+  gesto: string
+  cuando: string
+}[] = [
+  {
+    entrada: 'arriba-bajando',
+    caja: { cruza: true, tope: 880, pie: 4120 },
+    gesto: 'ida',
+    cuando: 'bajo de Quiénes somos y el tramo asoma por el pie del cuadro',
+  },
+  {
+    entrada: 'arriba-subiendo',
+    caja: { cruza: false, tope: 1500, pie: 4740 },
+    gesto: 'vuelta',
+    cuando: 'subo de vuelta a Quiénes somos y el tramo queda entero abajo',
+  },
+  {
+    entrada: 'abajo-bajando',
+    caja: { cruza: false, tope: -4140, pie: -900 },
+    gesto: 'nada',
+    cuando: 'sigo bajando a Servicios y el tramo queda entero arriba',
+  },
+  {
+    entrada: 'abajo-subiendo',
+    caja: { cruza: true, tope: -3200, pie: 40 },
+    gesto: 'nada',
+    cuando: 'vuelvo desde Servicios y el tramo reaparece por el tope — ACÁ estaba el defecto',
+  },
+]

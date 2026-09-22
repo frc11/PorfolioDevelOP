@@ -193,82 +193,145 @@ export function transformDeLaPose(pose: PoseDelElemento): string {
  */
 
 /**
- * ⚠️ **EL RELEVO — cuánto separa el nacimiento de una captura del de la
- * siguiente. MEDIDO.**
+ * ⚠️ **EL RITMO — la única constante de velocidad, y sale de la referencia.**
  *
- * En la referencia, al nacer una captura la anterior medía **29 %, 36 % y 29 %**
- * del ancho del cuadro en los tres relevos limpios del tramo grabado (los otros
- * dos caen en los bordes de la ventana y no cuentan). En anchos de cuadro, «la
- * anterior mide 0,32» y «el paso entre nacimientos es 0,32» son **el mismo
- * número**, porque el ancho ES el avance desde el nacimiento.
+ * Cuánto MULTIPLICA su tamaño una captura cada 100 px de scroll. Medido sobre
+ * heatbureau.com, en la banda donde vive la imagen que uno mira —entre el 40 % y
+ * el 120 % del cuadro—: ×1,33 · ×1,33 · ×1,50 · ×1,54 en la primera mitad de esa
+ * banda y ×1,02 · ×1,02 · ×1,18 · ×1,26 en la segunda. La mediana del conjunto
+ * es **×1,25**, y es lo que se declara.
  *
- * Corrobora aparte: la referencia hacía nacer una cada ~300 px de scroll, y una
- * captura llenaba el cuadro en 870–1000 px. O sea 0,30–0,34 de su propia vida.
+ * ⚠️ **Que sea un factor y no una cantidad de píxeles ES el arreglo.** Antes el
+ * ancho crecía en RECTA, que es como la referencia lo hace; el problema es que
+ * una recta en píxeles es un ritmo RELATIVO que se desploma: la primera captura
+ * iba de 189 a 472 px —×2,5— y más tarde de 1.323 a 2.362 —×1,8— sobre un tramo
+ * de scroll casi cuatro veces más largo. Con un factor constante, tramos iguales
+ * de scroll multiplican el tamaño por lo mismo **en cualquier punto del tramo**,
+ * que es lo que el ojo llama «ritmo parejo».
+ *
+ * ⚠️ **La referencia NO se copia acá, y hay que decirlo.** Sus imágenes también
+ * aceleran y frenan —más que las nuestras: ×3 a ×16 cada 100 px cuando son
+ * chiquitas contra ×1,02 cuando llenan el cuadro—. Lo que la salva es que
+ * conviven SEIS, así que la que uno mira está siempre en su fase lenta. Con tres
+ * capturas ese truco no está disponible, y por eso acá el ritmo se declara en vez
+ * de emerger.
  */
-export const ANCHO_DEL_RELEVO = 0.32
+export const RITMO_POR_CIEN_PX = 1.25
+
+/** El avance se mide en e-plegados: `ancho = nacer × e^(avance − nacimiento)`. */
+export const AVANCE_POR_PX = Math.log(RITMO_POR_CIEN_PX) / 100
+
+/**
+ * ⚠️ **A QUÉ TAMAÑO NACE UNA CAPTURA, en anchos de cuadro.**
+ *
+ * La referencia no contesta esta pregunta: **sus imágenes nacen en 0 px con
+ * opacidad 1** —medido: no entran con fundido ni aparecen grandes—. Nacen de la
+ * nada y crecen en recta, que es justamente lo que acá se descartó.
+ *
+ * Con crecimiento exponencial el cero no existe, así que el tamaño de nacimiento
+ * es una decisión, y es la que fija cuánto scroll pide el túnel: con el ritmo de
+ * arriba y el relevo de abajo, las tres capturas entran en 1.009 px de scroll, o
+ * sea adentro de la sección tal como está. Nacer más chico multiplicaría eso.
+ */
+export const ANCHO_AL_NACER = 0.44
+
+/**
+ * ⚠️ **EL RELEVO — la siguiente nace cuando la anterior CASI llena el cuadro.**
+ *
+ * Era 0,32 y la segunda aparecía con la primera a un tercio de la pantalla. Ahora
+ * la primera tiene que estar llegando al límite: 0,90 del ancho del cuadro. El
+ * tramo deja de ser una pila profunda y pasa a ser tres zooms encadenados, que es
+ * lo que se pidió.
+ */
+export const ANCHO_DEL_RELEVO = 0.9
 
 /**
  * «Llega al límite de la pantalla»: su ancho iguala al del cuadro. Es el fin del
- * túnel —lo que el paso 6 de la secuencia pide— y no un tamaño elegido.
+ * túnel y no un tamaño elegido.
  */
 export const ANCHO_DEL_LIMITE = 1
 
 /**
- * Debajo de esto una captura no se dibuja. A 1440 son 5,8 px: la referencia las
- * hacía aparecer entre 1 y 3 px, así que esto es un punto que ya se ve y no un
- * píxel suelto peleando con el redondeo del navegador.
+ * ⚠️ **EL TOPE — medido en la referencia, y acá hace falta de verdad.**
+ *
+ * Sus imágenes topaban entre 1,17 y 1,68 anchos de cuadro y se quedaban ahí. Con
+ * crecimiento exponencial el tope deja de ser decorativo: sin él, la primera
+ * terminaría en 4,18 anchos de cuadro —6.020 px de un archivo de 1.920— y lo que
+ * se ve es una textura estirada, no una captura. El valor es el TECHO de la banda
+ * medida, así que el desborde de la primera cae adentro de ella por construcción.
  */
-export const ANCHO_AL_APARECER = 0.004
+export const ANCHO_MAXIMO = 1.68
+
+/** El paso entre nacimientos, en e-plegados. DERIVADO del relevo y del nacimiento. */
+export const PASO_DEL_RELEVO = Math.log(ANCHO_DEL_RELEVO / ANCHO_AL_NACER)
+
+/**
+ * ⚠️ **LA ENTRADA DEL NACIMIENTO — lo único que el exponencial obliga a inventar.**
+ *
+ * Una captura no puede aparecer de golpe ocupando el 44 % del cuadro. La referencia
+ * no tiene este problema porque nace en cero. Acá entra con un fundido corto, y su
+ * largo no es una constante nueva: es **un cuarto del paso del relevo**, o sea una
+ * fracción de algo que ya estaba declarado.
+ */
+export const ENTRADA_DEL_NACIMIENTO = PASO_DEL_RELEVO / 4
 
 /** El avance al que nace la captura `indice`. La primera nace en cero. */
 export function avanceDelNacimiento(indice: number): number {
   if (!Number.isInteger(indice) || indice < 0) throw new Error(`índice inválido: ${indice}`)
-  return indice * ANCHO_DEL_RELEVO
+  return indice * PASO_DEL_RELEVO
 }
 
 /**
  * El avance con el que el túnel queda cumplido: la ÚLTIMA captura llega al límite
- * de la pantalla. Deriva de las otras dos constantes y de cuántas hay.
+ * de la pantalla. Deriva del paso y del tamaño de nacimiento.
  */
 export function avanceQueCompletaElTunel(cuantas: number): number {
   if (!Number.isInteger(cuantas) || cuantas < 1) throw new Error(`cuántas inválido: ${cuantas}`)
-  return avanceDelNacimiento(cuantas - 1) + ANCHO_DEL_LIMITE
+  return avanceDelNacimiento(cuantas - 1) + Math.log(ANCHO_DEL_LIMITE / ANCHO_AL_NACER)
+}
+
+/** Cuántos píxeles de scroll pide el túnel entero, al ritmo declarado. */
+export function pxQuePideElTunel(cuantas: number): number {
+  return avanceQueCompletaElTunel(cuantas) / AVANCE_POR_PX
 }
 
 /**
- * EL ANCHO DE UNA CAPTURA EN ANCHOS DE CUADRO, o `null` si todavía no se dibuja.
+ * EL ANCHO DE UNA CAPTURA EN ANCHOS DE CUADRO, o `null` si todavía no nació.
  *
- * ⚠️ No lleva tope, y no hace falta: el avance tampoco pasa del que completa el
- * túnel, así que la primera termina exactamente ahí. Cuánto vale ese máximo y por
- * qué cae donde la referencia lo tenía, en `anchoFinalDeLaPrimera`.
+ * `nacer × e^(avance − nacimiento)`, con tope. El ritmo relativo es el mismo en
+ * cualquier punto de la curva, que es la propiedad entera de este bloque.
  */
 export function anchoDeLaCaptura(indice: number, avance: number): number | null {
-  const ancho = avance - avanceDelNacimiento(indice)
-  return ancho < ANCHO_AL_APARECER ? null : ancho
+  const propio = avance - avanceDelNacimiento(indice)
+  if (propio < 0) return null
+  return Math.min(ANCHO_AL_NACER * Math.exp(propio), ANCHO_MAXIMO)
+}
+
+/** Cuánto se ve una captura recién nacida: entra en un cuarto de paso y se queda. */
+export function opacidadDeLaCaptura(indice: number, avance: number): number {
+  const propio = avance - avanceDelNacimiento(indice)
+  if (propio < 0) return 0
+  return Math.min(1, propio / ENTRADA_DEL_NACIMIENTO)
 }
 
 /**
- * ⚠️ **CUÁNTO LLEGA A MEDIR LA PRIMERA, y por qué no es un número elegido.**
- *
- * Es lo que el modelo deja: con tres capturas, `2 × 0,32 + 1 = 1,64` anchos de
- * cuadro. La referencia medía entre **1,17 y 1,68** anchos de cuadro en las cinco
- * imágenes que llegaron a su tope. O sea que el desborde de la primera **cae
- * adentro de la banda medida sin que nadie lo haya puesto ahí**: sale de cuántas
- * capturas hay y de la separación entre ellas, y de nada más.
+ * ⚠️ **CUÁNTO LLEGA A MEDIR LA PRIMERA.** Con tres capturas el modelo la llevaría
+ * a `0,44 × e^2,25 = 4,17` anchos de cuadro, así que **el tope de 1,70 sí muerde**:
+ * termina ahí, adentro de los 1,17–1,68 que la referencia medía, y deja de crecer
+ * mucho antes de que el túnel termine.
  */
 export function anchoFinalDeLaPrimera(cuantas: number): number {
-  return avanceQueCompletaElTunel(cuantas)
+  return Math.min(ANCHO_AL_NACER * Math.exp(avanceQueCompletaElTunel(cuantas)), ANCHO_MAXIMO)
 }
 
 /**
- * ⚠️ **LA BANDA EN LA QUE EL RÓTULO SE LEE — las dos constantes de arriba otra vez.**
+ * ⚠️ **LA BANDA EN LA QUE EL RÓTULO SE LEE — las dos constantes del tramo, otra vez.**
  *
- * El nombre y el rubro viajan con su captura y se ven exactamente mientras la
- * captura está entre el tamaño del relevo y el límite de la pantalla: antes es un
- * punto donde no entra un texto, y después el rótulo ya salió del cuadro con la
- * esquina a la que está pegado. No hay una tercera constante que calibrar.
+ * El nombre y el rubro viajan con su captura y se ven mientras la captura está
+ * entre su tamaño de nacimiento y el del relevo: desde que aparece hasta que la
+ * siguiente la releva. No hay una tercera constante que calibrar.
  */
-export const BANDA_DEL_ROTULO = { desde: ANCHO_DEL_RELEVO, hasta: ANCHO_DEL_LIMITE } as const
+export const BANDA_DEL_ROTULO = { desde: ANCHO_AL_NACER, hasta: ANCHO_DEL_RELEVO } as const
 
 /** Cuánto se ve el rótulo de una captura de ese ancho. Entra y sale en rampa. */
 export function opacidadDelRotulo(ancho: number): number {
@@ -345,6 +408,16 @@ export function avanceObjetivo(
   return avanceQueCompletaElTunel(cuantas) * acotar01((progreso - ventana.desde) / largo)
 }
 
+/** La inversa: en qué progreso de la sección el túnel lleva ese avance. */
+export function progresoDelAvance(
+  avance: number,
+  ventana: { readonly desde: number; readonly hasta: number },
+  cuantas: number,
+): number {
+  const total = avanceQueCompletaElTunel(cuantas)
+  return ventana.desde + acotar01(avance / total) * (ventana.hasta - ventana.desde)
+}
+
 /**
  * El `transform` de una captura: **centrada en el cuadro** y escalada a su ancho.
  *
@@ -364,3 +437,61 @@ export function transformDeLaCaptura(ancho: number): string {
 export function transformDelRotulo(ancho: number): string {
   return `scale(${(1 / ancho).toFixed(5)})`
 }
+
+// ===========================================================================
+// 3 - EL CTA: la ventana de navegador, su tipeo y el freno
+// ===========================================================================
+
+/**
+ * ⚠️ **HASTA DÓNDE CRECE LA VENTANA DEL CTA. No cubre la pantalla.**
+ *
+ * Llega al 62 % del ancho del cuadro y ahí se queda. No es un número suelto: es
+ * el ancho al que una ventana de navegador se lee COMO una ventana —con aire
+ * alrededor, apoyada sobre la sala— en vez de como una pantalla nueva. Sobre
+ * 1.440 son 893 px, y con la relación de abajo, 558 px de alto.
+ */
+export const ANCHO_DEL_CTA = 0.62
+
+/** La relación de la ventana. 16:10, que es la de un portátil y no la de un cine. */
+export const RELACION_DEL_CTA = { ancho: 16, alto: 10 } as const
+
+/**
+ * ⚠️ **EL TIPEO CUELGA DEL CRECIMIENTO Y NO DE UN RELOJ PROPIO.**
+ *
+ * Cuántas letras se ven es una función del avance de la ventana y de nada más:
+ * cuando la ventana llega a su tamaño, la frase está completa, por construcción.
+ * Un reloj propio tendría que mantenerse de acuerdo con el crecimiento, y dos
+ * relojes que tienen que coincidir es la forma de que un día no coincidan.
+ */
+export function letrasEscritas(u: number, total: number): number {
+  return Math.round(acotar01(u) * total)
+}
+
+/**
+ * ⚠️ **EL FRENO — cuánto se queda la frase antes de que el tramo siga.**
+ *
+ * Se pidió como una DURACIÓN y va como una duración: son milisegundos, no
+ * píxeles. Lo que frena es el AVANCE del tramo, no el scroll de la página —el
+ * repo tiene dos invariantes que prohíben tocar el scroll, y la doctrina escrita
+ * es que el gesto del visitante siempre gana—. Mientras dura, la página scrollea
+ * normal y la frase se queda quieta para que se alcance a leer; después el avance
+ * retoma y la persecución de tres segundos se encarga de que el reencuentro no
+ * sea un salto. **Nadie queda atrapado: lo que se detiene es el gesto.**
+ */
+export const DURACION_DEL_FRENO_MS = 900
+
+/**
+ * ⚠️ **CUÁNTO SE ATENÚA EL FONDO, y por qué es un velo y no un desenfoque.**
+ *
+ * Se eligió OSCURECER. Desenfocar querría decir `backdrop-filter` sobre un canvas
+ * 3D vivo, que es exactamente la familia de la que este repo ya se quemó: la
+ * lección del `EffectComposer` dice que un filtro sobre el canvas se paga en
+ * runtime de maneras que no se ven en estático. Un velo de color es una capa
+ * pintada y no vuelve a leer el cuadro de atrás.
+ *
+ * El 0,55 es lo que hace falta para que la ventana de navegador —papel claro—
+ * gane el primer plano sin apagar la sala del todo: por debajo la sala compite,
+ * por encima el tramo se lee como un corte a negro.
+ */
+export const VELO_DEL_CTA = 0.55
+

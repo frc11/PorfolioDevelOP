@@ -128,7 +128,7 @@ export const CONTENIDO = {
    * defectos visuales que la grabación anterior había dejado abiertos —el rubro
    * ilegible sobre el logo de la escena, el aire del PNG de Banú, y el nombre
    * del cliente dicho dos veces en El Garage, una como texto y otra como marca—.
-   * Los archivos siguen en `public/logos/` sin que nadie los pida.
+   * Los archivos se borraron del arbol: 2.162,1 KiB que ya no pesa nadie.
    *
    * ⚠️ **Los rubros los dictó el dueño y por eso NO son un invento.** Se
    * escribieron desde los hechos que dijo, sin adornar y sin agregar nada que no
@@ -161,6 +161,20 @@ export const CONTENIDO = {
       pagina: { fuente: '/capturas/esquina.webp', alt: 'La página de Esquina Estudio' },
     },
   ],
+
+  /**
+   * [verdad] EL CTA DEL FINAL DEL TÚNEL. La frase la dictó el dueño y la
+   * dirección es un marcador de posición deliberado —`tu-empresa.com.ar`— que se
+   * lee como el lugar del visitante y no como una promesa sobre un cliente real.
+   *
+   * ⚠️ El destino NO está acá: vive en `geometria.ts`, derivado de la tabla de
+   * navegación, porque a dónde lleva un enlace es estructura y no copy.
+   */
+  cta: {
+    frase: '¿El próximo proyecto sos vos?',
+    direccion: 'tu-empresa.com.ar',
+    rotulo: 'Hablemos',
+  },
 } as const
 
 /**
@@ -182,7 +196,7 @@ export const CONTENIDO = {
  * ⚠️ **VACÍO, Y ES EL PUNTO.** «Una casilla que se llena SALE de esta lista — no
  * queda tildada, desaparece», dice el bloque de arriba. Esta sección tenía nueve
  * casillas: seis medios y tres rubros. Llegaron los seis archivos
- * (`public/capturas/` y `public/logos/`) y el dueño dictó los tres rubros, así
+ * (`public/capturas/` y la carpeta de logos, ya borrada) y el dueño dictó los tres rubros, así
  * que no queda ninguna. Después el rediseño del tramo dejó de pedir los logos,
  * así que de los seis medios hoy se muestran TRES; los archivos siguen en disco
  * y nadie los referencia. La lista vacía no es un descuido: es lo que dice que

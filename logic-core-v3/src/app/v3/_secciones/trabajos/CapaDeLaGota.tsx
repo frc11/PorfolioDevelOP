@@ -9,9 +9,12 @@ import { DISPARO_DE_LA_NOCHE } from './geometria'
 import {
   DURACION_DEL_BARRIDO,
   cantidadDeLaNoche,
+  cruceDelTramo,
   estadoDeLaVuelta,
   estadoDelBarrido,
+  gestoDelCruce,
   maskDelBarrido,
+  type GestoDelBarrido,
 } from './gota'
 
 /**
@@ -68,9 +71,19 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
     // es decorativo y el contraste del texto no lo es. El número sigue saliendo
     // de `cantidadDeLaNoche`, así que tampoco acá hay un color escrito a mano.
     if (reducido) {
+      // ⚠️ Acá vale la MISMA regla de las cuatro entradas que abajo, y por el mismo
+      // defecto: con `isIntersecting` a secas, volver desde Servicios volvía a
+      // escribir la noche. No se ve —no hay banda— pero es el mismo error, y una
+      // regla que vale en una rama y no en la otra deja de ser una regla. Hay día
+      // en un solo caso: el tramo quedó entero por debajo, o sea estamos arriba.
       const soloNoche = new IntersectionObserver(
         ([e]) => {
-          NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(e.isIntersecting ? 1 : 0)
+          const cruce = cruceDelTramo({
+            cruza: e.isIntersecting,
+            tope: e.boundingClientRect.top,
+            pie: e.boundingClientRect.bottom,
+          })
+          NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(cruce === 'arriba-subiendo' ? 0 : 1)
         },
         { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
       )
@@ -128,53 +141,69 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
     }
 
     /**
-     * ⚠️ **SALIR POR ARRIBA Y SALIR POR ABAJO NO SON LO MISMO, y el observador
-     * sólo dice «ya no».** La sección deja de cruzar la línea en los dos
-     * extremos: subiendo —y ahí la noche tiene que volver, con su barrido— y
-     * bajando, cuando Trabajos ya pasó. Los separa la caja que el evento trae: si
-     * el pie de la sección todavía está debajo del tope del cuadro, quedó abajo.
+     * ⚠️ **LAS CUATRO ENTRADAS, Y EL BARRIDO CORRE EN UNA SOLA FRONTERA.**
+     *
+     * El defecto que esto cierra: volviendo desde Servicios —o sea subiendo— el
+     * tramo vuelve a cruzar la línea, `isIntersecting` se pone en cierto, y el
+     * barrido arrancaba de nuevo, a pantalla completa y encima de las capturas del
+     * túnel. La causa es la de siempre en este archivo: una guarda cierta en dos
+     * situaciones que no se parecen. `cruceDelTramo` las separa en `gota.ts`, con
+     * la caja que el propio evento trae, y `gestoDelCruce` dice qué corre en cada
+     * una. Acá no se decide nada: se obedece.
      */
-    const salioPorArriba = (e: IntersectionObserverEntry): boolean => e.boundingClientRect.bottom > 0
+    const queHace = (e: IntersectionObserverEntry): GestoDelBarrido =>
+      gestoDelCruce(
+        cruceDelTramo({
+          cruza: e.isIntersecting,
+          tope: e.boundingClientRect.top,
+          pie: e.boundingClientRect.bottom,
+        }),
+      )
+
+    /**
+     * ⚠️ **LA ÚNICA VEZ QUE EL COLOR SE PONE SIN GESTO, y es invisible.**
+     *
+     * Si la página arranca —o el componente se vuelve a montar al cruzar los 1025—
+     * con el tramo YA pasado o ya empezado, la noche tiene que estar puesta y no
+     * hay ningún cruce que la ponga: no lo hubo. Se restaura de una, en la primera
+     * observación y nunca más. Que no se vea está acotado por la tabla: desde ahí
+     * lo que llena el cuadro es Servicios, que es papel opaco, o el propio tramo,
+     * que ya debería estar de noche.
+     */
+    let primeraObservacion = true
+    const restaurarSiHaceFalta = (e: IntersectionObserverEntry): boolean => {
+      if (!primeraObservacion) return false
+      primeraObservacion = false
+      const cruce = cruceDelTramo({
+        cruza: e.isIntersecting,
+        tope: e.boundingClientRect.top,
+        pie: e.boundingClientRect.bottom,
+      })
+      if (cruce !== 'abajo-subiendo' && cruce !== 'abajo-bajando') return false
+      NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(1)
+      return true
+    }
 
     const laIda = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) arrancar('ida')
-        else if (!salioPorArriba(e)) {
-          /**
-           * ⚠️ **Trabajos quedó arriba: se suelta sin gesto, Y ES VISIBLE QUE NO
-           * SE VE.** Acá sí hay un cambio de color sin barrido, y está acotado por
-           * un hecho de la tabla: la sección que llena el cuadro en ese instante es
-           * Servicios, y Servicios es `papel-opaco` (`secciones.ts`) — el canvas no
-           * se ve. Correr la vuelta en cambio pintaría una banda negra encima de
-           * Servicios, que sí se vería. Soltar es lo invisible de las dos.
-           */
-          NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
-          cortar()
-        }
+        if (restaurarSiHaceFalta(e)) return
+        if (queHace(e) === 'ida') arrancar('ida')
       },
       { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
     )
 
     /**
-     * ⚠️ **LA VUELTA NO PUEDE CORRER SI NO HUBO IDA — y acá estaba el salto.**
-     *
-     * `salioPorArriba` mira si el pie de la sección sigue debajo del tope del
-     * cuadro, y eso es cierto en DOS situaciones que no se parecen en nada:
-     * cuando volvimos para arriba después de haber cruzado, y **cuando todavía no
-     * llegamos**. Al cargar la página estamos en la segunda: el observador se
-     * dispara en su primer cuadro con `isIntersecting: false`, y sin esta guarda
-     * arrancaba la vuelta ahí mismo. Eso es lo que se veía —la banda apareciendo
-     * arriba a la izquierda, que es donde la vuelta EMPIEZA, y barriendo hasta
-     * abajo a la derecha— al abrir el sitio, sin que nadie hubiera cruzado nada.
-     *
-     * La guarda es la pregunta correcta: **¿hay noche que devolver?** La hay si
-     * la ida está corriendo o si ya dejó algo de cantidad puesta.
+     * ⚠️ **LA VUELTA NO PUEDE CORRER SI NO HUBO IDA.** `gestoDelCruce` ya acota
+     * la vuelta a la frontera de arriba, pero falta el otro lado: al cargar la
+     * página arriba de todo, el tramo está por debajo y eso ES «salió por arriba»
+     * —nunca entró—. La guarda es la pregunta correcta: **¿hay noche que
+     * devolver?** La hay si la ida está corriendo o si ya dejó cantidad puesta.
      */
     const hayNocheQueDevolver = (): boolean => sentido === 'ida' || NOCHE_DISPARADA.cantidad > 0
 
     const laVuelta = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting && salioPorArriba(e) && hayNocheQueDevolver()) arrancar('vuelta')
+        if (queHace(e) === 'vuelta' && hayNocheQueDevolver()) arrancar('vuelta')
       },
       { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.vuelta}% 0px` },
     )
