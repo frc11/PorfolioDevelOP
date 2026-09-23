@@ -6,13 +6,13 @@ Lane PANEL · rama `lane/panel` · dev en 3010.
 
 - [x] F0.1 — Medir nk/news a 1440 y 390 (grilla, parallax, hover, tipografía)
 - [x] F0.2 — Leer la sección actual: archivos, invariantes, INVENTOS consumidos
-- [ ] F1 — Contenido: galería de 8 tarjetas en un archivo de datos, se van los textos y la lista, fuera `panelFechas` y `panelComparacion`
-- [ ] F2 — Grilla (ritmo 7n de nk) y parallax con una sola suscripción de scroll
-- [ ] F3 — Hover y `focus-visible`: la imagen escala 1,05 adentro del marco, el título se corre y entra la marca «qo»
-- [ ] F4 — Ampliar: elemento compartido, flechas, Esc, click afuera, cruz, foco atrapado y devuelto, fundido con movimiento reducido
-- [ ] F5 — «Y más…» con entrada expo-out de derecha a izquierda, una vez, y los puntos en fila
-- [ ] F6 — Móvil (<1025): una columna, sin hover, sin parallax, tocar amplía, «Y más…» quieto
-- [ ] F7 — lint, tsc, invariantes (s6-tu-panel, s7-arboles, s10-acceso, s21-llave), capturas, grabación, reporte
+- [x] F1 — Contenido: galería de 8 tarjetas en un archivo de datos, se van los textos y la lista, fuera `panelFechas` y `panelComparacion`
+- [x] F2 — Grilla (ritmo 7n de nk) y parallax con una sola suscripción de scroll
+- [x] F3 — Hover y `focus-visible`: la imagen escala 1,05 adentro del marco, el título se corre y entra la marca «qo»
+- [x] F4 — Ampliar: elemento compartido, flechas, Esc, click afuera, cruz, foco atrapado y devuelto, fundido con movimiento reducido
+- [x] F5 — «Y más…» con entrada expo-out de derecha a izquierda, una vez, y los puntos en fila
+- [x] F6 — Móvil (<1025): una columna, sin hover, sin parallax, tocar amplía, «Y más…» quieto
+- [x] F7 — lint, tsc, invariantes (s6-tu-panel, s7-arboles, s10-acceso, s21-llave), capturas, grabación, reporte
 
 ## Medición de nk/news (1440 × 900, Chrome por CDP, 2026-09-23)
 
@@ -35,11 +35,19 @@ Sonda: `scripts-panel/sonda.ts`. Crudos en `C:\Users\Valentino\.cache\b4-medicio
 | Fecha → etiqueta | 10 px, `line-height` 90 %, +0,4 px, mayúsculas, `opacity: .3`; 12 px debajo del marco, 10 px entre título y fecha | `Micro` (10 px) en mayúsculas con `--color-tinta-tenue` (la opacidad 0,3 no pasa AA); `--spacing-3` y `--spacing-2` |
 | 390 | una columna de 326 px, canal vertical 70, título 32 px, parallax APAGADO (`transform: none`) | una columna, sin parallax, sin hover |
 
+Nota: las fases 1 a 6 se commitearon juntas (`9fbf1f35`) porque comparten los mismos archivos de la sección.
+
 ## Decisiones
 
 - PROPUESTA (planificador): tarjetas 1 y 8 separadas; la etiqueta va donde nk pone la fecha.
 - El marco es 16:10 (instrucción) y no 16:9 (nk).
 - El corrimiento del título es 32 px y no 18: la marca «qo» necesita el lugar que en nk ocupa una barra de 7 px.
+
+- Las tarjetas grandes usan el ancho entero de la sección, como pidió la instrucción. A 1440 el marco L mide 1376 × 860 y casi llena la pantalla (en nk mide 1016 × 571). Para vetar: basta con acotar el ancho de la galería.
+- El marcador `[CAPTURA DEL PANEL]` se ve en cada tarjeta pero va `aria-hidden`: repetido ocho veces le ensuciaba el nombre a cada botón.
+- El censo de s10-acceso cambió (+8 paradas, −4 encabezados, −4 marcadores anunciados). El delta está aparte, en `DELTA_DEL_PANEL` al final de `s10-acceso-censo.ts`, para que el merge sea sumar.
+- `s6-tokens` acepta `opacity-0` y `opacity-100` como estructurales (apagado/prendido), igual que `none` y `full` en otras familias.
+- `s7-compuerta` necesita un build y este sprint no corre builds: queda sin correr.
 
 ## Pendiente para el usuario
 

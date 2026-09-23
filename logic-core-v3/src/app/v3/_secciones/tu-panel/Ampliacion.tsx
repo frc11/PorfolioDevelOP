@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom'
 import { Imagen } from '../../_componentes/medios/Imagen'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
+import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { cajaAmpliada, leerToken, milisegundosDe, pixelesDe, transformadaEntre, vecino } from './vuelo'
 import { CAPTURA, type Tarjeta } from './contenido'
 
@@ -54,8 +55,10 @@ export function Ampliacion({
   const ubicar = useCallback((): void => {
     const el = imagen.current
     if (el === null) return
-    const margen = pixelesDe(leerToken('--spacing-20'))
-    const caja = cajaAmpliada(window.innerWidth, window.innerHeight, margen, margen)
+    // Abajo de 1025 el margen es el de la grilla compacta: con 80 px, a 390 la imagen quedaba de 230.
+    const pie = pixelesDe(leerToken('--spacing-20'))
+    const margen = window.matchMedia(CONSULTA_ESCENARIO).matches ? pie : pixelesDe(leerToken('--spacing-4'))
+    const caja = cajaAmpliada(window.innerWidth, window.innerHeight, margen, pie)
     el.style.left = `${caja.left}px`
     el.style.top = `${caja.top}px`
     el.style.width = `${caja.width}px`
@@ -187,10 +190,10 @@ export function Ampliacion({
         <button ref={cerrarBoton} type="button" aria-label="Cerrar" onClick={cerrar} className={`${claseDeBoton} pointer-events-auto absolute top-[var(--spacing-6)] right-[var(--spacing-6)]`}>
           <span aria-hidden="true">✕</span>
         </button>
-        <button type="button" aria-label="Captura anterior" onClick={() => pasar(-1)} className={`${claseDeBoton} pointer-events-auto absolute top-1/2 left-[var(--spacing-4)] -translate-y-1/2`}>
+        <button type="button" aria-label="Captura anterior" onClick={() => pasar(-1)} className={`${claseDeBoton} pointer-events-auto absolute bottom-[var(--spacing-4)] left-[var(--spacing-4)] escritorio:top-1/2 escritorio:bottom-auto escritorio:-translate-y-1/2`}>
           <span aria-hidden="true">←</span>
         </button>
-        <button type="button" aria-label="Captura siguiente" onClick={() => pasar(1)} className={`${claseDeBoton} pointer-events-auto absolute top-1/2 right-[var(--spacing-4)] -translate-y-1/2`}>
+        <button type="button" aria-label="Captura siguiente" onClick={() => pasar(1)} className={`${claseDeBoton} pointer-events-auto absolute right-[var(--spacing-4)] bottom-[var(--spacing-4)] escritorio:top-1/2 escritorio:bottom-auto escritorio:-translate-y-1/2`}>
           <span aria-hidden="true">→</span>
         </button>
       </div>
