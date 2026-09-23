@@ -47,9 +47,11 @@ Nota: las fases 1 a 6 se commitearon juntas (`9fbf1f35`) porque comparten los mi
 - El marcador `[CAPTURA DEL PANEL]` se ve en cada tarjeta pero va `aria-hidden`: repetido ocho veces le ensuciaba el nombre a cada botón.
 - El censo de s10-acceso cambió (+8 paradas, −4 encabezados, −4 marcadores anunciados). El delta está aparte, en `DELTA_DEL_PANEL` al final de `s10-acceso-censo.ts`, para que el merge sea sumar.
 - `s6-tokens` acepta `opacity-0` y `opacity-100` como estructurales (apagado/prendido), igual que `none` y `full` en otras familias.
+- `_lib/secciones.ts` no se tocó: la fila de `tu-panel` sigue en `200svh` como mínimo y la galería la supera por contenido (a 1440 la sección pasó de 2 pantallas a unas 7,8). El ancla de la escena para el tramo `demos` (`anclaje.ts`) se va a correr: eso es escena y no se tocó.
 - `s7-compuerta` necesita un build y este sprint no corre builds: queda sin correr.
 
 ## Pendiente para el usuario
 
+- Grabación: `C:\Users\Valentino\.cache\b4-medicion\panel\grabacion\galeria-panel-1440.mp4`. Capturas: `n-1440-*.png` y `n-390-*.png` en la misma carpeta `panel`.
 - Las 8 capturas reales del panel (`TARJETAS[i].imagen` en `_secciones/tu-panel/contenido.ts`).
 - Anotado sin hacer: los testimonios van en «Por qué develOP», en un sprint aparte, y tienen que ser de clientes reales.
