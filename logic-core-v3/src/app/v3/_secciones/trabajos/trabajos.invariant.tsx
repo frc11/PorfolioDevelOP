@@ -43,6 +43,7 @@ import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 import { Trabajos } from './Trabajos'
 import { CATALOGO_DE_DEMOS as DEMOS } from './demos/catalogo'
 import { afirmarLasDemos } from './demos/demos-invariante'
+import { afirmarLaDireccionDeArte } from './capturas-invariante'
 
 const seccion = seccionDe('trabajos')
 
@@ -319,5 +320,6 @@ afirmarElTunel(conMotion, quieto, PROYECTOS.length)
 afirmarLasCuatroEntradas()
 // §25 —las demos— vive en `demos/demos-invariante.tsx`, con el resto de su carpeta.
 afirmarLasDemos()
+afirmarLaDireccionDeArte()
 
 cerrar('trabajos.invariant')

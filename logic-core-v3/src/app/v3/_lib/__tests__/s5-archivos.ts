@@ -212,6 +212,9 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/genie.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/GenieDeDemo.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/capturas.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/Captura.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/capturas-invariante.tsx`,
 ]
 
 /**

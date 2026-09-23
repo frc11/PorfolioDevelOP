@@ -10,7 +10,7 @@ escritorio ≥1025 (1440), que no cambia nada.
 
 - [x] Fase 0 — reconocimiento (abajo)
 - [x] Fase 1 — la costura de 1024
-- [ ] Fase 2 — capturas por dispositivo
+- [x] Fase 2 — capturas por dispositivo
 - [ ] Fase 3 — el túnel bajo 1024
 - [ ] Fase 4 — demos bajo 1024
 - [ ] Fase 5 — tipografía y posiciones
@@ -95,3 +95,33 @@ Abajo no hay Lenis: scroll nativo.
   `~/.cache/b4-medicion/movil/fase1/hoja-*.png`). Ninguna sección se rompió por el
   cambio: 1024 dejó de ser un ancho aparte. Los invariantes de la compuerta, de tokens
   y del banco quedaron en verde.
+
+## Fase 2 — capturas por dispositivo
+
+Sacadas con Chrome por CDP y el candado (`fase2-capturas.ts`): viewport, DPR 2, user
+agent de Safari y toque emulado, primera pantalla con la intro terminada. La de tablet de
+El Garage salió sin la foto del hero a los 9,5 s y se repitió esperando 22 s.
+
+| archivo | medida | calidad webp | peso |
+|---|---|---|---|
+| `el-garage-movil.webp` | 780 × 1688 | 82 | 29,4 KB |
+| `esquina-movil.webp` | 780 × 1688 | 82 | 24,5 KB |
+| `banu-movil.webp` | 780 × 1688 | 82 | 17,7 KB |
+| `el-garage-tablet.webp` | 1640 × 2360 | 82 | 59,4 KB |
+| `esquina-tablet.webp` | 1640 × 2360 | 82 | 33,8 KB |
+| `banu-tablet.webp` | 1640 × 2360 | 82 | 33,8 KB |
+
+- `trabajos/capturas.ts`: los dos cortes (móvil por debajo de 426, que es
+  `--breakpoint-movil`, y tablet por debajo de 1024), las medidas, las consultas de las
+  `<source>` y la ruta de cada corte derivada de la de escritorio: el contenido sigue
+  declarando un medio por proyecto.
+- `trabajos/Captura.tsx`: `<picture>` con las dos `<source>` y la imagen de escritorio
+  de base, las tres armadas con `getImageProps` (el mismo optimizador de `next/image`).
+  Lo usan el túnel y la lista quieta.
+- La caja de la captura en el túnel toma la proporción de su corte por CSS, y abajo de
+  1024 entra entera en el cuadro, apoyada en el alto cuando no alcanza el ancho.
+- Afirmado dos veces: `trabajos.invariant` §26 lee el marcado y resuelve, en 11 anchos
+  de 320 a 1920, qué fuente gana (gana UN archivo y es el de su corte), con dos
+  controles positivos; y medido en la red (`fase2-red.ts`, sin caché, recorriendo la
+  página entera): a 390 se piden sólo las tres `-movil`, a 768 sólo las tres `-tablet`,
+  a 1024 y 1440 sólo las tres de escritorio.

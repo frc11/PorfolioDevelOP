@@ -1,7 +1,7 @@
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { MarcoDeMedio } from '../_contrato/medios'
 
+import { CapturaPorDispositivo } from './Captura'
 import { CONTENIDO } from './contenido'
 import { MEDIDAS_DE_LAS_CAPTURAS, SIZES_DE_LA_CAPTURA } from './geometria'
 
@@ -57,8 +57,7 @@ function Captura({
   readonly medida: { readonly ancho: number; readonly alto: number }
 }): React.JSX.Element {
   return (
-    <MarcoDeMedio
-      marcador="[CAPTURA]"
+    <CapturaPorDispositivo
       fuente={proyecto.pagina.fuente}
       alt={proyecto.pagina.alt}
       ancho={medida.ancho}

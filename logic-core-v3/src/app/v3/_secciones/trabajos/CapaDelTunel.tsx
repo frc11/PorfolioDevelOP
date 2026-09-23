@@ -5,8 +5,9 @@ import React, { useCallback, useEffect, useRef } from 'react'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { MarcoDeMedio } from '../_contrato/medios'
 
+import { CapturaPorDispositivo } from './Captura'
+import { estiloDeLaCaja } from './capturas'
 import { CONTENIDO } from './contenido'
 import {
   BANDA_DEL_EFECTO,
@@ -395,10 +396,12 @@ export function CapaDelTunel({
         className="absolute inset-0 will-change-transform"
         style={{ transform: transformDeLaCapa(POSE_INICIAL.proyectos[i]) }}
       >
+        {/* La caja toma la proporción de su corte y, abajo de 1024, entra entera en el
+            cuadro: la captura vertical se apoya en el alto (`capturas.ts`). */}
         <div
           data-captura={trabajo.nombre}
-          className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2"
-          style={{ aspectRatio: `${medida.ancho} / ${medida.alto}` }}
+          className="absolute top-1/2 left-1/2 aspect-[var(--relacion-escritorio)] w-full -translate-x-1/2 -translate-y-1/2 max-escritorio:aspect-[var(--relacion-tablet)] max-escritorio:w-[min(100%,calc(100svh*var(--proporcion-tablet)))] max-movil:aspect-[var(--relacion-movil)] max-movil:w-[min(100%,calc(100svh*var(--proporcion-movil)))]"
+          style={estiloDeLaCaja(medida)}
         >
           {/* ⚠️ **EL RÓTULO VA PRIMERO EN EL MARCADO.** La rama quieta anuncia
               nombre → rubro → imagen, y `s10-acceso` compara el texto anunciado de
@@ -430,8 +433,7 @@ export function CapaDelTunel({
             data-anillo="sin-escala"
             className="pointer-events-auto block"
           >
-            <MarcoDeMedio
-              marcador="[CAPTURA]"
+            <CapturaPorDispositivo
               fuente={trabajo.pagina.fuente}
               alt={trabajo.pagina.alt}
               ancho={medida.ancho}
