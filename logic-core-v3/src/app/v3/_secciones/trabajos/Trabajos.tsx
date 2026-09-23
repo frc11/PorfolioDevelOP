@@ -67,7 +67,9 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
  */
 const CLASES_DE_LA_RAMA = {
   quieta: { seccion: 'relative max-escritorio:min-h-[inherit]', bloque: 'relative h-full w-full max-escritorio:min-h-[inherit]' },
-  animada: { seccion: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh', bloque: 'relative h-full w-full' },
+  // `overflow-x-clip`: el cartel termina su huida grande y oculto, y sin recorte la página se ensanchaba
+  // a 584 px en un teléfono de 375 (el navegador la alejaba para que entrara). `clip` no crea caja de scroll.
+  animada: { seccion: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh max-escritorio:overflow-x-clip', bloque: 'relative h-full w-full' },
 } as const
 
 function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {

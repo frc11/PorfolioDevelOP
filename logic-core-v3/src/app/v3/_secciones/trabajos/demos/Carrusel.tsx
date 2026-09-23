@@ -30,9 +30,10 @@ export function Carrusel({ enMarcha }: { readonly enMarcha?: () => boolean }): R
   const reducido = usePrefiereMenosMovimiento()
   return (
     // Tres portadas por renglón en el teléfono y cinco en tablet: la hoja lee estas dos propiedades.
+    // En un teléfono bajo la portada se topa por el alto (20 % del svh), así el bloque entra.
     <div
       data-pieza="carrusel"
-      className="-mx-[var(--pad-lateral-compacto)] flex flex-col gap-3 [--portada-aire:var(--spacing-3)] [--portada-ancho:calc((100vw-var(--spacing-3))/3)] escritorio:hidden movil:[--portada-aire:var(--spacing-4)] movil:[--portada-ancho:calc((100vw-var(--spacing-4))/5)]"
+      className="-mx-[var(--pad-lateral-compacto)] flex flex-col gap-3 [--portada-aire:var(--spacing-3)] [--portada-ancho:min(calc((100vw-var(--spacing-3))/3),calc(20svh/1.5+var(--spacing-3)))] escritorio:hidden movil:[--portada-aire:var(--spacing-4)] movil:[--portada-ancho:min(calc((100vw-var(--spacing-4))/5),calc(34svh/1.5+var(--spacing-4)))]"
     >
       <Renglon sentido={1} desfase={0} enMarcha={enMarcha} reducido={reducido} principal />
       <Renglon sentido={-1} desfase={4} enMarcha={enMarcha} reducido={reducido} className="hidden max-movil:block" />
@@ -140,10 +141,12 @@ function Renglon({
       e.preventDefault()
       suprimirElClic = false
     }
-    // Con el teclado adentro se detiene y trae la portada enfocada al cuadro.
+    // Con el TECLADO adentro se detiene y trae la portada enfocada al cuadro. Sólo el teclado:
+    // un toque también enfoca, y mover la pista bajo el dedo le robaba el clic a la portada.
     const alEnfocar = (e: FocusEvent): void => {
+      if (!(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
       conFoco = true
-      const portada = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-parte="portada"]') ?? null
+      const portada = e.target.closest<HTMLElement>('[data-parte="portada"]')
       if (portada !== null) {
         estado = { x: envolver(-portada.offsetLeft + FISICA_DEL_CARRUSEL.umbralDeIntencionPx, largo), v: 0 }
         pintar()

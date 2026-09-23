@@ -137,7 +137,7 @@ export function CapaDeDemos({
       <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center">
         {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. Abajo de 1024 no hay columna. */}
         <div aria-hidden="true" className="max-escritorio:hidden" />
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 max-movil:gap-5">
           <TextoDeDemos progresoDelTitulo={progresoDelTitulo} progresoDelParrafo={progresoDelParrafo} refDelParrafo={parrafo} />
           <div className="max-escritorio:hidden">
             <Biblioteca alAbrir={alAbrir} alejada={alejada} />

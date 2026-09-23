@@ -14,7 +14,7 @@ escritorio ≥1025 (1440), que no cambia nada.
 - [x] Fase 3 — el túnel bajo 1024
 - [x] Fase 4 — demos bajo 1024
 - [x] Fase 5 — tipografía y posiciones
-- [ ] Fase 6 — verificación y reporte
+- [x] Fase 6 — verificación y reporte
 
 ## Fase 0 — lo que hay
 
@@ -206,3 +206,43 @@ se mide en 80 ms con tope; el motor resuelve contra 100svh y el pin es de 100svh
 Trabajos pide la coreografía en todo ancho. Se derivaron del invariante (no a mano) los
 censos que suma el carrusel: `s10-acceso` pasa de 42 a 50 paradas (una por demo en el
 estante o la cinta y otra en el carrusel; el censo lee el marcado, donde están las dos).
+
+## Fase 6 — verificación
+
+**Lo que la verificación encontró y se arregló acá:**
+- **La página se ensanchaba en el teléfono.** El cartel termina su huida grande y oculto,
+  fuera de todo recorte: a 375 el documento medía 584 px y el navegador lo alejaba para que
+  entrara (la grabación salía encogida). La caja clavada de la rama coreografiada lleva
+  ahora `overflow-x: clip` abajo de 1024 (no crea caja de scroll). Medido de punta a punta
+  de la sección: 375 → 375 y 768 → 768.
+- **El toque no abría la demo.** Un toque enfoca la portada, y la pausa por foco movía la
+  pista bajo el dedo: el clic caía en otro lado. La pausa es ahora sólo con teclado
+  (`:focus-visible`), como en el estante. Medido: el toque de 80 ms abre una pestaña.
+- **A 320 × 568 el bloque de demos no entraba en el alto.** La portada se topa en el 20 %
+  del svh y el aire baja en el teléfono. Entra; «Demos para» queda debajo del cartel de
+  contenido inventado, que en producción no está.
+
+**En el navegador** (`f6-gestos.ts`, 390 × 844, toque): en reposo 34 px/s; un dedo vertical
+de 280 px que arranca sobre el carrusel baja la página 265 px; un arrastre de 150 px no abre
+nada ni mueve el scroll; un toque abre la demo; lanzada a favor pasa de 335 a 38 px/s en
+4 s camino de 34; lanzada en contra se detiene y vuelve a 34. ⚠️ El `touchEnd` de CDP no trae
+posición, así que el banco mide lanzamientos más lentos que el dedo; la trayectoria en contra
+entera la afirma §27 sobre la física.
+
+**Escritorio.** La superposición contra la referencia a 1440 sigue dentro del margen en las
+cinco capas (peor B 1,6 % del margen, igual que antes). Fuera de alcance: a 1440 el
+documento mide 1444 px en Trabajos (el margen de 4 px del recorte del túnel). Viene de
+antes y no se tocó.
+
+**Capturas** (`~/.cache/b4-medicion/movil/fase6/fila-*.png`): 320, 375, 425, 768, 1024 y
+1440 en los cinco momentos. **Grabaciones** (`~/.cache/b4-medicion/movil/grabacion-375/` y
+`grabacion-1024/`): 375 con toque, 42,5 s (el túnel entero y el carrusel lanzado a favor y
+en contra); 1024 con rueda, 22,4 s.
+
+**Batería en verde** (36): s5-trabajos (367), s7-arboles, s7-contrato, s10-acceso,
+s21-llave, s1-compuerta, s18-compuertas, s5-codigo, s3/s5/s6-tokens, s7-mezcla, s6-render,
+s6-servicios, s6-tu-panel, s6-cierre, s3-imagen, s3-cursor, s10-medida, s1-tokens,
+s7-pedido, s6-contrato, s6-lane, s6-contraste, s8-escena, s9e, s10e, s13e, s16-arnes, s17,
+s18, s19, s20, s22, s7e y s10-banco. `tsc` limpio; eslint sin errores (dos avisos que ya
+estaban en `s10-acceso`). Sin build: `s2-bundle`, `s7-compuerta` y `s8-chrome` necesitan
+la salida del build y no se corrieron.
