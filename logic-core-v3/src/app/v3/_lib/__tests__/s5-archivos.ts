@@ -208,6 +208,10 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CapaDeDemos.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/DemosQuietos.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/demos-invariante.tsx`,
+  // SPRINT DEMOS 2 · el Genie de macOS: su geometría pura, las tiras y el cromo que comparten con la ventana.
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/genie.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/GenieDeDemo.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
 ]
 
 /**

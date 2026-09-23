@@ -1,7 +1,7 @@
 'use client'
 
-import { useMotionValueEvent, type MotionValue } from 'motion/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
 import { CONTENIDO } from '../contenido'
@@ -9,7 +9,7 @@ import { arranqueDeDemos } from '../geometria'
 
 import { Biblioteca } from './Biblioteca'
 import type { Demo } from './catalogo'
-import { escalaDeDemos, transformDeDemos } from './entrada'
+import { LLEGADA, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
 
@@ -18,10 +18,11 @@ import { VentanaDeDemo } from './VentanaDeDemo'
  * LA CAPA DE DEMOS — la sección que se ve a través del vacío. **[DEMOS]**
  *
  * Detrás de la pila del túnel y encima del lienzo: es la escena la que se ve
- * alrededor de las piezas. Crece con la escala del vacío (`entrada.ts`) y llega a
- * 1 cuando el vacío llena el cuadro; desde ahí queda FIJA con el pin mientras la
- * escena sigue, y al despinearse se va con la sección hacia Servicios. Subiendo,
- * la misma función la achica dentro del vacío.
+ * alrededor de las piezas. Está en su lugar desde el principio —sin escala— y lo
+ * que la muestra es el agujero del vacío. Sus cosas LLEGAN tarde y escalonadas,
+ * atadas a la fracción del vacío (`entrada.ts`): el título, el párrafo y los
+ * libros de a uno, y el último se asienta cuando el vacío llena el cuadro. Desde
+ * ahí queda FIJA con el pin, y al despinearse se va con la sección.
  *
  * ⚠️ **VA DESPUÉS DEL TÚNEL EN EL MARCADO Y SE PINTA DETRÁS.** El orden del
  * marcado es el orden de lectura, y `s10-acceso` exige el mismo en las dos ramas:
@@ -43,12 +44,37 @@ export function CapaDeDemos({
   const capa = useRef<HTMLDivElement | null>(null)
   const [inicial] = useState(() => escalaDeDemos(mostrado.get()))
   const escala = useRef(inicial)
+  const libros = useRef<HTMLElement[]>([])
+  const parrafo = useRef<HTMLDivElement | null>(null)
+  const progresoDelTitulo = useMotionValue(enElTramo(inicial, LLEGADA.titulo))
+  const progresoDelParrafo = useMotionValue(enElTramo(inicial, LLEGADA.parrafo))
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const [alejada, setAlejada] = useState(false)
 
+  /** Escribe la llegada entera para una fracción del vacío. Pura: subiendo se deshace. */
+  const llegar = useCallback(
+    (u: number): void => {
+      progresoDelTitulo.set(enElTramo(u, LLEGADA.titulo))
+      const delParrafo = enElTramo(u, LLEGADA.parrafo)
+      progresoDelParrafo.set(delParrafo)
+      parrafo.current?.style.setProperty('opacity', delParrafo.toFixed(3))
+      libros.current.forEach((libro, i) => {
+        const pose = poseDelLibro(enElTramo(u, tramoDelLibro(i, libros.current.length)))
+        libro.style.setProperty('transform', pose.transform)
+        libro.style.setProperty('opacity', pose.opacidad.toFixed(3))
+      })
+    },
+    [progresoDelTitulo, progresoDelParrafo],
+  )
+
+  useLayoutEffect(() => {
+    libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
+    llegar(escala.current)
+  }, [llegar])
+
   useMotionValueEvent(mostrado, 'change', (p) => {
     escala.current = escalaDeDemos(p)
-    capa.current?.style.setProperty('transform', transformDeDemos(escala.current))
+    llegar(escala.current)
   })
 
   useEffect(() => {
@@ -81,13 +107,12 @@ export function CapaDeDemos({
          el túnel que se pinta encima, y el recorte del vacío dejaba de cortar el
          fondo de la ventana del CTA (medido: el agujero se veía claro). */
       className={className}
-      style={{ transform: transformDeDemos(inicial) }}
     >
       <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8">
         {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. */}
         <div aria-hidden="true" />
         <div className="flex flex-col gap-8">
-          <TextoDeDemos />
+          <TextoDeDemos progresoDelTitulo={progresoDelTitulo} progresoDelParrafo={progresoDelParrafo} refDelParrafo={parrafo} />
           <Biblioteca alAbrir={alAbrir} alejada={alejada} />
         </div>
       </Envoltorio>

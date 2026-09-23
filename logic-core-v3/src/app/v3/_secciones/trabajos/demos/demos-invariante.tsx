@@ -7,11 +7,11 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../../_lib/__tests__/afirmar'
 import { arranqueDeDemos, arranqueDeLaSalida } from '../geometria'
 
-import { MS_DEL_LIQUIDO, poseDeLaApertura, resorteCritico, type Caja } from './apertura'
+import { MS_DEL_GENIE, TIRAS_DEL_GENIE, esquinasDeLaTira, filaDelGenie, liderDelGenie, proyectar, type Caja } from './genie'
 import { Biblioteca } from './Biblioteca'
 import { CATALOGO_DE_DEMOS } from './catalogo'
 import { siguienteFoco } from './dialogo'
-import { escalaDeDemos } from './entrada'
+import { LLEGADA, conSobrepaso, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
 
 /**
  * §25 DEL INVARIANTE DE TRABAJOS — **LAS DEMOS.** Lo llama `trabajos.invariant`.
@@ -104,6 +104,25 @@ export function afirmarLasDemos(): void {
   }
   afirmar(noBaja, '  y en el medio crece sin volver atrás: es la misma recta con clamp del vacío')
 
+  // ── LA LLEGADA, ESCALONADA Y ATADA AL VACÍO ───────────────────────────
+  const libros = CATALOGO_DE_DEMOS.length
+  const tramos = [LLEGADA.titulo, LLEGADA.parrafo, ...CATALOGO_DE_DEMOS.map((_, i) => tramoDelLibro(i, libros))]
+  afirmar(tramos.every((t) => t.desde >= 0.6), 'hasta el 60 % del vacío no llega nada: sólo crece el vacío y se ve la escena')
+  afirmarIgual(tramoDelLibro(libros - 1, libros).hasta, 1, `  y el último de los ${String(libros)} libros se asienta en el 100 % exacto: cuando el vacío llena el cuadro`)
+  afirmar(CATALOGO_DE_DEMOS.every((_, i) => i === 0 || tramoDelLibro(i, libros).desde > tramoDelLibro(i - 1, libros).desde), '  los libros llegan de izquierda a derecha, uno detrás del otro')
+  afirmar(LLEGADA.titulo.desde < LLEGADA.parrafo.desde && LLEGADA.parrafo.desde <= LLEGADA.libros.desde, '  el orden es título, párrafo y libros')
+  let pico = 0
+  for (let k = 0; k <= 100; k += 1) pico = Math.max(pico, conSobrepaso(k / 100))
+  afirmar(pico > 1.05 && conSobrepaso(1) === 1, `el sobrepaso elástico es la FORMA de la curva: llega a ${pico.toFixed(3)} y termina en 1`)
+  afirmarIgual(poseDelLibro(1), { transform: 'none', opacidad: 1 }, '  y un libro asentado queda sin transformada y entero')
+  afirmar(enElTramo(0.5, LLEGADA.titulo) === 0 && enElTramo(0.9, LLEGADA.titulo) === 1, '  el título está abajo antes de su tramo y en su lugar después')
+  const sinReloj = (capa: string): boolean => {
+    const codigo = sinComentarios(capa)
+    return codigo.includes('llegar(escala.current)') && !/requestAnimationFrame|setTimeout|setInterval|performance\.now/.test(codigo)
+  }
+  afirmar(sinReloj(CAPA), '  la llegada no tiene reloj propio: es una función de la fracción del vacío, así que subiendo se deshace exacta y al revés')
+  controlPositivo('  el detector ve una llegada con reloj', `${CAPA}\nrequestAnimationFrame(() => llegar(escala.current))\n`, sinReloj)
+
   // ── EL ESTANTE: UNA PIEZA FOCALIZABLE POR DEMO ────────────────────────
   const estante = renderToStaticMarkup(<Biblioteca alAbrir={() => undefined} alejada={false} />)
   afirmarIgual(piezasFocalizables(estante), CATALOGO_DE_DEMOS.length, `las ${String(CATALOGO_DE_DEMOS.length)} piezas son anclas con destino y sin tabindex negativo: todas son paradas de teclado`)
@@ -131,12 +150,48 @@ export function afirmarLasDemos(): void {
   controlPositivo('  el detector ve un diálogo que deja correr la página', DIALOGO.replace("html.style.overflow = 'hidden'", 'void 0'), (d: string) => pausaLaPagina(d, VENTANA))
   controlPositivo('  y ve un diálogo que frena el motor de scroll', `${DIALOGO}\nlenis.stop()\n`, (d: string) => pausaLaPagina(d, VENTANA))
 
-  // ── LA APERTURA: EL RESORTE NO REBOTA ─────────────────────────────────
-  let pasa = false
-  for (let k = 0; k <= 100; k += 1) if (resorteCritico(k / 100) > 1) pasa = true
-  afirmar(!pasa && resorteCritico(1) === 1, 'el tiempo sólido es un resorte crítico: llega a 1 sin pasarse nunca')
-  const pieza: Caja = { x: 900, y: 500, ancho: 160, alto: 240 }
-  const final: Caja = { x: 144, y: 90, ancho: 1152, alto: 720 }
-  afirmarIgual(poseDeLaApertura(0, pieza, final).caja, pieza, '  la ventana nace con la caja exacta de su pieza')
-  afirmar(poseDeLaApertura(MS_DEL_LIQUIDO + 1, pieza, final).liquido === 0, '  y el filtro líquido se apaga al terminar el tiempo líquido, con la ventana todavía chica')
+  // ── LA APERTURA Y EL CIERRE: EL GENIE ─────────────────────────────────
+  afirmarElGenie()
+}
+
+/** El Genie: la geometría contra los cuadros que describió el pedido. */
+function afirmarElGenie(): void {
+  const ventana: Caja = { x: 144, y: 90, ancho: 1152, alto: 720 }
+  const libro: Caja = { x: 1040, y: 470, ancho: 160, alto: 240 }
+  const lider = liderDelGenie(ventana, libro)
+  afirmarIgual(lider, 'abajo', 'con el libro debajo del centro de la ventana, lidera el borde de abajo: es el Genie de minimizar hacia el Dock')
+  afirmarIgual(liderDelGenie(ventana, { ...libro, y: 60 }), 'arriba', '  y con el destino arriba, lidera el de arriba: el lado sale del destino, no se fija')
+  const plana = [0, 0.5, 1].map((v) => filaDelGenie(v, 0, ventana, libro, lider))
+  afirmar(plana.every((f, k) => f.izquierda === ventana.x && f.derecha === ventana.x + ventana.ancho && f.y === ventana.y + [0, 0.5, 1][k] * ventana.alto), 'en 0 la ventana está plana: cada fila en su lugar, con su ancho entero')
+  const adentro = [0, 1].map((v) => filaDelGenie(v, 1, ventana, libro, lider))
+  afirmar(adentro[0].y === libro.y && adentro[1].y === libro.y + libro.alto && adentro.every((f) => f.izquierda === libro.x && f.derecha === libro.x + libro.ancho), '  y en 1 está entera adentro del libro')
+  // Cuadro 2: el borde de abajo se tira hacia el destino y el de arriba sigue recto y ancho.
+  const arriba = filaDelGenie(0, 0.2, ventana, libro, lider)
+  const abajo = filaDelGenie(1, 0.2, ventana, libro, lider)
+  afirmar(arriba.izquierda === ventana.x && arriba.derecha === ventana.x + ventana.ancho, 'al empezar, el borde de ARRIBA sigue recto y ancho')
+  const barreIzquierda = abajo.izquierda - ventana.x
+  const barreDerecha = ventana.x + ventana.ancho - abajo.derecha
+  afirmar(barreIzquierda > 40 && barreIzquierda > 4 * barreDerecha, `  y el de ABAJO se tira al libro: su esquina izquierda barre ${barreIzquierda.toFixed(0)} px y la derecha ${barreDerecha.toFixed(0)} — el borde del lado del destino queda casi vertical`)
+  const espejo = filaDelGenie(1, 0.2, ventana, { ...libro, x: 200 }, lider)
+  afirmar(ventana.x + ventana.ancho - espejo.derecha > 4 * (espejo.izquierda - ventana.x), '  y con el libro a la izquierda la curva cambia de lado: la deriva el destino')
+  // Cuadros 3–4: cada fila se comprime más cuanto más cerca está del fondo.
+  const m = 0.6
+  const alturaDeFila = (v: number): number => filaDelGenie(v + 0.05, m, ventana, libro, lider).y - filaDelGenie(v, m, ventana, libro, lider).y
+  afirmar(alturaDeFila(0.9) < alturaDeFila(0.1), `a mitad del viaje las filas de abajo están más comprimidas que las de arriba (${alturaDeFila(0.9).toFixed(1)} px contra ${alturaDeFila(0.1).toFixed(1)} px por cada 5 %)`)
+  // Cuadro 5: al final baja y se angosta también el borde de arriba.
+  const tarde = filaDelGenie(0, 0.85, ventana, libro, lider)
+  afirmar(tarde.y > ventana.y + 50 && tarde.derecha - tarde.izquierda < ventana.ancho * 0.8, '  y al final el borde de arriba también baja y se angosta: la ventana entera se desliza por el embudo')
+  afirmar(MS_DEL_GENIE >= 500 && MS_DEL_GENIE <= 600, `el Genie dura ${String(MS_DEL_GENIE)} ms: los 500–600 del pedido`)
+  // Las tiras: cuadriláteros que comparten el borde, llevados por una proyectiva exacta.
+  const alto = ventana.alto / TIRAS_DEL_GENIE
+  const esquinas = esquinasDeLaTira(TIRAS_DEL_GENIE - 1, TIRAS_DEL_GENIE, 0.4, ventana, libro, lider, 0)
+  const puestas = [proyectar(esquinas, ventana.ancho, alto, 0, 0), proyectar(esquinas, ventana.ancho, alto, ventana.ancho, 0), proyectar(esquinas, ventana.ancho, alto, ventana.ancho, alto), proyectar(esquinas, ventana.ancho, alto, 0, alto)]
+  const error = Math.max(...puestas.map((p, k) => Math.hypot(p.x - esquinas[k].x, p.y - esquinas[k].y)))
+  afirmar(error < 0.01, `la transformada de cada tira lleva sus cuatro esquinas a su cuadrilátero (error ${error.toExponential(1)} px): los bordes curvos se unen fila a fila, sin escalera`)
+  const siguiente = esquinasDeLaTira(TIRAS_DEL_GENIE - 2, TIRAS_DEL_GENIE, 0.4, ventana, libro, lider, 0)
+  afirmar(Math.hypot(siguiente[3].x - esquinas[0].x, siguiente[3].y - esquinas[0].y) < 1e-9, '  y dos tiras vecinas comparten el borde exacto: no hay hueco entre filas')
+  controlPositivo('  el detector ve una transformada afín donde hacía falta una proyectiva', esquinas, (q: readonly [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }, { x: number; y: number }]) => {
+    const afin = { x: q[1].x - q[0].x + q[3].x, y: q[1].y - q[0].y + q[3].y }
+    return Math.hypot(afin.x - q[2].x, afin.y - q[2].y) < 0.01
+  })
 }
