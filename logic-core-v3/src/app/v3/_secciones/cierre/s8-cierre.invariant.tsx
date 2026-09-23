@@ -20,7 +20,7 @@ import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/e
 import { marcar } from '../_invariantes/render'
 import { CARPETAS_DE_SECCION, clasesEscritas, codigoDeLaSeccion, existe, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { Cierre, ContenidoDelCierre } from './Cierre'
-import { ANCLAS_QUE_EXISTEN, COLUMNAS, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA, ETIQUETA_DE_SECCION, LINEA_DE_CIERRE, NOVEDADES, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
+import { ANCLAS_QUE_EXISTEN, COLUMNAS, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA, ETIQUETA_DE_SECCION, LINEA_DE_CIERRE, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
 import * as S from './soporte'
 
 const seccionDelCierre = seccionDe('cierre')
@@ -45,7 +45,7 @@ for (const marca of MARCAS) {
 controlPositivo('el detector de coreografía ve la rama animada', CON, (h) => MARCAS.every((m) => !h.includes(m)))
 
 // ⚠️ B12 · `ETIQUETA_DE_SECCION` sale de acá y se afirma al revés abajo (regla 15).
-const TEXTOS = [TITULAR_DE_CIERRE, CTA_DE_CIERRE.rotulo, NOVEDADES.rotulo, NOVEDADES.ayuda,
+const TEXTOS = [TITULAR_DE_CIERRE, CTA_DE_CIERRE.rotulo,
   LINEA_DE_CIERRE.marca, LINEA_DE_CIERRE.nota, ...COLUMNAS.map((c) => c.titulo),
   ...DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ...PEDIDOS_DE_CONTACTO.map((p) => p.descripcion),
 ]
@@ -116,32 +116,20 @@ for (const [nombre, detector, roto] of S.DETECTORES) {
 titulo('5 · Foco: todo lo interactivo entra en el orden de tabulación')
 
 const focos = S.focalizables(SIN)
-afirmarIgual(focos.length, DESTINOS_DE_LA_RUTA.length + 2, `${focos.length} focalizables: ${DESTINOS_DE_LA_RUTA.length} enlaces del recorrido, el CTA y el campo de correo`)
+// SPRINT PANEL 2 · el campo de correo se mudó a Tu Panel con el formulario: queda una parada menos.
+afirmarIgual(focos.length, DESTINOS_DE_LA_RUTA.length + 1, `${focos.length} focalizables: ${DESTINOS_DE_LA_RUTA.length} enlaces del recorrido y el CTA`)
 afirmarIgual(S.focalizables(CON).length, focos.length, 'los mismos en la rama animada: la coreografía no se come una parada de tabulación')
 afirmarIgual(apagadosDeFoco(SIN), [], 'ningún elemento del marcado apaga el anillo')
-console.log('  el botón de envío NO es focalizable, y es a propósito: está `disabled` porque no hay a dónde enviar.')
 controlPositivo('el contador no cuenta un <a> sin href', '<a>x</a>', (h: string) => S.focalizables(h).length > 0)
 controlPositivo('ni un control deshabilitado', '<button disabled="">x</button>', (h: string) => S.focalizables(h).length > 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El formulario de novedades no puede tener éxito falso')
+titulo('6 · El formulario de novedades se mudó a Tu Panel (SPRINT PANEL 2)')
 
-const forma = S.formaDe(SIN)
-const apertura = S.aperturaDe(forma)
-const envios = S.enviosDe(forma)
-const idDeAyuda = /aria-describedby="([^"]*)"/.exec(forma)?.[1] ?? ''
-const ayuda = new RegExp(`<p id="${idDeAyuda}"[^>]*>([^<]*)</p>`).exec(forma)?.[1] ?? ''
-
-afirmar(forma.length > 0, `el formulario está en el marcado — ${forma.length} caracteres`)
-afirmar(envios.length > 0 && /\bdisabled[=\s>]/.test(envios[0]), '1 · el PRIMER botón de envío en orden de árbol renderiza `disabled`', `${envios.length} botón(es) de envío`)
-afirmar(envios.every((b) => /\bdisabled[=\s>]/.test(b)), '2 · y no queda ninguno habilitado que el navegador pueda tomar por defecto con Enter')
-afirmar(!/\saction=/.test(apertura) && !/\smethod=/.test(apertura), '3 · el <form> no declara `action` ni `method`', apertura)
-afirmar(idDeAyuda.length > 0 && ayuda === NOVEDADES.ayuda, '4 · el texto de ayuda existe y está atado por `aria-describedby`, así que se anuncia', idDeAyuda)
-for (const motivo of ['deshabilitado', 'destino']) afirmar(ayuda.includes(motivo), `  y dice el motivo: nombra "${motivo}"`)
-
-afirmar(S.sinExitoFalso(SIN), 'el predicado entero pasa sobre el marcado real')
-controlPositivo('y ve un envío habilitado', SIN.replace(' disabled=""', ''), S.sinExitoFalso)
-controlPositivo('y ve un <form> con action', SIN.replace('<form ', '<form action="/x" '), S.sinExitoFalso)
+// Estaba acá, deshabilitado porque no hay destino; ahora vive en `tu-panel/Remate.tsx`,
+// con el mismo componente, y `s6-tu-panel` §10 afirma ahí que no puede fingir un éxito.
+afirmarIgual(S.formaDe(SIN), '', 'el pie ya no monta un <form>')
+controlPositivo('el buscador de formularios ve uno cuando está', '<div><form data-pieza="novedades-forma"><input></form></div>', (h: string) => S.formaDe(h) === '')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · Ningún <a href> lleva a la nada')
@@ -181,7 +169,7 @@ titulo('9 · El pie se consume, no se rehace')
 
 afirmarIgual(S.rehaceElPie(FUENTE), [], 'ningún archivo declara un <footer>, un `data-pieza="pie` ni una regla propia de pie')
 controlPositivo('el detector ve un pie rehecho', S.PIE_REHECHO, (t: string) => S.rehaceElPie(t).length === 0)
-for (const pieza of ['chrome/Pie', 'chrome/PiePiezas', 'chrome/Novedades', 'chrome/Cta']) {
+for (const pieza of ['chrome/Pie', 'chrome/PiePiezas', 'chrome/Cta']) {
   afirmar(FUENTE.includes(`'../../_componentes/${pieza}'`), `se importa \`${pieza}\` de los componentes compartidos`)
 }
 afirmarIgual([...FUENTE.matchAll(/\binvertido\b/g)].map((m) => m[0]), [], 'no se le pasa `invertido` al Pie: la inversión la decide la tabla del lane A, no esta sección')
@@ -235,7 +223,7 @@ const TENUE = hexDe(/--color-tinta-tenue\s*:\s*(#[0-9A-Fa-f]{6})/)
 const TINTA_CLARA = hexDe(/\[data-seccion="invertida"\]\s*\{[^}]*?--color-tinta\s*:\s*(#[0-9A-Fa-f]{6})/)
 const TINTA = hexDe(/--color-tinta\s*:\s*(#[0-9A-Fa-f]{6})/)
 const ALFA = Number.parseFloat(/--opacity-casi\s*:\s*([\d.]+)/.exec(TEMA)?.[1] ?? '0')
-console.log(`  ⚠️ HALLAZGO FUERA DE MI CARPETA: \`--color-tinta-tenue\` (${TENUE}) NO se redefine en [data-seccion="invertida"]. Sobre ${OSCURO} da ${razonDeContraste(TENUE, OSCURO).toFixed(2)}:1 — falla AA y no llega a 3:1. Lo usa el <p> del texto de ayuda de \`chrome/Novedades.tsx\`, que este lane monta y no toca.`)
+console.log(`  ⚠️ HALLAZGO FUERA DE MI CARPETA: \`--color-tinta-tenue\` (${TENUE}) NO se redefine en [data-seccion="invertida"]. Sobre ${OSCURO} da ${razonDeContraste(TENUE, OSCURO).toFixed(2)}:1 — falla AA y no llega a 3:1. Lo usaba el texto de ayuda de \`chrome/Novedades.tsx\`, que desde SPRINT PANEL 2 se monta en Tu Panel, sobre papel.`)
 console.log(`  Mis archivos usan \`opacity-casi\` sobre la tinta en vez de esa clase: da ${razonDeContraste(S.mezclar(TINTA_CLARA, OSCURO, ALFA), OSCURO).toFixed(2)}:1 sobre el fondo invertido y ${razonDeContraste(S.mezclar(TINTA, PAPEL, ALFA), PAPEL).toFixed(2)}:1 sobre el papel. Pasa AA en las dos.`)
 
 // El control de que `Pie` sin props emite byte a byte lo de antes de B1 vive en `s3-layout.invariant`: la cadena de contención es su sujeto.

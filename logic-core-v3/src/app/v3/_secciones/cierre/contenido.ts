@@ -143,7 +143,7 @@ export const CTA_DE_CIERRE = {
 } as const
 
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */
-export type ClaseDeColumna = 'recorrido' | 'pedido' | 'novedades'
+export type ClaseDeColumna = 'recorrido' | 'pedido'
 
 export interface ColumnaDelPie {
   readonly id: string
@@ -159,7 +159,6 @@ export interface ColumnaDelPie {
 export const COLUMNAS: readonly ColumnaDelPie[] = [
   { id: 'recorrido', titulo: 'El recorrido', clase: 'recorrido' },
   { id: 'contacto', titulo: 'Contacto', clase: 'pedido' },
-  { id: 'novedades', titulo: 'Novedades', clase: 'novedades' },
 ]
 
 export interface PedidoDeEnlace {
@@ -180,26 +179,9 @@ export const PEDIDOS_DE_CONTACTO: readonly PedidoDeEnlace[] = [
   { marcador: '[ENLACE]', descripcion: 'las redes, una por red' },
 ]
 
-/**
- * EL FORMULARIO DE NOVEDADES — montado DESHABILITADO, con el motivo escrito.
- *
- * `FormularioDeNovedades` no declara `action` ni `onSubmit`, y un `<form>` sin
- * `action` se envía a la URL actual por GET: dejarlo habilitado recargaría la
- * página con el correo en la barra y parecería que funcionó. Ese es el éxito
- * falso, y es deuda conocida del pie del sitio vivo.
- *
- * El texto de ayuda no es una nota al pie: el componente lo ata con
- * `aria-describedby`, así que se anuncia junto al campo.
- */
-export const NOVEDADES = {
-  id: 'cierre-novedades',
-  rotulo: 'Tu correo',
-  placeholder: 'nombre@dominio',
-  rotuloDeEnvio: 'Suscribirme',
-  ayuda:
-    'El envío está deshabilitado: todavía no hay destino. Habilitado sin destino, el formulario ' +
-    'se enviaría a esta misma página y parecería que funcionó.',
-} as const
+// ⚠️ SPRINT PANEL 2 · El formulario de novedades se mudó a Tu Panel
+// (`tu-panel/Remate.tsx`), con el mismo componente y deshabilitado por la misma
+// razón: no hay destino. El pie queda con dos columnas.
 
 /**
  * LA LÍNEA DE CIERRE — la última del documento.

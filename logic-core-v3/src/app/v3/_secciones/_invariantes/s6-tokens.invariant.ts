@@ -141,7 +141,9 @@ const FAMILIAS: readonly Familia[] = [
   { nombre: 'tracking-', re: /^tracking-([a-z0-9-]+)$/, validos: TRACKINGS, estructurales: [] },
   { nombre: 'font-', re: /^font-([a-z0-9-]+)$/, validos: FUENTES, estructurales: [] },
   { nombre: 'rounded-', re: /^rounded-([a-z0-9-]+)$/, validos: RADIOS, estructurales: ['full', 'none'] },
-  { nombre: 'opacity-', re: /^opacity-([a-z0-9-]+)$/, validos: OPACIDADES, estructurales: [] },
+  // SPRINT PANEL · `0` y `100` son apagado y prendido, no un valor de diseño: la
+  // marca del hover de Tu panel entra con un fundido desde `opacity-0`.
+  { nombre: 'opacity-', re: /^opacity-([a-z0-9-]+)$/, validos: OPACIDADES, estructurales: ['0', '100'] },
   { nombre: 'max-w-', re: /^max-w-([a-z0-9-]+)$/, validos: CONTENEDORES, estructurales: ['full', 'none'] },
 ]
 

@@ -2319,3 +2319,9 @@ Está acá para que nadie lo dé por resuelto.
 
     **La unidad es la que hace desaparecer las constantes.** El avance se mide en ANCHOS DE CUADRO, así que el ancho de una captura **es** el avance que lleva desde que nació, y no hay una velocidad escondida en ningún lado. De ahí salen solas dos cosas que no se eligieron: el desborde de la primera con tres capturas es `2 × 0,32 + 1 = 1,64`, adentro de los 1,17–1,68 medidos; y el ritmo, `1,215` anchos de cuadro por cada 1000 px de scroll, contra los **1,15** de la referencia — **5,6 % de diferencia**, sin haber tocado el alto de la sección.
 
+
+## SPRINT PANEL — la galería de Tu panel (lane PANEL, 2026-09-23)
+
+- **La ampliación nace de su pieza.** `_secciones/tu-panel/Ampliacion.tsx` lleva la imagen desde el marco de la tarjeta hasta el centro con FLIP sobre la Web Animations API (`--duracion-lenta`, `--ease-principal`), con el velo, la cruz y las flechas ← →, y vuelve al marco de la tarjeta que esté abierta al cerrar. Con movimiento reducido, sólo un fundido.
+- **Pendiente para después del merge:** el lane DEMOS construye otra ventana que también nace de su pieza. No se buscó ni se compartió en este sprint: hay que unificar las dos en una primitiva común (la cuenta pura ya está aislada en `tu-panel/vuelo.ts`).
+- **«Y más…»** entra por tiempo, una vez, con `expo.out`. No hay un patrón del catálogo para eso (los nueve son de scroll), así que se declaró como gesto por tiempo en `_contrato/motion.ts` (`GESTOS_POR_TIEMPO`). Subirlo al catálogo compartido de `_lib/motion` es una decisión del planificador.

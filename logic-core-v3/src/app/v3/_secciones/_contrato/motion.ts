@@ -101,10 +101,36 @@ export const USOS_DECLARADOS: readonly UsoDePatron[] = [
   { patron: 'P3', seccion: 'servicios', para: 'el resaltado progresivo del párrafo, palabra por palabra' },
   { patron: 'P4', seccion: 'servicios', para: 'la llegada del CTA — entra desde 100 px abajo y muy frenado, cuando el 01 toma el panel' },
   { patron: 'P1', seccion: 'tu-panel', para: 'el titular, línea por línea' },
-  { patron: 'P2', seccion: 'tu-panel', para: 'los bloques' },
-  { patron: 'P4', seccion: 'tu-panel', para: 'la lista de capacidades' },
+  { patron: 'P2', seccion: 'tu-panel', para: 'la llegada de cada feature y de cada pieza del fondo, subiendo desde abajo' },
   { patron: 'P1', seccion: 'por-que-develop', para: 'el titular, línea por línea' },
   { patron: 'P5', seccion: 'por-que-develop', para: 'las piezas que aparecen — uno de los pocos usos que el sistema tiene' },
   { patron: 'P1', seccion: 'cierre', para: 'el titular de cierre' },
   { patron: 'P2', seccion: 'cierre', para: 'las columnas del pie, con escalonado' },
+]
+
+/**
+ * LOS GESTOS POR TIEMPO — lo que una sección anima UNA vez al entrar en vista, y
+ * que por eso no es un patrón del catálogo (los nueve son de scroll, `scrub`).
+ *
+ * SPRINT PANEL agrega el primero. Es un padrón aparte y no una fila de
+ * `USOS_DECLARADOS` porque `s6-contrato` exige que cada uso sea un patrón medido
+ * de la referencia, y éste no lo es: lo pidió la instrucción, con su curva.
+ */
+export interface GestoPorTiempo {
+  readonly id: string
+  readonly seccion: string
+  readonly para: string
+  /** El nombre de GSAP de la curva, para cruzarla con la de la implementación. */
+  readonly curva: string
+  readonly disparo: string
+}
+
+export const GESTOS_POR_TIEMPO: readonly GestoPorTiempo[] = [
+  {
+    id: 'entrada-desde-la-derecha',
+    seccion: 'tu-panel',
+    para: '«Y más…» y el newsletter entran de derecha a izquierda y los tres puntos llegan después, uno detrás del otro',
+    curva: 'expo.out',
+    disparo: 'al entrar en vista, y en espejo al salir por abajo (SPRINT PANEL 2); quieta abajo de 1025 y con movimiento reducido',
+  },
 ]

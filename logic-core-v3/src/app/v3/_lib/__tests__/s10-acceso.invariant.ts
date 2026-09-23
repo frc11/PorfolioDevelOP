@@ -44,7 +44,7 @@ import {
   ROTOS, documentoAnunciado, esRepeticionExacta, esRolDeLandmark, piezasDelDivisor,
   rotuloDeParada, textoAnunciado, transformadasDe, willChangeDe,
 } from './s10-acceso'
-import { afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
+import { DELTA_DEL_PANEL, afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
 import { COLOR, razon } from './s10-acceso-color'
 import {
   imprimirArbol, imprimirInventario, imprimirParadas, publicados, publicar,
@@ -52,6 +52,10 @@ import {
 import { afirmarLosLandmarks } from './s10-acceso-landmarks'
 import { deberiaAnimar } from '../../_secciones/_contrato/motion'
 import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
+import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
+
+/** SPRINT DEMOS · lo que suman las demos de Trabajos: una parada por demo y el `h3` de su título. */
+const DELTA_DE_DEMOS = { paradas: CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -143,9 +147,9 @@ imprimirParadas(QUIETA, PARADAS)
  * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-// SPRINT DEMOS · + las ocho demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo).
-afirmarIgual(PARADAS.length, 34, 'el home entero tiene 34 paradas: las 22 de antes, la captura de cada trabajo, el CTA del final del túnel y las ocho demos')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 34, '  y la rama animada tiene las mismas 34: el recorrido de teclado no cambia con el ancho')
+// SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel y las ${String(DELTA_DE_DEMOS.paradas)} demos`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -243,7 +247,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 30, 'la rama quieta publica 30 encabezados: los 27 de S11, el rótulo del bloque del equipo, el título de la foto y el de las demos')
+afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados + DELTA_DE_DEMOS.encabezados, 'la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo, más el título de las demos')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +

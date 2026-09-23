@@ -1,24 +1,22 @@
 /**
- * INVARIANTE — SECCIÓN 06 · TU PANEL.
+ * INVARIANTE — SECCIÓN 06 · TU PANEL, el caos ordenado (SPRINT PANEL 2).
  *
  * Renderiza la sección REAL a HTML en sus dos ramas —`anima={false}` y
- * `anima={true}`— y afirma sobre el marcado que sale, no sobre el código que lo
- * escribe. Es lo que convierte "abajo de 1025 se lee entera" en una afirmación y
- * no en una intención.
+ * `anima={true}`— y afirma sobre el marcado que sale; la geometría del caos, el
+ * parallax, el vuelo de la ampliación y el cronograma del remate se afirman
+ * contra las funciones puras que usan los componentes. Los barridos de
+ * convivencia corren sobre el modelo de `geometria.ts`; el del navegador
+ * (`scripts-panel/`) confirma que el DOM coincide.
  *
- * Los detectores viven ACÁ y no en un archivo de al lado porque sus controles
- * positivos son, por definición, lo que este lane no puede escribir: la frase con
- * las cifras fabricadas, un color a mano, un píxel suelto, un `outline-none`.
- * `codigoDeLaSeccion()` excluye los `*.invariant.*`, así que puestos acá el arnés
- * no se escanea a sí mismo — la misma excepción declarada que S3 y
- * `_invariantes/soporte.ts` ya dejaron escrita.
- *
- * Cada detector corre además contra una entrada rota, y cada conteo se imprime:
- * al lado de cada cero está cuántos caracteres, archivos o elementos se miraron.
+ * Cada detector corre además contra una entrada rota (control positivo).
  */
 
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
+import { RAIZ } from '../../_lib/__tests__/s3-archivos'
 import {
   apagadosDeFoco,
   arbitrariosSinVar,
@@ -27,33 +25,32 @@ import {
   literalesConUnidad,
   quitarComentarios,
 } from '../../_lib/__tests__/s3-escaneo'
-import { ATRIBUTO_PIEZAS, ATRIBUTO_TEXTO_ACCESIBLE } from '../../_lib/motion/lineas'
-import { CLASE_PESO } from '../../_lib/tipografia'
+import { INVENTOS } from '../_contrato/inventado'
+import { GESTOS_POR_TIEMPO, USOS_DECLARADOS } from '../_contrato/motion'
 import { seccionDe } from '../_contrato/forma'
-import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
+import { escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
+import { CONTENIDO_PROHIBIDO_DE_CONTROL, aperturasDe, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
+import { CAPTURA, DESCRIPCION, ID, NEWSLETTER, NOMBRE, PALABRAS_DEL_FONDO, PUNTOS_DE_Y_MAS, TARJETAS, TITULO, Y_MAS } from './contenido'
+import { ALFA_DEL_FONDO, VELOCIDAD_DEL_FONDO } from './Fondo'
 import {
-  CONTENIDO_PROHIBIDO_DE_CONTROL,
-  aperturasDe,
-  clasesTipograficasPerdidas,
-  cuentaDe,
-  focalizablesDe,
-  patronesNombrados,
-  sinAriaHidden,
-  textoAccesible,
-} from './deteccion'
-import {
-  BLOQUES,
-  CAPACIDADES,
-  ID,
-  NOMBRE,
-  TITULAR,
-  TITULO_DE_CAPACIDADES,
-} from './contenido'
+  ALTO_DE_LA_IMAGEN,
+  TABLA_DEL_CAOS,
+  TAMANOS,
+  cajasDelCaos,
+  cajasEn,
+  convivenciaEn,
+  corrimientoDelParallax,
+  fueraDelCuadro,
+  velocidadDe,
+  type FilaDelCaos,
+} from './geometria'
+import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
+import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
+import { cruceDelTramo as cruceDeTrabajos, gestoDelCruce as gestoDeTrabajos } from '../trabajos/gota'
+import { cajaAmpliada, transformadaEntre, vecino } from './vuelo'
 import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
-
-// ── Las dos ramas, renderizadas una sola vez ───────────────────────────────
 
 const montada = <TuPanel seccion={seccionDe(ID)} />
 const QUIETO = marcar(montada, { anima: false })
@@ -61,156 +58,228 @@ const ANIMADO = marcar(montada, { anima: true })
 
 const ARCHIVOS = codigoDeLaSeccion(ID)
 const CODIGO = ARCHIVOS.map((a) => leer(a)).join('\n')
-const PIEZAS_ANIMADAS = PIEZAS_POR_PATRON.P2 + PIEZAS_POR_PATRON.P4
+const fuenteDe = (nombre: string): string => quitarComentarios(leer(ARCHIVOS.find((a) => a.endsWith(`/${nombre}`)) ?? ''))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · Abajo de 1025 no se monta coreografía — y el texto está entero')
+titulo('1 · El contenido, entero y en orden, en las dos ramas')
 
-console.log(`  marcado: ${QUIETO.length} caracteres sin coreografía · ${ANIMADO.length} con ella`)
-afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada')
-afirmarIgual(cuentaDe(QUIETO, /will-change/g), 0, '  ni se promueve una capa de composición')
-afirmar(!QUIETO.includes(ATRIBUTO_PIEZAS), '  ni corre el divisor de líneas: el titular es un texto, no piezas')
-/** ⚠️ **ERAN DOS Y SON TRES (B12 §4.3), y la propiedad no cambió: NINGUNO sale
- *  de una decisión escrita a mano.** Dos vienen del DATO —el `min-height` de la
- *  tabla y la relación de aspecto del hueco— y el tercero lo escribe
- *  `next/image` sobre su `<img>` (`color:transparent`), que apareció cuando la
- *  captura pasó a tener un placeholder de verdad. Se afirma la cuenta Y de quién
- *  es cada uno: una cuenta sola no distingue un estilo del optimizador de uno
- *  que alguien tecleó. */
-afirmarIgual(cuentaDe(QUIETO, /style="/g), 3, 'tres estilos inline, y ninguno escrito a mano')
-afirmarIgual(cuentaDe(QUIETO, /style="color:transparent"/g), 1, '  uno es el que `next/image` le pone a su `<img>`: viene del optimizador, no del lane')
-afirmarIgual(cuentaDe(QUIETO, /style="[^"]*(min-height|aspect-ratio)/g), 2, '  y los otros dos salen del DATO: el `min-height` de la tabla y la relación de aspecto del hueco')
+const ORDEN = [
+  'Revisá cada conversación de tu chatbot',
+  'Recibí los leads ya calificados que consultaron tu página',
+  'Creá tickets para que cambiemos lo que necesites',
+  'Chateá con nosotros directo, por lo que sea',
+  'Pedí servicios nuevos a medida que los sumamos',
+  'Mirá el resumen de tu proyecto',
+  'Seguí tus resultados',
+  'Configurá cómo responde tu chatbot',
+]
+afirmarIgual(TARJETAS.map((t) => t.titulo), ORDEN, 'las ocho features, con el texto y el orden del sprint anterior')
+afirmarIgual(TITULO, 'Tu Panel', 'el título de la sección es «Tu Panel»')
 
-const TEXTOS = [TITULAR, TITULO_DE_CAPACIDADES, ...BLOQUES.map((b) => b.texto), ...CAPACIDADES]
-afirmarIgual(TEXTOS.filter((t) => !textoVisible(QUIETO).includes(t)), [], `los ${TEXTOS.length} textos de la sección están enteros sin una sola animación`)
-/** ⚠️ B12 · `NOMBRE` estaba en esta lista y ahora se afirma al revés: el rótulo
- *  de sección se fue de las ocho y no se lee. No se borra la cadena. Regla 15. */
-afirmar(!textoVisible(QUIETO).includes(NOMBRE), `y el RÓTULO DE SECCIÓN («${NOMBRE}») ya NO se lee: el título toma su lugar (B12)`)
-
-titulo('1b · CONTROL POSITIVO — con coreografía esas mismas cosas SÍ aparecen')
-
-afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_ANIMADAS, `${PIEZAS_ANIMADAS} piezas escriben transformada: ${PIEZAS_POR_PATRON.P2} de P2 + ${PIEZAS_POR_PATRON.P4} de P4`)
-afirmarIgual(cuentaDe(ANIMADO, /will-change-transform/g), PIEZAS_ANIMADAS, '  y las mismas promueven su capa de composición')
-afirmar(ANIMADO.includes(ATRIBUTO_PIEZAS), '  y el divisor de líneas SÍ se monta sobre el titular')
-afirmar(ANIMADO.includes(ATRIBUTO_TEXTO_ACCESIBLE), '  con su copia accesible: la frase entera sobrevive al corte en líneas')
-console.log('  P1 no aporta piezas en un render de servidor: el divisor está en su fase de medición — la misma lectura de R3 de reducido.invariant.')
+const TEXTOS = [TITULO, DESCRIPCION, ...TARJETAS.map((t) => t.titulo), ...TARJETAS.map((t) => t.etiqueta), Y_MAS, NEWSLETTER.titulo, NEWSLETTER.rotulo, NEWSLETTER.ayuda]
+for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
+  const visible = textoAccesible(html)
+  afirmarIgual(TEXTOS.filter((t) => !visible.includes(t)), [], `${rama}: los ${TEXTOS.length} textos se anuncian enteros`)
+  const desdeYMas = visible.slice(visible.indexOf(Y_MAS) + Y_MAS.length).trimStart()
+  afirmar(desdeYMas.replace(/\s/g, '').startsWith('.'.repeat(PUNTOS_DE_Y_MAS)), `${rama}:   «${Y_MAS}» con sus ${PUNTOS_DE_Y_MAS} puntos`)
+  const posiciones = ORDEN.map((t) => visible.indexOf(t))
+  afirmar(posiciones.every((p, i) => i === 0 || p > posiciones[i - 1]), `${rama}: las features se leen en orden`)
+}
+afirmar(!textoVisible(QUIETO).includes(NOMBRE), `el rótulo de sección («${NOMBRE}») sigue sin leerse (B12)`)
+afirmarIgual(cuentaDe(QUIETO, /data-pieza="marca-de-seccion"/g), 0, 'SIN el puntito azul: la sección no monta `MarcaDeSeccion` (la pieza compartida no se toca)')
+controlPositivo('el comparador de orden ve dos features cambiadas', [5, 3], (p) => p.every((x, i) => i === 0 || x > p[i - 1]))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El texto es EL MISMO en las dos ramas — la guardia contra un mobile distinto')
+titulo('2 · Abajo de 1025 no se monta coreografía, y el texto es el mismo')
 
-const textoQuieto = textoAccesible(QUIETO)
-afirmar(textoQuieto === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico, carácter por carácter', `${textoQuieto.length} caracteres`)
-/** ⚠️ **B4-A · LA RAMA QUIETA YA ESCONDE ALGO, y por eso la afirmación cambia de
- *  forma en vez de aflojarse.** Decía «no tiene un solo `aria-hidden`»; hoy tiene
- *  dos, y son las piezas DECORATIVAS de la marca del rótulo —el prefijo y el
- *  separador—, que están `aria-hidden` por la razón correcta: no dicen nada que
- *  el rótulo no diga. Lo que se afirma ahora es lo que la guardia protegía de
- *  verdad —que ningún TEXTO se esconda— y encima que lo escondido sean
- *  exactamente esas piezas, contadas. */
-const escondidoEnLaQuieta = [...QUIETO.matchAll(/<span data-pieza="(prefijo-de-servicio|separador)" aria-hidden="true"/g)].map((m) => m[1])
-afirmarIgual(cuentaDe(QUIETO, /aria-hidden="true"/g), escondidoEnLaQuieta.length, `  la rama quieta esconde ${escondidoEnLaQuieta.length} elementos del árbol y son TODOS piezas de marca decorativas: ${escondidoEnLaQuieta.join(' · ')}`)
-afirmarIgual(textoAccesible(sinAriaHidden(QUIETO)), textoQuieto, '  y esconderlas no le saca una sola letra al texto anunciado: son marcas, no palabras')
-afirmar(sinAriaHidden(ANIMADO).length < ANIMADO.length, '  y la animada sí — son las piezas visuales del divisor, fuera del árbol', `${ANIMADO.length - sinAriaHidden(ANIMADO).length} caracteres podados`)
-
-controlPositivo('el comparador ve una rama que dice algo que la otra no', { a: '<p>uno dos</p>', b: '<p>uno dos tres</p>' }, (par) => textoAccesible(par.a) === textoAccesible(par.b))
-controlPositivo('y el extractor no deja pasar el texto de un subárbol aria-hidden', '<p>uno<span aria-hidden="true"><span>DOS</span></span></p>', (h) => textoAccesible(h).includes('DOS'))
+afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada en el marcado')
+afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo)`)
+afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
+const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
+const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|arranque-final):[^;]*;?)+(opacity:[\d.]+)?)$/
+afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e)), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
+controlPositivo('el filtro de estilos ve uno escrito a mano', ['margin-top:12px'], (l) => l.every((e) => DEL_DATO.test(e)))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · El contenido inventado PARECE inventado — cero cifras, cero precios')
+titulo('3 · Cero cifras inventadas y cero capturas falsas')
 
 const visible = textoVisible(ANIMADO)
 afirmarIgual(escanearLoReal(visible), [], `cero hallazgos sobre ${visible.length} caracteres de texto renderizado`)
-afirmarIgual(preciosEncontrados(visible), [], '  y cero formas de precio: no están cerrados y no se inventan ni de ejemplo')
-console.log(`  marcadores en pantalla: ${marcadoresRealesEn(visible).join(' · ')}`)
-afirmar(marcadoresRealesEn(visible).length > 0, `  el contrapeso: ${marcadoresRealesEn(visible).length} marcadores distintos — cero hallazgos no es cero contenido`)
-afirmar(NOMBRES_REALES.every((n) => visible.includes(n)), '  los nombres reales están escritos: son clientes verificables, no testimonios inventados. DERIVADOS de NOMBRES_REALES', NOMBRES_REALES.join(' · '))
-
+afirmarIgual(preciosEncontrados(visible), [], '  y cero formas de precio')
+afirmarIgual(marcadoresRealesEn(visible), [CAPTURA.marcador], `  el único marcador en pantalla es el de la captura que falta: ${CAPTURA.marcador}`)
+afirmar(TARJETAS.every((t) => t.imagen !== CAPTURA.fuente || t.alt === ''), 'una feature con el placeholder no describe una pantalla que no existe: `alt` vacío')
+afirmar(!('panelFechas' in INVENTOS) && !('panelComparacion' in INVENTOS), 'INVENTOS sigue sin las casillas del panel viejo', `quedan ${Object.keys(INVENTOS).length}`)
+afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /conLlave\(/g), 0, '  y la sección no consume ninguna')
 controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearLoReal(t).length === 0)
-controlPositivo('y el detector de precios ve el suyo', 'desde $99.000 por mes', (t) => preciosEncontrados(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Cero valores fuera de los tokens, archivo por archivo')
 
-console.log(`  ${ARCHIVOS.length} archivos de producto, ${CODIGO.length} caracteres:`)
-for (const a of ARCHIVOS) console.log(`    ${a} — ${contarLineasDeCodigo(leer(a))} de código, ${contarLineas(leer(a))} totales`)
-
+console.log(`  ${ARCHIVOS.length} archivos de producto: ${ARCHIVOS.map((a) => a.split('/').pop()).join(' · ')}`)
 for (const archivo of ARCHIVOS) {
   const fuente = quitarComentarios(leer(archivo))
   const corto = archivo.split('/').pop() ?? archivo
-  afirmarIgual(hexEncontrados(fuente), [], `${corto}: cero colores escritos a mano`)
+  afirmarIgual(hexEncontrados(fuente), [], `${corto}: cero colores a mano`)
   afirmarIgual(funcionesDeColorEncontradas(fuente), [], `${corto}: cero funciones de color`)
   afirmarIgual(literalesConUnidad(fuente), [], `${corto}: cero literales con unidad`)
   afirmarIgual(arbitrariosSinVar(fuente), [], `${corto}: toda clase arbitraria consume var(--token)`)
   afirmar(contarLineasDeCodigo(leer(archivo)) <= LIMITE_DE_LINEAS_DE_CODIGO, `${corto}: no pasa las 300 líneas de código`)
 }
-afirmarIgual(cuentaDe(CODIGO, /style=\{\{/g), 0, 'ningún archivo del producto escribe un estilo inline propio — los dos que hay los ponen `Panel` y `HuecoDeMedio` desde el dato')
-
-controlPositivo('el detector de hex no está ciego', 'color: #0E0E0E', (t) => hexEncontrados(t).length === 0)
-controlPositivo('ni el de literales con unidad', 'const alto = "44px"', (t) => literalesConUnidad(t).length === 0)
-controlPositivo('ni el de arbitrarios sin token', 'className="gap-[16px]"', (t) => arbitrariosSinVar(t).length === 0)
+controlPositivo('el detector de arbitrarios sin token no está ciego', 'className="gap-[16px]"', (t) => arbitrariosSinVar(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4b · `cn()` no se comió ningún TAMAÑO de texto — y lo que sí se come, publicado')
+titulo('5 · Foco y hover — cada feature es un botón, y el hover tiene su gemelo de foco')
 
+const TARJETA = fuenteDe('Tarjeta.tsx')
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  const perdidas = clasesTipograficasPerdidas(html)
-  const familia = perdidas.filter((p) => p.falta === 'familia')
-  afirmarIgual(perdidas.filter((p) => p.falta !== 'familia'), [], `${rama}: los ${cuentaDe(html, /data-nivel="/g)} elementos de texto conservan su TAMAÑO y su PESO`)
-  afirmar(
-    familia.every((p) => !p.clases.includes(CLASE_PESO.normal)),
-    `${rama}: las ${familia.length} pérdidas de familia son todas de elementos con peso ≠ normal`,
-    'es la colisión medida de twMerge, no algo que escriba esta sección',
-  )
+  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 1, `${rama}: ${TARJETAS.length + 1} focalizables — una por feature y el campo del newsletter`)
+  afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), TARJETAS.length, `${rama}: cada feature avisa que abre un diálogo`)
 }
-afirmar(cuentaDe(QUIETO, /data-nivel="/g) > 0, `  el contrapeso: hay ${cuentaDe(QUIETO, /data-nivel="/g)} elementos con \`data-nivel\` para revisar`)
-console.log(
-  '  HALLAZGO fuera de este lane: `Textos.tsx` y `Titular.tsx` componen `font-cuerpo` con `font-medio` en el mismo `cn()`.\n' +
-    '  `font-medio` no es un peso conocido por tailwind-merge, así que lo toma como FAMILIA y borra `font-cuerpo`. Hoy es\n' +
-    '  inerte —`/v3/layout.tsx` ya pone `font-cuerpo` en la raíz y la familia se hereda— pero un `font-titulo` con peso ≠\n' +
-    '  normal cambiaría de tipografía en silencio. El arreglo es de `src/lib/utils.ts`, compartido con el sitio vivo.',
-)
-
-controlPositivo('el detector ve el tamaño que se comió una clase de color', '<p data-nivel="cuerpo" class="font-cuerpo leading-texto tracking-texto font-normal text-tinta-media">x</p>', (h) => clasesTipograficasPerdidas(h).length === 0)
-controlPositivo('y ve el peso que desapareció', '<p data-nivel="caption" class="text-fluido-caption leading-texto tracking-texto font-codigo text-center">x</p>', (h) => !clasesTipograficasPerdidas(h).some((p) => p.falta === 'peso'))
+const hovers = [...TARJETA.matchAll(/group-hover:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()
+const focos = [...TARJETA.matchAll(/group-focus-visible:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()
+afirmarIgual(focos, hovers, `los ${hovers.length} cambios de hover tienen su gemelo en focus-visible`)
+afirmar(TARJETA.includes('group-hover:scale-105') && TARJETA.includes('group-hover:translate-x-[var(--spacing-8)]'), 'se quedan la imagen a 1,05 y el título corrido 32 px del sprint anterior')
+afirmarIgual(ARCHIVOS.flatMap((a) => apagadosDeFoco(quitarComentarios(leer(a)))), [], 'ningún archivo apaga el anillo de foco')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Foco — la sección no tiene controles, y no captura el foco')
+titulo('6 · El caos: una TABLA fija, cuatro tamaños, nada aleatorio')
 
-afirmarIgual([...focalizablesDe(QUIETO), ...focalizablesDe(ANIMADO)], [], 'cero elementos focalizables en las dos ramas: esta sección informa, no actúa — el CTA vive en el cierre')
-afirmarIgual(ARCHIVOS.flatMap((a) => apagadosDeFoco(quitarComentarios(leer(a)))), [], `ninguno de los ${ARCHIVOS.length} archivos apaga el anillo de foco`)
-afirmarIgual([...quitarComentarios(CODIGO).matchAll(/\bhover:[a-z[]/g)].map((m) => m[0]), [], 'ninguna variante `hover:` — y por lo tanto ninguna sin su gemela de foco')
-
-controlPositivo('el buscador de focalizables ve uno que sí está', '<a href="/x">ir</a>', (h) => focalizablesDe(h).length === 0)
-controlPositivo('y no cuenta un tabindex="-1" como focalizable', '<div tabindex="-1">no tabula</div>', (h) => focalizablesDe(h).length > 0)
-controlPositivo('el detector de apagados ve las tres formas', '.a{outline:none}.b{outline-width:0}.c{outline-style:none}', (t) => apagadosDeFoco(t).length === 0)
+afirmarIgual(TABLA_DEL_CAOS.length, TARJETAS.length, 'una fila por feature')
+afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /Math\.random|crypto\.getRandomValues/g), 0, 'nada se sortea en tiempo de ejecución: la hidratación ve lo mismo que el servidor')
+afirmarIgual(Object.keys(TAMANOS).length, 4, 'cuatro clases de tamaño')
+afirmar(Object.values(TAMANOS).every((t) => t.ancho <= 45), 'ninguna pasa del 45 % del ancho', Object.values(TAMANOS).map((t) => `${t.ancho} %`).join(' · '))
+afirmar(new Set(TABLA_DEL_CAOS.map((f) => f.tamano)).size === 4, 'y las cuatro se usan: tamaños distintos, nada fijo')
+const ordenPorAncho = Object.values(TAMANOS).sort((a, b) => a.ancho - b.ancho)
+afirmar(ordenPorAncho.every((t, i) => i === 0 || t.velocidad > ordenPorAncho[i - 1].velocidad), 'las más grandes van un poco más rápido (profundidad)')
+afirmarIgual(velocidadDe(TABLA_DEL_CAOS.length - 1), 0, 'la última queda asentada: velocidad 0')
+afirmar(TABLA_DEL_CAOS[0].columna >= 40, 'la primera llega en el 60 % derecho, al lado del encabezado', `columna ${TABLA_DEL_CAOS[0].columna} %`)
+afirmar(VELOCIDAD_DEL_FONDO < 0 && Object.values(TAMANOS).every((t) => t.velocidad > VELOCIDAD_DEL_FONDO), 'el fondo va más lento que cualquier feature: está más lejos')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · La lista es una LISTA — `<ul>` con sus `<li>`, contados')
+titulo('7 · BARRIDO de convivencia sobre el modelo, a tres pantallas')
 
-for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  afirmarIgual(aperturasDe(html, 'ul'), 1, `${rama}: hay exactamente un <ul>`)
-  afirmarIgual(aperturasDe(html, 'li'), CAPACIDADES.length, `${rama}: y ${CAPACIDADES.length} <li>, uno por capacidad`)
+/** Barre el caos de a 5 px y devuelve el peor caso. */
+function barrer(tabla: readonly FilaDelCaos[], ancho: number, alto: number): { max: number; tapados: string[]; altoMaximo: number } {
+  const cajas = cajasDelCaos(ancho, alto, tabla)
+  const fin = cajas[cajas.length - 1].titulo.arriba + alto
+  let max = 0
+  const tapados = new Set<string>()
+  for (let s = -alto; s <= fin; s += 5) {
+    const r = convivenciaEn(cajasEn(cajas, s, alto), alto)
+    max = Math.max(max, r.visibles)
+    r.tapados.forEach((t) => tapados.add(t))
+  }
+  return { max, tapados: [...tapados], altoMaximo: Math.max(...cajas.map((c) => (c.imagen.alto + c.titulo.alto) / alto)) }
 }
-controlPositivo('el contador ve una lista que no está', '<div><span>uno</span><span>dos</span></div>', (h) => aperturasDe(h, 'li') > 0)
+for (const [ancho, alto] of [[1376, 900], [1856, 1080], [1216, 800]] as const) {
+  const r = barrer(TABLA_DEL_CAOS, ancho, alto)
+  afirmar(r.max <= 3, `${ancho} × ${alto}: nunca más de 3 features a la vez`, `máximo ${r.max}`)
+  afirmarIgual(r.tapados, [], `${ancho} × ${alto}: ningún título queda bajo otra imagen`)
+  afirmar(r.altoMaximo <= 0.55, `${ancho} × ${alto}: ninguna pasa del 55 % del alto`, `${(r.altoMaximo * 100).toFixed(1)} %`)
+}
+afirmarIgual(fueraDelCuadro(), [], 'ninguna se sale por los costados (con aire para el título corrido del hover)')
+const apretada = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, separacion: 8 } : f))
+controlPositivo('el barrido ve una fila que junta cuatro', apretada, (t) => barrer(t, 1376, 900).max <= 3)
+const encima = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, columna: 52, separacion: 30 } : f))
+controlPositivo('y ve un título tapado', encima, (t) => barrer(t, 1376, 900).tapados.length === 0)
+controlPositivo('y una que se sale', [{ columna: 70, tamano: 'l' as const, separacion: 0 }], (t) => fueraDelCuadro(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Los patrones que declaro son los que consumo — P1, P2 y P4')
+titulo('8 · Parallax: la imagen adentro del marco (nk) y UNA suscripción')
 
-/**
- * ⚠ CÓMO SE NOMBRA UN PATRÓN DESDE SITIO-S7: por su ID, no por el objeto.
- *
- * Antes una sección escribía `PATRONES.P2` y le pasaba el objeto medido al
- * canal. Ahora escribe `patron="P2"` y el objeto lo resuelve la implementación
- * animada — **es la condición de la compuerta**: importar `PATRONES` desde una
- * sección metía el sistema de motion entero en la carga inicial.
- *
- * O sea que el detector no cambió de intención, cambió de forma: sigue leyendo
- * qué patrones nombra la sección, en la sintaxis en que hoy los nombra.
- */
-afirmarIgual(patronesNombrados(CODIGO), ['P1', 'P2', 'P4'], 'la sección nombra estos tres patrones y ningún otro')
-afirmarIgual(Object.keys(PIEZAS_POR_PATRON).sort(), ['P1', 'P2', 'P4'], '  y la tabla de piezas declara los mismos tres')
-console.log(`  P1 → ${PIEZAS_POR_PATRON.P1} titular · P2 → ${PIEZAS_POR_PATRON.P2} bloques (${BLOQUES.length} de texto + la captura) · P4 → ${PIEZAS_POR_PATRON.P4} ítems`)
-controlPositivo('el buscador ve un patrón que no uso', 'const x = <B patron="P5" />', (c) => patronesNombrados(c).length === 0)
-controlPositivo('y no se come lo que dice un comentario', '/* acá menciono patron="P7" */', (c) => patronesNombrados(c).length > 0)
+afirmar(Math.abs(corrimientoDelParallax(683, 571, 900) - -164.261) < 1, 'nk: marco de 571 a 683 px del tope → −164,261', corrimientoDelParallax(683, 571, 900).toFixed(3))
+afirmar(Array.from({ length: 301 }, (_, k) => corrimientoDelParallax(-600 + k * 5, 571, 900)).every((y) => y <= 0 && y >= -(ALTO_DE_LA_IMAGEN - 1) * 571), 'el borde de la imagen nunca entra al marco')
+const GALERIA = fuenteDe('Galeria.tsx')
+afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /addEventListener\('scroll'/g), 1, 'UNA suscripción de scroll para la profundidad, el fondo y las imágenes')
+afirmar(/if \(!anima \|\| raiz === null\) return/.test(GALERIA), '  que no se instala sin coreografía (abajo de 1025 o con movimiento reducido)')
+afirmar(GALERIA.includes('el.offsetTop'), '  y mide la profundidad con `offsetTop`, que no ve la transformada que escribe')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('9 · La ampliación se queda: elemento compartido, flechas, Esc, foco')
+
+const caja = cajaAmpliada(1440, 900, 80, 80)
+afirmar(Math.abs(caja.width / caja.height - 1.6) < 1e-9, 'la caja final es 16:10', `${caja.width.toFixed(1)} × ${caja.height.toFixed(1)}`)
+afirmarIgual(transformadaEntre(caja, caja), 'translate(0px, 0px) scale(1, 1)', 'desde la caja final a sí misma: identidad')
+afirmarIgual([vecino(7, 1, 8), vecino(0, -1, 8)], [0, 7], 'las flechas dan la vuelta')
+const AMPLIACION = fuenteDe('Ampliacion.tsx')
+for (const [que, patron] of [['role="dialog"', /role="dialog"/], ['aria-modal', /aria-modal="true"/], ['Esc', /'Escape'/], ['flechas', /'ArrowRight'[\s\S]*'ArrowLeft'/], ['Tab atrapado', /'Tab'/], ['la cruz', /aria-label="Cerrar"/]] as const) {
+  afirmar(patron.test(AMPLIACION), `el diálogo tiene ${que}`)
+}
+afirmar(/botones\.current\[abierta\]\?\.focus/.test(GALERIA), '  y el foco vuelve a la feature abierta')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('10 · El remate: llega, SE VA en espejo, y el newsletter no finge un éxito')
+
+const tramos = cronogramaDelRemate(700, 300, PUNTOS_DE_Y_MAS)
+const finales = tramos.map((t) => t.delay + t.duration + t.endDelay)
+afirmar(finales.every((f) => Math.abs(f - finales[0]) < 1e-9), 'todas las piezas terminan en el mismo instante: invertidas salen en espejo', `${finales[0]} ms`)
+afirmar(tramos.every((t) => t.endDelay >= 0), '  sin relleno negativo')
+controlPositivo('el control ve un cronograma sin relleno', tramos.map((t) => t.delay + t.duration), (l) => l.every((f) => Math.abs(f - l[0]) < 1e-9))
+afirmar(salidaExponencial(0.25) > 0.8 && curvaComoLinear(salidaExponencial).startsWith('linear(0.0000, '), 'la curva es expo.out, pasada como `linear(…)`')
+const REMATE = fuenteDe('Remate.tsx')
+afirmar(REMATE.includes('gestoDelCruce(cruce)') && !REMATE.includes('isIntersecting)') && !/entrada\.isIntersecting\)\s*\{/.test(REMATE), 'el remate decide por el DISPARO POR LÍNEA del contrato, no por visibilidad')
+afirmar(REMATE.includes('margenDelDisparo(DISPARO_DEL_REMATE)') && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${DISPARO_DEL_REMATE}% 0%`, `  con la línea a ${DISPARO_DEL_REMATE} % del cuadro desde abajo (entra más tarde)`, margenDelDisparo(DISPARO_DEL_REMATE))
+afirmar(LENTITUD_DEL_REMATE > 1, `  y ${LENTITUD_DEL_REMATE} veces más lento que los tokens`)
+
+// SPRINT PANEL 3 · las cuatro entradas, como §19 de Trabajos.
+const CASOS = {
+  'arriba-bajando': { cruza: true, tope: 300, pie: 700 },
+  'arriba-subiendo': { cruza: false, tope: 700, pie: 1100 },
+  'abajo-bajando': { cruza: false, tope: -900, pie: -500 },
+  'abajo-subiendo': { cruza: true, tope: -200, pie: 200 },
+} as const
+const GESTO_ESPERADO = { 'arriba-bajando': 'ida', 'arriba-subiendo': 'vuelta', 'abajo-bajando': 'nada', 'abajo-subiendo': 'nada' } as const
+for (const entrada of ENTRADAS_AL_TRAMO) {
+  const c = CASOS[entrada]
+  afirmarIgual(cruceDelTramo(c), entrada, `${entrada}: se reconoce`)
+  afirmarIgual(gestoDelCruce(cruceDelTramo(c)), GESTO_ESPERADO[entrada], `  y su gesto es «${GESTO_ESPERADO[entrada]}»${entrada === 'abajo-bajando' ? ' — pasarlo bajando NO lo saca' : ''}`)
+  afirmarIgual([cruceDelTramo(c), gestoDelCruce(cruceDelTramo(c))], [cruceDeTrabajos(c), gestoDeTrabajos(cruceDeTrabajos(c))], '  y es EXACTAMENTE lo que decide Trabajos (`trabajos/gota.ts`): es el mismo mecanismo, no uno propio')
+}
+afirmar(ENTRADAS_AL_TRAMO.every((e) => puestoTras(e) === (e !== 'arriba-subiendo')), 'al cargar se posa: puesto en todo cruce salvo debajo de la línea')
+controlPositivo('el control ve un disparo por visibilidad (salir por arriba lo sacaría)', (c: { cruza: boolean }): string => (c.cruza ? 'ida' : 'vuelta'), (f) => f(CASOS['abajo-bajando']) === 'nada')
+afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.curva === 'expo.out'), 'declarado en el contrato como gesto por tiempo')
+
+const forma = /<form[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? ''
+const sinExitoFalso = (html: string): boolean => {
+  const f = /<form[\s\S]*?<\/form>/.exec(html)?.[0] ?? ''
+  const envios = [...f.matchAll(/<button[^>]*type="submit"[^>]*>/g)].map((m) => m[0])
+  return f.length > 0 && envios.length > 0 && envios.every((b) => /\bdisabled=""/.test(b)) && !/<form[^>]*\s(action|method)=/.test(f)
+}
+afirmar(sinExitoFalso(QUIETO), 'el newsletter no puede fingir un éxito: envío `disabled` y sin `action` — NO HAY DESTINO en el repo')
+afirmar(forma.includes(`aria-describedby="${NEWSLETTER.id}-ayuda"`) && forma.includes(NEWSLETTER.ayuda), '  y el motivo se anuncia con `aria-describedby`')
+controlPositivo('el predicado ve un envío habilitado', QUIETO.replace(' disabled=""', ''), sinExitoFalso)
+controlPositivo('y un <form> con action', QUIETO.replace('<form ', '<form action="/x" '), sinExitoFalso)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo("11 · El fondo: el contraste del «What's new» de nk, y fuera del árbol de lectura")
+
+const TEMA = readFileSync(path.join(RAIZ, 'src/app/theme-develop.css'), 'utf8')
+const hex = (re: RegExp): number[] => {
+  const h = re.exec(TEMA)?.[1] ?? '#000000'
+  return [1, 3, 5].map((i) => Number.parseInt(h.slice(i, i + 2), 16))
+}
+const lineal = (c: number): number => (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4)
+const luz = (rgb: readonly number[]): number => 0.2126 * lineal(rgb[0]) + 0.7152 * lineal(rgb[1]) + 0.0722 * lineal(rgb[2])
+const PAPEL = hex(/--color-fondo:\s*(#[0-9A-Fa-f]{6})/)
+const TINTA = hex(/--color-tinta:\s*(#[0-9A-Fa-f]{6})/)
+const mezcla = PAPEL.map((p, i) => ALFA_DEL_FONDO * TINTA[i] + (1 - ALFA_DEL_FONDO) * p)
+const contraste = (luz(PAPEL) + 0.05) / (luz(mezcla) + 0.05)
+afirmar(Math.abs(contraste - 1.0595) < 0.002, 'la tinta al alfa del fondo sobre el papel da el 1,0595:1 medido en nk', `${contraste.toFixed(4)}:1 · papel ${PAPEL.join(',')} · tinta ${TINTA.join(',')}`)
+afirmar(/<div aria-hidden="true" data-pieza="fondo-del-panel"/.test(QUIETO), 'la raíz del fondo lleva `aria-hidden`')
+const accesible = textoAccesible(QUIETO)
+afirmar(PALABRAS_DEL_FONDO.every((p) => !new RegExp(`(^|\\s)${p}(\\s|$)`).test(accesible) || TEXTOS.some((t) => t.includes(p))), 'ninguna palabra del fondo se anuncia por sí sola')
+const soloFondo = /<div aria-hidden="true" data-pieza="fondo-del-panel"[\s\S]*?(?=<div data-pieza="encabezado-del-panel")/.exec(QUIETO)?.[0] ?? ''
+afirmar(soloFondo.length > 0, 'el fondo va ANTES del encabezado en el árbol: detrás de todo', `${soloFondo.length} caracteres`)
+afirmarIgual(focalizablesDe(soloFondo).length, 0, 'no tiene nada focalizable')
+afirmar(/data-pieza="fondo-del-panel" class="[^"]*\bhidden\b[^"]*escritorio:block/.test(QUIETO), 'y sólo existe desde escritorio')
+afirmar(sinAriaHidden(QUIETO).length < QUIETO.length, 'CONTROL: la poda de aria-hidden sí saca el fondo del árbol')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('12 · Los patrones que declaro son los que consumo')
+
+afirmarIgual(patronesNombrados(CODIGO), ['P1', 'P2'], 'la sección nombra P1 (el título) y P2 (la llegada de la casa)')
+afirmarIgual(Object.keys(PIEZAS_POR_PATRON), ['P1', 'P2'], '  la tabla de piezas declara los mismos')
+afirmarIgual(USOS_DECLARADOS.filter((u) => u.seccion === ID).map((u) => u.patron), ['P1', 'P2'], '  y el contrato también')
+afirmarIgual(aperturasDe(QUIETO, 'li'), TARJETAS.length, 'las features son una lista: un <li> por feature')
 
 cerrar('s6-tu-panel.invariant')
