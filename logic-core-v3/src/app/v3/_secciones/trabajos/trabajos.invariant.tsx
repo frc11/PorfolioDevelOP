@@ -35,6 +35,7 @@ import { CSS, FUENTES, FUENTE_DE_LA_COMPOSICION, FUENTE_DEL_PANEL, afirmarElTune
 import { coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, nombresQueNoSonEncabezado } from './trabajos-piezas'
 import {
   DESTINO_DEL_CTA,
+  PANTALLAS_DE_LA_SECCION,
   PX_DE_LA_SECCION,
   DISPARO_DE_LA_NOCHE,
 } from './geometria'
@@ -84,7 +85,7 @@ controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viej
  */
 afirmar(
   sumaDeLosTramos(CONTENIDO.proyectos.length) <= PX_DE_LA_SECCION,
-  `los cinco tramos entran en el alto declarado: piden ${sumaDeLosTramos(CONTENIDO.proyectos.length).toFixed(0)} px de los ${PX_DE_LA_SECCION} que dan las ${seccion.pasosDeLaSecuencia ?? 0} pantallas`,
+  `los cinco tramos entran en el alto declarado: piden ${sumaDeLosTramos(CONTENIDO.proyectos.length).toFixed(0)} px de los ${PX_DE_LA_SECCION} que dan las ${PANTALLAS_DE_LA_SECCION.toFixed(2)} pantallas —el alto más el solape—`,
 )
 controlPositivo(
   'la cuenta del alto vería una sección de tres pantallas, que es la que tenía',

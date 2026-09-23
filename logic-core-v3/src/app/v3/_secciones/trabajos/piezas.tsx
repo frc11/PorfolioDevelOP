@@ -1,7 +1,7 @@
 'use client'
 
 import { useMotionValueEvent, type MotionValue } from 'motion/react'
-import { Fragment, useRef } from 'react'
+import { Fragment, useRef, useState } from 'react'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
@@ -24,14 +24,14 @@ import {
 } from './tunel'
 import {
   CAJA_DEL_CARTEL,
-  CARTEL,
+  HUIDA_DEL_CARTEL,
   ORIGEN_DEL_CARTEL,
   MEDIDA_DEL_CUERPO_CH,
   clasesDelCuerpoDelCartel,
   enLaVentana,
 } from './geometria'
 import { Proyecto } from './Proyecto'
-import { estiloDelLugar, poseDelGesto, transformDeLaPose } from './tunel'
+import { estiloDelLugar, huidaConHisteresis, poseDeLaHuida, transformDeLaPose } from './tunel'
 
 /**
  * LAS PIEZAS DE TEXTO QUE EL ESCENARIO MONTA — el cartel y la rama quieta.
@@ -97,13 +97,29 @@ import { estiloDelLugar, poseDelGesto, transformDeLaPose } from './tunel'
 export function PortadaDeTrabajos({
   seccion,
   progreso,
-}: PropsDeSeccion & { readonly progreso: MotionValue<number> }): React.JSX.Element {
+  mostrado,
+}: PropsDeSeccion & {
+  readonly progreso: MotionValue<number>
+  /** El progreso que el túnel MUESTRA: la huida lo lee a él y no al scroll. */
+  readonly mostrado: MotionValue<number>
+}): React.JSX.Element {
   const cartel = useRef<HTMLDivElement | null>(null)
+  /**
+   * Cuánto huyó el cartel en el primer cuadro: sale del scroll, como la pose del
+   * túnel. ⚠️ Se calcula UNA vez: si se recalculara en cada render, un re-render
+   * sin scroll (una época de medición nueva, un resize) le escribiría encima a la
+   * histéresis la pose de la ventana de bajada, y subiendo Portfolio volvía
+   * encima del túnel.
+   */
+  const [huidaInicial] = useState(() => enLaVentana(progreso.get(), HUIDA_DEL_CARTEL.bajando))
+  /** Cuánto huyó el cartel. La histéresis necesita el cuadro anterior. */
+  const huida = useRef(huidaInicial)
 
-  useMotionValueEvent(progreso, 'change', (p) => {
+  useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
-    const pose = poseDelGesto(enLaVentana(p, CARTEL), CARTEL)
+    huida.current = huidaConHisteresis(huida.current, p, HUIDA_DEL_CARTEL)
+    const pose = poseDeLaHuida(huida.current)
     if (pose === null) {
       el.style.setProperty('visibility', 'hidden')
       return
@@ -113,7 +129,7 @@ export function PortadaDeTrabajos({
     el.style.setProperty('transform', transformDeLaPose(pose))
   })
 
-  const inicial = poseDelGesto(enLaVentana(progreso.get(), CARTEL), CARTEL)
+  const inicial = poseDeLaHuida(huidaInicial)
   const lugar = estiloDelLugar(CAJA_DEL_CARTEL, ORIGEN_DEL_CARTEL)
 
   return (

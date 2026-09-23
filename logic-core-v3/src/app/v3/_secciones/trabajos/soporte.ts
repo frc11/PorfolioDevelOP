@@ -34,6 +34,7 @@ import {
 } from './geometria'
 import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, type CruceObservado, type EntradaAlTramo } from './gota'
 import { afirmarElRotulo } from './trabajos-rotulo'
+import { afirmarElRegulador } from './trabajos-regulador'
 import { afirmarLasVentanas } from './trabajos-ventanas'
 import {
   ANCHO_DEL_CTA,
@@ -461,15 +462,9 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     (paso: (e: EstadoDeUnResorte, dt: number) => EstadoDeUnResorte) =>
       Math.abs(recorridoDelResorte(3000, 1000 / 60, paso).final - recorridoDelResorte(3000, 1000 / 144, paso).final) < 1e-9,
   )
-  /**
-   * ⚠️ **LO QUE EVITA EL SALTO AL SOLTAR EL FRENO es que el resorte quede EN
-   * REPOSO mientras frena** —posición quieta y velocidad cero—, no cuánto dure.
-   * Así que se lee del fuente, y el control es un freno que congela la posición
-   * pero se guarda la velocidad.
-   */
-  const frenaEnReposo = (src: string): boolean => /if \(frenaSiCorresponde\(ahora\)\) reposarEn\(/.test(src)
-  afirmar(frenaEnReposo(FUENTE_DEL_TUNEL), '  mientras frena, el resorte queda en reposo —velocidad cero—: al soltar retoma desde ahí y no salta')
-  controlPositivo('  el detector vería un freno que conserva la velocidad', 'if (frenaSiCorresponde(ahora)) resorte.current = { ...resorte.current }', frenaEnReposo)
+  // El freno en reposo, la ráfaga, la garantía al despinearse y la histéresis del
+  // cartel —§24— viven en `trabajos-regulador.ts`, por la regla de las 300 líneas.
+  afirmarElRegulador(cuantas)
   afirmar(
     DURACION_DEL_FRENO_MS < a60.msAl99,
     `  y la pausa (${DURACION_DEL_FRENO_MS} ms) es más corta que lo que el túnel mismo tarda en posarse (${a60.msAl99.toFixed(0)} ms): se lee como el túnel asentándose, no como un corte`,

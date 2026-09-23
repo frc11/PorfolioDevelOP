@@ -1,5 +1,7 @@
 'use client'
 
+import { useMotionValue } from 'motion/react'
+
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
@@ -47,6 +49,9 @@ import { PortadaDeTrabajos, RamaQuieta } from './piezas'
  * habrían dado un tiempo que no es ninguna de las dos.
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
+  // ⚠️ UN SOLO valor amortiguado para el cartel y el túnel: lo escribe el túnel y
+  // lo lee el cartel, así que subiendo el cartel no puede volver encima del túnel.
+  const mostrado = useMotionValue(0)
   return (
     // ⚠️ Sin `bg-fondo` en móvil: la sección es `oscuro-transparente` y la
     // oscuridad la tiene que dar la SALA, no el panel. Pintarla acá tapaba el
@@ -62,11 +67,11 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
           if (progreso === null) return <RamaQuieta seccion={seccion} />
           return (
             <>
-              <PortadaDeTrabajos seccion={seccion} progreso={progreso} />
+              <PortadaDeTrabajos seccion={seccion} progreso={progreso} mostrado={mostrado} />
               {/* El recorte del túnel NO va acá: va adentro, como estilo, porque
                   necesita un margen de recorte y eso no es una clase. Ver el
                   docblock de `RECORTE_DEL_TUNEL` en `CapaDelTunel.tsx`. */}
-              <CapaDelTunel progreso={progreso} className="pointer-events-none absolute inset-0" />
+              <CapaDelTunel progreso={progreso} mostrado={mostrado} className="pointer-events-none absolute inset-0" />
             </>
           )
         }}

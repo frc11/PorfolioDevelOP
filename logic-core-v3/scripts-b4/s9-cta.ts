@@ -35,16 +35,16 @@ type Pagina = Awaited<ReturnType<typeof abrirPagina>>
 
 /**
  * Los puntos del recorrido, en px desde el tope de la sección. Derivados a mano
- * de `geometria.ts` con el alto de 9 pantallas —y por eso el banco además MIDE
+ * de `geometria.ts` con el alto de 7,57 pantallas —y por eso el banco además MIDE
  * dónde empieza la salida, en vez de creerle a esta cuenta—:
  *
  *   túnel     arranca en  +950  (el cartel empieza a huir: 9,5 scrolls de sección)
  *             termina en  +2430 (950 + PX_DEL_TUNEL = 950 + 1480, el tope del CTA)
- *   salida    arranca en  +4269 (8100 − 1131 − 1800, menos el viewport de la aproximación)
+ *   salida    arranca en  +2982 (6813 − 1131 − 1800, menos el viewport de la aproximación)
  *
- * (Antes de la reescritura el túnel terminaba en +2581; los puntos cambiaron con él.)
+ * (Con la espera de 1.839 px la salida arrancaba en +4269; los puntos cambiaron con ella.)
  */
-const PUNTOS_POSADOS = [2200, 2430, 2800, 3200, 3700, 4200] as const
+const PUNTOS_POSADOS = [2200, 2430, 2600, 2800, 2950] as const
 const ASENTAMIENTO_DECLARADO_MS = 5000
 const MARGEN_MS = 1200
 
@@ -154,21 +154,36 @@ async function principal(): Promise<void> {
       console.log(`  +${String(d).padStart(4)}  ${fila(l)}`)
     }
 
-    console.log('\nB · A RITMO DE LECTURA (una muesca cada 150 ms, sin posar)')
-    await posarYLeer(p, trabajos.top + 650)
-    for (let k = 0; k < 44; k += 1) {
-      await unaMuesca(p)
-      await medir<number>(p, 'new Promise((r) => setTimeout(() => r(1), 150))')
-      const l = await medir<Lectura | null>(p, SONDA)
-      if (l === null) continue
-      salida.aRitmo.push(l)
-      if (salida.alEmpezarLaSalida === null && l.salida < -0.5) {
-        salida.alEmpezarLaSalida = l
-        console.log(`  la salida empieza a llevárselo en ${fila(l)}`)
+    // ⚠️ Lo que decide si la espera alcanza no es un tamaño sino un TIEMPO: cuánto
+    // queda la frase entera a la vista antes de que la salida se la lleve, a dos
+    // ritmos de rueda —el de alguien que lee y el de alguien que pasa—.
+    for (const cadaMs of [300, 150]) {
+      console.log(`\nB · A RITMO (una muesca cada ${String(cadaMs)} ms, sin posar)`)
+      await posarYLeer(p, trabajos.top + 650)
+      salida.aRitmo = []
+      salida.alEmpezarLaSalida = null
+      let fraseEntera: { t: number; y: number } | null = null
+      for (let k = 0; k < 60 && salida.alEmpezarLaSalida === null; k += 1) {
+        await unaMuesca(p)
+        await medir<number>(p, `new Promise((r) => setTimeout(() => r(1), ${String(cadaMs)}))`)
+        const l = await medir<Lectura | null>(p, SONDA)
+        if (l === null) continue
+        salida.aRitmo.push(l)
+        if (fraseEntera === null && l.letras >= l.letrasTotales - 0.01) {
+          fraseEntera = { t: Date.now(), y: l.y }
+          console.log(`  la frase queda entera en ${fila(l)}`)
+        }
+        if (salida.alEmpezarLaSalida === null && l.salida < -0.5) {
+          salida.alEmpezarLaSalida = l
+          console.log(`  la salida empieza a llevárselo en ${fila(l)}`)
+          if (fraseEntera !== null) {
+            console.log(`  → la frase entera se vio ${String(Date.now() - fraseEntera.t)} ms y ${String(Math.round(l.y - fraseEntera.y))} px de scroll antes de irse`)
+          }
+        }
       }
+      const maximo = salida.aRitmo.reduce((m, l) => Math.max(m, l.anchoEnPantalla), 0)
+      console.log(`  máximo en pantalla a ritmo: ${maximo.toFixed(1)} px`)
     }
-    const maximo = salida.aRitmo.reduce((m, l) => Math.max(m, l.anchoEnPantalla), 0)
-    console.log(`  máximo en pantalla a ritmo: ${maximo.toFixed(1)} px`)
 
     writeFileSync(SALIDA, JSON.stringify(salida, null, 1))
     console.log(`\ncrudo en ${SALIDA}`)

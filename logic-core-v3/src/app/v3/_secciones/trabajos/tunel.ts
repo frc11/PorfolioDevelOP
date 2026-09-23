@@ -2,10 +2,11 @@
  * EL VOCABULARIO DEL TRAMO — **el cartel huye y el túnel se acerca.**
  * **[PORTFOLIO]**
  *
- * Dos mecánicas y ninguna tercera. La primera gobierna al CARTEL de Portfolio y
- * cuelga del progreso del scroll, como todo el resto del sitio. La segunda
- * gobierna al TÚNEL de capturas y **es la excepción declarada a esa doctrina**:
- * no cuelga de la POSICIÓN del scroll sino de su HISTORIA.
+ * Dos mecánicas y ninguna tercera. La primera gobierna al CARTEL de Portfolio;
+ * la segunda gobierna al TÚNEL de capturas y **es la excepción declarada a la
+ * doctrina del sitio**: no cuelga de la POSICIÓN del scroll sino de su HISTORIA.
+ * El cartel entró en la excepción con el túnel: su huida lee lo que el túnel
+ * MUESTRA, con histéresis, para no volver encima de él subiendo.
  *
  * ── ⚠️ LO QUE ESTE ARCHIVO DEJÓ DE SER ───────────────────────────────────
  *
@@ -57,7 +58,7 @@ function acotar01(v: number): number {
 }
 
 // ===========================================================================
-// 1 · EL CARTEL — nacer, crecer y huir sobre el progreso del scroll
+// 1 · EL CARTEL — huir sobre lo que el túnel muestra
 // ===========================================================================
 
 /**
@@ -95,9 +96,8 @@ export const DISTANCIA_DEL_VUELO = FOCO_DE_LA_ESCENA_PX / 2
 /** La curva de la salida: `power1.in`, t al cuadrado. Es la de P7, escrita acá. */
 export const CURVA_DEL_VUELO = (t: number): number => t * t
 
-/** Cuándo termina de crecer y desde cuándo huye, en fracción de su ventana. */
+/** Desde cuándo huye el cartel, en fracción de su ventana. */
 export interface TiemposDelGesto {
-  readonly crecerHasta: number
   readonly huirDesde: number | null
 }
 
@@ -109,43 +109,36 @@ export interface PoseDelElemento {
 }
 
 /**
- * LA POSE DEL CARTEL EN SU VENTANA, o `null` si no nació o ya terminó de huir.
- * Cuatro tramos y ninguno se superpone:
- *
- *   · `u ≤ 0` — no existe. ⚠️ El corte es ESTRICTO: fuera de su ventana el
- *     progreso SATURA en 0, así que con `< 0` el elemento quedaría pintado en su
- *     escala de nacimiento durante todo lo que viene antes.
- *   · hasta `huirDesde` — QUIETO. Llega con P1 adentro y después se lee.
- *   · de ahí en adelante — VUELA HACIA ADELANTE: z positivo y opacidad a la vez.
+ * LA POSE DEL CARTEL: su huida, o `null` si ya terminó de huir. Antes de huir la
+ * caja está quieta y entera —lo que llega es su contenido, con el rango de su
+ * propio call site—, y de ahí en adelante VUELA HACIA ADELANTE: z positivo y
+ * opacidad a la vez. Cuánto huyó lo decide `huidaConHisteresis`.
  */
-export function poseDelGesto(u: number, tiempos: TiemposDelGesto): PoseDelElemento | null {
-  const { crecerHasta, huirDesde } = tiempos
-  if (!(crecerHasta > 0 && crecerHasta <= 1)) {
-    throw new Error(`crecerHasta inválido: ${crecerHasta}`)
-  }
-  if (huirDesde !== null && !(huirDesde >= crecerHasta && huirDesde < 1)) {
-    throw new Error(`huirDesde inválido: ${huirDesde} contra crecerHasta ${crecerHasta}`)
-  }
-  // ⚠️ **ANTES DE SU VENTANA LA CAJA YA ESTÁ, Y ESO ES EL ARREGLO DE ESTE SPRINT.**
-  //
-  // Devolvía `null` —o sea `visibility: hidden`— para todo `u <= 0`, así que el
-  // cartel no existía hasta el píxel exacto en que el pin enganchaba. Medido:
-  // su ventana abre en el píxel 0 de la sección, así que la llegada entera
-  // ocurría en 420 px, de golpe y con el panel recién posado. Eso es lo que se
-  // reportó como «está ya puesto, sin llegada».
-  //
-  // Ahora la caja está desde el principio y lo que LLEGA es su contenido, con
-  // su propio rango —el mismo de «El equipo»—, que abre con la sección todavía
-  // entrando. La caja no hace nada mientras tanto: es un lugar, no un gesto.
-  //
-  // Mientras llega y mientras se lee, la caja está quieta y entera: lo que se
-  // mueve adentro son sus dos piezas, y eso no lo dibuja esta función.
-  if (huirDesde === null || u < huirDesde) {
-    return { escala: 1, z: 0, opacidad: 1 }
-  }
-  const t = CURVA_DEL_VUELO(Math.min(1, (u - huirDesde) / (1 - huirDesde)))
+/** La pose de la huida para una fracción lineal de ella: 0 entero, 1 ya se fue. */
+export function poseDeLaHuida(fraccion: number): PoseDelElemento | null {
+  const t = CURVA_DEL_VUELO(Math.min(1, Math.max(0, fraccion)))
   if (t >= 1) return null
   return { escala: 1, z: DISTANCIA_DEL_VUELO * t, opacidad: 1 - t }
+}
+
+/**
+ * ⚠️ **LA HUIDA CON HISTÉRESIS — subiendo, Portfolio no vuelve encima del túnel.**
+ *
+ * Bajando, el cartel huye en su ventana de siempre, mientras la primera captura
+ * nace: es el relevo, y (c) sale de acá. Subiendo, si la huida se desanduviera
+ * en esa MISMA ventana, el cartel volvería con El Garage todavía grande. Así que
+ * subiendo vuelve en la ventana de ANTES —misma duración, terminada donde arranca
+ * el túnel, con las capas ya en 0—, y entre las dos el cartel se queda como
+ * estaba: una banda, no un interruptor, así que dar vuelta el gesto a mitad de
+ * camino no salta. Recibe el progreso MOSTRADO del túnel, no el scroll.
+ */
+export function huidaConHisteresis(
+  anterior: number,
+  mostrado: number,
+  ventanas: { readonly bajando: { readonly desde: number; readonly hasta: number }; readonly subiendo: { readonly desde: number; readonly hasta: number } },
+): number {
+  const en = (v: { readonly desde: number; readonly hasta: number }): number => acotar01((mostrado - v.desde) / (v.hasta - v.desde))
+  return Math.min(en(ventanas.subiendo), Math.max(en(ventanas.bajando), anterior))
 }
 
 /** El estilo del LUGAR del cartel: su caja final y su punto interior. */
@@ -286,9 +279,10 @@ export interface PoseDelTunel {
 }
 
 /** La pose para un píxel del túnel, contado desde su arranque. */
-export function poseDelTunel(pxDelTunel: number): PoseDelTunel {
+export function poseDelTunel(pxDelTunel: number, pxDelEscenario: number = pxDelTunel): PoseDelTunel {
   const y = pxDelTunel + ORIGEN_DEL_TUNEL
-  const escenario = escalaDeLaCapa(CAPAS_DEL_TUNEL.escenario, y)
+  // El escenario lleva su propio resorte, así que puede ir en otro píxel.
+  const escenario = escalaDeLaCapa(CAPAS_DEL_TUNEL.escenario, pxDelEscenario + ORIGEN_DEL_TUNEL)
   const proyectos = CAPAS_DEL_TUNEL.proyectos.map((capa) => escalaDeLaCapa(capa, y))
   const anchos: number[] = []
   let producto = escenario
@@ -400,16 +394,26 @@ export function anchoDelRotuloEnPantalla(anchoDeLaCaptura: number): number {
 // ── El resorte: por qué sigue creciendo cuando soltás ──────────────────────
 
 /**
- * ⚠️ **EL RESORTE ES EL DE LA REFERENCIA, leído de su bundle.** Cada capa suya
- * persigue su recta con un resorte de framer-motion `stiffness 215, damping 100,
- * mass 1`: ζ = 3,41, muy sobreamortiguado, cero rebote. Reemplaza a la
- * persecución de 5.000 ms, que salía de un conteo a ojo.
+ * ⚠️ **LOS RESORTES SON LOS DE LA REFERENCIA, leídos de su bundle.** Sus capas de
+ * imagen persiguen su recta con un resorte de framer-motion `stiffness 215,
+ * damping 100, mass 1`: ζ = 3,41, muy sobreamortiguado, cero rebote. Su escenario
+ * lleva otro, el de abajo. Reemplazan a la persecución de 5.000 ms, que salía de
+ * un conteo a ojo.
  */
 export const RESORTE_DEL_TUNEL = { rigidez: 215, amortiguamiento: 100, masa: 1 } as const // aflojarlo = bajar el amortiguamiento
 
+/** El del escenario de la referencia, que es otro: ζ = 1,34, más vivo y sin rebote. */
+export const RESORTE_DEL_ESCENARIO = { rigidez: 500, amortiguamiento: 60, masa: 1 } as const
+
+export interface Resorte {
+  readonly rigidez: number
+  readonly amortiguamiento: number
+  readonly masa: number
+}
+
 /** ζ = c / (2 √(k·m)). Por encima de 1 no rebota. */
-export const ZETA_DEL_RESORTE =
-  RESORTE_DEL_TUNEL.amortiguamiento / (2 * Math.sqrt(RESORTE_DEL_TUNEL.rigidez * RESORTE_DEL_TUNEL.masa))
+export const zetaDe = (r: Resorte): number => r.amortiguamiento / (2 * Math.sqrt(r.rigidez * r.masa))
+export const ZETA_DEL_RESORTE = zetaDe(RESORTE_DEL_TUNEL)
 
 /**
  * ⚠️ **Un salto de cuadro no puede volverse un salto de imagen.** Si la pestaña
@@ -431,10 +435,15 @@ export interface EstadoDelResorte {
  * tres regímenes para que aflojar la constante no rompa nada, aunque el de la
  * referencia es el sobreamortiguado.
  */
-export function avanzarElResorte(estado: EstadoDelResorte, objetivo: number, dtMs: number): EstadoDelResorte {
+export function avanzarElResorte(
+  estado: EstadoDelResorte,
+  objetivo: number,
+  dtMs: number,
+  resorte: Resorte = RESORTE_DEL_TUNEL,
+): EstadoDelResorte {
   const t = Math.min(Math.max(dtMs, 0), DT_MAXIMO_MS) / 1000
-  const w0 = Math.sqrt(RESORTE_DEL_TUNEL.rigidez / RESORTE_DEL_TUNEL.masa)
-  const z = ZETA_DEL_RESORTE
+  const w0 = Math.sqrt(resorte.rigidez / resorte.masa)
+  const z = zetaDe(resorte)
   const x0 = estado.posicion - objetivo
   const v0 = estado.velocidad
   if (z > 1) {
@@ -576,12 +585,11 @@ export const VELO_DEL_CTA = 0.55
  * termina y el tramo ya está en otra cosa. Así que al llegar se QUEDA, y el
  * visitante sigue scrolleando sin que la ventana cambie de tamaño.
  *
- * Va en píxeles de scroll —la unidad en la que el resto del recorrido está
- * pensado— y son 900: una pantalla entera con la ventana quieta, ~0,9 s a ritmo
- * de lectura. Es un PISO: lo que sobra del alto de la sección se lo queda esta
- * espera, porque es el único tramo del recorrido donde estirarse no cuesta nada.
+ * Va en píxeles de scroll y es un PISO: lo que sobra del alto de la sección se
+ * lo queda esta espera. Se pidió al 30 % de lo que era (1.839 → 552 px), así que
+ * el piso baja a 550, justo debajo. El freno de 900 ms suma el tiempo de lectura.
  */
-export const PX_MINIMOS_DE_LA_ESPERA_DEL_CTA = 900
+export const PX_MINIMOS_DE_LA_ESPERA_DEL_CTA = 550
 
 /**
  * ⚠️ **LA SALIDA — el contenido se va A LA VELOCIDAD DEL SCROLL, ni una más.**

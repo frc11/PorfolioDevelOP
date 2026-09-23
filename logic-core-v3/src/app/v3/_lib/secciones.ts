@@ -24,7 +24,7 @@
  *
  * Las separaciones son CERO. Está medido —33 de 36 separaciones en 0px— y no
  * es un descuido de la referencia: el ritmo vive en el pinneado, no en el aire
- * entre bloques. Ningún panel declara margen.
+ * entre bloques. Ningún panel declara margen, salvo el negativo de un `solape`.
  */
 
 import { SUPERFICIES, type ModoSuperficie, type ModoSuperficieAngosta } from './superficies'
@@ -97,6 +97,21 @@ export interface Seccion {
    * escena.
    */
   readonly alto: string
+  /**
+   * ⚠️ **CUÁNTAS PANTALLAS SE MONTA SOBRE LA SECCIÓN ANTERIOR.** Opcional, y hoy
+   * lo declara una sola: Trabajos.
+   *
+   * `Panel` lo emite como un margen negativo y le suma lo mismo al piso del alto,
+   * así que la sección ARRANCA antes y TERMINA donde terminaba: el fin del panel
+   * no se mueve y la escena —que ancla cada tramo al FIN de su sección— no se
+   * entera. Por eso `alto` sigue siendo el alto sin el solape: es lo que la
+   * escena lee, y con el solape adentro contaría dos veces lo que no se corrió.
+   *
+   * Rompe a sabiendas «las separaciones son cero»: es la única forma de que un
+   * panel empiece a verse mientras el anterior todavía scrollea sin tocar ni el
+   * alto del anterior ni el recorrido de la cámara.
+   */
+  readonly solape?: number
   /**
    * CUÁNTOS PASOS TIENE LA SECUENCIA de una sección pinneada. Sólo las
    * pinneadas lo declaran, y es de donde sale su `alto`. (B1)
@@ -240,40 +255,24 @@ export function altoDeSecuenciaPinneada(pasos: number): string {
   return `${pasos * 100}svh`
 }
 
-/** Los pasos de las dos secuencias pinneadas. Su `contenido.ts` es la fuente y
- *  el invariante de cada sección afirma la igualdad; acá viven para que la
- *  tabla no importe contenido, que es la regla que la ordena. */
 /**
- * ⚠️ **TRABAJOS DEJA DE SER «UNA PANTALLA POR PROYECTO» — y el número ya no sale
- * del contenido sino del RECORRIDO.**
+ * ⚠️ **EL ALTO DE TRABAJOS SALE DEL RECORRIDO, NO DEL CONTENIDO.**
  *
- * Eran tres, uno por proyecto, y la igualdad con `contenido.ts` era comprobable.
- * Dejó de serlo cuando la sección pasó a ser un túnel de zoom con ritmo relativo
- * constante: **cuánto scroll pide el tramo sale del ritmo, del tamaño de
- * nacimiento y del relevo**, no de cuántos clientes hay. Con las capturas naciendo
- * al 2 % del cuadro —la profundidad que el pedido pidió— el túnel pide 5.165 px,
- * y con el cartel y el CTA la cuenta da 6.689.
+ * Los tramos piden píxeles (`trabajos/geometria.ts`): aproximación 900, cartel
+ * hasta la huida 950, túnel 1.480 —la tabla medida en la referencia—, salida
+ * 1.131 y demos 1.800, que suman 6.261. Lo que queda es la ESPERA del CTA, y se
+ * pidió al 30 % de lo que era (1.839 → 552 px). Con eso la sección mide 6.813 px:
+ * **757svh**, de los que 40 son el solape sobre Números y 717 son el alto propio.
  *
- * ⚠️ **Y hay un quinto sumando que no es un gesto: la APROXIMACIÓN.** El
- * progreso de esta sección lo resuelve el ancla de P7 sobre la caja de la
- * `<section>`, que abre cuando su tope cruza el borde de ABAJO del viewport, no
- * el de arriba. Medido en 1440×900: cuando el panel queda puesto el progreso ya
- * lleva 900 px —un viewport— recorridos, con el cartel a esa altura ya huyendo.
- * Ese tramo se gasta aunque no se use, así que entra en la cuenta.
- *
- * Y el último sumando es la ESPERA: la ventana del CTA se queda quieta en su
- * máximo hasta que el pin se despega, con un piso declarado de 900 px. Con ella
- * la cuenta cierra en 8.033 sobre 8.100 — **nueve pantallas**, y los 67 px de
- * sobra los absorbe la espera, que es lo último del recorrido.
- *
- * El espacio de demos ya no sale de esta cuenta: es el viewport que `sticky`
- * deja despineado al final, donde la página se lleva el panel para arriba.
- *
- * El reparto vive en `trabajos/geometria.ts`, en píxeles, y su invariante afirma
- * que la suma entra acá. O sea: la igualdad que se perdió se reemplazó por otra
- * comprobable, y no por nada.
+ * ⚠️ **EL SOLAPE LO PONE LA CÁMARA.** Portfolio llega ni bien pasa el cambio de
+ * plano: el tramo rápido del viaje de cámara de Números —donde la cámara va más
+ * rápido que la media de su segmento— termina en la pantalla 5,098 del
+ * recorrido, y el titular de Portfolio asomaba 0,398 pantallas después. **40svh**
+ * lo corren al corte (a 1440 × 900, 4.593 contra 4.594). Es la única pieza de la
+ * sección que se ancla a la escena, y la escena no se mueve: ver `solape`.
  */
-const PASOS_DE_TRABAJOS = 9
+const ALTO_DE_TRABAJOS = '717svh'
+const SOLAPE_DE_TRABAJOS = 0.4
 const PASOS_DE_SERVICIOS = 3
 
 /**
@@ -504,12 +503,12 @@ export const SECCIONES: readonly Seccion[] = [
     // noche detrás: el arco del sol baja a 0,08 mientras esta sección entra
     // (`_lib/escena/lightArc.ts`). Los tres proyectos vienen del fondo oscuro.
     superficie: 'oscuro-transparente',
-    // Sin preludio. Las nueve pantallas NO son los proyectos: son lo que pide el
-    // recorrido —aproximación, cartel, túnel, CTA y espera—, en píxeles en
-    // `trabajos/geometria.ts`. El recorrido de cámara lo lleva Números.
-    alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
+    // Sin preludio. Las pantallas NO son los proyectos: son lo que pide el
+    // recorrido, en píxeles en `trabajos/geometria.ts`. El recorrido de cámara lo
+    // lleva Números, y el solape monta a Trabajos sobre su final.
+    alto: ALTO_DE_TRABAJOS,
+    solape: SOLAPE_DE_TRABAJOS,
     pinneada: 'desde-escritorio',
-    pasosDeLaSecuencia: PASOS_DE_TRABAJOS,
   },
   /**
    * SERVICIOS — la sección pinneada que S1 dejó como demostración.

@@ -34,7 +34,8 @@ import { idDelTitularDeSeccion } from './tipografia/Titular'
  * ── Las separaciones son cero ──────────────────────────────────────────────
  *
  * Ningún panel declara margen. Está medido: 33 de 36 separaciones en 0px. El
- * ritmo vive en el pinneado, no en el aire entre bloques.
+ * ritmo vive en el pinneado, no en el aire entre bloques. La única excepción es
+ * a sabiendas y NEGATIVA: el `solape` de una sección (`estiloDelAlto`).
  */
 
 /**
@@ -132,11 +133,24 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
           ? undefined
           : CLASES_DE_LA_BANDA_ANGOSTA[seccion.superficieAngosta],
       )}
-      style={{ minHeight: seccion.alto }}
+      style={estiloDelAlto(seccion)}
     >
       {children}
     </section>
   )
+}
+
+/**
+ * EL ALTO DEL PANEL, con el solape si la sección lo declara (`secciones.ts`).
+ *
+ * El solape sube el panel sobre el anterior y le suma lo mismo al piso del alto:
+ * arranca antes y termina donde terminaba, así que nada de lo que viene después
+ * se corre y la escena —que ancla cada tramo al fin de su sección— no se entera.
+ */
+function estiloDelAlto(seccion: Seccion): React.CSSProperties {
+  if (seccion.solape === undefined) return { minHeight: seccion.alto }
+  const solape = `${Number((seccion.solape * 100).toFixed(4))}svh`
+  return { minHeight: `calc(${seccion.alto} + ${solape})`, marginTop: `calc(-1 * ${solape})` }
 }
 
 /**

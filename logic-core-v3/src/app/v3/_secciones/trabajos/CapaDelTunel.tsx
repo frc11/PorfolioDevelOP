@@ -9,15 +9,19 @@ import { MarcoDeMedio } from '../_contrato/medios'
 
 import { CONTENIDO } from './contenido'
 import {
+  BANDA_DEL_EFECTO,
   MEDIDAS_DE_LAS_CAPTURAS,
   SIZES_DE_LA_CAPTURA,
   enLaVentana,
+  fraccionDeScroll,
   progresoDelPxDelTunel,
+  pxDeLaSeccion,
   pxDelTunelEn,
   ventanaDeLaSalida,
   ventanaDelTunel,
 } from './geometria'
 import { VentanaDelCta } from './piezas'
+import { avanzarLoMostrado, reposoEn, type EstadoDelTunelMostrado } from './regulador'
 import { pintarElTipeo } from './trabajos-tipeo'
 import {
   ANCHO_CON_EL_ROTULO_ENTERO,
@@ -25,13 +29,11 @@ import {
   PX_DEL_TUNEL,
   PX_DE_LA_SALIDA,
   VELO_DEL_CTA,
-  avanzarElResorte,
   opacidadDelRotulo,
   poseDelTunel,
   pxParaQueElProyectoMida,
   transformDeLaCapa,
   transformDelRotulo,
-  type EstadoDelResorte,
 } from './tunel'
 
 /**
@@ -50,11 +52,14 @@ import {
  * adentro de su ancla—: así el orden anunciado sigue siendo nombre → rubro →
  * imagen por proyecto, y no hay un enlace adentro de otro.
  *
- * ── ⚠️ UN SOLO RELOJ PARA TODO EL TRAMO, Y ES UN PROGRESO CON RESORTE ───
+ * ── ⚠️ UN SOLO RELOJ PARA TODO EL TRAMO: EL SCROLL REGULADO Y DOS RESORTES ─
  *
- * Lo que se persigue es **el progreso de la sección**, con el resorte de la
- * referencia. De ese progreso dibujado salen las cinco escalas, el tipeo, el velo
- * y la salida, así que todos heredan la misma inercia sin un segundo reloj.
+ * Lo que se persigue es **el progreso de la sección**, regulado (`regulador.ts`:
+ * el objetivo no corre más que la velocidad máxima del efecto y la banda lo ata
+ * al scroll) y con los dos resortes de la referencia: el del escenario para su
+ * capa, el del túnel para todo lo demás —escalas, tipeo, velo y salida—. Lo que
+ * el resorte del túnel muestra se PUBLICA en `mostrado`, y el cartel lee ése: los
+ * dos se mueven con el mismo valor amortiguado.
  *
  * **Éste es el único tramo del sitio que no dibuja una función pura del scroll**:
  * el mismo scroll puede dar dos cuadros distintos según de dónde venga y cuánto
@@ -134,9 +139,12 @@ function medidaDe(indice: number): { readonly ancho: number; readonly alto: numb
 
 export function CapaDelTunel({
   progreso,
+  mostrado,
   className,
 }: {
   readonly progreso: MotionValue<number>
+  /** Donde se publica el progreso que el túnel muestra, para que el cartel lo lea. */
+  readonly mostrado: MotionValue<number>
   readonly className?: string
 }): React.JSX.Element {
   const contenedor = useRef<HTMLDivElement | null>(null)
@@ -148,8 +156,8 @@ export function CapaDelTunel({
   const fraseCta = useRef<HTMLDivElement | null>(null)
   const cursorCta = useRef<HTMLSpanElement | null>(null)
   const veloCta = useRef<HTMLDivElement | null>(null)
-  /** El progreso dibujado y su velocidad: el único estado del tramo. */
-  const resorte = useRef<EstadoDelResorte>({ posicion: 0, velocidad: 0 })
+  /** Lo mostrado —el objetivo regulado y los dos resortes, en px—: el único estado del tramo. */
+  const estado = useRef<EstadoDelTunelMostrado>(reposoEn(0))
   /** Los dos tokens del anillo de foco, leídos del tema una vez. */
   const anillo = useRef<{ grosor: number; desplazamiento: number } | null>(null)
 
@@ -184,8 +192,8 @@ export function CapaDelTunel({
    * cero— y **sigue siendo una parada**. Una madre en `scale(0)` esconde a toda
    * su cadena por la misma vía.
    */
-  const pintar = useCallback((p: number): void => {
-    const pose = poseDelTunel(pxDelTunelEn(p))
+  const pintar = useCallback((p: number, pEscenario: number): void => {
+    const pose = poseDelTunel(pxDelTunelEn(p), pxDelTunelEn(pEscenario))
     escenario.current?.style.setProperty('transform', transformDeLaCapa(pose.escenario))
     for (let i = 0; i < CAPTURAS.length; i += 1) {
       envoltorios.current[i]?.style.setProperty('transform', transformDeLaCapa(pose.proyectos[i]))
@@ -282,26 +290,35 @@ export function CapaDelTunel({
       return progresoDelPxDelTunel(pxParaQueElProyectoMida(enfocada, ANCHO_CON_EL_ROTULO_ENTERO))
     }
 
-    const objetivoDeAhora = (): number => Math.max(progreso.get(), pisoDelFoco())
+    /** El scroll que el efecto persigue, en px: el de la página, o el piso del foco si es mayor. */
+    const scrollDeAhora = (): number => pxDeLaSeccion(Math.max(progreso.get(), pisoDelFoco()))
 
-    /** Deja el progreso dibujado en `p` y QUIETO: un salto no hereda velocidad. */
-    const reposarEn = (p: number): void => {
-      resorte.current = { posicion: p, velocidad: 0 }
+    /** Pinta lo mostrado y lo publica: el cartel lee este mismo valor. */
+    const mostrar = (): void => {
+      const e = estado.current
+      pintar(fraccionDeScroll(e.tunel.posicion), fraccionDeScroll(e.escenario.posicion))
+      mostrado.set(fraccionDeScroll(e.tunel.posicion))
+    }
+
+    /** Deja lo mostrado en `px` y QUIETO: un salto no hereda velocidad. */
+    const reposarEn = (px: number): void => {
+      estado.current = reposoEn(px, pxDeLaSeccion(pisoDelFoco()))
     }
 
     /**
      * ⚠️ **EL FRENO — lo que se detiene es el GESTO, no el scroll.**
      *
-     * Cuando la frase termina de escribirse, el progreso dibujado se queda quieto
-     * `DURACION_DEL_FRENO_MS` para que se alcance a leer. La página sigue
-     * scrolleando normal: **nadie queda atrapado, ni con rueda ni con teclado**, y
-     * no se detiene el motor de scroll suave ni se cancela un solo evento — el
-     * repo tiene dos invariantes que prohíben lo primero y la doctrina escrita de
-     * que el gesto del visitante siempre gana. Al soltar, el resorte retoma desde
-     * el reposo y el reencuentro con el scroll no es un salto.
+     * Cuando la frase termina de escribirse, lo mostrado se queda quieto
+     * `DURACION_DEL_FRENO_MS` para que se alcance a leer: el objetivo y los dos
+     * resortes, en reposo (`avanzarLoMostrado`). La página sigue scrolleando
+     * normal: **nadie queda atrapado, ni con rueda ni con teclado**, y no se detiene
+     * el motor de scroll suave ni se cancela un solo evento — el repo tiene dos
+     * invariantes que prohíben lo primero y la doctrina escrita de que el gesto del
+     * visitante siempre gana. La banda gana sobre el freno: si hace falta para no
+     * quedar a medio camino, lo mostrado se mueve igual.
      */
     const frenaSiCorresponde = (ahora: number): boolean => {
-      const uCta = poseDelTunel(pxDelTunelEn(resorte.current.posicion)).fraccionDelCta
+      const uCta = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta
       if (uCta <= 0) yaFreno = false
       if (!yaFreno && uCta >= 1) {
         yaFreno = true
@@ -313,29 +330,29 @@ export function CapaDelTunel({
     const paso = (ahora: number): void => {
       const dt = anterior === 0 ? 0 : ahora - anterior
       anterior = ahora
-      if (frenaSiCorresponde(ahora)) reposarEn(resorte.current.posicion)
-      else resorte.current = avanzarElResorte(resorte.current, objetivoDeAhora(), dt)
-      pintar(resorte.current.posicion)
+      const pagina = pxDeLaSeccion(progreso.get())
+      estado.current = avanzarLoMostrado(estado.current, pagina, dt, BANDA_DEL_EFECTO, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
+      mostrar()
       cuadro = requestAnimationFrame(paso)
     }
 
     const arrancar = (): void => {
       if (cuadro !== 0) return
       anterior = 0
-      reposarEn(objetivoDeAhora())
+      reposarEn(scrollDeAhora())
       // Entrar con la frase ya escrita —recargando más abajo, o volviendo desde
       // Servicios— no es terminar de escribirla: ahí no se frena.
-      yaFreno = poseDelTunel(pxDelTunelEn(resorte.current.posicion)).fraccionDelCta >= 1
-      pintar(resorte.current.posicion)
+      yaFreno = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
+      mostrar()
       cuadro = requestAnimationFrame(paso)
     }
 
-    /** Frena el lazo y deja el progreso DONDE CORRESPONDE, sin animar la vuelta. */
+    /** Frena el lazo y deja lo mostrado DONDE CORRESPONDE, sin animar la vuelta. */
     const frenar = (): void => {
       if (cuadro !== 0) cancelAnimationFrame(cuadro)
       cuadro = 0
-      reposarEn(objetivoDeAhora())
-      pintar(resorte.current.posicion)
+      reposarEn(scrollDeAhora())
+      mostrar()
     }
 
     const alEntrarElFoco = (e: FocusEvent): void => {
@@ -345,10 +362,10 @@ export function CapaDelTunel({
       // El CTA no vive adentro de una captura: vive en su propia capa.
       enfocada = objetivo?.closest('[data-capa="cta"]') ? 'cta' : indice < 0 ? null : indice
       // El piso se toma de UN SALTO: un foco que aparece de a poco no es un foco.
-      const piso = pisoDelFoco()
-      if (resorte.current.posicion < piso) {
+      const piso = pxDeLaSeccion(pisoDelFoco())
+      if (estado.current.tunel.posicion < piso) {
         reposarEn(piso)
-        pintar(resorte.current.posicion)
+        mostrar()
       }
     }
     const alSalirElFoco = (): void => {
@@ -369,7 +386,7 @@ export function CapaDelTunel({
       caja.removeEventListener('focusout', alSalirElFoco)
       if (cuadro !== 0) cancelAnimationFrame(cuadro)
     }
-  }, [pintar, progreso])
+  }, [pintar, progreso, mostrado])
 
   /**
    * UNA CAPA DE PROYECTO, con la siguiente adentro. La última lleva al CTA.

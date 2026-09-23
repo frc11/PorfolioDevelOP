@@ -16,7 +16,7 @@
  *
  *     el cartel      1.200 px   llega con el gesto de la casa, se lee, y vuela
  *     el túnel       1.480 px   la tabla medida en la referencia, CTA incluido
- *     la espera     el resto    el CTA quieto en su tamaño, con piso de 900
+ *     la espera     el resto    el CTA quieto en su tamaño: hoy 552, con piso de 550
  *     la salida      1.131 px   todo sube 1:1 y sale por arriba del cuadro
  *     los demos      1.800 px   la sala de noche sola
  *
@@ -32,6 +32,7 @@ import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 
+import { ATRASO_DEL_RESORTE_PX, type BandaDelEfecto } from './regulador'
 import {
   CAPAS_DEL_TUNEL,
   PX_DEL_ESPACIO_DE_DEMOS,
@@ -51,8 +52,18 @@ export interface CajaDeLaCaptura {
   readonly sizes: string
 }
 
-/** Las pantallas que la tabla le da a la sección, leídas de la tabla. */
-export const PANTALLAS_DE_LA_SECCION = pantallasDe(seccionDe('trabajos'))
+/**
+ * Cuántas pantallas se monta la sección sobre Números, leídas de la tabla. Es lo
+ * que adelanta a Portfolio al cambio de plano de la cámara (`secciones.ts`).
+ */
+export const SOLAPE_DE_LA_SECCION = seccionDe('trabajos').solape ?? 0
+
+/**
+ * Las pantallas que la sección MIDE, leídas de la tabla: su alto más el solape.
+ * El progreso de P7 va de «tope abajo» a «pie abajo» sobre la caja real, y la
+ * caja real arranca el solape antes.
+ */
+export const PANTALLAS_DE_LA_SECCION = pantallasDe(seccionDe('trabajos')) + SOLAPE_DE_LA_SECCION
 
 /**
  * ⚠️ **EL ALTO CON EL QUE SE CUENTAN LOS PÍXELES DEL RITMO — y no es nuestro.**
@@ -97,8 +108,10 @@ export function fraccionDeScroll(px: number): number {
  * sin ellos, un dedo apoyado en el umbral hace ir y venir el barrido.
  */
 export const DISPARO_DE_LA_NOCHE = {
-  ida: (PANTALLAS_DE_NUMEROS - 1) * 100,
-  vuelta: (PANTALLAS_DE_NUMEROS - 1) * 100 + 8,
+  // ⚠️ Menos el solape: el tope de Trabajos está ahora esa fracción de pantalla
+  // más arriba, y la noche tiene que seguir cayendo donde termina Quiénes somos.
+  ida: (PANTALLAS_DE_NUMEROS - 1 - SOLAPE_DE_LA_SECCION) * 100,
+  vuelta: (PANTALLAS_DE_NUMEROS - 1 - SOLAPE_DE_LA_SECCION) * 100 + 8,
 } as const
 
 /** Normaliza un progreso contra una ventana. Fuera de ella satura. */
@@ -166,28 +179,20 @@ export function clasesDelCuerpoDelCartel(): string {
 
 /**
  * Una ventana del gesto, escrita en progreso de la SECCIÓN y no en fracciones de
- * sí misma, que es como se puede leer el orden de un vistazo. Las fracciones que
- * `poseDelGesto` necesita se DERIVAN.
+ * sí misma, que es como se puede leer el orden de un vistazo. La fracción de la
+ * huida se DERIVA, y acá se guarda que caiga adentro de la ventana.
  */
 export interface VentanaDelGesto extends TiemposDelGesto {
   readonly desde: number
   readonly hasta: number
 }
 
-export function gesto(
-  desde: number,
-  hasta: number,
-  terminaDeCrecer: number,
-  empiezaAHuir: number | null,
-): VentanaDelGesto {
+export function gesto(desde: number, hasta: number, empiezaAHuir: number | null): VentanaDelGesto {
   const largo = hasta - desde
   if (!(largo > 0)) throw new Error(`ventana inválida: ${desde} → ${hasta}`)
-  return {
-    desde,
-    hasta,
-    crecerHasta: (terminaDeCrecer - desde) / largo,
-    huirDesde: empiezaAHuir === null ? null : (empiezaAHuir - desde) / largo,
-  }
+  const huirDesde = empiezaAHuir === null ? null : (empiezaAHuir - desde) / largo
+  if (huirDesde !== null && !(huirDesde > 0 && huirDesde < 1)) throw new Error(`huirDesde inválido: ${huirDesde}`)
+  return { desde, hasta, huirDesde }
 }
 
 /** Devuelve al progreso de SECCIÓN un instante escrito en fracción de una
@@ -213,11 +218,8 @@ export const PX_DEL_CARTEL = 1200
 /**
  * ⚠️ **LOS CORTES DEL CARTEL, Y EL DE LA HUIDA VA EN SCROLLS.**
  *
- * `llega` quedó vestigial: desde que el titular y el cuerpo toman el rango de su
- * propio call site, la llegada no la gobierna este corte sino el `<Bloque>` de
- * cada pieza. Se queda porque `poseDelGesto` lo usa como guarda de orden —el
- * crecimiento tiene que terminar antes de que empiece la huida— y sacarlo sería
- * sacar la guarda.
+ * Había un `llega`, vestigial desde que el titular y el cuerpo toman el rango de
+ * su propio call site: se fue con `poseDelGesto`, que era el único que lo leía.
  *
  * `seVa` SÍ gobierna, y es uno de los tres tiempos que el usuario contó: **cuánto
  * tarda el cartel en irse de la pantalla**. Lo medía en 4 scrolls y lo quiere en
@@ -232,7 +234,6 @@ export const PX_DEL_CARTEL = 1200
 export const SCROLLS_DE_LA_HUIDA_DEL_CARTEL = 2.5
 
 export const CORTES_DEL_CARTEL = {
-  llega: 0.35,
   seVa: 1 - (SCROLLS_DE_LA_HUIDA_DEL_CARTEL * PX_POR_SCROLL) / PX_DEL_CARTEL,
 } as const
 
@@ -270,7 +271,6 @@ export const PX_DE_LA_APROXIMACION = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
 export const CARTEL = gesto(
   fraccionDeScroll(PX_DE_LA_APROXIMACION),
   fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL),
-  fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL * CORTES_DEL_CARTEL.llega),
   fraccionDeScroll(PX_DE_LA_APROXIMACION + PX_DEL_CARTEL * CORTES_DEL_CARTEL.seVa),
 )
 
@@ -409,6 +409,68 @@ export function ventanaDeLaSalida(cuantas: number): { readonly desde: number; re
  */
 export function arranqueDeDemos(cuantas: number): number {
   return ventanaDeLaSalida(cuantas).hasta
+}
+
+/**
+ * ⚠️ **LA HUIDA DEL CARTEL EN LAS DOS DIRECCIONES, leída del túnel MOSTRADO.**
+ * Bajando es la de siempre —de `huirDesde` al final del cartel— y de ahí sale
+ * (c). Subiendo es la misma duración corrida hacia atrás, terminada donde arranca
+ * el túnel: cuando el cartel empieza a volver, las capas ya están en 0.
+ */
+const HUIDA_BAJANDO = { desde: ARRANQUE_DEL_TUNEL, hasta: CARTEL.hasta } as const
+export const HUIDA_DEL_CARTEL = {
+  bajando: HUIDA_BAJANDO,
+  subiendo: { desde: 2 * HUIDA_BAJANDO.desde - HUIDA_BAJANDO.hasta, hasta: HUIDA_BAJANDO.desde },
+} as const
+
+/** Un progreso de la sección en px de la sección, que es la unidad del regulador. */
+export const pxDeLaSeccion = (progreso: number): number => progreso * PX_DE_LA_SECCION
+
+/**
+ * ⚠️ **LOS DOS RIELES DEL EFECTO REGULADO — cada punta es un lugar de la sección.**
+ *
+ * **El piso (bajando).** El pin se suelta en el progreso 1, y ahí lo mostrado
+ * tiene que estar en el arranque de los demos: la salida terminada y la sala sola.
+ * La salida se va 1:1, así que sus 1.131 px pueden ir a la velocidad del scroll;
+ * la espera no muestra nada moverse, así que se puede SALTAR; lo que se estira es
+ * el túnel, repartido en todo el scroll que queda desde su arranque. Por eso el
+ * túnel, aun a scroll desesperado, va a 0,54 de la velocidad de la página. Y el
+ * piso deja pasar en el arranque del túnel UNA RÁFAGA ENTERA sin tocarla: con
+ * menos aire la ráfaga lo alcanzaba a los 350 ms y el túnel saltaba de 244 a 674
+ * px/s, para caer a 200 al soltarse.
+ *
+ * **El techo (subiendo).** El pin se suelta arriba en la aproximación, y ahí el
+ * cartel tiene que haber vuelto entero. La espera se salta igual. Acá no entra
+ * una ráfaga de aire: arriba del túnel quedan 1.200 px, y un riel más empinado
+ * que el scroll sería peor que no regular.
+ *
+ * Las puntas donde lo mostrado toca el scroll dejan por lo menos
+ * `ATRASO_DEL_RESORTE_PX` de aire: quien scrollea más lento que el efecto nunca
+ * toca un riel. Y los dos llegan UNA MUESCA ANTES de que el pin se suelte: medido,
+ * entre el scroll y lo pintado hay un cuadro, y a scroll desesperado un cuadro son
+ * 30 px de salida que quedaban sin terminar en el cuadro del despineado.
+ */
+const PX_DEL_ARRANQUE_DEL_TUNEL = pxDeLaSeccion(ARRANQUE_DEL_TUNEL)
+const PX_DEL_FIN_DEL_TUNEL = PX_DEL_ARRANQUE_DEL_TUNEL + PX_DEL_TUNEL
+const PX_DEL_ARRANQUE_DE_LA_SALIDA = pxDeLaSeccion(arranqueDeLaSalida(CAPAS_DEL_TUNEL.proyectos.length))
+export const MARGEN_DEL_DESPINEADO = PX_POR_SCROLL
+const SCROLL_DEL_SALTO_BAJANDO = PX_DEL_ARRANQUE_DE_LA_SALIDA + PX_DEL_ESPACIO_DE_DEMOS - MARGEN_DEL_DESPINEADO
+const SCROLL_DEL_SALTO_SUBIENDO = PX_DEL_FIN_DEL_TUNEL - ATRASO_DEL_RESORTE_PX
+
+/** La ráfaga del pedido: diez muescas de rueda seguidas. */
+export const PX_DE_UNA_RAFAGA = 10 * PX_POR_SCROLL
+
+export const BANDA_DEL_EFECTO: BandaDelEfecto = {
+  piso: [
+    { scroll: PX_DEL_ARRANQUE_DEL_TUNEL + PX_DE_UNA_RAFAGA, efecto: PX_DEL_ARRANQUE_DEL_TUNEL },
+    { scroll: SCROLL_DEL_SALTO_BAJANDO, efecto: PX_DEL_FIN_DEL_TUNEL },
+    { scroll: SCROLL_DEL_SALTO_BAJANDO, efecto: PX_DEL_ARRANQUE_DE_LA_SALIDA },
+  ],
+  techo: [
+    { scroll: PX_DE_LA_APROXIMACION + MARGEN_DEL_DESPINEADO, efecto: pxDeLaSeccion(HUIDA_DEL_CARTEL.subiendo.desde) },
+    { scroll: SCROLL_DEL_SALTO_SUBIENDO, efecto: PX_DEL_FIN_DEL_TUNEL },
+    { scroll: SCROLL_DEL_SALTO_SUBIENDO, efecto: PX_DEL_ARRANQUE_DE_LA_SALIDA },
+  ],
 }
 
 /**
