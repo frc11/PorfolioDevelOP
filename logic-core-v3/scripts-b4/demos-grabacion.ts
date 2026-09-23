@@ -3,10 +3,10 @@
  *
  *     npx tsx scripts-b4/demos-grabacion.ts
  *
- * El puntero sobre el CTA → la entrada a demos por el vacío → el estante recorrido
- * → abrir → scrollear la demo → cerrar con la cruz → abrir otra → cerrar con Esc →
- * subir de vuelta por el vacío. Rueda de verdad y screencast con la duración real
- * de cada cuadro, como `s11-grabacion.ts`. ⚠️ Usa Chrome: tomar el candado antes.
+ * SPRINT DEMOS 2: la entrada de demos bajando → subir y volver a bajar por la
+ * entrada → abrir una demo → cerrarla con la cruz → abrir otra → cerrar con Esc.
+ * Rueda de verdad y screencast con la duración real de cada cuadro, como
+ * `s11-grabacion.ts`. ⚠️ Usa Chrome: tomar el candado antes.
  */
 
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -18,7 +18,7 @@ import { perfilPorId } from './perfiles'
 import { paneles } from './sitio'
 
 const PERFIL = perfilPorId('1440')
-const SALIDA = 'C:/Users/Valentino/.cache/b4-medicion/demos-grabacion'
+const SALIDA = 'C:/Users/Valentino/.cache/b4-medicion/demos2-grabacion'
 const CUADROS = `${SALIDA}/cuadros`
 const MS_POR_MUESCA = 250
 const PX_DE_LA_SECCION = 6813
@@ -84,50 +84,36 @@ async function principal(): Promise<void> {
     await p.conexion.enviar('Page.startScreencast', { format: 'jpeg', quality: 72, maxWidth: PERFIL.ancho, maxHeight: PERFIL.alto, everyNthFrame: 1 }, p.sessionId)
     await esperar(800)
 
-    console.log('1 · el puntero sobre el CTA')
-    await viajar(p, [60, 860], [720, 450], 700)
-    await esperar(1600)
-    await viajar(p, [720, 450], [1380, 860], 500)
-    await esperar(900)
-
-    console.log('2 · la entrada a demos por el vacío')
+    console.log('1 · la entrada de demos, bajando')
     await hasta(p, yDe(5000), 1, 1380, 860)
     await esperar(1500)
 
-    console.log('3 · el estante, de punta a punta')
-    const piezas = await medir<{ x: number; y: number }[]>(p, `[...document.querySelectorAll('[data-pieza="libro"]')].map((a) => { const r = a.getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.6 } })`)
-    const primera = piezas[0]
-    const ultima = piezas[piezas.length - 1]
-    await viajar(p, [1380, 860], [primera.x - 60, primera.y], 500)
-    await viajar(p, [primera.x - 60, primera.y], [ultima.x + 40, ultima.y], 2600)
-    await esperar(500)
+    console.log('2 · subir por la entrada y volver a bajar')
+    await hasta(p, yDe(4100), -1, 1380, 860)
+    await esperar(1200)
+    await hasta(p, yDe(5000), 1, 1380, 860)
+    await esperar(1800)
 
-    console.log('4 · abrir, scrollear la demo, cerrar con la cruz')
-    await viajar(p, [ultima.x + 40, ultima.y], [piezas[1].x, piezas[1].y], 500)
-    await esperar(400)
+    const piezas = await medir<{ x: number; y: number }[]>(p, `[...document.querySelectorAll('[data-pieza="libro"]')].map((a) => { const r = a.getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + r.height * 0.6 } })`)
+
+    console.log('3 · abrir una demo y cerrarla')
+    await viajar(p, [1380, 860], [piezas[1].x, piezas[1].y], 700)
+    await esperar(600)
     await clic(p, piezas[1].x, piezas[1].y)
     await esperar(3800)
-    await viajar(p, [piezas[1].x, piezas[1].y], [720, 480], 400)
-    await rueda(p, 720, 480, 10, 1)
-    await esperar(1200)
     const cruz = await medir<{ x: number; y: number }>(p, `(() => { const b = [...document.querySelectorAll('[role="dialog"] button')].pop(); const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 } })()`)
-    await viajar(p, [720, 480], [cruz.x, cruz.y], 500)
+    await viajar(p, [piezas[1].x, piezas[1].y], [cruz.x, cruz.y], 600)
     await clic(p, cruz.x, cruz.y)
-    await esperar(1500)
+    await esperar(1600)
 
-    console.log('5 · abrir otra y cerrar con Esc')
-    await viajar(p, [cruz.x, cruz.y], [piezas[4].x, piezas[4].y], 600)
-    await esperar(500)
-    await clic(p, piezas[4].x, piezas[4].y)
-    await esperar(3500)
+    console.log('4 · abrir otra y cerrar con Esc')
+    await viajar(p, [cruz.x, cruz.y], [piezas[6].x, piezas[6].y], 700)
+    await esperar(600)
+    await clic(p, piezas[6].x, piezas[6].y)
+    await esperar(3800)
     await p.conexion.enviar('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }, p.sessionId)
     await p.conexion.enviar('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }, p.sessionId)
-    await esperar(1500)
-
-    console.log('6 · subir de vuelta por el vacío')
-    await viajar(p, [piezas[4].x, piezas[4].y], [1380, 860], 400)
-    await hasta(p, yDe(3750), -1, 1380, 860)
-    await esperar(2500)
+    await esperar(1800)
 
     await p.conexion.enviar('Page.stopScreencast', {}, p.sessionId)
     await esperar(400)

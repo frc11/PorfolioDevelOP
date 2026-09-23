@@ -114,3 +114,68 @@ Cada fase cierra con un commit `wip(demos): fase N — …`.
   nombre, rubro y URL en `demos/catalogo.ts` Y en `WebTemplatesImmersive.tsx` (el invariante §25 exige
   que coincidan), y `npx tsx scripts-b4/demos-portadas.ts` para la portada.
   `CONTENIDO-PENDIENTE.md` NO se tocó: lo genera `s7-documento` y `s7-pedido` lo compara byte a byte.
+
+---
+
+# Sprint 2 — el Genie de macOS, la llegada escalonada y las 8 demos
+
+Punto de retorno: tag `demos-casi-perfecto` (daafc5aa). Commits `wip(demos2): fase N — …`.
+
+## Fase 1 — la apertura es el Genie (commit 6c6faef0, junto con la 2)
+- [x] el filtro líquido se fue entero (`apertura.ts` quedó en la caja final y el fundido)
+- [x] **tiras DOM, no WebGL.** 60 tiras; cada una es un CUADRILÁTERO con `matrix3d` (proyectiva de
+      Heckbert), no un rectángulo: los bordes curvos se unen fila a fila, sin escalera. Cada tira pisa
+      a la siguiente 1 px para tapar la costura del suavizado. No hubo costuras visibles → no hizo
+      falta WebGL
+- [x] la textura: la portada HORIZONTAL del template (`public/demos/*-ventana.webp`, 1152 × 654, la
+      medida de la demo en la ventana) con el cromo de la ventana encima (`CromoDeLaVentana`, el mismo
+      componente que la ventana viva, quieto). El cromo va sólo en las tiras que lo tocan
+- [x] el lado que se curva sale del destino: lidera el borde de abajo si el libro está debajo del
+      centro de la ventana; el borde del lado del libro recorre poco y queda casi vertical
+- [x] abrir = el Genie de minimizar al revés, desde el libro; cerrar = minimizar hacia el libro; al
+      cerrar primero se congela en la portada. El iframe se monta con la ventana ya abierta y se funde
+- [x] **fps medidos sin fotos:** abriendo 59 cuadros, media 13,7 ms (73 fps), 2 de 27 ms a los 50 y 77 ms
+      (el cuadro del clic, que monta el diálogo: el libro todavía está quieto) y ninguno durante el viaje;
+      cerrando 59 cuadros, media 13,2 ms, peor 13,5 ms, ninguno largo. Antes de sacar los 60 cromos
+      y el desenfoque del estante eran 6 de más de 20 ms
+- [x] **tiras de contacto** (`~/.cache/b4-medicion/demos2-ver/tira-apertura.png` y `tira-cierre.png`),
+      comparadas con la descripción: 1 plana · 2 el borde de abajo se tira al libro, la esquina izquierda
+      barre, el borde izquierdo en S, el de arriba recto y ancho, el derecho casi vertical · 3–4 el
+      embudo sube, las filas de abajo más comprimidas · 5 baja y se angosta el borde de arriba · 6 queda
+      una franja junto al libro y el libro la recibe. La apertura es la misma tira al revés
+- [x] lo demás de la ventana no cambió (se aleja la biblioteca, el velo, cruz, rojo, Esc, afuera, foco
+      devuelto, rueda en la demo, página quieta, una sola viva, precarga); movimiento reducido: fundido
+
+## Fase 2 — la llegada escalonada (commit 6c6faef0)
+- [x] la capa de demos ya no escala: está en su lugar y la muestra el agujero del vacío
+- [x] 0–60 % sólo el vacío · 60–72 % el título por P1 (renglón por renglón) · 68–80 % el párrafo
+      (P2 + un fundido: P2 sólo desplaza y el párrafo se veía desde el principio) · 72–100 % los ocho
+      libros de izquierda a derecha, con sobrepaso `easeOutBack` y un giro que se acomoda; el último
+      termina en el 100 % exacto (`tramoDelLibro`)
+- [x] todo es función de la fracción del vacío, sin reloj: subiendo se deshace al revés (§25 lo afirma)
+- [x] fotos en 50 / 64 / 78 / 90 / 100 % (`demos2-ver/llegada.png`)
+- [x] superposición del túnel contra la referencia: las 5 capas adentro del margen en todas sus muestras,
+      peor A 1,5 % y peor B 1,6 % del margen (lo mismo que antes del sprint). Una primera corrida murió en
+      el paso 1: editar el checklist mientras medía recargó la página (Tailwind escanea el repo entero)
+
+## Fase 3 — las 8 demos, también en el sitio vivo (commit 0b4a23c9)
+- [x] nombre y rubro de la propia página: **Niche Perfumes** (el logo dice eso; «Colección curada de
+      perfumería árabe de alta gama») y **AXON Studio** — el template de la URL «aura» se presenta
+      como AXON, agencia de diseño web. Acento: el dorado de Niche (#d4af37) y el verde del logo de
+      AXON (#00ff88), leídos de su CSS y de su captura
+- [x] en `demos/catalogo.ts` y en `WebTemplatesImmersive.tsx` (sólo las dos entradas, mismo formato)
+- [x] portadas con `demos-portadas.ts`: las 8, vertical y horizontal (AXON con espera larga: su intro
+      tarda más de 5 s y la primera foto la agarró a mitad)
+- [x] sitio vivo: `/web-development` con 8 tarjetas; medido «07 / 08» con Niche activa y su iframe, y
+      «08 / 08» con AXON activa y el suyo (`demos2-ver/sitio-vivo-web-development.png`)
+- [x] el invariante del catálogo sigue exacto, ahora con 8
+- [x] el estante entra en su columna: a 1280 los libros van de 656 a 1248 (la columna, exacta) y a 1440
+      de 736 a 1408; las portadas siguen en 160 px y se pisan más (paso 62 / 73 px)
+
+## Fase 4 — verificación
+- [x] lint y `tsc --noEmit` sin errores nuevos (los 2 avisos de `s10-acceso` son previos)
+- [x] en verde: s5-trabajos (320, con el §25), s7-arboles, s7-contrato, s10-acceso (34 paradas),
+      s21-llave, y s5/s3 tokens, código, compacto, cta, mezcla
+- [x] grabación a 1440 (`~/.cache/b4-medicion/demos2-grabacion/demos2-1440.mp4`, 29,8 s)
+- [x] las dos tiras de contacto del Genie
+- [x] reporte (en el chat)
