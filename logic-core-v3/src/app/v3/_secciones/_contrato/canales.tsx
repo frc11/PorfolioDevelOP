@@ -208,6 +208,33 @@ export function TextoPorLineas(props: TextoPorLineasProps): React.JSX.Element {
  */
 export const ATRIBUTO_TEXTO_POR_LINEAS = 'data-texto-por-lineas'
 
+/**
+ * ⚠️ **LA VENTANA QUE RECORTA — la mitad del gesto que no es el patrón.**
+ *
+ * Un canal con P1 o P2 sube su pieza desde abajo. Lo que hace que eso se LEA
+ * como una aparición —y no como un texto que pasa de largo— es que la pieza
+ * salga de detrás de una línea: el `overflow-hidden` de esta ventana. El
+ * docblock original lo dice sin vueltas: *«sin la máscara, las claves siguen
+ * corriendo y no se nota: ésa fue la regresión del titular»*.
+ *
+ * El relleno y su margen negativo se cancelan en el layout —aportan cero— y
+ * sólo corren el borde de recorte, para que no se coma ni una cola de «p» ni el
+ * trazo que un titular lleva debajo de la línea de base.
+ *
+ * ⚠️ **Vive acá porque la usan TRES secciones.** Nació en
+ * `quienes-somos/geometria.ts` como `ventanaDelTexto`, y cuando Trabajos y
+ * Servicios tuvieron que reproducir su gesto la opción era copiar la cadena dos
+ * veces más. Tres copias de una clase que tiene que ser la misma son tres
+ * formas de desincronizarse en silencio. Quiénes somos conserva la suya —es de
+ * otro lane— y el invariante afirma que las dos dicen lo mismo.
+ *
+ * ⚠️ **Y no va sobre una caja con focalizables adentro.** El anillo de foco
+ * del tema se dibuja con desplazamiento POSITIVO, así que un `overflow-hidden`
+ * se lo come; es lo que `s5-compacto` vigila. Para texto —que es para lo que
+ * esto existe— no hay nada que recortar de más.
+ */
+export const VENTANA_QUE_RECORTA = 'block overflow-hidden py-2 -my-2'
+
 export interface LlegadaEnCurvaProps {
   readonly progreso: Progreso
   /** Desde qué lado entra. Sin declararlo, entra desde la derecha. */

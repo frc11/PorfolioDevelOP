@@ -158,6 +158,28 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/asentamiento.ts`,
   // B12 · `gota.ts`: el núcleo PURO de la entrada (máscara radial, sin DOM).
   `${RAIZ_DE_SECCIONES}/trabajos/gota.ts`,
+  // ── ⚠️ LOS SEIS DEL TÚNEL, Y DOS DE ELLOS ESTABAN SIN REGISTRAR ──────────
+  //
+  // `tunel.ts` y `CapaDelTunel.tsx` nacieron con el zoom inmersivo y nunca
+  // entraron a esta lista: el padrón venía en ROJO desde entonces, y la falla no
+  // se veía porque `s5-codigo` no está en la batería que se corre por sprint.
+  // Quedan registrados acá, con los cuatro que el recorrido fue pidiendo después.
+  //
+  // `tunel.ts` es el vocabulario PURO del tramo —la cascada, sus anchos y sus
+  // curvas, sin una línea de DOM— y `CapaDelTunel.tsx` el único que escribe
+  // estilo. Los otros cuatro salieron de `soporte.ts` y de `CapaDelTunel.tsx` al
+  // pasar las 300 líneas, y el corte fue por TEMA en los cuatro casos:
+  //
+  //   `trabajos-rotulo.ts`      §21 · el rótulo del proyecto y su banda
+  //   `trabajos-nacimiento.ts`  §22 · el nacimiento y el reparto de tamaños
+  //   `trabajos-ventanas.ts`    §23 · las cuatro ventanas del recorrido
+  //   `trabajos-tipeo.ts`       la máquina de escribir del CTA y su cursor
+  `${RAIZ_DE_SECCIONES}/trabajos/tunel.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/CapaDelTunel.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-rotulo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-nacimiento.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-ventanas.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-tipeo.ts`,
   // TITULAR · los DOS que salieron del Hero al pasar las 300 líneas, mismo corte que Trabajos:
   // `geometria.ts` los números y las dos tipografías (el nivel `display` DERIVA del ancho de la
   // caja) y `soporte.ts` las cuatro cuentas. §11 del invariante escanea el primero, y lo dice.

@@ -92,12 +92,14 @@
  * que discrimina es el recorrido disponible, y va SIEMPRE al lado del cero.**
  */
 
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
 import {
   CLASE_INTERLETRADO,
   CLASE_INTERLINEADO,
   NIVELES_TIPOGRAFICOS,
   type Nivel,
 } from '../../_lib/tipografia'
+import { pantallasDe, seccionDe } from '../_contrato/forma'
 
 /**
  * La caja de UN servicio: una pantalla de alto, centrada, a lo ancho.
@@ -357,6 +359,31 @@ export const ALTO_DEL_VACIO_DE_ENTRADA = 0.55
 export const LINEA_DE_REFERENCIA = 0.72
 
 /**
+ * ⚠️ **EL ARRANQUE RESERVADO SE FUE, Y ES UNA CORRECCIÓN MÍA.**
+ *
+ * Hubo un `PX_DEL_ARRANQUE_DE_LA_SECUENCIA` que le reservaba al estado 00 el
+ * primer viewport del pin, con la secuencia remapeada a lo que quedaba. El
+ * diagnóstico que lo trajo era correcto —el 00 no tenía progreso propio y por
+ * eso no podía tener un gesto de entrada— pero **la solución cobraba el precio
+ * en el lugar equivocado**: durante esos 900 px la tira estaba congelada en su
+ * inicio, así que el visitante scrolleaba una pantalla entera con la columna
+ * derecha quieta. Eso se siente como un frenazo, y encima empujó la sección de
+ * 8 a 9 pantallas: llegar al primer servicio pasó a costar 900 px más.
+ *
+ * El gesto de llegada no necesitaba ese tramo. Lo resuelve el `<Bloque>` propio
+ * del rodillo, con el rango `ventana-de-la-mascara` —el mismo del titular de
+ * «El equipo»—, que abre con la sección todavía entrando: la llegada corre
+ * sobre la APROXIMACIÓN, que ya existía y no le cuesta un píxel a nadie.
+ *
+ * Así que la secuencia vuelve a leer el progreso del pin tal cual, y la sección
+ * vuelve a sus 8 pantallas. Lo único que queda de aquel sprint es lo que no
+ * cobraba nada: el gesto.
+ */
+
+
+
+
+/**
  * CUÁNTO TARDA EL RODILLO EN ROTAR, en segundos. **Es tiempo, no scroll.**
  *
  * Cruzar una frontera DISPARA la rotación; de ahí en más corre sola, aunque la
@@ -369,6 +396,41 @@ export const LINEA_DE_REFERENCIA = 0.72
  * misma máquina.
  */
 export const DURACION_DEL_DISPARO = 1.4
+
+/**
+ * ⚠️ **A QUÉ VELOCIDAD SE SCROLLEA LEYENDO. Medido en el navegador.**
+ *
+ * `secciones.ts` lo midió sobre el scroll suave del propio sitio: **la rueda
+ * entrega 100 px por golpe y Lenis los pasa derecho**, así que la velocidad es
+ * 100 × golpes por segundo. A un ritmo de lectura —10 golpes/s— son 1.000 px/s.
+ *
+ * Está acá y no allá porque de acá sale una CONDICIÓN de esta sección: cuánto
+ * scroll necesita un tramo para que su rotación no se corte contra el siguiente.
+ */
+export const VELOCIDAD_DE_LECTURA_PX_S = 1000
+
+/**
+ * ⚠️ **LO QUE UN TRAMO TIENE QUE MEDIR COMO MÍNIMO, y es una derivación.**
+ *
+ * Una rotación dura `DURACION_DEL_DISPARO`. Si el tramo que la contiene es más
+ * corto que lo que la página recorre en ese tiempo, la rotación se corta contra
+ * la frontera siguiente — que es el defecto con el que la sección pasó de 400 a
+ * 700 svh, con su número: el último tramo medía 1.015 px, 385 menos de los que
+ * la rotación necesita.
+ *
+ * No se escribe 1.400: se multiplica la duración por la velocidad. Así, mover la
+ * duración del disparo mueve el piso solo.
+ */
+export const PX_MINIMOS_DE_UN_TRAMO = DURACION_DEL_DISPARO * VELOCIDAD_DE_LECTURA_PX_S
+
+/**
+ * Cuánto scroll tiene el pin: el alto de la sección menos el viewport que el
+ * hijo `sticky` ocupa. Es la definición de `sticky`, no una medición. De acá
+ * salen los largos de los tres tramos, que es lo único que la usa.
+ */
+export function pxDelPin(): number {
+  return (pantallasDe(seccionDe('servicios')) - 1) * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
+}
 
 /**
  * LA CURVA DEL DISPARO, y por qué dejó de ser la del vocabulario del sitio.

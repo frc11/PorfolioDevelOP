@@ -237,4 +237,4 @@ export const PEDIDO: readonly EntradaDePedido[] = []
 // nombres llegan ya por un patrón del sistema. Queda P3, que pinta el cuerpo de
 // la bajada palabra por palabra, y P7, que es el patrón del BLOQUE: de ahí sale
 // la perspectiva de la cámara, que es lo que hace visible la huida.
-export const PATRONES_DE_LA_SECCION = ['P1', 'P3', 'P7'] as const
+export const PATRONES_DE_LA_SECCION = ['P2', 'P7'] as const

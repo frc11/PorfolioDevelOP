@@ -15,10 +15,10 @@
  * y las fracciones se derivan, así que mover el alto no desarma la composición.
  *
  *     el cartel      1.200 px   llega con el gesto de la casa, se lee, y vuela
- *     el túnel       3.001 px   sale del ritmo, del nacimiento y del relevo
- *     el CTA           324 px   la ventana crece y la frase se escribe
- *     la levantada     450 px   todo sube y sale por arriba del cuadro
- *     los demos     el resto    la sala de noche sola
+ *     el túnel       1.480 px   la tabla medida en la referencia, CTA incluido
+ *     la espera     el resto    el CTA quieto en su tamaño, con piso de 900
+ *     la salida      1.131 px   todo sube 1:1 y sale por arriba del cuadro
+ *     los demos      1.800 px   la sala de noche sola
  *
  * **La suma tiene que entrar en el alto declarado**, y eso lo afirma el
  * invariante: es lo que reemplazó a «los pasos son los proyectos», que dejó de
@@ -32,7 +32,16 @@ import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 
-import { pxQuePideElTunel, type Caja, type PuntoDelCuadro, type TiemposDelGesto } from './tunel'
+import {
+  CAPAS_DEL_TUNEL,
+  PX_DEL_ESPACIO_DE_DEMOS,
+  PX_DEL_TUNEL,
+  PX_DE_LA_SALIDA,
+  PX_POR_SCROLL,
+  type Caja,
+  type PuntoDelCuadro,
+  type TiemposDelGesto,
+} from './tunel'
 
 /** Lo que hay que PEDIR de un medio (ancho × alto) más el `sizes` con el que se
  *  sirve. Vive acá porque es geometría y no contenido. */
@@ -115,6 +124,7 @@ export function enLaVentana(progreso: number, ventana: { desde: number; hasta: n
  * 50 ch sobre los 111 caracteres de la bajada dan **tres renglones**.
  */
 export const MEDIDA_DEL_CUERPO_CH = 50
+
 
 /**
  * ⚠️ **LAS CLASES DEL CUERPO DEL CARTEL, DERIVADAS DE LA TABLA — y es una
@@ -201,11 +211,30 @@ export function progresoDeLaVentana(ventana: VentanaDelGesto, u: number): number
 export const PX_DEL_CARTEL = 1200
 
 /**
- * Las tres partes del cartel, en fracción de SU ventana. Llega en el primer
- * tercio, se lee en el medio —que es cuando el cuerpo se pinta— y se va en el
- * último. Los dos cortes van como dato porque son una decisión de ritmo.
+ * ⚠️ **LOS CORTES DEL CARTEL, Y EL DE LA HUIDA VA EN SCROLLS.**
+ *
+ * `llega` quedó vestigial: desde que el titular y el cuerpo toman el rango de su
+ * propio call site, la llegada no la gobierna este corte sino el `<Bloque>` de
+ * cada pieza. Se queda porque `poseDelGesto` lo usa como guarda de orden —el
+ * crecimiento tiene que terminar antes de que empiece la huida— y sacarlo sería
+ * sacar la guarda.
+ *
+ * `seVa` SÍ gobierna, y es uno de los tres tiempos que el usuario contó: **cuánto
+ * tarda el cartel en irse de la pantalla**. Lo medía en 4 scrolls y lo quiere en
+ * 2 o 3. Así que deja de escribirse como una fracción de la ventana —que no es
+ * una unidad que nadie pueda contar— y se DERIVA de los scrolls que tiene que
+ * durar la huida.
+ *
+ * ⚠️ Y mover esto mueve el arranque del túnel: `ventanaDelTunel` empieza en el
+ * instante exacto en que el cartel empieza a huir. Es una derivación declarada,
+ * no un acople accidental — la primera captura nace mientras el cartel se va.
  */
-export const CORTES_DEL_CARTEL = { llega: 0.35, seVa: 0.62 } as const
+export const SCROLLS_DE_LA_HUIDA_DEL_CARTEL = 2.5
+
+export const CORTES_DEL_CARTEL = {
+  llega: 0.35,
+  seVa: 1 - (SCROLLS_DE_LA_HUIDA_DEL_CARTEL * PX_POR_SCROLL) / PX_DEL_CARTEL,
+} as const
 
 /**
  * ⚠️ **EL PROGRESO DE ESTA SECCIÓN ARRANCA UN VIEWPORT ANTES DE LA SECCIÓN, Y
@@ -254,18 +283,26 @@ export const CARTEL = gesto(
  * pedirle dos cosas al ojo al mismo tiempo. Derivada del gesto del cartel.
  */
 /**
- * ⚠️ **LA VENTANA DE LA LLEGADA — el tramo en que el cartel entra con P1.**
+ * ⚠️ **LAS DOS VENTANAS DEL CARTEL SE FUERON, Y ES EL ARREGLO DEL SPRINT.**
  *
- * En fracción de la ventana del cartel, igual que la pintura. Es el primer corte
- * declarado: mientras dura, el titular sube renglón por renglón desde la línea
- * que lo recorta. Después queda quieto y se lee.
+ * Había una `VENTANA_DE_LA_LLEGADA` y una `VENTANA_DEL_CUERPO`, las dos en
+ * fracción de la ventana del cartel, que repartían su meseta entre el titular y
+ * su bajada. El problema no era el reparto: era que la ventana del cartel
+ * **abre en el píxel 0 de la sección**, o sea en el instante exacto en que el
+ * pin engancha. Con eso la llegada entera cabía en 420 px, de golpe y con el
+ * panel recién posado — que es lo que se reportó como «está ya puesto».
+ *
+ * Y había un segundo motivo, más difícil de ver: P2 baja la pieza el **60 % de
+ * su propio alto**, así que adentro de su ventana de recorte queda un 46 % del
+ * titular visible desde el primer cuadro. Una llegada corta que además empieza
+ * medio mostrada no se lee como llegada.
+ *
+ * Ahora cada pieza toma el rango de SU call site —`ventana-de-la-mascara` para
+ * el titular, `ventana-visible` para el cuerpo, igual que «El equipo» y la
+ * bajada de la agencia— y esos rangos abren con la sección todavía entrando. La
+ * ventana del cartel se queda gobernando lo único que le toca: cuándo la caja
+ * se va hacia adelante.
  */
-export const VENTANA_DE_LA_LLEGADA = { desde: 0, hasta: CORTES_DEL_CARTEL.llega } as const
-
-export const VENTANA_DE_LA_PINTURA = {
-  desde: CARTEL.crecerHasta,
-  hasta: CARTEL.huirDesde ?? 1,
-} as const
 
 /**
  * ⚠️ **EL CARTEL — su caja y su punto interior.**
@@ -278,7 +315,16 @@ export const VENTANA_DE_LA_PINTURA = {
  * Su punto interior está cerca del vértice de arriba a la izquierda —pero no en
  * él— así que crece hacia abajo y a la derecha desde ahí.
  */
-export const CAJA_DEL_CARTEL: Caja = { x0: 0.54, y0: 0.13, x1: 0.98, y1: 0.55 }
+/**
+ * ⚠️ **Y SU REPOSO ES LA MITAD DE LA PANTALLA, no el tercio de arriba.**
+ *
+ * Venía en `y0 0,13 – y1 0,55`: el centro de la caja caía en **0,34**, o sea un
+ * tercio del cuadro, y el cartel se leía colgado del techo con media pantalla
+ * vacía debajo. El alto de la caja no cambia —0,42 del cuadro, que es lo que el
+ * titular y su cuerpo piden—; lo que cambia es dónde se apoya: centrada, `0,29
+ * – 0,71`, con su centro en **0,50** exacto. Desde ahí se va hacia adelante.
+ */
+export const CAJA_DEL_CARTEL: Caja = { x0: 0.54, y0: 0.29, x1: 0.98, y1: 0.71 }
 export const ORIGEN_DEL_CARTEL: PuntoDelCuadro = { x: 0.08, y: 0.12 }
 
 // ===========================================================================
@@ -287,57 +333,82 @@ export const ORIGEN_DEL_CARTEL: PuntoDelCuadro = { x: 0.08, y: 0.12 }
 
 /**
  * ⚠️ **LA VENTANA DEL TÚNEL NO SE ELIGE: ARRANCA CON LA HUIDA DEL CARTEL Y DURA
- * LO QUE EL RITMO PIDE.**
+ * LO QUE DICE LA TABLA.**
  *
  * Empieza en el instante exacto en que el cartel arranca a huir —el paso 2 de la
- * secuencia, dicho como derivación y no como coincidencia— y su largo sale de
- * `pxQuePideElTunel`, que a su vez sale del ritmo, del relevo y del tamaño de
- * nacimiento. Si cualquiera de los tres cambia, la ventana se mueve sola y lo que
- * viene después se corre con ella.
+ * secuencia, dicho como derivación y no como coincidencia— y dura `PX_DEL_TUNEL`:
+ * del arranque del primer proyecto al tope del CTA, en los píxeles de la
+ * referencia. El CTA no tiene ventana propia: es la última capa de la tabla, y su
+ * tope ES el fin del túnel, así que no hay dos números que mantener de acuerdo.
  */
+const ARRANQUE_DEL_TUNEL = progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1)
+
 export function ventanaDelTunel(cuantas: number): { readonly desde: number; readonly hasta: number } {
-  const desde = progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1)
-  return { desde, hasta: desde + fraccionDeScroll(pxQuePideElTunel(cuantas)) }
+  // El día que entre un cuarto proyecto sin su capa en la tabla, esto tira acá.
+  if (cuantas !== CAPAS_DEL_TUNEL.proyectos.length) {
+    throw new Error(`hay ${cuantas} proyectos y la tabla tiene ${CAPAS_DEL_TUNEL.proyectos.length} capas`)
+  }
+  return { desde: ARRANQUE_DEL_TUNEL, hasta: ARRANQUE_DEL_TUNEL + fraccionDeScroll(PX_DEL_TUNEL) }
+}
+
+/** El píxel del túnel —contado desde su arranque— para un progreso de la sección. */
+export function pxDelTunelEn(progreso: number): number {
+  return (progreso - ARRANQUE_DEL_TUNEL) * PX_DE_LA_SECCION
+}
+
+/** La inversa: el progreso de la sección en un píxel del túnel. */
+export function progresoDelPxDelTunel(px: number): number {
+  return ARRANQUE_DEL_TUNEL + fraccionDeScroll(px)
 }
 
 /**
- * ⚠️ **LO QUE LE TOCA AL CTA, A LA HUIDA Y A LOS DEMOS, en píxeles de scroll.**
+ * ⚠️ **LA ESPERA — la ventana quieta en su máximo, y se queda con el sobrante.**
  *
- * Los tres van en píxeles y no en fracciones de progreso porque es la unidad en
- * la que se piensan: cuánto scroll tarda el visitante en recorrerlos. Se
- * convierten a progreso con la misma cuenta que el túnel.
- *
- *   · **el CTA** crece mientras se escribe la frase. 324 px son un tercio de
- *     pantalla: alcanza para leer veintinueve caracteres sin que se sienta lento.
- *   · **la levantada** sube todo y lo saca por arriba del cuadro. 450 px, medio
- *     tramo de pantalla: tiene que leerse como scroll y no como un truco, así que
- *     necesita más recorrido que un gesto.
- *   · **los demos** son lo que queda, y no se declara: es el resto. Así la suma
- *     cierra siempre en 1 y nadie tiene que mantener cuatro números de acuerdo.
+ * Arranca cuando el túnel termina —o sea cuando la ventana del CTA llegó a su
+ * tamaño— y dura lo que el alto de la sección le deje, con el piso declarado en
+ * `PX_MINIMOS_DE_LA_ESPERA_DEL_CTA`. Es el único tramo del recorrido donde
+ * estirarse no cuesta nada: la ventana ya no cambia de tamaño, así que un píxel
+ * de más es un píxel más de lectura.
  */
-export const PX_DEL_CTA = 324
-export const PX_DE_LA_LEVANTADA = 450
-
-export function ventanaDelCta(cuantas: number): { readonly desde: number; readonly hasta: number } {
+export function ventanaDeLaEspera(cuantas: number): { readonly desde: number; readonly hasta: number } {
   const desde = ventanaDelTunel(cuantas).hasta
-  return { desde, hasta: desde + fraccionDeScroll(PX_DEL_CTA) }
+  return { desde, hasta: arranqueDeLaSalida(cuantas) }
 }
 
-export function ventanaDeLaLevantada(cuantas: number): { readonly desde: number; readonly hasta: number } {
-  const desde = ventanaDelCta(cuantas).hasta
-  return { desde, hasta: desde + fraccionDeScroll(PX_DE_LA_LEVANTADA) }
+/** Cuántos píxeles de scroll le quedan de verdad a la espera. */
+export function pxDeLaEspera(cuantas: number): number {
+  const v = ventanaDeLaEspera(cuantas)
+  return (v.hasta - v.desde) * PX_DE_LA_SECCION
 }
 
 /**
- * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y es un RESTO, no un número.**
+ * ⚠️ **LA SALIDA Y LOS DEMOS SE CUENTAN DESDE EL FINAL, no desde el principio.**
  *
- * Empieza cuando la levantada terminó de sacar todo por arriba del cuadro, y de
- * ahí al final de la sección queda la sala de noche sola: el fondo 3D en negro,
- * sin nada encima. Es el espacio reservado, y sigue vacío por dentro — lo que va
- * adentro es contenido y todavía no lo sabemos.
+ * Los dos tienen largo fijo —la salida lo que tarda en salir lo más alto, los
+ * demos sus dos pantallas— y los dos tienen que terminar exactamente donde el
+ * pin se despega, que es donde el progreso llega a 1. Así que se restan del
+ * final y lo que sobra se lo queda la espera, que es lo que puede absorberlo.
+ */
+export function arranqueDeLaSalida(cuantas: number): number {
+  void cuantas
+  return 1 - fraccionDeScroll(PX_DE_LA_SALIDA + PX_DEL_ESPACIO_DE_DEMOS)
+}
+
+export function ventanaDeLaSalida(cuantas: number): { readonly desde: number; readonly hasta: number } {
+  const desde = arranqueDeLaSalida(cuantas)
+  return { desde, hasta: desde + fraccionDeScroll(PX_DE_LA_SALIDA) }
+}
+
+/**
+ * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y ahora sí está adentro del pin.**
+ *
+ * Empieza cuando la salida terminó de llevarse el contenido por arriba, y de ahí
+ * al final del progreso queda la sala de noche sola: el fondo 3D, sin nada
+ * encima, con la sección todavía clavada. Es el espacio reservado, y sigue vacío
+ * por dentro — lo que va adentro es contenido y todavía no lo sabemos.
  */
 export function arranqueDeDemos(cuantas: number): number {
-  return ventanaDeLaLevantada(cuantas).hasta
+  return ventanaDeLaSalida(cuantas).hasta
 }
 
 /**
@@ -352,6 +423,7 @@ export function arranqueDeDemos(cuantas: number): number {
  * **las tres crezcan exactamente igual** sin declararlo en ningún lado: el túnel
  * sólo escala, así que dos relaciones distintas se leerían como dos gestos.
  */
+
 export const MEDIDAS_DE_LAS_CAPTURAS: readonly { readonly ancho: number; readonly alto: number }[] = [
   { ancho: 1920, alto: 1080 },
   { ancho: 1920, alto: 1080 },
@@ -363,11 +435,12 @@ export const MEDIDAS_DE_LAS_CAPTURAS: readonly { readonly ancho: number; readonl
  * TECHO y no una medida.**
  *
  * En la lista de abajo de 1025 la captura ocupa la columna entera, así que 100 vw
- * es exacto. En el túnel no: la captura CRECE hasta 1,64 anchos de cuadro, o sea
- * que en el último tramo el navegador estira el archivo. `sizesPorViewport` no
- * admite más de 100 —lo valida— y pedir más tampoco serviría: el archivo mide
- * 1920 px y a 1440 el navegador ya elige ese. Lo que se estira son los últimos
- * 0,64 anchos, con la imagen ya desbordada y en movimiento. Queda declarado.
+ * es exacto. En el túnel no: la captura CRECE hasta 1,47 anchos de cuadro —lo que
+ * termina midiendo el último proyecto de la tabla—, o sea que en el último tramo
+ * el navegador estira el archivo. `sizesPorViewport` no admite más de 100 —lo
+ * valida— y pedir más tampoco serviría: el archivo mide 1920 px y a 1440 el
+ * navegador ya elige ese. Lo que se estira es lo que pasa de 1,33 anchos, con la
+ * imagen ya desbordada y en movimiento. Queda declarado.
  */
 export const SIZES_DE_LA_CAPTURA = sizesPorViewport(100)
 

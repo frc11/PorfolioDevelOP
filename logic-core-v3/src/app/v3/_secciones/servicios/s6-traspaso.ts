@@ -18,7 +18,9 @@
  */
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA as ALTO_DE_UNA_PANTALLA } from '../../_lib/navegacion'
 import { SERVICIOS } from '../_contrato/acento'
+import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { leer } from '../_invariantes/soporte'
 import {
   FRACCION_DEL_CRUCE_DE_COPIAS,
@@ -30,7 +32,13 @@ import {
 } from './CtaQueRota'
 import { CANTIDAD_DE_ESTADOS, ranuraVisible } from './RodilloDeEstados'
 import { cuenta } from './deteccion'
-import { CLASE_DEL_BOTON_ROTATIVO, CURVA_DEL_DISPARO } from './geometria'
+import {
+  ALTO_DEL_VACIO_DE_ENTRADA,
+  CLASE_DEL_BOTON_ROTATIVO,
+  CURVA_DEL_DISPARO,
+  PX_MINIMOS_DE_UN_TRAMO,
+  pxDelPin,
+} from './geometria'
 import { giroDe, prominenciaDe } from './GraficoDeTorta'
 import { cierreDeLaPintura, fronterasDeEstado, rangoDePintura } from './TiraDeServicios'
 
@@ -268,6 +276,122 @@ export function afirmarElTraspaso(
     '  CONTROL: los dos altos difieren en UNA unidad del sistema, que es lo que esa resta vale',
   )
   controlPositivo('el detector vería la clase vieja, sin reserva de alto', 'col-start-1 row-start-1 w-full [&_[data-parte=ventana]]:min-w-full', (c: string) => c.includes('min-h-[var(--cta-ventana-hover)]'))
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('20 · La llegada del 00 no cuesta un píxel, y los tres tramos son los de siempre')
+
+  /**
+   * ⚠️ **ESTA SECCIÓN AFIRMABA LO CONTRARIO, Y EL CAMBIO ES UNA CORRECCIÓN.**
+   *
+   * Afirmaba que el pin se partía en dos y que el primer viewport era del estado
+   * 00. El diagnóstico que lo trajo era correcto —el 00 no tenía progreso propio,
+   * medido: su último cuadro encendido caía 40 px antes de que el pin enganchara—
+   * pero la solución cobraba el precio en el lugar equivocado: durante esos 900
+   * px la tira quedaba congelada en su inicio, o sea una pantalla entera de
+   * scroll con la columna derecha quieta. Eso se siente como un frenazo, y
+   * encima llegar al primer servicio pasó a costar 900 px más.
+   *
+   * El gesto no necesitaba el tramo: lo resuelve el `<Bloque>` propio del
+   * rodillo sobre la aproximación, que ya existía. Así que lo que se afirma
+   * ahora es que la llegada **no le cuesta un píxel al recorrido**: la secuencia
+   * lee el progreso del pin TAL CUAL, sin remapeo, y la sección volvió a su alto.
+   */
+  const fuenteDelPanel = quitarComentarios(
+    leer('src/app/v3/_secciones/servicios/ServiciosEnSecuencia.tsx'),
+  )
+  afirmarIgual(
+    cuenta(fuenteDelPanel, /useEstadoDisparado\(\s*progreso\s*,/g),
+    1,
+    'el disparo lee el progreso del pin TAL CUAL: no hay tramo reservado ni remapeo que le saque recorrido a la secuencia',
+  )
+  afirmarIgual(
+    cuenta(fuenteDelPanel, /progresoDeLaSecuencia|arranqueDeLaSecuencia/g),
+    0,
+    '  y el remapeo no volvió por la puerta de atrás',
+  )
+  controlPositivo(
+    'el detector vería el remapeo de vuelta',
+    'const secuencia = useTransform(progreso, progresoDeLaSecuencia)',
+    (t: string) => cuenta(t, /progresoDeLaSecuencia|arranqueDeLaSecuencia/g) === 0,
+  )
+  /**
+   * ⚠️ **Y LA LLEGADA SIGUE EXISTIENDO, sobre un rango que no consume pin.**
+   *
+   * Es la mitad que se queda: el rodillo monta su propio `<Bloque>` con el rango
+   * `ventana-de-la-mascara`, el mismo del titular de «El equipo». Ese rango abre
+   * cuando el borde superior de la pieza cruza el 80 % del alto del cuadro —o
+   * sea con la sección todavía entrando— así que el gesto corre sobre la
+   * aproximación y no sobre el pin.
+   */
+  const fuenteDelRodilloParaLaLlegada = quitarComentarios(
+    leer('src/app/v3/_secciones/servicios/RodilloDeEstados.tsx'),
+  )
+  afirmarIgual(
+    cuenta(fuenteDelRodilloParaLaLlegada, /rango="ventana-de-la-mascara"/g),
+    1,
+    '  la llegada del 00 corre sobre la ventana de la máscara, que es aproximación y no pin',
+  )
+  afirmarIgual(
+    cuenta(fuenteDelRodilloParaLaLlegada, /<CanalDeUnaPieza[^>]*patron="P2"/g),
+    1,
+    '  con el patrón de su call site, que es lo único que este sprint conservó de aquél',
+  )
+
+  /**
+   * ⚠️ **NO SIRVE `MEDIDA_DE_PRUEBA`: es sintética, y acá los píxeles importan.**
+   *
+   * La de §18 —`{recorrido: 1000, alto: 500, topes: [100, 400, 700]}`— existe
+   * para probar una propiedad ESTRUCTURAL: que las fronteras más una sean las
+   * ranuras. Para eso cualquier medida sirve. Acá se afirma un largo en píxeles
+   * contra un piso en píxeles, así que la medida tiene que ser la del sitio.
+   *
+   * Se reconstruye de las constantes de la sección, con UN número medido: el
+   * alto de la ventana, 788 px a 1440×900, anotado en el docblock de
+   * `ALTO_DEL_VACIO_DE_ENTRADA` con esa misma cifra. No se puede derivar: es el
+   * alto del panel menos su relleno.
+   */
+  const ALTO_MEDIDO_DE_LA_VENTANA = 788
+  const VACIO = ALTO_DEL_VACIO_DE_ENTRADA * ALTO_DE_UNA_PANTALLA
+  const MEDIDA_REAL = {
+    recorrido: VACIO + SERVICIOS.length * ALTO_DE_UNA_PANTALLA - ALTO_MEDIDO_DE_LA_VENTANA,
+    alto: ALTO_MEDIDO_DE_LA_VENTANA,
+    topes: SERVICIOS.map((_, i) => VACIO + i * ALTO_DE_UNA_PANTALLA),
+  }
+  /** Los tres tramos, en píxeles del pin. Sin arranque reservado: las fronteras
+   *  son las que `fronterasDeEstado` da, leídas derecho sobre el pin. */
+  const cortes = [...fronterasDeEstado(MEDIDA_REAL), 1]
+  const tramos = cortes.slice(0, -1).map((desde, i) => (cortes[i + 1] - desde) * pxDelPin())
+  for (let i = 0; i < tramos.length; i += 1) {
+    afirmar(
+      tramos[i] >= PX_MINIMOS_DE_UN_TRAMO,
+      `  el tramo 0${String(i + 1)} mide ${tramos[i].toFixed(0)} px: ${(tramos[i] - PX_MINIMOS_DE_UN_TRAMO).toFixed(0)} px por encima de los ${PX_MINIMOS_DE_UN_TRAMO} que pide una rotación (+${((tramos[i] / PX_MINIMOS_DE_UN_TRAMO - 1) * 100).toFixed(0)} %)`,
+    )
+  }
+  /**
+   * ⚠️ **Y SON LOS DE SIEMPRE, con el número que el repo ya publicaba.**
+   *
+   * `PANTALLAS_DE_SERVICIOS` tiene escritos 2.168 · 2.355 · 1.776 desde que la
+   * sección pasó a 700svh. La reserva del estado 00 los dejó donde estaban a
+   * costa de una pantalla más; sacarla los deja donde estaban sin pagar nada.
+   * Si alguien vuelve a tocar el pin, esto se pone en rojo.
+   */
+  const TRAMOS_DE_SIEMPRE = [2168, 2355, 1776] as const
+  const SE_CORRIO = 3
+  afirmarIgual(
+    tramos.map((t, i) => Math.abs(t - TRAMOS_DE_SIEMPRE[i]) <= SE_CORRIO),
+    tramos.map(() => true),
+    `  y son los de siempre: ${tramos.map((t) => t.toFixed(0)).join(' · ')} contra ${TRAMOS_DE_SIEMPRE.join(' · ')}, con menos de ${SE_CORRIO} px de corrimiento`,
+  )
+  controlPositivo(
+    'el detector vería el pin con la pantalla de más, que corría los tres',
+    tramos.map((t) => (t * (pxDelPin() + ALTO_DE_UNA_PANTALLA)) / pxDelPin()),
+    (largos: readonly number[]) => largos.every((t, i) => Math.abs(t - TRAMOS_DE_SIEMPRE[i]) <= SE_CORRIO),
+  )
+  afirmarIgual(
+    pxDelPin() + ALTO_DE_UNA_PANTALLA,
+    7200,
+    `  CONTROL: el pin mide ${pxDelPin()} px, una pantalla menos que los 7.200 que llegó a tener`,
+  )
 
   // ════════════════════════════════════════════════════════════════════════════
   titulo('19 · El botón no aparece puesto: llega, y con un patrón del sistema')

@@ -4,6 +4,8 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { SERVICIOS } from '../_contrato/acento'
+import { Bloque } from '../_contrato/coreografia'
+import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
 import {
   CLASE_DE_LA_CAJA_DEL_RODILLO,
   CLASE_DE_LA_RANURA,
@@ -242,7 +244,57 @@ export function RodilloDeEstados({ posicion }: RodilloDeEstadosProps): React.JSX
             primer cuadro salga bien sin haber medido: su fondo ya coincide con
             el fondo de la caja, así que el traslado del estado 0 es cero. */}
         <Ranura posicion={posicion} indice={0} data-estado="intro" className={CLASE_DE_LA_RANURA_DE_ENTRADA}>
-          <RotuloDeLaIntro />
+          {/**
+           * ⚠️ **EL 00 LLEGA CON EL GESTO DE LA CASA, copiado de su call site.**
+           *
+           * No se eligió un patrón de catálogo: se fue a leer el titular de «El
+           * equipo» (`quienes-somos/equipo.tsx:54-62`), que es el que el pedido
+           * nombró, y ahí el gesto es **P2 adentro de una ventana que recorta** —
+           * `CanalDeUnaPieza` por dentro, `overflow-hidden` por fuera—. La
+           * ventana no es decoración: es lo que hace que el gesto se LEA como una
+           * aparición en vez de como un bloque que pasa de largo, y su docblock
+           * lo tiene anotado como una regresión ya pagada.
+           *
+           * El bloque se apoya ABAJO de su ranura, así que P2 —que lo baja media
+           * altura propia— lo mete detrás del borde de la ventana, y de ahí sale.
+           * La línea base desde la que salen las palabras es ese borde, que cae
+           * justo donde está el subrayado del bloque.
+           *
+           * `como="span"` porque la ranura ya es un `div` y acá no hace falta
+           * otro; `block` para que el `span` mida.
+           *
+           * ── ⚠️ Y EL PROGRESO SALE DE UN `<Bloque>` PROPIO, no del pin ─────
+           *
+           * Colgaba del primer viewport del pin, y eso lo hacía llegar TARDE:
+           * el progreso del pin está acotado en 0 durante toda la aproximación
+           * —medido: más de 1.040 px con la sección entrando— así que el gesto
+           * no empezaba hasta que el panel ya se había posado. Lo que se pidió
+           * es lo contrario: que vaya apareciendo MIENTRAS la sección se
+           * acerca.
+           *
+           * Así que toma el mismo rango que su call site: `<Bloque patron="P2"
+           * rango="ventana-de-la-mascara">`, que abre cuando el borde superior
+           * de la pieza cruza el 80 % del alto del cuadro —o sea, con la
+           * sección todavía entrando— y cierra en el 45 %. Es exactamente lo
+           * que hace el titular de «El equipo», y por eso llega mientras su
+           * sección todavía está entrando.
+           *
+           * ⚠️ Esto agrega el SEGUNDO `<Bloque>` de la sección, y §7 lo cuenta.
+           * La cuenta subió con su motivo: lo que esa afirmación cuida es que
+           * la SECUENCIA tenga un solo motor —que no haya dos mecanismos
+           * moviendo el mismo contenido—, y este bloque no mueve contenido de
+           * la secuencia: mueve el rótulo del estado que la precede, sobre un
+           * rango que el pin no puede expresar.
+           */}
+          <Bloque patron="P2" rango="ventana-de-la-mascara" className="block w-full">
+            {(progresoDeLaMascara) => (
+              <span className={VENTANA_QUE_RECORTA}>
+                <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
+                  <RotuloDeLaIntro />
+                </CanalDeUnaPieza>
+              </span>
+            )}
+          </Bloque>
         </Ranura>
         {SERVICIOS.map((servicio, i) => (
           <Ranura

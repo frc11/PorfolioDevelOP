@@ -21,47 +21,44 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
 
 import { CONTENIDO } from './contenido'
 import {
-  CARTEL,
   DESTINO_DEL_CTA,
   MEDIDAS_DE_LAS_CAPTURAS,
+  CORTES_DEL_CARTEL,
   PX_DEL_CARTEL,
   PX_DE_LA_APROXIMACION,
-  PX_DEL_CTA,
-  PX_DE_LA_LEVANTADA,
   PX_DE_LA_SECCION,
-  arranqueDeDemos,
-  enLaVentana,
-  progresoDeLaVentana,
-  ventanaDeLaLevantada,
-  ventanaDelCta,
-  ventanaDelTunel,
 } from './geometria'
 import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, type CruceObservado, type EntradaAlTramo } from './gota'
+import { afirmarElRotulo } from './trabajos-rotulo'
+import { afirmarLasVentanas } from './trabajos-ventanas'
 import {
-  ANCHO_AL_NACER,
   ANCHO_DEL_CTA,
-  ANCHO_DEL_RELEVO,
-  ALTURAS_DE_LA_LEVANTADA,
-  ANCHO_MAXIMO,
-  ASENTAMIENTO_DEL_TUNEL_MS,
-  AVANCE_POR_PX,
+  ANCHO_DEL_CUADRO_DE_REFERENCIA,
+  CAPAS_DEL_TUNEL,
   DURACION_DEL_FRENO_MS,
-  RESTO_AL_ASENTARSE,
-  RITMO_POR_CIEN_PX,
-  anchoDeLaCaptura,
-  anchoFinalDeLaPrimera,
-  avanceDelNacimiento,
-  avanceQueCompletaElTunel,
-  letrasEscritas,
-  perseguir,
-  pxQuePideElTunel,
+  PX_DEL_ESPACIO_DE_DEMOS,
+  PX_DEL_TUNEL,
+  PX_DE_LA_SALIDA,
+  PX_MINIMOS_DE_LA_ESPERA_DEL_CTA,
+  RESORTE_DEL_TUNEL,
+  ZETA_DEL_RESORTE,
+  avanzarElResorte,
+  escalaDeLaCapa,
+  poseDelTunel,
+  type CapaDeLaTabla,
 } from './tunel'
-import { CRUCES_DEL_TRAMO, caminoDeLaPersecucion, medidasDeWebp, pxDelTema } from './trabajos-piezas'
+import {
+  CRUCES_DEL_TRAMO,
+  ancestrosDe,
+  medidasDeWebp,
+  pxDelTema,
+  recorridoDelResorte,
+  type EstadoDeUnResorte,
+} from './trabajos-piezas'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 
@@ -179,135 +176,145 @@ export function afirmarLasCuatroEntradas(): void {
  * sección ya no sale del contenido sino de esto. Vive en el arnés porque es
  * plomería —sumar constantes— y no una afirmación.
  *
- * ⚠️ **LA APROXIMACIÓN SUMA aunque no sea un tramo del recorrido.** El progreso
+ * ⚠️ **DEL CARTEL SUMA LO QUE NO SE SOLAPA, y por eso no es `PX_DEL_CARTEL`.**
+ * El túnel arranca donde el cartel EMPIEZA A HUIR y no donde termina —es una
+ * derivación declarada: la primera captura nace mientras el cartel se va—, así
+ * que los últimos 38 % del cartel corren encima del túnel. Sumar el cartel
+ * entero contaría ese solapamiento dos veces y pediría 456 px que nadie gasta.
+ *
+ * ⚠️ **Y LA APROXIMACIÓN SUMA aunque no sea un tramo del recorrido.** El progreso
  * de esta sección abre un viewport antes de que el panel quede puesto, y ese
  * tramo se gasta igual: si no entrara en la cuenta, el alto declarado alcanzaría
  * para los cuatro gestos y el último se cortaría contra el final del progreso.
  * Su motivo, con la medición que lo encontró, está en `PX_DE_LA_APROXIMACION`.
+ *
+ * ⚠️ **Y EL CTA NO SUMA APARTE.** Es la última capa de la tabla, así que su
+ * recorrido está adentro de `PX_DEL_TUNEL`. Lo que sí suma son la SALIDA —lo que
+ * tarda el contenido en irse a velocidad de scroll— y el ESPACIO DE DEMOS.
  */
 export function sumaDeLosTramos(cuantas: number): number {
+  void cuantas
   return (
-    PX_DE_LA_APROXIMACION + PX_DEL_CARTEL + pxQuePideElTunel(cuantas) + PX_DEL_CTA + PX_DE_LA_LEVANTADA
+    PX_DE_LA_APROXIMACION +
+    PX_DEL_CARTEL * CORTES_DEL_CARTEL.seVa +
+    PX_DEL_TUNEL +
+    PX_MINIMOS_DE_LA_ESPERA_DEL_CTA +
+    PX_DE_LA_SALIDA +
+    PX_DEL_ESPACIO_DE_DEMOS
   )
 }
 
 /**
- * ⚠️ **§17 DEL INVARIANTE — el túnel, su ritmo y el CTA. Mudado acá por la regla
- * de las 300 líneas, sin tocar una afirmación.**
+ * ⚠️ **§17 DEL INVARIANTE — el túnel: la tabla, el anidamiento y el CTA.**
  *
- * Esto no comprueba que el túnel se vea bien: comprueba que sus números sigan
- * siendo los que se midieron, y que lo que se deriva se derive.
+ * Esto no comprueba que el túnel se vea bien —eso lo dice la superposición con la
+ * referencia, en el navegador—: comprueba que su función de avance sea la de
+ * ella, que las capas estén anidadas DE VERDAD en el marcado, y que el CTA llegue
+ * a su tamaño con la fracción que el túnel produce y no con una puesta a mano.
  */
+/** Cuántos `will-change-transform` tiene que escribir `CapaDelTunel`: TRES —el
+ *  escenario y las capas de proyecto, que escalan, y la capa entera, que se
+ *  traslada en la salida—. La capa del CTA lleva el suyo en `piezas.tsx`. */
+const CUANTAS_CAPAS_PROMOVIDAS = 3
+
 export function afirmarElTunel(conMotion: string, quieto: string, cuantas: number): void {
-  titulo('17 · El túnel: ritmo constante, relevo tardío y el CTA')
+  titulo('17 · El túnel: la tabla medida, anidada, y el CTA que llega')
 
-  // ── EL RITMO ES CONSTANTE EN TÉRMINOS RELATIVOS ─────────────────────────
+  // ── CADA CAPA ES UNA RECTA CON CLAMP ────────────────────────────────────
   /**
-   * ⚠️ **La afirmación que define el sprint.** Antes el ancho crecía en RECTA y
-   * el ritmo relativo se desplomaba: la primera captura iba ×2,5 en un tramo y
-   * ×1,8 en otro casi cuatro veces más largo. Ahora tramos IGUALES de scroll
-   * multiplican por lo MISMO, en cualquier punto del recorrido. Se mide en tres
-   * lugares distintos del túnel y los tres tienen que dar el mismo factor.
+   * ⚠️ **La función de avance es la de la referencia**, leída de su bundle y
+   * reproducida por sus 36 muestras: recta entre `arranca` y `topa`, quieta
+   * afuera. Se mira en las dos puntas, a un cuarto y a la mitad, y afuera de las
+   * dos. El control es una exponencial entre las MISMAS puntas —lo que se
+   * derivaba antes—: coincide en los extremos y falla en el medio.
    */
-  const total = avanceQueCompletaElTunel(cuantas)
-  /**
-   * ⚠️ Se mide sobre la ÚLTIMA captura y no sobre la primera: la primera topa en
-   * `ANCHO_MAXIMO` a mitad del recorrido y de ahí en más su factor es 1, que es el
-   * tope funcionando y no el ritmo fallando. La última crece de punta a punta.
-   */
-  const ultima = cuantas - 1
-  const factorEn = (avance: number): number =>
-    (anchoDeLaCaptura(ultima, avance + AVANCE_POR_PX * 100) ?? 0) / (anchoDeLaCaptura(ultima, avance) ?? 1)
-  const nace = avanceDelNacimiento(ultima)
-  const donde = [0.1, 0.5, 0.85]
-  for (const f of donde) {
-    afirmarIgual(
-      factorEn(nace + (total - nace) * f).toFixed(4),
-      RITMO_POR_CIEN_PX.toFixed(4),
-      `  a un ${(f * 100).toFixed(0)} % de la vida de la última captura, 100 px de scroll multiplican por ${RITMO_POR_CIEN_PX}`,
-    )
-  }
+  const CAPAS: readonly CapaDeLaTabla[] = [CAPAS_DEL_TUNEL.escenario, ...CAPAS_DEL_TUNEL.proyectos, CAPAS_DEL_TUNEL.cta]
+  const esRectaConClamp = (ley: (capa: CapaDeLaTabla, y: number) => number): boolean =>
+    CAPAS.every((c) => {
+      const en = (t: number): number => ley(c, c.arranca + t * (c.topa - c.arranca))
+      return (
+        ley(c, c.arranca - 500) === c.de &&
+        ley(c, c.topa + 500) === c.a &&
+        Math.abs(en(0.25) - (c.de + (c.a - c.de) * 0.25)) < 1e-12 &&
+        Math.abs(en(0.5) - (c.de + c.a) / 2) < 1e-12
+      )
+    })
+  afirmar(esRectaConClamp(escalaDeLaCapa), `las ${CAPAS.length} capas escalan en RECTA entre su arranque y su tope, y se quedan quietas afuera: la función de avance de la referencia`)
   controlPositivo(
-    'el chequeo del ritmo ve un crecimiento en RECTA, que es lo que había antes',
-    (avance: number) => 0.44 + avance,
-    (recta: (a: number) => number) => {
-      const factor = (a: number): number => recta(a + AVANCE_POR_PX * 100) / recta(a)
-      return Math.abs(factor(total * 0.05) - factor(total * 0.85)) < 1e-4
+    'el chequeo vería una exponencial entre las mismas puntas, que es la clase de ley que se derivaba',
+    (c: CapaDeLaTabla, y: number): number => {
+      const t = Math.min(1, Math.max(0, (y - c.arranca) / (c.topa - c.arranca)))
+      return c.de + ((c.a - c.de) * (Math.exp(3 * t) - 1)) / (Math.exp(3) - 1)
     },
+    esRectaConClamp,
   )
 
-  // ── EL RELEVO ES TARDÍO ─────────────────────────────────────────────────
-  for (let i = 1; i < cuantas; i += 1) {
-    afirmarIgual(
-      (anchoDeLaCaptura(i - 1, avanceDelNacimiento(i)) ?? 0).toFixed(4),
-      ANCHO_DEL_RELEVO.toFixed(4),
-      `  al nacer la captura ${i + 1}, la anterior mide ${ANCHO_DEL_RELEVO} del cuadro: casi llegando al límite`,
-    )
-  }
-  afirmar(
-    ANCHO_DEL_RELEVO >= 0.85,
-    `el relevo es TARDÍO: la siguiente no nace hasta que la anterior está en ${ANCHO_DEL_RELEVO} del cuadro (era 0,32)`,
+  // ── EL ANIDAMIENTO ESTÁ EN EL MARCADO, NO SÓLO EN LA CUENTA ─────────────
+  /**
+   * ⚠️ **Multiplicar las escalas a mano no es anidar**, y la decisión fue anidar:
+   * es la estructura la que produce el efecto. Así que se lee del marcado que
+   * sale del servidor qué capas envuelven al CTA, en orden. Y que entre ellas no
+   * haya ni un ancla ni una captura: la hija va AFUERA de la captura de su madre,
+   * o habría un enlace adentro de otro y el orden anunciado cambiaría.
+   */
+  const cadena = (html: string): string[] =>
+    ancestrosDe(html, 'data-capa="cta"')
+      .map((t) => /data-capa="([^"]+)"/.exec(t)?.[1] ?? null)
+      .filter((c): c is string => c !== null)
+  const CADENA_ESPERADA = ['escenario', ...CAPAS_DEL_TUNEL.proyectos.map((_, i) => `proyecto-${String(i)}`)]
+  afirmarIgual(cadena(conMotion), CADENA_ESPERADA, 'el CTA vive adentro del tercer proyecto, que vive adentro del segundo, del primero y del escenario: la matrioska, en el marcado')
+  controlPositivo(
+    'el detector vería las capas como hermanas con la escala multiplicada a mano',
+    '<div data-capa="escenario"></div><div data-capa="proyecto-0"></div><div data-capa="proyecto-1"></div><div data-capa="proyecto-2"></div><div data-capa="cta"></div>',
+    (html: string) => cadena(html).join() === CADENA_ESPERADA.join(),
   )
-  afirmarIgual(
-    (anchoDeLaCaptura(0, 0) ?? 0).toFixed(4),
-    ANCHO_AL_NACER.toFixed(4),
-    `  y nacen a ${ANCHO_AL_NACER} del cuadro — la referencia no da este número: sus imágenes nacen en 0 px con opacidad 1`,
+  const entreMedio = ancestrosDe(conMotion, 'data-capa="cta"').filter((t) => t.startsWith('<a ') || t.includes('data-captura='))
+  afirmarIgual(entreMedio, [], '  y entre ellas no hay un ancla ni una captura: cada hija va después de la captura de su madre, afuera de ella')
+
+  // ── LOS PROYECTOS TERMINAN ADENTRO DE UNA IMAGEN, COMO EN ELLA ──────────
+  /**
+   * ⚠️ Nuestras capturas son 16:9, así que cubren el cuadro de 1440 × 900 recién
+   * a 900 / 810 = 1,111 anchos. Los tres proyectos de la tabla terminan por
+   * encima —el espectador queda ADENTRO de cada uno, como en la referencia— y ésa
+   * es una propiedad de la ELECCIÓN de capas, no de la cuenta. El control es la
+   * otra elección que se evaluó (sus #1, #2 y #3): termina en 0,983 y deja la sala
+   * a la vista arriba y abajo.
+   */
+  const CUBRE_EL_CUADRO = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA / (ANCHO_DEL_CUADRO_DE_REFERENCIA * (9 / 16))
+  const finales = poseDelTunel(PX_DEL_TUNEL).anchos
+  afirmar(
+    finales.every((a) => a >= CUBRE_EL_CUADRO),
+    `los tres proyectos terminan cubriendo el cuadro: ${finales.map((a) => a.toFixed(3)).join(' · ')} anchos, todos arriba de ${CUBRE_EL_CUADRO.toFixed(3)}`,
+  )
+  controlPositivo(
+    'el chequeo vería la elección que termina sin cubrir (sus #1, #2 y #3)',
+    [1.3 * 0.7, 1.3 * 0.7 * 0.9, 1.3 * 0.7 * 0.9 * 1.2],
+    (anchos: number[]) => anchos.every((a) => a >= CUBRE_EL_CUADRO),
   )
 
-  // ── EL TOPE, MEDIDO, Y QUE ESTA VEZ MUERDE ──────────────────────────────
-  const DESBORDE_MEDIDO = { minimo: 1.17, maximo: 1.68 } as const
-  const desborde = anchoFinalDeLaPrimera(cuantas)
+  // §22 —la tabla, el CTA que llega y nada nace ni muere— vive en
+  // `trabajos-nacimiento.ts`, que se llama desde §21.
+
   afirmar(
-    desborde >= DESBORDE_MEDIDO.minimo && desborde <= DESBORDE_MEDIDO.maximo,
-    `la primera termina en ${desborde.toFixed(4)} anchos de cuadro, adentro de los ${DESBORDE_MEDIDO.minimo}–${DESBORDE_MEDIDO.maximo} medidos en la referencia`,
-  )
-  afirmar(
-    ANCHO_AL_NACER * Math.exp(total) > ANCHO_MAXIMO,
-    `  y el tope MUERDE: sin él la primera llegaría a ${(ANCHO_AL_NACER * Math.exp(total)).toFixed(2)} anchos de cuadro`,
+    PX_DEL_TUNEL < PX_DE_LA_SECCION,
+    `el túnel entero entra en la sección sin tocarle el alto: pide ${PX_DEL_TUNEL} px de los ${PX_DE_LA_SECCION}`,
   )
 
-  // ── LAS CUATRO VENTANAS ENTRAN EN LA SECCIÓN, EN ORDEN Y SIN PISARSE ────
-  const tunel = ventanaDelTunel(cuantas)
-  const cta = ventanaDelCta(cuantas)
-  const levantada = ventanaDeLaLevantada(cuantas)
-  const demos = arranqueDeDemos(cuantas)
-  afirmarIgual(
-    tunel.desde,
-    progresoDeLaVentana(CARTEL, CARTEL.huirDesde ?? 1),
-    'el túnel arranca en el instante EXACTO en que el cartel empieza a huir: es una derivación, no dos números escritos aparte',
-  )
-  afirmarIgual(
-    [tunel.hasta, cta.hasta, levantada.hasta].map((v) => v.toFixed(4)),
-    [cta.desde, levantada.desde, demos].map((v) => v.toFixed(4)),
-    '  y las cuatro ventanas se tocan sin huecos: túnel → CTA → levantada → demos',
-  )
-  afirmar(
-    demos < 1,
-    `  el tramo de demos existe y no es de largo cero: arranca en ${demos.toFixed(4)} y queda ${((1 - demos) * PX_DE_LA_SECCION).toFixed(0)} px de sala de noche sola`,
-  )
-  afirmar(
-    pxQuePideElTunel(cuantas) < PX_DE_LA_SECCION,
-    `  y el túnel entero entra en la sección sin tocarle el alto: pide ${pxQuePideElTunel(cuantas).toFixed(0)} px de los ${PX_DE_LA_SECCION}`,
-  )
+  // §23 —las cuatro ventanas del recorrido— vive en `trabajos-ventanas.ts`,
+  // por la regla de las 300 líneas. Mismo corte por TEMA que §21 y §22.
+  afirmarLasVentanas(cuantas, pxDelTema(CSS, 'foco-desplazamiento') + pxDelTema(CSS, 'foco-grosor'))
 
-  // ── EL CTA ──────────────────────────────────────────────────────────────
+  // §21 —el rótulo y su banda— vive en `trabajos-rotulo.ts`, por la regla de
+  // las 300 líneas. Mismo corte por TEMA que usó servicios con `s6-traspaso.ts`.
+  afirmarElRotulo(cuantas, conMotion)
+
+  // ── EL CTA ───────────────────────────────────────────────────────────────────────────
   afirmar(ANCHO_DEL_CTA < 1, `la ventana del CTA NO cubre la pantalla: crece hasta ${ANCHO_DEL_CTA} del ancho y ahí se queda`)
-  const letras = [...CONTENIDO.cta.frase].length
-  afirmarIgual(letrasEscritas(0, letras), 0, '  al empezar a crecer no hay una sola letra escrita')
-  afirmarIgual(
-    letrasEscritas(1, letras),
-    letras,
-    `  y cuando la ventana llega a su tamaño la frase está completa: las ${letras} letras, por construcción y no por calibración`,
-  )
   afirmar(
     conMotion.includes(DESTINO_DEL_CTA) && quieto.includes(DESTINO_DEL_CTA),
     `el CTA es un enlace real a contacto —${DESTINO_DEL_CTA}, el mismo destino que declara la navegación— en las DOS ramas`,
   )
   afirmarIgual(veces(conMotion, 'data-pieza="enlace-del-cta"'), 1, '  y es UNO solo: no hay dos anclas al mismo lugar en el mismo cuadro')
-  afirmar(
-    DURACION_DEL_FRENO_MS > 0 && DURACION_DEL_FRENO_MS < ASENTAMIENTO_DEL_TUNEL_MS,
-    `  el freno dura ${DURACION_DEL_FRENO_MS} ms — menos que el asentamiento, así que la persecución alcanza a reencontrarse con el scroll`,
-  )
 
   // ── EL FRENO NO TOCA EL SCROLL ──────────────────────────────────────────
   /**
@@ -337,42 +344,60 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     (src: string) => veces(src, "setProperty('visibility'") === 0,
   )
 
-  // ── LA LEVANTADA DESPEJA EL TRAMO DE DEMOS, Y NADA DESAPARECE ──────────
+  // ── LA SALIDA VA A VELOCIDAD DE SCROLL, Y NADA SE DESVANECE ───────────
+  const fuenteDeLaCapa = FUENTES.find((f) => f.archivo.includes('CapaDelTunel'))?.texto ?? ''
   /**
-   * ⚠️ **Lo que se afirma acá cambió de signo.** Antes la capa se iba con una
-   * huida —z negativo y desvanecido— y lo que se comprobaba era que la opacidad
-   * llegara a cero. Eso estaba mal pedido: nada tiene que desaparecer. Ahora sube
-   * y sale por arriba, así que lo que se comprueba es la TRASLACIÓN, y que la
-   * fuente **no toque la opacidad** en ese tramo.
+   * ⚠️ **ESTAS AFIRMACIONES CAMBIARON DE SIGNO TRES VECES. La cuarta es la buena.**
+   *
+   * Primero la capa se iba con una huida —z negativo y desvanecido— y se
+   * comprobaba que la opacidad llegara a cero. Después subía con un
+   * `translateY(−130 %)` y se comprobaba la traslación. Después se exigía que NO
+   * se trasladara, porque las dos anteriores eran deslizamientos impuestos.
+   *
+   * Y esa tercera dejó un defecto de estructura: sin traslación, lo único que
+   * saca el contenido es el despineado del panel, que dura exactamente un
+   * viewport y ocurre **mientras servicios entra por abajo**. Nunca queda un
+   * cuadro con la sala sola, y por eso el espacio de demos no se percibía.
+   *
+   * Así que la capa vuelve a trasladarse, y lo que se afirma es la VELOCIDAD:
+   * que lo haga en PÍXELES —no en porcentaje del contenedor, que ataría la
+   * velocidad a cuánto mida la caja— y que la cuenta sea 1:1 con el scroll. A
+   * esa velocidad no hay nada que distinguir de un scroll normal, porque es la
+   * velocidad del scroll.
    */
   afirmarIgual(
-    enLaVentana(demos, levantada),
+    veces(fuenteDeLaCapa, "capa.style.setProperty('transform'"),
     1,
-    'cuando empiezan los demos la levantada ya sacó todo por arriba: el tramo queda con la sala de noche sola',
+    'la capa se traslada UNA vez, en la salida: el contenido se va a velocidad de scroll',
   )
-  afirmarIgual(enLaVentana(levantada.desde, levantada), 0, '  y arranca recién cuando el CTA terminó de leerse')
-  /**
-   * ⚠️ **Cuánto hay que subir, con la cuenta hecha y no a ojo.** Lo más alto del
-   * tramo es la primera captura a `ANCHO_MAXIMO`: sobre un cuadro de 1.440 × 900
-   * son 2.419 px de ancho y, con la relación de las capturas, 1.361 de alto.
-   * Centrada, su borde de abajo queda en `450 + 680 = 1.130` px. Subir 1,3
-   * alturas son 1.170: el borde pasa el tope del cuadro con 39 px de sobra.
-   */
-  const altoDeLaMasAlta = ANCHO_MAXIMO * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA * (16 / 9) * (9 / 16)
-  const bordeDeAbajo = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA / 2 + (altoDeLaMasAlta * (9 / 16)) / 2
   afirmar(
-    ALTURAS_DE_LA_LEVANTADA * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA >= bordeDeAbajo,
-    `  y sube ${ALTURAS_DE_LA_LEVANTADA} alturas de ventana = ${(ALTURAS_DE_LA_LEVANTADA * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA).toFixed(0)} px, contra los ${bordeDeAbajo.toFixed(0)} px que hay hasta el borde de abajo de lo más alto`,
+    /translateY\(\$\{\(-salida\)\.toFixed\(1\)\}px\)/.test(fuenteDeLaCapa),
+    '  y lo escribe en PÍXELES: en porcentaje la velocidad dependería de cuánto mida la caja, y la igualdad con el scroll se perdería',
+  )
+  controlPositivo(
+    'el detector vería la levantada vieja, escrita en porcentaje del contenedor',
+    'capa.style.setProperty(`transform`, `translateY(${-subida}%)`)',
+    (src: string) => /translateY\(\$\{\(-salida\)\.toFixed\(1\)\}px\)/.test(src),
+  )
+  afirmarIgual(
+    veces(fuenteDeLaCapa, "capa.style.setProperty('opacity'"),
+    0,
+    '  y NO toca su opacidad: nada se desvanece, todo sale por arriba — la variable se llama `capa` justo para que esto se pueda afirmar',
+  )
+  controlPositivo(
+    '  y un desvanecido que vuelve',
+    "capa.style.setProperty('opacity', '0')",
+    (src: string) => veces(src, "capa.style.setProperty('opacity'") === 0,
   )
   /**
-   * ⚠️ **Y NADA SE DESVANECE, que es el punto del cambio.** La fuente no puede
-   * escribir opacidad sobre la capa en este tramo: si lo hiciera, volvería a ser
-   * una huida con otro nombre.
+   * ⚠️ **Y AHORA SÍ VA `will-change` SOBRE LA CAPA**, porque volvió a moverse.
+   * La regla del repo pide la capa de composición sobre el elemento que
+   * efectivamente se transforma, y en la salida ése es este contenedor.
    */
   afirmarIgual(
-    veces(FUENTES.find((f) => f.archivo.includes('CapaDelTunel'))?.texto ?? '', "capa.style.setProperty('opacity'"),
-    0,
-    '  y la capa NO toca su opacidad al levantarse: nada desaparece, todo sale por arriba — la variable se llama `capa` justo para que esto se pueda afirmar',
+    veces(fuenteDeLaCapa, 'will-change-transform'),
+    CUANTAS_CAPAS_PROMOVIDAS,
+    `  y quedan ${CUANTAS_CAPAS_PROMOVIDAS} capas promovidas en el archivo: el escenario y las de proyecto, que escalan, y la capa entera, que se traslada en la salida`,
   )
 
   // ── EL RECORTE Y SU MARGEN ──────────────────────────────────────────────
@@ -399,24 +424,54 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
   )
   afirmarIgual(MEDIDAS_DE_LAS_CAPTURAS.length, cuantas, '  y hay exactamente una medida por proyecto')
 
-  // ── LA PERSECUCIÓN, QUE NO SE TOCÓ ──────────────────────────────────────
-  const enPersecucion = (v: number, dt: number): number => perseguir(v, 1, dt)
-  const a60 = caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, 1000 / 60, enPersecucion)
-  const a144 = caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, 1000 / 144, enPersecucion)
-  afirmar(a60 >= 1 - RESTO_AL_ASENTARSE, `a los ${ASENTAMIENTO_DEL_TUNEL_MS} ms la persecución recorrió el ${(a60 * 100).toFixed(2)} % del camino`)
-  afirmar(
-    Math.abs(a60 - a144) < 1e-3,
-    `y el mismo tiempo da el mismo resultado a 60 y a 144 cuadros por segundo: ${a60.toFixed(6)} contra ${a144.toFixed(6)}`,
+  // ── EL RESORTE ES EL DE LA REFERENCIA ───────────────────────────────────
+  afirmarIgual(
+    ZETA_DEL_RESORTE.toFixed(2),
+    '3.41',
+    `el resorte es el de la referencia —rigidez ${RESORTE_DEL_TUNEL.rigidez}, amortiguamiento ${RESORTE_DEL_TUNEL.amortiguamiento}, masa ${RESORTE_DEL_TUNEL.masa}—: ζ = 3,41, sobreamortiguado`,
   )
-  // ⚠️ El factor del control es chico a propósito: con uno grande las dos corridas
-  // saturan en 1 dentro de la ventana y el control se queda ciego.
+  const hacia1 = (e: EstadoDeUnResorte, dt: number): EstadoDeUnResorte => avanzarElResorte(e, 1, dt)
+  const a60 = recorridoDelResorte(3000, 1000 / 60, hacia1)
+  const a144 = recorridoDelResorte(3000, 1000 / 144, hacia1)
+  afirmar(a60.maximo <= 1, `  y no rebota: en 3 s de escalón no pasa nunca del objetivo (lo más lejos que llega: ${a60.maximo.toFixed(6)})`)
   controlPositivo(
-    'el chequeo de los cuadros por segundo vería una persecución por factor fijo',
-    0.002,
-    (k: number) => {
-      const porFactorFijo = (v: number): number => v + (1 - v) * k
-      const corre = (dt: number): number => caminoDeLaPersecucion(ASENTAMIENTO_DEL_TUNEL_MS, dt, porFactorFijo)
-      return Math.abs(corre(1000 / 60) - corre(1000 / 144)) < 1e-3
+    'el chequeo del rebote vería un resorte flojo (ζ = 0,34)',
+    (e: EstadoDeUnResorte, dt: number): EstadoDeUnResorte => {
+      let x = e.posicion
+      let v = e.velocidad
+      for (let ms = 0; ms < dt; ms += 1) {
+        v += (-RESORTE_DEL_TUNEL.rigidez * (x - 1) - 10 * v) * 0.001
+        x += v * 0.001
+      }
+      return { posicion: x, velocidad: v }
     },
+    (paso: (e: EstadoDeUnResorte, dt: number) => EstadoDeUnResorte) => recorridoDelResorte(3000, 1000 / 60, paso).maximo <= 1,
+  )
+  afirmar(
+    Math.abs(a60.final - a144.final) < 1e-9,
+    `  y el mismo tiempo da el mismo resultado a 60 y a 144 cuadros por segundo: ${a60.final.toFixed(9)} contra ${a144.final.toFixed(9)}`,
+  )
+  controlPositivo(
+    '  y el de los cuadros por segundo vería el mismo resorte integrado con Euler',
+    (e: EstadoDeUnResorte, dt: number): EstadoDeUnResorte => {
+      const s = dt / 1000
+      const a = -RESORTE_DEL_TUNEL.rigidez * (e.posicion - 1) - RESORTE_DEL_TUNEL.amortiguamiento * e.velocidad
+      return { posicion: e.posicion + e.velocidad * s, velocidad: e.velocidad + a * s }
+    },
+    (paso: (e: EstadoDeUnResorte, dt: number) => EstadoDeUnResorte) =>
+      Math.abs(recorridoDelResorte(3000, 1000 / 60, paso).final - recorridoDelResorte(3000, 1000 / 144, paso).final) < 1e-9,
+  )
+  /**
+   * ⚠️ **LO QUE EVITA EL SALTO AL SOLTAR EL FRENO es que el resorte quede EN
+   * REPOSO mientras frena** —posición quieta y velocidad cero—, no cuánto dure.
+   * Así que se lee del fuente, y el control es un freno que congela la posición
+   * pero se guarda la velocidad.
+   */
+  const frenaEnReposo = (src: string): boolean => /if \(frenaSiCorresponde\(ahora\)\) reposarEn\(/.test(src)
+  afirmar(frenaEnReposo(FUENTE_DEL_TUNEL), '  mientras frena, el resorte queda en reposo —velocidad cero—: al soltar retoma desde ahí y no salta')
+  controlPositivo('  el detector vería un freno que conserva la velocidad', 'if (frenaSiCorresponde(ahora)) resorte.current = { ...resorte.current }', frenaEnReposo)
+  afirmar(
+    DURACION_DEL_FRENO_MS < a60.msAl99,
+    `  y la pausa (${DURACION_DEL_FRENO_MS} ms) es más corta que lo que el túnel mismo tarda en posarse (${a60.msAl99.toFixed(0)} ms): se lee como el túnel asentándose, no como un corte`,
   )
 }

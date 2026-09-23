@@ -25,7 +25,7 @@
  * inercia ni el ritmo con el que el tramo se va a ver.
  */
 
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { cerrarChrome, lanzarChrome } from './cdp'
@@ -42,14 +42,38 @@ const PX_POR_GOLPE = 100
 /** Golpes por segundo, a ritmo de lectura. También de B2. */
 const GOLPES_POR_SEGUNDO = 10
 
-interface Cuadro {
-  readonly datos: string
-  readonly y: number
-}
+/**
+ * ⚠️ **LOS CUADROS SE ESCRIBEN AL VUELO, Y ES POR QUÉ ESTO SE MORÍA.**
+ *
+ * Había un `interface Cuadro` y un arreglo que los juntaba para volcarlos al
+ * disco al final. Con el recorrido corto pasaba; con el largo son ~3.700 JPEG
+ * en base64 —del orden de 350 MB de cadenas vivas— y el harness mató la corrida
+ * DOS veces por memoria del sistema, siempre cerca del final.
+ *
+ * No hay razón para juntarlos: el cuadro llega, se escribe y no se vuelve a
+ * mirar. Así la memoria que ocupa la grabación entera es la de UN cuadro, y de
+ * paso una corrida cortada deja en el disco todo lo que alcanzó a grabar.
+ */
+
+/**
+ * ⚠️ **LOS CUADROS VAN A UNA CARPETA POR CORRIDA, y es una lección pagada.**
+ *
+ * Esto borraba la carpeta de salida entera como PRIMER paso, para no mezclar los
+ * cuadros de dos corridas. Parece prolijo y es destructivo: una corrida que se
+ * corta a mitad —y ésta se cortó dos veces, matada por el harness cuando la
+ * máquina se quedó sin memoria— deja la carpeta vacía **y se lleva puesta la
+ * grabación anterior, que estaba bien**. Borrar lo viejo antes de tener lo nuevo
+ * es apostar a que la corrida termina.
+ *
+ * Ahora los cuadros van a una subcarpeta propia —que sí se limpia, porque es
+ * suya— y el video queda arriba. Una corrida cortada no toca nada de lo que ya
+ * había.
+ */
+const CUADROS = `${SALIDA}/cuadros`
 
 async function principal(): Promise<void> {
-  rmSync(SALIDA, { recursive: true, force: true })
-  mkdirSync(SALIDA, { recursive: true })
+  rmSync(CUADROS, { recursive: true, force: true })
+  mkdirSync(CUADROS, { recursive: true })
 
   const chrome = await lanzarChrome({
     perfil: 'C:/Users/Valentino/.cache/b4-medicion/s4-grabacion-perfil',
@@ -82,12 +106,12 @@ async function principal(): Promise<void> {
       })()`,
     )
 
-    const cuadros: Cuadro[] = []
-    let ultimoY = arranque
+    let cuantos = 0
     p.conexion.al('Page.screencastFrame', (params) => {
       const datos = params.data as string
       const sessionId = params.sessionId as number
-      cuadros.push({ datos, y: ultimoY })
+      writeFileSync(path.join(CUADROS, `c${String(cuantos).padStart(5, '0')}.jpg`), Buffer.from(datos, 'base64'))
+      cuantos += 1
       void p.conexion.enviar('Page.screencastFrameAck', { sessionId }, p.sessionId)
     })
 
@@ -114,7 +138,6 @@ async function principal(): Promise<void> {
           p.sessionId,
         )
         await new Promise((r) => setTimeout(r, msPorGolpe))
-        if (g % 20 === 0) ultimoY = await medir<number>(p, 'window.scrollY')
       }
       // Que la inercia termine antes de dar la vuelta.
       await new Promise((r) => setTimeout(r, 1500))
@@ -123,11 +146,9 @@ async function principal(): Promise<void> {
     await p.conexion.enviar('Page.stopScreencast', {}, p.sessionId)
     await new Promise((r) => setTimeout(r, 400))
 
-    console.log(`\ncuadros recibidos: ${cuadros.length}`)
-    cuadros.forEach((c, i) => {
-      writeFileSync(path.join(SALIDA, `c${String(i).padStart(5, '0')}.jpg`), Buffer.from(c.datos, 'base64'))
-    })
-    console.log(`escritos en ${SALIDA}`)
+    console.log(`
+cuadros recibidos: ${cuantos}`)
+    console.log(`escritos AL VUELO en ${CUADROS} (${readdirSync(CUADROS).length} archivos)`)
     console.log(`\n  ffmpeg -framerate 30 -i "${SALIDA}/c%05d.jpg" -c:v libx264 -pix_fmt yuv420p "${SALIDA}/recorrido-1440.mp4"`)
 
     await cerrarPagina(p)

@@ -1,27 +1,32 @@
 'use client'
 
-import { useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
+import { useMotionValueEvent, type MotionValue } from 'motion/react'
 import { Fragment, useRef } from 'react'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { palabrasDe } from '../../_lib/palabras'
-import { CanalDePiezas, CanalDeTitular } from '../_contrato/canales'
+import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
+import { Bloque } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MarcaDeSeccion } from '../_contrato/Seccion'
 
 import { CONTENIDO } from './contenido'
 import { DESTINO_DEL_CTA } from './geometria'
-import { ANCHO_DEL_CTA, RELACION_DEL_CTA } from './tunel'
+import {
+  ANCHO_DEL_CTA,
+  CONVERSION_DE_LA_CAJA_DEL_CTA,
+  DURACION_DEL_TITILEO,
+  RELACION_DEL_CTA,
+  TOKEN_DEL_TITILEO,
+  transformDeLaCapa,
+} from './tunel'
 import {
   CAJA_DEL_CARTEL,
   CARTEL,
   ORIGEN_DEL_CARTEL,
   MEDIDA_DEL_CUERPO_CH,
-  VENTANA_DE_LA_LLEGADA,
-  VENTANA_DE_LA_PINTURA,
   clasesDelCuerpoDelCartel,
   enLaVentana,
 } from './geometria'
@@ -37,12 +42,6 @@ import { estiloDelLugar, poseDelGesto, transformDeLaPose } from './tunel'
  * el eje vertical con P2— y el tramo tiene dos verbos, no cuatro.
  */
 
-/** Las palabras de la bajada, partidas una sola vez. El espacio va ADENTRO de la
- *  pieza y adelante de la palabra: dos piezas vecinas sin él se anuncian pegadas,
- *  y `s10-acceso` §8 compara el texto anunciado de las dos ramas carácter por
- *  carácter. Así la concatenación devuelve la bajada exacta de la rama quieta. */
-const PALABRAS_DE_LA_BAJADA = palabrasDe(CONTENIDO.bajada)
-
 /**
  * EL CARTEL — «Portfolio» y su bajada, anclados arriba y a la derecha del logo.
  *
@@ -57,34 +56,49 @@ const PALABRAS_DE_LA_BAJADA = palabrasDe(CONTENIDO.bajada)
  * Y con eso se cierra solo el margen de 1 px que el hundido dejaba contra el pie
  * del cuadro: el cartel ya no baja, así que no hay nada que pueda asomar.
  *
- * ── El cuerpo se pinta, y por eso no pasa por `<Cuerpo>` ────────────────
+ * ── ⚠️ EL GESTO NO SE ELIGIÓ DE UN CATÁLOGO: SE COPIÓ DE DOS CALL SITES ──
  *
- * Se enciende palabra por palabra con `CanalDePiezas` y el patrón **P3**
- * —`opacity 0,3 → 1`, sin mover nada de lugar—, el mismo canal del contrato que
- * usa Servicios. No se copió nada de ese lane: el canal vive en
- * `_contrato/canales`, el partidor en `_lib/palabras`, los dos compartidos.
+ * El pedido nombró dos piezas del sitio y dijo que Portfolio tiene que hacer
+ * exactamente lo que hacen ellas. Se fue a leerlas, y la lectura corrigió al
+ * catálogo —que decía P1 por ser el patrón más usado del corpus—:
  *
- * La pintura corre exactamente en la MESETA (`VENTANA_DE_LA_PINTURA`): el único
- * tramo en que el cartel no está escalando ni alejándose.
+ *   · **el titular de «El equipo»** (`quienes-somos/equipo.tsx:54-62`) no usa P1.
+ *     Usa **P2** —el bloque entero subiendo desde media altura propia— adentro
+ *     de una VENTANA QUE RECORTA: `<span class="block overflow-hidden py-2 -my-2">`
+ *     por fuera y `CanalDeUnaPieza` por dentro. El docblock de esa ventana lo
+ *     dice con todas las letras: *«sin la máscara, las claves siguen corriendo y
+ *     no se nota: ésa fue la regresión del titular»*. La línea base desde la que
+ *     salen las palabras ES el borde de abajo de ese recorte.
+ *   · **el cuerpo de «develOP es una agencia…»** (`QuienesSomos.tsx:147-157`) usa
+ *     **P2 también**, y SIN ventana de recorte: sube desde media altura propia y
+ *     ya está. Nada de encenderse palabra por palabra.
  *
- * ── Qué mueve qué, ahora que el cartel llega con el gesto de la casa ───
+ * Así que acá va lo mismo: P2 para los dos, la máscara sólo en el titular, y la
+ * ventana de recorte se IMPORTA de la geometría compartida en vez de volver a
+ * deletrear sus clases.
  *
- * El titular lo mueve **P1**, por canal, y el cuerpo **P3**, por canal: los dos
- * del contrato compartido, ninguno escrito acá. Lo único que este archivo escribe
- * a mano es la SALIDA —el vuelo hacia adelante en z—, porque no hay patrón del
- * sistema para irse hacia el espectador y el que había iba al revés.
+ * ── ⚠️ Y EL PINTADO DEL CUERPO SALE ────────────────────────────
+ *
+ * El cuerpo se encendía palabra por palabra con P3. Se va por dos motivos y los
+ * dos son del pedido: el call site que hay que copiar no lo hace, y el gesto se
+ * repite después en Servicios —donde el párrafo se pinta mientras el paso
+ * avanza—, así que usarlo acá le saca el sentido allá. El cuerpo llega con su
+ * gesto y queda pintado.
+ *
+ * Con él se van el partidor de palabras y `CanalDePiezas` de este archivo.
+ *
+ * ── Qué mueve qué ───────────────────────────────────────
+ *
+ * El titular y el cuerpo los mueve **P2**, por canal del contrato compartido, en
+ * dos ventanas distintas para que se lean en orden. Lo único que este archivo
+ * escribe a mano es la SALIDA —el vuelo hacia adelante en z—, porque no hay
+ * patrón del sistema para irse hacia el espectador y el que había iba al revés.
  */
 export function PortadaDeTrabajos({
   seccion,
   progreso,
 }: PropsDeSeccion & { readonly progreso: MotionValue<number> }): React.JSX.Element {
   const cartel = useRef<HTMLDivElement | null>(null)
-  const pintura = useTransform(progreso, (p) =>
-    enLaVentana(enLaVentana(p, CARTEL), VENTANA_DE_LA_PINTURA),
-  )
-  const llegada = useTransform(progreso, (p) =>
-    enLaVentana(enLaVentana(p, CARTEL), VENTANA_DE_LA_LLEGADA),
-  )
 
   useMotionValueEvent(progreso, 'change', (p) => {
     const el = cartel.current
@@ -106,7 +120,12 @@ export function PortadaDeTrabajos({
     <div
       ref={cartel}
       data-pieza="cartel"
-      className="absolute flex flex-col gap-6 will-change-transform"
+      /* ⚠️ `justify-center` y no el arranque por defecto: la caja del cartel mide
+         0,42 del cuadro y su contenido bastante menos, así que apoyado arriba el
+         bloque quedaba 64 px más alto que el medio de la pantalla aunque la CAJA
+         estuviera centrada. Lo que el pedido pide que descanse a media pantalla
+         es lo que se ve, no la caja que lo contiene. */
+      className="absolute flex flex-col justify-center gap-6 will-change-transform"
       style={
         inicial === null
           ? { ...lugar, visibility: 'hidden' }
@@ -119,38 +138,51 @@ export function PortadaDeTrabajos({
       }
     >
       {/**
-       * ⚠️ **PORTFOLIO LLEGA CON EL GESTO DE LA CASA, y el gesto ya existía.**
+       * ⚠️ **EL TITULAR: P2 ADENTRO DE LA VENTANA QUE RECORTA.**
        *
-       * Entraba con una escala que crecía desde un punto interior. Eso no es el
-       * sitio: el sitio tiene UN gesto para que un titular entre, y es **P1, el
-       * revelado línea por línea** —142 instancias en el corpus de la referencia,
-       * el 58 %, y su propio archivo dice que si se reproduce un solo efecto es
-       * ése—. `LineasDeTexto` le pone a cada renglón su ventana de recorte y lo
-       * sube desde una altura de sí mismo: **la línea base desde la que salen las
-       * palabras es el borde de abajo de ese recorte**.
+       * Copiado de `equipo.tsx:54-62`, que es el call site que el pedido nombró.
+       * La ventana —`block overflow-hidden py-2 -my-2`— es lo que hace que el
+       * gesto se LEA como una aparición: sin ella P2 sigue corriendo y no se
+       * nota, que es textualmente la regresión que su docblock tiene anotada. El
+       * relleno y el margen se cancelan en el layout y sólo corren el borde de
+       * recorte, para que no se coma una cola de «p».
        *
-       * No se escribió nada nuevo. El canal, el partidor y el patrón ya estaban,
-       * y con ellos se fueron del núcleo la rampa de escala y su constante.
+       * Adentro de la ventana no hay nada focalizable —el titular es texto—, así
+       * que `s5-compacto` no tiene nada que decir: la regla del anillo de foco
+       * con desplazamiento positivo vale para cajas recortadas CON focalizables.
        *
-       * El `id` va en el envoltorio porque `CanalDeTitular` no acepta `id` —es de
-       * otro frente—, y el nombre accesible se computa del contenido, que es
-       * exactamente el titular. Es la misma solución que usa Tu panel.
+       * El `id` va en el envoltorio de afuera: el nombre accesible se computa del
+       * contenido, que es exactamente el titular.
        */}
       <div id={idDelTitularDeSeccion(seccion.id)}>
-        <CanalDeTitular progreso={llegada} patron="P1" texto={CONTENIDO.titular} nivel="display-xl" como="h2" />
+        <Bloque patron="P2" rango="ventana-de-la-mascara" className="block w-full">
+          {(progresoDeLaMascara) => (
+            <span className={VENTANA_QUE_RECORTA}>
+              <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
+                <Titular nivel="display-xl" como="h2">
+                  {CONTENIDO.titular}
+                </Titular>
+              </CanalDeUnaPieza>
+            </span>
+          )}
+        </Bloque>
       </div>
-      {/* La medida va como estilo en línea y no como clase arbitraria: el número
+      {/* ⚠️ **EL CUERPO: P2 Y SIN VENTANA.** Copiado de `QuienesSomos.tsx:147-157`,
+          el otro call site que el pedido nombró: ahí la bajada de la agencia sube
+          desde media altura propia y no lleva recorte. La diferencia con el
+          titular no es un olvido —es lo que separa a un rótulo de un párrafo—.
+
+          La medida va como estilo en línea y no como clase arbitraria: el número
           vive en `geometria.ts`, que es donde se decide, y así no hay una medida
           deletreada en ningún fuente que el escaneo de Tailwind pueda levantar. */}
       <div style={{ maxWidth: `${MEDIDA_DEL_CUERPO_CH}ch` }}>
-        <CanalDePiezas
-          progreso={pintura}
-          patron="P3"
-          cantidad={PALABRAS_DE_LA_BAJADA.length}
-          como="span"
-          contenedor={clasesDelCuerpoDelCartel()}
-          render={(i) => (i === 0 ? PALABRAS_DE_LA_BAJADA[i] : ` ${PALABRAS_DE_LA_BAJADA[i]}`)}
-        />
+        <Bloque patron="P2" rango="ventana-visible" className="block w-full">
+          {(progresoDelCuerpo) => (
+            <CanalDeUnaPieza progreso={progresoDelCuerpo} patron="P2">
+              <p className={clasesDelCuerpoDelCartel()}>{CONTENIDO.bajada}</p>
+            </CanalDeUnaPieza>
+          )}
+        </Bloque>
       </div>
     </div>
   )
@@ -247,107 +279,157 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
  * frase entera y las letras van escondidas de los lectores.
  */
 export function VentanaDelCta({
-  refVentana,
+  escalaInicial,
+  refEnvoltorio,
   refFrase,
+  refCursor,
   refVelo,
 }: {
-  readonly refVentana: (el: HTMLDivElement | null) => void
+  readonly escalaInicial: number
+  readonly refEnvoltorio: (el: HTMLDivElement | null) => void
   readonly refFrase: (el: HTMLDivElement | null) => void
+  readonly refCursor: (el: HTMLSpanElement | null) => void
   readonly refVelo: (el: HTMLDivElement | null) => void
 }): React.JSX.Element {
   const palabras = CONTENIDO.cta.frase.split(' ')
   return (
     <>
       {/* El velo que atenúa la sala. Es una capa pintada y no un filtro: ver
-          `VELO_DEL_CTA` en `tunel.ts`. */}
+          `VELO_DEL_CTA` en `tunel.ts`. ⚠️ Vive ADENTRO del tercer proyecto, antes
+          del CTA: afuera del nido pintaría encima de la ventana. Y adentro hereda
+          la escala del proyecto, que al nacer el CTA va por 0,58 del cuadro: por
+          eso se extiende un cuadro entero para cada lado, y el recorte del túnel
+          lo deja en el cuadro. */}
       <div
         ref={refVelo}
         data-pieza="velo-del-cta"
         aria-hidden="true"
-        className="bg-fondo pointer-events-none absolute inset-0"
+        className="bg-fondo pointer-events-none absolute -inset-full"
         style={{ opacity: 0 }}
       />
       {/* ⚠️ NO `data-pieza="cta"`: esa marca ya es del CTA del hero y del cierre, y
           `deslizamiento.ts` tiene un módulo entero colgado de ella. Robársela le
           daría a esta ventana el gesto de deslizamiento de aquél. */}
+      {/* LA CAPA DEL CTA: la última de la tabla, de 0 a 0,4 entre sus dos
+          scrolls. Es la caja del cuadro, como las otras, y la escala el lazo. */}
       <div
-        ref={refVentana}
-        data-pieza="ventana-del-cta"
-        /**
-         * ⚠️ **EL ANCHO LO PONE EL LAYOUT Y LA ESCALA VA DE 0 A 1.**
-         *
-         * Era al revés: una caja del ancho del cuadro escalada a 0,62. Con eso
-         * todo lo de adentro salía multiplicado por 0,62 —la URL declarada en
-         * 10 px llegaba a la pantalla en 6,2— y la tipografía del cromo era
-         * ilegible. Con la caja ya del tamaño final, un tamaño declarado es el
-         * tamaño que se ve.
-         */
-        className="absolute top-1/2 left-1/2 will-change-transform"
-        style={{
-          width: `${(ANCHO_DEL_CTA * 100).toFixed(2)}%`,
-          aspectRatio: `${RELACION_DEL_CTA.ancho} / ${RELACION_DEL_CTA.alto}`,
-          transform: 'translate(-50%, -50%) scale(0)',
-        }}
+        ref={refEnvoltorio}
+        data-capa="cta"
+        className="absolute inset-0 will-change-transform"
+        style={{ transform: transformDeLaCapa(escalaInicial) }}
       >
-        <a
-          href={DESTINO_DEL_CTA}
-          data-pieza="enlace-del-cta"
-          /* ⚠️ `bg-tinta text-fondo` y no una superficie del tema: acá la sala está
-             INVERTIDA, así que las superficies son oscuras y la tinta es clara —una
-             ventana de navegador pintada con ellas queda gris sobre gris, medido—.
-             El par invertido es el mismo que usa la franja de la llave, con su
-             contraste conocido, y además es lo que hace que esto se lea como una
-             ventana: papel claro con texto oscuro, encima de la noche. */
-          className="bg-tinta text-fondo rounded-sutil pointer-events-auto flex h-full w-full flex-col overflow-hidden"
+        <div
+          data-pieza="ventana-del-cta"
+          /**
+           * ⚠️ **EL ANCHO LO PONE EL LAYOUT Y LA ESCALA ACUMULADA TERMINA EN 1.**
+           *
+           * Una caja del ancho del cuadro escalada a 0,62 multiplicaba todo lo de
+           * adentro por 0,62 —la URL declarada en 10 px llegaba a la pantalla en
+           * 6,2—. Con la caja ya del tamaño final y la cadena terminando en 1, un
+           * tamaño declarado es el tamaño que se ve. La cadena termina en 1 por esta
+           * escala fija: la conversión entre la caja de su CTA y la nuestra
+           * (`CONVERSION_DE_LA_CAJA_DEL_CTA`), que sale de la tabla.
+           */
+          className="absolute top-1/2 left-1/2"
+          style={{
+            width: `${(ANCHO_DEL_CTA * 100).toFixed(2)}%`,
+            aspectRatio: `${RELACION_DEL_CTA.ancho} / ${RELACION_DEL_CTA.alto}`,
+            transform: `translate(-50%, -50%) scale(${CONVERSION_DE_LA_CAJA_DEL_CTA.toFixed(5)})`,
+          }}
         >
-          {/* El cromo: los tres círculos del semáforo y la barra de direcciones.
-              Los círculos son decoración y van con los colores de macOS, que son
-              lo que hace reconocible el gesto; la dirección SÍ es contenido y se
-              anuncia, porque también está en la lista de abajo de 1025. */}
-          <div className="flex items-center gap-2 px-5 py-4">
-            <span aria-hidden="true" className="bg-semaforo-rojo block size-3 rounded-full" />
-            <span aria-hidden="true" className="bg-semaforo-amarillo block size-3 rounded-full" />
-            <span aria-hidden="true" className="bg-semaforo-verde block size-3 rounded-full" />
-            <span className="border-fondo rounded-sutil ml-4 flex-1 border px-3 py-1 text-center">
-              <Cuerpo como="span" className="font-codigo">
-                {CONTENIDO.cta.direccion}
-              </Cuerpo>
-            </span>
-          </div>
-          {/**
-           * ⚠️ **LA FRASE ES UN CARTEL, no un renglón centrado.**
-           *
-           * Tamaño de display, interlineado por debajo de 1 —`leading-cartel`, el
-           * único del tema—, alineada a la izquierda y ocupando el ancho de la
-           * ventana en tres renglones. Deliberadamente fuera de contexto: un
-           * póster editorial adentro de un navegador.
-           *
-           * ⚠️ **EL TIPEO SE HACE CON UN RECORTE POR PALABRA, no con un elemento
-           * por letra**, y es una restricción del repo: dos detectores comparan el
-           * texto anunciado de las dos ramas nodo por nodo, y una frase partida en
-           * veintinueve elementos deja de tener palabras. Medido: faltaban cuatro.
-           * Con un `<span>` por PALABRA y un `clip-path` que la descubre de
-           * izquierda a derecha, el texto del documento sigue siendo la frase y lo
-           * que se ve sigue siendo letra por letra.
-           */}
-          <div className="flex flex-1 flex-col justify-center px-8 pb-8">
-            <Titular nivel="display-xl" como="p" className="leading-cartel text-left">
-              <span ref={refFrase} data-pieza="frase-del-cta">
-                {palabras.map((palabra, p) => (
-                  <Fragment key={`${palabra}-${String(p)}`}>
-                    {p > 0 ? ' ' : null}
-                    <span data-palabra={palabra} className="inline-block" style={{ clipPath: 'inset(0 100% 0 0)' }}>
-                      {palabra}
-                    </span>
-                  </Fragment>
-                ))}
+          <a
+            href={DESTINO_DEL_CTA}
+            data-pieza="enlace-del-cta"
+            /* ⚠️ `bg-tinta text-fondo` y no una superficie del tema: acá la sala está
+               INVERTIDA, así que las superficies son oscuras y la tinta es clara —una
+               ventana de navegador pintada con ellas queda gris sobre gris, medido—.
+               El par invertido es el mismo que usa la franja de la llave, con su
+               contraste conocido, y además es lo que hace que esto se lea como una
+               ventana: papel claro con texto oscuro, encima de la noche. */
+            className="bg-tinta text-fondo rounded-sutil pointer-events-auto flex h-full w-full flex-col overflow-hidden"
+          >
+            {/* El cromo: los tres círculos del semáforo y la barra de direcciones.
+                Los círculos son decoración y van con los colores de macOS, que son
+                lo que hace reconocible el gesto; la dirección SÍ es contenido y se
+                anuncia, porque también está en la lista de abajo de 1025. */}
+            <div className="flex items-center gap-2 px-5 py-4">
+              <span aria-hidden="true" className="bg-semaforo-rojo block size-3 rounded-full" />
+              <span aria-hidden="true" className="bg-semaforo-amarillo block size-3 rounded-full" />
+              <span aria-hidden="true" className="bg-semaforo-verde block size-3 rounded-full" />
+              <span className="border-fondo rounded-sutil ml-4 flex-1 border px-3 py-1 text-center">
+                <Cuerpo como="span" className="font-codigo">
+                  {CONTENIDO.cta.direccion}
+                </Cuerpo>
               </span>
-            </Titular>
-            <Cuerpo como="span" className="pt-6">
-              {CONTENIDO.cta.rotulo}
-            </Cuerpo>
-          </div>
-        </a>
+            </div>
+            {/**
+             * ⚠️ **LA FRASE ES UN CARTEL, no un renglón centrado.**
+             *
+             * Tamaño de display, interlineado por debajo de 1 —`leading-cartel`, el
+             * único del tema—, alineada a la izquierda y ocupando el ancho de la
+             * ventana en tres renglones. Deliberadamente fuera de contexto: un
+             * póster editorial adentro de un navegador.
+             *
+             * ⚠️ **EL TIPEO SE HACE CON UN RECORTE POR PALABRA, no con un elemento
+             * por letra**, y es una restricción del repo: dos detectores comparan el
+             * texto anunciado de las dos ramas nodo por nodo, y una frase partida en
+             * veintinueve elementos deja de tener palabras. Medido: faltaban cuatro.
+             * Con un `<span>` por PALABRA y un `clip-path` que la descubre de
+             * izquierda a derecha, el texto del documento sigue siendo la frase y lo
+             * que se ve sigue siendo letra por letra.
+             */}
+            <div className="flex flex-1 flex-col justify-center px-8 pb-8">
+              {/**
+               * ⚠️ **EL CURSOR VA POSICIONADO, NO INTERCALADO.**
+               *
+               * La cabeza de tipeo cae en la MITAD de una palabra —cada palabra se
+               * descubre con un recorte de izquierda a derecha—, así que un `_`
+               * puesto entre dos palabras del marcado nunca estaría donde el texto
+               * termina: estaría adelantado o atrasado hasta el ancho de una
+               * palabra entera. Va como UNA pieza absoluta que el bucle mueve.
+               *
+               * ⚠️ **Y se mueve con `offsetLeft`, no con `getBoundingClientRect`.**
+               * La ventana entera del CTA lleva una escala viva, así que los rects
+               * de todo lo de adentro vienen multiplicados por ella y el cursor
+               * quedaría cada vez más lejos a medida que la ventana crece.
+               * `offsetLeft`/`offsetTop` son caja de LAYOUT y no los toca ninguna
+               * transformada — la misma lección que el repo ya tiene anotada,
+               * aplicada al revés: acá lo que se quiere es ignorarlas.
+               *
+               * El `relative` de la frase es lo que la hace `offsetParent`. Va en
+               * un `span` que sigue siendo `inline`, así que no cambia un corte de
+               * renglón del cartel.
+               */}
+              <Titular nivel="display-xl" como="p" className="leading-cartel text-left">
+                <span ref={refFrase} data-pieza="frase-del-cta" className="relative">
+                  {palabras.map((palabra, p) => (
+                    <Fragment key={`${palabra}-${String(p)}`}>
+                      {p > 0 ? ' ' : null}
+                      <span data-palabra={palabra} className="inline-block" style={{ clipPath: 'inset(0 100% 0 0)' }}>
+                        {palabra}
+                      </span>
+                    </Fragment>
+                  ))}
+                  <span
+                    ref={refCursor}
+                    data-pieza="cursor-del-cta"
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 will-change-transform"
+                    style={{ [TOKEN_DEL_TITILEO as string]: DURACION_DEL_TITILEO } as React.CSSProperties}
+                  >
+                    _
+                  </span>
+                </span>
+              </Titular>
+              {/* ⚠️ «Hablemos» sube de `cuerpo` a `titulo-m`: es el rótulo del
+                  botón, no una nota al pie del cartel, y al lado de un titular de
+                  display se leía como letra chica. */}
+              <Titular nivel="titulo-m" como="span" className="pt-6">
+                {CONTENIDO.cta.rotulo}
+              </Titular>
+            </div>
+          </a>
+        </div>
       </div>
     </>
   )

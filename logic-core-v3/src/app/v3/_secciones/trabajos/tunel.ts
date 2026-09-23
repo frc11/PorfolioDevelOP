@@ -27,22 +27,15 @@
  * módulo lo alcanza la rama QUIETA, y `s7-contrato` prohíbe que el árbol quieto
  * importe un valor del sistema de motion.
  *
- * ── 2 · EL TÚNEL — medido sobre la referencia, no elegido ────────────────
+ * ── 2 · EL TÚNEL — la tabla medida sobre la referencia, anidada ─────────
  *
- * La mecánica y sus números salen de medir heatbureau.com con el banco de
- * `scripts-b4/`, a 1440 × 900, rastreando cuadro por cuadro la caja en pantalla
- * de cada imagen. Cada constante de abajo trae su medición. Los dos titulares:
- *
- *   · **no hay perspectiva.** `perspective: none` y `transform-style: flat` en
- *     las siete capas de la referencia. Es escala 2D y nada más.
- *   · **cada imagen crece en RECTA, no en exponencial.** Ajustando el ancho en
- *     pantalla contra el scroll, sólo en el tramo en que la imagen crece de
- *     verdad, la recta gana en las seis: R² 0,96–0,995 contra 0,77–0,84 del
- *     ajuste logarítmico. Lo que se lee como exponencial es el RELEVO —nace una
- *     cada tanto y las viejas siguen creciendo por fuera del cuadro—.
+ * Es la tabla de heatbureau.com tal cual —cinco de sus siete capas, cada una una
+ * recta con clamp— y el resorte de su bundle. Nada se deriva: ver la sección 2.
  */
 
 import type { CSSProperties } from 'react'
+
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
 
 /** Un lugar del cuadro en fracciones: `x` del ancho, `y` del alto. */
 export interface PuntoDelCuadro {
@@ -133,9 +126,20 @@ export function poseDelGesto(u: number, tiempos: TiemposDelGesto): PoseDelElemen
   if (huirDesde !== null && !(huirDesde >= crecerHasta && huirDesde < 1)) {
     throw new Error(`huirDesde inválido: ${huirDesde} contra crecerHasta ${crecerHasta}`)
   }
-  if (u <= 0) return null
-  // Mientras LLEGA y mientras se lee, la caja está quieta y entera: lo que se
-  // mueve adentro es P1, renglón por renglón, y eso no lo dibuja esta función.
+  // ⚠️ **ANTES DE SU VENTANA LA CAJA YA ESTÁ, Y ESO ES EL ARREGLO DE ESTE SPRINT.**
+  //
+  // Devolvía `null` —o sea `visibility: hidden`— para todo `u <= 0`, así que el
+  // cartel no existía hasta el píxel exacto en que el pin enganchaba. Medido:
+  // su ventana abre en el píxel 0 de la sección, así que la llegada entera
+  // ocurría en 420 px, de golpe y con el panel recién posado. Eso es lo que se
+  // reportó como «está ya puesto, sin llegada».
+  //
+  // Ahora la caja está desde el principio y lo que LLEGA es su contenido, con
+  // su propio rango —el mismo de «El equipo»—, que abre con la sección todavía
+  // entrando. La caja no hace nada mientras tanto: es un lugar, no un gesto.
+  //
+  // Mientras llega y mientras se lee, la caja está quieta y entera: lo que se
+  // mueve adentro son sus dos piezas, y eso no lo dibuja esta función.
   if (huirDesde === null || u < huirDesde) {
     return { escala: 1, z: 0, opacidad: 1 }
   }
@@ -183,270 +187,280 @@ export function transformDeLaPose(pose: PoseDelElemento): string {
 }
 
 // ===========================================================================
-// 2 · EL TÚNEL — el avance, y cuánto mide cada captura en pantalla
+// 2 · EL TÚNEL — la tabla medida sobre la referencia, anidada
 // ===========================================================================
 
 /**
- * ⚠️ **EL AVANCE SE MIDE EN ANCHOS DE CUADRO, Y LA UNIDAD ES LA MEDICIÓN.**
+ * ⚠️ **EL TÚNEL ES UNA TABLA, NO UNA LEY.** Cinco iteraciones derivaron leyes
+ * —dos tramos, ×2 por scroll, un umbral de percepción— de conteos hechos a ojo, y
+ * las cinco fallaron. Lo que hay acá es lo que se MIDIÓ en heatbureau.com con
+ * `scripts-b4/ref-tabla.ts` (1440 × 900, muescas de rueda reales, cada paso
+ * posado) y se leyó de su bundle: cada capa escala en RECTA entre dos scrolls y
+ * se queda en sus dos puntas. La recta reprodujo las 36 muestras de cada capa con
+ * un error máximo de 7·10⁻⁶. Nada de esto se ajustó: son sus números, tal cual.
  *
- * Una captura nace con ancho cero y crece en recta. Si el avance se cuenta en
- * anchos de cuadro, entonces **el ancho de una captura es, literalmente, el
- * avance que lleva desde que nació**: `ancho = avance − avanceDeSuNacimiento`.
- * No hay una constante de velocidad escondida —la elección de la unidad la hizo
- * desaparecer—, y todo lo demás de este bloque son distancias en esa misma regla.
+ * ── ⚠️ ANIDADAS, Y ESO ES EL EFECTO ─────────────────────────────────────
  *
- * El avance crece mientras se baja y decrece al subir. No es el progreso de la
- * sección: lo PERSIGUE, con retraso. Ver `perseguir`.
+ * Cada capa vive ADENTRO de la anterior y lleva su propia escala. Lo que mide en
+ * pantalla es el producto de la suya y la de todos sus ancestros: la aceleración
+ * que se leía como exponencial es ese producto de rectas, no una curva.
+ *
+ * ── ⚠️ CINCO DE SUS SIETE, Y CUÁLES SE CAYERON ──────────────────────────
+ *
+ * Ella tiene escenario + seis imágenes; nosotros, escenario + tres proyectos +
+ * CTA. Se cayeron su **#0** (el durazno: arranca en 0,8, y acá toda capa arranca
+ * en 0) y su **#1**. Con esas dos afuera, cada par padre → hijo de nuestra cadena
+ * —proyecto → proyecto → CTA— es un par CONSECUTIVO de la suya (#2 → #3 → #4 →
+ * #5), así que las razones de tamaño entre capas que coexisten son las suyas, en
+ * el mismo scroll. Es la única elección compatible con «arrancan en 0» que
+ * conserva los tres pares, y la única cuyos tres proyectos terminan desbordando
+ * el cuadro como los de ella.
+ *
+ * Su #3 además se desliza (`x: 42 → 0`, `y: 52 → 0`): acá no, lo único animado es
+ * la escala.
  */
+
+/** Una capa de la tabla: su escala va de `de` a `a` en recta entre `arranca` y
+ *  `topa`, que son scrolls de la REFERENCIA en píxeles, y afuera se queda. */
+export interface CapaDeLaTabla {
+  readonly de: number
+  readonly a: number
+  readonly arranca: number
+  readonly topa: number
+}
+
+/** La tabla, tal cual se midió. El comentario de cada fila dice qué capa suya es. */
+export const CAPAS_DEL_TUNEL = {
+  escenario: { de: 1, a: 1.3, arranca: 199, topa: 1420 }, // su escenario
+  proyectos: [
+    { de: 0, a: 0.9, arranca: 810, topa: 1720 }, // su #2
+    { de: 0, a: 1.2, arranca: 1303, topa: 1983 }, // su #3
+    { de: 0, a: 1.05, arranca: 1636, topa: 2236 }, // su #4
+  ],
+  cta: { de: 0, a: 0.4, arranca: 1873, topa: 2290 }, // su #5, que también es su CTA
+} as const satisfies {
+  readonly escenario: CapaDeLaTabla
+  readonly proyectos: readonly CapaDeLaTabla[]
+  readonly cta: CapaDeLaTabla
+}
+
+/** La escala de una capa en un scroll de la referencia: recta, y quieta afuera. */
+export function escalaDeLaCapa(capa: CapaDeLaTabla, yDeLaReferencia: number): number {
+  const t = (yDeLaReferencia - capa.arranca) / (capa.topa - capa.arranca)
+  // Las puntas devuelven el valor de la tabla y no la cuenta: así el producto de
+  // la cadena al final es BIT A BIT el de sus topes, y el CTA llega a 1 exacto.
+  if (t <= 0) return capa.de
+  if (t >= 1) return capa.a
+  return capa.de + (capa.a - capa.de) * t
+}
 
 /**
- * ⚠️ **EL RITMO — la única constante de velocidad, y sale de la referencia.**
- *
- * Cuánto MULTIPLICA su tamaño una captura cada 100 px de scroll. Medido sobre
- * heatbureau.com, en la banda donde vive la imagen que uno mira —entre el 40 % y
- * el 120 % del cuadro—: ×1,33 · ×1,33 · ×1,50 · ×1,54 en la primera mitad de esa
- * banda y ×1,02 · ×1,02 · ×1,18 · ×1,26 en la segunda. La mediana del conjunto
- * es **×1,25**, y es lo que se declara.
- *
- * ⚠️ **Que sea un factor y no una cantidad de píxeles ES el arreglo.** Antes el
- * ancho crecía en RECTA, que es como la referencia lo hace; el problema es que
- * una recta en píxeles es un ritmo RELATIVO que se desploma: la primera captura
- * iba de 189 a 472 px —×2,5— y más tarde de 1.323 a 2.362 —×1,8— sobre un tramo
- * de scroll casi cuatro veces más largo. Con un factor constante, tramos iguales
- * de scroll multiplican el tamaño por lo mismo **en cualquier punto del tramo**,
- * que es lo que el ojo llama «ritmo parejo».
- *
- * ⚠️ **La referencia NO se copia acá, y hay que decirlo.** Sus imágenes también
- * aceleran y frenan —más que las nuestras: ×3 a ×16 cada 100 px cuando son
- * chiquitas contra ×1,02 cuando llenan el cuadro—. Lo que la salva es que
- * conviven SEIS, así que la que uno mira está siempre en su fase lenta. Con tres
- * capturas ese truco no está disponible, y por eso acá el ritmo se declara en vez
- * de emerger.
+ * ⚠️ **DÓNDE CAE NUESTRO TÚNEL EN SU REGLA: donde arranca nuestro primer
+ * proyecto.** La tabla se corre ENTERA por esta sola constante, así que todas
+ * las distancias entre capas quedan las suyas. El túnel sigue arrancando donde
+ * el cartel empieza a huir (`geometria.ts`); lo que se elige acá es qué scroll de
+ * ella le toca a ese instante, y le toca el del primer proyecto para que no haya
+ * un tramo de escenario vacío. Su escenario arranca 611 px antes: lo hace con el
+ * túnel todavía sin nada adentro, y por eso no se ve.
  */
-export const RITMO_POR_CIEN_PX = 1.25
+export const ORIGEN_DEL_TUNEL = CAPAS_DEL_TUNEL.proyectos[0].arranca
 
-/** El avance se mide en e-plegados: `ancho = nacer × e^(avance − nacimiento)`. */
-export const AVANCE_POR_PX = Math.log(RITMO_POR_CIEN_PX) / 100
+/** Lo que dura el túnel: del arranque del primer proyecto al tope del CTA. 1.480 px. */
+export const PX_DEL_TUNEL = CAPAS_DEL_TUNEL.cta.topa - ORIGEN_DEL_TUNEL
 
-/**
- * ⚠️ **A QUÉ TAMAÑO NACE UNA CAPTURA, en anchos de cuadro.**
- *
- * La referencia no contesta esta pregunta: **sus imágenes nacen en 0 px con
- * opacidad 1** —medido: no entran con fundido ni aparecen grandes—. Nacen de la
- * nada y crecen en recta, que es justamente lo que acá se descartó.
- *
- * Con crecimiento exponencial el cero no existe, así que el tamaño de nacimiento
- * es una decisión, y es la que fija cuánto scroll pide el túnel.
- *
- * ⚠️ **Era 0,44 y bajó a 0,10, que son 144 px sobre un cuadro de 1.440.** A 0,44
- * la primera captura aparecía ya grande y el tramo se leía como tres saltos; a
- * 0,10 se la ve venir de lejos y tarda **1.032 px de scroll** en llenar el cuadro.
- * El precio está declarado y pagado: el túnel pasó de pedir 1.009 px a pedir
- * **3.001**, y la sección creció de tres pantallas a seis para dárselos.
- */
-export const ANCHO_AL_NACER = 0.1
+/** Lo que miden juntas, al final, las capas que envuelven al CTA. */
+const ACUMULADA_FINAL_ARRIBA_DEL_CTA = CAPAS_DEL_TUNEL.proyectos.reduce(
+  (producto: number, capa) => producto * capa.a,
+  CAPAS_DEL_TUNEL.escenario.a,
+)
 
-/**
- * ⚠️ **EL RELEVO — la siguiente nace cuando la anterior CASI llena el cuadro.**
- *
- * Era 0,32 y la segunda aparecía con la primera a un tercio de la pantalla. Ahora
- * la primera tiene que estar llegando al límite: 0,90 del ancho del cuadro. El
- * tramo deja de ser una pila profunda y pasa a ser tres zooms encadenados, que es
- * lo que se pidió.
- */
-export const ANCHO_DEL_RELEVO = 0.9
+/** La pose del túnel en un instante: cada escala propia y lo que mide cada uno. */
+export interface PoseDelTunel {
+  readonly escenario: number
+  readonly proyectos: readonly number[]
+  readonly cta: number
+  /** El ancho en pantalla de cada proyecto, en anchos de cuadro: su cadena. */
+  readonly anchos: readonly number[]
+  /** Cuánto de su tamaño final lleva el CTA en pantalla, de 0 a 1. */
+  readonly fraccionDelCta: number
+}
+
+/** La pose para un píxel del túnel, contado desde su arranque. */
+export function poseDelTunel(pxDelTunel: number): PoseDelTunel {
+  const y = pxDelTunel + ORIGEN_DEL_TUNEL
+  const escenario = escalaDeLaCapa(CAPAS_DEL_TUNEL.escenario, y)
+  const proyectos = CAPAS_DEL_TUNEL.proyectos.map((capa) => escalaDeLaCapa(capa, y))
+  const anchos: number[] = []
+  let producto = escenario
+  for (const escala of proyectos) {
+    producto *= escala
+    anchos.push(producto)
+  }
+  const cta = escalaDeLaCapa(CAPAS_DEL_TUNEL.cta, y)
+  return {
+    escenario,
+    proyectos,
+    cta,
+    anchos,
+    fraccionDelCta: (producto / ACUMULADA_FINAL_ARRIBA_DEL_CTA) * (cta / CAPAS_DEL_TUNEL.cta.a),
+  }
+}
 
 /**
- * «Llega al límite de la pantalla»: su ancho iguala al del cuadro. Es el fin del
- * túnel y no un tamaño elegido.
+ * En qué píxel del túnel el proyecto `indice` llega a medir `ancho` en pantalla.
+ * La cadena es un producto de rectas que no bajan, así que no baja: se biseca.
+ * Si nunca llega, devuelve el final del túnel.
  */
+export function pxParaQueElProyectoMida(indice: number, ancho: number): number {
+  if (!(indice >= 0 && indice < CAPAS_DEL_TUNEL.proyectos.length)) throw new Error(`proyecto inválido: ${indice}`)
+  const mide = (px: number): number => poseDelTunel(px).anchos[indice]
+  if (mide(PX_DEL_TUNEL) < ancho) return PX_DEL_TUNEL
+  let bajo = CAPAS_DEL_TUNEL.proyectos[indice].arranca - ORIGEN_DEL_TUNEL
+  let alto = PX_DEL_TUNEL
+  for (let k = 0; k < 48; k += 1) {
+    const medio = (bajo + alto) / 2
+    if (mide(medio) < ancho) bajo = medio
+    else alto = medio
+  }
+  return alto
+}
+
+/** El `transform` de una capa: sólo escala. El centro lo pone su caja, que es el cuadro. */
+export function transformDeLaCapa(escala: number): string {
+  return `scale(${escala.toFixed(5)})`
+}
+
+/**
+ * ⚠️ **UN SCROLL SON 100 PX.** Medido en B2 sobre el propio sitio —la rueda
+ * entrega 100 px por golpe— y la referencia se midió con muescas del mismo
+ * tamaño. Lo sigue usando el cartel para contar su huida en scrolls; el túnel ya
+ * no cuenta en scrolls sino en los píxeles de ella.
+ */
+export const PX_POR_SCROLL = 100
+
+/**
+ * ⚠️ **EL ANCHO DEL CUADRO CON EL QUE SE CUENTAN LOS PÍXELES.** Todo lo del tramo
+ * se midió a 1.440 × 900; los anchos en cuadros se pasan a píxeles con esto.
+ */
+export const ANCHO_DEL_CUADRO_DE_REFERENCIA = 1440
+
+/**
+ * ⚠️ **CUÁNTO DE SU CAPTURA OCUPA EL RÓTULO. Medido, no elegido.**
+ *
+ * El rótulo es `absolute bottom-0 left-0` adentro de la caja de la captura, así
+ * que la razón entre los dos anchos no depende de la escala. Medido con
+ * `offsetWidth` a 1440 × 900: 0,2674 · **0,3937** · 0,3521 — manda el más ancho,
+ * porque de acá sale un umbral que tiene que valer para los tres. Una captura se
+ * RECONOCE cuando se le puede leer el nombre, y eso pasa a este ancho.
+ */
+export const FRACCION_DEL_ROTULO = 0.3937
+
+/** El ancho del cuadro, en anchos de cuadro: donde el rótulo toca el borde y sale. */
 export const ANCHO_DEL_LIMITE = 1
 
 /**
- * ⚠️ **EL TOPE — medido en la referencia, y acá hace falta de verdad.**
- *
- * Sus imágenes topaban entre 1,17 y 1,68 anchos de cuadro y se quedaban ahí. Con
- * crecimiento exponencial el tope deja de ser decorativo: sin él, la primera
- * terminaría en 4,18 anchos de cuadro —6.020 px de un archivo de 1.920— y lo que
- * se ve es una textura estirada, no una captura. El valor es el TECHO de la banda
- * medida, así que el desborde de la primera cae adentro de ella por construcción.
+ * La banda en que se lee el rótulo: abre cuando entra en su captura y cierra
+ * cuando la captura llega al ancho del cuadro, que es cuando su esquina de abajo
+ * a la izquierda —donde vive— sale por el borde.
  */
-export const ANCHO_MAXIMO = 1.68
+export const BANDA_DEL_ROTULO = { desde: FRACCION_DEL_ROTULO, hasta: ANCHO_DEL_LIMITE } as const
 
-/** El paso entre nacimientos, en e-plegados. DERIVADO del relevo y del nacimiento. */
-export const PASO_DEL_RELEVO = Math.log(ANCHO_DEL_RELEVO / ANCHO_AL_NACER)
+/** Lo que tarda el rótulo en entrar o en salir: un cuarto de su banda. */
+const RAMPA_DEL_ROTULO = (BANDA_DEL_ROTULO.hasta - BANDA_DEL_ROTULO.desde) / 4
 
 /**
- * ⚠️ **LA ENTRADA DEL NACIMIENTO — lo único que el exponencial obliga a inventar.**
- *
- * Una captura no puede aparecer de golpe ocupando el 44 % del cuadro. La referencia
- * no tiene este problema porque nace en cero. Acá entra con un fundido corto, y su
- * largo no es una constante nueva: es **un cuarto del paso del relevo**, o sea una
- * fracción de algo que ya estaba declarado.
+ * ⚠️ **EL ANCHO DESDE EL QUE EL RÓTULO SE LEE ENTERO — y es el piso del foco.**
+ * Reconocible es poder leer el nombre, y en el borde de la banda el rótulo
+ * todavía está en opacidad 0: un piso ahí deja el enlace enfocado invisible.
  */
-export const ENTRADA_DEL_NACIMIENTO = PASO_DEL_RELEVO / 4
-
-/** El avance al que nace la captura `indice`. La primera nace en cero. */
-export function avanceDelNacimiento(indice: number): number {
-  if (!Number.isInteger(indice) || indice < 0) throw new Error(`índice inválido: ${indice}`)
-  return indice * PASO_DEL_RELEVO
-}
-
-/**
- * El avance con el que el túnel queda cumplido: la ÚLTIMA captura llega al límite
- * de la pantalla. Deriva del paso y del tamaño de nacimiento.
- */
-export function avanceQueCompletaElTunel(cuantas: number): number {
-  if (!Number.isInteger(cuantas) || cuantas < 1) throw new Error(`cuántas inválido: ${cuantas}`)
-  return avanceDelNacimiento(cuantas - 1) + Math.log(ANCHO_DEL_LIMITE / ANCHO_AL_NACER)
-}
-
-/** Cuántos píxeles de scroll pide el túnel entero, al ritmo declarado. */
-export function pxQuePideElTunel(cuantas: number): number {
-  return avanceQueCompletaElTunel(cuantas) / AVANCE_POR_PX
-}
-
-/**
- * EL ANCHO DE UNA CAPTURA EN ANCHOS DE CUADRO, o `null` si todavía no nació.
- *
- * `nacer × e^(avance − nacimiento)`, con tope. El ritmo relativo es el mismo en
- * cualquier punto de la curva, que es la propiedad entera de este bloque.
- */
-export function anchoDeLaCaptura(indice: number, avance: number): number | null {
-  const propio = avance - avanceDelNacimiento(indice)
-  if (propio < 0) return null
-  return Math.min(ANCHO_AL_NACER * Math.exp(propio), ANCHO_MAXIMO)
-}
-
-/** Cuánto se ve una captura recién nacida: entra en un cuarto de paso y se queda. */
-export function opacidadDeLaCaptura(indice: number, avance: number): number {
-  const propio = avance - avanceDelNacimiento(indice)
-  if (propio < 0) return 0
-  return Math.min(1, propio / ENTRADA_DEL_NACIMIENTO)
-}
-
-/**
- * ⚠️ **CUÁNTO LLEGA A MEDIR LA PRIMERA.** Con tres capturas el modelo la llevaría
- * a `0,44 × e^2,25 = 4,17` anchos de cuadro, así que **el tope de 1,70 sí muerde**:
- * termina ahí, adentro de los 1,17–1,68 que la referencia medía, y deja de crecer
- * mucho antes de que el túnel termine.
- */
-export function anchoFinalDeLaPrimera(cuantas: number): number {
-  return Math.min(ANCHO_AL_NACER * Math.exp(avanceQueCompletaElTunel(cuantas)), ANCHO_MAXIMO)
-}
-
-/**
- * ⚠️ **LA BANDA EN LA QUE EL RÓTULO SE LEE — las dos constantes del tramo, otra vez.**
- *
- * El nombre y el rubro viajan con su captura y se ven mientras la captura está
- * entre su tamaño de nacimiento y el del relevo: desde que aparece hasta que la
- * siguiente la releva. No hay una tercera constante que calibrar.
- */
-export const BANDA_DEL_ROTULO = { desde: ANCHO_AL_NACER, hasta: ANCHO_DEL_RELEVO } as const
+export const ANCHO_CON_EL_ROTULO_ENTERO = BANDA_DEL_ROTULO.desde + RAMPA_DEL_ROTULO
 
 /** Cuánto se ve el rótulo de una captura de ese ancho. Entra y sale en rampa. */
 export function opacidadDelRotulo(ancho: number): number {
   const { desde, hasta } = BANDA_DEL_ROTULO
-  const rampa = (hasta - desde) / 4
-  return Math.min(acotar01((ancho - desde) / rampa), acotar01((hasta - ancho) / rampa))
+  return Math.min(acotar01((ancho - desde) / RAMPA_DEL_ROTULO), acotar01((hasta - ancho) / RAMPA_DEL_ROTULO))
 }
 
-// ── La persecución: por qué sigue creciendo cuando soltás ──────────────────
+/**
+ * ⚠️ **EL RÓTULO ESCALA CON SU PROYECTO, y por eso no lleva transformada.** Vive
+ * adentro de la caja de la captura y hereda la escala de su cadena: la razón
+ * entre los dos anchos queda clavada en `FRACCION_DEL_ROTULO` en todo el
+ * recorrido. Contra-escalarlo es lo que hacía leer «El Garage» gigante encima de
+ * una captura chiquita.
+ */
+export function transformDelRotulo(): string {
+  return 'scale(1)'
+}
+
+/** El ancho del rótulo en pantalla, en anchos de cuadro, para una captura de ese ancho. */
+export function anchoDelRotuloEnPantalla(anchoDeLaCaptura: number): number {
+  return anchoDeLaCaptura * FRACCION_DEL_ROTULO
+}
+
+// ── El resorte: por qué sigue creciendo cuando soltás ──────────────────────
 
 /**
- * ⚠️ **CUÁNTO TARDA EN FRENAR DEL TODO DESPUÉS DE SOLTAR. Medido, y pedido.**
- *
- * El humano midió «~3 s» en la referencia y la medición lo confirma, pero no por
- * donde parece. Con un solo golpe de rueda de 120 px desde un estado quieto:
- * **el scroll de la referencia frena a los 764 ms** —eso es su scroll suave— y
- * **la imagen sigue creciendo hasta los 2.658 ms**, quedando 46 % más grande de
- * lo que era al soltar. Hay DOS amortiguaciones encadenadas y la segunda, la del
- * zoom, es la que se siente: su constante de tiempo medida es 454 ms
- * —decaimiento geométrico de razón 0,746 cada 133 ms, constante hasta el cuarto
- * decimal sobre nueve muestras—.
- *
- * Acá va UNA sola amortiguación con el tiempo que el humano pidió. Contra la
- * referencia, en los tres hitos del camino que queda por recorrer:
- *
- *     hito      referencia       esto
- *     50 %          525 ms     451 ms
- *     90 %        1.271 ms   1.499 ms
- *     99 %        2.231 ms   3.000 ms
+ * ⚠️ **EL RESORTE ES EL DE LA REFERENCIA, leído de su bundle.** Cada capa suya
+ * persigue su recta con un resorte de framer-motion `stiffness 215, damping 100,
+ * mass 1`: ζ = 3,41, muy sobreamortiguado, cero rebote. Reemplaza a la
+ * persecución de 5.000 ms, que salía de un conteo a ojo.
  */
-export const ASENTAMIENTO_DEL_TUNEL_MS = 3000
+export const RESORTE_DEL_TUNEL = { rigidez: 215, amortiguamiento: 100, masa: 1 } as const // aflojarlo = bajar el amortiguamiento
 
-/** Qué queda sin recorrer cuando decimos «ya frenó». El 1 % del camino. */
-export const RESTO_AL_ASENTARSE = 0.01
-
-/** La constante de tiempo, DERIVADA del asentamiento: 651 ms. */
-export const TAU_DEL_TUNEL_MS = ASENTAMIENTO_DEL_TUNEL_MS / Math.log(1 / RESTO_AL_ASENTARSE)
+/** ζ = c / (2 √(k·m)). Por encima de 1 no rebota. */
+export const ZETA_DEL_RESORTE =
+  RESORTE_DEL_TUNEL.amortiguamiento / (2 * Math.sqrt(RESORTE_DEL_TUNEL.rigidez * RESORTE_DEL_TUNEL.masa))
 
 /**
  * ⚠️ **Un salto de cuadro no puede volverse un salto de imagen.** Si la pestaña
- * estuvo oculta o el hilo se trabó, `dt` llega enorme y la persecución se comería
- * el retraso entero en un cuadro. Se acota a dos cuadros largos.
+ * estuvo oculta o el hilo se trabó, `dt` llega enorme y el resorte se comería el
+ * retraso entero en un cuadro. Se acota a dos cuadros largos.
  */
 export const DT_MAXIMO_MS = 100
 
+export interface EstadoDelResorte {
+  readonly posicion: number
+  readonly velocidad: number
+}
+
 /**
- * LA PERSECUCIÓN: el avance real corre atrás del objetivo y nunca lo alcanza de
- * golpe. **Ésta es la excepción a «todo cuelga del progreso»**: el objetivo sí
- * cuelga del scroll, pero lo que se dibuja depende además de cuánto tiempo pasó.
+ * Un paso del resorte hacia un objetivo quieto durante `dtMs`.
  *
- * `1 − e^(−dt/τ)` y no un factor fijo por cuadro: así el resultado no cambia con
- * los cuadros por segundo. Con un factor fijo, la misma constante frenaría en 3 s
- * a 60 fps y en 1,5 s a 120 fps, y el gesto sería otro según el monitor.
+ * ⚠️ **Solución EXACTA del paso, no Euler.** Así el resultado no depende de los
+ * cuadros por segundo: dos pasos de 8 ms dan lo mismo que uno de 16. Resuelve los
+ * tres regímenes para que aflojar la constante no rompa nada, aunque el de la
+ * referencia es el sobreamortiguado.
  */
-export function perseguir(actual: number, objetivo: number, dtMs: number): number {
-  const dt = Math.min(Math.max(dtMs, 0), DT_MAXIMO_MS)
-  return actual + (objetivo - actual) * (1 - Math.exp(-dt / TAU_DEL_TUNEL_MS))
-}
-
-/**
- * EL OBJETIVO DEL AVANCE PARA UN PROGRESO DE SECCIÓN DADO.
- *
- * Es lo ÚNICO del túnel que cuelga del scroll, y es una recta: empieza cuando el
- * cartel arranca a huir y termina donde empieza el tramo de demos. Las dos puntas
- * se derivan en `geometria.ts` y no se eligen acá.
- */
-export function avanceObjetivo(
-  progreso: number,
-  ventana: { readonly desde: number; readonly hasta: number },
-  cuantas: number,
-): number {
-  const largo = ventana.hasta - ventana.desde
-  if (!(largo > 0)) throw new Error(`ventana del túnel inválida: ${ventana.desde} → ${ventana.hasta}`)
-  return avanceQueCompletaElTunel(cuantas) * acotar01((progreso - ventana.desde) / largo)
-}
-
-/** La inversa: en qué progreso de la sección el túnel lleva ese avance. */
-export function progresoDelAvance(
-  avance: number,
-  ventana: { readonly desde: number; readonly hasta: number },
-  cuantas: number,
-): number {
-  const total = avanceQueCompletaElTunel(cuantas)
-  return ventana.desde + acotar01(avance / total) * (ventana.hasta - ventana.desde)
-}
-
-/**
- * El `transform` de una captura: **centrada en el cuadro** y escalada a su ancho.
- *
- * El centrado va en el `transform` y no en el posicionamiento porque los
- * porcentajes de `translate` se miden sobre la caja SIN escalar: el centro de la
- * captura cae en el centro del cuadro valga su escala lo que valga. Todo crece
- * desde el medio, que es lo que hace que uno se meta adentro y no mire de costado.
- */
-export function transformDeLaCaptura(ancho: number): string {
-  return `translate(-50%, -50%) scale(${ancho.toFixed(5)})`
-}
-
-/**
- * El `transform` del rótulo, que **deshace** la escala de su captura para que el
- * texto mida siempre lo mismo en pantalla mientras viaja pegado a su esquina.
- */
-export function transformDelRotulo(ancho: number): string {
-  return `scale(${(1 / ancho).toFixed(5)})`
+export function avanzarElResorte(estado: EstadoDelResorte, objetivo: number, dtMs: number): EstadoDelResorte {
+  const t = Math.min(Math.max(dtMs, 0), DT_MAXIMO_MS) / 1000
+  const w0 = Math.sqrt(RESORTE_DEL_TUNEL.rigidez / RESORTE_DEL_TUNEL.masa)
+  const z = ZETA_DEL_RESORTE
+  const x0 = estado.posicion - objetivo
+  const v0 = estado.velocidad
+  if (z > 1) {
+    const s = w0 * Math.sqrt(z * z - 1)
+    const r1 = -z * w0 + s
+    const r2 = -z * w0 - s
+    const a = (v0 - r2 * x0) / (r1 - r2)
+    const b = x0 - a
+    const e1 = Math.exp(r1 * t)
+    const e2 = Math.exp(r2 * t)
+    return { posicion: objetivo + a * e1 + b * e2, velocidad: r1 * a * e1 + r2 * b * e2 }
+  }
+  if (z === 1) {
+    const b = v0 + w0 * x0
+    const e = Math.exp(-w0 * t)
+    return { posicion: objetivo + (x0 + b * t) * e, velocidad: (b - w0 * (x0 + b * t)) * e }
+  }
+  const wd = w0 * Math.sqrt(1 - z * z)
+  const b = (v0 + z * w0 * x0) / wd
+  const e = Math.exp(-z * w0 * t)
+  const coseno = Math.cos(wd * t)
+  const seno = Math.sin(wd * t)
+  return {
+    posicion: objetivo + e * (x0 * coseno + b * seno),
+    velocidad: e * (-z * w0 * (x0 * coseno + b * seno) + wd * (b * coseno - x0 * seno)),
+  }
 }
 
 // ===========================================================================
@@ -459,7 +473,9 @@ export function transformDelRotulo(ancho: number): string {
  * Llega al 62 % del ancho del cuadro y ahí se queda. No es un número suelto: es
  * el ancho al que una ventana de navegador se lee COMO una ventana —con aire
  * alrededor, apoyada sobre la sala— en vez de como una pantalla nueva. Sobre
- * 1.440 son 893 px, y con la relación de abajo, 558 px de alto.
+ * 1.440 son 893 px, y con la relación de abajo, 558 px de alto. Es el ancho de
+ * LAYOUT de su caja: la escala acumulada al final vale 1, así que es también lo
+ * que mide en pantalla.
  */
 export const ANCHO_DEL_CTA = 0.62
 
@@ -467,24 +483,62 @@ export const ANCHO_DEL_CTA = 0.62
 export const RELACION_DEL_CTA = { ancho: 16, alto: 10 } as const
 
 /**
- * ⚠️ **EL TIPEO CUELGA DEL CRECIMIENTO Y NO DE UN RELOJ PROPIO.**
+ * ⚠️ **LA CAJA DEL CTA DE ELLA NO ES LA NUESTRA, y esto las convierte.**
  *
- * Cuántas letras se ven es una función del avance de la ventana y de nada más.
- * Un reloj propio tendría que mantenerse de acuerdo con el crecimiento, y dos
- * relojes que tienen que coincidir es la forma de que un día no coincidan.
- *
- * ⚠️ **La frase termina ANTES que el crecimiento, y por eso hay una fracción.**
- * Terminaba justo en el final —`u = 1`— y el resultado medido fue que con la
- * ventana ya grande todavía se leía «¿El próximo proyecto so». Un cartel que
- * termina de escribirse en el último píxel no se alcanza a leer nunca: para
- * cuando está completo, ya hay que seguir. Con 0,72 la frase está entera con la
- * ventana en tres cuartos, y el último cuarto del crecimiento es tiempo de
- * lectura. No es un reloj nuevo: es la misma cuenta, dividida.
+ * Su CTA es un botón de 244 px que termina en 131: su cadena lo deja en 0,54 de
+ * su tamaño, texto incluido. El nuestro es una ventana con una frase de display
+ * adentro, y a 0,59 —lo que da nuestra cadena— la dirección de 15 px llegaría a la
+ * pantalla en 8,8: ilegible. Así que su rampa se usa tal cual —de 0 a 0,4, entre
+ * sus mismos dos scrolls— y la ventana lleva ADENTRO una escala fija que es la
+ * inversa de la cadena al final: **la escala acumulada termina en 1** y lo que se
+ * declara es lo que se ve. Es la regla que la ventana ya tenía escrita, dicha para
+ * una cadena en vez de para una escala sola. No es un ajuste: sale de la tabla.
+ */
+export const CONVERSION_DE_LA_CAJA_DEL_CTA = 1 / (ACUMULADA_FINAL_ARRIBA_DEL_CTA * CAPAS_DEL_TUNEL.cta.a)
+
+/**
+ * ⚠️ **EL TIPEO CUELGA DEL CRECIMIENTO Y NO DE UN RELOJ PROPIO, y se mide contra
+ * el TAMAÑO.** Cuántas letras se ven es función de cuánto de su tamaño final
+ * lleva la ventana en pantalla y de nada más: la frase está entera con la ventana
+ * en tres cuartos, y el último cuarto del crecimiento es tiempo de lectura.
  */
 export const FRACCION_DEL_TIPEO = 0.72
 
-export function letrasEscritas(u: number, total: number): number {
-  return Math.round(acotar01(u / FRACCION_DEL_TIPEO) * total)
+export function letrasEscritas(fraccionDelTamano: number, total: number): number {
+  return Math.round(acotar01(fraccionDelTamano / FRACCION_DEL_TIPEO) * total)
+}
+
+/**
+ * ⚠️ **CADA CUÁNTO TITILA EL CURSOR. Es el ritmo de una consola, no un gusto.**
+ *
+ * Un cursor de terminal parpadea alrededor de una vez por segundo con 50 % de
+ * duty. Va como token en línea —no como clase— porque el número vive acá, que
+ * es donde está el resto del vocabulario del tramo, y así la hoja de estilo no
+ * lo repite.
+ */
+export const TOKEN_DEL_TITILEO = '--tipeo-titileo'
+export const DURACION_DEL_TITILEO = '1.06s'
+
+/**
+ * ⚠️ **DÓNDE ESTÁ LA CABEZA DE TIPEO, en palabras y en fracción de palabra.**
+ *
+ * Pura: recibe cuántas letras se escribieron y los largos de las palabras, y
+ * devuelve en cuál está la cabeza y qué fracción de ella se descubrió. El
+ * consumidor lo convierte a píxeles con la caja de layout de esa palabra.
+ *
+ * Cuando la frase terminó devuelve la ÚLTIMA palabra con fracción 1: el cursor
+ * se queda al final y sigue titilando, que es lo que hace un cursor.
+ */
+export function cabezaDelTipeo(
+  letras: number,
+  largos: readonly number[],
+): { readonly palabra: number; readonly fraccion: number } {
+  let restan = letras
+  for (let i = 0; i < largos.length; i += 1) {
+    if (restan < largos[i]) return { palabra: i, fraccion: largos[i] === 0 ? 1 : restan / largos[i] }
+    restan -= largos[i]
+  }
+  return { palabra: Math.max(0, largos.length - 1), fraccion: 1 }
 }
 
 /**
@@ -495,8 +549,8 @@ export function letrasEscritas(u: number, total: number): number {
  * repo tiene dos invariantes que prohíben tocar el scroll, y la doctrina escrita
  * es que el gesto del visitante siempre gana—. Mientras dura, la página scrollea
  * normal y la frase se queda quieta para que se alcance a leer; después el avance
- * retoma y la persecución de tres segundos se encarga de que el reencuentro no
- * sea un salto. **Nadie queda atrapado: lo que se detiene es el gesto.**
+ * retoma y el resorte se encarga de que el reencuentro no sea un salto. **Nadie
+ * queda atrapado: lo que se detiene es el gesto.**
  */
 export const DURACION_DEL_FRENO_MS = 900
 
@@ -516,13 +570,63 @@ export const DURACION_DEL_FRENO_MS = 900
 export const VELO_DEL_CTA = 0.55
 
 /**
- * ⚠️ **CUÁNTO SUBE LA CAPA PARA SALIR DEL CUADRO, en alturas de ventana.**
+ * ⚠️ **CUÁNTO SE QUEDA LA VENTANA EN SU TAMAÑO MÁXIMO. A mano, y es un piso.**
  *
- * No alcanza con una: la primera captura llega a 1,68 anchos de cuadro y, sobre
- * un 16:9, eso son 1.361 px de alto centrados en una ventana de 900 — o sea que
- * asoma 230 px por arriba. Con 1,3 alturas el borde de abajo de lo más alto queda
- * por encima del tope del cuadro, con margen. Medido sobre el ancho máximo y la
- * relación de las capturas, no elegido.
+ * Llegar al máximo y seguir de largo no deja leer el cartel: el crecimiento
+ * termina y el tramo ya está en otra cosa. Así que al llegar se QUEDA, y el
+ * visitante sigue scrolleando sin que la ventana cambie de tamaño.
+ *
+ * Va en píxeles de scroll —la unidad en la que el resto del recorrido está
+ * pensado— y son 900: una pantalla entera con la ventana quieta, ~0,9 s a ritmo
+ * de lectura. Es un PISO: lo que sobra del alto de la sección se lo queda esta
+ * espera, porque es el único tramo del recorrido donde estirarse no cuesta nada.
  */
-export const ALTURAS_DE_LA_LEVANTADA = 1.3
+export const PX_MINIMOS_DE_LA_ESPERA_DEL_CTA = 900
 
+/**
+ * ⚠️ **LA SALIDA — el contenido se va A LA VELOCIDAD DEL SCROLL, ni una más.**
+ *
+ * Hubo un `translateY(−130 %)` sobre la capa: 1.170 px de movimiento repartidos
+ * en 450 px de scroll, o sea **2,6 veces** más rápido que el dedo. Eso es lo que
+ * se leía como deslizamiento impuesto — no el gesto, la velocidad.
+ *
+ * Después se sacó del todo y se dejó que el contenido saliera con el despineado
+ * del panel. Tampoco sirvió, y por un motivo de estructura: el pin termina
+ * exactamente un viewport antes que la sección, así que durante ese despineado
+ * **servicios ya está entrando por abajo**. Nunca hay un cuadro con la sala sola.
+ *
+ * Así que la capa vuelve a moverse, pero a **1:1**: un píxel de scroll, un píxel
+ * de traslación. A esa velocidad no hay nada que distinguir de un scroll normal
+ * —porque ES la velocidad del scroll— y lo que se gana es que el contenido se va
+ * MIENTRAS la sección sigue clavada, dejando el cuadro vacío detrás.
+ *
+ * ⚠️ **CUÁNTO DURA: 1.131 px, el largo que ya tenía, y no se toca.** Salía del
+ * tope del modelo viejo —lo que tardaba en salir una captura de 1,68 cuadros— y
+ * ese tope se fue con el modelo. Lo que la hace suficiente nunca fue el tamaño de
+ * las capas: el recorte del túnel VIAJA con la capa que se traslada, así que con
+ * 900 px de alto más los 4 del margen del recorte el cuadro ya está vacío, mida lo
+ * que mida lo de adentro. Los 227 px que sobran son cuadro vacío antes de los
+ * demos, igual que antes.
+ */
+export const PX_DE_LA_SALIDA = 1131
+
+/**
+ * ⚠️ **EL ESPACIO DE DEMOS — dos pantallas, y el motivo es que UNA no alcanzó.**
+ *
+ * El tramo existía sobre el papel y no en la pantalla. Era «el viewport que
+ * `sticky` deja despineado al final», y eso se reportó como que no se percibe:
+ * durante ese viewport el panel sube y **servicios entra por abajo al mismo
+ * tiempo**, así que no es un espacio, es una transición.
+ *
+ * Ahora es un tramo de PIN, después de que la salida se llevó el contenido: la
+ * sección sigue clavada y en el cuadro no hay nada más que la sala de noche.
+ *
+ * Y son dos pantallas, no una. Una es exactamente lo que ya había y no se leyó.
+ * Dos son ~1,8 s a ritmo de lectura: un tramo que hay que ATRAVESAR, que es lo
+ * que convierte un hueco en un lugar. Sigue vacío por dentro —lo que va adentro
+ * es contenido y todavía no lo sabemos—, pero el lugar ya está reservado y se
+ * nota.
+ */
+export const PANTALLAS_DEL_ESPACIO_DE_DEMOS = 2
+export const PX_DEL_ESPACIO_DE_DEMOS =
+  PANTALLAS_DEL_ESPACIO_DE_DEMOS * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA

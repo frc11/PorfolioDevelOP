@@ -75,12 +75,12 @@ controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viej
  *
  * Decía «los pasos son los proyectos» y era cierto cuando la sección mostraba una
  * pantalla por cliente. Con el túnel de zoom eso se cayó: **cuánto scroll pide el
- * tramo sale del ritmo relativo, del tamaño de nacimiento y del relevo**, y no de
- * cuántos clientes hay. La igualdad vieja se habría vuelto una mentira cómoda.
+ * tramo sale de la tabla medida en la referencia**, y no de cuántos clientes hay.
+ * La igualdad vieja se habría vuelto una mentira cómoda.
  *
- * Lo que la reemplaza es más fuerte, no más débil: la suma de los cinco tramos
- * —cartel, túnel, CTA, levantada y demos— tiene que ENTRAR en el alto declarado,
- * y el sobrante tiene que ser el tramo de demos y no un hueco anónimo.
+ * Lo que la reemplaza es más fuerte, no más débil: la suma de los tramos
+ * —aproximación, cartel, túnel, espera mínima, salida y demos— tiene que ENTRAR
+ * en el alto declarado, y el sobrante se lo queda la espera del CTA.
  */
 afirmar(
   sumaDeLosTramos(CONTENIDO.proyectos.length) <= PX_DE_LA_SECCION,
@@ -263,7 +263,7 @@ const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].ma
 // (`tunel.ts`): nacer y crecer desde una esquina, huir en z. El cartel y los
 // nombres dejaron de llegar por un patrón del sistema. Queda P3 —el cuerpo que
 // se pinta— y P7, que es el patrón del BLOQUE y de ahí sale la perspectiva.
-afirmarIgual(patronesDelFuente, ['P1', 'P3', 'P7'], 'el componente consume TRES patrones: P1 el titular que llega renglón por renglón —el gesto de la casa—, P3 el cuerpo que se pinta, y P7 en el bloque, de donde sale la perspectiva del vuelo')
+afirmarIgual(patronesDelFuente, ['P2', 'P7'], 'el componente consume DOS patrones: P2 —el del titular de «El equipo» y el del cuerpo de la agencia, copiado de esos dos call sites— y P7 en el bloque, de donde sale la perspectiva del vuelo')
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
 // ════════════════════════════════════════════════════════════════════════════

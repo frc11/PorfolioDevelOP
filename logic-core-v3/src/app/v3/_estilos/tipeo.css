@@ -1,0 +1,47 @@
+/* =========================================================================
+ * EL CURSOR DE LA MÁQUINA DE ESCRIBIR — el guion bajo que titila
+ * =========================================================================
+ * La frase del CTA se escribe letra por letra mientras la ventana crece, y a
+ * la derecha de la cabeza de tipeo va un `_` titilando, como en una consola.
+ * Sigue titilando cuando la frase terminó: es un cursor, no una barra de
+ * progreso.
+ *
+ * ── Por qué el titileo es CSS y la POSICIÓN es JS ────────────────────────
+ *
+ * El titileo no depende del scroll —corre solo, a su ritmo— así que es una
+ * animación de CSS y no una línea más del bucle de cuadro. La posición sí
+ * depende del scroll, porque la cabeza de tipeo se mueve con el crecimiento
+ * de la ventana, y ésa la escribe `CapaDelTunel`.
+ *
+ * ── `steps(1, end)` y no una interpolación ───────────────────────────────
+ *
+ * Un cursor de consola no se desvanece: está o no está. Con una interpolación
+ * el guion bajo respiraría, que es otro gesto. El corte va en la mitad exacta
+ * del ciclo, que es el 50 % de duty de una terminal.
+ * ========================================================================= */
+
+@keyframes v3-titilar {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+[data-v3] [data-pieza="cursor-del-cta"] {
+  animation: v3-titilar var(--tipeo-titileo) steps(1, end) infinite;
+}
+
+/* Con `prefers-reduced-motion` el cursor se queda QUIETO y encendido: sigue
+ * marcando dónde está la cabeza de tipeo, que es lo que significa, y deja de
+ * parpadear, que es lo que molesta. No se esconde — esconderlo sería perder
+ * información por honrar una preferencia de movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza="cursor-del-cta"] {
+    animation: none;
+    opacity: 1;
+  }
+}

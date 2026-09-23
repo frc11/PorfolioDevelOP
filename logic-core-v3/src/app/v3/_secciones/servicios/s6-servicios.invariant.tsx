@@ -78,14 +78,20 @@ titulo('2 · Abajo de 1025 la sección se lee entera y no se mueve nada')
 afirmarIgual(cuenta(quieto, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada')
 afirmarIgual(cuenta(quieto, /will-change/g), 0, '  ni se promueve una capa de composición')
 afirmar(cuenta(animado, /transform:/g) > 0, `CONTROL: con coreografía hay ${cuenta(animado, /transform:/g)} transformadas`)
-// ⚠️ **DOS, Y EL REPARTO POR DUEÑO ES LA CIFRA QUE IMPORTA.** Fueron 15 —2
+// ⚠️ **TRES, Y EL REPARTO POR DUEÑO ES LA CIFRA QUE IMPORTA.** Fueron 15 —2
 // filas de P2, los 11 ítems de P4, el rodillo y la columna—, después 4 cuando
-// la lista salió, y ahora 2: **la tira y el rodillo, uno cada uno.** Los tres
-// bloques de contenido no promueven NADA porque no se mueven por su cuenta: la
-// única traslación de la derecha es la de la tira, que los lleva a los tres.
-// Bajar de 4 a 2 no es perder animación, es dejar de tener dos mecanismos
-// encima del mismo contenido — que era el defecto.
-afirmarIgual(cuenta(animado, /will-change-transform/g), 2, '  y 2 capas promovidas, una por cosa que se mueve: la tira y el rodillo')
+// la lista salió, después 2 —la tira y el rodillo, uno cada uno— y ahora 3.
+// Los tres bloques de contenido siguen sin promover NADA porque no se mueven
+// por su cuenta: la única traslación de la derecha es la de la tira, que los
+// lleva a los tres. Eso es lo que esta cuenta cuida y no cambió.
+//
+// ⚠️ **La tercera es la LLEGADA DEL ESTADO 00**, y es la única pieza de la
+// sección que se mueve por su cuenta a propósito: el canal P2 que hace entrar a
+// «Nuestros servicios» desde detrás de su ventana de recorte. La pone `Pieza`
+// sola —promueve donde hay transformada y no en todo—, así que subir esta cifra
+// no es aflojar la regla: es declarar el dueño nuevo. Si apareciera una CUARTA
+// sin dueño, esto se pone en rojo igual que antes.
+afirmarIgual(cuenta(animado, /will-change-transform/g), 3, '  y 3 capas promovidas, una por cosa que se mueve: la tira, el rodillo y la llegada del estado 00')
 controlPositivo('el contador vería una capa promovida de más', '<div class="will-change-transform"></div>', (h) => cuenta(h, /will-change-transform/g) === 0)
 // ⚠️ **LAS OPACIDADES, CONTADAS POR DUEÑO — y el reparto ES la afirmación.**
 //
@@ -217,7 +223,33 @@ const CODIGO = quitarComentarios(
   [...ARCHIVOS, 'src/app/v3/_secciones/_contrato/coreografia-animada.tsx'].map(leer).join('\n'),
 )
 afirmarIgual(cuenta(CODIGO, /useProgresoDePatron\s*\(/g), 1, 'el motor de progreso se monta UNA sola vez, en el Bloque')
-afirmarIgual(cuenta(CODIGO, /<Bloque\b/g), 1, 'y hay UN solo Bloque medido en toda la sección')
+/**
+ * ⚠️ **DOS BLOQUES, Y LA CUENTA SUBIÓ CON SU MOTIVO.**
+ *
+ * Era UNO y lo que esa cifra cuidaba sigue intacto: que la SECUENCIA tenga un
+ * solo motor, o sea que no haya dos mecanismos moviendo el mismo contenido. Eso
+ * lo garantiza la línea de arriba —`useProgresoDePatron` sigue montándose una
+ * sola vez, en el `Bloque` del pin— y no ésta.
+ *
+ * El segundo es la LLEGADA DEL ESTADO 00, y existe porque el pin **no puede
+ * expresar su rango**. El progreso del pin está acotado en 0 durante toda la
+ * aproximación —medido: el último cuadro con el 00 encendido cae 40 px antes de
+ * que el pin enganche— así que un gesto colgado de él empieza cuando la sección
+ * ya se posó, que es exactamente lo que se pidió corregir. Su rango es
+ * `ventana-de-la-mascara`, el mismo del titular de «El equipo», que abre con la
+ * sección todavía entrando.
+ *
+ * Lo que se afirma, entonces, no es «uno» sino el REPARTO: dos bloques, y el
+ * segundo es el del rodillo. Si apareciera un tercero, o si el segundo saliera
+ * de otro archivo, esto se pone en rojo igual que antes.
+ */
+afirmarIgual(cuenta(CODIGO, /<Bloque\b/g), 2, 'y hay DOS Bloques medidos: el del pin y el de la llegada del estado 00')
+afirmarIgual(
+  cuenta(quitarComentarios(leer('src/app/v3/_secciones/servicios/RodilloDeEstados.tsx')), /<Bloque\b/g),
+  1,
+  '  y el segundo es el del rodillo, que es el único que necesita un rango que el pin no puede dar',
+)
+controlPositivo('el contador vería un tercer Bloque', `${CODIGO}<Bloque patron="P2">`, (t: string) => cuenta(t, /<Bloque\b/g) === 2)
 for (const prohibida of ['useScroll', 'useProgresoEnTiempoReal', "addEventListener('scroll'", 'scrollY', 'IntersectionObserver']) {
   afirmarIgual(cuenta(CODIGO, new RegExp(prohibida.replace(/[()']/g, '\\$&'), 'g')), 0, `ningún archivo toca \`${prohibida}\` por su cuenta`)
 }

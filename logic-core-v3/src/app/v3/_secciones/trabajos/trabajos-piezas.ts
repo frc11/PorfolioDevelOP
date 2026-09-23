@@ -292,22 +292,34 @@ export function pxDelTema(css: string, nombre: string): number {
   return Number(m[1])
 }
 
+/** Un estado de resorte: posición y velocidad. El mismo que usa el túnel. */
+export interface EstadoDeUnResorte {
+  readonly posicion: number
+  readonly velocidad: number
+}
+
 /**
- * Cuánto camino recorre una persecución en `msTotal`, avanzando de a `dtPorCuadro`.
+ * EL RECORRIDO DE UN RESORTE hacia 1, desde el reposo en 0, de a `dtPorCuadro`.
  *
- * Existe para comprobar lo único que importa de una constante de tiempo: que el
- * mismo tiempo dé el mismo resultado con cuadros distintos. Toma el paso como
- * argumento para poder medir también una persecución MAL escrita —por factor
- * fijo— que es lo que el control positivo del invariante le pasa.
+ * Devuelve dónde terminó, lo más lejos que llegó —si pasa de 1, rebotó— y en qué
+ * milisegundo cruzó el 99 %. Toma el paso como argumento para poder medir
+ * también un resorte MAL escrito —flojo, o integrado con Euler— que es lo que los
+ * controles positivos del invariante le pasan.
  */
-export function caminoDeLaPersecucion(
+export function recorridoDelResorte(
   msTotal: number,
   dtPorCuadro: number,
-  paso: (actual: number, dt: number) => number,
-): number {
-  let v = 0
-  for (let t = 0; t < msTotal; t += dtPorCuadro) v = paso(v, dtPorCuadro)
-  return v
+  paso: (estado: EstadoDeUnResorte, dt: number) => EstadoDeUnResorte,
+): { readonly final: number; readonly maximo: number; readonly msAl99: number } {
+  let estado: EstadoDeUnResorte = { posicion: 0, velocidad: 0 }
+  let maximo = 0
+  let msAl99 = Number.POSITIVE_INFINITY
+  for (let t = dtPorCuadro; t <= msTotal + 1e-9; t += dtPorCuadro) {
+    estado = paso(estado, dtPorCuadro)
+    maximo = Math.max(maximo, estado.posicion)
+    if (msAl99 === Number.POSITIVE_INFINITY && estado.posicion >= 0.99) msAl99 = t
+  }
+  return { final: estado.posicion, maximo, msAl99 }
 }
 
 /**

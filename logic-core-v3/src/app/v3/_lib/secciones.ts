@@ -251,22 +251,29 @@ export function altoDeSecuenciaPinneada(pasos: number): string {
  * Dejó de serlo cuando la sección pasó a ser un túnel de zoom con ritmo relativo
  * constante: **cuánto scroll pide el tramo sale del ritmo, del tamaño de
  * nacimiento y del relevo**, no de cuántos clientes hay. Con las capturas naciendo
- * al 10 % del cuadro el túnel solo pide 3.001 px, y con el cartel, el CTA y la
- * levantada la cuenta da 4.975.
+ * al 2 % del cuadro —la profundidad que el pedido pidió— el túnel pide 5.165 px,
+ * y con el cartel y el CTA la cuenta da 6.689.
  *
  * ⚠️ **Y hay un quinto sumando que no es un gesto: la APROXIMACIÓN.** El
  * progreso de esta sección lo resuelve el ancla de P7 sobre la caja de la
  * `<section>`, que abre cuando su tope cruza el borde de ABAJO del viewport, no
  * el de arriba. Medido en 1440×900: cuando el panel queda puesto el progreso ya
  * lleva 900 px —un viewport— recorridos, con el cartel a esa altura ya huyendo.
- * Ese tramo se gasta aunque no se use, así que entra en la cuenta: 5.875, y con
- * lo que queda para los demos la sección cierra en 6.300 — siete pantallas.
+ * Ese tramo se gasta aunque no se use, así que entra en la cuenta.
+ *
+ * Y el último sumando es la ESPERA: la ventana del CTA se queda quieta en su
+ * máximo hasta que el pin se despega, con un piso declarado de 900 px. Con ella
+ * la cuenta cierra en 8.033 sobre 8.100 — **nueve pantallas**, y los 67 px de
+ * sobra los absorbe la espera, que es lo último del recorrido.
+ *
+ * El espacio de demos ya no sale de esta cuenta: es el viewport que `sticky`
+ * deja despineado al final, donde la página se lleva el panel para arriba.
  *
  * El reparto vive en `trabajos/geometria.ts`, en píxeles, y su invariante afirma
  * que la suma entra acá. O sea: la igualdad que se perdió se reemplazó por otra
  * comprobable, y no por nada.
  */
-const PASOS_DE_TRABAJOS = 7
+const PASOS_DE_TRABAJOS = 9
 const PASOS_DE_SERVICIOS = 3
 
 /**
@@ -347,11 +354,17 @@ export const PANTALLAS_DE_NUMEROS = 2
  * supera los 1.400 por **376 px, un 27 %**. Y el pintado de cada párrafo, que es
  * una fracción fija del pin, se estira de 927 a 1.622 px sin tocar una línea.
  *
- * ⚠️ El estado 00 no se toca ni se rompe: su frontera cae en el arranque mismo
- * del pin —el vacío de entrada mide 55svh y la línea de referencia cae en 567
- * px, así que el primer bloque ya la pasó cuando el panel engancha— y donde se
- * lee es en la APROXIMACIÓN, con el progreso acotado en 0, que dura un viewport
- * entero y no depende del largo del pin.
+ * ⚠️ **VOLVIÓ A 8, Y LA SUBIDA A 9 FUE UN ERROR MÍO CON SU MOTIVO.**
+ *
+ * Subió a 9 para reservarle al estado 00 el primer viewport del pin, porque sin
+ * progreso propio no podía tener un gesto de entrada. El diagnóstico era
+ * correcto y la solución no: durante esos 900 px la tira quedaba congelada en su
+ * inicio —una pantalla entera de scroll con la columna derecha quieta, que se
+ * siente como un frenazo— y llegar al primer servicio pasó a costar 900 px más.
+ *
+ * El gesto de llegada no necesitaba ese tramo: lo resuelve el `<Bloque>` propio
+ * del rodillo sobre la APROXIMACIÓN, que ya existía. Así que la reserva se fue y
+ * la tabla vuelve a su número, con los tres tramos exactamente donde estaban.
  */
 const PANTALLAS_DE_SERVICIOS = 8
 
@@ -491,8 +504,8 @@ export const SECCIONES: readonly Seccion[] = [
     // noche detrás: el arco del sol baja a 0,08 mientras esta sección entra
     // (`_lib/escena/lightArc.ts`). Los tres proyectos vienen del fondo oscuro.
     superficie: 'oscuro-transparente',
-    // Sin preludio. Las siete pantallas NO son los proyectos: son lo que pide el
-    // recorrido —aproximación, cartel, túnel, CTA, levantada y demos—, en píxeles en
+    // Sin preludio. Las nueve pantallas NO son los proyectos: son lo que pide el
+    // recorrido —aproximación, cartel, túnel, CTA y espera—, en píxeles en
     // `trabajos/geometria.ts`. El recorrido de cámara lo lleva Números.
     alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
     pinneada: 'desde-escritorio',
