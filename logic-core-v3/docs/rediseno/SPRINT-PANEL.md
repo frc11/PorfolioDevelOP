@@ -55,3 +55,25 @@ Nota: las fases 1 a 6 se commitearon juntas (`9fbf1f35`) porque comparten los mi
 - Grabación: `C:\Users\Valentino\.cache\b4-medicion\panel\grabacion\galeria-panel-1440.mp4`. Capturas: `n-1440-*.png` y `n-390-*.png` en la misma carpeta `panel`.
 - Las 8 capturas reales del panel (`TARJETAS[i].imagen` en `_secciones/tu-panel/contenido.ts`).
 - Anotado sin hacer: los testimonios van en «Por qué develOP», en un sprint aparte, y tienen que ser de clientes reales.
+
+---
+
+# Sprint 2 — «Tu Panel»: un caos ordenado de features
+
+## Checklist
+
+- [ ] F1 — Encabezado «Tu Panel» + descripción en el 30 % izquierdo; la primera feature llega en el 60 % derecho; sin el puntito azul
+- [ ] F2 — El caos: tabla fija de posiciones, 4 clases de tamaño, parallax por feature, llegada con el patrón de la casa, barridos de convivencia
+- [ ] F3 — «Y más…» + newsletter, reversibles al subir; el formulario sale del pie
+- [ ] F4 — Fondo decorativo: palabras y fragmentos de interfaz con el contraste medido del «What's new» de nk
+- [ ] F5 — Móvil: columna con anchos alternados, sin parallax, «Y más…» quieto, newsletter debajo
+- [ ] F6 — lint, tsc, invariantes, barridos, envío real, capturas, grabación, reporte
+
+## Hallazgos de la lectura
+
+- **El puntito azul** es `MarcaDeSeccion` (un `PrefijoDeServicio`, `bg-acento`), que `CabeceraDeSeccion` monta en TODAS las secciones (`_contrato/Rotulo.tsx`). Es compartido: se saca sólo en Tu Panel, que deja de montar la cabecera.
+- **⚠️ BLOQUEANTE · El backend del newsletter NO existe.** La instrucción dice que ya existe en el footer, y no es así:
+  - en `/v3` el formulario del pie es la columna «Novedades» del Cierre (`cierre/ColumnasDelPie.tsx` → `FormularioDeNovedades`), montado DESHABILITADO a propósito: `cierre/contenido.ts` explica que «todavía no hay destino» y que habilitarlo daría un éxito falso;
+  - el `Footer` del sitio vivo (`components/sections/home/Footer.tsx`) no tiene newsletter: es un formulario de CONTACTO (nombre, WhatsApp, rubro, mensaje) que va a un webhook de n8n o abre WhatsApp;
+  - no hay ninguna ruta, acción ni integración de suscripción en `src/` (lo de Brevo son campañas y correos transaccionales del panel de clientes).
+  Por la regla de no crear uno nuevo y no simular un éxito, el formulario se muda a Tu Panel TAL CUAL (el mismo componente, deshabilitado, con el motivo escrito). Los estados de cargando, éxito y error no se construyen: sin un destino no pueden ocurrir de verdad. Hace falta que el usuario decida el destino (lista de Brevo, n8n u otro).

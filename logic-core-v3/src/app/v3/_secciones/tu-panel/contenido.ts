@@ -1,5 +1,5 @@
 /**
- * EL CONTENIDO DE «TU PANEL» — la galería, como DATO.
+ * EL CONTENIDO DE «TU PANEL» — las features, como DATO.
  *
  * SPRINT PANEL: la sección dejó de ser captura + tres bloques + lista y pasó a
  * ser una galería al estilo de nk/news. Todo lo que el usuario va a cambiar —la
@@ -11,7 +11,7 @@
  * encima: una pantalla de panel inventada, con datos, sería contenido inventado.
  */
 
-import { sizesPorColumnas } from '../../_lib/imagen'
+import { sizesPorViewport } from '../../_lib/imagen'
 import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
@@ -20,9 +20,12 @@ export const ID = 'tu-panel'
 /** El nombre visible del rótulo. Es contenido, no el id. */
 export const NOMBRE = 'Tu panel'
 
-/** El encabezado de la galería, P1 línea por línea. Se queda del diseño anterior. */
-export const TITULAR =
-  'Cada proyecto viene con su panel: la misma pantalla que miramos nosotros, abierta para quien lo contrató.'
+/**
+ * EL ENCABEZADO — SPRINT PANEL 2. Ocupa el 30 % izquierdo en escritorio; la
+ * descripción entra en dos renglones como mucho a ese ancho.
+ */
+export const TITULO = 'Tu Panel'
+export const DESCRIPCION = 'Tu acceso al proyecto. Ves cómo va y pedís lo que necesites, sin esperar un mail.'
 
 /** Una tarjeta de la galería. `imagen` y `alt` son lo que se cambia cuando lleguen las capturas. */
 export interface Tarjeta {
@@ -58,6 +61,26 @@ export const Y_MAS = 'Y más'
 export const PUNTOS_DE_Y_MAS = 3
 
 /**
+ * EL NEWSLETTER — se mudó del pie del Cierre (SPRINT PANEL 2).
+ *
+ * ⚠️ Sigue DESHABILITADO, y por la misma razón que en el pie: no hay a dónde
+ * mandarlo. No existe una ruta ni una acción de suscripción en el repo (lo de
+ * Brevo son campañas y correos del panel de clientes), y un formulario habilitado
+ * sin destino se enviaría a esta misma página y parecería que funcionó.
+ */
+export const NEWSLETTER = {
+  id: 'tu-panel-novedades',
+  titulo: 'Sé el primero en enterarte de las nuevas features',
+  rotulo: 'Tu correo',
+  placeholder: 'nombre@dominio',
+  rotuloDeEnvio: 'Suscribirme',
+  ayuda: 'Todavía no hay a dónde mandarlo: el envío se habilita cuando exista la lista.',
+} as const
+
+/** Las palabras del fondo. Decorativas: no se anuncian. */
+export const PALABRAS_DEL_FONDO = ['Panel', 'Control', 'Resumen', 'Tickets', 'Leads', 'Resultados', 'Chatbot'] as const
+
+/**
  * LA CAPTURA — la medida que se le pide a cada imagen, y el marcador que se lee
  * encima mientras falte. `s21-fotos` cruza `fuente`, `ancho` y `alto` contra el
  * archivo del disco.
@@ -69,8 +92,8 @@ export const CAPTURA = {
   fuente: PLACEHOLDER,
   ancho: 1920,
   alto: 1080,
-  /** La tarjeta más ancha ocupa las tres columnas: es la que manda el candidato de la escalera. */
-  sizes: sizesPorColumnas(3, 3),
+  /** La feature más ancha ocupa el 45 % del ancho: es la que manda el candidato de la escalera. */
+  sizes: sizesPorViewport(45),
 } as const
 
 /**

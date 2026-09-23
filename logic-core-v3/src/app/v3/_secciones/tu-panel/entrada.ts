@@ -34,3 +34,32 @@ export function curvaComoLinear(curva: (t: number) => number, muestras: number =
 export function arranqueDelPunto(k: number, duracionDeLaFrase: number, duracionDelPunto: number): number {
   return duracionDeLaFrase + (k * duracionDelPunto) / 2
 }
+
+/** Una pieza del remate en el cronograma de WAAPI. */
+export interface TramoDelRemate {
+  readonly pieza: 'frase' | 'punto' | 'newsletter'
+  readonly delay: number
+  readonly duration: number
+  /** Relleno hasta el final común: sin él, al invertir cada pieza arrancaría desde su propio final. */
+  readonly endDelay: number
+}
+
+/** El newsletter arranca cuando la frase ya recorrió un cuarto de su tiempo. */
+export const DESFASE_DEL_NEWSLETTER = 0.25
+
+/**
+ * EL CRONOGRAMA REVERSIBLE — SPRINT PANEL 2.
+ *
+ * Todas las piezas terminan en el MISMO instante (`delay + duration + endDelay`
+ * igual para todas). Es lo que hace que `playbackRate = -1` las devuelva en
+ * espejo: se van primero los puntos, que llegaron últimos, y la frase al final.
+ */
+export function cronogramaDelRemate(duracion: number, duracionDelPunto: number, puntos: number): TramoDelRemate[] {
+  const crudos: Omit<TramoDelRemate, 'endDelay'>[] = [
+    { pieza: 'frase', delay: 0, duration: duracion },
+    ...Array.from({ length: puntos }, (_, k) => ({ pieza: 'punto' as const, delay: arranqueDelPunto(k, duracion, duracionDelPunto), duration: duracionDelPunto })),
+    { pieza: 'newsletter', delay: duracion * DESFASE_DEL_NEWSLETTER, duration: duracion },
+  ]
+  const total = Math.max(...crudos.map((t) => t.delay + t.duration))
+  return crudos.map((t) => ({ ...t, endDelay: total - t.delay - t.duration }))
+}

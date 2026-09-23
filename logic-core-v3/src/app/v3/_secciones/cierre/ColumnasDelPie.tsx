@@ -3,7 +3,6 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import type { MotionValue } from 'motion/react'
 
-import { FormularioDeNovedades } from '../../_componentes/chrome/Novedades'
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
 import { Caption, EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
@@ -11,7 +10,6 @@ import { CanalDePieza } from '../_contrato/canales'
 import {
   COLUMNAS,
   DESTINOS_DE_LA_RUTA,
-  NOVEDADES,
   PEDIDOS_DE_CONTACTO,
   type ClaseDeColumna,
 } from './contenido'
@@ -115,8 +113,7 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
 
 function CuerpoDeColumna({ clase }: { readonly clase: ClaseDeColumna }): React.JSX.Element {
   if (clase === 'recorrido') return <ColumnaDelRecorrido />
-  if (clase === 'pedido') return <ColumnaDePedido />
-  return <ColumnaDeNovedades />
+  return <ColumnaDePedido />
 }
 
 /**
@@ -166,25 +163,5 @@ function ColumnaDePedido(): React.JSX.Element {
         </li>
       ))}
     </ul>
-  )
-}
-
-/**
- * Deshabilitado y con el motivo dicho, porque no hay a dónde enviarlo.
- *
- * El botón de envío es el ÚNICO botón del formulario y renderiza `disabled`:
- * con el botón por defecto deshabilitado el navegador tampoco envía con Enter.
- */
-function ColumnaDeNovedades(): React.JSX.Element {
-  return (
-    <FormularioDeNovedades
-      id={NOVEDADES.id}
-      rotulo={NOVEDADES.rotulo}
-      placeholder={NOVEDADES.placeholder}
-      textoDeAyuda={NOVEDADES.ayuda}
-      rotuloDeEnvio={NOVEDADES.rotuloDeEnvio}
-      deshabilitado
-      icono={<ArrowRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
-    />
   )
 }

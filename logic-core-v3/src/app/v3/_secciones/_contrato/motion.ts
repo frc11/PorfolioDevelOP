@@ -101,6 +101,7 @@ export const USOS_DECLARADOS: readonly UsoDePatron[] = [
   { patron: 'P3', seccion: 'servicios', para: 'el resaltado progresivo del párrafo, palabra por palabra' },
   { patron: 'P4', seccion: 'servicios', para: 'la llegada del CTA — entra desde 100 px abajo y muy frenado, cuando el 01 toma el panel' },
   { patron: 'P1', seccion: 'tu-panel', para: 'el titular, línea por línea' },
+  { patron: 'P2', seccion: 'tu-panel', para: 'la llegada de cada feature y de cada pieza del fondo, subiendo desde abajo' },
   { patron: 'P1', seccion: 'por-que-develop', para: 'el titular, línea por línea' },
   { patron: 'P5', seccion: 'por-que-develop', para: 'las piezas que aparecen — uno de los pocos usos que el sistema tiene' },
   { patron: 'P1', seccion: 'cierre', para: 'el titular de cierre' },
@@ -128,8 +129,8 @@ export const GESTOS_POR_TIEMPO: readonly GestoPorTiempo[] = [
   {
     id: 'entrada-desde-la-derecha',
     seccion: 'tu-panel',
-    para: '«Y más…» entra de derecha a izquierda y los tres puntos llegan después, uno detrás del otro',
+    para: '«Y más…» y el newsletter entran de derecha a izquierda y los tres puntos llegan después, uno detrás del otro',
     curva: 'expo.out',
-    disparo: 'una sola vez, al entrar en vista; quieta abajo de 1025 y con movimiento reducido',
+    disparo: 'al entrar en vista, y en espejo al salir por abajo (SPRINT PANEL 2); quieta abajo de 1025 y con movimiento reducido',
   },
 ]
