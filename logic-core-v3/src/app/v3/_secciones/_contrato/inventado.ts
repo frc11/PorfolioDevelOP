@@ -114,17 +114,9 @@ export const INVENTOS = {
   // deuda que este archivo existe para no repetir. Se sacaron las tres, de acá
   // y de `contenido.ts`, sin dejar un consumidor huérfano.
 
-  // ── Tu panel · las dos casillas de dato adentro de la prosa ──────────────
-  panelFechas: {
-    marcador: '[MÉTRICA]',
-    pedido: '[MÉTRICA] al día, [CIFRA] acumulada.',
-    mentira: 'la última semana al día, 2.140 consultas acumuladas.',
-  },
-  panelComparacion: {
-    marcador: '[MÉTRICA]',
-    pedido: 'Mirar [MÉTRICA] de la semana al lado de la del período anterior.',
-    mentira: 'Mirar las 34 consultas de la semana al lado de las del período anterior.',
-  },
+  // ⚠️ SPRINT PANEL · Tu panel tenía acá sus dos casillas de dato adentro de la
+  // prosa. Se fueron con los tres bloques y la lista que las mostraban: la sección
+  // pasó a ser una galería sin una sola cifra.
 
   // ── Por qué develOP · dos diferenciales y el testimonio entero ───────────
   diferencialClientes: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: 'nueve' },

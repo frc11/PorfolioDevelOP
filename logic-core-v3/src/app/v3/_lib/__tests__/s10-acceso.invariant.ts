@@ -44,7 +44,7 @@ import {
   ROTOS, documentoAnunciado, esRepeticionExacta, esRolDeLandmark, piezasDelDivisor,
   rotuloDeParada, textoAnunciado, transformadasDe, willChangeDe,
 } from './s10-acceso'
-import { afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
+import { DELTA_DEL_PANEL, afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
 import { COLOR, razon } from './s10-acceso-color'
 import {
   imprimirArbol, imprimirInventario, imprimirParadas, publicados, publicar,
@@ -143,8 +143,8 @@ imprimirParadas(QUIETA, PARADAS)
  * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-afirmarIgual(PARADAS.length, 26, 'el home entero tiene 26 paradas: las 22 de antes, la captura de cada trabajo y el CTA del final del túnel')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26, '  y la rama animada tiene las mismas 26: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas, 'el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -242,7 +242,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 29, 'la rama quieta publica 29 encabezados: los 27 de S11, el rótulo del bloque del equipo y el título de la foto')
+afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados, 'la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +

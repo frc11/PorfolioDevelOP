@@ -35,7 +35,7 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**30 cosas pendientes** en las ocho secciones, de las cuales **22** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
+**27 cosas pendientes** en las ocho secciones, de las cuales **19** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
@@ -45,7 +45,7 @@ el archivo que la fila nombra.
 | 03 · Números | 0 |
 | 04 · Trabajos | 0 |
 | 05 · Servicios | 3 |
-| 06 · Tu panel | 4 |
+| 06 · Tu panel | 1 |
 | 07 · Por qué develOP | 4 |
 | 08 · Cierre | 5 |
 
@@ -57,7 +57,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 | quién | cuántas |
 |---|---:|
 | Franco (o un cliente) | 8 |
-| Valentino | 19 |
+| Valentino | 16 |
 | Una decisión, antes que un dato | 3 |
 
 ### Franco (o un cliente) — 8
@@ -71,7 +71,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
 - **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
-### Valentino — 19
+### Valentino — 16
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -86,10 +86,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
 - **05 · Servicios** · `CONTENIDO.<servicio>.medio` — El video del frente: qué se ve, en veinte segundos y sin audio necesario.
 - **05 · Servicios** · `CONTENIDO.<servicio>.medio` — El primer cuadro del video, para que no arranque negro.
-- **06 · Tu panel** · `BLOQUES[1].texto` — Qué muestra el panel al día: el dato que se mira todos los días.
-- **06 · Tu panel** · `BLOQUES[1].texto` — El dato acumulado que el panel muestra al lado del diario.
-- **06 · Tu panel** · `CAPACIDADES[10]` — Qué se compara semana contra semana en el panel.
-- **06 · Tu panel** · `CAPTURA` — La pantalla principal del panel de un cliente, con el estado de las entregas y el resumen de la semana. Con datos de muestra: ningún dato real de un cliente.
+- **06 · Tu panel** · `TARJETAS[i].imagen` — Una captura del panel por tarjeta, de la pantalla que nombra su título (conversaciones, leads, tickets, chat, servicios, resumen, resultados, configuración del chatbot). Con datos de muestra: ningún dato real de un cliente.
 - **08 · Cierre** · `PEDIDOS_DE_CONTACTO[1]` — Las redes, una por red, con el perfil real.
 - **08 · Cierre** · `LINEA_DE_CIERRE.piezas` — El año del pie de página.
 
@@ -171,10 +168,7 @@ Se edita en `src/app/v3/_secciones/tu-panel/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| `[MÉTRICA]` | `BLOQUES[1].texto` | Valentino | Qué muestra el panel al día: el dato que se mira todos los días. | Nombre del dato, sin número. Ej.: `consultas del día`. |
-| `[CIFRA]` | `BLOQUES[1].texto` | Valentino | El dato acumulado que el panel muestra al lado del diario. | Nombre del dato acumulado, sin número. |
-| `[MÉTRICA]` | `CAPACIDADES[10]` | Valentino | Qué se compara semana contra semana en el panel. | Nombre del dato comparado, sin número. |
-| `[CAPTURA DEL PANEL]` | `CAPTURA` | Valentino | La pantalla principal del panel de un cliente, con el estado de las entregas y el resumen de la semana. Con datos de muestra: ningún dato real de un cliente. | PNG o WEBP, 1920 × 1080 px (16:9). Se pone la ruta en `CAPTURA.fuente`. |
+| `[CAPTURA DEL PANEL]` | `TARJETAS[i].imagen` | Valentino | Una captura del panel por tarjeta, de la pantalla que nombra su título (conversaciones, leads, tickets, chat, servicios, resumen, resultados, configuración del chatbot). Con datos de muestra: ningún dato real de un cliente. | PNG o WEBP, 1920 × 1200 px (16:10). La ruta va en `TARJETAS[i].imagen` y su descripción en `TARJETAS[i].alt`. |
 
 
 ## 07 · Por qué develOP

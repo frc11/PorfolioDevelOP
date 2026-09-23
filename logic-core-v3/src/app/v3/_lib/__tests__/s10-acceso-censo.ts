@@ -120,7 +120,7 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   // tres veces, porque la tira los repite. Esa multiplicación no la mueve
   // ningún cierre y no se resta con la resta de arriba: se mide contra el
   // recorrido real, post-merge, y no se deriva por aritmética de casillas.
-  afirmarIgual(marcas.length, 26, 'son 26 marcadores ANUNCIADOS en la rama quieta')
+  afirmarIgual(marcas.length, 26 + DELTA_DEL_PANEL.marcadores, `son ${26 + DELTA_DEL_PANEL.marcadores} marcadores ANUNCIADOS en la rama quieta (26 + el delta de SPRINT PANEL)`)
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
@@ -141,3 +141,15 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   })
   return marcas
 }
+
+/**
+ * SPRINT PANEL · lo que la galería de Tu panel le cambia al censo del home, por
+ * separado para que el merge con el otro lane sea sumar y no reescribir.
+ *
+ *   paradas       +8  cada tarjeta es un botón que abre la ampliación
+ *   encabezados   −4  se fueron los tres `h3` de los bloques y el de la lista
+ *   marcadores    −4  se fueron [MÉTRICA] ×2, [CIFRA] y el [CAPTURA DEL PANEL]
+ *                     anunciado; los ocho de las tarjetas se ven pero van
+ *                     `aria-hidden` para no ensuciar el nombre de cada botón
+ */
+export const DELTA_DEL_PANEL = { paradas: 8, encabezados: -4, marcadores: -4 } as const
