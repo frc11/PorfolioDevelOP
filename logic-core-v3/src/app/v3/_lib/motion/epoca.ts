@@ -143,6 +143,26 @@ export function fotoDeServidor(): FotoDeEpoca {
   return FOTO_DE_SERVIDOR
 }
 
+/**
+ * ⚠️ **EL ALTO CONTRA EL QUE SE RESUELVEN LAS ANCLAS ES EL `svh`, NO EL `innerHeight`.**
+ * **[MÓVIL-TRABAJOS]** En Safari de iOS la barra de direcciones cambia `innerHeight`
+ * al scrollear y dispara `resize`: con ese alto, la época nueva re-resolvía las anclas
+ * y el progreso saltaba con la página quieta (medido: el túnel adelantaba 90 px de su
+ * tabla). El pin se clava en `svh` y las anclas se resuelven contra el mismo alto. En
+ * escritorio no hay barra que se esconda y los dos valen lo mismo.
+ */
+let sondaDelAlto: HTMLDivElement | null = null
+function altoDeLaVentana(): number {
+  if (sondaDelAlto === null) {
+    sondaDelAlto = document.createElement('div')
+    sondaDelAlto.setAttribute('aria-hidden', 'true')
+    sondaDelAlto.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none'
+    document.body.appendChild(sondaDelAlto)
+  }
+  const svh = sondaDelAlto.offsetHeight
+  return svh > 0 ? svh : window.innerHeight
+}
+
 /** Si el navegador está en condiciones de dar una medición de layout real. */
 function medicionConfiable(): boolean {
   if (typeof document === 'undefined') return false
@@ -163,7 +183,7 @@ function emitir(evento: EventoDeMedicion): void {
   foto = {
     epoca: siguiente.epoca,
     ancho: window.innerWidth,
-    alto: window.innerHeight,
+    alto: altoDeLaVentana(),
   }
   for (const oyente of oyentes) oyente()
 }
@@ -194,7 +214,7 @@ function cablear(): void {
   // El estado arranca con la visibilidad real, no con la supuesta.
   estado = { ...EPOCA_INICIAL, visible: medicionConfiable() }
   if (estado.visible) {
-    foto = { epoca: 0, ancho: window.innerWidth, alto: window.innerHeight }
+    foto = { epoca: 0, ancho: window.innerWidth, alto: altoDeLaVentana() }
     // ⚠ Avisar acá NO es redundante. El primer render devolvió el corte de
     // servidor —viewport en cero— y esta línea es la que lo reemplaza por la
     // medida real. `useSyncExternalStore` re-lee el corte después de

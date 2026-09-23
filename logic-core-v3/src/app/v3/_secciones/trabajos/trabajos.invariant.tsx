@@ -44,6 +44,7 @@ import { Trabajos } from './Trabajos'
 import { CATALOGO_DE_DEMOS as DEMOS } from './demos/catalogo'
 import { afirmarLasDemos } from './demos/demos-invariante'
 import { afirmarLaDireccionDeArte } from './capturas-invariante'
+import { afirmarAbajoDe1024 } from './movil-invariante'
 
 const seccion = seccionDe('trabajos')
 
@@ -166,8 +167,10 @@ controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un
 // sección es una lista de trabajos, y una lista de trabajos sin las capturas no
 // es la misma información con otro ritmo, es menos.
 // SPRINT DEMOS · más las portadas de las demos: la cinta las lleva dos veces (la copia es decoración).
-afirmarIgual(veces(quieto, '<img'), 3 + 2 * DEMOS.length, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${2 * DEMOS.length} portadas de la cinta`)
-afirmarIgual(veces(conMotion, '<img'), 3 + DEMOS.length, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto — y el estante, una portada por demo')
+// MÓVIL-TRABAJOS: el carrusel de abajo de 1024, en las dos ramas: dos renglones con la lista dos veces.
+const DEL_CARRUSEL = 4 * DEMOS.length
+afirmarIgual(veces(quieto, '<img'), 3 + 2 * DEMOS.length + DEL_CARRUSEL, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${2 * DEMOS.length} portadas de la cinta`)
+afirmarIgual(veces(conMotion, '<img'), 3 + DEMOS.length + DEL_CARRUSEL, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto — y el estante, una portada por demo')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
@@ -231,9 +234,9 @@ afirmarIgual(veces(quieto, '<button'), 0, 'cero botones')
 // ancla, porque tres paradas seguidas al mismo destino se anuncian tres veces
 // igual. Quedan las dos que hacen falta: el nombre, que es lo que se lee, y la
 // captura, que es lo que se ve. La de la imagen declara su `aria-label`.
-afirmarIgual(veces(quieto, '<a '), 7 + 2 * DEMOS.length, 'SIETE enlaces: el nombre y la captura de cada proyecto, más el CTA del final — y las demos de la cinta, dos veces')
-afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 6 + 2 * DEMOS.length, '  los SEIS que salen del sitio abren afuera sin darle acceso a esta ventana ni el referente — el séptimo es el CTA, que lleva adentro; las demos también salen')
-afirmarIgual(veces(conMotion, '<a '), 7 + DEMOS.length, '  y los mismos siete con la coreografía puesta: el recorrido de teclado no cambia con el ancho — más una pieza por demo')
+afirmarIgual(veces(quieto, '<a '), 7 + 2 * DEMOS.length + DEL_CARRUSEL, 'SIETE enlaces: el nombre y la captura de cada proyecto, más el CTA del final — y las demos de la cinta, dos veces')
+afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 6 + 2 * DEMOS.length + DEL_CARRUSEL, '  los SEIS que salen del sitio abren afuera sin darle acceso a esta ventana ni el referente — el séptimo es el CTA, que lleva adentro; las demos también salen')
+afirmarIgual(veces(conMotion, '<a '), 7 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta: el recorrido de teclado no cambia con el ancho — más una pieza por demo')
 afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.enlace), DESTINO_DEL_CTA, ...DEMOS.map((d) => d.url)]), [], '  y ni un `href` que no salga del contenido o de la tabla de navegación: ninguna URL inventada acá')
 afirmarIgual(enlacesConNombreSucio(quieto, PROYECTOS), [], '  el nombre accesible de cada uno es el del cliente y nada más: la métrica queda AFUERA')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.enlace)).length === 0)
@@ -301,13 +304,13 @@ titulo('16 · Las seis anclas son paradas de teclado de verdad, con su lugar pue
  */
 const DESTINOS_LEGITIMOS = [...PROYECTOS.map((p) => p.enlace), DESTINO_DEL_CTA, ...DEMOS.map((d) => d.url)]
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, 7 + DEMOS.length, 'abajo de 1025 las siete anclas son paradas de teclado: ninguna se quedó en marca de papel — más una por demo (la copia de la cinta no es parada)')
+afirmarIgual(PARADAS.length, 7 + 2 * DEMOS.length, 'abajo de 1025 las siete anclas son paradas de teclado: ninguna se quedó en marca de papel — más una por demo (la copia de la cinta no es parada)')
 afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a').map((p) => p.etiqueta), [], '  las siete son anclas —no un `div` con un manejador—, que es lo que las hace parada sin escribir un `tabindex`')
 afirmarIgual(PARADAS.filter((p) => p.destino === null || !DESTINOS_LEGITIMOS.includes(p.destino)).map((p) => p.destino), [], '  las siete llevan a un destino declarado: un ancla sin `href` no es parada, y una URL de otro lado no es de nadie')
 afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y las siete se anuncian con algo: dos van al mismo sitio por proyecto, así que el nombre propio es lo único que las distingue')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
 afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto en toda la rama quieta es la capa del barrido, que es decoración y lo declara')
-afirmarIgual(paradasDeTabulacion(conMotion).length, 7 + DEMOS.length, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
+afirmarIgual(paradasDeTabulacion(conMotion).length, 7 + 2 * DEMOS.length, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
 // El LUGAR, que es la otra mitad: el punto interior del cartel, que es el único
 // cartel— y cada una con su punto interior, desde el marcado y no desde un efecto.
 afirmarIgual(veces(conMotion, 'transform-origin:'), 1, '  UN solo punto interior escrito, y es el del cartel: el túnel crece desde el centro y no necesita ninguno')
@@ -321,5 +324,6 @@ afirmarLasCuatroEntradas()
 // §25 —las demos— vive en `demos/demos-invariante.tsx`, con el resto de su carpeta.
 afirmarLasDemos()
 afirmarLaDireccionDeArte()
+afirmarAbajoDe1024()
 
 cerrar('trabajos.invariant')

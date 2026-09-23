@@ -6,7 +6,7 @@ import { useCallback, useState, type ReactNode } from 'react'
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { politicaDeMovimiento, useMovimientoReducido } from '../_lib/motion/reducido'
 import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
-import { ProveedorDeCoreografia, type PrimitivasDeCoreografia } from './_contrato/coreografia'
+import { ProveedorDeCoreografia, ProveedorSinUmbral, type PrimitivasDeCoreografia } from './_contrato/coreografia'
 import { deberiaAnimar } from './_contrato/motion'
 
 /**
@@ -64,6 +64,8 @@ export function CompuertaDelHome({ children }: { readonly children: ReactNode })
   const arribaDelUmbral = useAnchoMinimo(CONSULTA_ESCENARIO)
   const politica = politicaDeMovimiento(useMovimientoReducido())
   const anima = deberiaAnimar(arribaDelUmbral, !politica.montaElMotorDeProgreso)
+  // MÓVIL-TRABAJOS: la misma política sin el ancho, para la sección que corre en todo ancho.
+  const animaSinUmbral = deberiaAnimar(true, !politica.montaElMotorDeProgreso)
 
   const [primitivas, setPrimitivas] = useState<PrimitivasDeCoreografia | null>(null)
 
@@ -76,8 +78,10 @@ export function CompuertaDelHome({ children }: { readonly children: ReactNode })
 
   return (
     <ProveedorDeCoreografia primitivas={anima ? primitivas : null}>
-      {anima ? <InstaladorDeCoreografia alInstalar={instalar} /> : null}
-      {children}
+      <ProveedorSinUmbral primitivas={animaSinUmbral ? primitivas : null}>
+        {animaSinUmbral ? <InstaladorDeCoreografia alInstalar={instalar} /> : null}
+        {children}
+      </ProveedorSinUmbral>
     </ProveedorDeCoreografia>
   )
 }

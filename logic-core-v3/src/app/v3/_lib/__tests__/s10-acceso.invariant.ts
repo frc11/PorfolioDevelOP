@@ -54,8 +54,12 @@ import { deberiaAnimar } from '../../_secciones/_contrato/motion'
 import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 
-/** SPRINT DEMOS · lo que suman las demos de Trabajos: una parada por demo y el `h3` de su título. */
-const DELTA_DE_DEMOS = { paradas: CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
+/**
+ * SPRINT DEMOS · lo que suman las demos de Trabajos: una parada por demo y el `h3` de su título.
+ * MÓVIL-TRABAJOS · y otra parada por demo en el carrusel de abajo de 1024 (el censo lee el marcado,
+ * donde las dos están; en el navegador una de las dos va en `display: none`).
+ */
+const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')

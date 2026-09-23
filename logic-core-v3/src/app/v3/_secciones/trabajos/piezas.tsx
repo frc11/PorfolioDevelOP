@@ -11,7 +11,6 @@ import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Ti
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
 import { Bloque } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
-import { MarcaDeSeccion } from '../_contrato/Seccion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { CONTENIDO } from './contenido'
@@ -19,10 +18,15 @@ import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
 import { DESTINO_DEL_CTA } from './geometria'
 import {
-  ANCHO_DEL_CTA,
+  CLASE_DE_LA_BAJADA_ANGOSTA,
+  CLASE_DE_LA_FRASE_ANGOSTA,
+  CLASE_DEL_TITULAR_DEL_CARTEL,
+  ESTILO_DE_LA_CAJA_DE_LA_VENTANA,
+  ESTILO_DEL_CARTEL_ANGOSTO,
+} from './angosto'
+import {
   CONVERSION_DE_LA_CAJA_DEL_CTA,
   DURACION_DEL_TITILEO,
-  RELACION_DEL_CTA,
   TOKEN_DEL_TITILEO,
   transformDeLaCapa,
 } from './tunel'
@@ -145,12 +149,15 @@ export function PortadaDeTrabajos({
          bloque quedaba 64 px más alto que el medio de la pantalla aunque la CAJA
          estuviera centrada. Lo que el pedido pide que descanse a media pantalla
          es lo que se ve, no la caja que lo contiene. */
-      className="absolute flex flex-col justify-center gap-6 will-change-transform"
+      /* MÓVIL-TRABAJOS: abajo de 1024 la caja va de margen a margen y se estira en alto;
+         las `!` le ganan al lugar de escritorio, que va en línea. */
+      className="absolute flex flex-col justify-center gap-6 will-change-transform max-escritorio:top-[var(--cartel-arriba-angosto)]! max-escritorio:left-[var(--pad-lateral-compacto)]! max-escritorio:h-[var(--cartel-alto-angosto)]! max-escritorio:w-[calc(100%-2*var(--pad-lateral-compacto))]!"
       style={
         inicial === null
-          ? { ...lugar, visibility: 'hidden' }
+          ? { ...lugar, ...ESTILO_DEL_CARTEL_ANGOSTO, visibility: 'hidden' }
           : {
               ...lugar,
+              ...ESTILO_DEL_CARTEL_ANGOSTO,
               visibility: 'visible',
               opacity: inicial.opacidad,
               transform: transformDeLaPose(inicial),
@@ -179,7 +186,7 @@ export function PortadaDeTrabajos({
           {(progresoDeLaMascara) => (
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
-                <Titular nivel="display-xl" como="h2">
+                <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
                   {CONTENIDO.titular}
                 </Titular>
               </CanalDeUnaPieza>
@@ -224,18 +231,21 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
       className="max-escritorio:min-h-[inherit] py-12"
       claseDeContenido="flex max-escritorio:min-h-[inherit] flex-col justify-between gap-12"
     >
-      <Grilla columnas="lateral" className="shrink-0">
-        <MarcaDeSeccion />
-        <div className="flex flex-col gap-2">
+      {/* MÓVIL-TRABAJOS: sin el punto azul en ningún ancho (la pieza es compartida y no se
+          toca: acá deja de montarse). Desde 1024 la celda lateral queda vacía y el texto no se
+          corre; abajo no hay celda y el titular se apoya en el margen de la página. */}
+      <Grilla columnas="lateral" className="shrink-0 max-escritorio:grid-cols-1!">
+        <div aria-hidden="true" className="max-escritorio:hidden" />
+        <div className="flex flex-col gap-2 max-escritorio:gap-6">
           <Titular
             nivel="titulo-m"
             como="h2"
             id={idDelTitularDeSeccion(seccion.id)}
-            className="max-w-[var(--breakpoint-medio)]"
+            className={`max-w-[var(--breakpoint-medio)] ${CLASE_DEL_TITULAR_DEL_CARTEL}`}
           >
             {CONTENIDO.titular}
           </Titular>
-          <Cuerpo className="max-w-[var(--breakpoint-medio)]">{CONTENIDO.bajada}</Cuerpo>
+          <Cuerpo className={`max-w-[var(--breakpoint-medio)] ${CLASE_DE_LA_BAJADA_ANGOSTA}`}>{CONTENIDO.bajada}</Cuerpo>
         </div>
       </Grilla>
       {/* Una pantalla por trabajo, como antes del preludio. Con el `min-h-svh`
@@ -364,10 +374,11 @@ export function VentanaDelCta({
            * escala fija: la conversión entre la caja de su CTA y la nuestra
            * (`CONVERSION_DE_LA_CAJA_DEL_CTA`), que sale de la tabla.
            */
-          className="absolute top-1/2 left-1/2"
+          /* MÓVIL-TRABAJOS: abajo de 1024 la ventana es un iPad y abajo de 426 un iPhone, y
+             entra entera en el alto (`CAJA_DE_LA_VENTANA_ANGOSTA`). */
+          className="absolute top-1/2 left-1/2 aspect-[var(--ventana-relacion)] w-[var(--ventana-ancho)] max-escritorio:aspect-[var(--ventana-relacion-tablet)] max-escritorio:w-[min(var(--ventana-ancho-tablet),calc(var(--ventana-alto-tablet)*var(--ventana-proporcion-tablet)))] max-movil:aspect-[var(--ventana-relacion-movil)] max-movil:w-[min(var(--ventana-ancho-movil),calc(var(--ventana-alto-movil)*var(--ventana-proporcion-movil)))]"
           style={{
-            width: `${(ANCHO_DEL_CTA * 100).toFixed(2)}%`,
-            aspectRatio: `${RELACION_DEL_CTA.ancho} / ${RELACION_DEL_CTA.alto}`,
+            ...ESTILO_DE_LA_CAJA_DE_LA_VENTANA,
             transform: `translate(-50%, -50%) scale(${CONVERSION_DE_LA_CAJA_DEL_CTA.toFixed(5)})`,
           }}
         >
@@ -383,18 +394,21 @@ export function VentanaDelCta({
                ⚠️ Ya no es el ancla: el enlace es «Hablemos» (`CtaEnlace`) y su zona de
                clic se estira sobre esta caja, que por eso es `relative`. Sin
                `overflow-hidden`: adentro hay un focalizable y su anillo va por fuera. */
-            className="bg-tinta text-fondo rounded-sutil relative flex h-full w-full flex-col"
+            className="bg-tinta text-fondo rounded-sutil relative flex h-full w-full flex-col max-escritorio:rounded-fuerte max-movil:rounded-[calc(3*var(--radius-fuerte))]"
             style={{ transition: TRANSICION_DE_LA_ELEVACION }}
           >
             {/* El cromo: los tres círculos del semáforo y la barra de direcciones.
                 Los círculos son decoración y van con los colores de macOS, que son
                 lo que hace reconocible el gesto; la dirección SÍ es contenido y se
                 anuncia, porque también está en la lista de abajo de 1025. */}
-            <div className="flex items-center gap-2 px-5 py-4">
-              <span aria-hidden="true" className="bg-semaforo-rojo block size-3 rounded-full" />
-              <span aria-hidden="true" className="bg-semaforo-amarillo block size-3 rounded-full" />
-              <span aria-hidden="true" className="bg-semaforo-verde block size-3 rounded-full" />
-              <span className="border-fondo rounded-sutil ml-4 flex-1 border px-3 py-1 text-center">
+            {/* MÓVIL-TRABAJOS: el semáforo es de macOS y sólo va desde 1024. Abajo la barra es la
+                de Safari: arriba y centrada en el iPad, y compacta, abajo y con el indicador de
+                inicio en el iPhone. `order-last` la baja sin mover el orden de lectura. */}
+            <div className="flex shrink-0 items-center gap-2 px-5 py-4 max-escritorio:justify-center max-movil:order-last max-movil:flex-col max-movil:gap-3 max-movil:px-4 max-movil:pt-2 max-movil:pb-3">
+              <span aria-hidden="true" className="bg-semaforo-rojo block size-3 rounded-full max-escritorio:hidden" />
+              <span aria-hidden="true" className="bg-semaforo-amarillo block size-3 rounded-full max-escritorio:hidden" />
+              <span aria-hidden="true" className="bg-semaforo-verde block size-3 rounded-full max-escritorio:hidden" />
+              <span className="border-fondo rounded-sutil ml-4 flex-1 border px-3 py-1 text-center max-escritorio:bg-fondo/10 max-escritorio:rounded-pastilla-s max-escritorio:ml-0 max-escritorio:max-w-[var(--ventana-barra-tablet)] max-escritorio:border-transparent max-escritorio:py-2 max-movil:w-full max-movil:max-w-none max-movil:flex-none">
                 <Cuerpo como="span" className="font-codigo relative">
                   {CONTENIDO.cta.direccion}
                   {/* La ruta que se tipea con el puntero encima (`encimaDelCta.ts`).
@@ -411,6 +425,7 @@ export function VentanaDelCta({
                   </span>
                 </Cuerpo>
               </span>
+              <span aria-hidden="true" className="bg-fondo hidden h-1 w-1/3 rounded-full max-movil:block" />
             </div>
             {/**
              * ⚠️ **LA FRASE ES UN CARTEL, no un renglón centrado.**
@@ -428,7 +443,7 @@ export function VentanaDelCta({
              * izquierda a derecha, el texto del documento sigue siendo la frase y lo
              * que se ve sigue siendo letra por letra.
              */}
-            <div className="flex flex-1 flex-col justify-center px-8 pb-8">
+            <div className="flex flex-1 flex-col justify-center px-8 pb-8 max-movil:px-6 max-movil:pt-8 max-movil:pb-2">
               {/**
                * ⚠️ **EL CURSOR VA POSICIONADO, NO INTERCALADO.**
                *
@@ -450,7 +465,7 @@ export function VentanaDelCta({
                * un `span` que sigue siendo `inline`, así que no cambia un corte de
                * renglón del cartel.
                */}
-              <Titular nivel="display-xl" como="p" className="leading-cartel text-left">
+              <Titular nivel="display-xl" como="p" className={`leading-cartel text-left ${CLASE_DE_LA_FRASE_ANGOSTA}`}>
                 <span ref={refFrase} data-pieza="frase-del-cta" className="relative">
                   {palabras.map((palabra, p) => (
                     <Fragment key={`${palabra}-${String(p)}`}>
@@ -487,7 +502,7 @@ export function VentanaDelCta({
                * entera: todo el cuadro sigue siendo el enlace a contacto, sin un
                * ancla adentro de otra.
                */}
-              <div className="flex items-baseline gap-4 pt-12">
+              <div className="flex items-baseline gap-4 pt-12 max-escritorio:flex-wrap max-escritorio:gap-x-4 max-escritorio:gap-y-2 max-movil:pt-8">
                 <span style={ESTILO_DEL_CTA_EN_LA_VENTANA}>
                   <CtaEnlace
                     href={DESTINO_DEL_CTA}

@@ -11,9 +11,9 @@ escritorio ≥1025 (1440), que no cambia nada.
 - [x] Fase 0 — reconocimiento (abajo)
 - [x] Fase 1 — la costura de 1024
 - [x] Fase 2 — capturas por dispositivo
-- [ ] Fase 3 — el túnel bajo 1024
-- [ ] Fase 4 — demos bajo 1024
-- [ ] Fase 5 — tipografía y posiciones
+- [x] Fase 3 — el túnel bajo 1024
+- [x] Fase 4 — demos bajo 1024
+- [x] Fase 5 — tipografía y posiciones
 - [ ] Fase 6 — verificación y reporte
 
 ## Fase 0 — lo que hay
@@ -125,3 +125,84 @@ El Garage salió sin la foto del hero a los 9,5 s y se repitió esperando 22 s.
   controles positivos; y medido en la red (`fase2-red.ts`, sin caché, recorriendo la
   página entera): a 390 se piden sólo las tres `-movil`, a 768 sólo las tres `-tablet`,
   a 1024 y 1440 sólo las tres de escritorio.
+
+## Fases 3, 4 y 5 — el túnel, las demos y la tipografía abajo de 1024
+
+Van juntas porque tocan los mismos archivos (el cartel y la ventana del CTA son a la vez
+marco del túnel y tipografía).
+
+**La coreografía, sólo para Trabajos.** `CompuertaDelHome` resuelve además la coreografía
+SIN el ancho, con la misma política de movimiento (`ProveedorSinUmbral`), y Trabajos la
+pide con `CoreografiaEnTodoAncho`. Las otras siete secciones siguen quietas abajo de 1024.
+Consecuencia: en el teléfono y la tablet el chunk de la coreografía ahora SE DESCARGA
+(después de hidratar, nunca en la carga inicial, que es lo que `s7-compuerta` afirma).
+
+**El pin.** `secciones.ts` sigue declarando `desde-escritorio`. Abajo de 1024, la rama
+coreografiada clava la sección con una caja de 100svh y la quieta sigue siendo una lista.
+
+**La tabla, en pantallas.** Los píxeles del túnel ya eran pantallas: se cuentan contra el
+alto de 900 y se pasan a fracción de la sección. El único parámetro que no cerraba era el
+solape: abajo de 1024 no rige, y la sección medía 7,17 pantallas contra las 7,57 que la
+tabla cuenta, así que cada tramo duraba un 5,3 % menos. `Panel.tsx` ahora suma el solape
+al alto en todo ancho y sube el panel sólo desde escritorio. Medido: la sección mide
+6389 px a 390 × 844 y 7751,7 a 768 × 1024, las dos 7,57 pantallas. En escritorio el valor
+no cambia.
+
+**iOS Safari.** El motor resolvía las anclas contra `innerHeight`. Simulado el cambio de
+alto (`innerHeight` +84 px con su `resize`, el CSS quieto) a 390 × 844 con el scroll
+parado en 6474: ANTES la primera captura pasaba de 0,445 a 0,533 de escala y asomaba la
+segunda. `epoca.ts` las resuelve ahora contra una sonda de 100svh: 0,44468 → 0,44471, el
+remanente del resorte, y la caja clavada quieta en 844 en los tres estados.
+
+**Scroll nativo con el dedo** (`f3-tactil.ts`, 390 × 844 DPR 2, toque, lanzamientos de
+720 px a 3750 px/s): el gesto táctil sintético de CDP no scrollea y el toque crudo no
+deja inercia, así que se midió con ráfagas de diez lanzamientos. Página a 4960 px/s de la
+tabla; el túnel, a 2327 como máximo (lo arrastra el riel, que es lo diseñado: 0,47 de la
+página); al soltarse el pin el vacío estaba lleno (`inset(50%)`) en las dos corridas.
+
+**Rendimiento** con el perfil móvil: a CPU ×4, 13,75 ms de media, p95 13,4, peor cuadro
+26,8 ms y cero cuadros de más de 33 ms (72,7 fps, la vsync del monitor). A CPU ×1 el p95
+fue 13,7 ms. El único cuadro largo cayó en la espera ociosa de 5 s y no es del túnel. No
+hizo falta recortar nada.
+
+**El marco** (`trabajos/angosto.ts`, todo por CSS con `max-escritorio:` y `max-movil:`):
+- el cartel va de margen a margen; «Portfolio» se queda en `display-xl` en el teléfono y
+  crece un 30 % en tablet, sin pasarse nunca de la calle (medido: la palabra mide 3,886
+  veces su cuerpo);
+- las capturas verticales entran enteras en el cuadro;
+- la ventana del CTA es un iPhone (9:17, 0,86 del ancho, apoyada en el alto si no alcanza)
+  con la barra compacta abajo y el indicador de inicio, o un iPad (3:4) con la barra
+  arriba y centrada. Sin semáforo de macOS. La frase baja a un cartel de tres renglones en
+  el teléfono y «Hablemos» con su aclaración se acomodan en dos líneas;
+- sin hover en táctil: la ruta `/hablemos` y la elevación sólo con un mouse que pueda
+  hacer hover.
+
+**Las demos** (fase 4): abajo de 1024 la capa entera crece rígida con el vacío (una
+escala, la entrada vieja); lo decide el CSS (`--demos-entrada`), no una consulta de ancho
+en JS. Cuando el vacío llena el cuadro arranca el carrusel (`demos/Carrusel.tsx`, física en
+`demos/fisicaDelCarrusel.ts`): dos renglones en el teléfono (derecha e izquierda, el
+segundo desfasado en 4) y uno en tablet. Velocidad de reposo de 34 px/s, relajación con
+constante de 0,85 s, lanzamiento con las muestras de los últimos 80 ms y tope de
+2400 px/s. `pan-y` con decisión horizontal pasados 8 px, toque de menos de 6 px y 250 ms,
+un rAF por renglón apagado fuera de pantalla, y velocidad de reposo cero con movimiento
+reducido. También reemplaza a la cinta de la rama quieta abajo de 1024; desde 1024 la cinta
+y el estante siguen como estaban.
+
+**La propuesta de los renglones, medida contra sí misma:** el desfase de 4 garantiza que
+la misma demo no coincida en la misma columna AL ARRANCAR. Como los renglones van en
+sentidos contrarios, la fase entre ellos gira a 68 px/s, así que una misma demo vuelve a
+quedar alineada consigo misma una vez por vuelta relativa: 1008 / 68, unos 15 s a 390.
+Queda para el usuario.
+
+**Tipografía** (fase 5): sin `MarcaDeSeccion` en trabajos en ningún ancho (la pieza
+compartida no se tocó). En la rama quieta abajo de 1024, «Portfolio» con el mismo tamaño que
+el cartel y la bajada en `titulo-s`, apoyados en el margen. Las demos: el título crece en
+el teléfono, y el título y el cuerpo en tablet.
+
+**Invariantes nuevos** (`trabajos.invariant` §27, con control positivo cada uno): el
+carrusel relaja a su ritmo a favor y en contra y no depende de los cuadros; el bucle no
+tiene costura; no secuestra el scroll vertical; el toque abre y el arrastre no; el gesto
+se mide en 80 ms con tope; el motor resuelve contra 100svh y el pin es de 100svh; y sólo
+Trabajos pide la coreografía en todo ancho. Se derivaron del invariante (no a mano) los
+censos que suma el carrusel: `s10-acceso` pasa de 42 a 50 paradas (una por demo en el
+estante o la cinta y otra en el carrusel; el censo lee el marcado, donde están las dos).

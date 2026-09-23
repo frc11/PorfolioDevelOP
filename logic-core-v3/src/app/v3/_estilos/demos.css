@@ -249,3 +249,46 @@
     scroll-snap-align: start;
   }
 }
+
+/* =========================================================================
+ * EL CARRUSEL — abajo de 1024: la cinta que corre sola y se lanza con el dedo.
+ * =========================================================================
+ * MÓVIL-TRABAJOS. La física y los gestos son de `demos/Carrusel.tsx`; acá va la
+ * caja. El renglón deja el scroll vertical al navegador (`pan-y`) y recorta con el
+ * margen del anillo de foco. Tres portadas por renglón en el teléfono y cinco en
+ * tablet; el aire va como relleno de cada una para que las dos copias midan igual.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="carrusel"] {
+  /* El anillo de foco: desplazamiento más grosor, que `overflow-clip-margin` no acepta en calc(). */
+  --carrusel-margen-del-recorte: 4px;
+}
+
+[data-v3] [data-pieza="carrusel"] [data-parte="renglon"] {
+  overflow: clip;
+  overflow-clip-margin: var(--carrusel-margen-del-recorte);
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+[data-v3] [data-pieza="carrusel"] [data-parte="pista"] {
+  display: flex;
+  inline-size: max-content;
+}
+
+[data-v3] [data-pieza="carrusel"] [data-parte="portada"] {
+  display: block;
+  flex: none;
+  inline-size: var(--portada-ancho);
+  padding-inline-end: var(--portada-aire);
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+[data-v3] [data-pieza="carrusel"] [data-parte="portada"] img {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: top;
+  border-radius: var(--radius-sutil);
+  pointer-events: none;
+}

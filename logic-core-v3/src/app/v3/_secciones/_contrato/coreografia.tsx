@@ -84,6 +84,38 @@ export function useCoreografiaActiva(): boolean {
   return usePrimitivas() !== null
 }
 
+/**
+ * LA COREOGRAFÍA QUE CRUZA EL UMBRAL. **[MÓVIL-TRABAJOS]**
+ *
+ * `CompuertaDelHome` la resuelve con la MISMA política de movimiento y sin el
+ * ancho: son las mismas primitivas animadas, o `null` con movimiento reducido.
+ * Una sección que la pide la recibe en todo ancho; el resto sigue con la del
+ * umbral, que abajo de 1024 es `null`. Hoy la pide sólo Trabajos: su túnel corre
+ * también en tablet y en el teléfono.
+ */
+const ContextoSinUmbral = createContext<PrimitivasDeCoreografia | null>(null)
+
+export function ProveedorSinUmbral({
+  primitivas,
+  children,
+}: {
+  readonly primitivas: PrimitivasDeCoreografia | null
+  readonly children: ReactNode
+}): React.JSX.Element {
+  return <ContextoSinUmbral value={primitivas}>{children}</ContextoSinUmbral>
+}
+
+/**
+ * Envuelve a la sección que corre su coreografía en todo ancho. Sin el proveedor
+ * de arriba —un invariante que renderiza una rama a mano— cae en la del umbral,
+ * así que el arnés sigue eligiendo la rama que quiere mirar.
+ */
+export function CoreografiaEnTodoAncho({ children }: { readonly children: ReactNode }): React.JSX.Element {
+  const delUmbral = usePrimitivas()
+  const sinUmbral = useContext(ContextoSinUmbral)
+  return <Contexto value={sinUmbral ?? delUmbral}>{children}</Contexto>
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // EL BLOQUE MEDIDO
 // ═══════════════════════════════════════════════════════════════════════════

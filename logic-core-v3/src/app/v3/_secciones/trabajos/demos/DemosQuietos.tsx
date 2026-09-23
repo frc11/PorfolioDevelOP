@@ -1,5 +1,6 @@
 import { Imagen } from '../../../_componentes/medios/Imagen'
 
+import { Carrusel } from './Carrusel'
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, type Demo } from './catalogo'
 import { TextoDeDemos } from './TextoDeDemos'
 
@@ -29,12 +30,15 @@ export function DemosQuietos(): React.JSX.Element {
     <div className="flex min-h-svh flex-col justify-center gap-8">
       <TextoDeDemos />
       {/* A sangre: la cinta sale del margen lateral del envoltorio y corre de borde a borde. */}
-      <div data-pieza="cinta" className="-mx-[var(--pad-lateral-compacto)]">
+      {/* MÓVIL-TRABAJOS: abajo de 1024 la cinta pasa a ser el carrusel, que con movimiento
+          reducido queda quieto y se arrastra igual. Desde 1024 la cinta sigue como estaba. */}
+      <div data-pieza="cinta" className="-mx-[var(--pad-lateral-compacto)] max-escritorio:hidden">
         <div data-parte="pista">
           <Lista />
           <Lista copia />
         </div>
       </div>
+      <Carrusel />
     </div>
   )
 }

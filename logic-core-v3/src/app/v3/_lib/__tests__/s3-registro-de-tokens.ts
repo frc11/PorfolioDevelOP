@@ -144,6 +144,9 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--libro-giro', valor: '30deg', evidencia: 'decidido', procedencia: 'el ángulo de un libro en el estante: la cara se lee y la vecina la tapa en parte' },
   { nombre: '--libro-alza', valor: 'var(--spacing-6)', evidencia: 'decidido', procedencia: 'cuánto sube la pieza levantada: un paso de 24 px del espaciado' },
   { nombre: '--libro-apertura', valor: 'var(--spacing-4)', evidencia: 'decidido', procedencia: 'cuánto se abren las vecinas para darle aire: un paso de 16 px' },
+
+  // ── MÓVIL-TRABAJOS · el carrusel de abajo de 1024 (`demos.css`) ───────
+  { nombre: '--carrusel-margen-del-recorte', valor: '4px', evidencia: 'derivado', procedencia: 'el anillo de foco (desplazamiento + grosor), el mismo margen que el recorte del túnel; `overflow-clip-margin` no acepta calc()' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

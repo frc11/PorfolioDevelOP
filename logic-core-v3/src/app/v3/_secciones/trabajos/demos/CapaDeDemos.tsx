@@ -7,7 +7,10 @@ import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
 import { CONTENIDO } from '../contenido'
 import { arranqueDeDemos } from '../geometria'
 
+import { cn } from '@/lib/utils'
+
 import { Biblioteca } from './Biblioteca'
+import { Carrusel } from './Carrusel'
 import type { Demo } from './catalogo'
 import { LLEGADA, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
 import { TextoDeDemos } from './TextoDeDemos'
@@ -50,10 +53,23 @@ export function CapaDeDemos({
   const progresoDelParrafo = useMotionValue(enElTramo(inicial, LLEGADA.parrafo))
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const [alejada, setAlejada] = useState(false)
+  /**
+   * ⚠️ **MÓVIL-TRABAJOS · ABAJO DE 1024 LA ENTRADA ES LA VIEJA: la capa entera, rígida,
+   * crece con el vacío** —una escala y nada más, para ahorrar—. Quién está de qué lado
+   * lo dice el CSS (`--demos-entrada`), no una consulta de ancho en JS.
+   */
+  const rigida = useRef(false)
 
   /** Escribe la llegada entera para una fracción del vacío. Pura: subiendo se deshace. */
   const llegar = useCallback(
     (u: number): void => {
+      if (rigida.current) {
+        capa.current?.style.setProperty('--demos-escala', u.toFixed(5))
+        progresoDelTitulo.set(1)
+        progresoDelParrafo.set(1)
+        parrafo.current?.style.setProperty('opacity', '1')
+        return
+      }
       progresoDelTitulo.set(enElTramo(u, LLEGADA.titulo))
       const delParrafo = enElTramo(u, LLEGADA.parrafo)
       progresoDelParrafo.set(delParrafo)
@@ -69,8 +85,18 @@ export function CapaDeDemos({
 
   useLayoutEffect(() => {
     libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
-    llegar(escala.current)
+    const leerLaEntrada = (): void => {
+      const el = capa.current
+      rigida.current = el !== null && getComputedStyle(el).getPropertyValue('--demos-entrada').trim() === 'rigida'
+      llegar(escala.current)
+    }
+    leerLaEntrada()
+    window.addEventListener('resize', leerLaEntrada)
+    return () => window.removeEventListener('resize', leerLaEntrada)
   }, [llegar])
+
+  /** El carrusel arranca cuando el vacío llenó la pantalla. */
+  const carruselEnMarcha = useCallback((): boolean => escala.current >= 1, [])
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     escala.current = escalaDeDemos(p)
@@ -106,14 +132,17 @@ export function CapaDeDemos({
       /* ⚠️ Sin `will-change` (ni acá ni en las caras): promovida, obligaba a componer
          el túnel que se pinta encima, y el recorte del vacío dejaba de cortar el
          fondo de la ventana del CTA (medido: el agujero se veía claro). */
-      className={className}
+      className={cn(className, 'max-escritorio:[--demos-entrada:rigida] max-escritorio:[transform:scale(var(--demos-escala,0))]')}
     >
-      <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8">
-        {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. */}
-        <div aria-hidden="true" />
+      <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center">
+        {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. Abajo de 1024 no hay columna. */}
+        <div aria-hidden="true" className="max-escritorio:hidden" />
         <div className="flex flex-col gap-8">
           <TextoDeDemos progresoDelTitulo={progresoDelTitulo} progresoDelParrafo={progresoDelParrafo} refDelParrafo={parrafo} />
-          <Biblioteca alAbrir={alAbrir} alejada={alejada} />
+          <div className="max-escritorio:hidden">
+            <Biblioteca alAbrir={alAbrir} alejada={alejada} />
+          </div>
+          <Carrusel enMarcha={carruselEnMarcha} />
         </div>
       </Envoltorio>
       {abierta === null ? null : (

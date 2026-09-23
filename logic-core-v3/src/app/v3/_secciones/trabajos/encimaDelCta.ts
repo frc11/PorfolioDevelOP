@@ -101,7 +101,9 @@ export function useEncimaDelCta(ventana: RefObject<HTMLDivElement | null>, reduc
       }
     }
 
-    const alEntrar = (): void => {
+    // MÓVIL-TRABAJOS: sin hover en táctil; un toque es un enlace directo, sin elevar ni tipear la ruta.
+    const alEntrar = (e: PointerEvent): void => {
+      if (e.pointerType !== 'mouse' || !window.matchMedia('(hover: hover)').matches) return
       puntero = true
       actualizar()
     }

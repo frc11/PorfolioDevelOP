@@ -4,6 +4,7 @@ import { Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { CanalDeTitular, CanalDeUnaPieza } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
+import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULO_DE_DEMOS } from '../angosto'
 import { TEXTO_DE_DEMOS } from './catalogo'
 
 /** La medida del párrafo, en caracteres: la misma del cuerpo del cartel de Portfolio. */
@@ -36,10 +37,10 @@ export function TextoDeDemos({
 }): React.JSX.Element {
   return (
     <div className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
-      <CanalDeTitular progreso={progresoDelTitulo} patron="P1" texto={TEXTO_DE_DEMOS.titulo} nivel="titulo-l" como="h3" />
+      <CanalDeTitular progreso={progresoDelTitulo} patron="P1" texto={TEXTO_DE_DEMOS.titulo} nivel="titulo-l" como="h3" className={CLASE_DEL_TITULO_DE_DEMOS} />
       <div ref={refDelParrafo}>
         <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
-          <Cuerpo>
+          <Cuerpo className={CLASE_DEL_CUERPO_DE_DEMOS}>
             {TEXTO_DE_DEMOS.parrafo} <span className="max-escritorio:hidden">{TEXTO_DE_DEMOS.enEscritorio}</span>{' '}
             <span className="escritorio:hidden">{TEXTO_DE_DEMOS.enMovil}</span>
           </Cuerpo>

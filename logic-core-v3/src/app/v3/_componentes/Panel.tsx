@@ -160,7 +160,8 @@ function estiloDelAlto(seccion: Seccion): React.CSSProperties {
   if (seccion.solape === undefined) return { minHeight: seccion.alto }
   return {
     '--solape-del-panel': `${Number((seccion.solape * 100).toFixed(4))}svh`,
-    minHeight: `calc(${seccion.alto} + var(--solape-en-uso, 0px))`,
+    // MÓVIL-TRABAJOS: el alto suma el solape en todo ancho (la tabla cuenta con él); el margen, sólo desde escritorio.
+    minHeight: `calc(${seccion.alto} + var(--solape-del-panel))`,
     marginTop: 'calc(-1 * var(--solape-en-uso, 0px))',
   } as React.CSSProperties
 }

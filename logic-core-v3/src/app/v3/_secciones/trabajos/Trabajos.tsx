@@ -2,7 +2,7 @@
 
 import { useMotionValue } from 'motion/react'
 
-import { Bloque, type Progreso } from '../_contrato/coreografia'
+import { Bloque, CoreografiaEnTodoAncho, useCoreografiaActiva, type Progreso } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
 
@@ -50,20 +50,42 @@ import { PortadaDeTrabajos, RamaQuieta } from './piezas'
  * habrían dado un tiempo que no es ninguna de las dos.
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
+  // MÓVIL-TRABAJOS: la única sección que corre su coreografía en todo ancho.
+  return (
+    <CoreografiaEnTodoAncho>
+      <TrabajosEnSuRama seccion={seccion} />
+    </CoreografiaEnTodoAncho>
+  )
+}
+
+/**
+ * ⚠️ **ABAJO DE 1024 EL PIN LO PONE LA RAMA, no la tabla.** `secciones.ts` declara
+ * a Trabajos `desde-escritorio`, y así sigue: la rama quieta de tablet y de teléfono
+ * es una lista más alta que una pantalla y no se clava. Con coreografía la sección
+ * se clava en todo ancho —la misma caja de una pantalla, en `svh`— y el bloque deja
+ * de heredar el alto de la sección.
+ */
+const CLASES_DE_LA_RAMA = {
+  quieta: { seccion: 'relative max-escritorio:min-h-[inherit]', bloque: 'relative h-full w-full max-escritorio:min-h-[inherit]' },
+  animada: { seccion: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh', bloque: 'relative h-full w-full' },
+} as const
+
+function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
   // ⚠️ UN SOLO valor amortiguado para el cartel y el túnel: lo escribe el túnel y
   // lo lee el cartel, así que subiendo el cartel no puede volver encima del túnel.
   const mostrado = useMotionValue(0)
+  const clases = CLASES_DE_LA_RAMA[useCoreografiaActiva() ? 'animada' : 'quieta']
   return (
     // ⚠️ Sin `bg-fondo` en móvil: la sección es `oscuro-transparente` y la
     // oscuridad la tiene que dar la SALA, no el panel. Pintarla acá tapaba el
     // canvas abajo de 1025 y con él lo único que esta sección viene a mostrar.
     // Quien la lleva a la noche en los dos lados del umbral es el disparo.
-    <Seccion seccion={seccion} className="relative max-escritorio:min-h-[inherit]">
+    <Seccion seccion={seccion} className={clases.seccion}>
       {/* ⚠️ El `min-h-[inherit]` viaja por la cadena ENTERA o no llega: el bloque
           está entre la sección y el envoltorio, y sin él el envoltorio hereda el
           cero del bloque en vez del alto del panel. Medido: la rama quieta
           quedaba 2.419 px más corta que su sección. */}
-      <Bloque patron="P7" anclaje="seccion" lente="escena" className="relative h-full w-full max-escritorio:min-h-[inherit]">
+      <Bloque patron="P7" anclaje="seccion" lente="escena" className={clases.bloque}>
         {(progreso: Progreso) => {
           if (progreso === null) return <RamaQuieta seccion={seccion} />
           return (
