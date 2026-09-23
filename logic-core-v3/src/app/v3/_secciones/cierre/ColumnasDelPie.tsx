@@ -91,7 +91,8 @@ export interface ColumnasDelPieProps {
 
 export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Element {
   return (
-    <BloqueDeColumnasDelPie>
+    // SPRINT PANEL 3 · el newsletter se mudó a Tu Panel: dos columnas llenan el ancho que la grilla de tres dejaba con un hueco.
+    <BloqueDeColumnasDelPie className="tablet:grid-cols-2">
       {COLUMNAS.map((columna, indice) => (
         <CanalDePieza
           key={columna.id}

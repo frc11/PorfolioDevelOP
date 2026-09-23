@@ -63,3 +63,14 @@ export function cronogramaDelRemate(duracion: number, duracionDelPunto: number, 
   const total = Math.max(...crudos.map((t) => t.delay + t.duration))
   return crudos.map((t) => ({ ...t, endDelay: total - t.delay - t.duration }))
 }
+
+/** SPRINT PANEL 3 · la línea de disparo del remate sube a 35 % del cuadro desde abajo: entra más tarde. */
+export const DISPARO_DEL_REMATE = 35
+
+/** SPRINT PANEL 3 · el remate corre 1,6 veces más lento que los tokens (700 → 1120 ms la frase). */
+export const LENTITUD_DEL_REMATE = 1.6
+
+/** El `rootMargin` que baja la línea de disparo: sólo el borde de abajo se mete `desdeAbajo` % del cuadro. */
+export function margenDelDisparo(desdeAbajo: number): string {
+  return [0, 0, -desdeAbajo, 0].map((v) => `${v}%`).join(' ')
+}

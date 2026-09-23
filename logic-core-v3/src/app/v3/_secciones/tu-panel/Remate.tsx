@@ -6,21 +6,21 @@ import { useEffect, useRef, useState } from 'react'
 import { FormularioDeNovedades } from '../../_componentes/chrome/Novedades'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { useCoreografiaActiva } from '../_contrato/coreografia'
+import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
-import { cronogramaDelRemate, curvaComoLinear, salidaExponencial } from './entrada'
+import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
 import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
 
 /**
  * EL REMATE — «Y más…» a la izquierda y el newsletter a la derecha (SPRINT PANEL 2).
  *
- * ── Llegan y SE VAN: la entrada se reproduce al revés al salir por abajo ──
+ * ── Se QUEDAN: el disparo es por LÍNEA, no por visibilidad (SPRINT PANEL 3) ─
  *
- * Se eligió invertir la misma animación por tiempo y no atarla al scroll. Atada
- * al scroll, la curva `expo.out` dejaría de ser una curva: la velocidad la
- * pondría la rueda, y un scroll lento la volvería lineal. Invertida, el gesto de
- * salida es EXACTAMENTE el de entrada en espejo —se van primero los puntos, que
- * llegaron últimos—, y cuesta un solo `IntersectionObserver`. Sale sólo cuando
- * el remate se va por ABAJO (se está subiendo); si se va por arriba, se queda.
+ * Como todos los objetos de la página: bajando, al cruzar la línea de disparo
+ * (`DISPARO_DEL_REMATE`), entran; se quedan aunque salgan por arriba; y sólo si
+ * se vuelve a SUBIR por encima de la línea hacen la entrada al revés —primero los
+ * puntos, después la frase y el newsletter—. El discriminador de los cuatro
+ * cruces es el de Trabajos (`_contrato/cruce.ts`); acá no hay uno propio.
  *
  * El newsletter es `FormularioDeNovedades`, el mismo componente que vivía en el
  * pie del Cierre, y sigue deshabilitado: no hay un destino al que mandarlo.
@@ -43,7 +43,11 @@ export function Remate(): React.JSX.Element {
     let animaciones: Animation[] = []
     const armar = (): void => {
       const curva = curvaComoLinear(salidaExponencial)
-      const tramos = cronogramaDelRemate(milisegundosDe(leerToken('--duracion-muy-lenta')), milisegundosDe(leerToken('--duracion-rapida')), PUNTOS_DE_Y_MAS)
+      const tramos = cronogramaDelRemate(
+        milisegundosDe(leerToken('--duracion-muy-lenta')) * LENTITUD_DEL_REMATE,
+        milisegundosDe(leerToken('--duracion-rapida')) * LENTITUD_DEL_REMATE,
+        PUNTOS_DE_Y_MAS,
+      )
       const derecha = window.innerWidth
       const corrida = pixelesDe(leerToken('--spacing-8'))
       const piezas = [frase.current, ...puntos.current, novedades.current]
@@ -64,16 +68,28 @@ export function Remate(): React.JSX.Element {
       })
       setEstado('vivo')
     }
+    let primero = true
     const observador = new IntersectionObserver(
-      ([entrada]) => {
-        if (entrada.isIntersecting) {
+      ([e]) => {
+        const cruce = cruceDelTramo({ cruza: e.isIntersecting, tope: e.boundingClientRect.top, pie: e.boundingClientRect.bottom })
+        // El primer aviso es el estado de carga, no un cruce: se posa donde toca, sin gesto.
+        if (primero) {
+          primero = false
+          if (puestoTras(cruce)) {
+            armar()
+            for (const a of animaciones) a.finish()
+          }
+          return
+        }
+        const gesto = gestoDelCruce(cruce)
+        if (gesto === 'ida') {
           if (animaciones.length === 0) armar()
           else reproducir(animaciones, 1)
-        } else if (entrada.boundingClientRect.top > 0) {
+        } else if (gesto === 'vuelta') {
           reproducir(animaciones, -1)
         }
       },
-      { threshold: 0.3 },
+      { rootMargin: margenDelDisparo(DISPARO_DEL_REMATE) },
     )
     observador.observe(raiz)
     return () => {

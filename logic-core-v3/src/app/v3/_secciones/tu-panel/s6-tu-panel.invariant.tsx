@@ -46,7 +46,9 @@ import {
   velocidadDe,
   type FilaDelCaos,
 } from './geometria'
-import { cronogramaDelRemate, curvaComoLinear, salidaExponencial } from './entrada'
+import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
+import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
+import { cruceDelTramo as cruceDeTrabajos, gestoDelCruce as gestoDeTrabajos } from '../trabajos/gota'
 import { cajaAmpliada, transformadaEntre, vecino } from './vuelo'
 import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
 
@@ -215,7 +217,26 @@ afirmar(tramos.every((t) => t.endDelay >= 0), '  sin relleno negativo')
 controlPositivo('el control ve un cronograma sin relleno', tramos.map((t) => t.delay + t.duration), (l) => l.every((f) => Math.abs(f - l[0]) < 1e-9))
 afirmar(salidaExponencial(0.25) > 0.8 && curvaComoLinear(salidaExponencial).startsWith('linear(0.0000, '), 'la curva es expo.out, pasada como `linear(…)`')
 const REMATE = fuenteDe('Remate.tsx')
-afirmar(REMATE.includes('reproducir(animaciones, -1)') && REMATE.includes('entrada.boundingClientRect.top > 0'), 'sale en espejo sólo cuando se va por ABAJO (se está subiendo)')
+afirmar(REMATE.includes('gestoDelCruce(cruce)') && !REMATE.includes('isIntersecting)') && !/entrada\.isIntersecting\)\s*\{/.test(REMATE), 'el remate decide por el DISPARO POR LÍNEA del contrato, no por visibilidad')
+afirmar(REMATE.includes('margenDelDisparo(DISPARO_DEL_REMATE)') && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${DISPARO_DEL_REMATE}% 0%`, `  con la línea a ${DISPARO_DEL_REMATE} % del cuadro desde abajo (entra más tarde)`, margenDelDisparo(DISPARO_DEL_REMATE))
+afirmar(LENTITUD_DEL_REMATE > 1, `  y ${LENTITUD_DEL_REMATE} veces más lento que los tokens`)
+
+// SPRINT PANEL 3 · las cuatro entradas, como §19 de Trabajos.
+const CASOS = {
+  'arriba-bajando': { cruza: true, tope: 300, pie: 700 },
+  'arriba-subiendo': { cruza: false, tope: 700, pie: 1100 },
+  'abajo-bajando': { cruza: false, tope: -900, pie: -500 },
+  'abajo-subiendo': { cruza: true, tope: -200, pie: 200 },
+} as const
+const GESTO_ESPERADO = { 'arriba-bajando': 'ida', 'arriba-subiendo': 'vuelta', 'abajo-bajando': 'nada', 'abajo-subiendo': 'nada' } as const
+for (const entrada of ENTRADAS_AL_TRAMO) {
+  const c = CASOS[entrada]
+  afirmarIgual(cruceDelTramo(c), entrada, `${entrada}: se reconoce`)
+  afirmarIgual(gestoDelCruce(cruceDelTramo(c)), GESTO_ESPERADO[entrada], `  y su gesto es «${GESTO_ESPERADO[entrada]}»${entrada === 'abajo-bajando' ? ' — pasarlo bajando NO lo saca' : ''}`)
+  afirmarIgual([cruceDelTramo(c), gestoDelCruce(cruceDelTramo(c))], [cruceDeTrabajos(c), gestoDeTrabajos(cruceDeTrabajos(c))], '  y es EXACTAMENTE lo que decide Trabajos (`trabajos/gota.ts`): es el mismo mecanismo, no uno propio')
+}
+afirmar(ENTRADAS_AL_TRAMO.every((e) => puestoTras(e) === (e !== 'arriba-subiendo')), 'al cargar se posa: puesto en todo cruce salvo debajo de la línea')
+controlPositivo('el control ve un disparo por visibilidad (salir por arriba lo sacaría)', (c: { cruza: boolean }): string => (c.cruza ? 'ida' : 'vuelta'), (f) => f(CASOS['abajo-bajando']) === 'nada')
 afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.curva === 'expo.out'), 'declarado en el contrato como gesto por tiempo')
 
 const forma = /<form[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? ''

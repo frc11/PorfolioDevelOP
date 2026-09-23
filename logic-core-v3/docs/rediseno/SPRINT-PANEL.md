@@ -111,3 +111,17 @@ Fondo: −0,18 (más lento que cualquier feature). Barridos: el modelo a 1440×9
 - En verde: s6-tu-panel (139), s6-cierre (77), s7-arboles, s10-acceso, s21-llave, s7-pedido, s6-tokens, s6-contrato, s6-lane, s6-render, s6-contraste, s7-contrato, s7-integracion, s7-cn, s3-codigo, s3-tokens, s3-foco, s21-fotos, s19-sincronia, s8-montaje, s5-codigo.
 - **Envío del newsletter: NO se probó contra ningún backend porque no existe.** No se simuló.
 - Capturas en la carpeta `panel` de `.cache/b4-medicion` (`p2-1440-a.png`, `p2-390-a.png`, `p2-390-remate.png`) y la grabación en `panel/grabacion2/tu-panel-1440.mp4`.
+
+---
+
+# Sprint 3 — el remate se queda
+
+- [x] 1 — «Y más…» y el newsletter por DISPARO POR LÍNEA: entran bajando al cruzar la línea, se quedan al pasarlos, y sólo vuelven al revés si se sube por encima de la línea
+- [x] 1b — más tarde y más lento: `DISPARO_DEL_REMATE = 35` (la línea a 35 % del cuadro desde abajo) y `LENTITUD_DEL_REMATE = 1.6` (frase 700 → 1120 ms), en `tu-panel/entrada.ts`
+- [x] 1c — las cuatro entradas afirmadas con su control positivo (`s6-tu-panel` §10)
+- [x] 2 — el hueco del pie: `tablet:grid-cols-2` por `className` de `BloqueDeColumnasDelPie` desde `cierre/ColumnasDelPie.tsx`; `chrome/Pie.tsx` sin tocar (`cn()` resuelve `tablet:grid-cols-3` → `-2`)
+- [x] Validación: lint, `tsc`, s6-tu-panel (155), s8-cierre (77), s10-acceso (74), más s7-contrato, s5-codigo, s6-contrato, s6-lane, s6-tokens, s3-codigo; grabación en `panel/grabacion3/remate-1440.mp4`
+
+**El mecanismo.** Es el de Trabajos: `cruceDelTramo` + `gestoDelCruce` de `trabajos/gota.ts` (un `IntersectionObserver` cuyo `rootMargin` baja la línea de disparo, y la caja del evento para distinguir los cuatro cruces). Como una sección no puede importar de otra (`s7-contrato`) y `trabajos/` es del otro lane, las dos funciones se subieron a `_contrato/cruce.ts` sin cambiar una línea de lógica; `s6-tu-panel` afirma que dan lo mismo que las de Trabajos en las cuatro entradas. **Pendiente para el merge:** que `gota.ts` importe de `_contrato/cruce.ts` y se borre la copia.
+
+**Medido en la grabación (1440 × 900):** antes, oculto · llegó (tope 300), puesto · pasado (tope −900), puesto · de vuelta (tope 100), puesto · subido por encima de la línea (tope 800), frase corrida 1408 px: se fue.
