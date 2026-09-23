@@ -22,9 +22,14 @@ import { TextoDeDemos } from './TextoDeDemos'
  */
 export function DemosQuietos(): React.JSX.Element {
   return (
+    // ⚠️ Sin `bg-fondo`, como el resto de la rama (`Trabajos.tsx`): la oscuridad la
+    // pone la sala. Probado y revertido: con fondo propio quedaba una costura contra
+    // la escena, y el papel que se había visto era la noche sin disparar (el banco
+    // había saltado en vez de llegar de a muescas).
     <div className="flex min-h-svh flex-col justify-center gap-8">
       <TextoDeDemos />
-      <div data-pieza="cinta">
+      {/* A sangre: la cinta sale del margen lateral del envoltorio y corre de borde a borde. */}
+      <div data-pieza="cinta" className="-mx-[var(--pad-lateral-compacto)]">
         <div data-parte="pista">
           <Lista />
           <Lista copia />

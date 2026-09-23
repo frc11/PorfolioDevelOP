@@ -207,6 +207,7 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/VentanaDeDemo.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CapaDeDemos.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/DemosQuietos.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/demos-invariante.tsx`,
 ]
 
 /**

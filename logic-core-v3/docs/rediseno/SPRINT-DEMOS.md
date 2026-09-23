@@ -36,9 +36,10 @@ Cada fase cierra con un commit `wip(demos): fase N — …`.
       `box-shadow: var(--shadow-flotante)` · alto `--nav-alto` = `2 × --spacing-3 + cuerpo × leading-texto` ·
       `padding-inline: var(--spacing-4)` · rótulo `text-cuerpo tracking-texto leading-texto font-semi` en tinta.
 - [x] **La capa del vacío:** `CapaDelTunel.tsx` pinta `recorteDelVacio(fraccionDelVacio(...))` sobre
-      `data-pieza="tunel"` dentro de `pintar()`. La capa de demos entra como HERMANA ANTERIOR de
-      `CapaDelTunel` en `Trabajos.tsx` (el orden del marcado es el orden de pintura) y lee la MISMA
-      fracción, que `pintar()` publica en un `MotionValue`.
+      `data-pieza="tunel"` dentro de `pintar()`. La capa de demos entra en `Trabajos.tsx` como hermana
+      de `CapaDelTunel` y lee la MISMA fracción desde `mostrado`, que el túnel ya publica. (Plan
+      original: hermana anterior; quedó POSTERIOR con z negativo, porque `s10-acceso` exige que las
+      demos se lean después del CTA en las dos ramas. `CapaDelTunel.tsx` no se tocó.)
 - [x] **Otras restricciones encontradas:**
   - `ScrollSuaveDeV3.tsx` afirma que **nunca llama `lenis.stop()`** (la clase `lenis-stopped` cuelga un
     `overflow: clip` del `<html>`), y la instancia no se publica. La pausa del scroll se hace con
@@ -46,45 +47,62 @@ Cada fase cierra con un commit `wip(demos): fase N — …`.
     mientras está abierto (la barra ya está oculta en `globals.css:476`, así que no corre el layout).
   - Abajo de 1025 **y con movimiento reducido** se monta la rama quieta (`CompuertaDelHome`).
 
-## Fase 1 — el CTA se entiende como apretable
-- [ ] «Hablemos» un renglón más abajo, más grande que un cuerpo y más chico que la frase
-- [ ] «Hablemos» es el `Cta` del sitio con su rollover (sin modificar el componente)
-- [ ] «(un clic y arrancamos)» en mono chico
-- [ ] hover/foco de la ventana: se eleva, mano, se tipea «/hablemos» y se borra al salir
-- [ ] la ventana sigue siendo el enlace; §16 intacto
+## Fase 1 — el CTA se entiende como apretable (commit b4ae3f6c)
+- [x] «Hablemos» un renglón más abajo (`pt-12`), a `--text-titulo-m`: más grande que un cuerpo y más chico que la frase
+- [x] «Hablemos» es el `CtaEnlace` del sitio con su rollover, SIN modificar el componente. Dos
+      redefiniciones en su caja: `--text-cuerpo → --text-titulo-m` y `--color-tinta → --color-fondo`
+      (el CTA pinta siempre en tinta, y adentro de la ventana el papel es la tinta de la sala)
+- [x] «(un clic y arrancamos)» en `Micro` mono, al lado; también en la rama quieta (paridad de `s10-acceso`)
+- [x] hover/foco de la ventana: sube `--spacing-2` con la sombra flotante y se tipea «/hablemos» con
+      `cabezaDelTipeo` (el mecanismo de la frase, con reloj de tiempo); al salir se borra (`encimaDelCta.ts`)
+- [x] la ventana entera sigue siendo el enlace: el `::after` del `CtaEnlace` se estira sobre ella. §16: siete
+      anclas, las siete paradas, destinos legítimos — en verde
 
-## Fase 2 — la entrada
-- [ ] capa de demos detrás del túnel y encima del canvas, escala = la fracción del vacío
-- [ ] fija con el cuadro lleno; se va con la sección
-- [ ] ida y vuelta sin saltos; el largo del tramo no cambia
-- [ ] superposición contra la referencia dentro de 1 px
+## Fase 2 — la entrada (commit e343103e, junto con 3 y 4: el código depende entre sí)
+- [x] `CapaDeDemos` escala = la fracción del vacío (`entrada.ts`, sin ley nueva), leída de `mostrado`
+- [x] va DESPUÉS del túnel en el marcado (orden de lectura, `s10-acceso`) y se pinta DEBAJO con z negativo
+- [x] fija con el cuadro lleno (pin); se va con la sección
+- [x] medido a 1440: 0,224 / 0,482 / 0,740 / 1 en px 4100 / 4350 / 4600 / 4860, igual a la fracción del vacío
+- [x] ⚠️ encontrado y arreglado: con `will-change` en la capa o en las caras, el túnel se componía encima y
+      el vacío dejaba de cortar el fondo de la ventana del CTA (el agujero se veía claro). Sin `will-change`, bien
+- [x] superposición contra la referencia (ver fase 6): dentro de 1 px
 
 ## Fase 3 — la biblioteca y el hover
-- [ ] layout: logo a la izquierda, título + párrafo + estante a la derecha
-- [ ] las piezas en perspectiva con su portada
-- [ ] hover: levanta, vecinas se abren, subida suave, bajada ≤120 ms
-- [ ] cartel con la estética del navbar, con el nombre correcto
-- [ ] teclado: foco levanta, flechas recorren, Enter abre
-- [ ] precarga por intención (>150 ms, una por vez)
+- [x] logo a la izquierda (columna vacía), título + párrafo + estante a la derecha
+- [x] seis piezas con su portada REAL (capturas de los templates, `public/demos/`, `scripts-b4/demos-portadas.ts`)
+- [x] hover CSS: la cara sube con resorte crítico (`linear()`), las vecinas se abren, bajada 100 ms
+- [x] cartel en portal con la pastilla del navbar token por token; medido: el nombre correcto en las seis
+- [x] teclado: piezas focalizables (anclas), foco levanta igual, flechas recorren, Enter abre
+- [x] precarga por intención: 150 ms, un solo `<link rel=prefetch>` que cambia de destino
 
 ## Fase 4 — abrir, usar y cerrar
-- [ ] la biblioteca se aleja y el velo del CTA oscurece
-- [ ] la ventana nace de la pieza, líquido → sólido; fps medidos
-- [ ] cromo del CTA + URL real + cruz; el rojo cierra
-- [ ] rueda en la demo, página quieta; click → pestaña nueva con cartel
-- [ ] esqueleto mientras carga, sin destello blanco; una sola viva
-- [ ] cerrar (cruz, rojo, Esc, afuera) al revés, foco devuelto
-- [ ] diálogo accesible con foco atrapado; movimiento reducido
+- [x] la biblioteca retrocede (`data-alejada`) y el velo del CTA (el mismo `bg-fondo` de la sala a `VELO_DEL_CTA`)
+- [x] la ventana nace con la caja de la pieza; líquido 180 ms (feTurbulence + feDisplacementMap, sólo chica)
+      → sólido 450 ms con resorte crítico. Medido sin fotos: 69 cuadros, media 13,5 ms, peor 27 ms (el del
+      montaje). El filtro NO cuesta: se queda
+- [x] 16:10 (la del CTA), 80 % del ancho o 82 % del alto; cromo del CTA + URL real (enlace) + cruz; el rojo cierra
+- [x] la rueda scrollea la demo y la página no se mueve (medido: 9573 → 9573 con 12 muescas)
+- [x] clic adentro → pestaña nueva (medido 2 → 3). La capa transparente NO sirve: la rueda no atraviesa a
+      un iframe de otro origen. Se detecta el clic por el foco que se va al iframe
+- [x] esqueleto con forma de página en los tonos de la sala; el iframe aparece recién cargado y asentado
+- [x] una sola viva; al cerrar se desmonta (medido: 0 iframes)
+- [x] cierre (cruz, rojo, Esc, afuera) por la misma línea al revés; foco devuelto (medido con Esc y con el rojo)
+- [x] diálogo modal con foco atrapado; movimiento reducido: fundido + escala 0,96
 
 ## Fase 5 — móvil y tablet
-- [ ] título, texto y cinta infinita CSS; quieta y deslizable con movimiento reducido
-- [ ] tocar una portada abre el template
+- [x] título, texto y cinta CSS (pista doble, media vuelta); quieta y deslizable con movimiento reducido
+- [x] tocar una portada abre el template en otra pestaña
+- [x] capturas a 375 y 768: la pista corre ~25 px/s en las dos; a sangre, sobre la noche de la escena
+- [x] ⚠️ probado y revertido: un `bg-fondo` propio en el bloque. El papel que se veía detrás era la noche
+      sin disparar (el banco saltaba); con fondo propio quedaba una costura contra la escena
 
 ## Fase 6 — verificación y reporte
-- [ ] lint + `tsc --noEmit`
-- [ ] s5-trabajos, s7-arboles, s7-contrato, s10-acceso, s21-llave en verde
-- [ ] invariantes nuevos con control positivo
-- [ ] superposición del túnel dentro de 1 px
-- [ ] grabación a 1440 + capturas de la cinta a 375 y 768
-- [ ] visual-qa (si está disponible)
+- [x] lint + `tsc --noEmit`
+- [x] s5-trabajos (301), s7-arboles, s7-contrato, s10-acceso, s21-llave en verde, y s5/s3 tokens, código, compacto
+- [x] invariantes nuevos con control positivo (§25, `demos/demos-invariante.tsx`)
+- [x] superposición del túnel dentro de 1 px: corrida 1 con UNA muestra afuera (yRef 1700, sólo la caja
+      medida, las tres capturas con el mismo ×1,48 → un cuadro suelto); corrida 2, las 5 capas adentro del
+      margen, peor A 1,5 % y peor B 1,6 % — lo mismo que el sprint del vacío
+- [x] grabación a 1440 (41 s, `~/.cache/b4-medicion/demos-grabacion/demos-1440.mp4`) + cinta a 375 y 768
+- [ ] visual-qa
 - [ ] reporte
