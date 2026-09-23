@@ -177,8 +177,8 @@ afirmarIgual(
 )
 afirmarIgual(
   ESCENARIO_MIN_ANCHO_PX - BREAKPOINTS.escritorio,
-  1,
-  '  y el de coreografía queda un píxel arriba, en 1025: la franja entre los dos es de UN píxel',
+  0,
+  '  y el de coreografía corta en el mismo ancho: la franja de un píxel se cerró (MÓVIL-TRABAJOS)',
 )
 // ⚠️ 1023 y no 1024: el corte de composición bajó un píxel, así que 1024 pasó a
 // ser el primer ancho donde `escritorio:` SÍ entra. El par de abajo prueba los

@@ -131,11 +131,11 @@ afirmarIgual(
  * al corte de COMPOSICIÓN (1024) y no al de coreografía (1025), que gobierna qué
  * se monta. Eran el mismo número hasta el sprint que los separó.
  */
-afirmarIgual(ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX, 1, 'los dos umbrales están a un píxel: composición 1024, coreografía 1025')
+afirmarIgual(ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX, 0, 'los dos umbrales valen lo mismo desde MÓVIL-TRABAJOS: 1024')
 afirmarIgual(
   resolver('var(--breakpoint-escritorio)', tokens)?.n,
   COMPOSICION_MIN_ANCHO_PX,
-  'el 1025 de los `sizes` es el token del sistema',
+  'el 1024 de los `sizes` es el token del sistema',
 )
 afirmarIgual(resolver('var(--breakpoint-tablet)', tokens)?.n, ANCHO_TABLET_PX, 'y el 768, también')
 

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-import { CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
+import { COMPOSICION_MIN_ANCHO_PX, CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
 import { calidadPorAncho } from '../escena/calidad'
 import { IMPORT_DE_LA_ESCENA } from '../escena/contrato'
 import { EscenarioCompuerta } from '../../_componentes/EscenarioCompuerta'
@@ -26,10 +26,21 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirma
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 const leer = (rel: string): string => readFileSync(path.join(RAIZ, rel), 'utf8')
 
-titulo('1 · El umbral: 1025px exactos, por ancho')
+titulo('1 · El umbral: 1024px, por ancho, y uno solo')
 
-afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1025, 'el umbral es 1025, medido y no interpolado')
-afirmarIgual(CONSULTA_ESCENARIO, '(min-width: 1025px)', 'la consulta es de ANCHO')
+// MÓVIL-TRABAJOS: era 1025 (el de la referencia) y bajó con el de composición.
+afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1024, 'el umbral es 1024: a 1024 se monta como escritorio')
+afirmarIgual(CONSULTA_ESCENARIO, '(min-width: 1024px)', 'la consulta es de ANCHO')
+afirmarIgual(
+  ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX,
+  0,
+  'y la franja de un píxel dejó de existir: lo que se monta y cómo se compone cortan en el mismo ancho',
+)
+controlPositivo(
+  'el chequeo de la franja ve los dos umbrales separados otra vez',
+  { composicion: 1024, escenario: 1025 },
+  (par: { composicion: number; escenario: number }) => par.escenario - par.composicion === 0,
+)
 afirmar(!/hover|pointer|coarse/.test(CONSULTA_ESCENARIO), 'no es por táctil: ni `hover`, ni `pointer`, ni `coarse`')
 
 controlPositivo(

@@ -25,6 +25,7 @@
 import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
+import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo, medir } from './s8-largos'
 import {
@@ -177,7 +178,8 @@ const sinComentarios = compuerta
 
 afirmar(/from '\.\.\/_lib\/compuerta'/.test(sinComentarios), 'importa el umbral de `_lib/compuerta`')
 afirmar(/from '\.\.\/_lib\/useAnchoMinimo'/.test(sinComentarios), '  y el hook de `_lib/useAnchoMinimo`')
-afirmar(!/1025/.test(sinComentarios), '  y NO escribe el 1025: un número repetido son dos compuertas')
+const LITERAL_DEL_UMBRAL = new RegExp(`\\b${String(ESCENARIO_MIN_ANCHO_PX)}\\b`)
+afirmar(!LITERAL_DEL_UMBRAL.test(sinComentarios), '  y NO escribe el umbral: un número repetido son dos compuertas')
 afirmar(
   /dynamic\(\s*\(\)\s*=>\s*import\(/.test(sinComentarios),
   '  y el árbol animado entra por `dynamic(() => import(...))`, el mecanismo de S1',
@@ -214,8 +216,8 @@ afirmarIgual(consultan, [], 'ninguna sección consulta la compuerta: se resuelve
 
 controlPositivo(
   'el chequeo del umbral ve un componente que declara el suyo',
-  'const MIO = 1025',
-  (fuente: string) => !/1025/.test(fuente),
+  `const MIO = ${String(ESCENARIO_MIN_ANCHO_PX)}`,
+  (fuente: string) => !LITERAL_DEL_UMBRAL.test(fuente),
 )
 controlPositivo(
   'el de la consulta NO está ciego: ve un `useAnchoMinimo` en el código',

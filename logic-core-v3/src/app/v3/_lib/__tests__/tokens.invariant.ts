@@ -595,7 +595,7 @@ async function principal(): Promise<void> {
   )
 
   // ─────────────────────────────────────────────────────────────────────────
-  titulo('7 · LOS DOS umbrales, cada uno contra su dueño, y la franja entre ellos')
+  titulo('7 · LOS DOS umbrales, cada uno contra su dueño, y ya sin franja entre ellos')
 
   /**
    * 🔴 **ESTA SECCIÓN AFIRMABA QUE HABÍA UN SOLO NÚMERO, Y AHORA HAY DOS.**
@@ -615,11 +615,12 @@ async function principal(): Promise<void> {
   const breakpoint = enElRepo.match(/--breakpoint-escritorio:\s*(\d+)px/)
   const valorDelBreakpoint = breakpoint ? Number.parseInt(breakpoint[1], 10) : null
   afirmarIgual(valorDelBreakpoint, COMPOSICION_MIN_ANCHO_PX, '`--breakpoint-escritorio` = COMPOSICION_MIN_ANCHO_PX = 1024 — el corte de composición')
-  afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1025, '  y la compuerta de coreografía sigue en 1025: es otro dueño y otra decisión (B6.1)')
+  // MÓVIL-TRABAJOS cerró la franja: la distancia medida entre los dos pasa a ser cero.
+  afirmarIgual(ESCENARIO_MIN_ANCHO_PX, COMPOSICION_MIN_ANCHO_PX, '  y la compuerta de montaje vale lo mismo: se deriva del corte de composición')
   afirmarIgual(
     ESCENARIO_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX,
-    1,
-    '  y la franja entre los dos es de UN píxel exacto: a 1024 se compone como escritorio y se monta como abajo',
+    0,
+    '  y la franja entre los dos es de CERO píxeles: a 1024 se compone y se monta como escritorio',
   )
 
   controlPositivo(
@@ -631,9 +632,9 @@ async function principal(): Promise<void> {
     },
   )
   controlPositivo(
-    'y el de la franja ve los dos umbrales pegados otra vez',
-    { composicion: 1025, escenario: 1025 },
-    (par: { composicion: number; escenario: number }) => par.escenario - par.composicion === 1,
+    'y el de la franja ve los dos umbrales separados otra vez',
+    { composicion: 1024, escenario: 1025 },
+    (par: { composicion: number; escenario: number }) => par.escenario - par.composicion === 0,
   )
 
   // ─────────────────────────────────────────────────────────────────────────

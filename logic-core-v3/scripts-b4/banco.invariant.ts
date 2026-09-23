@@ -67,8 +67,8 @@ afirmarIgual(
 )
 afirmarIgual(
   PERFILES_DEBAJO_DEL_UMBRAL.map((p) => p.id),
-  ['375', '393', '768', '1024'],
-  'cuatro perfiles caen abajo del umbral, que es el scope del frente B',
+  ['375', '393', '768'],
+  'tres perfiles caen abajo del umbral (MÓVIL-TRABAJOS subió 1024 al lado de escritorio)',
 )
 afirmar(
   PERFILES.every((p) => (p.ancho < ESCENARIO_MIN_ANCHO_PX) === p.debajoDelUmbral),
@@ -83,7 +83,7 @@ afirmarIgual(
 afirmarIgual(
   perfilPorId('1025').ancho - perfilPorId('1024').ancho,
   1,
-  '  y difieren en UN píxel, que es el ancho al que la compuerta abre',
+  '  y difieren en UN píxel: 1024 es donde la compuerta abre hoy y 1025 donde abría antes',
 )
 afirmarIgual(cadenaDeViewport(perfilPorId('375')), '375x667x1,mobile,touch', 'la cadena de `emulate` se deriva del perfil')
 afirmarIgual(cadenaDeViewport(perfilPorId('1920')), '1920x1080x1', '  y sin banderas donde el perfil no es táctil')

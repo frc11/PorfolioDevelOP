@@ -34,7 +34,8 @@ const leer = (relativo: string): string => readFileSync(path.join(RAIZ, relativo
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Un solo umbral para las tres, importado y no reescrito')
 
-afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1025, 'el umbral del escenario son 1025 px')
+afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1024, 'el umbral del escenario son 1024 px (MÓVIL-TRABAJOS: antes 1025)')
+const LITERAL_DEL_UMBRAL = new RegExp(`\\b${String(ESCENARIO_MIN_ANCHO_PX)}\\b`)
 afirmarIgual(CURSOR_MIN_ANCHO_PX, ESCENARIO_MIN_ANCHO_PX, '  el cursor cuelga del mismo, importado')
 afirmarIgual(SCROLL_SUAVE_MIN_ANCHO_PX, ESCENARIO_MIN_ANCHO_PX, '  y el scroll suave también')
 for (const [modulo, archivo] of [
@@ -46,14 +47,14 @@ for (const [modulo, archivo] of [
     `  \`${modulo}.ts\` lo IMPORTA: si alguien mueve el umbral, se mueve también acá`,
   )
   afirmar(
-    !/\b1025\b/.test(quitarComentarios(leer(archivo))),
+    !LITERAL_DEL_UMBRAL.test(quitarComentarios(leer(archivo))),
     `  y no lo reescribe como literal`,
   )
 }
 controlPositivo(
   'el detector de literal no está ciego',
-  'export const UMBRAL = 1025',
-  (f: string) => !/\b1025\b/.test(f),
+  `export const UMBRAL = ${String(ESCENARIO_MIN_ANCHO_PX)}`,
+  (f: string) => !LITERAL_DEL_UMBRAL.test(f),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

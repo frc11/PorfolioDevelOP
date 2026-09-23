@@ -1,5 +1,9 @@
 /**
- * LA COMPUERTA DE 1025 — los datos, sin React.
+ * LA COMPUERTA DE 1024 — los datos, sin React.
+ *
+ * ⚠️ **Fue la compuerta de 1025 hasta MÓVIL-TRABAJOS**, y lo que sigue abajo son
+ * mediciones de entonces: donde dice 1025, es el umbral de montaje de ese momento.
+ * El de hoy, y por qué se unificó, está en el bloque de los dos umbrales.
  *
  * Vive aparte del componente por una razón práctica: los invariantes la
  * importan y la verifican sin montar nada ni tocar el DOM. Un número que solo
@@ -110,42 +114,32 @@
  */
 
 /**
- * 🔴 **DOS UMBRALES QUE ESTUVIERON PEGADOS Y AHORA SE SEPARAN POR UN PÍXEL.**
+ * 🔴 **LOS DOS UMBRALES VUELVEN A VALER LO MISMO: 1024 (MÓVIL-TRABAJOS).**
  *
- * Hasta este sprint había UN número, 1025, haciendo dos trabajos: decidir qué se
- * MONTA (escena, cursor, scroll suave) y decidir cómo se COMPONE la página. Que
- * coincidieran era cómodo y cinco invariantes lo afirmaban como si fuera una
- * propiedad. **No lo era: era una coincidencia con dos dueños distintos.**
+ * Un sprint anterior los separó por un píxel. La composición bajó a 1024 —iPad
+ * apaisado y notebook son escritorio del lado del layout— y lo que se MONTA
+ * (coreografía, cursor propio, scroll suave, calidad de la escena) se quedó en
+ * 1025, con la referencia en la mano. Este bloque decía que la franja de un píxel
+ * «no se ve: se mide». **Se veía**: a 1024 exactos Trabajos tenía el marco `sticky`
+ * de escritorio con la rama quieta adentro y sin túnel, y la escena corría en la
+ * calidad del lado angosto.
  *
- * Lo que la separa es 1024, que no es un número cualquiera: es el iPad apaisado
- * y es la notebook. Del lado de la COMPOSICIÓN eso es escritorio sin discusión
- * —hay ancho de sobra para la calle lateral, para el ≠ en el margen y para los
- * tres nombres en la calle derecha—. Del lado de lo que se MONTA la respuesta es
- * la contraria y ya estaba medida: a 1024 la experiencia completa (escena a
- * calidad alta, cursor propio, motor de scroll) es una apuesta sobre una máquina
- * que puede ser táctil, y B6.1 la decidió en 1025 con la referencia en la mano.
- *
- * Así que los dos números se quedan, cada uno con su dueño:
+ * La decisión del dueño la cerró: **a 1024 la página se compone y se monta como
+ * escritorio.** Los dos nombres se quedan porque dicen cosas distintas —cómo se ve y
+ * qué se monta—, pero ya no pueden valer distinto: el de montaje SE DERIVA del de
+ * composición, y `compuerta.invariant` afirma que la diferencia es cero.
  *
  *     COMPOSICION_MIN_ANCHO_PX   1024   cómo se ve      → `--breakpoint-escritorio`
- *     ESCENARIO_MIN_ANCHO_PX     1025   qué se monta    → escena, cursor, scroll suave
- *
- * ⚠️ **La franja de un píxel es real y hay que saber qué pasa ahí.** A 1024
- * exactos la página se compone como escritorio y monta como abajo del umbral: la
- * escena está —se monta siempre desde que el dueño dio vuelta
- * `EscenarioCompuerta`— pero con la calidad del lado angosto, sin cursor propio
- * y sin Lenis. Ninguna de esas tres cosas es de composición, y por eso la franja
- * no se ve: se mide.
+ *     ESCENARIO_MIN_ANCHO_PX     1024   qué se monta    → coreografía, escena, cursor, scroll suave
  */
 export const COMPOSICION_MIN_ANCHO_PX = 1024
 
 /**
- * 1025px exactos. Medido, no interpolado: es el ancho al que la referencia
- * conmuta. ⚠️ **Ya NO es `--breakpoint-escritorio`**: ése bajó a 1024 con el
- * sprint que movió la composición, y el invariante que los ataba se partió en
- * dos —uno por umbral— en vez de aflojarse. Ver el bloque de arriba.
+ * El umbral de montaje, derivado del de composición. ⚠️ Era 1025, el ancho al que
+ * la referencia conmuta (medido, no interpolado); bajó un píxel para que no quede
+ * un ancho que se compone de un lado y se monta del otro.
  */
-export const ESCENARIO_MIN_ANCHO_PX = 1025
+export const ESCENARIO_MIN_ANCHO_PX = COMPOSICION_MIN_ANCHO_PX
 
 /** La consulta que se le pasa a `matchMedia`. Una sola fuente. */
 export const CONSULTA_ESCENARIO = `(min-width: ${ESCENARIO_MIN_ANCHO_PX}px)`

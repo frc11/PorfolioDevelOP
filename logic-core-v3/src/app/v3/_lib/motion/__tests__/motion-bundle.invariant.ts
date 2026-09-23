@@ -133,17 +133,18 @@ afirmar(
   /from '\.\.\/\.\.\/_lib\/useAnchoMinimo'/.test(fuenteDeLaCompuerta),
   '  y el hook de `_lib/useAnchoMinimo`',
 )
+const LITERAL_DEL_UMBRAL = new RegExp(`\\b${String(ESCENARIO_MIN_ANCHO_PX)}\\b`)
 afirmar(
-  !/1025/.test(fuenteDeLaCompuerta),
-  '  y NO escribe el 1025 por su cuenta: un número repetido son dos compuertas',
+  !LITERAL_DEL_UMBRAL.test(fuenteDeLaCompuerta),
+  '  y NO escribe el umbral por su cuenta: un número repetido son dos compuertas',
 )
-afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1025, 'el umbral compartido son 1025 px')
-afirmarIgual(CONSULTA_ESCENARIO, '(min-width: 1025px)', 'y la consulta es la de S1')
+afirmarIgual(ESCENARIO_MIN_ANCHO_PX, 1024, 'el umbral compartido son 1024 px (MÓVIL-TRABAJOS: antes 1025)')
+afirmarIgual(CONSULTA_ESCENARIO, '(min-width: 1024px)', 'y la consulta es la de S1, con el número de hoy')
 
 controlPositivo(
   'el chequeo del import ve un componente que declara su propio umbral',
-  "const MIO = 1025\nexport function X() { return null }",
-  (fuente: string) => !/1025/.test(fuente),
+  `const MIO = ${String(ESCENARIO_MIN_ANCHO_PX)}\nexport function X() { return null }`,
+  (fuente: string) => !LITERAL_DEL_UMBRAL.test(fuente),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

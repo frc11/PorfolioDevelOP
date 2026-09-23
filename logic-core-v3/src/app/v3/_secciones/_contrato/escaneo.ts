@@ -34,6 +34,7 @@
  * copia del código no prueba nada.
  */
 
+import { ESCENARIO_MIN_ANCHO_PX } from '../../_lib/compuerta'
 import { SECCIONES } from '../../_lib/secciones'
 import { sinLoInventado } from './restauracion'
 import { MARCADORES, type Marcador } from './marcadores'
@@ -91,7 +92,7 @@ export const NUMEROS_PERMITIDOS: readonly Excepcion[] = [
     motivo: `número de sección — ${s.nombre}. Estructura del recorrido, no un dato.`,
   })),
   {
-    valor: '1025',
+    valor: String(ESCENARIO_MIN_ANCHO_PX),
     motivo:
       'el umbral de la compuerta, en el aviso de que la coreografía no baja acá. ' +
       'Sale de ESCENARIO_MIN_ANCHO_PX, que un invariante ata a --breakpoint-escritorio.',

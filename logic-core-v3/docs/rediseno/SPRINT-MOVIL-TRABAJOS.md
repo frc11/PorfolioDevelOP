@@ -9,7 +9,7 @@ escritorio ≥1025 (1440), que no cambia nada.
 ## Checklist
 
 - [x] Fase 0 — reconocimiento (abajo)
-- [ ] Fase 1 — la costura de 1024
+- [x] Fase 1 — la costura de 1024
 - [ ] Fase 2 — capturas por dispositivo
 - [ ] Fase 3 — el túnel bajo 1024
 - [ ] Fase 4 — demos bajo 1024
@@ -70,3 +70,28 @@ Abajo no hay Lenis: scroll nativo.
   cuadro. El CTA es una caja de 0,62 del ancho con relación 16:10.
 - La capa de demos tiene z negativo adentro del bloque y ningún `will-change`, que es
   lo que mantiene el agujero del vacío.
+
+## Fase 1 — la costura de 1024
+
+- `ESCENARIO_MIN_ANCHO_PX` pasa a DERIVARSE de `COMPOSICION_MIN_ANCHO_PX`: los dos valen
+  1024. La declaración de la franja se reescribió en `compuerta.ts` (se veía, no «se
+  medía») y `compuerta.invariant` afirma que la diferencia es cero, con un control
+  positivo que ve el par viejo (1024 / 1025).
+- Se actualizaron las afirmaciones que clavaban 1025 o la franja de un píxel:
+  `compuerta`, `s18-compuertas`, `tokens` §7, `s3-cursor`, `s3-imagen`, `s10-medida`,
+  `s7-contrato`, `motion-bundle` (necesita build: no se corrió), `s10-referencias`,
+  el banco (`perfiles`: 1024 deja de estar «debajo del umbral»; `banco.invariant`) y
+  el padrón de números de `escaneo.ts`, que ahora lee el umbral en vez de escribirlo.
+- Medido con `fase1-costura.ts` (en el scratchpad) a 1023, 1024 y 1025, alto 768, las
+  ocho secciones más dos tomas de Trabajos, bajando de a pasos:
+
+  | ancho | coreografía | túnel | Lenis | cursor | rama de Trabajos |
+  |---|---|---|---|---|---|
+  | 1023 | no | no | no | no | quieta (tablet) |
+  | 1024 | sí | sí | sí | sí | coreografiada, igual que 1025 |
+  | 1025 | sí | sí | sí | sí | coreografiada |
+
+  Las nueve capturas de 1024 son las de 1025 (hojas en
+  `~/.cache/b4-medicion/movil/fase1/hoja-*.png`). Ninguna sección se rompió por el
+  cambio: 1024 dejó de ser un ancho aparte. Los invariantes de la compuerta, de tokens
+  y del banco quedaron en verde.

@@ -58,7 +58,7 @@ export interface Perfil {
   readonly movil: boolean
   /** `touch` en la cadena de `emulate`: `pointer: coarse` y `hover: none`. */
   readonly tactil: boolean
-  /** `< 1025`, o sea del lado donde no hay escenario ni coreografía. */
+  /** `< 1024`, o sea del lado donde no hay coreografía. */
   readonly debajoDelUmbral: boolean
 }
 
@@ -126,21 +126,21 @@ export const PERFILES: readonly Perfil[] = [
   },
   {
     id: '1024',
-    nombre: '1024 — justo abajo del umbral',
+    nombre: '1024 — el umbral',
     procedencia:
-      'un píxel abajo de `ESCENARIO_MIN_ANCHO_PX` (1025). El alto 768 es el del iPad apaisado y está clavado igual que el de `1025`.',
+      '`ESCENARIO_MIN_ANCHO_PX` exacto desde MÓVIL-TRABAJOS (antes 1025): donde la compuerta abre. El alto 768 es el del iPad apaisado y está clavado igual que el de `1025`.',
     ancho: 1024,
     alto: 768,
     dpr: 1,
     movil: false,
     tactil: false,
-    debajoDelUmbral: true,
+    debajoDelUmbral: false,
   },
   {
     id: '1025',
-    nombre: '1025 — justo arriba del umbral',
+    nombre: '1025 — el umbral de antes',
     procedencia:
-      '`ESCENARIO_MIN_ANCHO_PX` exacto, que es donde la compuerta abre. Mismo alto que `1024` para que la única variable sea el ancho.',
+      'el `ESCENARIO_MIN_ANCHO_PX` de antes de MÓVIL-TRABAJOS, que era donde la compuerta abría. Mismo alto que `1024` para que la única variable sea el ancho.',
     ancho: 1025,
     alto: 768,
     dpr: 1,
@@ -175,7 +175,7 @@ export const PERFILES: readonly Perfil[] = [
 ]
 
 /** El umbral, repetido acá para que este archivo se pueda leer solo. Lo custodia `banco.invariant.ts` contra `_lib/compuerta.ts`. */
-export const UMBRAL_DEL_ESCENARIO_PX = 1025
+export const UMBRAL_DEL_ESCENARIO_PX = 1024
 
 export function perfilPorId(id: string): Perfil {
   const p = PERFILES.find((x) => x.id === id)

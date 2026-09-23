@@ -83,7 +83,7 @@ afirmar(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Las dos consultas dicen lo que tienen que decir')
 
-afirmarIgual(CURSOR_MIN_ANCHO_PX, 1025, 'el umbral del cursor son 1025px')
+afirmarIgual(CURSOR_MIN_ANCHO_PX, 1024, 'el umbral del cursor son 1024px (MÓVIL-TRABAJOS: antes 1025)')
 afirmarIgual(
   CURSOR_MIN_ANCHO_PX,
   ESCENARIO_MIN_ANCHO_PX,
@@ -111,10 +111,10 @@ afirmarIgual(
 )
 afirmarIgual(
   CURSOR_MIN_ANCHO_PX - COMPOSICION_MIN_ANCHO_PX,
-  1,
-  '  el cursor queda UN píxel arriba del corte de composición: a 1024 se compone como escritorio y todavía no hay cursor propio',
+  0,
+  '  el cursor corta donde corta la composición: a 1024 ya hay cursor propio (la franja de un píxel se cerró)',
 )
-afirmarIgual(CONSULTA_CURSOR, '(min-width: 1025px)', 'la consulta de ancho está bien armada')
+afirmarIgual(CONSULTA_CURSOR, '(min-width: 1024px)', 'la consulta de ancho está bien armada')
 afirmarIgual(
   CONSULTA_MENOS_MOVIMIENTO,
   '(prefers-reduced-motion: reduce)',

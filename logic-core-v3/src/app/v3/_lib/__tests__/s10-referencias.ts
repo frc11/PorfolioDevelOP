@@ -18,8 +18,8 @@ export const RAMAS: readonly Rama[] = ['quieta', 'animada']
 
 /** Qué se sirve en cada rama. Es la traducción del sprint, no una preferencia. */
 export const QUE_SIRVE_CADA_RAMA: Readonly<Record<Rama, string>> = {
-  quieta: 'abajo de 1025, y en cualquier ancho con `prefers-reduced-motion`',
-  animada: 'desde 1025 y sin preferencia de movimiento reducido',
+  quieta: 'abajo de 1024, y en cualquier ancho con `prefers-reduced-motion`',
+  animada: 'desde 1024 y sin preferencia de movimiento reducido',
 }
 
 export interface AnchoDeReferencia {
@@ -45,8 +45,9 @@ export const ANCHOS_DE_REFERENCIA: readonly AnchoDeReferencia[] = [
   // borde de abajo de la composición: la lista la consumen los bancos de S10 y
   // cada ancho nuevo pide recibos nuevos en todos ellos. El corte se afirma en
   // `s10-medida` con `clasesEfectivas(…, 1023)`, que no cuesta un banco.
-  { px: 1024, porQue: 'EL CORTE de composición (`--breakpoint-escritorio`): iPad apaisado y notebook, ya con `escritorio:`' },
-  { px: 1025, porQue: 'el umbral de COREOGRAFÍA (`ESCENARIO_MIN_ANCHO_PX`): recién acá montan el cursor y el scroll suave' },
+  // MÓVIL-TRABAJOS: los dos umbrales volvieron a ser 1024; 1025 queda como el primer ancho de escritorio de antes.
+  { px: 1024, porQue: 'EL CORTE de composición y de montaje: iPad apaisado y notebook, con `escritorio:`, cursor y scroll suave' },
+  { px: 1025, porQue: 'el umbral de coreografía de antes de MÓVIL-TRABAJOS: se queda como testigo de que nada cambió arriba' },
 ]
 
 export const ANCHOS: readonly number[] = ANCHOS_DE_REFERENCIA.map((a) => a.px)
