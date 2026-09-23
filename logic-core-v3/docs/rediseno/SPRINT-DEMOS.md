@@ -104,5 +104,13 @@ Cada fase cierra con un commit `wip(demos): fase N — …`.
       medida, las tres capturas con el mismo ×1,48 → un cuadro suelto); corrida 2, las 5 capas adentro del
       margen, peor A 1,5 % y peor B 1,6 % — lo mismo que el sprint del vacío
 - [x] grabación a 1440 (41 s, `~/.cache/b4-medicion/demos-grabacion/demos-1440.mp4`) + cinta a 375 y 768
-- [ ] visual-qa
-- [ ] reporte
+- [~] visual-qa: ❓ A CONFIRMAR. El subagente existe, pero en este contexto no tiene sus herramientas de
+      preview (sólo lectura). Por el sprint, no se reemplazó por otra cosa: la verificación visual es la del
+      banco (`demos-ver.ts`, `demos-cinta.ts`) y la grabación
+- [x] reporte (en el chat)
+
+## Pedidos para el usuario (no se inventó nada)
+- **Las 2 demos que faltan**: el pedido dice 8 y el repo tiene 6 en todas las ramas. Para sumarlas:
+  nombre, rubro y URL en `demos/catalogo.ts` Y en `WebTemplatesImmersive.tsx` (el invariante §25 exige
+  que coincidan), y `npx tsx scripts-b4/demos-portadas.ts` para la portada.
+  `CONTENIDO-PENDIENTE.md` NO se tocó: lo genera `s7-documento` y `s7-pedido` lo compara byte a byte.
