@@ -315,7 +315,8 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     conMotion.includes(DESTINO_DEL_CTA) && quieto.includes(DESTINO_DEL_CTA),
     `el CTA es un enlace real a contacto —${DESTINO_DEL_CTA}, el mismo destino que declara la navegación— en las DOS ramas`,
   )
-  afirmarIgual(veces(conMotion, 'data-pieza="enlace-del-cta"'), 1, '  y es UNO solo: no hay dos anclas al mismo lugar en el mismo cuadro')
+  // El ancla del CTA es «Hablemos», el `CtaEnlace` del sitio: se cuenta por su destino.
+  afirmarIgual(veces(conMotion, `href="${DESTINO_DEL_CTA}"`), 1, '  y es UNO solo: no hay dos anclas al mismo lugar en el mismo cuadro')
 
   // ── EL FRENO NO TOCA EL SCROLL ──────────────────────────────────────────
   /**

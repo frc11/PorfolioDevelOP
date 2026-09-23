@@ -193,6 +193,8 @@ export const ARCHIVOS_DE_APOYO = [
   // `composicion.ts` (COMPO-1), `papel.ts` (PAPEL-2) y `ajuste.ts` (COMPO-2)
   // eran 100% composición: Modo pulido los desarmó enteros. El padrón se
   // retira con ellos, no se deja apuntando a un fantasma.
+  // SPRINT DEMOS · lo que pasa con el puntero encima de la ventana del CTA de Trabajos.
+  `${RAIZ_DE_SECCIONES}/trabajos/encimaDelCta.ts`,
 ]
 
 /**

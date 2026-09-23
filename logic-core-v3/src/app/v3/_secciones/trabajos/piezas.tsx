@@ -3,6 +3,7 @@
 import { useMotionValueEvent, type MotionValue } from 'motion/react'
 import { Fragment, useRef, useState } from 'react'
 
+import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
@@ -11,8 +12,10 @@ import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
 import { Bloque } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MarcaDeSeccion } from '../_contrato/Seccion'
+import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { CONTENIDO } from './contenido'
+import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
 import { DESTINO_DEL_CTA } from './geometria'
 import {
   ANCHO_DEL_CTA,
@@ -249,12 +252,11 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
           Si existiera de un solo lado, `s10-acceso` vería dos recorridos de
           teclado distintos según el ancho, que es lo que afirma que no pasa. */}
       <div className="flex min-h-svh flex-col justify-center">
-        <a
-          href={DESTINO_DEL_CTA}
-          aria-label={`${CONTENIDO.cta.frase} ${CONTENIDO.cta.rotulo}`}
-          data-pieza="enlace-del-cta"
-          className="flex flex-col gap-2"
-        >
+        {/* ⚠️ El enlace es «Hablemos», como arriba de 1025: allá su zona de clic
+            cubre la ventana, acá es el CTA del sitio al pie del bloque. El orden de
+            lectura es el mismo de los dos lados —dirección, frase, enlace,
+            aclaración— porque `s10-acceso` compara las dos ramas. */}
+        <div className="flex flex-col gap-2">
           {/* ⚠️ La dirección va PRIMERO, y el orden no es estético: arriba de 1025
               esto es una ventana de navegador y la barra de direcciones está
               arriba de todo. `s10-acceso` compara el texto anunciado de las dos
@@ -266,12 +268,23 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
           <Titular nivel="titulo-l" como="p">
             {CONTENIDO.cta.frase}
           </Titular>
-          <Cuerpo como="span">{CONTENIDO.cta.rotulo}</Cuerpo>
-        </a>
+          <div className="flex flex-wrap items-baseline gap-4">
+            <CtaEnlace href={DESTINO_DEL_CTA} rotulo={CONTENIDO.cta.rotulo} />
+            <Micro como="span" className="font-codigo">
+              {CONTENIDO.cta.aclaracion}
+            </Micro>
+          </div>
+        </div>
       </div>
     </Envoltorio>
   )
 }
+
+/** Las dos redefiniciones de la caja de «Hablemos». Ver el docblock en el marcado. */
+const ESTILO_DEL_CTA_EN_LA_VENTANA = {
+  '--text-cuerpo': 'var(--text-titulo-m)',
+  '--color-tinta': 'var(--color-fondo)',
+} as React.CSSProperties
 
 /**
  * LA VENTANA DE NAVEGADOR DEL CTA — el marcado, y nada más. **[PORTFOLIO]**
@@ -308,6 +321,8 @@ export function VentanaDelCta({
   readonly refVelo: (el: HTMLDivElement | null) => void
 }): React.JSX.Element {
   const palabras = CONTENIDO.cta.frase.split(' ')
+  const cuerpo = useRef<HTMLDivElement | null>(null)
+  useEncimaDelCta(cuerpo, usePrefiereMenosMovimiento())
   return (
     <>
       {/* El velo que atenúa la sala. Es una capa pintada y no un filtro: ver
@@ -353,16 +368,20 @@ export function VentanaDelCta({
             transform: `translate(-50%, -50%) scale(${CONVERSION_DE_LA_CAJA_DEL_CTA.toFixed(5)})`,
           }}
         >
-          <a
-            href={DESTINO_DEL_CTA}
-            data-pieza="enlace-del-cta"
+          <div
+            ref={cuerpo}
+            data-pieza="cuerpo-de-la-ventana"
             /* ⚠️ `bg-tinta text-fondo` y no una superficie del tema: acá la sala está
                INVERTIDA, así que las superficies son oscuras y la tinta es clara —una
                ventana de navegador pintada con ellas queda gris sobre gris, medido—.
                El par invertido es el mismo que usa la franja de la llave, con su
                contraste conocido, y además es lo que hace que esto se lea como una
-               ventana: papel claro con texto oscuro, encima de la noche. */
-            className="bg-tinta text-fondo rounded-sutil pointer-events-auto flex h-full w-full flex-col overflow-hidden"
+               ventana: papel claro con texto oscuro, encima de la noche.
+               ⚠️ Ya no es el ancla: el enlace es «Hablemos» (`CtaEnlace`) y su zona de
+               clic se estira sobre esta caja, que por eso es `relative`. Sin
+               `overflow-hidden`: adentro hay un focalizable y su anillo va por fuera. */
+            className="bg-tinta text-fondo rounded-sutil relative flex h-full w-full flex-col"
+            style={{ transition: TRANSICION_DE_LA_ELEVACION }}
           >
             {/* El cromo: los tres círculos del semáforo y la barra de direcciones.
                 Los círculos son decoración y van con los colores de macOS, que son
@@ -373,8 +392,19 @@ export function VentanaDelCta({
               <span aria-hidden="true" className="bg-semaforo-amarillo block size-3 rounded-full" />
               <span aria-hidden="true" className="bg-semaforo-verde block size-3 rounded-full" />
               <span className="border-fondo rounded-sutil ml-4 flex-1 border px-3 py-1 text-center">
-                <Cuerpo como="span" className="font-codigo">
+                <Cuerpo como="span" className="font-codigo relative">
                   {CONTENIDO.cta.direccion}
+                  {/* La ruta que se tipea con el puntero encima (`encimaDelCta.ts`).
+                      Va a la derecha de la dirección y AFUERA del flujo, así la
+                      dirección no se corre del centro; es decoración y no se anuncia. */}
+                  <span
+                    aria-hidden="true"
+                    data-pieza="ruta-del-cta"
+                    className="absolute top-0 left-full whitespace-nowrap"
+                    style={{ clipPath: recorteDeLaRuta(0) }}
+                  >
+                    {RUTA_DEL_CTA}
+                  </span>
                 </Cuerpo>
               </span>
             </div>
@@ -437,14 +467,36 @@ export function VentanaDelCta({
                   </span>
                 </span>
               </Titular>
-              {/* ⚠️ «Hablemos» sube de `cuerpo` a `titulo-m`: es el rótulo del
-                  botón, no una nota al pie del cartel, y al lado de un titular de
-                  display se leía como letra chica. */}
-              <Titular nivel="titulo-m" como="span" className="pt-6">
-                {CONTENIDO.cta.rotulo}
-              </Titular>
+              {/**
+               * ⚠️ **«HABLEMOS» ES EL CTA DEL SITIO, y su zona de clic es la ventana.**
+               *
+               * Baja un renglón y usa el `CtaEnlace` sin tocarlo: su rollover, su
+               * subrayado y su foco son los del resto del sitio. Dos redefiniciones
+               * en la caja de afuera, y ninguna adentro del componente:
+               *   · `--text-cuerpo` → `--text-titulo-m`: más grande que un cuerpo y
+               *     claramente más chico que la frase. La ventana del rollover se
+               *     deriva de ese token, así que crece con él;
+               *   · `--color-tinta` → `--color-fondo`: el CTA pinta SIEMPRE en tinta
+               *     (regla cerrada de la paleta), y adentro de esta ventana el papel
+               *     es la tinta de la sala. Sin esto era tinta clara sobre papel claro.
+               * La clase `after:` estira el `::after` del ancla sobre la ventana
+               * entera: todo el cuadro sigue siendo el enlace a contacto, sin un
+               * ancla adentro de otra.
+               */}
+              <div className="flex items-baseline gap-4 pt-12">
+                <span style={ESTILO_DEL_CTA_EN_LA_VENTANA}>
+                  <CtaEnlace
+                    href={DESTINO_DEL_CTA}
+                    rotulo={CONTENIDO.cta.rotulo}
+                    className="pointer-events-auto after:absolute after:inset-0"
+                  />
+                </span>
+                <Micro como="span" className="font-codigo">
+                  {CONTENIDO.cta.aclaracion}
+                </Micro>
+              </div>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </>

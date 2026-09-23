@@ -178,6 +178,8 @@ export const CONTENIDO = {
     frase: '¿El próximo proyecto sos vos?',
     direccion: 'tu-empresa.com.ar',
     rotulo: 'Hablemos',
+    // Al lado del botón, en mono chico: dice que la ventana entera se aprieta.
+    aclaracion: '(un clic y arrancamos)',
   },
 } as const
 
