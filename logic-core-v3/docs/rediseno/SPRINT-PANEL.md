@@ -62,12 +62,12 @@ Nota: las fases 1 a 6 se commitearon juntas (`9fbf1f35`) porque comparten los mi
 
 ## Checklist
 
-- [ ] F1 — Encabezado «Tu Panel» + descripción en el 30 % izquierdo; la primera feature llega en el 60 % derecho; sin el puntito azul
-- [ ] F2 — El caos: tabla fija de posiciones, 4 clases de tamaño, parallax por feature, llegada con el patrón de la casa, barridos de convivencia
-- [ ] F3 — «Y más…» + newsletter, reversibles al subir; el formulario sale del pie
-- [ ] F4 — Fondo decorativo: palabras y fragmentos de interfaz con el contraste medido del «What's new» de nk
-- [ ] F5 — Móvil: columna con anchos alternados, sin parallax, «Y más…» quieto, newsletter debajo
-- [ ] F6 — lint, tsc, invariantes, barridos, envío real, capturas, grabación, reporte
+- [x] F1 — Encabezado «Tu Panel» + descripción en el 30 % izquierdo; la primera feature llega en el 60 % derecho; sin el puntito azul
+- [x] F2 — El caos: tabla fija de posiciones, 4 clases de tamaño, parallax por feature, llegada con el patrón de la casa, barridos de convivencia
+- [x] F3 — «Y más…» + newsletter, reversibles al subir; el formulario sale del pie · ⚠️ el envío NO funciona: no hay backend (ver bloqueante)
+- [x] F4 — Fondo decorativo: palabras y fragmentos de interfaz con el contraste medido del «What's new» de nk
+- [x] F5 — Móvil: columna con anchos alternados, sin parallax, «Y más…» quieto, newsletter debajo
+- [x] F6 — lint, tsc, invariantes, barridos, envío real, capturas, grabación, reporte
 
 ## Hallazgos de la lectura
 
@@ -77,3 +77,37 @@ Nota: las fases 1 a 6 se commitearon juntas (`9fbf1f35`) porque comparten los mi
   - el `Footer` del sitio vivo (`components/sections/home/Footer.tsx`) no tiene newsletter: es un formulario de CONTACTO (nombre, WhatsApp, rubro, mensaje) que va a un webhook de n8n o abre WhatsApp;
   - no hay ninguna ruta, acción ni integración de suscripción en `src/` (lo de Brevo son campañas y correos transaccionales del panel de clientes).
   Por la regla de no crear uno nuevo y no simular un éxito, el formulario se muda a Tu Panel TAL CUAL (el mismo componente, deshabilitado, con el motivo escrito). Los estados de cargando, éxito y error no se construyen: sin un destino no pueden ocurrir de verdad. Hace falta que el usuario decida el destino (lista de Brevo, n8n u otro).
+
+## Medición — el «What's new» de nk.studio (1440 × 900, asentado)
+
+`rgb(186,186,186)`, 216 px, opacidad efectiva 0,1 sobre `rgb(253,253,249)` → **1,0595:1**, igual en cuatro posiciones. Acá: `--color-tinta` a alfa **0,0285** sobre `--color-fondo` da el mismo 1,0595:1 (`s6-tu-panel` §11 lo recalcula desde el tema). Tamaño: `--text-fluido-display-xl` × 216/104 = 216 px a 1440.
+
+## La tabla del caos (`tu-panel/geometria.ts`, `TABLA_DEL_CAOS`)
+
+| # | feature | columna | tamaño (ancho) | separación | velocidad |
+|---|---|---|---|---|---|
+| 1 | Revisá cada conversación… | 52 % | l (42 %) | 14 svh | 0,11 |
+| 2 | Recibí los leads… | 6 % | s (28 %) | 62 svh | 0,05 |
+| 3 | Creá tickets… | 60 % | m (35 %) | 44 svh | 0,08 |
+| 4 | Chateá con nosotros… | 29 % | xs (22 %) | 52 svh | 0,03 |
+| 5 | Pedí servicios nuevos… | 55 % | l (42 %) | 36 svh | 0,11 |
+| 6 | Mirá el resumen… | 3 % | m (35 %) | 58 svh | 0,08 |
+| 7 | Seguí tus resultados | 50 % | s (28 %) | 46 svh | 0,05 |
+| 8 | Configurá cómo responde… | 6 % | l (42 %) | 54 svh | 0 (asentada, en el flujo) |
+
+Fondo: −0,18 (más lento que cualquier feature). Barridos: el modelo a 1440×900, 1920×1080 y 1280×800 (`s6-tu-panel` §7) y el DOM real a 1440×900 cada 30 px: **3 visibles como máximo, 0 títulos tapados, 0 fuera del cuadro, sin scroll horizontal**.
+
+## Decisiones del Sprint 2
+
+- «Y más…» y el newsletter se van **reproduciendo la entrada al revés** cuando el remate sale por abajo (se está subiendo), y no atados al scroll: atado al scroll, expo-out deja de ser una curva (la velocidad la pone la rueda). Todas las piezas terminan en el mismo instante (`endDelay`), así que la salida es el espejo exacto: se van primero los puntos.
+- La llegada es **P2** («bloque entero», el patrón de 77 instancias de la referencia) para las features y para el fondo.
+- Móvil: **ninguna palabra de fondo**. En la columna no queda aire donde se lean como fondo: quedarían debajo de las features.
+- El newsletter es el MISMO `FormularioDeNovedades` que estaba en el pie, deshabilitado y con el motivo. El pie del Cierre queda con dos columnas en una grilla de tres (`chrome/Pie.tsx`, que no se tocó): la tercera queda vacía.
+- Arreglo de paso: `Ampliacion.tsx` importaba la compuerta (`CONSULTA_ESCENARIO`), cosa que `s7-contrato` prohíbe a las secciones. Venía del cierre del sprint 1. Ahora usa el token `--breakpoint-escritorio`.
+
+## Verificación del Sprint 2
+
+- `tsc --noEmit` limpio; lint limpio en lo tocado.
+- En verde: s6-tu-panel (139), s6-cierre (77), s7-arboles, s10-acceso, s21-llave, s7-pedido, s6-tokens, s6-contrato, s6-lane, s6-render, s6-contraste, s7-contrato, s7-integracion, s7-cn, s3-codigo, s3-tokens, s3-foco, s21-fotos, s19-sincronia, s8-montaje, s5-codigo.
+- **Envío del newsletter: NO se probó contra ningún backend porque no existe.** No se simuló.
+- Capturas en la carpeta `panel` de `.cache/b4-medicion` (`p2-1440-a.png`, `p2-390-a.png`, `p2-390-remate.png`) y la grabación en `panel/grabacion2/tu-panel-1440.mp4`.
