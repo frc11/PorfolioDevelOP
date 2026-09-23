@@ -132,10 +132,12 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
         seccion.superficieAngosta === undefined
           ? undefined
           : CLASES_DE_LA_BANDA_ANGOSTA[seccion.superficieAngosta],
+        seccion.solape === undefined ? undefined : CLASE_DEL_SOLAPE,
       )}
       style={estiloDelAlto(seccion)}
     >
       {children}
+      {seccion.solape === undefined ? null : <CajaSinSolape />}
     </section>
   )
 }
@@ -146,11 +148,42 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
  * El solape sube el panel sobre el anterior y le suma lo mismo al piso del alto:
  * arranca antes y termina donde terminaba, así que nada de lo que viene después
  * se corre y la escena —que ancla cada tramo al fin de su sección— no se entera.
+ *
+ * ⚠️ **RIGE SÓLO DESDE ESCRITORIO, y por eso viaja en dos propiedades.** El valor
+ * sale del DATO y va inline; lo que lo prende es la variante `escritorio:` de
+ * `CLASE_DEL_SOLAPE`, que copia ese valor a la propiedad que el margen y el alto
+ * leen. Abajo esa propiedad no existe y los dos caen a cero. Es CSS y no una
+ * rama de JS por lo mismo que la banda angosta: este componente corre en el
+ * servidor, y decidirlo al hidratar movería la página un cuadro después.
  */
 function estiloDelAlto(seccion: Seccion): React.CSSProperties {
   if (seccion.solape === undefined) return { minHeight: seccion.alto }
-  const solape = `${Number((seccion.solape * 100).toFixed(4))}svh`
-  return { minHeight: `calc(${seccion.alto} + ${solape})`, marginTop: `calc(-1 * ${solape})` }
+  return {
+    '--solape-del-panel': `${Number((seccion.solape * 100).toFixed(4))}svh`,
+    minHeight: `calc(${seccion.alto} + var(--solape-en-uso, 0px))`,
+    marginTop: 'calc(-1 * var(--solape-en-uso, 0px))',
+  } as React.CSSProperties
+}
+
+/** Prende el solape desde escritorio. Literal entera: armada, el escáner no la ve. */
+const CLASE_DEL_SOLAPE = 'escritorio:[--solape-en-uso:var(--solape-del-panel)]'
+
+/**
+ * ⚠️ **LA CAJA SIN SOLAPE — el panel donde estaría si no subiera.** Vacía y sin
+ * nombre accesible: va del tope sin solape al pie, que el solape no mueve. Es lo
+ * que mide quien necesita la sección tal como la declara la tabla —la noche de
+ * Trabajos, que se dispara contra ella— sin preguntar el ancho: su tope lee la
+ * misma propiedad que el margen, así que sigue al corte por CSS.
+ */
+function CajaSinSolape(): React.JSX.Element {
+  return (
+    <div
+      data-caja-sin-solape=""
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 bottom-0"
+      style={{ top: 'var(--solape-en-uso, 0px)' }}
+    />
+  )
 }
 
 /**

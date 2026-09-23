@@ -592,31 +592,64 @@ export const VELO_DEL_CTA = 0.55
 export const PX_MINIMOS_DE_LA_ESPERA_DEL_CTA = 550
 
 /**
- * ⚠️ **LA SALIDA — el contenido se va A LA VELOCIDAD DEL SCROLL, ni una más.**
+ * ⚠️ **LA SALIDA — un VACÍO que crece desde el centro y revela la escena.**
  *
- * Hubo un `translateY(−130 %)` sobre la capa: 1.170 px de movimiento repartidos
- * en 450 px de scroll, o sea **2,6 veces** más rápido que el dedo. Eso es lo que
- * se leía como deslizamiento impuesto — no el gesto, la velocidad.
+ * Reemplaza al traslado 1:1 hacia arriba, que se fue entero: a 1.300 de alto no
+ * alcanzaba a vaciar el cuadro. El vacío es la PRÓXIMA CAPA DEL TÚNEL —anidada
+ * adentro del CTA, recta con clamp sobre la regla de la referencia— y en vez de
+ * una imagen es un agujero en la pila, por el que se ve la escena que ya está
+ * detrás (`recorteDelVacio`). Cuando llena el cuadro no queda nada del túnel.
  *
- * Después se sacó del todo y se dejó que el contenido saliera con el despineado
- * del panel. Tampoco sirvió, y por un motivo de estructura: el pin termina
- * exactamente un viewport antes que la sección, así que durante ese despineado
- * **servicios ya está entrando por abajo**. Nunca hay un cuadro con la sala sola.
- *
- * Así que la capa vuelve a moverse, pero a **1:1**: un píxel de scroll, un píxel
- * de traslación. A esa velocidad no hay nada que distinguir de un scroll normal
- * —porque ES la velocidad del scroll— y lo que se gana es que el contenido se va
- * MIENTRAS la sección sigue clavada, dejando el cuadro vacío detrás.
- *
- * ⚠️ **CUÁNTO DURA: 1.131 px, el largo que ya tenía, y no se toca.** Salía del
- * tope del modelo viejo —lo que tardaba en salir una captura de 1,68 cuadros— y
- * ese tope se fue con el modelo. Lo que la hace suficiente nunca fue el tamaño de
- * las capas: el recorte del túnel VIAJA con la capa que se traslada, así que con
- * 900 px de alto más los 4 del margen del recorte el cuadro ya está vacío, mida lo
- * que mida lo de adentro. Los 227 px que sobran son cuadro vacío antes de los
- * demos, igual que antes.
+ * ⚠️ **LA VENTANA SIGUE DURANDO 1.131 px, y no por el vacío:** la espera al 30 %
+ * y los demos están fijos a los dos lados, así que moverla movería a uno de los
+ * dos. El vacío la llena en `PX_DEL_VACIO` (969) y lo que sobra ya es la sala.
  */
 export const PX_DE_LA_SALIDA = 1131
+
+/**
+ * ⚠️ **LA RAMPA DEL VACÍO ES LA DE LA ÚLTIMA CAPTURA (su #4), no la del CTA.**
+ * Misma pendiente —1,05 de escala en 600 px de su scroll—, desde 0 y hasta la
+ * escala con la que su cadena llena el cuadro. Con la del CTA (0,4 en 417 px)
+ * tardaría 1.768 px en llenarlo: no entra en la ventana y se come 637 de los demos.
+ */
+export const RAMPA_DEL_VACIO: CapaDeLaTabla = CAPAS_DEL_TUNEL.proyectos[CAPAS_DEL_TUNEL.proyectos.length - 1]
+
+/** La escala propia con la que una capa anidada adentro del CTA —en su tope— mide el cuadro entero. */
+export const ESCALA_QUE_LLENA_EL_CUADRO = 1 / (ACUMULADA_FINAL_ARRIBA_DEL_CTA * CAPAS_DEL_TUNEL.cta.a)
+
+/** Lo que tarda el vacío en llenar el cuadro, en px de la regla: 969. */
+export const PX_DEL_VACIO =
+  (ESCALA_QUE_LLENA_EL_CUADRO * (RAMPA_DEL_VACIO.topa - RAMPA_DEL_VACIO.arranca)) / (RAMPA_DEL_VACIO.a - RAMPA_DEL_VACIO.de)
+
+/** La capa del vacío en la regla de la referencia, arrancando en `arranca`. */
+export function capaDelVacio(arranca: number): CapaDeLaTabla {
+  return { de: 0, a: ESCALA_QUE_LLENA_EL_CUADRO, arranca, topa: arranca + PX_DEL_VACIO }
+}
+
+/** Cuánto del cuadro ocupa el vacío, de 0 a 1: la cadena del CTA por su escala propia. */
+export function fraccionDelVacio(pose: PoseDelTunel, capa: CapaDeLaTabla, pxDelTunel: number): number {
+  const cadenaDelCta = (pose.anchos[pose.anchos.length - 1] ?? 0) * pose.cta
+  return Math.min(1, cadenaDelCta * escalaDeLaCapa(capa, pxDelTunel + ORIGEN_DEL_TUNEL))
+}
+
+/**
+ * ⚠️ **EL AGUJERO: el marco menos un rectángulo central, con la regla `evenodd`.**
+ * El rectángulo va en % de la caja, así que tiene la proporción del cuadro a
+ * cualquier alto —900 o 1.300— y crece desde el centro. El marco de afuera deja
+ * el margen del recorte, igual que `overflow-clip-margin`. Lleno, no se pinta
+ * nada de la caja: ni un píxel del túnel, ni un anillo de foco.
+ */
+export function recorteDelVacio(fraccion: number, margenPx: number): string {
+  if (!(fraccion > 0)) return 'none'
+  if (fraccion >= 1) return 'inset(50%)'
+  const desde = `${(50 * (1 - fraccion)).toFixed(3)}%`
+  const hasta = `${(50 * (1 + fraccion)).toFixed(3)}%`
+  const afuera = `-${margenPx}px`
+  const lejos = `calc(100% + ${margenPx}px)`
+  const marco = `${afuera} ${afuera}, ${lejos} ${afuera}, ${lejos} ${lejos}, ${afuera} ${lejos}, ${afuera} ${afuera}`
+  const hueco = `${desde} ${desde}, ${hasta} ${desde}, ${hasta} ${hasta}, ${desde} ${hasta}, ${desde} ${desde}`
+  return `polygon(evenodd, ${marco}, ${hueco})`
+}
 
 /**
  * ⚠️ **EL ESPACIO DE DEMOS — dos pantallas, y el motivo es que UNA no alcanzó.**
@@ -626,7 +659,7 @@ export const PX_DE_LA_SALIDA = 1131
  * durante ese viewport el panel sube y **servicios entra por abajo al mismo
  * tiempo**, así que no es un espacio, es una transición.
  *
- * Ahora es un tramo de PIN, después de que la salida se llevó el contenido: la
+ * Ahora es un tramo de PIN, después de que el vacío se llevó el túnel: la
  * sección sigue clavada y en el cuadro no hay nada más que la sala de noche.
  *
  * Y son dos pantallas, no una. Una es exactamente lo que ya había y no se leyó.

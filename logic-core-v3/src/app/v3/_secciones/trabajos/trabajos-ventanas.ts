@@ -11,23 +11,32 @@
 
 import { afirmar, afirmarIgual, controlPositivo } from '../../_lib/__tests__/afirmar'
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
-import { leer } from '../_invariantes/soporte'
 import {
+  CAPA_DEL_VACIO,
   CARTEL,
   PX_DE_LA_SECCION,
   arranqueDeDemos,
   fraccionDeScroll,
   progresoDeLaVentana,
   pxDeLaEspera,
+  pxDelTunelEn,
   ventanaDeLaEspera,
   ventanaDeLaSalida,
   ventanaDelTunel,
 } from './geometria'
 import {
+  CAPAS_DEL_TUNEL,
+  ESCALA_QUE_LLENA_EL_CUADRO,
   PANTALLAS_DEL_ESPACIO_DE_DEMOS,
   PX_DEL_ESPACIO_DE_DEMOS,
+  PX_DEL_VACIO,
   PX_DE_LA_SALIDA,
   PX_MINIMOS_DE_LA_ESPERA_DEL_CTA,
+  PX_POR_SCROLL,
+  RAMPA_DEL_VACIO,
+  fraccionDelVacio,
+  poseDelTunel,
+  recorteDelVacio,
 } from './tunel'
 
 /** El largo que la salida tenía antes de este sprint, que no la toca. */
@@ -71,41 +80,61 @@ export function afirmarLasVentanas(cuantas: number, margenDelRecorte: number): v
     `  CONTROL: y son más de UNA pantalla, que es lo que el despineado ya daba y se reportó como que no se percibe`,
   )
   /**
-   * ⚠️ **LA SALIDA VA A 1:1 CON EL SCROLL, y dura lo que ya duraba.**
-   *
-   * El largo de la VENTANA tiene que ser exactamente igual al de la traslación,
-   * porque ésa es la igualdad que hace que se lea como scroll y no como un
-   * deslizamiento impuesto. El largo es el de antes —este sprint no toca la
-   * salida— y lo que lo hace suficiente es el recorte, que viaja con la capa: con
-   * el alto del cuadro más el margen del recorte, el cuadro ya quedó vacío.
+   * ⚠️ **LA SALIDA ES EL VACÍO, y su ventana dura lo que ya duraba.** La ventana
+   * no se movió —la espera al 30 % y los demos están fijos a los dos lados—; lo
+   * que cambió es lo que pasa adentro: el vacío, la próxima capa del túnel, nace
+   * en 0 donde la ventana arranca y llena el cuadro antes de que termine.
    */
   afirmarIgual(
     Number(((salida.hasta - salida.desde) * PX_DE_LA_SECCION).toFixed(0)),
     PX_DE_LA_SALIDA,
-    `  la salida recorre ${PX_DE_LA_SALIDA} px en ${PX_DE_LA_SALIDA} px de scroll: 1:1, que es lo que la hace indistinguible de un scroll normal`,
+    `  la ventana de la salida mide ${PX_DE_LA_SALIDA} px de scroll`,
   )
-  afirmarIgual(PX_DE_LA_SALIDA, SALIDA_QUE_NO_SE_TOCA, `  y dura los ${SALIDA_QUE_NO_SE_TOCA} px que ya duraba: el túnel cambió, la salida no`)
-  const vacia = (px: number): boolean => px >= ALTO_DE_VIEWPORT_DE_LA_REFERENCIA + margenDelRecorte
+  afirmarIgual(PX_DE_LA_SALIDA, SALIDA_QUE_NO_SE_TOCA, `  y dura los ${SALIDA_QUE_NO_SE_TOCA} px que ya duraba: la espera y los demos no se mueven`)
+  const vacioEn = (progreso: number): number => fraccionDelVacio(poseDelTunel(pxDelTunelEn(progreso)), CAPA_DEL_VACIO, pxDelTunelEn(progreso))
+  afirmarIgual(vacioEn(espera.hasta), 0, '  el vacío no existe antes de la salida: la espera muestra el CTA entero')
+  const alNacer = vacioEn(salida.desde + fraccionDeScroll(PX_POR_SCROLL))
+  afirmar(alNacer > 0 && alNacer < 0.15, `  y nace diminuto en el centro: una muesca adentro de la ventana ocupa ${(alNacer * 100).toFixed(1)} % del cuadro`)
+  const llena = (px: number): boolean => px <= PX_DE_LA_SALIDA
   afirmar(
-    vacia(PX_DE_LA_SALIDA),
-    `  y alcanza: con ${ALTO_DE_VIEWPORT_DE_LA_REFERENCIA + margenDelRecorte} px —el cuadro más los ${margenDelRecorte} del margen del recorte, que viaja con la capa— el cuadro ya está vacío`,
+    llena(PX_DEL_VACIO) && vacioEn(salida.hasta) === 1 && vacioEn(arranqueDeDemos(cuantas)) === 1,
+    `  y llena el cuadro en ${PX_DEL_VACIO.toFixed(0)} px, antes de que la ventana termine: en los demos no queda nada del túnel`,
   )
-  controlPositivo('el detector vería una salida que se corta con el contenido todavía a la vista', 850, vacia)
+  const conLaRampaDelCta = (ESCALA_QUE_LLENA_EL_CUADRO * (CAPAS_DEL_TUNEL.cta.topa - CAPAS_DEL_TUNEL.cta.arranca)) / CAPAS_DEL_TUNEL.cta.a
+  controlPositivo(`  el chequeo vería el vacío con la rampa del CTA, que tarda ${conLaRampaDelCta.toFixed(0)} px y no entra`, conLaRampaDelCta, llena)
+  const pendiente = (c: { de: number; a: number; arranca: number; topa: number }): number => (c.a - c.de) / (c.topa - c.arranca)
+  afirmar(
+    Math.abs(pendiente(CAPA_DEL_VACIO) - pendiente(RAMPA_DEL_VACIO)) < 1e-12 && RAMPA_DEL_VACIO === CAPAS_DEL_TUNEL.proyectos[CAPAS_DEL_TUNEL.proyectos.length - 1],
+    '  su rampa es la de la última captura de la tabla: la misma pendiente, recta con clamp desde 0',
+  )
+  afirmarIgual(
+    Number((ESCALA_QUE_LLENA_EL_CUADRO * CAPAS_DEL_TUNEL.cta.a * CAPAS_DEL_TUNEL.proyectos.reduce<number>((m, c) => m * c.a, CAPAS_DEL_TUNEL.escenario.a)).toFixed(9)),
+    1,
+    '  y va anidada adentro del CTA: con su escala final, su cadena mide el cuadro entero',
+  )
+  let salto = 0
+  let anterior = 0
+  let seAchica = false
+  for (let i = 0; i <= 2000; i += 1) {
+    const v = vacioEn(salida.desde + ((salida.hasta - salida.desde) * i) / 2000)
+    salto = Math.max(salto, Math.abs(v - anterior))
+    seAchica ||= v < anterior
+    anterior = v
+  }
+  afirmar(!seAchica && salto < 0.01, `  y crece sin achicarse ni saltar: el paso más grande entre dos muestras de 0,57 px es ${(salto * 100).toFixed(3)} % del cuadro — subiendo es la misma función al revés`)
   /**
-   * ⚠️ **Y LA OTRA MITAD DE LA IGUALDAD: cuánto se traslada la capa.** El largo
-   * de la ventana es `PX_DE_LA_SALIDA` por definición; lo que hace el 1:1 es que
-   * la capa se traslade la fracción de ESA ventana por ESE mismo largo. Se lee del
-   * fuente, y el control es la levantada vieja, 2,6 veces el dedo.
+   * ⚠️ **EL AGUJERO VA EN % DE LA CAJA, y por eso vale a cualquier alto.** La
+   * salida vieja fallaba a 1.300: trasladaba 1.131 px y el cuadro medía más. El
+   * agujero no mide píxeles: a la mitad de su recorrido es el rectángulo del 25 %
+   * al 75 % de la caja, que es el cuadro, con su proporción, a 900 o a 1.300.
    */
-  const unoAUno = (src: string): boolean =>
-    src.includes('enLaVentana(p, VENTANA_DE_LA_SALIDA) * PX_DE_LA_SALIDA') && src.includes('VENTANA_DE_LA_SALIDA = ventanaDeLaSalida(')
-  afirmar(unoAUno(leer('src/app/v3/_secciones/trabajos/CapaDelTunel.tsx')), '  y la capa se traslada la fracción de esa ventana por ese mismo largo: un píxel de scroll, un píxel de traslación')
-  controlPositivo('  el detector vería la levantada vieja', 'enLaVentana(p, VENTANA_DE_LA_SALIDA) * (1.3 * 900)', unoAUno)
-  controlPositivo(
-    'el detector vería la levantada vieja, que iba 2,6 veces más rápido que el dedo',
-    { recorre: 1.3 * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA, en: 450 },
-    (v: { recorre: number; en: number }) => Math.abs(v.recorre - v.en) < 1,
+  const aLaMitad = recorteDelVacio(0.5, margenDelRecorte)
+  afirmar(
+    aLaMitad.startsWith('polygon(evenodd, ') && aLaMitad.endsWith('25.000% 25.000%, 75.000% 25.000%, 75.000% 75.000%, 25.000% 75.000%, 25.000% 25.000%)'),
+    '  el agujero es el marco menos un rectángulo centrado en % de la caja: a la mitad, del 25 % al 75 % en los dos ejes',
   )
+  afirmar(aLaMitad.includes(`-${margenDelRecorte}px -${margenDelRecorte}px`), `  y el marco de afuera deja los ${margenDelRecorte} px del margen del recorte, como \`overflow-clip-margin\``)
+  afirmarIgual([recorteDelVacio(0, margenDelRecorte), recorteDelVacio(1, margenDelRecorte)], ['none', 'inset(50%)'], '  sin vacío la caja no se recorta; lleno, no pinta NADA: ni una captura, ni el CTA, ni un anillo de foco')
   afirmar(
     pxDeLaEspera(cuantas) >= PX_MINIMOS_DE_LA_ESPERA_DEL_CTA,
     `  la ventana del CTA se queda quieta en su máximo ${pxDeLaEspera(cuantas).toFixed(0)} px, que no baja del piso declarado de ${PX_MINIMOS_DE_LA_ESPERA_DEL_CTA}`,

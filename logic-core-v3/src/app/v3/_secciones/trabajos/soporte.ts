@@ -190,8 +190,8 @@ export function afirmarLasCuatroEntradas(): void {
  * Su motivo, con la medición que lo encontró, está en `PX_DE_LA_APROXIMACION`.
  *
  * ⚠️ **Y EL CTA NO SUMA APARTE.** Es la última capa de la tabla, así que su
- * recorrido está adentro de `PX_DEL_TUNEL`. Lo que sí suma son la SALIDA —lo que
- * tarda el contenido en irse a velocidad de scroll— y el ESPACIO DE DEMOS.
+ * recorrido está adentro de `PX_DEL_TUNEL`. Lo que sí suma son la SALIDA —la
+ * ventana en la que el vacío se lleva el túnel— y el ESPACIO DE DEMOS.
  */
 export function sumaDeLosTramos(cuantas: number): number {
   void cuantas
@@ -213,10 +213,10 @@ export function sumaDeLosTramos(cuantas: number): number {
  * ella, que las capas estén anidadas DE VERDAD en el marcado, y que el CTA llegue
  * a su tamaño con la fracción que el túnel produce y no con una puesta a mano.
  */
-/** Cuántos `will-change-transform` tiene que escribir `CapaDelTunel`: TRES —el
- *  escenario y las capas de proyecto, que escalan, y la capa entera, que se
- *  traslada en la salida—. La capa del CTA lleva el suyo en `piezas.tsx`. */
-const CUANTAS_CAPAS_PROMOVIDAS = 3
+/** Cuántos `will-change-transform` tiene que escribir `CapaDelTunel`: DOS —el
+ *  escenario y las capas de proyecto, que escalan—. La caja entera ya no se
+ *  traslada: la salida es un recorte. La del CTA lleva el suyo en `piezas.tsx`. */
+const CUANTAS_CAPAS_PROMOVIDAS = 2
 
 export function afirmarElTunel(conMotion: string, quieto: string, cuantas: number): void {
   titulo('17 · El túnel: la tabla medida, anidada, y el CTA que llega')
@@ -345,60 +345,37 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
     (src: string) => veces(src, "setProperty('visibility'") === 0,
   )
 
-  // ── LA SALIDA VA A VELOCIDAD DE SCROLL, Y NADA SE DESVANECE ───────────
+  // ── LA SALIDA ES UN VACÍO QUE CRECE, Y NADA SE DESVANECE ───────────────
   const fuenteDeLaCapa = FUENTES.find((f) => f.archivo.includes('CapaDelTunel'))?.texto ?? ''
   /**
-   * ⚠️ **ESTAS AFIRMACIONES CAMBIARON DE SIGNO TRES VECES. La cuarta es la buena.**
-   *
-   * Primero la capa se iba con una huida —z negativo y desvanecido— y se
-   * comprobaba que la opacidad llegara a cero. Después subía con un
-   * `translateY(−130 %)` y se comprobaba la traslación. Después se exigía que NO
-   * se trasladara, porque las dos anteriores eran deslizamientos impuestos.
-   *
-   * Y esa tercera dejó un defecto de estructura: sin traslación, lo único que
-   * saca el contenido es el despineado del panel, que dura exactamente un
-   * viewport y ocurre **mientras servicios entra por abajo**. Nunca queda un
-   * cuadro con la sala sola, y por eso el espacio de demos no se percibía.
-   *
-   * Así que la capa vuelve a trasladarse, y lo que se afirma es la VELOCIDAD:
-   * que lo haga en PÍXELES —no en porcentaje del contenedor, que ataría la
-   * velocidad a cuánto mida la caja— y que la cuenta sea 1:1 con el scroll. A
-   * esa velocidad no hay nada que distinguir de un scroll normal, porque es la
-   * velocidad del scroll.
+   * ⚠️ **ESTAS AFIRMACIONES CAMBIARON CUATRO VECES, y ahora ya no hay traslado.**
+   * Hubo una huida con desvanecido, un `translateY(−130 %)`, ningún movimiento y
+   * un traslado 1:1; el último no vaciaba el cuadro a 1.300 de alto. La salida es
+   * ahora la próxima capa del túnel, y lo que pinta es un AGUJERO en la caja: se
+   * afirma que la caja no se traslada, que escribe UN recorte y que ese recorte
+   * sale de la ley del vacío y no de una fracción puesta a mano.
    */
-  afirmarIgual(
-    veces(fuenteDeLaCapa, "capa.style.setProperty('transform'"),
-    1,
-    'la capa se traslada UNA vez, en la salida: el contenido se va a velocidad de scroll',
-  )
-  afirmar(
-    /translateY\(\$\{\(-salida\)\.toFixed\(1\)\}px\)/.test(fuenteDeLaCapa),
-    '  y lo escribe en PÍXELES: en porcentaje la velocidad dependería de cuánto mida la caja, y la igualdad con el scroll se perdería',
-  )
-  controlPositivo(
-    'el detector vería la levantada vieja, escrita en porcentaje del contenedor',
-    'capa.style.setProperty(`transform`, `translateY(${-subida}%)`)',
-    (src: string) => /translateY\(\$\{\(-salida\)\.toFixed\(1\)\}px\)/.test(src),
-  )
+  afirmarIgual(veces(fuenteDeLaCapa, "capa.style.setProperty('transform'"), 0, 'la caja del túnel ya no se traslada: el traslado 1:1 de la salida se fue entero')
+  controlPositivo('  el detector vería el traslado viejo', "capa.style.setProperty('transform', `translateY(${(-salida).toFixed(1)}px)`)", (src: string) => veces(src, "capa.style.setProperty('transform'") === 0)
+  const recortaConElVacio = (src: string): boolean =>
+    veces(src, "capa.style.setProperty('clip-path'") === 1 &&
+    src.includes("capa.style.setProperty('clip-path', recorteDelVacio(fraccionDelVacio(pose, CAPA_DEL_VACIO, pxDelTunelEn(p)), MARGEN_DEL_RECORTE_PX))")
+  afirmar(recortaConElVacio(fuenteDeLaCapa), '  y la salida es UN recorte, con la ley del vacío sobre la misma pose del túnel: un agujero que crece en la caja')
+  controlPositivo('  el detector vería un vacío con la fracción puesta a mano', "capa.style.setProperty('clip-path', recorteDelVacio(0.5, MARGEN_DEL_RECORTE_PX))", recortaConElVacio)
   afirmarIgual(
     veces(fuenteDeLaCapa, "capa.style.setProperty('opacity'"),
     0,
-    '  y NO toca su opacidad: nada se desvanece, todo sale por arriba — la variable se llama `capa` justo para que esto se pueda afirmar',
+    '  y NO toca su opacidad: nada se desvanece, lo que no está adentro del vacío se ve entero — la variable se llama `capa` justo para que esto se pueda afirmar',
   )
   controlPositivo(
     '  y un desvanecido que vuelve',
     "capa.style.setProperty('opacity', '0')",
     (src: string) => veces(src, "capa.style.setProperty('opacity'") === 0,
   )
-  /**
-   * ⚠️ **Y AHORA SÍ VA `will-change` SOBRE LA CAPA**, porque volvió a moverse.
-   * La regla del repo pide la capa de composición sobre el elemento que
-   * efectivamente se transforma, y en la salida ése es este contenedor.
-   */
   afirmarIgual(
     veces(fuenteDeLaCapa, 'will-change-transform'),
     CUANTAS_CAPAS_PROMOVIDAS,
-    `  y quedan ${CUANTAS_CAPAS_PROMOVIDAS} capas promovidas en el archivo: el escenario y las de proyecto, que escalan, y la capa entera, que se traslada en la salida`,
+    `  y quedan ${CUANTAS_CAPAS_PROMOVIDAS} capas promovidas en el archivo: el escenario y las de proyecto, que escalan; la caja ya no se mueve`,
   )
 
   // ── EL RECORTE Y SU MARGEN ──────────────────────────────────────────────

@@ -64,7 +64,12 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
 
   useEffect(() => {
     const capa = banda.current
-    const caja = capa?.closest('[data-panel]') ?? null
+    const panel = capa?.closest('[data-panel]') ?? null
+    // ⚠️ La noche se mide contra la caja SIN el solape (`Panel`): el panel como era
+    // antes de subir sobre Números, que es contra lo que se derivaron las líneas.
+    // El solape rige sólo desde escritorio y esa caja lo sigue por CSS, así que acá
+    // no hay nada que decidir por ancho.
+    const caja = panel?.querySelector('[data-caja-sin-solape]') ?? panel
     if (caja === null || capa === null) return
 
     // Con movimiento reducido la sala se invierte igual, pero sin banda: el gesto

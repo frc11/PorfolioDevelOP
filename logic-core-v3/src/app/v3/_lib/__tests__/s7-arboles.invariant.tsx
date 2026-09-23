@@ -237,7 +237,12 @@ afirmar(trabajos !== undefined, 'Trabajos está en el registro')
 if (trabajos !== undefined) {
   const quieto = marcar(<trabajos.Componente seccion={trabajos.seccion} />, { anima: false })
   const animado = marcar(<trabajos.Componente seccion={trabajos.seccion} />, { anima: true })
-  const absolutos = (html: string): number => (html.match(/class="[^"]*\babsolute\b/g) ?? []).length
+  // ⚠️ La caja sin solape de `Panel` no cuenta: es hija del PANEL, no de ninguna de
+  // las dos ramas, y su bloque contenedor es la sección en las dos, haya o no
+  // `perspective` adentro del bloque.
+  const sinLaCajaDelPanel = (html: string): string => html.replace(/<div data-caja-sin-solape=""[^>]*><\/div>/g, '')
+  const absolutos = (html: string): number => (sinLaCajaDelPanel(html).match(/class="[^"]*\babsolute\b/g) ?? []).length
+  afirmar(quieto !== sinLaCajaDelPanel(quieto), '  (la caja sin solape del panel está en el marcado y se descuenta: no es de ninguna rama)')
   afirmarIgual(absolutos(quieto), 0, 'su rama quieta no tiene un solo descendiente `absolute`')
   afirmar(absolutos(animado) > 0, `  y la animada tiene ${absolutos(animado)}: el detector ve`)
   afirmar(!quieto.includes('perspective'), '  y la quieta no escribe `perspective`')

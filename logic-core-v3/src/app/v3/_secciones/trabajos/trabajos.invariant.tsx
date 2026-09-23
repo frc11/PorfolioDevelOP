@@ -39,6 +39,7 @@ import {
   PX_DE_LA_SECCION,
   DISPARO_DE_LA_NOCHE,
 } from './geometria'
+import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
@@ -96,6 +97,12 @@ controlPositivo(
 // lo único que queda por afirmar acá es la HISTÉRESIS: las dos líneas existen, son
 // distintas y sueltan más abajo de donde prenden.
 afirmar(DISPARO_DE_LA_NOCHE.vuelta > DISPARO_DE_LA_NOCHE.ida, `las dos líneas del disparo son distintas y la de soltar va DEBAJO de la de prender: recorte ${DISPARO_DE_LA_NOCHE.ida} % para prender, ${DISPARO_DE_LA_NOCHE.vuelta} % para soltar`)
+const mideSinSolape = (src: string): boolean => src.includes("panel?.querySelector('[data-caja-sin-solape]') ?? panel") && src.includes('data-caja-sin-solape')
+afirmar(
+  mideSinSolape(FUENTES.find((f) => f.archivo.includes('CapaDeLaGota'))?.texto ?? '') && FUENTE_DEL_PANEL.includes('data-caja-sin-solape'),
+  `  y se miden contra la caja SIN solape que emite \`Panel\`: por eso son las de siempre, ${(PANTALLAS_DE_NUMEROS - 1) * 100} %, a cualquier ancho`,
+)
+controlPositivo('  el detector vería la gota observando el panel, que desde escritorio sube el solape', "const caja = capa?.closest('[data-panel]') ?? null", mideSinSolape)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El contenido no se puede leer como un dato')

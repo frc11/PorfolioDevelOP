@@ -10,14 +10,13 @@ import { MarcoDeMedio } from '../_contrato/medios'
 import { CONTENIDO } from './contenido'
 import {
   BANDA_DEL_EFECTO,
+  CAPA_DEL_VACIO,
   MEDIDAS_DE_LAS_CAPTURAS,
   SIZES_DE_LA_CAPTURA,
-  enLaVentana,
   fraccionDeScroll,
   progresoDelPxDelTunel,
   pxDeLaSeccion,
   pxDelTunelEn,
-  ventanaDeLaSalida,
   ventanaDelTunel,
 } from './geometria'
 import { VentanaDelCta } from './piezas'
@@ -27,11 +26,12 @@ import {
   ANCHO_CON_EL_ROTULO_ENTERO,
   DURACION_DEL_FRENO_MS,
   PX_DEL_TUNEL,
-  PX_DE_LA_SALIDA,
   VELO_DEL_CTA,
+  fraccionDelVacio,
   opacidadDelRotulo,
   poseDelTunel,
   pxParaQueElProyectoMida,
+  recorteDelVacio,
   transformDeLaCapa,
   transformDelRotulo,
 } from './tunel'
@@ -57,7 +57,7 @@ import {
  * Lo que se persigue es **el progreso de la sección**, regulado (`regulador.ts`:
  * el objetivo no corre más que la velocidad máxima del efecto y la banda lo ata
  * al scroll) y con los dos resortes de la referencia: el del escenario para su
- * capa, el del túnel para todo lo demás —escalas, tipeo, velo y salida—. Lo que
+ * capa, el del túnel para todo lo demás —escalas, tipeo, velo y el vacío—. Lo que
  * el resorte del túnel muestra se PUBLICA en `mostrado`, y el cartel lee ése: los
  * dos se mueven con el mismo valor amortiguado.
  *
@@ -92,7 +92,7 @@ const ESCONDIDO = 'scale(0)'
  * elemento. Un ancestro con `hidden` se lo come entero. Lo dice el invariante de
  * la compacta con todas las letras, y tiene razón: acá se probó y lo marcó en rojo.
  *
- * **La salida:** `overflow: clip` recorta igual pero no crea un contenedor de
+ * **El arreglo:** `overflow: clip` recorta igual pero no crea un contenedor de
  * scroll, y `overflow-clip-margin` le deja pintar unos píxeles por afuera.
  *
  * ⚠️ El margen va en píxeles a mano y NO como `calc()` de los tokens, y eso se
@@ -117,7 +117,6 @@ const CAPTURAS: readonly ProyectoDeContenido[] = CONTENIDO.proyectos
 // El día que entre un cuarto proyecto sin su capa en la tabla, esto tira acá.
 ventanaDelTunel(CAPTURAS.length)
 
-const VENTANA_DE_LA_SALIDA = ventanaDeLaSalida(CAPTURAS.length)
 const LETRAS_DE_LA_FRASE = [...CONTENIDO.cta.frase.replace(/ /g, '')].length
 
 /**
@@ -230,31 +229,22 @@ export function CapaDelTunel({
     pintarElTipeo(fraseCta.current, cursorCta.current, pose.fraccionDelCta, LETRAS_DE_LA_FRASE)
 
     /**
-     * ── ⚠️ LA SALIDA: LA CAPA SE VA A LA VELOCIDAD DEL SCROLL, NI UNA MÁS ──
+     * ── ⚠️ LA SALIDA: UN VACÍO QUE CRECE, Y ES UN AGUJERO EN ESTA CAJA ──────
      *
-     * Hubo un `translateY(−130 %)` acá: 1.170 px de movimiento repartidos en 450
-     * px de scroll, o sea 2,6 veces el dedo. Eso es lo que se leía como
-     * deslizamiento impuesto — no el gesto, la velocidad. Después se sacó del
-     * todo, y el contenido pasó a irse con el despineado del panel; tampoco
-     * sirvió, porque el pin termina un viewport antes que la sección y durante
-     * ese viewport **servicios ya está entrando por abajo**: nunca queda un
-     * cuadro con la sala sola.
+     * Hubo un traslado 1:1 hacia arriba y se fue entero: a 1.300 de alto no
+     * vaciaba el cuadro. Ahora la salida es la próxima capa del túnel —anidada
+     * adentro del CTA, con la rampa de la última captura (`tunel.ts`)— y lo que
+     * pinta es un agujero: la caja del túnel se recorta con el marco menos el
+     * rectángulo del vacío, y por ahí se ve la escena que ya está detrás. No hay
+     * un segundo lienzo ni nada escalado que la copie.
      *
-     * Ahora la capa se traslada de nuevo, y a **1:1**: un píxel de scroll, un
-     * píxel de traslación. A esa velocidad no hay nada que distinguir de un
-     * scroll normal, porque es la velocidad del scroll. Lo que se gana es que el
-     * contenido se va MIENTRAS la sección sigue clavada, y detrás queda el
-     * espacio de demos.
-     *
-     * Va en PÍXELES y no en porcentaje del contenedor justamente para que la
-     * igualdad con el scroll sea exacta y no dependa de cuánto mida la caja.
-     *
-     * ⚠️ Y **no toca la opacidad**: nada se desvanece, todo sale por arriba.
+     * Va en ESTA caja por lo mismo que el recorte de arriba: no escala, así que
+     * el agujero mide lo que dice en cualquier alto de ventana. Y **no toca la
+     * opacidad**: nada se desvanece; lo que no está adentro del vacío se ve entero.
      */
     const capa = contenedor.current
     if (capa !== null) {
-      const salida = enLaVentana(p, VENTANA_DE_LA_SALIDA) * PX_DE_LA_SALIDA
-      capa.style.setProperty('transform', `translateY(${(-salida).toFixed(1)}px)`)
+      capa.style.setProperty('clip-path', recorteDelVacio(fraccionDelVacio(pose, CAPA_DEL_VACIO, pxDelTunelEn(p)), MARGEN_DEL_RECORTE_PX))
     }
   }, [])
 
@@ -479,10 +469,9 @@ export function CapaDelTunel({
     <div
       ref={contenedor}
       data-pieza="tunel"
-      /* `will-change` acá y no sólo en las capas: en la SALIDA la caja que se
-         transforma es ÉSTA, y la regla del repo pide la capa de composición
-         sobre el elemento que efectivamente se mueve. */
-      className={`${className ?? ''} will-change-transform`}
+      /* Sin `will-change`: esta caja ya no se traslada —la salida es un recorte—,
+         y las que se transforman, el escenario y las capas, llevan el suyo. */
+      className={className}
       style={RECORTE_DEL_TUNEL}
     >
       <div

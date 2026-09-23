@@ -17,7 +17,7 @@
  *     el cartel      1.200 px   llega con el gesto de la casa, se lee, y vuela
  *     el túnel       1.480 px   la tabla medida en la referencia, CTA incluido
  *     la espera     el resto    el CTA quieto en su tamaño: hoy 552, con piso de 550
- *     la salida      1.131 px   todo sube 1:1 y sale por arriba del cuadro
+ *     la salida      1.131 px   un vacío crece desde el centro y revela la escena
  *     los demos      1.800 px   la sala de noche sola
  *
  * **La suma tiene que entrar en el alto declarado**, y eso lo afirma el
@@ -35,6 +35,7 @@ import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { ATRASO_DEL_RESORTE_PX, type BandaDelEfecto } from './regulador'
 import {
   CAPAS_DEL_TUNEL,
+  ORIGEN_DEL_TUNEL,
   PX_DEL_ESPACIO_DE_DEMOS,
   PX_DEL_TUNEL,
   PX_DE_LA_SALIDA,
@@ -42,6 +43,7 @@ import {
   type Caja,
   type PuntoDelCuadro,
   type TiemposDelGesto,
+  capaDelVacio,
 } from './tunel'
 
 /** Lo que hay que PEDIR de un medio (ancho × alto) más el `sizes` con el que se
@@ -106,12 +108,15 @@ export function fraccionDeScroll(px: number): number {
  * subiendo se abandona primero la de la ida —que tampoco hace nada— y recién
  * después la de la vuelta. Esos ocho puntos entre una y otra son la histéresis:
  * sin ellos, un dedo apoyado en el umbral hace ir y venir el barrido.
+ *
+ * ⚠️ **SIN EL SOLAPE, y es a propósito.** La gota no observa el panel sino la
+ * caja que `Panel` pone donde el panel estaría sin subir sobre Números. El solape
+ * rige sólo desde escritorio y esa caja lo sigue por CSS, así que las líneas son
+ * las de siempre a cualquier ancho y ninguna sección decide nada por ancho.
  */
 export const DISPARO_DE_LA_NOCHE = {
-  // ⚠️ Menos el solape: el tope de Trabajos está ahora esa fracción de pantalla
-  // más arriba, y la noche tiene que seguir cayendo donde termina Quiénes somos.
-  ida: (PANTALLAS_DE_NUMEROS - 1 - SOLAPE_DE_LA_SECCION) * 100,
-  vuelta: (PANTALLAS_DE_NUMEROS - 1 - SOLAPE_DE_LA_SECCION) * 100 + 8,
+  ida: (PANTALLAS_DE_NUMEROS - 1) * 100,
+  vuelta: (PANTALLAS_DE_NUMEROS - 1) * 100 + 8,
 } as const
 
 /** Normaliza un progreso contra una ventana. Fuera de ella satura. */
@@ -402,14 +407,19 @@ export function ventanaDeLaSalida(cuantas: number): { readonly desde: number; re
 /**
  * ⚠️ **DÓNDE EMPIEZA EL TRAMO DE DEMOS — y ahora sí está adentro del pin.**
  *
- * Empieza cuando la salida terminó de llevarse el contenido por arriba, y de ahí
- * al final del progreso queda la sala de noche sola: el fondo 3D, sin nada
+ * Empieza cuando la ventana de la salida terminó —el vacío ya llenó el cuadro—, y
+ * de ahí al final del progreso queda la sala de noche sola: el fondo 3D, sin nada
  * encima, con la sección todavía clavada. Es el espacio reservado, y sigue vacío
  * por dentro — lo que va adentro es contenido y todavía no lo sabemos.
  */
 export function arranqueDeDemos(cuantas: number): number {
   return ventanaDeLaSalida(cuantas).hasta
 }
+
+/** El vacío en la regla de la referencia: nace donde arranca la ventana de la salida. */
+export const CAPA_DEL_VACIO = capaDelVacio(
+  ORIGEN_DEL_TUNEL + pxDelTunelEn(arranqueDeLaSalida(CAPAS_DEL_TUNEL.proyectos.length)),
+)
 
 /**
  * ⚠️ **LA HUIDA DEL CARTEL EN LAS DOS DIRECCIONES, leída del túnel MOSTRADO.**
@@ -431,7 +441,8 @@ export const pxDeLaSeccion = (progreso: number): number => progreso * PX_DE_LA_S
  *
  * **El piso (bajando).** El pin se suelta en el progreso 1, y ahí lo mostrado
  * tiene que estar en el arranque de los demos: la salida terminada y la sala sola.
- * La salida se va 1:1, así que sus 1.131 px pueden ir a la velocidad del scroll;
+ * La salida es el vacío que se lleva el túnel, así que sus 1.131 px pueden ir a la
+ * velocidad del scroll;
  * la espera no muestra nada moverse, así que se puede SALTAR; lo que se estira es
  * el túnel, repartido en todo el scroll que queda desde su arranque. Por eso el
  * túnel, aun a scroll desesperado, va a 0,54 de la velocidad de la página. Y el

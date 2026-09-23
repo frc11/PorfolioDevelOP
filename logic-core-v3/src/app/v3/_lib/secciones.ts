@@ -110,6 +110,9 @@ export interface Seccion {
    * Rompe a sabiendas «las separaciones son cero»: es la única forma de que un
    * panel empiece a verse mientras el anterior todavía scrollea sin tocar ni el
    * alto del anterior ni el recorrido de la cámara.
+   *
+   * ⚠️ Rige sólo desde escritorio: abajo no hay túnel que adelantar, y el titular
+   * pasaba sobre el logo. `Panel` lo prende con la variante `escritorio:`.
    */
   readonly solape?: number
   /**
