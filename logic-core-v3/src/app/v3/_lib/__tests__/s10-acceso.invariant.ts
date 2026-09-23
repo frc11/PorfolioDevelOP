@@ -143,9 +143,9 @@ imprimirParadas(QUIETA, PARADAS)
  * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-// SPRINT DEMOS · + las seis demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo).
-afirmarIgual(PARADAS.length, 32, 'el home entero tiene 32 paradas: las 22 de antes, la captura de cada trabajo, el CTA del final del túnel y las seis demos')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 32, '  y la rama animada tiene las mismas 32: el recorrido de teclado no cambia con el ancho')
+// SPRINT DEMOS · + las ocho demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo).
+afirmarIgual(PARADAS.length, 34, 'el home entero tiene 34 paradas: las 22 de antes, la captura de cada trabajo, el CTA del final del túnel y las ocho demos')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 34, '  y la rama animada tiene las mismas 34: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

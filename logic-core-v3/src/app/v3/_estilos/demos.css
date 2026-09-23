@@ -33,8 +33,7 @@
   padding-block-start: calc(var(--libro-alza) + var(--spacing-12));
   transition:
     transform var(--duracion-lenta) var(--demos-resorte),
-    opacity var(--duracion-lenta) var(--demos-resorte),
-    filter var(--duracion-lenta) var(--demos-resorte);
+    opacity var(--duracion-lenta) var(--demos-resorte);
 }
 
 /* La biblioteca RETROCEDE cuando una demo está abierta: se achica, baja un poco y
@@ -42,7 +41,6 @@
 [data-v3] [data-pieza="estante"][data-alejada] {
   transform: translateY(var(--spacing-8)) scale(0.9);
   opacity: 0.35;
-  filter: blur(var(--border-hairline));
 }
 
 /* EL HUECO de cada pieza: plano y quieto, así el hover no cambia bajo el puntero
@@ -56,8 +54,15 @@
   border-radius: var(--radius-sutil);
 }
 
+/* Cada una tapa parte de la anterior, y si no entran en su columna se pisan MÁS:
+ * las portadas no se achican nunca. El `100 %` de un margen es el ancho del
+ * estante, así que el segundo término es el solape que lo llena exacto con
+ * `--libros` piezas (lo pone `Biblioteca`), y `min()` elige el mayor de los dos. */
 [data-v3] [data-pieza="libro"] + [data-pieza="libro"] {
-  margin-inline-start: calc(var(--libro-ancho) * -0.42);
+  margin-inline-start: min(
+    calc(var(--libro-ancho) * -0.42),
+    calc((100% - var(--libro-ancho)) / (var(--libros) - 1) - var(--libro-ancho))
+  );
 }
 
 /* LA CARA: la portada, girada como un libro en el estante. */

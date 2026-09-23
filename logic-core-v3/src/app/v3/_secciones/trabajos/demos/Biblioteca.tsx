@@ -95,7 +95,8 @@ export function Biblioteca({
 
   return (
     <>
-      <div data-pieza="estante" {...(alejada ? { 'data-alejada': '' } : {})}>
+      {/* `--libros`: el estante calcula con él cuánto se pisan para entrar en su columna. */}
+      <div data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})}>
         {CATALOGO_DE_DEMOS.map((demo, i) => (
           <a
             key={demo.slug}

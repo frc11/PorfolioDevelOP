@@ -80,6 +80,24 @@ const TEMPLATES: TemplateItem[] = [
         rgb: "0,229,255",
         url: "https://template-nebula.netlify.app/",
     },
+    {
+        slug: "niche",
+        name: "Niche Perfumes",
+        tagline: "Perfumery / High-end",
+        description: "Colección curada de perfumería árabe de alta gama, con importación directa y garantía de originalidad.",
+        accent: "#d4af37",
+        rgb: "212,175,55",
+        url: "https://nicheperfumeria.netlify.app/",
+    },
+    {
+        slug: "aura",
+        name: "AXON Studio",
+        tagline: "Agency / Web design studio",
+        description: "Agencia de diseño web que crea sitios, e-commerce y branding para negocios.",
+        accent: "#00ff88",
+        rgb: "0,255,136",
+        url: "https://template-aura-develop.netlify.app/",
+    },
 ]
 
 const clampIndex = (value: number) => Math.min(TEMPLATES.length - 1, Math.max(0, value))
