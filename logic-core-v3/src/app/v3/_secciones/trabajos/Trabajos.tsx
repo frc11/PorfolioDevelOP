@@ -8,6 +8,7 @@ import { Seccion } from '../_contrato/Seccion'
 
 import { CapaDeLaGota } from './CapaDeLaGota'
 import { CapaDelTunel } from './CapaDelTunel'
+import { CapaDeDemos } from './demos/CapaDeDemos'
 import { PortadaDeTrabajos, RamaQuieta } from './piezas'
 
 /**
@@ -72,6 +73,10 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
                   necesita un margen de recorte y eso no es una clase. Ver el
                   docblock de `RECORTE_DEL_TUNEL` en `CapaDelTunel.tsx`. */}
               <CapaDelTunel progreso={progreso} mostrado={mostrado} className="pointer-events-none absolute inset-0" />
+              {/* ⚠️ Las demos van DESPUÉS del túnel porque se LEEN después, y se pintan
+                  DEBAJO por su `z-index` negativo: así el túnel no cambia en nada
+                  (`demos/CapaDeDemos.tsx`). */}
+              <CapaDeDemos mostrado={mostrado} className="absolute inset-0 -z-[var(--z-elevado)]" />
             </>
           )
         }}

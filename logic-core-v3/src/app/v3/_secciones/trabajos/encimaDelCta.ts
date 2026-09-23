@@ -79,8 +79,15 @@ export function useEncimaDelCta(ventana: RefObject<HTMLDivElement | null>, reduc
 
     const actualizar = (): void => {
       const encima = puntero || foco
-      caja.style.setProperty('transform', encima ? ELEVACION_DE_LA_VENTANA : 'none')
-      caja.style.setProperty('box-shadow', encima ? 'var(--shadow-flotante)' : 'none')
+      // Al salir se QUITAN, no se ponen en `none`: la caja no tiene que quedar con
+      // una transformada propia cuando el vacío la recorta.
+      if (encima) {
+        caja.style.setProperty('transform', ELEVACION_DE_LA_VENTANA)
+        caja.style.setProperty('box-shadow', 'var(--shadow-flotante)')
+      } else {
+        caja.style.removeProperty('transform')
+        caja.style.removeProperty('box-shadow')
+      }
       objetivo = encima ? total : 0
       if (reducido) {
         letras = objetivo

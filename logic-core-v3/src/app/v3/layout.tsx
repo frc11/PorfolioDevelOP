@@ -28,6 +28,7 @@ import './_estilos/deslizamiento.css'
 import './_estilos/trazo.css'
 import './_estilos/banda.css'
 import './_estilos/tipeo.css'
+import './_estilos/demos.css'
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

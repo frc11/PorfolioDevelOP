@@ -143,8 +143,9 @@ imprimirParadas(QUIETA, PARADAS)
  * paradas seguidas al mismo destino se anuncian tres veces igual. Quedan las dos
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
-afirmarIgual(PARADAS.length, 26, 'el home entero tiene 26 paradas: las 22 de antes, la captura de cada trabajo y el CTA del final del túnel')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26, '  y la rama animada tiene las mismas 26: el recorrido de teclado no cambia con el ancho')
+// SPRINT DEMOS · + las seis demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo).
+afirmarIgual(PARADAS.length, 32, 'el home entero tiene 32 paradas: las 22 de antes, la captura de cada trabajo, el CTA del final del túnel y las seis demos')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 32, '  y la rama animada tiene las mismas 32: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -242,7 +243,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 29, 'la rama quieta publica 29 encabezados: los 27 de S11, el rótulo del bloque del equipo y el título de la foto')
+afirmarIgual(encabezados(QUIETA).length, 30, 'la rama quieta publica 30 encabezados: los 27 de S11, el rótulo del bloque del equipo, el título de la foto y el de las demos')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +

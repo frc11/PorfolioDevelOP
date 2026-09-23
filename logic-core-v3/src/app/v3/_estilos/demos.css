@@ -1,0 +1,246 @@
+/* =========================================================================
+ * LAS DEMOS — el estante, el cartel y la cinta. [PORTFOLIO · DEMOS]
+ * =========================================================================
+ * Todo lo que se mueve acá es CSS: el hover del estante, la apertura de las
+ * vecinas y la cinta de abajo de 1025. Ni una línea de JS por cuadro.
+ *
+ * ── Los números, derivados de los tokens ─────────────────────────────────
+ *
+ *   la bajada   100 ms = --duracion-media − --duracion-rapida, el mismo desfase
+ *               que ya usa el subrayado del CTA. «Casi instantánea»: ≤ 120 ms.
+ *   la subida   --duracion-lenta con un resorte CRÍTICO (ζ = 1): sube rápido,
+ *               frena y no rebota. La curva es x(t) = 1 − (1 + ωt)·e^(−ωt) con
+ *               ω = 10, muestreada cada 10 % — un resorte sin rebote no es una
+ *               cúbica, y `linear()` lo dibuja tal cual.
+ * ========================================================================= */
+
+/* Los dos tiempos van en la raíz: los lee el estante y también el cartel, que
+ * vive en un portal afuera de la sección. */
+[data-v3] {
+  --demos-bajada: calc(var(--duracion-media) - var(--duracion-rapida));
+  --demos-resorte: linear(0, 0.264 10%, 0.594 20%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1);
+}
+
+[data-v3] [data-pieza="estante"] {
+  --libro-ancho: calc(var(--spacing-8) * 5);
+  --libro-giro: 30deg;
+  --libro-alza: var(--spacing-6);
+  --libro-apertura: var(--spacing-4);
+
+  display: flex;
+  align-items: flex-end;
+  /* Aire arriba para la pieza levantada y su cartel: el alza más un renglón de la pastilla. */
+  padding-block-start: calc(var(--libro-alza) + var(--spacing-12));
+  transition:
+    transform var(--duracion-lenta) var(--demos-resorte),
+    opacity var(--duracion-lenta) var(--demos-resorte),
+    filter var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* La biblioteca RETROCEDE cuando una demo está abierta: se achica, baja un poco y
+ * se atenúa. Vuelve con el mismo resorte. */
+[data-v3] [data-pieza="estante"][data-alejada] {
+  transform: translateY(var(--spacing-8)) scale(0.9);
+  opacity: 0.35;
+  filter: blur(var(--border-hairline));
+}
+
+/* EL HUECO de cada pieza: plano y quieto, así el hover no cambia bajo el puntero
+ * cuando la cara se levanta. Cada una tapa parte de la anterior. */
+[data-v3] [data-pieza="libro"] {
+  position: relative;
+  flex: none;
+  display: block;
+  inline-size: var(--libro-ancho);
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sutil);
+}
+
+[data-v3] [data-pieza="libro"] + [data-pieza="libro"] {
+  margin-inline-start: calc(var(--libro-ancho) * -0.42);
+}
+
+/* LA CARA: la portada, girada como un libro en el estante. */
+[data-v3] [data-pieza="libro"] > [data-parte="cara"] {
+  display: block;
+  block-size: 100%;
+  overflow: clip;
+  border-radius: var(--radius-sutil);
+  box-shadow: var(--shadow-flotante);
+  transform: perspective(calc(var(--libro-ancho) * 6)) rotateY(var(--libro-giro));
+  transition:
+    transform var(--demos-bajada) ease-out,
+    box-shadow var(--demos-bajada) ease-out;
+  /* ⚠️ Sin `will-change`. Una cara promovida obligaba a componer el túnel, que se
+   * pinta encima, y el recorte del vacío dejaba de cortar el fondo de la ventana
+   * del CTA: el agujero se veía claro. Medido en la entrada, a 1440. */
+}
+
+[data-v3] [data-pieza="libro"] > [data-parte="cara"] img {
+  block-size: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* ── EL HOVER, sólo con puntero que pasa por encima; el foco hace lo mismo ── */
+
+@media (hover: hover) {
+  [data-v3] [data-pieza="libro"]:hover {
+    z-index: var(--z-elevado);
+  }
+
+  [data-v3] [data-pieza="libro"]:hover > [data-parte="cara"] {
+    transform: perspective(calc(var(--libro-ancho) * 6)) translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
+    box-shadow: var(--shadow-flotante), var(--shadow-flotante);
+    transition:
+      transform var(--duracion-lenta) var(--demos-resorte),
+      box-shadow var(--duracion-lenta) var(--demos-resorte);
+  }
+
+  [data-v3] [data-pieza="libro"]:hover + [data-pieza="libro"] > [data-parte="cara"] {
+    transform: perspective(calc(var(--libro-ancho) * 6)) translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
+    transition: transform var(--duracion-lenta) var(--demos-resorte);
+  }
+
+  [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:hover) > [data-parte="cara"] {
+    transform: perspective(calc(var(--libro-ancho) * 6)) translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
+    transition: transform var(--duracion-lenta) var(--demos-resorte);
+  }
+}
+
+[data-v3] [data-pieza="libro"]:focus-visible {
+  z-index: var(--z-elevado);
+}
+
+[data-v3] [data-pieza="libro"]:focus-visible > [data-parte="cara"] {
+  transform: perspective(calc(var(--libro-ancho) * 6)) translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
+  box-shadow: var(--shadow-flotante), var(--shadow-flotante);
+  transition:
+    transform var(--duracion-lenta) var(--demos-resorte),
+    box-shadow var(--duracion-lenta) var(--demos-resorte);
+}
+
+[data-v3] [data-pieza="libro"]:focus-visible + [data-pieza="libro"] > [data-parte="cara"] {
+  transform: perspective(calc(var(--libro-ancho) * 6)) translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
+  transition: transform var(--duracion-lenta) var(--demos-resorte);
+}
+
+[data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:focus-visible) > [data-parte="cara"] {
+  transform: perspective(calc(var(--libro-ancho) * 6)) translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
+  transition: transform var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* =========================================================================
+ * EL CARTEL — la pastilla del navbar, token por token.
+ * =========================================================================
+ * Copiada de la regla de la pastilla en `_estilos/navegacion.css`: borde,
+ * radio, superficie translúcida, desenfoque y sombra, con los MISMOS tokens. El
+ * rótulo lleva las mismas clases que un enlace del navbar. `demos.invariant`
+ * lee las dos hojas y afirma que las cinco declaraciones son idénticas.
+ *
+ * Vive en un portal afuera de la sección, como el navbar: adentro, la paleta
+ * está invertida y los mismos tokens darían otra pastilla.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="cartel-de-demos"] {
+  display: inline-flex;
+  align-items: center;
+  block-size: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));
+  padding-inline: var(--spacing-4);
+  white-space: nowrap;
+  color: var(--color-tinta);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-pastilla-l);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+  pointer-events: none;
+}
+
+/* El cartel del estante acompaña a la pieza levantada: aparece con la subida y
+ * se va con la bajada, con los mismos tiempos. */
+[data-v3] [data-pieza="cartel-de-demos"][data-parte="del-estante"] {
+  position: fixed;
+  z-index: var(--z-overlay);
+  opacity: 0;
+  transform: translate(-50%, var(--spacing-2));
+  transition:
+    opacity var(--demos-bajada) ease-out,
+    transform var(--demos-bajada) ease-out;
+}
+
+[data-v3] [data-pieza="cartel-de-demos"][data-parte="del-estante"][data-visible] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition:
+    opacity var(--duracion-lenta) var(--demos-resorte),
+    transform var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* =========================================================================
+ * LA CINTA — abajo de 1025: las portadas pasando solas, en CSS.
+ * =========================================================================
+ * La pista lleva la lista DOS veces y se traslada media pista por vuelta: el
+ * final de la primera copia cae exacto donde arrancó, y no hay costura. El
+ * espacio entre portadas va como relleno de cada una y no como `gap`, para que
+ * las dos mitades midan lo mismo. Con el foco adentro se detiene, así el
+ * teclado alcanza a cada portada.
+ * ========================================================================= */
+
+@keyframes v3-cinta {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+[data-v3] [data-pieza="cinta"] {
+  overflow: clip;
+}
+
+[data-v3] [data-pieza="cinta"] > [data-parte="pista"] {
+  display: flex;
+  inline-size: max-content;
+  animation: v3-cinta calc(var(--duracion-muy-lenta) * 60) linear infinite;
+}
+
+[data-v3] [data-pieza="cinta"]:focus-within > [data-parte="pista"] {
+  animation-play-state: paused;
+}
+
+[data-v3] [data-pieza="cinta"] [data-parte="portada"] {
+  display: block;
+  flex: none;
+  inline-size: calc(var(--spacing-8) * 5);
+  padding-inline-end: var(--spacing-4);
+}
+
+[data-v3] [data-pieza="cinta"] [data-parte="portada"] img {
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: top;
+  border-radius: var(--radius-sutil);
+}
+
+/* Con movimiento reducido la cinta queda QUIETA y se desliza a mano. La segunda
+ * copia se esconde: sin la vuelta, no hace falta. */
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza="cinta"] {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  [data-v3] [data-pieza="cinta"] > [data-parte="pista"] {
+    animation: none;
+  }
+
+  [data-v3] [data-pieza="cinta"] [data-parte="copia"] {
+    display: none;
+  }
+
+  [data-v3] [data-pieza="cinta"] [data-parte="portada"] {
+    scroll-snap-align: start;
+  }
+}

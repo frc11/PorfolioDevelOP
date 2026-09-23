@@ -137,6 +137,13 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
     procedencia: 'COMPONENTS.md §4.1 — blur(4px), que es un tercio de la única escala de desenfoque del sistema',
   },
 
+  // ── SPRINT DEMOS · el estante de la biblioteca (`demos.css`) ───────────
+  { nombre: '--demos-bajada', valor: 'calc(var(--duracion-media) - var(--duracion-rapida))', evidencia: 'derivado', procedencia: 'la bajada casi instantánea del pedido (≤ 120 ms): 400 − 300 = 100 ms, el mismo desfase del subrayado del CTA' },
+  { nombre: '--demos-resorte', valor: 'linear(0, 0.264 10%, 0.594 20%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1)', evidencia: 'derivado', procedencia: 'resorte crítico sin rebote: x(t) = 1 − (1 + 10t)·e^(−10t), muestreado cada 10 %' },
+  { nombre: '--libro-ancho', valor: 'calc(var(--spacing-8) * 5)', evidencia: 'decidido', procedencia: 'seis piezas de 160 px con su solape entran en la columna derecha a 1440' },
+  { nombre: '--libro-giro', valor: '30deg', evidencia: 'decidido', procedencia: 'el ángulo de un libro en el estante: la cara se lee y la vecina la tapa en parte' },
+  { nombre: '--libro-alza', valor: 'var(--spacing-6)', evidencia: 'decidido', procedencia: 'cuánto sube la pieza levantada: un paso de 24 px del espaciado' },
+  { nombre: '--libro-apertura', valor: 'var(--spacing-4)', evidencia: 'decidido', procedencia: 'cuánto se abren las vecinas para darle aire: un paso de 16 px' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

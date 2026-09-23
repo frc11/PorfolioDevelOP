@@ -195,6 +195,18 @@ export const ARCHIVOS_DE_APOYO = [
   // retira con ellos, no se deja apuntando a un fantasma.
   // SPRINT DEMOS · lo que pasa con el puntero encima de la ventana del CTA de Trabajos.
   `${RAIZ_DE_SECCIONES}/trabajos/encimaDelCta.ts`,
+  // SPRINT DEMOS · la biblioteca viva, en su carpeta: el catálogo atado al del sitio
+  // vivo, la entrada por el vacío, el estante, la ventana y la cinta de abajo de 1025.
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/catalogo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/entrada.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/precarga.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/apertura.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/dialogo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/TextoDeDemos.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/Biblioteca.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/VentanaDeDemo.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/CapaDeDemos.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/DemosQuietos.tsx`,
 ]
 
 /**

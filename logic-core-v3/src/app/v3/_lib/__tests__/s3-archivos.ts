@@ -44,6 +44,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/trazo.css`,
   `${V3}/_estilos/banda.css`,
   `${V3}/_estilos/tipeo.css`,
+  // SPRINT DEMOS · el estante, el cartel con la pastilla del navbar y la cinta.
+  `${V3}/_estilos/demos.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

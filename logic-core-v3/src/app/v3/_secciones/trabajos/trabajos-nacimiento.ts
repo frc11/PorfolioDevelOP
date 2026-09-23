@@ -249,8 +249,9 @@ export function afirmarLaTablaYElNacimiento(cuantas: number, conMotion: string):
    */
   afirmarIgual(
     [...conMotion.matchAll(/data-capa="([^"]+)"/g)].map((m) => m[1]),
-    ['escenario', ...CAPAS_DEL_TUNEL.proyectos.map((_, i) => `proyecto-${String(i)}`), 'cta'],
-    `las ${cuantas + 2} capas están en el marcado del primer cuadro, en el orden de la cadena`,
+    // SPRINT DEMOS · la capa de demos va después, afuera de la cadena: la escala el vacío.
+    ['escenario', ...CAPAS_DEL_TUNEL.proyectos.map((_, i) => `proyecto-${String(i)}`), 'cta', 'demos'],
+    `las ${cuantas + 2} capas están en el marcado del primer cuadro, en el orden de la cadena, y después la de demos`,
   )
   const conOpacidad = (html: string): string[] =>
     [...html.matchAll(/<[a-z]+[^>]*data-capa="[^"]*"[^>]*>/g)].map((m) => m[0]).filter((t) => /opacity/.test(t))

@@ -15,6 +15,7 @@ import { MarcaDeSeccion } from '../_contrato/Seccion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { CONTENIDO } from './contenido'
+import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
 import { DESTINO_DEL_CTA } from './geometria'
 import {
@@ -276,6 +277,8 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
           </div>
         </div>
       </div>
+      {/* Después del CTA, las demos: arriba de 1025 se ven por el vacío. */}
+      <DemosQuietos />
     </Envoltorio>
   )
 }
@@ -395,12 +398,13 @@ export function VentanaDelCta({
                 <Cuerpo como="span" className="font-codigo relative">
                   {CONTENIDO.cta.direccion}
                   {/* La ruta que se tipea con el puntero encima (`encimaDelCta.ts`).
-                      Va a la derecha de la dirección y AFUERA del flujo, así la
-                      dirección no se corre del centro; es decoración y no se anuncia. */}
+                      AFUERA del flujo pero en su lugar estático —sin `top` ni `left`—:
+                      queda pegada a la dirección y en su línea base, y la dirección
+                      no se corre del centro. Es decoración y no se anuncia. */}
                   <span
                     aria-hidden="true"
                     data-pieza="ruta-del-cta"
-                    className="absolute top-0 left-full whitespace-nowrap"
+                    className="absolute whitespace-nowrap"
                     style={{ clipPath: recorteDeLaRuta(0) }}
                   >
                     {RUTA_DEL_CTA}
