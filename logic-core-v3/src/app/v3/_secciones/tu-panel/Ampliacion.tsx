@@ -6,7 +6,6 @@ import { createPortal } from 'react-dom'
 import { Imagen } from '../../_componentes/medios/Imagen'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { cajaAmpliada, leerToken, milisegundosDe, pixelesDe, transformadaEntre, vecino } from './vuelo'
 import { CAPTURA, type Tarjeta } from './contenido'
 
@@ -57,7 +56,8 @@ export function Ampliacion({
     if (el === null) return
     // Abajo de 1025 el margen es el de la grilla compacta: con 80 px, a 390 la imagen quedaba de 230.
     const pie = pixelesDe(leerToken('--spacing-20'))
-    const margen = window.matchMedia(CONSULTA_ESCENARIO).matches ? pie : pixelesDe(leerToken('--spacing-4'))
+    // El corte es el de las clases `escritorio:` (el token), no la compuerta: las secciones no la consultan (s7-contrato).
+    const margen = window.innerWidth > pixelesDe(leerToken('--breakpoint-escritorio')) ? pie : pixelesDe(leerToken('--spacing-4'))
     const caja = cajaAmpliada(window.innerWidth, window.innerHeight, margen, pie)
     el.style.left = `${caja.left}px`
     el.style.top = `${caja.top}px`

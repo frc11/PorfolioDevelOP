@@ -115,7 +115,7 @@ export function Fondo(): React.JSX.Element {
     <div aria-hidden="true" data-pieza="fondo-del-panel" className="pointer-events-none absolute inset-0 hidden overflow-x-clip select-none escritorio:block">
       {PALABRAS_DEL_FONDO.map((palabra, i) => (
         <Pieza key={palabra} lugar={LUGARES_DE_PALABRAS[i]}>
-          <span className="font-display block text-[length:calc(var(--text-fluido-display-xl)*216/104)] leading-none whitespace-nowrap">{palabra}</span>
+          <span className="font-display block text-[length:calc(var(--text-fluido-display-xl)*216/104)] leading-cartel whitespace-nowrap">{palabra}</span>
         </Pieza>
       ))}
       {OBJETOS.map((o) => (

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import type { MotionValue } from 'motion/react'
 
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
