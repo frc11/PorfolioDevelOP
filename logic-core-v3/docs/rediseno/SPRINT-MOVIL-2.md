@@ -93,8 +93,18 @@ Escritorio ≥1025 no cambia; la prueba es la superposición del túnel a 1440 d
 
 ## Fase 4 — Verificación y reporte
 
-- [ ] lint + `tsc --noEmit` sin errores nuevos.
-- [ ] Batería en verde.
-- [ ] Invariantes nuevos con control.
-- [ ] Capturas a 320/375/425/768/1024 de trabajos, servicios y panel.
-- [ ] Grabación a 375 con toque.
+- [x] `tsc --noEmit` limpio. eslint sobre los archivos del sprint: 0 errores, 3 avisos que
+  ya estaban (`s10-acceso` ×2, `INERCIA_DE_LA_SECUENCIA` en `Servicios.tsx`). Sin build y
+  sin prettier.
+- [x] En verde: s5-trabajos (393), s6-servicios (225, con s6-traspaso adentro), s6-render,
+  s6-tu-panel (161), s7-arboles, s7-contrato, s6-cierre (s8-cierre), s10-acceso, s21-llave,
+  s5-tokens, s3-tokens, s5-codigo.
+- [x] Invariantes nuevos con control: la vuelta entera del túnel y el ritmo (§28,
+  `ritmo-invariante.tsx`), el carrusel acoplado (§27), sin hueco entre servicios y panel
+  (`servicios/angosto-invariante.tsx`), el remate visible y con llegada abajo de 1024 y el
+  barrido de 1024 (s6-tu-panel).
+- [x] Prueba de escritorio: la superposición del túnel a 1440 sigue dentro del margen en las
+  cinco capas (peor B 1,6 %, igual que antes).
+- [x] Capturas: trabajos (4 momentos), servicios (3) y panel (3) a 320/375/425/768/1024,
+  en `~/.cache/b4-medicion/movil2/fase4/` (50 archivos).
+- [x] Grabación a 375 con toque, 70,9 s: `~/.cache/b4-medicion/movil2/grabacion-375/grabacion-375.mp4`.
