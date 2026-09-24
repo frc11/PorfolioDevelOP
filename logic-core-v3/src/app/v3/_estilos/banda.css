@@ -82,6 +82,11 @@
   [data-v3] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
     background-color: var(--color-fondo);
   }
+  /* [FINAL 2] Los enlaces del pie mezclan con su columna: pie.css les fija la tinta y acá
+     toman la del papel, igual que el CTA que mezcla. */
+  [data-v3] [data-panel='cierre'] [data-pieza='pie-enlace-icono'] {
+    color: var(--color-fondo);
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse

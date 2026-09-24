@@ -59,7 +59,11 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { createElement } from 'react'
+
 import { Hero } from '../../_secciones/hero/Hero'
+import { Cierre } from '../../_secciones/cierre/Cierre'
+import { PorQueDevelop } from '../../_secciones/por-que-develop/PorQueDevelop'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { quieto } from '../../_secciones/quienes-somos/quienes-somos-piezas'
@@ -172,6 +176,24 @@ const CADENA_DEL_TITULAR = cadenaCompleta(HERO, 'el titular del hero', (n, clase
 afirmarQueLaCadenaLlega(CADENA_DEL_TITULAR, 'el titular del hero', BANDA_MOVIL)
 const CADENA_DE_LA_BAJADA = cadenaCompleta(HERO, 'la bajada del hero', (n, clases) => n.etiqueta === 'p' && clases.includes('mix-blend-difference'), COLA_DE_LA_CADENA)
 afirmarQueLaCadenaLlega(CADENA_DE_LA_BAJADA, 'la bajada del hero', BANDA_MOVIL)
+
+/**
+ * **[FINAL 2] EL FINAL TAMBIÉN MEZCLA.** De día, «Por qué develOP» y el pie se apoyan sobre el
+ * logo oscuro abajo de 1024 como la bajada de «Quiénes somos». La diferencia es que llegan con
+ * P5: la mezcla va en el CANAL de cada llegada —el elemento que lleva la transformada—, que
+ * es lo que deja la cadena limpia de ahí para arriba.
+ */
+const POR_QUE = marcar(createElement(PorQueDevelop, { seccion: seccionDe('por-que-develop') }), { anima: false })
+const PIE_DEL_FINAL = marcar(createElement(Cierre, { seccion: seccionDe('cierre') }), { anima: false })
+const conMezcla = (_n: Nodo, clases: string): boolean => clases.includes('mix-blend-difference')
+afirmarQueLaCadenaLlega(cadenaCompleta(POR_QUE, 'la frase de «Por qué develOP»', conMezcla, COLA_DE_LA_CADENA), 'la frase de «Por qué develOP»', ABAJO)
+afirmarQueLaCadenaLlega(
+  // El canal del botón es el último que mezcla en la sección.
+  cadenaCompleta(POR_QUE, 'el botón de «Por qué develOP»', (n, clases) => conMezcla(n, clases) && n.indice === Math.max(...nodosDe(POR_QUE).filter((m) => conMezcla(m, claseDe(m))).map((m) => m.indice)), COLA_DE_LA_CADENA),
+  'el botón de «Por qué develOP»',
+  ABAJO,
+)
+afirmarQueLaCadenaLlega(cadenaCompleta(PIE_DEL_FINAL, 'el isotipo del pie', conMezcla, COLA_DE_LA_CADENA), 'el isotipo del pie', ABAJO)
 
 // `[data-v3]` es el único que SÍ debe abrirlo: es el grupo, y tiene la escena adentro.
 for (const ancho of [...ABAJO, ...BANDA_MOVIL]) {
@@ -376,6 +398,11 @@ afirmar(
 for (const etiqueta of ['h3', 'h4', 'svg', 'p']) {
   afirmar(EN_QUIENES_SOMOS.some((q) => q.startsWith(etiqueta)), `  y hay al menos un \`${etiqueta}\` adentro`)
 }
+// [FINAL 2] El final: la frase, los seis valores, el CTA y su botón; en el pie, el isotipo, la identidad y las columnas.
+const EN_POR_QUE = CON_MEZCLA(POR_QUE)
+afirmar(EN_POR_QUE.length >= 9, `«Por qué develOP» mezcla ${EN_POR_QUE.length} piezas: la frase, los seis valores, el CTA y su botón`, EN_POR_QUE.join(' · '))
+const EN_EL_PIE = CON_MEZCLA(PIE_DEL_FINAL)
+afirmar(EN_EL_PIE.length >= 4, `el pie mezcla ${EN_EL_PIE.length} piezas: el isotipo, la identidad y las dos columnas (la fila de abajo no: lleva el acento)`, EN_EL_PIE.join(' · '))
 
 /**
  * ⚠️ **Y EL TEXTO DE LA FOTO NO ENTRA, QUE ES LA MITAD DE LA REGLA.** Ahí el

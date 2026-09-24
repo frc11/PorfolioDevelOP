@@ -2,10 +2,13 @@
 
 import { useMotionValue, useTransform, type MotionValue } from 'motion/react'
 
+import { cn } from '@/lib/utils'
+
 import { Pie } from '../../_componentes/chrome/Pie'
 import { Isotipo, Logotipo } from '../../_componentes/marca/Marca'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
+import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -60,11 +63,11 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
       claseDeContenido="relative grid content-between gap-[var(--spacing-12)] escritorio:block"
     >
       {/* El logo del pie apilado. Desde 1024 lo pone la escena, en el centro. */}
-      <Isotipo className="h-[var(--spacing-12)] w-auto self-start escritorio:hidden" />
+      <Isotipo className={cn('h-[var(--spacing-12)] w-auto self-start escritorio:hidden', MEZCLA_SOBRE_LA_ESCENA)} />
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
-          <Logotipo className="text-tinta" />
+          <Logotipo />
           <div id={idDelTitularDeSeccion(seccion.id)}>
             <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
               {TITULAR_DE_CIERRE}
@@ -79,7 +82,8 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
         </LlegaConProgreso>
       </div>
       <div className="escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
-        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-end escritorio:justify-between">
+        {/* Sin mezcla: el prefijo es relleno de acento y la mezcla lo daba vuelta; en reposo esta fila no pisa el logo. */}
+        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} mezcla={false} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-end escritorio:justify-between">
           <PedidoDelPie pedido={PEDIDOS_DE_CONTACTO[1]} />
           <LineaDeCierre />
         </Llega>
@@ -99,16 +103,20 @@ function Llega({
   progreso,
   ventana,
   className,
+  mezcla = true,
   children,
 }: {
   readonly progreso: Progreso
   readonly ventana: readonly [number, number]
   readonly className?: string
+  /** Abajo de 1024 la pieza mezcla contra la escena; la fila de abajo no, porque lleva el acento de la marca. */
+  readonly mezcla?: boolean
   readonly children: React.ReactNode
 }): React.JSX.Element {
   const tramo = useTramo(progreso, ventana)
   return (
-    <CanalDeUnaPieza progreso={tramo} patron="P5" className={className}>
+    // [FINAL 2] Abajo de 1024 el pie mezcla como el resto del tramo: la mezcla va en el canal, que es el que se transforma.
+    <CanalDeUnaPieza progreso={tramo} patron="P5" className={cn(mezcla && MEZCLA_SOBRE_LA_ESCENA, className)}>
       {children}
     </CanalDeUnaPieza>
   )

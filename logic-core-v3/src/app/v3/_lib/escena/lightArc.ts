@@ -281,12 +281,11 @@ export const LIGHT_ARC: readonly LightStop[] = [
   // ⚠️ B12 · LA VUELTA: el sol asoma en la pantalla en que Trabajos se va y
   // Servicios llega. Sube hasta la frontera declarada de la noche (0,34).
   parada(VUELTA.hasta, NIVEL_DE_LA_VUELTA, 6675, 123.5, 'linear'),
-  // [FINAL] · LA NOCHE DEL FINAL, puesta ESCONDIDA. El sol ya no amanece: vuelve a la
-  // noche mientras Servicios y Tu panel tapan la sala (la escena no dibuja entre 0,625 y
-  // 0,7375), así que el logo ya está claro —su emisión sale de este nivel— en el primer
-  // cuadro en que el corte recto lo descubre, sin una sola animación a la vista. Es el
-  // mismo mecanismo que lo pone claro en Trabajos; ya no depende de que la gota haya corrido.
-  parada(AMANECER.hasta, NIVEL_DE_LA_NOCHE, 6832.5, 131.15, 'linear'),
-  // La frase, los valores, el CTA y el pie, sobre la misma noche.
-  parada(1, NIVEL_DE_LA_NOCHE, 7700, 138, 'linear'),
+  // [FINAL 2] · EL DÍA DEL FINAL: la luz del hero —nivel 1, 6500 K, azimut −42—, puesta
+  // mientras Servicios y Tu panel tapan la sala (la escena no dibuja entre 0,625 y 0,7375).
+  // La cámara del final mira desde el mismo azimut que el hero, así que la sala se ve como
+  // en el hero. Que la noche disparada no la tape lo decide `nocheDisparada.ts`.
+  parada(AMANECER.hasta, 1, 6500, -42, 'linear'),
+  // La frase, los valores, el CTA y el pie, sobre el mismo día.
+  parada(1, 1, 6500, -42, 'linear'),
 ]

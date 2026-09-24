@@ -251,8 +251,8 @@ afirmar(FUENTE_REVELADO.includes("mask-image"), 'lo único que escribe es `mask-
 
 afirmar(FUENTE_ESCENA.includes("import { aplicarRevelado } from './revelado'"), 'EscenaDelHome importa `aplicarRevelado`')
 afirmar(
-  FUENTE_ESCENA.includes('aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro)'),
-  'y lo llama GATEADO: sólo con la escena en cuadro y el intro sin retener — la MISMA retención que la pose',
+  FUENTE_ESCENA.includes("aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro && faseRef.current === 'corriendo')"),
+  'y lo llama GATEADO: sólo con la escena en cuadro y el intro sin retener — la MISMA retención que la pose —, y [FINAL 2] con la escena ya corriendo: al reanudar no descubre el cuadro viejo que el canvas guardó',
 )
 // El revelado va DESPUÉS de escribir el progreso: no puede alterarlo.
 const posProgreso = FUENTE_ESCENA.indexOf("rig.set('progress'")

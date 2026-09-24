@@ -4,6 +4,7 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
+import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
@@ -138,6 +139,9 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
   )
 }
 
+/** Dos renglones en el lugar que queda entre el logo y su sombra: nunca más grande que el `titulo-xl` fluido. */
+const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)/2.3))]'
+
 function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
   const frase = useTramo(pin, VENTANA_DEL_CTA)
   const destacado = useTramo(pin, VENTANA_DEL_DESTACADO)
@@ -146,26 +150,27 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
   return (
     <motion.div
       data-pieza="cta-del-final"
-      className="absolute inset-0 flex flex-col items-center justify-center gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] text-center"
+      // [FINAL 2] Debajo del logo: de día el logo es negro y encima no se leía.
+      className="absolute inset-x-0 top-[var(--arriba-del-cta)] flex flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
       style={{ pointerEvents }}
     >
-      <div className="flex flex-col items-center">
-        <CanalDeUnaPieza progreso={frase} patron="P5">
-          <Titular nivel="titulo-xl" como="p">
-            {CTA.frase}
-          </Titular>
-        </CanalDeUnaPieza>
-        {/* Destacado por el peso, como el «let's create it» de nk: sobre el logo gris un gris
-            de tinta media no llegaba a leerse. */}
+      <CanalDeUnaPieza progreso={frase} patron="P5">
+        <Titular nivel="titulo-xl" como="p" className={TAMANO_DEL_CTA}>
+          {CTA.frase}
+        </Titular>
+      </CanalDeUnaPieza>
+      {/* El botón al lado del destacado: abajo, en el piso, está la sombra de contacto del logo. */}
+      <div className="flex items-baseline justify-center gap-[var(--spacing-8)]">
+        {/* Destacado por el peso, como el «let's create it» de nk. */}
         <CanalDeUnaPieza progreso={destacado} patron="P5">
-          <Titular nivel="titulo-xl" como="p" peso="fuerte">
+          <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
             {CTA.destacado}
           </Titular>
         </CanalDeUnaPieza>
+        <CanalDeUnaPieza progreso={destacado} patron="P5">
+          <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
+        </CanalDeUnaPieza>
       </div>
-      <CanalDeUnaPieza progreso={destacado} patron="P5">
-        <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
-      </CanalDeUnaPieza>
     </motion.div>
   )
 }
@@ -197,14 +202,13 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           {VALORES.map((valor) => (
             <li key={valor.clave}>
               <Llega>
-                <PiezaDeValor valor={valor} lineaPlena />
+                <PiezaDeValor valor={valor} />
               </Llega>
             </li>
           ))}
         </ul>
         <div data-pieza="cta-del-final" className="flex flex-col items-start gap-[var(--spacing-8)]">
           <Llega>
-            {/* A tinta plena y el destacado por el peso, como en el escenario: acá el texto se apoya sobre el logo gris. */}
             <Titular nivel="titulo-xl" como="p">
               {CTA.frase}
             </Titular>
@@ -213,7 +217,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
             </Titular>
           </Llega>
           <Llega>
-            <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
+            <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
           </Llega>
         </div>
       </CoreografiaEnTodoAncho>
@@ -226,7 +230,8 @@ function Llega({ children }: { readonly children: React.ReactNode }): React.JSX.
   return (
     <Bloque patron="P5" rango="ventana-visible">
       {(progreso) => (
-        <CanalDeUnaPieza progreso={progreso} patron="P5">
+        // [FINAL 2] La mezcla va en el canal, que es el que se transforma: en un ancestro cortaría la cadena.
+        <CanalDeUnaPieza progreso={progreso} patron="P5" className={MEZCLA_SOBRE_LA_ESCENA}>
           {children}
         </CanalDeUnaPieza>
       )}

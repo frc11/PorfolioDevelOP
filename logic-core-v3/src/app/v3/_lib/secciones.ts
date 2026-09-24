@@ -566,14 +566,15 @@ export const SECCIONES: readonly Seccion[] = [
   /**
    * POR QUÉ develOP — **[FINAL]** el escenario de los tres primeros tiempos del final
    * (frase, valores, CTA; `escena/finalDelRecorrido.ts`). Cuatro pantallas con el
-   * escenario clavado desde escritorio; abajo de 1024 mide su contenido. La sala está de
-   * noche, así que la tinta es la clara (`oscuro-transparente`).
+   * escenario clavado desde escritorio; abajo de 1024 mide su contenido. **[FINAL 2]** La
+   * sala vuelve a ser de día (`nocheDisparada.ts`, el día del final), así que la tinta es
+   * la oscura (`papel-transparente`).
    */
   {
     id: 'por-que-develop',
     numero: '07',
     nombre: 'Por qué develOP',
-    superficie: 'oscuro-transparente',
+    superficie: 'papel-transparente',
     alto: altoDeSecuenciaPinneada(PANTALLAS_DE_POR_QUE_DEVELOP),
     altoAngosto: 'contenido',
   },
@@ -652,8 +653,8 @@ export const SECCIONES: readonly Seccion[] = [
    * tinta al 0,6), no «la superficie». El resto de la resolución está en
    * `_estilos/pie.css` y en el reporte de B12.
    */
-  // [FINAL] el pie se arma alrededor del logo sobre la sala de noche: tinta clara.
-  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-transparente', alto: '100svh' },
+  // [FINAL 2] el pie se arma alrededor del logo sobre la sala de día: tinta oscura, como en B12.
+  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'papel-transparente', alto: '100svh' },
 ]
 
 /**

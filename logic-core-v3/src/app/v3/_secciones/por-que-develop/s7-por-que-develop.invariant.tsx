@@ -108,13 +108,16 @@ afirmar(huecoB > huecoA && huecoA > 25, `el hueco que el logo deja sale de la po
 afirmarIgual((FUENTE.match(/className="@container /g) ?? []).length, 2, '  cada columna de valores es un contenedor: en una angosta (159 px a 1024×768) el aire se achica y la columna no se desborda')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Abajo de 1024 el texto se apoya sobre el logo gris: tinta plena')
+titulo('5 · [FINAL 2] De día: tinta oscura heredada, y abajo de 1024 la mezcla de la casa')
 
-// Medido a 375 y 768 (fase 5): `tinta-media` sobre el logo de la noche da 2,31:1; la plena, 5,12:1 o más.
-const sinTintaMedia = (html: string): boolean => !/text-tinta-media/.test(html)
-afirmar(sinTintaMedia(quieto), 'la lista va entera a tinta plena: las seis líneas y la frase del CTA')
-afirmar(!sinTintaMedia(movido), '  el escenario conserva la línea en tinta media: ahí se apoya al costado del logo, sobre la sala')
-controlPositivo('  el chequeo vería una línea en tinta media', pieza, sinTintaMedia)
-afirmar(!/mix-blend/.test(quieto), '  y sin la mezcla de «Quiénes somos»: en la superficie invertida su tinta es casi negra y la diferencia contra la sala da negro sobre negro')
+// Ninguna pieza fija su color: hereda la tinta de la sección (oscura y plena) o, bajo la mezcla, la del papel.
+const sinColorPropio = (html: string): boolean => !/text-tinta(-media|-tenue)?\b/.test(html)
+afirmar(sinColorPropio(pieza), 'la pieza de valor no fija color: ni el ícono ni la línea (la línea en tinta media no pasaba AA sobre las sombras de la celosía)')
+controlPositivo('  el chequeo vería una línea en tinta media', '<p class="text-tinta-media">Sin plantillas</p>', sinColorPropio)
+const mezclados = (html: string): number => (html.match(/max-escritorio:mix-blend-difference/g) ?? []).length
+afirmar(mezclados(quieto) >= 9, `la lista (la rama de abajo de 1024) mezcla ${String(mezclados(quieto))} piezas: la frase, los seis valores, el CTA y su botón`)
+afirmar(/data-pieza="cta"[^>]*data-mezcla/.test(quieto) || /data-mezcla[^>]*data-pieza="cta"/.test(quieto), '  y el botón pide la tinta del papel (`data-mezcla`), como el del hero')
+afirmarIgual(mezclados(movido), 0, 'el escenario (desde 1024) no mezcla: ahí el texto va al costado del logo, sobre la sala clara')
+controlPositivo('  el conteo vería una lista sin mezcla', '<div class="flex">Seis razones</div>', (html: string) => mezclados(html) >= 9)
 
 cerrar('s7-por-que-develop.invariant')

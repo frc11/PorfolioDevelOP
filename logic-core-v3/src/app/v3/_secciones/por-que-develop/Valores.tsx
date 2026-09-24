@@ -24,25 +24,22 @@ export const ICONOS: Readonly<Record<IconoDeValor, LucideIcon>> = {
   personas: MessagesSquare,
 }
 
-/** Un valor: ícono, título y línea. El ícono es decoración: el título ya dice qué es. */
-export function PiezaDeValor({
-  valor,
-  className,
-  lineaPlena = false,
-}: {
-  readonly valor: Valor
-  readonly className?: string
-  /** La línea a tinta plena: sobre el logo gris de la noche, `tinta-media` da 2,31:1 y sólo la plena pasa AA. */
-  readonly lineaPlena?: boolean
-}): React.JSX.Element {
+/**
+ * Un valor: ícono, título y línea. El ícono es decoración: el título ya dice qué es.
+ *
+ * **[FINAL 2]** Sin un solo color propio: todo hereda la tinta de la sección. En el escenario
+ * es la oscura y plena —la línea en `tinta-media` daba 2,98–4,44:1 sobre las sombras de la
+ * celosía, a 1440 y a 1024—, y abajo de 1024 es la del papel que usa la mezcla.
+ */
+export function PiezaDeValor({ valor, className }: { readonly valor: Valor; readonly className?: string }): React.JSX.Element {
   const Icono = ICONOS[valor.clave]
   return (
     <div data-pieza="valor" data-valor={valor.clave} className={`flex flex-col gap-[var(--spacing-2)] ${className ?? ''}`}>
-      <Icono aria-hidden="true" strokeWidth={1.5} className="text-tinta size-[var(--spacing-6)] shrink-0" />
+      <Icono aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-6)] shrink-0" />
       <Titular nivel="titulo-s" como="h3">
         {valor.titulo}
       </Titular>
-      <Cuerpo como="p" className={lineaPlena ? undefined : 'text-tinta-media'}>
+      <Cuerpo como="p">
         {valor.linea}
       </Cuerpo>
     </div>

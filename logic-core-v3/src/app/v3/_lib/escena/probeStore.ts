@@ -222,8 +222,7 @@ export type SliderSpec = {
 export const PROBE_RANGES: { readonly [K in ProbeParamKey]: ProbeRange } = {
   angleDeg: { min: 0, max: 360, step: 0.5 },
   height: { min: -3.9, max: 9, step: 0.05 },
-  // SPRINT FINAL: hasta 40, la pose del pie (el logo al 19 % del cuadro, como el de nk).
-  distance: { min: 6, max: 40, step: 0.1 },
+  distance: { min: 6, max: 40, step: 0.1 }, // SPRINT FINAL: hasta 40, la pose del pie.
   frameX: { min: -1, max: 1, step: 0.01 },
   frameY: { min: -1, max: 1, step: 0.01 },
   keyIntensity: { min: 0, max: 9, step: 0.05 },

@@ -84,3 +84,13 @@ export const AIRE_DEL_LOGO_SVH = 3
 export function huecoDelLogo(distancia: number): number {
   return Math.round((ANCHO_DEL_LOGO_POR_DISTANCIA / distancia / 2) * 1000) / 10 + AIRE_DEL_LOGO_SVH
 }
+
+/**
+ * **[FINAL 2]** Dónde termina el logo por abajo, en `svh` desde arriba del cuadro, de frente y
+ * centrado. Medido en C (a 16): del 26 % al 74 % del alto en 1024×768, 1280×720, 1440×900 y
+ * 1920×1080 —el campo es vertical, así que no depende del ancho—: `0,48 × 16 = 7,68`.
+ */
+const ALTO_DEL_LOGO_POR_DISTANCIA = 7.68
+export function pieDelLogo(distancia: number): number {
+  return 50 + Math.round((ALTO_DEL_LOGO_POR_DISTANCIA / distancia / 2) * 1000) / 10
+}

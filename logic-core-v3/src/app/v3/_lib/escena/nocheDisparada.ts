@@ -68,8 +68,87 @@ export const NOCHE_DISPARADA = { cantidad: 0 }
  * Sigue sin poder aclarar nada: el extremo al que tiende es el `min`.
  */
 export function nivelConLaNocheDisparada(nivel: number): number {
-  const c = NOCHE_DISPARADA.cantidad
+  const c = nocheEfectiva()
   if (c <= 0) return nivel
   const tope = nivel > NIVEL_DE_LA_NOCHE ? NIVEL_DE_LA_NOCHE : nivel
   return c >= 1 ? tope : nivel + (tope - nivel) * c
+}
+
+/**
+ * **[FINAL 2] EL DÍA DEL FINAL** — de «Por qué develOP» al pie la sala vuelve a ser de día,
+ * y la noche disparada deja de regir. No es un segundo sistema de color: es una compuerta
+ * sobre la MISMA cantidad, que la gota sigue escribiendo como siempre.
+ *
+ * El cambio se esconde detrás del bloque opaco que forman Servicios y Tu panel (los dos
+ * `papel-opaco`, contiguos): rige desde que el MEDIO del bloque pasa el medio del cuadro.
+ * Ese punto cae con el bloque tapando el cuadro entero en todos los anchos, así que el
+ * cambio no se ve bajando ni subiendo. Y como es una función de la posición y no de la
+ * historia, un salto de scroll (Fin, Inicio, el menú) cae siempre del lado correcto.
+ *
+ * La escribe la atadura al scroll en el mismo cuadro en que escribe el progreso; la lee
+ * el rig a través de `nocheEfectiva`.
+ */
+export const DIA_DEL_FINAL = { activo: false }
+
+/** La noche que la sala muestra: la cantidad de la gota, salvo en el día del final. */
+export function nocheEfectiva(): number {
+  return DIA_DEL_FINAL.activo ? 0 : NOCHE_DISPARADA.cantidad
+}
+
+/** Una caja en coordenadas del cuadro. */
+export interface CajaEnElCuadro {
+  readonly tope: number
+  readonly pie: number
+}
+
+/** El bloque opaco del final (Servicios arriba, Tu panel abajo) y el alto del cuadro. */
+export interface BloqueOpaco {
+  readonly servicios: CajaEnElCuadro
+  readonly tuPanel: CajaEnElCuadro
+  readonly alto: number
+}
+
+/** El bloque tapa el cuadro entero: nada de la sala se ve en ninguna fila. */
+export function bloqueTapaElCuadro(b: BloqueOpaco): boolean {
+  return b.servicios.tope <= 0 && b.tuPanel.pie >= b.alto && b.servicios.pie >= b.tuPanel.tope - 1
+}
+
+/** ¿Rige el día del final en esta posición? Arriba del bloque no; abajo sí; tapado, el medio. */
+export function diaDelFinalEn(b: BloqueOpaco): boolean {
+  if (b.servicios.tope > 0) return false
+  if (b.tuPanel.pie < b.alto) return true
+  return (b.servicios.tope + b.tuPanel.pie) / 2 < b.alto / 2
+}
+
+/**
+ * La noche que corresponde tapada, en la mitad de arriba del bloque: la de abajo del tramo
+ * de Trabajos, que es 1 —la misma regla con que la gota se restaura al montarse—. Sólo se
+ * repone ahí, donde no se ve; así demos vuelve a verse de noche aunque se haya llegado al
+ * final con un salto que pasó por encima del disparo.
+ */
+export function nocheQueSeRepone(b: BloqueOpaco, cantidad: number): number | null {
+  return bloqueTapaElCuadro(b) && !diaDelFinalEn(b) && cantidad < 1 ? 1 : null
+}
+
+interface CajaMedible {
+  getBoundingClientRect(): { readonly top: number; readonly bottom: number }
+}
+
+/** Lee el bloque del documento. `null` si falta alguno de los dos paneles. */
+export function medirElBloqueOpaco(
+  documento: { querySelector(selector: string): CajaMedible | null },
+  alto: number,
+): BloqueOpaco | null {
+  const servicios = documento.querySelector('[data-panel="servicios"]')?.getBoundingClientRect()
+  const tuPanel = documento.querySelector('[data-panel="tu-panel"]')?.getBoundingClientRect()
+  if (servicios === undefined || tuPanel === undefined) return null
+  return { servicios: { tope: servicios.top, pie: servicios.bottom }, tuPanel: { tope: tuPanel.top, pie: tuPanel.bottom }, alto }
+}
+
+/** El paso por cuadro: pone la compuerta y, si corresponde, repone la noche escondida. */
+export function aplicarElDiaDelFinal(b: BloqueOpaco | null): void {
+  if (b === null) return
+  DIA_DEL_FINAL.activo = diaDelFinalEn(b)
+  const repuesta = nocheQueSeRepone(b, NOCHE_DISPARADA.cantidad)
+  if (repuesta !== null) NOCHE_DISPARADA.cantidad = repuesta
 }

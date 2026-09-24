@@ -6,6 +6,7 @@ import type { MotionValue } from 'motion/react'
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
 import { Caption, EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
+import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { CanalDePieza } from '../_contrato/canales'
 import {
   COLUMNAS,
@@ -104,7 +105,8 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           patron="P2"
           cantidad={COLUMNAS.length}
           indice={indice}
-          className="flex flex-col gap-[var(--spacing-4)]"
+          // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
+          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`}
         >
           <EtiquetaDeSeccion como="h3" sangria={false}>
             {columna.titulo}

@@ -113,9 +113,9 @@ const TOQUES_EN_ZONA_CERRADA: readonly ToqueDeclarado[] = [
   {
     archivo: 'src/app/probe-escena/_components/choreographyNotes.ts',
     razon:
-      'recibió la declaración del defecto 18 —el recorte por arriba de la pose `demos`—. §6 dice que los comentarios de cada keyframe se editan ahí y no en el array, y `test:s7e-export-sprites` lo hace cumplir byte por byte',
-    marca: /recorte por arriba/,
-    queAfirma: 'la declaración del recorte de `demos` sigue viviendo en el archivo del que el exportador la REGENERA',
+      'recibió la declaración del defecto 18 —el recorte por arriba de la pose `demos`—. §6 dice que los comentarios de cada keyframe se editan ahí y no en el array, y `test:s7e-export-sprites` lo hace cumplir byte por byte. **[FINAL]** la pose íntima se fue con el final (el tramo cierra en la frase, a 20) y con ella el recorte: la nota que la reemplaza lo declara',
+    marca: /pose íntima de V3/,
+    queAfirma: 'la nota que reemplazó a `demos` declara que su pose —y su recorte— se fueron, en el archivo del que el exportador la REGENERA',
   },
 ]
 

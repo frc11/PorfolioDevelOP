@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import {
   getIntroStage,
@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/home-intro/introHandoff'
 
 import { medirLasSecciones } from './extensionDeLasSecciones'
+import { aplicarElDiaDelFinal, medirElBloqueOpaco } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
@@ -15,6 +16,7 @@ import {
   escenaEnCuadro,
   siguiente,
   type EstadoDeLaEscena,
+  type FaseDeLaEscena,
 } from './visibilidad'
 import { createNumericStore, type ProbeRig } from './probeStore'
 
@@ -89,6 +91,13 @@ export function useEscenaAtadaAlScroll(
   reveladoRef: RefObject<HTMLDivElement | null>,
 ): EstadoDeLaEscena {
   const [estado, setEstado] = useState<EstadoDeLaEscena>(ESTADO_INICIAL)
+  // [FINAL 2] La fase, para el revelado; y cuando vuelve a correr, una lectura que descubre la escena ya pintada.
+  const faseRef = useRef<FaseDeLaEscena>(ESTADO_INICIAL.fase)
+  const pedirRef = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    faseRef.current = estado.fase
+    if (estado.fase === 'corriendo') pedirRef.current?.()
+  }, [estado.fase])
 
   useEffect(() => {
     let pedido = 0
@@ -107,6 +116,8 @@ export function useEscenaAtadaAlScroll(
         ? PROGRESO_RETENIDO
         : progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)
       rig.set('progress', progreso)
+      // [FINAL 2] El día del final, con la misma medida y en el mismo cuadro que el progreso.
+      aplicarElDiaDelFinal(medirElBloqueOpaco(document, ventana))
 
       const enCuadro = escenaEnCuadro(
         desplazamiento,
@@ -122,22 +133,31 @@ export function useEscenaAtadaAlScroll(
 
       // B3 · EL REVELADO, de la MISMA lectura de scroll: sólo una máscara CSS en
       // el envoltorio, jamás la pose ni el progreso. Ver `revelado.ts`.
-      aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro)
+      // [FINAL 2] Y sólo con la escena CORRIENDO: al reanudar, el canvas guarda el último cuadro de antes
+      // de suspenderse (con un salto, una pose y una luz que no son las de acá) hasta que vuelve a pintar.
+      aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro && faseRef.current === 'corriendo')
     }
 
     const pedir = (): void => {
       if (pedido === 0) pedido = requestAnimationFrame(leer)
     }
+    pedirRef.current = pedir
 
+    // [FINAL 2] El día del final se escribe también EN el evento: los eventos de scroll se despachan
+    // antes que los cuadros de animación, así que la escena lo ve en el mismo cuadro del salto.
+    const alDesplazar = (): void => {
+      aplicarElDiaDelFinal(medirElBloqueOpaco(document, window.innerHeight))
+      pedir()
+    }
     leer()
-    window.addEventListener('scroll', pedir, { passive: true })
+    window.addEventListener('scroll', alDesplazar, { passive: true })
     window.addEventListener('resize', pedir)
     document.addEventListener('visibilitychange', pedir)
     const desuscribir = subscribeIntroStage(pedir)
 
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
-      window.removeEventListener('scroll', pedir)
+      window.removeEventListener('scroll', alDesplazar)
       window.removeEventListener('resize', pedir)
       document.removeEventListener('visibilitychange', pedir)
       desuscribir()

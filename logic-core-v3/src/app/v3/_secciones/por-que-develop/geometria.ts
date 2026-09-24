@@ -14,7 +14,7 @@
 
 import type { CSSProperties } from 'react'
 
-import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
+import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, huecoDelLogo, pieDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 
 export { huecoDelLogo }
 
@@ -30,8 +30,19 @@ export const SUBIDA_DE_LA_FRASE_SVH = 30
  */
 const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 7
 
-/** Las variables que leen las clases: los huecos del logo en A y en B, y el techo de las columnas. */
+/**
+ * **[FINAL 2]** El CTA va DEBAJO del logo: de día el logo es negro y la tinta también, así
+ * que centrado encima no se leía. Arranca con aire bajo el pie del logo en C (77 svh) y
+ * termina antes de la sombra de contacto del piso, que en C arranca al 90 % del alto: el
+ * tamaño de la letra sale de ese lugar.
+ */
+export const ARRIBA_DEL_CTA_SVH = pieDelLogo(POSES_DEL_FINAL.cta.distance) + AIRE_SVH
+export const ABAJO_DEL_CTA_SVH = 11
+
+/** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
 export const ESTILO_DEL_ESCENARIO = {
+  '--arriba-del-cta': `${ARRIBA_DEL_CTA_SVH.toFixed(1)}svh`,
+  '--lugar-del-cta': `${(100 - ARRIBA_DEL_CTA_SVH - ABAJO_DEL_CTA_SVH).toFixed(1)}svh`,
   '--hueco-de-la-frase': `${huecoDelLogo(POSES_DEL_FINAL.frase.distance).toFixed(1)}svh`,
   '--hueco-de-los-valores': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
   '--arriba-de-los-valores': `${String(ARRIBA_DE_LOS_VALORES_SVH)}svh`,

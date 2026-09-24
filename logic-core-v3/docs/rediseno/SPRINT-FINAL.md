@@ -226,3 +226,39 @@ el pie sube; E se sostiene hasta el final.
 | C · CTA | 74 %, sube a frontal | a 16: 47 %, sube a frontal |
 | D · alejamiento | ×3,9 en 0,056 pantallas | ×2,5 en 0,25 pantallas: 12,06 alturas de cuadro por pantalla, 3,53 veces el arranque |
 | E · pie | 19 %, centrada | a 40: 19 %, centrado |
+
+## FINAL 2 — La escena vuelve a ser de día desde «Por qué develOP»
+
+Corrección del planificador: el final no va de noche, va de DÍA, como el hero.
+
+- [x] **La sala de día**: el arco termina en la luz del hero (nivel 1, 6500 K, azimut −42),
+  puesta escondida entre 0,625 y 0,7375 (`lightArc.ts`); las dos secciones vuelven a
+  `papel-transparente` (tinta oscura).
+- [x] **El cambio no se ve**: la noche disparada de la gota (`NOCHE_DISPARADA.cantidad`) deja de
+  regir con una compuerta sobre la MISMA cantidad (`DIA_DEL_FINAL`, `nocheDisparada.ts`): rige
+  desde que el medio del bloque opaco Servicios + Tu panel pasa el medio del cuadro. Es función
+  de la geometría, no de la historia, así que un salto cae del lado correcto. Tapada, en la
+  mitad de arriba, la noche se repone a 1 si un salto pasó por encima de la gota: demos vuelve
+  a verse de noche. Se escribe en el evento `scroll` (antes que los cuadros de animación) y en
+  la lectura por cuadro. La banda de la gota no corre en esta frontera (sus entradas «por
+  abajo» son `nada`).
+- [x] **El revelado espera a que la escena corra**: al reanudar, el canvas guardaba el último
+  cuadro de antes de suspenderse (con un salto, otra pose y otra luz); ahora la sala se descubre
+  cuando la máquina de visibilidad vuelve a `corriendo`.
+- [x] **C, de día**: el logo negro con la tinta negra encima no se leía. El CTA baja a los
+  19 svh que quedan bajo el logo (el logo en C ocupa del 26 % al 74 % del alto, medido en cuatro
+  ventanas), con el botón al lado del destacado —abajo está la sombra de contacto del piso— y la
+  letra calculada contra ese lugar.
+- [x] **Contraste AA de día, medido** (fondo desfavorable: percentil 10 para la tinta oscura, a
+  1440, 1024, 1920 y 1280×720): la frase, los títulos, el CTA y el botón pasan; las líneas de los
+  valores en `tinta-media` no pasaban sobre las sombras de la celosía (2,98–4,44:1) y ahora
+  heredan la tinta plena.
+- [x] **Abajo de 1024, la mezcla de la casa** en lugar de la tinta plena: en el canal de cada
+  llegada de «Por qué develOP» (9 piezas) y del pie (isotipo, identidad y columnas; la fila de
+  abajo no, porque lleva el acento de la marca y en reposo no pisa el logo). Los enlaces del pie
+  toman la tinta del papel en `banda.css`. `s7-mezcla` suma las cadenas del final (116, verde).
+- [x] Invariantes: `s24-dia` nuevo (26 afirmaciones, 5 controles: la compuerta en el borde, un
+  cuadro tarde, sin reposición, la entrada que sí corre la banda, la compuerta con memoria);
+  `s23-final` §2 reescrita (la sala de día al reanudar y al asomar); `s7-por-que-develop` §5,
+  `s17-revelado`, `s11-frontera` (el recorte de `demos` se fue con su pose) y `s8-montaje`
+  (`probeStore.ts` en su línea de base) al día.

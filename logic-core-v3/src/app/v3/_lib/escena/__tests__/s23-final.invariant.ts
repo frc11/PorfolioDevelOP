@@ -1,5 +1,5 @@
 /**
- * s23 · EL FINAL DEL RECORRIDO — el corte recto, el logo claro en el primer cuadro, la
+ * s23 · EL FINAL DEL RECORRIDO — el corte recto, la sala de día en el primer cuadro, la
  * excepción D al techo de velocidad y la ida y vuelta de A a E. **[FINAL]**
  *
  * Todo sale de los datos reales —la coreografía, el anclaje, el arco y el revelado— y
@@ -14,7 +14,8 @@ import { sampleLightArc } from '../choreographySampler'
 import { ANCLAJE } from '../anclaje'
 import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelFinal } from '../finalDelRecorrido'
 import { NIVEL_DE_LA_NOCHE } from '../lightArc'
-import { EMISION_EN_LA_NOCHE, emisionDelLogoEn } from '../logoEmision'
+import { emisionDelLogoEn } from '../logoEmision'
+import { DIA_DEL_FINAL, NOCHE_DISPARADA, nivelConLaNocheDisparada } from '../nocheDisparada'
 import { RAMPA_DE_LA_ENTRADA_PX, REVELADO_FRACCION, maskDeRevelado } from '../revelado'
 import { RITMO_POR_SEGMENTO, progresoDePantalla } from '../recorrido'
 import { MARGEN_DE_REANUDACION } from '../visibilidad'
@@ -32,28 +33,35 @@ afirmar(RAMPA_DE_LA_ENTRADA_PX === 0 && corteRecto(ENTRA, 600), 'la costura dond
 controlPositivo('  el chequeo vería la rampa de 0,125 de antes', maskDeRevelado([{ row: 600, tipo: 'sale' }], 900, 900 * REVELADO_FRACCION), (m: string | null) => corteRecto(m, 600))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El logo ya está claro en el primer cuadro en que se ve la escena')
+titulo('2 · [FINAL 2] La sala ya está de día en el primer cuadro en que se ve la escena')
 
 const geo = ANCLAJE.geometria.find((g) => g.id === 'por-que-develop')
 if (geo === undefined) throw new Error('falta por-que-develop en el anclaje')
 /** Donde la sección asoma por el pie del cuadro, y donde la escena reanuda (un margen antes). */
 const ASOMA = progresoDePantalla(geo.desdePantalla - 1)
 const REANUDA = progresoDePantalla(geo.desdePantalla - 1 - MARGEN_DE_REANUDACION)
+/** El nivel que ve la sala: el arco con la noche disparada encima, con la gota en 1 y el día del final puesto. */
 const nivelEn = (p: number, arco: (p: number, out: MutableLightLevels) => void = sampleLightArc): number => {
   const out = { level: 0, kelvin: 0, azimuthDeg: 0, elevationDeg: 0 } as MutableLightLevels
   arco(p, out)
-  return out.level
+  const [cantidad, activo] = [NOCHE_DISPARADA.cantidad, DIA_DEL_FINAL.activo]
+  NOCHE_DISPARADA.cantidad = 1
+  DIA_DEL_FINAL.activo = true
+  const nivel = nivelConLaNocheDisparada(out.level)
+  NOCHE_DISPARADA.cantidad = cantidad
+  DIA_DEL_FINAL.activo = activo
+  return nivel
 }
-const claroEn = (p: number, arco?: (p: number, out: MutableLightLevels) => void): boolean => nivelEn(p, arco) <= NIVEL_DE_LA_NOCHE + 1e-9 && emisionDelLogoEn(nivelEn(p, arco)) >= EMISION_EN_LA_NOCHE - 1e-9
-afirmar(claroEn(REANUDA) && claroEn(ASOMA), `cuando la escena reanuda (p ${REANUDA.toFixed(4)}) y cuando la sección asoma (p ${ASOMA.toFixed(4)}) el arco está en la noche y el logo emite entero`, `nivel ${nivelEn(ASOMA).toFixed(3)} · emisión ${emisionDelLogoEn(nivelEn(ASOMA)).toFixed(3)} de ${String(EMISION_EN_LA_NOCHE)}`)
+const deDiaEn = (p: number, arco?: (p: number, out: MutableLightLevels) => void): boolean => nivelEn(p, arco) >= 1 - 1e-9 && emisionDelLogoEn(nivelEn(p, arco)) === 0
+afirmar(deDiaEn(REANUDA) && deDiaEn(ASOMA), `cuando la escena reanuda (p ${REANUDA.toFixed(4)}) y cuando la sección asoma (p ${ASOMA.toFixed(4)}) la sala está a la luz del hero y el logo no emite: es oscuro`, `nivel ${nivelEn(ASOMA).toFixed(3)} · emisión ${emisionDelLogoEn(nivelEn(ASOMA)).toFixed(3)}`)
 let quieto = true
-for (let p = REANUDA; p <= 1; p += 1e-4) if (!claroEn(p)) quieto = false
-afirmar(quieto, '  y lo sigue estando hasta el final: el cambio a claro pasó entero ANTES, mientras Tu Panel tapaba la sala')
-// El arco de antes: amanecía escondido y llegaba a la mañana (0,643) en el ancla.
-const ARCO_DE_ANTES = (p: number, out: MutableLightLevels): void => {
-  out.level = p < 0.7375 ? 0.34 : 0.5 + ((0.643 - 0.5) * Math.min(1, (p - 0.7375) / (0.8525 - 0.7375)))
+for (let p = REANUDA; p <= 1; p += 1e-4) if (!deDiaEn(p)) quieto = false
+afirmar(quieto, '  y lo sigue estando hasta el final: el arco llegó al día entero ANTES, mientras Servicios y Tu panel tapaban la sala')
+// El arco del sprint anterior: volvía a la noche escondido y se quedaba ahí.
+const ARCO_DE_LA_NOCHE = (p: number, out: MutableLightLevels): void => {
+  out.level = p < 0.7375 ? 0.34 : NIVEL_DE_LA_NOCHE
 }
-controlPositivo('  el chequeo vería el arco de antes, que amanecía y dejaba el logo gris', ARCO_DE_ANTES, (arco: (p: number, out: MutableLightLevels) => void) => claroEn(ASOMA, arco))
+controlPositivo('  el chequeo vería el arco de la noche del sprint anterior, que dejaba el logo claro', ARCO_DE_LA_NOCHE, (arco: (p: number, out: MutableLightLevels) => void) => deDiaEn(ASOMA, arco))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El techo: el arranque sigue siendo lo más rápido, salvo el alejamiento D')

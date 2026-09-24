@@ -191,13 +191,11 @@ export const ARCHIVO_EXCEPTUADO_DEL_ESCANEO = `${CARPETA_DE_INVARIANTES}/soporte
 export const SUPERFICIE_ACORDADA: Readonly<Record<string, string>> = {
   servicios: 'papel-opaco',
   'tu-panel': 'papel-opaco',
-  // SPRINT FINAL: las dos del final van sobre la sala de NOCHE (el arco vuelve a la noche
-  // escondido detrás de Tu panel), así que la tinta es la clara.
-  'por-que-develop': 'oscuro-transparente',
+  'por-que-develop': 'papel-transparente',
   // B6-A abrió el Cierre (con velo); B8 le sacó el velo; **B12 le dio vuelta la
   // tinta**: sin el relleno del pie la sala al final es CLARA (gris 145,5) y la
   // tinta clara rompía 24 de 24 bloques contra 12 de 24 de la oscura.
-  cierre: 'oscuro-transparente',
+  cierre: 'papel-transparente',
 }
 
 export const PROHIBIDOS_EN_EL_LANE: readonly (readonly [string, RegExp])[] = [
