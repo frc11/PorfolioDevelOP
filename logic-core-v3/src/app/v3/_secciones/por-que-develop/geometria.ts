@@ -62,20 +62,22 @@ export interface Ventana {
 export const VENTANA_DE_LA_FRASE: Ventana = { desde: progresoDelPin(0), hasta: progresoDelPin(0.45) }
 
 /**
- * Los valores entran de a pares —izquierda y derecha a la vez, de arriba abajo— mientras
- * la cámara baja a B. Cada par arranca un tercio de pantalla después del anterior.
+ * Los valores entran de a pares —izquierda y derecha a la vez— mientras la cámara baja a B.
+ * **[BASE]** De ABAJO hacia arriba, porque suben: primero la fila de abajo, al final la de
+ * arriba (y subiendo, al revés, porque todo está atado al scroll). Abajo de 1024 la lista
+ * no usa esto: llega de arriba abajo, cada pieza sobre su ventana visible.
  */
 const LLEGADA_DE_LOS_VALORES = frase.hasta + 0.2
 const PASO_ENTRE_PARES = 0.3
 const DURACION_DE_UN_VALOR = 0.4
 export function ventanaDelValor(indice: number): Ventana {
-  const fila = indice % 3
+  const fila = 2 - (indice % 3)
   const desde = LLEGADA_DE_LOS_VALORES + fila * PASO_ENTRE_PARES
   return { desde: progresoDelPin(desde), hasta: progresoDelPin(desde + DURACION_DE_UN_VALOR) }
 }
 
-/** La frase sube mientras entran los valores: del primer par al último. */
-export const VENTANA_DE_LA_SUBIDA_DE_LA_FRASE: Ventana = { desde: ventanaDelValor(0).desde, hasta: ventanaDelValor(2).hasta }
+/** [BASE] La frase sube ANTES de que llegue el primer valor: ningún valor comparte altura con ella mientras llega. */
+export const VENTANA_DE_LA_SUBIDA_DE_LA_FRASE: Ventana = { desde: progresoDelPin(frase.hasta), hasta: ventanaDelValor(2).desde }
 /** La frase y los valores se levantan juntos cuando la cámara empieza a subir a C. */
 export const VENTANA_DE_LA_LEVANTADA: Ventana = { desde: progresoDelPin(valores.hasta), hasta: progresoDelPin(valores.hasta + 0.4) }
 

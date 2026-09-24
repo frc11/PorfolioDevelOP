@@ -25,6 +25,7 @@ import {
   VENTANA_DEL_DESTACADO,
   VENTANA_DE_LA_FRASE,
   VENTANA_DE_LA_LEVANTADA,
+  VENTANA_DE_LA_SUBIDA_DE_LA_FRASE,
   huecoDelLogo,
   ventanaDelValor,
 } from './geometria'
@@ -97,7 +98,15 @@ afirmar(
     VALORES.every((_, i) => ventanaDelValor(i).hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta)),
   '  los valores entran mientras la cámara baja a B y están puestos cuando llega',
 )
-afirmar(ventanaDelValor(1).desde > ventanaDelValor(0).desde && ventanaDelValor(3).desde === ventanaDelValor(0).desde, '  de a pares —izquierda y derecha juntas—, escalonados de arriba abajo')
+// [BASE] Desde 1024 los valores suben, así que llegan de ABAJO hacia arriba; subiendo, al revés (todo está atado al scroll).
+const deAbajoArriba = (v: (i: number) => { desde: number }): boolean =>
+  [0, 3].every((c) => v(c + 2).desde < v(c + 1).desde && v(c + 1).desde < v(c).desde) && v(3).desde === v(0).desde
+afirmar(deAbajoArriba(ventanaDelValor), '  de a pares —izquierda y derecha juntas—, escalonados de ABAJO hacia arriba: primero «Rápido, sin atajos» y «Hablás con quien lo hace»')
+controlPositivo('  el chequeo vería el orden de antes, de arriba abajo', (i: number) => ({ desde: (i % 3) * 0.1 }), deAbajoArriba)
+afirmar(VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta <= Math.min(...VALORES.map((_, i) => ventanaDelValor(i).desde)), '  y la frase termina de subir ANTES del primer valor: nunca comparten altura mientras llegan')
+// Abajo de 1024 la lista no cambia: los valores en orden de lectura, cada uno sobre su ventana visible (de arriba abajo).
+const enLista = VALORES.map((v) => quieto.indexOf(v.titulo))
+afirmar(enLista.every((x, i) => x > 0 && (i === 0 || x > enLista[i - 1])) && /rango="ventana-visible"/.test(FUENTE), 'abajo de 1024 la lista llega en orden normal, de arriba abajo: orden de lectura y ventana visible')
 afirmar(
   VENTANA_DE_LA_LEVANTADA.desde === progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta) && VENTANA_DEL_DESTACADO.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.cta.llega),
   '  la frase y los valores se levantan cuando la cámara empieza a subir, y el CTA queda armado cuando termina',

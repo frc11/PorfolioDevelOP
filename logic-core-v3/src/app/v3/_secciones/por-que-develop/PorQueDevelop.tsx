@@ -184,9 +184,9 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
           {CTA.destacado}
         </Titular>
       </CanalDeUnaPieza>
-      {/* [FINAL 3] El botón abajo, solo y más grande; su pastilla de papel lo separa de la sombra del piso. */}
+      {/* [BASE] El botón abajo, solo y más grande, sin fondo: sólo el texto y su subrayado, como el resto. */}
       <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-4)]">
-        <div className={`${BOTON_GRANDE} rounded-[var(--radius-pastilla-s)] bg-fondo px-[var(--spacing-6)] py-[var(--spacing-2)]`}>
+        <div className={BOTON_GRANDE}>
           <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
         </div>
       </CanalDeUnaPieza>
