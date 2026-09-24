@@ -25,7 +25,16 @@ export const ICONOS: Readonly<Record<IconoDeValor, LucideIcon>> = {
 }
 
 /** Un valor: ícono, título y línea. El ícono es decoración: el título ya dice qué es. */
-export function PiezaDeValor({ valor, className }: { readonly valor: Valor; readonly className?: string }): React.JSX.Element {
+export function PiezaDeValor({
+  valor,
+  className,
+  lineaPlena = false,
+}: {
+  readonly valor: Valor
+  readonly className?: string
+  /** La línea a tinta plena: sobre el logo gris de la noche, `tinta-media` da 2,31:1 y sólo la plena pasa AA. */
+  readonly lineaPlena?: boolean
+}): React.JSX.Element {
   const Icono = ICONOS[valor.clave]
   return (
     <div data-pieza="valor" data-valor={valor.clave} className={`flex flex-col gap-[var(--spacing-2)] ${className ?? ''}`}>
@@ -33,7 +42,7 @@ export function PiezaDeValor({ valor, className }: { readonly valor: Valor; read
       <Titular nivel="titulo-s" como="h3">
         {valor.titulo}
       </Titular>
-      <Cuerpo como="p" className="text-tinta-media">
+      <Cuerpo como="p" className={lineaPlena ? undefined : 'text-tinta-media'}>
         {valor.linea}
       </Cuerpo>
     </div>

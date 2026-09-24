@@ -105,5 +105,16 @@ afirmar(
 const huecoA = huecoDelLogo(POSES_DEL_FINAL.frase.distance)
 const huecoB = huecoDelLogo(POSES_DEL_FINAL.valores.distance)
 afirmar(huecoB > huecoA && huecoA > 25, `el hueco que el logo deja sale de la pose: ${huecoA.toFixed(1)} svh en A y ${huecoB.toFixed(1)} svh en B, más cerca`)
+afirmarIgual((FUENTE.match(/className="@container /g) ?? []).length, 2, '  cada columna de valores es un contenedor: en una angosta (159 px a 1024×768) el aire se achica y la columna no se desborda')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · Abajo de 1024 el texto se apoya sobre el logo gris: tinta plena')
+
+// Medido a 375 y 768 (fase 5): `tinta-media` sobre el logo de la noche da 2,31:1; la plena, 5,12:1 o más.
+const sinTintaMedia = (html: string): boolean => !/text-tinta-media/.test(html)
+afirmar(sinTintaMedia(quieto), 'la lista va entera a tinta plena: las seis líneas y la frase del CTA')
+afirmar(!sinTintaMedia(movido), '  el escenario conserva la línea en tinta media: ahí se apoya al costado del logo, sobre la sala')
+controlPositivo('  el chequeo vería una línea en tinta media', pieza, sinTintaMedia)
+afirmar(!/mix-blend/.test(quieto), '  y sin la mezcla de «Quiénes somos»: en la superficie invertida su tinta es casi negra y la diferencia contra la sala da negro sobre negro')
 
 cerrar('s7-por-que-develop.invariant')

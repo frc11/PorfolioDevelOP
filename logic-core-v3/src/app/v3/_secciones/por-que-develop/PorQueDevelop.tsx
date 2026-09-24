@@ -56,6 +56,9 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
   )
 }
 
+/** Una columna de valores; en una columna angosta (menos de 16rem) el aire entre valores se achica a la mitad. */
+const CLASE_DE_LA_COLUMNA = 'flex h-full flex-col justify-center gap-[var(--spacing-6)] @max-3xs:gap-[var(--spacing-3)]'
+
 /** El tramo de una ventana del pin, de 0 a 1. */
 function useTramo(pin: MotionValue<number>, v: Ventana): MotionValue<number> {
   return useTransform(pin, [v.desde, v.hasta], [0, 1])
@@ -89,16 +92,21 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           </span>
         </motion.p>
         {/* Los valores: tres a la izquierda del logo y tres a la derecha. */}
-        <ul className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[var(--pad-lateral-compacto)] right-[calc(50%+var(--hueco-de-los-valores))] flex flex-col justify-center gap-[var(--spacing-6)]">
-          {VALORES.slice(0, 3).map((valor, i) => (
-            <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
-          ))}
-        </ul>
-        <ul className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[var(--pad-lateral-compacto)] left-[calc(50%+var(--hueco-de-los-valores))] flex flex-col justify-center gap-[var(--spacing-6)]">
-          {VALORES.slice(3).map((valor, i) => (
-            <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
-          ))}
-        </ul>
+        {/* Cada columna es un contenedor: a 1024×768 mide 159 px y, con el aire de siempre, la de la derecha se desbordaba 41 px. */}
+        <div className="@container absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[var(--pad-lateral-compacto)] right-[calc(50%+var(--hueco-de-los-valores))]">
+          <ul className={CLASE_DE_LA_COLUMNA}>
+            {VALORES.slice(0, 3).map((valor, i) => (
+              <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
+            ))}
+          </ul>
+        </div>
+        <div className="@container absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[var(--pad-lateral-compacto)] left-[calc(50%+var(--hueco-de-los-valores))]">
+          <ul className={CLASE_DE_LA_COLUMNA}>
+            {VALORES.slice(3).map((valor, i) => (
+              <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
+            ))}
+          </ul>
+        </div>
       </motion.div>
       <CtaEnElEscenario pin={pin} />
     </div>
@@ -124,7 +132,7 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
   return (
     <li>
       <CanalDeUnaPieza progreso={tramo} patron="P5">
-        <PiezaDeValor valor={valor} />
+        <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" />
       </CanalDeUnaPieza>
     </li>
   )
@@ -189,17 +197,18 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           {VALORES.map((valor) => (
             <li key={valor.clave}>
               <Llega>
-                <PiezaDeValor valor={valor} />
+                <PiezaDeValor valor={valor} lineaPlena />
               </Llega>
             </li>
           ))}
         </ul>
         <div data-pieza="cta-del-final" className="flex flex-col items-start gap-[var(--spacing-8)]">
           <Llega>
-            <Titular nivel="titulo-xl" como="p" className="text-tinta-media">
+            {/* A tinta plena y el destacado por el peso, como en el escenario: acá el texto se apoya sobre el logo gris. */}
+            <Titular nivel="titulo-xl" como="p">
               {CTA.frase}
             </Titular>
-            <Titular nivel="titulo-xl" como="p">
+            <Titular nivel="titulo-xl" como="p" peso="fuerte">
               {CTA.destacado}
             </Titular>
           </Llega>

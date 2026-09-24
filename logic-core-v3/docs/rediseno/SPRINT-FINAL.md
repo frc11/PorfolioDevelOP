@@ -153,3 +153,30 @@ el pie sube; E se sostiene hasta el final.
 - [x] Invariantes: `s6-cierre` reescrito (20 afirmaciones, 2 controles: una llegada que se pasa
   del final y la caja que estiraba la sección); `s8-chrome` y la lista de quién pide
   coreografía en todo ancho, actualizados.
+
+## Fase 5 — Abajo de 1024
+
+- [x] **La adaptación normal** (la rama de lista, que también es la de menos movimiento en
+  cualquier ancho): la frase en dos renglones, los valores en lista —una columna a 375, dos
+  desde 426, así que a 768 van de a dos—, el CTA y el pie apilado con el logo arriba y sus
+  columnas de a dos desde 768.
+- [x] **Sin coreografía de cámara nueva**: la escena recorre la misma, reescalada por el mapeo
+  proporcional de siempre. Las piezas llegan con el gesto de la casa (P5 sobre su ventana
+  visible), sin parallax.
+- [x] **La regla del blend, y por qué acá no se aplica tal cual.** La premisa «el logo es oscuro»
+  no se cumple en esta banda: de noche el logo es gris (≈ #616161) sobre la sala casi negra y la
+  superficie es la invertida, de tinta clara. La mezcla de la página (tinta del fondo con
+  `difference`, la de «Quiénes somos») pinta acá |sala − 14|, negro sobre negro, y ninguna
+  `difference` pasa AA sobre ese gris (el máximo da 2,09:1, calculado). **Medido a 375:** las
+  seis líneas en `tinta-media` daban 2,31:1 sobre el logo. **Arreglo:** la lista va entera a
+  tinta plena —las líneas y la frase del CTA; el destacado se distingue por el peso, como en el
+  escenario—; el peor texto queda en 5,12:1 a 375 y 5,19:1 a 768, todo AA. `s7-mezcla` sigue en
+  verde (102/102): no se agregó ninguna mezcla ni ningún ancestro que la corte.
+- [x] **1024×768**: la columna derecha de valores se desbordaba 41 px y quedaba a 2 px del borde
+  de abajo (a 4:3 las columnas miden 159 px). Cada columna es ahora un contenedor y, cuando mide
+  menos de 16rem, el aire entre valores y dentro de cada uno se achica a la mitad: entra en su
+  caja (211–742 dentro de 207–745). Medido sin cambios a 1024×640, 1280×720, 1280×800,
+  1440×900 y 1920×1080.
+- [x] Invariantes: `s6-por-que-develop` suma la tinta plena de la lista (con control), la
+  ausencia de mezcla y las columnas contenedor (31 afirmaciones). En verde: s6-render,
+  s7-mezcla, s7-arboles, s5-codigo, s10-acceso; `tsc --noEmit` limpio.
