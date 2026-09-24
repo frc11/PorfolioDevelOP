@@ -176,10 +176,12 @@ export interface SeccionProps {
   readonly seccion: EntradaDeSeccion
   /** Clases de la caja interna. Se suman a las del pinneo. */
   readonly className?: string
+  /** Variables que leen las clases de la sección (MÓVIL 2: el ritmo del túnel de Trabajos). */
+  readonly style?: React.CSSProperties
   readonly children: React.ReactNode
 }
 
-export function Seccion({ seccion, className, children }: SeccionProps): React.JSX.Element {
+export function Seccion({ seccion, className, style, children }: SeccionProps): React.JSX.Element {
   /**
    * ⚠ LA MARCA DE LA SECCIÓN VIAJA EN EL PROPIO ELEMENTO PINNEADO, NO EN UN
    * ENVOLTORIO. Y no es una preferencia de estilo: es la condición de la que
@@ -219,6 +221,7 @@ export function Seccion({ seccion, className, children }: SeccionProps): React.J
           {...{ [ATRIBUTO_DE_SECCION]: seccion.id }}
           data-pinneado={seccion.pinneada}
           className={cn('w-full', clasesDePin, className)}
+          style={style}
         >
           {children}
         </div>
@@ -228,7 +231,7 @@ export function Seccion({ seccion, className, children }: SeccionProps): React.J
 
   return (
     <Panel seccion={seccion}>
-      <div {...{ [ATRIBUTO_DE_SECCION]: seccion.id }} className={cn('w-full', className)}>
+      <div {...{ [ATRIBUTO_DE_SECCION]: seccion.id }} className={cn('w-full', className)} style={style}>
         {children}
       </div>
     </Panel>

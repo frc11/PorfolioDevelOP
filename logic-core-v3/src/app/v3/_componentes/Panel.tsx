@@ -162,6 +162,8 @@ function estiloDelAlto(seccion: Seccion): React.CSSProperties {
     '--solape-del-panel': `${Number((seccion.solape * 100).toFixed(4))}svh`,
     // MÓVIL-TRABAJOS: el alto suma el solape en todo ancho (la tabla cuenta con él); el margen, sólo desde escritorio.
     minHeight: `calc(${seccion.alto} + var(--solape-del-panel))`,
+    // MÓVIL 2: el mismo alto, legible por las clases de adentro (Trabajos le suma el túnel estirado).
+    '--alto-minimo-del-panel': `calc(${seccion.alto} + var(--solape-del-panel))`,
     marginTop: 'calc(-1 * var(--solape-en-uso, 0px))',
   } as React.CSSProperties
 }

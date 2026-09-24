@@ -79,3 +79,36 @@ export function avanzarLaCinta(
   const recorrido = reposo * dtS + (estado.v - reposo) * c * (1 - Math.exp(-Math.max(0, dtS) / c))
   return { x: envolver(estado.x + recorrido, largo), v }
 }
+
+/**
+ * ⚠️ **UNA SOLA FILA PARA LOS DOS RENGLONES — MÓVIL 2.** La posición y la velocidad
+ * son de la fila, no de cada renglón: el de arriba las lee con signo `+1` (corre a la
+ * derecha) y el de abajo con `−1` (a la izquierda). Arrastrar o lanzar cualquiera de
+ * los dos mueve la fila, así que se mueven los dos, como una sola cinta que dobla.
+ */
+export type SentidoDelRenglon = 1 | -1
+
+export interface EstadoDeLaFila {
+  readonly x: number
+  readonly v: number
+}
+
+/** Dónde se ve un renglón: la posición de la fila con su signo, envuelta en su largo. */
+export function posicionDelRenglon(fila: EstadoDeLaFila, sentido: SentidoDelRenglon, largo: number): number {
+  return envolver(sentido * fila.x, largo)
+}
+
+/** La velocidad con la que se VE un renglón. */
+export function velocidadDelRenglon(fila: EstadoDeLaFila, sentido: SentidoDelRenglon): number {
+  return sentido * fila.v
+}
+
+/** Un dedo sobre un renglón arrastra la fila 1:1, con el signo de ese renglón, desde donde estaba al apoyar. */
+export function arrastrarLaFila(xAlApoyar: number, sentido: SentidoDelRenglon, dx: number): EstadoDeLaFila {
+  return { x: xAlApoyar + sentido * dx, v: 0 }
+}
+
+/** Soltar un renglón lanza la fila con la velocidad del dedo, en el signo de ese renglón. */
+export function lanzarLaFila(fila: EstadoDeLaFila, sentido: SentidoDelRenglon, velocidadDelDedo: number): EstadoDeLaFila {
+  return { x: fila.x, v: sentido * velocidadDelDedo }
+}

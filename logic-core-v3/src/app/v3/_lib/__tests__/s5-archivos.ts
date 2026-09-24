@@ -219,6 +219,10 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/Carrusel.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/fisicaDelCarrusel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
+  // MÓVIL 2
+  `${RAIZ_DE_SECCIONES}/trabajos/ritmo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/ritmo-invariante.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/ventana.ts`,
 ]
 
 /**

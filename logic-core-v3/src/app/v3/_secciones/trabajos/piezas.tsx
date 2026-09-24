@@ -16,6 +16,7 @@ import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimient
 import { CONTENIDO } from './contenido'
 import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
+import { ESTILO_DEL_CUERPO_QUE_ESCALA } from './ventana'
 import { DESTINO_DEL_CTA } from './geometria'
 import {
   CLASE_DE_LA_BAJADA_ANGOSTA,
@@ -295,7 +296,8 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
 
 /** Las dos redefiniciones de la caja de «Hablemos». Ver el docblock en el marcado. */
 const ESTILO_DEL_CTA_EN_LA_VENTANA = {
-  '--text-cuerpo': 'var(--text-titulo-m)',
+  // MÓVIL 2: desde 1024 lo achica la ventana (`ventana.ts`); abajo, `titulo-m`.
+  '--text-cuerpo': 'var(--cta-en-uso, var(--text-titulo-m))',
   '--color-tinta': 'var(--color-fondo)',
 } as React.CSSProperties
 
@@ -376,9 +378,10 @@ export function VentanaDelCta({
            */
           /* MÓVIL-TRABAJOS: abajo de 1024 la ventana es un iPad y abajo de 426 un iPhone, y
              entra entera en el alto (`CAJA_DE_LA_VENTANA_ANGOSTA`). */
-          className="absolute top-1/2 left-1/2 aspect-[var(--ventana-relacion)] w-[var(--ventana-ancho)] max-escritorio:aspect-[var(--ventana-relacion-tablet)] max-escritorio:w-[min(var(--ventana-ancho-tablet),calc(var(--ventana-alto-tablet)*var(--ventana-proporcion-tablet)))] max-movil:aspect-[var(--ventana-relacion-movil)] max-movil:w-[min(var(--ventana-ancho-movil),calc(var(--ventana-alto-movil)*var(--ventana-proporcion-movil)))]"
+          className="@container absolute top-1/2 left-1/2 aspect-[var(--ventana-relacion)] w-[var(--ventana-ancho)] escritorio:[--cta-en-uso:min(var(--text-titulo-m),var(--cta-en-la-ventana))] max-escritorio:aspect-[var(--ventana-relacion-tablet)] max-escritorio:w-[min(var(--ventana-ancho-tablet),calc(var(--ventana-alto-tablet)*var(--ventana-proporcion-tablet)))] max-movil:aspect-[var(--ventana-relacion-movil)] max-movil:w-[min(var(--ventana-ancho-movil),calc(var(--ventana-alto-movil)*var(--ventana-proporcion-movil)))]"
           style={{
             ...ESTILO_DE_LA_CAJA_DE_LA_VENTANA,
+            ...ESTILO_DEL_CUERPO_QUE_ESCALA,
             transform: `translate(-50%, -50%) scale(${CONVERSION_DE_LA_CAJA_DEL_CTA.toFixed(5)})`,
           }}
         >
@@ -443,7 +446,7 @@ export function VentanaDelCta({
              * izquierda a derecha, el texto del documento sigue siendo la frase y lo
              * que se ve sigue siendo letra por letra.
              */}
-            <div className="flex flex-1 flex-col justify-center px-8 pb-8 max-movil:px-6 max-movil:pt-8 max-movil:pb-2">
+            <div className="flex flex-1 flex-col justify-center px-8 pb-8 escritorio:pb-[min(calc(var(--spacing)*8),var(--aire-abajo-de-la-ventana))] max-movil:px-6 max-movil:pt-8 max-movil:pb-2">
               {/**
                * ⚠️ **EL CURSOR VA POSICIONADO, NO INTERCALADO.**
                *
@@ -465,7 +468,7 @@ export function VentanaDelCta({
                * un `span` que sigue siendo `inline`, así que no cambia un corte de
                * renglón del cartel.
                */}
-              <Titular nivel="display-xl" como="p" className={`leading-cartel text-left ${CLASE_DE_LA_FRASE_ANGOSTA}`}>
+              <Titular nivel="display-xl" como="p" className={`leading-cartel text-left escritorio:text-[length:min(var(--text-fluido-display-xl),var(--frase-en-la-ventana))] ${CLASE_DE_LA_FRASE_ANGOSTA}`}>
                 <span ref={refFrase} data-pieza="frase-del-cta" className="relative">
                   {palabras.map((palabra, p) => (
                     <Fragment key={`${palabra}-${String(p)}`}>
@@ -502,7 +505,7 @@ export function VentanaDelCta({
                * entera: todo el cuadro sigue siendo el enlace a contacto, sin un
                * ancla adentro de otra.
                */}
-              <div className="flex items-baseline gap-4 pt-12 max-escritorio:flex-wrap max-escritorio:gap-x-4 max-escritorio:gap-y-2 max-movil:pt-8">
+              <div className="flex items-baseline gap-4 pt-12 escritorio:pt-[min(calc(var(--spacing)*12),var(--aire-arriba-del-cta))] max-escritorio:flex-wrap max-escritorio:gap-x-4 max-escritorio:gap-y-2 max-movil:pt-8">
                 <span style={ESTILO_DEL_CTA_EN_LA_VENTANA}>
                   <CtaEnlace
                     href={DESTINO_DEL_CTA}

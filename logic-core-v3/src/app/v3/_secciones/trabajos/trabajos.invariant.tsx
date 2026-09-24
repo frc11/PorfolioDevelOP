@@ -45,6 +45,7 @@ import { CATALOGO_DE_DEMOS as DEMOS } from './demos/catalogo'
 import { afirmarLasDemos } from './demos/demos-invariante'
 import { afirmarLaDireccionDeArte } from './capturas-invariante'
 import { afirmarAbajoDe1024 } from './movil-invariante'
+import { afirmarElRitmo } from './ritmo-invariante'
 
 const seccion = seccionDe('trabajos')
 
@@ -167,8 +168,11 @@ controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un
 // sección es una lista de trabajos, y una lista de trabajos sin las capturas no
 // es la misma información con otro ritmo, es menos.
 // SPRINT DEMOS · más las portadas de las demos: la cinta las lleva dos veces (la copia es decoración).
-// MÓVIL-TRABAJOS: el carrusel de abajo de 1024, en las dos ramas: dos renglones con la lista dos veces.
-const DEL_CARRUSEL = 4 * DEMOS.length
+// MÓVIL-TRABAJOS: el carrusel de abajo de 1024, en las dos ramas, con cada lista dos veces.
+// MÓVIL 2: arriba las ocho (las 4–7 sólo en tablet) y abajo las 4–7 (sólo en el teléfono): 16 + 8.
+const DEL_CARRUSEL = 3 * DEMOS.length
+/** Paradas del carrusel EN EL MARCADO: las ocho de arriba y las cuatro de abajo. Cada ancho muestra ocho. */
+const PARADAS_DEL_CARRUSEL = DEMOS.length + DEMOS.length / 2
 afirmarIgual(veces(quieto, '<img'), 3 + 2 * DEMOS.length + DEL_CARRUSEL, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${2 * DEMOS.length} portadas de la cinta`)
 afirmarIgual(veces(conMotion, '<img'), 3 + DEMOS.length + DEL_CARRUSEL, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto — y el estante, una portada por demo')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
@@ -304,13 +308,13 @@ titulo('16 · Las seis anclas son paradas de teclado de verdad, con su lugar pue
  */
 const DESTINOS_LEGITIMOS = [...PROYECTOS.map((p) => p.enlace), DESTINO_DEL_CTA, ...DEMOS.map((d) => d.url)]
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, 7 + 2 * DEMOS.length, 'abajo de 1025 las siete anclas son paradas de teclado: ninguna se quedó en marca de papel — más una por demo (la copia de la cinta no es parada)')
+afirmarIgual(PARADAS.length, 7 + DEMOS.length + PARADAS_DEL_CARRUSEL, 'abajo de 1025 las siete anclas son paradas de teclado: ninguna se quedó en marca de papel — más una por demo en la cinta y las del carrusel (la copia no es parada; lo que un ancho oculta con display none, tampoco)')
 afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a').map((p) => p.etiqueta), [], '  las siete son anclas —no un `div` con un manejador—, que es lo que las hace parada sin escribir un `tabindex`')
 afirmarIgual(PARADAS.filter((p) => p.destino === null || !DESTINOS_LEGITIMOS.includes(p.destino)).map((p) => p.destino), [], '  las siete llevan a un destino declarado: un ancla sin `href` no es parada, y una URL de otro lado no es de nadie')
 afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y las siete se anuncian con algo: dos van al mismo sitio por proyecto, así que el nombre propio es lo único que las distingue')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
 afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto en toda la rama quieta es la capa del barrido, que es decoración y lo declara')
-afirmarIgual(paradasDeTabulacion(conMotion).length, 7 + 2 * DEMOS.length, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
+afirmarIgual(paradasDeTabulacion(conMotion).length, 7 + DEMOS.length + PARADAS_DEL_CARRUSEL, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
 // El LUGAR, que es la otra mitad: el punto interior del cartel, que es el único
 // cartel— y cada una con su punto interior, desde el marcado y no desde un efecto.
 afirmarIgual(veces(conMotion, 'transform-origin:'), 1, '  UN solo punto interior escrito, y es el del cartel: el túnel crece desde el centro y no necesita ninguno')
@@ -325,5 +329,6 @@ afirmarLasCuatroEntradas()
 afirmarLasDemos()
 afirmarLaDireccionDeArte()
 afirmarAbajoDe1024()
+afirmarElRitmo()
 
 cerrar('trabajos.invariant')

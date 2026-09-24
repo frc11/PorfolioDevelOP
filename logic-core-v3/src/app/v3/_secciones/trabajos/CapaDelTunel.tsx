@@ -10,7 +10,6 @@ import { CapturaPorDispositivo } from './Captura'
 import { estiloDeLaCaja } from './capturas'
 import { CONTENIDO } from './contenido'
 import {
-  BANDA_DEL_EFECTO,
   CAPA_DEL_VACIO,
   MEDIDAS_DE_LAS_CAPTURAS,
   SIZES_DE_LA_CAPTURA,
@@ -22,6 +21,7 @@ import {
 } from './geometria'
 import { VentanaDelCta } from './piezas'
 import { avanzarLoMostrado, reposoEn, type EstadoDelTunelMostrado } from './regulador'
+import { progresoDeLaTabla, ritmoDe } from './ritmo'
 import { pintarElTipeo } from './trabajos-tipeo'
 import {
   ANCHO_CON_EL_ROTULO_ENTERO,
@@ -161,24 +161,10 @@ export function CapaDelTunel({
   /** Los dos tokens del anillo de foco, leídos del tema una vez. */
   const anillo = useRef<{ grosor: number; desplazamiento: number } | null>(null)
 
-  const montarEnvoltorio = useCallback(
-    (i: number) => (el: HTMLDivElement | null) => {
-      envoltorios.current[i] = el
-    },
-    [],
-  )
-  const montarRotulo = useCallback(
-    (i: number) => (el: HTMLDivElement | null) => {
-      rotulos.current[i] = el
-    },
-    [],
-  )
-  const montarAncla = useCallback(
-    (i: number) => (el: HTMLAnchorElement | null) => {
-      anclas.current[i] = el
-    },
-    [],
-  )
+  // Cada llamada ya daba una función nueva por render: el `useCallback` no estabilizaba nada.
+  const montarEnvoltorio = (i: number) => (el: HTMLDivElement | null): void => void (envoltorios.current[i] = el)
+  const montarRotulo = (i: number) => (el: HTMLDivElement | null): void => void (rotulos.current[i] = el)
+  const montarAncla = (i: number) => (el: HTMLAnchorElement | null): void => void (anclas.current[i] = el)
 
   /**
    * Escribe el cuadro entero desde un progreso. Es lo único que toca el DOM.
@@ -261,6 +247,11 @@ export function CapaDelTunel({
 
     let cuadro = 0
     let anterior = 0
+    // MÓVIL 2: abajo de 1024 el CSS estira el túnel y le da el techo angosto (`ritmo.ts`).
+    let ritmo = ritmoDe(caja)
+    const leerElRitmo = (): void => void (ritmo = ritmoDe(caja))
+    /** El progreso de la página en la tabla: con el túnel estirado, el reloj de `ritmo.ts`. */
+    const progresoDeAhora = (): number => progresoDeLaTabla(progreso.get(), ritmo.estiramiento)
     /** Qué tiene el foco adentro del túnel: una captura por su índice, o el CTA. */
     let enfocada: number | 'cta' | null = null
     let frenoHasta = 0
@@ -282,7 +273,7 @@ export function CapaDelTunel({
     }
 
     /** El scroll que el efecto persigue, en px: el de la página, o el piso del foco si es mayor. */
-    const scrollDeAhora = (): number => pxDeLaSeccion(Math.max(progreso.get(), pisoDelFoco()))
+    const scrollDeAhora = (): number => pxDeLaSeccion(Math.max(progresoDeAhora(), pisoDelFoco()))
 
     /** Pinta lo mostrado y lo publica: el cartel lee este mismo valor. */
     const mostrar = (): void => {
@@ -321,8 +312,8 @@ export function CapaDelTunel({
     const paso = (ahora: number): void => {
       const dt = anterior === 0 ? 0 : ahora - anterior
       anterior = ahora
-      const pagina = pxDeLaSeccion(progreso.get())
-      estado.current = avanzarLoMostrado(estado.current, pagina, dt, BANDA_DEL_EFECTO, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
+      const pagina = pxDeLaSeccion(progresoDeAhora())
+      estado.current = avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
       mostrar()
       cuadro = requestAnimationFrame(paso)
     }
@@ -368,11 +359,13 @@ export function CapaDelTunel({
       else frenar()
     })
     observador.observe(panel)
+    window.addEventListener('resize', leerElRitmo)
     caja.addEventListener('focusin', alEntrarElFoco)
     caja.addEventListener('focusout', alSalirElFoco)
 
     return () => {
       observador.disconnect()
+      window.removeEventListener('resize', leerElRitmo)
       caja.removeEventListener('focusin', alEntrarElFoco)
       caja.removeEventListener('focusout', alSalirElFoco)
       if (cuadro !== 0) cancelAnimationFrame(cuadro)

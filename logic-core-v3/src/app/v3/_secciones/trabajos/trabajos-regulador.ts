@@ -292,9 +292,9 @@ export function afirmarElRegulador(cuantas: number): void {
   afirmar(quieto(avanzarLoMostrado(enMarcha, 2700, DT, BANDA_DEL_EFECTO, true)), 'mientras frena, el objetivo y los dos resortes quedan quietos y en reposo —velocidad cero—: al soltar retoman desde ahí y no saltan')
   controlPositivo('  el detector vería un freno que deja correr a los resortes', avanzarLoMostrado(enMarcha, 2700, DT, BANDA_DEL_EFECTO, false), quieto)
   const pasaElFreno = (src: string): boolean =>
-    src.includes('avanzarLoMostrado(estado.current, pagina, dt, BANDA_DEL_EFECTO, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))')
-  afirmar(pasaElFreno(CAPA), '  y el lazo le pasa al regulador el scroll de la página, el freno y el piso del foco, con la banda de la sección')
-  controlPositivo('  el detector vería un lazo que frena fuera del regulador', 'avanzarLoMostrado(estado.current, pagina, dt, BANDA_DEL_EFECTO, false, pxDeLaSeccion(pisoDelFoco()))', pasaElFreno)
+    src.includes('avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))')
+  afirmar(pasaElFreno(CAPA), '  y el lazo le pasa al regulador el scroll de la página, el freno y el piso del foco, con la banda de su ancho')
+  controlPositivo('  el detector vería un lazo que frena fuera del regulador', 'avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, false, pxDeLaSeccion(pisoDelFoco()))', pasaElFreno)
 
   // ── LA HISTÉRESIS DEL CARTEL ────────────────────────────────────────────
   afirmarIgual(

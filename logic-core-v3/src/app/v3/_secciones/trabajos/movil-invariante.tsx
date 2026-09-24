@@ -4,8 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 
+import { CATALOGO_DE_DEMOS } from './demos/catalogo'
+import { demosQueSeVen } from './demos/Carrusel'
 import {
   FISICA_DEL_CARRUSEL,
+  arrastrarLaFila,
+  lanzarLaFila,
+  posicionDelRenglon,
+  velocidadDelRenglon,
   avanzarLaCinta,
   envolver,
   esUnToque,
@@ -86,7 +92,7 @@ export function afirmarAbajoDe1024(): void {
   const CARRUSEL = sinComentarios(leer('demos/Carrusel.tsx'))
   const HOJA = leer('../../_estilos/demos.css')
   afirmar(/\[data-parte="renglon"\]\s*\{[^}]*touch-action:\s*pan-y/.test(HOJA), 'el renglón es `touch-action: pan-y`: el scroll vertical lo hace el navegador')
-  const capturaDentroDeLaIntencion = (fuente: string): boolean => /if \(gesto\.intencion === 'horizontal'\) caja\.setPointerCapture/.test(fuente) && (fuente.match(/setPointerCapture/g) ?? []).length === 1
+  const capturaDentroDeLaIntencion = (fuente: string): boolean => /if \(gesto\.intencion === 'horizontal'\) renglon\.setPointerCapture/.test(fuente) && (fuente.match(/setPointerCapture/g) ?? []).length === 1
   afirmar(capturaDentroDeLaIntencion(CARRUSEL), '  y el carrusel captura el dedo SÓLO después de decidir que el gesto es horizontal')
   controlPositivo(
     'el detector ve un carrusel que captura el dedo al apoyar',
@@ -108,15 +114,40 @@ export function afirmarAbajoDe1024(): void {
   afirmarIgual(velocidadDelGesto(muestras, 450), 1000, 'la velocidad sale de las muestras de la ventana: lo de antes de 80 ms no cuenta')
   afirmarIgual(velocidadDelGesto([{ t: 0, x: 0 }, { t: 10, x: 500 }], 10), TOPE, `  y un tirón queda en el tope de ${String(TOPE)} px/s`)
 
+  // ── MÓVIL 2: CUATRO Y CUATRO, Y UNA SOLA FILA ─────────────────────────
+  const todas = CATALOGO_DE_DEMOS.map((d) => d.slug)
+  const [arriba, abajo] = demosQueSeVen('movil')
+  afirmar(
+    arriba.length === 4 && abajo.length === 4 && arriba.every((d) => !abajo.includes(d)) && [...arriba, ...abajo].join() === todas.join(),
+    `en el teléfono, arriba ${arriba.join(' · ')} y abajo ${abajo.join(' · ')}: cuatro y cuatro, ninguna repetida entre renglones`,
+  )
+  afirmarIgual(demosQueSeVen('tablet'), [todas], '  y en tablet un solo renglón con las ocho')
+  const quieta = { x: 0, v: V0 }
+  const lanzadaAbajo = lanzarLaFila(quieta, -1, 900)
+  afirmar(
+    velocidadDelRenglon(lanzadaAbajo, -1) === 900 && velocidadDelRenglon(lanzadaAbajo, 1) === -900 && velocidadDelRenglon(quieta, 1) === V0,
+    `un lanzamiento de 900 px/s sobre el renglón de abajo cambia la velocidad del de arriba: de ${String(V0)} a ${String(velocidadDelRenglon(lanzadaAbajo, 1))} px/s`,
+  )
+  let sueltos = lanzadaAbajo
+  for (let k = 0; k < 8 * 60; k += 1) sueltos = avanzarLaCinta(sueltos, V0, 1 / 60, 1e9)
+  afirmar(Math.abs(velocidadDelRenglon(sueltos, 1) - V0) < 0.1 && Math.abs(velocidadDelRenglon(sueltos, -1) + V0) < 0.1, '  y los dos vuelven juntos a su ritmo: arriba a la derecha y abajo a la izquierda', `${velocidadDelRenglon(sueltos, 1).toFixed(2)} · ${velocidadDelRenglon(sueltos, -1).toFixed(2)} px/s`)
+  const arrastrada = arrastrarLaFila(0, 1, 50)
+  // Con una pista de 1000 px: en reposo los dos en −1000 (el cero envuelto); arrastrada, uno a −950 y el otro a −50.
+  afirmarIgual([posicionDelRenglon(arrastrada, 1, 1000), posicionDelRenglon(arrastrada, -1, 1000)], [-950, -50], '  arrastrar 50 px el de arriba corre 50 px el de abajo, en su sentido: son una sola fila')
+  const unaSolaFila = (fuente: string): boolean => (fuente.match(/let fila: EstadoDeLaFila/g) ?? []).length === 1 && !/let estado = \{/.test(fuente) && (fuente.match(/useEffect\(/g) ?? []).length === 1
+  afirmar(unaSolaFila(CARRUSEL), '  y el componente guarda UN estado de movimiento para los dos renglones, con un solo lazo')
+  controlPositivo('  el detector ve el carrusel de antes, con un estado por renglón', 'let estado = { x: envolver(-desfase * paso, largo), v: 0 }; useEffect(() => {})', unaSolaFila)
+
   // ── EL PIN Y LAS ANCLAS, EN svh ────────────────────────────────────────
   const EPOCA = sinComentarios(leer('../../_lib/motion/epoca.ts'))
   const anclasEnSvh = (fuente: string): boolean => !/alto:\s*window\.innerHeight/.test(fuente) && /height:100svh/.test(fuente) && (fuente.match(/altoDeLaVentana\(\)/g) ?? []).length >= 2
   afirmar(anclasEnSvh(EPOCA), 'el motor resuelve las anclas contra el `svh` (una sonda de 100svh), no contra `innerHeight`: la barra de Safari no las mueve')
   controlPositivo('el detector ve el motor viejo', 'foto = { epoca: 0, ancho: window.innerWidth, alto: window.innerHeight }', anclasEnSvh)
   const TRABAJOS = sinComentarios(leer('Trabajos.tsx'))
-  const pinEnSvh = (fuente: string): boolean => /animada: \{ seccion: '[^']*max-escritorio:sticky[^']*max-escritorio:h-svh[^']*'/.test(fuente) && !/\b(h-screen|h-dvh|h-lvh|100vh|100dvh)\b/.test(fuente)
+  // MÓVIL 2: el pin angosto lo lleva el bloque; la sección es la caja alta que lo contiene.
+  const pinEnSvh = (fuente: string): boolean => /bloque: '[^']*max-escritorio:sticky[^']*max-escritorio:h-svh[^']*'/.test(fuente) && !/\b(h-screen|h-dvh|h-lvh|100vh|100dvh)\b/.test(fuente)
   afirmar(pinEnSvh(TRABAJOS), '  y abajo de 1024 la rama coreografiada se clava con una caja de 100svh: ni vh, ni dvh')
-  controlPositivo('el detector ve un pin en dvh', "animada: { seccion: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-dvh' }", pinEnSvh)
+  controlPositivo('el detector ve un pin en dvh', "bloque: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-dvh' }", pinEnSvh)
 
   // ── LA COREOGRAFÍA QUE CRUZA EL UMBRAL LA PIDE SÓLO TRABAJOS ───────────
   const COMPUERTA = sinComentarios(leer('../CompuertaDelHome.tsx'))

@@ -10,6 +10,7 @@ import { CapaDeLaGota } from './CapaDeLaGota'
 import { CapaDelTunel } from './CapaDelTunel'
 import { CapaDeDemos } from './demos/CapaDeDemos'
 import { PortadaDeTrabajos, RamaQuieta } from './piezas'
+import { ESTILO_DEL_RITMO } from './ritmo'
 
 /**
  * 04 · TRABAJOS — el preludio, la conversión y el túnel. **[PORTFOLIO]**
@@ -69,20 +70,26 @@ const CLASES_DE_LA_RAMA = {
   quieta: { seccion: 'relative max-escritorio:min-h-[inherit]', bloque: 'relative h-full w-full max-escritorio:min-h-[inherit]' },
   // `overflow-x-clip`: el cartel termina su huida grande y oculto, y sin recorte la página se ensanchaba
   // a 584 px en un teléfono de 375 (el navegador la alejaba para que entrara). `clip` no crea caja de scroll.
-  animada: { seccion: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh max-escritorio:overflow-x-clip', bloque: 'relative h-full w-full' },
+  // MÓVIL 2: la sección crece lo que el túnel se estira (`ritmo.ts`) y el pin baja al bloque.
+  animada: {
+    seccion:
+      'relative max-escritorio:[--estiramiento-en-uso:var(--estiramiento-tablet)] max-movil:[--estiramiento-en-uso:var(--estiramiento-movil)] max-escritorio:min-h-[calc(var(--alto-minimo-del-panel)+(var(--estiramiento-en-uso)-1)*var(--tunel-en-pantallas)*100svh)]',
+    bloque: 'relative h-full w-full max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh max-escritorio:overflow-x-clip',
+  },
 } as const
 
 function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
   // ⚠️ UN SOLO valor amortiguado para el cartel y el túnel: lo escribe el túnel y
   // lo lee el cartel, así que subiendo el cartel no puede volver encima del túnel.
   const mostrado = useMotionValue(0)
-  const clases = CLASES_DE_LA_RAMA[useCoreografiaActiva() ? 'animada' : 'quieta']
+  const animada = useCoreografiaActiva()
+  const clases = CLASES_DE_LA_RAMA[animada ? 'animada' : 'quieta']
   return (
     // ⚠️ Sin `bg-fondo` en móvil: la sección es `oscuro-transparente` y la
     // oscuridad la tiene que dar la SALA, no el panel. Pintarla acá tapaba el
     // canvas abajo de 1025 y con él lo único que esta sección viene a mostrar.
     // Quien la lleva a la noche en los dos lados del umbral es el disparo.
-    <Seccion seccion={seccion} className={clases.seccion}>
+    <Seccion seccion={seccion} className={clases.seccion} style={animada ? ESTILO_DEL_RITMO : undefined}>
       {/* ⚠️ El `min-h-[inherit]` viaja por la cadena ENTERA o no llega: el bloque
           está entre la sección y el envoltorio, y sin él el envoltorio hereda el
           cero del bloque en vez del alto del panel. Medido: la rama quieta

@@ -59,7 +59,8 @@ import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
  * MÓVIL-TRABAJOS · y otra parada por demo en el carrusel de abajo de 1024 (el censo lee el marcado,
  * donde las dos están; en el navegador una de las dos va en `display: none`).
  */
-const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
+// MÓVIL 2: el carrusel lleva en el marcado sus ocho de arriba y las cuatro de abajo; cada ancho muestra ocho.
+const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length + CATALOGO_DE_DEMOS.length / 2, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
