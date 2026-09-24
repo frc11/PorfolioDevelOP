@@ -105,6 +105,10 @@ export const NUMEROS_PERMITIDOS: readonly Excepcion[] = [
       'SÍ afirma, que es disponibilidad continua— está en `LISTA_BLANCA_DE_CIFRAS` ' +
       'de `marcadores.ts`, que es la lista blanca del otro detector.',
   },
+  {
+    valor: '2026',
+    motivo: '[FINAL 3] el año de la línea legal del pie («© 2026 develOP»). Un dato del documento, no una medición.',
+  },
 ]
 
 /**

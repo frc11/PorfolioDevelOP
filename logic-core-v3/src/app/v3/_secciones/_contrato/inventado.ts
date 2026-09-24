@@ -88,12 +88,9 @@ export interface Invento {
  * del equipo, Tucumán, y qué hace develOP.
  */
 export const INVENTOS = {
-  // ── Números · las cinco casillas, con los rótulos que ya existían ────────
-  numerosProyectos: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '23' },
-  numerosClientes: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '9' },
-  numerosAnios: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '4' },
-  numerosRespuesta: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '6 h' },
-  numerosProcesos: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: '31' },
+  // ⚠️ FINAL 3 · Números tenía acá sus cinco casillas. La sección no se monta, así que
+  // eran mentiras declaradas que nadie mostraba: salieron las dos puntas, de acá y de
+  // `numeros/contenido.ts`, que vuelve a su marcador. Con la lista vacía la llave se apaga.
 
   // ⚠️ PORTFOLIO · Trabajos tenía acá las TRES métricas que iban al lado de cada
   // nombre. Se fueron con la pastilla que las mostraba: no hay nada medible en

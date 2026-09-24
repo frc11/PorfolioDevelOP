@@ -63,7 +63,8 @@ import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 // MÓVIL 2: el CTA al terminar cada servicio (se ve abajo de 1024; en el marcado, en las dos ramas).
 const DELTA_DE_SERVICIOS = { paradas: 3 } as const
 // SPRINT FINAL: «Por qué develOP» suma el botón «Hablanos» y pasa de 1 h2 + 4 h3 a 1 h2 + 6 h3; sus cinco marcadores se fueron con el contenido viejo.
-const DELTA_DEL_FINAL = { paradas: 1, encabezados: 2 } as const
+// FINAL 3 · el pie con datos reales: −1 (Números) +1 mail +1 WhatsApp +4 redes.
+const DELTA_DEL_FINAL = { paradas: 1 + 5, encabezados: 2 } as const
 const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length + CATALOGO_DE_DEMOS.length / 2, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')

@@ -5,7 +5,7 @@ import { useMotionValue, useTransform, type MotionValue } from 'motion/react'
 import { cn } from '@/lib/utils'
 
 import { Pie } from '../../_componentes/chrome/Pie'
-import { Isotipo, Logotipo } from '../../_componentes/marca/Marca'
+import { Logotipo } from '../../_componentes/marca/Marca'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
@@ -13,9 +13,9 @@ import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/core
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
-import { ColumnasDelPie, PedidoDelPie } from './ColumnasDelPie'
-import { LineaDeCierre } from './LineaDeCierre'
-import { PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
+import { ColumnasDelPie } from './ColumnasDelPie'
+import { TITULAR_DE_CIERRE } from './contenido'
+import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
 
 /**
  * 08 · CIERRE — el pie, armado alrededor del logo. **[FINAL]**
@@ -60,20 +60,19 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
       className="grid"
       claseDeEnvoltorio="grid"
       // Sin alto ni padding propios: el del `<footer>` sale de pie.css y la grilla estira la caja, así la sección mide 100svh.
-      claseDeContenido="relative grid content-between gap-[var(--spacing-12)] escritorio:block"
+      // [FINAL 3] Móvil: una columna. Tablet: frase y contacto | navegación, y abajo a todo el ancho. Sin logo chico: el 3D está detrás.
+      claseDeContenido="relative grid content-between gap-[var(--spacing-12)] tablet:grid-cols-2 tablet:gap-x-[var(--spacing-12)] escritorio:block"
     >
-      {/* El logo del pie apilado. Desde 1024 lo pone la escena, en el centro. */}
-      <Isotipo className={cn('h-[var(--spacing-12)] w-auto self-start escritorio:hidden', MEZCLA_SOBRE_LA_ESCENA)} />
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
-          <Logotipo />
+          <Logotipo className="max-escritorio:hidden" />
           <div id={idDelTitularDeSeccion(seccion.id)}>
             <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
               {TITULAR_DE_CIERRE}
             </Titular>
           </div>
-          <PedidoDelPie pedido={PEDIDOS_DE_CONTACTO[0]} />
+          <ContactoDelPie />
         </Llega>
       </div>
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:right-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
@@ -81,11 +80,10 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
           {(p) => <ColumnasDelPie progreso={p} />}
         </LlegaConProgreso>
       </div>
-      <div className="escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
-        {/* Sin mezcla: el prefijo es relleno de acento y la mezcla lo daba vuelta; en reposo esta fila no pisa el logo. */}
-        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} mezcla={false} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-end escritorio:justify-between">
-          <PedidoDelPie pedido={PEDIDOS_DE_CONTACTO[1]} />
-          <LineaDeCierre />
+      <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
+        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
+          <RedesDelPie />
+          <LineaLegal />
         </Llega>
       </div>
     </Pie>

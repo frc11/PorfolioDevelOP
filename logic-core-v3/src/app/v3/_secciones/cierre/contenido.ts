@@ -22,9 +22,7 @@
  * declarado en `NUMEROS_PERMITIDOS`.
  */
 
-import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { IDS_DE_SECCION, seccionDe } from '../_contrato/forma'
-import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /** El nombre visible de la sección, para el rótulo de la columna lateral. */
@@ -104,9 +102,12 @@ const SECCIONES_QUE_EL_PIE_ENLAZA: readonly string[] = IDS_DE_SECCION
  * es la misma de siempre y **el filtro se mantiene**: lo único que cambió es de
  * cuántas se filtra.
  */
+/** [FINAL 3] Sin Números (no se monta) y con «Inicio» en lugar de «Hero». */
+const SIN_ENLACE_EN_EL_PIE: readonly string[] = ['cierre', 'numeros']
+const ROTULO_EN_EL_PIE: Readonly<Record<string, string>> = { hero: 'Inicio' }
 export const DESTINOS_DE_LA_RUTA: readonly DestinoDeLaRuta[] = SECCIONES_QUE_EL_PIE_ENLAZA.filter(
-  (id) => id !== 'cierre',
-).map((id) => ({ ancla: `#${id}`, rotulo: seccionDe(id).nombre }))
+  (id) => !SIN_ENLACE_EN_EL_PIE.includes(id),
+).map((id) => ({ ancla: `#${id}`, rotulo: ROTULO_EN_EL_PIE[id] ?? seccionDe(id).nombre }))
 
 /**
  * El CTA. Va en TINTA por instrucción —nunca acento— y lleva a un destino que
@@ -166,110 +167,9 @@ export const COLUMNAS: readonly ColumnaDelPie[] = [
   { id: 'contacto', titulo: 'Contacto', clase: 'contacto' },
 ]
 
-export interface PedidoDeEnlace {
-  readonly marcador: Marcador
-  /** Qué va acá, escrito para que alguien lo lea. Es el pedido. */
-  readonly descripcion: string
-}
-
 /**
- * LA COLUMNA QUE NO SE PUEDE MONTAR — redes y dirección de contacto.
- *
- * No hay destino real, y un enlace que no lleva a ningún lado es la misma clase
- * de defecto que un formulario con éxito falso. Entonces se muestra LA FORMA de
- * la columna con el marcador como TEXTO, nunca como `<a>`.
+ * [FINAL 3] EL PEDIDO — vacío. El contacto, las redes y la línea legal pasaron a datos
+ * reales en `contacto.ts`; lo provisorio (las URLs de las redes) va con su TODO ahí, sin
+ * marcador en pantalla.
  */
-export const PEDIDOS_DE_CONTACTO: readonly PedidoDeEnlace[] = [
-  { marcador: '[ENLACE]', descripcion: 'la dirección de contacto, cuando exista' },
-  { marcador: '[ENLACE]', descripcion: 'las redes, una por red' },
-]
-
-// ⚠️ SPRINT PANEL 2 · El formulario de novedades se mudó a Tu Panel
-// (`tu-panel/Remate.tsx`), con el mismo componente y deshabilitado por la misma
-// razón: no hay destino. El pie queda con dos columnas.
-
-/**
- * LA LÍNEA DE CIERRE — la última del documento.
- *
- * Fecha, razón social y legales no existen todavía y no se inventan: van con su
- * marcador, en texto, y la nota dice qué entra ahí.
- *
- * ── ⚠️ B4-A · LA MARCA SE DERIVA DEL SISTEMA, Y ANTES ERA UNA COPIA ────────
- *
- * Decía `marca: 'develOP'`, escrito acá. B3 construyó el sistema de marca y su
- * `LOGOTIPO` es **la** palabra; dos cadenas iguales en dos archivos son dos
- * cosas que se pueden desincronizar sin que nada avise. Ahora sale de ahí.
- *
- * Y lo que la renderiza ya no es este texto: es la pieza `Logotipo` del sistema,
- * montada en `Cierre.tsx`. Este campo se queda porque el modelo de alto del pie
- * (`s10-mobile-pie`) mide la línea entera como cadena, y esa medición sigue
- * siendo la misma.
- */
-export const LINEA_DE_CIERRE = {
-  marca: LOGOTIPO,
-  piezas: ['[FECHA]', '[NOMBRE]', '[ENLACE]'] as readonly Marcador[],
-  nota: 'La fecha, la razón social y los legales entran acá cuando existan.',
-} as const
-
-/**
- * EL PEDIDO — lo que falta en esta sección, con su formato.
- *
- * Se agrega en SITIO-S7: el lane que escribió la sección declaraba lo
- * provisional en prosa y con marcadores visibles, pero **el pedido no era un
- * dato**, así que no se podía producir un documento con él ni comprobar que no
- * se quedara viejo. `s7-pedido` cruza esta tabla contra el texto renderizado en
- * los dos sentidos: un marcador en pantalla sin entrada acá falla, y una
- * entrada que pide algo que ya no se ve, también.
- *
- * El archivo donde se edita NO se escribe acá: sale del registro.
- */
-export const PEDIDO: readonly EntradaDePedido[] = [
-  {
-    ruta: 'PEDIDOS_DE_CONTACTO[0]',
-    clase: 'enlace',
-    marcador: '[ENLACE]',
-    quienLoTrae: 'decision',
-    que: 'La dirección de contacto: mail, WhatsApp o el destino que corresponda.',
-    formato: 'Una URL o un `mailto:`. El rótulo visible va aparte.',
-  },
-  {
-    ruta: 'PEDIDOS_DE_CONTACTO[1]',
-    clase: 'enlace',
-    marcador: '[ENLACE]',
-    quienLoTrae: 'valentino',
-    que: 'Las redes, una por red, con el perfil real.',
-    formato: 'Una URL por red.',
-  },
-  {
-    ruta: 'LINEA_DE_CIERRE.piezas',
-    clase: 'prosa',
-    marcador: '[FECHA]',
-    quienLoTrae: 'valentino',
-    que: 'El año del pie de página.',
-    formato: 'Cuatro dígitos. Se puede derivar de la fecha del build.',
-  },
-  {
-    ruta: 'LINEA_DE_CIERRE.piezas',
-    clase: 'prosa',
-    marcador: '[NOMBRE]',
-    quienLoTrae: 'decision',
-    que: 'La razón social, si va a figurar.',
-    formato: 'Nombre legal completo. Una línea.',
-  },
-  /**
-   * ⚠ FALTABA, y por eso se agrega en V3-D. `LINEA_DE_CIERRE.piezas` muestra
-   * TRES marcadores —`[FECHA]`, `[NOMBRE]` y `[ENLACE]`— y el pedido declaraba
-   * los dos primeros. El tercero pasaba el gate igual porque `s7-pedido` cruza
-   * CLASES de marcador y no ocurrencias, y `[ENLACE]` ya estaba declarado por
-   * la columna de contacto: el hueco de los legales quedaba en la pantalla y
-   * fuera de la lista que se le manda a Franco.
-   */
-  {
-    ruta: 'LINEA_DE_CIERRE.piezas',
-    clase: 'enlace',
-    marcador: '[ENLACE]',
-    quienLoTrae: 'decision',
-    que: 'Los legales del pie: a dónde llevan y si van a existir.',
-    formato: 'Una URL por documento, o ninguno si se decide que no van.',
-  },
-]
+export const PEDIDO: readonly EntradaDePedido[] = []

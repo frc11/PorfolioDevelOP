@@ -5,14 +5,13 @@ import type { MotionValue } from 'motion/react'
 
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
-import { Caption, EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
+import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { CanalDePieza } from '../_contrato/canales'
 import {
   COLUMNAS,
   DESTINOS_DE_LA_RUTA,
   CONTACTO_DEL_PIE,
-  PEDIDOS_DE_CONTACTO,
   type ClaseDeColumna,
 } from './contenido'
 
@@ -97,7 +96,8 @@ export interface ColumnasDelPieProps {
 export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Element {
   return (
     // SPRINT PANEL 3 · el newsletter se mudó a Tu Panel: dos columnas llenan el ancho que la grilla de tres dejaba con un hueco.
-    <BloqueDeColumnasDelPie className="tablet:grid-cols-2">
+    // [FINAL 3] Abajo de 1024 queda sola la navegación: el contacto va con la frase.
+    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 escritorio:grid-cols-2">
       {COLUMNAS.map((columna, indice) => (
         <CanalDePieza
           key={columna.id}
@@ -106,7 +106,7 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           cantidad={COLUMNAS.length}
           indice={indice}
           // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
-          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`}
+          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA} ${columna.clase === 'contacto' ? 'max-escritorio:hidden' : ''}`}
         >
           <EtiquetaDeSeccion como="h3" sangria={false}>
             {columna.titulo}
@@ -144,7 +144,8 @@ function ColumnaDeContacto(): React.JSX.Element {
  */
 function ColumnaDelRecorrido(): React.JSX.Element {
   return (
-    <ul className="flex flex-col gap-[var(--spacing-2)]">
+    // [FINAL 3] En móvil, dos columnas compactas.
+    <ul className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
         <li key={destino.ancla}>
           <EnlaceDelPieConIcono
@@ -152,36 +153,6 @@ function ColumnaDelRecorrido(): React.JSX.Element {
             rotulo={destino.rotulo}
             icono={<ArrowUpRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
           />
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-/** [FINAL] Un pedido del pie (la dirección, las redes): el marcador va como TEXTO. Un `<a>` acá sería un enlace a la nada. */
-export function PedidoDelPie({ pedido }: { readonly pedido: (typeof PEDIDOS_DE_CONTACTO)[number] }): React.JSX.Element {
-  return (
-    <ul className="flex flex-col gap-[var(--spacing-2)]">
-      {[pedido].map((pedido) => (
-        <li key={pedido.descripcion} className="flex flex-col">
-          {/* CON `peso`. Es el rodeo del defecto de `cn()` restaurado en
-              SITIO-S8: esta misma línea perdía la familia Y el peso en
-              silencio, y el arreglo de raíz de SITIO-S7 la devuelve a
-              `font-medio` + `font-codigo`. Ver la nota de `cn()` arriba. */}
-          <Caption como="span" peso="medio" className="font-codigo uppercase">
-            {pedido.marcador}
-          </Caption>
-          {/* ⚠️ B12 · A TINTA PLENA, y es la tercera palanca del pie con su número.
-              Iba a `opacity-casi` (0,6) porque sobre un pie que pintaba su propio
-              fondo eso pasaba AA en las dos superficies. Con el pie transparente
-              el fondo es la SALA, que tiene varianza, y el peor píxel manda: la
-              nota daba **1,84:1** al 0,6 y **2,45:1** a plena en la pose (1920,
-              `bloques-cierre-papel`). Subirla no la salva sola —la causa que
-              queda es la luz— pero es lo único que esta pieza puede aportar, y
-              dejarla al 0,6 sería regalar medio punto de contraste. */}
-          <Micro como="span" className="uppercase">
-            {pedido.descripcion}
-          </Micro>
         </li>
       ))}
     </ul>

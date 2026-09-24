@@ -58,7 +58,16 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
 }
 
 /** Una columna de valores; en una columna angosta (menos de 16rem) el aire entre valores se achica a la mitad. */
-const CLASE_DE_LA_COLUMNA = 'flex h-full flex-col justify-center gap-[var(--spacing-6)] @max-3xs:gap-[var(--spacing-3)]'
+const CLASE_DE_LA_COLUMNA = 'flex flex-col justify-start gap-[var(--spacing-6)] @max-3xs:gap-[var(--spacing-3)]'
+
+/** Una copia invisible y sin alto de la mitad del título: le da a la columna su mismo ancho. No se anuncia. */
+function AnchoDeLaFrase({ texto }: { readonly texto: string }): React.JSX.Element {
+  return (
+    <span aria-hidden="true" className="invisible block h-0">
+      <FraseDelFinal texto={texto} />
+    </span>
+  )
+}
 
 /** El tramo de una ventana del pin, de 0 a 1. */
 function useTramo(pin: MotionValue<number>, v: Ventana): MotionValue<number> {
@@ -94,19 +103,27 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         </motion.p>
         {/* Los valores: tres a la izquierda del logo y tres a la derecha. */}
         {/* Cada columna es un contenedor: a 1024×768 mide 159 px y, con el aire de siempre, la de la derecha se desbordaba 41 px. */}
-        <div className="@container absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[var(--pad-lateral-compacto)] right-[calc(50%+var(--hueco-de-los-valores))]">
-          <ul className={CLASE_DE_LA_COLUMNA}>
-            {VALORES.slice(0, 3).map((valor, i) => (
-              <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
-            ))}
-          </ul>
+        {/* [FINAL 3] Cada columna mide lo que su mitad del título (una copia invisible le da el ancho) y se pega a su lado del logo: simétricas. */}
+        <div className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+          <AnchoDeLaFrase texto={FRASE.izquierda} />
+          {/* El contenedor va adentro: con contención de tamaño no aportaría ancho y la columna mediría 0. */}
+          <div className="@container">
+            <ul className={CLASE_DE_LA_COLUMNA}>
+              {VALORES.slice(0, 3).map((valor, i) => (
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
+              ))}
+            </ul>
+          </div>
         </div>
-        <div className="@container absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[var(--pad-lateral-compacto)] left-[calc(50%+var(--hueco-de-los-valores))]">
-          <ul className={CLASE_DE_LA_COLUMNA}>
-            {VALORES.slice(3).map((valor, i) => (
-              <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
-            ))}
-          </ul>
+        <div className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+          <AnchoDeLaFrase texto={FRASE.derecha} />
+          <div className="@container">
+            <ul className={CLASE_DE_LA_COLUMNA}>
+              {VALORES.slice(3).map((valor, i) => (
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
+              ))}
+            </ul>
+          </div>
         </div>
       </motion.div>
       <CtaEnElEscenario pin={pin} />
@@ -140,7 +157,9 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
 }
 
 /** Dos renglones en el lugar que queda entre el logo y su sombra: nunca más grande que el `titulo-xl` fluido. */
-const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)/2.3))]'
+const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((var(--lugar-del-cta)-var(--spacing-20))/2.3))]'
+/** [FINAL 3] «Hablanos» más grande: el mismo botón, con su tipografía redefinida a `titulo-m`. */
+const BOTON_GRANDE = '[--text-cuerpo:var(--text-titulo-m)]'
 
 function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
   const frase = useTramo(pin, VENTANA_DEL_CTA)
@@ -159,18 +178,18 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
           {CTA.frase}
         </Titular>
       </CanalDeUnaPieza>
-      {/* El botón al lado del destacado: abajo, en el piso, está la sombra de contacto del logo. */}
-      <div className="flex items-baseline justify-center gap-[var(--spacing-8)]">
-        {/* Destacado por el peso, como el «let's create it» de nk. */}
-        <CanalDeUnaPieza progreso={destacado} patron="P5">
-          <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
-            {CTA.destacado}
-          </Titular>
-        </CanalDeUnaPieza>
-        <CanalDeUnaPieza progreso={destacado} patron="P5">
+      {/* Destacado por el peso, como el «let's create it» de nk. */}
+      <CanalDeUnaPieza progreso={destacado} patron="P5">
+        <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
+          {CTA.destacado}
+        </Titular>
+      </CanalDeUnaPieza>
+      {/* [FINAL 3] El botón abajo, solo y más grande; su pastilla de papel lo separa de la sombra del piso. */}
+      <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-4)]">
+        <div className={`${BOTON_GRANDE} rounded-[var(--radius-pastilla-s)] bg-fondo px-[var(--spacing-6)] py-[var(--spacing-2)]`}>
           <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
-        </CanalDeUnaPieza>
-      </div>
+        </div>
+      </CanalDeUnaPieza>
     </motion.div>
   )
 }
@@ -207,7 +226,8 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
             </li>
           ))}
         </ul>
-        <div data-pieza="cta-del-final" className="flex flex-col items-start gap-[var(--spacing-8)]">
+        {/* [FINAL 3] Separado de los valores, en su propio espacio; centrado desde tablet. */}
+        <div data-pieza="cta-del-final" className="flex min-h-[70svh] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
           <Llega>
             <Titular nivel="titulo-xl" como="p">
               {CTA.frase}
@@ -217,7 +237,9 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
             </Titular>
           </Llega>
           <Llega>
-            <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
+            <div className={BOTON_GRANDE}>
+              <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
+            </div>
           </Llega>
         </div>
       </CoreografiaEnTodoAncho>

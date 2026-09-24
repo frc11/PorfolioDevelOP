@@ -155,4 +155,5 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
 export const DELTA_DEL_PANEL = { paradas: 8, encabezados: -4, marcadores: -4 } as const
 
 /** SPRINT FINAL: los cinco marcadores del «Por qué develOP» viejo ([CIFRA], dos [MÉTRICA], [TESTIMONIO] y [NOMBRE]) se fueron con él. */
-export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 } as const
+// FINAL 3 · y el pie se queda sin sus cinco: [ENLACE] × 3, [FECHA] y [NOMBRE].
+export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 } as const

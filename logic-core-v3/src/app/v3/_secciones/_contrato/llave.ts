@@ -76,4 +76,5 @@
  * literal `true`, TypeScript estrecha cada `CONTENIDO_INVENTADO ? a : b` a una
  * sola rama y el invariante que comprueba **las dos** no compilaría.
  */
-export const CONTENIDO_INVENTADO: boolean = true
+// FINAL 3: APAGADA. INVENTOS quedó vacío; si alguien agrega una cifra inventada, la prende acá con su entrada.
+export const CONTENIDO_INVENTADO: boolean = false

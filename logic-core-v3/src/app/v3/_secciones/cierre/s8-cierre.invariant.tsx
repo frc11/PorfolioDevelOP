@@ -17,12 +17,13 @@ import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/e
 import { marcar } from '../_invariantes/render'
 import { leer } from '../_invariantes/soporte'
 import { Cierre, LLEGADAS_DEL_PIE } from './Cierre'
-import { COLUMNAS, CONTACTO_DEL_PIE, PEDIDO, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
+import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
+import { COLUMNAS, CONTACTO_DEL_PIE, DESTINOS_DE_LA_RUTA, PEDIDO, TITULAR_DE_CIERRE } from './contenido'
 
 const ID = 'cierre'
 const montado = <Cierre seccion={seccionDe(ID)} />
 const [quieto, movido] = [false, true].map((anima) => marcar(montado, { anima }))
-const FUENTE = ['Cierre.tsx', 'ColumnasDelPie.tsx', 'LineaDeCierre.tsx', 'contenido.ts'].map((f) => quitarComentarios(leer(`src/app/v3/_secciones/cierre/${f}`))).join('\n')
+const FUENTE = ['Cierre.tsx', 'ColumnasDelPie.tsx', 'PiezasDeContacto.tsx', 'contenido.ts', 'contacto.ts'].map((f) => quitarComentarios(leer(`src/app/v3/_secciones/cierre/${f}`))).join('\n')
 const anunciado = (html: string): string => textoVisible(html.replace(/<svg[\s\S]*?<\/svg>/g, ' ')).replace(/\s+/g, ' ').trim()
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -30,26 +31,28 @@ titulo('1 · La composición: el centro libre para el logo')
 
 afirmar(/<footer[^>]*data-pieza="pie"/.test(quieto), 'el pie es el `<footer>` de la página, adentro de la sección de cierre')
 afirmarIgual(COLUMNAS.map((c) => c.titulo), ['El recorrido', 'Contacto'], 'a la derecha, las columnas de hoy: el recorrido y el contacto')
-afirmar(quieto.indexOf(TITULAR_DE_CIERRE) < quieto.indexOf('El recorrido') && quieto.indexOf('El recorrido') < quieto.indexOf(PEDIDOS_DE_CONTACTO[1].descripcion), '  en orden de lectura: la identidad (izquierda), las columnas (derecha) y el pie de página (abajo)')
+afirmar(quieto.indexOf(TITULAR_DE_CIERRE) < quieto.indexOf('El recorrido') && quieto.indexOf('El recorrido') < quieto.indexOf(LINEA_LEGAL), '  en orden de lectura: la identidad y el contacto, la navegación y el pie de página')
 afirmar((FUENTE.match(/w-\[calc\(50%-var\(--hueco-del-pie\)\)\]/g) ?? []).length === 2, 'las dos columnas dejan libre el hueco del logo: medio cuadro menos el hueco, a cada lado')
 const hueco = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
 afirmar(hueco > 10 && hueco < 25, `el hueco sale de la pose E (a ${String(POSES_DEL_FINAL.pie.distance)}): ${hueco.toFixed(1)} svh`)
-afirmar(!/CabeceraDeSeccion|MarcaDeSeccion/.test(FUENTE) && !/data-pieza="marca-de-seccion"/.test(quieto + movido), 'sin el punto azul: el pie ya no monta la marca de sección')
+afirmar(!/CabeceraDeSeccion|MarcaDeSeccion|PrefijoDeServicio|Isotipo/.test(FUENTE) && !/data-pieza="(marca-de-seccion|prefijo-de-servicio|isotipo)"/.test(quieto + movido), 'sin el punto azul (ni la marca de sección ni el prefijo) y sin el logo chico: el 3D ya está detrás')
 afirmar(!/<form\b|<input\b/.test(quieto), 'el newsletter no está: vive en el panel')
 afirmar(/href="#contacto"/.test(quieto) && CONTACTO_DEL_PIE.rotulo === 'Hablanos', 'la columna de contacto enlaza al contacto («Hablanos», a #contacto)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El contenido: el de siempre, y lo que falta sigue pedido')
+titulo('2 · [FINAL 3] El contenido: datos reales, sin un solo marcador')
 
 afirmarIgual(escanearLoReal(textoVisible(quieto)), [], 'ni una cifra en el pie')
-const marcas = marcadoresRealesEn(textoVisible(quieto))
-const enlaces = (textoVisible(quieto).match(/\[ENLACE\]/g) ?? []).length
-afirmar(
-  [...new Set(marcas)].sort().join() === ['[ENLACE]', '[FECHA]', '[NOMBRE]'].join() && enlaces === 3,
-  'la dirección, las redes y los legales ([ENLACE] × 3), el año ([FECHA]) y la razón social ([NOMBRE]), con su marcador: nada inventado',
-  `${[...new Set(marcas)].join(' ')} · ${String(enlaces)} enlaces pedidos`,
-)
-afirmar(PEDIDO.length >= 5, `  y cada uno tiene su entrada en el pedido (${String(PEDIDO.length)})`)
+afirmarIgual(marcadoresRealesEn(textoVisible(quieto)), [], 'ni un marcador a la vista: se fueron [ENLACE], [FECHA], [NOMBRE] y las leyendas')
+controlPositivo('  el chequeo vería un marcador que quedó', '[ENLACE] las redes, una por red', (t: string) => marcadoresRealesEn(t).length === 0)
+afirmar(!/cuando exista/.test(textoVisible(quieto)), '  ni un «cuando exista»')
+afirmarIgual(PEDIDO.length, 0, '  y el pedido del pie quedó vacío')
+afirmar(quieto.includes(`href="${HREF_DEL_MAIL}"`) && MAIL === 'contacto@develop.com.ar', `el mail (${MAIL}), con su mailto`)
+afirmar(WHATSAPP.href.startsWith('https://wa.me/5493814154708?text=') && quieto.includes('data-pieza="whatsapp"'), 'WhatsApp abre wa.me con el mensaje precargado')
+afirmarIgual(REDES.map((r) => r.rotulo), ['Instagram', 'LinkedIn', 'TikTok', 'Facebook'], 'las cuatro redes, en orden')
+afirmar(REDES.every((r) => quieto.includes(`aria-label="${r.rotulo}"`)), '  cada una con su nombre accesible (son sólo íconos)')
+afirmar(textoVisible(quieto).includes(LINEA_LEGAL), `la línea legal: «${LINEA_LEGAL}»`)
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ['Inicio', 'Quiénes somos', 'Trabajos', 'Servicios', 'Tu panel', 'Por qué develOP'], 'la navegación: sin Números (no se monta) y con «Inicio» en lugar de «Hero»')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Llega después del alejamiento, y termina en el último píxel')

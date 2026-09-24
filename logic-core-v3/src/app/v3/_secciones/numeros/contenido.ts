@@ -40,7 +40,6 @@
  */
 
 import type { IdDePatron } from '../../_lib/motion/patrones'
-import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 export const CONTENIDO = {
@@ -59,11 +58,12 @@ export const CONTENIDO = {
    * propósito —falla fuerte y temprano— en vez de dejar una cifra sin lugar.
    */
   cifras: [
-    { clave: 'proyectos', valor: conLlave(INVENTOS.numerosProyectos), rotulo: 'Proyectos entregados' },
-    { clave: 'clientes', valor: conLlave(INVENTOS.numerosClientes), rotulo: 'Clientes activos' },
-    { clave: 'anios', valor: conLlave(INVENTOS.numerosAnios), rotulo: 'Años en el mercado' },
-    { clave: 'respuesta', valor: conLlave(INVENTOS.numerosRespuesta), rotulo: 'Tiempo de respuesta' },
-    { clave: 'procesos', valor: conLlave(INVENTOS.numerosProcesos), rotulo: 'Procesos automatizados' },
+    // FINAL 3: sin cifras inventadas; la sección no se monta y cada casilla queda en su marcador.
+    { clave: 'proyectos', valor: '[CIFRA]', rotulo: 'Proyectos entregados' },
+    { clave: 'clientes', valor: '[CIFRA]', rotulo: 'Clientes activos' },
+    { clave: 'anios', valor: '[CIFRA]', rotulo: 'Años en el mercado' },
+    { clave: 'respuesta', valor: '[CIFRA]', rotulo: 'Tiempo de respuesta' },
+    { clave: 'procesos', valor: '[CIFRA]', rotulo: 'Procesos automatizados' },
   ],
 } as const
 

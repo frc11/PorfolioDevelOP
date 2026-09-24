@@ -105,7 +105,7 @@ afirmar(
 const huecoA = huecoDelLogo(POSES_DEL_FINAL.frase.distance)
 const huecoB = huecoDelLogo(POSES_DEL_FINAL.valores.distance)
 afirmar(huecoB > huecoA && huecoA > 25, `el hueco que el logo deja sale de la pose: ${huecoA.toFixed(1)} svh en A y ${huecoB.toFixed(1)} svh en B, más cerca`)
-afirmarIgual((FUENTE.match(/className="@container /g) ?? []).length, 2, '  cada columna de valores es un contenedor: en una angosta (159 px a 1024×768) el aire se achica y la columna no se desborda')
+afirmarIgual((FUENTE.match(/className="@container[" ]/g) ?? []).length, 2, '  cada columna de valores es un contenedor: en una angosta (159 px a 1024×768) el aire se achica y la columna no se desborda')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · [FINAL 2] De día: tinta oscura heredada, y abajo de 1024 la mezcla de la casa')

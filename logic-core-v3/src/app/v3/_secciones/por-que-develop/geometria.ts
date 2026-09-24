@@ -37,13 +37,14 @@ const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 7
  * tamaño de la letra sale de ese lugar.
  */
 export const ARRIBA_DEL_CTA_SVH = pieDelLogo(POSES_DEL_FINAL.cta.distance) + AIRE_SVH
-export const ABAJO_DEL_CTA_SVH = 11
+export const ABAJO_DEL_CTA_SVH = 4
 
 /** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
 export const ESTILO_DEL_ESCENARIO = {
   '--arriba-del-cta': `${ARRIBA_DEL_CTA_SVH.toFixed(1)}svh`,
   '--lugar-del-cta': `${(100 - ARRIBA_DEL_CTA_SVH - ABAJO_DEL_CTA_SVH).toFixed(1)}svh`,
-  '--hueco-de-la-frase': `${huecoDelLogo(POSES_DEL_FINAL.frase.distance).toFixed(1)}svh`,
+  // [FINAL 3] La frase usa el hueco de B (el más ancho): así cada mitad arranca donde arranca su columna de valores.
+  '--hueco-de-la-frase': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
   '--hueco-de-los-valores': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
   '--arriba-de-los-valores': `${String(ARRIBA_DE_LOS_VALORES_SVH)}svh`,
   '--abajo-de-los-valores': `${String(AIRE_SVH)}svh`,

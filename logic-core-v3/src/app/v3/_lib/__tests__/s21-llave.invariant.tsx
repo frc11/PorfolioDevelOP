@@ -84,11 +84,14 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · `conLlave` — las DOS ramas, casilla por casilla, en la misma corrida')
 
+// FINAL 3: la lista puede quedar vacía, pero sólo con la llave apagada: vacía y prendida sería una franja que miente.
+const listaYLlaveDeAcuerdo = (casillas: number, llave: boolean): boolean => casillas > 0 || !llave
 afirmar(
-  LISTA_DE_INVENTOS.length > 0,
-  `la lista cerrada tiene ${LISTA_DE_INVENTOS.length} casillas inventadas`,
-  'sin esto todo lo de abajo sería verde por vacío',
+  listaYLlaveDeAcuerdo(LISTA_DE_INVENTOS.length, CONTENIDO_INVENTADO),
+  `la lista cerrada tiene ${LISTA_DE_INVENTOS.length} casillas inventadas y la llave está ${CONTENIDO_INVENTADO ? 'prendida' : 'apagada'}: dicen lo mismo`,
+  'con la lista vacía todo lo de abajo corre sobre cero casillas; el escáner (§6) sigue viendo una cifra sin declarar',
 )
+controlPositivo('  el chequeo vería la lista vacía con la llave prendida', [0, true] as const, ([n, llave]: readonly [number, boolean]) => listaYLlaveDeAcuerdo(n, llave))
 
 afirmarIgual(
   LISTA_DE_INVENTOS.filter((i) => conLlave(i, true) !== i.mentira).length,
@@ -215,8 +218,8 @@ afirmarIgual(
   'y las claves usadas son EXACTAMENTE las declaradas: ni una casilla muerta, ni una sin declarar',
 )
 afirmar(
-  FUENTES_DEL_LANE.length > 0 && llamadas.length > 0,
-  `  el barrido miró ${FUENTES_DEL_LANE.length} archivos del lane y encontró ${llamadas.length} llamadas: no es verde por vacío`,
+  FUENTES_DEL_LANE.length > 0 && (llamadas.length > 0 || LISTA_DE_INVENTOS.length === 0),
+  `  el barrido miró ${FUENTES_DEL_LANE.length} archivos del lane y encontró ${llamadas.length} llamadas, tantas como la lista pide`,
 )
 
 controlPositivo(
@@ -256,27 +259,11 @@ for (const { id, texto } of TEXTO_DE_LAS_OCHO) {
     `  y los ${aca.length} marcadores de \`${id}\` volvieron: ${[...new Set(aca.map((i) => i.marcador))].join(' ')}`,
   )
 }
-/**
- * ⚠️ NÚMEROS — DESCONECTADA (PORTFOLIO, etapa 2 de 3). Sus cinco casillas
- * siguen DECLARADAS y siguen USADAS —`numeros/contenido.ts` no se tocó, sigue
- * llamando a `conLlave(INVENTOS.numerosX)` las cinco veces— pero `registro.ts`
- * ya no monta `Numeros`, así que su HTML no entra a `TEXTO_DE_LAS_OCHO` y estas
- * cinco mentiras no pueden aparecer en ninguna de las ocho. No es un agujero
- * del escáner: es la consecuencia exacta de que la sección no renderiza. El
- * resto de la lista —13 casillas— sigue exigido entero.
- */
-const DESCONECTADAS: ReadonlySet<Invento> = new Set([
-  INVENTOS.numerosProyectos,
-  INVENTOS.numerosClientes,
-  INVENTOS.numerosAnios,
-  INVENTOS.numerosRespuesta,
-  INVENTOS.numerosProcesos,
-])
-const EXIGIDAS_EN_PANTALLA = LISTA_DE_INVENTOS.filter((i) => !DESCONECTADAS.has(i))
+// FINAL 3: sin exclusiones. Cada casilla declarada tiene que llegar a la pantalla (con la lista vacía, ninguna).
 afirmarIgual(
-  EXIGIDAS_EN_PANTALLA.filter((i) => !enPantalla.has(i.mentira)).map((i) => i.mentira),
+  LISTA_DE_INVENTOS.filter((i) => !enPantalla.has(i.mentira)).map((i) => i.mentira),
   [],
-  `las ${EXIGIDAS_EN_PANTALLA.length} casillas de las secciones montadas LLEGAN A LA PANTALLA: ninguna mentira declarada que no se vea (las ${DESCONECTADAS.size} de Números quedan afuera, desconectada)`,
+  `las ${LISTA_DE_INVENTOS.length} casillas declaradas LLEGAN A LA PANTALLA: ninguna mentira declarada que no se vea`,
 )
 
 controlPositivo(

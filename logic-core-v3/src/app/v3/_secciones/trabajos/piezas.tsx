@@ -296,8 +296,8 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
 
 /** Las dos redefiniciones de la caja de «Hablemos». Ver el docblock en el marcado. */
 const ESTILO_DEL_CTA_EN_LA_VENTANA = {
-  // MÓVIL 2: desde 1024 lo achica la ventana (`ventana.ts`); abajo, `titulo-m`.
-  '--text-cuerpo': 'var(--cta-en-uso, var(--text-titulo-m))',
+  // MÓVIL 2: desde 1024 lo achica la ventana (`ventana.ts`); abajo, `titulo-l` (FINAL 3: un escalón más grande).
+  '--text-cuerpo': 'var(--cta-en-uso, var(--text-titulo-l))',
   '--color-tinta': 'var(--color-fondo)',
 } as React.CSSProperties
 
@@ -378,7 +378,7 @@ export function VentanaDelCta({
            */
           /* MÓVIL-TRABAJOS: abajo de 1024 la ventana es un iPad y abajo de 426 un iPhone, y
              entra entera en el alto (`CAJA_DE_LA_VENTANA_ANGOSTA`). */
-          className="@container absolute top-1/2 left-1/2 aspect-[var(--ventana-relacion)] w-[var(--ventana-ancho)] escritorio:[--cta-en-uso:min(var(--text-titulo-m),var(--cta-en-la-ventana))] max-escritorio:aspect-[var(--ventana-relacion-tablet)] max-escritorio:w-[min(var(--ventana-ancho-tablet),calc(var(--ventana-alto-tablet)*var(--ventana-proporcion-tablet)))] max-movil:aspect-[var(--ventana-relacion-movil)] max-movil:w-[min(var(--ventana-ancho-movil),calc(var(--ventana-alto-movil)*var(--ventana-proporcion-movil)))]"
+          className="@container absolute top-1/2 left-1/2 aspect-[var(--ventana-relacion)] w-[var(--ventana-ancho)] escritorio:[--cta-en-uso:min(var(--text-titulo-l),calc(var(--cta-en-la-ventana)*1.25))] max-escritorio:aspect-[var(--ventana-relacion-tablet)] max-escritorio:w-[min(var(--ventana-ancho-tablet),calc(var(--ventana-alto-tablet)*var(--ventana-proporcion-tablet)))] max-movil:aspect-[var(--ventana-relacion-movil)] max-movil:w-[min(var(--ventana-ancho-movil),calc(var(--ventana-alto-movil)*var(--ventana-proporcion-movil)))]"
           style={{
             ...ESTILO_DE_LA_CAJA_DE_LA_VENTANA,
             ...ESTILO_DEL_CUERPO_QUE_ESCALA,
