@@ -67,11 +67,12 @@ el pie sube; E se sostiene hasta el final.
   Tu Panel tapando la sala) y se queda ahí hasta el final. Afirmado: en la reanudación
   (p 0,8110) y al asomar (p 0,8156) el nivel es 0,040 y la emisión 0,160 de 0,16.
 - [x] **La excepción D, con nombre**: fuera de D el pico es 2,786 alturas de cuadro por
-  pantalla contra 3,413 del arranque; **D va a 15,91, 4,66 veces el arranque**, en 0,25
-  pantallas. El techo global no se aflojó. Control: unos valores que llegan de golpe
-  ponen el chequeo en rojo.
+  pantalla contra 3,413 del arranque; **D va a 12,06, 3,53 veces el arranque**, en 0,25
+  pantallas (con las distancias finales de B y C, 16; con las de esta fase, 12, eran 15,91 y
+  4,66). El techo global no se aflojó. Control: unos valores que llegan de golpe ponen el
+  chequeo en rojo.
 - [x] **Ida y vuelta sin saltos**: en las cinco fronteras la pose coincide a los dos lados
-  (≤ 5,7e−4 de mundo con ε = 1e−7) y subiendo se deshace al revés.
+  (≤ 4,9e−4 de mundo con ε = 1e−7) y subiendo se deshace al revés.
 - [x] Invariantes: `s23-final` nuevo (11 afirmaciones, 4 controles); `s9e-recorrido` y
   `s17-revelado` reescritos para el final; `s8-escena`, `s16-arnes`, `s20-brillo`,
   `s22-emision`, `s18-modulacion`, `s8e-encuadre`, `s13e-camara`, `s19-lente`, `s7-mezcla`
@@ -86,7 +87,7 @@ el pie sube; E se sostiene hasta el final.
   (`por-que-develop/geometria.ts`):
   - **A · la frase** «Seis razones» · «para elegirnos» llega desde atrás con P5 —escala 0,8 → 1
     con la opacidad, el gesto que nk hace con «5 things / to remember», medido en su DOM— y
-    rodea al logo: el hueco sale de la pose (30,6 svh en A) y del ancho medido del logo.
+    rodea al logo: el hueco sale de la pose (34,0 svh en A, 41,8 en B) y del ancho medido del logo.
   - **B · los seis valores**, tres a cada lado, entran de a pares con P5 escalonado mientras la
     cámara baja; la frase se queda y sube 30 svh para no pisarlos.
   - La sección sigue siendo «Por qué develOP»: `h2` en `sr-only` en las dos ramas, id y menú.
@@ -106,3 +107,20 @@ el pie sube; E se sostiene hasta el final.
   +2 encabezados, −5 marcadores), la lista de quién pide coreografía en todo ancho, y la tabla
   de superficies acordadas, actualizados. En verde: s7-arboles, s7-contrato, s10-acceso,
   s21-llave, s5-codigo, s5-tokens, s3-tokens, s5-trabajos, s6-render, s7-mezcla.
+
+## Fase 3 — El CTA (≥1024)
+
+- [x] El código entró con el commit de la fase 2: el CTA vive en el mismo escenario clavado y
+  sale de la misma geometría (`por-que-develop/geometria.ts`); este commit trae su registro.
+- [x] **La frase y los valores se levantan juntos**: suben 12 svh y se apagan entre las pantallas
+  1,8 y 2,2 del pin, antes de que llegue el CTA.
+- [x] **El CTA llega centrado con el gesto de la casa** (P5, escala 0,8 → 1 con la opacidad): la
+  frase entre 2,0 y 2,55, el destacado y el botón entre 2,15 y 2,7 —que es cuando la cámara
+  termina de subir a frontal (C)—. Mientras no llegó, el botón no se puede tocar.
+- [x] **Se queda mientras la cámara sube** y hasta el final del pin; se va hacia arriba con la
+  sección mientras la cámara se aleja (D) y el pie sube.
+- [x] **Copy (PROPUESTA, construida)**: «Este sitio empezó con una charla.» · destacado por el
+  peso «El tuyo también.» · botón «Hablanos» con el CTA por defecto (`CtaEnlace`), a `#contacto`.
+- [x] **Contraste AA sobre el logo gris, medido a 1440 en C**: la frase y el destacado 5,77:1
+  (percentil 90), el botón 5,77:1 en el peor píxel (0 % bajo AA).
+
