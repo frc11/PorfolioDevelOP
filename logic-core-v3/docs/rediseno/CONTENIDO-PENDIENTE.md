@@ -35,7 +35,7 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**27 cosas pendientes** en las ocho secciones, de las cuales **19** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
+**23 cosas pendientes** en las ocho secciones, de las cuales **15** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
@@ -46,7 +46,7 @@ el archivo que la fila nombra.
 | 04 · Trabajos | 0 |
 | 05 · Servicios | 3 |
 | 06 · Tu panel | 1 |
-| 07 · Por qué develOP | 4 |
+| 07 · Por qué develOP | 0 |
 | 08 · Cierre | 5 |
 
 
@@ -56,20 +56,16 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 | quién | cuántas |
 |---|---:|
-| Franco (o un cliente) | 8 |
+| Franco (o un cliente) | 4 |
 | Valentino | 16 |
 | Una decisión, antes que un dato | 3 |
 
-### Franco (o un cliente) — 8
+### Franco (o un cliente) — 4
 
 - **02 · Quiénes somos** · `personas[0].seria.marcador` — El retrato SERIO de Franco: es el que se ve en reposo.
 - **02 · Quiénes somos** · `personas[0].suelta.marcador` — El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
-- **07 · Por qué develOP** · `DIFERENCIALES[2].cuerpo` — Cuántos negocios trabajan así hoy. Contados, no estimados.
-- **07 · Por qué develOP** · `DIFERENCIALES[3].cuerpo` — Cuánto más rápido es el camino de develOP, medido sobre entregas reales.
-- **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
-- **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
 ### Valentino — 16
 
@@ -98,11 +94,9 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 ## Lo que conviene pedir primero
 
-**Estas 3, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
+**Estas 1, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
 
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
-- **07 · Por qué develOP** · `TESTIMONIO.marcador` — Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte.
-- **07 · Por qué develOP** · `TESTIMONIO.firma` — Quién lo dijo: nombre y cargo, con el permiso pedido.
 
 
 ## 01 · Hero
@@ -177,10 +171,6 @@ Se edita en `src/app/v3/_secciones/por-que-develop/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| `[CIFRA]` | `DIFERENCIALES[2].cuerpo` | Franco (o un cliente) | Cuántos negocios trabajan así hoy. Contados, no estimados. | Un número entero, sin símbolo. |
-| `[MÉTRICA]` | `DIFERENCIALES[3].cuerpo` | Franco (o un cliente) | Cuánto más rápido es el camino de develOP, medido sobre entregas reales. | Un número con su unidad. Ej.: `3 semanas contra 9`. |
-| `[TESTIMONIO]` | `TESTIMONIO.marcador` | Franco (o un cliente) | Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. Sin cifras adentro — la cifra va aparte. | Dos o tres renglones, ~220 caracteres. Texto plano, entre comillas. |
-| `[NOMBRE]` | `TESTIMONIO.firma` | Franco (o un cliente) | Quién lo dijo: nombre y cargo, con el permiso pedido. | Nombre · cargo · empresa. Una línea. |
 
 
 ## 08 · Cierre

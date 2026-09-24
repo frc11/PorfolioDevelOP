@@ -1,5 +1,4 @@
 import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes'
-import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelFinal } from './finalDelRecorrido'
 
 /**
  * LA COREOGRAFÍA DEFINITIVA — datos, no lógica.
@@ -199,24 +198,25 @@ export const CHOREO_TRAMOS: readonly ChoreoTramo[] = [
 // ── Los keyframes ───────────────────────────────────────────────────────────
 
 /**
- * El recorrido. 7 keyframes: 7 capturados + 0 derivados.
+ * El recorrido. 12 keyframes: 12 capturados + 0 derivados.
  *
- * ⚠️ El censo de arriba dice "7 capturados" porque el exportador llama así a
- * todo lo que viene del archivo. **Ninguna de estas siete se capturó con el
- * editor**: seis son poses compuestas y una es un sostén. Lo que sí es literal
+ * ⚠️ El censo de arriba dice "12 capturados" porque el exportador llama así a
+ * todo lo que viene del archivo. **Ninguna de estas doce se capturó con el
+ * editor**: ocho son poses compuestas y cuatro son sostenes. Lo que sí es literal
  * es el "0 derivados" — este recorrido no tiene un solo keyframe de relleno.
  *
- * Una pose por tramo, más un sostén: el cierre se clava desde 0,950 porque ahí
- * van "develOP" y el slogan, y el texto sobre una cámara que todavía deriva se
- * lee peor. El hero **ya no** tiene el suyo — ver el aviso de la cabecera.
+ * Una pose por tramo hasta Demos; el final son cuatro tiempos —A, B, C y E—, cada
+ * uno con su sostén, porque el texto de «Por qué develOP» y del pie se lee peor
+ * sobre una cámara que todavía deriva. El hero **ya no** tiene el suyo — ver el
+ * aviso de la cabecera.
  *
- * Los cinco tramos que se mueven van `turn: 'literal'`: la vuelta se acumula
- * 130 + 55 + 10 + 115 + 50 = **360 exacto**. Con los ángulos de hoy `short`
- * daría lo mismo —ningún salto pasa de 180°— pero la marca está para que la
- * vuelta SOBREVIVA a que se editen los ángulos.
+ * Los tramos que giran van `turn: 'literal'`: la vuelta se acumula
+ * 130 + 55 + 10 + 165 = **360 exacto**, y el final ya no gira. Con los ángulos
+ * de hoy `short` daría lo mismo —ningún salto pasa de 180°— pero la marca está
+ * para que la vuelta SOBREVIVA a que se editen los ángulos.
  *
  * La pose son CINCO canales: ángulo, altura, distancia y los dos de encuadre.
- * `frameY` queda en cero en las seis, igual que en todo el recorrido anterior:
+ * `frameY` queda en cero en las doce, igual que en todo el recorrido anterior:
  * el canal solo tiene recorrido por encima de una distancia de 11,4 y la
  * composición de este track se resuelve con `frameX` y con la altura de cámara.
  * La luz no entra en la pose desde S6: vive en `LIGHT_ARC`, abajo.
@@ -354,34 +354,74 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // la escena se ve —el corte recto de Tu Panel— ya es A, y los 165° que faltan para la
   // vuelta entera se hacen donde nadie los ve. La pose íntima de V3 (310°, a 14, el logo
   // llenando el cuadro) se fue con el diferencial que la usaba.
-  //
-  // Del ancla en adelante los keyframes caen donde dice `finalDelRecorrido.ts`, sobre la
-  // recta del tramo `cierre`: cada tiempo llega a su pose y se SOSTIENE mientras la
-  // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
   {
     at: 0.75,
     name: 'frase',
     ease: 'shift',
     turn: 'literal',
-    pose: POSES_DEL_FINAL.frase,
+    pose: { angleDeg: 360, height: 1.6, distance: 20, frameX: 0, frameY: 0 },
   },
-  sosten('frase · sostén', TIEMPOS_DEL_FINAL.frase.hasta, POSES_DEL_FINAL.frase),
-  // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
-  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.valores.llega), name: 'valores', ease: 'shift', turn: 'literal', pose: POSES_DEL_FINAL.valores },
-  sosten('valores · sostén', TIEMPOS_DEL_FINAL.valores.hasta, POSES_DEL_FINAL.valores),
-  // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.
-  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.cta.llega), name: 'cta', ease: 'shift', turn: 'literal', pose: POSES_DEL_FINAL.cta },
-  sosten('cta · sostén', TIEMPOS_DEL_FINAL.cta.hasta, POSES_DEL_FINAL.cta),
-  // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo
-  // al 19 % del alto, centrado. Es la excepción con nombre al techo de velocidad.
-  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.pie.llega), name: 'pie', ease: 'arrive', turn: 'literal', pose: POSES_DEL_FINAL.pie },
-  { at: 1, name: 'pie · sostén', ease: 'arrive', turn: 'literal', pose: POSES_DEL_FINAL.pie },
-]
 
-/** Un sostén: la misma pose en otro progreso del final. La cámara se clava. */
-function sosten(name: string, pantalla: number, pose: ChoreoKeyframe['pose']): ChoreoKeyframe {
-  return { at: progresoDelFinal(pantalla), name, ease: 'linear', turn: 'literal', pose }
-}
+  // ── Tramo 6 · Por qué develOP y el pie — [FINAL] ─────────────────────────
+  //
+  // Del ancla en adelante los keyframes caen donde dice `finalDelRecorrido.ts`, sobre la
+  // recta del tramo `cierre`: cada tiempo llega a su pose y se SOSTIENE mientras la
+  // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
+  // `s23-final` afirma que estos literales son los de ese archivo.
+  {
+    at: 0.8709,
+    name: 'frase · sostén',
+    ease: 'linear',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: 1.6, distance: 20, frameX: 0, frameY: 0 },
+  },
+  {
+    // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
+    at: 0.9078,
+    name: 'valores',
+    ease: 'shift',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
+  },
+  {
+    at: 0.9189,
+    name: 'valores · sostén',
+    ease: 'linear',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
+  },
+  {
+    // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.
+    at: 0.9521,
+    name: 'cta',
+    ease: 'shift',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
+  },
+  {
+    at: 0.9631,
+    name: 'cta · sostén',
+    ease: 'linear',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
+  },
+  {
+    // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo
+    // al 19 % del alto, centrado. Es la excepción con nombre al techo de velocidad.
+    at: 0.9723,
+    name: 'pie',
+    ease: 'arrive',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
+  },
+  {
+    at: 1,
+    name: 'pie · sostén',
+    ease: 'arrive',
+    turn: 'literal',
+    pose: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
+  },
+]
 
 // ── El arco del sol ─────────────────────────────────────────────────────────
 

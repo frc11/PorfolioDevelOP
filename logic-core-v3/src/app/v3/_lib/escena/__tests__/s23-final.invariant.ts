@@ -12,7 +12,7 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import type { ChoreoKeyframe, MutableLightLevels } from '../choreographyTypes'
 import { sampleLightArc } from '../choreographySampler'
 import { ANCLAJE } from '../anclaje'
-import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../finalDelRecorrido'
+import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelFinal } from '../finalDelRecorrido'
 import { NIVEL_DE_LA_NOCHE } from '../lightArc'
 import { EMISION_EN_LA_NOCHE, emisionDelLogoEn } from '../logoEmision'
 import { RAMPA_DE_LA_ENTRADA_PX, REVELADO_FRACCION, maskDeRevelado } from '../revelado'
@@ -115,5 +115,33 @@ const vuelta = [0.99, 0.97, 0.96, 0.93, 0.9, 0.86, 0.8].map((p) => posicion(p).j
 afirmarIgual(vuelta, ida, '  y subiendo se deshace al revés: la pose es función del scroll, la misma en los dos sentidos')
 const conSalto = (p: number): readonly number[] => (p < D.desde ? posicion(p) : [0, 0, 60])
 controlPositivo('  el detector de saltos vería una cámara que se teletransporta en C → D', conSalto, (pos: (p: number) => readonly number[]) => saltoEn(D.desde, pos) < TOPE_DEL_SALTO)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · Los literales del recorrido son los de `finalDelRecorrido.ts`')
+
+// El bloque de keyframes va en literales porque el editor de la escena lo exporta así, byte por byte.
+const T = TIEMPOS_DEL_FINAL
+const DERIVADOS: readonly (readonly [string, number, ChoreoKeyframe['pose']])[] = [
+  ['frase · sostén', progresoDelFinal(T.frase.hasta), POSES_DEL_FINAL.frase],
+  ['valores', progresoDelFinal(T.valores.llega), POSES_DEL_FINAL.valores],
+  ['valores · sostén', progresoDelFinal(T.valores.hasta), POSES_DEL_FINAL.valores],
+  ['cta', progresoDelFinal(T.cta.llega), POSES_DEL_FINAL.cta],
+  ['cta · sostén', progresoDelFinal(T.cta.hasta), POSES_DEL_FINAL.cta],
+  ['pie', progresoDelFinal(T.pie.llega), POSES_DEL_FINAL.pie],
+  ['pie · sostén', 1, POSES_DEL_FINAL.pie],
+]
+const mismaPose = (a: ChoreoKeyframe['pose'], b: ChoreoKeyframe['pose']): boolean => (Object.keys(b) as (keyof ChoreoKeyframe['pose'])[]).every((k) => a[k] === b[k])
+/** Cada keyframe del final cae donde dice el tiempo (a lo sumo el redondeo del exportador, 5e−5) y con su pose. */
+const coinciden = (ks: readonly ChoreoKeyframe[]): boolean =>
+  DERIVADOS.every(([nombre, at, pose]) => {
+    const k = ks.find((x) => x.name === nombre)
+    return k !== undefined && Math.abs(k.at - at) <= 5e-5 && mismaPose(k.pose, pose)
+  })
+afirmar(coinciden(CHOREO_KEYFRAMES), 'los siete keyframes del final caen en su tiempo (al redondeo del exportador) y con su pose', DERIVADOS.map(([n, at]) => `${n} ${at.toFixed(4)}`).join(' · '))
+controlPositivo(
+  '  el chequeo vería una pose del final editada a mano sin tocar `finalDelRecorrido.ts`',
+  CHOREO_KEYFRAMES.map((k) => (k.name === 'cta' ? { ...k, pose: { ...k.pose, height: 1 } } : k)),
+  coinciden,
+)
 
 cerrar('s23-final.invariant')

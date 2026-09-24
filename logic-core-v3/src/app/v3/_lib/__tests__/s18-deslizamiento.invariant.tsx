@@ -121,10 +121,10 @@ afirmarIgual(
   'trabajos',
   '  y ese ancla es una sección REAL de la tabla, no un destino inventado',
 )
-/** El `<a>` del Cierre lleva el MISMO `data-pieza` y queda afuera por el ancestro. */
+/** El `<a>` del CTA del final lleva el MISMO `data-pieza` y queda afuera por el ancestro. SPRINT FINAL: se mudó del Cierre a «Por qué develOP». */
 afirmar(
-  leer('src/app/v3/_secciones/cierre/Cierre.tsx').includes('CtaEnlace'),
-  'el Cierre tiene su propio `CtaEnlace`: el filtro tiene que ser el ancestro, no el `data-pieza`',
+  leer('src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx').includes('CtaEnlace'),
+  'el final tiene su propio `CtaEnlace`: el filtro tiene que ser el ancestro, no el `data-pieza`',
 )
 afirmar(
   SELECTOR_DEL_CTA_DEL_HERO.startsWith('[data-panel='),

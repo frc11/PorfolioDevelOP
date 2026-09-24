@@ -180,3 +180,49 @@ el pie sube; E se sostiene hasta el final.
 - [x] Invariantes: `s6-por-que-develop` suma la tinta plena de la lista (con control), la
   ausencia de mezcla y las columnas contenedor (31 afirmaciones). En verde: s6-render,
   s7-mezcla, s7-arboles, s5-codigo, s10-acceso; `tsc --noEmit` limpio.
+
+## Fase 6 — Verificación
+
+- [x] **Lint y tipos**: eslint sobre los archivos del sprint, 0 errores; los 3 avisos ya estaban
+  en `movil-cerrado` (dos en `s10-acceso`, `LightStop` en `choreography.ts`). `tsc --noEmit`
+  limpio. Sin build y sin prettier.
+- [x] **En verde**: s7-arboles, s7-contrato, s7-mezcla, s6-cierre (s8-cierre reescrito), s10-acceso,
+  s21-llave, s23-final; la escena y la cámara (s8-escena, s16-arnes, s20-brillo, s22-emision,
+  s18-modulacion, s18-compuertas, s18-deslizamiento, s8e, s9e-recorrido, s13e-camara, s19-lente,
+  s7e entero, s10e a s22, s17-revelado, s17-marca, s19-sincronia); y s6-*, s5-*, s3-tokens,
+  s3-codigo, s3-frontera, s11-frontera, s7-pedido, s7-cn, s7-integracion, s8-montaje,
+  s10-lectura y s10-medida.
+- [x] **El túnel**: la superposición contra la referencia (`scripts-b4/ref-comparar.ts`) deja las
+  cinco capas adentro del margen de 1 px; el peor caso es el 1,6 % del margen, como antes.
+- [x] **Invariantes nuevas, con control positivo** (`s23-final`, 13 afirmaciones): el corte recto,
+  el logo claro en el primer cuadro, la excepción D (12,06 alturas de cuadro por pantalla,
+  3,53 veces el arranque, el único tramo arriba del techo), la ida y vuelta A → E sin saltos, y
+  los literales del recorrido atados a `finalDelRecorrido.ts`.
+- [x] **Lo que la verificación destapó, arreglado acá:**
+  - `s7e-export-sprites` y `s7e-variantes` estaban en rojo desde la fase 1 (la batería de
+    entonces no los corría): el editor de la escena exporta el bloque de keyframes en literales,
+    byte por byte, con sus notas. El final pasó a literales —los emitió el propio editor— con sus
+    notas en `choreographyNotes.ts`, y `s23-final` §5 afirma que coinciden con
+    `finalDelRecorrido.ts` al redondeo del exportador (5e−5).
+  - `s7e-recorridos`: el control de distancia del editor llegaba a 30 y la pose E está a 40; el
+    rango sube a 40 (`probeStore.ts`).
+  - `s18-deslizamiento`: el otro `CtaEnlace` de la página vive ahora en «Por qué develOP».
+  - `s8-chrome`: «ningún enlace a la nada» sigue estricto; el único enlace al destino provisorio
+    `#contacto` —el contacto del pie— se cuenta aparte.
+  - `s7-pedido`: `CONTENIDO-PENDIENTE.md` regenerado (27 → 23 pendientes: se van los cuatro del
+    «Por qué develOP» viejo).
+- ⛔ **Bloqueante escrito — necesitan un build, prohibido en este sprint:** `s7-compuerta`,
+  `s8-intro`, dos afirmaciones de `s8-chrome` (los chunks) y `s8-tres` leen `.next` de producción.
+- [x] **Con el candado**, en `~/.cache/b4-medicion/final/`: la tira lado a lado con nk en los siete
+  momentos (`tira/lado-a-lado.png`), la grabación a 1440 de Tu Panel al final y de vuelta
+  (`grabacion-1440/grabacion-1440.mp4`, 48 s, y su hoja) y las capturas a 375, 768 y 1024 (`f6/`).
+
+### El plan de cámara, final, contra nk
+
+| tiempo | nk | develOP |
+|---|---|---|
+| A · frase | barra al 38 % | a 20: logo al 38 %, frontal |
+| B · valores | 64 %, en contrapicado | a 16 (el plan decía 12): 47 %, contrapicado de 11°. A 12 el logo, que es ancho, no dejaba lugar a las columnas a 1024 |
+| C · CTA | 74 %, sube a frontal | a 16: 47 %, sube a frontal |
+| D · alejamiento | ×3,9 en 0,056 pantallas | ×2,5 en 0,25 pantallas: 12,06 alturas de cuadro por pantalla, 3,53 veces el arranque |
+| E · pie | 19 %, centrada | a 40: 19 %, centrado |

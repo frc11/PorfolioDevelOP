@@ -57,7 +57,10 @@ afirmarIgual(
   '  y con los rótulos de la misma fila: el nombre y el destino no se pueden desincronizar',
 )
 const HREFS_DEL_PIE = S.hrefsDe(PIE)
-afirmarIgual(S.aLaNada(HREFS_DEL_PIE, ANCLAS_QUE_EXISTEN), [], `los ${HREFS_DEL_PIE.length} enlaces del pie renderizado apuntan a un ancla que existe`)
+// SPRINT FINAL: el contacto va al destino provisorio declarado, el mismo del CTA del final; el resto, a un ancla que existe.
+const HREFS_REALES_DEL_PIE = HREFS_DEL_PIE.filter((h) => h !== CONTACTO_DEL_PIE.destino)
+afirmarIgual(HREFS_DEL_PIE.length - HREFS_REALES_DEL_PIE.length, 1, 'el pie tiene UN solo enlace al destino provisorio: el de contacto')
+afirmarIgual(S.aLaNada(HREFS_REALES_DEL_PIE, ANCLAS_QUE_EXISTEN), [], `los otros ${HREFS_REALES_DEL_PIE.length} enlaces del pie renderizado apuntan a un ancla que existe`)
 afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino), ANCLAS_QUE_EXISTEN), [], `y los ${ENLACES_DE_MUESTRA.length} de la pastilla también — son de muestra, pero no llevan a la nada`)
 controlPositivo('el detector ve un href a la nada', S.HREFS_A_LA_NADA, (l: readonly string[]) => S.aLaNada(l, ANCLAS_QUE_EXISTEN).length === 0)
 controlPositivo('y no se pone verde con la lista vacía de anclas', ['#hero'], (l: readonly string[]) => S.aLaNada(l, []).length === 0)

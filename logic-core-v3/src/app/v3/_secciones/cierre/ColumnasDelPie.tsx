@@ -35,8 +35,11 @@ import {
  * ── Los enlaces no pueden llevar a la nada ────────────────────────────────
  *
  * La columna del recorrido lleva a las anclas que EXISTEN, con sus nombres
- * sacados de la misma fila de la tabla. La de contacto no tiene destino real,
- * así que muestra su forma con el marcador en TEXTO y nunca con un `<a>`.
+ * sacados de la misma fila de la tabla. **[FINAL]** La de contacto lleva al
+ * destino del CTA del final, `#contacto`, declarado provisorio: es el único
+ * enlace del pie que todavía no tiene ancla, y `s8-chrome` lo cuenta aparte.
+ * Lo que sigue sin destino (la dirección, las redes) va como marcador en
+ * TEXTO, nunca con un `<a>`.
  *
  * ── El texto secundario va en tinta con opacidad, no en `tinta-media` ─────
  *
