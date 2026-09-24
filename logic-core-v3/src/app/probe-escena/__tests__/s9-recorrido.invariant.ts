@@ -62,11 +62,18 @@ check(
   CHOREO_KEYFRAMES.every((keyframe) => keyframe.derived !== true)
 )
 
+/**
+ * [FINAL] El final tiene CUATRO poses sobre sus dos tramos —la frase cierra `demos` y el
+ * valores, el CTA y el pie viven en `cierre`— y cada una se nombra acá. Una pose más que no
+ * esté en esta lista es relleno y pone esto en rojo.
+ */
+const POSES_DEL_FINAL_DECLARADAS = ['frase', 'valores', 'cta', 'pie'] as const
 const distintas = new Set(CHOREO_KEYFRAMES.map(firma))
 check(
-  'una pose distinta por tramo, ni una de más',
-  distintas.size === CHOREO_TRAMOS.length,
-  `${distintas.size} poses distintas y ${CHOREO_TRAMOS.length} tramos`
+  'una pose distinta por tramo hasta Trabajos, y las cuatro del final (frase · valores · cta · pie), ni una de más',
+  distintas.size === CHOREO_TRAMOS.length - 2 + POSES_DEL_FINAL_DECLARADAS.length &&
+    POSES_DEL_FINAL_DECLARADAS.every((n) => byName.has(n)),
+  `${distintas.size} poses distintas: ${CHOREO_TRAMOS.length - 2} de los tramos hasta Trabajos + ${POSES_DEL_FINAL_DECLARADAS.length} del final`
 )
 
 /**
@@ -80,11 +87,17 @@ check(
  * pone esto en rojo sin que nadie se acuerde de agregarlo acá, y uno declarado
  * que no esté, también.
  */
-const SOSTENES: readonly Par[] = [['cierre', 'cierre · sostén']]
+// [FINAL] cada tiempo del final se sostiene mientras la sección muestra lo suyo.
+const SOSTENES: readonly Par[] = [
+  ['frase', 'frase · sostén'],
+  ['valores', 'valores · sostén'],
+  ['cta', 'cta · sostén'],
+  ['pie', 'pie · sostén'],
+]
 
 const sostenes = sostenesDerivados(CHOREO_KEYFRAMES)
 check(
-  'el ÚNICO sostén del recorrido es el del cierre, y es copia exacta de su pose',
+  'los sostenes del recorrido son los cuatro del final, y cada uno es copia exacta de su pose',
   comoTexto(sostenes) === comoTexto(SOSTENES),
   `derivados del array: ${comoTexto(sostenes)} · declarados: ${comoTexto(SOSTENES)}`
 )
@@ -96,8 +109,8 @@ check(
         ? { ...keyframe, pose: { ...keyframe.pose, distance: keyframe.pose.distance + 1 } }
         : keyframe
     )
-  ).length === 0,
-  'moviéndole 1 a la distancia del sostén, la misma función devuelve cero: compara la pose, no el nombre'
+  ).length === SOSTENES.length - 1,
+  'moviéndole 1 a la distancia del último sostén, la misma función pierde ése: compara la pose, no el nombre'
 )
 check(
   'y el hero ya no tiene el suyo: ningún keyframe se llama así',
@@ -135,8 +148,9 @@ const CIERRA_TRAMO: readonly Par[] = [
   ['quiénes somos', 'quiénes somos'],
   ['números', 'números'],
   ['trabajos', 'trabajos'],
-  ['demos', 'demos'],
-  ['cierre', 'cierre · sostén'],
+  // [FINAL] `demos` corre escondido y cierra en la frase; `cierre`, en el sostén del pie.
+  ['demos', 'frase'],
+  ['cierre', 'pie · sostén'],
 ]
 /** El tramo cuya pose está en la APERTURA: el hero, desde V3-B. */
 const ABRE_TRAMO: readonly Par[] = [['hero', 'hero']]

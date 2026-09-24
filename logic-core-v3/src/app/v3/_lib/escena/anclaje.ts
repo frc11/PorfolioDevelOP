@@ -113,6 +113,7 @@
  */
 
 import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from './choreography'
+import { ANCLA_DE_POR_QUE_DEVELOP } from './finalDelRecorrido'
 import { SECCIONES } from '../secciones'
 import { type Anclaje, type TramoAnclado, derivarAnclaje } from './anclajeDerivacion'
 
@@ -187,7 +188,7 @@ export const TRAMOS_ANCLADOS: readonly TramoAnclado[] = [
   { tramo: 'números', secciones: ['numeros'] },
   { tramo: 'trabajos', secciones: ['trabajos'] },
   { tramo: 'demos', secciones: ['servicios', 'tu-panel'] },
-  { tramo: 'cierre', secciones: ['por-que-develop'], ancla: 0.8525 },
+  { tramo: 'cierre', secciones: ['por-que-develop'], ancla: ANCLA_DE_POR_QUE_DEVELOP },
 ]
 
 export type Reasignacion = {
@@ -203,19 +204,13 @@ export type Reasignacion = {
  */
 export const REASIGNACIONES: readonly Reasignacion[] = [
   {
-    keyframe: 'demos',
+    keyframe: 'frase',
     seccion: 'por-que-develop',
     razon:
-      'demos era una seccion del plan viejo que el sitio ya no tiene. Su pose es la mas intima ' +
-      'del recorrido —el logo llena el 81% del alto del cuadro, contrapicado a distancia 9, el ' +
-      'sol en contraluz a gamma 155-166°— y es la unica compuesta para mirarse sin texto encima. ' +
-      'El diferencial es la segunda de las dos secciones que dejan ver la sala y la que argumenta ' +
-      'por que develOP: la pose que le faltaba es esa. El tramo demos corre escondido detras de ' +
-      'Servicios y Tu panel, y desde V3-E cierra ADENTRO de Tu panel: la pose con la que ese tramo ' +
-      'CIERRA es la pose con la que el diferencial ASOMA, y para cuando llena el cuadro —en el ancla ' +
-      'declarada— la camara ya se alejo lo suficiente para que el titular quede limpio. Antes de la ' +
-      'descuantizacion el diferencial LLENABA el cuadro sobre esa pose, y ahi el titular se superponia ' +
-      'con el logo entre 7,1% y 15,1% segun el cuadro: era el defecto 7.',
+      '[FINAL] La frase es el primer tiempo del final y no tiene seccion propia: es la pose con la que ' +
+      'Por que develOP aparece. El tramo demos corre escondido detras de Servicios y Tu panel y cierra en ' +
+      'ella, asi que cuando el corte recto de Tu panel descubre la sala la camara ya esta frontal, ' +
+      'centrada y quieta, y la frase llega sobre una pose que no se mueve.',
   },
 ]
 

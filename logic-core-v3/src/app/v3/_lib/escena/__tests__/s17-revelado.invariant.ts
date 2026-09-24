@@ -22,6 +22,7 @@ import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import {
+  RAMPA_DE_LA_ENTRADA_PX,
   REVELADO_FRACCION,
   type BordeDeRevelado,
   type PanelDelRecorrido,
@@ -44,10 +45,17 @@ titulo('1 · EL NÚCLEO — una rampa espacial en la costura, no un opacity')
 
 const entra = maskDeRevelado([{ row: 540, tipo: 'entra' }], VENTANA, RAMPA)
 afirmar(entra !== null && /linear-gradient\(to bottom/.test(entra), 'un borde `entra` produce un gradiente vertical', entra ?? 'null')
+// [FINAL] la ENTRADA es un corte recto: oculta hasta la costura y plena desde ella, sin rampa.
+const corteRecto = (m: string | null, fila: number): boolean => m !== null && m.includes(`transparent ${fila}px`) && m.includes(`#000 ${fila}px`)
 afirmar(
-  entra !== null && entra.includes('transparent 540px') && entra.includes(`#000 ${540 + RAMPA}px`),
-  '  con la escena OCULTA (transparent) sobre la costura y PLENA (#000) una rampa más abajo',
-  `rampa de ${RAMPA}px en [540, ${540 + RAMPA}]`,
+  RAMPA_DE_LA_ENTRADA_PX === 0 && corteRecto(entra, 540),
+  '  la ENTRADA es un CORTE RECTO: la escena oculta hasta la costura y plena desde la misma fila, sin degradado',
+  entra ?? 'null',
+)
+controlPositivo(
+  '  el chequeo del corte recto vería la rampa de antes',
+  maskDeRevelado([{ row: 540, tipo: 'sale' }], VENTANA, RAMPA),
+  (m: string | null) => corteRecto(m, 540),
 )
 const sale = maskDeRevelado([{ row: 540, tipo: 'sale' }], VENTANA, RAMPA)
 afirmar(
@@ -173,8 +181,9 @@ afirmar(
   maskContiguas ?? 'null',
 )
 afirmar(
-  maskContiguas !== null && maskContiguas.includes(`#000 ${RAMPA}px`) && maskContiguas.includes(`#000 ${VENTANA - RAMPA}px`),
-  '  con la rampa de entrada arriba y la de salida abajo, donde SÍ hay opaco',
+  maskContiguas !== null && maskContiguas.includes('#000 0px') && maskContiguas.includes(`#000 ${VENTANA - RAMPA}px`),
+  '  con el corte recto de entrada arriba y la rampa de salida abajo, donde SÍ hay opaco',
+  maskContiguas ?? 'null',
 )
 
 const bordesConOpaco = bordesDeRevelado(docApilado, conOpacoEntreMedio, ATRIBUTO_DEL_PANEL)
@@ -199,11 +208,12 @@ controlPositivo(
 titulo('4 · LA RAMPA ESCALA CON EL VIEWPORT, no es un píxel copiado')
 
 afirmarIgual(REVELADO_FRACCION, MARGEN_DE_REANUDACION, 'el ancho del ablandado es el MISMO octavo que la reanudación (0,125)')
-const m720 = maskDeRevelado([{ row: 300, tipo: 'entra' }], 720, 720 * REVELADO_FRACCION)
-const m1080 = maskDeRevelado([{ row: 300, tipo: 'entra' }], 1080, 1080 * REVELADO_FRACCION)
+// [FINAL] la que escala es la rampa de SALIDA: la entrada no tiene rampa.
+const m720 = maskDeRevelado([{ row: 300, tipo: 'sale' }], 720, 720 * REVELADO_FRACCION)
+const m1080 = maskDeRevelado([{ row: 300, tipo: 'sale' }], 1080, 1080 * REVELADO_FRACCION)
 afirmar(
-  m720 !== null && m720.includes(`#000 ${300 + 720 * REVELADO_FRACCION}px`),
-  'a 720 de alto la rampa mide 90px; a 1080, 135px — la fracción por el viewport',
+  m720 !== null && m720.includes(`#000 ${300 - 720 * REVELADO_FRACCION}px`),
+  'a 720 de alto la rampa de salida mide 90px; a 1080, 135px — la fracción por el viewport',
   `720→${720 * REVELADO_FRACCION}px · 1080→${1080 * REVELADO_FRACCION}px`,
 )
 afirmar(m1080 !== null && m720 !== null && m1080 !== m720, '  y las dos máscaras difieren: la rampa no es un número fijo')

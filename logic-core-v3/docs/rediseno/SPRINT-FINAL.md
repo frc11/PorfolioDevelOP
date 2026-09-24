@@ -52,3 +52,29 @@ escenario clavado y el pie es la última): la escena aparece con A ya puesto (la
 alcanza escondida detrás de Tu Panel); A se sostiene 0,5 pantallas del pin; B llega en 1;
 se sostiene 0,3; C llega en 0,9 y se sostiene 0,3; D ocupa las primeras 0,25 pantallas en que
 el pie sube; E se sostiene hasta el final.
+
+## Fase 1 — La escena se extiende (≥1024)
+
+- [x] **Cinco tiempos sobre la coreografía de siempre** (`_lib/escena/finalDelRecorrido.ts`):
+  el tramo `demos` corre escondido y cierra en la pose de la frase; del ancla (0,8525) en
+  adelante los keyframes caen sobre la recta del tramo `cierre`: frase → sostén 0,8709 ·
+  valores 0,9078 → sostén 0,9189 · cta 0,9521 → sostén 0,9631 · pie 0,9723 → sostén 1.
+  «Por qué develOP» pasa a 4 pantallas (la entrada y tres de pin). Sin tocar
+  `scene-camera.ts` ni `HeroArtifact.tsx` (el sitio vivo sólo lee el primer keyframe).
+- [x] **El corte es recto**: la costura donde la sala ENTRA no tiene rampa
+  (`RAMPA_DE_LA_ENTRADA_PX = 0`, `revelado.ts`); la de salida de Trabajos conserva la suya.
+- [x] **El logo ya está claro**: el arco vuelve a la noche escondido (0,7375, con Servicios y
+  Tu Panel tapando la sala) y se queda ahí hasta el final. Afirmado: en la reanudación
+  (p 0,8110) y al asomar (p 0,8156) el nivel es 0,040 y la emisión 0,160 de 0,16.
+- [x] **La excepción D, con nombre**: fuera de D el pico es 2,786 alturas de cuadro por
+  pantalla contra 3,413 del arranque; **D va a 15,91, 4,66 veces el arranque**, en 0,25
+  pantallas. El techo global no se aflojó. Control: unos valores que llegan de golpe
+  ponen el chequeo en rojo.
+- [x] **Ida y vuelta sin saltos**: en las cinco fronteras la pose coincide a los dos lados
+  (≤ 5,7e−4 de mundo con ε = 1e−7) y subiendo se deshace al revés.
+- [x] Invariantes: `s23-final` nuevo (11 afirmaciones, 4 controles); `s9e-recorrido` y
+  `s17-revelado` reescritos para el final; `s8-escena`, `s16-arnes`, `s20-brillo`,
+  `s22-emision`, `s18-modulacion`, `s8e-encuadre`, `s13e-camara`, `s19-lente`, `s7-mezcla`
+  en verde.
+- Medido en el navegador a 1440: el corte recto, A frontal al asomar, B en contrapicado y
+  E con el logo chico al centro sobre la sala de noche.

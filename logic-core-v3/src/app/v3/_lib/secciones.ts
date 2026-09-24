@@ -330,6 +330,12 @@ const PASOS_DE_SERVICIOS = 3
 export const PANTALLAS_DE_NUMEROS = 2
 
 /**
+ * [FINAL] Las pantallas de «Por qué develOP»: la entrada y tres de pin, con la frase, los
+ * valores y el CTA (`escena/finalDelRecorrido.ts` reparte los tiempos sobre ellas).
+ */
+export const PANTALLAS_DE_POR_QUE_DEVELOP = 4
+
+/**
  * ⚠️ SERVICIOS SE ESTIRÓ: su alto ya NO es `pasos × 100svh`.
  *
  * Los pasos y el alto son dos conceptos distintos y por eso son dos constantes:
@@ -557,7 +563,20 @@ export const SECCIONES: readonly Seccion[] = [
    * porque no se ve. La cuenta de ritmo salía mal y nadie se enteraba.
    */
   { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '200svh' },
-  { id: 'por-que-develop', numero: '07', nombre: 'Por qué develOP', superficie: 'papel-transparente', alto: '100svh' },
+  /**
+   * POR QUÉ develOP — **[FINAL]** el escenario de los tres primeros tiempos del final
+   * (frase, valores, CTA; `escena/finalDelRecorrido.ts`). Cuatro pantallas con el
+   * escenario clavado desde escritorio; abajo de 1024 mide su contenido. La sala está de
+   * noche, así que la tinta es la clara (`oscuro-transparente`).
+   */
+  {
+    id: 'por-que-develop',
+    numero: '07',
+    nombre: 'Por qué develOP',
+    superficie: 'oscuro-transparente',
+    alto: altoDeSecuenciaPinneada(PANTALLAS_DE_POR_QUE_DEVELOP),
+    altoAngosto: 'contenido',
+  },
   /**
    * CIERRE — el alto MEDIDO, y por qué se queda en 100svh. **SITIO-S7.**
    *
@@ -633,7 +652,8 @@ export const SECCIONES: readonly Seccion[] = [
    * tinta al 0,6), no «la superficie». El resto de la resolución está en
    * `_estilos/pie.css` y en el reporte de B12.
    */
-  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'papel-transparente', alto: '100svh' },
+  // [FINAL] el pie se arma alrededor del logo sobre la sala de noche: tinta clara.
+  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-transparente', alto: '100svh' },
 ]
 
 /**

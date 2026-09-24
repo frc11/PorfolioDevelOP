@@ -1,4 +1,5 @@
 import { PANTALLAS_DE_NUMEROS } from '../secciones'
+import { ANCLA_DE_POR_QUE_DEVELOP } from './finalDelRecorrido'
 
 import type { LightStop } from './choreographyTypes'
 import { KEY_ELEVATION_DEG, RIM_NIGHT_LEVEL } from './probeLighting'
@@ -252,7 +253,7 @@ export const VUELTA = { desde: NOCHE.hasta, hasta: 0.625 } as const
 export const AMANECER = { desde: 0.625, hasta: 0.7375 } as const
 
 /** El ancla declarada del diferencial, espejada de `anclaje.ts` (`TRAMOS_ANCLADOS`). `s20-arco` afirma la igualdad. */
-export const ANCLA_DEL_DIFERENCIAL = 0.8525
+export const ANCLA_DEL_DIFERENCIAL = ANCLA_DE_POR_QUE_DEVELOP
 
 function parada(at: number, level: number, kelvin: number, azimuthDeg: number, ease?: LightStop['ease']): LightStop {
   const base = { at, level, kelvin, azimuthDeg, elevationDeg: Math.round(elevacionDe(level) * 1e4) / 1e4 }
@@ -280,10 +281,12 @@ export const LIGHT_ARC: readonly LightStop[] = [
   // ⚠️ B12 · LA VUELTA: el sol asoma en la pantalla en que Trabajos se va y
   // Servicios llega. Sube hasta la frontera declarada de la noche (0,34).
   parada(VUELTA.hasta, NIVEL_DE_LA_VUELTA, 6675, 123.5, 'linear'),
-  // Amanece escondido: la escena no dibuja entre 0,625 y 0,7375 (visibilidad).
-  parada(AMANECER.hasta, 0.5, 6832.5, 131.15, 'shift'),
-  // El diferencial entra con el sol subiendo y llega a su ancla con la luz de S9.
-  parada(ANCLA_DEL_DIFERENCIAL, NIVEL_DE_LA_MANANA, 7219, 135.28, 'linear'),
-  // El Cierre, a la misma luz: la sala se ve detrás del pie y no vuelve a bajar.
-  parada(1, NIVEL_DE_LA_MANANA, 7700, 138, 'linear'),
+  // [FINAL] · LA NOCHE DEL FINAL, puesta ESCONDIDA. El sol ya no amanece: vuelve a la
+  // noche mientras Servicios y Tu panel tapan la sala (la escena no dibuja entre 0,625 y
+  // 0,7375), así que el logo ya está claro —su emisión sale de este nivel— en el primer
+  // cuadro en que el corte recto lo descubre, sin una sola animación a la vista. Es el
+  // mismo mecanismo que lo pone claro en Trabajos; ya no depende de que la gota haya corrido.
+  parada(AMANECER.hasta, NIVEL_DE_LA_NOCHE, 6832.5, 131.15, 'linear'),
+  // La frase, los valores, el CTA y el pie, sobre la misma noche.
+  parada(1, NIVEL_DE_LA_NOCHE, 7700, 138, 'linear'),
 ]

@@ -74,6 +74,14 @@ import { ATRIBUTO_DEL_PANEL } from './extensionDeLasSecciones'
 export const REVELADO_FRACCION = 0.125
 
 /**
+ * ⚠️ **[FINAL] · LA ENTRADA ES UN CORTE RECTO.** Donde la sala ENTRA —un panel opaco
+ * arriba y la sala abajo, o sea Tu Panel → «Por qué develOP»— ya no hay rampa: el papel
+ * se va con un borde limpio, como el de nk al abrir su escena. La rampa queda para la
+ * SALIDA (Trabajos → Servicios), que es de una sección anterior y no se toca.
+ */
+export const RAMPA_DE_LA_ENTRADA_PX = 0
+
+/**
  * Un borde de una ventana transparente, en coordenadas de la VENTANA (viewport).
  *
  * - `entra` — panel opaco ARRIBA, sala ABAJO: bajando, la sala aparece. La rampa
@@ -139,7 +147,7 @@ export function maskDeRevelado(
   for (const b of activos) {
     if (b.tipo === 'entra') {
       puntos.push({ fila: acotar(b.row, ventana), alpha: 0 })
-      puntos.push({ fila: acotar(b.row + rampaPx, ventana), alpha: 1 })
+      puntos.push({ fila: acotar(b.row + RAMPA_DE_LA_ENTRADA_PX, ventana), alpha: 1 })
       alphaArriba = 1
     } else {
       puntos.push({ fila: acotar(b.row - rampaPx, ventana), alpha: 1 })

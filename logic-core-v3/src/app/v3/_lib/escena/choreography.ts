@@ -1,4 +1,5 @@
 import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes'
+import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelFinal } from './finalDelRecorrido'
 
 /**
  * LA COREOGRAFÍA DEFINITIVA — datos, no lógica.
@@ -346,85 +347,41 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     pose: { angleDeg: 195, height: 4.5, distance: 20, frameX: -0.85, frameY: 0 },
   },
 
-  // ── Tramo 5 · Demos ──────────────────────────────────────────────────────
+  // ── Tramo 5 · Demos, y el final — [FINAL] ────────────────────────────────
+  //
+  // El tramo `demos` sigue corriendo ESCONDIDO detrás de Servicios y Tu Panel, y ahora
+  // cierra en la pose de la frase: frontal, centrada, a 20. Así el primer cuadro en que
+  // la escena se ve —el corte recto de Tu Panel— ya es A, y los 165° que faltan para la
+  // vuelta entera se hacen donde nadie los ve. La pose íntima de V3 (310°, a 14, el logo
+  // llenando el cuadro) se fue con el diferencial que la usaba.
+  //
+  // Del ancla en adelante los keyframes caen donde dice `finalDelRecorrido.ts`, sobre la
+  // recta del tramo `cierre`: cada tiempo llega a su pose y se SOSTIENE mientras la
+  // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
   {
-    // "Vuelve a bajar al nivel del logo y se acerca. El momento más íntimo del
-    // recorrido."
-    //
-    // 115° de órbita y la distancia de 20 a 9: es el tramo que más mueve la cámara
-    // en el espacio, y el pico de velocidad del recorrido (75,3) vive acá, a mitad
-    // de camino. **Es la única pose donde el logo llena el cuadro** —81% del alto
-    // en tinta— y es la excepción que la arquitectónica se reserva.
-    //
-    // ── Por qué −2,60 y no 0 ───────────────────────────────────────────────
-    //
-    // La tabla pide además "sol visible en cuadro". El sol vive a elevación 29,6°
-    // en este punto del arco, así que para que entre en el encuadre la cámara
-    // tiene que estar MIRANDO HACIA ARRIBA lo suficiente: con media altura de
-    // cuadro de 17,5°, hace falta `altura ≤ −0,214 × distancia`, o sea −1,93 a
-    // distancia 9. −2,60 lo cumple con margen y sigue siendo "el nivel del logo"
-    // (la tinta va de −2,39 a +2,39): es un contrapicado de 16°, no un picado.
-    //
-    // Holgura contra el piso: 1,299.
-    //
-    // ── ⚠️ EL RECORTE POR ARRIBA ES DECISIÓN (SITIO-S11, defecto 18) ───────
-    //
-    // Llenar el cuadro y salirse de él NO son lo mismo, y hasta S10 acá sólo
-    // estaba escrito lo primero: a p=0,750 la caja llega a y=+1,05 con el borde en
-    // +1,00 y el logo entra al 98,9% en el peor cuadro — cerca del 1% del área
-    // queda afuera. **El valor no se toca:** lo que se recorta es el filo superior
-    // del trazo, no la forma, y un recorte por arriba que nadie declaró se lee como
-    // un error. Lo midió `s10-logo.invariant.ts` §3, y su §6 lo custodia.
     at: 0.75,
-    name: 'demos',
+    name: 'frase',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 310, height: -2.6, distance: 14, frameX: 1, frameY: 0 },
+    pose: POSES_DEL_FINAL.frase,
   },
-
-  // ── Tramo 6 · Cierre ─────────────────────────────────────────────────────
-  {
-    // "Retroceso largo. La cámara se va, el entorno se abre. Cierra en el mismo
-    // azimut que el hero pero mucho más lejos."
-    //
-    // De 9 a 27 de distancia: **el alejamiento más largo del recorrido**, y el que
-    // fija el rango completo de distancias del track (9 a 27, contra 7–16 de la
-    // base y 11,5–29 de la arquitectónica). El ángulo dice 360 y no 0 porque este
-    // archivo guarda el ángulo ACUMULADO; el panel lo publica envuelto y ahí se
-    // lee 0,0°, o sea el mismo azimut del hero.
-    //
-    // La altura −1,40 es el cierre de la dramática tal cual: un contrapicado de 3°
-    // que mira la marca desde apenas abajo, con el sol ya poniéndose detrás.
-    //
-    // El logo ocupa el 28% del alto del cuadro en tinta, así que quedan ~36% de
-    // aire arriba y abajo — sobra para el wordmark y una línea de slogan.
-    //
-    // `arrive` es la curva del sistema para lo que llega: el alejamiento resuelve
-    // temprano y después se demora, que es lo que deja la última pantalla quieta.
-    at: 0.95,
-    name: 'cierre',
-    ease: 'arrive',
-    turn: 'literal',
-    pose: { angleDeg: 360, height: -1.4, distance: 27, frameX: 0, frameY: 0 },
-  },
-  {
-    // Sostén de verdad: pose idéntica a la anterior. **La cámara se clava.**
-    //
-    // Sin él, la curva `arrive` seguía derivando a 0,77 alturas de cuadro por
-    // unidad de progreso en el último frame del recorrido, y el texto del cierre
-    // se apoya sobre una imagen que todavía se mueve. Con la llegada en 0,950 la
-    // velocidad medida es **0,00 desde p = 0,96 hasta el final**.
-    //
-    // El precio está medido y es chico: el retroceso pasa a repartirse en 0,20 de
-    // progreso en vez de 0,25, así que el mayor tirón del recorrido sube de 25,0 a
-    // **31,2** — todavía menos de la mitad de los 70,4 de la base.
-    at: 1,
-    name: 'cierre · sostén',
-    ease: 'arrive',
-    turn: 'literal',
-    pose: { angleDeg: 360, height: -1.4, distance: 27, frameX: 0, frameY: 0 },
-  },
+  sosten('frase · sostén', TIEMPOS_DEL_FINAL.frase.hasta, POSES_DEL_FINAL.frase),
+  // B · más cerca y desde abajo: un contrapicado de 15° (el piso admite −3,764 a 12).
+  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.valores.llega), name: 'valores', ease: 'shift', turn: 'literal', pose: POSES_DEL_FINAL.valores },
+  sosten('valores · sostén', TIEMPOS_DEL_FINAL.valores.hasta, POSES_DEL_FINAL.valores),
+  // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.
+  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.cta.llega), name: 'cta', ease: 'shift', turn: 'literal', pose: POSES_DEL_FINAL.cta },
+  sosten('cta · sostén', TIEMPOS_DEL_FINAL.cta.hasta, POSES_DEL_FINAL.cta),
+  // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo
+  // al 19 % del alto, centrado. Es la excepción con nombre al techo de velocidad.
+  { at: progresoDelFinal(TIEMPOS_DEL_FINAL.pie.llega), name: 'pie', ease: 'arrive', turn: 'literal', pose: POSES_DEL_FINAL.pie },
+  { at: 1, name: 'pie · sostén', ease: 'arrive', turn: 'literal', pose: POSES_DEL_FINAL.pie },
 ]
+
+/** Un sostén: la misma pose en otro progreso del final. La cámara se clava. */
+function sosten(name: string, pantalla: number, pose: ChoreoKeyframe['pose']): ChoreoKeyframe {
+  return { at: progresoDelFinal(pantalla), name, ease: 'linear', turn: 'literal', pose }
+}
 
 // ── El arco del sol ─────────────────────────────────────────────────────────
 
