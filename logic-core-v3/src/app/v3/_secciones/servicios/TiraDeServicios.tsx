@@ -4,6 +4,7 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useState, type RefObject } from 'react'
 
 import { ATRIBUTO_DE_SERVICIO, SERVICIOS, type Servicio } from '../_contrato/acento'
+import { CtaDelServicio } from './CtaDelServicio'
 import { BloqueDeServicio } from './BloqueDeServicio'
 import {
   ALTO_DEL_VACIO_DE_ENTRADA,
@@ -126,8 +127,8 @@ function progresoEnLaLinea(medida: MedidaDeLaTira, indice: number, fraccion: num
  * Dónde están las fronteras no cambió — sigue siendo el tope de cada bloque
  * contra la línea de referencia de la ventana. Cambió qué pasa al cruzarlas.
  */
-export function fronterasDeEstado(medida: MedidaDeLaTira): number[] {
-  return SERVICIOS.map((_, i) => progresoEnLaLinea(medida, i, LINEA_DE_REFERENCIA))
+export function fronterasDeEstado(medida: MedidaDeLaTira, linea: number = LINEA_DE_REFERENCIA): number[] {
+  return SERVICIOS.map((_, i) => progresoEnLaLinea(medida, i, linea))
 }
 
 /**
@@ -192,6 +193,9 @@ function BloqueEnLaTira({
     <div data-servicio={servicio.id} className={CLASE_DE_BLOQUE_DE_LA_TIRA}>
       <RotuloAnunciado servicio={servicio} />
       <BloqueDeServicio servicio={servicio} pintura={pintura} disposicion="panel" />
+      {/* MÓVIL 2: el CTA de cada servicio es de abajo de 1024 (acá va oculto); en el
+          marcado está en las dos ramas, así las dos anuncian lo mismo. */}
+      <CtaDelServicio servicio={servicio} />
     </div>
   )
 }

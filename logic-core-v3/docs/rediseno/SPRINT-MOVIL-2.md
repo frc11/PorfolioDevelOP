@@ -43,13 +43,30 @@ Escritorio ≥1025 no cambia; la prueba es la superposición del túnel a 1440 d
 
 ## Fase 2 — Servicios en móvil y tablet
 
-- [ ] Sticky arriba: rótulo, número, nombre, subrayado + rodillo + torta en miniatura.
-- [ ] Abajo: la columna derecha en scroll normal; el rodillo cambia al cruzar una línea.
-- [ ] CTA al terminar cada servicio, abajo a la izquierda, con su acento.
-- [ ] El sticky suelta al terminar el último servicio.
-- [ ] «IA y Automatizaciones» en móvil y tablet; el nombre completo al lector y a escritorio.
-- [ ] Sin el hueco gigante antes del panel (afirmado).
-- [ ] 1024: el título entra en su columna; el CTA de IA verificado contra Tu Panel.
+- [x] **Cabeza fija arriba** (`servicios/angosto.tsx`): el rodillo de cuatro estados y la torta
+  en miniatura a su derecha, con su llenado, giro y acumulación —las mismas funciones:
+  `fronterasDeEstado`, `rangoDePintura`, `cierreDeLaPintura`—. El progreso lo da un `Bloque`
+  de pin (coreografía en todo ancho, como Trabajos) sobre una REGLA de «caja + un cuadro −
+  la cabeza»: sobre la caja sola el pin terminaba antes de que el 03 llegara a la línea
+  (frontera 1,01, medido a 390). Línea del cambio: 30 % de la ventana bajo la cabeza.
+  Medido a 390: 00 → 01 → 02 → 03 en +0 / +0,3 / +0,6 / +1,2 pantallas; la cabeza suelta a +1,8.
+- [x] **Abajo, scroll normal**: párrafo, medio y caso de cada servicio; el nombre completo
+  queda en `sr-only` mientras la cabeza lo muestra.
+- [x] **CTA al terminar cada servicio**, abajo a la izquierda, con su acento (lo hereda del
+  `[data-servicio]` del bloque). Está también en la tira de escritorio, oculto, para que las
+  dos ramas anuncien lo mismo.
+- [x] **El sticky suelta con el último servicio** (la cabeza es hermana de los bloques).
+- [x] **«IA y Automatizaciones»** en la cabeza hasta 1024 inclusive (`NOMBRE_CORTO`); el
+  lector y el rótulo anunciado dicen el completo.
+- [x] **Sin hueco antes del panel**: la tabla suma `altoAngosto: 'contenido'` y abajo de 1024
+  el panel, el bloque del pin y cada servicio sueltan 800 / 800 / 100 svh. Medido a 768: del
+  CTA de IA al titular de Tu Panel, ~120 px. Afirmado con dos controles.
+- [x] **Sin coreografía** (papel, o menos movimiento) no hay cabeza: la lista queda con su
+  encabezado y sus rótulos, sin una transformada (s7-arboles, s10-acceso, s6-render en verde).
+- [x] **1024**: el completo pedía tres renglones (118 px en una caja de dos) y ningún nivel
+  razonable lo mete en dos → también ahí «IA y Automatizaciones» (79 px). 1025 no cambia.
+  **El CTA rotativo a 1024 es scroll normal**: al final del pin queda en 689–736 con Tu Panel
+  en 768, y a 1,2 del pin ya salió con su sección (−386). No se queda pegado afuera.
 
 ## Fase 3 — Panel en móvil y tablet
 

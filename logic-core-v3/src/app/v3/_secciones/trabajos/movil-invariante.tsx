@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -152,8 +152,14 @@ export function afirmarAbajoDe1024(): void {
   // ── LA COREOGRAFÍA QUE CRUZA EL UMBRAL LA PIDE SÓLO TRABAJOS ───────────
   const COMPUERTA = sinComentarios(leer('../CompuertaDelHome.tsx'))
   afirmar(/deberiaAnimar\(true, !politica\.montaElMotorDeProgreso\)/.test(COMPUERTA), 'la compuerta del home la resuelve con la MISMA política de movimiento, sin el ancho')
-  const secciones = ['hero/Hero.tsx', 'quienes-somos/QuienesSomos.tsx', 'numeros/Numeros.tsx', 'servicios/Servicios.tsx', 'tu-panel/TuPanel.tsx', 'por-que-develop/PorQueDevelop.tsx', 'cierre/Cierre.tsx']
-  const laPiden = secciones.filter((s) => /CoreografiaEnTodoAncho/.test(sinComentarios(leer('..', s))))
-  afirmarIgual(laPiden, [], '  y ninguna otra sección la pide: abajo de 1024 siguen quietas')
+  // MÓVIL 2: Servicios la pide para su cabeza fija de abajo de 1024 (`angosto.tsx`), y sólo ahí.
+  const carpetas = ['hero', 'quienes-somos', 'numeros', 'servicios', 'tu-panel', 'por-que-develop', 'cierre']
+  const laPiden = carpetas.flatMap((c) =>
+    readdirSync(path.join(AQUI, '..', c))
+      .filter((f) => /\.tsx?$/.test(f) && !/invariant|invariante/.test(f))
+      .filter((f) => /<CoreografiaEnTodoAncho>/.test(sinComentarios(leer('..', c, f))))
+      .map((f) => `${c}/${f}`),
+  )
+  afirmarIgual(laPiden, ['servicios/angosto.tsx'], '  y fuera de Trabajos la pide sólo la cabeza fija de Servicios: el resto sigue quieto abajo de 1024')
   afirmar(/<CoreografiaEnTodoAncho>/.test(TRABAJOS), '  Trabajos sí')
 }

@@ -8,6 +8,7 @@ import { CabeceraDeServicios } from './CabeceraDeServicios'
 import { ContenidoDeServicio } from './ContenidoDeServicio'
 import { CLASE_DE_BLOQUE_DE_SERVICIO } from './geometria'
 import { ServiciosEnSecuencia } from './ServiciosEnSecuencia'
+import { ServiciosAngostos } from './angosto'
 
 /**
  * SERVICIOS — la sección más coreografiada del sitio. UN momento, no tres.
@@ -109,12 +110,18 @@ const INERCIA_DE_LA_SECUENCIA: number | null = null
 function ServiciosApilados(): React.JSX.Element {
   return (
     <div className="flex w-full flex-col">
-      <CabeceraDeServicios />
-      {SERVICIOS.map((servicio) => (
-        <div key={servicio.id} data-servicio={servicio.id} className={CLASE_DE_BLOQUE_DE_SERVICIO}>
-          <ContenidoDeServicio servicio={servicio} />
+      <ServiciosAngostos>
+        {/* MÓVIL 2: con la cabeza fija (abajo de 1024 y con movimiento) el titular lo muestra
+            ella, y acá queda para el lector. */}
+        <div className="max-escritorio:[[data-cabeza]~&]:sr-only">
+          <CabeceraDeServicios />
         </div>
-      ))}
+        {SERVICIOS.map((servicio) => (
+          <div key={servicio.id} data-servicio={servicio.id} className={`${CLASE_DE_BLOQUE_DE_SERVICIO} max-escritorio:min-h-0`}>
+            <ContenidoDeServicio servicio={servicio} />
+          </div>
+        ))}
+      </ServiciosAngostos>
     </div>
   )
 }
@@ -129,7 +136,8 @@ export function Servicios({ seccion }: PropsDeSeccion): React.JSX.Element {
         // de Tailwind y su regla no se emitiría nunca. Es la misma excepción
         // declarada que `Panel` ya usa para su `min-height`.
         style={{ minHeight: ALTO_DECLARADO }}
-        className="relative"
+        // MÓVIL 2: abajo de 1024 no hay pin: la sección mide lo que mide su contenido.
+        className="relative max-escritorio:min-h-0!"
       >
         {(progreso) =>
           progreso === null ? (

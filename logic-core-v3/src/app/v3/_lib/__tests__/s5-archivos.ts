@@ -223,6 +223,9 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/ritmo.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/ritmo-invariante.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/ventana.ts`,
+  `${RAIZ_DE_SECCIONES}/servicios/angosto.tsx`,
+  `${RAIZ_DE_SECCIONES}/servicios/angosto-invariante.tsx`,
+  `${RAIZ_DE_SECCIONES}/servicios/CtaDelServicio.tsx`,
 ]
 
 /**

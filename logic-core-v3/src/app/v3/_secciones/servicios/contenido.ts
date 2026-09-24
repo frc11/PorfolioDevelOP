@@ -121,6 +121,15 @@ export const CTA_POR_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
   'ia-automatizacion': 'Quiero mi integración con IA',
 }
 
+/**
+ * MÓVIL 2: el nombre en la cabeza fija abajo de 1024, donde el completo no entra en dos
+ * renglones. El completo sigue siendo el nombre del servicio: lo anuncia el lector y
+ * lo muestra escritorio. Sólo lo lleva el que no entra.
+ */
+export const NOMBRE_CORTO: Readonly<Partial<Record<IdDeServicio, string>>> = {
+  'ia-automatizacion': 'IA y Automatizaciones',
+}
+
 export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = {
   web: {
     rubro: 'Digitalizá tu negocio',

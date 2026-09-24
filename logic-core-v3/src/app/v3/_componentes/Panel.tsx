@@ -133,6 +133,8 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
           ? undefined
           : CLASES_DE_LA_BANDA_ANGOSTA[seccion.superficieAngosta],
         seccion.solape === undefined ? undefined : CLASE_DEL_SOLAPE,
+        // MÓVIL 2: la `!` le gana al `min-height` en línea, que es el de desde 1024.
+        seccion.altoAngosto === 'contenido' ? 'max-escritorio:min-h-0!' : undefined,
       )}
       style={estiloDelAlto(seccion)}
     >

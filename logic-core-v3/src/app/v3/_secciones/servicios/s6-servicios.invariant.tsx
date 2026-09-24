@@ -43,6 +43,7 @@ import {
   DURACION_DEL_DISPARO,
 } from './geometria'
 import { Servicios } from './Servicios'
+import { afirmarServiciosAngostos } from './angosto-invariante'
 
 /** La frase que este lane existe para no escribir. Vive acá y no en el
  *  contrato: lleva `%` y `$`, y allá hacía fallar al escáner de tokens contra
@@ -209,8 +210,9 @@ titulo('6 · Foco: nadie apaga el anillo, y no hay nada que lo capture')
 
 afirmarIgual(fuentes.flatMap((f) => apagadosDeFoco(f.texto)), [], 'ningún archivo apaga el anillo de foco')
 afirmarIgual(fuentes.flatMap((f) => [...f.texto.matchAll(/\bhover:[a-z[]/g)].map((m) => m[0])), [], 'ninguna variante `hover:` sin su gemela — la coreografía de estado vive en las hojas')
-afirmarIgual(focalizablesDe(quieto), [], 'la sección no tiene elementos interactivos: cero focalizables sin coreografía')
-afirmarIgual(focalizablesDe(animado), [], '  y cero con coreografía — no hay CTA, y queda reportado')
+// MÓVIL 2: un CTA al terminar cada servicio (abajo de 1024 se ve; desde 1024 va oculto y rota uno solo).
+afirmarIgual(focalizablesDe(quieto), SERVICIOS.map(() => '<button'), 'los únicos focalizables son los CTA de cada servicio, uno por servicio, sin coreografía')
+afirmarIgual(focalizablesDe(animado), SERVICIOS.map(() => '<button'), '  y los mismos con coreografía: las dos ramas tienen el mismo recorrido de teclado')
 controlPositivo('el buscador de focalizables no está ciego', '<button>x</button><a href="#y">y</a>', (h) => focalizablesDe(h).length === 0)
 controlPositivo('el detector de apagados ve las cuatro formas', '.a{outline:none}.b{outline-width:0}.c{outline-style:none} "outline-none"', (t) => apagadosDeFoco(t).length === 0)
 
@@ -243,13 +245,14 @@ afirmarIgual(cuenta(CODIGO, /useProgresoDePatron\s*\(/g), 1, 'el motor de progre
  * segundo es el del rodillo. Si apareciera un tercero, o si el segundo saliera
  * de otro archivo, esto se pone en rojo igual que antes.
  */
-afirmarIgual(cuenta(CODIGO, /<Bloque\b/g), 2, 'y hay DOS Bloques medidos: el del pin y el de la llegada del estado 00')
+// MÓVIL 2: el tercero es el pin de la cabeza fija de abajo de 1024 (`angosto.tsx`).
+afirmarIgual(cuenta(CODIGO, /<Bloque\b/g), 3, 'y hay TRES Bloques medidos: el del pin, el de la llegada del estado 00 y el pin de la cabeza angosta')
 afirmarIgual(
   cuenta(quitarComentarios(leer('src/app/v3/_secciones/servicios/RodilloDeEstados.tsx')), /<Bloque\b/g),
   1,
   '  y el segundo es el del rodillo, que es el único que necesita un rango que el pin no puede dar',
 )
-controlPositivo('el contador vería un tercer Bloque', `${CODIGO}<Bloque patron="P2">`, (t: string) => cuenta(t, /<Bloque\b/g) === 2)
+controlPositivo('el contador vería un cuarto Bloque', `${CODIGO}<Bloque patron="P2">`, (t: string) => cuenta(t, /<Bloque\b/g) === 3)
 for (const prohibida of ['useScroll', 'useProgresoEnTiempoReal', "addEventListener('scroll'", 'scrollY', 'IntersectionObserver']) {
   afirmarIgual(cuenta(CODIGO, new RegExp(prohibida.replace(/[()']/g, '\\$&'), 'g')), 0, `ningún archivo toca \`${prohibida}\` por su cuenta`)
 }
@@ -605,5 +608,7 @@ afirmarElTraspaso(animado, torta, fuenteDelRodillo, fuenteDelCta, fuenteDeLaTira
 // ═══════════════════════════════════════════════════════════════════════════
 // §13 vive en `s6-tipografia.ts` — es un asunto de `cn()`, no de la sección.
 afirmarLaTipografia(quieto, animado)
+// MÓVIL 2: abajo de 1024 vive en `angosto-invariante.tsx`.
+afirmarServiciosAngostos()
 
 cerrar('s6-servicios.invariant')

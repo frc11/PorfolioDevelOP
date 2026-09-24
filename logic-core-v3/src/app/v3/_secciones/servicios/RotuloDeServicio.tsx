@@ -10,7 +10,7 @@ import {
   numeroEnLaSecuencia,
   type Servicio,
 } from '../_contrato/acento'
-import { CONTENIDO, ROTULO_DE_LA_INTRO, TITULAR } from './contenido'
+import { CONTENIDO, NOMBRE_CORTO, ROTULO_DE_LA_INTRO, TITULAR } from './contenido'
 import { CLASE_DEL_RENGLON_DEL_NOMBRE, NIVEL_DEL_NOMBRE } from './geometria'
 
 /**
@@ -87,6 +87,8 @@ interface PiezasDelRotulo {
   readonly numero: string
   readonly rubro: string
   readonly nombre: string
+  /** MÓVIL 2: el que se ve abajo de 1024, si el completo no entra. */
+  readonly nombreCorto?: string
   /** El color del rótulo: el acento de un servicio, o tinta media en la intro. */
   readonly claseDelRubro: string
   /** El relleno del subrayado: el acento, o tinta plena en la intro. */
@@ -119,7 +121,16 @@ function BloqueDeRotulo({
           como={decorativo ? 'span' : 'h3'}
           className={CLASE_DEL_RENGLON_DEL_NOMBRE}
         >
-          {piezas.nombre}
+          {piezas.nombreCorto === undefined ? (
+            piezas.nombre
+          ) : (
+            <>
+              {/* Hasta el portátil (1024) incluido: ahí el completo pide tres renglones en su columna
+                  (medido: 118 px en una caja de dos) y ningún nivel razonable lo mete en dos. */}
+              <span className="[@media(width<=theme(--breakpoint-escritorio))]:hidden">{piezas.nombre}</span>
+              <span className="hidden [@media(width<=theme(--breakpoint-escritorio))]:inline">{piezas.nombreCorto}</span>
+            </>
+          )}
         </Titular>
       </div>
       <ReglaDeAcento clase={piezas.claseDeLaRegla} />
@@ -144,6 +155,8 @@ export function RotuloDeServicio({
         numero: numeroDeServicio(servicio.id),
         rubro: CONTENIDO[servicio.id].rubro,
         nombre: servicio.nombre,
+        // Sólo en la cabeza (decorativa): el rótulo anunciado dice el nombre completo.
+        nombreCorto: decorativo ? NOMBRE_CORTO[servicio.id] : undefined,
         claseDelRubro: CLASES_DE_ACENTO.texto,
         claseDeLaRegla: CLASES_DE_ACENTO.relleno,
       }}

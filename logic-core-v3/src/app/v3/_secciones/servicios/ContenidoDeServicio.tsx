@@ -3,6 +3,7 @@
 import type { Servicio } from '../_contrato/acento'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { ContenidoDeSeccion } from '../_contrato/Seccion'
+import { CtaDelServicio } from './CtaDelServicio'
 import { BloqueDeServicio } from './BloqueDeServicio'
 import { RotuloDeServicio } from './RotuloDeServicio'
 
@@ -50,10 +51,14 @@ export function ContenidoDeServicio({ servicio }: ContenidoDeServicioProps): Rea
     // techo del bloque. Es aire de composición, no separación que alguien lea.
     // Medido en B1 a 1920.
     <ContenidoDeSeccion claseDeContenido="flex w-full flex-col gap-[var(--spacing-8)] py-[var(--spacing-8)]">
-      <CanalDeUnaPieza progreso={null} patron="P2">
-        <RotuloDeServicio servicio={servicio} />
-      </CanalDeUnaPieza>
+      {/* MÓVIL 2: con la cabeza fija el nombre lo muestra ella; acá, el completo, para el lector. */}
+      <div className="max-escritorio:[[data-cabeza]~*_&]:sr-only">
+        <CanalDeUnaPieza progreso={null} patron="P2">
+          <RotuloDeServicio servicio={servicio} />
+        </CanalDeUnaPieza>
+      </div>
       <BloqueDeServicio servicio={servicio} pintura={null} disposicion="apilada" />
+      <CtaDelServicio servicio={servicio} />
     </ContenidoDeSeccion>
   )
 }

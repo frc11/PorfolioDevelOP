@@ -163,6 +163,11 @@ export interface Seccion {
    * emite las variantes; ningún componente decide esto por su cuenta.
    */
   readonly pinneada?: 'siempre' | 'desde-escritorio'
+  /**
+   * MÓVIL 2: `'contenido'` suelta el alto abajo de 1024 —ahí no hay pin y la sección
+   * mide lo que mide su contenido—. Desde 1024 rige `alto`, igual que siempre.
+   */
+  readonly altoAngosto?: 'contenido'
 }
 
 /**
@@ -530,6 +535,7 @@ export const SECCIONES: readonly Seccion[] = [
     superficie: 'papel-opaco',
     alto: altoDeSecuenciaPinneada(PANTALLAS_DE_SERVICIOS),
     pinneada: 'siempre',
+    altoAngosto: 'contenido',
     pasosDeLaSecuencia: PASOS_DE_SERVICIOS,
   },
   /**
