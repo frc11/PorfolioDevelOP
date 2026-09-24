@@ -161,6 +161,6 @@ export function afirmarAbajoDe1024(): void {
       .map((f) => `${c}/${f}`),
   )
   // SPRINT FINAL: «Por qué develOP» la pide para que su lista de abajo de 1024 llegue con el gesto de la casa.
-  afirmarIgual(laPiden, ['servicios/angosto.tsx', 'por-que-develop/PorQueDevelop.tsx'], '  y fuera de Trabajos la piden sólo la cabeza fija de Servicios y la lista de «Por qué develOP»: el resto sigue quieto abajo de 1024')
+  afirmarIgual(laPiden, ['servicios/angosto.tsx', 'por-que-develop/PorQueDevelop.tsx', 'cierre/Cierre.tsx'], '  y fuera de Trabajos la piden sólo la cabeza fija de Servicios, la lista de «Por qué develOP» y el pie: el resto sigue quieto abajo de 1024')
   afirmar(/<CoreografiaEnTodoAncho>/.test(TRABAJOS), '  Trabajos sí')
 }

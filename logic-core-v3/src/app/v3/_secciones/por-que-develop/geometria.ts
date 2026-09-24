@@ -14,21 +14,11 @@
 
 import type { CSSProperties } from 'react'
 
-import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
+import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 
-/**
- * El ancho del logo en alturas de cuadro por unidad de distancia: a 14, en el contrapicado
- * de B, mide 797 px de un cuadro de 900 (o sea 0,886 del alto), y el alto del cuadro a esa
- * distancia es `0,6306 × 14` de mundo. De ahí `7,82 / 0,6306 = 12,4`.
- */
-const ANCHO_DEL_LOGO_POR_DISTANCIA = 12.4
-/** El aire entre el borde del logo y el texto, en `svh`. */
-const AIRE_SVH = 3
+export { huecoDelLogo }
 
-/** Medio ancho del logo más el aire, en `svh`, para una distancia de cámara. */
-export function huecoDelLogo(distancia: number): number {
-  return Math.round((ANCHO_DEL_LOGO_POR_DISTANCIA / distancia / 2) * 1000) / 10 + AIRE_SVH
-}
+const AIRE_SVH = AIRE_DEL_LOGO_SVH
 
 /** Cuánto sube la frase, en `svh`: la deja arriba del logo de B y de las columnas. */
 export const SUBIDA_DE_LA_FRASE_SVH = 30

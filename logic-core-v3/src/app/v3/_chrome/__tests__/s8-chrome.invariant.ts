@@ -23,7 +23,7 @@ import { SECCIONES } from '../../_lib/secciones'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { DIST, conjuntoInicial, contiene, kib, pesar, todosLosChunks } from '../../_lib/__tests__/s3-bundle'
 import { Cierre } from '../../_secciones/cierre/Cierre'
-import { ANCLAS_QUE_EXISTEN, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
+import { ANCLAS_QUE_EXISTEN, CONTACTO_DEL_PIE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import {
@@ -66,8 +66,9 @@ controlPositivo('y no se pone verde con la lista vacía de anclas', ['#hero'], (
  * ⚠️ **LO QUE ESTE CAMBIO ROMPIÓ Y ESTE SPRINT NO ARREGLA.** Se publica con el
  * número y no se afirma: la salida es de CONTENIDO y la decide el humano.
  */
-console.log(`  ⚠️ EL CTA DEL CIERRE CAMBIÓ DE DESTINO. Toma \`DESTINOS_DE_LA_RUTA[0].ancla\`, que con las cuatro de antes era \`#servicios\` y con las ocho en orden de recorrido es \`${CTA_DE_CIERRE.destino}\`. Su rótulo —«${CTA_DE_CIERRE.rotulo}»— ya no corresponde. Las dos salidas: cambiar el rótulo, o desatar el destino del \`[0]\`. Ninguna se tomó acá.`)
-afirmar(ANCLAS_QUE_EXISTEN.includes(CTA_DE_CIERRE.destino), '  lo que SÍ se puede afirmar: el CTA sigue apuntando a un ancla que EXISTE, así que no es un botón muerto')
+// SPRINT FINAL: el pie ya no tiene CTA propio (el llamado es el tiempo C de «Por qué develOP»);
+// su columna de contacto enlaza a `#contacto`, el destino declarado provisorio del sprint.
+afirmar(CONTACTO_DEL_PIE.destino === '#contacto' && !ANCLAS_QUE_EXISTEN.includes(CONTACTO_DEL_PIE.destino), '  el contacto del pie va a `#contacto`, el destino PROVISORIO del sprint: todavía no es un ancla del home (se define después)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · EL RODEO DE `peso` — restaurado, y NO estaba en Servicios')

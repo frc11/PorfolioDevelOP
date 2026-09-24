@@ -72,3 +72,15 @@ export const POSES_DEL_FINAL = {
 export function progresoDelPin(pantalla: number): number {
   return pantalla / (PANTALLAS_DE_POR_QUE_DEVELOP - 1)
 }
+
+/**
+ * EL HUECO QUE EL LOGO DEJA en el cuadro, en `svh`: su medio ancho más el aire. El ancho sale
+ * medido —a 14, en el contrapicado de B, mide 797 px de un cuadro de 900 (0,886 del alto), y
+ * el alto del cuadro a esa distancia es `0,6306 × 14` de mundo: `7,82 / 0,6306 = 12,4`—, así
+ * que la frase, los valores y el pie se apoyan a los costados del logo en cualquier ancho.
+ */
+const ANCHO_DEL_LOGO_POR_DISTANCIA = 12.4
+export const AIRE_DEL_LOGO_SVH = 3
+export function huecoDelLogo(distancia: number): number {
+  return Math.round((ANCHO_DEL_LOGO_POR_DISTANCIA / distancia / 2) * 1000) / 10 + AIRE_DEL_LOGO_SVH
+}

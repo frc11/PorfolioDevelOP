@@ -124,3 +124,32 @@ el pie sube; E se sostiene hasta el final.
 - [x] **Contraste AA sobre el logo gris, medido a 1440 en C**: la frase y el destacado 5,77:1
   (percentil 90), el botón 5,77:1 en el peor píxel (0 % bajo AA).
 
+## Fase 4 — El alejamiento y el pie (≥1024)
+
+- [x] **El alejamiento D** ocupa el primer cuarto de la pantalla en que el pie sube (de la
+  pantalla 3 a la 3,25): la cámara pasa de frontal a 16 a la pose E (arriba, a 40), con el logo
+  chico en el centro. Es la excepción declarada del techo de velocidad (fase 1).
+- [x] **El pie se arma alrededor del logo** (`cierre/Cierre.tsx`), con el hueco sacado de la pose
+  E (18,5 svh a cada lado del centro):
+  - izquierda: develOP, la línea de identidad «Lo que sigue lo armamos con vos» (el `h2` de la
+    sección) y debajo el contacto;
+  - derecha: las columnas «El recorrido» (las secciones de la página) y «Contacto» («Hablanos»);
+  - abajo: las redes, y la línea de develOP con el año, la razón social y los legales.
+- [x] **El contenido es el del pie de hoy, reacomodado**: lo que no existe sigue PEDIDO con su
+  marcador —la dirección, las redes y los legales ([ENLACE] × 3), el año ([FECHA]) y la razón
+  social ([NOMBRE])—. Nada inventado y sin newsletter (vive en Tu Panel).
+- [x] **Llega con el gesto de la casa, escalonado, después del alejamiento**: P5 sobre la última
+  pantalla, izquierda 0,3–0,6 · derecha 0,4–0,75 (las columnas con su escalonado de P2) · abajo
+  0,55–0,9.
+- [x] **Sin scroll vacío al final**: la caja de contenido le sumaba su propio alto y su padding al
+  del `<footer>` (que ya trae 80 px arriba y abajo del estilo del pie) y la sección medía 1060 px
+  en vez de 900. Sin eso mide 100svh, y el último píxel de scroll es el pie terminado y centrado
+  en el logo (medido: scroll máximo 26.805, sección de 900 con el tope en 0).
+- [x] **Sin el punto azul** también en el pie (la marca de sección no se monta; no se borró).
+- [x] El destino del CTA del pie viejo pasó a `CONTACTO_DEL_PIE` («Hablanos», `#contacto`);
+  `asentamiento.ts` y `soporte.ts` del pie viejo, sin consumidores, se borraron.
+- [x] **Contraste AA sobre la escena, medido a 1440 en el último píxel**: 16,5–18,2:1 en el
+  percentil 90 en las 19 hojas de texto; lo que queda bajo AA (≤ 1,3 % de cada caja) son motas.
+- [x] Invariantes: `s6-cierre` reescrito (20 afirmaciones, 2 controles: una llegada que se pasa
+  del final y la caja que estiraba la sección); `s8-chrome` y la lista de quién pide
+  coreografía en todo ancho, actualizados.

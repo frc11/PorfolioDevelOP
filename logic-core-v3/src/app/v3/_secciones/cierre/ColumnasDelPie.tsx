@@ -10,6 +10,7 @@ import { CanalDePieza } from '../_contrato/canales'
 import {
   COLUMNAS,
   DESTINOS_DE_LA_RUTA,
+  CONTACTO_DEL_PIE,
   PEDIDOS_DE_CONTACTO,
   type ClaseDeColumna,
 } from './contenido'
@@ -114,7 +115,22 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
 
 function CuerpoDeColumna({ clase }: { readonly clase: ClaseDeColumna }): React.JSX.Element {
   if (clase === 'recorrido') return <ColumnaDelRecorrido />
-  return <ColumnaDePedido />
+  return <ColumnaDeContacto />
+}
+
+/** [FINAL] La columna de contacto: el enlace al contacto, con el mismo gesto que la del recorrido. */
+function ColumnaDeContacto(): React.JSX.Element {
+  return (
+    <ul className="flex flex-col gap-[var(--spacing-2)]">
+      <li>
+        <EnlaceDelPieConIcono
+          href={CONTACTO_DEL_PIE.destino}
+          rotulo={CONTACTO_DEL_PIE.rotulo}
+          icono={<ArrowUpRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
+        />
+      </li>
+    </ul>
+  )
 }
 
 /**
@@ -137,11 +153,11 @@ function ColumnaDelRecorrido(): React.JSX.Element {
   )
 }
 
-/** El marcador va como TEXTO. Un `<a>` acá sería un enlace a la nada. */
-function ColumnaDePedido(): React.JSX.Element {
+/** [FINAL] Un pedido del pie (la dirección, las redes): el marcador va como TEXTO. Un `<a>` acá sería un enlace a la nada. */
+export function PedidoDelPie({ pedido }: { readonly pedido: (typeof PEDIDOS_DE_CONTACTO)[number] }): React.JSX.Element {
   return (
     <ul className="flex flex-col gap-[var(--spacing-2)]">
-      {PEDIDOS_DE_CONTACTO.map((pedido) => (
+      {[pedido].map((pedido) => (
         <li key={pedido.descripcion} className="flex flex-col">
           {/* CON `peso`. Es el rodeo del defecto de `cn()` restaurado en
               SITIO-S8: esta misma línea perdía la familia Y el peso en

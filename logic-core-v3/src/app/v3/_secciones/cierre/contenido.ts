@@ -137,13 +137,17 @@ export const DESTINOS_DE_LA_RUTA: readonly DestinoDeLaRuta[] = SECCIONES_QUE_EL_
  * `ANCLAS_QUE_EXISTEN` custodia que el destino exista: `s8-cierre.invariant`
  * afirma que ningún `href` del marcado lleva a la nada.
  */
-export const CTA_DE_CIERRE = {
-  rotulo: 'Ver los servicios',
-  destino: '#servicios',
+/**
+ * [FINAL] El CTA del pie se fue: el llamado a hablar es el tiempo C del final, en «Por qué
+ * develOP». El pie enlaza al contacto como una entrada más de su columna de contacto.
+ */
+export const CONTACTO_DEL_PIE = {
+  rotulo: 'Hablanos',
+  destino: '#contacto',
 } as const
 
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */
-export type ClaseDeColumna = 'recorrido' | 'pedido'
+export type ClaseDeColumna = 'recorrido' | 'contacto'
 
 export interface ColumnaDelPie {
   readonly id: string
@@ -158,7 +162,8 @@ export interface ColumnaDelPie {
  */
 export const COLUMNAS: readonly ColumnaDelPie[] = [
   { id: 'recorrido', titulo: 'El recorrido', clase: 'recorrido' },
-  { id: 'contacto', titulo: 'Contacto', clase: 'pedido' },
+  // [FINAL] la columna de contacto enlaza al contacto; la dirección y las redes pasaron a la izquierda y al pie.
+  { id: 'contacto', titulo: 'Contacto', clase: 'contacto' },
 ]
 
 export interface PedidoDeEnlace {
