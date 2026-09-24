@@ -40,6 +40,7 @@ import {
   TAMANOS,
   cajasDelCaos,
   cajasEn,
+  ESCALA_DE_LAS_FEATURES_A_1024,
   convivenciaEn,
   corrimientoDelParallax,
   fueraDelCuadro,
@@ -96,8 +97,10 @@ afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe
 afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo)`)
 afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
 const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
-const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|arranque-final):[^;]*;?)+(opacity:[\d.]+)?)$/
-afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e)), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
+const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|arranque-final|escala-a-1024):[^;]*;?)+(opacity:[\d.]+)?)$/
+// MÓVIL 2: la palabra quieta de abajo de 1024 lleva sólo el alfa del fondo, que es de la tabla.
+const ALFA_SOLO = `opacity:${String(ALFA_DEL_FONDO)}`
+afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e) && e !== ALFA_SOLO), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
 controlPositivo('el filtro de estilos ve uno escrito a mano', ['margin-top:12px'], (l) => l.every((e) => DEL_DATO.test(e)))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -159,8 +162,8 @@ afirmar(VELOCIDAD_DEL_FONDO < 0 && Object.values(TAMANOS).every((t) => t.velocid
 titulo('7 · BARRIDO de convivencia sobre el modelo, a tres pantallas')
 
 /** Barre el caos de a 5 px y devuelve el peor caso. */
-function barrer(tabla: readonly FilaDelCaos[], ancho: number, alto: number): { max: number; tapados: string[]; altoMaximo: number } {
-  const cajas = cajasDelCaos(ancho, alto, tabla)
+function barrer(tabla: readonly FilaDelCaos[], ancho: number, alto: number, escala = 1): { max: number; tapados: string[]; altoMaximo: number } {
+  const cajas = cajasDelCaos(ancho, alto, tabla, escala)
   const fin = cajas[cajas.length - 1].titulo.arriba + alto
   let max = 0
   const tapados = new Set<string>()
@@ -178,6 +181,11 @@ for (const [ancho, alto] of [[1376, 900], [1856, 1080], [1216, 800]] as const) {
   afirmar(r.altoMaximo <= 0.55, `${ancho} × ${alto}: ninguna pasa del 55 % del alto`, `${(r.altoMaximo * 100).toFixed(1)} %`)
 }
 afirmarIgual(fueraDelCuadro(), [], 'ninguna se sale por los costados (con aire para el título corrido del hover)')
+// MÓVIL 2: a 1024 las imágenes crecen y las de la derecha se corren hacia adentro lo que crecen (el `min()` de `Tarjeta.tsx`).
+const aLas1024 = (e: number): FilaDelCaos[] => TABLA_DEL_CAOS.map((f) => ({ ...f, columna: Math.min(f.columna, 98 - TAMANOS[f.tamano].ancho * e) }))
+const r1024 = barrer(aLas1024(ESCALA_DE_LAS_FEATURES_A_1024), 960, 768, ESCALA_DE_LAS_FEATURES_A_1024)
+afirmar(ESCALA_DE_LAS_FEATURES_A_1024 > 1 && r1024.max <= 3 && r1024.tapados.length === 0 && r1024.altoMaximo <= 0.55, `1024 × 768 con las imágenes ×${String(ESCALA_DE_LAS_FEATURES_A_1024)}: más grandes, nunca más de 3 a la vez y ningún título tapado`, `máximo ${r1024.max} · tapados ${r1024.tapados.length} · alto ${(r1024.altoMaximo * 100).toFixed(1)} %`)
+controlPositivo('  el barrido de 1024 vería una escala que ya tapa', 1.08, (e: number) => barrer(aLas1024(e), 960, 768, e).tapados.length === 0)
 const apretada = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, separacion: 8 } : f))
 controlPositivo('el barrido ve una fila que junta cuatro', apretada, (t) => barrer(t, 1376, 900).max <= 3)
 const encima = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, columna: 52, separacion: 30 } : f))
@@ -191,7 +199,8 @@ afirmar(Math.abs(corrimientoDelParallax(683, 571, 900) - -164.261) < 1, 'nk: mar
 afirmar(Array.from({ length: 301 }, (_, k) => corrimientoDelParallax(-600 + k * 5, 571, 900)).every((y) => y <= 0 && y >= -(ALTO_DE_LA_IMAGEN - 1) * 571), 'el borde de la imagen nunca entra al marco')
 const GALERIA = fuenteDe('Galeria.tsx')
 afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /addEventListener\('scroll'/g), 1, 'UNA suscripción de scroll para la profundidad, el fondo y las imágenes')
-afirmar(/if \(!anima \|\| raiz === null\) return/.test(GALERIA), '  que no se instala sin coreografía (abajo de 1025 o con movimiento reducido)')
+// MÓVIL 2: el lazo corre con movimiento en todo ancho (el parallax interno); la profundidad, sólo con la composición.
+afirmar(/if \(!movimiento \|\| raiz === null\) return/.test(GALERIA) && /const profundas = anima \?/.test(GALERIA), '  que no se instala con movimiento reducido, y abajo de 1024 mueve sólo la imagen adentro de su marco: sin profundidad ni fondo')
 afirmar(GALERIA.includes('el.offsetTop'), '  y mide la profundidad con `offsetTop`, que no ve la transformada que escribe')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -281,5 +290,17 @@ afirmarIgual(patronesNombrados(CODIGO), ['P1', 'P2'], 'la sección nombra P1 (el
 afirmarIgual(Object.keys(PIEZAS_POR_PATRON), ['P1', 'P2'], '  la tabla de piezas declara los mismos')
 afirmarIgual(USOS_DECLARADOS.filter((u) => u.seccion === ID).map((u) => u.patron), ['P1', 'P2'], '  y el contrato también')
 afirmarIgual(aperturasDe(QUIETO, 'li'), TARJETAS.length, 'las features son una lista: un <li> por feature')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('M2 · Abajo de 1024: «Y más...» y el formulario se ven, llegan y vuelven')
+
+const FUENTE_DEL_REMATE = quitarComentarios(fuenteDe('Remate.tsx'))
+const remateEnTodoAncho = (f: string): boolean =>
+  /const anima = useMovimientoEnTodoAncho\(\)/.test(f) && /if \(!anima \|\| raiz === null\) \{\s*setEstado\('quieto'\)\s*return\s*\}/.test(f)
+afirmar(remateEnTodoAncho(FUENTE_DEL_REMATE), 'el remate llega y vuelve con la política de movimiento EN TODO ANCHO, y sin movimiento vuelve a quedar a la vista')
+controlPositivo('  el chequeo vería el remate de antes, que abajo de 1024 no llegaba y al cruzar el umbral quedaba invisible', FUENTE_DEL_REMATE.replace('useMovimientoEnTodoAncho()', 'useCoreografiaActiva()'), remateEnTodoAncho)
+const enElPapel = /data-pieza="remate-del-panel" data-estado="([^"]*)"/.exec(QUIETO)?.[1]
+afirmarIgual(enElPapel, 'quieto', '  y en el papel (sin coreografía) está quieto y visible: ni «Y más...» ni el formulario llevan `invisible`')
+afirmarIgual(cuentaDe(/data-pieza="remate-del-panel"[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? '', /\binvisible\b/g), 0, '  (el marcado del remate no trae la clase que lo esconde)')
 
 cerrar('s6-tu-panel.invariant')

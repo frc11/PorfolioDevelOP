@@ -70,11 +70,26 @@ Escritorio ≥1025 no cambia; la prueba es la superposición del túnel a 1440 d
 
 ## Fase 3 — Panel en móvil y tablet
 
-- [ ] «Y más...» y el formulario visibles, con llegada y regresión (afirmado en los dos).
-- [ ] Palabras de fondo quietas, 1,0595:1, fuera de las features.
-- [ ] Parallax interno de las imágenes, medido con CPU ×4.
-- [ ] Ocho features en una columna con sus anchos alternados.
-- [ ] 1024: «Tu Panel» y su cuerpo más grandes; imágenes más grandes, ≤3 en pantalla.
+- [x] **«Y más...» y el formulario.** Causa: la llegada se armaba con la coreografía del
+  umbral (`useCoreografiaActiva`) y dejaba el remate en `espera` (`invisible`) hasta el
+  disparo; si la página perdía la coreografía —un ancho que cruza 1024, la emulación de
+  un aparato sobre una página cargada en escritorio— el estado nunca volvía a `quieto` y
+  quedaba invisible para siempre. En un teléfono cargado en frío se veían, sin llegada.
+  Arreglo: el remate lee `useMovimientoEnTodoAncho()` (nuevo en el contrato: la política
+  de movimiento sin el umbral) y sin movimiento vuelve a `quieto`. Medido a 390 y 768:
+  llega al pasar el disparo, se queda más abajo, vuelve (traslado 358 / 736 px) sólo al
+  subir por encima del disparo, y llega otra vez. Afirmado con control.
+- [x] **Palabras de fondo abajo de 1024**: quietas (sin `Bloque` ni profundidad), con el
+  mismo alfa (`ALFA_DEL_FONDO`, 1,0595:1), una en el aire entre cada feature y la siguiente
+  —siete palabras, siete huecos—: nunca debajo de una.
+- [x] **Parallax interno** en todo ancho (la capa mide 130 % en todo ancho); la profundidad
+  de las features sigue siendo sólo de escritorio. CPU ×4 bajando la galería: 13,29 / 13,31 ms
+  de media (390 / 768), p95 13,9, máximo 19,5 / 20,7 ms, 0 cuadros de más de 33 ms.
+- [x] **Ocho features en una columna** con sus anchos alternados (sin cambios).
+- [x] **1024**: «Tu Panel» de 48 a 65 px (1,3 `display`) y el cuerpo a `titulo-s`; las
+  imágenes ×1,07 (431 contra 404 px la más grande), el máximo que el modelo del caos deja
+  pasar a 960 × 768 con las de la derecha corridas hacia adentro. Medido en el navegador:
+  3 en pantalla como máximo y ningún título tapado. 1025 no cambia (404 px, 48,2 px).
 
 ## Fase 4 — Verificación y reporte
 

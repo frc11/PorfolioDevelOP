@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { FormularioDeNovedades } from '../../_componentes/chrome/Novedades'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { useCoreografiaActiva } from '../_contrato/coreografia'
+import { useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
 import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
@@ -29,7 +29,8 @@ import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
  * principio y el newsletter va debajo, a todo el ancho.
  */
 export function Remate(): React.JSX.Element {
-  const anima = useCoreografiaActiva()
+  // MÓVIL 2: la misma llegada y regresión en todo ancho.
+  const anima = useMovimientoEnTodoAncho()
   const [estado, setEstado] = useState<'quieto' | 'espera' | 'vivo'>('quieto')
   const fila = useRef<HTMLDivElement>(null)
   const frase = useRef<HTMLSpanElement>(null)
@@ -38,7 +39,11 @@ export function Remate(): React.JSX.Element {
 
   useEffect(() => {
     const raiz = fila.current
-    if (!anima || raiz === null) return
+    // Sin movimiento queda a la vista: también si lo perdió (un ancho que cruza el umbral la dejaba invisible).
+    if (!anima || raiz === null) {
+      setEstado('quieto')
+      return
+    }
     setEstado('espera')
     let animaciones: Animation[] = []
     const armar = (): void => {

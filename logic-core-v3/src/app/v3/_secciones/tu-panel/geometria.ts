@@ -27,6 +27,14 @@ export interface Tamano {
   readonly velocidad: number
 }
 
+/**
+ * MÓVIL 2: cuánto crecen las imágenes de las features en el portátil (1024). Es el
+ * máximo que el propio modelo del caos deja pasar a 960 × 768 —nunca más de 3 a la vez,
+ * ningún título tapado, ninguna afuera del 98 %—, con las de la derecha corridas hacia
+ * adentro lo que crecen: 1,07 pasa y 1,08 ya tapa un título (barrido de a 0,01).
+ */
+export const ESCALA_DE_LAS_FEATURES_A_1024 = 1.07
+
 export const TAMANOS: Readonly<Record<ClaseDeTamano, Tamano>> = {
   xs: { ancho: 22, nivel: 'titulo-s', velocidad: 0.03 },
   s: { ancho: 28, nivel: 'titulo-s', velocidad: 0.05 },
@@ -101,11 +109,12 @@ export interface CajaDeFeature {
  * modela con su alto de dos renglones más la etiqueta y los espacios (del DOM:
  * `--spacing-3` + renglones + `--spacing-2` + `Micro`).
  */
-export function cajasDelCaos(anchoUtil: number, altoDePantalla: number, tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): CajaDeFeature[] {
+export function cajasDelCaos(anchoUtil: number, altoDePantalla: number, tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS, escala = 1): CajaDeFeature[] {
   const tops = arranques(tabla)
   return tabla.map((fila, i) => {
     const t = TAMANOS[fila.tamano]
-    const ancho = (t.ancho / 100) * anchoUtil
+    // MÓVIL 2: `escala` agranda las imágenes (a 1024, `ESCALA_DE_LAS_FEATURES_A_1024`).
+    const ancho = (t.ancho / 100) * anchoUtil * escala
     const altoImagen = ancho / RELACION_DEL_MARCO
     const arriba = (tops[i] / 100) * altoDePantalla
     const renglon = t.nivel === 'titulo-m' ? 35 : 22

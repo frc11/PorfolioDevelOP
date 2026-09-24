@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
-import { useCoreografiaActiva } from '../_contrato/coreografia'
+import { useCoreografiaActiva, useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { Ampliacion } from './Ampliacion'
 import { TARJETAS } from './contenido'
 import { Fondo } from './Fondo'
-import { arranques, corrimientoDeProfundidad, corrimientoDelParallax } from './geometria'
+import { ESCALA_DE_LAS_FEATURES_A_1024, arranques, corrimientoDeProfundidad, corrimientoDelParallax } from './geometria'
 import { Tarjeta } from './Tarjeta'
 
 const ULTIMO_ARRANQUE = arranques()[TARJETAS.length - 1]
@@ -26,6 +26,8 @@ const ULTIMO_ARRANQUE = arranques()[TARJETAS.length - 1]
  */
 export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }): React.JSX.Element {
   const anima = useCoreografiaActiva()
+  // MÓVIL 2: el parallax INTERNO de las imágenes corre en todo ancho; la profundidad, sólo con la composición.
+  const movimiento = useMovimientoEnTodoAncho()
   const reducido = usePrefiereMenosMovimiento()
   const [abierta, setAbierta] = useState<number | null>(null)
   const caos = useRef<HTMLDivElement>(null)
@@ -35,8 +37,8 @@ export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }
 
   useEffect(() => {
     const raiz = caos.current
-    if (!anima || raiz === null) return
-    const profundas = [...raiz.querySelectorAll<HTMLElement>('[data-profundidad]')]
+    if (!movimiento || raiz === null) return
+    const profundas = anima ? [...raiz.querySelectorAll<HTMLElement>('[data-profundidad]')] : []
     let pedido = 0
     const pintar = (): void => {
       pedido = 0
@@ -69,7 +71,7 @@ export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }
       if (pedido !== 0) cancelAnimationFrame(pedido)
       for (const el of [...profundas, ...capasAlMontar]) if (el !== null) el.style.transform = ''
     }
-  }, [anima])
+  }, [anima, movimiento])
 
   const marcoDe = useCallback((i: number): HTMLElement | null => marcos.current[i] ?? null, [])
 
@@ -80,7 +82,7 @@ export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }
   }, [abierta])
 
   // La última feature va en el flujo: el caos reserva arriba el lugar donde arranca.
-  const alto = { '--arranque-final': `${ULTIMO_ARRANQUE}svh` } as CSSProperties
+  const alto = { '--arranque-final': `${ULTIMO_ARRANQUE}svh`, '--escala-a-1024': String(ESCALA_DE_LAS_FEATURES_A_1024) } as CSSProperties
 
   return (
     <div ref={caos} data-pieza="caos-del-panel" style={alto} className="relative flex flex-col gap-[var(--spacing-12)] escritorio:block">

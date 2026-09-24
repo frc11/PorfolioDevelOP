@@ -85,6 +85,17 @@ export function useCoreografiaActiva(): boolean {
 }
 
 /**
+ * MÓVIL 2: si hay movimiento EN TODO ANCHO —la política de movimiento, sin el umbral—.
+ * Para lo que no es un `Bloque` (un lazo propio de parallax, una llegada con la API
+ * de animaciones) y tiene que correr también abajo de 1024. Sin el proveedor sin
+ * umbral (el arnés de los invariantes) cae al de siempre, como `CoreografiaEnTodoAncho`.
+ */
+export function useMovimientoEnTodoAncho(): boolean {
+  const delUmbral = usePrimitivas()
+  return (useContext(ContextoSinUmbral) ?? delUmbral) !== null
+}
+
+/**
  * LA COREOGRAFÍA QUE CRUZA EL UMBRAL. **[MÓVIL-TRABAJOS]**
  *
  * `CompuertaDelHome` la resuelve con la MISMA política de movimiento y sin el
