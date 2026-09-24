@@ -1,243 +1,109 @@
 /**
- * INVARIANTE — SECCIÓN 07, POR QUÉ DEVELOP.
+ * s7 · POR QUÉ develOP — la frase, los seis valores y el CTA del final. **[FINAL]**
  *
- * Renderiza la sección a HTML en las DOS ramas —con las primitivas animadas
- * instaladas y sin ellas— y afirma sobre el marcado real, no sobre el código.
- * Las cifras del reporte se IMPRIMEN acá aunque ninguna afirmación las mire:
- * una cifra publicada sin instrumento que la produzca es prosa.
- *
- * ⚠️ Este archivo NO se escanea a sí mismo: sus controles positivos contienen a
- * propósito hex, píxeles sueltos, clases de fondo y la frase con cifras
- * inventadas que el sprint existe para no escribir. Misma excepción declarada
- * que `_invariantes/soporte.ts`.
+ * Reescrito entero con la sección: la vieja (titular, bajada, cuatro diferenciales y un
+ * testimonio) se fue con sus cinco entradas de INVENTOS. Lo que se afirma acá es lo que el
+ * sprint pidió: el contenido textual, una sola librería de íconos con un solo trazo, las
+ * dos ramas anunciando lo mismo, la rama quieta sin una transformada, el punto azul que ya
+ * no se monta y el reparto de las piezas sobre los mismos tiempos que la cámara.
  */
 
 import { renderToStaticMarkup } from 'react-dom/server'
 
-import { cn } from '@/lib/utils'
-
-import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
-import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { PATRONES } from '../../_lib/motion/patrones'
-import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX } from '../../_lib/superficies'
-import { USOS_DECLARADOS } from '../_contrato/motion'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
+import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
+import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 import { seccionDe } from '../_contrato/forma'
-import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
+import { LISTA_DE_INVENTOS } from '../_contrato/inventado'
+import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
-import { SUPERFICIE_ACORDADA, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
+import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
+import { CTA, FRASE, NOMBRE_DE_SECCION, PEDIDO, VALORES } from './contenido'
 import {
-  ALTO_MINIMO_DEL_BLOQUE, ALTO_MINIMO_DEL_BLOQUE_SVH, DIFERENCIALES, ENTRADA,
-  NOMBRE_DE_SECCION, PIEZAS_DE_P5, TESTIMONIO, TITULAR,
-} from './contenido'
+  VENTANA_DEL_CTA,
+  VENTANA_DEL_DESTACADO,
+  VENTANA_DE_LA_FRASE,
+  VENTANA_DE_LA_LEVANTADA,
+  huecoDelLogo,
+  ventanaDelValor,
+} from './geometria'
+import { ICONOS, PiezaDeValor } from './Valores'
 
 const ID = 'por-que-develop'
-const VIEWPORT = 900 // el viewport de la medición de la referencia: 1440×900
-
 const montada = <PorQueDevelop seccion={seccionDe(ID)} />
 const [quieto, movido] = [false, true].map((anima) => marcar(montada, { anima }))
-
-const ARCHIVOS = codigoDeLaSeccion(ID)
-const FUENTE = ARCHIVOS.map((a) => leer(a))
-const CARACTERES_DE_FUENTE = FUENTE.reduce((n, t) => n + t.length, 0)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · Abajo de 1025 no se monta una sola transformada')
-
-const transformadas = (html: string): string[] => [...html.matchAll(/style="[^"]*transform:[^"]*"/g)].map((m) => m[0])
-const willChange = (html: string): string[] => [...html.matchAll(/will-change[\w-]*/g)].map((m) => m[0])
-const marcaDeLineas = (html: string): string[] => [...html.matchAll(/data-lineas-piezas/g)].map((m) => m[0])
-
-console.log(`  marcado: ${quieto.length} caracteres quieto · ${movido.length} caracteres animado`)
-afirmarIgual(transformadas(quieto), [], 'con anima=false no hay una sola transformada en el marcado')
-afirmarIgual(willChange(quieto), [], 'ni un `will-change`')
-afirmarIgual(marcaDeLineas(quieto), [], 'ni la marca del divisor de líneas')
-
-// EL CONTROL POSITIVO de los tres: los mismos detectores contra la rama que sí anima.
-afirmar(transformadas(movido).length > 0, `con anima=true hay ${transformadas(movido).length} transformada(s) — los detectores no están ciegos`)
-afirmar(willChange(movido).length > 0, `y ${willChange(movido).length} marca(s) de will-change`)
-afirmar(marcaDeLineas(movido).length > 0, `y ${marcaDeLineas(movido).length} marca(s) del divisor de líneas`)
+// El código de la sección sin este archivo y sin comentarios: la prosa nombra lo que se sacó.
+const FUENTE = codigoDeLaSeccion(ID)
+  .filter((a) => !a.includes('invariant'))
+  .map((a) => quitarComentarios(leer(a)))
+  .join('\n')
+const anunciado = (html: string): string => textoVisible(html.replace(/<[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>/g, ' ')).replace(/\s+/g, ' ').trim()
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El texto es el MISMO en las dos ramas')
+titulo('1 · El copy, textual, y ni una cifra')
 
-/**
- * El divisor de líneas emite DOS copias del titular: la accesible (`sr-only`) y
- * la visual (`aria-hidden`, `data-lineas-piezas`). La comparación se hace sobre
- * lo ANUNCIADO, que es lo único que una persona recibe una sola vez.
- */
-function sinCopiaVisual(html: string): string {
-  let salida = ''
-  let i = 0
-  for (;;) {
-    const marca = html.indexOf('data-lineas-piezas', i)
-    if (marca === -1) return salida + html.slice(i)
-    const abre = html.lastIndexOf('<span', marca)
-    salida += html.slice(i, abre)
-    let profundidad = 0
-    let j = abre
-    for (;;) {
-      const otroAbre = html.indexOf('<span', j + 1)
-      const cierra = html.indexOf('</span>', j + 1)
-      if (cierra === -1) return salida
-      if (otroAbre !== -1 && otroAbre < cierra) { profundidad += 1; j = otroAbre; continue }
-      if (profundidad === 0) { i = cierra + '</span>'.length; break }
-      profundidad -= 1
-      j = cierra
-    }
-  }
-}
-
-const textoQuieto = textoVisible(quieto)
-const textoMovido = textoVisible(sinCopiaVisual(movido))
-afirmarIgual(textoMovido, textoQuieto, 'el texto anunciado es idéntico en las dos ramas')
-afirmar(sinCopiaVisual(movido).length < movido.length, `el removedor sacó ${movido.length - sinCopiaVisual(movido).length} caracteres de copia visual — no es una igualdad por vacío`)
-afirmarIgual(sinCopiaVisual(quieto).length, quieto.length, 'y no saca nada de la rama quieta, que no tiene copia visual')
-afirmarIgual(sinCopiaVisual('<span data-lineas-piezas=""><span>a</span><span>b</span></span>c'), 'c', 'el removedor saca el subárbol entero, no solo la etiqueta')
-
-// ⚠️ B12 · `NOMBRE_DE_SECCION` sale de acá y se afirma al revés abajo (regla 15).
-const TEXTOS_ESPERADOS: readonly string[] = [TITULAR, ENTRADA, TESTIMONIO.cita, TESTIMONIO.forma, TESTIMONIO.firma, ...DIFERENCIALES.flatMap((d) => [d.titulo, d.cuerpo])]
-const faltantes = TEXTOS_ESPERADOS.filter((t) => !textoQuieto.includes(t))
-afirmarIgual(faltantes, [], `los ${TEXTOS_ESPERADOS.length} textos de la sección se leen enteros sin una sola animación`)
-controlPositivo('el buscador de textos ve uno que falta', 'una frase que la sección no dice', (t: string) => textoQuieto.includes(t))
-afirmar(!textoQuieto.includes(NOMBRE_DE_SECCION) && !textoMovido.includes(NOMBRE_DE_SECCION), `y el RÓTULO DE SECCIÓN («${NOMBRE_DE_SECCION}») ya NO se lee en ninguna de las dos ramas: se fue de las ocho en B12 y el título toma su lugar`)
+afirmarIgual([FRASE.izquierda, FRASE.derecha], ['Seis razones', 'para elegirnos'], 'la frase es la propuesta: «Seis razones» · «para elegirnos»')
+afirmarIgual(
+  VALORES.map((v) => `${v.titulo} — ${v.linea}`),
+  [
+    'Hecho a medida — Sin plantillas: cada sitio se diseña para tu negocio.',
+    'Diseño que se destaca — Tu sitio no se parece al de tu competencia.',
+    'Rápido, sin atajos — Entregamos rápido sin recortar calidad.',
+    'Calidad que se nota — Carga rápido, se ve bien en cualquier pantalla y está bien construido por dentro.',
+    'Tu panel, tu control — Ves cómo va tu proyecto y pedís cambios sin esperar un mail.',
+    'Hablás con quien lo hace — Sin intermediarios: te atienden las personas que construyen tu sitio.',
+  ],
+  'los seis valores, en orden y con su línea',
+)
+afirmarIgual([CTA.frase, CTA.destacado, CTA.rotulo, CTA.destino], ['Este sitio empezó con una charla.', 'El tuyo también.', 'Hablanos', '#contacto'], 'el CTA: la frase, el destacado y «Hablanos» a #contacto')
+afirmarIgual(escanearLoReal(textoVisible(quieto)), [], 'el texto de la sección no tiene una sola cifra')
+afirmarIgual(marcadoresRealesEn(textoVisible(quieto)), [], '  ni un marcador: no queda nada pedido')
+afirmarIgual(PEDIDO.length, 0, '  y la tabla del pedido está vacía')
+afirmar(!/INVENTOS|conLlave/.test(FUENTE), 'la sección no consume INVENTOS', `quedan ${String(LISTA_DE_INVENTOS.length)} en la lista, todas de Números`)
+controlPositivo('  el detector vería un consumo de INVENTOS', 'conLlave(INVENTOS.diferencialClientes)', (f: string) => !/INVENTOS|conLlave/.test(f))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Contenido — ningún número que se pueda leer como un hecho')
+titulo('2 · Los íconos: una librería, un trazo, decoración')
 
-/** La frase que este lane existe para no escribir. Vive acá, en el instrumento. */
-const CONTENIDO_PROHIBIDO_DE_CONTROL = 'Crecimos +340% en 3 meses, con planes desde $99.000 por mes y ×2 de leads.'
-
-const hallazgos = escanearLoReal(textoQuieto)
-console.log(`  escaneados ${textoQuieto.length} caracteres de texto visible`)
-afirmarIgual(hallazgos, [], 'cero cifras sospechosas, cero precios y cero números sin declarar')
-afirmarIgual(escanearLoReal(textoMovido), [], 'y lo mismo en la rama animada')
-
-const marcadores = marcadoresRealesEn(textoQuieto)
-console.log(`  marcadores en pantalla: ${marcadores.join(' · ')}`)
-afirmar(marcadores.length >= 4, `hay ${marcadores.length} marcadores distintos — "cero hallazgos" no es "cero contenido"`)
-afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), 'los nombres reales están escritos derecho, sin marcador. DERIVADOS de NOMBRES_REALES: escritos acá, la lista y la afirmación eran la misma copia y no se podían contradecir', NOMBRES_REALES.join(' · '))
-
-controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t: string) => escanearLoReal(t).length === 0)
-console.log(`  la frase de control dispara ${escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
+const pieza = renderToStaticMarkup(<PiezaDeValor valor={VALORES[0]} />)
+afirmar(/<svg[^>]*aria-hidden="true"/.test(pieza) && /stroke-width="1.5"/.test(pieza), 'cada ícono es un svg `aria-hidden` de trazo 1,5')
+afirmarIgual(Object.keys(ICONOS).length, VALORES.length, '  uno por valor')
+const librerias = [...FUENTE.matchAll(/from '(lucide-react|@phosphor-icons\/[^']+|react-icons[^']*)'/g)].map((m) => m[1])
+afirmarIgual([...new Set(librerias)], ['lucide-react'], '  de UNA librería, la que el repo ya usaba')
+const trazos = [...FUENTE.matchAll(/strokeWidth=\{([\d.]+)\}/g)].map((m) => m[1])
+afirmarIgual([...new Set(trazos)], ['1.5'], '  con UN solo trazo')
+controlPositivo('  el detector de librerías vería dos mezcladas', "from 'lucide-react'\nfrom '@phosphor-icons/react'", (f: string) => [...new Set([...f.matchAll(/from '(lucide-react|@phosphor-icons\/[^']+)'/g)].map((m) => m[1]))].length === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · Tokens — cero color y cero literales con unidad')
+titulo('3 · Las dos ramas anuncian lo mismo, y la quieta no mueve nada')
 
-const sinComentarios = FUENTE.map((t) => quitarComentarios(t))
-afirmarIgual(sinComentarios.flatMap(hexEncontrados), [], `cero hex en los ${ARCHIVOS.length} archivos (${CARACTERES_DE_FUENTE} caracteres)`)
-afirmarIgual(sinComentarios.flatMap(funcionesDeColorEncontradas), [], 'cero rgb()/hsl()/oklch()')
-afirmarIgual(sinComentarios.flatMap(literalesConUnidad), [], 'cero literales con unidad')
-afirmarIgual(sinComentarios.flatMap(arbitrariosSinVar), [], 'toda clase arbitraria de Tailwind consume var(--token)')
-
-controlPositivo('el detector de hex ve uno', 'color: #0E0E0E', (t: string) => hexEncontrados(t).length === 0)
-controlPositivo('el de funciones de color ve una', 'rgba(17, 17, 17, 0.1)', (t: string) => funcionesDeColorEncontradas(t).length === 0)
-controlPositivo('el de literales con unidad ve uno', 'const alto = "55svh"', (t: string) => literalesConUnidad(t).length === 0)
-controlPositivo('el de arbitrarios ve uno sin var()', 'className="min-h-[55svh]"', (t: string) => arbitrariosSinVar(t).length === 0)
-
-/** LA ÚNICA EXCEPCIÓN DECLARADA: un valor que viene del DATO, en `style`. */
-const estilosEnLaFuente = sinComentarios.flatMap((t) => [...t.matchAll(/style=\{\{([^}]*)\}\}/g)].map((m) => m[1].trim()))
-afirmarIgual(estilosEnLaFuente, ['minHeight: ALTO_MINIMO_DEL_BLOQUE'], 'el único `style` inline de la carpeta es el alto del bloque de P5')
-afirmarIgual(ALTO_MINIMO_DEL_BLOQUE, `${ALTO_MINIMO_DEL_BLOQUE_SVH}svh`, 'y su valor se compone del número declarado más su unidad')
-console.log(`  el alto declarado es ${ALTO_MINIMO_DEL_BLOQUE} y aparece ${(quieto.match(/min-height:55svh/g) ?? []).length} vez/veces en el marcado`)
+afirmarIgual(anunciado(movido), anunciado(quieto), 'el escenario y la lista anuncian el mismo texto, en el mismo orden')
+afirmar(anunciado(quieto).startsWith(NOMBRE_DE_SECCION), '  y arranca por el `h2` «Por qué develOP», para el lector y para el menú', anunciado(quieto).slice(0, 60))
+afirmarIgual((quieto.match(/<h2\b/g) ?? []).length, 1, '  un solo `h2` por rama')
+afirmarIgual([...quieto.matchAll(/style="[^"]*transform:[^"]*"/g)].length, 0, 'la rama quieta no escribe una sola transformada')
+afirmar([...movido.matchAll(/style="[^"]*transform:[^"]*"/g)].length > 0, '  (control: la del escenario sí, así que el detector no está ciego)')
+afirmar(!/MarcaDeSeccion|CabeceraDeSeccion/.test(FUENTE) && !/data-pieza="marca-de-seccion"/.test(quieto + movido), 'sin el punto azul: la sección ya no monta la marca (la pieza compartida no se borró)')
+afirmar(/href="#contacto"/.test(quieto) && /data-pieza="cta"/.test(quieto), 'el botón es el CTA del sitio, a #contacto')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Foco — nada interactivo, y nadie apaga el anillo')
+titulo('4 · Las piezas, sobre los mismos tiempos que la cámara')
 
-const ETIQUETA_DE_CONTROL = /<(a|button|input|select|textarea|summary)\b([^>]*)>/gi
-function focalizablesDe(html: string): string[] {
-  const encontrados: string[] = []
-  for (const m of html.matchAll(ETIQUETA_DE_CONTROL)) {
-    const etiqueta = m[1].toLowerCase()
-    if (/\sdisabled(?:[=\s>]|$)/i.test(m[2])) continue
-    if (etiqueta !== 'a' || /\shref=/.test(m[2])) encontrados.push(`<${etiqueta}`)
-  }
-  for (const m of html.matchAll(/<([a-z][a-z0-9-]*)\b([^>]*\btabindex="(?!-1)[^"]*"[^>]*)>/gi)) encontrados.push(`<${m[1]} tabindex`)
-  return encontrados
-}
-
-afirmarIgual(focalizablesDe(quieto), [], 'la sección no declara ningún elemento interactivo — es contenido puro')
-afirmarIgual(focalizablesDe(movido), [], 'y tampoco en la rama animada')
-afirmarIgual(sinComentarios.flatMap(apagadosDeFoco), [], 'ningún archivo apaga el anillo de foco')
-controlPositivo('el buscador de focalizables ve uno', '<a href="#cierre">Ver el cierre</a>', (h: string) => focalizablesDe(h).length === 0)
-controlPositivo('el detector de apagados ve las tres formas', '.a{outline:none}.b{outline-width:0}.c{outline-style:none}', (t: string) => apagadosDeFoco(t).length === 0)
-controlPositivo('y también la utilidad de Tailwind', 'const c = "outline-none"', (t: string) => apagadosDeFoco(t).length === 0)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · Contraste de la tinta contra lo que hay detrás')
-
-const TEMA = leer('src/app/theme-develop.css').replace(/\/\*[\s\S]*?\*\//g, '')
-function valorDelTema(token: string): string {
-  const m = new RegExp(`${token}\\s*:\\s*([^;]+);`).exec(TEMA)
-  if (m === null) throw new Error(`s7: el token ${token} no está en el tema`)
-  return m[1].trim()
-}
-const PAPEL = valorDelTema('--color-fondo')
-
-afirmarIgual(razonDeContraste('#000000', '#FFFFFF').toFixed(4), '21.0000', 'control de la calculadora: negro contra blanco da 21,0000')
-afirmarIgual(razonDeContraste(TINTA_HEX, TINTA_HEX).toFixed(4), '1.0000', 'y un color contra sí mismo da 1,0000')
-
-const razones = COLORES_DEL_CANVAS_DE_PRUEBA.map((c) => ({ contra: `${c.token} (${c.hex})`, razon: razonDeContraste(TINTA_HEX, c.hex) }))
-const razonPapel = razonDeContraste(TINTA_HEX, PAPEL)
-for (const r of razones) console.log(`  tinta ${TINTA_HEX} contra ${r.contra}: ${r.razon.toFixed(4)}:1`)
-console.log(`  tinta ${TINTA_HEX} contra el papel --color-fondo (${PAPEL}), que es lo que se ve abajo de 1025: ${razonPapel.toFixed(4)}:1`)
-
-const peor = razones.reduce((a, b) => (a.razon <= b.razon ? a : b))
-console.log(`  PEOR CASO sobre el marcador de posición: ${peor.razon.toFixed(4)}:1 contra ${peor.contra}`)
-afirmar(peor.razon >= 4.5, `el peor caso pasa AA (4,5:1) — ${peor.razon.toFixed(4)}:1`)
-afirmar(peor.razon >= 7, `y pasa AAA (7:1) — ${peor.razon.toFixed(4)}:1`)
-afirmar(razones[0].razon !== razones[1].razon, `el comparador ve la diferencia entre los dos colores del canvas: ${razones[0].razon.toFixed(4)} contra ${razones[1].razon.toFixed(4)}`)
-
-/** El número de sección lo pinta `_contrato/Seccion.tsx` a `--opacity-casi`. */
-function componer(frente: string, alfa: number, fondo: string): string {
-  const canal = (h: string, i: number): number => Number.parseInt(h.slice(1 + i * 2, 3 + i * 2), 16)
-  const mezcla = (i: number): string => Math.round(canal(frente, i) * alfa + canal(fondo, i) * (1 - alfa)).toString(16).padStart(2, '0')
-  return `#${mezcla(0)}${mezcla(1)}${mezcla(2)}`
-}
-const ALFA = Number.parseFloat(valorDelTema('--opacity-casi'))
-const rotuloPeor = COLORES_DEL_CANVAS_DE_PRUEBA.map((c) => razonDeContraste(componer(TINTA_HEX, ALFA, c.hex), c.hex)).reduce((a, b) => Math.min(a, b))
-console.log(`  HEREDADO — el "07" del rótulo va a --opacity-casi (${ALFA}): peor caso ${rotuloPeor.toFixed(4)}:1 sobre el canvas de prueba`)
-afirmar(rotuloPeor > 1, `el compositor de alfa produce un número real (${rotuloPeor.toFixed(4)}:1) y no un 1,0000 por no hacer nada`)
-
-console.warn('  ⚠️ ESTA CIFRA VALE PARA EL MARCADOR DE POSICIÓN, que es plano y pinta dos tokens. La escena real es una sala con gradiente y NO hereda este número: hay que volver a medirlo cuando entre.')
-
-const seccion = seccionDe(ID)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · Los patrones que declaro son los que están')
-
-const declarados = USOS_DECLARADOS.filter((u) => u.seccion === ID).map((u) => u.patron)
-/** ⚠ Desde SITIO-S7 el patrón se nombra por su ID (`patron="P2"`): importar
- *  `PATRONES` metía el sistema entero en la carga inicial. */
-const RE_PATRON = /(?:PATRONES\.|patron=")(P\d)/g
-const usadosEnLaFuente = [...new Set(sinComentarios.flatMap((t) => [...t.matchAll(RE_PATRON)].map((m) => m[1])))].sort()
-afirmarIgual(usadosEnLaFuente, ['P1', 'P5'], 'la sección consume exactamente P1 y P5')
-afirmarIgual([...declarados].sort(), usadosEnLaFuente, 'y son los que `_contrato/motion.ts` declara para esta sección en USOS_DECLARADOS')
-controlPositivo('el detector ve un patrón que no está declarado', 'const x = <B patron="P9" />', (t: string) => [...t.matchAll(RE_PATRON)].map((m) => m[1]).every((p) => declarados.includes(p)))
-
-afirmarIgual(PIEZAS_DE_P5, DIFERENCIALES.length + 1, `el conjunto de P5 tiene ${PIEZAS_DE_P5} piezas: los ${DIFERENCIALES.length} diferenciales más el testimonio`)
-afirmarIgual(PATRONES.P5.escalonado, 0, 'con escalonado 0: las cinco arrancan juntas, como se midió')
-afirmar(movido.includes('data-lineas-accesible'), 'el canal de P1 emite su copia accesible del titular')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('11 · La superficie: la tabla dice lo que la instrucción acordó')
-
-/** ⚠ Era una publicación —había DOS tablas y la regla 13 mandaba publicar el
- *  delta— y con una sola tabla pasa a ser una afirmación. */
-afirmarIgual(seccion.superficie, SUPERFICIE_ACORDADA[ID], 'la tabla declara la superficie acordada')
-console.log(`  con ${seccion.superficie} el panel pinta "${SUPERFICIES[seccion.superficie].clases}"`)
-afirmarIgual(sinComentarios.flatMap((t) => [...t.matchAll(/papel-opaco|papel-transparente|oscuro-opaco|text-tinta|bg-fondo/g)].map((m) => m[0])), [], 'la sección no nombra ninguna superficie ni ninguna de sus clases: es correcta con las dos')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · Ninguna clase de tamaño tipográfico se pierde en el merge')
-
-const TAMANOS_ESPERADOS = ['text-fluido-titulo-xl', 'text-fluido-titulo-s', 'text-cuerpo', 'text-fluido-caption']
-const perdidos = TAMANOS_ESPERADOS.filter((c) => !quieto.includes(c))
-afirmarIgual(perdidos, [], `los ${TAMANOS_ESPERADOS.length} tamaños tipográficos de la sección sobreviven al merge de clases`)
-/** ⚠ AFIRMABA EL DEFECTO. SITIO-S7 lo arregló en la raíz —`src/lib/utils.ts`— y
- *  la comprobación se da vuelta con el mismo caso: el tamaño sobrevive. */
-const merge = cn('font-cuerpo', 'text-fluido-caption', 'text-tinta-media')
-console.log(`  cn('font-cuerpo','text-fluido-caption','text-tinta-media') → "${merge}"`)
-afirmar(merge.includes('text-fluido-caption'), 'el tamaño sobrevive al color: el defecto de `cn()` está arreglado')
+const adentro = [VENTANA_DE_LA_FRASE, ...VALORES.map((_, i) => ventanaDelValor(i)), VENTANA_DE_LA_LEVANTADA, VENTANA_DEL_CTA, VENTANA_DEL_DESTACADO]
+afirmar(adentro.every((v) => v.desde >= 0 && v.hasta <= 1 && v.hasta > v.desde), 'todas las ventanas caen adentro del pin')
+afirmar(VENTANA_DE_LA_FRASE.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.frase.hasta), 'la frase termina de llegar con la cámara quieta en A')
+afirmar(
+  VALORES.every((_, i) => ventanaDelValor(i).desde >= progresoDelPin(TIEMPOS_DEL_FINAL.frase.hasta)) &&
+    VALORES.every((_, i) => ventanaDelValor(i).hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta)),
+  '  los valores entran mientras la cámara baja a B y están puestos cuando llega',
+)
+afirmar(ventanaDelValor(1).desde > ventanaDelValor(0).desde && ventanaDelValor(3).desde === ventanaDelValor(0).desde, '  de a pares —izquierda y derecha juntas—, escalonados de arriba abajo')
+afirmar(
+  VENTANA_DE_LA_LEVANTADA.desde === progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta) && VENTANA_DEL_DESTACADO.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.cta.llega),
+  '  la frase y los valores se levantan cuando la cámara empieza a subir, y el CTA queda armado cuando termina',
+)
+const huecoA = huecoDelLogo(POSES_DEL_FINAL.frase.distance)
+const huecoB = huecoDelLogo(POSES_DEL_FINAL.valores.distance)
+afirmar(huecoB > huecoA && huecoA > 25, `el hueco que el logo deja sale de la pose: ${huecoA.toFixed(1)} svh en A y ${huecoB.toFixed(1)} svh en B, más cerca`)
 
 cerrar('s7-por-que-develop.invariant')

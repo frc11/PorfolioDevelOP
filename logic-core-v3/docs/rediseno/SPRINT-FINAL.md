@@ -78,3 +78,31 @@ el pie sube; E se sostiene hasta el final.
   en verde.
 - Medido en el navegador a 1440: el corte recto, A frontal al asomar, B en contrapicado y
   E con el logo chico al centro sobre la sala de noche.
+
+## Fase 2 — «Por qué develOP» (≥1024)
+
+- [x] **Escenario clavado de cuatro pantallas** (`por-que-develop/PorQueDevelop.tsx`) sobre el
+  pin de la sección, con las ventanas derivadas de los mismos tiempos que la cámara
+  (`por-que-develop/geometria.ts`):
+  - **A · la frase** «Seis razones» · «para elegirnos» llega desde atrás con P5 —escala 0,8 → 1
+    con la opacidad, el gesto que nk hace con «5 things / to remember», medido en su DOM— y
+    rodea al logo: el hueco sale de la pose (30,6 svh en A) y del ancho medido del logo.
+  - **B · los seis valores**, tres a cada lado, entran de a pares con P5 escalonado mientras la
+    cámara baja; la frase se queda y sube 30 svh para no pisarlos.
+  - La sección sigue siendo «Por qué develOP»: `h2` en `sr-only` en las dos ramas, id y menú.
+- [x] **Íconos: Lucide** (el repo ya la tenía; no se sumó Phosphor), trazo 1,5 en los seis y
+  el color de la tinta. Hecho a medida → `Ruler` · Diseño que se destaca → `PenTool` · Rápido,
+  sin atajos → `Timer` · Calidad que se nota → `BadgeCheck` · Tu panel, tu control →
+  `LayoutDashboard` · Hablás con quien lo hace → `MessagesSquare`.
+- [x] **Contraste AA sobre la escena, medido a 1440** (fondo sin el texto, percentil 90 bajo
+  cada caja): títulos 13,7–17,9:1, líneas 6,1–7,3:1, la frase 13,8 / 17,0:1. El 0,6–4,8 % de
+  los píxeles de cada caja que queda bajo AA son las motas blancas de la sala.
+- [x] **El contenido viejo se fue**: titular, bajada, cuatro diferenciales y el testimonio, con
+  sus **cinco entradas de INVENTOS** (las dos puntas). **Quedan 5 en INVENTOS, todas de
+  Números** (desconectada), así que la lista no llega a cero y la franja sigue por la llave.
+- [x] **Sin el punto azul**: la sección ya no monta `CabeceraDeSeccion` (no se borró).
+- [x] La superficie pasa a `oscuro-transparente` (tinta clara sobre la sala de noche).
+- [x] Invariantes: `s6-por-que-develop` reescrito (26 afirmaciones); `s10-acceso` (+1 parada,
+  +2 encabezados, −5 marcadores), la lista de quién pide coreografía en todo ancho, y la tabla
+  de superficies acordadas, actualizados. En verde: s7-arboles, s7-contrato, s10-acceso,
+  s21-llave, s5-codigo, s5-tokens, s3-tokens, s5-trabajos, s6-render, s7-mezcla.

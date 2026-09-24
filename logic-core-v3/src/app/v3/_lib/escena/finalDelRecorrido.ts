@@ -56,8 +56,11 @@ export function progresoDelFinal(pantalla: number): number {
 /** Las poses de los cinco tiempos (D es el camino entre C y E). */
 export const POSES_DEL_FINAL = {
   frase: { angleDeg: 360, height: 1.6, distance: 20, frameX: 0, frameY: 0 },
-  valores: { angleDeg: 360, height: -3.2, distance: 12, frameX: 0, frameY: 0 },
-  cta: { angleDeg: 360, height: 0, distance: 12, frameX: 0, frameY: 0 },
+  // A 16 y no a los 12 que da nk: la barra de nk es angosta y nuestro logo es ancho (medido en
+  // contrapicado a 14: 797 × 547 px a 1440 × 900), así que a 1024 × 768 los valores de los
+  // costados no entraban. Contrapicado de 11°; el piso admite −3,584 a 16.
+  valores: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
+  cta: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
   pie: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
 } as const
 

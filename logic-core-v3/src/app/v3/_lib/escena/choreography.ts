@@ -366,7 +366,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     pose: POSES_DEL_FINAL.frase,
   },
   sosten('frase · sostén', TIEMPOS_DEL_FINAL.frase.hasta, POSES_DEL_FINAL.frase),
-  // B · más cerca y desde abajo: un contrapicado de 15° (el piso admite −3,764 a 12).
+  // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
   { at: progresoDelFinal(TIEMPOS_DEL_FINAL.valores.llega), name: 'valores', ease: 'shift', turn: 'literal', pose: POSES_DEL_FINAL.valores },
   sosten('valores · sostén', TIEMPOS_DEL_FINAL.valores.hasta, POSES_DEL_FINAL.valores),
   // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.

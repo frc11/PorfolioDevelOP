@@ -118,42 +118,10 @@ export const INVENTOS = {
   // prosa. Se fueron con los tres bloques y la lista que las mostraban: la sección
   // pasó a ser una galería sin una sola cifra.
 
-  // ── Por qué develOP · dos diferenciales y el testimonio entero ───────────
-  diferencialClientes: { marcador: '[CIFRA]', pedido: '[CIFRA]', mentira: 'nueve' },
-  diferencialEntrega: {
-    marcador: '[MÉTRICA]',
-    pedido:
-      '[MÉTRICA] más rápido que el camino tradicional, medido sobre entregas reales. Hasta que la medición exista, la cifra no se escribe.',
-    mentira:
-      'Un mes más rápido que el camino tradicional, medido sobre entregas reales. La cuenta sale del promedio de las que ya salieron.',
-  },
-  /**
-   * ⚠️ EL NOMBRE DEL TESTIMONIO NO PUEDE CONFUNDIRSE CON UNA PERSONA REAL, y
-   * por eso no es un nombre plausible.
-   *
-   * La instrucción lo pide con esas palabras. Cualquier nombre y apellido
-   * rioplatense que suene creíble **es** el nombre de alguien: escribirlo abajo
-   * de una cita inventada le pone palabras en la boca a una persona que existe.
-   * `Persona Inventada` tiene el largo y el lugar de una firma —la composición
-   * se puede juzgar— y no se puede leer como alguien.
-   */
-  testimonioCita: {
-    marcador: '[TESTIMONIO]',
-    pedido: '[TESTIMONIO]',
-    mentira: 'Antes preguntaba por mensaje en qué andaba cada cosa. Ahora lo abro y lo veo.',
-  },
-  testimonioCuerpo: {
-    marcador: '[MÉTRICA]',
-    pedido:
-      'Dos o tres oraciones de quien abre el panel todos los días: qué hacía antes, qué hace ahora, y qué dejó de hacer. Sin cifras adentro — la cifra va aparte, como [MÉTRICA].',
-    mentira:
-      'Los pedidos entran solos y quedan con fecha. Dejé de llevar una planilla en paralelo para saber qué se había entregado y qué no.',
-  },
-  testimonioFirma: {
-    marcador: '[NOMBRE]',
-    pedido: '[NOMBRE]',
-    mentira: 'Persona Inventada · testimonio de muestra',
-  },
+  // ⚠️ SPRINT FINAL · Por qué develOP tenía acá dos diferenciales con cifra y el
+  // testimonio entero (cita, cuerpo y firma). Se fueron con la sección que los mostraba:
+  // la nueva son seis valores sin una sola cifra, y ninguna de las cinco mentiras se
+  // consume. Salieron las dos puntas juntas, de acá y de `contenido.ts`.
 } as const satisfies Record<string, Invento>
 
 export const LISTA_DE_INVENTOS: readonly Invento[] = Object.values(INVENTOS)
