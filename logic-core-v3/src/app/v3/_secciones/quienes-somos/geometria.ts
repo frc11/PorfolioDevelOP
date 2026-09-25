@@ -318,3 +318,12 @@ export const CLASES_DEL_REPARTO = cn(
   'escritorio:grid-cols-12 escritorio:gap-y-0',
   'gap-x-[var(--grilla-canal-compacto)] escritorio:gap-x-[var(--grilla-canal-amplio)]',
 )
+
+/** RECURSOS · A qué altura se ancla cada foto vertical en su marco apaisado. Clases enteras, para el escáner de Tailwind. */
+export const CLASE_DE_ENCUADRE = {
+  arriba: 'object-[50%_20%]',
+  medio: 'object-[50%_38%]',
+} as const
+
+/** RECURSOS · La proporción de cada marco como clase: las fotos llegaron verticales y el marco la impone. */
+export const CLASE_DE_RELACION = { retrato: 'aspect-4/3', foto: 'aspect-3/2' } as const

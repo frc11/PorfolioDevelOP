@@ -9,7 +9,7 @@ import { CanalDePieza, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } fr
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
 import { CONTENIDO } from './contenido'
-import { CLASES_DEL_REPARTO, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
+import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
 import { MarcoDeDosTomas } from './marco'
 import { CalleDerecha, Pantalla } from './pantalla'
 
@@ -131,6 +131,7 @@ export function ElEquipo(): React.JSX.Element {
                           suelta={persona.suelta}
                           texto={persona.rol}
                           registro="rotulo"
+                          relacion={CLASE_DE_RELACION.retrato}
                           ancho={GEOMETRIA.retrato.ancho}
                           alto={GEOMETRIA.retrato.alto}
                           sizes={SIZES_DEL_RETRATO}
@@ -225,6 +226,7 @@ export function LaFoto(): React.JSX.Element {
                   suelta={CONTENIDO.equipo.suelta}
                   texto={CONTENIDO.equipo.descripcion}
                   registro="cuerpo"
+                  relacion={CLASE_DE_RELACION.foto}
                   ancho={GEOMETRIA.foto.ancho}
                   alto={GEOMETRIA.foto.alto}
                   sizes={SIZES_DE_LA_FOTO}

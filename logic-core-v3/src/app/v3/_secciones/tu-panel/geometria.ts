@@ -188,3 +188,10 @@ export function corrimientoDelParallax(arriba: number, altoDelMarco: number, alt
 export function claseMovil(indice: number): string {
   return indice % 2 === 0 ? 'w-22/25' : 'ml-auto w-18/25'
 }
+
+/** RECURSOS · El anclaje horizontal de cada captura (el marco le recorta los costados). Clases enteras, para el escáner de Tailwind. */
+export const CLASE_DE_ENCUADRE = {
+  izquierda: 'object-left-top',
+  centro: 'object-top',
+  derecha: 'object-right-top',
+} as const

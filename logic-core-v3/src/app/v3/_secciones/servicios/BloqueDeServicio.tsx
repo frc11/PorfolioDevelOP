@@ -6,16 +6,16 @@ import { Grilla } from '../../_componentes/layout/Grilla'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import type { Servicio } from '../_contrato/acento'
 import { CanalDePiezas, CanalDeUnaPieza } from '../_contrato/canales'
-import { MarcoDeMedio } from '../_contrato/medios'
 import {
   ALTO_DEL_MEDIO,
   ANCHO_DEL_MEDIO,
   CONTENIDO,
-  POSTER_PROVISIONAL,
+  VIDEO_DE_MUESTRA,
   SIZES_DEL_MEDIO,
   palabrasDelParrafo,
 } from './contenido'
 import { ParrafoQueSePinta } from './ParrafoQueSePinta'
+import { VideoDeServicio } from './VideoDeServicio'
 import { NIVEL_DEL_PARRAFO, clasesDeNivel } from './geometria'
 
 /**
@@ -101,17 +101,14 @@ export function BloqueDeServicio({
   const medio = (
     <CanalDeUnaPieza progreso={null} patron="P2">
       <div data-fila="medio">
-        <MarcoDeMedio
-          clase="video"
-          marcador="[VIDEO]"
-          poster="[PÓSTER]"
-          fuente={POSTER_PROVISIONAL}
-          provisional
-          alt={contenido.medio}
+        {/* RECURSOS: el mismo video de muestra en los tres frentes, por ahora. */}
+        <VideoDeServicio
+          fuente={VIDEO_DE_MUESTRA.fuente}
+          poster={VIDEO_DE_MUESTRA.poster}
+          descripcion={contenido.medio}
           ancho={ANCHO_DEL_MEDIO}
           alto={ALTO_DEL_MEDIO}
           sizes={SIZES_DEL_MEDIO}
-          descripcion={contenido.medio}
         />
       </div>
     </CanalDeUnaPieza>

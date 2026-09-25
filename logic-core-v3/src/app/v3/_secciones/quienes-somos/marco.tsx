@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 import { MarcoDeMedio } from '../_contrato/medios'
 
-import { CONTENIDO } from './contenido'
+import { CLASE_DE_ENCUADRE } from './geometria'
 
 /**
  * EL MARCO DE DOS TOMAS — la seria en reposo, la descontracturada en el hover.
@@ -76,7 +76,10 @@ import { CONTENIDO } from './contenido'
 
 /** Una toma: el marcador que se pide y la leyenda que la distingue de su gemela. */
 export interface Toma {
-  readonly marcador: (typeof CONTENIDO.equipo.seria)['marcador'] | (typeof CONTENIDO.equipo.suelta)['marcador']
+  /** RECURSOS: la foto real, servida desde `public/`. */
+  readonly fuente: string
+  /** A qué altura está la cara en la foto vertical: la clase sale de `GEOMETRIA`. */
+  readonly encuadre: keyof typeof CLASE_DE_ENCUADRE
   readonly leyenda: string
 }
 
@@ -181,6 +184,7 @@ export function MarcoDeDosTomas({
   alto,
   sizes,
   proporcion,
+  relacion,
   descripcionYaVisible,
 }: {
   readonly seria: Toma
@@ -199,6 +203,8 @@ export function MarcoDeDosTomas({
    * toque. Los retratos no la pasan: entran con 53 y 107 px de sobra.
    */
   readonly proporcion?: string
+  /** RECURSOS: la proporción del marco, como clase (`CLASE_DE_RELACION`). */
+  readonly relacion: string
   /**
    * ⚠️ **SÓLO LA VERDAD PARA LA FOTO DEL EQUIPO.** Cuando la descripción de esta
    * instancia YA se lee afuera de la foto —el caso de «Nosotros» en la banda
@@ -208,7 +214,7 @@ export function MarcoDeDosTomas({
    */
   readonly descripcionYaVisible?: boolean
 }): React.JSX.Element {
-  const comun = { fuente: CONTENIDO.equipo.fuente, provisional: true, ancho, alto, sizes }
+  const comun = { ancho, alto, sizes }
   const [abierto, setAbierto] = useState(false)
   const alternar = useCallback(() => {
     setAbierto((v) => !v)
@@ -226,12 +232,14 @@ export function MarcoDeDosTomas({
         className="group relative w-full"
         style={ESTILO_DEL_MARCO}
       >
-        <span className={cn('block overflow-hidden', proporcion)}>
+        {/* RECURSOS: el marco manda la proporción (las fotos llegaron verticales) y cada toma encuadra su cara. */}
+        <span className={cn('block overflow-hidden', relacion, proporcion)}>
           <MarcoDeMedio
-            marcador={seria.marcador}
+            marcador="[FOTO]"
             alt={seria.leyenda}
+            fuente={seria.fuente}
             {...comun}
-            className={cn(ACERCAMIENTO, proporcion === undefined ? undefined : 'h-full')}
+            className={cn(ACERCAMIENTO, 'h-full w-full object-cover', CLASE_DE_ENCUADRE[seria.encuadre])}
           />
         </span>
 
@@ -239,18 +247,18 @@ export function MarcoDeDosTomas({
           aria-hidden="true"
           data-parte="suelta"
           className={cn(
-            'pointer-events-none absolute inset-0 [clip-path:inset(50%)]',
-            'transition-[var(--marco-propiedad)] duration-[var(--duracion-rapida)] ease-[var(--ease-salida)]',
-            'group-hover:[clip-path:inset(0%)] group-hover:duration-[var(--duracion-lenta)]',
-            'group-focus-visible:[clip-path:inset(0%)] group-focus-visible:duration-[var(--duracion-lenta)]',
-            'group-data-[abierto=true]:[clip-path:inset(0%)] group-data-[abierto=true]:duration-[var(--duracion-lenta)]',
+            // RECURSOS: la toma suelta entra con un fundido corto (hover, foco o el toque de la sección).
+            'pointer-events-none absolute inset-0 overflow-hidden opacity-0',
+            'transition-opacity duration-[var(--duracion-rapida)] ease-[var(--ease-salida)]',
+            'group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[abierto=true]:opacity-100',
           )}
         >
           <MarcoDeMedio
-            marcador={suelta.marcador}
+            marcador="[FOTO]"
             alt={suelta.leyenda}
+            fuente={suelta.fuente}
             {...comun}
-            className="h-full invert [&_img]:h-full [&_img]:object-cover"
+            className={cn('h-full w-full object-cover', CLASE_DE_ENCUADRE[suelta.encuadre])}
           />
         </div>
 

@@ -145,8 +145,9 @@ export const CONTENIDO = {
       nombre: 'Franco',
       /** [verdad] El mismo rol que publica el sitio vivo. Vuelve como primera parte del hover. */
       rol: 'Estrategia · Comercial · Planificación',
-      seria: { marcador: '[FOTO]', leyenda: 'Franco, retrato serio' },
-      suelta: { marcador: '[FOTO]', leyenda: 'Franco, retrato descontracturado' },
+      // RECURSOS: las fotos reales. `encuadre` dice a qué altura está la cara en la foto vertical (el marco es apaisado).
+      seria: { leyenda: 'Franco, de camisa a cuadros', fuente: '/recursos/equipo/franco.webp', encuadre: 'arriba' },
+      suelta: { leyenda: 'Franco pateando una pelota en una cancha de fútbol', fuente: '/recursos/equipo/franco-descontracturado.webp', encuadre: 'arriba' },
       /** [relleno] Lo que se lee sobre la foto en el hover, después del puesto. */
       descripcion: 'Enfocado, creativo, perfeccionista. Encargado de toda la estructura de develOP.',
     },
@@ -154,8 +155,8 @@ export const CONTENIDO = {
       nombre: 'Valentino',
       /** [verdad] El mismo rol que publica el sitio vivo. Vuelve como primera parte del hover. */
       rol: 'Ejecución técnica',
-      seria: { marcador: '[FOTO]', leyenda: 'Valentino, retrato serio' },
-      suelta: { marcador: '[FOTO]', leyenda: 'Valentino, retrato descontracturado' },
+      seria: { leyenda: 'Valentino sacándose una foto en el espejo', fuente: '/recursos/equipo/valentino.webp', encuadre: 'medio' },
+      suelta: { leyenda: 'Valentino apoyado en una mesa de pool, bajo luces violetas', fuente: '/recursos/equipo/valentino-descontracturado.webp', encuadre: 'medio' },
       /** [relleno] Lo que se lee sobre la foto en el hover, después del puesto. */
       descripcion: 'Obsesivo, curioso, inconformista. Escribe el sistema, lo pone a andar y lo mantiene.',
     },
@@ -168,8 +169,8 @@ export const CONTENIDO = {
      * pedido a Franco, y un marcador que sólo viviera en el `.tsx` no entraría
      * en esa lista. El componente se lo pasa a `MarcoDeMedio` desde acá.
      */
-    seria: { marcador: '[FOTO DEL EQUIPO]', leyenda: 'Franco y Valentino, juntos, en el lugar donde trabajan' },
-    suelta: { marcador: '[FOTO]', leyenda: 'Franco y Valentino, fuera del estudio' },
+    seria: { leyenda: 'Franco y Valentino, de remera blanca, en un jardín de noche', fuente: '/recursos/equipo/nosotros.webp', encuadre: 'medio' },
+    suelta: { leyenda: 'Franco y Valentino en un boliche, entre luces de colores', fuente: '/recursos/equipo/nosotros-descontracturado.webp', encuadre: 'medio' },
     /**
      * ⚠️ **B12 §4.3 · EL PLACEHOLDER, no la foto.** Es un archivo PROPIO
      * —generado por `scripts-b12/placeholders.ts`, rayado y grano en escala de
@@ -238,22 +239,6 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     formato: 'Dos palabras. Texto plano.',
   },
   {
-    ruta: 'personas[0].seria.marcador',
-    clase: 'foto',
-    marcador: '[FOTO]',
-    quienLoTrae: 'franco',
-    que: 'El retrato SERIO de Franco: es el que se ve en reposo.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal.',
-  },
-  {
-    ruta: 'personas[0].suelta.marcador',
-    clase: 'foto',
-    marcador: '[FOTO]',
-    quienLoTrae: 'franco',
-    que: 'El retrato DESCONTRACTURADO de Franco: aparece al pasar el mouse, encima del serio.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio.',
-  },
-  {
     ruta: 'personas[0].descripcion',
     clase: 'prosa',
     marcador: null,
@@ -262,44 +247,12 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     formato: 'Una o dos frases, ~90 caracteres. Texto plano.',
   },
   {
-    ruta: 'personas[1].seria.marcador',
-    clase: 'foto',
-    marcador: '[FOTO]',
-    quienLoTrae: 'valentino',
-    que: 'El retrato SERIO de Valentino: es el que se ve en reposo.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal.',
-  },
-  {
-    ruta: 'personas[1].suelta.marcador',
-    clase: 'foto',
-    marcador: '[FOTO]',
-    quienLoTrae: 'valentino',
-    que: 'El retrato DESCONTRACTURADO de Valentino: aparece al pasar el mouse, encima del serio.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que el serio.',
-  },
-  {
     ruta: 'personas[1].descripcion',
     clase: 'prosa',
     marcador: null,
     quienLoTrae: 'valentino',
     que: 'Cómo es Valentino y de qué se ocupa. Se lee sobre la foto, así que corto.',
     formato: 'Una o dos frases, ~90 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'equipo.seria.marcador',
-    clase: 'foto',
-    marcador: '[FOTO DEL EQUIPO]',
-    quienLoTrae: 'valentino',
-    que: 'La foto de los dos, en el lugar donde trabajan. Es la que se ve en reposo.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Se reemplaza poniendo la ruta en `equipo.fuente`.',
-  },
-  {
-    ruta: 'equipo.suelta.marcador',
-    clase: 'foto',
-    marcador: '[FOTO]',
-    quienLoTrae: 'valentino',
-    que: 'La foto de los dos DESCONTRACTURADA: aparece al pasar el mouse, encima de la seria.',
-    formato: 'JPG o WEBP, 1800 × 1200 px (3:2), horizontal. Mismo encuadre que la seria.',
   },
   {
     ruta: 'equipo.descripcion',

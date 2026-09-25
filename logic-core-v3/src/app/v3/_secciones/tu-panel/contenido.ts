@@ -27,6 +27,9 @@ export const NOMBRE = 'Tu panel'
 export const TITULO = 'Tu Panel'
 export const DESCRIPCION = 'Tu acceso al proyecto. Ves cómo va y pedís lo que necesites, sin esperar un mail.'
 
+/** Dónde se ancla una captura en su marco. La clase vive en `geometria.ts`. */
+export type EncuadreDeCaptura = 'izquierda' | 'centro' | 'derecha'
+
 /** Una tarjeta de la galería. `imagen` y `alt` son lo que se cambia cuando lleguen las capturas. */
 export interface Tarjeta {
   readonly titulo: string
@@ -36,6 +39,8 @@ export interface Tarjeta {
   readonly imagen: string
   /** `''` mientras la imagen sea el placeholder: un rayado no se describe como una pantalla. */
   readonly alt: string
+  /** RECURSOS: dónde se ancla la captura: el marco (con el 130 % del parallax) le recorta los costados. */
+  readonly encuadre: EncuadreDeCaptura
 }
 
 /** El placeholder rayado de B12 §4.3, con la medida de una captura real. */
@@ -46,14 +51,15 @@ const PLACEHOLDER = '/placeholders/panel.png'
  * voseo: es lo que la persona HACE en el panel, no lo que el panel «ofrece».
  */
 export const TARJETAS: readonly Tarjeta[] = [
-  { titulo: 'Revisá cada conversación de tu chatbot', etiqueta: 'Chatbot', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Recibí los leads ya calificados que consultaron tu página', etiqueta: 'Leads', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Creá tickets para que cambiemos lo que necesites', etiqueta: 'Soporte', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Chateá con nosotros directo, por lo que sea', etiqueta: 'Soporte', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Pedí servicios nuevos a medida que los sumamos', etiqueta: 'Servicios', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Mirá el resumen de tu proyecto', etiqueta: 'Proyecto', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Seguí tus resultados', etiqueta: 'Resultados', imagen: PLACEHOLDER, alt: '' },
-  { titulo: 'Configurá cómo responde tu chatbot', etiqueta: 'Chatbot', imagen: PLACEHOLDER, alt: '' },
+  // RECURSOS: las capturas reales del panel.
+  { titulo: 'Revisá cada conversación de tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/conversaciones.webp', encuadre: 'izquierda', alt: 'El panel con la lista de conversaciones del chatbot: fecha, mensajes y el lead que dejó cada una, con una conversación abierta.' },
+  { titulo: 'Recibí los leads ya calificados que consultaron tu página', etiqueta: 'Leads', imagen: '/recursos/panel/leads.webp', encuadre: 'derecha', alt: 'El panel de leads en tres columnas, calientes, tibios y fríos, con la ficha de un lead de prueba y sus datos de contacto.' },
+  { titulo: 'Creá tickets para que cambiemos lo que necesites', etiqueta: 'Soporte', imagen: '/recursos/panel/tickets.webp', encuadre: 'izquierda', alt: 'El centro de soporte del panel con los tickets abiertos, en curso y resueltos, y el botón para abrir uno nuevo.' },
+  { titulo: 'Chateá con nosotros directo, por lo que sea', etiqueta: 'Soporte', imagen: '/recursos/panel/mensajes.webp', encuadre: 'centro', alt: 'El chat del panel con el equipo de develOP: una conversación con mensajes de ida y vuelta y el campo para escribir.' },
+  { titulo: 'Pedí servicios nuevos a medida que los sumamos', etiqueta: 'Servicios', imagen: '/recursos/panel/servicios-nuevos.webp', encuadre: 'izquierda', alt: 'La vitrina de servicios del panel: un módulo disponible para desbloquear y los próximos, con el aviso para enterarse.' },
+  { titulo: 'Mirá el resumen de tu proyecto', etiqueta: 'Proyecto', imagen: '/recursos/panel/mi-proyecto.webp', encuadre: 'izquierda', alt: 'El resumen del proyecto en el panel: el avance en porcentaje, el tipo, las fechas y una entrega esperando aprobación.' },
+  { titulo: 'Seguí tus resultados', etiqueta: 'Resultados', imagen: '/recursos/panel/resultados.webp', encuadre: 'izquierda', alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.' },
+  { titulo: 'Configurá cómo responde tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/modifica-chatbot.webp', encuadre: 'izquierda', alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.' },
 ]
 
 /** El cierre de la galería, a tamaño de titular. Los puntos van aparte: entran uno por uno. */
@@ -101,14 +107,4 @@ export const CAPTURA = {
  * el texto renderizado en los dos sentidos.
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
-  {
-    ruta: 'TARJETAS[i].imagen',
-    clase: 'captura',
-    marcador: '[CAPTURA DEL PANEL]',
-    quienLoTrae: 'valentino',
-    que:
-      'Una captura del panel por tarjeta, de la pantalla que nombra su título (conversaciones, leads, tickets, ' +
-      'chat, servicios, resumen, resultados, configuración del chatbot). Con datos de muestra: ningún dato real de un cliente.',
-    formato: 'PNG o WEBP, 1920 × 1200 px (16:10). La ruta va en `TARJETAS[i].imagen` y su descripción en `TARJETAS[i].alt`.',
-  },
 ]

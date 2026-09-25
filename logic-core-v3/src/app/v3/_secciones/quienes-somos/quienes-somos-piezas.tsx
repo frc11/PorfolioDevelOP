@@ -78,7 +78,8 @@ export const TEXTOS = textosDe(CONTENIDO)
  *  optimizador la reescribe a `/_next/image?url=…`, así que se exime de la
  *  cuenta de textos y se comprueba CODIFICADA. Mismo trato que las tres
  *  capturas de Trabajos. */
-export const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => h.ruta !== 'equipo.fuente')
+// RECURSOS: también las rutas de las seis fotos y sus encuadres (un nombre de clase, no un texto).
+export const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => h.ruta !== 'equipo.fuente' && !/\.(fuente|encuadre)$/.test(h.ruta))
 export const FUENTE = readFileSync(
   path.join(path.dirname(fileURLToPath(import.meta.url)), 'QuienesSomos.tsx'),
   'utf8',
@@ -119,7 +120,7 @@ export const LITERALES = ['Franco', 'Valentino']
  */
 export const conFoto = renderToStaticMarkup(
   <MarcoDeMedio
-    marcador={CONTENIDO.equipo.seria.marcador}
+    marcador="[FOTO DEL EQUIPO]"
     fuente="/prueba-de-invariante.jpg"
     alt={CONTENIDO.equipo.seria.leyenda}
     ancho={GEOMETRIA.foto.ancho}

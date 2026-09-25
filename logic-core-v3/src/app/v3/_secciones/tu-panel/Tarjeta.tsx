@@ -11,7 +11,7 @@ import { Bloque } from '../_contrato/coreografia'
 import { ALFA_DEL_FONDO } from './Fondo'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CAPTURA, PALABRAS_DEL_FONDO, type Tarjeta as DatosDeTarjeta } from './contenido'
-import { TABLA_DEL_CAOS, TAMANOS, arranques, claseMovil, velocidadDe } from './geometria'
+import { CLASE_DE_ENCUADRE, TABLA_DEL_CAOS, TAMANOS, arranques, claseMovil, velocidadDe } from './geometria'
 
 const TOPES = arranques()
 
@@ -64,7 +64,7 @@ export function Tarjeta({
               <span ref={refDelMarco} data-parte="marco" className="bg-superficie-2 relative block aspect-16/10 w-full overflow-hidden">
                 <span className="absolute inset-0 block transition-transform duration-[var(--duracion-media)] ease-in-out group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transition-none">
                   <span ref={refDelParallax} data-parte="parallax" className="absolute inset-x-0 top-0 block h-13/10">
-                    <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(tamano.ancho, 88)} className="h-full object-cover" />
+                    <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(tamano.ancho, 88)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
                   </span>
                 </span>
                 {/* El marcador se VE (es un placeholder) pero no se anuncia: repetido

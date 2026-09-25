@@ -39,6 +39,9 @@ import { ALTO_DEL_MEDIO, ANCHO_DEL_MEDIO, POSTER_PROVISIONAL } from '../../_secc
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
+/** RECURSOS: las fotos del equipo llegaron; el mecanismo del placeholder se sigue probando con su marcador. */
+const MARCADOR_DE_LA_FOTO_DEL_EQUIPO = '[FOTO DEL EQUIPO]' as const
+
 /** La banda de peso declarada, en KiB. Abajo no pesa como una foto; arriba deja
  *  de ser un placeholder y pasa a ser un problema de carga. */
 const PESO_MINIMO_KIB = 150
@@ -136,7 +139,7 @@ titulo('5 · ⚠️ SE VEN COMO PLACEHOLDERS: el marcador queda escrito ENCIMA')
 
 const conFoto = marcar(
   <MarcoDeMedio
-    marcador={CONTENIDO_QUIENES.equipo.seria.marcador}
+    marcador={MARCADOR_DE_LA_FOTO_DEL_EQUIPO}
     fuente={CONTENIDO_QUIENES.equipo.fuente}
     provisional
     alt={CONTENIDO_QUIENES.equipo.seria.leyenda}
@@ -148,7 +151,7 @@ const conFoto = marcar(
 )
 
 afirmar(conFoto.includes('data-medio="placeholder"'), 'el marco provisional se declara `placeholder` y no `marcador`: hay archivo, y no es la foto')
-afirmar(textoVisible(conFoto).includes(CONTENIDO_QUIENES.equipo.seria.marcador), `  y ${CONTENIDO_QUIENES.equipo.seria.marcador} se lee ENCIMA de la imagen, en texto`)
+afirmar(textoVisible(conFoto).includes(MARCADOR_DE_LA_FOTO_DEL_EQUIPO), `  y ${MARCADOR_DE_LA_FOTO_DEL_EQUIPO} se lee ENCIMA de la imagen, en texto`)
 afirmar(conFoto.includes(encodeURIComponent(CONTENIDO_QUIENES.equipo.fuente)), '  con la imagen de verdad abajo, con su peso y su `sizes`')
 afirmar(conFoto.includes(`data-sizes="${SIZES_DE_LA_FOTO}"`), '  y el `sizes` escrito, que es lo que el día de la foto no hay que volver a pensar')
 afirmar(/<img[^>]*alt=""/.test(conFoto), '  ⚠️ el `alt` de la imagen va VACÍO: contarle a quien no ve una foto que no existe sería la misma mentira que este contrato evita')
@@ -157,7 +160,7 @@ afirmar(conFoto.includes('border-dashed'), '  y el borde punteado, que es el len
 controlPositivo(
   'el chequeo del marcador encima vería un marco sin él',
   '<figure data-medio="placeholder"><img src="/x.png" alt=""/></figure>',
-  (html: string) => textoVisible(html).includes(CONTENIDO_QUIENES.equipo.seria.marcador),
+  (html: string) => textoVisible(html).includes(MARCADOR_DE_LA_FOTO_DEL_EQUIPO),
 )
 afirmar(POSTER_PROVISIONAL === 'public/placeholders/poster.png'.replace('public', ''), 'y el póster de Servicios apunta al archivo servido, no a uno de disco', POSTER_PROVISIONAL)
 

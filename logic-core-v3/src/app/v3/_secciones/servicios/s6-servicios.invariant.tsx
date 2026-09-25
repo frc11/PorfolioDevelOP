@@ -183,7 +183,8 @@ afirmarIgual(hallazgos, [], `cero hallazgos sobre ${visibleQuieto.length} caract
 // cifras reales de ningún cliente, así que no quedan detrás de la llave
 // esperando un dato. Quedan [TESTIMONIO], [VIDEO] y [PÓSTER].
 const marcadores = marcadoresRealesEn(visibleQuieto)
-afirmar(marcadores.length >= 3, `el contrapeso: el escáner miró un texto con ${marcadores.length} marcadores`, marcadores.join(' · '))
+// RECURSOS: el video llegó; quedan los [TESTIMONIO] de cada frente.
+afirmar(marcadores.length >= 1 && marcadores.every((m) => m === '[TESTIMONIO]'), `el contrapeso: el escáner miró un texto con ${marcadores.length} marcadores, sólo testimonios`, marcadores.join(' · '))
 afirmar(IDS_DE_SERVICIO.every((id) => textoQuieto.includes(CONTENIDO[id].rubro)), 'los tres rubros están en el documento')
 afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), `y los ${NOMBRES_REALES.length} clientes REALES también, DERIVADOS de NOMBRES_REALES y no escritos acá`, NOMBRES_REALES.join(' · '))
 controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearLoReal(t).length === 0)
@@ -203,7 +204,7 @@ controlPositivo('los detectores ven un hex, un px suelto y un arbitrario sin var
 
 // El único estilo inline viene del DATO y está declarado en su lugar.
 afirmar(animado.includes(`min-height:${seccionDe('servicios').alto}`), 'el alto del bloque sale de la tabla del sitio, no de una clase muerta')
-afirmar(cuenta(animado, /aspect-ratio:/g) === SERVICIOS.length, 'y la relación del hueco de medio es el otro estilo del dato — uno por servicio, y con la pila son los tres')
+afirmar(cuenta(animado, /aspect-ratio:/g) === 0, 'y el video lleva su relación por clase (`aspect-video`): ningún otro estilo inline')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · Foco: nadie apaga el anillo, y no hay nada que lo capture')
@@ -436,9 +437,10 @@ controlPositivo('el detector de listas SÍ las ve cuando están', '<ul><li>uno</
  *  de estados para que agregar un servicio no deje el número viejo. */
 afirmarIgual(cuentaDeAtributo(animado, 'data-fila'), SERVICIOS.length * 2 + CANTIDAD_DE_ESTADOS, `${SERVICIOS.length * 2 + CANTIDAD_DE_ESTADOS} filas con coreografía: medio y caso por servicio, más los ${CANTIDAD_DE_ESTADOS} rótulos del rodillo`)
 afirmarIgual(cuentaDeAtributo(quieto, 'data-fila'), 9, 'y las mismas nueve en la rama apilada')
-afirmarIgual(cuentaDeAtributo(animado, 'data-medio'), SERVICIOS.length, 'un hueco de medio por servicio, con su marcador y su sizes')
-afirmarIgual(valoresDeAtributo(animado, 'data-marcador'), SERVICIOS.map(() => '[VIDEO]'), '  y los tres son VIDEO: está medido que es video, no imagen fija')
-afirmar(valoresDeAtributo(animado, 'data-sizes')[0].includes('vw'), '  con un sizes real compuesto por los ayudantes', valoresDeAtributo(animado, 'data-sizes')[0])
+// RECURSOS: el hueco pasó a ser el video de muestra, uno por servicio, mudo, en bucle y sin cargar hasta acercarse.
+const videos = [...animado.matchAll(/<video\b[^>]*>/g)].map((m) => m[0])
+afirmarIgual(videos.length, SERVICIOS.length, 'un video por servicio')
+afirmar(videos.every((v) => /muted/.test(v) && /loop/.test(v) && /playsInline|playsinline/.test(v) && /preload="none"/.test(v) && /poster="/.test(v) && !/ src="/.test(v)), '  mudo, en bucle, en línea, con póster y SIN fuente en el servidor: la pide recién cuando se acerca')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('14 · El rodillo DISPARA, y su máquina no sale de su archivo')
 

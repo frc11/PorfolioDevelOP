@@ -156,4 +156,5 @@ export const DELTA_DEL_PANEL = { paradas: 8, encabezados: -4, marcadores: -4 } a
 
 /** SPRINT FINAL: los cinco marcadores del «Por qué develOP» viejo ([CIFRA], dos [MÉTRICA], [TESTIMONIO] y [NOMBRE]) se fueron con él. */
 // FINAL 3 · y el pie se queda sin sus cinco: [ENLACE] × 3, [FECHA] y [NOMBRE].
-export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 } as const
+// RECURSOS · y las fotos y el video llegaron: −5 [FOTO], −1 [FOTO DEL EQUIPO] y −3 [VIDEO].
+export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 - 9 } as const

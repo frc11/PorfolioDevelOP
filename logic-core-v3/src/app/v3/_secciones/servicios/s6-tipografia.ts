@@ -32,7 +32,8 @@ export function afirmarLaTipografia(quieto: string, animado: string): void {
   afirmarIgual(tamanosPerdidos(quieto), [], `los ${elementos} elementos tipográficos conservan su clase de tamaño`)
   afirmarIgual(tamanosPerdidos(animado), [], '  y también con coreografía')
   afirmarIgual(familiasDeTituloPerdidas(quieto), [], '  y ningún titular cayó a la familia de cuerpo — la pérdida que SÍ se ve')
-  afirmar(elementos >= 3 * 5, `el contrapeso: ${elementos} elementos con data-nivel inspeccionados`)
+  // RECURSOS: el hueco del medio llevaba dos textos por servicio; el video no lleva ninguno.
+  afirmar(elementos >= 3 * 3, `el contrapeso: ${elementos} elementos con data-nivel inspeccionados`)
 
   // HEREDADO, se publica y no se afirma en cero (regla 13). Son de piezas
   // compartidas que este lane no toca: `EtiquetaDeSeccion` y el `<Caption>` de

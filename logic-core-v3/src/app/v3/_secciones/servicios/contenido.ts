@@ -215,6 +215,9 @@ export const SIZES_DEL_MEDIO = sizesPorTresTramos(50, 50, 100)
 /** ⚠️ B12 §4.3 · el PÓSTER provisional. El video sigue sin existir: uno que se reproduce se leería como el recorrido definitivo. */
 export const POSTER_PROVISIONAL = '/placeholders/poster.png'
 
+/** RECURSOS: el video de muestra de los tres frentes (H.264, sin audio) y su póster. */
+export const VIDEO_DE_MUESTRA = { fuente: '/recursos/servicios/placeholder.mp4', poster: '/recursos/servicios/placeholder-poster.webp' } as const
+
 /** Las palabras de un párrafo. Es la `cantidad` del canal P3. */
 export function palabrasDelParrafo(id: IdDeServicio): readonly string[] {
   return palabrasDe(CONTENIDO[id].parrafo)
@@ -267,21 +270,5 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     quienLoTrae: 'franco',
     que: 'El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.',
     formato: 'Dos o tres renglones, con el nombre del cliente. Texto plano.',
-  },
-  {
-    ruta: 'CONTENIDO.<servicio>.medio',
-    clase: 'video',
-    marcador: '[VIDEO]',
-    quienLoTrae: 'valentino',
-    que: 'El video del frente: qué se ve, en veinte segundos y sin audio necesario.',
-    formato: 'MP4 (h264), 1920 × 1080 px (16:9), ≤ 20 s, ≤ 4 MB. Sin audio obligatorio.',
-  },
-  {
-    ruta: 'CONTENIDO.<servicio>.medio',
-    clase: 'video',
-    marcador: '[PÓSTER]',
-    quienLoTrae: 'valentino',
-    que: 'El primer cuadro del video, para que no arranque negro.',
-    formato: 'JPG o WEBP, 1920 × 1080 px (16:9).',
   },
 ]

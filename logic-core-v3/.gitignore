@@ -219,3 +219,6 @@ src/modules/chatbot/evals/reports/
 # archivo sano.
 /.next-deslizar/
 docs/rediseno/capturas/
+
+# Originales pesados de los recursos (fotos, capturas, video): no se commitean.
+/Recursos-nuevos/
