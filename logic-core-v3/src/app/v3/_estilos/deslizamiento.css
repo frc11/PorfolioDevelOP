@@ -54,3 +54,11 @@
   opacity: 0;
   will-change: opacity;
 }
+
+/* [VIAJES] Con movimiento reducido el viaje es un salto tapado por un fundido corto. La regla global
+   deja toda transición en 1 ms; ésta le devuelve la suya sólo al velo, y el salto espera lo que declare. */
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] main {
+    transition-duration: var(--duracion-rapida) !important;
+  }
+}

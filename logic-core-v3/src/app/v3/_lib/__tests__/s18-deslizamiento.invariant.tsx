@@ -385,17 +385,27 @@ afirmar(
   /window\.clearTimeout\(relojDeArranque\)/.test(FUENTE_DEL_EFECTO),
   '  🔴 y `terminar` cancela el reloj de ARRANQUE: sin esa línea una rueda en los primeros 600 ms apagaría el velo y el scroll saldría de viaje igual',
 )
+// [VIAJES] La espera es `PRELUDIO_MS` en el viaje y el fundido del velo en el salto (movimiento reducido).
 afirmar(
-  FUENTE_DEL_EFECTO.includes('}, PRELUDIO_MS)'),
+  FUENTE_DEL_EFECTO.includes('const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS') && FUENTE_DEL_EFECTO.includes('}, espera)'),
   '  el viaje arranca a los `PRELUDIO_MS`, no en el mismo cuadro que el velo: es la pausa que el dueño pidió',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · El destino es EL ANCLA NATIVA — no un número, no `router.push`')
+/**
+ * 🔴 **[VIAJES] CAMBIO DE SUJETO: EL DESTINO YA NO ES EL ANCLA, ES UN NUDO DE LA COREOGRAFÍA.**
+ *
+ * DESLIZAR-1 le pasaba a `scrollTo` el ELEMENTO y el destino lo resolvía la librería con el
+ * `scroll-padding-top`. SPRINT VIAJES pide que cada destino salga de un nudo con nombre de la
+ * sección (`destinosDelViaje.ts`), medido en el click, y ése es un píxel: los dos motores reciben
+ * el MISMO número. El ancla sigue siendo el respaldo donde la sección no tiene nudo, así que las
+ * afirmaciones sobre cómo la resuelve la librería siguen de pie. `s27-viajes` §3 custodia los nudos.
+ */
+titulo('5 · El destino es un NUDO de la coreografía, medido en el click — no un literal, no `router.push`')
 
 afirmar(
-  quitarComentarios(leer(EFECTO)).includes('lenis.scrollTo(seccion, {'),
-  '`scrollTo` recibe el ELEMENTO: el destino lo calcula la librería, no el sprint',
+  quitarComentarios(leer(EFECTO)).includes('lenis.scrollTo(destinoEnPx, {') && quitarComentarios(leer(EFECTO)).includes('const destinoEnPx = destinoDelViaje(seccion)'),
+  '`scrollTo` recibe el nudo de la sección, el mismo píxel que el motor de abajo',
 )
 afirmar(!/router\.push|useRouter/.test(FUENTE_DEL_SPRINT), '  y no hay `router.push` ni `useRouter` en el sprint')
 afirmar(
@@ -452,7 +462,10 @@ afirmarIgual(SELECTOR_DEL_MAIN, '[data-v3] main', '  y el `<main>` se busca acot
 const reposo = CSS.slice(CSS.indexOf('[data-v3] main {'), CSS.indexOf(`[data-v3] main[${ATRIBUTO_DEL_VELO}]`))
 afirmar(reposo.includes('transition: opacity'), 'la `transition` vive en la regla de REPOSO: la vuelta se anima igual que la ida')
 afirmar(!reposo.includes('opacity: 0'), '  y el reposo NO apaga nada: sin el atributo el `<main>` se ve')
-const prendido = CSS.slice(CSS.indexOf(`[data-v3] main[${ATRIBUTO_DEL_VELO}]`))
+const prendido = CSS.slice(CSS.indexOf(`[data-v3] main[${ATRIBUTO_DEL_VELO}]`), CSS.indexOf('@media (prefers-reduced-motion: reduce)'))
+// [VIAJES] Con movimiento reducido la hoja le devuelve al velo su fundido, con el MISMO token: sigue siendo una definición del tiempo.
+const reducido = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: reduce)'))
+afirmar(/transition-duration: var\(--duracion-rapida\) !important;/.test(reducido) && !/opacity/.test(reducido), '  con movimiento reducido el velo recupera su fundido con el mismo token, y nada más')
 afirmar(prendido.includes('opacity: 0'), '  el estado prendido apaga')
 afirmar(prendido.includes('will-change: opacity'), '  y declara `will-change` SÓLO prendido: no deja una capa promovida para siempre')
 afirmar(!reposo.includes('will-change'), '    el reposo no lo lleva')
@@ -486,6 +499,8 @@ titulo('7 · LA REVERSIBILIDAD: cinco salidas, una función, y nadie llama `stop
 const EFECTO_LIMPIO = FUENTE_DEL_EFECTO
 afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función que apaga el velo')
 /**
+ * ⚠️ **[VIAJES] OCHO: la llegada del salto (movimiento reducido) es la tercera gemela de la llegada.**
+ *
  * ⚠️ **SIETE LLAMADAS Y SIGUEN SIENDO CINCO SALIDAS.** Eran cinco llamadas para
  * cinco salidas hasta que el viaje tuvo DOS motores: arriba del umbral lo mueve
  * Lenis y abajo `viajeSinLenis`, y dos de las cinco salidas necesitan una gemela
@@ -501,7 +516,7 @@ afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función
  * Lo que esta afirmación cuida no es el número sino que no haya una llamada
  * suelta: 5 + 2 gemelas = 7, y cada una tiene su renglón arriba.
  */
-afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 7, '  y exactamente SIETE sitios la llaman: cinco salidas, dos con gemela por el segundo motor')
+afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 8, '  y exactamente OCHO sitios la llaman: cinco salidas, dos con gemela por el segundo motor y la llegada del salto')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')
 afirmar(EFECTO_LIMPIO.includes('onComplete: () => terminar(true)'), '  salida 1 — llegó')
 afirmar(EFECTO_LIMPIO.includes("lenis.on('virtual-scroll'"), '  salida 2 — la rueda: el evento se emite ANTES de todas las guardas de `onVirtualScroll`')

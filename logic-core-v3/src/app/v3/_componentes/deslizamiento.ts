@@ -18,6 +18,16 @@ import { ATRIBUTO_DE_PANEL, IDS_DE_SECCION } from '../_secciones/_contrato/forma
  * dos segundos de scroll animado, con el `<main>` apagado para que lo que se vea
  * durante el viaje sea la escena.
  *
+ * ── [VIAJES] LO QUE CAMBIÓ: EL DESTINO ES UN NUDO Y VIAJAN LA BARRA Y EL MENÚ ─
+ *
+ * Desde SPRINT VIAJES el destino ya no es el ancla: es un nudo de la coreografía de
+ * cada sección, calculado en el click (`destinosDelViaje.ts`), y los dos motores y
+ * el salto reciben el MISMO píxel. Y la banda suspendida de abajo dejó de ser un
+ * impedimento: durante un viaje la escena dibuja entera (`_lib/escena/viaje.ts`),
+ * así que viajan también los ítems de la barra y del menú móvil. Lo que sigue es
+ * la historia de DESLIZAR-1, que sigue valiendo para las secciones sin nudo, donde
+ * el destino es el del ancla.
+ *
  * ── ⚠️ EL DESTINO NO SE ESCRIBE ACÁ, Y ES LA DECISIÓN CENTRAL ─────────────
  *
  * El deslizamiento **no calcula a dónde va**: le pasa a Lenis el mismo destino
@@ -208,6 +218,23 @@ export const SELECTOR_DEL_MAIN = '[data-v3] main'
  * y queda afuera por el ancestro, no por el `href`.
  */
 export const SELECTOR_DEL_CTA_DEL_HERO = `[${ATRIBUTO_DE_PANEL}="${IDS_DE_SECCION[0]}"] a[data-pieza="cta"]`
+
+/**
+ * [VIAJES] LOS ENLACES QUE VIAJAN — el CTA del hero, los ítems de la barra y los del menú móvil.
+ *
+ * Es el MISMO gesto para los tres: el de arriba sigue siendo el primero de la lista. «Contacto»
+ * también es un ítem, pero va a `#contacto`, que no es una sección: el efecto lo deja pasar y lo
+ * abre el formulario. Los dos literales salen de `Navegacion.tsx` y de `MenuMovil.tsx`, y
+ * `s27-viajes` afirma que aparecen tal cual en esos fuentes.
+ */
+export const SELECTOR_DE_LOS_VIAJES = [
+  SELECTOR_DEL_CTA_DEL_HERO,
+  '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]',
+  '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
+].join(', ')
+
+/** [VIAJES] Con movimiento reducido no hay viaje: un salto al mismo destino, tapado por un fundido corto. */
+export type ModoDelViaje = 'viaje' | 'salto'
 
 /**
  * 🔴 LA COMPUERTA DEL INTRO — el requisito, como función pura.

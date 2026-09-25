@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import type Lenis from 'lenis'
 
+import type { ModoDelViaje } from './deslizamiento'
 import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
 
 /**
@@ -24,8 +25,8 @@ import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
  * No renderiza nada: como el otro módulo perezoso de esta familia, todo lo que
  * hace vive en un efecto, así que montarlo o desmontarlo no puede mover una caja.
  */
-export default function DeslizamientoSinScrollSuave(): null {
+export default function DeslizamientoSinScrollSuave({ modo = 'viaje' }: { readonly modo?: ModoDelViaje }): null {
   const instancia = useRef<Lenis | null>(null)
-  useDeslizamientoDelCta(instancia)
+  useDeslizamientoDelCta(instancia, modo)
   return null
 }

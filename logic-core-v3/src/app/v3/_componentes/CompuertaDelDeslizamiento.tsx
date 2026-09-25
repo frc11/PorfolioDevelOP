@@ -55,10 +55,12 @@ export function CompuertaDelDeslizamiento() {
   const arribaDelUmbral = useAnchoMinimo(CONSULTA_SCROLL_SUAVE)
   const prefiereMenosMovimiento = usePrefiereMenosMovimiento()
 
+  // [VIAJES] Con movimiento reducido, en cualquier ancho: un salto al destino con un fundido corto.
+  // Va primero porque con la preferencia puesta `ScrollSuaveDeV3` no se monta en ningún ancho.
+  if (prefiereMenosMovimiento) return <DeslizamientoSinScrollSuave modo="salto" />
   // Arriba del umbral el deslizamiento ya lo monta `ScrollSuaveDeV3`, con la
   // instancia de Lenis. Montarlo dos veces serían dos escuchas del mismo click.
   if (arribaDelUmbral) return null
-  if (prefiereMenosMovimiento) return null
 
   return <DeslizamientoSinScrollSuave />
 }

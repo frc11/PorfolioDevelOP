@@ -5,6 +5,9 @@ import { useEffect, type RefObject } from 'react'
 
 import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
 
+import { planDelViaje } from '../_lib/escena/planDelViaje'
+import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
+
 import {
   ATRIBUTO_DEL_VELO,
   CURVA_DEL_VIAJE,
@@ -12,12 +15,14 @@ import {
   DURACION_DEL_VIAJE_MS,
   PRELUDIO_MS,
   RETARDO_ANTES_DE_DESAPARECER_MS,
-  SELECTOR_DEL_CTA_DEL_HERO,
+  SELECTOR_DE_LOS_VIAJES,
   SELECTOR_DEL_MAIN,
   TOTAL_DEL_DESLIZAMIENTO_MS,
   deberiaDeslizar,
+  type ModoDelViaje,
 } from './deslizamiento'
-import { destinoDelAncla, viajarSinLenis } from './viajeSinLenis'
+import { destinoDelViaje } from './destinosDelViaje'
+import { viajarSinLenis } from './viajeSinLenis'
 
 /**
  * EL MARGEN DEL RELOJ DE SEGURIDAD, en milisegundos.
@@ -134,7 +139,7 @@ const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS
  * reemplace sola. Este archivo entra al barrido de `.stop(` de
  * `s18-compuertas.invariant.ts` §3b junto a los otros tres del motor.
  */
-export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void {
+export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo: ModoDelViaje = 'viaje'): void {
   useEffect(() => {
     const zona = document.querySelector<HTMLElement>(SELECTOR_DEL_MAIN)
     if (zona === null) return
@@ -153,6 +158,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
     let relojDeArranque: number | undefined
     /** Y el de seguridad, que lo aborta si nadie reportó el final. */
     let reloj: number | undefined
+    /** [VIAJES] El que suelta la escena cuando el velo terminó de volver. */
+    let relojDeLaEscena: number | undefined
 
     /**
      * APAGA EL VELO. Idempotente, y la llaman las cinco salidas.
@@ -194,6 +201,9 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       // El orden importa: mientras el `<main>` sea inerte, `focus()` adentro no
       // hace nada. Primero se devuelve la interactividad, después el foco.
       zona.inert = false
+      // [VIAJES] La escena sigue en viaje hasta que el velo termina de volver: en un destino opaco,
+      // la sala de abajo no se ve mientras el `<main>` todavía es transparente.
+      relojDeLaEscena = window.setTimeout(terminarElViaje, duracionDelFundido(zona))
 
       const foco = llego ? destino : origen
       if (foco !== null) {
@@ -225,7 +235,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
 
       const blanco = evento.target
       if (!(blanco instanceof Element)) return
-      const enlace = blanco.closest<HTMLAnchorElement>(SELECTOR_DEL_CTA_DEL_HERO)
+      // [VIAJES] El CTA del hero, los ítems de la barra y los del menú móvil: el mismo gesto.
+      const enlace = blanco.closest<HTMLAnchorElement>(SELECTOR_DE_LOS_VIAJES)
       if (enlace === null) return
 
       // 🔴 La compuerta del intro. Antes de que la capa se vaya, el botón no
@@ -272,6 +283,11 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       origen = enlace
       destino = seccion
       enVuelo = true
+      // [VIAJES] El destino es un nudo de la coreografía (`destinosDelViaje.ts`), medido en el click; y
+      // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).
+      const destinoEnPx = destinoDelViaje(seccion)
+      window.clearTimeout(relojDeLaEscena)
+      empezarElViaje(planDelViaje(seccion.id, destinoEnPx))
 
       // El velo espera `RETARDO_ANTES_DE_DESAPARECER_MS`; con 0 va en el mismo cuadro.
       const encenderElVelo = (): void => {
@@ -347,8 +363,16 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
        * que todavía no se movió un píxel, y `terminar` limpia este reloj para
        * que el `scrollTo` de abajo no se ejecute nunca.
        */
+      // [VIAJES] Con movimiento reducido la espera es el fundido del velo, que declara la hoja.
+      const salto = modo === 'salto'
+      const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS
       relojDeArranque = window.setTimeout(() => {
         relojDeArranque = undefined
+        if (salto) {
+          window.scrollTo({ top: destinoEnPx, behavior: 'instant' })
+          terminar(true)
+          return
+        }
         /**
          * 🔴 **LOS DOS MOTORES, Y LA SECUENCIA ES UNA SOLA.** Lo que cambia entre
          * las dos ramas es QUIÉN mueve el scroll; el retardo, el fundido, la
@@ -359,14 +383,14 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
          */
         if (lenis === null) {
           cancelarElViaje = viajarSinLenis(
-            destinoDelAncla(seccion),
+            destinoEnPx,
             DURACION_DEL_VIAJE_MS,
             CURVA_DEL_VIAJE,
             () => terminar(true),
           )
           return
         }
-        lenis.scrollTo(seccion, {
+        lenis.scrollTo(destinoEnPx, {
           duration: DURACION_DEL_DESLIZAMIENTO_S,
           /**
            * 🔴 La curva PROPIA del viaje — `power1.inOut` del vocabulario de
@@ -383,7 +407,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
           lock: false,
           onComplete: () => terminar(true),
         })
-      }, PRELUDIO_MS)
+      }, espera)
     }
 
     const alHistorial = (): void => terminar(false)
@@ -396,6 +420,14 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>): void
       window.removeEventListener('popstate', alHistorial)
       // Desmontar a mitad de vuelo no puede dejar el `<main>` apagado ni inerte.
       terminar(false)
+      window.clearTimeout(relojDeLaEscena)
+      terminarElViaje()
     }
-  }, [instancia])
+  }, [instancia, modo])
+}
+
+/** [VIAJES] Cuánto tarda el velo en irse, leído de la hoja: una sola definición del fundido. */
+function duracionDelFundido(zona: HTMLElement): number {
+  const segundos = Number.parseFloat(getComputedStyle(zona).transitionDuration)
+  return Number.isFinite(segundos) ? segundos * 1000 : 0
 }
