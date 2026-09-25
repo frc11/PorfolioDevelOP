@@ -253,3 +253,11 @@ html:has([data-v3]) {
   translate: 0 calc(var(--spacing-6) * -1);
   pointer-events: none;
 }
+
+/* CONTACTO · el modo lo mide `NavegacionDelHome`: si la barra entra, se ve en cualquier ancho; si no, la reemplaza el menú móvil. */
+[data-v3] [data-pieza="navegacion"][data-modo="barra"] > [data-parte="pastilla"] {
+  visibility: visible;
+}
+[data-v3] [data-pieza="navegacion"][data-modo="menu"] > [data-parte="pastilla"] {
+  visibility: hidden;
+}

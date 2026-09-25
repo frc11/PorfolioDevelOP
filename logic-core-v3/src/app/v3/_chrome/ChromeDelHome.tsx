@@ -1,6 +1,7 @@
 import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
 
 import { Contacto } from './contacto/Contacto'
+import { MenuMovil } from './menu/MenuMovil'
 import { NavegacionDelHome } from './NavegacionDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
@@ -153,6 +154,7 @@ export function ChromeDelHome(): React.JSX.Element {
        */}
       {/* CONTACTO: la misma barra, con su estado activo (el subrayado que se desliza). */}
       <NavegacionDelHome className={CLASE_DE_LA_PASTILLA_APAGADA} />
+      <MenuMovil />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />
 

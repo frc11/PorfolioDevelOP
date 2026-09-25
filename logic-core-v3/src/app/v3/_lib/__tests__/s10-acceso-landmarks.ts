@@ -92,10 +92,11 @@ export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMA
     `  ⚠ y ABAJO DE 860 no está: el envoltorio del \`banner\` lleva \`${CLASE_DE_LA_PASTILLA_APAGADA}\` — ahí el documento tiene ${LANDMARKS.length - 2} landmarks y el \`main\` lo abre (PAPEL-2 §5 + COMPO-2 §2b/§3a, TEMPORAL)`,
     `${LANDMARKS.length} en el marcado · ${LANDMARKS.length - 2} en pantalla abajo de 860 — 5 de los 8 anchos del set`,
   )
+  // CONTACTO · la clase es sólo la conjetura de antes de medir; el modo lo decide `NavegacionDelHome` por el ancho real (barra desde 628 px) y abajo va el menú móvil.
   afirmarIgual(
     CLASE_DE_LA_PASTILLA_APAGADA,
-    'max-medio:hidden',
-    '  y la banda es la del corte declarado que separa 768 de 1024, no un corte nuevo: el dueño quiere la pastilla a 1024',
+    'max-medio:invisible',
+    '  y la banda es la del corte declarado que separa 768 de 1024, como conjetura antes de medir: `invisible` y no `hidden`, para que la barra se pueda medir',
   )
   controlPositivo(
     'el chequeo de la banda ve una pastilla apagada en TODO ancho, que sería otra cosa',

@@ -84,3 +84,48 @@ navbar hacen lo que hacían, salvo «Contacto», que abre el formulario.
   `preventDefault`.
 - [x] Censos al día: `s5-hero` (dos enlaces), `s18-deslizamiento` §1 (dos `<a>` y el segundo no
   desliza) y `s10-acceso` (+1 parada, `DELTA_DEL_CONTACTO`).
+
+## Fase 4 — El menú móvil
+
+- [x] **Un módulo del chrome**, `_chrome/menu/`: `tono.ts` (el tono de lo que hay debajo, puro),
+  `useTonoDebajo.ts` (lo lee por cuadro) y `MenuMovil.tsx` (el botón y el menú). Lo monta
+  `ChromeDelHome` al lado de la barra.
+- [x] **El corte, medido por el ancho real**: `NavegacionDelHome` mide si la lista entra en la
+  pastilla (`scrollWidth` contra `clientWidth`, con un `ResizeObserver` sobre el documento y la
+  lista) y escribe `data-modo` y el modo del chrome. **La barra entra desde 628 px; hasta 627 va
+  el menú** (la lista mide 562 px). Queda: menú a 320, 375 y 425; barra a 768, 1024 y 1440. Antes
+  de medir, abajo de 860 la barra está `invisible` (no `hidden`, así se puede medir).
+- [x] **El botón**: un círculo de 48 px arriba al centro con el isotipo. El tono sale de la
+  superficie declarada de la sección que queda bajo su centro y de `nocheEfectiva()`: invertida,
+  oscuro; transparente con noche (≥ 0,5), oscuro; el resto, claro. Sobre oscuro va claro, sobre
+  claro va dado vuelta (`data-seccion="invertida"`). Medido a 375 bajando: claro sólo en Trabajos;
+  al volver al hero con un salto, la noche sigue prendida y el botón queda claro, que es lo que
+  hay debajo.
+- [x] **El menú**: flota debajo del botón sin tocar ningún borde, con el sitio desenfocado atrás;
+  sitio oscuro → menú claro, sitio claro → menú oscuro. Quiénes somos · Trabajos · Servicios · Por
+  qué develOP · Contacto (la misma lista de la barra). Contacto cierra el menú y, ya desmontado,
+  abre el formulario desde abajo.
+- [x] **La animación que quedó: el resorte sin rebote**, que nace del botón (`transform-origin`
+  en su centro). Medido a 375 con perfil móvil y CPU ×4, en una pantalla de 75 Hz (13,3 ms por
+  cuadro): el resorte, 41 cuadros con 1 solo arriba de 20 ms (el primero, 67 ms: el montaje); el
+  Genie de las demos con el menú en sus 60 tiras (`genie.ts`, las mismas matrices), 24 cuadros,
+  5 arriba de 20 ms, p95 93 ms y máximo 160 ms. El Genie no sostiene 60 cuadros.
+- [x] **Cierre**: tocar afuera, el mismo botón o Esc. Diálogo con el foco atrapado; el foco vuelve
+  al botón en la limpieza del desmontaje, después de la de la trampa (con `onExitComplete` y un
+  cuadro, la trampa seguía montada y lo retenía: el foco caía en el `body`).
+- Anotado: el `devolverElFoco` del contacto usa el patrón de un cuadro después de la salida y
+  anda (medido en los cuatro anchos), pero tiene la misma carrera latente.
+
+## Validación
+
+- [x] `tsc --noEmit` y eslint sin errores en lo tocado. Sin build, sin prettier.
+- [x] Invariantes nuevos: `s25-contacto` (diálogo, scroll bloqueado, precarga, envío) y `s26-menu`
+  (28 afirmaciones: el contraste del botón sobre zonas claras y oscuras de día y de noche, ≥ 3:1 el
+  círculo y ≥ 4,5:1 el logo; el diálogo; los ítems; el modo por el ancho). Cada uno con control.
+- [x] Al día: `s5-hero`, `s18-deslizamiento`, `s10-acceso` (+ landmarks), `s8-chrome`. Siguen las
+  preexistentes: `s8-chrome` (2, piden un build) y `s3-foco` (el «libro» de las demos).
+- [x] Capturas en `~/.cache/b4-medicion/contacto/fotos/`: `navbar-*`, `formulario-*` en 375, 768,
+  1024 y 1440; `menu-sobre-claro-375` (Servicios) y `menu-sobre-oscuro-375` (Trabajos). Desde 628
+  px no hay menú: va la barra.
+- [x] Grabación a 375: `~/.cache/b4-medicion/contacto/menu-a-contacto-375.mp4` (6 s: abre el menú,
+  Contacto, el formulario sube, se cierra y el foco vuelve al botón).

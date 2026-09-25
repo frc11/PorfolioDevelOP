@@ -249,6 +249,7 @@
     "test:s23-final": "npx tsx src/app/v3/_lib/escena/__tests__/s23-final.invariant.ts",
     "test:s24-dia": "npx tsx src/app/v3/_lib/escena/__tests__/s24-dia.invariant.ts",
     "test:s25-contacto": "npx tsx src/app/v3/_chrome/contacto/s25-contacto.invariant.tsx",
+    "test:s26-menu": "npx tsx src/app/v3/_chrome/menu/s26-menu.invariant.tsx",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",
