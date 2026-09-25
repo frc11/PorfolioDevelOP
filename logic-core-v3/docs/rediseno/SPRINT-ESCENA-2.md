@@ -95,38 +95,131 @@ motivo si prueban algo que ya no existe):
 
 `/probe-escena` (el laboratorio) usa el mismo `ProbeStage`: la base limpia lo cambia también ahí.
 
-## Qué sigue, paso por paso
+## Parte B — la exploración del entorno (sin commitear al producto)
 
-1. Con el dev server en 3000 (lo levanta Valentino, o yo si me lo pide), sin cambiar código:
-   - `npx tsx scripts-escena/logo.ts actual actual` → la referencia de ACTUAL;
-   - `npx tsx scripts-escena/logo.ts base-bandera base` → la base por bandera. Las dos cajas
-     tienen que coincidir.
-2. Aplicar la base según el mapa de arriba (parte A.1) y borrar la bandera vieja.
-3. `npx tsx scripts-escena/logo.ts base-aplicada` → comparar contra `actual-1440.json` en Por qué
-   develOP y el pie. **Si el logo no queda idéntico (caja y centro, dentro de la oscilación de
-   ±1,15° medida entre tomas), es un bug: buscarlo antes de seguir** (parte A.2).
-4. Reescribir los invariantes de escena con controles positivos (parte A.3), `tsc --noEmit`, lint,
-   suites de escena y `test:s19`/`s24-dia`, commit y tag `escena-base-limpia`.
-5. Parte B: `_lib/escena/entorno.ts` con E0–E8, todas apagadas y combinables, pisables por el banco
-   antes de cargar (`window.__entornoDeLaEscena`).
-   - **E0**: la mancha de contacto, prendida o apagada.
-   - **E1**: óculo y haz, un cono aditivo con el polvo más brillante adentro; cálido de día, frío y
-     con estrellas de noche.
-   - **E2**: los monolitos, entre r ≈ 48 y 58 sobre la curva del ciclorama, medio tragados por la
-     bruma. Ojo: la cámara del pie llega a r = 40.
-   - **E3**: el día como recorrido, un tinte de la bruma y del haz atado al arco. El logo no cambia.
-   - **E4**: el pulso, una onda en el piso cada ~6 s.
-   - **E5**: anillos finos inclinados, sólo desde el ancla de Por qué develOP.
-   - **E6**: el polvo que responde, terminado. Estela por movimiento de cámara contra una copia
-     amortiguada de la matriz vista-proyección: el estiramiento sale solo con parallax de
-     profundidad, y la inercia sale de la amortiguación. Sin estela con movimiento reducido. Hay que
-     componer el `onBeforeCompile` con `conBrilloDeNoche` (`particleGlow.ts`), que ya lo usa.
-   - **E7 y E8, propuestas**: el polvo que se corre ante el cursor y vuelve con inercia; y el foco:
-     el polvo nítido en el plano del logo y más blando lejos de él, como un lente.
-6. Comparación:
-   - hojas de BASE, E0–E8 solas y E1+E2+E3+E6 en los cinco momentos, con asiento antes de cada
-     captura (`scripts-escena/comparar.ts` ya lo hace);
-   - clips de E4, E5 y E6;
-   - tabla de llamadas, triángulos y fps a 1440 y en móvil con CPU ×4;
-   - una línea de opinión por idea.
-7. Commitear sólo `entorno.ts` con las banderas apagadas, el script y este reporte.
+### Cómo está armada
+
+Cada idea tiene su propia bandera en `_lib/escena/entorno.ts`:
+- **Todas quedan en `false`.** Se combinan libres entre sí.
+- **Cómo se prenden:** el banco las prende antes de cargar la página, con
+  `window.__entornoDeLaEscena = 'E1,E2'`.
+- **Qué se commitea:** sólo `entorno.ts`, con las banderas apagadas. Lo que las implementa queda sin
+  commitear en el árbol de trabajo:
+  - `_lib/escena/entorno/`: `Entorno.tsx`, `vivo.ts`, `polvoVivo.ts`, `Haz.tsx`, `Monolitos.tsx`,
+    `Pulso.tsx` y `Anillos.tsx`;
+  - dos líneas en `ProbeStage.tsx`, que montan `<Entorno>` después del rig y la bandera E0 de la
+    mancha;
+  - una línea en `DepthParticles.tsx`, el parche del polvo.
+
+Cómo encajan las piezas:
+- **`Entorno.tsx` va después de `<OrbitRig>`**, así su `useFrame` lee el cuadro que el rig ya
+  escribió. **No toca la cámara ni el arco:** lee el progreso del `rig` y la noche de
+  `BRILLO_DE_LA_NOCHE`.
+- **E1, E6, E7 y E8 son un solo parche** sobre el `PointsMaterial` del polvo (`polvoVivo.ts`):
+  - encadena el `onBeforeCompile` de `conBrilloDeNoche`, no lo pisa;
+  - compila sólo los bloques de las ideas prendidas.
+- **Movimiento reducido:** sin estela (E6), sin empuje (E7), sin pulso (E4), y anillos quietos
+  (E5).
+- **Casi monocromo y barato:**
+  - sin volumétricos y sin mapas de sombra nuevos;
+  - el haz es un cono aditivo con degradé;
+  - el pulso es un anillo analítico en un solo plano.
+
+### Material de comparación
+
+Todo queda en `~/.cache/b4-medicion/escena2/entorno/`:
+- **Hojas:** `hoja-<idea>-1440.png`, una por idea (E0–E8 y `E1+E2+E3+E6`). Los cinco momentos van
+  en filas, con BASE a la izquierda y la idea a la derecha.
+- **Capturas sueltas:** `<momento>-1440-<variante>.png`.
+- **Clips:**
+  - `clip-E4-1440.mp4`: el hero quieto, 13 s;
+  - `clip-E5-1440.mp4`: Por qué develOP quieto, 9 s;
+  - `clip-E6-1440.mp4`: un tirón de scroll hacia Quiénes somos, frenada, vuelta rápida y quietud;
+  - `clip-E7-1440.mp4`: un barrido del puntero sobre el hero;
+  - `clip-base-1440.mp4`: el mismo gesto de E6, sin ideas, para comparar.
+- **Scripts:**
+  - `scripts-escena/entorno.ts`, en modos `capturas`, `fps` y `clip`;
+  - `scripts-escena/hojas-entorno.sh`, que arma las hojas;
+  - `scripts-escena/tinte.ts`, que da el color medio de una franja contra BASE.
+
+**El asiento.** Antes de cada captura hubo un empujón de 1 px y se buscó que dos capturas a 1,5 s
+coincidieran por bloques (menos de 1,5 de diferencia media).
+- En el hero y en el pie asentó al primer intento.
+- En Quiénes somos, Trabajos y Por qué develOP **no asentó ni en BASE**, así que cada captura
+  esperó el máximo, unos 14 s.
+- Posible causa: la interfaz de esas secciones, que sigue moviéndose (carruseles). No lo
+  verifiqué. La cámara sí está quieta después de 14 s.
+
+### Costo
+
+Las cifras son cuadros por segundo / llamadas de dibujo / triángulos del último cuadro, iguales
+en los cinco momentos salvo donde se indica.
+
+| Variante | 1440 | 375, CPU ×4 |
+|---|---|---|
+| BASE | 75 / 11 / 23.486 | 75 / 11 / 23.486 |
+| E0 mancha | 75 / 10 / 23.484 | 75 / 10 / 23.484 |
+| E1 óculo y haz | 75 / 14 / 23.712 | 75 / 14 / 23.712 |
+| E2 monolitos | 75 / 12–13 / 23.498–23.510 | 75 / 11–12 / 23.486–23.498 |
+| E3 el día | 75 / 11 / 23.486 | 75 / 11 / 23.486 |
+| E4 pulso | 75 / 12 / 23.582 | 75 / 12 / 23.582 |
+| E5 anillos | 75 / 13 / 28.766 | 75 / 13 / 28.766 |
+| E6 polvo que responde | 75 / 11 / 23.486 | 75 / 11 / 23.486 |
+| E7 cursor | 75 / 11 / 23.486 | 75 / 11 / 23.486 |
+| E8 foco | 75 / 11 / 23.486 | 75 / 11 / 23.486 |
+| E1+E2+E3+E6 | 75 / 15–16 / 23.724–23.736 | 75 / 14–15 / 23.712–23.724 |
+
+**El instrumento no separa las ideas por cuadros por segundo.**
+- El techo de 75 es el refresco del monitor.
+- Estrangular la CPU ×4 no frena una GPU de escritorio, que es donde gastan estas ideas (relleno
+  aditivo del haz, puntos más grandes en E6 y E8).
+- Lo comparable es la columna de llamadas y triángulos:
+  - E6, E7 y E8 no agregan ni una llamada, porque viven en el shader del polvo;
+  - E3 tampoco;
+  - E1 suma 3 llamadas;
+  - E5 suma 2 llamadas y 5.280 triángulos.
+- En E2 la cantidad varía porque three descarta por encuadre las piezas que no están en cuadro.
+- Para saber el costo real en un teléfono hace falta un teléfono.
+
+### Una línea por idea
+
+| Idea | Veredicto | Por qué |
+|---|---|---|
+| **E0 mancha** (apagarla) | **descartar** | Desde la base limpia la mancha es lo único que apoya el logo; sin ella flota en el blanco (hoja E0, hero). |
+| **E1 óculo y haz** | **quedarse, ajustando el día** | De noche es lo mejor de la exploración: una columna fría cae sobre el logo en Trabajos y el polvo de adentro la toma. De día casi no está; el pedido era muy sutil, pero se puede subir un poco. El óculo y las estrellas no entran en cuadro en ninguno de los cinco momentos: la cámara siempre mira hacia abajo. |
+| **E2 monolitos** | **descartar** | Se leen como barras flotando detrás de la retícula. Su base, sobre la curva del ciclorama, desaparece en el papel blanco. Es exactamente lo "pegado" que el pedido quería evitar. |
+| **E3 el día como recorrido** | **ajustar** | Funciona pero está en el límite: sobre el fondo lejano mueve entre 0,3 y 3 niveles (mañana cálida en el hero; lila en Por qué develOP y el pie, medido con `tinte.ts`). En Trabajos la noche no se ve, porque arriba del cuadro manda la capa de la sección. Es casi imperceptible, como se pidió; si se quiere que se lea en la suma del recorrido, hay que duplicarlo. |
+| **E4 pulso** | **ajustar** | Se lee y es tranquilo: un anillo fino sale de debajo del logo y se apaga antes de la pared. Pasa por detrás del texto del hero; con un período más largo o sólo en el pie molestaría menos. |
+| **E5 anillos** | **ajustar** | En Por qué develOP enmarcan el logo con elegancia. En el pie cruzan la columna de enlaces ("Inicio", "Quiénes somos"). Riesgo: dos órbitas alrededor de un logo leen como "átomo". Probar un solo anillo, o sólo en Por qué develOP. |
+| **E6 polvo que responde** | **se queda (decidido), terminado** | Estela con cabeza y cola que se apaga; más larga cerca por paralaje; al frenar se encoge en ~0,3 s, que es la inercia; sin estela con movimiento reducido. Ver `clip-E6` contra `clip-base`: en el cuadro 1,1 s las motas son estelas y en el 2,6 s vuelven a ser puntos. Cuesta cero llamadas. |
+| **E7 el cursor** | **descartar** | Funciona: el empuje llega a 0,85 al barrer y se apaga al quedarse quieto. Pero con 2.400 motas repartidas en un volumen de radio 34, cerca del cursor hay pocas, y el claro casi no se ve; ni subiendo la fuerza al doble se lee. Pide polvo denso cerca de la cámara, que no hay. |
+| **E8 el foco** | **ajustar** | Da un bokeh creíble de día (hero). De noche, con el brillo de la noche, engorda demasiadas motas y el cuadro se llena de discos. Hace falta bajar el crecimiento, o apagarlo de noche. |
+
+**E1+E2+E3+E6 juntas** (hoja `hoja-E1+E2+E3+E6-1440.png`):
+- de noche, el haz con el polvo encendido adentro es la imagen más fuerte de la exploración (la estela de E6 no aparece en las capturas, que se toman en reposo: se ve en su clip);
+- los monolitos son lo que sobra.
+- Recomendación: **E1+E3+E6, sin E2.**
+
+### Mis dos ideas
+
+- **E7** — el polvo se corre al paso del cursor y vuelve con inercia: la sala responde a la mano, no
+  sólo al scroll.
+- **E8** — el foco: el polvo nítido en el plano del logo y más blando lejos de él, como un lente de
+  verdad.
+
+### Estado
+
+- Todas las banderas quedan en `false`: el producto es la base limpia.
+- Commit de esta parte: `entorno.ts`, `scripts-escena/entorno.ts`,
+  `scripts-escena/hojas-entorno.sh`, `scripts-escena/tinte.ts` y este reporte.
+- Lo que implementa las ideas sigue sin commitear en el árbol de trabajo:
+  `_lib/escena/entorno/`, más `ProbeStage.tsx` y `DepthParticles.tsx`.
+- **Verificado:**
+  - `tsc` limpio;
+  - eslint limpio sobre `entorno/`, `entorno.ts`, `ProbeStage.tsx`, `DepthParticles.tsx` y el
+    script;
+  - con las banderas apagadas, `s28-base` y las suites de escena siguen en verde.
+- **Sin verificar en el navegador:**
+  - E6 con movimiento reducido: por construcción, el rig pone la estela en 0 y la copia de la
+    matriz sigue a la cámara cuadro a cuadro;
+  - el costo real en un teléfono.
