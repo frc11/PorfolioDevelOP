@@ -23,7 +23,7 @@ export interface Banco {
   readonly cerrar: () => Promise<void>
 }
 
-export async function abrirBanco(ancho: number, alto: number, opciones: { readonly reducido?: boolean; readonly perfil?: string } = {}): Promise<Banco> {
+export async function abrirBanco(ancho: number, alto: number, opciones: { readonly reducido?: boolean; readonly perfil?: string; readonly antesDeCargar?: string } = {}): Promise<Banco> {
   const chrome: ChromeLanzado = await lanzarChrome({ perfil: `C:/Users/Valentino/.cache/b4-medicion/${opciones.perfil ?? 'viajes'}-${String(ancho)}`, ancho: ancho + 40, alto: alto + 140 })
   const p = await abrirPagina(chrome)
   const s = p.sessionId
@@ -31,6 +31,8 @@ export async function abrirBanco(ancho: number, alto: number, opciones: { readon
     p.conexion.enviar('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, deviceScaleFactor: 1, mobile: ancho < 1024, screenWidth: ancho, screenHeight: alto }, s)
   await p.conexion.enviar('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: opciones.reducido === true ? 'reduce' : 'no-preference' }] }, s)
   await emular()
+  // Un script que corre antes que la página (una bandera, un instrumento): lo pide SPRINT ESCENA.
+  if (opciones.antesDeCargar !== undefined) await p.conexion.enviar('Page.addScriptToEvaluateOnNewDocument', { source: opciones.antesDeCargar }, s)
   await irA(p, 'http://localhost:3000/v3')
   await esperar(4000)
   const estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
