@@ -252,6 +252,7 @@
     "test:s27-viajes": "npx tsx src/app/v3/_lib/__tests__/s27-viajes.invariant.tsx",
     "test:s28-base": "npx tsx src/app/v3/_lib/escena/__tests__/s28-base.invariant.ts",
     "test:s29-pulso": "npx tsx src/app/v3/_lib/escena/__tests__/s29-pulso.invariant.ts",
+    "test:s30-escena4": "npx tsx src/app/v3/_lib/escena/__tests__/s30-escena4.invariant.ts",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",

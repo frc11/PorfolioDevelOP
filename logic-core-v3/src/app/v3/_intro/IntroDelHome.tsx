@@ -65,6 +65,17 @@ import { HomeIntro } from '@/components/layout/HomeIntro'
  * Poner una segunda frontera acá no agregaría nada y metería este archivo en el
  * bundle del cliente sin necesidad.
  */
+/**
+ * [ESCENA 4] EL PRELOADER, APAGADO EN `/v3` — y reversible: en `true` vuelve a montarse tal cual.
+ *
+ * Apagado no se monta nada, y la etapa del relevo (`introHandoff`) queda en `idle`, que es
+ * exactamente como arranca `/v3` en la visita repetida, con movimiento reducido o bajo el banco: la
+ * escena no se retiene, el scroll se ata desde el primer cuadro y el deslizamiento del CTA no espera.
+ * O sea: como si el preloader hubiera terminado al instante. No se toca `PreloaderContext.tsx` ni el
+ * home vivo, que sigue montando su intro.
+ */
+const CON_PRELOADER = false
+
 export function IntroDelHome() {
-  return <HomeIntro />
+  return CON_PRELOADER ? <HomeIntro /> : null
 }

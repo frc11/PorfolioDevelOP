@@ -42,8 +42,11 @@ export const VIVO = {
   uPluma: { value: 24 },
 }
 
-/** Lo que no es uniform pero también se comparte: cuándo nació el último principal (la sombra). */
-export const PULSO_VIVO = { ultimoPrincipal: -Infinity }
+/**
+ * Lo que no es uniform pero también se comparte: cuándo nació el último principal (la sombra) y
+ * [ESCENA 4] si el puntero está sobre el logo, tal como lo decide E4 (F-mirada lo lee, no lo decide).
+ */
+export const PULSO_VIVO = { ultimoPrincipal: -Infinity, hover: false }
 
 /** E1 · el haz: vertical, sobre el logo, del óculo al piso. Lo usan el cono y el polvo. */
 export const HAZ = {

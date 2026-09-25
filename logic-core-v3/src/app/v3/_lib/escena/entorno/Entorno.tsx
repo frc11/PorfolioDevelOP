@@ -121,6 +121,7 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       }
       const scrollEnMovimiento = t - m.ultimoMovimiento < PULSO.quietudDelScrollS
       m.hover = hover !== null ? hover.leer(state.camera, state.gl.domElement, logoGroupRef.current, progreso) : false
+      PULSO_VIVO.hover = m.hover
       const antes = m.pulso ?? pulsoInicial(t)
       m.pulso = avanzarElPulso(antes, { t, scrollEnMovimiento, hover: m.hover, reducido: quieto })
       escribirLosAnillos(m.pulso)

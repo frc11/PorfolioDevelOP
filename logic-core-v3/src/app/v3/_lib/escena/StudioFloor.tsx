@@ -60,7 +60,12 @@ const CYC_PROFILE: readonly THREE.Vector2[] = (() => {
   return points
 })()
 
-export function StudioFloor() {
+type StudioFloorProps = {
+  /** [ESCENA 4] La losa se achica al claro cuando la formación pone un piso más bajo alrededor. */
+  readonly radioDeLaLosa?: number
+}
+
+export function StudioFloor({ radioDeLaLosa = FLOOR_RADIUS }: StudioFloorProps) {
   const cycGeometry = useMemo(
     () => new THREE.LatheGeometry(CYC_PROFILE.slice(), FLOOR_SEGMENTS),
     []
@@ -94,7 +99,7 @@ export function StudioFloor() {
         libre. `position` deja la cara SUPERIOR exactamente en FLOOR_Y.
       */}
       <mesh position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]} material={materials.slab}>
-        <cylinderGeometry args={[FLOOR_RADIUS, FLOOR_RADIUS, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
+        <cylinderGeometry args={[radioDeLaLosa, radioDeLaLosa, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
       </mesh>
 
       {/*

@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
+import { CUPULA_VIVA, conMembrana, cupulaParcheada } from './membrana/parche'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
 import {
   MOIRE_BASE_ALPHA,
@@ -67,6 +68,8 @@ import type { ProbeParamsStore } from './probeStore'
 export type MoireHandle = {
   /** La capa gruesa. El loop le escribe `offset.y` para que baje. */
   readonly drift: THREE.Texture
+  /** [ESCENA 4] La capa fina: las variantes del moiré le corren la fase (`membrana/CupulaViva.tsx`). */
+  readonly fina: THREE.Texture
 }
 
 type LayerSpec = {
@@ -186,7 +189,13 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       }),
     })
 
-    return { coarse: make(coarse, coarseTexture), fine: make(fine, fineTexture) }
+    const capas = { coarse: make(coarse, coarseTexture), fine: make(fine, fineTexture) }
+    // [ESCENA 4] La cúpula como membrana y el moiré M4: un parche sobre la lectura del alfa, sólo si están prendidos.
+    if (cupulaParcheada()) {
+      conMembrana(capas.coarse.material, CUPULA_VIVA.gruesa)
+      conMembrana(capas.fine.material, CUPULA_VIVA.fina)
+    }
+    return capas
   }, [store])
 
   /**
@@ -229,7 +238,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   )
 
   useEffect(() => {
-    const handle: MoireHandle = { drift: layers.coarse.texture }
+    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
   }, [ref, layers])
