@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils'
 
 import { ENLACES_DE_MUESTRA, type EnlaceDeNavegacion } from '../../_lib/navegacion'
-import { PrefijoDeServicio } from '../marca/Marca'
 
 import type { EstadoForzado } from './Cta'
 
@@ -81,6 +80,10 @@ export interface NavegacionProps {
    * esta misma pieza y ahí no es la cabecera de nada.
    */
   readonly como?: 'div' | 'header'
+  /** CONTACTO · el `id` del enlace activo: va en tinta plena y los demás, atenuados. */
+  readonly activo?: string | null
+  /** Lo que va adentro de la barra además de la lista (el subrayado que se desliza). */
+  readonly children?: React.ReactNode
 }
 
 export function Navegacion({
@@ -88,6 +91,8 @@ export function Navegacion({
   rotulo = 'Navegación principal',
   className,
   como: Envoltorio = 'div',
+  activo = null,
+  children,
 }: NavegacionProps) {
   return (
     <Envoltorio data-pieza="navegacion" className={className}>
@@ -95,10 +100,11 @@ export function Navegacion({
         <ul data-parte="lista">
           {enlaces.map((enlace) => (
             <li key={enlace.id}>
-              <EnlaceDeNavegacionFlotante enlace={enlace} />
+              <EnlaceDeNavegacionFlotante enlace={enlace} activo={enlace.id === activo} />
             </li>
           ))}
         </ul>
+        {children}
       </nav>
     </Envoltorio>
   )
@@ -135,10 +141,12 @@ export function Navegacion({
 export function EnlaceDeNavegacionFlotante({
   enlace,
   forzado,
+  activo = false,
   className,
 }: {
   readonly enlace: EnlaceDeNavegacion
   readonly forzado?: EstadoForzado
+  readonly activo?: boolean
   readonly className?: string
 }) {
   return (
@@ -146,9 +154,11 @@ export function EnlaceDeNavegacionFlotante({
       href={enlace.destino}
       data-pieza="nav-enlace"
       data-forzado={forzado}
+      data-nav-id={enlace.id}
+      data-activo={activo ? 'true' : undefined}
+      aria-current={activo ? 'true' : undefined}
       className={cn('text-cuerpo tracking-texto leading-texto font-semi', className)}
     >
-      <PrefijoDeServicio />
       <span data-parte="rotulo">{enlace.rotulo}</span>
     </a>
   )

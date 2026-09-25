@@ -55,3 +55,18 @@ navbar hacen lo que hacían, salvo «Contacto», que abre el formulario.
   foco atrapado y devuelto y Esc, scroll bloqueado, precarga desde los tres «Quiero mi…» y el
   envío. `s8-chrome` y `s10-acceso` al día (y `s8-chrome` §4–5, que seguían con el pie de antes
   de FINAL 3).
+
+## Fase 2 — El navbar de escritorio
+
+- [x] **Forma**: rectángulo con el radio medido en nk, 10 px (`--radius-fuerte`), en lugar de la
+  píldora. El fondo, el borde, el desenfoque y cómo nace abajo y se pega arriba no cambiaron.
+- [x] **Estado activo** (PROPUESTA): sin punto azul (se fue el prefijo del enlace). El activo va
+  en tinta plena y los demás al 60 % (`--opacity-casi`, ≈ 4,6:1 sobre la barra, AA calculado);
+  una raya fina se desliza hasta el rótulo activo. El activo es la sección que cruza el medio
+  del cuadro; el hero, Números y Tu panel no tienen ítem y dejan la barra sin activo.
+- [x] Vive en `_chrome/NavegacionDelHome.tsx` (cliente): `Navegacion` sólo suma `activo` y la
+  ranura de la raya, así los archivos del navbar original siguen sin una señal de scroll
+  (`s3-navegacion` §5) y la galería de componentes no cambia.
+- [x] **«Contacto» abre el formulario**: va a `#contacto`, que intercepta el contacto.
+- Preexistente, anotado: `s3-foco` marca reglas de hover sin gemela de foco en el «libro» de las
+  demos; el único CSS de este sprint es `navegacion.css`.

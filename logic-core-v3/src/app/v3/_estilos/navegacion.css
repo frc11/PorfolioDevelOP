@@ -172,7 +172,8 @@ html:has([data-v3]) {
   scroll-padding-inline: calc(var(--foco-desplazamiento) + var(--foco-grosor));
   padding-inline: var(--spacing-4);
   border: var(--border-hairline) solid var(--color-borde);
-  border-radius: var(--radius-pastilla-l);
+  /* CONTACTO: rectángulo de bordes apenas redondeados, como el de nk (radio 10 px medido). */
+  border-radius: var(--radius-fuerte);
   background-color: var(--color-superficie-translucida);
   backdrop-filter: blur(var(--blur-panel));
   box-shadow: var(--shadow-flotante);
@@ -198,80 +199,47 @@ html:has([data-v3]) {
  * va declarada como medida.
  * ========================================================================= */
 
+[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"] {
+  /* El subrayado que se desliza se mide contra la barra. */
+  isolation: isolate;
+}
+/* CONTACTO · el estado activo: sin punto azul. El activo en tinta plena, los demás atenuados. */
 [data-v3] [data-pieza="nav-enlace"] {
-  --nav-retardo-reposo: 40ms; /* [medido, COMPONENTS.md §3.2] */
-  --nav-marcador-escala: 0.8; /* [medido, COMPONENTS.md §3.2] */
-  --nav-marcador-desplazamiento: calc(var(--spacing-4) * -1); /* −16px [medido] */
-
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-1);
   padding-inline: var(--spacing-2);
   color: var(--color-tinta);
   text-decoration: none;
-  transform: translateX(0);
-  transition-property: transform;
-  transition-duration: var(--duracion-lenta);
-  transition-timing-function: var(--ease-principal);
-  transition-delay: var(--nav-retardo-reposo);
-}
-
-/* ── B4-A · EL MARCADOR ES AHORA LA PIEZA `PrefijoDeServicio` ───────────────
- *
- * Era un `<span data-parte="marcador">` de esta hoja. El registro era el mismo
- * que el prefijo del sistema de marca —un relleno que precede a un rótulo y
- * marca lo que sigue— y tenía otro dueño: `Navegacion.tsx` monta la pieza y este
- * selector la agarra por `data-pieza`.
- *
- * **El reparto entre la hoja y la pieza, escrito:** la pastilla pone LA
- * GEOMETRÍA y EL MOVIMIENTO —tamaño de `--spacing-1`, el radio, la escala 0,8,
- * los −16px y los 500 ms, todo medido en la referencia— y la marca pone EL
- * RELLENO, que llega en la clase `bg-acento` de la pieza. Por eso este bloque ya
- * no declara `background-color`: declararlo lo ganaría por especificidad y el
- * retiñido por `data-servicio` quedaría muerto sin que nada avisara.
- *
- * ⚠ El tamaño SÍ se declara acá y gana por especificidad sobre el `size-*` que
- * la pieza trae (8px): la pastilla mide 604,05 × 48 px a 1920 y ese número está
- * aprobado por grabación. Medido después del cambio: **604,046875 × 48**, el
- * mismo bit. Cambiar el tamaño acá mueve la pastilla.
- * ------------------------------------------------------------------------- */
-
-[data-v3] [data-pieza="nav-enlace"] [data-pieza="prefijo-de-servicio"] {
-  display: block;
-  flex: none;
-  inline-size: var(--spacing-1);
-  block-size: var(--spacing-1);
-  border-radius: var(--radius-circulo);
-  opacity: 0;
-  transform: scale(var(--nav-marcador-escala))
-    translateX(var(--nav-marcador-desplazamiento));
-  transition-property: transform, opacity;
-  transition-duration: var(--duracion-lenta);
+  opacity: var(--opacity-casi);
+  transition-property: opacity;
+  transition-duration: var(--duracion-rapida);
   transition-timing-function: var(--ease-principal);
 }
-
 [data-v3]
   [data-pieza="nav-enlace"]:is(
     :hover,
     :focus-visible,
+    [data-activo="true"],
     [data-forzado~="hover"],
     [data-forzado~="foco"]
   ) {
-  transform: translateX(var(--spacing-2));
-  transition-delay: 0s;
-}
-
-[data-v3]
-  [data-pieza="nav-enlace"]:is(
-    :hover,
-    :focus-visible,
-    [data-forzado~="hover"],
-    [data-forzado~="foco"]
-  )
-  [data-pieza="prefijo-de-servicio"] {
   opacity: 1;
-  transform: none;
+}
+/* El subrayado fino del activo: una sola raya que viaja de un ítem al otro. */
+[data-v3] [data-pieza="navegacion"] [data-parte="subrayado-activo"] {
+  position: absolute;
+  bottom: var(--spacing-2);
+  left: 0;
+  block-size: var(--border-hairline);
+  inline-size: var(--subrayado-ancho, 0);
+  background-color: var(--color-tinta);
+  translate: var(--subrayado-x, 0) 0;
+  opacity: var(--subrayado-visible, 0);
+  pointer-events: none;
+  transition-property: translate, inline-size, opacity;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
 }
 
 /* CONTACTO · con el formulario abierto (incluida su salida) el navbar se esconde hacia arriba. */

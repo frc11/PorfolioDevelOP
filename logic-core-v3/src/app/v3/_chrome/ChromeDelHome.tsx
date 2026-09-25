@@ -1,7 +1,7 @@
 import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
-import { Navegacion } from '../_componentes/chrome/Navegacion'
 
 import { Contacto } from './contacto/Contacto'
+import { NavegacionDelHome } from './NavegacionDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 
@@ -151,7 +151,8 @@ export function ChromeDelHome(): React.JSX.Element {
        * los 72 px quedan como aire muerto a propósito. La medición de las dos
        * salidas está en `contrato.ts`.
        */}
-      <Navegacion como="header" className={CLASE_DE_LA_PASTILLA_APAGADA} />
+      {/* CONTACTO: la misma barra, con su estado activo (el subrayado que se desliza). */}
+      <NavegacionDelHome className={CLASE_DE_LA_PASTILLA_APAGADA} />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />
 
