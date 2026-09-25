@@ -273,3 +273,15 @@ html:has([data-v3]) {
   opacity: 1;
   transform: none;
 }
+
+/* CONTACTO · con el formulario abierto (incluida su salida) el navbar se esconde hacia arriba. */
+[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"] {
+  transition-property: opacity, translate;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+[data-v3]:has([data-pieza="contacto"]) [data-pieza="navegacion"] > [data-parte="pastilla"] {
+  opacity: 0;
+  translate: 0 calc(var(--spacing-6) * -1);
+  pointer-events: none;
+}

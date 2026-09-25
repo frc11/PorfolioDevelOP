@@ -45,23 +45,19 @@ const PIE = marcar(createElement(Cierre, { seccion: seccionDe('cierre') }), { an
 titulo('4 · El pie enlaza las OCHO, DERIVADAS, y ningún href lleva a la nada')
 
 afirmarIgual(ANCLAS_QUE_EXISTEN.length, SECCIONES.length, `las anclas que existen son las ${SECCIONES.length} de la tabla`)
-afirmarIgual(DESTINOS_DE_LA_RUTA.length, SECCIONES.length - 1, `y el pie ofrece ${DESTINOS_DE_LA_RUTA.length}: todas menos el Cierre, que no se enlaza a sí mismo`)
-afirmarIgual(
-  DESTINOS_DE_LA_RUTA.map((d) => d.ancla),
-  SECCIONES.filter((s) => s.id !== 'cierre').map((s) => `#${s.id}`),
-  'en el ORDEN DEL RECORRIDO, derivado de la tabla y no escrito al lado',
-)
-afirmarIgual(
-  DESTINOS_DE_LA_RUTA.map((d) => d.rotulo),
-  SECCIONES.filter((s) => s.id !== 'cierre').map((s) => s.nombre),
-  '  y con los rótulos de la misma fila: el nombre y el destino no se pueden desincronizar',
-)
+// FINAL 3 + CONTACTO: el pie enlaza las secciones MONTADAS (sin el Cierre, que no se enlaza a sí mismo, ni Números, que
+// no se monta) y el hero se llama «Inicio»; los externos son el mail, WhatsApp y las redes; `#contacto` abre el formulario.
+const SIN_ENLACE_EN_EL_PIE = ['cierre', 'numeros']
+const ENLAZADAS = SECCIONES.filter((s) => !SIN_ENLACE_EN_EL_PIE.includes(s.id))
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.ancla), ENLAZADAS.map((s) => `#${s.id}`), `el pie ofrece ${DESTINOS_DE_LA_RUTA.length}, en el ORDEN DEL RECORRIDO y derivadas de la tabla: todas menos el Cierre y Números`)
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ENLAZADAS.map((s) => (s.id === 'hero' ? 'Inicio' : s.nombre)), '  con los rótulos de la misma fila, salvo el hero, que en el pie se llama «Inicio»')
 const HREFS_DEL_PIE = S.hrefsDe(PIE)
-// SPRINT FINAL: el contacto va al destino provisorio declarado, el mismo del CTA del final; el resto, a un ancla que existe.
-const HREFS_REALES_DEL_PIE = HREFS_DEL_PIE.filter((h) => h !== CONTACTO_DEL_PIE.destino)
-afirmarIgual(HREFS_DEL_PIE.length - HREFS_REALES_DEL_PIE.length, 1, 'el pie tiene UN solo enlace al destino provisorio: el de contacto')
-afirmarIgual(S.aLaNada(HREFS_REALES_DEL_PIE, ANCLAS_QUE_EXISTEN), [], `los otros ${HREFS_REALES_DEL_PIE.length} enlaces del pie renderizado apuntan a un ancla que existe`)
-afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino), ANCLAS_QUE_EXISTEN), [], `y los ${ENLACES_DE_MUESTRA.length} de la pastilla también — son de muestra, pero no llevan a la nada`)
+const esExterno = (h: string): boolean => /^(mailto:|https:\/\/)/.test(h)
+const HREFS_INTERNOS = HREFS_DEL_PIE.filter((h) => !esExterno(h) && h !== CONTACTO_DEL_PIE.destino)
+afirmarIgual(HREFS_DEL_PIE.filter((h) => h === CONTACTO_DEL_PIE.destino).length, 1, 'el pie tiene UN enlace que abre el formulario de contacto')
+afirmarIgual(S.aLaNada(HREFS_INTERNOS, ANCLAS_QUE_EXISTEN), [], `los ${HREFS_INTERNOS.length} enlaces internos del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp y las redes)`)
+afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino).filter((d) => d !== '#contacto'), ANCLAS_QUE_EXISTEN), [], `y los de la pastilla también; «Contacto» abre el formulario`)
+afirmar(ENLACES_DE_MUESTRA.at(-1)?.destino === '#contacto' && ENLACES_DE_MUESTRA.at(-1)?.rotulo === 'Contacto', '  «Contacto» de la pastilla va a `#contacto`, que el chrome intercepta para abrir el formulario')
 controlPositivo('el detector ve un href a la nada', S.HREFS_A_LA_NADA, (l: readonly string[]) => S.aLaNada(l, ANCLAS_QUE_EXISTEN).length === 0)
 controlPositivo('y no se pone verde con la lista vacía de anclas', ['#hero'], (l: readonly string[]) => S.aLaNada(l, []).length === 0)
 
@@ -71,7 +67,7 @@ controlPositivo('y no se pone verde con la lista vacía de anclas', ['#hero'], (
  */
 // SPRINT FINAL: el pie ya no tiene CTA propio (el llamado es el tiempo C de «Por qué develOP»);
 // su columna de contacto enlaza a `#contacto`, el destino declarado provisorio del sprint.
-afirmar(CONTACTO_DEL_PIE.destino === '#contacto' && !ANCLAS_QUE_EXISTEN.includes(CONTACTO_DEL_PIE.destino), '  el contacto del pie va a `#contacto`, el destino PROVISORIO del sprint: todavía no es un ancla del home (se define después)')
+afirmar(CONTACTO_DEL_PIE.destino === '#contacto' && !ANCLAS_QUE_EXISTEN.includes(CONTACTO_DEL_PIE.destino), '  el contacto del pie va a `#contacto`, que no es un ancla: lo intercepta el chrome y abre el formulario (CONTACTO)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · EL RODEO DE `peso` — restaurado, y NO estaba en Servicios')
@@ -90,15 +86,9 @@ titulo('5 · EL RODEO DE `peso` — restaurado, y NO estaba en Servicios')
 const RODEO = 'src/app/v3/_secciones/cierre/ColumnasDelPie.tsx'
 const SERVICIOS = 'src/app/v3/_secciones/servicios/ContenidoDeServicio.tsx'
 afirmarIgual([...CANDIDATOS_DEL_RODEO], [RODEO, SERVICIOS], 'los dos candidatos que la Fase 0 dejó localizados')
-afirmar(/peso="medio"/.test(S.sinComentarios(S.leer(RODEO))), `el rodeo estaba en \`${RODEO}\` y SITIO-S8 lo restaura`)
+// FINAL 3: el pie ya no tiene marcadores ([ENLACE], [FECHA], [NOMBRE]): el rodeo de `peso` se fue con la pieza que lo llevaba.
+afirmar(!/PedidoDelPie/.test(S.sinComentarios(S.leer(RODEO))) && !/\[ENLACE\]/.test(PIE), `el rodeo estaba en \`${RODEO}\` y se fue con los marcadores del pie (FINAL 3): ya no hay pieza que pesar`)
 afirmarIgual([...S.sinComentarios(S.leer(SERVICIOS)).matchAll(/\speso=/g)].length, 0, `y en \`${SERVICIOS}\` no hay un solo \`peso=\`: no había nada que restaurar ahí`)
-
-const CLASES_DEL_MARCADOR = S.clasesDelElementoCon(PIE, '\\[ENLACE\\]')
-afirmar(CLASES_DEL_MARCADOR.includes('font-medio'), 'en pantalla: la pieza del pie recupera `font-medio`', CLASES_DEL_MARCADOR.join(' '))
-afirmar(CLASES_DEL_MARCADOR.includes('font-codigo'), '  y conserva `font-codigo`: los dos conviven, que es lo que `cn()` no sabía hacer')
-afirmar(!CLASES_DEL_MARCADOR.includes('font-normal'), '  y el `font-normal` del componente ya no gana')
-controlPositivo('el lector de clases ve la pieza SIN el peso', S.MARCADO_SIN_PESO, (h: string) => S.clasesDelElementoCon(h, '\\[ENLACE\\]').includes('font-medio'))
-console.log('  ⚠️ QUÉ CAMBIA EN PANTALLA: los dos marcadores `[ENLACE]` de la columna de contacto pasan de `--font-weight-normal` (400) a `--font-weight-medio` (500). Es composición, y por eso se reporta. Queda ASIMÉTRICO con la línea de cierre de `Cierre.tsx`, que tiene la misma forma y sigue en 400: ese archivo no es de este frente.')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · El cursor propio, detrás de la constante — y la constante, TOMADA (B5)')

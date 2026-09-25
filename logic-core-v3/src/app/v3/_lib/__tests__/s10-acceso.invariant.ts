@@ -173,8 +173,8 @@ afirmar(
 )
 afirmarIgual(
   PARADAS.slice(1, 6).map((p) => p.destino),
-  ['#quienes-somos', '#trabajos', '#servicios', '#por-que-develop', '#cierre'],
-  '  y las CINCO siguientes son los enlaces de la pastilla, en el mismo orden que medía S10',
+  ['#quienes-somos', '#trabajos', '#servicios', '#por-que-develop', '#contacto'],
+  '  y las CINCO siguientes son los enlaces de la pastilla, en el mismo orden que medía S10 (CONTACTO: el último abre el formulario)',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

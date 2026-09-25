@@ -10,6 +10,9 @@ export function CtaDelServicio({ servicio }: { readonly servicio: Servicio }): R
     // El acento lo hereda del bloque, que es el `[data-servicio]`: acá no va otro.
     <div
       data-pieza="cta-del-servicio"
+      // CONTACTO: abre el formulario con el servicio precargado.
+      data-abre-contacto=""
+      data-precarga={servicio.id}
       style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}
       className="escritorio:hidden"
     >

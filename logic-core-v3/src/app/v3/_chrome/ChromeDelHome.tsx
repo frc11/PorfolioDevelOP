@@ -1,6 +1,7 @@
 import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
 import { Navegacion } from '../_componentes/chrome/Navegacion'
 
+import { Contacto } from './contacto/Contacto'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 
@@ -151,6 +152,8 @@ export function ChromeDelHome(): React.JSX.Element {
        * salidas está en `contrato.ts`.
        */}
       <Navegacion como="header" className={CLASE_DE_LA_PASTILLA_APAGADA} />
+      {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
+      <Contacto />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

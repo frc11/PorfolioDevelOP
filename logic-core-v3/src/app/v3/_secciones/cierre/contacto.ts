@@ -8,7 +8,8 @@ export const MAIL = 'contacto@develop.com.ar'
 export const HREF_DEL_MAIL = `mailto:${MAIL}`
 
 /** WhatsApp: el número en formato internacional y el mensaje que llega precargado. */
-const NUMERO_DE_WHATSAPP = '5493814154708'
+// CONTACTO: lo usa también el formulario de contacto, que envía por WhatsApp.
+export const NUMERO_DE_WHATSAPP = '5493814154708'
 const MENSAJE_DE_WHATSAPP = 'Hola develOP, vi el sitio y quiero contarles mi proyecto.'
 export const WHATSAPP = {
   rotulo: 'Escribinos por WhatsApp',

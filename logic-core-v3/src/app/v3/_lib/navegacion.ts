@@ -163,5 +163,6 @@ export const ENLACES_DE_MUESTRA: readonly EnlaceDeNavegacion[] = [
   { id: 'trabajos', rotulo: 'Trabajos', destino: '#trabajos' },
   { id: 'servicios', rotulo: 'Servicios', destino: '#servicios' },
   { id: 'por-que-develop', rotulo: 'Por qué develOP', destino: '#por-que-develop' },
-  { id: 'cierre', rotulo: 'Contacto', destino: '#cierre' },
+  // CONTACTO: abre el formulario (lo intercepta el chrome); ya no hace scroll al pie.
+  { id: 'cierre', rotulo: 'Contacto', destino: '#contacto' },
 ]

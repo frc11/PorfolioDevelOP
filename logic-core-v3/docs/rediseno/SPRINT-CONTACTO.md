@@ -26,3 +26,32 @@ navbar hacen lo que hacían, salvo «Contacto», que abre el formulario.
     `cubic-bezier(.77,0,.175,1)` y 0,4 s de demora; la hoja, 0,7 s con la misma curva.
   - Navbar: una barra de 473 × 56 abajo al centro, **radio 10 px** (`--radius-fuerte`),
     fondo `rgba(7,11,10,.3)` con `blur(12px)`, 32 px de padding lateral.
+
+## Fase 1 — El formulario de contacto
+
+- [x] **Un módulo del chrome**, `_chrome/contacto/`: `contenido.ts` (copy, opciones y precarga),
+  `enviarContacto.ts` (la única puerta del envío y su validación), `apertura.ts` (el estado y la
+  delegación de clics), `CamposDelContacto.tsx` y `FormularioDeContacto.tsx`. Lo monta
+  `ChromeDelHome` una sola vez.
+- [x] **Se abre desde cualquier CTA de contacto**: todo `a[href="#contacto"]` (el «Hablanos»
+  final, el contacto del pie, «Contacto» del navbar y el «Hablemos» de Trabajos, que deriva de
+  esa entrada) y todo `[data-abre-contacto]` (los dos «Quiero mi…» de Servicios, con su
+  servicio en `data-precarga`). Los componentes compartidos no cambiaron.
+- [x] **Escritorio**: el navbar se esconde (CSS con `:has`, así vuelve recién cuando termina la
+  salida), el sitio se oscurece y desenfoca, el scroll queda bloqueado y la hoja BAJA desde
+  arriba: a todo el ancho con el contenido centrado, tope 90 svh con scroll interno y bordes de
+  abajo redondeados. Curva de nk (`.77,0,.175,1`), 0,7 s la hoja y 0,4 s el velo.
+- [x] **El costo del desenfoque, medido a 1440** sobre la escena: 75 cuadros por segundo con el
+  formulario cerrado y 75 abierto. Se queda el desenfoque de panel (`--blur-panel`) con un
+  oscurecido de tinta al 35 %.
+- [x] **Cierre**: la cruz, Esc o un click en el velo; el foco vuelve al botón que lo abrió un
+  cuadro después de la salida (antes, la trampa de foco lo retenía y quedaba en el `body`).
+- [x] **Móvil**: sube desde abajo y ocupa la pantalla (`h-[100dvh]`); cada campo se lleva al
+  centro con `scrollIntoView` al tomar el foco. Lo decide el modo del chrome (fase 4).
+- [x] **El envío sin backend**: `enviarContacto(datos)` valida y abre `wa.me/5493814154708` con
+  el mensaje armado; el botón dice «Enviar por WhatsApp» y después se lee «Te abrimos WhatsApp
+  con el mensaje armado: sólo falta que lo mandes desde ahí.» Nunca un «enviado».
+- [x] Invariantes: `s25-contacto` nuevo (27 afirmaciones, 5 controles): diálogo accesible con
+  foco atrapado y devuelto y Esc, scroll bloqueado, precarga desde los tres «Quiero mi…» y el
+  envío. `s8-chrome` y `s10-acceso` al día (y `s8-chrome` §4–5, que seguían con el pie de antes
+  de FINAL 3).

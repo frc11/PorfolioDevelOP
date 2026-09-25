@@ -267,6 +267,9 @@ export function CtaQueRota({ posicion, className }: CtaQueRotaProps): React.JSX.
       ref={caja}
       data-pieza="cta-que-rota"
       {...{ [ATRIBUTO_DE_SERVICIO]: SERVICIOS[acento].id }}
+      // CONTACTO: abre el formulario con el servicio que está a la vista.
+      data-abre-contacto=""
+      data-precarga={SERVICIOS[mostrado].id}
       // El acento entra por el atributo; acá sólo se re-aliasa la tinta a él,
       // que es lo que el subrayado del botón resuelve en su propia regla.
       style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}
