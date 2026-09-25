@@ -11,7 +11,8 @@
  *   2. El ancho escala lineal con α, con la distancia al cruce y con la
  *      oblicuidad, que son las tres cosas que dice la derivación.
  *   3. Se combina con el filtro de huella de píxel tomando el MAYOR, no la suma.
- *   4. El GLSL y el gemelo TS consumen el mismo número.
+ *   4. La perilla del panel arranca en el sol real. (El GLSL que la consumía
+ *      era `celosiaShader.ts`, que ESCENA 2 borró: queda el gemelo TS.)
  *
  * Lo que este modelo le hace al cuadro —los seis valores medios, la portadora y
  * el batido— está en `s12-tension.invariant.ts`.
@@ -33,7 +34,6 @@ import {
   celosiaPenumbraAt,
   celosiaSunSpread,
 } from '@/app/v3/_lib/escena/celosiaPenumbra'
-import { CELOSIA_SOURCE, createCelosiaUniforms } from '@/app/v3/_lib/escena/celosiaShader'
 import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
 import { MOIRE_MISMATCH, MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '@/app/v3/_lib/escena/probeMoire'
 import { PROBE_DEFAULTS, PROBE_PARAM_ORDER, PROBE_RANGES } from '@/app/v3/_lib/escena/probeStore'
@@ -208,35 +208,15 @@ section('El borde efectivo es el MAYOR de los dos, no la suma')
   )
 }
 
-// ── 4 · El shader y el gemelo consumen el mismo número ──────────────────────
+// ── 4 · La perilla del panel ────────────────────────────────────────────────
 
-section('El GLSL: la penumbra existe, entra por max() y no agrega una rama')
+section('La perilla: arranca en el sol real y llega hasta el lavado')
 
 {
-  const source = CELOSIA_SOURCE.fragmentPars
   check(
-    'el fragment calcula la penumbra del cruce a partir de su distancia',
-    source.includes('float cosine = dot( q.xz, uCelosiaSun.xz ) / layer.x;') &&
-      source.includes('uCelosiaKnobs.w * t / ( pitch * max( abs( cosine ), 1e-4 ) )'),
-    'el `t` del cruce es lo que hace que el ancho sea POR FRAGMENTO y distinto capa por capa'
-  )
-  check(
-    'y la combina con la huella de píxel tomando el mayor',
-    source.includes('float w = max( max( fwidth( phase ), penumbra ), 1e-5 );'),
-    'no la reemplaza y no la suma'
-  )
-  check(
-    'sin una sola rama nueva: `fwidth` sigue fuera de todo condicional',
-    !source.includes('if (') && !source.includes('if('),
-    'adentro de una rama que no todos los píxeles del quad toman, `fwidth` no está definido'
-  )
-
-  const uniforms = createCelosiaUniforms()
-  check(
-    'el uniform arranca en el sol real, y es el MISMO número que usa el gemelo',
-    Math.abs(uniforms.uCelosiaKnobs.value.w - celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG)) < 1e-12 &&
-      Math.abs(uniforms.uCelosiaKnobs.value.w - 2 * Math.tan((0.266 * Math.PI) / 180)) < 1e-12,
-    `uCelosiaKnobs.w = ${uniforms.uCelosiaKnobs.value.w.toFixed(6)} = 2·tan(${CELOSIA_SUN_RADIUS_DEG}°) · el radio angular del sol real`
+    'el sol real es el mismo número que usa el gemelo',
+    Math.abs(SPREAD - 2 * Math.tan((0.266 * Math.PI) / 180)) < 1e-12,
+    `2·tan(${CELOSIA_SUN_RADIUS_DEG}°) = ${SPREAD.toFixed(6)} · el radio angular del sol real`
   )
   check(
     'la perilla está en el panel, arranca en el sol real y llega hasta el lavado',
@@ -244,7 +224,7 @@ section('El GLSL: la penumbra existe, entra por max() y no agrega una rama')
       PROBE_DEFAULTS.celosiaSunRadiusDeg === CELOSIA_SUN_RADIUS_DEG &&
       PROBE_RANGES.celosiaSunRadiusDeg.min === 0 &&
       PROBE_RANGES.celosiaSunRadiusDeg.max === CELOSIA_SUN_RADIUS_MAX_DEG,
-    `0 … ${CELOSIA_SUN_RADIUS_MAX_DEG}°, default ${CELOSIA_SUN_RADIUS_DEG}° · el mínimo es el control (S11) y el tope es donde el moiré del piso se lava`
+    `0 … ${CELOSIA_SUN_RADIUS_MAX_DEG}°, default ${CELOSIA_SUN_RADIUS_DEG}°`
   )
 }
 

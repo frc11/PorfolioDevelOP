@@ -15,7 +15,7 @@ import {
 /**
  * LA GEOMETRÍA DE LA PROYECCIÓN (S11) — dónde cruza el rayo al sol cada capa.
  *
- * Es el gemelo en TypeScript del shader (`celosiaShader.ts`) y el instrumento con
+ * Era el gemelo en TypeScript del shader (`celosiaShader.ts`, que ESCENA 2 borró) y el instrumento con
  * el que se mide todo lo que S11 publica. Los dos hacen la MISMA cuenta, y una
  * comprobación verifica que los números que consumen sean los mismos.
  *

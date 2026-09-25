@@ -3,27 +3,74 @@
 Rama `rediseno/home` · dev 3000 · candado de Chrome (`scratchpad/candado.sh`; el candado vive en
 `~/.cache/b4-medicion/chrome.lock` y se borra solo al terminar).
 
-## Dónde quedó (antes de reiniciar la PC)
+## Parte A — la base limpia (commit + tag `escena-base-limpia`)
 
-- **Commit WIP `wip(escena2): antes de reiniciar`**: el trabajo en curso guardado, sin terminar.
-  - La bandera vieja del sprint anterior (`_lib/escena/variante.ts`) y su cableado, en ACTUAL (el
-    producto se ve como siempre):
-    - `ProbeStage.tsx`: sombra del logo, niebla y reflejo;
-    - `StudioFloor.tsx`: las marcas;
-    - `lightRig.ts`: la celosía;
-    - `EscenaDelHome.tsx`: las motas;
-    - `ProbeLogo.tsx`: `construirGeometriasDelLogo`, que sólo usa el reflejo;
-    - `ReflejoDelLogo.tsx`.
-  - Una receta provisoria **`base`** en esa bandera: V2 sin el reflejo, o sea la base limpia que
-    pide la parte A (sin marcas, sin celosía, sin la sombra del logo, bruma 42 → 110).
-  - La sonda **`scripts-escena/logo.ts`**. Recorre Hero → Quiénes → Trabajos → Por qué → pie por
-    scroll. En Por qué develOP y en el pie mide la caja y el centro de la tinta del logo sobre la
-    escena sola (`<main>` escondido, luminancia < 60), en tres tomas a 1 s. Con segundo argumento
-    pisa la bandera vieja.
-- **No se aplicó nada de la parte A ni de la B.** La primera corrida de `logo.ts` no llegó a medir:
-  el dev server se había caído por falta de memoria (el puerto 3000 no escuchaba).
+### Qué se aplicó
 
-## Mapa de lo que hay que sacar para la base (parte A)
+La escena del producto (y la de `/probe-escena`, que usa el mismo `ProbeStage`) quedó así:
+
+- **sin las marcas del piso**: se borraron `floorMarks.ts`, `InstancedBars.tsx`, los colores de las
+  marcas y `BarPlacement` de `probeScene.ts`;
+- **sin la celosía** (la sombra de la cúpula): se borró `celosiaShader.ts` y se sacó su cableado de
+  `StudioFloor`, `ProbeLogo`, `ProbeStage`, `OrbitRig` y `lightRig` (el bloque 6b);
+- **sin la sombra del logo** que giraba con el sol:
+  - no hay mapa de sombras: se fueron `shadows` del Canvas, `castShadow`/`receiveShadow`, las
+    props `shadow-*` de la principal, el bloque del mapa en `OrbitRig`, `SOMBRAS_DEL_CANVAS`,
+    `sombraPx`/`sombraRadio` y las constantes `SHADOW_*`;
+  - la oclusión de contacto sigue apoyando el logo;
+- **bruma 42 → 110**, que arranca detrás del logo;
+- **sin reflejo**, sin la bandera vieja (`variante.ts`) y sin la rama V3 (las motas compactas).
+
+Se quedan, porque no proyectan nada y sacarlos movería la luz o el preloader:
+- el factor de cielo del hemisférico (`probeCelosia.ts`);
+- `celosiaGeometry.ts` y `celosiaPenumbra.ts`, que usan el intro y el panel del laboratorio;
+- la deriva de la textura de la envolvente.
+
+### ¿El logo quedó idéntico? Sí.
+
+El logo se midió como la mancha oscura conexa más grande de la escena sola
+(`scripts-escena/logo-componente.ts`), en tres tomas a 1 s a 1440 × 900. Resultados:
+
+| Momento | Variante | Caja (x · y) | Centro | Área |
+|---|---|---|---|---|
+| Por qué develOP | ACTUAL | 430–1011 · 247–652 | (727,5 · 418,1) | ~105.000 |
+| Por qué develOP | base aplicada | 430–1009 · 249–651 | (726,3 · 418,2) | ~104.400 |
+| Pie | ACTUAL | 598–841 · 365–534 | (721,9 · 436,9) | ~17.900 |
+| Pie | base aplicada | 598–841 · 365–534 | (722,0 · 437,0) | ~18.100 |
+
+- **Por qué develOP:** la base aplicada difiere de ACTUAL en 1–2 px de borde y 1,2 px de centro. Es
+  el canto que la celosía oscurecía, no pose ni tamaño.
+- **Pie:** la caja es la misma al píxel.
+- La base por bandera dio lo mismo antes de aplicarla.
+- La diferencia de tamaño y pose que asomó en la primera corrida era una hoja vieja
+  (`actual-v1.png`), no la escena.
+
+### Los invariantes
+
+- **Nuevo:** `test:s28-base`, 19 afirmaciones, con controles positivos en cada barrido. Afirma:
+  - sin sombras, sin gobo, sin marcas, sin reflejo y sin bandera: lee el código sin comentarios;
+  - la bruma derivada de los keyframes y del estudio:
+    - la pose más lejana ve el logo a 40,3 y su borde (a 43,9) se vela un 0,23 %;
+    - la pared detrás del logo en esa pose cae entera en la niebla;
+    - con la bruma vieja (20 → 150) el mismo medidor ve el velo y la pared asoma;
+  - la oclusión de contacto montada.
+- **Reescrito:**
+  - `s7-sol`: la key apunta exactamente al sol del arco, con control del comparador;
+  - `s12-penumbra`: sin la sección del GLSL, la perilla del panel se queda;
+  - `s8-escena`: la lista de módulos mudados, de 29 a 26.
+- **Retirado:** `s11-celosia`. Probaba el enganche del gobo contra three, y el gobo ya no existe.
+- **En verde:** `tsc --noEmit`; eslint sobre el alcance; y las suites `s7e-*`, `s9e`, `s10e-*`,
+  `s11e`, `s12e`, `s8-escena`, `s9-instrumentos`, `s9-sentry`, `s10-raf` (con sus 2 fuera de
+  ventana de siempre), `s14e`, `s15e-*`, `s16-arnes`, `s18`, `s19-sincronia`, `s19-lente`,
+  `s20-brillo`, `s22-emision`, `s23-final` y `s24-dia`.
+- **Build:** `next build` aislado en `.next-b13` (con el heap de 4096 que fija `netlify.toml`; con
+  el de 2 GB por defecto se queda sin memoria).
+- **Fuera de alcance, no tocado:**
+  - `s17-revelado` falla desde SPRINT VIAJES: la llamada a `aplicarRevelado` se mudó a
+    `ataduraAlScroll.ts` y ganó `!viajando`.
+  - `s8-tres` y `s8-intro` piden un build en `.next`, que el `next dev` del checkout ocupa.
+
+## Mapa de lo que se sacó para la base (parte A, referencia)
 
 Todo en `src/app/v3/_lib/escena/` salvo donde se indica.
 

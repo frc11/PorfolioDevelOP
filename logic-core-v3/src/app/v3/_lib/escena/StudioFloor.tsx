@@ -3,10 +3,6 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
-import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
-import { MARK_PLACEMENTS } from './floorMarks'
-import { InstancedBars } from './InstancedBars'
-import { recetaDeLaEscena } from './variante'
 import {
   CYC_COVE_RADIUS,
   CYC_COVE_STEPS,
@@ -19,7 +15,7 @@ import {
 } from './probeScene'
 
 /**
- * El piso: la losa, el ciclorama y el set de marcas.
+ * El piso: la losa y el ciclorama.
  *
  * **El ciclorama (S4).** El disco plano de radio 110 se partió en una losa plana
  * con espesor hasta el radio 34 y una superficie de revolución que curva hacia
@@ -29,27 +25,12 @@ import {
  * transición y desde ningún ángulo hay una línea. Los números y el porqué de la
  * altura de la pared están en `probeScene.ts`.
  *
- * **Las marcas.** Su geometría y su razón de ser viven en `floorMarks.ts`; acá
- * solo se dibujan. Son 48 barras en **un solo draw call** (ver `InstancedBars`),
- * y en S5 pasaron de marcas de estudio a lenguaje de plano: ejes, cotas y una
- * escala graduada además del encuadre y las cintas.
+ * ── [ESCENA 2] La base limpia ──────────────────────────────────────────────
  *
- * Todo esto sigue la misma regla que el sprint original: dar profundidad sin
- * pedir atención. Son objetos de tamaño conocido apoyados en el piso, así que al
- * orbitar dan la lectura de perspectiva que un plano vacío no da; y ninguno
- * compite en peso visual con el logo.
- *
- * ── S11: el papel recibe la celosía ────────────────────────────────────────
- *
- * Los dos materiales se arman acá y no en el JSX porque `applyCelosia` tiene que
- * correr sobre la instancia antes del primer render. **Siguen siendo el mismo
- * material**: `meshStandardMaterial`, mismo color, misma rugosidad. Lo único que
- * cambia es que la key llega modulada por la trama de la rendija.
- *
- * ⚠️ **La losa Y el ciclorama, las dos.** Con el gobo solo en la losa, las bandas
- * terminarían en una circunferencia en el radio 34 — justo donde S4 puso la cove
- * para que **no** hubiera una línea. Son dos materiales y no uno porque el
- * ciclorama va en `DoubleSide` y la losa no, pero llevan el mismo shader.
+ * Sin las marcas (las 48 barras de `floorMarks.ts`, que se fueron) y sin la
+ * celosía: el papel ya no recibe la sombra de la cúpula, que barría el piso al
+ * girar el sol con el scroll. Tampoco recibe sombra del logo: la escena no tiene
+ * mapa de sombras y lo que apoya el logo es su oclusión de contacto.
  */
 
 /**
@@ -79,12 +60,7 @@ const CYC_PROFILE: readonly THREE.Vector2[] = (() => {
   return points
 })()
 
-type StudioFloorProps = {
-  /** Los uniforms compartidos de la celosía. El papel es su receptor principal. */
-  celosia: CelosiaUniforms
-}
-
-export function StudioFloor({ celosia }: StudioFloorProps) {
+export function StudioFloor() {
   const cycGeometry = useMemo(
     () => new THREE.LatheGeometry(CYC_PROFILE.slice(), FLOOR_SEGMENTS),
     []
@@ -96,10 +72,8 @@ export function StudioFloor({ celosia }: StudioFloorProps) {
     const slab = paper()
     const cyclorama = paper()
     cyclorama.side = THREE.DoubleSide
-    applyCelosia(slab, celosia)
-    applyCelosia(cyclorama, celosia)
     return { slab, cyclorama }
-  }, [celosia])
+  }, [])
 
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(() => () => cycGeometry.dispose(), [cycGeometry])
@@ -118,16 +92,8 @@ export function StudioFloor({ celosia }: StudioFloorProps) {
         inferior, así que rasar el piso con la cámara sigue mostrando una
         escena— pero ahora termina donde arranca el ciclorama, no en un borde
         libre. `position` deja la cara SUPERIOR exactamente en FLOOR_Y.
-
-        Sin `castShadow`: no hay nada debajo que pueda recibir su sombra, y
-        meterla en el shadow map solo arriesgaba acné sobre su propia cara y
-        sobre las marcas, que están apoyadas encima.
       */}
-      <mesh
-        position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]}
-        material={materials.slab}
-        receiveShadow
-      >
+      <mesh position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]} material={materials.slab}>
         <cylinderGeometry args={[FLOOR_RADIUS, FLOOR_RADIUS, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
       </mesh>
 
@@ -143,15 +109,7 @@ export function StudioFloor({ celosia }: StudioFloorProps) {
         confirmado en pantalla, pasarlo a `THREE.FrontSide` es una línea y ahorra
         el descarte de caras traseras.
       */}
-      <mesh
-        position={[0, FLOOR_Y, 0]}
-        geometry={cycGeometry}
-        material={materials.cyclorama}
-        receiveShadow
-      />
-
-      {/* [ESCENA] Las marcas del piso, salvo en las variantes de limpieza (`variante.ts`). */}
-      {recetaDeLaEscena().marcasDelPiso && <InstancedBars placements={MARK_PLACEMENTS} celosia={celosia} receiveShadow />}
+      <mesh position={[0, FLOOR_Y, 0]} geometry={cycGeometry} material={materials.cyclorama} />
     </group>
   )
 }

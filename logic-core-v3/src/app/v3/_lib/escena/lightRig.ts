@@ -21,11 +21,7 @@ import {
   rimIntensityAt,
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
-import type { CelosiaUniforms } from './celosiaShader'
-import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from './celosiaPenumbra'
-import { CELOSIA_BAR } from './probeCelosia'
 import { kelvinToSrgb } from './probeScene'
-import { recetaDeLaEscena } from './variante'
 
 /**
  * LA APLICACIÓN DEL RIG DE LUZ — lo que el `useFrame` escribe cada cuadro.
@@ -60,19 +56,6 @@ export type LightRigTargets = {
   fog: THREE.Fog | null
   /** El color de fondo de la escena, si es un color plano. Sigue a la niebla. */
   background: THREE.Color | null
-  /**
-   * LA CELOSÍA (S11). Hasta S10 acá vivían el cuerpo del sol y su washout: dos
-   * sprites que el rig colocaba sobre el eje de la principal para que la fuente
-   * se viera. **Los dos se borraron** — un sol no es un círculo en el cielo, es
-   * una dirección de la que viene la luz, y sobre papel blanco un disco claro no
-   * tiene contra qué recortarse.
-   *
-   * Lo que queda es el mismo eje con otro consumidor: `SUN_DIRECTION` se escribe
-   * en este uniform y el shader lo usa para proyectar la rendija sobre todo lo
-   * que recibe la key. La garantía que S7 protegía —que la fuente y la sombra no
-   * se puedan desincronizar— sigue siendo la misma línea de código.
-   */
-  celosia: CelosiaUniforms | null
 }
 
 export function createLightRigTargets(): LightRigTargets {
@@ -83,7 +66,6 @@ export function createLightRigTargets(): LightRigTargets {
     hemi: null,
     fog: null,
     background: null,
-    celosia: null,
   }
 }
 
@@ -114,18 +96,6 @@ export type LightRigInput = {
    * `probeCelosia.ts`.
    */
   skyFactor: number
-  /** Deriva de la capa gruesa, en celdas. La MISMA que se le escribe a la textura. */
-  celosiaDrift: number
-  /** La barra de la celosía, del slider del panel. */
-  celosiaBar: number
-  /**
-   * El tamaño angular del sol ya como `2·tan(α)` (S12), del slider del panel.
-   *
-   * Entra por acá y no por un store propio por el mismo motivo que la barra: es
-   * una propiedad de la MISMA fuente que la key, así que la sombra y la luz que
-   * la tira salen del mismo número. En 0 el borde vuelve a ser el de S11.
-   */
-  celosiaSpread: number
 }
 
 export function createLightRigInput(): LightRigInput {
@@ -138,9 +108,6 @@ export function createLightRigInput(): LightRigInput {
     cameraHeight: 0,
     followsCamera: false,
     skyFactor: 1,
-    celosiaDrift: 0,
-    celosiaBar: CELOSIA_BAR,
-    celosiaSpread: celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG),
   }
 }
 
@@ -173,8 +140,6 @@ const RAD = Math.PI / 180
  * y el cuerpo, y por eso se calcula UNA vez y la usan los dos.
  */
 const SUN_DIRECTION = new THREE.Vector3()
-/** [ESCENA] Un sol sin componente horizontal: el shader descarta la proyección y la celosía no oscurece nada. */
-const SOL_SIN_CELOSIA = new THREE.Vector3(0, 1, 0)
 
 /** Posición de una luz fija, en polares alrededor del origen. */
 function place(
@@ -227,13 +192,10 @@ export function applyLightRig(
     cameraHeight,
     followsCamera,
     skyFactor,
-    celosiaDrift,
-    celosiaBar,
-    celosiaSpread,
   } = input
 
   // 0 · EL EJE DEL SOL, que es el de la principal. Se resuelve una sola vez y lo
-  //     usan las dos cosas: la luz que proyecta la sombra y el cuerpo que se ve.
+  //     usa la principal (la base limpia no tiene sombra ni cuerpo del sol).
   //     Con el toggle "la luz sigue a la cámara" encendido el azimut pasa a ser
   //     relativo a la cámara, y el sol se corre con él — que es lo correcto: si
   //     la luz se movió, la fuente se movió.
@@ -255,11 +217,9 @@ export function applyLightRig(
     cache.lastKelvin = kelvin
   }
 
-  // 2 · Principal. Es la única que proyecta sombra, y va sobre el eje del sol.
+  // 2 · Principal. Va sobre el eje del sol; desde ESCENA 2 no proyecta sombra.
   //     `KEY_DISTANCE` no es "dónde está el sol": una direccional no tiene
-  //     posición física, solo dirección. Ese número es dónde se para la CÁMARA
-  //     DE SOMBRA, y se la deja cerca para que su rango de profundidad quede
-  //     apretado (ver `SHADOW_NEAR` / `SHADOW_FAR`).
+  //     posición física, solo dirección.
   const key = targets.key
   if (key) {
     key.intensity = KEY_INTENSITY * level
@@ -330,25 +290,6 @@ export function applyLightRig(
   if (fogLevel !== cache.lastFogLevel) {
     cache.fogTint.copy(cache.fogBase).multiplyScalar(fogLevel)
     cache.lastFogLevel = fogLevel
-  }
-
-  // 6b · LA CELOSÍA, sobre el MISMO eje que acaba de colocar la principal.
-  //
-  //      Es la línea que garantiza que la luz que proyecta la sombra y la
-  //      dirección que dibuja las bandas sean la misma: `SUN_DIRECTION` se
-  //      calculó una sola vez arriba y la usan las dos. Si alguien mueve el
-  //      arco, se mueven las dos o no se mueve ninguna — es la misma garantía
-  //      que S7 escribió para el cuerpo del sol, con otro consumidor.
-  //
-  //      La deriva y la barra entran por acá y no por un store propio para que
-  //      el shader y la textura de la envolvente lean el MISMO número: la sombra
-  //      de la rendija baja exactamente cuando baja la rendija.
-  const celosia = targets.celosia
-  if (celosia) {
-    celosia.uCelosiaSun.value.copy(recetaDeLaEscena().celosia ? SUN_DIRECTION : SOL_SIN_CELOSIA)
-    celosia.uCelosiaKnobs.value.x = celosiaBar
-    celosia.uCelosiaKnobs.value.y = celosiaDrift
-    celosia.uCelosiaKnobs.value.w = celosiaSpread
   }
 
   if (targets.fog) targets.fog.color.copy(cache.fogTint)

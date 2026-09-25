@@ -20,12 +20,16 @@
  * sol **cruce las dos capas** desde el piso — y se mudó a
  * `s11-proyeccion.invariant.ts`, que es donde vive la proyección.
  *
+ * ⚠️ **ESCENA 2 borró la celosía**, y con ella el segundo consumidor del eje. Lo
+ * que queda es la otra mitad de la misma garantía: **la key está EXACTAMENTE
+ * donde el arco dice que está el sol**, recalculado acá desde el azimut y la
+ * elevación que devuelve `sampleLightArc` y no copiado del rig.
+ *
  * ⚠️ **Modo pulido sacó el resto** (la forma del arco de un día, el alcance del
  * mapa de sombra, el radio de partícula contra el fondo): era composición.
  */
 import * as THREE from 'three'
 
-import { createCelosiaUniforms } from '@/app/v3/_lib/escena/celosiaShader'
 import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
 import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
@@ -40,20 +44,27 @@ import { check, report, section } from './harness'
 const RAD = Math.PI / 180
 const arc: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
 
-// ── 1 · La celosía Y la key son la misma dirección ──────────────────────────
+// ── 1 · La key está sobre el eje del sol que dice el arco ───────────────────
 
-section('La celosía y la luz principal comparten eje')
+section('La luz principal está donde el arco dice que está el sol')
+
+/** El eje del sol, recalculado desde el arco y no leído del rig. */
+function ejeDelArco(azimuthDeg: number, elevationDeg: number): THREE.Vector3 {
+  const horizontal = Math.cos(elevationDeg * RAD)
+  return new THREE.Vector3(
+    Math.sin(azimuthDeg * RAD) * horizontal,
+    Math.sin(elevationDeg * RAD),
+    Math.cos(azimuthDeg * RAD) * horizontal
+  )
+}
 
 {
   const targets = createLightRigTargets()
   targets.key = new THREE.DirectionalLight()
-  targets.celosia = createCelosiaUniforms()
   const input = createLightRigInput()
   const cache = createLightRigCache()
 
-  let collinear = true
   let worstAngle = 0
-  let unit = true
   for (let i = 0; i <= 100; i += 1) {
     const p = i / 100
     sampleLightArc(p, arc)
@@ -66,65 +77,33 @@ section('La celosía y la luz principal comparten eje')
     applyLightRig(targets, input, cache)
 
     const key = targets.key.position.clone().normalize()
-    const gobo = targets.celosia.uCelosiaSun.value
-    const angle = (key.angleTo(gobo.clone().normalize()) * 180) / Math.PI
+    const angle = (key.angleTo(ejeDelArco(arc.azimuthDeg, arc.elevationDeg)) * 180) / Math.PI
     if (angle > worstAngle) worstAngle = angle
-    if (angle > 1e-4) collinear = false
-    // El shader la usa SIN normalizar: si dejara de ser unitaria, el parámetro de
-    // la cuadrática dejaría de estar en unidades de mundo y el cruce se correría.
-    if (Math.abs(gobo.length() - 1) > 1e-9) unit = false
   }
 
   check(
-    'la dirección que proyecta la celosía y la key apuntan EXACTAMENTE igual',
-    collinear,
+    'la key apunta EXACTAMENTE al sol del arco en todo el recorrido',
+    worstAngle < 1e-4,
     `desvío máximo ${worstAngle.toExponential(1)}° en 101 puntos del recorrido`
   )
   check(
-    'y el vector que recibe el shader es unitario',
-    unit,
-    'el gobo marcha el rayo en unidades de mundo: sin normalizar, el cruce se corre'
-  )
-  check(
-    'la key sigue parada donde va la cámara de sombra',
+    'y está parada a su distancia de siempre',
     Math.abs(targets.key.position.length() - KEY_DISTANCE) < 1e-6,
-    `${KEY_DISTANCE} — la celosía no la movió`
+    `${KEY_DISTANCE}`
   )
-
-  // Con el toggle "la luz sigue a la cámara" los dos tienen que seguir juntos: si
-  // la celosía se quedara donde estaba, las bandas vendrían de otro lado que la
-  // sombra.
-  input.followsCamera = true
-  input.cameraAzimuth = 1.2
-  applyLightRig(targets, input, cache)
-  const followAngle =
-    (targets.key.position
-      .clone()
-      .normalize()
-      .angleTo(targets.celosia.uCelosiaSun.value.clone().normalize()) *
-      180) /
-    Math.PI
-  check('con el toggle de luz solidaria, la celosía gira con ella', followAngle < 1e-6)
 
   /**
-   * ⚠️ **EL CONTROL POSITIVO DEL DETECTOR DE COLINEALIDAD (SITIO-S10).** Lo que
-   * afirma la sección es un ángulo por debajo de 1e-4° entre dos vectores, y eso
-   * sale en verde también si el comparador estuviera devolviendo siempre 0. Se le
-   * da el MISMO comparador con el gobo girado un grado alrededor de Y.
+   * ⚠️ **EL CONTROL POSITIVO DEL COMPARADOR.** Un ángulo por debajo de 1e-4° sale
+   * en verde también si el comparador devolviera siempre 0. Se le da el MISMO
+   * comparador con el eje del arco girado un grado alrededor de Y.
    */
   const key = targets.key.position.clone().normalize()
-  const torcido = targets.celosia.uCelosiaSun.value.clone().normalize()
-  torcido.applyAxisAngle(new THREE.Vector3(0, 1, 0), 1 * RAD)
+  const torcido = ejeDelArco(arc.azimuthDeg + 1, arc.elevationDeg)
   const desvio = (key.angleTo(torcido) * 180) / Math.PI
   check(
-    'control positivo — el mismo comparador VE un gobo girado un grado',
+    'control positivo — el mismo comparador VE un sol girado un grado',
     desvio > 1e-4,
     `${desvio.toFixed(3)}° — el umbral de la afirmación es 1e-4°`
-  )
-  check(
-    'control positivo — y el medidor de longitud VE un vector que dejó de ser unitario',
-    Math.abs(torcido.clone().multiplyScalar(2).length() - 1) > 1e-9,
-    'la afirmación "el vector es unitario" mide la longitud, no la asume'
   )
 }
 

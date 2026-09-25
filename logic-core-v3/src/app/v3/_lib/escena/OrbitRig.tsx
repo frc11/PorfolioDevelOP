@@ -17,7 +17,6 @@ import {
   VIRA_PITCH_DEG,
   VIRA_PITCH_PERIOD_S,
   VIRA_PITCH_PHASE,
-  VIRA_UPDATES_SHADOW,
   VIRA_YAW_DEG,
   VIRA_YAW_PERIOD_S,
 } from './choreographyPhysics'
@@ -57,8 +56,6 @@ import {
   type LightRigInput,
   type LightRigTargets,
 } from './lightRig'
-import { celosiaSunSpread } from './celosiaPenumbra'
-import { writeCelosiaLayers, type CelosiaUniforms } from './celosiaShader'
 import type { MoireHandle } from './MoireScreen'
 import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
 import { nivelConLaNocheDisparada } from './nocheDisparada'
@@ -202,21 +199,12 @@ type OrbitRigProps = {
    * B13 · El material del logo. El rig le escribe la EMISIVA en el mismo cuadro
    * en el que alimenta a las luces y al brillo de las motas: la luz de la sala,
    * el polvo y la pieza salen del mismo nivel del arco y no se pueden
-   * desincronizar. Por qué un ref y no un uniform compartido: el material ya
-   * lleva `onBeforeCompile` puesto por la celosía, y un segundo parche lo
-   * pisaría (`applyCelosia` asigna la propiedad, no la encadena).
+   * desincronizar.
    */
   logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
   /** Los dos campos de partículas. Es lo que deriva (ver `choreographyPhysics.ts`). */
   dustGroupRef: RefObject<THREE.Group | null>
   bokehGroupRef: RefObject<THREE.Group | null>
-  /**
-   * LA CELOSIA (S11). Reemplaza a los dos refs de sprite que habia hasta S10 —el
-   * cuerpo del sol y su washout— y no es un ref: es el objeto de uniforms que
-   * comparten el papel, las marcas y el logo. `applyLightRig` le escribe el eje
-   * del sol, la barra y la deriva, una vez por frame para todos.
-   */
-  celosia: CelosiaUniforms
   /** La envolvente. El loop le desplaza la capa gruesa hacia abajo. */
   moireRef: RefObject<MoireHandle | null>
 }
@@ -241,14 +229,9 @@ export function OrbitRig({
   logoMaterialRef,
   dustGroupRef,
   bokehGroupRef,
-  celosia,
   moireRef,
 }: OrbitRigProps) {
-  const shadowModeRef = useRef<boolean | null>(null)
   const modeRef = useRef<ProbeMode | null>(null)
-  // El ultimo desajuste volcado a los uniforms de la celosia. Empieza en null
-  // para forzar la primera escritura sin comparar contra un valor inventado.
-  const mismatchRef = useRef<number | null>(null)
   const framesRef = useRef(0)
   const elapsedRef = useRef(0)
   // La niebla y el fondo se declaran en el JSX de `ProbeStage` y viven en la
@@ -295,35 +278,7 @@ export function OrbitRig({
     // movimiento reducido no hay física en ningún modo.
     const physics = isChoreo && physicsEnabled && !reducedMotion
 
-    // 0 · El shadow map se recalcula solo cuando puede haber cambiado.
-    //
-    // Con las luces fijas al mundo y el objeto quieto, el mapa de profundidad es
-    // idéntico frame a frame: apagar `autoUpdate` saca una pasada de render
-    // completa de cada frame sin cambiar un píxel. Que la CÁMARA se mueva no lo
-    // invalida — una direccional solo depende de la luz y de quién proyecta, y
-    // el contraluz, que sí sigue a la cámara, no proyecta ninguna.
-    //
-    // Lo que sí lo invalida es la vira, porque mueve al que proyecta. Sigue
-    // siendo el gasto que `VIRA_UPDATES_SHADOW` permite apagar; desde S6 cuesta
-    // la cuarta parte, porque el mapa bajó de 2048² a 1024².
-    //
-    // **Y desde S7 lo invalida algo más: el sol se mueve.** La principal recorre
-    // un arco ligado al progreso, así que en cuanto el recorrido avanza la luz
-    // cambia de dirección y la sombra con ella — que es justamente lo que hace
-    // que el espacio se lea como real. Por eso `trackDriven` entra en la cuenta.
-    // No suma costo sobre lo que ya había: en coreografía la vira ya obligaba a
-    // recalcular el mapa en cada cuadro. En manual, con el sol quieto y sin
-    // vira, el mapa sigue congelándose como desde S4.
-    //
-    // Va acá y no en un `useEffect` porque `state.gl` es el argumento del loop:
-    // mutar el renderer que devuelve `useThree` es lo que la regla
-    // `react-hooks/immutability` prohíbe, con razón.
-    const shadowMoves = keyFollowsCamera || trackDriven || (physics && VIRA_UPDATES_SHADOW)
-    if (shadowModeRef.current !== shadowMoves) {
-      state.gl.shadowMap.autoUpdate = shadowMoves
-      state.gl.shadowMap.needsUpdate = true
-      shadowModeRef.current = shadowMoves
-    }
+    // 0 · [ESCENA 2] Ya no hay mapa de sombras que recalcular: la base limpia no proyecta ninguna.
 
     // 1 · De dónde salen los cinco números de pose de este frame.
     let angleDeg: number
@@ -526,21 +481,10 @@ export function OrbitRig({
     targets.hemi = hemiLightRef.current
     targets.fog = fogRef.current
     targets.background = backgroundRef.current
-    targets.celosia = celosia
 
-    // LA DERIVA, calculada UNA vez y usada en dos lugares: la textura de la
-    // envolvente (paso 6b) y la sombra que esa misma envolvente proyecta. Si
-    // cada uno tuviera su cuenta, la rendija y su sombra se irían separando.
+    // LA DERIVA de la capa gruesa de la envolvente (la textura, paso 6b).
     const elapsedNow = state.clock.elapsedTime
     const drift = reducedMotion ? 0 : (elapsedNow / MOIRE_DRIFT_PERIOD_S) % 1
-
-    // El desajuste redefine la trama fina y por lo tanto la celosía que proyecta.
-    // Se mueve por click, no por frame: se compara y solo se escribe si cambió.
-    const mismatch = Math.round(params.moireMismatch)
-    if (mismatch !== mismatchRef.current) {
-      mismatchRef.current = mismatch
-      writeCelosiaLayers(celosia, mismatch)
-    }
 
     const lightInput = scratch.lightInput
     lightInput.level = arc.level
@@ -550,12 +494,7 @@ export function OrbitRig({
     lightInput.cameraAzimuth = azimuth
     lightInput.cameraHeight = height
     lightInput.followsCamera = keyFollowsCamera
-    lightInput.celosiaBar = params.celosiaBar
-    lightInput.celosiaDrift = drift
     lightInput.skyFactor = celosiaSkyFactor(params.celosiaBar)
-    // El radio angular llega como `2·tan(α)` porque es lo que consume el shader:
-    // la trigonometría se hace una vez acá y no cuatro veces por fragmento.
-    lightInput.celosiaSpread = celosiaSunSpread(params.celosiaSunRadiusDeg)
 
     applyLightRig(targets, lightInput, scratch.lightCache)
     // B8: las partículas brillan con la noche del arco, en el mismo cuadro que la luz — `particleGlow.ts`.

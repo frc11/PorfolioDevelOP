@@ -5,8 +5,8 @@ import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
  *
  * Era "un solo lugar para todos los números de la escena" hasta S6, y dejó de
  * serlo porque el archivo se hizo largo: la luz salió a `probeLighting.ts`, la
- * niebla y la sombra a `probeAtmosphere.ts`, las partículas y sus generadores de
- * sprite a `probeParticles.ts`, y las marcas a `floorMarks.ts` desde S5. Lo que
+ * niebla a `probeAtmosphere.ts` y las partículas y sus generadores de sprite a
+ * `probeParticles.ts`; las marcas de piso se borraron en ESCENA 2. Lo que
  * queda acá es la escena en su sentido más literal: **qué hay, de qué color,
  * apoyado sobre qué y mirado con qué lente.**
  *
@@ -83,12 +83,6 @@ export const INK_COLOR = '#0F0F0F'
  * (bajarlo), y es el que le da al contraluz una superficie donde dibujarse.
  */
 export const INK_ROUGHNESS = 0.34
-/** Marcas de registro sobre el papel: `--color-ds-light-border`. */
-export const MARK_COLOR = '#D7D7D5'
-/** Marco exterior: más claro, se va hacia el fondo y no compite con el interior. */
-export const MARK_SOFT_COLOR = '#E6E6E3'
-/** Cintas de posición: más oscuras. Una cinta es cinta, no una línea trazada. */
-export const MARK_TAPE_COLOR = '#CFCFCC'
 /** Rebote del papel hacia arriba (piso del hemisférico). Cálido apenas. */
 export const BOUNCE_COLOR = '#EDEAE3'
 /**
@@ -186,16 +180,10 @@ export const CYC_WALL_TOP = 150
 export const CYC_COVE_STEPS = 16
 
 /**
- * ── LAS MARCAS DE PISO ─────────────────────────────────────────────────────
+ * ── LAS MARCAS DE PISO, que ESCENA 2 borró ─────────────────────────────────
  *
- * Las medidas y el armado del set completo viven en `floorMarks.ts`. Se movieron
- * ahí en S5, cuando el set pasó de "marcas de estudio" a **lenguaje de plano**:
- * a las esquinas de encuadre, las cruces de registro y las cintas se les
- * sumaron los ejes, dos cotas y una escala graduada. Son treinta líneas de
- * geometría con su porqué, y viven al lado del código que las arma.
- *
- * Acá quedan los colores, que son paleta: `MARK_COLOR`, `MARK_SOFT_COLOR` y
- * `MARK_TAPE_COLOR`, más arriba.
+ * Las 48 barras de replanteo (`floorMarks.ts` + `InstancedBars.tsx`) se fueron
+ * con la base limpia: el piso es papel sin nada encima. Su historia está en git.
  */
 
 // ── La cámara ──────────────────────────────────────────────────────────────
@@ -241,36 +229,10 @@ export const AUTO_ORBIT_DEG_PER_S = 24
  * cambia la iluminación) y el contraluz es del OBSERVADOR (solidario a la
  * cámara en azimut y en altura, así que el filo existe en toda la órbita).
  *
- * Ahí viven también la niebla, la sombra y la oclusión de contacto. La curva que
+ * Ahí viven también la niebla y la oclusión de contacto. La curva que
  * sube y baja el nivel general a lo largo del recorrido es `LIGHT_ARC`, en
  * `choreography.ts`, junto al resto de lo que se calibra.
  */
-
-// ── Geometría instanciada ───────────────────────────────────────────────────
-
-/**
- * Una caja con posición, tamaño, giro y color propios, para dibujarse junto a
- * muchas otras en un solo draw call (ver `InstancedBars.tsx`).
- *
- * **Después de S10 le queda un solo consumidor: las marcas de piso.** Nació como
- * el vocabulario compartido de cuatro familias —marcas, planos suspendidos,
- * retícula del techo y pilares—, y las otras tres se borraron. Se conserva
- * igual, y no por inercia: las 48 marcas siguen siendo un solo draw call gracias
- * a esto, y es lo que va a necesitar cualquier familia de cajas que se sume
- * después.
- *
- * `rotation` se interpreta en orden **YXZ**: primero el azimut, y la
- * inclinación DESPUÉS, adentro del marco ya girado. Con el XYZ que three usa
- * por default, la inclinación se aplicaría sobre el eje X del padre y cada
- * pieza se inclinaría en una dirección distinta según su azimut — el mismo
- * problema que S4 resolvía con dos grupos anidados.
- */
-export type BarPlacement = {
-  readonly position: readonly [number, number, number]
-  readonly scale: readonly [number, number, number]
-  readonly rotation?: readonly [number, number, number]
-  readonly color: string
-}
 
 // ── Las partículas ─────────────────────────────────────────────────────────
 

@@ -2,10 +2,9 @@
 
 import { useLoader } from '@react-three/fiber'
 import { useEffect, useMemo, type RefObject } from 'react'
-import { SVGLoader, type SVGResult } from 'three-stdlib'
+import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
-import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
 
@@ -31,18 +30,6 @@ type ProbeLogoProps = {
   /** Se dispara una vez, cuando el objeto existe en la escena. Nunca por frame. */
   onReady: () => void
   /**
-   * La celosía (S11). El logo la recibe como cualquier otra superficie, y eso es
-   * lo que lo integra al espacio en vez de dejarlo pegado encima.
-   *
-   * ⚠️ **En una pieza negra la banda se lee por el ESPECULAR, no por el difuso.**
-   * El albedo de la tinta es 0,0046 en lineal: su forma la dibuja el reflejo, que
-   * no depende del albedo (ver `INK_ROUGHNESS` en `probeScene.ts`). El gobo
-   * multiplica `directLight.color` **antes** de `RE_Direct`, así que apaga las dos
-   * cosas por igual: donde cae la barra, el 100% del aporte de la key desaparece
-   * —difuso y lóbulo— y la banda cruza el brillo del canto.
-   */
-  celosia: CelosiaUniforms
-  /**
    * B13 · Por dónde sale el material para que el rig le escriba la emisiva.
    *
    * El material lo arma este componente —es suyo, y lo libera al desmontar—,
@@ -54,7 +41,7 @@ type ProbeLogoProps = {
   materialRef?: RefObject<THREE.MeshStandardMaterial | null>
 }
 
-export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoProps) {
+export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
   const svgData = useLoader(SVGLoader, '/logodevelOP.svg')
 
   /**
@@ -69,7 +56,26 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
    * Centrar en los tres ejes deja el eje de la órbita pasando por el centro
    * real de la pieza. De paso, la caja medida es el dato que se publica.
    */
-  const geometries = useMemo(() => construirGeometriasDelLogo(svgData), [svgData])
+  const geometries = useMemo(() => {
+    const shapes = svgData.paths.flatMap((path) => path.toShapes(true))
+    const built = shapes.map((shape) => new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE))
+
+    const box = new THREE.Box3()
+    for (const geometry of built) {
+      geometry.computeBoundingBox()
+      if (geometry.boundingBox) box.union(geometry.boundingBox)
+    }
+
+    const center = box.getCenter(new THREE.Vector3())
+    const size = box.getSize(new THREE.Vector3())
+    for (const geometry of built) {
+      geometry.translate(-center.x, -center.y, -center.z)
+      geometry.computeBoundingBox()
+      geometry.computeBoundingSphere()
+    }
+
+    return { built, size }
+  }, [svgData])
 
   // Publica la caja real (en unidades de mundo) y avisa que la escena existe.
   // Un efecto y no el render: escribir en un store durante el render es un
@@ -85,9 +91,9 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
    * UN material para todas las piezas del path, y no uno por `<mesh>`.
    *
    * Hasta S10 cada malla declaraba el suyo en el JSX con parámetros idénticos.
-   * Desde S11 tiene que ser una instancia real para poder pasarle
-   * `applyCelosia`, y de paso deja de haber N materiales iguales — o sea N
-   * programas compilados donde alcanza con uno.
+   * Una instancia real, que el rig alcanza por ref para escribirle la emisiva
+   * (B13), y de paso no hay N materiales iguales — o sea N programas compilados
+   * donde alcanza con uno.
    *
    * Los parámetros no cambiaron y su porqué tampoco:
    *
@@ -104,8 +110,7 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
    * está en `probeScene.ts`.
    *
    * `DoubleSide` igual que el frozen — el SVG no garantiza el sentido de giro de
-   * sus contornos, y de paso llena el shadow map por atrás, que en una pieza tan
-   * fina evita que la sombra se despegue del objeto.
+   * sus contornos.
    */
   const material = useMemo(() => {
     const built = new THREE.MeshStandardMaterial({
@@ -114,9 +119,8 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
       metalness: 0,
       side: THREE.DoubleSide,
     })
-    applyCelosia(built, celosia)
     return built
-  }, [celosia])
+  }, [])
 
   // El material sale por el ref para que el rig le escriba la emisiva (B13). Un
   // efecto y no el render: escribir un ref durante el render es un efecto
@@ -142,33 +146,8 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
   return (
     <group scale={PROBE_SVG_SCALE} rotation={SVG_FLIP}>
       {geometries.built.map((geometry, index) => (
-        <mesh key={index} geometry={geometry} material={material} castShadow receiveShadow />
+        <mesh key={index} geometry={geometry} material={material} />
       ))}
     </group>
   )
 }
-
-/** [ESCENA] Las geometrías del logo, centradas en su propia caja. Las usan el logo y su reflejo (`ReflejoDelLogo`). */
-export function construirGeometriasDelLogo(svgData: SVGResult): { built: THREE.ExtrudeGeometry[]; size: THREE.Vector3 } {
-  const shapes = svgData.paths.flatMap((path) => path.toShapes(true))
-  const built = shapes.map((shape) => new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE))
-
-  const box = new THREE.Box3()
-  for (const geometry of built) {
-    geometry.computeBoundingBox()
-    if (geometry.boundingBox) box.union(geometry.boundingBox)
-  }
-
-  const center = box.getCenter(new THREE.Vector3())
-  const size = box.getSize(new THREE.Vector3())
-  for (const geometry of built) {
-    geometry.translate(-center.x, -center.y, -center.z)
-    geometry.computeBoundingBox()
-    geometry.computeBoundingSphere()
-  }
-
-  return { built, size }
-}
-
-/** [ESCENA] La rotación con la que el SVG queda derecho: la usa también el reflejo. */
-export const GIRO_DEL_SVG = SVG_FLIP

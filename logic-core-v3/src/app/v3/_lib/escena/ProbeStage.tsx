@@ -4,34 +4,18 @@ import { Canvas } from '@react-three/fiber'
 
 import { ajustesDe } from './ajustes'
 import type { NivelDeCalidad } from './calidad'
-import {
-  CAMARA_DEL_CANVAS,
-  SOMBRAS_DEL_CANVAS,
-  contextoDe,
-} from './configuracionDelCanvas'
-import { Suspense, useMemo, useRef } from 'react'
+import { CAMARA_DEL_CANVAS, contextoDe } from './configuracionDelCanvas'
+import { Suspense, useRef } from 'react'
 import * as THREE from 'three'
 
 import { BokehParticles } from './BokehParticles'
-import { createCelosiaUniforms } from './celosiaShader'
 import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
 import { DepthParticles } from './DepthParticles'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
-import {
-  FOG_COLOR,
-  FOG_FAR,
-  FOG_NEAR,
-  SHADOW_BIAS,
-  SHADOW_FAR,
-  SHADOW_NEAR,
-  SHADOW_NORMAL_BIAS,
-  SHADOW_ORTHO,
-} from './probeAtmosphere'
+import { FOG_COLOR, FOG_FAR, FOG_NEAR } from './probeAtmosphere'
 import { ProbeLogo } from './ProbeLogo'
-import { ReflejoDelLogo } from './ReflejoDelLogo'
-import { recetaDeLaEscena } from './variante'
 import { StudioFloor } from './StudioFloor'
 import {
   BOUNCE_COLOR,
@@ -45,10 +29,15 @@ import {
 } from './probeStore'
 
 /**
- * La escena. **Cuatro cosas y nada más** (S11): el piso con sus marcas, la
- * envolvente de rendijas, las partículas y el logo. El sol ya no es una de
- * ellas: se borró su cuerpo y quedó su dirección, que es lo que proyecta la
- * rendija sobre todo lo demás (ver `probeCelosia.ts`).
+ * La escena. **Cuatro cosas y nada más**: el piso, la envolvente de rendijas,
+ * las partículas y el logo. El sol no es una de ellas: se borró su cuerpo y quedó
+ * su dirección, que ilumina la sala.
+ *
+ * **[ESCENA 2] La base limpia.** Sin las marcas del piso, sin la celosía (la
+ * sombra de la cúpula, que barría el piso al girar el sol con el scroll) y sin la
+ * sombra del logo, que giraba con el mismo sol: la escena no tiene mapa de
+ * sombras. Lo que apoya el logo es su oclusión de contacto, quieta. La bruma
+ * arranca detrás del logo y se come el horizonte (`probeAtmosphere.ts`).
  *
  * **Sin HDRI es media respuesta del probe.** El artefacto del hero es un espejo
  * (`metalness=1`, `clearcoat=1`) y por eso necesita 1,27 MiB de entorno
@@ -72,11 +61,10 @@ import {
  * No hay una sola imagen de "tecnología": ni nodos, ni circuitos, ni pantallas,
  * ni engranajes. Nada orgánico tampoco. Geometría, y nada más que geometría.
  *
- * **La atmósfera, en S6.** Tres puntos de luz en vez de dos, niebla lineal,
- * sombra cuatro veces más barata con una penumbra que ahora se elige, y una
+ * **La atmósfera, en S6.** Tres puntos de luz en vez de dos, niebla lineal y una
  * oclusión de contacto debajo del logo. Los números y sus porqués están en
- * `probeLighting.ts` (el rig) y `probeAtmosphere.ts` (niebla, sombra y
- * contacto); acá solo se cablean.
+ * `probeLighting.ts` (el rig) y `probeAtmosphere.ts` (niebla y contacto); acá
+ * solo se cablean.
  *
  * La regla que ordena todo lo que se agrega: **nada brilla por sí mismo** —todo
  * responde a las mismas luces, así que la sala entera se apaga con el cierre— y
@@ -87,9 +75,6 @@ import {
  * ⚠️ **El orden de dibujo de los transparentes sigue siendo explícito.** La cadena
  * quedó en gruesa → fina → partículas: se fueron los dos eslabones del sol. El
  * porqué está en `probeMoire.ts`.
- *
- * **La celosía no agrega ningún objeto**: es un gobo analítico adentro del shader
- * de los materiales que ya existían. Ver `celosiaShader.ts`.
  */
 
 type ProbeStageProps = {
@@ -163,21 +148,6 @@ export default function ProbeStage({
   const bokehGroupRef = useRef<THREE.Group>(null)
   /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
-  /**
-   * LOS UNIFORMS DE LA CELOSÍA (S11). **Uno solo para toda la escena**: el papel,
-   * el ciclorama, las 48 marcas y el logo comparten este objeto, así que el rig
-   * escribe el eje del sol una vez por frame y lo ven los cuatro.
-   *
-   * Va en un `useMemo` sin dependencias y NO en un `useRef`, aunque el ref sea lo
-   * que uno escribe primero: leer `ref.current` durante el render es exactamente
-   * lo que `react-hooks/refs` prohíbe, y con razón. Y el `useMemo` además cierra
-   * el caso que preocupaba —que el objeto se recree y los materiales queden
-   * apuntando al viejo—, porque los tres receptores arman sus materiales en un
-   * `useMemo` que depende de ÉSTE: si se rehiciera, se rehacen con él.
-   */
-  const celosia = useMemo(() => createCelosiaUniforms(), [])
-  // [ESCENA] La variante de la escena (`variante.ts`): en ACTUAL, la receta no cambia nada.
-  const receta = useMemo(() => recetaDeLaEscena(), [])
 
   return (
     <Canvas
@@ -186,9 +156,8 @@ export default function ProbeStage({
       // Ver `eventSource` en los props: sin esto el offset de mouse no llega.
       eventSource={eventSource}
       eventPrefix={eventPrefix}
-      // Sombras, cámara inicial, contexto y `dpr`: `configuracionDelCanvas.ts`,
+      // Cámara inicial, contexto y `dpr`: `configuracionDelCanvas.ts`,
       // con sus razones. Salieron de acá en B5 sin cambiar un valor.
-      shadows={SOMBRAS_DEL_CANVAS}
       camera={CAMARA_DEL_CANVAS}
       // `gl` y `dpr` salen del NIVEL. Los dos son referencias estables: la tabla
       // de `ajustes.ts` y la de contextos están congeladas a nivel de módulo, así
@@ -202,7 +171,7 @@ export default function ProbeStage({
         cualquier encuadre que destape el fondo detrás del ciclorama.
       */}
       <color attach="background" args={[FOG_COLOR]} />
-      <fog attach="fog" args={[FOG_COLOR, receta.bruma?.cerca ?? FOG_NEAR, receta.bruma?.lejos ?? FOG_FAR]} />
+      <fog attach="fog" args={[FOG_COLOR, FOG_NEAR, FOG_FAR]} />
 
       <Suspense fallback={null}>
         {/*
@@ -214,28 +183,15 @@ export default function ProbeStage({
           · Hemisférico: el cielo del estudio y el rebote del papel hacia
             arriba. Impide que la cara en sombra se vaya a negro sin forma, y le
             da a la pared del ciclorama la mezcla que dibuja la cove.
-          · Principal: 3/4 alto por delante-izquierda, fija al mundo. Es la
-            ÚNICA que proyecta sombra.
+          · Principal: 3/4 alto por delante-izquierda, fija al mundo. No proyecta
+            sombra: la base limpia no tiene mapa de sombras.
           · Relleno: opuesto, más bajo y suave, también fijo al mundo.
           · Contraluz: solidario a la cámara en azimut y en altura. Es el que
             recorta el logo del fondo, y el único que se mueve con la vista.
         */}
         <hemisphereLight ref={hemiLightRef} args={[PAPER_COLOR, BOUNCE_COLOR]} />
 
-        <directionalLight
-          ref={keyLightRef}
-          castShadow={receta.sombraDelLogo}
-          shadow-mapSize={[ajustes.sombraPx, ajustes.sombraPx]}
-          shadow-camera-near={SHADOW_NEAR}
-          shadow-camera-far={SHADOW_FAR}
-          shadow-camera-left={-SHADOW_ORTHO}
-          shadow-camera-right={SHADOW_ORTHO}
-          shadow-camera-top={SHADOW_ORTHO}
-          shadow-camera-bottom={-SHADOW_ORTHO}
-          shadow-bias={SHADOW_BIAS}
-          shadow-normalBias={SHADOW_NORMAL_BIAS}
-          shadow-radius={ajustes.sombraRadio}
-        />
+        <directionalLight ref={keyLightRef} />
 
         <directionalLight ref={fillLightRef} />
         <directionalLight ref={rimLightRef} />
@@ -243,16 +199,14 @@ export default function ProbeStage({
         {/*
           EL SOL (S11). **Ya no hay ningún cuerpo que dibujar.** Hasta S10 acá
           vivían un sprite y su washout; el disco se borró entero y el arco quedó
-          intacto. Lo que se ve ahora no es la fuente sino lo que la fuente
-          PROYECTA — sobre papel blanco no se puede agregar luz, solo sacarla.
+          intacto: queda la dirección de la principal, que ilumina y no proyecta.
         */}
 
         <group ref={logoGroupRef}>
-          <ProbeLogo stats={stats} onReady={onReady} celosia={celosia} materialRef={logoMaterialRef} />
+          <ProbeLogo stats={stats} onReady={onReady} materialRef={logoMaterialRef} />
         </group>
 
-        <StudioFloor celosia={celosia} />
-        {receta.reflejo && <ReflejoDelLogo logoRef={logoGroupRef} />}
+        <StudioFloor />
         <ContactOcclusion />
 
         {/*
@@ -307,7 +261,6 @@ export default function ProbeStage({
           logoMaterialRef={logoMaterialRef}
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
-          celosia={celosia}
           moireRef={moireRef}
         />
       </Suspense>

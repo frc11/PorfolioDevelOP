@@ -16,7 +16,6 @@ import { fuenteDeEventosDelHome } from './fuenteDeEventos'
 import { crearPistaDelHome } from './pistaDelHome'
 import { escenaRetenida } from './retencion'
 import { fisicaEn, frameloopDe } from './visibilidad'
-import { recetaDeLaEscena } from './variante'
 import {
   PROBE_DEFAULTS,
   PROBE_RIG_DEFAULTS,
@@ -111,8 +110,7 @@ export default function EscenaDelHome({ calidad }: { readonly calidad: NivelDeCa
   // `plena` el valor es exactamente el default, así que arriba de 1025 nada
   // cambia.
   const [store] = useState(() =>
-    // [ESCENA] V3 baja las motas abajo de 1024 (`variante.ts`); en ACTUAL la receta no toca nada.
-    createNumericStore<ProbeParams>({ ...PROBE_DEFAULTS, particleCount: (calidad === 'compacta' ? recetaDeLaEscena().motasCompactas : null) ?? ajustesDe(calidad).motas }),
+    createNumericStore<ProbeParams>({ ...PROBE_DEFAULTS, particleCount: ajustesDe(calidad).motas }),
   )
   const [stats] = useState(() => createNumericStore<ProbeStats>(PROBE_STATS_DEFAULTS))
   const [rig] = useState(() => createNumericStore<ProbeRig>(PROBE_RIG_DEFAULTS))

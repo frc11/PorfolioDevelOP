@@ -21,16 +21,6 @@ import { PROBE_DEFAULTS } from './probeStore'
  */
 
 /**
- * `PCFShadowMap` explícito, y NO el `PCFSoftShadowMap` que r3f pone con
- * `shadows` en `true`. Suena al revés y no lo es: en three 0.182 el "soft" no
- * tiene entrada en la tabla de defines del shader y compila como
- * `SHADOWMAP_TYPE_BASIC`, o sea una sola muestra sin filtrar. El PCF común es el
- * único que da un disco de muestreo, y su tamaño es `shadow.radius`. La cita del
- * código de three está en `SHADOW_RADIUS`.
- */
-export const SOMBRAS_DEL_CANVAS = { type: THREE.PCFShadowMap } as const
-
-/**
  * La posición inicial la pisa `OrbitRig` en el primer frame; se declara igual
  * para que el primer render no salga desde el origen.
  */

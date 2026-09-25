@@ -34,8 +34,9 @@ export const DESTINO = 'src/app/v3/_lib/escena'
 export const ORIGEN = 'src/app/probe-escena/_components'
 
 /**
- * Los 29 módulos que SITIO-S8 mudó: la clausura transitiva por VALOR de lo que
- * `ProbeStage.tsx` necesita para renderizar.
+ * Los módulos que SITIO-S8 mudó: la clausura transitiva por VALOR de lo que
+ * `ProbeStage.tsx` necesita para renderizar. Eran 29; ESCENA 2 borró tres (las
+ * marcas, sus barras instanciadas y el gobo de la celosía) y quedan 26.
  *
  * ⚠ Está escrita y no derivada, y es de la clase que §7.27 dice que **tiene**
  * que estarlo: es la lista de lo que este sprint decidió mover, o sea la
@@ -47,7 +48,6 @@ export const MODULOS_MUDADOS: readonly string[] = [
   'BokehParticles.tsx',
   'ContactOcclusion.tsx',
   'DepthParticles.tsx',
-  'InstancedBars.tsx',
   'MoireScreen.tsx',
   'OrbitRig.tsx',
   'ProbeLogo.tsx',
@@ -57,12 +57,10 @@ export const MODULOS_MUDADOS: readonly string[] = [
   'cameraFraming.ts',
   'celosiaGeometry.ts',
   'celosiaPenumbra.ts',
-  'celosiaShader.ts',
   'choreography.ts',
   'choreographyPhysics.ts',
   'choreographySampler.ts',
   'choreographyTypes.ts',
-  'floorMarks.ts',
   'lightRig.ts',
   'moireTextures.ts',
   'particleTextures.ts',

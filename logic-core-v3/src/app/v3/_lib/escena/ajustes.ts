@@ -1,4 +1,3 @@
-import { SHADOW_MAP_SIZE, SHADOW_RADIUS } from './probeAtmosphere'
 import { PROBE_DEFAULTS } from './probeStore'
 import type { NivelDeCalidad } from './calidad'
 
@@ -113,8 +112,6 @@ import type { NivelDeCalidad } from './calidad'
  *     sesiones. Lo que cuesta es el canto del logo, que es el único negro puro
  *     del cuadro y la marca. No se aplica; queda como la primera palanca para el
  *     día que un teléfono real diga que hace falta.
- *   · **`sombraPx` y `sombraRadio`** miden cero y se ven: el mapa a la mitad
- *     granula el borde de la sombra del logo sobre el papel.
  *   · **`motas`** mide cero y se ve: es la mitad del aire de la sala.
  *
  * ⚠️ **Lo que NO se probó, y con su motivo.** `BOKEH_COUNT` —que la
@@ -151,14 +148,6 @@ export interface AjustesDeCalidad {
    * celosía, que no se tocan.
    */
   readonly antialias: boolean
-  /** El lado del mapa de sombra de la única luz que proyecta. */
-  readonly sombraPx: number
-  /**
-   * `shadow-radius`, o sea el disco de PCF. NO es costo por pase: son ~20 taps
-   * filtrados **por fragmento que recibe sombra**, y los receptores son el
-   * piso, el ciclorama, las 48 marcas y el logo (`probeAtmosphere.ts:161-167`).
-   */
-  readonly sombraRadio: number
   /** Las motas dibujadas. Se aplica por `setDrawRange`: no reasigna un buffer. */
   readonly motas: number
 }
@@ -174,16 +163,12 @@ export const AJUSTES: Readonly<Record<NivelDeCalidad, AjustesDeCalidad>> = {
   plena: {
     dpr: [1, 1.5],
     antialias: true,
-    sombraPx: SHADOW_MAP_SIZE,
-    sombraRadio: SHADOW_RADIUS,
     motas: PROBE_DEFAULTS.particleCount,
   },
   compacta: {
     /** −55,6 % de píxeles rasterizados. El único campo degradado. */
     dpr: [1, 1],
     antialias: true,
-    sombraPx: SHADOW_MAP_SIZE,
-    sombraRadio: SHADOW_RADIUS,
     motas: PROBE_DEFAULTS.particleCount,
   },
 }
