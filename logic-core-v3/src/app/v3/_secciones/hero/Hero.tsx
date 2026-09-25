@@ -229,13 +229,11 @@ function BajadaYCta(): React.JSX.Element {
           sangrías de las dos filas del titular SÍ escalan con el cuerpo (+1 y
           +4 → +7). El detalle, con la tabla, está en
           `GEOMETRIA.claseDeLaSangriaDelCta`. */}
-      <CtaEnlace
-        href={CONTENIDO.cta.destino}
-        rotulo={CONTENIDO.cta.rotulo}
-        registro="rotulo"
-        mezcla
-        className={cn(GEOMETRIA.claseDeLaSangriaDelCta, MEZCLA_SOBRE_LA_ESCENA)}
-      />
+      {/* [CONTACTO] Los dos CTA en una fila que se parte si no entra; la sangría pasa a la fila para que los dos arranquen en la columna. */}
+      <div className={cn('flex flex-wrap gap-x-4', GEOMETRIA.claseDeLaSangriaDelCta)}>
+        <CtaEnlace href={CONTENIDO.cta.destino} rotulo={CONTENIDO.cta.rotulo} registro="rotulo" mezcla className={MEZCLA_SOBRE_LA_ESCENA} />
+        <CtaEnlace href={CONTENIDO.ctaContacto.destino} rotulo={CONTENIDO.ctaContacto.rotulo} registro="rotulo" mezcla className={MEZCLA_SOBRE_LA_ESCENA} />
+      </div>
     </>
   )
 }

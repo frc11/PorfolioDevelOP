@@ -70,3 +70,17 @@ navbar hacen lo que hacían, salvo «Contacto», que abre el formulario.
 - [x] **«Contacto» abre el formulario**: va a `#contacto`, que intercepta el contacto.
 - Preexistente, anotado: `s3-foco` marca reglas de hover sin gemela de foco en el «libro» de las
   demos; el único CSS de este sprint es `navegacion.css`.
+
+## Fase 3 — El botón del hero
+
+- [x] **«Hablemos» a la derecha de «Mirá los trabajos»**: el mismo `CtaEnlace`, con el mismo
+  registro (`rotulo`), la misma mezcla sobre la escena y el mismo rollover, a `#contacto`, que
+  intercepta el contacto. El copy vive en `hero/contenido.ts` (`ctaContacto`).
+- [x] Los dos van en una fila que se parte si no entra (a 320 la caja de la bajada mide 256 px);
+  la sangría que cancela el relleno del CTA pasó a la fila, así los dos arrancan en la columna.
+  Entra en una fila a 375, 768 y 1440 (`~/.cache/b4-medicion/contacto/hero/`).
+- [x] El deslizamiento del CTA del hero sigue siendo sólo para «Mirá los trabajos»: su selector
+  resuelve a los dos, pero `#contacto` no es una sección y el efecto sale antes del
+  `preventDefault`.
+- [x] Censos al día: `s5-hero` (dos enlaces), `s18-deslizamiento` §1 (dos `<a>` y el segundo no
+  desliza) y `s10-acceso` (+1 parada, `DELTA_DEL_CONTACTO`).

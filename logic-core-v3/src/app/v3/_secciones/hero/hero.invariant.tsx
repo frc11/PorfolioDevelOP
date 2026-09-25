@@ -227,7 +227,9 @@ controlPositivo('el chequeo de la frase entera ve las dos mitades pegadas sin es
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · El CTA: un enlace nativo, a un ancla que existe, sin anidar')
 
-afirmarIgual(veces(quieto, '<a '), 1, 'hay UN solo elemento interactivo en la sección')
+// CONTACTO · «Hablemos», el gemelo del CTA, abre el formulario.
+afirmarIgual(veces(quieto, '<a '), 2, 'hay DOS elementos interactivos en la sección: el CTA y su gemelo «Hablemos»')
+afirmar(quieto.includes(`href="${CONTENIDO.ctaContacto.destino}"`) && anuncia(quieto, CONTENIDO.ctaContacto.rotulo) === 1, '  y el gemelo va a `#contacto` y se anuncia una vez')
 afirmarIgual(veces(quieto, '<button'), 0, '  y no es un botón: es un enlace')
 afirmar(quieto.includes(`href="${CONTENIDO.cta.destino}"`), `el CTA apunta a ${CONTENIDO.cta.destino}`)
 afirmarIgual(seccionPorId(CONTENIDO.cta.destino.slice(1)).id, 'trabajos', '  y ese ancla es una sección REAL de `secciones.ts`, no un destino inventado')

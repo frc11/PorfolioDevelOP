@@ -187,6 +187,12 @@ export const CONTENIDO = {
      */
     destino: '#trabajos',
   },
+
+  /** [CONTACTO] El gemelo del CTA: mismo registro y mismo rollover; `#contacto` lo intercepta el chrome y abre el formulario. */
+  ctaContacto: {
+    rotulo: 'Hablemos',
+    destino: '#contacto',
+  },
 } as const
 
 /**

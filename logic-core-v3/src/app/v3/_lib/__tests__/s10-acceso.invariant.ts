@@ -65,6 +65,8 @@ const DELTA_DE_SERVICIOS = { paradas: 3 } as const
 // SPRINT FINAL: «Por qué develOP» suma el botón «Hablanos» y pasa de 1 h2 + 4 h3 a 1 h2 + 6 h3; sus cinco marcadores se fueron con el contenido viejo.
 // FINAL 3 · el pie con datos reales: −1 (Números) +1 mail +1 WhatsApp +4 redes.
 const DELTA_DEL_FINAL = { paradas: 1 + 5, encabezados: 2 } as const
+/** CONTACTO · + «Hablemos» al lado del CTA del hero, que abre el formulario. */
+const DELTA_DEL_CONTACTO = { paradas: 1 } as const
 const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length + CATALOGO_DE_DEMOS.length / 2, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
@@ -158,8 +160,8 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, y «Hablemos» en el hero`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

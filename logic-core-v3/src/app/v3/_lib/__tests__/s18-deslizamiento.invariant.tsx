@@ -26,7 +26,7 @@ import { deberiaCorrerElScrollSuave } from '../scrollSuave'
 import { BORDE_INFERIOR_EN_REPOSO_PX } from '../navegacion'
 import type { IntroStage } from '@/components/layout/home-intro/introHandoff'
 import { marcar } from '../../_secciones/_invariantes/render'
-import { seccionDe } from '../../_secciones/_contrato/forma'
+import { IDS_DE_SECCION, seccionDe } from '../../_secciones/_contrato/forma'
 import { Hero } from '../../_secciones/hero/Hero'
 import { CONTENIDO } from '../../_secciones/hero/contenido'
 import { seccionPorId } from '../secciones'
@@ -111,7 +111,9 @@ afirmar(
   quieto.includes('data-panel="hero"') && quieto.includes('data-pieza="cta"'),
   'las dos mitades del selector están en el marcado servido del hero',
 )
-afirmarIgual(veces(quieto, '<a '), 1, '  y la sección tiene UN solo `<a>`: el selector no puede resolver a dos')
+/** CONTACTO · el hero tiene dos `<a>`: el selector resuelve a los dos y sólo desliza el que apunta a una sección de la tabla. «Hablemos» va a `#contacto`, que no es sección: el deslizamiento lo deja pasar y lo abre el formulario. */
+afirmarIgual(veces(quieto, '<a '), 2, '  y la sección tiene DOS `<a>`: «Mirá los trabajos» y «Hablemos»')
+afirmar(!IDS_DE_SECCION.includes(CONTENIDO.ctaContacto.destino.slice(1) as (typeof IDS_DE_SECCION)[number]) && /if \(seccion === null\) return/.test(quitarComentarios(leer(EFECTO))), '  y el segundo no desliza: `#contacto` no es una sección y el efecto sale antes del `preventDefault`')
 afirmar(
   quieto.includes(`href="${CONTENIDO.cta.destino}"`),
   `  que apunta a ${CONTENIDO.cta.destino}`,
