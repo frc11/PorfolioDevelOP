@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
 import { MARK_PLACEMENTS } from './floorMarks'
 import { InstancedBars } from './InstancedBars'
+import { recetaDeLaEscena } from './variante'
 import {
   CYC_COVE_RADIUS,
   CYC_COVE_STEPS,
@@ -149,7 +150,8 @@ export function StudioFloor({ celosia }: StudioFloorProps) {
         receiveShadow
       />
 
-      <InstancedBars placements={MARK_PLACEMENTS} celosia={celosia} receiveShadow />
+      {/* [ESCENA] Las marcas del piso, salvo en las variantes de limpieza (`variante.ts`). */}
+      {recetaDeLaEscena().marcasDelPiso && <InstancedBars placements={MARK_PLACEMENTS} celosia={celosia} receiveShadow />}
     </group>
   )
 }

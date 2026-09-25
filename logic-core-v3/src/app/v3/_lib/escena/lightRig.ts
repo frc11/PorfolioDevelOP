@@ -25,6 +25,7 @@ import type { CelosiaUniforms } from './celosiaShader'
 import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from './celosiaPenumbra'
 import { CELOSIA_BAR } from './probeCelosia'
 import { kelvinToSrgb } from './probeScene'
+import { recetaDeLaEscena } from './variante'
 
 /**
  * LA APLICACIÓN DEL RIG DE LUZ — lo que el `useFrame` escribe cada cuadro.
@@ -172,6 +173,8 @@ const RAD = Math.PI / 180
  * y el cuerpo, y por eso se calcula UNA vez y la usan los dos.
  */
 const SUN_DIRECTION = new THREE.Vector3()
+/** [ESCENA] Un sol sin componente horizontal: el shader descarta la proyección y la celosía no oscurece nada. */
+const SOL_SIN_CELOSIA = new THREE.Vector3(0, 1, 0)
 
 /** Posición de una luz fija, en polares alrededor del origen. */
 function place(
@@ -342,7 +345,7 @@ export function applyLightRig(
   //      de la rendija baja exactamente cuando baja la rendija.
   const celosia = targets.celosia
   if (celosia) {
-    celosia.uCelosiaSun.value.copy(SUN_DIRECTION)
+    celosia.uCelosiaSun.value.copy(recetaDeLaEscena().celosia ? SUN_DIRECTION : SOL_SIN_CELOSIA)
     celosia.uCelosiaKnobs.value.x = celosiaBar
     celosia.uCelosiaKnobs.value.y = celosiaDrift
     celosia.uCelosiaKnobs.value.w = celosiaSpread

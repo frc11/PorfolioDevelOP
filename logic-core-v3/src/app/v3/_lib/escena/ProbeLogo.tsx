@@ -2,7 +2,7 @@
 
 import { useLoader } from '@react-three/fiber'
 import { useEffect, useMemo, type RefObject } from 'react'
-import { SVGLoader } from 'three-stdlib'
+import { SVGLoader, type SVGResult } from 'three-stdlib'
 import * as THREE from 'three'
 
 import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
@@ -69,26 +69,7 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
    * Centrar en los tres ejes deja el eje de la órbita pasando por el centro
    * real de la pieza. De paso, la caja medida es el dato que se publica.
    */
-  const geometries = useMemo(() => {
-    const shapes = svgData.paths.flatMap((path) => path.toShapes(true))
-    const built = shapes.map((shape) => new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE))
-
-    const box = new THREE.Box3()
-    for (const geometry of built) {
-      geometry.computeBoundingBox()
-      if (geometry.boundingBox) box.union(geometry.boundingBox)
-    }
-
-    const center = box.getCenter(new THREE.Vector3())
-    const size = box.getSize(new THREE.Vector3())
-    for (const geometry of built) {
-      geometry.translate(-center.x, -center.y, -center.z)
-      geometry.computeBoundingBox()
-      geometry.computeBoundingSphere()
-    }
-
-    return { built, size }
-  }, [svgData])
+  const geometries = useMemo(() => construirGeometriasDelLogo(svgData), [svgData])
 
   // Publica la caja real (en unidades de mundo) y avisa que la escena existe.
   // Un efecto y no el render: escribir en un store durante el render es un
@@ -166,3 +147,28 @@ export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoPro
     </group>
   )
 }
+
+/** [ESCENA] Las geometrías del logo, centradas en su propia caja. Las usan el logo y su reflejo (`ReflejoDelLogo`). */
+export function construirGeometriasDelLogo(svgData: SVGResult): { built: THREE.ExtrudeGeometry[]; size: THREE.Vector3 } {
+  const shapes = svgData.paths.flatMap((path) => path.toShapes(true))
+  const built = shapes.map((shape) => new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE))
+
+  const box = new THREE.Box3()
+  for (const geometry of built) {
+    geometry.computeBoundingBox()
+    if (geometry.boundingBox) box.union(geometry.boundingBox)
+  }
+
+  const center = box.getCenter(new THREE.Vector3())
+  const size = box.getSize(new THREE.Vector3())
+  for (const geometry of built) {
+    geometry.translate(-center.x, -center.y, -center.z)
+    geometry.computeBoundingBox()
+    geometry.computeBoundingSphere()
+  }
+
+  return { built, size }
+}
+
+/** [ESCENA] La rotación con la que el SVG queda derecho: la usa también el reflejo. */
+export const GIRO_DEL_SVG = SVG_FLIP

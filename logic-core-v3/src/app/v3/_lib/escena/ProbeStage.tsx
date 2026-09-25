@@ -30,6 +30,8 @@ import {
   SHADOW_ORTHO,
 } from './probeAtmosphere'
 import { ProbeLogo } from './ProbeLogo'
+import { ReflejoDelLogo } from './ReflejoDelLogo'
+import { recetaDeLaEscena } from './variante'
 import { StudioFloor } from './StudioFloor'
 import {
   BOUNCE_COLOR,
@@ -174,6 +176,8 @@ export default function ProbeStage({
    * `useMemo` que depende de ÉSTE: si se rehiciera, se rehacen con él.
    */
   const celosia = useMemo(() => createCelosiaUniforms(), [])
+  // [ESCENA] La variante de la escena (`variante.ts`): en ACTUAL, la receta no cambia nada.
+  const receta = useMemo(() => recetaDeLaEscena(), [])
 
   return (
     <Canvas
@@ -198,7 +202,7 @@ export default function ProbeStage({
         cualquier encuadre que destape el fondo detrás del ciclorama.
       */}
       <color attach="background" args={[FOG_COLOR]} />
-      <fog attach="fog" args={[FOG_COLOR, FOG_NEAR, FOG_FAR]} />
+      <fog attach="fog" args={[FOG_COLOR, receta.bruma?.cerca ?? FOG_NEAR, receta.bruma?.lejos ?? FOG_FAR]} />
 
       <Suspense fallback={null}>
         {/*
@@ -220,7 +224,7 @@ export default function ProbeStage({
 
         <directionalLight
           ref={keyLightRef}
-          castShadow
+          castShadow={receta.sombraDelLogo}
           shadow-mapSize={[ajustes.sombraPx, ajustes.sombraPx]}
           shadow-camera-near={SHADOW_NEAR}
           shadow-camera-far={SHADOW_FAR}
@@ -248,6 +252,7 @@ export default function ProbeStage({
         </group>
 
         <StudioFloor celosia={celosia} />
+        {receta.reflejo && <ReflejoDelLogo logoRef={logoGroupRef} />}
         <ContactOcclusion />
 
         {/*
