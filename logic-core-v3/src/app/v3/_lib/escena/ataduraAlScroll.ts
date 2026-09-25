@@ -11,6 +11,7 @@ import { aplicarElDiaDelFinal, medirElBloqueOpaco } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
+import { suscribirAlViaje, viajeEnCurso } from './viaje'
 import {
   ESTADO_INICIAL,
   escenaEnCuadro,
@@ -119,12 +120,16 @@ export function useEscenaAtadaAlScroll(
       // [FINAL 2] El día del final, con la misma medida y en el mismo cuadro que el progreso.
       aplicarElDiaDelFinal(medirElBloqueOpaco(document, ventana))
 
-      const enCuadro = escenaEnCuadro(
-        desplazamiento,
-        secciones.arriba,
-        secciones.abajo,
-        ventana,
-      )
+      // [VIAJES] Durante un viaje el `<main>` está apagado y se ve la sala entera: dibuja también en la banda opaca.
+      const viajando = viajeEnCurso() !== null
+      const enCuadro =
+        viajando ||
+        escenaEnCuadro(
+          desplazamiento,
+          secciones.arriba,
+          secciones.abajo,
+          ventana,
+        )
       // `siguiente` devuelve el MISMO objeto cuando no hay transición, así que
       // React descarta la actualización y esto no re-renderiza por cuadro de
       // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por
@@ -135,7 +140,7 @@ export function useEscenaAtadaAlScroll(
       // el envoltorio, jamás la pose ni el progreso. Ver `revelado.ts`.
       // [FINAL 2] Y sólo con la escena CORRIENDO: al reanudar, el canvas guarda el último cuadro de antes
       // de suspenderse (con un salto, una pose y una luz que no son las de acá) hasta que vuelve a pintar.
-      aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro && faseRef.current === 'corriendo')
+      aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro && !viajando && faseRef.current === 'corriendo')
     }
 
     const pedir = (): void => {
@@ -154,6 +159,8 @@ export function useEscenaAtadaAlScroll(
     window.addEventListener('resize', pedir)
     document.addEventListener('visibilitychange', pedir)
     const desuscribir = subscribeIntroStage(pedir)
+    // [VIAJES] Al empezar y al terminar un viaje se vuelve a leer: la escena se enciende o se suspende en el acto.
+    const desuscribirDelViaje = suscribirAlViaje(pedir)
 
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
@@ -161,6 +168,7 @@ export function useEscenaAtadaAlScroll(
       window.removeEventListener('resize', pedir)
       document.removeEventListener('visibilitychange', pedir)
       desuscribir()
+      desuscribirDelViaje()
     }
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.

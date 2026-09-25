@@ -3,6 +3,8 @@
 import { animate, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
 import { useEffect } from 'react'
 
+import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
+
 import { CURVA_DEL_DISPARO, DURACION_DEL_DISPARO } from './geometria'
 
 /**
@@ -55,8 +57,15 @@ export function useEstadoDisparado(
   const posicion = useMotionValue(0)
 
   useMotionValueEvent(objetivo, 'change', (destino) => {
-    animate(posicion, destino, { duration: DURACION_DEL_DISPARO, ease: [...CURVA_DEL_DISPARO] })
+    // [VIAJES] Durante un viaje no rota: se posa donde el scroll lo deja.
+    if (viajeEnCurso() !== null) posicion.jump(destino)
+    else animate(posicion, destino, { duration: DURACION_DEL_DISPARO, ease: [...CURVA_DEL_DISPARO] })
   })
+
+  // [VIAJES] Y al terminar un viaje llega posado: sin una rotación a medias.
+  useEffect(() => suscribirAlViaje(() => {
+    if (viajeEnCurso() === null) posicion.jump(objetivo.get())
+  }), [posicion, objetivo])
 
   // Al montar, se posa donde el scroll ya esté: entrar por un ancla o recargar a
   // mitad del pin no puede dejar a los tres consumidores en el estado 0.

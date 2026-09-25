@@ -4,6 +4,7 @@ import { type MotionValue } from 'motion/react'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
+import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 import { Titular } from '../../_componentes/tipografia/Titular'
 
 import { CapturaPorDispositivo } from './Captura'
@@ -313,7 +314,9 @@ export function CapaDelTunel({
       const dt = anterior === 0 ? 0 : ahora - anterior
       anterior = ahora
       const pagina = pxDeLaSeccion(progresoDeAhora())
-      estado.current = avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
+      // [VIAJES] Durante un viaje el túnel no reproduce su zoom: lo mostrado va con la página, quieto.
+      if (viajeEnCurso() !== null) reposarEn(scrollDeAhora())
+      else estado.current = avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
       mostrar()
       cuadro = requestAnimationFrame(paso)
     }
@@ -359,12 +362,20 @@ export function CapaDelTunel({
       else frenar()
     })
     observador.observe(panel)
+    // [VIAJES] Al terminar un viaje llega asentado: los resortes y el regulador en su reposo para ese punto.
+    const bajaDelViaje = suscribirAlViaje(() => {
+      if (viajeEnCurso() !== null) return
+      reposarEn(scrollDeAhora())
+      yaFreno = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
+      mostrar()
+    })
     window.addEventListener('resize', leerElRitmo)
     caja.addEventListener('focusin', alEntrarElFoco)
     caja.addEventListener('focusout', alSalirElFoco)
 
     return () => {
       observador.disconnect()
+      bajaDelViaje()
       window.removeEventListener('resize', leerElRitmo)
       caja.removeEventListener('focusin', alEntrarElFoco)
       caja.removeEventListener('focusout', alSalirElFoco)

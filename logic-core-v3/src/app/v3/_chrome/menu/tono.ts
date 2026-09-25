@@ -23,18 +23,5 @@ export function tonoDebajo(superficie: ModoSuperficie, noche: number): Tono {
 /** El botón y el menú se dan vuelta (`data-seccion="invertida"`) cuando lo de abajo es claro. */
 export const vaInvertido = (debajo: Tono): boolean => debajo === 'claro'
 
-export interface PanelEnElCuadro {
-  readonly id: string
-  readonly tope: number
-  readonly pie: number
-}
-
-/**
- * La sección que se ve en la altura `y` del cuadro. Si dos se pisan (el solape de Trabajos
- * sobre Números), gana la que va después en el documento, que es la que se pinta encima.
- */
-export function panelEn(paneles: readonly PanelEnElCuadro[], y: number): string | null {
-  let visto: string | null = null
-  for (const p of paneles) if (p.tope <= y && y < p.pie) visto = p.id
-  return visto
-}
+// [VIAJES] Vive con la extensión de las secciones: la usan también el viaje y la escena.
+export { panelEn, type PanelEnElCuadro } from '../../_lib/escena/extensionDeLasSecciones'

@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 
-import { NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
+import { DIA_DEL_FINAL, NOCHE_DISPARADA, suscribirAlDiaDelFinal } from '../../_lib/escena/nocheDisparada'
+import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 
 import { DISPARO_DE_LA_NOCHE } from './geometria'
@@ -72,6 +73,24 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
     const caja = panel?.querySelector('[data-caja-sin-solape]') ?? panel
     if (caja === null || capa === null) return
 
+    /**
+     * [VIAJES] LA NOCHE QUE DEJARÍA EL SCROLL ACÁ: la regla de las cuatro entradas sobre la caja
+     * de este cuadro, sin gesto. Hay día en un solo caso: el tramo quedó entero por debajo. Es la
+     * misma regla de la rama quieta, y con ella se asienta la noche al terminar un viaje.
+     */
+    const nocheDelScroll = (): number => {
+      const r = caja.getBoundingClientRect()
+      const cruza = r.top < window.innerHeight * (1 + DISPARO_DE_LA_NOCHE.ida / 100) && r.bottom > 0
+      return cantidadDeLaNoche(cruceDelTramo({ cruza, tope: r.top, pie: r.bottom }) === 'arriba-subiendo' ? 0 : 1)
+    }
+    /** [VIAJES] Un viaje que cambia de luz arranca con la noche que se VE: con el día del final puesto, ninguna. */
+    const alEmpezarElViaje = (): boolean => {
+      const viaje = viajeEnCurso()
+      if (viaje === null || viaje.luz !== null || !DIA_DEL_FINAL.activo) return false
+      NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
+      return true
+    }
+
     // Con movimiento reducido la sala se invierte igual, pero sin banda: el gesto
     // es decorativo y el contraste del texto no lo es. El número sigue saliendo
     // de `cantidadDeLaNoche`, así que tampoco acá hay un color escrito a mano.
@@ -93,8 +112,18 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
         { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
       )
       soloNoche.observe(caja)
+      // [VIAJES] El salto no cruza nada que un observador vea: al terminar, la noche del lugar; en el medio, la del día.
+      const bajaDelViaje = suscribirAlViaje(() => {
+        if (viajeEnCurso() === null) NOCHE_DISPARADA.cantidad = nocheDelScroll()
+        else alEmpezarElViaje()
+      })
+      const bajaDelDia = suscribirAlDiaDelFinal((dia) => {
+        if (viajeEnCurso()?.luz === null) NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(dia ? 0 : 1)
+      })
       return () => {
         soloNoche.disconnect()
+        bajaDelViaje()
+        bajaDelDia()
         NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
       }
     }
@@ -216,9 +245,28 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
     laIda.observe(caja)
     laVuelta.observe(caja)
 
+    /**
+     * [VIAJES] DURANTE UN VIAJE. Al empezar, la noche que se ve; al terminar, la que dejaría el
+     * scroll, sin barrido a medias. Y si el viaje cambia de luz, el día del final —que el scroll
+     * cambia escondido detrás del bloque opaco— se recorre con el reloj de siempre, no de golpe.
+     */
+    const bajaDelViaje = suscribirAlViaje(() => {
+      if (viajeEnCurso() !== null) {
+        if (alEmpezarElViaje()) cortar()
+        return
+      }
+      cortar()
+      NOCHE_DISPARADA.cantidad = nocheDelScroll()
+    })
+    const bajaDelDia = suscribirAlDiaDelFinal((dia) => {
+      if (viajeEnCurso()?.luz === null) arrancar(dia ? 'vuelta' : 'ida')
+    })
+
     return () => {
       laIda.disconnect()
       laVuelta.disconnect()
+      bajaDelViaje()
+      bajaDelDia()
       cortar()
       NOCHE_DISPARADA.cantidad = cantidadDeLaNoche(0)
     }

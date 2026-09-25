@@ -44,6 +44,7 @@
  */
 
 import { NIVEL_DE_LA_NOCHE } from './lightArc'
+import { nivelEntre, viajeEnCurso } from './viaje'
 
 /**
  * ⚠️ **EL ESTADO ES UNA CANTIDAD, NO UN BOOLEANO — y la ida no cambió un bit.**
@@ -69,10 +70,16 @@ export const NOCHE_DISPARADA = { cantidad: 0 }
  */
 export function nivelConLaNocheDisparada(nivel: number): number {
   const c = nocheEfectiva()
-  if (c <= 0) return nivel
   const tope = nivel > NIVEL_DE_LA_NOCHE ? NIVEL_DE_LA_NOCHE : nivel
-  return c >= 1 ? tope : nivel + (tope - nivel) * c
+  const natural = c <= 0 ? nivel : c >= 1 ? tope : nivel + (tope - nivel) * c
+  NIVEL_NATURAL.valor = natural
+  // [VIAJES] En un viaje de día a día la luz va de una punta a la otra sin pasar por la noche.
+  const luz = viajeEnCurso()?.luz ?? null
+  return luz === null ? natural : nivelEntre(luz, window.scrollY)
 }
+
+/** [VIAJES] El último nivel natural que calculó la escena: la luz de salida de un viaje. */
+export const NIVEL_NATURAL = { valor: 1 }
 
 /**
  * **[FINAL 2] EL DÍA DEL FINAL** — de «Por qué develOP» al pie la sala vuelve a ser de día,
@@ -92,7 +99,19 @@ export const DIA_DEL_FINAL = { activo: false }
 
 /** La noche que la sala muestra: la cantidad de la gota, salvo en el día del final. */
 export function nocheEfectiva(): number {
+  // [VIAJES] En un viaje que cambia de luz el día del final no corta: la noche la mueve el reloj del barrido.
+  const viaje = viajeEnCurso()
+  if (viaje !== null && viaje.luz === null) return NOCHE_DISPARADA.cantidad
   return DIA_DEL_FINAL.activo ? 0 : NOCHE_DISPARADA.cantidad
+}
+
+/** [VIAJES] Quién se entera cuando el día del final cambia: el barrido, para recorrer el cambio con su reloj. */
+const oyentesDelDia = new Set<(activo: boolean) => void>()
+export function suscribirAlDiaDelFinal(f: (activo: boolean) => void): () => void {
+  oyentesDelDia.add(f)
+  return () => {
+    oyentesDelDia.delete(f)
+  }
 }
 
 /** Una caja en coordenadas del cuadro. */
@@ -148,7 +167,10 @@ export function medirElBloqueOpaco(
 /** El paso por cuadro: pone la compuerta y, si corresponde, repone la noche escondida. */
 export function aplicarElDiaDelFinal(b: BloqueOpaco | null): void {
   if (b === null) return
+  const antes = DIA_DEL_FINAL.activo
   DIA_DEL_FINAL.activo = diaDelFinalEn(b)
+  if (DIA_DEL_FINAL.activo !== antes) oyentesDelDia.forEach((f) => f(DIA_DEL_FINAL.activo))
   const repuesta = nocheQueSeRepone(b, NOCHE_DISPARADA.cantidad)
-  if (repuesta !== null) NOCHE_DISPARADA.cantidad = repuesta
+  // [VIAJES] Durante un viaje no se repone de golpe: la sala se ve, y la noche la mueve el reloj del barrido.
+  if (repuesta !== null && viajeEnCurso() === null) NOCHE_DISPARADA.cantidad = repuesta
 }
