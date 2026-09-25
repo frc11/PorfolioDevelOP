@@ -4,7 +4,7 @@
  * Recorre los momentos como `comparar.ts` (Hero → Quiénes → Trabajos → Por qué → pie, por scroll a
  * pasos) y en Por qué develOP y en el pie mide el logo sobre la escena sola (`<main>` escondido):
  * la caja y el centro de la tinta negra (luminancia < 60, fuera de la barra), en tres tomas a 1 s.
- * Con `variante` pisa la bandera vieja (para medir ACTUAL antes de sacarla); sin ella, el producto
+ * Con `variante` pisa `_lib/escena/entorno.ts` (`base`, `producto`, …); sin ella, el producto
  * como está. Guarda las capturas y un JSON por nombre en `~/.cache/b4-medicion/escena2/logo/`.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -57,7 +57,7 @@ export async function empujon(b: Banco): Promise<void> {
 
 async function principal(): Promise<void> {
   mkdirSync(DIR, { recursive: true })
-  const b = await abrirBanco(ANCHO, ALTO, { perfil: 'escena2', antesDeCargar: VARIANTE === '' ? undefined : `window.__varianteDeLaEscena = '${VARIANTE}'` })
+  const b = await abrirBanco(ANCHO, ALTO, { perfil: 'escena2', antesDeCargar: VARIANTE === '' ? undefined : `window.__entornoDeLaEscena = '${VARIANTE}'` })
   const salida: Record<string, CajaDelLogo[]> = {}
   try {
     const topeMas = (id: string, pantallas: number): Promise<number> => medir<number>(b.p, `(() => { const r = document.querySelector('[data-panel="${id}"]').getBoundingClientRect(); return Math.round(r.top + scrollY + ${String(pantallas)} * innerHeight) })()`)

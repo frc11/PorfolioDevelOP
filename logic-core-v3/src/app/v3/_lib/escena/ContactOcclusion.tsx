@@ -1,7 +1,12 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
+
+import { entornoDeLaEscena } from './entorno'
+import { sombraEn } from './entorno/sombra'
+import { PULSO_VIVO, VIVO } from './entorno/vivo'
 
 import {
   CONTACT_COLOR,
@@ -52,7 +57,54 @@ import { createContactSpriteData } from './particleTextures'
  * no oscurecida por ella. Los tres tienen `depthWrite` apagado, así que el orden
  * es lo único que lo decide.
  */
-export function ContactOcclusion() {
+/**
+ * [ESCENA 3] LA SOMBRA CON FÍSICA. Con `logoGroupRef`, la mancha acompaña la altura REAL del punto
+ * más bajo del logo (si sube, más chica y más tenue; si baja, más grande y más marcada) y se contrae
+ * apenas con cada pulso principal. Las cuentas son puras y están en `entorno/sombra.ts`. En reposo
+ * vale exactamente escala 1 y la opacidad de siempre: la altura se compara contra la de reposo,
+ * medida UNA vez sobre la geometría y sin la vira.
+ */
+type ContactOcclusionProps = {
+  readonly logoGroupRef?: RefObject<THREE.Group | null>
+}
+
+const CAJA = new THREE.Box3()
+
+/** Cuánto flota el punto más bajo del logo sobre el papel, o `null` si todavía no cargó. */
+function alturaDelLogo(logo: THREE.Object3D): number | null {
+  CAJA.setFromObject(logo)
+  return CAJA.isEmpty() ? null : CAJA.min.y - FLOOR_Y
+}
+
+export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null)
+  const reposoRef = useRef<number | null>(null)
+  const viva = entornoDeLaEscena().sombraViva && logoGroupRef !== undefined
+
+  useFrame(() => {
+    if (!viva) return
+    const logo = logoGroupRef?.current
+    const mesh = meshRef.current
+    const material = materialRef.current
+    if (!logo || !mesh || !material) return
+    if (reposoRef.current === null) {
+      // La altura de reposo, sin la vira: se saca el giro un instante para medir y se devuelve.
+      const giro = logo.rotation.clone()
+      logo.rotation.set(0, 0, 0)
+      logo.updateMatrixWorld(true)
+      reposoRef.current = alturaDelLogo(logo)
+      logo.rotation.copy(giro)
+      logo.updateMatrixWorld(true)
+      if (reposoRef.current === null) return
+    }
+    const altura = alturaDelLogo(logo)
+    if (altura === null) return
+    const sombra = sombraEn(altura, reposoRef.current, VIVO.uTiempo.value - PULSO_VIVO.ultimoPrincipal)
+    mesh.scale.set(sombra.escala, sombra.escala, 1)
+    material.opacity = CONTACT_OPACITY * sombra.opacidad
+  })
+
   const sprite = useMemo(() => {
     const texture = new THREE.DataTexture(
       createContactSpriteData(CONTACT_SPRITE_SIZE, CONTACT_CORE, CONTACT_FALLOFF),
@@ -71,6 +123,7 @@ export function ContactOcclusion() {
 
   return (
     <mesh
+      ref={meshRef}
       // Acostado mirando hacia arriba, y apoyado apenas por encima de las
       // marcas de piso (que suben hasta 0,012 desde el papel) para que también
       // las oscurezca: una oclusión que no toca lo que está debajo del objeto no
@@ -89,6 +142,7 @@ export function ContactOcclusion() {
         el tono lo pone `color` y la densidad el alfa por `opacity`.
       */}
       <meshBasicMaterial
+        ref={materialRef}
         map={sprite}
         color={CONTACT_COLOR}
         transparent

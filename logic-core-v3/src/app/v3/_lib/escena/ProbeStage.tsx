@@ -11,6 +11,7 @@ import * as THREE from 'three'
 import { BokehParticles } from './BokehParticles'
 import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
+import { Entorno } from './entorno/Entorno'
 import { DepthParticles } from './DepthParticles'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
@@ -207,7 +208,8 @@ export default function ProbeStage({
         </group>
 
         <StudioFloor />
-        <ContactOcclusion />
+        {/* [ESCENA 3] La mancha sigue la altura del logo y se contrae con el pulso principal. */}
+        <ContactOcclusion logoGroupRef={logoGroupRef} />
 
         {/*
           LA ENVOLVENTE DE RENDIJAS (S10). Dos cilindros coaxiales alrededor de la
@@ -263,6 +265,8 @@ export default function ProbeStage({
           bokehGroupRef={bokehGroupRef}
           moireRef={moireRef}
         />
+        {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
+        <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
       </Suspense>
     </Canvas>
   )

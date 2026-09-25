@@ -17,6 +17,7 @@ import {
   buildParticleField,
 } from './probeParticles'
 import { conBrilloDeNoche } from './particleGlow'
+import { conPolvoVivo } from './entorno/polvoVivo'
 import { createDotSpriteData } from './particleTextures'
 import type { ProbeParamsStore } from './probeStore'
 
@@ -181,7 +182,7 @@ export function DepthParticles({ store }: DepthParticlesProps) {
             <pointsMaterial
               ref={(material) => {
                 // B8: en la noche las motas brillan (mezcla hacia el blanco, sin color) — `particleGlow.ts`.
-                if (material !== null) conBrilloDeNoche(material)
+                if (material !== null) conPolvoVivo(conBrilloDeNoche(material))
               }}
               map={sprite}
               size={PARTICLE_SIZE}
