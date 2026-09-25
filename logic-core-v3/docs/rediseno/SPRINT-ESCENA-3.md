@@ -8,11 +8,10 @@ en clip.
 
 ## Qué quedó
 
-`_lib/escena/entorno.ts` tiene E1, E4, E6 y E7 prendidas. Los niveles quedan así:
-- haz `medio`;
-- cursor `A`;
-- estela del cursor apagada;
-- sombra viva.
+`_lib/escena/entorno.ts` tiene E1, E4, E6 y E7 prendidas, y la sombra viva. Después de tu
+revisión (ver «Ajustes después de la revisión», al final):
+- el haz quedó en `sutil`, de día y de noche;
+- el cursor quedó sólo en su nivel A: el B y la estela del cursor se borraron.
 
 Todo lo demás vive en `_lib/escena/entorno/`:
 
@@ -21,17 +20,18 @@ Todo lo demás vive en `_lib/escena/entorno/`:
 | `Entorno.tsx` | Monta lo prendido y escribe el estado compartido una vez por cuadro, **después** del rig. Lee la cámara y el arco; no los toca. |
 | `maquinaDelPulso.ts` | E4 · la máquina de estados del pulso, **pura**, con sus constantes en el bloque `PULSO`. |
 | `Pulso.tsx` | E4 · el dibujo: hasta 4 anillos analíticos en un plano, apagados sobre el texto. |
-| `hoverDelLogo.ts` | E4 y E7 · `pointermove` en `window` más un rayo por cuadro contra la caja del logo, con sus compuertas. |
+| `hoverDelLogo.ts` | E4 y E7 · `pointermove` en `window` más un rayo por cuadro contra la silueta del logo, con sus compuertas. |
+| `silueta.ts` | E4 · la envolvente convexa de la «cp» y el test de punto adentro, **puros**. |
 | `cajasDeTexto.ts` | E4 · dónde hay texto en pantalla, para que el anillo no le baje el contraste. |
 | `sombra.ts` | La sombra con física, **pura**: altura del logo y pulso principal → escala y opacidad de la mancha. |
 | `Haz.tsx` | E1 · el óculo, la columna, la mancha de luz y las estrellas. |
-| `polvoVivo.ts` | E1, E6 y E7 · el parche del polvo (y del bokeh, sólo con el cursor B). |
-| `vivo.ts` | El estado compartido, los niveles del haz y del cursor. |
+| `polvoVivo.ts` | E1, E6 y E7 · el parche del polvo. |
+| `vivo.ts` | El estado compartido, los niveles del haz y el alcance del cursor. |
 
 Además se tocó:
 - **`ContactOcclusion.tsx`**: la sombra con física. Es la mancha de siempre; ahora sigue al logo.
 - **`ProbeStage.tsx`**: monta `<Entorno>` y le pasa el grupo del logo a la mancha.
-- **`DepthParticles.tsx`** y **`BokehParticles.tsx`**: una línea cada uno, el parche.
+- **`DepthParticles.tsx`**: una línea, el parche. `BokehParticles.tsx` volvió a como estaba.
 
 **Limpieza.** Se borró el código y las banderas de E0, E2, E3, E5 y E8:
 - `Monolitos.tsx` y `Anillos.tsx`;
@@ -118,11 +118,13 @@ modos: reposo, scroll, hover, apagado (movimiento reducido) y las transiciones.
 **El hover** (`hoverDelLogo.ts`):
 - `pointermove` en `window`, sin tocar el `pointer-events` del canvas.
 - Un rayo por cuadro como máximo, y sólo si el puntero se movió o cambió el progreso.
-- **Va contra la caja del logo, no contra la malla.** Contra la malla titilaba: la «cp» tiene
-  agujeros, y el cursor que entra cruza trazos y huecos. El primer clip dio 7 principales donde
-  tenía que haber 2. Encima hay una histéresis de 80 ms para entrar y 200 ms para salir.
-- **Efecto secundario:** la caja incluye las esquinas vacías del logo, así que ahí también cuenta
-  como hover.
+- **Va contra la envolvente convexa de la «cp»**, no contra la malla ni contra la caja.
+  - Contra la malla titilaba: la «cp» tiene agujeros, y el cursor que entra cruza trazos y huecos.
+    El primer clip dio 7 principales donde tenía que haber 2.
+  - Contra la caja, las esquinas vacías contaban como hover.
+  - La envolvente se calcula una vez sobre todos los vértices del logo, en su espacio local. El rayo
+    se lleva a ese espacio, con la vira del cuadro, y se corta con el plano medio del logo.
+- **Histéresis:** 80 ms para entrar y 200 ms para salir, sin cambios.
 
 **Compuertas.** No hay hover si:
 - el puntero no es fino (mouse o lápiz con hover real);
@@ -201,26 +203,18 @@ No se cambió nada de su respuesta, el largo de la estela, los tiempos ni la ine
 Con movimiento reducido, emulado por CDP: en pleno scroll la estela vale **0** y las motas son
 puntos. Ver `medidas/e6-en-pleno-scroll-normal.png` contra `…-reducido.png`.
 
-## 4 · E7 — el cursor en dos niveles
+## 4 · E7 — el cursor
 
-El mecanismo es el mismo en los dos niveles: el empuje sube con la velocidad del puntero y se
-apaga solo. Sólo cambia el alcance (`NIVELES_DEL_CURSOR`):
-
-| nivel | radio² (NDC) | profundidad donde pesa 1 | peso mínimo del polvo lejano | bokeh |
-|---|---|---|---|---|
-| **A** (el de ESCENA 2, sin cambios) | 0,06 | 10 | 0 | no |
-| **B** | 0,16 | 18 | 0,55 | sí |
-
-- **Por defecto: A**, hasta que elijas.
-- **Estela del cursor** (`estela`, apagada). Lo empujado se proyecta también con el cursor y el
-  empuje de hace un instante, y deja la estela de E6.
+El empuje sube con la velocidad del puntero y se apaga solo. Queda el **nivel A**, el de ESCENA 2
+sin cambios (`ALCANCE_DEL_CURSOR`): radio² 0,06 en NDC, peso 1 a profundidad 10 y peso mínimo 0 para
+el polvo lejano. Lo que se probó y se borró está en «Ajustes después de la revisión».
 - **Táctil y movimiento reducido: el empuje queda en 0** durante todo el barrido, y el hover nunca
   prende. Emulados por CDP (táctil: touch más `hover: none` y `pointer: coarse`). Ver
   `medidas/e7-tactil.mp4` y `medidas/e7-reducido.mp4`.
 
 **Al mirar el clip d.** El puntero ya movía la cámara antes de este sprint (el desplazamiento de
-mouse), y E6 responde a cualquier movimiento de cámara. Por eso en los seis paneles todo el polvo
-hace estela mientras el cursor barre. Lo propio de E7 es el hueco que se abre alrededor del punto
+mouse), y E6 responde a cualquier movimiento de cámara. Por eso en todos los paneles todo el polvo
+hacía estela mientras el cursor barría. Lo propio de E7 es el hueco que se abre alrededor del punto
 rojo y se cierra solo.
 
 ## 5 · E1 — el ajuste
@@ -230,8 +224,8 @@ Cada nivel se da como (columna, mancha de luz en el piso, polvo en el haz):
 | nivel | día | noche |
 |---|---|---|
 | ESCENA 2 | 0,035 / 0,02 / 0,55 (polvo claro) | 0,16 / 0,2 / 0,9 |
-| **sutil** | 0,045 / 0,05 / 0,4 | 0,05 / 0,06 / 0,3 |
-| **medio** (por defecto) | 0,07 / 0,09 / 0,62 | 0,08 / 0,10 / 0,45 (**50 %**) |
+| **sutil** (el elegido) | 0,045 / 0,05 / 0,4 | 0,05 / 0,06 / 0,3 |
+| medio | 0,07 / 0,09 / 0,62 | 0,08 / 0,10 / 0,45 (**50 %**) |
 
 - **Noche:** es la mitad, luz ambiente y no un foco de teatro.
 - **Día:** sobre papel blanco la luz aditiva casi no suma. Por eso la columna se lee de dos maneras:
@@ -253,15 +247,16 @@ Cada nivel se da como (columna, mancha de luz en el piso, polvo en el haz):
 - **fps.** 75 es el techo del monitor. Estrangular la CPU no frena una GPU de escritorio, así que el
   costo en un teléfono real sigue sin medir.
 - **Uniforms nuevos.** Ningún material viejo pierde nada.
-  - Polvo: 10 en el vértice (`uVPPrevio`, `uResolucion`, `uEstela`, `uCursor`, `uEmpuje`,
-    `uCursorPrevio`, `uEmpujePrevio`, `uAspecto`, `uCursorAlcance`, `uHaz`) y 2 en el fragmento
-    (`uHazDia`, `uHazNoche`), más 4 varyings.
-  - Bokeh: 4, sólo con el cursor B.
+  - Polvo: 8 en el vértice (`uVPPrevio`, `uResolucion`, `uEstela`, `uCursor`, `uEmpuje`, `uAspecto`,
+    `uCursorAlcance`, `uHaz`) y 2 en el fragmento (`uHazDia`, `uHazNoche`), más 4 varyings. Con
+    `uCursorPrevio` y `uEmpujePrevio` borrados, junto con la estela del cursor.
+  - Bokeh: ninguno (el parche del cursor B se borró).
   - Haz: 3.
   - Pulso: `uTiempo`, `uNoche`, `uAnillos[4]`, `uTexto[6]`, `uPluma`.
 - **Atributos nuevos:** uno, `aTam` de las 70 estrellas.
 - **CPU por cuadro:**
-  - un rayo contra una caja, sólo si se movió el puntero o el progreso;
+  - un rayo contra la silueta (un plano y un polígono convexo), sólo si se movió el puntero o el
+    progreso. La envolvente se calcula una vez;
   - una lectura del DOM cada 200 ms (60 ms con scroll), sólo mientras hay anillos vivos.
 
 ## Qué mirar para cada punto
@@ -269,12 +264,12 @@ Cada nivel se da como (columna, mancha de luz en el piso, polvo en el haz):
 | punto | archivo (en `~/.cache/b4-medicion/escena3/`) |
 |---|---|
 | pulso de reposo | `clips/a-hero-quieto.mp4`: nacen anillos a 1,3 · 5,0 · 8,7 s |
-| hover: entrada, 4 s, salida, 4 s | `clips/b-hover.mp4`: principal a 2,1 s, rápidos cada ~0,95 s, principal a 7,6 s, el de reposo a 11,4 s. La sombra se contrae con cada principal |
+| hover: esquina vacía, entrada, 4 s, salida, 4 s | `clips/b-hover.mp4` (rehecho): el punto rojo se queda 1,8 s en la esquina vacía de abajo a la izquierda (756, 618) **sin hover ni principal**; principal al entrar (4,95 s), rápidos cada ~0,95 s, principal al salir (10,07 s), el de reposo a 13,77 s. La sombra se contrae con cada principal |
 | E6 | `clips/c-scroll-y-frenada.mp4` |
 | E6 reducido | `medidas/e6-en-pleno-scroll-normal.png` contra `…-reducido.png` |
-| E7 A / B / B con estela, día y noche | `clips/d-cursor-mosaico.mp4` (y los seis sueltos, `clips/d-*.mp4`) |
+| E7 (A), día y noche | `clips/d-dia-A.mp4` y `clips/d-noche-A.mp4` (el mosaico `d-cursor-mosaico.mp4` todavía tiene B y B con estela: es el que miraste para decidir) |
 | E7 táctil y reducido | `medidas/e7-tactil.mp4`, `medidas/e7-reducido.mp4` |
-| E1 sutil contra medio | `clips/e-haz-mosaico.mp4` y `hojas/hoja-haz-medio-vs-sutil-1440.png` |
+| E1 sutil contra medio | `clips/e-haz-mosaico.mp4` y `hojas/hoja-haz-medio-vs-sutil-1440.png` (grabados con el medio como producto; ahora el producto es el sutil) |
 | base contra ESCENA 3 | `hojas/hoja-base-vs-producto-1440.png`, `hojas/hoja-base-vs-producto-375.png` |
 | contraste con el pulso | `medidas/contraste*.json` y `medidas/contraste-peor-*.png` |
 
@@ -284,7 +279,7 @@ Cada nivel se da como (columna, mancha de luz en el piso, polvo en el haz):
 - **`next build`:** en verde, aislado en `.next-b13`, con el heap de 4096 que fija `netlify.toml`.
 - **eslint:** limpio en `_lib/escena/entorno/`, `entorno.ts`, `ProbeStage.tsx`, `DepthParticles.tsx`,
   `BokehParticles.tsx`, `ContactOcclusion.tsx`, los invariantes nuevos y `scripts-escena/`.
-- **`s29-pulso`** (nuevo): 39 afirmaciones, 0 fallas, con controles positivos. Cubre la máquina, la
+- **`s29-pulso`** (nuevo): 44 afirmaciones, 0 fallas, con controles positivos. Cubre la máquina, la
   sombra, las banderas y la limpieza.
 - **`s28-base`:** 19 / 0, con su control positivo.
 - **Suites de escena en verde:** `s7e-*`, `s8-escena`, `s9e`, `s10e-*`, `s11e`, `s12e`, `s10-raf` (2
@@ -298,3 +293,38 @@ Cada nivel se da como (columna, mancha de luz en el piso, polvo en el haz):
 **Ambiente.** Varias corridas de medición se cortaron o se invalidaron porque la pestaña del banco
 quedó oculta: la PC estaba en uso y había otra ventana encima. El banco lo detecta y se corta. Se
 repitieron hasta tener series limpias; las inválidas no se usaron.
+
+## Ajustes después de la revisión
+
+1. **E1: sutil**, de día y de noche. Es el valor de `entorno.ts`; el medio queda como nivel para
+   comparar.
+2. **E7: nivel A**.
+   - La variante «B con estela» se borró: como el cursor ya mueve la cámara, E6 estira todo el polvo
+     y la estela no sumaba.
+   - El B no eran sólo constantes: tenía código aparte (el parche del bokeh, `conBokehVivo`). Por eso
+     también se borró, con su bandera de nivel y los uniforms del cursor atrasado.
+   - `s29-pulso` §8 afirma que no queda rastro.
+3. **Hover: la envolvente convexa de la «cp»**, con la histéresis 80/200 ms sin cambios (ver §1).
+   - `s29-pulso` §9 afirma, sobre una «cp» de juguete, que los agujeros y el hueco entre letras
+     cuentan y que la esquina vacía de abajo a la izquierda no. Su control positivo es que la caja
+     vieja sí la contaba.
+   - En el sitio, el clip b rehecho pasa 1,8 s por una esquina vacía sin disparar, y cada entrada y
+     salida da un solo principal.
+4. **Git.** El `git checkout -- tsconfig.json` de la vuelta anterior rompió la regla aunque fuera un
+   artefacto del build.
+   - Regla desde ahora: si un build ensucia un archivo trackeado, se para y se avisa; no se descarta.
+   - Verificado: `git status` no lista `tsconfig.json` y `git diff HEAD -- tsconfig.json` da 0 líneas.
+
+## Pendiente abierto · el salto de 500 px en Quiénes somos
+
+**Qué pasó.** En una corrida de `comparar.ts` con `base`, a 1440, después de llegar a Quiénes somos
+(scroll pedido 1035), la verificación encontró el scroll en **1535**: +500 px sin que el banco lo
+pidiera. El reintento lo corrigió.
+
+**Qué no se sabe.** Quién lo movió. Todavía no estaba el espía de saltos. Después, en cuatro corridas
+con el espía (20 momentos), no se repitió.
+
+**Qué queda.** El espía sigue en el banco. Si vuelve a pasar, la verificación falla e imprime la pila
+de la orden de scroll: `scrollTo`, `scroll`, `scrollBy`, `scrollIntoView` o `scrollTop`. Puede ser un
+bug del sitio y no del banco. Es la misma clase de falla que dejó la hoja de E0 de ESCENA 2
+capturando Trabajos en el pie.

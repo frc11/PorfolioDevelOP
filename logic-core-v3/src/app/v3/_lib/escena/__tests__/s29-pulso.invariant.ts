@@ -16,7 +16,8 @@
  *   6. LA SOMBRA: en reposo vale exactamente 1 y 1; más alto, más chica y más tenue; más bajo, más
  *      grande y más marcada; el principal la contrae y vuelve.
  *   7. LAS BANDERAS: el producto trae E1, E4, E6 y E7; `base` apaga todo; el pedido se lee.
- *   8. LA LIMPIEZA: de E0, E2, E3, E5 y E8 no queda código.
+ *   8. LA LIMPIEZA: de E0, E2, E3, E5 y E8 no queda código, ni del cursor B ni de su estela.
+ *   9. LA SILUETA DEL HOVER: la envolvente convexa cubre los agujeros y deja afuera las esquinas vacías.
  *
  * Cada detector tiene su control positivo: se le da una entrada equivocada y tiene que verla.
  */
@@ -35,6 +36,7 @@ import {
   type EntradasDelPulso,
   type EstadoDelPulso,
 } from '../entorno/maquinaDelPulso'
+import { dentroDelConvexo, envolventeConvexa, type Punto } from '../entorno/silueta'
 import { SOMBRA, contraccionEn, sombraEn } from '../entorno/sombra'
 
 const CUADRO = 1 / 60
@@ -215,12 +217,14 @@ afirmar(contraccionEn(SOMBRA.contraccionDuraS) === 0 && contraccionEn(-0.1) === 
 titulo('7 · LAS BANDERAS — el producto, la base y el pedido del banco')
 
 afirmar(ENTORNO.E1 && ENTORNO.E4 && ENTORNO.E6 && ENTORNO.E7, 'el producto trae E1, E4, E6 y E7 prendidas')
-afirmar(ENTORNO.haz === 'medio' && ENTORNO.cursor === 'A' && !ENTORNO.cursorConEstela, '  con el haz en medio, el cursor en A y sin estela en el cursor')
+afirmar(ENTORNO.haz === 'sutil', '  con el haz en sutil, de día y de noche')
 afirmarIgual(entornoPedido('base'), BASE_LIMPIA, "`base` es la escena de escena-base-limpia: todo apagado")
 afirmarIgual(entornoPedido('producto'), ENTORNO, '`producto` son las banderas de arriba, tal cual')
-const pedido = entornoPedido('E1,E7,haz=sutil,cursor=B,estela')
-afirmar(pedido.E1 && !pedido.E4 && !pedido.E6 && pedido.E7 && pedido.haz === 'sutil' && pedido.cursor === 'B' && pedido.cursorConEstela, 'el pedido del banco se lee entero')
-controlPositivo('el lector del pedido no inventa ideas que no se pidieron', 'E1', (p: string) => { const e = entornoPedido(p); return e.E1 && !e.E4 && !e.E6 && !e.E7 && false })
+const pedido = entornoPedido('E1,E7,haz=medio,mascara=no')
+afirmar(pedido.E1 && !pedido.E4 && !pedido.E6 && pedido.E7 && pedido.haz === 'medio' && !pedido.mascaraDeTexto, 'el pedido del banco se lee entero')
+const soloE1 = (p: string): boolean => { const e = entornoPedido(p); return e.E1 && !e.E4 && !e.E6 && !e.E7 }
+afirmar(soloE1('E1'), '  y no inventa ideas que no se pidieron')
+controlPositivo('el detector VE un pedido con una idea de más', 'E1,E4', soloE1)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · LA LIMPIEZA — de E0, E2, E3, E5 y E8 no queda código')
@@ -230,10 +234,24 @@ const codigoDelEntorno = [
   ...readdirSync(ENTORNO_DIR).map((n) => readFileSync(path.join(ENTORNO_DIR, n), 'utf8')),
   readFileSync(path.join(process.cwd(), 'src/app/v3/_lib/escena/entorno.ts'), 'utf8'),
 ].join('\n')
-const RESTOS = /Monolitos|<Anillos|\/Anillos\b|uTinte|tinteDelDia|uFoco|POLVO_FOCO|APARECEN_LOS_ANILLOS|E0:|E2:|E3:|E5:|E8:/
+const RESTOS = /cursorConEstela|CURSOR_CON_ESTELA|conBokehVivo|NIVELES_DEL_CURSOR|Monolitos|<Anillos|\/Anillos\b|uTinte|tinteDelDia|uFoco|POLVO_FOCO|APARECEN_LOS_ANILLOS|E0:|E2:|E3:|E5:|E8:/
 afirmarIgual(IDEAS_DEL_ENTORNO, ['E1', 'E4', 'E6', 'E7'], 'el entorno tiene sólo las cuatro ideas aprobadas')
 afirmar(!RESTOS.test(codigoDelEntorno), '  y ningún archivo del entorno nombra lo descartado (monolitos, anillos, tinte, foco, banderas viejas)')
 afirmar(!existsSync(path.join(ENTORNO_DIR, 'Monolitos.tsx')) && !existsSync(path.join(ENTORNO_DIR, 'Anillos.tsx')), '  y sus archivos no existen')
 controlPositivo('el detector VE un resto del tinte de E3', 'VIVO.uTinte.value', (f: string) => !RESTOS.test(f))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('9 · LA SILUETA DEL HOVER — sin agujeros y sin esquinas vacías')
+
+/** Una «cp» de juguete: dos anillos y el palo de la p, sólo el contorno (con sus agujeros). */
+const anillo = (cx: number, cy: number, r: number): Punto[] => Array.from({ length: 48 }, (_, i): Punto => [cx + r * Math.cos((i / 48) * 2 * Math.PI), cy + r * Math.sin((i / 48) * 2 * Math.PI)])
+const cp: Punto[] = [...anillo(-2, 0, 1.5), ...anillo(-2, 0, 0.9), ...anillo(2, 0, 1.5), ...anillo(2, 0, 0.9), [3.2, 0], [3.5, 0], [3.2, -3.5], [3.5, -3.5]]
+const casco = envolventeConvexa(cp)
+afirmar(dentroDelConvexo(casco, -2, 0) && dentroDelConvexo(casco, 2, 0), 'los agujeros de la c y de la p cuentan: el hover no titila al cruzarlos')
+afirmar(dentroDelConvexo(casco, 0, 0), '  y el hueco entre las dos letras también')
+const esquinaVacia: Punto = [-3.4, -3.4]
+afirmar(!dentroDelConvexo(casco, esquinaVacia[0], esquinaVacia[1]), 'la esquina de la caja que el logo no toca (abajo a la izquierda) NO cuenta')
+const enLaCaja = (x: number, y: number): boolean => x >= -3.5 && x <= 3.5 && y >= -3.5 && y <= 1.5
+controlPositivo('el control VE que la caja sí contaba esa esquina (el defecto de antes)', enLaCaja, (prueba) => !prueba(esquinaVacia[0], esquinaVacia[1]))
 
 cerrar('s29-pulso')

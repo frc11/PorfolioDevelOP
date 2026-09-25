@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import type { NivelDelCursor, NivelDelHaz } from '../entorno'
+import type { NivelDelHaz } from '../entorno'
 
 /**
  * [ESCENA 3] Lo que las ideas del entorno comparten por cuadro. Lo escribe `Entorno.tsx` después
@@ -26,11 +26,8 @@ export const VIVO = {
   /** E7 · el cursor en NDC, amortiguado, y cuánto empuja (sube con la velocidad y se apaga). */
   uCursor: { value: new THREE.Vector2(9, 9) },
   uEmpuje: { value: 0 },
-  /** E7 con estela · el cursor y el empuje con el mismo retraso que la copia de la cámara. */
-  uCursorPrevio: { value: new THREE.Vector2(9, 9) },
-  uEmpujePrevio: { value: 0 },
   uAspecto: { value: 1 },
-  /** E7 · el alcance del nivel: radio² en NDC, profundidad de referencia y piso del peso. */
+  /** E7 · el alcance: radio² en NDC, profundidad de referencia y piso del peso (`ALCANCE_DEL_CURSOR`). */
   uCursorAlcance: { value: new THREE.Vector3(0.06, 10, 0) },
   /** E1 · 1 si el haz está prendido: el polvo lo lee para saber si hay columna. */
   uHaz: { value: 0 },
@@ -69,15 +66,8 @@ export const NIVELES_DEL_HAZ: Readonly<Record<NivelDelHaz, { readonly dia: reado
 }
 
 /**
- * E7 · LOS DOS NIVELES DEL CURSOR — mismo mecanismo de empuje y recuperación, distinto alcance:
- * radio² del círculo de influencia en NDC, la profundidad a la que el peso vale 1 y el peso mínimo
- * que conserva el polvo lejano.
- *
- * - **A** = el de ESCENA 2, sin cambios: el polvo cercano, en un círculo chico.
- * - **B** = más presente: casi el triple de radio, el plano del logo y lo de atrás, y también el
- *   bokeh.
+ * E7 · EL ALCANCE DEL CURSOR — radio² del círculo de influencia en NDC, la profundidad a la que el
+ * peso vale 1 y el peso mínimo que conserva el polvo lejano. Es el nivel A de ESCENA 3: el polvo
+ * cercano, en un círculo chico.
  */
-export const NIVELES_DEL_CURSOR: Readonly<Record<NivelDelCursor, readonly [number, number, number]>> = {
-  A: [0.06, 10, 0],
-  B: [0.16, 18, 0.55],
-}
+export const ALCANCE_DEL_CURSOR: readonly [number, number, number] = [0.06, 10, 0]

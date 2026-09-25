@@ -1,10 +1,14 @@
 /**
  * [ESCENA 3] EL ENTORNO — lo que se aprobó de la exploración de ESCENA 2, prendido en la base.
  *
- * - **E1** · óculo y haz: la columna de luz sobre el logo, en dos niveles (`NIVEL_DEL_HAZ`).
+ * - **E1** · óculo y haz: la columna de luz sobre el logo, en su nivel `sutil` (el `medio` queda
+ *   para comparar).
  * - **E4** · el pulso: anillos que salen del logo por el piso, con hover (`entorno/maquinaDelPulso.ts`).
  * - **E6** · el polvo que responde: estelas con la velocidad y inercia al frenar.
- * - **E7** · el cursor: el polvo se corre al paso del puntero, en dos niveles (`NIVEL_DEL_CURSOR`).
+ * - **E7** · el cursor: el polvo cercano se corre al paso del puntero y vuelve con inercia. Es el
+ *   nivel A de ESCENA 3; el B (más alcance y el bokeh) y la estela del cursor se probaron y se
+ *   borraron: el B necesitaba código propio y la estela no sumaba, porque el cursor ya mueve la
+ *   cámara y E6 estira todo el polvo.
  *
  * E0, E2, E3, E5 y E8 se descartaron y su código se borró: quedan documentadas en
  * `docs/rediseno/SPRINT-ESCENA-2.md`.
@@ -14,7 +18,6 @@
  *     window.__entornoDeLaEscena = 'producto'             → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                 → la escena de `escena-base-limpia`
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'      → sólo esas, con esos niveles
- *     window.__entornoDeLaEscena = 'E7,cursor=B,estela'   → el cursor B con la estela de E6
  *     window.__entornoDeLaEscena = 'E4,mascara=no'        → el pulso sin apagarse sobre el texto (para medirlo)
  */
 
@@ -24,8 +27,6 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-export type NivelDelCursor = 'A' | 'B'
-
 export interface Entorno {
   readonly E1: boolean
   readonly E4: boolean
@@ -33,10 +34,6 @@ export interface Entorno {
   readonly E7: boolean
   /** E1 · cuánto se nota el haz, de día y de noche (`entorno/Haz.tsx`). */
   readonly haz: NivelDelHaz
-  /** E7 · cuánto alcanza el empuje: A = el de ESCENA 2; B = más radio y más profundidad. */
-  readonly cursor: NivelDelCursor
-  /** E7 · lo empujado deja la estela de E6. */
-  readonly cursorConEstela: boolean
   /** La sombra de contacto sigue la altura del logo y responde al pulso (`entorno/sombra.ts`). */
   readonly sombraViva: boolean
   /** E4 · el anillo se apaga sobre las cajas de texto. Sólo el banco lo apaga, para medir sin él. */
@@ -49,9 +46,7 @@ export const ENTORNO: Entorno = {
   E4: true,
   E6: true,
   E7: true,
-  haz: 'medio',
-  cursor: 'A',
-  cursorConEstela: false,
+  haz: 'sutil',
   sombraViva: true,
   mascaraDeTexto: true,
 }
@@ -62,9 +57,7 @@ export const BASE_LIMPIA: Entorno = {
   E4: false,
   E6: false,
   E7: false,
-  haz: 'medio',
-  cursor: 'A',
-  cursorConEstela: false,
+  haz: 'sutil',
   sombraViva: false,
   mascaraDeTexto: true,
 }
@@ -79,15 +72,12 @@ export function entornoPedido(pedido: string): Entorno {
   const valor = (clave: string): string | undefined =>
     [...partes].find((p) => p.startsWith(`${clave}=`))?.slice(clave.length + 1)
   const haz = valor('haz')
-  const cursor = valor('cursor')
   return {
     E1: partes.has('E1'),
     E4: partes.has('E4'),
     E6: partes.has('E6'),
     E7: partes.has('E7'),
     haz: haz === 'sutil' || haz === 'medio' ? haz : ENTORNO.haz,
-    cursor: cursor === 'A' || cursor === 'B' ? cursor : ENTORNO.cursor,
-    cursorConEstela: partes.has('estela'),
     sombraViva: !partes.has('sombra=quieta'),
     mascaraDeTexto: !partes.has('mascara=no'),
   }

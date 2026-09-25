@@ -12,7 +12,7 @@ import { Haz } from './Haz'
 import { crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
 import { Pulso } from './Pulso'
 import { PULSO, avanzarElPulso, pulsoInicial, type EstadoDelPulso } from './maquinaDelPulso'
-import { NIVELES_DEL_CURSOR, NIVELES_DEL_HAZ, PULSO_VIVO, VIVO } from './vivo'
+import { ALCANCE_DEL_CURSOR, NIVELES_DEL_HAZ, PULSO_VIVO, VIVO } from './vivo'
 
 /**
  * [ESCENA 3] Monta las ideas prendidas y escribe `VIVO` una vez por cuadro.
@@ -100,8 +100,7 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     const hover = hoverRef.current
 
     if (e.E7) {
-      const alcance = NIVELES_DEL_CURSOR[e.cursor]
-      VIVO.uCursorAlcance.value.set(alcance[0], alcance[1], alcance[2])
+      VIVO.uCursorAlcance.value.set(ALCANCE_DEL_CURSOR[0], ALCANCE_DEL_CURSOR[1], ALCANCE_DEL_CURSOR[2])
       VIVO.uAspecto.value = state.size.width / Math.max(1, state.size.height)
       const velocidad = dt > 0 ? state.pointer.distanceTo(m.puntero) / dt : 0
       m.puntero.copy(state.pointer)
@@ -112,10 +111,6 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       const actual = VIVO.uEmpuje.value
       const tau = objetivo > actual ? EMPUJE_SUBE_TAU_S : EMPUJE_BAJA_TAU_S
       VIVO.uEmpuje.value = actual + (objetivo - actual) * (1 - Math.exp(-dt / tau))
-      // Con la estela: el mismo retraso que la copia de la cámara.
-      const k = 1 - Math.exp(-dt / ESTELA_TAU_S)
-      VIVO.uCursorPrevio.value.lerp(VIVO.uCursor.value, k)
-      VIVO.uEmpujePrevio.value += (VIVO.uEmpuje.value - VIVO.uEmpujePrevio.value) * k
     }
 
     if (e.E4 && !quieto) {

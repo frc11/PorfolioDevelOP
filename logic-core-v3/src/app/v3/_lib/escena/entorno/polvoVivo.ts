@@ -15,8 +15,7 @@ import { HAZ, VIVO } from './vivo'
  *   movimiento de cámara, así que se estira más. Cuando el scroll frena, la copia alcanza a la
  *   cámara y la estela se encoge sola: ésa es la inercia;
  * - **E7** · el CURSOR corre las motas en pantalla, más a las cercanas, y la fuerza se apaga
- *   cuando el puntero se queda quieto: vuelven solas. El nivel sólo cambia el ALCANCE
- *   (`uCursorAlcance`); con la estela prendida, lo empujado también deja estela.
+ *   cuando el puntero se queda quieto: vuelven solas. El alcance está en `uCursorAlcance`.
  *
  * La mota se dibuja como una cápsula dentro del sprite: el sprite crece lo que mide la estela y
  * el perfil radial del punto se lee a lo largo del segmento. Encadena el `onBeforeCompile` que ya
@@ -28,7 +27,6 @@ export function conPolvoVivo<T extends THREE.Material>(material: T): T {
     e.E1 ? '#define POLVO_HAZ' : '',
     e.E6 ? '#define POLVO_ESTELA' : '',
     e.E7 ? '#define POLVO_CURSOR' : '',
-    e.E6 && e.E7 && e.cursorConEstela ? '#define CURSOR_CON_ESTELA' : '',
   ]
     .filter(Boolean)
     .join('\n')
@@ -41,20 +39,6 @@ export function conPolvoVivo<T extends THREE.Material>(material: T): T {
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_FRAGMENT}`)
       .replace('#include <map_particle_fragment>', MAPA_DE_LA_CAPSULA)
       .replace('#include <alphatest_fragment>', `${LUZ_DEL_HAZ}\n#include <alphatest_fragment>`)
-  })
-}
-
-/**
- * E7 nivel B · el bokeh también se corre. Sólo el empuje: ni estela ni haz, y el sprite de siempre.
- */
-export function conBokehVivo<T extends THREE.Material>(material: T): T {
-  const e = entornoDeLaEscena()
-  if (!e.E7 || e.cursor !== 'B') return material
-  const defines = '#define POLVO_CURSOR'
-  return parchear(material, defines, (shader) => {
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${defines}\n${PARS_VERTEX}`)
-      .replace('#include <fog_vertex>', `#include <fog_vertex>\n${CUERPO_DEL_BOKEH}`)
   })
 }
 
@@ -80,8 +64,6 @@ uniform vec2 uResolucion;
 uniform float uEstela;
 uniform vec2 uCursor;
 uniform float uEmpuje;
-uniform vec2 uCursorPrevio;
-uniform float uEmpujePrevio;
 uniform float uAspecto;
 uniform vec3 uCursorAlcance;
 uniform float uHaz;
@@ -110,15 +92,9 @@ const CUERPO_VERTEX = /* glsl */ `
 	float cerca = clamp( 10.0 / max( profundidad, 0.1 ), 0.0, 2.5 );
 	vec2 ndc = gl_Position.xy / gl_Position.w;
 	#ifdef POLVO_ESTELA
-		// Antes de que el cursor la corra: la estela es de la CÁMARA (y del empuje, si se pidió).
+		// Antes de que el cursor la corra: la estela es de la CÁMARA.
 		vec4 antes = uVPPrevio * modelMatrix * vec4( transformed, 1.0 );
-		vec2 ndcAntes = antes.xy / antes.w;
-		vec2 ahora = ndc;
-		#if defined( POLVO_CURSOR ) && defined( CURSOR_CON_ESTELA )
-			ahora += empujeEn( ndc, uCursor, uEmpuje, profundidad );
-			ndcAntes += empujeEn( ndcAntes, uCursorPrevio, uEmpujePrevio, profundidad );
-		#endif
-		vec2 enPixeles = ( ahora - ndcAntes ) * 0.5 * uResolucion;
+		vec2 enPixeles = ( ndc - antes.xy / antes.w ) * 0.5 * uResolucion;
 	#endif
 	#ifdef POLVO_HAZ
 		vec4 mundo = modelMatrix * vec4( transformed, 1.0 );
@@ -139,11 +115,6 @@ const CUERPO_VERTEX = /* glsl */ `
 	#ifdef POLVO_CURSOR
 		gl_Position.xy += empujeEn( ndc, uCursor, uEmpuje, profundidad ) * gl_Position.w;
 	#endif
-`
-
-const CUERPO_DEL_BOKEH = /* glsl */ `
-	vec2 ndcDelBokeh = gl_Position.xy / gl_Position.w;
-	gl_Position.xy += empujeEn( ndcDelBokeh, uCursor, uEmpuje, - mvPosition.z ) * gl_Position.w;
 `
 
 // `uNoche` ya lo declara `conBrilloDeNoche`, que corre antes: acá se usa, no se redeclara.

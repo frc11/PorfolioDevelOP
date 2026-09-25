@@ -2,11 +2,11 @@
  * SPRINT ESCENA 3 — los clips. clips.ts <a|b|c|d|e|todos>
  *
  *   a) el hero quieto 10 s: el pulso de reposo;
- *   b) el hover: el cursor entra al logo, se queda 4 s, sale y quedan 4 s de reposo;
+ *   b) el hover: el cursor pasa primero por una ESQUINA VACÍA de la caja del logo (no tiene que
+ *      disparar), después entra al logo, se queda 4 s, sale y quedan 4 s de reposo;
  *   c) scroll y frenada (E6), el mismo gesto de ESCENA 2;
- *   d) un barrido del cursor sobre una zona vacía, de día (hero) y de noche (Trabajos), en A, en B y en
- *      B con estela, en un mosaico de 3 × 2;
- *   e) el haz sutil contra el medio, de día (pie) y de noche (Trabajos), en un mosaico de 2 × 2.
+ *   d) un barrido del cursor sobre una zona vacía, de día (hero) y de noche (Trabajos);
+ *   e) el haz sutil (producto) contra el medio, de día (pie) y de noche (Trabajos), en un mosaico de 2 × 2.
  *
  * Chrome no dibuja el cursor: el banco inyecta un punto rojo que lo sigue, sólo en la captura. Cada
  * clip anota en consola lo que la escena publica para el banco (`__escenaViva`): modos, anillos,
@@ -48,14 +48,17 @@ async function anotar(b: Banco, cadaMs: number, gesto: () => Promise<void>): Pro
   return notas
 }
 
-/** El centro de los puntos de una grilla sobre la zona del logo donde la escena dice hover. */
-async function puntoDelLogo(b: Banco, zona: readonly [number, number, number, number]): Promise<[number, number]> {
+/**
+ * Recorre una grilla sobre la zona del logo y devuelve el centro de los puntos con hover, y una
+ * esquina VACÍA: una esquina de la caja de esos puntos (o sea, del logo en pantalla) que no da hover.
+ */
+async function puntosDelLogo(b: Banco, zona: readonly [number, number, number, number]): Promise<{ centro: [number, number]; esquina: [number, number] }> {
   const [x0, y0, x1, y1] = zona
   const dentro: [number, number][] = []
-  for (let j = 0; j <= 8; j += 1) {
-    for (let i = 0; i <= 8; i += 1) {
-      const x = x0 + ((x1 - x0) * i) / 8
-      const y = y0 + ((y1 - y0) * j) / 8
+  for (let j = 0; j <= 10; j += 1) {
+    for (let i = 0; i <= 10; i += 1) {
+      const x = x0 + ((x1 - x0) * i) / 10
+      const y = y0 + ((y1 - y0) * j) / 10
       await mover(b, x, y)
       await esperar(260)
       if ((await escenaViva(b))?.hover === true) dentro.push([x, y])
@@ -63,7 +66,15 @@ async function puntoDelLogo(b: Banco, zona: readonly [number, number, number, nu
   }
   if (dentro.length === 0) throw new Error('no encontré el logo: ningún punto de la zona dio hover')
   const media = (k: 0 | 1): number => Math.round(dentro.reduce((s, p) => s + p[k], 0) / dentro.length)
-  return [media(0), media(1)]
+  const xs = dentro.map((p) => p[0])
+  const ys = dentro.map((p) => p[1])
+  const caja = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]
+  for (const [x, y] of [[caja[0], caja[3]], [caja[2], caja[1]], [caja[0], caja[1]], [caja[2], caja[3]]]) {
+    await mover(b, x, y)
+    await esperar(400)
+    if ((await escenaViva(b))?.hover === false) return { centro: [media(0), media(1)], esquina: [x, y] }
+  }
+  throw new Error('ninguna esquina de la caja del logo quedó vacía: la silueta sigue siendo una caja')
 }
 
 async function clipA(): Promise<void> {
@@ -84,14 +95,17 @@ async function clipB(): Promise<void> {
   try {
     const fuera: [number, number] = [1330, 760]
     await mover(b, fuera[0], fuera[1])
-    const logo = await puntoDelLogo(b, [760, 300, 1180, 600])
+    const { centro: logo, esquina } = await puntosDelLogo(b, [700, 240, 1260, 660])
     await mover(b, fuera[0], fuera[1])
     await esperar(4500)
-    console.log(`b) el logo da hover en (${logo.join(', ')})`)
+    console.log(`b) el logo da hover en (${logo.join(', ')}); esquina vacía en (${esquina.join(', ')})`)
     const notas = await anotar(b, 50, async () => {
       const r = await grabar(b, `${DIR}/b-hover`, async () => {
         await esperar(1500)
-        await viajarElPuntero(b, fuera, logo, 600)
+        // Primero la esquina vacía: tiene que NO disparar.
+        await viajarElPuntero(b, fuera, esquina, 600)
+        await esperar(1800)
+        await viajarElPuntero(b, esquina, logo, 500)
         await esperar(4000)
         await viajarElPuntero(b, logo, fuera, 600)
         await esperar(4500)
@@ -133,11 +147,7 @@ async function barrido(b: Banco, y: number): Promise<void> {
   await esperar(2600)
 }
 
-const NIVELES_E7: readonly [string, string][] = [
-  ['A', 'producto'],
-  ['B', 'E1,E4,E6,E7,cursor=B'],
-  ['B con estela', 'E1,E4,E6,E7,cursor=B,estela'],
-]
+const NIVELES_E7: readonly [string, string][] = [['A', 'producto']]
 
 async function clipD(): Promise<void> {
   const piezas: string[] = []
@@ -162,13 +172,13 @@ async function clipD(): Promise<void> {
       }
     }
   }
-  mosaico(piezas, 3, `${DIR}/d-cursor-mosaico.mp4`)
+  mosaico(piezas, 1, `${DIR}/d-cursor-mosaico.mp4`)
 }
 
 async function clipE(): Promise<void> {
   const piezas: string[] = []
   for (const momento of ['dia', 'noche'] as const) {
-    for (const [nombre, pedido] of [['medio', 'producto'], ['sutil', 'E1,E4,E6,E7,haz=sutil']] as const) {
+    for (const [nombre, pedido] of [['sutil', 'producto'], ['medio', 'E1,E4,E6,E7,haz=medio']] as const) {
       const b = await abrir(pedido)
       try {
         const y = momento === 'dia' ? await medir<number>(b.p, 'document.documentElement.scrollHeight - innerHeight') : await topeMas('trabajos', 0)(b)
