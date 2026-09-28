@@ -33,6 +33,9 @@
  * `fugaz=no`); el foco que busca, las fibras, el grano y las sombras de las motas se borraron (código y
  * banderas). La luz que rebota (`rebote`) se queda.
  *
+ * **[ESCENA 8] Encendidos**, además: la trama anclada al piso (T2, `limite`; el banco la suelta con
+ * `limite=no`).
+ *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
  * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos).
@@ -105,6 +108,8 @@ export interface Entorno {
   readonly rebote: boolean
   /** [ESCENA 7] T13 · la estrella fugaz, de noche, afuera de la trama (`estrellas/Fugaz.tsx`). [ESCENA 8] encendida. */
   readonly fugaz: boolean
+  /** [ESCENA 8] T2 · la trama anclada al piso: baja a pleno hasta el piso, con zócalo y contacto (`moire/limite.ts`). */
+  readonly limite: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -132,6 +137,7 @@ export const ENTORNO: Entorno = {
   nitidez: true,
   rebote: true,
   fugaz: true,
+  limite: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -158,6 +164,7 @@ export const BASE_LIMPIA: Entorno = {
   nitidez: false,
   rebote: false,
   fugaz: false,
+  limite: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -199,6 +206,7 @@ export function entornoPedido(pedido: string): Entorno {
     nitidez: producto ? valor('nitidez') !== 'no' : partes.has('nitidez'),
     rebote: producto ? valor('rebote') !== 'no' : partes.has('rebote'),
     fugaz: producto ? valor('fugaz') !== 'no' : partes.has('fugaz'),
+    limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
     pruebas: pruebasPedidas(partes),
   }
 }

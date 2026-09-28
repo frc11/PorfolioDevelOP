@@ -31,6 +31,7 @@ import {
 } from './probeMoire'
 import type { ProbeParamsStore } from './probeStore'
 import { FLOOR_Y } from './probeScene'
+import { TRAMA_ANCLADA, ZOCALO, LIMITE } from './moire/limite'
 
 /**
  * LA ENVOLVENTE DE RENDIJAS — dos cilindros coaxiales, la cámara adentro.
@@ -88,7 +89,7 @@ type LayerSpec = {
   readonly top: number
   readonly cells: number
   readonly order: number
-  /** [ESCENA 5] El desvanecido de abajo, si no es el de siempre. */
+  /** [ESCENA 5] El desvanecido de abajo, si no es el de siempre. [ESCENA 8] 0: ninguno (anclada, T2). */
   readonly fadeBottom?: number
 }
 
@@ -120,7 +121,8 @@ function buildLayerGeometry(spec: LayerSpec): THREE.CylinderGeometry {
     colors[i * 4] = 1
     colors[i * 4 + 1] = 1
     colors[i * 4 + 2] = 1
-    colors[i * 4 + 3] = bandEnvelope(v, spec.fadeBottom !== undefined && v < 0.5 ? spec.fadeBottom : MOIRE_FADE)
+    // [ESCENA 8] T2: anclada, abajo no hay fundido (el alfa de vértice lo estiraba a todo el primer tramo): la corta el piso.
+    colors[i * 4 + 3] = spec.fadeBottom === 0 && v < 0.5 ? 1 : bandEnvelope(v, spec.fadeBottom !== undefined && v < 0.5 ? spec.fadeBottom : MOIRE_FADE)
   }
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
 
@@ -165,20 +167,24 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   { store, hastaElPiso = false },
   ref
 ) {
+  // [ESCENA 8] T2: con la formación y la bandera, las dos capas bajan a pleno hasta debajo del piso.
+  const anclada = hastaElPiso && entornoDeLaEscena().limite
   const layers = useMemo(() => {
+    const abajo = anclada ? TRAMA_ANCLADA.abajo : TRAMA_HASTA_EL_PISO.abajo
+    const fundido = anclada ? 0 : TRAMA_HASTA_EL_PISO.fundido
     const coarse: LayerSpec = {
       radius: MOIRE_FAR_RADIUS,
-      bottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.abajo : MOIRE_FAR_BOTTOM,
+      bottom: hastaElPiso ? abajo : MOIRE_FAR_BOTTOM,
       top: MOIRE_FAR_TOP,
-      fadeBottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.fundido : undefined,
+      fadeBottom: hastaElPiso ? fundido : undefined,
       cells: MOIRE_COARSE_CELLS,
       order: MOIRE_FAR_ORDER,
     }
     const fine: LayerSpec = {
       radius: MOIRE_NEAR_RADIUS,
-      bottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.abajo : MOIRE_NEAR_BOTTOM,
+      bottom: hastaElPiso ? abajo : MOIRE_NEAR_BOTTOM,
       top: MOIRE_NEAR_TOP,
-      fadeBottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.fundido : undefined,
+      fadeBottom: hastaElPiso ? fundido : undefined,
       cells: fineCells(store.current.moireMismatch),
       order: MOIRE_NEAR_ORDER,
     }
@@ -220,7 +226,24 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     conElAmanecer(capas.coarse.material)
     conElAmanecer(capas.fine.material)
     return capas
-  }, [store, hastaElPiso])
+  }, [store, hastaElPiso, anclada])
+
+  // [ESCENA 8] T2: el zócalo de la pared (la capa gruesa), del color de la trama y más denso que sus líneas.
+  const zocalo = useMemo(() => {
+    if (!anclada) return null
+    const alto = ZOCALO.arriba - ZOCALO.abajo
+    const geometry = new THREE.CylinderGeometry(ZOCALO.radio, ZOCALO.radio, alto, MOIRE_SEGMENTS, 1, true)
+    const material = new THREE.MeshLambertMaterial({ color: MOIRE_COLOR, transparent: true, opacity: LIMITE.zocalo.opacidad, depthWrite: false, side: THREE.BackSide })
+    conElAmanecer(material)
+    return { geometry, material, y: ZOCALO.abajo + alto / 2 }
+  }, [anclada])
+  useEffect(
+    () => () => {
+      zocalo?.geometry.dispose()
+      zocalo?.material.dispose()
+    },
+    [zocalo]
+  )
 
   /**
    * El desajuste se mueve con un slider, o sea por click y no por frame. Se
@@ -262,7 +285,8 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   )
 
   useEffect(() => {
-    const banda = (spec: LayerSpec): readonly [number, number, number, number] => [spec.bottom, spec.top, spec.fadeBottom ?? MOIRE_FADE, MOIRE_FADE]
+    // [ESCENA 8] T2: sin fundido abajo, el cielo lee uno ínfimo (divide por él en el shader).
+    const banda = (spec: LayerSpec): readonly [number, number, number, number] => [spec.bottom, spec.top, spec.fadeBottom === 0 ? 1e-4 : (spec.fadeBottom ?? MOIRE_FADE), MOIRE_FADE]
     const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture, altoDeLaFina: layers.fine.spec.top - layers.fine.spec.bottom, bandas: { gruesa: banda(layers.coarse.spec), fina: banda(layers.fine.spec) } }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
@@ -279,6 +303,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
           position={[0, layer.spec.bottom + (layer.spec.top - layer.spec.bottom) / 2, 0]}
         />
       ))}
+      {zocalo !== null && <mesh geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} />}
     </>
   )
 })

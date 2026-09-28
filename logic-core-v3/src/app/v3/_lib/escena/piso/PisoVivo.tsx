@@ -56,7 +56,9 @@ const PASOS_POR_CUADRO = 8
 
 function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
   const radio = pisoConFormacion(calidad)?.radio ?? FLOOR_RADIUS
-  const armado = useMemo(() => armar(grillaDelPiso(radio)), [radio])
+  // [ESCENA 8] T2: con la trama anclada al piso, el piso junto a la pared junta menos luz (el contacto).
+  const conContacto = pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().limite
+  const armado = useMemo(() => armar(grillaDelPiso(radio), conContacto), [radio, conContacto])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({
     inicio: true,
@@ -193,7 +195,7 @@ function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THRE
   if (principal !== null && principal.position.lengthSq() > 1e-6) armado.uLuzDelBisel.value.set(principal.position.x, principal.position.z).normalize()
 }
 
-function armar(grilla: Grilla) {
+function armar(grilla: Grilla, conContacto: boolean) {
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
@@ -226,7 +228,7 @@ function armar(grilla: Grilla) {
     uHazDia: VIVO.uHazDia,
     uHazNoche: VIVO.uHazNoche,
     ...MANCHA_EN_EL_PISO,
-  })
+  }, conContacto)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   const geometria = geometriaDelBloque(grilla.lado)

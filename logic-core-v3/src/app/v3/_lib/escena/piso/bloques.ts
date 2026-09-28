@@ -4,6 +4,7 @@ import { CHARCO_DEL_HAZ_GLSL } from '../entorno/Haz'
 import { NACE_EN, ANILLOS_GLSL } from '../entorno/Pulso'
 import { PULSO } from '../entorno/maquinaDelPulso'
 import { ANILLOS_EN_EL_SHADER } from '../entorno/vivo'
+import { CONTACTO_DE_LA_TRAMA_GLSL } from '../moire/limite'
 import { CARAS_DEL_LOGO_GLSL } from '../polvo/simulacion'
 import { FLOOR_Y } from '../probeScene'
 import { MANCHA_GLSL } from '../sombra/enElPiso'
@@ -261,7 +262,7 @@ const l = PISO_VIVO.luz
  * de cada bloque en el vértice (recortado al disco) y, en el fragmento, la oclusión, el bisel y lo que el
  * piso tiene encima.
  */
-export function conPisoVivo(material: THREE.MeshStandardMaterial, uniforms: UniformsDelPiso & Record<string, THREE.IUniform>): THREE.MeshStandardMaterial {
+export function conPisoVivo(material: THREE.MeshStandardMaterial, uniforms: UniformsDelPiso & Record<string, THREE.IUniform>, conContacto = false): THREE.MeshStandardMaterial {
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
@@ -335,7 +336,8 @@ varying float vEscalon;
 varying float vAltoDelBloque;
 ${ANILLOS_GLSL}
 ${MANCHA_GLSL}
-${CHARCO_DEL_HAZ_GLSL}`,
+${CHARCO_DEL_HAZ_GLSL}
+${conContacto ? CONTACTO_DE_LA_TRAMA_GLSL : ''}`,
       )
       .replace(
         '#include <colorspace_fragment>',
@@ -357,6 +359,8 @@ ${CHARCO_DEL_HAZ_GLSL}`,
 		}
 		// Lo hondo, un poco más oscuro y lo alto, un poco más claro: el valle junta menos luz que la cresta.
 		luz *= 1.0 + ${f(l.hondo[0])} * clamp( vAltoDelBloque / ${f(l.hondo[1])}, -1.0, 1.0 );
+		// [ESCENA 8] T2: al pie de la pared de la trama el piso junta menos luz (con la trama anclada).
+		${conContacto ? 'luz *= 1.0 - contactoDeLaTrama( length( vPiso.xz ) );' : ''}
 		gl_FragColor.rgb *= luz;
 		// Lo que antes eran planos apoyados, en el mismo orden: la mancha, el charco del haz y el pulso.
 		vec2 m = manchaDelContacto( vPiso.xz );
@@ -367,7 +371,7 @@ ${CHARCO_DEL_HAZ_GLSL}`,
 	}`,
       )
   }
-  material.customProgramCacheKey = () => 'piso-vivo-mar'
+  material.customProgramCacheKey = () => `piso-vivo-mar${conContacto ? '-contacto' : ''}`
   return material
 }
 
