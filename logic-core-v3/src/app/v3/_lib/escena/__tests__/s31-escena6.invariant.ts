@@ -11,7 +11,7 @@
  * §6 · (el piso vivo pasó a `s32-escena7`: ESCENA 7 lo hizo un mar, encendido).
  * §7 · 6e: el encendido parpadea una vez, se asienta, y la frontera de la noche no lo repite.
  * §8 · 6g: la compuerta de la variante se ve al bajar y vuelve escondida; el frente va de afuera adentro.
- * §9 · 6c y 6d: la niebla rasante vive afuera y baja; la velocidad la abre pero no la borra.
+ * §9 · (6c y 6d pasaron a `s32-escena7`: ESCENA 7 las juntó en la niebla de afuera, encendida).
  * §10 · la limpieza: el relieve (R1/R2), las cajas de texto y F-mirada no dejan código.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -26,7 +26,6 @@ import { ENCENDIDO, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { FORMACION } from '../formacion/enFormacion'
 import type { BloqueOpaco } from '../nocheDisparada'
-import { RASANTE } from '../niebla/rasante'
 import { FISICA } from '../polvo/simulacion'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { CAMERA_FOV, FLOOR_Y } from '../probeScene'
@@ -44,10 +43,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,rasante,velocidad,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,encendido,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
@@ -138,14 +137,6 @@ const ultimo = subiendo.lastIndexOf(true) * 10
 afirmar(ultimo > 900, 'subiendo, sigue de día hasta que el bloque tapa todo (la noche vuelve escondida)', `se apaga con el borde en ${String(ultimo)} px`)
 afirmar(frenteEn(0) === DIA_DESDE_AFUERA.desde && frenteEn(DIA_DESDE_AFUERA.duracionS) === DIA_DESDE_AFUERA.hasta && frenteEn(1) < frenteEn(0.5), 'el frente va de afuera (118) hasta el logo, siempre hacia adentro')
 afirmar(DIA_DESDE_AFUERA.desde > f.radioDelPisoDeAbajo && DIA_DESDE_AFUERA.hasta < 0, '  y arranca más allá de la formación y termina pasando el logo')
-
-// ── §9 · 6c y 6d ──────────────────────────────────────────────────────────
-titulo('§9 · 6c y 6d: la niebla de afuera')
-afirmar(RASANTE.desde > f.radioDelEscenario, 'la niebla rasante vive afuera del escenario', `desde ${String(RASANTE.desde)}`)
-afirmar(RASANTE.alto.minimo + RASANTE.alto.suma < ALTO_DE_LA_COPIA * f.escala, '  y es baja: un banco lleno no pasa la altura de una copia', `${String(RASANTE.alto.minimo + RASANTE.alto.suma)} contra ${(ALTO_DE_LA_COPIA * f.escala).toFixed(1)}`)
-afirmar(RASANTE.pasos >= 10 && /corrido/.test(leer('niebla/rasante.ts')), '  integrada en varios tramos por rayo, con un corrimiento por píxel (sin escalones)')
-afirmar(RASANTE.abre.neblina < 1 && RASANTE.abre.rasante < 1, '6d · la velocidad la abre pero no la borra del todo')
-afirmar(MOIRE_NEAR_RADIUS < RASANTE.desde, '  y nunca entra a la trama')
 
 // ── §10 · la limpieza ─────────────────────────────────────────────────────
 titulo('§10 · el relieve, las cajas de texto y F-mirada no dejan código')

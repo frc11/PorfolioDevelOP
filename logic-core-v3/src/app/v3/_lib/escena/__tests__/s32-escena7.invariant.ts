@@ -12,6 +12,8 @@
  * T6 · 6a, el aire con inercia: encendido, tal cual se aprobó.
  * T7 · el obstáculo natural: sin burbuja; el aire rodea al logo (flujo potencial) y la mota lo sigue con su
  *      inercia; la que entra más rápido que el umbral queda pegada un momento; los remolinos (6b), borrados.
+ * T8 · la niebla de afuera: 6c y 6d en un solo efecto, encendido, más densa, que esconde las filas de atrás,
+ *      se abre con la velocidad y se posa rápido; sin planos, sin repetición, sin escalones.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -30,7 +32,9 @@ import { FLOOR_RADIUS } from '../probeScene'
 import { INERCIA } from '../polvo/Aire'
 import { FISICA, flujoAlrededor } from '../polvo/simulacion'
 import { HOLGURA } from '../polvo/obstaculo'
-import { MOIRE_FAR_RADIUS } from '../probeMoire'
+import { ABRE_CON } from '../formacion/Formacion'
+import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
+import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
@@ -229,5 +233,19 @@ afirmar(/vec3 viento = vientoDelDespertar\( p \) \+ alrededorDelLogo\( p, uVient
 afirmar(/if \( entra > \$\{FISICA\.obstaculo\.pegar\.toFixed\(2\)\} \)/.test(sim7) && /modo > 5\.5 && modo < 6\.5/.test(sim7), 'con fuerza, queda pegada (modo 6) y se desprende siguiendo el aire', `umbral ${String(FISICA.obstaculo.pegar)} u/s entrando a la cara; pegada de ${String(FISICA.obstaculo.pega[0])} a ${String(FISICA.obstaculo.pega[1])} s`)
 afirmar(FISICA.obstaculo.pegar > 0.5 && FISICA.obstaculo.pegar < 4.8, '  el umbral cae entre el aire de un scroll suave (~0,5 u/s, medido) y el de uno fuerte (~5 u/s, medido)')
 afirmar(/\( modoDeLaFisica > 5\.5 && modoDeLaFisica < 6\.5 \) \) mundo = \( uLogo/.test(sim7), '  la pegada acompaña al logo (guardada en su espacio)')
+
+// ── T8 · la niebla de afuera ──────────────────────────────────────────────
+titulo('T8 · la niebla de afuera: 6c y 6d, un solo efecto')
+afirmar(ENTORNO.niebla && !BASE_LIMPIA.niebla && !entornoPedido('producto,niebla=no').niebla, 'encendida en el producto; el banco la apaga con `niebla=no`')
+const pruebas7 = entornoPedido('producto,rasante,velocidad').pruebas
+afirmar(!('nieblaRasante' in pruebas7) && !('nieblaVelocidad' in pruebas7), '  un solo efecto: ya no hay una bandera para la rasante y otra para la velocidad')
+afirmar(RASANTE.densidad.fondo > 2 * 0.45 && RASANTE.hasta === FORMACION.radioDelPisoDeAbajo, 'más densa (ESCENA 6: 0,45 por unidad) y en todo el piso de la formación', `de ${String(RASANTE.densidad.adelante)} adelante a ${String(RASANTE.densidad.fondo)} en el fondo, hasta ${String(RASANTE.hasta)}`)
+afirmar(RASANTE.alto.minimo + RASANTE.alto.suma < 5 * FORMACION.escala && RASANTE.alto.minimo + RASANTE.alto.suma + RASANTE.alto.fondo > 5 * FORMACION.escala, 'adelante es baja (no tapa una copia entera); atrás tapa copias enteras: esconde las filas de atrás', `adelante hasta ${(RASANTE.alto.minimo + RASANTE.alto.suma).toFixed(1)} u, atrás hasta ${(RASANTE.alto.minimo + RASANTE.alto.suma + RASANTE.alto.fondo).toFixed(1)} u; una copia, ${(5 * FORMACION.escala).toFixed(1)} u`)
+afirmar(RASANTE.pasos >= 10 && leer('StudioFloor.tsx').includes('CORRIDO_POR_PIXEL') && CORRIDO_POR_PIXEL.includes('gl_FragCoord'), 'sin escalones: integrada en tramos corridos por píxel en el piso (y por vértice en las copias)')
+afirmar(!/Plane|Sprite|PlaneGeometry/.test(leer('niebla/rasante.ts')), '  sin planos: es una densidad en el espacio')
+afirmar(/mat2\( cos\( a \), sin\( a \), - sin\( a \), cos\( a \) \)/.test(leer('niebla/rasante.ts')) && /z \* 1\.7/.test(leer('niebla/rasante.ts')), '  sin repetición: el ruido gira y cambia de forma con el tiempo')
+afirmar(RASANTE.abre.rasante < 1 && RASANTE.abre.neblina < 1, 'con el scroll rápido se abre (pero no se borra del todo)')
+afirmar(ABRE_CON.bajaS < 0.7, '  y al frenar se vuelve a posar rápido', `en ${String(ABRE_CON.bajaS)} s (ESCENA 6: 0,7 s)`)
+afirmar(MOIRE_NEAR_RADIUS < RASANTE.desde, 'nunca entra a la trama')
 
 cerrar('s32-escena7')

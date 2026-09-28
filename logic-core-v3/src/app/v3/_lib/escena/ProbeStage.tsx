@@ -217,7 +217,7 @@ export default function ProbeStage({
         </group>
 
         {/* [ESCENA 5] Con la formación, el piso es un escenario con otro más bajo alrededor. */}
-        <StudioFloor escenario={pisoConFormacion(calidad)} conNieblaRasante={pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().pruebas.nieblaRasante} conPisoVivo={entornoDeLaEscena().pisoVivo} />
+        <StudioFloor escenario={pisoConFormacion(calidad)} conNieblaRasante={pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().niebla} conPisoVivo={entornoDeLaEscena().pisoVivo} />
         {/* [ESCENA 3] La mancha sigue la altura del logo y se contrae con el pulso principal. */}
         <ContactOcclusion logoGroupRef={logoGroupRef} />
 

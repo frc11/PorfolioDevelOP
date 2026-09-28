@@ -22,14 +22,12 @@
  *
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
- * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`) y la inercia del aire
- * (6a tal cual, `inercia`). El banco las apaga para comparar con `formacion=no`, `cielo=no`, `posarse=no`,
- * `piso=no` e `inercia=no`.
+ * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`), la inercia del aire
+ * (6a tal cual, `inercia`) y la niebla de afuera (6c + 6d, un solo efecto, `niebla`). El banco las apaga
+ * para comparar con `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no` y `niebla=no`.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6c `rasante` · bancos de niebla bajos sobre el piso de afuera;
- * - 6d `velocidad` · la niebla de afuera se abre con la velocidad del scroll;
  * - 6e `encendido` · el haz arranca como una luz artificial cuando cae la noche;
  * - 6f `calor` · el aire caliente del haz, de noche;
  * - 6g `dia=afuera` · el día vuelve barriendo desde afuera.
@@ -51,10 +49,6 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6c · niebla rasante afuera. */
-  readonly nieblaRasante: boolean
-  /** 6d · la niebla de afuera se abre con la velocidad. */
-  readonly nieblaVelocidad: boolean
   /** 6e · el haz se enciende. */
   readonly hazEncendido: boolean
   /** 6f · aire caliente en el haz. */
@@ -65,8 +59,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  nieblaRasante: false,
-  nieblaVelocidad: false,
   hazEncendido: false,
   aireCaliente: false,
   diaDesdeAfuera: false,
@@ -101,6 +93,8 @@ export interface Entorno {
   readonly pisoVivo: boolean
   /** [ESCENA 7] T6 · 6a, el aire tiene inercia: sigue derivando después de un scroll fuerte (`polvo/Aire.tsx`). */
   readonly inercia: boolean
+  /** [ESCENA 7] T8 · la niebla de afuera (6c + 6d): esconde las filas de atrás y se abre con la velocidad (`niebla/`). */
+  readonly niebla: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -123,6 +117,7 @@ export const ENTORNO: Entorno = {
   posarse: true,
   pisoVivo: true,
   inercia: true,
+  niebla: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -144,6 +139,7 @@ export const BASE_LIMPIA: Entorno = {
   posarse: false,
   pisoVivo: false,
   inercia: false,
+  niebla: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -180,14 +176,13 @@ export function entornoPedido(pedido: string): Entorno {
     posarse: producto ? valor('posarse') !== 'no' : partes.has('posarse'),
     pisoVivo: producto ? valor('piso') !== 'no' : partes.has('piso'),
     inercia: producto ? valor('inercia') !== 'no' : partes.has('inercia'),
+    niebla: producto ? valor('niebla') !== 'no' : partes.has('niebla'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   return {
-    nieblaRasante: partes.has('rasante'),
-    nieblaVelocidad: partes.has('velocidad'),
     hazEncendido: partes.has('encendido'),
     aireCaliente: partes.has('calor'),
     diaDesdeAfuera: valor('dia') === 'afuera',

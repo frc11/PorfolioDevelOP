@@ -60,8 +60,8 @@ export function Formacion(props: PropsDeLaFormacion) {
 
 function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
-  const { nieblaRasante, nieblaVelocidad } = entornoDeLaEscena().pruebas
-  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), nieblaRasante), [svg, nieblaRasante])
+  const { niebla } = entornoDeLaEscena()
+  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), niebla), [svg, niebla])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({ camara: null as THREE.Camera | null, progreso: Number.NaN, antes: null as THREE.Vector3 | null, abre: 0 })
 
@@ -87,8 +87,8 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
     const m = memoria.current
     m.camara = state.camera
     alCuadro(armado.copia, fueraDelTunel(rig.current.progress))
-    // [ESCENA 6] 6d: la velocidad de la cámara mientras el scroll la mueve, con la inercia de E6.
-    if (nieblaVelocidad) {
+    // [ESCENA 7] T8: la niebla se abre con la velocidad de la cámara mientras el scroll la mueve (6d).
+    if (niebla) {
       const dt = Math.min(Math.max(delta, 1e-3), 0.1)
       const progreso = rig.current.progress
       const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
@@ -110,8 +110,11 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   )
 }
 
-/** 6d: a qué velocidad de la cámara la niebla está del todo abierta (u/s), y la inercia de E6 (s). */
-const ABRE_CON = { plena: 12, subeS: 0.11, bajaS: 0.7 } as const
+/**
+ * 6d: a qué velocidad de la cámara la niebla está del todo abierta (u/s), y en cuánto se abre y se vuelve a
+ * posar (s). [ESCENA 7] Se posa más rápido que en ESCENA 6 (0,7 s).
+ */
+export const ABRE_CON = { plena: 12, subeS: 0.11, bajaS: 0.4 } as const
 
 function abrir(abre: number): void {
   NIEBLA_DE_AFUERA.uAbre.value = abre
