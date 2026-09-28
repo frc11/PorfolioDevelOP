@@ -16,6 +16,8 @@
  *      se abre con la velocidad y se posa rápido; sin planos, sin repetición, sin escalones.
  * T9 · el haz se enciende: encendido; falla más tiempo y más tenue que la luz final, prende con un golpe
  *      y queda más arriba; la histéresis de siempre; las motas, la sombra y el rebote siguen su intensidad.
+ * T10 · la nitidez del polvo: encendida; motas chicas y definidas, sólo las muy cercanas desenfocadas y
+ *      poco; menos bokeh y más chico; el aire caliente (6f), borrado.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -37,6 +39,8 @@ import { HOLGURA } from '../polvo/obstaculo'
 import { ABRE_CON } from '../formacion/Formacion'
 import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
 import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
+import { BOKEH_NITIDO, NITIDEZ, ladoDeLaMota } from '../polvo/nitidez'
+import { BOKEH_COUNT, BOKEH_SIZE, PARTICLE_SIZE } from '../probeParticles'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -283,5 +287,22 @@ afirmar(!otra.fases.includes('encendiendo') && otra.e.fase === 'prendido', 'otra
 const aireTsx = leer('polvo/Aire.tsx')
 afirmar(/Math\.min\(1, VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
 afirmar(/manchasDelHaz\(VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* k/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
+
+// ── T10 · la nitidez del polvo ────────────────────────────────────────────
+titulo('T10 · el polvo nítido')
+afirmar(ENTORNO.nitidez && !BASE_LIMPIA.nitidez && !entornoPedido('producto,nitidez=no').nitidez, 'encendida en el producto; el banco la apaga con `nitidez=no`')
+const CALOR = /aireCaliente|__calorDelBanco|CALOR|<Calor/
+afirmar(!existsSync(path.join(ESCENA, 'entorno/Calor.tsx')) && !codigo(ESCENA).some((c) => CALOR.test(c)), '6f · el aire caliente se borró: ni el componente, ni la bandera, ni la pasada extra')
+controlPositivo('el detector VE el aire caliente', '<Calor calidad={calidad} />', (c: string) => !CALOR.test(c))
+// El lado de una mota a 900 px de alto: lo de antes (0,17 × 450 / d) contra el de ahora.
+const antes = (d: number): number => (PARTICLE_SIZE * 450) / d
+let enFocoMax = 0
+for (let d = NITIDEZ.desenfocaDesde; d <= 24; d += 0.25) enFocoMax = Math.max(enFocoMax, ladoDeLaMota(antes(d), d).enFoco + ladoDeLaMota(antes(d), d).desenfoque)
+afirmar(enFocoMax <= NITIDEZ.tam[1] + 1e-9, 'todas nítidas: de la distancia de foco en adelante ninguna mota pasa de 3,2 px', `a 4 u antes medía ${antes(4).toFixed(0)} px; ahora ${String(NITIDEZ.tam[1])}`)
+const cerca = ladoDeLaMota(antes(NITIDEZ.cerca), NITIDEZ.cerca)
+afirmar(cerca.desenfoque > 0 && cerca.enFoco + cerca.desenfoque < 12, 'sólo las muy cercanas se desenfocan, y poco', `la más cercana (${String(NITIDEZ.cerca)} u) mide ${(cerca.enFoco + cerca.desenfoque).toFixed(1)} px; antes, ${antes(3.5).toFixed(0)} px a 3,5 u`)
+afirmar(NITIDEZ.cerca < 3.5, '  (se desvanece contra la lente más cerca que antes: quedan unas pocas, no una nube)')
+afirmar(/0\.75 \/ max\( vLadoN, 1\.0 \)/.test(leer('polvo/nitidez.ts')) && /#ifdef POLVO_NITIDO/.test(leer('polvo/parche.ts')), 'el borde de la mota es de un píxel (no el sprite blando)')
+afirmar(BOKEH_NITIDO.cuantos <= BOKEH_COUNT / 2 && BOKEH_NITIDO.tam <= BOKEH_SIZE / 2, 'menos bokeh y más chico', `${String(BOKEH_NITIDO.cuantos)} discos de ${String(BOKEH_NITIDO.tam)} (antes ${String(BOKEH_COUNT)} de ${String(BOKEH_SIZE)})`)
 
 cerrar('s32-escena7')

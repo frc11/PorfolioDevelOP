@@ -18,6 +18,8 @@ import {
 } from './probeParticles'
 import { conBrilloDeNoche } from './particleGlow'
 import { conAire } from './polvo/parche'
+import { BOKEH_NITIDO } from './polvo/nitidez'
+import { entornoDeLaEscena } from './entorno'
 import { createBokehSpriteData } from './particleTextures'
 
 /**
@@ -62,9 +64,12 @@ export function BokehParticles() {
    * volumen (r³) dejaría casi todas contra el borde exterior, justo donde el
    * desenfoque casi no se ve.
    */
+  // [ESCENA 7] T10: con el polvo nítido, pocos discos y más chicos (`polvo/nitidez.ts`).
+  const nitido = entornoDeLaEscena().nitidez
+  const cuantos = nitido ? BOKEH_NITIDO.cuantos : BOKEH_COUNT
   const shells = useMemo(() => {
     const field = buildParticleField(
-      BOKEH_COUNT,
+      cuantos,
       BOKEH_R_MIN,
       BOKEH_R_MAX,
       BOKEH_RADIUS_BIAS,
@@ -80,22 +85,22 @@ export function BokehParticles() {
     // estos tres floats y marcar `needsUpdate`, sin tocar geometría, sin cambiar
     // el material y sin un draw call más.
     const tint = new THREE.Color(BOKEH_COLOR)
-    const colors = new Float32Array(BOKEH_COUNT * 3)
-    for (let i = 0; i < BOKEH_COUNT; i += 1) {
+    const colors = new Float32Array(cuantos * 3)
+    for (let i = 0; i < cuantos; i += 1) {
       colors[i * 3] = tint.r
       colors[i * 3 + 1] = tint.g
       colors[i * 3 + 2] = tint.b
     }
 
     return Array.from({ length: SHELL_COUNT }, (_unused, index) => {
-      const from = Math.round(BOKEH_SHELLS[index] * BOKEH_COUNT)
-      const to = Math.round(BOKEH_SHELLS[index + 1] * BOKEH_COUNT)
+      const from = Math.round(BOKEH_SHELLS[index] * cuantos)
+      const to = Math.round(BOKEH_SHELLS[index + 1] * cuantos)
       return {
         positions: field.positions.subarray(from * 3, to * 3),
         colors: colors.subarray(from * 3, to * 3),
       }
     })
-  }, [])
+  }, [cuantos])
 
   /**
    * La forma. Difiere del sprite de polvo en una sola cosa y es la que importa:
@@ -140,11 +145,11 @@ export function BokehParticles() {
                 if (material !== null) conAire(conBrilloDeNoche(material), 'bokeh', index)
               }}
               map={sprite}
-              size={BOKEH_SIZE}
+              size={nitido ? BOKEH_NITIDO.tam : BOKEH_SIZE}
               sizeAttenuation
               vertexColors
               transparent
-              opacity={BOKEH_OPACITY}
+              opacity={nitido ? BOKEH_NITIDO.opacidad : BOKEH_OPACITY}
               depthWrite={false}
             />
           </points>

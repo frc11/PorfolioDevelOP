@@ -102,6 +102,8 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     }
     // [ESCENA 7] T7: el aire que corre, para la física: rodea al logo y lleva a las motas.
     AIRE.uVientoDelAire.value.copy(m.aire)
+    // [ESCENA 7] T10: el lado nítido de la mota se cuenta en píxeles CSS.
+    AIRE.uPixel.value = state.viewport.dpr
     m.camaraAntes.copy(state.camera.position)
 
     // 5d · de noche, lo que el haz le quita al giro de cada concha, acumulado.

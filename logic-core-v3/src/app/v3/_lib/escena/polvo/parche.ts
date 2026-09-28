@@ -5,8 +5,9 @@ import { VIVO } from '../entorno/vivo'
 import { PARTICLE_FAR_COLOR, PARTICLE_NEAR_COLOR } from '../probeParticles'
 import { MOTAS_FRAGMENT_GLSL, MOTAS_GLSL, MOTAS_PARS_GLSL, MOTAS_TAM_GLSL } from './motas'
 import { DISTANCIA_AL_LOGO_GLSL, HOLGURA } from './obstaculo'
+import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from './nitidez'
 import { FISICA_EN_LA_MOTA_GLSL } from './simulacion'
-import { VOLUMEN_GLSL } from './volumen'
+import { POLVO_PAREJO, VOLUMEN_GLSL } from './volumen'
 
 /**
  * [ESCENA 5] EL AIRE — el parche sobre el material de cada concha de polvo (y del bokeh, para 5a)
@@ -47,6 +48,8 @@ export const AIRE = {
   uDeriva: { value: new THREE.Vector3() },
   /** [ESCENA 7] T7 · el aire que corre (6a), en u/s: lo que rodea al logo en la física. */
   uVientoDelAire: { value: new THREE.Vector3() },
+  /** [ESCENA 7] T10 · píxeles del búfer por píxel CSS: el lado nítido de la mota es en píxeles CSS. */
+  uPixel: { value: 1 },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -71,6 +74,11 @@ varying float vParejo;
 	${MOTAS_PARS_GLSL}
 #else
 	varying float vDestello;
+#endif
+#ifdef POLVO_NITIDO
+	uniform float uPixel;
+	varying float vDesenfoque;
+	varying float vLadoN;
 #endif
 uniform float uTiempo;
 `
@@ -116,6 +124,10 @@ const DESPUES_DEL_CURSOR = /* glsl */ `
 const PARS_FRAGMENT = /* glsl */ `
 varying float vParejo;
 varying float vDestello;
+#ifdef POLVO_NITIDO
+	varying float vDesenfoque;
+	varying float vLadoN;
+#endif
 `
 
 const FRAGMENTO = /* glsl */ `
@@ -136,12 +148,15 @@ function definesDe(campo: Campo, concha: number): string {
     campo === 'polvo' && e.polvoParejo && e.posarse ? '#define AIRE_FISICA' : '',
     campo === 'polvo' && e.polvoParejo && e.inercia ? '#define AIRE_INERCIA' : '',
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
+    campo === 'polvo' && e.nitidez ? '#define POLVO_NITIDO' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
   const holgura = campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh
   // [ESCENA 7] Con la física, tras el cursor sólo un margen: que el cursor no meta una mota en el logo.
   const trasElCursor = partes.includes('#define AIRE_FISICA') ? 0.1 : holgura
-  return [...partes, `#define CONCHA_DEL_POLVO ${String(concha)}`, `#define HOLGURA_DEL_CAMPO ${holgura.toFixed(2)}`, `#define HOLGURA_TRAS_EL_CURSOR ${trasElCursor.toFixed(2)}`].join('\n')
+  // [ESCENA 7] T10: con el polvo nítido, la mota se desvanece contra la lente más cerca (quedan unas pocas desenfocadas).
+  const cerca = campo === 'polvo' && e.nitidez ? NITIDEZ.cerca : POLVO_PAREJO.cerca
+  return [...partes, `#define CONCHA_DEL_POLVO ${String(concha)}`, `#define HOLGURA_DEL_CAMPO ${holgura.toFixed(2)}`, `#define HOLGURA_TRAS_EL_CURSOR ${trasElCursor.toFixed(2)}`, `#define CERCA_DEL_POLVO ${cerca.toFixed(2)}`].join('\n')
 }
 
 /** ¿Este campo lleva el volumen parejo? (El componente arma su búfer según esto.) */
@@ -160,10 +175,12 @@ export function conAire<T extends THREE.Material>(material: T, campo: Campo, con
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_VERTEX}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CUERPO}`)
-      .replace('#include <logdepthbuf_vertex>', `#ifdef AIRE_MOTAS\n${MOTAS_TAM_GLSL}\n#endif\n#include <logdepthbuf_vertex>`)
+      .replace('#include <logdepthbuf_vertex>', `${NITIDEZ_VERTEX_GLSL}\n#ifdef AIRE_MOTAS\n${MOTAS_TAM_GLSL}\n#endif\n#include <logdepthbuf_vertex>`)
       .replace(/\}\s*$/, `${DESPUES_DEL_CURSOR}\n}`)
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_FRAGMENT}`)
+      // [ESCENA 7] T10: el perfil de la mota, nítido (o desenfocado si está muy cerca), en lugar del sprite blando.
+      .replace('diffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );', `#ifdef POLVO_NITIDO\n${NITIDEZ_FRAGMENT_GLSL}\n#else\n\t\tdiffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );\n#endif`)
       .replace('#include <alphatest_fragment>', `${FRAGMENTO}\n#include <alphatest_fragment>`)
   }
   material.customProgramCacheKey = () => `${clavePrevia()}|aire|${defines.replace(/\s+/g, ' ')}`

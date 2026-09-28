@@ -374,7 +374,7 @@ export const FISICA_EN_LA_MOTA_GLSL = /* glsl */ `
 		transformed = transpose( mat3( modelMatrix ) ) * ( mundo - modelMatrix[ 3 ].xyz );
 		if ( modoDeLaFisica > 0.5 ) {
 			float lejos = distance( mundo, cameraPosition );
-			vParejo = smoothstep( 0.8, ${POLVO_PAREJO.cerca.toFixed(2)}, lejos ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejos ) );
+			vParejo = smoothstep( 0.8, CERCA_DEL_POLVO, lejos ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejos ) );
 			vParejo *= 1.0 - smoothstep( ${(POLVO_PAREJO.radio - 1.5).toFixed(2)}, ${POLVO_PAREJO.radio.toFixed(2)}, length( mundo.xz ) );
 		}
 	}

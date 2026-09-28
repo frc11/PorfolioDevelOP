@@ -12,7 +12,6 @@ import { BokehParticles } from './BokehParticles'
 import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
 import { entornoDeLaEscena } from './entorno'
-import { Calor } from './entorno/Calor'
 import { DiaDesdeAfuera } from './dia/DiaDesdeAfuera'
 import { Entorno } from './entorno/Entorno'
 import { DepthParticles } from './DepthParticles'
@@ -284,8 +283,6 @@ export default function ProbeStage({
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
-        {/* [ESCENA 6] 6f, la pasada extra: al final, con la cámara y todo lo demás de este cuadro ya escritos. */}
-        <Calor calidad={calidad} />
         <DiaDesdeAfuera />
       </Suspense>
     </Canvas>

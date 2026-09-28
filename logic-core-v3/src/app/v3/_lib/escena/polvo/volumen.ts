@@ -97,7 +97,7 @@ export const VOLUMEN_GLSL = /* glsl */ `
 		vParejo = 1.0 - smoothstep( ${(1 - POLVO_PAREJO.fundido).toFixed(3)}, 1.0, borde );
 		vec3 enElMundo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
 		float lejosDeLaCamara = distance( enElMundo, cameraPosition );
-		vParejo *= smoothstep( 0.8, ${POLVO_PAREJO.cerca.toFixed(2)}, lejosDeLaCamara ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejosDeLaCamara ) );
+		vParejo *= smoothstep( 0.8, CERCA_DEL_POLVO, lejosDeLaCamara ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejosDeLaCamara ) );
 		vParejo *= 1.0 - smoothstep( ${(POLVO_PAREJO.radio - 1.5).toFixed(2)}, ${POLVO_PAREJO.radio.toFixed(2)}, length( enElMundo.xz ) );
 		vParejo *= smoothstep( ${POLVO_PAREJO.piso.toFixed(3)}, ${(POLVO_PAREJO.piso + 0.3).toFixed(3)}, enElMundo.y );
 		#ifdef USE_COLOR

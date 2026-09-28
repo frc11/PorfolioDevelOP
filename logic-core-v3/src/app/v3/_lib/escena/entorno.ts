@@ -24,19 +24,19 @@
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
  * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`), la inercia del aire
  * (6a tal cual, `inercia`), la niebla de afuera (6c + 6d, un solo efecto, `niebla`) y el haz que se
- * enciende (6e, más notorio, `hazEncendido`). El banco las apaga para comparar con `formacion=no`,
- * `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no` y `encendido=no`.
+ * enciende (6e, más notorio, `hazEncendido`), además del polvo nítido (T10, `nitidez`). El banco las apaga
+ * para comparar con `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no`,
+ * `encendido=no` y `nitidez=no`. Se borraron 6b y 6f.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6f `calor` · el aire caliente del haz, de noche;
  * - 6g `dia=afuera` · el día vuelve barriendo desde afuera.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,calor,dia=afuera'      → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,dia=afuera'            → el producto con una prueba
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -49,15 +49,12 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6f · aire caliente en el haz. */
-  readonly aireCaliente: boolean
   /** 6g · el día entra desde afuera. */
   readonly diaDesdeAfuera: boolean
 }
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  aireCaliente: false,
   diaDesdeAfuera: false,
 }
 
@@ -94,6 +91,8 @@ export interface Entorno {
   readonly niebla: boolean
   /** [ESCENA 7] T9 · 6e, el haz se enciende al caer la noche: falla y después prende (`entorno/encendido.ts`). */
   readonly hazEncendido: boolean
+  /** [ESCENA 7] T10 · el polvo nítido: motas chicas y definidas; sólo las muy cercanas se desenfocan, y poco. */
+  readonly nitidez: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -118,6 +117,7 @@ export const ENTORNO: Entorno = {
   inercia: true,
   niebla: true,
   hazEncendido: true,
+  nitidez: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -141,6 +141,7 @@ export const BASE_LIMPIA: Entorno = {
   inercia: false,
   niebla: false,
   hazEncendido: false,
+  nitidez: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -179,13 +180,13 @@ export function entornoPedido(pedido: string): Entorno {
     inercia: producto ? valor('inercia') !== 'no' : partes.has('inercia'),
     niebla: producto ? valor('niebla') !== 'no' : partes.has('niebla'),
     hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
+    nitidez: producto ? valor('nitidez') !== 'no' : partes.has('nitidez'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   return {
-    aireCaliente: partes.has('calor'),
     diaDesdeAfuera: valor('dia') === 'afuera',
   }
 }
