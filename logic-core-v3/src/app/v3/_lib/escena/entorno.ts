@@ -24,9 +24,10 @@
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
  * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`), la inercia del aire
  * (6a tal cual, `inercia`), la niebla de afuera (6c + 6d, un solo efecto, `niebla`) y el haz que se
- * enciende (6e, más notorio, `hazEncendido`), además del polvo nítido (T10, `nitidez`). El banco las apaga
- * para comparar con `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no`,
- * `encendido=no` y `nitidez=no`. Se borraron 6b y 6f.
+ * enciende (6e, más notorio, `hazEncendido`), además del polvo nítido (T10, `nitidez`) y el haz en el piso
+ * (las sombras de las motas y la luz que rebota, T12, `rebote`). El banco las apaga para comparar con
+ * `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no`, `encendido=no`,
+ * `nitidez=no` y `rebote=no`. Se borraron 6b y 6f.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
@@ -93,6 +94,11 @@ export interface Entorno {
   readonly hazEncendido: boolean
   /** [ESCENA 7] T10 · el polvo nítido: motas chicas y definidas; sólo las muy cercanas se desenfocan, y poco. */
   readonly nitidez: boolean
+  /**
+   * [ESCENA 7] T12 · el haz en el piso: las motas que cruzan la mancha de luz del haz proyectan sombritas,
+   * y de noche el piso iluminado aclara apenas la cara de abajo del logo (`polvo/sombras.ts`, `entorno/Rebote.tsx`).
+   */
+  readonly rebote: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -118,6 +124,7 @@ export const ENTORNO: Entorno = {
   niebla: true,
   hazEncendido: true,
   nitidez: true,
+  rebote: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -142,6 +149,7 @@ export const BASE_LIMPIA: Entorno = {
   niebla: false,
   hazEncendido: false,
   nitidez: false,
+  rebote: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -181,6 +189,7 @@ export function entornoPedido(pedido: string): Entorno {
     niebla: producto ? valor('niebla') !== 'no' : partes.has('niebla'),
     hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
     nitidez: producto ? valor('nitidez') !== 'no' : partes.has('nitidez'),
+    rebote: producto ? valor('rebote') !== 'no' : partes.has('rebote'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }

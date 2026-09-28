@@ -1,6 +1,6 @@
 'use client'
 
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
@@ -23,6 +23,7 @@ import { entornoDeLaEscena, hayBanco } from './entorno'
 import { contarPorZonas } from './polvo/conteo'
 import { conAire, llevaElVolumenParejo } from './polvo/parche'
 import { posicionesDelPolvoParejo } from './polvo/volumen'
+import { SOMBRAS_EN_VIVO, materialDeLasSombras } from './polvo/sombras'
 import { createDotSpriteData } from './particleTextures'
 import type { ProbeParamsStore } from './probeStore'
 
@@ -72,6 +73,18 @@ type VentanaDelBanco = Window & { __polvoDelBanco?: { contar: (columnas: number,
 
 export function DepthParticles({ store }: DepthParticlesProps) {
   const geometryRefs = useRef<(DrawRangeTarget | null)[]>([])
+  // [ESCENA 7] T12: las sombras de las motas del haz, una pasada más por concha sobre las mismas motas.
+  const sombraRefs = useRef<(DrawRangeTarget | null)[]>([])
+  const e = entornoDeLaEscena()
+  const conSombras = e.rebote && e.E1 && llevaElVolumenParejo('polvo')
+  const sombras = useMemo(() => (conSombras ? Array.from({ length: SHELL_COUNT }, (_u, i) => materialDeLasSombras(i)) : []), [conSombras])
+  useEffect(() => () => sombras.forEach((m) => m.dispose()), [sombras])
+  const tam = useMemo(() => new THREE.Vector2(), [])
+  useFrame((state) => {
+    if (!conSombras) return
+    state.gl.getDrawingBufferSize(tam)
+    SOMBRAS_EN_VIVO.uAlto.value = tam.y
+  })
   const pointsRefs = useRef<(THREE.Object3D | null)[]>([])
   const camera = useThree((state) => state.camera)
   const scene = useThree((state) => state.scene)
@@ -158,11 +171,11 @@ export function DepthParticles({ store }: DepthParticlesProps) {
       // Con el volumen parejo la caja lleva más motas: se dibuja la misma FRACCIÓN que pide el control.
       const share = Math.min(1, Math.max(0, values.particleCount / PARTICLES_MAX))
       for (let index = 0; index < SHELL_COUNT; index += 1) {
-        const geometry = geometryRefs.current[index]
-        if (!geometry) continue
         const count = Math.round(shells[index].count * share)
-        if (geometry.drawRange.count === count) continue
-        geometry.setDrawRange(0, count)
+        for (const geometry of [geometryRefs.current[index], sombraRefs.current[index]]) {
+          if (!geometry || geometry.drawRange.count === count) continue
+          geometry.setDrawRange(0, count)
+        }
       }
     }
 
@@ -226,6 +239,18 @@ export function DepthParticles({ store }: DepthParticlesProps) {
               depthWrite={false}
             />
           </points>
+          {sombras[index] !== undefined && 'indices' in shell && shell.indices !== undefined && (
+            <points frustumCulled={false} renderOrder={1} material={sombras[index]}>
+              <bufferGeometry
+                ref={(instance) => {
+                  sombraRefs.current[index] = instance
+                }}
+              >
+                <bufferAttribute attach="attributes-position" args={[shell.positions, 3]} />
+                <bufferAttribute attach="attributes-aIndice" args={[shell.indices, 1]} />
+              </bufferGeometry>
+            </points>
+          )}
         </group>
       ))}
     </>

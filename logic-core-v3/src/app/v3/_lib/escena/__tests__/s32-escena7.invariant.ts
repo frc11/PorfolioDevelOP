@@ -18,6 +18,8 @@
  *      y queda más arriba; la histéresis de siempre; las motas, la sombra y el rebote siguen su intensidad.
  * T10 · la nitidez del polvo: encendida; motas chicas y definidas, sólo las muy cercanas desenfocadas y
  *      poco; menos bokeh y más chico; el aire caliente (6f), borrado.
+ * T12 · el haz en el piso: las motas que cruzan la mancha de luz proyectan sombritas que se mueven, y de
+ *      noche el piso iluminado aclara apenas la cara de abajo del logo; siguen la intensidad del haz.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -41,6 +43,8 @@ import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
 import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
 import { BOKEH_NITIDO, NITIDEZ, ladoDeLaMota } from '../polvo/nitidez'
 import { BOKEH_COUNT, BOKEH_SIZE, PARTICLE_SIZE } from '../probeParticles'
+import { SOMBRAS } from '../polvo/sombras'
+import { REBOTE } from '../entorno/Rebote'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -304,5 +308,23 @@ afirmar(cerca.desenfoque > 0 && cerca.enFoco + cerca.desenfoque < 12, 'sólo las
 afirmar(NITIDEZ.cerca < 3.5, '  (se desvanece contra la lente más cerca que antes: quedan unas pocas, no una nube)')
 afirmar(/0\.75 \/ max\( vLadoN, 1\.0 \)/.test(leer('polvo/nitidez.ts')) && /#ifdef POLVO_NITIDO/.test(leer('polvo/parche.ts')), 'el borde de la mota es de un píxel (no el sprite blando)')
 afirmar(BOKEH_NITIDO.cuantos <= BOKEH_COUNT / 2 && BOKEH_NITIDO.tam <= BOKEH_SIZE / 2, 'menos bokeh y más chico', `${String(BOKEH_NITIDO.cuantos)} discos de ${String(BOKEH_NITIDO.tam)} (antes ${String(BOKEH_COUNT)} de ${String(BOKEH_SIZE)})`)
+
+// ── T12 · el haz en el piso ───────────────────────────────────────────────
+titulo('T12 · las motas del haz dan sombra y el piso rebota luz')
+afirmar(ENTORNO.rebote && !BASE_LIMPIA.rebote && !entornoPedido('producto,rebote=no').rebote, 'encendido en el producto; el banco lo apaga con `rebote=no`')
+const sombras = leer('polvo/sombras.ts')
+afirmar(/vec3 enElPiso = mundo \+ \( mundo - oculo \) \* \( alto \/ \( oculo\.y - mundo\.y \) \);/.test(sombras) && /float enElHaz = enLaColumna\( mundo \);/.test(sombras), 'cada mota del haz se proyecta al piso desde el óculo (la luz del haz baja de ahí), sobre el bloque que tiene debajo')
+afirmar(/\$\{FISICA_EN_LA_MOTA_GLSL\}/.test(sombras) && /\$\{MOTAS_GLSL\}/.test(sombras) && /\$\{VOLUMEN_GLSL\}/.test(sombras), '  la misma mota que se ve: el volumen, la física y el freno del haz (la sombra se mueve con ella)')
+afirmar(/2\.0 \* \$\{f\(HAZ\.radioArriba\)\} \* alto \/ \( oculo\.y - mundo\.y \)/.test(sombras), '  la penumbra crece con la altura: el óculo no es un punto')
+// De noche el charco es casi toda la luz del piso: la sombra se ve; de día, sobre el papel, casi nada.
+const oscurece = (charco: number, propia: number): number => (SOMBRAS.tapa * charco) / (propia + charco)
+const deNoche = oscurece(0.06 * FIRME, SOMBRAS.piso.noche)
+const deDia = oscurece(0.05, SOMBRAS.piso.dia)
+afirmar(deNoche > 5 * deDia && deNoche < 0.5, 'oscurece sólo la luz del haz: de noche se ve, de día casi nada', `en el centro del charco, de noche ${(deNoche * 100).toFixed(0)} %, de día ${(deDia * 100).toFixed(1)} %`)
+afirmar(/blendDst: THREE\.OneMinusSrcColorFactor/.test(sombras) && /blendSrcAlpha: THREE\.ZeroFactor/.test(sombras) && /blendDstAlpha: THREE\.OneFactor/.test(sombras), '  la mezcla multiplica el piso y no toca el alfa del lienzo')
+const rebote = leer('entorno/Rebote.tsx')
+afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNoche\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
+afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), 'utf8')), '  sin tocar `ProbeLogo`: el parche es sobre su material')
+afirmar(/mix\( uHazDia\.y, uHazNoche\.y, uNoche \)/.test(sombras) && /nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), 'las dos siguen la intensidad del haz (el charco de noche lleva el encendido, T9)')
 
 cerrar('s32-escena7')
