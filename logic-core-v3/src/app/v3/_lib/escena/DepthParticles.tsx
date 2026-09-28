@@ -241,8 +241,7 @@ function campoParejo(): { count: number; positions: Float32Array; colors: Float3
   const n = positions.length / 3
   const colors = new Float32Array(n * 3).fill(0.5)
   // [ESCENA 6] Con la física, cada mota sabe cuál es su celda en la simulación (`polvo/simulacion.ts`).
-  const p = entornoDeLaEscena().pruebas
-  const indices = entornoDeLaEscena().posarse || p.remolinos ? Float32Array.from({ length: n }, (_u, i) => i) : undefined
+  const indices = entornoDeLaEscena().posarse ? Float32Array.from({ length: n }, (_u, i) => i) : undefined
   return Array.from({ length: SHELL_COUNT }, (_unused, index) => {
     const from = Math.round((index / SHELL_COUNT) * n)
     const to = Math.round(((index + 1) / SHELL_COUNT) * n)

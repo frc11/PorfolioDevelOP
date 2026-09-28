@@ -16,7 +16,7 @@ import { VOLUMEN_GLSL } from './volumen'
  * - **5a** · el logo no se atraviesa (`obstaculo.ts`), antes de proyectar y, con E7, otra vez
  *   después del empuje del cursor (en el producto desde ESCENA 6);
  * - **5d** · las motas del haz (`motas.ts`, en el producto desde ESCENA 6);
- * - [ESCENA 6] **la física** (`simulacion.ts`, con `posarse` o 6b `remolinos`): la posición sale de la
+ * - [ESCENA 6] **la física** (`simulacion.ts`, con `posarse`): la posición sale de la
  *   simulación de cada mota;
  * - [ESCENA 6] **6a** · la inercia del aire: todo el volumen corrido por `uDeriva` antes de repetirse.
  *
@@ -38,12 +38,13 @@ export const AIRE = {
   uLogoPalo: { value: new THREE.Vector4(0, 0, 0, 0) },
   uLogo: { value: new THREE.Matrix4() },
   uLogoInverso: { value: new THREE.Matrix4() },
-  uAbrir: { value: 0 },
   uContraGiro: { value: [0, 0, 0] },
   uMotas: { value: 0 },
   /** [ESCENA 6] La simulación de cada mota (la salida de posición y modo) y el corrimiento de 6a. */
   uFisica: { value: null as THREE.Texture | null },
   uDeriva: { value: new THREE.Vector3() },
+  /** [ESCENA 7] T7 · el aire que corre (6a), en u/s: lo que rodea al logo en la física. */
+  uVientoDelAire: { value: new THREE.Vector3() },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -79,10 +80,11 @@ const CUERPO = /* glsl */ `
 	#ifdef AIRE_PAREJO
 		${VOLUMEN_GLSL}
 	#endif
-	#ifdef AIRE_OBSTACULO
+	#if defined( AIRE_OBSTACULO ) && ! defined( AIRE_FISICA )
+		// Sin física (el bokeh, o el banco sin posarse), la holgura fija; con física, lo hace la simulación.
 		{
 			vec3 enElMundo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
-			vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_DEL_CAMPO + uAbrir * ${HOLGURA.alAbrir.toFixed(2)} );
+			vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_DEL_CAMPO );
 			transformed = transpose( mat3( modelMatrix ) ) * ( fuera - modelMatrix[ 3 ].xyz );
 		}
 	#endif
@@ -99,11 +101,11 @@ const CUERPO = /* glsl */ `
 /** Con E7, después del empuje del cursor: la mota empujada contra el logo se desliza por su borde. */
 const DESPUES_DEL_CURSOR = /* glsl */ `
 	#if defined( AIRE_OBSTACULO ) && defined( POLVO_CURSOR )
-	// La que está sobre el logo (o resbalando) ya está en su cara: no se la corre la holgura.
-	if ( modoDeLaFisica < 2.5 || modoDeLaFisica > 4.5 ) {
+	// La que está sobre el logo, resbalando o pegada ya está en su cara: no se la corre la holgura.
+	if ( modoDeLaFisica < 2.5 || ( modoDeLaFisica > 4.5 && modoDeLaFisica < 5.5 ) ) {
 		vec3 enLaVista = vec3( gl_Position.x / projectionMatrix[ 0 ][ 0 ], gl_Position.y / projectionMatrix[ 1 ][ 1 ], mvPosition.z );
 		vec3 enElMundo = transpose( mat3( viewMatrix ) ) * ( enLaVista - viewMatrix[ 3 ].xyz );
-		vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_DEL_CAMPO + uAbrir * ${HOLGURA.alAbrir.toFixed(2)} );
+		vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_TRAS_EL_CURSOR );
 		if ( fuera != enElMundo ) gl_Position = projectionMatrix * viewMatrix * vec4( fuera, 1.0 );
 	}
 	#endif
@@ -126,16 +128,18 @@ type Shader = Parameters<THREE.Material['onBeforeCompile']>[0]
 /** Qué partes lleva este campo en esta carga ('' si ninguna). */
 function definesDe(campo: Campo, concha: number): string {
   const e = entornoDeLaEscena()
-  const p = e.pruebas
   const partes = [
     campo === 'polvo' && e.polvoParejo ? '#define AIRE_PAREJO' : '',
     e.obstaculo ? '#define AIRE_OBSTACULO' : '',
-    campo === 'polvo' && e.polvoParejo && (e.posarse || p.remolinos) ? '#define AIRE_FISICA' : '',
+    campo === 'polvo' && e.polvoParejo && e.posarse ? '#define AIRE_FISICA' : '',
     campo === 'polvo' && e.polvoParejo && e.inercia ? '#define AIRE_INERCIA' : '',
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
-  return [...partes, `#define CONCHA_DEL_POLVO ${String(concha)}`, `#define HOLGURA_DEL_CAMPO ${(campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh).toFixed(2)}`].join('\n')
+  const holgura = campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh
+  // [ESCENA 7] Con la física, tras el cursor sólo un margen: que el cursor no meta una mota en el logo.
+  const trasElCursor = partes.includes('#define AIRE_FISICA') ? 0.1 : holgura
+  return [...partes, `#define CONCHA_DEL_POLVO ${String(concha)}`, `#define HOLGURA_DEL_CAMPO ${holgura.toFixed(2)}`, `#define HOLGURA_TRAS_EL_CURSOR ${trasElCursor.toFixed(2)}`].join('\n')
 }
 
 /** ¿Este campo lleva el volumen parejo? (El componente arma su búfer según esto.) */

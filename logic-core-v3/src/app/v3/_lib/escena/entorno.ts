@@ -28,7 +28,6 @@
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6b `remolinos` · el aire se arremolina detrás del logo cuando gira en el cuadro;
  * - 6c `rasante` · bancos de niebla bajos sobre el piso de afuera;
  * - 6d `velocidad` · la niebla de afuera se abre con la velocidad del scroll;
  * - 6e `encendido` · el haz arranca como una luz artificial cuando cae la noche;
@@ -39,7 +38,7 @@
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,encendido,remolinos'   → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,encendido,calor'       → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -52,8 +51,6 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6b · remolinos detrás del logo. */
-  readonly remolinos: boolean
   /** 6c · niebla rasante afuera. */
   readonly nieblaRasante: boolean
   /** 6d · la niebla de afuera se abre con la velocidad. */
@@ -68,7 +65,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  remolinos: false,
   nieblaRasante: false,
   nieblaVelocidad: false,
   hazEncendido: false,
@@ -190,7 +186,6 @@ export function entornoPedido(pedido: string): Entorno {
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   return {
-    remolinos: partes.has('remolinos'),
     nieblaRasante: partes.has('rasante'),
     nieblaVelocidad: partes.has('velocidad'),
     hazEncendido: partes.has('encendido'),

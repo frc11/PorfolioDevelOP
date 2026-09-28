@@ -28,7 +28,7 @@ interface PropsDelAire {
   readonly logoGroupRef: RefObject<THREE.Group | null>
 }
 
-type VentanaDelBanco = Window & { __aireDelBanco?: { abrir: number; motas: number; deriva: number[]; aire: number[] } }
+type VentanaDelBanco = Window & { __aireDelBanco?: { viento: number; motas: number; deriva: number[]; aire: number[] } }
 
 /**
  * [ESCENA 6] 6a · el aire: qué parte de la velocidad de la cámara toma mientras hay scroll, en cuánto
@@ -41,9 +41,6 @@ function derivar(aire: THREE.Vector3, dt: number): void {
   AIRE.uDeriva.value.addScaledVector(aire, dt)
 }
 
-/** La holgura se abre con la estela de E6 (τ 0,11 s) y se cierra más lento, como el agua detrás de una piedra. */
-const ABRE_TAU_S = 0.11
-const CIERRA_TAU_S = 0.7
 const RAD_POR_S = DUST_SPIN_DEG_S.map((g) => (g * Math.PI) / 180)
 
 export function Aire(props: PropsDelAire) {
@@ -70,8 +67,6 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     progreso: Number.NaN,
     camara: new THREE.Vector3(),
     camaraAntes: new THREE.Vector3(),
-    velocidad: 0,
-    primera: true,
     empuje: new THREE.Vector3(),
     aire: new THREE.Vector3(),
   })
@@ -80,7 +75,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     const m = memoria.current
     const dt = Math.min(delta, 0.1)
 
-    // 5a · la forma y la pose del logo, y cuánto se abre la holgura con la velocidad de la cámara.
+    // 5a · la forma y la pose del logo. [ESCENA 7] T7: la holgura ya no se abre con la velocidad (la burbuja se fue).
     if (forma !== undefined) {
       AIRE.uLogoC.value.set(...forma.c)
       AIRE.uLogoP.value.set(...forma.p)
@@ -92,11 +87,6 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
       AIRE.uLogo.value.copy(logo.matrixWorld)
       AIRE.uLogoInverso.value.copy(logo.matrixWorld).invert()
     }
-    const velocidad = m.primera || dt <= 0 ? 0 : state.camera.position.distanceTo(m.camara) / dt
-    m.camara.copy(state.camera.position)
-    m.primera = false
-    m.velocidad += (velocidad - m.velocidad) * (1 - Math.exp(-dt / (velocidad > m.velocidad ? ABRE_TAU_S : CIERRA_TAU_S)))
-    AIRE.uAbrir.value = quieto ? 0 : Math.min(1, m.velocidad / 12)
 
     // [ESCENA 6] 6a · la inercia del aire: mientras el scroll mueve la cámara, el aire la acompaña un
     // poco; cuando frena, sigue derivando hacia donde iba y se frena despacio.
@@ -110,6 +100,8 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
       m.aire.lerp(m.empuje, 1 - Math.exp(-dt / tau))
       derivar(m.aire, dt)
     }
+    // [ESCENA 7] T7: el aire que corre, para la física: rodea al logo y lleva a las motas.
+    AIRE.uVientoDelAire.value.copy(m.aire)
     m.camaraAntes.copy(state.camera.position)
 
     // 5d · de noche, lo que el haz le quita al giro de cada concha, acumulado.
@@ -120,7 +112,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
       if (!quieto) for (let i = 0; i < 3; i += 1) AIRE.uContraGiro.value[i] += RAD_POR_S[Math.min(i, RAD_POR_S.length - 1)] * MOTAS.frenoEnElHaz * noche * dt
     }
 
-    if (hayBanco()) (window as VentanaDelBanco).__aireDelBanco = { abrir: AIRE.uAbrir.value, motas: AIRE.uMotas.value, deriva: AIRE.uDeriva.value.toArray(), aire: m.aire.toArray() }
+    if (hayBanco()) (window as VentanaDelBanco).__aireDelBanco = { viento: AIRE.uVientoDelAire.value.length(), motas: AIRE.uMotas.value, deriva: AIRE.uDeriva.value.toArray(), aire: m.aire.toArray() }
   })
 
   return null

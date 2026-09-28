@@ -17,17 +17,15 @@ import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
 
 /**
  * [ESCENA 6] LA FÍSICA DEL POLVO — corre la simulación de `simulacion.ts` una vez por cuadro, después del
- * rig y del aire (lee la cámara, las conchas y la pose del logo de este cuadro). Sólo con `posarse` o
- * con 6b `remolinos`, y con el polvo parejo.
+ * rig y del aire (lee la cámara, las conchas, la pose del logo y el aire que corre de este cuadro). Con
+ * `posarse` y el polvo parejo: en el producto desde ESCENA 7.
  *
  * Lleva su propio reloj (el de la escena, salvo que el banco pida cámara lenta) y la máquina de la
  * quietud de `posarse.ts`. El remolino del despertar sólo sopla si el polvo llegó a posarse (la
  * quietud duró más que `POSARSE.empiezaS`): mover el cursor después de una pausa corta no arma nada.
  *
- * 6b: lo que se lee como «el logo gira» es la cámara que orbita (en el mundo, el logo sólo se
- * balancea). Los remolinos salen de ese giro APARENTE: con la velocidad angular de la cámara alrededor
- * del logo, se sueltan vórtices en los bordes del logo, del lado de atrás del giro, alternando el
- * sentido, y se apagan en `FISICA.estela.vidaS`.
+ * [ESCENA 7] T7: 6b se borró; el logo como obstáculo del aire que corre está en la
+ * simulación (`alrededorDelLogo`, y las motas que quedan pegadas, modo 6).
  */
 
 interface PropsDeLaFisica {
@@ -37,25 +35,17 @@ interface PropsDeLaFisica {
 }
 
 type VentanaDelBanco = Window & {
-  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; remolinos: () => number[][]; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida> }
+  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida> }
 }
 
 export function Fisica(props: PropsDeLaFisica) {
   const e = entornoDeLaEscena()
-  if (!e.polvoParejo || (!e.posarse && !e.pruebas.remolinos)) return null
+  if (!e.polvoParejo || !e.posarse) return null
   return <FisicaPrendida {...props} />
-}
-
-interface Remolino {
-  x: number
-  z: number
-  fuerza: number
-  edad: number
 }
 
 function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
   const { posarse } = entornoDeLaEscena()
-  const { remolinos: conEstela } = entornoDeLaEscena().pruebas
   const armado = useMemo(() => armar(), [])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({
@@ -69,11 +59,6 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
     plano: new THREE.Plane(new THREE.Vector3(0, 1, 0), -FLOOR_Y),
     punto: new THREE.Vector3(),
     movimiento: 0,
-    azimut: Number.NaN,
-    giro: 0,
-    proximo: 0,
-    signo: 1,
-    remolinos: [] as Remolino[],
     gl: null as THREE.WebGLRenderer | null,
   })
 
@@ -85,14 +70,14 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
         const gl = memoria.current.gl
         if (gl === null) return []
         const datos = armado.sim.leer(gl, 0)
-        const cuenta = [0, 0, 0, 0, 0, 0]
-        for (let k = 0; k < armado.cuantas; k += 1) cuenta[Math.min(5, Math.max(0, Math.round(datos[k * 4 + 3])))] += 1
+        // Aire, cayendo, en el piso, sobre el logo, deslizando, levantada y pegada.
+        const cuenta = [0, 0, 0, 0, 0, 0, 0]
+        for (let k = 0; k < armado.cuantas; k += 1) cuenta[Math.min(6, Math.max(0, Math.round(datos[k * 4 + 3])))] += 1
         return cuenta
       },
       camaraLenta: (escala) => {
         memoria.current.escala = escala
       },
-      remolinos: () => memoria.current.remolinos.map((r) => [r.x, r.z, r.fuerza, r.edad]),
       medir: (pasos) => armado.cronometro.pedir(pasos),
       // Cuánto corrió el aire a las motas que están en el aire: cuántas se movieron más de 0,1, la media y la máxima.
       corrimiento: () => {
@@ -151,12 +136,6 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
     // Cuánto se mueve la coreografía (0–1): lo que hace resbalar el polvo del logo.
     m.movimiento += (Math.min(1, velocidadDelScroll * 25) - m.movimiento) * (1 - Math.exp(-dtReal / 0.2))
 
-    // 6b · el giro aparente del logo: la velocidad angular de la cámara a su alrededor.
-    const azimut = Math.atan2(state.camera.position.x, state.camera.position.z)
-    const dAzimut = Number.isNaN(m.azimut) ? 0 : Math.atan2(Math.sin(azimut - m.azimut), Math.cos(azimut - m.azimut))
-    m.azimut = azimut
-    m.giro += ((dtReal > 0 ? dAzimut / dtReal : 0) - m.giro) * (1 - Math.exp(-dtReal / 0.15))
-    if (conEstela && !quieto) soltarRemolinos(m, state.camera, dt)
 
     dustGroup.updateMatrixWorld(true)
     const conchas: THREE.Matrix4[] = []
@@ -180,33 +159,12 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
       desperto: conRemolino ? despertar.desperto : -1e9,
       origen: despertar.origen,
       movimiento: m.movimiento,
-      remolinos: m.remolinos,
     })
     if (dt > 0) armado.cronometro.correr(gl, () => armado.sim.paso(gl))
     publicar(armado.sim.estado()[0])
   })
 
   return null
-}
-
-/** Suelta vórtices en los bordes del logo, del lado de atrás de su giro aparente, y envejece los vivos. */
-function soltarRemolinos(m: { giro: number; proximo: number; signo: number; remolinos: Remolino[]; reloj: number }, camara: THREE.Camera, dt: number): void {
-  const e = FISICA.estela
-  for (const r of m.remolinos) r.edad += dt
-  m.remolinos = m.remolinos.filter((r) => r.edad < e.vidaS)
-  const giro = Math.abs(m.giro)
-  if (giro < 0.08 || m.reloj < m.proximo || m.remolinos.length >= e.cuantos) return
-  // Uno cada vez menos tiempo cuanto más rápido gira; alternando el borde y el sentido.
-  m.proximo = m.reloj + Math.max(0.25, 0.7 - giro)
-  // Los bordes del logo, vistos desde la cámara: a la derecha y a la izquierda de su eje.
-  const derecha = new THREE.Vector3().setFromMatrixColumn(camara.matrixWorld, 0).setY(0).normalize()
-  const lado = m.signo
-  m.signo = -m.signo
-  // Para la cámara el logo gira al revés que ella: el borde que avanza deja la estela atrás.
-  const atras = derecha.clone().multiplyScalar(-Math.sign(m.giro) * 1.4)
-  const borde = derecha.clone().multiplyScalar(lado * 3.2).add(atras)
-  const [minima, maxima] = e.fuerza
-  m.remolinos.push({ x: borde.x, z: borde.z, fuerza: lado * Math.sign(m.giro) * Math.min(maxima, minima + giro * 12), edad: 0 })
 }
 
 interface Paso {
@@ -220,7 +178,6 @@ interface Paso {
   readonly desperto: number
   readonly origen: readonly [number, number, number]
   readonly movimiento: number
-  readonly remolinos: readonly Remolino[]
 }
 
 function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
@@ -235,12 +192,6 @@ function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   u.uDesperto.value = p.desperto
   ;(u.uOrigen.value as THREE.Vector3).set(...p.origen)
   u.uMovimiento.value = p.movimiento
-  const vortices = u.uRemolinos.value as THREE.Vector4[]
-  for (let i = 0; i < vortices.length; i += 1) {
-    const r = p.remolinos[i]
-    if (r === undefined) vortices[i].set(0, 0, 0, 0)
-    else vortices[i].set(r.x, r.z, r.fuerza, r.edad)
-  }
 }
 
 function publicar(textura: THREE.Texture): void {
@@ -276,7 +227,7 @@ function armar() {
       uDesperto: { value: -1e9 },
       uOrigen: { value: new THREE.Vector3() },
       uMovimiento: { value: 0 },
-      uRemolinos: { value: Array.from({ length: FISICA.estela.cuantos }, () => new THREE.Vector4()) },
+      uVientoDelAire: AIRE.uVientoDelAire,
       uPisoVivo: PISO_EN_VIVO.uPisoVivo,
       uGrillaDelPiso: PISO_EN_VIVO.uGrillaDelPiso,
       uLogoC: AIRE.uLogoC,
@@ -284,7 +235,6 @@ function armar() {
       uLogoPalo: AIRE.uLogoPalo,
       uLogo: AIRE.uLogo,
       uLogoInverso: AIRE.uLogoInverso,
-      uAbrir: AIRE.uAbrir,
     },
     true,
   )

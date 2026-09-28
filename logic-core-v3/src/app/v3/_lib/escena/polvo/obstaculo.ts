@@ -10,8 +10,7 @@
  *
  * **La cuenta.** En el espacio del logo (su grupo, con la vira): la distancia con signo a la pieza
  * más cercana; si una mota queda a menos de dos holguras, se la corre hacia afuera por la normal y
- * queda entre una y dos (repartidas, no pegadas a la superficie). La holgura crece con la velocidad de la cámara (`uAbrir`): al scrollear, las estelas de
- * E6 se abren alrededor del logo. Con E7 la misma cuenta corre después del empuje del cursor, así
+ * queda entre una y dos (repartidas, no pegadas a la superficie). [ESCENA 7] La holgura es fija. Con E7 la misma cuenta corre después del empuje del cursor, así
  * que lo que el cursor empuja contra el logo se desliza por su borde en vez de meterse.
  */
 
@@ -21,8 +20,12 @@ export const FORMA_DEL_LOGO_SVG = {
   palo: { x: 598, desde: 640, hasta: 862, radio: 70 },
 } as const
 
-/** La holgura mínima (sin scroll) y cuánto se suma con la cámara a toda velocidad, en unidades de mundo. */
-export const HOLGURA = { polvo: 0.45, bokeh: 1.0, alAbrir: 3.2 } as const
+/**
+ * La holgura, en unidades de mundo: la mota queda entre una y dos holguras de la forma. [ESCENA 7] T7: fija
+ * (hasta ESCENA 6 sumaba hasta 3,2 con la velocidad de la cámara y se abría una burbuja que después se
+ * cerraba a la fuerza); lo que el aire hace alrededor del logo lo hace la física (`simulacion.ts`).
+ */
+export const HOLGURA = { polvo: 0.45, bokeh: 1.0 } as const
 
 /** Las piezas en el espacio del grupo del logo: el centro de la caja de su trazo va al origen. */
 export interface FormaDelLogo {
@@ -60,7 +63,6 @@ uniform vec4 uLogoP;
 uniform vec4 uLogoPalo;
 uniform mat4 uLogo;
 uniform mat4 uLogoInverso;
-uniform float uAbrir;
 float alToro( vec3 q, vec4 t, out vec3 n ) {
 	vec2 d = q.xy - t.xy;
 	float l = max( length( d ), 1e-4 );

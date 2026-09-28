@@ -1,18 +1,19 @@
 import { FLOOR_Y } from '../probeScene'
-import { DISTANCIA_AL_LOGO_GLSL, HOLGURA } from './obstaculo'
+import { DISTANCIA_AL_LOGO_GLSL } from './obstaculo'
 import { POSARSE } from './posarse'
 import { POLVO_PAREJO } from './volumen'
 
 /**
- * [ESCENA 6] EL POLVO CON FÍSICA — pura: la simulación de cada mota en la GPU, para el polvo que se
- * posa (y lo levanta el aire) y los remolinos de 6b. Sólo corre con alguna de esas pruebas.
+ * [ESCENA 6] EL POLVO CON FÍSICA — pura: la simulación de cada mota en la GPU: el polvo que se posa
+ * (y lo levanta el aire) y, desde ESCENA 7, el logo como obstáculo del aire. En el producto.
  *
  * **El estado.** Dos texturas de una celda por mota (32 bits por canal): la posición y la velocidad,
  * y en el canal que sobra, el MODO de la mota y desde cuándo está en él:
  *
  * - **0 · en el aire.** La mota es la del producto (la caja que acompaña a la cámara, las conchas que
- *   giran, el logo como obstáculo) MÁS un corrimiento `D` que el aire le da y que vuelve solo a cero
+ *   giran) MÁS un corrimiento `D` que el aire le da y que vuelve solo a cero
  *   (un resorte amortiguado). En reposo `D` = 0: la mota está exactamente donde estaba sin física.
+ *   [ESCENA 7] T7: el aire que corre (6a) RODEA al logo, y la mota lo sigue con su inercia (ver abajo).
  * - **1 · cayendo.** Con la quietud (los tiempos de ESCENA 5: empieza a los 8 s, en el piso a los 25)
  *   cada mota se suelta del aire y baja con arrastre: la velocidad va hacia la de caída (la que la
  *   deja en el piso a tiempo) más una turbulencia lenta, así que deriva y no baja en línea recta.
@@ -26,10 +27,18 @@ import { POLVO_PAREJO } from './volumen'
  *   de ráfaga sale de ahí a `POSARSE.velocidad`. La mota que alcanza el frente queda en ese viento, con
  *   arrastre y un poco de gravedad; pasado el soplo, el aire la vuelve a llevar (modo 0, con el `D`
  *   que traiga). El logo es obstáculo en todos los modos que se mueven.
+ * - **6 · pegada.** [ESCENA 7] La que choca contra el logo con fuerza queda pegada un momento (guardada
+ *   en el espacio del logo) y después se desprende: sale con el aire (modo 5) y el aire la vuelve a llevar.
  *
- * **Los remolinos de 6b** son vórtices de eje vertical que se sueltan en los bordes del logo, del
- * lado de atrás de su giro aparente, y se apagan en unos segundos: empujan el `D` de las motas del
- * aire, y el resorte las devuelve.
+ * **[ESCENA 7] T7 · el obstáculo, como un obstáculo de verdad.** Hasta ESCENA 6 la holgura alrededor del
+ * logo se abría con la velocidad de la cámara y se cerraba al frenar: una burbuja que empujaba las motas y
+ * después las traía de vuelta a la fuerza. Se fue, y con ella la holgura fija: en reposo la mota está donde
+ * está (las pocas que caen adentro del logo, unas tres de 14.000, se corren a su cara). Ahora el aire que corre (6a, `uVientoDelAire`) rodea la forma del
+ * logo como un flujo potencial: cerca de la superficie se anula lo que entra y se acelera lo que pasa de
+ * costado (`alrededor`). La mota no sigue ese flujo de golpe: se acerca a él con su arrastre (0,25 s). Con
+ * el aire lento la mota tiene tiempo de doblar y RODEA al logo siguiendo el flujo; con el aire rápido no le
+ * alcanza, CHOCA, y si entra más rápido que `obstaculo.pegar` se queda PEGADA (modo 6) entre 0,35 y 1,3 s,
+ * se desprende y sigue el flujo. Es lo que pasa con el polvo de verdad: lo decide la inercia, no una regla.
  */
 
 export const FISICA = {
@@ -47,9 +56,24 @@ export const FISICA = {
   remolino: { circulacion: 14, nucleo: 0.8, crece: 1.6, subida: 2.6, aspira: 0.8, frente: 2.5, ascenso: 3, duraS: 6 },
   /** Cuánto dura el soplo en una mota levantada antes de que el aire la vuelva a llevar (s, más un azar). */
   soplo: { s: 1.4, azar: 0.8, gravedad: 0.3, arrastre: 0.35 },
-  /** 6b · los remolinos detrás del logo: cuántos a la vez, su núcleo (u) y su vida (s). */
-  estela: { cuantos: 6, nucleo: 1.3, vidaS: 3.6, apaga: 1.5, fuerza: [2.4, 6.5], alcance: 3, alto: 4 },
+  /**
+   * [ESCENA 7] T7 · el logo como obstáculo del aire: el radio de influencia del flujo que lo rodea (u), el
+   * margen de contacto (u), la velocidad con que una mota tiene que entrar para quedar pegada (u/s),
+   * cuánto queda pegada (s, entre las dos) y con cuánto se despega de la cara (u/s).
+   */
+  obstaculo: { radio: 1.8, margen: 0.22, pegar: 1.6, pega: [0.35, 1.3], despega: 0.4 },
 } as const
+
+/**
+ * [ESCENA 7] T7 · la perturbación del flujo alrededor del logo (la misma cuenta que `alrededorDelLogo` en
+ * el shader): con el aire `aire`, en un punto a `d` de la cara, con normal `n`. Pura, para el invariante.
+ */
+export function flujoAlrededor(aire: readonly [number, number, number], n: readonly [number, number, number], d: number): [number, number, number] {
+  const r = FISICA.obstaculo.radio
+  const s = (r / (r + Math.max(d, 0))) ** 3
+  const entra = aire[0] * n[0] + aire[1] * n[1] + aire[2] * n[2]
+  return [0, 1, 2].map((k) => (-entra * n[k] + 0.5 * (aire[k] - entra * n[k])) * s) as [number, number, number]
+}
 
 /**
  * El `DISTANCIA_AL_LOGO_GLSL` más la cuenta que usa la física: la cara del logo, con espesor real. Pide
@@ -104,7 +128,7 @@ uniform float uQuieto;
 uniform float uDesperto;
 uniform vec3 uOrigen;
 uniform float uMovimiento;
-uniform vec4 uRemolinos[ ${FISICA.estela.cuantos} ];
+uniform vec3 uVientoDelAire;
 uniform sampler2D uPisoVivo;
 uniform vec4 uGrillaDelPiso;
 in vec2 vUv;
@@ -124,7 +148,7 @@ float ruido3( vec3 p ) {
 	return mix( a, b, u.z ) * 2.0 - 1.0;
 }
 
-// La mota del producto: la caja que acompaña a la cámara (la cuenta de volumen.ts) y el logo como obstáculo.
+// La mota del producto: la caja que acompaña a la cámara (la cuenta de volumen.ts).
 vec3 libre( vec3 p0, int k ) {
 	mat4 m = uConcha[ k ];
 	mat3 giro = mat3( m );
@@ -133,8 +157,8 @@ vec3 libre( vec3 p0, int k ) {
 	vec3 centro = camara + adelante * ${(L / 2 - POLVO_PAREJO.atras).toFixed(2)};
 	vec3 t = p0 + transpose( giro ) * uDeriva;
 	t = centro + mod( t - centro + ${(L / 2).toFixed(2)}, ${L.toFixed(2)} ) - ${(L / 2).toFixed(2)};
-	vec3 mundo = ( m * vec4( t, 1.0 ) ).xyz;
-	return afueraDelLogo( mundo, ${HOLGURA.polvo.toFixed(2)} + uAbrir * ${HOLGURA.alAbrir.toFixed(2)} );
+	// [ESCENA 7] Sin la holgura: el logo como obstáculo lo hace el aire que lo rodea y el choque (modo 0).
+	return ( m * vec4( t, 1.0 ) ).xyz;
 }
 
 // [ESCENA 7] El piso bajo xz: el tope del bloque del piso vivo si hay, o el piso plano.
@@ -174,21 +198,16 @@ vec3 vientoDelDespertar( vec3 p ) {
 	return v;
 }
 
-// 6b · los remolinos detrás del logo: vórtices de eje vertical (x, z, circulación con signo, edad).
-vec3 vientoDeLaEstela( vec3 p ) {
-	vec3 v = vec3( 0.0 );
-	for ( int i = 0; i < ${FISICA.estela.cuantos}; i++ ) {
-		vec4 k = uRemolinos[ i ];
-		if ( k.z == 0.0 ) continue;
-		vec2 d = p.xz - k.xy;
-		float r2 = dot( d, d );
-		float nucleo = ${FISICA.estela.nucleo.toFixed(2)} * ( 1.0 + 0.6 * k.w );
-		float vida = exp( - k.w / ${FISICA.estela.apaga.toFixed(2)} ) * smoothstep( 0.0, 0.25, k.w );
-		// Sólo cerca: un vórtice suelto llega lejos (cae como 1/r), el de la estela no pasa de unos metros.
-		float cerca = exp( - r2 / pow( ${FISICA.estela.alcance.toFixed(2)} * ( 1.0 + 0.3 * k.w ), 2.0 ) ) * exp( - pow( p.y / ${FISICA.estela.alto.toFixed(2)}, 2.0 ) );
-		v.xz += vec2( - d.y, d.x ) * k.z * vida * cerca / ( r2 + nucleo * nucleo );
-	}
-	return v;
+// [ESCENA 7] T7 · el aire que rodea al logo: la perturbación de un flujo potencial alrededor de la forma
+// (lo que entra a la superficie se anula; lo que pasa de costado, se acelera). Cae con la distancia.
+vec3 alrededorDelLogo( vec3 p, vec3 aire ) {
+	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
+	float d = caraDelLogo( q );
+	if ( d > ${(FISICA.obstaculo.radio * 4).toFixed(2)} ) return vec3( 0.0 );
+	vec3 n = normalize( mat3( uLogo ) * normalDelLogo( q ) );
+	float s = pow( ${FISICA.obstaculo.radio.toFixed(2)} / ( ${FISICA.obstaculo.radio.toFixed(2)} + max( d, 0.0 ) ), 3.0 );
+	float entra = dot( aire, n );
+	return ( - entra * n + 0.5 * ( aire - entra * n ) ) * s;
 }
 
 // Choca con el logo: afuera de su cara, sin velocidad hacia adentro. Devuelve la normal (0 si no tocó).
@@ -216,7 +235,9 @@ void main() {
 	float azar = azar1( indice );
 	float retraso = azar * ${POSARSE.desparejoS.toFixed(2)};
 	vec3 f = libre( o.xyz, int( o.w + 0.5 ) );
-	vec3 p = modo < 0.5 ? f + e0.xyz : ( modo > 2.5 && modo < 3.5 ? ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz : e0.xyz );
+	// En el aire, la del producto más D; sobre el logo o pegada, guardada en el espacio del logo.
+	bool enElLogo = ( modo > 2.5 && modo < 3.5 ) || ( modo > 5.5 && modo < 6.5 );
+	vec3 p = modo < 0.5 ? f + e0.xyz : ( enElLogo ? ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz : e0.xyz );
 	// El piso bajo la mota (con el piso vivo, el tope de su bloque: la posada sube y baja con el mar).
 	float piso = pisoEn( p.xz ) + 0.02 + fract( azar * 7.31 ) * ${POSARSE.alturaPosada.toFixed(3)};
 	float quieta = uReloj - uQuieto;
@@ -229,10 +250,27 @@ void main() {
 			modo = 1.0;
 			desde = uReloj;
 		} else {
+			// El aire corre (6a) y la mota, con él: su velocidad es la del aire más v. Cerca del logo el aire
+			// lo rodea (T7), y la mota se acerca a ese flujo con su arrastre (su inercia).
 			vec3 d = e0.xyz;
-			vec3 viento = vientoDelDespertar( p ) + vientoDeLaEstela( p );
+			vec3 viento = vientoDelDespertar( p ) + alrededorDelLogo( p, uVientoDelAire );
 			v += ( ( viento - v ) / ${FISICA.aire.arrastre.toFixed(2)} - ${FISICA.aire.rigidez.toFixed(2)} * d - ${FISICA.aire.amortigua.toFixed(2)} * v ) * dt;
 			d += v * dt;
+			// Si igual llega a la cara del logo: con fuerza, queda pegada; si no, se corre por la cara.
+			vec3 q = ( uLogoInverso * vec4( f + d, 1.0 ) ).xyz;
+			float cara = caraDelLogo( q );
+			if ( cara < ${FISICA.obstaculo.margen.toFixed(2)} ) {
+				vec3 n = normalize( mat3( uLogo ) * normalDelLogo( q ) );
+				float entra = - dot( uVientoDelAire + v, n );
+				vec3 enLaCara = f + d + n * ( ${(FISICA.obstaculo.margen * 0.5).toFixed(3)} - cara );
+				if ( entra > ${FISICA.obstaculo.pegar.toFixed(2)} ) {
+					salida0 = vec4( ( uLogoInverso * vec4( enLaCara, 1.0 ) ).xyz, 6.0 );
+					salida1 = vec4( 0.0, 0.0, 0.0, uReloj );
+					return;
+				}
+				d = enLaCara - f;
+				v += n * max( 0.0, entra );
+			}
 			if ( dot( d, d ) < 1e-8 && dot( v, v ) < 1e-8 ) { d = vec3( 0.0 ); v = vec3( 0.0 ); }
 			salida0 = vec4( d, 0.0 );
 			salida1 = vec4( v, desde );
@@ -285,11 +323,28 @@ void main() {
 			return;
 		}
 	}
-	// Levantada: en el viento del despertar, con arrastre y poca gravedad; pasado el soplo, el aire la lleva.
-	vec3 viento = vientoDelDespertar( p ) + vientoDeLaEstela( p ) + turbulencia( p );
+	if ( modo > 5.5 && modo < 6.5 ) {
+		// Pegada al logo: un rato (cada una el suyo) y después se desprende con el aire que corre.
+		float pega = mix( ${FISICA.obstaculo.pega[0].toFixed(2)}, ${FISICA.obstaculo.pega[1].toFixed(2)}, fract( azar * 13.1 ) );
+		if ( ! despierta && uReloj - desde < pega ) { salida0 = vec4( e0.xyz, 6.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
+		vec3 n = normalize( mat3( uLogo ) * normalDelLogo( e0.xyz ) );
+		v = uVientoDelAire + n * ${FISICA.obstaculo.despega.toFixed(2)};
+		modo = 5.0;
+		desde = uReloj;
+	}
+	// Levantada: en el viento del despertar y el del aire (que rodea al logo), con arrastre y poca gravedad;
+	// pasado el soplo, el aire la lleva.
+	vec3 viento = vientoDelDespertar( p ) + uVientoDelAire + alrededorDelLogo( p, uVientoDelAire ) + turbulencia( p );
 	v += ( ( viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ) - v ) / ${FISICA.soplo.arrastre.toFixed(2)} ) * dt;
+	vec3 antesDelChoque = v;
 	p += v * dt;
-	chocar( p, v );
+	vec3 golpe = chocar( p, v );
+	// [ESCENA 7] T7: la levantada que choca fuerte contra el logo también queda pegada un momento.
+	if ( dot( golpe, golpe ) > 0.5 && - dot( antesDelChoque, golpe ) > ${FISICA.obstaculo.pegar.toFixed(2)} ) {
+		salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, 6.0 );
+		salida1 = vec4( 0.0, 0.0, 0.0, uReloj );
+		return;
+	}
 	if ( p.y < piso ) { p.y = piso; v.y = max( v.y, 0.0 ); }
 	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} ) {
 		salida0 = vec4( p - f, 0.0 );
@@ -314,7 +369,7 @@ export const FISICA_EN_LA_MOTA_GLSL = /* glsl */ `
 		modoDeLaFisica = floor( e0.w + 0.5 );
 		vec3 mundo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
 		if ( modoDeLaFisica < 0.5 ) mundo += e0.xyz;
-		else if ( modoDeLaFisica > 2.5 && modoDeLaFisica < 3.5 ) mundo = ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz;
+		else if ( ( modoDeLaFisica > 2.5 && modoDeLaFisica < 3.5 ) || ( modoDeLaFisica > 5.5 && modoDeLaFisica < 6.5 ) ) mundo = ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz;
 		else mundo = e0.xyz;
 		transformed = transpose( mat3( modelMatrix ) ) * ( mundo - modelMatrix[ 3 ].xyz );
 		if ( modoDeLaFisica > 0.5 ) {

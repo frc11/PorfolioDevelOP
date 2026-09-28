@@ -7,7 +7,7 @@
  * §3 · (la formación pasó a `s32-escena7`: ESCENA 7 le sacó las fallas y la hizo la fábrica gigante).
  * §4 · las estrellas: muchas débiles y pocas brillantes, el halo sólo en las brillantes, y la banda
  *      cubre todo el cielo que se ve por encima del piso.
- * §5 · el polvo con física: los tiempos de siempre, los modos, la estela de 6b que no pasa de unos metros.
+ * §5 · el polvo con física: los modos y el despertar (6b se borró en ESCENA 7).
  * §6 · (el piso vivo pasó a `s32-escena7`: ESCENA 7 lo hizo un mar, encendido).
  * §7 · 6e: el encendido parpadea una vez, se asienta, y la frontera de la noche no lo repite.
  * §8 · 6g: la compuerta de la variante se ve al bajar y vuelve escondida; el frente va de afuera adentro.
@@ -44,10 +44,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,rasante,velocidad,encendido,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
@@ -87,7 +87,6 @@ const sim = leer('polvo/simulacion.ts')
 afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'modo > 3.5 && modo < 4.5', 'salida0 = vec4( p, 5.0 )'].every((m) => sim.includes(m)), 'los seis modos están en la simulación (aire, cayendo, piso, logo, deslizando y, lo que queda, levantada)')
 afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lleva arrastre y turbulencia (no baja en línea recta)')
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
-afirmar(FISICA.estela.alcance <= 4 && FISICA.estela.alto <= 5, '6b · la estela del logo no pasa de unos metros (un vórtice suelto llega lejos)', `alcance ${String(FISICA.estela.alcance)} u`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')
 
 // ── §7 · 6e ───────────────────────────────────────────────────────────────

@@ -10,6 +10,8 @@
  * T5 · el piso vivo: encendido, un mar continuo que sube y baja, sin scroll, a paso fijo, que no toca al
  *      logo; el borde, el presupuesto y los planos del piso escondidos.
  * T6 · 6a, el aire con inercia: encendido, tal cual se aprobó.
+ * T7 · el obstáculo natural: sin burbuja; el aire rodea al logo (flujo potencial) y la mota lo sigue con su
+ *      inercia; la que entra más rápido que el umbral queda pegada un momento; los remolinos (6b), borrados.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -26,6 +28,8 @@ import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { PISO_VIVO, grillaDelPiso, marejadasEn } from '../piso/bloques'
 import { FLOOR_RADIUS } from '../probeScene'
 import { INERCIA } from '../polvo/Aire'
+import { FISICA, flujoAlrededor } from '../polvo/simulacion'
+import { HOLGURA } from '../polvo/obstaculo'
 import { MOIRE_FAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -146,7 +150,7 @@ controlPositivo('el detector VE los tiempos de antes', { empiezaS: 8, asentadoS:
 afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con movimiento reducido no se posa (como antes)')
 const fisica = leer('polvo/Fisica.tsx')
 afirmar(/const dt = quieto \? 0 : dtReal \* m\.escala/.test(fisica) && !/camaraLenta\(0\.25\)/.test(fisica), 'el remolino va a velocidad real: la cámara lenta es sólo un gancho del banco')
-afirmar(/if \(!e\.polvoParejo \|\| \(!e\.posarse/.test(fisica), '  y la física corre en el producto (con el polvo parejo)')
+afirmar(/if \(!e\.polvoParejo \|\| !e\.posarse\) return null/.test(fisica), '  y la física corre en el producto (con el polvo parejo)')
 
 // ── T5 · el piso vivo ─────────────────────────────────────────────────────
 titulo('T5 · el piso vivo: un mar de bloques')
@@ -201,5 +205,29 @@ titulo('T6 · 6a, el aire con inercia, tal cual')
 afirmar(ENTORNO.inercia && !BASE_LIMPIA.inercia && !entornoPedido('producto,inercia=no').inercia, 'encendido en el producto; el banco lo apaga con `inercia=no`')
 afirmarIgual({ ...INERCIA }, { arrastre: 0.25, tomaS: 0.4, frenaS: 2.2 }, '  con los valores aprobados de ESCENA 6 (toma el 25 % de la cámara en 0,4 s y frena en 2,2 s)')
 afirmar(/e\.polvoParejo && e\.inercia \? '#define AIRE_INERCIA'/.test(leer('polvo/parche.ts')) && /if \(e\.inercia\) \{/.test(leer('polvo/Aire.tsx')), '  y el mismo código: el volumen corrido por el aire antes de repetirse')
+
+// ── T7 · el obstáculo natural ─────────────────────────────────────────────
+titulo('T7 · el obstáculo, como un obstáculo de verdad')
+afirmar(ENTORNO.obstaculo, 'encendido (5a sigue en el producto)')
+const REMOLINOS = /remolinos|vientoDeLaEstela|uRemolinos|soltarRemolinos|FISICA\.estela/
+afirmar(!codigo(ESCENA).some((c) => REMOLINOS.test(c)) && !('remolinos' in entornoPedido('producto,remolinos').pruebas), '6b · los remolinos se borraron: ni el código ni la bandera')
+controlPositivo('el detector VE un remolino', 'uniform vec4 uRemolinos[ 6 ];', (c: string) => !REMOLINOS.test(c))
+const BURBUJA = /uAbrir|alAbrir|ABRE_TAU_S/
+afirmar(!codigo(ESCENA).some((c) => BURBUJA.test(c)) && Object.keys(HOLGURA).join(',') === 'polvo,bokeh', 'sin burbuja: la holgura ya no se abre con la velocidad ni se cierra a la fuerza')
+controlPositivo('el detector VE la burbuja', 'HOLGURA_DEL_CAMPO + uAbrir * 3.20', (c: string) => !BURBUJA.test(c))
+const sim7 = leer('polvo/simulacion.ts')
+afirmar(/return \( m \* vec4\( t, 1\.0 \) \)\.xyz;/.test(sim7) && /#if defined\( AIRE_OBSTACULO \) && ! defined\( AIRE_FISICA \)/.test(leer('polvo/parche.ts')), '  con física, la mota no se corre del logo en reposo: lo hace el aire que lo rodea (sin física, el bokeh, la holgura fija)')
+// El flujo potencial: en la cara, el aire no entra; de costado, pasa más rápido; lejos, no hay nada.
+const n: [number, number, number] = [0, 0, 1]
+const aire: [number, number, number] = [0.6, 0, -2]
+const enLaCara = flujoAlrededor(aire, n, 0)
+const total = [aire[0] + enLaCara[0], aire[1] + enLaCara[1], aire[2] + enLaCara[2]]
+afirmar(Math.abs(total[2]) < 1e-12 && Math.abs(total[0]) > Math.abs(aire[0]), 'el aire rodea al logo: en su cara no entra, y lo que pasa de costado se acelera', `normal ${total[2].toFixed(3)}, costado ${aire[0]} → ${total[0].toFixed(2)} u/s`)
+const lejos = flujoAlrededor(aire, n, 6 * FISICA.obstaculo.radio)
+afirmar(Math.hypot(...lejos) < 0.02 * Math.hypot(...aire), '  y lejos del logo el aire no se entera', `a ${String(6 * FISICA.obstaculo.radio)} u: ${(Math.hypot(...lejos) / Math.hypot(...aire) * 100).toFixed(2)} %`)
+afirmar(/vec3 viento = vientoDelDespertar\( p \) \+ alrededorDelLogo\( p, uVientoDelAire \);/.test(sim7) && /\/ \$\{FISICA\.aire\.arrastre\.toFixed\(2\)\}/.test(sim7), '  la mota del aire sigue ese flujo con su arrastre (su inercia): lenta, dobla; rápida, choca')
+afirmar(/if \( entra > \$\{FISICA\.obstaculo\.pegar\.toFixed\(2\)\} \)/.test(sim7) && /modo > 5\.5 && modo < 6\.5/.test(sim7), 'con fuerza, queda pegada (modo 6) y se desprende siguiendo el aire', `umbral ${String(FISICA.obstaculo.pegar)} u/s entrando a la cara; pegada de ${String(FISICA.obstaculo.pega[0])} a ${String(FISICA.obstaculo.pega[1])} s`)
+afirmar(FISICA.obstaculo.pegar > 0.5 && FISICA.obstaculo.pegar < 4.8, '  el umbral cae entre el aire de un scroll suave (~0,5 u/s, medido) y el de uno fuerte (~5 u/s, medido)')
+afirmar(/\( modoDeLaFisica > 5\.5 && modoDeLaFisica < 6\.5 \) \) mundo = \( uLogo/.test(sim7), '  la pegada acompaña al logo (guardada en su espacio)')
 
 cerrar('s32-escena7')
