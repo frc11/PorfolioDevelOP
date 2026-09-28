@@ -35,7 +35,13 @@ export async function abrirBanco(ancho: number, alto: number, opciones: { readon
   if (opciones.antesDeCargar !== undefined) await p.conexion.enviar('Page.addScriptToEvaluateOnNewDocument', { source: opciones.antesDeCargar }, s)
   await irA(p, 'http://localhost:3000/v3')
   await esperar(4000)
-  const estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
+  let estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
+  // [ESCENA 5] Si la ventana quedó detrás de otra, se la trae al frente antes de cortar.
+  for (let intento = 0; intento < 4 && estado.visible !== 'visible'; intento += 1) {
+    await p.conexion.enviar('Page.bringToFront', {}, s)
+    await esperar(1500)
+    estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
+  }
   if (estado.visible !== 'visible' || estado.ancho !== ancho) throw new Error(`la pestaña no está al frente o el ancho no es el pedido: ${JSON.stringify(estado)}`)
   return {
     p,

@@ -13,10 +13,12 @@ import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
 import { Entorno } from './entorno/Entorno'
 import { DepthParticles } from './DepthParticles'
-import { Formacion, radioDeLaLosaConFormacion } from './formacion/Formacion'
-import { PesoDelLogo } from './peso/PesoDelLogo'
-import { CupulaViva } from './membrana/CupulaViva'
+import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
+import { MoireVivo } from './moire/MoireVivo'
+import { Aire } from './polvo/Aire'
+import { Paredes } from './relieve/Paredes'
+import { PisoDeBloques } from './relieve/PisoDeBloques'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
 import { FOG_COLOR, FOG_FAR, FOG_NEAR } from './probeAtmosphere'
@@ -145,8 +147,6 @@ export default function ProbeStage({
    * escala y el volteo del SVG, y esta rotación se compone por afuera.
    */
   const logoGroupRef = useRef<THREE.Group>(null)
-  /** [ESCENA 4] El peso del logo: un grupo propio adentro del de la vira; en reposo, la identidad. */
-  const pesoRef = useRef<THREE.Group>(null)
   /** B13 · el material del logo: lo publica `ProbeLogo` y `OrbitRig` le escribe la
    *  emisiva en el mismo cuadro que las luces (`logoEmision.ts`). */
   const logoMaterialRef = useRef<THREE.MeshStandardMaterial>(null)
@@ -210,12 +210,11 @@ export default function ProbeStage({
         */}
 
         <group ref={logoGroupRef}>
-          <group ref={pesoRef}>
-            <ProbeLogo stats={stats} onReady={onReady} materialRef={logoMaterialRef} />
-          </group>
+          <ProbeLogo stats={stats} onReady={onReady} materialRef={logoMaterialRef} />
         </group>
 
-        <StudioFloor radioDeLaLosa={radioDeLaLosaConFormacion(calidad)} />
+        {/* [ESCENA 5] Con la formación, el piso es un escenario con otro más bajo alrededor. */}
+        <StudioFloor escenario={pisoConFormacion(calidad)} />
         {/* [ESCENA 3] La mancha sigue la altura del logo y se contrae con el pulso principal. */}
         <ContactOcclusion logoGroupRef={logoGroupRef} />
 
@@ -235,7 +234,7 @@ export default function ProbeStage({
           direcciones contra los cinco recorridos: 26 veces de margen. Los números
           están en `probeMoire.ts`.
         */}
-        <MoireScreen ref={moireRef} store={store} />
+        <MoireScreen ref={moireRef} store={store} hastaElPiso={pisoConFormacion(calidad) !== undefined} />
 
         {/*
           Los dos campos van en grupos propios porque el rig los hace DERIVAR.
@@ -275,11 +274,13 @@ export default function ProbeStage({
         />
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        {/* [ESCENA 4] Las pruebas, apagadas salvo en el banco (`entorno.ts`, `Escena4`). */}
+        {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
+        <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
+        <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        <PesoDelLogo rig={rig} pesoRef={pesoRef} quieto={reducedMotion} />
-        <CupulaViva rig={rig} moireRef={moireRef} quieto={reducedMotion} />
-        <Estrellas rig={rig} />
+        <Estrellas rig={rig} calidad={calidad} />
+        <Paredes />
+        <PisoDeBloques />
       </Suspense>
     </Canvas>
   )

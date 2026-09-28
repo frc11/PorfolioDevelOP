@@ -1,5 +1,6 @@
 'use client'
 
+import { useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
@@ -7,6 +8,7 @@ import { FLOOR_Y } from './probeScene'
 import {
   DUST_SHELLS,
   PARTICLES_MAX,
+  createRandom,
   PARTICLE_FAR_COLOR,
   PARTICLE_NEAR_COLOR,
   PARTICLE_R_MAX,
@@ -18,6 +20,10 @@ import {
 } from './probeParticles'
 import { conBrilloDeNoche } from './particleGlow'
 import { conPolvoVivo } from './entorno/polvoVivo'
+import { hayBanco } from './entorno'
+import { contarPorZonas } from './polvo/conteo'
+import { conAire, llevaElVolumenParejo } from './polvo/parche'
+import { POLVO_PAREJO, SEMILLA_DEL_POLVO_PAREJO } from './polvo/volumen'
 import { createDotSpriteData } from './particleTextures'
 import type { ProbeParamsStore } from './probeStore'
 
@@ -63,8 +69,13 @@ type DrawRangeTarget = {
   setDrawRange(start: number, count: number): void
 }
 
+type VentanaDelBanco = Window & { __polvoDelBanco?: { contar: (columnas: number, filas: number) => number[]; camara: () => number[]; puntos: () => number } }
+
 export function DepthParticles({ store }: DepthParticlesProps) {
   const geometryRefs = useRef<(DrawRangeTarget | null)[]>([])
+  const pointsRefs = useRef<(THREE.Object3D | null)[]>([])
+  const camera = useThree((state) => state.camera)
+  const scene = useThree((state) => state.scene)
 
   /**
    * El campo se calcula UNA vez, con PRNG sembrado (ver `createRandom`): mismo
@@ -76,6 +87,7 @@ export function DepthParticles({ store }: DepthParticlesProps) {
    * exponente 1.4 carga un poco más cerca todavía.
    */
   const shells = useMemo(() => {
+    if (llevaElVolumenParejo('polvo')) return campoParejo()
     const field = buildParticleField(
       PARTICLES_MAX,
       PARTICLE_R_MIN,
@@ -144,6 +156,7 @@ export function DepthParticles({ store }: DepthParticlesProps) {
    */
   useEffect(() => {
     const apply = (values: { particleCount: number }) => {
+      // Con el volumen parejo la caja lleva más motas: se dibuja la misma FRACCIÓN que pide el control.
       const share = Math.min(1, Math.max(0, values.particleCount / PARTICLES_MAX))
       for (let index = 0; index < SHELL_COUNT; index += 1) {
         const geometry = geometryRefs.current[index]
@@ -158,11 +171,30 @@ export function DepthParticles({ store }: DepthParticlesProps) {
     return store.subscribe(apply)
   }, [store, shells])
 
+  // [ESCENA 5] Para el banco: cuántas motas caen en cada zona de la pantalla (`polvo/conteo.ts`).
+  useEffect(() => {
+    if (!hayBanco()) return undefined
+    const ventana = window as VentanaDelBanco
+    ventana.__polvoDelBanco = {
+      contar: (columnas, filas) => contarPorZonas(pointsRefs.current.filter((p) => p instanceof THREE.Points), camera, llevaElVolumenParejo('polvo'), columnas, filas),
+      camara: () => [...camera.position.toArray(), ...camera.getWorldDirection(new THREE.Vector3()).toArray(), ...camera.quaternion.toArray()],
+      puntos: () => puntosDeLaEscena(scene),
+    }
+    return () => {
+      delete ventana.__polvoDelBanco
+    }
+  }, [camera, scene])
+
   return (
     <>
       {shells.map((shell, index) => (
         <group key={index}>
-          <points frustumCulled={false}>
+          <points
+            frustumCulled={false}
+            ref={(instance) => {
+              pointsRefs.current[index] = instance
+            }}
+          >
             <bufferGeometry
               ref={(instance) => {
                 geometryRefs.current[index] = instance
@@ -182,7 +214,8 @@ export function DepthParticles({ store }: DepthParticlesProps) {
             <pointsMaterial
               ref={(material) => {
                 // B8: en la noche las motas brillan (mezcla hacia el blanco, sin color) — `particleGlow.ts`.
-                if (material !== null) conPolvoVivo(conBrilloDeNoche(material))
+                // [ESCENA 5] Y el aire: el volumen parejo y las pruebas del polvo — `polvo/parche.ts`.
+                if (material !== null) conAire(conPolvoVivo(conBrilloDeNoche(material)), 'polvo', index)
               }}
               map={sprite}
               size={PARTICLE_SIZE}
@@ -197,4 +230,33 @@ export function DepthParticles({ store }: DepthParticlesProps) {
       ))}
     </>
   )
+}
+
+/**
+ * [ESCENA 5] EL CAMPO PAREJO — uniforme en una caja (`polvo/volumen.ts`), en tres conchas de igual
+ * cantidad. El color no se hornea: lo pone el shader por el radio de cada mota ya repetida.
+ */
+function campoParejo(): { count: number; positions: Float32Array; colors: Float32Array }[] {
+  const random = createRandom(SEMILLA_DEL_POLVO_PAREJO)
+  const n = POLVO_PAREJO.cuantas
+  const lado = POLVO_PAREJO.lado
+  const positions = new Float32Array(n * 3)
+  for (let i = 0; i < n * 3; i += 1) positions[i] = (random() - 0.5) * lado
+  const colors = new Float32Array(n * 3).fill(0.5)
+  return Array.from({ length: SHELL_COUNT }, (_unused, index) => {
+    const from = Math.round((index / SHELL_COUNT) * n)
+    const to = Math.round(((index + 1) / SHELL_COUNT) * n)
+    return { count: to - from, positions: positions.subarray(from * 3, to * 3), colors: colors.subarray(from * 3, to * 3) }
+  })
+}
+
+/** [ESCENA 5] Para el banco: cuántos puntos manda a dibujar la escena entera (polvo, bokeh, estrellas). */
+function puntosDeLaEscena(scene: THREE.Object3D): number {
+  let total = 0
+  scene.traverse((o) => {
+    if (!(o instanceof THREE.Points) || !o.visible) return
+    const n = o.geometry.getAttribute('position').count
+    total += Math.min(n, o.geometry.drawRange.count)
+  })
+  return total
 }

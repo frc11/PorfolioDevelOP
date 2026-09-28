@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { entornoDeLaEscena } from './entorno'
 import { sombraEn } from './entorno/sombra'
 import { PULSO_VIVO, VIVO } from './entorno/vivo'
+import { SOMBRA_DEL_HAZ, manchasDelHaz } from './sombra/sombraDelHaz'
 
 import {
   CONTACT_COLOR,
@@ -79,30 +80,49 @@ function alturaDelLogo(logo: THREE.Object3D): number | null {
 export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.MeshBasicMaterial>(null)
+  const duraRef = useRef<THREE.Mesh>(null)
+  const duraMaterialRef = useRef<THREE.MeshBasicMaterial>(null)
   const reposoRef = useRef<number | null>(null)
-  const viva = entornoDeLaEscena().sombraViva && logoGroupRef !== undefined
+  const entorno = entornoDeLaEscena()
+  const viva = entorno.sombraViva && logoGroupRef !== undefined
+  // [ESCENA 5] 5c: la mancha según el haz, con bandera (`sombra/sombraDelHaz.ts`).
+  const conElHaz = entorno.pruebas.sombraHaz
 
   useFrame(() => {
-    if (!viva) return
-    const logo = logoGroupRef?.current
     const mesh = meshRef.current
     const material = materialRef.current
-    if (!logo || !mesh || !material) return
-    if (reposoRef.current === null) {
-      // La altura de reposo, sin la vira: se saca el giro un instante para medir y se devuelve.
-      const giro = logo.rotation.clone()
-      logo.rotation.set(0, 0, 0)
-      logo.updateMatrixWorld(true)
-      reposoRef.current = alturaDelLogo(logo)
-      logo.rotation.copy(giro)
-      logo.updateMatrixWorld(true)
-      if (reposoRef.current === null) return
+    if (!mesh || !material) return
+    let escala = 1
+    let opacidad = 1
+    if (viva) {
+      const logo = logoGroupRef?.current
+      if (!logo) return
+      if (reposoRef.current === null) {
+        // La altura de reposo, sin la vira: se saca el giro un instante para medir y se devuelve.
+        const giro = logo.rotation.clone()
+        logo.rotation.set(0, 0, 0)
+        logo.updateMatrixWorld(true)
+        reposoRef.current = alturaDelLogo(logo)
+        logo.rotation.copy(giro)
+        logo.updateMatrixWorld(true)
+        if (reposoRef.current === null) return
+      }
+      const altura = alturaDelLogo(logo)
+      if (altura === null) return
+      const sombra = sombraEn(altura, reposoRef.current, VIVO.uTiempo.value - PULSO_VIVO.ultimoPrincipal)
+      escala = sombra.escala
+      opacidad = sombra.opacidad
     }
-    const altura = alturaDelLogo(logo)
-    if (altura === null) return
-    const sombra = sombraEn(altura, reposoRef.current, VIVO.uTiempo.value - PULSO_VIVO.ultimoPrincipal)
-    mesh.scale.set(sombra.escala, sombra.escala, 1)
-    material.opacity = CONTACT_OPACITY * sombra.opacidad
+    if (!viva && !conElHaz) return
+    const haz = manchasDelHaz(VIVO.uNoche.value, conElHaz && entorno.E1)
+    mesh.scale.set(escala * haz.escalaBlanda, escala * haz.escalaBlanda, 1)
+    material.opacity = CONTACT_OPACITY * opacidad * haz.opacidadBlanda
+    const dura = duraRef.current
+    const duraMaterial = duraMaterialRef.current
+    if (dura && duraMaterial) {
+      dura.scale.set(escala * haz.escalaDura, escala * haz.escalaDura, 1)
+      duraMaterial.opacity = Math.min(1, CONTACT_OPACITY * opacidad * haz.opacidadDura)
+    }
   })
 
   const sprite = useMemo(() => {
@@ -118,37 +138,56 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
     return texture
   }, [])
 
-  // r3f solo libera lo que declara el JSX; ésta la creó `useMemo`.
+  const spriteDuro = useMemo(() => {
+    if (!conElHaz) return null
+    const s = SOMBRA_DEL_HAZ.sprite
+    const texture = new THREE.DataTexture(createContactSpriteData(CONTACT_SPRITE_SIZE, s.nucleo, s.caida), CONTACT_SPRITE_SIZE, CONTACT_SPRITE_SIZE, THREE.RGBAFormat)
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.needsUpdate = true
+    return texture
+  }, [conElHaz])
+
+  // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(() => () => sprite.dispose(), [sprite])
+  useEffect(() => () => spriteDuro?.dispose(), [spriteDuro])
 
   return (
-    <mesh
-      ref={meshRef}
-      // Acostado mirando hacia arriba, y apoyado apenas por encima de las
-      // marcas de piso (que suben hasta 0,012 desde el papel) para que también
-      // las oscurezca: una oclusión que no toca lo que está debajo del objeto no
-      // es una oclusión, es una calcomanía.
-      position={[0, FLOOR_Y + CONTACT_LIFT, 0]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      renderOrder={-1}
-    >
-      <planeGeometry args={[CONTACT_WIDTH, CONTACT_DEPTH]} />
-      {/*
-        `basic` y no `standard`: esto no es una superficie iluminada, es una
-        modulación de lo que hay debajo. Un material que respondiera a las luces
-        estaría calculando el sombreado de una mancha negra.
+    <>
+      <mesh
+        ref={meshRef}
+        // Acostado mirando hacia arriba, y apoyado apenas por encima de las
+        // marcas de piso (que suben hasta 0,012 desde el papel) para que también
+        // las oscurezca: una oclusión que no toca lo que está debajo del objeto no
+        // es una oclusión, es una calcomanía.
+        position={[0, FLOOR_Y + CONTACT_LIFT, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        renderOrder={-1}
+      >
+        <planeGeometry args={[CONTACT_WIDTH, CONTACT_DEPTH]} />
+        {/*
+          `basic` y no `standard`: esto no es una superficie iluminada, es una
+          modulación de lo que hay debajo. Un material que respondiera a las luces
+          estaría calculando el sombreado de una mancha negra.
 
-        El mapa aporta SOLO la forma: sus canales de color son blancos, así que
-        el tono lo pone `color` y la densidad el alfa por `opacity`.
-      */}
-      <meshBasicMaterial
-        ref={materialRef}
-        map={sprite}
-        color={CONTACT_COLOR}
-        transparent
-        opacity={CONTACT_OPACITY}
-        depthWrite={false}
-      />
-    </mesh>
+          El mapa aporta SOLO la forma: sus canales de color son blancos, así que
+          el tono lo pone `color` y la densidad el alfa por `opacity`.
+        */}
+        <meshBasicMaterial
+          ref={materialRef}
+          map={sprite}
+          color={CONTACT_COLOR}
+          transparent
+          opacity={CONTACT_OPACITY}
+          depthWrite={false}
+        />
+      </mesh>
+      {spriteDuro !== null && (
+        <mesh ref={duraRef} position={[0, FLOOR_Y + CONTACT_LIFT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
+          <planeGeometry args={[CONTACT_WIDTH, CONTACT_DEPTH]} />
+          <meshBasicMaterial ref={duraMaterialRef} map={spriteDuro} color={CONTACT_COLOR} transparent opacity={0} depthWrite={false} />
+        </mesh>
+      )}
+    </>
   )
 }

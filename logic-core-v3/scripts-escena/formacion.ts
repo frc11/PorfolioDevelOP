@@ -1,27 +1,26 @@
 /**
- * SPRINT ESCENA 4 — la formación. formacion.ts <ancho> <alto> "<variantes>" ["<momentos>"] [carpeta]
+ * SPRINT ESCENA 4 y 5 — la formación. formacion.ts <ancho> <alto> "<variantes>" ["<momentos>"] [carpeta]
  *
  * Una captura por variante y por momento, con el mismo recorrido del banco de ESCENA 3 (por scroll, a
  * pasos, asentada y verificada). Una variante es un pedido para `_lib/escena/entorno.ts`:
- * `E1,E4,E6,E7` es el producto, y se le suma `L1` o `L2`, `densidad=menos|mas`, `mirada`…
+ * `producto` es el producto, y se le suma `formacion`, `movil=menos`, `mirada`…
  *
  * Con formación, además mide: el contraste del logo contra su entorno y el del texto, con la
- * formación y sin ella en la misma carga (`contraste-formacion.ts`), y cuántas copias caen adentro
- * del cuadro. Todo va a `~/.cache/b4-medicion/escena4/<carpeta>/`.
+ * formación y sin ella en la misma carga (`contraste-formacion.ts`), cuántas copias caen adentro del
+ * cuadro y cuántos triángulos suman. Todo va a `~/.cache/b4-medicion/escena5/<carpeta>/`.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 
 import { medir } from '../scripts-b4/navegador'
 import { abrirBanco, type Banco } from '../scripts-viajes/banco'
-import { CONTADOR, ESPIA_DE_SALTOS, MOMENTOS, capturarMomento, selloDeCarga } from './banco-escena'
+import { CONTADOR, DIR5, ESPIA_DE_SALTOS, MOMENTOS, capturarMomento, selloDeCarga } from './banco-escena'
 import { rotuloDe } from './comparar'
 import { contrasteDeLaFormacion, contrasteDelTexto, type ContrasteDeLaFormacion, type Tomas } from './contraste-formacion'
 import { escenaSola } from './logo'
 
-export const DIR4 = 'C:/Users/Valentino/.cache/b4-medicion/escena4'
 
 const [ANCHO, ALTO] = [Number(process.argv[2] ?? 1440), Number(process.argv[3] ?? 900)]
-const VARIANTES = (process.argv[4] ?? 'E1,E4,E6,E7').split(' ').filter(Boolean)
+const VARIANTES = (process.argv[4] ?? 'producto,formacion').split(' ').filter(Boolean)
 const QUE_MOMENTOS = (process.argv[5] ?? 'hero quienes-somos trabajos-de-noche por-que-develop pie').split(' ').filter(Boolean)
 const CARPETA = process.argv[6] ?? 'formacion/cuadros'
 
@@ -68,7 +67,7 @@ async function medirElTexto(b: Banco): Promise<{ con: number; sin: number; peorC
 }
 
 async function principal(): Promise<void> {
-  const dir = `${DIR4}/${CARPETA}`
+  const dir = `${DIR5}/${CARPETA}`
   mkdirSync(dir, { recursive: true })
   const filas: unknown[] = []
   for (const variante of VARIANTES) {
@@ -84,7 +83,7 @@ async function principal(): Promise<void> {
         const hay = await medir<boolean>(b.p, HAY_FORMACION)
         const medida = hay ? { ...(await medirElContraste(b, `${dir}/${nombre}`)), texto: await medirElTexto(b) } : null
         const visibles = hay ? await medir<number>(b.p, 'window.__formacionDelBanco.visibles()') : 0
-        const copias = hay ? await medir<{ copias: number; instancias: number }>(b.p, '({ copias: window.__formacionDelBanco.copias, instancias: window.__formacionDelBanco.instancias })') : null
+        const copias = hay ? await medir<{ copias: number; instancias: number; triangulosDeLaFormacion: number }>(b.p, '({ copias: window.__formacionDelBanco.copias, instancias: window.__formacionDelBanco.instancias, triangulosDeLaFormacion: window.__formacionDelBanco.triangulos })') : null
         const dibujos = await medir<{ ultimo: number; ultimosTriangulos: number }>(b.p, 'window.__dibujos')
         const fila = { variante, momento: momento.nombre, ancho: ANCHO, y: c.y, llamadas: dibujos.ultimo, triangulos: Math.round(dibujos.ultimosTriangulos), visibles, ...copias, ...medida }
         filas.push(fila)

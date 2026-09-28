@@ -1,23 +1,19 @@
-import { FLOOR_RADIUS } from '../probeScene'
 import { REGION, type Region } from './regiones'
 
 /**
- * [ESCENA 4] LA FORMACIÓN — pura: dónde se para cada copia fallada y de qué piezas está hecha. Sin
+ * [ESCENA 5] LA FORMACIÓN — pura: dónde se para cada copia fallada y de qué piezas está hecha. Sin
  * three, para que el invariante la corra sin navegador.
  *
- * **La formación.** Como un ejército: bloques de filas intercaladas (cada fila corrida media posición
- * respecto de la anterior), con un pasillo entre bloques, y todas mirando hacia el mismo lado (+z, el
- * lado del hero). Nada al azar en la formación: la imperfección está en las piezas.
+ * **Dónde.** Afuera de la trama, en todo el perímetro: la cúpula es un cilindro de rendijas, su piso
+ * es un escenario (`radioDelEscenario`, apenas afuera de la capa gruesa en 44) y la formación está
+ * alrededor, en un piso `desnivel` más abajo. Se ve a través de la trama: la cámara orbita adentro,
+ * así que la formación la rodea entera.
  *
- * **El claro.** Ninguna copia entra en el círculo de `radioDelClaro`, y ese radio no es de gusto: es
- * más grande que la distancia más larga de la cámara en las poses cercanas (20), así que ninguna copia
- * queda nunca entre la cámara y el logo, ni pegada a la lente. La única pose que sale del claro es el
- * pie (a 40), y desde ahí la formación queda por debajo de la línea hacia el logo.
- *
- * **Un nivel más abajo.** La formación está en un piso más bajo que el nuestro:
- * - **L1** · el nuestro sobre una plataforma apenas elevada: el borde del claro es un escalón;
- * - **L2** · sin plataforma: el piso cae en rampa desde el borde del claro y la formación, más abajo,
- *   es más chica.
+ * **Cómo.** Como un ejército: bloques rectangulares tangentes al anillo, con un pasillo entre bloque
+ * y bloque; adentro de cada bloque, filas intercaladas (la fila impar lleva una copia menos, corrida
+ * media posición) y todas mirando al centro del bloque, o sea al escenario. Nada al azar en la
+ * formación: la imperfección está en las piezas. Del tamaño casi del logo (`escala`): no son
+ * miniaturas, y las de adelante tapan a las de atrás.
  *
  * **Falladas, no deformadas.** Cada copia es un modelo que salió mal de fábrica, hecho de piezas
  * rígidas: cada pieza es la malla del logo recortada a una región (`regiones.ts`) y puesta con su
@@ -76,32 +72,38 @@ export interface Pieza {
 export interface Copia {
   readonly x: number
   readonly z: number
+  /** Hacia dónde mira (giro alrededor de y): el +z de la copia apunta al centro de su bloque. */
+  readonly mira: number
+  readonly bloque: number
+  readonly fila: number
   readonly falla: Falla
   readonly piezas: readonly Pieza[]
-  /** Hacia dónde tendría que girar para mirar al logo (F-mirada), y en qué orden. */
+  /** Cuánto más tendría que girar para mirar al logo (F-mirada), y en qué orden. */
   readonly anguloAlCentro: number
   readonly retardo: number
 }
 
-export type Lectura = 'L1' | 'L2'
-export type Densidad = 'menos' | 'base' | 'mas'
-
 export const FORMACION = {
-  radioDelClaro: 21.5,
-  /** Hasta dónde llega: adentro de la losa (34), antes de que el piso suba en el ciclorama. */
-  radioExterior: FLOOR_RADIUS - 1,
-  L1: { desnivel: 0.4, rampa: 0, escala: 0.28 },
-  L2: { desnivel: 1.3, rampa: 3.2, escala: 0.22 },
+  /** El tamaño de cada copia contra el logo. */
+  escala: 0.9,
+  /** El borde del escenario: nuestro piso termina acá, apenas afuera de la capa gruesa (44). */
+  radioDelEscenario: 45,
+  /** Cuánto más abajo que el nuestro está el piso de la formación. */
+  desnivel: 1.6,
+  /** A qué distancia del centro va la primera fila (el centro de su bloque). */
+  radioDeLaPrimeraFila: 48,
+  /** Cuántos bloques dan la vuelta, y cuántas columnas y filas lleva cada uno. */
+  bloques: 7,
+  bloque: { columnas: 5, filas: 4 },
   /**
-   * El paso dentro de un bloque, en anchos y en altos de copia. De costado nunca se tocan (más de un
-   * ancho); de fondo van apretadas, como un ejército, y la fila intercalada asoma entre dos de adelante.
+   * El paso adentro de un bloque, en anchos y en altos de copia. De costado nunca se tocan (más de un
+   * ancho); de fondo van apretadas, y la fila intercalada asoma entre dos de adelante.
    */
   paso: { lateral: 1.08, entreFilas: 0.72 },
-  bloque: { columnas: 6, filas: 4, pasilloLateral: 1.1, pasilloEntreFilas: 1.6 },
-  /** Cuánto se estira el paso para ralear o apretar. */
-  densidad: { menos: 1.35, base: 1, mas: 0.84 },
-  /** En el teléfono: un bloque de cada dos, y las dos primeras filas de cada uno. */
-  movil: { saltoDeBloques: 2, filas: 2 },
+  /** Hasta dónde llega el piso de abajo: de ahí sube el ciclorama. */
+  radioDelPisoDeAbajo: 64,
+  /** En el teléfono, con `movil=menos`: las dos primeras filas de cada bloque. */
+  movil: { filas: 2 },
   /** El tono de una copia sin falla de color, y los de las que nacieron mal. */
   tono: { base: 0.5, blanco: 0.93, grisClaro: 0.76 },
 } as const
@@ -134,16 +136,6 @@ export function esPerfecta(copia: Copia): boolean {
   const p = copia.piezas[0]
   const nulo = (v: Vec3, base: number): boolean => v.every((c) => Math.abs(c - base) < 1e-6)
   return p.region === REGION.todo && nulo(p.giro, 0) && nulo(p.desplazamiento, 0) && nulo(p.escala, 1) && Math.abs(p.tono - FORMACION.tono.base) < 1e-6
-}
-
-/** La altura del piso de la formación bajo el nuestro. */
-export function desnivelDe(lectura: Lectura): number {
-  return FORMACION[lectura].desnivel
-}
-
-/** Desde qué radio arranca el piso de abajo: en L2 hay una rampa entre los dos pisos. */
-export function radioDelPisoDeAbajo(lectura: Lectura): number {
-  return FORMACION.radioDelClaro + FORMACION[lectura].rampa
 }
 
 function pieza(parcial: Partial<Pieza> & Pick<Pieza, 'region'>): Pieza {
@@ -243,67 +235,69 @@ export const APOYAR_EN_EL_PISO: ReadonlySet<Falla> = new Set<Falla>([
 interface Lugar {
   readonly x: number
   readonly z: number
+  readonly mira: number
+  readonly bloque: number
+  readonly fila: number
 }
 
-/** Los lugares de la formación: bloques de filas intercaladas, con pasillos, recortados al anillo. */
-export function lugares(lectura: Lectura, densidad: Densidad, anchoDeCopia: number, altoDeCopia: number, movil: boolean): Lugar[] {
+/**
+ * El ángulo del centro de cada bloque. Corrido medio bloque: detrás del pie (la cámara a 40, en el
+ * azimut 0) cae un pasillo y no un bloque, y detrás del logo en el hero (azimut 180) cae un bloque.
+ */
+export function anguloDelBloque(bloque: number): number {
+  return ((bloque + 0.5) / FORMACION.bloques) * Math.PI * 2
+}
+
+/** Los lugares de la formación: bloques tangentes al anillo, de filas intercaladas, con pasillos. */
+export function lugares(anchoDeCopia: number, altoDeCopia: number, movil: boolean): Lugar[] {
   const f = FORMACION
-  const escala = f[lectura].escala
-  const estira = f.densidad[densidad]
-  const lateral = f.paso.lateral * anchoDeCopia * escala * estira
-  const entreFilas = f.paso.entreFilas * altoDeCopia * escala * estira
-  const b = f.bloque
-  const anchoDelBloque = b.columnas * lateral + b.pasilloLateral * anchoDeCopia * escala * estira
-  const hondoDelBloque = b.filas * entreFilas + b.pasilloEntreFilas * altoDeCopia * escala * estira
-  const desde = radioDelPisoDeAbajo(lectura) + (anchoDeCopia * escala) / 2 + 0.3
-  const hasta = f.radioExterior
-  const medioAncho = (anchoDeCopia * escala) / 2
+  const lateral = f.paso.lateral * anchoDeCopia * f.escala
+  const entreFilas = f.paso.entreFilas * altoDeCopia * f.escala
+  const filas = movil ? f.movil.filas : f.bloque.filas
   const salida: Lugar[] = []
-  const cuantos = Math.ceil(hasta / Math.min(anchoDelBloque, hondoDelBloque)) + 1
-  for (let bz = -cuantos; bz <= cuantos; bz += 1) {
-    for (let bx = -cuantos; bx <= cuantos; bx += 1) {
-      if (movil && (bx + bz) % f.movil.saltoDeBloques !== 0) continue
-      for (let fila = 0; fila < (movil ? f.movil.filas : b.filas); fila += 1) {
-        // Cada fila, corrida media posición respecto de la anterior.
-        const corrida = fila % 2 === 1 ? lateral / 2 : 0
-        for (let col = 0; col < b.columnas; col += 1) {
-          const x = bx * anchoDelBloque + col * lateral + corrida
-          const z = bz * hondoDelBloque + fila * entreFilas
-          // La copia entera dentro del anillo: ni un borde adentro del claro, ni afuera del piso.
-          const cerca = Math.hypot(Math.abs(x) - Math.min(Math.abs(x), medioAncho), z)
-          const lejos = Math.hypot(Math.abs(x) + medioAncho, z)
-          if (cerca < desde || lejos > hasta) continue
-          salida.push({ x, z })
-        }
+  for (let bloque = 0; bloque < f.bloques; bloque += 1) {
+    const angulo = anguloDelBloque(bloque)
+    // Hacia afuera (radial) y de costado (tangente), en el centro del bloque.
+    const [ux, uz] = [Math.sin(angulo), Math.cos(angulo)]
+    const [tx, tz] = [Math.cos(angulo), -Math.sin(angulo)]
+    for (let fila = 0; fila < filas; fila += 1) {
+      // La fila impar lleva una copia menos: queda corrida media posición, entre dos de adelante.
+      const columnas = f.bloque.columnas - (fila % 2)
+      const hondo = f.radioDeLaPrimeraFila + fila * entreFilas
+      for (let col = 0; col < columnas; col += 1) {
+        const costado = (col - (columnas - 1) / 2) * lateral
+        // El +z de la copia apunta al escenario: mira hacia −u.
+        salida.push({ x: ux * hondo + tx * costado, z: uz * hondo + tz * costado, mira: angulo + Math.PI, bloque, fila })
       }
     }
   }
   return salida
 }
 
+/** El ángulo en (−π, π]. */
+function envolver(a: number): number {
+  return Math.atan2(Math.sin(a), Math.cos(a))
+}
+
 /**
  * La formación entera. Cada copia saca UNA falla de la lista, en orden barajado para que ningún
  * bloque se lea como un muestrario: la variación está en qué falla le tocó, no en dónde está.
  */
-export function formar(
-  lectura: Lectura,
-  densidad: Densidad,
-  m: MedidasDeLaCopia,
-  opciones: { readonly semilla?: number; readonly movil?: boolean } = {},
-): Copia[] {
+export function formar(m: MedidasDeLaCopia, opciones: { readonly semilla?: number; readonly movil?: boolean } = {}): Copia[] {
   const r = azar(opciones.semilla ?? 0x0cf0a11a)
-  const radioMaximo = FORMACION.radioExterior
-  return lugares(lectura, densidad, m.ancho, m.alto, opciones.movil === true).map(({ x, z }) => {
+  const f = FORMACION
+  const ultima = f.radioDeLaPrimeraFila + (f.bloque.filas - 1) * f.paso.entreFilas * m.alto * f.escala
+  return lugares(m.ancho, m.alto, opciones.movil === true).map((lugar) => {
     const falla = FALLAS[Math.floor(r() * FALLAS.length)]
-    const radio = Math.hypot(x, z)
+    const radio = Math.hypot(lugar.x, lugar.z)
     return {
-      x,
-      z,
+      ...lugar,
       falla,
       piezas: piezasDe(falla, r, m),
-      anguloAlCentro: Math.atan2(-x, -z),
-      // Giran de adentro para afuera: la onda de miradas sale del logo.
-      retardo: ((radio - FORMACION.radioDelClaro) / (radioMaximo - FORMACION.radioDelClaro)) * 0.6,
+      // Mirar al logo: el +z hacia el centro exacto, no hacia el centro del bloque.
+      anguloAlCentro: envolver(Math.atan2(-lugar.x, -lugar.z) - lugar.mira),
+      // Giran de adelante para atrás: la onda de miradas sale del escenario.
+      retardo: ((radio - f.radioDeLaPrimeraFila) / Math.max(1e-6, ultima + 4 - f.radioDeLaPrimeraFila)) * 0.6,
     }
   })
 }

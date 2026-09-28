@@ -3,7 +3,8 @@
 import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
-import { CUPULA_VIVA, conMembrana, cupulaParcheada } from './membrana/parche'
+import { entornoDeLaEscena } from './entorno'
+import { conDesajusteVivo } from './moire/parche'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
 import {
   MOIRE_BASE_ALPHA,
@@ -28,6 +29,7 @@ import {
   verticalRepeat,
 } from './probeMoire'
 import type { ProbeParamsStore } from './probeStore'
+import { FLOOR_Y } from './probeScene'
 
 /**
  * LA ENVOLVENTE DE RENDIJAS — dos cilindros coaxiales, la cámara adentro.
@@ -68,8 +70,10 @@ import type { ProbeParamsStore } from './probeStore'
 export type MoireHandle = {
   /** La capa gruesa. El loop le escribe `offset.y` para que baje. */
   readonly drift: THREE.Texture
-  /** [ESCENA 4] La capa fina: las variantes del moiré le corren la fase (`membrana/CupulaViva.tsx`). */
+  /** [ESCENA 5] La capa fina: el moiré vivo le corre la fase y le cambia el desajuste (`moire/MoireVivo.tsx`). */
   readonly fina: THREE.Texture
+  /** [ESCENA 5] El alto de la banda fina (con la formación llega hasta el piso): lo necesita M4. */
+  readonly altoDeLaFina: number
 }
 
 type LayerSpec = {
@@ -78,7 +82,17 @@ type LayerSpec = {
   readonly top: number
   readonly cells: number
   readonly order: number
+  /** [ESCENA 5] El desvanecido de abajo, si no es el de siempre. */
+  readonly fadeBottom?: number
 }
+
+/**
+ * [ESCENA 5] CON LA FORMACIÓN, LA TRAMA LLEGA AL PISO — el cilindro se para sobre el escenario, como
+ * en el dibujo: las dos capas bajan hasta el piso y el desvanecido de abajo se acorta. Sin esto las
+ * copias (paradas un piso más abajo, a 60 o más de la cámara) quedan justo debajo de la banda y la
+ * trama no las tapa. Arriba no cambia nada.
+ */
+export const TRAMA_HASTA_EL_PISO = { abajo: FLOOR_Y + 0.02, fundido: 0.035 } as const
 
 /** Cilindro abierto con el desvanecido de banda en el alfa de vértice. */
 function buildLayerGeometry(spec: LayerSpec): THREE.CylinderGeometry {
@@ -100,7 +114,7 @@ function buildLayerGeometry(spec: LayerSpec): THREE.CylinderGeometry {
     colors[i * 4] = 1
     colors[i * 4 + 1] = 1
     colors[i * 4 + 2] = 1
-    colors[i * 4 + 3] = bandEnvelope(v, MOIRE_FADE)
+    colors[i * 4 + 3] = bandEnvelope(v, spec.fadeBottom !== undefined && v < 0.5 ? spec.fadeBottom : MOIRE_FADE)
   }
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
 
@@ -137,24 +151,28 @@ function applyRepeat(texture: THREE.Texture, spec: LayerSpec): void {
 type MoireScreenProps = {
   /** De acá sale `moireMismatch`, que redefine la trama fina. */
   store: ProbeParamsStore
+  /** [ESCENA 5] Con la formación, la trama baja hasta el escenario (`TRAMA_HASTA_EL_PISO`). */
+  hastaElPiso?: boolean
 }
 
 export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function MoireScreen(
-  { store },
+  { store, hastaElPiso = false },
   ref
 ) {
   const layers = useMemo(() => {
     const coarse: LayerSpec = {
       radius: MOIRE_FAR_RADIUS,
-      bottom: MOIRE_FAR_BOTTOM,
+      bottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.abajo : MOIRE_FAR_BOTTOM,
       top: MOIRE_FAR_TOP,
+      fadeBottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.fundido : undefined,
       cells: MOIRE_COARSE_CELLS,
       order: MOIRE_FAR_ORDER,
     }
     const fine: LayerSpec = {
       radius: MOIRE_NEAR_RADIUS,
-      bottom: MOIRE_NEAR_BOTTOM,
+      bottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.abajo : MOIRE_NEAR_BOTTOM,
       top: MOIRE_NEAR_TOP,
+      fadeBottom: hastaElPiso ? TRAMA_HASTA_EL_PISO.fundido : undefined,
       cells: fineCells(store.current.moireMismatch),
       order: MOIRE_NEAR_ORDER,
     }
@@ -190,13 +208,10 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     })
 
     const capas = { coarse: make(coarse, coarseTexture), fine: make(fine, fineTexture) }
-    // [ESCENA 4] La cúpula como membrana y el moiré M4: un parche sobre la lectura del alfa, sólo si están prendidos.
-    if (cupulaParcheada()) {
-      conMembrana(capas.coarse.material, CUPULA_VIVA.gruesa)
-      conMembrana(capas.fine.material, CUPULA_VIVA.fina)
-    }
+    // [ESCENA 5] M4: la fina lee dos desajustes en las transiciones entre tramos (`moire/parche.ts`).
+    if (entornoDeLaEscena().moire) conDesajusteVivo(capas.fine.material)
     return capas
-  }, [store])
+  }, [store, hastaElPiso])
 
   /**
    * El desajuste se mueve con un slider, o sea por click y no por frame. Se
@@ -238,14 +253,15 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   )
 
   useEffect(() => {
-    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture }
+    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture, altoDeLaFina: layers.fine.spec.top - layers.fine.spec.bottom }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
   }, [ref, layers])
 
   return (
     <>
-      {[layers.coarse, layers.fine].map((layer) => (
+      {/* [ESCENA 5] Con el relieve R1 la capa gruesa la dibuja `relieve/Paredes.tsx`, en escalones. */}
+      {(entornoDeLaEscena().pruebas.relieve === 'R1' ? [layers.fine] : [layers.coarse, layers.fine]).map((layer) => (
         <mesh
           key={layer.spec.radius}
           geometry={layer.geometry}

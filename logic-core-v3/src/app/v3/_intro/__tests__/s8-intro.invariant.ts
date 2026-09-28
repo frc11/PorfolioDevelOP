@@ -33,6 +33,8 @@ import { DIST, conjuntoInicial, contiene, kib, partirCargaInicial, pesar } from 
 
 import { BOOT, CONDICIONES, HOME, IDENTIDADES, LAYOUT_RAIZ, MODULO_DEL_PRELOADER, PIEZA, PIEZAS_INTERNAS } from './condiciones'
 import { identidad, identidadDeTexto, identificadoresUsados, montaDeFormaEstatica, textosPresentes } from './soporte'
+import { deberiaDeslizar } from '../../_componentes/deslizamiento'
+import { escenaRetenida } from '../../_lib/escena/retencion'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El home lo monta, y el import es ESTÁTICO')
@@ -216,25 +218,38 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · EL PESO — lo que se puede medir sin build, y lo que no')
+titulo('6 · LA BANDERA DEL PRELOADER EN `/v3` — apagado entra directo; prendido, el peso')
 
 /**
- * Montar el intro de forma estática mete su código en la carga inicial de
- * `/v3`. La pregunta es si eso hace crecer **lo PROPIO** de `/v3`, que es lo
- * que `test:s5-peso` acota en 60 KiB crudo.
+ * [ESCENA 5] **El preloader de `/v3` va con una bandera** (`CON_PRELOADER`, en el montaje) y hoy está
+ * APAGADO. El test la lee del disco y afirma lo que corresponde a cada lado:
  *
- * Se puede adelantar sobre el build de la LÍNEA DE BASE, y la respuesta es que
- * no: el chunk que lleva el overlay ya viaja en la carga inicial de `/v3` HOY,
- * sin que `/v3` monte el intro, porque el layout raíz monta `HomeIntroBoot` del
- * mismo módulo. Es HEREDADO, no propio.
- *
- * ⚠ **Es una predicción, no la medición.** Componer cambia el grafo de módulos
- * y webpack reparticiona: el número que cierra el riesgo sale del build de la
- * Fase 2.
+ * - **apagado** · el montaje no pone nada y la página entra directo: la etapa del relevo queda en
+ *   `idle` —la de la visita repetida—, así que la escena no se retiene y el deslizamiento del CTA no
+ *   espera; y la intro sigue: el home vivo la monta como siempre, y el gate pre-paint arma igual (§5).
+ *   El peso del overlay no se afirma: sin montaje, que su chunk viaje o no en `/v3` ya no es una
+ *   promesa de este archivo.
+ * - **prendido** · lo de siempre: el chunk del overlay viaja en la carga inicial de `/v3` y es el
+ *   mismo archivo que pide `/` (HEREDADO).
  */
-if (!existsSync(DIST)) {
+const bandera = /const CON_PRELOADER = (true|false)/.exec(fuenteMontaje)?.[1]
+afirmar(bandera !== undefined, 'el montaje declara la bandera del preloader', `CON_PRELOADER = ${bandera ?? '?'}`)
+afirmar(/return CON_PRELOADER \? <HomeIntro \/> : null/.test(fuenteMontaje), '  y la bandera decide entre montar el intro tal cual y no montar nada')
+controlPositivo(
+  'el lector de la bandera no la inventa donde no está',
+  'export function IntroDelHome() { return <HomeIntro /> }',
+  (f: string) => /const CON_PRELOADER = (true|false)/.test(f),
+)
+
+if (bandera === 'false') {
+  afirmar(!escenaRetenida('idle', true) && !escenaRetenida('idle', false), 'apagado · la escena no se retiene en `idle`, la etapa en que queda `/v3`: entra directo')
+  afirmar(deberiaDeslizar('idle'), '  y el deslizamiento del CTA no espera al intro')
+  controlPositivo('el detector VE una escena retenida', 'covering' as const, (etapa) => !escenaRetenida(etapa, true))
+  const home = leer('src/app/page.tsx')
+  afirmar(montaDeFormaEstatica(home, '@/components/layout/HomeIntro') && /<HomeIntro \/>/.test(home), 'y la intro sigue: el home vivo la importa y la monta como siempre')
+} else if (!existsSync(DIST)) {
   noCorre(
-    'el chunk del overlay ya viaja en la carga inicial de /v3, y por eso es HEREDADO',
+    'prendido · el chunk del overlay ya viaja en la carga inicial de /v3, y por eso es HEREDADO',
     'no hay build en `.next/`. Es la mitad medible del riesgo de `test:s5-peso`.',
   )
 } else {

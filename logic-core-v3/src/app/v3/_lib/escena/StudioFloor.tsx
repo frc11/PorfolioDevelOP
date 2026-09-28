@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo } from 'react'
+import { mergeBufferGeometries } from 'three-stdlib'
 import * as THREE from 'three'
 
 import {
@@ -34,42 +35,67 @@ import {
  */
 
 /**
- * Perfil del ciclorama, en (radio, altura sobre `FLOOR_Y`).
+ * Perfil del ciclorama, en (radio, altura sobre `FLOOR_Y`), arrancando en `desde` a la altura `bajo`.
  *
- * Arranca en el borde de la losa plana con **tangente horizontal** —el centro
+ * Arranca en el borde del piso plano con **tangente horizontal** —el centro
  * del arco está justo encima del punto de arranque, así que el radio ahí es
  * vertical— y termina vertical, para que la pared siga en la misma dirección
  * sin quiebre. Las dos tangencias son lo que hace que el empalme no se vea:
  * superficies que se tocan con la misma normal no dejan costura.
  */
-const CYC_PROFILE: readonly THREE.Vector2[] = (() => {
+function perfilDelCiclorama(desde: number, bajo: number): THREE.Vector2[] {
   const points: THREE.Vector2[] = []
 
   for (let i = 0; i <= CYC_COVE_STEPS; i += 1) {
     const t = (i / CYC_COVE_STEPS) * (Math.PI / 2)
     points.push(
       new THREE.Vector2(
-        FLOOR_RADIUS + CYC_COVE_RADIUS * Math.sin(t),
-        CYC_COVE_RADIUS * (1 - Math.cos(t))
+        desde + CYC_COVE_RADIUS * Math.sin(t),
+        bajo + CYC_COVE_RADIUS * (1 - Math.cos(t))
       )
     )
   }
 
-  points.push(new THREE.Vector2(FLOOR_RADIUS + CYC_COVE_RADIUS, CYC_WALL_TOP))
+  points.push(new THREE.Vector2(desde + CYC_COVE_RADIUS, CYC_WALL_TOP))
 
   return points
-})()
-
-type StudioFloorProps = {
-  /** [ESCENA 4] La losa se achica al claro cuando la formación pone un piso más bajo alrededor. */
-  readonly radioDeLaLosa?: number
 }
 
-export function StudioFloor({ radioDeLaLosa = FLOOR_RADIUS }: StudioFloorProps) {
+/** [ESCENA 5] El escenario: nuestro piso termina en `radio`, y alrededor hay otro `desnivel` más abajo, hasta `hasta`. */
+export interface Escenario {
+  readonly radio: number
+  readonly desnivel: number
+  readonly hasta: number
+}
+
+type StudioFloorProps = {
+  /** [ESCENA 5] Con la formación, el piso es un escenario y el ciclorama arranca más afuera y más abajo. */
+  readonly escenario?: Escenario
+}
+
+/** El canto del escenario y el piso de abajo, en una sola malla (relativa a `FLOOR_Y`). */
+function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
+  const canto = new THREE.CylinderGeometry(e.radio, e.radio, e.desnivel - FLOOR_THICKNESS, FLOOR_SEGMENTS, 1, true)
+  canto.translate(0, -FLOOR_THICKNESS - (e.desnivel - FLOOR_THICKNESS) / 2, 0)
+  const piso = new THREE.RingGeometry(e.radio, e.hasta, FLOOR_SEGMENTS, 1)
+  piso.rotateX(-Math.PI / 2)
+  piso.translate(0, -e.desnivel, 0)
+  const junta = mergeBufferGeometries([canto, piso]) ?? piso
+  for (const g of [canto, piso]) if (g !== junta) g.dispose()
+  return junta
+}
+
+export function StudioFloor({ escenario }: StudioFloorProps) {
+  const radioDeLaLosa = escenario?.radio ?? FLOOR_RADIUS
   const cycGeometry = useMemo(
-    () => new THREE.LatheGeometry(CYC_PROFILE.slice(), FLOOR_SEGMENTS),
-    []
+    () =>
+      new THREE.LatheGeometry(
+        perfilDelCiclorama(escenario?.hasta ?? FLOOR_RADIUS, -(escenario?.desnivel ?? 0)),
+        FLOOR_SEGMENTS
+      ),
+    [escenario]
   )
+  const pisoDeAbajo = useMemo(() => (escenario === undefined ? null : geometriaDelPisoDeAbajo(escenario)), [escenario])
 
   const materials = useMemo(() => {
     const paper = () =>
@@ -82,6 +108,7 @@ export function StudioFloor({ radioDeLaLosa = FLOOR_RADIUS }: StudioFloorProps) 
 
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(() => () => cycGeometry.dispose(), [cycGeometry])
+  useEffect(() => () => pisoDeAbajo?.dispose(), [pisoDeAbajo])
   useEffect(
     () => () => {
       materials.slab.dispose()
@@ -115,6 +142,8 @@ export function StudioFloor({ radioDeLaLosa = FLOOR_RADIUS }: StudioFloorProps) 
         el descarte de caras traseras.
       */}
       <mesh position={[0, FLOOR_Y, 0]} geometry={cycGeometry} material={materials.cyclorama} />
+      {/* [ESCENA 5] El canto del escenario y el piso de la formación: el mismo papel. */}
+      {pisoDeAbajo !== null && <mesh position={[0, FLOOR_Y, 0]} geometry={pisoDeAbajo} material={materials.cyclorama} />}
     </group>
   )
 }
