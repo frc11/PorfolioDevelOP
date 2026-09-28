@@ -21,11 +21,11 @@
  * de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
  *
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
- * fallas: se borraron). El banco las apaga para comparar con `formacion=no`.
+ * fallas: se borraron) y el cielo de noche (estrellas y vía láctea, `cielo`). El banco las apaga para
+ * comparar con `formacion=no` y `cielo=no`.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - `estrellas` · el cielo de afuera, detrás de la trama y de la formación, sólo de noche;
  * - `posarse` · el polvo se posa con la quietud y lo levanta el aire (`polvo/Fisica.tsx`);
  * - `piso` · el piso vivo, de bloques (`piso/`); `piso=pulso` le suma la onda del pulso principal;
  * - 6a `inercia` · el aire sigue derivando después de un scroll fuerte;
@@ -40,7 +40,7 @@
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,estrellas,posarse'     → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,posarse,inercia'       → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -56,8 +56,6 @@ export type NivelDelHaz = 'sutil' | 'medio'
 export type PisoVivo = 'no' | 'si' | 'pulso'
 
 export interface Pruebas {
-  /** Estrellas: el cielo de afuera, sólo de noche. */
-  readonly estrellas: boolean
   /** El polvo se posa con la quietud y lo levanta el aire. */
   readonly posarse: boolean
   readonly pisoVivo: PisoVivo
@@ -79,7 +77,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  estrellas: false,
   posarse: false,
   pisoVivo: 'no',
   inercia: false,
@@ -112,6 +109,8 @@ export interface Entorno {
   readonly motas: boolean
   /** [ESCENA 7] T2 · la formación, «la fábrica gigante» (`formacion/`). En el teléfono no hay. */
   readonly formacion: boolean
+  /** [ESCENA 7] T3 · el cielo de noche: estrellas y vía láctea, detrás de la trama (`estrellas/`). */
+  readonly cielo: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -130,6 +129,7 @@ export const ENTORNO: Entorno = {
   sombraHaz: true,
   motas: true,
   formacion: true,
+  cielo: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -147,6 +147,7 @@ export const BASE_LIMPIA: Entorno = {
   sombraHaz: false,
   motas: false,
   formacion: false,
+  cielo: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -179,6 +180,7 @@ export function entornoPedido(pedido: string): Entorno {
     sombraHaz: producto ? !partes.has('sombra=blanda') : partes.has('sombra=haz'),
     motas: producto ? valor('motas') !== 'no' : partes.has('motas'),
     formacion: producto ? valor('formacion') !== 'no' : partes.has('formacion'),
+    cielo: producto ? valor('cielo') !== 'no' : partes.has('cielo'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
@@ -186,7 +188,6 @@ export function entornoPedido(pedido: string): Entorno {
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   const piso = valor('piso')
   return {
-    estrellas: partes.has('estrellas'),
     posarse: partes.has('posarse'),
     pisoVivo: piso === 'pulso' ? 'pulso' : partes.has('piso') ? 'si' : 'no',
     inercia: partes.has('inercia'),

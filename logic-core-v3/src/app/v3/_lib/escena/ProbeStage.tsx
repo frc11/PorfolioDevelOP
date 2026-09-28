@@ -282,7 +282,7 @@ export default function ProbeStage({
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
-        <Estrellas rig={rig} calidad={calidad} />
+        <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
         <PisoVivo rig={rig} calidad={calidad} quieto={reducedMotion} />
         {/* [ESCENA 6] 6f, la pasada extra: al final, con la cámara y todo lo demás de este cuadro ya escritos. */}
         <Calor calidad={calidad} />

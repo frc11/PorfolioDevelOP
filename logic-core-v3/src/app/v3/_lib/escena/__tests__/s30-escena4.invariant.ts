@@ -38,7 +38,7 @@ afirmarIgual(BASE_LIMPIA.pruebas, PRUEBAS_APAGADAS, '  la base tampoco')
 const antes = entornoPedido('producto,moire=hoy,polvo=antes')
 afirmar(!antes.moire && !antes.polvoParejo && antes.E1, '`moire=hoy` y `polvo=antes` dan el producto con el moiré y el polvo de la base')
 afirmar(!entornoPedido('E1,E4,E6,E7').moire && entornoPedido('E1,moire').moire, 'sin `producto`, sólo lo que la lista nombra')
-controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,estrellas', (p: string) => !entornoPedido(p).pruebas.estrellas && !entornoPedido(p).moire)
+controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,posarse', (p: string) => !entornoPedido(p).pruebas.posarse && !entornoPedido(p).moire)
 
 // ── §4 · el moiré ─────────────────────────────────────────────────────────
 titulo('§4 · el moiré vivo')

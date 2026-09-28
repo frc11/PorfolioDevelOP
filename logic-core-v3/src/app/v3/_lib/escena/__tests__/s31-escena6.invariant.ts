@@ -45,10 +45,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,estrellas,posarse,piso=pulso,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,posarse,piso=pulso,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { estrellas: true, posarse: true, pisoVivo: 'pulso', inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { posarse: true, pisoVivo: 'pulso', inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
 afirmar(entornoPedido('producto,piso').pruebas.pisoVivo === 'si', '  `piso` es el piso vivo sin el pulso')

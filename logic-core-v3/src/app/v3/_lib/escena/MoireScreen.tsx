@@ -75,6 +75,11 @@ export type MoireHandle = {
   readonly fina: THREE.Texture
   /** [ESCENA 5] El alto de la banda fina (con la formación llega hasta el piso): lo necesita M4. */
   readonly altoDeLaFina: number
+  /**
+   * [ESCENA 7] Dónde está cada capa (abajo, arriba, fundido de abajo y de arriba, fracción del alto):
+   * el cielo de afuera lee la trama para quedar detrás (`estrellas/cielo.ts`).
+   */
+  readonly bandas: { readonly gruesa: readonly [number, number, number, number]; readonly fina: readonly [number, number, number, number] }
 }
 
 type LayerSpec = {
@@ -257,7 +262,8 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   )
 
   useEffect(() => {
-    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture, altoDeLaFina: layers.fine.spec.top - layers.fine.spec.bottom }
+    const banda = (spec: LayerSpec): readonly [number, number, number, number] => [spec.bottom, spec.top, spec.fadeBottom ?? MOIRE_FADE, MOIRE_FADE]
+    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture, altoDeLaFina: layers.fine.spec.top - layers.fine.spec.bottom, bandas: { gruesa: banda(layers.coarse.spec), fina: banda(layers.fine.spec) } }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
   }, [ref, layers])
