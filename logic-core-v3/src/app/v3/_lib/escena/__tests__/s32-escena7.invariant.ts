@@ -22,6 +22,9 @@
  *      noche el piso iluminado aclara apenas la cara de abajo del logo; siguen la intensidad del haz.
  * T11 · el amanecer (con bandera, apagado): el orden (estrellas, resplandor, filas de afuera adentro, la
  *      trama, el piso, el logo), la compuerta, que no quede atrás del scroll, y la vuelta escondida.
+ * T13 · las pruebas nuevas (con bandera, apagadas): fibras pocas que caen girando a contraluz; la estrella
+ *      fugaz de noche, detrás de la trama, cada 5 a 10 s, tenue y rápida; el foco que busca y se clava
+ *      (sólo en el polvo); el grano fino que se mueve y no le saca nitidez a nada.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -50,6 +53,11 @@ import { REBOTE } from '../entorno/Rebote'
 import { AMANECER, amanecerEn, frenteEn, frenteHasta, momentoEn, progresoPorScroll } from '../amanecer/linea'
 import type { BloqueOpaco } from '../nocheDisparada'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
+import { FIBRAS } from '../pruebas/Fibras'
+import { FUGAZ, franjaLibre, trayectoriaDeLaFugaz } from '../pruebas/Fugaz'
+import { BUSCA } from '../pruebas/Enfoque'
+import { GRANO } from '../pruebas/Grano'
+import { ENFOQUE } from '../polvo/nitidez'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
@@ -369,5 +377,58 @@ for (let pie = 0; pie <= 3000; pie += 10) {
 afirmar(subiendo.lastIndexOf(true) * 10 > 900, 'la vuelta a la noche sigue escondida (se apaga con el bloque tapando todo)')
 afirmar(progresoPorScroll(100, 100, 400) === 0 && progresoPorScroll(400, 100, 400) === 1 && AMANECER.acelera > 0, 'no queda atrás del scroll: con el scroll corre más rápido, y termina antes de que el título llegue', `${String(AMANECER.final)} s mirando quieto`)
 afirmar(/NOCHE_DEL_AMANECER\.sostenida \? 0 : NOCHE_DISPARADA\.cantidad|!NOCHE_DEL_AMANECER\.sostenida \? 0/.test(leer('nocheDisparada.ts')), 'la sala sigue de noche hasta que entra la luz (la noche se sostiene)')
+
+// ── T13 · las pruebas nuevas ──────────────────────────────────────────────
+titulo('T13 · fibras, estrella fugaz, foco que busca y grano: con bandera')
+const lasCuatro = ['fibras', 'fugaz', 'enfoque', 'grano'] as const
+const pedidas = entornoPedido('producto,fibras,fugaz,enfoque,grano').pruebas
+afirmar(lasCuatro.every((p) => !ENTORNO.pruebas[p] && !BASE_LIMPIA.pruebas[p]) && lasCuatro.every((p) => pedidas[p]), 'las cuatro apagadas en el producto; el banco las prende por nombre')
+const montaje = leer('ProbeStage.tsx')
+afirmar(['<Fibras />', '<Fugaz rig={rig} />', '<Enfoque rig={rig} />', '<Grano />'].every((m) => montaje.includes(m)), '  montadas en la escena (cada una se apaga sola sin su bandera)')
+// Fibras.
+const fibras = leer('pruebas/Fibras.tsx')
+afirmar(FIBRAS.cuantas <= 80 && FIBRAS.largo[0] > 10 * FIBRAS.ancho, 'fibras: pocas y más grandes que el polvo, cintas largas y finas', `${String(FIBRAS.cuantas)} fibras de ${String(FIBRAS.largo[0])} a ${String(FIBRAS.largo[1])} u por ${String(FIBRAS.ancho)}`)
+afirmar(FIBRAS.cae[0] > 0 && FIBRAS.gira[0] > 0 && /mat3 giro = girar\( normalize\( aGiro\.xyz \), aGiro\.w \* t/.test(fibras), '  caen y giran sobre su eje')
+afirmar(/vPlano = abs\( dot\( plano, normalize\( cameraPosition - mundo \) \) \)/.test(fibras) && /mix\( 0\.25, 0\.85, vPlano \)/.test(fibras), '  a contraluz: de plano se ven enteras y de canto casi nada (el destello al girar)')
+afirmar(/new THREE\.InstancedBufferGeometry\(\)/.test(fibras) && !/useFrame/.test(fibras), '  una llamada de dibujo, sin simulación (todo es una cuenta del reloj)')
+// La estrella fugaz.
+const fugaz = leer('pruebas/Fugaz.tsx')
+afirmar(FUGAZ.cada[0] === 5 && FUGAZ.cada[1] === 10, 'fugaz: cada 5 a 10 s')
+afirmar(FUGAZ.dura[1] < 1 && FUGAZ.brillo < 1, '  tenue y rápida', `cruza en ${String(FUGAZ.dura[0])} a ${String(FUGAZ.dura[1])} s, con ${String(FUGAZ.brillo)} de brillo en el pico`)
+afirmar(/VIVO\.uNoche\.value >= FUGAZ\.noche/.test(fugaz) && /fueraDelTunel\(rig\.current\.progress\) > 0\.99/.test(fugaz), '  sólo de noche y fuera del túnel')
+const leeLaTrama = (c: string): boolean => /\* delanteDeLaTrama\( cameraPosition, d \)/.test(c)
+afirmar(leeLaTrama(fugaz) && /renderOrder = MOIRE_FAR_ORDER - 1/.test(fugaz), '  detrás de la trama y de la formación: lee la trama como las estrellas y se dibuja antes que ella')
+controlPositivo('el detector VE una fugaz delante de la trama', 'vAlfa = uBrillo * aK * aK * aparece;', leeLaTrama)
+// Los dos extremos en el cuadro y fuera del logo: el arco (un círculo máximo alrededor del ojo) se proyecta como una recta.
+const adentro = (tr: readonly number[]): boolean => tr.every((v) => Math.abs(v) <= FUGAZ.borde)
+const enLaFranja = (tr: readonly number[], [a, b]: readonly [number, number]): boolean => adentro(tr) && [tr[0], tr[2]].every((x) => x >= a - 1e-9 && x <= b + 1e-9)
+// Logos de prueba en el cuadro: el de Números (a la izquierda, medido), uno al centro, uno a la derecha, uno abajo.
+const LOGOS = [{ x0: -0.85, x1: -0.05, y0: -0.55, y1: 0.75 }, { x0: -0.3, x1: 0.3, y0: -0.5, y1: 0.5 }, { x0: 0.2, x1: 0.9, y0: -0.4, y1: 0.6 }, { x0: -0.4, x1: 0.4, y0: -0.9, y1: 0.1 }] as const
+let cruzan = 0
+let bien = true
+for (const logo of [...LOGOS, null]) {
+  const libre = franjaLibre(logo)
+  if (logo !== null && logo.y1 >= 0.19 && (libre[0] < logo.x1 + 1e-9 && libre[1] > logo.x0 - 1e-9)) bien = false
+  for (let n = 0; n < 400; n += 1) {
+    const tr = trayectoriaDeLaFugaz(n, libre)
+    if (tr === null) continue
+    cruzan += 1
+    if (!enLaFranja(tr, libre) || tr[3] >= tr[1] || Math.abs(tr[2]) > Math.abs(tr[0]) + FUGAZ.recorre.x[1]) bien = false
+  }
+}
+afirmar(bien && cruzan > 1500, '  nace arriba, en el lado que el logo deja libre, y cae de costado: el trazo entero en el cuadro y sin pasar detrás del logo', `${String(cruzan)} de 2.000 con cinco logos de prueba`)
+controlPositivo('el detector VE un trazo que sale del cuadro (el medido antes del arreglo)', [-0.75, 0.66, -1.07, 0.38], (tr: readonly number[]) => adentro(tr))
+controlPositivo('el detector VE un trazo detrás del logo (el medido en Números)', [-0.5, 0.48, -0.27, 0.35], (tr: readonly number[]) => enLaFranja(tr, franjaLibre(LOGOS[0])))
+afirmar(/if \(tr === null \|\| Math\.min\(desde\.y, hasta\.y\) < f\.horizonte\)/.test(fugaz) && /franjaLibre\(logoEnElCuadro\(camara\)\)/.test(fugaz), '  la franja sale del logo proyectado en cada cruce; si no hay cielo libre, esa no sale (ni tapada por el piso ni por el logo)')
+// El foco que busca.
+const enfoque = leer('pruebas/Enfoque.tsx')
+afirmar(!/logoMaterial|ProbeLogo|uniforms\.uBlur/.test(enfoque) && /AIRE\.uBusca\.value = cuanto/.test(enfoque), 'enfoque: sólo desenfoca el polvo; el logo es a lo que el foco va')
+afirmar(ENFOQUE.tope <= 6 && Math.exp(-1 / BUSCA.clava) < 0.1, '  sutil: a lo sumo unos píxeles de más, y en un segundo se clavó', `tope ${String(ENFOQUE.tope)} px; al segundo queda el ${(Math.exp(-1 / BUSCA.clava) * 100).toFixed(0)} %`)
+afirmar(/Math\.cos\(\(2 \* Math\.PI \* s\) \/ BUSCA\.periodo\)/.test(enfoque) && BUSCA.pasa < 1, '  duda: el foco se pasa de un lado y del otro del logo y se apaga')
+// El grano.
+const grano = leer('pruebas/Grano.tsx')
+afirmar(GRANO.cuanto <= 0.05 && /gl_FragCoord\.xy/.test(grano), 'grano: un píxel por grano y bajo (todo sigue nítido)', `±${(GRANO.cuanto * 100).toFixed(1)} % de la luz`)
+afirmar(/floor\( uTiempo \* 60\.0 \)/.test(grano), '  se mueve: otro grano en cada cuadro')
+afirmar(/blendSrcAlpha: THREE\.ZeroFactor/.test(grano) && /blendDstAlpha: THREE\.OneFactor/.test(grano) && /depthTest: false/.test(grano), '  multiplica lo que hay y no toca el alfa del lienzo')
 
 cerrar('s32-escena7')

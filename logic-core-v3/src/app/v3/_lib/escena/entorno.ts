@@ -31,7 +31,9 @@
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos).
+ * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos);
+ * - T13 `fibras`, `fugaz`, `enfoque` y `grano` · pelusas que caen girando, una estrella fugaz de noche,
+ *   el foco que busca al frenar y el grano de cámara.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
@@ -52,11 +54,23 @@ export type NivelDelHaz = 'sutil' | 'medio'
 export interface Pruebas {
   /** T11 · el amanecer: el día entra desde afuera y por la trama, como un evento de luz (`amanecer/`). */
   readonly amanecer: boolean
+  /** T13 · fibras en el aire: pocas pelusas que caen girando (`pruebas/Fibras.tsx`). */
+  readonly fibras: boolean
+  /** T13 · la estrella fugaz, de noche, afuera de la trama (`pruebas/Fugaz.tsx`). */
+  readonly fugaz: boolean
+  /** T13 · el enfoque que busca: al frenar el scroll el foco duda y se clava en el logo (`pruebas/Enfoque.tsx`). */
+  readonly enfoque: boolean
+  /** T13 · el grano de cámara, muy fino y en movimiento (`pruebas/Grano.tsx`). */
+  readonly grano: boolean
 }
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
   amanecer: false,
+  fibras: false,
+  fugaz: false,
+  enfoque: false,
+  grano: false,
 }
 
 export interface Entorno {
@@ -197,6 +211,10 @@ export function entornoPedido(pedido: string): Entorno {
 function pruebasPedidas(partes: ReadonlySet<string>): Pruebas {
   return {
     amanecer: partes.has('amanecer'),
+    fibras: partes.has('fibras'),
+    fugaz: partes.has('fugaz'),
+    enfoque: partes.has('enfoque'),
+    grano: partes.has('grano'),
   }
 }
 

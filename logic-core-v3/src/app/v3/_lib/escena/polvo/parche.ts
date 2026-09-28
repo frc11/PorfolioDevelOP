@@ -51,6 +51,9 @@ export const AIRE = {
   uVientoDelAire: { value: new THREE.Vector3() },
   /** [ESCENA 7] T10 · píxeles del búfer por píxel CSS: el lado nítido de la mota es en píxeles CSS. */
   uPixel: { value: 1 },
+  /** [ESCENA 7] T13 · el enfoque que busca: cuánto busca (0 a 1) y a qué distancia está el foco (u). */
+  uBusca: { value: 0 },
+  uFoco: { value: 12 },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -80,6 +83,10 @@ varying float vParejo;
 	uniform float uPixel;
 	varying float vDesenfoque;
 	varying float vLadoN;
+#endif
+#ifdef POLVO_ENFOQUE
+	uniform float uBusca;
+	uniform float uFoco;
 #endif
 #ifdef AMANECER
 	varying vec3 vMundoDelAmanecer;
@@ -165,6 +172,7 @@ function definesDe(campo: Campo, concha: number): string {
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
     campo === 'polvo' && e.nitidez ? '#define POLVO_NITIDO' : '',
     campo === 'polvo' && hayAmanecer() ? '#define AMANECER' : '',
+    campo === 'polvo' && e.nitidez && e.pruebas.enfoque ? '#define POLVO_ENFOQUE' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
   const holgura = campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh
