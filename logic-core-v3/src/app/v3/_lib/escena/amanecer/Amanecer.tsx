@@ -9,23 +9,31 @@ import { VIVO } from '../entorno/vivo'
 import { TRAMA_GLSL } from '../estrellas/cielo'
 import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
 import type { MoireHandle } from '../MoireScreen'
-import { NOCHE_DEL_AMANECER, suscribirAlDiaDelFinal } from '../nocheDisparada'
+import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, medirElBloqueOpaco } from '../nocheDisparada'
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../probeMoire'
-import { AMANECER, momentoEn, progresoPorScroll } from './linea'
+import { viajeEnCurso } from '../viaje'
+import { DIA_DEL_TEXTO } from './diaDelTexto'
+import { AMANECER, PAUSA_S, avanceDelCuadro, avanceDelScroll, diaParaElTexto, momentoEn } from './linea'
 import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 
 /**
- * [ESCENA 7] T11 · EL AMANECER — el reloj del evento y los haces por la trama (`linea.ts` tiene el porqué).
- * Arranca cuando la compuerta del amanecer prende el día; sostiene la noche hasta el cambio, escribe lo que
- * los materiales leen, y dibuja los haces: el sol bajo que pasa por los cuadrados de la trama deja luz en
- * el aire de la sala (una cuenta por píxel a lo largo del rayo: en cada punto, si el camino hacia el sol
+ * [ESCENA 7] T11 · EL AMANECER — el avance del evento y los haces por la trama (`linea.ts` tiene el porqué).
+ * Corre mientras la compuerta del amanecer tiene prendido el día; sostiene la noche hasta el cambio, escribe
+ * lo que los materiales leen, y dibuja los haces: el sol bajo que pasa por los cuadrados de la trama deja luz
+ * en el aire de la sala (una cuenta por píxel a lo largo del rayo: en cada punto, si el camino hacia el sol
  * pasa por un hueco de las dos capas de la trama).
+ *
+ * [ESCENA 8] T3 · El avance que se muestra persigue al que pide el scroll con una velocidad tope, en las dos
+ * direcciones. No se reproduce donde nadie lo ve o no corresponde: al cargar ya adentro del final, en un viaje
+ * del menú y con el bloque opaco tapando el cuadro, va derecho al pedido; con menos movimiento, el día llega
+ * de una vez. Escribe cuánto día hay para el texto del final (`DIA_DEL_TEXTO`), y si el pie (compartido, no
+ * espera) queda a la vista, no deja al amanecer atrás de lo legible.
  */
 
 type VentanaDelBanco = Window & {
   __amanecerDelBanco?: {
-    estado: () => { activo: boolean; s: number; frente: number; rayos: number; resplandor: number; sostiene: boolean }
+    estado: () => { activo: boolean; s: number; avance: number; pedido: number; texto: number; abajo: number; frente: number; rayos: number; resplandor: number; sostiene: boolean }
     /** Deja el amanecer quieto en el segundo `s` (o lo suelta con `null`): para fotografiar cada momento. */
     congelar: (s: number | null) => void
   }
@@ -34,6 +42,8 @@ type VentanaDelBanco = Window & {
 interface PropsDelAmanecer {
   readonly moireRef: RefObject<MoireHandle | null>
   readonly logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
+  /** [ESCENA 8] Con menos movimiento no hay evento: el día llega de una vez en la compuerta. */
+  readonly quieto: boolean
 }
 
 export function Amanecer(props: PropsDelAmanecer) {
@@ -94,6 +104,12 @@ void main() {
 }
 `
 
+/** [ESCENA 8] T3 · ¿El pie ya está a la vista? (Su tinta es de día y no espera al amanecer.) */
+function pieALaVista(m: { pie: Element | null }): boolean {
+  if (m.pie === null || !m.pie.isConnected) m.pie = document.querySelector('[data-panel="cierre"]')
+  return m.pie !== null && m.pie.getBoundingClientRect().top < window.innerHeight
+}
+
 /** Los haces, alrededor del ojo y sólo mientras hay rayos. */
 function mostrarLosHaces(malla: THREE.Mesh, hay: boolean, ojo: THREE.Vector3): boolean {
   malla.visible = hay
@@ -101,8 +117,8 @@ function mostrarLosHaces(malla: THREE.Mesh, hay: boolean, ojo: THREE.Vector3): b
   return hay
 }
 
-function AmanecerPrendido({ moireRef, logoMaterialRef }: PropsDelAmanecer) {
-  const memoria = useRef({ activo: false, s: 0, inicio: 0, fin: 0, scroll: Number.NaN, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null })
+function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
+  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null })
   const haces = useMemo(() => {
     // Una esfera alrededor del ojo, sin prueba de profundidad: el rayo lo corta la cuenta (la pared o el piso).
     const geometria = new THREE.SphereGeometry(20, 32, 16)
@@ -128,18 +144,12 @@ function AmanecerPrendido({ moireRef, logoMaterialRef }: PropsDelAmanecer) {
     haces.material.dispose()
   }, [haces])
 
+  // Al desmontarse, el texto del final no queda esperando un día que ya nadie escribe.
   useEffect(
-    () =>
-      suscribirAlDiaDelFinal((activo) => {
-        const m = memoria.current
-        m.activo = activo
-        m.s = 0
-        if (!activo) return
-        // Dónde tiene que estar terminado: cuando el tope de Por qué develOP llega a `titulo` del cuadro.
-        const porQue = document.querySelector('[data-panel="por-que-develop"]')?.getBoundingClientRect()
-        m.inicio = window.scrollY
-        m.fin = porQue === undefined ? m.inicio : porQue.top + window.scrollY - AMANECER.titulo * window.innerHeight
-      }),
+    () => () => {
+      DIA_DEL_TEXTO.frase.set(1)
+      DIA_DEL_TEXTO.abajo.set(1)
+    },
     [],
   )
 
@@ -147,7 +157,7 @@ function AmanecerPrendido({ moireRef, logoMaterialRef }: PropsDelAmanecer) {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
     ventana.__amanecerDelBanco = {
-      estado: () => ({ activo: memoria.current.activo, s: memoria.current.s, frente: AMANECER_EN_VIVO.uFrenteDelDia.value, rayos: AMANECER_EN_VIVO.uRayos.value, resplandor: AMANECER_EN_VIVO.uResplandor.value, sostiene: NOCHE_DEL_AMANECER.sostenida }),
+      estado: () => ({ activo: memoria.current.activo, s: memoria.current.avance * AMANECER.final, avance: memoria.current.avance, pedido: memoria.current.pedido, texto: DIA_DEL_TEXTO.frase.get(), abajo: DIA_DEL_TEXTO.abajo.get(), frente: AMANECER_EN_VIVO.uFrenteDelDia.value, rayos: AMANECER_EN_VIVO.uRayos.value, resplandor: AMANECER_EN_VIVO.uResplandor.value, sostiene: NOCHE_DEL_AMANECER.sostenida }),
       congelar: (s) => {
         memoria.current.congelado = s
       },
@@ -166,16 +176,22 @@ function AmanecerPrendido({ moireRef, logoMaterialRef }: PropsDelAmanecer) {
       conElAmanecerEnElLogo(logo)
       m.logo = logo
     }
-    const scroll = window.scrollY
-    const velocidad = Number.isNaN(m.scroll) || dt <= 0 ? 0 : Math.abs(scroll - m.scroll) / window.innerHeight / dt
-    m.scroll = scroll
-    if (m.congelado !== null) m.s = m.congelado
-    else if (m.activo && m.s < AMANECER.final) {
-      // El reloj corre más rápido con el scroll, y no puede quedar atrás del título de Por qué develOP.
-      m.s += dt * (1 + AMANECER.acelera * velocidad)
-      m.s = Math.max(m.s, progresoPorScroll(scroll, m.inicio, m.fin) * AMANECER.final)
+    // [ESCENA 8] T3: el avance persigue al que pide el scroll (el borde de Tu panel), con una velocidad tope.
+    m.cuadros += 1
+    const activo = DIA_DEL_FINAL.activo
+    const bloque = activo ? medirElBloqueOpaco(document, window.innerHeight) : null
+    m.pedido = bloque === null ? 0 : avanceDelScroll(bloque.tuPanel.pie, bloque.alto)
+    const recien = activo && !m.activo
+    m.activo = activo
+    if (m.congelado !== null) m.avance = m.congelado / AMANECER.final
+    else if (!activo) m.avance = 0
+    else {
+      const oculto = delta > PAUSA_S || (bloque !== null && bloqueTapaElCuadro(bloque))
+      m.avance = avanceDelCuadro(m.avance, m.pedido, dt, { recien, carga: m.cuadros <= 3, quieto, viaje: viajeEnCurso() !== null, oculto, pie: pieALaVista(m) })
     }
-    const momento = momentoEn(m.activo ? m.s : AMANECER.final + 1)
+    DIA_DEL_TEXTO.frase.set(m.activo ? diaParaElTexto(m.avance, 'frase') : 1)
+    DIA_DEL_TEXTO.abajo.set(m.activo ? diaParaElTexto(m.avance, 'abajo') : 1)
+    const momento = momentoEn(m.activo ? m.avance * AMANECER.final : AMANECER.final + 1)
     const u = AMANECER_EN_VIVO
     // Mientras sostiene la noche, el cielo de noche que el cielo del amanecer va a destapar.
     if (m.activo && momento.sostieneLaNoche && state.scene.fog !== null) u.uCieloDeNoche.value.copy(state.scene.fog.color).convertLinearToSRGB()

@@ -285,8 +285,8 @@ export default function ProbeStage({
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
-        {/* [ESCENA 7] T11, con bandera: el amanecer (el día entra desde afuera y por la trama). */}
-        <Amanecer moireRef={moireRef} logoMaterialRef={logoMaterialRef} />
+        {/* [ESCENA 7] T11 · el amanecer (el día entra desde afuera y por la trama); [ESCENA 8] encendido y atado al scroll. */}
+        <Amanecer moireRef={moireRef} logoMaterialRef={logoMaterialRef} quieto={reducedMotion} />
         {/* [ESCENA 7] T13 · la estrella fugaz, de noche (encendida en ESCENA 8). */}
         <Fugaz rig={rig} />
         {/* [ESCENA 7] T12: de noche, el piso iluminado por el haz aclara apenas la cara de abajo del logo. */}

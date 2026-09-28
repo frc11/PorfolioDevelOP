@@ -34,17 +34,16 @@
  * banderas). La luz que rebota (`rebote`) se queda.
  *
  * **[ESCENA 8] Encendidos**, además: la trama anclada al piso (T2, `limite`; el banco la suelta con
- * `limite=no`).
+ * `limite=no`) y el amanecer atado al scroll (T3, `amanecer`; era la prueba T11 de ESCENA 7; el banco lo
+ * apaga con `amanecer=no`).
  *
- * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
- *
- * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos).
+ * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende. Después de
+ * T3 no queda ninguna de ESCENA 7.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,amanecer'              → el producto con una prueba
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -56,15 +55,10 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-export interface Pruebas {
-  /** T11 · el amanecer: el día entra desde afuera y por la trama, como un evento de luz (`amanecer/`). */
-  readonly amanecer: boolean
-}
+export type Pruebas = Readonly<Record<never, boolean>>
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = {
-  amanecer: false,
-}
+export const PRUEBAS_APAGADAS: Pruebas = {}
 
 export interface Entorno {
   readonly E1: boolean
@@ -110,6 +104,8 @@ export interface Entorno {
   readonly fugaz: boolean
   /** [ESCENA 8] T2 · la trama anclada al piso: baja a pleno hasta el piso, con zócalo y contacto (`moire/limite.ts`). */
   readonly limite: boolean
+  /** [ESCENA 7] T11 · el amanecer: el día entra desde afuera y por la trama (`amanecer/`). [ESCENA 8] T3: encendido y atado al scroll. */
+  readonly amanecer: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -138,6 +134,7 @@ export const ENTORNO: Entorno = {
   rebote: true,
   fugaz: true,
   limite: true,
+  amanecer: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -165,6 +162,7 @@ export const BASE_LIMPIA: Entorno = {
   rebote: false,
   fugaz: false,
   limite: false,
+  amanecer: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -207,13 +205,9 @@ export function entornoPedido(pedido: string): Entorno {
     rebote: producto ? valor('rebote') !== 'no' : partes.has('rebote'),
     fugaz: producto ? valor('fugaz') !== 'no' : partes.has('fugaz'),
     limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
-    pruebas: pruebasPedidas(partes),
-  }
-}
-
-function pruebasPedidas(partes: ReadonlySet<string>): Pruebas {
-  return {
-    amanecer: partes.has('amanecer'),
+    amanecer: producto ? valor('amanecer') !== 'no' : partes.has('amanecer'),
+    // [ESCENA 8] Después de T3 no queda ninguna prueba: el pedido no puede nombrar ninguna.
+    pruebas: PRUEBAS_APAGADAS,
   }
 }
 

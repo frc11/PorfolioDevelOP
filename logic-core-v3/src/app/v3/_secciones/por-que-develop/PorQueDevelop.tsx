@@ -3,6 +3,7 @@
 import { motion, useTransform, type MotionValue } from 'motion/react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
@@ -74,8 +75,18 @@ function useTramo(pin: MotionValue<number>, v: Ventana): MotionValue<number> {
   return useTransform(pin, [v.desde, v.hasta], [0, 1])
 }
 
+/**
+ * [ESCENA 8] T3 · La llegada de una pieza espera al día: es tinta de día, y con un scroll rápido la sala todavía
+ * está amaneciendo detrás (el amanecer tarda por lo menos 2,5 s). La frase va sobre las paredes; los valores y el
+ * CTA, sobre el piso, que se ilumina después. Con un scroll lento el día ya está: no cambia nada.
+ */
+function useLlegadaDeDia(pin: MotionValue<number>, v: Ventana, donde: keyof typeof DIA_DEL_TEXTO): MotionValue<number> {
+  const tramo = useTramo(pin, v)
+  return useTransform([tramo, DIA_DEL_TEXTO[donde]], ([t, d]: number[]) => Math.min(t, d))
+}
+
 function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
-  const frase = useTramo(pin, VENTANA_DE_LA_FRASE)
+  const frase = useLlegadaDeDia(pin, VENTANA_DE_LA_FRASE, 'frase')
   // La frase se queda mientras entran los valores, pero sube: el valor del medio de cada
   // columna le caía encima.
   const subeLaFrase = useTransform(useTramo(pin, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE), (u) => `${(-u * SUBIDA_DE_LA_FRASE_SVH).toFixed(3)}svh`)
@@ -146,7 +157,7 @@ function FraseDelFinal({ texto }: { readonly texto: string }): React.JSX.Element
 }
 
 function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number }): React.JSX.Element {
-  const tramo = useTramo(pin, ventanaDelValor(indice))
+  const tramo = useLlegadaDeDia(pin, ventanaDelValor(indice), 'abajo')
   return (
     <li>
       <CanalDeUnaPieza progreso={tramo} patron="P5">
@@ -162,8 +173,8 @@ const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl)
 const BOTON_GRANDE = '[--text-cuerpo:var(--text-titulo-m)]'
 
 function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
-  const frase = useTramo(pin, VENTANA_DEL_CTA)
-  const destacado = useTramo(pin, VENTANA_DEL_DESTACADO)
+  const frase = useLlegadaDeDia(pin, VENTANA_DEL_CTA, 'abajo')
+  const destacado = useLlegadaDeDia(pin, VENTANA_DEL_DESTACADO, 'abajo')
   // Mientras no llegó, el botón no se puede tocar aunque esté en su lugar.
   const pointerEvents = useTransform(destacado, (u) => (u > 0.5 ? 'auto' : 'none'))
   return (

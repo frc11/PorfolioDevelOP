@@ -20,7 +20,7 @@
  *      poco; menos bokeh y más chico; el aire caliente (6f), borrado.
  * T12 · el haz en el piso: de noche el piso iluminado aclara apenas la cara de abajo del logo; sigue la
  *      intensidad del haz. [ESCENA 8] Las sombritas de las motas se borraron.
- * T11 · el amanecer (con bandera, apagado): el orden (estrellas, resplandor, filas de afuera adentro, la
+ * T11 · el amanecer ([ESCENA 8] T3: encendido y atado al scroll; el avance, en s33): el orden (estrellas, resplandor, filas de afuera adentro, la
  *      trama, el piso, el logo), la compuerta, que no quede atrás del scroll, y la vuelta escondida.
  * T13 · las pruebas nuevas: [ESCENA 8] la estrella fugaz, encendida (de noche, detrás de la trama, cada 5
  *      a 10 s, tenue y rápida); las fibras, el foco que busca y el grano, borrados.
@@ -48,7 +48,7 @@ import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendid
 import { BOKEH_NITIDO, NITIDEZ, ladoDeLaMota } from '../polvo/nitidez'
 import { BOKEH_COUNT, BOKEH_SIZE, PARTICLE_SIZE } from '../probeParticles'
 import { REBOTE } from '../entorno/Rebote'
-import { AMANECER, amanecerEn, frenteEn, frenteHasta, momentoEn, progresoPorScroll } from '../amanecer/linea'
+import { AMANECER, amanecerEn, frenteEn, frenteHasta, momentoEn } from '../amanecer/linea'
 import type { BloqueOpaco } from '../nocheDisparada'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 import { FUGAZ, franjaLibre, trayectoriaDeLaFugaz } from '../estrellas/Fugaz'
@@ -342,8 +342,8 @@ afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), '
 afirmar(/nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), '  sigue la intensidad del haz (el charco de noche lleva el encendido, T9)')
 
 // ── T11 · el amanecer ─────────────────────────────────────────────────────
-titulo('T11 · el amanecer: un evento de luz, con bandera')
-afirmar(!ENTORNO.pruebas.amanecer && entornoPedido('producto,amanecer').pruebas.amanecer, 'apagado en el producto; el banco lo prende con `amanecer`')
+titulo('T11 · el amanecer: un evento de luz ([ESCENA 8] encendido)')
+afirmar(ENTORNO.amanecer && !BASE_LIMPIA.amanecer && !entornoPedido('producto,amanecer=no').amanecer, '[ESCENA 8] encendido en el producto; el banco lo apaga con `amanecer=no`')
 afirmar(!existsSync(path.join(ESCENA, 'dia')) && !codigo(ESCENA).some((c) => /dia=afuera|DIA_DESDE_AFUERA|hayDiaDesdeAfuera/.test(c)), '  6g se volvió el amanecer: la carpeta `dia/` no existe y nada nombra la variante vieja')
 // El orden, en el reloj del amanecer.
 const estrellasFuera = AMANECER.estrellas[1]
@@ -377,7 +377,7 @@ for (let pie = 0; pie <= 3000; pie += 10) {
   subiendo.push(prendido)
 }
 afirmar(subiendo.lastIndexOf(true) * 10 > 900, 'la vuelta a la noche sigue escondida (se apaga con el bloque tapando todo)')
-afirmar(progresoPorScroll(100, 100, 400) === 0 && progresoPorScroll(400, 100, 400) === 1 && AMANECER.acelera > 0, 'no queda atrás del scroll: con el scroll corre más rápido, y termina antes de que el título llegue', `${String(AMANECER.final)} s mirando quieto`)
+afirmar(AMANECER.minimoS >= 2.5 && !('acelera' in AMANECER) && !('titulo' in AMANECER), '[ESCENA 8] ya no es un reloj que se acelera: el avance persigue al scroll con una velocidad tope (s33, T3)', `de punta a punta, ${String(AMANECER.minimoS)} s como mínimo`)
 afirmar(/NOCHE_DEL_AMANECER\.sostenida \? 0 : NOCHE_DISPARADA\.cantidad|!NOCHE_DEL_AMANECER\.sostenida \? 0/.test(leer('nocheDisparada.ts')), 'la sala sigue de noche hasta que entra la luz (la noche se sostiene)')
 
 // ── T13 · las pruebas nuevas ──────────────────────────────────────────────
@@ -386,7 +386,7 @@ afirmar(ENTORNO.fugaz && !BASE_LIMPIA.fugaz && !entornoPedido('producto,fugaz=no
 const BORRADAS = /<Fibras|<Enfoque|<Grano|__enfoqueDelBanco|POLVO_ENFOQUE|uBusca|GRANO\b|FIBRAS\b/
 afirmar(!existsSync(path.join(ESCENA, 'pruebas')) && !codigo(ESCENA).some((c) => BORRADAS.test(c)), 'las fibras, el foco que busca y el grano se borraron: ni los archivos ni el montaje ni el parche del polvo')
 controlPositivo('el detector VE el montaje del grano', '<Grano />', (c: string) => !BORRADAS.test(c))
-afirmar(Object.keys(entornoPedido('producto,fibras,enfoque,grano').pruebas).join(',') === 'amanecer', '  y sus banderas tampoco existen')
+afirmar(!['fibras', 'enfoque', 'grano'].some((b) => b in entornoPedido('producto,fibras,enfoque,grano').pruebas), '  y sus banderas tampoco existen')
 afirmar(leer('ProbeStage.tsx').includes('<Fugaz rig={rig} />'), '  la fugaz, montada en la escena')
 // La estrella fugaz.
 const fugaz = leer('estrellas/Fugaz.tsx')

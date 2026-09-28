@@ -7,12 +7,12 @@ import { AMANECER } from './linea'
 
 /**
  * [ESCENA 7] T11 · LA LUZ DEL AMANECER — lo que los materiales leen (lo escribe `Amanecer.tsx`) y los parches
- * que la pintan. Todo compila sólo con la bandera: sin ella los materiales no cambian.
+ * que la pintan. Todo compila sólo con la bandera: sin ella los materiales no cambian. [ESCENA 8] Encendida.
  */
 
 /** ¿Hay amanecer en esta carga? */
 export function hayAmanecer(): boolean {
-  return entornoDeLaEscena().pruebas.amanecer
+  return entornoDeLaEscena().amanecer
 }
 
 const sol = (() => {

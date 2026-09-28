@@ -37,12 +37,9 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,amanecer')
-afirmarIgual(
-  pedido.pruebas,
-  { ...PRUEBAS_APAGADAS, amanecer: true },
-  'el pedido del banco prende cada prueba (y sólo la nombrada)',
-)
+// [ESCENA 8] El amanecer (6g) dejó de ser una prueba: el pedido lo nombra como a cualquier bandera del producto.
+const pedido = entornoPedido('E1,amanecer')
+afirmar(pedido.amanecer && !entornoPedido('E1').amanecer && !entornoPedido('E1,amanecer').moire, 'el pedido del banco prende lo nombrado (y sólo eso)')
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
 afirmar(!sin.obstaculo && !sin.sombraHaz && !sin.motas && sin.E1 && sin.moire, 'el banco puede apagar 5a, 5c y 5d para comparar, y el resto sigue')
 controlPositivo('el detector VE un producto sin 5c', 'producto,sombra=blanda', (p: string) => entornoPedido(p).sombraHaz)

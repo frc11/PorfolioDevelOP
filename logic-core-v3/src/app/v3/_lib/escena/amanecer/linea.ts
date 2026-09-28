@@ -1,7 +1,8 @@
 import type { BloqueOpaco } from '../nocheDisparada'
 
 /**
- * [ESCENA 7] T11 · EL AMANECER — puro: cuándo arranca y qué pasa en cada momento. Con bandera, apagado.
+ * [ESCENA 7] T11 · EL AMANECER — puro: cuándo arranca y qué pasa en cada momento.
+ * [ESCENA 8] T3: encendido en el producto y ATADO AL SCROLL (ver «El avance», abajo).
  *
  * **Qué es.** La vuelta del día como un EVENTO DE LUZ (la 6g de ESCENA 6 más los rayos por la trama). El
  * día entra desde afuera, en este orden:
@@ -19,10 +20,19 @@ import type { BloqueOpaco } from '../nocheDisparada'
  * de abajo de Tu panel sube y deja ver la sala (`visible`). Bajando, la noche sigue hasta ahí, y ahí
  * arranca el amanecer. Subiendo, la noche vuelve escondida (la compuerta de siempre decide el regreso).
  *
- * **La duración (la propuesta): 7,6 s** si se mira quieto. Si se sigue scrolleando, el reloj del amanecer
- * corre más rápido con la velocidad (`acelera`), y además no puede quedar atrás del scroll: cuando el
- * título de Por qué develOP llega a `titulo` del cuadro, el amanecer ya terminó (`progresoPorScroll`).
- * Así el texto nunca entra sobre la sala a oscuras.
+ * **El avance [ESCENA 8] T3.** Ya no es un reloj que se acelera: el amanecer es un avance de 0 a 1 que
+ * PIDE el scroll —el borde de Tu panel de `visible` a `hasta` del cuadro (`avanceDelScroll`)— y el que se
+ * MUESTRA lo persigue con una velocidad tope (`perseguir`): de punta a punta tarda por lo menos `minimoS`.
+ * Con un scroll lento el amanecer sigue al scroll; con uno rápido se reproduce entero a esa velocidad,
+ * alcanzando al scroll; hacia atrás, igual (la noche vuelve con el mismo guion al revés). En ESCENA 7 un
+ * scroll rápido lo terminaba en un parpadeo (el reloj ×3 y el tope del título) y casi no se veía.
+ *
+ * **El texto no queda sobre la sala a oscuras.** La tinta de «Por qué develOP» es de día. En escritorio el
+ * texto del escenario espera al día (`diaParaElTexto`): la frase, que va sobre las paredes, cuando el frente
+ * pasó la trama; los valores y el CTA, que van más abajo, sobre el piso, cuando el frente pasó el piso (medido:
+ * con el piso todavía oscuro la tinta da 1,4 a 3,4). Abajo de 1024 el texto va con la mezcla por diferencia y se
+ * lee sobre cualquier fondo. El pie es compartido y no espera: si queda a la vista antes, el amanecer salta a
+ * lo legible (`texto.abajo[1]`). Con menos movimiento no hay evento: el día llega de una vez en la compuerta.
  *
  * **Cómo se pinta.** La luz de la sala es una sola (el arco). Hasta `cambio` la sala sigue de noche (se
  * sostiene la noche) y el horizonte se enciende encima. En `cambio` la sala pasa a día, y lo que el
@@ -31,8 +41,17 @@ import type { BloqueOpaco } from '../nocheDisparada'
  * los alcanza, así el logo es lo último). El cielo pasa de noche a día desde el horizonte hacia arriba.
  */
 export const AMANECER = {
-  /** Qué fracción del cuadro tiene que dejar ver Tu panel (su borde de abajo, desde arriba). */
+  /** Qué fracción del cuadro tiene que dejar ver Tu panel (su borde de abajo, desde arriba): la compuerta, y donde arranca el avance. */
   visible: 0.85,
+  /** [ESCENA 8] T3 · Dónde termina el avance: el borde de Tu panel ya arriba del cuadro (el escenario del final clavado). */
+  hasta: -0.15,
+  /** [ESCENA 8] T3 · Lo más rápido que corre, de punta a punta (s): con un scroll rápido se reproduce entero a esta velocidad. */
+  minimoS: 2.5,
+  /**
+   * [ESCENA 8] T3 · El texto del final aparece entre dos avances: la frase (sobre las paredes) cuando el frente ya
+   * pasó la trama; lo de abajo (los valores, el CTA y el pie, sobre el piso) cuando ya pasó el piso.
+   */
+  texto: { frase: [0.64, 0.72], abajo: [0.82, 0.9] },
   /** Las estrellas se apagan (s). */
   estrellas: [0, 0.9],
   /** El resplandor del horizonte nace y queda (s); se va al final. */
@@ -55,10 +74,6 @@ export const AMANECER = {
   oscuro: 0.2,
   /** El sol del amanecer: detrás de la formación que se ve desde el pie (azimut y elevación, grados). */
   sol: { azimut: 180, elevacion: 9 },
-  /** Cuánto más rápido corre el reloj por cada pantalla por segundo de scroll. */
-  acelera: 3,
-  /** Dónde tiene que estar terminado: el tope de Por qué develOP, en fracción del cuadro desde arriba. */
-  titulo: 0.62,
 } as const
 
 const suave = (u: number): number => {
@@ -136,11 +151,52 @@ export function amanecerEn(b: BloqueOpaco, antes: boolean, deSiempre: boolean): 
   return antes ? seVe || deSiempre : seVe
 }
 
+/** [ESCENA 8] T3 · El avance que pide el scroll (0 a 1): dónde está el borde de abajo de Tu panel (px desde arriba del cuadro). */
+export function avanceDelScroll(pieDeTuPanel: number, alto: number): number {
+  const desde = AMANECER.visible * alto
+  const hasta = AMANECER.hasta * alto
+  return Math.min(1, Math.max(0, (desde - pieDeTuPanel) / (desde - hasta)))
+}
+
+/** [ESCENA 8] T3 · Un paso del avance que se muestra: persigue al pedido, a lo sumo `dt / minimoS`, en las dos direcciones. */
+export function perseguir(mostrado: number, pedido: number, dt: number): number {
+  const tope = dt / AMANECER.minimoS
+  return mostrado + Math.max(-tope, Math.min(tope, pedido - mostrado))
+}
+
+/** [ESCENA 8] T3 · Cuánto puede mostrarse el texto del final (tinta de día) con este avance: 0 hasta que su fondo está iluminado. */
+export function diaParaElTexto(avance: number, donde: keyof typeof AMANECER.texto): number {
+  const [a, b] = AMANECER.texto[donde]
+  return suave((avance - a) / (b - a))
+}
+
+/** [ESCENA 8] T3 · Un cuadro más largo que esto (s) es la escena que vuelve de estar suspendida (detrás del bloque opaco). */
+export const PAUSA_S = 0.5
+
+/** Lo que decide el avance de un cuadro, además del pedido. */
+export interface CuadroDelAmanecer {
+  /** La compuerta recién prendió el día. */
+  readonly recien: boolean
+  /** Es de los primeros cuadros de la escena: una carga ya adentro del final. */
+  readonly carga: boolean
+  /** Menos movimiento. */
+  readonly quieto: boolean
+  /** Un viaje del menú. */
+  readonly viaje: boolean
+  /** Nadie vio el camino: el bloque tapa el cuadro, o la escena vuelve de estar suspendida. */
+  readonly oculto: boolean
+  /** El pie (tinta de día, no espera) está a la vista. */
+  readonly pie: boolean
+}
+
 /**
- * El avance que el scroll le impone: 0 cuando arrancó, 1 cuando el tope de Por qué develOP llega a `titulo`
- * del cuadro. `inicio` es el scroll del arranque; `fin`, el scroll en que el título llega.
+ * [ESCENA 8] T3 · El avance de este cuadro. Sin evento al cargar ya adentro del final, en un viaje ni donde nadie
+ * lo ve (va derecho al pedido); con menos movimiento, de una vez; si no, persigue al pedido con la velocidad tope,
+ * y con el pie a la vista no queda atrás de lo legible.
  */
-export function progresoPorScroll(scroll: number, inicio: number, fin: number): number {
-  if (fin <= inicio) return 1
-  return Math.min(1, Math.max(0, (scroll - inicio) / (fin - inicio)))
+export function avanceDelCuadro(anterior: number, pedido: number, dt: number, c: CuadroDelAmanecer): number {
+  if (c.quieto) return pedido > 0 ? 1 : 0
+  if (c.recien) return c.carga || c.viaje ? pedido : 0
+  if (c.viaje || c.oculto) return pedido
+  return Math.max(perseguir(anterior, pedido, dt), c.pie ? AMANECER.texto.abajo[1] : 0)
 }
