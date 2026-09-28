@@ -39,9 +39,13 @@ export const RASANTE = {
   abre: { neblina: 0.7, rasante: 0.85 },
 } as const
 
+/** El corrimiento por píxel de los tramos (ruido de gradiente entrelazado): sólo en un fragmento. */
+export const CORRIDO_POR_PIXEL = 'fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) )'
+
 /**
- * `transmitanciaRasante( camara, mundo, abre )`: qué parte de la superficie en `mundo` llega a la
- * cámara a través de los bancos (1 sin niebla). Pide `uTiempo` y la pendiente del piso de abajo.
+ * `transmitanciaRasante( camara, mundo, abre, corrido )`: qué parte de la superficie en `mundo` llega a
+ * la cámara a través de los bancos (1 sin niebla). Pide `uTiempo`. `corrido` (0–1) corre los tramos:
+ * por píxel, `CORRIDO_POR_PIXEL` (sin escalones); por vértice, 0,5.
  */
 export const RASANTE_GLSL = /* glsl */ `
 float azarRasante( vec3 p ) { return fract( sin( dot( p, vec3( 127.1, 311.7, 74.7 ) ) ) * 43758.5453 ); }
@@ -63,13 +67,13 @@ float densidadRasante( vec3 p ) {
 	float z = uTiempo * ${RASANTE.cambia.toFixed(3)};
 	float banco = 0.65 * ruidoRasante( vec3( q, z ) ) + 0.35 * ruidoRasante( vec3( q * 2.3 + 11.0, z * 1.7 ) );
 	float hay = smoothstep( ${RASANTE.umbral[0].toFixed(2)}, ${RASANTE.umbral[1].toFixed(2)}, banco );
-	float suelo = ${FLOOR_Y.toFixed(4)} - ${FORMACION.desnivel.toFixed(2)} + ${FORMACION.pendiente.toFixed(4)} * max( 0.0, r - ${FORMACION.radioDelEscenario.toFixed(1)} );
+	float suelo = ${(FLOOR_Y - FORMACION.desnivel).toFixed(4)};
 	float alto = ${RASANTE.alto.minimo.toFixed(2)} + ${RASANTE.alto.suma.toFixed(2)} * ruidoRasante( vec3( q * 1.3 + 5.0, z * 0.6 ) );
 	float h = p.y - suelo;
 	float perfil = 1.0 - smoothstep( 0.25 * alto, alto, h );
 	return ${RASANTE.densidad.toFixed(3)} * anillo * hay * perfil * step( - 0.2, h );
 }
-float transmitanciaRasante( vec3 camara, vec3 mundo, float abre ) {
+float transmitanciaRasante( vec3 camara, vec3 mundo, float abre, float corrido ) {
 	vec3 d = mundo - camara;
 	float largo = length( d );
 	d /= max( largo, 1e-4 );
@@ -80,8 +84,6 @@ float transmitanciaRasante( vec3 camara, vec3 mundo, float abre ) {
 	float entra = a > 1e-6 ? ( - b + sqrt( max( b * b - 4.0 * a * c, 0.0 ) ) ) / ( 2.0 * a ) : largo;
 	if ( entra >= largo ) return 1.0;
 	float tramo = min( largo - entra, 60.0 ) / ${RASANTE.pasos.toFixed(1)};
-	// Corrido por píxel (ruido de gradiente entrelazado): sin escalones.
-	float corrido = fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) );
 	float optica = 0.0;
 	for ( int i = 0; i < ${RASANTE.pasos}; i++ ) {
 		vec3 p = camara + d * ( entra + ( float( i ) + corrido ) * tramo );

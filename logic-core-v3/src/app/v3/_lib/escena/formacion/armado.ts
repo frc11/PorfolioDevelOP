@@ -1,20 +1,24 @@
 import * as THREE from 'three'
 
+import { MOIRE_FAR_ORDER } from '../probeMoire'
 import { FLOOR_Y } from '../probeScene'
-import { alturaDelPisoDeAbajo, type Escenario } from '../StudioFloor'
+import type { Escenario } from '../StudioFloor'
 import { copiaHorneada } from './copia'
 import { FORMACION, formar, type Copia } from './enFormacion'
 import { materialDeLaCopia, type UniformsDeLaCopia } from './materiales'
 
 /**
  * [ESCENA 5] EL ARMADO DE LA FORMACIÓN — lo que se construye una vez: una instancia por copia, en dos
- * mallas instanciadas (dos llamadas de dibujo): la primera fila con canto y las de atrás sólo con la
- * tapa (`copia.ts`). Sin React: `Formacion.tsx` lo monta y le escribe cada cuadro.
+ * mallas instanciadas (dos llamadas de dibujo). [ESCENA 7] La primera fila con la malla entera (con
+ * canto) y las de atrás con la silueta (un cuadrado con la tapa en una textura, `copia.ts`): miles de
+ * copias en dos triángulos cada una. La primera fila es opaca; las siluetas se mezclan y van de atrás
+ * hacia adelante, antes que el cielo y que la trama. Sin React:
+ * `Formacion.tsx` lo monta y le escribe cada cuadro.
  */
 
 export interface Armado {
   readonly copias: readonly Copia[]
-  /** Las dos mallas: la de la primera fila y la de las de atrás. */
+  /** Las dos mallas: la de la primera fila y la de las siluetas. */
   readonly mallas: readonly THREE.InstancedMesh[]
   readonly copia: UniformsDeLaCopia
   /** Los triángulos que manda a dibujar la formación entera. */
@@ -22,11 +26,14 @@ export interface Armado {
   readonly soltar: () => void
 }
 
-/** La altura del piso de la formación, en el borde del escenario. */
+/** Las siluetas son transparentes: se dibujan antes que las estrellas y que la trama gruesa. */
+export const ORDEN_DE_LAS_SILUETAS = MOIRE_FAR_ORDER - 10
+
+/** La altura del piso de la formación (plano). */
 export const PISO_DE_ABAJO = FLOOR_Y - FORMACION.desnivel
 
 /** El escenario y el piso de abajo que lleva la formación. */
-export const ESCENARIO: Escenario = { radio: FORMACION.radioDelEscenario, desnivel: FORMACION.desnivel, hasta: FORMACION.radioDelPisoDeAbajo, pendiente: FORMACION.pendiente }
+export const ESCENARIO: Escenario = { radio: FORMACION.radioDelEscenario, desnivel: FORMACION.desnivel, hasta: FORMACION.radioDelPisoDeAbajo }
 
 /** Cuántas copias caen adentro del cuadro (para el banco). */
 export function contarVisibles(copias: readonly Copia[], camara: THREE.Camera): number {
@@ -35,35 +42,36 @@ export function contarVisibles(copias: readonly Copia[], camara: THREE.Camera): 
   return copias.filter((c) => frustum.containsPoint(punto.set(c.x, PISO_DE_ABAJO + 2.2 * FORMACION.escala, c.z))).length
 }
 
-const lineal = (srgb: number): number => (srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4)
-
-export function armar(formas: THREE.Shape[], sinFallasVisibles: boolean, rasante: boolean): Armado {
+export function armar(formas: THREE.Shape[], rasante: boolean): Armado {
   const horneada = copiaHorneada(formas)
-  const caja = horneada.geometria.boundingBox ?? new THREE.Box3()
-  const medidas = { ancho: caja.max.x - caja.min.x, alto: caja.max.y - caja.min.y, caja: horneada.caja }
-  const copias = formar(medidas, { sinFallasVisibles })
+  const copias = formar()
   const copia: UniformsDeLaCopia = { uVisible: { value: 1 } }
-  const material = materialDeLaCopia(horneada.fronteras, copia, rasante)
+  const { x0, x1, y0, y1 } = horneada.caja
+  // La silueta: el cuadrado de la caja de la copia, de frente (+z), con la tapa en la textura.
+  const cuadrado = new THREE.PlaneGeometry(x1 - x0, y1 - y0)
+  cuadrado.translate((x0 + x1) / 2, (y0 + y1) / 2, 0)
+  const materiales = [materialDeLaCopia(copia, rasante, null), materialDeLaCopia(copia, rasante, horneada.silueta)]
 
   const e = FORMACION.escala
-  const grupos = [copias.filter((c) => c.fila < FORMACION.filasConCanto), copias.filter((c) => c.fila >= FORMACION.filasConCanto)]
-  const geometrias = [horneada.geometria, horneada.tapa]
+  // La primera fila, opaca, de adelante hacia atrás; las siluetas se mezclan, así que van de atrás hacia adelante.
+  const grupos = [copias.filter((c) => c.fila < FORMACION.filasConCanto), copias.filter((c) => c.fila >= FORMACION.filasConCanto).reverse()]
+  const geometrias = [horneada.geometria, cuadrado]
   let triangulos = 0
+  const matriz = new THREE.Matrix4()
+  const giro = new THREE.Matrix4()
+  const escala = new THREE.Matrix4().makeScale(e, e, e)
   const mallas = grupos.map((grupo, k) => {
     const geometria = geometrias[k]
-    const malla = new THREE.InstancedMesh(geometria, material, grupo.length)
+    const malla = new THREE.InstancedMesh(geometria, materiales[k], grupo.length)
     malla.frustumCulled = false
-    const datos = new Float32Array(grupo.length * 4)
+    // Las siluetas, antes que la trama (que va por delante) y que el cielo (que tapan).
+    if (k === 1) malla.renderOrder = ORDEN_DE_LAS_SILUETAS
     grupo.forEach((c, i) => {
-      const y = FLOOR_Y + alturaDelPisoDeAbajo(ESCENARIO, Math.hypot(c.x, c.z))
-      malla.setMatrixAt(i, new THREE.Matrix4().makeTranslation(c.x, y, c.z).multiply(new THREE.Matrix4().makeRotationY(c.mira)).multiply(new THREE.Matrix4().makeScale(e, e, e)))
-      const p = c.pieza
-      // La parte de otro tono va en la parte entera (la región) y la fraccionaria (su tono, lineal).
-      datos.set([p.region, p.corte, lineal(p.tono), p.otra === null ? 0 : p.otra.region + Math.min(0.999, lineal(p.otra.tono))], i * 4)
+      malla.setMatrixAt(i, matriz.makeTranslation(c.x, PISO_DE_ABAJO, c.z).multiply(giro.makeRotationY(c.mira)).multiply(escala))
     })
-    geometria.setAttribute('aPieza', new THREE.InstancedBufferAttribute(datos, 4))
     malla.instanceMatrix.needsUpdate = true
-    triangulos += (geometria.getAttribute('position').count / 3) * grupo.length
+    const indices = geometria.index
+    triangulos += ((indices === null ? geometria.getAttribute('position').count : indices.count) / 3) * grupo.length
     return malla
   })
 
@@ -75,7 +83,8 @@ export function armar(formas: THREE.Shape[], sinFallasVisibles: boolean, rasante
     soltar: () => {
       for (const m of mallas) m.dispose()
       for (const g of geometrias) g.dispose()
-      material.dispose()
+      for (const m of materiales) m.dispose()
+      horneada.silueta.dispose()
     },
   }
 }

@@ -15,18 +15,16 @@ import { ESCENARIO, armar, contarVisibles } from './armado'
 import type { UniformsDeLaCopia } from './materiales'
 
 /**
- * [ESCENA 5] LA FORMACIÓN — las copias falladas afuera de la trama, alrededor del escenario y un
- * piso más abajo. Decoración de fondo: `enFormacion.ts` tiene el porqué de cada regla, `armado.ts`
- * lo que se construye y `materiales.ts` por qué casi no se ven.
+ * [ESCENA 5] LA FORMACIÓN — las copias afuera de la trama, alrededor del escenario y un piso más abajo.
+ * Decoración de fondo: `enFormacion.ts` tiene el porqué de cada regla, `armado.ts` lo que se construye y
+ * `materiales.ts` cuánto se ve cada copia.
  *
- * **El piso.** Con la formación, nuestro piso es un escenario de radio 45 y alrededor hay un piso
- * 1,6 más abajo que sube apenas hacia afuera, hasta el 72, donde recién arranca el ciclorama
- * (`StudioFloor`, `pisoConFormacion`). El desnivel no lleva ningún objeto: se lee porque el borde del
- * escenario tapa el pie de la primera fila.
+ * **[ESCENA 7] Encendida en el producto**, «la fábrica gigante»: todas iguales al original y negras,
+ * muchas más filas hacia atrás sobre un piso plano que llega al horizonte (`StudioFloor`,
+ * `pisoConFormacion`). El desnivel no lleva ningún objeto: se lee porque el borde del escenario tapa el
+ * pie de la primera fila.
  *
  * **Dónde no está.** En el túnel de Trabajos (`tunelEnLaEscena.ts`) ni en el teléfono.
- *
- * [ESCENA 6] Sin F-mirada: ahora todas miran al centro, así que no tenían hacia dónde girar.
  */
 
 interface PropsDeLaFormacion {
@@ -47,7 +45,7 @@ type VentanaDelBanco = Window & {
 
 /** ¿Hay formación en esta carga y en este ancho? */
 function hayFormacion(calidad: NivelDeCalidad): boolean {
-  return entornoDeLaEscena().pruebas.formacion && calidad !== 'compacta'
+  return entornoDeLaEscena().formacion && calidad !== 'compacta'
 }
 
 /** El escenario y el piso de abajo, si esta carga tiene formación. */
@@ -62,8 +60,8 @@ export function Formacion(props: PropsDeLaFormacion) {
 
 function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
-  const { sinFallasVisibles, nieblaRasante, nieblaVelocidad } = entornoDeLaEscena().pruebas
-  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), sinFallasVisibles, nieblaRasante), [svg, sinFallasVisibles, nieblaRasante])
+  const { nieblaRasante, nieblaVelocidad } = entornoDeLaEscena().pruebas
+  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), nieblaRasante), [svg, nieblaRasante])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({ camara: null as THREE.Camera | null, progreso: Number.NaN, antes: null as THREE.Vector3 | null, abre: 0 })
 

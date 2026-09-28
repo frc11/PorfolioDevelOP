@@ -20,10 +20,11 @@
  * bokeh (5a, `obstaculo`), la mancha de contacto según el haz (5c, `sombraHaz`) y las motas del haz
  * de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
  *
+ * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
+ * fallas: se borraron). El banco las apaga para comparar con `formacion=no`.
+ *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - `formacion` · las copias falladas afuera de la trama, un piso más abajo (`formacion/`); `fallas=no`
- *   es la variante sin fallas visibles. En el teléfono no hay;
  * - `estrellas` · el cielo de afuera, detrás de la trama y de la formación, sólo de noche;
  * - `posarse` · el polvo se posa con la quietud y lo levanta el aire (`polvo/Fisica.tsx`);
  * - `piso` · el piso vivo, de bloques (`piso/`); `piso=pulso` le suma la onda del pulso principal;
@@ -39,7 +40,7 @@
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,formacion,estrellas'   → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,estrellas,posarse'     → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -55,10 +56,6 @@ export type NivelDelHaz = 'sutil' | 'medio'
 export type PisoVivo = 'no' | 'si' | 'pulso'
 
 export interface Pruebas {
-  /** Las copias falladas afuera de la trama, en formación, en un piso más bajo que el nuestro. */
-  readonly formacion: boolean
-  /** La variante de la formación sin fallas visibles, para comparar. */
-  readonly sinFallasVisibles: boolean
   /** Estrellas: el cielo de afuera, sólo de noche. */
   readonly estrellas: boolean
   /** El polvo se posa con la quietud y lo levanta el aire. */
@@ -82,8 +79,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  formacion: false,
-  sinFallasVisibles: false,
   estrellas: false,
   posarse: false,
   pisoVivo: 'no',
@@ -115,6 +110,8 @@ export interface Entorno {
   readonly sombraHaz: boolean
   /** [ESCENA 6] 5d · las motas del haz, de noche (`polvo/motas.ts`). */
   readonly motas: boolean
+  /** [ESCENA 7] T2 · la formación, «la fábrica gigante» (`formacion/`). En el teléfono no hay. */
+  readonly formacion: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -132,6 +129,7 @@ export const ENTORNO: Entorno = {
   obstaculo: true,
   sombraHaz: true,
   motas: true,
+  formacion: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -148,6 +146,7 @@ export const BASE_LIMPIA: Entorno = {
   obstaculo: false,
   sombraHaz: false,
   motas: false,
+  formacion: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -179,6 +178,7 @@ export function entornoPedido(pedido: string): Entorno {
     obstaculo: producto ? valor('obstaculo') !== 'no' : partes.has('obstaculo'),
     sombraHaz: producto ? !partes.has('sombra=blanda') : partes.has('sombra=haz'),
     motas: producto ? valor('motas') !== 'no' : partes.has('motas'),
+    formacion: producto ? valor('formacion') !== 'no' : partes.has('formacion'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
@@ -186,8 +186,6 @@ export function entornoPedido(pedido: string): Entorno {
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   const piso = valor('piso')
   return {
-    formacion: partes.has('formacion'),
-    sinFallasVisibles: valor('fallas') === 'no',
     estrellas: partes.has('estrellas'),
     posarse: partes.has('posarse'),
     pisoVivo: piso === 'pulso' ? 'pulso' : partes.has('piso') ? 'si' : 'no',

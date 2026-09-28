@@ -7,7 +7,7 @@ import * as THREE from 'three'
 import type { NivelDeCalidad } from '../calidad'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
-import { azar } from '../formacion/enFormacion'
+import { FORMACION, azar } from '../formacion/enFormacion'
 import { pisoConFormacion } from '../formacion/Formacion'
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_FAR_ORDER, MOIRE_FAR_RADIUS } from '../probeMoire'
@@ -171,8 +171,8 @@ function EstrellasPrendidas({ rig, calidad }: PropsDeLasEstrellas) {
       uNoche: VIVO.uNoche,
       uVisible: { value: 1 },
       uPixel: { value: 1 },
-      // Con el piso de la formación, el cielo arranca donde termina ese piso; si no, apenas detrás de la trama.
-      uRadio: { value: escenario?.hasta ?? ESTRELLAS.afueraDe + 1 },
+      // Con la formación, el cielo está más allá de la última fila; si no, apenas detrás de la trama.
+      uRadio: { value: escenario !== undefined ? FORMACION.radioDelCielo : ESTRELLAS.afueraDe + 1 },
       uSuelo: { value: FLOOR_Y - (escenario?.desnivel ?? 0) },
       uTiempo: VIVO.uTiempo,
       uResolucion: { value: new THREE.Vector2(1, 1) },

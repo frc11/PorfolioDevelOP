@@ -13,7 +13,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 
 import { medir } from '../scripts-b4/navegador'
 import { abrirBanco, type Banco } from '../scripts-viajes/banco'
-import { CONTADOR, DIR5, DIR6, ESPIA_DE_SALTOS, MOMENTOS, capturarMomento, selloDeCarga } from './banco-escena'
+import { CONTADOR, DIR5, DIR6, DIR7, ESPIA_DE_SALTOS, MOMENTOS, capturarMomento, selloDeCarga } from './banco-escena'
 import { rotuloDe } from './comparar'
 import { contrasteDeLaFormacion, contrasteDelTexto, type ContrasteDeLaFormacion, type Tomas } from './contraste-formacion'
 import { escenaSola } from './logo'
@@ -23,8 +23,8 @@ const [ANCHO, ALTO] = [Number(process.argv[2] ?? 1440), Number(process.argv[3] ?
 const VARIANTES = (process.argv[4] ?? 'producto,formacion').split(' ').filter(Boolean)
 const QUE_MOMENTOS = (process.argv[5] ?? 'hero quienes-somos trabajos-de-noche por-que-develop pie').split(' ').filter(Boolean)
 const CARPETA = process.argv[6] ?? 'formacion/cuadros'
-/** [ESCENA 6] `ESCENA=6` escribe en las entregas de ESCENA 6. */
-const BASE = process.env.ESCENA === '6' ? DIR6 : DIR5
+/** [ESCENA 6] `ESCENA=6` (o `7`) escribe en las entregas de ese sprint. */
+const BASE = process.env.ESCENA === '7' ? DIR7 : process.env.ESCENA === '6' ? DIR6 : DIR5
 
 /** Lo que el componente publica para el banco. */
 const HAY_FORMACION = 'typeof window.__formacionDelBanco === "object"'

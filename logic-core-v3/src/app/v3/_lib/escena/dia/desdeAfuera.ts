@@ -25,8 +25,8 @@ export const DIA_DESDE_AFUERA = {
   /** Qué fracción del cuadro tiene que dejar ver Tu panel (su borde de abajo, desde arriba). */
   visible: 0.85,
   duracionS: 2.6,
-  /** El frente: de dónde sale, hasta dónde llega y su ancho (u). */
-  desde: 118,
+  /** El frente: de dónde sale (más allá del piso de la formación), hasta dónde llega y su ancho (u). */
+  desde: 310,
   hasta: -8,
   ancho: 6,
   /** El papel de noche contra el de día, codificado (0,2 ≈ 50 / 240). */

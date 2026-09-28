@@ -28,6 +28,8 @@ export const DIR3 = 'C:/Users/Valentino/.cache/b4-medicion/escena3'
 export const DIR5 = 'C:/Users/Valentino/.cache/b4-medicion/escena5'
 /** [ESCENA 6] Las entregas de este sprint. */
 export const DIR6 = 'C:/Users/Valentino/.cache/b4-medicion/escena6'
+/** [ESCENA 7] Las entregas de este sprint (`banco7.ts`). */
+export const DIR7 = 'C:/Users/Valentino/.cache/b4-medicion/escena7'
 
 /** Cuenta las llamadas de dibujo y los triángulos del último cuadro completo. */
 export const CONTADOR = `(() => {

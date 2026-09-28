@@ -254,6 +254,7 @@
     "test:s29-pulso": "npx tsx src/app/v3/_lib/escena/__tests__/s29-pulso.invariant.ts",
     "test:s30-escena4": "npx tsx src/app/v3/_lib/escena/__tests__/s30-escena4.invariant.ts",
     "test:s31-escena6": "npx tsx src/app/v3/_lib/escena/__tests__/s31-escena6.invariant.ts",
+    "test:s32-escena7": "npx tsx src/app/v3/_lib/escena/__tests__/s32-escena7.invariant.ts",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",

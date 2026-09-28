@@ -15,7 +15,7 @@ import {
   PAPER_COLOR,
 } from './probeScene'
 import { VIVO } from './entorno/vivo'
-import { NIEBLA_DE_AFUERA, RASANTE_GLSL } from './niebla/rasante'
+import { CORRIDO_POR_PIXEL, NIEBLA_DE_AFUERA, RASANTE_GLSL } from './niebla/rasante'
 import { conElDiaDesdeAfuera } from './dia/desdeAfuera'
 
 /**
@@ -66,23 +66,18 @@ function perfilDelCiclorama(desde: number, bajo: number): THREE.Vector2[] {
 
 /**
  * [ESCENA 5] El escenario: nuestro piso termina en `radio`, y alrededor hay otro `desnivel` más abajo,
- * hasta `hasta`. [ESCENA 6] Ese piso sube apenas hacia afuera (`pendiente`, sin escalones), como una
- * platea: cada fila de la formación asoma por encima de la de adelante.
+ * hasta `hasta`. [ESCENA 7] Ese piso es PLANO (la pendiente de ESCENA 6 se fue: la profundidad de la
+ * formación sale de la perspectiva) y llega hasta el horizonte, donde la bruma lo termina: no hay
+ * ciclorama, la fábrica no tiene paredes.
  */
 export interface Escenario {
   readonly radio: number
   readonly desnivel: number
   readonly hasta: number
-  readonly pendiente: number
-}
-
-/** La altura del piso de abajo a una distancia `r` del centro, relativa a `FLOOR_Y`. */
-export function alturaDelPisoDeAbajo(e: Escenario, r: number): number {
-  return -e.desnivel + e.pendiente * Math.max(0, r - e.radio)
 }
 
 type StudioFloorProps = {
-  /** [ESCENA 5] Con la formación, el piso es un escenario y el ciclorama arranca más afuera y más abajo. */
+  /** [ESCENA 5] Con la formación, el piso es un escenario con otro más bajo alrededor, hasta el horizonte. */
   readonly escenario?: Escenario
   /** [ESCENA 6] 6c: el piso de abajo y el ciclorama integran la niebla rasante (`niebla/rasante.ts`). */
   readonly conNieblaRasante?: boolean
@@ -97,7 +92,7 @@ function conLaNiebla(material: THREE.MeshStandardMaterial): void {
       .replace('#include <project_vertex>', '#include <project_vertex>\n\tvMundoRasante = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;')
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\nvarying vec3 vMundoRasante;\nuniform float uTiempo;\nuniform float uAbre;\n${RASANTE_GLSL}`)
-      .replace('#include <fog_fragment>', '#include <fog_fragment>\n\t#ifdef USE_FOG\n\t\tgl_FragColor.rgb = mix( fogColor, gl_FragColor.rgb, transmitanciaRasante( cameraPosition, vMundoRasante, uAbre ) );\n\t#endif')
+      .replace('#include <fog_fragment>', `#include <fog_fragment>\n\t#ifdef USE_FOG\n\t\tgl_FragColor.rgb = mix( fogColor, gl_FragColor.rgb, transmitanciaRasante( cameraPosition, vMundoRasante, uAbre, ${CORRIDO_POR_PIXEL} ) );\n\t#endif`)
   }
   material.customProgramCacheKey = () => 'papel-con-niebla-rasante'
 }
@@ -106,12 +101,10 @@ function conLaNiebla(material: THREE.MeshStandardMaterial): void {
 function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
   const canto = new THREE.CylinderGeometry(e.radio, e.radio, e.desnivel - FLOOR_THICKNESS, FLOOR_SEGMENTS, 1, true)
   canto.translate(0, -FLOOR_THICKNESS - (e.desnivel - FLOOR_THICKNESS) / 2, 0)
-  const piso = new THREE.RingGeometry(e.radio, e.hasta, FLOOR_SEGMENTS, 1)
+  // Anillos concéntricos: con uno solo, los triángulos largos hasta el horizonte interpolan mal la bruma.
+  const piso = new THREE.RingGeometry(e.radio, e.hasta, FLOOR_SEGMENTS, 12)
   piso.rotateX(-Math.PI / 2)
-  // La pendiente: cada vértice a la altura de su radio (el anillo tiene un solo tramo, así que es un cono).
-  const p = piso.getAttribute('position')
-  for (let i = 0; i < p.count; i += 1) p.setY(i, alturaDelPisoDeAbajo(e, Math.hypot(p.getX(i), p.getZ(i))))
-  piso.computeVertexNormals()
+  piso.translate(0, -e.desnivel, 0)
   const junta = mergeBufferGeometries([canto, piso]) ?? piso
   for (const g of [canto, piso]) if (g !== junta) g.dispose()
   return junta
@@ -119,14 +112,7 @@ function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
 
 export function StudioFloor({ escenario, conNieblaRasante = false }: StudioFloorProps) {
   const radioDeLaLosa = escenario?.radio ?? FLOOR_RADIUS
-  const cycGeometry = useMemo(
-    () =>
-      new THREE.LatheGeometry(
-        perfilDelCiclorama(escenario?.hasta ?? FLOOR_RADIUS, escenario === undefined ? 0 : alturaDelPisoDeAbajo(escenario, escenario.hasta)),
-        FLOOR_SEGMENTS
-      ),
-    [escenario]
-  )
+  const cycGeometry = useMemo(() => new THREE.LatheGeometry(perfilDelCiclorama(FLOOR_RADIUS, 0), FLOOR_SEGMENTS), [])
   const pisoDeAbajo = useMemo(() => (escenario === undefined ? null : geometriaDelPisoDeAbajo(escenario)), [escenario])
 
   const materials = useMemo(() => {
@@ -177,7 +163,8 @@ export function StudioFloor({ escenario, conNieblaRasante = false }: StudioFloor
         confirmado en pantalla, pasarlo a `THREE.FrontSide` es una línea y ahorra
         el descarte de caras traseras.
       */}
-      <mesh position={[0, FLOOR_Y, 0]} geometry={cycGeometry} material={materials.cyclorama} />
+      {/* [ESCENA 7] Con la formación no hay ciclorama: el piso de abajo llega al horizonte. */}
+      {escenario === undefined && <mesh position={[0, FLOOR_Y, 0]} geometry={cycGeometry} material={materials.cyclorama} />}
       {/* [ESCENA 5] El canto del escenario y el piso de la formación: el mismo papel. */}
       {pisoDeAbajo !== null && <mesh position={[0, FLOOR_Y, 0]} geometry={pisoDeAbajo} material={materials.cyclorama} />}
     </group>
