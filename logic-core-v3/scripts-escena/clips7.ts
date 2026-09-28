@@ -9,6 +9,7 @@ import { esperar, scrollHasta, type Banco } from '../scripts-viajes/banco'
 import { grabar, mover, topeMas, viajarElPuntero } from './banco-escena'
 import { abrir7, carpeta7 } from './banco7'
 import { FUERA, fin, ladoALado, puntoDelLogo, recorte, scrollSuave } from './clips6'
+import { scrollDe } from './foto7'
 
 const [QUE, VARIANTE] = [process.argv[2] ?? '', process.argv[3] ?? '']
 
@@ -180,7 +181,188 @@ async function amanecer(que: string): Promise<void> {
   }
 }
 
+/**
+ * T4 · el polvo que se posa: una vuelta corta para que la cámara recién frene al empezar el clip; quieto
+ * 14 s (empieza a posarse a los ~4 s y está en el piso a los ~10 s) y el despertar (el remolino, a velocidad real).
+ */
+async function sePosa(): Promise<void> {
+  const dir = carpeta7('se-posa')
+  const b = await abrir7('producto')
+  try {
+    await mover(b, FUERA[0], FUERA[1])
+    const quienes = await topeMas('quienes-somos', 0.15)(b)
+    await esperar(2500)
+    await scrollSuave(b, 0, quienes * 0.3, 900)
+    await scrollSuave(b, quienes * 0.3, 0, 900)
+    const r = await grabar(b, `${dir}/se-posa-y-despierta`, async () => {
+      await esperar(14000)
+      await scrollSuave(b, 0, quienes * 0.5, 700)
+      await esperar(5000)
+    }, 1440)
+    console.log(JSON.stringify({ clip: 'se-posa', ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+/**
+ * T5 · el techo del ojo: 45 s quieto en Números de noche (la cámara al ras del piso), donde una cresta con
+ * el anillo del pulso encima subía un bloque por encima de la cámara. Se mide la luz de la franja de arriba
+ * del horizonte cuadro por cuadro: un bloque delante la hunde.
+ */
+async function ojo(): Promise<void> {
+  const dir = carpeta7('piso-vivo')
+  const b = await abrir7('producto')
+  try {
+    await mover(b, FUERA[0], FUERA[1])
+    await scrollHasta(b, 3900)
+    await esperar(3000)
+    const r = await grabar(b, `${dir}/ojo-numeros-45s`, () => esperar(45000), 1440)
+    console.log(JSON.stringify({ clip: 'ojo', ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+/** T3 · la noche quieta en Trabajos y mirando el cielo (Números), y la esquina de arriba al doble. */
+async function cielo(): Promise<void> {
+  const dir = carpeta7('cielo')
+  for (const [nombre, donde] of [['trabajos', 'trabajos+0'], ['numeros', '3900']] as const) {
+    const b = await abrir7('producto')
+    try {
+      await mover(b, FUERA[0], FUERA[1])
+      await scrollHasta(b, await scrollDe(b, donde))
+      await esperar(3000)
+      const destino = `${dir}/noche-quieta-${nombre}`
+      const r = await grabar(b, destino, () => esperar(12000), 1440)
+      recorte(`${destino}.mp4`, `${destino}-esquina-x2.mp4`, 0, 0, 720, 300)
+      console.log(JSON.stringify({ clip: `cielo-${nombre}`, ...r }))
+    } finally {
+      await b.cerrar()
+    }
+  }
+}
+
+/** T8 · la niebla: quieta en Quiénes somos, un scroll rápido (se abre) y el freno (se posa enseguida), ida y vuelta. */
+async function niebla(): Promise<void> {
+  const dir = carpeta7('niebla')
+  const b = await abrir7('producto')
+  try {
+    const quienes = await topeMas('quienes-somos', 0.15)(b)
+    const lejos = await topeMas('quienes-somos', 0.9)(b)
+    await scrollHasta(b, quienes)
+    await mover(b, FUERA[0], FUERA[1])
+    await esperar(3000)
+    const r = await grabar(b, `${dir}/se-abre-con-el-scroll`, async () => {
+      await esperar(2500)
+      await scrollSuave(b, quienes, lejos, 500)
+      await esperar(3500)
+      await scrollSuave(b, lejos, quienes, 500)
+      await esperar(3500)
+    }, 1440)
+    console.log(JSON.stringify({ clip: 'niebla', ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+/** T6 · el aire con inercia: el mismo scroll y freno, con y sin (el polvo sigue derivando ~2 s). */
+async function inercia(): Promise<void> {
+  const dir = carpeta7('inercia')
+  for (const [nombre, pedido] of [['con', 'producto'], ['sin', 'producto,inercia=no']] as const) {
+    const b = await abrir7(pedido)
+    try {
+      const quienes = await topeMas('quienes-somos', 0.15)(b)
+      await mover(b, FUERA[0], FUERA[1])
+      await esperar(2500)
+      const r = await grabar(b, `${dir}/${nombre}`, async () => {
+        await esperar(1000)
+        await scrollSuave(b, 0, quienes * 0.4, 900)
+        await esperar(4500)
+        await scrollSuave(b, quienes * 0.4, 0, 900)
+        await esperar(4500)
+      }, 1440)
+      console.log(JSON.stringify({ clip: `inercia-${nombre}`, ...r }))
+    } finally {
+      await b.cerrar()
+    }
+  }
+  ladoALado(`${dir}/sin.mp4`, `${dir}/con.mp4`, `${dir}/sin-y-con.mp4`, ['sin inercia', 'con inercia (producto)'])
+}
+
+/**
+ * T12 · de noche, quieto sobre el charco del haz: las sombritas de las motas y el rebote en el logo. Graba
+ * apenas frena la cámara (a los 4 s de quietud el polvo empieza a posarse y se van las motas del haz); el
+ * recorte es el charco, debajo del logo.
+ */
+async function motas(): Promise<void> {
+  const dir = carpeta7('motas')
+  const b = await abrir7('producto')
+  try {
+    await mover(b, FUERA[0], FUERA[1])
+    await scrollHasta(b, await topeMas('trabajos', 0)(b))
+    await esperar(300)
+    const destino = `${dir}/noche-charco`
+    const r = await grabar(b, destino, () => esperar(12000), 1440)
+    recorte(`${destino}.mp4`, `${destino}-x2.mp4`, 230, 440, 720, 440)
+    console.log(JSON.stringify({ clip: 'motas', ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+/** T13 · las pruebas nuevas, cada una en su momento (con su bandera). */
+async function pruebas(que: string): Promise<void> {
+  const dir = carpeta7('pruebas')
+  const pedido = que === 'todas' ? 'producto,fibras,fugaz,enfoque,grano' : `producto,${que}`
+  const b = await abrir7(pedido)
+  try {
+    await mover(b, FUERA[0], FUERA[1])
+    if (que === 'fugaz') {
+      // La noche mirando el cielo (los números): una a mano enseguida, y después las que salen solas.
+      await scrollHasta(b, 3900)
+      await esperar(3000)
+      const r = await grabar(b, `${dir}/fugaz-noche`, async () => {
+        await esperar(700)
+        await medir(b.p, 'window.__fugazDelBanco.ya()')
+        await esperar(14000)
+      }, 1440)
+      console.log(JSON.stringify({ clip: 'fugaz', cuantas: await medir<number>(b.p, 'window.__fugazDelBanco.cuantas()'), ...r }))
+    } else if (que === 'enfoque') {
+      const quienes = await topeMas('quienes-somos', 0.15)(b)
+      await esperar(2000)
+      const r = await grabar(b, `${dir}/enfoque-al-frenar`, async () => {
+        await esperar(800)
+        await scrollSuave(b, 0, quienes * 0.45, 1400)
+        await esperar(2500)
+        await scrollSuave(b, quienes * 0.45, quienes, 1400)
+        await esperar(2500)
+      }, 1440)
+      console.log(JSON.stringify({ clip: 'enfoque', ...r }))
+    } else {
+      // Fibras y grano: quieto en el hero y en Quiénes somos.
+      await esperar(2000)
+      const quienes = await topeMas('quienes-somos', 0.15)(b)
+      const r = await grabar(b, `${dir}/${que}`, async () => {
+        await esperar(6000)
+        await scrollSuave(b, 0, quienes, 1600)
+        await esperar(6000)
+      }, 1440)
+      console.log(JSON.stringify({ clip: que, ...r }))
+    }
+  } finally {
+    await b.cerrar()
+  }
+}
+
 async function principal(): Promise<void> {
+  if (QUE === 'pruebas') return pruebas(VARIANTE)
+  if (QUE === 'se-posa') return sePosa()
+  if (QUE === 'ojo') return ojo()
+  if (QUE === 'cielo') return cielo()
+  if (QUE === 'niebla') return niebla()
+  if (QUE === 'inercia') return inercia()
+  if (QUE === 'motas') return motas()
   if (QUE === 'amanecer') return amanecer(VARIANTE)
   if (QUE === 'haz') return haz()
   if (QUE === 'piso') return piso(VARIANTE === 'mar-quienes' ? 'mar' : VARIANTE, VARIANTE === 'mar' ? 'mar-20s-hero' : VARIANTE === 'mar-quienes' ? 'mar-20s-quienes' : 'pulso')
