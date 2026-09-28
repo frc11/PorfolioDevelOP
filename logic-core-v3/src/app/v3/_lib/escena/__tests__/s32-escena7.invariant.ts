@@ -18,13 +18,12 @@
  *      y queda más arriba; la histéresis de siempre; las motas, la sombra y el rebote siguen su intensidad.
  * T10 · la nitidez del polvo: encendida; motas chicas y definidas, sólo las muy cercanas desenfocadas y
  *      poco; menos bokeh y más chico; el aire caliente (6f), borrado.
- * T12 · el haz en el piso: las motas que cruzan la mancha de luz proyectan sombritas que se mueven, y de
- *      noche el piso iluminado aclara apenas la cara de abajo del logo; siguen la intensidad del haz.
+ * T12 · el haz en el piso: de noche el piso iluminado aclara apenas la cara de abajo del logo; sigue la
+ *      intensidad del haz. [ESCENA 8] Las sombritas de las motas se borraron.
  * T11 · el amanecer (con bandera, apagado): el orden (estrellas, resplandor, filas de afuera adentro, la
  *      trama, el piso, el logo), la compuerta, que no quede atrás del scroll, y la vuelta escondida.
- * T13 · las pruebas nuevas (con bandera, apagadas): fibras pocas que caen girando a contraluz; la estrella
- *      fugaz de noche, detrás de la trama, cada 5 a 10 s, tenue y rápida; el foco que busca y se clava
- *      (sólo en el polvo); el grano fino que se mueve y no le saca nitidez a nada.
+ * T13 · las pruebas nuevas: [ESCENA 8] la estrella fugaz, encendida (de noche, detrás de la trama, cada 5
+ *      a 10 s, tenue y rápida); las fibras, el foco que busca y el grano, borrados.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -48,16 +47,11 @@ import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
 import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
 import { BOKEH_NITIDO, NITIDEZ, ladoDeLaMota } from '../polvo/nitidez'
 import { BOKEH_COUNT, BOKEH_SIZE, PARTICLE_SIZE } from '../probeParticles'
-import { SOMBRAS } from '../polvo/sombras'
 import { REBOTE } from '../entorno/Rebote'
 import { AMANECER, amanecerEn, frenteEn, frenteHasta, momentoEn, progresoPorScroll } from '../amanecer/linea'
 import type { BloqueOpaco } from '../nocheDisparada'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
-import { FIBRAS } from '../pruebas/Fibras'
-import { FUGAZ, franjaLibre, trayectoriaDeLaFugaz } from '../pruebas/Fugaz'
-import { BUSCA } from '../pruebas/Enfoque'
-import { GRANO } from '../pruebas/Grano'
-import { ENFOQUE } from '../polvo/nitidez'
+import { FUGAZ, franjaLibre, trayectoriaDeLaFugaz } from '../estrellas/Fugaz'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
@@ -322,7 +316,7 @@ afirmar(/manchasDelHaz\(VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k/.test(leer('Cont
 // ── T10 · la nitidez del polvo ────────────────────────────────────────────
 titulo('T10 · el polvo nítido')
 afirmar(ENTORNO.nitidez && !BASE_LIMPIA.nitidez && !entornoPedido('producto,nitidez=no').nitidez, 'encendida en el producto; el banco la apaga con `nitidez=no`')
-const CALOR = /aireCaliente|__calorDelBanco|CALOR|<Calor/
+const CALOR = /aireCaliente|__calorDelBanco|CALOR\b|<Calor/
 afirmar(!existsSync(path.join(ESCENA, 'entorno/Calor.tsx')) && !codigo(ESCENA).some((c) => CALOR.test(c)), '6f · el aire caliente se borró: ni el componente, ni la bandera, ni la pasada extra')
 controlPositivo('el detector VE el aire caliente', '<Calor calidad={calidad} />', (c: string) => !CALOR.test(c))
 // El lado de una mota a 900 px de alto: lo de antes (0,17 × 450 / d) contra el de ahora.
@@ -337,22 +331,15 @@ afirmar(/0\.75 \/ max\( vLadoN, 1\.0 \)/.test(leer('polvo/nitidez.ts')) && /#ifd
 afirmar(BOKEH_NITIDO.cuantos <= BOKEH_COUNT / 2 && BOKEH_NITIDO.tam <= BOKEH_SIZE / 2, 'menos bokeh y más chico', `${String(BOKEH_NITIDO.cuantos)} discos de ${String(BOKEH_NITIDO.tam)} (antes ${String(BOKEH_COUNT)} de ${String(BOKEH_SIZE)})`)
 
 // ── T12 · el haz en el piso ───────────────────────────────────────────────
-titulo('T12 · las motas del haz dan sombra y el piso rebota luz')
+titulo('T12 · el piso rebota luz (las sombras de las motas, borradas en ESCENA 8)')
 afirmar(ENTORNO.rebote && !BASE_LIMPIA.rebote && !entornoPedido('producto,rebote=no').rebote, 'encendido en el producto; el banco lo apaga con `rebote=no`')
-const sombras = leer('polvo/sombras.ts')
-afirmar(/vec3 enElPiso = mundo \+ \( mundo - oculo \) \* \( alto \/ \( oculo\.y - mundo\.y \) \);/.test(sombras) && /float enElHaz = enLaColumna\( mundo \);/.test(sombras), 'cada mota del haz se proyecta al piso desde el óculo (la luz del haz baja de ahí), sobre el bloque que tiene debajo')
-afirmar(/\$\{FISICA_EN_LA_MOTA_GLSL\}/.test(sombras) && /\$\{MOTAS_GLSL\}/.test(sombras) && /\$\{VOLUMEN_GLSL\}/.test(sombras), '  la misma mota que se ve: el volumen, la física y el freno del haz (la sombra se mueve con ella)')
-afirmar(/2\.0 \* \$\{f\(HAZ\.radioArriba\)\} \* alto \/ \( oculo\.y - mundo\.y \)/.test(sombras), '  la penumbra crece con la altura: el óculo no es un punto')
-// De noche el charco es casi toda la luz del piso: la sombra se ve; de día, sobre el papel, casi nada.
-const oscurece = (charco: number, propia: number): number => (SOMBRAS.tapa * charco) / (propia + charco)
-const deNoche = oscurece(0.06 * FIRME, SOMBRAS.piso.noche)
-const deDia = oscurece(0.05, SOMBRAS.piso.dia)
-afirmar(deNoche > 5 * deDia && deNoche < 0.5, 'oscurece sólo la luz del haz: de noche se ve, de día casi nada', `en el centro del charco, de noche ${(deNoche * 100).toFixed(0)} %, de día ${(deDia * 100).toFixed(1)} %`)
-afirmar(/blendDst: THREE\.OneMinusSrcColorFactor/.test(sombras) && /blendSrcAlpha: THREE\.ZeroFactor/.test(sombras) && /blendDstAlpha: THREE\.OneFactor/.test(sombras), '  la mezcla multiplica el piso y no toca el alfa del lienzo')
+const SOMBRITAS = /materialDeLasSombras|SOMBRAS_EN_VIVO|polvo\/sombras/
+afirmar(!existsSync(path.join(ESCENA, 'polvo/sombras.ts')) && !codigo(ESCENA).some((c) => SOMBRITAS.test(c)), '[ESCENA 8] las sombritas de las motas se borraron: ni el archivo ni la pasada')
+controlPositivo('el detector VE la pasada de las sombritas', "import { SOMBRAS_EN_VIVO, materialDeLasSombras } from './polvo/sombras'", (c: string) => !SOMBRITAS.test(c))
 const rebote = leer('entorno/Rebote.tsx')
 afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNoche\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
 afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), 'utf8')), '  sin tocar `ProbeLogo`: el parche es sobre su material')
-afirmar(/mix\( uHazDia\.y, uHazNoche\.y, uNoche \)/.test(sombras) && /nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), 'las dos siguen la intensidad del haz (el charco de noche lleva el encendido, T9)')
+afirmar(/nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), '  sigue la intensidad del haz (el charco de noche lleva el encendido, T9)')
 
 // ── T11 · el amanecer ─────────────────────────────────────────────────────
 titulo('T11 · el amanecer: un evento de luz, con bandera')
@@ -394,20 +381,15 @@ afirmar(progresoPorScroll(100, 100, 400) === 0 && progresoPorScroll(400, 100, 40
 afirmar(/NOCHE_DEL_AMANECER\.sostenida \? 0 : NOCHE_DISPARADA\.cantidad|!NOCHE_DEL_AMANECER\.sostenida \? 0/.test(leer('nocheDisparada.ts')), 'la sala sigue de noche hasta que entra la luz (la noche se sostiene)')
 
 // ── T13 · las pruebas nuevas ──────────────────────────────────────────────
-titulo('T13 · fibras, estrella fugaz, foco que busca y grano: con bandera')
-const lasCuatro = ['fibras', 'fugaz', 'enfoque', 'grano'] as const
-const pedidas = entornoPedido('producto,fibras,fugaz,enfoque,grano').pruebas
-afirmar(lasCuatro.every((p) => !ENTORNO.pruebas[p] && !BASE_LIMPIA.pruebas[p]) && lasCuatro.every((p) => pedidas[p]), 'las cuatro apagadas en el producto; el banco las prende por nombre')
-const montaje = leer('ProbeStage.tsx')
-afirmar(['<Fibras />', '<Fugaz rig={rig} />', '<Enfoque rig={rig} />', '<Grano />'].every((m) => montaje.includes(m)), '  montadas en la escena (cada una se apaga sola sin su bandera)')
-// Fibras.
-const fibras = leer('pruebas/Fibras.tsx')
-afirmar(FIBRAS.cuantas <= 80 && FIBRAS.largo[0] > 10 * FIBRAS.ancho, 'fibras: pocas y más grandes que el polvo, cintas largas y finas', `${String(FIBRAS.cuantas)} fibras de ${String(FIBRAS.largo[0])} a ${String(FIBRAS.largo[1])} u por ${String(FIBRAS.ancho)}`)
-afirmar(FIBRAS.cae[0] > 0 && FIBRAS.gira[0] > 0 && /mat3 giro = girar\( normalize\( aGiro\.xyz \), aGiro\.w \* t/.test(fibras), '  caen y giran sobre su eje')
-afirmar(/vPlano = abs\( dot\( plano, normalize\( cameraPosition - mundo \) \) \)/.test(fibras) && /mix\( 0\.25, 0\.85, vPlano \)/.test(fibras), '  a contraluz: de plano se ven enteras y de canto casi nada (el destello al girar)')
-afirmar(/new THREE\.InstancedBufferGeometry\(\)/.test(fibras) && !/useFrame/.test(fibras), '  una llamada de dibujo, sin simulación (todo es una cuenta del reloj)')
+titulo('T13 · la estrella fugaz, encendida; fibras, foco que busca y grano, borrados (ESCENA 8)')
+afirmar(ENTORNO.fugaz && !BASE_LIMPIA.fugaz && !entornoPedido('producto,fugaz=no').fugaz && entornoPedido('fugaz').fugaz, 'la fugaz, encendida en el producto; el banco la apaga con `fugaz=no`')
+const BORRADAS = /<Fibras|<Enfoque|<Grano|__enfoqueDelBanco|POLVO_ENFOQUE|uBusca|GRANO\b|FIBRAS\b/
+afirmar(!existsSync(path.join(ESCENA, 'pruebas')) && !codigo(ESCENA).some((c) => BORRADAS.test(c)), 'las fibras, el foco que busca y el grano se borraron: ni los archivos ni el montaje ni el parche del polvo')
+controlPositivo('el detector VE el montaje del grano', '<Grano />', (c: string) => !BORRADAS.test(c))
+afirmar(Object.keys(entornoPedido('producto,fibras,enfoque,grano').pruebas).join(',') === 'amanecer', '  y sus banderas tampoco existen')
+afirmar(leer('ProbeStage.tsx').includes('<Fugaz rig={rig} />'), '  la fugaz, montada en la escena')
 // La estrella fugaz.
-const fugaz = leer('pruebas/Fugaz.tsx')
+const fugaz = leer('estrellas/Fugaz.tsx')
 afirmar(FUGAZ.cada[0] === 5 && FUGAZ.cada[1] === 10, 'fugaz: cada 5 a 10 s')
 afirmar(FUGAZ.dura[1] < 1 && FUGAZ.brillo < 1, '  tenue y rápida', `cruza en ${String(FUGAZ.dura[0])} a ${String(FUGAZ.dura[1])} s, con ${String(FUGAZ.brillo)} de brillo en el pico`)
 afirmar(/VIVO\.uNoche\.value >= FUGAZ\.noche/.test(fugaz) && /fueraDelTunel\(rig\.current\.progress\) > 0\.99/.test(fugaz), '  sólo de noche y fuera del túnel')
@@ -435,15 +417,4 @@ afirmar(bien && cruzan > 1500, '  nace arriba, en el lado que el logo deja libre
 controlPositivo('el detector VE un trazo que sale del cuadro (el medido antes del arreglo)', [-0.75, 0.66, -1.07, 0.38], (tr: readonly number[]) => adentro(tr))
 controlPositivo('el detector VE un trazo detrás del logo (el medido en Números)', [-0.5, 0.48, -0.27, 0.35], (tr: readonly number[]) => enLaFranja(tr, franjaLibre(LOGOS[0])))
 afirmar(/if \(tr === null \|\| Math\.min\(desde\.y, hasta\.y\) < f\.horizonte\)/.test(fugaz) && /franjaLibre\(logoEnElCuadro\(camara\)\)/.test(fugaz), '  la franja sale del logo proyectado en cada cruce; si no hay cielo libre, esa no sale (ni tapada por el piso ni por el logo)')
-// El foco que busca.
-const enfoque = leer('pruebas/Enfoque.tsx')
-afirmar(!/logoMaterial|ProbeLogo|uniforms\.uBlur/.test(enfoque) && /AIRE\.uBusca\.value = cuanto/.test(enfoque), 'enfoque: sólo desenfoca el polvo; el logo es a lo que el foco va')
-afirmar(ENFOQUE.tope <= 6 && Math.exp(-1 / BUSCA.clava) < 0.1, '  sutil: a lo sumo unos píxeles de más, y en un segundo se clavó', `tope ${String(ENFOQUE.tope)} px; al segundo queda el ${(Math.exp(-1 / BUSCA.clava) * 100).toFixed(0)} %`)
-afirmar(/Math\.cos\(\(2 \* Math\.PI \* s\) \/ BUSCA\.periodo\)/.test(enfoque) && BUSCA.pasa < 1, '  duda: el foco se pasa de un lado y del otro del logo y se apaga')
-// El grano.
-const grano = leer('pruebas/Grano.tsx')
-afirmar(GRANO.cuanto <= 0.05 && /gl_FragCoord\.xy/.test(grano), 'grano: un píxel por grano y bajo (todo sigue nítido)', `±${(GRANO.cuanto * 100).toFixed(1)} % de la luz`)
-afirmar(/floor\( uTiempo \* 60\.0 \)/.test(grano), '  se mueve: otro grano en cada cuadro')
-afirmar(/blendSrcAlpha: THREE\.ZeroFactor/.test(grano) && /blendDstAlpha: THREE\.OneFactor/.test(grano) && /depthTest: false/.test(grano), '  multiplica lo que hay y no toca el alfa del lienzo')
-
 cerrar('s32-escena7')

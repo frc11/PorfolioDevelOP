@@ -15,13 +15,10 @@ import { entornoDeLaEscena } from './entorno'
 import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
-import { Enfoque } from './pruebas/Enfoque'
-import { Fibras } from './pruebas/Fibras'
-import { Fugaz } from './pruebas/Fugaz'
-import { Grano } from './pruebas/Grano'
 import { DepthParticles } from './DepthParticles'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
+import { Fugaz } from './estrellas/Fugaz'
 import { MoireVivo } from './moire/MoireVivo'
 import { PisoVivo } from './piso/PisoVivo'
 import { Aire } from './polvo/Aire'
@@ -290,11 +287,8 @@ export default function ProbeStage({
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
         {/* [ESCENA 7] T11, con bandera: el amanecer (el día entra desde afuera y por la trama). */}
         <Amanecer moireRef={moireRef} logoMaterialRef={logoMaterialRef} />
-        {/* [ESCENA 7] T13, con bandera: las fibras, la estrella fugaz, el foco que busca y el grano (el último del cuadro). */}
-        <Fibras />
+        {/* [ESCENA 7] T13 · la estrella fugaz, de noche (encendida en ESCENA 8). */}
         <Fugaz rig={rig} />
-        <Enfoque rig={rig} />
-        <Grano />
         {/* [ESCENA 7] T12: de noche, el piso iluminado por el haz aclara apenas la cara de abajo del logo. */}
         <Rebote logoMaterialRef={logoMaterialRef} />
       </Suspense>

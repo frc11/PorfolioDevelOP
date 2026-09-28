@@ -22,12 +22,6 @@ export const NITIDEZ = {
   cerca: 2.0,
 } as const
 
-/**
- * [ESCENA 7] T13 · el enfoque que busca (con bandera): cuánto se desenfoca una mota lejos del foco mientras
- * busca (px por cada vez la distancia del foco) y el tope (px).
- */
-export const ENFOQUE = { px: 7, tope: 6 } as const
-
 /** El bokeh: cuántos discos quedan (de 90), su tamaño en el mundo (antes 1,2) y su opacidad (antes 0,2). */
 export const BOKEH_NITIDO = { cuantos: 30, tam: 0.34, opacidad: 0.16 } as const
 
@@ -45,10 +39,6 @@ export const NITIDEZ_VERTEX_GLSL = /* glsl */ `
 		float lejosN = - mvPosition.z;
 		float enFoco = clamp( gl_PointSize, ${NITIDEZ.tam[0].toFixed(2)} * uPixel, ${NITIDEZ.tam[1].toFixed(2)} * uPixel );
 		float coc = max( 0.0, ${NITIDEZ.desenfocaDesde.toFixed(2)} / max( lejosN, 0.1 ) - 1.0 ) * ${NITIDEZ.desenfoque.toFixed(2)} * uPixel;
-		#ifdef POLVO_ENFOQUE
-			// [ESCENA 7] T13: mientras el foco busca, lo que no está a la distancia del foco se desenfoca un poco.
-			coc += uBusca * min( ${ENFOQUE.tope.toFixed(1)}, ${ENFOQUE.px.toFixed(1)} * abs( 1.0 - uFoco / max( lejosN, 0.1 ) ) ) * uPixel;
-		#endif
 		vDesenfoque = coc / ( coc + enFoco );
 		gl_PointSize = enFoco + coc;
 		vLadoN = gl_PointSize;

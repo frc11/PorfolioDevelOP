@@ -6,8 +6,8 @@ import * as THREE from 'three'
 
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
-import { TRAMA_GLSL } from '../estrellas/cielo'
-import { TRAMA_EN_VIVO } from '../estrellas/trama'
+import { TRAMA_GLSL } from './cielo'
+import { TRAMA_EN_VIVO } from './trama'
 import { FORMACION } from '../formacion/enFormacion'
 import { AIRE } from '../polvo/parche'
 import { MOIRE_FAR_ORDER } from '../probeMoire'
@@ -15,8 +15,8 @@ import type { ProbeRigStore } from '../probeStore'
 import { fueraDelTunel } from '../tunelEnLaEscena'
 
 /**
- * [ESCENA 7] T13 · ESTRELLA FUGAZ — con bandera, apagada. De noche, afuera de la trama, cada 5 a 10 s (la
- * noche dura poco): un trazo tenue y rápido que cruza un pedazo del cielo que se está mirando, con la cola
+ * [ESCENA 7] T13 · ESTRELLA FUGAZ — [ESCENA 8] aprobada: encendida en el producto (`fugaz`; el banco la
+ * apaga con `fugaz=no`). De noche, afuera de la trama, cada 5 a 10 s (la noche dura poco): un trazo tenue y rápido que cruza un pedazo del cielo que se está mirando, con la cola
  * que se apaga. Está en el infinito, como las estrellas: detrás de la trama (la lee, como ellas) y de las
  * siluetas de la formación. Una llamada de dibujo, sólo mientras cruza.
  *
@@ -109,7 +109,7 @@ interface PropsDeLaFugaz {
 type VentanaDelBanco = Window & { __fugazDelBanco?: { cuantas: () => number; ya: (fija?: number) => void; donde: () => number[] } }
 
 export function Fugaz(props: PropsDeLaFugaz) {
-  if (!entornoDeLaEscena().pruebas.fugaz) return null
+  if (!entornoDeLaEscena().fugaz) return null
   return <FugazPrendida {...props} />
 }
 

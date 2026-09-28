@@ -29,11 +29,13 @@
  * `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no`, `encendido=no`,
  * `nitidez=no` y `rebote=no`. Se borraron 6b y 6f.
  *
+ * **[ESCENA 8] El veredicto de ESCENA 7**: la estrella fugaz pasa al producto (`fugaz`, se apaga con
+ * `fugaz=no`); el foco que busca, las fibras, el grano y las sombras de las motas se borraron (código y
+ * banderas). La luz que rebota (`rebote`) se queda.
+ *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos);
- * - T13 `fibras`, `fugaz`, `enfoque` y `grano` · pelusas que caen girando, una estrella fugaz de noche,
- *   el foco que busca al frenar y el grano de cámara.
+ * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos).
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
@@ -54,23 +56,11 @@ export type NivelDelHaz = 'sutil' | 'medio'
 export interface Pruebas {
   /** T11 · el amanecer: el día entra desde afuera y por la trama, como un evento de luz (`amanecer/`). */
   readonly amanecer: boolean
-  /** T13 · fibras en el aire: pocas pelusas que caen girando (`pruebas/Fibras.tsx`). */
-  readonly fibras: boolean
-  /** T13 · la estrella fugaz, de noche, afuera de la trama (`pruebas/Fugaz.tsx`). */
-  readonly fugaz: boolean
-  /** T13 · el enfoque que busca: al frenar el scroll el foco duda y se clava en el logo (`pruebas/Enfoque.tsx`). */
-  readonly enfoque: boolean
-  /** T13 · el grano de cámara, muy fino y en movimiento (`pruebas/Grano.tsx`). */
-  readonly grano: boolean
 }
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
   amanecer: false,
-  fibras: false,
-  fugaz: false,
-  enfoque: false,
-  grano: false,
 }
 
 export interface Entorno {
@@ -109,10 +99,12 @@ export interface Entorno {
   /** [ESCENA 7] T10 · el polvo nítido: motas chicas y definidas; sólo las muy cercanas se desenfocan, y poco. */
   readonly nitidez: boolean
   /**
-   * [ESCENA 7] T12 · el haz en el piso: las motas que cruzan la mancha de luz del haz proyectan sombritas,
-   * y de noche el piso iluminado aclara apenas la cara de abajo del logo (`polvo/sombras.ts`, `entorno/Rebote.tsx`).
+   * [ESCENA 7] T12 · la luz que rebota: de noche el piso iluminado por el haz aclara apenas la cara de abajo
+   * del logo (`entorno/Rebote.tsx`). [ESCENA 8] Las sombras de las motas se borraron.
    */
   readonly rebote: boolean
+  /** [ESCENA 7] T13 · la estrella fugaz, de noche, afuera de la trama (`estrellas/Fugaz.tsx`). [ESCENA 8] encendida. */
+  readonly fugaz: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -139,6 +131,7 @@ export const ENTORNO: Entorno = {
   hazEncendido: true,
   nitidez: true,
   rebote: true,
+  fugaz: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -164,6 +157,7 @@ export const BASE_LIMPIA: Entorno = {
   hazEncendido: false,
   nitidez: false,
   rebote: false,
+  fugaz: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -204,6 +198,7 @@ export function entornoPedido(pedido: string): Entorno {
     hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
     nitidez: producto ? valor('nitidez') !== 'no' : partes.has('nitidez'),
     rebote: producto ? valor('rebote') !== 'no' : partes.has('rebote'),
+    fugaz: producto ? valor('fugaz') !== 'no' : partes.has('fugaz'),
     pruebas: pruebasPedidas(partes),
   }
 }
@@ -211,10 +206,6 @@ export function entornoPedido(pedido: string): Entorno {
 function pruebasPedidas(partes: ReadonlySet<string>): Pruebas {
   return {
     amanecer: partes.has('amanecer'),
-    fibras: partes.has('fibras'),
-    fugaz: partes.has('fugaz'),
-    enfoque: partes.has('enfoque'),
-    grano: partes.has('grano'),
   }
 }
 
