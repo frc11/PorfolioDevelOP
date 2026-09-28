@@ -6,6 +6,7 @@ import { PARTICLE_FAR_COLOR, PARTICLE_NEAR_COLOR } from '../probeParticles'
 import { MOTAS_FRAGMENT_GLSL, MOTAS_GLSL, MOTAS_PARS_GLSL, MOTAS_TAM_GLSL } from './motas'
 import { DISTANCIA_AL_LOGO_GLSL, HOLGURA } from './obstaculo'
 import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from './nitidez'
+import { AMANECER_EN_VIVO, AMANECER_GLSL, hayAmanecer } from '../amanecer/luz'
 import { FISICA_EN_LA_MOTA_GLSL } from './simulacion'
 import { POLVO_PAREJO, VOLUMEN_GLSL } from './volumen'
 
@@ -80,6 +81,9 @@ varying float vParejo;
 	varying float vDesenfoque;
 	varying float vLadoN;
 #endif
+#ifdef AMANECER
+	varying vec3 vMundoDelAmanecer;
+#endif
 uniform float uTiempo;
 `
 
@@ -103,6 +107,9 @@ const CUERPO = /* glsl */ `
 	#endif
 	#ifdef AIRE_MOTAS
 		${MOTAS_GLSL}
+	#endif
+	#ifdef AMANECER
+		vMundoDelAmanecer = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
 	#endif
 	// Lo que queda afuera de la sala va detrás de la cámara: no pinta un píxel.
 	if ( vParejo < 0.002 ) transformed = ( transpose( mat3( modelMatrix ) ) * ( cameraPosition - modelMatrix[ 3 ].xyz ) ) - transpose( mat3( modelMatrix ) ) * vec3( viewMatrix[ 0 ][ 2 ], viewMatrix[ 1 ][ 2 ], viewMatrix[ 2 ][ 2 ] ) * -50.0;
@@ -128,10 +135,18 @@ varying float vDestello;
 	varying float vDesenfoque;
 	varying float vLadoN;
 #endif
+#ifdef AMANECER
+	varying vec3 vMundoDelAmanecer;
+	${AMANECER_GLSL}
+#endif
 `
 
 const FRAGMENTO = /* glsl */ `
 	diffuseColor.a *= vParejo;
+	#ifdef AMANECER
+		// [ESCENA 7] T11: la mota guarda su blanco de noche hasta que el frente del día la alcanza.
+		diffuseColor.rgb = mix( vec3( 1.0 ), diffuseColor.rgb, alcanzadoPorElDia( vMundoDelAmanecer ) );
+	#endif
 	#ifdef AIRE_MOTAS
 		${MOTAS_FRAGMENT_GLSL}
 	#endif
@@ -149,6 +164,7 @@ function definesDe(campo: Campo, concha: number): string {
     campo === 'polvo' && e.polvoParejo && e.inercia ? '#define AIRE_INERCIA' : '',
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
     campo === 'polvo' && e.nitidez ? '#define POLVO_NITIDO' : '',
+    campo === 'polvo' && hayAmanecer() ? '#define AMANECER' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
   const holgura = campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh
@@ -171,7 +187,7 @@ export function conAire<T extends THREE.Material>(material: T, campo: Campo, con
   const clavePrevia = material.customProgramCacheKey.bind(material)
   material.onBeforeCompile = (shader: Shader, renderer) => {
     previo(shader, renderer)
-    Object.assign(shader.uniforms, AIRE, { uTiempo: VIVO.uTiempo })
+    Object.assign(shader.uniforms, AIRE, AMANECER_EN_VIVO, { uTiempo: VIVO.uTiempo })
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_VERTEX}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CUERPO}`)

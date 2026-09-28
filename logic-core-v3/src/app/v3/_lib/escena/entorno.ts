@@ -31,13 +31,13 @@
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6g `dia=afuera` · el día vuelve barriendo desde afuera.
+ * - T11 `amanecer` · el día entra desde afuera y por la trama, como un evento de luz (6g + los rayos).
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,dia=afuera'            → el producto con una prueba
+ *     window.__entornoDeLaEscena = 'producto,amanecer'              → el producto con una prueba
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -50,13 +50,13 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6g · el día entra desde afuera. */
-  readonly diaDesdeAfuera: boolean
+  /** T11 · el amanecer: el día entra desde afuera y por la trama, como un evento de luz (`amanecer/`). */
+  readonly amanecer: boolean
 }
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  diaDesdeAfuera: false,
+  amanecer: false,
 }
 
 export interface Entorno {
@@ -190,13 +190,13 @@ export function entornoPedido(pedido: string): Entorno {
     hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
     nitidez: producto ? valor('nitidez') !== 'no' : partes.has('nitidez'),
     rebote: producto ? valor('rebote') !== 'no' : partes.has('rebote'),
-    pruebas: pruebasPedidas(partes, valor),
+    pruebas: pruebasPedidas(partes),
   }
 }
 
-function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
+function pruebasPedidas(partes: ReadonlySet<string>): Pruebas {
   return {
-    diaDesdeAfuera: valor('dia') === 'afuera',
+    amanecer: partes.has('amanecer'),
   }
 }
 

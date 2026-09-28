@@ -4,6 +4,7 @@
  * Cada `<qué>` escribe en su carpeta de `escena7/`. El cursor va como un punto rojo que sólo existe
  * en la captura (`PUNTO_DEL_CURSOR`).
  */
+import { medir } from '../scripts-b4/navegador'
 import { esperar, scrollHasta, type Banco } from '../scripts-viajes/banco'
 import { grabar, mover, topeMas, viajarElPuntero } from './banco-escena'
 import { abrir7, carpeta7 } from './banco7'
@@ -144,7 +145,43 @@ async function haz(): Promise<void> {
   }
 }
 
+/**
+ * T11 · el amanecer (con bandera): de Tu panel a Por qué develOP. `mirar`: baja despacio hasta que el borde
+ * de Tu panel deja ver la sala y se queda quieto mirando el amanecer entero; `rapido`: baja de un tirón (el
+ * amanecer se acelera y termina antes de que llegue el título).
+ */
+async function amanecer(que: string): Promise<void> {
+  const dir = carpeta7('amanecer')
+  const b = await abrir7('producto,amanecer')
+  try {
+    const desde = await medir<number>(b.p, `(() => { const r = document.querySelector('[data-panel="tu-panel"]').getBoundingClientRect(); return Math.round(r.bottom + scrollY - innerHeight * 1.12) })()`)
+    const puerta = await medir<number>(b.p, `(() => { const r = document.querySelector('[data-panel="tu-panel"]').getBoundingClientRect(); return Math.round(r.bottom + scrollY - innerHeight * 0.8) })()`)
+    const hasta = await topeMas('por-que-develop', 0.25)(b)
+    await scrollHasta(b, desde)
+    await mover(b, FUERA[0], FUERA[1])
+    await esperar(2500)
+    const nombre = que === 'rapido' ? 'amanecer-scroll-rapido' : 'amanecer-mirando'
+    const r = await grabar(b, `${dir}/${nombre}`, async () => {
+      await esperar(800)
+      if (que === 'rapido') {
+        await scrollSuave(b, desde, hasta, 1400)
+        await esperar(4000)
+        return
+      }
+      await scrollSuave(b, desde, puerta, 2200)
+      await esperar(9500)
+      await scrollSuave(b, puerta, hasta, 2500)
+      await esperar(2000)
+    }, 1440)
+    const estado = await medir<unknown>(b.p, 'window.__amanecerDelBanco ? window.__amanecerDelBanco.estado() : null')
+    console.log(JSON.stringify({ clip: nombre, desde, puerta, hasta, estado, ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
 async function principal(): Promise<void> {
+  if (QUE === 'amanecer') return amanecer(VARIANTE)
   if (QUE === 'haz') return haz()
   if (QUE === 'piso') return piso(VARIANTE === 'mar-quienes' ? 'mar' : VARIANTE, VARIANTE === 'mar' ? 'mar-20s-hero' : VARIANTE === 'mar-quienes' ? 'mar-20s-quienes' : 'pulso')
   if (QUE === 'obstaculo') return VARIANTE === 'juntar' ? obstaculoLadoALado() : obstaculo(VARIANTE === 'antes' ? 'antes' : 'despues')

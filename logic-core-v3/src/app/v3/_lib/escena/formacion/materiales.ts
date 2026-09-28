@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { VIVO } from '../entorno/vivo'
-import { BARRIDO_DEL_DIA, DIA_DESDE_AFUERA_GLSL, OSCURECER_GLSL, hayDiaDesdeAfuera } from '../dia/desdeAfuera'
+import { AMANECER_EN_VIVO, AMANECER_GLSL, OSCURECER_GLSL, hayAmanecer } from '../amanecer/luz'
 import { NIEBLA_DE_AFUERA, RASANTE_GLSL } from '../niebla/rasante'
 import { FOG_COLOR } from '../probeAtmosphere'
 import { INK_COLOR } from '../probeScene'
@@ -104,8 +104,8 @@ varying float vRasante;
 	uniform sampler2D uSilueta;
 	varying vec2 vUv;
 #endif
-#ifdef DIA_DESDE_AFUERA
-	${DIA_DESDE_AFUERA_GLSL}
+#ifdef AMANECER
+	${AMANECER_GLSL}
 #endif
 void main() {
 	float alfa = 1.0;
@@ -123,7 +123,7 @@ void main() {
 	gl_FragColor.rgb = mix( fogColor, gl_FragColor.rgb, seVe );
 	// ⚠ El lienzo compone el alfa que se escribe: una copia opaca escribe 1, y la silueta su borde.
 	gl_FragColor.a = alfa;
-	#ifdef DIA_DESDE_AFUERA
+	#ifdef AMANECER
 		${OSCURECER_GLSL('vMundo')}
 	#endif
 }
@@ -145,10 +145,10 @@ export function materialDeLaCopia(uniforms: UniformsDeLaCopia, rasante: boolean,
     defines: {
       ...(silueta !== null ? { SILUETA: '' } : {}),
       ...(rasante ? { NIEBLA_RASANTE: '' } : {}),
-      ...(hayDiaDesdeAfuera() ? { DIA_DESDE_AFUERA: '' } : {}),
+      ...(hayAmanecer() ? { AMANECER: '' } : {}),
     },
     uniforms: {
-      ...BARRIDO_DEL_DIA,
+      ...AMANECER_EN_VIVO,
       uTiempo: VIVO.uTiempo,
       uAbre: NIEBLA_DE_AFUERA.uAbre,
       ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),

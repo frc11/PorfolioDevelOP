@@ -43,7 +43,8 @@
  * escribe `activa`; `OrbitRig` la lee y nunca la escribe.
  */
 
-import { diaDesdeAfueraEn, hayDiaDesdeAfuera } from './dia/desdeAfuera'
+import { amanecerEn } from './amanecer/linea'
+import { hayAmanecer } from './amanecer/luz'
 import { NIVEL_DE_LA_NOCHE } from './lightArc'
 import { nivelEntre, viajeEnCurso } from './viaje'
 
@@ -98,12 +99,15 @@ export const NIVEL_NATURAL = { valor: 1 }
  */
 export const DIA_DEL_FINAL = { activo: false }
 
+/** [ESCENA 7] T11: el amanecer sostiene la noche un rato después de que la compuerta prende el día. */
+export const NOCHE_DEL_AMANECER = { sostenida: false }
+
 /** La noche que la sala muestra: la cantidad de la gota, salvo en el día del final. */
 export function nocheEfectiva(): number {
   // [VIAJES] En un viaje que cambia de luz el día del final no corta: la noche la mueve el reloj del barrido.
   const viaje = viajeEnCurso()
   if (viaje !== null && viaje.luz === null) return NOCHE_DISPARADA.cantidad
-  return DIA_DEL_FINAL.activo ? 0 : NOCHE_DISPARADA.cantidad
+  return DIA_DEL_FINAL.activo && !NOCHE_DEL_AMANECER.sostenida ? 0 : NOCHE_DISPARADA.cantidad
 }
 
 /** [VIAJES] Quién se entera cuando el día del final cambia: el barrido, para recorrer el cambio con su reloj. */
@@ -169,9 +173,9 @@ export function medirElBloqueOpaco(
 export function aplicarElDiaDelFinal(b: BloqueOpaco | null): void {
   if (b === null) return
   const antes = DIA_DEL_FINAL.activo
-  // [ESCENA 6] 6g, con bandera: el día prende cuando Tu panel deja ver la sala, y vuelve escondido.
+  // [ESCENA 7] T11, con bandera (el amanecer): el día prende cuando Tu panel deja ver la sala, y vuelve escondido.
   const deSiempre = diaDelFinalEn(b)
-  DIA_DEL_FINAL.activo = hayDiaDesdeAfuera() ? diaDesdeAfueraEn(b, antes, deSiempre) : deSiempre
+  DIA_DEL_FINAL.activo = hayAmanecer() ? amanecerEn(b, antes, deSiempre) : deSiempre
   if (DIA_DEL_FINAL.activo !== antes) oyentesDelDia.forEach((f) => f(DIA_DEL_FINAL.activo))
   const repuesta = nocheQueSeRepone(b, NOCHE_DISPARADA.cantidad)
   // [VIAJES] Durante un viaje no se repone de golpe: la sala se ve, y la noche la mueve el reloj del barrido.

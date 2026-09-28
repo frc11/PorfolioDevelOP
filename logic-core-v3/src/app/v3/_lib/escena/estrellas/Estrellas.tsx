@@ -10,11 +10,12 @@ import { VIVO } from '../entorno/vivo'
 import { FORMACION, azar } from '../formacion/enFormacion'
 import { pisoConFormacion } from '../formacion/Formacion'
 import type { MoireHandle } from '../MoireScreen'
-import { DESAJUSTE_VIVO } from '../moire/parche'
 import { FLOOR_Y } from '../probeScene'
-import { MOIRE_FAR_ORDER, MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
+import { MOIRE_FAR_ORDER, MOIRE_FAR_RADIUS } from '../probeMoire'
 import type { ProbeRigStore } from '../probeStore'
 import { fueraDelTunel } from '../tunelEnLaEscena'
+import { TRAMA_EN_VIVO, leerLaTrama } from './trama'
+import { AMANECER_EN_VIVO, hayAmanecer } from '../amanecer/luz'
 import { TRAMA_GLSL, VIA_LACTEA, densidadDeLaBanda, direccionDeLaBanda, polvoDeLaBanda, viaLacteaGlsl } from './cielo'
 
 /**
@@ -79,6 +80,7 @@ uniform float uRadio;
 uniform float uSuelo;
 uniform float uTiempo;
 uniform vec2 uResolucion;
+uniform float uEstrellasDelAmanecer;
 varying float vAlfa;
 varying float vClase;
 ${TRAMA_GLSL}
@@ -108,7 +110,8 @@ void main() {
 	// Dos senos de razón irracional: no se lee como un parpadeo regular.
 	float ola = 0.5 + 0.5 * sin( 6.2832 * ( uTiempo * f + aEstrella.w ) ) * cos( 6.2832 * ( uTiempo * f * 0.618 + aEstrella.w * 1.7 ) );
 	float titila = 1.0 - hondo * ola;
-	vAlfa = aEstrella.x * titila * aparece * uVisible * afuera;
+	// [ESCENA 7] T11: antes de que entre la luz del amanecer, las estrellas se apagan (1 sin el amanecer).
+	vAlfa = aEstrella.x * titila * aparece * uVisible * afuera * uEstrellasDelAmanecer;
 	// [ESCENA 7] Detrás de una raya de la trama, no se ve.
 	if ( vAlfa > 0.001 ) vAlfa *= delanteDeLaTrama( o, d );
 	vClase = aEstrella.z;
@@ -157,15 +160,35 @@ void main() {
 const FRAGMENT_DE_LA_CUPULA = /* glsl */ `
 uniform float uNoche;
 uniform float uVisible;
+uniform float uEstrellasDelAmanecer;
 varying vec3 vMundo;
 ${TRAMA_GLSL}
 ${viaLacteaGlsl()}
+#ifdef AMANECER
+	uniform float uResplandor;
+	uniform float uBarridoDelDia;
+	uniform float uCieloDelAmanecer;
+	uniform vec3 uCieloDeNoche;
+	uniform vec3 uSolDelAmanecer;
+#endif
 void main() {
 	vec3 d = normalize( vMundo - cameraPosition );
-	float noche = smoothstep( 0.5, 0.9, uNoche ) * uVisible;
+	float noche = smoothstep( 0.5, 0.9, uNoche ) * uVisible * uEstrellasDelAmanecer;
 	float pasa = delanteDeLaTrama( cameraPosition, d );
 	float luz = viaLactea( d ) * noche * pasa;
 	float oscuro = ${CIELO.oscuro.toFixed(2)} * smoothstep( ${CIELO.desde.toFixed(2)}, ${CIELO.hasta.toFixed(2)}, d.y ) * noche * pasa;
+	#ifdef AMANECER
+		// [ESCENA 7] T11: el resplandor nace en el horizonte (más del lado del sol); después el cielo pasa de noche
+		// a día desde el horizonte hacia arriba (la sala ya es de día: lo de atrás es el cielo de día).
+		vec2 alSol = normalize( uSolDelAmanecer.xz );
+		float horizonte = exp( - max( d.y, 0.0 ) / 0.08 ) * ( 0.6 + 0.4 * max( 0.0, dot( normalize( d.xz + 1e-5 ), alSol ) ) );
+		luz += 0.5 * uResplandor * horizonte * pasa;
+		if ( uBarridoDelDia > 0.5 ) {
+			float dia = clamp( uCieloDelAmanecer * 1.6 - clamp( d.y / 0.6, 0.0, 1.0 ), 0.0, 1.0 );
+			gl_FragColor = vec4( uCieloDeNoche * ( 1.0 - dia ) + vec3( luz ), 1.0 - dia );
+			return;
+		}
+	#endif
 	// Mezcla propia: lo de atrás por (1 − oscuro) más la luz de la banda (el alfa sigue en 1).
 	gl_FragColor = vec4( vec3( luz ), oscuro );
 }
@@ -240,22 +263,11 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
     geometria.setAttribute('position', new THREE.BufferAttribute(new Float32Array(cuantas * 3), 3))
     geometria.setAttribute('aDireccion', new THREE.BufferAttribute(direccion, 3))
     geometria.setAttribute('aEstrella', new THREE.BufferAttribute(estrella, 4))
-    const trama = {
-      uTramaGruesa: { value: null as THREE.Texture | null },
-      uTramaFina: { value: null as THREE.Texture | null },
-      uMatGruesa: { value: new THREE.Matrix3() },
-      uMatFina: { value: new THREE.Matrix3() },
-      uRepeticionB: DESAJUSTE_VIVO.uRepeticionB,
-      uCorrimientoB: DESAJUSTE_VIVO.uCorrimientoB,
-      uMezclaB: DESAJUSTE_VIVO.uMezclaDelDesajuste,
-      uBandaGruesa: { value: new THREE.Vector4(0, 1, 1, 1) },
-      uBandaFina: { value: new THREE.Vector4(0, 1, 1, 1) },
-      uRadiosDeLaTrama: { value: new THREE.Vector2(MOIRE_NEAR_RADIUS, MOIRE_FAR_RADIUS) },
-      uHayTrama: { value: 0 },
-    }
+    const trama = TRAMA_EN_VIVO
     const uVisible = { value: 1 }
     const uniforms = {
       ...trama,
+      uEstrellasDelAmanecer: AMANECER_EN_VIVO.uEstrellasDelAmanecer,
       uNoche: VIVO.uNoche,
       uVisible,
       uPixel: { value: 1 },
@@ -272,7 +284,8 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
     puntos.renderOrder = MOIRE_FAR_ORDER - 2
     const esfera = new THREE.SphereGeometry(RADIO_DE_LA_CUPULA, 64, 32)
     const deLaCupula = new THREE.ShaderMaterial({
-      uniforms: { ...trama, uNoche: VIVO.uNoche, uVisible },
+      uniforms: { ...trama, ...AMANECER_EN_VIVO, uNoche: VIVO.uNoche, uVisible },
+      defines: hayAmanecer() ? { AMANECER: '' } : {},
       vertexShader: VERTEX_DE_LA_CUPULA,
       fragmentShader: FRAGMENT_DE_LA_CUPULA,
       transparent: true,
@@ -318,7 +331,7 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
 
   useFrame((state) => {
     alCuadro(armado.uniforms, fueraDelTunel(rig.current.progress), state.viewport.dpr, state.gl)
-    leerLaTrama(armado.trama, moireRef.current)
+    leerLaTrama(moireRef.current)
     armado.cupula.position.copy(state.camera.position)
   })
 
@@ -335,31 +348,4 @@ function alCuadro(u: { uVisible: { value: number }; uPixel: { value: number }; u
   gl.getDrawingBufferSize(u.uResolucion.value)
   // Un píxel CSS, redondeado a píxeles enteros del búfer: nítidas.
   u.uPixel.value = Math.max(1, Math.round(dpr))
-}
-
-interface UniformsDeLaTrama {
-  readonly uTramaGruesa: { value: THREE.Texture | null }
-  readonly uTramaFina: { value: THREE.Texture | null }
-  readonly uMatGruesa: { value: THREE.Matrix3 }
-  readonly uMatFina: { value: THREE.Matrix3 }
-  readonly uBandaGruesa: { value: THREE.Vector4 }
-  readonly uBandaFina: { value: THREE.Vector4 }
-  readonly uHayTrama: { value: number }
-}
-
-/** La trama de este cuadro: sus dos texturas, con la transformación que tienen ahora, y dónde está cada capa. */
-function leerLaTrama(u: UniformsDeLaTrama, moire: MoireHandle | null): void {
-  if (moire === null) {
-    u.uHayTrama.value = 0
-    return
-  }
-  moire.drift.updateMatrix()
-  moire.fina.updateMatrix()
-  u.uTramaGruesa.value = moire.drift
-  u.uTramaFina.value = moire.fina
-  u.uMatGruesa.value.copy(moire.drift.matrix)
-  u.uMatFina.value.copy(moire.fina.matrix)
-  u.uBandaGruesa.value.set(...moire.bandas.gruesa)
-  u.uBandaFina.value.set(...moire.bandas.fina)
-  u.uHayTrama.value = 1
 }

@@ -12,7 +12,7 @@ import { crearCronometro, type Medida } from '../gpu/cronometro'
 import { crearPingPong } from '../gpu/pingPong'
 import { AIRE } from '../polvo/parche'
 import { FLOOR_RADIUS, FLOOR_Y, PAPER_COLOR } from '../probeScene'
-import { conElDiaDesdeAfuera } from '../dia/desdeAfuera'
+import { conElAmanecer } from '../amanecer/luz'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { PISO_EN_VIVO } from './enVivo'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
@@ -221,7 +221,8 @@ function armar(grilla: Grilla) {
     uHazNoche: VIVO.uHazNoche,
     ...MANCHA_EN_EL_PISO,
   })
-  conElDiaDesdeAfuera(material)
+  // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
+  conElAmanecer(material, true)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

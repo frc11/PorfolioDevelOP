@@ -20,6 +20,8 @@
  *      poco; menos bokeh y más chico; el aire caliente (6f), borrado.
  * T12 · el haz en el piso: las motas que cruzan la mancha de luz proyectan sombritas que se mueven, y de
  *      noche el piso iluminado aclara apenas la cara de abajo del logo; siguen la intensidad del haz.
+ * T11 · el amanecer (con bandera, apagado): el orden (estrellas, resplandor, filas de afuera adentro, la
+ *      trama, el piso, el logo), la compuerta, que no quede atrás del scroll, y la vuelta escondida.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -45,6 +47,8 @@ import { BOKEH_NITIDO, NITIDEZ, ladoDeLaMota } from '../polvo/nitidez'
 import { BOKEH_COUNT, BOKEH_SIZE, PARTICLE_SIZE } from '../probeParticles'
 import { SOMBRAS } from '../polvo/sombras'
 import { REBOTE } from '../entorno/Rebote'
+import { AMANECER, amanecerEn, frenteEn, frenteHasta, momentoEn, progresoPorScroll } from '../amanecer/linea'
+import type { BloqueOpaco } from '../nocheDisparada'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -326,5 +330,44 @@ const rebote = leer('entorno/Rebote.tsx')
 afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNoche\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
 afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), 'utf8')), '  sin tocar `ProbeLogo`: el parche es sobre su material')
 afirmar(/mix\( uHazDia\.y, uHazNoche\.y, uNoche \)/.test(sombras) && /nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), 'las dos siguen la intensidad del haz (el charco de noche lleva el encendido, T9)')
+
+// ── T11 · el amanecer ─────────────────────────────────────────────────────
+titulo('T11 · el amanecer: un evento de luz, con bandera')
+afirmar(!ENTORNO.pruebas.amanecer && entornoPedido('producto,amanecer').pruebas.amanecer, 'apagado en el producto; el banco lo prende con `amanecer`')
+afirmar(!existsSync(path.join(ESCENA, 'dia')) && !codigo(ESCENA).some((c) => /dia=afuera|DIA_DESDE_AFUERA|hayDiaDesdeAfuera/.test(c)), '  6g se volvió el amanecer: la carpeta `dia/` no existe y nada nombra la variante vieja')
+// El orden, en el reloj del amanecer.
+const estrellasFuera = AMANECER.estrellas[1]
+const resplandorArriba = AMANECER.resplandor[1]
+const alaTrama = frenteHasta(44)
+const alPiso = frenteHasta(38)
+const alLogo = frenteHasta(3)
+afirmar(momentoEn(0).estrellas === 1 && momentoEn(estrellasFuera).estrellas === 0 && estrellasFuera < AMANECER.cambio, '1 · antes de que entre la luz se apagan las estrellas (la sala sigue de noche)', `se apagan en ${String(estrellasFuera)} s; la luz entra a los ${String(AMANECER.cambio)} s`)
+afirmar(momentoEn(resplandorArriba - 0.01).resplandor > 0.99 && momentoEn(resplandorArriba - 0.01).sostieneLaNoche && momentoEn(resplandorArriba - 0.01).frente >= FORMACION.hasta, '2 · la luz nace en el horizonte, detrás de la formación, con la sala todavía de noche (a contraluz)')
+let baja = true
+for (let t = AMANECER.cambio; t < AMANECER.final; t += 0.01) if (frenteEn(t + 0.01) > frenteEn(t) + 1e-9) baja = false
+afirmar(baja && frenteEn(AMANECER.cambio) > FORMACION.hasta && frenteHasta(FORMACION.radioDeLaPrimeraFila) > frenteHasta(FORMACION.hasta), '3 · el frente avanza fila por fila, de las lejanas a las cercanas', `la última fila a los ${frenteHasta(FORMACION.hasta).toFixed(2)} s, la primera a los ${frenteHasta(FORMACION.radioDeLaPrimeraFila).toFixed(2)} s`)
+const [r0, r1, r2] = AMANECER.rayos
+afirmar(r0 < alaTrama && r1 >= alaTrama - 0.3 && r1 <= alPiso + 0.3 && r2 > alPiso, '4 · entra por los cuadrados de la trama: los haces pican cuando el frente cruza la trama', `la trama a los ${alaTrama.toFixed(2)}–${alPiso.toFixed(2)} s; los haces pican a los ${String(r1)} s`)
+afirmar(alPiso < alLogo && alLogo <= AMANECER.final, '5 · llega al piso vivo y, por último, al logo', `el piso a los ${alPiso.toFixed(2)} s, el logo a los ${alLogo.toFixed(2)} s; todo asentado a los ${String(AMANECER.final)} s`)
+afirmar(/delanteDeLaTrama\( \$\{mundo\}, uSolDelAmanecer \)/.test(leer('amanecer/luz.ts')) && /suma \+= delanteDeLaTrama\( p, uSolDelAmanecer \)/.test(leer('amanecer/Amanecer.tsx')), '  el sol pasa por los huecos de las dos capas: cuadros de luz en el piso y haces en el aire')
+afirmar(/mix\( vec3\( \$\{LOGO_DE_NOCHE/.test(leer('amanecer/luz.ts')) && /mix\( vec3\( 1\.0 \), diffuseColor\.rgb, alcanzadoPorElDia/.test(leer('polvo/parche.ts')), '  el logo guarda su gris de noche y el polvo su blanco hasta que el frente los alcanza (el logo es lo último)')
+// La compuerta y el scroll.
+const bloque = (pie: number): BloqueOpaco => ({ servicios: { tope: pie - 4500, pie: pie - 1800 }, tuPanel: { tope: pie - 1800, pie }, alto: 900 })
+let prendido = false
+const bajando: boolean[] = []
+for (let pie = 3000; pie >= 0; pie -= 10) {
+  prendido = amanecerEn(bloque(pie), prendido, (pie - 4500 + pie) / 2 < 450)
+  bajando.push(prendido)
+}
+const primero = 3000 - bajando.indexOf(true) * 10
+afirmar(primero < 900 * AMANECER.visible && primero > 900 * AMANECER.visible - 20, 'el momento: arranca cuando el borde de Tu panel deja ver la sala', `con el borde en ${String(primero)} px de 900`)
+const subiendo: boolean[] = []
+for (let pie = 0; pie <= 3000; pie += 10) {
+  prendido = amanecerEn(bloque(pie), prendido, (pie - 4500 + pie) / 2 < 450)
+  subiendo.push(prendido)
+}
+afirmar(subiendo.lastIndexOf(true) * 10 > 900, 'la vuelta a la noche sigue escondida (se apaga con el bloque tapando todo)')
+afirmar(progresoPorScroll(100, 100, 400) === 0 && progresoPorScroll(400, 100, 400) === 1 && AMANECER.acelera > 0, 'no queda atrás del scroll: con el scroll corre más rápido, y termina antes de que el título llegue', `${String(AMANECER.final)} s mirando quieto`)
+afirmar(/NOCHE_DEL_AMANECER\.sostenida \? 0 : NOCHE_DISPARADA\.cantidad|!NOCHE_DEL_AMANECER\.sostenida \? 0/.test(leer('nocheDisparada.ts')), 'la sala sigue de noche hasta que entra la luz (la noche se sostiene)')
 
 cerrar('s32-escena7')

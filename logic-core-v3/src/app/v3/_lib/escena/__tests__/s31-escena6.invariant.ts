@@ -10,7 +10,7 @@
  * §5 · el polvo con física: los modos y el despertar (6b se borró en ESCENA 7).
  * §6 · (el piso vivo pasó a `s32-escena7`: ESCENA 7 lo hizo un mar, encendido).
  * §7 · (6e pasó a `s32-escena7`: ESCENA 7 lo encendió y lo hizo más notorio).
- * §8 · 6g: la compuerta de la variante se ve al bajar y vuelve escondida; el frente va de afuera adentro.
+ * §8 · (6g pasó a `s32-escena7`: ESCENA 7 la hizo el amanecer, T11).
  * §9 · (6c y 6d pasaron a `s32-escena7`: ESCENA 7 las juntó en la niebla de afuera, encendida).
  * §10 · la limpieza: el relieve (R1/R2), las cajas de texto y F-mirada no dejan código.
  */
@@ -20,11 +20,9 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { CHOREO_KEYFRAMES } from '../choreography'
 import { MOUSE_HEIGHT_FACTOR } from '../choreographyPhysics'
-import { DIA_DESDE_AFUERA, diaDesdeAfueraEn, frenteEn } from '../dia/desdeAfuera'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { FORMACION } from '../formacion/enFormacion'
-import type { BloqueOpaco } from '../nocheDisparada'
 import { FISICA } from '../polvo/simulacion'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { CAMERA_FOV, FLOOR_Y } from '../probeScene'
@@ -39,10 +37,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,dia=afuera')
+const pedido = entornoPedido('producto,amanecer')
 afirmarIgual(
   pedido.pruebas,
-  { diaDesdeAfuera: true },
+  { amanecer: true },
   'el pedido del banco prende cada prueba',
 )
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
@@ -83,27 +81,6 @@ afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', '
 afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lleva arrastre y turbulencia (no baja en línea recta)')
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')
-
-// ── §8 · 6g ───────────────────────────────────────────────────────────────
-titulo('§8 · 6g: el día entra desde afuera, visible al bajar y escondido al subir')
-const bloque = (pie: number): BloqueOpaco => ({ servicios: { tope: pie - 4500, pie: pie - 1800 }, tuPanel: { tope: pie - 1800, pie }, alto: 900 })
-let prendido = false
-const bajando: boolean[] = []
-for (let pie = 3000; pie >= 0; pie -= 10) {
-  prendido = diaDesdeAfueraEn(bloque(pie), prendido, (pie - 4500 + pie) / 2 < 450)
-  bajando.push(prendido)
-}
-const primero = 3000 - bajando.indexOf(true) * 10
-afirmar(primero < 900 * DIA_DESDE_AFUERA.visible && primero > 900 * DIA_DESDE_AFUERA.visible - 20, 'bajando, prende recién cuando Tu panel deja ver la sala', `con el borde en ${String(primero)} px de 900`)
-const subiendo: boolean[] = []
-for (let pie = 0; pie <= 3000; pie += 10) {
-  prendido = diaDesdeAfueraEn(bloque(pie), prendido, (pie - 4500 + pie) / 2 < 450)
-  subiendo.push(prendido)
-}
-const ultimo = subiendo.lastIndexOf(true) * 10
-afirmar(ultimo > 900, 'subiendo, sigue de día hasta que el bloque tapa todo (la noche vuelve escondida)', `se apaga con el borde en ${String(ultimo)} px`)
-afirmar(frenteEn(0) === DIA_DESDE_AFUERA.desde && frenteEn(DIA_DESDE_AFUERA.duracionS) === DIA_DESDE_AFUERA.hasta && frenteEn(1) < frenteEn(0.5), 'el frente va de afuera (118) hasta el logo, siempre hacia adentro')
-afirmar(DIA_DESDE_AFUERA.desde > f.radioDelPisoDeAbajo && DIA_DESDE_AFUERA.hasta < 0, '  y arranca más allá de la formación y termina pasando el logo')
 
 // ── §10 · la limpieza ─────────────────────────────────────────────────────
 titulo('§10 · el relieve, las cajas de texto y F-mirada no dejan código')

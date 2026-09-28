@@ -16,7 +16,7 @@ import {
 } from './probeScene'
 import { VIVO } from './entorno/vivo'
 import { CORRIDO_POR_PIXEL, NIEBLA_DE_AFUERA, RASANTE_GLSL } from './niebla/rasante'
-import { conElDiaDesdeAfuera } from './dia/desdeAfuera'
+import { conElAmanecer } from './amanecer/luz'
 
 /**
  * El piso: la losa y el ciclorama.
@@ -127,9 +127,9 @@ export function StudioFloor({ escenario, conNieblaRasante = false, conPisoVivo =
     const cyclorama = paper()
     cyclorama.side = THREE.DoubleSide
     if (conNieblaRasante) conLaNiebla(cyclorama)
-    // [ESCENA 6] 6g: con la variante, el barrido del día (no hace nada sin la bandera).
-    conElDiaDesdeAfuera(slab)
-    conElDiaDesdeAfuera(cyclorama)
+    // [ESCENA 7] T11: con la bandera, el amanecer (no hace nada sin ella).
+    conElAmanecer(slab, true)
+    conElAmanecer(cyclorama)
     return { slab, cyclorama }
   }, [conNieblaRasante])
 
