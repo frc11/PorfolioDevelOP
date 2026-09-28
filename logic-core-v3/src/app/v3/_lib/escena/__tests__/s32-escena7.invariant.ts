@@ -9,6 +9,7 @@
  * T4 · el polvo que se posa: encendido, con los tiempos a la mitad; el remolino, a velocidad real.
  * T5 · el piso vivo: encendido, un mar continuo que sube y baja, sin scroll, a paso fijo, que no toca al
  *      logo; el borde, el presupuesto y los planos del piso escondidos.
+ * T6 · 6a, el aire con inercia: encendido, tal cual se aprobó.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -24,6 +25,7 @@ import { VIA_LACTEA, densidadDeLaBanda, direccionDe, enLaBanda, polvoDeLaBanda }
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { PISO_VIVO, grillaDelPiso, marejadasEn } from '../piso/bloques'
 import { FLOOR_RADIUS } from '../probeScene'
+import { INERCIA } from '../polvo/Aire'
 import { MOIRE_FAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -193,5 +195,11 @@ afirmar(/\{!conPisoVivo && \(/.test(leer('StudioFloor.tsx')), '  sin losa debajo
 const entornoTsx = leer('entorno/Entorno.tsx')
 afirmar(/<Haz conCharco=\{!e\.pisoVivo\} \/>/.test(entornoTsx) && /!e\.pisoVivo && <Pulso \/>/.test(entornoTsx) && /const enElPiso = entorno\.pisoVivo/.test(leer('ContactOcclusion.tsx')), 'el anillo, el charco y la mancha de contacto los pinta el piso (sin él, los planos de siempre)')
 afirmar(/pisoEn\( p\.xz \)/.test(leer('polvo/simulacion.ts')), 'el polvo posado se apoya en su bloque y sube y baja con el mar')
+
+// ── T6 · el aire con inercia ──────────────────────────────────────────────
+titulo('T6 · 6a, el aire con inercia, tal cual')
+afirmar(ENTORNO.inercia && !BASE_LIMPIA.inercia && !entornoPedido('producto,inercia=no').inercia, 'encendido en el producto; el banco lo apaga con `inercia=no`')
+afirmarIgual({ ...INERCIA }, { arrastre: 0.25, tomaS: 0.4, frenaS: 2.2 }, '  con los valores aprobados de ESCENA 6 (toma el 25 % de la cámara en 0,4 s y frena en 2,2 s)')
+afirmar(/e\.polvoParejo && e\.inercia \? '#define AIRE_INERCIA'/.test(leer('polvo/parche.ts')) && /if \(e\.inercia\) \{/.test(leer('polvo/Aire.tsx')), '  y el mismo código: el volumen corrido por el aire antes de repetirse')
 
 cerrar('s32-escena7')

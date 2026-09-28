@@ -131,7 +131,7 @@ function definesDe(campo: Campo, concha: number): string {
     campo === 'polvo' && e.polvoParejo ? '#define AIRE_PAREJO' : '',
     e.obstaculo ? '#define AIRE_OBSTACULO' : '',
     campo === 'polvo' && e.polvoParejo && (e.posarse || p.remolinos) ? '#define AIRE_FISICA' : '',
-    campo === 'polvo' && e.polvoParejo && p.inercia ? '#define AIRE_INERCIA' : '',
+    campo === 'polvo' && e.polvoParejo && e.inercia ? '#define AIRE_INERCIA' : '',
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''

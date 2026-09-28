@@ -48,7 +48,7 @@ const RAD_POR_S = DUST_SPIN_DEG_S.map((g) => (g * Math.PI) / 180)
 
 export function Aire(props: PropsDelAire) {
   const e = entornoDeLaEscena()
-  if (!e.obstaculo && !e.motas && !e.pruebas.inercia) return null
+  if (!e.obstaculo && !e.motas && !e.inercia) return null
   return e.obstaculo ? <AireConElLogo {...props} /> : <AirePrendido {...props} />
 }
 
@@ -100,7 +100,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
 
     // [ESCENA 6] 6a · la inercia del aire: mientras el scroll mueve la cámara, el aire la acompaña un
     // poco; cuando frena, sigue derivando hacia donde iba y se frena despacio.
-    if (e.pruebas.inercia) {
+    if (e.inercia) {
       const progreso = rig.current.progress
       const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
       m.progreso = progreso

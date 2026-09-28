@@ -22,12 +22,12 @@
  *
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
- * los tiempos a la mitad, `posarse`) y el piso vivo (un mar, sin scroll, `pisoVivo`). El banco las apaga
- * para comparar con `formacion=no`, `cielo=no`, `posarse=no` y `piso=no`.
+ * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`) y la inercia del aire
+ * (6a tal cual, `inercia`). El banco las apaga para comparar con `formacion=no`, `cielo=no`, `posarse=no`,
+ * `piso=no` e `inercia=no`.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6a `inercia` · el aire sigue derivando después de un scroll fuerte;
  * - 6b `remolinos` · el aire se arremolina detrás del logo cuando gira en el cuadro;
  * - 6c `rasante` · bancos de niebla bajos sobre el piso de afuera;
  * - 6d `velocidad` · la niebla de afuera se abre con la velocidad del scroll;
@@ -39,7 +39,7 @@
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,inercia,encendido'     → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,encendido,remolinos'   → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -52,8 +52,6 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6a · el aire tiene inercia. */
-  readonly inercia: boolean
   /** 6b · remolinos detrás del logo. */
   readonly remolinos: boolean
   /** 6c · niebla rasante afuera. */
@@ -70,7 +68,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  inercia: false,
   remolinos: false,
   nieblaRasante: false,
   nieblaVelocidad: false,
@@ -106,6 +103,8 @@ export interface Entorno {
   readonly posarse: boolean
   /** [ESCENA 7] T5 · el piso vivo, un mar de bloques que responde al cursor y al pulso (`piso/`). */
   readonly pisoVivo: boolean
+  /** [ESCENA 7] T6 · 6a, el aire tiene inercia: sigue derivando después de un scroll fuerte (`polvo/Aire.tsx`). */
+  readonly inercia: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -127,6 +126,7 @@ export const ENTORNO: Entorno = {
   cielo: true,
   posarse: true,
   pisoVivo: true,
+  inercia: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -147,6 +147,7 @@ export const BASE_LIMPIA: Entorno = {
   cielo: false,
   posarse: false,
   pisoVivo: false,
+  inercia: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -182,13 +183,13 @@ export function entornoPedido(pedido: string): Entorno {
     cielo: producto ? valor('cielo') !== 'no' : partes.has('cielo'),
     posarse: producto ? valor('posarse') !== 'no' : partes.has('posarse'),
     pisoVivo: producto ? valor('piso') !== 'no' : partes.has('piso'),
+    inercia: producto ? valor('inercia') !== 'no' : partes.has('inercia'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   return {
-    inercia: partes.has('inercia'),
     remolinos: partes.has('remolinos'),
     nieblaRasante: partes.has('rasante'),
     nieblaVelocidad: partes.has('velocidad'),
