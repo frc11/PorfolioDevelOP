@@ -75,9 +75,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
 
     if (e.E1) {
       const nivel = NIVELES_DEL_HAZ[e.haz]
-      // [ESCENA 6] 6e: con la prueba, la parte de noche del haz sigue al encendido (1 sin la prueba).
+      // [ESCENA 6] 6e: la parte de noche del haz sigue al encendido (1 sin él). [ESCENA 7] En el producto.
       let k = 1
-      if (e.pruebas.hazEncendido) {
+      if (e.hazEncendido) {
         const noche = VIVO.uNoche.value
         m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, quieto)
         k = m.encendido.k

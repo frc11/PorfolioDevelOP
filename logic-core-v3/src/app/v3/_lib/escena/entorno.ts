@@ -23,12 +23,12 @@
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
  * los tiempos a la mitad, `posarse`), el piso vivo (un mar, sin scroll, `pisoVivo`), la inercia del aire
- * (6a tal cual, `inercia`) y la niebla de afuera (6c + 6d, un solo efecto, `niebla`). El banco las apaga
- * para comparar con `formacion=no`, `cielo=no`, `posarse=no`, `piso=no`, `inercia=no` y `niebla=no`.
+ * (6a tal cual, `inercia`), la niebla de afuera (6c + 6d, un solo efecto, `niebla`) y el haz que se
+ * enciende (6e, más notorio, `hazEncendido`). El banco las apaga para comparar con `formacion=no`,
+ * `cielo=no`, `posarse=no`, `piso=no`, `inercia=no`, `niebla=no` y `encendido=no`.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - 6e `encendido` · el haz arranca como una luz artificial cuando cae la noche;
  * - 6f `calor` · el aire caliente del haz, de noche;
  * - 6g `dia=afuera` · el día vuelve barriendo desde afuera.
  *
@@ -36,7 +36,7 @@
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,encendido,calor'       → el producto con esas pruebas
+ *     window.__entornoDeLaEscena = 'producto,calor,dia=afuera'      → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -49,8 +49,6 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 export interface Pruebas {
-  /** 6e · el haz se enciende. */
-  readonly hazEncendido: boolean
   /** 6f · aire caliente en el haz. */
   readonly aireCaliente: boolean
   /** 6g · el día entra desde afuera. */
@@ -59,7 +57,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  hazEncendido: false,
   aireCaliente: false,
   diaDesdeAfuera: false,
 }
@@ -95,6 +92,8 @@ export interface Entorno {
   readonly inercia: boolean
   /** [ESCENA 7] T8 · la niebla de afuera (6c + 6d): esconde las filas de atrás y se abre con la velocidad (`niebla/`). */
   readonly niebla: boolean
+  /** [ESCENA 7] T9 · 6e, el haz se enciende al caer la noche: falla y después prende (`entorno/encendido.ts`). */
+  readonly hazEncendido: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -118,6 +117,7 @@ export const ENTORNO: Entorno = {
   pisoVivo: true,
   inercia: true,
   niebla: true,
+  hazEncendido: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -140,6 +140,7 @@ export const BASE_LIMPIA: Entorno = {
   pisoVivo: false,
   inercia: false,
   niebla: false,
+  hazEncendido: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -177,13 +178,13 @@ export function entornoPedido(pedido: string): Entorno {
     pisoVivo: producto ? valor('piso') !== 'no' : partes.has('piso'),
     inercia: producto ? valor('inercia') !== 'no' : partes.has('inercia'),
     niebla: producto ? valor('niebla') !== 'no' : partes.has('niebla'),
+    hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
   return {
-    hazEncendido: partes.has('encendido'),
     aireCaliente: partes.has('calor'),
     diaDesdeAfuera: valor('dia') === 'afuera',
   }

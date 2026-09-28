@@ -118,7 +118,34 @@ async function piso(que: string, nombre: string, pedido = 'producto'): Promise<v
   }
 }
 
+/** T9 · la noche cae y el haz se enciende (falla y prende); después, ida y vuelta sobre la frontera (sin volver a fallar). */
+async function haz(): Promise<void> {
+  const dir = carpeta7('haz')
+  const b = await abrir7('producto')
+  try {
+    // La noche cae (la gota) a ~1,4 pantallas antes de Trabajos: se arranca de día, antes.
+    const dia = await topeMas('trabajos', -2.2)(b)
+    const noche = await topeMas('trabajos', -0.9)(b)
+    await scrollHasta(b, dia)
+    await mover(b, FUERA[0], FUERA[1])
+    await esperar(3000)
+    const r = await grabar(b, `${dir}/cae-la-noche`, async () => {
+      await esperar(800)
+      await scrollSuave(b, dia, noche, 3500)
+      await esperar(6500)
+      await scrollSuave(b, noche, dia, 2000)
+      await esperar(1500)
+      await scrollSuave(b, dia, noche, 2000)
+      await esperar(3500)
+    }, 1440)
+    console.log(JSON.stringify({ clip: 'haz', ...r }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
 async function principal(): Promise<void> {
+  if (QUE === 'haz') return haz()
   if (QUE === 'piso') return piso(VARIANTE === 'mar-quienes' ? 'mar' : VARIANTE, VARIANTE === 'mar' ? 'mar-20s-hero' : VARIANTE === 'mar-quienes' ? 'mar-20s-quienes' : 'pulso')
   if (QUE === 'obstaculo') return VARIANTE === 'juntar' ? obstaculoLadoALado() : obstaculo(VARIANTE === 'antes' ? 'antes' : 'despues')
   throw new Error(`no sé qué es «${QUE}»`)

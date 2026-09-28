@@ -14,6 +14,8 @@
  *      inercia; la que entra más rápido que el umbral queda pegada un momento; los remolinos (6b), borrados.
  * T8 · la niebla de afuera: 6c y 6d en un solo efecto, encendido, más densa, que esconde las filas de atrás,
  *      se abre con la velocidad y se posa rápido; sin planos, sin repetición, sin escalones.
+ * T9 · el haz se enciende: encendido; falla más tiempo y más tenue que la luz final, prende con un golpe
+ *      y queda más arriba; la histéresis de siempre; las motas, la sombra y el rebote siguen su intensidad.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -34,6 +36,7 @@ import { FISICA, flujoAlrededor } from '../polvo/simulacion'
 import { HOLGURA } from '../polvo/obstaculo'
 import { ABRE_CON } from '../formacion/Formacion'
 import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
+import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -247,5 +250,38 @@ afirmar(/mat2\( cos\( a \), sin\( a \), - sin\( a \), cos\( a \) \)/.test(leer('
 afirmar(RASANTE.abre.rasante < 1 && RASANTE.abre.neblina < 1, 'con el scroll rápido se abre (pero no se borra del todo)')
 afirmar(ABRE_CON.bajaS < 0.7, '  y al frenar se vuelve a posar rápido', `en ${String(ABRE_CON.bajaS)} s (ESCENA 6: 0,7 s)`)
 afirmar(MOIRE_NEAR_RADIUS < RASANTE.desde, 'nunca entra a la trama')
+
+// ── T9 · el haz se enciende ───────────────────────────────────────────────
+titulo('T9 · el haz se enciende, más notorio')
+afirmar(ENTORNO.hazEncendido && !BASE_LIMPIA.hazEncendido && !entornoPedido('producto,encendido=no').hazEncendido, 'encendido en el producto; el banco lo apaga con `encendido=no`')
+const muestras = Array.from({ length: Math.round(GUION_S * 1000) }, (_u, i) => [i / 1000, guionEn(i / 1000)] as const)
+const falla = muestras.filter(([s]) => s < FALLA_S).map(([, k]) => k)
+const golpe = Math.max(...muestras.filter(([s]) => s >= FALLA_S).map(([, k]) => k))
+afirmar(Math.max(...falla) < FIRME && Math.max(...falla) > 0.2, 'los intentos que fallan, más tenues que la luz final', `el más fuerte, ${Math.max(...falla).toFixed(2)}; la luz final, ${String(FIRME)}`)
+afirmar(FIRME > 1 && golpe > FIRME, 'el encendido final, más fuerte: un golpe que se asienta más arriba que el haz de ESCENA 6', `golpe ${golpe.toFixed(2)}, firme ${String(FIRME)} (ESCENA 6: firme 1)`)
+afirmar(FALLA_S > 2 * 1.25 - 0.1 && GUION.filter(([, , k]) => k < FIRME).length >= 6, 'la falla dura más (el doble que en ESCENA 6) y son varios intentos', `${String(FALLA_S)} s, ${String(GUION.filter(([, , k]) => k < FIRME).length)} intentos (ESCENA 6: 1,25 s)`)
+afirmar(falla.some((k) => k === 0) && guionEn(FALLA_S - 0.1) === 0, '  entre intento e intento, y antes del golpe, se apaga (se entiende que falla)')
+controlPositivo('el detector VE un guion de ESCENA 6 (destellos por encima del final)', [2.2, 1.8, 1.35], (picos: number[]) => Math.max(...picos) < 1)
+const correr = (e: EstadoDelEncendido, noches: readonly number[], desde: number, dt = 0.05): { e: EstadoDelEncendido; fases: string[] } => {
+  let t = desde
+  const fases: string[] = []
+  for (const n of noches) {
+    e = avanzarElEncendido(e, n, t, false)
+    fases.push(e.fase)
+    t += dt
+  }
+  return { e, fases }
+}
+const noche = (s: number): number[] => Array.from({ length: Math.round(s / 0.05) }, () => 1)
+const dia = (s: number): number[] => Array.from({ length: Math.round(s / 0.05) }, () => 0)
+const ida = correr(encendidoInicial(0, 0), noche(GUION_S + 0.5), 0)
+afirmar(ida.fases.includes('encendiendo') && ida.e.fase === 'prendido' && ida.e.k === FIRME, 'cae la noche: el guion, y termina prendido en la luz final')
+const vuelta = correr(ida.e, dia(ENCENDIDO.apagaS + 0.2), GUION_S + 0.5)
+afirmar(vuelta.e.fase === 'apagado' && vuelta.e.k === 0, 'vuelve el día: se apaga suave hasta cero')
+const otra = correr(vuelta.e, noche(1), GUION_S + 0.5 + ENCENDIDO.apagaS + 0.2)
+afirmar(!otra.fases.includes('encendiendo') && otra.e.fase === 'prendido', 'otra vez de noche enseguida: prende sin repetir la falla (histéresis)')
+const aireTsx = leer('polvo/Aire.tsx')
+afirmar(/Math\.min\(1, VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
+afirmar(/manchasDelHaz\(VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* k/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
 
 cerrar('s32-escena7')

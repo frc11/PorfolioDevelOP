@@ -40,6 +40,8 @@ export const AIRE = {
   uLogoInverso: { value: new THREE.Matrix4() },
   uContraGiro: { value: [0, 0, 0] },
   uMotas: { value: 0 },
+  /** [ESCENA 7] T9 · cuánto más brillan las motas con el haz prendido (1 = como antes). */
+  uBrilloDeLasMotas: { value: 1 },
   /** [ESCENA 6] La simulación de cada mota (la salida de posición y modo) y el corrimiento de 6a. */
   uFisica: { value: null as THREE.Texture | null },
   uDeriva: { value: new THREE.Vector3() },

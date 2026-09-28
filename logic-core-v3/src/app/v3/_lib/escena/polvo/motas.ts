@@ -35,6 +35,7 @@ float enLaColumna( vec3 mundo ) {
 export const MOTAS_PARS_GLSL = /* glsl */ `
 uniform float uContraGiro[ 3 ];
 uniform float uMotas;
+uniform float uBrilloDeLasMotas;
 varying float vDestello;
 ${EN_EL_HAZ}
 `
@@ -50,7 +51,7 @@ export const MOTAS_GLSL = /* glsl */ `
 		transformed.xz = vec2( ca * transformed.x + sa * transformed.z, - sa * transformed.x + ca * transformed.z );
 		float azar = fract( sin( dot( position, vec3( 39.3468, 11.1354, 83.1552 ) ) ) * 24634.6345 );
 		float f = mix( ${MOTAS.frecuencia.desde.toFixed(2)}, ${MOTAS.frecuencia.hasta.toFixed(2)}, azar );
-		vDestello = w * pow( 0.5 + 0.5 * sin( 6.2832 * ( uTiempo * f + azar ) ), ${MOTAS.pico.toFixed(1)} );
+		vDestello = w * pow( 0.5 + 0.5 * sin( 6.2832 * ( uTiempo * f + azar ) ), ${MOTAS.pico.toFixed(1)} ) * uBrilloDeLasMotas;
 	}
 `
 

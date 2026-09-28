@@ -9,7 +9,7 @@
  *      cubre todo el cielo que se ve por encima del piso.
  * §5 · el polvo con física: los modos y el despertar (6b se borró en ESCENA 7).
  * §6 · (el piso vivo pasó a `s32-escena7`: ESCENA 7 lo hizo un mar, encendido).
- * §7 · 6e: el encendido parpadea una vez, se asienta, y la frontera de la noche no lo repite.
+ * §7 · (6e pasó a `s32-escena7`: ESCENA 7 lo encendió y lo hizo más notorio).
  * §8 · 6g: la compuerta de la variante se ve al bajar y vuelve escondida; el frente va de afuera adentro.
  * §9 · (6c y 6d pasaron a `s32-escena7`: ESCENA 7 las juntó en la niebla de afuera, encendida).
  * §10 · la limpieza: el relieve (R1/R2), las cajas de texto y F-mirada no dejan código.
@@ -22,18 +22,14 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import { MOUSE_HEIGHT_FACTOR } from '../choreographyPhysics'
 import { DIA_DESDE_AFUERA, diaDesdeAfueraEn, frenteEn } from '../dia/desdeAfuera'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
-import { ENCENDIDO, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { FORMACION } from '../formacion/enFormacion'
 import type { BloqueOpaco } from '../nocheDisparada'
 import { FISICA } from '../polvo/simulacion'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { CAMERA_FOV, FLOOR_Y } from '../probeScene'
-import { MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
-/** El alto de la «cp» entera en el espacio de la copia (medido en el banco). */
-const ALTO_DE_LA_COPIA = 5
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
 
 // ── §1 · las banderas ─────────────────────────────────────────────────────
@@ -43,10 +39,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
@@ -87,35 +83,6 @@ afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', '
 afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lleva arrastre y turbulencia (no baja en línea recta)')
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')
-
-// ── §7 · 6e ───────────────────────────────────────────────────────────────
-titulo('§7 · 6e: el haz se enciende una vez')
-const correr = (e: EstadoDelEncendido, noches: readonly number[], desde: number, dt = 0.05): { e: EstadoDelEncendido; fases: string[]; kMax: number } => {
-  let t = desde
-  const fases: string[] = []
-  let kMax = 0
-  for (const n of noches) {
-    e = avanzarElEncendido(e, n, t, false)
-    fases.push(e.fase)
-    kMax = Math.max(kMax, e.k)
-    t += dt
-  }
-  return { e, fases, kMax }
-}
-const noche = (s: number): number[] => Array.from({ length: Math.round(s / 0.05) }, () => 1)
-const dia = (s: number): number[] => Array.from({ length: Math.round(s / 0.05) }, () => 0)
-const ida = correr(encendidoInicial(0, 0), noche(GUION_S + 0.5), 0)
-afirmar(ida.fases.includes('encendiendo') && ida.e.fase === 'prendido' && ida.e.k === 1, 'cae la noche: arranca con el guion y termina prendido en 1')
-afirmar(ida.kMax > 1.5 && guionEn(0.1) > 1 && guionEn(0.25) === 0, '  el guion destella por encima de 1 y entre destellos se apaga (se nota)')
-const vuelta = correr(ida.e, dia(ENCENDIDO.apagaS + 0.2), GUION_S + 0.5)
-afirmar(vuelta.e.fase === 'apagado' && vuelta.e.k === 0 && vuelta.fases.includes('apagando'), 'vuelve el día: se apaga suave hasta cero')
-const otra = correr(vuelta.e, noche(1), GUION_S + 0.5 + ENCENDIDO.apagaS + 0.2)
-afirmar(!otra.fases.includes('encendiendo') && otra.e.fase === 'prendido', 'otra vez de noche enseguida: prende sin repetir el parpadeo (histéresis)')
-const tarde = correr(vuelta.e, noche(0.2), 100)
-afirmar(tarde.fases.includes('encendiendo'), '  y si pasó un rato, el parpadeo vuelve')
-const tibia = correr(ida.e, Array.from({ length: 40 }, () => 0.45), 10)
-afirmar(tibia.e.fase === 'prendido', 'entre las dos fronteras (0,35 y 0,55) no cambia nada')
-controlPositivo('el detector VE un encendido que repite el parpadeo', ['apagado', 'encendiendo', 'prendido', 'apagando', 'apagado', 'encendiendo'], (fs: string[]) => fs.filter((x) => x === 'encendiendo').length <= 1)
 
 // ── §8 · 6g ───────────────────────────────────────────────────────────────
 titulo('§8 · 6g: el día entra desde afuera, visible al bajar y escondido al subir')

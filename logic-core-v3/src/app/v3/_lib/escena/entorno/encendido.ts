@@ -1,45 +1,58 @@
 /**
  * [ESCENA 6] 6e · EL HAZ SE ENCIENDE — pura: cuando cae la noche, E1 arranca como una luz artificial.
+ * [ESCENA 7] T9: encendido en el producto, y más notorio.
  *
  * La máquina lleva `k`, lo que se multiplica a la parte de noche del haz: la columna, el charco, el
- * polvo del haz, las motas (5d) y la mancha dura (5c) siguen esa intensidad. Prendido vale 1; en los
- * picos del encendido pasa de 1 (el haz en su nivel `sutil` es tan tenue que un parpadeo hasta 1 no
- * se lee: un tubo que arranca destella más fuerte y después se asienta). De día no cambia nada: la
- * luz de día del haz no es este foco.
+ * polvo del haz, las motas (5d), la mancha dura (5c) y la luz que rebota del piso (T12) siguen esa
+ * intensidad. De día no cambia nada: la luz de día del haz no es este foco.
  *
- * - **apagado → encendiendo** cuando la noche pasa `prende`. El encendido es un guion fijo: dos
- *   parpadeos, un instante inestable y después firme (`GUION`).
+ * **El guion (T9).** Primero FALLA: una serie de intentos cortos y tenues, dispares, con dos tramos que
+ * tiemblan (~2,5 s, el doble que en ESCENA 6), todos más débiles que la luz final. Un instante a oscuras,
+ * y ENCIENDE: un golpe más fuerte que todo lo anterior que se asienta en `FIRME`, más alto que el haz de
+ * ESCENA 6 (que quedaba en 1). En ESCENA 6 los intentos eran destellos por encima del final; ahora se lee
+ * que está fallando y que después prende.
+ *
+ * - **apagado → encendiendo** cuando la noche pasa `prende`.
  * - **encendiendo → prendido** al terminar el guion.
  * - **prendido (o encendiendo) → apagando** cuando la noche baja de `apaga`: se apaga suave.
  * - **apagando → apagado** cuando `k` llega a 0.
  *
  * HISTÉRESIS: entre `apaga` y `prende` no cambia nada, y si vuelve a anochecer antes de `reposoS`
- * desde que se apagó, prende sin parpadear (sube suave). Ir y volver sobre la frontera de la noche no
- * repite el parpadeo a cada rato.
+ * desde que se apagó, prende sin fallar (sube suave a `FIRME`). Ir y volver sobre la frontera de la noche
+ * no repite el guion a cada rato.
  */
 export const ENCENDIDO = {
   prende: 0.55,
   apaga: 0.35,
-  /** Lo que tarda en apagarse, y en prender sin parpadeo (s). */
+  /** Lo que tarda en apagarse, y en prender sin el guion (s). */
   apagaS: 1.2,
   subeS: 0.6,
-  /** Cuánto tiene que estar apagado para volver a parpadear al prender (s). */
+  /** Cuánto tiene que estar apagado para volver a fallar al prender (s). */
   reposoS: 8,
 } as const
 
+/** La intensidad del haz prendido, contra la de ESCENA 6 (1). */
+export const FIRME = 1.45
+
 /**
- * El guion del encendido: tramos (desde, hasta, intensidad) en segundos. Entre dos tramos, apagado;
- * en el inestable la intensidad tiembla alrededor de su valor.
+ * El guion: tramos (desde, hasta, intensidad) en segundos. Entre dos tramos, apagado. Los intentos que
+ * fallan, tenues; los dos largos tiemblan (`TIEMBLAN`). El último es el encendido: un golpe que se asienta.
  */
 export const GUION: readonly (readonly [number, number, number])[] = [
-  [0.08, 0.15, 2.2],
-  [0.31, 0.37, 1.8],
-  [0.52, 1.25, 1.35],
-  [1.25, 1.6, 1.15],
+  [0.1, 0.17, 0.42],
+  [0.36, 0.4, 0.28],
+  [0.62, 0.95, 0.5],
+  [1.18, 1.24, 0.34],
+  [1.48, 1.92, 0.58],
+  [2.14, 2.22, 0.4],
+  [2.42, 2.5, 0.62],
+  [2.78, 3.7, 2.4],
 ]
-export const GUION_S = 1.6
-/** El tramo inestable: de cuándo a cuándo tiembla, y cuánto. */
-const INESTABLE = { desde: 0.52, hasta: 1.25, cuanto: 0.5 } as const
+export const GUION_S = 3.7
+/** Dónde termina la falla y arranca el encendido de verdad (s). */
+export const FALLA_S = 2.78
+/** Los tramos que tiemblan, y cuánto. */
+const TIEMBLAN = { cuanto: 0.25, tramos: [2, 4] } as const
 
 export type Fase = 'apagado' | 'encendiendo' | 'prendido' | 'apagando'
 
@@ -55,25 +68,29 @@ export interface EstadoDelEncendido {
 }
 
 export function encendidoInicial(noche: number, t: number): EstadoDelEncendido {
-  // Si la escena arranca de noche (un salto, una recarga), el haz ya está prendido: no parpadea sin que nadie lo vea caer.
-  return noche >= ENCENDIDO.prende ? { fase: 'prendido', desde: t, apagadoEn: -Infinity, k: 1, kInicial: 1 } : { fase: 'apagado', desde: t, apagadoEn: -Infinity, k: 0, kInicial: 0 }
+  // Si la escena arranca de noche (un salto, una recarga), el haz ya está prendido: no falla sin que nadie lo vea caer.
+  return noche >= ENCENDIDO.prende ? { fase: 'prendido', desde: t, apagadoEn: -Infinity, k: FIRME, kInicial: FIRME } : { fase: 'apagado', desde: t, apagadoEn: -Infinity, k: 0, kInicial: 0 }
 }
 
-/** El temblor del tramo inestable: dos senos rápidos, deterministas. */
+/** El temblor de un tramo inestable: dos senos rápidos, deterministas. */
 function temblor(s: number): number {
   return 0.5 * Math.sin(s * 71.3) + 0.5 * Math.sin(s * 43.1 + 1.7)
 }
 
 /** La intensidad del guion a `s` segundos de empezar. */
 export function guionEn(s: number): number {
-  for (const [desde, hasta, k] of GUION) {
+  for (let i = 0; i < GUION.length; i += 1) {
+    const [desde, hasta, k] = GUION[i]
     if (s < desde || s >= hasta) continue
-    if (s >= INESTABLE.desde && s < INESTABLE.hasta) return Math.max(0, k + INESTABLE.cuanto * temblor(s))
-    // El último tramo se asienta suave, de `k` a 1.
-    if (hasta === GUION_S) return k + (1 - k) * ((s - desde) / (hasta - desde))
+    if ((TIEMBLAN.tramos as readonly number[]).includes(i)) return Math.max(0, k + TIEMBLAN.cuanto * temblor(s))
+    // El encendido: el golpe en 0,05 s y después se asienta en FIRME.
+    if (hasta === GUION_S) {
+      const u = (s - desde) / (hasta - desde)
+      return u < 0.06 ? k * (u / 0.06) : k + (FIRME - k) * (1 - Math.exp(-(u - 0.06) * 5))
+    }
     return k
   }
-  return s >= GUION_S ? 1 : 0
+  return s >= GUION_S ? FIRME : 0
 }
 
 /** Un paso: la noche de este cuadro y el reloj. Con `reducido`, sin guion: sigue a la noche sin parpadear. */
@@ -86,12 +103,12 @@ export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: numb
       return { ...e, fase: 'encendiendo', desde: t, kInicial: 0 }
     case 'encendiendo':
       if (noche < ENCENDIDO.apaga) return { ...e, fase: 'apagando', desde: t, kInicial: e.k }
-      if (en >= GUION_S) return { ...e, fase: 'prendido', desde: t, k: 1, kInicial: 1 }
+      if (en >= GUION_S) return { ...e, fase: 'prendido', desde: t, k: FIRME, kInicial: FIRME }
       return { ...e, k: guionEn(en) }
     case 'prendido':
       if (noche < ENCENDIDO.apaga) return { ...e, fase: 'apagando', desde: t, kInicial: e.k }
       // Prendido sin guion (volvió a anochecer enseguida): sube suave desde donde estaba.
-      return { ...e, k: Math.min(1, e.kInicial + (1 - e.kInicial) * Math.min(1, en / ENCENDIDO.subeS)) }
+      return { ...e, k: e.kInicial + (FIRME - e.kInicial) * Math.min(1, en / ENCENDIDO.subeS) }
     case 'apagando': {
       if (noche >= ENCENDIDO.prende) return { ...e, fase: 'prendido', desde: t, kInicial: e.k }
       const k = Math.max(0, e.kInicial * (1 - en / ENCENDIDO.apagaS))
@@ -100,5 +117,5 @@ export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: numb
   }
 }
 
-/** Lo que leen los demás (las motas, la sombra): la intensidad del haz de noche, 1 sin la prueba. */
+/** Lo que leen los demás (las motas, la sombra, el rebote): la intensidad del haz de noche (1 sin el encendido). */
 export const HAZ_ENCENDIDO = { k: 1 }
