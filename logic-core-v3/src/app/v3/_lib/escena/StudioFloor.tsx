@@ -14,6 +14,9 @@ import {
   FLOOR_Y,
   PAPER_COLOR,
 } from './probeScene'
+import { VIVO } from './entorno/vivo'
+import { NIEBLA_DE_AFUERA, RASANTE_GLSL } from './niebla/rasante'
+import { conElDiaDesdeAfuera } from './dia/desdeAfuera'
 
 /**
  * El piso: la losa y el ciclorama.
@@ -61,16 +64,42 @@ function perfilDelCiclorama(desde: number, bajo: number): THREE.Vector2[] {
   return points
 }
 
-/** [ESCENA 5] El escenario: nuestro piso termina en `radio`, y alrededor hay otro `desnivel` más abajo, hasta `hasta`. */
+/**
+ * [ESCENA 5] El escenario: nuestro piso termina en `radio`, y alrededor hay otro `desnivel` más abajo,
+ * hasta `hasta`. [ESCENA 6] Ese piso sube apenas hacia afuera (`pendiente`, sin escalones), como una
+ * platea: cada fila de la formación asoma por encima de la de adelante.
+ */
 export interface Escenario {
   readonly radio: number
   readonly desnivel: number
   readonly hasta: number
+  readonly pendiente: number
+}
+
+/** La altura del piso de abajo a una distancia `r` del centro, relativa a `FLOOR_Y`. */
+export function alturaDelPisoDeAbajo(e: Escenario, r: number): number {
+  return -e.desnivel + e.pendiente * Math.max(0, r - e.radio)
 }
 
 type StudioFloorProps = {
   /** [ESCENA 5] Con la formación, el piso es un escenario y el ciclorama arranca más afuera y más abajo. */
   readonly escenario?: Escenario
+  /** [ESCENA 6] 6c: el piso de abajo y el ciclorama integran la niebla rasante (`niebla/rasante.ts`). */
+  readonly conNieblaRasante?: boolean
+}
+
+/** [ESCENA 6] 6c: el material del papel de afuera, con los bancos que cada punto tiene delante. */
+function conLaNiebla(material: THREE.MeshStandardMaterial): void {
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, { uTiempo: VIVO.uTiempo, uAbre: NIEBLA_DE_AFUERA.uAbre })
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vMundoRasante;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\n\tvMundoRasante = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;')
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>\nvarying vec3 vMundoRasante;\nuniform float uTiempo;\nuniform float uAbre;\n${RASANTE_GLSL}`)
+      .replace('#include <fog_fragment>', '#include <fog_fragment>\n\t#ifdef USE_FOG\n\t\tgl_FragColor.rgb = mix( fogColor, gl_FragColor.rgb, transmitanciaRasante( cameraPosition, vMundoRasante, uAbre ) );\n\t#endif')
+  }
+  material.customProgramCacheKey = () => 'papel-con-niebla-rasante'
 }
 
 /** El canto del escenario y el piso de abajo, en una sola malla (relativa a `FLOOR_Y`). */
@@ -79,18 +108,21 @@ function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
   canto.translate(0, -FLOOR_THICKNESS - (e.desnivel - FLOOR_THICKNESS) / 2, 0)
   const piso = new THREE.RingGeometry(e.radio, e.hasta, FLOOR_SEGMENTS, 1)
   piso.rotateX(-Math.PI / 2)
-  piso.translate(0, -e.desnivel, 0)
+  // La pendiente: cada vértice a la altura de su radio (el anillo tiene un solo tramo, así que es un cono).
+  const p = piso.getAttribute('position')
+  for (let i = 0; i < p.count; i += 1) p.setY(i, alturaDelPisoDeAbajo(e, Math.hypot(p.getX(i), p.getZ(i))))
+  piso.computeVertexNormals()
   const junta = mergeBufferGeometries([canto, piso]) ?? piso
   for (const g of [canto, piso]) if (g !== junta) g.dispose()
   return junta
 }
 
-export function StudioFloor({ escenario }: StudioFloorProps) {
+export function StudioFloor({ escenario, conNieblaRasante = false }: StudioFloorProps) {
   const radioDeLaLosa = escenario?.radio ?? FLOOR_RADIUS
   const cycGeometry = useMemo(
     () =>
       new THREE.LatheGeometry(
-        perfilDelCiclorama(escenario?.hasta ?? FLOOR_RADIUS, -(escenario?.desnivel ?? 0)),
+        perfilDelCiclorama(escenario?.hasta ?? FLOOR_RADIUS, escenario === undefined ? 0 : alturaDelPisoDeAbajo(escenario, escenario.hasta)),
         FLOOR_SEGMENTS
       ),
     [escenario]
@@ -103,8 +135,12 @@ export function StudioFloor({ escenario }: StudioFloorProps) {
     const slab = paper()
     const cyclorama = paper()
     cyclorama.side = THREE.DoubleSide
+    if (conNieblaRasante) conLaNiebla(cyclorama)
+    // [ESCENA 6] 6g: con la variante, el barrido del día (no hace nada sin la bandera).
+    conElDiaDesdeAfuera(slab)
+    conElDiaDesdeAfuera(cyclorama)
     return { slab, cyclorama }
-  }, [])
+  }, [conNieblaRasante])
 
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(() => () => cycGeometry.dispose(), [cycGeometry])

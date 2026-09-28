@@ -7,7 +7,9 @@ import * as THREE from 'three'
 import { entornoDeLaEscena } from './entorno'
 import { sombraEn } from './entorno/sombra'
 import { PULSO_VIVO, VIVO } from './entorno/vivo'
+import { MANCHA_EN_EL_PISO } from './sombra/enElPiso'
 import { SOMBRA_DEL_HAZ, manchasDelHaz } from './sombra/sombraDelHaz'
+import { HAZ_ENCENDIDO } from './entorno/encendido'
 
 import {
   CONTACT_COLOR,
@@ -85,8 +87,10 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
   const reposoRef = useRef<number | null>(null)
   const entorno = entornoDeLaEscena()
   const viva = entorno.sombraViva && logoGroupRef !== undefined
-  // [ESCENA 5] 5c: la mancha según el haz, con bandera (`sombra/sombraDelHaz.ts`).
-  const conElHaz = entorno.pruebas.sombraHaz
+  // [ESCENA 6] 5c: la mancha según el haz, en el producto (`sombra/sombraDelHaz.ts`).
+  const conElHaz = entorno.sombraHaz
+  // [ESCENA 6] Con el piso vivo la mancha la pinta el piso (los bloques que suben taparían el plano).
+  const enElPiso = entorno.pruebas.pisoVivo !== 'no'
 
   useFrame(() => {
     const mesh = meshRef.current
@@ -113,15 +117,22 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
       escala = sombra.escala
       opacidad = sombra.opacidad
     }
-    if (!viva && !conElHaz) return
-    const haz = manchasDelHaz(VIVO.uNoche.value, conElHaz && entorno.E1)
+    if (!viva && !conElHaz && !enElPiso) return
+    // [ESCENA 6] Con 6e, la mancha dura sigue al encendido del haz (k es 1 sin la prueba).
+    const haz = manchasDelHaz(VIVO.uNoche.value * HAZ_ENCENDIDO.k, conElHaz && entorno.E1)
     mesh.scale.set(escala * haz.escalaBlanda, escala * haz.escalaBlanda, 1)
     material.opacity = CONTACT_OPACITY * opacidad * haz.opacidadBlanda
+    const opacidadDura = Math.min(1, CONTACT_OPACITY * opacidad * haz.opacidadDura)
     const dura = duraRef.current
     const duraMaterial = duraMaterialRef.current
     if (dura && duraMaterial) {
       dura.scale.set(escala * haz.escalaDura, escala * haz.escalaDura, 1)
-      duraMaterial.opacity = Math.min(1, CONTACT_OPACITY * opacidad * haz.opacidadDura)
+      duraMaterial.opacity = opacidadDura
+    }
+    if (enElPiso) {
+      MANCHA_EN_EL_PISO.uMancha.value.set(escala * haz.escalaBlanda, material.opacity, escala * haz.escalaDura, conElHaz ? opacidadDura : 0)
+      mesh.visible = false
+      if (dura) dura.visible = false
     }
   })
 

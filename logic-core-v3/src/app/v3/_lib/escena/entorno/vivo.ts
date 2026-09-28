@@ -9,8 +9,6 @@ import type { NivelDelHaz } from '../entorno'
 
 /** Cuántos anillos del pulso puede dibujar el shader a la vez: el tope de `maquinaDelPulso.ts`. */
 export const ANILLOS_EN_EL_SHADER = 4
-/** Cuántas cajas de texto atenúan el pulso a la vez (las más grandes en pantalla). */
-export const CAJAS_DE_TEXTO = 6
 
 export const VIVO = {
   /** Segundos de reloj de la escena (quieto con movimiento reducido). */
@@ -36,17 +34,10 @@ export const VIVO = {
   uHazNoche: { value: new THREE.Vector3() },
   /** E4 · los anillos vivos: (nace, duración, alcance, amplitud); amplitud 0 = vacío. */
   uAnillos: { value: Array.from({ length: ANILLOS_EN_EL_SHADER }, () => new THREE.Vector4()) },
-  /** E4 · las cajas de texto en pantalla, en píxeles del búfer (x0, y0, x1, y1), abajo-izquierda. */
-  uTexto: { value: Array.from({ length: CAJAS_DE_TEXTO }, () => new THREE.Vector4(-1, -1, -1, -1)) },
-  /** E4 · el borde suave de la atenuación alrededor de cada caja, en píxeles del búfer. */
-  uPluma: { value: 24 },
 }
 
-/**
- * Lo que no es uniform pero también se comparte: cuándo nació el último principal (la sombra) y
- * [ESCENA 4] si el puntero está sobre el logo, tal como lo decide E4 (F-mirada lo lee, no lo decide).
- */
-export const PULSO_VIVO = { ultimoPrincipal: -Infinity, hover: false }
+/** Lo que no es uniform pero también se comparte: cuándo nació el último principal (la sombra, el piso vivo). */
+export const PULSO_VIVO = { ultimoPrincipal: -Infinity }
 
 /** E1 · el haz: vertical, sobre el logo, del óculo al piso. Lo usan el cono y el polvo. */
 export const HAZ = {

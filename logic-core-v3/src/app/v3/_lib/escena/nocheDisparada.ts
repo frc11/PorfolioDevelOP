@@ -43,6 +43,7 @@
  * escribe `activa`; `OrbitRig` la lee y nunca la escribe.
  */
 
+import { diaDesdeAfueraEn, hayDiaDesdeAfuera } from './dia/desdeAfuera'
 import { NIVEL_DE_LA_NOCHE } from './lightArc'
 import { nivelEntre, viajeEnCurso } from './viaje'
 
@@ -168,7 +169,9 @@ export function medirElBloqueOpaco(
 export function aplicarElDiaDelFinal(b: BloqueOpaco | null): void {
   if (b === null) return
   const antes = DIA_DEL_FINAL.activo
-  DIA_DEL_FINAL.activo = diaDelFinalEn(b)
+  // [ESCENA 6] 6g, con bandera: el día prende cuando Tu panel deja ver la sala, y vuelve escondido.
+  const deSiempre = diaDelFinalEn(b)
+  DIA_DEL_FINAL.activo = hayDiaDesdeAfuera() ? diaDesdeAfueraEn(b, antes, deSiempre) : deSiempre
   if (DIA_DEL_FINAL.activo !== antes) oyentesDelDia.forEach((f) => f(DIA_DEL_FINAL.activo))
   const repuesta = nocheQueSeRepone(b, NOCHE_DISPARADA.cantidad)
   // [VIAJES] Durante un viaje no se repone de golpe: la sala se ve, y la noche la mueve el reloj del barrido.

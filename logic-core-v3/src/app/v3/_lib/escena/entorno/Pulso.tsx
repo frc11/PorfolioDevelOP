@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
 import { FLOOR_RADIUS, FLOOR_Y } from '../probeScene'
-import { ANILLOS_EN_EL_SHADER, CAJAS_DE_TEXTO, VIVO } from './vivo'
+import { ANILLOS_EN_EL_SHADER, VIVO } from './vivo'
 
 /**
  * [ESCENA 3] E4 · EL PULSO — el dibujo. Un solo plano en el piso con hasta tres anillos analíticos:
@@ -13,28 +13,24 @@ import { ANILLOS_EN_EL_SHADER, CAJAS_DE_TEXTO, VIVO } from './vivo'
  * `uAnillos`.
  *
  * Cada anillo arranca en el borde del logo y desacelera, como una onda que pierde energía. De día
- * oscurece el papel apenas; de noche lo aclara. Sobre las cajas de texto (`uTexto`) se apaga, con
- * un borde suave: el pulso no le baja el contraste a nada que haya que leer.
+ * oscurece el papel apenas; de noche lo aclara.
+ *
+ * **[ESCENA 6] Pasa detrás del texto.** Hasta ESCENA 5 el anillo se apagaba sobre las cajas de texto
+ * y dejaba un rectángulo del color del piso detrás de cada bloque: se borró. El contraste que le
+ * cuesta al texto está medido (`escena6/fondos-texto`).
  */
 
 /** Dónde nace el anillo: el borde del logo sobre el piso. */
-const NACE_EN = 3.6
+export const NACE_EN = 3.6
 
-const VERTEX = /* glsl */ `
-varying vec2 vPlano;
-void main() {
-	vPlano = position.xy;
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-}
-`
-
-const FRAGMENT = /* glsl */ `
+/**
+ * Los anillos, en GLSL: `cuantoDelPulso( r )` es cuánto se mezcla el piso hacia `vec3( uNoche )` a
+ * esa distancia del centro. [ESCENA 6] Exportado: con el piso vivo lo pinta el piso mismo.
+ */
+export const ANILLOS_GLSL = /* glsl */ `
 uniform float uTiempo;
 uniform float uNoche;
 uniform vec4 uAnillos[ ${ANILLOS_EN_EL_SHADER} ];
-uniform vec4 uTexto[ ${CAJAS_DE_TEXTO} ];
-uniform float uPluma;
-varying vec2 vPlano;
 
 // Un anillo: (nace, duración, alcance, amplitud). El de reposo es exactamente el de ESCENA 2.
 float anilloEn( vec4 a, float r ) {
@@ -47,24 +43,28 @@ float anilloEn( vec4 a, float r ) {
 	return exp( - d * d ) * pow( 1.0 - t, 1.8 ) * smoothstep( 0.0, 0.06, t ) * a.w;
 }
 
-// 0 adentro de cualquier caja de texto, 1 lejos de todas, con la pluma de transición.
-float fueraDelTexto() {
-	float m = 1.0;
-	for ( int i = 0; i < ${CAJAS_DE_TEXTO}; i++ ) {
-		vec4 c = uTexto[ i ];
-		if ( c.z <= c.x ) continue;
-		vec2 dentro = min( gl_FragCoord.xy - c.xy, c.zw - gl_FragCoord.xy );
-		m = min( m, 1.0 - smoothstep( - uPluma, 0.0, min( dentro.x, dentro.y ) ) );
-	}
-	return m;
-}
-
-void main() {
-	float r = length( vPlano );
+float cuantoDelPulso( float r ) {
 	float suma = 0.0;
 	for ( int i = 0; i < ${ANILLOS_EN_EL_SHADER}; i++ ) suma += anilloEn( uAnillos[ i ], r );
-	if ( suma <= 0.0005 ) discard;
-	float cuanto = suma * mix( 0.075, 0.12, uNoche ) * fueraDelTexto();
+	return suma * mix( 0.075, 0.12, uNoche );
+}
+`
+
+const VERTEX = /* glsl */ `
+varying vec2 vPlano;
+void main() {
+	vPlano = position.xy;
+	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}
+`
+
+const FRAGMENT = /* glsl */ `
+${ANILLOS_GLSL}
+varying vec2 vPlano;
+
+void main() {
+	float cuanto = cuantoDelPulso( length( vPlano ) );
+	if ( cuanto <= 0.0005 * 0.075 ) discard;
 	gl_FragColor = vec4( vec3( uNoche ), cuanto );
 }
 `
@@ -77,8 +77,6 @@ export function Pulso() {
           uTiempo: VIVO.uTiempo,
           uNoche: VIVO.uNoche,
           uAnillos: VIVO.uAnillos,
-          uTexto: VIVO.uTexto,
-          uPluma: VIVO.uPluma,
         },
         vertexShader: VERTEX,
         fragmentShader: FRAGMENT,

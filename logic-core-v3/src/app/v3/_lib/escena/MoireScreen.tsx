@@ -5,6 +5,7 @@ import * as THREE from 'three'
 
 import { entornoDeLaEscena } from './entorno'
 import { conDesajusteVivo } from './moire/parche'
+import { conElDiaDesdeAfuera } from './dia/desdeAfuera'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
 import {
   MOIRE_BASE_ALPHA,
@@ -210,6 +211,9 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     const capas = { coarse: make(coarse, coarseTexture), fine: make(fine, fineTexture) }
     // [ESCENA 5] M4: la fina lee dos desajustes en las transiciones entre tramos (`moire/parche.ts`).
     if (entornoDeLaEscena().moire) conDesajusteVivo(capas.fine.material)
+    // [ESCENA 6] 6g: con la variante, el barrido del día (no hace nada sin la bandera).
+    conElDiaDesdeAfuera(capas.coarse.material)
+    conElDiaDesdeAfuera(capas.fine.material)
     return capas
   }, [store, hastaElPiso])
 
@@ -260,8 +264,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
 
   return (
     <>
-      {/* [ESCENA 5] Con el relieve R1 la capa gruesa la dibuja `relieve/Paredes.tsx`, en escalones. */}
-      {(entornoDeLaEscena().pruebas.relieve === 'R1' ? [layers.fine] : [layers.coarse, layers.fine]).map((layer) => (
+      {[layers.coarse, layers.fine].map((layer) => (
         <mesh
           key={layer.spec.radius}
           geometry={layer.geometry}

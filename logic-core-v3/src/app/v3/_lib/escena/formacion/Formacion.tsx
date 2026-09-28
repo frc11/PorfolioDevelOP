@@ -3,16 +3,15 @@
 import { useFrame, useLoader } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { SVGLoader } from 'three-stdlib'
-import type * as THREE from 'three'
+import * as THREE from 'three'
 
 import type { NivelDeCalidad } from '../calidad'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
-import { PULSO_VIVO } from '../entorno/vivo'
 import type { ProbeRigStore } from '../probeStore'
 import type { Escenario } from '../StudioFloor'
+import { NIEBLA_DE_AFUERA } from '../niebla/rasante'
 import { fueraDelTunel } from '../tunelEnLaEscena'
-import { armar, contarVisibles } from './armado'
-import { FORMACION } from './enFormacion'
+import { ESCENARIO, armar, contarVisibles } from './armado'
 import type { UniformsDeLaCopia } from './materiales'
 
 /**
@@ -21,18 +20,18 @@ import type { UniformsDeLaCopia } from './materiales'
  * lo que se construye y `materiales.ts` por qué casi no se ven.
  *
  * **El piso.** Con la formación, nuestro piso es un escenario de radio 45 y alrededor hay un piso
- * 1,6 más abajo, hasta el 64, donde recién arranca el ciclorama (`StudioFloor`, `pisoConFormacion`).
- * El desnivel no lleva ningún objeto: se lee porque el borde del escenario tapa el pie de las
- * primeras filas.
+ * 1,6 más abajo que sube apenas hacia afuera, hasta el 72, donde recién arranca el ciclorama
+ * (`StudioFloor`, `pisoConFormacion`). El desnivel no lleva ningún objeto: se lee porque el borde del
+ * escenario tapa el pie de la primera fila.
  *
- * **Dónde no está.** En el túnel de Trabajos (`tunelEnLaEscena.ts`), y en el teléfono, salvo
- * `movil=menos` (las dos primeras filas de cada bloque).
+ * **Dónde no está.** En el túnel de Trabajos (`tunelEnLaEscena.ts`) ni en el teléfono.
+ *
+ * [ESCENA 6] Sin F-mirada: ahora todas miran al centro, así que no tenían hacia dónde girar.
  */
 
 interface PropsDeLaFormacion {
   readonly rig: ProbeRigStore
   readonly calidad: NivelDeCalidad
-  readonly quieto: boolean
   readonly logoGroupRef: RefObject<THREE.Group | null>
 }
 
@@ -48,15 +47,12 @@ type VentanaDelBanco = Window & {
 
 /** ¿Hay formación en esta carga y en este ancho? */
 function hayFormacion(calidad: NivelDeCalidad): boolean {
-  const p = entornoDeLaEscena().pruebas
-  return p.formacion && (calidad !== 'compacta' || p.movil === 'menos')
+  return entornoDeLaEscena().pruebas.formacion && calidad !== 'compacta'
 }
 
-const ESCENARIO: Escenario = { radio: FORMACION.radioDelEscenario, desnivel: FORMACION.desnivel, hasta: FORMACION.radioDelPisoDeAbajo }
-
-/** El escenario y el piso de abajo, si esta carga los pide (la formación o el relieve del piso). */
+/** El escenario y el piso de abajo, si esta carga tiene formación. */
 export function pisoConFormacion(calidad: NivelDeCalidad): Escenario | undefined {
-  return hayFormacion(calidad) || entornoDeLaEscena().pruebas.relieve === 'R2' ? ESCENARIO : undefined
+  return hayFormacion(calidad) ? ESCENARIO : undefined
 }
 
 export function Formacion(props: PropsDeLaFormacion) {
@@ -64,26 +60,25 @@ export function Formacion(props: PropsDeLaFormacion) {
   return <FormacionPrendida {...props} />
 }
 
-function FormacionPrendida({ rig, calidad, quieto, logoGroupRef }: PropsDeLaFormacion) {
+function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
-  const movil = calidad === 'compacta'
-  const { mirada, relieve } = entornoDeLaEscena().pruebas
-  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), movil, relieve === 'R2'), [svg, movil, relieve])
+  const { sinFallasVisibles, nieblaRasante, nieblaVelocidad } = entornoDeLaEscena().pruebas
+  const armado = useMemo(() => armar(svg.paths.flatMap((p) => p.toShapes(true)), sinFallasVisibles, nieblaRasante), [svg, sinFallasVisibles, nieblaRasante])
   useEffect(() => () => armado.soltar(), [armado])
-  const memoria = useRef({ camara: null as THREE.Camera | null, mirada: 0 })
+  const memoria = useRef({ camara: null as THREE.Camera | null, progreso: Number.NaN, antes: null as THREE.Vector3 | null, abre: 0 })
 
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
     ventana.__formacionDelBanco = {
       mostrar: (conFormacion, conLogo) => {
-        armado.instancias.visible = conFormacion
+        for (const malla of armado.mallas) malla.visible = conFormacion
         if (logoGroupRef.current !== null) logoGroupRef.current.visible = conLogo
       },
       visibles: () => (memoria.current.camara === null ? 0 : contarVisibles(armado.copias, memoria.current.camara)),
       copias: armado.copias.length,
-      instancias: armado.instancias.count,
-      triangulos: armado.instancias.count * armado.triangulosPorPieza,
+      instancias: armado.mallas.reduce((n, m) => n + m.count, 0),
+      triangulos: armado.triangulos,
     }
     return () => {
       delete ventana.__formacionDelBanco
@@ -93,21 +88,37 @@ function FormacionPrendida({ rig, calidad, quieto, logoGroupRef }: PropsDeLaForm
   useFrame((state, delta) => {
     const m = memoria.current
     m.camara = state.camera
-    m.mirada = siguienteMirada(m.mirada, mirada && !quieto && PULSO_VIVO.hover, Math.min(delta, 0.1))
-    alCuadro(armado.copia, fueraDelTunel(rig.current.progress), m.mirada)
+    alCuadro(armado.copia, fueraDelTunel(rig.current.progress))
+    // [ESCENA 6] 6d: la velocidad de la cámara mientras el scroll la mueve, con la inercia de E6.
+    if (nieblaVelocidad) {
+      const dt = Math.min(Math.max(delta, 1e-3), 0.1)
+      const progreso = rig.current.progress
+      const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
+      m.progreso = progreso
+      const velocidad = conScroll && m.antes !== null ? state.camera.position.distanceTo(m.antes) / dt : 0
+      m.antes = (m.antes ?? new THREE.Vector3()).copy(state.camera.position)
+      const objetivo = Math.min(1, velocidad / ABRE_CON.plena)
+      m.abre += (objetivo - m.abre) * (1 - Math.exp(-dt / (objetivo > m.abre ? ABRE_CON.subeS : ABRE_CON.bajaS)))
+      abrir(m.abre)
+    }
   })
 
-  return <primitive object={armado.instancias} />
+  return (
+    <>
+      {armado.mallas.map((malla) => (
+        <primitive key={malla.uuid} object={malla} />
+      ))}
+    </>
+  )
 }
 
-function alCuadro(u: UniformsDeLaCopia, visible: number, mirada: number): void {
+/** 6d: a qué velocidad de la cámara la niebla está del todo abierta (u/s), y la inercia de E6 (s). */
+const ABRE_CON = { plena: 12, subeS: 0.11, bajaS: 0.7 } as const
+
+function abrir(abre: number): void {
+  NIEBLA_DE_AFUERA.uAbre.value = abre
+}
+
+function alCuadro(u: UniformsDeLaCopia, visible: number): void {
   u.uVisible.value = visible
-  u.uMirada.value = mirada
-}
-
-/** F-mirada: 0 → 1 en ~2,5 s al entrar el hover, y de vuelta al salir. */
-function siguienteMirada(actual: number, hover: boolean, dt: number): number {
-  const objetivo = hover ? 1 : 0
-  const paso = dt / 2.5
-  return objetivo > actual ? Math.min(objetivo, actual + paso) : Math.max(objetivo, actual - paso)
 }

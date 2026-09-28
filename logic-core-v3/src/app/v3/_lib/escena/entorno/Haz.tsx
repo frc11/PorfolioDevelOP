@@ -61,16 +61,27 @@ void main() {
 }
 `
 
+/**
+ * La luz que el haz deja en el piso, aditiva. [ESCENA 6] Exportada: con el piso vivo la pinta el piso
+ * mismo. Pide `uNoche`, `uHazDia` y `uHazNoche` declarados.
+ */
+export const CHARCO_DEL_HAZ_GLSL = /* glsl */ `
+vec3 charcoDelHaz( vec2 plano ) {
+	float r = length( plano ) / ${HAZ.radioAbajo.toFixed(2)};
+	float charco = exp( - r * r * 2.2 );
+	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNoche );
+	return luz * charco * mix( uHazDia.y, uHazNoche.y, uNoche );
+}
+`
+
 const FRAGMENT_DE_LA_MANCHA = /* glsl */ `
 uniform float uNoche;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 varying vec2 vPlano;
+${CHARCO_DEL_HAZ_GLSL}
 void main() {
-	float r = length( vPlano ) / ${HAZ.radioAbajo.toFixed(2)};
-	float charco = exp( - r * r * 2.2 );
-	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNoche );
-	gl_FragColor = vec4( luz * charco * mix( uHazDia.y, uHazNoche.y, uNoche ), 1.0 );
+	gl_FragColor = vec4( charcoDelHaz( vPlano ), 1.0 );
 }
 `
 
@@ -104,7 +115,8 @@ function aditivo(vertexShader: string, fragmentShader: string): THREE.ShaderMate
   })
 }
 
-export function Haz() {
+/** `conCharco`: el plano de la luz en el piso; con el piso vivo la pinta el piso ([ESCENA 6]). */
+export function Haz({ conCharco }: { readonly conCharco: boolean }) {
   const piezas = useMemo(() => {
     const cono = new THREE.CylinderGeometry(HAZ.radioArriba, HAZ.radioAbajo, ALTO, 48, 1, true)
     const techo = new THREE.RingGeometry(HAZ.radioArriba + 0.4, 46, 64, 1)
@@ -154,14 +166,16 @@ export function Haz() {
         material={piezas.materiales.haz}
         renderOrder={2}
       />
-      <mesh
-        position={[0, FLOOR_Y + 0.03, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        material={piezas.materiales.mancha}
-        renderOrder={1}
-      >
-        <planeGeometry args={[HAZ.radioAbajo * 3, HAZ.radioAbajo * 3]} />
-      </mesh>
+      {conCharco && (
+        <mesh
+          position={[0, FLOOR_Y + 0.03, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          material={piezas.materiales.mancha}
+          renderOrder={1}
+        >
+          <planeGeometry args={[HAZ.radioAbajo * 3, HAZ.radioAbajo * 3]} />
+        </mesh>
+      )}
     </group>
   )
 }

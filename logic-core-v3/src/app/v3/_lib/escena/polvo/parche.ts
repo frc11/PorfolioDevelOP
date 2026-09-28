@@ -5,7 +5,7 @@ import { VIVO } from '../entorno/vivo'
 import { PARTICLE_FAR_COLOR, PARTICLE_NEAR_COLOR } from '../probeParticles'
 import { MOTAS_FRAGMENT_GLSL, MOTAS_GLSL, MOTAS_PARS_GLSL, MOTAS_TAM_GLSL } from './motas'
 import { DISTANCIA_AL_LOGO_GLSL, HOLGURA } from './obstaculo'
-import { NUNCA, POSARSE_GLSL } from './posarse'
+import { FISICA_EN_LA_MOTA_GLSL } from './simulacion'
 import { VOLUMEN_GLSL } from './volumen'
 
 /**
@@ -14,9 +14,11 @@ import { VOLUMEN_GLSL } from './volumen'
  *
  * - **el volumen parejo** (`volumen.ts`, en el producto): la caja que acompaña a la cámara;
  * - **5a** · el logo no se atraviesa (`obstaculo.ts`), antes de proyectar y, con E7, otra vez
- *   después del empuje del cursor;
- * - **5b** · el polvo se posa (`posarse.ts`);
- * - **5d** · las motas del haz (`motas.ts`).
+ *   después del empuje del cursor (en el producto desde ESCENA 6);
+ * - **5d** · las motas del haz (`motas.ts`, en el producto desde ESCENA 6);
+ * - [ESCENA 6] **la física** (`simulacion.ts`, con `posarse` o 6b `remolinos`): la posición sale de la
+ *   simulación de cada mota;
+ * - [ESCENA 6] **6a** · la inercia del aire: todo el volumen corrido por `uDeriva` antes de repetirse.
  *
  * Todo pasa sobre `transformed` ANTES de proyectar, así que E1, E6 y E7 (`entorno/polvoVivo.ts`) leen
  * la mota ya movida, como leían la fija: su código no cambia. Encadena el `onBeforeCompile` que ya
@@ -37,12 +39,11 @@ export const AIRE = {
   uLogo: { value: new THREE.Matrix4() },
   uLogoInverso: { value: new THREE.Matrix4() },
   uAbrir: { value: 0 },
-  uPolvoQuieto: { value: NUNCA },
-  uPolvoDesperto: { value: -NUNCA },
-  uPolvoAntes: { value: -NUNCA },
-  uPolvoOrigen: { value: new THREE.Vector3() },
   uContraGiro: { value: [0, 0, 0] },
   uMotas: { value: 0 },
+  /** [ESCENA 6] La simulación de cada mota (la salida de posición y modo) y el corrimiento de 6a. */
+  uFisica: { value: null as THREE.Texture | null },
+  uDeriva: { value: new THREE.Vector3() },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -50,13 +51,18 @@ export type Campo = 'polvo' | 'bokeh'
 const PARS_VERTEX = /* glsl */ `
 uniform vec3 uTintaCerca;
 uniform vec3 uTintaLejos;
-uniform float uPolvoQuieto;
-uniform float uPolvoDesperto;
-uniform float uPolvoAntes;
-uniform vec3 uPolvoOrigen;
 varying float vParejo;
 #ifdef AIRE_OBSTACULO
 	${DISTANCIA_AL_LOGO_GLSL}
+#elif defined( AIRE_FISICA )
+	uniform mat4 uLogo;
+#endif
+#ifdef AIRE_FISICA
+	attribute float aIndice;
+	uniform sampler2D uFisica;
+#endif
+#ifdef AIRE_INERCIA
+	uniform vec3 uDeriva;
 #endif
 #ifdef AIRE_MOTAS
 	${MOTAS_PARS_GLSL}
@@ -69,6 +75,7 @@ uniform float uTiempo;
 const CUERPO = /* glsl */ `
 	vParejo = 1.0;
 	vDestello = 0.0;
+	float modoDeLaFisica = 0.0;
 	#ifdef AIRE_PAREJO
 		${VOLUMEN_GLSL}
 	#endif
@@ -79,8 +86,8 @@ const CUERPO = /* glsl */ `
 			transformed = transpose( mat3( modelMatrix ) ) * ( fuera - modelMatrix[ 3 ].xyz );
 		}
 	#endif
-	#ifdef AIRE_POSARSE
-		${POSARSE_GLSL}
+	#ifdef AIRE_FISICA
+		${FISICA_EN_LA_MOTA_GLSL}
 	#endif
 	#ifdef AIRE_MOTAS
 		${MOTAS_GLSL}
@@ -92,7 +99,8 @@ const CUERPO = /* glsl */ `
 /** Con E7, después del empuje del cursor: la mota empujada contra el logo se desliza por su borde. */
 const DESPUES_DEL_CURSOR = /* glsl */ `
 	#if defined( AIRE_OBSTACULO ) && defined( POLVO_CURSOR )
-	{
+	// La que está sobre el logo (o resbalando) ya está en su cara: no se la corre la holgura.
+	if ( modoDeLaFisica < 2.5 || modoDeLaFisica > 4.5 ) {
 		vec3 enLaVista = vec3( gl_Position.x / projectionMatrix[ 0 ][ 0 ], gl_Position.y / projectionMatrix[ 1 ][ 1 ], mvPosition.z );
 		vec3 enElMundo = transpose( mat3( viewMatrix ) ) * ( enLaVista - viewMatrix[ 3 ].xyz );
 		vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_DEL_CAMPO + uAbrir * ${HOLGURA.alAbrir.toFixed(2)} );
@@ -121,9 +129,10 @@ function definesDe(campo: Campo, concha: number): string {
   const p = e.pruebas
   const partes = [
     campo === 'polvo' && e.polvoParejo ? '#define AIRE_PAREJO' : '',
-    p.obstaculo ? '#define AIRE_OBSTACULO' : '',
-    campo === 'polvo' && p.posarse ? '#define AIRE_POSARSE' : '',
-    campo === 'polvo' && p.motas && e.E1 ? '#define AIRE_MOTAS' : '',
+    e.obstaculo ? '#define AIRE_OBSTACULO' : '',
+    campo === 'polvo' && e.polvoParejo && (p.posarse || p.remolinos) ? '#define AIRE_FISICA' : '',
+    campo === 'polvo' && e.polvoParejo && p.inercia ? '#define AIRE_INERCIA' : '',
+    campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
   return [...partes, `#define CONCHA_DEL_POLVO ${String(concha)}`, `#define HOLGURA_DEL_CAMPO ${(campo === 'polvo' ? HOLGURA.polvo : HOLGURA.bokeh).toFixed(2)}`].join('\n')

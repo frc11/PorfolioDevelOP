@@ -1,6 +1,6 @@
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS } from '../probeMoire'
-import { PARTICLE_R_MAX, PARTICLE_R_MIN } from '../probeParticles'
+import { DUST_SHELLS, PARTICLE_R_MAX, PARTICLE_R_MIN, createRandom } from '../probeParticles'
 
 /**
  * [ESCENA 5] EL POLVO PAREJO — puro: la misma densidad en todo el interior de la trama, con una
@@ -50,6 +50,23 @@ export const POLVO_PAREJO = {
 /** La semilla del campo parejo: propia, para no coincidir con el de la base. */
 export const SEMILLA_DEL_POLVO_PAREJO = 0x9a1e70
 
+/** Las motas del campo parejo, uniformes en la caja (siempre las mismas: la semilla es fija). */
+export function posicionesDelPolvoParejo(): Float32Array {
+  const random = createRandom(SEMILLA_DEL_POLVO_PAREJO)
+  const n = POLVO_PAREJO.cuantas
+  const positions = new Float32Array(n * 3)
+  for (let i = 0; i < n * 3; i += 1) positions[i] = (random() - 0.5) * POLVO_PAREJO.lado
+  return positions
+}
+
+/** [ESCENA 6] De qué concha es cada mota: tres tramos iguales, en orden. */
+export function conchasDelPolvoParejo(n: number): Uint8Array {
+  const conchas = DUST_SHELLS.length - 1
+  const salida = new Uint8Array(n)
+  for (let k = 0; k < conchas; k += 1) salida.fill(k, Math.round((k / conchas) * n), Math.round(((k + 1) / conchas) * n))
+  return salida
+}
+
 /** Repite `v` en la caja de lado `lado` centrada en `centro` (en cada eje). Es la cuenta del shader. */
 export function envolver(v: number, centro: number, lado: number): number {
   const u = v - centro + lado / 2
@@ -70,6 +87,10 @@ export const VOLUMEN_GLSL = /* glsl */ `
 		vec3 camaraEnLaConcha = transpose( giroDeLaConcha ) * ( cameraPosition - corridaDeLaConcha );
 		vec3 adelante = transpose( giroDeLaConcha ) * ( - vec3( viewMatrix[ 0 ][ 2 ], viewMatrix[ 1 ][ 2 ], viewMatrix[ 2 ][ 2 ] ) );
 		vec3 centroDeLaCaja = camaraEnLaConcha + adelante * ${(POLVO_PAREJO.lado / 2 - POLVO_PAREJO.atras).toFixed(2)};
+		#ifdef AIRE_INERCIA
+			// [ESCENA 6] 6a: todo el volumen corrido por el aire, antes de repetirse.
+			transformed += transpose( giroDeLaConcha ) * uDeriva;
+		#endif
 		transformed = centroDeLaCaja + mod( transformed - centroDeLaCaja + ${(POLVO_PAREJO.lado / 2).toFixed(2)}, ${POLVO_PAREJO.lado.toFixed(2)} ) - ${(POLVO_PAREJO.lado / 2).toFixed(2)};
 		vec3 enLaCaja = abs( transformed - centroDeLaCaja ) / ${(POLVO_PAREJO.lado / 2).toFixed(2)};
 		float borde = max( enLaCaja.x, max( enLaCaja.y, enLaCaja.z ) );

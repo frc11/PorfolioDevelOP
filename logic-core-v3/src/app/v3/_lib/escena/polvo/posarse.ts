@@ -1,13 +1,15 @@
-import { FLOOR_Y } from '../probeScene'
-
 /**
- * [ESCENA 5] 5b · EL POLVO QUE SE POSA — pura: la quietud, el despertar y la cuenta de cada mota.
+ * [ESCENA 5] 5b · EL POLVO QUE SE POSA — pura: la quietud y el despertar.
  *
  * Después de `empiezaS` sin scroll ni cursor, el polvo baja despacio y a los `asentadoS` está en el
  * piso del escenario; cada mota con su propio retraso (`desparejoS`), para que no bajen en bloque. El
  * scroll o el cursor lo levantan, y el despertar se propaga desde donde empezó el movimiento a
  * `velocidad` unidades por segundo: el cursor, desde el punto del piso que tiene debajo; el scroll,
  * desde la cámara. Con movimiento reducido no se posa.
+ *
+ * [ESCENA 6] Cómo baja y cómo sube cada mota ya no es una cuenta de su altura: es la física de
+ * `simulacion.ts` (arrastre, turbulencia, el remolino del despertar, el logo). Acá quedan los tiempos y
+ * la máquina de la quietud, que la física lee.
  *
  * El estado vive en tres instantes (en el reloj de la escena) y un punto: desde cuándo está quieto
  * (`quieto`, infinito mientras hay movimiento), cuándo despertó (`desperto`), desde cuándo estaba
@@ -54,29 +56,3 @@ export function avanzarElPolvo(e: EstadoDelPolvo, t: number, movimiento: readonl
   if (e.quieto >= NUNCA && t - e.ultimoMovimiento > POSARSE.quietudS) return { ...e, quieto: e.ultimoMovimiento }
   return e
 }
-
-/** Cuánto se posó una mota a `s` segundos de quietud, con su retraso (0 en el aire, 1 en el piso). */
-export function posadaEn(s: number, retraso: number): number {
-  const u = (s - POSARSE.empiezaS - retraso) / (POSARSE.asentadoS - POSARSE.empiezaS)
-  const x = Math.min(1, Math.max(0, u))
-  return x * x * (3 - 2 * x)
-}
-
-/**
- * La cuenta en GLSL: va después del volumen, sobre `transformed` (espacio de la concha; como la
- * concha sólo gira alrededor de y y sube o baja, bajar en el mundo es bajar ahí). Usa `uTiempo`.
- */
-export const POSARSE_GLSL = /* glsl */ `
-	{
-		vec3 enElMundo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
-		float azar = fract( sin( dot( position, vec3( 12.9898, 78.233, 37.719 ) ) ) * 43758.5453 );
-		float retraso = azar * ${POSARSE.desparejoS.toFixed(2)};
-		float tramo = ${(POSARSE.asentadoS - POSARSE.empiezaS).toFixed(2)};
-		float frente = uPolvoDesperto + distance( enElMundo.xz, uPolvoOrigen.xz ) / ${POSARSE.velocidad.toFixed(2)};
-		float antesDelFrente = smoothstep( 0.0, 1.0, ( min( uTiempo, frente ) - uPolvoAntes - ${POSARSE.empiezaS.toFixed(2)} - retraso ) / tramo );
-		float posada = antesDelFrente * ( 1.0 - smoothstep( 0.0, ${POSARSE.subidaS.toFixed(2)}, uTiempo - frente ) );
-		posada = max( posada, smoothstep( 0.0, 1.0, ( uTiempo - uPolvoQuieto - ${POSARSE.empiezaS.toFixed(2)} - retraso ) / tramo ) );
-		float piso = ${FLOOR_Y.toFixed(4)} + 0.02 + azar * ${POSARSE.alturaPosada.toFixed(3)};
-		transformed.y += ( piso - enElMundo.y ) * posada;
-	}
-`

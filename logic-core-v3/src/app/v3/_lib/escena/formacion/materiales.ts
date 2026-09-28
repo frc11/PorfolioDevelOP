@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 
 import { VIVO } from '../entorno/vivo'
-import { ALTO_DEL_PISO_GLSL, RUIDO_GLSL, TIEMPO_DEL_PISO } from '../relieve/ruido'
+import { BARRIDO_DEL_DIA, DIA_DESDE_AFUERA_GLSL, OSCURECER_GLSL, hayDiaDesdeAfuera } from '../dia/desdeAfuera'
+import { NIEBLA_DE_AFUERA, RASANTE, RASANTE_GLSL } from '../niebla/rasante'
 import { EN_LA_REGION_GLSL, type Fronteras } from './regiones'
 
 /**
@@ -20,34 +21,18 @@ export const NEBLINA = { desde: 20, hasta: 90, dia: 0.93, noche: 0.93 } as const
 
 const VERTEX_DE_LA_COPIA = /* glsl */ `
 attribute vec4 aPieza;
-attribute vec4 aAncla;
-uniform float uMirada;
 varying vec3 vLocal;
 varying vec4 vPieza;
 varying vec3 vNormalMundo;
+varying vec3 vMundo;
 #include <common>
 #include <fog_pars_vertex>
-#ifdef SOBRE_EL_PISO_DE_BLOQUES
-	uniform float uTiempoDelRuido;
-	${RUIDO_GLSL}
-	${ALTO_DEL_PISO_GLSL}
-#endif
-vec2 girar2( vec2 p, float a ) { float c = cos( a ); float s = sin( a ); return vec2( c * p.x - s * p.y, s * p.x + c * p.y ); }
 void main() {
 	vLocal = position;
 	vPieza = aPieza;
 	vec4 mundo = modelMatrix * instanceMatrix * vec4( position, 1.0 );
-	vec3 n = normalize( mat3( modelMatrix ) * mat3( instanceMatrix ) * normal );
-	// F-mirada: cada copia gira alrededor de su lugar hacia el logo, de adelante para atrás.
-	float t = smoothstep( 0.0, 1.0, clamp( uMirada * 1.6 - aAncla.w, 0.0, 1.0 ) );
-	float a = aAncla.z * t;
-	mundo.xz = aAncla.xy + girar2( mundo.xz - aAncla.xy, - a );
-	n.xz = girar2( n.xz, - a );
-	#ifdef SOBRE_EL_PISO_DE_BLOQUES
-		// R2: parada sobre el bloque que tiene debajo.
-		mundo.y += altoDelPiso( aAncla.xy, uTiempoDelRuido );
-	#endif
-	vNormalMundo = n;
+	vMundo = mundo.xyz;
+	vNormalMundo = normalize( mat3( modelMatrix ) * mat3( instanceMatrix ) * normal );
 	vec4 mvPosition = viewMatrix * mundo;
 	gl_Position = projectionMatrix * mvPosition;
 	#include <fog_vertex>
@@ -59,38 +44,57 @@ uniform float uNoche;
 uniform float uVisible;
 uniform vec4 uNeblina;
 uniform vec3 uLuz;
+uniform float uAbre;
 varying vec3 vLocal;
 varying vec4 vPieza;
 varying vec3 vNormalMundo;
+varying vec3 vMundo;
 #include <common>
 #include <fog_pars_fragment>
 ${EN_LA_REGION_GLSL}
+#ifdef NIEBLA_RASANTE
+	uniform float uTiempo;
+	${RASANTE_GLSL}
+#endif
+#ifdef DIA_DESDE_AFUERA
+	${DIA_DESDE_AFUERA_GLSL}
+#endif
 void main() {
 	if ( ! enLaRegion( vLocal.xy, vPieza.x, vPieza.y ) ) discard;
-	// Las espejadas dan vuelta el sentido de las caras: el signo viene en la pieza.
-	bool frente = gl_FrontFacing == ( vPieza.w > 0.0 );
-	vec3 n = normalize( vNormalMundo ) * ( frente ? 1.0 : - 1.0 );
+	// La parte de otro tono: la región en la parte entera de w y su tono en la fraccionaria.
+	float otra = floor( vPieza.w );
+	float tono = otra > 0.5 && enLaRegion( vLocal.xy, otra, 0.0 ) ? fract( vPieza.w ) : vPieza.z;
+	vec3 n = normalize( vNormalMundo ) * ( gl_FrontFacing ? 1.0 : - 1.0 );
 	float luz = 0.45 + 0.25 * ( 0.5 + 0.5 * n.y ) + 0.4 * max( dot( n, uLuz ), 0.0 );
-	gl_FragColor = vec4( vec3( vPieza.z ) * luz * mix( 1.0, 0.05, uNoche ), 1.0 );
+	gl_FragColor = vec4( vec3( tono ) * luz * mix( 1.0, 0.05, uNoche ), 1.0 );
 	#include <colorspace_fragment>
 	#include <fog_fragment>
 	#ifdef USE_FOG
-		float neblina = smoothstep( uNeblina.x, uNeblina.y, vFogDepth ) * mix( uNeblina.z, uNeblina.w, uNoche );
+		// [ESCENA 6] 6d: con la velocidad del scroll la neblina se abre (uAbre es 0 sin la prueba).
+		float neblina = smoothstep( uNeblina.x, uNeblina.y, vFogDepth ) * mix( uNeblina.z, uNeblina.w, uNoche ) * ( 1.0 - ${RASANTE.abre.neblina.toFixed(2)} * uAbre );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, max( neblina, 1.0 - uVisible ) );
+		#ifdef NIEBLA_RASANTE
+			// [ESCENA 6] 6c: los bancos que esta copia tiene delante.
+			gl_FragColor.rgb = mix( fogColor, gl_FragColor.rgb, transmitanciaRasante( cameraPosition, vMundo, uAbre ) );
+		#endif
+	#endif
+	#ifdef DIA_DESDE_AFUERA
+		${OSCURECER_GLSL('vMundo')}
 	#endif
 }
 `
 
 export interface UniformsDeLaCopia {
-  readonly uMirada: { value: number }
   readonly uVisible: { value: number }
 }
 
-export function materialDeLaCopia(fronteras: Fronteras, uniforms: UniformsDeLaCopia, sobreBloques: boolean): THREE.ShaderMaterial {
+export function materialDeLaCopia(fronteras: Fronteras, uniforms: UniformsDeLaCopia, rasante: boolean): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    defines: sobreBloques ? { SOBRE_EL_PISO_DE_BLOQUES: '' } : {},
+    defines: { ...(rasante ? { NIEBLA_RASANTE: '' } : {}), ...(hayDiaDesdeAfuera() ? { DIA_DESDE_AFUERA: '' } : {}) },
     uniforms: {
-      ...TIEMPO_DEL_PISO,
+      ...BARRIDO_DEL_DIA,
+      uTiempo: VIVO.uTiempo,
+      uAbre: NIEBLA_DE_AFUERA.uAbre,
       ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
       ...uniforms,
       uNoche: VIVO.uNoche,

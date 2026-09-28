@@ -11,14 +11,17 @@ import * as THREE from 'three'
 import { BokehParticles } from './BokehParticles'
 import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
+import { entornoDeLaEscena } from './entorno'
+import { Calor } from './entorno/Calor'
+import { DiaDesdeAfuera } from './dia/DiaDesdeAfuera'
 import { Entorno } from './entorno/Entorno'
 import { DepthParticles } from './DepthParticles'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
 import { MoireVivo } from './moire/MoireVivo'
+import { PisoVivo } from './piso/PisoVivo'
 import { Aire } from './polvo/Aire'
-import { Paredes } from './relieve/Paredes'
-import { PisoDeBloques } from './relieve/PisoDeBloques'
+import { Fisica } from './polvo/Fisica'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
 import { FOG_COLOR, FOG_FAR, FOG_NEAR } from './probeAtmosphere'
@@ -214,7 +217,7 @@ export default function ProbeStage({
         </group>
 
         {/* [ESCENA 5] Con la formación, el piso es un escenario con otro más bajo alrededor. */}
-        <StudioFloor escenario={pisoConFormacion(calidad)} />
+        <StudioFloor escenario={pisoConFormacion(calidad)} conNieblaRasante={pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().pruebas.nieblaRasante} />
         {/* [ESCENA 3] La mancha sigue la altura del logo y se contrae con el pulso principal. */}
         <ContactOcclusion logoGroupRef={logoGroupRef} />
 
@@ -277,10 +280,13 @@ export default function ProbeStage({
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
         <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        <Formacion rig={rig} calidad={calidad} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
+        <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} />
+        <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} />
-        <Paredes />
-        <PisoDeBloques />
+        <PisoVivo rig={rig} calidad={calidad} quieto={reducedMotion} />
+        {/* [ESCENA 6] 6f, la pasada extra: al final, con la cámara y todo lo demás de este cuadro ya escritos. */}
+        <Calor calidad={calidad} />
+        <DiaDesdeAfuera />
       </Suspense>
     </Canvas>
   )

@@ -220,8 +220,9 @@ afirmar(ENTORNO.E1 && ENTORNO.E4 && ENTORNO.E6 && ENTORNO.E7, 'el producto trae 
 afirmar(ENTORNO.haz === 'sutil', '  con el haz en sutil, de día y de noche')
 afirmarIgual(entornoPedido('base'), BASE_LIMPIA, "`base` es la escena de escena-base-limpia: todo apagado")
 afirmarIgual(entornoPedido('producto'), ENTORNO, '`producto` son las banderas de arriba, tal cual')
-const pedido = entornoPedido('E1,E7,haz=medio,mascara=no')
-afirmar(pedido.E1 && !pedido.E4 && !pedido.E6 && pedido.E7 && pedido.haz === 'medio' && !pedido.mascaraDeTexto, 'el pedido del banco se lee entero')
+// [ESCENA 6] La máscara de texto del pulso se borró: ya no hay bandera que apagar.
+const pedido = entornoPedido('E1,E7,haz=medio')
+afirmar(pedido.E1 && !pedido.E4 && !pedido.E6 && pedido.E7 && pedido.haz === 'medio', 'el pedido del banco se lee entero')
 const soloE1 = (p: string): boolean => { const e = entornoPedido(p); return e.E1 && !e.E4 && !e.E6 && !e.E7 }
 afirmar(soloE1('E1'), '  y no inventa ideas que no se pidieron')
 controlPositivo('el detector VE un pedido con una idea de más', 'E1,E4', soloE1)

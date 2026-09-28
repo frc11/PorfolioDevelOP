@@ -8,7 +8,6 @@ import { FLOOR_Y } from './probeScene'
 import {
   DUST_SHELLS,
   PARTICLES_MAX,
-  createRandom,
   PARTICLE_FAR_COLOR,
   PARTICLE_NEAR_COLOR,
   PARTICLE_R_MAX,
@@ -20,10 +19,10 @@ import {
 } from './probeParticles'
 import { conBrilloDeNoche } from './particleGlow'
 import { conPolvoVivo } from './entorno/polvoVivo'
-import { hayBanco } from './entorno'
+import { entornoDeLaEscena, hayBanco } from './entorno'
 import { contarPorZonas } from './polvo/conteo'
 import { conAire, llevaElVolumenParejo } from './polvo/parche'
-import { POLVO_PAREJO, SEMILLA_DEL_POLVO_PAREJO } from './polvo/volumen'
+import { posicionesDelPolvoParejo } from './polvo/volumen'
 import { createDotSpriteData } from './particleTextures'
 import type { ProbeParamsStore } from './probeStore'
 
@@ -202,6 +201,7 @@ export function DepthParticles({ store }: DepthParticlesProps) {
             >
               <bufferAttribute attach="attributes-position" args={[shell.positions, 3]} />
               <bufferAttribute attach="attributes-color" args={[shell.colors, 3]} />
+              {'indices' in shell && shell.indices !== undefined && <bufferAttribute attach="attributes-aIndice" args={[shell.indices, 1]} />}
             </bufferGeometry>
             {/*
               `sizeAttenuation` es lo que hace legible la profundidad: la misma
@@ -236,17 +236,17 @@ export function DepthParticles({ store }: DepthParticlesProps) {
  * [ESCENA 5] EL CAMPO PAREJO — uniforme en una caja (`polvo/volumen.ts`), en tres conchas de igual
  * cantidad. El color no se hornea: lo pone el shader por el radio de cada mota ya repetida.
  */
-function campoParejo(): { count: number; positions: Float32Array; colors: Float32Array }[] {
-  const random = createRandom(SEMILLA_DEL_POLVO_PAREJO)
-  const n = POLVO_PAREJO.cuantas
-  const lado = POLVO_PAREJO.lado
-  const positions = new Float32Array(n * 3)
-  for (let i = 0; i < n * 3; i += 1) positions[i] = (random() - 0.5) * lado
+function campoParejo(): { count: number; positions: Float32Array; colors: Float32Array; indices?: Float32Array }[] {
+  const positions = posicionesDelPolvoParejo()
+  const n = positions.length / 3
   const colors = new Float32Array(n * 3).fill(0.5)
+  // [ESCENA 6] Con la física, cada mota sabe cuál es su celda en la simulación (`polvo/simulacion.ts`).
+  const p = entornoDeLaEscena().pruebas
+  const indices = p.posarse || p.remolinos ? Float32Array.from({ length: n }, (_u, i) => i) : undefined
   return Array.from({ length: SHELL_COUNT }, (_unused, index) => {
     const from = Math.round((index / SHELL_COUNT) * n)
     const to = Math.round(((index + 1) / SHELL_COUNT) * n)
-    return { count: to - from, positions: positions.subarray(from * 3, to * 3), colors: colors.subarray(from * 3, to * 3) }
+    return { count: to - from, positions: positions.subarray(from * 3, to * 3), colors: colors.subarray(from * 3, to * 3), indices: indices?.subarray(from, to) }
   })
 }
 

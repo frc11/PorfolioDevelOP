@@ -23,7 +23,7 @@ interface PropsDelMoire {
   readonly quieto: boolean
 }
 
-/** La fase acumulada de la gruesa, en celdas (sin envolver): el relieve R1 se mueve con ella. */
+/** La fase acumulada de la gruesa, en celdas (sin envolver). */
 export const MOIRE_EN_VIVO = { celdasBajadas: 0 }
 
 type VentanaDelBanco = Window & { __moireVivo?: { velocidad: number; desajuste: number; faseFina: number } }

@@ -7,7 +7,7 @@ import * as THREE from 'three'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
-import { leerCajasDeTexto } from './cajasDeTexto'
+import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
 import { Pulso } from './Pulso'
@@ -25,13 +25,13 @@ const ESTELA_TAU_S = 0.11
 const CURSOR_TAU_S = 0.05
 const EMPUJE_SUBE_TAU_S = 0.08
 const EMPUJE_BAJA_TAU_S = 0.7
-/** Cada cuánto se releen las cajas de texto mientras hay anillos vivos (quieto / con scroll). */
-const TEXTO_CADA_MS = 200
-const TEXTO_CADA_MS_CON_SCROLL = 60
-/** La pluma de la atenuación del pulso alrededor del texto, en píxeles CSS. */
-const PLUMA_CSS = 24
 
-type VentanaDelBanco = Window & { __escenaViva?: Record<string, unknown> }
+type VentanaDelBanco = Window & { __escenaViva?: Record<string, unknown>; __relojDelBanco?: { detenido: boolean; t?: number } }
+
+/** [ESCENA 6] El banco puede detener el reloj de la escena (y ponerlo en un instante) para fotografiar un anillo quieto. */
+function relojDelBanco(): { detenido: boolean; t?: number } | undefined {
+  return hayBanco() ? (window as VentanaDelBanco).__relojDelBanco : undefined
+}
 
 interface PropsDelEntorno {
   readonly rig: ProbeRigStore
@@ -48,9 +48,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     puntero: new THREE.Vector2(),
     tam: new THREE.Vector2(),
     pulso: null as EstadoDelPulso | null,
+    encendido: null as EstadoDelEncendido | null,
     progreso: Number.NaN,
     ultimoMovimiento: -Infinity,
-    textoLeidoEn: 0,
     hover: false,
   })
 
@@ -67,15 +67,25 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
   useFrame((state, delta) => {
     const m = memoria.current
     const dt = Math.min(delta, 0.1)
-    if (!quieto) VIVO.uTiempo.value += dt
+    const reloj = relojDelBanco()
+    if (reloj?.t !== undefined) VIVO.uTiempo.value = reloj.t
+    else if (!quieto && reloj?.detenido !== true) VIVO.uTiempo.value += dt
     const t = VIVO.uTiempo.value
     VIVO.uNoche.value = BRILLO_DE_LA_NOCHE.uNoche.value
 
     if (e.E1) {
       const nivel = NIVELES_DEL_HAZ[e.haz]
+      // [ESCENA 6] 6e: con la prueba, la parte de noche del haz sigue al encendido (1 sin la prueba).
+      let k = 1
+      if (e.pruebas.hazEncendido) {
+        const noche = VIVO.uNoche.value
+        m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, quieto)
+        k = m.encendido.k
+        encender(k)
+      }
       VIVO.uHaz.value = 1
       VIVO.uHazDia.value.set(nivel.dia[0], nivel.dia[1], nivel.dia[2])
-      VIVO.uHazNoche.value.set(nivel.noche[0], nivel.noche[1], nivel.noche[2])
+      VIVO.uHazNoche.value.set(nivel.noche[0] * k, nivel.noche[1] * k, nivel.noche[2] * k)
     }
 
     if (e.E6) {
@@ -121,20 +131,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       }
       const scrollEnMovimiento = t - m.ultimoMovimiento < PULSO.quietudDelScrollS
       m.hover = hover !== null ? hover.leer(state.camera, state.gl.domElement, logoGroupRef.current, progreso) : false
-      PULSO_VIVO.hover = m.hover
       const antes = m.pulso ?? pulsoInicial(t)
       m.pulso = avanzarElPulso(antes, { t, scrollEnMovimiento, hover: m.hover, reducido: quieto })
       escribirLosAnillos(m.pulso)
-      // Las cajas de texto sólo importan con anillos vivos; se releen con freno.
-      const ahora = performance.now()
-      const cada = scrollEnMovimiento ? TEXTO_CADA_MS_CON_SCROLL : TEXTO_CADA_MS
-      if (e.mascaraDeTexto && m.pulso.anillos.length > 0 && ahora - m.textoLeidoEn > cada) {
-        m.textoLeidoEn = ahora
-        const lienzo = state.gl.domElement
-        leerCajasDeTexto(lienzo, VIVO.uTexto.value, PLUMA_CSS)
-        const r = lienzo.getBoundingClientRect()
-        VIVO.uPluma.value = PLUMA_CSS * (r.width > 0 ? lienzo.width / r.width : 1)
-      }
     }
 
     if (hayBanco()) {
@@ -142,20 +141,27 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
         t,
         modo: m.pulso?.modo ?? null,
         anillos: m.pulso?.anillos.map((a) => a.clase) ?? [],
+        nacen: m.pulso?.anillos.map((a) => a.nace) ?? [],
         hover: m.hover,
         empuje: VIVO.uEmpuje.value,
         noche: VIVO.uNoche.value,
         estela: VIVO.uEstela.value,
+        encendido: m.encendido === null ? null : { fase: m.encendido.fase, k: m.encendido.k },
       }
     }
   })
 
   return (
     <>
-      {e.E1 && <Haz />}
-      {e.E4 && !quieto && <Pulso />}
+      {e.E1 && <Haz conCharco={e.pruebas.pisoVivo === 'no'} />}
+      {e.E4 && !quieto && e.pruebas.pisoVivo === 'no' && <Pulso />}
     </>
   )
+}
+
+/** 6e: lo que leen las motas y la sombra. */
+function encender(k: number): void {
+  HAZ_ENCENDIDO.k = k
 }
 
 /** Vuelca los anillos vivos a `uAnillos` y anota el último principal para la sombra. */

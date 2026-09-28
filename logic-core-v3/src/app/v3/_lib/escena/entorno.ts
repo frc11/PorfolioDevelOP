@@ -16,16 +16,24 @@
  * **[ESCENA 5] Encendidos**, además: el moiré con sus cuatro variantes juntas (`moire`, en
  * `moire/`) y el polvo con la misma densidad en todo el interior (`polvoParejo`, en `polvo/`).
  *
- * **[ESCENA 5] Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco
- * las prende:
+ * **[ESCENA 6] Pasan al producto** tres pruebas de ESCENA 5: el logo como obstáculo del polvo y del
+ * bokeh (5a, `obstaculo`), la mancha de contacto según el haz (5c, `sombraHaz`) y las motas del haz
+ * de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
  *
- * - `formacion` · las copias falladas afuera de la trama, en un piso más bajo (`formacion/`);
- *   `mirada` las gira hacia el logo con el hover; en el teléfono no hay, salvo `movil=menos`;
+ * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
+ *
+ * - `formacion` · las copias falladas afuera de la trama, un piso más abajo (`formacion/`); `fallas=no`
+ *   es la variante sin fallas visibles. En el teléfono no hay;
  * - `estrellas` · el cielo de afuera, detrás de la trama y de la formación, sólo de noche;
- * - `obstaculo` (5a) · el polvo y el bokeh rodean al logo; `posarse` (5b) · el polvo se posa en el
- *   piso con la quietud; `sombra=haz` (5c) · la mancha de contacto según el haz; `motas` (5d) · las
- *   motas del haz, de noche; `R1` / `R2` (5e) · el relieve por ruido, y `relieve=vivo` lo hace
- *   evolucionar.
+ * - `posarse` · el polvo se posa con la quietud y lo levanta el aire (`polvo/Fisica.tsx`);
+ * - `piso` · el piso vivo, de bloques (`piso/`); `piso=pulso` le suma la onda del pulso principal;
+ * - 6a `inercia` · el aire sigue derivando después de un scroll fuerte;
+ * - 6b `remolinos` · el aire se arremolina detrás del logo cuando gira en el cuadro;
+ * - 6c `rasante` · bancos de niebla bajos sobre el piso de afuera;
+ * - 6d `velocidad` · la niebla de afuera se abre con la velocidad del scroll;
+ * - 6e `encendido` · el haz arranca como una luz artificial cuando cae la noche;
+ * - 6f `calor` · el aire caliente del haz, de noche;
+ * - 6g `dia=afuera` · el día vuelve barriendo desde afuera.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
@@ -33,6 +41,7 @@
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
  *     window.__entornoDeLaEscena = 'producto,formacion,estrellas'   → el producto con esas pruebas
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
+ *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
@@ -42,43 +51,49 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-/** [ESCENA 5] El relieve por ruido (5e): en las paredes (R1) o en el piso de afuera (R2). */
-export type Relieve = 'no' | 'R1' | 'R2'
+/** [ESCENA 6] El piso vivo: apagado, con el cursor y el scroll, o además con la onda del pulso principal. */
+export type PisoVivo = 'no' | 'si' | 'pulso'
 
 export interface Pruebas {
   /** Las copias falladas afuera de la trama, en formación, en un piso más bajo que el nuestro. */
   readonly formacion: boolean
-  /** F-mirada: con hover sobre el logo, las copias giran despacio hacia el original. */
-  readonly mirada: boolean
-  /** En el teléfono (`compacta`): sin formación, o la versión con menos copias. */
-  readonly movil: 'ninguna' | 'menos'
+  /** La variante de la formación sin fallas visibles, para comparar. */
+  readonly sinFallasVisibles: boolean
   /** Estrellas: el cielo de afuera, sólo de noche. */
   readonly estrellas: boolean
-  /** 5a · el logo no se atraviesa. */
-  readonly obstaculo: boolean
-  /** 5b · el polvo se posa con la quietud. */
+  /** El polvo se posa con la quietud y lo levanta el aire. */
   readonly posarse: boolean
-  /** 5c · la mancha de contacto según el haz. */
-  readonly sombraHaz: boolean
-  /** 5d · las motas del haz, de noche. */
-  readonly motas: boolean
-  readonly relieve: Relieve
-  /** 5e · el ruido del relieve evoluciona muy lento (si no, quieto). */
-  readonly relieveVivo: boolean
+  readonly pisoVivo: PisoVivo
+  /** 6a · el aire tiene inercia. */
+  readonly inercia: boolean
+  /** 6b · remolinos detrás del logo. */
+  readonly remolinos: boolean
+  /** 6c · niebla rasante afuera. */
+  readonly nieblaRasante: boolean
+  /** 6d · la niebla de afuera se abre con la velocidad. */
+  readonly nieblaVelocidad: boolean
+  /** 6e · el haz se enciende. */
+  readonly hazEncendido: boolean
+  /** 6f · aire caliente en el haz. */
+  readonly aireCaliente: boolean
+  /** 6g · el día entra desde afuera. */
+  readonly diaDesdeAfuera: boolean
 }
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
   formacion: false,
-  mirada: false,
-  movil: 'ninguna',
+  sinFallasVisibles: false,
   estrellas: false,
-  obstaculo: false,
   posarse: false,
-  sombraHaz: false,
-  motas: false,
-  relieve: 'no',
-  relieveVivo: false,
+  pisoVivo: 'no',
+  inercia: false,
+  remolinos: false,
+  nieblaRasante: false,
+  nieblaVelocidad: false,
+  hazEncendido: false,
+  aireCaliente: false,
+  diaDesdeAfuera: false,
 }
 
 export interface Entorno {
@@ -90,12 +105,16 @@ export interface Entorno {
   readonly haz: NivelDelHaz
   /** La sombra de contacto sigue la altura del logo y responde al pulso (`entorno/sombra.ts`). */
   readonly sombraViva: boolean
-  /** E4 · el anillo se apaga sobre las cajas de texto. Sólo el banco lo apaga, para medir sin él. */
-  readonly mascaraDeTexto: boolean
   /** [ESCENA 5] El moiré con M1a, M2, M3 y M4 juntos (`moire/`). Sin él, el de la base. */
   readonly moire: boolean
   /** [ESCENA 5] El polvo con la misma densidad en todo el interior (`polvo/`). Sin él, el de la base. */
   readonly polvoParejo: boolean
+  /** [ESCENA 6] 5a · el logo no se atraviesa: el polvo y el bokeh lo rodean (`polvo/obstaculo.ts`). */
+  readonly obstaculo: boolean
+  /** [ESCENA 6] 5c · la mancha de contacto según el haz (`sombra/sombraDelHaz.ts`). */
+  readonly sombraHaz: boolean
+  /** [ESCENA 6] 5d · las motas del haz, de noche (`polvo/motas.ts`). */
+  readonly motas: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -108,9 +127,11 @@ export const ENTORNO: Entorno = {
   E7: true,
   haz: 'sutil',
   sombraViva: true,
-  mascaraDeTexto: true,
   moire: true,
   polvoParejo: true,
+  obstaculo: true,
+  sombraHaz: true,
+  motas: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -122,9 +143,11 @@ export const BASE_LIMPIA: Entorno = {
   E7: false,
   haz: 'sutil',
   sombraViva: false,
-  mascaraDeTexto: true,
   moire: false,
   polvoParejo: false,
+  obstaculo: false,
+  sombraHaz: false,
+  motas: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -151,25 +174,30 @@ export function entornoPedido(pedido: string): Entorno {
     E7: tiene('E7'),
     haz: haz === 'sutil' || haz === 'medio' ? haz : ENTORNO.haz,
     sombraViva: !partes.has('sombra=quieta'),
-    mascaraDeTexto: !partes.has('mascara=no'),
     moire: valor('moire') !== 'hoy' && (producto || partes.has('moire')),
     polvoParejo: valor('polvo') !== 'antes' && (producto || partes.has('parejo')),
+    obstaculo: producto ? valor('obstaculo') !== 'no' : partes.has('obstaculo'),
+    sombraHaz: producto ? !partes.has('sombra=blanda') : partes.has('sombra=haz'),
+    motas: producto ? valor('motas') !== 'no' : partes.has('motas'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
+  const piso = valor('piso')
   return {
     formacion: partes.has('formacion'),
-    mirada: partes.has('mirada'),
-    movil: valor('movil') === 'menos' ? 'menos' : 'ninguna',
+    sinFallasVisibles: valor('fallas') === 'no',
     estrellas: partes.has('estrellas'),
-    obstaculo: partes.has('obstaculo'),
     posarse: partes.has('posarse'),
-    sombraHaz: valor('sombra') === 'haz',
-    motas: partes.has('motas'),
-    relieve: partes.has('R1') ? 'R1' : partes.has('R2') ? 'R2' : 'no',
-    relieveVivo: valor('relieve') === 'vivo',
+    pisoVivo: piso === 'pulso' ? 'pulso' : partes.has('piso') ? 'si' : 'no',
+    inercia: partes.has('inercia'),
+    remolinos: partes.has('remolinos'),
+    nieblaRasante: partes.has('rasante'),
+    nieblaVelocidad: partes.has('velocidad'),
+    hazEncendido: partes.has('encendido'),
+    aireCaliente: partes.has('calor'),
+    diaDesdeAfuera: valor('dia') === 'afuera',
   }
 }
 
