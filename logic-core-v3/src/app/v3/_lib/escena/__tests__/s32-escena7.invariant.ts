@@ -208,6 +208,21 @@ afirmar(/ruidoDelPiso\( vec3\( x \* /.test(bloques), '  el agrupamiento y el pic
 afirmar(/const paso = PISO_VIVO\.onda\.paso/.test(pisoVivo) && /while \(m\.reloj \+ paso <= t/.test(pisoVivo) && PISO_VIVO.onda.paso === 1 / 120, 'estable a cualquier cantidad de cuadros: la simulación corre a paso fijo de 1/120 s y el mar es una cuenta del reloj')
 afirmar(/4\.0 \* cruz \+ esquinas - 20\.0 \* h/.test(bloques), '  y la ola es isótropa (el frente no sale cuadrado)')
 afirmar(/caraDelLogo\( \( uLogoInverso \* vec4\( tapa, 1\.0 \) \)\.xyz \) - 0\.7072 \* uLado - /.test(bloques) && PISO_VIVO.techo.margen > 0.05, 'nunca toca al logo: cada tapa, menos media diagonal, guarda un margen con la forma del logo', `margen ${String(PISO_VIVO.techo.margen)} u`)
+// El techo del ojo: con la cámara al ras (Números, 0,7 u sobre el piso) una cresta con el anillo encima subía
+// un bloque cercano por encima de la cámara y tapaba medio cuadro. Modelo del techo blando del shader.
+const ojo = PISO_VIVO.ojo
+const techoBlando = (x: number, techo: number): number => (x > techo - ojo.suave ? techo - ojo.suave * Math.exp(-(x - techo + ojo.suave) / ojo.suave) : x)
+const aLaAltura = (alto: number, d: number): number => ojo.margen - Math.max(0, d - ojo.desde) * ojo.sube - alto
+let cercaDebajo = true
+let asomaMax = 0
+for (const alto of [0.3, 0.5, 0.7, 1.2, 3]) for (let d = 0.5; d <= FLOOR_RADIUS; d += 0.5) for (let x = -0.4; x <= 1.2; x += 0.02) {
+  const tapa = techoBlando(x, alto - aLaAltura(0, d))
+  if (d <= ojo.desde && tapa > alto - ojo.margen + 1e-9) cercaDebajo = false
+  asomaMax = Math.max(asomaMax, (Math.atan2(tapa - alto, d) * 180) / Math.PI)
+}
+afirmar(cercaDebajo && asomaMax < 1.2, 'nunca por encima del ojo: a menos de 6 u cada tapa queda 0,15 debajo de la cámara; lejos asoma sobre el horizonte, como mucho', `${asomaMax.toFixed(2)}° (con alturas de hasta 1,2 u y la cámara de 0,3 a 3 u sobre el piso)`)
+controlPositivo('el detector VE un bloque por encima del ojo (el medido en Números: la cámara a 0,7, el bloque a 0,72 a 2 u)', { alto: 0.7, tapa: 0.72, d: 2 }, (c: { alto: number; tapa: number; d: number }) => !(c.d <= ojo.desde && c.tapa > c.alto - ojo.margen))
+afirmar(/if \( uCamara\.y > \$\{f\(FLOOR_Y\)\} \) \{/.test(bloques) && /camara: state\.camera\.getWorldPosition\(m\.ojo\)/.test(pisoVivo), '  el techo sale de la cámara de cada paso, sólo con la cámara arriba del piso (y lo leen los bloques, el polvo posado y la mancha)')
 // El borde: los bloques cubren el disco entero (recortados al círculo); el presupuesto.
 for (const radio of [FLOOR_RADIUS, 45]) {
   const g = grillaDelPiso(radio)

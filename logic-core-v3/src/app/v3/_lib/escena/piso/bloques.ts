@@ -70,6 +70,13 @@ export const PISO_VIVO = {
   pulso: { principal: 34, reposo: 4, hover: 3, ancho: 1.1 },
   /** El logo: el margen entre la tapa de un bloque y la forma (u). */
   techo: { margen: 0.12 },
+  /**
+   * [ESCENA 7] El techo del ojo: con la cámara al ras del piso (de noche, en Números, 0,7 u arriba) una cresta
+   * del mar con el anillo del pulso encima subía un bloque cercano por encima de la cámara y tapaba medio
+   * cuadro. Cerca, la tapa queda `margen` debajo del ojo; desde `desde` u el techo sube `sube` por unidad (lo
+   * lejano puede asomar sobre el horizonte, apenas); `suave`: el ancho del techo blando (sin quiebre).
+   */
+  ojo: { margen: 0.15, desde: 6, sube: 0.03, suave: 0.05 },
   /** La luz: oclusión del costado y de la tapa (cuánto y en cuánto se apaga, u) y el bisel (ancho en fracción del lado, cuánto). */
   luz: { rendija: [0.34, 0.16], junto: [0.24, 0.12], bisel: [0.035, 0.06], costado: 0.93, escalon: [0.0, 0.1], hondo: [0.07, 0.3] },
 } as const
@@ -159,6 +166,7 @@ uniform vec4 uLogoC;
 uniform vec4 uLogoP;
 uniform vec4 uLogoPalo;
 uniform mat4 uLogoInverso;
+uniform vec3 uCamara;
 in vec2 vUv;
 layout( location = 0 ) out vec4 salida;
 
@@ -228,6 +236,12 @@ void main() {
 			float libre = caraDelLogo( ( uLogoInverso * vec4( tapa, 1.0 ) ).xyz ) - 0.7072 * uLado - ${f(PISO_VIVO.techo.margen)};
 			if ( libre < 0.0 ) dibujo += libre;
 		}
+	}
+	// Nunca por encima del ojo (PISO_VIVO.ojo): un techo blando, sólo con la cámara arriba del piso.
+	if ( uCamara.y > ${f(FLOOR_Y)} ) {
+		float techo = uCamara.y - ${f(FLOOR_Y)} - ${f(PISO_VIVO.ojo.margen)} + max( 0.0, length( xz - uCamara.xz ) - ${f(PISO_VIVO.ojo.desde)} ) * ${f(PISO_VIVO.ojo.sube)};
+		float blando = ${f(PISO_VIVO.ojo.suave)};
+		if ( dibujo > techo - blando ) dibujo = techo - blando * exp( - ( dibujo - techo + blando ) / blando );
 	}
 	salida = vec4( nueva, h, dibujo, 1.0 );
 }

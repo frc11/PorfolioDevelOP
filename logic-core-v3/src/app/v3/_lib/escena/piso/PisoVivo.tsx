@@ -67,6 +67,7 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     rayo: new THREE.Raycaster(),
     plano: new THREE.Plane(new THREE.Vector3(0, 1, 0), -FLOOR_Y),
     punto: new THREE.Vector3(),
+    ojo: new THREE.Vector3(),
     reloj: Number.NaN,
     pasos: 0,
     principal: null as THREE.DirectionalLight | null,
@@ -131,6 +132,7 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
         cursor: [m.cursor.x, m.cursor.y, PISO_VIVO.cursor.radio / g.lado, m.presencia],
         t: m.reloj,
         conLogo: AIRE.uLogoC.value.z > 0 && AIRE.uLogoC.value.w > 0 ? 1 : 0,
+        camara: state.camera.getWorldPosition(m.ojo),
       })
       correr(armado, gl)
       pasos += 1
@@ -150,6 +152,8 @@ interface Paso {
   readonly cursor: readonly [number, number, number, number]
   readonly t: number
   readonly conLogo: number
+  /** Dónde está el ojo: ningún bloque sube por encima (`PISO_VIVO.ojo`). */
+  readonly camara: THREE.Vector3
 }
 
 function alPaso(s: Record<string, THREE.IUniform>, p: Paso): void {
@@ -158,6 +162,7 @@ function alPaso(s: Record<string, THREE.IUniform>, p: Paso): void {
   ;(s.uCursor.value as THREE.Vector4).set(...p.cursor)
   s.uTiempo.value = p.t
   s.uConLogo.value = p.conLogo
+  ;(s.uCamara.value as THREE.Vector3).copy(p.camara)
 }
 
 /** Un paso de la simulación (medido si el banco lo pidió). */
@@ -205,6 +210,7 @@ function armar(grilla: Grilla) {
     uLogoP: AIRE.uLogoP,
     uLogoPalo: AIRE.uLogoPalo,
     uLogoInverso: AIRE.uLogoInverso,
+    uCamara: { value: new THREE.Vector3(0, 1e4, 0) },
   })
   uAlturas.value = sim.estado()[0]
   const material = conPisoVivo(new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0 }), {
