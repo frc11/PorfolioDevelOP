@@ -16,7 +16,7 @@ import { POLVO_PAREJO } from './volumen'
  * - **1 · cayendo.** Con la quietud (los tiempos de ESCENA 5: empieza a los 8 s, en el piso a los 25)
  *   cada mota se suelta del aire y baja con arrastre: la velocidad va hacia la de caída (la que la
  *   deja en el piso a tiempo) más una turbulencia lenta, así que deriva y no baja en línea recta.
- * - **2 · en el piso.** Quieta.
+ * - **2 · en el piso.** Quieta. [ESCENA 7] Con el piso vivo, apoyada en su bloque: sube y baja con el mar.
  * - **3 · sobre el logo.** Si cae sobre una cara de arriba del logo (normal a menos de 50° de la
  *   vertical) se queda ahí, guardada en el espacio del logo: acompaña su balanceo.
  * - **4 · deslizando.** Cuando la coreografía se mueve, la del logo resbala por la cara (la gravedad a
@@ -51,8 +51,12 @@ export const FISICA = {
   estela: { cuantos: 6, nucleo: 1.3, vidaS: 3.6, apaga: 1.5, fuerza: [2.4, 6.5], alcance: 3, alto: 4 },
 } as const
 
-/** El `DISTANCIA_AL_LOGO_GLSL` más la cuenta que usa la física: la cara del logo, con espesor real. */
-const CARAS_DEL_LOGO_GLSL = /* glsl */ `
+/**
+ * El `DISTANCIA_AL_LOGO_GLSL` más la cuenta que usa la física: la cara del logo, con espesor real. Pide
+ * `uLogoC`, `uLogoP` y `uLogoPalo` declarados. [ESCENA 7] Exportada: el piso vivo la usa para que ningún
+ * bloque toque al logo.
+ */
+export const CARAS_DEL_LOGO_GLSL = /* glsl */ `
 // El logo con su espesor de verdad: dos anillos extruidos (el trazo y la profundidad de la extrusión)
 // y el palo, una caja. Mismas piezas que el obstáculo, en el espacio del grupo del logo.
 const float MEDIO_TRAZO = 0.371;
@@ -101,6 +105,8 @@ uniform float uDesperto;
 uniform vec3 uOrigen;
 uniform float uMovimiento;
 uniform vec4 uRemolinos[ ${FISICA.estela.cuantos} ];
+uniform sampler2D uPisoVivo;
+uniform vec4 uGrillaDelPiso;
 in vec2 vUv;
 layout( location = 0 ) out vec4 salida0;
 layout( location = 1 ) out vec4 salida1;
@@ -129,6 +135,14 @@ vec3 libre( vec3 p0, int k ) {
 	t = centro + mod( t - centro + ${(L / 2).toFixed(2)}, ${L.toFixed(2)} ) - ${(L / 2).toFixed(2)};
 	vec3 mundo = ( m * vec4( t, 1.0 ) ).xyz;
 	return afueraDelLogo( mundo, ${HOLGURA.polvo.toFixed(2)} + uAbrir * ${HOLGURA.alAbrir.toFixed(2)} );
+}
+
+// [ESCENA 7] El piso bajo xz: el tope del bloque del piso vivo si hay, o el piso plano.
+float pisoEn( vec2 xz ) {
+	if ( uGrillaDelPiso.z < 0.5 ) return ${FLOOR_Y.toFixed(4)};
+	ivec2 celda = ivec2( floor( xz / uGrillaDelPiso.y + uGrillaDelPiso.x * 0.5 ) );
+	if ( celda.x < 0 || celda.y < 0 || celda.x >= int( uGrillaDelPiso.x ) || celda.y >= int( uGrillaDelPiso.x ) ) return ${FLOOR_Y.toFixed(4)};
+	return ${FLOOR_Y.toFixed(4)} + texelFetch( uPisoVivo, celda, 0 ).b;
 }
 
 // La turbulencia de la caída: lenta y horizontal, un poco vertical.
@@ -201,9 +215,10 @@ void main() {
 	float dt = uDt;
 	float azar = azar1( indice );
 	float retraso = azar * ${POSARSE.desparejoS.toFixed(2)};
-	float piso = ${FLOOR_Y.toFixed(4)} + 0.02 + fract( azar * 7.31 ) * ${POSARSE.alturaPosada.toFixed(3)};
 	vec3 f = libre( o.xyz, int( o.w + 0.5 ) );
 	vec3 p = modo < 0.5 ? f + e0.xyz : ( modo > 2.5 && modo < 3.5 ? ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz : e0.xyz );
+	// El piso bajo la mota (con el piso vivo, el tope de su bloque: la posada sube y baja con el mar).
+	float piso = pisoEn( p.xz ) + 0.02 + fract( azar * 7.31 ) * ${POSARSE.alturaPosada.toFixed(3)};
 	float quieta = uReloj - uQuieto;
 	// El frente del despertar llega a esta mota: sólo cuenta si despertó después de que se soltara.
 	bool despierta = uDesperto > desde && uReloj >= uDesperto + distance( p.xz, uOrigen.xz ) / ${POSARSE.velocidad.toFixed(1)};
@@ -247,7 +262,7 @@ void main() {
 	}
 	if ( modo > 1.5 && modo < 2.5 ) {
 		if ( despierta ) { modo = 5.0; desde = uReloj; }
-		else { salida0 = vec4( p, 2.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
+		else { salida0 = vec4( p.x, piso, p.z, 2.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
 	}
 	if ( modo > 2.5 && modo < 3.5 ) {
 		if ( despierta ) { modo = 5.0; desde = uReloj; }

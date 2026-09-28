@@ -8,7 +8,7 @@
  * §4 · las estrellas: muchas débiles y pocas brillantes, el halo sólo en las brillantes, y la banda
  *      cubre todo el cielo que se ve por encima del piso.
  * §5 · el polvo con física: los tiempos de siempre, los modos, la estela de 6b que no pasa de unos metros.
- * §6 · el piso vivo: el presupuesto de bloques en los dos radios y los planos del piso escondidos.
+ * §6 · (el piso vivo pasó a `s32-escena7`: ESCENA 7 lo hizo un mar, encendido).
  * §7 · 6e: el encendido parpadea una vez, se asienta, y la frontera de la noche no lo repite.
  * §8 · 6g: la compuerta de la variante se ve al bajar y vuelve escondida; el frente va de afuera adentro.
  * §9 · 6c y 6d: la niebla rasante vive afuera y baja; la velocidad la abre pero no la borra.
@@ -27,10 +27,9 @@ import { ESTRELLAS } from '../estrellas/Estrellas'
 import { FORMACION } from '../formacion/enFormacion'
 import type { BloqueOpaco } from '../nocheDisparada'
 import { RASANTE } from '../niebla/rasante'
-import { PISO_VIVO, grillaDelPiso } from '../piso/bloques'
 import { FISICA } from '../polvo/simulacion'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
-import { CAMERA_FOV, FLOOR_RADIUS, FLOOR_Y } from '../probeScene'
+import { CAMERA_FOV, FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -45,13 +44,12 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,piso=pulso,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { pisoVivo: 'pulso', inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
-afirmar(entornoPedido('producto,piso').pruebas.pisoVivo === 'si', '  `piso` es el piso vivo sin el pulso')
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
 afirmar(!sin.obstaculo && !sin.sombraHaz && !sin.motas && sin.E1 && sin.moire, 'el banco puede apagar 5a, 5c y 5d para comparar, y el resto sigue')
 controlPositivo('el detector VE un producto sin 5c', 'producto,sombra=blanda', (p: string) => entornoPedido(p).sombraHaz)
@@ -91,23 +89,6 @@ afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lle
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
 afirmar(FISICA.estela.alcance <= 4 && FISICA.estela.alto <= 5, '6b · la estela del logo no pasa de unos metros (un vórtice suelto llega lejos)', `alcance ${String(FISICA.estela.alcance)} u`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')
-
-// ── §6 · el piso vivo ─────────────────────────────────────────────────────
-titulo('§6 · el piso vivo: el presupuesto y lo que el piso tiene encima')
-for (const radio of [FLOOR_RADIUS, f.radioDelEscenario]) {
-  const g = grillaDelPiso(radio)
-  afirmar(g.cuantas * 10 <= 60000, `con el piso de radio ${String(radio)}: ~60.000 triángulos`, `${String(g.cuantas)} bloques, ${String(g.cuantas * 10)} triángulos`)
-  let afuera = 0
-  for (let k = 0; k < g.cuantas; k += 1) {
-    const [i, j] = [g.celdas[k * 2], g.celdas[k * 2 + 1]]
-    for (const di of [0, 1]) for (const dj of [0, 1]) if (Math.hypot((i + di - g.n / 2) * g.lado, (j + dj - g.n / 2) * g.lado) > radio + 1e-9) afuera += 1
-  }
-  afirmar(afuera === 0, '  todos los bloques enteros adentro del disco')
-}
-const entorno = leer('entorno/Entorno.tsx')
-afirmar(/pisoVivo === 'no' && <Pulso \/>/.test(entorno) && /conCharco=\{e\.pruebas\.pisoVivo === 'no'\}/.test(entorno), 'con el piso vivo el anillo y el charco los pinta el piso (sin él, los planos de siempre)')
-afirmar(/enElPiso[\s\S]*mesh\.visible = false/.test(leer('ContactOcclusion.tsx')), '  y la mancha de contacto también')
-afirmar(PISO_VIVO.escalon * PISO_VIVO.reposo <= 0.1, 'en reposo es casi plano', `a lo sumo ${String(PISO_VIVO.escalon * PISO_VIVO.reposo)} u`)
 
 // ── §7 · 6e ───────────────────────────────────────────────────────────────
 titulo('§7 · 6e: el haz se enciende una vez')

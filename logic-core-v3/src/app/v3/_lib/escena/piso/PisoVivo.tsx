@@ -5,23 +5,24 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import type { NivelDeCalidad } from '../calidad'
-import type { ProbeRigStore } from '../probeStore'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
-import { NACE_EN } from '../entorno/Pulso'
-import { PULSO } from '../entorno/maquinaDelPulso'
-import { PULSO_VIVO, VIVO } from '../entorno/vivo'
+import { VIVO } from '../entorno/vivo'
 import { pisoConFormacion } from '../formacion/Formacion'
 import { crearCronometro, type Medida } from '../gpu/cronometro'
 import { crearPingPong } from '../gpu/pingPong'
+import { AIRE } from '../polvo/parche'
 import { FLOOR_RADIUS, FLOOR_Y, PAPER_COLOR } from '../probeScene'
 import { conElDiaDesdeAfuera } from '../dia/desdeAfuera'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
+import { PISO_EN_VIVO } from './enVivo'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
 
 /**
  * [ESCENA 6] EL PISO VIVO — monta los bloques y corre la simulación (`bloques.ts` tiene el porqué).
- * Va después del rig y del entorno: lee la cámara, el cursor y el pulso de este cuadro. Con movimiento
- * reducido queda el relieve de reposo, quieto.
+ * [ESCENA 7] T5: encendido en el producto, el mar, sin scroll. Va después del rig y del entorno: lee la
+ * cámara, el cursor, el pulso y la pose del logo de este cuadro. La simulación corre a PASO FIJO (1/120 s),
+ * tantos pasos como el reloj pida: la misma ola a 30 que a 144 cuadros por segundo. Con movimiento
+ * reducido el piso queda quieto (el mar parado en un instante).
  */
 
 type VentanaDelBanco = Window & {
@@ -30,20 +31,19 @@ type VentanaDelBanco = Window & {
     triangulos: number
     celdas: number
     medir: (pasos: number) => Promise<Medida>
-    /** La altura más alta y la más baja de la simulación, y la presencia del cursor. */
-    estado: () => { maximo: number; minimo: number; presencia: number; agita: number; cursor: number[] }
+    /** La altura dibujada más alta y la más baja, la presencia del cursor y cuántos pasos corrió el último cuadro. */
+    estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number }
   }
 }
 
 interface PropsDelPiso {
-  readonly rig: ProbeRigStore
   readonly calidad: NivelDeCalidad
   readonly quieto: boolean
 }
 
 /** ¿Hay piso vivo en esta carga? Los planos apoyados en el piso lo preguntan para esconderse. */
 export function hayPisoVivo(): boolean {
-  return entornoDeLaEscena().pruebas.pisoVivo !== 'no'
+  return entornoDeLaEscena().pisoVivo
 }
 
 export function PisoVivo(props: PropsDelPiso) {
@@ -51,9 +51,11 @@ export function PisoVivo(props: PropsDelPiso) {
   return <PisoVivoPrendido {...props} />
 }
 
-function PisoVivoPrendido({ rig, calidad, quieto }: PropsDelPiso) {
+/** Como mucho, cuántos pasos fijos se corren en un cuadro (un cuadro muy largo no se recupera entero). */
+const PASOS_POR_CUADRO = 8
+
+function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
   const radio = pisoConFormacion(calidad)?.radio ?? FLOOR_RADIUS
-  const conPulso = entornoDeLaEscena().pruebas.pisoVivo === 'pulso'
   const armado = useMemo(() => armar(grillaDelPiso(radio)), [radio])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({
@@ -62,13 +64,12 @@ function PisoVivoPrendido({ rig, calidad, quieto }: PropsDelPiso) {
     presencia: 0,
     ultimoCursor: -Infinity,
     cursor: new THREE.Vector2(),
-    camara: new THREE.Vector3(),
-    progreso: Number.NaN,
-    primera: true,
-    agita: 0,
     rayo: new THREE.Raycaster(),
     plano: new THREE.Plane(new THREE.Vector3(0, 1, 0), -FLOOR_Y),
     punto: new THREE.Vector3(),
+    reloj: Number.NaN,
+    pasos: 0,
+    principal: null as THREE.DirectionalLight | null,
   })
 
   useEffect(() => {
@@ -81,12 +82,12 @@ function PisoVivoPrendido({ rig, calidad, quieto }: PropsDelPiso) {
       estado: () => {
         const datos = armado.sim.leer(armado.gl.current ?? new THREE.WebGLRenderer())
         let [maximo, minimo] = [-Infinity, Infinity]
-        for (let k = 0; k < datos.length; k += 4) {
+        for (let k = 2; k < datos.length; k += 4) {
           maximo = Math.max(maximo, datos[k])
           minimo = Math.min(minimo, datos[k])
         }
         const m = memoria.current
-        return { maximo, minimo, presencia: m.presencia, agita: m.agita, cursor: [m.cursor.x, m.cursor.y] }
+        return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos }
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
     }
@@ -103,9 +104,9 @@ function PisoVivoPrendido({ rig, calidad, quieto }: PropsDelPiso) {
       armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 1))
       m.inicio = false
     }
-    const dt = Math.min(Math.max(delta, 1 / 240), 1 / 30)
     const t = VIVO.uTiempo.value
     const g = armado.grilla
+    const dt = Math.min(Math.max(delta, 0), 0.1)
 
     // El cursor: el punto del piso bajo el puntero; la presencia sube al moverlo y se apaga quieto.
     const movio = m.puntero.x < 5 && m.puntero.distanceToSquared(state.pointer) > 1e-8
@@ -117,33 +118,27 @@ function PisoVivoPrendido({ rig, calidad, quieto }: PropsDelPiso) {
     const presente = !quieto && toca !== null && t - m.ultimoCursor < PISO_VIVO.cursor.quietoS
     m.presencia += ((presente ? 1 : 0) - m.presencia) * (1 - Math.exp(-dt / (presente ? 0.15 : 0.8)))
 
-    // El scroll: la velocidad de la cámara mientras el progreso se mueve, con la familia de inercia de E6.
-    const progreso = rig.current.progress
-    const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
-    m.progreso = progreso
-    const velocidad = m.primera || !conScroll ? 0 : state.camera.position.distanceTo(m.camara) / dt
-    m.camara.copy(state.camera.position)
-    m.primera = false
-    const objetivo = quieto ? 0 : Math.min(1, velocidad / PISO_VIVO.scroll.plena)
-    m.agita += (objetivo - m.agita) * (1 - Math.exp(-dt / (objetivo > m.agita ? PISO_VIVO.scroll.subeS : PISO_VIVO.scroll.bajaS)))
-
-    // El pulso principal: dónde va su frente.
-    const clase = PULSO.anillos.principal
-    const u = (t - PULSO_VIVO.ultimoPrincipal) / clase.duracionS
-    const vivo = conPulso && !quieto && u >= 0 && u <= 1
-    const frente = NACE_EN + (clase.alcance - NACE_EN) * (1 - (1 - u) ** 2.2)
-
+    // Los pasos fijos que pide el reloj de la escena (que se detiene con movimiento reducido).
+    const paso = PISO_VIVO.onda.paso
+    if (Number.isNaN(m.reloj) || t < m.reloj || t - m.reloj > 1) m.reloj = t - paso
     const s = armado.sim.material.uniforms
-    alPaso(s, {
-      dt,
-      c2: ((PISO_VIVO.onda.velocidad * dt) / g.lado) ** 2,
-      cursor: [m.cursor.x, m.cursor.y, PISO_VIVO.cursor.radio / g.lado, m.presencia],
-      agita: m.agita,
-      t,
-      anillo: [frente / g.lado, PISO_VIVO.pulso.ancho / g.lado, vivo ? PISO_VIVO.pulso.fuerza * (1 - u) : 0],
-    })
-    if (!quieto) correr(armado, gl)
-    alCuadro(armado, VIVO.uHaz.value)
+    let pasos = 0
+    while (m.reloj + paso <= t + 1e-9 && pasos < PASOS_POR_CUADRO) {
+      m.reloj += paso
+      alPaso(s, {
+        dt: paso,
+        c2: ((PISO_VIVO.onda.velocidad * paso) / g.lado) ** 2,
+        cursor: [m.cursor.x, m.cursor.y, PISO_VIVO.cursor.radio / g.lado, m.presencia],
+        t: m.reloj,
+        conLogo: AIRE.uLogoC.value.z > 0 && AIRE.uLogoC.value.w > 0 ? 1 : 0,
+      })
+      correr(armado, gl)
+      pasos += 1
+    }
+    if (pasos === PASOS_POR_CUADRO) m.reloj = t
+    m.pasos = pasos
+    m.principal ??= laPrincipal(state.scene)
+    alCuadro(armado, VIVO.uHaz.value, m.principal)
   })
 
   return <primitive object={armado.bloques} />
@@ -153,51 +148,72 @@ interface Paso {
   readonly dt: number
   readonly c2: number
   readonly cursor: readonly [number, number, number, number]
-  readonly agita: number
   readonly t: number
-  readonly anillo: readonly [number, number, number]
+  readonly conLogo: number
 }
 
 function alPaso(s: Record<string, THREE.IUniform>, p: Paso): void {
   s.uDt.value = p.dt
   s.uC2.value = p.c2
   ;(s.uCursor.value as THREE.Vector4).set(...p.cursor)
-  s.uAgita.value = p.agita
   s.uTiempo.value = p.t
-  ;(s.uAnillo.value as THREE.Vector3).set(...p.anillo)
+  s.uConLogo.value = p.conLogo
 }
 
 /** Un paso de la simulación (medido si el banco lo pidió). */
 function correr(armado: ReturnType<typeof armar>, gl: THREE.WebGLRenderer): void {
   armado.cronometro.correr(gl, () => armado.sim.paso(gl))
   armado.uAlturas.value = armado.sim.estado()[0]
+  // El polvo posado lee las mismas alturas (`enVivo.ts`).
+  PISO_EN_VIVO.uPisoVivo.value = armado.uAlturas.value
+  PISO_EN_VIVO.uGrillaDelPiso.value.set(armado.grilla.n, armado.grilla.lado, 1, 0)
 }
 
 function guardarElContexto(armado: ReturnType<typeof armar>, gl: THREE.WebGLRenderer): void {
   armado.gl.current = gl
 }
 
-function alCuadro(armado: ReturnType<typeof armar>, haz: number): void {
+/** La luz principal de la sala: la direccional más intensa (el rig la mueve con el arco, no la cambia). */
+function laPrincipal(escena: THREE.Object3D): THREE.DirectionalLight | null {
+  let principal: THREE.DirectionalLight | null = null
+  escena.traverse((o) => {
+    if (o instanceof THREE.DirectionalLight && (principal === null || o.intensity > principal.intensity)) principal = o
+  })
+  return principal
+}
+
+/** La luz principal, vista desde arriba, para el bisel de las tapas (la dirección hacia la luz en el piso). */
+function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THREE.DirectionalLight | null): void {
   armado.uHaz.value = haz
+  if (principal !== null && principal.position.lengthSq() > 1e-6) armado.uLuzDelBisel.value.set(principal.position.x, principal.position.z).normalize()
 }
 
 function armar(grilla: Grilla) {
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
+  const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
   const sim = crearPingPong(grilla.n, grilla.n, 1, SIMULACION_GLSL, {
-    uDt: { value: 1 / 60 },
+    uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
-    uRadio: { value: grilla.n / 2 },
+    uRadio: { value: grilla.radio / grilla.lado },
+    uLado: { value: grilla.lado },
     uCursor: { value: new THREE.Vector4(9999, 9999, 1, 0) },
-    uAgita: { value: 0 },
     uTiempo: { value: 0 },
-    uAnillo: { value: new THREE.Vector3(0, 1, 0) },
+    uAnillos: VIVO.uAnillos,
+    uConLogo: { value: 0 },
+    uLogoC: AIRE.uLogoC,
+    uLogoP: AIRE.uLogoP,
+    uLogoPalo: AIRE.uLogoPalo,
+    uLogoInverso: AIRE.uLogoInverso,
   })
   uAlturas.value = sim.estado()[0]
   const material = conPisoVivo(new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0 }), {
     uAlturas,
     uLado: { value: grilla.lado },
+    uRadioDelPiso: { value: grilla.radio },
+    uN: { value: grilla.n },
     uHaz,
+    uLuzDelBisel,
     uNoche: VIVO.uNoche,
     uTiempo: VIVO.uTiempo,
     uAnillos: VIVO.uAnillos,
@@ -224,6 +240,7 @@ function armar(grilla: Grilla) {
     bloques,
     uAlturas,
     uHaz,
+    uLuzDelBisel,
     soltar: () => {
       sim.soltar()
       geometria.dispose()

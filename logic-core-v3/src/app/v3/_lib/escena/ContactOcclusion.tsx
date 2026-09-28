@@ -90,7 +90,7 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
   // [ESCENA 6] 5c: la mancha según el haz, en el producto (`sombra/sombraDelHaz.ts`).
   const conElHaz = entorno.sombraHaz
   // [ESCENA 6] Con el piso vivo la mancha la pinta el piso (los bloques que suben taparían el plano).
-  const enElPiso = entorno.pruebas.pisoVivo !== 'no'
+  const enElPiso = entorno.pisoVivo
 
   useFrame(() => {
     const mesh = meshRef.current

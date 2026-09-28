@@ -11,6 +11,7 @@ import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
 import { AIRE } from './parche'
+import { PISO_EN_VIVO } from '../piso/enVivo'
 import { POSARSE, avanzarElPolvo, polvoInicial, type EstadoDelPolvo } from './posarse'
 import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
 
@@ -276,6 +277,8 @@ function armar() {
       uOrigen: { value: new THREE.Vector3() },
       uMovimiento: { value: 0 },
       uRemolinos: { value: Array.from({ length: FISICA.estela.cuantos }, () => new THREE.Vector4()) },
+      uPisoVivo: PISO_EN_VIVO.uPisoVivo,
+      uGrillaDelPiso: PISO_EN_VIVO.uGrillaDelPiso,
       uLogoC: AIRE.uLogoC,
       uLogoP: AIRE.uLogoP,
       uLogoPalo: AIRE.uLogoPalo,

@@ -217,7 +217,7 @@ export default function ProbeStage({
         </group>
 
         {/* [ESCENA 5] Con la formación, el piso es un escenario con otro más bajo alrededor. */}
-        <StudioFloor escenario={pisoConFormacion(calidad)} conNieblaRasante={pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().pruebas.nieblaRasante} />
+        <StudioFloor escenario={pisoConFormacion(calidad)} conNieblaRasante={pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().pruebas.nieblaRasante} conPisoVivo={entornoDeLaEscena().pisoVivo} />
         {/* [ESCENA 3] La mancha sigue la altura del logo y se contrae con el pulso principal. */}
         <ContactOcclusion logoGroupRef={logoGroupRef} />
 
@@ -283,7 +283,7 @@ export default function ProbeStage({
         <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
-        <PisoVivo rig={rig} calidad={calidad} quieto={reducedMotion} />
+        <PisoVivo calidad={calidad} quieto={reducedMotion} />
         {/* [ESCENA 6] 6f, la pasada extra: al final, con la cámara y todo lo demás de este cuadro ya escritos. */}
         <Calor calidad={calidad} />
         <DiaDesdeAfuera />

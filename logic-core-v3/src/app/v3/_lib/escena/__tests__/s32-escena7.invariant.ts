@@ -7,6 +7,8 @@
  * T3 · el cielo de noche: encendido, siempre detrás de la trama, más denso y más luminoso, con la vía
  *      láctea (banda difusa con franjas de polvo) cruzando el cielo que se ve; monocromo, nítido, lento.
  * T4 · el polvo que se posa: encendido, con los tiempos a la mitad; el remolino, a velocidad real.
+ * T5 · el piso vivo: encendido, un mar continuo que sube y baja, sin scroll, a paso fijo, que no toca al
+ *      logo; el borde, el presupuesto y los planos del piso escondidos.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -20,6 +22,8 @@ import { FORMACION, anguloDe, bandas, cuantasFilas, formar, radioDeLaFila, trian
 import { CIELO, ESTRELLAS } from '../estrellas/Estrellas'
 import { VIA_LACTEA, densidadDeLaBanda, direccionDe, enLaBanda, polvoDeLaBanda } from '../estrellas/cielo'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
+import { PISO_VIVO, grillaDelPiso, marejadasEn } from '../piso/bloques'
+import { FLOOR_RADIUS } from '../probeScene'
 import { MOIRE_FAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -141,5 +145,53 @@ afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con m
 const fisica = leer('polvo/Fisica.tsx')
 afirmar(/const dt = quieto \? 0 : dtReal \* m\.escala/.test(fisica) && !/camaraLenta\(0\.25\)/.test(fisica), 'el remolino va a velocidad real: la cámara lenta es sólo un gancho del banco')
 afirmar(/if \(!e\.polvoParejo \|\| \(!e\.posarse/.test(fisica), '  y la física corre en el producto (con el polvo parejo)')
+
+// ── T5 · el piso vivo ─────────────────────────────────────────────────────
+titulo('T5 · el piso vivo: un mar de bloques')
+afirmar(ENTORNO.pisoVivo && !BASE_LIMPIA.pisoVivo && !entornoPedido('producto,piso=no').pisoVivo, 'encendido en el producto; el banco lo apaga con `piso=no`')
+const pisoVivo = leer('piso/PisoVivo.tsx')
+const bloques = leer('piso/bloques.ts')
+afirmar(!/progress|agita|scroll/i.test(pisoVivo.replace(/\/\*\*[\s\S]*?\*\//g, '')) && !/uAgita/.test(bloques), 'no reacciona al scroll: ni el componente ni la simulación lo leen')
+controlPositivo('el detector VE el scroll', 'const progreso = rig.current.progress', (c: string) => !/progress|agita|scroll/i.test(c))
+afirmar(/uCursor/.test(bloques) && /empujeDelAnillo/.test(bloques) && /for \( int i = 0; i < \$\{ANILLOS_EN_EL_SHADER\}; i\+\+ \) fuerza \+= empujeDelAnillo/.test(bloques), '  sólo al cursor y al pulso (cada anillo empuja con su frente)')
+// El mar: sube y baja, se mueve siempre, sin saltos y sin repetirse.
+let [minimo, maximo, salto] = [Infinity, -Infinity, 0]
+for (let t = 0; t < 60; t += 0.5) for (let x = -40; x <= 40; x += 4) for (let z = -40; z <= 40; z += 4) {
+  const h = marejadasEn(x, z, t)
+  minimo = Math.min(minimo, h)
+  maximo = Math.max(maximo, h)
+  salto = Math.max(salto, Math.abs(marejadasEn(x, z, t + 1 / 120) - h))
+}
+afirmar(minimo < -0.12 && maximo > 0.12, 'sube Y baja respecto del reposo', `de ${minimo.toFixed(2)} a ${maximo.toFixed(2)} u (ESCENA 6: 0 a 0,1, sólo arriba)`)
+afirmar(maximo < 0.5 && minimo > -0.5, '  sin exagerar: el mar solo no pasa de medio bloque', `el lado del bloque es ${(PISO_VIVO.lado * 45 / 34).toFixed(2)} u con la formación`)
+afirmar(salto < 0.01, '  continuo: en un paso de 1/120 s ningún bloque se mueve más de 1 cm', `máximo ${salto.toFixed(4)} u`)
+afirmar(!/floor\( h \/|escalon\.toFixed|reposoDelPiso/.test(bloques), '  y sin escalones de altura (ESCENA 6 redondeaba a 0,05 y el movimiento saltaba)')
+const rumbos = PISO_VIVO.mar.marejadas.map((m) => m[0])
+const largos = PISO_VIVO.mar.marejadas.map((m) => m[1])
+let racional = false
+for (let i = 0; i < largos.length; i += 1) for (let j = i + 1; j < largos.length; j += 1) for (let q = 1; q <= 4; q += 1) { const p = (largos[i] / largos[j]) * q; if (Math.abs(p - Math.round(p)) < 0.02) racional = true }
+afirmar(PISO_VIVO.mar.marejadas.length >= 4 && new Set(rumbos).size === rumbos.length && !racional, 'no se repite: marejadas con rumbos distintos y largos sin relación simple entre sí, y un agrupamiento que cambia en el tiempo', `${String(largos.length)} marejadas`)
+afirmar(/ruidoDelPiso\( vec3\( x \* /.test(bloques), '  el agrupamiento y el picado son ruido que cambia con el tiempo')
+afirmar(/const paso = PISO_VIVO\.onda\.paso/.test(pisoVivo) && /while \(m\.reloj \+ paso <= t/.test(pisoVivo) && PISO_VIVO.onda.paso === 1 / 120, 'estable a cualquier cantidad de cuadros: la simulación corre a paso fijo de 1/120 s y el mar es una cuenta del reloj')
+afirmar(/4\.0 \* cruz \+ esquinas - 20\.0 \* h/.test(bloques), '  y la ola es isótropa (el frente no sale cuadrado)')
+afirmar(/caraDelLogo\( \( uLogoInverso \* vec4\( tapa, 1\.0 \) \)\.xyz \) - 0\.7072 \* uLado - /.test(bloques) && PISO_VIVO.techo.margen > 0.05, 'nunca toca al logo: cada tapa, menos media diagonal, guarda un margen con la forma del logo', `margen ${String(PISO_VIVO.techo.margen)} u`)
+// El borde: los bloques cubren el disco entero (recortados al círculo); el presupuesto.
+for (const radio of [FLOOR_RADIUS, 45]) {
+  const g = grillaDelPiso(radio)
+  afirmar(g.cuantas * 10 <= 60000, `con el piso de radio ${String(radio)}: ~60.000 triángulos`, `${String(g.cuantas)} bloques, ${String(g.cuantas * 10)} triángulos`)
+  const celdas = new Set<string>()
+  for (let k = 0; k < g.cuantas; k += 1) celdas.add(`${String(g.celdas[k * 2])},${String(g.celdas[k * 2 + 1])}`)
+  let sinBloque = 0
+  for (let a = 0; a < 360; a += 3) for (let r = 0; r < radio; r += 0.5) {
+    const [x, z] = [Math.sin((a * Math.PI) / 180) * r, Math.cos((a * Math.PI) / 180) * r]
+    if (!celdas.has(`${String(Math.floor(x / g.lado + g.n / 2))},${String(Math.floor(z / g.lado + g.n / 2))}`)) sinBloque += 1
+  }
+  afirmar(sinBloque === 0, '  los bloques cubren el disco entero (los del borde se recortan al círculo)')
+}
+afirmar(/if \( rr > uRadioDelPiso \) xz \*= uRadioDelPiso \/ rr;/.test(bloques) && /smoothstep\( radio - /.test(bloques), '  recortados al círculo, y el mar se apaga en el borde (al ras del canto)')
+afirmar(/\{!conPisoVivo && \(/.test(leer('StudioFloor.tsx')), '  sin losa debajo: los valles bajan más que ella')
+const entornoTsx = leer('entorno/Entorno.tsx')
+afirmar(/<Haz conCharco=\{!e\.pisoVivo\} \/>/.test(entornoTsx) && /!e\.pisoVivo && <Pulso \/>/.test(entornoTsx) && /const enElPiso = entorno\.pisoVivo/.test(leer('ContactOcclusion.tsx')), 'el anillo, el charco y la mancha de contacto los pinta el piso (sin él, los planos de siempre)')
+afirmar(/pisoEn\( p\.xz \)/.test(leer('polvo/simulacion.ts')), 'el polvo posado se apoya en su bloque y sube y baja con el mar')
 
 cerrar('s32-escena7')

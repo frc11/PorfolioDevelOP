@@ -21,13 +21,12 @@
  * de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
  *
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
- * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`) y el polvo que se posa (con
- * los tiempos a la mitad, `posarse`). El banco las apaga para comparar con `formacion=no`, `cielo=no` y
- * `posarse=no`.
+ * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
+ * los tiempos a la mitad, `posarse`) y el piso vivo (un mar, sin scroll, `pisoVivo`). El banco las apaga
+ * para comparar con `formacion=no`, `cielo=no`, `posarse=no` y `piso=no`.
  *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende:
  *
- * - `piso` · el piso vivo, de bloques (`piso/`); `piso=pulso` le suma la onda del pulso principal;
  * - 6a `inercia` · el aire sigue derivando después de un scroll fuerte;
  * - 6b `remolinos` · el aire se arremolina detrás del logo cuando gira en el cuadro;
  * - 6c `rasante` · bancos de niebla bajos sobre el piso de afuera;
@@ -52,11 +51,7 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-/** [ESCENA 6] El piso vivo: apagado, con el cursor y el scroll, o además con la onda del pulso principal. */
-export type PisoVivo = 'no' | 'si' | 'pulso'
-
 export interface Pruebas {
-  readonly pisoVivo: PisoVivo
   /** 6a · el aire tiene inercia. */
   readonly inercia: boolean
   /** 6b · remolinos detrás del logo. */
@@ -75,7 +70,6 @@ export interface Pruebas {
 
 /** Todo apagado: así van en el producto y en la base. */
 export const PRUEBAS_APAGADAS: Pruebas = {
-  pisoVivo: 'no',
   inercia: false,
   remolinos: false,
   nieblaRasante: false,
@@ -110,6 +104,8 @@ export interface Entorno {
   readonly cielo: boolean
   /** [ESCENA 7] T4 · el polvo se posa con la quietud y lo levanta el aire (`polvo/Fisica.tsx`). */
   readonly posarse: boolean
+  /** [ESCENA 7] T5 · el piso vivo, un mar de bloques que responde al cursor y al pulso (`piso/`). */
+  readonly pisoVivo: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -130,6 +126,7 @@ export const ENTORNO: Entorno = {
   formacion: true,
   cielo: true,
   posarse: true,
+  pisoVivo: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -149,6 +146,7 @@ export const BASE_LIMPIA: Entorno = {
   formacion: false,
   cielo: false,
   posarse: false,
+  pisoVivo: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -183,14 +181,13 @@ export function entornoPedido(pedido: string): Entorno {
     formacion: producto ? valor('formacion') !== 'no' : partes.has('formacion'),
     cielo: producto ? valor('cielo') !== 'no' : partes.has('cielo'),
     posarse: producto ? valor('posarse') !== 'no' : partes.has('posarse'),
+    pisoVivo: producto ? valor('piso') !== 'no' : partes.has('piso'),
     pruebas: pruebasPedidas(partes, valor),
   }
 }
 
 function pruebasPedidas(partes: ReadonlySet<string>, valor: (clave: string) => string | undefined): Pruebas {
-  const piso = valor('piso')
   return {
-    pisoVivo: piso === 'pulso' ? 'pulso' : partes.has('piso') ? 'si' : 'no',
     inercia: partes.has('inercia'),
     remolinos: partes.has('remolinos'),
     nieblaRasante: partes.has('rasante'),

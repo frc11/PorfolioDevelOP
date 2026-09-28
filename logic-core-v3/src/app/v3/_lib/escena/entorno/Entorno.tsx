@@ -153,8 +153,8 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
 
   return (
     <>
-      {e.E1 && <Haz conCharco={e.pruebas.pisoVivo === 'no'} />}
-      {e.E4 && !quieto && e.pruebas.pisoVivo === 'no' && <Pulso />}
+      {e.E1 && <Haz conCharco={!e.pisoVivo} />}
+      {e.E4 && !quieto && !e.pisoVivo && <Pulso />}
     </>
   )
 }

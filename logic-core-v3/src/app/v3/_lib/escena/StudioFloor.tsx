@@ -81,6 +81,11 @@ type StudioFloorProps = {
   readonly escenario?: Escenario
   /** [ESCENA 6] 6c: el piso de abajo y el ciclorama integran la niebla rasante (`niebla/rasante.ts`). */
   readonly conNieblaRasante?: boolean
+  /**
+   * [ESCENA 7] Con el piso vivo no hay losa: los bloques cubren el disco entero y bajan más que ella en los
+   * valles. El canto del escenario arranca entonces al ras del piso.
+   */
+  readonly conPisoVivo?: boolean
 }
 
 /** [ESCENA 6] 6c: el material del papel de afuera, con los bancos que cada punto tiene delante. */
@@ -97,10 +102,10 @@ function conLaNiebla(material: THREE.MeshStandardMaterial): void {
   material.customProgramCacheKey = () => 'papel-con-niebla-rasante'
 }
 
-/** El canto del escenario y el piso de abajo, en una sola malla (relativa a `FLOOR_Y`). */
-function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
-  const canto = new THREE.CylinderGeometry(e.radio, e.radio, e.desnivel - FLOOR_THICKNESS, FLOOR_SEGMENTS, 1, true)
-  canto.translate(0, -FLOOR_THICKNESS - (e.desnivel - FLOOR_THICKNESS) / 2, 0)
+/** El canto del escenario y el piso de abajo, en una sola malla (relativa a `FLOOR_Y`). `desde`: dónde arranca el canto. */
+function geometriaDelPisoDeAbajo(e: Escenario, desde: number): THREE.BufferGeometry {
+  const canto = new THREE.CylinderGeometry(e.radio, e.radio, e.desnivel - desde, FLOOR_SEGMENTS, 1, true)
+  canto.translate(0, -desde - (e.desnivel - desde) / 2, 0)
   // Anillos concéntricos: con uno solo, los triángulos largos hasta el horizonte interpolan mal la bruma.
   const piso = new THREE.RingGeometry(e.radio, e.hasta, FLOOR_SEGMENTS, 12)
   piso.rotateX(-Math.PI / 2)
@@ -110,10 +115,10 @@ function geometriaDelPisoDeAbajo(e: Escenario): THREE.BufferGeometry {
   return junta
 }
 
-export function StudioFloor({ escenario, conNieblaRasante = false }: StudioFloorProps) {
+export function StudioFloor({ escenario, conNieblaRasante = false, conPisoVivo = false }: StudioFloorProps) {
   const radioDeLaLosa = escenario?.radio ?? FLOOR_RADIUS
   const cycGeometry = useMemo(() => new THREE.LatheGeometry(perfilDelCiclorama(FLOOR_RADIUS, 0), FLOOR_SEGMENTS), [])
-  const pisoDeAbajo = useMemo(() => (escenario === undefined ? null : geometriaDelPisoDeAbajo(escenario)), [escenario])
+  const pisoDeAbajo = useMemo(() => (escenario === undefined ? null : geometriaDelPisoDeAbajo(escenario, conPisoVivo ? 0 : FLOOR_THICKNESS)), [escenario, conPisoVivo])
 
   const materials = useMemo(() => {
     const paper = () =>
@@ -147,9 +152,11 @@ export function StudioFloor({ escenario, conNieblaRasante = false }: StudioFloor
         escena— pero ahora termina donde arranca el ciclorama, no en un borde
         libre. `position` deja la cara SUPERIOR exactamente en FLOOR_Y.
       */}
-      <mesh position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]} material={materials.slab}>
-        <cylinderGeometry args={[radioDeLaLosa, radioDeLaLosa, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
-      </mesh>
+      {!conPisoVivo && (
+        <mesh position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]} material={materials.slab}>
+          <cylinderGeometry args={[radioDeLaLosa, radioDeLaLosa, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
+        </mesh>
+      )}
 
       {/*
         El ciclorama. Mismo material que la losa: en un estudio la cove y el
