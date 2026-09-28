@@ -40,8 +40,8 @@ afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna
 const pedido = entornoPedido('producto,amanecer')
 afirmarIgual(
   pedido.pruebas,
-  { amanecer: true },
-  'el pedido del banco prende cada prueba',
+  { ...PRUEBAS_APAGADAS, amanecer: true },
+  'el pedido del banco prende cada prueba (y sólo la nombrada)',
 )
 const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
 afirmar(!sin.obstaculo && !sin.sombraHaz && !sin.motas && sin.E1 && sin.moire, 'el banco puede apagar 5a, 5c y 5d para comparar, y el resto sigue')
