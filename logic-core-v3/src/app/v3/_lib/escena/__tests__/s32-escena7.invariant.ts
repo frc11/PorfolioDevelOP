@@ -288,7 +288,7 @@ const falla = muestras.filter(([s]) => s < FALLA_S).map(([, k]) => k)
 const golpe = Math.max(...muestras.filter(([s]) => s >= FALLA_S).map(([, k]) => k))
 afirmar(Math.max(...falla) < FIRME && Math.max(...falla) > 0.2, 'los intentos que fallan, más tenues que la luz final', `el más fuerte, ${Math.max(...falla).toFixed(2)}; la luz final, ${String(FIRME)}`)
 afirmar(FIRME > 1 && golpe > FIRME, 'el encendido final, más fuerte: un golpe que se asienta más arriba que el haz de ESCENA 6', `golpe ${golpe.toFixed(2)}, firme ${String(FIRME)} (ESCENA 6: firme 1)`)
-afirmar(FALLA_S > 2 * 1.25 - 0.1 && GUION.filter(([, , k]) => k < FIRME).length >= 6, 'la falla dura más (el doble que en ESCENA 6) y son varios intentos', `${String(FALLA_S)} s, ${String(GUION.filter(([, , k]) => k < FIRME).length)} intentos (ESCENA 6: 1,25 s)`)
+afirmar(FALLA_S > 1.25 && GUION.filter(([, , k]) => k < FIRME).length >= 3, 'la falla dura más que en ESCENA 6 y son varios intentos ([ESCENA 8] T1 los bajó a la mitad: la cuenta, en s33)', `${String(FALLA_S)} s, ${String(GUION.filter(([, , k]) => k < FIRME).length)} intentos (ESCENA 6: 1,25 s)`)
 afirmar(falla.some((k) => k === 0) && guionEn(FALLA_S - 0.1) === 0, '  entre intento e intento, y antes del golpe, se apaga (se entiende que falla)')
 controlPositivo('el detector VE un guion de ESCENA 6 (destellos por encima del final)', [2.2, 1.8, 1.35], (picos: number[]) => Math.max(...picos) < 1)
 const correr = (e: EstadoDelEncendido, noches: readonly number[], desde: number, dt = 0.05): { e: EstadoDelEncendido; fases: string[] } => {

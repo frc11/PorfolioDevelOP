@@ -1,13 +1,14 @@
 /**
  * [ESCENA 6] 6e · EL HAZ SE ENCIENDE — pura: cuando cae la noche, E1 arranca como una luz artificial.
  * [ESCENA 7] T9: encendido en el producto, y más notorio.
+ * [ESCENA 8] T1: se pasaba de fallas; quedan la mitad de los intentos (de siete, cuatro: uno sí y uno no).
  *
  * La máquina lleva `k`, lo que se multiplica a la parte de noche del haz: la columna, el charco, el
  * polvo del haz, las motas (5d), la mancha dura (5c) y la luz que rebota del piso (T12) siguen esa
  * intensidad. De día no cambia nada: la luz de día del haz no es este foco.
  *
- * **El guion (T9).** Primero FALLA: una serie de intentos cortos y tenues, dispares, con dos tramos que
- * tiemblan (~2,5 s, el doble que en ESCENA 6), todos más débiles que la luz final. Un instante a oscuras,
+ * **El guion (T9, T1 de ESCENA 8).** Primero FALLA: cuatro intentos cortos y tenues, dispares, con dos
+ * tramos que tiemblan (~1,7 s), todos más débiles que la luz final. Un instante a oscuras,
  * y ENCIENDE: un golpe más fuerte que todo lo anterior que se asienta en `FIRME`, más alto que el haz de
  * ESCENA 6 (que quedaba en 1). En ESCENA 6 los intentos eran destellos por encima del final; ahora se lee
  * que está fallando y que después prende.
@@ -40,19 +41,16 @@ export const FIRME = 1.45
  */
 export const GUION: readonly (readonly [number, number, number])[] = [
   [0.1, 0.17, 0.42],
-  [0.36, 0.4, 0.28],
-  [0.62, 0.95, 0.5],
-  [1.18, 1.24, 0.34],
-  [1.48, 1.92, 0.58],
-  [2.14, 2.22, 0.4],
-  [2.42, 2.5, 0.62],
-  [2.78, 3.7, 2.4],
+  [0.36, 0.69, 0.5],
+  [0.92, 1.36, 0.58],
+  [1.58, 1.66, 0.62],
+  [1.94, 2.86, 2.4],
 ]
-export const GUION_S = 3.7
+export const GUION_S = 2.86
 /** Dónde termina la falla y arranca el encendido de verdad (s). */
-export const FALLA_S = 2.78
+export const FALLA_S = 1.94
 /** Los tramos que tiemblan, y cuánto. */
-const TIEMBLAN = { cuanto: 0.25, tramos: [2, 4] } as const
+const TIEMBLAN = { cuanto: 0.25, tramos: [1, 2] } as const
 
 export type Fase = 'apagado' | 'encendiendo' | 'prendido' | 'apagando'
 
