@@ -6,6 +6,7 @@
  *      más filas, un poco menos densa, en bandas intercaladas; el presupuesto, la cámara y 375.
  * T3 · el cielo de noche: encendido, siempre detrás de la trama, más denso y más luminoso, con la vía
  *      láctea (banda difusa con franjas de polvo) cruzando el cielo que se ve; monocromo, nítido, lento.
+ * T4 · el polvo que se posa: encendido, con los tiempos a la mitad; el remolino, a velocidad real.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
@@ -18,6 +19,7 @@ import { BASE_LIMPIA, ENTORNO, entornoPedido } from '../entorno'
 import { FORMACION, anguloDe, bandas, cuantasFilas, formar, radioDeLaFila, triangulosDeLaFormacion, type Copia } from '../formacion/enFormacion'
 import { CIELO, ESTRELLAS } from '../estrellas/Estrellas'
 import { VIA_LACTEA, densidadDeLaBanda, direccionDe, enLaBanda, polvoDeLaBanda } from '../estrellas/cielo'
+import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { MOIRE_FAR_RADIUS } from '../probeMoire'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -129,5 +131,15 @@ afirmar(masPolvo > 0.9 && VIA_LACTEA.polvo > 0.6, '  con franjas oscuras de polv
 afirmar(/vec4\( vec3\( luz \), oscuro \)/.test(estrellas) && /vec4\( vec3\( vAlfa \* cuanto \), 1\.0 \)/.test(estrellas), 'monocromo: la banda y las estrellas pintan los tres canales iguales')
 afirmar(CIELO.desde > 0 && CIELO.oscuro < 1, 'el cielo se oscurece hacia arriba y en el horizonte queda del color de la bruma (empalma con el piso del fondo)')
 afirmar(/floor\( px \) \+ 0\.5/.test(estrellas) && ESTRELLAS.titileo.hasta <= 0.3 && /fueraDelTunel/.test(estrellas) && /smoothstep\( aEstrella\.y/.test(estrellas), 'siguen igual: nítidas (al centro del píxel), titileo lento, aparecen con la noche y se van antes del túnel')
+
+// ── T4 · el polvo que se posa ─────────────────────────────────────────────
+titulo('T4 · el polvo que se posa, con los tiempos a la mitad')
+afirmar(ENTORNO.posarse && !BASE_LIMPIA.posarse && !entornoPedido('producto,posarse=no').posarse, 'encendido en el producto; el banco lo apaga con `posarse=no`')
+afirmar(POSARSE.empiezaS === 8 / 2 && POSARSE.asentadoS <= 10 && POSARSE.desparejoS === 3 / 2, 'los tiempos a la mitad: empieza a los 4 s y la caída apunta a los ~10 s (ESCENA 6: 8 s y ~20 s medidos)', `${String(POSARSE.empiezaS)} s / ${String(POSARSE.asentadoS)} s / ${String(POSARSE.desparejoS)} s`)
+controlPositivo('el detector VE los tiempos de antes', { empiezaS: 8, asentadoS: 25, desparejoS: 3 }, (t: { empiezaS: number; asentadoS: number; desparejoS: number }) => t.empiezaS === 4 && t.asentadoS <= 10 && t.desparejoS === 1.5)
+afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con movimiento reducido no se posa (como antes)')
+const fisica = leer('polvo/Fisica.tsx')
+afirmar(/const dt = quieto \? 0 : dtReal \* m\.escala/.test(fisica) && !/camaraLenta\(0\.25\)/.test(fisica), 'el remolino va a velocidad real: la cámara lenta es sólo un gancho del banco')
+afirmar(/if \(!e\.polvoParejo \|\| \(!e\.posarse/.test(fisica), '  y la física corre en el producto (con el polvo parejo)')
 
 cerrar('s32-escena7')

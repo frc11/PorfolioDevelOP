@@ -45,10 +45,10 @@ afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el
 afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
-const pedido = entornoPedido('producto,posarse,piso=pulso,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
+const pedido = entornoPedido('producto,piso=pulso,inercia,remolinos,rasante,velocidad,encendido,calor,dia=afuera')
 afirmarIgual(
   pedido.pruebas,
-  { posarse: true, pisoVivo: 'pulso', inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
+  { pisoVivo: 'pulso', inercia: true, remolinos: true, nieblaRasante: true, nieblaVelocidad: true, hazEncendido: true, aireCaliente: true, diaDesdeAfuera: true },
   'el pedido del banco prende cada prueba',
 )
 afirmar(entornoPedido('producto,piso').pruebas.pisoVivo === 'si', '  `piso` es el piso vivo sin el pulso')
@@ -83,7 +83,7 @@ afirmar(ESTRELLAS.elevacion.hasta > subida + CAMERA_FOV / 2, '  y arriba, hasta 
 
 // ── §5 · el polvo con física ──────────────────────────────────────────────
 titulo('§5 · el polvo que se posa, con física')
-afirmar(POSARSE.empiezaS === 8 && POSARSE.asentadoS === 25 && POSARSE.velocidad === 16, 'los tiempos de arranque de ESCENA 5: empieza a los 8 s, en el piso a los 25, el despertar a 16 u/s')
+afirmar(POSARSE.velocidad === 16, 'el despertar sale a 16 u/s (los tiempos de la quietud, a la mitad, en s32)')
 afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con movimiento reducido no se posa nunca')
 const sim = leer('polvo/simulacion.ts')
 afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'modo > 3.5 && modo < 4.5', 'salida0 = vec4( p, 5.0 )'].every((m) => sim.includes(m)), 'los seis modos están en la simulación (aire, cayendo, piso, logo, deslizando y, lo que queda, levantada)')

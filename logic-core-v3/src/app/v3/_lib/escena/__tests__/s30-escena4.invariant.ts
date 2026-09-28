@@ -38,7 +38,7 @@ afirmarIgual(BASE_LIMPIA.pruebas, PRUEBAS_APAGADAS, '  la base tampoco')
 const antes = entornoPedido('producto,moire=hoy,polvo=antes')
 afirmar(!antes.moire && !antes.polvoParejo && antes.E1, '`moire=hoy` y `polvo=antes` dan el producto con el moiré y el polvo de la base')
 afirmar(!entornoPedido('E1,E4,E6,E7').moire && entornoPedido('E1,moire').moire, 'sin `producto`, sólo lo que la lista nombra')
-controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,posarse', (p: string) => !entornoPedido(p).pruebas.posarse && !entornoPedido(p).moire)
+controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,inercia', (p: string) => !entornoPedido(p).pruebas.inercia && !entornoPedido(p).moire)
 
 // ── §4 · el moiré ─────────────────────────────────────────────────────────
 titulo('§4 · el moiré vivo')
@@ -64,7 +64,7 @@ for (let v = -200; v <= 200; v += 0.37) {
 }
 afirmar(fuera === 0, 'la caja se repite: toda mota cae adentro, corrida un número entero de lados')
 afirmar(POLVO_PAREJO.radio < MOIRE_NEAR_RADIUS, '  y el polvo no sale de la trama', `radio ${String(POLVO_PAREJO.radio)}`)
-afirmar(POSARSE.empiezaS === 8 && POSARSE.asentadoS === 25, '5b · los tiempos de siempre: empieza a bajar a los 8 s de quietud y a los 25 está en el piso (la caída, en s31)')
+afirmar(POSARSE.empiezaS > 0 && POSARSE.asentadoS > POSARSE.empiezaS, '5b · empieza a bajar con la quietud y después está en el piso (los tiempos de ESCENA 7, en s32)')
 let e = polvoInicial(0)
 e = avanzarElPolvo(e, 1, [0, 0, 0], false)
 afirmar(e.quieto === NUNCA && e.desperto === 1, '5b · el movimiento lo despierta, y desde donde empezó')

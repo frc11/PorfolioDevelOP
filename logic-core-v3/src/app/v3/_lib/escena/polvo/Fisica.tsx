@@ -41,7 +41,7 @@ type VentanaDelBanco = Window & {
 
 export function Fisica(props: PropsDeLaFisica) {
   const e = entornoDeLaEscena()
-  if (!e.polvoParejo || (!e.pruebas.posarse && !e.pruebas.remolinos)) return null
+  if (!e.polvoParejo || (!e.posarse && !e.pruebas.remolinos)) return null
   return <FisicaPrendida {...props} />
 }
 
@@ -53,7 +53,8 @@ interface Remolino {
 }
 
 function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
-  const { posarse, remolinos: conEstela } = entornoDeLaEscena().pruebas
+  const { posarse } = entornoDeLaEscena()
+  const { remolinos: conEstela } = entornoDeLaEscena().pruebas
   const armado = useMemo(() => armar(), [])
   useEffect(() => () => armado.soltar(), [armado])
   const memoria = useRef({

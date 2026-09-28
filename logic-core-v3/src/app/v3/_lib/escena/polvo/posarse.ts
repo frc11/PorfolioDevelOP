@@ -17,9 +17,11 @@
  * sabe, mota por mota, cuánto se había posado cuando le llegó el frente y cuánto le queda subir.
  */
 export const POSARSE = {
-  empiezaS: 8,
-  asentadoS: 25,
-  desparejoS: 3,
+  // [ESCENA 7] T4: los tiempos a la mitad. Empezaba a los 8 s y quedaba todo en el piso a los ~20 (medido);
+  // ahora empieza a los 4 y el objetivo de la caída (9,5 s más el desparejo) lo deja en el piso a los ~10.
+  empiezaS: 4,
+  asentadoS: 9.5,
+  desparejoS: 1.5,
   velocidad: 16,
   subidaS: 1.8,
   /** Cuánto tiene que pasar sin movimiento para que cuente como quieto. */
