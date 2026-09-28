@@ -28,17 +28,21 @@ export type TonoDelCielo = 'celeste' | 'mono'
 export const VARIANTES_DEL_CIELO: readonly VarianteDelCielo[] = ['pintado', 'bloques', 'particulas']
 export const TONOS_DEL_CIELO: readonly TonoDelCielo[] = ['celeste', 'mono']
 
-/** Los colores de cada tono (codificados): el cielo arriba, la nube y su sombra. En el horizonte, la bruma. */
+/**
+ * Los colores de cada tono (codificados): el cielo arriba, la nube y su sombra. En el horizonte, la bruma. Medido:
+ * con #B9C8D4 y el degradé entero a 0,32 el texto sobre el cielo perdía hasta 30 % (Seis razones, de 12,5 a 8,7);
+ * más claros y con el degradé más largo, la franja donde va el texto queda cerca del papel.
+ */
 export const TONOS: Record<TonoDelCielo, { readonly alto: string; readonly nube: string; readonly sombra: string }> = {
-  celeste: { alto: '#B9C8D4', nube: '#FFFFFF', sombra: '#DCE2E7' },
-  mono: { alto: '#D4D4D1', nube: '#FFFFFF', sombra: '#E4E4E1' },
+  celeste: { alto: '#C8D5DF', nube: '#FFFFFF', sombra: '#E1E6EA' },
+  mono: { alto: '#DCDCD9', nube: '#FFFFFF', sombra: '#E8E8E5' },
 }
 
 export const CIELO_DE_DIA = {
   /** El radio del cielo: el de la noche (más allá de la última fila y del piso de abajo). */
   radio: FORMACION.radioDelCielo,
-  /** A qué altura del rayo (el seno de la elevación) el cielo ya tiene el color de arriba. */
-  degrade: 0.32,
+  /** A qué altura del rayo (el seno de la elevación) el cielo ya tiene el color de arriba (~27°). */
+  degrade: 0.45,
   /** Entre qué cantidades de noche se apaga (antes de que asomen las estrellas, en 0,35). */
   noche: [0.1, 0.33],
   /** La bruma sobre las nubes cerca del horizonte: hasta qué seno de la elevación. */
