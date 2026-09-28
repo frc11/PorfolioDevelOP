@@ -1,4 +1,5 @@
 import { FLOOR_Y } from '../probeScene'
+import { CAMPO_DEL_LOGO_GLSL } from './campoDelLogo'
 import { DISTANCIA_AL_LOGO_GLSL } from './obstaculo'
 import { POSARSE } from './posarse'
 import { POLVO_PAREJO } from './volumen'
@@ -39,6 +40,15 @@ import { POLVO_PAREJO } from './volumen'
  * el aire lento la mota tiene tiempo de doblar y RODEA al logo siguiendo el flujo; con el aire rápido no le
  * alcanza, CHOCA, y si entra más rápido que `obstaculo.pegar` se queda PEGADA (modo 6) entre 0,35 y 1,3 s,
  * se desprende y sigue el flujo. Es lo que pasa con el polvo de verdad: lo decide la inercia, no una regla.
+ *
+ * **[ESCENA 8] T5 · el choque, contra la malla real.** El choque, el pegado, el polvo posado sobre el logo y el
+ * que desliza usan el campo de distancia de la malla real (`campoDelLogo.ts`), no las formas aproximadas (el
+ * anillo entero de la «c» cerraba su boca con una pared que no existe: ahí se formaban los arcos que flotaban
+ * afuera del logo). Se pega sólo la que entra a la cara que recibe el impacto —con la velocidad RELATIVA a la
+ * superficie del logo, que también se mueve—, a un pelo de la superficie; ninguna queda más de `contacto.hasta`,
+ * y si el logo se mueve o gira (en el mundo, o en el cuadro porque la coreografía lo está girando) se sueltan
+ * todas y no se pega ninguna. Se desprende hacia donde va el aire (lo que el aire tiene de
+ * largo de la cara), nunca en contra. El rodeo suave del flujo (sin pegado) sigue con las formas de siempre.
  */
 
 export const FISICA = {
@@ -62,7 +72,22 @@ export const FISICA = {
    * cuánto queda pegada (s, entre las dos) y con cuánto se despega de la cara (u/s).
    */
   obstaculo: { radio: 1.8, margen: 0.22, pegar: 1.6, pega: [0.35, 1.3], despega: 0.4 },
+  /**
+   * [ESCENA 8] T5 · contra la malla real: a cuánto de la cara se detecta el contacto y dónde queda la pegada (u);
+   * cuánto queda pegada como mucho (s); y desde qué velocidad de la superficie del logo se sueltan (u/s).
+   */
+  contacto: { detecta: 0.12, queda: 0.03, hasta: 1.5, seMueve: 0.35 },
 } as const
+
+/**
+ * [ESCENA 8] T5 · con qué se desprende una mota pegada: lo que el aire tiene de largo de la cara, y hacia afuera
+ * sólo lo que el aire ya lleva hacia afuera. Nunca en contra del aire (su producto con el aire no es negativo).
+ * La misma cuenta que `despegue` en el shader; pura, para el invariante.
+ */
+export function despegue(aire: readonly [number, number, number], n: readonly [number, number, number]): [number, number, number] {
+  const entra = Math.min(0, aire[0] * n[0] + aire[1] * n[1] + aire[2] * n[2])
+  return [aire[0] - n[0] * entra, aire[1] - n[1] * entra, aire[2] - n[2] * entra]
+}
 
 /**
  * [ESCENA 7] T7 · la perturbación del flujo alrededor del logo (la misma cuenta que `alrededorDelLogo` en
@@ -129,6 +154,8 @@ uniform float uDesperto;
 uniform vec3 uOrigen;
 uniform float uMovimiento;
 uniform vec3 uVientoDelAire;
+uniform mat4 uLogoAntes;
+uniform float uMovimientoDelLogo;
 uniform sampler2D uPisoVivo;
 uniform vec4 uGrillaDelPiso;
 in vec2 vUv;
@@ -136,6 +163,7 @@ layout( location = 0 ) out vec4 salida0;
 layout( location = 1 ) out vec4 salida1;
 ${DISTANCIA_AL_LOGO_GLSL}
 ${CARAS_DEL_LOGO_GLSL}
+${CAMPO_DEL_LOGO_GLSL}
 
 float azar1( float n ) { return fract( sin( n * 12.9898 + 4.1414 ) * 43758.5453 ); }
 float azar3( vec3 p ) { return fract( sin( dot( p, vec3( 127.1, 311.7, 74.7 ) ) ) * 43758.5453 ); }
@@ -210,14 +238,30 @@ vec3 alrededorDelLogo( vec3 p, vec3 aire ) {
 	return ( - entra * n + 0.5 * ( aire - entra * n ) ) * s;
 }
 
-// Choca con el logo: afuera de su cara, sin velocidad hacia adentro. Devuelve la normal (0 si no tocó).
+// [ESCENA 8] T5: la velocidad de la superficie del logo en p (el punto del logo que está ahí, este cuadro y el anterior).
+vec3 velocidadDelLogo( vec3 p ) {
+	if ( uDt <= 0.0 ) return vec3( 0.0 );
+	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
+	return ( p - ( uLogoAntes * vec4( q, 1.0 ) ).xyz ) / uDt;
+}
+
+// [ESCENA 8] T5: el logo quieto, en el mundo y en el cuadro (la coreografía no lo está girando): sólo así se pega algo.
+#define LOGO_QUIETO ( uMovimientoDelLogo < ${FISICA.contacto.seMueve.toFixed(2)} && uMovimiento < ${FISICA.resbala.toFixed(2)} )
+
+// [ESCENA 8] T5: con qué se desprende (la cuenta de \`despegue\`): el aire a lo largo de la cara, nunca en contra.
+vec3 despegue( vec3 aire, vec3 n ) {
+	return aire - n * min( 0.0, dot( aire, n ) );
+}
+
+// Choca con el logo (la malla real, T5): afuera de su cara, sin velocidad hacia adentro de la superficie (que
+// también se mueve). Devuelve la normal (0 si no tocó).
 vec3 chocar( inout vec3 p, inout vec3 v ) {
 	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
-	float d = caraDelLogo( q );
+	float d = campoDelLogo( q );
 	if ( d >= ${FISICA.logo.radio.toFixed(3)} ) return vec3( 0.0 );
-	vec3 n = normalize( mat3( uLogo ) * normalDelLogo( q ) );
+	vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
 	p += n * ( ${FISICA.logo.radio.toFixed(3)} - d );
-	v -= n * min( 0.0, dot( v, n ) );
+	v -= n * min( 0.0, dot( v - velocidadDelLogo( p ), n ) );
 	return n;
 }
 
@@ -256,14 +300,15 @@ void main() {
 			vec3 viento = vientoDelDespertar( p ) + alrededorDelLogo( p, uVientoDelAire );
 			v += ( ( viento - v ) / ${FISICA.aire.arrastre.toFixed(2)} - ${FISICA.aire.rigidez.toFixed(2)} * d - ${FISICA.aire.amortigua.toFixed(2)} * v ) * dt;
 			d += v * dt;
-			// Si igual llega a la cara del logo: con fuerza, queda pegada; si no, se corre por la cara.
+			// Si igual llega a la cara del logo (la malla real, T5): con fuerza contra la cara que recibe el impacto
+			// (la velocidad relativa a la superficie) y el logo quieto, queda pegada; si no, se corre por la cara.
 			vec3 q = ( uLogoInverso * vec4( f + d, 1.0 ) ).xyz;
-			float cara = caraDelLogo( q );
-			if ( cara < ${FISICA.obstaculo.margen.toFixed(2)} ) {
-				vec3 n = normalize( mat3( uLogo ) * normalDelLogo( q ) );
-				float entra = - dot( uVientoDelAire + v, n );
-				vec3 enLaCara = f + d + n * ( ${(FISICA.obstaculo.margen * 0.5).toFixed(3)} - cara );
-				if ( entra > ${FISICA.obstaculo.pegar.toFixed(2)} ) {
+			float cara = campoDelLogo( q );
+			if ( cara < ${FISICA.contacto.detecta.toFixed(2)} ) {
+				vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
+				float entra = - dot( uVientoDelAire + v - velocidadDelLogo( f + d ), n );
+				vec3 enLaCara = f + d + n * ( ${FISICA.contacto.queda.toFixed(3)} - cara );
+				if ( entra > ${FISICA.obstaculo.pegar.toFixed(2)} && LOGO_QUIETO ) {
 					salida0 = vec4( ( uLogoInverso * vec4( enLaCara, 1.0 ) ).xyz, 6.0 );
 					salida1 = vec4( 0.0, 0.0, 0.0, uReloj );
 					return;
@@ -312,23 +357,24 @@ void main() {
 		else {
 			// Deslizando: la gravedad a lo largo de la cara, con roce; al dejar la cara, cae.
 			vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
-			vec3 n = normalize( mat3( uLogo ) * normalDelLogo( q ) );
+			vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
 			vec3 g = vec3( 0.0, - ${FISICA.logo.gravedad.toFixed(2)}, 0.0 );
 			v += ( g - n * dot( g, n ) - v * ${FISICA.logo.roce.toFixed(2)} ) * dt;
 			p += v * dt;
 			chocar( p, v );
-			float lejos = caraDelLogo( ( uLogoInverso * vec4( p, 1.0 ) ).xyz );
+			float lejos = campoDelLogo( ( uLogoInverso * vec4( p, 1.0 ) ).xyz );
 			salida0 = vec4( p, lejos > ${FISICA.logo.suelta.toFixed(2)} ? 1.0 : 4.0 );
 			salida1 = vec4( v, desde );
 			return;
 		}
 	}
 	if ( modo > 5.5 && modo < 6.5 ) {
-		// Pegada al logo: un rato (cada una el suyo) y después se desprende con el aire que corre.
-		float pega = mix( ${FISICA.obstaculo.pega[0].toFixed(2)}, ${FISICA.obstaculo.pega[1].toFixed(2)}, fract( azar * 13.1 ) );
-		if ( ! despierta && uReloj - desde < pega ) { salida0 = vec4( e0.xyz, 6.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
-		vec3 n = normalize( mat3( uLogo ) * normalDelLogo( e0.xyz ) );
-		v = uVientoDelAire + n * ${FISICA.obstaculo.despega.toFixed(2)};
+		// Pegada al logo: un rato (cada una el suyo, nunca más de \`contacto.hasta\`), y si el logo se mueve o gira,
+		// se suelta. Se desprende con el aire que corre, a lo largo de la cara: nunca en contra del aire (T5).
+		float pega = min( mix( ${FISICA.obstaculo.pega[0].toFixed(2)}, ${FISICA.obstaculo.pega[1].toFixed(2)}, fract( azar * 13.1 ) ), ${FISICA.contacto.hasta.toFixed(2)} );
+		if ( ! despierta && uReloj - desde < pega && LOGO_QUIETO ) { salida0 = vec4( e0.xyz, 6.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
+		vec3 n = normalize( mat3( uLogo ) * normalDelCampo( e0.xyz ) );
+		v = despegue( uVientoDelAire, n );
 		modo = 5.0;
 		desde = uReloj;
 	}
@@ -339,8 +385,9 @@ void main() {
 	vec3 antesDelChoque = v;
 	p += v * dt;
 	vec3 golpe = chocar( p, v );
-	// [ESCENA 7] T7: la levantada que choca fuerte contra el logo también queda pegada un momento.
-	if ( dot( golpe, golpe ) > 0.5 && - dot( antesDelChoque, golpe ) > ${FISICA.obstaculo.pegar.toFixed(2)} ) {
+	// [ESCENA 7] T7: la levantada que choca fuerte contra el logo también queda pegada un momento. [ESCENA 8] T5:
+	// con la velocidad relativa a la superficie, y sólo con el logo quieto.
+	if ( dot( golpe, golpe ) > 0.5 && - dot( antesDelChoque - velocidadDelLogo( p ), golpe ) > ${FISICA.obstaculo.pegar.toFixed(2)} && LOGO_QUIETO ) {
 		salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, 6.0 );
 		salida1 = vec4( 0.0, 0.0, 0.0, uReloj );
 		return;

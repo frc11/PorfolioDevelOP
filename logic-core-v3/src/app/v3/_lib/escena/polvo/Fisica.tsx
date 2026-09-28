@@ -11,6 +11,7 @@ import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
 import { AIRE } from './parche'
+import { CAMPO_EN_VIVO, campoDelLogo, contornoDeLaMalla, publicarElCampo, type MallaDelLogo } from './campoDelLogo'
 import { PISO_EN_VIVO } from '../piso/enVivo'
 import { POSARSE, avanzarElPolvo, polvoInicial, type EstadoDelPolvo } from './posarse'
 import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
@@ -26,16 +27,22 @@ import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
  *
  * [ESCENA 7] T7: 6b se borró; el logo como obstáculo del aire que corre está en la
  * simulación (`alrededorDelLogo`, y las motas que quedan pegadas, modo 6).
+ *
+ * [ESCENA 8] T5: arma una vez el campo de distancia de la malla real del logo (`campoDelLogo.ts`) cuando las
+ * mallas ya están, fuera del cuadro (en un momento libre), y en cada cuadro le pasa a la simulación la pose del
+ * logo del cuadro anterior (la velocidad de su superficie) y cuánto se mueve (las pegadas se sueltan).
  */
 
 interface PropsDeLaFisica {
   readonly rig: ProbeRigStore
   readonly quieto: boolean
   readonly dustGroupRef: RefObject<THREE.Group | null>
+  /** [ESCENA 8] T5 · el grupo del logo: sus mallas son las del campo de distancia. */
+  readonly logoGroupRef: RefObject<THREE.Group | null>
 }
 
 type VentanaDelBanco = Window & {
-  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida> }
+  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida>; campo: () => { ms: number; celdas: number[]; tramos: number } | null; movimientoDelLogo: () => number }
 }
 
 export function Fisica(props: PropsDeLaFisica) {
@@ -44,7 +51,30 @@ export function Fisica(props: PropsDeLaFisica) {
   return <FisicaPrendida {...props} />
 }
 
-function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
+/** [ESCENA 8] T5 · las mallas del logo en el espacio de su grupo (el que lee la simulación con `uLogoInverso`). */
+function mallasDelLogo(grupo: THREE.Group): MallaDelLogo[] {
+  grupo.updateMatrixWorld(true)
+  const inversa = grupo.matrixWorld.clone().invert()
+  const mallas: MallaDelLogo[] = []
+  grupo.traverse((o) => {
+    if (!(o instanceof THREE.Mesh) || !(o.geometry instanceof THREE.BufferGeometry)) return
+    const posicion = o.geometry.getAttribute('position')
+    if (posicion === undefined) return
+    mallas.push({ posiciones: posicion.array, indices: o.geometry.index?.array ?? null, matriz: inversa.clone().multiply(o.matrixWorld) })
+  })
+  return mallas
+}
+
+/** [ESCENA 8] T5 · cuánto se mueve la superficie del logo (u/s): el punto de su caja que más se corrió desde el cuadro anterior. */
+const ESQUINAS_DEL_LOGO = [new THREE.Vector3(-3.4, -3.6, 0), new THREE.Vector3(3.4, -3.6, 0), new THREE.Vector3(-3.4, 3.6, 0), new THREE.Vector3(3.4, 3.6, 0)]
+function movimientoDelLogo(ahora: THREE.Matrix4, antes: THREE.Matrix4, dt: number, a: THREE.Vector3, b: THREE.Vector3): number {
+  if (dt <= 0) return 0
+  let mas = 0
+  for (const e of ESQUINAS_DEL_LOGO) mas = Math.max(mas, a.copy(e).applyMatrix4(ahora).distanceTo(b.copy(e).applyMatrix4(antes)))
+  return mas / dt
+}
+
+function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFisica) {
   const { posarse } = entornoDeLaEscena()
   const armado = useMemo(() => armar(), [])
   useEffect(() => () => armado.soltar(), [armado])
@@ -60,7 +90,25 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
     punto: new THREE.Vector3(),
     movimiento: 0,
     gl: null as THREE.WebGLRenderer | null,
+    // [ESCENA 8] T5: el campo del logo (se arma una vez), la pose del logo del cuadro anterior y cuánto se mueve.
+    campo: 'falta' as 'falta' | 'armando' | 'listo',
+    medidaDelCampo: null as { ms: number; celdas: number[]; tramos: number } | null,
+    textura: null as THREE.Data3DTexture | null,
+    logoAntes: null as THREE.Matrix4 | null,
+    seMueve: 0,
+    a: new THREE.Vector3(),
+    b: new THREE.Vector3(),
   })
+
+  // [ESCENA 8] T5: al desmontarse, el campo se libera y la simulación vuelve a no tener logo.
+  useEffect(
+    () => () => {
+      memoria.current.textura?.dispose()
+      CAMPO_EN_VIVO.uCampoDelLogo.value = null
+      CAMPO_EN_VIVO.uHayCampo.value = 0
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!hayBanco()) return undefined
@@ -79,6 +127,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
         memoria.current.escala = escala
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
+      campo: () => memoria.current.medidaDelCampo,
+      movimientoDelLogo: () => memoria.current.seMueve,
       // Cuánto corrió el aire a las motas que están en el aire: cuántas se movieron más de 0,1, la media y la máxima.
       corrimiento: () => {
         const gl = memoria.current.gl
@@ -108,9 +158,33 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
       armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 0))
       m.inicio = false
     }
+    // [ESCENA 8] T5: el campo de la malla real, una vez, en un momento libre (no en este cuadro).
+    const grupoDelLogo = logoGroupRef.current
+    if (m.campo === 'falta' && grupoDelLogo !== null) {
+      const mallas = mallasDelLogo(grupoDelLogo)
+      if (mallas.length > 0) {
+        m.campo = 'armando'
+        const armar = (): void => {
+          const t0 = performance.now()
+          const contorno = contornoDeLaMalla(mallas)
+          const campo = campoDelLogo(contorno)
+          m.textura = publicarElCampo(campo)
+          m.medidaDelCampo = { ms: Math.round(performance.now() - t0), celdas: [...campo.n], tramos: contorno.tramos.length / 4 }
+          m.campo = 'listo'
+        }
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(armar, { timeout: 1500 })
+        else window.setTimeout(armar, 0)
+      }
+    }
     const dustGroup = dustGroupRef.current
     if (dustGroup === null) return
     const dtReal = Math.min(delta, 1 / 30)
+    // [ESCENA 8] T5: la pose del logo del cuadro anterior (la velocidad de su superficie) y cuánto se mueve.
+    const logoAntes = m.logoAntes ?? AIRE.uLogo.value.clone()
+    const seMueve = movimientoDelLogo(AIRE.uLogo.value, logoAntes, dtReal, m.a, m.b)
+    m.seMueve += (seMueve - m.seMueve) * (1 - Math.exp(-dtReal / 0.08))
+    const antesDeEste = m.logoAntes === null ? logoAntes : m.logoAntes.clone()
+    m.logoAntes = (m.logoAntes ?? new THREE.Matrix4()).copy(AIRE.uLogo.value)
     const dt = quieto ? 0 : dtReal * m.escala
     m.reloj += dt
 
@@ -159,6 +233,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef }: PropsDeLaFisica) {
       desperto: conRemolino ? despertar.desperto : -1e9,
       origen: despertar.origen,
       movimiento: m.movimiento,
+      logoAntes: antesDeEste,
+      movimientoDelLogo: m.seMueve,
     })
     if (dt > 0) armado.cronometro.correr(gl, () => armado.sim.paso(gl))
     publicar(armado.sim.estado()[0])
@@ -178,6 +254,9 @@ interface Paso {
   readonly desperto: number
   readonly origen: readonly [number, number, number]
   readonly movimiento: number
+  /** [ESCENA 8] T5 · la pose del logo del cuadro anterior y cuánto se mueve su superficie (u/s). */
+  readonly logoAntes: THREE.Matrix4
+  readonly movimientoDelLogo: number
 }
 
 function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
@@ -192,6 +271,8 @@ function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   u.uDesperto.value = p.desperto
   ;(u.uOrigen.value as THREE.Vector3).set(...p.origen)
   u.uMovimiento.value = p.movimiento
+  ;(u.uLogoAntes.value as THREE.Matrix4).copy(p.logoAntes)
+  u.uMovimientoDelLogo.value = p.movimientoDelLogo
 }
 
 function publicar(textura: THREE.Texture): void {
@@ -235,6 +316,10 @@ function armar() {
       uLogoPalo: AIRE.uLogoPalo,
       uLogo: AIRE.uLogo,
       uLogoInverso: AIRE.uLogoInverso,
+      // [ESCENA 8] T5: la pose del logo del cuadro anterior, cuánto se mueve, y el campo de la malla real.
+      uLogoAntes: { value: new THREE.Matrix4() },
+      uMovimientoDelLogo: { value: 0 },
+      ...CAMPO_EN_VIVO,
     },
     true,
   )

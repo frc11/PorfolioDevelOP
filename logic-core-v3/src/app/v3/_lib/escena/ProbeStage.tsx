@@ -281,7 +281,7 @@ export default function ProbeStage({
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
         <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} />
+        <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
