@@ -68,6 +68,7 @@ function armar() {
     toneMapped: false,
   })
   const cupula = new THREE.Mesh(esfera, material)
+  cupula.name = 'cielo de día'
   cupula.frustumCulled = false
   // Última de lo opaco (lo de adelante ya escribió su profundidad) y sin escribir la suya: las estrellas la pisan.
   cupula.renderOrder = 1000

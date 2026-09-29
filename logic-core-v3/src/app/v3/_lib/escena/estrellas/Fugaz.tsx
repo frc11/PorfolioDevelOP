@@ -156,6 +156,7 @@ function FugazPrendida({ rig }: PropsDeLaFugaz) {
     const uniforms = { ...TRAMA_EN_VIVO, uDesde: { value: new THREE.Vector3(0, 1, 0) }, uHasta: { value: new THREE.Vector3(0, 1, 0) }, uProgreso: { value: 0 }, uBrillo: { value: 0 }, uResolucion: { value: new THREE.Vector2(1, 1) }, uPixel: { value: 1 } }
     const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTEX, fragmentShader: FRAGMENT, transparent: true, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
     const linea = new THREE.Mesh(geometria, material)
+    linea.name = 'fugaz'
     linea.frustumCulled = false
     linea.renderOrder = MOIRE_FAR_ORDER - 1
     linea.visible = false

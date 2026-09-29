@@ -63,6 +63,7 @@ export function armar(formas: THREE.Shape[], rasante: boolean): Armado {
   const mallas = grupos.map((grupo, k) => {
     const geometria = geometrias[k]
     const malla = new THREE.InstancedMesh(geometria, materiales[k], grupo.length)
+    malla.name = k === 0 ? 'formación · primeras filas' : 'formación · siluetas'
     malla.frustumCulled = false
     // Las siluetas, antes que la trama (que va por delante) y que el cielo (que tapan).
     if (k === 1) malla.renderOrder = ORDEN_DE_LAS_SILUETAS

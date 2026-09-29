@@ -145,7 +145,7 @@ export function StudioFloor({ escenario, conNieblaRasante = false, conPisoVivo =
   )
 
   return (
-    <group>
+    <group name="piso">
       {/*
         La losa plana. Sigue siendo un cilindro con espesor —tiene canto y cara
         inferior, así que rasar el piso con la cámara sigue mostrando una

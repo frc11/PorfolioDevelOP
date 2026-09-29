@@ -297,13 +297,14 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       {[layers.coarse, layers.fine].map((layer) => (
         <mesh
           key={layer.spec.radius}
+          name={layer === layers.coarse ? 'trama gruesa' : 'trama fina'}
           geometry={layer.geometry}
           material={layer.material}
           renderOrder={layer.spec.order}
           position={[0, layer.spec.bottom + (layer.spec.top - layer.spec.bottom) / 2, 0]}
         />
       ))}
-      {zocalo !== null && <mesh geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} />}
+      {zocalo !== null && <mesh name="zócalo" geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} />}
     </>
   )
 })

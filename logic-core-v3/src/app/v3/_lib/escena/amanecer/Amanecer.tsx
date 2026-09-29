@@ -138,6 +138,7 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       depthTest: false,
     })
     const malla = new THREE.Mesh(geometria, material)
+    malla.name = 'rayos del amanecer'
     malla.frustumCulled = false
     malla.renderOrder = 3
     malla.visible = false

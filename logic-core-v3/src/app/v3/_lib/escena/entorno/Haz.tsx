@@ -152,7 +152,7 @@ export function Haz({ conCharco }: { readonly conCharco: boolean }) {
   )
 
   return (
-    <group>
+    <group name="haz">
       <mesh
         position={[0, HAZ.arriba, 0]}
         rotation={[-Math.PI / 2, 0, 0]}

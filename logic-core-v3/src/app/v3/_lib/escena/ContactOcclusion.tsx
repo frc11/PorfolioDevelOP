@@ -167,6 +167,7 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
     <>
       <mesh
         ref={meshRef}
+        name="contacto"
         // Acostado mirando hacia arriba, y apoyado apenas por encima de las
         // marcas de piso (que suben hasta 0,012 desde el papel) para que también
         // las oscurezca: una oclusión que no toca lo que está debajo del objeto no
@@ -194,7 +195,7 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
         />
       </mesh>
       {spriteDuro !== null && (
-        <mesh ref={duraRef} position={[0, FLOOR_Y + CONTACT_LIFT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
+        <mesh ref={duraRef} name="contacto duro" position={[0, FLOOR_Y + CONTACT_LIFT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
           <planeGeometry args={[CONTACT_WIDTH, CONTACT_DEPTH]} />
           <meshBasicMaterial ref={duraMaterialRef} map={spriteDuro} color={CONTACT_COLOR} transparent opacity={0} depthWrite={false} />
         </mesh>

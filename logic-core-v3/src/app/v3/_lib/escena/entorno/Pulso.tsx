@@ -88,7 +88,7 @@ export function Pulso() {
   useEffect(() => () => material.dispose(), [material])
 
   return (
-    <mesh position={[0, FLOOR_Y + 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]} material={material} renderOrder={1}>
+    <mesh name="pulso" position={[0, FLOOR_Y + 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]} material={material} renderOrder={1}>
       <circleGeometry args={[FLOOR_RADIUS, 96]} />
     </mesh>
   )

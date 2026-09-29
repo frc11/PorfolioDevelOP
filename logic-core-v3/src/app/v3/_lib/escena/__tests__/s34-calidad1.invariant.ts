@@ -10,6 +10,8 @@
  * A3 · el obstáculo sin pegado: el modo 6 borrado; el flujo que rodea al logo contra la malla real (un campo del flujo,
  *      más grueso y de más alcance): el aire pasa por la boca de la «c» y por el ojo de la «p»; la que choca se corre
  *      por la cara sin rebote; el empuje tras el cursor también contra la malla real. Lo posado sobre el logo, igual.
+ * B0 · el instrumento: el perfil de la GPU sólo existe con banco, y lo que se dibuja tiene nombre (el perfil agrupa
+ *      por nombre: sin él, una pasada nueva aparece como «(sin nombre)» y nadie sabe qué cuesta).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -169,5 +171,20 @@ controlPositivo('el detector VE el campo fino (topado a 1,2 u)', delFino, sabeLe
 const rodeoA3 = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(simulacion)?.[0] ?? ''
 afirmar(/float d = flujoDelLogo\( q \);/.test(rodeoA3) && /normalDelFlujo\( q \)/.test(rodeoA3) && /campoDelLogo\(contorno, CAMPO_DEL_FLUJO\)/.test(fisica) && /publicarElFlujo\(flujo\)/.test(fisica) && /\.\.\.FLUJO_EN_VIVO/.test(fisica), 'el flujo de la simulación lee el campo del flujo, que la física hornea y publica')
 afirmar(/#ifdef AIRE_FISICA\s*vec3 fuera = afueraDelCampo\( enElMundo, HOLGURA_TRAS_EL_CURSOR \);/.test(parche) && /CAMPO_EN_VIVO, \{ uTiempo/.test(parche), '  tras el cursor, la mota empujada contra el logo se corre a su cara real (la boca y el ojo, abiertos)')
+
+// ── B0 · el instrumento ───────────────────────────────────────────────────
+titulo('B0 · el instrumento: el perfil de la GPU, sólo con banco, y todo lo que se dibuja con nombre')
+const perfilGpu = leer('gpu/PerfilDeLaGpu.tsx')
+afirmar(/if \(!hayBanco\(\)\) return undefined/.test(perfilGpu) && /<PerfilDeLaGpu \/>/.test(leer('ProbeStage.tsx')), 'el perfil de la GPU se monta en la escena y sin banco no hace nada')
+/** Lo que se dibuja, por archivo, y el nombre con que el perfil lo agrupa. */
+const NOMBRES: readonly (readonly [string, string])[] = [
+  ['ProbeStage.tsx', 'name="logo"'], ['ProbeStage.tsx', 'name="polvo"'], ['ProbeStage.tsx', 'name="bokeh"'], ['StudioFloor.tsx', 'name="piso"'],
+  ['ContactOcclusion.tsx', 'name="contacto"'], ['MoireScreen.tsx', "'trama gruesa' : 'trama fina'"], ['MoireScreen.tsx', 'name="zócalo"'], ['entorno/Haz.tsx', 'name="haz"'],
+  ['entorno/Pulso.tsx', 'name="pulso"'], ['estrellas/Estrellas.tsx', "puntos.name = 'estrellas'"], ['estrellas/Estrellas.tsx', "cupula.name = 'vía láctea'"], ['estrellas/Fugaz.tsx', "linea.name = 'fugaz'"],
+  ['formacion/armado.ts', "'formación · primeras filas' : 'formación · siluetas'"], ['cieloDeDia/CieloDeDia.tsx', "cupula.name = 'cielo de día'"], ['piso/PisoVivo.tsx', "bloques.name = 'piso vivo'"], ['amanecer/Amanecer.tsx', "malla.name = 'rayos del amanecer'"],
+]
+const conNombre = (lista: readonly (readonly [string, string])[]): boolean => lista.every(([a, n]) => leer(a).includes(n))
+afirmar(conNombre(NOMBRES), '  todo lo que se dibuja tiene nombre (el perfil de la GPU agrupa por nombre)', `${String(NOMBRES.length)} nombres en ${String(new Set(NOMBRES.map(([a]) => a)).size)} archivos`)
+controlPositivo('el detector VE un objeto sin nombre', [...NOMBRES, ['piso/PisoVivo.tsx', "bloques.name = 'otro'"] as const], conNombre)
 
 cerrar('s34-calidad1')

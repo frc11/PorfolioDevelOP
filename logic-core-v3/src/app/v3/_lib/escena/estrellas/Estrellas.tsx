@@ -279,6 +279,7 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
     }
     const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTEX, fragmentShader: FRAGMENT, transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending })
     const puntos = new THREE.Points(geometria, material)
+    puntos.name = 'estrellas'
     puntos.frustumCulled = false
     // Antes que la trama gruesa: la trama se dibuja encima.
     puntos.renderOrder = MOIRE_FAR_ORDER - 2
@@ -298,6 +299,7 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
       side: THREE.BackSide,
     })
     const cupula = new THREE.Mesh(esfera, deLaCupula)
+    cupula.name = 'vía láctea'
     cupula.frustumCulled = false
     cupula.renderOrder = MOIRE_FAR_ORDER - 3
     return { puntos, cupula, geometria, esfera, material, deLaCupula, uniforms, trama, cuantas }

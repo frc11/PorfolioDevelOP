@@ -29,10 +29,8 @@ import { OrbitRig } from './OrbitRig'
 import { FOG_COLOR, FOG_FAR, FOG_NEAR } from './probeAtmosphere'
 import { ProbeLogo } from './ProbeLogo'
 import { StudioFloor } from './StudioFloor'
-import {
-  BOUNCE_COLOR,
-  PAPER_COLOR,
-} from './probeScene'
+import { BOUNCE_COLOR, PAPER_COLOR } from './probeScene'
+import { PerfilDeLaGpu } from './gpu/PerfilDeLaGpu'
 import {
   type ProbeMode,
   type ProbeParamsStore,
@@ -214,7 +212,7 @@ export default function ProbeStage({
           intacto: queda la dirección de la principal, que ilumina y no proyecta.
         */}
 
-        <group ref={logoGroupRef}>
+        <group ref={logoGroupRef} name="logo">
           <ProbeLogo stats={stats} onReady={onReady} materialRef={logoMaterialRef} />
         </group>
 
@@ -248,10 +246,10 @@ export default function ProbeStage({
           matriz por concha y cero costo por partícula. El porqué está en
           `choreographyPhysics.ts`.
         */}
-        <group ref={dustGroupRef}>
+        <group ref={dustGroupRef} name="polvo">
           <DepthParticles store={store} />
         </group>
-        <group ref={bokehGroupRef}>
+        <group ref={bokehGroupRef} name="bokeh">
           <BokehParticles />
         </group>
 
@@ -294,6 +292,8 @@ export default function ProbeStage({
         <Fugaz rig={rig} />
         {/* [ESCENA 7] T12: de noche, el piso iluminado por el haz aclara apenas la cara de abajo del logo. */}
         <Rebote logoMaterialRef={logoMaterialRef} />
+        {/* [CALIDAD 1] El perfil de la GPU por pasada: sólo con banco (`gpu/PerfilDeLaGpu.tsx`). */}
+        <PerfilDeLaGpu />
       </Suspense>
     </Canvas>
   )

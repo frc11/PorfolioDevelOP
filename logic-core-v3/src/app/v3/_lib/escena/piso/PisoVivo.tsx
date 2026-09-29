@@ -234,6 +234,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)
+  bloques.name = 'piso vivo'
   bloques.frustumCulled = false
   const matriz = new THREE.Matrix4()
   for (let k = 0; k < grilla.cuantas; k += 1) {
