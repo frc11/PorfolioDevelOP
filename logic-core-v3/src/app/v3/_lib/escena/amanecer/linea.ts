@@ -190,13 +190,65 @@ export interface CuadroDelAmanecer {
 }
 
 /**
+ * [CALIDAD 1] A1 · EL DÍA DE LA LLEGADA. En un viaje del menú que no cambia de luz (de día a día) el amanecer no corre:
+ * desde el primer cuadro la compuerta es la del destino y, si está prendida, el amanecer está entero (el día). No el
+ * avance que pide el scroll allá: abajo de 1024 «Por qué develOP» llega con el borde de Tu panel arriba y pide 0,851,
+ * el centro todavía oscuro, y mostrarlo desde el primer cuadro pinta de noche el vuelo entero. `pieDeTuPanel` es el
+ * borde de abajo de Tu panel EN EL DESTINO (px desde arriba del cuadro); los destinos del menú no caen en la
+ * histéresis de `amanecerEn`.
+ */
+export function compuertaEnLaLlegada(pieDeTuPanel: number, alto: number): boolean {
+  return pieDeTuPanel < alto * AMANECER.visible
+}
+
+/** [CALIDAD 1] A1 · Cuánto puede volver el scroll para atrás de la llegada antes de soltar el día entero. */
+export const SOLTAR_LA_LLEGADA = 0.02
+
+/**
+ * [CALIDAD 1] A1 · Después de un viaje de día a día el amanecer sigue entero mientras el scroll no lo alcance (1) ni
+ * vuelva para atrás de donde llegó: así no corre para atrás al llegar. Volviendo, lo suelta y sigue la vuelta de siempre.
+ */
+export function sigueEntero(pedido: number, pedidoAlLlegar: number): boolean {
+  return pedido < 1 && pedido >= pedidoAlLlegar - SOLTAR_LA_LLEGADA
+}
+
+/**
  * [ESCENA 8] T3 · El avance de este cuadro. Sin evento al cargar ya adentro del final, en un viaje ni donde nadie
  * lo ve (va derecho al pedido); con menos movimiento, de una vez; si no, persigue al pedido con la velocidad tope,
- * y con el pie a la vista no queda atrás de lo legible.
+ * y con el pie a la vista no queda atrás de lo legible. [CALIDAD 1] Un viaje que cambia de luz sigue acá (como
+ * antes); uno de día a día no llega: lo resuelve `compuertaEnLaLlegada`.
  */
 export function avanceDelCuadro(anterior: number, pedido: number, dt: number, c: CuadroDelAmanecer): number {
   if (c.quieto) return pedido > 0 ? 1 : 0
   if (c.recien) return c.carga || c.viaje ? pedido : 0
   if (c.viaje || c.oculto) return pedido
   return Math.max(perseguir(anterior, pedido, dt), c.pie ? AMANECER.texto.abajo[1] : 0)
+}
+
+/** [CALIDAD 1] A1 · Lo que el amanecer prendido recuerda de un cuadro al otro. */
+export interface MemoriaDelAmanecer {
+  avance: number
+  /** Llegó de un viaje de día a día y sostiene el día entero. */
+  entero: boolean
+  /** El avance que pedía el scroll al terminar ese viaje. */
+  pedidoAlLlegar: number
+}
+
+/**
+ * [CALIDAD 1] A1 · Un cuadro del amanecer prendido. En un viaje de día a día, el día entero (y se anota la llegada);
+ * después, sostenido mientras `sigueEntero`; si no, `avanceDelCuadro` como siempre. Escribe en `m`.
+ */
+export function pasoDelAmanecer(m: MemoriaDelAmanecer, deDiaADia: boolean, pedido: number, dt: number, c: CuadroDelAmanecer): void {
+  if (deDiaADia) {
+    m.avance = 1
+    m.entero = true
+    m.pedidoAlLlegar = pedido
+    return
+  }
+  if (m.entero && sigueEntero(pedido, m.pedidoAlLlegar)) {
+    m.avance = 1
+    return
+  }
+  m.entero = false
+  m.avance = avanceDelCuadro(m.avance, pedido, dt, c)
 }

@@ -14,7 +14,7 @@ import { FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../probeMoire'
 import { viajeEnCurso } from '../viaje'
 import { DIA_DEL_TEXTO } from './diaDelTexto'
-import { AMANECER, PAUSA_S, avanceDelCuadro, avanceDelScroll, diaParaElTexto, momentoEn } from './linea'
+import { AMANECER, PAUSA_S, avanceDelScroll, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer } from './linea'
 import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 
 /**
@@ -29,6 +29,10 @@ import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
  * del menú y con el bloque opaco tapando el cuadro, va derecho al pedido; con menos movimiento, el día llega
  * de una vez. Escribe cuánto día hay para el texto del final (`DIA_DEL_TEXTO`), y si el pie (compartido, no
  * espera) queda a la vista, no deja al amanecer atrás de lo legible.
+ *
+ * [CALIDAD 1] A1 · En un viaje de día a día el amanecer no corre (ni de ida ni de vuelta por Tu panel): desde el
+ * primer cuadro, la compuerta del destino con el día entero (`compuertaEnLaLlegada`), que se sostiene al llegar
+ * hasta que el scroll lo alcanza o vuelve para atrás (`sigueEntero`). Los viajes que cambian de luz, como antes.
  */
 
 type VentanaDelBanco = Window & {
@@ -118,7 +122,7 @@ function mostrarLosHaces(malla: THREE.Mesh, hay: boolean, ojo: THREE.Vector3): b
 }
 
 function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
-  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null })
+  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0 })
   const haces = useMemo(() => {
     // Una esfera alrededor del ojo, sin prueba de profundidad: el rayo lo corta la cuenta (la pared o el piso).
     const geometria = new THREE.SphereGeometry(20, 32, 16)
@@ -178,16 +182,21 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     }
     // [ESCENA 8] T3: el avance persigue al que pide el scroll (el borde de Tu panel), con una velocidad tope.
     m.cuadros += 1
-    const activo = DIA_DEL_FINAL.activo
-    const bloque = activo ? medirElBloqueOpaco(document, window.innerHeight) : null
-    m.pedido = bloque === null ? 0 : avanceDelScroll(bloque.tuPanel.pie, bloque.alto)
+    // [CALIDAD 1] A1: en un viaje de día a día, desde el primer cuadro la compuerta del destino (Tu panel corrido allá).
+    const luzDelViaje = viajeEnCurso()?.luz ?? null
+    const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null ? medirElBloqueOpaco(document, window.innerHeight) : null
+    const enLaLlegada = luzDelViaje !== null && bloque !== null ? compuertaEnLaLlegada(bloque.tuPanel.pie - (luzDelViaje.y1 - window.scrollY), bloque.alto) : null
+    const activo = enLaLlegada ?? DIA_DEL_FINAL.activo
+    m.pedido = activo && bloque !== null ? avanceDelScroll(bloque.tuPanel.pie, bloque.alto) : 0
     const recien = activo && !m.activo
     m.activo = activo
     if (m.congelado !== null) m.avance = m.congelado / AMANECER.final
-    else if (!activo) m.avance = 0
-    else {
+    else if (!activo) {
+      m.avance = 0
+      m.entero = false
+    } else {
       const oculto = delta > PAUSA_S || (bloque !== null && bloqueTapaElCuadro(bloque))
-      m.avance = avanceDelCuadro(m.avance, m.pedido, dt, { recien, carga: m.cuadros <= 3, quieto, viaje: viajeEnCurso() !== null, oculto, pie: pieALaVista(m) })
+      pasoDelAmanecer(m, enLaLlegada !== null, m.pedido, dt, { recien, carga: m.cuadros <= 3, quieto, viaje: viajeEnCurso() !== null, oculto, pie: pieALaVista(m) })
     }
     DIA_DEL_TEXTO.frase.set(m.activo ? diaParaElTexto(m.avance, 'frase') : 1)
     DIA_DEL_TEXTO.abajo.set(m.activo ? diaParaElTexto(m.avance, 'abajo') : 1)
