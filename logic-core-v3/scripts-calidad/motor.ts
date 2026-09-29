@@ -28,15 +28,17 @@ import { medir } from '../scripts-b4/navegador'
 import { esperar } from '../scripts-viajes/banco'
 import { DIRC } from './banco'
 import { abrirMotor, type BancoDelMotor } from './motor/abrir'
-import { agruparMemoria, agruparPerfil, porSegundo, resumen, ritmo, tramoEn, tramosDe, type Documento, type NodoDeMemoria, type PerfilDeCpu, type Tramo } from './motor/analisis'
+import { agruparMemoria, agruparPerfil, archivoDe, porSegundo, resumen, ritmo, tramoEn, tramosDe, type Documento, type NodoDeMemoria, type PerfilDeCpu, type Tramo } from './motor/analisis'
 
 const [PARTE, ANCHO, ALTO, ETIQUETA, PEDIDO, DPR] = [process.argv[2] ?? 'gpu', Number(process.argv[3] ?? 1440), Number(process.argv[4] ?? 900), process.argv[5] ?? 'base', process.argv[6] ?? 'producto', Number(process.argv[7] ?? 1)]
+/** `FRIO=1`: cada corrida con el perfil de Chrome limpio (sin la caché de shaders): la primera visita. */
+const FRIO = process.env.FRIO === '1'
 
 /** La velocidad del recorrido (px/s): el documento entero en ~30 s a 1440 y ~25 s a 375. */
 const VELOCIDAD = 900
 
 const carpeta = (): string => {
-  const d = `${DIRC}/motor/${ETIQUETA}/${String(ANCHO)}${DPR === 1 ? '' : `@${String(DPR)}x`}`
+  const d = `${DIRC}/motor/${ETIQUETA}/${String(ANCHO)}${DPR === 1 ? '' : `@${String(DPR)}x`}${FRIO ? '-frio' : ''}`
   mkdirSync(d, { recursive: true })
   return d
 }
@@ -79,7 +81,7 @@ function porTramo(serie: readonly (readonly [number, number])[], tramos: readonl
 }
 
 async function parteGpu(): Promise<void> {
-  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR })
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
   try {
     const d = await documento(b)
     const tramos = tramosDe(d)
@@ -103,7 +105,7 @@ async function parteGpu(): Promise<void> {
 }
 
 async function parteRitmo(): Promise<void> {
-  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, conVsync: true })
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, conVsync: true, frio: FRIO })
   try {
     const d = await documento(b)
     const tramos = tramosDe(d)
@@ -118,7 +120,7 @@ async function parteRitmo(): Promise<void> {
 }
 
 async function parteCpu(): Promise<void> {
-  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR })
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
   const s = b.p.sessionId
   try {
     const d = await documento(b)
@@ -126,18 +128,42 @@ async function parteCpu(): Promise<void> {
     await b.p.conexion.enviar('Profiler.enable', {}, s)
     await b.p.conexion.enviar('Profiler.setSamplingInterval', { interval: 200 }, s)
     await medir(b.p, 'window.__commitsDelBanco.activo = true')
+    // El reloj de la página cuando arranca el perfil: para ubicar sus muestras en los cuadros largos.
+    const t0 = await medir<number>(b.p, 'performance.now()')
     await b.p.conexion.enviar('Profiler.start', {}, s)
     const r = await recorrer(b, d)
     const { profile } = (await b.p.conexion.enviar('Profiler.stop', {}, s)) as { profile: PerfilDeCpu }
     const commits = await medir<unknown>(b.p, '(() => { const c = window.__commitsDelBanco; c.activo = false; return { commits: c.commits, porRaiz: c.porRaiz, porComponente: Object.entries(c.porComponente).sort((a, b) => b[1] - a[1]).slice(0, 40) } })()')
-    const loafs = await medir<unknown[]>(b.p, 'window.__loafs')
+    const loafs = await medir<{ t: number; ms: number; y: number }[]>(b.p, 'window.__loafs')
     const segundos = (r.t[r.t.length - 1] - r.t[0]) / 1000
     const perfil = agruparPerfil(profile)
-    escribir('cpu', { ancho: ANCHO, alto: ALTO, dpr: DPR, pedido: PEDIDO, segundos, cuadros: r.t.length, perfil, commits, cuadrosLargos: loafs, tramos: tramosDe(d) })
-    console.log(JSON.stringify({ segundos, recolector: perfil.especiales['(garbage collector)'], pausas: perfil.pausasDelRecolector, commits, cuadrosLargos: loafs.length, top: perfil.porArchivo.slice(0, 8) }))
+    const tramos = tramosDe(d)
+    const adentro = loafs.filter((l) => l.ms >= 100).map((l) => ({ ...l, tramo: tramoEn(tramos, l.y), adentro: adentroDe(profile, t0, l.t, l.t + l.ms) }))
+    escribir('cpu', { ancho: ANCHO, alto: ALTO, dpr: DPR, pedido: PEDIDO, segundos, cuadros: r.t.length, perfil, commits, cuadrosLargos: loafs, adentroDeLosLargos: adentro, tramos })
+    console.log(JSON.stringify({ segundos, recolector: perfil.especiales['(garbage collector)'], pausas: perfil.pausasDelRecolector, commits: (commits as { commits: number }).commits, cuadrosLargos: loafs.length, top: perfil.porArchivo.slice(0, 8) }))
+    for (const a of adentro) console.log(`  ${String(a.ms)} ms en ${a.tramo}: ${a.adentro.slice(0, 6).map(([k, v]) => `${k} ${String(v)}`).join(' | ')}`)
   } finally {
     await b.cerrar()
   }
+}
+
+/**
+ * Lo que corrió adentro de una ventana de la página [desde, hasta] (ms de `performance.now()`): el tiempo propio por
+ * función de las muestras del perfil que caen ahí. El perfil arranca en `t0` (el reloj de la página).
+ */
+function adentroDe(p: PerfilDeCpu, t0: number, desde: number, hasta: number): [string, number][] {
+  const nodo = new Map(p.nodes.map((n) => [n.id, n]))
+  const acc = new Map<string, number>()
+  let t = t0
+  for (let i = 0; i < p.samples.length; i += 1) {
+    t += (p.timeDeltas[i] ?? 0) / 1000
+    if (t < desde || t > hasta) continue
+    const n = nodo.get(p.samples[i])
+    if (n === undefined) continue
+    const k = `${n.callFrame.functionName || '(anónima)'}${n.callFrame.url === '' ? '' : ` · ${archivoDe(n.callFrame.url)}:${String(n.callFrame.lineNumber + 1)}`}`
+    acc.set(k, (acc.get(k) ?? 0) + (p.timeDeltas[i + 1] ?? 0) / 1000)
+  }
+  return [...acc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => [k, Math.round(v)])
 }
 
 /** Los momentos de las pasadas: dónde pararse (px) y, si hace falta, qué congelar. */
@@ -156,7 +182,7 @@ async function momentos(b: BancoDelMotor, d: Documento): Promise<{ nombre: strin
 }
 
 async function partePasadas(): Promise<void> {
-  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR })
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
   try {
     const d = await documento(b)
     const salida: Record<string, unknown> = {}
@@ -181,7 +207,7 @@ async function partePasadas(): Promise<void> {
 }
 
 async function parteMemoria(): Promise<void> {
-  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR })
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
   const s = b.p.sessionId
   try {
     const d = await documento(b)
@@ -213,7 +239,89 @@ async function parteMemoria(): Promise<void> {
   }
 }
 
-const PARTES: Record<string, () => Promise<void>> = { gpu: parteGpu, ritmo: parteRitmo, cpu: parteCpu, pasadas: partePasadas, memoria: parteMemoria }
+/** [CALIDAD 1] B1 · qué programas se compilan durante el recorrido (tarde) y para qué objetos, con los cuadros largos. */
+async function parteProgramas(): Promise<void> {
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
+  try {
+    const d = await documento(b)
+    const tramos = tramosDe(d)
+    await medir(b.p, `(() => { window.__loafs = []; new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__loafs.push({ t: Math.round(e.startTime), ms: Math.round(e.duration), y: Math.round(scrollY) }) }).observe({ type: 'long-animation-frame' }); return 0 })()`)
+    const alCargar = await medir<{ total: number }>(b.p, 'window.__gpuDelBanco.programas()')
+    const precompilado = await medir<unknown>(b.p, 'window.__precompiladoDelBanco ?? null')
+    await medir(b.p, 'window.__gpuDelBanco.vigilar()')
+    await recorrer(b, d)
+    const v = await medir<{ nuevos: { t: number; y: number; ids: number[] }[]; programas: { total: number; lista: { id: number; nombre: string; usadoPor: string[] }[] } }>(b.p, 'window.__gpuDelBanco.vigilados()')
+    const loafs = await medir<{ t: number; ms: number; y: number }[]>(b.p, 'window.__loafs')
+    const quien = new Map(v.programas.lista.map((p) => [p.id, p]))
+    const tarde = v.nuevos.map((n) => ({ y: Math.round(n.y), tramo: tramoEn(tramos, n.y), programas: n.ids.map((id) => ({ id, nombre: quien.get(id)?.nombre ?? '?', usadoPor: quien.get(id)?.usadoPor ?? [] })), cuadroLargo: loafs.filter((l) => Math.abs(l.t - n.t) < 1500).map((l) => l.ms) }))
+    escribir('programas', { ancho: ANCHO, alto: ALTO, dpr: DPR, pedido: PEDIDO, precompilado, alCargar: alCargar.total, alFinal: v.programas.total, tarde, cuadrosLargos: loafs, lista: v.programas.lista })
+    console.log(JSON.stringify({ precompilado, alCargar: alCargar.total, alFinal: v.programas.total, cuadrosLargos: loafs.filter((l) => l.ms >= 100).map((l) => `${String(l.ms)} ms en ${tramoEn(tramos, l.y)}`), tarde: tarde.map((x) => `${x.tramo} (y ${String(x.y)}): ${x.programas.map((p) => `${String(p.id)} ${p.usadoPor.join('/') || p.nombre}`).join(', ')} · largos ${x.cuadroLargo.join('/')}`) }, null, 1))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+/** Un evento de la traza de Chrome (formato Trace Event). */
+interface EventoDeLaTraza {
+  readonly name: string
+  readonly cat: string
+  readonly ph: string
+  readonly ts: number
+  readonly dur?: number
+  readonly tid: number
+  readonly args?: { readonly data?: Record<string, unknown>; readonly beginData?: Record<string, unknown>; readonly elementCount?: number }
+}
+
+/**
+ * [CALIDAD 1] B1 · la TRAZA: lo que hace Blink (estilo, layout, pintura, decodificar, la GPU del compositor) durante el
+ * recorrido, para los cuadros largos que el perfil de JS sólo ve como `scrollTo`. Los eventos de más de 40 ms, con el
+ * scroll de ese momento.
+ */
+async function parteTraza(): Promise<void> {
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
+  const s = b.p.sessionId
+  try {
+    const d = await documento(b)
+    const tramos = tramosDe(d)
+    const eventos: EventoDeLaTraza[] = []
+    b.p.conexion.al('Tracing.dataCollected', (p) => {
+      eventos.push(...((p as { value: EventoDeLaTraza[] }).value))
+    })
+    const terminada = new Promise<void>((r) => {
+      b.p.conexion.al('Tracing.tracingComplete', () => r())
+    })
+    await b.p.conexion.enviar('Tracing.start', { categories: 'devtools.timeline,disabled-by-default-devtools.timeline,blink,v8,gpu', transferMode: 'ReportEvents' }, s)
+    const r = await recorrer(b, d)
+    await b.p.conexion.enviar('Tracing.end', {}, s)
+    await terminada
+    // El scroll de cada instante: los cuadros grabados, en el reloj de la traza (µs) — se alinea por el primer cuadro.
+    const marcas = eventos.filter((e) => e.name === 'FireAnimationFrame' || e.name === 'AnimationFrame').map((e) => e.ts).sort((a, c) => a - c)
+    const t0Traza = marcas[0] ?? 0
+    const scrollEn = (ts: number): number => {
+      const t = r.t[0] + (ts - t0Traza) / 1000
+      let j = 0
+      while (j + 1 < r.t.length && r.t[j + 1] <= t) j += 1
+      return r.y[j]
+    }
+    const largos = eventos.filter((e) => e.ph === 'X' && (e.dur ?? 0) > 40000 && !['RunTask', 'ThreadControllerImpl::RunTask', 'TaskQueueManager::ProcessTaskFromWorkQueue', 'MessageLoop::RunTask'].includes(e.name))
+    const porNombre = new Map<string, { ms: number; veces: number; peor: number; donde: string[] }>()
+    for (const e of largos) {
+      const ms = (e.dur ?? 0) / 1000
+      const k = e.name
+      const a = porNombre.get(k) ?? { ms: 0, veces: 0, peor: 0, donde: [] }
+      const y = scrollEn(e.ts)
+      const extra = e.args?.data?.elementCount ?? e.args?.elementCount ?? e.args?.beginData?.dirtyObjects ?? ''
+      porNombre.set(k, { ms: a.ms + ms, veces: a.veces + 1, peor: Math.max(a.peor, ms), donde: [...a.donde, `${String(Math.round(ms))} ms en ${tramoEn(tramos, y)}${extra === '' ? '' : ` (${String(extra)})`}`] })
+    }
+    const lista = [...porNombre.entries()].sort((a, c) => c[1].peor - a[1].peor).map(([k, v]) => ({ evento: k, veces: v.veces, peorMs: Math.round(v.peor), totalMs: Math.round(v.ms), donde: v.donde.slice(0, 12) }))
+    escribir('traza', { ancho: ANCHO, alto: ALTO, dpr: DPR, pedido: PEDIDO, eventos: eventos.length, largos: lista })
+    for (const x of lista.slice(0, 25)) console.log(`${x.evento}: ${String(x.veces)} veces, peor ${String(x.peorMs)} ms · ${x.donde.slice(0, 5).join(' | ')}`)
+  } finally {
+    await b.cerrar()
+  }
+}
+
+const PARTES: Record<string, () => Promise<void>> = { gpu: parteGpu, ritmo: parteRitmo, cpu: parteCpu, pasadas: partePasadas, memoria: parteMemoria, programas: parteProgramas, traza: parteTraza }
 
 if (process.argv[1]?.endsWith('motor.ts')) {
   const parte = PARTES[PARTE]

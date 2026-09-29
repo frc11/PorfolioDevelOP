@@ -198,7 +198,7 @@ afirmar(/float d = campoDelLogo\( q \);/.test(chocar) && /normalDelCampo\( q \)/
 afirmar(/float cara = campoDelLogo\( q \);/.test(sim) && /float lejos = campoDelLogo\(/.test(sim) && (sim.match(/normalDelCampo\(/g) ?? []).length >= 3, '  el contacto en el aire y lo que desliza, también')
 const rodeo = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
 afirmar(/flujoDelLogo\( q \)/.test(rodeo) && !/caraDelLogo/.test(rodeo), '  [CALIDAD 1] A3: el rodeo del flujo, contra la malla real (el campo del flujo)')
-afirmar(/campoDelLogo\(contorno\)/.test(leer('polvo/Fisica.tsx')) && /requestIdleCallback/.test(leer('polvo/Fisica.tsx')) && /THREE\.Data3DTexture/.test(leer('polvo/campoDelLogo.ts')), '  una textura 3D que se arma una vez al cargar, fuera del cuadro, y se lee en el espacio del logo (sigue su pose)')
+afirmar(/campoDeAPoco\(contorno\)/.test(leer('polvo/Fisica.tsx')) && /requestIdleCallback/.test(leer('polvo/Fisica.tsx')) && /THREE\.Data3DTexture/.test(leer('polvo/campoDelLogo.ts')), '  una textura 3D que se arma una vez al cargar, fuera del cuadro ([CALIDAD 1] B1: de a poco), y se lee en el espacio del logo (sigue su pose)')
 // El contacto: con la velocidad relativa a la superficie del logo, a un pelo de ella. [CALIDAD 1] A3: sin pegado.
 afirmar(/float entra = - dot\( uVientoDelAire \+ v - velocidadDelLogo\( f \+ d \), n \);/.test(sim) && /v -= n \* min\( 0\.0, dot\( v - velocidadDelLogo\( p \), n \) \);/.test(sim), 'el contacto va con la velocidad relativa a la superficie del logo (que también se mueve)')
 afirmar(FISICA.contacto.queda < 0.05, '  a un pelo de la superficie real (ESCENA 7 la dejaba a 0,11 de la forma aproximada)', `${String(FISICA.contacto.queda)} u`)

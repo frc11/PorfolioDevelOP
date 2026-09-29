@@ -113,6 +113,13 @@ export interface CampoDelLogo {
 
 /** La distancia en el plano, con signo (negativa adentro), en una grilla de `nx` × `ny` celdas desde (x0, y0). */
 export function distanciaEnElPlano(c: Contorno, x0: number, y0: number, nx: number, ny: number, celda: number, alcance: number = CAMPO_DEL_LOGO.alcance): Float32Array {
+  const plano = planoPorFilas(c, x0, y0, nx, ny, celda, alcance)
+  for (let j = 0; j < ny; j += 1) plano.fila(j)
+  return plano.salida
+}
+
+/** [CALIDAD 1] B1 · La misma cuenta, fila por fila: `fila(j)` llena la fila `j` de `salida` (para hornear de a poco). */
+function planoPorFilas(c: Contorno, x0: number, y0: number, nx: number, ny: number, celda: number, alcance: number): { readonly fila: (j: number) => void; readonly salida: Float32Array } {
   const t = c.tramos
   const cuantos = t.length / 4
   // Los tramos por casilla (de `alcance` de lado), para buscar sólo cerca.
@@ -128,7 +135,7 @@ export function distanciaEnElPlano(c: Contorno, x0: number, y0: number, nx: numb
   }
   const salida = new Float32Array(nx * ny)
   const cruces: number[] = []
-  for (let j = 0; j < ny; j += 1) {
+  const fila = (j: number): void => {
     const y = y0 + (j + 0.5) * celda
     // La paridad: dónde cruza la fila cada tramo que la corta (medio abierto: un vértice cuenta una vez).
     cruces.length = 0
@@ -152,7 +159,7 @@ export function distanciaEnElPlano(c: Contorno, x0: number, y0: number, nx: numb
       salida[j * nx + i] = despues % 2 === 1 ? -d : d
     }
   }
-  return salida
+  return { fila, salida }
 }
 
 /** La distancia del prisma: la del plano `d2` combinada con la del espesor (medio espesor `h`, centro `zc`). */
@@ -163,6 +170,17 @@ export function delPrisma(d2: number, z: number, zc: number, h: number): number 
 
 /** El campo entero: la caja del contorno con margen, la distancia en el plano y el prisma en cada celda. */
 export function campoDelLogo(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL_LOGO): CampoDelLogo {
+  const horno = campoDeAPoco(c, opciones)
+  horno.paso(Infinity)
+  return horno.campo()
+}
+
+/**
+ * [CALIDAD 1] B1 · EL CAMPO DE A POCO: la misma cuenta que `campoDelLogo`, partida en el tiempo. `paso(ms)` hornea filas
+ * del plano y después capas del prisma hasta gastar `ms`, y dice si terminó. Al cargar, el campo fino y el del flujo
+ * eran dos tareas de ~90 ms cada una (cuadros largos): así van en momentos libres de unos pocos ms.
+ */
+export function campoDeAPoco(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL_LOGO): { readonly paso: (ms: number) => boolean; readonly campo: () => CampoDelLogo } {
   const { celda, margen, alcance } = opciones
   const t = c.tramos
   let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
@@ -174,15 +192,22 @@ export function campoDelLogo(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL
   }
   const min: [number, number, number] = [xMin - margen, yMin - margen, c.zMin - margen]
   const n: [number, number, number] = [Math.ceil((xMax - xMin + 2 * margen) / celda), Math.ceil((yMax - yMin + 2 * margen) / celda), Math.ceil((c.zMax - c.zMin + 2 * margen) / celda)]
-  const plano = distanciaEnElPlano(c, min[0], min[1], n[0], n[1], celda, alcance)
+  const plano = planoPorFilas(c, min[0], min[1], n[0], n[1], celda, alcance)
   const [zc, h] = [(c.zMin + c.zMax) / 2, (c.zMax - c.zMin) / 2]
   const datos = new Float32Array(n[0] * n[1] * n[2])
-  for (let k = 0; k < n[2]; k += 1) {
+  const capa = (k: number): void => {
     const z = min[2] + (k + 0.5) * celda
-    const capa = k * n[0] * n[1]
-    for (let j = 0; j < n[0] * n[1]; j += 1) datos[capa + j] = delPrisma(plano[j], z, zc, h)
+    const desde = k * n[0] * n[1]
+    for (let j = 0; j < n[0] * n[1]; j += 1) datos[desde + j] = delPrisma(plano.salida[j], z, zc, h)
   }
-  return { datos, n, min, tam: [n[0] * celda, n[1] * celda, n[2] * celda] }
+  let [fila, z] = [0, 0]
+  const paso = (ms: number): boolean => {
+    const hasta = performance.now() + ms
+    while (fila < n[1] && performance.now() < hasta) plano.fila(fila++)
+    while (fila >= n[1] && z < n[2] && performance.now() < hasta) capa(z++)
+    return fila >= n[1] && z >= n[2]
+  }
+  return { paso, campo: () => ({ datos, n, min, tam: [n[0] * celda, n[1] * celda, n[2] * celda] }) }
 }
 
 /** Lo mismo que lee el shader, en TS (para el invariante): la distancia en un punto del espacio del logo. */

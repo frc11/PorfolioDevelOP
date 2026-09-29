@@ -47,6 +47,13 @@ type VentanaDelBanco = Window & {
     /** Graba el tiempo de GPU de cada cuadro hasta `parar`, que devuelve [instante, ms] por cuadro. */
     grabar: () => void
     parar: () => Promise<readonly (readonly [number, number])[]>
+    /** [CALIDAD 1] B1 · los programas compilados, y los que aparecen mientras se vigila. */
+    programas: () => unknown
+    vigilar: () => void
+    vigilados: () => unknown
+    /** Para los experimentos con un programa: el contexto y el programa de WebGL de un programa de three. */
+    contexto: () => WebGLRenderingContext | WebGL2RenderingContext
+    programaCrudo: (id: number) => WebGLProgram | null
     extension: boolean
   }
 }
@@ -201,6 +208,46 @@ function crearPerfil(renderer: THREE.WebGLRenderer, escena: THREE.Scene) {
       })
   }
 
+  /**
+   * [CALIDAD 1] B1 · LOS PROGRAMAS: cuántos compiló el renderer y quién usa cada uno. `vigilar` anota, cuadro a cuadro,
+   * cuándo aparece uno nuevo (con el scroll), para saber qué se compila tarde (la primera vez que aparece una variante).
+   */
+  const programas = (): { readonly total: number; readonly lista: readonly { readonly id: number; readonly nombre: string; readonly usadoPor: readonly string[] }[] } => {
+    const lista = renderer.info.programs ?? []
+    const usadoPor = new Map<number, Set<string>>()
+    escena.traverse((o) => {
+      const d = o as Dibujable & { material?: THREE.Material | THREE.Material[] }
+      if (d.material === undefined) return
+      for (const m of Array.isArray(d.material) ? d.material : [d.material]) {
+        const programa = (renderer.properties.get(m) as { currentProgram?: { id: number } }).currentProgram
+        if (programa !== undefined) (usadoPor.get(programa.id) ?? usadoPor.set(programa.id, new Set()).get(programa.id))?.add(nombreDe(o))
+      }
+    })
+    return { total: lista.length, lista: lista.map((p) => ({ id: p.id, nombre: p.name, usadoPor: [...(usadoPor.get(p.id) ?? [])] })) }
+  }
+  const nuevos: { t: number; y: number; ids: number[] }[] = []
+  let vigilando = false
+  const vigilar = (): void => {
+    vigilando = true
+    nuevos.length = 0
+    let antes = new Set((renderer.info.programs ?? []).map((p) => p.id))
+    const paso = (): void => {
+      if (!vigilando) return
+      const ahora = renderer.info.programs ?? []
+      if (ahora.length !== antes.size) {
+        const ids = ahora.map((p) => p.id).filter((id) => !antes.has(id))
+        if (ids.length > 0) nuevos.push({ t: performance.now(), y: window.scrollY, ids })
+        antes = new Set(ahora.map((p) => p.id))
+      }
+      requestAnimationFrame(paso)
+    }
+    requestAnimationFrame(paso)
+  }
+  const vigilados = (): { readonly nuevos: readonly { t: number; y: number; ids: number[] }[]; readonly programas: ReturnType<typeof programas> } => {
+    vigilando = false
+    return { nuevos: [...nuevos], programas: programas() }
+  }
+
   /** Cuántos renders de la escena y cuántos cuadros de animación hubo en `ms` (¿cada cuadro dibuja?). */
   const contar = (ms: number): Promise<{ readonly renders: number; readonly cuadros: number }> => {
     const render = renderer.render
@@ -225,7 +272,7 @@ function crearPerfil(renderer: THREE.WebGLRenderer, escena: THREE.Scene) {
     })
   }
 
-  return { medir, contar, grabar, hayExtension: ext !== null }
+  return { medir, contar, grabar, programas, vigilar, vigilados, hayExtension: ext !== null }
 }
 
 export function PerfilDeLaGpu() {
@@ -243,6 +290,11 @@ export function PerfilDeLaGpu() {
         parar = perfil.grabar()
       },
       parar: () => (parar === null ? Promise.resolve([]) : parar()),
+      programas: perfil.programas,
+      vigilar: perfil.vigilar,
+      vigilados: perfil.vigilados,
+      contexto: () => gl.getContext(),
+      programaCrudo: (id) => (gl.info.programs ?? []).find((p) => p.id === id)?.program ?? null,
       extension: perfil.hayExtension,
     }
     return () => {

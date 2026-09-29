@@ -31,12 +31,8 @@ import { ProbeLogo } from './ProbeLogo'
 import { StudioFloor } from './StudioFloor'
 import { BOUNCE_COLOR, PAPER_COLOR } from './probeScene'
 import { PerfilDeLaGpu } from './gpu/PerfilDeLaGpu'
-import {
-  type ProbeMode,
-  type ProbeParamsStore,
-  type ProbeRigStore,
-  type ProbeStatsStore,
-} from './probeStore'
+import { Precompilar } from './gpu/Precompilar'
+import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
 
 /**
  * La escena. **Cuatro cosas y nada más**: el piso, la envolvente de rendijas,
@@ -292,6 +288,8 @@ export default function ProbeStage({
         <Fugaz rig={rig} />
         {/* [ESCENA 7] T12: de noche, el piso iluminado por el haz aclara apenas la cara de abajo del logo. */}
         <Rebote logoMaterialRef={logoMaterialRef} />
+        {/* [CALIDAD 1] B1 · todos los programas compilados al arrancar, en paralelo (`gpu/Precompilar.tsx`). */}
+        <Precompilar logoMaterialRef={logoMaterialRef} />
         {/* [CALIDAD 1] El perfil de la GPU por pasada: sólo con banco (`gpu/PerfilDeLaGpu.tsx`). */}
         <PerfilDeLaGpu />
       </Suspense>

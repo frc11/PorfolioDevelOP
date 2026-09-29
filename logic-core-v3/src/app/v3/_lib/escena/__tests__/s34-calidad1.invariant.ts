@@ -12,6 +12,8 @@
  *      por la cara sin rebote; el empuje tras el cursor también contra la malla real. Lo posado sobre el logo, igual.
  * B0 · el instrumento: el perfil de la GPU sólo existe con banco, y lo que se dibuja tiene nombre (el perfil agrupa
  *      por nombre: sin él, una pasada nueva aparece como «(sin nombre)» y nadie sabe qué cuesta).
+ * B1 · precompilar: la escena entera compilada al arrancar (también lo invisible) y calentada con un dibujo de un
+ *      píxel; el lazo de los rayos con tope uniforme; los campos del logo horneados de a poco, con el mismo resultado.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -19,7 +21,7 @@ import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
-import { CAMPO_DEL_FLUJO, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
+import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
 import { FISICA, flujoAlrededor } from '../polvo/simulacion'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer } from '../amanecer/linea'
 
@@ -169,7 +171,7 @@ afirmar(sabeLejos(delFlujo), '  el campo del flujo sabe la distancia hasta donde
 controlPositivo('el detector VE el campo fino (topado a 1,2 u)', delFino, sabeLejos)
 // Cableado: el flujo lee el campo del flujo; la física lo hornea en otro momento libre; tras el cursor, la malla real.
 const rodeoA3 = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(simulacion)?.[0] ?? ''
-afirmar(/float d = flujoDelLogo\( q \);/.test(rodeoA3) && /normalDelFlujo\( q \)/.test(rodeoA3) && /campoDelLogo\(contorno, CAMPO_DEL_FLUJO\)/.test(fisica) && /publicarElFlujo\(flujo\)/.test(fisica) && /\.\.\.FLUJO_EN_VIVO/.test(fisica), 'el flujo de la simulación lee el campo del flujo, que la física hornea y publica')
+afirmar(/float d = flujoDelLogo\( q \);/.test(rodeoA3) && /normalDelFlujo\( q \)/.test(rodeoA3) && /campoDeAPoco\(contorno, CAMPO_DEL_FLUJO\)/.test(fisica) && /publicarElFlujo\(f\)/.test(fisica) && /\.\.\.FLUJO_EN_VIVO/.test(fisica), 'el flujo de la simulación lee el campo del flujo, que la física hornea y publica')
 afirmar(/#ifdef AIRE_FISICA\s*vec3 fuera = afueraDelCampo\( enElMundo, HOLGURA_TRAS_EL_CURSOR \);/.test(parche) && /CAMPO_EN_VIVO, \{ uTiempo/.test(parche), '  tras el cursor, la mota empujada contra el logo se corre a su cara real (la boca y el ojo, abiertos)')
 
 // ── B0 · el instrumento ───────────────────────────────────────────────────
@@ -186,5 +188,35 @@ const NOMBRES: readonly (readonly [string, string])[] = [
 const conNombre = (lista: readonly (readonly [string, string])[]): boolean => lista.every(([a, n]) => leer(a).includes(n))
 afirmar(conNombre(NOMBRES), '  todo lo que se dibuja tiene nombre (el perfil de la GPU agrupa por nombre)', `${String(NOMBRES.length)} nombres en ${String(new Set(NOMBRES.map(([a]) => a)).size)} archivos`)
 controlPositivo('el detector VE un objeto sin nombre', [...NOMBRES, ['piso/PisoVivo.tsx', "bloques.name = 'otro'"] as const], conNombre)
+
+// ── B1 · precompilar ──────────────────────────────────────────────────────
+titulo('B1 · precompilar: nada se compila la primera vez que aparece')
+const precompilar = leer('gpu/Precompilar.tsx')
+afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('ProbeStage.tsx')) && /gl\.compileAsync\(escena, camara\)/.test(precompilar), 'la escena entera se compila al arrancar, en paralelo (`compileAsync` recorre también lo invisible)')
+/** El calentamiento: un dibujo de UN píxel con todo prendido y sin descarte, y todo devuelto como estaba. */
+const calienta = (c: string): boolean => /gl\.setScissor\(0, 0, 1, 1\)/.test(c) && /o\.visible = true/.test(c) && /o\.frustumCulled = false/.test(c) && /t\.o\.visible = t\.visible/.test(c) && /t\.o\.frustumCulled = t\.descarte/.test(c) && /gl\.setScissorTest\(false\)/.test(c)
+afirmar(calienta(precompilar), '  y se calienta con un dibujo de un píxel (ANGLE arma el ejecutable en el primer dibujo), devolviendo visibilidad y descarte')
+controlPositivo('el detector VE un calentamiento que no devuelve la visibilidad', precompilar.replace('t.o.visible = t.visible', 't.o.visible = true'), calienta)
+const haces = leer('amanecer/Amanecer.tsx')
+const topeUniforme = (c: string): boolean => /for \( int i = 0; i < uPasos; i\+\+ \)/.test(c) && /uniform int uPasos;/.test(c) && !/i < \$\{HACES\.pasos\}/.test(c)
+afirmar(topeUniforme(haces), 'el lazo de los rayos tiene tope uniforme (con uno fijo Direct3D lo desenrolla: 85 contra 51 ms de enlace medidos)')
+controlPositivo('el detector VE el lazo de tope fijo', haces.replace('i < uPasos;', 'i < ${HACES.pasos};'), topeUniforme)
+// El campo de a poco da EXACTAMENTE el mismo campo que de una vez (la «c» de prueba de A3).
+const deAPoco = (() => {
+  const horno = campoDeAPoco(contornoC, CAMPO_DEL_FLUJO)
+  let pasos = 0
+  while (!horno.paso(0.05)) pasos += 1
+  return { campo: horno.campo(), pasos }
+})()
+const igualito = (a: Float32Array, b: Float32Array): boolean => a.length === b.length && a.every((v, i) => v === b[i])
+afirmar(igualito(deAPoco.campo.datos, flujo.datos) && deAPoco.pasos > 10, 'los campos del logo se hornean de a poco (momentos libres de pocos ms) y dan el mismo campo, celda por celda', `${String(deAPoco.pasos)} pasos de 0,05 ms`)
+const cortado = (() => {
+  const horno = campoDeAPoco(contornoC, CAMPO_DEL_FLUJO)
+  horno.paso(0.05)
+  return horno.campo().datos
+})()
+controlPositivo('el detector VE un horno cortado a mitad de camino', cortado, (d: Float32Array) => igualito(d, flujo.datos))
+const fisicaB1 = leer('polvo/Fisica.tsx')
+afirmar(/const PRESUPUESTO_DEL_HORNO_MS = [1-8]\b/.test(fisicaB1) && /hornearDeAPoco\(fino,/.test(fisicaB1) && /hornearDeAPoco\(flujo,/.test(fisicaB1) && !/campoDelLogo\(contorno/.test(fisicaB1), '  la física hornea los dos campos de a poco, con un presupuesto por momento libre (antes, dos tareas de ~90 ms al cargar)')
 
 cerrar('s34-calidad1')

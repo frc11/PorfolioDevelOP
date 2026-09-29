@@ -11,7 +11,7 @@ import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
 import { AIRE } from './parche'
-import { CAMPO_DEL_FLUJO, CAMPO_EN_VIVO, FLUJO_EN_VIVO, campoDelLogo, contornoDeLaMalla, publicarElCampo, publicarElFlujo, type MallaDelLogo } from './campoDelLogo'
+import { CAMPO_DEL_FLUJO, CAMPO_EN_VIVO, FLUJO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo, publicarElFlujo, type MallaDelLogo } from './campoDelLogo'
 import { PISO_EN_VIVO } from '../piso/enVivo'
 import { POSARSE, avanzarElPolvo, polvoInicial, type EstadoDelPolvo } from './posarse'
 import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
@@ -30,8 +30,28 @@ import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
  * [ESCENA 8] T5: arma una vez el campo de distancia de la malla real del logo (`campoDelLogo.ts`) cuando las
  * mallas ya están, fuera del cuadro (en un momento libre), y en cada cuadro le pasa a la simulación la pose del
  * logo del cuadro anterior (la velocidad de su superficie). [CALIDAD 1] A3: también el campo del flujo, en otro
- * momento libre; y como no hay pegado, ya no mide cuánto se mueve el logo.
+ * momento libre; y como no hay pegado, ya no mide cuánto se mueve el logo. B1: los dos, DE A POCO (`hornearDeAPoco`).
  */
+
+/** [CALIDAD 1] B1 · cuánto trabaja el horno en cada momento libre (ms): lejos de un cuadro largo. */
+const PRESUPUESTO_DEL_HORNO_MS = 6
+
+/**
+ * [CALIDAD 1] B1 · hornea un campo en momentos libres, con presupuesto: ninguna tarea larga al cargar (antes, dos de
+ * ~90 ms). Sin `requestIdleCallback`, en tareas sueltas del mismo presupuesto. Avisa con el campo terminado.
+ */
+function hornearDeAPoco(horno: ReturnType<typeof campoDeAPoco>, listo: (ms: number) => void): void {
+  const t0 = performance.now()
+  const seguir = (plazo?: IdleDeadline): void => {
+    // Con la GPU al límite casi no hay momentos libres: si vence la espera, el presupuesto entero igual.
+    const ms = plazo === undefined || plazo.didTimeout ? PRESUPUESTO_DEL_HORNO_MS : Math.min(PRESUPUESTO_DEL_HORNO_MS, Math.max(2, plazo.timeRemaining() - 1))
+    if (horno.paso(ms)) listo(Math.round(performance.now() - t0))
+    else if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(seguir, { timeout: 60 })
+    else window.setTimeout(seguir, 0)
+  }
+  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(seguir, { timeout: 60 })
+  else window.setTimeout(seguir, 0)
+}
 
 interface PropsDeLaFisica {
   readonly rig: ProbeRigStore
@@ -164,26 +184,27 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       const mallas = mallasDelLogo(grupoDelLogo)
       if (mallas.length > 0) {
         m.campo = 'armando'
-        const libre = (f: () => void): void => {
-          if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(f, { timeout: 1500 })
-          else window.setTimeout(f, 0)
-        }
-        const armar = (): void => {
-          const t0 = performance.now()
+        // [CALIDAD 1] B1: el fino primero (el choque) y después el del flujo, cada uno de a poco. El `ms` es de punta a
+        // punta (con las esperas entre momentos libres), no de trabajo.
+        const empezar = (): void => {
           const contorno = contornoDeLaMalla(mallas)
-          const campo = campoDelLogo(contorno)
-          m.textura = publicarElCampo(campo)
-          m.medidaDelCampo = { ms: Math.round(performance.now() - t0), celdas: [...campo.n], tramos: contorno.tramos.length / 4 }
-          m.campo = 'listo'
-          // [CALIDAD 1] A3: el del flujo, en el próximo momento libre (no en el mismo tirón).
-          libre(() => {
-            const t1 = performance.now()
-            const flujo = campoDelLogo(contorno, CAMPO_DEL_FLUJO)
-            m.texturaDelFlujo = publicarElFlujo(flujo)
-            m.medidaDelFlujo = { ms: Math.round(performance.now() - t1), celdas: [...flujo.n], tramos: contorno.tramos.length / 4 }
+          const tramos = contorno.tramos.length / 4
+          const fino = campoDeAPoco(contorno)
+          hornearDeAPoco(fino, (ms) => {
+            const campo = fino.campo()
+            m.textura = publicarElCampo(campo)
+            m.medidaDelCampo = { ms, celdas: [...campo.n], tramos }
+            m.campo = 'listo'
+            const flujo = campoDeAPoco(contorno, CAMPO_DEL_FLUJO)
+            hornearDeAPoco(flujo, (ms2) => {
+              const f = flujo.campo()
+              m.texturaDelFlujo = publicarElFlujo(f)
+              m.medidaDelFlujo = { ms: ms2, celdas: [...f.n], tramos }
+            })
           })
         }
-        libre(armar)
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(empezar, { timeout: 1500 })
+        else window.setTimeout(empezar, 0)
       }
     }
     const dustGroup = dustGroupRef.current

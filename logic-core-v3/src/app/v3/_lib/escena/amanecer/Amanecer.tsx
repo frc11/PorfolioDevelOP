@@ -71,6 +71,8 @@ const FRAGMENT_DE_LOS_HACES = /* glsl */ `
 uniform float uRayos;
 uniform vec3 uSolDelAmanecer;
 uniform float uTiempo;
+// [CALIDAD 1] B1: el tope del lazo es un uniform: con uno fijo, el compilador de Direct3D (ANGLE) lo desenrolla entero y tarda 1,4 s.
+uniform int uPasos;
 varying vec3 vMundo;
 ${TRAMA_GLSL}
 float azarDelAire( vec3 p ) { return fract( sin( dot( p, vec3( 127.1, 311.7, 74.7 ) ) ) * 43758.5453 ); }
@@ -93,10 +95,10 @@ void main() {
 	float largo = a > 1e-6 ? ( - b + sqrt( max( b * b - a * c, 0.0 ) ) ) / a : 60.0;
 	if ( d.y < 0.0 ) largo = min( largo, ( ${FLOOR_Y.toFixed(3)} - o.y ) / d.y );
 	if ( d.y > 0.0 ) largo = min( largo, ( ${MOIRE_NEAR_TOP.toFixed(1)} - o.y ) / d.y );
-	float paso = max( largo, 0.0 ) / ${HACES.pasos.toFixed(1)};
+	float paso = max( largo, 0.0 ) / float( uPasos );
 	float corrido = fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) );
 	float suma = 0.0;
-	for ( int i = 0; i < ${HACES.pasos}; i++ ) {
+	for ( int i = 0; i < uPasos; i++ ) {
 		vec3 p = o + d * ( ( float( i ) + corrido ) * paso );
 		// El aire de la sala: más denso abajo, y desparejo (se mueve despacio).
 		float aire = ( 0.45 + 0.55 * ruidoDelAire( p * 0.18 + vec3( 0.0, uTiempo * 0.05, 0.0 ) ) ) * exp( - max( 0.0, p.y - ${FLOOR_Y.toFixed(3)} ) / ${HACES.alto.toFixed(1)} );
@@ -127,7 +129,7 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     // Una esfera alrededor del ojo, sin prueba de profundidad: el rayo lo corta la cuenta (la pared o el piso).
     const geometria = new THREE.SphereGeometry(20, 32, 16)
     const material = new THREE.ShaderMaterial({
-      uniforms: { ...TRAMA_EN_VIVO, uRayos: AMANECER_EN_VIVO.uRayos, uSolDelAmanecer: AMANECER_EN_VIVO.uSolDelAmanecer, uTiempo: VIVO.uTiempo },
+      uniforms: { ...TRAMA_EN_VIVO, uRayos: AMANECER_EN_VIVO.uRayos, uSolDelAmanecer: AMANECER_EN_VIVO.uSolDelAmanecer, uTiempo: VIVO.uTiempo, uPasos: { value: HACES.pasos } },
       vertexShader: VERTEX_DE_LOS_HACES,
       fragmentShader: FRAGMENT_DE_LOS_HACES,
       transparent: true,

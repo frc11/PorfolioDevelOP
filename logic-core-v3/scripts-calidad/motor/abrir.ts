@@ -100,6 +100,8 @@ export interface OpcionesDelMotor {
   readonly dpr?: number
   /** Con el vsync puesto (sólo para comparar con los bancos de antes). */
   readonly conVsync?: boolean
+  /** En frío: el perfil de Chrome limpio, sin la caché de shaders de corridas anteriores (la primera visita). */
+  readonly frio?: boolean
 }
 
 export async function abrirMotor(ancho: number, alto: number, o: OpcionesDelMotor = {}): Promise<BancoDelMotor> {
@@ -109,6 +111,7 @@ export async function abrirMotor(ancho: number, alto: number, o: OpcionesDelMoto
     ancho: ancho + 40,
     alto: alto + 140,
     banderasExtra: o.conVsync === true ? [] : [...SIN_VSYNC],
+    limpiarPerfil: o.frio === true,
   })
   const p = await abrirPagina(chrome)
   const s = p.sessionId
