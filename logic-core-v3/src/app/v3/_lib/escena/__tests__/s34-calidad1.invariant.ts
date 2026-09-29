@@ -14,6 +14,9 @@
  *      por nombre: sin él, una pasada nueva aparece como «(sin nombre)» y nadie sabe qué cuesta).
  * B1 · precompilar: la escena entera compilada al arrancar (también lo invisible) y calentada con un dibujo de un
  *      píxel; el lazo de los rayos con tope uniforme; los campos del logo horneados de a poco, con el mismo resultado.
+ * B2 · cero reservas por cuadro: ningún `useFrame` de la escena reserva (clones, vectores, arreglos, objetos) salvo
+ *      con banco o en el primer cuadro; las variantes que escriben en un objeto fijo dan lo mismo que las puras; ni
+ *      la atadura al scroll ni el tono del menú llaman a React en cada cuadro sin cambio.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -23,7 +26,12 @@ import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirma
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
 import { FISICA, flujoAlrededor } from '../polvo/simulacion'
-import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer } from '../amanecer/linea'
+import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
+import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
+import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
+import { medirLasSecciones, medirLasSeccionesEn } from '../extensionDeLasSecciones'
+import { avanzarElPulso, pulsoInicial } from '../entorno/maquinaDelPulso'
+import { avanzarElEncendido, encendidoInicial } from '../entorno/encendido'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
@@ -91,7 +99,7 @@ afirmar(compuertaEnLaLlegada(-200, ALTO) && !compuertaEnLaLlegada(ALTO * 2.5, AL
 // Cableado: el componente usa la regla (y sólo en los viajes de día a día: los que llevan luz).
 const componente = leer('amanecer/Amanecer.tsx')
 afirmar(/const luzDelViaje = viajeEnCurso\(\)\?\.luz \?\? null/.test(componente) && /compuertaEnLaLlegada\(bloque\.tuPanel\.pie - \(luzDelViaje\.y1 - window\.scrollY\), bloque\.alto\)/.test(componente) && /pasoDelAmanecer\(m, enLaLlegada !== null,/.test(componente), '  el componente la usa: la compuerta del destino con Tu panel corrido allá, sólo en los viajes que llevan luz (de día a día)')
-afirmar(/viaje: viajeEnCurso\(\) !== null/.test(componente), '  los viajes que cambian de luz siguen con la regla de antes')
+afirmar(/viaje = viajeEnCurso\(\) !== null/.test(componente), '  los viajes que cambian de luz siguen con la regla de antes')
 
 // ── A2 · el cielo de día: pintado celeste ─────────────────────────────────
 titulo('A2 · el cielo de día: el pintado celeste, encendido')
@@ -218,5 +226,64 @@ const cortado = (() => {
 controlPositivo('el detector VE un horno cortado a mitad de camino', cortado, (d: Float32Array) => igualito(d, flujo.datos))
 const fisicaB1 = leer('polvo/Fisica.tsx')
 afirmar(/const PRESUPUESTO_DEL_HORNO_MS = [1-8]\b/.test(fisicaB1) && /hornearDeAPoco\(fino,/.test(fisicaB1) && /hornearDeAPoco\(flujo,/.test(fisicaB1) && !/campoDelLogo\(contorno/.test(fisicaB1), '  la física hornea los dos campos de a poco, con un presupuesto por momento libre (antes, dos tareas de ~90 ms al cargar)')
+
+// ── B2 · cero reservas por cuadro ─────────────────────────────────────────
+titulo('B2 · cero reservas por cuadro en los useFrame de la escena y en sus manejadores')
+/** El cuerpo de cada `useFrame((…) => { … })` de un fuente (por llaves). */
+function cuerposDeUseFrame(fuente: string): string[] {
+  const cuerpos: string[] = []
+  let desde = fuente.indexOf('useFrame(')
+  while (desde >= 0) {
+    const abre = fuente.indexOf('{', fuente.indexOf('=>', desde))
+    let nivel = 0
+    let i = abre
+    for (; i < fuente.length; i += 1) {
+      if (fuente[i] === '{') nivel += 1
+      else if (fuente[i] === '}') {
+        nivel -= 1
+        if (nivel === 0) break
+      }
+    }
+    cuerpos.push(fuente.slice(abre, i + 1))
+    desde = fuente.indexOf('useFrame(', i)
+  }
+  return cuerpos
+}
+/** Lo que reserva: clones, vectores y matrices nuevos, arreglos armados, map/filter/forEach, objetos esparcidos. */
+const RESERVA = /\.clone\(\)|new THREE\.(Vector[234]|Matrix[34]|Quaternion|Euler|Color|Box3)\(|\.map\(|\.filter\(|\.forEach\(|\[\.\.\.|\{ \.\.\./
+/**
+ * Las líneas que pueden reservar: sólo con banco (`hayBanco()` o marcadas `// banco`), o las que arman algo UNA vez
+ * (marcadas `// una vez`: el primer cuadro, o cuando termina un horneado). La marca es la regla, escrita en el código.
+ */
+const PERMITIDA = /hayBanco\(\)|\/\/ banco|\/\/ una vez|\?\?=/
+const reservasEn = (fuente: string): string[] => cuerposDeUseFrame(fuente).flatMap((c) => c.split('\n')).filter((l) => RESERVA.test(l) && !PERMITIDA.test(l)).map((l) => l.trim())
+const CON_USE_FRAME = ['polvo/Fisica.tsx', 'polvo/Aire.tsx', 'piso/PisoVivo.tsx', 'amanecer/Amanecer.tsx', 'entorno/Entorno.tsx', 'entorno/Rebote.tsx', 'moire/MoireVivo.tsx', 'estrellas/Estrellas.tsx', 'estrellas/Fugaz.tsx', 'formacion/Formacion.tsx', 'cieloDeDia/CieloDeDia.tsx', 'ContactOcclusion.tsx', 'OrbitRig.tsx']
+const sobran = CON_USE_FRAME.flatMap((a) => reservasEn(leer(a)).map((l) => `${a}: ${l.slice(0, 90)}`))
+afirmar(sobran.length === 0, 'ningún useFrame de la escena reserva en cada cuadro (salvo con banco o armando algo la primera vez)', sobran.length === 0 ? `${String(CON_USE_FRAME.length)} archivos` : sobran.join(' | '))
+controlPositivo('el detector VE un clon en un useFrame', "useFrame((state) => {\n    const antes = m.logoAntes.clone()\n  })", (c: string) => reservasEn(c).length === 0)
+// Las variantes que escriben en un objeto fijo dan lo mismo que las puras.
+const vivo: EstadoDelPolvoVivo = { ...polvoInicial(0), origen: [0, 0, 0] }
+let puro = polvoInicial(0)
+const movimientos: (readonly [number, number, number] | null)[] = [null, [1, 2, 3], [1.5, 2, 3], null, null, [4, 5, 6], null]
+let igualPolvo = true
+movimientos.forEach((mov, i) => {
+  puro = avanzarElPolvo(puro, i * 0.4, mov, false)
+  avanzarElPolvoEn(vivo, i * 0.4, mov, false)
+  igualPolvo &&= JSON.stringify(puro) === JSON.stringify(vivo)
+})
+afirmar(igualPolvo, '  el polvo que se posa: la variante escribible da lo mismo que la pura (y copia el origen, no lo guarda)')
+const momentoVivo = momentoEn(0) as MomentoVivo
+const igualMomento = [0, 0.7, 2.5, 4.4, 4.9, 6.1, 7.2, 8].every((t) => JSON.stringify(momentoEn(t)) === JSON.stringify(momentoEn(t, momentoVivo)))
+afirmar(igualMomento, '  el momento del amanecer: escrito en un objeto fijo, igual')
+const falso = (tope: number, pie: number) => ({ getBoundingClientRect: () => ({ top: tope, bottom: pie }) })
+const documentoFalso = { querySelector: (sel: string) => (sel.includes('servicios') ? falso(-300, 400) : falso(400, 1300)), querySelectorAll: () => [falso(-500, 200), falso(200, 900), falso(900, 2000)] }
+afirmar(JSON.stringify(medirElBloqueOpacoEn(documentoFalso, 900, bloqueVivo())) === JSON.stringify(medirElBloqueOpaco(documentoFalso, 900)) && JSON.stringify(medirLasSeccionesEn(documentoFalso, 100, { arriba: 0, abajo: 0 })) === JSON.stringify(medirLasSecciones(documentoFalso, 100)), '  el bloque opaco y la extensión de las secciones: medidos en objetos fijos, igual')
+// Las máquinas que corren en cada cuadro devuelven el MISMO estado cuando nada cambia (en reposo, cero objetos).
+const pulso = pulsoInicial(0)
+const quietoPulso = avanzarElPulso(avanzarElPulso(pulso, { t: 0.1, scrollEnMovimiento: false, hover: false, reducido: true }), { t: 0.2, scrollEnMovimiento: false, hover: false, reducido: true })
+const encendido = avanzarElEncendido(encendidoInicial(1, 0), 1, 30, false)
+afirmar(avanzarElPulso(quietoPulso, { t: 0.3, scrollEnMovimiento: false, hover: false, reducido: true }) === quietoPulso && avanzarElEncendido(encendido, 1, 31, false) === encendido, '  el pulso apagado y el haz prendido y asentado devuelven el mismo estado (nada nuevo por cuadro)')
+// Nadie llama a React en cada cuadro sin un cambio.
+afirmar(/if \(siguiente\(estadoRef\.current, evento\) !== estadoRef\.current\) setEstado/.test(leer('ataduraAlScroll.ts')) && /if \(tono !== ultimo\) \{\s*ultimo = tono\s*setTono\(tono\)/.test(readFileSync(path.join(process.cwd(), 'src/app/v3/_chrome/menu/useTonoDebajo.ts'), 'utf8')), 'la atadura al scroll y el tono del menú llaman a React sólo cuando algo cambia (antes, en cada cuadro)')
 
 cerrar('s34-calidad1')

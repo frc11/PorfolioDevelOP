@@ -216,7 +216,7 @@ for (const alto of [0.3, 0.5, 0.7, 1.2, 3]) for (let d = 0.5; d <= FLOOR_RADIUS;
 }
 afirmar(cercaDebajo && asomaMax < 1.2, 'nunca por encima del ojo: a menos de 6 u cada tapa queda 0,15 debajo de la cámara; lejos asoma sobre el horizonte, como mucho', `${asomaMax.toFixed(2)}° (con alturas de hasta 1,2 u y la cámara de 0,3 a 3 u sobre el piso)`)
 controlPositivo('el detector VE un bloque por encima del ojo (el medido en Números: la cámara a 0,7, el bloque a 0,72 a 2 u)', { alto: 0.7, tapa: 0.72, d: 2 }, (c: { alto: number; tapa: number; d: number }) => !(c.d <= ojo.desde && c.tapa > c.alto - ojo.margen))
-afirmar(/if \( uCamara\.y > \$\{f\(FLOOR_Y\)\} \) \{/.test(bloques) && /camara: state\.camera\.getWorldPosition\(m\.ojo\)/.test(pisoVivo), '  el techo sale de la cámara de cada paso, sólo con la cámara arriba del piso (y lo leen los bloques, el polvo posado y la mancha)')
+afirmar(/if \( uCamara\.y > \$\{f\(FLOOR_Y\)\} \) \{/.test(bloques) && /state\.camera\.getWorldPosition\(m\.ojo\)\)/.test(pisoVivo) && /uCamara\.value as THREE\.Vector3\)\.copy\(camara\)/.test(pisoVivo), '  el techo sale de la cámara de cada paso, sólo con la cámara arriba del piso (y lo leen los bloques, el polvo posado y la mancha)')
 // El borde: los bloques cubren el disco entero (recortados al círculo); el presupuesto.
 for (const radio of [FLOOR_RADIUS, 45]) {
   const g = grillaDelPiso(radio)

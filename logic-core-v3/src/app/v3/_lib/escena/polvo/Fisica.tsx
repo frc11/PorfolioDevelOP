@@ -13,7 +13,7 @@ import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
 import { AIRE } from './parche'
 import { CAMPO_DEL_FLUJO, CAMPO_EN_VIVO, FLUJO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo, publicarElFlujo, type MallaDelLogo } from './campoDelLogo'
 import { PISO_EN_VIVO } from '../piso/enVivo'
-import { POSARSE, avanzarElPolvo, polvoInicial, type EstadoDelPolvo } from './posarse'
+import { POSARSE, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from './posarse'
 import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
 
 /**
@@ -100,7 +100,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     inicio: true,
     reloj: 0,
     escala: 1,
-    polvo: null as EstadoDelPolvo | null,
+    polvo: null as EstadoDelPolvoVivo | null,
     progreso: Number.NaN,
     puntero: new THREE.Vector2(9, 9),
     rayo: new THREE.Raycaster(),
@@ -114,7 +114,14 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     medidaDelFlujo: null as MedidaDelCampo | null,
     textura: null as THREE.Data3DTexture | null,
     texturaDelFlujo: null as THREE.Data3DTexture | null,
-    logoAntes: null as THREE.Matrix4 | null,
+    // [CALIDAD 1] B2: todo lo que el cuadro usa, armado una vez (cero reservas por cuadro).
+    logoAntes: new THREE.Matrix4(),
+    antesDeEste: new THREE.Matrix4(),
+    hayPose: false,
+    origen: [0, 0, 0] as [number, number, number],
+    adelante: new THREE.Vector3(),
+    conchas: [] as THREE.Matrix4[],
+    paso: pasoInicial(),
   })
 
   // [ESCENA 8] T5: al desmontarse, el campo se libera y la simulación vuelve a no tener logo.
@@ -175,7 +182,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     const gl = state.gl
     m.gl = gl
     if (m.inicio) {
-      armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 0))
+      armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 0)) // una vez
       m.inicio = false
     }
     // [ESCENA 8] T5: el campo de la malla real, una vez, en un momento libre (no en este cuadro).
@@ -193,13 +200,13 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
           hornearDeAPoco(fino, (ms) => {
             const campo = fino.campo()
             m.textura = publicarElCampo(campo)
-            m.medidaDelCampo = { ms, celdas: [...campo.n], tramos }
+            m.medidaDelCampo = { ms, celdas: [...campo.n], tramos } // una vez
             m.campo = 'listo'
             const flujo = campoDeAPoco(contorno, CAMPO_DEL_FLUJO)
             hornearDeAPoco(flujo, (ms2) => {
               const f = flujo.campo()
               m.texturaDelFlujo = publicarElFlujo(f)
-              m.medidaDelFlujo = { ms: ms2, celdas: [...f.n], tramos }
+              m.medidaDelFlujo = { ms: ms2, celdas: [...f.n], tramos } // una vez
             })
           })
         }
@@ -210,10 +217,13 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     const dustGroup = dustGroupRef.current
     if (dustGroup === null) return
     const dtReal = Math.min(delta, 1 / 30)
-    // [ESCENA 8] T5: la pose del logo del cuadro anterior (la velocidad de su superficie).
-    const logoAntes = m.logoAntes ?? AIRE.uLogo.value.clone()
-    const antesDeEste = m.logoAntes === null ? logoAntes : m.logoAntes.clone()
-    m.logoAntes = (m.logoAntes ?? new THREE.Matrix4()).copy(AIRE.uLogo.value)
+    // [ESCENA 8] T5: la pose del logo del cuadro anterior (la velocidad de su superficie). [CALIDAD 1] B2: dos matrices que se turnan.
+    if (!m.hayPose) {
+      m.logoAntes.copy(AIRE.uLogo.value)
+      m.hayPose = true
+    }
+    m.antesDeEste.copy(m.logoAntes)
+    m.logoAntes.copy(AIRE.uLogo.value)
     const dt = quieto ? 0 : dtReal * m.escala
     m.reloj += dt
 
@@ -225,70 +235,92 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     const cursor = m.puntero.x < 5 && m.puntero.distanceToSquared(state.pointer) > 1e-8
     m.progreso = progreso
     m.puntero.copy(state.pointer)
-    let origen: [number, number, number] | null = null
+    let hayOrigen = false
     if (cursor) {
       m.rayo.setFromCamera(state.pointer, state.camera)
       const toca = m.rayo.ray.intersectPlane(m.plano, m.punto)
-      if (toca !== null) origen = [toca.x, FLOOR_Y, toca.z]
+      if (toca !== null) {
+        m.origen[0] = toca.x
+        m.origen[1] = FLOOR_Y
+        m.origen[2] = toca.z
+        hayOrigen = true
+      }
     }
-    if (origen === null && (scroll || cursor)) {
+    if (!hayOrigen && (scroll || cursor)) {
       const adelante = state.camera.getWorldDirection(m.punto.set(0, 0, 0)).setY(0).normalize()
-      origen = [state.camera.position.x + adelante.x * 6, FLOOR_Y, state.camera.position.z + adelante.z * 6]
+      m.origen[0] = state.camera.position.x + adelante.x * 6
+      m.origen[1] = FLOOR_Y
+      m.origen[2] = state.camera.position.z + adelante.z * 6
+      hayOrigen = true
     }
-    m.polvo = avanzarElPolvo(m.polvo ?? polvoInicial(m.reloj), m.reloj, origen, quieto || !posarse)
+    if (m.polvo === null) {
+      const inicial = polvoInicial(m.reloj)
+      m.polvo = { ...inicial, origen: [inicial.origen[0], inicial.origen[1], inicial.origen[2]] } // una vez
+    }
+    avanzarElPolvoEn(m.polvo, m.reloj, hayOrigen ? m.origen : null, quieto || !posarse)
     // Cuánto se mueve la coreografía (0–1): lo que hace resbalar el polvo del logo.
     m.movimiento += (Math.min(1, velocidadDelScroll * 25) - m.movimiento) * (1 - Math.exp(-dtReal / 0.2))
 
 
     dustGroup.updateMatrixWorld(true)
-    const conchas: THREE.Matrix4[] = []
+    const conchas = m.conchas
+    conchas.length = 0
     for (const hijo of dustGroup.children) {
-      const puntos = hijo.children.find((o) => o instanceof THREE.Points)
-      if (puntos !== undefined) conchas.push(puntos.matrixWorld)
+      for (const o of hijo.children) {
+        if (o instanceof THREE.Points) {
+          conchas.push(o.matrixWorld)
+          break
+        }
+      }
     }
     if (conchas.length < 3) return
-    const adelante = state.camera.getWorldDirection(new THREE.Vector3())
     const despertar = m.polvo
     // El remolino del despertar sólo si el polvo alcanzó a posarse antes de despertar.
     const conRemolino = despertar.desperto - despertar.antes > POSARSE.empiezaS
-    alPaso(armado.sim.material.uniforms, {
-      conchas,
-      camara: state.camera.position,
-      adelante,
-      dt,
-      reloj: m.reloj,
-      posarse: posarse ? 1 : 0,
-      quieto: despertar.quieto,
-      desperto: conRemolino ? despertar.desperto : -1e9,
-      origen: despertar.origen,
-      movimiento: m.movimiento,
-      logoAntes: antesDeEste,
-    })
-    if (dt > 0) armado.cronometro.correr(gl, () => armado.sim.paso(gl))
+    const p = m.paso
+    p.conchas = conchas
+    p.camara = state.camera.position
+    p.adelante = state.camera.getWorldDirection(m.adelante)
+    p.dt = dt
+    p.reloj = m.reloj
+    p.posarse = posarse ? 1 : 0
+    p.quieto = despertar.quieto
+    p.desperto = conRemolino ? despertar.desperto : -1e9
+    p.origen = despertar.origen
+    p.movimiento = m.movimiento
+    p.logoAntes = m.antesDeEste
+    alPaso(armado.sim.material.uniforms, p)
+    if (dt > 0) correr(armado, gl)
     publicar(armado.sim.estado()[0])
   })
 
   return null
 }
 
+/** [CALIDAD 1] B2: uno solo, escribible, que el cuadro rellena. */
 interface Paso {
-  readonly conchas: readonly THREE.Matrix4[]
-  readonly camara: THREE.Vector3
-  readonly adelante: THREE.Vector3
-  readonly dt: number
-  readonly reloj: number
-  readonly posarse: number
-  readonly quieto: number
-  readonly desperto: number
-  readonly origen: readonly [number, number, number]
-  readonly movimiento: number
+  conchas: readonly THREE.Matrix4[]
+  camara: THREE.Vector3
+  adelante: THREE.Vector3
+  dt: number
+  reloj: number
+  posarse: number
+  quieto: number
+  desperto: number
+  origen: readonly [number, number, number]
+  movimiento: number
   /** [ESCENA 8] T5 · la pose del logo del cuadro anterior. */
-  readonly logoAntes: THREE.Matrix4
+  logoAntes: THREE.Matrix4
+}
+
+function pasoInicial(): Paso {
+  const cero = new THREE.Vector3()
+  return { conchas: [], camara: cero, adelante: cero, dt: 0, reloj: 0, posarse: 0, quieto: 0, desperto: 0, origen: [0, 0, 0], movimiento: 0, logoAntes: new THREE.Matrix4() }
 }
 
 function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   const conchas = u.uConcha.value as THREE.Matrix4[]
-  p.conchas.forEach((c, i) => conchas[i].copy(c))
+  for (let i = 0; i < p.conchas.length; i += 1) conchas[i].copy(p.conchas[i])
   ;(u.uCamara.value as THREE.Vector3).copy(p.camara)
   ;(u.uAdelante.value as THREE.Vector3).copy(p.adelante)
   u.uDt.value = p.dt
@@ -296,9 +328,15 @@ function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   u.uPosarse.value = p.posarse
   u.uQuieto.value = p.quieto
   u.uDesperto.value = p.desperto
-  ;(u.uOrigen.value as THREE.Vector3).set(...p.origen)
+  ;(u.uOrigen.value as THREE.Vector3).set(p.origen[0], p.origen[1], p.origen[2])
   u.uMovimiento.value = p.movimiento
   ;(u.uLogoAntes.value as THREE.Matrix4).copy(p.logoAntes)
+}
+
+/** Un paso de la simulación (medido si el banco lo pidió), con la pasada armada una vez ([CALIDAD 1] B2). */
+function correr(armado: ReturnType<typeof armar>, gl: THREE.WebGLRenderer): void {
+  armado.gl.current = gl
+  armado.cronometro.correr(gl, armado.pasar)
 }
 
 function publicar(textura: THREE.Texture): void {
@@ -349,9 +387,15 @@ function armar() {
     },
     true,
   )
+  const gl = { current: null as THREE.WebGLRenderer | null }
   return {
     cuantas,
     sim,
+    gl,
+    // [CALIDAD 1] B2: la pasada de la simulación, armada una vez (el cronómetro la corre en cada cuadro).
+    pasar: (): void => {
+      if (gl.current !== null) sim.paso(gl.current)
+    },
     cronometro: crearCronometro(),
     soltar: () => {
       sim.soltar()

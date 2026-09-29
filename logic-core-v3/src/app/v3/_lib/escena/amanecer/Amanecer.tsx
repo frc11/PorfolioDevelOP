@@ -9,12 +9,12 @@ import { VIVO } from '../entorno/vivo'
 import { TRAMA_GLSL } from '../estrellas/cielo'
 import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
 import type { MoireHandle } from '../MoireScreen'
-import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, medirElBloqueOpaco } from '../nocheDisparada'
+import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from '../nocheDisparada'
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../probeMoire'
 import { viajeEnCurso } from '../viaje'
 import { DIA_DEL_TEXTO } from './diaDelTexto'
-import { AMANECER, PAUSA_S, avanceDelScroll, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer } from './linea'
+import { AMANECER, PAUSA_S, avanceDelScroll, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer, type MomentoVivo } from './linea'
 import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 
 /**
@@ -124,7 +124,7 @@ function mostrarLosHaces(malla: THREE.Mesh, hay: boolean, ojo: THREE.Vector3): b
 }
 
 function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
-  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0 })
+  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false } })
   const haces = useMemo(() => {
     // Una esfera alrededor del ojo, sin prueba de profundidad: el rayo lo corta la cuenta (la pared o el piso).
     const geometria = new THREE.SphereGeometry(20, 32, 16)
@@ -187,7 +187,7 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     m.cuadros += 1
     // [CALIDAD 1] A1: en un viaje de día a día, desde el primer cuadro la compuerta del destino (Tu panel corrido allá).
     const luzDelViaje = viajeEnCurso()?.luz ?? null
-    const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null ? medirElBloqueOpaco(document, window.innerHeight) : null
+    const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null ? medirElBloqueOpacoEn(document, window.innerHeight, m.bloque) : null
     const enLaLlegada = luzDelViaje !== null && bloque !== null ? compuertaEnLaLlegada(bloque.tuPanel.pie - (luzDelViaje.y1 - window.scrollY), bloque.alto) : null
     const activo = enLaLlegada ?? DIA_DEL_FINAL.activo
     m.pedido = activo && bloque !== null ? avanceDelScroll(bloque.tuPanel.pie, bloque.alto) : 0
@@ -198,12 +198,19 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       m.avance = 0
       m.entero = false
     } else {
-      const oculto = delta > PAUSA_S || (bloque !== null && bloqueTapaElCuadro(bloque))
-      pasoDelAmanecer(m, enLaLlegada !== null, m.pedido, dt, { recien, carga: m.cuadros <= 3, quieto, viaje: viajeEnCurso() !== null, oculto, pie: pieALaVista(m) })
+      // [CALIDAD 1] B2: el cuadro de parámetros, siempre el mismo objeto.
+      const c = m.cuadro
+      c.recien = recien
+      c.carga = m.cuadros <= 3
+      c.quieto = quieto
+      c.viaje = viajeEnCurso() !== null
+      c.oculto = delta > PAUSA_S || (bloque !== null && bloqueTapaElCuadro(bloque))
+      c.pie = pieALaVista(m)
+      pasoDelAmanecer(m, enLaLlegada !== null, m.pedido, dt, c)
     }
     DIA_DEL_TEXTO.frase.set(m.activo ? diaParaElTexto(m.avance, 'frase') : 1)
     DIA_DEL_TEXTO.abajo.set(m.activo ? diaParaElTexto(m.avance, 'abajo') : 1)
-    const momento = momentoEn(m.activo ? m.avance * AMANECER.final : AMANECER.final + 1)
+    const momento = momentoEn(m.activo ? m.avance * AMANECER.final : AMANECER.final + 1, m.momento)
     const u = AMANECER_EN_VIVO
     // Mientras sostiene la noche, el cielo de noche que el cielo del amanecer va a destapar.
     if (m.activo && momento.sostieneLaNoche && state.scene.fog !== null) u.uCieloDeNoche.value.copy(state.scene.fog.color).convertLinearToSRGB()

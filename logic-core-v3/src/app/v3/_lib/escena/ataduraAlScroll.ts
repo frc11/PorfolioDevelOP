@@ -6,8 +6,8 @@ import {
   subscribeIntroStage,
 } from '@/components/layout/home-intro/introHandoff'
 
-import { medirLasSecciones } from './extensionDeLasSecciones'
-import { aplicarElDiaDelFinal, medirElBloqueOpaco } from './nocheDisparada'
+import { medirLasSeccionesEn } from './extensionDeLasSecciones'
+import { aplicarElDiaDelFinal, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
@@ -40,6 +40,10 @@ import { createNumericStore, type ProbeRig } from './probeStore'
 
 /** El progreso al que la escena se queda quieta mientras el intro la tapa. */
 const PROGRESO_RETENIDO = 0
+
+/** [CALIDAD 1] B2 · los dos eventos de cuadro, armados una vez (no uno por cuadro de scroll). */
+const EN_CUADRO = { tipo: 'cuadro', enCuadro: true } as const
+const FUERA_DE_CUADRO = { tipo: 'cuadro', enCuadro: false } as const
 
 /**
  * ATA LA ESCENA AL SCROLL DE LA PÁGINA — el progreso y la visibilidad, de UNA
@@ -99,9 +103,17 @@ export function useEscenaAtadaAlScroll(
     faseRef.current = estado.fase
     if (estado.fase === 'corriendo') pedirRef.current?.()
   }, [estado.fase])
+  // [CALIDAD 1] B2: el último estado confirmado, para no llamar a React en cada cuadro de scroll sin transición.
+  const estadoRef = useRef<EstadoDeLaEscena>(ESTADO_INICIAL)
+  useEffect(() => {
+    estadoRef.current = estado
+  }, [estado])
 
   useEffect(() => {
     let pedido = 0
+    // [CALIDAD 1] B2: lo que se mide en cada cuadro, escrito siempre en los mismos objetos.
+    const extension = { arriba: 0, abajo: 0 }
+    const bloque = bloqueVivo()
 
     const leer = (): void => {
       pedido = 0
@@ -109,7 +121,7 @@ export function useEscenaAtadaAlScroll(
       const ventana = window.innerHeight
       if (!(ventana > 0)) return
       const desplazamiento = window.scrollY
-      const secciones = medirLasSecciones(document, desplazamiento)
+      const secciones = medirLasSeccionesEn(document, desplazamiento, extension)
       if (secciones === null) return
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
@@ -118,7 +130,7 @@ export function useEscenaAtadaAlScroll(
         : progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)
       rig.set('progress', progreso)
       // [FINAL 2] El día del final, con la misma medida y en el mismo cuadro que el progreso.
-      aplicarElDiaDelFinal(medirElBloqueOpaco(document, ventana))
+      aplicarElDiaDelFinal(medirElBloqueOpacoEn(document, ventana, bloque))
 
       // [VIAJES] Durante un viaje el `<main>` está apagado y se ve la sala entera: dibuja también en la banda opaca.
       const viajando = viajeEnCurso() !== null
@@ -134,7 +146,10 @@ export function useEscenaAtadaAlScroll(
       // React descarta la actualización y esto no re-renderiza por cuadro de
       // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por
       // identidad en su invariante — no una esperanza sobre esta línea.
-      setEstado((previo) => siguiente(previo, { tipo: 'cuadro', enCuadro }))
+      // [CALIDAD 1] B2: sin transición `siguiente` devuelve el mismo objeto; entonces no se llama a React (que igual
+      // reservaría la actualización en cada cuadro de scroll).
+      const evento = enCuadro ? EN_CUADRO : FUERA_DE_CUADRO
+      if (siguiente(estadoRef.current, evento) !== estadoRef.current) setEstado((previo) => siguiente(previo, evento))
 
       // B3 · EL REVELADO, de la MISMA lectura de scroll: sólo una máscara CSS en
       // el envoltorio, jamás la pose ni el progreso. Ver `revelado.ts`.
@@ -151,7 +166,7 @@ export function useEscenaAtadaAlScroll(
     // [FINAL 2] El día del final se escribe también EN el evento: los eventos de scroll se despachan
     // antes que los cuadros de animación, así que la escena lo ve en el mismo cuadro del salto.
     const alDesplazar = (): void => {
-      aplicarElDiaDelFinal(medirElBloqueOpaco(document, window.innerHeight))
+      aplicarElDiaDelFinal(medirElBloqueOpacoEn(document, window.innerHeight, bloque))
       pedir()
     }
     leer()

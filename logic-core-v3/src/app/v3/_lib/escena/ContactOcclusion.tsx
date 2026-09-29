@@ -103,7 +103,7 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
       if (!logo) return
       if (reposoRef.current === null) {
         // La altura de reposo, sin la vira: se saca el giro un instante para medir y se devuelve.
-        const giro = logo.rotation.clone()
+        const giro = logo.rotation.clone() // una vez
         logo.rotation.set(0, 0, 0)
         logo.updateMatrixWorld(true)
         reposoRef.current = alturaDelLogo(logo)

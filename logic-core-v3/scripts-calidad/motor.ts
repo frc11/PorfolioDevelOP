@@ -321,7 +321,33 @@ async function parteTraza(): Promise<void> {
   }
 }
 
-const PARTES: Record<string, () => Promise<void>> = { gpu: parteGpu, ritmo: parteRitmo, cpu: parteCpu, pasadas: partePasadas, memoria: parteMemoria, programas: parteProgramas, traza: parteTraza }
+/** [CALIDAD 1] B2 · lo que se reserva DURANTE el recorrido (muestreo de V8), por función y por archivo, en bytes por cuadro. */
+async function parteReservas(): Promise<void> {
+  const b = await abrirMotor(ANCHO, ALTO, { pedido: PEDIDO, dpr: DPR, frio: FRIO })
+  const s = b.p.sessionId
+  try {
+    const d = await documento(b)
+    await b.p.conexion.enviar('HeapProfiler.enable', {}, s)
+    await b.p.conexion.enviar('HeapProfiler.startSampling', { samplingInterval: 2048 }, s)
+    const r = await recorrer(b, d)
+    const { profile } = (await b.p.conexion.enviar('HeapProfiler.stopSampling', {}, s)) as { profile: { head: NodoDeMemoria } }
+    const porFuncion = agruparMemoria(profile.head)
+    const cuadros = r.t.length
+    const porArchivo = new Map<string, number>()
+    for (const [k, v] of porFuncion) {
+      const a = k.split(' · ')[1]?.replace(/:\d+$/, '') ?? '?'
+      porArchivo.set(a, (porArchivo.get(a) ?? 0) + v)
+    }
+    const total = porFuncion.reduce((a, [, v]) => a + v, 0)
+    const aCuadro = (v: number): number => Math.round(v / Math.max(1, cuadros))
+    escribir('reservas', { ancho: ANCHO, alto: ALTO, dpr: DPR, pedido: PEDIDO, cuadros, bytesPorCuadro: aCuadro(total), porArchivo: [...porArchivo.entries()].sort((a, c) => c[1] - a[1]).slice(0, 30).map(([k, v]) => [k, aCuadro(v)]), porFuncion: porFuncion.slice(0, 50).map(([k, v]) => [k, aCuadro(v)]) })
+    console.log(JSON.stringify({ cuadros, bytesPorCuadro: aCuadro(total), porArchivo: [...porArchivo.entries()].sort((a, c) => c[1] - a[1]).slice(0, 12).map(([k, v]) => [k, aCuadro(v)]) }))
+  } finally {
+    await b.cerrar()
+  }
+}
+
+const PARTES: Record<string, () => Promise<void>> = { gpu: parteGpu, ritmo: parteRitmo, cpu: parteCpu, pasadas: partePasadas, memoria: parteMemoria, programas: parteProgramas, traza: parteTraza, reservas: parteReservas }
 
 if (process.argv[1]?.endsWith('motor.ts')) {
   const parte = PARTES[PARTE]

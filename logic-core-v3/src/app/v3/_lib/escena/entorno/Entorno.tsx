@@ -52,6 +52,7 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     progreso: Number.NaN,
     ultimoMovimiento: -Infinity,
     hover: false,
+    entradas: { t: 0, scrollEnMovimiento: false, hover: false, reducido: false },
   })
 
   useEffect(() => {
@@ -132,7 +133,13 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       const scrollEnMovimiento = t - m.ultimoMovimiento < PULSO.quietudDelScrollS
       m.hover = hover !== null ? hover.leer(state.camera, state.gl.domElement, logoGroupRef.current, progreso) : false
       const antes = m.pulso ?? pulsoInicial(t)
-      m.pulso = avanzarElPulso(antes, { t, scrollEnMovimiento, hover: m.hover, reducido: quieto })
+      // [CALIDAD 1] B2: las entradas del pulso, siempre el mismo objeto.
+      const entradas = m.entradas
+      entradas.t = t
+      entradas.scrollEnMovimiento = scrollEnMovimiento
+      entradas.hover = m.hover
+      entradas.reducido = quieto
+      m.pulso = avanzarElPulso(antes, entradas)
       escribirLosAnillos(m.pulso)
     }
 
@@ -140,8 +147,8 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       ;(window as VentanaDelBanco).__escenaViva = {
         t,
         modo: m.pulso?.modo ?? null,
-        anillos: m.pulso?.anillos.map((a) => a.clase) ?? [],
-        nacen: m.pulso?.anillos.map((a) => a.nace) ?? [],
+        anillos: m.pulso?.anillos.map((a) => a.clase) ?? [], // banco
+        nacen: m.pulso?.anillos.map((a) => a.nace) ?? [], // banco
         hover: m.hover,
         empuje: VIVO.uEmpuje.value,
         noche: VIVO.uNoche.value,

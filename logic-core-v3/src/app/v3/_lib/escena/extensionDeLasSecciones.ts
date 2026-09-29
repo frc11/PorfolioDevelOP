@@ -145,6 +145,28 @@ export function medirLasSecciones(
   return extensionDe(cajas)
 }
 
+/**
+ * [CALIDAD 1] B2 · la misma medición, escrita en `destino` y sin arreglos intermedios: la corre la escena en cada
+ * cuadro de scroll. Devuelve `destino`, o `null` si no hay qué medir (los mismos casos que `extensionDe`).
+ */
+export function medirLasSeccionesEn(documento: FuenteDeLasSecciones, scrollY: number, destino: { arriba: number; abajo: number }): ExtensionDeLasSecciones | null {
+  const nodos = documento.querySelectorAll(SELECTOR_DE_LAS_SECCIONES)
+  let arriba = Number.POSITIVE_INFINITY
+  let abajo = Number.NEGATIVE_INFINITY
+  for (let i = 0; i < nodos.length; i += 1) {
+    const caja = nodos[i].getBoundingClientRect()
+    const a = caja.top + scrollY
+    const b = caja.bottom + scrollY
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+    if (a < arriba) arriba = a
+    if (b > abajo) abajo = b
+  }
+  if (!(arriba <= abajo)) return null
+  destino.arriba = arriba
+  destino.abajo = abajo
+  return destino
+}
+
 /** Un panel del recorrido en coordenadas del cuadro. */
 export interface PanelEnElCuadro {
   readonly id: string

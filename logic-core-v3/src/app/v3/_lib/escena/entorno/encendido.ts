@@ -103,10 +103,13 @@ export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: numb
       if (noche < ENCENDIDO.apaga) return { ...e, fase: 'apagando', desde: t, kInicial: e.k }
       if (en >= GUION_S) return { ...e, fase: 'prendido', desde: t, k: FIRME, kInicial: FIRME }
       return { ...e, k: guionEn(en) }
-    case 'prendido':
+    case 'prendido': {
       if (noche < ENCENDIDO.apaga) return { ...e, fase: 'apagando', desde: t, kInicial: e.k }
       // Prendido sin guion (volvió a anochecer enseguida): sube suave desde donde estaba.
-      return { ...e, k: e.kInicial + (FIRME - e.kInicial) * Math.min(1, en / ENCENDIDO.subeS) }
+      const k = e.kInicial + (FIRME - e.kInicial) * Math.min(1, en / ENCENDIDO.subeS)
+      // [CALIDAD 1] B2: asentado, el mismo estado (la noche entera sin reservar nada por cuadro).
+      return k === e.k ? e : { ...e, k }
+    }
     case 'apagando': {
       if (noche >= ENCENDIDO.prende) return { ...e, fase: 'prendido', desde: t, kInicial: e.k }
       const k = Math.max(0, e.kInicial * (1 - en / ENCENDIDO.apagaS))

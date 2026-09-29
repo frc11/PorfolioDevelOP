@@ -49,12 +49,42 @@ export function polvoInicial(t: number): EstadoDelPolvo {
  * `reducido`, nunca queda quieto.
  */
 export function avanzarElPolvo(e: EstadoDelPolvo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean): EstadoDelPolvo {
-  if (reducido) return { ...e, quieto: NUNCA, ultimoMovimiento: t }
+  const copia: EstadoDelPolvoVivo = { ...e, origen: [e.origen[0], e.origen[1], e.origen[2]] }
+  avanzarElPolvoEn(copia, t, movimiento, reducido)
+  return copia
+}
+
+/** [CALIDAD 1] B2 · el estado que la escena reusa en cada cuadro: el mismo, escribible. */
+export interface EstadoDelPolvoVivo {
+  quieto: number
+  desperto: number
+  antes: number
+  origen: [number, number, number]
+  ultimoMovimiento: number
+}
+
+/**
+ * [CALIDAD 1] B2 · la misma cuenta que `avanzarElPolvo`, escribiendo en `e`: la escena la corre en cada cuadro sin
+ * reservar nada (el origen del despertar se copia, no se guarda la referencia).
+ */
+export function avanzarElPolvoEn(e: EstadoDelPolvoVivo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean): void {
+  if (reducido) {
+    e.quieto = NUNCA
+    e.ultimoMovimiento = t
+    return
+  }
   if (movimiento !== null) {
     // Despierta sólo si estaba quieto: mientras sigue el movimiento, el frente ya salió.
-    if (e.quieto < NUNCA) return { quieto: NUNCA, desperto: t, antes: e.quieto, origen: movimiento, ultimoMovimiento: t }
-    return { ...e, ultimoMovimiento: t }
+    if (e.quieto < NUNCA) {
+      e.antes = e.quieto
+      e.quieto = NUNCA
+      e.desperto = t
+      e.origen[0] = movimiento[0]
+      e.origen[1] = movimiento[1]
+      e.origen[2] = movimiento[2]
+    }
+    e.ultimoMovimiento = t
+    return
   }
-  if (e.quieto >= NUNCA && t - e.ultimoMovimiento > POSARSE.quietudS) return { ...e, quieto: e.ultimoMovimiento }
-  return e
+  if (e.quieto >= NUNCA && t - e.ultimoMovimiento > POSARSE.quietudS) e.quieto = e.ultimoMovimiento
 }

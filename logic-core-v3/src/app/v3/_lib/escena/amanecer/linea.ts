@@ -107,21 +107,28 @@ export interface MomentoDelAmanecer {
   readonly cielo: number
 }
 
-/** Qué pasa a `s` segundos de empezar el amanecer. */
-export function momentoEn(s: number): MomentoDelAmanecer {
+/** [CALIDAD 1] B2 · un momento escribible, para la escena (que lo llena en cada cuadro sin reservar). */
+export type MomentoVivo = { -readonly [K in keyof MomentoDelAmanecer]: MomentoDelAmanecer[K] }
+
+/** Cuándo el frente pasa por las primeras filas (una bisección: se hace una vez, no en cada cuadro). */
+let frenteEnLasPrimeras = Number.NaN
+
+/** Qué pasa a `s` segundos de empezar el amanecer. Con `destino`, lo escribe ahí ([CALIDAD 1] B2). */
+export function momentoEn(s: number, destino?: MomentoVivo): MomentoDelAmanecer {
   const a = AMANECER
   const [r0, r1, r2] = a.rayos
+  if (Number.isNaN(frenteEnLasPrimeras)) frenteEnLasPrimeras = frenteHasta(46)
   const rayos = s < r0 || s > r2 ? 0 : s < r1 ? suave((s - r0) / (r1 - r0)) : 1 - suave((s - r1) / (r2 - r1))
-  const resplandor = s < a.resplandor[0] ? 0 : s < a.resplandor[1] ? suave((s - a.resplandor[0]) / (a.resplandor[1] - a.resplandor[0])) : 1 - suave((s - frenteHasta(46)) / (a.final - frenteHasta(46)))
-  return {
-    estrellas: 1 - suave((s - a.estrellas[0]) / (a.estrellas[1] - a.estrellas[0])),
-    resplandor,
-    sostieneLaNoche: s < a.cambio,
-    barre: s >= a.cambio && s < a.final,
-    frente: frenteEn(s),
-    rayos,
-    cielo: suave((s - a.cambio) / (a.final - a.cambio)),
-  }
+  const resplandor = s < a.resplandor[0] ? 0 : s < a.resplandor[1] ? suave((s - a.resplandor[0]) / (a.resplandor[1] - a.resplandor[0])) : 1 - suave((s - frenteEnLasPrimeras) / (a.final - frenteEnLasPrimeras))
+  const m = destino ?? { estrellas: 0, resplandor: 0, sostieneLaNoche: false, barre: false, frente: 0, rayos: 0, cielo: 0 }
+  m.estrellas = 1 - suave((s - a.estrellas[0]) / (a.estrellas[1] - a.estrellas[0]))
+  m.resplandor = resplandor
+  m.sostieneLaNoche = s < a.cambio
+  m.barre = s >= a.cambio && s < a.final
+  m.frente = frenteEn(s)
+  m.rayos = rayos
+  m.cielo = suave((s - a.cambio) / (a.final - a.cambio))
+  return m
 }
 
 /** Cuándo el frente llega al radio `r` (s). */
@@ -130,7 +137,8 @@ export function frenteHasta(r: number): number {
   for (let i = 1; i < f.length; i += 1) {
     if (r >= f[i][1]) {
       // Bisección sobre el tramo (el frente baja con el tiempo).
-      let [a, b]: number[] = [f[i - 1][0], f[i][0]]
+      let a: number = f[i - 1][0]
+      let b: number = f[i][0]
       for (let k = 0; k < 40; k += 1) {
         const m = (a + b) / 2
         if (frenteEn(m) > r) a = m

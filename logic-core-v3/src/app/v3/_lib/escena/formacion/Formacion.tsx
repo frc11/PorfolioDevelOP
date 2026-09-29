@@ -94,7 +94,7 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
       const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
       m.progreso = progreso
       const velocidad = conScroll && m.antes !== null ? state.camera.position.distanceTo(m.antes) / dt : 0
-      m.antes = (m.antes ?? new THREE.Vector3()).copy(state.camera.position)
+      m.antes = (m.antes ?? new THREE.Vector3()).copy(state.camera.position) // una vez (después, copia)
       const objetivo = Math.min(1, velocidad / ABRE_CON.plena)
       m.abre += (objetivo - m.abre) * (1 - Math.exp(-dt / (objetivo > m.abre ? ABRE_CON.subeS : ABRE_CON.bajaS)))
       abrir(m.abre)

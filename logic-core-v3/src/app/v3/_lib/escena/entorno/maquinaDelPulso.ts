@@ -92,10 +92,13 @@ export function vivoEn(anillo: Anillo, t: number, c: ConstantesDelPulso = PULSO)
 
 export function avanzarElPulso(estado: EstadoDelPulso, e: EntradasDelPulso, c: ConstantesDelPulso = PULSO): EstadoDelPulso {
   const modo = modoDelPulso(e)
-  if (modo === 'apagado') return { modo, proximo: null, anillos: [] }
+  // [CALIDAD 1] B2: sin cambios, el mismo estado (en reposo el pulso corre en cada cuadro sin reservar nada).
+  if (modo === 'apagado') return estado.modo === 'apagado' && estado.proximo === null && estado.anillos.length === 0 ? estado : { modo, proximo: null, anillos: [] }
 
-  // 1 · Los que terminaron su recorrido se van. Los vivos, nunca.
-  let anillos = estado.anillos.filter((a) => vivoEn(a, e.t, c))
+  // 1 · Los que terminaron su recorrido se van. Los vivos, nunca. (Se filtra sólo si alguno terminó.)
+  let muerto = false
+  for (const a of estado.anillos) if (!vivoEn(a, e.t, c)) muerto = true
+  let anillos = muerto ? estado.anillos.filter((a) => vivoEn(a, e.t, c)) : estado.anillos
   let proximo = estado.proximo
 
   // 2 · Un cambio de modo reprograma el próximo; entrar o salir del hover larga el principal.
@@ -115,5 +118,6 @@ export function avanzarElPulso(estado: EstadoDelPulso, e: EntradasDelPulso, c: C
     if (proximo <= e.t) proximo = e.t + periodo
   }
 
+  if (modo === estado.modo && proximo === estado.proximo && anillos === estado.anillos) return estado
   return { modo, proximo, anillos }
 }

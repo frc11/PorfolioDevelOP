@@ -169,6 +169,34 @@ export function medirElBloqueOpaco(
   return { servicios: { tope: servicios.top, pie: servicios.bottom }, tuPanel: { tope: tuPanel.top, pie: tuPanel.bottom }, alto }
 }
 
+/** [CALIDAD 1] B2 · un bloque escribible, para medir en cada cuadro sin reservar. */
+export interface BloqueOpacoVivo {
+  servicios: { tope: number; pie: number }
+  tuPanel: { tope: number; pie: number }
+  alto: number
+}
+
+export function bloqueVivo(): BloqueOpacoVivo {
+  return { servicios: { tope: 0, pie: 0 }, tuPanel: { tope: 0, pie: 0 }, alto: 0 }
+}
+
+/** [CALIDAD 1] B2 · `medirElBloqueOpaco` escrito en `destino` (lo único que se reserva son los rectángulos del DOM). */
+export function medirElBloqueOpacoEn(
+  documento: { querySelector(selector: string): CajaMedible | null },
+  alto: number,
+  destino: BloqueOpacoVivo,
+): BloqueOpaco | null {
+  const servicios = documento.querySelector('[data-panel="servicios"]')?.getBoundingClientRect()
+  const tuPanel = documento.querySelector('[data-panel="tu-panel"]')?.getBoundingClientRect()
+  if (servicios === undefined || tuPanel === undefined) return null
+  destino.servicios.tope = servicios.top
+  destino.servicios.pie = servicios.bottom
+  destino.tuPanel.tope = tuPanel.top
+  destino.tuPanel.pie = tuPanel.bottom
+  destino.alto = alto
+  return destino
+}
+
 /** El paso por cuadro: pone la compuerta y, si corresponde, repone la noche escondida. */
 export function aplicarElDiaDelFinal(b: BloqueOpaco | null): void {
   if (b === null) return

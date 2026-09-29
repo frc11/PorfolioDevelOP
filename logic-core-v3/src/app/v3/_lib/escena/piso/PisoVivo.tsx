@@ -104,7 +104,7 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     const gl = state.gl
     guardarElContexto(armado, gl)
     if (m.inicio) {
-      armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 1))
+      armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 1)) // una vez
       m.inicio = false
     }
     const t = VIVO.uTiempo.value
@@ -128,14 +128,8 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     let pasos = 0
     while (m.reloj + paso <= t + 1e-9 && pasos < PASOS_POR_CUADRO) {
       m.reloj += paso
-      alPaso(s, {
-        dt: paso,
-        c2: ((PISO_VIVO.onda.velocidad * paso) / g.lado) ** 2,
-        cursor: [m.cursor.x, m.cursor.y, PISO_VIVO.cursor.radio / g.lado, m.presencia],
-        t: m.reloj,
-        conLogo: AIRE.uLogoC.value.z > 0 && AIRE.uLogoC.value.w > 0 ? 1 : 0,
-        camara: state.camera.getWorldPosition(m.ojo),
-      })
+      // [CALIDAD 1] B2: los uniforms del paso, sin un objeto ni un arreglo por paso.
+      alPaso(s, paso, g.lado, m.cursor, m.presencia, m.reloj, state.camera.getWorldPosition(m.ojo))
       correr(armado, gl)
       pasos += 1
     }
@@ -148,28 +142,19 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
   return <primitive object={armado.bloques} />
 }
 
-interface Paso {
-  readonly dt: number
-  readonly c2: number
-  readonly cursor: readonly [number, number, number, number]
-  readonly t: number
-  readonly conLogo: number
-  /** Dónde está el ojo: ningún bloque sube por encima (`PISO_VIVO.ojo`). */
-  readonly camara: THREE.Vector3
+/** Los uniforms de un paso. [CALIDAD 1] B2: en argumentos sueltos (antes, un objeto y un arreglo por paso). */
+function alPaso(s: Record<string, THREE.IUniform>, paso: number, lado: number, cursor: THREE.Vector2, presencia: number, t: number, camara: THREE.Vector3): void {
+  s.uDt.value = paso
+  s.uC2.value = ((PISO_VIVO.onda.velocidad * paso) / lado) ** 2
+  ;(s.uCursor.value as THREE.Vector4).set(cursor.x, cursor.y, PISO_VIVO.cursor.radio / lado, presencia)
+  s.uTiempo.value = t
+  s.uConLogo.value = AIRE.uLogoC.value.z > 0 && AIRE.uLogoC.value.w > 0 ? 1 : 0
+  ;(s.uCamara.value as THREE.Vector3).copy(camara)
 }
 
-function alPaso(s: Record<string, THREE.IUniform>, p: Paso): void {
-  s.uDt.value = p.dt
-  s.uC2.value = p.c2
-  ;(s.uCursor.value as THREE.Vector4).set(...p.cursor)
-  s.uTiempo.value = p.t
-  s.uConLogo.value = p.conLogo
-  ;(s.uCamara.value as THREE.Vector3).copy(p.camara)
-}
-
-/** Un paso de la simulación (medido si el banco lo pidió). */
+/** Un paso de la simulación (medido si el banco lo pidió). [CALIDAD 1] B2: con la pasada armada una vez. */
 function correr(armado: ReturnType<typeof armar>, gl: THREE.WebGLRenderer): void {
-  armado.cronometro.correr(gl, () => armado.sim.paso(gl))
+  armado.cronometro.correr(gl, armado.pasar)
   armado.uAlturas.value = armado.sim.estado()[0]
   // El polvo posado lee las mismas alturas (`enVivo.ts`).
   PISO_EN_VIVO.uPisoVivo.value = armado.uAlturas.value
@@ -242,11 +227,16 @@ function armar(grilla: Grilla, conContacto: boolean) {
     bloques.setMatrixAt(k, matriz.makeTranslation(x, FLOOR_Y, z))
   }
   bloques.instanceMatrix.needsUpdate = true
+  const gl = { current: null as THREE.WebGLRenderer | null }
   return {
     grilla,
-    gl: { current: null as THREE.WebGLRenderer | null },
+    gl,
     cronometro: crearCronometro(),
     sim,
+    // [CALIDAD 1] B2: la pasada de la simulación, armada una vez (el cronómetro la corre en cada paso).
+    pasar: (): void => {
+      if (gl.current !== null) sim.paso(gl.current)
+    },
     bloques,
     uAlturas,
     uHaz,
