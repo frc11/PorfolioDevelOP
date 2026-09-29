@@ -8,8 +8,9 @@
  * T3 · el amanecer atado al scroll: encendido; el avance que pide el scroll y el que se muestra, que lo persigue
  *      con una velocidad tope (entero en 2,5 s como mínimo), en las dos direcciones; sin evento donde nadie lo
  *      ve; el texto del final espera al día; el pie no deja al amanecer atrás de lo legible.
- * T4 · el cielo de día (con bandera, apagado): tres variantes en dos tonos, en la franja del cielo de la noche,
- *      detrás de la formación y de la trama; se va con la noche antes de las estrellas; claro (el texto se lee).
+ * T4 · el cielo de día, en la franja del cielo de la noche, detrás de la formación y de la trama; se va con la noche
+ *      antes de las estrellas; claro (el texto se lee). [CALIDAD 1] A2: el pintado celeste pasó al producto y las
+ *      otras cinco pruebas se borraron (lo afirma s34-calidad1); acá queda lo que sigue valiendo del pintado.
  * T5 · la colisión con el logo: contra el campo de distancia de la malla real (una «c» de prueba, extruida por
  *      three como el logo: la boca de la «c» queda afuera, donde el anillo de ESCENA 7 la cerraba); se pega sólo
  *      contra la cara que recibe el impacto y con el logo quieto; nada más de 1,5 s; se desprende con el aire.
@@ -27,11 +28,9 @@ import { AMANECER, avanceDelCuadro, avanceDelScroll, diaParaElTexto, perseguir, 
 import * as linea from '../amanecer/linea'
 import { CAMPO_DEL_LOGO, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
 import { FISICA, despegue } from '../polvo/simulacion'
-import { CIELO_DE_DIA, TONOS, TONOS_DEL_CIELO, VARIANTES_DEL_CIELO, diaDelCielo, nubesDeBloques, nubesDePolvo } from '../cieloDeDia/nubes'
+import { CELESTE, CIELO_DE_DIA, diaDelCielo } from '../cieloDeDia/nubes'
 import { ESTRELLAS } from '../estrellas/Estrellas'
-import { NITIDEZ } from '../polvo/nitidez'
 import { INK_COLOR } from '../probeScene'
-import { MOIRE_FAR_ORDER } from '../probeMoire'
 import { PISO_VIVO } from '../piso/bloques'
 import { FORMACION } from '../formacion/enFormacion'
 import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS, MOIRE_OPACITY } from '../probeMoire'
@@ -136,44 +135,24 @@ const amanecer = leer('amanecer/Amanecer.tsx')
 afirmar(/DIA_DEL_TEXTO\.frase\.set\(m\.activo \? diaParaElTexto\(m\.avance, 'frase'\) : 1\)/.test(amanecer) && /quieto=\{reducedMotion\}/.test(leer('ProbeStage.tsx')), 'la escena lo escribe en cada cuadro (1 fuera del amanecer) y sabe si hay menos movimiento')
 
 // ── T4 · el cielo de día ──────────────────────────────────────────────────
-titulo('T4 · el cielo de día: con bandera y apagado')
-const combinaciones = VARIANTES_DEL_CIELO.flatMap((v) => TONOS_DEL_CIELO.map((t) => `${v}-${t}`))
-afirmar(ENTORNO.pruebas.cieloDeDia === 'no' && BASE_LIMPIA.pruebas.cieloDeDia === 'no', 'apagado en el producto y en la base')
-afirmar(combinaciones.length === 6 && combinaciones.every((c) => entornoPedido(`producto,cielo-dia=${c}`).pruebas.cieloDeDia === c) && entornoPedido('producto,cielo-dia=nubes').pruebas.cieloDeDia === 'no', 'el banco prende cada una por nombre: tres variantes en dos tonos (y nada con un nombre que no existe)', combinaciones.join(' · '))
+titulo('T4 · el cielo de día (el pintado celeste; [CALIDAD 1] A2 lo pasó al producto)')
 const montaje = leer('ProbeStage.tsx')
-afirmar(montaje.includes('<CieloDeDia calidad={calidad} quieto={reducedMotion} />') && /pisoConFormacion\(calidad\) === undefined\) return null/.test(leer('cieloDeDia/CieloDeDia.tsx')), '  montado en la escena; sólo con la formación (es el cielo de afuera)')
-// Los tonos: claros, y el celeste, celeste.
+afirmar(montaje.includes('<CieloDeDia calidad={calidad} />') && /pisoConFormacion\(calidad\) === undefined\) return null/.test(leer('cieloDeDia/CieloDeDia.tsx')), 'montado en la escena; sólo con la formación (es el cielo de afuera)')
+// El tono: claro, y celeste.
 const rgb = (hex: string): [number, number, number] => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255) as [number, number, number]
 const lin = (c: number): number => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
 const lum = (hex: string): number => { const [r, g, b] = rgb(hex).map(lin); return 0.2126 * r + 0.7152 * g + 0.0722 * b }
 const wcag = (a: string, b: string): number => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05)
-const [cr, , cb] = rgb(TONOS.celeste.alto)
-const [mr, mg, mb] = rgb(TONOS.mono.alto)
-afirmar(cb - cr > 0.04 && Math.max(Math.abs(mr - mg), Math.abs(mg - mb)) < 0.02, 'dos tonos: celeste desaturado y monocromo (gris claro con nubes blancas)', `celeste ${TONOS.celeste.alto}, mono ${TONOS.mono.alto}`)
-const peorTinta = Math.min(...TONOS_DEL_CIELO.flatMap((t) => [TONOS[t].alto, TONOS[t].sombra].map((c) => wcag(INK_COLOR, c))))
-afirmar(peorTinta > 7, '  claros: la tinta del texto y el negro del logo se despegan de cualquier parte del cielo', `lo peor, ${peorTinta.toFixed(1)}:1 (AA pide 4,5)`)
+const [cr, , cb] = rgb(CELESTE.alto)
+afirmar(cb - cr > 0.04, 'celeste desaturado, con nubes blancas', `arriba ${CELESTE.alto}`)
+const peorTinta = Math.min(...[CELESTE.alto, CELESTE.sombra].map((c) => wcag(INK_COLOR, c)))
+afirmar(peorTinta > 7, '  claro: la tinta del texto y el negro del logo se despegan de cualquier parte del cielo', `lo peor, ${peorTinta.toFixed(1)}:1 (AA pide 4,5)`)
 // Dónde va: en la franja del cielo, detrás de la formación y de la trama; se va con la noche antes de las estrellas.
 afirmar(diaDelCielo(0) === 1 && diaDelCielo(ESTRELLAS.umbral.desde) === 0 && CIELO_DE_DIA.radio === FORMACION.radioDelCielo, 'se va con la noche antes de que asomen las estrellas, y está donde el cielo de la noche', `apagado del todo con noche ${String(CIELO_DE_DIA.noche[1])}; las estrellas, desde ${String(ESTRELLAS.umbral.desde)}`)
 const cielo = leer('cieloDeDia/CieloDeDia.tsx')
-afirmar(/renderOrder = MOIRE_FAR_ORDER - 5/.test(cielo) && MOIRE_FAR_ORDER - 5 < MOIRE_FAR_ORDER - 3 && /depthWrite: false,\s*toneMapped: false,\s*\}\)\s*const cupula/.test(cielo) && /cupula\.renderOrder = 1000/.test(cielo), '  antes que la cúpula de la noche (que lo tapa de noche y lo destapa con el amanecer) y que la trama; la cúpula no escribe profundidad (las estrellas la pisan)')
-afirmar(/a\.bloques\.visible = dia > 0\.01/.test(cielo), '  los bloques (que sí escriben profundidad) se van antes de que asomen las estrellas: no las tapan')
-const bloques = nubesDeBloques()
-const polvo = nubesDePolvo()
-const alturaAngular = (x: number, y: number, z: number): number => (Math.atan2(y - FLOOR_Y, Math.hypot(x, z)) * 180) / Math.PI
-const radios = [...bloques.map((c) => Math.hypot(c.x, c.z)), ...Array.from({ length: polvo.cuantos }, (_u, k) => Math.hypot(polvo.posiciones[k * 3], polvo.posiciones[k * 3 + 2]))]
-const alturas = [...bloques.map((c) => alturaAngular(c.x, c.y - c.alto / 2, c.z)), ...Array.from({ length: polvo.cuantos }, (_u, k) => alturaAngular(polvo.posiciones[k * 3], polvo.posiciones[k * 3 + 1], polvo.posiciones[k * 3 + 2]))]
-const menor = (v: readonly number[]): number => v.reduce((a, x) => Math.min(a, x), Infinity)
-const mayor = (v: readonly number[]): number => v.reduce((a, x) => Math.max(a, x), -Infinity)
-afirmar(menor(radios) > FORMACION.hasta && mayor(radios) < CIELO_DE_DIA.radio && menor(alturas) > 1.5, 'las nubes, detrás de la última fila de la formación y delante del cielo, arriba del horizonte', `radios de ${menor(radios).toFixed(0)} a ${mayor(radios).toFixed(0)}; desde ${menor(alturas).toFixed(1)}° sobre el piso`)
-// Cada variante con su lenguaje.
+afirmar(/depthWrite: false,\s*toneMapped: false,\s*\}\)\s*const cupula/.test(cielo) && /cupula\.renderOrder = 1000/.test(cielo) && !/transparent: true/.test(cielo), '  opaca y última de lo opaco: antes que la cúpula de la noche (transparente, que lo tapa de noche y lo destapa con el amanecer); no escribe profundidad (las estrellas la pisan)')
 const P8 = CIELO_DE_DIA.pintado
 afirmar(P8.union <= 0.06 && P8.tono <= 0.02 && /fwidth\( a \)/.test(leer('cieloDeDia/nubes.ts')), 'pintado: un ciclorama con las uniones de los paneles apenas visibles (un píxel, unos puntos más oscuras) y cada panel con su tono', `${String(P8.paneles)} paneles en la vuelta, cada ${String(P8.cadaGrados)}°; la unión ${(P8.union * 100).toFixed(1)} %, el tono ±${(P8.tono * 50).toFixed(1)} %`)
-const medioBloque = CIELO_DE_DIA.bloques.celda / 2
-const escalonado = bloques.every((c) => Math.abs(c.alto / medioBloque - Math.round(c.alto / medioBloque)) < 1e-9)
-const bases = new Set(bloques.map((c) => `${Math.round(c.giro * 1e6)}|${(c.y - c.alto / 2).toFixed(6)}`))
-afirmar(escalonado && bases.size === CIELO_DE_DIA.bloques.cuantas && bloques.length < 3000, 'bloques: columnas de cubos sobre una base plana, escalonadas en medios bloques (el lenguaje del piso vivo)', `${String(bloques.length)} cubos en ${String(CIELO_DE_DIA.bloques.cuantas)} nubes, una base por nube; una llamada`)
-afirmar(CIELO_DE_DIA.bloques.deriva > 0 && CIELO_DE_DIA.bloques.deriva < 0.01 && CIELO_DE_DIA.particulas.deriva < 0.01, '  derivan despacio', `una vuelta en ${((2 * Math.PI) / CIELO_DE_DIA.bloques.deriva / 60).toFixed(0)} min`)
-afirmar(CIELO_DE_DIA.particulas.tam[0] === NITIDEZ.tam[0] && CIELO_DE_DIA.particulas.tam[1] === NITIDEZ.tam[1] && /0\.75 \/ max\( vLado, 1\.0 \)/.test(cielo), 'partículas: nubes del mismo polvo de la escena (el tamaño y el borde de un píxel de las motas nítidas)', `${String(polvo.cuantos)} puntos en ${String(CIELO_DE_DIA.particulas.cuantas)} nubes`)
 
 // ── T5 · la colisión con el logo ──────────────────────────────────────────
 titulo('T5 · la colisión contra la malla real del logo')

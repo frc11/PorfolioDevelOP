@@ -231,6 +231,7 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
 | envolvente | `#3E3E40` | las dos capas de rendijas, a opacidad 0,45 con el hueco al 18% |
 | marcas de piso | `#D7D7D5` / `#E6E6E3` / `#CFCFCC` | registro, marco exterior, cintas |
 | partículas | `#5A5A57` → `#DCDCD9` · `#B9B9B4` | polvo cercano → lejano · bokeh |
+| cielo de día | `#C8D5DF` · `#FFFFFF` · `#E1E6EA` | **excepción aprobada a la regla monocroma** ([CALIDAD 1] A2, decisión de Valentino): el cielo pintado celeste, sus nubes y su sombra. Ver `ESTADO-ESCENA.md` |
 
 ~~masa oscura `#191917`~~ y ~~estructura aérea `#3A3A35`/`#2A2A26`~~ **se fueron con S10**, junto con los objetos que las llevaban.
 

@@ -285,8 +285,8 @@ export default function ProbeStage({
         <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
-        {/* [ESCENA 8] T4, con bandera: el cielo de día (detrás de la formación y de la trama). */}
-        <CieloDeDia calidad={calidad} quieto={reducedMotion} />
+        {/* [ESCENA 8] T4 · el cielo de día (detrás de la formación y de la trama); [CALIDAD 1] A2: el pintado celeste, encendido. */}
+        <CieloDeDia calidad={calidad} />
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
         {/* [ESCENA 7] T11 · el amanecer (el día entra desde afuera y por la trama); [ESCENA 8] encendido y atado al scroll. */}
         <Amanecer moireRef={moireRef} logoMaterialRef={logoMaterialRef} quieto={reducedMotion} />

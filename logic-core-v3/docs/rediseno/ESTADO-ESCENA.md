@@ -30,7 +30,16 @@
 | La luz que rebota | De noche el charco aclara la cara de abajo del logo (ESCENA 7, T12). Las sombras de las motas, borradas en ESCENA 8 | `entorno/Rebote.tsx` |
 | **[ESCENA 8] T2 · la trama anclada** | Las dos capas bajan a pleno hasta 1 u debajo del piso (sin fundido): el piso las corta. La pared (capa gruesa) lleva un zócalo fino (0,1 u, opacidad 0,62) y el piso vivo un contacto al pie de cada capa | `moire/limite.ts`, `MoireScreen.tsx`, `piso/bloques.ts` |
 | **[ESCENA 8] T3 · el amanecer** | Encendido (era la prueba T11 de ESCENA 7) y atado al scroll: el scroll pide el avance (borde de Tu panel del 85 % al escenario del final clavado) y el que se muestra lo persigue con tope (entero en 2,5 s como mínimo), en las dos direcciones. Sin evento al cargar adentro, en un viaje, con el bloque tapando; con menos movimiento, de una vez. El texto del escenario de Por qué develOP espera al día; el pie (compartido) fuerza el avance a 0,9 si se ve antes | `amanecer/`, `_secciones/por-que-develop/PorQueDevelop.tsx` |
+| **[CALIDAD 1] A2 · el cielo de día** | Encendido: el **pintado celeste** (T4 de ESCENA 8, elegido por Valentino), un ciclorama con nubes pintadas y paneles, en la franja del cielo de la noche, detrás de la formación y de la trama; se va con la noche antes de las estrellas y el amanecer lo destapa desde el horizonte. Sólo con la formación (no en el teléfono). **Rompe la regla monocroma: excepción aprobada** (abajo) | `cieloDeDia/` |
 | Preloader de /v3 | Apagado (`CON_PRELOADER = false`) | `_intro/` |
+
+### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
+
+- **El celeste del cielo de día** ([CALIDAD 1] A2). La dirección de arte es monocroma (DIRECCION-ESCENA §4, la
+  paleta); el cielo de día pintado lleva un celeste desaturado (`#C8D5DF` arriba, nubes blancas, sombra `#E1E6EA`,
+  `cieloDeDia/nubes.ts`). **Es una decisión explícita de Valentino, no un error**: excepción aprobada. Medido en
+  ESCENA 8: ningún texto baja de AA (mínimo 10,25:1); el texto sobre el cielo pierde hasta 17,5 % de contraste
+  (Por qué develOP).
 
 ## 2 · Las banderas
 
@@ -49,12 +58,13 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 | `fugaz=no` | [ESCENA 8] sin la estrella fugaz |
 | `limite=no` | [ESCENA 8] T2 · la trama como en ESCENA 7 (flotando) |
 | `amanecer=no` | [ESCENA 8] T3 · sin el amanecer (el día vuelve escondido, como antes de ESCENA 7) |
+| `cielo-dia=no` | [CALIDAD 1] A2 · sin el cielo de día (queda el fondo de la bruma, como antes) |
 
 ### Las pruebas (apagadas en el producto)
 
-| Token | Prueba | Qué hace | Dónde |
-|---|---|---|---|
-| `cielo-dia=<variante>-<tono>` | T4 de ESCENA 8 | El cielo de día: un cielo natural en un espacio construido, en la franja del cielo de noche, detrás de la formación y de la trama; se va con la noche antes de las estrellas y el amanecer lo destapa desde el horizonte. `pintado` (ciclorama con nubes pintadas y paneles), `bloques` (cúmulos de cubos, como el piso vivo, que derivan) o `particulas` (nubes del polvo nítido, que derivan); `celeste` o `mono` | `cieloDeDia/` |
+Ninguna. [CALIDAD 1] A2: el cielo de día pasó al producto en su variante pintado-celeste; las otras cinco (el pintado
+mono, y los bloques y las partículas en los dos tonos) se borraron, código y banderas (`cielo-dia=<variante>-<tono>`
+ya no existe).
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -64,7 +74,7 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `__escenaViva`, `__relojDelBanco`, `__polvoDelBanco`, `__formacionDelBanco`, `__estrellasDelBanco`,
 `__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()` y
 `movimientoDelLogo()`), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con `avance`, `pedido` y el día
-para el texto; `congelar(s)`), `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` (`variante`, `dia`,
+para el texto; `congelar(s)`), `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`,
 `mostrar`).
 
 ## 3 · Presupuestos (1440 × 900, medidos)
@@ -135,9 +145,7 @@ el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips qui
   El costo de los rayos (ver §3) es del producto mientras duran.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
-- **El cielo de día (T4)**: por elegir (variante y tono; el celeste rompe la regla monocroma). Con los tonos
-  finales ningún texto baja de AA (mínimo 10,25:1) pero el texto sobre el cielo pierde contraste: hasta 17,5 %
-  con celeste y 12,3 % con mono (Por qué develOP). En el hero casi no se ve cielo (la formación llega arriba).
+- ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
 - **El pegado (T5)**: con las reglas nuevas se pegan muy pocas (0 a 2 a la vez). Si el clip todavía se ve raro,
   sacar el pegado entero es borrar el modo 6 de la simulación.
 - La licencia de Book of Shapes (`LICENCIA-BOOKOFSHAPES.md`) cubre los SVG descargados, no el código.

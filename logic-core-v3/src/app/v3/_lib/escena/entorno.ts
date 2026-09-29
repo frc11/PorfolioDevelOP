@@ -37,16 +37,18 @@
  * `limite=no`) y el amanecer atado al scroll (T3, `amanecer`; era la prueba T11 de ESCENA 7; el banco lo
  * apaga con `amanecer=no`).
  *
- * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende. Después de
- * T3 no queda ninguna de ESCENA 7; la de ESCENA 8:
+ * **[CALIDAD 1] A2** · el cielo de día (T4 de ESCENA 8) pasa al producto en su variante elegida, el pintado celeste
+ * (`cieloDeDia`; el banco lo apaga con `cielo-dia=no`). Las otras cinco se borraron, código y banderas. El celeste
+ * rompe la regla monocroma de DIRECCION-ESCENA: es una excepción aprobada (ESTADO-ESCENA.md).
  *
- * - T4 `cielo-dia=<variante>-<tono>` · el cielo de día (`pintado`, `bloques` o `particulas`; `celeste` o `mono`).
+ * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende. Después de A2 no
+ * queda ninguna.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
- *     window.__entornoDeLaEscena = 'producto,cielo-dia=pintado-mono' → el producto con una prueba
+ *     window.__entornoDeLaEscena = 'producto,cielo-dia=no'          → el producto sin el cielo de día
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
@@ -58,17 +60,11 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-/** [ESCENA 8] T4 · el cielo de día que pide el banco: `<variante>-<tono>` (`cieloDeDia/`), o `no`. */
-export type PedidoDelCielo = 'no' | `${'pintado' | 'bloques' | 'particulas'}-${'celeste' | 'mono'}`
-const PEDIDOS_DEL_CIELO: readonly PedidoDelCielo[] = ['pintado-celeste', 'pintado-mono', 'bloques-celeste', 'bloques-mono', 'particulas-celeste', 'particulas-mono']
-
-export interface Pruebas {
-  /** [ESCENA 8] T4 · el cielo de día: un cielo natural en un espacio construido (`cieloDeDia/`). */
-  readonly cieloDeDia: PedidoDelCielo
-}
+/** Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). */
+export type Pruebas = Readonly<Record<never, boolean>>
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { cieloDeDia: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = {}
 
 export interface Entorno {
   readonly E1: boolean
@@ -116,6 +112,8 @@ export interface Entorno {
   readonly limite: boolean
   /** [ESCENA 7] T11 · el amanecer: el día entra desde afuera y por la trama (`amanecer/`). [ESCENA 8] T3: encendido y atado al scroll. */
   readonly amanecer: boolean
+  /** [ESCENA 8] T4 · el cielo de día (`cieloDeDia/`). [CALIDAD 1] A2: el pintado celeste, encendido. */
+  readonly cieloDeDia: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -145,6 +143,7 @@ export const ENTORNO: Entorno = {
   fugaz: true,
   limite: true,
   amanecer: true,
+  cieloDeDia: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -173,6 +172,7 @@ export const BASE_LIMPIA: Entorno = {
   fugaz: false,
   limite: false,
   amanecer: false,
+  cieloDeDia: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -216,14 +216,9 @@ export function entornoPedido(pedido: string): Entorno {
     fugaz: producto ? valor('fugaz') !== 'no' : partes.has('fugaz'),
     limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
     amanecer: producto ? valor('amanecer') !== 'no' : partes.has('amanecer'),
-    pruebas: pruebasPedidas(valor('cielo-dia')),
+    cieloDeDia: producto ? valor('cielo-dia') !== 'no' : partes.has('cielo-dia'),
+    pruebas: PRUEBAS_APAGADAS,
   }
-}
-
-/** [ESCENA 8] Las pruebas que nombra el pedido (hoy, sólo el cielo de día de T4). */
-function pruebasPedidas(cielo: string | undefined): Pruebas {
-  const pedido = PEDIDOS_DEL_CIELO.find((p) => p === cielo)
-  return { cieloDeDia: pedido ?? 'no' }
 }
 
 let resuelto: Entorno | null = null
