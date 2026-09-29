@@ -4,6 +4,7 @@ import { entornoDeLaEscena } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { PARTICLE_FAR_COLOR, PARTICLE_NEAR_COLOR } from '../probeParticles'
 import { MOTAS_FRAGMENT_GLSL, MOTAS_GLSL, MOTAS_PARS_GLSL, MOTAS_TAM_GLSL } from './motas'
+import { CAMPO_DEL_LOGO_GLSL, CAMPO_EN_VIVO } from './campoDelLogo'
 import { DISTANCIA_AL_LOGO_GLSL, HOLGURA } from './obstaculo'
 import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from './nitidez'
 import { AMANECER_EN_VIVO, AMANECER_GLSL, hayAmanecer } from '../amanecer/luz'
@@ -61,6 +62,18 @@ uniform vec3 uTintaLejos;
 varying float vParejo;
 #ifdef AIRE_OBSTACULO
 	${DISTANCIA_AL_LOGO_GLSL}
+	#ifdef AIRE_FISICA
+		${CAMPO_DEL_LOGO_GLSL}
+		// [CALIDAD 1] A3 · tras el cursor, contra la malla real: la boca de la «c» y el ojo de la «p» quedan abiertos
+		// (con las formas de siempre, la mota que caía en la boca se corría a una pared que no existe).
+		vec3 afueraDelCampo( vec3 mundo, float holgura ) {
+			vec3 q = ( uLogoInverso * vec4( mundo, 1.0 ) ).xyz;
+			float d = campoDelLogo( q );
+			if ( d >= 2.0 * holgura ) return mundo;
+			float u = clamp( ( d + 0.6 ) / ( 2.0 * holgura + 0.6 ), 0.0, 1.0 );
+			return ( uLogo * vec4( q + normalDelCampo( q ) * ( holgura * ( 1.0 + u * u ) - d ), 1.0 ) ).xyz;
+		}
+	#endif
 #elif defined( AIRE_FISICA )
 	uniform mat4 uLogo;
 #endif
@@ -118,11 +131,15 @@ const CUERPO = /* glsl */ `
 /** Con E7, después del empuje del cursor: la mota empujada contra el logo se desliza por su borde. */
 const DESPUES_DEL_CURSOR = /* glsl */ `
 	#if defined( AIRE_OBSTACULO ) && defined( POLVO_CURSOR )
-	// La que está sobre el logo, resbalando o pegada ya está en su cara: no se la corre la holgura.
+	// La que está sobre el logo o resbalando ya está en su cara: no se la corre la holgura.
 	if ( modoDeLaFisica < 2.5 || ( modoDeLaFisica > 4.5 && modoDeLaFisica < 5.5 ) ) {
 		vec3 enLaVista = vec3( gl_Position.x / projectionMatrix[ 0 ][ 0 ], gl_Position.y / projectionMatrix[ 1 ][ 1 ], mvPosition.z );
 		vec3 enElMundo = transpose( mat3( viewMatrix ) ) * ( enLaVista - viewMatrix[ 3 ].xyz );
-		vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_TRAS_EL_CURSOR );
+		#ifdef AIRE_FISICA
+			vec3 fuera = afueraDelCampo( enElMundo, HOLGURA_TRAS_EL_CURSOR );
+		#else
+			vec3 fuera = afueraDelLogo( enElMundo, HOLGURA_TRAS_EL_CURSOR );
+		#endif
 		if ( fuera != enElMundo ) gl_Position = projectionMatrix * viewMatrix * vec4( fuera, 1.0 );
 	}
 	#endif
@@ -187,7 +204,7 @@ export function conAire<T extends THREE.Material>(material: T, campo: Campo, con
   const clavePrevia = material.customProgramCacheKey.bind(material)
   material.onBeforeCompile = (shader: Shader, renderer) => {
     previo(shader, renderer)
-    Object.assign(shader.uniforms, AIRE, AMANECER_EN_VIVO, { uTiempo: VIVO.uTiempo })
+    Object.assign(shader.uniforms, AIRE, AMANECER_EN_VIVO, CAMPO_EN_VIVO, { uTiempo: VIVO.uTiempo })
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_VERTEX}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CUERPO}`)

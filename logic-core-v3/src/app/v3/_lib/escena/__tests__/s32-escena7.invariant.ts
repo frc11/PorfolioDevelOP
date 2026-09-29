@@ -262,9 +262,7 @@ afirmar(Math.abs(total[2]) < 1e-12 && Math.abs(total[0]) > Math.abs(aire[0]), 'e
 const lejos = flujoAlrededor(aire, n, 6 * FISICA.obstaculo.radio)
 afirmar(Math.hypot(...lejos) < 0.02 * Math.hypot(...aire), '  y lejos del logo el aire no se entera', `a ${String(6 * FISICA.obstaculo.radio)} u: ${(Math.hypot(...lejos) / Math.hypot(...aire) * 100).toFixed(2)} %`)
 afirmar(/vec3 viento = vientoDelDespertar\( p \) \+ alrededorDelLogo\( p, uVientoDelAire \);/.test(sim7) && /\/ \$\{FISICA\.aire\.arrastre\.toFixed\(2\)\}/.test(sim7), '  la mota del aire sigue ese flujo con su arrastre (su inercia): lenta, dobla; rápida, choca')
-afirmar(/if \( entra > \$\{FISICA\.obstaculo\.pegar\.toFixed\(2\)\}( && LOGO_QUIETO)? \)/.test(sim7) && /modo > 5\.5 && modo < 6\.5/.test(sim7), 'con fuerza, queda pegada (modo 6) y se desprende siguiendo el aire ([ESCENA 8] T5: contra la malla real y con el logo quieto; en s33)', `umbral ${String(FISICA.obstaculo.pegar)} u/s entrando a la cara; pegada de ${String(FISICA.obstaculo.pega[0])} a ${String(FISICA.obstaculo.pega[1])} s`)
-afirmar(FISICA.obstaculo.pegar > 0.5 && FISICA.obstaculo.pegar < 4.8, '  el umbral cae entre el aire de un scroll suave (~0,5 u/s, medido) y el de uno fuerte (~5 u/s, medido)')
-afirmar(/\( modoDeLaFisica > 5\.5 && modoDeLaFisica < 6\.5 \) \) mundo = \( uLogo/.test(sim7), '  la pegada acompaña al logo (guardada en su espacio)')
+afirmar(/v \+= n \* max\( 0\.0, entra \);/.test(sim7) && !/modo > 5\.5 && modo < 6\.5/.test(sim7), 'la que choca se corre por la cara, sin rebote ([ESCENA 7] con fuerza quedaba pegada, modo 6; [CALIDAD 1] A3 lo borró: s34)')
 
 // ── T8 · la niebla de afuera ──────────────────────────────────────────────
 titulo('T8 · la niebla de afuera: 6c y 6d, un solo efecto')

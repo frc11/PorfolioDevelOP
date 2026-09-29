@@ -12,8 +12,8 @@
  *      antes de las estrellas; claro (el texto se lee). [CALIDAD 1] A2: el pintado celeste pasó al producto y las
  *      otras cinco pruebas se borraron (lo afirma s34-calidad1); acá queda lo que sigue valiendo del pintado.
  * T5 · la colisión con el logo: contra el campo de distancia de la malla real (una «c» de prueba, extruida por
- *      three como el logo: la boca de la «c» queda afuera, donde el anillo de ESCENA 7 la cerraba); se pega sólo
- *      contra la cara que recibe el impacto y con el logo quieto; nada más de 1,5 s; se desprende con el aire.
+ *      three como el logo: la boca de la «c» queda afuera, donde el anillo de ESCENA 7 la cerraba). [CALIDAD 1] A3:
+ *      el pegado se borró (lo afirma s34).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -27,7 +27,7 @@ import { bandEnvelope } from '../moireTextures'
 import { AMANECER, avanceDelCuadro, avanceDelScroll, diaParaElTexto, perseguir, type CuadroDelAmanecer } from '../amanecer/linea'
 import * as linea from '../amanecer/linea'
 import { CAMPO_DEL_LOGO, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
-import { FISICA, despegue } from '../polvo/simulacion'
+import { FISICA } from '../polvo/simulacion'
 import { CELESTE, CIELO_DE_DIA, diaDelCielo } from '../cieloDeDia/nubes'
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { INK_COLOR } from '../probeScene'
@@ -190,34 +190,17 @@ const afueraEnLaBoca = (d: (q: readonly [number, number, number]) => number): bo
 afirmar(afueraEnLaBoca(enElCampo), 'la boca de la «c» está afuera: ninguna mota se proyecta ni se pega a una pared que no existe', `en la boca, el campo da ${enElCampo(enLaBoca).toFixed(2)} u`)
 controlPositivo('el detector VE el anillo entero de ESCENA 7 (cerraba la boca)', anilloDe7, afueraEnLaBoca)
 extruida.dispose()
-// La física lo usa en el choque, el pegado, lo posado y lo que desliza; el rodeo suave del flujo sigue igual.
+// La física lo usa en el choque, lo posado y lo que desliza. [CALIDAD 1] A3: el pegado se borró y el rodeo del flujo va
+// contra la malla real (su propio campo, más grueso y de más alcance: s34).
 const sim = leer('polvo/simulacion.ts')
 const chocar = /vec3 chocar\( inout vec3 p, inout vec3 v \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
 afirmar(/float d = campoDelLogo\( q \);/.test(chocar) && /normalDelCampo\( q \)/.test(chocar) && !/caraDelLogo/.test(chocar), 'el choque (lo que cae y se posa sobre el logo, lo que desliza, lo levantado) es contra el campo de la malla real')
-afirmar(/float cara = campoDelLogo\( q \);/.test(sim) && /float lejos = campoDelLogo\(/.test(sim) && (sim.match(/normalDelCampo\(/g) ?? []).length >= 4, '  el contacto y el pegado en el aire, lo que desliza y la pegada que se desprende, también')
+afirmar(/float cara = campoDelLogo\( q \);/.test(sim) && /float lejos = campoDelLogo\(/.test(sim) && (sim.match(/normalDelCampo\(/g) ?? []).length >= 3, '  el contacto en el aire y lo que desliza, también')
 const rodeo = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
-afirmar(/caraDelLogo\( q \)/.test(rodeo) && !/campoDelLogo/.test(rodeo), '  el rodeo suave del flujo (sin pegado) sigue como estaba')
+afirmar(/flujoDelLogo\( q \)/.test(rodeo) && !/caraDelLogo/.test(rodeo), '  [CALIDAD 1] A3: el rodeo del flujo, contra la malla real (el campo del flujo)')
 afirmar(/campoDelLogo\(contorno\)/.test(leer('polvo/Fisica.tsx')) && /requestIdleCallback/.test(leer('polvo/Fisica.tsx')) && /THREE\.Data3DTexture/.test(leer('polvo/campoDelLogo.ts')), '  una textura 3D que se arma una vez al cargar, fuera del cuadro, y se lee en el espacio del logo (sigue su pose)')
-// Dónde se pega, cuánto y cómo se desprende.
-afirmar(/float entra = - dot\( uVientoDelAire \+ v - velocidadDelLogo\( f \+ d \), n \);/.test(sim) && /- dot\( antesDelChoque - velocidadDelLogo\( p \), golpe \)/.test(sim), 'se pega sólo la que entra a la cara que recibe el impacto: con la velocidad relativa a la superficie del logo')
-afirmar((sim.match(/LOGO_QUIETO/g) ?? []).length === 4 && /uMovimientoDelLogo < \$\{FISICA\.contacto\.seMueve/.test(sim) && /uMovimiento < \$\{FISICA\.resbala/.test(sim), '  con el logo quieto: si se mueve o gira (en el mundo, o la coreografía lo gira en el cuadro), se sueltan todas')
-afirmar(FISICA.obstaculo.pega[1] <= FISICA.contacto.hasta && FISICA.contacto.hasta <= 1.5 && /min\( mix\([\s\S]*?\), \$\{FISICA\.contacto\.hasta\.toFixed\(2\)\} \)/.test(sim), '  nada queda pegado más de 1,5 s', `de ${String(FISICA.obstaculo.pega[0])} a ${String(FISICA.obstaculo.pega[1])} s, con tope ${String(FISICA.contacto.hasta)}`)
-afirmar(FISICA.contacto.queda < 0.05 && FISICA.contacto.queda < FISICA.obstaculo.margen * 0.5, '  a un pelo de la superficie real (ESCENA 7 la dejaba a 0,11 de la forma aproximada)', `${String(FISICA.contacto.queda)} u`)
-// Se desprende hacia donde va el aire: nunca en contra, nunca hacia adentro.
-const nuncaEnContra = (f: (a: readonly [number, number, number], n: readonly [number, number, number]) => readonly number[]): boolean => {
-  for (let k = 0; k < 400; k += 1) {
-    const aire: [number, number, number] = [Math.sin(k * 1.3) * 3, Math.cos(k * 0.7) * 3, Math.sin(k * 2.1) * 0.4]
-    const n0 = [Math.cos(k * 0.37), Math.sin(k * 0.91), Math.sin(k * 0.23) * 0.3]
-    const l = Math.hypot(n0[0], n0[1], n0[2])
-    const n: [number, number, number] = [n0[0] / l, n0[1] / l, n0[2] / l]
-    if (aire[0] * n[0] + aire[1] * n[1] + aire[2] * n[2] >= 0) continue
-    const v = f(aire, n)
-    if (v[0] * aire[0] + v[1] * aire[1] + v[2] * aire[2] < -1e-9 || v[0] * n[0] + v[1] * n[1] + v[2] * n[2] < -1e-9) return false
-  }
-  return true
-}
-afirmar(nuncaEnContra(despegue) && /v = despegue\( uVientoDelAire, n \);/.test(sim), 'se desprende con el aire (lo que el aire tiene de largo de la cara): nunca en contra del aire ni hacia adentro')
-const despegueDe7 = (a: readonly [number, number, number], n: readonly [number, number, number]): number[] => [a[0] + n[0] * 0.4, a[1] + n[1] * 0.4, a[2] + n[2] * 0.4]
-controlPositivo('el detector VE el despegue de ESCENA 7 (el aire más un empujón fijo hacia afuera)', despegueDe7, nuncaEnContra)
+// El contacto: con la velocidad relativa a la superficie del logo, a un pelo de ella. [CALIDAD 1] A3: sin pegado.
+afirmar(/float entra = - dot\( uVientoDelAire \+ v - velocidadDelLogo\( f \+ d \), n \);/.test(sim) && /v -= n \* min\( 0\.0, dot\( v - velocidadDelLogo\( p \), n \) \);/.test(sim), 'el contacto va con la velocidad relativa a la superficie del logo (que también se mueve)')
+afirmar(FISICA.contacto.queda < 0.05, '  a un pelo de la superficie real (ESCENA 7 la dejaba a 0,11 de la forma aproximada)', `${String(FISICA.contacto.queda)} u`)
 
 cerrar('s33-escena8')

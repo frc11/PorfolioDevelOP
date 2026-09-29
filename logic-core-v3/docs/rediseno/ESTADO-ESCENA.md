@@ -23,7 +23,7 @@
 | El polvo que se posa | Física por mota en la GPU (ESCENA 7, T4) | `polvo/Fisica.tsx`, `polvo/simulacion.ts` |
 | El piso vivo | Un mar de bloques, con el techo del ojo (ESCENA 7, T5) | `piso/` |
 | La inercia del aire (6a) | Tal cual (ESCENA 7, T6) | `polvo/Aire.tsx` |
-| El obstáculo | Flujo potencial alrededor del logo (las formas de siempre). **[ESCENA 8] T5:** el choque, el pegado, el polvo posado sobre el logo y el que desliza van contra un **campo de distancia de la malla real** (textura 3D horneada al cargar). Se pega sólo contra la cara del impacto, a 0,03 u, con el logo quieto; nada más de 1,5 s; se desprende con el aire | `polvo/campoDelLogo.ts`, `polvo/simulacion.ts` |
+| El obstáculo | **[CALIDAD 1] A3:** sólo el flujo. El aire rodea al logo como un flujo potencial contra la **malla real** (un campo del flujo: celdas de 0,1 u, hasta 2,6 u del logo) y pasa por la boca de la «c» y el ojo de la «p»; la mota que igual llega a la cara se corre por ella, sin rebote. **El pegado (modo 6) se borró.** El choque, el polvo posado sobre el logo y el que desliza, contra el campo fino (ESCENA 8, T5). El empuje tras el cursor, también contra la malla real. Los dos campos se hornean una vez al cargar, en dos momentos libres (89 y 93 ms medidos) | `polvo/campoDelLogo.ts`, `polvo/simulacion.ts`, `polvo/parche.ts` |
 | La niebla de afuera | 6c + 6d (ESCENA 7, T8) | `niebla/rasante.ts`, `formacion/Formacion.tsx` |
 | El haz se enciende | **[ESCENA 8] T1:** cuatro intentos que fallan (de siete: uno sí y uno no) en 1,94 s, el golpe y la luz firme | `entorno/encendido.ts` |
 | El polvo nítido | Motas de 1,4 a 3,2 px con borde de un píxel (ESCENA 7, T10) | `polvo/nitidez.ts` |
@@ -146,6 +146,5 @@ el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips qui
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
-- **El pegado (T5)**: con las reglas nuevas se pegan muy pocas (0 a 2 a la vez). Si el clip todavía se ve raro,
-  sacar el pegado entero es borrar el modo 6 de la simulación.
+- ~~**El pegado (T5)**~~ → [CALIDAD 1] A3: borrado (el modo 6); queda sólo el flujo, que pasa por los huecos del logo.
 - La licencia de Book of Shapes (`LICENCIA-BOOKOFSHAPES.md`) cubre los SVG descargados, no el código.

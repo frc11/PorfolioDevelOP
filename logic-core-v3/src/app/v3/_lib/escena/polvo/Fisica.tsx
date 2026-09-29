@@ -11,7 +11,7 @@ import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
 import { AIRE } from './parche'
-import { CAMPO_EN_VIVO, campoDelLogo, contornoDeLaMalla, publicarElCampo, type MallaDelLogo } from './campoDelLogo'
+import { CAMPO_DEL_FLUJO, CAMPO_EN_VIVO, FLUJO_EN_VIVO, campoDelLogo, contornoDeLaMalla, publicarElCampo, publicarElFlujo, type MallaDelLogo } from './campoDelLogo'
 import { PISO_EN_VIVO } from '../piso/enVivo'
 import { POSARSE, avanzarElPolvo, polvoInicial, type EstadoDelPolvo } from './posarse'
 import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
@@ -25,12 +25,12 @@ import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
  * quietud de `posarse.ts`. El remolino del despertar sólo sopla si el polvo llegó a posarse (la
  * quietud duró más que `POSARSE.empiezaS`): mover el cursor después de una pausa corta no arma nada.
  *
- * [ESCENA 7] T7: 6b se borró; el logo como obstáculo del aire que corre está en la
- * simulación (`alrededorDelLogo`, y las motas que quedan pegadas, modo 6).
+ * [ESCENA 7] T7: 6b se borró; el logo como obstáculo del aire que corre está en la simulación (`alrededorDelLogo`).
  *
  * [ESCENA 8] T5: arma una vez el campo de distancia de la malla real del logo (`campoDelLogo.ts`) cuando las
  * mallas ya están, fuera del cuadro (en un momento libre), y en cada cuadro le pasa a la simulación la pose del
- * logo del cuadro anterior (la velocidad de su superficie) y cuánto se mueve (las pegadas se sueltan).
+ * logo del cuadro anterior (la velocidad de su superficie). [CALIDAD 1] A3: también el campo del flujo, en otro
+ * momento libre; y como no hay pegado, ya no mide cuánto se mueve el logo.
  */
 
 interface PropsDeLaFisica {
@@ -42,7 +42,7 @@ interface PropsDeLaFisica {
 }
 
 type VentanaDelBanco = Window & {
-  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida>; campo: () => { ms: number; celdas: number[]; tramos: number } | null; movimientoDelLogo: () => number }
+  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida>; campo: () => MedidaDelCampo | null; flujo: () => MedidaDelCampo | null }
 }
 
 export function Fisica(props: PropsDeLaFisica) {
@@ -65,13 +65,11 @@ function mallasDelLogo(grupo: THREE.Group): MallaDelLogo[] {
   return mallas
 }
 
-/** [ESCENA 8] T5 · cuánto se mueve la superficie del logo (u/s): el punto de su caja que más se corrió desde el cuadro anterior. */
-const ESQUINAS_DEL_LOGO = [new THREE.Vector3(-3.4, -3.6, 0), new THREE.Vector3(3.4, -3.6, 0), new THREE.Vector3(-3.4, 3.6, 0), new THREE.Vector3(3.4, 3.6, 0)]
-function movimientoDelLogo(ahora: THREE.Matrix4, antes: THREE.Matrix4, dt: number, a: THREE.Vector3, b: THREE.Vector3): number {
-  if (dt <= 0) return 0
-  let mas = 0
-  for (const e of ESQUINAS_DEL_LOGO) mas = Math.max(mas, a.copy(e).applyMatrix4(ahora).distanceTo(b.copy(e).applyMatrix4(antes)))
-  return mas / dt
+/** Lo que el banco lee de un campo horneado: cuánto tardó, sus celdas y los tramos del contorno. */
+interface MedidaDelCampo {
+  readonly ms: number
+  readonly celdas: number[]
+  readonly tramos: number
 }
 
 function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFisica) {
@@ -90,22 +88,24 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     punto: new THREE.Vector3(),
     movimiento: 0,
     gl: null as THREE.WebGLRenderer | null,
-    // [ESCENA 8] T5: el campo del logo (se arma una vez), la pose del logo del cuadro anterior y cuánto se mueve.
+    // [ESCENA 8] T5: el campo del logo (se arma una vez) y la pose del logo del cuadro anterior. [CALIDAD 1] A3: y el del flujo.
     campo: 'falta' as 'falta' | 'armando' | 'listo',
-    medidaDelCampo: null as { ms: number; celdas: number[]; tramos: number } | null,
+    medidaDelCampo: null as MedidaDelCampo | null,
+    medidaDelFlujo: null as MedidaDelCampo | null,
     textura: null as THREE.Data3DTexture | null,
+    texturaDelFlujo: null as THREE.Data3DTexture | null,
     logoAntes: null as THREE.Matrix4 | null,
-    seMueve: 0,
-    a: new THREE.Vector3(),
-    b: new THREE.Vector3(),
   })
 
   // [ESCENA 8] T5: al desmontarse, el campo se libera y la simulación vuelve a no tener logo.
   useEffect(
     () => () => {
       memoria.current.textura?.dispose()
+      memoria.current.texturaDelFlujo?.dispose()
       CAMPO_EN_VIVO.uCampoDelLogo.value = null
       CAMPO_EN_VIVO.uHayCampo.value = 0
+      FLUJO_EN_VIVO.uFlujoDelLogo.value = null
+      FLUJO_EN_VIVO.uHayFlujo.value = 0
     },
     [],
   )
@@ -118,9 +118,9 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
         const gl = memoria.current.gl
         if (gl === null) return []
         const datos = armado.sim.leer(gl, 0)
-        // Aire, cayendo, en el piso, sobre el logo, deslizando, levantada y pegada.
-        const cuenta = [0, 0, 0, 0, 0, 0, 0]
-        for (let k = 0; k < armado.cuantas; k += 1) cuenta[Math.min(6, Math.max(0, Math.round(datos[k * 4 + 3])))] += 1
+        // Aire, cayendo, en el piso, sobre el logo, deslizando y levantada ([CALIDAD 1] A3: la pegada se borró).
+        const cuenta = [0, 0, 0, 0, 0, 0]
+        for (let k = 0; k < armado.cuantas; k += 1) cuenta[Math.min(5, Math.max(0, Math.round(datos[k * 4 + 3])))] += 1
         return cuenta
       },
       camaraLenta: (escala) => {
@@ -128,7 +128,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
       campo: () => memoria.current.medidaDelCampo,
-      movimientoDelLogo: () => memoria.current.seMueve,
+      flujo: () => memoria.current.medidaDelFlujo,
       // Cuánto corrió el aire a las motas que están en el aire: cuántas se movieron más de 0,1, la media y la máxima.
       corrimiento: () => {
         const gl = memoria.current.gl
@@ -164,6 +164,10 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       const mallas = mallasDelLogo(grupoDelLogo)
       if (mallas.length > 0) {
         m.campo = 'armando'
+        const libre = (f: () => void): void => {
+          if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(f, { timeout: 1500 })
+          else window.setTimeout(f, 0)
+        }
         const armar = (): void => {
           const t0 = performance.now()
           const contorno = contornoDeLaMalla(mallas)
@@ -171,18 +175,22 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
           m.textura = publicarElCampo(campo)
           m.medidaDelCampo = { ms: Math.round(performance.now() - t0), celdas: [...campo.n], tramos: contorno.tramos.length / 4 }
           m.campo = 'listo'
+          // [CALIDAD 1] A3: el del flujo, en el próximo momento libre (no en el mismo tirón).
+          libre(() => {
+            const t1 = performance.now()
+            const flujo = campoDelLogo(contorno, CAMPO_DEL_FLUJO)
+            m.texturaDelFlujo = publicarElFlujo(flujo)
+            m.medidaDelFlujo = { ms: Math.round(performance.now() - t1), celdas: [...flujo.n], tramos: contorno.tramos.length / 4 }
+          })
         }
-        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(armar, { timeout: 1500 })
-        else window.setTimeout(armar, 0)
+        libre(armar)
       }
     }
     const dustGroup = dustGroupRef.current
     if (dustGroup === null) return
     const dtReal = Math.min(delta, 1 / 30)
-    // [ESCENA 8] T5: la pose del logo del cuadro anterior (la velocidad de su superficie) y cuánto se mueve.
+    // [ESCENA 8] T5: la pose del logo del cuadro anterior (la velocidad de su superficie).
     const logoAntes = m.logoAntes ?? AIRE.uLogo.value.clone()
-    const seMueve = movimientoDelLogo(AIRE.uLogo.value, logoAntes, dtReal, m.a, m.b)
-    m.seMueve += (seMueve - m.seMueve) * (1 - Math.exp(-dtReal / 0.08))
     const antesDeEste = m.logoAntes === null ? logoAntes : m.logoAntes.clone()
     m.logoAntes = (m.logoAntes ?? new THREE.Matrix4()).copy(AIRE.uLogo.value)
     const dt = quieto ? 0 : dtReal * m.escala
@@ -234,7 +242,6 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       origen: despertar.origen,
       movimiento: m.movimiento,
       logoAntes: antesDeEste,
-      movimientoDelLogo: m.seMueve,
     })
     if (dt > 0) armado.cronometro.correr(gl, () => armado.sim.paso(gl))
     publicar(armado.sim.estado()[0])
@@ -254,9 +261,8 @@ interface Paso {
   readonly desperto: number
   readonly origen: readonly [number, number, number]
   readonly movimiento: number
-  /** [ESCENA 8] T5 · la pose del logo del cuadro anterior y cuánto se mueve su superficie (u/s). */
+  /** [ESCENA 8] T5 · la pose del logo del cuadro anterior. */
   readonly logoAntes: THREE.Matrix4
-  readonly movimientoDelLogo: number
 }
 
 function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
@@ -272,7 +278,6 @@ function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   ;(u.uOrigen.value as THREE.Vector3).set(...p.origen)
   u.uMovimiento.value = p.movimiento
   ;(u.uLogoAntes.value as THREE.Matrix4).copy(p.logoAntes)
-  u.uMovimientoDelLogo.value = p.movimientoDelLogo
 }
 
 function publicar(textura: THREE.Texture): void {
@@ -316,10 +321,10 @@ function armar() {
       uLogoPalo: AIRE.uLogoPalo,
       uLogo: AIRE.uLogo,
       uLogoInverso: AIRE.uLogoInverso,
-      // [ESCENA 8] T5: la pose del logo del cuadro anterior, cuánto se mueve, y el campo de la malla real.
+      // [ESCENA 8] T5: la pose del logo del cuadro anterior y el campo de la malla real. [CALIDAD 1] A3: y el del flujo.
       uLogoAntes: { value: new THREE.Matrix4() },
-      uMovimientoDelLogo: { value: 0 },
       ...CAMPO_EN_VIVO,
+      ...FLUJO_EN_VIVO,
     },
     true,
   )

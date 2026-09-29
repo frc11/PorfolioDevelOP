@@ -7,12 +7,18 @@
  *      scroll lo alcanza o vuelve para atrás. Los viajes que cambian de luz, como antes.
  * A2 · el cielo de día: el pintado celeste encendido en el producto (el banco lo apaga), las otras cinco variantes
  *      borradas (código y banderas) y la excepción a la regla monocroma registrada en ESTADO-ESCENA.md.
+ * A3 · el obstáculo sin pegado: el modo 6 borrado; el flujo que rodea al logo contra la malla real (un campo del flujo,
+ *      más grueso y de más alcance): el aire pasa por la boca de la «c» y por el ojo de la «p»; la que choca se corre
+ *      por la cara sin rebote; el empuje tras el cursor también contra la malla real. Lo posado sobre el logo, igual.
  */
+import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
+import { CAMPO_DEL_FLUJO, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
+import { FISICA, flujoAlrededor } from '../polvo/simulacion'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer } from '../amanecer/linea'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
@@ -97,5 +103,71 @@ const estado = readFileSync(path.join(process.cwd(), 'docs/rediseno/ESTADO-ESCEN
 const registrada = (doc: string): boolean => /excepci[oó]n aprobada/i.test(doc) && /celeste/.test(doc) && /monocrom/.test(doc)
 afirmar(registrada(estado), 'la excepción a la regla monocroma está registrada en ESTADO-ESCENA.md (para que nadie la «corrija»)')
 controlPositivo('el detector VE un estado sin la excepción', estado.replace(/excepci[oó]n aprobada/gi, 'prueba'), registrada)
+
+// ── A3 · el obstáculo sin pegado ──────────────────────────────────────────
+titulo('A3 · el obstáculo: sin pegado, el flujo por los huecos')
+const simulacion = leer('polvo/simulacion.ts')
+const fisica = leer('polvo/Fisica.tsx')
+const parche = leer('polvo/parche.ts')
+/** Restos del pegado (el modo 6): escribirlo, leerlo, soltarlo o desprenderlo. */
+const PEGADO = /, 6\.0 \)|modo > 5\.5 && modo < 6\.5|modoDeLaFisica > 5\.5|LOGO_QUIETO|despegue\(|obstaculo\.pegar|contacto\.hasta/
+afirmar(!PEGADO.test(simulacion) && !PEGADO.test(parche) && Object.keys(FISICA.obstaculo).join() === 'radio' && Object.keys(FISICA.contacto).join() === 'detecta,queda', 'el pegado (modo 6) se borró: ni se escribe ni se lee, y sus constantes tampoco están')
+controlPositivo('el detector VE el pegado de ESCENA 8', 'salida0 = vec4( ( uLogoInverso * vec4( enLaCara, 1.0 ) ).xyz, 6.0 );', (c: string) => !PEGADO.test(c))
+afirmar(/const cuenta = \[0, 0, 0, 0, 0, 0\]/.test(fisica) && !/movimientoDelLogo/.test(fisica), '  el banco cuenta seis modos, y ya no se mide cuánto se mueve el logo (sólo servía para soltar las pegadas)')
+// Sin rebote: al tocar la cara sólo se quita lo que entra (la velocidad relativa a la superficie); nada sale para afuera.
+afirmar(/v \+= n \* max\( 0\.0, entra \);/.test(simulacion) && /v -= n \* min\( 0\.0, dot\( v - velocidadDelLogo\( p \), n \) \);/.test(simulacion), 'la que llega a la cara se corre por ella, sin rebote: sólo se le quita lo que entra')
+// Lo posado sobre el logo (aprobado) sigue, con el campo fino.
+afirmar(/if \( n\.y > \$\{FISICA\.logo\.cara\.toFixed\(2\)\} \)/.test(simulacion) && /float d = campoDelLogo\( q \);/.test(simulacion), '  el polvo que se posa SOBRE el logo sigue igual (contra el campo fino de la malla real)')
+
+// El flujo, contra la malla real: una «c» de prueba como la de s33 (extruida por three, con bisel; la boca a la derecha).
+const [RC, rc, hc] = [2, 1.26, 0.28]
+const bocaC = Math.PI / 6
+const formaC = new THREE.Shape()
+formaC.absarc(0, 0, RC, bocaC, 2 * Math.PI - bocaC, false)
+formaC.absarc(0, 0, rc, 2 * Math.PI - bocaC, bocaC, true)
+const mallaC = new THREE.ExtrudeGeometry(formaC, { depth: 2 * hc, bevelEnabled: true, bevelThickness: 0.007, bevelSize: 0.007, bevelSegments: 5, curveSegments: 64 })
+mallaC.translate(0, 0, -hc)
+const contornoC = contornoDeLaMalla([{ posiciones: mallaC.getAttribute('position').array, indices: mallaC.index?.array ?? null, matriz: new THREE.Matrix4() }])
+mallaC.dispose()
+const flujo = campoDelLogo(contornoC, CAMPO_DEL_FLUJO)
+const fino = campoDelLogo(contornoC)
+type Distancia = (q: readonly [number, number, number]) => number
+const delFlujo: Distancia = (q) => distanciaDelCampo(flujo, q)
+const delFino: Distancia = (q) => distanciaDelCampo(fino, q)
+/** El anillo entero de ESCENA 7 (las formas de siempre): la boca de la «c», una pared. */
+const anilloEntero: Distancia = (q) => {
+  const d2 = Math.abs(Math.hypot(q[0], q[1]) - (RC + rc) / 2) - (RC - rc) / 2
+  const dz = Math.abs(q[2]) - hc
+  return Math.hypot(Math.max(d2, 0), Math.max(dz, 0)) + Math.min(Math.max(d2, dz), 0)
+}
+/** El aire que resulta en un punto (el de afuera más lo que el logo le hace), con la normal por diferencias centradas. */
+const aireEn = (d: Distancia, q: readonly [number, number, number], aire: [number, number, number]): number[] => {
+  const e = CAMPO_DEL_FLUJO.celda
+  const g = [0, 1, 2].map((k) => d(q.map((v, i) => (i === k ? v + e : v)) as [number, number, number]) - d(q.map((v, i) => (i === k ? v - e : v)) as [number, number, number]))
+  const l = Math.hypot(g[0], g[1], g[2]) || 1
+  const pert = flujoAlrededor(aire, [g[0] / l, g[1] / l, g[2] / l], d(q))
+  return aire.map((a, k) => a + pert[k])
+}
+// En la boca (un poco afuera del eje, donde el campo tiene pendiente), con el aire entrando por ella.
+const enLaBocaC: [number, number, number] = [(RC + rc) / 2 + 0.1, 0.06, 0]
+const entrando: [number, number, number] = [-2, 0, 0]
+const pasaPorLaBoca = (d: Distancia): boolean => aireEn(d, enLaBocaC, entrando)[0] < 0.5 * entrando[0]
+afirmar(pasaPorLaBoca(delFlujo), 'el aire pasa por la boca de la «c»: con la malla real, entra con más de la mitad de su velocidad', `${aireEn(delFlujo, enLaBocaC, entrando)[0].toFixed(2)} u/s de ${String(entrando[0])}`)
+controlPositivo('el detector VE la boca cerrada de las formas de siempre (el anillo entero)', anilloEntero, pasaPorLaBoca)
+// El hueco de adentro (como el ojo de la «p»): abierto, lejos de las paredes.
+const abierto = (d: Distancia): boolean => d([0, 0, 0]) > 1
+afirmar(abierto(delFlujo), '  el hueco de adentro (como el ojo de la «p») está abierto', `a ${delFlujo([0, 0, 0]).toFixed(2)} u de la pared`)
+controlPositivo('el detector VE un hueco tapado', (q: readonly [number, number, number]) => Math.hypot(q[0], q[1]) - RC, abierto)
+// Alcance: donde el aire ya empieza a doblar el campo del flujo sabe la distancia; el fino no (su tope es 1,2 u). Abajo
+// a la izquierda, adentro de la caja del campo fino y a más de 1,2 u del contorno.
+const enDiagonal: [number, number, number] = [-2.4, -2.4, 0]
+const lejosDeVerdad = Math.hypot(2.4, 2.4) - RC
+const sabeLejos = (d: Distancia): boolean => Math.abs(d(enDiagonal) - lejosDeVerdad) < 0.1
+afirmar(sabeLejos(delFlujo), '  el campo del flujo sabe la distancia hasta donde el aire empieza a doblar', `a ${lejosDeVerdad.toFixed(2)} u da ${delFlujo(enDiagonal).toFixed(2)} (el fino, ${delFino(enDiagonal).toFixed(2)}: tope de 1,2)`)
+controlPositivo('el detector VE el campo fino (topado a 1,2 u)', delFino, sabeLejos)
+// Cableado: el flujo lee el campo del flujo; la física lo hornea en otro momento libre; tras el cursor, la malla real.
+const rodeoA3 = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(simulacion)?.[0] ?? ''
+afirmar(/float d = flujoDelLogo\( q \);/.test(rodeoA3) && /normalDelFlujo\( q \)/.test(rodeoA3) && /campoDelLogo\(contorno, CAMPO_DEL_FLUJO\)/.test(fisica) && /publicarElFlujo\(flujo\)/.test(fisica) && /\.\.\.FLUJO_EN_VIVO/.test(fisica), 'el flujo de la simulación lee el campo del flujo, que la física hornea y publica')
+afirmar(/#ifdef AIRE_FISICA\s*vec3 fuera = afueraDelCampo\( enElMundo, HOLGURA_TRAS_EL_CURSOR \);/.test(parche) && /CAMPO_EN_VIVO, \{ uTiempo/.test(parche), '  tras el cursor, la mota empujada contra el logo se corre a su cara real (la boca y el ojo, abiertos)')
 
 cerrar('s34-calidad1')

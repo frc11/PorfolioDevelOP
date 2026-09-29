@@ -13,14 +13,34 @@ import * as THREE from 'three'
  * costado de la malla (normal horizontal) proyectadas al plano del logo son el contorno, con sus agujeros; de ahí
  * sale la distancia en el plano (la mínima a un tramo) y el signo (paridad de los cruces de una recta). El
  * espesor es el de la malla. La distancia en 3D es la del prisma: la del plano y la del espesor combinadas.
+ *
+ * **[CALIDAD 1] A3 · dos campos de la misma malla.** El fino (`CAMPO_DEL_LOGO`) para lo que toca la cara: el choque,
+ * el polvo posado y el que desliza. Y uno del FLUJO (`CAMPO_DEL_FLUJO`), más grueso y de más alcance, para el aire
+ * que rodea al logo: el fino sólo sabe distancias hasta 1,2 u y su caja termina a 0,5 u del logo, y el aire empieza a
+ * doblar desde más lejos. Con la malla real el aire pasa por los huecos (la boca de la «c» y el ojo de la «p»); con
+ * las formas de siempre (dos anillos enteros) la boca de la «c» era una pared.
  */
+
+/** Cómo se hornea un campo: el lado de una celda, cuánto sobra alrededor de la caja del logo y hasta dónde se busca (u). */
+export interface OpcionesDelCampo {
+  readonly celda: number
+  readonly margen: number
+  readonly alcance: number
+}
+
 export const CAMPO_DEL_LOGO = {
   /** El lado de una celda de la textura (u) y cuánto sobra alrededor de la caja del logo (u). */
   celda: 0.05,
   margen: 0.5,
   /** Hasta dónde se busca el tramo más cercano (u): más lejos da lo mismo (la física mira a menos de 0,3). */
   alcance: 1.2,
-} as const
+} as const satisfies OpcionesDelCampo
+
+/**
+ * [CALIDAD 1] A3 · el campo del flujo: celdas de 0,1 u (el hueco más chico, la boca de la «c», tiene varias) y hasta
+ * 2,6 u del logo, donde el aire que lo rodea ya se desvía menos de un 7 % (el radio del flujo es 1,8 u).
+ */
+export const CAMPO_DEL_FLUJO = { celda: 0.1, margen: 2.6, alcance: 2.6 } as const satisfies OpcionesDelCampo
 
 export interface Contorno {
   /** Los tramos del contorno en el plano del logo: x0, y0, x1, y1 por tramo. */
@@ -92,10 +112,9 @@ export interface CampoDelLogo {
 }
 
 /** La distancia en el plano, con signo (negativa adentro), en una grilla de `nx` × `ny` celdas desde (x0, y0). */
-export function distanciaEnElPlano(c: Contorno, x0: number, y0: number, nx: number, ny: number, celda: number): Float32Array {
+export function distanciaEnElPlano(c: Contorno, x0: number, y0: number, nx: number, ny: number, celda: number, alcance: number = CAMPO_DEL_LOGO.alcance): Float32Array {
   const t = c.tramos
   const cuantos = t.length / 4
-  const alcance = CAMPO_DEL_LOGO.alcance
   // Los tramos por casilla (de `alcance` de lado), para buscar sólo cerca.
   const [bx, by] = [Math.ceil((nx * celda) / alcance) + 1, Math.ceil((ny * celda) / alcance) + 1]
   const casillas: number[][] = Array.from({ length: bx * by }, () => [])
@@ -143,8 +162,8 @@ export function delPrisma(d2: number, z: number, zc: number, h: number): number 
 }
 
 /** El campo entero: la caja del contorno con margen, la distancia en el plano y el prisma en cada celda. */
-export function campoDelLogo(c: Contorno): CampoDelLogo {
-  const { celda, margen } = CAMPO_DEL_LOGO
+export function campoDelLogo(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL_LOGO): CampoDelLogo {
+  const { celda, margen, alcance } = opciones
   const t = c.tramos
   let [xMin, yMin, xMax, yMax] = [Infinity, Infinity, -Infinity, -Infinity]
   for (let k = 0; k < t.length; k += 2) {
@@ -155,7 +174,7 @@ export function campoDelLogo(c: Contorno): CampoDelLogo {
   }
   const min: [number, number, number] = [xMin - margen, yMin - margen, c.zMin - margen]
   const n: [number, number, number] = [Math.ceil((xMax - xMin + 2 * margen) / celda), Math.ceil((yMax - yMin + 2 * margen) / celda), Math.ceil((c.zMax - c.zMin + 2 * margen) / celda)]
-  const plano = distanciaEnElPlano(c, min[0], min[1], n[0], n[1], celda)
+  const plano = distanciaEnElPlano(c, min[0], min[1], n[0], n[1], celda, alcance)
   const [zc, h] = [(c.zMin + c.zMax) / 2, (c.zMax - c.zMin) / 2]
   const datos = new Float32Array(n[0] * n[1] * n[2])
   for (let k = 0; k < n[2]; k += 1) {
@@ -194,8 +213,36 @@ export const CAMPO_EN_VIVO = {
   uHayCampo: { value: 0 },
 }
 
-/** La textura (media precisión: se filtra en todas las placas) y los uniforms. */
+/** [CALIDAD 1] A3 · lo mismo del campo del flujo. */
+export const FLUJO_EN_VIVO = {
+  uFlujoDelLogo: { value: null as THREE.Data3DTexture | null },
+  uFlujoMin: { value: new THREE.Vector3() },
+  uFlujoTam: { value: new THREE.Vector3(1, 1, 1) },
+  uHayFlujo: { value: 0 },
+}
+
+/** [CALIDAD 1] A3 · el campo del flujo, publicado como el fino (sus uniforms). */
+export function publicarElFlujo(f: CampoDelLogo): THREE.Data3DTexture {
+  const textura = texturaDelCampo(f)
+  FLUJO_EN_VIVO.uFlujoDelLogo.value = textura
+  FLUJO_EN_VIVO.uFlujoMin.value.set(...f.min)
+  FLUJO_EN_VIVO.uFlujoTam.value.set(...f.tam)
+  FLUJO_EN_VIVO.uHayFlujo.value = 1
+  return textura
+}
+
+/** La textura y los uniforms del campo fino. */
 export function publicarElCampo(f: CampoDelLogo): THREE.Data3DTexture {
+  const textura = texturaDelCampo(f)
+  CAMPO_EN_VIVO.uCampoDelLogo.value = textura
+  CAMPO_EN_VIVO.uCampoMin.value.set(...f.min)
+  CAMPO_EN_VIVO.uCampoTam.value.set(...f.tam)
+  CAMPO_EN_VIVO.uHayCampo.value = 1
+  return textura
+}
+
+/** La textura de un campo: media precisión (se filtra en todas las placas). */
+function texturaDelCampo(f: CampoDelLogo): THREE.Data3DTexture {
   const medio = new Uint16Array(f.datos.length)
   for (let k = 0; k < f.datos.length; k += 1) medio[k] = THREE.DataUtils.toHalfFloat(f.datos[k])
   const textura = new THREE.Data3DTexture(medio, f.n[0], f.n[1], f.n[2])
@@ -208,35 +255,38 @@ export function publicarElCampo(f: CampoDelLogo): THREE.Data3DTexture {
   textura.wrapR = THREE.ClampToEdgeWrapping
   textura.unpackAlignment = 1
   textura.needsUpdate = true
-  CAMPO_EN_VIVO.uCampoDelLogo.value = textura
-  CAMPO_EN_VIVO.uCampoMin.value.set(...f.min)
-  CAMPO_EN_VIVO.uCampoTam.value.set(...f.tam)
-  CAMPO_EN_VIVO.uHayCampo.value = 1
   return textura
 }
 
 /**
  * En GLSL: la distancia con signo a la malla real en un punto del espacio del logo, y su normal (diferencias
- * centradas de una celda). Sin el campo (antes de cargar el logo) no hay logo: devuelve lejos.
+ * centradas de una celda). Sin el campo (antes de cargar el logo) no hay logo: devuelve lejos. `u` nombra sus
+ * uniforms (`Campo`, `Flujo`); `distancia` y `normal`, sus funciones.
  */
-export const CAMPO_DEL_LOGO_GLSL = /* glsl */ `
-precision highp sampler3D;
-uniform sampler3D uCampoDelLogo;
-uniform vec3 uCampoMin;
-uniform vec3 uCampoTam;
-uniform float uHayCampo;
-float campoDelLogo( vec3 q ) {
-	if ( uHayCampo < 0.5 ) return 1e3;
-	vec3 uvw = ( q - uCampoMin ) / uCampoTam;
+function glslDelCampo(u: string, distancia: string, normal: string, celda: number): string {
+  return /* glsl */ `
+uniform sampler3D u${u}DelLogo;
+uniform vec3 u${u}Min;
+uniform vec3 u${u}Tam;
+uniform float uHay${u};
+float ${distancia}( vec3 q ) {
+	if ( uHay${u} < 0.5 ) return 1e3;
+	vec3 uvw = ( q - u${u}Min ) / u${u}Tam;
 	vec3 dentro = clamp( uvw, 0.0, 1.0 );
-	return texture( uCampoDelLogo, dentro ).r + length( ( uvw - dentro ) * uCampoTam );
+	return texture( u${u}DelLogo, dentro ).r + length( ( uvw - dentro ) * u${u}Tam );
 }
-vec3 normalDelCampo( vec3 q ) {
-	vec2 e = vec2( ${CAMPO_DEL_LOGO.celda.toFixed(3)}, 0.0 );
+vec3 ${normal}( vec3 q ) {
+	vec2 e = vec2( ${celda.toFixed(3)}, 0.0 );
 	vec3 g = vec3(
-		campoDelLogo( q + e.xyy ) - campoDelLogo( q - e.xyy ),
-		campoDelLogo( q + e.yxy ) - campoDelLogo( q - e.yxy ),
-		campoDelLogo( q + e.yyx ) - campoDelLogo( q - e.yyx ) );
+		${distancia}( q + e.xyy ) - ${distancia}( q - e.xyy ),
+		${distancia}( q + e.yxy ) - ${distancia}( q - e.yxy ),
+		${distancia}( q + e.yyx ) - ${distancia}( q - e.yyx ) );
 	return g / max( length( g ), 1e-6 );
 }
 `
+}
+
+export const CAMPO_DEL_LOGO_GLSL = `precision highp sampler3D;\n${glslDelCampo('Campo', 'campoDelLogo', 'normalDelCampo', CAMPO_DEL_LOGO.celda)}`
+
+/** [CALIDAD 1] A3 · el campo del flujo en GLSL, `flujoDelLogo` y `normalDelFlujo` (va después de `CAMPO_DEL_LOGO_GLSL`). */
+export const FLUJO_DEL_LOGO_GLSL = glslDelCampo('Flujo', 'flujoDelLogo', 'normalDelFlujo', CAMPO_DEL_FLUJO.celda)
