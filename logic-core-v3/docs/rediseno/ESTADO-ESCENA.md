@@ -140,9 +140,12 @@ el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips qui
 
 ## 6 · Lo que quedó abierto (para decidir o para CALIDAD 1)
 
-- **El amanecer (T3)**, ahora del producto: la compuerta sigue en el 85 %, así que con un scroll lento lo
-  primero del evento pasa con Tu panel tapando el cielo (verlo entero pide un tramo de sala sin texto: layout).
-  El costo de los rayos (ver §3) es del producto mientras duran.
+- **PENDIENTE · la compuerta del amanecer** ([CALIDAD 1] A4: anotado, no se hace). El amanecer arranca cuando el
+  borde de abajo de Tu panel deja ver el 85 % del cuadro (`AMANECER.visible`), así que con un scroll lento lo primero
+  del evento (se apagan las estrellas, nace el resplandor en el horizonte) pasa con Tu panel tapando el cielo. Verlo
+  entero pide un tramo de sala sin texto entre Tu panel y Por qué develOP: **es un cambio de layout** (la tabla de
+  secciones), no de la escena. Queda para un sprint de layout. El costo de los rayos es del producto mientras duran
+  (ver §3; CALIDAD 1 lo bajó, ver su informe).
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
