@@ -382,6 +382,10 @@ afirmar(new RegExp(`&& bordeDeF < \\$\\{\\(1 - POLVO_PAREJO\\.fundido\\)\\.toFix
 // El remolino: la aspiración ya no crece debajo del piso.
 const aspiraDeAntes = (alto: number): number => FISICA.remolino.aspira * Math.exp(-alto / 1.2)
 const aspiraAhora = (alto: number): number => FISICA.remolino.aspira * Math.exp(-Math.max(alto, 0) / 1.2)
+/** ¿Ninguna normal del campo se normaliza sin red? (Con gradiente nulo, `normalize` de cero es NaN.) */
+const normalesSeguras = (c: string): boolean => !/normalize\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/.test(c) && (c.match(/normalSegura\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/g) ?? []).length === 4 && /return largo > 1e-6 \? n \/ largo : vec3\( 0\.0, 1\.0, 0\.0 \);/.test(c)
+afirmar(normalesSeguras(simB4), 'ninguna mota se pierde en NaN contra el logo: las normales del campo tienen red (medido: 12 de 14.000 quedaban trabadas cayendo, ahora 0)')
+controlPositivo('el detector VE la normal sin red de antes', simB4.replace('vec3 n = normalSegura( mat3( uLogo ) * normalDelCampo( q ) );', 'vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );'), normalesSeguras)
 afirmar(/exp\( - max\( alto, 0\.0 \) \/ 1\.2 \)/.test(simB4) && !/exp\( - alto \/ 1\.2 \)/.test(simB4) && aspiraAhora(-20) === aspiraAhora(0), 'el remolino no aspira más fuerte debajo del piso (antes lanzaba esas motas a millones de unidades)', `a 20 u debajo del piso: ${aspiraDeAntes(-20).toExponential(1)} u/s antes, ${aspiraAhora(-20).toFixed(1)} ahora`)
 
 // ── B5 · los rayos del amanecer a media resolución ───────────────────────

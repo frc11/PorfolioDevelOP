@@ -255,6 +255,13 @@ vec3 vientoDelDespertar( vec3 p ) {
 	return v;
 }
 
+// [CALIDAD 1] B4 · una normal sin NaN: donde el campo no tiene gradiente (plano), \`normalize\` de cero daba NaN y la
+// mota se perdía para siempre (12 de 14.000, trabadas cayendo); ahí, hacia arriba.
+vec3 normalSegura( vec3 n ) {
+	float largo = length( n );
+	return largo > 1e-6 ? n / largo : vec3( 0.0, 1.0, 0.0 );
+}
+
 // [ESCENA 7] T7 · el aire que rodea al logo: la perturbación de un flujo potencial alrededor de la forma
 // (lo que entra a la superficie se anula; lo que pasa de costado, se acelera). Cae con la distancia.
 // [CALIDAD 1] A3: la forma es la malla real (su campo del flujo): el aire pasa por la boca de la «c» y el ojo de la «p».
@@ -262,7 +269,7 @@ vec3 alrededorDelLogo( vec3 p, vec3 aire ) {
 	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
 	float d = flujoDelLogo( q );
 	if ( d > ${(FISICA.obstaculo.radio * 4).toFixed(2)} ) return vec3( 0.0 );
-	vec3 n = normalize( mat3( uLogo ) * normalDelFlujo( q ) );
+	vec3 n = normalSegura( mat3( uLogo ) * normalDelFlujo( q ) );
 	float s = pow( ${FISICA.obstaculo.radio.toFixed(2)} / ( ${FISICA.obstaculo.radio.toFixed(2)} + max( d, 0.0 ) ), 3.0 );
 	float entra = dot( aire, n );
 	return ( - entra * n + 0.5 * ( aire - entra * n ) ) * s;
@@ -282,7 +289,7 @@ vec3 chocar( inout vec3 p, inout vec3 v ) {
 	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
 	float d = campoDelLogo( q );
 	if ( d >= ${FISICA.logo.radio.toFixed(3)} ) return vec3( 0.0 );
-	vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
+	vec3 n = normalSegura( mat3( uLogo ) * normalDelCampo( q ) );
 	p += n * ( ${FISICA.logo.radio.toFixed(3)} - d );
 	v -= n * min( 0.0, dot( v - velocidadDelLogo( p ), n ) );
 	return n;
@@ -337,7 +344,7 @@ void main() {
 			vec3 q = ( uLogoInverso * vec4( f + d, 1.0 ) ).xyz;
 			float cara = campoDelLogo( q );
 			if ( cara < ${FISICA.contacto.detecta.toFixed(2)} ) {
-				vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
+				vec3 n = normalSegura( mat3( uLogo ) * normalDelCampo( q ) );
 				float entra = - dot( uVientoDelAire + v - velocidadDelLogo( f + d ), n );
 				d = f + d + n * ( ${FISICA.contacto.queda.toFixed(3)} - cara ) - f;
 				v += n * max( 0.0, entra );
@@ -382,7 +389,7 @@ void main() {
 		else {
 			// Deslizando: la gravedad a lo largo de la cara, con roce; al dejar la cara, cae.
 			vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
-			vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
+			vec3 n = normalSegura( mat3( uLogo ) * normalDelCampo( q ) );
 			vec3 g = vec3( 0.0, - ${FISICA.logo.gravedad.toFixed(2)}, 0.0 );
 			p += relajar( v, ( g - n * dot( g, n ) ) / ${FISICA.logo.roce.toFixed(2)}, ${FISICA.logo.roce.toFixed(2)}, dt );
 			chocar( p, v );
