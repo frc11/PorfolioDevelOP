@@ -6,7 +6,7 @@ import * as THREE from 'three'
 
 import { hayBanco } from '../entorno'
 import { ESCENAS_APARTE } from '../gpu/Precompilar'
-import { leerLaTrama } from '../estrellas/trama'
+import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
 import type { MoireHandle } from '../MoireScreen'
 import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from '../nocheDisparada'
 import { viajeEnCurso } from '../viaje'
@@ -42,6 +42,8 @@ type VentanaDelBanco = Window & {
     congelar: (s: number | null) => void
     /** [CALIDAD 1] B5 · los haces (su escena y su búfer): para compararlos con los de resolución completa. */
     haces: () => HacesDelAmanecer
+    /** [CALIDAD 1] B7 · prende (1) o apaga (0) el prefiltro de la sombra de la trama en el piso, para el A/B del titileo. */
+    tramaFiltrada: (v: number) => void
   }
 }
 
@@ -96,6 +98,9 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
         memoria.current.congelado = s
       },
       haces: () => haces,
+      tramaFiltrada: (v) => {
+        TRAMA_EN_VIVO.uTramaFiltrada.value = v
+      },
     }
     return () => {
       delete ventana.__amanecerDelBanco

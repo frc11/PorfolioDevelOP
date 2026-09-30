@@ -21,6 +21,8 @@ export const TRAMA_EN_VIVO = {
   uBandaFina: { value: new THREE.Vector4(0, 1, 1, 1) },
   uRadiosDeLaTrama: { value: new THREE.Vector2(MOIRE_NEAR_RADIUS, MOIRE_FAR_RADIUS) },
   uHayTrama: { value: 0 },
+  /** [CALIDAD 1] B7 · la sombra de la trama en el piso, prefiltrada (1); con banco se apaga (0) para el A/B del titileo. */
+  uTramaFiltrada: { value: 1 },
 }
 
 /** Lee la trama de este cuadro: sus dos texturas, con la transformación que tienen ahora, y dónde está cada capa. */

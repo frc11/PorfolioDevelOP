@@ -5,6 +5,7 @@ import { useEffect, useMemo, type RefObject } from 'react'
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
+import { conCantosSuaves } from './cantosDelLogo'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
 
@@ -58,7 +59,8 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
    */
   const geometries = useMemo(() => {
     const shapes = svgData.paths.flatMap((path) => path.toShapes(true))
-    const built = shapes.map((shape) => new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE))
+    // [CALIDAD 1] B7: con los costados suaves (el brillo del bisel ya no se prende de a tramos): `cantosDelLogo.ts`.
+    const built = shapes.map((shape) => conCantosSuaves(new THREE.ExtrudeGeometry(shape, PROBE_EXTRUDE)))
 
     const box = new THREE.Box3()
     for (const geometry of built) {

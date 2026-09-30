@@ -27,6 +27,8 @@
  *      punto flotante), sumada por un cuadrado con el mismo aditivo; precompilada y calentada con el resto.
  * B6 · la nitidez del polvo: ninguna mota por debajo de un píxel del búfer (se apaga con su área), alfa premultiplicado
  *      en el polvo y el bokeh; el tamaño en foco sigue con su tope (el real lo supera a toda distancia visible).
+ * B7 · antialiasing: los costados del logo con normales suaves hasta un pliegue (el brillo ya no se prende de a tramos)
+ *      y la tapa plana; la sombra de la trama en el piso prefiltrada con gradientes sin costura (sólo en el fragmento).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -40,6 +42,8 @@ import { HACES } from '../amanecer/haces'
 import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from '../polvo/nitidez'
 import { PARTICLE_SIZE } from '../probeParticles'
 import { POLVO_PAREJO } from '../polvo/volumen'
+import { PLIEGUE, conCantosSuaves } from '../cantosDelLogo'
+import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -424,5 +428,50 @@ afirmar(/transparent\s*\/\/ \[CALIDAD 1\] B6[^\n]*\s*premultipliedAlpha/.test(le
 const ladoReal = (d: number, mitadDelAlto: number): number => (PARTICLE_SIZE * mitadDelAlto) / d
 const dondeSeVeEntera = POLVO_PAREJO.alcance - 4
 afirmar(ladoReal(dondeSeVeEntera, 406) > NITIDEZ.tam[1] && ladoReal(dondeSeVeEntera, 450) > NITIDEZ.tam[1], '  el lado real de una mota supera el tope en foco en todo lo que se ve entero (por eso el tope es el tamaño, y hacerlo real las agrandaría)', `a ${String(dondeSeVeEntera)} u, donde empieza el fundido del alcance: ${ladoReal(dondeSeVeEntera, 450).toFixed(2)} px a 900 de alto y ${ladoReal(dondeSeVeEntera, 406).toFixed(2)} a 812; tope ${String(NITIDEZ.tam[1])}`)
+
+// ── B7 · antialiasing ─────────────────────────────────────────────────────
+titulo('B7 · los brillos del logo sin escalones, la sombra de la trama sin titileo')
+/** Una letra de prueba: medio círculo (una curva de doce tramos) cerrado por una esquina recta, extruida con bisel. */
+function letraDePrueba(): THREE.BufferGeometry {
+  const forma = new THREE.Shape()
+  forma.moveTo(-1, 0)
+  forma.absarc(0, 0, 1, Math.PI, 0, true)
+  forma.lineTo(-1, 0)
+  return new THREE.ExtrudeGeometry(forma, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 5, curveSegments: 12 })
+}
+/** Por cada posición repetida de los costados, cuánto se abren entre sí las normales de sus copias (grados). */
+function aperturas(g: THREE.BufferGeometry, grupo: number): number[] {
+  const { start, count } = g.groups[grupo]
+  const pos = g.getAttribute('position')
+  const nor = g.getAttribute('normal')
+  const porLugar = new Map<string, THREE.Vector3[]>()
+  for (let i = start; i < start + count; i += 1) {
+    const clave = [pos.getX(i), pos.getY(i), pos.getZ(i)].map((v) => v.toFixed(4)).join(',')
+    const lista = porLugar.get(clave) ?? []
+    lista.push(new THREE.Vector3(nor.getX(i), nor.getY(i), nor.getZ(i)))
+    porLugar.set(clave, lista)
+  }
+  return [...porLugar.values()].map((l) => Math.max(0, ...l.map((a) => Math.max(...l.map((b) => THREE.MathUtils.radToDeg(a.angleTo(b)))))))
+}
+const cruda = letraDePrueba()
+const suave = conCantosSuaves(letraDePrueba())
+const tapaPlana = (g: THREE.BufferGeometry): boolean => {
+  const { start, count } = g.groups[0]
+  const nor = g.getAttribute('normal')
+  for (let i = start; i < start + count; i += 1) if (Math.abs(Math.abs(nor.getZ(i)) - 1) > 1e-4) return false
+  return true
+}
+const abiertas = (g: THREE.BufferGeometry): number[] => aperturas(g, 1).filter((a) => a > 1e-3)
+// En los costados suaves sólo quedan abiertas las esquinas (de más del pliegue); en los crudos, cada tramo de la curva.
+const soloEsquinas = (g: THREE.BufferGeometry): boolean => abiertas(g).every((a) => a > THREE.MathUtils.radToDeg(PLIEGUE))
+afirmar(tapaPlana(suave) && soloEsquinas(suave) && abiertas(suave).length > 0 && suave.getAttribute('position').count === cruda.getAttribute('position').count, 'el logo: costados con normales suaves (la curva sin escalones), esquinas duras y tapa plana; los mismos triángulos', `pliegue de ${THREE.MathUtils.radToDeg(PLIEGUE).toFixed(0)}°; en la letra de prueba quedan ${String(abiertas(suave).length)} lugares abiertos (las esquinas) contra ${String(abiertas(cruda).length)} en la cruda`)
+controlPositivo('el detector VE los costados por cara de antes (un escalón por tramo de curva)', cruda, soloEsquinas)
+afirmar(/conCantosSuaves\(new THREE\.ExtrudeGeometry\(shape, PROBE_EXTRUDE\)\)/.test(leer('ProbeLogo.tsx')), '  el logo del producto se arma así')
+// La sombra de la trama en el piso: prefiltrada, con gradientes; el bloque con derivadas sólo va en un fragmento.
+const filtrada = (g: string): boolean => /textureGrad\( uTramaFina,/.test(g) && /textureGrad\( uTramaGruesa,/.test(g) && /vec2 corrido = vec2\( fract\( uv\.x \+ 0\.5 \), uv\.y \);/.test(g) && /if \( abs\( dxc\.x \) < abs\( dx\.x \) \) dx\.x = dxc\.x;/.test(g)
+afirmar(filtrada(TRAMA_FILTRADA_GLSL) && !/dFdx|textureGrad/.test(TRAMA_GLSL), 'la sombra de la trama en el piso, prefiltrada con gradientes sin costura (la trama compartida, que también va al vértice, sin derivadas)')
+controlPositivo('el detector VE la búsqueda sin prefiltro (el nivel 0 fijo)', TRAMA_FILTRADA_GLSL.replace(/textureGrad\( uTramaFina,/g, 'textureLod( uTramaFina,'), filtrada)
+const luzB7 = leer('amanecer/luz.ts')
+afirmar(luzB7.includes('uTramaFiltrada > 0.5 ? delanteDeLaTramaFiltrada(') && luzB7.includes('conSol ? `${TRAMA_GLSL}') && luzB7.includes('${TRAMA_FILTRADA_GLSL}` : '), '  el piso la usa (sólo el piso, que es fragmento)')
 
 cerrar('s34-calidad1')

@@ -182,3 +182,41 @@ float delanteDeLaTrama( vec3 o, vec3 d ) {
 	return pasa;
 }
 `
+
+/**
+ * [CALIDAD 1] B7 · LA MISMA CUENTA, PREFILTRADA — va DESPUÉS de `TRAMA_GLSL` y sólo en un fragmento (usa derivadas: en el
+ * vértice no compila). Lejos o rasante, la sombra de una raya más fina que un píxel se promedia (como la trama misma, con
+ * sus mipmaps) en vez de titilar al moverse. Donde el ángulo da la vuelta (u salta de 1 a 0) no hay gradiente de verdad:
+ * se toma el de u corrido media vuelta. `uTramaFiltrada` en 0 (con banco) vuelve a la de antes, para el A/B.
+ */
+export const TRAMA_FILTRADA_GLSL = /* glsl */ `
+uniform float uTramaFiltrada;
+vec4 gradienteSinCostura( vec2 uv ) {
+	vec2 corrido = vec2( fract( uv.x + 0.5 ), uv.y );
+	vec2 dx = dFdx( uv ), dy = dFdy( uv );
+	vec2 dxc = dFdx( corrido ), dyc = dFdy( corrido );
+	if ( abs( dxc.x ) < abs( dx.x ) ) dx.x = dxc.x;
+	if ( abs( dyc.x ) < abs( dy.x ) ) dy.x = dyc.x;
+	return vec4( dx, dy );
+}
+float delanteDeLaTramaFiltrada( vec3 o, vec3 d ) {
+	if ( uHayTrama < 0.5 ) return 1.0;
+	float pasa = 1.0;
+	vec2 uv = dondeCruza( o, d, uRadiosDeLaTrama.x, uBandaFina );
+	vec4 g = gradienteSinCostura( uv );
+	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+		mat2 m = mat2( uMatFina );
+		float a = textureGrad( uTramaFina, ( uMatFina * vec3( uv, 1.0 ) ).xy, m * g.xy, m * g.zw ).g;
+		if ( uMezclaB > 0.0 ) a = mix( a, textureGrad( uTramaFina, uv * uRepeticionB + uCorrimientoB, g.xy * uRepeticionB, g.zw * uRepeticionB ).g, uMezclaB );
+		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaFina );
+	}
+	uv = dondeCruza( o, d, uRadiosDeLaTrama.y, uBandaGruesa );
+	g = gradienteSinCostura( uv );
+	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+		mat2 m = mat2( uMatGruesa );
+		float a = textureGrad( uTramaGruesa, ( uMatGruesa * vec3( uv, 1.0 ) ).xy, m * g.xy, m * g.zw ).g;
+		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaGruesa );
+	}
+	return pasa;
+}
+`

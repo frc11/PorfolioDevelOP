@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { entornoDeLaEscena } from '../entorno'
-import { TRAMA_GLSL } from '../estrellas/cielo'
+import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
 import { TRAMA_EN_VIVO } from '../estrellas/trama'
 import { AMANECER } from './linea'
 
@@ -68,7 +68,8 @@ export const OSCURECER_GLSL = (mundo: string): string => /* glsl */ `
 /** El sol que entra por los cuadrados de la trama y cae en el piso (los cuadros de luz de la persiana). */
 export const SOL_EN_EL_PISO_GLSL = (mundo: string): string => /* glsl */ `
 	if ( uRayos > 0.001 ) {
-		float pasa = delanteDeLaTrama( ${mundo}, uSolDelAmanecer );
+		// [CALIDAD 1] B7: prefiltrada (lejos, las rayas finas se promedian en vez de titilar).
+		float pasa = uTramaFiltrada > 0.5 ? delanteDeLaTramaFiltrada( ${mundo}, uSolDelAmanecer ) : delanteDeLaTrama( ${mundo}, uSolDelAmanecer );
 		gl_FragColor.rgb += vec3( ${LUZ.toFixed(2)} ) * pasa * uRayos * 0.22 * ( 1.0 - alcanzadoPorElDia( ${mundo} ) * 0.6 );
 	}
 `
@@ -90,7 +91,7 @@ export function conElAmanecer<T extends Material>(material: T, conSol = false): 
       .replace('#include <common>', '#include <common>\nvarying vec3 vMundoDelDia;')
       .replace('#include <project_vertex>', '#include <project_vertex>\n\tvMundoDelDia = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;')
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\nvarying vec3 vMundoDelDia;\n${AMANECER_GLSL}\n${conSol ? TRAMA_GLSL : ''}`)
+      .replace('#include <common>', `#include <common>\nvarying vec3 vMundoDelDia;\n${AMANECER_GLSL}\n${conSol ? `${TRAMA_GLSL}\n${TRAMA_FILTRADA_GLSL}` : ''}`)
       .replace('#include <fog_fragment>', `#include <fog_fragment>\n${OSCURECER_GLSL('vMundoDelDia')}\n${conSol ? SOL_EN_EL_PISO_GLSL('vMundoDelDia') : ''}`)
   }
   material.customProgramCacheKey = () => `${clavePrevia()}|amanecer${conSol ? '-sol' : ''}`
