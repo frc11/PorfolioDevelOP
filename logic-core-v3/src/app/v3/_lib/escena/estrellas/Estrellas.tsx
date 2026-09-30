@@ -334,7 +334,7 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
   }, [scene, armado])
 
   useFrame((state) => {
-    alCuadro(armado.uniforms, fueraDelTunel(rig.current.progress), state.viewport.dpr, state.gl)
+    alCuadro(armado.uniforms, armado.puntos, fueraDelTunel(rig.current.progress), state.viewport.dpr, state.gl)
     leerLaTrama(moireRef.current)
     armado.cupula.position.copy(state.camera.position)
   })
@@ -347,8 +347,11 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
   )
 }
 
-function alCuadro(u: { uVisible: { value: number }; uPixel: { value: number }; uResolucion: { value: THREE.Vector2 } }, visible: number, dpr: number, gl: THREE.WebGLRenderer): void {
+function alCuadro(u: { uVisible: { value: number }; uPixel: { value: number }; uResolucion: { value: THREE.Vector2 } }, puntos: THREE.Points, visible: number, dpr: number, gl: THREE.WebGLRenderer): void {
   u.uVisible.value = visible
+  // [CALIDAD 1] B12 · si ninguna puede verse (de día, con menos noche que el umbral más bajo; en el túnel; o el amanecer ya
+  // las apagó) no se dibujan: el vértice de todas costaba 0,34 ms por cuadro también de día, sin pintar un píxel.
+  puntos.visible = visible > 0.001 && VIVO.uNoche.value > ESTRELLAS.umbral.desde && AMANECER_EN_VIVO.uEstrellasDelAmanecer.value > 0.001
   gl.getDrawingBufferSize(u.uResolucion.value)
   // Un píxel CSS, redondeado a píxeles enteros del búfer: nítidas.
   u.uPixel.value = Math.max(1, Math.round(dpr))

@@ -37,6 +37,7 @@
  *      niebla del papel de afuera y el dithering; se va con las copias en el túnel.
  * B11 · la calidad adaptativa: si los cuadros no entran baja de a un escalón (primero motas, con fundido; después dpr),
  *      con histéresis; no oscila, ignora los tirones sueltos y vuelve a subir cuando sobra.
+ * B12 · el teléfono: las estrellas no se dibujan cuando ninguna puede verse (su vértice costaba 0,34 ms también de día).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -54,6 +55,7 @@ import { PLIEGUE, conCantosSuaves } from '../cantosDelLogo'
 import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
 import { RANGOS_DEL_RUIDO_AZUL, RUIDO_AZUL_GLSL } from '../ruidoAzul'
 import { ADAPTATIVA, dprDelEscalon, estadoAdaptativoInicial, pasoAdaptativo } from '../gpu/adaptativa'
+import { ESTRELLAS } from '../estrellas/Estrellas'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -589,5 +591,17 @@ const hashes = Array.from({ length: 200 }, (_u, i) => { const v = Math.sin(i * 1
 const encendida = (f: number, h: number): number => { const t = Math.min(1, Math.max(0, (h - f) / 0.05)); return 1 - t * t * (3 - 2 * t) }
 afirmar(/vParejo \*= 1\.0 - smoothstep\( uFraccionDeMotas, uFraccionDeMotas \+ 0\.05, fract\( sin\( aIndice \* 12\.9898 \+ 78\.233 \) \* 43758\.5453 \) \);/.test(parcheB11) && hashes.every((h) => encendida(1, h) === 1), 'las motas que sobran se apagan con un fundido, al azar y parejo (con todo encendido no se toca ninguna)', `con 0,8: ${String(hashes.filter((h) => encendida(0.8, h) < 0.5).length)} de 200 apagadas`)
 afirmar(/if \(pasoAdaptativo\(m\.e, delta \* 1000, m\.activa\)\) setDpr\(/.test(leer('gpu/CalidadAdaptativa.tsx')) && /activa: !hayBanco\(\)/.test(leer('gpu/CalidadAdaptativa.tsx')), '  el dpr se toca sólo cuando cambia el escalón (nada de React por cuadro); con banco arranca apagada')
+
+// ── B12 · el teléfono ─────────────────────────────────────────────────────
+titulo('B12 · el presupuesto del teléfono: lo que no se ve, no se dibuja')
+/** El alfa más alto que puede tener una estrella (la cuenta del vértice), con su umbral más bajo y el brillo entero. */
+const alfaMaximo = (noche: number, visible: number, delAmanecer: number): number => {
+  const t = Math.min(1, Math.max(0, (noche - ESTRELLAS.umbral.desde) / ESTRELLAS.fundido))
+  return t * t * (3 - 2 * t) * visible * delAmanecer
+}
+const sinDibujar = (noche: number, visible: number, delAmanecer: number): boolean => !(visible > 0.001 && noche > ESTRELLAS.umbral.desde && delAmanecer > 0.001)
+const casos = [0, 0.2, 0.35, 0.36, 0.5, 1].flatMap((n) => [0, 0.5, 1].flatMap((v) => [0, 1].map((a) => [n, v, a] as const)))
+afirmar(casos.every(([n, v, a]) => !sinDibujar(n, v, a) || alfaMaximo(n, v, a) <= 0.001) && /puntos\.visible = visible > 0\.001 && VIVO\.uNoche\.value > ESTRELLAS\.umbral\.desde && AMANECER_EN_VIVO\.uEstrellasDelAmanecer\.value > 0\.001/.test(leer('estrellas/Estrellas.tsx')), 'las estrellas no se dibujan sólo cuando ninguna puede verse (de día, en el túnel, o apagadas por el amanecer): la misma imagen', 'medido a 375: el cuadro baja 0,3–0,4 ms en todos los momentos (hero 1,53 → 1,18)')
+controlPositivo('el detector VE un corte que apaga estrellas visibles (con la noche en el umbral de la mitad)', (n: number, v: number, a: number) => !(v > 0.001 && n > 0.6 && a > 0.001), (f: (n: number, v: number, a: number) => boolean) => casos.every(([n, v, a]) => !f(n, v, a) || alfaMaximo(n, v, a) <= 0.001))
 
 cerrar('s34-calidad1')
