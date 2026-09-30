@@ -395,11 +395,15 @@ afirmar(/vParejo \*= mix\( carasDelAire, 1\.0, modoDeLaFisica < 0\.5 \? min\( pe
 afirmar(/float lejos = distance\( mundo, cameraPosition \);\s*float pesoSuelta/.test(simB4), '  la cámara y la sala se cuentan donde se DIBUJA la mota (en el aire, con su corrimiento), no en su lugar de la caja')
 // El peso: en la parte fraccionaria del modo, escrito en cada salida, en segundos (no en cuadros).
 const escrituras = simB4.match(/salida0 = vec4\([^;]*\);/g) ?? []
-afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 9, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
+afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 10, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
 afirmar(PESO_EN_EL_MODO < 0.5 && [0, 1, 2, 3, 4, 5].every((m) => [0, 0.5, 1].every((w) => Math.round(m + PESO_EN_EL_MODO * w) === m)), '  el modo se sigue leyendo igual (redondeado) con cualquier peso', `el peso ocupa de 0 a ${String(PESO_EN_EL_MODO)}`)
 const pasosHasta = (hz: number, s: number): number => Math.ceil(s * hz) / hz
 afirmar(/peso \+ dt \/ \$\{FISICA\.fundido\.entraS\.toFixed\(2\)\}/.test(simB4) && /peso - dt \/ \$\{FISICA\.fundido\.saleS\.toFixed\(2\)\}/.test(simB4) && Math.abs(pasosHasta(60, FISICA.fundido.entraS) - pasosHasta(144, FISICA.fundido.entraS)) < 0.02, '  el peso avanza con dt: el mismo fundido a 60 y a 144 Hz', `aparece en ${String(FISICA.fundido.entraS)} s, se va en ${String(FISICA.fundido.saleS)} s`)
-afirmar(new RegExp(`&& bordeDeF < \\$\\{\\(1 - POLVO_PAREJO\\.fundido\\)\\.toFixed\\(3\\)\\}`).test(simB4), 'la levantada vuelve al aire sólo con su lugar lejos de las caras de la caja (ahí el aire la dibuja entera)')
+const vuelveLejosDeLasCaras = new RegExp(`if \\( bordeDeF < \\$\\{\\(1 - POLVO_PAREJO\\.fundido\\)\\.toFixed\\(3\\)\\} \\) \\{\\s*salida0 = vec4\\( p - f, modoConPeso\\( 0\\.0, peso, dt \\) \\);`)
+/** [seguimiento] La levantada que no puede volver al aire, con la quietud, se posa (cae, como las del aire). */
+const sePosa = (c: string): boolean => /if \( uPosarse > 0\.5 && quieta > \$\{POSARSE\.empiezaS\.toFixed\(1\)\} \+ retraso \) \{\s*salida0 = vec4\( p, modoConPeso\( 1\.0, peso, dt \) \);\s*salida1 = vec4\( v, uReloj \);/.test(c)
+afirmar(vuelveLejosDeLasCaras.test(simB4) && sePosa(simB4), 'la levantada vuelve al aire sólo con su lugar lejos de las caras de la caja (ahí el aire la dibuja entera); [seguimiento] la que no puede, con la página quieta se posa como las del aire', 'medido en la noche a los 11 s de quietud: sin el seguimiento, 5.449 de 14.000 seguían levantadas')
+controlPositivo('el detector VE la levantada que no se posa nunca (B4 sin el seguimiento)', simB4.replace(/\s*if \( uPosarse > 0\.5 && quieta > \$\{POSARSE\.empiezaS\.toFixed\(1\)\} \+ retraso \) \{\s*salida0 = vec4\( p, modoConPeso\( 1\.0, peso, dt \) \);\s*salida1 = vec4\( v, uReloj \);\s*return;\s*\}/, ''), sePosa)
 // El remolino: la aspiración ya no crece debajo del piso.
 const aspiraDeAntes = (alto: number): number => FISICA.remolino.aspira * Math.exp(-alto / 1.2)
 const aspiraAhora = (alto: number): number => FISICA.remolino.aspira * Math.exp(-Math.max(alto, 0) / 1.2)

@@ -57,7 +57,8 @@ import { POLVO_PAREJO } from './volumen'
  * desaparecían de golpe. Ahora la simulación guarda en la parte fraccionaria del modo el PESO de la mota suelta (0 en
  * el aire, 1 suelta, en `fundido`), y el material mezcla con él el corte del volumen del aire: aparecen y se van con
  * un fundido. En el aire el corte de las CARAS vale siempre (donde la caja se repite, la mota del aire salta de lugar:
- * tiene que estar apagada), así que la levantada vuelve al aire sólo cuando su lugar está lejos de las caras. Y el
+ * tiene que estar apagada), así que la levantada vuelve al aire sólo cuando su lugar está lejos de las caras (con la
+ * quietud, la que no puede volver se posa sin pasar por el aire, como se posan las del aire). Y el
  * remolino ya no aspira debajo del piso: su `exp( - alto / 1,2 )` crecía sin tope con la altura negativa y lanzaba las
  * motas de abajo del piso a millones de unidades (se veían como puntos sueltos).
  */
@@ -408,10 +409,19 @@ void main() {
 	if ( p.y < piso ) { p.y = piso; v.y = max( v.y, 0.0 ); }
 	// [CALIDAD 1] B4 · vuelve al aire sólo si su lugar está lejos de las caras de la caja: ahí el aire la dibuja entera y
 	// no hay salto; mientras tanto sigue suelta (cae despacio).
-	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} && bordeDeF < ${(1 - POLVO_PAREJO.fundido).toFixed(3)} ) {
-		salida0 = vec4( p - f, modoConPeso( 0.0, peso, dt ) );
-		salida1 = vec4( v, desde );
-		return;
+	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} ) {
+		if ( bordeDeF < ${(1 - POLVO_PAREJO.fundido).toFixed(3)} ) {
+			salida0 = vec4( p - f, modoConPeso( 0.0, peso, dt ) );
+			salida1 = vec4( v, desde );
+			return;
+		}
+		// [CALIDAD 1] B4 (seguimiento) · la que no puede volver al aire, con la quietud se posa como las del aire, sin
+		// pasar por él: antes quedaba levantada con la página quieta (medido en la noche: 5.449 de 14.000, nunca en el piso).
+		if ( uPosarse > 0.5 && quieta > ${POSARSE.empiezaS.toFixed(1)} + retraso ) {
+			salida0 = vec4( p, modoConPeso( 1.0, peso, dt ) );
+			salida1 = vec4( v, uReloj );
+			return;
+		}
 	}
 	salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) );
 	salida1 = vec4( v, desde );
