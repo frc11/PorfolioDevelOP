@@ -5,6 +5,7 @@ import * as THREE from 'three'
 
 import { FLOOR_Y, PAPER_COLOR } from '../probeScene'
 import { HAZ, VIVO } from './vivo'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 2 · exploración] E1 · ÓCULO Y HAZ.
@@ -133,10 +134,11 @@ export function Haz({ conCharco }: { readonly conCharco: boolean }) {
     estrellas.setAttribute('position', new THREE.BufferAttribute(posiciones, 3))
     estrellas.setAttribute('aTam', new THREE.BufferAttribute(tam, 1))
     const materiales = {
-      haz: aditivo(VERTEX_DEL_HAZ, FRAGMENT_DEL_HAZ),
-      mancha: aditivo(VERTEX_PLANO, FRAGMENT_DE_LA_MANCHA),
+      // [CALIDAD 1] B8: el haz y su mancha son degradés: con dithering (ruido azul).
+      haz: conDithering(aditivo(VERTEX_DEL_HAZ, FRAGMENT_DEL_HAZ)),
+      mancha: conDithering(aditivo(VERTEX_PLANO, FRAGMENT_DE_LA_MANCHA)),
       estrellas: aditivo(VERTEX_DE_LAS_ESTRELLAS, FRAGMENT_DE_LAS_ESTRELLAS),
-      techo: new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, side: THREE.DoubleSide }),
+      techo: new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, side: THREE.DoubleSide, dithering: true }),
     }
     return { cono, techo, estrellas, materiales }
   }, [])

@@ -6,6 +6,7 @@ import { TRAMA_EN_VIVO } from '../estrellas/trama'
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../probeMoire'
 import { AMANECER_EN_VIVO } from './luz'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 7] T11 · LOS HACES DEL AMANECER — el sol bajo que pasa por los cuadrados de la trama deja luz en el aire de
@@ -142,7 +143,8 @@ export function armarLosHaces() {
   // Medio punto flotante: la luz de los haces es poca y ocho bits la escalonarían antes de sumarla.
   const bufer = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false, stencilBuffer: false })
   const cuadrado = new THREE.PlaneGeometry(2, 2)
-  const mezcla = new THREE.ShaderMaterial({
+  // [CALIDAD 1] B8: la bruma de los haces es un degradé: con dithering (ruido azul).
+  const mezcla = conDithering(new THREE.ShaderMaterial({
     uniforms: { uHaces: { value: bufer.texture } },
     vertexShader: VERTEX_DE_LA_COMPOSICION,
     fragmentShader: FRAGMENT_DE_LA_COMPOSICION,
@@ -151,7 +153,7 @@ export function armarLosHaces() {
     depthTest: false,
     toneMapped: false,
     blending: THREE.AdditiveBlending,
-  })
+  }))
   const composicion = new THREE.Mesh(cuadrado, mezcla)
   composicion.name = 'rayos del amanecer · composición'
   composicion.frustumCulled = false

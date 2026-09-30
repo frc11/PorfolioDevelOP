@@ -5,6 +5,7 @@ import { AMANECER_EN_VIVO, AMANECER_GLSL, OSCURECER_GLSL, hayAmanecer } from '..
 import { NIEBLA_DE_AFUERA, RASANTE_GLSL } from '../niebla/rasante'
 import { FOG_COLOR } from '../probeAtmosphere'
 import { INK_COLOR } from '../probeScene'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 5] EL MATERIAL DE LA COPIA — se dibuja en la sala, opaco, detrás de la trama: la trama es
@@ -167,5 +168,6 @@ export function materialDeLaCopia(uniforms: UniformsDeLaCopia, rasante: boolean,
     // La silueta se MEZCLA (el borde suave es su alfa) y escribe profundidad: van de atrás hacia adelante.
     transparent: silueta !== null,
   })
-  return material
+  // [CALIDAD 1] B8: la formación se funde en la niebla: con dithering (ruido azul).
+  return conDithering(material)
 }

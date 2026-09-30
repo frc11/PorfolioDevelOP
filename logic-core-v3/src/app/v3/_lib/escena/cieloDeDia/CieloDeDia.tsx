@@ -9,6 +9,7 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { pisoConFormacion } from '../formacion/Formacion'
 import { CELESTE, CIELO_DE_DIA, CIELO_DE_DIA_GLSL, diaDelCielo } from './nubes'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 8] T4 · EL CIELO DE DÍA (`nubes.ts` tiene el porqué). [CALIDAD 1] A2: en el producto, el pintado celeste
@@ -59,14 +60,15 @@ function armar() {
     uDia: { value: 1 },
   }
   const esfera = new THREE.SphereGeometry(CIELO_DE_DIA.radio, 96, 48)
-  const material = new THREE.ShaderMaterial({
+  // [CALIDAD 1] B8: el cielo es un degradé: con dithering (ruido azul).
+  const material = conDithering(new THREE.ShaderMaterial({
     uniforms,
     vertexShader: VERTEX_DE_LA_CUPULA,
     fragmentShader: FRAGMENT_DE_LA_CUPULA,
     side: THREE.BackSide,
     depthWrite: false,
     toneMapped: false,
-  })
+  }))
   const cupula = new THREE.Mesh(esfera, material)
   cupula.name = 'cielo de día'
   cupula.frustumCulled = false

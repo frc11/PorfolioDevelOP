@@ -120,6 +120,8 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
       roughness: INK_ROUGHNESS,
       metalness: 0,
       side: THREE.DoubleSide,
+      // [CALIDAD 1] B8: con dithering (ruido azul): la noche del logo sin escalones.
+      dithering: true,
     })
     return built
   }, [])

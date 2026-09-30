@@ -5,6 +5,7 @@ import * as THREE from 'three'
 
 import { FLOOR_RADIUS, FLOOR_Y } from '../probeScene'
 import { ANILLOS_EN_EL_SHADER, VIVO } from './vivo'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 3] E4 · EL PULSO — el dibujo. Un solo plano en el piso con hasta tres anillos analíticos:
@@ -72,7 +73,8 @@ void main() {
 export function Pulso() {
   const material = useMemo(
     () =>
-      new THREE.ShaderMaterial({
+      // [CALIDAD 1] B8: el pulso oscurece mezclando: con dithering en el color y el alfa (ruido azul).
+      conDithering(new THREE.ShaderMaterial({
         uniforms: {
           uTiempo: VIVO.uTiempo,
           uNoche: VIVO.uNoche,
@@ -82,7 +84,7 @@ export function Pulso() {
         fragmentShader: FRAGMENT,
         transparent: true,
         depthWrite: false,
-      }),
+      }), true),
     []
   )
   useEffect(() => () => material.dispose(), [material])

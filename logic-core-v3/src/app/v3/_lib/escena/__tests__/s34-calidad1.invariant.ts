@@ -29,6 +29,8 @@
  *      en el polvo y el bokeh; el tamaño en foco sigue con su tope (el real lo supera a toda distancia visible).
  * B7 · antialiasing: los costados del logo con normales suaves hasta un pliegue (el brillo ya no se prende de a tramos)
  *      y la tapa plana; la sombra de la trama en el piso prefiltrada con gradientes sin costura (sólo en el fragmento).
+ * B8 · dithering con ruido azul: un mosaico de 16×16 (una permutación de los 256 umbrales, sin baja frecuencia) en
+ *      lugar del ruido blanco de three, en todos los materiales con degradés (cielos, niebla, noche, piso, trama).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -44,6 +46,7 @@ import { PARTICLE_SIZE } from '../probeParticles'
 import { POLVO_PAREJO } from '../polvo/volumen'
 import { PLIEGUE, conCantosSuaves } from '../cantosDelLogo'
 import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
+import { RANGOS_DEL_RUIDO_AZUL, RUIDO_AZUL_GLSL } from '../ruidoAzul'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -408,7 +411,7 @@ const aMediaResolucion = (h: string): boolean =>
   /escena\.background = new THREE\.Color\(0, 0, 0\)/.test(h) &&
   /type: THREE\.HalfFloatType/.test(h) &&
   /composicion\.renderOrder = 3/.test(h) &&
-  /blending: THREE\.AdditiveBlending,\s*\}\)\s*const composicion/.test(h) &&
+  /blending: THREE\.AdditiveBlending,\s*\}\)\)?\s*const composicion/.test(h) &&
   !/escena\.add\(composicion\)/.test(h)
 afirmar(aMediaResolucion(hacesB5) && HACES.resolucion === 0.5 && /<primitive object=\{haces\.composicion\} \/>/.test(amanecerB5) && /dibujarLosHaces\(haces, state\.gl, state\.camera\)/.test(amanecerB5), 'los haces se dibujan en su búfer a la mitad del lienzo por lado (medio flotante) y un cuadrado aditivo los suma a la escena', 'un cuarto de los píxeles; la cuenta por píxel no cambió')
 controlPositivo('el detector VE los haces dibujados en la escena, a resolución completa (antes de B5)', hacesB5.replace('gl.setRenderTarget(h.bufer)', 'gl.setRenderTarget(null)'), aMediaResolucion)
@@ -473,5 +476,41 @@ afirmar(filtrada(TRAMA_FILTRADA_GLSL) && !/dFdx|textureGrad/.test(TRAMA_GLSL), '
 controlPositivo('el detector VE la búsqueda sin prefiltro (el nivel 0 fijo)', TRAMA_FILTRADA_GLSL.replace(/textureGrad\( uTramaFina,/g, 'textureLod( uTramaFina,'), filtrada)
 const luzB7 = leer('amanecer/luz.ts')
 afirmar(luzB7.includes('uTramaFiltrada > 0.5 ? delanteDeLaTramaFiltrada(') && luzB7.includes('conSol ? `${TRAMA_GLSL}') && luzB7.includes('${TRAMA_FILTRADA_GLSL}` : '), '  el piso la usa (sólo el piso, que es fragmento)')
+
+// ── B8 · dithering con ruido azul ─────────────────────────────────────────
+titulo('B8 · los degradados sin escalones: dithering con ruido azul')
+const umbralesB8 = RANGOS_DEL_RUIDO_AZUL.map((r) => (r + 0.5) / 256)
+/** La energía de baja frecuencia de un mosaico de 16×16 (radio ≤ 2), normalizada: el ruido blanco da ~1, el azul ~0. */
+function bajaFrecuenciaB8(v: readonly number[]): number {
+  const n = 16
+  const media = v.reduce((a, b) => a + b, 0) / v.length
+  let [baja, total] = [0, 0]
+  for (let fv = 0; fv < n; fv += 1) for (let fu = 0; fu < n; fu += 1) {
+    if (fu === 0 && fv === 0) continue
+    let [re, im] = [0, 0]
+    for (let i = 0; i < n * n; i += 1) { const a = (-2 * Math.PI * (fu * (i % n) + fv * Math.floor(i / n))) / n; re += (v[i] - media) * Math.cos(a); im += (v[i] - media) * Math.sin(a) }
+    const p = re * re + im * im
+    if (Math.hypot(Math.min(fu, n - fu), Math.min(fv, n - fv)) <= 2) baja += p
+    total += p
+  }
+  return baja / total / ((Math.PI * 4) / (n * n - 1))
+}
+const esPermutacion = (v: readonly number[]): boolean => v.length === 256 && new Set(v.map((u) => Math.round(u * 256 - 0.5))).size === 256 && v.every((u) => Math.abs(u * 256 - 0.5 - Math.round(u * 256 - 0.5)) < 0.05)
+const azul = (v: readonly number[]): boolean => esPermutacion(v) && bajaFrecuenciaB8(v) < 0.1
+afirmar(azul(umbralesB8) && Math.abs(umbralesB8.reduce((a, b) => a + b, 0) / 256 - 0.5) < 1e-3, 'el mosaico es ruido azul: los 256 umbrales una vez cada uno, de media ½ (no corre el color), sin baja frecuencia', `energía de baja frecuencia ${bajaFrecuenciaB8(umbralesB8).toFixed(3)} (el ruido blanco da ~1)`)
+let semillaB8 = 7
+const blancoB8 = Array.from({ length: 256 }, (_u, i) => (i + 0.5) / 256).sort(() => { semillaB8 = (semillaB8 * 16807) % 2147483647; return semillaB8 / 2147483647 - 0.5 })
+controlPositivo('el detector VE un mosaico de ruido blanco (los mismos umbrales, barajados)', blancoB8, azul)
+const ruidoB8 = leer('ruidoAzul.ts')
+afirmar(/THREE\.ShaderChunk\.dithering_pars_fragment = RUIDO_AZUL_GLSL/.test(ruidoB8) && /instalarElRuidoAzul\(\)/.test(leer('configuracionDelCanvas.ts')) && /return color \+ vec3\( ruidoAzul\(\) - 0\.5 \) \/ 255\.0;/.test(RUIDO_AZUL_GLSL), '  reemplaza al de three (ruido blanco con corrimiento de color) antes de compilar la escena: ±½ escalón, igual en los tres canales')
+afirmar(/texelFetch\( uRuidoAzul, ivec2\( mod\( gl_FragCoord\.xy, 16\.0 \) \), 0 \)/.test(RUIDO_AZUL_GLSL) && !/float\[ 256 \]/.test(RUIDO_AZUL_GLSL) && /THREE\.RedFormat, THREE\.UnsignedByteType/.test(ruidoB8) && /Object\.assign\(definicion\.uniforms, RUIDO_AZUL_EN_VIVO\)/.test(ruidoB8), '  el mosaico va en una textura (un arreglo constante de 256 le costaba a Direct3D más de un segundo por programa), que los materiales de three reciben de su definición')
+const CON_DITHERING: readonly (readonly [string, RegExp])[] = [
+  ['StudioFloor.tsx', /metalness: 0, dithering: true/], ['piso/PisoVivo.tsx', /metalness: 0, dithering: true/], ['MoireScreen.tsx', /dithering: true,\s*alphaMap: texture/],
+  ['MoireScreen.tsx', /side: THREE\.BackSide, dithering: true \}/], ['ProbeLogo.tsx', /dithering: true,/], ['ContactOcclusion.tsx', /depthWrite=\{false\} dithering \/>/],
+  ['entorno/Haz.tsx', /haz: conDithering\(aditivo/], ['entorno/Pulso.tsx', /\}\), true\),/], ['cieloDeDia/CieloDeDia.tsx', /const material = conDithering\(new THREE\.ShaderMaterial/],
+  ['estrellas/Estrellas.tsx', /const deLaCupula = conDithering\(new THREE\.ShaderMaterial/], ['amanecer/haces.ts', /const mezcla = conDithering\(new THREE\.ShaderMaterial/], ['formacion/materiales.ts', /return conDithering\(material\)/],
+]
+const sinDithering = CON_DITHERING.filter(([a, r]) => !r.test(leer(a))).map(([a]) => a)
+afirmar(sinDithering.length === 0, 'el dithering va en todo lo que pinta degradados: el papel y el piso, la trama, el logo, la sombra de contacto, el haz, el pulso, los dos cielos, los haces y la formación', sinDithering.length === 0 ? `${String(CON_DITHERING.length)} materiales (medido: las mesetas de un mismo color bajan de 2,8–4,9 px a 1,1–1,3; la media no cambia)` : sinDithering.join(', '))
 
 cerrar('s34-calidad1')

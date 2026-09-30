@@ -122,7 +122,8 @@ export function StudioFloor({ escenario, conNieblaRasante = false, conPisoVivo =
 
   const materials = useMemo(() => {
     const paper = () =>
-      new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0 })
+      // [CALIDAD 1] B8: con dithering (ruido azul): el papel y la niebla sin escalones.
+      new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0, dithering: true })
     const slab = paper()
     const cyclorama = paper()
     cyclorama.side = THREE.DoubleSide

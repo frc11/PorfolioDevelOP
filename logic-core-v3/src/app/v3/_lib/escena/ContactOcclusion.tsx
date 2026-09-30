@@ -192,12 +192,14 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
           transparent
           opacity={CONTACT_OPACITY}
           depthWrite={false}
+          // [CALIDAD 1] B8: la sombra de contacto es un degradé: con dithering (ruido azul).
+          dithering
         />
       </mesh>
       {spriteDuro !== null && (
         <mesh ref={duraRef} name="contacto duro" position={[0, FLOOR_Y + CONTACT_LIFT + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
           <planeGeometry args={[CONTACT_WIDTH, CONTACT_DEPTH]} />
-          <meshBasicMaterial ref={duraMaterialRef} map={spriteDuro} color={CONTACT_COLOR} transparent opacity={0} depthWrite={false} />
+          <meshBasicMaterial ref={duraMaterialRef} map={spriteDuro} color={CONTACT_COLOR} transparent opacity={0} depthWrite={false} dithering />
         </mesh>
       )}
     </>

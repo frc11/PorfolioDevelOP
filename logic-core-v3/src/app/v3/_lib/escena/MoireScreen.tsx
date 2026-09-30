@@ -210,6 +210,8 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       geometry: buildLayerGeometry(spec),
       material: new THREE.MeshLambertMaterial({
         color: MOIRE_COLOR,
+        // [CALIDAD 1] B8: con dithering (ruido azul).
+        dithering: true,
         alphaMap: texture,
         transparent: true,
         opacity: MOIRE_OPACITY,
@@ -233,7 +235,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     if (!anclada) return null
     const alto = ZOCALO.arriba - ZOCALO.abajo
     const geometry = new THREE.CylinderGeometry(ZOCALO.radio, ZOCALO.radio, alto, MOIRE_SEGMENTS, 1, true)
-    const material = new THREE.MeshLambertMaterial({ color: MOIRE_COLOR, transparent: true, opacity: LIMITE.zocalo.opacidad, depthWrite: false, side: THREE.BackSide })
+    const material = new THREE.MeshLambertMaterial({ color: MOIRE_COLOR, transparent: true, opacity: LIMITE.zocalo.opacidad, depthWrite: false, side: THREE.BackSide, dithering: true })
     conElAmanecer(material)
     return { geometry, material, y: ZOCALO.abajo + alto / 2 }
   }, [anclada])

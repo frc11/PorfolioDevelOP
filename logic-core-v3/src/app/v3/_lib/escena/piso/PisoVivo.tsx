@@ -200,7 +200,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uCamara: { value: new THREE.Vector3(0, 1e4, 0) },
   })
   uAlturas.value = sim.estado()[0]
-  const material = conPisoVivo(new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0 }), {
+  // [CALIDAD 1] B8: con dithering (ruido azul).
+  const material = conPisoVivo(new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0, dithering: true }), {
     uAlturas,
     uLado: { value: grilla.lado },
     uRadioDelPiso: { value: grilla.radio },

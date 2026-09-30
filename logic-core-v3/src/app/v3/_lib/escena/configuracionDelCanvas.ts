@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { AJUSTES } from './ajustes'
+import { instalarElRuidoAzul } from './ruidoAzul'
 import type { NivelDeCalidad } from './calidad'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR } from './probeScene'
 import { PROBE_DEFAULTS } from './probeStore'
@@ -44,6 +45,9 @@ export const CAMARA_DEL_CANVAS = {
  * Lo único que difiere entre los dos es `antialias`; el resto es idéntico y se
  * escribe una vez en `COMUN`.
  */
+// [CALIDAD 1] B8: el dithering de los materiales, con ruido azul (`ruidoAzul.ts`). Antes de compilar la escena.
+instalarElRuidoAzul()
+
 const COMUN = {
   /** Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás. */
   alpha: false,

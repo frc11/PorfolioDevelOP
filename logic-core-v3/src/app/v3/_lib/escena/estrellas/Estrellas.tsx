@@ -17,6 +17,7 @@ import { fueraDelTunel } from '../tunelEnLaEscena'
 import { TRAMA_EN_VIVO, leerLaTrama } from './trama'
 import { AMANECER_EN_VIVO, hayAmanecer } from '../amanecer/luz'
 import { TRAMA_GLSL, VIA_LACTEA, densidadDeLaBanda, direccionDeLaBanda, polvoDeLaBanda, viaLacteaGlsl } from './cielo'
+import { conDithering } from '../ruidoAzul'
 
 /**
  * [ESCENA 5] ESTRELLAS — el cielo de afuera de la trama, sólo de noche. [ESCENA 7] T3: encendido en el
@@ -284,7 +285,8 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
     // Antes que la trama gruesa: la trama se dibuja encima.
     puntos.renderOrder = MOIRE_FAR_ORDER - 2
     const esfera = new THREE.SphereGeometry(RADIO_DE_LA_CUPULA, 64, 32)
-    const deLaCupula = new THREE.ShaderMaterial({
+    // [CALIDAD 1] B8: la noche oscurece mezclando: con dithering en el color y el alfa (ruido azul).
+    const deLaCupula = conDithering(new THREE.ShaderMaterial({
       uniforms: { ...trama, ...AMANECER_EN_VIVO, uNoche: VIVO.uNoche, uVisible },
       defines: hayAmanecer() ? { AMANECER: '' } : {},
       vertexShader: VERTEX_DE_LA_CUPULA,
@@ -297,7 +299,7 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
       blendSrc: THREE.OneFactor,
       blendDst: THREE.OneMinusSrcAlphaFactor,
       side: THREE.BackSide,
-    })
+    }), true)
     const cupula = new THREE.Mesh(esfera, deLaCupula)
     cupula.name = 'vía láctea'
     cupula.frustumCulled = false
