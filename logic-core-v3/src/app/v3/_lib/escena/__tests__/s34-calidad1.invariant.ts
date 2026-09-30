@@ -35,6 +35,8 @@
  *      más de ΔE 2); la salida es sRGB.
  * B10 · el apoyo de las copias: una mancha de contacto instanciada en la base de cada copia de la formación, con la
  *      niebla del papel de afuera y el dithering; se va con las copias en el túnel.
+ * B11 · la calidad adaptativa: si los cuadros no entran baja de a un escalón (primero motas, con fundido; después dpr),
+ *      con histéresis; no oscila, ignora los tirones sueltos y vuelve a subir cuando sobra.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -51,6 +53,7 @@ import { POLVO_PAREJO } from '../polvo/volumen'
 import { PLIEGUE, conCantosSuaves } from '../cantosDelLogo'
 import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
 import { RANGOS_DEL_RUIDO_AZUL, RUIDO_AZUL_GLSL } from '../ruidoAzul'
+import { ADAPTATIVA, dprDelEscalon, estadoAdaptativoInicial, pasoAdaptativo } from '../gpu/adaptativa'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -210,7 +213,7 @@ afirmar(/#ifdef AIRE_FISICA\s*vec3 fuera = afueraDelCampo\( enElMundo, HOLGURA_T
 // ── B0 · el instrumento ───────────────────────────────────────────────────
 titulo('B0 · el instrumento: el perfil de la GPU, sólo con banco, y todo lo que se dibuja con nombre')
 const perfilGpu = leer('gpu/PerfilDeLaGpu.tsx')
-afirmar(/if \(!hayBanco\(\)\) return undefined/.test(perfilGpu) && /<PerfilDeLaGpu \/>/.test(leer('ProbeStage.tsx')), 'el perfil de la GPU se monta en la escena y sin banco no hace nada')
+afirmar(/if \(!hayBanco\(\)\) return undefined/.test(perfilGpu) && /<PerfilDeLaGpu \/>/.test(leer('gpu/MotorDeLaEscena.tsx')), 'el perfil de la GPU se monta en la escena y sin banco no hace nada') // [CALIDAD 1] B11: por el motor de la escena
 /** Lo que se dibuja, por archivo, y el nombre con que el perfil lo agrupa. */
 const NOMBRES: readonly (readonly [string, string])[] = [
   ['ProbeStage.tsx', 'name="logo"'], ['ProbeStage.tsx', 'name="polvo"'], ['ProbeStage.tsx', 'name="bokeh"'], ['StudioFloor.tsx', 'name="piso"'],
@@ -225,7 +228,7 @@ controlPositivo('el detector VE un objeto sin nombre', [...NOMBRES, ['piso/PisoV
 // ── B1 · precompilar ──────────────────────────────────────────────────────
 titulo('B1 · precompilar: nada se compila la primera vez que aparece')
 const precompilar = leer('gpu/Precompilar.tsx')
-afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('ProbeStage.tsx')) && /gl\.compileAsync\(escena, camara\)/.test(precompilar), 'la escena entera se compila al arrancar, en paralelo (`compileAsync` recorre también lo invisible)')
+afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('gpu/MotorDeLaEscena.tsx')) && /<MotorDeLaEscena logoMaterialRef=\{logoMaterialRef\} dpr=\{ajustes\.dpr\} \/>/.test(leer('ProbeStage.tsx')) && /gl\.compileAsync\(escena, camara\)/.test(precompilar), 'la escena entera se compila al arrancar, en paralelo (`compileAsync` recorre también lo invisible)')
 /** El calentamiento: un dibujo de UN píxel con todo prendido y sin descarte, y todo devuelto como estaba. */
 const calienta = (c: string): boolean => /gl\.setScissor\(0, 0, 1, 1\)/.test(c) && /o\.visible = true/.test(c) && /o\.frustumCulled = false/.test(c) && /t\.o\.visible = t\.visible/.test(c) && /t\.o\.frustumCulled = t\.descarte/.test(c) && /gl\.setScissorTest\(false\)/.test(c)
 afirmar(calienta(precompilar), '  y se calienta con un dibujo de un píxel (ANGLE arma el ejecutable en el primer dibujo), devolviendo visibilidad y descarte')
@@ -536,5 +539,55 @@ const apoyo = (c: string): boolean =>
 afirmar(apoyo(armadoB10), 'cada copia lleva en su base la mancha de contacto del logo (su textura y su color), instanciada, con la niebla del papel de afuera y dithering', 'una llamada, dos triángulos por copia: medido, 0,05–0,1 ms de GPU para 6.839 copias')
 controlPositivo('el detector VE una mancha sin la niebla del papel (se vería oscura en la bruma)', armadoB10.replace('if (rasante) conLaNiebla(material)', ''), apoyo)
 afirmar(/contacto\.material\.opacity = CONTACTO_DE_LA_COPIA\.opacidad \* visible/.test(leer('formacion/Formacion.tsx')) && /<primitive object=\{armado\.contacto\} \/>/.test(leer('formacion/Formacion.tsx')), '  se va con las copias (en el túnel no hay formación)')
+
+// ── B11 · la calidad adaptativa ──────────────────────────────────────────
+titulo('B11 · la calidad adaptativa: de a un escalón, con histéresis, sin oscilar')
+/** Una corrida simulada: `hz` de refresco, y en cada cuadro si se pierde (dura dos) según el tiempo y el escalón. */
+function corrida(hz: number, segundos: number, pierde: (t: number, escalon: number) => boolean, tiron?: number): { escalones: number[]; cambios: number[]; refresco: number } {
+  const e = estadoAdaptativoInicial()
+  const [escalones, cambios] = [[] as number[], [] as number[]]
+  let t = 0
+  let tirado = false
+  while (t < segundos) {
+    let delta = (pierde(t, e.escalon) ? 2 : 1) * (1000 / hz)
+    if (tiron !== undefined && !tirado && t >= tiron) { delta = 500; tirado = true }
+    if (pasoAdaptativo(e, delta)) cambios.push(t)
+    escalones.push(e.escalon)
+    t += delta / 1000
+  }
+  return { escalones, cambios, refresco: e.refresco }
+}
+const aTiempo = corrida(60, 60, () => false)
+afirmar(aTiempo.cambios.length === 0 && Math.abs(aTiempo.refresco - 1000 / 60) < 0.01, 'con los cuadros a tiempo no cambia nada (y el refresco que estima es el de la pantalla)', `60 s a 60 Hz; refresco ${aTiempo.refresco.toFixed(2)} ms`)
+const a144 = corrida(144, 60, () => false)
+afirmar(a144.cambios.length === 0 && Math.abs(a144.refresco - 1000 / 144) < 0.01, '  igual a 144 Hz')
+const conTiron = corrida(60, 30, () => false, 10)
+afirmar(conTiron.cambios.length === 0, '  un tirón suelto (medio segundo) no baja nada')
+// Una carga que sólo entra desde el escalón 2: pierde uno de cada dos cuadros en 0 y 1.
+let par = false
+const pesada = corrida(60, 180, (_t, escalon) => { par = !par; return escalon < 2 && par })
+const ultimoMinuto = pesada.escalones.slice(-3600)
+const enDos = ultimoMinuto.filter((x) => x === 2).length / ultimoMinuto.length
+const espaciados = pesada.cambios.every((t, i) => i === 0 || t - pesada.cambios[i - 1] >= ADAPTATIVA.quietoS)
+/** Las pruebas de subida (el escalón 2 que vuelve a probar el 1): cada una, al menos el doble de lejos que la anterior. */
+const pruebas = pesada.cambios.filter((_t, i) => i >= 2 && i % 2 === 0)
+const esperasQueCrecen = pruebas.every((t, i) => i < 2 || t - pruebas[i - 1] >= 1.8 * (pruebas[i - 1] - pruebas[i - 2]))
+afirmar(pesada.escalones.includes(2) && enDos > 0.8 && espaciados && esperasQueCrecen && !pesada.escalones.includes(3), 'con una carga que no entra, baja de a un escalón hasta el que entra y se queda: vuelve a probar el de arriba cada vez más de tarde (sin oscilar)', `${String(pesada.cambios.length)} cambios en 3 minutos (las pruebas a los ${pruebas.map((t) => t.toFixed(0)).join(', ')} s); el último minuto, ${(enDos * 100).toFixed(0)} % en el escalón 2`)
+// Si la carga se va, vuelve arriba.
+let par2 = false
+const vuelve = corrida(60, 240, (t, escalon) => { par2 = !par2; return t < 30 && escalon < 3 && par2 })
+afirmar(vuelve.escalones[vuelve.escalones.length - 1] === 0, '  y cuando sobra, vuelve a subir de a uno hasta arriba', `${String(vuelve.cambios.length)} cambios`)
+controlPositivo('el detector VE un controlador sin histéresis (el que oscila)', (() => {
+  const e = { escalon: 0, cambios: 0 }
+  let p = false
+  for (let k = 0; k < 10800; k += 1) { p = !p; const lento = e.escalon < 2 && p; const nuevo = lento ? Math.min(4, e.escalon + 1) : Math.max(0, e.escalon - 1); if (nuevo !== e.escalon) e.cambios += 1; e.escalon = nuevo }
+  return e.cambios
+})(), (cambios: number) => cambios <= 8)
+afirmar(dprDelEscalon(0, 1.5, 2) === 1.5 && dprDelEscalon(2, 1.5, 2) === 1.35 && dprDelEscalon(4, 1.5, 1) === 0.7 && dprDelEscalon(4, 1, 1) === 0.7 && ADAPTATIVA.escalones.every((x, i) => i === 0 || (x.motas <= ADAPTATIVA.escalones[i - 1].motas && x.dpr <= ADAPTATIVA.escalones[i - 1].dpr)), '  los escalones bajan primero las motas y después el dpr (de a 10 % del tope del nivel, sin pasar el de la pantalla)')
+const parcheB11 = leer('polvo/parche.ts')
+const hashes = Array.from({ length: 200 }, (_u, i) => { const v = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return v - Math.floor(v) })
+const encendida = (f: number, h: number): number => { const t = Math.min(1, Math.max(0, (h - f) / 0.05)); return 1 - t * t * (3 - 2 * t) }
+afirmar(/vParejo \*= 1\.0 - smoothstep\( uFraccionDeMotas, uFraccionDeMotas \+ 0\.05, fract\( sin\( aIndice \* 12\.9898 \+ 78\.233 \) \* 43758\.5453 \) \);/.test(parcheB11) && hashes.every((h) => encendida(1, h) === 1), 'las motas que sobran se apagan con un fundido, al azar y parejo (con todo encendido no se toca ninguna)', `con 0,8: ${String(hashes.filter((h) => encendida(0.8, h) < 0.5).length)} de 200 apagadas`)
+afirmar(/if \(pasoAdaptativo\(m\.e, delta \* 1000, m\.activa\)\) setDpr\(/.test(leer('gpu/CalidadAdaptativa.tsx')) && /activa: !hayBanco\(\)/.test(leer('gpu/CalidadAdaptativa.tsx')), '  el dpr se toca sólo cuando cambia el escalón (nada de React por cuadro); con banco arranca apagada')
 
 cerrar('s34-calidad1')

@@ -52,6 +52,8 @@ export const AIRE = {
   uVientoDelAire: { value: new THREE.Vector3() },
   /** [ESCENA 7] T10 · píxeles del búfer por píxel CSS: el lado nítido de la mota es en píxeles CSS. */
   uPixel: { value: 1 },
+  /** [CALIDAD 1] B11 · qué fracción de las motas está encendida (la calidad adaptativa la baja con un fundido). */
+  uFraccionDeMotas: { value: 1 },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -80,6 +82,7 @@ varying float vParejo;
 #ifdef AIRE_FISICA
 	attribute float aIndice;
 	uniform sampler2D uFisica;
+	uniform float uFraccionDeMotas;
 #endif
 #ifdef AIRE_INERCIA
 	uniform vec3 uDeriva;
@@ -119,6 +122,8 @@ const CUERPO = /* glsl */ `
 	#endif
 	#ifdef AIRE_FISICA
 		${FISICA_EN_LA_MOTA_GLSL}
+		// [CALIDAD 1] B11 · con la calidad bajada se apaga una fracción de las motas, al azar y parejo, con un fundido.
+		vParejo *= 1.0 - smoothstep( uFraccionDeMotas, uFraccionDeMotas + 0.05, fract( sin( aIndice * 12.9898 + 78.233 ) * 43758.5453 ) );
 	#endif
 	#ifdef AIRE_MOTAS
 		${MOTAS_GLSL}
