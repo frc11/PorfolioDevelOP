@@ -215,7 +215,8 @@ export const SIZES_DEL_MEDIO = sizesPorTresTramos(50, 50, 100)
 /** ⚠️ B12 §4.3 · el PÓSTER provisional. El video sigue sin existir: uno que se reproduce se leería como el recorrido definitivo. */
 export const POSTER_PROVISIONAL = '/placeholders/poster.png'
 
-/** RECURSOS: el video de muestra de los tres frentes (H.264, sin audio) y su póster. */
+/** RECURSOS: el video de muestra de los tres frentes (H.264, sin audio) y su póster. [ESCENA 10] T2: 960 × 600 a 25
+ *  cuadros por segundo; cómo codificar el de verdad, en `docs/rediseno/VIDEO-DE-SERVICIOS.md`. */
 export const VIDEO_DE_MUESTRA = { fuente: '/recursos/servicios/placeholder.mp4', poster: '/recursos/servicios/placeholder-poster.webp' } as const
 
 /** Las palabras de un párrafo. Es la `cantidad` del canal P3. */

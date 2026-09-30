@@ -182,7 +182,7 @@ entero, `escena9/t4-fluidez/motor/`):
 | 1440 con dpr 1,5 | 11,04 (antes 14,45) | 1,35 (antes 1,63) |
 
 Cuadros perdidos con vsync a 1440 con dpr 1,5: AMD 356 → 139 (90 de Servicios); NVIDIA 80, todos de Servicios (el video
-de muestra de la sección, ver §6).
+de muestra de la sección, ver §6; [ESCENA 10] T2: 0).
 
 **[ESCENA 10] T1 · el producto después del cierre** (1440, NVIDIA, el último cuadro de cada momento): de día **23–24
 llamadas y 138.532 triángulos** (antes 19–20 y 127.680: el mapa de la sombra del logo, las copias del logo y las dos
@@ -263,7 +263,8 @@ en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`);
 [ESCENA 10] Los bancos del sprint (`scripts-escena10/`, los mismos instrumentos, con la NVIDIA): T1: `t1-momentos` (los
 cinco momentos del producto que esté en el servidor, con un rótulo, y la hoja antes/después), `t1-pasos` (el anochecer y
 el amanecer grabados, recortados al logo y al piso) y `t1-sonda` (la noche de la sala y la del logo, el encendido y la
-fuerza de la sombra, cada segundo).
+fuerza de la sombra, cada segundo); T2: `t2-servicios` (los cuadros perdidos por pasada en Servicios y la frenada),
+`t2-tamano` (de qué tamaño se ve el video), `t2-sonda` (el estado de cada video, quieto) y `t2-clip`.
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -280,10 +281,12 @@ fuerza de la sombra, cada segundo).
   polvo saltan (226 rad en ese cuadro). Pasa con la escena tapada (verificado con capturas), así que no se ve.
 - **[CALIDAD 1, hallado]** La escena sigue dibujando unos cientos de píxeles de scroll adentro de Servicios, ya tapada
   por la sección opaca, antes de suspenderse.
-- **[ESCENA 9, hallado] Servicios pierde ~80 cuadros por pasada con cualquier placa y dpr** (15–18 % de sus cuadros; la
-  escena está suspendida). Es el video de muestra de la sección (`placeholder.mp4`, H.264 1152×720 a 30 cuadros por
-  segundo): con el video escondido, 0 (`escena9/t4-fluidez/servicios/`). No es de la escena; queda para cuando llegue el
-  video de verdad.
+- ~~**[ESCENA 9, hallado] Servicios pierde ~80 cuadros por pasada con cualquier placa y dpr**~~ → **[ESCENA 10] T2:
+  0.** Era el video de muestra de la sección, andando en medio del scroll. Ahora se pausa mientras el scroll se mueve y
+  vuelve a andar desde el mismo cuadro a los 180 ms de frenar (`_secciones/servicios/VideoDeServicio.tsx`, con el aviso
+  compartido de `_lib/scrollEnMovimiento.ts`), y va recodificado a 25 cuadros por segundo (divide los 75 Hz) y a
+  960 × 600 (la menor resolución que se ve igual a 1440; 887 KB). Medido con la NVIDIA, dpr 1 y 1,5: de 74–80 cuadros
+  perdidos por pasada a 0 (`escena10/t2-video/`). Cómo codificar el de verdad: `docs/rediseno/VIDEO-DE-SERVICIOS.md`.
 - **[CALIDAD 1, hallado]** La primera carga después de CUALQUIER cambio de shaders los compila en frío: ~1,25 s de
   calentar dentro del precompilado, al cargar (Direct3D arma el ejecutable en el primer dibujo). Desde la segunda carga
   (en la misma sesión del banco o en otra, con el mismo perfil) Chrome los encuentra en su caché: 16–19 ms de compilar y

@@ -7,6 +7,8 @@
  *      brillante, el bloom, AgX y Neutral como opción, el sedoso, los títulos de ESCENA 9). Y la luz según el momento:
  *      de día la sombra del logo y la mancha de contacto, sin haz; de noche sólo la mancha dura del haz; el paso sigue a
  *      la noche EN EL LOGO, que en el amanecer cambia cuando el frente lo alcanza (sin saltos).
+ * T2 · el video de Servicios: quieto mientras el scroll se mueve (vuelve a andar desde el mismo cuadro al frenar) y
+ *      recodificado a 25 cuadros por segundo, a la menor resolución que se ve igual; la receta, en VIDEO-DE-SERVICIOS.md.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -125,5 +127,42 @@ const sombraSinSaltos = (c: string): boolean => /const fuerza = SOMBRA_DEL_LOGO\
 afirmar(sombraSinSaltos(luzDelLogo), 'la sombra del logo sobre el piso vivo va de día: la luz principal por el día en el logo (de noche, cero; en el amanecer vuelve con el frente), sin el corte al 3 %')
 controlPositivo('el detector VE el corte de la prueba de ESCENA 9', `${luzDelLogo}\nconst fuerza = cruda < 0.03 ? 0 : cruda`, sombraSinSaltos)
 afirmar(/\{e\.sombraDelLogo && e\.pisoVivo \? <SombraDelLogo \{\.\.\.props\} \/> : null\}/.test(luzDelLogo) && /const conSombra = entornoDeLaEscena\(\)\.sombraDelLogo/.test(leer('piso/PisoVivo.tsx')), '  se monta con el piso vivo (es quien la recibe), y el banco la apaga con `sombra-logo=no`')
+
+// ── T2 · el video de Servicios ────────────────────────────────────────────
+titulo('T2 · el video de Servicios: quieto mientras el scroll se mueve, y a 25 cuadros por segundo')
+const video = deLaRaiz('src/app/v3/_secciones/servicios/VideoDeServicio.tsx')
+const enMovimiento = deLaRaiz('src/app/v3/_lib/scrollEnMovimiento.ts')
+const pausaConElScroll = (c: string): boolean =>
+  /const soltar = seguirElScroll\(\s*QUIETO_PARA_VOLVER_MS,\s*\(\) => \{\s*if \(!el\.paused\) el\.pause\(\)\s*\},\s*\(\) => void el\.play\(\)/.test(c) &&
+  /return \(\) => \{\s*soltar\(\)\s*el\.pause\(\)/.test(c) &&
+  !/addEventListener\('scroll'/.test(codigo(c))
+const quieto = Number(/export const QUIETO_PARA_VOLVER_MS = (\d+)/.exec(video)?.[1] ?? 'NaN')
+afirmar(pausaConElScroll(video) && quieto >= 100 && quieto <= 400, 'con el scroll en movimiento el video se pausa en su cuadro, y vuelve a andar desde ahí cuando el scroll lleva un rato quieto', `${String(quieto)} ms (medido con la NVIDIA a 1440, dpr 1 y 1,5: de 74–80 cuadros perdidos por pasada a 0; vuelve 198 ms después de frenar)`)
+controlPositivo('el detector VE el video de antes (sólo se pausaba fuera de pantalla)', video.replace('const soltar = seguirElScroll(', 'const soltar = () => undefined; (('), pausaConElScroll)
+/** Un solo escucha para todos: se pone con el primero, se saca con el último, y sólo anota la hora y avisa. */
+const unEscucha = (c: string): boolean => (codigo(c).match(/addEventListener\('scroll'/g) ?? []).length === 1 && /if \(suscriptos\.length === 0\) window\.addEventListener\('scroll', alScroll, \{ passive: true \}\)/.test(c) && /if \(suscriptos\.length === 0\) window\.removeEventListener\('scroll', alScroll\)/.test(c)
+afirmar(unEscucha(enMovimiento), '  el movimiento lo avisa `_lib/scrollEnMovimiento.ts`: un solo escucha para los tres videos (la sección no escucha el scroll por su cuenta, como pide s6-servicios)')
+controlPositivo('el detector VE un escucha por suscripción', enMovimiento.replace('if (suscriptos.length === 0) window.addEventListener', 'window.addEventListener'), unEscucha)
+/** Los cuadros por segundo y el tamaño de la pista de video de un MP4 (una sola pista: `mdhd`, `stts` y `tkhd`). */
+const delMp4 = (b: Buffer): { fps: number; ancho: number; alto: number } => {
+  const caja = (nombre: string): number => b.indexOf(Buffer.from(nombre, 'latin1'))
+  const mdhd = caja('mdhd')
+  const escala = b.readUInt32BE(mdhd + (b[mdhd + 4] === 1 ? 24 : 16))
+  const stts = caja('stts')
+  const tkhd = caja('tkhd')
+  const tk = b[tkhd + 4] === 1 ? 12 : 0
+  return { fps: escala / b.readUInt32BE(stts + 16), ancho: b.readUInt32BE(tkhd + 80 + tk) / 65536, alto: b.readUInt32BE(tkhd + 84 + tk) / 65536 }
+}
+const muestra = delMp4(readFileSync(path.join(process.cwd(), 'public/recursos/servicios/placeholder.mp4')))
+afirmar(muestra.fps === 25 && muestra.ancho === 960 && muestra.alto === 600, 'el video de muestra va a 25 cuadros por segundo (divide los 75 Hz: cada cuadro, tres refrescos) y a 960 × 600, la menor resolución que se ve igual a 1440', `${String(muestra.fps)} cuadros por segundo, ${String(muestra.ancho)} × ${String(muestra.alto)} (SSIM 0,991 contra la original al tamaño de 1440; 887 KB, lo mismo que antes)`)
+/** Un MP4 mínimo con la escala y el paso de un video de 30 cuadros por segundo (el de antes). */
+const de30 = Buffer.alloc(200)
+de30.write('mdhd', 10, 'latin1')
+de30.writeUInt32BE(15360, 26)
+de30.write('stts', 60, 'latin1')
+de30.writeUInt32BE(512, 76)
+de30.write('tkhd', 100, 'latin1')
+controlPositivo('el lector VE un video de 30 cuadros por segundo', de30, (x: Buffer) => delMp4(x).fps === 25)
+afirmar(existsSync(path.join(process.cwd(), 'docs/rediseno/VIDEO-DE-SERVICIOS.md')) && /VIDEO-DE-SERVICIOS\.md/.test(deLaRaiz('src/app/v3/_secciones/servicios/contenido.ts')), '  cómo codificar el video de verdad queda escrito (`docs/rediseno/VIDEO-DE-SERVICIOS.md`) y el contenido lo nombra')
 
 cerrar('s36-escena10')
