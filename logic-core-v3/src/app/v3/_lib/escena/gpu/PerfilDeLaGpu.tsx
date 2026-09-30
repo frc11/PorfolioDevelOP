@@ -97,7 +97,8 @@ function crearPerfil(renderer: THREE.WebGLRenderer, escena: THREE.Scene) {
         if (modo === 'cuadro' && s === escena) cerrar()
         return
       }
-      abrir(`simulación ${String(rt.width)}×${String(rt.height)}`)
+      // [CALIDAD 1] B5: una escena aparte con nombre (los haces del amanecer) se mide con el suyo.
+      abrir(s.name !== '' ? s.name : `simulación ${String(rt.width)}×${String(rt.height)}`)
       render.call(renderer, s, c)
       cerrar()
     }

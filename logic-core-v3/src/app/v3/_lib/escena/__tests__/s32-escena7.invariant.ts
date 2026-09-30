@@ -357,7 +357,7 @@ afirmar(baja && frenteEn(AMANECER.cambio) > FORMACION.hasta && frenteHasta(FORMA
 const [r0, r1, r2] = AMANECER.rayos
 afirmar(r0 < alaTrama && r1 >= alaTrama - 0.3 && r1 <= alPiso + 0.3 && r2 > alPiso, '4 · entra por los cuadrados de la trama: los haces pican cuando el frente cruza la trama', `la trama a los ${alaTrama.toFixed(2)}–${alPiso.toFixed(2)} s; los haces pican a los ${String(r1)} s`)
 afirmar(alPiso < alLogo && alLogo <= AMANECER.final, '5 · llega al piso vivo y, por último, al logo', `el piso a los ${alPiso.toFixed(2)} s, el logo a los ${alLogo.toFixed(2)} s; todo asentado a los ${String(AMANECER.final)} s`)
-afirmar(/delanteDeLaTrama\( \$\{mundo\}, uSolDelAmanecer \)/.test(leer('amanecer/luz.ts')) && /suma \+= delanteDeLaTrama\( p, uSolDelAmanecer \)/.test(leer('amanecer/Amanecer.tsx')), '  el sol pasa por los huecos de las dos capas: cuadros de luz en el piso y haces en el aire')
+afirmar(/delanteDeLaTrama\( \$\{mundo\}, uSolDelAmanecer \)/.test(leer('amanecer/luz.ts')) && /suma \+= delanteDeLaTrama\( p, uSolDelAmanecer \)/.test(leer('amanecer/haces.ts')), '  el sol pasa por los huecos de las dos capas: cuadros de luz en el piso y haces en el aire') // [CALIDAD 1] B5: los haces se mudaron a haces.ts
 afirmar(/mix\( vec3\( \$\{LOGO_DE_NOCHE/.test(leer('amanecer/luz.ts')) && /mix\( vec3\( 1\.0 \), diffuseColor\.rgb, alcanzadoPorElDia/.test(leer('polvo/parche.ts')), '  el logo guarda su gris de noche y el polvo su blanco hasta que el frente los alcanza (el logo es lo último)')
 // La compuerta y el scroll.
 const bloque = (pie: number): BloqueOpaco => ({ servicios: { tope: pie - 4500, pie: pie - 1800 }, tuPanel: { tope: pie - 1800, pie }, alto: 900 })

@@ -5,16 +5,14 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { hayBanco } from '../entorno'
-import { VIVO } from '../entorno/vivo'
-import { TRAMA_GLSL } from '../estrellas/cielo'
-import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
+import { ESCENAS_APARTE } from '../gpu/Precompilar'
+import { leerLaTrama } from '../estrellas/trama'
 import type { MoireHandle } from '../MoireScreen'
 import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from '../nocheDisparada'
-import { FLOOR_Y } from '../probeScene'
-import { MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../probeMoire'
 import { viajeEnCurso } from '../viaje'
 import { DIA_DEL_TEXTO } from './diaDelTexto'
 import { AMANECER, PAUSA_S, avanceDelScroll, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer, type MomentoVivo } from './linea'
+import { armarLosHaces, dibujarLosHaces, mostrarLosHaces, type HacesDelAmanecer } from './haces'
 import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 
 /**
@@ -33,6 +31,8 @@ import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
  * [CALIDAD 1] A1 · En un viaje de día a día el amanecer no corre (ni de ida ni de vuelta por Tu panel): desde el
  * primer cuadro, la compuerta del destino con el día entero (`compuertaEnLaLlegada`), que se sostiene al llegar
  * hasta que el scroll lo alcanza o vuelve para atrás (`sigueEntero`). Los viajes que cambian de luz, como antes.
+ *
+ * [CALIDAD 1] B5 · Los haces se dibujan a media resolución, en su búfer: `haces.ts`.
  */
 
 type VentanaDelBanco = Window & {
@@ -40,6 +40,8 @@ type VentanaDelBanco = Window & {
     estado: () => { activo: boolean; s: number; avance: number; pedido: number; texto: number; abajo: number; frente: number; rayos: number; resplandor: number; sostiene: boolean }
     /** Deja el amanecer quieto en el segundo `s` (o lo suelta con `null`): para fotografiar cada momento. */
     congelar: (s: number | null) => void
+    /** [CALIDAD 1] B5 · los haces (su escena y su búfer): para compararlos con los de resolución completa. */
+    haces: () => HacesDelAmanecer
   }
 }
 
@@ -55,60 +57,6 @@ export function Amanecer(props: PropsDelAmanecer) {
   return <AmanecerPrendido {...props} />
 }
 
-/** Los haces: cuántos tramos por píxel, cuánta luz por unidad de aire, y el aire de la sala. */
-const HACES = { pasos: 20, luz: 0.0035, alto: 10 } as const
-
-const VERTEX_DE_LOS_HACES = /* glsl */ `
-varying vec3 vMundo;
-void main() {
-	vec4 mundo = modelMatrix * vec4( position, 1.0 );
-	vMundo = mundo.xyz;
-	gl_Position = projectionMatrix * viewMatrix * mundo;
-}
-`
-
-const FRAGMENT_DE_LOS_HACES = /* glsl */ `
-uniform float uRayos;
-uniform vec3 uSolDelAmanecer;
-uniform float uTiempo;
-// [CALIDAD 1] B1: el tope del lazo es un uniform: con uno fijo, el compilador de Direct3D (ANGLE) lo desenrolla entero y tarda 1,4 s.
-uniform int uPasos;
-varying vec3 vMundo;
-${TRAMA_GLSL}
-float azarDelAire( vec3 p ) { return fract( sin( dot( p, vec3( 127.1, 311.7, 74.7 ) ) ) * 43758.5453 ); }
-float ruidoDelAire( vec3 p ) {
-	vec3 i = floor( p );
-	vec3 f = fract( p );
-	vec3 u = f * f * ( 3.0 - 2.0 * f );
-	float a = mix( mix( azarDelAire( i ), azarDelAire( i + vec3( 1, 0, 0 ) ), u.x ), mix( azarDelAire( i + vec3( 0, 1, 0 ) ), azarDelAire( i + vec3( 1, 1, 0 ) ), u.x ), u.y );
-	float b = mix( mix( azarDelAire( i + vec3( 0, 0, 1 ) ), azarDelAire( i + vec3( 1, 0, 1 ) ), u.x ), mix( azarDelAire( i + vec3( 0, 1, 1 ) ), azarDelAire( i + vec3( 1, 1, 1 ) ), u.x ), u.y );
-	return mix( a, b, u.z );
-}
-void main() {
-	if ( uRayos < 0.001 ) discard;
-	vec3 o = cameraPosition;
-	vec3 d = normalize( vMundo - o );
-	// El aire de la sala: del ojo hasta la pared de la trama fina, o hasta el piso si el rayo lo toca antes.
-	float a = dot( d.xz, d.xz );
-	float b = dot( o.xz, d.xz );
-	float c = dot( o.xz, o.xz ) - ${(MOIRE_NEAR_RADIUS - 1).toFixed(1)} * ${(MOIRE_NEAR_RADIUS - 1).toFixed(1)};
-	float largo = a > 1e-6 ? ( - b + sqrt( max( b * b - a * c, 0.0 ) ) ) / a : 60.0;
-	if ( d.y < 0.0 ) largo = min( largo, ( ${FLOOR_Y.toFixed(3)} - o.y ) / d.y );
-	if ( d.y > 0.0 ) largo = min( largo, ( ${MOIRE_NEAR_TOP.toFixed(1)} - o.y ) / d.y );
-	float paso = max( largo, 0.0 ) / float( uPasos );
-	float corrido = fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) );
-	float suma = 0.0;
-	for ( int i = 0; i < uPasos; i++ ) {
-		vec3 p = o + d * ( ( float( i ) + corrido ) * paso );
-		// El aire de la sala: más denso abajo, y desparejo (se mueve despacio).
-		float aire = ( 0.45 + 0.55 * ruidoDelAire( p * 0.18 + vec3( 0.0, uTiempo * 0.05, 0.0 ) ) ) * exp( - max( 0.0, p.y - ${FLOOR_Y.toFixed(3)} ) / ${HACES.alto.toFixed(1)} );
-		suma += delanteDeLaTrama( p, uSolDelAmanecer ) * aire * paso;
-	}
-	// Contra el sol se ve más (el aire dispersa hacia adelante).
-	float fase = 0.3 + 0.9 * pow( max( 0.0, dot( d, uSolDelAmanecer ) ), 8.0 );
-	gl_FragColor = vec4( vec3( 0.92 ) * suma * ${HACES.luz.toFixed(4)} * fase * uRayos, 1.0 );
-}
-`
 
 /** [ESCENA 8] T3 · ¿El pie ya está a la vista? (Su tinta es de día y no espera al amanecer.) */
 function pieALaVista(m: { pie: Element | null }): boolean {
@@ -116,39 +64,18 @@ function pieALaVista(m: { pie: Element | null }): boolean {
   return m.pie !== null && m.pie.getBoundingClientRect().top < window.innerHeight
 }
 
-/** Los haces, alrededor del ojo y sólo mientras hay rayos. */
-function mostrarLosHaces(malla: THREE.Mesh, hay: boolean, ojo: THREE.Vector3): boolean {
-  malla.visible = hay
-  malla.position.copy(ojo)
-  return hay
-}
 
 function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
   const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false } })
-  const haces = useMemo(() => {
-    // Una esfera alrededor del ojo, sin prueba de profundidad: el rayo lo corta la cuenta (la pared o el piso).
-    const geometria = new THREE.SphereGeometry(20, 32, 16)
-    const material = new THREE.ShaderMaterial({
-      uniforms: { ...TRAMA_EN_VIVO, uRayos: AMANECER_EN_VIVO.uRayos, uSolDelAmanecer: AMANECER_EN_VIVO.uSolDelAmanecer, uTiempo: VIVO.uTiempo, uPasos: { value: HACES.pasos } },
-      vertexShader: VERTEX_DE_LOS_HACES,
-      fragmentShader: FRAGMENT_DE_LOS_HACES,
-      transparent: true,
-      depthWrite: false,
-      toneMapped: false,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      depthTest: false,
-    })
-    const malla = new THREE.Mesh(geometria, material)
-    malla.name = 'rayos del amanecer'
-    malla.frustumCulled = false
-    malla.renderOrder = 3
-    malla.visible = false
-    return { malla, geometria, material }
-  }, [])
-  useEffect(() => () => {
-    haces.geometria.dispose()
-    haces.material.dispose()
+  const haces = useMemo(() => armarLosHaces(), [])
+  useEffect(() => {
+    // [CALIDAD 1] B5: la escena de los haces se dibuja aparte: que también se precompile y se caliente al arrancar.
+    const aparte = { escena: haces.escena, bufer: haces.bufer }
+    ESCENAS_APARTE.add(aparte)
+    return () => {
+      ESCENAS_APARTE.delete(aparte)
+      haces.soltar()
+    }
   }, [haces])
 
   // Al desmontarse, el texto del final no queda esperando un día que ya nadie escribe.
@@ -168,11 +95,12 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       congelar: (s) => {
         memoria.current.congelado = s
       },
+      haces: () => haces,
     }
     return () => {
       delete ventana.__amanecerDelBanco
     }
-  }, [])
+  }, [haces])
 
   useFrame((state, delta) => {
     const m = memoria.current
@@ -221,8 +149,11 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     u.uFrenteDelDia.value = momento.frente
     u.uRayos.value = m.activo ? momento.rayos : 0
     u.uCieloDelAmanecer.value = m.activo && momento.barre ? momento.cielo : m.activo && !momento.sostieneLaNoche ? 1 : 0
-    if (mostrarLosHaces(haces.malla, u.uRayos.value > 0.001, state.camera.position)) leerLaTrama(moireRef.current)
+    if (mostrarLosHaces(haces, u.uRayos.value > 0.001, state.camera.position)) {
+      leerLaTrama(moireRef.current)
+      dibujarLosHaces(haces, state.gl, state.camera)
+    }
   })
 
-  return <primitive object={haces.malla} />
+  return <primitive object={haces.composicion} />
 }

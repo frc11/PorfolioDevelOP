@@ -23,6 +23,8 @@
  * B4 · nada aparece ni se va de golpe: la visibilidad del polvo es continua al pasar del aire a suelta y de vuelta (el
  *      peso de la mota suelta que la simulación guarda en el modo), la repetición de la caja queda siempre apagada en
  *      el aire, y el remolino ya no lanza las motas de abajo del piso.
+ * B5 · los rayos del amanecer a media resolución: su escena aparte en un búfer de la mitad del lienzo por lado (medio
+ *      punto flotante), sumada por un cuadrado con el mismo aditivo; precompilada y calentada con el resto.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -32,6 +34,7 @@ import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirma
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
 import { FISICA, PESO_EN_EL_MODO, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
+import { HACES } from '../amanecer/haces'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -197,7 +200,7 @@ const NOMBRES: readonly (readonly [string, string])[] = [
   ['ProbeStage.tsx', 'name="logo"'], ['ProbeStage.tsx', 'name="polvo"'], ['ProbeStage.tsx', 'name="bokeh"'], ['StudioFloor.tsx', 'name="piso"'],
   ['ContactOcclusion.tsx', 'name="contacto"'], ['MoireScreen.tsx', "'trama gruesa' : 'trama fina'"], ['MoireScreen.tsx', 'name="zócalo"'], ['entorno/Haz.tsx', 'name="haz"'],
   ['entorno/Pulso.tsx', 'name="pulso"'], ['estrellas/Estrellas.tsx', "puntos.name = 'estrellas'"], ['estrellas/Estrellas.tsx', "cupula.name = 'vía láctea'"], ['estrellas/Fugaz.tsx', "linea.name = 'fugaz'"],
-  ['formacion/armado.ts', "'formación · primeras filas' : 'formación · siluetas'"], ['cieloDeDia/CieloDeDia.tsx', "cupula.name = 'cielo de día'"], ['piso/PisoVivo.tsx', "bloques.name = 'piso vivo'"], ['amanecer/Amanecer.tsx', "malla.name = 'rayos del amanecer'"],
+  ['formacion/armado.ts', "'formación · primeras filas' : 'formación · siluetas'"], ['cieloDeDia/CieloDeDia.tsx', "cupula.name = 'cielo de día'"], ['piso/PisoVivo.tsx', "bloques.name = 'piso vivo'"], ['amanecer/haces.ts', "malla.name = 'rayos del amanecer'"], ['amanecer/haces.ts', "composicion.name = 'rayos del amanecer · composición'"],
 ]
 const conNombre = (lista: readonly (readonly [string, string])[]): boolean => lista.every(([a, n]) => leer(a).includes(n))
 afirmar(conNombre(NOMBRES), '  todo lo que se dibuja tiene nombre (el perfil de la GPU agrupa por nombre)', `${String(NOMBRES.length)} nombres en ${String(new Set(NOMBRES.map(([a]) => a)).size)} archivos`)
@@ -211,7 +214,7 @@ afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('ProbeS
 const calienta = (c: string): boolean => /gl\.setScissor\(0, 0, 1, 1\)/.test(c) && /o\.visible = true/.test(c) && /o\.frustumCulled = false/.test(c) && /t\.o\.visible = t\.visible/.test(c) && /t\.o\.frustumCulled = t\.descarte/.test(c) && /gl\.setScissorTest\(false\)/.test(c)
 afirmar(calienta(precompilar), '  y se calienta con un dibujo de un píxel (ANGLE arma el ejecutable en el primer dibujo), devolviendo visibilidad y descarte')
 controlPositivo('el detector VE un calentamiento que no devuelve la visibilidad', precompilar.replace('t.o.visible = t.visible', 't.o.visible = true'), calienta)
-const haces = leer('amanecer/Amanecer.tsx')
+const haces = leer('amanecer/haces.ts') // [CALIDAD 1] B5: los haces se mudaron a su archivo
 const topeUniforme = (c: string): boolean => /for \( int i = 0; i < uPasos; i\+\+ \)/.test(c) && /uniform int uPasos;/.test(c) && !/i < \$\{HACES\.pasos\}/.test(c)
 afirmar(topeUniforme(haces), 'el lazo de los rayos tiene tope uniforme (con uno fijo Direct3D lo desenrolla: 85 contra 51 ms de enlace medidos)')
 controlPositivo('el detector VE el lazo de tope fijo', haces.replace('i < uPasos;', 'i < ${HACES.pasos};'), topeUniforme)
@@ -380,5 +383,25 @@ afirmar(new RegExp(`&& bordeDeF < \\$\\{\\(1 - POLVO_PAREJO\\.fundido\\)\\.toFix
 const aspiraDeAntes = (alto: number): number => FISICA.remolino.aspira * Math.exp(-alto / 1.2)
 const aspiraAhora = (alto: number): number => FISICA.remolino.aspira * Math.exp(-Math.max(alto, 0) / 1.2)
 afirmar(/exp\( - max\( alto, 0\.0 \) \/ 1\.2 \)/.test(simB4) && !/exp\( - alto \/ 1\.2 \)/.test(simB4) && aspiraAhora(-20) === aspiraAhora(0), 'el remolino no aspira más fuerte debajo del piso (antes lanzaba esas motas a millones de unidades)', `a 20 u debajo del piso: ${aspiraDeAntes(-20).toExponential(1)} u/s antes, ${aspiraAhora(-20).toFixed(1)} ahora`)
+
+// ── B5 · los rayos del amanecer a media resolución ───────────────────────
+titulo('B5 · los rayos del amanecer: la misma luz, un cuarto de los píxeles')
+const hacesB5 = leer('amanecer/haces.ts')
+const amanecerB5 = leer('amanecer/Amanecer.tsx')
+/** ¿Los haces van a su búfer (una escena aparte, fondo negro) y un cuadrado los suma, como se sumaban? */
+const aMediaResolucion = (h: string): boolean =>
+  /gl\.setRenderTarget\(h\.bufer\)\s*gl\.render\(h\.escena, camara\)\s*gl\.setRenderTarget\(previo\)/.test(h) &&
+  /Math\.ceil\(h\.lienzo\.x \* HACES\.resolucion\)/.test(h) &&
+  /escena\.background = new THREE\.Color\(0, 0, 0\)/.test(h) &&
+  /type: THREE\.HalfFloatType/.test(h) &&
+  /composicion\.renderOrder = 3/.test(h) &&
+  /blending: THREE\.AdditiveBlending,\s*\}\)\s*const composicion/.test(h) &&
+  !/escena\.add\(composicion\)/.test(h)
+afirmar(aMediaResolucion(hacesB5) && HACES.resolucion === 0.5 && /<primitive object=\{haces\.composicion\} \/>/.test(amanecerB5) && /dibujarLosHaces\(haces, state\.gl, state\.camera\)/.test(amanecerB5), 'los haces se dibujan en su búfer a la mitad del lienzo por lado (medio flotante) y un cuadrado aditivo los suma a la escena', 'un cuarto de los píxeles; la cuenta por píxel no cambió')
+controlPositivo('el detector VE los haces dibujados en la escena, a resolución completa (antes de B5)', hacesB5.replace('gl.setRenderTarget(h.bufer)', 'gl.setRenderTarget(null)'), aMediaResolucion)
+afirmar(/for \( int i = 0; i < uPasos; i\+\+ \)/.test(hacesB5) && /pasos: 20, luz: 0\.0035, alto: 10/.test(hacesB5), '  la misma cuenta: 20 tramos por píxel, la misma luz y el mismo aire (lo que se ve no cambia)')
+const precompilarB5 = leer('gpu/Precompilar.tsx')
+afirmar(/ESCENAS_APARTE\.add\(aparte\)/.test(amanecerB5) && /ESCENAS_APARTE\.delete\(aparte\)/.test(amanecerB5) && /\.\.\.\[\.\.\.ESCENAS_APARTE\]\.map\(\(a\) => gl\.compileAsync\(a\.escena, camara\)\)/.test(precompilarB5) && /for \(const a of ESCENAS_APARTE\) \{\s*const previo = gl\.getRenderTarget\(\)\s*gl\.setRenderTarget\(a\.bufer\)\s*calentar\(gl, a\.escena, camara\)/.test(precompilarB5), 'la escena aparte de los haces se precompila y se calienta al arrancar, en su búfer (nada se compila tarde: medido, 26 programas al cargar y 26 al final)')
+afirmar(/abrir\(s\.name !== '' \? s\.name : /.test(leer('gpu/PerfilDeLaGpu.tsx')), '  y el perfil de la GPU la mide con su nombre')
 
 cerrar('s34-calidad1')

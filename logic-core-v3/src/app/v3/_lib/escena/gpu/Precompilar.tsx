@@ -30,6 +30,12 @@ import { hayBanco } from '../entorno'
  */
 const CUADROS_DESPUES_DEL_LOGO = 8
 
+/**
+ * [CALIDAD 1] B5 · lo que se dibuja en una escena aparte, en su propio búfer (los haces del amanecer, a media
+ * resolución): se compila y se calienta igual, en su búfer. Lo registra quien la dibuja, al montarse.
+ */
+export const ESCENAS_APARTE = new Set<{ readonly escena: THREE.Scene; readonly bufer: THREE.WebGLRenderTarget }>()
+
 type Dibujable = THREE.Object3D & { readonly isMesh?: boolean; readonly isPoints?: boolean; readonly isLine?: boolean; readonly isSprite?: boolean }
 
 type VentanaDelBanco = Window & { __precompiladoDelBanco?: { readonly compilarMs: number; readonly calentarMs: number } }
@@ -68,6 +74,12 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
       e.hecho = true
       const t0 = performance.now()
       calentar(gl, escena, camara)
+      for (const a of ESCENAS_APARTE) {
+        const previo = gl.getRenderTarget()
+        gl.setRenderTarget(a.bufer)
+        calentar(gl, a.escena, camara)
+        gl.setRenderTarget(previo)
+      }
       if (hayBanco()) {
         // Con banco, lo que tardó de verdad (esperando a la GPU): en frío es la compilación de Direct3D de lo invisible.
         gl.getContext().finish()
@@ -80,7 +92,7 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
     if (e.cuadros < CUADROS_DESPUES_DEL_LOGO) return
     e.compilado = true
     const t0 = performance.now()
-    void gl.compileAsync(escena, camara).then(() => {
+    void Promise.all([gl.compileAsync(escena, camara), ...[...ESCENAS_APARTE].map((a) => gl.compileAsync(a.escena, camara))]).then(() => {
       e.compilarMs = Math.round(performance.now() - t0)
       e.calentar = true
     })
