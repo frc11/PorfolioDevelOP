@@ -14,11 +14,9 @@ import * as THREE from 'three'
  * sale la distancia en el plano (la mínima a un tramo) y el signo (paridad de los cruces de una recta). El
  * espesor es el de la malla. La distancia en 3D es la del prisma: la del plano y la del espesor combinadas.
  *
- * **[CALIDAD 1] A3 · dos campos de la misma malla.** El fino (`CAMPO_DEL_LOGO`) para lo que toca la cara: el choque,
- * el polvo posado y el que desliza. Y uno del FLUJO (`CAMPO_DEL_FLUJO`), más grueso y de más alcance, para el aire
- * que rodea al logo: el fino sólo sabe distancias hasta 1,2 u y su caja termina a 0,5 u del logo, y el aire empieza a
- * doblar desde más lejos. Con la malla real el aire pasa por los huecos (la boca de la «c» y el ojo de la «p»); con
- * las formas de siempre (dos anillos enteros) la boca de la «c» era una pared.
+ * [CALIDAD 1] A3 horneaba un segundo campo, el del FLUJO (más grueso y de más alcance), para el aire que rodeaba al
+ * logo. **[ESCENA 9] T1:** el polvo en vuelo ya no se entera del logo y ese campo se borró; queda el fino, para el
+ * polvo que se posa sobre el logo con la página quieta.
  */
 
 /** Cómo se hornea un campo: el lado de una celda, cuánto sobra alrededor de la caja del logo y hasta dónde se busca (u). */
@@ -35,12 +33,6 @@ export const CAMPO_DEL_LOGO = {
   /** Hasta dónde se busca el tramo más cercano (u): más lejos da lo mismo (la física mira a menos de 0,3). */
   alcance: 1.2,
 } as const satisfies OpcionesDelCampo
-
-/**
- * [CALIDAD 1] A3 · el campo del flujo: celdas de 0,1 u (el hueco más chico, la boca de la «c», tiene varias) y hasta
- * 2,6 u del logo, donde el aire que lo rodea ya se desvía menos de un 7 % (el radio del flujo es 1,8 u).
- */
-export const CAMPO_DEL_FLUJO = { celda: 0.1, margen: 2.6, alcance: 2.6 } as const satisfies OpcionesDelCampo
 
 export interface Contorno {
   /** Los tramos del contorno en el plano del logo: x0, y0, x1, y1 por tramo. */
@@ -177,8 +169,8 @@ export function campoDelLogo(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL
 
 /**
  * [CALIDAD 1] B1 · EL CAMPO DE A POCO: la misma cuenta que `campoDelLogo`, partida en el tiempo. `paso(ms)` hornea filas
- * del plano y después capas del prisma hasta gastar `ms`, y dice si terminó. Al cargar, el campo fino y el del flujo
- * eran dos tareas de ~90 ms cada una (cuadros largos): así van en momentos libres de unos pocos ms.
+ * del plano y después capas del prisma hasta gastar `ms`, y dice si terminó. Al cargar, el campo era una tarea de
+ * ~90 ms (un cuadro largo): así va en momentos libres de unos pocos ms.
  */
 export function campoDeAPoco(c: Contorno, opciones: OpcionesDelCampo = CAMPO_DEL_LOGO): { readonly paso: (ms: number) => boolean; readonly campo: () => CampoDelLogo } {
   const { celda, margen, alcance } = opciones
@@ -238,24 +230,6 @@ export const CAMPO_EN_VIVO = {
   uHayCampo: { value: 0 },
 }
 
-/** [CALIDAD 1] A3 · lo mismo del campo del flujo. */
-export const FLUJO_EN_VIVO = {
-  uFlujoDelLogo: { value: null as THREE.Data3DTexture | null },
-  uFlujoMin: { value: new THREE.Vector3() },
-  uFlujoTam: { value: new THREE.Vector3(1, 1, 1) },
-  uHayFlujo: { value: 0 },
-}
-
-/** [CALIDAD 1] A3 · el campo del flujo, publicado como el fino (sus uniforms). */
-export function publicarElFlujo(f: CampoDelLogo): THREE.Data3DTexture {
-  const textura = texturaDelCampo(f)
-  FLUJO_EN_VIVO.uFlujoDelLogo.value = textura
-  FLUJO_EN_VIVO.uFlujoMin.value.set(...f.min)
-  FLUJO_EN_VIVO.uFlujoTam.value.set(...f.tam)
-  FLUJO_EN_VIVO.uHayFlujo.value = 1
-  return textura
-}
-
 /** La textura y los uniforms del campo fino. */
 export function publicarElCampo(f: CampoDelLogo): THREE.Data3DTexture {
   const textura = texturaDelCampo(f)
@@ -286,7 +260,7 @@ function texturaDelCampo(f: CampoDelLogo): THREE.Data3DTexture {
 /**
  * En GLSL: la distancia con signo a la malla real en un punto del espacio del logo, y su normal (diferencias
  * centradas de una celda). Sin el campo (antes de cargar el logo) no hay logo: devuelve lejos. `u` nombra sus
- * uniforms (`Campo`, `Flujo`); `distancia` y `normal`, sus funciones.
+ * uniforms (`Campo`); `distancia` y `normal`, sus funciones.
  */
 function glslDelCampo(u: string, distancia: string, normal: string, celda: number): string {
   return /* glsl */ `
@@ -312,6 +286,3 @@ vec3 ${normal}( vec3 q ) {
 }
 
 export const CAMPO_DEL_LOGO_GLSL = `precision highp sampler3D;\n${glslDelCampo('Campo', 'campoDelLogo', 'normalDelCampo', CAMPO_DEL_LOGO.celda)}`
-
-/** [CALIDAD 1] A3 · el campo del flujo en GLSL, `flujoDelLogo` y `normalDelFlujo` (va después de `CAMPO_DEL_LOGO_GLSL`). */
-export const FLUJO_DEL_LOGO_GLSL = glslDelCampo('Flujo', 'flujoDelLogo', 'normalDelFlujo', CAMPO_DEL_FLUJO.celda)

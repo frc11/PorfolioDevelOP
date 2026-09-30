@@ -12,14 +12,15 @@ import { PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { HAZ_ENCENDIDO } from '../entorno/encendido'
 import { MOTAS } from './motas'
-import { formaDelLogo, type FormaDelLogo } from './obstaculo'
+import { formaDelLogo, type FormaDelLogo } from './formaDelLogo'
 import { AIRE } from './parche'
 
 /**
  * [ESCENA 5] EL AIRE — escribe, después del rig y del entorno, los uniforms del polvo (`parche.ts`):
- * la forma y la pose del logo (5a), el freno del haz (5d) y [ESCENA 6] el corrimiento de 6a. La
+ * la forma y la pose del logo, el freno del haz (5d) y [ESCENA 6] el corrimiento de 6a. La
  * quietud y el despertar se mudaron a la física (`Fisica.tsx`). Sin ninguno no se monta. No mueve la
- * cámara ni el logo: los lee.
+ * cámara ni el logo: los lee. [ESCENA 9] T1: la forma ya no es un obstáculo del polvo; la leen el piso
+ * vivo y la fugaz, y la pose, el polvo posado sobre el logo.
  */
 
 interface PropsDelAire {
@@ -44,12 +45,10 @@ function derivar(aire: THREE.Vector3, dt: number): void {
 const RAD_POR_S = DUST_SPIN_DEG_S.map((g) => (g * Math.PI) / 180)
 
 export function Aire(props: PropsDelAire) {
-  const e = entornoDeLaEscena()
-  if (!e.obstaculo && !e.motas && !e.inercia) return null
-  return e.obstaculo ? <AireConElLogo {...props} /> : <AirePrendido {...props} />
+  return <AireConElLogo {...props} />
 }
 
-/** Con 5a hace falta el SVG para saber dónde está el centro del trazo (el de `ProbeLogo`). */
+/** Hace falta el SVG para saber dónde está el centro del trazo (el de `ProbeLogo`). */
 function AireConElLogo(props: PropsDelAire) {
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
   const forma = useMemo(() => {
@@ -75,7 +74,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     const m = memoria.current
     const dt = Math.min(delta, 0.1)
 
-    // 5a · la forma y la pose del logo. [ESCENA 7] T7: la holgura ya no se abre con la velocidad (la burbuja se fue).
+    // La forma y la pose del logo (para el piso vivo, la fugaz y el polvo posado).
     if (forma !== undefined) {
       AIRE.uLogoC.value.set(...forma.c)
       AIRE.uLogoP.value.set(...forma.p)
@@ -100,7 +99,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
       m.aire.lerp(m.empuje, 1 - Math.exp(-dt / tau))
       derivar(m.aire, dt)
     }
-    // [ESCENA 7] T7: el aire que corre, para la física: rodea al logo y lleva a las motas.
+    // [ESCENA 7] T7: el aire que corre, para la física: lleva a las motas levantadas ([ESCENA 9] T1: ya no rodea al logo).
     AIRE.uVientoDelAire.value.copy(m.aire)
     // [ESCENA 7] T10: el lado nítido de la mota se cuenta en píxeles CSS.
     AIRE.uPixel.value = state.viewport.dpr

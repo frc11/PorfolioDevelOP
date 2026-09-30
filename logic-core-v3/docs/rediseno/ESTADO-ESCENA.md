@@ -1,10 +1,11 @@
-# Estado de la escena — después de CALIDAD 1
+# Estado de la escena — después de CALIDAD 1 y ESCENA 9
 
 > Qué está encendido, qué banderas hay y qué hace cada una, los presupuestos, las **reglas de rendimiento que todo
 > efecto nuevo tiene que cumplir (§4)** y las fallas conocidas. La escena vive en `src/app/v3/_lib/escena/`; las
 > banderas, en `entorno.ts`. Las entregas medidas de cada sprint están en `~/.cache/b4-medicion/escena<N>/` y
 > `~/.cache/b4-medicion/calidad1/` (con un `mirar.txt` por carpeta). CALIDAD 1: rama `rediseno/home`, un commit por
-> punto; el informe es `docs/rediseno/CALIDAD-1.md`.
+> punto; el informe es `docs/rediseno/CALIDAD-1.md`. ESCENA 9 (premium): un commit por ticket, las entregas en
+> `~/.cache/b4-medicion/escena9/`.
 
 ---
 
@@ -17,14 +18,14 @@
 | E6 · estela del polvo · E7 · el cursor | Como en ESCENA 6 | `entorno/polvoVivo.ts` |
 | Sombra con física | La mancha de contacto la pinta el piso vivo | `ContactOcclusion.tsx`, `entorno/sombra.ts` |
 | Moiré vivo (M1a + M2 + M3 + M4) | Como en ESCENA 6 | `moire/` |
-| Polvo parejo, 5a, 5c, 5d | Como en ESCENA 6; 5a es el obstáculo (ver T5 de ESCENA 8) | `polvo/` |
+| Polvo parejo, 5c, 5d | Como en ESCENA 6. 5a (el obstáculo) se borró en ESCENA 9 (T1) | `polvo/` |
 | La formación («la fábrica gigante») | 6.839 copias negras en 59 filas, piso plano, niebla atrás (ESCENA 7, T2) | `formacion/` |
 | El cielo de noche | 90.000 estrellas y la vía láctea, detrás de la trama y de la formación (ESCENA 7, T3) | `estrellas/` |
 | La estrella fugaz | **[ESCENA 8] Encendida.** De noche, fuera del túnel, cada 5–10 s: una cinta con ancho en píxeles, del lado del cielo que el logo deja libre, detrás de la trama | `estrellas/Fugaz.tsx` |
 | El polvo que se posa | Física por mota en la GPU (ESCENA 7, T4) | `polvo/Fisica.tsx`, `polvo/simulacion.ts` |
 | El piso vivo | Un mar de bloques, con el techo del ojo (ESCENA 7, T5) | `piso/` |
 | La inercia del aire (6a) | Tal cual (ESCENA 7, T6) | `polvo/Aire.tsx` |
-| El obstáculo | **[CALIDAD 1] A3:** sólo el flujo. El aire rodea al logo como un flujo potencial contra la **malla real** (un campo del flujo: celdas de 0,1 u, hasta 2,6 u del logo) y pasa por la boca de la «c» y el ojo de la «p»; la mota que igual llega a la cara se corre por ella, sin rebote. **El pegado (modo 6) se borró.** El choque, el polvo posado sobre el logo y el que desliza, contra el campo fino (ESCENA 8, T5). El empuje tras el cursor, también contra la malla real. Los dos campos se hornean una vez al cargar, en dos momentos libres (89 y 93 ms medidos) | `polvo/campoDelLogo.ts`, `polvo/simulacion.ts`, `polvo/parche.ts` |
+| El obstáculo | **[ESCENA 9] T1: borrado.** El polvo en vuelo atraviesa al logo (el logo lo tapa), como antes de 5a: sin rodeo (ni su campo del flujo), sin contacto con la cara, sin deslizar, sin la holgura del bokeh ni la de tras el cursor, y sin bandera. Queda lo aprobado: con la página quieta, la mota que CAE y entra por una cara de arriba se posa ahí (contra el campo de la malla real, horneado una vez al cargar); con el despertar o el movimiento se levanta. La forma del logo en tres piezas (la leen el piso vivo y la fugaz) quedó en `formaDelLogo.ts` | `polvo/simulacion.ts`, `polvo/campoDelLogo.ts`, `polvo/formaDelLogo.ts` |
 | La niebla de afuera | 6c + 6d (ESCENA 7, T8) | `niebla/rasante.ts`, `formacion/Formacion.tsx` |
 | El haz se enciende | **[ESCENA 8] T1:** cuatro intentos que fallan (de siete: uno sí y uno no) en 1,94 s, el golpe y la luz firme | `entorno/encendido.ts` |
 | El polvo nítido | Motas de 1,4 a 3,2 px con borde de un píxel (ESCENA 7, T10) | `polvo/nitidez.ts` |
@@ -64,7 +65,7 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 | Token | Efecto |
 |---|---|
 | `moire=hoy` · `polvo=antes` | el moiré y el polvo de la base |
-| `obstaculo=no` · `sombra=blanda` · `motas=no` · `sombra=quieta` · `haz=medio` | como en ESCENA 6 |
+| `sombra=blanda` · `motas=no` · `sombra=quieta` · `haz=medio` | como en ESCENA 6 ([ESCENA 9] T1: `obstaculo=no` ya no existe) |
 | `formacion=no` · `cielo=no` · `posarse=no` · `piso=no` · `inercia=no` · `niebla=no` · `encendido=no` · `nitidez=no` · `rebote=no` | sin cada pieza de ESCENA 7 |
 | `fugaz=no` | [ESCENA 8] sin la estrella fugaz |
 | `limite=no` | [ESCENA 8] T2 · la trama como en ESCENA 7 (flotando) |
@@ -83,8 +84,8 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 ### Ganchos del banco (sólo existen con `__entornoDeLaEscena`)
 
 `__escenaViva`, `__relojDelBanco`, `__polvoDelBanco`, `__formacionDelBanco`, `__estrellasDelBanco`,
-`__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `flujo()`,
-`estado()` y `aire()` para el instrumento de los saltos), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
+`__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `estado()` y
+`aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`). [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
@@ -164,6 +165,7 @@ informe.
 
 ## 5 · Los invariantes
 
+`npm run test:s35-escena9` ([ESCENA 9] una sección por ticket, con sus controles positivos),
 `npm run test:s34-calidad1` ([CALIDAD 1] una sección por punto, A1 a A3 y B0 a B12, con sus controles positivos),
 `npm run test:s33-escena8` (una sección por ticket, T1 a T5, con sus controles positivos),
 `test:s32-escena7` (lo de ESCENA 7 que sigue; ajustado a lo que ESCENA 8 cambió), `test:s31-escena6`,
@@ -183,6 +185,9 @@ velocidad constante por partes: `gpu` y `pasadas` sin vsync, `ritmo` con vsync, 
 saltos del polvo con el estado real de la física), `fluidez.ts` (el recorrido grabado con el instante de cada cuadro y
 sus cuadros por segundo encima, y los lado a lado), `momentos.ts` y `hojas.ts` (los cinco momentos y sus hojas), y uno
 por punto (`b3-tabla` a `b11-tirones`).
+
+[ESCENA 9] Los bancos del sprint (`scripts-escena9/`, los mismos instrumentos): `t1-obstaculo` (el scroll fuerte y el
+despertar con el logo al doble, y cuántas motas hay contra la cara de la malla real cada 250 ms).
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -221,4 +226,5 @@ por punto (`b3-tabla` a `b11-tirones`).
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
 - ~~**El pegado (T5)**~~ → [CALIDAD 1] A3: borrado (el modo 6); queda sólo el flujo, que pasa por los huecos del logo.
+  → [ESCENA 9] T1: el flujo también, y todo el obstáculo; queda el polvo que se posa sobre el logo con la página quieta.
 - La licencia de Book of Shapes (`LICENCIA-BOOKOFSHAPES.md`) cubre los SVG descargados, no el código.

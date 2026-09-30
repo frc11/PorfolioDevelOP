@@ -40,8 +40,6 @@ import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
 import { PISO_VIVO, grillaDelPiso, marejadasEn } from '../piso/bloques'
 import { FLOOR_RADIUS } from '../probeScene'
 import { INERCIA } from '../polvo/Aire'
-import { FISICA, flujoAlrededor } from '../polvo/simulacion'
-import { HOLGURA } from '../polvo/obstaculo'
 import { ABRE_CON } from '../formacion/Formacion'
 import { CORRIDO_POR_PIXEL, RASANTE } from '../niebla/rasante'
 import { ENCENDIDO, FALLA_S, FIRME, GUION, GUION_S, avanzarElEncendido, encendidoInicial, guionEn, type EstadoDelEncendido } from '../entorno/encendido'
@@ -243,27 +241,16 @@ afirmarIgual({ ...INERCIA }, { arrastre: 0.25, tomaS: 0.4, frenaS: 2.2 }, '  con
 afirmar(/e\.polvoParejo && e\.inercia \? '#define AIRE_INERCIA'/.test(leer('polvo/parche.ts')) && /if \(e\.inercia\) \{/.test(leer('polvo/Aire.tsx')), '  y el mismo código: el volumen corrido por el aire antes de repetirse')
 
 // ── T7 · el obstáculo natural ─────────────────────────────────────────────
-titulo('T7 · el obstáculo, como un obstáculo de verdad')
-afirmar(ENTORNO.obstaculo, 'encendido (5a sigue en el producto)')
+// [ESCENA 9] T1: el obstáculo entero (el rodeo del flujo, el contacto y la holgura) se borró, código y bandera: lo afirma
+// s35. Queda lo que T7 había sacado (los remolinos de 6b y la burbuja), que no tiene que volver.
+titulo('T7 · el obstáculo (borrado en ESCENA 9): lo que T7 sacó no vuelve')
+afirmar(!('obstaculo' in ENTORNO), 'la bandera del obstáculo no existe')
 const REMOLINOS = /remolinos|vientoDeLaEstela|uRemolinos|soltarRemolinos|FISICA\.estela/
 afirmar(!codigo(ESCENA).some((c) => REMOLINOS.test(c)) && !('remolinos' in entornoPedido('producto,remolinos').pruebas), '6b · los remolinos se borraron: ni el código ni la bandera')
 controlPositivo('el detector VE un remolino', 'uniform vec4 uRemolinos[ 6 ];', (c: string) => !REMOLINOS.test(c))
 const BURBUJA = /uAbrir|alAbrir|ABRE_TAU_S/
-afirmar(!codigo(ESCENA).some((c) => BURBUJA.test(c)) && Object.keys(HOLGURA).join(',') === 'polvo,bokeh', 'sin burbuja: la holgura ya no se abre con la velocidad ni se cierra a la fuerza')
+afirmar(!codigo(ESCENA).some((c) => BURBUJA.test(c)), 'sin burbuja: nada se abre con la velocidad ni se cierra a la fuerza')
 controlPositivo('el detector VE la burbuja', 'HOLGURA_DEL_CAMPO + uAbrir * 3.20', (c: string) => !BURBUJA.test(c))
-const sim7 = leer('polvo/simulacion.ts')
-afirmar(/return \( m \* vec4\( t, 1\.0 \) \)\.xyz;/.test(sim7) && /#if defined\( AIRE_OBSTACULO \) && ! defined\( AIRE_FISICA \)/.test(leer('polvo/parche.ts')), '  con física, la mota no se corre del logo en reposo: lo hace el aire que lo rodea (sin física, el bokeh, la holgura fija)')
-// El flujo potencial: en la cara, el aire no entra; de costado, pasa más rápido; lejos, no hay nada.
-const n: [number, number, number] = [0, 0, 1]
-const aire: [number, number, number] = [0.6, 0, -2]
-const enLaCara = flujoAlrededor(aire, n, 0)
-const total = [aire[0] + enLaCara[0], aire[1] + enLaCara[1], aire[2] + enLaCara[2]]
-afirmar(Math.abs(total[2]) < 1e-12 && Math.abs(total[0]) > Math.abs(aire[0]), 'el aire rodea al logo: en su cara no entra, y lo que pasa de costado se acelera', `normal ${total[2].toFixed(3)}, costado ${aire[0]} → ${total[0].toFixed(2)} u/s`)
-const lejos = flujoAlrededor(aire, n, 6 * FISICA.obstaculo.radio)
-afirmar(Math.hypot(...lejos) < 0.02 * Math.hypot(...aire), '  y lejos del logo el aire no se entera', `a ${String(6 * FISICA.obstaculo.radio)} u: ${(Math.hypot(...lejos) / Math.hypot(...aire) * 100).toFixed(2)} %`)
-afirmar(/vec3 viento = vientoDelDespertar\( p \) \+ alrededorDelLogo\( p, uVientoDelAire \);/.test(sim7) && /\/ \$\{FISICA\.aire\.arrastre\.toFixed\(2\)\}/.test(sim7), '  la mota del aire sigue ese flujo con su arrastre (su inercia): lenta, dobla; rápida, choca')
-afirmar(/v \+= n \* max\( 0\.0, entra \);/.test(sim7) && !/modo > 5\.5 && modo < 6\.5/.test(sim7), 'la que choca se corre por la cara, sin rebote ([ESCENA 7] con fuerza quedaba pegada, modo 6; [CALIDAD 1] A3 lo borró: s34)')
-
 // ── T8 · la niebla de afuera ──────────────────────────────────────────────
 titulo('T8 · la niebla de afuera: 6c y 6d, un solo efecto')
 afirmar(ENTORNO.niebla && !BASE_LIMPIA.niebla && !entornoPedido('producto,niebla=no').niebla, 'encendida en el producto; el banco la apaga con `niebla=no`')

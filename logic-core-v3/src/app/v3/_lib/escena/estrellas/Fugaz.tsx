@@ -231,7 +231,7 @@ function FugazPrendida({ rig }: PropsDeLaFugaz) {
 }
 
 /**
- * La caja del logo en el cuadro (de −1 a 1): las piezas que el polvo ya conoce (`uLogoC`, `uLogoP`,
+ * La caja del logo en el cuadro (de −1 a 1): las piezas de la forma del logo (`uLogoC`, `uLogoP`,
  * `uLogoPalo`, en el espacio del logo) con su trazo, llevadas al mundo con `uLogo` y proyectadas.
  */
 function logoEnElCuadro(camara: THREE.Camera): { x0: number; x1: number; y0: number; y1: number } | null {

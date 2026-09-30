@@ -27,7 +27,6 @@ import { bandEnvelope } from '../moireTextures'
 import { AMANECER, avanceDelCuadro, avanceDelScroll, diaParaElTexto, perseguir, type CuadroDelAmanecer } from '../amanecer/linea'
 import * as linea from '../amanecer/linea'
 import { CAMPO_DEL_LOGO, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
-import { FISICA } from '../polvo/simulacion'
 import { CELESTE, CIELO_DE_DIA, diaDelCielo } from '../cieloDeDia/nubes'
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { INK_COLOR } from '../probeScene'
@@ -190,17 +189,11 @@ const afueraEnLaBoca = (d: (q: readonly [number, number, number]) => number): bo
 afirmar(afueraEnLaBoca(enElCampo), 'la boca de la «c» está afuera: ninguna mota se proyecta ni se pega a una pared que no existe', `en la boca, el campo da ${enElCampo(enLaBoca).toFixed(2)} u`)
 controlPositivo('el detector VE el anillo entero de ESCENA 7 (cerraba la boca)', anilloDe7, afueraEnLaBoca)
 extruida.dispose()
-// La física lo usa en el choque, lo posado y lo que desliza. [CALIDAD 1] A3: el pegado se borró y el rodeo del flujo va
-// contra la malla real (su propio campo, más grueso y de más alcance: s34).
+// La física lo usa para el polvo que se posa sobre el logo. [CALIDAD 1] A3 borró el pegado; [ESCENA 9] T1, el choque, el
+// contacto en el aire, el deslizar y el rodeo del flujo (s35): queda sólo lo que CAE sobre el logo con la página quieta.
 const sim = leer('polvo/simulacion.ts')
-const chocar = /vec3 chocar\( inout vec3 p, inout vec3 v \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
-afirmar(/float d = campoDelLogo\( q \);/.test(chocar) && /normalDelCampo\( q \)/.test(chocar) && !/caraDelLogo/.test(chocar), 'el choque (lo que cae y se posa sobre el logo, lo que desliza, lo levantado) es contra el campo de la malla real')
-afirmar(/float cara = campoDelLogo\( q \);/.test(sim) && /float lejos = campoDelLogo\(/.test(sim) && (sim.match(/normalDelCampo\(/g) ?? []).length >= 3, '  el contacto en el aire y lo que desliza, también')
-const rodeo = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
-afirmar(/flujoDelLogo\( q \)/.test(rodeo) && !/caraDelLogo/.test(rodeo), '  [CALIDAD 1] A3: el rodeo del flujo, contra la malla real (el campo del flujo)')
+const posarseEnElLogo = /bool posarseEnElLogo\( inout vec3 p, vec3 antes \) \{[\s\S]*?\n\}/.exec(sim)?.[0] ?? ''
+afirmar(/float d = campoDelLogo\( q \);/.test(posarseEnElLogo) && /normalDelCampo\( q \)/.test(posarseEnElLogo) && !/caraDelLogo/.test(posarseEnElLogo), 'lo que cae y se posa sobre el logo es contra el campo de la malla real')
 afirmar(/campoDeAPoco\(contorno\)/.test(leer('polvo/Fisica.tsx')) && /requestIdleCallback/.test(leer('polvo/Fisica.tsx')) && /THREE\.Data3DTexture/.test(leer('polvo/campoDelLogo.ts')), '  una textura 3D que se arma una vez al cargar, fuera del cuadro ([CALIDAD 1] B1: de a poco), y se lee en el espacio del logo (sigue su pose)')
-// El contacto: con la velocidad relativa a la superficie del logo, a un pelo de ella. [CALIDAD 1] A3: sin pegado.
-afirmar(/float entra = - dot\( uVientoDelAire \+ v - velocidadDelLogo\( f \+ d \), n \);/.test(sim) && /v -= n \* min\( 0\.0, dot\( v - velocidadDelLogo\( p \), n \) \);/.test(sim), 'el contacto va con la velocidad relativa a la superficie del logo (que también se mueve)')
-afirmar(FISICA.contacto.queda < 0.05, '  a un pelo de la superficie real (ESCENA 7 la dejaba a 0,11 de la forma aproximada)', `${String(FISICA.contacto.queda)} u`)
 
 cerrar('s33-escena8')

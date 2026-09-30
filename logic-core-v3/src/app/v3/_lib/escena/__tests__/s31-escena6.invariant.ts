@@ -31,17 +31,18 @@ const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
 
 // ── §1 · las banderas ─────────────────────────────────────────────────────
-titulo('§1 · 5a, 5c y 5d en el producto; lo nuevo apagado')
-afirmar(ENTORNO.obstaculo && ENTORNO.sombraHaz && ENTORNO.motas, 'el producto trae el obstáculo (5a), la sombra según el haz (5c) y las motas (5d)')
+titulo('§1 · 5c y 5d en el producto; lo nuevo apagado')
+// [ESCENA 9] T1: el obstáculo (5a) se borró, código y bandera (s35).
+afirmar(ENTORNO.sombraHaz && ENTORNO.motas && !('obstaculo' in ENTORNO), 'el producto trae la sombra según el haz (5c) y las motas (5d); el obstáculo (5a) ya no existe')
 afirmar(ENTORNO.moire && ENTORNO.polvoParejo, '  y sigue con el moiré vivo y el polvo parejo')
-afirmar(!BASE_LIMPIA.obstaculo && !BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
+afirmar(!BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
 // [ESCENA 8] El amanecer (6g) dejó de ser una prueba: el pedido lo nombra como a cualquier bandera del producto.
 const pedido = entornoPedido('E1,amanecer')
 afirmar(pedido.amanecer && !entornoPedido('E1').amanecer && !entornoPedido('E1,amanecer').moire, 'el pedido del banco prende lo nombrado (y sólo eso)')
-const sin = entornoPedido('producto,obstaculo=no,sombra=blanda,motas=no')
-afirmar(!sin.obstaculo && !sin.sombraHaz && !sin.motas && sin.E1 && sin.moire, 'el banco puede apagar 5a, 5c y 5d para comparar, y el resto sigue')
+const sin = entornoPedido('producto,sombra=blanda,motas=no')
+afirmar(!sin.sombraHaz && !sin.motas && sin.E1 && sin.moire, 'el banco puede apagar 5c y 5d para comparar, y el resto sigue')
 controlPositivo('el detector VE un producto sin 5c', 'producto,sombra=blanda', (p: string) => entornoPedido(p).sombraHaz)
 
 // ── §2 · los fondos del texto ─────────────────────────────────────────────
@@ -74,7 +75,7 @@ titulo('§5 · el polvo que se posa, con física')
 afirmar(POSARSE.velocidad === 16, 'el despertar sale a 16 u/s (los tiempos de la quietud, a la mitad, en s32)')
 afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con movimiento reducido no se posa nunca')
 const sim = leer('polvo/simulacion.ts')
-afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'modo > 3.5 && modo < 4.5', 'salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) )'].every((m) => sim.includes(m)), 'los seis modos están en la simulación (aire, cayendo, piso, logo, deslizando y, lo que queda, levantada)') // [CALIDAD 1] B4: el modo lleva el peso de la mota suelta
+afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) )'].every((m) => sim.includes(m)), 'los modos están en la simulación (aire, cayendo, piso, logo y, lo que queda, levantada; [ESCENA 9] T1 borró el deslizar)') // [CALIDAD 1] B4: el modo lleva el peso de la mota suelta
 afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lleva arrastre y turbulencia (no baja en línea recta)')
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')

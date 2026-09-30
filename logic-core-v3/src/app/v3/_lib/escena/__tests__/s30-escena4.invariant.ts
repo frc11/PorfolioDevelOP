@@ -18,7 +18,7 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { M1A, M2, M3, M4, PERIODO_DE_LA_BASE_S, corrimientoDelPulso, desajusteEn, velocidadDeLaGruesa } from '../moire/variantes'
-import { distanciaAlLogo, formaDelLogo } from '../polvo/obstaculo'
+import { formaDelLogo } from '../polvo/formaDelLogo'
 import { NUNCA, POSARSE, avanzarElPolvo, polvoInicial } from '../polvo/posarse'
 import { POLVO_PAREJO, envolver } from '../polvo/volumen'
 import { PROBE_SVG_SCALE } from '../probeScene'
@@ -72,9 +72,10 @@ e = avanzarElPolvo(e, 1.5, null, false)
 afirmar(e.quieto === 1, '  y sin movimiento vuelve a quedar quieto desde el último')
 afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, '  con movimiento reducido no se posa nunca')
 const forma = formaDelLogo({ x: 515, y: 546 }, PROBE_SVG_SCALE)
-const centroDelTrazo: [number, number, number] = [forma.c[0] - forma.c[2], forma.c[1], 0]
-afirmar(distanciaAlLogo(centroDelTrazo, forma) < 0, '5a · un punto en el trazo de la «c» está adentro de la forma del logo')
-controlPositivo('y uno lejos no', [0, 20, 0] as [number, number, number], (q) => distanciaAlLogo(q, forma) < 0)
+// [ESCENA 9] T1: el obstáculo (5a) se borró; la forma queda (la leen el piso vivo y la fugaz): s35.
+const cuencos = (f: typeof forma): boolean => [f.c, f.p].every((t) => t[2] > 0 && t[3] > 0 && t[3] < t[2]) && f.c[0] < f.p[0]
+afirmar(cuencos(forma), '5a · la forma del logo: dos cuencos con su tubo más fino que su radio, la «c» a la izquierda de la «p»')
+controlPositivo('y una forma sin escala no', formaDelLogo({ x: 515, y: 546 }, 0), cuencos)
 
 // ── §6 · la sombra según el haz ───────────────────────────────────────────
 titulo('§6 · la sombra según el haz (5c)')

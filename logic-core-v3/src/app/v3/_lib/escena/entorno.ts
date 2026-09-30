@@ -17,8 +17,8 @@
  * `moire/`) y el polvo con la misma densidad en todo el interior (`polvoParejo`, en `polvo/`).
  *
  * **[ESCENA 6] Pasan al producto** tres pruebas de ESCENA 5: el logo como obstáculo del polvo y del
- * bokeh (5a, `obstaculo`), la mancha de contacto según el haz (5c, `sombraHaz`) y las motas del haz
- * de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
+ * bokeh (5a; [ESCENA 9] T1: borrado, código y bandera), la mancha de contacto según el haz (5c, `sombraHaz`)
+ * y las motas del haz de noche (5d, `motas`). Y el pulso ya no se apaga sobre las cajas de texto: la máscara se borró.
  *
  * **[ESCENA 7] Pasan al producto**, mejoradas: la formación («la fábrica gigante», `formacion`; sin
  * fallas: se borraron), el cielo de noche (estrellas y vía láctea, `cielo`), el polvo que se posa (con
@@ -50,7 +50,7 @@
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
  *     window.__entornoDeLaEscena = 'producto,cielo-dia=no'          → el producto sin el cielo de día
  *     window.__entornoDeLaEscena = 'producto,moire=hoy,polvo=antes' → el producto con el moiré y el polvo de antes
- *     window.__entornoDeLaEscena = 'producto,obstaculo=no,sombra=blanda,motas=no' → sin 5a, 5c ni 5d
+ *     window.__entornoDeLaEscena = 'producto,sombra=blanda,motas=no'  → sin 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
@@ -79,8 +79,6 @@ export interface Entorno {
   readonly moire: boolean
   /** [ESCENA 5] El polvo con la misma densidad en todo el interior (`polvo/`). Sin él, el de la base. */
   readonly polvoParejo: boolean
-  /** [ESCENA 6] 5a · el logo no se atraviesa: el polvo y el bokeh lo rodean (`polvo/obstaculo.ts`). */
-  readonly obstaculo: boolean
   /** [ESCENA 6] 5c · la mancha de contacto según el haz (`sombra/sombraDelHaz.ts`). */
   readonly sombraHaz: boolean
   /** [ESCENA 6] 5d · las motas del haz, de noche (`polvo/motas.ts`). */
@@ -128,7 +126,6 @@ export const ENTORNO: Entorno = {
   sombraViva: true,
   moire: true,
   polvoParejo: true,
-  obstaculo: true,
   sombraHaz: true,
   motas: true,
   formacion: true,
@@ -157,7 +154,6 @@ export const BASE_LIMPIA: Entorno = {
   sombraViva: false,
   moire: false,
   polvoParejo: false,
-  obstaculo: false,
   sombraHaz: false,
   motas: false,
   formacion: false,
@@ -201,7 +197,6 @@ export function entornoPedido(pedido: string): Entorno {
     sombraViva: !partes.has('sombra=quieta'),
     moire: valor('moire') !== 'hoy' && (producto || partes.has('moire')),
     polvoParejo: valor('polvo') !== 'antes' && (producto || partes.has('parejo')),
-    obstaculo: producto ? valor('obstaculo') !== 'no' : partes.has('obstaculo'),
     sombraHaz: producto ? !partes.has('sombra=blanda') : partes.has('sombra=haz'),
     motas: producto ? valor('motas') !== 'no' : partes.has('motas'),
     formacion: producto ? valor('formacion') !== 'no' : partes.has('formacion'),

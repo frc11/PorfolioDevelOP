@@ -10,6 +10,7 @@
  * A3 · el obstáculo sin pegado: el modo 6 borrado; el flujo que rodea al logo contra la malla real (un campo del flujo,
  *      más grueso y de más alcance): el aire pasa por la boca de la «c» y por el ojo de la «p»; la que choca se corre
  *      por la cara sin rebote; el empuje tras el cursor también contra la malla real. Lo posado sobre el logo, igual.
+ *      [ESCENA 9] T1 borró el obstáculo entero (s35): acá queda que el pegado no vuelva.
  * B0 · el instrumento: el perfil de la GPU sólo existe con banco, y lo que se dibuja tiene nombre (el perfil agrupa
  *      por nombre: sin él, una pasada nueva aparece como «(sin nombre)» y nadie sabe qué cuesta).
  * B1 · precompilar: la escena entera compilada al arrancar (también lo invisible) y calentada con un dibujo de un
@@ -45,8 +46,8 @@ import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
-import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
-import { FISICA, PESO_EN_EL_MODO, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
+import { campoDeAPoco, campoDelLogo, contornoDeLaMalla } from '../polvo/campoDelLogo'
+import { FISICA, PESO_EN_EL_MODO, pasoDelAire } from '../polvo/simulacion'
 import { HACES } from '../amanecer/haces'
 import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from '../polvo/nitidez'
 import { PARTICLE_SIZE } from '../probeParticles'
@@ -147,21 +148,19 @@ afirmar(registrada(estado), 'la excepción a la regla monocroma está registrada
 controlPositivo('el detector VE un estado sin la excepción', estado.replace(/excepci[oó]n aprobada/gi, 'prueba'), registrada)
 
 // ── A3 · el obstáculo sin pegado ──────────────────────────────────────────
-titulo('A3 · el obstáculo: sin pegado, el flujo por los huecos')
+// [ESCENA 9] T1: el obstáculo entero se borró (el flujo que A3 pasó a la malla real, el contacto, la holgura tras el
+// cursor y el deslizar): lo afirma s35. Queda lo que A3 borró (el pegado), que no tiene que volver, y la «c» de prueba
+// para el horno de B1.
+titulo('A3 · el obstáculo: sin pegado (el flujo, borrado en ESCENA 9)')
 const simulacion = leer('polvo/simulacion.ts')
 const fisica = leer('polvo/Fisica.tsx')
 const parche = leer('polvo/parche.ts')
 /** Restos del pegado (el modo 6): escribirlo, leerlo, soltarlo o desprenderlo. */
 const PEGADO = /, 6\.0 \)|modo > 5\.5 && modo < 6\.5|modoDeLaFisica > 5\.5|LOGO_QUIETO|despegue\(|obstaculo\.pegar|contacto\.hasta/
-afirmar(!PEGADO.test(simulacion) && !PEGADO.test(parche) && Object.keys(FISICA.obstaculo).join() === 'radio' && Object.keys(FISICA.contacto).join() === 'detecta,queda', 'el pegado (modo 6) se borró: ni se escribe ni se lee, y sus constantes tampoco están')
+afirmar(!PEGADO.test(simulacion) && !PEGADO.test(parche) && !('obstaculo' in FISICA) && !('contacto' in FISICA), 'el pegado (modo 6) se borró: ni se escribe ni se lee, y sus constantes tampoco están')
 controlPositivo('el detector VE el pegado de ESCENA 8', 'salida0 = vec4( ( uLogoInverso * vec4( enLaCara, 1.0 ) ).xyz, 6.0 );', (c: string) => !PEGADO.test(c))
 afirmar(/const cuenta = \[0, 0, 0, 0, 0, 0\]/.test(fisica) && !/movimientoDelLogo/.test(fisica), '  el banco cuenta seis modos, y ya no se mide cuánto se mueve el logo (sólo servía para soltar las pegadas)')
-// Sin rebote: al tocar la cara sólo se quita lo que entra (la velocidad relativa a la superficie); nada sale para afuera.
-afirmar(/v \+= n \* max\( 0\.0, entra \);/.test(simulacion) && /v -= n \* min\( 0\.0, dot\( v - velocidadDelLogo\( p \), n \) \);/.test(simulacion), 'la que llega a la cara se corre por ella, sin rebote: sólo se le quita lo que entra')
-// Lo posado sobre el logo (aprobado) sigue, con el campo fino.
-afirmar(/if \( n\.y > \$\{FISICA\.logo\.cara\.toFixed\(2\)\} \)/.test(simulacion) && /float d = campoDelLogo\( q \);/.test(simulacion), '  el polvo que se posa SOBRE el logo sigue igual (contra el campo fino de la malla real)')
-
-// El flujo, contra la malla real: una «c» de prueba como la de s33 (extruida por three, con bisel; la boca a la derecha).
+// La «c» de prueba de s33 (extruida por three, con bisel; la boca a la derecha), para el horno de B1.
 const [RC, rc, hc] = [2, 1.26, 0.28]
 const bocaC = Math.PI / 6
 const formaC = new THREE.Shape()
@@ -171,46 +170,7 @@ const mallaC = new THREE.ExtrudeGeometry(formaC, { depth: 2 * hc, bevelEnabled: 
 mallaC.translate(0, 0, -hc)
 const contornoC = contornoDeLaMalla([{ posiciones: mallaC.getAttribute('position').array, indices: mallaC.index?.array ?? null, matriz: new THREE.Matrix4() }])
 mallaC.dispose()
-const flujo = campoDelLogo(contornoC, CAMPO_DEL_FLUJO)
 const fino = campoDelLogo(contornoC)
-type Distancia = (q: readonly [number, number, number]) => number
-const delFlujo: Distancia = (q) => distanciaDelCampo(flujo, q)
-const delFino: Distancia = (q) => distanciaDelCampo(fino, q)
-/** El anillo entero de ESCENA 7 (las formas de siempre): la boca de la «c», una pared. */
-const anilloEntero: Distancia = (q) => {
-  const d2 = Math.abs(Math.hypot(q[0], q[1]) - (RC + rc) / 2) - (RC - rc) / 2
-  const dz = Math.abs(q[2]) - hc
-  return Math.hypot(Math.max(d2, 0), Math.max(dz, 0)) + Math.min(Math.max(d2, dz), 0)
-}
-/** El aire que resulta en un punto (el de afuera más lo que el logo le hace), con la normal por diferencias centradas. */
-const aireEn = (d: Distancia, q: readonly [number, number, number], aire: [number, number, number]): number[] => {
-  const e = CAMPO_DEL_FLUJO.celda
-  const g = [0, 1, 2].map((k) => d(q.map((v, i) => (i === k ? v + e : v)) as [number, number, number]) - d(q.map((v, i) => (i === k ? v - e : v)) as [number, number, number]))
-  const l = Math.hypot(g[0], g[1], g[2]) || 1
-  const pert = flujoAlrededor(aire, [g[0] / l, g[1] / l, g[2] / l], d(q))
-  return aire.map((a, k) => a + pert[k])
-}
-// En la boca (un poco afuera del eje, donde el campo tiene pendiente), con el aire entrando por ella.
-const enLaBocaC: [number, number, number] = [(RC + rc) / 2 + 0.1, 0.06, 0]
-const entrando: [number, number, number] = [-2, 0, 0]
-const pasaPorLaBoca = (d: Distancia): boolean => aireEn(d, enLaBocaC, entrando)[0] < 0.5 * entrando[0]
-afirmar(pasaPorLaBoca(delFlujo), 'el aire pasa por la boca de la «c»: con la malla real, entra con más de la mitad de su velocidad', `${aireEn(delFlujo, enLaBocaC, entrando)[0].toFixed(2)} u/s de ${String(entrando[0])}`)
-controlPositivo('el detector VE la boca cerrada de las formas de siempre (el anillo entero)', anilloEntero, pasaPorLaBoca)
-// El hueco de adentro (como el ojo de la «p»): abierto, lejos de las paredes.
-const abierto = (d: Distancia): boolean => d([0, 0, 0]) > 1
-afirmar(abierto(delFlujo), '  el hueco de adentro (como el ojo de la «p») está abierto', `a ${delFlujo([0, 0, 0]).toFixed(2)} u de la pared`)
-controlPositivo('el detector VE un hueco tapado', (q: readonly [number, number, number]) => Math.hypot(q[0], q[1]) - RC, abierto)
-// Alcance: donde el aire ya empieza a doblar el campo del flujo sabe la distancia; el fino no (su tope es 1,2 u). Abajo
-// a la izquierda, adentro de la caja del campo fino y a más de 1,2 u del contorno.
-const enDiagonal: [number, number, number] = [-2.4, -2.4, 0]
-const lejosDeVerdad = Math.hypot(2.4, 2.4) - RC
-const sabeLejos = (d: Distancia): boolean => Math.abs(d(enDiagonal) - lejosDeVerdad) < 0.1
-afirmar(sabeLejos(delFlujo), '  el campo del flujo sabe la distancia hasta donde el aire empieza a doblar', `a ${lejosDeVerdad.toFixed(2)} u da ${delFlujo(enDiagonal).toFixed(2)} (el fino, ${delFino(enDiagonal).toFixed(2)}: tope de 1,2)`)
-controlPositivo('el detector VE el campo fino (topado a 1,2 u)', delFino, sabeLejos)
-// Cableado: el flujo lee el campo del flujo; la física lo hornea en otro momento libre; tras el cursor, la malla real.
-const rodeoA3 = /vec3 alrededorDelLogo\( vec3 p, vec3 aire \) \{[\s\S]*?\n\}/.exec(simulacion)?.[0] ?? ''
-afirmar(/float d = flujoDelLogo\( q \);/.test(rodeoA3) && /normalDelFlujo\( q \)/.test(rodeoA3) && /campoDeAPoco\(contorno, CAMPO_DEL_FLUJO\)/.test(fisica) && /publicarElFlujo\(f\)/.test(fisica) && /\.\.\.FLUJO_EN_VIVO/.test(fisica), 'el flujo de la simulación lee el campo del flujo, que la física hornea y publica')
-afirmar(/#ifdef AIRE_FISICA\s*vec3 fuera = afueraDelCampo\( enElMundo, HOLGURA_TRAS_EL_CURSOR \);/.test(parche) && /CAMPO_EN_VIVO, \{ uTiempo/.test(parche), '  tras el cursor, la mota empujada contra el logo se corre a su cara real (la boca y el ojo, abiertos)')
 
 // ── B0 · el instrumento ───────────────────────────────────────────────────
 titulo('B0 · el instrumento: el perfil de la GPU, sólo con banco, y todo lo que se dibuja con nombre')
@@ -241,21 +201,21 @@ afirmar(topeUniforme(haces), 'el lazo de los rayos tiene tope uniforme (con uno 
 controlPositivo('el detector VE el lazo de tope fijo', haces.replace('i < uPasos;', 'i < ${HACES.pasos};'), topeUniforme)
 // El campo de a poco da EXACTAMENTE el mismo campo que de una vez (la «c» de prueba de A3).
 const deAPoco = (() => {
-  const horno = campoDeAPoco(contornoC, CAMPO_DEL_FLUJO)
+  const horno = campoDeAPoco(contornoC)
   let pasos = 0
   while (!horno.paso(0.05)) pasos += 1
   return { campo: horno.campo(), pasos }
 })()
 const igualito = (a: Float32Array, b: Float32Array): boolean => a.length === b.length && a.every((v, i) => v === b[i])
-afirmar(igualito(deAPoco.campo.datos, flujo.datos) && deAPoco.pasos > 10, 'los campos del logo se hornean de a poco (momentos libres de pocos ms) y dan el mismo campo, celda por celda', `${String(deAPoco.pasos)} pasos de 0,05 ms`)
+afirmar(igualito(deAPoco.campo.datos, fino.datos) && deAPoco.pasos > 10, 'el campo del logo se hornea de a poco (momentos libres de pocos ms) y da el mismo campo, celda por celda', `${String(deAPoco.pasos)} pasos de 0,05 ms`)
 const cortado = (() => {
-  const horno = campoDeAPoco(contornoC, CAMPO_DEL_FLUJO)
+  const horno = campoDeAPoco(contornoC)
   horno.paso(0.05)
   return horno.campo().datos
 })()
-controlPositivo('el detector VE un horno cortado a mitad de camino', cortado, (d: Float32Array) => igualito(d, flujo.datos))
+controlPositivo('el detector VE un horno cortado a mitad de camino', cortado, (d: Float32Array) => igualito(d, fino.datos))
 const fisicaB1 = leer('polvo/Fisica.tsx')
-afirmar(/const PRESUPUESTO_DEL_HORNO_MS = [1-8]\b/.test(fisicaB1) && /hornearDeAPoco\(fino,/.test(fisicaB1) && /hornearDeAPoco\(flujo,/.test(fisicaB1) && !/campoDelLogo\(contorno/.test(fisicaB1), '  la física hornea los dos campos de a poco, con un presupuesto por momento libre (antes, dos tareas de ~90 ms al cargar)')
+afirmar(/const PRESUPUESTO_DEL_HORNO_MS = [1-8]\b/.test(fisicaB1) && /hornearDeAPoco\(fino,/.test(fisicaB1) && !/campoDelLogo\(contorno/.test(fisicaB1), '  la física hornea el campo de a poco, con un presupuesto por momento libre (antes, una tarea de ~90 ms al cargar; [ESCENA 9] T1 borró el del flujo)')
 
 // ── B2 · cero reservas por cuadro ─────────────────────────────────────────
 titulo('B2 · cero reservas por cuadro en los useFrame de la escena y en sus manejadores')
@@ -351,7 +311,7 @@ const peorDesvio = (paso: PasoDelAire): number => Math.max(...[60, 75, 120, 144]
 afirmar(peorDesvio(pasoDelAire) < 0.0075, 'el aire del polvo: la misma trayectoria a 60, 75, 120 y 144 Hz (Euler exponencial)', `se aparta a lo sumo ${(peorDesvio(pasoDelAire) * 100).toFixed(2)} % del pico del tiempo continuo (Euler explícito: ${(peorDesvio(eulerDeAntes) * 100).toFixed(2)} %)`)
 controlPositivo('el detector VE el Euler explícito de antes (1,0 % a 60 Hz)', eulerDeAntes, (paso) => peorDesvio(paso) < 0.0075)
 const simulacionB3 = leer('polvo/simulacion.ts')
-afirmar((simulacionB3.match(/(d|p) \+= relajar\( v,/g) ?? []).length === 4 && !/\bd \+= v \* dt;|\bp \+= v \* dt;/.test(simulacionB3), '  los cuatro modos que mueven motas (aire, caída, deslizando, levantada) integran con `relajar`, ninguno con Euler explícito')
+afirmar((simulacionB3.match(/(d|p) \+= relajar\( v,/g) ?? []).length === 3 && !/\bd \+= v \* dt;|\bp \+= v \* dt;/.test(simulacionB3), '  los tres modos que mueven motas (aire, caída, levantada; [ESCENA 9] T1 borró el deslizar) integran con `relajar`, ninguno con Euler explícito')
 // Lo demás que corre por cuadro ya era exacto en el tiempo: se afirma para que siga así.
 const exactos: readonly (readonly [string, RegExp, string])[] = [
   ['choreographySampler.ts', /current \+ diff \* \(1 - Math\.exp\(-dt \/ tau\)\)/, 'la cámara y el puntero persiguen con un amortiguador exponencial'],
@@ -395,7 +355,7 @@ afirmar(/vParejo \*= mix\( carasDelAire, 1\.0, modoDeLaFisica < 0\.5 \? min\( pe
 afirmar(/float lejos = distance\( mundo, cameraPosition \);\s*float pesoSuelta/.test(simB4), '  la cámara y la sala se cuentan donde se DIBUJA la mota (en el aire, con su corrimiento), no en su lugar de la caja')
 // El peso: en la parte fraccionaria del modo, escrito en cada salida, en segundos (no en cuadros).
 const escrituras = simB4.match(/salida0 = vec4\([^;]*\);/g) ?? []
-afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 10, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
+afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 9, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
 afirmar(PESO_EN_EL_MODO < 0.5 && [0, 1, 2, 3, 4, 5].every((m) => [0, 0.5, 1].every((w) => Math.round(m + PESO_EN_EL_MODO * w) === m)), '  el modo se sigue leyendo igual (redondeado) con cualquier peso', `el peso ocupa de 0 a ${String(PESO_EN_EL_MODO)}`)
 const pasosHasta = (hz: number, s: number): number => Math.ceil(s * hz) / hz
 afirmar(/peso \+ dt \/ \$\{FISICA\.fundido\.entraS\.toFixed\(2\)\}/.test(simB4) && /peso - dt \/ \$\{FISICA\.fundido\.saleS\.toFixed\(2\)\}/.test(simB4) && Math.abs(pasosHasta(60, FISICA.fundido.entraS) - pasosHasta(144, FISICA.fundido.entraS)) < 0.02, '  el peso avanza con dt: el mismo fundido a 60 y a 144 Hz', `aparece en ${String(FISICA.fundido.entraS)} s, se va en ${String(FISICA.fundido.saleS)} s`)
@@ -408,7 +368,7 @@ controlPositivo('el detector VE la levantada que no se posa nunca (B4 sin el seg
 const aspiraDeAntes = (alto: number): number => FISICA.remolino.aspira * Math.exp(-alto / 1.2)
 const aspiraAhora = (alto: number): number => FISICA.remolino.aspira * Math.exp(-Math.max(alto, 0) / 1.2)
 /** ¿Ninguna normal del campo se normaliza sin red? (Con gradiente nulo, `normalize` de cero es NaN.) */
-const normalesSeguras = (c: string): boolean => !/normalize\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/.test(c) && (c.match(/normalSegura\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/g) ?? []).length === 4 && /return largo > 1e-6 \? n \/ largo : vec3\( 0\.0, 1\.0, 0\.0 \);/.test(c)
+const normalesSeguras = (c: string): boolean => !/normalize\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/.test(c) && (c.match(/normalSegura\( mat3\( uLogo \) \* normalDel(Campo|Flujo)\( q \) \)/g) ?? []).length === 1 && /return largo > 1e-6 \? n \/ largo : vec3\( 0\.0, 1\.0, 0\.0 \);/.test(c)
 afirmar(normalesSeguras(simB4), 'ninguna mota se pierde en NaN contra el logo: las normales del campo tienen red (medido: 12 de 14.000 quedaban trabadas cayendo, ahora 0)')
 controlPositivo('el detector VE la normal sin red de antes', simB4.replace('vec3 n = normalSegura( mat3( uLogo ) * normalDelCampo( q ) );', 'vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );'), normalesSeguras)
 afirmar(/exp\( - max\( alto, 0\.0 \) \/ 1\.2 \)/.test(simB4) && !/exp\( - alto \/ 1\.2 \)/.test(simB4) && aspiraAhora(-20) === aspiraAhora(0), 'el remolino no aspira más fuerte debajo del piso (antes lanzaba esas motas a millones de unidades)', `a 20 u debajo del piso: ${aspiraDeAntes(-20).toExponential(1)} u/s antes, ${aspiraAhora(-20).toFixed(1)} ahora`)
