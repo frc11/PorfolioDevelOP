@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 
 import { AJUSTES } from './ajustes'
-import { entornoDeLaEscena } from './entorno'
 import { instalarElRuidoAzul } from './ruidoAzul'
 import { instalarElTono } from './tono'
 import type { NivelDeCalidad } from './calidad'
@@ -83,19 +82,9 @@ const CONTEXTOS: Readonly<Record<NivelDeCalidad, typeof COMUN & { readonly antia
   compacta: { ...COMUN, antialias: AJUSTES.compacta.antialias },
 }
 
-/**
- * [ESCENA 9] T3 · con la prueba del antialiasing, un contexto propio por nivel, fijo (se arma una vez por carga: las
- * banderas no cambian), SIN el antialias del lienzo: las muestras las pone el búfer del posproceso, y el lienzo sólo
- * recibe la copia final (con las suyas serían dos resoluciones de MSAA por cuadro).
- */
-function sinMuestras(base: (typeof CONTEXTOS)[NivelDeCalidad]): (typeof CONTEXTOS)[NivelDeCalidad] {
-  return { ...base, antialias: false }
-}
-const CONTEXTOS_CON_POSPROCESO: Readonly<Record<NivelDeCalidad, (typeof CONTEXTOS)[NivelDeCalidad]>> = { plena: sinMuestras(CONTEXTOS.plena), compacta: sinMuestras(CONTEXTOS.compacta) }
-const CON_POSPROCESO = entornoDeLaEscena().pruebas.aa !== 'no'
-
+/** [ESCENA 10] El antialias es el del lienzo (CALIDAD 1): el de prueba de ESCENA 9 (TAA u 8 muestras) se borró. */
 export function contextoDe(nivel: NivelDeCalidad): (typeof CONTEXTOS)[NivelDeCalidad] {
-  return CON_POSPROCESO ? CONTEXTOS_CON_POSPROCESO[nivel] : CONTEXTOS[nivel]
+  return CONTEXTOS[nivel]
 }
 
 /**

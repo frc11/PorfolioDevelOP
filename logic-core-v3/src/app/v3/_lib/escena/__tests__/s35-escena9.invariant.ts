@@ -9,8 +9,8 @@
  * T2 · el logo de noche: los costados sin emisión y las tapas con la de siempre y un borde en su contorno (el campo de
  *      distancia 2D del contorno del SVG); qué cara es cuál sale de la normal de la geometría; de día no cambia nada
  *      (todo es proporcional a la emisión); el amanecer guarda la noche con el mismo dibujo.
- * T3 · material y luz: el estudio generado, la sombra del logo sobre el piso vivo (varianza, una lectura por píxel), el
- *      tono ACES compensado con el brillo de Neutral y el antialiasing de prueba (TAA u 8 muestras).
+ * T3 · material y luz: el estudio generado, la sombra del logo sobre el piso vivo (varianza, una lectura por píxel) y el
+ *      tono ACES compensado con el brillo de Neutral. El antialiasing de prueba (TAA u 8 muestras) se borró en ESCENA 10.
  * T4 · fluidez: los bloques del piso vivo de adelante hacia atrás (órdenes por sector, cada bloque con su celda), las
  *      dos cúpulas que no suman no se dibujan (con las condiciones exactas de su fragmento), el aire que decide el
  *      scroll en segundos y la placa del banco.
@@ -32,7 +32,6 @@ import { PROBE_EXTRUDE } from '../probeScene'
 import { CONTORNO, distanciasAlContorno } from '../logoDeNoche'
 import { ESTUDIO, escenaDelEstudio } from '../estudio'
 import { SOMBRA_DEL_LOGO_GLSL } from '../sombra/delLogo'
-import { CAPA_DEL_POLVO, halton } from '../gpu/posproceso'
 import { TONO_COMPENSADO_GLSL } from '../tono'
 import { PISO_VIVO, centroDeLaCelda, grillaDelPiso } from '../piso/bloques'
 import { ORDEN_DE_LA_GRILLA, ORDEN_DE_LOS_BLOQUES, armarLosOrdenes, ponerElOrden, sectorDe } from '../piso/ordenDeLosBloques'
@@ -139,10 +138,9 @@ afirmar(guardaConDibujo(luz), 'el amanecer guarda la noche con el mismo dibujo; 
 controlPositivo('el detector VE el amanecer de antes (sólo el gris parejo)', luz.replace('#ifdef LOGO_DE_NOCHE_CON_BORDE', ''), guardaConDibujo)
 
 // ── T3 · material y luz ───────────────────────────────────────────────────
-titulo('T3 · material y luz: el estudio, la sombra, el tono y el antialiasing de prueba (el bloom y el brillante se borraron)')
-const pruebasT3 = leer('PruebasDeLaEscena.tsx')
+titulo('T3 · material y luz: el estudio, la sombra y el tono (el bloom, el brillante y el antialiasing de prueba se borraron)')
 const luzDelLogo = leer('LuzDelLogo.tsx')
-afirmar(/return pruebas\.aa !== 'no' \? <Posproceso \/> : null/.test(pruebasT3), 'sin la bandera del antialiasing no se monta ningún posproceso')
+afirmar(!existsSync(path.join(ESCENA, 'gpu/posproceso.ts')) && !existsSync(path.join(ESCENA, 'PruebasDeLaEscena.tsx')) && !('aa' in entornoPedido('producto,aa=taa').pruebas), '[ESCENA 10] el posproceso de prueba (el bloom, el TAA y las 8 muestras) se borró: queda el antialias del lienzo de CALIDAD 1')
 
 // El estudio: lo arma y lo suelta el MISMO montaje (en desarrollo React monta dos veces).
 const logoFuente = leer('ProbeLogo.tsx')
@@ -164,23 +162,6 @@ controlPositivo('el detector VE la búsqueda y el filtro de PCSS', `${SOMBRA_DEL
 afirmar(/copia\.matrixAutoUpdate = false\s*copia\.matrixWorldAutoUpdate = false/.test(luzDelLogo), '  las copias del logo en el mapa llevan su matriz copiada (sin eso, el dibujo la volvía la identidad y el mapa quedaba vacío)')
 afirmar(/if \(fuerza < 0\.001\) return/.test(luzDelLogo), '  sin fuerza (de noche) el mapa no se dibuja')
 afirmar(/piso-vivo-mar\$\{conContacto \? '-contacto' : ''\}\$\{conSombra \? '-sombra-del-logo' : ''\}/.test(leer('piso/bloques.ts')), '  el piso lleva la sombra sólo cuando la hay (su programa es otro; el banco la apaga con `sombra-logo=no`)')
-
-// El posproceso del antialiasing de prueba: la misma imagen que el lienzo; el TAA reproyecta sin el corrimiento.
-const pp = leer('gpu/posproceso.ts')
-afirmar(/escenaRT\.texture\.internalFormat = 'RGBA8'/.test(pp) && /isXRRenderTarget = true/.test(pp), 'la escena en su búfer sale como en la pantalla (el tono y la codificación de three) y se resuelve (RGBA8 en las muestras y en la textura)', 'medido en ESCENA 9: 0 píxeles distintos contra el dibujo directo, en el mismo cuadro')
-/** Una pasada de una capa sin el fondo: con un fondo de color, three limpia el búfer aunque autoClear esté apagado. */
-const sinElFondo = (c: string): boolean => /escena\.background = null\s*camara\.layers\.set\(capa\)/.test(c) && /escena\.background = fondo/.test(c)
-afirmar(sinElFondo(pp), '  la pasada de una capa (el polvo sobre el TAA) saca el fondo mientras dibuja')
-controlPositivo('el detector VE la pasada con el fondo (borraba la escena)', pp.replace('escena.background = null', 'escena.background = fondo'), sinElFondo)
-afirmar(new Set<number>([0, CAPA_DEL_POLVO]).size === 2 && !/bloom|Bloom/.test(pp.replace(/\/\*\*[\s\S]*?\*\/|\/\/[^\n]*/g, '')), '  el polvo va en su capa; el bloom se borró (ESCENA 10)')
-/** El TAA reconstruye el punto con la cámara SIN corrimiento. */
-const reproyectaBien = (c: string): boolean => /u\.taa\.uInversaActual\.value\.multiplyMatrices\(sinCorrimiento, camara\.matrixWorldInverse\)\.invert\(\)/.test(c)
-afirmar(reproyectaBien(pp), 'el TAA reproyecta con la cámara sin corrimiento (con la corrida, el historial se leía desplazado y no convergía)', 'medido quieto: titileo 1,24 → 0,17')
-controlPositivo('el detector VE la reproyección con la cámara corrida', pp.replace('multiplyMatrices(sinCorrimiento, camara.matrixWorldInverse).invert()', 'multiplyMatrices(camara.projectionMatrix, camara.matrixWorldInverse).invert()'), reproyectaBien)
-afirmar(Math.abs(halton(1, 2) - 0.5) < 1e-12 && Math.abs(halton(2, 2) - 0.25) < 1e-12 && Math.abs(halton(1, 3) - 1 / 3) < 1e-12 && Array.from({ length: 8 }, (_, k) => halton(k + 1, 3)).every((v) => v > 0 && v < 1), '  el corrimiento es Halton (2, 3): repartido en el píxel, sin repetirse en 8 cuadros')
-afirmar(/if \(pruebas\.aa === 'taa' && polvo\.current\.size < 2\)/.test(pruebasT3) && /soloLaCapa\(gl, escena, camara, CAPA_DEL_POLVO, escenaRT\)/.test(pp), '  con el TAA el polvo va aparte y se dibuja encima (el TAA borraba las motas: no tienen vectores de movimiento)')
-const canvas = leer('configuracionDelCanvas.ts')
-afirmar(/return \{ \.\.\.base, antialias: false \}/.test(canvas) && /return CON_POSPROCESO \? CONTEXTOS_CON_POSPROCESO\[nivel\] : CONTEXTOS\[nivel\]/.test(canvas), '  con el posproceso el lienzo va sin sus muestras (las pone el búfer de la escena)')
 
 // El tono: la compensación descansa en que ACES conserva el gris (sus matrices suman 1 por fila; las de AgX también).
 const trozo = THREE.ShaderChunk.tonemapping_pars_fragment

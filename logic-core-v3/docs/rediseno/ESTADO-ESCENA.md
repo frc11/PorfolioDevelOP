@@ -91,15 +91,13 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 bloques y las partículas en los dos tonos) se borraron, código y banderas (`cielo-dia=<variante>-<tono>` ya no existe).
 
 [ESCENA 9] Las de ese sprint, para que decidiera Valentino; con banco, en el pedido; **sin banco, en la URL**
-(`/v3?pruebas=aa=taa`): sólo cambian las pruebas, el resto es el producto y no aparece ningún gancho del banco.
+(`/v3?pruebas=<token>`): sólo cambian las pruebas, el resto es el producto y no aparece ningún gancho del banco.
 **[ESCENA 10] T1:** decididas. Pasaron al producto el logo de noche claro, el negro satinado, la sombra del logo, ACES
 compensado y el scroll de nk (arriba); se borraron, código y banderas, `logo-noche=fino|grueso`, `material=brillante`,
 `bloom` (y su capa y su cadena de niveles), `tono=agx` (y Neutral como opción), `lenis=sedoso` y `titulos=dom|webgl`
-(con `_fuentes/chivo-400-latin.ttf`: los reemplaza T3 de ESCENA 10).
-
-| Token | Efecto |
-|---|---|
-| `aa=taa` · `=msaa8` | T3 · el antialiasing de las aristas en movimiento: TAA (la cámara corrida por Halton, el historial reproyectado con la profundidad y recortado a la vecindad; el polvo va aparte, encima) u 8 muestras en lugar de 4 (`gpu/posproceso.ts`) |
+(con `_fuentes/chivo-400-latin.ttf`: los reemplaza T3 de ESCENA 10). Y el antialiasing de prueba (`aa=taa|msaa8`):
+queda el del lienzo de CALIDAD 1, que ya estaba en el producto (Valentino); con él se borró el posproceso entero
+(`gpu/posproceso.ts`: el búfer de la escena, el TAA y su gancho `__posprocesoDelBanco`). No queda ninguna prueba.
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -111,8 +109,7 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__sombraDelLogoDelBanco`
-(`poner(prendida)`, `mapa()`; [ESCENA 10] `fuerza()`) y `__posprocesoDelBanco` (`taa` en vivo, `dibujar()`, `pasos(n)`: la
-GPU de cada paso del posproceso); T4: `__pisoDelBanco.orden(prendido, estricta)` (los bloques en el orden nuevo o en el de
+(`poner(prendida)`, `mapa()`; [ESCENA 10] `fuerza()`); T4: `__pisoDelBanco.orden(prendido, estricta)` (los bloques en el orden nuevo o en el de
 la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; `__logoDeNocheDelBanco`,
 `__materialDelLogoDelBanco` y `__lenisDelBanco` se borraron con sus variantes. [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
@@ -151,7 +148,7 @@ amanecer, que ahora es del producto: 18,23 ms de media y 26,7 de p95, las mismas
 monitor cuantiza el cuadro a 13,34 o 26,68 ms y el 37 % de los cuadros tardó dos refrescos las dos veces); fuera
 de los rayos el amanecer no cuesta nada que se vea. Detalle y notas: `escena8/costo.txt`.
 
-Reglas que siguen valiendo: sin EffectComposer en la escena ([ESCENA 9] el posproceso de T3 es propio y va con bandera); `dpr` a lo sumo 1,5; lo transparente
+Reglas que siguen valiendo: sin EffectComposer en la escena (el posproceso propio de ESCENA 9 se borró en ESCENA 10); `dpr` a lo sumo 1,5; lo transparente
 DoubleSide dibuja dos pasadas salvo `forceSinglePass`. El lienzo COMPONE el alfa que escriben los
 materiales: un material opaco escribe alfa 1 (si no, bordes blancos contra el papel).
 
@@ -306,8 +303,8 @@ fuerza de la sombra, cada segundo).
   de las aristas de geometría (es el límite del MSAA de 4 muestras: pide TAA o más muestras) y los recortes del
   teléfono (sin un teléfono para medir; el menú está en `calidad1/b12-telefono/`).
   → [ESCENA 9] T3 los probó con bandera (abajo).
-- ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2). El antialiasing (`aa=`) no se
-  decidió en T1; queda como prueba.
+- ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2), el antialiasing también: el del
+  lienzo de CALIDAD 1 (TAA no).
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

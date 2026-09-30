@@ -33,7 +33,7 @@ titulo('T1 · el cierre de ESCENA 9: lo elegido, en el producto; lo demás, borr
 afirmar(ENTORNO.logoDeNoche && ENTORNO.materialDelLogo && ENTORNO.sombraDelLogo, 'en el producto: el logo de noche, el negro satinado y la sombra del logo')
 const sinCadaUno = entornoPedido('producto,logo-noche=no,material=no,sombra-logo=no')
 afirmar(!sinCadaUno.logoDeNoche && !sinCadaUno.materialDelLogo && !sinCadaUno.sombraDelLogo && !BASE_LIMPIA.logoDeNoche && !BASE_LIMPIA.materialDelLogo && !BASE_LIMPIA.sombraDelLogo, '  el banco los apaga con `=no` para comparar; la base limpia no los tiene')
-afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'aa', '  de las pruebas de ESCENA 9 queda sólo el antialiasing (no se decidió)', Object.keys(PRUEBAS_APAGADAS).join())
+afirmar(Object.keys(PRUEBAS_APAGADAS).length === 0 && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron')
 
 // El logo de noche: la variante clara (el filo casi blanco), la única.
 const exportsDelLogo = Object.keys(logoDeNoche)
@@ -53,9 +53,10 @@ const conAces = (c: string, glsl: string): boolean => /toneMapping: THREE\.Custo
 afirmar(conAces(lienzo, TONO_COMPENSADO_GLSL) && !/NeutralToneMapping,/.test(codigo(lienzo)) && !/tono=|agx/i.test(codigo(leer('entorno.ts'))), 'el tono es ACES compensado (el color de ACES con el brillo de Neutral), instalado antes de compilar; sin opción Neutral ni AgX')
 controlPositivo('el detector VE el lienzo con Neutral', lienzo.replace('toneMapping: THREE.CustomToneMapping,', 'toneMapping: THREE.NeutralToneMapping,'), (c: string) => conAces(c, TONO_COMPENSADO_GLSL))
 
-// El bloom, borrado: ni su capa, ni sus pasos, ni su bandera.
-const pp = codigo(leer('gpu/posproceso.ts'))
-afirmar(!/bloom|Bloom|LOS_QUE_BRILLAN|CAPA_DEL_BLOOM|UMBRAL_GLSL|BAJAR_GLSL|SUBIR_GLSL/.test(pp) && !/bloom/.test(codigo(leer('entorno.ts'))), 'el bloom se borró: ni la capa de lo que brilla, ni la cadena de niveles, ni la bandera')
+// El bloom y el antialiasing de prueba, borrados: el posproceso entero (su búfer, sus pasos, sus banderas).
+const lienzoSinPrueba = (c: string): boolean => /return CONTEXTOS\[nivel\]/.test(c) && !/antialias: false|POSPROCESO/.test(codigo(c))
+afirmar(!existsSync(path.join(ESCENA, 'gpu/posproceso.ts')) && !/bloom|aa=/.test(codigo(leer('entorno.ts'))) && lienzoSinPrueba(lienzo), 'el bloom y el antialiasing de prueba se borraron (el posproceso entero): el lienzo lleva su antialias de CALIDAD 1')
+controlPositivo('el detector VE el lienzo sin muestras de la prueba', lienzo.replace('return CONTEXTOS[nivel]', 'return { ...CONTEXTOS[nivel], antialias: false }'), lienzoSinPrueba)
 
 // El scroll de nk: sobre la instancia, sin tocar la construcción (la afirman `compuerta` y `s18`).
 const motor = deLaRaiz('src/app/v3/_componentes/ScrollSuaveDeV3.tsx')

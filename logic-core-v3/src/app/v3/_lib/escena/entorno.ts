@@ -67,27 +67,17 @@ export type NivelDelHaz = 'sutil' | 'medio'
 
 /**
  * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de ese sprint, para
- * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; queda el
- * antialiasing, que no se decidió.
+ * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
+ * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. No queda ninguna.
  */
-export interface Pruebas {
-  /** [ESCENA 9] T3 · el antialiasing de las aristas en movimiento (`gpu/posproceso.ts`); `aa=taa|msaa8`. */
-  readonly aa: 'taa' | 'msaa8' | 'no'
-}
+export type Pruebas = Readonly<Record<string, never>>
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { aa: 'no' }
-
-/** Lo que vale de una lista, o `no`. */
-function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
-  return opciones.find((o) => o === v) ?? 'no'
-}
+export const PRUEBAS_APAGADAS: Pruebas = {}
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return {
-    aa: unoDe(['taa', 'msaa8'] as const, valor('aa')),
-  }
+function pruebasDe(): Pruebas {
+  return {}
 }
 
 export interface Entorno {
@@ -256,7 +246,7 @@ export function entornoPedido(pedido: string): Entorno {
     logoDeNoche: producto ? valor('logo-noche') !== 'no' : partes.has('logo-noche'),
     materialDelLogo: producto ? valor('material') !== 'no' : partes.has('material'),
     sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
-    pruebas: pruebasDe(valor),
+    pruebas: pruebasDe(),
   }
 }
 
@@ -272,7 +262,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=aa=taa`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=<token>`.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     resuelto = pruebas === null ? ENTORNO : { ...ENTORNO, pruebas: entornoPedido(`producto,${pruebas}`).pruebas }
   }
