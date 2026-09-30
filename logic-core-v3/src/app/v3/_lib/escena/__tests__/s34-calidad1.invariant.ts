@@ -490,7 +490,9 @@ afirmar(sinDithering.length === 0, 'el dithering va en todo lo que pinta degrada
 // ── B9 · el tone mapping ──────────────────────────────────────────────────
 titulo('B9 · tone mapping: el que conserva los colores canónicos')
 const lienzoB9 = leer('configuracionDelCanvas.ts')
-afirmar(/toneMapping: THREE\.NeutralToneMapping,/.test(lienzoB9) && /\[CALIDAD 1\] B9 · ACES y AgX, MEDIDOS contra este/.test(lienzoB9), 'se queda Neutral: ACES y AgX, medidos con la exposición compensada, corren el piso, el papel o el cielo más de ΔE 2 (CIEDE2000)', 'ACES compensado: el piso 2,5–2,8; AgX compensado: 3–4,3 (scripts-calidad/b9-tono.ts)')
+// [ESCENA 10] T1: Valentino eligió ACES COMPENSADO (la curva de brillo de Neutral: en un gris, Neutral exacto). Lo que
+// B9 midió sigue anotado en el lienzo; el tono de ahora lo afirma s36 (T1).
+afirmar(/toneMapping: THREE\.CustomToneMapping,/.test(lienzoB9) && /\[CALIDAD 1\] B9 · ACES y AgX, MEDIDOS contra Neutral/.test(lienzoB9), 'lo que B9 midió queda anotado (ACES y AgX con la exposición compensada corrían los canónicos más de ΔE 2); el tono es el ACES compensado de ESCENA 10 (s36)', 'ACES con exposición: el piso 2,5–2,8; AgX: 3–4,3 (scripts-calidad/b9-tono.ts)')
 afirmar(/const codificado = \(hex: string\): THREE\.Color => new THREE\.Color\(hex\)\.convertLinearToSRGB\(\)/.test(leer('cieloDeDia/CieloDeDia.tsx')) && /#include <colorspace_fragment>/.test(leer('formacion/materiales.ts')), '  la salida es sRGB: los materiales propios que escriben el color directo lo codifican a sRGB (el cielo) o incluyen la conversión (la formación)')
 
 // ── B10 · el apoyo de las copias ─────────────────────────────────────────

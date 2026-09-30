@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import { FLOOR_Y, PAPER_COLOR } from '../probeScene'
@@ -39,7 +40,7 @@ void main() {
 `
 
 const FRAGMENT_DEL_HAZ = /* glsl */ `
-uniform float uNoche;
+uniform float uNocheDelLogo;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 varying vec3 vNormal2;
@@ -48,8 +49,9 @@ varying float vAlto;
 void main() {
 	float deFrente = pow( abs( dot( normalize( vNormal2 ), normalize( vVista ) ) ), 1.6 );
 	float puntas = smoothstep( 0.0, 0.18, vAlto ) * ( 1.0 - smoothstep( 0.72, 1.0, vAlto ) );
-	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNoche );
-	float cuanto = mix( uHazDia.x, uHazNoche.x, uNoche );
+	// [ESCENA 10] T1: con la noche en el logo (en el amanecer se va cuando el frente lo alcanza, no al empezar el barrido).
+	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNocheDelLogo );
+	float cuanto = mix( uHazDia.x, uHazNoche.x, uNocheDelLogo );
 	gl_FragColor = vec4( luz * deFrente * puntas * cuanto, 1.0 );
 }
 `
@@ -64,19 +66,19 @@ void main() {
 
 /**
  * La luz que el haz deja en el piso, aditiva. [ESCENA 6] Exportada: con el piso vivo la pinta el piso
- * mismo. Pide `uNoche`, `uHazDia` y `uHazNoche` declarados.
+ * mismo. Pide `uNocheDelLogo` ([ESCENA 10] T1: era `uNoche`), `uHazDia` y `uHazNoche` declarados.
  */
 export const CHARCO_DEL_HAZ_GLSL = /* glsl */ `
 vec3 charcoDelHaz( vec2 plano ) {
 	float r = length( plano ) / ${HAZ.radioAbajo.toFixed(2)};
 	float charco = exp( - r * r * 2.2 );
-	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNoche );
-	return luz * charco * mix( uHazDia.y, uHazNoche.y, uNoche );
+	vec3 luz = mix( vec3( 1.0, 0.9, 0.74 ), vec3( 0.72, 0.84, 1.0 ), uNocheDelLogo );
+	return luz * charco * mix( uHazDia.y, uHazNoche.y, uNocheDelLogo );
 }
 `
 
 const FRAGMENT_DE_LA_MANCHA = /* glsl */ `
-uniform float uNoche;
+uniform float uNocheDelLogo;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 varying vec2 vPlano;
@@ -105,7 +107,7 @@ void main() {
 
 function aditivo(vertexShader: string, fragmentShader: string): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { uNoche: VIVO.uNoche, uHazDia: VIVO.uHazDia, uHazNoche: VIVO.uHazNoche },
+    uniforms: { uNoche: VIVO.uNoche, uNocheDelLogo: VIVO.uNocheDelLogo, uHazDia: VIVO.uHazDia, uHazNoche: VIVO.uHazNoche },
     vertexShader,
     fragmentShader,
     blending: THREE.AdditiveBlending,
@@ -143,6 +145,15 @@ export function Haz({ conCharco }: { readonly conCharco: boolean }) {
     return { cono, techo, estrellas, materiales }
   }, [])
 
+  // [ESCENA 10] T1 · regla 5: sin haz (de día, o apagado en su encendido), la columna y el charco no se dibujan.
+  const cono = useRef<THREE.Mesh>(null)
+  const charco = useRef<THREE.Mesh>(null)
+  useFrame(() => {
+    const [dia, noche, n] = [VIVO.uHazDia.value, VIVO.uHazNoche.value, VIVO.uNocheDelLogo.value]
+    if (cono.current !== null) cono.current.visible = dia.x > 0 || (noche.x > 0 && n > 0)
+    if (charco.current !== null) charco.current.visible = dia.y > 0 || (noche.y > 0 && n > 0)
+  })
+
   useEffect(
     () => () => {
       piezas.cono.dispose()
@@ -163,6 +174,8 @@ export function Haz({ conCharco }: { readonly conCharco: boolean }) {
       />
       <points position={[0, HAZ.arriba, 0]} geometry={piezas.estrellas} material={piezas.materiales.estrellas} />
       <mesh
+        ref={cono}
+        name="haz · columna"
         position={[0, FLOOR_Y + ALTO / 2, 0]}
         geometry={piezas.cono}
         material={piezas.materiales.haz}
@@ -170,6 +183,8 @@ export function Haz({ conCharco }: { readonly conCharco: boolean }) {
       />
       {conCharco && (
         <mesh
+          ref={charco}
+          name="haz · charco"
           position={[0, FLOOR_Y + 0.03, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           material={piezas.materiales.mancha}

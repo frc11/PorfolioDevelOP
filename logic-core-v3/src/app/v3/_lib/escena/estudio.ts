@@ -1,29 +1,23 @@
 import * as THREE from 'three'
 
-import { INK_ROUGHNESS } from './probeScene'
-
 /**
- * [ESCENA 9] T3 · EL LOGO CON MATERIAL FÍSICO Y REFLEJOS DE ESTUDIO — una prueba (bandera `material=satinado` o
- * `material=brillante`).
+ * [ESCENA 9] T3 · EL LOGO CON REFLEJOS DE ESTUDIO — [ESCENA 10] T1: en el producto, el negro satinado (el brillante,
+ * con laca, se borró). El banco lo apaga con `material=no`.
  *
- * Hasta acá el logo es negro con luces analíticas y sin entorno (S6: «sin HDRI, media respuesta»): lo único que dibuja
- * su volumen es el brillo puntual de tres direccionales. Un objeto de estudio de verdad se lee por lo que REFLEJA: las
- * paredes curvas del logo (con las normales suaves de B7) barren muchas direcciones y cada una devuelve un pedazo del
- * estudio. Acá el estudio se GENERA (no se descarga nada): una sala gris oscura con un softbox grande arriba, dos tiras
- * verticales a los costados, un relleno tenue al frente y el piso claro del estudio, convertidos una vez al cargar en
- * un mapa de entorno filtrado por rugosidad (PMREM de three, 256 px por cara).
+ * Hasta ESCENA 9 el logo era negro con luces analíticas y sin entorno (S6: «sin HDRI, media respuesta»): lo único que
+ * dibujaba su volumen era el brillo puntual de tres direccionales. Un objeto de estudio de verdad se lee por lo que
+ * REFLEJA: las paredes curvas del logo (con las normales suaves de B7) barren muchas direcciones y cada una devuelve un
+ * pedazo del estudio. El estudio se GENERA (no se descarga nada): una sala gris oscura con un softbox grande arriba, dos
+ * tiras verticales a los costados, un relleno tenue al frente y el piso claro del estudio, convertidos una vez al cargar
+ * en un mapa de entorno filtrado por rugosidad (PMREM de three, 256 px por cara).
  *
  * El color base NO cambia (la tinta de siempre, metalness 0: el 4 % de reflejo de un dieléctrico, más en los cantos por
- * Fresnel). Dos variantes: satinado (el reflejo difuso, sin laca) y brillante (una laca encima: un segundo reflejo nítido
- * de los softbox). Cuánto se ven los reflejos sigue a la luz de la sala en cada cuadro (la principal): de noche, con la
- * sala apagada, el estudio también se apaga.
+ * Fresnel). El satinado es sólo una rugosidad menor: el reflejo difuso del estudio, sin laca. Va en el
+ * `MeshStandardMaterial` de siempre (en ESCENA 9 la prueba usaba el físico: sin laca, con el IOR de 1,5, su reflejo es
+ * el mismo 4 % y su F90 el mismo 1: da la misma imagen con un programa más corto). Cuánto se ven los reflejos sigue a la
+ * luz de la sala en cada cuadro (la principal, `LuzDelLogo.tsx`): de noche, con la sala apagada, el estudio también.
  */
-export type MaterialDelLogo = 'satinado' | 'brillante'
-
-export const MATERIALES_DEL_LOGO: Readonly<Record<MaterialDelLogo, { readonly roughness: number; readonly clearcoat: number; readonly clearcoatRoughness: number; readonly reflejos: number }>> = {
-  satinado: { roughness: 0.3, clearcoat: 0, clearcoatRoughness: 0, reflejos: 1 },
-  brillante: { roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.06, reflejos: 1 },
-}
+export const SATINADO = { roughness: 0.3 } as const
 
 /** Los softbox del estudio: dónde (centro), cuánto miden, hacia dónde miran y cuánta luz dan (lineal). */
 export const ESTUDIO = {
@@ -40,23 +34,6 @@ export const ESTUDIO = {
     { nombre: 'frente alto', centro: [0, 6, 12], tam: [8, 2], mira: [0, -0.45, -1], luz: 2.4 },
   ],
 } as const
-
-/**
- * Lo que el material hace en vivo: cuánto se ven los reflejos de la variante puesta (0 = como el producto) y el nivel de
- * la luz de la sala del último cuadro (lo escribe `ReflejosDelLogo`).
- */
-export const ESTUDIO_EN_VIVO = { reflejos: 1, nivel: 1 }
-
-/** Pone la variante en el material (o la del producto, con `no`: sin reflejos, la rugosidad y sin laca). */
-export function aplicarMaterial(m: THREE.MeshPhysicalMaterial, variante: MaterialDelLogo | 'no'): void {
-  const v = variante === 'no' ? { roughness: INK_ROUGHNESS, clearcoat: 0, clearcoatRoughness: 0, reflejos: 0 } : MATERIALES_DEL_LOGO[variante]
-  m.roughness = v.roughness
-  m.clearcoat = v.clearcoat
-  m.clearcoatRoughness = v.clearcoatRoughness
-  ESTUDIO_EN_VIVO.reflejos = v.reflejos
-  // Ya, no en el cuadro que viene: el banco dibuja cada variante en la misma tarea.
-  m.envMapIntensity = v.reflejos * ESTUDIO_EN_VIVO.nivel
-}
 
 /** El estudio como escena (para generar el entorno): la sala, el piso y los softbox. Devuelve también cómo soltarla. */
 export function escenaDelEstudio(): { readonly escena: THREE.Scene; readonly soltar: () => void } {
@@ -102,7 +79,7 @@ export function crearElEstudio(gl: THREE.WebGLRenderer): THREE.WebGLRenderTarget
 }
 
 /** Arma el estudio y se lo pone al material; devuelve cómo sacarlo (lo llama la limpieza del MISMO montaje). */
-export function ponerElEstudio(material: THREE.MeshPhysicalMaterial, gl: THREE.WebGLRenderer): () => void {
+export function ponerElEstudio(material: THREE.MeshStandardMaterial, gl: THREE.WebGLRenderer): () => void {
   const estudio = crearElEstudio(gl)
   material.envMap = estudio.texture
   material.needsUpdate = true

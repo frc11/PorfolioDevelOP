@@ -4,12 +4,14 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { AMANECER_EN_VIVO } from '../amanecer/luz'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
+import { nocheDelLogo } from './nocheDelLogo'
 import { Pulso } from './Pulso'
 import { PULSO, avanzarElPulso, pulsoInicial, type EstadoDelPulso } from './maquinaDelPulso'
 import { ALCANCE_DEL_CURSOR, NIVELES_DEL_HAZ, PULSO_VIVO, VIVO } from './vivo'
@@ -73,13 +75,15 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     else if (!quieto && reloj?.detenido !== true) VIVO.uTiempo.value += dt
     const t = VIVO.uTiempo.value
     VIVO.uNoche.value = BRILLO_DE_LA_NOCHE.uNoche.value
+    // [ESCENA 10] T1: la noche en el logo (la del amanecer, hasta que su frente lo alcanza): la siguen el haz y las sombras.
+    VIVO.uNocheDelLogo.value = nocheDelLogo(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)
 
     if (e.E1) {
       const nivel = NIVELES_DEL_HAZ[e.haz]
       // [ESCENA 6] 6e: la parte de noche del haz sigue al encendido (1 sin él). [ESCENA 7] En el producto.
       let k = 1
       if (e.hazEncendido) {
-        const noche = VIVO.uNoche.value
+        const noche = VIVO.uNocheDelLogo.value
         m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, quieto)
         k = m.encendido.k
         encender(k)
@@ -152,6 +156,7 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
         hover: m.hover,
         empuje: VIVO.uEmpuje.value,
         noche: VIVO.uNoche.value,
+        nocheDelLogo: VIVO.uNocheDelLogo.value,
         estela: VIVO.uEstela.value,
         encendido: m.encendido === null ? null : { fase: m.encendido.fase, k: m.encendido.k },
       }

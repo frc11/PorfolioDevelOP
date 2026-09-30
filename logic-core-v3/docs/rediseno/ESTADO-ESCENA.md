@@ -1,11 +1,13 @@
-# Estado de la escena — después de CALIDAD 1 y ESCENA 9
+# Estado de la escena — después de CALIDAD 1, ESCENA 9 y ESCENA 10
 
 > Qué está encendido, qué banderas hay y qué hace cada una, los presupuestos, las **reglas de rendimiento que todo
 > efecto nuevo tiene que cumplir (§4)** y las fallas conocidas. La escena vive en `src/app/v3/_lib/escena/`; las
 > banderas, en `entorno.ts`. Las entregas medidas de cada sprint están en `~/.cache/b4-medicion/escena<N>/` y
 > `~/.cache/b4-medicion/calidad1/` (con un `mirar.txt` por carpeta). CALIDAD 1: rama `rediseno/home`, un commit por
 > punto; el informe es `docs/rediseno/CALIDAD-1.md`. ESCENA 9 (premium): un commit por ticket, las entregas en
-> `~/.cache/b4-medicion/escena9/`.
+> `~/.cache/b4-medicion/escena9/`. ESCENA 10 (el cierre de ESCENA 9, el video de Servicios y los títulos de volumen):
+> un commit por ticket, las entregas en `~/.cache/b4-medicion/escena10/`; desde ahí todo banco mide con la NVIDIA
+> (`BANCO_GPU=alta`).
 
 ---
 
@@ -13,10 +15,10 @@
 
 | Pieza | Qué hace | Dónde |
 |---|---|---|
-| E1 · óculo y haz (nivel `sutil`) | Columna de luz sobre el logo y polvo del haz; el charco lo pinta el piso vivo | `entorno/Haz.tsx`, `entorno/polvoVivo.ts` |
+| E1 · óculo y haz (nivel `sutil`) | Columna de luz sobre el logo y polvo del haz; el charco lo pinta el piso vivo. **[ESCENA 10] T1: sólo de noche** (de día casi no se veía: su nivel de día es cero), con la noche en el logo | `entorno/Haz.tsx`, `entorno/polvoVivo.ts` |
 | E4 · el pulso | El principal y el hover; con el piso vivo el anillo es una ONDA del piso | `entorno/maquinaDelPulso.ts`, `piso/` |
 | E6 · estela del polvo · E7 · el cursor | Como en ESCENA 6 | `entorno/polvoVivo.ts` |
-| Sombra con física | La mancha de contacto la pinta el piso vivo | `ContactOcclusion.tsx`, `entorno/sombra.ts` |
+| Sombra con física | La mancha de contacto la pinta el piso vivo. **[ESCENA 10] T1:** de día la blanda; de noche sólo la dura del haz (la blanda va a cero); con el haz apagado en su encendido, ninguna | `ContactOcclusion.tsx`, `entorno/sombra.ts`, `sombra/sombraDelHaz.ts` |
 | Moiré vivo (M1a + M2 + M3 + M4) | Como en ESCENA 6 | `moire/` |
 | Polvo parejo, 5c, 5d | Como en ESCENA 6. 5a (el obstáculo) se borró en ESCENA 9 (T1) | `polvo/` |
 | La formación («la fábrica gigante») | 6.839 copias negras en 59 filas, piso plano, niebla atrás (ESCENA 7, T2) | `formacion/` |
@@ -47,6 +49,12 @@
 | **[ESCENA 9] T4 · los bloques de adelante hacia atrás** | Los bloques del piso vivo se dibujan de adelante hacia atrás desde la cámara (ocho órdenes por sector, armados al cargar; se cambia sólo al cambiar de sector): la GPU descarta lo tapado antes de pintarlo. La misma imagen salvo aristas compartidas (empates de profundidad) | `piso/ordenDeLosBloques.ts` |
 | **[ESCENA 9] T4 · las cúpulas que no suman** | La de la vía láctea no se dibuja de día (ni en el túnel) y la del cielo de día no se dibuja de noche: las mismas condiciones que anulan su fragmento | `estrellas/Estrellas.tsx`, `cieloDeDia/CieloDeDia.tsx` |
 | **[ESCENA 9] T4 · el aire, en segundos** | Decide si hay scroll con una retención de 50 ms (el scroll se mueve de a píxeles enteros): la misma deriva a 60, 75, 120 y 144 Hz | `polvo/Aire.tsx` |
+| **[ESCENA 10] T1 · el logo de noche** | La variante «claro, borde blanco» de ESCENA 9 (T2): de noche los costados negros y las tapas con su gris y un filo casi blanco (10 unidades del SVG, 0,88 en pantalla); el amanecer guarda la noche con el mismo dibujo; de día no cambia | `logoDeNoche.ts` |
+| **[ESCENA 10] T1 · el negro satinado** | La tinta con los reflejos de un estudio generado al cargar (PMREM) y rugosidad 0,3, en el `MeshStandardMaterial` de siempre (sin laca el físico daba el mismo reflejo); los reflejos siguen a la luz principal: de noche se apagan | `estudio.ts`, `LuzDelLogo.tsx` |
+| **[ESCENA 10] T1 · la sombra del logo** | De día, la sombra de la principal sobre el piso vivo (mapa de varianza del logo solo, una lectura por píxel), junto con la mancha de contacto; cuánto: la principal por el día en el logo (sin el corte al 3 % de la prueba) | `sombra/delLogo.ts`, `LuzDelLogo.tsx` |
+| **[ESCENA 10] T1 · la noche en el logo** | `VIVO.uNocheDelLogo`: la noche de la sala, salvo en el amanecer, donde sigue de noche hasta que el frente del día alcanza al logo (la sala pasa a día de un cuadro al otro al empezar el barrido). La siguen el haz, su encendido, las manchas, la sombra del logo, el rebote y las motas del haz: el paso acompaña al día y al amanecer sin saltos (el mayor cambio entre dos cuadros del amanecer, 2,1 %) | `entorno/nocheDelLogo.ts`, `entorno/Entorno.tsx` |
+| **[ESCENA 10] T1 · el tono ACES compensado** | El color de ACES con la curva de brillo de Neutral (en un gris, Neutral exacto): el tono `Custom` de three, para todo el lienzo. Neutral como opción y AgX se borraron | `tono.ts`, `configuracionDelCanvas.ts` |
+| **[ESCENA 10] T1 · el scroll de nk** | Lenis en modo `lerp` 0,1 sobre la instancia de /v3 (la construcción sigue con las opciones del sitio); el sedoso se borró | `_componentes/lenisDeNk.ts` |
 
 ### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
 
@@ -75,24 +83,22 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 | `amanecer=no` | [ESCENA 8] T3 · sin el amanecer (el día vuelve escondido, como antes de ESCENA 7) |
 | `cielo-dia=no` | [CALIDAD 1] A2 · sin el cielo de día (queda el fondo de la bruma, como antes) |
 | `orden-piso=no` | [ESCENA 9] T4 · los bloques del piso vivo en el orden de la grilla (el de antes) |
+| `logo-noche=no` · `material=no` · `sombra-logo=no` | [ESCENA 10] T1 · sin el logo de noche claro, sin el satinado (el mate de antes) y sin la sombra del logo |
 
 ### Las pruebas (apagadas en el producto)
 
 [CALIDAD 1] A2: el cielo de día pasó al producto en su variante pintado-celeste; las otras cinco (el pintado mono, y los
 bloques y las partículas en los dos tonos) se borraron, código y banderas (`cielo-dia=<variante>-<tono>` ya no existe).
 
-[ESCENA 9] Las del sprint, para que decida Valentino. Con banco, en el pedido; **sin banco, en la URL**
-(`/v3?pruebas=logo-noche=fino`): sólo cambian las pruebas, el resto es el producto y no aparece ningún gancho del banco.
+[ESCENA 9] Las de ese sprint, para que decidiera Valentino; con banco, en el pedido; **sin banco, en la URL**
+(`/v3?pruebas=aa=taa`): sólo cambian las pruebas, el resto es el producto y no aparece ningún gancho del banco.
+**[ESCENA 10] T1:** decididas. Pasaron al producto el logo de noche claro, el negro satinado, la sombra del logo, ACES
+compensado y el scroll de nk (arriba); se borraron, código y banderas, `logo-noche=fino|grueso`, `material=brillante`,
+`bloom` (y su capa y su cadena de niveles), `tono=agx` (y Neutral como opción), `lenis=sedoso` y `titulos=dom|webgl`
+(con `_fuentes/chivo-400-latin.ttf`: los reemplaza T3 de ESCENA 10).
 
 | Token | Efecto |
 |---|---|
-| `logo-noche=fino` · `=grueso` · `=claro` | T2 · el logo de noche: costados sin emisión (negro), tapas con el gris de hoy y un borde en su contorno (negro fino, negro grueso o claro); el amanecer guarda la noche con el mismo dibujo; de día no cambia (`logoDeNoche.ts`) |
-| `material=satinado` · `=brillante` | T3 · el logo de material físico (el mismo color) con los reflejos de un estudio GENERADO al cargar: una sala oscura con softbox arriba del horizonte, filtrada por rugosidad (PMREM); satinado sin laca, brillante con laca. Los reflejos siguen a la luz de la sala: de noche se apagan (`estudio.ts`) |
-| `sombra-logo` | T3 · la sombra proyectada del logo por la luz principal sobre el piso vivo: un mapa de varianza de 256² del logo solo, desenfocado, y UNA lectura por píxel en el piso; convive con la mancha de contacto; de noche no se dibuja (`sombra/delLogo.ts`) |
-| `bloom` | T3 · un resplandor sólo de noche y sólo del haz, las estrellas y la fugaz: van en una capa propia y se vuelven a dibujar solos sobre la profundidad de la escena; la escena pasa a un búfer propio multimuestreado que se copia al lienzo (`gpu/posproceso.ts`, sin EffectComposer) |
-| `tono=agx` · `=aces` | T3 · el tono de three compensado: el color del tono pedido con el brillo de Neutral (en un gris da Neutral exacto) (`tono.ts`) |
-| `titulos=dom` · `=webgl` | T5 · los títulos de Portfolio y de la frase de Por qué develOP en 3D: la pieza se queda y las letras llegan con el progreso que la movía, acostadas sobre su base, de izquierda a derecha. `dom`: el título de verdad partido en letras con perspectiva de CSS (`_componentes/titulos3d/`); `webgl`: el título en la escena con troika (la misma Chivo, la luz, la niebla), en un módulo que sólo se descarga con la bandera, con la Chivo en TTF instanciada en 400 (`_fuentes/chivo-400-latin.ttf`: troika no lee WOFF2), y el del DOM transparente en su lugar (`escena/titulos/`). Con movimiento reducido las dos secciones montan su rama quieta y la prueba no se monta. La bandera se lee después de hidratar (`_lib/titulos3d/llegada.ts`) |
-| `lenis=nk` · `=sedoso` | T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075). Cambia las opciones de la instancia, no su construcción (`_componentes/lenisDePrueba.ts`) |
 | `aa=taa` · `=msaa8` | T3 · el antialiasing de las aristas en movimiento: TAA (la cámara corrida por Halton, el historial reproyectado con la profundidad y recortado a la vecindad; el polvo va aparte, encima) u 8 muestras en lugar de 4 (`gpu/posproceso.ts`) |
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
@@ -104,11 +110,11 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `estado()` y
 `aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
-`__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__logoDeNocheDelBanco`
-(`variante(v)`: las variantes del logo de noche en vivo, para compararlas en el mismo cuadro), `__materialDelLogoDelBanco`
-(`variante(v)`), `__sombraDelLogoDelBanco` (`poner(prendida)`, `mapa()`, `depurar()`) y `__posprocesoDelBanco` (`bloom`
-y `taa` en vivo, `dibujar()`, `pasos(n)`: la GPU de cada paso del posproceso); T4: `__pisoDelBanco.orden(prendido,
-estricta)` (los bloques en el orden nuevo o en el de la grilla) y `__lenisDelBanco.poner(v)` (la curva en vivo). [CALIDAD 1]
+`__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__sombraDelLogoDelBanco`
+(`poner(prendida)`, `mapa()`; [ESCENA 10] `fuerza()`) y `__posprocesoDelBanco` (`taa` en vivo, `dibujar()`, `pasos(n)`: la
+GPU de cada paso del posproceso); T4: `__pisoDelBanco.orden(prendido, estricta)` (los bloques en el orden nuevo o en el de
+la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; `__logoDeNocheDelBanco`,
+`__materialDelLogoDelBanco` y `__lenisDelBanco` se borraron con sus variantes. [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
 arranca apagada con banco, `activa(true)`).
@@ -181,6 +187,11 @@ entero, `escena9/t4-fluidez/motor/`):
 Cuadros perdidos con vsync a 1440 con dpr 1,5: AMD 356 → 139 (90 de Servicios); NVIDIA 80, todos de Servicios (el video
 de muestra de la sección, ver §6).
 
+**[ESCENA 10] T1 · el producto después del cierre** (1440, NVIDIA, el último cuadro de cada momento): de día **23–24
+llamadas y 138.532 triángulos** (antes 19–20 y 127.680: el mapa de la sombra del logo, las copias del logo y las dos
+pasadas de su desenfoque); de noche 20–21 y 122.624 (la sombra no se dibuja). Lo que costaban en la integrada, en ESCENA 9
+(arriba): el satinado +0,0 a +0,2 ms, la sombra +0,3 a +0,6 de día, ACES compensado +0,2 a +0,6.
+
 ## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
 
 1. **Todo en segundos, nunca en cuadros.** Lo que se mueve integra con el `dt` del cuadro, acotado contra los
@@ -210,12 +221,15 @@ de muestra de la sección, ver §6).
    cuestan más de un segundo por programa (B8 lo midió); si hace falta una tabla, una textura.
 9. **Que aguante la calidad adaptativa.** El dpr puede bajar a 0,7 veces el tope y las motas al 65 % (B11): el efecto
    tiene que verse bien ahí. Y nada redimensiona el lienzo ni sus búferes en medio del scroll: cuesta 30–60 ms de hilo.
-10. **Los colores canónicos no se mueven.** El tone mapping es Neutral (B9): el piso, el papel y el cielo en reposo,
-    ΔE < 2 contra lo aprobado. Un cambio de color de salida se mide con `scripts-calidad/b9-tono.ts`.
+10. **Los colores canónicos no se mueven.** El piso, el papel y el cielo en reposo, ΔE < 2 contra lo aprobado; un cambio
+    de color de salida se mide con `scripts-calidad/b9-tono.ts`. [ESCENA 10] T1: el tone mapping es ACES COMPENSADO (la
+    elección de Valentino en ESCENA 9): en un gris da Neutral exacto, pero corre los blancos cálidos del papel y del piso
+    ΔE 2,0–2,7 (medido en ESCENA 9, `t3-tono`): la excepción es de la elección, no un defecto a corregir.
 
 ## 5 · Los invariantes
 
-`npm run test:s35-escena9` ([ESCENA 9] una sección por ticket, con sus controles positivos),
+`npm run test:s36-escena10` ([ESCENA 10] una sección por ticket, con sus controles positivos),
+`npm run test:s35-escena9` ([ESCENA 9] una sección por ticket; ajustada a lo que ESCENA 10 decidió),
 `npm run test:s34-calidad1` ([CALIDAD 1] una sección por punto, A1 a A3 y B0 a B12, con sus controles positivos),
 `npm run test:s33-escena8` (una sección por ticket, T1 a T5, con sus controles positivos),
 `test:s32-escena7` (lo de ESCENA 7 que sigue; ajustado a lo que ESCENA 8 cambió), `test:s31-escena6`,
@@ -248,6 +262,11 @@ los bloques: la GPU y la imagen en el mismo cuadro), `t4-invisibles` (las cúpul
 llegada de cada variante en las dos secciones, con y sin movimiento reducido). `motor.ts` escribe
 en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`); `fluidez.ts` graba otras comparaciones
 (`RAIZ`, `PEDIDO`, `LADO`); cualquier banco mide con la NVIDIA con `BANCO_GPU=alta`.
+
+[ESCENA 10] Los bancos del sprint (`scripts-escena10/`, los mismos instrumentos, con la NVIDIA): T1: `t1-momentos` (los
+cinco momentos del producto que esté en el servidor, con un rótulo, y la hoja antes/después), `t1-pasos` (el anochecer y
+el amanecer grabados, recortados al logo y al piso) y `t1-sonda` (la noche de la sala y la del logo, el encendido y la
+fuerza de la sombra, cada segundo).
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -287,16 +306,8 @@ en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`);
   de las aristas de geometría (es el límite del MSAA de 4 muestras: pide TAA o más muestras) y los recortes del
   teléfono (sin un teléfono para medir; el menú está en `calidad1/b12-telefono/`).
   → [ESCENA 9] T3 los probó con bandera (abajo).
-- **[ESCENA 9] T3 · por decidir (Valentino):** el material (satinado, brillante o ninguno), la sombra proyectada y el
-  bloom de noche (caro en la integrada: +3,5 ms de noche). Propuestas: el tono se queda Neutral (compensados, AgX y
-  ACES casi no cambian la imagen, pero los blancos cálidos del papel y del piso llegan a ΔE 2,0–2,7); el antialiasing,
-  ninguno en la integrada (+3,5 a +4,6 ms los dos; el TAA además ablanda la línea del bisel). Qué mirar:
-  `escena9/t3-material-y-luz/mirar.txt`.
-- **[ESCENA 9] T4 · por decidir (Valentino):** el scroll suave (`lenis=nk` o `lenis=sedoso`; medido: la curva de hoy ya
-  es la de nk) y el video de Servicios. Lo que queda en la integrada con dpr 1,5 (49 cuadros perdidos fuera de Servicios)
-  es la formación y el piso de abajo: bajarlos cambia la imagen. Qué mirar: `escena9/t4-fluidez/mirar.txt`.
-- **[ESCENA 9] T5 · por decidir (Valentino):** los títulos en 3D (`titulos=dom` o `titulos=webgl`, o ninguno). Qué mirar:
-  `escena9/t5-titulos/mirar.txt`.
+- ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2). El antialiasing (`aa=`) no se
+  decidió en T1; queda como prueba.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

@@ -49,25 +49,27 @@ export const CAMARA_DEL_CANVAS = {
  */
 // [CALIDAD 1] B8: el dithering de los materiales, con ruido azul (`ruidoAzul.ts`). Antes de compilar la escena.
 instalarElRuidoAzul()
-// [ESCENA 9] T3 · la prueba del tono (AgX o ACES compensados, `tono.ts`): también antes de compilar nada.
-const TONO_DE_PRUEBA = instalarElTono(entornoDeLaEscena().pruebas.tono)
+// [ESCENA 10] T1 · el tono ACES compensado (`tono.ts`): también antes de compilar nada.
+instalarElTono()
 
 const COMUN = {
   /** Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás. */
   alpha: false,
   powerPreference: 'high-performance' as const,
   /**
-   * r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el blanco
-   * del papel y mantiene el matiz de la luz de color al mover la temperatura.
+   * r3f pone ACES por default. Hasta ESCENA 9 fue Neutral (Khronos PBR Neutral):
+   * conserva el blanco del papel y el matiz de la luz de color.
    *
-   * [CALIDAD 1] B9 · ACES y AgX, MEDIDOS contra este, en los cinco momentos, con
-   * la exposición compensada para igualar el piso (`scripts-calidad/b9-tono.ts`):
-   * ninguno deja los colores canónicos en ΔE < 2 (CIEDE2000). ACES corre el piso
-   * 2,5–2,8 y el cielo del hero 2,1; AgX no llega al blanco del piso ni con
-   * exposición 4 y compensado queda en 3–4,3. Se queda Neutral. La salida es
-   * sRGB y los materiales propios codifican su color a sRGB (lo verificó B9).
+   * [CALIDAD 1] B9 · ACES y AgX, MEDIDOS contra Neutral con la exposición
+   * compensada (`scripts-calidad/b9-tono.ts`): ninguno dejaba los colores
+   * canónicos en ΔE < 2 (ACES corría el piso 2,5–2,8).
+   *
+   * [ESCENA 10] T1 · el tono es ACES COMPENSADO (`tono.ts`, el `Custom` de three):
+   * el color de ACES con la curva de brillo de Neutral. En un gris da Neutral
+   * exacto; en un color, la cromaticidad de ACES. Lo eligió Valentino en ESCENA 9
+   * (T3); lo que corre los blancos cálidos está en ESTADO-ESCENA §4, regla 10.
    */
-  toneMapping: THREE.NeutralToneMapping,
+  toneMapping: THREE.CustomToneMapping,
 } as const
 
 /**
@@ -81,25 +83,19 @@ const CONTEXTOS: Readonly<Record<NivelDeCalidad, typeof COMUN & { readonly antia
   compacta: { ...COMUN, antialias: AJUSTES.compacta.antialias },
 }
 
-/** El contexto con las pruebas de esta carga (el tono y el antialias pueden cambiar; el resto es el de siempre). */
-type ContextoConPruebas = Omit<(typeof CONTEXTOS)[NivelDeCalidad], 'toneMapping'> & { readonly toneMapping: THREE.ToneMapping }
-
 /**
- * [ESCENA 9] T3 · con las pruebas, un contexto propio por nivel, fijo (se arma una vez por carga: las banderas no
- * cambian): el tono propio (`Custom`) con la prueba del tono, y SIN el antialias del lienzo con el posproceso (el bloom
- * o el antialiasing de prueba): ahí las muestras las pone su búfer, y el lienzo sólo recibe la copia final (con las suyas
- * serían dos resoluciones de MSAA por cuadro).
+ * [ESCENA 9] T3 · con la prueba del antialiasing, un contexto propio por nivel, fijo (se arma una vez por carga: las
+ * banderas no cambian), SIN el antialias del lienzo: las muestras las pone el búfer del posproceso, y el lienzo sólo
+ * recibe la copia final (con las suyas serían dos resoluciones de MSAA por cuadro).
  */
-function conPruebas(base: (typeof CONTEXTOS)[NivelDeCalidad]): ContextoConPruebas {
-  const { pruebas } = entornoDeLaEscena()
-  const posproceso = pruebas.bloom || pruebas.aa !== 'no'
-  return { ...base, toneMapping: TONO_DE_PRUEBA ? THREE.CustomToneMapping : base.toneMapping, antialias: posproceso ? false : base.antialias }
+function sinMuestras(base: (typeof CONTEXTOS)[NivelDeCalidad]): (typeof CONTEXTOS)[NivelDeCalidad] {
+  return { ...base, antialias: false }
 }
-const CONTEXTOS_CON_PRUEBAS: Readonly<Record<NivelDeCalidad, ContextoConPruebas>> = { plena: conPruebas(CONTEXTOS.plena), compacta: conPruebas(CONTEXTOS.compacta) }
-const HAY_PRUEBAS_DEL_CONTEXTO = TONO_DE_PRUEBA || entornoDeLaEscena().pruebas.bloom || entornoDeLaEscena().pruebas.aa !== 'no'
+const CONTEXTOS_CON_POSPROCESO: Readonly<Record<NivelDeCalidad, (typeof CONTEXTOS)[NivelDeCalidad]>> = { plena: sinMuestras(CONTEXTOS.plena), compacta: sinMuestras(CONTEXTOS.compacta) }
+const CON_POSPROCESO = entornoDeLaEscena().pruebas.aa !== 'no'
 
-export function contextoDe(nivel: NivelDeCalidad): ContextoConPruebas {
-  return HAY_PRUEBAS_DEL_CONTEXTO ? CONTEXTOS_CON_PRUEBAS[nivel] : CONTEXTOS[nivel]
+export function contextoDe(nivel: NivelDeCalidad): (typeof CONTEXTOS)[NivelDeCalidad] {
+  return CON_POSPROCESO ? CONTEXTOS_CON_POSPROCESO[nivel] : CONTEXTOS[nivel]
 }
 
 /**

@@ -68,6 +68,7 @@ uniform float uAspecto;
 uniform vec3 uCursorAlcance;
 uniform float uHaz;
 uniform float uNoche;
+uniform float uNocheDelLogo;
 varying vec2 vDireccion;
 varying float vEstira;
 varying float vAlfa;
@@ -100,8 +101,9 @@ const CUERPO_VERTEX = /* glsl */ `
 		vec4 mundo = modelMatrix * vec4( transformed, 1.0 );
 		float alto = clamp( ( mundo.y - ${FLOOR_Y.toFixed(4)} ) / ( ${HAZ.arriba.toFixed(1)} - ${FLOOR_Y.toFixed(4)} ), 0.0, 1.0 );
 		float radio = mix( ${HAZ.radioAbajo.toFixed(2)}, ${HAZ.radioArriba.toFixed(2)}, alto );
-		vEnElHaz = uHaz * ( 1.0 - smoothstep( 0.55, 1.0, length( mundo.xz ) / radio ) );
-		gl_PointSize *= 1.0 + mix( 0.55, 0.35, uNoche ) * vEnElHaz;
+		// [ESCENA 10] T1: el haz existe sólo con la noche en el logo (de día se sacó).
+		vEnElHaz = uHaz * uNocheDelLogo * ( 1.0 - smoothstep( 0.55, 1.0, length( mundo.xz ) / radio ) );
+		gl_PointSize *= 1.0 + mix( 0.55, 0.35, uNocheDelLogo ) * vEnElHaz;
 	#endif
 	#ifdef POLVO_ESTELA
 		float largo = min( length( enPixeles ) * uEstela, 22.0 * cerca + 4.0 );
@@ -119,6 +121,7 @@ const CUERPO_VERTEX = /* glsl */ `
 
 // `uNoche` ya lo declara `conBrilloDeNoche`, que corre antes: acá se usa, no se redeclara.
 const PARS_FRAGMENT = /* glsl */ `
+uniform float uNocheDelLogo;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 varying vec2 vDireccion;
@@ -152,9 +155,9 @@ const MAPA_DE_LA_CAPSULA = /* glsl */ `
  */
 const LUZ_DEL_HAZ = /* glsl */ `
 	#ifdef POLVO_HAZ
-		vec3 luzDelHaz = mix( vec3( 0.72, 0.58, 0.36 ), vec3( 0.82, 0.9, 1.0 ), uNoche );
-		float cuantoHaz = vEnElHaz * mix( uHazDia.z, uHazNoche.z, uNoche );
+		vec3 luzDelHaz = mix( vec3( 0.72, 0.58, 0.36 ), vec3( 0.82, 0.9, 1.0 ), uNocheDelLogo );
+		float cuantoHaz = vEnElHaz * mix( uHazDia.z, uHazNoche.z, uNocheDelLogo );
 		diffuseColor.rgb = mix( diffuseColor.rgb, luzDelHaz, cuantoHaz );
-		diffuseColor.a = min( 1.0, diffuseColor.a * ( 1.0 + mix( 1.0, 0.6, uNoche ) * vEnElHaz ) );
+		diffuseColor.a = min( 1.0, diffuseColor.a * ( 1.0 + mix( 1.0, 0.6, uNocheDelLogo ) * vEnElHaz ) );
 	#endif
 `

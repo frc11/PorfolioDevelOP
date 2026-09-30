@@ -7,7 +7,7 @@ import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
-import { instalarLenisDePrueba } from './lenisDePrueba'
+import { ponerElModoDeNk } from './lenisDeNk'
 import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
 
 /**
@@ -21,7 +21,9 @@ import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
  * ── Lo que hace, entero ───────────────────────────────────────────────────
  *
  * Construye una instancia con `OPCIONES_DE_LENIS` —**la configuración del sitio
- * vivo, importada, no copiada**— y le da un `requestAnimationFrame`. Nada más.
+ * vivo, importada, no copiada**— y le da un `requestAnimationFrame`. [ESCENA 10]
+ * T1: y le pone el modo de nk (`lenisDeNk.ts`: `lerp` 0,1, sin duración), que
+ * cambia las opciones de la instancia y no su construcción.
  *
  * ── ⚠️ Lo que NO hace, y cada cosa tiene su razón ─────────────────────────
  *
@@ -70,8 +72,8 @@ export default function ScrollSuaveDeV3(): null {
 
   useEffect(() => {
     const lenis = new Lenis({ ...OPCIONES_DE_LENIS })
-    // [ESCENA 9] T4 · la prueba de la curva (bandera `lenis=`): cambia las opciones de la instancia, no su construcción.
-    const soltarLaPrueba = instalarLenisDePrueba(lenis)
+    // [ESCENA 10] T1 · el modo de nk (era la prueba `lenis=nk` de ESCENA 9): las opciones de la instancia, no su construcción.
+    ponerElModoDeNk(lenis)
     instancia.current = lenis
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
@@ -85,7 +87,6 @@ export default function ScrollSuaveDeV3(): null {
       // cancela el pedido de cuadro y después se destruye. Al revés queda un
       // `rAF` vivo pidiendo cuadros sobre una instancia muerta.
       cancelAnimationFrame(pedido)
-      soltarLaPrueba()
       lenis.destroy()
       instancia.current = null
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)

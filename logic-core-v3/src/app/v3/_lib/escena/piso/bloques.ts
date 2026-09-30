@@ -323,6 +323,7 @@ float altoDelBloque( ivec2 c ) {
         '#include <common>',
         `#include <common>
 uniform float uHaz;
+uniform float uNocheDelLogo;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 uniform vec2 uLuzDelBisel;
@@ -368,7 +369,7 @@ ${conSombra ? SOMBRA_DEL_LOGO_GLSL : ''}`,
 		vec2 m = manchaDelContacto( vPiso.xz );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.x );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.y );
-		// [ESCENA 9] T3 · con la prueba, la sombra proyectada del logo (con la luz principal), conviviendo con la mancha.
+		// [ESCENA 10] T1 · la sombra proyectada del logo (con la luz principal, de día), conviviendo con la mancha.
 		${conSombra ? APLICAR_LA_SOMBRA_GLSL : ''}
 		gl_FragColor.rgb += charcoDelHaz( vPiso.xz ) * uHaz;
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, vec3( uNoche ), cuantoDelPulso( length( vPiso.xz ) ) );

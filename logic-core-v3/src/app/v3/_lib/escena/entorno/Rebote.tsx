@@ -24,7 +24,7 @@ export const REBOTE = {
 } as const
 
 const PARS = /* glsl */ `
-uniform float uNoche;
+uniform float uNocheDelLogo;
 uniform vec3 uHazDia;
 uniform vec3 uHazNoche;
 uniform float uRebote;
@@ -62,8 +62,8 @@ function ReboteEnElLogo({ logoMaterialRef }: PropsDelRebote) {
       parchear(material, uRebote.current)
       hecho.current = material
     }
-    // Sólo de noche: de día el charco es papel sobre papel.
-    uRebote.current.value = REBOTE.cuanto * VIVO.uNoche.value
+    // Sólo de noche: de día el charco es papel sobre papel. [ESCENA 10] T1: con la noche en el logo, como el haz.
+    uRebote.current.value = REBOTE.cuanto * VIVO.uNocheDelLogo.value
   })
 
   return null
@@ -74,7 +74,7 @@ function parchear(material: THREE.MeshStandardMaterial, uRebote: { value: number
   const clavePrevia = material.customProgramCacheKey.bind(material)
   material.onBeforeCompile = (shader, renderer) => {
     previo(shader, renderer)
-    Object.assign(shader.uniforms, { uNoche: VIVO.uNoche, uHazDia: VIVO.uHazDia, uHazNoche: VIVO.uHazNoche, uRebote })
+    Object.assign(shader.uniforms, { uNocheDelLogo: VIVO.uNocheDelLogo, uHazDia: VIVO.uHazDia, uHazNoche: VIVO.uHazNoche, uRebote })
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vMundoDelRebote;')
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\n\tvMundoDelRebote = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;')

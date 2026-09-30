@@ -6,9 +6,9 @@ import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
 import { conCantosSuaves } from './cantosDelLogo'
-import { entornoDeLaEscena, hayBanco } from './entorno'
-import { MATERIALES_DEL_LOGO, aplicarMaterial, ponerElEstudio, type MaterialDelLogo } from './estudio'
-import { aplicarVariante, conLogoDeNoche, hornearElContorno, type VarianteDelLogoDeNoche } from './logoDeNoche'
+import { entornoDeLaEscena } from './entorno'
+import { SATINADO, ponerElEstudio } from './estudio'
+import { conLogoDeNoche, hornearElContorno } from './logoDeNoche'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
 
@@ -31,11 +31,6 @@ const SVG_FLIP: readonly [number, number, number] = [Math.PI, 0, 0]
 
 /** Los puntos por curva del SVG en la extrusión (el default de three): el contorno de las tapas usa los mismos. */
 const CURVAS_DE_LA_EXTRUSION = 12
-
-type VentanaDelBanco = Window & {
-  __logoDeNocheDelBanco?: { variante: (v: VarianteDelLogoDeNoche | 'no') => void }
-  __materialDelLogoDelBanco?: { variante: (v: MaterialDelLogo | 'no') => void }
-}
 
 type ProbeLogoProps = {
   stats: ProbeStatsStore
@@ -112,7 +107,9 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
    * Los parámetros no cambiaron y su porqué tampoco:
    *
    * Negro MATE, la decisión ya tomada del sprint: `metalness=0`, sin entorno que
-   * reflejar (el HDRI de 1,27 MiB del hero) y sin cromado.
+   * reflejar (el HDRI de 1,27 MiB del hero) y sin cromado. [ESCENA 10] T1: negro
+   * SATINADO — el mismo color con los reflejos de un estudio generado al cargar
+   * (`estudio.ts`; nada que descargar) y su rugosidad.
    *
    * **Lo que S6 corrigió es la rugosidad, y es el número que le da forma al
    * objeto.** Un negro de albedo casi nulo no se describe con luz difusa —por más
@@ -127,47 +124,32 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
    * sus contornos.
    */
   const gl = useThree((s) => s.gl)
-  const { material, logoDeNoche } = useMemo(() => {
-    const parametros = {
+  const { material, contorno } = useMemo(() => {
+    const e = entornoDeLaEscena()
+    const built = new THREE.MeshStandardMaterial({
       color: INK_COLOR,
-      roughness: INK_ROUGHNESS,
+      // [ESCENA 10] T1: el negro satinado (el banco lo apaga con `material=no`).
+      roughness: e.materialDelLogo ? SATINADO.roughness : INK_ROUGHNESS,
       metalness: 0,
       side: THREE.DoubleSide,
       // [CALIDAD 1] B8: con dithering (ruido azul): la noche del logo sin escalones.
       dithering: true,
-    }
-    // [ESCENA 9] T3 · la prueba del material físico con reflejos de estudio (bandera `material`): el mismo color, un
-    // entorno generado al cargar y la rugosidad y la laca de la variante (`estudio.ts`).
-    const pedido = entornoDeLaEscena().pruebas.materialDelLogo
-    const built = pedido === 'no' ? new THREE.MeshStandardMaterial(parametros) : new THREE.MeshPhysicalMaterial({ ...parametros, ...MATERIALES_DEL_LOGO[pedido] })
-    // [ESCENA 9] T2 · la prueba del logo de noche (bandera `logo-noche`): costados negros, tapas con borde.
-    const variante = entornoDeLaEscena().pruebas.logoDeNoche
-    if (variante === 'no') return { material: built, logoDeNoche: null }
-    const contorno = hornearElContorno(geometries.shapes, CURVAS_DE_LA_EXTRUSION, geometries.center)
-    return { material: built, logoDeNoche: { contorno, uniforms: conLogoDeNoche(built, contorno, variante) } }
+    })
+    // [ESCENA 10] T1: el logo de noche, costados negros y tapas con un filo claro (el banco lo apaga con `logo-noche=no`).
+    if (!e.logoDeNoche) return { material: built, contorno: null }
+    const horneado = hornearElContorno(geometries.shapes, CURVAS_DE_LA_EXTRUSION, geometries.center)
+    conLogoDeNoche(built, horneado)
+    return { material: built, contorno: horneado }
   }, [geometries])
 
   // [ESCENA 9] T3 · el estudio: un búfer que arma y suelta CADA montaje (en desarrollo React monta dos veces: uno armado
-  // en el render y soltado en la limpieza dejaba el entorno negro). Con banco, las variantes se cambian en vivo.
+  // en el render y soltado en la limpieza dejaba el entorno negro).
   useEffect(() => {
-    if (!(material instanceof THREE.MeshPhysicalMaterial)) return undefined
-    const sacar = ponerElEstudio(material, gl)
-    if (hayBanco()) (window as VentanaDelBanco).__materialDelLogoDelBanco = { variante: (v) => aplicarMaterial(material, v) }
-    return () => {
-      sacar()
-      delete (window as VentanaDelBanco).__materialDelLogoDelBanco
-    }
+    if (!entornoDeLaEscena().materialDelLogo) return undefined
+    return ponerElEstudio(material, gl)
   }, [material, gl])
 
-  // [ESCENA 9] T2 · con banco, las variantes se cambian en vivo (para compararlas en el mismo cuadro).
-  useEffect(() => {
-    if (logoDeNoche === null) return undefined
-    if (hayBanco()) (window as VentanaDelBanco).__logoDeNocheDelBanco = { variante: (v) => aplicarVariante(logoDeNoche.uniforms, v) }
-    return () => {
-      logoDeNoche.contorno.textura.dispose()
-      delete (window as VentanaDelBanco).__logoDeNocheDelBanco
-    }
-  }, [logoDeNoche])
+  useEffect(() => () => contorno?.textura.dispose(), [contorno])
 
   // El material sale por el ref para que el rig le escriba la emisiva (B13). Un
   // efecto y no el render: escribir un ref durante el render es un efecto

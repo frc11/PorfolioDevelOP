@@ -197,7 +197,7 @@ function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THRE
 }
 
 function armar(grilla: Grilla, conContacto: boolean) {
-  const conSombra = entornoDeLaEscena().pruebas.sombraDelLogo
+  const conSombra = entornoDeLaEscena().sombraDelLogo
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
@@ -226,12 +226,13 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uHaz,
     uLuzDelBisel,
     uNoche: VIVO.uNoche,
+    uNocheDelLogo: VIVO.uNocheDelLogo,
     uTiempo: VIVO.uTiempo,
     uAnillos: VIVO.uAnillos,
     uHazDia: VIVO.uHazDia,
     uHazNoche: VIVO.uHazNoche,
     ...MANCHA_EN_EL_PISO,
-    // [ESCENA 9] T3 · la prueba de la sombra proyectada del logo.
+    // [ESCENA 10] T1 · la sombra proyectada del logo (era la prueba T3 de ESCENA 9).
     ...(conSombra ? SOMBRA_EN_VIVO : {}),
   }, conContacto, conSombra)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.

@@ -79,9 +79,10 @@ controlPositivo('y una forma sin escala no', formaDelLogo({ x: 515, y: 546 }, 0)
 
 // ── §6 · la sombra según el haz ───────────────────────────────────────────
 titulo('§6 · la sombra según el haz (5c)')
-afirmarIgual(manchasDelHaz(1, false), { escalaBlanda: 1, opacidadBlanda: 1, escalaDura: 1, opacidadDura: 0 }, 'sin el haz la mancha es la de siempre')
-const noche = manchasDelHaz(1, true)
-const dia = manchasDelHaz(0, true)
+afirmarIgual(manchasDelHaz(1, 1, false), { escalaBlanda: 1, opacidadBlanda: 1, escalaDura: 1, opacidadDura: 0 }, 'sin el haz la mancha es la de siempre')
+// [ESCENA 10] T1: la noche y lo prendido del haz van por separado (la blanda sigue a la noche; la dura, a la noche por `k`).
+const noche = manchasDelHaz(1, 1, true)
+const dia = manchasDelHaz(0, 1, true)
 afirmar(noche.opacidadDura > 1 && dia.opacidadDura === 0, 'de noche aparece la mancha dura y oscura; de día no')
 afirmar(dia.escalaBlanda > 1 && dia.opacidadBlanda < 1, 'de día la blanda se abre y se aclara')
 

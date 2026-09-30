@@ -15,6 +15,11 @@ export const VIVO = {
   uTiempo: { value: 0 },
   /** 0 de día, 1 de noche: el mismo nivel que ya aclara las motas (`particleGlow.ts`). */
   uNoche: { value: 0 },
+  /**
+   * [ESCENA 10] T1 · la noche EN EL LOGO: la de la sala, salvo en el amanecer, donde sigue de noche hasta que el frente
+   * del día alcanza al logo (`nocheDelLogo.ts`). La siguen el haz (sólo de noche), las manchas de contacto y la sombra.
+   */
+  uNocheDelLogo: { value: 0 },
   /** E6 · una copia AMORTIGUADA de la vista-proyección: la estela es la distancia a ella. */
   uVPPrevio: { value: new THREE.Matrix4() },
   /** El búfer de dibujo, en píxeles de dispositivo. */
@@ -50,12 +55,13 @@ export const HAZ = {
  * E1 · LOS DOS NIVELES DEL HAZ — (columna, mancha en el piso, polvo dentro del haz).
  *
  * - **Noche**: el `medio` es la mitad de ESCENA 2 (0,16 / 0,2 / 0,9): luz ambiente, no un foco.
- * - **Día**: sobre papel blanco la luz aditiva casi no suma, así que la columna se lee por el
- *   polvo que la cruza (más grande y ámbar) y por una mancha de luz suave en el piso, que todavía
- *   tiene margen hasta el blanco.
+ * - **Día**: sobre papel blanco la luz aditiva casi no suma, así que la columna se leía por el
+ *   polvo que la cruza (más grande y ámbar) y por una mancha de luz suave en el piso.
+ *   [ESCENA 10] T1: en el producto (`sutil`) el haz se saca de día (casi no se veía): cero, y
+ *   aparece con la noche en el logo. El `medio` (sólo para comparar) conserva el suyo.
  */
 export const NIVELES_DEL_HAZ: Readonly<Record<NivelDelHaz, { readonly dia: readonly [number, number, number]; readonly noche: readonly [number, number, number] }>> = {
-  sutil: { dia: [0.045, 0.05, 0.4], noche: [0.05, 0.06, 0.3] },
+  sutil: { dia: [0, 0, 0], noche: [0.05, 0.06, 0.3] },
   medio: { dia: [0.07, 0.09, 0.62], noche: [0.08, 0.1, 0.45] },
 }
 

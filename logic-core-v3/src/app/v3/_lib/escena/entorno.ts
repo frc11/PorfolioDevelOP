@@ -41,8 +41,13 @@
  * (`cieloDeDia`; el banco lo apaga con `cielo-dia=no`). Las otras cinco se borraron, código y banderas. El celeste
  * rompe la regla monocroma de DIRECCION-ESCENA: es una excepción aprobada (ESTADO-ESCENA.md).
  *
- * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco las prende. Después de A2 no
- * queda ninguna.
+ * **[ESCENA 10] T1 · el cierre de ESCENA 9**: pasan al producto el logo de noche en su variante clara (`logoDeNoche`; el
+ * banco lo apaga con `logo-noche=no`), el negro satinado con los reflejos del estudio (`materialDelLogo`, `material=no`),
+ * la sombra del logo sobre el piso vivo (`sombraDelLogo`, `sombra-logo=no`), el tono ACES compensado (sin bandera: es el
+ * tono del lienzo, `tono.ts`) y el scroll suave de nk (`_componentes/lenisDeNk.ts`). El bloom, el brillante, AgX, el
+ * sedoso, las otras dos variantes del logo de noche y los títulos de ESCENA 9 se borraron, código y banderas.
+ *
+ * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco (o la URL) las prende.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
  *
@@ -54,9 +59,6 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
-import type { VarianteDelLogoDeNoche } from './logoDeNoche'
-import type { TonoDePrueba } from './tono'
-
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
 export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
@@ -64,36 +66,17 @@ export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 export type NivelDelHaz = 'sutil' | 'medio'
 
 /**
- * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de este sprint,
- * para que decida Valentino: cada una con su bandera, apagada en el producto.
+ * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de ese sprint, para
+ * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; queda el
+ * antialiasing, que no se decidió.
  */
-/** [ESCENA 9] T4 · las dos curvas del scroll suave a prueba (`_componentes/lenisDePrueba.ts`). */
-export type LenisDePrueba = 'nk' | 'sedoso'
-
-/** [ESCENA 9] T5 · las dos variantes de los títulos en 3D: en el DOM o en la escena. */
-export type TitulosDePrueba = 'dom' | 'webgl'
-
 export interface Pruebas {
-  /** [ESCENA 9] T2 · el logo de noche: costados negros, tapas grises con borde (`logoDeNoche.ts`); `logo-noche=<variante>`. */
-  readonly logoDeNoche: VarianteDelLogoDeNoche | 'no'
-  /** [ESCENA 9] T3 · el material del logo con reflejos de estudio (`estudio.ts`); `material=satinado|brillante`. */
-  readonly materialDelLogo: 'satinado' | 'brillante' | 'no'
-  /** [ESCENA 9] T3 · la sombra proyectada del logo sobre el piso vivo (`sombra/delLogo.ts`); `sombra-logo`. */
-  readonly sombraDelLogo: boolean
-  /** [ESCENA 9] T3 · el bloom de noche: el haz, las estrellas brillantes y la fugaz (`gpu/posproceso.ts`); `bloom`. */
-  readonly bloom: boolean
-  /** [ESCENA 9] T3 · el tono AgX o ACES, compensado (`tono.ts`); `tono=agx|aces`. */
-  readonly tono: TonoDePrueba | 'no'
   /** [ESCENA 9] T3 · el antialiasing de las aristas en movimiento (`gpu/posproceso.ts`); `aa=taa|msaa8`. */
   readonly aa: 'taa' | 'msaa8' | 'no'
-  /** [ESCENA 9] T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075); `lenis=nk|sedoso`. */
-  readonly lenis: LenisDePrueba | 'no'
-  /** [ESCENA 9] T5 · los títulos en 3D de Portfolio y Por qué develOP (`_lib/titulos3d/llegada.ts`); `titulos=dom|webgl`. */
-  readonly titulos: TitulosDePrueba | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no', lenis: 'no', titulos: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { aa: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -101,16 +84,9 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 }
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(valor: (clave: string) => string | undefined, partes: ReadonlySet<string>): Pruebas {
+function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
-    logoDeNoche: unoDe<VarianteDelLogoDeNoche>(['fino', 'grueso', 'claro'], valor('logo-noche')),
-    materialDelLogo: unoDe(['satinado', 'brillante'] as const, valor('material')),
-    sombraDelLogo: partes.has('sombra-logo'),
-    bloom: partes.has('bloom'),
-    tono: unoDe<TonoDePrueba>(['agx', 'aces'], valor('tono')),
     aa: unoDe(['taa', 'msaa8'] as const, valor('aa')),
-    lenis: unoDe<LenisDePrueba>(['nk', 'sedoso'], valor('lenis')),
-    titulos: unoDe<TitulosDePrueba>(['dom', 'webgl'], valor('titulos')),
   }
 }
 
@@ -162,6 +138,12 @@ export interface Entorno {
   readonly amanecer: boolean
   /** [ESCENA 8] T4 · el cielo de día (`cieloDeDia/`). [CALIDAD 1] A2: el pintado celeste, encendido. */
   readonly cieloDeDia: boolean
+  /** [ESCENA 10] T1 · el logo de noche: costados negros y tapas con un filo claro (`logoDeNoche.ts`; era T2 de ESCENA 9). */
+  readonly logoDeNoche: boolean
+  /** [ESCENA 10] T1 · el negro satinado con los reflejos del estudio (`estudio.ts`; era T3 de ESCENA 9). */
+  readonly materialDelLogo: boolean
+  /** [ESCENA 10] T1 · la sombra del logo sobre el piso vivo, de día (`sombra/delLogo.ts`; era T3 de ESCENA 9). */
+  readonly sombraDelLogo: boolean
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -192,6 +174,9 @@ export const ENTORNO: Entorno = {
   limite: true,
   amanecer: true,
   cieloDeDia: true,
+  logoDeNoche: true,
+  materialDelLogo: true,
+  sombraDelLogo: true,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -221,6 +206,9 @@ export const BASE_LIMPIA: Entorno = {
   limite: false,
   amanecer: false,
   cieloDeDia: false,
+  logoDeNoche: false,
+  materialDelLogo: false,
+  sombraDelLogo: false,
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -265,7 +253,10 @@ export function entornoPedido(pedido: string): Entorno {
     limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
     amanecer: producto ? valor('amanecer') !== 'no' : partes.has('amanecer'),
     cieloDeDia: producto ? valor('cielo-dia') !== 'no' : partes.has('cielo-dia'),
-    pruebas: pruebasDe(valor, partes),
+    logoDeNoche: producto ? valor('logo-noche') !== 'no' : partes.has('logo-noche'),
+    materialDelLogo: producto ? valor('material') !== 'no' : partes.has('material'),
+    sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
+    pruebas: pruebasDe(valor),
   }
 }
 
@@ -281,7 +272,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=logo-noche=fino`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=aa=taa`.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     resuelto = pruebas === null ? ENTORNO : { ...ENTORNO, pruebas: entornoPedido(`producto,${pruebas}`).pruebas }
   }

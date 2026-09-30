@@ -118,8 +118,9 @@ export function ContactOcclusion({ logoGroupRef }: ContactOcclusionProps) {
       opacidad = sombra.opacidad
     }
     if (!viva && !conElHaz && !enElPiso) return
-    // [ESCENA 6] Con 6e, la mancha dura sigue al encendido del haz (k es 1 sin la prueba).
-    const haz = manchasDelHaz(VIVO.uNoche.value * HAZ_ENCENDIDO.k, conElHaz && entorno.E1)
+    // [ESCENA 6] Con 6e, la mancha dura sigue al encendido del haz (k es 1 sin la prueba). [ESCENA 10] T1: las dos siguen a
+    // la noche en el logo (de día la blanda, de noche sólo la dura del haz; en el amanecer, cuando el frente lo alcanza).
+    const haz = manchasDelHaz(VIVO.uNocheDelLogo.value, HAZ_ENCENDIDO.k, conElHaz && entorno.E1)
     mesh.scale.set(escala * haz.escalaBlanda, escala * haz.escalaBlanda, 1)
     material.opacity = CONTACT_OPACITY * opacidad * haz.opacidadBlanda
     const opacidadDura = Math.min(1, CONTACT_OPACITY * opacidad * haz.opacidadDura)

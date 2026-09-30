@@ -1,15 +1,11 @@
 import * as THREE from 'three'
 
 /**
- * [ESCENA 9] T3 · EL POSPROCESO — dos pruebas que necesitan la escena en un búfer antes de llegar a la pantalla:
- *   · `bloom`: un resplandor sutil, SOLO de noche, del haz, las estrellas brillantes y la fugaz. Es SELECTIVO: esas tres
- *     van en una capa propia (`CAPA_DEL_BLOOM`), y después de dibujar la escena se vuelven a dibujar SOLAS sobre la
- *     misma profundidad (lo que las tapa, el logo o la formación, las sigue tapando) en un color limpio: eso es lo que
- *     brilla. Por umbral no se podía: de noche el polvo es blanco (a propósito) y el haz queda en 0,22–0,26 de pantalla,
- *     por debajo del logo (0,41);
- *   · `aa=taa` o `aa=msaa8`: el antialiasing de las aristas en movimiento (el titileo que B7 dejó anotado como el límite
- *     del MSAA de 4 muestras): un TAA (la cámara corrida medio píxel en cada cuadro y el historial reproyectado y
- *     recortado a la vecindad) o, sin tiempo, 8 muestras en lugar de 4.
+ * [ESCENA 9] T3 · EL POSPROCESO — una prueba que necesita la escena en un búfer antes de llegar a la pantalla:
+ * `aa=taa` o `aa=msaa8`, el antialiasing de las aristas en movimiento (el titileo que B7 dejó anotado como el límite del
+ * MSAA de 4 muestras): un TAA (la cámara corrida medio píxel en cada cuadro y el historial reproyectado y recortado a la
+ * vecindad) o, sin tiempo, 8 muestras en lugar de 4. [ESCENA 10] T1: el bloom de noche, la otra prueba que lo usaba,
+ * se borró (código y bandera); queda lo mínimo del antialiasing, que no se decidió.
  *
  * Sin EffectComposer (el contrato de /v3 no deja importar postprocessing; ESTADO §3): el molde es `amanecer/haces.ts`,
  * un búfer propio y un cuadrado. **La escena sale igual que en la pantalla**: el búfer se marca como el de XR para three
@@ -17,30 +13,16 @@ import * as THREE from 'three'
  * en un búfer three los deja lineales y sin tono, y los materiales propios que escriben el color ya codificado —el gris
  * que el amanecer guarda para el logo, la noche— saldrían mal). Todo lo que sigue trabaja sobre esa imagen de pantalla
  * (el TAA en el espacio de pantalla, como muchos motores, para que el tono no parpadee), y la copia final la escribe tal
- * cual. Sin estas pruebas, nada de esto se monta y la escena se dibuja al lienzo como siempre.
+ * cual. Sin la prueba, nada de esto se monta y la escena se dibuja al lienzo como siempre.
  */
-/** La capa de lo que brilla (three: la 0 es la de todo; ésta no la usa nadie más). */
-export const CAPA_DEL_BLOOM = 1
-
 /**
  * La capa del polvo con el TAA: las motas se mueven solas (sin vectores de movimiento el TAA las borra: el recorte a la
  * vecindad acepta el fondo del historial y la mota queda al 10 %). Con el TAA van SOLO en esta capa y se dibujan después
- * de resolverlo, encima, con su antialias analítico de siempre (B6).
+ * de resolverlo, encima, con su antialias analítico de siempre (B6). (La capa 1 era la del bloom.)
  */
 export const CAPA_DEL_POLVO = 2
 
-/** Los que brillan (por el nombre de su objeto): el haz, las estrellas y la fugaz. */
-export const LOS_QUE_BRILLAN = ['haz', 'estrellas', 'fugaz'] as const
-
 export const POSPROCESO = {
-  bloom: {
-    /** El umbral (luminancia de pantalla, sobre lo que brilla SOLO, contra negro) y su rodilla. */
-    umbral: 0.04,
-    rodilla: 0.03,
-    /** Cuánto se suma (con la noche entera; repartido entre los niveles) y cuántos niveles de media resolución. */
-    intensidad: 0.8,
-    niveles: 5,
-  },
   taa: {
     /** Cuánto del cuadro nuevo entra al historial en reposo, y con la cámara rápida (px por cuadro, desde `rapido`). */
     nuevo: 0.1,
@@ -65,15 +47,9 @@ function paso(nombre: string, fragmento: string, uniforms: Record<string, THREE.
 
 const COPIA_GLSL = /* glsl */ `
 uniform sampler2D uImagen;
-uniform sampler2D uBloom;
-uniform float uBloomFuerza;
 varying vec2 vUv;
 void main() {
-	vec3 c = texture2D( uImagen, vUv ).rgb;
-	// El resplandor es un degradé suave sobre 8 bits: con dithering (regla 8; ruido de gradiente intercalado), y sólo
-	// cuando hay bloom (sin él, la copia es la imagen byte a byte).
-	if ( uBloomFuerza > 0.0 ) c += texture2D( uBloom, vUv ).rgb * uBloomFuerza + ( fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) - 0.5 ) / 255.0;
-	gl_FragColor = vec4( c, 1.0 );
+	gl_FragColor = vec4( texture2D( uImagen, vUv ).rgb, 1.0 );
 }
 `
 
@@ -143,51 +119,6 @@ void main() {
 }
 `
 
-/** El bloom: lo que pasa el umbral (con rodilla), a media resolución. */
-const UMBRAL_GLSL = /* glsl */ `
-uniform sampler2D uImagen;
-uniform vec2 uTexel;
-varying vec2 vUv;
-void main() {
-	// Cuatro muestras (el promedio de un bloque de 2 × 2 de la imagen entera).
-	vec3 c = 0.25 * ( texture2D( uImagen, vUv + vec2( -0.5, -0.5 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 0.5, -0.5 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( -0.5, 0.5 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 0.5, 0.5 ) * uTexel ).rgb );
-	float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
-	float r = clamp( l - ${(POSPROCESO.bloom.umbral - POSPROCESO.bloom.rodilla).toFixed(3)}, 0.0, ${(2 * POSPROCESO.bloom.rodilla).toFixed(3)} );
-	r = r * r / ${(4 * POSPROCESO.bloom.rodilla).toFixed(4)};
-	float peso = max( r, l - ${POSPROCESO.bloom.umbral.toFixed(3)} ) / max( l, 1e-4 );
-	gl_FragColor = vec4( c * peso, 1.0 );
-}
-`
-
-/** Bajar (media resolución): cinco muestras en X (el «dual» de Kawase). */
-const BAJAR_GLSL = /* glsl */ `
-uniform sampler2D uImagen;
-uniform vec2 uTexel;
-varying vec2 vUv;
-void main() {
-	vec3 c = texture2D( uImagen, vUv ).rgb * 4.0;
-	c += texture2D( uImagen, vUv + vec2( -1.0, -1.0 ) * uTexel ).rgb;
-	c += texture2D( uImagen, vUv + vec2( 1.0, -1.0 ) * uTexel ).rgb;
-	c += texture2D( uImagen, vUv + vec2( -1.0, 1.0 ) * uTexel ).rgb;
-	c += texture2D( uImagen, vUv + vec2( 1.0, 1.0 ) * uTexel ).rgb;
-	gl_FragColor = vec4( c / 8.0, 1.0 );
-}
-`
-
-/** Subir (el doble de resolución): ocho muestras en carpa, sumadas al nivel de arriba. */
-const SUBIR_GLSL = /* glsl */ `
-uniform sampler2D uImagen;
-uniform sampler2D uArriba;
-uniform vec2 uTexel;
-varying vec2 vUv;
-void main() {
-	vec3 c = texture2D( uImagen, vUv + vec2( -2.0, 0.0 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 2.0, 0.0 ) * uTexel ).rgb;
-	c += texture2D( uImagen, vUv + vec2( 0.0, -2.0 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 0.0, 2.0 ) * uTexel ).rgb;
-	c += 2.0 * ( texture2D( uImagen, vUv + vec2( -1.0, -1.0 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 1.0, -1.0 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( -1.0, 1.0 ) * uTexel ).rgb + texture2D( uImagen, vUv + vec2( 1.0, 1.0 ) * uTexel ).rgb );
-	gl_FragColor = vec4( c / 12.0 + texture2D( uArriba, vUv ).rgb, 1.0 );
-}
-`
-
 /** Halton de base `b`, el término `i` (desde 1). */
 export function halton(i: number, b: number): number {
   let [f, r, k] = [1, 0, i]
@@ -202,14 +133,14 @@ export function halton(i: number, b: number): number {
 export interface Posproceso {
   /** Para el precompilado: la escena de los pasos (una malla por paso) y un búfer donde calentarlos. */
   readonly aparte: { readonly escena: THREE.Scene; readonly bufer: THREE.WebGLRenderTarget }
-  /** Dibuja la escena y los pasos; `noche` (0 a 1) enciende el bloom. */
-  readonly dibujar: (gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera, noche: number) => void
-  /** Con banco: la fuerza del bloom (para compararlo en el mismo cuadro) y el TAA (para comparar su titileo). */
-  readonly banco: { bloom: number; taa: boolean; depurar: (gl: THREE.WebGLRenderer) => unknown; muestras: (n: number) => void; depurarElTaa: (modo: number) => void; medirPasos: (gl: THREE.WebGLRenderer, dibujo: () => void, n: number) => Promise<Record<string, number>> }
+  /** Dibuja la escena y los pasos. */
+  readonly dibujar: (gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera) => void
+  /** Con banco: el TAA (para comparar su titileo). */
+  readonly banco: { taa: boolean; depurar: (gl: THREE.WebGLRenderer) => unknown; muestras: (n: number) => void; depurarElTaa: (modo: number) => void; medirPasos: (gl: THREE.WebGLRenderer, dibujo: () => void, n: number) => Promise<Record<string, number>> }
   readonly soltar: () => void
 }
 
-export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa: Aa }): Posproceso {
+export function crearPosproceso(opciones: { readonly aa: Aa }): Posproceso {
   const muestras = opciones.aa === 'msaa8' ? 8 : 4
   const conTaa = opciones.aa === 'taa'
   // La escena, como en la pantalla (ver arriba), con su profundidad (el TAA la lee para reproyectar).
@@ -223,24 +154,14 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
   escenaRT.texture.name = 'posproceso · escena'
   const opcionesDeMedio = { type: THREE.HalfFloatType, depthBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false }
   const historial = conTaa ? [new THREE.WebGLRenderTarget(1, 1, opcionesDeMedio), new THREE.WebGLRenderTarget(1, 1, opcionesDeMedio)] : []
-  // Con el bloom, la imagen de la escena se guarda antes de volver a dibujar lo que brilla sobre su búfer.
-  const imagenRT = opciones.bloom ? new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType, depthBuffer: false, generateMipmaps: false }) : null
-  const niveles = opciones.bloom ? Array.from({ length: POSPROCESO.bloom.niveles }, () => new THREE.WebGLRenderTarget(1, 1, opcionesDeMedio)) : []
-  const subidas = opciones.bloom ? Array.from({ length: POSPROCESO.bloom.niveles - 1 }, () => new THREE.WebGLRenderTarget(1, 1, opcionesDeMedio)) : []
 
   const u = {
-    copia: { uImagen: { value: null as THREE.Texture | null }, uBloom: { value: null as THREE.Texture | null }, uBloomFuerza: { value: 0 } },
+    copia: { uImagen: { value: null as THREE.Texture | null } },
     taa: { uActual: { value: null as THREE.Texture | null }, uProfundidad: { value: null as THREE.Texture | null }, uHistorial: { value: null as THREE.Texture | null }, uInversaActual: { value: new THREE.Matrix4() }, uAnterior: { value: new THREE.Matrix4() }, uTexel: { value: new THREE.Vector2() }, uHayHistorial: { value: 0 }, uDepurar: { value: 0 } },
-    umbral: { uImagen: { value: null as THREE.Texture | null }, uTexel: { value: new THREE.Vector2() } },
-    bajar: { uImagen: { value: null as THREE.Texture | null }, uTexel: { value: new THREE.Vector2() } },
-    subir: { uImagen: { value: null as THREE.Texture | null }, uArriba: { value: null as THREE.Texture | null }, uTexel: { value: new THREE.Vector2() } },
   }
   const materiales = {
     copia: paso('posproceso · copia', COPIA_GLSL, u.copia),
     taa: paso('posproceso · taa', TAA_GLSL, u.taa),
-    umbral: paso('posproceso · bloom umbral', UMBRAL_GLSL, u.umbral),
-    bajar: paso('posproceso · bloom bajar', BAJAR_GLSL, u.bajar),
-    subir: paso('posproceso · bloom subir', SUBIR_GLSL, u.subir),
   }
   // Una malla por paso (se prende la del paso que corre): así el precompilado los compila todos al arrancar (regla 2).
   const cuadrado = new THREE.PlaneGeometry(2, 2)
@@ -259,7 +180,6 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
   let prendida: THREE.Mesh | null = null
 
   const tam = new THREE.Vector2()
-  const colorDeFondo = new THREE.Color()
   const sinCorrimiento = new THREE.Matrix4()
   const vistaProyeccion = new THREE.Matrix4()
   let [ancho, alto, cuadro, cual, hayHistorial] = [0, 0, 0, 0, false]
@@ -302,7 +222,6 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
         requestAnimationFrame(leer)
       })
     },
-    bloom: 1,
     taa: true,
     // Con banco: un píxel del medio del búfer de la escena y el error de WebGL (para cuando algo sale negro).
     depurar: (gl: THREE.WebGLRenderer): unknown => {
@@ -355,14 +274,11 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
     if (tam.x === ancho && tam.y === alto) return
     ;[ancho, alto] = [tam.x, tam.y]
     escenaRT.setSize(ancho, alto)
-    imagenRT?.setSize(ancho, alto)
     for (const h of historial) h.setSize(ancho, alto)
-    niveles.forEach((n, i) => n.setSize(Math.max(1, ancho >> (i + 1)), Math.max(1, alto >> (i + 1))))
-    subidas.forEach((n, i) => n.setSize(Math.max(1, ancho >> (i + 1)), Math.max(1, alto >> (i + 1))))
     hayHistorial = false
   }
 
-  const dibujar = (gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera, noche: number): void => {
+  const dibujar = (gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera): void => {
     medir(gl)
     const previo = gl.getRenderTarget()
     const taa = conTaa && banco.taa
@@ -406,7 +322,6 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
       hayHistorial = true
       // La imagen del TAA vuelve al búfer de la escena (que conserva su profundidad) y el polvo se dibuja encima.
       u.copia.uImagen.value = destino.texture
-      u.copia.uBloomFuerza.value = 0
       abrir('el polvo encima')
       pasar(gl, 'copia', escenaRT, false)
       soloLaCapa(gl, escena, camara, CAPA_DEL_POLVO, escenaRT)
@@ -414,48 +329,8 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
       imagen = escenaRT.texture
     } else hayHistorial = false
     cuadro += 1
-    // 3 · el bloom, sólo de noche. Cada nivel suma su parte: se normaliza por cuántos son.
-    const fuerza = opciones.bloom ? (POSPROCESO.bloom.intensidad * noche * banco.bloom) / POSPROCESO.bloom.niveles : 0
-    if (fuerza > 0.001 && imagenRT !== null) {
-      // La imagen, a salvo: lo que brilla se dibuja sobre el búfer de la escena.
-      u.copia.uImagen.value = imagen
-      u.copia.uBloomFuerza.value = 0
-      abrir('guardar la imagen')
-      pasar(gl, 'copia', imagenRT)
-      cerrar()
-      imagen = imagenRT.texture
-      // Lo que brilla, SOLO, sobre la profundidad de la escena y un color limpio.
-      const alfa = gl.getClearAlpha()
-      gl.getClearColor(colorDeFondo)
-      abrir('lo que brilla')
-      gl.setRenderTarget(escenaRT)
-      gl.setClearColor(0x000000, 1)
-      gl.clear(true, false, false)
-      gl.setClearColor(colorDeFondo, alfa)
-      soloLaCapa(gl, escena, camara, CAPA_DEL_BLOOM, escenaRT)
-      cerrar()
-      abrir('la cadena del bloom')
-      u.umbral.uImagen.value = escenaRT.texture
-      u.umbral.uTexel.value.set(1 / ancho, 1 / alto)
-      pasar(gl, 'umbral', niveles[0])
-      for (let i = 1; i < niveles.length; i += 1) {
-        u.bajar.uImagen.value = niveles[i - 1].texture
-        u.bajar.uTexel.value.set(1 / niveles[i - 1].width, 1 / niveles[i - 1].height)
-        pasar(gl, 'bajar', niveles[i])
-      }
-      for (let i = niveles.length - 2; i >= 0; i -= 1) {
-        const abajo = i === niveles.length - 2 ? niveles[i + 1] : subidas[i + 1]
-        u.subir.uImagen.value = abajo.texture
-        u.subir.uArriba.value = niveles[i].texture
-        u.subir.uTexel.value.set(1 / abajo.width, 1 / abajo.height)
-        pasar(gl, 'subir', subidas[i])
-      }
-      u.copia.uBloom.value = subidas[0].texture
-      cerrar()
-    }
-    // 4 · al lienzo, tal cual.
+    // 3 · al lienzo, tal cual.
     u.copia.uImagen.value = imagen
-    u.copia.uBloomFuerza.value = fuerza
     abrir('al lienzo')
     pasar(gl, 'copia', null)
     cerrar()
@@ -469,8 +344,7 @@ export function crearPosproceso(opciones: { readonly bloom: boolean; readonly aa
     soltar: () => {
       escenaRT.depthTexture?.dispose()
       escenaRT.dispose()
-      imagenRT?.dispose()
-      for (const r of [...historial, ...niveles, ...subidas]) r.dispose()
+      for (const r of historial) r.dispose()
       for (const m of Object.values(materiales)) m.dispose()
       cuadrado.dispose()
     },

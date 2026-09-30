@@ -295,8 +295,9 @@ afirmar(vuelta.e.fase === 'apagado' && vuelta.e.k === 0, 'vuelve el día: se apa
 const otra = correr(vuelta.e, noche(1), GUION_S + 0.5 + ENCENDIDO.apagaS + 0.2)
 afirmar(!otra.fases.includes('encendiendo') && otra.e.fase === 'prendido', 'otra vez de noche enseguida: prende sin repetir la falla (histéresis)')
 const aireTsx = leer('polvo/Aire.tsx')
-afirmar(/Math\.min\(1, VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
-afirmar(/manchasDelHaz\(VIVO\.uNoche\.value \* HAZ_ENCENDIDO\.k/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* k/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
+// [ESCENA 10] T1: con la noche EN EL LOGO (la del amanecer, hasta que su frente lo alcanza), no la de la sala.
+afirmar(/Math\.min\(1, VIVO\.uNocheDelLogo\.value \* HAZ_ENCENDIDO\.k\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
+afirmar(/manchasDelHaz\(VIVO\.uNocheDelLogo\.value, HAZ_ENCENDIDO\.k,/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* k/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
 
 // ── T10 · la nitidez del polvo ────────────────────────────────────────────
 titulo('T10 · el polvo nítido')
@@ -322,7 +323,7 @@ const SOMBRITAS = /materialDeLasSombras|SOMBRAS_EN_VIVO|polvo\/sombras/
 afirmar(!existsSync(path.join(ESCENA, 'polvo/sombras.ts')) && !codigo(ESCENA).some((c) => SOMBRITAS.test(c)), '[ESCENA 8] las sombritas de las motas se borraron: ni el archivo ni la pasada')
 controlPositivo('el detector VE la pasada de las sombritas', "import { SOMBRAS_EN_VIVO, materialDeLasSombras } from './polvo/sombras'", (c: string) => !SOMBRITAS.test(c))
 const rebote = leer('entorno/Rebote.tsx')
-afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNoche\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
+afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNocheDelLogo\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
 afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), 'utf8')), '  sin tocar `ProbeLogo`: el parche es sobre su material')
 afirmar(/nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), '  sigue la intensidad del haz (el charco de noche lleva el encendido, T9)')
 

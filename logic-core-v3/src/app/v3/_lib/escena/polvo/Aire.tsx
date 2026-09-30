@@ -118,7 +118,8 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     if (e.motas) {
       // [ESCENA 6] Con 6e, las motas siguen al encendido del haz. [ESCENA 7] El freno llega a lo sumo al
       // de siempre (el haz prendido pasa de 1 y las motas girarían para atrás); el destello sí sube con él.
-      const noche = Math.min(1, VIVO.uNoche.value * HAZ_ENCENDIDO.k)
+      // [ESCENA 10] T1: con la noche en el logo, como el haz.
+      const noche = Math.min(1, VIVO.uNocheDelLogo.value * HAZ_ENCENDIDO.k)
       AIRE.uMotas.value = noche
       AIRE.uBrilloDeLasMotas.value = Math.max(1, HAZ_ENCENDIDO.k)
       if (!quieto) for (let i = 0; i < 3; i += 1) AIRE.uContraGiro.value[i] += RAD_POR_S[Math.min(i, RAD_POR_S.length - 1)] * MOTAS.frenoEnElHaz * noche * dt

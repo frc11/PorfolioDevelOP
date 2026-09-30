@@ -31,7 +31,8 @@ import { ProbeLogo } from './ProbeLogo'
 import { StudioFloor } from './StudioFloor'
 import { BOUNCE_COLOR, PAPER_COLOR } from './probeScene'
 import { MotorDeLaEscena } from './gpu/MotorDeLaEscena'
-import { PruebasDeLaEscena9 } from './PruebasDeLaEscena9'
+import { LuzDelLogo } from './LuzDelLogo'
+import { PruebasDeLaEscena } from './PruebasDeLaEscena'
 import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
 
 /**
@@ -290,8 +291,9 @@ export default function ProbeStage({
         <Rebote logoMaterialRef={logoMaterialRef} />
         {/* [CALIDAD 1] El motor: el precompilado (B1), la calidad adaptativa (B11) y el perfil de la GPU con banco. */}
         <MotorDeLaEscena logoMaterialRef={logoMaterialRef} dpr={ajustes.dpr} />
-        {/* [ESCENA 9] Las pruebas de T3 (cada una con su bandera; en el producto, ninguna). */}
-        <PruebasDeLaEscena9 keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} />
+        {/* [ESCENA 10] T1 · los reflejos del satinado y la sombra del logo; y las pruebas (cada una con su bandera). */}
+        <LuzDelLogo keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} />
+        <PruebasDeLaEscena />
       </Suspense>
     </Canvas>
   )
