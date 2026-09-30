@@ -94,12 +94,13 @@ export const VOLUMEN_GLSL = /* glsl */ `
 		transformed = centroDeLaCaja + mod( transformed - centroDeLaCaja + ${(POLVO_PAREJO.lado / 2).toFixed(2)}, ${POLVO_PAREJO.lado.toFixed(2)} ) - ${(POLVO_PAREJO.lado / 2).toFixed(2)};
 		vec3 enLaCaja = abs( transformed - centroDeLaCaja ) / ${(POLVO_PAREJO.lado / 2).toFixed(2)};
 		float borde = max( enLaCaja.x, max( enLaCaja.y, enLaCaja.z ) );
-		vParejo = 1.0 - smoothstep( ${(1 - POLVO_PAREJO.fundido).toFixed(3)}, 1.0, borde );
 		vec3 enElMundo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
+		// [CALIDAD 1] B4 · el corte del volumen (sus caras y el piso), aparte: con física, la mota suelta lo deja de a poco.
+		carasDelAire = 1.0 - smoothstep( ${(1 - POLVO_PAREJO.fundido).toFixed(3)}, 1.0, borde );
+		pisoDelAire = smoothstep( ${POLVO_PAREJO.piso.toFixed(3)}, ${(POLVO_PAREJO.piso + 0.3).toFixed(3)}, enElMundo.y );
 		float lejosDeLaCamara = distance( enElMundo, cameraPosition );
-		vParejo *= smoothstep( 0.8, CERCA_DEL_POLVO, lejosDeLaCamara ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejosDeLaCamara ) );
+		vParejo = carasDelAire * pisoDelAire * smoothstep( 0.8, CERCA_DEL_POLVO, lejosDeLaCamara ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejosDeLaCamara ) );
 		vParejo *= 1.0 - smoothstep( ${(POLVO_PAREJO.radio - 1.5).toFixed(2)}, ${POLVO_PAREJO.radio.toFixed(2)}, length( enElMundo.xz ) );
-		vParejo *= smoothstep( ${POLVO_PAREJO.piso.toFixed(3)}, ${(POLVO_PAREJO.piso + 0.3).toFixed(3)}, enElMundo.y );
 		#ifdef USE_COLOR
 			vColor.rgb = mix( uTintaCerca, uTintaLejos, clamp( ( length( enElMundo ) - ${TINTE_POR_RADIO.desde.toFixed(1)} ) / ${(TINTE_POR_RADIO.hasta - TINTE_POR_RADIO.desde).toFixed(1)}, 0.0, 1.0 ) );
 		#endif

@@ -20,6 +20,9 @@
  * B3 · independiente del framerate: la física del polvo integra con Euler exponencial (la misma trayectoria a 60, 75,
  *      120 y 144 Hz); el resto de lo que corre por cuadro ya era exacto en el tiempo (amortiguadores exponenciales,
  *      relojes, pasos fijos) y queda afirmado.
+ * B4 · nada aparece ni se va de golpe: la visibilidad del polvo es continua al pasar del aire a suelta y de vuelta (el
+ *      peso de la mota suelta que la simulación guarda en el modo), la repetición de la caja queda siempre apagada en
+ *      el aire, y el remolino ya no lanza las motas de abajo del piso.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -28,7 +31,7 @@ import path from 'node:path'
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
-import { FISICA, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
+import { FISICA, PESO_EN_EL_MODO, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -337,5 +340,45 @@ const exactos: readonly (readonly [string, RegExp, string])[] = [
 ]
 const noExactos = exactos.filter(([a, r]) => !r.test(leer(a))).map(([a, , q]) => `${a}: ${q}`)
 afirmar(noExactos.length === 0, 'lo demás que corre por cuadro es exacto en el tiempo (no cuenta cuadros)', noExactos.length === 0 ? exactos.map(([, , q]) => q).join('; ') : noExactos.join(' | '))
+
+// ── B4 · nada aparece ni se va de golpe ───────────────────────────────────
+titulo('B4 · los bordes del volumen: las motas entran y salen con un fundido')
+const simB4 = leer('polvo/simulacion.ts')
+const volumenB4 = leer('polvo/volumen.ts')
+/**
+ * El corte del volumen del aire (lo que multiplica a la cámara y la sala), la cuenta del material: `caras` y `piso` son los
+ * fundidos del lugar de la mota en la caja; `peso`, el de la mota suelta (ya suavizado). `sinTope` es el primer intento
+ * (sin el `min`), para el control positivo.
+ */
+function corteDelAire(modo: number, peso: number, caras: number, piso: number, sinTope = false): number {
+  const pesoCaras = modo === 0 && !sinTope ? Math.min(peso, caras) : peso
+  return (caras + (1 - caras) * pesoCaras) * (piso + (1 - piso) * peso)
+}
+/** El de antes de B4: el del aire en el modo 0, nada en los sueltos (la visibilidad cambiaba de régimen de golpe). */
+const corteDeAntes = (modo: number, _peso: number, caras: number, piso: number): number => (modo === 0 ? caras * piso : 1)
+type Corte = (modo: number, peso: number, caras: number, piso: number) => number
+const grilla = [0, 0.1, 0.35, 0.6, 0.9, 1]
+/** ¿Continua al soltarse del aire (peso 0) y al volver a él (con su lugar lejos de las caras, la compuerta)? */
+const continua = (corte: Corte): boolean =>
+  grilla.every((caras) => grilla.every((piso) => Math.abs(corte(0, 0, caras, piso) - corte(1, 0, caras, piso)) < 1e-9)) &&
+  grilla.every((piso) => grilla.every((peso) => Math.abs(corte(5, peso, 1, piso) - corte(0, peso, 1, piso)) < 1e-9))
+/** ¿En el aire, donde la caja se repite (caras 0), la mota está apagada con cualquier peso? */
+const repeticionOculta = (corte: Corte): boolean => grilla.every((piso) => grilla.every((peso) => (peso === 1 ? true : corte(0, peso, 0, piso) === 0)))
+afirmar(continua(corteDelAire) && repeticionOculta(corteDelAire) && corteDelAire(0, 0, 0.4, 0.7) === 0.4 * 0.7 && corteDelAire(2, 1, 0.4, 0.7) === 1, 'la visibilidad es continua al soltarse del aire y al volver, y en el aire la repetición de la caja queda apagada', 'en reposo, igual que antes: el corte entero en el aire, ninguno suelta')
+controlPositivo('el detector VE el cambio de régimen de antes (aparecían en el piso y se iban en el aire de golpe)', corteDeAntes, continua)
+controlPositivo('y VE el intento sin tope: la mota que vuelve se vería saltar donde la caja se repite', (m: number, p: number, c: number, q: number) => corteDelAire(m, p, c, q, true), repeticionOculta)
+afirmar(/vParejo \*= mix\( carasDelAire, 1\.0, modoDeLaFisica < 0\.5 \? min\( pesoSuelta, carasDelAire \) : pesoSuelta \);/.test(simB4) && /vParejo \*= mix\( pisoDelAire, 1\.0, pesoSuelta \);/.test(simB4) && /carasDelAire = 1\.0 - smoothstep/.test(volumenB4) && /pisoDelAire = smoothstep/.test(volumenB4), '  el material hace esa cuenta (las caras y el piso del volumen, aparte, mezclados por el peso)')
+afirmar(/float lejos = distance\( mundo, cameraPosition \);\s*float pesoSuelta/.test(simB4), '  la cámara y la sala se cuentan donde se DIBUJA la mota (en el aire, con su corrimiento), no en su lugar de la caja')
+// El peso: en la parte fraccionaria del modo, escrito en cada salida, en segundos (no en cuadros).
+const escrituras = simB4.match(/salida0 = vec4\([^;]*\);/g) ?? []
+afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 9, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
+afirmar(PESO_EN_EL_MODO < 0.5 && [0, 1, 2, 3, 4, 5].every((m) => [0, 0.5, 1].every((w) => Math.round(m + PESO_EN_EL_MODO * w) === m)), '  el modo se sigue leyendo igual (redondeado) con cualquier peso', `el peso ocupa de 0 a ${String(PESO_EN_EL_MODO)}`)
+const pasosHasta = (hz: number, s: number): number => Math.ceil(s * hz) / hz
+afirmar(/peso \+ dt \/ \$\{FISICA\.fundido\.entraS\.toFixed\(2\)\}/.test(simB4) && /peso - dt \/ \$\{FISICA\.fundido\.saleS\.toFixed\(2\)\}/.test(simB4) && Math.abs(pasosHasta(60, FISICA.fundido.entraS) - pasosHasta(144, FISICA.fundido.entraS)) < 0.02, '  el peso avanza con dt: el mismo fundido a 60 y a 144 Hz', `aparece en ${String(FISICA.fundido.entraS)} s, se va en ${String(FISICA.fundido.saleS)} s`)
+afirmar(new RegExp(`&& bordeDeF < \\$\\{\\(1 - POLVO_PAREJO\\.fundido\\)\\.toFixed\\(3\\)\\}`).test(simB4), 'la levantada vuelve al aire sólo con su lugar lejos de las caras de la caja (ahí el aire la dibuja entera)')
+// El remolino: la aspiración ya no crece debajo del piso.
+const aspiraDeAntes = (alto: number): number => FISICA.remolino.aspira * Math.exp(-alto / 1.2)
+const aspiraAhora = (alto: number): number => FISICA.remolino.aspira * Math.exp(-Math.max(alto, 0) / 1.2)
+afirmar(/exp\( - max\( alto, 0\.0 \) \/ 1\.2 \)/.test(simB4) && !/exp\( - alto \/ 1\.2 \)/.test(simB4) && aspiraAhora(-20) === aspiraAhora(0), 'el remolino no aspira más fuerte debajo del piso (antes lanzaba esas motas a millones de unidades)', `a 20 u debajo del piso: ${aspiraDeAntes(-20).toExponential(1)} u/s antes, ${aspiraAhora(-20).toFixed(1)} ahora`)
 
 cerrar('s34-calidad1')

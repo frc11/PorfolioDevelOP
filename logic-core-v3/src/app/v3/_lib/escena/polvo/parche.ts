@@ -104,6 +104,8 @@ const CUERPO = /* glsl */ `
 	vParejo = 1.0;
 	vDestello = 0.0;
 	float modoDeLaFisica = 0.0;
+	float carasDelAire = 1.0;
+	float pisoDelAire = 1.0;
 	#ifdef AIRE_PAREJO
 		${VOLUMEN_GLSL}
 	#endif

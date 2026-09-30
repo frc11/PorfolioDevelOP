@@ -74,7 +74,7 @@ titulo('§5 · el polvo que se posa, con física')
 afirmar(POSARSE.velocidad === 16, 'el despertar sale a 16 u/s (los tiempos de la quietud, a la mitad, en s32)')
 afirmar(avanzarElPolvo(polvoInicial(0), 30, null, true).quieto === NUNCA, 'con movimiento reducido no se posa nunca')
 const sim = leer('polvo/simulacion.ts')
-afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'modo > 3.5 && modo < 4.5', 'salida0 = vec4( p, 5.0 )'].every((m) => sim.includes(m)), 'los seis modos están en la simulación (aire, cayendo, piso, logo, deslizando y, lo que queda, levantada)')
+afirmar(['modo < 0.5', 'modo > 0.5 && modo < 1.5', 'modo > 1.5 && modo < 2.5', 'modo > 2.5 && modo < 3.5', 'modo > 3.5 && modo < 4.5', 'salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) )'].every((m) => sim.includes(m)), 'los seis modos están en la simulación (aire, cayendo, piso, logo, deslizando y, lo que queda, levantada)') // [CALIDAD 1] B4: el modo lleva el peso de la mota suelta
 afirmar(/turbulencia\( p \)/.test(sim) && /arrastre/.test(sim), '  la caída lleva arrastre y turbulencia (no baja en línea recta)')
 afirmar(FISICA.logo.cara > 0.5 && FISICA.logo.cara < 0.9, '  el polvo se queda en las caras de arriba del logo', `normal a menos de ${(Math.acos(FISICA.logo.cara) * 180 / Math.PI).toFixed(0)}° de la vertical`)
 afirmar(/despertar\.desperto - despertar\.antes > POSARSE\.empiezaS/.test(leer('polvo/Fisica.tsx')), 'el remolino del despertar sólo sopla si el polvo llegó a posarse')

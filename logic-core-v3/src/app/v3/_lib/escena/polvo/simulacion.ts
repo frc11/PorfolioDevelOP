@@ -49,6 +49,17 @@ import { POLVO_PAREJO } from './volumen'
  * usa las formas de siempre (dos anillos enteros: la boca de la «c» era una pared) sino un campo de la malla real
  * (`CAMPO_DEL_FLUJO`, más grueso y de más alcance que el del choque): el aire, y el polvo con él, pasa por la boca
  * de la «c» y por el ojo de la «p». El polvo posado sobre el logo (modo 3) y el que desliza siguen con el campo fino.
+ *
+ * **[CALIDAD 1] B4 · nada aparece ni se va de golpe.** La mota del aire se ve según su lugar en el volumen que se
+ * repite (se desvanece contra sus caras y contra el piso); la suelta (modos 1 a 5), según dónde está. Al cambiar de
+ * régimen la visibilidad saltaba: al posarse, las motas del volumen que caían DEBAJO del piso (un tercio: invisibles
+ * en el aire) aparecían de golpe sobre él, y al volver al aire después del soplo, las que tenían su lugar ahí
+ * desaparecían de golpe. Ahora la simulación guarda en la parte fraccionaria del modo el PESO de la mota suelta (0 en
+ * el aire, 1 suelta, en `fundido`), y el material mezcla con él el corte del volumen del aire: aparecen y se van con
+ * un fundido. En el aire el corte de las CARAS vale siempre (donde la caja se repite, la mota del aire salta de lugar:
+ * tiene que estar apagada), así que la levantada vuelve al aire sólo cuando su lugar está lejos de las caras. Y el
+ * remolino ya no aspira debajo del piso: su `exp( - alto / 1,2 )` crecía sin tope con la altura negativa y lanzaba las
+ * motas de abajo del piso a millones de unidades (se veían como puntos sueltos).
  */
 
 export const FISICA = {
@@ -70,7 +81,12 @@ export const FISICA = {
   obstaculo: { radio: 1.8 },
   /** [ESCENA 8] T5 · contra la malla real: a cuánto de la cara se detecta el contacto y dónde queda la mota que se corre por ella (u). */
   contacto: { detecta: 0.12, queda: 0.03 },
+  /** [CALIDAD 1] B4 · en cuánto se suelta del aire la mota (aparece la que estaba debajo del piso) y en cuánto vuelve a él (s). */
+  fundido: { entraS: 2.5, saleS: 1.5 },
 } as const
+
+/** [CALIDAD 1] B4 · el peso de la mota suelta va en la parte fraccionaria del modo, de 0 a esto (menos de 0,5: el modo se redondea). */
+export const PESO_EN_EL_MODO = 0.4
 
 /**
  * [CALIDAD 1] B3 · UN PASO QUE NO DEPENDE DEL FRAMERATE: la velocidad `v` relaja hacia `objetivo` con tasa `lambda`
@@ -176,8 +192,9 @@ float ruido3( vec3 p ) {
 	return mix( a, b, u.z ) * 2.0 - 1.0;
 }
 
-// La mota del producto: la caja que acompaña a la cámara (la cuenta de volumen.ts).
-vec3 libre( vec3 p0, int k ) {
+// La mota del producto: la caja que acompaña a la cámara (la cuenta de volumen.ts). [CALIDAD 1] B4: y en \`borde\`,
+// cuán cerca está de las caras de la caja (0 en el centro, 1 en una cara, donde se repite).
+vec3 libre( vec3 p0, int k, out float borde ) {
 	mat4 m = uConcha[ k ];
 	mat3 giro = mat3( m );
 	vec3 camara = transpose( giro ) * ( uCamara - m[ 3 ].xyz );
@@ -185,6 +202,8 @@ vec3 libre( vec3 p0, int k ) {
 	vec3 centro = camara + adelante * ${(L / 2 - POLVO_PAREJO.atras).toFixed(2)};
 	vec3 t = p0 + transpose( giro ) * uDeriva;
 	t = centro + mod( t - centro + ${(L / 2).toFixed(2)}, ${L.toFixed(2)} ) - ${(L / 2).toFixed(2)};
+	vec3 enLaCaja = abs( t - centro ) / ${(L / 2).toFixed(2)};
+	borde = max( enLaCaja.x, max( enLaCaja.y, enLaCaja.z ) );
 	// [ESCENA 7] Sin la holgura: el logo como obstáculo lo hace el aire que lo rodea y el choque (modo 0).
 	return ( m * vec4( t, 1.0 ) ).xyz;
 }
@@ -227,7 +246,8 @@ vec3 vientoDelDespertar( vec3 p ) {
 	float centroDeAltura = 1.0 + ${FISICA.remolino.ascenso.toFixed(1)} * a;
 	float enAltura = exp( - pow( ( alto - centroDeAltura ) / ( 2.0 + 1.5 * a ), 2.0 ) );
 	float sube = ${FISICA.remolino.subida.toFixed(2)} * exp( - a / 2.5 ) * nace * exp( - r * r / ( 2.0 * pow( nucleo * 1.8, 2.0 ) ) );
-	float aspira = - ${FISICA.remolino.aspira.toFixed(2)} * exp( - alto / 1.2 ) * exp( - r * r / pow( 3.0 * nucleo, 2.0 ) ) * nace;
+	// [CALIDAD 1] B4 · sin tope abajo del piso: con la altura negativa crecía sin límite y lanzaba las motas de ahí.
+	float aspira = - ${FISICA.remolino.aspira.toFixed(2)} * exp( - max( alto, 0.0 ) / 1.2 ) * exp( - r * r / pow( 3.0 * nucleo, 2.0 ) ) * nace;
 	vec3 v = vec3( - radial.y, 0.0, radial.x ) * giro * ( 0.4 + 0.6 * enAltura ) + vec3( 0.0, sube, 0.0 ) + vec3( radial.x, 0.0, radial.y ) * aspira;
 	// El frente de la ráfaga: sale del origen y levanta al pasar.
 	float frente = exp( - pow( ( r - ${POSARSE.velocidad.toFixed(1)} * a ) / ${FISICA.remolino.frente.toFixed(2)}, 2.0 ) ) * exp( - a / 1.5 );
@@ -268,6 +288,13 @@ vec3 chocar( inout vec3 p, inout vec3 v ) {
 	return n;
 }
 
+// [CALIDAD 1] B4 · el modo con el peso de la mota suelta en su parte fraccionaria: hacia 1 en los modos sueltos y hacia
+// 0 en el aire. El material mezcla con él el corte del volumen del aire: ni aparece ni se va de golpe.
+float modoConPeso( float modo, float peso, float dt ) {
+	peso = modo > 0.5 ? min( 1.0, peso + dt / ${FISICA.fundido.entraS.toFixed(2)} ) : max( 0.0, peso - dt / ${FISICA.fundido.saleS.toFixed(2)} );
+	return modo + ${PESO_EN_EL_MODO.toFixed(2)} * peso;
+}
+
 void main() {
 	ivec2 c = ivec2( gl_FragCoord.xy );
 	float indice = float( c.y ) * uTam.x + float( c.x );
@@ -276,12 +303,14 @@ void main() {
 	vec4 e1 = texelFetch( uEstado[ 1 ], c, 0 );
 	vec4 o = texelFetch( uOrigenes, c, 0 );
 	float modo = floor( e0.w + 0.5 );
+	float peso = clamp( ( e0.w - modo ) / ${PESO_EN_EL_MODO.toFixed(2)}, 0.0, 1.0 );
 	float desde = e1.w;
 	vec3 v = e1.xyz;
 	float dt = uDt;
 	float azar = azar1( indice );
 	float retraso = azar * ${POSARSE.desparejoS.toFixed(2)};
-	vec3 f = libre( o.xyz, int( o.w + 0.5 ) );
+	float bordeDeF;
+	vec3 f = libre( o.xyz, int( o.w + 0.5 ), bordeDeF );
 	// En el aire, la del producto más D; sobre el logo, guardada en el espacio del logo.
 	bool enElLogo = modo > 2.5 && modo < 3.5;
 	vec3 p = modo < 0.5 ? f + e0.xyz : ( enElLogo ? ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz : e0.xyz );
@@ -314,7 +343,7 @@ void main() {
 				v += n * max( 0.0, entra );
 			}
 			if ( dot( d, d ) < 1e-8 && dot( v, v ) < 1e-8 ) { d = vec3( 0.0 ); v = vec3( 0.0 ); }
-			salida0 = vec4( d, 0.0 );
+			salida0 = vec4( d, modoConPeso( 0.0, peso, dt ) );
 			salida1 = vec4( v, desde );
 			return;
 		}
@@ -329,24 +358,24 @@ void main() {
 			p += relajar( v, objetivo, ${(1 / FISICA.caida.arrastre).toFixed(4)}, dt );
 			vec3 n = chocar( p, v );
 			if ( n.y > ${FISICA.logo.cara.toFixed(2)} ) {
-				salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, 3.0 );
+				salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, modoConPeso( 3.0, peso, dt ) );
 				salida1 = vec4( 0.0, 0.0, 0.0, desde );
 				return;
 			}
 			if ( p.y <= piso ) { p.y = piso; v = vec3( 0.0 ); modo = 2.0; }
-			salida0 = vec4( p, modo );
+			salida0 = vec4( p, modoConPeso( modo, peso, dt ) );
 			salida1 = vec4( v, desde );
 			return;
 		}
 	}
 	if ( modo > 1.5 && modo < 2.5 ) {
 		if ( despierta ) { modo = 5.0; desde = uReloj; }
-		else { salida0 = vec4( p.x, piso, p.z, 2.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
+		else { salida0 = vec4( p.x, piso, p.z, modoConPeso( 2.0, peso, dt ) ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
 	}
 	if ( modo > 2.5 && modo < 3.5 ) {
 		if ( despierta ) { modo = 5.0; desde = uReloj; }
 		else if ( uMovimiento > ${FISICA.resbala.toFixed(2)} ) { modo = 4.0; v = vec3( 0.0 ); }
-		else { salida0 = vec4( e0.xyz, 3.0 ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
+		else { salida0 = vec4( e0.xyz, modoConPeso( 3.0, peso, dt ) ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
 	}
 	if ( modo > 3.5 && modo < 4.5 ) {
 		if ( despierta ) { modo = 5.0; desde = uReloj; }
@@ -358,7 +387,7 @@ void main() {
 			p += relajar( v, ( g - n * dot( g, n ) ) / ${FISICA.logo.roce.toFixed(2)}, ${FISICA.logo.roce.toFixed(2)}, dt );
 			chocar( p, v );
 			float lejos = campoDelLogo( ( uLogoInverso * vec4( p, 1.0 ) ).xyz );
-			salida0 = vec4( p, lejos > ${FISICA.logo.suelta.toFixed(2)} ? 1.0 : 4.0 );
+			salida0 = vec4( p, modoConPeso( lejos > ${FISICA.logo.suelta.toFixed(2)} ? 1.0 : 4.0, peso, dt ) );
 			salida1 = vec4( v, desde );
 			return;
 		}
@@ -370,12 +399,14 @@ void main() {
 	// [CALIDAD 1] A3: la levantada que choca se corre por la cara (ya no se pega).
 	chocar( p, v );
 	if ( p.y < piso ) { p.y = piso; v.y = max( v.y, 0.0 ); }
-	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} ) {
-		salida0 = vec4( p - f, 0.0 );
+	// [CALIDAD 1] B4 · vuelve al aire sólo si su lugar está lejos de las caras de la caja: ahí el aire la dibuja entera y
+	// no hay salto; mientras tanto sigue suelta (cae despacio).
+	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} && bordeDeF < ${(1 - POLVO_PAREJO.fundido).toFixed(3)} ) {
+		salida0 = vec4( p - f, modoConPeso( 0.0, peso, dt ) );
 		salida1 = vec4( v, desde );
 		return;
 	}
-	salida0 = vec4( p, 5.0 );
+	salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) );
 	salida1 = vec4( v, desde );
 }
 `
@@ -383,8 +414,9 @@ void main() {
 /**
  * En el material de la mota: después del volumen y del obstáculo (que dejan en `transformed` la mota
  * del producto), la posición de la simulación. En el aire, la del producto más `D`; en los otros
- * modos, la de la simulación, y cuánto se ve se vuelve a contar ahí (cerca de la lente, el alcance y
- * la sala), sin el corte del piso: la mota posada está en el piso.
+ * modos, la de la simulación. Cuánto se ve se vuelve a contar ahí (cerca de la lente, el alcance y
+ * la sala); el corte del volumen del aire (sus caras y el piso: la mota posada está en el piso) va
+ * mezclado por el peso de la mota suelta ([CALIDAD 1] B4).
  */
 export const FISICA_EN_LA_MOTA_GLSL = /* glsl */ `
 	{
@@ -396,10 +428,14 @@ export const FISICA_EN_LA_MOTA_GLSL = /* glsl */ `
 		else if ( modoDeLaFisica > 2.5 && modoDeLaFisica < 3.5 ) mundo = ( uLogo * vec4( e0.xyz, 1.0 ) ).xyz;
 		else mundo = e0.xyz;
 		transformed = transpose( mat3( modelMatrix ) ) * ( mundo - modelMatrix[ 3 ].xyz );
-		if ( modoDeLaFisica > 0.5 ) {
-			float lejos = distance( mundo, cameraPosition );
-			vParejo = smoothstep( 0.8, CERCA_DEL_POLVO, lejos ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejos ) );
-			vParejo *= 1.0 - smoothstep( ${(POLVO_PAREJO.radio - 1.5).toFixed(2)}, ${POLVO_PAREJO.radio.toFixed(2)}, length( mundo.xz ) );
-		}
+		// [CALIDAD 1] B4 · la cámara y la sala, donde se DIBUJA la mota (en el aire, con su corrimiento); el corte del
+		// volumen del aire, mezclado por el peso de la mota suelta: nada aparece ni se va de golpe. En el aire, el de las
+		// caras nunca deja de valer del todo (\`min\`): ahí se repite la caja y la mota salta de lugar.
+		float lejos = distance( mundo, cameraPosition );
+		float pesoSuelta = smoothstep( 0.0, 1.0, clamp( ( e0.w - modoDeLaFisica ) / ${PESO_EN_EL_MODO.toFixed(2)}, 0.0, 1.0 ) );
+		vParejo = smoothstep( 0.8, CERCA_DEL_POLVO, lejos ) * ( 1.0 - smoothstep( ${(POLVO_PAREJO.alcance - 4).toFixed(2)}, ${POLVO_PAREJO.alcance.toFixed(2)}, lejos ) );
+		vParejo *= 1.0 - smoothstep( ${(POLVO_PAREJO.radio - 1.5).toFixed(2)}, ${POLVO_PAREJO.radio.toFixed(2)}, length( mundo.xz ) );
+		vParejo *= mix( carasDelAire, 1.0, modoDeLaFisica < 0.5 ? min( pesoSuelta, carasDelAire ) : pesoSuelta );
+		vParejo *= mix( pisoDelAire, 1.0, pesoSuelta );
 	}
 `

@@ -54,6 +54,8 @@ type VentanaDelBanco = Window & {
     /** Para los experimentos con un programa: el contexto y el programa de WebGL de un programa de three. */
     contexto: () => WebGLRenderingContext | WebGL2RenderingContext
     programaCrudo: (id: number) => WebGLProgram | null
+    /** [CALIDAD 1] B4 · para los instrumentos que se inyectan desde el banco: el renderer y la escena. */
+    tres: () => { readonly gl: THREE.WebGLRenderer; readonly escena: THREE.Scene }
     extension: boolean
   }
 }
@@ -295,6 +297,7 @@ export function PerfilDeLaGpu() {
       vigilados: perfil.vigilados,
       contexto: () => gl.getContext(),
       programaCrudo: (id) => (gl.info.programs ?? []).find((p) => p.id === id)?.program ?? null,
+      tres: () => ({ gl, escena }),
       extension: perfil.hayExtension,
     }
     return () => {

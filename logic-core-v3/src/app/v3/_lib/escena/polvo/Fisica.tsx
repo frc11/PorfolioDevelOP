@@ -62,7 +62,7 @@ interface PropsDeLaFisica {
 }
 
 type VentanaDelBanco = Window & {
-  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida>; campo: () => MedidaDelCampo | null; flujo: () => MedidaDelCampo | null }
+  __fisicaDelBanco?: { modos: () => number[]; camaraLenta: (escala: number) => void; corrimiento: () => number[]; medir: (pasos: number) => Promise<Medida>; campo: () => MedidaDelCampo | null; flujo: () => MedidaDelCampo | null; estado: () => Float32Array | null; aire: () => typeof AIRE }
 }
 
 export function Fisica(props: PropsDeLaFisica) {
@@ -156,6 +156,9 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       medir: (pasos) => armado.cronometro.pedir(pasos),
       campo: () => memoria.current.medidaDelCampo,
       flujo: () => memoria.current.medidaDelFlujo,
+      // [CALIDAD 1] B4 · para el instrumento de los saltos (inyectado desde el banco): el estado crudo y los uniforms del aire.
+      estado: () => (memoria.current.gl === null ? null : armado.sim.leer(memoria.current.gl, 0)),
+      aire: () => AIRE,
       // Cuánto corrió el aire a las motas que están en el aire: cuántas se movieron más de 0,1, la media y la máxima.
       corrimiento: () => {
         const gl = memoria.current.gl
