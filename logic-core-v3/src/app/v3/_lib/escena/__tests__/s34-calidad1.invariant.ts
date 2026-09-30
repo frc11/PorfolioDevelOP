@@ -17,6 +17,9 @@
  * B2 · cero reservas por cuadro: ningún `useFrame` de la escena reserva (clones, vectores, arreglos, objetos) salvo
  *      con banco o en el primer cuadro; las variantes que escriben en un objeto fijo dan lo mismo que las puras; ni
  *      la atadura al scroll ni el tono del menú llaman a React en cada cuadro sin cambio.
+ * B3 · independiente del framerate: la física del polvo integra con Euler exponencial (la misma trayectoria a 60, 75,
+ *      120 y 144 Hz); el resto de lo que corre por cuadro ya era exacto en el tiempo (amortiguadores exponenciales,
+ *      relojes, pasos fijos) y queda afirmado.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -25,7 +28,7 @@ import path from 'node:path'
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
-import { FISICA, flujoAlrededor } from '../polvo/simulacion'
+import { FISICA, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -285,5 +288,54 @@ const encendido = avanzarElEncendido(encendidoInicial(1, 0), 1, 30, false)
 afirmar(avanzarElPulso(quietoPulso, { t: 0.3, scrollEnMovimiento: false, hover: false, reducido: true }) === quietoPulso && avanzarElEncendido(encendido, 1, 31, false) === encendido, '  el pulso apagado y el haz prendido y asentado devuelven el mismo estado (nada nuevo por cuadro)')
 // Nadie llama a React en cada cuadro sin un cambio.
 afirmar(/if \(siguiente\(estadoRef\.current, evento\) !== estadoRef\.current\) setEstado/.test(leer('ataduraAlScroll.ts')) && /if \(tono !== ultimo\) \{\s*ultimo = tono\s*setTono\(tono\)/.test(readFileSync(path.join(process.cwd(), 'src/app/v3/_chrome/menu/useTonoDebajo.ts'), 'utf8')), 'la atadura al scroll y el tono del menú llaman a React sólo cuando algo cambia (antes, en cada cuadro)')
+
+// ── B3 · independiente del framerate ──────────────────────────────────────
+titulo('B3 · independiente del framerate: la misma escena a 60, 75, 120 y 144 Hz')
+type PasoDelAire = (d: number, v: number, viento: number, dt: number) => { readonly d: number; readonly v: number }
+/** El gesto canónico: el viento sopla 3 u/s 0,6 s y se va con la inercia del aire (1,4 s). */
+const vientoDelGesto = (t: number): number => (t < 0.6 ? 3 : 3 * Math.exp(-(t - 0.6) / 1.4))
+/** El paso de antes de B3 (Euler explícito), para el control positivo. */
+function eulerDeAntes(d: number, v: number, viento: number, dt: number): { readonly d: number; readonly v: number } {
+  const v1 = v + ((viento - v) / FISICA.aire.arrastre - FISICA.aire.rigidez * d - FISICA.aire.amortigua * v) * dt
+  return { d: d + v1 * dt, v: v1 }
+}
+function trayectoria(paso: PasoDelAire, hz: number): readonly (readonly [number, number])[] {
+  const dt = 1 / hz
+  let [d, v] = [0, 0]
+  const salida: [number, number][] = []
+  for (let t = 0; t < 4; t += dt) {
+    const r = paso(d, v, vientoDelGesto(t), dt)
+    ;[d, v] = [r.d, r.v]
+    salida.push([t + dt, d])
+  }
+  return salida
+}
+/** La referencia en el instante `t`, interpolada entre sus dos muestras (cada muestra se compara en SU instante). */
+function enT(serie: readonly (readonly [number, number])[], t: number): number {
+  const i = serie.findIndex(([x]) => x >= t)
+  if (i <= 0) return serie[Math.max(i, 0)][1]
+  const [[x0, y0], [x1, y1]] = [serie[i - 1], serie[i]]
+  return y0 + ((y1 - y0) * (t - x0)) / (x1 - x0)
+}
+const continuo = trayectoria(pasoDelAire, 20000)
+const picoDelAire = Math.max(...continuo.map(([, d]) => Math.abs(d)))
+/** Cuánto se aparta (fracción del pico) del tiempo continuo, en la peor de las cuatro frecuencias. */
+const peorDesvio = (paso: PasoDelAire): number => Math.max(...[60, 75, 120, 144].flatMap((hz) => trayectoria(paso, hz).filter(([t]) => t < 3.9).map(([t, d]) => Math.abs(d - enT(continuo, t)) / picoDelAire)))
+afirmar(peorDesvio(pasoDelAire) < 0.0075, 'el aire del polvo: la misma trayectoria a 60, 75, 120 y 144 Hz (Euler exponencial)', `se aparta a lo sumo ${(peorDesvio(pasoDelAire) * 100).toFixed(2)} % del pico del tiempo continuo (Euler explícito: ${(peorDesvio(eulerDeAntes) * 100).toFixed(2)} %)`)
+controlPositivo('el detector VE el Euler explícito de antes (1,0 % a 60 Hz)', eulerDeAntes, (paso) => peorDesvio(paso) < 0.0075)
+const simulacionB3 = leer('polvo/simulacion.ts')
+afirmar((simulacionB3.match(/(d|p) \+= relajar\( v,/g) ?? []).length === 4 && !/\bd \+= v \* dt;|\bp \+= v \* dt;/.test(simulacionB3), '  los cuatro modos que mueven motas (aire, caída, deslizando, levantada) integran con `relajar`, ninguno con Euler explícito')
+// Lo demás que corre por cuadro ya era exacto en el tiempo: se afirma para que siga así.
+const exactos: readonly (readonly [string, RegExp, string])[] = [
+  ['choreographySampler.ts', /current \+ diff \* \(1 - Math\.exp\(-dt \/ tau\)\)/, 'la cámara y el puntero persiguen con un amortiguador exponencial'],
+  ['polvo/Aire.tsx', /m\.aire\.lerp\(m\.empuje, 1 - Math\.exp\(-dt \/ tau\)\)/, 'el aire toma y suelta la velocidad con un amortiguador exponencial'],
+  ['entorno/Entorno.tsx', /1 - Math\.exp\(-dt \/ ESTELA_TAU_S\)/, 'la estela del polvo (E6) sigue a la cámara con un amortiguador exponencial'],
+  ['moire/MoireVivo.tsx', /1 - Math\.exp\(-dt \/ M2\.tauS\)/, 'el moiré acelera con el scroll con un amortiguador exponencial'],
+  ['piso/PisoVivo.tsx', /while \(m\.reloj \+ paso <= t \+ 1e-9 && pasos < PASOS_POR_CUADRO\)/, 'el piso vivo avanza a pasos fijos del reloj de la escena'],
+  ['amanecer/linea.ts', /const tope = dt \/ AMANECER\.minimoS/, 'el amanecer persigue al scroll con una velocidad tope en unidades por segundo'],
+  ['derivaDelAire.ts', /shell\.rotation\.y = elapsed \* spin\[index\]/, 'las conchas del polvo giran con el reloj'],
+]
+const noExactos = exactos.filter(([a, r]) => !r.test(leer(a))).map(([a, , q]) => `${a}: ${q}`)
+afirmar(noExactos.length === 0, 'lo demás que corre por cuadro es exacto en el tiempo (no cuenta cuadros)', noExactos.length === 0 ? exactos.map(([, , q]) => q).join('; ') : noExactos.join(' | '))
 
 cerrar('s34-calidad1')

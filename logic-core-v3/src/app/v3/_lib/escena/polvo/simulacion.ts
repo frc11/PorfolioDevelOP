@@ -73,6 +73,24 @@ export const FISICA = {
 } as const
 
 /**
+ * [CALIDAD 1] B3 · UN PASO QUE NO DEPENDE DEL FRAMERATE: la velocidad `v` relaja hacia `objetivo` con tasa `lambda`
+ * EXACTA en el paso (Euler exponencial), y lo que se mueve es su integral. Con Euler explícito la trayectoria del aire
+ * se apartaba del tiempo continuo 1,0 % del pico a 60 Hz y 0,4 % a 144 Hz; así, 0,5 % y 0,2 %, y estable con cualquier
+ * `dt`. La misma cuenta que `relajar` en el shader; pura, para el invariante (por componente).
+ */
+export function relajar(v: number, objetivo: number, lambda: number, dt: number): { readonly v: number; readonly movido: number } {
+  const e = Math.exp(-lambda * dt)
+  return { v: objetivo + (v - objetivo) * e, movido: objetivo * dt + ((v - objetivo) * (1 - e)) / lambda }
+}
+
+/** [CALIDAD 1] B3 · un paso del aire (modo 0) por componente: el resorte que devuelve `d` y el arrastre hacia el viento. */
+export function pasoDelAire(d: number, v: number, viento: number, dt: number): { readonly d: number; readonly v: number } {
+  const lambda = 1 / FISICA.aire.arrastre + FISICA.aire.amortigua
+  const r = relajar(v, (viento / FISICA.aire.arrastre - FISICA.aire.rigidez * d) / lambda, lambda, dt)
+  return { d: d + r.movido, v: r.v }
+}
+
+/**
  * [ESCENA 7] T7 · la perturbación del flujo alrededor del logo (la misma cuenta que `alrededorDelLogo` en
  * el shader): con el aire `aire`, en un punto a `d` de la cara, con normal `n`. Pura, para el invariante.
  */
@@ -179,6 +197,15 @@ float pisoEn( vec2 xz ) {
 	return ${FLOOR_Y.toFixed(4)} + texelFetch( uPisoVivo, celda, 0 ).b;
 }
 
+// [CALIDAD 1] B3 · la velocidad relaja EXACTA hacia \`objetivo\` en el paso (Euler exponencial): la misma trayectoria a
+// 60, 75, 120 y 144 Hz, estable con cualquier dt. Devuelve lo que se movió en el paso (con dt 0, nada).
+vec3 relajar( inout vec3 v, vec3 objetivo, float lambda, float dt ) {
+	float e = exp( - lambda * dt );
+	vec3 movido = objetivo * dt + ( v - objetivo ) * ( 1.0 - e ) / lambda;
+	v = objetivo + ( v - objetivo ) * e;
+	return movido;
+}
+
 // La turbulencia de la caída: lenta y horizontal, un poco vertical.
 vec3 turbulencia( vec3 p ) {
 	vec3 q = p / ${FISICA.caida.escala.toFixed(2)} + vec3( 0.0, 0.0, uReloj * 0.07 );
@@ -274,8 +301,8 @@ void main() {
 			// lo rodea (T7), y la mota se acerca a ese flujo con su arrastre (su inercia).
 			vec3 d = e0.xyz;
 			vec3 viento = vientoDelDespertar( p ) + alrededorDelLogo( p, uVientoDelAire );
-			v += ( ( viento - v ) / ${FISICA.aire.arrastre.toFixed(2)} - ${FISICA.aire.rigidez.toFixed(2)} * d - ${FISICA.aire.amortigua.toFixed(2)} * v ) * dt;
-			d += v * dt;
+			const float LAMBDA_DEL_AIRE = ${(1 / FISICA.aire.arrastre + FISICA.aire.amortigua).toFixed(4)};
+			d += relajar( v, ( viento / ${FISICA.aire.arrastre.toFixed(2)} - ${FISICA.aire.rigidez.toFixed(2)} * d ) / LAMBDA_DEL_AIRE, LAMBDA_DEL_AIRE, dt );
 			// Si igual llega a la cara del logo (la malla real, T5), se corre por la cara: sin lo que entra (con la
 			// velocidad relativa a la superficie) y sin rebote. [CALIDAD 1] A3: ya no se pega.
 			vec3 q = ( uLogoInverso * vec4( f + d, 1.0 ) ).xyz;
@@ -299,8 +326,7 @@ void main() {
 			float falta = max( 0.6, ${POSARSE.asentadoS.toFixed(1)} + retraso * 0.3 - quieta );
 			float baja = max( ${FISICA.caida.minima.toFixed(2)}, ( p.y - piso ) / falta );
 			vec3 objetivo = turbulencia( p ) + vec3( 0.0, - baja, 0.0 );
-			v += ( objetivo - v ) / ${FISICA.caida.arrastre.toFixed(2)} * dt;
-			p += v * dt;
+			p += relajar( v, objetivo, ${(1 / FISICA.caida.arrastre).toFixed(4)}, dt );
 			vec3 n = chocar( p, v );
 			if ( n.y > ${FISICA.logo.cara.toFixed(2)} ) {
 				salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, 3.0 );
@@ -329,8 +355,7 @@ void main() {
 			vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
 			vec3 n = normalize( mat3( uLogo ) * normalDelCampo( q ) );
 			vec3 g = vec3( 0.0, - ${FISICA.logo.gravedad.toFixed(2)}, 0.0 );
-			v += ( g - n * dot( g, n ) - v * ${FISICA.logo.roce.toFixed(2)} ) * dt;
-			p += v * dt;
+			p += relajar( v, ( g - n * dot( g, n ) ) / ${FISICA.logo.roce.toFixed(2)}, ${FISICA.logo.roce.toFixed(2)}, dt );
 			chocar( p, v );
 			float lejos = campoDelLogo( ( uLogoInverso * vec4( p, 1.0 ) ).xyz );
 			salida0 = vec4( p, lejos > ${FISICA.logo.suelta.toFixed(2)} ? 1.0 : 4.0 );
@@ -341,8 +366,7 @@ void main() {
 	// Levantada: en el viento del despertar y el del aire (que rodea al logo), con arrastre y poca gravedad;
 	// pasado el soplo, el aire la lleva.
 	vec3 viento = vientoDelDespertar( p ) + uVientoDelAire + alrededorDelLogo( p, uVientoDelAire ) + turbulencia( p );
-	v += ( ( viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ) - v ) / ${FISICA.soplo.arrastre.toFixed(2)} ) * dt;
-	p += v * dt;
+	p += relajar( v, viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ), ${(1 / FISICA.soplo.arrastre).toFixed(4)}, dt );
 	// [CALIDAD 1] A3: la levantada que choca se corre por la cara (ya no se pega).
 	chocar( p, v );
 	if ( p.y < piso ) { p.y = piso; v.y = max( v.y, 0.0 ); }
