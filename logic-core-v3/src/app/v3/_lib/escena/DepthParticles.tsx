@@ -222,6 +222,8 @@ export function DepthParticles({ store }: DepthParticlesProps) {
               sizeAttenuation
               vertexColors
               transparent
+              // [CALIDAD 1] B6: alfa premultiplicado (la misma mezcla, sin el color de un borde transparente).
+              premultipliedAlpha
               opacity={0.9}
               depthWrite={false}
             />

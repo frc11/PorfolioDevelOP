@@ -25,6 +25,8 @@
  *      el aire, y el remolino ya no lanza las motas de abajo del piso.
  * B5 · los rayos del amanecer a media resolución: su escena aparte en un búfer de la mitad del lienzo por lado (medio
  *      punto flotante), sumada por un cuadrado con el mismo aditivo; precompilada y calentada con el resto.
+ * B6 · la nitidez del polvo: ninguna mota por debajo de un píxel del búfer (se apaga con su área), alfa premultiplicado
+ *      en el polvo y el bokeh; el tamaño en foco sigue con su tope (el real lo supera a toda distancia visible).
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -35,6 +37,9 @@ import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorn
 import { CAMPO_DEL_FLUJO, campoDeAPoco, campoDelLogo, contornoDeLaMalla, distanciaDelCampo } from '../polvo/campoDelLogo'
 import { FISICA, PESO_EN_EL_MODO, flujoAlrededor, pasoDelAire } from '../polvo/simulacion'
 import { HACES } from '../amanecer/haces'
+import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from '../polvo/nitidez'
+import { PARTICLE_SIZE } from '../probeParticles'
+import { POLVO_PAREJO } from '../polvo/volumen'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
 import { bloqueVivo, medirElBloqueOpaco, medirElBloqueOpacoEn } from '../nocheDisparada'
@@ -407,5 +412,17 @@ afirmar(/for \( int i = 0; i < uPasos; i\+\+ \)/.test(hacesB5) && /pasos: 20, lu
 const precompilarB5 = leer('gpu/Precompilar.tsx')
 afirmar(/ESCENAS_APARTE\.add\(aparte\)/.test(amanecerB5) && /ESCENAS_APARTE\.delete\(aparte\)/.test(amanecerB5) && /\.\.\.\[\.\.\.ESCENAS_APARTE\]\.map\(\(a\) => gl\.compileAsync\(a\.escena, camara\)\)/.test(precompilarB5) && /for \(const a of ESCENAS_APARTE\) \{\s*const previo = gl\.getRenderTarget\(\)\s*gl\.setRenderTarget\(a\.bufer\)\s*calentar\(gl, a\.escena, camara\)/.test(precompilarB5), 'la escena aparte de los haces se precompila y se calienta al arrancar, en su búfer (nada se compila tarde: medido, 26 programas al cargar y 26 al final)')
 afirmar(/abrir\(s\.name !== '' \? s\.name : /.test(leer('gpu/PerfilDeLaGpu.tsx')), '  y el perfil de la GPU la mide con su nombre')
+
+// ── B6 · la nitidez del polvo ─────────────────────────────────────────────
+titulo('B6 · el polvo nítido: sin motas de menos de un píxel encendidas enteras, alfa premultiplicado')
+/** ¿El punto no baja de un píxel y, si su lado real es menor, pone la luz de su área? */
+const subpixel = (v: string, f: string): boolean => /vLadoN = enFoco \+ coc;\s*gl_PointSize = max\( vLadoN, 1\.0 \);/.test(v) && /\* min\( 1\.0, vLadoN \* vLadoN \);/.test(f)
+afirmar(subpixel(NITIDEZ_VERTEX_GLSL, NITIDEZ_FRAGMENT_GLSL), 'una mota de menos de un píxel del búfer se dibuja de uno y se apaga con su área (sin chispear)', `hoy el lado mínimo es ${String(NITIDEZ.tam[0])} px CSS: pasa sólo con la resolución bajada`)
+controlPositivo('el detector VE el punto de antes (lado sin piso ni fundido)', NITIDEZ_FRAGMENT_GLSL.replace(' * min( 1.0, vLadoN * vLadoN )', ''), (f: string) => subpixel(NITIDEZ_VERTEX_GLSL, f))
+afirmar(/transparent\s*\/\/ \[CALIDAD 1\] B6[^\n]*\s*premultipliedAlpha/.test(leer('DepthParticles.tsx')) && /transparent\s*\/\/ \[CALIDAD 1\] B6[^\n]*\s*premultipliedAlpha/.test(leer('BokehParticles.tsx')), 'el polvo y el bokeh con alfa premultiplicado (medido: la misma imagen, 272 de 1,3 M de píxeles a un nivel)')
+// El tamaño en foco: el real (perspectiva) supera el tope a toda distancia visible, así que el tope ES el tamaño.
+const ladoReal = (d: number, mitadDelAlto: number): number => (PARTICLE_SIZE * mitadDelAlto) / d
+const dondeSeVeEntera = POLVO_PAREJO.alcance - 4
+afirmar(ladoReal(dondeSeVeEntera, 406) > NITIDEZ.tam[1] && ladoReal(dondeSeVeEntera, 450) > NITIDEZ.tam[1], '  el lado real de una mota supera el tope en foco en todo lo que se ve entero (por eso el tope es el tamaño, y hacerlo real las agrandaría)', `a ${String(dondeSeVeEntera)} u, donde empieza el fundido del alcance: ${ladoReal(dondeSeVeEntera, 450).toFixed(2)} px a 900 de alto y ${ladoReal(dondeSeVeEntera, 406).toFixed(2)} a 812; tope ${String(NITIDEZ.tam[1])}`)
 
 cerrar('s34-calidad1')

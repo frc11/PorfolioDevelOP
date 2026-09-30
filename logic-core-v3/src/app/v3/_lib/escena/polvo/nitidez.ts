@@ -40,19 +40,21 @@ export const NITIDEZ_VERTEX_GLSL = /* glsl */ `
 		float enFoco = clamp( gl_PointSize, ${NITIDEZ.tam[0].toFixed(2)} * uPixel, ${NITIDEZ.tam[1].toFixed(2)} * uPixel );
 		float coc = max( 0.0, ${NITIDEZ.desenfocaDesde.toFixed(2)} / max( lejosN, 0.1 ) - 1.0 ) * ${NITIDEZ.desenfoque.toFixed(2)} * uPixel;
 		vDesenfoque = coc / ( coc + enFoco );
-		gl_PointSize = enFoco + coc;
-		vLadoN = gl_PointSize;
+		// [CALIDAD 1] B6 · un punto no baja de un píxel del búfer: por debajo se dibuja de uno y se apaga con su área.
+		vLadoN = enFoco + coc;
+		gl_PointSize = max( vLadoN, 1.0 );
 	}
 	#endif
 `
 
 /**
  * En el fragmento, en lugar del perfil blando del sprite: un disco de borde de un píxel, y el desenfocado
- * con el borde blando y la luz repartida. `r` es la distancia al centro del punto (0 a 0,5).
+ * con el borde blando y la luz repartida. `r` es la distancia al centro del punto (0 a 0,5). [CALIDAD 1] B6: la mota
+ * de menos de un píxel del búfer (sólo con la resolución bajada) pone la luz de su área, no la de un píxel entero.
  */
 export const NITIDEZ_FRAGMENT_GLSL = /* glsl */ `
 		float bordeN = 0.75 / max( vLadoN, 1.0 );
 		float nitida = 1.0 - smoothstep( 0.5 - bordeN, 0.5, r );
 		float blanda = ( 1.0 - smoothstep( 0.18, 0.5, r ) ) * mix( 1.0, 0.3, vDesenfoque );
-		diffuseColor.a *= mix( nitida, blanda, vDesenfoque );
+		diffuseColor.a *= mix( nitida, blanda, vDesenfoque ) * min( 1.0, vLadoN * vLadoN );
 `

@@ -149,6 +149,8 @@ export function BokehParticles() {
               sizeAttenuation
               vertexColors
               transparent
+              // [CALIDAD 1] B6: alfa premultiplicado, como el polvo.
+              premultipliedAlpha
               opacity={nitido ? BOKEH_NITIDO.opacidad : BOKEH_OPACITY}
               depthWrite={false}
             />
