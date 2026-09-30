@@ -35,13 +35,13 @@
 | Preloader de /v3 | Apagado (`CON_PRELOADER = false`) | `_intro/` |
 | **[CALIDAD 1] B1 · el precompilado** | Todos los programas se compilan al arrancar (también lo invisible y las escenas aparte, como los rayos) y se calientan con un dibujo de un píxel: ninguno se compila en el recorrido | `gpu/Precompilar.tsx` |
 | **[CALIDAD 1] B3 · la física en segundos** | Los modos que mueven motas integran con Euler exponencial: la misma trayectoria a 60, 75, 120 y 144 Hz | `polvo/simulacion.ts` |
-| **[CALIDAD 1] B4 · sin saltos** | El peso de la mota suelta (en el modo) mezcla el corte del volumen del aire: nada aparece en el piso ni se va en el aire de golpe; el remolino no lanza las motas de abajo del piso; ninguna mota se pierde en NaN | `polvo/simulacion.ts`, `polvo/volumen.ts` |
+| **[CALIDAD 1] B4 · sin saltos** | El peso de la mota suelta (en el modo) mezcla el corte del volumen del aire: nada aparece en el piso ni se va en el aire de golpe; el remolino no lanza las motas de abajo del piso; ninguna mota se pierde en NaN; la levantada que no puede volver al aire (cerca de las caras) se posa con la quietud | `polvo/simulacion.ts`, `polvo/volumen.ts` |
 | **[CALIDAD 1] B5 · los rayos a media resolución** | En su propio búfer, la mitad del lienzo por lado; un cuadrado los suma | `amanecer/haces.ts` |
 | **[CALIDAD 1] B6 · el polvo** | Ninguna mota bajo un píxel encendida entera; alfa premultiplicado | `polvo/nitidez.ts` |
 | **[CALIDAD 1] B7 · antialiasing** | Los costados del logo con normales suaves hasta un pliegue de 40° (sin facetas); la sombra de la trama en el piso, prefiltrada | `cantosDelLogo.ts`, `estrellas/cielo.ts` |
 | **[CALIDAD 1] B8 · dithering de ruido azul** | En todo lo que pinta degradados (una textura de 16×16) | `ruidoAzul.ts` |
 | **[CALIDAD 1] B10 · el apoyo de las copias** | Una mancha de contacto instanciada en la base de cada copia de la formación | `formacion/armado.ts` |
-| **[CALIDAD 1] B11 · la calidad adaptativa** | Si los cuadros no entran baja de a un escalón (motas con fundido, después dpr de a 10 %), con histéresis | `gpu/adaptativa.ts`, `gpu/CalidadAdaptativa.tsx` |
+| **[CALIDAD 1] B11 · la calidad adaptativa** | Si los cuadros no entran baja de a un escalón (motas con fundido, después dpr de a 10 %), con histéresis. El dpr cambia sólo con el scroll quieto: redimensionar el lienzo congela el hilo 30–60 ms | `gpu/adaptativa.ts`, `gpu/CalidadAdaptativa.tsx` |
 | **[CALIDAD 1] B12 · lo que no se ve** | Las estrellas no se dibujan cuando ninguna puede verse | `estrellas/Estrellas.tsx` |
 
 ### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
@@ -158,7 +158,7 @@ informe.
    `conDithering(material)` (los propios). Nada de arreglos constantes grandes indexados en un shader: a Direct3D le
    cuestan más de un segundo por programa (B8 lo midió); si hace falta una tabla, una textura.
 9. **Que aguante la calidad adaptativa.** El dpr puede bajar a 0,7 veces el tope y las motas al 65 % (B11): el efecto
-   tiene que verse bien ahí.
+   tiene que verse bien ahí. Y nada redimensiona el lienzo ni sus búferes en medio del scroll: cuesta 30–60 ms de hilo.
 10. **Los colores canónicos no se mueven.** El tone mapping es Neutral (B9): el piso, el papel y el cielo en reposo,
     ΔE < 2 contra lo aprobado. Un cambio de color de salida se mide con `scripts-calidad/b9-tono.ts`.
 
@@ -177,6 +177,13 @@ scroll fuerte y el conteo de pegadas), `cielo8` (las variantes del cielo, el tex
 el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips quietos del cielo), `costo8` y
 `hojas8`.
 
+[CALIDAD 1] Los bancos del motor (`scripts-calidad/`, con su propio Chrome por CDP): `motor.ts` (el recorrido a
+velocidad constante por partes: `gpu` y `pasadas` sin vsync, `ritmo` con vsync, `cpu`, `memoria`, `programas`, `traza`,
+`reservas`; va a `calidad1/motor/<etiqueta>/`), `tabla.ts` (la tabla, con otra etiqueta al lado), `saltos.ts` (los
+saltos del polvo con el estado real de la física), `fluidez.ts` (el recorrido grabado con el instante de cada cuadro y
+sus cuadros por segundo encima, y los lado a lado), `momentos.ts` y `hojas.ts` (los cinco momentos y sus hojas), y uno
+por punto (`b3-tabla` a `b11-tirones`).
+
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
 - **`s17-revelado`**: 1 falla, ya estaba antes de ESCENA 5. Busca una llamada que se mudó a
@@ -189,11 +196,13 @@ el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips qui
   usuario mueve el punto rojo y E7 si pasa por la ventana del banco.
 - **[CALIDAD 1, hallado]** Cuando la escena se suspende (frameloop `never` detrás de Servicios) r3f corre un último
   cuadro con el timestamp del navegador (ms) como reloj en segundos, y al reanudar el reloj vuelve a 0: las conchas del
-  polvo y la vira saltan. Pasa con la escena tapada (verificado con capturas), así que no se ve.
+  polvo saltan (226 rad en ese cuadro). Pasa con la escena tapada (verificado con capturas), así que no se ve.
 - **[CALIDAD 1, hallado]** La escena sigue dibujando unos cientos de píxeles de scroll adentro de Servicios, ya tapada
   por la sección opaca, antes de suspenderse.
-- **[CALIDAD 1, hallado]** El Chrome del banco no conserva la caché de shaders entre sesiones: cada corrida del banco
-  se mide en frío (1,27 s de precompilado); en la misma sesión, la segunda carga baja a 161–237 ms.
+- **[CALIDAD 1, hallado]** La primera carga después de CUALQUIER cambio de shaders los compila en frío: ~1,25 s de
+  calentar dentro del precompilado, al cargar (Direct3D arma el ejecutable en el primer dibujo). Desde la segunda carga
+  (en la misma sesión del banco o en otra, con el mismo perfil) Chrome los encuentra en su caché: 16–19 ms de compilar y
+  79–125 de calentar. Un banco que mide la carga tiene que decir si es la primera después de un cambio.
 
 ## 7 · Lo que quedó abierto (para decidir)
 
