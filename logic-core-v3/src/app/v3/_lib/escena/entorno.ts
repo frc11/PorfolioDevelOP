@@ -54,17 +54,33 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
+import type { VarianteDelLogoDeNoche } from './logoDeNoche'
+
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
 export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
 
 export type NivelDelHaz = 'sutil' | 'medio'
 
-/** Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). */
-export type Pruebas = Readonly<Record<never, boolean>>
+/**
+ * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de este sprint,
+ * para que decida Valentino: cada una con su bandera, apagada en el producto.
+ */
+export interface Pruebas {
+  /** [ESCENA 9] T2 · el logo de noche: costados negros, tapas grises con borde (`logoDeNoche.ts`); `logo-noche=<variante>`. */
+  readonly logoDeNoche: VarianteDelLogoDeNoche | 'no'
+}
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = {}
+export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no' }
+
+const VARIANTES_DEL_LOGO: readonly VarianteDelLogoDeNoche[] = ['fino', 'grueso', 'claro']
+
+/** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
+function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
+  const logo = valor('logo-noche')
+  return { logoDeNoche: VARIANTES_DEL_LOGO.find((v) => v === logo) ?? 'no' }
+}
 
 export interface Entorno {
   readonly E1: boolean
@@ -212,7 +228,7 @@ export function entornoPedido(pedido: string): Entorno {
     limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
     amanecer: producto ? valor('amanecer') !== 'no' : partes.has('amanecer'),
     cieloDeDia: producto ? valor('cielo-dia') !== 'no' : partes.has('cielo-dia'),
-    pruebas: PRUEBAS_APAGADAS,
+    pruebas: pruebasDe(valor),
   }
 }
 
@@ -226,7 +242,12 @@ export function entornoDeLaEscena(): Entorno {
   if (resuelto !== null) return resuelto
   if (typeof window === 'undefined') return ENTORNO
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
-  resuelto = typeof pedido === 'string' ? entornoPedido(pedido) : ENTORNO
+  if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
+  else {
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=logo-noche=fino`.
+    const pruebas = new URLSearchParams(window.location.search).get('pruebas')
+    resuelto = pruebas === null ? ENTORNO : { ...ENTORNO, pruebas: entornoPedido(`producto,${pruebas}`).pruebas }
+  }
   return resuelto
 }
 

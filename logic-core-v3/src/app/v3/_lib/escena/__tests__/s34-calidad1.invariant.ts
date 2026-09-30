@@ -139,7 +139,8 @@ controlPositivo('el detector VE un producto sin el cielo', { ...ENTORNO, cieloDe
 const delCielo = [leer('cieloDeDia/nubes.ts'), leer('cieloDeDia/CieloDeDia.tsx'), leer('entorno.ts')]
 /** Restos de las otras cinco en el código (no en la prosa): sus variantes, el tono mono, las funciones y el pedido por nombre. */
 const RESTOS = /nubesDeBloques|nubesDePolvo|'particulas'|'bloques'|'mono'|mono:|TonoDelCielo|VarianteDelCielo|CIELO_PINTADO|PedidoDelCielo|cielo-dia=pintado/
-afirmar(delCielo.every((c) => !RESTOS.test(c)) && Object.keys(PRUEBAS_APAGADAS).length === 0, 'las otras cinco se borraron: ni el código ni las banderas (y no queda ninguna prueba)')
+// [ESCENA 9] El sprint agregó sus pruebas (apagadas en el producto: s35); ninguna es del cielo.
+afirmar(delCielo.every((c) => !RESTOS.test(c)) && !Object.keys(PRUEBAS_APAGADAS).some((k) => /cielo/i.test(k)) && Object.values(PRUEBAS_APAGADAS).every((v) => v === 'no' || v === false), 'las otras cinco se borraron: ni el código ni las banderas (y ninguna prueba del cielo queda)')
 controlPositivo('el detector VE un resto de ESCENA 8', "const [variante, tono] = pedido.split('-') as [VarianteDelCielo, 'mono']", (c: string) => !RESTOS.test(c))
 const estado = readFileSync(path.join(process.cwd(), 'docs/rediseno/ESTADO-ESCENA.md'), 'utf8')
 /** La excepción, escrita donde el próximo sprint la lee: el celeste, la regla monocroma y que está aprobada. */

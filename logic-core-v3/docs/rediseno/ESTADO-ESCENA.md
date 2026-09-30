@@ -74,9 +74,15 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 
 ### Las pruebas (apagadas en el producto)
 
-Ninguna. [CALIDAD 1] A2: el cielo de día pasó al producto en su variante pintado-celeste; las otras cinco (el pintado
-mono, y los bloques y las partículas en los dos tonos) se borraron, código y banderas (`cielo-dia=<variante>-<tono>`
-ya no existe).
+[CALIDAD 1] A2: el cielo de día pasó al producto en su variante pintado-celeste; las otras cinco (el pintado mono, y los
+bloques y las partículas en los dos tonos) se borraron, código y banderas (`cielo-dia=<variante>-<tono>` ya no existe).
+
+[ESCENA 9] Las del sprint, para que decida Valentino. Con banco, en el pedido; **sin banco, en la URL**
+(`/v3?pruebas=logo-noche=fino`): sólo cambian las pruebas, el resto es el producto y no aparece ningún gancho del banco.
+
+| Token | Efecto |
+|---|---|
+| `logo-noche=fino` · `=grueso` · `=claro` | T2 · el logo de noche: costados sin emisión (negro), tapas con el gris de hoy y un borde en su contorno (negro fino, negro grueso o claro); el amanecer guarda la noche con el mismo dibujo; de día no cambia (`logoDeNoche.ts`) |
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -87,7 +93,8 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `estado()` y
 `aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
-`__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`). [CALIDAD 1]
+`__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__logoDeNocheDelBanco`
+(`variante(v)`: las variantes del logo de noche en vivo, para compararlas en el mismo cuadro). [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
 arranca apagada con banco, `activa(true)`).
@@ -187,7 +194,9 @@ sus cuadros por segundo encima, y los lado a lado), `momentos.ts` y `hojas.ts` (
 por punto (`b3-tabla` a `b11-tirones`).
 
 [ESCENA 9] Los bancos del sprint (`scripts-escena9/`, los mismos instrumentos): `t1-obstaculo` (el scroll fuerte y el
-despertar con el logo al doble, y cuántas motas hay contra la cara de la malla real cada 250 ms).
+despertar con el logo al doble, y cuántas motas hay contra la cara de la malla real cada 250 ms), `mismo-cuadro` (la
+escena dibujada una vez por variante en una sola tarea, leída del lienzo), `t2-logo-noche` (las variantes del logo de
+noche en el mismo cuadro, los clips y la prueba abierta por URL). `motor.ts` escribe en otra carpeta con `RAIZ=`.
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 

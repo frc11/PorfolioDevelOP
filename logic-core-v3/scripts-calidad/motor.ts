@@ -20,7 +20,7 @@
  * sus percentiles no dicen nada. Por eso el costo por cuadro sale de la GPU cuadro a cuadro, el promedio de cuadros por
  * segundo sale de contar cuadros en el tiempo, y los tirones salen del ritmo con vsync.
  *
- * Va a `calidad1/motor/<etiqueta>/<ancho>/<parte>.json`.
+ * Va a `calidad1/motor/<etiqueta>/<ancho>/<parte>.json` ([ESCENA 9] o a `$RAIZ/motor/...`).
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -37,8 +37,11 @@ const FRIO = process.env.FRIO === '1'
 /** La velocidad del recorrido (px/s): el documento entero en ~30 s a 1440 y ~25 s a 375. */
 const VELOCIDAD = 900
 
+/** [ESCENA 9] `RAIZ=<carpeta>`: otra carpeta de entregas (por defecto la de CALIDAD 1). */
+const RAIZ = process.env.RAIZ ?? DIRC
+
 const carpeta = (): string => {
-  const d = `${DIRC}/motor/${ETIQUETA}/${String(ANCHO)}${DPR === 1 ? '' : `@${String(DPR)}x`}${FRIO ? '-frio' : ''}`
+  const d = `${RAIZ}/motor/${ETIQUETA}/${String(ANCHO)}${DPR === 1 ? '' : `@${String(DPR)}x`}${FRIO ? '-frio' : ''}`
   mkdirSync(d, { recursive: true })
   return d
 }

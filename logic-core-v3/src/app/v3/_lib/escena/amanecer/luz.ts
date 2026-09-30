@@ -117,7 +117,8 @@ export function conElAmanecerEnElLogo(material: THREE.MeshStandardMaterial): voi
       .replace('#include <project_vertex>', '#include <project_vertex>\n\tvMundoDelLogo = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;')
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\nvarying vec3 vMundoDelLogo;\n${AMANECER_GLSL}`)
-      .replace('#include <dithering_fragment>', `#include <dithering_fragment>\n\tgl_FragColor.rgb = mix( vec3( ${LOGO_DE_NOCHE.toFixed(2)} ), gl_FragColor.rgb, alcanzadoPorElDia( vMundoDelLogo ) );`)
+      // [ESCENA 9] T2 · con la prueba del logo de noche, lo que guarda lleva su dibujo (costados negros, tapas con borde).
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>\n#ifdef LOGO_DE_NOCHE_CON_BORDE\n\tgl_FragColor.rgb = mix( colorDelLogoDeNoche( ${LOGO_DE_NOCHE.toFixed(2)} ), gl_FragColor.rgb, alcanzadoPorElDia( vMundoDelLogo ) );\n#else\n\tgl_FragColor.rgb = mix( vec3( ${LOGO_DE_NOCHE.toFixed(2)} ), gl_FragColor.rgb, alcanzadoPorElDia( vMundoDelLogo ) );\n#endif`)
   }
   material.customProgramCacheKey = () => `${clavePrevia()}|amanecer-logo`
   material.needsUpdate = true

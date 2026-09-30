@@ -6,6 +6,8 @@ import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
 import { conCantosSuaves } from './cantosDelLogo'
+import { entornoDeLaEscena, hayBanco } from './entorno'
+import { aplicarVariante, conLogoDeNoche, hornearElContorno, type VarianteDelLogoDeNoche } from './logoDeNoche'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
 
@@ -25,6 +27,11 @@ import type { ProbeStatsStore } from './probeStore'
 
 /** Igual que el frozen: el SVG viene con el eje Y para abajo. */
 const SVG_FLIP: readonly [number, number, number] = [Math.PI, 0, 0]
+
+/** Los puntos por curva del SVG en la extrusión (el default de three): el contorno de las tapas usa los mismos. */
+const CURVAS_DE_LA_EXTRUSION = 12
+
+type VentanaDelBanco = Window & { __logoDeNocheDelBanco?: { variante: (v: VarianteDelLogoDeNoche | 'no') => void } }
 
 type ProbeLogoProps = {
   stats: ProbeStatsStore
@@ -76,7 +83,8 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
       geometry.computeBoundingSphere()
     }
 
-    return { built, size }
+    // [ESCENA 9] T2 · las formas y el corrimiento, para el contorno de las tapas del logo de noche.
+    return { built, size, shapes, center }
   }, [svgData])
 
   // Publica la caja real (en unidades de mundo) y avisa que la escena existe.
@@ -114,7 +122,7 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
    * `DoubleSide` igual que el frozen — el SVG no garantiza el sentido de giro de
    * sus contornos.
    */
-  const material = useMemo(() => {
+  const { material, logoDeNoche } = useMemo(() => {
     const built = new THREE.MeshStandardMaterial({
       color: INK_COLOR,
       roughness: INK_ROUGHNESS,
@@ -123,8 +131,22 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
       // [CALIDAD 1] B8: con dithering (ruido azul): la noche del logo sin escalones.
       dithering: true,
     })
-    return built
-  }, [])
+    // [ESCENA 9] T2 · la prueba del logo de noche (bandera `logo-noche`): costados negros, tapas con borde.
+    const variante = entornoDeLaEscena().pruebas.logoDeNoche
+    if (variante === 'no') return { material: built, logoDeNoche: null }
+    const contorno = hornearElContorno(geometries.shapes, CURVAS_DE_LA_EXTRUSION, geometries.center)
+    return { material: built, logoDeNoche: { contorno, uniforms: conLogoDeNoche(built, contorno, variante) } }
+  }, [geometries])
+
+  // [ESCENA 9] T2 · con banco, las variantes se cambian en vivo (para compararlas en el mismo cuadro).
+  useEffect(() => {
+    if (logoDeNoche === null) return undefined
+    if (hayBanco()) (window as VentanaDelBanco).__logoDeNocheDelBanco = { variante: (v) => aplicarVariante(logoDeNoche.uniforms, v) }
+    return () => {
+      logoDeNoche.contorno.textura.dispose()
+      delete (window as VentanaDelBanco).__logoDeNocheDelBanco
+    }
+  }, [logoDeNoche])
 
   // El material sale por el ref para que el rig le escriba la emisiva (B13). Un
   // efecto y no el render: escribir un ref durante el render es un efecto
