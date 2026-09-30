@@ -7,6 +7,7 @@ import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
+import { instalarLenisDePrueba } from './lenisDePrueba'
 import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
 
 /**
@@ -69,6 +70,8 @@ export default function ScrollSuaveDeV3(): null {
 
   useEffect(() => {
     const lenis = new Lenis({ ...OPCIONES_DE_LENIS })
+    // [ESCENA 9] T4 · la prueba de la curva (bandera `lenis=`): cambia las opciones de la instancia, no su construcción.
+    const soltarLaPrueba = instalarLenisDePrueba(lenis)
     instancia.current = lenis
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
@@ -82,6 +85,7 @@ export default function ScrollSuaveDeV3(): null {
       // cancela el pedido de cuadro y después se destruye. Al revés queda un
       // `rAF` vivo pidiendo cuadros sobre una instancia muerta.
       cancelAnimationFrame(pedido)
+      soltarLaPrueba()
       lenis.destroy()
       instancia.current = null
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)

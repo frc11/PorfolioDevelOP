@@ -37,6 +37,13 @@ type VentanaDelBanco = Window & { __aireDelBanco?: { viento: number; motas: numb
  */
 export const INERCIA = { arrastre: 0.25, tomaS: 0.4, frenaS: 2.2 } as const
 
+/**
+ * [ESCENA 9] T4 · cuánto sigue contando como scroll después del último cambio del progreso (s). El scroll se mueve de a
+ * píxeles enteros: en la cola de Lenis, a 144 Hz, el píxel cambia uno de cada tres cuadros, y contado por cuadro el aire
+ * creía que el scroll paraba dos de cada tres y frenaba con `frenaS` (a 144 Hz la deriva quedaba un 10 % más lejos que a 60).
+ */
+export const RETENCION_DEL_SCROLL_S = 0.05
+
 /** 6a: el corrimiento de todo el volumen avanza con el aire. */
 function derivar(aire: THREE.Vector3, dt: number): void {
   AIRE.uDeriva.value.addScaledVector(aire, dt)
@@ -64,6 +71,7 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
   const e = entornoDeLaEscena()
   const memoria = useRef({
     progreso: Number.NaN,
+    desdeElScroll: Number.POSITIVE_INFINITY,
     camara: new THREE.Vector3(),
     camaraAntes: new THREE.Vector3(),
     empuje: new THREE.Vector3(),
@@ -91,7 +99,8 @@ function AirePrendido({ rig, quieto, logoGroupRef, forma }: PropsDelAire & { rea
     // poco; cuando frena, sigue derivando hacia donde iba y se frena despacio.
     if (e.inercia) {
       const progreso = rig.current.progress
-      const conScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
+      m.desdeElScroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6 ? 0 : m.desdeElScroll + dt
+      const conScroll = m.desdeElScroll < RETENCION_DEL_SCROLL_S
       m.progreso = progreso
       if (!quieto && conScroll && dt > 0) m.empuje.copy(state.camera.position).sub(m.camaraAntes).divideScalar(dt).multiplyScalar(INERCIA.arrastre)
       else m.empuje.set(0, 0, 0)

@@ -196,6 +196,8 @@ export async function lanzarChrome(opciones: {
       `--window-size=${opciones.ancho},${opciones.alto}`,
       `--window-position=${opciones.x ?? 0},${opciones.y ?? 0}`,
       ...BANDERAS,
+      // [ESCENA 9] T4 · la máquina tiene dos placas y Chrome elige la integrada: `BANCO_GPU=alta` pide la NVIDIA.
+      ...(process.env.BANCO_GPU === 'alta' ? ['--force_high_performance_gpu'] : []),
       ...(opciones.banderasExtra ?? []),
       'about:blank',
     ],

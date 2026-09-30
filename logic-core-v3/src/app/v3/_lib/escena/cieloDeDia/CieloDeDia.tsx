@@ -1,7 +1,7 @@
 'use client'
 
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import type { NivelDeCalidad } from '../calidad'
@@ -82,13 +82,17 @@ function armar() {
 }
 
 /** Por cuadro: cuánto día hay y la bruma de este cuadro. */
-function alCuadro(a: ReturnType<typeof armar>, niebla: THREE.Color | null): void {
+function alCuadro(a: ReturnType<typeof armar>, niebla: THREE.Color | null, mostrado: boolean): void {
   a.uniforms.uDia.value = diaDelCielo(VIVO.uNoche.value)
+  // [ESCENA 9] T4 · sin nada de día pinta el color de la niebla, el mismo del fondo: no se dibuja (medido: 0 píxeles).
+  a.cupula.visible = mostrado && a.uniforms.uDia.value > 0
   if (niebla !== null) a.uniforms.uNiebla.value.copy(niebla).convertLinearToSRGB()
 }
 
 function CieloPrendido() {
   const armado = useMemo(() => armar(), [])
+  // El banco puede esconderlo (para comparar); el cuadro decide lo demás.
+  const mostrado = useRef(true)
   useEffect(() => () => armado.soltar(), [armado])
   useEffect(() => {
     if (!hayBanco()) return undefined
@@ -97,13 +101,14 @@ function CieloPrendido() {
     ventana.__cieloDeDiaDelBanco = {
       dia: () => armado.uniforms.uDia.value,
       mostrar: (si) => {
-        armado.cupula.visible = si
+        mostrado.current = si
+        armado.cupula.visible = si && armado.uniforms.uDia.value > 0
       },
     }
     return () => {
       delete ventana.__cieloDeDiaDelBanco
     }
   }, [armado])
-  useFrame((state) => alCuadro(armado, state.scene.fog?.color ?? null))
+  useFrame((state) => alCuadro(armado, state.scene.fog?.color ?? null, mostrado.current))
   return <primitive object={armado.cupula} />
 }

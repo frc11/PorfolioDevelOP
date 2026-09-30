@@ -17,6 +17,7 @@ import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { PISO_EN_VIVO } from './enVivo'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
+import { ORDEN_DE_LA_GRILLA, armarLosOrdenes, ponerElOrden, profundidadEstricta, sectorDe } from './ordenDeLosBloques'
 
 /**
  * [ESCENA 6] EL PISO VIVO — monta los bloques y corre la simulación (`bloques.ts` tiene el porqué).
@@ -34,6 +35,8 @@ type VentanaDelBanco = Window & {
     medir: (pasos: number) => Promise<Medida>
     /** La altura dibujada más alta y la más baja, la presencia del cursor y cuántos pasos corrió el último cuadro. */
     estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number }
+    /** [ESCENA 9] T4 · los bloques de adelante hacia atrás (o en el orden de la grilla) y la profundidad estricta. */
+    orden: (prendido: boolean, estricta: boolean) => void
   }
 }
 
@@ -74,6 +77,7 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     reloj: Number.NaN,
     pasos: 0,
     principal: null as THREE.DirectionalLight | null,
+    sector: 0,
   })
 
   useEffect(() => {
@@ -94,6 +98,13 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
         return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos }
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
+      orden: (prendido, estricta) => {
+        const o = armado.orden
+        if (o === null) return
+        o.apagado = !prendido
+        ponerElOrden(armado.bloques, armado.celdas, o, prendido ? memoria.current.sector : ORDEN_DE_LA_GRILLA)
+        profundidadEstricta(armado.bloques, estricta)
+      },
     }
     return () => {
       delete ventana.__pisoDelBanco
@@ -104,6 +115,10 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     const m = memoria.current
     const gl = state.gl
     guardarElContexto(armado, gl)
+    // [ESCENA 9] T4 · los bloques de adelante hacia atrás desde la cámara: se reordenan sólo al cambiar de sector.
+    state.camera.getWorldPosition(m.ojo)
+    m.sector = sectorDe(m.ojo.x, m.ojo.z)
+    if (armado.orden !== null && !armado.orden.apagado) ponerElOrden(armado.bloques, armado.celdas, armado.orden, m.sector)
     if (m.inicio) {
       armado.sim.llenar(gl, new THREE.Vector4(0, 0, 0, 1)) // una vez
       m.inicio = false
@@ -232,10 +247,17 @@ function armar(grilla: Grilla, conContacto: boolean) {
     bloques.setMatrixAt(k, matriz.makeTranslation(x, FLOOR_Y, z))
   }
   bloques.instanceMatrix.needsUpdate = true
+  // [ESCENA 9] T4 · los órdenes de adelante hacia atrás, uno por sector (`ordenDeLosBloques.ts`), armados una vez.
+  const celdas = geometria.getAttribute('aCelda') as THREE.InstancedBufferAttribute
+  const centros = new Float32Array(grilla.cuantas * 2)
+  for (let k = 0; k < grilla.cuantas; k += 1) centros.set(centroDeLaCelda(grilla.celdas[k * 2], grilla.celdas[k * 2 + 1], grilla), k * 2)
+  const orden = entornoDeLaEscena().ordenDelPiso ? armarLosOrdenes(centros, bloques.instanceMatrix.array as Float32Array, grilla.celdas) : null
   const gl = { current: null as THREE.WebGLRenderer | null }
   return {
     grilla,
     gl,
+    celdas,
+    orden,
     cronometro: crearCronometro(),
     sim,
     // [CALIDAD 1] B2: la pasada de la simulación, armada una vez (el cronómetro la corre en cada paso).

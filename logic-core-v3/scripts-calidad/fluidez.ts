@@ -10,6 +10,9 @@
  * `base` se graba con el código de la escena del commit de B0 (c1c8b6cd, puesto a mano y devuelto después) y `final`
  * con el de ahora, con la calidad adaptativa prendida como en el producto. `lado` arma los lado a lado. Va a
  * `calidad1/final/`.
+ *
+ * [ESCENA 9] Con otra etiqueta (la adaptativa prendida salvo en `base`) y `RAIZ` (la carpeta), `PEDIDO` (lo que pide el
+ * banco) y `LADO` («izquierda|derecha|rótulo izquierdo|rótulo derecho», para `lado`): graba otras comparaciones.
  */
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -135,11 +138,11 @@ function armarVideo(dir: string, cuadros: readonly Cuadro[], ass: string, destin
 }
 
 async function grabarElRecorrido(): Promise<void> {
-  const dir = carpeta('final')
-  const b = await abrirMotor(ANCHO, ALTO, { dpr: DPR, conVsync: true })
+  const dir = (process.env.RAIZ ?? carpeta('final'))
+  const b = await abrirMotor(ANCHO, ALTO, { dpr: DPR, conVsync: true, pedido: process.env.PEDIDO ?? 'producto' })
   const base = `${dir}/${nombre(ETIQUETA)}`
   try {
-    const adaptativa = ETIQUETA === 'final' ? await medir<boolean>(b.p, '(() => { if (!window.__calidadDelBanco) return false; window.__calidadDelBanco.activa(true); return true })()') : false
+    const adaptativa = ETIQUETA !== 'base' ? await medir<boolean>(b.p, '(() => { if (!window.__calidadDelBanco) return false; window.__calidadDelBanco.activa(true); return true })()') : false
     const d = await medir<Documento>(b.p, DOCUMENTO)
     const tramos = tramosDe(d)
     await medir(b.p, 'window.scrollTo(0, 0)')
@@ -178,16 +181,17 @@ async function grabarElRecorrido(): Promise<void> {
 
 /** Los dos lado a lado, a 60 cuadros por segundo (los de ESCENA van a 30: esconderían justo lo que se compara). */
 function ladoALado(): void {
-  const dir = carpeta('final')
-  const [izquierda, derecha] = [`${dir}/${nombre('base')}.mp4`, `${dir}/${nombre('final')}.mp4`]
+  const dir = (process.env.RAIZ ?? carpeta('final'))
+  const [iz, de, rotuloIz, rotuloDe] = (process.env.LADO ?? 'base|final|BASE · antes de la parte B|FINAL · despues de CALIDAD 1').split('|')
+  const [izquierda, derecha] = [`${dir}/${nombre(iz)}.mp4`, `${dir}/${nombre(de)}.mp4`]
   const alto = 720
   const rotulo = (texto: string): string => `drawtext=fontfile='${FUENTE}':text='${texto}':x=12:y=10:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.7:boxborderw=5`
   const cadena = (i: number, texto: string): string => `[${String(i)}:v]scale=-2:${String(alto)},fps=60,${rotulo(texto)},tpad=stop_mode=clone:stop_duration=30[v${String(i)}]`
   const duracion = (a: string): number => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', a], { encoding: 'utf8' }).trim())
   const d = Math.max(duracion(izquierda), duracion(derecha))
-  const filtro = `${cadena(0, 'BASE · antes de la parte B')};${cadena(1, 'FINAL · despues de CALIDAD 1')};[v0][v1]hstack=inputs=2:shortest=0[s];[s]trim=duration=${d.toFixed(2)}[f]`
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', izquierda, '-i', derecha, '-filter_complex', filtro, '-map', '[f]', '-c:v', 'libx264', '-crf', '20', '-pix_fmt', 'yuv420p', `${dir}/${nombre('base-y-final')}.mp4`])
-  console.log(`${dir}/${nombre('base-y-final')}.mp4`)
+  const filtro = `${cadena(0, rotuloIz)};${cadena(1, rotuloDe)};[v0][v1]hstack=inputs=2:shortest=0[s];[s]trim=duration=${d.toFixed(2)}[f]`
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', izquierda, '-i', derecha, '-filter_complex', filtro, '-map', '[f]', '-c:v', 'libx264', '-crf', '20', '-pix_fmt', 'yuv420p', `${dir}/${nombre(`${iz}-y-${de}`)}.mp4`])
+  console.log(`${dir}/${nombre(`${iz}-y-${de}`)}.mp4`)
 }
 
 if (process.argv[1]?.endsWith('fluidez.ts')) {

@@ -158,6 +158,9 @@ void main() {
 }
 `
 
+/** [ESCENA 9] T4 · la noche desde la que la cúpula empieza a sumar (el borde de abajo de su `smoothstep`). */
+const NOCHE_DE_LA_CUPULA = 0.5
+
 const FRAGMENT_DE_LA_CUPULA = /* glsl */ `
 uniform float uNoche;
 uniform float uVisible;
@@ -174,7 +177,7 @@ ${viaLacteaGlsl()}
 #endif
 void main() {
 	vec3 d = normalize( vMundo - cameraPosition );
-	float noche = smoothstep( 0.5, 0.9, uNoche ) * uVisible * uEstrellasDelAmanecer;
+	float noche = smoothstep( ${NOCHE_DE_LA_CUPULA.toFixed(2)}, 0.9, uNoche ) * uVisible * uEstrellasDelAmanecer;
 	float pasa = delanteDeLaTrama( cameraPosition, d );
 	float luz = viaLactea( d ) * noche * pasa;
 	float oscuro = ${CIELO.oscuro.toFixed(2)} * smoothstep( ${CIELO.desde.toFixed(2)}, ${CIELO.hasta.toFixed(2)}, d.y ) * noche * pasa;
@@ -334,7 +337,8 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
   }, [scene, armado])
 
   useFrame((state) => {
-    alCuadro(armado.uniforms, armado.puntos, fueraDelTunel(rig.current.progress), state.viewport.dpr, state.gl)
+    const visible = fueraDelTunel(rig.current.progress)
+    alCuadro(armado.uniforms, armado.puntos, armado.cupula, visible, state.viewport.dpr, state.gl)
     leerLaTrama(moireRef.current)
     armado.cupula.position.copy(state.camera.position)
   })
@@ -347,8 +351,20 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
   )
 }
 
-function alCuadro(u: { uVisible: { value: number }; uPixel: { value: number }; uResolucion: { value: THREE.Vector2 } }, puntos: THREE.Points, visible: number, dpr: number, gl: THREE.WebGLRenderer): void {
+/**
+ * [ESCENA 9] T4 · la cúpula suma algo sólo de noche o en el amanecer: si no, su luz y su oscuro valen cero y se dibujaba
+ * igual, cubriendo la pantalla (0,4–0,8 ms de GPU de día a 1440, el doble con dpr 1,5). Las mismas condiciones que
+ * anulan su fragmento: la noche por debajo del borde de su `smoothstep`, el túnel, las estrellas apagadas por el amanecer.
+ */
+function cupulaEnCuadro(visible: number): boolean {
+  const a = AMANECER_EN_VIVO
+  const deNoche = VIVO.uNoche.value > NOCHE_DE_LA_CUPULA && visible > 0 && a.uEstrellasDelAmanecer.value > 0
+  return deNoche || a.uResplandor.value > 0 || a.uBarridoDelDia.value > 0.5
+}
+
+function alCuadro(u: { uVisible: { value: number }; uPixel: { value: number }; uResolucion: { value: THREE.Vector2 } }, puntos: THREE.Points, cupula: THREE.Mesh, visible: number, dpr: number, gl: THREE.WebGLRenderer): void {
   u.uVisible.value = visible
+  cupula.visible = cupulaEnCuadro(visible)
   // [CALIDAD 1] B12 · si ninguna puede verse (de día, con menos noche que el umbral más bajo; en el túnel; o el amanecer ya
   // las apagó) no se dibujan: el vértice de todas costaba 0,34 ms por cuadro también de día, sin pintar un píxel.
   puntos.visible = visible > 0.001 && VIVO.uNoche.value > ESTRELLAS.umbral.desde && AMANECER_EN_VIVO.uEstrellasDelAmanecer.value > 0.001

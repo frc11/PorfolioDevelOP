@@ -44,6 +44,9 @@
 | **[CALIDAD 1] B10 · el apoyo de las copias** | Una mancha de contacto instanciada en la base de cada copia de la formación | `formacion/armado.ts` |
 | **[CALIDAD 1] B11 · la calidad adaptativa** | Si los cuadros no entran baja de a un escalón (motas con fundido, después dpr de a 10 %), con histéresis. El dpr cambia sólo con el scroll quieto: redimensionar el lienzo congela el hilo 30–60 ms | `gpu/adaptativa.ts`, `gpu/CalidadAdaptativa.tsx` |
 | **[CALIDAD 1] B12 · lo que no se ve** | Las estrellas no se dibujan cuando ninguna puede verse | `estrellas/Estrellas.tsx` |
+| **[ESCENA 9] T4 · los bloques de adelante hacia atrás** | Los bloques del piso vivo se dibujan de adelante hacia atrás desde la cámara (ocho órdenes por sector, armados al cargar; se cambia sólo al cambiar de sector): la GPU descarta lo tapado antes de pintarlo. La misma imagen salvo aristas compartidas (empates de profundidad) | `piso/ordenDeLosBloques.ts` |
+| **[ESCENA 9] T4 · las cúpulas que no suman** | La de la vía láctea no se dibuja de día (ni en el túnel) y la del cielo de día no se dibuja de noche: las mismas condiciones que anulan su fragmento | `estrellas/Estrellas.tsx`, `cieloDeDia/CieloDeDia.tsx` |
+| **[ESCENA 9] T4 · el aire, en segundos** | Decide si hay scroll con una retención de 50 ms (el scroll se mueve de a píxeles enteros): la misma deriva a 60, 75, 120 y 144 Hz | `polvo/Aire.tsx` |
 
 ### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
 
@@ -71,6 +74,7 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 | `limite=no` | [ESCENA 8] T2 · la trama como en ESCENA 7 (flotando) |
 | `amanecer=no` | [ESCENA 8] T3 · sin el amanecer (el día vuelve escondido, como antes de ESCENA 7) |
 | `cielo-dia=no` | [CALIDAD 1] A2 · sin el cielo de día (queda el fondo de la bruma, como antes) |
+| `orden-piso=no` | [ESCENA 9] T4 · los bloques del piso vivo en el orden de la grilla (el de antes) |
 
 ### Las pruebas (apagadas en el producto)
 
@@ -87,6 +91,7 @@ bloques y las partículas en los dos tonos) se borraron, código y banderas (`ci
 | `sombra-logo` | T3 · la sombra proyectada del logo por la luz principal sobre el piso vivo: un mapa de varianza de 256² del logo solo, desenfocado, y UNA lectura por píxel en el piso; convive con la mancha de contacto; de noche no se dibuja (`sombra/delLogo.ts`) |
 | `bloom` | T3 · un resplandor sólo de noche y sólo del haz, las estrellas y la fugaz: van en una capa propia y se vuelven a dibujar solos sobre la profundidad de la escena; la escena pasa a un búfer propio multimuestreado que se copia al lienzo (`gpu/posproceso.ts`, sin EffectComposer) |
 | `tono=agx` · `=aces` | T3 · el tono de three compensado: el color del tono pedido con el brillo de Neutral (en un gris da Neutral exacto) (`tono.ts`) |
+| `lenis=nk` · `=sedoso` | T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075). Cambia las opciones de la instancia, no su construcción (`_componentes/lenisDePrueba.ts`) |
 | `aa=taa` · `=msaa8` | T3 · el antialiasing de las aristas en movimiento: TAA (la cámara corrida por Halton, el historial reproyectado con la profundidad y recortado a la vecindad; el polvo va aparte, encima) u 8 muestras en lugar de 4 (`gpu/posproceso.ts`) |
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
@@ -101,7 +106,8 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__logoDeNocheDelBanco`
 (`variante(v)`: las variantes del logo de noche en vivo, para compararlas en el mismo cuadro), `__materialDelLogoDelBanco`
 (`variante(v)`), `__sombraDelLogoDelBanco` (`poner(prendida)`, `mapa()`, `depurar()`) y `__posprocesoDelBanco` (`bloom`
-y `taa` en vivo, `dibujar()`, `pasos(n)`: la GPU de cada paso del posproceso). [CALIDAD 1]
+y `taa` en vivo, `dibujar()`, `pasos(n)`: la GPU de cada paso del posproceso); T4: `__pisoDelBanco.orden(prendido,
+estricta)` (los bloques en el orden nuevo o en el de la grilla) y `__lenisDelBanco.poner(v)` (la curva en vivo). [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
 arranca apagada con banco, `activa(true)`).
@@ -161,12 +167,27 @@ dos cargas del producto, hasta 0,22 ms):
 | `tono=agx` · `tono=aces` | +0,5 a +1,0 · +0,2 a +0,6 |
 | `logo-noche=grueso` | 0 |
 
+**[ESCENA 9] T4 · la placa.** El Chrome del banco usa la AMD INTEGRADA por defecto (CALIDAD 1 y T3 se midieron ahí);
+`BANCO_GPU=alta` pide la NVIDIA (`--force_high_performance_gpu`). Después de T4, GPU por cuadro (p50, el recorrido
+entero, `escena9/t4-fluidez/motor/`):
+
+| | AMD integrada | NVIDIA RTX 5050 |
+|---|---|---|
+| 1440 | 6,04 ms (CALIDAD 1: 7,08) | 0,81 ms |
+| 375 | 0,95 | 0,31 |
+| 1440 con dpr 1,5 | 11,04 (antes 14,45) | 1,35 (antes 1,63) |
+
+Cuadros perdidos con vsync a 1440 con dpr 1,5: AMD 356 → 139 (90 de Servicios); NVIDIA 80, todos de Servicios (el video
+de muestra de la sección, ver §6).
+
 ## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
 
 1. **Todo en segundos, nunca en cuadros.** Lo que se mueve integra con el `dt` del cuadro, acotado contra los
    tirones (`Math.min(delta, 1 / 30)` o 0,1): los amortiguadores con `1 − exp(−dt/τ)`, la física con Euler
    exponencial (`relajar` en `polvo/simulacion.ts`), lo periódico con el reloj, los pasos fijos con su acumulador. Se
-   prueba igual a 60, 75, 120 y 144 Hz (s34 B3 tiene el molde).
+   prueba igual a 60, 75, 120 y 144 Hz (s34 B3 tiene el molde; [ESCENA 9] `scripts-escena9/t4-hz.ts` corre la página
+   entera con un reloj virtual). Lo que se decide por «cambió el scroll en este cuadro» se sostiene en segundos: el
+   scroll se mueve de a píxeles enteros y a 144 Hz la cola de Lenis no cambia de píxel en cada cuadro (el aire, T4).
 2. **Precompilado.** Todo programa nuevo se compila al arrancar: si va en la escena, `Precompilar` lo compila y lo
    calienta aunque esté invisible; si se dibuja aparte (su propia escena o su búfer), se registra en `ESCENAS_APARTE`.
    Se verifica con `motor.ts programas`: `tarde` tiene que quedar vacío.
@@ -220,7 +241,11 @@ escena dibujada una vez por variante en una sola tarea, leída del lienzo), `t2-
 noche en el mismo cuadro, los clips y la prueba abierta por URL), `t3-tono` (el tono pedido crudo, con exposición y
 compensado, en el mismo cuadro; el ΔE de los colores canónicos), `t3-mismo-cuadro` (material, sombra y bloom),
 `t3-titileo` (el titileo de las aristas con 4 y 8 muestras y con TAA, con la cámara corriéndose de a poco), `t3-costo`
-(la GPU por cuadro de cada prueba) y `t3-clips`. `motor.ts` escribe en otra carpeta con `RAIZ=`.
+(la GPU por cuadro de cada prueba) y `t3-clips`; T4: `t4-gpu` (qué placa), `t4-orden` y `t4-orden-imagen` (el orden de
+los bloques: la GPU y la imagen en el mismo cuadro), `t4-invisibles` (las cúpulas), `t4-hz` (el reloj virtual),
+`t4-lenis` (las curvas y los clips contra nk.studio) y `t4-servicios` (la traza y los sospechosos). `motor.ts` escribe
+en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`); `fluidez.ts` graba otras comparaciones
+(`RAIZ`, `PEDIDO`, `LADO`); cualquier banco mide con la NVIDIA con `BANCO_GPU=alta`.
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -237,6 +262,10 @@ compensado, en el mismo cuadro; el ΔE de los colores canónicos), `t3-mismo-cua
   polvo saltan (226 rad en ese cuadro). Pasa con la escena tapada (verificado con capturas), así que no se ve.
 - **[CALIDAD 1, hallado]** La escena sigue dibujando unos cientos de píxeles de scroll adentro de Servicios, ya tapada
   por la sección opaca, antes de suspenderse.
+- **[ESCENA 9, hallado] Servicios pierde ~80 cuadros por pasada con cualquier placa y dpr** (15–18 % de sus cuadros; la
+  escena está suspendida). Es el video de muestra de la sección (`placeholder.mp4`, H.264 1152×720 a 30 cuadros por
+  segundo): con el video escondido, 0 (`escena9/t4-fluidez/servicios/`). No es de la escena; queda para cuando llegue el
+  video de verdad.
 - **[CALIDAD 1, hallado]** La primera carga después de CUALQUIER cambio de shaders los compila en frío: ~1,25 s de
   calentar dentro del precompilado, al cargar (Direct3D arma el ejecutable en el primer dibujo). Desde la segunda carga
   (en la misma sesión del banco o en otra, con el mismo perfil) Chrome los encuentra en su caché: 16–19 ms de compilar y
@@ -261,6 +290,9 @@ compensado, en el mismo cuadro; el ΔE de los colores canónicos), `t3-mismo-cua
   ACES casi no cambian la imagen, pero los blancos cálidos del papel y del piso llegan a ΔE 2,0–2,7); el antialiasing,
   ninguno en la integrada (+3,5 a +4,6 ms los dos; el TAA además ablanda la línea del bisel). Qué mirar:
   `escena9/t3-material-y-luz/mirar.txt`.
+- **[ESCENA 9] T4 · por decidir (Valentino):** el scroll suave (`lenis=nk` o `lenis=sedoso`; medido: la curva de hoy ya
+  es la de nk) y el video de Servicios. Lo que queda en la integrada con dpr 1,5 (49 cuadros perdidos fuera de Servicios)
+  es la formación y el piso de abajo: bajarlos cambia la imagen. Qué mirar: `escena9/t4-fluidez/mirar.txt`.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

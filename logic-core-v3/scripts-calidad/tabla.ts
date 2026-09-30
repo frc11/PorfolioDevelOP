@@ -11,7 +11,9 @@ import { DIRC } from './banco'
 import { tramoEn, type Tramo } from './motor/analisis'
 
 const [ETIQUETA, CONTRA, DESTINO] = [process.argv[2] ?? 'base', process.argv[3], process.argv[4]]
-const ANCHOS = ['1440', '375']
+/** [ESCENA 9] `RAIZ`, `ANCHOS` (con `1440@1.5x` para el dpr 1,5) y `PLACA`: otra carpeta, otros anchos, otra placa. */
+const RAIZ = process.env.RAIZ ?? DIRC
+const ANCHOS = (process.env.ANCHOS ?? '1440,375').split(',')
 
 type Resumen = { n: number; p50: number; p95: number; p99: number; max: number; media: number; mas16: number; mas33: number }
 interface Gpu { total: Resumen; porTramo: Record<string, Resumen>; fps: Record<string, { fps: number; msPorCuadro: number }>; tramos: Tramo[]; segundos: number; cuadros: number }
@@ -21,7 +23,7 @@ interface Pasadas { momentos: Record<string, { totalCuadroMs: number; rendersPor
 interface Memoria { momentos: Record<string, { bytesPorCuadro: number; recolectorMs: number; porFuncion: [string, number][] }> }
 
 function leer<T>(etiqueta: string, ancho: string, parte: string): T | null {
-  const a = `${DIRC}/motor/${etiqueta}/${ancho}/${parte}.json`
+  const a = `${RAIZ}/motor/${etiqueta}/${ancho}/${parte}.json`
   return existsSync(a) ? (JSON.parse(readFileSync(a, 'utf8')) as T) : null
 }
 
@@ -99,8 +101,8 @@ function seccion(ancho: string): string[] {
   return L
 }
 
-const L = [`# Rendimiento de la escena — ${ETIQUETA}${CONTRA === undefined ? '' : ` contra ${CONTRA}`}`, '', 'Máquina de medición: AMD Radeon integrada (ANGLE, Direct3D 11), monitor de 75 Hz. Servidor de desarrollo (React en modo desarrollo: sus costos son una cota de arriba). DPR 1.', '']
+const L = [`# Rendimiento de la escena — ${ETIQUETA}${CONTRA === undefined ? '' : ` contra ${CONTRA}`}`, '', `Máquina de medición: ${process.env.PLACA ?? 'AMD Radeon integrada (ANGLE, Direct3D 11)'}, monitor de 75 Hz. Servidor de desarrollo (React en modo desarrollo: sus costos son una cota de arriba). DPR 1${ANCHOS.some((a) => a.includes('@')) ? ' (1,5 donde el ancho dice @1.5x)' : ''}.`, '']
 for (const a of ANCHOS) L.push(...seccion(a))
-const destino = DESTINO ?? `${DIRC}/motor/${ETIQUETA}/tabla.md`
+const destino = DESTINO ?? `${RAIZ}/motor/${ETIQUETA}/tabla.md`
 writeFileSync(destino, L.join('\n'))
 console.log(destino)

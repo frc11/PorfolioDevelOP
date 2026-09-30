@@ -67,6 +67,9 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de este sprint,
  * para que decida Valentino: cada una con su bandera, apagada en el producto.
  */
+/** [ESCENA 9] T4 · las dos curvas del scroll suave a prueba (`_componentes/lenisDePrueba.ts`). */
+export type LenisDePrueba = 'nk' | 'sedoso'
+
 export interface Pruebas {
   /** [ESCENA 9] T2 · el logo de noche: costados negros, tapas grises con borde (`logoDeNoche.ts`); `logo-noche=<variante>`. */
   readonly logoDeNoche: VarianteDelLogoDeNoche | 'no'
@@ -80,10 +83,12 @@ export interface Pruebas {
   readonly tono: TonoDePrueba | 'no'
   /** [ESCENA 9] T3 · el antialiasing de las aristas en movimiento (`gpu/posproceso.ts`); `aa=taa|msaa8`. */
   readonly aa: 'taa' | 'msaa8' | 'no'
+  /** [ESCENA 9] T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075); `lenis=nk|sedoso`. */
+  readonly lenis: LenisDePrueba | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no', lenis: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -99,6 +104,7 @@ function pruebasDe(valor: (clave: string) => string | undefined, partes: Readonl
     bloom: partes.has('bloom'),
     tono: unoDe<TonoDePrueba>(['agx', 'aces'], valor('tono')),
     aa: unoDe(['taa', 'msaa8'] as const, valor('aa')),
+    lenis: unoDe<LenisDePrueba>(['nk', 'sedoso'], valor('lenis')),
   }
 }
 
@@ -127,6 +133,8 @@ export interface Entorno {
   readonly posarse: boolean
   /** [ESCENA 7] T5 · el piso vivo, un mar de bloques que responde al cursor y al pulso (`piso/`). */
   readonly pisoVivo: boolean
+  /** [ESCENA 9] T4 · los bloques del piso vivo se dibujan de adelante hacia atrás (`piso/ordenDeLosBloques.ts`). */
+  readonly ordenDelPiso: boolean
   /** [ESCENA 7] T6 · 6a, el aire tiene inercia: sigue derivando después de un scroll fuerte (`polvo/Aire.tsx`). */
   readonly inercia: boolean
   /** [ESCENA 7] T8 · la niebla de afuera (6c + 6d): esconde las filas de atrás y se abre con la velocidad (`niebla/`). */
@@ -168,6 +176,7 @@ export const ENTORNO: Entorno = {
   cielo: true,
   posarse: true,
   pisoVivo: true,
+  ordenDelPiso: true,
   inercia: true,
   niebla: true,
   hazEncendido: true,
@@ -196,6 +205,7 @@ export const BASE_LIMPIA: Entorno = {
   cielo: false,
   posarse: false,
   pisoVivo: false,
+  ordenDelPiso: false,
   inercia: false,
   niebla: false,
   hazEncendido: false,
@@ -239,6 +249,7 @@ export function entornoPedido(pedido: string): Entorno {
     cielo: producto ? valor('cielo') !== 'no' : partes.has('cielo'),
     posarse: producto ? valor('posarse') !== 'no' : partes.has('posarse'),
     pisoVivo: producto ? valor('piso') !== 'no' : partes.has('piso'),
+    ordenDelPiso: producto ? valor('orden-piso') !== 'no' : partes.has('orden-piso'),
     inercia: producto ? valor('inercia') !== 'no' : partes.has('inercia'),
     niebla: producto ? valor('niebla') !== 'no' : partes.has('niebla'),
     hazEncendido: producto ? valor('encendido') !== 'no' : partes.has('encendido'),
