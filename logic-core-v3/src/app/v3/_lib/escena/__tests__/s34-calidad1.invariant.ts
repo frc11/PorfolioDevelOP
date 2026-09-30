@@ -33,6 +33,8 @@
  *      lugar del ruido blanco de three, en todos los materiales con degradés (cielos, niebla, noche, piso, trama).
  * B9 · el tone mapping: se queda Neutral (ACES y AgX, medidos con la exposición compensada, corren los colores canónicos
  *      más de ΔE 2); la salida es sRGB.
+ * B10 · el apoyo de las copias: una mancha de contacto instanciada en la base de cada copia de la formación, con la
+ *      niebla del papel de afuera y el dithering; se va con las copias en el túnel.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -520,5 +522,19 @@ titulo('B9 · tone mapping: el que conserva los colores canónicos')
 const lienzoB9 = leer('configuracionDelCanvas.ts')
 afirmar(/toneMapping: THREE\.NeutralToneMapping,/.test(lienzoB9) && /\[CALIDAD 1\] B9 · ACES y AgX, MEDIDOS contra este/.test(lienzoB9), 'se queda Neutral: ACES y AgX, medidos con la exposición compensada, corren el piso, el papel o el cielo más de ΔE 2 (CIEDE2000)', 'ACES compensado: el piso 2,5–2,8; AgX compensado: 3–4,3 (scripts-calidad/b9-tono.ts)')
 afirmar(/const codificado = \(hex: string\): THREE\.Color => new THREE\.Color\(hex\)\.convertLinearToSRGB\(\)/.test(leer('cieloDeDia/CieloDeDia.tsx')) && /#include <colorspace_fragment>/.test(leer('formacion/materiales.ts')), '  la salida es sRGB: los materiales propios que escriben el color directo lo codifican a sRGB (el cielo) o incluyen la conversión (la formación)')
+
+// ── B10 · el apoyo de las copias ─────────────────────────────────────────
+titulo('B10 · las copias apoyadas en su piso: la oclusión de contacto en la base')
+const armadoB10 = leer('formacion/armado.ts')
+const apoyo = (c: string): boolean =>
+  /export const CONTACTO_DE_LA_COPIA = \{ fondo: 1\.4, sobra: 1\.05, opacidad: 0\.4 \} as const/.test(c) &&
+  /createContactSpriteData\(n, CONTACT_CORE, CONTACT_FALLOFF\)/.test(c) &&
+  /color: CONTACT_COLOR, transparent: true, opacity: CONTACTO_DE_LA_COPIA\.opacidad, depthWrite: false, dithering: true/.test(c) &&
+  /if \(rasante\) conLaNiebla\(material\)/.test(c) &&
+  /new THREE\.InstancedMesh\(plano, material, copias\.length\)/.test(c) &&
+  /makeTranslation\(c\.x, PISO_DE_ABAJO \+ 0\.01, c\.z\)\.multiply\(giro\.makeRotationY\(c\.mira\)\)/.test(c)
+afirmar(apoyo(armadoB10), 'cada copia lleva en su base la mancha de contacto del logo (su textura y su color), instanciada, con la niebla del papel de afuera y dithering', 'una llamada, dos triángulos por copia: medido, 0,05–0,1 ms de GPU para 6.839 copias')
+controlPositivo('el detector VE una mancha sin la niebla del papel (se vería oscura en la bruma)', armadoB10.replace('if (rasante) conLaNiebla(material)', ''), apoyo)
+afirmar(/contacto\.material\.opacity = CONTACTO_DE_LA_COPIA\.opacidad \* visible/.test(leer('formacion/Formacion.tsx')) && /<primitive object=\{armado\.contacto\} \/>/.test(leer('formacion/Formacion.tsx')), '  se va con las copias (en el túnel no hay formación)')
 
 cerrar('s34-calidad1')

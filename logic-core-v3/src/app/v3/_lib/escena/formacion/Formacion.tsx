@@ -11,7 +11,7 @@ import type { ProbeRigStore } from '../probeStore'
 import type { Escenario } from '../StudioFloor'
 import { NIEBLA_DE_AFUERA } from '../niebla/rasante'
 import { fueraDelTunel } from '../tunelEnLaEscena'
-import { ESCENARIO, armar, contarVisibles } from './armado'
+import { CONTACTO_DE_LA_COPIA, ESCENARIO, armar, contarVisibles } from './armado'
 import type { UniformsDeLaCopia } from './materiales'
 
 /**
@@ -86,7 +86,7 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   useFrame((state, delta) => {
     const m = memoria.current
     m.camara = state.camera
-    alCuadro(armado.copia, fueraDelTunel(rig.current.progress))
+    alCuadro(armado.copia, armado.contacto, fueraDelTunel(rig.current.progress))
     // [ESCENA 7] T8: la niebla se abre con la velocidad de la cámara mientras el scroll la mueve (6d).
     if (niebla) {
       const dt = Math.min(Math.max(delta, 1e-3), 0.1)
@@ -106,6 +106,7 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
       {armado.mallas.map((malla) => (
         <primitive key={malla.uuid} object={malla} />
       ))}
+      <primitive object={armado.contacto} />
     </>
   )
 }
@@ -120,6 +121,9 @@ function abrir(abre: number): void {
   NIEBLA_DE_AFUERA.uAbre.value = abre
 }
 
-function alCuadro(u: UniformsDeLaCopia, visible: number): void {
+function alCuadro(u: UniformsDeLaCopia, contacto: THREE.InstancedMesh, visible: number): void {
   u.uVisible.value = visible
+  // [CALIDAD 1] B10: la mancha de contacto se va con las copias (en el túnel).
+  if (contacto.material instanceof THREE.MeshBasicMaterial) contacto.material.opacity = CONTACTO_DE_LA_COPIA.opacidad * visible
+  contacto.visible = visible > 0.001
 }

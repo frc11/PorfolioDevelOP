@@ -1,8 +1,10 @@
 import * as THREE from 'three'
 
+import { CONTACT_COLOR, CONTACT_CORE, CONTACT_FALLOFF, CONTACT_SPRITE_SIZE } from '../probeAtmosphere'
+import { createContactSpriteData } from '../particleTextures'
 import { MOIRE_FAR_ORDER } from '../probeMoire'
 import { FLOOR_Y } from '../probeScene'
-import type { Escenario } from '../StudioFloor'
+import { conLaNiebla, type Escenario } from '../StudioFloor'
 import { copiaHorneada } from './copia'
 import { FORMACION, formar, type Copia } from './enFormacion'
 import { materialDeLaCopia, type UniformsDeLaCopia } from './materiales'
@@ -20,6 +22,8 @@ export interface Armado {
   readonly copias: readonly Copia[]
   /** Las dos mallas: la de la primera fila y la de las siluetas. */
   readonly mallas: readonly THREE.InstancedMesh[]
+  /** [CALIDAD 1] B10 · la mancha de contacto en la base de cada copia (una malla instanciada). */
+  readonly contacto: THREE.InstancedMesh
   readonly copia: UniformsDeLaCopia
   /** Los triángulos que manda a dibujar la formación entera. */
   readonly triangulos: number
@@ -76,16 +80,61 @@ export function armar(formas: THREE.Shape[], rasante: boolean): Armado {
     return malla
   })
 
+  const contacto = contactoDeLasCopias(copias, (x1 - x0) * e, rasante)
+
   return {
     copias,
     mallas,
+    contacto: contacto.malla,
     copia,
-    triangulos,
+    triangulos: triangulos + copias.length * 2,
     soltar: () => {
+      contacto.soltar()
       for (const m of mallas) m.dispose()
       for (const g of geometrias) g.dispose()
       for (const m of materiales) m.dispose()
       horneada.silueta.dispose()
+    },
+  }
+}
+
+/**
+ * [CALIDAD 1] B10 · EL APOYO DE LAS COPIAS — la oclusión de contacto en la base de cada una: la luz ambiente que no llega
+ * a la junta entre la copia y su piso. Es la misma mancha que la del logo (`ContactOcclusion.tsx`: la misma textura, el
+ * mismo color), más angosta de fondo porque la copia está parada (no flota) y apenas más clara. Una malla instanciada
+ * (una llamada, dos triángulos por copia), con la niebla del papel de afuera, así que lejos se funde con el piso igual
+ * que él; y con el dithering de ruido azul, porque es un degradé.
+ */
+export const CONTACTO_DE_LA_COPIA = { fondo: 1.4, sobra: 1.05, opacidad: 0.4 } as const
+
+function contactoDeLasCopias(copias: readonly Copia[], ancho: number, rasante: boolean): { readonly malla: THREE.InstancedMesh; readonly soltar: () => void } {
+  const n = CONTACT_SPRITE_SIZE
+  const textura = new THREE.DataTexture(createContactSpriteData(n, CONTACT_CORE, CONTACT_FALLOFF), n, n, THREE.RGBAFormat)
+  textura.minFilter = THREE.LinearFilter
+  textura.magFilter = THREE.LinearFilter
+  textura.needsUpdate = true
+  const plano = new THREE.PlaneGeometry(1, 1)
+  plano.rotateX(-Math.PI / 2)
+  const material = new THREE.MeshBasicMaterial({ map: textura, color: CONTACT_COLOR, transparent: true, opacity: CONTACTO_DE_LA_COPIA.opacidad, depthWrite: false, dithering: true })
+  if (rasante) conLaNiebla(material)
+  const malla = new THREE.InstancedMesh(plano, material, copias.length)
+  malla.name = 'formación · contacto'
+  malla.frustumCulled = false
+  // Sobre el piso y antes que las siluetas (que se mezclan por encima).
+  malla.renderOrder = ORDEN_DE_LAS_SILUETAS - 1
+  const [matriz, giro] = [new THREE.Matrix4(), new THREE.Matrix4()]
+  const escala = new THREE.Matrix4().makeScale(ancho * CONTACTO_DE_LA_COPIA.sobra, 1, CONTACTO_DE_LA_COPIA.fondo)
+  copias.forEach((c, i) => {
+    malla.setMatrixAt(i, matriz.makeTranslation(c.x, PISO_DE_ABAJO + 0.01, c.z).multiply(giro.makeRotationY(c.mira)).multiply(escala))
+  })
+  malla.instanceMatrix.needsUpdate = true
+  return {
+    malla,
+    soltar: () => {
+      malla.dispose()
+      plano.dispose()
+      material.dispose()
+      textura.dispose()
     },
   }
 }

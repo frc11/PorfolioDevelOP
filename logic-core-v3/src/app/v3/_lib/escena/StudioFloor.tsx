@@ -88,8 +88,11 @@ type StudioFloorProps = {
   readonly conPisoVivo?: boolean
 }
 
-/** [ESCENA 6] 6c: el material del papel de afuera, con los bancos que cada punto tiene delante. */
-function conLaNiebla(material: THREE.MeshStandardMaterial): void {
+/**
+ * [ESCENA 6] 6c: el material del papel de afuera, con los bancos que cada punto tiene delante. [CALIDAD 1] B10: también
+ * la mancha de contacto de la formación, que está sobre ese papel (sirve a cualquier material de three).
+ */
+export function conLaNiebla(material: THREE.Material): void {
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, { uTiempo: VIVO.uTiempo, uAbre: NIEBLA_DE_AFUERA.uAbre })
     shader.vertexShader = shader.vertexShader
