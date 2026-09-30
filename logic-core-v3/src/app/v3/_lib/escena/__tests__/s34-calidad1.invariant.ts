@@ -54,7 +54,7 @@ import { POLVO_PAREJO } from '../polvo/volumen'
 import { PLIEGUE, conCantosSuaves } from '../cantosDelLogo'
 import { TRAMA_FILTRADA_GLSL, TRAMA_GLSL } from '../estrellas/cielo'
 import { RANGOS_DEL_RUIDO_AZUL, RUIDO_AZUL_GLSL } from '../ruidoAzul'
-import { ADAPTATIVA, dprDelEscalon, estadoAdaptativoInicial, pasoAdaptativo } from '../gpu/adaptativa'
+import { ADAPTATIVA, dprDelEscalon, dprPendiente, estadoAdaptativoInicial, pasoAdaptativo } from '../gpu/adaptativa'
 import { ESTRELLAS } from '../estrellas/Estrellas'
 import { AMANECER, SOLTAR_LA_LLEGADA, avanceDelCuadro, avanceDelScroll, compuertaEnLaLlegada, momentoEn, pasoDelAmanecer, type CuadroDelAmanecer, type MemoriaDelAmanecer, type MomentoVivo } from '../amanecer/linea'
 import { avanzarElPolvo, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from '../polvo/posarse'
@@ -590,7 +590,40 @@ const parcheB11 = leer('polvo/parche.ts')
 const hashes = Array.from({ length: 200 }, (_u, i) => { const v = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return v - Math.floor(v) })
 const encendida = (f: number, h: number): number => { const t = Math.min(1, Math.max(0, (h - f) / 0.05)); return 1 - t * t * (3 - 2 * t) }
 afirmar(/vParejo \*= 1\.0 - smoothstep\( uFraccionDeMotas, uFraccionDeMotas \+ 0\.05, fract\( sin\( aIndice \* 12\.9898 \+ 78\.233 \) \* 43758\.5453 \) \);/.test(parcheB11) && hashes.every((h) => encendida(1, h) === 1), 'las motas que sobran se apagan con un fundido, al azar y parejo (con todo encendido no se toca ninguna)', `con 0,8: ${String(hashes.filter((h) => encendida(0.8, h) < 0.5).length)} de 200 apagadas`)
-afirmar(/if \(pasoAdaptativo\(m\.e, delta \* 1000, m\.activa\)\) setDpr\(/.test(leer('gpu/CalidadAdaptativa.tsx')) && /activa: !hayBanco\(\)/.test(leer('gpu/CalidadAdaptativa.tsx')), '  el dpr se toca sólo cuando cambia el escalón (nada de React por cuadro); con banco arranca apagada')
+// [seguimiento] Cambiar el dpr redimensiona el lienzo y congela el hilo 30–60 ms: espera el scroll quieto.
+/** Con lo que aplica `CalidadAdaptativa`: la carga depende de lo APLICADO, y el dpr espera que el scroll pare. */
+function corridaConScroll(pierde: (aplicado: number) => boolean, scrollHasta: number, retener: boolean): { maximoConScroll: number; cambiosDeDpr: number[]; aplicado: number } {
+  const e = estadoAdaptativoInicial()
+  const cambiosDeDpr: number[] = []
+  let [t, aplicado, maximoConScroll] = [0, 0, 0]
+  while (t < 150) {
+    const delta = (pierde(aplicado) ? 2 : 1) * (1000 / 60)
+    pasoAdaptativo(e, delta, true, retener && dprPendiente(e.escalon, aplicado))
+    if (e.escalon !== aplicado) {
+      const cambia = dprPendiente(e.escalon, aplicado)
+      if (!cambia || !retener || t >= scrollHasta) {
+        if (cambia) cambiosDeDpr.push(t)
+        aplicado = e.escalon
+      }
+    }
+    if (t < scrollHasta) maximoConScroll = Math.max(maximoConScroll, e.escalon)
+    t += delta / 1000
+  }
+  return { maximoConScroll, cambiosDeDpr, aplicado }
+}
+/** Una carga que sólo entra desde el escalón 3 (pierde uno de cada dos cuadros antes), con el scroll en marcha 60 s. */
+const cargaHastaTres = (): ((aplicado: number) => boolean) => {
+  let p = false
+  return (aplicado) => {
+    p = !p
+    return aplicado < 3 && p
+  }
+}
+const conScroll = corridaConScroll(cargaHastaTres(), 60, true)
+afirmar(conScroll.cambiosDeDpr.length > 0 && conScroll.cambiosDeDpr.every((t) => t >= 60) && conScroll.maximoConScroll === 2 && conScroll.aplicado === 3, '[seguimiento] el dpr cambia sólo con el scroll quieto: mientras se scrollea bajan las motas y el pedido de dpr espera sin que se siga decidiendo; quieto, se aplica y sigue hasta el escalón que entra', `los cambios de dpr a los ${conScroll.cambiosDeDpr.map((t) => t.toFixed(1)).join(', ')} s; con scroll, hasta el escalón ${String(conScroll.maximoConScroll)}; al final, el ${String(conScroll.aplicado)}`)
+controlPositivo('el detector VE la adaptativa de antes (el dpr cambia en medio del scroll)', corridaConScroll(cargaHastaTres(), 60, false), (r) => r.cambiosDeDpr.every((t) => t >= 60))
+const fuenteB11 = leer('gpu/CalidadAdaptativa.tsx')
+afirmar((fuenteB11.match(/setDpr\(/g) ?? []).length === 1 && /if \(cambiaElDpr\) setDpr\(/.test(fuenteB11) && /performance\.now\(\) - m\.ultimoScroll >= ADAPTATIVA\.scrollQuietoMs/.test(fuenteB11) && /pasoAdaptativo\(m\.e, delta \* 1000, m\.activa, dprPendiente\(m\.e\.escalon, m\.aplicado\)\)/.test(fuenteB11) && /activa: !hayBanco\(\)/.test(fuenteB11), '  el dpr se toca sólo cuando el escalón lo cambia y con el scroll quieto (nada de React por cuadro); con banco arranca apagada')
 
 // ── B12 · el teléfono ─────────────────────────────────────────────────────
 titulo('B12 · el presupuesto del teléfono: lo que no se ve, no se dibuja')

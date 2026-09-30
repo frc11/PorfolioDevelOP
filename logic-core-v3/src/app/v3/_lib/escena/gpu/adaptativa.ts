@@ -18,6 +18,11 @@
  * **Los escalones.** Primero menos motas (con un fundido: ninguna desaparece de golpe) y después menos resolución (el
  * dpr, de a 10 % del tope del nivel: un cambio chico de nitidez). El tope del nivel es el de siempre: 1,5 en `plena`
  * (el de la regla del repo, debajo del 2 que pide el sprint) y 1 en `compacta`.
+ *
+ * **[B11, seguimiento] El dpr, con la página quieta.** Cambiar el dpr redimensiona el lienzo, y eso congela el hilo
+ * 30–60 ms (medido: `gl.setPixelRatio` solo, sin React; b11-redimensionar): con el scroll en marcha es un tirón. Las
+ * motas se aplican enseguida (van con fundido); el dpr espera a que el scroll lleve `scrollQuietoMs` quieto, y mientras
+ * espera el controlador no decide (todavía no ve el efecto del cambio que pidió).
  */
 export const ADAPTATIVA = {
   escalones: [
@@ -32,6 +37,8 @@ export const ADAPTATIVA = {
   bajaTrasS: 1.5,
   subeTrasS: 6,
   quietoS: 2.5,
+  /** Cuánto tiene que llevar quieto el scroll para cambiar el dpr (ms). */
+  scrollQuietoMs: 400,
   tauS: 0.4,
   ignorarMs: 100,
   /** La ventana del refresco (cuadros), cada cuánto se recalcula y el percentil. */
@@ -65,10 +72,13 @@ export function estadoAdaptativoInicial(): EstadoAdaptativo {
 
 /**
  * Un cuadro: escribe en `e` (sin reservar) y devuelve si cambió el escalón. `activa` en falso (el banco, que mide
- * configuraciones fijas) sigue midiendo el refresco y la media pero no decide, y deja el escalón en 0.
+ * configuraciones fijas) sigue midiendo el refresco y la media pero no decide, y deja el escalón en 0. `retenido`: hay
+ * un cambio de dpr esperando la página quieta; la pausa vuelve a empezar en cada cuadro, así se decide recién con el
+ * cambio hecho y asentado.
  */
-export function pasoAdaptativo(e: EstadoAdaptativo, deltaMs: number, activa = true): boolean {
+export function pasoAdaptativo(e: EstadoAdaptativo, deltaMs: number, activa = true, retenido = false): boolean {
   if (!(deltaMs > 0) || deltaMs > ADAPTATIVA.ignorarMs) return false
+  if (retenido) e.quieto = ADAPTATIVA.quietoS
   const dt = deltaMs / 1000
   e.intervalos[e.cuantos % ADAPTATIVA.ventana] = deltaMs
   e.cuantos += 1
@@ -106,6 +116,11 @@ export function pasoAdaptativo(e: EstadoAdaptativo, deltaMs: number, activa = tr
   e.holgado = 0
   e.quieto = ADAPTATIVA.quietoS
   return true
+}
+
+/** Si el escalón pedido cambia el dpr del que está aplicado: ese cambio espera la página quieta. */
+export function dprPendiente(pedido: number, aplicado: number): boolean {
+  return ADAPTATIVA.escalones[pedido].dpr !== ADAPTATIVA.escalones[aplicado].dpr
 }
 
 /** El dpr de un escalón: una fracción del tope del nivel, sin pasar el de la pantalla ni bajar de 0,5. */
