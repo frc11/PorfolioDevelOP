@@ -180,7 +180,9 @@ dos cargas del producto, hasta 0,22 ms):
 | `logo-noche=grueso` | 0 |
 
 **[ESCENA 9] T4 · la placa.** El Chrome del banco usa la AMD INTEGRADA por defecto (CALIDAD 1 y T3 se midieron ahí);
-`BANCO_GPU=alta` pide la NVIDIA (`--force_high_performance_gpu`). Después de T4, GPU por cuadro (p50, el recorrido
+`BANCO_GPU=alta` pide la NVIDIA (`--force_high_performance_gpu`). [ESCENA 10] Después de un reinicio de la máquina, Chrome
+usa la NVIDIA también por defecto (y ni `--force_low_power_gpu` lo lleva a la integrada: manda la preferencia de gráficos
+de Windows): antes de rotular una medición con la placa, `scripts-escena9/t4-gpu.ts`. Después de T4, GPU por cuadro (p50, el recorrido
 entero, `escena9/t4-fluidez/motor/`):
 
 | | AMD integrada | NVIDIA RTX 5050 |
@@ -302,7 +304,8 @@ contra la del DOM; `PUNTERO=centro` saca el corrimiento del mouse), `t3-camara` 
   vuelve a andar desde el mismo cuadro a los 180 ms de frenar (`_secciones/servicios/VideoDeServicio.tsx`, con el aviso
   compartido de `_lib/scrollEnMovimiento.ts`), y va recodificado a 25 cuadros por segundo (divide los 75 Hz) y a
   960 × 600 (la menor resolución que se ve igual a 1440; 887 KB). Medido con la NVIDIA, dpr 1 y 1,5: de 74–80 cuadros
-  perdidos por pasada a 0 (`escena10/t2-video/`); con la integrada, también 0 (en ESCENA 9 perdía 79–90). Cómo codificar
+  perdidos por pasada a 0 (`escena10/t2-video/`). La integrada no se pudo medir: después de un reinicio el Chrome del
+  banco usa la NVIDIA aunque se le pida la de bajo consumo (la preferencia de gráficos de Windows manda). Cómo codificar
   el de verdad: `docs/rediseno/VIDEO-DE-SERVICIOS.md`. La tabla final del sprint: `escena10/tabla-final.txt`.
 - **[CALIDAD 1, hallado]** La primera carga después de CUALQUIER cambio de shaders los compila en frío: ~1,25 s de
   calentar dentro del precompilado, al cargar (Direct3D arma el ejecutable en el primer dibujo). Desde la segunda carga

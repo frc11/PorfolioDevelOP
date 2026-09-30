@@ -17,5 +17,9 @@ export function carpeta(nombre: string): string {
   return dir
 }
 
-/** La placa con que se midió (va en cada resultado). */
-export const PLACA = process.env.BANCO_GPU === 'alta' ? 'nvidia' : 'amd'
+/**
+ * La placa pedida (va en cada resultado). Sin `BANCO_GPU=alta`, la que elija Chrome: en ESCENA 9 era la integrada, pero
+ * después de un reinicio (ESCENA 10) Chrome usa la NVIDIA también por defecto (lo dice `scripts-escena9/t4-gpu.ts`), así
+ * que «por defecto» no quiere decir la integrada: se verifica con ese banco antes de rotular una medición.
+ */
+export const PLACA = process.env.BANCO_GPU === 'alta' ? 'nvidia' : 'por-defecto'
