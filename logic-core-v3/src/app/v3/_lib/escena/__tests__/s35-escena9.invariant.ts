@@ -16,6 +16,9 @@
  * T4 · fluidez: los bloques del piso vivo de adelante hacia atrás (órdenes por sector, cada bloque con su celda), las
  *      dos cúpulas que no suman no se dibujan (con las condiciones exactas de su fragmento), el scroll suave a prueba
  *      (`lenis=nk|sedoso`, sin tocar la construcción), el aire que decide el scroll en segundos y la placa del banco.
+ * T5 · los títulos en 3D (prueba, `titulos=dom|webgl`): las letras llegan con el progreso que movía la pieza, de izquierda
+ *      a derecha y con las mismas cifras en el DOM y en la escena; accesibles; sin la prueba, el producto tal cual; troika
+ *      sólo se descarga con la bandera.
  */
 import * as THREE from 'three'
 import { existsSync, readFileSync } from 'node:fs'
@@ -35,6 +38,7 @@ import { PISO_VIVO, centroDeLaCelda, grillaDelPiso } from '../piso/bloques'
 import { ORDEN_DE_LA_GRILLA, ORDEN_DE_LOS_BLOQUES, armarLosOrdenes, ponerElOrden, sectorDe } from '../piso/ordenDeLosBloques'
 import { CIELO_DE_DIA, diaDelCielo } from '../cieloDeDia/nubes'
 import { RETENCION_DEL_SCROLL_S } from '../polvo/Aire'
+import { LLEGADA_3D, llegadaDeLaLetra, transformDeLaLetra } from '../../titulos3d/llegada'
 
 const ESCENA = path.join(process.cwd(), 'src/app/v3/_lib/escena')
 const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8')
@@ -305,5 +309,40 @@ controlPositivo('el detector VE la decisión por cuadro (la de antes)', aireFuen
 
 // La placa: el Chrome del banco elige la integrada; `BANCO_GPU=alta` pide la NVIDIA.
 afirmar(/process\.env\.BANCO_GPU === 'alta' \? \['--force_high_performance_gpu'\] : \[\]/.test(deLaRaiz('scripts-b4/cdp.ts')), 'el banco puede medir con la NVIDIA (`BANCO_GPU=alta`): por defecto Chrome usa la AMD integrada', 'medido con WEBGL_debug_renderer_info (t4-gpu)')
+
+// ── T5 · títulos en 3D ────────────────────────────────────────────────────
+titulo('T5 · los títulos en 3D: dos variantes con bandera, en Portfolio y en Por qué develOP')
+afirmar(ENTORNO.pruebas.titulos === 'no' && entornoPedido('producto,titulos=dom').pruebas.titulos === 'dom' && entornoPedido('producto,titulos=webgl').pruebas.titulos === 'webgl', 'apagada en el producto; `titulos=dom` o `titulos=webgl` la piden (con banco o en la URL)')
+const deV3 = (rel: string): string => readFileSync(path.join(process.cwd(), 'src/app/v3', rel), 'utf8').replace(/\r\n/g, '\n')
+const llegadaFuente = deV3('_lib/titulos3d/llegada.ts')
+afirmar(/useSyncExternalStore\(sinCambios, \(\) => entornoDeLaEscena\(\)\.pruebas\.titulos, \(\) => 'no'\)/.test(llegadaFuente), '  la bandera se lee después de hidratar: el servidor y el primer render son los del producto (sin desajuste)')
+// La llegada: cada letra de 0 a 1, en orden, de izquierda a derecha; las dos variantes con las mismas cifras.
+const pasos = Array.from({ length: 21 }, (_, k) => k / 20)
+const llegaBien = (f: (p: number, orden: number) => number): boolean =>
+  [0, 0.3, 1].every((orden) => f(0, orden) === 0 && f(1, orden) === 1 && pasos.every((p, k) => k === 0 || f(p, orden) >= f(pasos[k - 1], orden))) &&
+  f(LLEGADA_3D.dura, 0) === 1 && f(1 - LLEGADA_3D.dura, 1) === 0 && pasos.every((p) => f(p, 0) >= f(p, 1))
+afirmar(llegaBien(llegadaDeLaLetra), '  cada letra llega de 0 a 1 sin volver atrás; la primera arranca con el progreso y la última termina con él')
+controlPositivo('el detector VE una llegada que empieza por la última letra', (p: number, orden: number) => llegadaDeLaLetra(p, 1 - orden), llegaBien)
+afirmar(transformDeLaLetra(1) === 'translate3d(0, 0.0000em, 0.00px) rotateX(0.00deg)' || transformDeLaLetra(1) === 'translate3d(0, 0.0000em, -0.00px) rotateX(-0.00deg)', '  llegada, la letra queda en su lugar (sin giro ni corrimiento)', transformDeLaLetra(1))
+const escena3d = leer('titulos/TitulosEnLaEscena.tsx')
+afirmar(/\$\{f\(LLEGADA_3D\.dura\)\}/.test(escena3d) && /\$\{f\(\(LLEGADA_3D\.giro \* Math\.PI\) \/ 180\)\}/.test(escena3d) && /\$\{f\(LLEGADA_3D\.subida\)\}/.test(escena3d), '  la variante de la escena usa las mismas cifras que la del DOM (el escalonado, el giro y la subida)')
+// La fuente de la escena: troika no lee WOFF2 (lo rechaza en su worker y el texto se queda esperando, sin error).
+const fuenteQueLee = (c: string): boolean => /new URL\('\.\.\/\.\.\/\.\.\/_fuentes\/[a-z0-9-]+\.(ttf|otf|woff)', import\.meta\.url\)/.test(c) && existsSync(path.join(process.cwd(), 'src/app/v3/_fuentes/chivo-400-latin.ttf'))
+afirmar(fuenteQueLee(escena3d), '  la escena usa la Chivo en TTF (instanciada en 400, el peso de los títulos): troika no lee WOFF2', 'con la WOFF2 del sitio los títulos no se montaban: la fuente nunca llegaba')
+controlPositivo('el detector VE la WOFF2 del sitio', escena3d.replace('chivo-400-latin.ttf', 'chivo-latin.woff2'), fuenteQueLee)
+// Accesible: una copia entera del texto para el lector; lo que se mueve no se anuncia.
+const letrasFuente = deV3('_componentes/titulos3d/LetrasQueLlegan.tsx')
+const pruebaFuente = deV3('_componentes/titulos3d/TituloDePrueba.tsx')
+afirmar(/<span className="sr-only">\{texto\}<\/span>/.test(letrasFuente) && /<span aria-hidden="true"/.test(letrasFuente) && /<span ref=\{lugar\} style=\{\{ color: 'transparent' \}\}>\s*\{texto\}/.test(pruebaFuente), 'accesible: en el DOM, el texto entero para el lector y las letras sin anunciar; en la escena, el texto del DOM queda en su lugar (transparente)')
+afirmar(/el\.style\.transform = reducido \? 'none' : transformDeLaLetra\(e\)/.test(letrasFuente) && /float falta = \( 1\.0 - e \) \* \( 1\.0 - uQuieto \);/.test(escena3d) && /a\.uQuieto\.value = quieto \? 1 : 0/.test(escena3d) && /alLeerElDom\(armado, titulo\.elemento, menos\.matches\)/.test(escena3d), '  con movimiento reducido, las dos aparecen sin moverse (sólo la opacidad)')
+// Sin la prueba, el producto: la pieza con su progreso y el texto tal cual.
+const piezasFuente = deV3('_secciones/trabajos/piezas.tsx')
+const porQueFuente = deV3('_secciones/por-que-develop/PorQueDevelop.tsx')
+afirmar(/if \(prueba === 'dom'\) return <LetrasQueLlegan/.test(pruebaFuente) && /return <>\{texto\}<\/>/.test(pruebaFuente) && /progreso=\{titulos === 'no' \? progresoDeLaMascara : null\}/.test(piezasFuente) && (porQueFuente.match(/progreso=\{titulos === 'no' \? frase : null\}/g) ?? []).length === 2, 'sin la prueba no cambia nada: la pieza sigue con su progreso (P2 en Portfolio, P5 en la frase) y el título es el texto de siempre')
+// Troika no viaja con la escena: sólo se descarga con la bandera.
+const pruebas9 = leer('PruebasDeLaEscena9.tsx')
+const soloPerezoso = (c: string): boolean => /const TitulosEnLaEscena = lazy\(\(\) => import\('\.\/titulos\/TitulosEnLaEscena'\)\)/.test(c) && !/^import[^\n]*titulos\/TitulosEnLaEscena/m.test(c) && /pruebas\.titulos === 'webgl' \?/.test(c)
+afirmar(soloPerezoso(pruebas9), 'la variante de la escena es un módulo aparte que sólo se descarga con `titulos=webgl`')
+controlPositivo('el detector VE la importación directa (troika viajaría con la escena)', `import TitulosEnLaEscena from './titulos/TitulosEnLaEscena'\n${pruebas9}`, soloPerezoso)
 
 cerrar('s35-escena9')

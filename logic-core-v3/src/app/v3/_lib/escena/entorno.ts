@@ -70,6 +70,9 @@ export type NivelDelHaz = 'sutil' | 'medio'
 /** [ESCENA 9] T4 · las dos curvas del scroll suave a prueba (`_componentes/lenisDePrueba.ts`). */
 export type LenisDePrueba = 'nk' | 'sedoso'
 
+/** [ESCENA 9] T5 · las dos variantes de los títulos en 3D: en el DOM o en la escena. */
+export type TitulosDePrueba = 'dom' | 'webgl'
+
 export interface Pruebas {
   /** [ESCENA 9] T2 · el logo de noche: costados negros, tapas grises con borde (`logoDeNoche.ts`); `logo-noche=<variante>`. */
   readonly logoDeNoche: VarianteDelLogoDeNoche | 'no'
@@ -85,10 +88,12 @@ export interface Pruebas {
   readonly aa: 'taa' | 'msaa8' | 'no'
   /** [ESCENA 9] T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075); `lenis=nk|sedoso`. */
   readonly lenis: LenisDePrueba | 'no'
+  /** [ESCENA 9] T5 · los títulos en 3D de Portfolio y Por qué develOP (`_lib/titulos3d/llegada.ts`); `titulos=dom|webgl`. */
+  readonly titulos: TitulosDePrueba | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no', lenis: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no', lenis: 'no', titulos: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -105,6 +110,7 @@ function pruebasDe(valor: (clave: string) => string | undefined, partes: Readonl
     tono: unoDe<TonoDePrueba>(['agx', 'aces'], valor('tono')),
     aa: unoDe(['taa', 'msaa8'] as const, valor('aa')),
     lenis: unoDe<LenisDePrueba>(['nk', 'sedoso'], valor('lenis')),
+    titulos: unoDe<TitulosDePrueba>(['dom', 'webgl'], valor('titulos')),
   }
 }
 

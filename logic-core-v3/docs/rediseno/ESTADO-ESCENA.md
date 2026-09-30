@@ -91,6 +91,7 @@ bloques y las partículas en los dos tonos) se borraron, código y banderas (`ci
 | `sombra-logo` | T3 · la sombra proyectada del logo por la luz principal sobre el piso vivo: un mapa de varianza de 256² del logo solo, desenfocado, y UNA lectura por píxel en el piso; convive con la mancha de contacto; de noche no se dibuja (`sombra/delLogo.ts`) |
 | `bloom` | T3 · un resplandor sólo de noche y sólo del haz, las estrellas y la fugaz: van en una capa propia y se vuelven a dibujar solos sobre la profundidad de la escena; la escena pasa a un búfer propio multimuestreado que se copia al lienzo (`gpu/posproceso.ts`, sin EffectComposer) |
 | `tono=agx` · `=aces` | T3 · el tono de three compensado: el color del tono pedido con el brillo de Neutral (en un gris da Neutral exacto) (`tono.ts`) |
+| `titulos=dom` · `=webgl` | T5 · los títulos de Portfolio y de la frase de Por qué develOP en 3D: la pieza se queda y las letras llegan con el progreso que la movía, acostadas sobre su base, de izquierda a derecha. `dom`: el título de verdad partido en letras con perspectiva de CSS (`_componentes/titulos3d/`); `webgl`: el título en la escena con troika (la misma Chivo, la luz, la niebla), en un módulo que sólo se descarga con la bandera, con la Chivo en TTF instanciada en 400 (`_fuentes/chivo-400-latin.ttf`: troika no lee WOFF2), y el del DOM transparente en su lugar (`escena/titulos/`). Con movimiento reducido las dos secciones montan su rama quieta y la prueba no se monta. La bandera se lee después de hidratar (`_lib/titulos3d/llegada.ts`) |
 | `lenis=nk` · `=sedoso` | T4 · el scroll suave en modo lerp: el de nk (0,1) o con más inercia (0,075). Cambia las opciones de la instancia, no su construcción (`_componentes/lenisDePrueba.ts`) |
 | `aa=taa` · `=msaa8` | T3 · el antialiasing de las aristas en movimiento: TAA (la cámara corrida por Halton, el historial reproyectado con la profundidad y recortado a la vecindad; el polvo va aparte, encima) u 8 muestras en lugar de 4 (`gpu/posproceso.ts`) |
 
@@ -243,7 +244,8 @@ compensado, en el mismo cuadro; el ΔE de los colores canónicos), `t3-mismo-cua
 `t3-titileo` (el titileo de las aristas con 4 y 8 muestras y con TAA, con la cámara corriéndose de a poco), `t3-costo`
 (la GPU por cuadro de cada prueba) y `t3-clips`; T4: `t4-gpu` (qué placa), `t4-orden` y `t4-orden-imagen` (el orden de
 los bloques: la GPU y la imagen en el mismo cuadro), `t4-invisibles` (las cúpulas), `t4-hz` (el reloj virtual),
-`t4-lenis` (las curvas y los clips contra nk.studio) y `t4-servicios` (la traza y los sospechosos). `motor.ts` escribe
+`t4-lenis` (las curvas y los clips contra nk.studio) y `t4-servicios` (la traza y los sospechosos); T5: `t5-clips` (la
+llegada de cada variante en las dos secciones, con y sin movimiento reducido). `motor.ts` escribe
 en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`); `fluidez.ts` graba otras comparaciones
 (`RAIZ`, `PEDIDO`, `LADO`); cualquier banco mide con la NVIDIA con `BANCO_GPU=alta`.
 
@@ -293,6 +295,8 @@ en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`);
 - **[ESCENA 9] T4 · por decidir (Valentino):** el scroll suave (`lenis=nk` o `lenis=sedoso`; medido: la curva de hoy ya
   es la de nk) y el video de Servicios. Lo que queda en la integrada con dpr 1,5 (49 cuadros perdidos fuera de Servicios)
   es la formación y el piso de abajo: bajarlos cambia la imagen. Qué mirar: `escena9/t4-fluidez/mirar.txt`.
+- **[ESCENA 9] T5 · por decidir (Valentino):** los títulos en 3D (`titulos=dom` o `titulos=webgl`, o ninguno). Qué mirar:
+  `escena9/t5-titulos/mirar.txt`.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

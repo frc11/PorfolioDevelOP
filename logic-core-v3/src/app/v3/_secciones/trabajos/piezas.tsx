@@ -8,6 +8,8 @@ import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
+import { TituloDePrueba } from '../../_componentes/titulos3d/TituloDePrueba'
+import { usePruebaDeTitulos } from '../../_lib/titulos3d/llegada'
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
 import { Bloque } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -113,6 +115,8 @@ export function PortadaDeTrabajos({
   readonly mostrado: MotionValue<number>
 }): React.JSX.Element {
   const cartel = useRef<HTMLDivElement | null>(null)
+  // [ESCENA 9] T5 · la prueba de los títulos en 3D: la pieza se queda y llegan las letras, con el mismo progreso.
+  const titulos = usePruebaDeTitulos()
   /**
    * Cuánto huyó el cartel en el primer cuadro: sale del scroll, como la pose del
    * túnel. ⚠️ Se calcula UNA vez: si se recalculara en cada render, un re-render
@@ -186,9 +190,9 @@ export function PortadaDeTrabajos({
         <Bloque patron="P2" rango="ventana-de-la-mascara" className="block w-full">
           {(progresoDeLaMascara) => (
             <span className={VENTANA_QUE_RECORTA}>
-              <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
+              <CanalDeUnaPieza progreso={titulos === 'no' ? progresoDeLaMascara : null} patron="P2" como="span" className="block">
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  {CONTENIDO.titular}
+                  <TituloDePrueba prueba={titulos} id="portfolio" texto={CONTENIDO.titular} progreso={progresoDeLaMascara} />
                 </Titular>
               </CanalDeUnaPieza>
             </span>

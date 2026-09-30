@@ -1,10 +1,13 @@
 'use client'
 
 import { motion, useTransform, type MotionValue } from 'motion/react'
+import type { ComponentProps } from 'react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
+import { TituloDePrueba } from '../../_componentes/titulos3d/TituloDePrueba'
+import { usePruebaDeTitulos } from '../../_lib/titulos3d/llegada'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
@@ -87,6 +90,8 @@ function useLlegadaDeDia(pin: MotionValue<number>, v: Ventana, donde: keyof type
 
 function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
   const frase = useLlegadaDeDia(pin, VENTANA_DE_LA_FRASE, 'frase')
+  // [ESCENA 9] T5 · la prueba de los títulos en 3D: la pieza se queda y llegan las letras, con el mismo progreso.
+  const titulos = usePruebaDeTitulos()
   // La frase se queda mientras entran los valores, pero sube: el valor del medio de cada
   // columna le caía encima.
   const subeLaFrase = useTransform(useTramo(pin, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE), (u) => `${(-u * SUBIDA_DE_LA_FRASE_SVH).toFixed(3)}svh`)
@@ -102,13 +107,13 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         {/* La frase, partida a los dos lados del logo. Se anuncia entera y en orden. */}
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
-            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.izquierda} />
+            <CanalDeUnaPieza progreso={titulos === 'no' ? frase : null} patron="P5" como="span" className="block">
+              <FraseDelFinal texto={FRASE.izquierda} prueba={{ prueba: titulos, id: 'frase-izquierda', progreso: frase }} />
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
-            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.derecha} />
+            <CanalDeUnaPieza progreso={titulos === 'no' ? frase : null} patron="P5" como="span" className="block">
+              <FraseDelFinal texto={FRASE.derecha} prueba={{ prueba: titulos, id: 'frase-derecha', progreso: frase }} />
             </CanalDeUnaPieza>
           </span>
         </motion.p>
@@ -144,14 +149,14 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
 
 /** La mitad de la frase: un titular que nunca pasa del lugar que el logo le deja. La variante
  *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca). */
-function FraseDelFinal({ texto }: { readonly texto: string }): React.JSX.Element {
+function FraseDelFinal({ texto, prueba }: { readonly texto: string; readonly prueba?: Omit<ComponentProps<typeof TituloDePrueba>, 'texto'> }): React.JSX.Element {
   return (
     <Titular
       nivel="titulo-xl"
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {texto}
+      {prueba === undefined ? texto : <TituloDePrueba {...prueba} texto={texto} />}
     </Titular>
   )
 }

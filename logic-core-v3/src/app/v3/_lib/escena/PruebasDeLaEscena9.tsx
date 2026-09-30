@@ -1,7 +1,7 @@
 'use client'
 
 import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, type RefObject } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { entornoDeLaEscena, hayBanco } from './entorno'
@@ -13,9 +13,12 @@ import { KEY_INTENSITY } from './probeLighting'
 import { SOMBRA_DEL_LOGO, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
 
 /**
- * [ESCENA 9] LAS PRUEBAS DE T3 QUE CORREN POR CUADRO — un solo montaje en `ProbeStage` (que no pasa de 300 líneas), y
- * cada una sólo con su bandera: sin ninguna, no se monta nada.
+ * [ESCENA 9] LAS PRUEBAS DE T3 Y T5 QUE CORREN POR CUADRO — un solo montaje en `ProbeStage` (que no pasa de 300
+ * líneas), y cada una sólo con su bandera: sin ninguna, no se monta nada.
  */
+
+/** T5 · los títulos en la escena: un módulo aparte que sólo se descarga con `titulos=webgl` (troika no viaja con la escena). */
+const TitulosEnLaEscena = lazy(() => import('./titulos/TitulosEnLaEscena'))
 interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
   readonly logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
@@ -29,6 +32,11 @@ export function PruebasDeLaEscena9(props: Props) {
       {pruebas.materialDelLogo !== 'no' ? <ReflejosDelLogo {...props} /> : null}
       {pruebas.sombraDelLogo ? <SombraDelLogo {...props} /> : null}
       {pruebas.bloom || pruebas.aa !== 'no' ? <Posproceso /> : null}
+      {pruebas.titulos === 'webgl' ? (
+        <Suspense fallback={null}>
+          <TitulosEnLaEscena />
+        </Suspense>
+      ) : null}
     </>
   )
 }
