@@ -302,7 +302,8 @@ contra la del DOM; `PUNTERO=centro` saca el corrimiento del mouse), `t3-camara` 
   vuelve a andar desde el mismo cuadro a los 180 ms de frenar (`_secciones/servicios/VideoDeServicio.tsx`, con el aviso
   compartido de `_lib/scrollEnMovimiento.ts`), y va recodificado a 25 cuadros por segundo (divide los 75 Hz) y a
   960 × 600 (la menor resolución que se ve igual a 1440; 887 KB). Medido con la NVIDIA, dpr 1 y 1,5: de 74–80 cuadros
-  perdidos por pasada a 0 (`escena10/t2-video/`). Cómo codificar el de verdad: `docs/rediseno/VIDEO-DE-SERVICIOS.md`.
+  perdidos por pasada a 0 (`escena10/t2-video/`); con la integrada, también 0 (en ESCENA 9 perdía 79–90). Cómo codificar
+  el de verdad: `docs/rediseno/VIDEO-DE-SERVICIOS.md`. La tabla final del sprint: `escena10/tabla-final.txt`.
 - **[CALIDAD 1, hallado]** La primera carga después de CUALQUIER cambio de shaders los compila en frío: ~1,25 s de
   calentar dentro del precompilado, al cargar (Direct3D arma el ejecutable en el primer dibujo). Desde la segunda carga
   (en la misma sesión del banco o en otra, con el mismo perfil) Chrome los encuentra en su caché: 16–19 ms de compilar y
