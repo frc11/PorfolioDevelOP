@@ -1,9 +1,10 @@
-# Estado de la escena — después de ESCENA 8
+# Estado de la escena — después de CALIDAD 1
 
-> Para el sprint siguiente (CALIDAD 1): qué está encendido, qué banderas hay y qué hace cada una, los
-> presupuestos y las fallas conocidas. La escena vive en `src/app/v3/_lib/escena/`; las banderas, en
-> `entorno.ts`. Las entregas medidas de cada sprint están en `~/.cache/b4-medicion/escena<N>/` (con un
-> `mirar.txt` por carpeta). Último commit de la serie: ESCENA 8 (rama `rediseno/home`), un commit por ticket.
+> Qué está encendido, qué banderas hay y qué hace cada una, los presupuestos, las **reglas de rendimiento que todo
+> efecto nuevo tiene que cumplir (§4)** y las fallas conocidas. La escena vive en `src/app/v3/_lib/escena/`; las
+> banderas, en `entorno.ts`. Las entregas medidas de cada sprint están en `~/.cache/b4-medicion/escena<N>/` y
+> `~/.cache/b4-medicion/calidad1/` (con un `mirar.txt` por carpeta). CALIDAD 1: rama `rediseno/home`, un commit por
+> punto; el informe es `docs/rediseno/CALIDAD-1.md`.
 
 ---
 
@@ -32,6 +33,16 @@
 | **[ESCENA 8] T3 · el amanecer** | Encendido (era la prueba T11 de ESCENA 7) y atado al scroll: el scroll pide el avance (borde de Tu panel del 85 % al escenario del final clavado) y el que se muestra lo persigue con tope (entero en 2,5 s como mínimo), en las dos direcciones. Sin evento al cargar adentro, en un viaje, con el bloque tapando; con menos movimiento, de una vez. El texto del escenario de Por qué develOP espera al día; el pie (compartido) fuerza el avance a 0,9 si se ve antes | `amanecer/`, `_secciones/por-que-develop/PorQueDevelop.tsx` |
 | **[CALIDAD 1] A2 · el cielo de día** | Encendido: el **pintado celeste** (T4 de ESCENA 8, elegido por Valentino), un ciclorama con nubes pintadas y paneles, en la franja del cielo de la noche, detrás de la formación y de la trama; se va con la noche antes de las estrellas y el amanecer lo destapa desde el horizonte. Sólo con la formación (no en el teléfono). **Rompe la regla monocroma: excepción aprobada** (abajo) | `cieloDeDia/` |
 | Preloader de /v3 | Apagado (`CON_PRELOADER = false`) | `_intro/` |
+| **[CALIDAD 1] B1 · el precompilado** | Todos los programas se compilan al arrancar (también lo invisible y las escenas aparte, como los rayos) y se calientan con un dibujo de un píxel: ninguno se compila en el recorrido | `gpu/Precompilar.tsx` |
+| **[CALIDAD 1] B3 · la física en segundos** | Los modos que mueven motas integran con Euler exponencial: la misma trayectoria a 60, 75, 120 y 144 Hz | `polvo/simulacion.ts` |
+| **[CALIDAD 1] B4 · sin saltos** | El peso de la mota suelta (en el modo) mezcla el corte del volumen del aire: nada aparece en el piso ni se va en el aire de golpe; el remolino no lanza las motas de abajo del piso; ninguna mota se pierde en NaN | `polvo/simulacion.ts`, `polvo/volumen.ts` |
+| **[CALIDAD 1] B5 · los rayos a media resolución** | En su propio búfer, la mitad del lienzo por lado; un cuadrado los suma | `amanecer/haces.ts` |
+| **[CALIDAD 1] B6 · el polvo** | Ninguna mota bajo un píxel encendida entera; alfa premultiplicado | `polvo/nitidez.ts` |
+| **[CALIDAD 1] B7 · antialiasing** | Los costados del logo con normales suaves hasta un pliegue de 40° (sin facetas); la sombra de la trama en el piso, prefiltrada | `cantosDelLogo.ts`, `estrellas/cielo.ts` |
+| **[CALIDAD 1] B8 · dithering de ruido azul** | En todo lo que pinta degradados (una textura de 16×16) | `ruidoAzul.ts` |
+| **[CALIDAD 1] B10 · el apoyo de las copias** | Una mancha de contacto instanciada en la base de cada copia de la formación | `formacion/armado.ts` |
+| **[CALIDAD 1] B11 · la calidad adaptativa** | Si los cuadros no entran baja de a un escalón (motas con fundido, después dpr de a 10 %), con histéresis | `gpu/adaptativa.ts`, `gpu/CalidadAdaptativa.tsx` |
+| **[CALIDAD 1] B12 · lo que no se ve** | Las estrellas no se dibujan cuando ninguna puede verse | `estrellas/Estrellas.tsx` |
 
 ### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
 
@@ -72,10 +83,13 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 ### Ganchos del banco (sólo existen con `__entornoDeLaEscena`)
 
 `__escenaViva`, `__relojDelBanco`, `__polvoDelBanco`, `__formacionDelBanco`, `__estrellasDelBanco`,
-`__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()` y
-`movimientoDelLogo()`), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con `avance`, `pedido` y el día
-para el texto; `congelar(s)`), `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`,
-`mostrar`).
+`__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `flujo()`,
+`estado()` y `aire()` para el instrumento de los saltos), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
+`avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
+`__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`). [CALIDAD 1]
+`__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
+`__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
+arranca apagada con banco, `activa(true)`).
 
 ## 3 · Presupuestos (1440 × 900, medidos)
 
@@ -113,8 +127,44 @@ Reglas que siguen valiendo: sin EffectComposer en la escena; `dpr` a lo sumo 1,5
 DoubleSide dibuja dos pasadas salvo `forceSinglePass`. El lienzo COMPONE el alfa que escriben los
 materiales: un material opaco escribe alfa 1 (si no, bordes blancos contra el papel).
 
-## 4 · Los invariantes
+**[CALIDAD 1]** El costo de GPU por objeto se mide con `scripts-calidad/motor.ts pasadas` (sin vsync, por nombre de
+objeto). Después de CALIDAD 1, a 1440 con dpr 1, el pico del amanecer cuesta ~11 ms de objetos (los rayos, 2,3 ms
+con su composición; antes 7,9); a 375, el cuadro va de 0,98 a 2,28 ms. Las tablas base contra final están en el
+informe.
 
+## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
+
+1. **Todo en segundos, nunca en cuadros.** Lo que se mueve integra con el `dt` del cuadro, acotado contra los
+   tirones (`Math.min(delta, 1 / 30)` o 0,1): los amortiguadores con `1 − exp(−dt/τ)`, la física con Euler
+   exponencial (`relajar` en `polvo/simulacion.ts`), lo periódico con el reloj, los pasos fijos con su acumulador. Se
+   prueba igual a 60, 75, 120 y 144 Hz (s34 B3 tiene el molde).
+2. **Precompilado.** Todo programa nuevo se compila al arrancar: si va en la escena, `Precompilar` lo compila y lo
+   calienta aunque esté invisible; si se dibuja aparte (su propia escena o su búfer), se registra en `ESCENAS_APARTE`.
+   Se verifica con `motor.ts programas`: `tarde` tiene que quedar vacío.
+3. **Cero reservas por cuadro.** En `useFrame` y en los manejadores de scroll: nada de `new`, `clone`, arreglos,
+   objetos, `map`/`filter`/`forEach` ni cierres. Lo que se usa por cuadro se arma una vez (marcado `// una vez`; lo de
+   banco, `// banco`); las máquinas de estado devuelven EL MISMO objeto si nada cambió; React sólo cuando algo cambia
+   (nada de `setState` por cuadro). El detector de s34 B2 revisa todos los `useFrame` de la escena.
+4. **Presupuesto.** Medido con `motor.ts pasadas` en el momento donde se ve: a 1440 con dpr 1, **menos de 0,5 ms** de
+   GPU; a 375, **menos de 0,2 ms**; y el cuadro de 375 no pasa de **3 ms** en esta placa en el momento más pesado. Lo que
+   cubre la pantalla entera y hace una cuenta cara por píxel (rayos, volúmenes) va a menos resolución en su búfer
+   (el molde es `amanecer/haces.ts`).
+5. **Lo que no se ve, no se dibuja.** `visible = false`, no alfa 0 ni tamaño 0: el vértice corre igual (las estrellas
+   de día costaban 0,34 ms sin pintar un píxel).
+6. **Con nombre.** Todo lo que se dibuja lleva `name` (el perfil de la GPU agrupa por nombre; s34 B0 lo revisa).
+7. **Sin saltos.** Lo que aparece o se va lo hace con un fundido (en el tiempo o en el espacio), nunca de un cuadro al
+   otro; lo que queda más chico que un píxel se apaga con su área (B4, B6).
+8. **Degradados con dithering.** Un material nuevo con degradados: `dithering: true` (los de three) o
+   `conDithering(material)` (los propios). Nada de arreglos constantes grandes indexados en un shader: a Direct3D le
+   cuestan más de un segundo por programa (B8 lo midió); si hace falta una tabla, una textura.
+9. **Que aguante la calidad adaptativa.** El dpr puede bajar a 0,7 veces el tope y las motas al 65 % (B11): el efecto
+   tiene que verse bien ahí.
+10. **Los colores canónicos no se mueven.** El tone mapping es Neutral (B9): el piso, el papel y el cielo en reposo,
+    ΔE < 2 contra lo aprobado. Un cambio de color de salida se mide con `scripts-calidad/b9-tono.ts`.
+
+## 5 · Los invariantes
+
+`npm run test:s34-calidad1` ([CALIDAD 1] una sección por punto, A1 a A3 y B0 a B12, con sus controles positivos),
 `npm run test:s33-escena8` (una sección por ticket, T1 a T5, con sus controles positivos),
 `test:s32-escena7` (lo de ESCENA 7 que sigue; ajustado a lo que ESCENA 8 cambió), `test:s31-escena6`,
 `test:s28-base`, `test:s29-pulso`, `test:s30-escena4`, y los de siempre (`s8-escena`, `s16-arnes`, `s18`,
@@ -127,7 +177,7 @@ scroll fuerte y el conteo de pegadas), `cielo8` (las variantes del cielo, el tex
 el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips quietos del cielo), `costo8` y
 `hojas8`.
 
-## 5 · Fallas conocidas (no son de ESCENA 8)
+## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
 - **`s17-revelado`**: 1 falla, ya estaba antes de ESCENA 5. Busca una llamada que se mudó a
   `ataduraAlScroll.ts` en VIAJES.
@@ -137,15 +187,27 @@ el amanecer con cada cielo), `clips8` (el haz con su curva de luz; los clips qui
   ventana» (dependen del entorno de medición).
 - El banco: la pestaña puede quedar oculta (el banco reintenta `bringToFront`); el mouse real del
   usuario mueve el punto rojo y E7 si pasa por la ventana del banco.
+- **[CALIDAD 1, hallado]** Cuando la escena se suspende (frameloop `never` detrás de Servicios) r3f corre un último
+  cuadro con el timestamp del navegador (ms) como reloj en segundos, y al reanudar el reloj vuelve a 0: las conchas del
+  polvo y la vira saltan. Pasa con la escena tapada (verificado con capturas), así que no se ve.
+- **[CALIDAD 1, hallado]** La escena sigue dibujando unos cientos de píxeles de scroll adentro de Servicios, ya tapada
+  por la sección opaca, antes de suspenderse.
+- **[CALIDAD 1, hallado]** El Chrome del banco no conserva la caché de shaders entre sesiones: cada corrida del banco
+  se mide en frío (1,27 s de precompilado); en la misma sesión, la segunda carga baja a 161–237 ms.
 
-## 6 · Lo que quedó abierto (para decidir o para CALIDAD 1)
+## 7 · Lo que quedó abierto (para decidir)
 
 - **PENDIENTE · la compuerta del amanecer** ([CALIDAD 1] A4: anotado, no se hace). El amanecer arranca cuando el
   borde de abajo de Tu panel deja ver el 85 % del cuadro (`AMANECER.visible`), así que con un scroll lento lo primero
   del evento (se apagan las estrellas, nace el resplandor en el horizonte) pasa con Tu panel tapando el cielo. Verlo
   entero pide un tramo de sala sin texto entre Tu panel y Por qué develOP: **es un cambio de layout** (la tabla de
-  secciones), no de la escena. Queda para un sprint de layout. El costo de los rayos es del producto mientras duran
-  (ver §3; CALIDAD 1 lo bajó, ver su informe).
+  secciones), no de la escena. Queda para un sprint de layout. El costo de los rayos es del producto mientras duran:
+  CALIDAD 1 (B5) lo bajó de 7,9 a 2,3 ms de GPU a 1440 (de 17,8 a 5,1 con dpr 1,5).
+- **[CALIDAD 1] Lo que no se hizo del sprint, con su porqué** (detalle en `CALIDAD-1.md`): el tamaño de las motas por
+  perspectiva real (el real supera el tope en foco a toda distancia visible: agrandaría las motas), AgX o ACES (corren
+  los colores canónicos más de ΔE 2), mapas de sombra en tiempo real (serían sombras proyectadas nuevas), el titileo
+  de las aristas de geometría (es el límite del MSAA de 4 muestras: pide TAA o más muestras) y los recortes del
+  teléfono (sin un teléfono para medir; el menú está en `calidad1/b12-telefono/`).
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
