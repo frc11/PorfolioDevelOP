@@ -97,7 +97,13 @@ compensado y el scroll de nk (arriba); se borraron, código y banderas, `logo-no
 `bloom` (y su capa y su cadena de niveles), `tono=agx` (y Neutral como opción), `lenis=sedoso` y `titulos=dom|webgl`
 (con `_fuentes/chivo-400-latin.ttf`: los reemplaza T3 de ESCENA 10). Y el antialiasing de prueba (`aa=taa|msaa8`):
 queda el del lienzo de CALIDAD 1, que ya estaba en el producto (Valentino); con él se borró el posproceso entero
-(`gpu/posproceso.ts`: el búfer de la escena, el TAA y su gancho `__posprocesoDelBanco`). No queda ninguna prueba.
+(`gpu/posproceso.ts`: el búfer de la escena, el TAA y su gancho `__posprocesoDelBanco`).
+
+[ESCENA 10] La de este sprint, para que decida Valentino (con banco, en el pedido; sin banco, en la URL):
+
+| Token | Efecto |
+|---|---|
+| `titulos=negro` · `=blanco` | T3 · los títulos de Portfolio y de la frase de Por qué develOP como objetos de la escena: la Chivo (OFL, la WOFF2 del sitio en 400, `_fuentes/chivo-400-titulos.json`) extruida, una malla por título, quieta en el mundo donde la cámara del momento de la lectura (medido: `LECTURA` en `_lib/titulos3d/registro.ts`) la ve en el lugar del DOM; las letras llegan desde atrás girando y se van igual, persiguiendo al progreso de la pieza con un mínimo de 1,4 s. De noche, el dibujo del logo (su emisión, costados negros, tapas claras con filo); el blanco de día, con un filo oscuro. El DOM conserva el texto (sr-only) y su lugar (invisible, sin anunciar). Un módulo aparte que sólo se descarga con la bandera (`escena/titulos3d/`, `PruebasDeLaEscena.tsx`) |
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -110,7 +116,9 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__sombraDelLogoDelBanco`
 (`poner(prendida)`, `mapa()`; [ESCENA 10] `fuerza()`); T4: `__pisoDelBanco.orden(prendido, estricta)` (los bloques en el orden nuevo o en el de
-la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; `__logoDeNocheDelBanco`,
+la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; T3: `__titulosDelBanco` (`titulos()`: la
+llegada, la salida, lo mostrado y la caja de cada título en el cuadro contra la del DOM; `camara()`: la viva contra la que
+calcula la colocación; `progreso()`); `__logoDeNocheDelBanco`,
 `__materialDelLogoDelBanco` y `__lenisDelBanco` se borraron con sus variantes. [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
@@ -189,6 +197,11 @@ llamadas y 138.532 triángulos** (antes 19–20 y 127.680: el mapa de la sombra 
 pasadas de su desenfoque); de noche 20–21 y 122.624 (la sombra no se dibuja). Lo que costaban en la integrada, en ESCENA 9
 (arriba): el satinado +0,0 a +0,2 ms, la sombra +0,3 a +0,6 de día, ACES compensado +0,2 a +0,6.
 
+**[ESCENA 10] T3 · los títulos de volumen (la prueba)**, en el medio de su lectura, contra el producto (NVIDIA, 1440,
+`escena10/t3-titulos/costo-nvidia-1440.json`): Portfolio +6.524 triángulos, +1 a +2 llamadas, +0,04 a +0,20 ms de GPU
+por cuadro; la frase (las dos mitades) +29.688 triángulos, +1 a +2 llamadas, +0,27 a +0,34 ms. Fuera de su lectura no
+se dibujan.
+
 ## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
 
 1. **Todo en segundos, nunca en cuadros.** Lo que se mueve integra con el `dt` del cuadro, acotado contra los
@@ -264,7 +277,10 @@ en otra carpeta con `RAIZ=`; `tabla.ts` lee de ahí (`RAIZ`, `ANCHOS`, `PLACA`);
 cinco momentos del producto que esté en el servidor, con un rótulo, y la hoja antes/después), `t1-pasos` (el anochecer y
 el amanecer grabados, recortados al logo y al piso) y `t1-sonda` (la noche de la sala y la del logo, el encendido y la
 fuerza de la sombra, cada segundo); T2: `t2-servicios` (los cuadros perdidos por pasada en Servicios y la frenada),
-`t2-tamano` (de qué tamaño se ve el video), `t2-sonda` (el estado de cada video, quieto) y `t2-clip`.
+`t2-tamano` (de qué tamaño se ve el video), `t2-sonda` (el estado de cada video, quieto) y `t2-clip`; T3: `t3-fuente.py`
+(la Chivo a geometría), `t3-lectura` (en qué progreso de la coreografía se lee cada título), `t3-sonda` (la caja del 3D
+contra la del DOM; `PUNTERO=centro` saca el corrimiento del mouse), `t3-camara` (la cámara viva contra la calculada),
+`t3-costo` y `t3-clips`.
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -308,6 +324,9 @@ fuerza de la sombra, cada segundo); T2: `t2-servicios` (los cuadros perdidos por
   → [ESCENA 9] T3 los probó con bandera (abajo).
 - ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2), el antialiasing también: el del
   lienzo de CALIDAD 1 (TAA no).
+- **[ESCENA 10] T3 · por decidir (Valentino):** los títulos de volumen (`titulos=negro`, `titulos=blanco` o ninguno). No
+  proyectan sombra en el piso; abajo de 1025 no hay (las secciones no tienen escenario). Qué mirar:
+  `escena10/t3-titulos/mirar.txt`.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

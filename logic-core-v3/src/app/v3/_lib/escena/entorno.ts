@@ -68,16 +68,30 @@ export type NivelDelHaz = 'sutil' | 'medio'
 /**
  * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de ese sprint, para
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
- * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. No queda ninguna.
+ * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
+ * volumen, para que decida Valentino.
  */
-export type Pruebas = Readonly<Record<string, never>>
+/** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
+export type TitulosDeVolumen = 'negro' | 'blanco'
+
+export interface Pruebas {
+  /** [ESCENA 10] T3 · los títulos de Portfolio y Por qué develOP extruidos, en el mundo (`escena/titulos3d/`); `titulos=negro|blanco`. */
+  readonly titulos: TitulosDeVolumen | 'no'
+}
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = {}
+export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no' }
+
+/** Lo que vale de una lista, o `no`. */
+function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
+  return opciones.find((o) => o === v) ?? 'no'
+}
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(): Pruebas {
-  return {}
+function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
+  return {
+    titulos: unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
+  }
 }
 
 export interface Entorno {
@@ -246,7 +260,7 @@ export function entornoPedido(pedido: string): Entorno {
     logoDeNoche: producto ? valor('logo-noche') !== 'no' : partes.has('logo-noche'),
     materialDelLogo: producto ? valor('material') !== 'no' : partes.has('material'),
     sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
-    pruebas: pruebasDe(),
+    pruebas: pruebasDe(valor),
   }
 }
 
@@ -262,7 +276,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=<token>`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=titulos=negro`.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     resuelto = pruebas === null ? ENTORNO : { ...ENTORNO, pruebas: entornoPedido(`producto,${pruebas}`).pruebas }
   }

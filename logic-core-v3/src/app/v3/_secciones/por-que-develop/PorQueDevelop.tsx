@@ -3,6 +3,8 @@
 import { motion, useTransform, type MotionValue } from 'motion/react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
+import { LECTURA } from '../../_lib/titulos3d/registro'
 import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
@@ -103,12 +105,12 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.izquierda} />
+              <FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada }} />
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.derecha} />
+              <FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada }} />
             </CanalDeUnaPieza>
           </span>
         </motion.p>
@@ -143,15 +145,17 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
 }
 
 /** La mitad de la frase: un titular que nunca pasa del lugar que el logo le deja. La variante
- *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca). */
-function FraseDelFinal({ texto }: { readonly texto: string }): React.JSX.Element {
+ *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca).
+ *  [ESCENA 10] T3 · con `volumen`, el título de volumen de la prueba: llega con la frase y se va con la levantada; se
+ *  lee con la cámara de los valores y en el lugar al que la frase sube con ellos. */
+function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
       nivel="titulo-xl"
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {texto}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} />}
     </Titular>
   )
 }

@@ -29,6 +29,12 @@ export const BORDE_DEL_LOGO_DE_NOCHE = {
 /** Hasta dónde sabe distancias el campo del contorno (unidades del SVG) y cuántas unidades por celda. */
 export const CONTORNO = { alcance: 40, celda: 2 } as const
 
+/** La escala de un campo de contorno: el alcance y la celda, en las unidades de su geometría. */
+export interface EscalaDelContorno {
+  readonly alcance: number
+  readonly celda: number
+}
+
 /** Negro sólido de noche: el valor en pantalla de los costados mientras el amanecer guarda la noche. */
 const NEGRO_DE_NOCHE = 0.03
 
@@ -37,6 +43,8 @@ export interface ContornoDelLogo {
   readonly textura: THREE.DataTexture
   /** La esquina de la caja y 1 / su tamaño: la uv de un punto del plano es `(p − min) · inv`. */
   readonly caja: THREE.Vector4
+  /** [ESCENA 10] T3 · hasta dónde sabe distancias (unidades de su geometría: el logo, del SVG; un título, em). */
+  readonly alcance: number
 }
 
 /**
@@ -44,8 +52,8 @@ export interface ContornoDelLogo {
  * a menos del alcance de algún tramo, recorriendo cada tramo por su caja. `centro` es lo que la geometría se corrió.
  * Pura salvo la textura: el invariante la usa con un contorno de prueba.
  */
-export function distanciasAlContorno(contornos: readonly (readonly THREE.Vector2[])[], min: readonly [number, number], n: readonly [number, number]): Uint8Array {
-  const { alcance, celda } = CONTORNO
+export function distanciasAlContorno(contornos: readonly (readonly THREE.Vector2[])[], min: readonly [number, number], n: readonly [number, number], escala: EscalaDelContorno = CONTORNO): Uint8Array {
+  const { alcance, celda } = escala
   const d = new Float32Array(n[0] * n[1]).fill(alcance)
   for (const puntos of contornos) {
     for (let k = 0; k < puntos.length; k += 1) {
@@ -80,19 +88,24 @@ export function hornearElContorno(formas: readonly THREE.Shape[], curvas: number
     const { shape, holes } = f.extractPoints(curvas)
     for (const c of [shape, ...holes]) contornos.push(c.map((p) => new THREE.Vector2(p.x - centro.x, p.y - centro.y)))
   }
+  return hornearContornos(contornos)
+}
+
+/** [ESCENA 10] T3 · el campo de unos contornos ya ubicados en su plano, con la escala de su geometría. */
+export function hornearContornos(contornos: readonly (readonly THREE.Vector2[])[], escala: EscalaDelContorno = CONTORNO): ContornoDelLogo {
   const caja = new THREE.Box2()
   for (const c of contornos) for (const p of c) caja.expandByPoint(p)
-  const margen = CONTORNO.alcance + CONTORNO.celda
+  const margen = escala.alcance + escala.celda
   const min: [number, number] = [caja.min.x - margen, caja.min.y - margen]
-  const n: [number, number] = [Math.ceil((caja.max.x - caja.min.x + 2 * margen) / CONTORNO.celda), Math.ceil((caja.max.y - caja.min.y + 2 * margen) / CONTORNO.celda)]
-  const textura = new THREE.DataTexture(distanciasAlContorno(contornos, min, n), n[0], n[1], THREE.RedFormat, THREE.UnsignedByteType)
+  const n: [number, number] = [Math.ceil((caja.max.x - caja.min.x + 2 * margen) / escala.celda), Math.ceil((caja.max.y - caja.min.y + 2 * margen) / escala.celda)]
+  const textura = new THREE.DataTexture(distanciasAlContorno(contornos, min, n, escala), n[0], n[1], THREE.RedFormat, THREE.UnsignedByteType)
   textura.minFilter = THREE.LinearFilter
   textura.magFilter = THREE.LinearFilter
   textura.wrapS = THREE.ClampToEdgeWrapping
   textura.wrapT = THREE.ClampToEdgeWrapping
   textura.unpackAlignment = 1
   textura.needsUpdate = true
-  return { textura, caja: new THREE.Vector4(min[0], min[1], 1 / (n[0] * CONTORNO.celda), 1 / (n[1] * CONTORNO.celda)) }
+  return { textura, caja: new THREE.Vector4(min[0], min[1], 1 / (n[0] * escala.celda), 1 / (n[1] * escala.celda)), alcance: escala.alcance }
 }
 
 /** La luz del borde en pantalla, como radiancia para la emisión (la inversa de sRGB; el tono es la identidad hasta ~0,8). */
@@ -114,12 +127,14 @@ const FRAGMENTO_PARS = /* glsl */ `
 varying vec2 vPlanoDelLogo;
 varying float vTapaDelLogo;
 uniform float uAnchoDelBorde;
+uniform float uAlcanceDelContorno;
+uniform float uTapaDeNoche;
 uniform sampler2D uContornoDelLogo;
 uniform vec4 uCajaDelContorno;
 // Cuánto borde hay en este punto de la tapa (0 en los costados), con antialias analítico.
 float bordeDelLogoDeNoche() {
-	float d = texture2D( uContornoDelLogo, ( vPlanoDelLogo - uCajaDelContorno.xy ) * uCajaDelContorno.zw ).r * ${CONTORNO.alcance.toFixed(1)};
-	float aa = max( fwidth( d ) * 0.75, 0.05 );
+	float d = texture2D( uContornoDelLogo, ( vPlanoDelLogo - uCajaDelContorno.xy ) * uCajaDelContorno.zw ).r * uAlcanceDelContorno;
+	float aa = max( fwidth( d ) * 0.75, uAlcanceDelContorno * 0.00125 );
 	return vTapaDelLogo * ( 1.0 - smoothstep( uAnchoDelBorde - aa, uAnchoDelBorde + aa, d ) );
 }
 // El color en pantalla del logo de noche mientras el amanecer lo guarda (\`gris\`: el de siempre, parejo).
@@ -132,22 +147,27 @@ vec3 colorDelLogoDeNoche( float gris ) {
 const FRAGMENTO = /* glsl */ `
 	{
 		// [ESCENA 9] T2 · de noche: los costados sin emisión (negro sólido), las tapas con la de siempre y su borde claro.
+		// [ESCENA 10] T3: una tapa propia (el título blanco), si la pide (negativa: la emisión del material).
 		float noche = clamp( emissive.r / ${EMISION_EN_LA_NOCHE.toFixed(3)}, 0.0, 1.0 );
-		totalEmissiveRadiance = mix( totalEmissiveRadiance * vTapaDelLogo, vec3( ${radianciaDe(BORDE_DEL_LOGO_DE_NOCHE.luz.toFixed(2))} ) * noche, bordeDelLogoDeNoche() );
+		vec3 tapa = uTapaDeNoche < 0.0 ? totalEmissiveRadiance : vec3( ${radianciaDe('uTapaDeNoche')} ) * noche;
+		totalEmissiveRadiance = mix( tapa * vTapaDelLogo, vec3( ${radianciaDe(BORDE_DEL_LOGO_DE_NOCHE.luz.toFixed(2))} ) * noche, bordeDelLogoDeNoche() );
 	}
 `
 
 type Shader = Parameters<THREE.Material['onBeforeCompile']>[0]
 
 /**
- * Instala el parche en un material (el del logo; [ESCENA 10] T3 también el de los títulos en su variante negra), con
- * su contorno y el ancho del filo en las unidades de su geometría. Encadena el `onBeforeCompile` que ya tuviera; los que
+ * Instala el parche en un material (el del logo; [ESCENA 10] T3 también el de los títulos de volumen), con su contorno y
+ * el ancho del filo en las unidades de su geometría y, si la pide, una tapa propia de noche (el valor en pantalla: el
+ * título blanco; sin ella, la emisión del material, como el logo). Encadena el `onBeforeCompile` que ya tuviera; los que
  * se instalan después (el rebote, el amanecer) lo encadenan a él. Su código va ANTES de la emisiva del mapa: el rebote
  * suma después. La noche la lee de la emisiva del material (la que escribe el rig con `escribirEmisionDelLogo`).
  */
-export function conLogoDeNoche(material: THREE.MeshStandardMaterial, contorno: ContornoDelLogo, ancho: number = BORDE_DEL_LOGO_DE_NOCHE.ancho): void {
+export function conLogoDeNoche(material: THREE.MeshStandardMaterial, contorno: ContornoDelLogo, opciones: { readonly ancho?: number; readonly tapa?: number } = {}): void {
   const u = {
-    uAnchoDelBorde: { value: ancho },
+    uAnchoDelBorde: { value: opciones.ancho ?? BORDE_DEL_LOGO_DE_NOCHE.ancho },
+    uAlcanceDelContorno: { value: contorno.alcance },
+    uTapaDeNoche: { value: opciones.tapa ?? -1 },
     uContornoDelLogo: { value: contorno.textura },
     uCajaDelContorno: { value: contorno.caja },
   }

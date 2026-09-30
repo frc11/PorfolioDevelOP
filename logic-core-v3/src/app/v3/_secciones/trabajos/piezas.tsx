@@ -1,11 +1,13 @@
 'use client'
 
-import { useMotionValueEvent, type MotionValue } from 'motion/react'
+import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/react'
 import { Fragment, useRef, useState } from 'react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
+import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
+import { LECTURA } from '../../_lib/titulos3d/registro'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
@@ -123,11 +125,14 @@ export function PortadaDeTrabajos({
   const [huidaInicial] = useState(() => enLaVentana(progreso.get(), HUIDA_DEL_CARTEL.bajando))
   /** Cuánto huyó el cartel. La histéresis necesita el cuadro anterior. */
   const huida = useRef(huidaInicial)
+  /** [ESCENA 10] T3 · la huida, para el título de volumen: sus letras se van con ella (0 a 1). */
+  const salidaDelTitulo = useMotionValue(huidaInicial)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
     huida.current = huidaConHisteresis(huida.current, p, HUIDA_DEL_CARTEL)
+    salidaDelTitulo.set(huida.current)
     const pose = poseDeLaHuida(huida.current)
     if (pose === null) {
       el.style.setProperty('visibility', 'hidden')
@@ -188,7 +193,8 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  {CONTENIDO.titular}
+                  {/* [ESCENA 10] T3 · con la prueba, el título de volumen (llega con la máscara, se va con la huida). */}
+                  <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} />
                 </Titular>
               </CanalDeUnaPieza>
             </span>

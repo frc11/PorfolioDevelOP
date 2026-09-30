@@ -126,7 +126,10 @@ const mide = (datos: Uint8Array): boolean => Math.abs(en(51, 5, datos) - 5) < 1.
 afirmar(mide(d), 'el borde sale de la distancia al contorno: a 5 unidades del lado da 5; en el centro, el tope', `${en(51, 5, d).toFixed(2)} y ${en(95, 51, d).toFixed(2)}; centro ${en(50, 50, d).toFixed(1)}`)
 controlPositivo('el detector VE un contorno corrido', distanciasAlContorno([cuadrado[0].map((p) => p.clone().addScalar(8))], min, n), mide)
 // De día no cambia: lo nuevo es proporcional a la emisión (de día, cero).
-const deDiaIgual = (c: string): boolean => /float noche = clamp\( emissive\.r \/ \$\{EMISION_EN_LA_NOCHE\.toFixed\(3\)\}, 0\.0, 1\.0 \);/.test(c) && /totalEmissiveRadiance = mix\( totalEmissiveRadiance \* vTapaDelLogo, [^\n]*\* noche, bordeDelLogoDeNoche\(\) \);/.test(c)
+const deDiaIgual = (c: string): boolean =>
+  /float noche = clamp\( emissive\.r \/ \$\{EMISION_EN_LA_NOCHE\.toFixed\(3\)\}, 0\.0, 1\.0 \);/.test(c) &&
+  /vec3 tapa = uTapaDeNoche < 0\.0 \? totalEmissiveRadiance : vec3\( [^\n]*\) \* noche;/.test(c) &&
+  /totalEmissiveRadiance = mix\( tapa \* vTapaDelLogo, [^\n]*\* noche, bordeDelLogoDeNoche\(\) \);/.test(c)
 afirmar(deDiaIgual(logoDeNocheFuente), 'de día el logo no cambia: los costados y el borde salen de la emisión, que de día es cero', 'medido en ESCENA 9 en el mismo cuadro: 0 píxeles distintos en el hero a 1440 y a 375')
 controlPositivo('el detector VE un borde que no depende de la noche', logoDeNocheFuente.replace('* noche, bordeDelLogoDeNoche() );', ', bordeDelLogoDeNoche() );'), deDiaIgual)
 const luz = leer('amanecer/luz.ts')
@@ -140,7 +143,7 @@ controlPositivo('el detector VE el amanecer de antes (sólo el gris parejo)', lu
 // ── T3 · material y luz ───────────────────────────────────────────────────
 titulo('T3 · material y luz: el estudio, la sombra y el tono (el bloom, el brillante y el antialiasing de prueba se borraron)')
 const luzDelLogo = leer('LuzDelLogo.tsx')
-afirmar(!existsSync(path.join(ESCENA, 'gpu/posproceso.ts')) && !existsSync(path.join(ESCENA, 'PruebasDeLaEscena.tsx')) && !('aa' in entornoPedido('producto,aa=taa').pruebas), '[ESCENA 10] el posproceso de prueba (el bloom, el TAA y las 8 muestras) se borró: queda el antialias del lienzo de CALIDAD 1')
+afirmar(!existsSync(path.join(ESCENA, 'gpu/posproceso.ts')) && !/posproceso|Posproceso/.test(leer('PruebasDeLaEscena.tsx')) && !('aa' in entornoPedido('producto,aa=taa').pruebas), '[ESCENA 10] el posproceso de prueba (el bloom, el TAA y las 8 muestras) se borró: queda el antialias del lienzo de CALIDAD 1')
 
 // El estudio: lo arma y lo suelta el MISMO montaje (en desarrollo React monta dos veces).
 const logoFuente = leer('ProbeLogo.tsx')
@@ -277,7 +280,7 @@ afirmar(/process\.env\.BANCO_GPU === 'alta' \? \['--force_high_performance_gpu'\
 // ── T5 · títulos en 3D ────────────────────────────────────────────────────
 titulo('T5 · los títulos en 3D de ESCENA 9: borrados (los reemplaza T3 de ESCENA 10)')
 const deV3 = (rel: string): string => path.join(process.cwd(), 'src/app/v3', rel)
-const restos = ['_componentes/titulos3d', '_lib/titulos3d/llegada.ts', '_lib/titulos3d/enLaEscena.ts', '_lib/escena/titulos', '_fuentes/chivo-400-latin.ttf'].filter((r) => existsSync(deV3(r)))
+const restos = ['_componentes/titulos3d/LetrasQueLlegan.tsx', '_componentes/titulos3d/TituloDePrueba.tsx', '_lib/titulos3d/llegada.ts', '_lib/titulos3d/enLaEscena.ts', '_lib/escena/titulos', '_fuentes/chivo-400-latin.ttf'].filter((r) => existsSync(deV3(r)))
 const titulosPedidos = (v: string): unknown => (entornoPedido(`producto,titulos=${v}`).pruebas as unknown as Record<string, unknown>).titulos
 afirmar(restos.length === 0 && titulosPedidos('dom') !== 'dom' && titulosPedidos('webgl') !== 'webgl', 'V1 (DOM) y V2 (troika) no existen: ni sus archivos, ni la TTF, ni sus banderas', restos.join(', ') || 'nada')
 const secciones = readFileSync(deV3('_secciones/trabajos/piezas.tsx'), 'utf8') + readFileSync(deV3('_secciones/por-que-develop/PorQueDevelop.tsx'), 'utf8')

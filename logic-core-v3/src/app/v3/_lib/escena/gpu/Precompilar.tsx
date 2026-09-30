@@ -40,8 +40,11 @@ type Dibujable = THREE.Object3D & { readonly isMesh?: boolean; readonly isPoints
 
 type VentanaDelBanco = Window & { __precompiladoDelBanco?: { readonly compilarMs: number; readonly calentarMs: number } }
 
-/** Un dibujo de todo lo que se puede dibujar (lo invisible y lo que está fuera de cuadro), en un píxel. */
-function calentar(gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera): void {
+/**
+ * Un dibujo de todo lo que se puede dibujar (lo invisible y lo que está fuera de cuadro), en un píxel. [ESCENA 10] T3:
+ * exportado, para lo que llega después del precompilado (un módulo perezoso) y se calienta al montarse.
+ */
+export function calentar(gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera): void {
   const tocados: { readonly o: THREE.Object3D; readonly visible: boolean; readonly descarte: boolean }[] = []
   escena.traverse((o) => {
     const d = o as Dibujable
