@@ -31,6 +31,8 @@
  *      y la tapa plana; la sombra de la trama en el piso prefiltrada con gradientes sin costura (sólo en el fragmento).
  * B8 · dithering con ruido azul: un mosaico de 16×16 (una permutación de los 256 umbrales, sin baja frecuencia) en
  *      lugar del ruido blanco de three, en todos los materiales con degradés (cielos, niebla, noche, piso, trama).
+ * B9 · el tone mapping: se queda Neutral (ACES y AgX, medidos con la exposición compensada, corren los colores canónicos
+ *      más de ΔE 2); la salida es sRGB.
  */
 import * as THREE from 'three'
 import { readFileSync } from 'node:fs'
@@ -512,5 +514,11 @@ const CON_DITHERING: readonly (readonly [string, RegExp])[] = [
 ]
 const sinDithering = CON_DITHERING.filter(([a, r]) => !r.test(leer(a))).map(([a]) => a)
 afirmar(sinDithering.length === 0, 'el dithering va en todo lo que pinta degradados: el papel y el piso, la trama, el logo, la sombra de contacto, el haz, el pulso, los dos cielos, los haces y la formación', sinDithering.length === 0 ? `${String(CON_DITHERING.length)} materiales (medido: las mesetas de un mismo color bajan de 2,8–4,9 px a 1,1–1,3; la media no cambia)` : sinDithering.join(', '))
+
+// ── B9 · el tone mapping ──────────────────────────────────────────────────
+titulo('B9 · tone mapping: el que conserva los colores canónicos')
+const lienzoB9 = leer('configuracionDelCanvas.ts')
+afirmar(/toneMapping: THREE\.NeutralToneMapping,/.test(lienzoB9) && /\[CALIDAD 1\] B9 · ACES y AgX, MEDIDOS contra este/.test(lienzoB9), 'se queda Neutral: ACES y AgX, medidos con la exposición compensada, corren el piso, el papel o el cielo más de ΔE 2 (CIEDE2000)', 'ACES compensado: el piso 2,5–2,8; AgX compensado: 3–4,3 (scripts-calidad/b9-tono.ts)')
+afirmar(/const codificado = \(hex: string\): THREE\.Color => new THREE\.Color\(hex\)\.convertLinearToSRGB\(\)/.test(leer('cieloDeDia/CieloDeDia.tsx')) && /#include <colorspace_fragment>/.test(leer('formacion/materiales.ts')), '  la salida es sRGB: los materiales propios que escriben el color directo lo codifican a sRGB (el cielo) o incluyen la conversión (la formación)')
 
 cerrar('s34-calidad1')

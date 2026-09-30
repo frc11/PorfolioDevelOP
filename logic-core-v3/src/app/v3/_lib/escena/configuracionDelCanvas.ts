@@ -55,6 +55,13 @@ const COMUN = {
   /**
    * r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el blanco
    * del papel y mantiene el matiz de la luz de color al mover la temperatura.
+   *
+   * [CALIDAD 1] B9 · ACES y AgX, MEDIDOS contra este, en los cinco momentos, con
+   * la exposición compensada para igualar el piso (`scripts-calidad/b9-tono.ts`):
+   * ninguno deja los colores canónicos en ΔE < 2 (CIEDE2000). ACES corre el piso
+   * 2,5–2,8 y el cielo del hero 2,1; AgX no llega al blanco del piso ni con
+   * exposición 4 y compensado queda en 3–4,3. Se queda Neutral. La salida es
+   * sRGB y los materiales propios codifican su color a sRGB (lo verificó B9).
    */
   toneMapping: THREE.NeutralToneMapping,
 } as const
