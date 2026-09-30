@@ -68,8 +68,8 @@ function lab([r8, g8, b8]: Rgb): [number, number, number] {
   const f = (t: number): number => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116)
   return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))]
 }
-/** CIEDE2000. */
-function deltaE2000(c1: Rgb, c2: Rgb): number {
+/** CIEDE2000. [ESCENA 9] Exportada: la usa el banco del tono de T3. */
+export function deltaE2000(c1: Rgb, c2: Rgb): number {
   const [L1, a1, b1] = lab(c1)
   const [L2, a2, b2] = lab(c2)
   const C1 = Math.hypot(a1, b1), C2 = Math.hypot(a2, b2), Cm = (C1 + C2) / 2

@@ -1,7 +1,9 @@
 import * as THREE from 'three'
 
 import { AJUSTES } from './ajustes'
+import { entornoDeLaEscena } from './entorno'
 import { instalarElRuidoAzul } from './ruidoAzul'
+import { instalarElTono } from './tono'
 import type { NivelDeCalidad } from './calidad'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR } from './probeScene'
 import { PROBE_DEFAULTS } from './probeStore'
@@ -47,6 +49,8 @@ export const CAMARA_DEL_CANVAS = {
  */
 // [CALIDAD 1] B8: el dithering de los materiales, con ruido azul (`ruidoAzul.ts`). Antes de compilar la escena.
 instalarElRuidoAzul()
+// [ESCENA 9] T3 · la prueba del tono (AgX o ACES compensados, `tono.ts`): también antes de compilar nada.
+const TONO_DE_PRUEBA = instalarElTono(entornoDeLaEscena().pruebas.tono)
 
 const COMUN = {
   /** Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás. */
@@ -77,8 +81,25 @@ const CONTEXTOS: Readonly<Record<NivelDeCalidad, typeof COMUN & { readonly antia
   compacta: { ...COMUN, antialias: AJUSTES.compacta.antialias },
 }
 
-export function contextoDe(nivel: NivelDeCalidad): (typeof CONTEXTOS)[NivelDeCalidad] {
-  return CONTEXTOS[nivel]
+/** El contexto con las pruebas de esta carga (el tono y el antialias pueden cambiar; el resto es el de siempre). */
+type ContextoConPruebas = Omit<(typeof CONTEXTOS)[NivelDeCalidad], 'toneMapping'> & { readonly toneMapping: THREE.ToneMapping }
+
+/**
+ * [ESCENA 9] T3 · con las pruebas, un contexto propio por nivel, fijo (se arma una vez por carga: las banderas no
+ * cambian): el tono propio (`Custom`) con la prueba del tono, y SIN el antialias del lienzo con el posproceso (el bloom
+ * o el antialiasing de prueba): ahí las muestras las pone su búfer, y el lienzo sólo recibe la copia final (con las suyas
+ * serían dos resoluciones de MSAA por cuadro).
+ */
+function conPruebas(base: (typeof CONTEXTOS)[NivelDeCalidad]): ContextoConPruebas {
+  const { pruebas } = entornoDeLaEscena()
+  const posproceso = pruebas.bloom || pruebas.aa !== 'no'
+  return { ...base, toneMapping: TONO_DE_PRUEBA ? THREE.CustomToneMapping : base.toneMapping, antialias: posproceso ? false : base.antialias }
+}
+const CONTEXTOS_CON_PRUEBAS: Readonly<Record<NivelDeCalidad, ContextoConPruebas>> = { plena: conPruebas(CONTEXTOS.plena), compacta: conPruebas(CONTEXTOS.compacta) }
+const HAY_PRUEBAS_DEL_CONTEXTO = TONO_DE_PRUEBA || entornoDeLaEscena().pruebas.bloom || entornoDeLaEscena().pruebas.aa !== 'no'
+
+export function contextoDe(nivel: NivelDeCalidad): ContextoConPruebas {
+  return HAY_PRUEBAS_DEL_CONTEXTO ? CONTEXTOS_CON_PRUEBAS[nivel] : CONTEXTOS[nivel]
 }
 
 /**

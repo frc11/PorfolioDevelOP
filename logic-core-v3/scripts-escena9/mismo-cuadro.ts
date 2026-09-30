@@ -21,7 +21,8 @@ export interface MismoCuadro {
   readonly pngs: readonly string[]
 }
 
-export function mismoCuadro(variantes: readonly string[], preparar: string): string {
+/** `dibujar`: cómo se dibuja un cuadro (por defecto la escena al lienzo; con el posproceso, su dibujo entero). */
+export function mismoCuadro(variantes: readonly string[], preparar: string, dibujar = 'gl.render(escena, camara)'): string {
   return `(async () => {
   const { gl, escena } = window.__gpuDelBanco.tres()
   let camara = null
@@ -59,7 +60,7 @@ export function mismoCuadro(variantes: readonly string[], preparar: string): str
   const leer = () => { const a = new Uint8Array(w * h * 4); ctx.readPixels(0, 0, w, h, ctx.RGBA, ctx.UNSIGNED_BYTE, a); return a }
   const png = (a) => { const img = c2.createImageData(w, h); for (let y = 0; y < h; y += 1) img.data.set(a.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4); c2.putImageData(img, 0, 0); return lienzo.toDataURL('image/png').split(',')[1] }
   const leidos = []
-  for (const k of ${JSON.stringify(variantes)}) { preparar(k); gl.render(escena, camara); leidos.push(leer()) }
+  for (const k of ${JSON.stringify(variantes)}) { preparar(k); ${dibujar}; leidos.push(leer()) }
   preparar(${JSON.stringify(variantes[0])})
   const distintos = leidos.map((a) => {
     let [enElLogo, enTodo, maxima] = [0, 0, 0]
@@ -79,8 +80,8 @@ export function mismoCuadro(variantes: readonly string[], preparar: string): str
 }
 
 /** Corre el mismo cuadro y guarda cada variante como `<base>-<variante>.png`. */
-export async function guardarMismoCuadro(b: Banco, variantes: readonly string[], preparar: string, base: string): Promise<MismoCuadro> {
-  const r = await medir<MismoCuadro>(b.p, mismoCuadro(variantes, preparar))
+export async function guardarMismoCuadro(b: Banco, variantes: readonly string[], preparar: string, base: string, dibujar?: string): Promise<MismoCuadro> {
+  const r = await medir<MismoCuadro>(b.p, mismoCuadro(variantes, preparar, dibujar))
   r.pngs.forEach((png, k) => writeFileSync(`${base}-${variantes[k]}.png`, Buffer.from(png, 'base64')))
   return r
 }

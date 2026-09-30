@@ -8,6 +8,7 @@ import { CONTACTO_DE_LA_TRAMA_GLSL } from '../moire/limite'
 import { CARAS_DEL_LOGO_GLSL } from '../polvo/simulacion'
 import { FLOOR_Y } from '../probeScene'
 import { MANCHA_GLSL } from '../sombra/enElPiso'
+import { APLICAR_LA_SOMBRA_GLSL, SOMBRA_DEL_LOGO_GLSL } from '../sombra/delLogo'
 
 /**
  * [ESCENA 6] EL PISO VIVO — puro: la grilla de bloques, la simulación y el material. De «Isometric Noise
@@ -262,7 +263,7 @@ const l = PISO_VIVO.luz
  * de cada bloque en el vértice (recortado al disco) y, en el fragmento, la oclusión, el bisel y lo que el
  * piso tiene encima.
  */
-export function conPisoVivo(material: THREE.MeshStandardMaterial, uniforms: UniformsDelPiso & Record<string, THREE.IUniform>, conContacto = false): THREE.MeshStandardMaterial {
+export function conPisoVivo(material: THREE.MeshStandardMaterial, uniforms: UniformsDelPiso & Record<string, THREE.IUniform>, conContacto = false, conSombra = false): THREE.MeshStandardMaterial {
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
@@ -337,7 +338,8 @@ varying float vAltoDelBloque;
 ${ANILLOS_GLSL}
 ${MANCHA_GLSL}
 ${CHARCO_DEL_HAZ_GLSL}
-${conContacto ? CONTACTO_DE_LA_TRAMA_GLSL : ''}`,
+${conContacto ? CONTACTO_DE_LA_TRAMA_GLSL : ''}
+${conSombra ? SOMBRA_DEL_LOGO_GLSL : ''}`,
       )
       .replace(
         '#include <colorspace_fragment>',
@@ -366,12 +368,14 @@ ${conContacto ? CONTACTO_DE_LA_TRAMA_GLSL : ''}`,
 		vec2 m = manchaDelContacto( vPiso.xz );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.x );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.y );
+		// [ESCENA 9] T3 · con la prueba, la sombra proyectada del logo (con la luz principal), conviviendo con la mancha.
+		${conSombra ? APLICAR_LA_SOMBRA_GLSL : ''}
 		gl_FragColor.rgb += charcoDelHaz( vPiso.xz ) * uHaz;
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, vec3( uNoche ), cuantoDelPulso( length( vPiso.xz ) ) );
 	}`,
       )
   }
-  material.customProgramCacheKey = () => `piso-vivo-mar${conContacto ? '-contacto' : ''}`
+  material.customProgramCacheKey = () => `piso-vivo-mar${conContacto ? '-contacto' : ''}${conSombra ? '-sombra-del-logo' : ''}`
   return material
 }
 

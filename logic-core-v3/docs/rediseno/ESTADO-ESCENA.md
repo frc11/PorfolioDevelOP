@@ -83,6 +83,11 @@ bloques y las partículas en los dos tonos) se borraron, código y banderas (`ci
 | Token | Efecto |
 |---|---|
 | `logo-noche=fino` · `=grueso` · `=claro` | T2 · el logo de noche: costados sin emisión (negro), tapas con el gris de hoy y un borde en su contorno (negro fino, negro grueso o claro); el amanecer guarda la noche con el mismo dibujo; de día no cambia (`logoDeNoche.ts`) |
+| `material=satinado` · `=brillante` | T3 · el logo de material físico (el mismo color) con los reflejos de un estudio GENERADO al cargar: una sala oscura con softbox arriba del horizonte, filtrada por rugosidad (PMREM); satinado sin laca, brillante con laca. Los reflejos siguen a la luz de la sala: de noche se apagan (`estudio.ts`) |
+| `sombra-logo` | T3 · la sombra proyectada del logo por la luz principal sobre el piso vivo: un mapa de varianza de 256² del logo solo, desenfocado, y UNA lectura por píxel en el piso; convive con la mancha de contacto; de noche no se dibuja (`sombra/delLogo.ts`) |
+| `bloom` | T3 · un resplandor sólo de noche y sólo del haz, las estrellas y la fugaz: van en una capa propia y se vuelven a dibujar solos sobre la profundidad de la escena; la escena pasa a un búfer propio multimuestreado que se copia al lienzo (`gpu/posproceso.ts`, sin EffectComposer) |
+| `tono=agx` · `=aces` | T3 · el tono de three compensado: el color del tono pedido con el brillo de Neutral (en un gris da Neutral exacto) (`tono.ts`) |
+| `aa=taa` · `=msaa8` | T3 · el antialiasing de las aristas en movimiento: TAA (la cámara corrida por Halton, el historial reproyectado con la profundidad y recortado a la vecindad; el polvo va aparte, encima) u 8 muestras en lugar de 4 (`gpu/posproceso.ts`) |
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -94,7 +99,9 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
 `avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__logoDeNocheDelBanco`
-(`variante(v)`: las variantes del logo de noche en vivo, para compararlas en el mismo cuadro). [CALIDAD 1]
+(`variante(v)`: las variantes del logo de noche en vivo, para compararlas en el mismo cuadro), `__materialDelLogoDelBanco`
+(`variante(v)`), `__sombraDelLogoDelBanco` (`poner(prendida)`, `mapa()`, `depurar()`) y `__posprocesoDelBanco` (`bloom`
+y `taa` en vivo, `dibujar()`, `pasos(n)`: la GPU de cada paso del posproceso). [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
 arranca apagada con banco, `activa(true)`).
@@ -131,7 +138,7 @@ amanecer, que ahora es del producto: 18,23 ms de media y 26,7 de p95, las mismas
 monitor cuantiza el cuadro a 13,34 o 26,68 ms y el 37 % de los cuadros tardó dos refrescos las dos veces); fuera
 de los rayos el amanecer no cuesta nada que se vea. Detalle y notas: `escena8/costo.txt`.
 
-Reglas que siguen valiendo: sin EffectComposer en la escena; `dpr` a lo sumo 1,5; lo transparente
+Reglas que siguen valiendo: sin EffectComposer en la escena ([ESCENA 9] el posproceso de T3 es propio y va con bandera); `dpr` a lo sumo 1,5; lo transparente
 DoubleSide dibuja dos pasadas salvo `forceSinglePass`. El lienzo COMPONE el alfa que escriben los
 materiales: un material opaco escribe alfa 1 (si no, bordes blancos contra el papel).
 
@@ -139,6 +146,20 @@ materiales: un material opaco escribe alfa 1 (si no, bordes blancos contra el pa
 objeto). Después de CALIDAD 1, a 1440 con dpr 1, el pico del amanecer cuesta ~11 ms de objetos (los rayos, 2,3 ms
 con su composición; antes 7,9); a 375, el cuadro va de 0,98 a 2,28 ms. Las tablas base contra final están en el
 informe.
+
+**[ESCENA 9] T3 · el costo de las pruebas** (la AMD integrada, 1440, dpr 1: la GPU de todo lo que se dibuja por cuadro,
+2 s por momento, `scripts-escena9/t3-costo.ts`; el producto: 8,7–8,9 ms de día, 6,4 de noche, 11,1 en los rayos; entre
+dos cargas del producto, hasta 0,22 ms):
+
+| Prueba | ms de GPU por cuadro |
+|---|---|
+| `material=satinado` | +0,0 a +0,2 |
+| `material=brillante` | +0,1 a +0,5 (Quiénes somos, el logo de costado) |
+| `sombra-logo` | +0,3 a +0,6 de día; 0 de noche |
+| `bloom` | +1,4 a +1,6 de día (el búfer propio); +3,5 de noche |
+| `aa=taa` · `aa=msaa8` | +3,5 a +4,6 · +3,7 a +4,5 |
+| `tono=agx` · `tono=aces` | +0,5 a +1,0 · +0,2 a +0,6 |
+| `logo-noche=grueso` | 0 |
 
 ## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
 
@@ -196,7 +217,10 @@ por punto (`b3-tabla` a `b11-tirones`).
 [ESCENA 9] Los bancos del sprint (`scripts-escena9/`, los mismos instrumentos): `t1-obstaculo` (el scroll fuerte y el
 despertar con el logo al doble, y cuántas motas hay contra la cara de la malla real cada 250 ms), `mismo-cuadro` (la
 escena dibujada una vez por variante en una sola tarea, leída del lienzo), `t2-logo-noche` (las variantes del logo de
-noche en el mismo cuadro, los clips y la prueba abierta por URL). `motor.ts` escribe en otra carpeta con `RAIZ=`.
+noche en el mismo cuadro, los clips y la prueba abierta por URL), `t3-tono` (el tono pedido crudo, con exposición y
+compensado, en el mismo cuadro; el ΔE de los colores canónicos), `t3-mismo-cuadro` (material, sombra y bloom),
+`t3-titileo` (el titileo de las aristas con 4 y 8 muestras y con TAA, con la cámara corriéndose de a poco), `t3-costo`
+(la GPU por cuadro de cada prueba) y `t3-clips`. `motor.ts` escribe en otra carpeta con `RAIZ=`.
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
@@ -231,6 +255,12 @@ noche en el mismo cuadro, los clips y la prueba abierta por URL). `motor.ts` esc
   los colores canónicos más de ΔE 2), mapas de sombra en tiempo real (serían sombras proyectadas nuevas), el titileo
   de las aristas de geometría (es el límite del MSAA de 4 muestras: pide TAA o más muestras) y los recortes del
   teléfono (sin un teléfono para medir; el menú está en `calidad1/b12-telefono/`).
+  → [ESCENA 9] T3 los probó con bandera (abajo).
+- **[ESCENA 9] T3 · por decidir (Valentino):** el material (satinado, brillante o ninguno), la sombra proyectada y el
+  bloom de noche (caro en la integrada: +3,5 ms de noche). Propuestas: el tono se queda Neutral (compensados, AgX y
+  ACES casi no cambian la imagen, pero los blancos cálidos del papel y del piso llegan a ΔE 2,0–2,7); el antialiasing,
+  ninguno en la integrada (+3,5 a +4,6 ms los dos; el TAA además ablanda la línea del bisel). Qué mirar:
+  `escena9/t3-material-y-luz/mirar.txt`.
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).

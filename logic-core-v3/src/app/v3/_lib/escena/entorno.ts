@@ -55,6 +55,7 @@
  */
 
 import type { VarianteDelLogoDeNoche } from './logoDeNoche'
+import type { TonoDePrueba } from './tono'
 
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
@@ -69,17 +70,36 @@ export type NivelDelHaz = 'sutil' | 'medio'
 export interface Pruebas {
   /** [ESCENA 9] T2 · el logo de noche: costados negros, tapas grises con borde (`logoDeNoche.ts`); `logo-noche=<variante>`. */
   readonly logoDeNoche: VarianteDelLogoDeNoche | 'no'
+  /** [ESCENA 9] T3 · el material del logo con reflejos de estudio (`estudio.ts`); `material=satinado|brillante`. */
+  readonly materialDelLogo: 'satinado' | 'brillante' | 'no'
+  /** [ESCENA 9] T3 · la sombra proyectada del logo sobre el piso vivo (`sombra/delLogo.ts`); `sombra-logo`. */
+  readonly sombraDelLogo: boolean
+  /** [ESCENA 9] T3 · el bloom de noche: el haz, las estrellas brillantes y la fugaz (`gpu/posproceso.ts`); `bloom`. */
+  readonly bloom: boolean
+  /** [ESCENA 9] T3 · el tono AgX o ACES, compensado (`tono.ts`); `tono=agx|aces`. */
+  readonly tono: TonoDePrueba | 'no'
+  /** [ESCENA 9] T3 · el antialiasing de las aristas en movimiento (`gpu/posproceso.ts`); `aa=taa|msaa8`. */
+  readonly aa: 'taa' | 'msaa8' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { logoDeNoche: 'no', materialDelLogo: 'no', sombraDelLogo: false, bloom: false, tono: 'no', aa: 'no' }
 
-const VARIANTES_DEL_LOGO: readonly VarianteDelLogoDeNoche[] = ['fino', 'grueso', 'claro']
+/** Lo que vale de una lista, o `no`. */
+function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
+  return opciones.find((o) => o === v) ?? 'no'
+}
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  const logo = valor('logo-noche')
-  return { logoDeNoche: VARIANTES_DEL_LOGO.find((v) => v === logo) ?? 'no' }
+function pruebasDe(valor: (clave: string) => string | undefined, partes: ReadonlySet<string>): Pruebas {
+  return {
+    logoDeNoche: unoDe<VarianteDelLogoDeNoche>(['fino', 'grueso', 'claro'], valor('logo-noche')),
+    materialDelLogo: unoDe(['satinado', 'brillante'] as const, valor('material')),
+    sombraDelLogo: partes.has('sombra-logo'),
+    bloom: partes.has('bloom'),
+    tono: unoDe<TonoDePrueba>(['agx', 'aces'], valor('tono')),
+    aa: unoDe(['taa', 'msaa8'] as const, valor('aa')),
+  }
 }
 
 export interface Entorno {
@@ -228,7 +248,7 @@ export function entornoPedido(pedido: string): Entorno {
     limite: producto ? valor('limite') !== 'no' : partes.has('limite'),
     amanecer: producto ? valor('amanecer') !== 'no' : partes.has('amanecer'),
     cieloDeDia: producto ? valor('cielo-dia') !== 'no' : partes.has('cielo-dia'),
-    pruebas: pruebasDe(valor),
+    pruebas: pruebasDe(valor, partes),
   }
 }
 

@@ -1,12 +1,13 @@
 'use client'
 
-import { useLoader } from '@react-three/fiber'
+import { useLoader, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, type RefObject } from 'react'
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
 import { conCantosSuaves } from './cantosDelLogo'
 import { entornoDeLaEscena, hayBanco } from './entorno'
+import { MATERIALES_DEL_LOGO, aplicarMaterial, ponerElEstudio, type MaterialDelLogo } from './estudio'
 import { aplicarVariante, conLogoDeNoche, hornearElContorno, type VarianteDelLogoDeNoche } from './logoDeNoche'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
@@ -31,7 +32,10 @@ const SVG_FLIP: readonly [number, number, number] = [Math.PI, 0, 0]
 /** Los puntos por curva del SVG en la extrusión (el default de three): el contorno de las tapas usa los mismos. */
 const CURVAS_DE_LA_EXTRUSION = 12
 
-type VentanaDelBanco = Window & { __logoDeNocheDelBanco?: { variante: (v: VarianteDelLogoDeNoche | 'no') => void } }
+type VentanaDelBanco = Window & {
+  __logoDeNocheDelBanco?: { variante: (v: VarianteDelLogoDeNoche | 'no') => void }
+  __materialDelLogoDelBanco?: { variante: (v: MaterialDelLogo | 'no') => void }
+}
 
 type ProbeLogoProps = {
   stats: ProbeStatsStore
@@ -122,21 +126,38 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
    * `DoubleSide` igual que el frozen — el SVG no garantiza el sentido de giro de
    * sus contornos.
    */
+  const gl = useThree((s) => s.gl)
   const { material, logoDeNoche } = useMemo(() => {
-    const built = new THREE.MeshStandardMaterial({
+    const parametros = {
       color: INK_COLOR,
       roughness: INK_ROUGHNESS,
       metalness: 0,
       side: THREE.DoubleSide,
       // [CALIDAD 1] B8: con dithering (ruido azul): la noche del logo sin escalones.
       dithering: true,
-    })
+    }
+    // [ESCENA 9] T3 · la prueba del material físico con reflejos de estudio (bandera `material`): el mismo color, un
+    // entorno generado al cargar y la rugosidad y la laca de la variante (`estudio.ts`).
+    const pedido = entornoDeLaEscena().pruebas.materialDelLogo
+    const built = pedido === 'no' ? new THREE.MeshStandardMaterial(parametros) : new THREE.MeshPhysicalMaterial({ ...parametros, ...MATERIALES_DEL_LOGO[pedido] })
     // [ESCENA 9] T2 · la prueba del logo de noche (bandera `logo-noche`): costados negros, tapas con borde.
     const variante = entornoDeLaEscena().pruebas.logoDeNoche
     if (variante === 'no') return { material: built, logoDeNoche: null }
     const contorno = hornearElContorno(geometries.shapes, CURVAS_DE_LA_EXTRUSION, geometries.center)
     return { material: built, logoDeNoche: { contorno, uniforms: conLogoDeNoche(built, contorno, variante) } }
   }, [geometries])
+
+  // [ESCENA 9] T3 · el estudio: un búfer que arma y suelta CADA montaje (en desarrollo React monta dos veces: uno armado
+  // en el render y soltado en la limpieza dejaba el entorno negro). Con banco, las variantes se cambian en vivo.
+  useEffect(() => {
+    if (!(material instanceof THREE.MeshPhysicalMaterial)) return undefined
+    const sacar = ponerElEstudio(material, gl)
+    if (hayBanco()) (window as VentanaDelBanco).__materialDelLogoDelBanco = { variante: (v) => aplicarMaterial(material, v) }
+    return () => {
+      sacar()
+      delete (window as VentanaDelBanco).__materialDelLogoDelBanco
+    }
+  }, [material, gl])
 
   // [ESCENA 9] T2 · con banco, las variantes se cambian en vivo (para compararlas en el mismo cuadro).
   useEffect(() => {

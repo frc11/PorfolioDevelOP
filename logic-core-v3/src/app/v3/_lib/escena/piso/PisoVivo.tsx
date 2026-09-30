@@ -14,6 +14,7 @@ import { AIRE } from '../polvo/parche'
 import { FLOOR_RADIUS, FLOOR_Y, PAPER_COLOR } from '../probeScene'
 import { conElAmanecer } from '../amanecer/luz'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
+import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { PISO_EN_VIVO } from './enVivo'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
 
@@ -181,6 +182,7 @@ function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THRE
 }
 
 function armar(grilla: Grilla, conContacto: boolean) {
+  const conSombra = entornoDeLaEscena().pruebas.sombraDelLogo
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
@@ -214,7 +216,9 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uHazDia: VIVO.uHazDia,
     uHazNoche: VIVO.uHazNoche,
     ...MANCHA_EN_EL_PISO,
-  }, conContacto)
+    // [ESCENA 9] T3 · la prueba de la sombra proyectada del logo.
+    ...(conSombra ? SOMBRA_EN_VIVO : {}),
+  }, conContacto, conSombra)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   const geometria = geometriaDelBloque(grilla.lado)
