@@ -1,6 +1,7 @@
 import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
+import { OndaDeLasPortadas } from '../_secciones/trabajos/demos/OndaDeLasPortadas'
 import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
@@ -163,6 +164,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <RespuestaDeLaEscena />
       {/* [INTERFAZ 2] T2: la vista previa del destino en el menú (sólo con `?pruebas=anticipa=si`). */}
       <AnticipacionDelMenu />
+      {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar (sólo con `?pruebas=vida=si`). */}
+      <OndaDeLasPortadas />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

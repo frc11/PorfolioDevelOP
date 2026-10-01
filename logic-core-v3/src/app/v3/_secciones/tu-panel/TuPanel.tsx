@@ -1,6 +1,8 @@
 'use client'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
+import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
+import { usePrueba } from '../../_lib/pruebasDeLaInterfaz'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeTexto, CanalDeTitular } from '../_contrato/canales'
@@ -41,6 +43,7 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
 
 /** «Tu Panel» y su descripción. En escritorio, el 30 % izquierdo arriba del caos. */
 function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.JSX.Element {
+  const vida = usePrueba('vida')
   return (
     // MÓVIL 2: a 1024 el titular sube a 1,3 `display` (de 48 a 65 px) y el cuerpo a `titulo-s`.
     <div data-pieza="encabezado-del-panel" className="flex flex-col gap-[var(--spacing-6)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-fluido-titulo-xl:calc(var(--text-fluido-display)*1.3)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-cuerpo:var(--text-titulo-s)] escritorio:absolute escritorio:top-0 escritorio:left-0 escritorio:z-[var(--z-elevado)] escritorio:w-3/10">
@@ -61,6 +64,8 @@ function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.
           </CanalDeTexto>
         )}
       </Bloque>
+      {/* [INTERFAZ 2] T3 · con `vida=si`, el panel funcionando con datos de ejemplo. */}
+      {vida === 'si' && <PanelEnVivo />}
     </div>
   )
 }

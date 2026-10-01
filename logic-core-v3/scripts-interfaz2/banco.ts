@@ -103,3 +103,26 @@ export async function hastaLosValores(b: Banco): Promise<boolean> {
   }
   return false
 }
+
+/**
+ * Hasta el estante de las demos (escritorio), con la rueda como una persona (un `scrollTo` hasta el final no dispara la
+ * noche de Trabajos: cae con la gota al cruzar la frontera): un salto hasta el tope de Trabajos y después de a dos
+ * muescas hasta que el tercer libro esté entero en la mitad de abajo del cuadro y quieto. El túnel va fijado: la caja
+ * de un libro medida antes de llegar no dice dónde va a quedar.
+ */
+export async function hastaElEstante(b: Banco): Promise<boolean> {
+  const tope = await medir<number>(b.p, `(() => { const r = document.querySelector('[data-panel="trabajos"]').getBoundingClientRect(); return Math.round(r.top + scrollY) })()`)
+  await medir(b.p, `window.scrollTo(0, ${String(Math.max(0, tope - 900))})`)
+  await esperar(1200)
+  const LIBRO = `[...document.querySelectorAll('[data-panel="trabajos"] a[data-pieza="libro"]')][2]`
+  for (let k = 0; k < 120; k += 1) {
+    await rueda(b, 2, 90)
+    await esperar(350)
+    const listo = await medir<boolean>(b.p, `(() => { const e = ${LIBRO}; if (!e) return false; const r = e.getBoundingClientRect(); return r.height > 40 && r.top > innerHeight * 0.35 && r.bottom < innerHeight * 0.95 })()`)
+    if (listo) {
+      await esperar(2500)
+      return true
+    }
+  }
+  return false
+}

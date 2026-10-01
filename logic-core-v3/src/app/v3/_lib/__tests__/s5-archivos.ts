@@ -220,6 +220,9 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/fisicaDelCarrusel.ts`,
   // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
   `${RAIZ_DE_SECCIONES}/trabajos/demos/llevarALaLlegada.ts`,
+  // INTERFAZ 2 · T3: la onda que recorre la portada al pasar (con la bandera `vida=si`) y su escucha delegado.
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/ondaDeLaPortada.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/OndaDeLasPortadas.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
   `${RAIZ_DE_SECCIONES}/trabajos/ritmo.ts`,

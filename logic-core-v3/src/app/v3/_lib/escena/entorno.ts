@@ -81,10 +81,12 @@ export interface Pruebas {
   readonly responde: 'si' | 'no'
   /** [INTERFAZ 2] T2 · el menú anticipa el destino (la luz y un giro de la cámara) antes del clic; `anticipa=si`. */
   readonly anticipa: 'si' | 'no'
+  /** [INTERFAZ 2] T3 · las portadas de las demos ondean y las secciones opacas (Servicios, Tu panel) tienen vida; `vida=si`. */
+  readonly vida: 'si' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no', anticipa: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no', anticipa: 'no', vida: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -97,6 +99,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     titulos: unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
     responde: unoDe(['si'], valor('responde')),
     anticipa: unoDe(['si'], valor('anticipa')),
+    vida: unoDe(['si'], valor('vida')),
   }
 }
 

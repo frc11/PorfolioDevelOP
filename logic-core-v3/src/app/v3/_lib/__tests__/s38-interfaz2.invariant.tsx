@@ -9,7 +9,13 @@
  * y sus entregas en `~/.cache/b4-medicion/interfaz2/`.
  */
 import { readFileSync } from 'node:fs'
+import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
+
+import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
+import { CONTADOR_DE_EJEMPLO, PEDIDOS_DE_EJEMPLO, PROCESOS_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_EJEMPLO, ROTULO_DEL_PROCESO, TOPE_DEL_CONTADOR } from '../../_componentes/vida/ejemplos'
+import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
+import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 
 import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
 import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from '../../_chrome/escena/RespuestaDeLaEscena'
@@ -239,5 +245,42 @@ const ANTICIPACION_TSX = leer('_chrome/escena/AnticipacionDelMenu.tsx')
 afirmar(ANTICIPACION_TSX.includes('const y1 = destinoDelViaje(seccion)') && ANTICIPACION_TSX.includes('const viaje = planDelViaje(seccion.id, y1)'), 'el plan sale de LA MISMA cuenta que el clic: el nudo del destino y la clase de luz del viaje')
 afirmar(ANTICIPACION_TSX.includes('if (reducido.matches || viajeEnCurso() !== null || !deberiaDeslizar(getIntroStage())) return') && ANTICIPACION_TSX.includes('if (seccion === null) return'), '  y sólo donde el clic viaja: sin movimiento reducido, sin un viaje en curso, con la compuerta del intro; «Contacto» (no es una sección) no anticipa')
 afirmar(SELECTOR_DE_LOS_ITEMS === '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]' && leer('_chrome/ChromeDelHome.tsx').includes('<AnticipacionDelMenu />'), '  los ítems de la barra, con un escucha delegado (la pastilla compartida no se toca)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T3 · 1 · Las portadas de las demos: una onda del mismo lenguaje que el piso')
+
+afirmar(PRUEBAS_APAGADAS.vida === 'no' && entornoPedido('producto,vida=si').pruebas.vida === 'si', 'apagada en el producto; `vida=si` la pide')
+afirmar(ANILLOS_GLSL.includes('( 1.0 - pow( 1.0 - t, 2.2 ) )') && Math.abs(frenteDeLaOnda(0.5) - (1 - 0.5 ** 2.2)) < 1e-12 && frenteDeLaOnda(0) === 0 && frenteDeLaOnda(1) === 1, 'el frente de la onda es el de los anillos del piso (rápido al nacer, frenando): la misma curva')
+afirmar(colaDeLaOnda(0) === 0 && colaDeLaOnda(1) === 0 && colaDeLaOnda(0.1) > colaDeLaOnda(0.6), '  y la cola: nace sin golpe, se apaga con el frente')
+const [r0, g0, b0] = pixelDelMapa(0, 0)
+const enElFrente = pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa, 0)
+const antesDelFrente = pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa - ONDA_DE_LA_PORTADA.anchoEnElMapa * 0.7, 0)
+const despuesDelFrente = pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa + ONDA_DE_LA_PORTADA.anchoEnElMapa * 0.7, 0)
+afirmar(Math.abs(r0 - 0.5) < 1e-6 && Math.abs(g0 - 0.5) < 1e-6 && b0 < 1e-6, 'el mapa es neutro lejos del frente (no corre la imagen entera)')
+afirmar(enElFrente[2] > 0.99 && antesDelFrente[0] > 0.5 && despuesDelFrente[0] < 0.5, '  en el frente: la banda entera, y empuja hacia afuera de un lado y hacia adentro del otro (una cresta)')
+const ONDA_TS = leer('_secciones/trabajos/demos/ondaDeLaPortada.ts').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+afirmar(!/will-change|willChange/.test(ONDA_TS) && leer('_secciones/trabajos/demos/OndaDeLasPortadas.tsx').includes("querySelector<HTMLElement>('[data-parte=\"cara\"] img')"), 'un filtro sobre la IMAGEN de la cara, sin promover nada (la cara no puede llevar will-change: rompe el vacío del túnel)')
+afirmar(!/ondear|OndaDeLasPortadas/.test(leer('_secciones/trabajos/demos/Biblioteca.tsx')) && leer('_chrome/ChromeDelHome.tsx').includes('<OndaDeLasPortadas />'), '  la biblioteca no se toca: un escucha delegado, montado en el chrome del home')
+afirmar(/if \(\(e\.pointerType !== 'mouse' && e\.pointerType !== 'pen'\) \|\| !fino\.matches \|\| reducido\.matches\) return/.test(leer('_secciones/trabajos/demos/OndaDeLasPortadas.tsx')), '  sólo con puntero fino y sin movimiento reducido')
+
+titulo('T3 · 2 · Tu panel y Servicios con vida propia: datos de ejemplo que se dicen de ejemplo')
+
+const TEXTOS_DE_EJEMPLO = [ROTULO_DE_EJEMPLO, QUIEN_DE_EJEMPLO, CONTADOR_DE_EJEMPLO, ROTULO_DEL_PROCESO, ...PEDIDOS_DE_EJEMPLO.flatMap((p) => [p.que, p.desde]), ...Object.values(PROCESOS_DE_EJEMPLO).flat()]
+const sinCifras = (textos: readonly string[]): boolean => textos.every((t) => !/[0-9%$+×]/.test(t))
+afirmar(sinCifras(TEXTOS_DE_EJEMPLO), 'ningún texto de ejemplo trae una cifra, un porcentaje o un monto (CONTENIDO_INVENTADO)', `${String(TEXTOS_DE_EJEMPLO.length)} textos`)
+controlPositivo('el chequeo de las cifras ve un ejemplo con una cifra de negocio', ['Ventas +38 %'], sinCifras)
+afirmar(/ejemplo/i.test(ROTULO_DE_EJEMPLO) && /ejemplo/i.test(QUIEN_DE_EJEMPLO) && /ejemplo/i.test(CONTADOR_DE_EJEMPLO) && /ejemplo/i.test(ROTULO_DEL_PROCESO), '  y todo dice que es de ejemplo: el rótulo, el contador, quién manda los pedidos, el proceso')
+afirmar(TOPE_DEL_CONTADOR < 10, `  el contador cuenta ESTE ejemplo y vuelve a empezar en ${String(TOPE_DEL_CONTADOR)}: no parece un acumulado`)
+afirmarIgual(Object.keys(PROCESOS_DE_EJEMPLO).sort(), [...IDS_DE_SERVICIO].sort(), 'un proceso por servicio, con los ids del sistema')
+afirmar(Object.values(PROCESOS_DE_EJEMPLO).every((p) => p.length === 4), '  de cuatro pasos cada uno (el alto de la tarjeta no cambia con el servicio)')
+
+const PANEL_HTML = renderToStaticMarkup(<PanelEnVivo />)
+afirmar(PANEL_HTML.includes('aria-label="Ejemplo del panel funcionando, con datos de ejemplo"') && PANEL_HTML.includes('aria-label="Pausar el ejemplo"'), 'el panel se nombra para el lector y se puede pausar (WCAG 2.2.2: se mueve solo más de cinco segundos)')
+afirmar(veces(PANEL_HTML, 'aria-hidden="true"') >= 3 && /<ul aria-hidden="true"/.test(PANEL_HTML), '  lo que se mueve (la lista, el contador, las barras) no se anuncia')
+const LATIDO_TS = leer('_componentes/vida/useLatido.ts')
+afirmar(LATIDO_TS.includes('new IntersectionObserver') && LATIDO_TS.includes("prefers-reduced-motion: reduce") && LATIDO_TS.includes("document.visibilityState === 'visible'") && LATIDO_TS.includes('pausado'), 'se detiene solo: fuera de cuadro, con la pestaña oculta, con movimiento reducido y con la pausa')
+afirmar(leer('_secciones/tu-panel/TuPanel.tsx').includes("{vida === 'si' && <PanelEnVivo />}") && leer('_secciones/servicios/ServiciosEnSecuencia.tsx').includes("{vida === 'si' && <ProcesoEnVivo posicion={posicion} />}"), 'montados sólo con `vida=si`: en el servidor y sin la bandera no existen (el marcado del producto no cambia)')
+const PROCESO_TSX = leer('_componentes/vida/ProcesoEnVivo.tsx')
+afirmar(PROCESO_TSX.includes("useMotionValueEvent(posicion, 'change'") && !/addEventListener\('scroll'|useScroll\(/.test(PROCESO_TSX) && !PROCESO_TSX.includes('data-servicio'), 'el proceso de Servicios cambia con el rodillo (su disparo), sin escuchar el scroll y sin otro `[data-servicio]` (un acento por contexto)')
 
 cerrar('s38-interfaz2')
