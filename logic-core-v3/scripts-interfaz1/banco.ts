@@ -73,7 +73,7 @@ export interface Banco {
 }
 
 export interface OpcionesDelBanco {
-  /** Lo que va después de `/v3` (p. ej. `?interfaz=cursor=nk`). */
+  /** Lo que va después de `/v3` (una consulta: p. ej. `?pruebas=…`). */
   readonly consulta?: string
   readonly reducido?: boolean
   /** Sin el gancho del banco de la escena (`__entornoDeLaEscena`): la página exactamente como la abre una persona. */

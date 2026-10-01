@@ -1,7 +1,6 @@
 import { cancelFrame, frame, motionValue, type MotionValue } from 'motion/react'
 import { useEffect } from 'react'
 
-import { varianteDeInterfaz } from '../interfaz'
 import { VELOCIDAD_DEL_SCROLL } from '../velocidadDelScroll'
 
 /**
@@ -20,16 +19,19 @@ import { VELOCIDAD_DEL_SCROLL } from '../velocidadDelScroll'
  *
  * El objetivo es 0 hasta `umbralPxS` (leer pasando no mueve un título), crece con un `smoothstep` hasta `topeGrados` en
  * `saturacionPxS` y conserva el signo: bajando (el contenido sube) la punta derecha se queda atrás, abajo. El resorte es
- * subamortiguado (ζ ≈ 0,55): al frenar vuelve, pasa un poco y se asienta. Integrado en segundos (Euler semi-implícito
- * con el `delta` acotado a 1/30 s): el mismo gesto da la misma inclinación a 60, 75, 120 y 144 Hz.
+ * subamortiguado (ζ ≈ 0,55): al frenar vuelve, pasa un poco y se asienta. Integrado en segundos (la solución exacta, con
+ * el `delta` acotado a 1/30 s): el mismo gesto da la misma inclinación a 60, 75, 120 y 144 Hz.
+ *
+ * Con menos movimiento no hay inercia: la coreografía no se instala (ni Lenis), así que ningún título la lleva.
  */
 export const INERCIA_DEL_TEXTO = {
-  // Calibrado con el banco (`scripts-interfaz1/frenada.ts`): leer pasando con la rueda (~830 px/s) casi no inclina
-  // (0,03°); una ráfaga de la rueda (siete muescas seguidas, ~2.600 px/s de pico con el lerp de Lenis) pide 1,3° y el resorte llega a ~0,8°;
-  // sólo un tirón fuerte toca el tope.
+  // [INTERFAZ 1] Cierre: la MARCADA, elegida por Valentino (el tope en 5°, el doble de la primera propuesta). Medido con el
+  // banco (`scripts-interfaz1/frenada.ts`): leer pasando con la rueda (~830 px/s) casi no inclina (0,05°); una ráfaga de la
+  // rueda (siete muescas seguidas, ~2.600 px/s de pico con el lerp de Lenis) llega a 0,6–1,6° según el título; sólo un
+  // tirón fuerte toca el tope. Se ve según el ANCHO del título (un `skewY` corre las puntas en proporción al ancho).
   umbralPxS: 600,
   saturacionPxS: 4500,
-  topeGrados: 2.5,
+  topeGrados: 5,
   resorte: { rigidez: 140, amortiguacion: 13 },
   /** Por debajo de esto (grados y grados/s) el resorte está quieto y no se escribe nada. */
   reposo: 0.002,
@@ -83,16 +85,8 @@ const inclinacion: MotionValue<number> = motionValue(0)
 const resorte: EstadoDelResorte = { x: 0, v: 0 } // una vez
 let usuarios = 0
 
-/**
- * Las variantes en la URL, para juzgar en vivo: `?interfaz=inercia=no` (sin inercia) y `?interfaz=inercia=marcada` (el
- * doble de inclinación: el tope en 5°). La inclinación se ve según el ANCHO del título (un `skewY` corre las puntas en
- * proporción al ancho): en «Tu Panel» (~200 px) 1° corre las puntas ±1,7 px; en el titular de Quiénes somos, ±5 px.
- */
-const VARIANTE = varianteDeInterfaz('inercia')
-const FACTOR = VARIANTE === 'no' ? 0 : VARIANTE === 'marcada' ? 2 : 1
-
 function paso({ delta }: { readonly delta: number }): void {
-  const objetivo = FACTOR * inclinacionObjetivo(VELOCIDAD_DEL_SCROLL.pxPorSegundo)
+  const objetivo = inclinacionObjetivo(VELOCIDAD_DEL_SCROLL.pxPorSegundo)
   const { reposo } = INERCIA_DEL_TEXTO
   if (objetivo === 0 && Math.abs(resorte.x) < reposo && Math.abs(resorte.v) < reposo) {
     if (resorte.x !== 0) {

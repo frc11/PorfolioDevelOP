@@ -15,9 +15,7 @@ import { NOCHE_QUE_OSCURECE, type Tono } from '../menu/tono'
  *   · `logo`   — sobre el logo de la escena (lo dice la escena: `LOGO_BAJO_EL_PUNTERO`): un anillo grande, el punto queda.
  *   · `oculto` — sobre un campo de texto (manda el cursor de texto del sistema) o fuera de la ventana.
  * El cursor nativo NO se oculta nunca (en nk tampoco: `cursor: none` en 0 de 4.270 elementos).
- *
- * Con `?interfaz=cursor=nk`, el de la referencia: sobre cualquier control se apaga (opacidad 0) y queda el nativo; el
- * logo no tiene estado propio.
+
  */
 export type EstadoDelCursor = 'texto' | 'enlace' | 'boton' | 'demo' | 'logo' | 'oculto'
 
@@ -29,13 +27,12 @@ export const SELECTOR_DE_ENLACES = 'a[href], [role="link"]'
 /** El texto del halo sobre una demo. */
 export const ETIQUETA_DE_LA_DEMO = 'Abrir'
 
-export function estadoBajo(debajo: Element | null, sobreElLogo: boolean, comoNk = false): EstadoDelCursor {
+export function estadoBajo(debajo: Element | null, sobreElLogo: boolean): EstadoDelCursor {
   if (debajo === null) return 'oculto'
   if (debajo.closest(SELECTOR_DE_CAMPOS) !== null) return 'oculto'
   const demo = debajo.closest(SELECTOR_DE_DEMOS) !== null
   const boton = !demo && debajo.closest(SELECTOR_DE_BOTONES) !== null
   const enlace = !demo && !boton && debajo.closest(SELECTOR_DE_ENLACES) !== null
-  if (comoNk) return demo || boton || enlace ? 'oculto' : 'texto'
   if (demo) return 'demo'
   if (boton) return 'boton'
   if (enlace) return 'enlace'

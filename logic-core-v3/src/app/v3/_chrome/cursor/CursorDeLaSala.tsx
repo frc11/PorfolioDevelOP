@@ -5,7 +5,6 @@ import { useEffect, useRef } from 'react'
 import { SEGUIMIENTO_DE_LA_REFERENCIA } from '../../_lib/cursor'
 import { LOGO_BAJO_EL_PUNTERO } from '../../_lib/escena/entorno/hoverDelLogo'
 import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
-import { varianteDeInterfaz } from '../../_lib/interfaz'
 import { MARCA_CURSOR_DE_LA_SALA } from './marca'
 import { ETIQUETA_DE_LA_DEMO, estadoBajo, fraccionDelPaso, tonoBajo, type EstadoDelCursor } from './estado'
 
@@ -36,7 +35,6 @@ export default function CursorDeLaSala(): React.JSX.Element {
   useEffect(() => {
     const el = raiz.current
     if (el === null) return
-    const comoNk = varianteDeInterfaz('cursor') === 'nk'
     const destino = { x: 0, y: 0 }
     const nucleo = { x: 0, y: 0 }
     const halo = { x: 0, y: 0 }
@@ -52,7 +50,7 @@ export default function CursorDeLaSala(): React.JSX.Element {
 
     const leerLoDeAbajo = (): void => {
       const debajo = adentro ? document.elementFromPoint(destino.x, destino.y) : null
-      const nuevo = estadoBajo(debajo, logo && !comoNk, comoNk)
+      const nuevo = estadoBajo(debajo, logo)
       if (nuevo !== estado) el.setAttribute('data-estado', (estado = nuevo))
       const nuevoTono = tonoBajo(debajo, nocheEfectiva())
       if (nuevoTono !== tono) el.setAttribute('data-tono', (tono = nuevoTono))
