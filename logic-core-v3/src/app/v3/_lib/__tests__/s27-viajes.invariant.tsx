@@ -51,7 +51,7 @@ const literales: readonly [string, string][] = [
   ['src/app/v3/_chrome/barra/BarraDelHome.tsx', 'data-pieza="barra"'],
   ['src/app/v3/_chrome/barra/BarraDelHome.tsx', 'data-pieza="barra-enlace"'],
   ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-pieza="menu-movil"'],
-  ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-parte="item-del-menu"'],
+  ['src/app/v3/_chrome/menu/PanelDelMenu.tsx', 'data-parte="item-del-menu"'],
 ]
 for (const [archivo, literal] of literales) {
   afirmar(SELECTOR_DE_LOS_VIAJES.includes(literal) && leer(archivo).includes(literal), `  \`${literal}\` está en el selector y lo EMITE \`${path.basename(archivo)}\` tal cual`)
@@ -59,7 +59,7 @@ for (const [archivo, literal] of literales) {
 const nada = (): void => undefined
 const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
 const BARRA = hrefsDe(renderToStaticMarkup(<BarraDelHome />), 'data-pieza="barra-enlace"')
-const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto invertido={false} boton={{ current: null }} alCubrir={nada} alCerrado={nada} alContacto={nada} alSoltar={nada} />), 'data-parte="item-del-menu"')
+const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alContacto={nada} alSoltar={nada} />), 'data-parte="item-del-menu"')
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
 afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
 afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (su «Contacto» es un botón)')

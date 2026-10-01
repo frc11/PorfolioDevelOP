@@ -13,12 +13,13 @@
  *     cerca del borde, como en una lente. Va DESPUÉS del desenfoque: con el orden al revés el canto toma lo de afuera ya
  *     corrido y se oscurece. Safari no acepta filtros SVG en el `backdrop-filter`: se queda con todo lo demás.
  *
- * La copia PLANA (`vidrio-plano`) es la que viaja en el Genie: opaca y sin leer el fondo (cuarenta tiras con desenfoque
- * serían cuarenta lecturas del fondo por cuadro), con el tono que el vidrio suele dar. Al terminar de abrir el vidrio de
- * verdad se funde encima (`MS_DEL_RELEVO`).
+ * [NAVBAR] Retoque 1 · Durante el Genie se ve ESTE vidrio, recortado por la silueta del Genie (`silueta.ts`, un
+ * `clip-path` por cuadro, con `data-genie`): su contenido se esconde (el texto viaja en las tiras, encima), las sombras
+ * de adentro se apagan y un filo de luz (`filo-del-genie`) sigue la forma. Sin copia plana ni relevo: el material es el
+ * mismo de punta a punta. Sin sombra de afuera: el recorte la cortaría y aparecería de golpe al final.
  */
 
-[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"]) {
+[data-v3] [data-pieza="vidrio"] {
   --vidrio-tinte: 56%;
   --vidrio-tinte-plano: 64%;
   --vidrio-desenfoque: var(--blur-panel);
@@ -28,43 +29,31 @@
   --vidrio-reflejo: 28%;
   --vidrio-reflejo-hasta: 24%;
   --vidrio-radio: calc(var(--radius-fuerte) * 3);
-  position: relative;
+  position: fixed;
   isolation: isolate;
   border-radius: var(--vidrio-radio);
   color: var(--color-tinta);
-  box-shadow:
-    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-fondo) var(--vidrio-brillo), transparent),
-    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-fondo) var(--vidrio-filo), transparent),
-    var(--shadow-flotante);
-}
-
-/* En el vidrio oscuro la luz es el papel, que en la sala invertida es la tinta. */
-[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])[data-seccion="invertida"] {
-  box-shadow:
-    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-tinta) var(--vidrio-brillo), transparent),
-    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent),
-    var(--shadow-flotante);
-}
-
-[data-v3] [data-pieza="vidrio"] {
-  position: fixed;
   background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte), transparent);
   -webkit-backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(var(--vidrio-saturacion));
   backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(var(--vidrio-saturacion));
+  box-shadow:
+    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-fondo) var(--vidrio-brillo), transparent),
+    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-fondo) var(--vidrio-filo), transparent);
+}
+
+/* En el vidrio oscuro la luz es el papel, que en la sala invertida es la tinta. */
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"] {
+  box-shadow:
+    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-tinta) var(--vidrio-brillo), transparent),
+    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent);
 }
 
 [data-v3] [data-pieza="vidrio"][data-lente] {
   backdrop-filter: blur(var(--vidrio-desenfoque)) url(#lente-del-menu) saturate(var(--vidrio-saturacion));
 }
 
-/* Opaca: con un tinte translúcido el píxel que se pisan las rendijas se ve doble (una raya por tira). Es el tono que el
-   vidrio suele dar sobre su zona: el papel con algo de tinta (claro) o al revés (oscuro). */
-[data-v3] [data-pieza="vidrio-plano"] {
-  background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-plano), var(--color-tinta));
-}
-
 /* El especular: una luz que baja desde el borde de arriba y se apaga, detrás del texto. */
-[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])::before {
+[data-v3] [data-pieza="vidrio"]::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -74,11 +63,39 @@
   pointer-events: none;
 }
 
-[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])[data-seccion="invertida"]::before {
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"]::before {
   background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-tinta) var(--vidrio-reflejo), transparent), transparent var(--vidrio-reflejo-hasta));
 }
 
-/* Sin `backdrop-filter` (un navegador viejo) el fondo se vería nítido detrás de los ítems: la copia plana, opaca. */
+/* [Retoque 1] Durante el Genie: el contenido viaja en las tiras, el filo sigue a la silueta, sin sombras de adentro. */
+[data-v3] [data-pieza="vidrio"][data-genie] {
+  box-shadow: none;
+}
+
+[data-v3] [data-pieza="vidrio"][data-genie] > :not([data-parte="filo-del-genie"]) {
+  visibility: hidden;
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="filo-del-genie"] {
+  display: none;
+}
+
+[data-v3] [data-pieza="vidrio"][data-genie] [data-parte="filo-del-genie"] {
+  display: block;
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="filo-del-genie"] path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-fondo) var(--vidrio-filo), transparent);
+  stroke-width: calc(var(--border-hairline) * 2);
+}
+
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"] [data-parte="filo-del-genie"] path {
+  stroke: color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent);
+}
+
+/* Sin `backdrop-filter` (un navegador viejo) el fondo se vería nítido detrás de los ítems: un tinte opaco, el papel con
+   algo de tinta (claro) o al revés (oscuro). */
 @supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
   [data-v3] [data-pieza="vidrio"] {
     background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-plano), var(--color-tinta));

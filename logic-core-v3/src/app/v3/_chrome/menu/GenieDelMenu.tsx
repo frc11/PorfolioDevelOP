@@ -1,24 +1,22 @@
 'use client'
 
-import { useCallback, useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
+import { memo, useCallback, useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
 import { esquinasDeLaTira, liderDelGenie, matrizDeLaTira, type Caja } from '../../_secciones/trabajos/demos/genie'
 
 /**
  * [NAVBAR] T3 · EL GENIE DEL MENÚ — el mismo de las demos (`genie.ts`: el embudo y el deslizamiento, la proyección de
- * cada tira) con el panel del menú adentro: sale del botón y vuelve a él.
+ * cada tira) con el panel del menú: sale del botón y vuelve a él.
  *
- * Cada tira es el panel visto por una rendija de su alto, llevado por `matrix3d` a su cuadrilátero. Lo que viaja es una
- * copia PLANA (`vidrio-plano` en `vidrio.css`: el tinte sin el `backdrop-filter`): cuarenta vidrios con desenfoque y
- * lente serían cuarenta lecturas del fondo por cuadro. Al terminar de abrir, el vidrio de verdad toma su lugar.
+ * [NAVBAR] Retoque 1 · Las tiras llevan SÓLO EL TEXTO del panel (el botón de cerrar y los renglones, en su lugar
+ * medido), sin fondo: el material es el vidrio de verdad, recortado por la silueta del Genie (`silueta.ts`), que viaja
+ * debajo. Antes cada tira llevaba una copia plana del panel y al terminar el vidrio la relevaba: se veía el salto de
+ * sólido a transparente. La capa la recorta la misma silueta: nada del texto asoma fuera de la forma.
  *
- * ⚠️ **Lo que es caro es montar y disponer, no mover**, medido con la CPU ×4 (`navbar/t3-menu/costo.json`):
- *   · cada tira lleva SÓLO las piezas que caen en su rendija (el botón de cerrar, los renglones), en el lugar MEDIDO del
- *     panel real (`piezas`), no el panel entero: cuarenta copias de seis renglones eran medio millar de nodos;
- *   · la capa está montada y dispuesta desde que el chrome pasa a modo menú y se muestra con `visibility`: con
- *     `display: none` cada apertura volvía a disponer las cuarenta.
- * Menos tiras que las demos (40 contra 60) porque el panel es texto y no una foto. Las rendijas se pisan un píxel
- * (`SOLAPE`), como en las demos: sin eso queda una costura clara entre dos.
+ * ⚠️ **Lo que es caro es montar y disponer, no mover** (medido con la CPU ×4): cada tira lleva sólo las piezas que caen
+ * en su rendija, y la capa está montada desde el modo menú y se muestra con `visibility`. Es `memo`: abrir el menú no la
+ * vuelve a dibujar. 40 tiras (las demos usan 60): el panel es texto, no una foto. Las rendijas se pisan un píxel
+ * (`SOLAPE`), como en las demos.
  */
 export const TIRAS_DEL_MENU = 40
 const SOLAPE = 1 / 720
@@ -34,11 +32,10 @@ export interface PiezaDelGenie {
   readonly nodo: ReactNode
 }
 
-export function GenieDelMenu({
+function GenieDelMenuSinMemo({
   ventana,
   destino,
   piezas,
-  fondo,
   ref,
 }: {
   /** La caja del panel abierto. */
@@ -46,8 +43,6 @@ export function GenieDelMenu({
   /** La caja del botón del menú: de donde sale y adonde vuelve. */
   readonly destino: Caja
   readonly piezas: readonly PiezaDelGenie[]
-  /** El panel plano de cada tira (el tinte y el radio), con sus piezas adentro. */
-  readonly fondo: (hijos: ReactNode) => ReactNode
   readonly ref?: Ref<ControlDelGenieDelMenu>
 }): React.JSX.Element {
   const tiras = useRef<(HTMLDivElement | null)[]>([])
@@ -81,14 +76,12 @@ export function GenieDelMenu({
             className="absolute top-0 left-0 origin-top-left overflow-hidden will-change-transform"
             style={{ width: ventana.ancho, height: alto + ventana.alto * SOLAPE, transform: 'scale(0)' }}
           >
-            <div className="absolute left-0" style={{ top: -i * alto, width: ventana.ancho, height: ventana.alto }}>
-              {fondo(
-                enLaRendija.map((p) => (
-                  <div key={p.clave} className="absolute" style={{ left: p.caja.x, top: p.caja.y, width: p.caja.ancho, height: p.caja.alto }}>
-                    {p.nodo}
-                  </div>
-                )),
-              )}
+            <div className="text-tinta absolute left-0" style={{ top: -i * alto, width: ventana.ancho, height: ventana.alto }}>
+              {enLaRendija.map((p) => (
+                <div key={p.clave} className="absolute" style={{ left: p.caja.x, top: p.caja.y, width: p.caja.ancho, height: p.caja.alto }}>
+                  {p.nodo}
+                </div>
+              ))}
             </div>
           </div>
         )
@@ -96,3 +89,5 @@ export function GenieDelMenu({
     </div>
   )
 }
+
+export const GenieDelMenu = memo(GenieDelMenuSinMemo)

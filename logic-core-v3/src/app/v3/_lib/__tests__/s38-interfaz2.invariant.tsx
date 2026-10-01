@@ -138,7 +138,8 @@ afirmar(abierto380 <= 1 - 0.95 * RESPUESTA.menu.oscurece + 1e-6, `con el menú a
 afirmar(correrMenu(true, NIVEL_DE_LA_NOCHE, 1, 60) >= NIVEL_DE_LA_NOCHE - 1e-9 && correrMenu(false, 1, 0.8, 60) > 0.999, '  de noche no baja de la noche; al cerrar vuelve a la luz entera')
 RESPUESTA_EN_VIVO.menu = 0
 MENU_DE_LA_INTERFAZ.abierto = false
-const MENU_MOVIL = leer('_chrome/menu/MenuMovil.tsx')
+// [NAVBAR] El menú del teléfono: el botón (`MenuMovil`) y el panel con su velo (`MenuDeVidrio`).
+const MENU_MOVIL = leer('_chrome/menu/MenuMovil.tsx') + leer('_chrome/menu/MenuDeVidrio.tsx')
 afirmar(MENU_MOVIL.includes(['backdrop-blur-', '[calc(var(--blur-panel)/3)]'].join('')) && /useEffect\(\(\) => \{\s*salaDetrasDelMenu\(abierto\)\s*return \(\) => salaDetrasDelMenu\(false\)\s*\}, \[abierto\]\)/.test(MENU_MOVIL), 'el velo desenfoca POCO la página y la sala toma el desenfoque y baja su luz al abrir el menú')
 afirmar(/arc\.level = nivelConLaNocheDisparada\(arc\.level\)\s*\/\/[^\n]*\n\s*arc\.level = nivelConLaInterfaz\(arc\.level, Math\.min\(delta, 0\.1\)\)/.test(leer('_lib/escena/OrbitRig.tsx')), 'el rig suma la interfaz DESPUÉS de la noche disparada: la luz de salida de un viaje queda limpia')
 afirmarIgual(centroNormalizado({ left: 0, top: 0, width: 100, height: 100 }, 200, 200), [-0.5, 0.5], 'el centro de una pieza en coordenadas del lienzo')

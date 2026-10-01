@@ -1,57 +1,42 @@
 'use client'
 
-import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref, type RefObject } from 'react'
-
-import { cn } from '@/lib/utils'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { useMovimientoReducido } from '../../_lib/motion/reducido'
-import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO } from '../../_secciones/trabajos/demos/apertura'
-import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
-import { MS_DEL_GENIE, correrPorTiempo } from '../../_secciones/trabajos/demos/genie'
 import { abrirContacto, useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
-import { GenieDelMenu, type ControlDelGenieDelMenu, type PiezaDelGenie } from './GenieDelMenu'
-import { LenteDelVidrio, conLente } from './LenteDelVidrio'
-import { CLASE_DEL_CERRAR, CLASE_DEL_ITEM, CRUZ, ContenidoDelMenu, ROTULO_DEL_MENU, medirLaGeometria, mismaGeometria, type Geometria } from './PanelDelMenu'
+import { Menu, type ControlDelMenu } from './MenuDeVidrio'
+import { ROTULO_DEL_MENU } from './PanelDelMenu'
 import { vaInvertido } from './tono'
 import { useTonoDebajo } from './useTonoDebajo'
 
 /**
  * EL MENÚ DEL TELÉFONO — un círculo con el logo arriba al centro y un panel de vidrio líquido. **[CONTACTO]** ·
- * **[NAVBAR] T3**
+ * **[NAVBAR] T3 y retoque 1**
  *
  * Se monta cuando el chrome está en modo menú (abajo de `medio`, o si la barra no entra: lo mide `BarraDelHome`).
  *
  *   · **Se abre con el Genie de las demos, desde el botón, y se cierra igual, de vuelta al botón** (`GenieDelMenu`, la
- *     misma geometría y el mismo reloj que la ventana de una demo). Lo que viaja es una copia plana del panel; al
- *     terminar de abrir, el vidrio de verdad toma su lugar. Con movimiento reducido, sin Genie: un fundido corto (el de
- *     las demos). En SPRINT CONTACTO el Genie se descartó para este menú por su costo (p95 93 ms con la CPU ×4): acá
- *     todo está MONTADO Y ESCONDIDO desde que el chrome pasa a modo menú (el panel, las tiras en `display: none`, el
- *     mapa de la lente ya dibujado), así abrir no monta nada. Medido en `navbar/t3-menu/`.
- *   · **Cubre casi toda la pantalla**, centrado, con `--spacing-4` de margen en los cuatro lados.
- *   · **El vidrio** (`vidrio.css`): desenfoque y saturación del fondo, el brillo especular arriba y un filo de luz; en
- *     Chromium, además, la refracción del canto (`LenteDelVidrio`). Safari no acepta filtros SVG en el
- *     `backdrop-filter` y se queda con lo demás, que se sostiene solo.
- *   · **El tono, el de la zona** (se lee al abrir, en el medio del cuadro): sobre zona oscura, vidrio claro; sobre zona
- *     clara, vidrio oscuro (los tokens de la sala invertida). El texto es la tinta de cada tono sobre su tinte: AA
- *     contra cualquier fondo (medido en `navbar/t3-menu/`).
+ *     misma geometría y el mismo reloj que la ventana de una demo). Con movimiento reducido, sin Genie: el fundido de
+ *     las demos.
+ *   · **[Retoque 1] El panel nace con su vidrio**: durante todo el Genie se ve el vidrio de verdad (desenfoque, tinte,
+ *     lente) recortado por la silueta del Genie (`silueta.ts`); las tiras llevan sólo el texto, encima. No hay copia
+ *     plana ni relevo: no cambia la opacidad en ningún momento, al abrir ni al cerrar.
+ *   · **[Retoque 1] El primer cuadro, en tiempo**: el clic abre todo a mano (el tono, la forma, el reloj) y deja lo de
+ *     React (lo que el botón anuncia, la trampa del diálogo) para una transición; el Genie es `memo`. Y montado el
+ *     menú, una vez, el vidrio con su lente y las tiras se pintan dos cuadros casi transparentes: así el primer Genie no
+ *     compila nada (`precalentar`). Medido en `navbar/retoque/1-transparencia/`.
+ *   · **Cubre casi toda la pantalla**, centrado, con `--spacing-4` de margen en los cuatro lados. El vidrio y su tono:
+ *     `vidrio.css` (sobre zona oscura, vidrio claro; sobre zona clara, oscuro; el texto en AA contra cualquier fondo).
  *   · Detrás, la sala se desenfoca y se oscurece (`salaDetrasDelMenu`, T1 de INTERFAZ 2) y la página, poco.
  *
- * Es un diálogo con el foco atrapado (`TrampaDelMenu`, montada sólo mientras está abierto): su botón de cerrar está
- * ADENTRO, en el lugar del botón del menú (que se esconde mientras el panel lo tapa), así el lector lo encuentra y Tab no
- * se escapa. Esc, el botón o tocar afuera lo cierran; el foco vuelve al botón del menú. Los ítems son grandes (un
- * renglón de `--spacing-12` como mínimo) y «Contacto» abre el formulario cuando el menú terminó de irse.
+ * El panel, su Genie y la trampa están en `MenuDeVidrio.tsx`. Es un diálogo con el foco atrapado (`TrampaDelMenu`, montada sólo mientras está abierto): su botón de cerrar está
+ * ADENTRO, en el lugar del botón del menú (que se esconde mientras el panel lo tapa). Esc, el botón o tocar afuera lo
+ * cierran; el foco vuelve al botón del menú. «Contacto» abre el formulario cuando el menú terminó de irse.
  */
 
-export { ROTULO_DEL_MENU }
-
-/**
- * El relevo entre la copia plana del Genie y el vidrio (ms): al abrir el vidrio se funde encima de las tiras quietas; al
- * cerrar se funde mientras las tiras arrancan. Sin él se veía el salto: la copia plana no puede leer el fondo.
- */
-export const MS_DEL_RELEVO = 140
+export { Menu, ROTULO_DEL_MENU }
 
 /** Sobre una zona oscura (la sala de noche, una foto), el vidrio claro; sobre una clara, el oscuro. */
 function zonaOscura(): boolean {
@@ -63,8 +48,6 @@ function zonaOscura(): boolean {
 export function MenuMovil(): React.JSX.Element | null {
   const { modo } = useContacto()
   const [abierto, setAbierto] = useState(false)
-  const [vidrioOscuro, setVidrioOscuro] = useState(false)
-  const [cubierto, setCubierto] = useState(false)
   const boton = useRef<HTMLButtonElement>(null)
   const menu = useRef<ControlDelMenu>(null)
   const haciaElContacto = useRef(false)
@@ -84,10 +67,9 @@ export function MenuMovil(): React.JSX.Element | null {
     if (!enMenu) setAbierto(false)
   }
 
-  const alCerrado = useCallback(() => {
-    setCubierto(false)
-    setAbierto(false)
-  }, [])
+  // El panel abierto tapa al botón (su botón de cerrar va en el mismo lugar): a mano, sin volver a dibujar.
+  const cubrir = useCallback((si: boolean) => boton.current?.style.setProperty('visibility', si ? 'hidden' : 'visible'), [])
+  const alCerrado = useCallback(() => setAbierto(false), [])
   const alContacto = useCallback(() => {
     haciaElContacto.current = true
   }, [])
@@ -104,7 +86,7 @@ export function MenuMovil(): React.JSX.Element | null {
   return (
     // [NAVBAR] Arriba del resto del chrome (el infinito del recorrido, la barra): el panel abierto lo tapa todo.
     <div data-pieza="menu-movil" className="fixed inset-x-0 top-0 z-[var(--z-overlay)]">
-      <Menu ref={menu} abierto={abierto} invertido={vidrioOscuro} boton={boton} alCubrir={setCubierto} alCerrado={alCerrado} alContacto={alContacto} alSoltar={alSoltar} />
+      <Menu ref={menu} abierto={abierto} boton={boton} alCubrir={cubrir} alCerrado={alCerrado} alContacto={alContacto} alSoltar={alSoltar} />
       <button
         ref={boton}
         type="button"
@@ -115,264 +97,15 @@ export function MenuMovil(): React.JSX.Element | null {
         aria-controls="menu-movil"
         onClick={() => {
           if (abierto) return
-          setVidrioOscuro(!zonaOscura())
-          setAbierto(true)
-          menu.current?.abrir()
+          // [Retoque 1] El Genie arranca en este mismo cuadro, a mano; lo de React va después, en una transición.
+          menu.current?.abrir(!zonaOscura())
+          salaDetrasDelMenu(true)
+          startTransition(() => setAbierto(true))
         }}
-        className={cn(
-          'bg-fondo text-tinta border-borde fixed inset-x-0 top-[var(--spacing-4)] mx-auto grid size-[var(--spacing-12)] place-items-center rounded-full border shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)]',
-          cubierto && 'invisible',
-        )}
+        className="bg-fondo text-tinta border-borde fixed inset-x-0 top-[var(--spacing-4)] mx-auto grid size-[var(--spacing-12)] place-items-center rounded-full border shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)]"
       >
         <Isotipo className="h-[var(--spacing-5)]" />
       </button>
     </div>
-  )
-}
-
-type Fase = 'cerrado' | 'abriendo' | 'abierto' | 'cerrando'
-
-/** Lo que el botón del menú le pide al panel. */
-export interface ControlDelMenu {
-  readonly abrir: () => void
-}
-
-/** La trampa del diálogo, montada sólo con el menú abierto. Su desmontaje suelta el foco y el scroll (en ese orden). */
-function TrampaDelMenu({ caja, alCerrar, alSoltar }: { readonly caja: RefObject<HTMLDivElement | null>; readonly alCerrar: () => void; readonly alSoltar: () => void }): null {
-  useDialogo(caja, alCerrar)
-  // Declarado después de `useDialogo`: su limpieza corre después de la de la trampa (que, si no, retendría el foco).
-  useEffect(() => alSoltar, [alSoltar])
-  return null
-}
-
-export function Menu({
-  abierto,
-  invertido,
-  boton,
-  alCubrir,
-  alCerrado,
-  alContacto,
-  alSoltar,
-  ref,
-}: {
-  /** Lo pide el botón; el menú abre con el Genie y, al terminar de cerrar, avisa (`alCerrado`). */
-  readonly abierto: boolean
-  /** El vidrio oscuro (sobre una zona clara). */
-  readonly invertido: boolean
-  readonly boton: RefObject<HTMLButtonElement | null>
-  /** El panel abierto tapa al botón del menú (su botón de cerrar va en el mismo lugar). */
-  readonly alCubrir: (cubierto: boolean) => void
-  readonly alCerrado: () => void
-  readonly alContacto: () => void
-  readonly alSoltar: () => void
-  readonly ref?: Ref<ControlDelMenu>
-}): React.JSX.Element {
-  const caja = useRef<HTMLDivElement>(null)
-  const velo = useRef<HTMLDivElement>(null)
-  const capaDelGenie = useRef<HTMLDivElement>(null)
-  const pintor = useRef<ControlDelGenieDelMenu>(null)
-  const cancelar = useRef<() => void>(() => undefined)
-  /** La fase y cuánto está metido en el botón (1 = adentro): refs, para que cerrar no cambie y la trampa no se rearme. */
-  const fase = useRef<Fase>('cerrado')
-  const metido = useRef(1)
-  const reducido = useMovimientoReducido()
-  const [geometria, setGeometria] = useState<Geometria | null>(null)
-  const arrancarAlMedir = useRef(false)
-  const [lente] = useState(conLente)
-
-  // Montado y escondido: la geometría (y con ella el mapa de la lente) se mide ya, no al abrir, y otra vez si cambia el
-  // cuadro. Un objeto nuevo sólo si cambió algo: las cuarenta tiras no se vuelven a dibujar por nada.
-  useEffect(() => {
-    const medir = (): void => {
-      const nueva = medirLaGeometria(caja.current, boton.current)
-      setGeometria((g) => (g !== null && mismaGeometria(g, nueva) ? g : nueva))
-    }
-    const primera = requestAnimationFrame(medir)
-    window.addEventListener('resize', medir)
-    return () => {
-      cancelAnimationFrame(primera)
-      window.removeEventListener('resize', medir)
-    }
-  }, [boton])
-
-  /** Un cuadro del Genie: `m` es cuánto está metido en el botón (1 = adentro). */
-  const cuadro = useCallback((m: number): void => {
-    metido.current = m
-    pintor.current?.pintar(m)
-    velo.current?.style.setProperty('opacity', (1 - m).toFixed(3))
-  }, [])
-
-  /** El vidrio de verdad a la vista (o no), la capa del Genie al revés, y el velo que atrapa los toques. */
-  const mostrar = useCallback((vidrio: boolean, genie: boolean): void => {
-    caja.current?.style.setProperty('visibility', vidrio ? 'visible' : 'hidden')
-    capaDelGenie.current?.style.setProperty('visibility', genie ? 'visible' : 'hidden')
-  }, [])
-
-  /** Movimiento reducido: sin Genie, el panel en su lugar con un fundido y una escala corta (los de las demos). */
-  const fundir = useCallback(
-    (hacia: 0 | 1, alTerminar: () => void): (() => void) => {
-      mostrar(true, false)
-      return correrPorTiempo(
-        MS_DEL_FUNDIDO,
-        (t) => {
-          const u = hacia === 1 ? t / MS_DEL_FUNDIDO : 1 - t / MS_DEL_FUNDIDO
-          caja.current?.style.setProperty('opacity', u.toFixed(3))
-          caja.current?.style.setProperty('scale', (ESCALA_DEL_FUNDIDO + (1 - ESCALA_DEL_FUNDIDO) * u).toFixed(4))
-          velo.current?.style.setProperty('opacity', u.toFixed(3))
-        },
-        alTerminar,
-      )
-    },
-    [mostrar],
-  )
-
-  const arrancar = useCallback((): void => {
-    fase.current = 'abriendo'
-    velo.current?.style.setProperty('pointer-events', 'auto')
-    const listo = (): void => {
-      fase.current = 'abierto'
-      alCubrir(true)
-      caja.current?.querySelector<HTMLElement>('[data-parte="item-del-menu"]')?.focus({ preventScroll: true })
-    }
-    if (reducido) {
-      cancelar.current = fundir(1, listo)
-      return
-    }
-    caja.current?.style.removeProperty('opacity')
-    caja.current?.style.removeProperty('scale')
-    mostrar(false, true)
-    cuadro(1)
-    // Un cuadro después del que muestra las tiras: contar desde ahí era perder los primeros.
-    const espera = requestAnimationFrame(() => {
-      cancelar.current = correrPorTiempo(MS_DEL_GENIE, (t) => cuadro(1 - t / MS_DEL_GENIE), () => {
-        caja.current?.style.setProperty('opacity', '0')
-        mostrar(true, true)
-        cancelar.current = correrPorTiempo(MS_DEL_RELEVO, (t) => caja.current?.style.setProperty('opacity', (t / MS_DEL_RELEVO).toFixed(3)), () => {
-          mostrar(true, false)
-          listo()
-        })
-      })
-    })
-    cancelar.current = () => cancelAnimationFrame(espera)
-  }, [reducido, fundir, mostrar, cuadro, alCubrir])
-
-  // LA APERTURA, que pide el botón. Si la geometría cambió (el teclado del teléfono, una rotación) se re-mide y arranca
-  // cuando las tiras ya están a medida.
-  useImperativeHandle(
-    ref,
-    () => ({
-      abrir: () => {
-        if (fase.current !== 'cerrado') return
-        const ahora = medirLaGeometria(caja.current, boton.current)
-        if (geometria !== null && mismaGeometria(ahora, geometria)) arrancar()
-        else {
-          arrancarAlMedir.current = true
-          setGeometria(ahora)
-        }
-      },
-    }),
-    [geometria, arrancar, boton],
-  )
-  useLayoutEffect(() => {
-    if (!arrancarAlMedir.current || geometria === null) return
-    arrancarAlMedir.current = false
-    arrancar()
-  }, [geometria, arrancar])
-
-  // EL CIERRE: el vidrio se va, y el Genie lo lleva de vuelta al botón (desde donde iba, si se cierra abriendo).
-  const cerrar = useCallback((): void => {
-    if (fase.current === 'cerrando' || fase.current === 'cerrado') return
-    const estabaAbierto = fase.current === 'abierto'
-    fase.current = 'cerrando'
-    cancelar.current()
-    alCubrir(false)
-    const terminar = (): void => {
-      fase.current = 'cerrado'
-      mostrar(false, false)
-      caja.current?.style.removeProperty('opacity')
-      velo.current?.style.setProperty('pointer-events', 'none')
-      alCerrado()
-    }
-    if (reducido) {
-      cancelar.current = fundir(0, terminar)
-      return
-    }
-    mostrar(estabaAbierto, true)
-    const desde = estabaAbierto ? 0 : metido.current
-    cuadro(desde)
-    const ms = MS_DEL_GENIE * (1 - desde)
-    cancelar.current = correrPorTiempo(
-      ms,
-      (t) => {
-        cuadro(desde + (1 - desde) * (ms === 0 ? 1 : t / ms))
-        if (estabaAbierto) caja.current?.style.setProperty('opacity', Math.max(0, 1 - t / MS_DEL_RELEVO).toFixed(3))
-      },
-      terminar,
-    )
-  }, [reducido, fundir, cuadro, mostrar, alCubrir, alCerrado])
-
-  // Si el chrome vuelve a la barra con el menú abierto, el padre lo da por cerrado: acá se apaga todo de golpe.
-  useEffect(() => {
-    if (abierto || fase.current === 'cerrado' || fase.current === 'cerrando') return
-    cancelar.current()
-    fase.current = 'cerrado'
-    mostrar(false, false)
-  }, [abierto, mostrar])
-  useEffect(() => () => cancelar.current(), [])
-
-  const tono = invertido ? 'invertida' : undefined
-  // La copia plana: cada pieza medida, pintada como la de verdad.
-  const piezas = useMemo<readonly PiezaDelGenie[]>(
-    () =>
-      (geometria?.piezas ?? []).map((p, i) => ({
-        clave: String(i),
-        caja: p.caja,
-        nodo: p.cerrar ? <span className={cn(CLASE_DEL_CERRAR, 'size-full')}>{CRUZ}</span> : <span className={cn(CLASE_DEL_ITEM, 'h-full')}>{p.texto}</span>,
-      })),
-    [geometria],
-  )
-  return (
-    <>
-      {abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}
-      <div
-        ref={velo}
-        data-parte="velo-del-menu"
-        aria-hidden="true"
-        onClick={cerrar}
-        className="pointer-events-none fixed inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_20%,transparent)] opacity-0 backdrop-blur-[calc(var(--blur-panel)/3)]"
-        // [INTERFAZ 2] T1 · el velo desenfoca POCO la página (un tercio de `--blur-panel`): la que se va de foco es la sala.
-      />
-      {geometria !== null && !reducido && (
-        <div ref={capaDelGenie} className="invisible">
-          <GenieDelMenu
-            ref={pintor}
-            ventana={geometria.ventana}
-            destino={geometria.destino}
-            piezas={piezas}
-            fondo={(hijos) => (
-              <div data-pieza="vidrio-plano" data-seccion={tono} className="size-full">
-                {hijos}
-              </div>
-            )}
-          />
-        </div>
-      )}
-      {lente && geometria !== null && <LenteDelVidrio ancho={geometria.ventana.ancho} alto={geometria.ventana.alto} radio={geometria.radio} />}
-      <div
-        ref={caja}
-        id="menu-movil"
-        role="dialog"
-        aria-modal="true"
-        aria-label={ROTULO_DEL_MENU.menu}
-        data-parte="menu"
-        data-pieza="vidrio"
-        data-seccion={tono}
-        data-lente={lente && geometria !== null ? '' : undefined}
-        data-lenis-prevent=""
-        className="invisible fixed inset-[var(--spacing-4)] flex flex-col"
-      >
-        <ContenidoDelMenu alCerrar={cerrar} alContacto={alContacto} />
-      </div>
-    </>
   )
 }

@@ -23,7 +23,8 @@ import { Menu, MenuMovil, ROTULO_DEL_MENU } from './MenuMovil'
 import { panelEn, tonoDebajo, vaInvertido, type Tono } from './tono'
 
 const leer = (r: string): string => quitarComentarios(readFileSync(path.join(RAIZ, r), 'utf8'))
-const FUENTE = leer('src/app/v3/_chrome/menu/MenuMovil.tsx')
+// [NAVBAR] El menú son dos archivos: el botón (`MenuMovil`) y el panel con su trampa (`MenuDeVidrio`).
+const FUENTE = leer('src/app/v3/_chrome/menu/MenuMovil.tsx') + leer('src/app/v3/_chrome/menu/MenuDeVidrio.tsx')
 const HOOK = leer('src/app/v3/_chrome/menu/useTonoDebajo.ts')
 
 // Los colores de `theme-develop.css`: el papel y la tinta, y los mismos dados vuelta.
@@ -66,7 +67,7 @@ titulo('2 · El menú es un diálogo accesible: foco atrapado y devuelto, Esc, t
 
 const nada = (): void => undefined
 // [NAVBAR] T3 · el menú queda montado y escondido; abre con el Genie y la trampa se monta sólo abierto.
-const MENU = renderToStaticMarkup(<Menu abierto invertido boton={{ current: null }} alCubrir={nada} alCerrado={nada} alContacto={nada} alSoltar={nada} />)
+const MENU = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alContacto={nada} alSoltar={nada} />)
 const esDialogo = (h: string): boolean => /role="dialog"/.test(h) && /aria-modal="true"/.test(h) && /aria-label="Menú"/.test(h) && /id="menu-movil"/.test(h)
 afirmar(esDialogo(MENU), 'el menú es un diálogo modal con nombre')
 controlPositivo('  el chequeo vería un menú sin rol de diálogo', MENU.replace('role="dialog"', ''), esDialogo)

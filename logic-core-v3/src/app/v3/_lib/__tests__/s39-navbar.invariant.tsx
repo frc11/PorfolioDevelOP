@@ -9,6 +9,7 @@
  *        en Chromium), el tono de la zona con el texto en AA contra cualquier fondo, y el diálogo.
  *   T4 · el contacto en el teléfono, entero en una pantalla: los mismos campos, la hoja compacta sólo en el teléfono.
  *   Retoque 4 · el hover tranquilo de la barra, con sus dos variantes por la URL.
+ *   Retoque 1 · el menú nace con su vidrio: la silueta del Genie lo recorta, sin copia plana ni relevo.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
@@ -19,12 +20,14 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
 import { varianteDelHover } from '../../_chrome/barra/hover'
 import { conLente } from '../../_chrome/menu/LenteDelVidrio'
+import { aplicarLaSilueta } from '../../_chrome/menu/silueta'
 import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
 import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
 import { centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
 import { MS_DE_LA_LLEGADA_DEL_TITULO, repetirLaLlegadaDelTitulo } from '../../_componentes/llegadaDelTitulo'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
+import { liderDelGenie, type Caja } from '../../_secciones/trabajos/demos/genie'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 import { NodoFalso, VENTANA, conDomFalso } from './s27-dom-falso'
 
@@ -110,13 +113,14 @@ afirmar(['src/app/v3/_componentes/chrome/Navegacion.tsx', 'src/app/v3/_estilos/n
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T3 · El menú del teléfono: el Genie, el vidrio, el tono y el diálogo')
 
-// El menú son dos archivos: el botón, las fases y el Genie (`MenuMovil`), y el adentro y la geometría (`PanelDelMenu`).
-const MENU = sinComentarios(leer('_chrome/menu/MenuMovil.tsx') + leer('_chrome/menu/PanelDelMenu.tsx'))
+// El menú son tres archivos: el botón (`MenuMovil`), el panel con sus fases y el Genie (`MenuDeVidrio`), y el adentro
+// y la geometría (`PanelDelMenu`).
+const MENU = sinComentarios(['_chrome/menu/MenuMovil.tsx', '_chrome/menu/MenuDeVidrio.tsx', '_chrome/menu/PanelDelMenu.tsx'].map(leer).join('\n'))
 const GENIE = sinComentarios(leer('_chrome/menu/GenieDelMenu.tsx'))
-afirmar(MENU.includes("import { MS_DEL_GENIE, correrPorTiempo } from '../../_secciones/trabajos/demos/genie'") && GENIE.includes('esquinasDeLaTira(i, TIRAS_DEL_MENU, m, ventana, destino, lider, SOLAPE)') && leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('correrPorTiempo as correr'), 'el Genie es el de las demos: la misma geometría, la misma duración y el mismo reloj (que ahora comparten)')
+afirmar(MENU.includes("import { MS_DEL_GENIE, correrPorTiempo, liderDelGenie } from '../../_secciones/trabajos/demos/genie'") && GENIE.includes('esquinasDeLaTira(i, TIRAS_DEL_MENU, m, ventana, destino, lider, SOLAPE)') && leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('correrPorTiempo as correr'), 'el Genie es el de las demos: la misma geometría, la misma duración y el mismo reloj (que ahora comparten)')
 afirmar(MENU.includes('destino: cajaDe(boton)') && MENU.includes('(t) => cuadro(1 - t / MS_DEL_GENIE)') && /cuadro\(desde \+ \(1 - desde\)/.test(MENU), '  sale del botón al abrir y vuelve a él al cerrar (desde donde iba, si se cierra abriendo)')
 afirmar(MENU.includes('cancelar.current = fundir(1, listo)') && MENU.includes('MS_DEL_FUNDIDO') && /geometria !== null && !reducido &&/.test(MENU), '  con movimiento reducido no hay Genie: el fundido corto de las demos')
-afirmar(GENIE.includes('const enLaRendija = piezas.filter(') && !/children/.test(GENIE) && MENU.includes("className=\"invisible\"") && MENU.includes("style.setProperty('visibility', genie ? 'visible' : 'hidden')"), '  y abrir no monta nada: cada tira lleva sólo las piezas medidas de su rendija y la capa se muestra con `visibility` (medido con la CPU ×4 en navbar/t3-menu)')
+afirmar(GENIE.includes('const enLaRendija = piezas.filter(') && !/children/.test(GENIE) && MENU.includes("className=\"invisible\"") && MENU.includes("capaDelGenie.current?.style.setProperty('visibility', estado === 'genie' ? 'visible' : 'hidden')"), '  y abrir no monta nada: cada tira lleva sólo las piezas medidas de su rendija y la capa se muestra con `visibility` (medido con la CPU ×4 en navbar/t3-menu)')
 afirmar(MENU.includes('className="invisible fixed inset-[var(--spacing-4)] flex flex-col"') && MENU.includes('data-pieza="vidrio"'), 'casi toda la pantalla, centrado, con margen en los cuatro lados')
 
 const VIDRIO = sinComentarios(leer('_estilos/vidrio.css'))
@@ -147,11 +151,36 @@ const peorContraste = (t: number): number => {
 }
 afirmar(peorContraste(tinte) >= 4.5, `el texto en AA contra CUALQUIER fondo: con el tinte del ${String(Math.round(tinte * 100))} % el peor caso (vidrio claro sobre negro, oscuro sobre blanco velado) da ${peorContraste(tinte).toFixed(2)}:1 (medido en píxeles: 6,5 y 6,7)`)
 controlPositivo('  el chequeo vería un tinte demasiado transparente', 0.4, (t: number) => peorContraste(t) >= 4.5)
-afirmar(MENU.includes('setVidrioOscuro(!zonaOscura())') && MENU.includes('tonoBajo(debajo, nocheQueSeVe())') && MENU.includes("data-seccion={tono}"), 'el tono de la zona, leído al abrir: sobre zona oscura vidrio claro, sobre zona clara vidrio oscuro (los tokens de la sala invertida)')
+afirmar(MENU.includes('menu.current?.abrir(!zonaOscura())') && MENU.includes('tonoBajo(debajo, nocheQueSeVe())') && MENU.includes("el?.setAttribute('data-seccion', 'invertida')"), 'el tono de la zona, leído al abrir: sobre zona oscura vidrio claro, sobre zona clara vidrio oscuro (los tokens de la sala invertida)')
 
 afirmar(MENU.includes('{abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}') && /data-parte="cerrar-el-menu" aria-label=\{ROTULO_DEL_MENU\.cerrar\}/.test(MENU), 'el diálogo: la trampa de foco sólo abierto, y el que cierra está adentro')
 afirmar(MENU.includes('min-h-[var(--spacing-12)]') && MENU.includes('text-titulo-m'), '  ítems grandes y tocables: un renglón de 48 px como mínimo, en `titulo-m`')
 afirmar(MENU.includes("caja.current?.querySelector<HTMLElement>('[data-parte=\"item-del-menu\"]')?.focus({ preventScroll: true })") && MENU.includes('boton.current?.focus({ preventScroll: true })'), '  al abrir, el foco al primer ítem; al cerrar, de vuelta al botón del menú')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Retoque 1 · El menú nace con su vidrio')
+
+// Un teléfono de 390 × 844: el panel con `--spacing-4` de margen y el botón de 48 arriba al centro.
+const PANEL: Caja = { x: 16, y: 16, ancho: 358, alto: 812 }
+const BOTON: Caja = { x: 171, y: 16, ancho: 48, alto: 48 }
+const LIDER = liderDelGenie(PANEL, BOTON)
+
+// El cuadro de verdad: lo que `aplicarLaSilueta` le hace al vidrio, al texto y al filo.
+const anotado = new Map<string, string>()
+const falso = (nombre: string): { style: { setProperty: (k: string, v: string) => void; removeProperty: (k: string) => void }; setAttribute: (k: string, v: string) => void } => ({
+  style: { setProperty: (k, v) => anotado.set(`${nombre}.${k}`, v), removeProperty: (k) => anotado.delete(`${nombre}.${k}`) },
+  setAttribute: (k, v) => anotado.set(`${nombre}.${k}`, v),
+})
+aplicarLaSilueta(0.5, PANEL, BOTON, LIDER, { vidrio: falso('vidrio') as unknown as HTMLElement, texto: falso('texto') as unknown as HTMLElement, filo: falso('filo') as unknown as SVGPathElement })
+const recorte = (clave: string): string => /^path\('(.*)'\)$/.exec(anotado.get(clave) ?? '')?.[1] ?? ''
+afirmar(recorte('vidrio.clip-path') !== '' && anotado.get('filo.d') === recorte('vidrio.clip-path') && recorte('texto.clip-path') !== '', 'el vidrio de verdad, recortado por la silueta; el texto, por la MISMA forma (en la pantalla); el filo la dibuja')
+
+const VIDRIO_GENIE = sinComentarios(leer('_estilos/vidrio.css'))
+afirmar(!VIDRIO_GENIE.includes('vidrio-plano') && !MENU.includes('MS_DEL_RELEVO') && !GENIE.includes('fondo'), 'sin copia plana ni relevo: el material es el mismo de punta a punta')
+afirmar(/\[data-pieza="vidrio"\]\[data-genie\] \{\s*box-shadow: none;\s*\}/.test(VIDRIO_GENIE) && /\[data-genie\] > :not\(\[data-parte="filo-del-genie"\]\) \{\s*visibility: hidden;\s*\}/.test(VIDRIO_GENIE), '  durante el Genie el vidrio no cambia ni su tinte ni su opacidad: sólo esconde su contenido (que viaja en las tiras)')
+afirmar(/const cuadro = useCallback\(\s*\(m: number\): void => \{\s*metido\.current = m\s*forma\(m\)\s*velo\.current\?\.style\.setProperty\('opacity'/.test(MENU), '  cada cuadro mueve la forma; la opacidad que cambia es la del velo de atrás, no la del vidrio')
+afirmar(/menu\.current\?\.abrir\(!zonaOscura\(\)\)\s*salaDetrasDelMenu\(true\)\s*startTransition\(\(\) => setAbierto\(true\)\)/.test(MENU) && GENIE.includes('export const GenieDelMenu = memo(GenieDelMenuSinMemo)'), 'el clic arranca el Genie a mano en su cuadro; lo de React va en una transición y las tiras no se vuelven a dibujar')
+afirmar(MENU.includes("el?.style.setProperty('opacity', '0.01')") && MENU.includes('forma(0.5)') && MENU.includes('const precalentado = useRef(false)'), '  y antes del primer clic, el vidrio y las tiras se pintaron una vez (precalentar): el primer cuadro no compila')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T4 · El contacto en el teléfono, entero en una pantalla')
