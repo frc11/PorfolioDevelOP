@@ -153,3 +153,26 @@
   position: relative;
   z-index: var(--z-elevado);
 }
+
+/* [INTERFAZ 1] Cierre 2 · en el carrusel el anillo va POR DENTRO de la portada: el carrusel va a sangre y la primera de
+   cada fila queda contra el borde de la pantalla, donde el anillo de afuera perdía su lado izquierdo. Los mismos dos
+   tonos, espejados hacia adentro (papel, tinta, papel) sobre la caja de la imagen, sin el aire de la derecha. El
+   contorno del enlace queda transparente: en colores forzados el sistema lo pinta y es el anillo que se ve ahí. */
+[data-v3][data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible {
+  outline-color: transparent;
+  box-shadow: none;
+}
+
+[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inset-inline-end: var(--portada-aire);
+  border-radius: var(--radius-sutil);
+  box-shadow:
+    inset 0 0 0 var(--foco-desplazamiento) var(--color-fondo),
+    inset 0 0 0 calc(var(--foco-desplazamiento) + var(--foco-grosor)) var(--color-tinta),
+    inset 0 0 0 calc(var(--foco-desplazamiento) + 2 * var(--foco-grosor)) var(--color-fondo);
+  pointer-events: none;
+}

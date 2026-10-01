@@ -415,6 +415,14 @@ const CAPA_DE_DEMOS = leer('_secciones/trabajos/demos/CapaDeDemos.tsx')
 afirmar(CAPA_DE_DEMOS.includes('cancelar = llevarALaLlegada(') && leer('_secciones/trabajos/demos/llevarALaLlegada.ts').includes('const falta = opciones.arranque - opciones.mostrado()'), 'con el teclado, la capa de demos termina de llegar (lo mostrado se asentaba detrás del salto: escala 0,76)')
 afirmar(DEMOS_CSS.includes('padding-inline: var(--carrusel-margen-del-recorte);') && DEMOS_CSS.includes('margin-inline: calc(-1 * var(--carrusel-margen-del-recorte));'), 'el renglón del carrusel lleva su holgura en la caja (aporte cero al layout): la capa compuesta no respetaba el margen del recorte')
 afirmar(FOCO.includes('[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible') && /z-index: var\(--z-elevado\)/.test(FOCO), 'la portada enfocada sube un piso: la vecina, pintada después, ya no le tapa el anillo')
-afirmar(leer('_secciones/trabajos/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'), 'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
+const anilloDeAdentro = (css: string): string => { const i = css.indexOf('[data-parte="portada"]:focus-visible::after'); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)) }
+const reglaDeAdentro = anilloDeAdentro(FOCO)
+afirmar(
+  reglaDeAdentro.includes('inset-inline-end: var(--portada-aire)') && veces(reglaDeAdentro, 'inset 0 0 0 ') === 3 && reglaDeAdentro.includes('var(--color-tinta)'),
+  'el carrusel lleva el anillo POR DENTRO de la portada (papel, tinta, papel sobre la caja de la imagen): la primera de cada fila va contra el borde de la pantalla',
+)
+afirmar(/\[data-v3\]\[data-v3\] \[data-pieza="carrusel"\] \[data-parte="portada"\]:focus-visible \{\s*outline-color: transparent;/.test(FOCO), '  y el de afuera queda transparente, sólo en el carrusel (en colores forzados el sistema lo pinta)')
+controlPositivo('el chequeo del anillo de adentro ve el de antes (sólo afuera, sin pseudo-elemento)', '[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible { position: relative; }', (css: string) => anilloDeAdentro(css).includes('inset 0 0 0 '))
+afirmar(leer('_secciones/trabajos/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'),'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
 
 cerrar('s37-interfaz1')

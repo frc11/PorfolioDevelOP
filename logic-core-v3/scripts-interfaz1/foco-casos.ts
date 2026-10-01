@@ -27,13 +27,16 @@ interface Caso {
   readonly nombre: string
 }
 
-const CASOS: readonly Caso[] = [
+const TODOS_LOS_CASOS: readonly Caso[] = [
   { id: 'libro-1-1440', ancho: 1440, alto: 900, selector: '[data-pieza="libro"]', nombre: 'Zero Protocol' },
   { id: 'carrusel-zero-390', ancho: 390, alto: 844, selector: '[data-pieza="carrusel"] a', nombre: 'Zero Protocol' },
   { id: 'carrusel-nexo-390', ancho: 390, alto: 844, selector: '[data-pieza="carrusel"] a', nombre: 'NEXO Bold' },
   { id: 'tunel-esquina-390', ancho: 390, alto: 844, selector: '[data-pieza="enlace-de-proyecto"]', nombre: 'Esquina Estudio' },
   { id: 'tunel-banu-390', ancho: 390, alto: 844, selector: '[data-pieza="enlace-de-proyecto"]', nombre: 'Banú Scents' },
 ]
+
+// FOCO_CASOS=<texto>: sólo los casos cuyo id lo contiene (p. ej. «carrusel»).
+const CASOS = TODOS_LOS_CASOS.filter((c) => c.id.includes(process.env.FOCO_CASOS ?? ''))
 
 const CAJA = `(() => { const r = document.activeElement.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height), innerWidth, innerHeight] })()`
 
