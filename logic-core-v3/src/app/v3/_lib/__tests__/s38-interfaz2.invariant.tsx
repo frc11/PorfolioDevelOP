@@ -5,7 +5,7 @@
  *   T1 · la escena responde a la interfaz: el pulso que pide un CTA, la onda del piso hacia un valor, la sala detrás del
  *        menú del teléfono.
  *   T2 · la vista previa del destino en la barra.
- *   T3 · la vida propia: la onda de las portadas, Tu panel (la barra, sin número) y Servicios.
+ *   T3 · la vida propia: la onda de las portadas y Tu panel (la barra, sin número); Servicios sin vida (cierre final).
  *   Cierre · el cartel de las demos pegado al cursor, el infinito del recorrido, la sombra de día (una sola).
  *
  * Lo que necesita navegador está en los bancos de `scripts-interfaz2/` y sus entregas en `~/.cache/b4-medicion/interfaz2/`.
@@ -20,8 +20,7 @@ import { demoBajo, estadoBajo, nocheQueSeVe, tonoBajo } from '../../_chrome/curs
 import { CAJA_DEL_INFINITO, TRAMOS, TRAZO_DEL_INFINITO, porcentajeDelRecorrido, puntoDeLaLemniscata, textoDelPorcentaje } from '../../_chrome/recorrido/recorrido'
 import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
 import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
-import { PEDIDOS_DE_EJEMPLO, PROCESOS_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD, ROTULO_DEL_PROCESO } from '../../_componentes/vida/ejemplos'
-import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
+import { PEDIDOS_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD } from '../../_componentes/vida/ejemplos'
 import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { ENCENDIDO } from '../escena/entorno/encendido'
@@ -185,13 +184,13 @@ controlPositivo('el chequeo del salto ve un viaje que suelta la anticipación de
 afirmar(/if \(physics\) angleDeg \+= giroDeLaInterfaz\(\)/.test(leer('_lib/escena/OrbitRig.tsx')) && SELECTOR_DE_LOS_ITEMS === '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]' && leer('_chrome/escena/AnticipacionDelMenu.tsx').includes('const viaje = planDelViaje(seccion.id, y1)'), 'el giro sólo con la física; los ítems de la barra; la misma cuenta que el clic')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('T3 · La vida propia: la onda de las portadas, Tu panel (la barra, sin número) y Servicios')
+titulo('T3 · La vida propia: la onda de las portadas y Tu panel (la barra, sin número)')
 
 afirmar(ANILLOS_GLSL.includes('( 1.0 - pow( 1.0 - t, 2.2 ) )') && Math.abs(frenteDeLaOnda(0.5) - (1 - 0.5 ** 2.2)) < 1e-12 && colaDeLaOnda(0) === 0 && colaDeLaOnda(1) === 0, 'la onda de la portada tiene el frente y la cola de los anillos del piso')
 const [r0, g0] = pixelDelMapa(0, 0)
 afirmar(Math.abs(r0 - 0.5) < 1e-6 && Math.abs(g0 - 0.5) < 1e-6 && pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa, 0)[2] > 0.99, '  su mapa es neutro lejos del frente y lleva la banda en el frente')
 afirmar(!/will-change|willChange/.test(sinComentarios(leer('_secciones/trabajos/demos/ondaDeLaPortada.ts'))) && leer('_chrome/ChromeDelHome.tsx').includes('<OndaDeLasPortadas />'), '  sin promover capas (la cara no puede llevar will-change), en el producto')
-const TEXTOS_DE_EJEMPLO = [ROTULO_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD, ROTULO_DEL_PROCESO, ...PEDIDOS_DE_EJEMPLO.flatMap((p) => [p.que, p.desde]), ...Object.values(PROCESOS_DE_EJEMPLO).flat()]
+const TEXTOS_DE_EJEMPLO = [ROTULO_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD, ...PEDIDOS_DE_EJEMPLO.flatMap((p) => [p.que, p.desde])]
 const sinCifras = (textos: readonly string[]): boolean => textos.every((t) => !/[0-9%$+×]/.test(t))
 afirmar(sinCifras(TEXTOS_DE_EJEMPLO), 'ningún texto de ejemplo trae una cifra (CONTENIDO_INVENTADO)', `${String(TEXTOS_DE_EJEMPLO.length)} textos`)
 controlPositivo('el chequeo de las cifras ve un ejemplo con una cifra de negocio', ['Ventas +38 %'], sinCifras)
@@ -199,8 +198,9 @@ const PANEL_HTML = renderToStaticMarkup(<PanelEnVivo />)
 afirmar(!/>[^<]*\d[^<]*</.test(PANEL_HTML) && PANEL_HTML.includes(`>${ROTULO_DE_LA_ACTIVIDAD}<`), 'Tu panel: la barra de actividad, SIN número (decisión del cierre): ni un dígito en la tarjeta', PANEL_HTML.match(/>[^<]*\d[^<]*</)?.[0] ?? '')
 controlPositivo('el chequeo del número ve la tarjeta con el contador de antes', '<span class="tabular-nums">3</span>', (h: string) => !/>[^<]*\d[^<]*</.test(h))
 afirmar(PANEL_HTML.includes('aria-label="Pausar el ejemplo"') && veces(PANEL_HTML, '<div aria-hidden="true"') === 2 && !/<(ul|li)/.test(PANEL_HTML) && !/style="/.test(PANEL_HTML), '  se puede pausar, lo que se mueve no se anuncia, y sin listas ni estilos en línea (las reglas de la sección)')
-afirmarIgual(Object.keys(PROCESOS_DE_EJEMPLO).sort(), [...IDS_DE_SERVICIO].sort(), 'Servicios: un proceso de ejemplo por servicio')
-afirmar(leer('_secciones/tu-panel/TuPanel.tsx').includes('      <PanelEnVivo />') && leer('_secciones/servicios/ServiciosEnSecuencia.tsx').includes('<ProcesoEnVivo posicion={posicion} />'), '  los dos en el producto')
+afirmar(leer('_secciones/tu-panel/TuPanel.tsx').includes('      <PanelEnVivo />'), '  Tu panel, en el producto')
+afirmar(!/ProcesoEnVivo|proceso-en-vivo/.test(leer('_secciones/servicios/ServiciosEnSecuencia.tsx')), 'Servicios, como antes de INTERFAZ 2: sin el recorrido del pedido de ejemplo (cierre final)')
+controlPositivo('el chequeo de Servicios ve el recorrido montado', '<ProcesoEnVivo posicion={posicion} />', (f: string) => !/ProcesoEnVivo|proceso-en-vivo/.test(f))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Cierre · 4 · El cartel de las demos: uno solo, pegado al cursor')

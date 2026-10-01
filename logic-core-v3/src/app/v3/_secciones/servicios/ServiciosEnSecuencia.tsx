@@ -5,7 +5,6 @@ import { useRef } from 'react'
 
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { ProcesoEnVivo } from '../../_componentes/vida/ProcesoEnVivo'
 import { ContenidoDeSeccion } from '../_contrato/Seccion'
 import { ID_DEL_TITULAR } from './CabeceraDeServicios'
 import { TITULAR } from './contenido'
@@ -108,8 +107,6 @@ export function PanelDeSecuencia({ progreso }: ServiciosEnSecuenciaProps): React
             <div className={CLASE_DEL_HUECO_DE_LA_TORTA}>
               <GraficoDeTorta progreso={progreso} medida={medida} posicion={posicion} />
             </div>
-            {/* [INTERFAZ 2] T3 · el servicio funcionando con un pedido de ejemplo. */}
-            <ProcesoEnVivo posicion={posicion} />
             {/* `mt-auto` y no un hueco: el CTA se apoya en el borde de abajo del
                 panel y se queda ahí todo el pin, sin empujar a la torta ni
                 depender de cuánto mida el bloque del título en cada estado. */}

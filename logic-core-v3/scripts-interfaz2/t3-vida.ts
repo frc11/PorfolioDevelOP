@@ -1,12 +1,13 @@
 /**
- * SPRINT INTERFAZ 2 · T3 — la vida propia de las secciones opacas (`vida=si`): Tu panel y Servicios.
+ * SPRINT INTERFAZ 2 · T3 — la vida propia de las secciones opacas (`vida=si`): Tu panel. [Cierre final] La de Servicios
+ * se borró; sus gestos y fotos también.
  *
  *   `clips`: lado a lado sin la bandera y con ella — `tu-panel` (la página quieta en el arranque de Tu panel: entran los
  *            pedidos, sube el contador) y `servicios` (la rueda recorre el pin: el proceso de cada servicio);
  *   `fotos`: con la bandera, Tu panel y Servicios quietos a 1440, con movimiento reducido (la tarjeta quieta) y a 390.
  *
  *   `cierre`: [cierre de INTERFAZ 2, sin bandera: la vida está en el producto] las fotos y un clip de cada una tal como
- *            quedaron (Tu panel sin el número, Servicios una vez por servicio), en `interfaz2/cierre/vida/`.
+ *            quedaron (Tu panel sin el número), en `interfaz2/cierre/vida/`.
  *
  * Uso: `npx tsx scripts-interfaz2/t3-vida.ts [clips|fotos|cierre]` (sin argumento, las dos primeras).
  */
@@ -42,20 +43,6 @@ const GESTOS: Record<string, { readonly preparar: (b: Banco) => Promise<void>; r
       for (let k = 0; k < 9; k += 1) await raton(b, [1400, 880 - k * 6], [1400, 874 - k * 6], 30, 33)
     },
   },
-  servicios: {
-    preparar: async (b) => {
-      await raton(b, [1400, 880], [1400, 880], 1, 0)
-      await hasta(b, 'servicios', 300)
-    },
-    gesto: async (b) => {
-      // El pin entero en ~13 s: de a tres muescas y una pausa, para ver cada servicio funcionando.
-      for (let k = 0; k < 18; k += 1) {
-        await rueda(b, 3, 90)
-        await esperar(450)
-      }
-      await esperar(1500)
-    },
-  },
 }
 
 async function clips(): Promise<void> {
@@ -89,13 +76,6 @@ async function fotos(dir = carpeta('t3-vida/fotos'), pedido = 'producto,vida=si'
       await foto(b, `${dir}/tu-panel-${rotulo}.png`)
       const caja = await medir<unknown>(b.p, `(() => { const e = document.querySelector('[data-pieza="panel-en-vivo"]'); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height), texto: e.innerText.slice(0, 200) } })()`)
       console.log(rotulo, 'panel', JSON.stringify(caja))
-      if (ancho >= 1024) {
-        await hasta(b, 'servicios', 1600)
-        await esperar(3500)
-        await foto(b, `${dir}/servicios-${rotulo}.png`)
-        const proceso = await medir<unknown>(b.p, `(() => { const e = document.querySelector('[data-pieza="proceso-en-vivo"]'); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height), texto: e.innerText.slice(0, 200) } })()`)
-        console.log(rotulo, 'proceso', JSON.stringify(proceso))
-      }
     } finally {
       await b.cerrar()
     }
