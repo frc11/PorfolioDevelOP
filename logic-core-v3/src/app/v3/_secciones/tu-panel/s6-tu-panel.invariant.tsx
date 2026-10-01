@@ -139,7 +139,9 @@ titulo('5 · Foco y hover — cada feature es un botón, y el hover tiene su gem
 
 const TARJETA = fuenteDe('Tarjeta.tsx')
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 1, `${rama}: ${TARJETAS.length + 1} focalizables — una por feature y el campo del newsletter`)
+  // [INTERFAZ 2] Más el botón de pausa del panel en vivo (`_componentes/vida/PanelEnVivo.tsx`): se mueve solo más de cinco
+  // segundos y WCAG 2.2.2 pide poder pausarlo. Está en las dos ramas.
+  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 2, `${rama}: ${TARJETAS.length + 2} focalizables — una por feature, el campo del newsletter y la pausa del panel en vivo`)
   afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), TARJETAS.length, `${rama}: cada feature avisa que abre un diálogo`)
 }
 const hovers = [...TARJETA.matchAll(/group-hover:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()

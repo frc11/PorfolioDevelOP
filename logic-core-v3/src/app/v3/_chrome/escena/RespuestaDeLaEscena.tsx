@@ -3,10 +3,9 @@
 import { useEffect } from 'react'
 
 import { pedirElPulso, pedirLaOnda } from '../../_lib/escena/interfaz/pedidos'
-import { usePrueba } from '../../_lib/pruebasDeLaInterfaz'
 
 /**
- * [INTERFAZ 2] T1 · LA ESCENA RESPONDE A LA INTERFAZ — lo que el DOM le pide a la sala (con `?pruebas=responde=si`).
+ * [INTERFAZ 2] T1 · LA ESCENA RESPONDE A LA INTERFAZ — lo que el DOM le pide a la sala (en el producto desde el cierre).
  *
  *   · **un CTA con el puntero encima** (o con el foco del teclado): el logo larga su pulso PRINCIPAL, el de E4, por la
  *     misma máquina (`maquinaDelPulso.ts`, el pedido): no se duplica nada y la máquina decide si hay lugar;
@@ -16,7 +15,7 @@ import { usePrueba } from '../../_lib/pruebasDeLaInterfaz'
  *   · el menú del teléfono lo atiende el menú (`menu/MenuMovil.tsx`).
  *
  * Un escucha en el documento, delegado (como el de los viajes): no toca ninguna pieza compartida. El puntero cuenta
- * sólo si es fino (un toque no tiene «encima»). Sin la bandera no se monta nada.
+ * sólo si es fino (un toque no tiene «encima»).
  */
 
 /** Los que piden el pulso: los CTA del sistema y la ventana de «Hablemos» del final del túnel (que no es un `cta`). */
@@ -41,10 +40,7 @@ function ctaDe(objetivo: EventTarget | null): Element | null {
 }
 
 export function RespuestaDeLaEscena(): null {
-  const responde = usePrueba('responde')
-
   useEffect(() => {
-    if (responde !== 'si') return undefined
     const fino = window.matchMedia(PUNTERO_FINO)
     let ctaActual: Element | null = null
     let valorActual: Element | null = null
@@ -82,7 +78,7 @@ export function RespuestaDeLaEscena(): null {
       document.removeEventListener('pointerout', alSalir)
       document.removeEventListener('focusin', alEnfocar)
     }
-  }, [responde])
+  }, [])
 
   return null
 }

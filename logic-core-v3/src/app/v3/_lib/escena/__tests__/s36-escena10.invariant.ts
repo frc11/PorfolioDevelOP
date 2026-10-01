@@ -49,10 +49,8 @@ titulo('T1 · el cierre de ESCENA 9: lo elegido, en el producto; lo demás, borr
 afirmar(ENTORNO.logoDeNoche && ENTORNO.materialDelLogo && ENTORNO.sombraDelLogo, 'en el producto: el logo de noche, el negro satinado y la sombra del logo')
 const sinCadaUno = entornoPedido('producto,logo-noche=no,material=no,sombra-logo=no')
 afirmar(!sinCadaUno.logoDeNoche && !sinCadaUno.materialDelLogo && !sinCadaUno.sombraDelLogo && !BASE_LIMPIA.logoDeNoche && !BASE_LIMPIA.materialDelLogo && !BASE_LIMPIA.sombraDelLogo, '  el banco los apaga con `=no` para comparar; la base limpia no los tiene')
-// [INTERFAZ 2] Las pruebas de ese sprint (la interfaz y la escena juntas) entran a la misma lista: lo que se afirma acá
-// sigue siendo que de ESCENA 9 no queda ninguna, no cuántas hay.
-const PRUEBAS_DE_INTERFAZ_2 = ['responde', 'anticipa', 'vida', 'recorrido']
-afirmar(Object.keys(PRUEBAS_APAGADAS).every((k) => k === 'titulos' || PRUEBAS_DE_INTERFAZ_2.includes(k)) && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (las que hay son la de T3 y las de INTERFAZ 2)', Object.keys(PRUEBAS_APAGADAS).join())
+// [INTERFAZ 2] Las pruebas de ese sprint pasaron al producto o se borraron en su cierre: la única que queda es la de T3.
+afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'titulos' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (la que hay es la de T3)', Object.keys(PRUEBAS_APAGADAS).join())
 
 // El logo de noche: la variante clara (el filo casi blanco), la única.
 const exportsDelLogo = Object.keys(logoDeNoche)
@@ -123,9 +121,10 @@ const entornoTsx = leer('entorno/Entorno.tsx')
 const i = entornoTsx.indexOf('VIVO.uNocheDelLogo.value = nocheDelLogo(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)')
 afirmar(i > entornoTsx.indexOf('VIVO.uNoche.value = BRILLO_DE_LA_NOCHE.uNoche.value') && i < entornoTsx.indexOf('if (e.E1) {') && /const noche = VIVO\.uNocheDelLogo\.value\s*m\.encendido = avanzarElEncendido/.test(entornoTsx), '  la escribe el entorno en cada cuadro, antes del haz; el encendido también la sigue (no se apaga al empezar el barrido)')
 
-// Las manchas: de día la blanda; de noche sólo la dura del haz (la blanda, cero); el haz apagado un instante, ninguna.
+// Las manchas: de noche sólo la dura del haz; el haz apagado un instante, ninguna. [Cierre de INTERFAZ 2] De día tampoco
+// hay mancha blanda: la sombra de día es la real del logo (`sombra/delLogo.ts`); dos sombras no tenían sentido.
 const [dia, noche, apagado] = [manchasDelHaz(0, 1, true), manchasDelHaz(1, 1, true), manchasDelHaz(1, 0, true)]
-afirmar(dia.opacidadBlanda > 0.5 && dia.opacidadDura === 0 && noche.opacidadBlanda === 0 && noche.opacidadDura > 1 && apagado.opacidadBlanda === 0 && apagado.opacidadDura === 0, 'de día, la mancha de contacto; de noche, sólo la mancha dura del haz; sin luz (el haz apagado en su encendido), ninguna', JSON.stringify({ dia, noche }))
+afirmar(dia.opacidadBlanda === 0 && dia.opacidadDura === 0 && noche.opacidadBlanda === 0 && noche.opacidadDura > 1 && apagado.opacidadBlanda === 0 && apagado.opacidadDura === 0, 'de día, ninguna mancha (la sombra es la del logo); de noche, sólo la mancha dura del haz; sin luz (el haz apagado en su encendido), ninguna', JSON.stringify({ dia, noche }))
 /** El paso de un extremo al otro: cada 1 % de noche, la mancha cambia poco (continua). */
 const continua = (f: typeof manchasDelHaz): boolean => {
   for (let k = 1; k <= 100; k += 1) {

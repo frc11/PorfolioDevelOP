@@ -11,10 +11,9 @@ import { ANTICIPACION_PEDIDA } from '../../_lib/escena/interfaz/pedidos'
 import { NIVEL_NATURAL } from '../../_lib/escena/nocheDisparada'
 import { planDelViaje } from '../../_lib/escena/planDelViaje'
 import { viajeEnCurso } from '../../_lib/escena/viaje'
-import { usePrueba } from '../../_lib/pruebasDeLaInterfaz'
 
 /**
- * [INTERFAZ 2] T2 · LA VISTA PREVIA DEL DESTINO, del lado del DOM (con `?pruebas=anticipa=si`).
+ * [INTERFAZ 2] T2 · LA VISTA PREVIA DEL DESTINO, del lado del DOM (en el producto desde el cierre).
  *
  * El puntero (fino) o el foco del teclado sobre un ítem de la barra: se arma el plan de la anticipación con LA MISMA
  * cuenta que hace el clic (el nudo del destino, `destinosDelViaje.ts`, y la clase de luz del viaje, `planDelViaje.ts`)
@@ -34,10 +33,7 @@ function itemDe(objetivo: EventTarget | null): HTMLAnchorElement | null {
 }
 
 export function AnticipacionDelMenu(): null {
-  const anticipa = usePrueba('anticipa')
-
   useEffect(() => {
-    if (anticipa !== 'si') return undefined
     const fino = window.matchMedia(PUNTERO_FINO)
     const reducido = window.matchMedia(MOVIMIENTO_REDUCIDO)
     let actual: HTMLAnchorElement | null = null
@@ -87,7 +83,7 @@ export function AnticipacionDelMenu(): null {
       document.removeEventListener('focusout', alDesenfocar)
       soltar()
     }
-  }, [anticipa])
+  }, [])
 
   return null
 }

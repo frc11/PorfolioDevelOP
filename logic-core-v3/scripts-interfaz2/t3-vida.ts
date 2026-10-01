@@ -5,7 +5,10 @@
  *            pedidos, sube el contador) y `servicios` (la rueda recorre el pin: el proceso de cada servicio);
  *   `fotos`: con la bandera, Tu panel y Servicios quietos a 1440, con movimiento reducido (la tarjeta quieta) y a 390.
  *
- * Uso: `npx tsx scripts-interfaz2/t3-vida.ts [clips|fotos]` (sin argumento, las dos).
+ *   `cierre`: [cierre de INTERFAZ 2, sin bandera: la vida está en el producto] las fotos y un clip de cada una tal como
+ *            quedaron (Tu panel sin el número, Servicios una vez por servicio), en `interfaz2/cierre/vida/`.
+ *
+ * Uso: `npx tsx scripts-interfaz2/t3-vida.ts [clips|fotos|cierre]` (sin argumento, las dos primeras).
  */
 import { writeFileSync } from 'node:fs'
 
@@ -76,10 +79,9 @@ async function clips(): Promise<void> {
   }
 }
 
-async function fotos(): Promise<void> {
-  const dir = carpeta('t3-vida/fotos')
+async function fotos(dir = carpeta('t3-vida/fotos'), pedido = 'producto,vida=si'): Promise<void> {
   for (const [ancho, alto, reducido] of [[1440, 900, false], [1440, 900, true], [390, 844, false]] as const) {
-    const b = await abrir(ancho, alto, { pedido: 'producto,vida=si', reducido })
+    const b = await abrir(ancho, alto, { pedido, reducido })
     const rotulo = `${String(ancho)}${reducido ? '-reducido' : ''}`
     try {
       await hasta(b, 'tu-panel', ancho < 1024 ? 200 : 120)
@@ -100,8 +102,24 @@ async function fotos(): Promise<void> {
   }
 }
 
+async function cierre(): Promise<void> {
+  const dir = carpeta('cierre/vida')
+  await fotos(dir, 'producto')
+  for (const [nombre, g] of Object.entries(GESTOS)) {
+    const b = await abrir(1440, 900, { pedido: 'producto' })
+    try {
+      await g.preparar(b)
+      const cuadros = await grabar(b, `${dir}/_cuadros-${nombre}`, () => g.gesto(b), 1200)
+      armarClip(`${dir}/_cuadros-${nombre}`, cuadros, `${dir}/${nombre}.mp4`, `${nombre} - en el producto - ${b.placa.includes('NVIDIA') ? 'NVIDIA' : b.placa}`)
+    } finally {
+      await b.cerrar()
+    }
+  }
+}
+
 correr(async () => {
   const que = process.argv[2]
+  if (que === 'cierre') return cierre()
   if (que === undefined || que === 'fotos') await fotos()
   if (que === undefined || que === 'clips') await clips()
 })

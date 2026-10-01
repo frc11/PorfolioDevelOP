@@ -147,9 +147,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       entradas.scrollEnMovimiento = scrollEnMovimiento
       entradas.hover = m.hover
       entradas.reducido = quieto
-      // [INTERFAZ 2] T1 · un CTA pide el principal: sólo con la bandera, y sólo un pedido nuevo y reciente.
+      // [INTERFAZ 2] T1 · un CTA pide el principal: sólo un pedido nuevo y reciente.
       entradas.pedido = false
-      if (e.pruebas.responde === 'si' && PULSO_PEDIDO.n !== m.pulsoAtendido) {
+      if (PULSO_PEDIDO.n !== m.pulsoAtendido) {
         m.pulsoAtendido = PULSO_PEDIDO.n
         entradas.pedido = vigente(PULSO_PEDIDO.cuando, performance.now())
       }

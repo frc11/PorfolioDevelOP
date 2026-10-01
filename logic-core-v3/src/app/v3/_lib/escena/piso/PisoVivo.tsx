@@ -139,8 +139,8 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     const presente = !quieto && toca !== null && t - m.ultimoCursor < PISO_VIVO.cursor.quietoS
     m.presencia += ((presente ? 1 : 0) - m.presencia) * (1 - Math.exp(-dt / (presente ? 0.15 : 0.8)))
 
-    // [INTERFAZ 2] T1 · la onda que pide la interfaz (sólo con la bandera; sin movimiento reducido, como el pulso).
-    if (!quieto && entornoDeLaEscena().pruebas.responde === 'si') atenderLaOnda(state.camera, t, performance.now())
+    // [INTERFAZ 2] T1 · la onda que pide la interfaz (sin movimiento reducido, como el pulso).
+    if (!quieto) atenderLaOnda(state.camera, t, performance.now())
 
     // Los pasos fijos que pide el reloj de la escena (que se detiene con movimiento reducido).
     const paso = PISO_VIVO.onda.paso
@@ -206,10 +206,9 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
-  // [INTERFAZ 2] T1 · con `responde=si`, la simulación con la onda hacia lo señalado (`ondaDirigida.ts`); sin ella, la de siempre.
-  const conOnda = entornoDeLaEscena().pruebas.responde === 'si'
-  const sim = crearPingPong(grilla.n, grilla.n, 1, conOnda ? conOndaDirigida(SIMULACION_GLSL) : SIMULACION_GLSL, {
-    ...(conOnda ? { uOnda: ONDA_EN_VIVO.uOnda } : {}),
+  // [INTERFAZ 2] T1 · la simulación con la onda hacia lo señalado (`ondaDirigida.ts`, inyectada en `SIMULACION_GLSL`).
+  const sim = crearPingPong(grilla.n, grilla.n, 1, conOndaDirigida(SIMULACION_GLSL), {
+    uOnda: ONDA_EN_VIVO.uOnda,
     uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
     uRadio: { value: grilla.radio / grilla.lado },
@@ -245,7 +244,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   }, conContacto, conSombra)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
-  if (conOnda) conLaOndaEnElPiso(material)
+  conLaOndaEnElPiso(material)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

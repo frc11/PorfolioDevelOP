@@ -2,9 +2,8 @@
  * [INTERFAZ 2] T3 · LOS DATOS DE EJEMPLO de la vida propia de las secciones opacas (Tu panel y Servicios).
  *
  * Es un producto funcionando, no un dato: nombres que dicen que son de ejemplo, tipos de pedido genéricos, ninguna
- * cifra de negocio (ni montos, ni porcentajes, ni clientes reales: `CONTENIDO_INVENTADO`). El único número es el
- * contador del panel, que cuenta los pedidos de ESTE ejemplo desde uno y vuelve a empezar: la tarjeta entera dice
- * «datos de ejemplo» arriba, y el contador no existe fuera de la animación (no está en el marcado del servidor).
+ * cifra (ni montos, ni porcentajes, ni clientes reales, ni contadores: `CONTENIDO_INVENTADO`). [Cierre de INTERFAZ 2]
+ * El contador del panel se fue: queda la barra de actividad, sin número.
  */
 
 /** El rótulo que va arriba de todo lo que se mueve solo. */
@@ -22,11 +21,8 @@ export const PEDIDOS_DE_EJEMPLO: readonly { readonly que: string; readonly desde
   { que: 'Lead calificado', desde: 'Chat del sitio' },
 ]
 
-/** El contador del panel: lo que se lee arriba del número. */
-export const CONTADOR_DE_EJEMPLO = 'Pedidos del ejemplo'
-
-/** Hasta cuánto sube el contador antes de volver a empezar (una ronda corta: no parece un acumulado real). */
-export const TOPE_DEL_CONTADOR = 9
+/** La barra de actividad del panel (sin número: decisión del cierre de INTERFAZ 2). */
+export const ROTULO_DE_LA_ACTIVIDAD = 'Actividad'
 
 /**
  * Servicios: cómo se ve cada servicio funcionando, paso por paso. La misma línea que el panel (algo que pasa solo,

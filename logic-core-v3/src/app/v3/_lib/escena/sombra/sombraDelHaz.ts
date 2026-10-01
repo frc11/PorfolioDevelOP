@@ -9,10 +9,14 @@
  * 35 %). Y cada una sigue a lo suyo: la blanda es del día (sigue a la noche en el logo, `nocheDelLogo`), la dura es del
  * haz (sigue a la noche por lo prendido del haz, `k`, con su encendido). Con el haz apagado un instante en su encendido
  * no queda ninguna: sin luz no hay sombra.
+ *
+ * [Cierre de INTERFAZ 2] · de día tampoco hay mancha blanda: dos sombras no tenían sentido (la mancha elíptica debajo del
+ * logo y la sombra real con forma de «cp», corrida, `sombra/delLogo.ts`). De día queda sólo la real; de noche, sólo la
+ * del haz. La blanda vale cero siempre (con E1): el paso entre las dos sombras es el de siempre, sin saltos.
  */
 export const SOMBRA_DEL_HAZ = {
-  /** De día: cuánto se agranda y cuánto se aclara la mancha blanda. */
-  dia: { escala: 1.2, opacidad: 0.8 },
+  /** De día: cuánto se agranda la mancha blanda y cuánto queda de ella (nada: de día la sombra es la del logo). */
+  dia: { escala: 1.2, opacidad: 0 },
   /** De noche: cuánto queda de la blanda (nada), y la dura (su tamaño contra la blanda y su densidad). */
   noche: { blanda: 0, escalaDura: 0.82, opacidadDura: 1.75 },
   /** El sprite de la mancha dura: núcleo ancho y caída abrupta. */
