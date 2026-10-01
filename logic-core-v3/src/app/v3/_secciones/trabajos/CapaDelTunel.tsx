@@ -1,6 +1,8 @@
 'use client'
 
 import { type MotionValue } from 'motion/react'
+
+import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
@@ -419,7 +421,7 @@ export function CapaDelTunel({
           >
             <Titular nivel="titulo-m" como="h3">
               <a href={trabajo.enlace} target="_blank" rel="noopener noreferrer" data-pieza="enlace-de-proyecto">
-                {trabajo.nombre}
+                <DosCopias>{trabajo.nombre}</DosCopias>
               </a>
             </Titular>
             <Cuerpo como="p">{trabajo.rubro}</Cuerpo>

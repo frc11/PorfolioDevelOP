@@ -99,7 +99,10 @@ titulo('6 · El cursor propio, detrás de la constante — y la constante, TOMAD
 const decision: boolean = CURSOR_PROPIO_EN_EL_HOME
 afirmar(decision === true, 'la decisión está TOMADA: `CURSOR_PROPIO_EN_EL_HOME` en `true` (B5)')
 afirmar(CHROME_LIMPIO.includes('CURSOR_PROPIO_EN_EL_HOME'), 'y el chrome la LEE: el montaje del cursor cuelga de ella, no de un comentario')
-afirmar(S.importsDe(CHROME).includes('../_componentes/chrome/CursorCompuerta'), '  montando la compuerta que YA EXISTE desde S3, no una nueva')
+// [INTERFAZ 1] T2: el home monta el cursor de la sala (`_chrome/cursor/`), con las compuertas de S3 (`deberiaMontarseElCursor`,
+// 1024 y sin movimiento reducido) más el puntero fino; el de S3 (`chrome/CursorCompuerta`) sigue sin tocar en la galería.
+afirmar(S.importsDe(CHROME).includes('./cursor/CompuertaDelCursor'), '  montando la compuerta del cursor de la sala (INTERFAZ 1), que reusa las de S3')
+afirmar(!S.importsDe(CHROME).includes('../_componentes/chrome/CursorCompuerta'), '  y no las dos a la vez: un solo cursor en el home')
 
 /** ⚠️ **Verde por vacío, corregido:** el `!MARCADO.includes(MARCA_CURSOR)` de antes
  *  pasaba con la constante en los DOS valores. Se afirma junto con su causa. */

@@ -10,6 +10,14 @@
 import { readFileSync } from 'node:fs'
 import { useMotionValue } from 'motion/react'
 import type { ReactNode } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { estadoBajo, fraccionDelPaso, tonoBajo } from '../../_chrome/cursor/estado'
+import { DosCopias } from '../../_componentes/rollover/DosCopias'
+import { textoVisible } from '../../_secciones/_contrato/escaneo'
+import { quitarSubarbolesConAtributo } from '../../_secciones/_invariantes/marcado'
+import { ROLLOVER_MEDIDO } from '../cta'
+import { SEGUIMIENTO_DE_LA_REFERENCIA } from '../cursor'
 
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
@@ -215,5 +223,144 @@ afirmar(!/set[A-Z]\w*\(/.test(cuerpoDelPaso) && !inercia.includes('useState'), '
 afirmarIgual(veces(inercia, 'motionValue(0)'), 1, 'una sola inclinación para todos los títulos (un MotionValue del módulo)')
 afirmar(inercia.includes('frame.update(paso, true)') && inercia.includes('cancelFrame(paso)'), 'el bucle corre en el cuadro de motion mientras haya títulos, y se apaga con el último')
 controlPositivo('el chequeo de reservas ve un paso que arma un objeto', 'const e = { x: 0 }', (c: string) => !reserva.test(c))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · 1 · El rollover de dos copias: la geometría medida, en em; entra animado y vuelve de un cuadro')
+
+const ROLLOVER = leer('_estilos/rollover.css')
+const PX_DEL_CTA = 15 // `--text-cuerpo`, donde se midió el CTA (theme-develop.css)
+const propiedad = (nombre: string): string => (new RegExp(`--rollover-${nombre}:\\s*([^;]+);`).exec(ROLLOVER)?.[1] ?? '').trim()
+const em = (nombre: string): number => Number.parseFloat(propiedad(nombre))
+const { salida, entrada } = ROLLOVER_MEDIDO
+afirmarIgual(
+  [em('salida-x'), em('salida-y'), em('entrada-x'), em('entrada-y')].map((v) => Math.round(v * 100) / 100),
+  [salida.x, salida.y, entrada.x, entrada.y].map((px) => Math.round((px / PX_DEL_CTA) * 100) / 100),
+  'los desplazamientos son los medidos en el CTA (ROLLOVER_MEDIDO, px) divididos por su tamaño de texto: el mismo gesto a cualquier tamaño',
+)
+afirmarIgual([propiedad('giro-salida'), propiedad('giro-entrada')], [`${String(salida.giroGrados)}deg`, `${String(entrada.giroGrados)}deg`], 'y los giros, los medidos: 6° la que sale, 10° la que entra')
+const bloques = ROLLOVER.replace(/\/\*[\s\S]*?\*\//g, '').split('}')
+const base = bloques.filter((b) => b.includes('[data-copia') && !b.includes(':hover') && !b.includes(':focus-visible'))
+afirmar(base.length >= 2 && base.every((b) => !b.includes('transition')), 'la transición vive SÓLO en la regla de estado: al salir el rótulo vuelve de un cuadro (BOTON-1)')
+const hoverAfuera = ROLLOVER.replace(/\/\*[\s\S]*?\*\//g, '').split('@media (hover: hover) and (pointer: fine)')[0]
+afirmar(!hoverAfuera.includes(':hover'), 'el hover, sólo con el puntero fino (en una pantalla táctil quedaría pegado después de tocar)')
+afirmar(hoverAfuera.includes(':focus-visible'), '  y el foco del teclado lo dispara siempre')
+controlPositivo('el chequeo de la transición ve una regla de reposo con transición', ['[data-copia="b"] { transition: opacity 1s; }'], (bs: readonly string[]) => bs.every((b) => !b.includes('transition')))
+
+const rollover = renderToStaticMarkup(<a href="#x"><DosCopias>Escribinos por WhatsApp</DosCopias></a>)
+afirmarIgual(veces(rollover, 'Escribinos por WhatsApp'), 2, 'dos copias del rótulo en el marcado')
+afirmarIgual(textoVisible(quitarSubarbolesConAtributo(rollover, 'aria-hidden')), 'Escribinos por WhatsApp', '  y el nombre del link, UNA vez: la segunda va aria-hidden (en nk el lector lee las dos pegadas)')
+controlPositivo('el chequeo del nombre ve dos copias sin aria-hidden', rollover.replace('aria-hidden="true"', ''), (h: string) => textoVisible(quitarSubarbolesConAtributo(h, 'aria-hidden')) === 'Escribinos por WhatsApp')
+const DONDE_HAY_ROLLOVER = [
+  ['_secciones/cierre/PiezasDeContacto.tsx', 2],
+  ['_secciones/trabajos/Proyecto.tsx', 1],
+  ['_secciones/trabajos/CapaDelTunel.tsx', 1],
+] as const
+for (const [ruta, n] of DONDE_HAY_ROLLOVER) afirmarIgual(veces(leer(ruta), '<DosCopias>'), n, `${ruta}: ${String(n)} rollover(s)`)
+afirmarIgual(veces(leer('layout.tsx'), "import './_estilos/rollover.css'") + veces(leer('layout.tsx'), "import './_estilos/cursor-sala.css'"), 2, 'las dos hojas nuevas entran por el layout, como las demás (un componente que importa CSS rompe los invariantes que corren en Node)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · 2 · El cursor de la sala: el estado y el tono de lo que hay debajo')
+
+/** Un DOM mínimo: lo que `estado.ts` lee (closest, el ancestro, los atributos y el tag). */
+class Nodo {
+  readonly parentElement: Nodo | null
+  constructor(
+    readonly tagName: string,
+    private readonly atributos: Readonly<Record<string, string>> = {},
+    padre: Nodo | null = null,
+  ) {
+    this.parentElement = padre
+  }
+  getAttribute(n: string): string | null {
+    return this.atributos[n] ?? null
+  }
+  hasAttribute(n: string): boolean {
+    return n in this.atributos
+  }
+  /** Un selector simple: `tag`, `[attr]`, `[attr="v"]`, `tag[attr]`. */
+  private es(simple: string): boolean {
+    const m = /^([a-z]*)((?:\[[^\]]+\])*)$/i.exec(simple)
+    if (m === null) return false
+    if (m[1] !== '' && m[1].toUpperCase() !== this.tagName) return false
+    return [...m[2].matchAll(/\[([\w-]+)(?:="([^"]*)")?\]/g)].every((a) => (a[2] === undefined ? this.hasAttribute(a[1]) : this.getAttribute(a[1]) === a[2]))
+  }
+  closest(selector: string): Nodo | null {
+    for (const alternativa of selector.split(',').map((s) => s.trim())) {
+      const partes = alternativa.split(/\s+/)
+      for (let n: Nodo | null = this; n !== null; n = n.parentElement) {
+        if (!n.es(partes[partes.length - 1])) continue
+        let ok = true
+        let arriba = n.parentElement
+        for (let k = partes.length - 2; k >= 0 && ok; k -= 1) {
+          while (arriba !== null && !arriba.es(partes[k])) arriba = arriba.parentElement
+          ok = arriba !== null
+          arriba = arriba?.parentElement ?? null
+        }
+        if (ok) return n
+      }
+    }
+    return null
+  }
+}
+const como = (n: Nodo | null): Element | null => n as unknown as Element | null
+
+const html = new Nodo('HTML')
+const trabajos = new Nodo('SECTION', { 'data-panel': 'trabajos', 'data-seccion': 'invertida' }, html)
+const hero = new Nodo('SECTION', { 'data-panel': 'hero' }, html)
+const parrafo = new Nodo('P', {}, hero)
+const link = new Nodo('A', { href: '#x' }, hero)
+const textoDelLink = new Nodo('SPAN', { 'data-copia': 'a' }, link)
+const cta = new Nodo('A', { href: '#c', 'data-pieza': 'cta' }, hero)
+const libro = new Nodo('A', { href: '#d', 'data-pieza': 'libro' }, trabajos)
+const cinta = new Nodo('DIV', { 'data-pieza': 'cinta' }, trabajos)
+const demoDeLaCinta = new Nodo('A', { href: '#e' }, cinta)
+const campo = new Nodo('INPUT', {}, hero)
+afirmarIgual(
+  [parrafo, textoDelLink, cta, libro, demoDeLaCinta, campo, null].map((n) => estadoBajo(como(n), false)),
+  ['texto', 'enlace', 'boton', 'demo', 'demo', 'oculto', 'oculto'],
+  'contenido → texto · link (también desde su rótulo) → enlace · CTA → botón · libro y cinta → demo · campo y afuera → oculto',
+)
+afirmarIgual([estadoBajo(como(parrafo), true), estadoBajo(como(link), true)], ['logo', 'enlace'], 'sobre el logo (lo dice la escena) → logo; un link encima del logo gana')
+afirmarIgual([parrafo, link, cta, libro].map((n) => estadoBajo(como(n), true, true)), ['texto', 'oculto', 'oculto', 'oculto'], 'la variante nk: sobre cualquier control se apaga, y el logo no tiene estado propio')
+controlPositivo('el chequeo de estados ve un cursor que confunde el libro con un link', ['enlace'], (e: readonly string[]) => e[0] === 'demo')
+
+const sinFondo = (): string => 'rgba(0, 0, 0, 0)'
+afirmarIgual(
+  [tonoBajo(como(parrafo), 0, sinFondo), tonoBajo(como(libro), 1, sinFondo), tonoBajo(como(libro), 0, sinFondo)],
+  ['claro', 'oscuro', 'claro'],
+  'el tono: el hero de día, claro; Trabajos de noche, oscuro; Trabajos con la sala todavía de día (un salto), claro',
+)
+const fondoOscuro = (el: Element): string => (el === como(cinta) ? 'rgb(14, 14, 14)' : 'rgba(0, 0, 0, 0)')
+afirmarIgual(tonoBajo(como(demoDeLaCinta), 0, fondoOscuro), 'oscuro', 'un fondo opaco oscuro debajo (una ventana, una tarjeta) manda sobre la sala')
+controlPositivo('el chequeo del tono ve un cursor claro sobre la sala de noche', 'claro', (t: string) => t === 'oscuro')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · 3 · El cursor: en segundos, sin reservas, detrás de su compuerta, con el nativo siempre a la vista')
+
+const recorrido = (hz: number): number => {
+  let x = 0
+  for (let t = 0; t < 0.3; t += 1 / hz) x += (100 - x) * fraccionDelPaso(1 / hz, SEGUIMIENTO_DE_LA_REFERENCIA.t63Ms.nucleo)
+  return x
+}
+afirmar(Math.abs(recorrido(60) - recorrido(144)) < 1.5, `la persecución es la misma a 60 y 144 Hz (en 0,3 s: ${recorrido(60).toFixed(1)} y ${recorrido(144).toFixed(1)} de 100 px)`)
+let restante = 1
+for (let k = 0; k < 120; k += 1) restante *= 1 - fraccionDelPaso(SEGUIMIENTO_DE_LA_REFERENCIA.t63Ms.nucleo / 1000 / 120, SEGUIMIENTO_DE_LA_REFERENCIA.t63Ms.nucleo)
+afirmar(Math.abs(restante - Math.exp(-1)) < 1e-9, '  y en t63 (la constante medida en nk) recorrió el 63 %')
+controlPositivo('el chequeo de los hz ve el coeficiente por cuadro del cursor de S3', [60, 144], (hzs: readonly number[]) => {
+  const porCuadro = (hz: number): number => {
+    let x = 0
+    for (let t = 0; t < 0.3; t += 1 / hz) x += (100 - x) * 0.0483
+    return x
+  }
+  return Math.abs(porCuadro(hzs[0]) - porCuadro(hzs[1])) < 1.5
+})
+const cursor = leer('_chrome/cursor/CursorDeLaSala.tsx')
+const pasoDelCursor = cuerpoDe(cursor, 'const paso = (ahora: number): void =>')
+afirmar(pasoDelCursor.includes('fraccionDelPaso(') && !reserva.test(pasoDelCursor), 'el paso del cursor no reserva nada por cuadro (ni arreglos, ni objetos, ni cierres)')
+afirmar(!cursor.includes('useState') && !/set[A-Z]\w*\(/.test(pasoDelCursor), '  ni pasa por React: atributos `data-` y propiedades de CSS')
+const compuerta = leer('_chrome/cursor/CompuertaDelCursor.tsx')
+afirmar(compuerta.includes("'(hover: hover) and (pointer: fine)'") && compuerta.includes('deberiaMontarseElCursor(') && compuerta.includes('ssr: false'), 'la compuerta: la de S3 (1024 y sin movimiento reducido) + el puntero fino, y el componente se descarga sólo si monta')
+afirmar(!leer('_estilos/cursor-sala.css').includes('cursor: none'), 'el cursor nativo no se oculta en ninguna parte (como en nk)')
+afirmar(leer('_lib/escena/entorno/Entorno.tsx').includes('LOGO_BAJO_EL_PUNTERO.sobre = m.hover'), 'el estado del logo lo escribe la escena con su propio hover (las compuertas de E4 ya aplicadas)')
 
 cerrar('s37-interfaz1')

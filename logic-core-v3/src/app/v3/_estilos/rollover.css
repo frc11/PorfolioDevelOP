@@ -1,0 +1,82 @@
+/*
+ * [INTERFAZ 1] T2 · EL ROLLOVER DE DOS COPIAS (`_componentes/rollover/DosCopias.tsx`).
+ *
+ * La geometría medida en nk (COMPONENTS.md §3.3, `_lib/cta.ts` → ROLLOVER_MEDIDO), pasada a `em` del texto del CTA donde
+ * se midió (15 px, `--text-cuerpo`): la salida (+20, −33,75) px son (+1,3333, −2,25) em; la entrada (−30, +24,75) px son
+ * (−2, +1,65) em. Así el gesto es el mismo a cualquier tamaño (un nombre de proyecto en `titulo-m`, una URL en mono).
+ * La duración y la curva, las del CTA: 1,3 s (`--duracion-muy-lenta` + 2 × `--duracion-rapida`) con `--ease-salida`.
+ * `s37-interfaz1` afirma que estos números son los del CTA divididos por su tamaño.
+ *
+ * La transición vive SÓLO en la regla de estado (como en `cta.css`, BOTON-1): al entrar anima, al salir vuelve de un
+ * cuadro. El hover sólo con el puntero fino (`hover: hover`): en una pantalla táctil el `:hover` queda pegado después de
+ * tocar. El foco del teclado lo dispara siempre.
+ */
+[data-v3] [data-rollover] {
+  --rollover-giro-salida: 6deg;
+  --rollover-salida-x: 1.3333em;
+  --rollover-salida-y: -2.25em;
+  --rollover-giro-entrada: 10deg;
+  --rollover-entrada-x: -2em;
+  --rollover-entrada-y: 1.65em;
+  --rollover-recorte-inicial: inset(80% 0 0);
+  --rollover-intercambio: calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida));
+
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  vertical-align: top;
+  /* El subrayado del link (si tiene) baja a las copias: una caja atómica no lo recibe sola. */
+  text-decoration: inherit;
+}
+
+[data-v3] [data-rollover] [data-copia] {
+  display: block;
+  white-space: nowrap;
+  text-decoration: inherit;
+}
+
+[data-v3] [data-rollover] [data-copia="b"] {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--rollover-giro-entrada)) translate(var(--rollover-entrada-x), var(--rollover-entrada-y));
+  opacity: 0;
+  clip-path: var(--rollover-recorte-inicial);
+}
+
+/* El estado: el foco del teclado siempre, el banco con `data-forzado` (como el CTA). */
+[data-v3] :is(a, button):not(:disabled):is(:focus-visible, [data-forzado~="hover"], [data-forzado~="foco"]) [data-rollover] [data-copia] {
+  transition-property: transform, opacity, clip-path;
+  transition-duration: var(--rollover-intercambio);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3] :is(a, button):not(:disabled):is(:focus-visible, [data-forzado~="hover"], [data-forzado~="foco"]) [data-rollover] [data-copia="a"] {
+  transform: rotate(var(--rollover-giro-salida)) translate(var(--rollover-salida-x), var(--rollover-salida-y));
+  opacity: 0;
+}
+
+[data-v3] :is(a, button):not(:disabled):is(:focus-visible, [data-forzado~="hover"], [data-forzado~="foco"]) [data-rollover] [data-copia="b"] {
+  transform: none;
+  opacity: 1;
+  clip-path: inset(0);
+}
+
+/* El mismo estado con el puntero fino. */
+@media (hover: hover) and (pointer: fine) {
+  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia] {
+    transition-property: transform, opacity, clip-path;
+    transition-duration: var(--rollover-intercambio);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia="a"] {
+    transform: rotate(var(--rollover-giro-salida)) translate(var(--rollover-salida-x), var(--rollover-salida-y));
+    opacity: 0;
+  }
+
+  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia="b"] {
+    transform: none;
+    opacity: 1;
+    clip-path: inset(0);
+  }
+}

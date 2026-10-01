@@ -29,6 +29,8 @@ import './_estilos/trazo.css'
 import './_estilos/banda.css'
 import './_estilos/tipeo.css'
 import './_estilos/demos.css'
+import './_estilos/rollover.css' // [INTERFAZ 1] T2 · el rollover de dos copias
+import './_estilos/cursor-sala.css' // [INTERFAZ 1] T2 · el cursor de la sala
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

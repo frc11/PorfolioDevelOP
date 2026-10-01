@@ -1,3 +1,4 @@
+import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
 import { IconoDeMarca } from './IconosDeMarca'
@@ -12,7 +13,7 @@ export function ContactoDelPie(): React.JSX.Element {
   return (
     <div className="flex flex-col items-start gap-[var(--spacing-4)]">
       <a href={HREF_DEL_MAIL} className="text-cuerpo font-semi underline decoration-1 underline-offset-4">
-        {MAIL}
+        <DosCopias>{MAIL}</DosCopias>
       </a>
       <a
         href={WHATSAPP.href}
@@ -22,7 +23,7 @@ export function ContactoDelPie(): React.JSX.Element {
         className="inline-flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-current px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi"
       >
         <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
-        {WHATSAPP.rotulo}
+        <DosCopias>{WHATSAPP.rotulo}</DosCopias>
       </a>
     </div>
   )

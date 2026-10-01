@@ -1,3 +1,4 @@
+import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 
@@ -79,7 +80,7 @@ export function Proyecto({
       <div className="flex flex-col gap-1">
         <Titular nivel="titulo-m" como="h3">
           <a href={proyecto.enlace} target="_blank" rel="noopener noreferrer" data-pieza="enlace-de-proyecto">
-            {proyecto.nombre}
+            <DosCopias>{proyecto.nombre}</DosCopias>
           </a>
         </Titular>
         <Cuerpo como="p">{proyecto.rubro}</Cuerpo>

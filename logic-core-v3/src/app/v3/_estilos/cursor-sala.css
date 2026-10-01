@@ -1,0 +1,129 @@
+/*
+ * [INTERFAZ 1] T2 · EL CURSOR DE LA SALA (`_chrome/cursor/CursorDeLaSala.tsx`).
+ *
+ * Dos capas de DOM como en nk (COMPONENTS.md §4): el punto (4 px) y el halo (36 px, con el desenfoque de 4 px), centradas
+ * en el puntero por `translate` (la posición la escribe el bucle en propiedades de CSS, no son valores de diseño). El
+ * tamaño de cada estado va por `scale` (sin cambiar la caja: nada se reacomoda) y las transiciones de estado con la curva
+ * de salida. El cursor nativo nunca se oculta.
+ *
+ * Los colores salen del tono de lo que hay debajo (`data-tono`, `estado.ts`): sobre lo claro, tinta; sobre lo oscuro
+ * (Trabajos, la sala de noche, la ventana de una demo), papel. Sólo tokens.
+ */
+[data-v3] [data-pieza="cursor-sala"] {
+  --cursor-nucleo-lado: var(--spacing-1);
+  --cursor-halo-lado: calc(var(--spacing-8) + var(--spacing-1));
+  --cursor-halo-desenfoque: calc(var(--blur-panel) / 3);
+  --cursor-tinta: var(--color-tinta);
+  --cursor-papel: var(--color-fondo);
+  --cursor-velo: var(--color-borde);
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duracion-media) var(--ease-salida);
+}
+
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"] {
+  --cursor-tinta: var(--color-fondo);
+  --cursor-papel: var(--color-tinta);
+  --cursor-velo: color-mix(in srgb, var(--color-fondo) 18%, transparent);
+}
+
+[data-v3] [data-pieza="cursor-sala"][data-activo="si"]:not([data-estado="oculto"]) {
+  opacity: 1;
+}
+
+[data-v3] [data-pieza="cursor-sala"] [data-parte="nucleo"],
+[data-v3] [data-pieza="cursor-sala"] [data-parte="halo"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circulo);
+  transition-property: scale, opacity, background-color, border-color;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3] [data-pieza="cursor-sala"] [data-parte="nucleo"] {
+  inline-size: var(--cursor-nucleo-lado);
+  block-size: var(--cursor-nucleo-lado);
+  margin: calc(var(--cursor-nucleo-lado) / -2);
+  background-color: var(--cursor-tinta);
+  translate: var(--cursor-nucleo-x, 0) var(--cursor-nucleo-y, 0);
+}
+
+[data-v3] [data-pieza="cursor-sala"] [data-parte="halo"] {
+  inline-size: var(--cursor-halo-lado);
+  block-size: var(--cursor-halo-lado);
+  margin: calc(var(--cursor-halo-lado) / -2);
+  border: var(--border-hairline) solid transparent;
+  background-color: var(--cursor-velo);
+  backdrop-filter: blur(var(--cursor-halo-desenfoque));
+  translate: var(--cursor-halo-x, 0) var(--cursor-halo-y, 0);
+}
+
+/* La etiqueta de la demo: escondida salvo en ese estado. Su tamaño sigue al del halo (va adentro, a escala inversa). */
+[data-v3] [data-pieza="cursor-sala"] [data-parte="etiqueta"] {
+  font-size: var(--text-micro);
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--cursor-papel);
+  scale: 0.4;
+  opacity: 0;
+  transition-property: scale, opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+/* enlace — el punto se va; el halo se abre en un anillo alrededor del cursor nativo. */
+[data-v3] [data-pieza="cursor-sala"][data-estado="enlace"] [data-parte="nucleo"] {
+  scale: 0;
+}
+[data-v3] [data-pieza="cursor-sala"][data-estado="enlace"] [data-parte="halo"] {
+  scale: 1.5;
+  background-color: transparent;
+  border-color: var(--cursor-tinta);
+  backdrop-filter: none;
+}
+
+/* boton — el halo crece y se aclara: el gesto lo hace el rollover del botón. */
+[data-v3] [data-pieza="cursor-sala"][data-estado="boton"] [data-parte="nucleo"] {
+  scale: 0;
+}
+[data-v3] [data-pieza="cursor-sala"][data-estado="boton"] [data-parte="halo"] {
+  scale: 2;
+  opacity: 0.6;
+}
+
+/* demo — el halo crece, se llena de tinta y dice «Abrir». */
+[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="nucleo"] {
+  scale: 0;
+}
+[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="halo"] {
+  scale: 2.4;
+  background-color: var(--cursor-tinta);
+  backdrop-filter: none;
+}
+[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="etiqueta"] {
+  scale: 0.42;
+  opacity: 1;
+}
+
+/* logo — un anillo grande alrededor; el punto queda (el logo responde con su pulso, E4). */
+[data-v3] [data-pieza="cursor-sala"][data-estado="logo"] [data-parte="halo"] {
+  scale: 2.2;
+  background-color: transparent;
+  border-color: var(--cursor-tinta);
+  backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza="cursor-sala"] {
+    display: none;
+  }
+}

@@ -5,10 +5,11 @@
  * sólo en el navegador (en el servidor no hay URL: el producto). Sin la consulta, el producto.
  *
  *   · `inercia=no` — el texto sin inercia (T1), para comparar; `inercia=marcada` — el doble de inclinación.
+ *   · `cursor=nk` — el cursor de la referencia (T2): sobre lo que se toca se apaga y queda el nativo.
  */
 let resuelto: ReadonlyMap<string, string> | null = null
 
-export function varianteDeInterfaz(clave: 'inercia'): string | null {
+export function varianteDeInterfaz(clave: 'inercia' | 'cursor'): string | null {
   if (typeof window === 'undefined') return null
   if (resuelto === null) {
     const pedido = new URLSearchParams(window.location.search).get('interfaz') ?? ''

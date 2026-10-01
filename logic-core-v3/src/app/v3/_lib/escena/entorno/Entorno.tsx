@@ -10,7 +10,7 @@ import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
-import { crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
+import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
 import { nocheDelLogo } from './nocheDelLogo'
 import { Pulso } from './Pulso'
 import { PULSO, avanzarElPulso, pulsoInicial, type EstadoDelPulso } from './maquinaDelPulso'
@@ -136,6 +136,7 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       }
       const scrollEnMovimiento = t - m.ultimoMovimiento < PULSO.quietudDelScrollS
       m.hover = hover !== null ? hover.leer(state.camera, state.gl.domElement, logoGroupRef.current, progreso) : false
+      LOGO_BAJO_EL_PUNTERO.sobre = m.hover // [INTERFAZ 1] T2: para el cursor del DOM
       const antes = m.pulso ?? pulsoInicial(t)
       // [CALIDAD 1] B2: las entradas del pulso, siempre el mismo objeto.
       const entradas = m.entradas

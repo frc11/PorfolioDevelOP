@@ -1,4 +1,4 @@
-import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
+import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
 import { MenuMovil } from './menu/MenuMovil'
@@ -172,7 +172,8 @@ export function ChromeDelHome(): React.JSX.Element {
        * naturaleza: las de S3 preguntan si el cursor CORRESPONDE en este
        * dispositivo; ésta pregunta si el home lo lleva.
        */}
-      {CURSOR_PROPIO_EN_EL_HOME ? <CursorCompuerta /> : null}
+      {/* [INTERFAZ 1] T2: el cursor de la sala (`cursor/`) en lugar del de S3, que sigue en la galería sin tocar. */}
+      {CURSOR_PROPIO_EN_EL_HOME ? <CompuertaDelCursor /> : null}
     </>
   )
 }

@@ -27,6 +27,9 @@ correr(async () => {
       palabras: document.querySelectorAll('[data-palabras-piezas]').length,
       inercia: document.querySelectorAll('[data-inercia]').length,
       gancho: typeof window.__inerciaDelBanco,
+      rollovers: document.querySelectorAll('[data-rollover]').length,
+      subrayadoDelMail: (() => { const c = document.querySelector('[data-panel="cierre"] a[href^="mailto"] [data-copia="a"]'); return c ? getComputedStyle(c).textDecorationLine : null })(),
+      cursor: (() => { const c = document.querySelector('[data-pieza="cursor-sala"], [data-pieza="cursor"]'); return c ? c.getAttribute('data-pieza') : null })(),
       vigia: window.__vigia,
     }))()`)
     console.log(JSON.stringify(r, null, 1))

@@ -14,7 +14,9 @@
 
 import type { CruceObservado, EntradaAlTramo } from './gota'
 
+import { textoVisible } from '../_contrato/escaneo'
 import { tramoDeSecuencia } from '../_contrato/secuencia'
+import { quitarSubarbolesConAtributo } from '../_invariantes/marcado'
 
 /** Los elementos que no cierran, para que la pila de ancestros no se desbalancee. */
 const VACIOS = new Set(['img', 'br', 'hr', 'input', 'meta', 'link', 'source'])
@@ -122,7 +124,17 @@ export function enlacesFueraDelContenido(html: string, declarados: readonly stri
 /** Los nombres que NO son un `h3` con su enlace adentro. El enlace en el medio
  *  es la forma que de verdad sale desde que las tarjetas llevan al sitio. */
 export function nombresQueNoSonEncabezado(html: string, nombres: readonly string[]): string[] {
-  return nombres.filter((n) => !new RegExp(`<h3[^>]*>\s*<a [^>]*>${n}</a>\s*</h3>`).test(html))
+  const enEncabezado = [...html.matchAll(/<h3[^>]*>\s*<a [^>]*>([\s\S]*?)<\/a>\s*<\/h3>/g)].map((m) => nombreAccesible(m[1]))
+  return nombres.filter((n) => !enEncabezado.includes(n))
+}
+
+/**
+ * [INTERFAZ 1] T2 · El nombre accesible del contenido de un enlace: su texto, sin lo que cuelga de un `aria-hidden`.
+ * El nombre del proyecto lleva el rollover de dos copias (`DosCopias`): la segunda es `aria-hidden` y un lector lee
+ * el nombre UNA vez; comparar el texto crudo lo vería dos veces.
+ */
+function nombreAccesible(interior: string): string {
+  return textoVisible(quitarSubarbolesConAtributo(interior, 'aria-hidden'))
 }
 
 /** Los enlaces cuyo nombre accesible NO es exactamente el nombre del cliente.
@@ -132,7 +144,7 @@ export function enlacesConNombreSucio(
   proyectos: readonly { nombre: string; enlace: string }[],
 ): string[] {
   return proyectos
-    .filter((p) => !new RegExp(`href="${p.enlace}"[^>]*>${p.nombre}</a>`).test(html))
+    .filter((p) => ![...html.matchAll(new RegExp(`href="${p.enlace}"[^>]*>([\\s\\S]*?)</a>`, 'g'))].some((m) => nombreAccesible(m[1]) === p.nombre))
     .map((p) => p.nombre)
 }
 

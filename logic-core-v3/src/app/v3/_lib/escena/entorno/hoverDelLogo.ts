@@ -29,6 +29,13 @@ const INTERACTIVOS = 'a, button, input, select, textarea, label, summary, [role=
 /** Cuánto tiene que sostenerse el cambio para contar, en segundos: entrar rápido, salir con calma. */
 export const HISTERESIS = { entrarS: 0.08, salirS: 0.2 } as const
 
+/**
+ * [INTERFAZ 1] T2 · el puntero sobre el logo, para el cursor del DOM (`_chrome/cursor/`): lo escribe la escena en su
+ * cuadro (`Entorno.tsx`) con todas las compuertas de este módulo ya aplicadas, y lo lee el cursor en el suyo. Un objeto
+ * del módulo, no un estado: cero React por cuadro.
+ */
+export const LOGO_BAJO_EL_PUNTERO = { sobre: false }
+
 /** La franja del recorrido donde el logo está en el túnel o tapado: sin hover. */
 export const SIN_HOVER = { desde: ATARDECER.hasta, hasta: AMANECER.hasta } as const
 
