@@ -248,6 +248,10 @@ La máquina tiene dos placas (la AMD integrada y la NVIDIA). En ESCENA 9 el Chro
 **Un componente que importa su `.css` rompe todos los invariantes que corren en Node [Oct 2026]**
 En INTERFAZ 1 dos componentes nuevos (`DosCopias`, el cursor de la sala) importaron su hoja (`import '../../_estilos/x.css'`). El sitio andaba, pero cada invariante que renderiza esas piezas con `npx tsx` se cayó con `SyntaxError: Unexpected token '{'` adentro del `.css`, sin decir qué componente lo arrastraba; `verificar` mostró sólo suites que «no imprimen resumen». Regla: en /v3 las hojas entran por `layout.tsx` (es la convención: todas están ahí; agregar una línea de import es cambiar cómo se importa, no qué renderiza) y cada hoja nueva va al padrón de `s3-tokens` (`s3-archivos.ts`) con sus propiedades en `s3-registro-de-tokens.ts`. Corolario: una suite que termina sin su línea de «N afirmaciones» no pasó ni falló: se cayó, y hay que leer su salida.
 
+
+**Un `git add` con una ruta ya borrada no agrega NADA [Oct 2026]**
+En el cierre de INTERFAZ 1 el archivo borrado se había marcado con `git rm` y después se lo volvió a nombrar en el `git add` de la lista: git respondió `fatal: pathspec ... did not match any files` y no agregó ninguna de las otras rutas. El commit salió sólo con el borrado y se pusheó un árbol que no compilaba (los que importaban el archivo quedaron afuera); hubo que completarlo con otro commit. Regla: después de cada `git add` por ruta, mirar `git status --short` ANTES de commitear (que no quede ningún ` M` de lo que iba en ese commit); un archivo borrado entra con `git rm` y no se repite en el `git add`.
+
 ---
 
 *Update this file when Claude makes a correctable mistake. Add the rule that prevents it. Prune entries that no longer apply.*
