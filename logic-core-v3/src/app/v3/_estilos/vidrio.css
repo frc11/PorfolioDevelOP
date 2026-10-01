@@ -1,0 +1,86 @@
+/**
+ * [NAVBAR] T3 · EL VIDRIO LÍQUIDO — el material del menú del teléfono, imitando el de iOS lo más posible.
+ *
+ *   · **el tinte y el desenfoque**: el fondo se ve desenfocado y más saturado a través de un tinte del papel (claro) o de
+ *     la tinta (oscuro, con los tokens de la sala invertida: `data-seccion="invertida"`). El tinte es lo que sostiene el
+ *     contraste del texto contra CUALQUIER fondo: con el 56 % (y el velo del menú, que deja el blanco en 0,8) la tinta
+ *     da AA aun sobre el negro (vidrio claro, 5,5:1) o el blanco (vidrio oscuro, 5,8:1). Medido en `navbar/t3-menu/`.
+ *     El desenfoque es el del panel del sistema: con menos, el titular del hero se lee detrás de los ítems.
+ *   · **el especular**: una luz arriba, que baja y se apaga (`::before`, detrás del texto), y una línea de luz en el borde
+ *     de arriba;
+ *   · **el filo**: un borde de luz de un filete alrededor;
+ *   · **la refracción del canto** (`[data-lente]`, sólo Chromium: `LenteDelVidrio.tsx`): el fondo se curva hacia adentro
+ *     cerca del borde, como en una lente. Va DESPUÉS del desenfoque: con el orden al revés el canto toma lo de afuera ya
+ *     corrido y se oscurece. Safari no acepta filtros SVG en el `backdrop-filter`: se queda con todo lo demás.
+ *
+ * La copia PLANA (`vidrio-plano`) es la que viaja en el Genie: opaca y sin leer el fondo (cuarenta tiras con desenfoque
+ * serían cuarenta lecturas del fondo por cuadro), con el tono que el vidrio suele dar. Al terminar de abrir el vidrio de
+ * verdad se funde encima (`MS_DEL_RELEVO`).
+ */
+
+[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"]) {
+  --vidrio-tinte: 56%;
+  --vidrio-tinte-plano: 64%;
+  --vidrio-desenfoque: var(--blur-panel);
+  --vidrio-saturacion: 1.8;
+  --vidrio-brillo: 70%;
+  --vidrio-filo: 40%;
+  --vidrio-reflejo: 28%;
+  --vidrio-reflejo-hasta: 24%;
+  --vidrio-radio: calc(var(--radius-fuerte) * 3);
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--vidrio-radio);
+  color: var(--color-tinta);
+  box-shadow:
+    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-fondo) var(--vidrio-brillo), transparent),
+    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-fondo) var(--vidrio-filo), transparent),
+    var(--shadow-flotante);
+}
+
+/* En el vidrio oscuro la luz es el papel, que en la sala invertida es la tinta. */
+[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])[data-seccion="invertida"] {
+  box-shadow:
+    inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-tinta) var(--vidrio-brillo), transparent),
+    inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent),
+    var(--shadow-flotante);
+}
+
+[data-v3] [data-pieza="vidrio"] {
+  position: fixed;
+  background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte), transparent);
+  -webkit-backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(var(--vidrio-saturacion));
+  backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(var(--vidrio-saturacion));
+}
+
+[data-v3] [data-pieza="vidrio"][data-lente] {
+  backdrop-filter: blur(var(--vidrio-desenfoque)) url(#lente-del-menu) saturate(var(--vidrio-saturacion));
+}
+
+/* Opaca: con un tinte translúcido el píxel que se pisan las rendijas se ve doble (una raya por tira). Es el tono que el
+   vidrio suele dar sobre su zona: el papel con algo de tinta (claro) o al revés (oscuro). */
+[data-v3] [data-pieza="vidrio-plano"] {
+  background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-plano), var(--color-tinta));
+}
+
+/* El especular: una luz que baja desde el borde de arriba y se apaga, detrás del texto. */
+[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-fondo) var(--vidrio-reflejo), transparent), transparent var(--vidrio-reflejo-hasta));
+  pointer-events: none;
+}
+
+[data-v3] :is([data-pieza="vidrio"], [data-pieza="vidrio-plano"])[data-seccion="invertida"]::before {
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-tinta) var(--vidrio-reflejo), transparent), transparent var(--vidrio-reflejo-hasta));
+}
+
+/* Sin `backdrop-filter` (un navegador viejo) el fondo se vería nítido detrás de los ítems: la copia plana, opaca. */
+@supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
+  [data-v3] [data-pieza="vidrio"] {
+    background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-plano), var(--color-tinta));
+  }
+}

@@ -10,7 +10,7 @@ import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO, cajaFinal } from './apertura'
 import { TEXTO_DE_DEMOS, type Demo } from './catalogo'
 import { CromoDeLaVentana } from './CromoDeLaVentana'
 import { useDialogo } from './dialogo'
-import { MS_DEL_GENIE, type Caja } from './genie'
+import { MS_DEL_GENIE, correrPorTiempo as correr, type Caja } from './genie'
 import { GenieDeDemo, type ControlDelGenie } from './GenieDeDemo'
 
 /**
@@ -50,23 +50,6 @@ type Fase = 'abriendo' | 'abierta' | 'cerrando'
 function cajaDe(el: Element): Caja {
   const r = el.getBoundingClientRect()
   return { x: r.left, y: r.top, ancho: r.width, alto: r.height }
-}
-
-function correr(ms: number, alCuadro: (t: number) => void, alTerminar: () => void): () => void {
-  let cuadro = 0
-  let inicio = 0
-  const paso = (ahora: number): void => {
-    if (inicio === 0) inicio = ahora
-    const t = Math.min(ms, ahora - inicio)
-    alCuadro(t)
-    if (t >= ms) {
-      alTerminar()
-      return
-    }
-    cuadro = requestAnimationFrame(paso)
-  }
-  cuadro = requestAnimationFrame(paso)
-  return () => cancelAnimationFrame(cuadro)
 }
 
 export function VentanaDeDemo({

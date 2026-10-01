@@ -5,6 +5,8 @@
  *        Portfolio y Por qué develOP (el viaje frena justo antes de su llegada y la recorre sin velo).
  *   T2 · la barra de escritorio, propia de /v3: la misma pastilla visual (y la misma geometría), los ítems del home con
  *        el rollover de dos copias, y la pieza compartida intacta para la galería.
+ *   T3 · el menú del teléfono de vidrio líquido: el Genie de las demos desde el botón, el material (con la lente sólo
+ *        en Chromium), el tono de la zona con el texto en AA contra cualquier fondo, y el diálogo.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
@@ -13,13 +15,15 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
+import { conLente } from '../../_chrome/menu/LenteDelVidrio'
+import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
 import { DURACION_DE_LA_LLEGADA_MS, DURACION_DEL_VIAJE_MS, MARGEN_ANTES_DE_LA_LLEGADA } from '../../_componentes/deslizamiento'
 import { antesDeLaLlegada, centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { lineaDeLaNoche } from '../../_secciones/trabajos/geometria'
 import { AMANECER } from '../escena/amanecer/linea'
-import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 import { NodoFalso, VENTANA, conDomFalso } from './s27-dom-falso'
 
 const V3 = 'src/app/v3'
@@ -142,5 +146,50 @@ const intacto = (ruta: string): boolean => {
   }
 }
 afirmar(['src/app/v3/_componentes/chrome/Navegacion.tsx', 'src/app/v3/_estilos/navegacion.css', 'src/app/v3/_lib/navegacion.ts'].every(intacto), 'la pieza compartida (la pastilla, su hoja y su lista de muestra) quedó como estaba antes del sprint: la sigue usando la galería')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T3 · El menú del teléfono: el Genie, el vidrio, el tono y el diálogo')
+
+const MENU = sinComentarios(leer('_chrome/menu/MenuMovil.tsx'))
+const GENIE = sinComentarios(leer('_chrome/menu/GenieDelMenu.tsx'))
+afirmar(MENU.includes("import { MS_DEL_GENIE, correrPorTiempo, type Caja } from '../../_secciones/trabajos/demos/genie'") && GENIE.includes('esquinasDeLaTira(i, TIRAS_DEL_MENU, m, ventana, destino, lider, SOLAPE)') && leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('correrPorTiempo as correr'), 'el Genie es el de las demos: la misma geometría, la misma duración y el mismo reloj (que ahora comparten)')
+afirmar(MENU.includes('destino: cajaDe(boton)') && MENU.includes('(t) => cuadro(1 - t / MS_DEL_GENIE)') && /cuadro\(desde \+ \(1 - desde\)/.test(MENU), '  sale del botón al abrir y vuelve a él al cerrar (desde donde iba, si se cierra abriendo)')
+afirmar(MENU.includes('cancelar.current = fundir(1, listo)') && MENU.includes('MS_DEL_FUNDIDO') && /geometria !== null && !reducido &&/.test(MENU), '  con movimiento reducido no hay Genie: el fundido corto de las demos')
+afirmar(GENIE.includes('const enLaRendija = piezas.filter(') && !/children/.test(GENIE) && MENU.includes("className=\"invisible\"") && MENU.includes("style.setProperty('visibility', genie ? 'visible' : 'hidden')"), '  y abrir no monta nada: cada tira lleva sólo las piezas medidas de su rendija y la capa se muestra con `visibility` (medido con la CPU ×4 en navbar/t3-menu)')
+afirmar(MENU.includes('className="invisible fixed inset-[var(--spacing-4)] flex flex-col"') && MENU.includes('data-pieza="vidrio"'), 'casi toda la pantalla, centrado, con margen en los cuatro lados')
+
+const VIDRIO = sinComentarios(leer('_estilos/vidrio.css'))
+const conWebkit = /-webkit-backdrop-filter: blur\(var\(--vidrio-desenfoque\)\) saturate\(var\(--vidrio-saturacion\)\);/.test(VIDRIO)
+afirmar(conWebkit && /\[data-pieza="vidrio"\]\[data-lente\] \{\s*backdrop-filter: blur\(var\(--vidrio-desenfoque\)\) url\(#lente-del-menu\) saturate/.test(VIDRIO) && (VIDRIO.match(/url\(#lente-del-menu\)/g) ?? []).length === 1, 'el material: desenfoque y saturación (con el prefijo de Safari) y la lente SÓLO bajo `data-lente`, después del desenfoque')
+afirmar(VIDRIO.includes('::before') && VIDRIO.includes('inset 0 var(--border-hairline) 0 0') && VIDRIO.includes('inset 0 0 0 var(--border-hairline)') && VIDRIO.includes('@supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none))'), '  el especular arriba, el filo de luz, y un tinte casi opaco donde no hay `backdrop-filter`')
+afirmar(!conLente(), '  fuera de Chromium no hay lente (Safari no pinta un filtro SVG en el `backdrop-filter` y, con él, se queda sin desenfoque)')
+const [cx, cy] = desplazamientoEn(179, 406, 358, 812, 30, BORDE_DE_LA_LENTE)
+const [ix] = desplazamientoEn(1, 406, 358, 812, 30, BORDE_DE_LA_LENTE)
+const [dx] = desplazamientoEn(357, 406, 358, 812, 30, BORDE_DE_LA_LENTE)
+const [, ay] = desplazamientoEn(179, 1, 358, 812, 30, BORDE_DE_LA_LENTE)
+afirmar(cx === 0 && cy === 0 && ix > 0.8 && dx < -0.8 && ay > 0.8, 'la lente: quieta en el centro (como una losa) y en el canto el fondo se toma de adentro, de los cuatro lados')
+const mapa = mapaDeLaLente(358, 812, 30)
+afirmar(mapa.pixeles[((Math.floor(mapa.alto / 2) * mapa.ancho + Math.floor(mapa.ancho / 2)) * 4)] === 128, '  el mapa codifica 128 («quieto») en el centro', `${String(mapa.ancho)} × ${String(mapa.alto)}`)
+
+/** El peor contraste del texto: la tinta de cada tono contra su tinte sobre el fondo más adverso, detrás del velo del menú. */
+const TEMA = { papel: '#F7F7F5', tinta: '#111111', invertidoFondo: '#0E0E0E' }
+const canal = (hex: string, i: number): number => Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
+const mezcla = (a: string, b: string, t: number): string => `#${[0, 1, 2].map((i) => Math.round(canal(a, i) * t + canal(b, i) * (1 - t)).toString(16).padStart(2, '0')).join('')}`
+const VELO = 0.2
+const tinte = Number.parseFloat(/--vidrio-tinte: ([\d.]+)%;/.exec(VIDRIO)?.[1] ?? '0') / 100
+const peorContraste = (t: number): number => {
+  // Detrás del velo (la tinta al 20 %) lo más claro es el papel velado y lo más oscuro, el negro.
+  const masClaro = mezcla(TEMA.tinta, '#ffffff', VELO)
+  const claro = razonDeContraste(TEMA.tinta, mezcla(TEMA.papel, '#000000', t))
+  const oscuro = razonDeContraste(TEMA.papel, mezcla(TEMA.invertidoFondo, masClaro, t))
+  return Math.min(claro, oscuro)
+}
+afirmar(peorContraste(tinte) >= 4.5, `el texto en AA contra CUALQUIER fondo: con el tinte del ${String(Math.round(tinte * 100))} % el peor caso (vidrio claro sobre negro, oscuro sobre blanco velado) da ${peorContraste(tinte).toFixed(2)}:1 (medido en píxeles: 6,5 y 6,7)`)
+controlPositivo('  el chequeo vería un tinte demasiado transparente', 0.4, (t: number) => peorContraste(t) >= 4.5)
+afirmar(MENU.includes('setVidrioOscuro(!zonaOscura())') && MENU.includes('tonoBajo(debajo, nocheQueSeVe())') && MENU.includes("data-seccion={tono}"), 'el tono de la zona, leído al abrir: sobre zona oscura vidrio claro, sobre zona clara vidrio oscuro (los tokens de la sala invertida)')
+
+afirmar(MENU.includes('{abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}') && /data-parte="cerrar-el-menu" aria-label=\{ROTULO_DEL_MENU\.cerrar\}/.test(MENU), 'el diálogo: la trampa de foco sólo abierto, y el que cierra está adentro')
+afirmar(MENU.includes('min-h-[var(--spacing-12)]') && MENU.includes('text-titulo-m'), '  ítems grandes y tocables: un renglón de 48 px como mínimo, en `titulo-m`')
+afirmar(MENU.includes("caja.current?.querySelector<HTMLElement>('[data-parte=\"item-del-menu\"]')?.focus({ preventScroll: true })") && MENU.includes('boton.current?.focus({ preventScroll: true })'), '  al abrir, el foco al primer ítem; al cerrar, de vuelta al botón del menú')
 
 cerrar('s39-navbar')

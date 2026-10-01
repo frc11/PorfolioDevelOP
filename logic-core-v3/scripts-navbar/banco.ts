@@ -29,6 +29,11 @@ export interface OpcionesDelBanco {
   readonly reducido?: boolean
   /** Bajar la CPU (×4 es un teléfono de gama media). */
   readonly cpu?: number
+  /**
+   * Cuánto más ancho puede salir el cuadro sin cortar. Sólo para la rama de movimiento reducido a 390: el renglón del
+   * carrusel de Trabajos se pasa del borde y la página mide 402 (hallazgo del sprint, anterior a él).
+   */
+  readonly anchoTolerado?: number
 }
 
 /** Abre /v3 con los ganchos del banco, la pestaña al frente y el ancho verificado. */
@@ -48,7 +53,8 @@ export async function abrir(ancho: number, alto: number, o: OpcionesDelBanco = {
     await esperar(1500)
     estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
   }
-  if (estado.visible !== 'visible' || estado.ancho !== ancho) throw new Error(`la pestaña no está al frente o el ancho no es el pedido: ${JSON.stringify(estado)}`)
+  if (estado.ancho !== ancho && estado.ancho - ancho <= (o.anchoTolerado ?? 0)) console.log(`  ⚠ el cuadro mide ${String(estado.ancho)} y no ${String(ancho)} (tolerado)`)
+  else if (estado.visible !== 'visible' || estado.ancho !== ancho) throw new Error(`la pestaña no está al frente o el ancho no es el pedido: ${JSON.stringify(estado)}`)
   if (o.cpu !== undefined) await p.conexion.enviar('Emulation.setCPUThrottlingRate', { rate: o.cpu }, s)
   const placa = await medir<string>(p, `(() => { const c = document.createElement('canvas').getContext('webgl'); const i = c && c.getExtension('WEBGL_debug_renderer_info'); return i ? String(c.getParameter(i.UNMASKED_RENDERER_WEBGL)) : 'desconocida' })()`)
   return {

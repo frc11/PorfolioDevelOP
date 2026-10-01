@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type RefObject } from 'react'
 
-import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
 import { SECCIONES } from '../../_lib/secciones'
+import { nocheQueSeVe } from '../cursor/estado'
 import { tonoDebajo, type Tono } from './tono'
 
 const SUPERFICIE_DE = new Map(SECCIONES.map((s) => [s.id, s.superficie]))
@@ -35,7 +35,8 @@ export function useTonoDebajo(boton: RefObject<HTMLElement | null>, activo: bool
         }
         const superficie = SUPERFICIE_DE.get(visto)
         if (superficie !== undefined) {
-          const tono = tonoDebajo(superficie, nocheEfectiva())
+          // [NAVBAR] La noche que SE VE (la del arco o la de la gota): llegando de un salto la gota sola es cero.
+          const tono = tonoDebajo(superficie, nocheQueSeVe())
           if (tono !== ultimo) {
             ultimo = tono
             setTono(tono)

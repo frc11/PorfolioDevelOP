@@ -22,6 +22,7 @@ import { MarcaDeLaLlave } from './_secciones/_contrato/MarcaDeLaLlave'
 import './_estilos/cta.css'
 import './_estilos/navegacion.css'
 import './_estilos/barra.css' // [NAVBAR] T2 · la barra propia del home
+import './_estilos/vidrio.css' // [NAVBAR] T3 · el vidrio líquido del menú del teléfono
 import './_estilos/cursor.css'
 import './_estilos/pie.css'
 import './_estilos/foco.css'

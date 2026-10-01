@@ -153,3 +153,25 @@ export function proyectar(esquinas: readonly [Punto, Punto, Punto, Punto], ancho
   const W = m[3] * x + m[7] * y + m[15]
   return { x: X / W, y: Y / W }
 }
+
+/**
+ * EL RELOJ DEL GENIE — corre `alCuadro(t)` en cada cuadro durante `ms` (`t` en ms desde el primero, la última vez
+ * exacto en `ms`) y después `alTerminar`; devuelve el cancelador. [NAVBAR] Lo comparten la ventana de las demos y el
+ * menú del teléfono (antes vivía adentro de `VentanaDeDemo`).
+ */
+export function correrPorTiempo(ms: number, alCuadro: (t: number) => void, alTerminar: () => void): () => void {
+  let cuadro = 0
+  let inicio = 0
+  const paso = (ahora: number): void => {
+    if (inicio === 0) inicio = ahora
+    const t = Math.min(ms, ahora - inicio)
+    alCuadro(t)
+    if (t >= ms) {
+      alTerminar()
+      return
+    }
+    cuadro = requestAnimationFrame(paso)
+  }
+  cuadro = requestAnimationFrame(paso)
+  return () => cancelAnimationFrame(cuadro)
+}

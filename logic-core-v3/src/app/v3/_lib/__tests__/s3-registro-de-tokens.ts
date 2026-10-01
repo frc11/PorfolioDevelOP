@@ -128,6 +128,16 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--barra-margen-al-pie', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: 'el mismo de `--nav-margen-al-pie`' },
   { nombre: '--barra-nacimiento', valor: 'calc(100svh - var(--barra-margen-al-pie) - var(--barra-alto))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-nacimiento`, con los nombres propios' },
   { nombre: '--barra-umbral', valor: 'calc(var(--barra-nacimiento) - var(--barra-reposo))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-umbral`, con los nombres propios' },
+  // ── [NAVBAR] T3 · El vidrio líquido del menú del teléfono (`vidrio.css`) ──
+  { nombre: '--vidrio-tinte', valor: '56%', evidencia: 'decidido', procedencia: 'el tinte que sostiene el contraste del texto contra cualquier fondo (con el velo del menú): AA sobre el negro (claro, 5,5:1) y el blanco (oscuro, 5,8:1); medido en navbar/t3-menu' },
+  { nombre: '--vidrio-tinte-plano', valor: '64%', evidencia: 'decidido', procedencia: 'la copia plana del Genie, OPACA: el papel con el 36 % de tinta (o al revés), el tono que el vidrio suele dar sobre su zona (164 y 98 contra ~150 y ~110 medidos); también el respaldo sin `backdrop-filter`' },
+  { nombre: '--vidrio-desenfoque', valor: 'var(--blur-panel)', evidencia: 'decidido', procedencia: '12 px, el del panel del sistema: con 24 la curva del canto no tiene qué curvar (la sala ya llega desenfocada); con 6 el titular del hero se lee detrás de los ítems' },
+  { nombre: '--vidrio-saturacion', valor: '1.8', evidencia: 'decidido', procedencia: 'la saturación del fondo del vidrio de iOS (180 %), la misma del glassmorphism de CLAUDE.md' },
+  { nombre: '--vidrio-brillo', valor: '70%', evidencia: 'decidido', procedencia: 'la línea de luz del borde de arriba (el especular)' },
+  { nombre: '--vidrio-filo', valor: '40%', evidencia: 'decidido', procedencia: 'el filo de luz de un filete alrededor' },
+  { nombre: '--vidrio-reflejo', valor: '28%', evidencia: 'decidido', procedencia: 'la luz que baja desde arriba, detrás del texto' },
+  { nombre: '--vidrio-reflejo-hasta', valor: '24%', evidencia: 'decidido', procedencia: 'hasta dónde baja: el primer cuarto, arriba de los ítems' },
+  { nombre: '--vidrio-radio', valor: 'calc(var(--radius-fuerte) * 3)', evidencia: 'decidido', procedencia: '30 px: el radio grande de los paneles de iOS a pantalla casi completa' },
 
   // ── Cursor ─────────────────────────────────────────────────────────────
   { nombre: '--cursor-nucleo-lado', valor: 'var(--spacing-1)', evidencia: 'medido', procedencia: 'COMPONENTS.md §4.1 — núcleo de 4×4, que es --spacing-1 exacto' },

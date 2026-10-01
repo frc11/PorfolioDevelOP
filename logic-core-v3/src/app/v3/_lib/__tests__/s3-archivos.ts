@@ -51,6 +51,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/cursor-sala.css`,
   // [NAVBAR] T2 · la barra propia del home (la misma pastilla, con nombres propios).
   `${V3}/_estilos/barra.css`,
+  // [NAVBAR] T3 · el vidrio líquido del menú del teléfono.
+  `${V3}/_estilos/vidrio.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los
