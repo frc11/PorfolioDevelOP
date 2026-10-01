@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { RAIZ } from '../../_lib/__tests__/s3-archivos'
 import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
+import { ENLACES_DEL_HOME } from '../enlaces'
 import { SECCIONES } from '../../_lib/secciones'
 import type { ModoSuperficie } from '../../_lib/superficies'
 import { fijarModoDelChrome } from '../contacto/apertura'
@@ -86,8 +86,8 @@ afirmarIgual(renderToStaticMarkup(<MenuMovil />), '', '  con la barra de escrito
 titulo('3 · Los ítems, y Contacto abre el formulario')
 
 const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].map((m) => m[1])
-afirmarIgual(items, ['Quiénes somos', 'Trabajos', 'Servicios', 'Por qué develOP', 'Contacto'], 'los cinco, en el orden de la barra')
-afirmarIgual(items, ENLACES_DE_MUESTRA.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista')
+afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], '[NAVBAR] los seis, en el orden de la barra')
+afirmarIgual(items, ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`)')
 afirmar(/<button type="button" data-parte="item-del-menu"[^>]*>Contacto</.test(MENU) && /abrirContacto\(\[\], boton\.current\)/.test(FUENTE), 'Contacto es un botón: cierra el menú y abre el formulario, con el foco de vuelta al botón del menú')
 
 // ═══════════════════════════════════════════════════════════════════════════

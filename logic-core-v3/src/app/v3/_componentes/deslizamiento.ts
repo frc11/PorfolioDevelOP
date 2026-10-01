@@ -103,6 +103,19 @@ export const DURACION_DEL_DESLIZAMIENTO_S = DURACION_DEL_VIAJE_MS / 1000
 export const TOTAL_DEL_DESLIZAMIENTO_MS = PRELUDIO_MS + DURACION_DEL_VIAJE_MS
 
 /**
+ * [NAVBAR] LA LLEGADA A LA VISTA — Portfolio y Por qué develOP no aterrizan detrás del velo: el viaje frena JUSTO
+ * ANTES de su llegada (la gota de la noche en Trabajos, el amanecer en Por qué develOP), el velo vuelve, y la llegada
+ * se recorre a la vista hasta el nudo de siempre (el título quieto, la frase posada). Ese tramo es un scroll como el
+ * de la rueda: la gota, el amanecer y los títulos hacen lo que hacen con el scroll, nada se asienta a mano. Dura
+ * siempre lo mismo, como el viaje, y con su misma curva (arranca y frena en velocidad cero). Dónde frena:
+ * `antesDeLaLlegada` en `destinosDelViaje.ts`.
+ */
+export const DURACION_DE_LA_LLEGADA_MS = 2400
+
+/** [NAVBAR] Cuánto antes de la llegada frena el viaje, en fracción del cuadro: un respiro de lo de antes del cambio. */
+export const MARGEN_ANTES_DE_LA_LLEGADA = 0.2
+
+/**
  * 🔴 **LA CURVA DEL VIAJE — Y ESTE SPRINT LE DA UNA PROPIA, QUE ES UN COSTO.**
  *
  * ── Lo que DESLIZAR-1 hacía, y por qué estaba bien ────────────────────────

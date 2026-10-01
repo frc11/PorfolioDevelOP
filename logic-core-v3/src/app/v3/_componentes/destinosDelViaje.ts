@@ -5,8 +5,11 @@ import {
   ANCLA_DE_LA_VENTANA_VISIBLE,
   ANCLA_DEL_TRAZO,
 } from '../_secciones/_contrato/bloqueAnimado'
+import { AMANECER } from '../_lib/escena/amanecer/linea'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../_secciones/por-que-develop/geometria'
+import { lineaDeLaNoche } from '../_secciones/trabajos/geometria'
+import { MARGEN_ANTES_DE_LA_LLEGADA } from './deslizamiento'
 import { destinoDelAncla } from './viajeSinLenis'
 
 /**
@@ -34,6 +37,17 @@ import { destinoDelAncla } from './viajeSinLenis'
  *
  * Donde la sección no tiene coreografía (movimiento reducido, o una rama quieta) el nudo no
  * existe y el destino es el del ancla, que es lo que hacía el enlace antes.
+ *
+ * ── [NAVBAR] LO QUE CAMBIÓ CON EL MENÚ PROPIO ─────────────────────────────
+ *
+ *   · **Quiénes somos, un poco antes**: la primera pantalla (del título al cuerpo) CENTRADA en el cuadro que la barra
+ *     deja libre, nunca antes de que el título termine de llegar ni después del reposo de antes (que dejaba el título
+ *     pegado a la barra). A 1440 × 900, 917 en lugar de 1035; a 1024 × 768, el tope de la sección en lugar de 805.
+ *   · **Panel** (Tu panel, nuevo en la barra): la cabecera entera a la vista —el título, la bajada y el panel en vivo—,
+ *     centrada en el cuadro libre si sobra lugar, sin mostrar la sección de arriba.
+ *   · **Portfolio y Por qué develOP llegan a la vista** (`antesDeLaLlegada`): el viaje frena justo antes de que el
+ *     scroll dispare su llegada —la gota de la noche, el amanecer— y la llegada se recorre después, sin velo, hasta el
+ *     MISMO nudo de arriba (`useDeslizamientoDelCta`).
  */
 
 /** Los rangos con nombre de un bloque animado, tal como los escribe su `data-rango`. */
@@ -75,18 +89,45 @@ function despejeDeLaBarra(): number {
   return Number.isFinite(px) ? px : 0
 }
 
-/** Quiénes somos: el fin de la entrada, sin pasar el punto en que el título se mete debajo de la barra. */
+/**
+ * [NAVBAR] Un tramo del documento (`arriba` → `abajo`) centrado en el cuadro que la barra deja libre; si no entra, su
+ * tope apenas debajo de la barra. Nunca antes del tope de la sección: la de arriba no asoma.
+ */
+export function centradoDebajoDeLaBarra(topeDeLaSeccion: number, arriba: number, abajo: number, v: number, despeje: number): number {
+  const sobra = Math.max(0, v - despeje - (abajo - arriba))
+  return Math.max(topeDeLaSeccion, arriba - despeje - sobra / 2)
+}
+
+/**
+ * Quiénes somos: [NAVBAR] la primera pantalla centrada debajo de la barra, sin adelantarse al título (sus ventanas
+ * terminadas) ni pasarse del reposo de antes: el fin de la entrada, sin pasar el punto en que el título se mete debajo
+ * de la barra.
+ */
 function reposoDeQuienesSomos(panel: HTMLElement, v: number): number {
   const titulo = panel.querySelector<HTMLElement>('[data-composicion="agencia"] > [data-arbol]')
-  const conElTituloDespejado = titulo === null ? Number.POSITIVE_INFINITY : Math.floor(topeSinPegar(titulo) - despejeDeLaBarra())
-  return Math.min(Math.ceil(finDeLaEntrada(panel, v) ?? topeDe(panel)), conElTituloDespejado)
+  const despeje = despejeDeLaBarra()
+  const conElTituloDespejado = titulo === null ? Number.POSITIVE_INFINITY : Math.floor(topeSinPegar(titulo) - despeje)
+  const reposo = Math.min(Math.ceil(finDeLaEntrada(panel, v) ?? topeDe(panel)), conElTituloDespejado)
+  const primera = bloquesDeLaPrimeraPantalla(panel, v)
+  if (titulo === null || primera.length === 0) return reposo
+  const arriba = Math.min(...primera.map(topeSinPegar))
+  const abajo = Math.max(...primera.map((b) => topeSinPegar(b) + b.getBoundingClientRect().height))
+  const delTitulo = [titulo, ...titulo.querySelectorAll<HTMLElement>(SELECTOR_DEL_BLOQUE_ANIMADO)]
+    .map((b) => finDeLaVentana(b, v))
+    .filter((f): f is number => f !== null)
+  const llegoElTitulo = delTitulo.length === 0 ? Number.NEGATIVE_INFINITY : Math.max(...delTitulo)
+  return Math.min(reposo, Math.ceil(Math.max(centradoDebajoDeLaBarra(topeDe(panel), arriba, abajo, v, despeje), llegoElTitulo)))
+}
+
+/** Los bloques animados que arrancan en la primera pantalla de la sección. */
+function bloquesDeLaPrimeraPantalla(panel: HTMLElement, v: number): HTMLElement[] {
+  const tope = topeDe(panel)
+  return [...panel.querySelectorAll<HTMLElement>(SELECTOR_DEL_BLOQUE_ANIMADO)].filter((b) => topeSinPegar(b) < tope + v)
 }
 
 /** El fin de la entrada de la primera pantalla: la ventana más tardía de sus bloques, o `null` sin coreografía. */
 function finDeLaEntrada(panel: HTMLElement, v: number): number | null {
-  const tope = topeDe(panel)
-  const fines = [...panel.querySelectorAll<HTMLElement>(SELECTOR_DEL_BLOQUE_ANIMADO)]
-    .filter((b) => topeSinPegar(b) < tope + v)
+  const fines = bloquesDeLaPrimeraPantalla(panel, v)
     .map((b) => finDeLaVentana(b, v))
     .filter((f): f is number => f !== null)
   return fines.length === 0 ? null : Math.max(...fines)
@@ -108,6 +149,13 @@ const NUDOS: Readonly<Record<string, (panel: HTMLElement, v: number) => number |
     return Math.ceil(Math.max(topeDe(panel), subida ?? Number.NEGATIVE_INFINITY))
   },
   servicios: (panel) => Math.floor(topeDe(panel)),
+  // [NAVBAR] Panel: la cabecera entera a la vista (el título, la bajada y el panel en vivo).
+  'tu-panel': (panel, v) => {
+    const cabecera = panel.querySelector<HTMLElement>('[data-pieza="encabezado-del-panel"]')
+    if (cabecera === null) return null
+    const arriba = topeSinPegar(cabecera)
+    return Math.ceil(centradoDebajoDeLaBarra(topeDe(panel), arriba, arriba + cabecera.getBoundingClientRect().height, v, despejeDeLaBarra()))
+  },
   'por-que-develop': (panel, v) => {
     const escenario = panel.querySelector<HTMLElement>('[data-pieza="escenario-del-final"]')
     const pin = escenario?.closest<HTMLElement>(SELECTOR_DEL_BLOQUE_ANIMADO) ?? null
@@ -126,4 +174,48 @@ export function destinoDelViaje(seccion: HTMLElement): number {
   if (nudo === null) return Math.round(destinoDelAncla(seccion))
   const maximo = Math.floor(Math.max(0, document.documentElement.scrollHeight - window.innerHeight))
   return Math.min(Math.max(nudo, 0), maximo)
+}
+
+/**
+ * [NAVBAR] DÓNDE ARRANCA LA LLEGADA de cada sección que la tiene: el píxel de scroll en que el scroll la dispara.
+ *
+ *   · **Trabajos** — la gota de la noche: la caja sin el solape cruzando `lineaDeLaNoche` (la misma línea con que la
+ *     mide `CapaDeLaGota`). Después vienen el barrido y la subida de «Portfolio».
+ *   · **Por qué develOP** — el amanecer: el pie de Tu panel en `AMANECER.visible` del cuadro, donde el scroll empieza a
+ *     pedirlo (`avanceDelScroll`). Después vienen el día y la frase, que lo espera.
+ */
+const LLEGADAS: Readonly<Record<string, (panel: HTMLElement, v: number) => number | null>> = {
+  trabajos: (panel, v) => topeDe(panel.querySelector<HTMLElement>('[data-caja-sin-solape]') ?? panel) - lineaDeLaNoche(v),
+  'por-que-develop': (_, v) => {
+    const tuPanel = document.querySelector<HTMLElement>('[data-panel="tu-panel"]')
+    return tuPanel === null ? null : topeDe(tuPanel) + tuPanel.getBoundingClientRect().height - AMANECER.visible * v
+  },
+}
+
+/** La sección que ocupa el medio del cuadro con el scroll en `y`. */
+function seccionEnElPunto(y: number, v: number): string | null {
+  for (const p of document.querySelectorAll<HTMLElement>('[data-panel]')) {
+    const tope = topeDe(p)
+    if (tope <= y + v / 2 && y + v / 2 < tope + p.getBoundingClientRect().height) return p.getAttribute('data-panel')
+  }
+  return null
+}
+
+/** El primer tramo de un viaje con la llegada a la vista: hasta dónde va tapado, y qué sección hay ahí. */
+export interface LlegadaALaVista {
+  readonly antes: number
+  readonly seccion: string
+}
+
+/**
+ * [NAVBAR] DÓNDE FRENA EL VIAJE ANTES DE LA LLEGADA, en píxeles enteros; `null` si va derecho a su nudo. Sólo bajando
+ * y desde antes de la llegada: subiendo, o ya adentro, la llegada no se ve como se construyó y el viaje es el de siempre.
+ */
+export function antesDeLaLlegada(seccion: HTMLElement, destino: number): LlegadaALaVista | null {
+  const v = window.innerHeight
+  const llegada = LLEGADAS[seccion.getAttribute('data-panel') ?? '']?.(seccion, v) ?? null
+  if (llegada === null) return null
+  const antes = Math.floor(llegada - MARGEN_ANTES_DE_LA_LLEGADA * v)
+  if (antes <= window.scrollY || antes >= destino) return null
+  return { antes, seccion: seccionEnElPunto(antes, v) ?? seccion.id }
 }

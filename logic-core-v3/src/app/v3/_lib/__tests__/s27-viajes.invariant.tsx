@@ -24,6 +24,7 @@ import {
 } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { Navegacion } from '../../_componentes/chrome/Navegacion'
+import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
 import { Menu } from '../../_chrome/menu/MenuMovil'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { destinoDelViaje } from '../../_componentes/destinosDelViaje'
@@ -57,11 +58,11 @@ for (const [archivo, literal] of literales) {
 }
 const nada = (): void => undefined
 const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
-const BARRA = hrefsDe(renderToStaticMarkup(<Navegacion />), 'data-pieza="nav-enlace"')
+const BARRA = hrefsDe(renderToStaticMarkup(<Navegacion enlaces={ENLACES_DEL_HOME} />), 'data-pieza="nav-enlace"')
 const MENU = hrefsDe(renderToStaticMarkup(<Menu invertido={false} alCerrar={nada} alContacto={nada} alDesmontar={nada} />), 'data-parte="item-del-menu"')
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
-afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#por-que-develop'], 'la barra lleva a cuatro secciones de la tabla')
-afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#por-que-develop'], '  y el menú móvil a las mismas cuatro (su «Contacto» es un botón)')
+afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
+afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (su «Contacto» es un botón)')
 afirmarIgual(BARRA.filter((h) => !esSeccion(h)), ['#contacto'], '«Contacto» no viaja: `#contacto` no es una sección, el efecto lo deja pasar y lo abre el formulario')
 afirmar(/const seccion = document\.getElementById\(ancla\.slice\(1\)\)\s*if \(seccion === null\) return/.test(EFECTO), '  y el efecto sale ANTES del `preventDefault` cuando el ancla no es una sección')
 controlPositivo('  el chequeo de secciones vería un destino inventado', '#inventada', esSeccion)
@@ -99,8 +100,8 @@ afirmar(Math.abs(largo - DURACION_DEL_VIAJE_MS) <= CUADRO_MS, `  y lo que tardan
 /** Un viaje por velocidad: la duración sale de la distancia. Tiene que dar distinto. */
 const porVelocidad: typeof viajarSinLenis = (destino, _ms, curva, alTerminar) => viajarSinLenis(destino, Math.abs(destino - window.scrollY) / 8, curva, alTerminar)
 controlPositivo('  el chequeo vería un viaje que va por velocidad', porVelocidad, (f: typeof viajarSinLenis) => Math.abs(cuantoTarda(0, 900, f) - cuantoTarda(0, 21_000, f)) < CUADRO_MS)
-afirmarIgual((EFECTO.match(/duration:/g) ?? []).length, 1, 'con Lenis hay UNA sola duración en el efecto')
-afirmar(EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S') && EFECTO.includes('DURACION_DEL_VIAJE_MS,'), '  y es la constante, la misma que recibe el motor de abajo: ninguna se calcula con la distancia')
+afirmarIgual((EFECTO.match(/duration:/g) ?? []).length, 2, 'con Lenis hay DOS duraciones en el efecto: la del viaje y [NAVBAR] la de la llegada a la vista')
+afirmar(EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S') && EFECTO.includes('DURACION_DEL_VIAJE_MS,') && EFECTO.includes('duration: DURACION_DE_LA_LLEGADA_MS / 1000') && EFECTO.includes('viajarSinLenis(destinoEnPx, DURACION_DE_LA_LLEGADA_MS,'), '  y son constantes, las mismas que recibe el motor de abajo: ninguna se calcula con la distancia')
 afirmarIgual(DURACION_DEL_DESLIZAMIENTO_S * 1000, DURACION_DEL_VIAJE_MS, '  la de Lenis va en segundos, derivada de los mismos milisegundos')
 const LIBRERIA = leer('node_modules/lenis/dist/lenis.mjs')
 afirmar(LIBRERIA.includes('if (this.duration && this.easing) {') && LIBRERIA.includes('const linearProgress = clamp(0, this.currentTime / this.duration, 1);'), '  y Lenis, con `duration` y `easing`, anima por TIEMPO: el `lerp` (que va por distancia) sólo corre sin duración')
@@ -134,7 +135,14 @@ const entradaDe = (panel: NodoFalso, v: number): number => Math.ceil(Math.max(..
 conDomFalso(900, 72, () => {
   VENTANA.scrollY = 0
   const qs = quienesSomos(900 + 224)
-  afirmarIgual(destinoDelViaje(qs as unknown as HTMLElement), entradaDe(qs, 900), 'Quiénes somos: el fin de la ventana más tardía de la primera pantalla (la de «El equipo» no cuenta)')
+  /**
+   * [NAVBAR] Un poco antes que el reposo de antes (el fin de la ventana más tardía, que dejaba el título pegado a la
+   * barra): la primera pantalla —del título a 1124 al pie del cuerpo a 1650, 526 px— centrada en los 828 px que la
+   * barra deja libres, 151 arriba y 151 abajo: 1124 − 72 − 151 = 901. El título ya llegó (sus ventanas terminan en
+   * 719 y 809) y «El equipo» sigue sin contar.
+   */
+  afirmarIgual(destinoDelViaje(qs as unknown as HTMLElement), 901, 'Quiénes somos: [NAVBAR] la primera pantalla centrada debajo de la barra (la de «El equipo» no cuenta)')
+  afirmar(901 < entradaDe(qs, 900), '  un poco antes que el reposo de antes', `antes ${String(entradaDe(qs, 900))}`)
 })
 conDomFalso(768, 72, () => {
   const bajo = quienesSomos(900 + 150)
@@ -169,7 +177,7 @@ const DESTINOS = quitarComentarios(leer('src/app/v3/_componentes/destinosDelViaj
 const sinPixeles = (f: string): boolean => !/[^\w.]\d{2,}/.test(f)
 afirmar(sinPixeles(DESTINOS), 'y ningún destino está escrito en píxeles: el módulo no tiene un solo número de dos cifras')
 controlPositivo('  el detector vería un destino escrito a mano', 'trabajos: () => 5072,', sinPixeles)
-afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECTO.includes('lenis.scrollTo(destinoEnPx, {') && EFECTO.includes('destinoEnPx,'), 'los dos motores y el salto van al MISMO píxel, medido en el click')
+afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECTO.includes('const hasta = llegada?.antes ?? destinoEnPx') && EFECTO.includes('lenis.scrollTo(hasta, {') && /viajarSinLenis\(\s*hasta,/.test(EFECTO) && EFECTO.includes('window.scrollTo({ top: destinoEnPx'), 'los dos motores van al MISMO píxel, medido en el click ([NAVBAR] el de antes de la llegada si la tiene), y el salto al nudo')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · La noche durante el viaje')

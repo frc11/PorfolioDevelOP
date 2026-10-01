@@ -70,6 +70,8 @@ const DELTA_DEL_CONTACTO = { paradas: 1 } as const
 const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length + CATALOGO_DE_DEMOS.length / 2, encabezados: 1 } as const
 // [Cierre de INTERFAZ 2] + la pausa del panel en vivo de Tu panel (se mueve solo más de cinco segundos: WCAG 2.2.2), en las dos ramas.
 const DELTA_DE_LA_VIDA = { paradas: 1 } as const
+// [NAVBAR] T1 · «Panel» es un ítem nuevo de la barra (lleva a Tu panel): una parada más, en las dos ramas.
+const DELTA_DEL_NAVBAR = { paradas: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -162,8 +164,8 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero y la pausa del panel en vivo`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo y «Panel» en la barra`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -176,9 +178,9 @@ afirmar(
   '  y su destino EXISTE en el marcado: el salto aterriza en algo',
 )
 afirmarIgual(
-  PARADAS.slice(1, 6).map((p) => p.destino),
-  ['#quienes-somos', '#trabajos', '#servicios', '#por-que-develop', '#contacto'],
-  '  y las CINCO siguientes son los enlaces de la pastilla, en el mismo orden que medía S10 (CONTACTO: el último abre el formulario)',
+  PARADAS.slice(1, 7).map((p) => p.destino),
+  ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop', '#contacto'],
+  '  y las SEIS siguientes son los ítems de la barra, en su orden ([NAVBAR] «Panel» nuevo; CONTACTO: el último abre el formulario)',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -200,7 +202,7 @@ afirmarIgual(DESCUENTO_NACIMIENTO_PX, 72, 'el nacimiento es `100svh − 72px`, d
  * donde está (`sticky` de alto cero con la pastilla `absolute` a `100svh − 72`),
  * y bajarla la haría nacer más abajo.
  */
-afirmar(PARADAS[6].seccion === 'hero', 'la primera parada que vive en el CONTENIDO es la 7ª — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[6]).rotulo} → ${PARADAS[6].destino}`)
+afirmar(PARADAS[7].seccion === 'hero', 'la primera parada que vive en el CONTENIDO es la 8ª ([NAVBAR] seis ítems) — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[7]).rotulo} → ${PARADAS[7].destino}`)
 afirmar(PARADAS[0].seccion === null || PARADAS[0].seccion === undefined || PARADAS[0].destino === '#hero', '  y la 1ª es el escape: el enlace de salto vive en el chrome y apunta al contenido')
 console.log(
   '  ✅ HALLAZGOS 1 y 2 — CERRADOS en SITIO-S11 · `_chrome/SaltarAlContenido.tsx` + `_estilos/foco.css` — el enlace de salto es la parada 1 ' +

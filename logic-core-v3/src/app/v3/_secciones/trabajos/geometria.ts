@@ -119,6 +119,9 @@ export const DISPARO_DE_LA_NOCHE = {
   vuelta: (PANTALLAS_DE_NUMEROS - 1) * 100 + 8,
 } as const
 
+/** [NAVBAR] La línea de la ida en píxeles: la caja sin el solape la cruza con su tope a esta distancia del cuadro. */
+export const lineaDeLaNoche = (alto: number): number => alto * (1 + DISPARO_DE_LA_NOCHE.ida / 100)
+
 /** Normaliza un progreso contra una ventana. Fuera de ella satura. */
 export function enLaVentana(progreso: number, ventana: { desde: number; hasta: number }): number {
   const u = (progreso - ventana.desde) / (ventana.hasta - ventana.desde)

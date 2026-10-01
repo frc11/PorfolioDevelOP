@@ -6,7 +6,7 @@ import { DIA_DEL_FINAL, NOCHE_DISPARADA, suscribirAlDiaDelFinal } from '../../_l
 import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 
-import { DISPARO_DE_LA_NOCHE } from './geometria'
+import { DISPARO_DE_LA_NOCHE, lineaDeLaNoche } from './geometria'
 import {
   DURACION_DEL_BARRIDO,
   cantidadDeLaNoche,
@@ -80,7 +80,7 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
      */
     const nocheDelScroll = (): number => {
       const r = caja.getBoundingClientRect()
-      const cruza = r.top < window.innerHeight * (1 + DISPARO_DE_LA_NOCHE.ida / 100) && r.bottom > 0
+      const cruza = r.top < lineaDeLaNoche(window.innerHeight) && r.bottom > 0
       return cantidadDeLaNoche(cruceDelTramo({ cruza, tope: r.top, pie: r.bottom }) === 'arriba-subiendo' ? 0 : 1)
     }
     /** [VIAJES] Un viaje que cambia de luz arranca con la noche que se VE: con el día del final puesto, ninguna. */

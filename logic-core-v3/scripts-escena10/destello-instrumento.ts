@@ -164,6 +164,8 @@ export interface Pico {
   /** Cuánto se sale del rango de sus dos vecinos (luminancia media de lo que se ve en toda la ventana). */
   readonly fuera: number
   readonly luminancias: readonly number[]
+  /** [NAVBAR] Qué fracción de las celdas a la vista se sale, cada una, del rango de sus vecinos en la misma dirección. */
+  readonly celdas: number
   readonly estados: Omit<Cuadro, 'celdas'>[]
 }
 
@@ -171,13 +173,43 @@ export interface Pico {
 export const CUADROS_DEL_DESTELLO = 12
 
 /**
+ * [NAVBAR] Cuánto de lo que se ve tiene que salirse para que el pico sea de LUZ: la mitad de las celdas, cada una por
+ * más de medio umbral y en la dirección del pico. Un destello de luz (la sala de día un cuadro entre cuadros de noche)
+ * mueve la sala entera: el control positivo de este invariante saca el 100 % de las celdas (0,78 de luminancia). La
+ * geometría que va y vuelve en un cuadro no: en un viaje rápido que cruza Trabajos el logo queda UN cuadro de canto
+ * (menos negro en pantalla, la media sube 0,025–0,035) y eso saca el 24–31 % de las celdas. Medido en el sprint NAVBAR
+ * (`scripts-navbar/t1-sonda-destello.ts`): el viaje del hero a Por qué develOP ya lo daba a veces antes del sprint (una
+ * de dos corridas), y la verde de antes era suerte del muestreo.
+ */
+export const FRACCION_DEL_DESTELLO = 0.5
+
+/** Qué fracción de las celdas comunes a la ventana se sale, cada una, del rango de sus dos vecinos, en una dirección. */
+function celdasQueSeSalen(ventana: readonly Cuadro[], comunes: readonly boolean[], sube: boolean, umbral: number): number {
+  let [n, fuera] = [0, 0]
+  const [a, z] = [ventana[0], ventana[ventana.length - 1]]
+  const medio = ventana.slice(1, -1)
+  for (let b = 0; b < BANDAS; b += 1) {
+    if (!comunes[b]) continue
+    for (let col = 0; col < COLUMNAS; col += 1) {
+      const k = b * COLUMNAS + col
+      const valores = medio.map((c) => c.celdas[k])
+      const d = sube ? Math.min(...valores) - Math.max(a.celdas[k], z.celdas[k]) : Math.min(a.celdas[k], z.celdas[k]) - Math.max(...valores)
+      n += 1
+      if (d > umbral / 2) fuera += 1
+    }
+  }
+  return fuera / Math.max(1, n)
+}
+
+/**
  * Los DESTELLOS, en todo el recorrido (barrido incluido): de uno a `CUADROS_DEL_DESTELLO` cuadros seguidos que se salen
  * del rango de sus dos vecinos (todos más claros, o todos más oscuros, que el más claro y el más oscuro de los vecinos)
  * por más de `umbral`, en la luminancia media de lo que se ve en toda la ventana. Un fundido rápido (el de la luz de un
  * viaje) o la cámara volando cambian mucho de un cuadro al otro, pero no ida y vuelta: no son picos. Gana la ventana que
- * más se sale (una chica adentro de una larga no la tapa).
+ * más se sale (una chica adentro de una larga no la tapa). [NAVBAR] Y es de LUZ: se sale por lo menos
+ * `FRACCION_DEL_DESTELLO` de lo que se ve (la geometría que va y vuelve, como el logo de canto, no).
  */
-export function destellosEn(cuadros: readonly Cuadro[], umbral: number): Pico[] {
+export function destellosEn(cuadros: readonly Cuadro[], umbral: number, fraccion = FRACCION_DEL_DESTELLO): Pico[] {
   const candidatos: Pico[] = []
   for (let k = 1; k <= CUADROS_DEL_DESTELLO; k += 1) {
     for (let i = 1; i + k < cuadros.length; i += 1) {
@@ -197,7 +229,9 @@ export function destellosEn(cuadros: readonly Cuadro[], umbral: number): Pico[] 
       const arriba = Math.min(...medio) - Math.max(a, z)
       const abajo = Math.min(a, z) - Math.max(...medio)
       const fuera = Math.max(arriba, abajo)
-      if (fuera > umbral) candidatos.push({ i, cuadros: k, t: Math.round(cuadros[i].t), fuera: Math.round(fuera * 1e4) / 1e4, luminancias: L.map((x) => Math.round(x * 1e3) / 1e3), estados: ventana.map(sinCeldas) })
+      if (fuera <= umbral) continue
+      const celdas = celdasQueSeSalen(ventana, comunes, arriba >= abajo, umbral)
+      if (celdas >= fraccion) candidatos.push({ i, cuadros: k, t: Math.round(cuadros[i].t), fuera: Math.round(fuera * 1e4) / 1e4, luminancias: L.map((x) => Math.round(x * 1e3) / 1e3), celdas: Math.round(celdas * 100) / 100, estados: ventana.map(sinCeldas) })
     }
   }
   const picos: Pico[] = []

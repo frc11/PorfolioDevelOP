@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Navegacion } from '../_componentes/chrome/Navegacion'
-import { ENLACES_DE_MUESTRA } from '../_lib/navegacion'
+import { ENLACES_DEL_HOME } from './enlaces'
 import { fijarModoDelChrome, type ModoDelChrome } from './contacto/apertura'
 
 /**
@@ -16,7 +16,7 @@ import { fijarModoDelChrome, type ModoDelChrome } from './contacto/apertura'
  */
 
 /** Los ids de la barra que son secciones del home. */
-const EN_LA_BARRA = new Set(ENLACES_DE_MUESTRA.map((e) => e.id))
+const EN_LA_BARRA = new Set(ENLACES_DEL_HOME.map((e) => e.id))
 
 /**
  * ¿Entra la barra entera? La pastilla tiene un ancho máximo y recorta su lista; si la lista
@@ -96,7 +96,7 @@ export function NavegacionDelHome({ className }: { readonly className?: string }
   }, [activo])
 
   return (
-    <Navegacion como="header" className={className} activo={activo}>
+    <Navegacion como="header" className={className} activo={activo} enlaces={ENLACES_DEL_HOME}>
       <span ref={raya} data-parte="subrayado-activo" aria-hidden="true" />
     </Navegacion>
   )

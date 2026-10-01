@@ -26,12 +26,26 @@ import { abrirMotor } from '../scripts-calidad/motor/abrir'
 import { clicEnElItem } from '../scripts-viajes/b-humo'
 import { esperar, scrollHasta } from '../scripts-viajes/banco'
 import { ORIGEN, UMBRAL, UMBRAL_DEL_PICO, VELOCIDADES, acontecimientos, grabarCuadros, idaYVuelta, irAlControl, tope, tramoFinal } from './destello'
-import { INSTRUMENTO, bandasALaVista, destellosEn, saltosEn } from './destello-instrumento'
+import { BANDAS, CAMPOS, COLUMNAS, INSTRUMENTO, bandasALaVista, destellosEn, saltosEn, type Cuadro } from './destello-instrumento'
 
 const VIAJES = ['trabajos>por-que-develop', 'por-que-develop>trabajos', 'hero>por-que-develop'] as const
 const A_LA_VISTA = ['compuerta-prende', 'cambio-a-dia', 'cambio-a-noche'] as const
 
+/** [NAVBAR] Tres cuadros quietos con el del medio más claro en `fraccion` de las celdas, por `salto`. */
+function sintetico(fraccion: number, salto: number): Cuadro[] {
+  const total = BANDAS * COLUMNAS
+  return [0, 1, 2].map((i) => {
+    const campos = Object.fromEntries(CAMPOS.map((k) => [k, k === 't' ? i * 13 : k === 'alto' ? 900 : k.endsWith('Tope') || k.endsWith('Pie') ? Number.NaN : 0])) as Omit<Cuadro, 'celdas'>
+    return { ...campos, celdas: Array.from({ length: total }, (_, k) => 0.5 + (i === 1 && k < fraccion * total ? salto : 0)) }
+  })
+}
+
 async function principal(): Promise<void> {
+  titulo('La definición: un destello es de LUZ ([NAVBAR])')
+  afirmar(destellosEn(sintetico(1, 0.04), UMBRAL_DEL_PICO).length === 1, 'un cuadro con la sala entera más clara (0,04) es un destello')
+  afirmar(destellosEn(sintetico(0.3, 0.12), UMBRAL_DEL_PICO).length === 0, 'la geometría que va y vuelve en un tercio del cuadro (0,036 de media, como el logo de canto en un viaje) no lo es')
+  controlPositivo('  el detector sin la fracción sí la contaba (la falla que se vio en el sprint NAVBAR)', sintetico(0.3, 0.12), (x) => destellosEn(x, UMBRAL_DEL_PICO, 0).length === 0)
+
   const b = await abrirMotor(1440, 900, { conVsync: true })
   try {
     const placa = await medir<string>(b.p, `(() => { const gl = document.createElement('canvas').getContext('webgl2'); const e = gl.getExtension('WEBGL_debug_renderer_info'); return e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) })()`)
@@ -61,7 +75,8 @@ async function principal(): Promise<void> {
       await esperar(1500)
       const r = await grabarCuadros(b, async () => {
         await clicEnElItem(b, d)
-        await esperar(5500)
+        // [NAVBAR] Hasta el final de la llegada a la vista (Por qué develOP la recorre sin velo después del viaje).
+        await esperar(8200)
       })
       const picos = destellosEn(r.cuadros, UMBRAL_DEL_PICO)
       afirmar(r.cuadros.filter((c) => c.viaje === 1).length >= 30 && picos.length === 0, `${o} → ${d}: ningún destello en el viaje`, picos.length === 0 ? `${String(r.cuadros.filter((c) => c.viaje === 1).length)} cuadros de viaje` : JSON.stringify(picos[0]))

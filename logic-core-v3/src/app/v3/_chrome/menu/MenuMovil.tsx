@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
+import { ENLACES_DEL_HOME } from '../enlaces'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
@@ -137,7 +137,7 @@ export function Menu({
       >
         <nav aria-label="Navegación principal">
           <ul className="flex flex-col">
-            {ENLACES_DE_MUESTRA.map((enlace) => (
+            {ENLACES_DEL_HOME.map((enlace) => (
               <li key={enlace.id}>
                 {enlace.destino === '#contacto' ? (
                   <button type="button" data-parte="item-del-menu" onClick={alContacto} className={CLASE_DEL_ITEM}>
