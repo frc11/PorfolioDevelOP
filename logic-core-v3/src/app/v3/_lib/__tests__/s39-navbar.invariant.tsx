@@ -55,7 +55,7 @@ afirmarIgual(ENLACES_DEL_HOME.map((e) => e.rotulo), ['Quiénes somos', 'Portfoli
 const secciones = ENLACES_DEL_HOME.filter((e) => e.destino !== '#contacto')
 afirmar(secciones.every((e) => (IDS_DE_SECCION as readonly string[]).includes(e.destino.slice(1)) && e.destino === `#${e.id}`), '  cada uno lleva a una sección de la tabla («Portfolio» sigue siendo `#trabajos`, «Panel» es `#tu-panel`)')
 afirmarIgual(ENLACES_DEL_HOME[ENLACES_DEL_HOME.length - 1], { id: 'cierre', rotulo: 'Contacto', destino: '#contacto' }, '  y «Contacto» sigue siendo el de hoy: abre el formulario')
-const USAN_LA_LISTA = ['_chrome/menu/MenuMovil.tsx']
+const USAN_LA_LISTA = ['_chrome/menu/PanelDelMenu.tsx']
 afirmar(USAN_LA_LISTA.every((r) => leer(r).includes('ENLACES_DEL_HOME.map(')) && !/ENLACES_DE_MUESTRA/.test(USAN_LA_LISTA.map(leer).join('\n')), '  el menú del teléfono usa la lista del home, no la de muestra de la pastilla compartida')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -152,9 +152,10 @@ afirmar(['src/app/v3/_componentes/chrome/Navegacion.tsx', 'src/app/v3/_estilos/n
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T3 · El menú del teléfono: el Genie, el vidrio, el tono y el diálogo')
 
-const MENU = sinComentarios(leer('_chrome/menu/MenuMovil.tsx'))
+// El menú son dos archivos: el botón, las fases y el Genie (`MenuMovil`), y el adentro y la geometría (`PanelDelMenu`).
+const MENU = sinComentarios(leer('_chrome/menu/MenuMovil.tsx') + leer('_chrome/menu/PanelDelMenu.tsx'))
 const GENIE = sinComentarios(leer('_chrome/menu/GenieDelMenu.tsx'))
-afirmar(MENU.includes("import { MS_DEL_GENIE, correrPorTiempo, type Caja } from '../../_secciones/trabajos/demos/genie'") && GENIE.includes('esquinasDeLaTira(i, TIRAS_DEL_MENU, m, ventana, destino, lider, SOLAPE)') && leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('correrPorTiempo as correr'), 'el Genie es el de las demos: la misma geometría, la misma duración y el mismo reloj (que ahora comparten)')
+afirmar(MENU.includes("import { MS_DEL_GENIE, correrPorTiempo } from '../../_secciones/trabajos/demos/genie'") && GENIE.includes('esquinasDeLaTira(i, TIRAS_DEL_MENU, m, ventana, destino, lider, SOLAPE)') && leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('correrPorTiempo as correr'), 'el Genie es el de las demos: la misma geometría, la misma duración y el mismo reloj (que ahora comparten)')
 afirmar(MENU.includes('destino: cajaDe(boton)') && MENU.includes('(t) => cuadro(1 - t / MS_DEL_GENIE)') && /cuadro\(desde \+ \(1 - desde\)/.test(MENU), '  sale del botón al abrir y vuelve a él al cerrar (desde donde iba, si se cierra abriendo)')
 afirmar(MENU.includes('cancelar.current = fundir(1, listo)') && MENU.includes('MS_DEL_FUNDIDO') && /geometria !== null && !reducido &&/.test(MENU), '  con movimiento reducido no hay Genie: el fundido corto de las demos')
 afirmar(GENIE.includes('const enLaRendija = piezas.filter(') && !/children/.test(GENIE) && MENU.includes("className=\"invisible\"") && MENU.includes("style.setProperty('visibility', genie ? 'visible' : 'hidden')"), '  y abrir no monta nada: cada tira lleva sólo las piezas medidas de su rendija y la capa se muestra con `visibility` (medido con la CPU ×4 en navbar/t3-menu)')

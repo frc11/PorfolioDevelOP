@@ -1,6 +1,5 @@
 'use client'
 
-import { X } from 'lucide-react'
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -9,13 +8,13 @@ import { Isotipo } from '../../_componentes/marca/Marca'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO } from '../../_secciones/trabajos/demos/apertura'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
-import { MS_DEL_GENIE, correrPorTiempo, type Caja } from '../../_secciones/trabajos/demos/genie'
+import { MS_DEL_GENIE, correrPorTiempo } from '../../_secciones/trabajos/demos/genie'
 import { abrirContacto, useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
-import { ENLACES_DEL_HOME } from '../enlaces'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { GenieDelMenu, type ControlDelGenieDelMenu, type PiezaDelGenie } from './GenieDelMenu'
 import { LenteDelVidrio, conLente } from './LenteDelVidrio'
+import { CLASE_DEL_CERRAR, CLASE_DEL_ITEM, CRUZ, ContenidoDelMenu, ROTULO_DEL_MENU, medirLaGeometria, mismaGeometria, type Geometria } from './PanelDelMenu'
 import { vaInvertido } from './tono'
 import { useTonoDebajo } from './useTonoDebajo'
 
@@ -46,7 +45,7 @@ import { useTonoDebajo } from './useTonoDebajo'
  * renglón de `--spacing-12` como mínimo) y «Contacto» abre el formulario cuando el menú terminó de irse.
  */
 
-export const ROTULO_DEL_MENU = { abrir: 'Abrir el menú', cerrar: 'Cerrar el menú', menu: 'Menú' } as const
+export { ROTULO_DEL_MENU }
 
 /**
  * El relevo entre la copia plana del Genie y el vidrio (ms): al abrir el vidrio se funde encima de las tiras quietas; al
@@ -132,40 +131,6 @@ export function MenuMovil(): React.JSX.Element | null {
 }
 
 type Fase = 'cerrado' | 'abriendo' | 'abierto' | 'cerrando'
-
-/** Una pieza del panel medida en su lugar (relativa al panel): lo que la copia plana del Genie repite. */
-interface PiezaMedida {
-  readonly cerrar: boolean
-  readonly texto: string
-  readonly caja: Caja
-}
-
-interface Geometria {
-  readonly ventana: Caja
-  readonly destino: Caja
-  readonly radio: number
-  readonly piezas: readonly PiezaMedida[]
-}
-
-function cajaDe(el: Element | null): Caja {
-  const r = el?.getBoundingClientRect()
-  return r === undefined ? { x: 0, y: 0, ancho: 0, alto: 0 } : { x: r.left, y: r.top, ancho: r.width, alto: r.height }
-}
-
-/** El panel (en su lugar, escondido) y el botón: de dónde sale el Genie y adónde va, y el radio del panel para la lente. */
-function medirLaGeometria(panel: HTMLElement | null, boton: HTMLElement | null): Geometria {
-  const radio = panel === null ? 0 : Number.parseFloat(getComputedStyle(panel).borderTopLeftRadius) || 0
-  const ventana = cajaDe(panel)
-  const piezas = panel === null ? [] : [...panel.querySelectorAll<HTMLElement>('[data-parte="cerrar-el-menu"], [data-parte="item-del-menu"]')].map((el) => {
-    const c = cajaDe(el)
-    return { cerrar: el.getAttribute('data-parte') === 'cerrar-el-menu', texto: el.textContent ?? '', caja: { x: c.x - ventana.x, y: c.y - ventana.y, ancho: c.ancho, alto: c.alto } }
-  })
-  return { ventana, destino: cajaDe(boton), radio, piezas }
-}
-
-const mismaCaja = (a: Caja, b: Caja): boolean => a.x === b.x && a.y === b.y && a.ancho === b.ancho && a.alto === b.alto
-const mismaGeometria = (a: Geometria, b: Geometria): boolean =>
-  mismaCaja(a.ventana, b.ventana) && mismaCaja(a.destino, b.destino) && a.radio === b.radio && a.piezas.length === b.piezas.length && a.piezas.every((p, i) => mismaCaja(p.caja, b.piezas[i].caja))
 
 /** Lo que el botón del menú le pide al panel. */
 export interface ControlDelMenu {
@@ -411,49 +376,3 @@ export function Menu({
     </>
   )
 }
-
-/** La cruz del botón de cerrar (la misma en la copia plana del Genie). */
-const CRUZ = <X aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-5)]" />
-
-/** El adentro del panel: su botón de cerrar (arriba al centro, en el lugar del botón del menú) y los ítems. */
-function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
-  return (
-    <div className="flex size-full flex-col">
-      <button type="button" data-parte="cerrar-el-menu" aria-label={ROTULO_DEL_MENU.cerrar} onClick={alCerrar} className={CLASE_DEL_CERRAR}>
-        {CRUZ}
-      </button>
-      <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-12)]">
-        <ul className="flex flex-col gap-[var(--spacing-1)]">
-          {ENLACES_DEL_HOME.map((enlace) => (
-            <li key={enlace.id}>
-              {enlace.destino === '#contacto' ? (
-                <button
-                  type="button"
-                  data-parte="item-del-menu"
-                  onClick={() => {
-                    alContacto()
-                    alCerrar()
-                  }}
-                  className={CLASE_DEL_ITEM}
-                >
-                  {enlace.rotulo}
-                </button>
-              ) : (
-                <a href={enlace.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
-                  {enlace.rotulo}
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
-  )
-}
-
-const CLASE_DEL_CERRAR = 'bg-fondo text-tinta border-borde mx-auto grid size-[var(--spacing-12)] shrink-0 place-items-center rounded-full border'
-
-const CLASE_DEL_ITEM = cn(
-  'text-titulo-m font-titulo leading-titulo tracking-titulo flex min-h-[var(--spacing-12)] w-full items-center rounded-[var(--radius-medio)] px-[var(--spacing-4)] py-[var(--spacing-2)] text-left',
-  'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
-)
