@@ -22,6 +22,7 @@ import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 
 import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
+import { VELO_CON_LA_SALA_DETRAS } from '../../_chrome/menu/MenuMovil'
 import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from '../../_chrome/escena/RespuestaDeLaEscena'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { ENCENDIDO } from '../escena/entorno/encendido'
@@ -167,10 +168,7 @@ MENU_DE_LA_INTERFAZ.abierto = false
 afirmar(/arc\.level = nivelConLaNocheDisparada\(arc\.level\)\s*\/\/[^\n]*\n\s*arc\.level = nivelConLaInterfaz\(arc\.level, Math\.min\(delta, 0\.1\)\)/.test(leer('_lib/escena/OrbitRig.tsx')), 'el rig la aplica DESPUÉS de la noche disparada: la luz de salida de un viaje (`NIVEL_NATURAL`) queda limpia')
 
 const MENU_MOVIL = leer('_chrome/menu/MenuMovil.tsx')
-// Las clases del velo, partidas: el escaneo de Tailwind lee este archivo (CLAUDE.md, modo pulido).
-const VELO_POCO = ['backdrop-blur-', '[calc(var(--blur-panel)/3)]'].join('')
-const VELO_ENTERO = ['backdrop-blur-', '[var(--blur-panel)]'].join('')
-afirmar(MENU_MOVIL.includes(`salaDetras ? '${VELO_POCO}' : '${VELO_ENTERO}'`), 'con la bandera el velo desenfoca POCO la página (un tercio) y la que se va de foco es la sala; sin ella, el velo de siempre')
+afirmar(MENU_MOVIL.includes('style={salaDetras ? { backdropFilter: VELO_CON_LA_SALA_DETRAS } : undefined}') && VELO_CON_LA_SALA_DETRAS === 'blur(calc(var(--blur-panel) / 3))', 'con la bandera el velo desenfoca POCO la página (un tercio) y la que se va de foco es la sala; sin ella, el velo de siempre (su clase no cambió)')
 afirmar(/useEffect\(\(\) => \{\s*if \(!responde\) return undefined\s*salaDetrasDelMenu\(abierto\)\s*return \(\) => salaDetrasDelMenu\(false\)\s*\}, \[responde, abierto\]\)/.test(MENU_MOVIL), '  el menú avisa al abrir y al cerrar (y al desmontarse), sólo con la bandera')
 const SALA = leer('_chrome/escena/salaDetrasDelMenu.ts')
 afirmar(SALA.includes("document.querySelector<HTMLElement>('[data-escena]')") && SALA.includes("'blur(var(--blur-panel))'"), '  el lienzo de la escena toma el desenfoque entero (`--blur-panel`), con la duración del menú')

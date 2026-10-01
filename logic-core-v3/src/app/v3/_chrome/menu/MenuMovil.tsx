@@ -28,6 +28,8 @@ import { useTonoDebajo } from './useTonoDebajo'
  */
 
 export const MS_DEL_MENU = 380
+/** [INTERFAZ 2] T1 · el velo con la sala detrás (`salaDetrasDelMenu.ts`): un tercio del desenfoque del panel. */
+export const VELO_CON_LA_SALA_DETRAS = 'blur(calc(var(--blur-panel) / 3))'
 export const ROTULO_DEL_MENU = { abrir: 'Abrir el menú', cerrar: 'Cerrar el menú', menu: 'Menú' } as const
 
 /** El centro del botón, visto desde el borde de arriba del menú: de ahí nace. */
@@ -119,10 +121,9 @@ export function Menu({
         data-parte="velo-del-menu"
         aria-hidden="true"
         onClick={alCerrar}
-        className={cn(
-          'fixed inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_20%,transparent)]',
-          salaDetras ? 'backdrop-blur-[calc(var(--blur-panel)/3)]' : 'backdrop-blur-[var(--blur-panel)]',
-        )}
+        className="fixed inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_20%,transparent)] backdrop-blur-[var(--blur-panel)]"
+        // [INTERFAZ 2] T1 · con la sala detrás, el velo desenfoca POCO la página (un tercio): la que se va de foco es la sala.
+        style={salaDetras ? { backdropFilter: VELO_CON_LA_SALA_DETRAS } : undefined}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
