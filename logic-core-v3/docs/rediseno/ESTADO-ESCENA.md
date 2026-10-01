@@ -109,6 +109,14 @@ una etapa posterior (la de 3D).** Quedan con su bandera, apagados en el producto
 |---|---|
 | `titulos=negro` · `=blanco` | T3 · los títulos de Portfolio y de la frase de Por qué develOP como objetos de la escena: la Chivo (OFL, la WOFF2 del sitio en 400, `_fuentes/chivo-400-titulos.json`) extruida, una malla por título, quieta en el mundo donde la cámara del momento de la lectura (medido: `LECTURA` en `_lib/titulos3d/registro.ts`) la ve en el lugar del DOM; las letras llegan desde atrás girando y se van igual, persiguiendo al progreso de la pieza con un mínimo de 1,4 s. De noche, el dibujo del logo (su emisión, costados negros, tapas claras con filo); el blanco de día, con un filo oscuro. El DOM conserva el texto (sr-only) y su lugar (invisible, sin anunciar). Un módulo aparte que sólo se descarga con la bandera (`escena/titulos3d/`, `PruebasDeLaEscena.tsx`) |
 
+[INTERFAZ 2] Las de ese sprint (la escena y la interfaz juntas), apagadas en el producto; el detalle, en
+`ESTADO-INTERFAZ.md` §5. Las que tocan la escena:
+
+| Token | Efecto en la escena |
+|---|---|
+| `responde=si` | el pulso PRINCIPAL que pide un CTA entra por la máquina de E4 (`EntradasDelPulso.pedido`; sin él, la misma máquina); la onda dirigida del piso vivo (un término inyectado en la simulación y una banda en el dibujo, `piso/ondaDirigida.ts`); la luz de la sala baja un 22 % con el menú del teléfono abierto (`interfaz/respuesta.ts`, después de la noche disparada) |
+| `anticipa=si` | la vista previa del destino: un corrimiento de la luz adentro de su clase (`RIM_NIGHT_LEVEL` como frontera, el encendido del haz como juez) y un giro de 7° de la cámara junto al del mouse, sólo con la física (`interfaz/anticipacion.ts`) |
+
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 
@@ -124,7 +132,9 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; T3: `__titulosDelBanco` (`titulos()`: la
 llegada, la salida, lo mostrado y la caja de cada título en el cuadro contra la del DOM; `camara()`: la viva contra la que
 calcula la colocación; `progreso()`); `__logoDeNocheDelBanco`,
-`__materialDelLogoDelBanco` y `__lenisDelBanco` se borraron con sus variantes. [CALIDAD 1]
+`__materialDelLogoDelBanco` y `__lenisDelBanco` se borraron con sus variantes. [INTERFAZ 2] `__respuestaDelBanco()` (lo que la
+interfaz le suma a la sala: el menú y la anticipación) y `__pisoDelBanco.estado().onda` (la onda dirigida: cuándo nació,
+su dirección y su fuerza). [CALIDAD 1]
 `__gpuDelBanco` (el tiempo de GPU por objeto con nombre, la grabación por cuadro, los programas, `tres()`),
 `__precompiladoDelBanco` (cuánto tardó el precompilado) y `__calidadDelBanco` (el escalón de la adaptativa;
 arranca apagada con banco, `activa(true)`).
@@ -245,6 +255,8 @@ se dibujan.
 
 ## 5 · Los invariantes
 
+`npm run test:s38-interfaz2` ([INTERFAZ 2] la escena que responde a la interfaz, con bandera: el pulso pedido, la onda
+dirigida, la luz con el menú, la anticipación del destino; una sección por ticket con sus controles positivos),
 `npm run test:s36-escena10` ([ESCENA 10] una sección por ticket, con sus controles positivos; la del cierre: el orden
 del cuadro y el viaje que cambia de luz),
 **`npm run test:escena-destello`** ([ESCENA 10] cierre · el destello de un cuadro, **con scroll real**: la rueda por CDP

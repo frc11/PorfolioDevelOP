@@ -1,4 +1,4 @@
-# Estado de la interfaz — después de INTERFAZ 1
+# Estado de la interfaz — después de INTERFAZ 1 y INTERFAZ 2
 
 > Qué hay en la capa de interfaz de /v3 (el texto en movimiento, el rollover, el cursor, los estados), las variantes en
 > la URL, los invariantes y lo que quedó abierto. La escena tiene su propio estado (`ESTADO-ESCENA.md`). Las entregas de
@@ -10,6 +10,10 @@
 > instala la coreografía). El rollover del menú y del pie va al sprint del navbar; el corrimiento de la fuente, a la pasada
 > técnica. El margen del túnel subió a 6 px y los casos del foco que el pase de Tab capturó mal se midieron con el control
 > quieto y en pantalla (§3): de ahí salieron tres arreglos más en el carrusel del teléfono.
+>
+> **INTERFAZ 2 (la escena y la interfaz, una sola cosa):** cuatro tickets, TODOS CON BANDERA y apagados en el producto,
+> para que decida Valentino (§5). Un commit por ticket: T1 `379338c6`, T2 `ebde7524`, T3 `08049b68`, T4 `c353ed22`. Las
+> entregas, en `~/.cache/b4-medicion/interfaz2/<ticket>/mirar.txt`.
 >
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
@@ -76,3 +80,26 @@ píxel corrido (la pista para en −0,5 px) y se ve suavizado. `_estilos/foco.cs
 - Diseño: una pausa para el video de Servicios y para el carrusel del teléfono (WCAG 2.2.2); flechas en el carrusel.
 - El CTA que rota de Servicios se desmonta fuera de su tramo (con Tab no se llega en escritorio).
 - Los títulos de volumen (ESCENA 10 T3) siguen pendientes para la etapa de 3D: no entraron al canal del texto.
+
+## 5 · INTERFAZ 2 · con bandera, para decidir
+
+Las cuatro se piden en la URL (`/v3?pruebas=responde=si,anticipa=si,vida=si,recorrido=logo`) o con el banco
+(`__entornoDeLaEscena = 'producto,…'`); viven en `Pruebas` de `_lib/escena/entorno.ts` y el DOM las lee con `usePrueba`
+(`_lib/pruebasDeLaInterfaz.ts`, `no` en el servidor). Sin ellas, el sitio es el mismo: la máquina del pulso sin pedido es
+la misma cuadro por cuadro, la simulación del piso es la misma (la onda se inyecta al armarla), el rig recibe el mismo
+nivel y cero giro, y nada se monta.
+
+| Bandera | Qué hace | Dónde |
+|---|---|---|
+| `responde=si` (T1) | Un CTA con el puntero encima (o el foco) pide el PULSO PRINCIPAL de E4 a la misma máquina (`pedido`: sin scroll, con lugar, no a menos de 1,6 s de otro). Un valor de Por qué develOP hace ondear el piso vivo desde el logo hacia el piso que se ve debajo del valor (Servicios no tiene tarjetas y tapa la escena: decisión anotada). El menú del teléfono abierto: la luz de la sala baja un 22 % y el lienzo se desenfoca (`--blur-panel`); el velo desenfoca poco la página | `_chrome/escena/RespuestaDeLaEscena.tsx`, `salaDetrasDelMenu.ts`, `_lib/escena/interfaz/{pedidos,respuesta}.ts`, `entorno/maquinaDelPulso.ts`, `piso/ondaDirigida.ts` |
+| `anticipa=si` (T2) | El puntero o el foco sobre un ítem de la barra: la luz se corre hacia la del destino adentro de su clase (de día no cruza a la noche, de noche no la deja) y la cámara gira 7°; vuelve sola al segundo. Con el clic el viaje sale de la anticipación y la descuenta con su avance (sin salto) | `_chrome/escena/AnticipacionDelMenu.tsx`, `_lib/escena/interfaz/anticipacion.ts`, `OrbitRig.tsx` |
+| `vida=si` (T3) | Las portadas del estante ondean al pasar (un anillo con el frente, la cola y la banda de los del piso; filtro SVG sobre la imagen, sin promover capas). Tu panel: el panel funcionando con datos de ejemplo (pedidos que entran, un contador de ejemplo de 1 a 9, pausa). Servicios: el recorrido de un pedido de ejemplo por el servicio del rodillo | `trabajos/demos/{ondaDeLaPortada.ts,OndaDeLasPortadas.tsx}`, `_componentes/vida/` |
+| `recorrido=logo` · `=reloj` (T4) | El indicador de recorrido, abajo a la derecha desde 1024: el logo que se dibuja (el infinito hasta Por qué develOP, el palo con el Cierre) o el reloj del día (el arco de luz de la sala, con aguja). Un tramo igual por sección; cada sección es un enlace que viaja con el gesto de la barra (`SELECTOR_DE_LOS_VIAJES`); tocar el trazo o el disco lleva a su tramo | `_chrome/recorrido/` |
+
+Invariante: `npm run test:s38-interfaz2` (una sección por ticket, con sus controles positivos; 90 afirmaciones). Bancos:
+`scripts-interfaz2/` (`t1-sonda`, `t1-clips`, `t2-anticipa`, `t3-portadas`, `t3-vida`, `t4-recorrido`, `t4-trazo`). Ajustados:
+`s36-escena10` (las pruebas que hay ya no son sólo `titulos`), `s5-archivos` (dos archivos de las demos en el padrón) y
+`SELECTOR_DE_LOS_VIAJES` (los puntos del indicador). Lo que queda por decidir con cada una está en su `mirar.txt`; lo
+principal: la onda de los valores en lugar de «tarjetas de servicio», el contador de ejemplo de Tu panel frente a
+`CONTENIDO_INVENTADO`, y para el teléfono el indicador en el botón del menú (propuesto, no construido).
+
