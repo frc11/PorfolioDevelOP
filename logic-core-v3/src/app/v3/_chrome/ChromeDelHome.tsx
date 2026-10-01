@@ -3,7 +3,7 @@ import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 import { Contacto } from './contacto/Contacto'
 import { OndaDeLasPortadas } from '../_secciones/trabajos/demos/OndaDeLasPortadas'
 import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
-import { IndicadorDelRecorrido } from './recorrido/IndicadorDelRecorrido'
+import { InfinitoDelRecorrido } from './recorrido/InfinitoDelRecorrido'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
 import { NavegacionDelHome } from './NavegacionDelHome'
@@ -161,14 +161,14 @@ export function ChromeDelHome(): React.JSX.Element {
       <MenuMovil />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />
-      {/* [INTERFAZ 2] T1: la escena responde a la interfaz (sólo con `?pruebas=responde=si`). */}
+      {/* [INTERFAZ 2] T1: la escena responde a la interfaz. */}
       <RespuestaDeLaEscena />
-      {/* [INTERFAZ 2] T2: la vista previa del destino en el menú (sólo con `?pruebas=anticipa=si`). */}
+      {/* [INTERFAZ 2] T2: la vista previa del destino en el menú. */}
       <AnticipacionDelMenu />
-      {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar (sólo con `?pruebas=vida=si`). */}
+      {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar. */}
       <OndaDeLasPortadas />
-      {/* [INTERFAZ 2] T4: el indicador de recorrido (sólo con `?pruebas=recorrido=logo` o `=reloj`). */}
-      <IndicadorDelRecorrido />
+      {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). */}
+      <InfinitoDelRecorrido />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**
