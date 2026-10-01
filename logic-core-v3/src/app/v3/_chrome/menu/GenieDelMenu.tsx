@@ -11,7 +11,8 @@ import { esquinasDeLaTira, liderDelGenie, matrizDeLaTira, type Caja } from '../.
  * [NAVBAR] Retoque 1 · Las tiras llevan SÓLO EL TEXTO del panel (el botón de cerrar y los renglones, en su lugar
  * medido), sin fondo: el material es el vidrio de verdad, recortado por la silueta del Genie (`silueta.ts`), que viaja
  * debajo. Antes cada tira llevaba una copia plana del panel y al terminar el vidrio la relevaba: se veía el salto de
- * sólido a transparente. La capa la recorta la misma silueta: nada del texto asoma fuera de la forma.
+ * sólido a transparente. La capa la recorta la misma silueta: nada del texto asoma fuera de la forma (ni fuera del
+ * círculo del botón, al final).
  *
  * ⚠️ **Lo que es caro es montar y disponer, no mover** (medido con la CPU ×4): cada tira lleva sólo las piezas que caen
  * en su rendija, y la capa está montada desde el modo menú y se muestra con `visibility`. Es `memo`: abrir el menú no la

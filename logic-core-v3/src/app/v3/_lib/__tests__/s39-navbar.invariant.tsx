@@ -9,7 +9,8 @@
  *        en Chromium), el tono de la zona con el texto en AA contra cualquier fondo, y el diálogo.
  *   T4 · el contacto en el teléfono, entero en una pantalla: los mismos campos, la hoja compacta sólo en el teléfono.
  *   Retoque 4 · el hover tranquilo de la barra, con sus dos variantes por la URL.
- *   Retoque 1 · el menú nace con su vidrio: la silueta del Genie lo recorta, sin copia plana ni relevo.
+ *   Retoques 1 y 2 · el menú nace con su vidrio (la silueta del Genie lo recorta, sin copia plana ni relevo) y la
+ *        forma se funde en el círculo del botón: sus esquinas van del radio del panel al del botón.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
@@ -20,7 +21,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
 import { varianteDelHover } from '../../_chrome/barra/hover'
 import { conLente } from '../../_chrome/menu/LenteDelVidrio'
-import { aplicarLaSilueta } from '../../_chrome/menu/silueta'
+import { aplicarLaSilueta, caminoDeLaSilueta, radioDeLaSilueta, siluetaDelGenie } from '../../_chrome/menu/silueta'
 import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
 import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
@@ -158,12 +159,47 @@ afirmar(MENU.includes('min-h-[var(--spacing-12)]') && MENU.includes('text-titulo
 afirmar(MENU.includes("caja.current?.querySelector<HTMLElement>('[data-parte=\"item-del-menu\"]')?.focus({ preventScroll: true })") && MENU.includes('boton.current?.focus({ preventScroll: true })'), '  al abrir, el foco al primer ítem; al cerrar, de vuelta al botón del menú')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('Retoque 1 · El menú nace con su vidrio')
+titulo('Retoques 1 y 2 · El menú nace con su vidrio y se funde en el círculo del botón')
 
 // Un teléfono de 390 × 844: el panel con `--spacing-4` de margen y el botón de 48 arriba al centro.
 const PANEL: Caja = { x: 16, y: 16, ancho: 358, alto: 812 }
 const BOTON: Caja = { x: 171, y: 16, ancho: 48, alto: 48 }
 const LIDER = liderDelGenie(PANEL, BOTON)
+const RADIO_DEL_PANEL = 30
+
+/** Los puntos de un camino de la silueta: los extremos de cada tramo y el medio de cada curva (sobre la curva). */
+function puntosDelCamino(d: string): { x: number; y: number }[] {
+  const n = d.split(' ')
+  const puntos: { x: number; y: number }[] = []
+  let ultimo = { x: 0, y: 0 }
+  for (let i = 0; i < n.length; ) {
+    const orden = n[i]
+    const par = (k: number): { x: number; y: number } => ({ x: Number(n[i + 1 + k * 2]), y: Number(n[i + 2 + k * 2]) })
+    if (orden === 'M' || orden === 'L') {
+      ultimo = par(0)
+      puntos.push(ultimo)
+      i += 3
+    } else if (orden === 'C') {
+      const [c1, c2, fin] = [par(0), par(1), par(2)]
+      const medio = (a: number, b: number, c: number, e: number): number => (a + 3 * b + 3 * c + e) / 8
+      puntos.push({ x: medio(ultimo.x, c1.x, c2.x, fin.x), y: medio(ultimo.y, c1.y, c2.y, fin.y) }, fin)
+      ultimo = fin
+      i += 7
+    } else i += 1
+  }
+  return puntos
+}
+const CENTRO_DEL_BOTON = { x: BOTON.x + BOTON.ancho / 2, y: BOTON.y + BOTON.alto / 2 }
+const lejosDelCirculo = (d: string): number => Math.max(...puntosDelCamino(d).map((p) => Math.abs(Math.hypot(p.x - CENTRO_DEL_BOTON.x, p.y - CENTRO_DEL_BOTON.y) - BOTON.ancho / 2)))
+const adentro = siluetaDelGenie(1, PANEL, BOTON, LIDER)
+const caminoAdentro = caminoDeLaSilueta(adentro, radioDeLaSilueta(1, RADIO_DEL_PANEL, BOTON.ancho / 2))
+afirmar(lejosDelCirculo(caminoAdentro) < 0.5, `adentro del botón la forma ES su círculo: ningún punto se aparta más de medio píxel (${lejosDelCirculo(caminoAdentro).toFixed(2)} px)`)
+controlPositivo('  el chequeo vería las puntas de un cuadrado', caminoDeLaSilueta(adentro, 0), (d: string) => lejosDelCirculo(d) < 0.5)
+afirmar(radioDeLaSilueta(0, 30, 24) === 30 && radioDeLaSilueta(1, 30, 24) === 24 && radioDeLaSilueta(0.5, 30, 24) === 27, '  las esquinas van del radio del panel (abierto) al del botón (adentro)')
+const abiertoXs = puntosDelCamino(caminoDeLaSilueta(siluetaDelGenie(0, PANEL, BOTON, LIDER), RADIO_DEL_PANEL, PANEL))
+afirmar(Math.min(...abiertoXs.map((p) => Math.min(p.x, p.y))) >= -0.05 && Math.min(...abiertoXs.map((p) => p.x)) < 0.05 && Math.max(...abiertoXs.map((p) => p.x)) <= PANEL.ancho + 0.05 && Math.max(...abiertoXs.map((p) => p.y)) <= PANEL.alto + 0.05, '  abierto, la forma es la caja del panel (en sus coordenadas)')
+const cadaCuadro = Array.from({ length: 21 }, (_, k) => caminoDeLaSilueta(siluetaDelGenie(k / 20, PANEL, BOTON, LIDER), radioDeLaSilueta(k / 20, RADIO_DEL_PANEL, 24)))
+afirmar(cadaCuadro.every((d) => (d.match(/ C /g) ?? []).length === 4 && !d.includes('NaN')), '  en cada cuadro del Genie, cuatro esquinas redondeadas: nunca una punta')
 
 // El cuadro de verdad: lo que `aplicarLaSilueta` le hace al vidrio, al texto y al filo.
 const anotado = new Map<string, string>()
@@ -171,9 +207,9 @@ const falso = (nombre: string): { style: { setProperty: (k: string, v: string) =
   style: { setProperty: (k, v) => anotado.set(`${nombre}.${k}`, v), removeProperty: (k) => anotado.delete(`${nombre}.${k}`) },
   setAttribute: (k, v) => anotado.set(`${nombre}.${k}`, v),
 })
-aplicarLaSilueta(0.5, PANEL, BOTON, LIDER, { vidrio: falso('vidrio') as unknown as HTMLElement, texto: falso('texto') as unknown as HTMLElement, filo: falso('filo') as unknown as SVGPathElement })
+aplicarLaSilueta(1, PANEL, BOTON, LIDER, RADIO_DEL_PANEL, { vidrio: falso('vidrio') as unknown as HTMLElement, texto: falso('texto') as unknown as HTMLElement, filo: falso('filo') as unknown as SVGPathElement })
 const recorte = (clave: string): string => /^path\('(.*)'\)$/.exec(anotado.get(clave) ?? '')?.[1] ?? ''
-afirmar(recorte('vidrio.clip-path') !== '' && anotado.get('filo.d') === recorte('vidrio.clip-path') && recorte('texto.clip-path') !== '', 'el vidrio de verdad, recortado por la silueta; el texto, por la MISMA forma (en la pantalla); el filo la dibuja')
+afirmar(recorte('vidrio.clip-path') !== '' && anotado.get('filo.d') === recorte('vidrio.clip-path') && lejosDelCirculo(recorte('texto.clip-path')) < 0.5, 'el vidrio de verdad, recortado por la silueta; el texto, por la MISMA forma (en la pantalla); el filo la dibuja')
 
 const VIDRIO_GENIE = sinComentarios(leer('_estilos/vidrio.css'))
 afirmar(!VIDRIO_GENIE.includes('vidrio-plano') && !MENU.includes('MS_DEL_RELEVO') && !GENIE.includes('fondo'), 'sin copia plana ni relevo: el material es el mismo de punta a punta')

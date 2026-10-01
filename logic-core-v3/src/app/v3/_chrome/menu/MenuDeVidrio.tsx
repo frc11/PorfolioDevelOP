@@ -86,7 +86,7 @@ export function Menu({
     (m: number): void => {
       if (geometria === null) return
       pintor.current?.pintar(m)
-      aplicarLaSilueta(m, geometria.ventana, geometria.destino, liderDelGenie(geometria.ventana, geometria.destino), capas())
+      aplicarLaSilueta(m, geometria.ventana, geometria.destino, liderDelGenie(geometria.ventana, geometria.destino), geometria.radio, capas())
     },
     [geometria, capas],
   )

@@ -13,7 +13,7 @@ import { useTonoDebajo } from './useTonoDebajo'
 
 /**
  * EL MENÚ DEL TELÉFONO — un círculo con el logo arriba al centro y un panel de vidrio líquido. **[CONTACTO]** ·
- * **[NAVBAR] T3 y retoque 1**
+ * **[NAVBAR] T3 y retoques 1 y 2**
  *
  * Se monta cuando el chrome está en modo menú (abajo de `medio`, o si la barra no entra: lo mide `BarraDelHome`).
  *
@@ -23,6 +23,8 @@ import { useTonoDebajo } from './useTonoDebajo'
  *   · **[Retoque 1] El panel nace con su vidrio**: durante todo el Genie se ve el vidrio de verdad (desenfoque, tinte,
  *     lente) recortado por la silueta del Genie (`silueta.ts`); las tiras llevan sólo el texto, encima. No hay copia
  *     plana ni relevo: no cambia la opacidad en ningún momento, al abrir ni al cerrar.
+ *   · **[Retoque 2] Sin esquinas**: la silueta redondea sus esquinas del radio del panel al del botón, y adentro del
+ *     botón (48 × 48, radio 24) es su círculo. El texto se recorta con la misma forma.
  *   · **[Retoque 1] El primer cuadro, en tiempo**: el clic abre todo a mano (el tono, la forma, el reloj) y deja lo de
  *     React (lo que el botón anuncia, la trampa del diálogo) para una transición; el Genie es `memo`. Y montado el
  *     menú, una vez, el vidrio con su lente y las tiras se pintan dos cuadros casi transparentes: así el primer Genie no
