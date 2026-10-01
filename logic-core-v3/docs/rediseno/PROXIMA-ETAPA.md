@@ -16,4 +16,3 @@ Base cerrada en `base-terminada` (rama `rediseno/home`). Una línea por ítem.
 - Partículas sobre el texto: en el CTA final a 1440 una partícula de la escena se pinta encima de «El tuyo también.».
 - Suites que necesitan build: `s7-compuerta`, `s8-intro`, `s8-tres` y dos afirmaciones de `s8-chrome`.
 - Pasada técnica · el corrimiento de 0,067 al cargar por el cambio de la fuente de respaldo a la Chivo (`layout.tsx`, compartido): medirlo con un build de producción; si sigue, `display: 'optional'` o un respaldo con métricas ajustadas (INTERFAZ 1).
-- Carrusel del teléfono · la primera portada de cada fila, enfocada con el teclado, queda contra el borde de la pantalla (el carrusel va a sangre): su anillo se ve en tres lados; el cuarto pide un margen a la izquierda o un anillo por dentro de la portada (decisión de diseño, INTERFAZ 1).

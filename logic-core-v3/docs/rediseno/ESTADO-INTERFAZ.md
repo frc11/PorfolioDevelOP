@@ -35,12 +35,13 @@ y los grados).
 
 ## 3 · Los invariantes y los bancos
 
-`npm run test:s37-interfaz1` (una sección por ticket con sus controles positivos y la del cierre; 113 afirmaciones). Ajustados por este
+`npm run test:s37-interfaz1` (una sección por ticket con sus controles positivos y la del cierre; 116 afirmaciones). Ajustados por este
 sprint, con su porqué en el fuente: `quienes-somos` (7 piezas y 6 divisores), `s6-tu-panel` (+1 transformada: la
 inclinación), `s8-cierre` y `s5-trabajos` (el texto anunciado y el nombre accesible sin lo que cuelga de `aria-hidden`),
 `s8-chrome` (la compuerta del cursor nuevo), `angosto-invariante` (el CTA por servicio con `enEscritorio`); en el cierre,
 `s5-trabajos` (el margen del túnel, derivado del tema: desplazamiento + DOS grosores) y `demos-invariante` (el empujón del
-teclado sólo mueve la página: la llegada sigue sin reloj propio).
+teclado sólo mueve la página: la llegada sigue sin reloj propio). En el cierre 2: `s5-archivos` (`llevarALaLlegada.ts` en el
+padrón) y `rollover.css` (la regla del puntero fino nombra también el foco: la paridad hover/foco de `s3-foco`).
 
 Los bancos (`scripts-interfaz1/`, contra el servidor de desarrollo): `recorrido` (el recorrido con la rueda y el vigía:
 corrimientos del layout, el divisor rehecho a la vista, las fuentes), `frenada` (la ráfaga y la frenada sobre un título,
@@ -54,7 +55,13 @@ contorno contra su borde, de los dos lados), `chequeo` y `sonda`.
 **El foco, al cierre** (`interfaz1/t3-completitud/`): a 1440, 0 anillos bajo 3:1 (mediana 16,4); a 390, mediana 17,1 y dos
 rótulos del túnel que el instrumento da en ~2,6 a escala 0,55 (sus píxeles muestran el contorno claro entre dos franjas
 oscuras en los cuatro lados: `casos-de-cerca.png`). Los casos: el primer libro a 1440, 13,5:1; las primeras portadas del
-carrusel a 390, 18:1 en tres lados (el cuarto, contra el borde de la pantalla: §4).
+carrusel a 390, 18:1 en los cuatro lados con el anillo por dentro (cierre 2: `foco-casos-inset/carrusel-inset-de-cerca.png`).
+
+**Cierre 2 · el anillo por dentro en el carrusel** (decidido): el carrusel sigue a sangre y su portada enfocada lleva el
+anillo hacia adentro, sobre la caja de la imagen sin el aire de la derecha: papel, tinta, papel (2 px cada uno) en un
+`::after`. El contorno de afuera queda transparente sólo ahí (en colores forzados lo pinta el sistema). Medido con Tab
+desde arriba a 390, la primera portada de cada fila: los cuatro lados, 18:1; a izquierda y derecha el contorno cae medio
+píxel corrido (la pista para en −0,5 px) y se ve suavizado. `_estilos/foco.css`.
 
 ## 4 · Lo que quedó abierto
 
@@ -64,10 +71,6 @@ carrusel a 390, 18:1 en tres lados (el cuarto, contra el borde de la pantalla: �
 - **El corrimiento de la carga (0,067) → la pasada técnica** (decidido; en `PROXIMA-ETAPA.md`): el cambio de la fuente
   de respaldo a la Chivo, en `layout.tsx` (compartido, no se tocó). Medirlo con un build de producción; si sigue,
   `display: 'optional'` o un respaldo con métricas ajustadas.
-- **El carrusel del teléfono, la primera portada de cada fila con el teclado:** queda contra el borde de la pantalla (el
-  carrusel va a sangre y la pista vive en [−largo, 0): la primera portada no puede quedar más a la derecha que el borde del
-  renglón). Su anillo se ve en tres lados. El cuarto pide cambiar el diseño: un margen a la izquierda del carrusel, o un
-  anillo POR DENTRO de las portadas (con un pseudo-elemento, porque la imagen tapa una sombra interior).
 - Compartidos: el `:hover` pegado en táctil (`cta.css`, `pie.css`, `navegacion.css`), los abridores del contacto sin
   `aria-haspopup` (`Cta`), el input del newsletter que acepta texto con el envío deshabilitado (`Novedades`).
 - Diseño: una pausa para el video de Servicios y para el carrusel del teléfono (WCAG 2.2.2); flechas en el carrusel.
