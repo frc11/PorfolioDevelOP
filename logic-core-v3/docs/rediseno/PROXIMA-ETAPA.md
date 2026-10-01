@@ -3,6 +3,7 @@
 Base cerrada en `base-terminada` (rama `rediseno/home`). Una línea por ítem.
 
 - Navbar: la pastilla del menú del home nuevo, pendiente de rediseño y de sus destinos definitivos.
+- Navbar · el rollover de dos copias (INTERFAZ 1) en los links del menú y del pie: se hace en el sprint del navbar de v3 (`chrome/Navegacion.tsx` y `chrome/PiePiezas.tsx`, compartidos: una prop `rotulo?` y el home pasa `DosCopias`; ver `ESTADO-INTERFAZ.md` §4).
 - Contacto: definir la página o el destino de `#contacto` (hoy «Hablanos» y la columna Contacto del pie apuntan ahí y no existe).
 - Newsletter: no tiene backend; la propuesta es una lista de Brevo (el formulario en Tu panel está deshabilitado).
 - Preloader: no levanta en Safari real.
@@ -14,3 +15,5 @@ Base cerrada en `base-terminada` (rama `rediseno/home`). Una línea por ítem.
 - Desborde: los 4 px de desborde a 1440.
 - Partículas sobre el texto: en el CTA final a 1440 una partícula de la escena se pinta encima de «El tuyo también.».
 - Suites que necesitan build: `s7-compuerta`, `s8-intro`, `s8-tres` y dos afirmaciones de `s8-chrome`.
+- Pasada técnica · el corrimiento de 0,067 al cargar por el cambio de la fuente de respaldo a la Chivo (`layout.tsx`, compartido): medirlo con un build de producción; si sigue, `display: 'optional'` o un respaldo con métricas ajustadas (INTERFAZ 1).
+- Carrusel del teléfono · la primera portada de cada fila, enfocada con el teclado, queda contra el borde de la pantalla (el carrusel va a sangre): su anillo se ve en tres lados; el cuarto pide un margen a la izquierda o un anillo por dentro de la portada (decisión de diseño, INTERFAZ 1).
