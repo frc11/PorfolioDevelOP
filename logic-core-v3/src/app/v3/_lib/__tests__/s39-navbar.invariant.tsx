@@ -7,6 +7,7 @@
  *        el rollover de dos copias, y la pieza compartida intacta para la galería.
  *   T3 · el menú del teléfono de vidrio líquido: el Genie de las demos desde el botón, el material (con la lente sólo
  *        en Chromium), el tono de la zona con el texto en AA contra cualquier fondo, y el diálogo.
+ *   T4 · el contacto en el teléfono, entero en una pantalla: los mismos campos, la hoja compacta sólo en el teléfono.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
@@ -17,6 +18,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
 import { conLente } from '../../_chrome/menu/LenteDelVidrio'
 import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
+import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
 import { DURACION_DE_LA_LLEGADA_MS, DURACION_DEL_VIAJE_MS, MARGEN_ANTES_DE_LA_LLEGADA } from '../../_componentes/deslizamiento'
 import { antesDeLaLlegada, centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
@@ -191,5 +193,18 @@ afirmar(MENU.includes('setVidrioOscuro(!zonaOscura())') && MENU.includes('tonoBa
 afirmar(MENU.includes('{abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}') && /data-parte="cerrar-el-menu" aria-label=\{ROTULO_DEL_MENU\.cerrar\}/.test(MENU), 'el diálogo: la trampa de foco sólo abierto, y el que cierra está adentro')
 afirmar(MENU.includes('min-h-[var(--spacing-12)]') && MENU.includes('text-titulo-m'), '  ítems grandes y tocables: un renglón de 48 px como mínimo, en `titulo-m`')
 afirmar(MENU.includes("caja.current?.querySelector<HTMLElement>('[data-parte=\"item-del-menu\"]')?.focus({ preventScroll: true })") && MENU.includes('boton.current?.focus({ preventScroll: true })'), '  al abrir, el foco al primer ítem; al cerrar, de vuelta al botón del menú')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T4 · El contacto en el teléfono, entero en una pantalla')
+
+const vacio = { intereses: [], presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
+const sinNada = (): void => undefined
+const campos = (compacto: boolean): string => renderToStaticMarkup(<CamposDelContacto datos={vacio} errores={{}} alternarInteres={sinNada} escribir={sinNada} compacto={compacto} />)
+const controles = (h: string): string[] => [...h.matchAll(/<(input|textarea)[^>]*name="([^"]+)"/g)].map((m) => `${m[1]}:${m[2]}`)
+afirmarIgual(controles(campos(true)), controles(campos(false)), 'los MISMOS campos en la hoja del teléfono: no se sacó ninguno (los siete intereses, el presupuesto, el nombre, el medio, la empresa y el mensaje)')
+afirmar(controles(campos(true)).length === 12 && /<textarea[^>]*rows="2"/.test(campos(true)) && /<textarea[^>]*rows="3"/.test(campos(false)), '  el mensaje en dos renglones en el teléfono (tres en escritorio)')
+const HOJA = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
+afirmar(HOJA.includes('const compacto = !desdeArriba') && HOJA.includes("compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]'") && HOJA.includes('compacto={compacto}'), 'compacta sólo la hoja del teléfono (la que sube de abajo, en el modo del menú): la de escritorio queda como estaba')
+afirmar(HOJA.includes("compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]'") && HOJA.includes('<Cta type="submit" rotulo={ROTULO_DEL_ENVIO}'), '  el pie al lado del botón de enviar: el botón a la vista sin deslizar (medido: 390 × 844, 375 × 667 y 390 × 664 entran; navbar/t4-contacto)')
 
 cerrar('s39-navbar')

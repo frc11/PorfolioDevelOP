@@ -86,6 +86,13 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   }
 
   const desdeArriba = modo === 'barra'
+  /**
+   * [NAVBAR] T4 · EN EL TELÉFONO, ENTERO EN UNA PANTALLA. La hoja de abajo (el modo del menú) entra en `100svh` a 390 × 844
+   * y a 375 × 667 con el botón de enviar a la vista, sin sacar un campo: menos aire, las preguntas y la bajada en
+   * `caption`, los chips más bajos, el mensaje en dos renglones y el pie al lado del botón. La de arriba (escritorio)
+   * no cambia. Medido en `navbar/t4-contacto/`.
+   */
+  const compacto = !desdeArriba
   const fuera = desdeArriba ? '-100%' : '100%'
   const hoja = reducido ? { duration: 0 } : { duration: MS_DE_LA_HOJA / 1000, ease: CURVA }
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
@@ -119,13 +126,18 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         exit={{ y: fuera }}
         transition={hoja}
       >
-        <div className="mx-auto flex w-full max-w-[min(100%,calc(var(--spacing-20)*14))] flex-col gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]">
-          <div className="flex items-start justify-between gap-[var(--spacing-6)]">
-            <div className="flex flex-col gap-[var(--spacing-2)]">
-              <h2 id="contacto-titulo" className="text-fluido-titulo-l font-titulo leading-titulo tracking-titulo">
+        <div
+          className={cn(
+            'mx-auto flex w-full max-w-[min(100%,calc(var(--spacing-20)*14))] flex-col',
+            compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]',
+          )}
+        >
+          <div className={cn('flex items-start justify-between', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-6)]')}>
+            <div className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-1)]' : 'gap-[var(--spacing-2)]')}>
+              <h2 id="contacto-titulo" className={cn(compacto ? 'text-fluido-titulo-m' : 'text-fluido-titulo-l', 'font-titulo leading-titulo tracking-titulo')}>
                 {TITULO}
               </h2>
-              <p className="text-cuerpo leading-texto max-w-[60ch]">
+              <p className={cn(compacto ? 'text-caption' : 'text-cuerpo', 'leading-texto max-w-[60ch]')}>
                 {BAJADA.antes}
                 <a href={BAJADA.mail.href} className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
                   {BAJADA.mail.rotulo}
@@ -147,11 +159,16 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             </button>
           </div>
 
-          <form noValidate onSubmit={alEnviar} className="flex flex-col gap-[var(--spacing-8)]">
-            <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} />
-            <div className="border-borde flex flex-col gap-[var(--spacing-4)] border-t pt-[var(--spacing-6)] tablet:flex-row tablet:items-center tablet:justify-between">
+          <form noValidate onSubmit={alEnviar} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
+            <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
+            <div
+              className={cn(
+                'border-borde flex border-t',
+                compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]' : 'flex-col gap-[var(--spacing-4)] pt-[var(--spacing-6)] tablet:flex-row tablet:items-center tablet:justify-between',
+              )}
+            >
               <p className="text-caption leading-texto">{PIE}</p>
-              <Cta type="submit" rotulo={ROTULO_DEL_ENVIO} />
+              <Cta type="submit" rotulo={ROTULO_DEL_ENVIO} className={compacto ? 'shrink-0' : undefined} />
             </div>
             {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
                 siempre se anuncia); lo que cambia es lo de adentro. */}
