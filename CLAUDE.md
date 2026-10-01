@@ -244,6 +244,10 @@ En ESCENA 10, Claude Code cortó por memoria una tarea en segundo plano (un lote
 **Qué placa usa el banco no es fijo: se verifica antes de rotular [Sep 2026]**
 La máquina tiene dos placas (la AMD integrada y la NVIDIA). En ESCENA 9 el Chrome del banco usaba la integrada por defecto; después de un reinicio usó la NVIDIA, y `--force_low_power_gpu` no lo llevó a la AMD (manda la preferencia de gráficos de Windows). Dos corridas salieron rotuladas «amd» siendo de la NVIDIA y el rótulo llegó a `ESTADO-ESCENA.md` (hubo que corregirlo con otro commit). Regla: antes de rotular una medición con una placa, correr `npx tsx scripts-escena9/t4-gpu.ts` (o leer `WEBGL_debug_renderer_info` en la misma página que se mide) y rotular con lo que diga, no con la bandera pedida; sin `BANCO_GPU=alta` el rótulo es «por defecto», no «la integrada».
 
+
+**Un componente que importa su `.css` rompe todos los invariantes que corren en Node [Oct 2026]**
+En INTERFAZ 1 dos componentes nuevos (`DosCopias`, el cursor de la sala) importaron su hoja (`import '../../_estilos/x.css'`). El sitio andaba, pero cada invariante que renderiza esas piezas con `npx tsx` se cayó con `SyntaxError: Unexpected token '{'` adentro del `.css`, sin decir qué componente lo arrastraba; `verificar` mostró sólo suites que «no imprimen resumen». Regla: en /v3 las hojas entran por `layout.tsx` (es la convención: todas están ahí; agregar una línea de import es cambiar cómo se importa, no qué renderiza) y cada hoja nueva va al padrón de `s3-tokens` (`s3-archivos.ts`) con sus propiedades en `s3-registro-de-tokens.ts`. Corolario: una suite que termina sin su línea de «N afirmaciones» no pasó ni falló: se cayó, y hay que leer su salida.
+
 ---
 
 *Update this file when Claude makes a correctable mistake. Add the rule that prevents it. Prune entries that no longer apply.*
