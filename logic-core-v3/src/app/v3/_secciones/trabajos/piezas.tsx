@@ -125,7 +125,7 @@ export function PortadaDeTrabajos({
   const [huidaInicial] = useState(() => enLaVentana(progreso.get(), HUIDA_DEL_CARTEL.bajando))
   /** Cuánto huyó el cartel. La histéresis necesita el cuadro anterior. */
   const huida = useRef(huidaInicial)
-  /** [ESCENA 10] T3 · la huida, para el título de volumen: sus letras se van con ella (0 a 1). */
+  /** [ESCENA 10] T3 · la huida, para el título de volumen del titular (con la prueba `titulos`): llega con la máscara y sus letras se van con esta huida (0 a 1). */
   const salidaDelTitulo = useMotionValue(huidaInicial)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
@@ -193,7 +193,6 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  {/* [ESCENA 10] T3 · con la prueba, el título de volumen (llega con la máscara, se va con la huida). */}
                   <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} />
                 </Titular>
               </CanalDeUnaPieza>
