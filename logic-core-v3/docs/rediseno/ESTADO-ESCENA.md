@@ -7,7 +7,9 @@
 > punto; el informe es `docs/rediseno/CALIDAD-1.md`. ESCENA 9 (premium): un commit por ticket, las entregas en
 > `~/.cache/b4-medicion/escena9/`. ESCENA 10 (el cierre de ESCENA 9, el video de Servicios y los títulos de volumen):
 > un commit por ticket, las entregas en `~/.cache/b4-medicion/escena10/`; desde ahí todo banco mide con la NVIDIA
-> (`BANCO_GPU=alta`).
+> (`BANCO_GPU=alta`). **Cierre de ESCENA 10:** la luz y las sombras (T1) y el video de Servicios (T2), aprobados por
+> Valentino; los títulos de volumen (T3), aprobados para la etapa de 3D (pendiente, §7); el destello de un cuadro de
+> día/noche al salir de Tu panel, arreglado en el orden del cuadro (§6), con su invariante con scroll real (§5).
 
 ---
 
@@ -33,7 +35,7 @@
 | El polvo nítido | Motas de 1,4 a 3,2 px con borde de un píxel (ESCENA 7, T10) | `polvo/nitidez.ts` |
 | La luz que rebota | De noche el charco aclara la cara de abajo del logo (ESCENA 7, T12). Las sombras de las motas, borradas en ESCENA 8 | `entorno/Rebote.tsx` |
 | **[ESCENA 8] T2 · la trama anclada** | Las dos capas bajan a pleno hasta 1 u debajo del piso (sin fundido): el piso las corta. La pared (capa gruesa) lleva un zócalo fino (0,1 u, opacidad 0,62) y el piso vivo un contacto al pie de cada capa | `moire/limite.ts`, `MoireScreen.tsx`, `piso/bloques.ts` |
-| **[ESCENA 8] T3 · el amanecer** | Encendido (era la prueba T11 de ESCENA 7) y atado al scroll: el scroll pide el avance (borde de Tu panel del 85 % al escenario del final clavado) y el que se muestra lo persigue con tope (entero en 2,5 s como mínimo), en las dos direcciones. Sin evento al cargar adentro, en un viaje, con el bloque tapando; con menos movimiento, de una vez. El texto del escenario de Por qué develOP espera al día; el pie (compartido) fuerza el avance a 0,9 si se ve antes | `amanecer/`, `_secciones/por-que-develop/PorQueDevelop.tsx` |
+| **[ESCENA 8] T3 · el amanecer** | Encendido (era la prueba T11 de ESCENA 7) y atado al scroll: el scroll pide el avance (borde de Tu panel del 85 % al escenario del final clavado) y el que se muestra lo persigue con tope (entero en 2,5 s como mínimo), en las dos direcciones. Sin evento al cargar adentro, en un viaje, con el bloque tapando; con menos movimiento, de una vez. El texto del escenario de Por qué develOP espera al día; el pie (compartido) fuerza el avance a 0,9 si se ve antes. **[ESCENA 10] Cierre:** decide su estado (la noche sostenida, el barrido, el frente) ANTES que el rig, con prioridad −1 (`ANTES_QUE_EL_RIG`); los haces, en un paso después del rig. En un viaje del menú que cambia de luz no corre (la sala la mueve el reloj del viaje) y al llegar va derecho al pedido | `amanecer/`, `_secciones/por-que-develop/PorQueDevelop.tsx` |
 | **[CALIDAD 1] A2 · el cielo de día** | Encendido: el **pintado celeste** (T4 de ESCENA 8, elegido por Valentino), un ciclorama con nubes pintadas y paneles, en la franja del cielo de la noche, detrás de la formación y de la trama; se va con la noche antes de las estrellas y el amanecer lo destapa desde el horizonte. Sólo con la formación (no en el teléfono). **Rompe la regla monocroma: excepción aprobada** (abajo) | `cieloDeDia/` |
 | Preloader de /v3 | Apagado (`CON_PRELOADER = false`) | `_intro/` |
 | **[CALIDAD 1] B1 · el precompilado** | Todos los programas se compilan al arrancar (también lo invisible y las escenas aparte, como los rayos) y se calientan con un dibujo de un píxel: ninguno se compila en el recorrido | `gpu/Precompilar.tsx` |
@@ -99,7 +101,9 @@ compensado y el scroll de nk (arriba); se borraron, código y banderas, `logo-no
 queda el del lienzo de CALIDAD 1, que ya estaba en el producto (Valentino); con él se borró el posproceso entero
 (`gpu/posproceso.ts`: el búfer de la escena, el TAA y su gancho `__posprocesoDelBanco`).
 
-[ESCENA 10] La de este sprint, para que decida Valentino (con banco, en el pedido; sin banco, en la URL):
+[ESCENA 10] La de este sprint (con banco, en el pedido; sin banco, en la URL). **Cierre: le encantaron, pero van en
+una etapa posterior (la de 3D).** Quedan con su bandera, apagados en el producto y sin borrar, las dos variantes
+(`negro` y `blanco`): pendiente aprobado (§7).
 
 | Token | Efecto |
 |---|---|
@@ -113,7 +117,8 @@ sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
 `__escenaViva`, `__relojDelBanco`, `__polvoDelBanco`, `__formacionDelBanco`, `__estrellasDelBanco`,
 `__pisoDelBanco`, `__fisicaDelBanco` (modos, cámara lenta, `medir` GPU; [ESCENA 8] `campo()`; [CALIDAD 1] `estado()` y
 `aire()` para el instrumento de los saltos; `flujo()` se borró en ESCENA 9 con el campo del flujo), `__aireDelBanco`, `__amanecerDelBanco` (`estado` con
-`avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`),
+`avance`, `pedido` y el día para el texto; `congelar(s)`; [CALIDAD 1] `haces()` y `tramaFiltrada(v)`; [ESCENA 10] cierre:
+`destello()`, el control positivo del invariante del destello: el próximo cuadro, la noche sostenida al revés),
 `__fugazDelBanco`, [ESCENA 8] `__cieloDeDiaDelBanco` ([CALIDAD 1] `dia`, `mostrar`), [ESCENA 9] `__sombraDelLogoDelBanco`
 (`poner(prendida)`, `mapa()`; [ESCENA 10] `fuerza()`); T4: `__pisoDelBanco.orden(prendido, estricta)` (los bloques en el orden nuevo o en el de
 la grilla). [ESCENA 10] T1: `__escenaViva` publica también `nocheDelLogo`; T3: `__titulosDelBanco` (`titulos()`: la
@@ -240,9 +245,17 @@ se dibujan.
 
 ## 5 · Los invariantes
 
-`npm run test:s36-escena10` ([ESCENA 10] una sección por ticket, con sus controles positivos),
+`npm run test:s36-escena10` ([ESCENA 10] una sección por ticket, con sus controles positivos; la del cierre: el orden
+del cuadro y el viaje que cambia de luz),
+**`npm run test:escena-destello`** ([ESCENA 10] cierre · el destello de un cuadro, **con scroll real**: la rueda por CDP
+y Lenis, Tu panel → Por qué develOP ida y vuelta a tres velocidades y tres viajes del menú que cruzan el final; ningún
+salto de luminancia entre dos cuadros seguidos fuera del barrido y ningún destello —de 1 a 12 cuadros que se salen del
+rango de sus vecinos— en lo que se ve; sin verde por no llegar; control positivo por el camino del defecto. **Pide el
+servidor de desarrollo y una placa** (`BANCO_GPU=alta`): por eso no tiene la forma `test:sNN-…` y `verificar` no lo
+corre. Unos tres minutos),
 `npm run test:s35-escena9` ([ESCENA 9] una sección por ticket; ajustada a lo que ESCENA 10 decidió),
-`npm run test:s34-calidad1` ([CALIDAD 1] una sección por punto, A1 a A3 y B0 a B12, con sus controles positivos),
+`npm run test:s34-calidad1` ([CALIDAD 1] una sección por punto, A1 a A3 y B0 a B12, con sus controles positivos; A1,
+ajustada al cierre de ESCENA 10: los viajes que cambian de luz ya no siguen la regla de antes),
 `npm run test:s33-escena8` (una sección por ticket, T1 a T5, con sus controles positivos),
 `test:s32-escena7` (lo de ESCENA 7 que sigue; ajustado a lo que ESCENA 8 cambió), `test:s31-escena6`,
 `test:s28-base`, `test:s29-pulso`, `test:s30-escena4`, y los de siempre (`s8-escena`, `s16-arnes`, `s18`,
@@ -282,12 +295,29 @@ fuerza de la sombra, cada segundo); T2: `t2-servicios` (los cuadros perdidos por
 `t2-tamano` (de qué tamaño se ve el video), `t2-sonda` (el estado de cada video, quieto) y `t2-clip`; T3: `t3-fuente.py`
 (la Chivo a geometría), `t3-lectura` (en qué progreso de la coreografía se lee cada título), `t3-sonda` (la caja del 3D
 contra la del DOM; `PUNTERO=centro` saca el corrimiento del mouse), `t3-camara` (la cámara viva contra la calculada),
-`t3-costo` y `t3-clips`.
+`t3-costo` y `t3-clips`. Cierre: `destello.ts` (el banco del destello: cada cuadro dibujado, con su instante, leído del
+lienzo en la misma tarea en que se dibuja —luminancia en 30 × 8 celdas y una miniatura— y lo que la escena decidió en
+ese cuadro; tramos `final-<velocidad>`, `noche-<velocidad>`, `viajes` y `control`), `destello-instrumento.ts` (el
+instrumento y los dos detectores, los que usa el invariante) y `destello-clip.ts` (antes/después cuadro a cuadro).
 
 ## 6 · Fallas conocidas (no son de ESCENA 8 ni de CALIDAD 1)
 
+- ~~**[ESCENA 10, lo vio Valentino] Un cuadro de día entre cuadros de noche saliendo de Tu panel**~~ → **arreglado en el
+  cierre.** Era el orden del cuadro: la compuerta del día (85 %) se prende en el evento de scroll, el rig lee en su
+  `useFrame` la noche que sostiene el amanecer, y el amanecer la escribía DESPUÉS (su `useFrame` iba más abajo en el
+  árbol). En el cuadro en que se prendía la compuerta el rig leía la del cuadro anterior (apagada) y dibujaba la sala de
+  día entera, con la sombra del logo de T1; lo mismo volviendo, al cruzar el cambio, y al empezar el barrido un cuadro de
+  noche oscurecido. Medido con la rueda (NVIDIA, 1440): saltos de 0,83 y 0,76 de luminancia media a la vista (lo demás,
+  0,010 a lo sumo); después, 0 en las tres velocidades. Ahora el amanecer decide antes que el rig (`Amanecer.tsx`, «El
+  orden del cuadro»). Revisado también: la frontera de la noche (Quiénes somos → Trabajos) no lo tenía; los viajes del
+  menú que cruzan el final y cambian de luz tenían otro de la misma familia (el amanecer corría a la velocidad del vuelo
+  sobre una luz que mueve el reloj del viaje: Por qué develOP → Trabajos oscurecía la sala de día en 9 cuadros y volvía
+  al día de golpe), también arreglado. Las entregas: `escena10/destello/mirar.txt`.
 - **`s17-revelado`**: 1 falla, ya estaba antes de ESCENA 5. Busca una llamada que se mudó a
   `ataduraAlScroll.ts` en VIAJES.
+- **`s5-trabajos`** (1 falla: la pastilla del cartel), **`s6-tokens`** (3: valores sueltos y arbitrarios en
+  `PorQueDevelop.tsx` y `PiezasDeContacto.tsx`, del 24-09) y **`s7-compuerta`** (pide un build de producción): ya
+  estaban antes de ESCENA 10. `s7-contrato` (`piezas.tsx` en 301 líneas de código por T3) se arregló en el cierre.
 - **`s8-tres` y el bundle**: piden un build de producción (`.next`) y no se corre mientras el servidor
   de desarrollo usa esa carpeta.
 - **`s10-raf` y `s11-frontera`**: 0 fallas, pero 2 afirmaciones de cada uno quedan «fuera de
@@ -328,9 +358,13 @@ contra la del DOM; `PUNTERO=centro` saca el corrimiento del mouse), `t3-camara` 
   → [ESCENA 9] T3 los probó con bandera (abajo).
 - ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2), el antialiasing también: el del
   lienzo de CALIDAD 1 (TAA no).
-- **[ESCENA 10] T3 · por decidir (Valentino):** los títulos de volumen (`titulos=negro`, `titulos=blanco` o ninguno). No
-  proyectan sombra en el piso; abajo de 1025 no hay (las secciones no tienen escenario). Qué mirar:
-  `escena10/t3-titulos/mirar.txt`.
+- **PENDIENTE APROBADO · la etapa de 3D: los títulos de volumen** ([ESCENA 10] T3). A Valentino le encantaron; van en
+  una etapa posterior. Quedan como están: con su bandera (`titulos=negro`, `titulos=blanco`), apagados en el producto y
+  SIN borrar (el módulo perezoso `escena/titulos3d/`, `_componentes/titulos3d/`, `_lib/titulos3d/registro.ts`, la
+  fuente `_fuentes/chivo-400-titulos.json` y su lugar en Portfolio y en la frase de Por qué develOP). Lo que queda por
+  decidir en esa etapa: la variante (negro o blanco); que no proyectan sombra en el piso; que abajo de 1025 no hay (las
+  secciones no tienen escenario). Costo medido: §3. Qué mirar: `escena10/t3-titulos/mirar.txt`.
+- **[ESCENA 10] Aprobados:** la luz y las sombras según el momento (T1) y el video de Servicios (T2).
 - **El pie y el amanecer**: el pie es compartido y no espera al día; si se llega antes de tiempo (un tirón de
   más de cuatro pantallas, o Fin) el amanecer salta a 0,9 para que su tinta se lea.
 - ~~**El cielo de día (T4)**: por elegir~~ → [CALIDAD 1] A2: el pintado celeste, encendido (excepción aprobada, §1).
