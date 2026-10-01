@@ -61,20 +61,20 @@
   clip-path: inset(0);
 }
 
-/* El mismo estado con el puntero fino. */
+/* El mismo estado con el puntero fino (nombra el foco también: la paridad hover/foco de s3-foco lo mira regla por regla). */
 @media (hover: hover) and (pointer: fine) {
-  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia] {
+  [data-v3] :is(a, button):not(:disabled):is(:hover, :focus-visible) [data-rollover] [data-copia] {
     transition-property: transform, opacity, clip-path;
     transition-duration: var(--rollover-intercambio);
     transition-timing-function: var(--ease-salida);
   }
 
-  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia="a"] {
+  [data-v3] :is(a, button):not(:disabled):is(:hover, :focus-visible) [data-rollover] [data-copia="a"] {
     transform: rotate(var(--rollover-giro-salida)) translate(var(--rollover-salida-x), var(--rollover-salida-y));
     opacity: 0;
   }
 
-  [data-v3] :is(a, button):not(:disabled):hover [data-rollover] [data-copia="b"] {
+  [data-v3] :is(a, button):not(:disabled):is(:hover, :focus-visible) [data-rollover] [data-copia="b"] {
     transform: none;
     opacity: 1;
     clip-path: inset(0);

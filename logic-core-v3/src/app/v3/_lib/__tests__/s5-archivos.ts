@@ -218,6 +218,8 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/angosto.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/Carrusel.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/fisicaDelCarrusel.ts`,
+  // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/llevarALaLlegada.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
   `${RAIZ_DE_SECCIONES}/trabajos/ritmo.ts`,
