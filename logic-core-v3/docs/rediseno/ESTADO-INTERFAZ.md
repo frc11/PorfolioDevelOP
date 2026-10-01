@@ -1,4 +1,4 @@
-# Estado de la interfaz — después de INTERFAZ 1 y INTERFAZ 2
+# Estado de la interfaz — después de INTERFAZ 1, INTERFAZ 2 y NAVBAR V3
 
 > Qué hay en la capa de interfaz de /v3 (el texto en movimiento, el rollover, el cursor, los estados), las variantes en
 > la URL, los invariantes y lo que quedó abierto. La escena tiene su propio estado (`ESTADO-ESCENA.md`). Las entregas de
@@ -19,6 +19,12 @@
 > `interfaz2/cierre/<decisión>/`, cada una con su `mirar.txt`. **Cierre final:** la vida de Servicios, no (se borró el
 > recorrido del pedido de ejemplo: Servicios queda como antes de INTERFAZ 2); Tu panel queda con la barra sola, y la
 > idea de simular el producto con los componentes reales del panel va a `PROXIMA-ETAPA.md`; lo demás, aprobado tal cual.
+>
+> **NAVBAR V3 (el menú propio del home, liquid glass y destinos):** cuatro tickets, un commit cada uno: T1 `d514e28e`
+> (ítems y destinos), T2 `ce198959` (la barra de escritorio propia, con el rollover), T3 `133aea71` (el menú del
+> teléfono de vidrio líquido con el Genie), T4 `72b85aa2` (el contacto en el teléfono, entero en una pantalla). /v3 dejó
+> de importar la pastilla compartida, que queda para la galería (§6). Las entregas, en
+> `~/.cache/b4-medicion/navbar/<ticket>/mirar.txt`.
 >
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
@@ -74,9 +80,9 @@ píxel corrido (la pista para en −0,5 px) y se ve suavizado. `_estilos/foco.cs
 
 ## 4 · Lo que quedó abierto
 
-- **El rollover del menú y de los links del pie → el sprint del navbar de v3** (decidido en el cierre; también en
-  `PROXIMA-ETAPA.md`). `chrome/Navegacion.tsx` y `chrome/PiePiezas.tsx` son compartidos: una prop opcional
-  `rotulo?: (texto) => ReactNode` en cada uno y el home pasa `DosCopias` (detalle en `interfaz1/t2-rollover-cursor/mirar.txt`).
+- **El rollover del menú: hecho en NAVBAR V3** (la barra es propia del home y monta `DosCopias`, §6). **El de los
+  links del pie sigue pendiente**: `chrome/PiePiezas.tsx` es compartido; una prop opcional `rotulo?: (texto) =>
+  ReactNode` y el home pasa `DosCopias` (detalle en `interfaz1/t2-rollover-cursor/mirar.txt`).
 - **El corrimiento de la carga (0,067) → la pasada técnica** (decidido; en `PROXIMA-ETAPA.md`): el cambio de la fuente
   de respaldo a la Chivo, en `layout.tsx` (compartido, no se tocó). Medirlo con un build de producción; si sigue,
   `display: 'optional'` o un respaldo con métricas ajustadas.
@@ -111,3 +117,36 @@ cierre, con sus controles positivos). Bancos: `scripts-interfaz2/` (`t1-sonda`, 
 `cierre-pasos`); los de T1–T3 piden su bandera, que ya no existe: los dos lados muestran el producto. Ajustados en el
 cierre: `s36-escena10` (`Pruebas` vuelve a ser `titulos`; la mancha de día en cero), `s6-tu-panel` y `s10-acceso` (un focalizable
 más: la pausa del panel) y `SELECTOR_DE_LOS_VIAJES` (sin los puntos del indicador, como antes de INTERFAZ 2).
+
+## 6 · NAVBAR V3 · el menú propio del home
+
+| Pieza | Qué hace | Dónde |
+|---|---|---|
+| T1 · los ítems | Quiénes somos · Portfolio · Servicios · Panel · Por qué develOP · Contacto, una sola lista para la barra y el menú. «Portfolio» sigue yendo a `#trabajos`; «Panel» (nuevo) a `#tu-panel`; «Contacto» abre el formulario, como antes | `_chrome/enlaces.ts` |
+| T1 · los destinos | Quiénes somos un poco antes: la primera pantalla centrada en el cuadro libre bajo la barra, sin adelantarse al título ni pasarse del reposo de antes (1440: 917 en lugar de 1035). Panel: la cabecera de Tu panel entera a la vista, sin asomar Servicios. Servicios y Contacto, como antes | `_componentes/destinosDelViaje.ts` |
+| T1 · la llegada a la vista | Portfolio y Por qué develOP: el viaje tapado frena 0,2 de cuadro antes de la línea de la gota o del pedido del amanecer; el velo vuelve; la llegada se recorre sin velo (2,4 s, la curva del viaje) hasta el nudo de siempre, como un scroll (la escena deja el viaje antes). Sólo bajando y desde antes de la llegada; con movimiento reducido, el salto al nudo. El CTA del hero comparte el destino de Portfolio y hace lo mismo | `destinosDelViaje.ts` (`antesDeLaLlegada`), `useDeslizamientoDelCta.ts` (`recorrerLaLlegada`), `deslizamiento.ts` |
+| T2 · la barra | La misma pastilla visual y la misma geometría (`--barra-*` = `--nav-*`), propia del home, con el rollover de dos copias en cada rótulo y el subrayado del activo. El modo: la barra desde `medio` si entra; abajo, el menú del teléfono (antes quedaba una franja de 628 a 860 sin barra ni menú) | `_chrome/barra/BarraDelHome.tsx`, `_estilos/barra.css` |
+| T3 · el menú del teléfono | Se abre con el Genie de las demos desde el botón y se cierra de vuelta a él (la misma geometría, duración y reloj, que ahora comparten); con movimiento reducido, el fundido de las demos. Casi toda la pantalla, 16 px de margen en los cuatro lados. Montado y escondido desde el modo menú: abrir no monta nada, y cada tira lleva sólo las piezas medidas de su rendija | `_chrome/menu/{MenuMovil,GenieDelMenu}.tsx`, `_secciones/trabajos/demos/genie.ts` (`correrPorTiempo`) |
+| T3 · el vidrio | Desenfoque 12 px y saturación 1,8 del fondo, especular arriba, filo de luz; en Chromium, la refracción del canto (un filtro SVG en el `backdrop-filter`: Safari no lo pinta y, con él, pierde el desenfoque; se detecta por motor, `navigator.userAgentData`). El tono de la zona, leído al abrir: sobre zona clara vidrio oscuro, sobre oscura vidrio claro. El texto en AA contra cualquier fondo (tinte 56 %; medido 6,5 y 6,7:1). La copia plana del Genie es opaca y se releva en 140 ms | `_estilos/vidrio.css`, `_chrome/menu/{lente.ts,LenteDelVidrio.tsx}` |
+| T3 · el diálogo | El foco atrapado (la trampa sólo abierto), el botón de cerrar ADENTRO en el lugar del botón del menú, Esc y tocar afuera cierran, el foco vuelve al botón. Ítems en `titulo-m`, renglones de 48 px como mínimo. El tono del botón con la noche que se ve (`nocheQueSeVe`) | `MenuMovil.tsx`, `useTonoDebajo.ts` |
+| T4 · el contacto | La hoja del teléfono entra entera en una pantalla a 390 × 844 y a 375 × 667 (y a 390 × 664, las barras de Safari de un iPhone 14/15) con el botón de enviar a la vista, sin sacar campos. La de escritorio no cambia | `_chrome/contacto/{FormularioDeContacto,CamposDelContacto}.tsx` |
+
+**El costo del menú** (390 × 844, NVIDIA): con la CPU normal, un cuadro largo en la primera apertura (40–173 ms) y
+después 13,3 ms; con la CPU ×4, abrir y cerrar con p95 27–67 ms y un cuadro largo en el clic (107–295 ms); el vidrio
+quieto, 13,3 ms. SPRINT CONTACTO había descartado el Genie en este menú por p95 93 ms.
+
+**Safari.** Playwright 1.61 con WebKit 26.5 (instalado en el sprint): el panel no lleva la lente, declara el
+`-webkit-backdrop-filter` y el diálogo anda igual. Lo que no se puede ver ahí es el vidrio: el WebKit de Playwright en
+Windows no pinta `backdrop-filter`. Se mira en el iPhone.
+
+**El destello** (`npm run test:escena-destello`, con scroll real): 22 afirmaciones y 0 fallas al cierre. Se ajustó la
+definición con su control: un destello de luz mueve la mitad de las celdas a la vista o más; el logo de canto en un
+viaje rápido que cruza Trabajos saca el 24–31 % y daba un falso pico (ya pasaba antes del sprint, en una de dos
+corridas).
+
+Invariante: `npm run test:s39-navbar` (52 afirmaciones: una sección por ticket, con sus controles positivos). Bancos:
+`scripts-navbar/` (`t1-viajes`, `t1-sonda-destello`, `t2-barra`, `t3-menu`, `t3-webkit`, `t4-contacto`). Ajustados:
+`s10-acceso` (una parada más, «Panel»), `s18-deslizamiento` (diez llamadas a `terminar`), `s26-menu` (los seis ítems, la
+barra propia, el menú nuevo), `s27-viajes` (la barra propia, dos duraciones, el nuevo reposo de Quiénes somos), `s38`
+(el selector de la anticipación), `s3-archivos` y el registro (`barra.css`, `vidrio.css`), el instrumento del destello y
+los bancos que tocaban la barra (`scripts-viajes`, `scripts-interfaz1/2`, `scripts-b11`).
