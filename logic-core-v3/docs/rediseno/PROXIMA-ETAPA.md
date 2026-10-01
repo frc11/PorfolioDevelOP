@@ -2,12 +2,10 @@
 
 Base cerrada en `base-terminada` (rama `rediseno/home`). Una línea por ítem.
 
-- Pie · el rollover de dos copias (INTERFAZ 1) en los links del pie: el del menú se hizo en NAVBAR V3 (la barra propia); el pie es compartido (`chrome/PiePiezas.tsx`: una prop `rotulo?` y el home pasa `DosCopias`; ver `ESTADO-INTERFAZ.md` §4).
-- Navbar · mirar el vidrio del menú en un iPhone real (Safari): el WebKit de Playwright en Windows no pinta `backdrop-filter` (`navbar/t3-menu/mirar.txt`).
-- Navbar · el contacto en un iPhone SE con las barras de Safari (375 × ~548) no entra: faltan 103 px. Lo que habría que sacar: la bajada con el mail y WhatsApp (~60 px), la pregunta 2 como renglón aparte (~26 px) y unos 20 px más (la empresa o un título más chico). Decide Valentino (`navbar/t4-contacto/mirar.txt`).
-- Navbar · el menú del teléfono con la CPU ×4 tiene un cuadro largo en el clic de abrir (107–295 ms): lo que queda es el render de React, la trampa y el desenfoque de la sala (`navbar/t3-menu/costo.json`).
-- Hallazgo · con movimiento reducido a 390 el renglón del carrusel de Trabajos se pasa 6 px del borde y la página mide 402 de ancho (la holgura del anillo de foco de INTERFAZ 1): en el teléfono, scroll horizontal y los `fixed` más anchos que la pantalla.
-- Hallazgo · `s3-tokens` sigue en rojo por tres propiedades registradas que ninguna hoja declara (`--nav-retardo-reposo`, `--nav-marcador-escala`, `--nav-marcador-desplazamiento`): salen del registro o vuelven a la hoja.
+- Pie · el rollover de dos copias (INTERFAZ 1) en los links del pie: el de la barra se hizo en NAVBAR V3 y su retoque lo cambió por un hover tranquilo; el pie es compartido (`chrome/PiePiezas.tsx`: una prop `rotulo?` y el home pasa `DosCopias`; ver `ESTADO-INTERFAZ.md` §4).
+- Navbar · mirar el vidrio del menú en un iPhone real (Safari): el WebKit de Playwright en Windows no pinta `backdrop-filter`, y ahí el texto del Genie se ve cortado entre tiras al pasar por el cuello (`navbar/t3-menu/mirar.txt`, `navbar/retoque/1-transparencia/mirar.txt`).
+- Navbar · el contacto en un iPhone SE con las barras de Safari (375 × ~548) no entra: faltan 103 px. Lo que habría que sacar: la bajada con el mail y WhatsApp (~60 px), la pregunta 2 como renglón aparte (~26 px) y unos 20 px más (la empresa o un título más chico). Decidido en el retoque: queda como está (`navbar/t4-contacto/mirar.txt`).
+- Hallazgo · `s8-montaje` en rojo por cuatro archivos de la escena que pasan las 300 líneas sin declarar (`s32-escena7.invariant.ts`, `s34-calidad1.invariant.ts`, `piso/bloques.ts`, `polvo/Fisica.tsx`): anterior al retoque del navbar, no se tocó.
 - Contacto: definir la página o el destino de `#contacto` (hoy «Hablanos» y la columna Contacto del pie apuntan ahí y no existe).
 - Newsletter: no tiene backend; la propuesta es una lista de Brevo (el formulario en Tu panel está deshabilitado).
 - Preloader: no levanta en Safari real.
