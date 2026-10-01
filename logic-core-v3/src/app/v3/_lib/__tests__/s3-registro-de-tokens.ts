@@ -113,14 +113,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
     evidencia: 'derivado',
     procedencia: 'nuestro equivalente de su 792. A 900px de viewport da 804.',
   },
-  { nombre: '--nav-retardo-reposo', valor: '40ms', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.2 — transition-delay 0,04s en reposo, 0s en hover' },
-  { nombre: '--nav-marcador-escala', valor: '0.8', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.2 — el marcador entra desde scale(0.8)' },
-  {
-    nombre: '--nav-marcador-desplazamiento',
-    valor: 'calc(var(--spacing-4) * -1)',
-    evidencia: 'medido',
-    procedencia: '−16px medidos, que es --spacing-4 en negativo',
-  },
+  // [NAVBAR] Retoque · `--nav-retardo-reposo`, `--nav-marcador-escala` y `--nav-marcador-desplazamiento` salieron del
+  // registro: el marcador y su retardo ya no están en `navegacion.css` (s3-tokens §4 las daba como registradas que no existen).
 
   // ── [NAVBAR] La barra propia del home (`barra.css`): la geometría de la pastilla, con nombres propios ──
   { nombre: '--barra-reposo', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: 'el mismo de `--nav-reposo`: la barra del home es la pastilla de siempre' },

@@ -200,10 +200,11 @@ export function Carrusel({ enMarcha }: { readonly enMarcha?: () => boolean }): R
   return (
     // Tres portadas por renglón en el teléfono y cinco en tablet: la hoja lee estas dos propiedades.
     // En un teléfono bajo la portada se topa por el alto (20 % del svh), así el bloque entra.
+    // [NAVBAR] `overflow-x-clip`: la holgura de los renglones se pasaba 6 px del borde y la rama quieta ensanchaba la página.
     <div
       ref={carrusel}
       data-pieza="carrusel"
-      className="-mx-[var(--pad-lateral-compacto)] flex flex-col gap-3 [--portada-aire:var(--spacing-3)] [--portada-ancho:min(calc((100vw-var(--spacing-3))/3),calc(20svh/1.5+var(--spacing-3)))] escritorio:hidden movil:[--portada-aire:var(--spacing-4)] movil:[--portada-ancho:min(calc((100vw-var(--spacing-4))/5),calc(34svh/1.5+var(--spacing-4)))]"
+      className="-mx-[var(--pad-lateral-compacto)] flex flex-col gap-3 overflow-x-clip [--portada-aire:var(--spacing-3)] [--portada-ancho:min(calc((100vw-var(--spacing-3))/3),calc(20svh/1.5+var(--spacing-3)))] escritorio:hidden movil:[--portada-aire:var(--spacing-4)] movil:[--portada-ancho:min(calc((100vw-var(--spacing-4))/5),calc(34svh/1.5+var(--spacing-4)))]"
     >
       {RENGLONES_DEL_CARRUSEL.map((r) => (
         <div key={r.sentido} data-parte="renglon" data-sentido={r.sentido > 0 ? 'derecha' : 'izquierda'} className={r.clase}>
