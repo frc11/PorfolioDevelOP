@@ -99,7 +99,10 @@ export const NIVEL_NATURAL = { valor: 1 }
  */
 export const DIA_DEL_FINAL = { activo: false }
 
-/** [ESCENA 7] T11: el amanecer sostiene la noche un rato después de que la compuerta prende el día. */
+/**
+ * [ESCENA 7] T11: el amanecer sostiene la noche un rato después de que la compuerta prende el día. [ESCENA 10] La escribe
+ * el amanecer en cada cuadro ANTES que el rig (`ANTES_QUE_EL_RIG`): leída del cuadro anterior, daba un cuadro de día.
+ */
 export const NOCHE_DEL_AMANECER = { sostenida: false }
 
 /** La noche que la sala muestra: la cantidad de la gota, salvo en el día del final. */

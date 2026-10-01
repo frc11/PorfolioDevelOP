@@ -259,6 +259,7 @@
     "test:s34-calidad1": "npx tsx src/app/v3/_lib/escena/__tests__/s34-calidad1.invariant.ts",
     "test:s35-escena9": "npx tsx src/app/v3/_lib/escena/__tests__/s35-escena9.invariant.ts",
     "test:s36-escena10": "npx tsx src/app/v3/_lib/escena/__tests__/s36-escena10.invariant.ts",
+    "test:escena-destello": "npx tsx scripts-escena10/destello.invariant.ts",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",

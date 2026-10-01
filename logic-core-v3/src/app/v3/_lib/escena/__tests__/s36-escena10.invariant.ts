@@ -11,15 +11,18 @@
  *      recodificado a 25 cuadros por segundo, a la menor resolución que se ve igual; la receta, en VIDEO-DE-SERVICIOS.md.
  * T3 · los títulos de volumen (prueba, `titulos=negro|blanco`): la Chivo extruida, una malla por título, quieta en el
  *      mundo donde la cámara del momento de la lectura la ve en el lugar del DOM; la llegada girando desde atrás, con un
- *      mínimo de tiempo; accesibles; de noche con el dibujo del logo; con las reglas de rendimiento.
+ *      mínimo de tiempo; accesibles; de noche con el dibujo del logo; con las reglas de rendimiento. [CIERRE] Aprobados
+ *      para la etapa de 3D: quedan con su bandera, apagados y sin borrar.
+ * CIERRE · el destello de un cuadro: el amanecer decide su estado antes que el rig (el rig leía la noche sostenida del
+ *      cuadro anterior: un cuadro de día al prenderse la compuerta); en un viaje que cambia de luz, quieto.
  */
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
-import { momentoEn } from '../amanecer/linea'
+import { avanceDelCuadro, momentoEn } from '../amanecer/linea'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { nocheDelLogo } from '../entorno/nocheDelLogo'
 import { NIVELES_DEL_HAZ } from '../entorno/vivo'
@@ -277,5 +280,26 @@ const reglas = (c: string): boolean =>
   /colocar\(a\.grupo, nudo, lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\), FUENTE\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
 controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
+
+// ── CIERRE · el destello de un cuadro ─────────────────────────────────────
+// Con scroll real lo mide `npm run test:escena-destello` (pide el servidor); acá, el orden del cuadro y el viaje.
+titulo('CIERRE · el destello de un cuadro: el amanecer decide antes que el rig; en un viaje que cambia de luz, quieto')
+const amanecer = codigo(leer('amanecer/Amanecer.tsx'))
+/** El paso que escribe la noche sostenida, el barrido y el frente corre antes que el rig; los haces, en otro paso, después. */
+const ordenDelCuadro = (c: string): boolean => {
+  const pasos = c.split('useFrame(').slice(1)
+  const estado = pasos.filter((p) => /NOCHE_DEL_AMANECER\.sostenida = m\.activo && momento\.sostieneLaNoche/.test(p) && /u\.uBarridoDelDia\.value =/.test(p) && /u\.uFrenteDelDia\.value =/.test(p))
+  const haces = pasos.filter((p) => /dibujarLosHaces\(haces, state\.gl, state\.camera\)/.test(p))
+  return /const ANTES_QUE_EL_RIG = -1\b/.test(c) && estado.length === 1 && /\}, ANTES_QUE_EL_RIG\)/.test(estado[0]) && !estado[0].includes('dibujarLosHaces') && haces.length === 1 && !haces[0].includes('ANTES_QUE_EL_RIG')
+}
+afirmar(ordenDelCuadro(amanecer), 'el estado del amanecer (la noche sostenida, el barrido, el frente) se decide con prioridad −1, antes del rig y de todo lo que lee la noche; los haces, en un paso aparte después del rig (la cámara de este cuadro)')
+controlPositivo('el detector VE el paso del estado sin prioridad (después del rig: el cuadro de día)', amanecer.replace('}, ANTES_QUE_EL_RIG)', '})'), ordenDelCuadro)
+const eventosDeR3f = readdirSync(path.join(process.cwd(), 'node_modules/@react-three/fiber/dist')).find((f) => /^events-.*\.cjs\.dev\.js$/.test(f)) ?? ''
+const r3f = eventosDeR3f === '' ? '' : readFileSync(path.join(process.cwd(), 'node_modules/@react-three/fiber/dist', eventosDeR3f), 'utf8')
+afirmar(/internal\.priority = internal\.priority \+ \(priority > 0 \? 1 : 0\)/.test(r3f) && /internal\.subscribers\.sort\(\(a, b\) => a\.priority - b\.priority\)/.test(r3f), '  en r3f una prioridad negativa corre antes que las de 0 y no se lleva el dibujo (sólo una positiva lo toma)', eventosDeR3f)
+const viajeQuieto = (c: string): boolean => /const cambiaDeLuz = viaje !== null && luzDelViaje === null/.test(c) && /const activo = !cambiaDeLuz && \(enLaLlegada \?\? DIA_DEL_FINAL\.activo\)/.test(c) && /c\.viaje = viaje !== null \|\| m\.deUnViaje/.test(c) && /m\.deUnViaje = cambiaDeLuz/.test(c)
+const alLlegar = avanceDelCuadro(0, 0.97, 1 / 75, { recien: true, carga: false, quieto: false, viaje: true, oculto: false, pie: false })
+afirmar(viajeQuieto(amanecer) && alLlegar === 0.97, 'en un viaje del menú que cambia de luz el amanecer no corre (la sala la mueve el reloj del viaje) y al llegar va derecho al pedido; corría a la velocidad del vuelo', `al llegar: ${String(alLlegar)}`)
+controlPositivo('el detector VE el amanecer que corre en el viaje', amanecer.replace('const activo = !cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)', 'const activo = enLaLlegada ?? DIA_DEL_FINAL.activo'), viajeQuieto)
 
 cerrar('s36-escena10')

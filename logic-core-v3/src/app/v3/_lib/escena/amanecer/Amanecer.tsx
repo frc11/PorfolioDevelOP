@@ -33,7 +33,20 @@ import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
  * hasta que el scroll lo alcanza o vuelve para atrás (`sigueEntero`). Los viajes que cambian de luz, como antes.
  *
  * [CALIDAD 1] B5 · Los haces se dibujan a media resolución, en su búfer: `haces.ts`.
+ *
+ * [ESCENA 10] CIERRE · EL ORDEN DEL CUADRO. El estado del amanecer (la noche sostenida, el barrido, el frente) se
+ * decide ANTES de que lo lea nadie: corre con prioridad −1 (`ANTES_QUE_EL_RIG`), antes de los `useFrame` de prioridad 0.
+ * Corría después del rig, y el rig leía la noche sostenida del cuadro anterior: al prenderse la compuerta (y volviendo,
+ * al cruzar el cambio) se dibujaba UN cuadro de día entero con el amanecer sosteniendo la noche, y al empezar el barrido
+ * uno de noche oscurecido. Los haces van en un segundo paso, después del rig: usan la cámara y la bruma de ESTE cuadro.
+ * Y en un viaje que cambia de luz la sala la mueve el reloj del viaje (`nocheEfectiva` no lee la noche sostenida): el
+ * amanecer no corre (sin evento, como en los de día a día) y al llegar va derecho al pedido. Corría a la velocidad del
+ * vuelo: Por qué develOP → Trabajos oscurecía la sala de día en 9 cuadros y volvía al día de golpe antes de la noche
+ * del viaje; Trabajos → Por qué develOP pasaba el resplandor y el barrido por la sala de noche en 14.
  */
+
+/** [ESCENA 10] CIERRE · La prioridad del paso del estado: antes que el rig y que todo lo que lee la noche. */
+const ANTES_QUE_EL_RIG = -1
 
 type VentanaDelBanco = Window & {
   __amanecerDelBanco?: {
@@ -44,6 +57,8 @@ type VentanaDelBanco = Window & {
     haces: () => HacesDelAmanecer
     /** [CALIDAD 1] B7 · prende (1) o apaga (0) el prefiltro de la sombra de la trama en el piso, para el A/B del titileo. */
     tramaFiltrada: (v: number) => void
+    /** [ESCENA 10] CIERRE · el control positivo del invariante del destello: el próximo cuadro, la noche sostenida al revés. */
+    destello: () => void
   }
 }
 
@@ -68,7 +83,7 @@ function pieALaVista(m: { pie: Element | null }): boolean {
 
 
 function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
-  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false } })
+  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false }, deUnViaje: false, destello: false })
   const haces = useMemo(() => armarLosHaces(), [])
   useEffect(() => {
     // [CALIDAD 1] B5: la escena de los haces se dibuja aparte: que también se precompile y se caliente al arrancar.
@@ -101,13 +116,17 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       tramaFiltrada: (v) => {
         TRAMA_EN_VIVO.uTramaFiltrada.value = v
       },
+      destello: () => {
+        memoria.current.destello = true
+      },
     }
     return () => {
       delete ventana.__amanecerDelBanco
     }
   }, [haces])
 
-  useFrame((state, delta) => {
+  // [ESCENA 10] CIERRE · El paso del estado, antes que el rig (ver «El orden del cuadro», arriba).
+  useFrame((_state, delta) => {
     const m = memoria.current
     const dt = Math.min(delta, 0.1)
     // El logo guarda su gris de noche hasta que el frente lo alcanza (una sola vez por material).
@@ -119,10 +138,13 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     // [ESCENA 8] T3: el avance persigue al que pide el scroll (el borde de Tu panel), con una velocidad tope.
     m.cuadros += 1
     // [CALIDAD 1] A1: en un viaje de día a día, desde el primer cuadro la compuerta del destino (Tu panel corrido allá).
-    const luzDelViaje = viajeEnCurso()?.luz ?? null
+    const viaje = viajeEnCurso()
+    const luzDelViaje = viaje?.luz ?? null
+    // [ESCENA 10] CIERRE: en uno que cambia de luz, quieto (la luz es la del reloj del viaje); al llegar, derecho al pedido.
+    const cambiaDeLuz = viaje !== null && luzDelViaje === null
     const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null ? medirElBloqueOpacoEn(document, window.innerHeight, m.bloque) : null
     const enLaLlegada = luzDelViaje !== null && bloque !== null ? compuertaEnLaLlegada(bloque.tuPanel.pie - (luzDelViaje.y1 - window.scrollY), bloque.alto) : null
-    const activo = enLaLlegada ?? DIA_DEL_FINAL.activo
+    const activo = !cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)
     m.pedido = activo && bloque !== null ? avanceDelScroll(bloque.tuPanel.pie, bloque.alto) : 0
     const recien = activo && !m.activo
     m.activo = activo
@@ -136,17 +158,16 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       c.recien = recien
       c.carga = m.cuadros <= 3
       c.quieto = quieto
-      c.viaje = viajeEnCurso() !== null
+      c.viaje = viaje !== null || m.deUnViaje
       c.oculto = delta > PAUSA_S || (bloque !== null && bloqueTapaElCuadro(bloque))
       c.pie = pieALaVista(m)
       pasoDelAmanecer(m, enLaLlegada !== null, m.pedido, dt, c)
     }
+    m.deUnViaje = cambiaDeLuz
     DIA_DEL_TEXTO.frase.set(m.activo ? diaParaElTexto(m.avance, 'frase') : 1)
     DIA_DEL_TEXTO.abajo.set(m.activo ? diaParaElTexto(m.avance, 'abajo') : 1)
     const momento = momentoEn(m.activo ? m.avance * AMANECER.final : AMANECER.final + 1, m.momento)
     const u = AMANECER_EN_VIVO
-    // Mientras sostiene la noche, el cielo de noche que el cielo del amanecer va a destapar.
-    if (m.activo && momento.sostieneLaNoche && state.scene.fog !== null) u.uCieloDeNoche.value.copy(state.scene.fog.color).convertLinearToSRGB()
     NOCHE_DEL_AMANECER.sostenida = m.activo && momento.sostieneLaNoche
     u.uEstrellasDelAmanecer.value = m.activo ? momento.estrellas : 1
     u.uResplandor.value = m.activo ? momento.resplandor : 0
@@ -154,6 +175,19 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     u.uFrenteDelDia.value = momento.frente
     u.uRayos.value = m.activo ? momento.rayos : 0
     u.uCieloDelAmanecer.value = m.activo && momento.barre ? momento.cielo : m.activo && !momento.sostieneLaNoche ? 1 : 0
+    // El control positivo del invariante del destello (sólo lo pide el banco): este cuadro, la noche sostenida al revés.
+    if (m.destello) {
+      NOCHE_DEL_AMANECER.sostenida = !NOCHE_DEL_AMANECER.sostenida
+      m.destello = false
+    }
+  }, ANTES_QUE_EL_RIG)
+
+  // Después del rig: el cielo de noche que el amanecer va a destapar (la bruma de este cuadro) y los haces (su cámara).
+  useFrame((state) => {
+    const m = memoria.current
+    const u = AMANECER_EN_VIVO
+    // Mientras sostiene la noche, el cielo de noche que el cielo del amanecer va a destapar.
+    if (m.activo && m.momento.sostieneLaNoche && state.scene.fog !== null) u.uCieloDeNoche.value.copy(state.scene.fog.color).convertLinearToSRGB()
     if (mostrarLosHaces(haces, u.uRayos.value > 0.001, state.camera.position)) {
       leerLaTrama(moireRef.current)
       dibujarLosHaces(haces, state.gl, state.camera)
