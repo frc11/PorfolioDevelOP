@@ -1,5 +1,8 @@
 import { SECCIONES } from '../../_lib/secciones'
+import { CATALOGO_DE_DEMOS, TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { SUPERFICIES, type ModoSuperficie } from '../../_lib/superficies'
+import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
+import { BRILLO_DE_LA_NOCHE } from '../../_lib/escena/particleGlow'
 import { NOCHE_QUE_OSCURECE, type Tono } from '../menu/tono'
 
 /**
@@ -11,7 +14,9 @@ import { NOCHE_QUE_OSCURECE, type Tono } from '../menu/tono'
  *   · `texto`  — sobre contenido: el punto y el halo (lo medido en nk, COMPONENTS.md §4).
  *   · `enlace` — sobre un link: el punto se va y el halo se abre en un anillo alrededor del cursor nativo.
  *   · `boton`  — sobre un botón o un CTA: el halo crece y se aclara (el gesto lo hace el rollover del botón).
- *   · `demo`   — sobre una demo (un libro de la biblioteca, la cinta): el halo crece, se llena y dice «Abrir».
+ *   · `demo`   — sobre una demo (un libro de la biblioteca, la cinta): el punto y el halo se van y aparece el CARTEL
+ *                «Click para ver <proyecto>», pegado al cursor (`CursorDeLaSala.tsx`). [Cierre de INTERFAZ 2] El círculo
+ *                «Abrir» se borró: había dos carteles a la vez (éste y la pastilla fija del estante); queda uno.
  *   · `logo`   — sobre el logo de la escena (lo dice la escena: `LOGO_BAJO_EL_PUNTERO`): un anillo grande, el punto queda.
  *   · `oculto` — sobre un campo de texto (manda el cursor de texto del sistema) o fuera de la ventana.
  * El cursor nativo NO se oculta nunca (en nk tampoco: `cursor: none` en 0 de 4.270 elementos).
@@ -24,8 +29,19 @@ export const SELECTOR_DE_CAMPOS = 'input, textarea, select, [contenteditable="tr
 export const SELECTOR_DE_BOTONES = 'button, [role="button"], [data-pieza="cta"], summary'
 export const SELECTOR_DE_ENLACES = 'a[href], [role="link"]'
 
-/** El texto del halo sobre una demo. */
-export const ETIQUETA_DE_LA_DEMO = 'Abrir'
+/**
+ * [Cierre de INTERFAZ 2] La demo bajo el puntero y su cartel: la pieza (para apoyar el cartel arriba de su cara) y el
+ * texto («Click para ver Zero Protocol»), el mismo de la pastilla fija (`TEXTO_DE_DEMOS`). El nombre sale del catálogo
+ * por el `data-demo` del libro, o del nombre accesible de la pieza («Zero Protocol, Tecnología»).
+ */
+export function demoBajo(debajo: Element | null): { readonly pieza: Element; readonly texto: string } | null {
+  const pieza = debajo?.closest(SELECTOR_DE_DEMOS) ?? null
+  if (pieza === null) return null
+  const slug = pieza.getAttribute('data-demo')
+  const delCatalogo = slug === null ? undefined : CATALOGO_DE_DEMOS.find((d) => d.slug === slug)?.nombre
+  const nombre = delCatalogo ?? (pieza.getAttribute('aria-label') ?? '').split(',')[0].trim()
+  return nombre === '' ? null : { pieza, texto: TEXTO_DE_DEMOS.cartelDeLaPieza(nombre) }
+}
 
 export function estadoBajo(debajo: Element | null, sobreElLogo: boolean): EstadoDelCursor {
   if (debajo === null) return 'oculto'
@@ -81,6 +97,16 @@ export function tonoBajo(debajo: Element | null, noche: number, estilo: (el: Ele
     }
   }
   return 'claro'
+}
+
+/**
+ * [Cierre de INTERFAZ 2] LA NOCHE QUE SE VE: la de la gota (`nocheEfectiva`, la que dispara Trabajos al cruzar) o la del
+ * arco de la escena (el brillo de la noche que publica el rig en cada cuadro), la mayor. Llegando a Trabajos de un salto
+ * (un ancla, un `scrollTo`) la gota no cae y la sala igual está de noche por el arco: con la de la gota sola, el cursor
+ * (y el infinito del recorrido) quedaban oscuros sobre la noche (medido en el cierre, a 1440).
+ */
+export function nocheQueSeVe(): number {
+  return Math.max(nocheEfectiva(), BRILLO_DE_LA_NOCHE.uNoche.value)
 }
 
 /**

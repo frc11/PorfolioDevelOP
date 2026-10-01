@@ -60,20 +60,6 @@
   translate: var(--cursor-halo-x, 0) var(--cursor-halo-y, 0);
 }
 
-/* La etiqueta de la demo: escondida salvo en ese estado. Su tamaño sigue al del halo (va adentro, a escala inversa). */
-[data-v3] [data-pieza="cursor-sala"] [data-parte="etiqueta"] {
-  font-size: var(--text-micro);
-  line-height: var(--leading-micro);
-  letter-spacing: var(--tracking-micro);
-  text-transform: uppercase;
-  color: var(--color-fondo);
-  scale: 0.4;
-  opacity: 0;
-  transition-property: scale, opacity;
-  transition-duration: var(--duracion-media);
-  transition-timing-function: var(--ease-salida);
-}
-
 /* enlace — el punto se va; el halo se abre en un anillo alrededor del cursor nativo. */
 [data-v3] [data-pieza="cursor-sala"][data-estado="enlace"] [data-parte="nucleo"] {
   scale: 0;
@@ -94,17 +80,49 @@
   opacity: 0.6;
 }
 
-/* demo — el halo crece, se llena de tinta y dice «Abrir». */
-[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="nucleo"] {
+/* demo — [Cierre de INTERFAZ 2] el punto y el halo se van: sobre una demo el cursor es el CARTEL (abajo). El círculo
+   «Abrir» se borró: con la pastilla del estante eran dos carteles a la vez. */
+[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] :is([data-parte="nucleo"], [data-parte="halo"]) {
   scale: 0;
 }
-[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="halo"] {
-  scale: 2.4;
-  background-color: var(--color-tinta);
-  backdrop-filter: none;
+
+/*
+ * EL CARTEL DE LAS DEMOS, pegado al cursor: la pastilla del estante («Click para ver <proyecto>», `demos.css`: el mismo
+ * borde, radio, superficie, desenfoque y sombra) como UN objeto que el bucle mueve, ensancha y escala en segundos
+ * (`CursorDeLaSala.tsx`). Centrado en su punto (`translate` con su propio tamaño), con el ancho que persigue al del texto
+ * y la escala de su aparición. El aire sobre la cara levantada del libro lo lee el bucle de `scroll-margin-block-start`
+ * (no es un margen: es la medida de la pastilla de antes, el alza del estante y un paso de aire).
+ */
+[data-v3] [data-pieza="cursor-sala"] [data-parte="cartel"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  inline-size: var(--cursor-cartel-ancho, 0);
+  block-size: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));
+  padding-inline: var(--spacing-4);
+  scroll-margin-block-start: calc(var(--spacing-6) + var(--spacing-3));
+  color: var(--color-tinta);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-pastilla-l);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+  translate: calc(var(--cursor-cartel-x, 0) - 50%) calc(var(--cursor-cartel-y, 0) - 50%);
+  scale: var(--cursor-cartel-escala, 0);
 }
-[data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="etiqueta"] {
-  scale: 0.42;
+
+/* Las dos capas del texto: la que entra aparece por fundido en la MISMA caja (nunca dos cajas). */
+[data-v3] [data-pieza="cursor-sala"] [data-parte="cartel-texto"] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--duracion-rapida) var(--ease-salida);
+}
+[data-v3] [data-pieza="cursor-sala"] [data-parte="cartel-texto"][data-visible] {
   opacity: 1;
 }
 
@@ -125,12 +143,6 @@
 }
 [data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"]:is([data-estado="enlace"], [data-estado="logo"]) [data-parte="halo"] {
   border-color: var(--color-fondo);
-}
-[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"][data-estado="demo"] [data-parte="halo"] {
-  background-color: var(--color-fondo);
-}
-[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"] [data-parte="etiqueta"] {
-  color: var(--color-tinta);
 }
 
 @media (prefers-reduced-motion: reduce) {

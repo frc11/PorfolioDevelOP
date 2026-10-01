@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom'
 
 import { Imagen } from '../../../_componentes/medios/Imagen'
 
+import { PRESENCIA_DEL_CURSOR } from '../../../_chrome/cursor/presencia'
+
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, TEXTO_DE_DEMOS, type Demo } from './catalogo'
 import { MS_DE_INTENCION, precargar } from './precarga'
 
@@ -28,6 +30,10 @@ import { MS_DE_INTENCION, precargar } from './precarga'
  * mismos tokens darían una pastilla oscura. Es UNO solo, que cambia de texto y de
  * lugar: acompaña a la pieza levantada, no al puntero, y por eso el nombre es
  * siempre el de la pieza que está arriba.
+ *
+ * [Cierre de INTERFAZ 2] Con el cursor de la sala (puntero fino, desde 1024, sin
+ * movimiento reducido) el cartel del mouse es el del cursor, pegado a él; éste
+ * queda para el foco del teclado y para cuando no hay cursor.
  */
 export function Biblioteca({
   alAbrir,
@@ -68,7 +74,8 @@ export function Biblioteca({
 
   const alEntrar = (e: React.PointerEvent<HTMLAnchorElement>, demo: Demo): void => {
     if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
-    mostrarElCartel(e.currentTarget, demo)
+    // [Cierre de INTERFAZ 2] Con el cursor de la sala, el cartel va pegado al cursor (`CursorDeLaSala.tsx`): uno solo.
+    if (!PRESENCIA_DEL_CURSOR.montado) mostrarElCartel(e.currentTarget, demo)
     window.clearTimeout(intencion.current)
     intencion.current = window.setTimeout(() => precargar(demo.url), MS_DE_INTENCION)
   }
