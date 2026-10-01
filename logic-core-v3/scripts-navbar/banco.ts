@@ -34,7 +34,7 @@ export interface OpcionesDelBanco {
    * carrusel de Trabajos se pasa del borde y la página mide 402 (hallazgo del sprint, anterior a él).
    */
   readonly anchoTolerado?: number
-  /** La consulta de la URL, sin el `?` (por ejemplo `interfaz=navhover=b`). */
+  /** La consulta de la URL, sin el `?` (por ejemplo `interfaz=algo=b`). */
   readonly consulta?: string
 }
 
