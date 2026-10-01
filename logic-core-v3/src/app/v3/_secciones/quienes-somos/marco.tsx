@@ -18,8 +18,12 @@ import { CLASE_DE_ENCUADRE } from './geometria'
  *
  * ── Qué hace ──────────────────────────────────────────────────────────────
  *
- * La suelta **crece desde el centro** con `clip-path: inset(50%) → inset(0)`: en
- * rectángulo, sin escalar la imagen, así que no se deforma ni pierde nitidez. El
+ * La suelta **crece desde un rectángulo chico en el centro** hasta llenar la tarjeta,
+ * como una máscara que se abre (`clip-path` de `--marco-cerrado` a `--marco-abierto`),
+ * sin escalar la imagen; después suben abajo a la izquierda el nombre y el rol,
+ * escalonados, y al salir todo vuelve en orden inverso (es el hover de las fotos del
+ * equipo de nk). [NAVBAR] Recuperado: `ee87777b` lo había cambiado por un fundido.
+ * Son transiciones, así que un entrar y salir rápido se revierte desde donde está. El
  * velo es un degradado desde abajo y no un velo parejo: parejo ensucia la foto
  * entera, y lo único que hace falta oscurecer es donde se apoya el texto.
  *
@@ -119,6 +123,17 @@ const ESTILO_DEL_MARCO = {
   '--revelado-entra-demora': 'calc(var(--duracion-lenta) * 0.5)',
   '--revelado-sale': 'var(--duracion-rapida)',
   '--revelado-sale-demora': 'calc(var(--duracion-rapida) * 0.5)',
+  // El escalón entre el nombre y el rol (a la entrada y, al revés, a la salida).
+  '--revelado-escalon': 'calc(var(--duracion-rapida) / 3)',
+  // La máscara de la suelta: un rectángulo chico en el centro que se abre hasta llenar la tarjeta.
+  '--marco-cerrado': 'inset(42% 41%)',
+  '--marco-abierto': 'inset(0%)',
+  // Entra sin demora; al salir espera a que el texto empiece a irse, y recién cerrada se apaga.
+  '--marco-entra': 'clip-path var(--duracion-media) var(--ease-salida), opacity 0s',
+  '--marco-sale':
+    'clip-path var(--revelado-sale) var(--ease-salida) var(--revelado-sale-demora), opacity 0s linear calc(var(--revelado-sale) + var(--revelado-sale-demora))',
+  // Con movimiento reducido no hay máscara: la suelta se funde.
+  '--marco-fundido': 'opacity var(--duracion-rapida) var(--ease-salida)',
   '--marco-velo':
     'linear-gradient(to top, color-mix(in srgb, var(--color-tinta) 85%, transparent), color-mix(in srgb, var(--color-tinta) 40%, transparent) 50%, transparent)',
 } as React.CSSProperties
@@ -142,13 +157,17 @@ const REVELADO = {
     'block translate-y-full',
     // La SALIDA se declara en la base y la ENTRADA en las reglas de estado: al
     // soltar, la regla de estado deja de aplicar y vuelve ésta, que es más corta.
-    'transition duration-[var(--revelado-sale)] ease-[var(--ease-salida)] delay-[var(--revelado-sale-demora)]',
+    // Las demoras son de cada renglón (`--linea-*`): el nombre y el rol escalonados.
+    'transition duration-[var(--revelado-sale)] ease-[var(--ease-salida)] delay-[var(--linea-sale)]',
     // Hover y foco — Tailwind guarda `hover:` solo bajo `(hover: hover)`.
-    'group-hover:translate-y-0 group-hover:duration-[var(--revelado-entra)] group-hover:delay-[var(--revelado-entra-demora)]',
-    'group-has-focus-visible:translate-y-0 group-has-focus-visible:duration-[var(--revelado-entra)] group-has-focus-visible:delay-[var(--revelado-entra-demora)]',
+    'group-hover:translate-y-0 group-hover:duration-[var(--revelado-entra)] group-hover:delay-[var(--linea-entra)]',
+    'group-has-focus-visible:translate-y-0 group-has-focus-visible:duration-[var(--revelado-entra)] group-has-focus-visible:delay-[var(--linea-entra)]',
     // El estado del toque, para el dispositivo sin hover. MISMOS valores que arriba.
-    'group-data-[abierto=true]:translate-y-0 group-data-[abierto=true]:duration-[var(--revelado-entra)] group-data-[abierto=true]:delay-[var(--revelado-entra-demora)]',
+    'group-data-[abierto=true]:translate-y-0 group-data-[abierto=true]:duration-[var(--revelado-entra)] group-data-[abierto=true]:delay-[var(--linea-entra)]',
+    // Con movimiento reducido el texto está en su lugar y lo trae el fundido del velo.
+    'motion-reduce:translate-y-0!',
   ),
+  nombre: 'text-titulo-s font-semi',
   rotulo: 'font-codigo text-caption uppercase',
   /** Un escalón más abajo que antes (`titulo-s`): el pedido es que se aprecie más la foto y menos el texto encima. */
   cuerpo: 'text-cuerpo leading-[var(--revelado-interlineado)]',
@@ -175,9 +194,17 @@ const ACERCAMIENTO = cn(
   'group-data-[abierto=true]:scale-[var(--marco-acercamiento)] group-data-[abierto=true]:duration-[var(--duracion-lenta)]',
 )
 
+/** Las demoras de cada renglón: entra el nombre y después el rol; sale el rol y después el nombre. */
+const ESCALON: Record<'solo' | 'primero' | 'segundo', React.CSSProperties> = {
+  solo: { '--linea-entra': 'var(--revelado-entra-demora)', '--linea-sale': '0s' } as React.CSSProperties,
+  primero: { '--linea-entra': 'var(--revelado-entra-demora)', '--linea-sale': 'var(--revelado-escalon)' } as React.CSSProperties,
+  segundo: { '--linea-entra': 'calc(var(--revelado-entra-demora) + var(--revelado-escalon))', '--linea-sale': '0s' } as React.CSSProperties,
+}
+
 export function MarcoDeDosTomas({
   seria,
   suelta,
+  nombre,
   texto,
   registro,
   ancho,
@@ -189,7 +216,9 @@ export function MarcoDeDosTomas({
 }: {
   readonly seria: Toma
   readonly suelta: Toma
-  /** Lo ÚNICO que aparece en el hover. En los retratos es el puesto; en la foto del equipo, su frase. */
+  /** [NAVBAR] En los retratos: el nombre, que sube primero sobre la foto (el rol, después). */
+  readonly nombre?: string
+  /** Lo que aparece en el hover. En los retratos es el puesto; en la foto del equipo, su frase. */
   readonly texto: string
   readonly registro: 'rotulo' | 'cuerpo'
   readonly ancho: number
@@ -247,10 +276,13 @@ export function MarcoDeDosTomas({
           aria-hidden="true"
           data-parte="suelta"
           className={cn(
-            // RECURSOS: la toma suelta entra con un fundido corto (hover, foco o el toque de la sección).
-            'pointer-events-none absolute inset-0 overflow-hidden opacity-0',
-            'transition-opacity duration-[var(--duracion-rapida)] ease-[var(--ease-salida)]',
-            'group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-[abierto=true]:opacity-100',
+            // La máscara que se abre desde el centro (hover, foco o el toque de la sección).
+            'pointer-events-none absolute inset-0 overflow-hidden opacity-0 [clip-path:var(--marco-cerrado)] [transition:var(--marco-sale)]',
+            'group-hover:opacity-100 group-hover:[clip-path:var(--marco-abierto)] group-hover:[transition:var(--marco-entra)]',
+            'group-has-focus-visible:opacity-100 group-has-focus-visible:[clip-path:var(--marco-abierto)] group-has-focus-visible:[transition:var(--marco-entra)]',
+            'group-data-[abierto=true]:opacity-100 group-data-[abierto=true]:[clip-path:var(--marco-abierto)] group-data-[abierto=true]:[transition:var(--marco-entra)]',
+            // Movimiento reducido: sin máscara, un fundido (pisa el estilo en línea, por eso `!`).
+            'motion-reduce:[--marco-cerrado:var(--marco-abierto)]! motion-reduce:[--marco-entra:var(--marco-fundido)]! motion-reduce:[--marco-sale:var(--marco-fundido)]!',
           )}
         >
           <MarcoDeMedio
@@ -299,8 +331,18 @@ export function MarcoDeDosTomas({
             {/* `data-parte="revelado-texto"` es lo que `banda.css` apaga en la banda
                 móvil cuando la descripción YA está afuera de la foto (§2 del pedido):
                 el intercambio de imagen y el velo se quedan, sale sólo el texto. */}
+            {nombre !== undefined && (
+              <p className={REVELADO.ventana} data-parte="revelado-nombre">
+                <span className={cn(REVELADO.texto, REVELADO.nombre)} style={ESCALON.primero}>
+                  {nombre}
+                </span>
+              </p>
+            )}
             <p className={REVELADO.ventana} data-parte="revelado-texto">
-              <span className={cn(REVELADO.texto, registro === 'rotulo' ? REVELADO.rotulo : REVELADO.cuerpo)}>
+              <span
+                className={cn(REVELADO.texto, registro === 'rotulo' ? REVELADO.rotulo : REVELADO.cuerpo)}
+                style={nombre === undefined ? ESCALON.solo : ESCALON.segundo}
+              >
                 {texto}
               </span>
             </p>

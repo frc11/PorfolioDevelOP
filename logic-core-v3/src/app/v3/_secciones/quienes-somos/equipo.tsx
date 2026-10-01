@@ -130,6 +130,7 @@ export function ElEquipo(): React.JSX.Element {
                         <MarcoDeDosTomas
                           seria={persona.seria}
                           suelta={persona.suelta}
+                          nombre={persona.nombre}
                           texto={persona.rol}
                           registro="rotulo"
                           relacion={CLASE_DE_RELACION.retrato}

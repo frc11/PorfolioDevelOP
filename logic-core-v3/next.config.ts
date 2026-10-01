@@ -38,6 +38,8 @@ const nextConfig = {
   // que es lo que corre el CI — `next build` type-chequea distinto (respeta
   // exclusiones del tsconfig y no alcanza todo lo que alcanza tsc).
   images: {
+    // [NAVBAR] AVIF primero (las fotos del equipo pesan menos) y WebP para quien no lo lee.
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
