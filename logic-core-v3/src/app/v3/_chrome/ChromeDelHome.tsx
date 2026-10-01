@@ -1,6 +1,7 @@
 import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
+import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
 import { NavegacionDelHome } from './NavegacionDelHome'
@@ -160,6 +161,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <Contacto />
       {/* [INTERFAZ 2] T1: la escena responde a la interfaz (sólo con `?pruebas=responde=si`). */}
       <RespuestaDeLaEscena />
+      {/* [INTERFAZ 2] T2: la vista previa del destino en el menú (sólo con `?pruebas=anticipa=si`). */}
+      <AnticipacionDelMenu />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

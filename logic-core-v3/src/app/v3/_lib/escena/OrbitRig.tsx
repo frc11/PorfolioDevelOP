@@ -59,7 +59,7 @@ import {
 import type { MoireHandle } from './MoireScreen'
 import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
 import { nivelConLaNocheDisparada } from './nocheDisparada'
-import { nivelConLaInterfaz } from './interfaz/respuesta'
+import { giroDeLaInterfaz, nivelConLaInterfaz } from './interfaz/respuesta'
 import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
@@ -438,6 +438,8 @@ export function OrbitRig({
     }
     angleDeg += desplazamiento.angleDeg
     height += desplazamiento.height
+    // [INTERFAZ 2] T2 · el giro de la vista previa del destino (con su bandera, y sólo con la física: no con movimiento reducido).
+    if (physics) angleDeg += giroDeLaInterfaz()
 
     // 3 · Cámara sobre la órbita. Ángulo 0° = de frente al logo (se lee bien);
     // 90° y 270° son los perfiles; 180° es de atrás, con el logo espejado.

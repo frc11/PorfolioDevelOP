@@ -11,6 +11,8 @@
  * cobra pantallas después, al volver.
  */
 
+import type { PlanDeAnticipacion } from './anticipacion'
+
 /** Cuánto vale un pedido sin atender (ms): un cuadro largo, y nada más. */
 export const VIGENCIA_DEL_PEDIDO_MS = 250
 
@@ -22,6 +24,13 @@ export const ONDA_PEDIDA = { n: 0, cuando: Number.NEGATIVE_INFINITY, x: 0, y: 0 
 
 /** El menú del teléfono, abierto: la sala se oscurece apenas (`respuesta.ts`) y se desenfoca (el lienzo). */
 export const MENU_DE_LA_INTERFAZ = { abierto: false }
+
+/**
+ * [INTERFAZ 2] T2 · la vista previa del destino que pide el menú: el plan armado en el evento (el puntero o el foco
+ * sobre un ítem), o `null` cuando se va. No vence como los otros pedidos: lo sostiene el DOM mientras está encima y la
+ * anticipación misma vuelve sola al segundo (`anticipacion.ts`).
+ */
+export const ANTICIPACION_PEDIDA: { plan: PlanDeAnticipacion | null } = { plan: null }
 
 export function pedirElPulso(ahora: number): void {
   PULSO_PEDIDO.n += 1

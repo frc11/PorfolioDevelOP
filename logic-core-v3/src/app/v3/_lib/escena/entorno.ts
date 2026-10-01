@@ -79,10 +79,12 @@ export interface Pruebas {
   readonly titulos: TitulosDeVolumen | 'no'
   /** [INTERFAZ 2] T1 · la escena responde a la interfaz (`escena/interfaz/`); `responde=si`. */
   readonly responde: 'si' | 'no'
+  /** [INTERFAZ 2] T2 · el menú anticipa el destino (la luz y un giro de la cámara) antes del clic; `anticipa=si`. */
+  readonly anticipa: 'si' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no', anticipa: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -94,6 +96,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
     titulos: unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
     responde: unoDe(['si'], valor('responde')),
+    anticipa: unoDe(['si'], valor('anticipa')),
   }
 }
 

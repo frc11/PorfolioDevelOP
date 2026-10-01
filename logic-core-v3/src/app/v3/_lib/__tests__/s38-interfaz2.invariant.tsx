@@ -11,13 +11,18 @@
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
+import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
 import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from '../../_chrome/escena/RespuestaDeLaEscena'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
+import { ENCENDIDO } from '../escena/entorno/encendido'
 import { ANILLOS_GLSL } from '../escena/entorno/Pulso'
 import { PULSO, avanzarElPulso, pulsoInicial, type EntradasDelPulso, type EstadoDelPulso } from '../escena/entorno/maquinaDelPulso'
+import { ANTICIPACION, anticipacionInicial, avanzarLaAnticipacion, luzDeLaAnticipacion, planDeLaAnticipacion, type EstadoDeLaAnticipacion, type PlanDeAnticipacion } from '../escena/interfaz/anticipacion'
 import { MENU_DE_LA_INTERFAZ, VIGENCIA_DEL_PEDIDO_MS, pedirLaOnda, vigente } from '../escena/interfaz/pedidos'
-import { RESPUESTA, RESPUESTA_EN_VIVO, nivelConLaInterfaz } from '../escena/interfaz/respuesta'
+import { RESPUESTA, RESPUESTA_EN_VIVO, giroDeLaInterfaz, nivelConLaInterfaz } from '../escena/interfaz/respuesta'
 import { NIVEL_DE_LA_NOCHE } from '../escena/lightArc'
+import { brilloDeLaNocheEn } from '../escena/particleGlow'
+import { RIM_NIGHT_LEVEL } from '../escena/probeLighting'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, ONDA_DIRIGIDA, ONDA_EN_VIVO, atenderLaOnda, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { FLOOR_Y } from '../escena/probeScene'
@@ -128,11 +133,13 @@ afirmarIgual(ONDA_EN_VIVO.uOnda.value.toArray(), antes, '  y un pedido viejo no 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T1 · 3 · El menú del teléfono: la sala se oscurece apenas (su luz) y se desenfoca (el lienzo)')
 
-afirmar([1, 0.5, 0.04, 0.3].every((n) => nivelConLaInterfaz(n, 1 / 60, false) === n), 'sin la bandera el rig recibe EXACTAMENTE el mismo nivel')
+const SIN_BANDERAS = { responde: false, anticipa: false }
+const SOLO_RESPONDE = { responde: true, anticipa: false }
+afirmar([1, 0.5, 0.04, 0.3].every((n) => nivelConLaInterfaz(n, 1 / 60, SIN_BANDERAS) === n), 'sin la bandera el rig recibe EXACTAMENTE el mismo nivel')
 const correrMenu = (abierto: boolean, nivel: number, segundos: number, hz: number): number => {
   MENU_DE_LA_INTERFAZ.abierto = abierto
   let n = nivel
-  for (let k = 0; k < Math.round(segundos * hz); k += 1) n = nivelConLaInterfaz(nivel, 1 / hz, true)
+  for (let k = 0; k < Math.round(segundos * hz); k += 1) n = nivelConLaInterfaz(nivel, 1 / hz, SOLO_RESPONDE)
   return n
 }
 RESPUESTA_EN_VIVO.menu = 0
@@ -166,5 +173,71 @@ afirmar(SELECTOR_DE_LOS_CTA.includes('[data-pieza="cta"]') && SELECTOR_DE_LOS_CT
 const RESPUESTA_TSX = leer('_chrome/escena/RespuestaDeLaEscena.tsx')
 afirmar(RESPUESTA_TSX.includes("if (responde !== 'si') return undefined") && RESPUESTA_TSX.includes("(e.pointerType !== 'mouse' && e.pointerType !== 'pen') || !fino.matches"), 'sin la bandera no escucha nada; con ella, sólo el puntero fino (un toque no tiene «encima»)')
 afirmar(leer('_chrome/ChromeDelHome.tsx').includes('<RespuestaDeLaEscena />'), 'montada en el chrome del home (no en una pieza compartida)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · 1 · La vista previa del destino: hacia la luz del destino, adentro de la clase de la sala')
+
+afirmar(PRUEBAS_APAGADAS.anticipa === 'no' && entornoPedido('producto,anticipa=si').pruebas.anticipa === 'si', 'apagada en el producto; `anticipa=si` la pide')
+const haciaLaNoche = luzDeLaAnticipacion('dia-a-noche', 1, null)
+afirmar(haciaLaNoche < -0.3 && brilloDeLaNocheEn(1 + haciaLaNoche) === 0, `de día, hacia Trabajos: la luz baja (${haciaLaNoche.toFixed(3)}) sin cruzar a la noche (las motas no brillan, el haz no se enciende)`)
+const haciaElDia = luzDeLaAnticipacion('noche-a-dia', NIVEL_DE_LA_NOCHE, null)
+afirmar(haciaElDia > 0 && brilloDeLaNocheEn(NIVEL_DE_LA_NOCHE + haciaElDia) >= ENCENDIDO.prende, `de noche, hacia una sección de día: la luz sube (${haciaElDia.toFixed(3)}) sin dejar la noche (el brillo queda arriba de lo que prende el haz)`)
+afirmar(luzDeLaAnticipacion('dia-a-noche', RIM_NIGHT_LEVEL + 0.02, null) <= 0, '  una sala de día pegada a la frontera no se ACLARA para anticipar la noche')
+afirmar(luzDeLaAnticipacion('dia-a-dia', 1, 1) === 0 && luzDeLaAnticipacion('noche-a-noche', NIVEL_DE_LA_NOCHE, null) === 0, '  de día a día con la misma luz (Servicios, Por qué develOP): sólo la cámara')
+const planHaciaAbajo = planDeLaAnticipacion('trabajos', 'dia-a-noche', 1, null, 0, 5000, 0)
+const planHaciaArriba = planDeLaAnticipacion('quienes-somos', 'dia-a-dia', 1, 1, 9000, 1000, 0)
+afirmar(planHaciaAbajo.sentido === 1 && planHaciaArriba.sentido === -1, 'la cámara gira hacia donde queda el destino: el ángulo de la pista crece con el progreso')
+
+titulo('T2 · 2 · Sube, se sostiene un segundo, vuelve; con el clic, el viaje sale de ahí')
+
+/** Corre la anticipación cuadro a cuadro: `plan` desde `t0`, y un viaje desde `tViaje` (el scroll de y0 a y1 en 2,6 s). */
+function anticipar(plan: PlanDeAnticipacion | null, hz: number, segundos: number, viaje?: { readonly desde: number; readonly destino: string; readonly y0: number; readonly y1: number }, maquina = avanzarLaAnticipacion): { luz: number[]; giro: number[] } {
+  const e = anticipacionInicial()
+  const luz: number[] = []
+  const giro: number[] = []
+  for (let k = 0; k < Math.round(segundos * hz); k += 1) {
+    const t = k / hz
+    const enViaje = viaje !== undefined && t >= viaje.desde && t < viaje.desde + 3.2
+    const avance = viaje === undefined ? 0 : Math.max(0, Math.min(1, (t - viaje.desde - 0.3) / 2.6))
+    const scrollY = viaje === undefined ? 0 : viaje.y0 + (viaje.y1 - viaje.y0) * (avance * avance * (3 - 2 * avance))
+    maquina(e, plan, enViaje ? (viaje?.destino ?? null) : null, scrollY, t * 1000, 1 / hz)
+    luz.push(e.luz)
+    giro.push(e.giro)
+  }
+  return { luz, giro }
+}
+const plan = planDeLaAnticipacion('trabajos', 'dia-a-noche', 1, null, 0, 5000, 0)
+const ant60 = anticipar(plan, 60, 3)
+const en = (serie: number[], s: number, hz = 60): number => serie[Math.round(s * hz) - 1]
+afirmar(Math.abs(en(ant60.luz, 0.55) - plan.luz) < 0.05 * Math.abs(plan.luz) && Math.abs(en(ant60.giro, 0.55) - ANTICIPACION.giroDeg) < 0.05 * ANTICIPACION.giroDeg, `entra en medio segundo: luz ${en(ant60.luz, 0.55).toFixed(3)} de ${plan.luz.toFixed(3)}, giro ${en(ant60.giro, 0.55).toFixed(2)}° de ${String(ANTICIPACION.giroDeg)}°`)
+afirmar(Math.abs(en(ant60.luz, 2.9)) < 0.03 * Math.abs(plan.luz) && Math.abs(en(ant60.giro, 2.9)) < 0.03 * ANTICIPACION.giroDeg, `  y vuelve sola después de ${String(ANTICIPACION.sostenS)} s aunque el puntero siga encima (a los 2,9 s: ${en(ant60.luz, 2.9).toFixed(4)})`)
+const ant144 = anticipar(plan, 144, 0.4)
+afirmar(Math.abs(en(ant144.luz, 0.4, 144) - en(ant60.luz, 0.4)) < 2e-3, `  en segundos: igual a 60 y a 144 Hz (${en(ant60.luz, 0.4).toFixed(4)} y ${en(ant144.luz, 0.4, 144).toFixed(4)})`)
+
+const conClic = anticipar(plan, 60, 4, { desde: 0.6, destino: 'trabajos', y0: 0, y1: 5000 })
+const maximoSalto = (serie: number[]): number => serie.reduce((m, v, i) => (i === 0 ? m : Math.max(m, Math.abs(v - serie[i - 1]))), 0)
+const iClic = Math.round(0.6 * 60)
+afirmar(Math.abs(conClic.luz[iClic] - conClic.luz[iClic - 1]) < 0.01 && Math.abs(conClic.giro[iClic] - conClic.giro[iClic - 1]) < 0.15, 'con el clic, el viaje arranca DESDE la anticipación: el cuadro del clic sigue al de antes (sin salto)')
+afirmar(Math.abs(en(conClic.luz, 3.8)) < 1e-9 && Math.abs(en(conClic.giro, 3.8)) < 1e-9, '  y lo anticipado se descuenta con el avance del viaje: en la llegada es cero')
+afirmar(maximoSalto(conClic.luz) < 0.05 && maximoSalto(conClic.giro) < 0.8, `  ningún cuadro salta (el mayor cambio, el de la entrada suave: ${maximoSalto(conClic.luz).toFixed(3)} de luz, ${maximoSalto(conClic.giro).toFixed(2)}°)`)
+const deGolpe = (e: EstadoDeLaAnticipacion, p: PlanDeAnticipacion | null, v: string | null, y: number, ahora: number, dt: number): void => {
+  avanzarLaAnticipacion(e, p, v, y, ahora, dt)
+  if (v !== null) [e.luz, e.giro] = [0, 0]
+}
+controlPositivo('el chequeo del salto ve un viaje que suelta la anticipación de golpe al hacer clic', plan, (p: PlanDeAnticipacion) => {
+  const r = anticipar(p, 60, 4, { desde: 0.6, destino: 'trabajos', y0: 0, y1: 5000 }, deGolpe)
+  return Math.abs(r.luz[iClic] - r.luz[iClic - 1]) < 0.01
+})
+const aOtroLado = anticipar(plan, 60, 4, { desde: 0.6, destino: 'servicios', y0: 0, y1: 9000 })
+afirmar(maximoSalto(aOtroLado.luz) < 0.05 && Math.abs(en(aOtroLado.luz, 3.8)) < 0.01 * Math.abs(plan.luz), 'un viaje a OTRO lado (el CTA del hero, otro ítem): lo anticipado vuelve en el tiempo, sin salto')
+
+titulo('T2 · 3 · Dónde vive: el rig, la barra, la misma cuenta que el clic')
+
+afirmarIgual(giroDeLaInterfaz({ responde: true, anticipa: false }), 0, 'sin la bandera la cámara no recibe nada')
+afirmar(/angleDeg \+= desplazamiento\.angleDeg\s*\n\s*height \+= desplazamiento\.height\s*\n\s*\/\/[^\n]*\n\s*if \(physics\) angleDeg \+= giroDeLaInterfaz\(\)/.test(leer('_lib/escena/OrbitRig.tsx')), 'el giro va junto al del mouse y sólo con la física (no con movimiento reducido); la pose publicada no lo lleva')
+const ANTICIPACION_TSX = leer('_chrome/escena/AnticipacionDelMenu.tsx')
+afirmar(ANTICIPACION_TSX.includes('const y1 = destinoDelViaje(seccion)') && ANTICIPACION_TSX.includes('const viaje = planDelViaje(seccion.id, y1)'), 'el plan sale de LA MISMA cuenta que el clic: el nudo del destino y la clase de luz del viaje')
+afirmar(ANTICIPACION_TSX.includes('if (reducido.matches || viajeEnCurso() !== null || !deberiaDeslizar(getIntroStage())) return') && ANTICIPACION_TSX.includes('if (seccion === null) return'), '  y sólo donde el clic viaja: sin movimiento reducido, sin un viaje en curso, con la compuerta del intro; «Contacto» (no es una sección) no anticipa')
+afirmar(SELECTOR_DE_LOS_ITEMS === '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]' && leer('_chrome/ChromeDelHome.tsx').includes('<AnticipacionDelMenu />'), '  los ítems de la barra, con un escucha delegado (la pastilla compartida no se toca)')
 
 cerrar('s38-interfaz2')
