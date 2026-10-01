@@ -49,7 +49,10 @@ titulo('T1 · el cierre de ESCENA 9: lo elegido, en el producto; lo demás, borr
 afirmar(ENTORNO.logoDeNoche && ENTORNO.materialDelLogo && ENTORNO.sombraDelLogo, 'en el producto: el logo de noche, el negro satinado y la sombra del logo')
 const sinCadaUno = entornoPedido('producto,logo-noche=no,material=no,sombra-logo=no')
 afirmar(!sinCadaUno.logoDeNoche && !sinCadaUno.materialDelLogo && !sinCadaUno.sombraDelLogo && !BASE_LIMPIA.logoDeNoche && !BASE_LIMPIA.materialDelLogo && !BASE_LIMPIA.sombraDelLogo, '  el banco los apaga con `=no` para comparar; la base limpia no los tiene')
-afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'titulos' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (la que hay es la de T3)', Object.keys(PRUEBAS_APAGADAS).join())
+// [INTERFAZ 2] Las pruebas de ese sprint (la interfaz y la escena juntas) entran a la misma lista: lo que se afirma acá
+// sigue siendo que de ESCENA 9 no queda ninguna, no cuántas hay.
+const PRUEBAS_DE_INTERFAZ_2 = ['responde', 'anticipa', 'vida', 'recorrido']
+afirmar(Object.keys(PRUEBAS_APAGADAS).every((k) => k === 'titulos' || PRUEBAS_DE_INTERFAZ_2.includes(k)) && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (las que hay son la de T3 y las de INTERFAZ 2)', Object.keys(PRUEBAS_APAGADAS).join())
 
 // El logo de noche: la variante clara (el filo casi blanco), la única.
 const exportsDelLogo = Object.keys(logoDeNoche)

@@ -59,6 +59,7 @@ import {
 import type { MoireHandle } from './MoireScreen'
 import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
 import { nivelConLaNocheDisparada } from './nocheDisparada'
+import { nivelConLaInterfaz } from './interfaz/respuesta'
 import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
@@ -314,6 +315,8 @@ export function OrbitRig({
       sampleLightArc(progress, arc)
       // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.
       arc.level = nivelConLaNocheDisparada(arc.level)
+      // [INTERFAZ 2] La sala responde a la interfaz (con su bandera; sin ella, el mismo nivel) — `interfaz/respuesta.ts`.
+      arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))
 
       // 1b · Al ENTRAR al modo, la pose amortiguada arranca desde donde estaban
       //      los sliders: el cambio de modo desliza en vez de saltar.

@@ -11,6 +11,8 @@
  *   salir se vuelve al período de reposo (y sólo con el scroll quieto, porque si no el modo es
  *   scroll).
  * - **apagado** (movimiento reducido): ningún anillo.
+ * - **[INTERFAZ 2] T1 · el pedido de la interfaz** (un CTA con el puntero encima): el MISMO principal, si no hay scroll,
+ *   si hay lugar y si no nació otro principal hace menos de `pedidoCadaS`. Sin pedido, la máquina es la de siempre.
  *
  * Nunca se corta un anillo vivo: cada uno trae su duración desde que nace. Al cambiar de modo sólo
  * se reprograma el PRÓXIMO. El tope cuenta todos los vivos, y los periódicos dejan siempre un
@@ -32,6 +34,8 @@ export const PULSO = {
    * el primero nace a un período de hover de la entrada.
    */
   tope: 4,
+  /** [INTERFAZ 2] T1 · un principal pedido por la interfaz no nace a menos de esto de otro principal (s). */
+  pedidoCadaS: 1.6,
   /** Cada clase de anillo: vida (s), radio final en el piso (unidades de mundo) y amplitud. */
   anillos: {
     reposo: { duracionS: 3.6, alcance: 26, amplitud: 1 },
@@ -64,6 +68,8 @@ export interface EntradasDelPulso {
   /** El puntero está sobre el logo (con todas las compuertas de `hoverDelLogo.ts` ya aplicadas). */
   readonly hover: boolean
   readonly reducido: boolean
+  /** [INTERFAZ 2] T1 · la interfaz pide el principal en este cuadro (`interfaz/pedidos.ts`). Sin él, como siempre. */
+  readonly pedido?: boolean
 }
 
 export type ConstantesDelPulso = typeof PULSO
@@ -108,6 +114,13 @@ export function avanzarElPulso(estado: EstadoDelPulso, e: EntradasDelPulso, c: C
     if ((entra || sale) && anillos.length < c.tope) anillos = [...anillos, { nace: e.t, clase: 'principal' }]
     const periodo = periodoDe(modo, c)
     proximo = periodo === null ? null : e.t + periodo
+  }
+
+  // 2b · [INTERFAZ 2] T1 · el principal que pide la interfaz: no con el scroll, no si no hay lugar, no encima de otro.
+  if (e.pedido === true && modo !== 'scroll' && anillos.length < c.tope) {
+    let reciente = false
+    for (const a of anillos) if (a.clase === 'principal' && e.t - a.nace < c.pedidoCadaS) reciente = true
+    if (!reciente) anillos = [...anillos, { nace: e.t, clase: 'principal' }]
   }
 
   // 3 · El periódico de este modo, si le toca y hay lugar (dejando uno para el principal).

@@ -262,6 +262,8 @@
     "test:escena-destello": "npx tsx scripts-escena10/destello.invariant.ts",
     "test:s37-interfaz1": "npx tsx src/app/v3/_lib/__tests__/s37-interfaz1.invariant.tsx",
     "test:s37": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s37",
+    "test:s38-interfaz2": "npx tsx src/app/v3/_lib/__tests__/s38-interfaz2.invariant.tsx",
+    "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",

@@ -9,6 +9,8 @@ import { Isotipo } from '../../_componentes/marca/Marca'
 import { ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
+import { usePrueba } from '../../_lib/pruebasDeLaInterfaz'
+import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { abrirContacto, useContacto } from '../contacto/apertura'
 import { vaInvertido } from './tono'
 import { useTonoDebajo } from './useTonoDebajo'
@@ -44,6 +46,14 @@ export function MenuMovil(): React.JSX.Element | null {
     setAbierto(false)
   }, [])
 
+  // [INTERFAZ 2] T1 · con `responde=si`, la sala se desenfoca y se oscurece apenas detrás del menú abierto.
+  const responde = usePrueba('responde') === 'si'
+  useEffect(() => {
+    if (!responde) return undefined
+    salaDetrasDelMenu(abierto)
+    return () => salaDetrasDelMenu(false)
+  }, [responde, abierto])
+
   // Si el chrome vuelve a la barra, el menú se cierra (ajuste durante el render, no en un efecto).
   const [enMenuAntes, setEnMenuAntes] = useState(enMenu)
   if (enMenuAntes !== enMenu) {
@@ -63,7 +73,7 @@ export function MenuMovil(): React.JSX.Element | null {
   return (
     <div data-pieza="menu-movil" className="fixed inset-x-0 top-0 z-[var(--z-cabecera)]">
       <AnimatePresence>
-        {abierto && <Menu key="menu" invertido={invertido} alCerrar={cerrar} alContacto={irAlContacto} alDesmontar={alDesmontar} />}
+        {abierto && <Menu key="menu" invertido={invertido} alCerrar={cerrar} alContacto={irAlContacto} alDesmontar={alDesmontar} salaDetras={responde} />}
       </AnimatePresence>
       <button
         ref={boton}
@@ -87,11 +97,14 @@ export function Menu({
   alCerrar,
   alContacto,
   alDesmontar,
+  salaDetras = false,
 }: {
   readonly invertido: boolean
   readonly alCerrar: () => void
   readonly alContacto: () => void
   readonly alDesmontar: () => void
+  /** [INTERFAZ 2] T1 · la sala toma el desenfoque (`salaDetrasDelMenu.ts`): el velo desenfoca poco la página. */
+  readonly salaDetras?: boolean
 }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
   const reducido = useMovimientoReducido()
@@ -106,7 +119,10 @@ export function Menu({
         data-parte="velo-del-menu"
         aria-hidden="true"
         onClick={alCerrar}
-        className="fixed inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_20%,transparent)] backdrop-blur-[var(--blur-panel)]"
+        className={cn(
+          'fixed inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_20%,transparent)]',
+          salaDetras ? 'backdrop-blur-[calc(var(--blur-panel)/3)]' : 'backdrop-blur-[var(--blur-panel)]',
+        )}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

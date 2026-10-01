@@ -16,6 +16,7 @@ import { conElAmanecer } from '../amanecer/luz'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { PISO_EN_VIVO } from './enVivo'
+import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
 import { ORDEN_DE_LA_GRILLA, armarLosOrdenes, ponerElOrden, profundidadEstricta, sectorDe } from './ordenDeLosBloques'
 
@@ -34,7 +35,7 @@ type VentanaDelBanco = Window & {
     celdas: number
     medir: (pasos: number) => Promise<Medida>
     /** La altura dibujada más alta y la más baja, la presencia del cursor y cuántos pasos corrió el último cuadro. */
-    estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number }
+    estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number; onda: number[] }
     /** [ESCENA 9] T4 · los bloques de adelante hacia atrás (o en el orden de la grilla) y la profundidad estricta. */
     orden: (prendido: boolean, estricta: boolean) => void
   }
@@ -95,7 +96,8 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
           minimo = Math.min(minimo, datos[k])
         }
         const m = memoria.current
-        return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos }
+        // [INTERFAZ 2] T1 · la onda hacia lo señalado: cuándo nació, su dirección y su fuerza.
+        return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos, onda: ONDA_EN_VIVO.uOnda.value.toArray() }
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
       orden: (prendido, estricta) => {
@@ -136,6 +138,9 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     if (toca !== null) m.cursor.set(toca.x / g.lado, toca.z / g.lado)
     const presente = !quieto && toca !== null && t - m.ultimoCursor < PISO_VIVO.cursor.quietoS
     m.presencia += ((presente ? 1 : 0) - m.presencia) * (1 - Math.exp(-dt / (presente ? 0.15 : 0.8)))
+
+    // [INTERFAZ 2] T1 · la onda que pide la interfaz (sólo con la bandera; sin movimiento reducido, como el pulso).
+    if (!quieto && entornoDeLaEscena().pruebas.responde === 'si') atenderLaOnda(state.camera, t, performance.now())
 
     // Los pasos fijos que pide el reloj de la escena (que se detiene con movimiento reducido).
     const paso = PISO_VIVO.onda.paso
@@ -201,7 +206,10 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
-  const sim = crearPingPong(grilla.n, grilla.n, 1, SIMULACION_GLSL, {
+  // [INTERFAZ 2] T1 · con `responde=si`, la simulación con la onda hacia lo señalado (`ondaDirigida.ts`); sin ella, la de siempre.
+  const conOnda = entornoDeLaEscena().pruebas.responde === 'si'
+  const sim = crearPingPong(grilla.n, grilla.n, 1, conOnda ? conOndaDirigida(SIMULACION_GLSL) : SIMULACION_GLSL, {
+    ...(conOnda ? { uOnda: ONDA_EN_VIVO.uOnda } : {}),
     uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
     uRadio: { value: grilla.radio / grilla.lado },
@@ -237,6 +245,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   }, conContacto, conSombra)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
+  if (conOnda) conLaOndaEnElPiso(material)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

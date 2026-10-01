@@ -1,6 +1,7 @@
 import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
+import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
 import { NavegacionDelHome } from './NavegacionDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
@@ -157,6 +158,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <MenuMovil />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />
+      {/* [INTERFAZ 2] T1: la escena responde a la interfaz (sólo con `?pruebas=responde=si`). */}
+      <RespuestaDeLaEscena />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

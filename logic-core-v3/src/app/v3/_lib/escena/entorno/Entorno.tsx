@@ -8,6 +8,7 @@ import { AMANECER_EN_VIVO } from '../amanecer/luz'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
+import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
@@ -54,7 +55,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     progreso: Number.NaN,
     ultimoMovimiento: -Infinity,
     hover: false,
-    entradas: { t: 0, scrollEnMovimiento: false, hover: false, reducido: false },
+    entradas: { t: 0, scrollEnMovimiento: false, hover: false, reducido: false, pedido: false },
+    // [INTERFAZ 2] T1 · el último pedido de pulso atendido (`interfaz/pedidos.ts`).
+    pulsoAtendido: PULSO_PEDIDO.n,
   })
 
   useEffect(() => {
@@ -144,6 +147,12 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       entradas.scrollEnMovimiento = scrollEnMovimiento
       entradas.hover = m.hover
       entradas.reducido = quieto
+      // [INTERFAZ 2] T1 · un CTA pide el principal: sólo con la bandera, y sólo un pedido nuevo y reciente.
+      entradas.pedido = false
+      if (e.pruebas.responde === 'si' && PULSO_PEDIDO.n !== m.pulsoAtendido) {
+        m.pulsoAtendido = PULSO_PEDIDO.n
+        entradas.pedido = vigente(PULSO_PEDIDO.cuando, performance.now())
+      }
       m.pulso = avanzarElPulso(antes, entradas)
       escribirLosAnillos(m.pulso)
     }
