@@ -32,6 +32,10 @@
 > variantes), 5 `a27251e0` (el carrusel con movimiento reducido y `s3-tokens` en verde). Las entregas, en
 > `~/.cache/b4-medicion/navbar/retoque/<punto>/mirar.txt`.
 >
+> **Cierre del navbar:** el hover de la barra es la variante `b`, el resaltado que se desliza (`b92b1f09`: la `a` y la
+> bandera se borraron); lo demás del retoque, aprobado. Y se recuperó el hover de las fotos del equipo (`c5cfa28b`,
+> §6). Clips en `~/.cache/b4-medicion/navbar/cierre/fotos/`.
+>
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
 
@@ -131,11 +135,12 @@ más: la pausa del panel) y `SELECTOR_DE_LOS_VIAJES` (sin los puntos del indicad
 | T1 · los ítems | Quiénes somos · Portfolio · Servicios · Panel · Por qué develOP · Contacto, una sola lista para la barra y el menú. «Portfolio» sigue yendo a `#trabajos`; «Panel» (nuevo) a `#tu-panel`; «Contacto» abre el formulario, como antes | `_chrome/enlaces.ts` |
 | T1 · los destinos | Quiénes somos un poco antes: la primera pantalla centrada en el cuadro libre bajo la barra, sin adelantarse al título ni pasarse del reposo de antes (1440: 917 en lugar de 1035). Panel: la cabecera de Tu panel entera a la vista, sin asomar Servicios. Servicios y Contacto, como antes | `_componentes/destinosDelViaje.ts` |
 | Retoque 3 · la llegada del título | Portfolio y Por qué develOP viajan como todos (un viaje, la duración de siempre); al llegar, antes de que se vaya el velo, el título repite su llegada aislado (900 ms, `CURVAS.principal`), a la par del progreso del scroll. La «llegada a la vista» de T1 se borró | `_componentes/llegadaDelTitulo.ts`, `_secciones/_contrato/canales.tsx` (`llegadaDe`), `useDeslizamientoDelCta.ts` |
-| T2 · la barra | La misma pastilla visual y la misma geometría (`--barra-*` = `--nav-*`), propia del home, con el subrayado del activo. [Retoque 4] Sin el rollover de dos copias: el hover es una línea fina que crece desde el centro (`a`, la de siempre) o un resaltado que sigue al puntero y al foco y descansa en el activo (`b`), con `?interfaz=navhover=a|b`. El modo: la barra desde `medio` si entra; abajo, el menú del teléfono (antes quedaba una franja de 628 a 860 sin barra ni menú) | `_chrome/barra/{BarraDelHome.tsx,hover.ts}`, `_estilos/barra.css` |
+| T2 · la barra | La misma pastilla visual y la misma geometría (`--barra-*` = `--nav-*`), propia del home. Sin el rollover de dos copias: el hover es un resaltado suave, UNO, que sigue al puntero y al foco y descansa en el activo (es el indicador; al cierre quedó esta variante, la `b`, y la línea desde el centro y la bandera se borraron). El modo: la barra desde `medio` si entra; abajo, el menú del teléfono (antes quedaba una franja de 628 a 860 sin barra ni menú) | `_chrome/barra/BarraDelHome.tsx`, `_estilos/barra.css` |
 | T3 · el menú del teléfono | Se abre con el Genie de las demos desde el botón y se cierra de vuelta a él (la misma geometría, duración y reloj, que ahora comparten); con movimiento reducido, el fundido de las demos. Casi toda la pantalla, 16 px de margen en los cuatro lados. Montado y escondido desde el modo menú: abrir no monta nada, y cada tira lleva sólo las piezas medidas de su rendija (el texto). [Retoques 1 y 2] Durante el Genie se ve el vidrio de verdad recortado por la silueta de sus filas, con las esquinas del radio del panel al del botón: adentro, la forma es el círculo del botón. El clic arranca el Genie a mano; lo de React va en una transición; el vidrio y las tiras se precalientan al montar | `_chrome/menu/{MenuMovil,MenuDeVidrio,PanelDelMenu,GenieDelMenu}.tsx` (el botón; el panel, sus fases y el Genie; el adentro y la geometría medida; las tiras), `silueta.ts`, `_secciones/trabajos/demos/genie.ts` (`correrPorTiempo`) |
 | T3 · el vidrio | Desenfoque 12 px y saturación 1,8 del fondo, especular arriba, filo de luz; en Chromium, la refracción del canto (un filtro SVG en el `backdrop-filter`: Safari no lo pinta y, con él, pierde el desenfoque; se detecta por motor, `navigator.userAgentData`). El tono de la zona, leído al abrir: sobre zona clara vidrio oscuro, sobre oscura vidrio claro. El texto en AA contra cualquier fondo (tinte 56 %; medido 6,5 y 6,7:1; 6,33 y 6,68 en el retoque). Durante el Genie, el mismo vidrio con un filo que sigue a la silueta; sin copia plana ni relevo, y sin sombra de afuera (el recorte la cortaba) | `_estilos/vidrio.css`, `_chrome/menu/{lente.ts,LenteDelVidrio.tsx}` |
 | T3 · el diálogo | El foco atrapado (la trampa sólo abierto), el botón de cerrar ADENTRO en el lugar del botón del menú, Esc y tocar afuera cierran, el foco vuelve al botón. Ítems en `titulo-m`, renglones de 48 px como mínimo. El tono del botón con la noche que se ve (`nocheQueSeVe`) | `MenuMovil.tsx`, `useTonoDebajo.ts` |
 | T4 · el contacto | La hoja del teléfono entra entera en una pantalla a 390 × 844 y a 375 × 667 (y a 390 × 664, las barras de Safari de un iPhone 14/15) con el botón de enviar a la vista, sin sacar campos. La de escritorio no cambia | `_chrome/contacto/{FormularioDeContacto,CamposDelContacto}.tsx` |
+| Cierre · el hover de las fotos del equipo | Recuperado (`ee87777b` lo había cambiado por un fundido), como el de nk: la foto descontracturada crece desde un rectángulo chico en el centro hasta llenar la tarjeta (una máscara, `clip-path`, 400 ms), después suben abajo a la izquierda el nombre y el rol, escalonados; al salir, al revés. Son transiciones: entrar y salir rápido se revierte desde donde va. El foco hace lo mismo; con movimiento reducido, un fundido. En el teléfono, sin hover: el toque abre y cierra (el botón del marco que ya estaba). Las fotos salen en AVIF (WebP de respaldo) al tamaño del `sizes` | `_secciones/quienes-somos/{marco,equipo}.tsx`, `next.config.ts` (`images.formats`) |
 
 **El costo del menú** (390 × 844, NVIDIA): con la CPU normal, un cuadro largo en la primera apertura (40–173 ms) y
 después 13,3 ms; con la CPU ×4, abrir y cerrar con p95 27–67 ms y un cuadro largo en el clic (107–295 ms); el vidrio
@@ -154,9 +159,9 @@ definición con su control: un destello de luz mueve la mitad de las celdas a la
 viaje rápido que cruza Trabajos saca el 24–31 % y daba un falso pico (ya pasaba antes del sprint, en una de dos
 corridas).
 
-Invariante: `npm run test:s39-navbar` (62 afirmaciones: una sección por ticket y por retoque, con sus controles
+Invariante: `npm run test:s39-navbar` (61 afirmaciones: una sección por ticket y por retoque, con sus controles
 positivos). Bancos: `scripts-navbar/` (`t1-viajes`, `t1-sonda-destello`, `t2-barra`, `t3-menu`, `t3-webkit`,
-`t4-contacto`; los del retoque, `r3-llegada`, `r4-hover`, `r5-pendientes`, `r12-menu`). Ajustados:
+`t4-contacto`; los del retoque, `r3-llegada`, `r5-pendientes`, `r12-menu`; el del cierre, `c1-fotos`). Ajustados:
 `s10-acceso` (una parada más, «Panel»), `s18-deslizamiento` (ocho llamadas a `terminar` después del retoque 3), `s26-menu` (los seis ítems, la
 barra propia, el menú nuevo), `s27-viajes` (la barra propia, una duración, el nuevo reposo de Quiénes somos), `s38`
 (el selector de la anticipación; `s26`, `s27` y `s38` leen el menú en sus tres archivos), `s3-archivos` y el registro (`barra.css`, `vidrio.css`), el instrumento del destello y
