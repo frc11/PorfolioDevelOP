@@ -8,7 +8,9 @@ import type { IdDePatron } from '../../_lib/motion/patrones'
 import type {
   CanalDePiezaProps,
   CanalDePiezasProps,
+  CanalDeTextoProps,
   CanalDeTitularProps,
+  ConInerciaProps,
   LlegadaEnCurvaProps,
   ProgresoAmortiguadoProps,
   SignoDistintoProps,
@@ -42,6 +44,9 @@ export interface PrimitivasDeCoreografia {
   readonly CanalDePieza: (props: CanalDePiezaProps) => React.JSX.Element
   readonly CanalDePiezas: (props: CanalDePiezasProps) => React.JSX.Element
   readonly CanalDeTitular: (props: CanalDeTitularProps) => React.JSX.Element
+  /** [INTERFAZ 1] T1 · el sistema único del texto, y la inercia sola. */
+  readonly CanalDeTexto: (props: CanalDeTextoProps) => React.JSX.Element
+  readonly ConInercia: (props: ConInerciaProps) => React.JSX.Element
   readonly TextoPorLineas: (props: TextoPorLineasProps) => React.JSX.Element
   readonly Trazo: (props: TrazoProps) => React.JSX.Element
   readonly LlegadaEnCurva: (props: LlegadaEnCurvaProps) => React.JSX.Element

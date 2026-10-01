@@ -7,7 +7,7 @@ import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
 import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
-import { CanalDePieza } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto } from '../_contrato/canales'
 import {
   COLUMNAS,
   DESTINOS_DE_LA_RUTA,
@@ -108,9 +108,14 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
           className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA} ${columna.clase === 'contacto' ? 'max-escritorio:hidden' : ''}`}
         >
-          <EtiquetaDeSeccion como="h3" sangria={false}>
-            {columna.titulo}
-          </EtiquetaDeSeccion>
+          {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. */}
+          <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
+            {(contenido) => (
+              <EtiquetaDeSeccion como="h3" sangria={false}>
+                {contenido}
+              </EtiquetaDeSeccion>
+            )}
+          </CanalDeTexto>
           <CuerpoDeColumna clase={columna.clase} />
         </CanalDePieza>
       ))}

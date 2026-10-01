@@ -10,7 +10,7 @@ import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../_contrato/canales'
+import { CanalDeTexto, CanalDeUnaPieza, ConInercia, VENTANA_QUE_RECORTA } from '../_contrato/canales'
 import { Bloque } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
@@ -193,14 +193,16 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block">
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} />
+                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} /></ConInercia>
                 </Titular>
               </CanalDeUnaPieza>
             </span>
           )}
         </Bloque>
       </div>
-      {/* ⚠️ **EL CUERPO: P2 Y SIN VENTANA.** Copiado de `QuienesSomos.tsx:147-157`,
+      {/* [INTERFAZ 1] T1: el cuerpo entra ahora por el canal del texto (párrafo, por línea con máscara), como la bajada de
+          Quiénes somos; el Portfolio lleva la inercia de los títulos. Lo que sigue es la historia de antes.
+          ⚠️ **EL CUERPO: P2 Y SIN VENTANA.** Copiado de `QuienesSomos.tsx:147-157`,
           el otro call site que el pedido nombró: ahí la bajada de la agencia sube
           desde media altura propia y no lleva recorte. La diferencia con el
           titular no es un olvido —es lo que separa a un rótulo de un párrafo—.
@@ -211,9 +213,9 @@ export function PortadaDeTrabajos({
       <div style={{ maxWidth: `${MEDIDA_DEL_CUERPO_CH}ch` }}>
         <Bloque patron="P2" rango="ventana-visible" className="block w-full">
           {(progresoDelCuerpo) => (
-            <CanalDeUnaPieza progreso={progresoDelCuerpo} patron="P2">
-              <p className={clasesDelCuerpoDelCartel()}>{CONTENIDO.bajada}</p>
-            </CanalDeUnaPieza>
+            <CanalDeTexto progreso={progresoDelCuerpo} tipo="parrafo" texto={CONTENIDO.bajada}>
+              {(contenido) => <p className={clasesDelCuerpoDelCartel()}>{contenido}</p>}
+            </CanalDeTexto>
           )}
         </Bloque>
       </div>

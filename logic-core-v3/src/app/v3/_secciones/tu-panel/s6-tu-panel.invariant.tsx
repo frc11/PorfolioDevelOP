@@ -94,7 +94,9 @@ controlPositivo('el comparador de orden ve dos features cambiadas', [5, 3], (p) 
 titulo('2 · Abajo de 1025 no se monta coreografía, y el texto es el mismo')
 
 afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada en el marcado')
-afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo)`)
+// [INTERFAZ 1] T1: más la del titular, que lleva la inercia de los títulos (su envoltorio escribe su `skewY`).
+afirmarIgual(cuentaDe(ANIMADO, /data-inercia/g), 1, 'el titular lleva la inercia de los títulos')
+afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2 + 1, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo), más la inclinación del titular`)
 afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
 const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
 const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|arranque-final|escala-a-1024):[^;]*;?)+(opacity:[\d.]+)?)$/

@@ -14,6 +14,7 @@ import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, huecoDelLogo } from '../../_lib/esc
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../../_lib/secciones'
 import { seccionDe } from '../_contrato/forma'
 import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
+import { quitarSubarbolesConAtributo } from '../_invariantes/marcado'
 import { marcar } from '../_invariantes/render'
 import { leer } from '../_invariantes/soporte'
 import { Cierre, LLEGADAS_DEL_PIE } from './Cierre'
@@ -24,7 +25,9 @@ const ID = 'cierre'
 const montado = <Cierre seccion={seccionDe(ID)} />
 const [quieto, movido] = [false, true].map((anima) => marcar(montado, { anima }))
 const FUENTE = ['Cierre.tsx', 'ColumnasDelPie.tsx', 'PiezasDeContacto.tsx', 'contenido.ts', 'contacto.ts'].map((f) => quitarComentarios(leer(`src/app/v3/_secciones/cierre/${f}`))).join('\n')
-const anunciado = (html: string): string => textoVisible(html.replace(/<svg[\s\S]*?<\/svg>/g, ' ')).replace(/\s+/g, ' ').trim()
+// [INTERFAZ 1] T1: sin lo que cuelga de un `aria-hidden` — el titular y las etiquetas entran por el canal del texto, que
+// lleva el texto entero en un `sr-only` y las piezas ocultas al lector: sin este corte se contaría dos veces.
+const anunciado = (html: string): string => textoVisible(quitarSubarbolesConAtributo(html.replace(/<svg[\s\S]*?<\/svg>/g, ' '), 'aria-hidden')).replace(/\s+/g, ' ').trim()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La composición: el centro libre para el logo')

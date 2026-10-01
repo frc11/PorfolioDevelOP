@@ -7,6 +7,7 @@ import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
+import { VELOCIDAD_DEL_SCROLL, velocidadDelCuadro } from '../_lib/velocidadDelScroll'
 import { ponerElModoDeNk } from './lenisDeNk'
 import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
 
@@ -77,8 +78,14 @@ export default function ScrollSuaveDeV3(): null {
     instancia.current = lenis
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
+    // [INTERFAZ 1] T1 · la velocidad del scroll, una vez por cuadro y en px/s, para el texto con inercia.
+    let [yAnterior, tAnterior] = [lenis.animatedScroll, 0]
     let pedido = requestAnimationFrame(function cuadro(tiempo: number) {
       lenis.raf(tiempo)
+      const y = lenis.animatedScroll
+      VELOCIDAD_DEL_SCROLL.pxPorSegundo = tAnterior === 0 ? 0 : velocidadDelCuadro(yAnterior, y, tiempo - tAnterior)
+      yAnterior = y
+      tAnterior = tiempo
       pedido = requestAnimationFrame(cuadro)
     })
 
@@ -87,6 +94,7 @@ export default function ScrollSuaveDeV3(): null {
       // cancela el pedido de cuadro y después se destruye. Al revés queda un
       // `rAF` vivo pidiendo cuadros sobre una instancia muerta.
       cancelAnimationFrame(pedido)
+      VELOCIDAD_DEL_SCROLL.pxPorSegundo = 0
       lenis.destroy()
       instancia.current = null
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)

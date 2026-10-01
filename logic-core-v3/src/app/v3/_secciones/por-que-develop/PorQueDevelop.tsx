@@ -9,7 +9,7 @@ import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
-import { CanalDeUnaPieza } from '../_contrato/canales'
+import { CanalDeUnaPieza, ConInercia } from '../_contrato/canales'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
 import { ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { CTA, FRASE, NOMBRE_DE_SECCION, VALORES, type Valor } from './contenido'
@@ -101,16 +101,16 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         {NOMBRE_DE_SECCION}
       </h2>
       <motion.div className="absolute inset-0" style={{ y, opacity }}>
-        {/* La frase, partida a los dos lados del logo. Se anuncia entera y en orden. */}
+        {/* La frase, partida a los dos lados del logo. Se anuncia entera y en orden. [INTERFAZ 1] T1: con la inercia de los títulos. */}
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada }} />
+              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
-              <FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada }} />
+              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>
         </motion.p>

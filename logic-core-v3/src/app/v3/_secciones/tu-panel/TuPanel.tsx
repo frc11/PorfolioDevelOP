@@ -3,7 +3,7 @@
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDeTitular } from '../_contrato/canales'
+import { CanalDeTexto, CanalDeTitular } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { DESCRIPCION, TITULO } from './contenido'
@@ -53,7 +53,14 @@ function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.
           </div>
         )}
       </Bloque>
-      <Cuerpo className="text-tinta-media">{DESCRIPCION}</Cuerpo>
+      {/* [INTERFAZ 1] T1 · la descripción, que entraba quieta, entra como párrafo (por línea, con máscara). */}
+      <Bloque patron="P1" rango="ventana-visible">
+        {(progreso) => (
+          <CanalDeTexto progreso={progreso} tipo="parrafo" texto={DESCRIPCION}>
+            {(contenido) => <Cuerpo className="text-tinta-media">{contenido}</Cuerpo>}
+          </CanalDeTexto>
+        )}
+      </Bloque>
     </div>
   )
 }

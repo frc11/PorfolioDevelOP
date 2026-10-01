@@ -1,7 +1,7 @@
 'use client'
 
 import type { MotionValue } from 'motion/react'
-import { Fragment } from 'react'
+import { Fragment, useCallback } from 'react'
 
 import type { NombreDeCurva } from '../../_lib/motion/curvas'
 import { textoDeLineas, textoNormalizado } from '../../_lib/motion/lineas'
@@ -55,6 +55,12 @@ export interface LineasDeTextoProps {
   readonly escalonado: number
   /** Las clases de tipografía del bloque. Sin ellas la medición no vale. */
   readonly className?: string
+  /**
+   * [INTERFAZ 1] El elemento de la raíz. `span` (en bloque) deja partir el texto ADENTRO de un `<p>` o de un `<h2>` sin
+   * marcado inválido —su contenido es de frase—, que es lo que el canal del texto necesita: el elemento tipográfico de
+   * la rama quieta sigue siendo el mismo y sólo cambia lo que tiene adentro. Por defecto, `div`, como antes.
+   */
+  readonly como?: 'div' | 'span'
 }
 
 export function LineasDeTexto({
@@ -65,9 +71,17 @@ export function LineasDeTexto({
   duracionDeclarada,
   escalonado,
   className,
+  como: Raiz = 'div',
 }: LineasDeTextoProps): React.JSX.Element {
   const { palabras, lineas, midiendo, refContenedor, guardarPalabra } = useLineasMedidas(texto)
   const textos = textoDeLineas(palabras, lineas)
+  // Un `ref` de callback: la raíz puede ser `div` o `span`, y un objeto tipado para uno no entra en el otro.
+  const montarLaRaiz = useCallback(
+    (el: HTMLElement | null) => {
+      refContenedor.current = el
+    },
+    [refContenedor],
+  )
 
   const spec = {
     claves,
@@ -76,7 +90,7 @@ export function LineasDeTexto({
   }
 
   return (
-    <div ref={refContenedor} className={`relative ${className ?? ''}`}>
+    <Raiz ref={montarLaRaiz} className={`relative ${Raiz === 'span' ? 'block ' : ''}${className ?? ''}`}>
       {/* El texto accesible. Es lo ÚNICO que anuncia un lector de pantalla. */}
       <span className="sr-only" data-lineas-accesible="">
         {textoNormalizado(texto)}
@@ -108,6 +122,6 @@ export function LineasDeTexto({
               </span>
             ))}
       </span>
-    </div>
+    </Raiz>
   )
 }

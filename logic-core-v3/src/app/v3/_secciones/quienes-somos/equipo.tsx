@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
 import { CONTENIDO } from './contenido'
@@ -52,12 +52,11 @@ export function ElEquipo(): React.JSX.Element {
       <CalleDerecha className="grow">
         <div data-composicion="equipo" className="flex w-full flex-col gap-[var(--spacing-12)]">
           <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="@container w-full" style={GEOMETRIA.estilos.tituloDelEquipo}>
+            {/* [INTERFAZ 1] T1 · el título por línea, con su máscara por línea y la inercia (el canal del texto). */}
             {(progreso) => (
-              <span className={GEOMETRIA.ventanaDelTexto}>
-                <CanalDeUnaPieza progreso={progreso} patron="P2" como="span" className="block">
-                  <h3 className={cn(GEOMETRIA.tituloDelEquipo, MEZCLA_SOBRE_LA_ESCENA)}>{CONTENIDO.tituloDelEquipo}</h3>
-                </CanalDeUnaPieza>
-              </span>
+              <CanalDeTexto progreso={progreso} tipo="titulo" texto={CONTENIDO.tituloDelEquipo}>
+                {(contenido) => <h3 className={cn(GEOMETRIA.tituloDelEquipo, MEZCLA_SOBRE_LA_ESCENA)}>{contenido}</h3>}
+              </CanalDeTexto>
             )}
           </Bloque>
 
@@ -73,21 +72,21 @@ export function ElEquipo(): React.JSX.Element {
                 >
                   <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="w-full">
                     {(progreso) => (
-                      <span className={GEOMETRIA.ventanaDelTexto}>
-                        <CanalDeUnaPieza progreso={progreso} patron="P2" como="span" className="block">
-                          {/* Hasta tablet los nombres suben al escalón que tenía «El equipo»
-                              (`titulo-l`), que a su vez subió al del titular: la sección
-                              corre su escalera completa un paso. Arriba del corte queda
-                              `titulo-m`, el nivel que el componente declara. */}
+                      <CanalDeTexto progreso={progreso} tipo="titulo" texto={persona.nombre}>
+                        {/* Hasta tablet los nombres suben al escalón que tenía «El equipo»
+                            (`titulo-l`), que a su vez subió al del titular: la sección
+                            corre su escalera completa un paso. Arriba del corte queda
+                            `titulo-m`, el nivel que el componente declara. */}
+                        {(contenido) => (
                           <Titular
                             nivel="titulo-m"
                             como="h4"
                             className={cn('max-escritorio:text-fluido-titulo-l', MEZCLA_SOBRE_LA_ESCENA)}
                           >
-                            {persona.nombre}
+                            {contenido}
                           </Titular>
-                        </CanalDeUnaPieza>
-                      </span>
+                        )}
+                      </CanalDeTexto>
                     )}
                   </Bloque>
 
@@ -95,11 +94,13 @@ export function ElEquipo(): React.JSX.Element {
                       y no la del nombre: son dos registros distintos, y el pedido lo dice. */}
                   <Bloque patron="P2" rango="ventana-visible" className="w-full">
                     {(progreso) => (
-                      <CanalDeUnaPieza progreso={progreso} patron="P2">
-                        <Cuerpo como="p" className={cn(GEOMETRIA.medidaMovilDelCuerpo, MEZCLA_SOBRE_LA_ESCENA)}>
-                          {persona.descripcion}
-                        </Cuerpo>
-                      </CanalDeUnaPieza>
+                      <CanalDeTexto progreso={progreso} tipo="parrafo" texto={persona.descripcion}>
+                        {(contenido) => (
+                          <Cuerpo como="p" className={cn(GEOMETRIA.medidaMovilDelCuerpo, MEZCLA_SOBRE_LA_ESCENA)}>
+                            {contenido}
+                          </Cuerpo>
+                        )}
+                      </CanalDeTexto>
                     )}
                   </Bloque>
 

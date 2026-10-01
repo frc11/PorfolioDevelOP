@@ -7,7 +7,7 @@ import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeUnaPieza, ProgresoAmortiguado, SignoDistinto, Trazo } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, ConInercia, ProgresoAmortiguado, SignoDistinto, Trazo } from '../_contrato/canales'
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
@@ -86,44 +86,47 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
                         Los dos son `aria-hidden`: el nombre accesible lo da el `h2`
                         `sr-only` de arriba con la frase entera, así que duplicar el
                         marcado visual no duplica nada de lo que se anuncia. */}
-                    {[
-                      { tramos: TRAMOS_DEL_TITULAR_EN_LA_BANDA, clase: 'movil:hidden' },
-                      { tramos: TRAMOS_DEL_TITULAR, clase: 'max-movil:hidden' },
-                    ].map((reparto) => (
-                      <div
-                        key={reparto.clase}
-                        aria-hidden="true"
-                        className={cn('flex flex-col', reparto.clase, MEZCLA_SOBRE_LA_ESCENA)}
-                      >
-                        {reparto.tramos.map((renglon, indice) => (
-                          <span key={`${renglon.antes}${renglon.marcado}`} className={GEOMETRIA.ventanaDelTexto}>
-                            <CanalDePieza
-                              progreso={progresoDeEntrada}
-                              patron="P1"
-                              cantidad={reparto.tramos.length}
-                              indice={indice}
-                              como="span"
-                              className="block"
-                            >
-                              {renglon.antes}
-                              {renglon.tipo === null ? null : (
-                                <>
-                                  {renglon.antes === '' ? null : ' '}
-                                  <Trazo
-                                    progreso={progresoDelTrazo}
-                                    tipo={renglon.tipo}
-                                    className={GEOMETRIA.pesosDelTitular[renglon.tipo]}
-                                  >
-                                    {renglon.marcado}
-                                  </Trazo>
-                                  {renglon.cierre}
-                                </>
-                              )}
-                            </CanalDePieza>
-                          </span>
-                        ))}
-                      </div>
-                    ))}
+                    {/* [INTERFAZ 1] T1 · la inercia de los títulos, sin cambiar cómo entran los renglones. */}
+                    <ConInercia como="div">
+                      {[
+                        { tramos: TRAMOS_DEL_TITULAR_EN_LA_BANDA, clase: 'movil:hidden' },
+                        { tramos: TRAMOS_DEL_TITULAR, clase: 'max-movil:hidden' },
+                      ].map((reparto) => (
+                        <div
+                          key={reparto.clase}
+                          aria-hidden="true"
+                          className={cn('flex flex-col', reparto.clase, MEZCLA_SOBRE_LA_ESCENA)}
+                        >
+                          {reparto.tramos.map((renglon, indice) => (
+                            <span key={`${renglon.antes}${renglon.marcado}`} className={GEOMETRIA.ventanaDelTexto}>
+                              <CanalDePieza
+                                progreso={progresoDeEntrada}
+                                patron="P1"
+                                cantidad={reparto.tramos.length}
+                                indice={indice}
+                                como="span"
+                                className="block"
+                              >
+                                {renglon.antes}
+                                {renglon.tipo === null ? null : (
+                                  <>
+                                    {renglon.antes === '' ? null : ' '}
+                                    <Trazo
+                                      progreso={progresoDelTrazo}
+                                      tipo={renglon.tipo}
+                                      className={GEOMETRIA.pesosDelTitular[renglon.tipo]}
+                                    >
+                                      {renglon.marcado}
+                                    </Trazo>
+                                    {renglon.cierre}
+                                  </>
+                                )}
+                              </CanalDePieza>
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </ConInercia>
                   </>
                 )}
               </Bloque>
@@ -151,9 +154,9 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             style={GEOMETRIA.estilos.bajada}
           >
             {(progreso) => (
-              <CanalDeUnaPieza progreso={progreso} patron="P2">
-                <p className={GEOMETRIA.cuerpoDeLaBajada}>{CONTENIDO.bajada}</p>
-              </CanalDeUnaPieza>
+              <CanalDeTexto progreso={progreso} tipo="parrafo" texto={CONTENIDO.bajada}>
+                {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
+              </CanalDeTexto>
             )}
           </Bloque>
 

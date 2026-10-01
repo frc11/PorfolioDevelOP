@@ -122,7 +122,7 @@ export interface LineasMedidas {
   /** Si estamos en la fase plana: el bloque se pinta con `visibility: hidden`. */
   readonly midiendo: boolean
   /** Va en el contenedor del bloque, que tiene que ser `position: relative`. */
-  readonly refContenedor: React.RefObject<HTMLDivElement | null>
+  readonly refContenedor: React.RefObject<HTMLElement | null>
   /** Va en cada palabra de la fase plana. */
   readonly guardarPalabra: (indice: number) => (elemento: HTMLElement | null) => void
 }
@@ -130,7 +130,7 @@ export interface LineasMedidas {
 export function useLineasMedidas(texto: string): LineasMedidas {
   const palabras = useMemo(() => palabrasDe(texto), [texto])
 
-  const refContenedor = useRef<HTMLDivElement | null>(null)
+  const refContenedor = useRef<HTMLElement | null>(null)
   const refPalabras = useRef<(HTMLElement | null)[]>([])
 
   // Constante perezosa: el registro se crea una vez y el setter nunca se usa.

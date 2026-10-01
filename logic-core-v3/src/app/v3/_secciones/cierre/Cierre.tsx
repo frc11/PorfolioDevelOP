@@ -10,7 +10,7 @@ import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Ti
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
-import { CanalDeUnaPieza } from '../_contrato/canales'
+import { CanalDeTexto, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
 import { ColumnasDelPie } from './ColumnasDelPie'
@@ -55,6 +55,7 @@ export const LLEGADAS_DEL_PIE = {
 } as const
 
 function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+  const tramoIzquierdo = useTramo(progreso, LLEGADAS_DEL_PIE.izquierda)
   return (
     <Pie
       className="grid"
@@ -68,9 +69,14 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
           <Logotipo className="max-escritorio:hidden" />
           <div id={idDelTitularDeSeccion(seccion.id)}>
-            <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
-              {TITULAR_DE_CIERRE}
-            </Titular>
+            {/* [INTERFAZ 1] T1 · el titular por línea (el canal del texto), con el tramo de su llegada. */}
+            <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
+              {(contenido) => (
+                <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
+                  {contenido}
+                </Titular>
+              )}
+            </CanalDeTexto>
           </div>
           <ContactoDelPie />
         </Llega>

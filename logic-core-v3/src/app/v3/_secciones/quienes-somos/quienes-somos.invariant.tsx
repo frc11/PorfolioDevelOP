@@ -102,10 +102,19 @@ afirmar(conMotion.includes('transform:'), 'con coreografía los bloques P2 SÍ e
 // los dos de siempre arriba—, y el marcado trae los dos porque el que no corresponde se
 // esconde con `medio:hidden` / `max-medio:hidden`. O sea 2 + 4 = 6 renglones en vez de 2,
 // y 9 + 4 = 13. El que se ve sigue siendo UNO: esto cuenta marcado, no pantalla.
+// [INTERFAZ 1] T1: SIETE piezas y SEIS divisores. El rótulo del equipo, los dos nombres, sus dos descripciones y la bajada
+// pasaron al canal del texto (por línea, con máscara): sus piezas existen recién cuando el divisor mide en el navegador,
+// así que en este marcado son seis divisores en su fase de medición (`data-lineas-piezas`), no seis piezas. Quedan como
+// piezas los seis renglones del titular y la foto.
 afirmarIgual(
   veces(conMotion, 'will-change-transform'),
-  13,
-  'y son trece: los SEIS renglones de los dos repartos del titular (P1), el rótulo del equipo, la bajada, la foto y los dos nombres con sus dos descripciones',
+  7,
+  'y son siete piezas: los SEIS renglones de los dos repartos del titular (P1) y la foto',
+)
+afirmarIgual(
+  veces(conMotion, 'data-lineas-piezas'),
+  6,
+  '  y seis textos por el canal del texto: el rótulo del equipo, los dos nombres, sus dos descripciones y la bajada',
 )
 // Modo pulido: el handle ya no puede ser `data-texto-por-lineas` —el titular no usa ese
 // primitivo—, así que las dos afirmaciones se aflojan a la propiedad que seguían cuidando.

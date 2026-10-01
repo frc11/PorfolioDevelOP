@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { Titular, type NivelDeTitular } from '../../_componentes/tipografia/Titular'
 import type { IdDePatron } from '../../_lib/motion/patrones'
+import type { TipoDeTexto } from '../../_lib/motion/texto'
 
 import { usePrimitivas, type Progreso } from './coreografia'
 
@@ -199,6 +200,50 @@ export function TextoPorLineas(props: TextoPorLineasProps): React.JSX.Element {
       {props.texto}
     </Etiqueta>
   )
+}
+
+export interface CanalDeTextoProps {
+  readonly progreso: Progreso
+  /** La familia: `titulo` (por línea, con inercia), `parrafo` (por línea) o `etiqueta` (por palabra). */
+  readonly tipo: TipoDeTexto
+  /** El texto. Plano: el divisor lo parte y el lector lo lee entero. */
+  readonly texto: string
+  /** El elemento tipográfico, con el contenido adentro. Es el MISMO en las dos ramas. */
+  readonly children: (contenido: ReactNode) => ReactNode
+}
+
+/**
+ * [INTERFAZ 1] T1 · EL CANAL DEL TEXTO — el sistema único de movimiento del texto de /v3.
+ *
+ * El consumidor pone su elemento tipográfico (`<p>`, `<Titular como="h3">`, `<EtiquetaDeSeccion>`…) y el canal decide
+ * QUÉ va adentro: en la rama quieta, el texto; en la animada, el texto partido según su familia (`FAMILIA_DEL_TEXTO`:
+ * el título y el párrafo por línea, la etiqueta por palabra, todos con máscara y la misma curva). El elemento, su `id`,
+ * sus clases y su caja son los mismos en las dos ramas: nada se corre al instalarse la coreografía, el árbol de
+ * encabezados no cambia y no hay un `<div>` adentro de un `<p>` (las piezas son `span`).
+ */
+export function CanalDeTexto(props: CanalDeTextoProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null && props.progreso !== null) return <primitivas.CanalDeTexto {...props} />
+  return <>{props.children(props.texto)}</>
+}
+
+export interface ConInerciaProps {
+  /** `div` si envuelve bloques; `span` (en bloque) si va adentro de un encabezado. */
+  readonly como?: 'div' | 'span'
+  readonly children: ReactNode
+}
+
+/**
+ * [INTERFAZ 1] T1 · LA INERCIA SOLA — para los títulos que entran con su propio gesto (los renglones partidos a mano de
+ * Quiénes somos con sus trazos, el Portfolio con su título de volumen, la frase de Por qué develOP con el amanecer): se
+ * inclinan con el scroll rápido como los del canal del texto, sin cambiar cómo entran. La rama quieta es el mismo
+ * envoltorio en bloque, sin transformada.
+ */
+export function ConInercia(props: ConInerciaProps): React.JSX.Element {
+  const primitivas = usePrimitivas()
+  if (primitivas !== null) return <primitivas.ConInercia {...props} />
+  const Elemento = props.como === 'div' ? 'div' : 'span'
+  return <Elemento className="block">{props.children}</Elemento>
 }
 
 /**

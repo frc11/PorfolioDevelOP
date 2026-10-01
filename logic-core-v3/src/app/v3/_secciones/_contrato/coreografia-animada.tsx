@@ -13,12 +13,15 @@ import { useProgresoDePatron } from '../../_lib/motion/useProgresoDePatron'
 import { LineasDeTexto } from '../../motion/_componentes/LineasDeTexto'
 import { Pieza } from '../../motion/_componentes/Pieza'
 import { Piezas } from '../../motion/_componentes/Piezas'
+import { Inclinado, TextoQueEntra } from '../../motion/_componentes/TextoQueEntra'
 
 import { TRAZOS_DEL_SIGNO } from './canales'
 import type {
   CanalDePiezaProps,
   CanalDePiezasProps,
+  CanalDeTextoProps,
   CanalDeTitularProps,
+  ConInerciaProps,
   LlegadaEnCurvaProps,
   ProgresoAmortiguadoProps,
   SignoDistintoProps,
@@ -244,16 +247,31 @@ function CanalDeTitularAnimado(props: CanalDeTitularProps): React.JSX.Element {
   const patron = PATRONES[props.patron]
   return (
     <Titular nivel={props.nivel} como={props.como} className={props.className}>
-      <LineasDeTexto
-        texto={props.texto}
-        progreso={progreso}
-        claves={patron.claves}
-        curva={patron.curva}
-        duracionDeclarada={patron.duracionDeclarada}
-        escalonado={patron.escalonado}
-      />
+      {/* [INTERFAZ 1] T1: con la inercia de los títulos, y la raíz en `span` (un `div` no va adentro de un `<h_>`). */}
+      <Inclinado>
+        <LineasDeTexto
+          texto={props.texto}
+          progreso={progreso}
+          claves={patron.claves}
+          curva={patron.curva}
+          duracionDeclarada={patron.duracionDeclarada}
+          escalonado={patron.escalonado}
+          como="span"
+        />
+      </Inclinado>
     </Titular>
   )
+}
+
+/** [INTERFAZ 1] T1 · el canal del texto: el elemento del consumidor con el texto partido según su familia. */
+function CanalDeTextoAnimado(props: CanalDeTextoProps): React.JSX.Element {
+  const progreso = props.progreso
+  if (progreso === null) throw new Error('CanalDeTexto animado sin progreso')
+  return <>{props.children(<TextoQueEntra tipo={props.tipo} texto={props.texto} progreso={progreso} />)}</>
+}
+
+function ConInerciaAnimada(props: ConInerciaProps): React.JSX.Element {
+  return <Inclinado como={props.como}>{props.children}</Inclinado>
 }
 
 function TextoPorLineasAnimado(props: TextoPorLineasProps): React.JSX.Element {
@@ -422,6 +440,8 @@ export const PRIMITIVAS_ANIMADAS: PrimitivasDeCoreografia = {
   CanalDePieza: CanalDePiezaAnimado,
   CanalDePiezas: CanalDePiezasAnimado,
   CanalDeTitular: CanalDeTitularAnimado,
+  CanalDeTexto: CanalDeTextoAnimado,
+  ConInercia: ConInerciaAnimada,
   TextoPorLineas: TextoPorLineasAnimado,
   Trazo: TrazoAnimado,
   SignoDistinto: SignoDistintoAnimado,
