@@ -83,10 +83,12 @@ export interface Pruebas {
   readonly anticipa: 'si' | 'no'
   /** [INTERFAZ 2] T3 · las portadas de las demos ondean y las secciones opacas (Servicios, Tu panel) tienen vida; `vida=si`. */
   readonly vida: 'si' | 'no'
+  /** [INTERFAZ 2] T4 · el indicador de recorrido: el logo que se dibuja o el reloj del día; `recorrido=logo|reloj`. */
+  readonly recorrido: 'logo' | 'reloj' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no', anticipa: 'no', vida: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no', responde: 'no', anticipa: 'no', vida: 'no', recorrido: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -100,6 +102,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     responde: unoDe(['si'], valor('responde')),
     anticipa: unoDe(['si'], valor('anticipa')),
     vida: unoDe(['si'], valor('vida')),
+    recorrido: unoDe<'logo' | 'reloj'>(['logo', 'reloj'], valor('recorrido')),
   }
 }
 

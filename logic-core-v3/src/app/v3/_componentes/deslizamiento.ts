@@ -231,6 +231,8 @@ export const SELECTOR_DE_LOS_VIAJES = [
   SELECTOR_DEL_CTA_DEL_HERO,
   '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
+  // [INTERFAZ 2] T4 · los puntos del indicador de recorrido (sólo existe con `?pruebas=recorrido=…`).
+  '[data-pieza="recorrido"] a[data-parte="paso-del-recorrido"]',
 ].join(', ')
 
 /** [VIAJES] Con movimiento reducido no hay viaje: un salto al mismo destino, tapado por un fundido corto. */

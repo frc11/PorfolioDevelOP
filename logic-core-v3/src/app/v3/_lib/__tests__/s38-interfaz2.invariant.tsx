@@ -12,6 +12,10 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
+import { DIA_DEL_RELOJ, NOCHE_DEL_RELOJ, colorDeLaLuz, lugarEnElDisco } from '../../_chrome/recorrido/RelojDelDia'
+import { SECCIONES_DEL_RECORRIDO, TRAZO_DEL_INFINITO, TRAZO_DEL_PALO, avanceDeLaPagina, avanceDelRecorrido, dibujado, iniciosDelRecorrido, seccionDelTramo } from '../../_chrome/recorrido/recorrido'
+import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
+import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
 import { CONTADOR_DE_EJEMPLO, PEDIDOS_DE_EJEMPLO, PROCESOS_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_EJEMPLO, ROTULO_DEL_PROCESO, TOPE_DEL_CONTADOR } from '../../_componentes/vida/ejemplos'
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
@@ -282,5 +286,43 @@ afirmar(LATIDO_TS.includes('new IntersectionObserver') && LATIDO_TS.includes("pr
 afirmar(leer('_secciones/tu-panel/TuPanel.tsx').includes("{vida === 'si' && <PanelEnVivo />}") && leer('_secciones/servicios/ServiciosEnSecuencia.tsx').includes("{vida === 'si' && <ProcesoEnVivo posicion={posicion} />}"), 'montados sólo con `vida=si`: en el servidor y sin la bandera no existen (el marcado del producto no cambia)')
 const PROCESO_TSX = leer('_componentes/vida/ProcesoEnVivo.tsx')
 afirmar(PROCESO_TSX.includes("useMotionValueEvent(posicion, 'change'") && !/addEventListener\('scroll'|useScroll\(/.test(PROCESO_TSX) && !PROCESO_TSX.includes('data-servicio'), 'el proceso de Servicios cambia con el rodillo (su disparo), sin escuchar el scroll y sin otro `[data-servicio]` (un acento por contexto)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T4 · 1 · El recorrido: las secciones, dónde empiezan, un tramo igual para cada una')
+
+afirmar(PRUEBAS_APAGADAS.recorrido === 'no' && entornoPedido('producto,recorrido=logo').pruebas.recorrido === 'logo' && entornoPedido('producto,recorrido=reloj').pruebas.recorrido === 'reloj' && entornoPedido('producto,recorrido=barra').pruebas.recorrido === 'no', 'apagado en el producto; `recorrido=logo` o `recorrido=reloj` (las dos variantes)')
+const IDS_DEL_RECORRIDO = SECCIONES_DEL_RECORRIDO.map((s) => s.id)
+afirmar(IDS_DEL_RECORRIDO.length === 7 && !IDS_DEL_RECORRIDO.includes('numeros') && IDS_DEL_RECORRIDO.every((id) => (IDS_DE_SECCION as readonly string[]).includes(id)), 'siete secciones, las del sitio en su orden (Números, vacía, no se nombra)', IDS_DEL_RECORRIDO.join(', '))
+afirmar(SECCIONES_DEL_RECORRIDO[0].rotulo === 'Inicio' && SECCIONES_DEL_RECORRIDO[6].rotulo === 'Contacto', '  con nombres para una persona: «Inicio» y «Contacto», no «Hero» y «Cierre»')
+// Una página de 25 pantallas de 900: el Cierre (la última, una pantalla) termina en el scroll máximo.
+const ALTO = 900
+const TOPES = [0, 900, 3600, 8100, 15300, 17100, 21600]
+const MAXIMO = 21600
+const INICIOS = iniciosDelRecorrido(TOPES, MAXIMO, ALTO)
+afirmar(INICIOS[0] === 0 && INICIOS[6] < 1 && INICIOS.every((s, i) => i === 0 || s > INICIOS[i - 1]), `cada sección empieza cuando su tope cruza la mitad del cuadro (la línea de la barra): el Cierre, antes del final (${INICIOS[6].toFixed(3)})`)
+controlPositivo('el chequeo ve el borde de arriba: el Cierre empezaría en 1 y nunca se lo vería empezar', TOPES.map((t, i) => (i === 0 ? 0 : t / MAXIMO)), (s: readonly number[]) => s[6] < 1)
+afirmar(INICIOS.every((s, i) => Math.abs(avanceDelRecorrido(s, INICIOS) - i / 7) < 1e-9), 'un tramo igual por sección: cada una empieza en i/7 del indicador (las cortas no se amontonan)')
+afirmar([0, 0.03, 0.2, 0.5, 0.71, 0.9, 0.99, 1].every((p) => Math.abs(avanceDeLaPagina(avanceDelRecorrido(p, INICIOS), INICIOS) - p) < 1e-9), '  y vuelve: del indicador a la página y de la página al indicador, el mismo punto')
+const pasoDelAvance = Array.from({ length: 201 }, (_, k) => avanceDelRecorrido(k / 200, INICIOS))
+afirmar(pasoDelAvance.every((r, k) => k === 0 || r >= pasoDelAvance[k - 1]), '  nunca retrocede al bajar')
+afirmar(seccionDelTramo(0, 7) === 0 && seccionDelTramo(0.999, 7) === 6 && seccionDelTramo(3.5 / 7, 7) === 3, 'tocar el trazo o el disco en un tramo lleva a la sección de ese tramo')
+
+titulo('T4 · 2 · V1 el logo que se dibuja, V2 el reloj del día')
+
+afirmar(dibujado(0, 7).infinito === 0 && dibujado(0, 7).palo === 0 && Math.abs(dibujado(6 / 7, 7).infinito - 1) < 1e-9 && dibujado(6 / 7, 7).palo < 1e-9 && dibujado(1, 7).palo === 1, 'el infinito se arma con las secciones hasta Por qué develOP; el palo, con el Cierre: al final de la página se completa')
+afirmar(TRAZO_DEL_INFINITO.endsWith('618.8 618.5') && TRAZO_DEL_PALO.startsWith('M618.8 618.5'), '  el palo baja desde donde termina el cuenco de la «p» (un solo trazo, en dos tramos)')
+afirmarIgual(colorDeLaLuz(0), NOCHE_DEL_RELOJ.toLowerCase(), 'el reloj: la noche de la sala en el nivel 0')
+afirmarIgual(colorDeLaLuz(1), DIA_DEL_RELOJ.toLowerCase(), '  y el papel en el nivel 1 (los extremos de la sala, no los de la tinta: no se dan vuelta con el tono)')
+afirmar(lugarEnElDisco(0)[0] === 50 && lugarEnElDisco(0)[1] < 10 && lugarEnElDisco(0.25)[0] > 90, '  las horas, desde arriba y en el sentido del reloj')
+
+titulo('T4 · 3 · Navegación accesible, sólo desde 1024, con el gesto de la barra')
+
+const INDICADOR = leer('_chrome/recorrido/IndicadorDelRecorrido.tsx')
+afirmar(SELECTOR_DE_LOS_VIAJES.includes('[data-pieza="recorrido"] a[data-parte="paso-del-recorrido"]') && INDICADOR.includes('data-pieza="recorrido"') && INDICADOR.includes('data-parte="paso-del-recorrido"'), 'los puntos viajan con el MISMO gesto que la barra (están en `SELECTOR_DE_LOS_VIAJES` y el indicador los emite tal cual)')
+afirmar(INDICADOR.includes('aria-label="Recorrido de la página"') && INDICADOR.includes('aria-label={`Ir a ${s.rotulo}`}') && INDICADOR.includes("aria-current={i === actual ? 'location' : undefined}"), 'para el lector y el teclado: una navegación con nombre, un enlace por sección, la actual marcada')
+afirmar(/aria-hidden="true" className="block h-auto w-full/.test(leer('_chrome/recorrido/LogoQueSeDibuja.tsx')) && leer('_chrome/recorrido/RelojDelDia.tsx').includes('<span ref={disco} aria-hidden="true"'), '  y el dibujo no se anuncia')
+afirmar(INDICADOR.includes('max-escritorio:hidden'), 'sólo desde 1024 (el umbral único del sitio)')
+afirmar(/if \(i !== actual\) setActual\(i\)/.test(INDICADOR) && /useTransform\(scrollYProgress, \(p\) => avanceDelRecorrido\(p, iniciosVivos\.current\)\)/.test(INDICADOR), 'el dibujo lo mueve el avance directo (un MotionValue); React, sólo al cambiar de sección')
+afirmar(leer('_chrome/ChromeDelHome.tsx').includes('<IndicadorDelRecorrido />') && INDICADOR.includes("if (variante === 'no') return null"), 'montado en el chrome del home; sin la bandera no existe')
 
 cerrar('s38-interfaz2')
