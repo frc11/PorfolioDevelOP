@@ -10,6 +10,10 @@
 > (`BANCO_GPU=alta`). **Cierre de ESCENA 10:** la luz y las sombras (T1) y el video de Servicios (T2), aprobados por
 > Valentino; los títulos de volumen (T3), aprobados para la etapa de 3D (pendiente, §7); el destello de un cuadro de
 > día/noche al salir de Tu panel, arreglado en el orden del cuadro (§6), con su invariante con scroll real (§5).
+> **Cierre de INTERFAZ 2:** la escena que responde a la interfaz (el pulso que pide un CTA, la onda de los valores, la
+> sala detrás del menú del teléfono) y la vista previa del destino están en el producto, sin bandera (§1); de día se
+> sacó la mancha de contacto (queda la sombra real del logo). El costo, contra b26c8c45: el mismo ritmo a 75 Hz y el
+> mismo tiempo de GPU (`~/.cache/b4-medicion/interfaz2/cierre/costo/`).
 
 ---
 
@@ -20,7 +24,7 @@
 | E1 · óculo y haz (nivel `sutil`) | Columna de luz sobre el logo y polvo del haz; el charco lo pinta el piso vivo. **[ESCENA 10] T1: sólo de noche** (de día casi no se veía: su nivel de día es cero), con la noche en el logo | `entorno/Haz.tsx`, `entorno/polvoVivo.ts` |
 | E4 · el pulso | El principal y el hover; con el piso vivo el anillo es una ONDA del piso | `entorno/maquinaDelPulso.ts`, `piso/` |
 | E6 · estela del polvo · E7 · el cursor | Como en ESCENA 6 | `entorno/polvoVivo.ts` |
-| Sombra con física | La mancha de contacto la pinta el piso vivo. **[ESCENA 10] T1:** de día la blanda; de noche sólo la dura del haz (la blanda va a cero); con el haz apagado en su encendido, ninguna | `ContactOcclusion.tsx`, `entorno/sombra.ts`, `sombra/sombraDelHaz.ts` |
+| Sombra con física | La mancha de contacto la pinta el piso vivo. **[ESCENA 10] T1:** de día la blanda; de noche sólo la dura del haz (la blanda va a cero); con el haz apagado en su encendido, ninguna. **[Cierre de INTERFAZ 2]** de día tampoco la blanda (`dia.opacidad` 0): la sombra de día es sólo la real del logo | `ContactOcclusion.tsx`, `entorno/sombra.ts`, `sombra/sombraDelHaz.ts` |
 | Moiré vivo (M1a + M2 + M3 + M4) | Como en ESCENA 6 | `moire/` |
 | Polvo parejo, 5c, 5d | Como en ESCENA 6. 5a (el obstáculo) se borró en ESCENA 9 (T1) | `polvo/` |
 | La formación («la fábrica gigante») | 6.839 copias negras en 59 filas, piso plano, niebla atrás (ESCENA 7, T2) | `formacion/` |
@@ -53,8 +57,10 @@
 | **[ESCENA 9] T4 · el aire, en segundos** | Decide si hay scroll con una retención de 50 ms (el scroll se mueve de a píxeles enteros): la misma deriva a 60, 75, 120 y 144 Hz | `polvo/Aire.tsx` |
 | **[ESCENA 10] T1 · el logo de noche** | La variante «claro, borde blanco» de ESCENA 9 (T2): de noche los costados negros y las tapas con su gris y un filo casi blanco (10 unidades del SVG, 0,88 en pantalla); el amanecer guarda la noche con el mismo dibujo; de día no cambia | `logoDeNoche.ts` |
 | **[ESCENA 10] T1 · el negro satinado** | La tinta con los reflejos de un estudio generado al cargar (PMREM) y rugosidad 0,3, en el `MeshStandardMaterial` de siempre (sin laca el físico daba el mismo reflejo); los reflejos siguen a la luz principal: de noche se apagan | `estudio.ts`, `LuzDelLogo.tsx` |
-| **[ESCENA 10] T1 · la sombra del logo** | De día, la sombra de la principal sobre el piso vivo (mapa de varianza del logo solo, una lectura por píxel), junto con la mancha de contacto; cuánto: la principal por el día en el logo (sin el corte al 3 % de la prueba) | `sombra/delLogo.ts`, `LuzDelLogo.tsx` |
+| **[ESCENA 10] T1 · la sombra del logo** | De día, la sombra de la principal sobre el piso vivo (mapa de varianza del logo solo, una lectura por píxel), sola desde el cierre de INTERFAZ 2 (antes, junto con la mancha de contacto); cuánto: la principal por el día en el logo (sin el corte al 3 % de la prueba) | `sombra/delLogo.ts`, `LuzDelLogo.tsx` |
 | **[ESCENA 10] T1 · la noche en el logo** | `VIVO.uNocheDelLogo`: la noche de la sala, salvo en el amanecer, donde sigue de noche hasta que el frente del día alcanza al logo (la sala pasa a día de un cuadro al otro al empezar el barrido). La siguen el haz, su encendido, las manchas, la sombra del logo, el rebote y las motas del haz: el paso acompaña al día y al amanecer sin saltos (el mayor cambio entre dos cuadros del amanecer, 2,1 %) | `entorno/nocheDelLogo.ts`, `entorno/Entorno.tsx` |
+| **[INTERFAZ 2] · la escena responde** | Un CTA con el puntero encima (o el foco) pide el pulso PRINCIPAL a la máquina de E4 (`EntradasDelPulso.pedido`, con la vigencia de 250 ms del canal; no a menos de 1,6 s de otro). Un valor de Por qué develOP hace ondear el piso vivo desde el logo hacia el piso que se ve debajo del valor (un término inyectado en la simulación y una banda en el dibujo). Con el menú del teléfono abierto la luz de la sala baja un 22 % (después de la noche disparada) | `interfaz/{pedidos,respuesta}.ts`, `entorno/maquinaDelPulso.ts`, `piso/ondaDirigida.ts`, `_chrome/escena/RespuestaDeLaEscena.tsx` |
+| **[INTERFAZ 2] · la vista previa del destino** | El puntero o el foco sobre un ítem de la barra corre la luz hacia la del destino ADENTRO de su clase (`RIM_NIGHT_LEVEL` como frontera, el encendido del haz como juez) y gira la cámara 7° junto al del mouse; el viaje la descuenta con su avance (sin salto) | `interfaz/anticipacion.ts`, `OrbitRig.tsx`, `_chrome/escena/AnticipacionDelMenu.tsx` |
 | **[ESCENA 10] T1 · el tono ACES compensado** | El color de ACES con la curva de brillo de Neutral (en un gris, Neutral exacto): el tono `Custom` de three, para todo el lienzo. Neutral como opción y AgX se borraron | `tono.ts`, `configuracionDelCanvas.ts` |
 | **[ESCENA 10] T1 · el scroll de nk** | Lenis en modo `lerp` 0,1 sobre la instancia de /v3 (la construcción sigue con las opciones del sitio); el sedoso se borró | `_componentes/lenisDeNk.ts` |
 
@@ -109,13 +115,8 @@ una etapa posterior (la de 3D).** Quedan con su bandera, apagados en el producto
 |---|---|
 | `titulos=negro` · `=blanco` | T3 · los títulos de Portfolio y de la frase de Por qué develOP como objetos de la escena: la Chivo (OFL, la WOFF2 del sitio en 400, `_fuentes/chivo-400-titulos.json`) extruida, una malla por título, quieta en el mundo donde la cámara del momento de la lectura (medido: `LECTURA` en `_lib/titulos3d/registro.ts`) la ve en el lugar del DOM; las letras llegan desde atrás girando y se van igual, persiguiendo al progreso de la pieza con un mínimo de 1,4 s. De noche, el dibujo del logo (su emisión, costados negros, tapas claras con filo); el blanco de día, con un filo oscuro. El DOM conserva el texto (sr-only) y su lugar (invisible, sin anunciar). Un módulo aparte que sólo se descarga con la bandera (`escena/titulos3d/`, `PruebasDeLaEscena.tsx`) |
 
-[INTERFAZ 2] Las de ese sprint (la escena y la interfaz juntas), apagadas en el producto; el detalle, en
-`ESTADO-INTERFAZ.md` §5. Las que tocan la escena:
-
-| Token | Efecto en la escena |
-|---|---|
-| `responde=si` | el pulso PRINCIPAL que pide un CTA entra por la máquina de E4 (`EntradasDelPulso.pedido`; sin él, la misma máquina); la onda dirigida del piso vivo (un término inyectado en la simulación y una banda en el dibujo, `piso/ondaDirigida.ts`); la luz de la sala baja un 22 % con el menú del teléfono abierto (`interfaz/respuesta.ts`, después de la noche disparada) |
-| `anticipa=si` | la vista previa del destino: un corrimiento de la luz adentro de su clase (`RIM_NIGHT_LEVEL` como frontera, el encendido del haz como juez) y un giro de 7° de la cámara junto al del mouse, sólo con la física (`interfaz/anticipacion.ts`) |
+[INTERFAZ 2] Las de ese sprint (`responde`, `anticipa`, `vida`, `recorrido`) se borraron en el cierre: lo aprobado está
+en el producto (§1) y `Pruebas` vuelve a ser sólo `titulos`. El detalle, en `ESTADO-INTERFAZ.md` §5.
 
 Borrado en ESCENA 8 (código y banderas): el enfoque que busca, las fibras, el grano y la pasada de las
 sombras de las motas (`polvo/sombras.ts`). La carpeta `pruebas/` no existe más.
@@ -255,8 +256,9 @@ se dibujan.
 
 ## 5 · Los invariantes
 
-`npm run test:s38-interfaz2` ([INTERFAZ 2] la escena que responde a la interfaz, con bandera: el pulso pedido, la onda
-dirigida, la luz con el menú, la anticipación del destino; una sección por ticket con sus controles positivos),
+`npm run test:s38-interfaz2` ([INTERFAZ 2] la escena que responde a la interfaz, en el producto desde el cierre: el pulso
+pedido, la onda dirigida, la luz con el menú, la anticipación del destino; y lo del cierre: el cartel, el infinito, la
+sombra de día; una sección por ticket con sus controles positivos),
 `npm run test:s36-escena10` ([ESCENA 10] una sección por ticket, con sus controles positivos; la del cierre: el orden
 del cuadro y el viaje que cambia de luz),
 **`npm run test:escena-destello`** ([ESCENA 10] cierre · el destello de un cuadro, **con scroll real**: la rueda por CDP
