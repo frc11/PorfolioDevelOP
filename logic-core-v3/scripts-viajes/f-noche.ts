@@ -56,7 +56,7 @@ async function principal(): Promise<void> {
     void b.p.conexion.enviar('Page.screencastFrameAck', { sessionId: params.sessionId }, b.p.sessionId)
   })
   try {
-    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'nav-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="navegacion"]').appendChild(a); return 0 })()`)
+    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'barra-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="barra"]').appendChild(a); return 0 })()`)
     const knots: Record<string, number> = { hero: 0 }
     for (const id of ['quienes-somos', 'servicios', 'por-que-develop', 'trabajos']) {
       await scrollHasta(b, 0)

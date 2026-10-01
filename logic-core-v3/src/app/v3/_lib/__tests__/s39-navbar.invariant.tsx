@@ -3,11 +3,16 @@
  *
  *   T1 · los ítems y los destinos: el orden, Quiénes somos un poco antes, el nudo de Panel y la llegada a la vista de
  *        Portfolio y Por qué develOP (el viaje frena justo antes de su llegada y la recorre sin velo).
+ *   T2 · la barra de escritorio, propia de /v3: la misma pastilla visual (y la misma geometría), los ítems del home con
+ *        el rollover de dos copias, y la pieza compartida intacta para la galería.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
+import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { renderToStaticMarkup } from 'react-dom/server'
 
+import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
 import { DURACION_DE_LA_LLEGADA_MS, DURACION_DEL_VIAJE_MS, MARGEN_ANTES_DE_LA_LLEGADA } from '../../_componentes/deslizamiento'
 import { antesDeLaLlegada, centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
@@ -103,5 +108,39 @@ afirmar(orden.every((t, i) => llegada.includes(t) && (i === 0 || llegada.indexOf
 afirmar(/relojDeArranque = window\.setTimeout\(\(\) => \{[\s\S]*?\}, fundido\)/.test(llegada), '  la llegada arranca cuando el velo terminó de irse (el fundido que declara la hoja)')
 afirmar(EFECTO.includes("const llegada = modo === 'salto' ? null : antesDeLaLlegada(seccion, destinoEnPx)") && EFECTO.includes('empezarElViaje(planDelViaje(llegada?.seccion ?? seccion.id, hasta))'), '  con movimiento reducido no hay llegada a la vista (el salto va al nudo), y el viaje tapado lleva la luz de donde frena')
 controlPositivo('el chequeo del orden vería la escena soltada después de arrancar la llegada', llegada.replace('terminarElViaje()\n', '').replace('lock: false, onComplete: () => terminar(true) })', 'lock: false, onComplete: () => terminar(true) }); terminarElViaje()'), (f: string) => orden.every((t, i) => f.includes(t) && (i === 0 || f.indexOf(t) > f.indexOf(orden[i - 1]))))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · La barra de escritorio, propia de /v3')
+
+const BARRA_HTML = renderToStaticMarkup(<BarraDelHome />)
+const enlaces = [...BARRA_HTML.matchAll(/<a [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/a>/g)]
+afirmarIgual(enlaces.map((m) => /href="([^"]+)"/.exec(m[0])?.[1]), ENLACES_DEL_HOME.map((e) => e.destino), 'seis enlaces, los del home, en su orden')
+const visible = (html: string): string => html.replace(/<span data-copia="b" aria-hidden="true">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, '')
+afirmar(enlaces.every((m, i) => m[1].includes('data-rollover') && visible(m[1]) === ENLACES_DEL_HOME[i].rotulo), '  cada rótulo con el rollover de dos copias (INTERFAZ 1), y el nombre accesible es el rótulo una sola vez (la copia B no se anuncia)')
+controlPositivo('el chequeo del nombre vería una copia B que se anuncia', '<span data-rollover=""><span data-copia="a">Panel</span><span data-copia="b">Panel</span></span>', (h: string) => visible(h) === 'Panel')
+afirmar(/<header data-pieza="barra"[^>]*><nav data-parte="pastilla" aria-label="Navegación principal"><ul data-parte="lista">/.test(BARRA_HTML) && BARRA_HTML.includes('data-parte="subrayado-activo" aria-hidden="true"'), '  el banner con su navegación (el landmark de siempre) y el subrayado del activo, mudo')
+
+const BARRA_CSS = sinComentarios(leer('_estilos/barra.css'))
+const NAV_CSS = sinComentarios(leer('_estilos/navegacion.css'))
+const escapar = (s: string): string => s.replace(/[[\]().*+?^$|\\]/g, '\\$&')
+const declaracion = (hoja: string, selector: string, prop: string): string => new RegExp(`${escapar(selector)} \\{[^}]*?\\n\\s*${prop}: ([^;]+);`).exec(hoja)?.[1] ?? '?'
+const VISUAL = ['border', 'border-radius', 'background-color', 'backdrop-filter', 'box-shadow', 'padding-inline', 'block-size', 'top']
+const iguales = (a: string, b: string): boolean => a !== '?' && a.replaceAll('--barra-', '--nav-') === b
+afirmar(VISUAL.every((p) => iguales(declaracion(BARRA_CSS, '[data-v3] [data-pieza="barra"] > [data-parte="pastilla"]', p), declaracion(NAV_CSS, '[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"]', p))), 'la MISMA pastilla visual que la de siempre: borde, radio, superficie, desenfoque, sombra, relleno, alto y nacimiento')
+controlPositivo('  el chequeo vería una pastilla con otro radio', declaracion(BARRA_CSS, '[data-v3] [data-pieza="barra"] > [data-parte="pastilla"]', 'border-radius').replace('fuerte', 'medio'), (r: string) => iguales(r, declaracion(NAV_CSS, '[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"]', 'border-radius')))
+const GEOMETRIA = ['reposo', 'alto', 'margen-al-pie', 'nacimiento', 'umbral']
+afirmar(GEOMETRIA.every((n) => iguales(declaracion(BARRA_CSS, '[data-v3] [data-pieza="barra"]', `--barra-${n}`), declaracion(NAV_CSS, '[data-v3] [data-pieza="navegacion"]', `--nav-${n}`))), '  y la misma geometría con nombres propios: las constantes de `_lib/navegacion.ts` (Trabajos, Servicios, las anclas) la siguen describiendo')
+afirmar(!/\[data-modo="barra"\][^{]*\{[^}]*visibility: visible/.test(BARRA_CSS) && modoDelChrome(562, 900, true) === 'menu', 'abajo de `medio` la pastilla apagada es el menú: ninguna regla la vuelve visible (la de siempre la mostraba de 628 a 860 sin menú)')
+const CHROME = leer('_chrome/ChromeDelHome.tsx')
+afirmar(CHROME.includes('<BarraDelHome className={CLASE_DE_LA_PASTILLA_APAGADA} />') && !/Navegacion(DelHome)?['\s]/.test(sinComentarios(CHROME).replace(/'[^']*barra[^']*'/g, '')) && leer('layout.tsx').includes("import './_estilos/barra.css'"), 'el home monta la barra propia (y su hoja entra por el layout, como todas)')
+const intacto = (ruta: string): boolean => {
+  try {
+    execFileSync('git', ['diff', '--quiet', 'b3e2dc31', '--', ruta])
+    return true
+  } catch {
+    return false
+  }
+}
+afirmar(['src/app/v3/_componentes/chrome/Navegacion.tsx', 'src/app/v3/_estilos/navegacion.css', 'src/app/v3/_lib/navegacion.ts'].every(intacto), 'la pieza compartida (la pastilla, su hoja y su lista de muestra) quedó como estaba antes del sprint: la sigue usando la galería')
 
 cerrar('s39-navbar')

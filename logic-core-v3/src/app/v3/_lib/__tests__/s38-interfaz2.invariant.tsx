@@ -181,7 +181,7 @@ controlPositivo('el chequeo del salto ve un viaje que suelta la anticipación de
   const r = anticipar(p, 60, 4, { desde: 0.6, destino: 'trabajos', y0: 0, y1: 5000 }, deGolpe)
   return Math.abs(r.luz[iClic] - r.luz[iClic - 1]) < 0.01
 })
-afirmar(/if \(physics\) angleDeg \+= giroDeLaInterfaz\(\)/.test(leer('_lib/escena/OrbitRig.tsx')) && SELECTOR_DE_LOS_ITEMS === '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]' && leer('_chrome/escena/AnticipacionDelMenu.tsx').includes('const viaje = planDelViaje(seccion.id, y1)'), 'el giro sólo con la física; los ítems de la barra; la misma cuenta que el clic')
+afirmar(/if \(physics\) angleDeg \+= giroDeLaInterfaz\(\)/.test(leer('_lib/escena/OrbitRig.tsx')) && SELECTOR_DE_LOS_ITEMS === '[data-pieza="barra"] a[data-pieza="barra-enlace"]' && leer('_chrome/escena/AnticipacionDelMenu.tsx').includes('const viaje = planDelViaje(seccion.id, y1)'), 'el giro sólo con la física; los ítems de la barra; la misma cuenta que el clic')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T3 · La vida propia: la onda de las portadas y Tu panel (la barra, sin número)')

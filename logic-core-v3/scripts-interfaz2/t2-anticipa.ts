@@ -16,7 +16,7 @@ import { writeFileSync } from 'node:fs'
 import { medir } from '../scripts-b4/navegador'
 import { abrir, armarClip, carpeta, centroDe, correr, esperar, grabar, ladoALado, raton, viajar, type Banco } from './banco'
 
-const ITEM = (id: string): string => `[data-pieza="navegacion"] a[href="#${id}"]`
+const ITEM = (id: string): string => `[data-pieza="barra"] a[href="#${id}"]`
 const CENTRO: [number, number] = [720, 600]
 
 const MUESTREO = `(() => { window.__muestras = []; const paso = () => { const r = window.__respuestaDelBanco && window.__respuestaDelBanco(); if (r) window.__muestras.push({ t: performance.now(), y: scrollY, luz: r.luz, giro: r.giro, modo: r.modo }); window.__muestreo = requestAnimationFrame(paso) }; paso() })()`

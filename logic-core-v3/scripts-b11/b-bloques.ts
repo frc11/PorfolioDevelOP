@@ -74,7 +74,7 @@ import { LAS_SEIS, ORIGEN, PERFILES_DE_B11, SELECTOR_DE_LA_ESCENA, TEMP, argumen
 
 /** La caja de la pastilla de navegación en el cuadro, en esta posición; `null` si no está montada. */
 const LECTOR_DE_LA_PASTILLA = `(() => {
-  const n = document.querySelector('[data-pieza="navegacion"] [data-parte="pastilla"]')
+  const n = document.querySelector('[data-pieza="barra"] [data-parte="pastilla"]')
   if (n === null) return null
   const r = n.getBoundingClientRect()
   return r.width > 0 && r.height > 0 ? { x: r.left, y: r.top, ancho: r.width, alto: r.height } : null

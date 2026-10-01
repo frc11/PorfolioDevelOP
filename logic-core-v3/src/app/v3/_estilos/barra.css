@@ -1,0 +1,104 @@
+/**
+ * [NAVBAR] LA BARRA DEL HOME — la pastilla de escritorio, propia de /v3.
+ *
+ * Es la MISMA pastilla visual de `navegacion.css` (que sigue siendo de la pieza compartida, la de la galería): la misma
+ * geometría —nace al pie de la primera pantalla y se pega arriba—, el mismo vidrio, los mismos enlaces casi opacos y
+ * el subrayado del activo que se desliza. Lo propio: los ítems del home (`_chrome/enlaces.ts`) con el rollover de dos
+ * copias de INTERFAZ 1 (`rollover.css`, por el `<a>` que lo contiene) y su marca (`data-pieza="barra"`), para que la
+ * hoja compartida no la toque. La geometría se declara con nombres propios y los mismos tokens que `--nav-*`: las
+ * constantes de `_lib/navegacion.ts` (de las que dependen Trabajos, Servicios y el despeje de las anclas) siguen
+ * describiéndola, y `s39-navbar` afirma que son iguales.
+ *
+ * El despeje de las anclas (`scroll-padding-top`) sigue en `navegacion.css`: es del documento, no de la pieza.
+ */
+
+[data-v3] [data-pieza="barra"] {
+  --barra-reposo: var(--spacing-6);
+  --barra-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));
+  --barra-margen-al-pie: var(--spacing-6);
+  --barra-nacimiento: calc(100svh - var(--barra-margen-al-pie) - var(--barra-alto));
+  --barra-umbral: calc(var(--barra-nacimiento) - var(--barra-reposo));
+  position: sticky;
+  top: calc(var(--barra-umbral) * -1);
+  block-size: 0;
+  z-index: var(--z-cabecera);
+}
+
+[data-v3] [data-pieza="barra"] > [data-parte="pastilla"] {
+  position: absolute;
+  top: var(--barra-nacimiento);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  block-size: var(--barra-alto);
+  inline-size: max-content;
+  max-inline-size: calc(100% - var(--pad-lateral-compacto) * 2);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: calc(var(--foco-desplazamiento) + var(--foco-grosor));
+  padding-inline: var(--spacing-4);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-fuerte);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+  isolation: isolate;
+  transition-property: opacity, translate;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra"] [data-parte="lista"] {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-v3] [data-pieza="barra-enlace"] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--spacing-2);
+  color: var(--color-tinta);
+  text-decoration: none;
+  opacity: var(--opacity-casi);
+  transition-property: opacity;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra-enlace"]:is(:hover, :focus-visible, [data-activo="true"], [data-forzado~="hover"], [data-forzado~="foco"]) {
+  opacity: 1;
+}
+
+[data-v3] [data-pieza="barra"] [data-parte="subrayado-activo"] {
+  position: absolute;
+  bottom: var(--spacing-2);
+  left: 0;
+  block-size: var(--border-hairline);
+  inline-size: var(--subrayado-ancho, 0);
+  background-color: var(--color-tinta);
+  translate: var(--subrayado-x, 0) 0;
+  opacity: var(--subrayado-visible, 0);
+  pointer-events: none;
+  transition-property: translate, inline-size, opacity;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+
+/* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. */
+[data-v3]:has([data-pieza="contacto"]) [data-pieza="barra"] > [data-parte="pastilla"] {
+  opacity: 0;
+  translate: 0 calc(var(--spacing-6) * -1);
+  pointer-events: none;
+}
+
+/* El modo lo decide `BarraDelHome`: la barra si entra y está encendida (desde `medio`), si no el menú del teléfono. */
+[data-v3] [data-pieza="barra"][data-modo="menu"] > [data-parte="pastilla"] {
+  visibility: hidden;
+}

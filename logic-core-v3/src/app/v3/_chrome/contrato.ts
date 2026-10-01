@@ -167,7 +167,7 @@ export const PASTILLA_APAGADA_ABAJO_DE_MEDIO = true
 /** La clase que la apaga. Va acá y no en el JSX para que la constante de arriba
  *  y el mecanismo se lean juntos, y para que el instrumento afirme la MISMA
  *  cadena que se renderiza. */
-// CONTACTO · antes de medir, abajo de 860 la barra no se ve; la medición de `NavegacionDelHome` decide después (`data-modo`).
+// CONTACTO · antes de medir, abajo de 860 la barra no se ve; la medición de `BarraDelHome` decide después (`data-modo`).
 export const CLASE_DE_LA_PASTILLA_APAGADA = 'max-medio:invisible'
 
 /** El módulo que se monta, con su ruta exacta. Para poder afirmar que existe. */

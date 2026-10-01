@@ -146,7 +146,7 @@ async function principal(): Promise<void> {
   const b = await abrirBanco(ANCHO, ALTO, { perfil: 'viajes-estado' })
   const informe: unknown[] = []
   try {
-    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'nav-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="navegacion"]').appendChild(a); return 0 })()`)
+    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'barra-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="barra"]').appendChild(a); return 0 })()`)
     const viajarA = async (id: string): Promise<void> => {
       if (id === 'hero') await medir(b.p, `(() => { document.querySelector('[data-instrumento]').click(); return 0 })()`)
       else await clicEnElItem(b, id)

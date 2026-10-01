@@ -237,12 +237,12 @@ export const SELECTOR_DEL_CTA_DEL_HERO = `[${ATRIBUTO_DE_PANEL}="${IDS_DE_SECCIO
  *
  * Es el MISMO gesto para los tres: el de arriba sigue siendo el primero de la lista. «Contacto»
  * también es un ítem, pero va a `#contacto`, que no es una sección: el efecto lo deja pasar y lo
- * abre el formulario. Los dos literales salen de `Navegacion.tsx` y de `MenuMovil.tsx`, y
+ * abre el formulario. Los dos literales salen de `BarraDelHome.tsx` ([NAVBAR] la barra propia) y de `MenuMovil.tsx`, y
  * `s27-viajes` afirma que aparecen tal cual en esos fuentes.
  */
 export const SELECTOR_DE_LOS_VIAJES = [
   SELECTOR_DEL_CTA_DEL_HERO,
-  '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]',
+  '[data-pieza="barra"] a[data-pieza="barra-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
 ].join(', ')
 

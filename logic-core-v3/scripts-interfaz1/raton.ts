@@ -41,7 +41,7 @@ const ESCENAS: readonly Escena[] = [
       { nombre: 'titular', selector: '[data-panel="hero"] h1' },
       { nombre: 'cta-trabajos', selector: '[data-panel="hero"] a[data-pieza="cta"]', texto: 'trabajos' },
       { nombre: 'cta-hablemos', selector: '[data-panel="hero"] a[data-pieza="cta"]', texto: 'Hablemos' },
-      { nombre: 'menu-trabajos', selector: 'a[data-pieza="nav-enlace"]', texto: 'Trabajos' },
+      { nombre: 'menu-trabajos', selector: 'a[data-pieza="barra-enlace"]', texto: 'Trabajos' },
       { nombre: 'logo', selector: 'LOGO' },
     ],
   },

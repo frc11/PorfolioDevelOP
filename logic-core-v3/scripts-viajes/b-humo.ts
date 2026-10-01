@@ -11,8 +11,8 @@ export async function clicEnElItem(b: Awaited<ReturnType<typeof abrirBanco>>, id
   return medir<string>(
     b.p,
     `(async () => {
-      const barra = document.querySelector('[data-pieza="navegacion"]')
-      const enBarra = barra?.getAttribute('data-modo') !== 'menu' ? barra.querySelector('a[data-pieza="nav-enlace"][href="#${id}"]') : null
+      const barra = document.querySelector('[data-pieza="barra"]')
+      const enBarra = barra?.getAttribute('data-modo') !== 'menu' ? barra.querySelector('a[data-pieza="barra-enlace"][href="#${id}"]') : null
       if (enBarra) { enBarra.click(); return 'barra' }
       document.querySelector('[data-parte="boton-del-menu"]').click()
       await new Promise((r) => setTimeout(r, 600))

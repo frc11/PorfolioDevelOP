@@ -23,7 +23,7 @@ async function principal(): Promise<void> {
   const b = await abrirBanco(ANCHO, ALTO)
   const s = b.p.sessionId
   try {
-    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'nav-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="navegacion"]').appendChild(a); return 0 })()`)
+    await medir(b.p, `(() => { const a = document.createElement('a'); a.href = '#hero'; a.setAttribute('data-pieza', 'barra-enlace'); a.setAttribute('data-instrumento', ''); a.style.display = 'none'; document.querySelector('[data-pieza="barra"]').appendChild(a); return 0 })()`)
     const cuadros: { t: number; data: string }[] = []
     b.p.conexion.al('Page.screencastFrame', (crudo) => {
       const params = crudo as unknown as { data: string; sessionId: number; metadata: { timestamp: number } }

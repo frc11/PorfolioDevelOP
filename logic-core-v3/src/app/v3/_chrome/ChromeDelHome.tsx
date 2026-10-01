@@ -6,7 +6,7 @@ import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { InfinitoDelRecorrido } from './recorrido/InfinitoDelRecorrido'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
-import { NavegacionDelHome } from './NavegacionDelHome'
+import { BarraDelHome } from './barra/BarraDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 
@@ -156,8 +156,8 @@ export function ChromeDelHome(): React.JSX.Element {
        * los 72 px quedan como aire muerto a propósito. La medición de las dos
        * salidas está en `contrato.ts`.
        */}
-      {/* CONTACTO: la misma barra, con su estado activo (el subrayado que se desliza). */}
-      <NavegacionDelHome className={CLASE_DE_LA_PASTILLA_APAGADA} />
+      {/* [NAVBAR] La barra propia del home (la misma pastilla, con sus ítems y el rollover), con su estado activo. */}
+      <BarraDelHome className={CLASE_DE_LA_PASTILLA_APAGADA} />
       <MenuMovil />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />

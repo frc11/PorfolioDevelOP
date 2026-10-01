@@ -49,6 +49,8 @@ export const ARCHIVOS_DE_ESTILO = [
   // [INTERFAZ 1] T2 · el rollover de dos copias y el cursor de la sala.
   `${V3}/_estilos/rollover.css`,
   `${V3}/_estilos/cursor-sala.css`,
+  // [NAVBAR] T2 · la barra propia del home (la misma pastilla, con nombres propios).
+  `${V3}/_estilos/barra.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

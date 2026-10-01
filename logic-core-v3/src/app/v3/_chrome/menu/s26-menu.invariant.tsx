@@ -18,7 +18,7 @@ import { ENLACES_DEL_HOME } from '../enlaces'
 import { SECCIONES } from '../../_lib/secciones'
 import type { ModoSuperficie } from '../../_lib/superficies'
 import { fijarModoDelChrome } from '../contacto/apertura'
-import { modoDelChrome } from '../NavegacionDelHome'
+import { modoDelChrome } from '../barra/BarraDelHome'
 import { Menu, MenuMovil, ROTULO_DEL_MENU } from './MenuMovil'
 import { panelEn, tonoDebajo, vaInvertido, type Tono } from './tono'
 
@@ -96,7 +96,8 @@ titulo('4 · El modo del chrome sale del ancho real')
 afirmarIgual(modoDelChrome(562, 600), 'barra', 'si la lista entra en la pastilla, la barra de escritorio')
 afirmarIgual(modoDelChrome(562, 561), 'menu', '  y si se pasa un píxel, el menú móvil')
 controlPositivo('  el chequeo vería un modo que siempre es barra', (() => 'barra') as typeof modoDelChrome, (f: typeof modoDelChrome) => f(562, 561) === 'menu')
-const NAV = leer('src/app/v3/_chrome/NavegacionDelHome.tsx')
-afirmar(/modoDelChrome\(pastilla\.scrollWidth, pastilla\.clientWidth\)/.test(NAV) && /new ResizeObserver\(medir\)/.test(NAV) && /fijarModoDelChrome\(modo\)/.test(NAV), '  una medición en el chrome, al cambiar el ancho o la lista; las secciones no preguntan el ancho')
+afirmarIgual(modoDelChrome(562, 600, true), 'menu', '  [NAVBAR] y con la pastilla apagada (abajo de `medio`), el menú aunque la lista entre: no queda una franja sin barra ni menú')
+const NAV = leer('src/app/v3/_chrome/barra/BarraDelHome.tsx')
+afirmar(/modoDelChrome\(pastilla\.scrollWidth, pastilla\.clientWidth, getComputedStyle\(cabecera\)\.visibility === 'hidden'\)/.test(NAV) && /new ResizeObserver\(medir\)/.test(NAV) && /fijarModoDelChrome\(modo\)/.test(NAV), '  una medición en el chrome, al cambiar el ancho o la lista; las secciones no preguntan el ancho')
 
 cerrar('s26-menu.invariant')

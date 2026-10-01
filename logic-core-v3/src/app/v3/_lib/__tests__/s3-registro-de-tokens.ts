@@ -122,6 +122,13 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
     procedencia: '−16px medidos, que es --spacing-4 en negativo',
   },
 
+  // ── [NAVBAR] La barra propia del home (`barra.css`): la geometría de la pastilla, con nombres propios ──
+  { nombre: '--barra-reposo', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: 'el mismo de `--nav-reposo`: la barra del home es la pastilla de siempre' },
+  { nombre: '--barra-alto', valor: 'calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-alto` (48 px)' },
+  { nombre: '--barra-margen-al-pie', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: 'el mismo de `--nav-margen-al-pie`' },
+  { nombre: '--barra-nacimiento', valor: 'calc(100svh - var(--barra-margen-al-pie) - var(--barra-alto))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-nacimiento`, con los nombres propios' },
+  { nombre: '--barra-umbral', valor: 'calc(var(--barra-nacimiento) - var(--barra-reposo))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-umbral`, con los nombres propios' },
+
   // ── Cursor ─────────────────────────────────────────────────────────────
   { nombre: '--cursor-nucleo-lado', valor: 'var(--spacing-1)', evidencia: 'medido', procedencia: 'COMPONENTS.md §4.1 — núcleo de 4×4, que es --spacing-1 exacto' },
   {

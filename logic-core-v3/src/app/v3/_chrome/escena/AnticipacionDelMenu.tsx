@@ -23,7 +23,7 @@ import { viajeEnCurso } from '../../_lib/escena/viaje'
  * documento, como el de los viajes), con la compuerta del intro, sin un viaje en curso y sin movimiento reducido.
  * «Contacto» no viaja (abre el formulario): no anticipa nada.
  */
-export const SELECTOR_DE_LOS_ITEMS = '[data-pieza="navegacion"] a[data-pieza="nav-enlace"]'
+export const SELECTOR_DE_LOS_ITEMS = '[data-pieza="barra"] a[data-pieza="barra-enlace"]'
 
 const PUNTERO_FINO = '(hover: hover) and (pointer: fine)'
 const MOVIMIENTO_REDUCIDO = '(prefers-reduced-motion: reduce)'

@@ -63,7 +63,7 @@ export async function abrir(ancho: number, alto: number, o: OpcionesDelBanco = {
 
 /** Un viaje del menú (la barra de escritorio) a una sección, y la espera a que llegue y el velo vuelva. */
 export async function viajar(b: Banco, id: string): Promise<void> {
-  await medir(b.p, `document.querySelector('[data-pieza="navegacion"] a[href="#${id}"]').click()`)
+  await medir(b.p, `document.querySelector('[data-pieza="barra"] a[href="#${id}"]').click()`)
   await esperar(3800)
 }
 

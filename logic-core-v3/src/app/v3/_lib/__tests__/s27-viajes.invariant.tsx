@@ -23,8 +23,7 @@ import {
   SELECTOR_DEL_CTA_DEL_HERO,
 } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
-import { Navegacion } from '../../_componentes/chrome/Navegacion'
-import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
+import { BarraDelHome } from '../../_chrome/barra/BarraDelHome'
 import { Menu } from '../../_chrome/menu/MenuMovil'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { destinoDelViaje } from '../../_componentes/destinosDelViaje'
@@ -48,8 +47,9 @@ const partes = SELECTOR_DE_LOS_VIAJES.split(', ')
 afirmarIgual(partes[0], SELECTOR_DEL_CTA_DEL_HERO, 'el primero sigue siendo el CTA del hero: el gesto es el suyo, no otro')
 afirmar(/closest<HTMLAnchorElement>\(SELECTOR_DE_LOS_VIAJES\)/.test(EFECTO), '  y el efecto escucha la lista entera con UN solo `closest`: no hay un segundo gesto')
 const literales: readonly [string, string][] = [
-  ['src/app/v3/_componentes/chrome/Navegacion.tsx', 'data-pieza="navegacion"'],
-  ['src/app/v3/_componentes/chrome/Navegacion.tsx', 'data-pieza="nav-enlace"'],
+  // [NAVBAR] la barra propia del home: la pieza compartida (`_componentes/chrome/Navegacion.tsx`) quedó para la galería.
+  ['src/app/v3/_chrome/barra/BarraDelHome.tsx', 'data-pieza="barra"'],
+  ['src/app/v3/_chrome/barra/BarraDelHome.tsx', 'data-pieza="barra-enlace"'],
   ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-pieza="menu-movil"'],
   ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-parte="item-del-menu"'],
 ]
@@ -58,7 +58,7 @@ for (const [archivo, literal] of literales) {
 }
 const nada = (): void => undefined
 const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
-const BARRA = hrefsDe(renderToStaticMarkup(<Navegacion enlaces={ENLACES_DEL_HOME} />), 'data-pieza="nav-enlace"')
+const BARRA = hrefsDe(renderToStaticMarkup(<BarraDelHome />), 'data-pieza="barra-enlace"')
 const MENU = hrefsDe(renderToStaticMarkup(<Menu invertido={false} alCerrar={nada} alContacto={nada} alDesmontar={nada} />), 'data-parte="item-del-menu"')
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
 afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
