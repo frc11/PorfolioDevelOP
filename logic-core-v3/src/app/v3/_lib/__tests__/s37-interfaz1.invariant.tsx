@@ -363,4 +363,36 @@ afirmar(compuerta.includes("'(hover: hover) and (pointer: fine)'") && compuerta.
 afirmar(!leer('_estilos/cursor-sala.css').includes('cursor: none'), 'el cursor nativo no se oculta en ninguna parte (como en nk)')
 afirmar(leer('_lib/escena/entorno/Entorno.tsx').includes('LOGO_BAJO_EL_PUNTERO.sobre = m.hover'), 'el estado del logo lo escribe la escena con su propio hover (las compuertas de E4 ya aplicadas)')
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T3 · 1 · El anillo de foco que se ve sobre cualquier fondo, y el estado apretado')
+
+const FOCO = leer('_estilos/foco.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const reglaDelAnillo = FOCO.slice(FOCO.indexOf('[data-v3][data-v3] :focus-visible'), FOCO.indexOf('}', FOCO.indexOf('[data-v3][data-v3] :focus-visible')))
+afirmar(reglaDelAnillo.includes('outline-color: var(--color-tinta)'), 'el contorno lleva la tinta DEL ELEMENTO (en una sección invertida es clara), no `--color-foco`, que se resuelve una vez en :root')
+afirmar(reglaDelAnillo.includes('box-shadow: 0 0 0 calc(var(--foco-desplazamiento) + 2 * var(--foco-grosor)) var(--color-fondo)'), '  y un borde de papel por dentro y por fuera del contorno: dos tonos (WCAG C40), que se ven sobre claro, sobre oscuro y adentro de `difference`')
+afirmar(reglaDelAnillo.includes(':not([data-pieza="salto"])'), '  sin pisar la caja con sombra del salto al contenido')
+afirmar(FOCO.includes('[data-v3] [data-pieza="chip-de-contacto"]:has(:focus-visible)') && !leer('_chrome/contacto/CamposDelContacto.tsx').includes('focus-within:ring'), 'el chip del contacto: el anillo en el chip cuando el foco DEL TECLADO está adentro (no con el mouse)')
+afirmar(/:is\(a\[href\], button:not\(:disabled\), \[role="button"\], summary\):active \{\s*opacity: var\(--opacity-casi\);\s*transition: none;/.test(FOCO), 'todo lo que se toca tiene estado apretado (en nk, ninguno): opacidad casi, sin transición')
+const MARGEN_DEL_ANILLO = '6px' // desplazamiento (2) + dos grosores (2 + 2): el contorno y su borde
+const DEMOS_CSS = leer('_estilos/demos.css')
+afirmar(DEMOS_CSS.includes(`--cinta-margen-del-recorte: ${MARGEN_DEL_ANILLO};`) && DEMOS_CSS.includes('overflow-clip-margin: var(--cinta-margen-del-recorte);') && DEMOS_CSS.includes(`--carrusel-margen-del-recorte: ${MARGEN_DEL_ANILLO};`), `la cinta y el carrusel recortan dejando ${MARGEN_DEL_ANILLO} afuera: el anillo entero (en px: overflow-clip-margin no acepta calc)`)
+controlPositivo('el chequeo del anillo ve la regla del tema de antes (un solo tono, `--color-foco`)', 'outline: var(--foco-grosor) solid var(--color-foco);', (r: string) => r.includes('outline-color: var(--color-tinta)'))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T3 · 2 · Lo que faltaba, resuelto donde estaba')
+
+const MARCO = leer('_secciones/quienes-somos/marco.tsx')
+afirmar(!/group-focus-visible:/.test(MARCO) && veces(MARCO, 'group-has-focus-visible:') >= 5, 'el marco de las fotos se revela con el foco del teclado: el grupo TIENE el foco adentro (antes preguntaba si el grupo, un div, tenía el foco: nunca)')
+afirmar(leer('_secciones/por-que-develop/PorQueDevelop.tsx').includes('onFocus={(e) => llevarAlCta(e.currentTarget, destacado.get())}'), 'el «Hablanos» del final: si toma el foco antes de llegar, la página va adonde llega (antes, el anillo alrededor de nada)')
+const CAMPOS_DEL_CONTACTO = leer('_chrome/contacto/CamposDelContacto.tsx')
+const FORMULARIO = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const sinComentarios = (fuente: string): string => fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+afirmarIgual(veces(sinComentarios(CAMPOS_DEL_CONTACTO + FORMULARIO), 'role="alert"'), 1, 'el contacto avisa los errores UNA vez, al enviar (antes, una alerta por campo que volvía a sonar con cada tecla)')
+afirmar(CAMPOS_DEL_CONTACTO.includes("aria-invalid={errores.intereses !== undefined || undefined}"), '  los intereses dicen que están mal (aria-invalid), no sólo el texto de abajo')
+afirmar(veces(CAMPOS_DEL_CONTACTO, "'border-tinta border-dashed'") === 2, '  el error con borde punteado: no se confunde con el foco (liso)')
+afirmar(/<p role="status"[^>]*>\s*\{abiertoEn !== null/.test(FORMULARIO), '  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia)')
+afirmar(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('aria-busy={abierta && !cargada}'), 'la ventana de una demo dice que está cargando (aria-busy y una región de estado; el esqueleto es sólo para la vista)')
+afirmar(leer('_secciones/servicios/ContenidoDeServicio.tsx').includes('<CtaDelServicio servicio={servicio} enEscritorio />'), 'Servicios con menos movimiento en escritorio tiene sus CTA (antes, ninguno)')
+afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_secciones/cierre/PiezasDeContacto.tsx')), 'las redes del pie responden al pasar y al enfocar')
+
 cerrar('s37-interfaz1')

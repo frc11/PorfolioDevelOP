@@ -110,3 +110,38 @@
   color: var(--color-tinta);
   box-shadow: var(--shadow-flotante);
 }
+
+/* =========================================================================
+ * [INTERFAZ 1] T3 · EL ANILLO QUE SE VE SOBRE CUALQUIER FONDO.
+ *
+ * El anillo del tema (`theme-develop.css`) es `--color-foco`, que vale `var(--color-tinta)` resuelto UNA vez en `:root`:
+ * #111 en todo el árbol, aunque una sección invertida redefina la tinta. Medido con Tab real y en píxeles
+ * (`scripts-interfaz1/foco.ts`): contra la sala de noche de Trabajos, 1,0:1 (no se ve); abajo de 1025, adentro de la
+ * mezcla `difference` del hero y del pie, 1,16:1.
+ *
+ * Dos tonos, la técnica C40 de WCAG: el contorno con la tinta DEL ELEMENTO (que en una sección invertida es clara) y un
+ * borde de papel por dentro y por fuera del contorno (`box-shadow`, del papel del elemento). Sobre claro se ve el
+ * contorno; sobre oscuro, el borde; adentro de `difference`, el papel invierte lo de atrás. El grosor y el
+ * desplazamiento siguen siendo los del tema. Sin el salto al contenido: tiene su propia caja con sombra.
+ * Más específico que la regla del tema a propósito (dos veces `[data-v3]`): este archivo no decide el orden de carga.
+ * ========================================================================= */
+[data-v3][data-v3] :focus-visible:not([data-pieza="salto"]),
+[data-v3][data-v3]:focus-visible {
+  outline-color: var(--color-tinta);
+  box-shadow: 0 0 0 calc(var(--foco-desplazamiento) + 2 * var(--foco-grosor)) var(--color-fondo);
+}
+
+/* El chip del contacto: su checkbox es `sr-only` (su anillo no se ve), así que el anillo va en el chip cuando el foco
+   del TECLADO está adentro (antes era un anillo de foco-dentro: también con el mouse, y tinta sobre un chip tinta). */
+[data-v3] [data-pieza="chip-de-contacto"]:has(:focus-visible) {
+  outline: var(--foco-grosor) solid var(--color-tinta);
+  outline-offset: var(--foco-desplazamiento);
+  box-shadow: 0 0 0 calc(var(--foco-desplazamiento) + 2 * var(--foco-grosor)) var(--color-fondo);
+}
+
+/* [INTERFAZ 1] T3 · EL ESTADO APRETADO. En nk no hay ninguno (2 reglas `:active` en 2.628, ninguna aplica). Acá, todo lo
+   que se toca responde al apretar: una baja de opacidad sin transición (el dedo y el clic la sienten en el instante). */
+[data-v3] :is(a[href], button:not(:disabled), [role="button"], summary):active {
+  opacity: var(--opacity-casi);
+  transition: none;
+}

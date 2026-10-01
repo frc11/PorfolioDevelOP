@@ -41,7 +41,9 @@ function Error({ campo, errores }: { readonly campo: CampoConError; readonly err
   const texto = errores[campo]
   if (texto === undefined) return null
   return (
-    <p id={idDelError(campo)} role="alert" className="text-micro leading-texto">
+    // [INTERFAZ 1] T3: sin `role="alert"` por campo (sonaban hasta cinco a la vez, y otra vez con cada tecla): el aviso es
+    // UNO, al enviar (`FormularioDeContacto`); éste lo lee el lector al llegar al campo (`aria-describedby`).
+    <p id={idDelError(campo)} className="text-micro leading-texto">
       {texto}
     </p>
   )
@@ -66,7 +68,8 @@ function Pildora({
   const conError = campo !== 'empresa' && errores[campo] !== undefined
   return (
     <div className="flex flex-col gap-[var(--spacing-1)]">
-      <label className={cn(PILDORA, conError && 'border-tinta')}>
+      {/* [INTERFAZ 1] T3: el error con borde punteado (el foco es liso: no se confunden). */}
+      <label className={cn(PILDORA, conError && 'border-tinta border-dashed')}>
         <span className="text-caption shrink-0 font-medio">{CAMPOS[campo].rotulo}</span>
         <input
           name={campo}
@@ -107,11 +110,20 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir }:
                   data-pieza="chip-de-contacto"
                   data-marcado={marcado ? 'true' : 'false'}
                   className={cn(
-                    'text-caption cursor-pointer rounded-[var(--radius-pastilla-s)] border px-[var(--spacing-4)] py-[var(--spacing-2)] transition-colors focus-within:ring-2 focus-within:ring-[var(--color-foco)]',
+                    'text-caption cursor-pointer rounded-[var(--radius-pastilla-s)] border px-[var(--spacing-4)] py-[var(--spacing-2)] transition-colors',
                     marcado ? 'border-tinta bg-tinta text-fondo' : 'border-borde-fuerte hover:border-tinta',
                   )}
                 >
-                  <input type="checkbox" name="intereses" value={i.id} checked={marcado} onChange={() => alternarInteres(i.id)} className="sr-only" />
+                  <input
+                    type="checkbox"
+                    name="intereses"
+                    value={i.id}
+                    checked={marcado}
+                    onChange={() => alternarInteres(i.id)}
+                    aria-invalid={errores.intereses !== undefined || undefined}
+                    aria-describedby={errores.intereses === undefined ? undefined : idDelError('intereses')}
+                    className="sr-only"
+                  />
                   {i.rotulo}
                 </label>
               )
@@ -135,7 +147,7 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir }:
             <Pildora campo="empresa" datos={datos} errores={errores} escribir={escribir} requerido={false} />
           </div>
           <div className="flex flex-col gap-[var(--spacing-1)]">
-            <label className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)] py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta')}>
+            <label className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)] py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
               <span className="text-caption shrink-0 font-medio">{CAMPOS.mensaje.rotulo}</span>
               <textarea
                 name="mensaje"

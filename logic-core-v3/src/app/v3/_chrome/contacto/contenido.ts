@@ -59,6 +59,10 @@ export const DESPUES_DEL_ENVIO = {
 
 export const ROTULO_DE_CERRAR = 'Cerrar el formulario de contacto'
 
+/** [INTERFAZ 1] T3 · El aviso al enviar con errores: UNO, para el lector (cada campo dice el suyo al llegar a él). */
+export const avisoDeErrores = (n: number): string =>
+  n === 1 ? 'Falta un dato: el foco quedó en el campo para completarlo.' : `Faltan ${String(n)} datos: el foco quedó en el primero.`
+
 /** Lo que cada «Quiero mi…» de Servicios deja marcado al abrir. */
 export const PRECARGA_POR_SERVICIO: Readonly<Record<string, readonly Interes[]>> = {
   web: ['web'],

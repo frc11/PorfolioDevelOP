@@ -11,7 +11,7 @@ import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
 import { CamposDelContacto } from './CamposDelContacto'
-import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, TITULO, type Interes } from './contenido'
+import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, TITULO, avisoDeErrores, type Interes } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from './enviarContacto'
 
 /**
@@ -50,6 +50,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [errores, setErrores] = useState<ErroresDeContacto>({})
   const [intento, setIntento] = useState(false)
   const [abiertoEn, setAbiertoEn] = useState<string | null>(null)
+  const [aviso, setAviso] = useState('')
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -69,6 +70,10 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     const r = enviarContacto(datos)
     if (r.estado === 'invalido') {
       setErrores(r.errores)
+      // [INTERFAZ 1] T3: un aviso, vaciado y vuelto a escribir para que un segundo intento también se anuncie.
+      setAviso('')
+      const n = Object.keys(r.errores).length
+      requestAnimationFrame(() => setAviso(avisoDeErrores(n)))
       // El foco va al primer campo con error, después de que el render lo marque.
       const form = e.currentTarget
       const primero = r.errores.intereses !== undefined ? '[data-pieza="chip-de-contacto"] input' : '[aria-invalid="true"]'
@@ -76,6 +81,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
       return
     }
     setErrores({})
+    setAviso('')
     setAbiertoEn(r.url)
   }
 
@@ -121,11 +127,11 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               </h2>
               <p className="text-cuerpo leading-texto max-w-[60ch]">
                 {BAJADA.antes}
-                <a href={BAJADA.mail.href} className="underline decoration-1 underline-offset-4">
+                <a href={BAJADA.mail.href} className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
                   {BAJADA.mail.rotulo}
                 </a>
                 {BAJADA.medio}
-                <a href={BAJADA.whatsapp.href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4">
+                <a href={BAJADA.whatsapp.href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
                   {BAJADA.whatsapp.rotulo}
                 </a>
                 {BAJADA.despues}
@@ -147,15 +153,22 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               <p className="text-caption leading-texto">{PIE}</p>
               <Cta type="submit" rotulo={ROTULO_DEL_ENVIO} />
             </div>
-            {abiertoEn !== null && (
-              <p role="status" className="text-caption leading-texto">
-                {DESPUES_DEL_ENVIO.texto}{' '}
-                <a href={abiertoEn} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4">
-                  {DESPUES_DEL_ENVIO.reintento}
-                </a>
-                .
-              </p>
-            )}
+            {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
+                siempre se anuncia); lo que cambia es lo de adentro. */}
+            <p role="alert" className="sr-only">
+              {aviso}
+            </p>
+            <p role="status" className="text-caption leading-texto empty:hidden">
+              {abiertoEn !== null && (
+                <>
+                  {DESPUES_DEL_ENVIO.texto}{' '}
+                  <a href={abiertoEn} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
+                    {DESPUES_DEL_ENVIO.reintento}
+                  </a>
+                  .
+                </>
+              )}
+            </p>
           </form>
         </div>
       </motion.div>

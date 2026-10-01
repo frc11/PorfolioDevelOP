@@ -202,7 +202,12 @@
 }
 
 [data-v3] [data-pieza="cinta"] {
+  /* [INTERFAZ 1] T3: el recorte deja afuera el anillo de foco: desplazamiento + dos grosores (el contorno y su borde de
+     papel, `foco.css`) = 6 px, en px a mano porque `overflow-clip-margin` no acepta calc() (como el carrusel, abajo). */
+  --cinta-margen-del-recorte: 6px;
+
   overflow: clip;
+  overflow-clip-margin: var(--cinta-margen-del-recorte);
 }
 
 [data-v3] [data-pieza="cinta"] > [data-parte="pista"] {
@@ -260,8 +265,9 @@
  * ========================================================================= */
 
 [data-v3] [data-pieza="carrusel"] {
-  /* El anillo de foco: desplazamiento más grosor, que `overflow-clip-margin` no acepta en calc(). */
-  --carrusel-margen-del-recorte: 4px;
+  /* El anillo de foco: desplazamiento más grosor, que `overflow-clip-margin` no acepta en calc(). [INTERFAZ 1] T3: más
+     otro grosor, el borde de papel del anillo de dos tonos (`foco.css`): 6 px. Con 4, el recorte se comía el borde. */
+  --carrusel-margen-del-recorte: 6px;
 }
 
 [data-v3] [data-pieza="carrusel"] [data-parte="renglon"] {

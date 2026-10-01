@@ -64,4 +64,6 @@ export const TEXTO_DE_DEMOS = {
   cartelDeLaPieza: (nombre: string): string => `Click para ver ${nombre}`,
   cartelDeLaVisita: 'Click para visitar demo',
   cerrar: 'Cerrar la demo',
+  /** [INTERFAZ 1] T3 · lo que anuncia la ventana mientras la demo carga (el esqueleto es sólo para la vista). */
+  cargando: 'Cargando la demo…',
 } as const

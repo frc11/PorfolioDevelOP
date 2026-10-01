@@ -35,7 +35,7 @@ export function RedesDelPie(): React.JSX.Element {
     <ul className="flex justify-between tablet:justify-start tablet:gap-[var(--spacing-6)]">
       {REDES.map((r) => (
         <li key={r.red}>
-          <a href={r.href} target="_blank" rel="noopener noreferrer" aria-label={r.rotulo} className="inline-flex p-[var(--spacing-1)]">
+          <a href={r.href} target="_blank" rel="noopener noreferrer" aria-label={r.rotulo} className="inline-flex p-[var(--spacing-1)] transition-transform duration-[var(--duracion-rapida)] hover:-translate-y-0.5 focus-visible:-translate-y-0.5 motion-reduce:transition-none">
             <IconoDeMarca marca={r.red} className="size-[var(--spacing-6)]" />
           </a>
         </li>

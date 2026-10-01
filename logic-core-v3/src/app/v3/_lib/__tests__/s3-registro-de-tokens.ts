@@ -146,7 +146,20 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--libro-apertura', valor: 'var(--spacing-4)', evidencia: 'decidido', procedencia: 'cuánto se abren las vecinas para darle aire: un paso de 16 px' },
 
   // ── MÓVIL-TRABAJOS · el carrusel de abajo de 1024 (`demos.css`) ───────
-  { nombre: '--carrusel-margen-del-recorte', valor: '4px', evidencia: 'derivado', procedencia: 'el anillo de foco (desplazamiento + grosor), el mismo margen que el recorte del túnel; `overflow-clip-margin` no acepta calc()' },
+  { nombre: '--carrusel-margen-del-recorte', valor: '6px', evidencia: 'derivado', procedencia: '[INTERFAZ 1] T3 · el anillo de foco de dos tonos (desplazamiento + dos grosores: el contorno y su borde de papel); `overflow-clip-margin` no acepta calc()' },
+  { nombre: '--cinta-margen-del-recorte', valor: '6px', evidencia: 'derivado', procedencia: '[INTERFAZ 1] T3 · el mismo margen que el carrusel: el anillo de dos tonos entero, en px porque no acepta calc()' },
+
+  { nombre: '--cursor-velo-oscuro', valor: 'color-mix(in srgb, var(--color-fondo) 18%, transparent)', evidencia: 'decidido', procedencia: '[INTERFAZ 1] T2 · el halo del cursor sobre lo oscuro: el papel apenas, el par del gris claro del halo (nk: 0,1 de alfa)' },
+
+  // ── INTERFAZ 1 · T2 · el rollover de dos copias (`rollover.css`): lo medido en el CTA (ROLLOVER_MEDIDO) ÷ sus 15 px ──
+  { nombre: '--rollover-giro-salida', valor: '6deg', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.3: matrix(0.994522, 0.104528…) = sin 6°, la copia A al salir' },
+  { nombre: '--rollover-salida-x', valor: '1.3333em', evidencia: 'derivado', procedencia: 'los +20 px medidos de la salida ÷ los 15 px del CTA: el mismo gesto a cualquier tamaño' },
+  { nombre: '--rollover-salida-y', valor: '-2.25em', evidencia: 'derivado', procedencia: 'los −33,75 px medidos de la salida ÷ los 15 px del CTA' },
+  { nombre: '--rollover-giro-entrada', valor: '10deg', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.3: matrix(0.984808, 0.173648…) = sin 10°, la copia B al entrar' },
+  { nombre: '--rollover-entrada-x', valor: '-2em', evidencia: 'derivado', procedencia: 'los −30 px medidos de la entrada ÷ los 15 px del CTA' },
+  { nombre: '--rollover-entrada-y', valor: '1.65em', evidencia: 'derivado', procedencia: 'los +24,75 px medidos de la entrada ÷ los 15 px del CTA' },
+  { nombre: '--rollover-recorte-inicial', valor: 'inset(80% 0 0)', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.2: el clip-path de la copia B en reposo' },
+  { nombre: '--rollover-intercambio', valor: 'calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida))', evidencia: 'derivado', procedencia: 'los 1,3 s medidos del intercambio, compuestos con los tokens como en `cta.css`' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

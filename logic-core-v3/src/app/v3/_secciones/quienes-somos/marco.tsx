@@ -37,7 +37,7 @@ import { CLASE_DE_ENCUADRE } from './geometria'
  *
  * Los dos mecanismos conviven en el MISMO marcado:
  *
- *   · `group-hover:` / `group-focus-visible:` — Tailwind 4 ya envuelve `hover:`
+ *   · `group-hover:` / `group-has-focus-visible:` — Tailwind 4 ya envuelve `hover:`
  *     en `@media (hover: hover)` (verificado en la hoja servida), así que estas
  *     clases son inertes solas en un dispositivo táctil: no hace falta pedirlo.
  *     El foco por teclado no depende de la capacidad de posarse y por eso no
@@ -145,7 +145,7 @@ const REVELADO = {
     'transition duration-[var(--revelado-sale)] ease-[var(--ease-salida)] delay-[var(--revelado-sale-demora)]',
     // Hover y foco — Tailwind guarda `hover:` solo bajo `(hover: hover)`.
     'group-hover:translate-y-0 group-hover:duration-[var(--revelado-entra)] group-hover:delay-[var(--revelado-entra-demora)]',
-    'group-focus-visible:translate-y-0 group-focus-visible:duration-[var(--revelado-entra)] group-focus-visible:delay-[var(--revelado-entra-demora)]',
+    'group-has-focus-visible:translate-y-0 group-has-focus-visible:duration-[var(--revelado-entra)] group-has-focus-visible:delay-[var(--revelado-entra-demora)]',
     // El estado del toque, para el dispositivo sin hover. MISMOS valores que arriba.
     'group-data-[abierto=true]:translate-y-0 group-data-[abierto=true]:duration-[var(--revelado-entra)] group-data-[abierto=true]:delay-[var(--revelado-entra-demora)]',
   ),
@@ -171,7 +171,7 @@ const ACERCAMIENTO = cn(
   '[&_img]:h-full [&_img]:object-cover',
   'scale-100 transition duration-[var(--duracion-rapida)] ease-[var(--ease-salida)]',
   'group-hover:scale-[var(--marco-acercamiento)] group-hover:duration-[var(--duracion-lenta)]',
-  'group-focus-visible:scale-[var(--marco-acercamiento)] group-focus-visible:duration-[var(--duracion-lenta)]',
+  'group-has-focus-visible:scale-[var(--marco-acercamiento)] group-has-focus-visible:duration-[var(--duracion-lenta)]',
   'group-data-[abierto=true]:scale-[var(--marco-acercamiento)] group-data-[abierto=true]:duration-[var(--duracion-lenta)]',
 )
 
@@ -250,7 +250,7 @@ export function MarcoDeDosTomas({
             // RECURSOS: la toma suelta entra con un fundido corto (hover, foco o el toque de la sección).
             'pointer-events-none absolute inset-0 overflow-hidden opacity-0',
             'transition-opacity duration-[var(--duracion-rapida)] ease-[var(--ease-salida)]',
-            'group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[abierto=true]:opacity-100',
+            'group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-[abierto=true]:opacity-100',
           )}
         >
           <MarcoDeMedio
@@ -290,7 +290,7 @@ export function MarcoDeDosTomas({
             'pointer-events-none absolute inset-0 flex items-end opacity-[var(--marco-oculto)]',
             'transition-opacity duration-[var(--duracion-media)] ease-[var(--ease-salida)]',
             'group-hover:opacity-100',
-            'group-focus-visible:opacity-100',
+            'group-has-focus-visible:opacity-100',
             'group-data-[abierto=true]:opacity-100',
           )}
         >

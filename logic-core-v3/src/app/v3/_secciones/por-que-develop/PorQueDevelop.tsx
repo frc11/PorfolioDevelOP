@@ -176,6 +176,20 @@ const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl)
 /** [FINAL 3] «Hablanos» más grande: el mismo botón, con su tipografía redefinida a `titulo-m`. */
 const BOTON_GRANDE = '[--text-cuerpo:var(--text-titulo-m)]'
 
+/**
+ * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
+ * al final del recorrido del escenario y al día): medido, el anillo se dibujaba alrededor de nada (1,0:1, sólo el cielo).
+ * Al recibir el foco sin haber llegado, la página va de un salto al final del escenario, donde llega; el día lo alcanza
+ * con su propio tope (amanecer, ~2,5 s). El mismo gesto que el túnel de Trabajos con sus capturas.
+ */
+function llevarAlCta(cta: HTMLElement, llegada: number): void {
+  if (llegada > 0.5) return
+  const panel = cta.closest('[data-panel]')
+  if (!(panel instanceof HTMLElement)) return
+  const fin = panel.getBoundingClientRect().bottom + window.scrollY - window.innerHeight
+  window.scrollTo({ top: Math.round(fin), behavior: 'instant' })
+}
+
 function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
   const frase = useLlegadaDeDia(pin, VENTANA_DEL_CTA, 'abajo')
   const destacado = useLlegadaDeDia(pin, VENTANA_DEL_DESTACADO, 'abajo')
@@ -187,6 +201,7 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
       // [FINAL 2] Debajo del logo: de día el logo es negro y encima no se leía.
       className="absolute inset-x-0 top-[var(--arriba-del-cta)] flex flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
       style={{ pointerEvents }}
+      onFocus={(e) => llevarAlCta(e.currentTarget, destacado.get())}
     >
       <CanalDeUnaPieza progreso={frase} patron="P5">
         <Titular nivel="titulo-xl" como="p" className={TAMANO_DEL_CTA}>

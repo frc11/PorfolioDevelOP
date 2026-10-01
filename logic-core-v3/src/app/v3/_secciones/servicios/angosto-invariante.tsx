@@ -56,9 +56,11 @@ export function afirmarServiciosAngostos(): void {
   // ── UN CTA AL TERMINAR CADA SERVICIO, CON SU ACENTO ────────────────────
   const CONTENIDO_DE_SERVICIO = leer('ContenidoDeServicio.tsx')
   const TIRA = leer('TiraDeServicios.tsx')
-  afirmar(/<CtaDelServicio servicio=\{servicio\} \/>\s*<\/ContenidoDeSeccion>/.test(CONTENIDO_DE_SERVICIO), 'el CTA va al final de cada servicio, adentro del bloque que lleva su `[data-servicio]`: el acento lo hereda de ahí')
+  // [INTERFAZ 1] T3: en la rama apilada el CTA lleva `enEscritorio` (con menos movimiento en escritorio es el único).
+  afirmar(/<CtaDelServicio servicio=\{servicio\} enEscritorio \/>\s*<\/ContenidoDeSeccion>/.test(CONTENIDO_DE_SERVICIO), 'el CTA va al final de cada servicio, adentro del bloque que lleva su `[data-servicio]`: el acento lo hereda de ahí')
   afirmar(/<CtaDelServicio servicio=\{servicio\} \/>/.test(TIRA), '  y está también en la tira de escritorio (oculto): las dos ramas anuncian lo mismo')
-  afirmar(/className="escritorio:hidden"/.test(leer('CtaDelServicio.tsx')), '  y desde 1024 no se ve: ahí rota uno solo')
+  afirmar(/enEscritorio \? undefined : 'escritorio:hidden'/.test(leer('CtaDelServicio.tsx')), '  y desde 1024, en la tira, no se ve: ahí rota uno solo')
+  afirmar(!/enEscritorio/.test(TIRA), '  (la tira no lo pide: sólo la rama apilada, que en escritorio existe únicamente con menos movimiento, lo muestra)')
 
   // ── EL NOMBRE CORTO ES SÓLO DE LA CABEZA ───────────────────────────────
   afirmarIgual(Object.keys(NOMBRE_CORTO), ['ia-automatizacion'], 'el único nombre corto es el de IA y Automatizaciones')

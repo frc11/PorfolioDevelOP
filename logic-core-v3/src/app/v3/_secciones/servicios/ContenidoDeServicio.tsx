@@ -58,7 +58,7 @@ export function ContenidoDeServicio({ servicio }: ContenidoDeServicioProps): Rea
         </CanalDeUnaPieza>
       </div>
       <BloqueDeServicio servicio={servicio} pintura={null} disposicion="apilada" />
-      <CtaDelServicio servicio={servicio} />
+      <CtaDelServicio servicio={servicio} enEscritorio />
     </ContenidoDeSeccion>
   )
 }

@@ -7,15 +7,15 @@
  * de salida. El cursor nativo nunca se oculta.
  *
  * Los colores salen del tono de lo que hay debajo (`data-tono`, `estado.ts`): sobre lo claro, tinta; sobre lo oscuro
- * (Trabajos, la sala de noche, la ventana de una demo), papel. Sólo tokens.
+ * (Trabajos, la sala de noche, la ventana de una demo), papel: las reglas del tono oscuro van al final, una por pieza
+ * (sin redefinir propiedades: el padrón de tokens lee la última declaración de cada una). Sólo tokens.
  */
 [data-v3] [data-pieza="cursor-sala"] {
   --cursor-nucleo-lado: var(--spacing-1);
   --cursor-halo-lado: calc(var(--spacing-8) + var(--spacing-1));
   --cursor-halo-desenfoque: calc(var(--blur-panel) / 3);
-  --cursor-tinta: var(--color-tinta);
-  --cursor-papel: var(--color-fondo);
-  --cursor-velo: var(--color-borde);
+  /* El velo del halo sobre lo oscuro: el papel, apenas (el gris del halo claro, `--color-borde`, ahí no se ve). */
+  --cursor-velo-oscuro: color-mix(in srgb, var(--color-fondo) 18%, transparent);
 
   position: fixed;
   inset: 0;
@@ -23,12 +23,6 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--duracion-media) var(--ease-salida);
-}
-
-[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"] {
-  --cursor-tinta: var(--color-fondo);
-  --cursor-papel: var(--color-tinta);
-  --cursor-velo: color-mix(in srgb, var(--color-fondo) 18%, transparent);
 }
 
 [data-v3] [data-pieza="cursor-sala"][data-activo="si"]:not([data-estado="oculto"]) {
@@ -52,7 +46,7 @@
   inline-size: var(--cursor-nucleo-lado);
   block-size: var(--cursor-nucleo-lado);
   margin: calc(var(--cursor-nucleo-lado) / -2);
-  background-color: var(--cursor-tinta);
+  background-color: var(--color-tinta);
   translate: var(--cursor-nucleo-x, 0) var(--cursor-nucleo-y, 0);
 }
 
@@ -61,7 +55,7 @@
   block-size: var(--cursor-halo-lado);
   margin: calc(var(--cursor-halo-lado) / -2);
   border: var(--border-hairline) solid transparent;
-  background-color: var(--cursor-velo);
+  background-color: var(--color-borde);
   backdrop-filter: blur(var(--cursor-halo-desenfoque));
   translate: var(--cursor-halo-x, 0) var(--cursor-halo-y, 0);
 }
@@ -72,7 +66,7 @@
   line-height: var(--leading-micro);
   letter-spacing: var(--tracking-micro);
   text-transform: uppercase;
-  color: var(--cursor-papel);
+  color: var(--color-fondo);
   scale: 0.4;
   opacity: 0;
   transition-property: scale, opacity;
@@ -87,7 +81,7 @@
 [data-v3] [data-pieza="cursor-sala"][data-estado="enlace"] [data-parte="halo"] {
   scale: 1.5;
   background-color: transparent;
-  border-color: var(--cursor-tinta);
+  border-color: var(--color-tinta);
   backdrop-filter: none;
 }
 
@@ -106,7 +100,7 @@
 }
 [data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="halo"] {
   scale: 2.4;
-  background-color: var(--cursor-tinta);
+  background-color: var(--color-tinta);
   backdrop-filter: none;
 }
 [data-v3] [data-pieza="cursor-sala"][data-estado="demo"] [data-parte="etiqueta"] {
@@ -118,8 +112,25 @@
 [data-v3] [data-pieza="cursor-sala"][data-estado="logo"] [data-parte="halo"] {
   scale: 2.2;
   background-color: transparent;
-  border-color: var(--cursor-tinta);
+  border-color: var(--color-tinta);
   backdrop-filter: none;
+}
+
+/* El tono oscuro: el papel donde va la tinta y al revés. */
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"] [data-parte="nucleo"] {
+  background-color: var(--color-fondo);
+}
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"]:is([data-estado="texto"], [data-estado="boton"]) [data-parte="halo"] {
+  background-color: var(--cursor-velo-oscuro);
+}
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"]:is([data-estado="enlace"], [data-estado="logo"]) [data-parte="halo"] {
+  border-color: var(--color-fondo);
+}
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"][data-estado="demo"] [data-parte="halo"] {
+  background-color: var(--color-fondo);
+}
+[data-v3] [data-pieza="cursor-sala"][data-tono="oscuro"] [data-parte="etiqueta"] {
+  color: var(--color-tinta);
 }
 
 @media (prefers-reduced-motion: reduce) {

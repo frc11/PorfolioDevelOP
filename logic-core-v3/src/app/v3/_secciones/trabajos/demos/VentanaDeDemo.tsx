@@ -218,11 +218,16 @@ export function VentanaDeDemo({
         role="dialog"
         aria-modal="true"
         aria-label={`${demo.nombre} — demo en vivo`}
+        aria-busy={abierta && !cargada}
         data-demo={demo.slug}
         className="bg-tinta text-fondo rounded-sutil fixed flex flex-col overflow-hidden"
         style={{ left: final.x, top: final.y, width: final.ancho, height: final.alto, visibility: 'hidden' }}
       >
         <CromoDeLaVentana demo={demo} alCerrar={cerrar} refDelPrimerControl={primerControl} />
+        {/* [INTERFAZ 1] T3 · el estado de carga, para el lector: el esqueleto de abajo es sólo para la vista. */}
+        <p role="status" className="sr-only">
+          {abierta && !cargada ? TEXTO_DE_DEMOS.cargando : ''}
+        </p>
         <div {...SALA} className="bg-fondo relative min-h-0 flex-1 overflow-hidden">
           <Esqueleto />
           {/* La portada horizontal: la misma imagen que curva el Genie. Mientras la
