@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react'
 
+import { useLlegadaDelTitulo } from '../../_componentes/llegadaDelTitulo'
+
 import { Titular, type NivelDeTitular } from '../../_componentes/tipografia/Titular'
 import type { IdDePatron } from '../../_lib/motion/patrones'
 import type { TipoDeTexto } from '../../_lib/motion/texto'
@@ -68,6 +70,11 @@ export interface CanalDeUnaPiezaProps {
   readonly className?: string
   readonly como?: 'div' | 'span'
   readonly children: ReactNode
+  /**
+   * [NAVBAR] Retoque 3 · el id de la sección cuyo viaje del menú, al llegar, le pide a esta pieza repetir su llegada
+   * aislada (`llegadaDelTitulo.ts`): los títulos de Portfolio y de Por qué develOP.
+   */
+  readonly llegadaDe?: string
 }
 
 /**
@@ -84,7 +91,15 @@ export function CanalDeUnaPieza({
   className,
   como,
   children,
+  llegadaDe,
 }: CanalDeUnaPiezaProps): React.JSX.Element {
+  if (llegadaDe !== undefined && progreso !== null) {
+    return (
+      <PiezaQueLlega id={llegadaDe} progreso={progreso} patron={patron} className={className} como={como}>
+        {children}
+      </PiezaQueLlega>
+    )
+  }
   return (
     <CanalDePieza
       progreso={progreso}
@@ -434,4 +449,9 @@ export function ProgresoAmortiguado(props: ProgresoAmortiguadoProps): React.JSX.
   const primitivas = usePrimitivas()
   if (primitivas !== null && props.progreso !== null) return <primitivas.ProgresoAmortiguado {...props} />
   return <>{props.children(null)}</>
+}
+
+/** [NAVBAR] Retoque 3 · la misma pieza, con el progreso que el viaje puede repetir (`useLlegadaDelTitulo`). */
+function PiezaQueLlega({ id, progreso, ...resto }: Omit<CanalDeUnaPiezaProps, 'llegadaDe' | 'progreso'> & { readonly id: string; readonly progreso: NonNullable<Progreso> }): React.JSX.Element {
+  return <CanalDeUnaPieza {...resto} progreso={useLlegadaDelTitulo(id, progreso)} />
 }

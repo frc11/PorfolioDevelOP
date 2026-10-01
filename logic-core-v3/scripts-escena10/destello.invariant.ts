@@ -75,8 +75,7 @@ async function principal(): Promise<void> {
       await esperar(1500)
       const r = await grabarCuadros(b, async () => {
         await clicEnElItem(b, d)
-        // [NAVBAR] Hasta el final de la llegada a la vista (Por qué develOP la recorre sin velo después del viaje).
-        await esperar(8200)
+        await esperar(5500)
       })
       const picos = destellosEn(r.cuadros, UMBRAL_DEL_PICO)
       afirmar(r.cuadros.filter((c) => c.viaje === 1).length >= 30 && picos.length === 0, `${o} → ${d}: ningún destello en el viaje`, picos.length === 0 ? `${String(r.cuadros.filter((c) => c.viaje === 1).length)} cuadros de viaje` : JSON.stringify(picos[0]))

@@ -1,8 +1,8 @@
 /**
  * SPRINT NAVBAR V3 — el invariante del sprint: el menú propio del home, con sus controles positivos.
  *
- *   T1 · los ítems y los destinos: el orden, Quiénes somos un poco antes, el nudo de Panel y la llegada a la vista de
- *        Portfolio y Por qué develOP (el viaje frena justo antes de su llegada y la recorre sin velo).
+ *   T1 · los ítems y los destinos: el orden, Quiénes somos un poco antes y el nudo de Panel. [Retoque 3] Portfolio y Por
+ *        qué develOP viajan como todos y, al llegar, el título repite su llegada aislado (la llegada «a la vista» se borró).
  *   T2 · la barra de escritorio, propia de /v3: la misma pastilla visual (y la misma geometría), los ítems del home con
  *        el rollover de dos copias, y la pieza compartida intacta para la galería.
  *   T3 · el menú del teléfono de vidrio líquido: el Genie de las demos desde el botón, el material (con la lente sólo
@@ -22,33 +22,15 @@ import { conLente } from '../../_chrome/menu/LenteDelVidrio'
 import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
 import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
 import { ENLACES_DEL_HOME } from '../../_chrome/enlaces'
-import { DURACION_DE_LA_LLEGADA_MS, DURACION_DEL_VIAJE_MS, MARGEN_ANTES_DE_LA_LLEGADA } from '../../_componentes/deslizamiento'
-import { antesDeLaLlegada, centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
+import { centradoDebajoDeLaBarra, destinoDelViaje } from '../../_componentes/destinosDelViaje'
+import { MS_DE_LA_LLEGADA_DEL_TITULO, repetirLaLlegadaDelTitulo } from '../../_componentes/llegadaDelTitulo'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
-import { lineaDeLaNoche } from '../../_secciones/trabajos/geometria'
-import { AMANECER } from '../escena/amanecer/linea'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 import { NodoFalso, VENTANA, conDomFalso } from './s27-dom-falso'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
 const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
-
-/** El documento falso con las secciones que `antesDeLaLlegada` recorre (la del medio del cuadro, Tu panel). */
-function conDocumento<T>(paneles: readonly NodoFalso[], cuerpo: () => T): T {
-  const antes = globalThis.document
-  const documento = {
-    documentElement: { scrollHeight: 30_000 },
-    querySelectorAll: (s: string) => (s === '[data-panel]' ? paneles : []),
-    querySelector: (s: string) => paneles.find((p) => s === `[data-panel="${p.getAttribute('data-panel') ?? ''}"]`) ?? null,
-  }
-  Object.assign(globalThis, { document: documento })
-  try {
-    return cuerpo()
-  } finally {
-    Object.assign(globalThis, { document: antes })
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T1 · Los ítems: el orden pedido, una sola lista para la barra y el menú')
@@ -80,42 +62,16 @@ conDomFalso(900, 72, () => {
 afirmar(/'tu-panel': \(panel, v\) => \{/.test(leer('_componentes/destinosDelViaje.ts')), '  Tu panel tiene nudo (antes caía en el ancla: con la barra encima, 72 px de Servicios a la vista)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('T1 · La llegada a la vista: Portfolio y Por qué develOP frenan justo antes de su llegada')
-
-afirmar(MARGEN_ANTES_DE_LA_LLEGADA > 0 && MARGEN_ANTES_DE_LA_LLEGADA <= 0.25, `el viaje frena ${String(MARGEN_ANTES_DE_LA_LLEGADA)} de cuadro antes: un respiro de lo de antes, no una pantalla`)
-afirmar(DURACION_DE_LA_LLEGADA_MS >= 2000 && DURACION_DE_LA_LLEGADA_MS <= DURACION_DEL_VIAJE_MS, `  y la llegada dura siempre lo mismo (${String(DURACION_DE_LA_LLEGADA_MS)} ms): lo bastante para el barrido de la noche y el amanecer, no más que el viaje`)
-
-conDomFalso(900, 72, () => {
-  const caja = new NodoFalso({ tope: 5073 + 360, alto: 2700 })
-  const numeros = new NodoFalso({ tope: 2700, alto: 2373 }, { 'data-panel': 'numeros' })
-  const trabajos = new NodoFalso({ tope: 5073, alto: 6813 }, { 'data-panel': 'trabajos' }).responde('[data-caja-sin-solape]', caja)
-  conDocumento([numeros, trabajos], () => {
-    VENTANA.scrollY = 0
-    const esperado = Math.floor(5073 + 360 - lineaDeLaNoche(900) - MARGEN_ANTES_DE_LA_LLEGADA * 900)
-    const a = antesDeLaLlegada(trabajos as unknown as HTMLElement, 5073)
-    afirmarIgual(a, { antes: esperado, seccion: 'numeros' }, 'Trabajos: frena antes de la línea de la gota (la misma de `CapaDeLaGota`), con la luz de la sección que hay ahí')
-    VENTANA.scrollY = 6000
-    afirmarIgual(antesDeLaLlegada(trabajos as unknown as HTMLElement, 5073), null, '  subiendo (desde Servicios) va derecho: la llegada se construyó bajando')
-    VENTANA.scrollY = esperado + 10
-    afirmarIgual(antesDeLaLlegada(trabajos as unknown as HTMLElement, 5073), null, '  y ya adentro de la llegada, también')
-    VENTANA.scrollY = 0
-  })
-  const tuPanel = new NodoFalso({ tope: 19086, alto: 4119 }, { 'data-panel': 'tu-panel' })
-  const porQue = new NodoFalso({ tope: 23205, alto: 3600 }, { 'data-panel': 'por-que-develop' })
-  conDocumento([tuPanel, porQue], () => {
-    const esperado = Math.floor(19086 + 4119 - AMANECER.visible * 900 - MARGEN_ANTES_DE_LA_LLEGADA * 900)
-    afirmarIgual(antesDeLaLlegada(porQue as unknown as HTMLElement, 23835), { antes: esperado, seccion: 'tu-panel' }, 'Por qué develOP: frena antes de que el pie de Tu panel pida el amanecer, con Tu panel tapando el cuadro')
-    afirmarIgual(antesDeLaLlegada(tuPanel as unknown as HTMLElement, 19086), null, 'las demás secciones no tienen llegada a la vista: van derecho a su nudo')
-  })
-})
+titulo('Retoque 3 · Portfolio y Por qué develOP: el viaje de todos, y después la llegada del título, aislada')
 
 const EFECTO = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
-const llegada = EFECTO.slice(EFECTO.indexOf('const recorrerLaLlegada'), EFECTO.indexOf('const alClick'))
-const orden = ['zona.removeAttribute(ATRIBUTO_DEL_VELO)', 'zona.inert = false', 'reloj = window.setTimeout(() => terminar(false)', 'terminarElViaje()', 'lenis.scrollTo(destinoEnPx']
-afirmar(orden.every((t, i) => llegada.includes(t) && (i === 0 || llegada.indexOf(t) > llegada.indexOf(orden[i - 1]))), 'el segundo tramo: el velo se va, el reloj de seguridad se rearma, la escena deja el viaje y RECIÉN ahí se recorre la llegada')
-afirmar(/relojDeArranque = window\.setTimeout\(\(\) => \{[\s\S]*?\}, fundido\)/.test(llegada), '  la llegada arranca cuando el velo terminó de irse (el fundido que declara la hoja)')
-afirmar(EFECTO.includes("const llegada = modo === 'salto' ? null : antesDeLaLlegada(seccion, destinoEnPx)") && EFECTO.includes('empezarElViaje(planDelViaje(llegada?.seccion ?? seccion.id, hasta))'), '  con movimiento reducido no hay llegada a la vista (el salto va al nudo), y el viaje tapado lleva la luz de donde frena')
-controlPositivo('el chequeo del orden vería la escena soltada después de arrancar la llegada', llegada.replace('terminarElViaje()\n', '').replace('lock: false, onComplete: () => terminar(true) })', 'lock: false, onComplete: () => terminar(true) }); terminarElViaje()'), (f: string) => orden.every((t, i) => f.includes(t) && (i === 0 || f.indexOf(t) > f.indexOf(orden[i - 1]))))
+afirmar(!/antesDeLaLlegada|recorrerLaLlegada|DURACION_DE_LA_LLEGADA_MS/.test(EFECTO + sinComentarios(leer('_componentes/destinosDelViaje.ts')) + sinComentarios(leer('_componentes/deslizamiento.ts'))) && EFECTO.includes('empezarElViaje(planDelViaje(seccion.id, destinoEnPx))'), 'el viaje va derecho al nudo, con la duración de todos (la llegada «a la vista» de T1 se borró: el sitio no espera al texto)')
+const terminarElVuelo = EFECTO.slice(EFECTO.indexOf('const terminar = (llego: boolean): void => {'), EFECTO.indexOf('const alClick'))
+afirmar(terminarElVuelo.includes('if (llego && destino !== null) repetirLaLlegadaDelTitulo(destino.id, duracionDelFundido(zona))') && terminarElVuelo.indexOf('repetirLaLlegadaDelTitulo(') < terminarElVuelo.indexOf('zona.removeAttribute(ATRIBUTO_DEL_VELO)'), '  al llegar pide la llegada del título ANTES de quitar el velo (vuelve a cero sin verse) y para después del fundido')
+afirmar(leer('_secciones/trabajos/piezas.tsx').includes('<CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>') && (leer('_secciones/por-que-develop/PorQueDevelop.tsx').match(/<CanalDeUnaPieza progreso=\{frase\} patron="P5" como="span" className="block" llegadaDe="por-que-develop">/g) ?? []).length === 2 && leer('_secciones/_contrato/canales.tsx').includes('progreso={useLlegadaDelTitulo(id, progreso)}'), '  la escuchan «Portfolio» (su máscara) y las dos mitades de la frase de Por qué develOP, en su canal: sólo el texto, sin cámara ni página')
+afirmar(!repetirLaLlegadaDelTitulo('servicios', 0) && MS_DE_LA_LLEGADA_DEL_TITULO >= 600 && MS_DE_LA_LLEGADA_DEL_TITULO <= 1200, `  las demás secciones no la tienen, y dura ${String(MS_DE_LA_LLEGADA_DEL_TITULO)} ms, encima del viaje y después`)
+const LLEGADA = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
+afirmar(LLEGADA.includes('(r < 0 ? p : Math.min(p, r))') && LLEGADA.includes('void control.then(() => repeticion.set(-1))'), '  el progreso del título: el del scroll, salvo mientras corre la llegada (y nunca más adelante que el scroll); al terminar vuelve al del scroll, que en el nudo ya vale 1')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T2 · La barra de escritorio, propia de /v3')

@@ -5,11 +5,8 @@ import {
   ANCLA_DE_LA_VENTANA_VISIBLE,
   ANCLA_DEL_TRAZO,
 } from '../_secciones/_contrato/bloqueAnimado'
-import { AMANECER } from '../_lib/escena/amanecer/linea'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../_secciones/por-que-develop/geometria'
-import { lineaDeLaNoche } from '../_secciones/trabajos/geometria'
-import { MARGEN_ANTES_DE_LA_LLEGADA } from './deslizamiento'
 import { destinoDelAncla } from './viajeSinLenis'
 
 /**
@@ -45,9 +42,9 @@ import { destinoDelAncla } from './viajeSinLenis'
  *     pegado a la barra). A 1440 × 900, 917 en lugar de 1035; a 1024 × 768, el tope de la sección en lugar de 805.
  *   · **Panel** (Tu panel, nuevo en la barra): la cabecera entera a la vista —el título, la bajada y el panel en vivo—,
  *     centrada en el cuadro libre si sobra lugar, sin mostrar la sección de arriba.
- *   · **Portfolio y Por qué develOP llegan a la vista** (`antesDeLaLlegada`): el viaje frena justo antes de que el
- *     scroll dispare su llegada —la gota de la noche, el amanecer— y la llegada se recorre después, sin velo, hasta el
- *     MISMO nudo de arriba (`useDeslizamientoDelCta`).
+ *   · **Portfolio y Por qué develOP**: [NAVBAR] Retoque 3 · el viaje va derecho a su nudo, con la duración de todos;
+ *     al llegar, el TÍTULO repite su llegada, aislado (`llegadaDelTitulo.ts`). La llegada «a la vista» de T1 (frenar
+ *     antes y recorrerla sin velo, ~5,5 s) se borró: el sitio no espera al texto.
  */
 
 /** Los rangos con nombre de un bloque animado, tal como los escribe su `data-rango`. */
@@ -174,48 +171,4 @@ export function destinoDelViaje(seccion: HTMLElement): number {
   if (nudo === null) return Math.round(destinoDelAncla(seccion))
   const maximo = Math.floor(Math.max(0, document.documentElement.scrollHeight - window.innerHeight))
   return Math.min(Math.max(nudo, 0), maximo)
-}
-
-/**
- * [NAVBAR] DÓNDE ARRANCA LA LLEGADA de cada sección que la tiene: el píxel de scroll en que el scroll la dispara.
- *
- *   · **Trabajos** — la gota de la noche: la caja sin el solape cruzando `lineaDeLaNoche` (la misma línea con que la
- *     mide `CapaDeLaGota`). Después vienen el barrido y la subida de «Portfolio».
- *   · **Por qué develOP** — el amanecer: el pie de Tu panel en `AMANECER.visible` del cuadro, donde el scroll empieza a
- *     pedirlo (`avanceDelScroll`). Después vienen el día y la frase, que lo espera.
- */
-const LLEGADAS: Readonly<Record<string, (panel: HTMLElement, v: number) => number | null>> = {
-  trabajos: (panel, v) => topeDe(panel.querySelector<HTMLElement>('[data-caja-sin-solape]') ?? panel) - lineaDeLaNoche(v),
-  'por-que-develop': (_, v) => {
-    const tuPanel = document.querySelector<HTMLElement>('[data-panel="tu-panel"]')
-    return tuPanel === null ? null : topeDe(tuPanel) + tuPanel.getBoundingClientRect().height - AMANECER.visible * v
-  },
-}
-
-/** La sección que ocupa el medio del cuadro con el scroll en `y`. */
-function seccionEnElPunto(y: number, v: number): string | null {
-  for (const p of document.querySelectorAll<HTMLElement>('[data-panel]')) {
-    const tope = topeDe(p)
-    if (tope <= y + v / 2 && y + v / 2 < tope + p.getBoundingClientRect().height) return p.getAttribute('data-panel')
-  }
-  return null
-}
-
-/** El primer tramo de un viaje con la llegada a la vista: hasta dónde va tapado, y qué sección hay ahí. */
-export interface LlegadaALaVista {
-  readonly antes: number
-  readonly seccion: string
-}
-
-/**
- * [NAVBAR] DÓNDE FRENA EL VIAJE ANTES DE LA LLEGADA, en píxeles enteros; `null` si va derecho a su nudo. Sólo bajando
- * y desde antes de la llegada: subiendo, o ya adentro, la llegada no se ve como se construyó y el viaje es el de siempre.
- */
-export function antesDeLaLlegada(seccion: HTMLElement, destino: number): LlegadaALaVista | null {
-  const v = window.innerHeight
-  const llegada = LLEGADAS[seccion.getAttribute('data-panel') ?? '']?.(seccion, v) ?? null
-  if (llegada === null) return null
-  const antes = Math.floor(llegada - MARGEN_ANTES_DE_LA_LLEGADA * v)
-  if (antes <= window.scrollY || antes >= destino) return null
-  return { antes, seccion: seccionEnElPunto(antes, v) ?? seccion.id }
 }

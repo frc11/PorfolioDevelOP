@@ -100,8 +100,8 @@ afirmar(Math.abs(largo - DURACION_DEL_VIAJE_MS) <= CUADRO_MS, `  y lo que tardan
 /** Un viaje por velocidad: la duración sale de la distancia. Tiene que dar distinto. */
 const porVelocidad: typeof viajarSinLenis = (destino, _ms, curva, alTerminar) => viajarSinLenis(destino, Math.abs(destino - window.scrollY) / 8, curva, alTerminar)
 controlPositivo('  el chequeo vería un viaje que va por velocidad', porVelocidad, (f: typeof viajarSinLenis) => Math.abs(cuantoTarda(0, 900, f) - cuantoTarda(0, 21_000, f)) < CUADRO_MS)
-afirmarIgual((EFECTO.match(/duration:/g) ?? []).length, 2, 'con Lenis hay DOS duraciones en el efecto: la del viaje y [NAVBAR] la de la llegada a la vista')
-afirmar(EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S') && EFECTO.includes('DURACION_DEL_VIAJE_MS,') && EFECTO.includes('duration: DURACION_DE_LA_LLEGADA_MS / 1000') && EFECTO.includes('viajarSinLenis(destinoEnPx, DURACION_DE_LA_LLEGADA_MS,'), '  y son constantes, las mismas que recibe el motor de abajo: ninguna se calcula con la distancia')
+afirmarIgual((EFECTO.match(/duration:/g) ?? []).length, 1, 'con Lenis hay UNA sola duración en el efecto ([NAVBAR] retoque 3: Portfolio y Por qué develOP vuelven a viajar como todos)')
+afirmar(EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S') && EFECTO.includes('DURACION_DEL_VIAJE_MS,'), '  y es la constante, la misma que recibe el motor de abajo: ninguna se calcula con la distancia')
 afirmarIgual(DURACION_DEL_DESLIZAMIENTO_S * 1000, DURACION_DEL_VIAJE_MS, '  la de Lenis va en segundos, derivada de los mismos milisegundos')
 const LIBRERIA = leer('node_modules/lenis/dist/lenis.mjs')
 afirmar(LIBRERIA.includes('if (this.duration && this.easing) {') && LIBRERIA.includes('const linearProgress = clamp(0, this.currentTime / this.duration, 1);'), '  y Lenis, con `duration` y `easing`, anima por TIEMPO: el `lerp` (que va por distancia) sólo corre sin duración')
@@ -177,7 +177,7 @@ const DESTINOS = quitarComentarios(leer('src/app/v3/_componentes/destinosDelViaj
 const sinPixeles = (f: string): boolean => !/[^\w.]\d{2,}/.test(f)
 afirmar(sinPixeles(DESTINOS), 'y ningún destino está escrito en píxeles: el módulo no tiene un solo número de dos cifras')
 controlPositivo('  el detector vería un destino escrito a mano', 'trabajos: () => 5072,', sinPixeles)
-afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECTO.includes('const hasta = llegada?.antes ?? destinoEnPx') && EFECTO.includes('lenis.scrollTo(hasta, {') && /viajarSinLenis\(\s*hasta,/.test(EFECTO) && EFECTO.includes('window.scrollTo({ top: destinoEnPx'), 'los dos motores van al MISMO píxel, medido en el click ([NAVBAR] el de antes de la llegada si la tiene), y el salto al nudo')
+afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECTO.includes('lenis.scrollTo(destinoEnPx, {') && EFECTO.includes('destinoEnPx,'), 'los dos motores y el salto van al MISMO píxel, medido en el click')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · La noche durante el viaje')

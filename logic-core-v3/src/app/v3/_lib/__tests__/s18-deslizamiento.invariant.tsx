@@ -515,11 +515,8 @@ afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función
  * son del documento y no del motor, así que siguen siendo una sola cada una.
  * Lo que esta afirmación cuida no es el número sino que no haya una llamada
  * suelta: 5 + 2 gemelas = 7, y cada una tiene su renglón arriba.
- *
- * [NAVBAR] La llegada a la vista suma tres (su reloj de seguridad y su llegada por cada motor), y las dos llegadas del
- * primer tramo pasan a ser UNA (`alLlegar`, que termina o sigue con la llegada): 8 − 2 + 1 + 3 = 10.
  */
-afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 10, '  y exactamente DIEZ sitios la llaman: cinco salidas, dos con gemela por el segundo motor, la llegada del salto y la llegada a la vista ([NAVBAR])')
+afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 8, '  y exactamente OCHO sitios la llaman: cinco salidas, dos con gemela por el segundo motor y la llegada del salto')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')
 afirmar(EFECTO_LIMPIO.includes('onComplete: () => terminar(true)'), '  salida 1 — llegó')
 afirmar(EFECTO_LIMPIO.includes("lenis.on('virtual-scroll'"), '  salida 2 — la rueda: el evento se emite ANTES de todas las guardas de `onVirtualScroll`')

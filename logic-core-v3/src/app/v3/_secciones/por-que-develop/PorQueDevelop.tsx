@@ -104,12 +104,12 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         {/* La frase, partida a los dos lados del logo. Se anuncia entera y en orden. [INTERFAZ 1] T1: con la inercia de los títulos. */}
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
-            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
+            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
               <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
-            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block">
+            <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
               <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>

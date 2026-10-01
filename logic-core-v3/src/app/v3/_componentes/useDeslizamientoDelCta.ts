@@ -11,7 +11,6 @@ import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
 import {
   ATRIBUTO_DEL_VELO,
   CURVA_DEL_VIAJE,
-  DURACION_DE_LA_LLEGADA_MS,
   DURACION_DEL_DESLIZAMIENTO_S,
   DURACION_DEL_VIAJE_MS,
   PRELUDIO_MS,
@@ -22,7 +21,8 @@ import {
   deberiaDeslizar,
   type ModoDelViaje,
 } from './deslizamiento'
-import { antesDeLaLlegada, destinoDelViaje } from './destinosDelViaje'
+import { destinoDelViaje } from './destinosDelViaje'
+import { repetirLaLlegadaDelTitulo } from './llegadaDelTitulo'
 import { viajarSinLenis } from './viajeSinLenis'
 
 /**
@@ -198,6 +198,9 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
         cancelarElViaje()
         cancelarElViaje = null
       }
+      // [NAVBAR] Retoque 3 · llegó: el título de la sección repite su llegada, aislado, después del fundido del velo. Se
+      // pide ANTES de quitarlo, así el título vuelve a cero sin que se vea (`llegadaDelTitulo.ts`).
+      if (llego && destino !== null) repetirLaLlegadaDelTitulo(destino.id, duracionDelFundido(zona))
       zona.removeAttribute(ATRIBUTO_DEL_VELO)
       // El orden importa: mientras el `<main>` sea inerte, `focus()` adentro no
       // hace nada. Primero se devuelve la interactividad, después el foco.
@@ -226,30 +229,6 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       }
       origen = null
       destino = null
-    }
-
-    /**
-     * [NAVBAR] LA LLEGADA A LA VISTA — el segundo tramo de Portfolio y de Por qué develOP. El viaje frenó justo antes
-     * de la llegada: el velo vuelve, la escena deja el viaje (lo que sigue es un scroll como el de la rueda: la gota,
-     * el amanecer y los títulos hacen lo suyo) y, con el velo ya ido, se recorre hasta el nudo. Las salidas son las
-     * mismas: la rueda o el historial lo cortan, el reloj de seguridad se rearma para este tramo, y al terminar el foco
-     * va al destino.
-     */
-    const recorrerLaLlegada = (lenis: Lenis | null, destinoEnPx: number): void => {
-      zona.removeAttribute(ATRIBUTO_DEL_VELO)
-      zona.inert = false
-      const fundido = duracionDelFundido(zona)
-      window.clearTimeout(reloj)
-      reloj = window.setTimeout(() => terminar(false), fundido + DURACION_DE_LA_LLEGADA_MS + MARGEN_DEL_RELOJ_MS)
-      relojDeArranque = window.setTimeout(() => {
-        relojDeArranque = undefined
-        terminarElViaje()
-        if (lenis === null) {
-          cancelarElViaje = viajarSinLenis(destinoEnPx, DURACION_DE_LA_LLEGADA_MS, CURVA_DEL_VIAJE, () => terminar(true))
-          return
-        }
-        lenis.scrollTo(destinoEnPx, { duration: DURACION_DE_LA_LLEGADA_MS / 1000, easing: CURVA_DEL_VIAJE, lock: false, onComplete: () => terminar(true) })
-      }, fundido)
     }
 
     const alClick = (evento: MouseEvent): void => {
@@ -311,12 +290,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       // [VIAJES] El destino es un nudo de la coreografía (`destinosDelViaje.ts`), medido en el click; y
       // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).
       const destinoEnPx = destinoDelViaje(seccion)
-      // [NAVBAR] Con la llegada a la vista, el viaje tapado va hasta justo antes de ella, con la luz de lo que hay ahí.
-      const llegada = modo === 'salto' ? null : antesDeLaLlegada(seccion, destinoEnPx)
-      const hasta = llegada?.antes ?? destinoEnPx
-      const alLlegar = (): void => (llegada === null ? terminar(true) : recorrerLaLlegada(instancia.current, destinoEnPx))
       window.clearTimeout(relojDeLaEscena)
-      empezarElViaje(planDelViaje(llegada?.seccion ?? seccion.id, hasta))
+      empezarElViaje(planDelViaje(seccion.id, destinoEnPx))
 
       // El velo espera `RETARDO_ANTES_DE_DESAPARECER_MS`; con 0 va en el mismo cuadro.
       const encenderElVelo = (): void => {
@@ -412,14 +387,14 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
          */
         if (lenis === null) {
           cancelarElViaje = viajarSinLenis(
-            hasta,
+            destinoEnPx,
             DURACION_DEL_VIAJE_MS,
             CURVA_DEL_VIAJE,
-            alLlegar,
+            () => terminar(true),
           )
           return
         }
-        lenis.scrollTo(hasta, {
+        lenis.scrollTo(destinoEnPx, {
           duration: DURACION_DEL_DESLIZAMIENTO_S,
           /**
            * 🔴 La curva PROPIA del viaje — `power1.inOut` del vocabulario de
@@ -434,7 +409,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
           // saldría por la guarda de `isLocked` con un `preventDefault()`, y el
           // visitante quedaría encerrado los cuatro segundos.
           lock: false,
-          onComplete: alLlegar,
+          onComplete: () => terminar(true),
         })
       }, espera)
     }
