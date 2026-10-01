@@ -61,6 +61,7 @@ for p in pasos:
     a = p['anillo']
     contraste = None
     franja_que_se_ve = None
+    dos_tonos = None
     if a['estilo'] != 'none' and px(a['grosor']) > 0:
         # En pantalla: un control adentro de una capa escalada (el túnel) dibuja su anillo escalado.
         k = p.get('escala', 1) or 1
@@ -81,8 +82,19 @@ for p in pasos:
                 if mejor is None or c > mejor:
                     mejor, franja_que_se_ve = c, nombre
         contraste = None if mejor is None else round(mejor, 2)
+        # [INTERFAZ 1] Cierre · el anillo de dos tonos ENTERO (técnica C40): el contorno contra SU borde, de los dos lados.
+        # Si el recorte o algo encima se come una franja, esto baja; si están las dos, da el contraste de los dos tonos.
+        if con_borde:
+            med = {}
+            for nombre, (d1, d2) in franjas.items():
+                banda = franja(img, caja, d1, d2)
+                if len(banda):
+                    med[nombre] = float(np.median(lum(banda)))
+            if len(med) == 3:
+                c = lambda a, b: (max(a, b) + 0.05) / (min(a, b) + 0.05)
+                dos_tonos = round(min(c(med['contorno'], med['borde de adentro']), c(med['contorno'], med['borde de afuera'])), 2)
     fuera = caja['y'] + caja['h'] < 0 or caja['y'] > img.shape[0] or caja['w'] == 0 or caja['h'] == 0
-    resultados.append({'paso': p['paso'], 'tag': p['tag'], 'panel': p['panel'], 'nombre': p['nombre'], 'focoVisible': p['focoVisible'], 'franja': franja_que_se_ve,
+    resultados.append({'paso': p['paso'], 'tag': p['tag'], 'panel': p['panel'], 'nombre': p['nombre'], 'focoVisible': p['focoVisible'], 'franja': franja_que_se_ve, 'dosTonos': dos_tonos,
                        'anillo': a, 'contraste': contraste, 'fueraDelCuadro': fuera, 'mezcla': p['mezcla'], 'recorta': p['recorta'],
                        'seccion': p['seccion'], 'fondo': p['fondo']})
     M = 28
@@ -112,7 +124,7 @@ for i, (rec, rotulo, nota, contraste) in enumerate(recortes):
     d.text((x, y + 168), nota, fill=color, font=FUENTE)
 hoja.save(os.path.join(DIR, 'hoja.png'))
 json.dump(resultados, open(os.path.join(DIR, 'contraste.json'), 'w', encoding='utf8'), ensure_ascii=False, indent=1)
-for p in pasos:
+for p in pasos if not os.environ.get('GUARDAR') else []:
     ruta = os.path.join(DIR, p['png'])
     if os.path.exists(ruta):
         os.remove(ruta)

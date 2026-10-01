@@ -303,7 +303,8 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
 
   // §23 —las cuatro ventanas del recorrido— vive en `trabajos-ventanas.ts`,
   // por la regla de las 300 líneas. Mismo corte por TEMA que §21 y §22.
-  afirmarLasVentanas(cuantas, pxDelTema(CSS, 'foco-desplazamiento') + pxDelTema(CSS, 'foco-grosor'))
+  // [INTERFAZ 1] Cierre: el anillo de dos tonos (`foco.css`) es desplazamiento + DOS grosores (el contorno y su borde).
+  afirmarLasVentanas(cuantas, pxDelTema(CSS, 'foco-desplazamiento') + 2 * pxDelTema(CSS, 'foco-grosor'))
 
   // §21 —el rótulo y su banda— vive en `trabajos-rotulo.ts`, por la regla de
   // las 300 líneas. Mismo corte por TEMA que usó servicios con `s6-traspaso.ts`.
@@ -386,7 +387,7 @@ export function afirmarElTunel(conMotion: string, quieto: string, cuantas: numbe
   // propios hijos, no al anillo de foco, que se dibuja por fuera de su caja. Que
   // ningún focalizable quede adentro de una caja recortada lo afirma `s5-compacto`
   // sobre las cuatro secciones enteras, que es donde esa regla vive.
-  const margenDelAnillo = pxDelTema(CSS, 'foco-desplazamiento') + pxDelTema(CSS, 'foco-grosor')
+  const margenDelAnillo = pxDelTema(CSS, 'foco-desplazamiento') + 2 * pxDelTema(CSS, 'foco-grosor')
   const margenEscrito = Number(/overflow-clip-margin:\s*(\d+(?:\.\d+)?)px/.exec(conMotion)?.[1] ?? NaN)
   afirmarIgual(margenEscrito, margenDelAnillo, `  y el margen son los ${margenDelAnillo} px del anillo, leídos del tema y no elegidos acá`)
 

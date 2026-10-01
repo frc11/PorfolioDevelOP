@@ -20,7 +20,7 @@ const [ANCHO, ALTO] = [Number(process.argv[3] ?? 1440), Number(process.argv[4] ?
 const CONSULTA = process.argv[5] ?? ''
 const TOPE = 160
 
-const LEER = `(() => {
+export const LEER = `(() => {
   const el = document.activeElement
   if (!el || el === document.body || el === document.documentElement) return { nada: true }
   if (el.tagName === 'NEXTJS-PORTAL') return { nada: true, portal: true }
@@ -49,7 +49,7 @@ const LEER = `(() => {
   }
 })()`
 
-correr(async () => {
+if (process.argv[1]?.endsWith('foco.ts')) correr(async () => {
   const dir = `${carpeta('t3-completitud')}/foco-${String(ANCHO)}-${ROTULO}`
   rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })

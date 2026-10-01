@@ -108,7 +108,9 @@ const ESCONDIDO = 'scale(0)'
  * ⚠️ **Y el recorte va en ESTA caja, que no escala.** Si fuera la del escenario,
  * su caja crecería ×1,3 con él y volvería la barra horizontal.
  */
-const MARGEN_DEL_RECORTE_PX = 4
+// [INTERFAZ 1] Cierre: 6 = desplazamiento + DOS grosores: el anillo de dos tonos (`foco.css`) lleva un borde de papel por
+// fuera del contorno; con 4, en el teléfono el recorte se lo comía y el contorno solo daba 2,6:1.
+const MARGEN_DEL_RECORTE_PX = 6
 
 const RECORTE_DEL_TUNEL = {
   overflow: 'clip',

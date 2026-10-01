@@ -7,7 +7,7 @@
  * Lo que necesita navegador (que la inclinación se vea, que nada se corra al cargar) está en los bancos de
  * `scripts-interfaz1/` y sus entregas en `~/.cache/b4-medicion/interfaz1/`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { useMotionValue } from 'motion/react'
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -16,6 +16,7 @@ import { estadoBajo, fraccionDelPaso, tonoBajo } from '../../_chrome/cursor/esta
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { textoVisible } from '../../_secciones/_contrato/escaneo'
 import { quitarSubarbolesConAtributo } from '../../_secciones/_invariantes/marcado'
+import { FISICA_DEL_CARRUSEL, envolver, objetivoDelFoco } from '../../_secciones/trabajos/demos/fisicaDelCarrusel'
 import { ROLLOVER_MEDIDO } from '../cta'
 import { SEGUIMIENTO_DE_LA_REFERENCIA } from '../cursor'
 
@@ -321,7 +322,9 @@ afirmarIgual(
   'contenido → texto · link (también desde su rótulo) → enlace · CTA → botón · libro y cinta → demo · campo y afuera → oculto',
 )
 afirmarIgual([estadoBajo(como(parrafo), true), estadoBajo(como(link), true)], ['logo', 'enlace'], 'sobre el logo (lo dice la escena) → logo; un link encima del logo gana')
-afirmarIgual([parrafo, link, cta, libro].map((n) => estadoBajo(como(n), true, true)), ['texto', 'oculto', 'oculto', 'oculto'], 'la variante nk: sobre cualquier control se apaga, y el logo no tiene estado propio')
+// [INTERFAZ 1] Cierre: Valentino eligió el cursor nuevo y la inercia marcada; las variantes de la URL se borraron.
+afirmar(!existsSync(`${V3}/_lib/interfaz.ts`) && !leer('_chrome/cursor/CursorDeLaSala.tsx').includes('varianteDeInterfaz') && !leer('_lib/motion/inercia.ts').includes('varianteDeInterfaz'), 'sin variantes en la URL: un solo cursor y una sola inercia (las elegidas en el cierre)')
+afirmarIgual(INERCIA_DEL_TEXTO.topeGrados, 5, '  la inercia es la marcada: el tope en 5°')
 controlPositivo('el chequeo de estados ve un cursor que confunde el libro con un link', ['enlace'], (e: readonly string[]) => e[0] === 'demo')
 
 const sinFondo = (): string => 'rgba(0, 0, 0, 0)'
@@ -394,5 +397,24 @@ afirmar(/<p role="status"[^>]*>\s*\{abiertoEn !== null/.test(FORMULARIO), '  la 
 afirmar(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('aria-busy={abierta && !cargada}'), 'la ventana de una demo dice que está cargando (aria-busy y una región de estado; el esqueleto es sólo para la vista)')
 afirmar(leer('_secciones/servicios/ContenidoDeServicio.tsx').includes('<CtaDelServicio servicio={servicio} enEscritorio />'), 'Servicios con menos movimiento en escritorio tiene sus CTA (antes, ninguno)')
 afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_secciones/cierre/PiezasDeContacto.tsx')), 'las redes del pie responden al pasar y al enfocar')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Cierre · los casos del foco que el pase de Tab había capturado mal, medidos con el control quieto y en pantalla')
+
+const LARGO = 498
+const visibleDe = (offsetLeft: number, objetivo: number): number => offsetLeft + envolver(objetivo, LARGO)
+afirmar(
+  [0, 125, 249, 374].every((ol) => { const x = visibleDe(ol, objetivoDelFoco(ol)); return x > -1 && x < 20 }),
+  'el carrusel trae la portada ENFOCADA al borde del renglón, la primera también (la pista vive en [−largo, 0))',
+)
+controlPositivo('el chequeo del carrusel ve el objetivo de antes: la primera portada iba al período de atrás (quedaba la copia)', 0, (ol: number) => {
+  const x = visibleDe(ol, -ol + FISICA_DEL_CARRUSEL.umbralDeIntencionPx)
+  return x > -1 && x < 20
+})
+const CAPA_DE_DEMOS = leer('_secciones/trabajos/demos/CapaDeDemos.tsx')
+afirmar(CAPA_DE_DEMOS.includes('cancelar = llevarALaLlegada(') && leer('_secciones/trabajos/demos/llevarALaLlegada.ts').includes('const falta = opciones.arranque - opciones.mostrado()'), 'con el teclado, la capa de demos termina de llegar (lo mostrado se asentaba detrás del salto: escala 0,76)')
+afirmar(DEMOS_CSS.includes('padding-inline: var(--carrusel-margen-del-recorte);') && DEMOS_CSS.includes('margin-inline: calc(-1 * var(--carrusel-margen-del-recorte));'), 'el renglón del carrusel lleva su holgura en la caja (aporte cero al layout): la capa compuesta no respetaba el margen del recorte')
+afirmar(FOCO.includes('[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible') && /z-index: var\(--z-elevado\)/.test(FOCO), 'la portada enfocada sube un piso: la vecina, pintada después, ya no le tapa el anillo')
+afirmar(leer('_secciones/trabajos/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'), 'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
 
 cerrar('s37-interfaz1')

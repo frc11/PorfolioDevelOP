@@ -36,6 +36,17 @@ export function envolver(x: number, largo: number): number {
   return r >= 0 ? r - largo : r
 }
 
+/**
+ * [INTERFAZ 1] Cierre · Dónde se pone la pista cuando el TECLADO enfoca una portada: su borde izquierdo a
+ * `umbralDeIntencionPx` del borde del renglón. Con la primera portada (`offsetLeft` 0) eso pedía +8, y la pista vive en
+ * [−largo, 0): la vuelta lo mandaba al período de atrás (−largo + 8) y quedaba a la vista la COPIA (sin foco) mientras la
+ * portada enfocada se iba afuera del cuadro (medido con Tab real a 390: x −102 y −328). Un objetivo que no entra en el
+ * rango se queda en el borde: medio píxel antes del cero.
+ */
+export function objetivoDelFoco(offsetLeft: number): number {
+  return Math.min(-offsetLeft + FISICA_DEL_CARRUSEL.umbralDeIntencionPx, -0.5)
+}
+
 export interface Muestra {
   readonly t: number
   readonly x: number

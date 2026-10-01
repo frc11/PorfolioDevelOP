@@ -122,6 +122,12 @@ export function afirmarLasDemos(): void {
   }
   afirmar(sinReloj(CAPA), '  la llegada no tiene reloj propio: es una función de la fracción del vacío, así que subiendo se deshace exacta y al revés')
   controlPositivo('  el detector ve una llegada con reloj', `${CAPA}\nrequestAnimationFrame(() => llegar(escala.current))\n`, sinReloj)
+  // [INTERFAZ 1] Cierre · el empujón del teclado tiene reloj, y por eso vive aparte: sólo puede mover la PÁGINA (scroll),
+  // nunca la capa. La llegada sigue siendo una función de la fracción del vacío.
+  const LLEVAR = sinComentarios(leer('llevarALaLlegada.ts'))
+  const soloMueveLaPagina = (src: string): boolean => /window\.scroll(To|By)\(/.test(src) && !/llegar\(|\.style\.|setProperty|escala\.current\s*=/.test(src)
+  afirmar(soloMueveLaPagina(LLEVAR), '  el empujón del teclado (`llevarALaLlegada`) sólo mueve la página: no toca la capa ni su llegada')
+  controlPositivo('  el detector ve un empujón que escribe la capa', `${LLEVAR}\ncapa.style.setProperty('--demos-escala', '1')\n`, soloMueveLaPagina)
 
   // ── EL ESTANTE: UNA PIEZA FOCALIZABLE POR DEMO ────────────────────────
   const estante = renderToStaticMarkup(<Biblioteca alAbrir={() => undefined} alejada={false} />)

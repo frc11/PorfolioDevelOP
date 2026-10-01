@@ -273,6 +273,11 @@
 [data-v3] [data-pieza="carrusel"] [data-parte="renglon"] {
   overflow: clip;
   overflow-clip-margin: var(--carrusel-margen-del-recorte);
+  /* [INTERFAZ 1] Cierre: la pista se mueve en una capa compuesta y ahí el margen del recorte no se respetó (medido a 390:
+     la primera portada enfocada, pegada al borde, sin anillo del lado izquierdo). La holgura va en la caja: relleno y
+     margen negativo del mismo tamaño, que aportan cero al layout (como las líneas de `LineasDeTexto`). */
+  padding-inline: var(--carrusel-margen-del-recorte);
+  margin-inline: calc(-1 * var(--carrusel-margen-del-recorte));
   touch-action: pan-y;
   cursor: grab;
 }

@@ -145,3 +145,11 @@
   opacity: var(--opacity-casi);
   transition: none;
 }
+
+/* [INTERFAZ 1] Cierre · la portada enfocada del carrusel y de la cinta sube un piso: las vecinas van después en el orden
+   de pintado y le tapaban el anillo de ese lado (medido a 390: el borde de papel de la derecha, debajo de la vecina). */
+[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible,
+[data-v3] [data-pieza="cinta"] a:focus-visible {
+  position: relative;
+  z-index: var(--z-elevado);
+}

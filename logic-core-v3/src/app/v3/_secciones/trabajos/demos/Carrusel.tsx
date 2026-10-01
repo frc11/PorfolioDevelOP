@@ -7,6 +7,7 @@ import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimi
 
 import {
   FISICA_DEL_CARRUSEL,
+  objetivoDelFoco,
   arrastrarLaFila,
   avanzarLaCinta,
   esUnToque,
@@ -155,7 +156,7 @@ export function Carrusel({ enMarcha }: { readonly enMarcha?: () => boolean }): R
       const portada = e.target.closest<HTMLElement>('[data-parte="portada"]')
       const renglon = e.target.closest<HTMLElement>('[data-parte="renglon"]')
       if (portada !== null && renglon !== null) {
-        fila = { x: sentidoDe(renglon) * (-portada.offsetLeft + FISICA_DEL_CARRUSEL.umbralDeIntencionPx), v: 0 }
+        fila = { x: sentidoDe(renglon) * objetivoDelFoco(portada.offsetLeft), v: 0 }
         pintar()
       }
     }

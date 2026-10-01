@@ -13,6 +13,7 @@ import { Biblioteca } from './Biblioteca'
 import { Carrusel } from './Carrusel'
 import type { Demo } from './catalogo'
 import { LLEGADA, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
+import { llevarALaLlegada } from './llevarALaLlegada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
 
@@ -107,16 +108,23 @@ export function CapaDeDemos({
     const el = capa.current
     const panel = el?.closest<HTMLElement>('[data-panel]') ?? null
     if (el === null || panel === null) return
+    const arranque = arranqueDeDemos(CONTENIDO.proyectos.length)
+    let cancelar = (): void => undefined
     const alEntrarElFoco = (e: FocusEvent): void => {
       // Sólo el teclado: un clic en una pieza a medio crecer abre la demo ahí mismo.
       if (escala.current >= 1 || !(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
       // El progreso de la sección arranca con su borde de arriba en el pie del cuadro.
       const cero = panel.getBoundingClientRect().top + window.scrollY - window.innerHeight
-      window.scrollTo({ top: cero + arranqueDeDemos(CONTENIDO.proyectos.length) * panel.offsetHeight })
+      cancelar()
+      // [INTERFAZ 1] Cierre: y si lo mostrado se asienta antes de que la capa llegue, la página sigue (`llevarALaLlegada`).
+      cancelar = llevarALaLlegada({ destino: cero + arranque * panel.offsetHeight, alto: panel.offsetHeight, arranque, mostrado: () => mostrado.get(), llego: () => escala.current >= 0.999 })
     }
     el.addEventListener('focusin', alEntrarElFoco)
-    return () => el.removeEventListener('focusin', alEntrarElFoco)
-  }, [])
+    return () => {
+      cancelar()
+      el.removeEventListener('focusin', alEntrarElFoco)
+    }
+  }, [mostrado])
 
   const alAbrir = useCallback((demo: Demo, pieza: HTMLAnchorElement): void => {
     setAbierta({ demo, pieza })
