@@ -3,11 +3,10 @@
  *
  * Es la MISMA pastilla visual de `navegacion.css` (que sigue siendo de la pieza compartida, la de la galería): la misma
  * geometría —nace al pie de la primera pantalla y se pega arriba—, el mismo vidrio, los mismos enlaces casi opacos y
- * el subrayado del activo que se desliza. Lo propio: los ítems del home (`_chrome/enlaces.ts`) con el rollover de dos
- * copias de INTERFAZ 1 (`rollover.css`, por el `<a>` que lo contiene) y su marca (`data-pieza="barra"`), para que la
- * hoja compartida no la toque. La geometría se declara con nombres propios y los mismos tokens que `--nav-*`: las
- * constantes de `_lib/navegacion.ts` (de las que dependen Trabajos, Servicios y el despeje de las anclas) siguen
- * describiéndola, y `s39-navbar` afirma que son iguales.
+ * el subrayado del activo que se desliza. Lo propio: los ítems del home (`_chrome/enlaces.ts`), el hover tranquilo (las
+ * dos variantes de abajo) y su marca (`data-pieza="barra"`), para que la hoja compartida no la toque. La geometría se
+ * declara con nombres propios y los mismos tokens que `--nav-*`: las constantes de `_lib/navegacion.ts` (de las que
+ * dependen Trabajos, Servicios y el despeje de las anclas) siguen describiéndola, y `s39-navbar` afirma que son iguales.
  *
  * El despeje de las anclas (`scroll-padding-top`) sigue en `navegacion.css`: es del documento, no de la pieza.
  */
@@ -89,6 +88,56 @@
   transition-property: translate, inline-size, opacity;
   transition-duration: var(--duracion-lenta);
   transition-timing-function: var(--ease-principal);
+}
+
+/*
+ * [NAVBAR] RETOQUE 4 · EL HOVER, TRANQUILO — el rollover tipo botón no va en la barra. Dos variantes (`hover.ts`, la URL
+ * `?interfaz=navhover=a|b`): las dos con la misma respuesta al foco del teclado que al mouse.
+ */
+
+/* a · el rótulo sube a tinta plena (la regla de arriba) y una línea fina crece desde el centro, a la altura del subrayado. */
+[data-v3] [data-pieza="barra"][data-navhover="a"] [data-pieza="barra-enlace"]::after {
+  content: '';
+  position: absolute;
+  inset-inline: var(--spacing-2);
+  bottom: calc(var(--spacing-1) * -1);
+  block-size: var(--border-hairline);
+  background-color: currentColor;
+  scale: 0 1;
+  transition: scale var(--duracion-media) var(--ease-salida);
+  pointer-events: none;
+}
+
+[data-v3] [data-pieza="barra"][data-navhover="a"] [data-pieza="barra-enlace"]:is(:hover, :focus-visible, [data-forzado~="hover"], [data-forzado~="foco"])::after {
+  scale: 1 1;
+}
+
+/* b · un resaltado suave, UNO, que viaja al ítem señalado (el mouse o el foco) y descansa en el activo: es el indicador. */
+[data-v3] [data-pieza="barra"] [data-parte="resaltado"] {
+  --barra-resaltado: 8%;
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: -1;
+  block-size: calc(var(--text-cuerpo) * var(--leading-texto) + var(--spacing-2) * 2);
+  inline-size: var(--resaltado-ancho, 0);
+  translate: var(--resaltado-x, 0) -50%;
+  border-radius: var(--radius-pastilla-s);
+  background-color: color-mix(in srgb, var(--color-tinta) var(--barra-resaltado), transparent);
+  opacity: var(--resaltado-visible, 0);
+  pointer-events: none;
+  transition-property: translate, inline-size, opacity;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra"][data-navhover="b"] [data-parte="resaltado"] {
+  display: block;
+}
+
+[data-v3] [data-pieza="barra"][data-navhover="b"] [data-parte="subrayado-activo"] {
+  display: none;
 }
 
 /* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. */

@@ -34,6 +34,8 @@ export interface OpcionesDelBanco {
    * carrusel de Trabajos se pasa del borde y la página mide 402 (hallazgo del sprint, anterior a él).
    */
   readonly anchoTolerado?: number
+  /** La consulta de la URL, sin el `?` (por ejemplo `interfaz=navhover=b`). */
+  readonly consulta?: string
 }
 
 /** Abre /v3 con los ganchos del banco, la pestaña al frente y el ancho verificado. */
@@ -45,7 +47,7 @@ export async function abrir(ancho: number, alto: number, o: OpcionesDelBanco = {
   await p.conexion.enviar('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, deviceScaleFactor: 1, mobile: ancho < 1024, screenWidth: ancho, screenHeight: alto }, s)
   if (ancho < 1024) await p.conexion.enviar('Emulation.setTouchEmulationEnabled', { enabled: false }, s)
   await p.conexion.enviar('Page.addScriptToEvaluateOnNewDocument', { source: `window.__entornoDeLaEscena = 'producto'; ${ERRORES}` }, s)
-  await irA(p, 'http://localhost:3000/v3')
+  await irA(p, `http://localhost:3000/v3${o.consulta === undefined ? '' : `?${o.consulta}`}`)
   await esperar(5000)
   let estado = await medir<{ visible: string; ancho: number }>(p, '({ visible: document.visibilityState, ancho: innerWidth })')
   for (let intento = 0; intento < 4 && estado.visible !== 'visible'; intento += 1) {

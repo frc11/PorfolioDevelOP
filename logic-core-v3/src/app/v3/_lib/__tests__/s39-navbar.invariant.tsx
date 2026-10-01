@@ -8,6 +8,7 @@
  *   T3 · el menú del teléfono de vidrio líquido: el Genie de las demos desde el botón, el material (con la lente sólo
  *        en Chromium), el tono de la zona con el texto en AA contra cualquier fondo, y el diálogo.
  *   T4 · el contacto en el teléfono, entero en una pantalla: los mismos campos, la hoja compacta sólo en el teléfono.
+ *   Retoque 4 · el hover tranquilo de la barra, con sus dos variantes por la URL.
  *
  * Lo que necesita navegador está en los bancos de `scripts-navbar/` y sus entregas en `~/.cache/b4-medicion/navbar/`.
  */
@@ -16,6 +17,7 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { BarraDelHome, modoDelChrome } from '../../_chrome/barra/BarraDelHome'
+import { varianteDelHover } from '../../_chrome/barra/hover'
 import { conLente } from '../../_chrome/menu/LenteDelVidrio'
 import { BORDE_DE_LA_LENTE, desplazamientoEn, mapaDeLaLente } from '../../_chrome/menu/lente'
 import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
@@ -122,7 +124,7 @@ const BARRA_HTML = renderToStaticMarkup(<BarraDelHome />)
 const enlaces = [...BARRA_HTML.matchAll(/<a [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/a>/g)]
 afirmarIgual(enlaces.map((m) => /href="([^"]+)"/.exec(m[0])?.[1]), ENLACES_DEL_HOME.map((e) => e.destino), 'seis enlaces, los del home, en su orden')
 const visible = (html: string): string => html.replace(/<span data-copia="b" aria-hidden="true">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, '')
-afirmar(enlaces.every((m, i) => m[1].includes('data-rollover') && visible(m[1]) === ENLACES_DEL_HOME[i].rotulo), '  cada rótulo con el rollover de dos copias (INTERFAZ 1), y el nombre accesible es el rótulo una sola vez (la copia B no se anuncia)')
+afirmar(enlaces.every((m, i) => !m[1].includes('data-rollover') && visible(m[1]) === ENLACES_DEL_HOME[i].rotulo), '  [NAVBAR] Retoque 4: sin el rollover tipo botón (quedó en el CTA, el mail, WhatsApp y los proyectos), y el nombre accesible es el rótulo')
 controlPositivo('el chequeo del nombre vería una copia B que se anuncia', '<span data-rollover=""><span data-copia="a">Panel</span><span data-copia="b">Panel</span></span>', (h: string) => visible(h) === 'Panel')
 afirmar(/<header data-pieza="barra"[^>]*><nav data-parte="pastilla" aria-label="Navegación principal"><ul data-parte="lista">/.test(BARRA_HTML) && BARRA_HTML.includes('data-parte="subrayado-activo" aria-hidden="true"'), '  el banner con su navegación (el landmark de siempre) y el subrayado del activo, mudo')
 
@@ -207,5 +209,16 @@ afirmar(controles(campos(true)).length === 12 && /<textarea[^>]*rows="2"/.test(c
 const HOJA = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 afirmar(HOJA.includes('const compacto = !desdeArriba') && HOJA.includes("compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]'") && HOJA.includes('compacto={compacto}'), 'compacta sólo la hoja del teléfono (la que sube de abajo, en el modo del menú): la de escritorio queda como estaba')
 afirmar(HOJA.includes("compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]'") && HOJA.includes('<Cta type="submit" rotulo={ROTULO_DEL_ENVIO}'), '  el pie al lado del botón de enviar: el botón a la vista sin deslizar (medido: 390 × 844, 375 × 667 y 390 × 664 entran; navbar/t4-contacto)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Retoque 4 · El hover de la barra: tranquilo, dos variantes')
+
+afirmar(varianteDelHover('') === 'a' && varianteDelHover('interfaz=navhover=b') === 'b' && varianteDelHover('interfaz=otra=1,navhover=b') === 'b' && varianteDelHover('interfaz=navhover=z') === 'a', 'la variante por la URL (`?interfaz=navhover=a|b`); sin pedido, o con otro valor, la `a`')
+const ROLLOVER_FUERA = ['_secciones/cierre/PiezasDeContacto.tsx', '_secciones/trabajos/Proyecto.tsx', '_secciones/trabajos/CapaDelTunel.tsx']
+afirmar(!/DosCopias/.test(leer('_chrome/barra/BarraDelHome.tsx')) && ROLLOVER_FUERA.every((r) => leer(r).includes('<DosCopias')), 'el rollover tipo botón salió de la barra y se queda afuera: el mail y WhatsApp, los proyectos, el CTA del túnel')
+afirmar(/data-navhover="a"\]\s*\[data-pieza="barra-enlace"\]::after \{[^}]*scale: 0 1;/.test(BARRA_CSS) && /data-navhover="a"\]\s*\[data-pieza="barra-enlace"\]:is\(:hover, :focus-visible[^)]*\)::after \{\s*scale: 1 1;/.test(BARRA_CSS), 'a · una línea fina que crece desde el centro, con el mouse y con el foco')
+afirmar((BARRA_HTML.match(/data-parte="resaltado"/g) ?? []).length === 1 && /data-navhover="b"\]\s*\[data-parte="resaltado"\] \{\s*display: block;/.test(BARRA_CSS) && /data-navhover="b"\]\s*\[data-parte="subrayado-activo"\] \{\s*display: none;/.test(BARRA_CSS), 'b · UN resaltado que viaja (no uno por ítem) y es el indicador del activo en reposo')
+const BARRA_TSX = sinComentarios(leer('_chrome/barra/BarraDelHome.tsx'))
+afirmar(BARRA_TSX.includes("barra.addEventListener('pointerover', alEntrar)") && BARRA_TSX.includes("barra.addEventListener('focusin', alEntrar)") && BARRA_TSX.includes("ubicarBajo(resaltado.current, 'resaltado', senalado.current ?? delActivo)"), '  sigue al mouse y al foco del teclado, y vuelve al activo al salir')
 
 cerrar('s39-navbar')

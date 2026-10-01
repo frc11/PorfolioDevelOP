@@ -2,21 +2,24 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME } from '../enlaces'
+import { varianteDelHover } from './hover'
 
 /**
  * [NAVBAR] LA BARRA DEL HOME — la pastilla de escritorio, propia de /v3 (antes `NavegacionDelHome` montaba la pieza
  * compartida `_componentes/chrome/Navegacion.tsx`, que sigue igual para la galería).
  *
- * La misma pastilla visual (`_estilos/barra.css`), con los ítems del home y el rollover de dos copias de INTERFAZ 1 en
- * cada rótulo: al pasar el mouse o con el foco del teclado la copia de abajo sube y la de arriba se va. El teclado es el
- * de siempre: los seis son enlaces en el orden de lectura, con el anillo de foco de dos tonos (`foco.css`); Enter viaja
- * (el viaje los escucha por `SELECTOR_DE_LOS_VIAJES`) y «Contacto» abre el formulario.
+ * La misma pastilla visual (`_estilos/barra.css`), con los ítems del home. [NAVBAR] Retoque 4: el hover es TRANQUILO
+ * (el rollover tipo botón de INTERFAZ 1 quedó afuera de la barra: el CTA, el mail, WhatsApp, los proyectos), con dos
+ * variantes por la URL (`hover.ts`): `a`, la línea fina que crece desde el centro; `b`, un resaltado que se desliza. El
+ * teclado es el de siempre: los seis son enlaces en el orden de lectura, con el anillo de foco de dos tonos (`foco.css`)
+ * y la misma respuesta que el mouse; Enter viaja (el viaje los escucha por `SELECTOR_DE_LOS_VIAJES`) y «Contacto» abre
+ * el formulario.
  *
  * El activo es la sección que cruza el medio del cuadro; si no está en la barra (el hero, Números, el cierre), no hay.
- * El subrayado es UNA raya que se desliza hasta el rótulo activo: se mide acá, una vez por cambio, contra la barra.
+ * El subrayado es UNA raya que se desliza hasta el rótulo activo: se mide acá, una vez por cambio, contra la barra. En
+ * la variante `b` el indicador es el resaltado: descansa en el activo y viaja al ítem que el mouse o el foco señalan.
  *
  * El modo (`data-modo`) lo decide el ancho real: la barra si entra y está encendida, si no el menú del teléfono. Abajo
  * de `medio` la pastilla está apagada (`CLASE_DE_LA_PASTILLA_APAGADA`, en el montaje) y es el menú, aunque la lista
@@ -42,6 +45,10 @@ export function activoDe(idDeLaSeccion: string | null): string | null {
 export function BarraDelHome({ className }: { readonly className?: string }): React.JSX.Element {
   const [activo, setActivo] = useState<string | null>(null)
   const raya = useRef<HTMLSpanElement>(null)
+  const resaltado = useRef<HTMLSpanElement>(null)
+  /** El ítem que el mouse o el foco señalan (la variante `b` lleva ahí el resaltado); null: ninguno. */
+  const senalado = useRef<HTMLElement | null>(null)
+  const ubicarElResaltado = useRef<() => void>(() => undefined)
 
   useEffect(() => {
     const paneles = [...document.querySelectorAll<HTMLElement>('[data-panel]')]
@@ -86,25 +93,59 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     const el = raya.current
     const barra = el?.parentElement
     if (el === null || barra === null || barra === undefined) return
-    const ubicar = (): void => {
-      const rotulo = activo === null ? null : barra.querySelector<HTMLElement>(`[data-nav-id="${activo}"] [data-parte="rotulo"]`)
-      if (rotulo === null) {
-        el.style.setProperty('--subrayado-visible', '0')
+    /** Una pieza que se ubica bajo un elemento de la barra (o se apaga): el subrayado y el resaltado. */
+    const ubicarBajo = (pieza: HTMLElement | null, nombre: 'subrayado' | 'resaltado', debajo: HTMLElement | null): void => {
+      if (pieza === null) return
+      if (debajo === null) {
+        pieza.style.setProperty(`--${nombre}-visible`, '0')
         return
       }
-      const r = rotulo.getBoundingClientRect()
+      const r = debajo.getBoundingClientRect()
       const b = barra.getBoundingClientRect()
-      el.style.setProperty('--subrayado-x', `${String(r.left - b.left + barra.scrollLeft)}px`)
-      el.style.setProperty('--subrayado-ancho', `${String(r.width)}px`)
-      el.style.setProperty('--subrayado-visible', '1')
+      pieza.style.setProperty(`--${nombre}-x`, `${String(r.left - b.left + barra.scrollLeft)}px`)
+      pieza.style.setProperty(`--${nombre}-ancho`, `${String(r.width)}px`)
+      pieza.style.setProperty(`--${nombre}-visible`, '1')
     }
+    const delActivo = activo === null ? null : barra.querySelector<HTMLElement>(`[data-nav-id="${activo}"]`)
+    const ubicar = (): void => {
+      ubicarBajo(el, 'subrayado', delActivo?.querySelector<HTMLElement>('[data-parte="rotulo"]') ?? null)
+      ubicarBajo(resaltado.current, 'resaltado', senalado.current ?? delActivo)
+    }
+    ubicarElResaltado.current = ubicar
     ubicar()
     window.addEventListener('resize', ubicar)
     return () => window.removeEventListener('resize', ubicar)
   }, [activo])
 
+  // [NAVBAR] Retoque 4 · la variante del hover (la URL) y el ítem señalado: el mouse encima o el foco del teclado.
+  useEffect(() => {
+    const barra = raya.current?.parentElement
+    const cabecera = barra?.parentElement
+    if (barra === null || barra === undefined || cabecera === null || cabecera === undefined) return
+    cabecera.setAttribute('data-navhover', varianteDelHover(window.location.search))
+    const senalar = (el: HTMLElement | null): void => {
+      senalado.current = el
+      ubicarElResaltado.current()
+    }
+    const alEntrar = (e: Event): void => senalar(e.target instanceof Element ? e.target.closest<HTMLElement>('[data-pieza="barra-enlace"]') : null)
+    const alSalir = (): void => senalar(null)
+    const alPerderElFoco = (e: FocusEvent): void => {
+      if (!(e.relatedTarget instanceof Node && barra.contains(e.relatedTarget))) senalar(null)
+    }
+    barra.addEventListener('pointerover', alEntrar)
+    barra.addEventListener('pointerleave', alSalir)
+    barra.addEventListener('focusin', alEntrar)
+    barra.addEventListener('focusout', alPerderElFoco)
+    return () => {
+      barra.removeEventListener('pointerover', alEntrar)
+      barra.removeEventListener('pointerleave', alSalir)
+      barra.removeEventListener('focusin', alEntrar)
+      barra.removeEventListener('focusout', alPerderElFoco)
+    }
+  }, [])
+
   return (
-    <header data-pieza="barra" className={className}>
+    <header data-pieza="barra" data-navhover="a" className={className}>
       <nav data-parte="pastilla" aria-label="Navegación principal">
         <ul data-parte="lista">
           {ENLACES_DEL_HOME.map((enlace) => {
@@ -119,15 +160,14 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
                   aria-current={esActivo ? 'true' : undefined}
                   className="text-cuerpo tracking-texto leading-texto font-semi"
                 >
-                  <span data-parte="rotulo">
-                    <DosCopias>{enlace.rotulo}</DosCopias>
-                  </span>
+                  <span data-parte="rotulo">{enlace.rotulo}</span>
                 </a>
               </li>
             )
           })}
         </ul>
         <span ref={raya} data-parte="subrayado-activo" aria-hidden="true" />
+        <span ref={resaltado} data-parte="resaltado" aria-hidden="true" />
       </nav>
     </header>
   )

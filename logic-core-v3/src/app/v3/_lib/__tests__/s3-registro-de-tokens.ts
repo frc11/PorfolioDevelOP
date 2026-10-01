@@ -122,6 +122,7 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--barra-margen-al-pie', valor: 'var(--spacing-6)', evidencia: 'derivado', procedencia: 'el mismo de `--nav-margen-al-pie`' },
   { nombre: '--barra-nacimiento', valor: 'calc(100svh - var(--barra-margen-al-pie) - var(--barra-alto))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-nacimiento`, con los nombres propios' },
   { nombre: '--barra-umbral', valor: 'calc(var(--barra-nacimiento) - var(--barra-reposo))', evidencia: 'derivado', procedencia: 'el mismo de `--nav-umbral`, con los nombres propios' },
+  { nombre: '--barra-resaltado', valor: '8%', evidencia: 'decidido', procedencia: '[NAVBAR] Retoque 4 · el resaltado de la variante b del hover: la tinta al 8 %, el mismo de los ítems del menú del teléfono' },
   // ── [NAVBAR] T3 · El vidrio líquido del menú del teléfono (`vidrio.css`) ──
   { nombre: '--vidrio-tinte', valor: '56%', evidencia: 'decidido', procedencia: 'el tinte que sostiene el contraste del texto contra cualquier fondo (con el velo del menú): AA sobre el negro (claro, 5,5:1) y el blanco (oscuro, 5,8:1); medido en navbar/t3-menu' },
   { nombre: '--vidrio-tinte-plano', valor: '64%', evidencia: 'decidido', procedencia: 'la copia plana del Genie, OPACA: el papel con el 36 % de tinta (o al revés), el tono que el vidrio suele dar sobre su zona (164 y 98 contra ~150 y ~110 medidos); también el respaldo sin `backdrop-filter`' },
