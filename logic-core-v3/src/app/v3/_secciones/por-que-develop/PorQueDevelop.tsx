@@ -25,6 +25,7 @@ import {
   ventanaDelValor,
   type Ventana,
 } from './geometria'
+import { ValorEnVolumen } from './valorEnVolumen'
 import { PiezaDeValor } from './Valores'
 
 /**
@@ -166,9 +167,10 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
   const tramo = useLlegadaDeDia(pin, ventanaDelValor(indice), 'abajo')
   return (
     <li>
-      <CanalDeUnaPieza progreso={tramo} patron="P5">
+      {/* [RETOQUE 3D] 3G · cada valor llega desde un lugar distinto de la sala (CSS 3D; antes, P5). */}
+      <ValorEnVolumen progreso={tramo} indice={indice}>
         <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" />
-      </CanalDeUnaPieza>
+      </ValorEnVolumen>
     </li>
   )
 }

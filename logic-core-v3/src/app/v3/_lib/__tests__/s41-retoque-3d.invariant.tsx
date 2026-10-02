@@ -18,6 +18,7 @@
  *   3D · las fotos del equipo llegan desde atrás en un marco con espesor (CSS 3D, el hover no cambia) y quedan fijas; al
  *        revés con el scroll para arriba; planas sin coreografía.
  *   3E · los libros de las demos se levantan desde atrás sobre su base (y se acuestan para atrás).
+ *   3G · cada valor de Por qué develOP (ícono, título y texto) llega desde un lugar distinto de la sala (CSS 3D).
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -34,6 +35,7 @@ import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { FOTO_EN_VOLUMEN, poseDeLaFoto } from '../../_secciones/quienes-somos/fotoEnVolumen'
 import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
+import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-develop/valorEnVolumen'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -179,5 +181,14 @@ const seLevanta = (pose: typeof poseDelLibro): boolean => anguloDe(pose(0).trans
 afirmar(seLevanta(poseDelLibro) && LIBRO_QUE_LLEGA.acostado === 90, 'acostado hacia atrás sobre su base (90°), se para con el sobrepaso de siempre (se pasa un poco hacia adelante) y se asienta sin transformada; es la fracción del vacío: para atrás se vuelve a acostar')
 controlPositivo('el detector VE la llegada de antes (desde abajo, sin giro sobre la base)', ((t: number) => ({ transform: t >= 1 ? 'none' : `translateY(${String((1 - t) * 110)}%)`, opacidad: 1 })) as typeof poseDelLibro, seLevanta)
 afirmar(/\[data-v3\] \[data-pieza="libro"\] \{[^}]*transform-origin: 50% 100%;/.test(readFileSync(`${V3}/_estilos/demos.css`, 'utf8')), '  el giro va sobre la base del libro (`transform-origin` abajo)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3G · Los valores de Por qué develOP llegan desde la sala')
+
+const lugares = new Set(DESDE_DONDE_LLEGAN.map((d) => `${String(d.x)},${String(d.y)},${String(d.z)}`))
+const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4, 5].every((i) => pose(1, i).transform === 'none' && pose(0, i).opacidad === 0 && /translate3d\(-?\d/.test(pose(0, i).transform)) && new Set([0, 1, 2, 3, 4, 5].map((i) => pose(0, i).transform)).size === 6
+afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
+controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
+afirmar(/<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor/.test(porQue) && !/requestAnimationFrame|setTimeout/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 cerrar('s41-retoque-3d')
