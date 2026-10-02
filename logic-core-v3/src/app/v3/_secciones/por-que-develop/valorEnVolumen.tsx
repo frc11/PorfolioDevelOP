@@ -31,6 +31,9 @@ export const DESDE_DONDE_LLEGAN: readonly DesdeDondeLlega[] = [
 
 export const PERSPECTIVA_DE_LOS_VALORES = 1200
 
+/** Porcentajes de la caja: a la izquierda del logo la perspectiva mira desde la derecha (el logo), y al revés. */
+const MIRADA_DESDE_EL_LOGO = { izquierda: [120, 50], derecha: [-20, 50] } as const
+
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 const salida = (t: number): number => 1 - (1 - t) ** 3
 
@@ -56,8 +59,8 @@ export function ValorEnVolumen({ progreso, indice, children }: { readonly progre
     el.style.opacity = pose.opacidad.toFixed(3)
   })
   const inicial = poseDelValor(progreso.get(), indice)
-  // A la izquierda del logo la perspectiva mira desde la derecha (el logo), y al revés.
-  const desdeElLogo = indice < 3 ? '120% 50%' : '-20% 50%'
+  const [x, y] = MIRADA_DESDE_EL_LOGO[indice < 3 ? 'izquierda' : 'derecha']
+  const desdeElLogo = `${String(x)}% ${String(y)}%`
   return (
     <div data-pieza="valor-en-volumen" style={{ perspective: `${String(PERSPECTIVA_DE_LOS_VALORES)}px`, perspectiveOrigin: desdeElLogo }}>
       <div ref={pieza} style={{ transform: inicial.transform, opacity: inicial.opacidad }}>
