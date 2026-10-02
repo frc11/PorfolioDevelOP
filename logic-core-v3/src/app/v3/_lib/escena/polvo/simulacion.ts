@@ -66,6 +66,11 @@ export const FISICA = {
   soplo: { s: 1.4, azar: 0.8, gravedad: 0.3, arrastre: 0.35 },
   /** [CALIDAD 1] B4 · en cuánto se suelta del aire la mota (aparece la que estaba debajo del piso) y en cuánto vuelve a él (s). */
   fundido: { entraS: 2.5, saleS: 1.5 },
+  /**
+   * [RETOQUE 3D] B2 · la levantada sube a su lugar en el aire: con qué constante (s), a lo sumo a qué velocidad (u/s), a
+   * qué distancia se le entrega al aire (u) y cuánto lo persigue como mucho después del soplo (s).
+   */
+  vuelta: { s: 0.8, tope: 3.5, entrega: 0.35, esperaS: 3 },
 } as const
 
 /** [CALIDAD 1] B4 · el peso de la mota suelta va en la parte fraccionaria del modo, de 0 a esto (menos de 0,5: el modo se redondea). */
@@ -327,15 +332,27 @@ void main() {
 		if ( despierta || uMovimiento > ${FISICA.resbala.toFixed(2)} ) { modo = 5.0; desde = uReloj; v = vec3( 0.0 ); }
 		else { salida0 = vec4( e0.xyz, modoConPeso( 3.0, peso, dt ) ); salida1 = vec4( 0.0, 0.0, 0.0, desde ); return; }
 	}
-	// Levantada (y la que deslizaba, que ya no existe): en el viento del despertar y el del aire, con arrastre y poca
-	// gravedad; pasado el soplo, el aire la lleva. [ESCENA 9] T1: el logo no la toca.
+	// Levantada (y la que deslizaba, que ya no existe): en el viento del despertar y el del aire, con arrastre; pasado el
+	// soplo, el aire la lleva. [ESCENA 9] T1: el logo no la toca.
+	// [RETOQUE 3D] B2 · y SUBE a su lugar en el aire (cerca de las caras de la caja, sólo a su altura): cualquier despertar,
+	// aunque sea un scroll mínimo, la levanta entera. Antes la devolvía la gravedad o el resorte lento del aire (τ ≈ 8 s) y
+	// a los 4 s de quietud se volvía a posar sin haber subido; las de cerca de las caras (44 %) no salían del piso.
+	bool cercaDeLasCaras = bordeDeF >= ${(1 - POLVO_PAREJO.fundido).toFixed(3)};
+	vec3 lugar = cercaDeLasCaras ? vec3( p.x, f.y, p.z ) : f;
+	lugar.y = max( lugar.y, piso );
+	vec3 hacia = ( lugar - p ) / ${FISICA.vuelta.s.toFixed(2)};
+	float rapidez = length( hacia );
+	if ( rapidez > ${FISICA.vuelta.tope.toFixed(2)} ) hacia *= ${FISICA.vuelta.tope.toFixed(2)} / rapidez;
 	vec3 viento = vientoDelDespertar( p ) + uVientoDelAire + turbulencia( p );
-	p += relajar( v, viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ), ${(1 / FISICA.soplo.arrastre).toFixed(4)}, dt );
+	p += relajar( v, viento + hacia, ${(1 / FISICA.soplo.arrastre).toFixed(4)}, dt );
 	if ( p.y < piso ) { p.y = piso; v.y = max( v.y, 0.0 ); }
 	// [CALIDAD 1] B4 · vuelve al aire sólo si su lugar está lejos de las caras de la caja: ahí el aire la dibuja entera y
-	// no hay salto; mientras tanto sigue suelta (cae despacio).
-	if ( uReloj - desde > ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} ) {
-		if ( bordeDeF < ${(1 - POLVO_PAREJO.fundido).toFixed(3)} ) {
+	// no hay salto. [RETOQUE 3D] B2: cuando llegó a su lugar (o su lugar es debajo del piso, donde el aire no la dibuja: se
+	// funde), o si lo persiguió demasiado (la cámara lo corre); mientras tanto sigue suelta, en el aire.
+	float pasado = uReloj - desde - ( ${FISICA.soplo.s.toFixed(2)} + azar * ${FISICA.soplo.azar.toFixed(2)} );
+	if ( pasado > 0.0 ) {
+		bool llego = distance( p, f ) < ${FISICA.vuelta.entrega.toFixed(2)} || f.y < ${POLVO_PAREJO.piso.toFixed(4)} || pasado > ${FISICA.vuelta.esperaS.toFixed(1)};
+		if ( !cercaDeLasCaras && llego ) {
 			salida0 = vec4( p - f, modoConPeso( 0.0, peso, dt ) );
 			salida1 = vec4( v, desde );
 			return;

@@ -5,6 +5,7 @@
  *   B1 · el título de Portfolio sin salida propia: la llegada, una vez empezada, termina; llegado, se queda y se va con
  *        su sección (corrido con su escenario); fuera del cuadro se rearma; lo esconde la primera foto del túnel tapando
  *        el cuadro, y mientras tanto no cambia (la llegada después de un viaje espera a que se vea).
+ *   B2 · el polvo posado: cualquier scroll lo levanta (la levantada sube a su lugar en el aire).
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -38,5 +39,16 @@ const tapa = (f: (p: number) => boolean): boolean => !f(progresoDelPxDelTunel(0)
 afirmar(tapa(primeraFotoTapa), '  lo esconde la primera foto del túnel recién cuando tapa el cuadro entero (no la huida del cartel: ahí todavía se veía)')
 controlPositivo('el detector VE el escondido con la foto chica', (p: number) => p >= progresoDelPxDelTunel(300), tapa)
 afirmar(/else if \(!tapado\) m\.llegada = persigue/.test(escena), '  tapado, nada cambia: después de un viaje desde más allá del túnel la llegada espera a que se vea')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B2 · El polvo posado: cualquier scroll lo levanta')
+
+const simulacion = leer('_lib/escena/polvo/simulacion.ts')
+const sube = (c: string): boolean => /vec3 lugar = cercaDeLasCaras \? vec3\( p\.x, f\.y, p\.z \) : f;/.test(c) && /p \+= relajar\( v, viento \+ hacia, /.test(c) && !/viento \+ vec3\( 0\.0, - \$\{FISICA\.soplo\.gravedad/.test(c)
+afirmar(sube(simulacion), 'la levantada SUBE a su lugar en el aire (cerca de las caras de la caja, a su altura), no la devuelve la gravedad ni el resorte lento del aire', 'medido con un scroll de una muesca: la altura media de la suelta de −4,2 a +3,9 en 5 s (antes, −4,2 a −3,9 y el 44 % nunca salió del piso)')
+controlPositivo('el detector VE la levantada con gravedad de antes', simulacion.replace('viento + hacia, ', 'viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ), '), sube)
+afirmar(/bool llego = distance\( p, f \) < /.test(simulacion) && /if \( !cercaDeLasCaras && llego \) \{/.test(simulacion), '  se le entrega al aire cuando llegó a su lugar (o el suyo es debajo del piso, donde se funde): sin salto')
+const fisica = leer('_lib/escena/polvo/Fisica.tsx')
+afirmar(/const scroll = !Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6/.test(fisica), '  el despertar es cualquier cambio del scroll (un píxel de los 27.705 de la página es 3,6e-5 > 1e-6)')
 
 cerrar('s41-retoque-3d')
