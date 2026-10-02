@@ -17,6 +17,7 @@
  *        su línea lo tapa: lo que queda debajo del pie de la palabra no se dibuja.
  *   3D · las fotos del equipo llegan desde atrás en un marco con espesor (CSS 3D, el hover no cambia) y quedan fijas; al
  *        revés con el scroll para arriba; planas sin coreografía.
+ *   3E · los libros de las demos se levantan desde atrás sobre su base (y se acuestan para atrás).
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -32,6 +33,7 @@ import { CONTENIDO as CONTENIDO_DE_QUIENES } from '../../_secciones/quienes-somo
 import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { FOTO_EN_VOLUMEN, poseDeLaFoto } from '../../_secciones/quienes-somos/fotoEnVolumen'
+import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -168,5 +170,14 @@ controlPositivo('el detector VE la llegada desde adelante', ((q: number, l: 'izq
 const foto = sinComentarios(leer('_secciones/quienes-somos/fotoEnVolumen.tsx'))
 afirmar(/if \(progreso === null\) return <>\{children\}<\/>/.test(foto) && (foto.match(/data-parte="canto"/g) ?? []).length === 1 && /transformStyle: 'preserve-3d'/.test(foto) && !/requestAnimationFrame|setTimeout|setInterval/.test(foto), '  el marco: cuatro cantos que van hacia atrás (CSS 3D); sin coreografía (abajo de 1025, movimiento reducido) la foto sola, plana; sin reloj propio')
 afirmar((equipo.match(/<FotoEnVolumen progreso=/g) ?? []).length === 2 && /CONTENIDO.personas.map/.test(equipo) && !/LlegadaEnCurva/.test(equipo), '  las tres fotos (los dos retratos, en el mapa de las personas, y la del equipo); la llegada en curva de antes se fue; el hover (`MarcoDeDosTomas`) no se tocó')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3E · Las demos se levantan desde atrás')
+
+const anguloDe = (t: string): number => (t === 'none' ? 0 : Number(/rotateX\((-?[\d.]+)deg\)/.exec(t)?.[1] ?? NaN))
+const seLevanta = (pose: typeof poseDelLibro): boolean => anguloDe(pose(0).transform) === LIBRO_QUE_LLEGA.acostado && pose(1).transform === 'none' && Math.min(...Array.from({ length: 41 }, (_, k) => anguloDe(pose(k / 40).transform))) < 0
+afirmar(seLevanta(poseDelLibro) && LIBRO_QUE_LLEGA.acostado === 90, 'acostado hacia atrás sobre su base (90°), se para con el sobrepaso de siempre (se pasa un poco hacia adelante) y se asienta sin transformada; es la fracción del vacío: para atrás se vuelve a acostar')
+controlPositivo('el detector VE la llegada de antes (desde abajo, sin giro sobre la base)', ((t: number) => ({ transform: t >= 1 ? 'none' : `translateY(${String((1 - t) * 110)}%)`, opacidad: 1 })) as typeof poseDelLibro, seLevanta)
+afirmar(/\[data-v3\] \[data-pieza="libro"\] \{[^}]*transform-origin: 50% 100%;/.test(readFileSync(`${V3}/_estilos/demos.css`, 'utf8')), '  el giro va sobre la base del libro (`transform-origin` abajo)')
 
 cerrar('s41-retoque-3d')

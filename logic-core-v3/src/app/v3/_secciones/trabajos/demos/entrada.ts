@@ -51,8 +51,12 @@ export const LLEGADA = {
 /** Cuánto del recorrido del vacío dura la llegada de UN libro. Se pisan: el siguiente sale antes. */
 export const TRAMO_DE_UN_LIBRO = 0.14
 
-/** Qué tan abajo empieza un libro, en su propio alto, y cuánto giro trae. */
-export const LIBRO_QUE_LLEGA = { abajo: 110, giro: -9 } as const
+/**
+ * [RETOQUE 3D] 3E · el libro se LEVANTA desde atrás (como «El equipo»): acostado hacia atrás sobre su base, se para con el
+ * sobrepaso de siempre (se pasa un poco hacia adelante y se asienta); con el scroll para atrás se vuelve a acostar. La
+ * perspectiva (px) va en la transformada del libro. Antes subía desde abajo (110 % de su alto) con un giro de −9°.
+ */
+export const LIBRO_QUE_LLEGA = { acostado: 90, perspectiva: 700 } as const
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 
@@ -76,11 +80,10 @@ export function conSobrepaso(t: number): number {
   return 1 + c3 * u * u * u + c1 * u * u
 }
 
-/** La pose de un libro a `t` de su tramo. En 1, en su lugar y sin transformada. */
+/** La pose de un libro a `t` de su tramo (sobre su base: `transform-origin` abajo, en `demos.css`). En 1, en su lugar y sin transformada. */
 export function poseDelLibro(t: number): { readonly transform: string; readonly opacidad: number } {
   const u = acotar01(t)
   if (u >= 1) return { transform: 'none', opacidad: 1 }
-  const y = (1 - conSobrepaso(u)) * LIBRO_QUE_LLEGA.abajo
-  const giro = LIBRO_QUE_LLEGA.giro * (1 - u) ** 3
-  return { transform: `translateY(${y.toFixed(3)}%) rotate(${giro.toFixed(3)}deg)`, opacidad: acotar01(u / 0.2) }
+  const acostado = (1 - conSobrepaso(u)) * LIBRO_QUE_LLEGA.acostado
+  return { transform: `perspective(${String(LIBRO_QUE_LLEGA.perspectiva)}px) rotateX(${acostado.toFixed(3)}deg)`, opacidad: acotar01(u / 0.2) }
 }

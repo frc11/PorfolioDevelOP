@@ -52,6 +52,8 @@
   inline-size: var(--libro-ancho);
   aspect-ratio: 2 / 3;
   border-radius: var(--radius-sutil);
+  /* [RETOQUE 3D] 3E · la llegada lo levanta sobre su base. */
+  transform-origin: 50% 100%;
 }
 
 /* Cada una tapa parte de la anterior, y si no entran en su columna se pisan MÁS:
