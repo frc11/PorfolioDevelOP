@@ -64,8 +64,11 @@ export function cronogramaDelRemate(duracion: number, duracionDelPunto: number, 
   return crudos.map((t) => ({ ...t, endDelay: total - t.delay - t.duration }))
 }
 
-/** SPRINT PANEL 3 · la línea de disparo del remate sube a 35 % del cuadro desde abajo: entra más tarde. */
-export const DISPARO_DEL_REMATE = 35
+/**
+ * SPRINT PANEL 3 · la línea de disparo del remate, en % del cuadro desde abajo. [CIERRE RETOQUE 3D] B4: de 35 a 6 — entran ni
+ * bien asoman y, subiendo, se van recién cuando están por salir, bien abajo (con 35 se iban en la mitad de abajo del cuadro).
+ */
+export const DISPARO_DEL_REMATE = 6
 
 /** [RETOQUE 3D] B4 · cuánto corren la frase y el newsletter al entrar, en corridas de los puntos (`--spacing-8`): cerca de su lugar. */
 export const CORRIDAS_DEL_REMATE = 3

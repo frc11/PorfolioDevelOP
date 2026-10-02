@@ -6,6 +6,7 @@
  *   P1 · el polvo en facetas (la variante b) pasó al producto; la a y la c se borraron, con su bandera.
  *   B2 · una muesca levanta el polvo posado en toda la página: también después del último nudo (el progreso en 1).
  *   B3 · el encendido del haz: en los intentos parpadea la luz entera (la columna y el charco), no el cono de polvo solo.
+ *   B4 · «Y más…» y el newsletter entran ni bien asoman y se van recién cuando están por salir, bien abajo.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -14,6 +15,7 @@ import { CAPAS_DEL_TUNEL } from '../../_secciones/trabajos/tunel'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { FACETAS_DEL_POLVO, FACETAS_VERTEX_GLSL } from '../escena/polvo/facetas'
 import { FIRME, GUION, repartoDelEncendido } from '../escena/entorno/encendido'
+import { DISPARO_DEL_REMATE, margenDelDisparo } from '../../_secciones/tu-panel/entrada'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -62,5 +64,12 @@ controlPositivo('el detector VE el reparto de antes (todo con k)', ((k: number) 
 const polvoVivo = sinComentarios(leer('_lib/escena/entorno/polvoVivo.ts'))
 const entornoTsx = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 afirmar(/vEnElHaz = uHaz \* uConoDelHaz \* uNocheDelLogo \* \(/.test(polvoVivo) && /VIVO\.uConoDelHaz\.value = reparto\.cono/.test(entornoTsx) && /nivel\.noche\[0\] \* reparto\.luz, nivel\.noche\[1\] \* reparto\.luz, nivel\.noche\[2\] \* k/.test(entornoTsx), '  el polvo del cono (el que dibujaba el embudo: pesa 0,30 contra 0,05 de la columna) crece y pesa con el encendido, ya no con el haz apagado')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B4 · «Y más…»: entra ni bien asoma, se va bien abajo')
+
+const bienAbajo = (desdeAbajo: number): boolean => desdeAbajo > 0 && desdeAbajo <= 8
+afirmar(bienAbajo(DISPARO_DEL_REMATE) && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${String(DISPARO_DEL_REMATE)}% 0%`, `la línea de disparo del remate a ${String(DISPARO_DEL_REMATE)} % del cuadro desde abajo: la misma línea para entrar (ni bien asoma) y para irse subiendo (cuando está por salir)`)
+controlPositivo('el detector VE la línea de antes (35 %: se iba en la mitad de abajo)', 35, bienAbajo)
 
 cerrar('s42-cierre-retoque')
