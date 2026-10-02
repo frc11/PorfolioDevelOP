@@ -47,6 +47,9 @@
  * tono del lienzo, `tono.ts`) y el scroll suave de nk (`_componentes/lenisDeNk.ts`). El bloom, el brillante, AgX, el
  * sedoso, las otras dos variantes del logo de noche y los títulos de ESCENA 9 se borraron, código y banderas.
  *
+ * **[CIERRE RETOQUE 3D] P1** · el polvo en facetas (la variante b del RETOQUE 3D, `facetas`; el banco lo apaga con
+ * `facetas=no`). La a y la c se borraron, código y bandera.
+ *
  * **Las pruebas** (`Pruebas`) van apagadas en el producto y en la base; sólo el banco (o la URL) las prende.
  *
  * El banco de medición pisa todo esto ANTES de cargar la página, sin tocar el archivo:
@@ -70,18 +73,15 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
  * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
  * volumen, para que decida Valentino. [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`); la prueba
- * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera).
+ * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera) y el polvo en facetas pasó al producto (`facetas`): ninguna.
  */
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
 
-export interface Pruebas {
-  /** [RETOQUE 3D] Las tres variantes del polvo para comparar (`polvo/variantes.ts`); `polvo=a`, `polvo=b`, `polvo=c`. */
-  readonly polvo: 'a' | 'b' | 'c' | 'no'
-}
+export type Pruebas = Readonly<Record<string, never>>
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { polvo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = {}
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -89,10 +89,8 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 }
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return {
-    polvo: unoDe<'a' | 'b' | 'c'>(['a', 'b', 'c'], valor('polvo')),
-  }
+function pruebasDe(): Pruebas {
+  return {}
 }
 
 export interface Entorno {
@@ -149,6 +147,8 @@ export interface Entorno {
   readonly materialDelLogo: boolean
   /** [ESCENA 10] T1 · la sombra del logo sobre el piso vivo, de día (`sombra/delLogo.ts`; era T3 de ESCENA 9). */
   readonly sombraDelLogo: boolean
+  /** [CIERRE RETOQUE 3D] P1 · el polvo en facetas, la variante b del RETOQUE 3D (`polvo/facetas.ts`); va con `nitidez`. */
+  readonly facetas: boolean
   /**
    * [3D Y SONIDO] T1 · los títulos de volumen de Portfolio y de la frase de Por qué develOP (`escena/titulos3d/`; eran T3
    * de ESCENA 10): el negro satinado del logo. `titulos=blanco` (con banco o en la URL) los pide blancos, para comparar;
@@ -188,6 +188,7 @@ export const ENTORNO: Entorno = {
   logoDeNoche: true,
   materialDelLogo: true,
   sombraDelLogo: true,
+  facetas: true,
   titulos: 'negro',
   pruebas: PRUEBAS_APAGADAS,
 }
@@ -221,6 +222,7 @@ export const BASE_LIMPIA: Entorno = {
   logoDeNoche: false,
   materialDelLogo: false,
   sombraDelLogo: false,
+  facetas: false,
   titulos: 'no',
   pruebas: PRUEBAS_APAGADAS,
 }
@@ -269,8 +271,9 @@ export function entornoPedido(pedido: string): Entorno {
     logoDeNoche: producto ? valor('logo-noche') !== 'no' : partes.has('logo-noche'),
     materialDelLogo: producto ? valor('material') !== 'no' : partes.has('material'),
     sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
+    facetas: producto ? valor('facetas') !== 'no' : partes.has('facetas'),
     titulos: producto ? (valor('titulos') === 'no' ? 'no' : valor('titulos') === 'blanco' ? 'blanco' : ENTORNO.titulos) : unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
-    pruebas: pruebasDe(valor),
+    pruebas: pruebasDe(),
   }
 }
 
@@ -286,7 +289,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=polvo=b`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=titulos=blanco`.
     // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     const pedido = pruebas === null ? null : entornoPedido(`producto,${pruebas}`)

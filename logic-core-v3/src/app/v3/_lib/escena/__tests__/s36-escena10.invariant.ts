@@ -52,8 +52,8 @@ afirmar(!sinCadaUno.logoDeNoche && !sinCadaUno.materialDelLogo && !sinCadaUno.so
 // [INTERFAZ 2] Las pruebas de ese sprint pasaron al producto o se borraron en su cierre: la única que queda es la de T3.
 // [3D Y SONIDO] T1: los títulos de T3 pasaron al producto; la prueba que queda es el sonido (T2 de ese sprint).
 // [RETOQUE 3D] 3J: + la del túnel lento (`tunel=lento`).
-// [CIERRE RETOQUE 3D] D6: el túnel lento se borró.
-afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'polvo' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (la que hay es la del polvo, del RETOQUE 3D)', Object.keys(PRUEBAS_APAGADAS).join())
+// [CIERRE RETOQUE 3D] D6 y P1: el túnel lento se borró y el polvo en facetas pasó al producto.
+afirmar(Object.keys(PRUEBAS_APAGADAS).join() === '' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (no queda ninguna)', Object.keys(PRUEBAS_APAGADAS).join())
 
 // El logo de noche: la variante clara (el filo casi blanco), la única.
 const exportsDelLogo = Object.keys(logoDeNoche)
