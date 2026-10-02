@@ -68,7 +68,8 @@ titulo('B1 · Portfolio: sin salida propia, se queda y se va con su sección')
 
 const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && !/<TituloDeVolumen[^>]*\squeda/.test(porQue), 'Portfolio se queda (`queda`); la frase de Por qué develOP sigue con su salida')
+// [CIERRE RETOQUE 3D] B6: la frase de Por qué develOP también se queda (s42 · B6).
+afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && porQue.length > 0, 'Portfolio se queda (`queda`)')
 const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 const terminaLaLlegada = (c: string): boolean => /m\.llegada = persigue\(m\.llegada, seVa \? 0 : m\.llegada > 0 \? 1 : a\.titulo\.llegada, dt, /.test(c)
 afirmar(terminaLaLlegada(escena), '  la llegada, una vez empezada, termina: el scroll para atrás a mitad de camino no la deja a medio armar («Portf\'o»)')
@@ -124,9 +125,9 @@ const arribaDeLosValores = (): number => {
   return m === null ? NaN : 50 - SUBIDA_DE_LA_FRASE_SVH + Number(m[1])
 }
 afirmar(SUBIDA_DE_LA_FRASE_SVH === 33 && arribaDeLosValores() === 27, 'la frase sube 3 svh más y las columnas quedan donde estaban (27 svh): el aire entre los dos pasa de 7 a 10 svh', 'medido a 1440 × 900: de la «g» del 3D al ícono de «Calidad que se nota», 16 px → 43 px')
-const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/salida: levantada, corrida \}\}/g) ?? []).length === 2
+const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, corrida \}\}/g) ?? []).length === 2
 afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
-controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/salida: levantada, corrida \}\}/g, 'salida: levantada }}'), subeConLaLevantada)
+controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/llegada: frase, corrida \}\}/g, 'llegada: frase }}'), subeConLaLevantada)
 afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
 
 // ═══════════════════════════════════════════════════════════════════════════

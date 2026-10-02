@@ -7,6 +7,7 @@
  *   B2 · una muesca levanta el polvo posado en toda la página: también después del último nudo (el progreso en 1).
  *   B3 · el encendido del haz: en los intentos parpadea la luz entera (la columna y el charco), no el cono de polvo solo.
  *   B4 · «Y más…» y el newsletter entran ni bien asoman y se van recién cuando están por salir, bien abajo.
+ *   B6 · la frase de Por qué develOP («Seis razones / para elegirnos») sin salida, como Portfolio.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -71,5 +72,13 @@ titulo('B4 · «Y más…»: entra ni bien asoma, se va bien abajo')
 const bienAbajo = (desdeAbajo: number): boolean => desdeAbajo > 0 && desdeAbajo <= 8
 afirmar(bienAbajo(DISPARO_DEL_REMATE) && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${String(DISPARO_DEL_REMATE)}% 0%`, `la línea de disparo del remate a ${String(DISPARO_DEL_REMATE)} % del cuadro desde abajo: la misma línea para entrar (ni bien asoma) y para irse subiendo (cuando está por salir)`)
 controlPositivo('el detector VE la línea de antes (35 %: se iba en la mitad de abajo)', 35, bienAbajo)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B6 · La frase de Por qué develOP, sin salida')
+
+const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{null\}[^>]*\squeda \/>/.test(c) && !/salida: levantada/.test(c)
+afirmar(sinSalida(porQue), 'las dos mitades se quedan (`queda`, sin `salida`): la llegada, una vez empezada, termina (el scroll rápido no la deja a medio armar) y se van con su sección, como Portfolio')
+controlPositivo('el detector VE la frase que se iba con la levantada', porQue.replace('llegada: frase, corrida }', 'llegada: frase, salida: levantada, corrida }'), sinSalida)
 
 cerrar('s42-cierre-retoque')
