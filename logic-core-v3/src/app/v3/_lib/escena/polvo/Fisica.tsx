@@ -215,6 +215,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     m.progreso = progreso
     m.puntero.copy(state.pointer)
     let hayOrigen = false
+    let delCursor = false
     if (cursor) {
       m.rayo.setFromCamera(state.pointer, state.camera)
       const toca = m.rayo.ray.intersectPlane(m.plano, m.punto)
@@ -223,6 +224,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
         m.origen[1] = FLOOR_Y
         m.origen[2] = toca.z
         hayOrigen = true
+        delCursor = true
       }
     }
     if (!hayOrigen && (scroll || cursor)) {
@@ -236,7 +238,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
       const inicial = polvoInicial(m.reloj)
       m.polvo = { ...inicial, origen: [inicial.origen[0], inicial.origen[1], inicial.origen[2]] } // una vez
     }
-    avanzarElPolvoEn(m.polvo, m.reloj, hayOrigen ? m.origen : null, quieto || !posarse)
+    avanzarElPolvoEn(m.polvo, m.reloj, hayOrigen ? m.origen : null, quieto || !posarse, delCursor)
     // Cuánto se mueve la coreografía (0–1): lo que levanta el polvo del logo ([ESCENA 9] T1: antes lo hacía resbalar).
     m.movimiento += (Math.min(1, velocidadDelScroll * 25) - m.movimiento) * (1 - Math.exp(-dtReal / 0.2))
 
@@ -266,6 +268,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     p.quieto = despertar.quieto
     p.desperto = conRemolino ? despertar.desperto : -1e9
     p.origen = despertar.origen
+    // [RETOQUE 3D] B3 · el remolino, sólo en el despertar del cursor (donde se movió la mano); el del scroll, sólo el frente.
+    p.remolino = despertar.delCursor ? 1 : 0
     p.movimiento = m.movimiento
     alPaso(armado.sim.material.uniforms, p)
     if (dt > 0) correr(armado, gl)
@@ -286,12 +290,13 @@ interface Paso {
   quieto: number
   desperto: number
   origen: readonly [number, number, number]
+  remolino: number
   movimiento: number
 }
 
 function pasoInicial(): Paso {
   const cero = new THREE.Vector3()
-  return { conchas: [], camara: cero, adelante: cero, dt: 0, reloj: 0, posarse: 0, quieto: 0, desperto: 0, origen: [0, 0, 0], movimiento: 0 }
+  return { conchas: [], camara: cero, adelante: cero, dt: 0, reloj: 0, posarse: 0, quieto: 0, desperto: 0, origen: [0, 0, 0], remolino: 0, movimiento: 0 }
 }
 
 function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
@@ -305,6 +310,7 @@ function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
   u.uQuieto.value = p.quieto
   u.uDesperto.value = p.desperto
   ;(u.uOrigen.value as THREE.Vector3).set(p.origen[0], p.origen[1], p.origen[2])
+  u.uRemolino.value = p.remolino
   u.uMovimiento.value = p.movimiento
 }
 
@@ -346,6 +352,7 @@ function armar() {
       uQuieto: { value: 1e9 },
       uDesperto: { value: -1e9 },
       uOrigen: { value: new THREE.Vector3() },
+      uRemolino: { value: 0 },
       uMovimiento: { value: 0 },
       uVientoDelAire: AIRE.uVientoDelAire,
       uPisoVivo: PISO_EN_VIVO.uPisoVivo,

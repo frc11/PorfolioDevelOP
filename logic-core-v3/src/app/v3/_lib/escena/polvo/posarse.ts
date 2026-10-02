@@ -36,21 +36,23 @@ export interface EstadoDelPolvo {
   readonly antes: number
   readonly origen: readonly [number, number, number]
   readonly ultimoMovimiento: number
+  /** [RETOQUE 3D] B3 · si el despertar salió del cursor (con remolino) o del scroll (sólo el frente). */
+  readonly delCursor: boolean
 }
 
 export const NUNCA = 1e9
 
 export function polvoInicial(t: number): EstadoDelPolvo {
-  return { quieto: t, desperto: -NUNCA, antes: -NUNCA, origen: [0, 0, 0], ultimoMovimiento: t }
+  return { quieto: t, desperto: -NUNCA, antes: -NUNCA, origen: [0, 0, 0], ultimoMovimiento: t, delCursor: false }
 }
 
 /**
  * Un paso: `movimiento` trae el origen si en este cuadro hubo scroll o cursor, o `null`. Con
  * `reducido`, nunca queda quieto.
  */
-export function avanzarElPolvo(e: EstadoDelPolvo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean): EstadoDelPolvo {
+export function avanzarElPolvo(e: EstadoDelPolvo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean, delCursor = false): EstadoDelPolvo {
   const copia: EstadoDelPolvoVivo = { ...e, origen: [e.origen[0], e.origen[1], e.origen[2]] }
-  avanzarElPolvoEn(copia, t, movimiento, reducido)
+  avanzarElPolvoEn(copia, t, movimiento, reducido, delCursor)
   return copia
 }
 
@@ -61,13 +63,14 @@ export interface EstadoDelPolvoVivo {
   antes: number
   origen: [number, number, number]
   ultimoMovimiento: number
+  delCursor: boolean
 }
 
 /**
  * [CALIDAD 1] B2 · la misma cuenta que `avanzarElPolvo`, escribiendo en `e`: la escena la corre en cada cuadro sin
  * reservar nada (el origen del despertar se copia, no se guarda la referencia).
  */
-export function avanzarElPolvoEn(e: EstadoDelPolvoVivo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean): void {
+export function avanzarElPolvoEn(e: EstadoDelPolvoVivo, t: number, movimiento: readonly [number, number, number] | null, reducido: boolean, delCursor = false): void {
   if (reducido) {
     e.quieto = NUNCA
     e.ultimoMovimiento = t
@@ -82,6 +85,7 @@ export function avanzarElPolvoEn(e: EstadoDelPolvoVivo, t: number, movimiento: r
       e.origen[0] = movimiento[0]
       e.origen[1] = movimiento[1]
       e.origen[2] = movimiento[2]
+      e.delCursor = delCursor
     }
     e.ultimoMovimiento = t
     return

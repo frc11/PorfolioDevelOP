@@ -146,6 +146,7 @@ uniform float uPosarse;
 uniform float uQuieto;
 uniform float uDesperto;
 uniform vec3 uOrigen;
+uniform float uRemolino;
 uniform float uMovimiento;
 uniform vec3 uVientoDelAire;
 uniform mat4 uLogo;
@@ -224,7 +225,10 @@ vec3 vientoDelDespertar( vec3 p ) {
 	float sube = ${FISICA.remolino.subida.toFixed(2)} * exp( - a / 2.5 ) * nace * exp( - r * r / ( 2.0 * pow( nucleo * 1.8, 2.0 ) ) );
 	// [CALIDAD 1] B4 · sin tope abajo del piso: con la altura negativa crecía sin límite y lanzaba las motas de ahí.
 	float aspira = - ${FISICA.remolino.aspira.toFixed(2)} * exp( - max( alto, 0.0 ) / 1.2 ) * exp( - r * r / pow( 3.0 * nucleo, 2.0 ) ) * nace;
-	vec3 v = vec3( - radial.y, 0.0, radial.x ) * giro * ( 0.4 + 0.6 * enAltura ) + vec3( 0.0, sube, 0.0 ) + vec3( radial.x, 0.0, radial.y ) * aspira;
+	// [RETOQUE 3D] B3 · el remolino (el giro, la subida por el centro y la aspiración) sólo si despertó el cursor: el del
+	// scroll nace en un punto fijo delante de la cámara, que no es un lugar de la sala; de noche, con las motas encendidas,
+	// se veía un embudo de luz que la cámara dejaba atrás. El frente (la ráfaga que levanta al pasar) es de los dos.
+	vec3 v = ( vec3( - radial.y, 0.0, radial.x ) * giro * ( 0.4 + 0.6 * enAltura ) + vec3( 0.0, sube, 0.0 ) + vec3( radial.x, 0.0, radial.y ) * aspira ) * uRemolino;
 	// El frente de la ráfaga: sale del origen y levanta al pasar.
 	float frente = exp( - pow( ( r - ${POSARSE.velocidad.toFixed(1)} * a ) / ${FISICA.remolino.frente.toFixed(2)}, 2.0 ) ) * exp( - a / 1.5 );
 	v += ( vec3( radial.x, 0.0, radial.y ) * 1.2 + vec3( 0.0, 3.0, 0.0 ) ) * frente;

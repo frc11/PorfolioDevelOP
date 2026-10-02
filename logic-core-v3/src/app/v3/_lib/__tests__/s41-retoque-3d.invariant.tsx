@@ -6,11 +6,13 @@
  *        su sección (corrido con su escenario); fuera del cuadro se rearma; lo esconde la primera foto del túnel tapando
  *        el cuadro, y mientras tanto no cambia (la llegada después de un viaje espera a que se vea).
  *   B2 · el polvo posado: cualquier scroll lo levanta (la levantada sube a su lugar en el aire).
+ *   B3 · el remolino de noche: el remolino del despertar sólo con el cursor; el del scroll, sólo el frente.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
 import { readFileSync } from 'node:fs'
 
+import { avanzarElPolvo, polvoInicial } from '../escena/polvo/posarse'
 import { corrimiento } from '../escena/titulos3d/colocacion'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -50,5 +52,16 @@ controlPositivo('el detector VE la levantada con gravedad de antes', simulacion.
 afirmar(/bool llego = distance\( p, f \) < /.test(simulacion) && /if \( !cercaDeLasCaras && llego \) \{/.test(simulacion), '  se le entrega al aire cuando llegó a su lugar (o el suyo es debajo del piso, donde se funde): sin salto')
 const fisica = leer('_lib/escena/polvo/Fisica.tsx')
 afirmar(/const scroll = !Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6/.test(fisica), '  el despertar es cualquier cambio del scroll (un píxel de los 27.705 de la página es 3,6e-5 > 1e-6)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B3 · El remolino de noche: sólo el cursor arma remolino')
+
+const conRemolinoSoloDelCursor = (c: string): boolean => /\+ vec3\( radial\.x, 0\.0, radial\.y \) \* aspira \) \* uRemolino;/.test(c)
+afirmar(conRemolinoSoloDelCursor(simulacion), 'el giro, la subida por el centro y la aspiración del despertar, multiplicados por `uRemolino`; el frente queda para los dos', 'la causa: el despertar del scroll armaba el vórtice en un punto fijo 6 u delante de la cámara; de noche las motas encendidas lo volvían un embudo de luz que la cámara dejaba atrás')
+controlPositivo('el detector VE el remolino de siempre', simulacion.replace(' * aspira ) * uRemolino;', ' * aspira );'), conRemolinoSoloDelCursor)
+afirmar(/p\.remolino = despertar\.delCursor \? 1 : 0/.test(fisica) && /delCursor = true/.test(fisica), '  el estado del polvo recuerda de dónde salió el despertar: el cursor (con su punto en el piso) o el scroll')
+const delScroll = avanzarElPolvo(polvoInicial(0), 10, [0, 0, 0], false)
+const delCursor = avanzarElPolvo(polvoInicial(0), 10, [1, 0, 1], false, true)
+afirmar(!delScroll.delCursor && delCursor.delCursor && avanzarElPolvo(delCursor, 10.1, [5, 0, 5], false).delCursor, '  y lo guarda mientras dura el movimiento (sólo cambia al despertar de una quietud)')
 
 cerrar('s41-retoque-3d')
