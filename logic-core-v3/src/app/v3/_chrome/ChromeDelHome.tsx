@@ -9,6 +9,7 @@ import { MenuMovil } from './menu/MenuMovil'
 import { BarraDelHome } from './barra/BarraDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
+import { SonidoDelHome } from './sonido/SonidoDelHome'
 
 /**
  * EL CHROME DEL HOME — la pastilla que viaja, y el cursor detrás de su decisión.
@@ -169,6 +170,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <OndaDeLasPortadas />
       {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). */}
       <InfinitoDelRecorrido />
+      {/* [3D Y SONIDO] T2: el sonido, sólo con `?pruebas=sonido=si` (el parlante) o `?sonidos=1` (la página de prueba). */}
+      <SonidoDelHome />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

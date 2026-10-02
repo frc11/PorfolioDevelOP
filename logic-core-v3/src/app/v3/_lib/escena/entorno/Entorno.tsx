@@ -9,6 +9,8 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
+import { callar, sonar } from '../../sonido/bus'
+import { TUNEL_EN_LA_ESCENA } from '../tunelEnLaEscena'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
@@ -86,8 +88,14 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       // [ESCENA 6] 6e: la parte de noche del haz sigue al encendido (1 sin él). [ESCENA 7] En el producto.
       let k = 1
       if (e.hazEncendido) {
+        const antesDelHaz = m.encendido
         const noche = VIVO.uNocheDelLogo.value
         m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, quieto)
+        // [3D Y SONIDO] T2: el guion suena (el zumbido sigue a los intentos); si se apaga a mitad, se calla.
+        if (antesDelHaz !== null && m.encendido.fase !== antesDelHaz.fase) {
+          if (m.encendido.fase === 'encendiendo') sonar('encendido')
+          else if (antesDelHaz.fase === 'encendiendo') callar('encendido')
+        }
         k = m.encendido.k
         encender(k)
       }
@@ -134,6 +142,8 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     if (e.E4 && !quieto) {
       const progreso = rig.current.progress
       if (progreso !== m.progreso) {
+        // [3D Y SONIDO] T2: entrar al túnel de Trabajos (de cualquier lado) suena un soplido; al cargar adentro, no.
+        if (!Number.isNaN(m.progreso) && !enElTunel(m.progreso) && enElTunel(progreso)) sonar('tunel')
         m.progreso = progreso
         m.ultimoMovimiento = t
       }
@@ -154,6 +164,8 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
         entradas.pedido = vigente(PULSO_PEDIDO.cuando, performance.now())
       }
       m.pulso = avanzarElPulso(antes, entradas)
+      // [3D Y SONIDO] T2: un principal que nace en este cuadro (lo larga el hover del logo o un CTA), un golpe grave.
+      if (m.pulso.anillos !== antes.anillos && nacioUnPrincipal(m.pulso, t)) sonar('pulso')
       escribirLosAnillos(m.pulso)
     }
 
@@ -184,6 +196,17 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
 /** 6e: lo que leen las motas y la sombra. */
 function encender(k: number): void {
   HAZ_ENCENDIDO.k = k
+}
+
+/** [3D Y SONIDO] T2 · ¿el progreso está en el túnel? */
+function enElTunel(p: number): boolean {
+  return p >= TUNEL_EN_LA_ESCENA.desde && p <= TUNEL_EN_LA_ESCENA.hasta
+}
+
+/** [3D Y SONIDO] T2 · ¿nació un principal en el instante `t`? Sin reservar nada (sólo se pregunta si cambiaron los anillos). */
+function nacioUnPrincipal(pulso: EstadoDelPulso, t: number): boolean {
+  for (let i = 0; i < pulso.anillos.length; i += 1) if (pulso.anillos[i].clase === 'principal' && pulso.anillos[i].nace === t) return true
+  return false
 }
 
 /** Vuelca los anillos vivos a `uAnillos` y anota el último principal para la sombra. */

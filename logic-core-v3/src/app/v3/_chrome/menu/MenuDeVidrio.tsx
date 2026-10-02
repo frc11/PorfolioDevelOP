@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref, type RefObject } from 'react'
 
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
+import { sonar } from '../../_lib/sonido/bus'
 import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO } from '../../_secciones/trabajos/demos/apertura'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { MS_DEL_GENIE, correrPorTiempo, liderDelGenie } from '../../_secciones/trabajos/demos/genie'
@@ -135,6 +136,7 @@ export function Menu({
 
   const arrancar = useCallback((): void => {
     fase.current = 'abriendo'
+    sonar('abre') // [3D Y SONIDO] T2
     velo.current?.style.setProperty('pointer-events', 'auto')
     // Las tiras también: si el clic cae durante el precalentado, ninguna queda casi transparente.
     for (const el of [caja.current, capaDelGenie.current]) el?.style.removeProperty('opacity')
@@ -225,6 +227,7 @@ export function Menu({
     if (fase.current === 'cerrando' || fase.current === 'cerrado') return
     const estabaAbierto = fase.current === 'abierto'
     fase.current = 'cerrando'
+    sonar('cierra') // [3D Y SONIDO] T2
     cancelar.current()
     alCubrir(false)
     const terminar = (): void => {

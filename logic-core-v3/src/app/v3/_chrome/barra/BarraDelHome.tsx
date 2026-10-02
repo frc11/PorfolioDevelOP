@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import { sonar } from '../../_lib/sonido/bus'
 import { fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME } from '../enlaces'
 
@@ -117,6 +118,8 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     const barra = pastillaRef.current
     if (barra === null) return
     const senalar = (el: HTMLElement | null): void => {
+      // [3D Y SONIDO] T2: un ítem nuevo bajo el puntero o el foco, un tic (con el sonido apagado, nada).
+      if (el !== null && el !== senalado.current) sonar('tic')
       senalado.current = el
       ubicarElResaltado.current()
     }

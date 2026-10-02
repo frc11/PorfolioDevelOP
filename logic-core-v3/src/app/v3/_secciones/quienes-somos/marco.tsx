@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { sonar } from '../../_lib/sonido/bus'
+
 import { MarcoDeMedio } from '../_contrato/medios'
 
 import { CLASE_DE_ENCUADRE } from './geometria'
@@ -248,8 +250,10 @@ export function MarcoDeDosTomas({
   const comun = { ancho, alto, sizes }
   const [abierto, setAbierto] = useState(false)
   const alternar = useCallback(() => {
-    setAbierto((v) => !v)
-  }, [])
+    // [3D Y SONIDO] T2: el roce, al abrirse con el toque.
+    if (!abierto) sonar('foto')
+    setAbierto(!abierto)
+  }, [abierto])
 
   return (
     /* El envoltorio existe para que el aviso caiga DEBAJO de la foto y no
@@ -262,6 +266,9 @@ export function MarcoDeDosTomas({
         {...(descripcionYaVisible ? { 'data-descripcion-afuera': '' } : {})}
         className="group relative w-full"
         style={ESTILO_DEL_MARCO}
+        onPointerEnter={(e) => {
+          if (e.pointerType === 'mouse') sonar('foto')
+        }}
       >
         {/* RECURSOS: el marco manda la proporción (las fotos llegaron verticales) y cada toma encuadra su cara. */}
         <span className={cn('block overflow-hidden', relacion, proporcion)}>
@@ -361,6 +368,9 @@ export function MarcoDeDosTomas({
           data-toque="marco"
           aria-pressed={abierto}
           onClick={alternar}
+          onFocus={(e) => {
+            if (e.currentTarget.matches(':focus-visible')) sonar('foto')
+          }}
           className="absolute inset-0 z-10"
         >
           <span className="sr-only">{texto}</span>

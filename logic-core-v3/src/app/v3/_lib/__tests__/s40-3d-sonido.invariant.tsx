@@ -7,15 +7,22 @@
  *   T1 · los títulos de volumen en el producto: el negro, `titulos=blanco` y `titulos=no`; en un viaje del menú ningún
  *        título llega y al terminar llegan con la llegada repetida de su sección; el DOM esconde su texto recién con el
  *        título armado y sólo desde 1024 (con CSS); abajo de 1024 ni se descarga.
+ *   T2 · el sonido: con bandera y apagado en el producto; howler y el archivo llegan sólo en un `import()`; sin motor,
+ *        nada suena; la elección se guarda con try/catch; un sprite de menos de 200 KB, bajo; dónde suena.
  *
  * Lo que se ve (los clips, la hoja, el costo, la propuesta): `scripts-3d-sonido/`, en `~/.cache/b4-medicion/3d-sonido/`.
  */
-import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { readFileSync, statSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { BASE_LIMPIA, ENTORNO, entornoPedido } from '../escena/entorno'
-import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { callar, instalarElSonido, sonar } from '../sonido/bus'
+import { SONIDOS, VOLUMEN_GENERAL } from '../sonido/catalogo'
+import { guardarPrendido, leerPrendido, leerVolumenes } from '../sonido/preferencia'
+import { CORTES_DEL_SPRITE } from '../sonido/sprite'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
@@ -94,5 +101,76 @@ afirmar(/activo: material !== 'no' && escritorio/.test(dom) && /const escritorio
 afirmar(/calentar\(gl, escena, camara\)\s*for \(const a of armados\) marcarListo\(a\.titulo\.id, true\)/.test(escena3d) && /marcarListo\(a\.titulo\.id, false\)/.test(escena3d), '  la escena avisa «listo» recién compilado y calentado, y lo retira al soltarlo')
 const perezoso = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
 afirmar(/const escritorio = useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(perezoso) && /if \(entornoDeLaEscena\(\)\.titulos === 'no' \|\| !escritorio\) return null/.test(perezoso), '  y abajo de 1024 el módulo de los títulos ni se descarga')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('T2 · El sonido: con bandera, apagado en el producto')
+
+afirmar(ENTORNO.pruebas.sonido === 'no' && entornoPedido('producto,sonido=si').pruebas.sonido === 'si' && entornoPedido('producto,sonido=otro').pruebas.sonido === 'no', 'apagado en el producto; `?pruebas=sonido=si` lo pide (con banco o en la URL)')
+const montaje = sinComentarios(leer('_chrome/sonido/SonidoDelHome.tsx'))
+afirmar(/const ControlDelSonido = lazy\(\(\) => import\('\.\/ControlDelSonido'\)\)/.test(montaje) && /const PruebaDeSonidos = lazy\(\(\) => import\('\.\/PruebaDeSonidos'\)\)/.test(montaje) && /entornoDeLaEscena\(\)\.pruebas\.sonido === 'si'/.test(montaje) && /get\('sonidos'\) === '1'/.test(montaje) && /<SonidoDelHome \/>/.test(leer('_chrome/ChromeDelHome.tsx')), '  el parlante (con la prueba) y la página de prueba (`?sonidos=1`), perezosos y decididos después de hidratar')
+
+/** Los archivos de /v3 que importan howler o el motor sin `import()` (todo lo demás del sitio, sin el sonido). */
+const ARCHIVOS_DE_V3 = execFileSync('git', ['ls-files', '-co', '--exclude-standard', V3], { encoding: 'utf8' }).split('\n').filter((r) => /\.(ts|tsx)$/.test(r) && !r.includes('__tests__'))
+const importaElMotor = (fuente: string): boolean => /^import (?!type )[^\n]*from '(howler|[^']*sonido\/motor)'/m.test(fuente)
+const conElMotor = ARCHIVOS_DE_V3.filter((r) => !r.endsWith('_lib/sonido/motor.ts') && importaElMotor(readFileSync(r, 'utf8')))
+afirmar(conElMotor.length === 0 && /import\('\.\.\/\.\.\/_lib\/sonido\/motor'\)/.test(leer('_chrome/sonido/motorCompartido.ts')), 'howler y el archivo se descargan recién al prender: el motor llega sólo en un `import()`', conElMotor.join(', ') || 'ninguno lo importa de entrada')
+controlPositivo('el detector VE una importación de entrada', "import { Howl } from 'howler'\n", (f: string) => !importaElMotor(f))
+
+titulo('T2 · Nada suena sin el motor, y el motor llega con una acción')
+const oidos: string[] = []
+sonar('tic')
+instalarElSonido({ sonar: (s) => oidos.push(s), callar: (s) => oidos.push(`-${s}`) })
+sonar('clic')
+callar('amanecer')
+instalarElSonido(null)
+sonar('foto')
+afirmarIgual(oidos, ['clic', '-amanecer'], 'sin el motor instalado `sonar` y `callar` no hacen nada (el producto); con él, llegan')
+const control = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+afirmar(/userActivation\?\.hasBeenActive === true\) cargar\(\)/.test(control) && /window\.addEventListener\('pointerdown', cargar, true\)/.test(control) && /window\.addEventListener\('keydown', cargar, true\)/.test(control), '  si quedó prendido de otra visita, el motor espera la primera acción en la página (un toque, una tecla)')
+afirmar(/motor\.current\?\.ambiente\(reducido \|\| document\.visibilityState !== 'visible' \? null : nocheQueSeVe\(\)\)/.test(control), '  con movimiento reducido (o la pestaña oculta), sin ambiente')
+
+titulo('T2 · Lo que se recuerda: con try/catch')
+const almacenQueTira = { getItem: (): never => { throw new Error('bloqueado') }, setItem: (): never => { throw new Error('bloqueado') }, removeItem: (): never => { throw new Error('bloqueado') } }
+const conAlmacen = <T,>(almacen: unknown, f: () => T): T => {
+  const g = globalThis as unknown as { window?: unknown }
+  const antes = g.window
+  g.window = { localStorage: almacen }
+  try {
+    return f()
+  } finally {
+    g.window = antes
+  }
+}
+const sinAlmacen = conAlmacen(almacenQueTira, () => {
+  guardarPrendido(false)
+  return { prendido: leerPrendido(), volumenes: leerVolumenes() }
+})
+afirmar(sinAlmacen.prendido === false && sinAlmacen.volumenes.tic === SONIDOS.tic.volumen && sinAlmacen.volumenes.general === VOLUMEN_GENERAL, 'con el almacenamiento bloqueado (ventana privada, vista previa) no tira: apagado y los volúmenes del catálogo')
+controlPositivo('el almacén de prueba de verdad tira', almacenQueTira, (a: typeof almacenQueTira) => {
+  try {
+    a.getItem()
+    return true
+  } catch {
+    return false
+  }
+})
+
+titulo('T2 · Bajo, corto, un solo sprite')
+const pesos = { webm: statSync('public/v3/sonido/sonidos.webm').size, m4a: statSync('public/v3/sonido/sonidos.m4a').size }
+const liviano = (p: { webm: number; m4a: number }): boolean => p.webm < 200 * 1024 && p.m4a < 200 * 1024
+afirmar(liviano(pesos), 'un sprite de menos de 200 KB en cada formato (Opus y, para Safari, AAC)', `${String(Math.round(pesos.webm / 1024))} KB y ${String(Math.round(pesos.m4a / 1024))} KB`)
+controlPositivo('el detector VE un sprite de 250 KB', { webm: 250 * 1024, m4a: 100 }, liviano)
+const nombres = Object.keys(CORTES_DEL_SPRITE)
+afirmarIgual(nombres.sort(), ['abre', 'amanecer', 'cierra', 'clic', 'dia', 'encendido', 'foto', 'noche', 'pulso', 'tic', 'tunel'], '  los once del pedido, en el mismo archivo')
+afirmar(Object.entries(CORTES_DEL_SPRITE).every(([n, c]) => (c.length === 3) === (n === 'dia' || n === 'noche')) && Object.values(CORTES_DEL_SPRITE).every((c) => c[1] <= 6000), '  sólo los dos ambientes son bucles; ninguno pasa de 6 s')
+afirmar(VOLUMEN_GENERAL <= 0.7 && Object.values(SONIDOS).every((s) => s.volumen <= 0.35) && SONIDOS.dia.volumen <= 0.08 && SONIDOS.noche.volumen <= 0.08, '  bajo: el general 0,7; cada uno a lo sumo 0,35; el ambiente, menos de 0,08')
+const doc = readFileSync('docs/rediseno/SONIDO.md', 'utf8')
+afirmar(/CC0/.test(doc) && /howler\.js\*\* 2\.2\.4[^|]*\| MIT/.test(doc) && nombres.every((n) => doc.includes(`\`${n}\``)), '  la fuente y la licencia de cada uno, en `docs/rediseno/SONIDO.md` (generados acá: CC0; howler, MIT)')
+
+titulo('T2 · Dónde suena (en la escena, sólo en un cambio)')
+const entornoTsx = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
+afirmar(/if \(m\.pulso\.anillos !== antes\.anillos && nacioUnPrincipal\(m\.pulso, t\)\) sonar\('pulso'\)/.test(entornoTsx) && /if \(m\.encendido\.fase === 'encendiendo'\) sonar\('encendido'\)/.test(entornoTsx) && /!Number\.isNaN\(m\.progreso\) && !enElTunel\(m\.progreso\) && enElTunel\(progreso\)\) sonar\('tunel'\)/.test(entornoTsx), 'el principal que nace, el guion del haz que arranca y la entrada al túnel: preguntados sólo cuando algo cambió')
+afirmar(/if \(m\.avance < SONIDO_DEL_AMANECER\.salto\) sonar\('amanecer'\)/.test(sinComentarios(leer('_lib/escena/amanecer/Amanecer.tsx'))), '  el amanecer, sólo si arranca de a poco (al cargar adentro o en un viaje salta: no suena)')
+afirmar(/if \(el !== null && el !== senalado\.current\) sonar\('tic'\)/.test(leer('_chrome/barra/BarraDelHome.tsx')) && (leer('_chrome/menu/MenuDeVidrio.tsx').match(/sonar\('(abre|cierra)'\)/g) ?? []).length === 2 && (leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').match(/sonar\('(abre|cierra)'\)/g) ?? []).length === 2 && (leer('_secciones/quienes-somos/marco.tsx').match(/sonar\('foto'\)/g) ?? []).length === 3, '  en el DOM: la barra (tic), el Genie del menú y de las demos (abre, cierra), las fotos (el mouse, el foco y el toque)')
 
 cerrar('s40-3d-sonido')

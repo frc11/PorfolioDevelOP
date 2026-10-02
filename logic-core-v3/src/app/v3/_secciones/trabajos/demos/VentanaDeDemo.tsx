@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { sonar } from '../../../_lib/sonido/bus'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 import { VELO_DEL_CTA } from '../tunel'
 
@@ -110,6 +111,7 @@ export function VentanaDeDemo({
 
   // LA APERTURA: el Genie de minimizar, recorrido al revés desde el libro.
   useLayoutEffect(() => {
+    sonar('abre') // [3D Y SONIDO] T2
     if (reducido) {
       cara()?.style.setProperty('visibility', 'hidden')
       genie.current?.style.setProperty('visibility', 'hidden')
@@ -139,6 +141,7 @@ export function VentanaDeDemo({
   const cerrar = useCallback((): void => {
     if (cerrando.current) return
     cerrando.current = true
+    sonar('cierra') // [3D Y SONIDO] T2
     cancelar.current()
     setFase('cerrando')
     alEmpezarACerrar()
