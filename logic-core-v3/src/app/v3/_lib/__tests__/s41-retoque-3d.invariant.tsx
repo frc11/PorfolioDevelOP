@@ -62,19 +62,20 @@ const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx
 // [CIERRE RETOQUE 3D] B6: la frase de Por qué develOP también se queda (s42 · B6).
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && porQue.length > 0, 'Portfolio se queda (`queda`)')
 const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
-const terminaLaLlegada = (c: string): boolean => /m\.llegada = persigue\(m\.llegada, seVa \? 0 : m\.llegada > 0 \? 1 : a\.titulo\.llegada, dt, /.test(c)
-afirmar(terminaLaLlegada(escena), '  la llegada, una vez empezada, termina: el scroll para atrás a mitad de camino no la deja a medio armar («Portf\'o»)')
-controlPositivo('el detector VE la llegada que sigue al scroll para atrás', escena.replace('m.llegada > 0 ? 1 : a.titulo.llegada', 'a.titulo.llegada'), terminaLaLlegada)
+// [RONDA 2] F2: la llegada de Portfolio ya no «termina lo que empezó» (con el scroll rápido quedaba en «Portfoli»): es función del scroll, con el asiento al frenar (s43 · F2).
+const terminaLaLlegada = (c: string): boolean => /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)
+afirmar(terminaLaLlegada(escena), '  la llegada de Portfolio es función del scroll: a cualquier velocidad, un estado coherente; al frenar, armado o desarmado del todo')
+controlPositivo('el detector VE la llegada que termina lo que empezó', escena.replace('mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)', 'persigue(m.llegada, m.llegada > 0 ? 1 : a.titulo.llegada, dt)'), terminaLaLlegada)
 const conSuSeccion = (c: string): boolean => /correr\(a, d\)/.test(c) && /const d = corrimiento\(a\.pin, y\)/.test(c)
 afirmar(conSuSeccion(escena), '  llegado, va corrido con su escenario: sale con la sección, sin animación propia')
 controlPositivo('el detector VE el título clavado en el mundo', escena.replace('correr(a, d)', 'correr(a, 0)'), conSuSeccion)
 const pin = { inicio: 5073, fin: 10986 }
 afirmar(corrimiento(pin, 4573) === 500 && corrimiento(pin, 7000) === 0 && corrimiento(pin, 11486) === -500, '  el corrimiento: antes del escenario clavado baja con la sección, clavado no se mueve, después sube con ella')
-afirmar(/if \(fuera\) \{\s*if \(a\.titulo\.rearma\) m\.llegada = 0/.test(escena) && /const visible = m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja y se rearma para la próxima llegada (desde Por qué develOP ya no se ve de espaldas)')
+afirmar(/const visible = m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja (y la llegada, función del scroll, ya es la que corresponde cuando vuelve)')
 const tapa = (f: (p: number) => boolean): boolean => !f(progresoDelPxDelTunel(0)) && !f(progresoDelPxDelTunel(400)) && f(progresoDelPxDelTunel(910))
 afirmar(tapa(primeraFotoTapa), '  lo esconde la primera foto del túnel recién cuando tapa el cuadro entero (no la huida del cartel: ahí todavía se veía)')
 controlPositivo('el detector VE el escondido con la foto chica', (p: number) => p >= progresoDelPxDelTunel(300), tapa)
-afirmar(/else if \(!tapado\) m\.llegada = persigue/.test(escena), '  tapado, nada cambia: después de un viaje desde más allá del túnel la llegada espera a que se vea')
+afirmar(/else if \(!fuera && !tapado\) m\.llegada = persigue\(m\.llegada, a\.titulo\.llegada, dt, a\.titulo\.minimoS/.test(escena), '  tapado o fuera, el que llega por tiempo (el hero) espera; Portfolio sigue al scroll')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B2 · El polvo posado: cualquier scroll lo levanta')
@@ -116,9 +117,9 @@ const arribaDeLosValores = (): number => {
   return m === null ? NaN : 50 - SUBIDA_DE_LA_FRASE_SVH + Number(m[1])
 }
 afirmar(SUBIDA_DE_LA_FRASE_SVH === 33 && arribaDeLosValores() === 27, 'la frase sube 3 svh más y las columnas quedan donde estaban (27 svh): el aire entre los dos pasa de 7 a 10 svh', 'medido a 1440 × 900: de la «g» del 3D al ícono de «Calidad que se nota», 16 px → 43 px')
-const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, corrida \}\}/g) ?? []).length === 2
+const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, salida: levantada, corrida \}\}/g) ?? []).length === 2
 afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
-controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/llegada: frase, corrida \}\}/g, 'llegada: frase }}'), subeConLaLevantada)
+controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/llegada: frase, salida: levantada, corrida \}\}/g, 'llegada: frase, salida: levantada }}'), subeConLaLevantada)
 afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -184,7 +185,7 @@ const lugares = new Set(DESDE_DONDE_LLEGAN.map((d) => `${String(d.x)},${String(d
 const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4, 5].every((i) => pose(1, i).transform === 'none' && pose(0, i).opacidad === 0 && /translate3d\(-?\d/.test(pose(0, i).transform)) && new Set([0, 1, 2, 3, 4, 5].map((i) => pose(0, i).transform)).size === 6
 afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
 controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
-afirmar(/<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor/.test(porQue) && !/requestAnimationFrame|setTimeout/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
+afirmar(/<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor/.test(porQue) && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')

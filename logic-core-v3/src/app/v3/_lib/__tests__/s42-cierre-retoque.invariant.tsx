@@ -99,9 +99,10 @@ controlPositivo('el detector VE la línea de antes (35 %: se iba en la mitad de 
 titulo('B6 · La frase de Por qué develOP, sin salida')
 
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{null\}[^>]*\squeda \/>/.test(c) && !/salida: levantada/.test(c)
-afirmar(sinSalida(porQue), 'las dos mitades se quedan (`queda`, sin `salida`): la llegada, una vez empezada, termina (el scroll rápido no la deja a medio armar) y se van con su sección, como Portfolio')
-controlPositivo('el detector VE la frase que se iba con la levantada', porQue.replace('llegada: frase, corrida }', 'llegada: frase, salida: levantada, corrida }'), sinSalida)
+// [RONDA 2] F2: la frase vuelve a irse con la levantada, función del scroll (s43 · F2).
+const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*llegadaDe="por-que-develop" \/>/.test(c) && (c.match(/salida: levantada/g) ?? []).length === 2
+afirmar(sinSalida(porQue), 'las dos mitades se van con la levantada otra vez (sin `queda`), con la llegada y la salida función del scroll')
+controlPositivo('el detector VE la frase que se queda', porQue.replace(/salida: levantada, /g, ''), sinSalida)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D4 · Las fotos del equipo, como antes')

@@ -4,6 +4,7 @@ import { animate, useMotionValue, useTransform, type MotionValue } from 'motion/
 import { useEffect } from 'react'
 
 import { CURVAS } from '../_lib/motion/curvas'
+import { REPETICIONES } from '../_lib/titulos3d/repeticiones'
 
 /**
  * [NAVBAR] RETOQUE 3 · LA LLEGADA DEL TÍTULO, AISLADA — el viaje del menú a Portfolio o a Por qué develOP lleva directo
@@ -19,6 +20,9 @@ import { CURVAS } from '../_lib/motion/curvas'
  *
  * Sin coreografía (movimiento reducido, la rama quieta) no hay progreso y no hay repetición: el título vuelve con el
  * fundido de todo lo demás.
+ *
+ * [RONDA 2] F2 · se puede interrumpir y siempre converge: un pedido nuevo la reinicia, el desmontaje la corta y vuelve al
+ * scroll (nunca queda un progreso a medias), y mientras corre la escena no asienta (`REPETICIONES`).
  */
 export const MS_DE_LA_LLEGADA_DEL_TITULO = 900
 
@@ -39,13 +43,26 @@ export function useLlegadaDelTitulo(id: string, progreso: MotionValue<number>): 
   useEffect(() => {
     let control: ReturnType<typeof animate> | null = null
     let reloj: number | undefined
+    let activa = false
+    const empezar = (): void => {
+      if (!activa) REPETICIONES.activas += 1
+      activa = true
+    }
+    const terminar = (): void => {
+      if (activa) REPETICIONES.activas = Math.max(0, REPETICIONES.activas - 1)
+      activa = false
+    }
     const alPedido = (demoraMs: number): void => {
       control?.stop()
       window.clearTimeout(reloj)
       repeticion.set(0)
+      empezar()
       reloj = window.setTimeout(() => {
         control = animate(repeticion, 1, { duration: MS_DE_LA_LLEGADA_DEL_TITULO / 1000, ease: CURVAS.principal })
-        void control.then(() => repeticion.set(-1))
+        void control.then(() => {
+          repeticion.set(-1)
+          terminar()
+        })
       }, demoraMs)
     }
     const de = oyentes.get(id) ?? new Set()
@@ -55,6 +72,9 @@ export function useLlegadaDelTitulo(id: string, progreso: MotionValue<number>): 
       de.delete(alPedido)
       control?.stop()
       window.clearTimeout(reloj)
+      // Cortada a mitad: vuelve al scroll (nunca un progreso a medias).
+      repeticion.set(-1)
+      terminar()
     }
   }, [id, repeticion])
   return combinado

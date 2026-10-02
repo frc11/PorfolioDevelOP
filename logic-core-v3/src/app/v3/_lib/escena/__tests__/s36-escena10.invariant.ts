@@ -33,7 +33,7 @@ import { manchasDelHaz } from '../sombra/sombraDelHaz'
 import { TONO_COMPENSADO_GLSL } from '../tono'
 import { camaraDeLaLectura, colocar, lineaDeBase } from '../titulos3d/colocacion'
 import { VOLUMEN_DEL_TITULO, armarElTitulo } from '../titulos3d/geometria'
-import { LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, llegadaDeLaLetra, persigue } from '../titulos3d/llegada'
+import { LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, llegadaDeLaLetra } from '../titulos3d/llegada'
 import { LECTURA } from '../../titulos3d/registro'
 import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../../_secciones/trabajos/contenido'
 import { FRASE } from '../../../_secciones/por-que-develop/contenido'
@@ -237,17 +237,9 @@ controlPositivo('el detector VE la llegada al revés', (p: number, o: number) =>
 const mismaCuenta = (glsl: string): boolean => glsl.includes(`( p - orden * ${(1 - LLEGADA_DE_LAS_LETRAS.dura).toFixed(5)} ) / ${LLEGADA_DE_LAS_LETRAS.dura.toFixed(5)}`) && /return 1\.0 - pow\( 1\.0 - u, 3\.0 \);/.test(glsl)
 afirmar(mismaCuenta(LLEGADA_PARS_GLSL) && /float eDeLaLetra = llegadaDeLaLetra\( uLlegada, aLetra \) \* \( 1\.0 - llegadaDeLaLetra\( uSalida, aLetra \) \);/.test(LLEGADA_NORMAL_GLSL), '  el vértice hace la misma cuenta (y se van igual: la salida con la misma curva)')
 afirmar(/float faltaDeLaLetra = \( 1\.0 - eDeLaLetra \) \* \( 1\.0 - uQuieto \);/.test(LLEGADA_NORMAL_GLSL) && /vAparece = smoothstep\( 0\.0, [0-9.]+, eDeLaLetra \);/.test(LLEGADA_NORMAL_GLSL), '  con movimiento reducido no se mueven ni giran: sólo se disuelven en su lugar')
-/** Cuánto tarda lo que se muestra en ir de 0 a 1 cuando el scroll pide 1 de golpe, a 60 Hz (s). */
-const tardaEnLlegar = (f: typeof persigue): number => {
-  let [v, t] = [0, 0]
-  while (v < 1 && t < 10) {
-    v = f(v, 1, 1 / 60)
-    t += 1 / 60
-  }
-  return t
-}
-afirmar(tardaEnLlegar(persigue) >= LLEGADA_DE_LAS_LETRAS.minimoS - 1e-6 && LLEGADA_DE_LAS_LETRAS.minimoS >= 1 && /a\.mostrado\.llegada = persigue\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')) && /a\.mostrado\.salida = persigue\(a\.mostrado\.salida, a\.titulo\.salida, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), '  y se nota a cualquier velocidad: lo que se muestra persigue al scroll, entera en 1,4 s como mínimo, en las dos direcciones (en segundos: regla 1)', `${tardaEnLlegar(persigue).toFixed(2)} s con un tirón (la ventana del scroll son ~300 px: medio segundo con la rueda)`)
-controlPositivo('el detector VE la llegada pegada al scroll', (_m: number, p: number) => p, (f: typeof persigue) => tardaEnLlegar(f) >= LLEGADA_DE_LAS_LETRAS.minimoS - 1e-6)
+// [RONDA 2] F2: lo que se muestra ya no persigue con un mínimo de tiempo: es función del scroll, con el asiento al frenar (s43 · F2).
+afirmar(/a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), '  y se nota a cualquier velocidad: lo que se muestra es función del scroll en las dos direcciones, con el asiento al frenar (s43 · F2)')
+controlPositivo('el detector VE la persecución de antes', `a.mostrado.llegada = persigue(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, dt)`, (c: string) => /mostradoDelScroll\(a\.mostrado\.llegada/.test(c))
 afirmar(LLEGADA_DE_LAS_LETRAS.profundidad >= 8 && LLEGADA_DE_LAS_LETRAS.vueltas >= 1, '  la llegada se nota: vienen de atrás (em) y giran sobre sí mismas', `${String(LLEGADA_DE_LAS_LETRAS.profundidad)} em, ${String(LLEGADA_DE_LAS_LETRAS.vueltas)} vueltas`)
 
 // La colocación: con la cámara del momento de la lectura, el origen del título cae en el comienzo de su renglón del DOM.

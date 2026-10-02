@@ -108,12 +108,12 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, corrida }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada, corrida }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, corrida }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada, corrida }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>
         </motion.p>
@@ -150,16 +150,16 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
 /** La mitad de la frase: un titular que nunca pasa del lugar que el logo le deja. La variante
  *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca).
  *  [ESCENA 10] T3 · con `volumen`, el título de volumen ([3D Y SONIDO] T1: del producto): llega con la frase; se lee con la
- *  cámara de los valores y en el lugar al que la frase sube con ellos. [CIERRE RETOQUE 3D] B6: sin salida (como Portfolio):
- *  la llegada, una vez empezada, termina (el scroll rápido no la deja a medio armar) y se va con su sección. */
-function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly corrida: MotionValue<number> } }): React.JSX.Element {
+ *  cámara de los valores y en el lugar al que la frase sube con ellos. [RONDA 2] F2: vuelve a irse con la levantada, y la
+ *  llegada y la salida son función del scroll (con el asiento al frenar): ninguna velocidad la deja a medio armar. */
+function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number>; readonly corrida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
       nivel="titulo-xl"
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={null} corrida={volumen.corrida} llegadaDe="por-que-develop" queda />}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} llegadaDe="por-que-develop" />}
     </Titular>
   )
 }

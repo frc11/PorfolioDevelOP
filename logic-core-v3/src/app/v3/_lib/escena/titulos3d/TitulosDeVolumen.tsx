@@ -22,7 +22,8 @@ import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { armarElTitulo } from './geometria'
-import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, persigue } from './llegada'
+import { ASIENTO, DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll, persigue } from './llegada'
+import { REPETICIONES } from '../../titulos3d/repeticiones'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -116,7 +117,8 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera() })
+  // [RONDA 2] F2 · `scroll`: dónde estaba la página y desde cuándo (el asiento, con el scroll quieto).
+  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera(), scroll: { y: Number.NaN, cuando: 0 } })
 
   // Movimiento reducido: sin llegada (se disuelven en su lugar). Se lee al cambiar, no por cuadro.
   useEffect(() => {
@@ -237,22 +239,31 @@ function descolocar(armados: readonly Armado[], ancho: number): void {
 }
 
 /** Un cuadro: la llegada y la salida de cada título (perseguidas), si se dibuja, dónde va (al empezar a llegar) y su luz. */
-function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
+function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number } }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
   if (s.armados.length === 0) return
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
   const enViaje = viajeEnCurso() !== null
   const y = window.scrollY
+  // [RONDA 2] F2 · el asiento: con el scroll quieto (y sin viaje ni llegada repetida corriendo), lo que quedó a mitad se
+  // completa o se deshace. Lo demás es función del scroll.
+  const ahora = performance.now()
+  if (y !== s.scroll.y) {
+    s.scroll.y = y
+    s.scroll.cuando = ahora
+  }
+  const asentar = !enViaje && REPETICIONES.activas === 0 && ahora - s.scroll.cuando > ASIENTO.quietoMs
   for (const a of s.armados) {
     if (a.titulo.queda) {
       if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
-      a.malla.visible = alCuadroDelQueQueda(a, enViaje, y, dt, viva)
+      a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
       continue
     }
-    a.mostrado.llegada = persigue(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, dt)
-    a.mostrado.salida = persigue(a.mostrado.salida, a.titulo.salida, dt)
+    // [RONDA 2] F2 · función del scroll (la llegada y la salida), con el asiento al frenar; en un viaje, desarmado.
+    a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)
+    a.mostrado.salida = mostradoDelScroll(a.mostrado.salida, a.titulo.salida, asentar, dt)
     const { llegada, salida } = a.mostrado
     a.uniforms.uLlegada.value = llegada
     a.uniforms.uSalida.value = salida
@@ -324,22 +335,20 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
 }
 
 /**
- * [RETOQUE 3D] B1 · EL QUE SE QUEDA (Portfolio): la llegada, una vez empezada, termina (con el scroll para atrás a mitad
- * de camino no queda a medio armar); llegado, se queda. Va corrido con su escenario (sale con la sección, sin animación
- * propia), y cuando queda fuera del cuadro se rearma para la próxima llegada. `salida` entera lo esconde sin moverlo (el
- * túnel lo tapa) y mientras tanto nada cambia: después de un viaje desde más allá del túnel, la llegada espera a que se
- * vea. En un viaje del menú se va como todos. Devuelve si se dibuja.
+ * [RETOQUE 3D] B1 · EL QUE SE QUEDA (Portfolio, el hero): sin salida propia; va corrido con su escenario (sale con la
+ * sección, sin animación propia). `salida` entera lo esconde sin moverlo (el túnel lo tapa). Devuelve si se dibuja.
+ *
+ * [RONDA 2] F2 · Portfolio ya no «termina lo que empezó» (eso, con el scroll rápido, lo dejaba en «Portfoli»): su llegada
+ * es función del scroll, con el asiento al frenar, como la de todos. El hero (no se rearma: llega una vez por carga) sigue
+ * con su llegada por tiempo, que converge sola.
  */
-function alCuadroDelQueQueda(a: Armado, enViaje: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
+function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
   const d = corrimiento(a.pin, y)
   const fuera = fueraDelCuadro(a, d)
   const tapado = a.titulo.salida >= 0.999
-  // [RETOQUE 3D] El que no se rearma (el hero: llega una vez por carga) tampoco se va en un viaje.
-  const seVa = enViaje && a.titulo.rearma
-  if (fuera) {
-    if (a.titulo.rearma) m.llegada = 0
-  } else if (!tapado) m.llegada = persigue(m.llegada, seVa ? 0 : m.llegada > 0 ? 1 : a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
+  if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)
+  else if (!fuera && !tapado) m.llegada = persigue(m.llegada, a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0

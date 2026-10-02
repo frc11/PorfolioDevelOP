@@ -1,9 +1,10 @@
 'use client'
 
-import { useMotionValueEvent, type MotionValue } from 'motion/react'
-import { useRef } from 'react'
+import { animate, useMotionValueEvent, type MotionValue } from 'motion/react'
+import { useEffect, useRef } from 'react'
 
 import { useGiroDeLaMirada } from '../../_componentes/volumen/useGiroDeLaMirada'
+import { ASIENTO } from '../../_lib/titulos3d/repeticiones'
 
 /**
  * [RETOQUE 3D] 3G · CADA VALOR LLEGA DESDE LA SALA — el bloque entero (el ícono, el título y el texto) con CSS 3D: sale
@@ -56,13 +57,35 @@ export function ValorEnVolumen({ progreso, indice, children }: { readonly progre
   // [CIERRE RETOQUE 3D] D1 · fijo en el mundo: gira al revés de lo que el mouse le suma a la cámara.
   const mirada = useRef<HTMLDivElement | null>(null)
   useGiroDeLaMirada(mirada)
-  useMotionValueEvent(progreso, 'change', (p) => {
+  // [RONDA 2] F2 · la pose es función del progreso; con el scroll quieto, lo que quedó a mitad se asienta (llega o se va del
+  // todo); cualquier scroll lo interrumpe.
+  const asiento = useRef<{ reloj: number | undefined; control: ReturnType<typeof animate> | null }>({ reloj: undefined, control: null })
+  const posar = (p: number): void => {
     const el = pieza.current
     if (el === null) return
     const pose = poseDelValor(p, indice)
     el.style.transform = pose.transform
     el.style.opacity = pose.opacidad.toFixed(3)
+  }
+  useMotionValueEvent(progreso, 'change', (p) => {
+    const a = asiento.current
+    a.control?.stop()
+    a.control = null
+    window.clearTimeout(a.reloj)
+    posar(p)
+    if (p <= 0 || p >= 1) return
+    const destino = p >= 0.5 ? 1 : 0
+    a.reloj = window.setTimeout(() => {
+      a.control = animate(p, destino, { duration: ASIENTO.s * Math.abs(destino - p), ease: 'easeOut', onUpdate: posar })
+    }, ASIENTO.quietoMs)
   })
+  useEffect(
+    () => () => {
+      asiento.current.control?.stop()
+      window.clearTimeout(asiento.current.reloj)
+    },
+    [],
+  )
   const inicial = poseDelValor(progreso.get(), indice)
   const [x, y] = MIRADA_DESDE_EL_LOGO[indice < 3 ? 'izquierda' : 'derecha']
   const desdeElLogo = `${String(x)}% ${String(y)}%`

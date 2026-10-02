@@ -8,6 +8,9 @@
  *   F1 · los formularios envían de verdad (el contacto del pie y el del panel a `/api/contacto`, el newsletter a
  *        `/api/newsletter`): Zod y límite por IP en el servidor, validación al lado del campo, sin carteles de «todavía
  *        no envía» ni `mailto`; WhatsApp vuelve al pie (fuera del formulario).
+ *   F2 · las llegadas y salidas de los títulos 3D (Portfolio, la frase, El equipo, las demos) y de los valores son función
+ *        del scroll, con el asiento al frenar (armado o desarmado del todo); la frase vuelve a tener salida; la llegada
+ *        después de un viaje se puede interrumpir y converge.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/ronda2/LEEME.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -18,6 +21,8 @@ import { avanzarElEncendido, encendidoInicial, noPasoDePortfolio } from '../esce
 import { VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
 import { leerVolumenes } from '../sonido/preferencia'
 import { validarElMail, validarElPie } from '../formularios/validar'
+import { mostradoDelScroll, persigue } from '../escena/titulos3d/llegada'
+import { ASIENTO } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -92,5 +97,45 @@ afirmar(Object.keys(errores).join() === 'nombre,mail,mensaje' && Object.keys(val
 controlPositivo('el detector VE un mail sin arroba aceptado', ((d: { nombre: string; mail: string; mensaje: string }) => (d.mail.length > 0 ? {} : { mail: 'x' })) as typeof validarElPie, (f: typeof validarElPie) => f({ nombre: 'Ana', mail: 'ana', mensaje: 'Hola' }).mail !== undefined)
 const piezas = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
 afirmar(/data-pieza="whatsapp"/.test(piezas) && /href=\{WHATSAPP\.href\}/.test(piezas) && !/whatsapp|wa\.me/i.test(sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx')) + panel), 'WhatsApp vuelve al pie, donde estaba, con su botón; en el formulario de contacto (el panel) no está')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('F2 · Llegadas y salidas que no se rompen')
+
+type Seguidor = (mostrado: number, pedido: number, asentar: boolean, dt: number) => number
+/** Idas y vueltas rápidas (un scroll que salta), y después quieto: cada cuadro coherente, y al final armado o desarmado del todo. */
+const noSeRompe = (f: Seguidor): boolean => {
+  const dt = 1 / 60
+  let m = 0
+  let azar = 7
+  for (let k = 0; k < 600; k += 1) {
+    azar = (azar * 9301 + 49297) % 233280
+    const pedido = (k % 40 < 20 ? 1 : 0) * (azar / 233280)
+    m = f(m, pedido, false, dt)
+    if (!(m >= 0 && m <= 1)) return false
+  }
+  // Frena a mitad de camino: el asiento lo completa o lo deshace, en lo que dura el asiento (más un margen).
+  for (const parado of [0.62, 0.3]) {
+    let q = m
+    for (let t = 0; t < ASIENTO.s + 0.2; t += dt) q = f(q, parado, true, dt)
+    if (q !== (parado >= 0.5 ? 1 : 0)) return false
+  }
+  return true
+}
+afirmar(noSeRompe(mostradoDelScroll), 'lo que se muestra es función del scroll: idas y vueltas a cualquier velocidad dan siempre un estado coherente, y al frenar queda armado o desarmado del todo (el asiento)', `asiento: ${String(ASIENTO.quietoMs)} ms quieto, ${String(ASIENTO.s)} s de punta a punta`)
+controlPositivo('el detector VE la persecución de antes (no asienta: al frenar a mitad queda a mitad)', ((m: number, p: number, _a: boolean, dt: number) => persigue(m, p, dt)) as Seguidor, noSeRompe)
+const alcanza = (f: Seguidor): boolean => {
+  let m = 1
+  for (let t = 0; t < ASIENTO.alcanceS + 0.05; t += 1 / 60) m = f(m, 0.4, false, 1 / 60)
+  return m === 0.4
+}
+afirmar(alcanza(mostradoDelScroll), '  al volver el scroll después de un asiento, alcanza al progreso sin saltar (en lo que dura el alcance) y desde ahí lo sigue tal cual')
+const escena3d = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+afirmar(/const asentar = !enViaje && REPETICIONES\.activas === 0 && ahora - s\.scroll\.cuando > ASIENTO\.quietoMs/.test(escena3d) && (escena3d.match(/mostradoDelScroll\(/g) ?? []).length === 3 && !/m\.llegada > 0 \? 1 :/.test(escena3d), '  en la escena: Portfolio, la frase, El equipo y las demos (la llegada y la salida), sin «termina lo que empezó»; el asiento, sólo con el scroll quieto y sin un viaje ni una llegada repetida corriendo')
+const porQueDevelop = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+afirmar((porQueDevelop.match(/salida: levantada, corrida \}/g) ?? []).length === 2 && /salida=\{volumen\.salida\}/.test(porQueDevelop) && !/llegadaDe="por-que-develop" queda/.test(porQueDevelop), 'la frase de Por qué develOP vuelve a irse con la levantada (con la misma regla)')
+const repetida = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
+afirmar(/REPETICIONES\.activas \+= 1/.test(repetida) && /repeticion\.set\(-1\)\s*terminar\(\)/.test(repetida), 'la llegada aislada después de un viaje (por tiempo) se puede interrumpir y converge: un pedido nuevo la reinicia, cortada vuelve al scroll; mientras corre, no se asienta')
+const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
+afirmar(/a\.reloj = window\.setTimeout\(\(\) => \{\s*a\.control = animate\(p, destino,/.test(valor) && /a\.control\?\.stop\(\)/.test(valor), 'los valores (CSS 3D): la pose, función de su tramo; quietos a mitad, se asientan; cualquier scroll lo interrumpe')
 
 cerrar('s43-ronda2')

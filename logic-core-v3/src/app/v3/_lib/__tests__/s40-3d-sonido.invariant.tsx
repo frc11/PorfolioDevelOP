@@ -83,7 +83,8 @@ afirmar(/resuelto = pedido === null \? ENTORNO : \{ \.\.\.ENTORNO, titulos: pedi
 titulo('T1 · Con los viajes del menú: durante el viaje no llegan; al terminar, la llegada repetida')
 const escena3d = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 // [RETOQUE 3D] B1: entre los dos, el scroll del cuadro (el que se queda va corrido con su escenario).
-const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY\s*for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = persigue\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, dt\)/.test(c)
+// [RONDA 2] F2: con el asiento entre la lectura del scroll y el recorrido; lo mostrado, función del scroll.
+const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY[\s\S]{0,700}?for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)
 afirmar(sostieneEnElViaje(escena3d), 'en un viaje lo pedido es 0 (ninguna letra llega con el velo puesto; la cámara viaja sola), leído una vez por cuadro')
 controlPositivo('el detector VE la llegada que corre con el scroll del viaje', escena3d.replace('enViaje ? 0 : a.titulo.llegada', 'a.titulo.llegada'), sostieneEnElViaje)
 const dom = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))

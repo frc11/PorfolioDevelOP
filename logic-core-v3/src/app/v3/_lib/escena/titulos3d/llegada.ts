@@ -1,3 +1,5 @@
+import { ASIENTO } from '../../titulos3d/repeticiones'
+
 /**
  * [ESCENA 10] T3 · LA LLEGADA DE LAS LETRAS — cada letra entra desde la profundidad (de atrás del título, con la niebla
  * de la sala), girando sobre su eje vertical una vuelta y cuarto y un poco inclinada, y se ensambla en su lugar; se van
@@ -28,6 +30,23 @@ export const LLEGADA_DE_LAS_LETRAS = {
 export function persigue(mostrado: number, pedido: number, dt: number, minimoS: number = LLEGADA_DE_LAS_LETRAS.minimoS): number {
   const tope = dt / minimoS
   return mostrado + Math.max(-tope, Math.min(tope, pedido - mostrado))
+}
+
+/**
+ * [RONDA 2] F2 · LO QUE SE MUESTRA, FUNCIÓN DEL SCROLL — el estado de cada letra sale del progreso del scroll (con su curva,
+ * `llegadaDeLaLetra`), no de una animación que se dispara y tiene que terminar: cualquier velocidad y cualquier dirección
+ * dan un estado coherente. Lo único con tiempo es el ASIENTO: con el scroll quieto (`asentar`), lo que quedó a mitad se
+ * completa o se deshace (al extremo más cercano) en `ASIENTO.s`; al volver el scroll, alcanza al progreso en `alcanceS`
+ * (para no saltar) y desde ahí lo sigue tal cual. Converge siempre: armado o desarmado del todo al frenar.
+ */
+
+export { ASIENTO }
+
+export function mostradoDelScroll(mostrado: number, pedido: number, asentar: boolean, dt: number): number {
+  const p = Math.min(1, Math.max(0, pedido))
+  if (asentar && p > 0 && p < 1) return persigue(mostrado, p >= 0.5 ? 1 : 0, dt, ASIENTO.s)
+  if (Math.abs(mostrado - p) < 0.02) return p
+  return persigue(mostrado, p, dt, ASIENTO.alcanceS)
 }
 
 /** Cuánto llegó la letra de lugar `orden` (0 la primera, 1 la última) con el progreso `p`: arranca después; frena al final. */
