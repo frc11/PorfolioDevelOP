@@ -158,10 +158,10 @@ titulo('D5 · El pie: bloques sólidos que flotan')
 
 const delPie = ['_secciones/cierre/FormularioDelPie.tsx', '_secciones/cierre/PiezasDeContacto.tsx', '_secciones/cierre/ColumnasDelPie.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
 const cuantos = (c: string, re: RegExp): number => (c.match(re) ?? []).length
-// [RONDA 2] F1: los campos van en un `map` y volvió WhatsApp; el aviso y su mail se fueron.
-const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) >= 6 && /<BloqueSolido className="block w-full">\s*\{k === 'mensaje' \? \(/.test(c) && /<BloqueSolido className="self-start">\s*<button type="submit"/.test(c) && /<BloqueSolido>\s*<a\s+href=\{WHATSAPP\.href\}/.test(c) && /<BloqueSolido>\s*<EnlaceDelPieConIcono/.test(c)
+// [RONDA 2] F1: los campos van en un `map` y volvió WhatsApp; el aviso y su mail se fueron. F5: los campos, en ranura; Enviar, la principal.
+const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) >= 6 && /<BloqueSolido forma="ranura" className="block w-full">\s*\{k === 'mensaje' \? \(/.test(c) && /<BloqueSolido forma="principal" className="self-start[^"]*">\s*<button type="submit"/.test(c) && /<BloqueSolido>\s*<a\s+href=\{WHATSAPP\.href\}/.test(c) && /<BloqueSolido>\s*<EnlaceDelPieConIcono/.test(c)
 afirmar(todoEsUnBloque(delPie), 'cada enlace (el mail, WhatsApp, el recorrido, las redes), cada campo (nombre, mail, mensaje) y el botón son un bloque sólido, con el elemento de verdad adentro (se enfoca, se escribe)')
-controlPositivo('el detector VE un campo sin su bloque', delPie.replace('<BloqueSolido className="block w-full">', '<div>'), todoEsUnBloque)
+controlPositivo('el detector VE un campo sin su bloque', delPie.replace('<BloqueSolido forma="ranura" className="block w-full">', '<div>'), todoEsUnBloque)
 const cierreTsx = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
 afirmar(!/PlanoDelPie/.test(cierreTsx) && !existsSync(`${V3}/_secciones/cierre/planoDelPie.tsx`), '  ya no es una sala alrededor del logo: las paredes y el piso se borraron')
 const quieto = renderToStaticMarkup(<BloqueSolido><a href="#x">x</a></BloqueSolido>)
@@ -169,7 +169,8 @@ const plano = (h: string): boolean => !/data-parte="(canto|tapa)"/.test(h) && !/
 afirmar(plano(quieto), '  en el servidor (y abajo de 1025, y con movimiento reducido) el bloque es plano: ni cantos ni tapa ni transformadas; el elemento, tal cual')
 controlPositivo('el detector VE un bloque con sus cantos', quieto.replace('<a href', '<span data-parte="canto" style="transform:rotateX(90deg)"></span><a href'), plano)
 const solido = sinComentarios(leer('_componentes/volumen/BloqueSolido.tsx'))
-afirmar(/const solido = escritorio && !reducido/.test(solido) && /useGiroDeLaMirada\(giro, solido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 2, '  desde 1025 tiene tapa, cuatro cantos y cara de atrás (`aria-hidden`) y gira al revés de la cámara (D1): se le ven la perspectiva y los costados')
+// [RONDA 2] F5: la pose es la de su lugar en el pie más el paralaje (`usePoseDeLaPieza`); suman la sombra y la ranura, también mudas.
+afirmar(/const solido = escritorio && !reducido/.test(solido) && /usePoseDeLaPieza\(raiz, pose, solido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 4, '  desde 1025 tiene tapa, cuatro cantos y cara de atrás (`aria-hidden`) y gira al revés de la cámara (D1): se le ven la perspectiva y los costados')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D3 · El título de Demos, en volumen')

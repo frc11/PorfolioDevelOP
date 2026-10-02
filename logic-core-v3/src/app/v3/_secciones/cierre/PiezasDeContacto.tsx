@@ -8,12 +8,13 @@ import { IconoDeMarca } from './IconosDeMarca'
  * LAS PIEZAS DE CONTACTO DEL PIE. **[FINAL 3]** Todo en `currentColor` y sin color propio:
  * desde 1024 hereda la tinta del pie y abajo, la del papel que usa la mezcla.
  * [CIERRE RETOQUE 3D] D5: cada enlace es un bloque sólido que flota (`BloqueSolido`, desde 1025).
+ * [RONDA 2] F5: las piezas, separadas del titular y entre sí (los cantos y la sombra piden aire).
  */
 
 /** El mail subrayado y el botón de WhatsApp. [RONDA 2] F1: WhatsApp vuelve al pie, donde estaba (sólo queda fuera del formulario de contacto). */
 export function ContactoDelPie(): React.JSX.Element {
   return (
-    <div className="flex flex-col items-start gap-[var(--spacing-4)]">
+    <div className="flex flex-col items-start gap-[var(--spacing-4)] escritorio:mt-[var(--spacing-6)] escritorio:gap-[var(--spacing-5)]">
       <BloqueSolido>
         <a href={HREF_DEL_MAIL} className="block text-cuerpo font-semi underline decoration-1 underline-offset-4 escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-2)]">
           <DosCopias>{MAIL}</DosCopias>
@@ -38,7 +39,7 @@ export function ContactoDelPie(): React.JSX.Element {
 /** Las redes: sólo íconos, del mismo trazo y tamaño; el nombre va en el enlace. En móvil, repartidas a lo ancho. */
 export function RedesDelPie(): React.JSX.Element {
   return (
-    <ul className="flex justify-between tablet:justify-start tablet:gap-[var(--spacing-6)]">
+    <ul className="flex justify-between tablet:justify-start tablet:gap-[var(--spacing-6)] escritorio:gap-[var(--spacing-8)]">
       {REDES.map((r) => (
         <li key={r.red}>
           <BloqueSolido>

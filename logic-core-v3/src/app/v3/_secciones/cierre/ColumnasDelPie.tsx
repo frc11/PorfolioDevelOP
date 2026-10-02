@@ -142,7 +142,7 @@ function ColumnaDeContacto(): React.JSX.Element {
 function ColumnaDelRecorrido(): React.JSX.Element {
   return (
     // [FINAL 3] En móvil, dos columnas compactas.
-    <ul className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1">
+    <ul className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1 escritorio:gap-y-[var(--spacing-4)]">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
         <li key={destino.ancla}>
           {/* [CIERRE RETOQUE 3D] D5 · cada enlace, un bloque sólido que flota (desde 1025). */}

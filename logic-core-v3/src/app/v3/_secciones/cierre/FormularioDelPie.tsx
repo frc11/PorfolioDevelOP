@@ -18,8 +18,11 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * [RONDA 2] F1 · ENVÍA: a `/api/contacto` (validación en el navegador y en el servidor). Al enviar, cada campo con error
  * lo dice a su lado y el foco va al primero; mientras viaja, el botón ocupado; el resultado, en sus regiones vivas (el
  * error del servidor, normal; el «listo», y el formulario vacío). Sin carteles de «todavía no envía».
+ *
+ * [RONDA 2] F5 · cada campo es una placa con la ranura hundida (`forma="ranura"`) y Enviar, la tecla principal (más
+ * grande y más alta); entre los campos, más aire.
  */
-const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
+const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
 const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
 const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
@@ -70,7 +73,7 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <form id="contacto" tabIndex={-1} noValidate data-pieza="contacto-del-pie" aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)]">
+    <form id="contacto" tabIndex={-1} noValidate data-pieza="contacto-del-pie" aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)] escritorio:gap-[var(--spacing-5)]">
       {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
         const f = campo(k)
         return (
@@ -78,7 +81,7 @@ export function FormularioDelPie(): React.JSX.Element {
             <label htmlFor={f.id} className={ROTULO}>
               {c[k]}
             </label>
-            <BloqueSolido className="block w-full">
+            <BloqueSolido forma="ranura" className="block w-full">
               {k === 'mensaje' ? (
                 <textarea id={f.id} name={k} rows={3} required value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none')} />
               ) : (
@@ -105,8 +108,8 @@ export function FormularioDelPie(): React.JSX.Element {
           </div>
         )
       })}
-      <BloqueSolido className="self-start">
-        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi disabled:cursor-wait">
+      <BloqueSolido forma="principal" className="self-start escritorio:mt-[var(--spacing-2)]">
+        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait">
           {enviando && <Loader2 aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-4)] animate-spin motion-reduce:animate-none" />}
           {enviando ? c.enviando : c.enviar}
         </button>

@@ -25,6 +25,7 @@ import { mostradoDelScroll, persigue } from '../escena/titulos3d/llegada'
 import { ASIENTO } from '../titulos3d/repeticiones'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { filoDeDiaGlsl } from '../escena/titulos3d/filo'
+import { PIEZA, ladoEn, poseDeLaPieza } from '../../_componentes/volumen/piezaSolida'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -160,5 +161,40 @@ const material = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
 afirmar(/else if \(filo !== 'no'\) shader\.fragmentShader/.test(material) && /customProgramCacheKey = \(\) => `titulo-de-volumen-\$\{variante\}-filo-\$\{filo\}`/.test(material), '  sólo en los títulos negros (el blanco tiene su filo oscuro), y cada variante con su programa')
 const delLogo = ['_lib/escena/logoDeNoche.ts', '_lib/escena/logoEmision.ts'].map(leer).join('\n')
 afirmar(!/filo\.ts|filoDeDiaGlsl|pruebas\.filo/.test(delLogo), '  el logo no se toca')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('F5 · El pie premium')
+
+const caja = (x: number, y: number, w: number, h: number): DOMRect => ({ left: x, top: y, width: w, height: h, right: x + w, bottom: y + h, x, y, toJSON: () => ({}) }) as DOMRect
+const marco = caja(0, 0, 1440, 900)
+const angulos = (t: string): [number, number] => {
+  const m = /rotateX\((-?[\d.]+)deg\) rotateY\((-?[\d.]+)deg\)/.exec(t)
+  return m === null ? [Number.NaN, Number.NaN] : [Number(m[1]), Number(m[2])]
+}
+const quieto = { giro: 0, inclinacion: 0 }
+const seVenLosCantos = (f: typeof poseDeLaPieza): boolean => {
+  const izquierda = angulos(f(ladoEn(caja(40, 500, 200, 50), marco), quieto))
+  const derecha = angulos(f(ladoEn(caja(1150, 300, 120, 50), marco), quieto))
+  const abajo = angulos(f(ladoEn(caja(40, 780, 50, 50), marco), quieto))
+  // De frente nunca: todas muestran su canto de arriba; las de la izquierda, su costado derecho; las de abajo, más canto.
+  return [izquierda, derecha, abajo].every(([x]) => x <= -PIEZA.inclinacion.siempre) && izquierda[1] < 0 && derecha[1] > 0 && abajo[0] < izquierda[0]
+}
+afirmar(seVenLosCantos(poseDeLaPieza), 'con el mouse quieto, cada pieza muestra su canto de arriba y el costado que mira al centro (más del doble de antes: antes, de frente)')
+controlPositivo('el detector VE la pieza de frente', ((l: Parameters<typeof poseDeLaPieza>[0], m: Parameters<typeof poseDeLaPieza>[1]) => `rotateX(${(m.inclinacion * 2).toFixed(3)}deg) rotateY(${(-m.giro * 2).toFixed(3)}deg)`) as typeof poseDeLaPieza, seVenLosCantos)
+const paralaje = (f: typeof poseDeLaPieza): boolean => {
+  const lado = ladoEn(caja(700, 400, 100, 40), marco)
+  const [x0, y0] = angulos(f(lado, quieto))
+  const [x1, y1] = angulos(f(lado, { giro: 4, inclinacion: 2 }))
+  return y1 - y0 <= -4 * 3 && x1 - x0 >= 2 * 3
+}
+afirmar(paralaje(poseDeLaPieza) && PIEZA.exageracion > 2, '  el paralaje del mouse, más exagerado que el de los valores (al revés de la cámara)', `×${String(PIEZA.exageracion)}`)
+const anchas = (f: typeof poseDeLaPieza): boolean => Math.abs(angulos(f(ladoEn(caja(1150, 300, 360, 50), marco), quieto))[1]) < Math.abs(angulos(f(ladoEn(caja(1150, 300, 120, 50), marco), quieto))[1])
+afirmar(anchas(poseDeLaPieza), '  las piezas anchas (los campos) giran menos de costado: no tapan su rótulo')
+const bloque = sinComentarios(leer('_componentes/volumen/BloqueSolido.tsx'))
+afirmar(/data-seccion=\{solido \? 'invertida' : undefined\}/.test(bloque) && /solido && 'text-tinta'/.test(bloque), '  el negro satinado con la tinta clara: la pieza es una sala invertida (el texto y el foco se dan vuelta)')
+afirmar(/group-hover\/pieza:-translate-z-\[var\(--pieza-encima\)\]/.test(bloque) && /group-active\/pieza:-translate-z-\[var\(--pieza-apretada\)\]/.test(bloque) && /group-has-\[:focus-visible\]\/pieza:/.test(bloque) && PIEZA.hundida.apretada > PIEZA.hundida.encima, '  se hunde como una tecla: con el mouse encima o el foco del teclado, y más al apretar')
+afirmar(/data-parte="sombra"/.test(bloque) && /forma === 'ranura' && <span aria-hidden="true" data-parte="ranura"/.test(bloque), '  la sombra de contacto atrás, y los campos en una ranura hundida')
+const sonido = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+afirmar(/const DE_LOS_CTA = `[^`]*\[data-pieza="bloque-solido"\]\[data-solido\]`/.test(sonido), '  con el parlante prendido: el hover de una pieza suena el tic y el clic, el pestillo (como los CTA)')
 
 cerrar('s43-ronda2')

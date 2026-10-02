@@ -25,7 +25,8 @@ import { pedirElMotor, soltarElMotor } from './motorCompartido'
 const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
 /** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: [CIERRE RETOQUE 3D] S1 · su clic, el pestillo. */
 const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
-const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto]`
+// [RONDA 2] F5 · y las piezas del pie (desde 1025): el hover, el tic; el clic, el pestillo, como una tecla.
+const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido]`
 
 export default function ControlDelSonido(): React.JSX.Element {
   const boton = useRef<HTMLButtonElement>(null)
