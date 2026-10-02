@@ -7,8 +7,9 @@ import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TextoBase } from '../../_componentes/tipografia/Textos'
+import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
-import { Bloque } from '../_contrato/coreografia'
+import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -238,6 +239,14 @@ function BajadaYCta(): React.JSX.Element {
   )
 }
 
+/**
+ * [RETOQUE 3D] 3A · EL TITULAR EN VOLUMEN: los dos registros, cada uno con su fuente (Archivo 700 y la Chivo 300 itálica,
+ * en mayúsculas como los pinta el DOM). Llegan UNA vez por carga, al armarse: cada letra desde un lugar distinto de la
+ * sala, y se ensamblan donde está el texto, que se pintó primero (el LCP) y se apaga mientras llegan. Sin salida: se van
+ * con la página.
+ */
+const LLEGADA_DEL_TITULAR_S = 2.4
+
 export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Seccion seccion={seccion}>
@@ -412,82 +421,7 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                     entre la celda y el bloque no agrega nada. */}
                 <Grilla columnas={GEOMETRIA.columnasDeLaCajaDelTitular}>
                   <Bloque patron="P1" className={GEOMETRIA.claseDelTitular}>
-                    {(progreso) => (
-                      // El `h1` es el nombre accesible de la región del Hero (S11,
-                      // defecto 10), y acá es además el que junta las tres filas
-                      // en UN nombre: «Tu negocio vendiendo las 24 hs». Todas las
-                      // piezas son `<span>` —contenido de frase, que es lo único
-                      // que un encabezado admite, y por eso el envoltorio del
-                      // registro 1 también lo es— así que no hace falta el par
-                      // `sr-only` + `aria-hidden` que `TextoPorLineas` necesita
-                      // para poder emitir un `<div>` adentro del `h1`.
-                      <h1
-                        id={idDelTitularDeSeccion(seccion.id)}
-                        data-titular="dos-registros"
-                        // La mezcla va en el `h1` y no por renglon: asi el titular
-                        // entero compone como UN grupo y despues mezcla, que es lo
-                        // que da el borde duro parejo en las dos filas.
-                        className={cn('flex flex-col items-start', MEZCLA_SOBRE_LA_ESCENA)}
-                      >
-                        {/* ⚠️ **EL REGISTRO 1 ES LA PIEZA QUIETA, Y NO PASA POR
-                            UN CANAL.** Sin coreografía de entrada, presente en
-                            el primer cuadro. Devuelve lo que el hero perdió al
-                            irse el cepillo, que era la única pieza sin entrada
-                            y estaba ahí por un motivo escrito: **sostiene la
-                            pantalla mientras el preloader todavía está
-                            saliendo**. Sin nada quieto, el primer cuadro del
-                            hero queda vacío, que es exactamente el defecto que
-                            una coreografía de entrada existe para evitar.
-
-                            No es «P1 con duración cero»: es OTRO árbol, sin
-                            primitiva montada, sin suscripción al progreso y sin
-                            una transformada por cuadro. El registro 2 se queda
-                            con P1 y es su única pieza.
-
-                            ⚠️ **COMPO-1 · ES UN ENVOLTORIO Y ADENTRO VAN DOS
-                            FILAS.** Abajo de 1025 el registro 1 se parte en
-                            «TU NEGOCIO» / «VENDIENDO» —quiebre declarado, no
-                            envuelto— y de 1025 para arriba el envoltorio vuelve
-                            a ser `block`, las dos filas salen inline y el
-                            renglón es el mismo que el dueño aprobó a 1440 y a
-                            1920. **La clase de tipografía va en el ENVOLTORIO y
-                            no en las filas**, y eso no es una preferencia: el
-                            espacio de en medio es un nodo de texto suyo, así que
-                            con la clase adentro saldría en la familia y el
-                            tamaño heredados —cuerpo, 15 px— y en escritorio las
-                            dos palabras quedarían casi pegadas. */}
-                        <span className={cn(TIPOGRAFIA_DEL_TITULAR, GEOMETRIA.claseDelEnvoltorioDeFilas)}>
-                          <span>{CONTENIDO.titularFila1}</span>
-                          {/* El mismo separador que el de abajo, y por el mismo
-                              motivo: sin él el nombre accesible dice «Tu
-                              negociovendiendo». Abajo de 1025 no se ve —las dos
-                              filas son ítems de una columna flex y un ítem
-                              anónimo de puro espacio no se renderiza— y arriba
-                              ES el espacio entre las dos palabras. */}
-                          {' '}
-                          <span>{CONTENIDO.titularFila2}</span>
-                        </span>
-                        {/* ⚠️ ESTE ESPACIO NO ES FORMATO: es el separador del
-                            NOMBRE ACCESIBLE. Las dos piezas son hermanas y sin
-                            nada en medio el h1 se anuncia «Tu negocio
-                            vendiendolas 24 hs» — el mismo defecto que
-                            `_lib/cta.ts` documenta para las dos copias del
-                            rollover de la referencia. Lo encontró
-                            `hero.invariant.tsx` §7 y no se ve: las dos piezas
-                            son ítems de un contenedor `flex-col`. */}
-                        {' '}
-                        <CanalDePieza
-                          progreso={progreso}
-                          patron="P1"
-                          cantidad={GEOMETRIA.piezasAnimadasDelTitular}
-                          indice={0}
-                          como="span"
-                          className={TIPOGRAFIA_DEL_REGISTRO_2}
-                        >
-                          {CONTENIDO.titularFila3}
-                        </CanalDePieza>
-                      </h1>
-                    )}
+                    {(progreso) => <TitularDelHero seccion={seccion} progreso={progreso} />}
                   </Bloque>
                 </Grilla>
 
@@ -518,5 +452,92 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
         </div>
       </Envoltorio>
     </Seccion>
+  )
+}
+
+/**
+ * EL TITULAR — un componente para que sus ganchos se monten con el `h1`: la compuerta del home cambia el árbol quieto por
+ * el animado y el `h1` se vuelve a montar ([RETOQUE 3D] 3A: el título de volumen anota el elemento que pinta su texto).
+ */
+function TitularDelHero({ seccion, progreso }: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+  const { lugar: lugar1, listo: listo1 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'hero-registro-1', texto: `${CONTENIDO.titularFila1} ${CONTENIDO.titularFila2}`.toUpperCase(), fuente: 'archivo-700', gesto: 'azar', llegada: null, queda: true, rearma: false, minimoS: LLEGADA_DEL_TITULAR_S })
+  const { lugar: lugar2, listo: listo2 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'hero-registro-2', texto: CONTENIDO.titularFila3.toUpperCase(), fuente: 'chivo-300-italica', gesto: 'azar', llegada: null, queda: true, rearma: false, minimoS: LLEGADA_DEL_TITULAR_S })
+  return (
+    // El `h1` es el nombre accesible de la región del Hero (S11,
+    // defecto 10), y acá es además el que junta las tres filas
+    // en UN nombre: «Tu negocio vendiendo las 24 hs». Todas las
+    // piezas son `<span>` —contenido de frase, que es lo único
+    // que un encabezado admite, y por eso el envoltorio del
+    // registro 1 también lo es— así que no hace falta el par
+    // `sr-only` + `aria-hidden` que `TextoPorLineas` necesita
+    // para poder emitir un `<div>` adentro del `h1`.
+    <h1
+      id={idDelTitularDeSeccion(seccion.id)}
+      data-titular="dos-registros"
+      // La mezcla va en el `h1` y no por renglon: asi el titular
+      // entero compone como UN grupo y despues mezcla, que es lo
+      // que da el borde duro parejo en las dos filas.
+      className={cn('flex flex-col items-start', MEZCLA_SOBRE_LA_ESCENA)}
+    >
+      {/* ⚠️ **EL REGISTRO 1 ES LA PIEZA QUIETA, Y NO PASA POR
+          UN CANAL.** Sin coreografía de entrada, presente en
+          el primer cuadro. Devuelve lo que el hero perdió al
+          irse el cepillo, que era la única pieza sin entrada
+          y estaba ahí por un motivo escrito: **sostiene la
+          pantalla mientras el preloader todavía está
+          saliendo**. Sin nada quieto, el primer cuadro del
+          hero queda vacío, que es exactamente el defecto que
+          una coreografía de entrada existe para evitar.
+
+          No es «P1 con duración cero»: es OTRO árbol, sin
+          primitiva montada, sin suscripción al progreso y sin
+          una transformada por cuadro. El registro 2 se queda
+          con P1 y es su única pieza.
+
+          ⚠️ **COMPO-1 · ES UN ENVOLTORIO Y ADENTRO VAN DOS
+          FILAS.** Abajo de 1025 el registro 1 se parte en
+          «TU NEGOCIO» / «VENDIENDO» —quiebre declarado, no
+          envuelto— y de 1025 para arriba el envoltorio vuelve
+          a ser `block`, las dos filas salen inline y el
+          renglón es el mismo que el dueño aprobó a 1440 y a
+          1920. **La clase de tipografía va en el ENVOLTORIO y
+          no en las filas**, y eso no es una preferencia: el
+          espacio de en medio es un nodo de texto suyo, así que
+          con la clase adentro saldría en la familia y el
+          tamaño heredados —cuerpo, 15 px— y en escritorio las
+          dos palabras quedarían casi pegadas. */}
+      <span ref={lugar1} className={cn(TIPOGRAFIA_DEL_TITULAR, GEOMETRIA.claseDelEnvoltorioDeFilas, listo1 && TEXTO_REEMPLAZADO)}>
+        <span>{CONTENIDO.titularFila1}</span>
+        {/* El mismo separador que el de abajo, y por el mismo
+            motivo: sin él el nombre accesible dice «Tu
+            negociovendiendo». Abajo de 1025 no se ve —las dos
+            filas son ítems de una columna flex y un ítem
+            anónimo de puro espacio no se renderiza— y arriba
+            ES el espacio entre las dos palabras. */}
+        {' '}
+        <span>{CONTENIDO.titularFila2}</span>
+      </span>
+      {/* ⚠️ ESTE ESPACIO NO ES FORMATO: es el separador del
+          NOMBRE ACCESIBLE. Las dos piezas son hermanas y sin
+          nada en medio el h1 se anuncia «Tu negocio
+          vendiendolas 24 hs» — el mismo defecto que
+          `_lib/cta.ts` documenta para las dos copias del
+          rollover de la referencia. Lo encontró
+          `hero.invariant.tsx` §7 y no se ve: las dos piezas
+          son ítems de un contenedor `flex-col`. */}
+      {' '}
+      <CanalDePieza
+        progreso={progreso}
+        patron="P1"
+        cantidad={GEOMETRIA.piezasAnimadasDelTitular}
+        indice={0}
+        como="span"
+        className={TIPOGRAFIA_DEL_REGISTRO_2}
+      >
+        <span ref={lugar2} className={cn('block', listo2 && TEXTO_REEMPLAZADO)}>
+          {CONTENIDO.titularFila3}
+        </span>
+      </CanalDePieza>
+    </h1>
   )
 }

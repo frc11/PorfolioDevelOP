@@ -25,8 +25,8 @@ export const LLEGADA_DE_LAS_LETRAS = {
 } as const
 
 /** Un paso de lo que se muestra: persigue al progreso pedido, a lo sumo `dt / minimoS`, en las dos direcciones. */
-export function persigue(mostrado: number, pedido: number, dt: number): number {
-  const tope = dt / LLEGADA_DE_LAS_LETRAS.minimoS
+export function persigue(mostrado: number, pedido: number, dt: number, minimoS: number = LLEGADA_DE_LAS_LETRAS.minimoS): number {
+  const tope = dt / minimoS
   return mostrado + Math.max(-tope, Math.min(tope, pedido - mostrado))
 }
 
@@ -39,14 +39,44 @@ export function llegadaDeLaLetra(p: number, orden: number): number {
 
 const f = (x: number): string => x.toFixed(5)
 
+/**
+ * [RETOQUE 3D] LAS LLEGADAS NUEVAS. `letras`: la de ESCENA 10 (de atrás y girando). `azar` (3A, el hero): cada letra sale
+ * de un lugar distinto de la sala (`aDesde`, sembrado) y se ensambla girando. `levanta` (3C, «El equipo»): la palabra
+ * acostada hacia adelante sobre el pie de atrás de su caja se levanta (de _ a |), letra por letra; lo que queda debajo de
+ * ese pie no se dibuja (la línea la tapa): aparece de la nada recién cuando se levanta.
+ */
+export type LlegadaDelTitulo = 'letras' | 'azar' | 'levanta'
+
+/** De dónde sale cada letra en `letras` (em): la de ESCENA 10, de atrás y un poco más arriba. */
+export const DESDE_DE_LAS_LETRAS: readonly [number, number, number] = [0, LLEGADA_DE_LAS_LETRAS.subida, -LLEGADA_DE_LAS_LETRAS.profundidad]
+
+/** `azar`: la caja de la sala de donde salen (em, alrededor del título; nunca de delante de la cámara) y la semilla. */
+export const AZAR_DE_LAS_LETRAS = { x: [-38, 38], y: [-10, 18], z: [-55, -6], semilla: 0x24e5 } as const
+
+/** Un generador chico y determinista (mulberry32): el mismo azar en cada carga, el mismo en el invariante. */
+export function sembrar(semilla: number): () => number {
+  let a = semilla >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 /** El vértice: en `beginnormal` se arma el giro de la letra (y gira la normal); en `begin`, la posición. */
 export const LLEGADA_PARS_GLSL = /* glsl */ `
 attribute float aLetra;
 attribute vec3 aPivote;
+attribute vec3 aDesde;
 uniform float uLlegada;
 uniform float uSalida;
 uniform float uQuieto;
+uniform float uLevanta;
+uniform vec2 uPieDeLaPalabra;
 varying float vAparece;
+varying float vSobreElPie;
 float llegadaDeLaLetra( float p, float orden ) {
 	float u = clamp( ( p - orden * ${f(1 - LLEGADA_DE_LAS_LETRAS.dura)} ) / ${f(LLEGADA_DE_LAS_LETRAS.dura)}, 0.0, 1.0 );
 	return 1.0 - pow( 1.0 - u, 3.0 );
@@ -64,19 +94,30 @@ export const LLEGADA_NORMAL_GLSL = /* glsl */ `
 	// [ESCENA 10] T3 · cuánto le falta a esta letra (la llegada por lo que no se fue) y su giro.
 	float eDeLaLetra = llegadaDeLaLetra( uLlegada, aLetra ) * ( 1.0 - llegadaDeLaLetra( uSalida, aLetra ) );
 	float faltaDeLaLetra = ( 1.0 - eDeLaLetra ) * ( 1.0 - uQuieto );
-	mat3 giroDeLaLetra = giroDeLaLetraEn( faltaDeLaLetra );
-	objectNormal = giroDeLaLetra * objectNormal;
+	// [RETOQUE 3D] \`levanta\`: sin el giro propio; la letra se acuesta hacia adelante sobre el pie de atrás de la palabra.
+	mat3 giroDeLaLetra = giroDeLaLetraEn( faltaDeLaLetra * ( 1.0 - uLevanta ) );
+	float acostada = faltaDeLaLetra * uLevanta * ${f(Math.PI / 2)};
+	mat3 alzado = mat3( 1.0, 0.0, 0.0, 0.0, cos( acostada ), sin( acostada ), 0.0, - sin( acostada ), cos( acostada ) );
+	objectNormal = alzado * giroDeLaLetra * objectNormal;
 	vAparece = smoothstep( 0.0, ${f(LLEGADA_DE_LAS_LETRAS.aparece)}, eDeLaLetra );
+	// La que se levanta aparece por la línea, no por el tramado (salvo con movimiento reducido, que no se mueve).
+	vAparece = mix( vAparece, 1.0, uLevanta * ( 1.0 - uQuieto ) );
 `
 
 export const LLEGADA_POSICION_GLSL = /* glsl */ `
-	transformed = aPivote + giroDeLaLetra * ( transformed - aPivote ) + vec3( 0.0, faltaDeLaLetra * ${f(LLEGADA_DE_LAS_LETRAS.subida)}, - faltaDeLaLetra * ${f(LLEGADA_DE_LAS_LETRAS.profundidad)} );
+	vec3 pieDeLaLetra = vec3( transformed.x, uPieDeLaPalabra );
+	vec3 enCamino = aPivote + giroDeLaLetra * ( transformed - aPivote ) + faltaDeLaLetra * aDesde;
+	transformed = mix( enCamino, pieDeLaLetra + alzado * ( transformed - pieDeLaLetra ), uLevanta );
+	// Cuánto queda arriba del pie (em): debajo, la línea lo tapa.
+	vSobreElPie = ( transformed.y - uPieDeLaPalabra.x ) * uLevanta + ( 1.0 - uLevanta );
 `
 
 /** El fragmento: el tramado que la disuelve (ruido de gradiente intercalado, fijo en la pantalla). */
 export const DISOLVER_PARS_GLSL = /* glsl */ `
 varying float vAparece;
+varying float vSobreElPie;
 `
 export const DISOLVER_GLSL = /* glsl */ `
 	if ( vAparece < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= vAparece ) discard;
+	if ( vSobreElPie < 0.002 ) discard;
 `

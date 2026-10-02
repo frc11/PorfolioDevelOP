@@ -13,6 +13,7 @@
  *   { "captura": "nombre" }            PNG en la carpeta `salida` (por defecto, la de entregas del sprint `_mirar/`)
  *   { "viajar": "trabajos" }           el viaje de la barra
  *   { "raton": [x, y] }
+ *   { "recargar": "?consulta" }       vuelve a cargar /v3 (con esa consulta) y sigue sin esperar
  */
 import { readFileSync } from 'node:fs'
 
@@ -27,6 +28,7 @@ type Paso =
   | { readonly captura: string }
   | { readonly viajar: string }
   | { readonly raton: readonly [number, number] }
+  | { readonly recargar: string }
 
 interface Pedido {
   readonly ancho: number
@@ -60,6 +62,7 @@ async function main(): Promise<void> {
         await capturar(b, `${salida}/${paso.captura}.png`)
         console.log(`captura: ${salida}/${paso.captura}.png`)
       } else if ('viajar' in paso) await viajarA(b, paso.viajar)
+      else if ('recargar' in paso) await b.p.conexion.enviar('Page.navigate', { url: `http://localhost:3000/v3${paso.recargar}` }, b.p.sessionId)
       else await raton(b, paso.raton, paso.raton)
     }
   } finally {

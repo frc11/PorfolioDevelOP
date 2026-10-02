@@ -6,7 +6,9 @@ import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import datosDeLaFuente from '../../../_fuentes/chivo-400-titulos.json'
-import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos, type TituloDeVolumen } from '../../titulos3d/registro'
+import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'
+import datosDeLaItalica from '../../../_fuentes/chivo-300-italica-titulos.json'
+import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos, type FuenteDelTitulo, type TituloDeVolumen } from '../../titulos3d/registro'
 import { conElAmanecer } from '../amanecer/luz'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio, SATINADO } from '../estudio'
@@ -62,6 +64,15 @@ const FILO_DE_DIA_GLSL = /* glsl */ `
 type Variante = 'negro' | 'blanco'
 
 const FUENTE = new Font(datosDeLaFuente as FontData)
+/** [RETOQUE 3D] Las fuentes de los títulos: la Chivo 400 de siempre, Archivo 700 y la Chivo 300 itálica del hero. */
+const FUENTES: Readonly<Record<FuenteDelTitulo, Font>> = {
+  'chivo-400': FUENTE,
+  'archivo-700': new Font(datosDeArchivo as FontData),
+  'chivo-300-italica': new Font(datosDeLaItalica as FontData),
+}
+
+/** [RETOQUE 3D] El lugar de un título en el cuadro, escribible: el de `pantalla` se recalcula en cada cuadro sin reservar. */
+type LugarVivo = { -readonly [K in keyof LugarEnElCuadro]: LugarEnElCuadro[K] }
 
 interface Armado {
   readonly titulo: TituloDeVolumen
@@ -70,7 +81,8 @@ interface Armado {
   readonly grupo: THREE.Group
   readonly malla: THREE.Mesh
   readonly material: THREE.MeshStandardMaterial
-  readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number } }
+  readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number }; readonly uLevanta: { value: number }; readonly uPieDeLaPalabra: { value: THREE.Vector2 } }
+  readonly fuente: Font
   readonly contorno: ContornoDelLogo
   colocado: boolean
   /**
@@ -82,6 +94,8 @@ interface Armado {
   mundoPorPx: number
   lugar: LugarEnElCuadro | null
   pin: PinDelLugar
+  /** [RETOQUE 3D] El de `pantalla`, en cada cuadro: su lugar de ahora en el cuadro. */
+  readonly ahora: LugarVivo
 }
 
 interface Props {
@@ -208,7 +222,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     }
   }, [camara, rig, stats, tam.width, tam.height])
 
-  useFrame((_, delta) => alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1)))
+  useFrame((_, delta) => alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), camara))
 
   return <group ref={raiz} name="titulos de volumen" />
 }
@@ -220,7 +234,7 @@ function descolocar(armados: readonly Armado[], ancho: number): void {
 }
 
 /** Un cuadro: la llegada y la salida de cada título (perseguidas), si se dibuja, dónde va (al empezar a llegar) y su luz. */
-function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number): void {
+function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
   if (s.armados.length === 0) return
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
@@ -228,9 +242,9 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
   const y = window.scrollY
   for (const a of s.armados) {
     if (a.titulo.queda) {
-      if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats)
+      if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
-      a.malla.visible = alCuadroDelQueQueda(a, enViaje, y, dt)
+      a.malla.visible = alCuadroDelQueQueda(a, enViaje, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
       continue
     }
@@ -246,10 +260,36 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       if (llegada <= 0) a.colocado = false
       continue
     }
-    if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats)
-    correr(a, 0)
+    if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
+    // [RETOQUE 3D] El de `pantalla` (3C) va con la página: fuera del cuadro no se dibuja.
+    const d = a.titulo.colocacion === 'pantalla' ? corrimiento(a.pin, y) : 0
+    if (fueraDelCuadro(a, d)) {
+      a.malla.visible = false
+      continue
+    }
+    ubicar(a, d, viva)
     iluminar(a, logo, nivel)
   }
+}
+
+/** [RETOQUE 3D] ¿Su renglón, corrido `d` px, quedó entero fuera del cuadro? */
+function fueraDelCuadro(a: Armado, d: number): boolean {
+  const l = a.lugar
+  return l !== null && (l.arriba + d > l.alto || l.arriba + l.linea + d < 0)
+}
+
+/**
+ * [RETOQUE 3D] Dónde va en este cuadro: `lectura`, corrido desde donde lo colocó la cámara de su lectura; `pantalla`, donde
+ * la cámara de ahora lo ve en su lugar del DOM de ahora (sin leer el DOM: su lugar al colocarse, corrido con la página).
+ */
+function ubicar(a: Armado, d: number, viva: THREE.Camera): void {
+  const l = a.lugar
+  if (a.titulo.colocacion === 'pantalla' && l !== null && viva instanceof THREE.PerspectiveCamera) {
+    a.ahora.arriba = l.arriba + d + a.titulo.corrida * l.alto
+    colocar(a.grupo, viva, a.ahora, a.fuente.data)
+    return
+  }
+  correr(a, d)
 }
 
 /** [RETOQUE 3D] B5 · el título, corrido desde donde se colocó: `d` px (su escenario) más la corrida de su pieza del DOM. */
@@ -258,15 +298,19 @@ function correr(a: Armado, d: number): void {
   a.grupo.position.copy(a.base).addScaledVector(a.arriba, -(d + a.titulo.corrida * alto) * a.mundoPorPx)
 }
 
-/** Una vez por llegada (y al cambiar el cuadro): el título donde la cámara de su lectura lo ve en su lugar del DOM. */
-function colocarElArmado(a: Armado, camara: THREE.PerspectiveCamera, aspecto: number, stats: ProbeStatsStore): void {
-  const nudo = camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, camara)
+/**
+ * Una vez por llegada (y al cambiar el cuadro): el título donde la cámara de su lectura lo ve en su lugar del DOM. El de
+ * `pantalla`, con la cámara de ahora (la de su lectura es ésa: lo que se ve ahora es lo que reemplaza).
+ */
+function colocarElArmado(a: Armado, camara: THREE.PerspectiveCamera, aspecto: number, stats: ProbeStatsStore, viva: THREE.Camera): void {
+  const nudo = a.titulo.colocacion === 'pantalla' && viva instanceof THREE.PerspectiveCamera ? viva : camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, camara)
   const lugar = lugarDeLectura(a.titulo.lugar, a.titulo.subida)
-  a.mundoPorPx = colocar(a.grupo, nudo, lugar, FUENTE.data) // una vez por llegada
+  a.mundoPorPx = colocar(a.grupo, nudo, lugar, a.fuente.data) // una vez por llegada
   a.lugar = lugar
+  Object.assign(a.ahora, lugar)
   a.base.copy(a.grupo.position)
   a.arriba.set(0, 1, 0).applyQuaternion(nudo.quaternion)
-  if (a.titulo.queda) a.pin = pinDelLugar(a.titulo.lugar)
+  if (a.titulo.queda || a.titulo.colocacion === 'pantalla') a.pin = pinDelLugar(a.titulo.lugar)
   a.colocado = true
 }
 
@@ -283,19 +327,22 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
  * túnel lo tapa) y mientras tanto nada cambia: después de un viaje desde más allá del túnel, la llegada espera a que se
  * vea. En un viaje del menú se va como todos. Devuelve si se dibuja.
  */
-function alCuadroDelQueQueda(a: Armado, enViaje: boolean, y: number, dt: number): boolean {
+function alCuadroDelQueQueda(a: Armado, enViaje: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
   const d = corrimiento(a.pin, y)
-  const l = a.lugar
-  const fuera = l !== null && (l.arriba + d > l.alto || l.arriba + l.linea + d < 0)
+  const fuera = fueraDelCuadro(a, d)
   const tapado = a.titulo.salida >= 0.999
-  if (fuera) m.llegada = 0
-  else if (!tapado) m.llegada = persigue(m.llegada, enViaje ? 0 : m.llegada > 0 ? 1 : a.titulo.llegada, dt)
+  // [RETOQUE 3D] El que no se rearma (el hero: llega una vez por carga) tampoco se va en un viaje.
+  const seVa = enViaje && a.titulo.rearma
+  if (fuera) {
+    if (a.titulo.rearma) m.llegada = 0
+  } else if (!tapado) m.llegada = persigue(m.llegada, seVa ? 0 : m.llegada > 0 ? 1 : a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0
-  correr(a, d)
-  return m.llegada > 0 && !fuera && !tapado
+  const visible = m.llegada > 0 && !fuera && !tapado
+  if (visible) ubicar(a, d, viva)
+  return visible
 }
 
 /** Con la página ociosa (a lo sumo en 1,5 s); Safari no tiene `requestIdleCallback`: ahí, en 200 ms. Devuelve cómo cancelarlo. */
@@ -314,9 +361,12 @@ function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRen
 }
 
 function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
-  const { geometria, contornos } = armarElTitulo(FUENTE, titulo.texto, posicionesDelDom(titulo.lugar))
+  const fuente = FUENTES[titulo.fuente]
+  const { geometria, contornos } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto)
   const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
-  const uniforms = { uLlegada: { value: 0 }, uSalida: { value: 0 }, uQuieto: { value: 0 } }
+  // [RETOQUE 3D] `levanta`: el pie de atrás de la palabra (el más bajo y el más atrás de su caja, em) es el eje del giro y la línea.
+  const caja = geometria.boundingBox ?? new THREE.Box3()
+  const uniforms = { uLlegada: { value: 0 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: titulo.gesto === 'levanta' ? 1 : 0 }, uPieDeLaPalabra: { value: new THREE.Vector2(caja.min.y, caja.min.z) } }
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
@@ -339,7 +389,7 @@ function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   malla.visible = false
   const grupo = new THREE.Group()
   grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, contorno, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 } }
+  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 } }
 }
 
 function soltar(a: Armado): void {

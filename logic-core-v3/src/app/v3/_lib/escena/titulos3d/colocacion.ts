@@ -147,29 +147,35 @@ export function lugarDeLectura(el: HTMLElement, subida: number): LugarEnElCuadro
     e = e.offsetParent instanceof HTMLElement ? e.offsetParent : null
   }
   if (e === null) {
-    const r = el.getBoundingClientRect()
-    return { izquierda: r.left, arriba: r.top - subida * innerHeight, linea, cuerpo, ancho: innerWidth, alto: innerHeight }
+    // [RETOQUE 3D] Sin escenario: su lugar en el documento (sin transformaciones: la llegada de la pieza la mueve) menos el
+    // scroll de ahora; con el recorrido de `pinDelLugar` (el scroll de ahora en las dos puntas) va con la página.
+    return { izquierda: x - scrollX, arriba: y - scrollY - subida * innerHeight, linea, cuerpo, ancho: innerWidth, alto: innerHeight }
   }
   const pegado = parseFloat(getComputedStyle(e).top) || 0
   return { izquierda: x + e.getBoundingClientRect().left, arriba: y + pegado - subida * innerHeight, linea, cuerpo, ancho: innerWidth, alto: innerHeight }
 }
 
 /**
- * La x de cada carácter del texto del elemento (em, desde el comienzo del renglón): lo que el navegador compuso, con el
- * interletrado y el kerning. Relativa a la caja del elemento, así que una escala de la pieza no la cambia.
+ * La x de cada letra del texto del elemento (em, desde el comienzo del renglón; sin los espacios): lo que el navegador
+ * compuso, con el interletrado y el kerning. Relativa a la caja del elemento, así que una escala de la pieza no la cambia.
  */
 export function posicionesDelDom(el: HTMLElement): number[] | null {
-  const nodo = el.firstChild
-  if (!(nodo instanceof Text) || nodo.length === 0) return null
+  // [RETOQUE 3D] Todos los nodos de texto que se ven, en orden (el registro 1 del hero son dos palabras en dos `span` y un
+  // espacio; «El equipo» va partido por el canal del texto, con su copia para el lector): las letras, sin los espacios.
+  const recorrido = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement?.closest('.sr-only') === null ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) })
   const caja = el.getBoundingClientRect()
   const escala = el.offsetWidth > 0 ? caja.width / el.offsetWidth : 1
   const cuerpo = parseFloat(getComputedStyle(el).fontSize)
   const rango = document.createRange()
   const x: number[] = []
-  for (let k = 0; k < nodo.length; k += 1) {
-    rango.setStart(nodo, k)
-    rango.setEnd(nodo, k + 1)
-    x.push((rango.getBoundingClientRect().left - caja.left) / escala / cuerpo)
+  for (let nodo = recorrido.nextNode(); nodo !== null; nodo = recorrido.nextNode()) {
+    if (!(nodo instanceof Text)) continue
+    for (let k = 0; k < nodo.length; k += 1) {
+      if (nodo.data[k].trim() === '') continue
+      rango.setStart(nodo, k)
+      rango.setEnd(nodo, k + 1)
+      x.push((rango.getBoundingClientRect().left - caja.left) / escala / cuerpo)
+    }
   }
-  return x
+  return x.length === 0 ? null : x
 }

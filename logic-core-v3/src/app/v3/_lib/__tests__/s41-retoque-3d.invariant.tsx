@@ -10,13 +10,19 @@
  *   B4 · «Y más…» de Tu panel aparece y se va en su lugar (una corrida corta con fundido), no cruzando la pantalla.
  *   B5 · «para elegirnos» separado del primer valor: la frase sube más (con el mismo lugar de las columnas) y el título
  *        de volumen sube con la levantada, como su pieza del DOM.
+ *   3A · el titular del hero en volumen (Archivo 700 y la Chivo 300 itálica): las letras llegan una vez por carga desde
+ *        lugares al azar de la sala; el DOM se pinta primero (LCP) y se apaga con una opacidad (sigue en el árbol
+ *        accesible); va con la página (`pantalla`), sin salida.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
 import { readFileSync } from 'node:fs'
+import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import { avanzarElPolvo, polvoInicial } from '../escena/polvo/posarse'
 import { corrimiento } from '../escena/titulos3d/colocacion'
+import { armarElTitulo } from '../escena/titulos3d/geometria'
+import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
 import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
@@ -33,7 +39,7 @@ const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && !/<TituloDeVolumen[^>]*\squeda/.test(porQue), 'Portfolio se queda (`queda`); la frase de Por qué develOP sigue con su salida')
 const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
-const terminaLaLlegada = (c: string): boolean => /m\.llegada = persigue\(m\.llegada, enViaje \? 0 : m\.llegada > 0 \? 1 : a\.titulo\.llegada, dt\)/.test(c)
+const terminaLaLlegada = (c: string): boolean => /m\.llegada = persigue\(m\.llegada, seVa \? 0 : m\.llegada > 0 \? 1 : a\.titulo\.llegada, dt, /.test(c)
 afirmar(terminaLaLlegada(escena), '  la llegada, una vez empezada, termina: el scroll para atrás a mitad de camino no la deja a medio armar («Portf\'o»)')
 controlPositivo('el detector VE la llegada que sigue al scroll para atrás', escena.replace('m.llegada > 0 ? 1 : a.titulo.llegada', 'a.titulo.llegada'), terminaLaLlegada)
 const conSuSeccion = (c: string): boolean => /correr\(a, d\)/.test(c) && /const d = corrimiento\(a\.pin, y\)/.test(c)
@@ -41,7 +47,7 @@ afirmar(conSuSeccion(escena), '  llegado, va corrido con su escenario: sale con 
 controlPositivo('el detector VE el título clavado en el mundo', escena.replace('correr(a, d)', 'correr(a, 0)'), conSuSeccion)
 const pin = { inicio: 5073, fin: 10986 }
 afirmar(corrimiento(pin, 4573) === 500 && corrimiento(pin, 7000) === 0 && corrimiento(pin, 11486) === -500, '  el corrimiento: antes del escenario clavado baja con la sección, clavado no se mueve, después sube con ella')
-afirmar(/if \(fuera\) m\.llegada = 0/.test(escena) && /return m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja y se rearma para la próxima llegada (desde Por qué develOP ya no se ve de espaldas)')
+afirmar(/if \(fuera\) \{\s*if \(a\.titulo\.rearma\) m\.llegada = 0/.test(escena) && /const visible = m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja y se rearma para la próxima llegada (desde Por qué develOP ya no se ve de espaldas)')
 const tapa = (f: (p: number) => boolean): boolean => !f(progresoDelPxDelTunel(0)) && !f(progresoDelPxDelTunel(400)) && f(progresoDelPxDelTunel(910))
 afirmar(tapa(primeraFotoTapa), '  lo esconde la primera foto del túnel recién cuando tapa el cuadro entero (no la huida del cartel: ahí todavía se veía)')
 controlPositivo('el detector VE el escondido con la foto chica', (p: number) => p >= progresoDelPxDelTunel(300), tapa)
@@ -90,5 +96,33 @@ const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform
 afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
 controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/salida: levantada, corrida \}\}/g, 'salida: levantada }}'), subeConLaLevantada)
 afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3A · El titular del hero en volumen: desde el azar de la sala, una vez')
+
+const fuenteDe = (archivo: string): FontData => JSON.parse(readFileSync(`${V3}/_fuentes/${archivo}`, 'utf8')) as FontData
+const archivo = fuenteDe('archivo-700-titulos.json')
+const italica = fuenteDe('chivo-300-italica-titulos.json')
+const registro1 = `${CONTENIDO_DEL_HERO.titularFila1} ${CONTENIDO_DEL_HERO.titularFila2}`.toUpperCase()
+const registro2 = CONTENIDO_DEL_HERO.titularFila3.toUpperCase()
+const cubre = (g: FontData['glyphs'], t: string): boolean => [...t].every((c) => g[c] !== undefined)
+afirmar(cubre(archivo.glyphs, registro1) && cubre(italica.glyphs, registro2) && /wght 700/.test(String(archivo.original_font_information.fontSubfamily)) && /wght 300/.test(String(italica.original_font_information.fontSubfamily)), 'cada registro con la fuente que el DOM pinta (Archivo 700 y la Chivo 300 itálica), en mayúsculas como el `uppercase`: cada letra tiene su glifo', `${registro1} · ${registro2}`)
+controlPositivo('el detector VE el registro en minúsculas (como está en el contenido)', `${CONTENIDO_DEL_HERO.titularFila1}`, (t: string) => cubre(archivo.glyphs, t))
+const hero = sinComentarios(leer('_secciones/hero/Hero.tsx'))
+const unaVezDesdeElAzar = (c: string): boolean => (c.match(/gesto: 'azar', llegada: null, queda: true, rearma: false/g) ?? []).length === 2
+afirmar(unaVezDesdeElAzar(hero) && /fuente: 'archivo-700'/.test(hero) && /fuente: 'chivo-300-italica'/.test(hero), '  los dos registros llegan desde el azar, solos y una vez (al armarse; no se rearman ni se van en un viaje), sin salida')
+controlPositivo('el detector VE un registro que se rearma', hero.replace('rearma: false', 'rearma: true'), unaVezDesdeElAzar)
+const usa = sinComentarios(leer('_componentes/titulos3d/useTextoDeVolumen.ts'))
+const clase = /TEXTO_REEMPLAZADO = '([^']*)'/.exec(usa)?.[1] ?? ''
+afirmar(/listo1 && TEXTO_REEMPLAZADO/.test(hero) && /listo2 && TEXTO_REEMPLAZADO/.test(hero) && clase.startsWith('escritorio:opacity-0 ') && !clase.includes('invisible'), '  el DOM se pinta primero (el LCP) y, con el título armado, se apaga con una opacidad desde 1024: sigue en el árbol accesible (es el `h1`)')
+const fuenteDelHero = new Font(archivo)
+const conAzar = armarElTitulo(fuenteDelHero, registro1, null, 'azar')
+const desde = conAzar.geometria.getAttribute('aDesde')
+const distintos = new Set<string>()
+for (let k = 0; k < desde.count; k += 1) distintos.add(`${desde.getX(k).toFixed(2)},${desde.getY(k).toFixed(2)},${desde.getZ(k).toFixed(2)}`)
+const repetido = armarElTitulo(fuenteDelHero, registro1, null, 'azar').geometria.getAttribute('aDesde')
+afirmar(distintos.size === conAzar.letras && repetido.getX(0) === desde.getX(0) && [...distintos].every((d) => Number(d.split(',')[2]) < 0), '  cada letra sale de un lugar distinto de la sala (sembrado: el mismo en cada carga), nunca de delante de la cámara', `${String(distintos.size)} lugares para ${String(conAzar.letras)} letras`)
+const enFila = armarElTitulo(fuenteDelHero, registro1).geometria.getAttribute('aDesde')
+afirmar(enFila.getX(0) === 0 && enFila.getZ(0) < 0, '  y los títulos de siempre (`letras`) salen de donde salían (de atrás, `aDesde` constante)')
 
 cerrar('s41-retoque-3d')

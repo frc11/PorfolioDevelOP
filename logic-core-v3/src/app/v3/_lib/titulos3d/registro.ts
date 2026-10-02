@@ -4,6 +4,10 @@ import { motionValue, useMotionValueEvent, type MotionValue } from 'motion/react
 import { useEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
+import type { LlegadaDelTitulo } from '../escena/titulos3d/llegada'
+
+/** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
+export type FuenteDelTitulo = 'chivo-400' | 'archivo-700' | 'chivo-300-italica'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN, del lado del DOM — sin three: la sección anota acá su título (el lugar que
@@ -40,6 +44,17 @@ export interface TituloDeVolumen {
    * (fracción del cuadro, positivo hacia abajo): la levantada de la frase de Por qué develOP. El título va corrido igual.
    */
   corrida: number
+  /**
+   * [RETOQUE 3D] La fuente; el gesto de la llegada (`letras`, `azar`, `levanta`: `llegada.ts`); dónde se coloca
+   * (`lectura`: quieto en el mundo, donde la cámara de su lectura lo ve en su lugar; `pantalla`: en cada cuadro donde la
+   * cámara de ahora lo ve en su lugar del DOM, para lo que va con la página y no tiene escenario); si el que se queda se
+   * rearma al salir del cuadro (el hero no: llega una vez por carga); y cuánto tarda la llegada como mínimo (s).
+   */
+  readonly fuente: FuenteDelTitulo
+  readonly gesto: LlegadaDelTitulo
+  readonly colocacion: 'lectura' | 'pantalla'
+  readonly rearma: boolean
+  readonly minimoS: number | null
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -81,22 +96,27 @@ interface Anotacion {
   readonly salida: MotionValue<number> | null
   readonly queda?: boolean
   readonly corrida?: MotionValue<number> | null
+  readonly fuente?: FuenteDelTitulo
+  readonly gesto?: LlegadaDelTitulo
+  readonly colocacion?: 'lectura' | 'pantalla'
+  readonly rearma?: boolean
+  readonly minimoS?: number | null
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0 })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, activo])
+  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p
