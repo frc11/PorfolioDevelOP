@@ -8,6 +8,7 @@
  *   B3 · el encendido del haz: en los intentos parpadea la luz entera (la columna y el charco), no el cono de polvo solo.
  *   B4 · «Y más…» y el newsletter entran ni bien asoman y se van recién cuando están por salir, bien abajo.
  *   B6 · la frase de Por qué develOP («Seis razones / para elegirnos») sin salida, como Portfolio.
+ *   D4 · las fotos del equipo sin el marco 3D: vuelven a como estaban antes del RETOQUE 3D (la llegada en curva y el hover).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -80,5 +81,13 @@ const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx
 const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{null\}[^>]*\squeda \/>/.test(c) && !/salida: levantada/.test(c)
 afirmar(sinSalida(porQue), 'las dos mitades se quedan (`queda`, sin `salida`): la llegada, una vez empezada, termina (el scroll rápido no la deja a medio armar) y se van con su sección, como Portfolio')
 controlPositivo('el detector VE la frase que se iba con la levantada', porQue.replace('llegada: frase, corrida }', 'llegada: frase, salida: levantada, corrida }'), sinSalida)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D4 · Las fotos del equipo, como antes')
+
+const equipo = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
+const comoAntes = (c: string): boolean => /<LlegadaEnCurva\s+progreso=\{perseguido\}\s+sentido=\{aLaDerecha \? 'desde-la-derecha' : 'desde-la-izquierda'\}/.test(c) && !/FotoEnVolumen/.test(c) && (c.match(/<MarcoDeDosTomas/g) ?? []).length === 2
+afirmar(comoAntes(equipo) && !existsSync(`${V3}/_secciones/quienes-somos/fotoEnVolumen.tsx`), 'los retratos llegan en curva como antes del RETOQUE 3D y la foto del equipo con su bloque; el marco 3D se borró; el hover desde el punto (`MarcoDeDosTomas`) sigue')
+controlPositivo('el detector VE el marco 3D', `${equipo}\n<FotoEnVolumen progreso={progreso} lado="derecha">`, comoAntes)
 
 cerrar('s42-cierre-retoque')

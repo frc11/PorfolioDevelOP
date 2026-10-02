@@ -45,7 +45,6 @@ import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido
 import { CONTENIDO as CONTENIDO_DE_QUIENES } from '../../_secciones/quienes-somos/contenido'
 import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
-import { FOTO_EN_VOLUMEN, poseDeLaFoto } from '../../_secciones/quienes-somos/fotoEnVolumen'
 import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-develop/valorEnVolumen'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
@@ -175,25 +174,7 @@ afirmar(debajoDelPie([giro(0.7, espesor, Math.PI / 2), giro(0, espesor, Math.PI 
 controlPositivo('el detector VE la acostada hacia atrás (se vería arriba de la línea)', [giro(0.7, espesor, -Math.PI / 2)], debajoDelPie)
 afirmar(/if \( vSobreElPie < 0\.002 \) discard;/.test(DISOLVER_GLSL), '  lo que queda debajo del pie no se dibuja: aparece de la nada recién cuando se levanta')
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('3D · Las fotos del equipo: desde atrás, en un marco con espesor')
-
-const zDe = (t: string): number => Number(/translate3d\(0, 0, (-?[\d.]+)px\)/.exec(t)?.[1] ?? 0)
-const llegaDeAtras = (pose: typeof poseDeLaFoto): boolean => {
-  let anterior = -Infinity
-  for (let k = 0; k <= 50; k += 1) {
-    const { transform } = pose(k / 50, 'derecha')
-    const z = transform === 'none' ? 0 : zDe(transform)
-    if (z < anterior - 1e-6 || z > 0) return false
-    anterior = z
-  }
-  return zDe(pose(0, 'derecha').transform) <= -1000 && pose(1, 'izquierda').transform === 'none' && pose(0, 'izquierda').opacidad === 0
-}
-afirmar(llegaDeAtras(poseDeLaFoto), 'llega desde atrás de la sala (de 1.000 px o más, apagada y girada) y se asienta sin transformada; es una función del progreso: con el scroll para arriba, la salida es la inversa', `${String(FOTO_EN_VOLUMEN.profundidad)} px, ${String(FOTO_EN_VOLUMEN.giro)}°`)
-controlPositivo('el detector VE la llegada desde adelante', ((q: number, l: 'izquierda' | 'derecha') => { const pz = poseDeLaFoto(q, l); return { ...pz, transform: pz.transform.replace('0, 0, -', '0, 0, ') } }) as typeof poseDeLaFoto, llegaDeAtras)
-const foto = sinComentarios(leer('_secciones/quienes-somos/fotoEnVolumen.tsx'))
-afirmar(/if \(progreso === null\) return <>\{children\}<\/>/.test(foto) && (foto.match(/data-parte="canto"/g) ?? []).length === 1 && /transformStyle: 'preserve-3d'/.test(foto) && !/requestAnimationFrame|setTimeout|setInterval/.test(foto), '  el marco: cuatro cantos que van hacia atrás (CSS 3D); sin coreografía (abajo de 1025, movimiento reducido) la foto sola, plana; sin reloj propio')
-afirmar((equipo.match(/<FotoEnVolumen progreso=/g) ?? []).length === 2 && /CONTENIDO.personas.map/.test(equipo) && !/LlegadaEnCurva/.test(equipo), '  las tres fotos (los dos retratos, en el mapa de las personas, y la del equipo); la llegada en curva de antes se fue; el hover (`MarcoDeDosTomas`) no se tocó')
+// [CIERRE] 3D · las fotos del equipo volvieron a como estaban (sin marco 3D): s42 · D4.
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3E · Las demos se levantan desde atrás')
