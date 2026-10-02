@@ -286,10 +286,16 @@ class Nodo {
     if (m[1] !== '' && m[1].toUpperCase() !== this.tagName) return false
     return [...m[2].matchAll(/\[([\w-]+)(?:="([^"]*)")?\]/g)].every((a) => (a[2] === undefined ? this.hasAttribute(a[1]) : this.getAttribute(a[1]) === a[2]))
   }
+  /** Este nodo y sus ancestros, en orden (sin alias de `this`: [CIERRE RETOQUE 3D] el lint de `no-this-alias`). */
+  private desdeAca(): Nodo[] {
+    const lista: Nodo[] = [this]
+    for (let p = this.parentElement; p !== null; p = p.parentElement) lista.push(p)
+    return lista
+  }
   closest(selector: string): Nodo | null {
     for (const alternativa of selector.split(',').map((s) => s.trim())) {
       const partes = alternativa.split(/\s+/)
-      for (let n: Nodo | null = this; n !== null; n = n.parentElement) {
+      for (const n of this.desdeAca()) {
         if (!n.es(partes[partes.length - 1])) continue
         let ok = true
         let arriba = n.parentElement
