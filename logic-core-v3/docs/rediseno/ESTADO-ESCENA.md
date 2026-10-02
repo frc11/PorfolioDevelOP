@@ -14,6 +14,11 @@
 > sala detrás del menú del teléfono) y la vista previa del destino están en el producto, sin bandera (§1); de día se
 > sacó la mancha de contacto (queda la sombra real del logo). El costo, contra b26c8c45: el mismo ritmo a 75 Hz y el
 > mismo tiempo de GPU (`~/.cache/b4-medicion/interfaz2/cierre/costo/`).
+>
+> **3D Y SONIDO:** los títulos de volumen de ESCENA 10 están en el producto (T1 `92d345e8`, el negro satinado; el blanco con
+> `?pruebas=titulos=blanco`), con la llegada aislada del navbar (§1, §7). La prueba que queda es el sonido (T2 `708aa941`,
+> `sonido=si`: `ESTADO-INTERFAZ.md` §7). Las entregas, en `~/.cache/b4-medicion/3d-sonido/` (un `mirar.txt` por ticket
+> y un `LEEME.txt`).
 
 ---
 
@@ -63,6 +68,7 @@
 | **[INTERFAZ 2] · la vista previa del destino** | El puntero o el foco sobre un ítem de la barra corre la luz hacia la del destino ADENTRO de su clase (`RIM_NIGHT_LEVEL` como frontera, el encendido del haz como juez) y gira la cámara 7° junto al del mouse; el viaje la descuenta con su avance (sin salto) | `interfaz/anticipacion.ts`, `OrbitRig.tsx`, `_chrome/escena/AnticipacionDelMenu.tsx` |
 | **[ESCENA 10] T1 · el tono ACES compensado** | El color de ACES con la curva de brillo de Neutral (en un gris, Neutral exacto): el tono `Custom` de three, para todo el lienzo. Neutral como opción y AgX se borraron | `tono.ts`, `configuracionDelCanvas.ts` |
 | **[ESCENA 10] T1 · el scroll de nk** | Lenis en modo `lerp` 0,1 sobre la instancia de /v3 (la construcción sigue con las opciones del sitio); el sedoso se borró | `_componentes/lenisDeNk.ts` |
+| **[3D Y SONIDO] T1 · los títulos de volumen** | Los de ESCENA 10 (T3), en el producto: Portfolio y la frase de Por qué develOP, la Chivo extruida con el negro satinado del logo (el blanco, con `titulos=blanco`). En un viaje del menú ninguno llega (lo pedido es 0); al terminar, la llegada repetida del destino (el retoque 3 del navbar) trae las letras desde la profundidad con la cámara quieta; con el scroll, la de siempre. El DOM esconde su texto recién con el título armado y compilado (sin WebGL se lee el texto) y sólo desde 1024: abajo, ni se descarga el módulo | `titulos3d/`, `_lib/titulos3d/registro.ts`, `_componentes/titulos3d/TituloDeVolumen.tsx`, `PruebasDeLaEscena.tsx` |
 
 ### Excepciones aprobadas a DIRECCION-ESCENA (no «corregir»)
 
@@ -92,6 +98,7 @@ las pruebas nombradas; sin él, sólo lo que la lista nombra; `base` es la escen
 | `cielo-dia=no` | [CALIDAD 1] A2 · sin el cielo de día (queda el fondo de la bruma, como antes) |
 | `orden-piso=no` | [ESCENA 9] T4 · los bloques del piso vivo en el orden de la grilla (el de antes) |
 | `logo-noche=no` · `material=no` · `sombra-logo=no` | [ESCENA 10] T1 · sin el logo de noche claro, sin el satinado (el mate de antes) y sin la sombra del logo |
+| `titulos=no` · `titulos=blanco` | [3D Y SONIDO] T1 · sin los títulos de volumen (el texto de antes) · con el material blanco, para comparar (también en la URL: `/v3?pruebas=titulos=blanco`) |
 
 ### Las pruebas (apagadas en el producto)
 
@@ -109,11 +116,13 @@ queda el del lienzo de CALIDAD 1, que ya estaba en el producto (Valentino); con 
 
 [ESCENA 10] La de este sprint (con banco, en el pedido; sin banco, en la URL). **Cierre: le encantaron, pero van en
 una etapa posterior (la de 3D).** Quedan con su bandera, apagados en el producto y sin borrar, las dos variantes
-(`negro` y `blanco`): pendiente aprobado (§7).
+(`negro` y `blanco`): pendiente aprobado (§7). **[3D Y SONIDO] T1: al producto** (el negro; `titulos` dejó de ser una
+prueba y es una bandera del producto, arriba). La prueba que queda es `sonido=si` (T2: el parlante y lo que suena;
+`ESTADO-INTERFAZ.md` §7).
 
 | Token | Efecto |
 |---|---|
-| `titulos=negro` · `=blanco` | T3 · los títulos de Portfolio y de la frase de Por qué develOP como objetos de la escena: la Chivo (OFL, la WOFF2 del sitio en 400, `_fuentes/chivo-400-titulos.json`) extruida, una malla por título, quieta en el mundo donde la cámara del momento de la lectura (medido: `LECTURA` en `_lib/titulos3d/registro.ts`) la ve en el lugar del DOM; las letras llegan desde atrás girando y se van igual, persiguiendo al progreso de la pieza con un mínimo de 1,4 s. De noche, el dibujo del logo (su emisión, costados negros, tapas claras con filo); el blanco de día, con un filo oscuro. El DOM conserva el texto (sr-only) y su lugar (invisible, sin anunciar). Un módulo aparte que sólo se descarga con la bandera (`escena/titulos3d/`, `PruebasDeLaEscena.tsx`) |
+| ~~`titulos=negro` · `=blanco`~~ (al producto en 3D Y SONIDO) | T3 · los títulos de Portfolio y de la frase de Por qué develOP como objetos de la escena: la Chivo (OFL, la WOFF2 del sitio en 400, `_fuentes/chivo-400-titulos.json`) extruida, una malla por título, quieta en el mundo donde la cámara del momento de la lectura (medido: `LECTURA` en `_lib/titulos3d/registro.ts`) la ve en el lugar del DOM; las letras llegan desde atrás girando y se van igual, persiguiendo al progreso de la pieza con un mínimo de 1,4 s. De noche, el dibujo del logo (su emisión, costados negros, tapas claras con filo); el blanco de día, con un filo oscuro. El DOM conserva el texto (sr-only) y su lugar (invisible, sin anunciar). Un módulo aparte que sólo se descarga con la bandera (`escena/titulos3d/`, `PruebasDeLaEscena.tsx`) |
 
 [INTERFAZ 2] Las de ese sprint (`responde`, `anticipa`, `vida`, `recorrido`) se borraron en el cierre: lo aprobado está
 en el producto (§1) y `Pruebas` vuelve a ser sólo `titulos`. El detalle, en `ESTADO-INTERFAZ.md` §5.
@@ -220,6 +229,10 @@ pasadas de su desenfoque); de noche 20–21 y 122.624 (la sombra no se dibuja). 
 por cuadro; la frase (las dos mitades) +29.688 triángulos, +1 a +2 llamadas, +0,27 a +0,34 ms. Fuera de su lectura no
 se dibujan.
 
+**[3D Y SONIDO] T1 · los títulos en el producto** (NVIDIA, 1440, en el medio de cada lectura, contra `titulos=no`;
+`3d-sonido/t1-titulos/costo-NVIDIA-1440.json`): Portfolio +6.524 triángulos y +1 llamada, los títulos 0,03 ms de GPU por
+cuadro; la frase +29.687 y +1, 0,18 ms (el blanco, 0,23). Dentro del presupuesto de §4.
+
 ## 4 · Reglas de rendimiento: lo que todo efecto nuevo tiene que cumplir ([CALIDAD 1] B13)
 
 1. **Todo en segundos, nunca en cuadros.** Lo que se mueve integra con el `dt` del cuadro, acotado contra los
@@ -256,6 +269,8 @@ se dibujan.
 
 ## 5 · Los invariantes
 
+`npm run test:s40-3d-sonido` ([3D Y SONIDO] una sección por ticket con sus controles: la máscara de las fotos desde
+un punto, los títulos en el producto con el viaje y el DOM, el sonido),
 `npm run test:s38-interfaz2` ([INTERFAZ 2] la escena que responde a la interfaz, en el producto desde el cierre: el pulso
 pedido, la onda dirigida, la luz con el menú, la anticipación del destino; y lo del cierre: el cartel, el infinito, la
 sombra de día; una sección por ticket con sus controles positivos),
@@ -372,7 +387,11 @@ instrumento y los dos detectores, los que usa el invariante) y `destello-clip.ts
   → [ESCENA 9] T3 los probó con bandera (abajo).
 - ~~**[ESCENA 9] T3, T4 y T5 · por decidir**~~ → [ESCENA 10] T1: decididas (§1 y §2), el antialiasing también: el del
   lienzo de CALIDAD 1 (TAA no).
-- **PENDIENTE APROBADO · la etapa de 3D: los títulos de volumen** ([ESCENA 10] T3). A Valentino le encantaron; van en
+- ~~**PENDIENTE APROBADO · la etapa de 3D: los títulos de volumen**~~ → **[3D Y SONIDO] T1: en el producto** (el
+  negro; §1). Lo que sigue (propuesto, no construido; `3d-sonido/t1-titulos/propuesta/`, con capturas simuladas): el
+  Cierre sí («Lo que sigue lo armamos con vos», con la escena a la vista), Quiénes somos quizás (su énfasis habría que
+  rehacerlo en 3D), Tu panel y Servicios no (secciones opacas: la escena no se dibuja ahí). Lo que decía antes:
+  **PENDIENTE APROBADO · la etapa de 3D: los títulos de volumen** ([ESCENA 10] T3). A Valentino le encantaron; van en
   una etapa posterior. Quedan como están: con su bandera (`titulos=negro`, `titulos=blanco`), apagados en el producto y
   SIN borrar (el módulo perezoso `escena/titulos3d/`, `_componentes/titulos3d/`, `_lib/titulos3d/registro.ts`, la
   fuente `_fuentes/chivo-400-titulos.json` y su lugar en Portfolio y en la frase de Por qué develOP). Lo que queda por

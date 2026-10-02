@@ -1,4 +1,4 @@
-# Estado de la interfaz — después de INTERFAZ 1, INTERFAZ 2 y NAVBAR V3
+# Estado de la interfaz — después de INTERFAZ 1, INTERFAZ 2, NAVBAR V3 y 3D Y SONIDO
 
 > Qué hay en la capa de interfaz de /v3 (el texto en movimiento, el rollover, el cursor, los estados), las variantes en
 > la URL, los invariantes y lo que quedó abierto. La escena tiene su propio estado (`ESTADO-ESCENA.md`). Las entregas de
@@ -35,6 +35,10 @@
 > **Cierre del navbar:** el hover de la barra es la variante `b`, el resaltado que se desliza (`b92b1f09`: la `a` y la
 > bandera se borraron); lo demás del retoque, aprobado. Y se recuperó el hover de las fotos del equipo (`c5cfa28b`,
 > §6). Clips en `~/.cache/b4-medicion/navbar/cierre/fotos/`.
+>
+> **3D Y SONIDO:** tres tickets, un commit cada uno: T0 `7f8aaa08` (el hover de las fotos arranca desde un punto), T1 `92d345e8`
+> (los títulos 3D de ESCENA 10 al producto, con la llegada aislada del navbar: `ESTADO-ESCENA.md`), T2 `708aa941` (el sonido,
+> con bandera y apagado en el producto: §7). Las entregas, en `~/.cache/b4-medicion/3d-sonido/` (`LEEME.txt`).
 >
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
@@ -100,7 +104,8 @@ píxel corrido (la pista para en −0,5 px) y se ve suavizado. `_estilos/foco.cs
   `aria-haspopup` (`Cta`), el input del newsletter que acepta texto con el envío deshabilitado (`Novedades`).
 - Diseño: una pausa para el video de Servicios y para el carrusel del teléfono (WCAG 2.2.2); flechas en el carrusel.
 - El CTA que rota de Servicios se desmonta fuera de su tramo (con Tab no se llega en escritorio).
-- Los títulos de volumen (ESCENA 10 T3) siguen pendientes para la etapa de 3D: no entraron al canal del texto.
+- ~~Los títulos de volumen (ESCENA 10 T3) siguen pendientes para la etapa de 3D~~ → [3D Y SONIDO] T1: en el producto
+  (Portfolio y la frase); no entraron al canal del texto (la pieza del DOM sigue llegando por su canal, invisible).
 
 ## 5 · INTERFAZ 2 · en el producto (cierre)
 
@@ -140,7 +145,7 @@ más: la pausa del panel) y `SELECTOR_DE_LOS_VIAJES` (sin los puntos del indicad
 | T3 · el vidrio | Desenfoque 12 px y saturación 1,8 del fondo, especular arriba, filo de luz; en Chromium, la refracción del canto (un filtro SVG en el `backdrop-filter`: Safari no lo pinta y, con él, pierde el desenfoque; se detecta por motor, `navigator.userAgentData`). El tono de la zona, leído al abrir: sobre zona clara vidrio oscuro, sobre oscura vidrio claro. El texto en AA contra cualquier fondo (tinte 56 %; medido 6,5 y 6,7:1; 6,33 y 6,68 en el retoque). Durante el Genie, el mismo vidrio con un filo que sigue a la silueta; sin copia plana ni relevo, y sin sombra de afuera (el recorte la cortaba) | `_estilos/vidrio.css`, `_chrome/menu/{lente.ts,LenteDelVidrio.tsx}` |
 | T3 · el diálogo | El foco atrapado (la trampa sólo abierto), el botón de cerrar ADENTRO en el lugar del botón del menú, Esc y tocar afuera cierran, el foco vuelve al botón. Ítems en `titulo-m`, renglones de 48 px como mínimo. El tono del botón con la noche que se ve (`nocheQueSeVe`) | `MenuMovil.tsx`, `useTonoDebajo.ts` |
 | T4 · el contacto | La hoja del teléfono entra entera en una pantalla a 390 × 844 y a 375 × 667 (y a 390 × 664, las barras de Safari de un iPhone 14/15) con el botón de enviar a la vista, sin sacar campos. La de escritorio no cambia | `_chrome/contacto/{FormularioDeContacto,CamposDelContacto}.tsx` |
-| Cierre · el hover de las fotos del equipo | Recuperado (`ee87777b` lo había cambiado por un fundido), como el de nk: la foto descontracturada crece desde un rectángulo chico en el centro hasta llenar la tarjeta (una máscara, `clip-path`, 400 ms), después suben abajo a la izquierda el nombre y el rol, escalonados; al salir, al revés. Son transiciones: entrar y salir rápido se revierte desde donde va. El foco hace lo mismo; con movimiento reducido, un fundido. En el teléfono, sin hover: el toque abre y cierra (el botón del marco que ya estaba). Las fotos salen en AVIF (WebP de respaldo) al tamaño del `sizes` | `_secciones/quienes-somos/{marco,equipo}.tsx`, `next.config.ts` (`images.formats`) |
+| Cierre · el hover de las fotos del equipo | Recuperado (`ee87777b` lo había cambiado por un fundido), como el de nk: la foto descontracturada crece desde un punto de 2 px en el centro ([3D Y SONIDO] T0; antes, un rectángulo de ~17 %, y con la curva de apertura que arranca rápido) hasta llenar la tarjeta (una máscara, `clip-path`, 400 ms), después suben abajo a la izquierda el nombre y el rol, escalonados; al salir, al revés. Son transiciones: entrar y salir rápido se revierte desde donde va. El foco hace lo mismo; con movimiento reducido, un fundido. En el teléfono, sin hover: el toque abre y cierra (el botón del marco que ya estaba). Las fotos salen en AVIF (WebP de respaldo) al tamaño del `sizes` | `_secciones/quienes-somos/{marco,equipo}.tsx`, `next.config.ts` (`images.formats`) |
 
 **El costo del menú** (390 × 844, NVIDIA): con la CPU normal, un cuadro largo en la primera apertura (40–173 ms) y
 después 13,3 ms; con la CPU ×4, abrir y cerrar con p95 27–67 ms y un cuadro largo en el clic (107–295 ms); el vidrio
@@ -166,3 +171,21 @@ positivos). Bancos: `scripts-navbar/` (`t1-viajes`, `t1-sonda-destello`, `t2-bar
 barra propia, el menú nuevo), `s27-viajes` (la barra propia, una duración, el nuevo reposo de Quiénes somos), `s38`
 (el selector de la anticipación; `s26`, `s27` y `s38` leen el menú en sus tres archivos), `s3-archivos` y el registro (`barra.css`, `vidrio.css`), el instrumento del destello y
 los bancos que tocaban la barra (`scripts-viajes`, `scripts-interfaz1/2`, `scripts-b11`).
+
+## 7 · 3D Y SONIDO · el sonido (con bandera, apagado en el producto)
+
+Hasta que Valentino lo escuche, el producto no suena ni descarga nada de sonido. El sitio con sonido:
+`/v3?pruebas=sonido=si` (aparece el parlante); la página de prueba: `/v3?sonidos=1` (un botón y un volumen por sonido,
+que se guardan en el navegador y usa el sitio). Las fuentes y las licencias: `docs/rediseno/SONIDO.md` (once sonidos
+generados con síntesis propia, CC0; howler.js 2.2.4, MIT).
+
+| Pieza | Qué hace | Dónde |
+|---|---|---|
+| El parlante | Junto al infinito (en escritorio a su izquierda; en el teléfono encima), en su lenguaje (trazo fino, puntas redondas, el borde tenue del tono contrario) y con su tono (copia el `data-seccion` que el infinito leyó). Apagado por defecto; la elección se recuerda (`localStorage` con try/catch). Si quedó prendido de otra visita, el motor llega con la primera acción en la página | `_chrome/sonido/ControlDelSonido.tsx`, `_lib/sonido/preferencia.ts` |
+| El motor | howler con UN sprite (Opus 124 KB; AAC 151 KB para Safari), descargado recién al prender (un `import()`). Un sonido pedido antes de que el archivo cargue se descarta. Cada uno con su volumen y su separación mínima; los largos no se pisan; `callar` los funde. El ambiente: los dos bucles a la vez, repartidos por la noche que se ve; sin él con movimiento reducido o con la pestaña oculta | `_lib/sonido/{motor,catalogo,sprite}.ts`, `_chrome/sonido/motorCompartido.ts` |
+| El bus | `sonar` y `callar`, lo único que importan las piezas que suenan: sin motor no hacen nada | `_lib/sonido/bus.ts` |
+| Dónde suena | La barra (`tic`), cualquier enlace o botón (`clic`, un oyente delegado), el Genie del menú y de las demos (`abre`, `cierra`), las fotos del equipo (`foto`: el mouse, el foco, el toque), el principal del pulso (`pulso`), el guion del haz (`encendido`), el túnel (`tunel`), el amanecer que arranca de a poco (`amanecer`) y el ambiente (`dia`, `noche`). En la escena, sólo en un cambio (nada por cuadro) | `BarraDelHome.tsx`, `MenuDeVidrio.tsx`, `VentanaDeDemo.tsx`, `marco.tsx`, `entorno/Entorno.tsx`, `amanecer/Amanecer.tsx` |
+| La página de prueba | Un panel sobre el sitio: «Cargar los sonidos» (la acción que habilita el audio), «Sonar» y un volumen por sonido, el bucle de cada ambiente, el general, «Volver a los de fábrica» y los valores escritos para pasarlos | `_chrome/sonido/PruebaDeSonidos.tsx` |
+
+Invariante: `npm run test:s40-3d-sonido` (la sección de T2). Banco: `scripts-3d-sonido/t2-sonido.ts` (sin oírlo: qué se
+descarga y cuándo, y qué sonido pide cada gesto) y el generador, `t2-sonidos.ts`.
