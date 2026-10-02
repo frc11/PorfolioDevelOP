@@ -70,20 +70,18 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
  * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
  * volumen, para que decida Valentino. [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`); la prueba
- * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró); la prueba es el túnel lento.
+ * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera).
  */
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
 
 export interface Pruebas {
-  /** [RETOQUE 3D] 3J · el túnel de Trabajos más lento en escritorio (`trabajos/ritmo.ts`); `tunel=lento`. */
-  readonly tunel: 'lento' | 'no'
   /** [RETOQUE 3D] Las tres variantes del polvo para comparar (`polvo/variantes.ts`); `polvo=a`, `polvo=b`, `polvo=c`. */
   readonly polvo: 'a' | 'b' | 'c' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { tunel: 'no', polvo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { polvo: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -93,7 +91,6 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
-    tunel: unoDe<'lento'>(['lento'], valor('tunel')),
     polvo: unoDe<'a' | 'b' | 'c'>(['a', 'b', 'c'], valor('polvo')),
   }
 }
@@ -289,7 +286,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=tunel=lento`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=polvo=b`.
     // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     const pedido = pruebas === null ? null : entornoPedido(`producto,${pruebas}`)

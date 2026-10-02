@@ -1,9 +1,6 @@
 'use client'
 
 import { useMotionValue } from 'motion/react'
-import { useSyncExternalStore } from 'react'
-
-import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 
 import { Bloque, CoreografiaEnTodoAncho, useCoreografiaActiva, type Progreso } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -13,7 +10,7 @@ import { CapaDeLaGota } from './CapaDeLaGota'
 import { CapaDelTunel } from './CapaDelTunel'
 import { CapaDeDemos } from './demos/CapaDeDemos'
 import { PortadaDeTrabajos, RamaQuieta } from './piezas'
-import { CLASE_DEL_TUNEL_LENTO, ESTILO_DEL_RITMO, ESTILO_DEL_RITMO_LENTO } from './ritmo'
+import { ESTILO_DEL_RITMO } from './ritmo'
 
 /**
  * 04 · TRABAJOS — el preludio, la conversión y el túnel. **[PORTFOLIO]**
@@ -81,25 +78,18 @@ const CLASES_DE_LA_RAMA = {
   },
 } as const
 
-/** [RETOQUE 3D] 3J · la prueba del túnel lento, leída después de hidratar (el servidor no la conoce). */
-const sinCambios = (): (() => void) => () => undefined
-function useTunelLento(): boolean {
-  return useSyncExternalStore(sinCambios, () => entornoDeLaEscena().pruebas.tunel === 'lento', () => false)
-}
-
 function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
   // ⚠️ UN SOLO valor amortiguado para el cartel y el túnel: lo escribe el túnel y
   // lo lee el cartel, así que subiendo el cartel no puede volver encima del túnel.
   const mostrado = useMotionValue(0)
   const animada = useCoreografiaActiva()
-  const lento = useTunelLento() && animada
   const clases = CLASES_DE_LA_RAMA[animada ? 'animada' : 'quieta']
   return (
     // ⚠️ Sin `bg-fondo` en móvil: la sección es `oscuro-transparente` y la
     // oscuridad la tiene que dar la SALA, no el panel. Pintarla acá tapaba el
     // canvas abajo de 1025 y con él lo único que esta sección viene a mostrar.
     // Quien la lleva a la noche en los dos lados del umbral es el disparo.
-    <Seccion seccion={seccion} className={lento ? `${clases.seccion} ${CLASE_DEL_TUNEL_LENTO}` : clases.seccion} style={animada ? (lento ? ESTILO_DEL_RITMO_LENTO : ESTILO_DEL_RITMO) : undefined}>
+    <Seccion seccion={seccion} className={clases.seccion} style={animada ? ESTILO_DEL_RITMO : undefined}>
       {/* ⚠️ El `min-h-[inherit]` viaja por la cadena ENTERA o no llega: el bloque
           está entre la sección y el envoltorio, y sin él el envoltorio hereda el
           cero del bloque en vez del alto del panel. Medido: la rama quieta
@@ -113,7 +103,7 @@ function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
               {/* El recorte del túnel NO va acá: va adentro, como estilo, porque
                   necesita un margen de recorte y eso no es una clase. Ver el
                   docblock de `RECORTE_DEL_TUNEL` en `CapaDelTunel.tsx`. */}
-              <CapaDelTunel progreso={progreso} mostrado={mostrado} key={lento ? 'lento' : 'tabla'} className="pointer-events-none absolute inset-0" />
+              <CapaDelTunel progreso={progreso} mostrado={mostrado} className="pointer-events-none absolute inset-0" />
               {/* ⚠️ Las demos van DESPUÉS del túnel porque se LEEN después, y se pintan
                   DEBAJO por su `z-index` negativo: así el túnel no cambia en nada
                   (`demos/CapaDeDemos.tsx`). */}

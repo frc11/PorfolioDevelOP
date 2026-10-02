@@ -48,9 +48,10 @@ titulo('Cierre · lo aprobado pasó al producto: las banderas del sprint ya no e
 
 // [3D Y SONIDO] T1: los títulos de ESCENA 10 pasaron al producto; la prueba que queda es el sonido.
 // [RETOQUE 3D] 3J: + la del túnel lento; el sonido pasó al producto (su bandera se borró).
-afirmarIgual(Object.keys(PRUEBAS_APAGADAS), ['tunel', 'polvo'], 'las pruebas que quedan son las del RETOQUE 3D: el túnel lento (3J) y las variantes del polvo; el sonido pasó al producto')
+// [CIERRE RETOQUE 3D] D6: el túnel lento se borró.
+afirmarIgual(Object.keys(PRUEBAS_APAGADAS), ['polvo'], 'la prueba que queda es la de las variantes del polvo (RETOQUE 3D); el sonido pasó al producto y el túnel lento se borró')
 const pedidas = entornoPedido('producto,responde=si,anticipa=si,vida=si,recorrido=logo').pruebas as unknown as Record<string, unknown>
-afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && ENTORNO.pruebas.tunel === 'no', '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
+afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && ENTORNO.pruebas.polvo === 'no', '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
 afirmar(!/usePrueba|pruebasDeLaInterfaz/.test(['_chrome/ChromeDelHome.tsx', '_chrome/menu/MenuMovil.tsx', '_chrome/escena/RespuestaDeLaEscena.tsx', '_chrome/escena/AnticipacionDelMenu.tsx', '_secciones/tu-panel/TuPanel.tsx', '_secciones/servicios/ServiciosEnSecuencia.tsx'].map(leer).join('\n')), '  y nada del DOM pregunta por ellas')
 
 // ═══════════════════════════════════════════════════════════════════════════
