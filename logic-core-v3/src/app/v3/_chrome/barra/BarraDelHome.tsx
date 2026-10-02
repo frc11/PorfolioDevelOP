@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { sonar } from '../../_lib/sonido/bus'
-import { fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
+import { ABRE_EL_PANEL, fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
 
 /**
@@ -170,10 +170,11 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
         </ul>
         <span ref={resaltado} data-parte="resaltado" aria-hidden="true" />
       </nav>
-      {/* [RETOQUE 3D] N1 · Contacto (viaja al formulario del pie) y Login (el del sitio), en la esquina de arriba a la derecha. */}
+      {/* [RETOQUE 3D] N1 · Contacto y Login (el del sitio), en la esquina de arriba a la derecha. [CIERRE] N1: Contacto abre el panel. */}
       <div data-parte="esquina" onPointerEnter={() => sonar('tic')}>
         <a
           href={ENLACE_DE_CONTACTO.destino}
+          data-abre-contacto={ABRE_EL_PANEL}
           data-pieza="barra-enlace"
           data-nav-id={ENLACE_DE_CONTACTO.id}
           data-activo={activo === ENLACE_DE_CONTACTO.id ? 'true' : undefined}

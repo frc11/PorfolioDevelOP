@@ -2,11 +2,11 @@
  * EL ENVÍO DEL CONTACTO — una sola puerta. **[CONTACTO]**
  *
  * Todavía no hay backend: `enviarContacto` arma el mensaje con lo que cargó la persona y
- * abre WhatsApp con ese texto. Conectar el backend es cambiar SÓLO esta función (y el rótulo
- * del botón, `ROTULO_DEL_ENVIO`). La validación es pura y vive acá, al lado.
+ * abre el correo con ese texto ([CIERRE RETOQUE 3D] N1: era WhatsApp, que se fue de todos lados). Conectar el backend es
+ * cambiar SÓLO esta función (y el rótulo del botón, `ROTULO_DEL_ENVIO`). La validación es pura y vive acá, al lado.
  */
 
-import { NUMERO_DE_WHATSAPP } from '../../_secciones/cierre/contacto'
+import { MAIL } from '../../_secciones/cierre/contacto'
 import { INTERESES, type Interes } from './contenido'
 
 export interface DatosDeContacto {
@@ -31,12 +31,12 @@ export function validarContacto(d: DatosDeContacto): ErroresDeContacto {
   if (d.presupuesto.trim().length === 0) e.presupuesto = 'Contanos un número, un rango o «todavía no sé».'
   if (d.nombre.trim().length < 2) e.nombre = 'Decinos cómo te llamás.'
   const medio = d.medio.trim()
-  if (!EMAIL.test(medio) && !(TELEFONO.test(medio) && medio.replace(/\D/g, '').length >= 8)) e.medio = 'Un email o un número de WhatsApp.'
+  if (!EMAIL.test(medio) && !(TELEFONO.test(medio) && medio.replace(/\D/g, '').length >= 8)) e.medio = 'Un email o un teléfono.'
   if (d.mensaje.trim().length < 3) e.mensaje = 'Contanos aunque sea en una línea.'
   return e
 }
 
-/** El texto que llega por WhatsApp. */
+/** El texto del mail. */
 export function mensajeDeContacto(d: DatosDeContacto): string {
   const rotulos = d.intereses.map((id) => INTERESES.find((i) => i.id === id)?.rotulo ?? id)
   const empresa = d.empresa.trim()
@@ -49,19 +49,21 @@ export function mensajeDeContacto(d: DatosDeContacto): string {
   ].join('\n')
 }
 
-export function urlDeWhatsApp(d: DatosDeContacto): string {
-  return `https://wa.me/${NUMERO_DE_WHATSAPP}?text=${encodeURIComponent(mensajeDeContacto(d))}`
+export const ASUNTO_DEL_MAIL = 'Contacto desde la web de develOP'
+
+export function urlDelMail(d: DatosDeContacto): string {
+  return `mailto:${MAIL}?subject=${encodeURIComponent(ASUNTO_DEL_MAIL)}&body=${encodeURIComponent(mensajeDeContacto(d))}`
 }
 
 export type ResultadoDelEnvio =
   | { readonly estado: 'invalido'; readonly errores: ErroresDeContacto }
-  | { readonly estado: 'abierto-en-whatsapp'; readonly url: string }
+  | { readonly estado: 'abierto-en-el-mail'; readonly url: string }
 
-/** LA puerta del envío. Hoy: valida y abre WhatsApp. Nunca dice «enviado». */
-export function enviarContacto(d: DatosDeContacto, abrir: (url: string) => void = (u) => window.open(u, '_blank', 'noopener,noreferrer')): ResultadoDelEnvio {
+/** LA puerta del envío. Hoy: valida y abre el correo. Nunca dice «enviado». */
+export function enviarContacto(d: DatosDeContacto, abrir: (url: string) => void = (u) => window.location.assign(u)): ResultadoDelEnvio {
   const errores = validarContacto(d)
   if (Object.keys(errores).length > 0) return { estado: 'invalido', errores }
-  const url = urlDeWhatsApp(d)
+  const url = urlDelMail(d)
   abrir(url)
-  return { estado: 'abierto-en-whatsapp', url }
+  return { estado: 'abierto-en-el-mail', url }
 }

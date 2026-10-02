@@ -9,6 +9,8 @@
  *   B4 · «Y más…» y el newsletter entran ni bien asoman y se van recién cuando están por salir, bien abajo.
  *   B6 · la frase de Por qué develOP («Seis razones / para elegirnos») sin salida, como Portfolio.
  *   D4 · las fotos del equipo sin el marco 3D: vuelven a como estaban antes del RETOQUE 3D (la llegada en curva y el hover).
+ *   N1 · «Contacto» (la esquina de la barra y el menú del teléfono) abre el panel de contacto de SPRINT CONTACTO, sin
+ *        WhatsApp (el envío arma un mail); lo demás que lleva a contacto sigue viajando al pie.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -89,5 +91,17 @@ const equipo = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
 const comoAntes = (c: string): boolean => /<LlegadaEnCurva\s+progreso=\{perseguido\}\s+sentido=\{aLaDerecha \? 'desde-la-derecha' : 'desde-la-izquierda'\}/.test(c) && !/FotoEnVolumen/.test(c) && (c.match(/<MarcoDeDosTomas/g) ?? []).length === 2
 afirmar(comoAntes(equipo) && !existsSync(`${V3}/_secciones/quienes-somos/fotoEnVolumen.tsx`), 'los retratos llegan en curva como antes del RETOQUE 3D y la foto del equipo con su bloque; el marco 3D se borró; el hover desde el punto (`MarcoDeDosTomas`) sigue')
 controlPositivo('el detector VE el marco 3D', `${equipo}\n<FotoEnVolumen progreso={progreso} lado="derecha">`, comoAntes)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('N1 · «Contacto» abre el panel de contacto')
+
+const contactoTsx = sinComentarios(leer('_chrome/contacto/Contacto.tsx'))
+const apertura = sinComentarios(leer('_chrome/contacto/apertura.ts'))
+const barra = sinComentarios(leer('_chrome/barra/BarraDelHome.tsx'))
+const abreElPanel = (c: string, a: string, b: string): boolean => /return <FormularioDeContacto \/>/.test(c) && /=== ABRE_EL_PANEL\) abrirContacto\(/.test(a) && /addEventListener\('click', alTocar, \{ capture: true \}\)/.test(a) && /href=\{ENLACE_DE_CONTACTO\.destino\}\s*data-abre-contacto=\{ABRE_EL_PANEL\}/.test(b)
+afirmar(abreElPanel(contactoTsx, apertura, barra), 'el panel (la hoja de SPRINT CONTACTO) vuelve a montarse; el Contacto de la esquina lo abre (en la captura: antes que el viaje, que deja pasar lo ya atendido) y el del menú del teléfono también, al cerrarse el menú')
+controlPositivo('el detector VE el Contacto que viaja al pie', [contactoTsx, apertura, barra.replace(' data-abre-contacto={ABRE_EL_PANEL}', '')], ([c, a, b]: string[]) => abreElPanel(c, a, b))
+const delPanel = ['_chrome/contacto/contenido.ts', '_chrome/contacto/enviarContacto.ts', '_chrome/contacto/FormularioDeContacto.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
+afirmar(!/whatsapp|wa\.me|WHATSAPP/i.test(delPanel) && /mailto:\$\{MAIL\}\?subject=/.test(delPanel), '  sin WhatsApp (se fue de todos lados): el envío valida y arma un mail con el mensaje; nunca dice «enviado»')
 
 cerrar('s42-cierre-retoque')

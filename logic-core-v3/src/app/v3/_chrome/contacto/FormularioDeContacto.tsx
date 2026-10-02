@@ -142,10 +142,6 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
                 <a href={BAJADA.mail.href} className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
                   {BAJADA.mail.rotulo}
                 </a>
-                {BAJADA.medio}
-                <a href={BAJADA.whatsapp.href} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
-                  {BAJADA.whatsapp.rotulo}
-                </a>
                 {BAJADA.despues}
               </p>
             </div>
@@ -179,7 +175,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               {abiertoEn !== null && (
                 <>
                   {DESPUES_DEL_ENVIO.texto}{' '}
-                  <a href={abiertoEn} target="_blank" rel="noopener noreferrer" className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
+                  <a href={abiertoEn} className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
                     {DESPUES_DEL_ENVIO.reintento}
                   </a>
                   .

@@ -64,8 +64,11 @@ export function useContacto(): EstadoDelContacto {
 /**
  * El selector de lo que abre el contacto. [RETOQUE 3D] 3I: los `a[href="#contacto"]` son enlaces de verdad al formulario
  * del pie (el viaje los lleva); quedan los disparadores que no son enlaces (los CTA de Servicios), que viajan ahí también.
+ * [CIERRE RETOQUE 3D] N1: con `data-abre-contacto="panel"` (el Contacto de la esquina de la barra) abre el panel de
+ * contacto de SPRINT CONTACTO, la hoja que baja; el del menú del teléfono es un botón que lo abre al cerrarse el menú.
  */
 export const SELECTOR_DE_APERTURA = '[data-abre-contacto]'
+export const ABRE_EL_PANEL = 'panel'
 
 /**
  * [RETOQUE 3D] 3I · TODO APUNTA A CONTACTO: al formulario del pie. Si hay un enlace del viaje a `#contacto` (la barra o
@@ -89,16 +92,20 @@ export function precargaDe(disparador: Element): readonly Interes[] {
   return servicio === null ? [] : (PRECARGA_POR_SERVICIO[servicio] ?? [])
 }
 
-/** Intercepta los clics de apertura en todo el documento. Se monta una vez, en el chrome. [RETOQUE 3D] 3I: viajan al pie. */
+/**
+ * Intercepta los clics de apertura en todo el documento. Se monta una vez, en el chrome. [RETOQUE 3D] 3I: viajan al pie.
+ * [CIERRE RETOQUE 3D] N1: los del panel lo abren. En la captura: antes que el viaje, que deja pasar lo ya atendido.
+ */
 export function useAperturaDelContacto(selectorDeLosViajes: string): void {
   useEffect(() => {
     const alTocar = (e: MouseEvent): void => {
       const objetivo = e.target instanceof Element ? e.target.closest(SELECTOR_DE_APERTURA) : null
       if (objetivo === null) return
       e.preventDefault()
-      viajarAlContacto(selectorDeLosViajes)
+      if (objetivo.getAttribute('data-abre-contacto') === ABRE_EL_PANEL) abrirContacto(precargaDe(objetivo), objetivo instanceof HTMLElement ? objetivo : null)
+      else viajarAlContacto(selectorDeLosViajes)
     }
-    document.addEventListener('click', alTocar)
-    return () => document.removeEventListener('click', alTocar)
+    document.addEventListener('click', alTocar, { capture: true })
+    return () => document.removeEventListener('click', alTocar, { capture: true })
   }, [selectorDeLosViajes])
 }

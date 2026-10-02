@@ -19,6 +19,7 @@ import { abrirContacto, cerrarContacto, devolverElFoco, precargaDe, SELECTOR_DE_
 import { DESPUES_DEL_ENVIO, INTERESES, PRECARGA_POR_SERVICIO, ROTULO_DEL_ENVIO, TITULO } from './contenido'
 import { enviarContacto, mensajeDeContacto, validarContacto, type DatosDeContacto } from './enviarContacto'
 import { HojaParaElInvariante } from './FormularioDeContacto'
+import { MAIL } from '../../_secciones/cierre/contacto'
 
 const leer = (r: string): string => readFileSync(path.join(RAIZ, r), 'utf8')
 const HOJA = renderToStaticMarkup(<HojaParaElInvariante />)
@@ -72,7 +73,9 @@ controlPositivo('  el chequeo vería una precarga equivocada', { ...PRECARGA_POR
 const SERVICIOS = ['src/app/v3/_secciones/servicios/CtaDelServicio.tsx', 'src/app/v3/_secciones/servicios/CtaQueRota.tsx'].map(leer)
 afirmar(SERVICIOS.every((f) => /data-abre-contacto=""/.test(f) && /data-precarga=\{/.test(f)), 'los dos CTA de Servicios (el de móvil y el que rota) abren el contacto con su servicio')
 // [RETOQUE 3D] 3I: `#contacto` es el formulario del pie (el viaje lo lleva); los `[data-abre-contacto]` viajan ahí también.
-afirmar(!SELECTOR_DE_APERTURA.includes('a[href="#contacto"]') && SELECTOR_DE_APERTURA.includes('[data-abre-contacto]') && /viajarAlContacto\(selectorDeLosViajes\)/.test(leer('src/app/v3/_chrome/contacto/apertura.ts')), 'todo apunta al contacto del pie: `#contacto` es su ancla y `[data-abre-contacto]` viaja ahí')
+// [CIERRE RETOQUE 3D] N1: menos los del panel (`data-abre-contacto="panel"`), que abren la hoja.
+const APERTURA = leer('src/app/v3/_chrome/contacto/apertura.ts')
+afirmar(!SELECTOR_DE_APERTURA.includes('a[href="#contacto"]') && SELECTOR_DE_APERTURA.includes('[data-abre-contacto]') && /viajarAlContacto\(selectorDeLosViajes\)/.test(APERTURA) && /=== ABRE_EL_PANEL\) abrirContacto\(precargaDe\(objetivo\)/.test(APERTURA), 'todo apunta al contacto del pie (`#contacto` es su ancla y `[data-abre-contacto]` viaja ahí), menos los del panel, que abren la hoja')
 const HOJA_WEB = renderToStaticMarkup(<HojaParaElInvariante precarga={['web']} />)
 const marcados = (h: string): string[] => [...h.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].filter((m) => /checked/.test(m[0])).map((m) => /value="([^"]+)"/.exec(m[0])?.[1] ?? '?')
 afirmarIgual(marcados(HOJA_WEB), ['web'], '  y la hoja abre con ese chip marcado de verdad, y sólo ese')
@@ -82,14 +85,16 @@ titulo('4 · El envío: una sola puerta, validación real y nunca un «enviado»
 
 const VALIDO: DatosDeContacto = { intereses: ['web'], presupuesto: 'todavía no sé', nombre: 'Ana', medio: 'ana@tuempresa.com', empresa: '', mensaje: 'Una web para el negocio' }
 afirmarIgual(Object.keys(validarContacto(VALIDO)), [], 'con todo lo obligatorio, no hay errores (la empresa es opcional)')
-afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana' })).sort(), ['intereses', 'medio'], '  y se marca lo que falta: sin opción y con un contacto que no es email ni WhatsApp')
+afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana' })).sort(), ['intereses', 'medio'], '  y se marca lo que falta: sin opción y con un contacto que no es email ni teléfono')
 let abierta: string | null = null
 const invalido = enviarContacto({ ...VALIDO, nombre: '' }, (u) => { abierta = u })
 afirmar(invalido.estado === 'invalido' && abierta === null, 'con errores no sale nada')
 const valido = enviarContacto(VALIDO, (u) => { abierta = u })
-afirmar(valido.estado === 'abierto-en-whatsapp' && abierta !== null && (abierta as string).startsWith('https://wa.me/5493814154708?text=') && (abierta as string).includes(encodeURIComponent(mensajeDeContacto(VALIDO))), 'válido, abre wa.me con el mensaje armado')
+// [CIERRE RETOQUE 3D] N1: sin WhatsApp (se fue de todos lados): el mail, con el mensaje armado.
+afirmar(valido.estado === 'abierto-en-el-mail' && abierta !== null && (abierta as string).startsWith(`mailto:${MAIL}?subject=`) && (abierta as string).includes(encodeURIComponent(mensajeDeContacto(VALIDO))), 'válido, abre el correo con el mensaje armado')
+afirmar(!/whatsapp|wa\.me/i.test(HOJA), '  y la hoja no nombra WhatsApp')
 controlPositivo('  el chequeo vería un envío que abre con errores', () => 'abierto', (f: () => string) => f() === 'invalido')
-afirmar(ROTULO_DEL_ENVIO === 'Enviar por WhatsApp' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO.texto + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
+afirmar(ROTULO_DEL_ENVIO === 'Enviar por mail' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO.texto + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
 afirmar(INTERESES.length === 7 && !/newsletter|novedades/i.test(HOJA), 'siete opciones y sin casilla de newsletter')
 
 cerrar('s25-contacto.invariant')

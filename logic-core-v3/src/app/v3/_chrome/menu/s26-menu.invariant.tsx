@@ -67,7 +67,7 @@ titulo('2 · El menú es un diálogo accesible: foco atrapado y devuelto, Esc, t
 
 const nada = (): void => undefined
 // [NAVBAR] T3 · el menú queda montado y escondido; abre con el Genie y la trampa se monta sólo abierto.
-const MENU = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} />)
+const MENU = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />)
 const esDialogo = (h: string): boolean => /role="dialog"/.test(h) && /aria-modal="true"/.test(h) && /aria-label="Menú"/.test(h) && /id="menu-movil"/.test(h)
 afirmar(esDialogo(MENU), 'el menú es un diálogo modal con nombre')
 controlPositivo('  el chequeo vería un menú sin rol de diálogo', MENU.replace('role="dialog"', ''), esDialogo)
@@ -93,7 +93,8 @@ const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].ma
 afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto', 'Login'], '[NAVBAR] las cinco secciones, en el orden de la barra, y al pie Contacto y Login')
 afirmarIgual(items.slice(0, 6), ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`), más el login')
 // [RETOQUE 3D] 3I y N1: todo apunta a contacto: el del menú es un enlace del viaje (al formulario del pie), al pie del menú.
-afirmar(/<ul data-parte="pie-del-menu"[\s\S]*<a href="#contacto" data-parte="item-del-menu"[^>]*>Contacto<[\s\S]*<a href="\/login" data-parte="item-del-menu"[^>]*>Login</.test(MENU), 'Contacto es un enlace del viaje (al contacto del pie) y Login el del sitio, separados al pie del menú')
+// [CIERRE RETOQUE 3D] N1: Contacto vuelve a ser un botón que abre el panel de contacto (al cerrarse el menú).
+afirmar(/<ul data-parte="pie-del-menu"[\s\S]*<button type="button" data-parte="item-del-menu"[^>]*>Contacto<[\s\S]*<a href="\/login" data-parte="item-del-menu"[^>]*>Login</.test(MENU) && /abrirContacto\(\[\], boton\.current\)/.test(leer('src/app/v3/_chrome/menu/MenuMovil.tsx')), 'Contacto es un botón (cierra el menú y abre el panel de contacto, con el foco de vuelta al botón del menú) y Login el del sitio, separados al pie del menú')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El modo del chrome sale del ancho real')

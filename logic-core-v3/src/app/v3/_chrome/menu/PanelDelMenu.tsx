@@ -54,9 +54,10 @@ export const CRUZ = <X aria-hidden="true" strokeWidth={1.5} className="size-[var
 
 /**
  * El adentro del panel: su botón de cerrar (arriba al centro, en el lugar del botón del menú), las secciones y, al pie,
- * separados, Contacto (viaja al formulario del pie, como las secciones) y Login (el del sitio) [RETOQUE 3D] N1.
+ * separados, Contacto y Login (el del sitio) [RETOQUE 3D] N1. [CIERRE RETOQUE 3D] N1: Contacto es un botón: cierra el
+ * menú y abre el panel de contacto (`MenuMovil`).
  */
-export function ContenidoDelMenu({ alCerrar }: { readonly alCerrar: () => void }): React.JSX.Element {
+export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
   return (
     <div className="flex size-full flex-col">
       <button type="button" data-parte="cerrar-el-menu" aria-label={ROTULO_DEL_MENU.cerrar} onClick={alCerrar} className={CLASE_DEL_CERRAR}>
@@ -75,9 +76,17 @@ export function ContenidoDelMenu({ alCerrar }: { readonly alCerrar: () => void }
       </nav>
       <ul data-parte="pie-del-menu" className="grid grid-cols-2 gap-[var(--spacing-2)] px-[var(--spacing-6)] pb-[var(--spacing-6)]">
         <li>
-          <a href={ENLACE_DE_CONTACTO.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM_DEL_PIE}>
+          <button
+            type="button"
+            data-parte="item-del-menu"
+            onClick={() => {
+              alContacto()
+              alCerrar()
+            }}
+            className={CLASE_DEL_ITEM_DEL_PIE}
+          >
             {ENLACE_DE_CONTACTO.rotulo}
-          </a>
+          </button>
         </li>
         <li>
           <a href={ENLACE_DE_LOGIN.destino} data-parte="item-del-menu" className={CLASE_DEL_ITEM_DEL_PIE}>

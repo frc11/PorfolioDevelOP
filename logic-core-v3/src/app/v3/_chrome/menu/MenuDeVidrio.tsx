@@ -39,6 +39,7 @@ export function Menu({
   alCubrir,
   alCerrado,
   alSoltar,
+  alContacto,
   ref,
 }: {
   /** Lo que el botón anuncia (y la trampa del diálogo); el Genie lo arranca `abrir`, a mano. */
@@ -47,6 +48,7 @@ export function Menu({
   readonly alCubrir: (cubierto: boolean) => void
   readonly alCerrado: () => void
   readonly alSoltar: () => void
+  readonly alContacto: () => void
   readonly ref?: Ref<ControlDelMenu>
 }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
@@ -294,7 +296,7 @@ export function Menu({
         <svg data-parte="filo-del-genie" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full overflow-visible">
           <path ref={filo} />
         </svg>
-        <ContenidoDelMenu alCerrar={cerrar} />
+        <ContenidoDelMenu alCerrar={cerrar} alContacto={alContacto} />
       </div>
       {/* El texto del Genie va ENCIMA del vidrio. */}
       {geometria !== null && !reducido && (

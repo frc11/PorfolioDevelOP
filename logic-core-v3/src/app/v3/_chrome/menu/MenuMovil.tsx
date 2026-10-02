@@ -3,7 +3,7 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { useContacto } from '../contacto/apertura'
+import { abrirContacto, useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { Menu, type ControlDelMenu } from './MenuDeVidrio'
@@ -72,17 +72,24 @@ export function MenuMovil(): React.JSX.Element | null {
   const cubrir = useCallback((si: boolean) => boton.current?.style.setProperty('visibility', si ? 'hidden' : 'visible'), [])
   const alCerrado = useCallback(() => setAbierto(false), [])
 
-  // Al cerrar del todo, con la trampa de foco y el bloqueo de scroll ya soltados.
-  // [RETOQUE 3D] N1 · Contacto es un enlace del viaje, como las secciones: al soltar, el foco vuelve al botón.
+  // Al cerrar del todo, con la trampa de foco y el bloqueo de scroll ya soltados: el foco vuelve al botón, o
+  // [CIERRE RETOQUE 3D] N1 · se abre el panel de contacto, que al cerrarse le devuelve el foco al botón del menú.
+  const haciaElContacto = useRef(false)
+  const alContacto = useCallback(() => {
+    haciaElContacto.current = true
+  }, [])
   const alSoltar = useCallback((): void => {
-    boton.current?.focus({ preventScroll: true })
+    if (haciaElContacto.current) {
+      haciaElContacto.current = false
+      abrirContacto([], boton.current)
+    } else boton.current?.focus({ preventScroll: true })
   }, [])
 
   if (!enMenu) return null
   return (
     // [NAVBAR] Arriba del resto del chrome (el infinito del recorrido, la barra): el panel abierto lo tapa todo.
     <div data-pieza="menu-movil" className="fixed inset-x-0 top-0 z-[var(--z-overlay)]">
-      <Menu ref={menu} abierto={abierto} boton={boton} alCubrir={cubrir} alCerrado={alCerrado} alSoltar={alSoltar} />
+      <Menu ref={menu} abierto={abierto} boton={boton} alCubrir={cubrir} alCerrado={alCerrado} alSoltar={alSoltar} alContacto={alContacto} />
       <button
         ref={boton}
         type="button"

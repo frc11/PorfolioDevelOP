@@ -2,19 +2,18 @@
  * EL FORMULARIO DE CONTACTO — el copy, las opciones y la precarga. **[CONTACTO]**
  *
  * PROPUESTA del planificador, adaptada del de nk: voseo, frases cortas y sin genéricos.
- * El mail y WhatsApp salen del archivo de contacto del pie, que es la única fuente.
+ * El mail sale del archivo de contacto del pie, que es la única fuente. [CIERRE RETOQUE 3D] N1: sin WhatsApp (se fue de
+ * todos lados en el RETOQUE 3D): el envío arma un mail.
  */
 
-import { HREF_DEL_MAIL, MAIL, WHATSAPP } from '../../_secciones/cierre/contacto'
+import { HREF_DEL_MAIL, MAIL } from '../../_secciones/cierre/contacto'
 
 export const TITULO = 'Armemos algo juntos.'
 
-/** La bajada, en tres tramos: el mail y WhatsApp van como enlaces reales. */
+/** La bajada, en dos tramos y el mail como enlace real. */
 export const BAJADA = {
   antes: 'Completá el formulario o escribinos a ',
   mail: { rotulo: MAIL, href: HREF_DEL_MAIL },
-  medio: ' o por ',
-  whatsapp: { rotulo: 'WhatsApp', href: WHATSAPP.href },
   despues: '. Lo que te quede más cómodo.',
 } as const
 
@@ -41,19 +40,19 @@ export const PREGUNTAS = {
 export const CAMPOS = {
   presupuesto: { rotulo: 'Presupuesto', ejemplo: 'Un número, un rango o «todavía no sé»' },
   nombre: { rotulo: 'Nombre', ejemplo: 'ej.: Ana Pérez' },
-  medio: { rotulo: 'Email o WhatsApp', ejemplo: 'ej.: ana@tuempresa.com' },
+  medio: { rotulo: 'Email o teléfono', ejemplo: 'ej.: ana@tuempresa.com' },
   empresa: { rotulo: 'Empresa (opcional)', ejemplo: 'ej.: Tu Empresa' },
   mensaje: { rotulo: '¿Qué tenés en mente?', ejemplo: 'ej.: Que la gente nos encuentre y nos escriba' },
 } as const
 
 export const PIE = 'Todo es obligatorio salvo la empresa. Si es vago, está perfecto.'
 
-/** Mientras no haya backend el envío abre WhatsApp: el rótulo lo dice. Cambia junto con `enviarContacto`. */
-export const ROTULO_DEL_ENVIO = 'Enviar por WhatsApp'
+/** Mientras no haya backend el envío abre el correo: el rótulo lo dice. Cambia junto con `enviarContacto`. */
+export const ROTULO_DEL_ENVIO = 'Enviar por mail'
 
 /** Lo que se dice después de enviar. Nunca un «¡Enviado!»: el mensaje todavía no salió. */
 export const DESPUES_DEL_ENVIO = {
-  texto: 'Te abrimos WhatsApp con el mensaje armado: sólo falta que lo mandes desde ahí.',
+  texto: 'Te abrimos tu correo con el mensaje armado: sólo falta que lo mandes desde ahí.',
   reintento: 'Si no se abrió, abrilo acá',
 } as const
 

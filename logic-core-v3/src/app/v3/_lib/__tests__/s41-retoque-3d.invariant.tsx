@@ -224,7 +224,8 @@ afirmar(/if \(progreso === null\) return <>\{children\}<\/>/.test(sinComentarios
 const formulario = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 afirmar(/<form id="contacto"/.test(formulario) && ['contacto-nombre', 'contacto-mail', 'contacto-mensaje'].every((c) => formulario.includes(`htmlFor="${c}"`) && formulario.includes(`id="${c}"`)) && /<button type="submit" disabled aria-describedby="contacto-aviso"/.test(formulario) && /id="contacto-aviso"/.test(formulario), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo); no envía todavía y lo dice un aviso, con el mail como salida')
 const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
-afirmar(!/WHATSAPP|whatsapp/.test(piezasDeContacto) && !/<FormularioDeContacto/.test(sinComentarios(leer('_chrome/contacto/Contacto.tsx'))), '  WhatsApp se fue del pie, y la hoja de contacto (que enviaba por WhatsApp) ya no se monta: no se muestra lo que no anda')
+// [CIERRE RETOQUE 3D] N1: la hoja vuelve (sin WhatsApp, por mail): s42 · N1.
+afirmar(!/WHATSAPP|whatsapp/.test(piezasDeContacto), '  WhatsApp se fue del pie')
 const efecto = sinComentarios(readFileSync('src/app/v3/_componentes/useDeslizamientoDelCta.ts', 'utf8'))
 afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla/.test(efecto) && /const foco = llego \? \(objetivo \?\? destino\) : origen/.test(efecto), '  todo apunta a contacto: `#contacto` (la barra, el menú, el «Hablemos» del hero) viaja a la sección del pie y le da el foco al formulario; los CTA de Servicios viajan ahí también')
 
@@ -241,7 +242,8 @@ controlPositivo('el detector VE a Contacto adentro de la pastilla', barra.replac
 const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
 afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (al pie del hero están el infinito y el parlante); si no entra al lado de la pastilla, el menú del teléfono')
 const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
-afirmar(/<ul data-parte="pie-del-menu"[\s\S]*href=\{ENLACE_DE_CONTACTO\.destino\}[\s\S]*href=\{ENLACE_DE_LOGIN\.destino\}/.test(menu) && /\{ENLACES_DE_SECCION\.map\(/.test(menu), '  en el teléfono, separados al pie del menú de vidrio')
+// [CIERRE RETOQUE 3D] N1: Contacto, un botón que abre el panel.
+afirmar(/<ul data-parte="pie-del-menu"[\s\S]*\{ENLACE_DE_CONTACTO\.rotulo\}[\s\S]*href=\{ENLACE_DE_LOGIN\.destino\}/.test(menu) && /\{ENLACES_DE_SECCION\.map\(/.test(menu), '  en el teléfono, separados al pie del menú de vidrio')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('N2 · El infinito, 1,3 veces más grande')
