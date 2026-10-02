@@ -48,6 +48,17 @@ export const ESTILO_DEL_RITMO = {
 } as CSSProperties
 
 /**
+ * [RETOQUE 3D] 3J · EL TÚNEL MÁS LENTO, una prueba (`?pruebas=tunel=lento`): a Valentino el acercamiento de las imágenes le
+ * parece demasiado rápido. La tabla medida de heatbureau no se toca; se usa el mismo estiramiento que el teléfono y la
+ * tablet ya tienen, ahora en escritorio: el túnel cuesta 1,6 veces el scroll (1.480 px → 2.368) y la sección crece eso.
+ * Las imágenes crecen igual y en el mismo orden, sólo más despacio. Y la clase que lo prende desde 1024.
+ */
+export const ESTIRAMIENTO_DEL_TUNEL_LENTO = 1.6
+export const ESTILO_DEL_RITMO_LENTO = { ...ESTILO_DEL_RITMO, '--estiramiento-lento': String(ESTIRAMIENTO_DEL_TUNEL_LENTO) } as CSSProperties
+export const CLASE_DEL_TUNEL_LENTO =
+  'escritorio:[--estiramiento-en-uso:var(--estiramiento-lento)] escritorio:min-h-[calc(var(--alto-minimo-del-panel)+(var(--estiramiento-en-uso)-1)*var(--tunel-en-pantallas)*100svh)]'
+
+/**
  * EL RELOJ: un píxel de la sección estirada (contado contra 900, como todo) al píxel
  * de la tabla. Continuo y creciente, así que un scroll que baja nunca hace volver
  * al túnel.

@@ -78,10 +78,12 @@ export type TitulosDeVolumen = 'negro' | 'blanco'
 export interface Pruebas {
   /** [3D Y SONIDO] T2 · el sonido (`_lib/sonido/`): el control del parlante y lo que suena; `sonido=si`. */
   readonly sonido: 'si' | 'no'
+  /** [RETOQUE 3D] 3J · el túnel de Trabajos más lento en escritorio (`trabajos/ritmo.ts`); `tunel=lento`. */
+  readonly tunel: 'lento' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { sonido: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { sonido: 'no', tunel: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -92,6 +94,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
     sonido: unoDe<'si'>(['si'], valor('sonido')),
+    tunel: unoDe<'lento'>(['lento'], valor('tunel')),
   }
 }
 

@@ -23,6 +23,7 @@
  *        el gris más tenue con 3:1 (texto grande) sobre el papel de la ventana; lleva al pie.
  *   3I · el pie en volumen (CSS 3D: paredes y piso que miran al logo; todo lo que se toca, del DOM); el contacto es un
  *        formulario (nombre, mail, mensaje) que no envía y lo dice; WhatsApp afuera; todo apunta a contacto.
+ *   3J · el túnel lento, con bandera (`tunel=lento`): la tabla del producto no se toca; el túnel se estira en escritorio.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -44,7 +45,10 @@ import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajo
 import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_secciones/trabajos/contenido'
 import { PORCENTAJE_DE_TINTA_TENUE } from '../../_secciones/trabajos/ventana'
 import { PLANOS_DEL_PIE, poseDelPlano } from '../../_secciones/cierre/planoDelPie'
-import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
+import { ESTIRAMIENTO_DEL_TUNEL_LENTO, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
+import { CAPAS_DEL_TUNEL } from '../../_secciones/trabajos/tunel'
+import { ENTORNO, entornoPedido } from '../escena/entorno'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
@@ -231,5 +235,15 @@ const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto
 afirmar(!/WHATSAPP|whatsapp/.test(piezasDeContacto) && !/<FormularioDeContacto/.test(sinComentarios(leer('_chrome/contacto/Contacto.tsx'))), '  WhatsApp se fue del pie, y la hoja de contacto (que enviaba por WhatsApp) ya no se monta: no se muestra lo que no anda')
 const efecto = sinComentarios(readFileSync('src/app/v3/_componentes/useDeslizamientoDelCta.ts', 'utf8'))
 afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla/.test(efecto) && /const foco = llego \? \(objetivo \?\? destino\) : origen/.test(efecto), '  todo apunta a contacto: `#contacto` (la barra, el menú, el «Hablemos» del hero) viaja a la sección del pie y le da el foco al formulario; los CTA de Servicios viajan ahí también')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3J · El túnel lento, con bandera')
+
+afirmarIgual(CAPAS_DEL_TUNEL, { escenario: { de: 1, a: 1.3, arranca: 199, topa: 1420 }, proyectos: [{ de: 0, a: 0.9, arranca: 810, topa: 1720 }, { de: 0, a: 1.2, arranca: 1303, topa: 1983 }, { de: 0, a: 1.05, arranca: 1636, topa: 2236 }], cta: { de: 0, a: 0.4, arranca: 1873, topa: 2290 } }, 'la tabla medida de heatbureau no se toca (la del producto)')
+afirmar(ENTORNO.pruebas.tunel === 'no' && entornoPedido('producto,tunel=lento').pruebas.tunel === 'lento', '  la variante va con su bandera (`?pruebas=tunel=lento`, o el pedido del banco); en el producto, apagada')
+const masDespacio = (k: number): boolean => k > 1 && Math.abs((pxDeLaTabla(6000 + 100, k) - pxDeLaTabla(6000, k)) - 100 / k) < 1e-9
+afirmar(masDespacio(ESTIRAMIENTO_DEL_TUNEL_LENTO), '  el túnel cuesta 1,6 veces el scroll: el reloj de los anchos angostos, en escritorio (la sección crece lo mismo)', `×${String(ESTIRAMIENTO_DEL_TUNEL_LENTO)}: 1.480 px → ${String(Math.round(1480 * ESTIRAMIENTO_DEL_TUNEL_LENTO))}`)
+controlPositivo('el detector VE el túnel de siempre', 1, masDespacio)
+afirmar(/<CapaDelTunel progreso=\{progreso\} mostrado=\{mostrado\} key=\{lento \? 'lento' : 'tabla'\}/.test(sinComentarios(leer('_secciones/trabajos/Trabajos.tsx'))), '  con la bandera el túnel se vuelve a montar y lee su ritmo nuevo')
 
 cerrar('s41-retoque-3d')
