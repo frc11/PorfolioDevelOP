@@ -165,7 +165,7 @@ afirmar(/const solido = escritorio && !reducido/.test(solido) && /useGiroDeLaMir
 titulo('D3 · El título de Demos, en volumen')
 
 const textoDeDemos = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
-const seLevanta = (c: string): boolean => (c.match(/useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos-[12]', texto: renglon[12], fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/g) ?? []).length === 2
+const seLevanta = (c: string): boolean => (c.match(/\{ lugar: lugar[12], listo: listo[12] \} = useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos-[12]', texto: renglon[12], fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/g) ?? []).length === 2
 afirmar(seLevanta(textoDeDemos) && TEXTO_DE_DEMOS.renglonesDelTitulo.join(' ') === TEXTO_DE_DEMOS.titulo, '«Demos para abrir acá mismo» se levanta de acostado a parado con el progreso de su llegada, como «El equipo» (y se acuesta al volver): desde 1024, en sus dos renglones (el 3D arma una línea por título)')
 controlPositivo('el detector VE el título plano', textoDeDemos.replace(/gesto: 'levanta'/g, "gesto: 'letras'"), seLevanta)
 const glifos = new Set(Object.keys((datosDeLaChivo as { glyphs: Record<string, unknown> }).glyphs))

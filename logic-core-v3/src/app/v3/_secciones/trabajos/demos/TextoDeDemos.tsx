@@ -64,15 +64,15 @@ export function TextoDeDemos({
  */
 function TituloDeDemos({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
   const [renglon1, renglon2] = TEXTO_DE_DEMOS.renglonesDelTitulo
-  const uno = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-1', texto: renglon1, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
-  const dos = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-2', texto: renglon2, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  const { lugar: lugar1, listo: listo1 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-1', texto: renglon1, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  const { lugar: lugar2, listo: listo2 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-2', texto: renglon2, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
   return (
     <CanalDeUnaPieza progreso={progreso} patron="P1">
       <Titular nivel="titulo-l" como="h3" className={CLASE_DEL_TITULO_DE_DEMOS}>
-        <span ref={uno.lugar} className={cn('escritorio:block', uno.listo && TEXTO_REEMPLAZADO)}>
+        <span ref={lugar1} className={cn('escritorio:block', listo1 && TEXTO_REEMPLAZADO)}>
           {renglon1}
         </span>{' '}
-        <span ref={dos.lugar} className={cn('escritorio:block', dos.listo && TEXTO_REEMPLAZADO)}>
+        <span ref={lugar2} className={cn('escritorio:block', listo2 && TEXTO_REEMPLAZADO)}>
           {renglon2}
         </span>
       </Titular>
