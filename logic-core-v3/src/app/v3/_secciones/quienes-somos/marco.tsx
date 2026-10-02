@@ -18,7 +18,7 @@ import { CLASE_DE_ENCUADRE } from './geometria'
  *
  * ── Qué hace ──────────────────────────────────────────────────────────────
  *
- * La suelta **crece desde un rectángulo chico en el centro** hasta llenar la tarjeta,
+ * La suelta **crece desde un punto en el centro** (2 px; [3D Y SONIDO] T0) hasta llenar la tarjeta,
  * como una máscara que se abre (`clip-path` de `--marco-cerrado` a `--marco-abierto`),
  * sin escalar la imagen; después suben abajo a la izquierda el nombre y el rol,
  * escalonados, y al salir todo vuelve en orden inverso (es el hover de las fotos del
@@ -125,11 +125,13 @@ const ESTILO_DEL_MARCO = {
   '--revelado-sale-demora': 'calc(var(--duracion-rapida) * 0.5)',
   // El escalón entre el nombre y el rol (a la entrada y, al revés, a la salida).
   '--revelado-escalon': 'calc(var(--duracion-rapida) / 3)',
-  // La máscara de la suelta: un rectángulo chico en el centro que se abre hasta llenar la tarjeta.
-  '--marco-cerrado': 'inset(42% 41%)',
+  // La máscara de la suelta: un punto de 2 px en el centro que se abre hasta llenar la tarjeta (y se cierra en él).
+  '--marco-cerrado': 'inset(calc(50% - 1px))',
   '--marco-abierto': 'inset(0%)',
+  // [3D Y SONIDO] T0 · desde un punto, `--ease-salida` dejaba ~100 ms un punto casi invisible: la misma cola, arranque rápido.
+  '--marco-curva': 'cubic-bezier(0.3, 0.4, 0, 1)',
   // Entra sin demora; al salir espera a que el texto empiece a irse, y recién cerrada se apaga.
-  '--marco-entra': 'clip-path var(--duracion-media) var(--ease-salida), opacity 0s',
+  '--marco-entra': 'clip-path var(--duracion-media) var(--marco-curva), opacity 0s',
   '--marco-sale':
     'clip-path var(--revelado-sale) var(--ease-salida) var(--revelado-sale-demora), opacity 0s linear calc(var(--revelado-sale) + var(--revelado-sale-demora))',
   // Con movimiento reducido no hay máscara: la suelta se funde.
