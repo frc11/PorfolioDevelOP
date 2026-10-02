@@ -19,6 +19,10 @@
 > `?pruebas=titulos=blanco`), con la llegada aislada del navbar (§1, §7). La prueba que queda es el sonido (T2 `708aa941`,
 > `sonido=si`: `ESTADO-INTERFAZ.md` §7). Las entregas, en `~/.cache/b4-medicion/3d-sonido/` (un `mirar.txt` por ticket
 > y un `LEEME.txt`).
+>
+> **RETOQUE 3D:** los bugs del polvo y de los títulos, los títulos y bloques nuevos en 3D, el túnel lento y las variantes
+> del polvo con bandera (§8). Un commit por ticket; las entregas, en `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt`
+> por bloque y el `LEEME.txt`). Invariante: `npm run test:s41-retoque-3d`.
 
 ---
 
@@ -404,3 +408,23 @@ instrumento y los dos detectores, los que usa el invariante) y `destello-clip.ts
 - ~~**El pegado (T5)**~~ → [CALIDAD 1] A3: borrado (el modo 6); queda sólo el flujo, que pasa por los huecos del logo.
   → [ESCENA 9] T1: el flujo también, y todo el obstáculo; queda el polvo que se posa sobre el logo con la página quieta.
 - La licencia de Book of Shapes (`LICENCIA-BOOKOFSHAPES.md`) cubre los SVG descargados, no el código.
+
+## 8 · RETOQUE 3D
+
+| Ticket | Qué cambió en la escena | Dónde |
+|---|---|---|
+| B1 `e6c2c858` | **Portfolio sin salida propia** (`queda`): la llegada, una vez empezada, termina; llegado, se queda y va corrido con su escenario pegajoso (sale con la sección); fuera del cuadro no se dibuja y se rearma; lo esconde la primera foto del túnel recién cuando tapa el cuadro (tapado, nada cambia: la llegada después de un viaje espera a que se vea). Con un salto de scroll se veía de espaldas en Por qué develOP: arreglado por el «fuera» | `titulos3d/TitulosDeVolumen.tsx`, `titulos3d/colocacion.ts` (`pinDelLugar`, `corrimiento`), `trabajos/geometria.ts` (`primeraFotoTapa`) |
+| B2 `6768feea` | **Cualquier scroll levanta el polvo posado**: la levantada SUBE a su lugar en el aire (τ 0,8 s, tope 3,5 u/s; cerca de las caras de la caja, a su altura). Antes la devolvía el resorte lento del aire (τ ≈ 8 s) y el 44 % no salía del piso: con una muesca, de −4,2 a −3,9 de altura media; ahora a +3,9 en 5 s | `polvo/simulacion.ts` (`FISICA.vuelta`) |
+| B3 `5c1a1d4a` | **El remolino de noche**: la causa era el despertar del SCROLL armando el remolino (giro, subida y aspiración) en un punto fijo 6 u delante de la cámara; de noche, con las motas encendidas, un embudo de luz que la cámara dejaba atrás. El remolino queda sólo para el cursor; el scroll levanta con el frente. No era la luz del haz | `polvo/posarse.ts` (`delCursor`), `polvo/Fisica.tsx`, `polvo/simulacion.ts` (`uRemolino`) |
+| B5 `416ad260` | La frase de Por qué develOP sube 33 svh (era 30) con el aire 10 (era 7): «para elegirnos» y el primer valor, 43 px de aire (eran 16). El título de volumen sube con la levantada (`corrida` del registro) | `por-que-develop/geometria.ts`, `titulos3d/registro.ts` |
+| 3A `99130428` | **El titular del hero en volumen** (Archivo 700 y la Chivo 300 itálica, `scripts-retoque/fuentes-3d.py`): gesto `azar` (cada letra desde un lugar sembrado de la sala), una vez por carga; colocación nueva `pantalla` (en cada cuadro con la cámara de ahora sobre el lugar del DOM: va con la página, sin salto); el DOM se pinta primero (LCP) y se apaga con opacidad | `titulos3d/llegada.ts` (`aDesde`, gestos), `geometria.ts`, `_componentes/titulos3d/useTextoDeVolumen.ts`, `hero/Hero.tsx` (`TitularDelHero`) |
+| 3C `1964fef0` | **«El equipo» se levanta** (gesto `levanta`): acostado hacia adelante sobre el pie de atrás de la palabra, lo que queda debajo no se dibuja (la línea lo tapa); con el progreso de su máscara, reversible | `titulos3d/llegada.ts` (`uLevanta`, `vSobreElPie`), `quienes-somos/equipo.tsx` |
+| 3J `014d0b08` | **El túnel lento** (`?pruebas=tunel=lento`): el estiramiento de los anchos angostos (×1,6) en escritorio; la tabla medida no se toca; la sección crece 888 px | `trabajos/ritmo.ts`, `trabajos/Trabajos.tsx` |
+| Partículas `cd75ed53` | **Tres variantes del polvo** (`?pruebas=polvo=a|b|c`; la de hoy, la referencia): a menos y mejor, b facetas, c aire con textura. Un `define`: cambian cuántas, el tamaño, el brillo y la forma, nunca el lugar (la física anda igual) | `polvo/variantes.ts`, `polvo/parche.ts` |
+
+Las pruebas que quedan (`Pruebas`): `tunel` y `polvo`. La de `sonido` se borró: el sonido pasó al producto
+(`ESTADO-INTERFAZ.md` §8). Los bloques en CSS 3D (las fotos del equipo, las demos, los valores, el pie) están en
+`ESTADO-INTERFAZ.md` §8: no son de la escena.
+
+Visto y no tocado: el arco de luz que cruza la pantalla ~3 s después de un scroll de noche es el anillo del pulso (E4).
+

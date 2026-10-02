@@ -40,6 +40,11 @@
 > (los títulos 3D de ESCENA 10 al producto, con la llegada aislada del navbar: `ESTADO-ESCENA.md`), T2 `708aa941` (el sonido,
 > con bandera y apagado en el producto: §7). Las entregas, en `~/.cache/b4-medicion/3d-sonido/` (`LEEME.txt`).
 >
+> **RETOQUE 3D:** los bugs de «Y más…» (B4) y «para elegirnos» (B5), los bloques en CSS 3D, el cierre del túnel, el pie
+> con el contacto de verdad (todo apunta a contacto; sin WhatsApp), Contacto y Login en la esquina de la barra, el
+> infinito más grande y el sonido en el producto con candidatos para elegir (§8). Las entregas, en
+> `~/.cache/b4-medicion/retoque-3d/`. Invariante: `npm run test:s41-retoque-3d`.
+>
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
 
@@ -189,3 +194,22 @@ generados con síntesis propia, CC0; howler.js 2.2.4, MIT).
 
 Invariante: `npm run test:s40-3d-sonido` (la sección de T2). Banco: `scripts-3d-sonido/t2-sonido.ts` (sin oírlo: qué se
 descarga y cuándo, y qué sonido pide cada gesto) y el generador, `t2-sonidos.ts`.
+
+## 8 · RETOQUE 3D
+
+| Ticket | Qué cambió | Dónde |
+|---|---|---|
+| B4 `64eb943a` | «Y más…» y el newsletter aparecen y se van en su lugar (una corrida corta, tres de los puntos, con fundido); antes salían del borde del cuadro y lo cruzaban | `tu-panel/Remate.tsx`, `tu-panel/entrada.ts` |
+| 3D `780861b5` | Las fotos del equipo (los dos retratos y «Nosotros») llegan desde atrás en un marco con espesor (CSS 3D: cuatro cantos, perspectiva desde el centro de la página) y quedan fijas; al revés para arriba; el hover no cambió | `quienes-somos/fotoEnVolumen.tsx`, `equipo.tsx` |
+| 3E `12cbc203` | Las demos se levantan desde atrás sobre su base (`rotateX`, con el sobrepaso de siempre) y se acuestan para atrás | `trabajos/demos/entrada.ts`, `_estilos/demos.css` |
+| 3G `77866608` | Cada valor de Por qué develOP llega desde un lugar distinto de la sala (CSS 3D; antes P5) | `por-que-develop/valorEnVolumen.tsx` |
+| 3H `e77c63fa` | El cierre del túnel: sin «Hablemos» ni «(un clic y arrancamos)»; abajo y centrado «Clickeá acá para empezar», gris #8E8E8D (3,06:1 sobre el papel de la ventana: la mezcla de sus tokens al 45 %), lleva al pie | `trabajos/piezas.tsx`, `trabajos/ventana.ts` |
+| 3I `520657d9` | El pie en volumen (CSS 3D: dos paredes y un piso que miran al logo; llegan desde atrás). El contacto es un formulario (nombre, mail, mensaje) que **no envía todavía** y lo dice (el envío y su validación de servidor: próxima etapa). WhatsApp se fue del pie y la hoja de contacto (que enviaba por WhatsApp) ya no se monta. **Todo apunta a contacto**: el viaje resuelve un ancla que no es sección (`#contacto`) a su sección y enfoca el formulario; los `[data-abre-contacto]` viajan ahí | `cierre/{FormularioDelPie,planoDelPie}.tsx`, `_componentes/useDeslizamientoDelCta.ts`, `_chrome/contacto/{apertura.ts,Contacto.tsx}` |
+| N1 `5c1fba6a` | Contacto sale de la pastilla y va arriba a la derecha con «Login» (`/login`, el del sitio), en su propia pastilla de vidrio, siempre arriba; si no entra, el menú del teléfono. En el teléfono, los dos al pie del menú de vidrio | `_chrome/enlaces.ts`, `barra/BarraDelHome.tsx`, `_estilos/barra.css`, `menu/PanelDelMenu.tsx` |
+| N2 `8e9bee41` | El infinito del recorrido, ×1,3 (83 px en escritorio, 62 en el teléfono); el parlante se corre con él | `recorrido/InfinitoDelRecorrido.tsx`, `sonido/ControlDelSonido.tsx` |
+| Sonido `12b583b3` | **Al producto**: el parlante siempre, apagado por defecto (la bandera `sonido=si` se borró). Volúmenes finales; sin túnel ni amanecer ni los ambientes de día y de noche; el hover de los CTA suena el tic de la barra. Candidatos para elegir en `/v3?sonidos=1` (lo elegido se guarda y suena en el sitio; de fábrica, el `a`): el clic de la barra (4), el de los CTA (4) y UN ambiente (3 bucles de 24 s, cada uno en su archivo, diferido) | `_lib/sonido/`, `_chrome/sonido/`, `scripts-retoque/sonidos.ts`, `docs/rediseno/SONIDO.md` |
+
+Ajustados por el sprint (con su porqué en el fuente): `s8-cierre`, `s8-chrome`, `s25-contacto`, `s26-menu`, `s27-viajes`,
+`s18-deslizamiento`, `s10-acceso` (+3 paradas: el formulario y Login; el landmark del formulario), `s39-navbar`, `s38`,
+`s36`, `s40`, `s34` (la vuelta de la levantada).
+
