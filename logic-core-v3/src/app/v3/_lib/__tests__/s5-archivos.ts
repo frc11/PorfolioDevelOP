@@ -90,7 +90,8 @@ export const CARPETAS_DE_SECCION: readonly CarpetaDeSeccion[] = [
 // B12 · `piezas.tsx` (plano, portada y rama quieta) y `CapaDeLaGota.tsx` (la
 // máscara de la entrada) salieron de `Trabajos.tsx` al mudar el título al
 // escenario. PINTAN PANTALLA: van acá y no en `ARCHIVOS_DE_APOYO`.
-export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/piezas.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/CapaDeLaGota.tsx`]
+// [RETOQUE 3D] 3D · `fotoEnVolumen.tsx` (el marco con espesor de las fotos del equipo) pinta pantalla.
+export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/quienes-somos/fotoEnVolumen.tsx`,`${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/piezas.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/CapaDeLaGota.tsx`]
 
 /**
  * La ruta de demostración del lane. **Borrada en SITIO-S7**, que es lo que su
