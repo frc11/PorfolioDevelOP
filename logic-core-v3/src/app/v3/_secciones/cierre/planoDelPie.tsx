@@ -25,11 +25,11 @@ export const PLANOS_DEL_PIE = {
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 const salida = (t: number): number => 1 - (1 - t) ** 3
 
-/** Desde dónde mira cada plano (hacia el logo) y sobre qué borde gira. */
-const MIRADA: Readonly<Record<LadoDelPlano, { readonly origen: string; readonly desde: string }>> = {
-  izquierda: { origen: '0% 50%', desde: '140% 50%' },
-  derecha: { origen: '100% 50%', desde: '-40% 50%' },
-  abajo: { origen: '50% 100%', desde: '50% -300%' },
+/** Desde dónde mira cada plano (hacia el logo, en porcentajes de su caja) y sobre qué borde gira. */
+const MIRADA: Readonly<Record<LadoDelPlano, { readonly origen: string; readonly desde: readonly [number, number] }>> = {
+  izquierda: { origen: 'left center', desde: [140, 50] },
+  derecha: { origen: 'right center', desde: [-40, 50] },
+  abajo: { origen: 'center bottom', desde: [50, -300] },
 }
 
 /** La pose de un plano a `p` de su llegada. En 1, mirando al logo (nunca sin giro: el pie es una sala). */
@@ -53,7 +53,7 @@ export function PlanoDelPie({ progreso, ventana, lado, children }: { readonly pr
   if (progreso === null) return <>{children}</>
   const { origen, desde } = MIRADA[lado]
   return (
-    <div data-pieza="plano-del-pie" data-lado={lado} style={{ perspective: `${String(PLANOS_DEL_PIE.perspectiva)}px`, perspectiveOrigin: desde }}>
+    <div data-pieza="plano-del-pie" data-lado={lado} style={{ perspective: `${String(PLANOS_DEL_PIE.perspectiva)}px`, perspectiveOrigin: `${String(desde[0])}% ${String(desde[1])}%` }}>
       <div ref={plano} style={{ transform: poseDelPlano(tramo.get(), lado), transformOrigin: origen }}>
         {children}
       </div>
