@@ -81,9 +81,10 @@ const CENTRO = new THREE.Vector3()
 
 /**
  * Pone el título (su grupo, con la geometría en em y el origen en el comienzo de la línea de base) donde la cámara del
- * nudo lo ve en su lugar del DOM: a la profundidad del centro del logo, de frente y del cuerpo del DOM.
+ * nudo lo ve en su lugar del DOM: a la profundidad del centro del logo, de frente y del cuerpo del DOM. Devuelve cuánto
+ * mundo es un píxel a esa profundidad.
  */
-export function colocar(grupo: THREE.Object3D, camara: THREE.PerspectiveCamera, lugar: LugarEnElCuadro, fuente: MedidasDeLaFuente): void {
+export function colocar(grupo: THREE.Object3D, camara: THREE.PerspectiveCamera, lugar: LugarEnElCuadro, fuente: MedidasDeLaFuente): number {
   camara.getWorldDirection(ADELANTE)
   CENTRO.set(0, ORBIT_TARGET_Y, 0).sub(camara.position)
   const profundidad = CENTRO.dot(ADELANTE)
@@ -95,6 +96,38 @@ export function colocar(grupo: THREE.Object3D, camara: THREE.PerspectiveCamera, 
   const mundoPorPx = (2 * profundidad * Math.tan(THREE.MathUtils.degToRad(camara.fov) / 2)) / lugar.alto
   grupo.scale.setScalar(lugar.cuerpo * mundoPorPx)
   grupo.updateMatrixWorld(true)
+  return mundoPorPx
+}
+
+/**
+ * [RETOQUE 3D] B1 · EL RECORRIDO DEL ESCENARIO, en px de scroll: entre `inicio` y `fin` el escenario pegajoso del título
+ * está clavado (el título, en su lugar de lectura); antes baja con la sección y después sube con ella. Sin escenario, el
+ * título va con la página: los dos son el scroll de ahora. Se lee una vez por llegada (con el escenario suelto un momento
+ * para medir su lugar natural), nunca por cuadro.
+ */
+export interface PinDelLugar {
+  readonly inicio: number
+  readonly fin: number
+}
+
+export function pinDelLugar(el: HTMLElement): PinDelLugar {
+  let e: HTMLElement | null = el
+  while (e !== null && getComputedStyle(e).position !== 'sticky') e = e.parentElement
+  const padre = e?.parentElement ?? null
+  if (e === null || padre === null) return { inicio: scrollY, fin: scrollY }
+  const pegado = parseFloat(getComputedStyle(e).top) || 0
+  const antes = e.style.position
+  e.style.position = 'relative'
+  const natural = e.getBoundingClientRect().top + scrollY
+  e.style.position = antes
+  const caja = getComputedStyle(padre)
+  const fondo = padre.getBoundingClientRect().bottom + scrollY - (parseFloat(caja.paddingBottom) || 0) - (parseFloat(caja.borderBottomWidth) || 0)
+  return { inicio: natural - pegado, fin: Math.max(natural, fondo - e.offsetHeight) - pegado }
+}
+
+/** Cuánto está corrido el escenario de su lugar clavado con el scroll `y` (px, positivo hacia abajo). */
+export function corrimiento(pin: PinDelLugar, y: number): number {
+  return y < pin.inicio ? pin.inicio - y : y > pin.fin ? pin.fin - y : 0
 }
 
 /**

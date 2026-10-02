@@ -17,7 +17,7 @@ import { KEY_INTENSITY } from '../probeLighting'
 import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
 import { viajeEnCurso } from '../viaje'
-import { camaraDeLaLectura, colocar, lugarDeLectura, posicionesDelDom } from './colocacion'
+import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { armarElTitulo } from './geometria'
 import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, persigue } from './llegada'
 
@@ -73,6 +73,15 @@ interface Armado {
   readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number } }
   readonly contorno: ContornoDelLogo
   colocado: boolean
+  /**
+   * [RETOQUE 3D] B1 · lo que el que se queda necesita para irse con su sección: dónde quedó colocado (el lugar de lectura,
+   * el grupo y la dirección de arriba de la cámara que lo colocó), cuánto mundo es un píxel ahí y el recorrido del escenario.
+   */
+  readonly base: THREE.Vector3
+  readonly arriba: THREE.Vector3
+  mundoPorPx: number
+  lugar: LugarEnElCuadro | null
+  pin: PinDelLugar
 }
 
 interface Props {
@@ -216,7 +225,15 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
   const enViaje = viajeEnCurso() !== null
+  const y = window.scrollY
   for (const a of s.armados) {
+    if (a.titulo.queda) {
+      if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats)
+      a.uniforms.uQuieto.value = s.quieto ? 1 : 0
+      a.malla.visible = alCuadroDelQueQueda(a, enViaje, y, dt)
+      if (a.malla.visible) iluminar(a, logo, nivel)
+      continue
+    }
     a.mostrado.llegada = persigue(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, dt)
     a.mostrado.salida = persigue(a.mostrado.salida, a.titulo.salida, dt)
     const { llegada, salida } = a.mostrado
@@ -229,15 +246,49 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       if (llegada <= 0) a.colocado = false
       continue
     }
-    if (!a.colocado) {
-      const nudo = camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, s.nudo)
-      colocar(a.grupo, nudo, lugarDeLectura(a.titulo.lugar, a.titulo.subida), FUENTE.data) // una vez por llegada
-      a.colocado = true
-    }
-    // La noche del logo, en el mismo cuadro; y los reflejos, con la luz de la sala.
-    if (logo !== null) a.material.emissive.copy(logo.emissive)
-    a.material.envMapIntensity = nivel
+    if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats)
+    iluminar(a, logo, nivel)
   }
+}
+
+/** Una vez por llegada (y al cambiar el cuadro): el título donde la cámara de su lectura lo ve en su lugar del DOM. */
+function colocarElArmado(a: Armado, camara: THREE.PerspectiveCamera, aspecto: number, stats: ProbeStatsStore): void {
+  const nudo = camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, camara)
+  const lugar = lugarDeLectura(a.titulo.lugar, a.titulo.subida)
+  a.mundoPorPx = colocar(a.grupo, nudo, lugar, FUENTE.data) // una vez por llegada
+  a.lugar = lugar
+  a.base.copy(a.grupo.position)
+  a.arriba.set(0, 1, 0).applyQuaternion(nudo.quaternion)
+  if (a.titulo.queda) a.pin = pinDelLugar(a.titulo.lugar)
+  a.colocado = true
+}
+
+/** La noche del logo, en el mismo cuadro; y los reflejos, con la luz de la sala. */
+function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: number): void {
+  if (logo !== null) a.material.emissive.copy(logo.emissive)
+  a.material.envMapIntensity = nivel
+}
+
+/**
+ * [RETOQUE 3D] B1 · EL QUE SE QUEDA (Portfolio): la llegada, una vez empezada, termina (con el scroll para atrás a mitad
+ * de camino no queda a medio armar); llegado, se queda. Va corrido con su escenario (sale con la sección, sin animación
+ * propia), y cuando queda fuera del cuadro se rearma para la próxima llegada. `salida` entera lo esconde sin moverlo (el
+ * túnel lo tapa) y mientras tanto nada cambia: después de un viaje desde más allá del túnel, la llegada espera a que se
+ * vea. En un viaje del menú se va como todos. Devuelve si se dibuja.
+ */
+function alCuadroDelQueQueda(a: Armado, enViaje: boolean, y: number, dt: number): boolean {
+  const m = a.mostrado
+  const d = corrimiento(a.pin, y)
+  const l = a.lugar
+  const fuera = l !== null && (l.arriba + d > l.alto || l.arriba + l.linea + d < 0)
+  const tapado = a.titulo.salida >= 0.999
+  if (fuera) m.llegada = 0
+  else if (!tapado) m.llegada = persigue(m.llegada, enViaje ? 0 : m.llegada > 0 ? 1 : a.titulo.llegada, dt)
+  m.salida = 0
+  a.uniforms.uLlegada.value = m.llegada
+  a.uniforms.uSalida.value = 0
+  a.grupo.position.copy(a.base).addScaledVector(a.arriba, -d * a.mundoPorPx)
+  return m.llegada > 0 && !fuera && !tapado
 }
 
 /** Con la página ociosa (a lo sumo en 1,5 s); Safari no tiene `requestIdleCallback`: ahí, en 200 ms. Devuelve cómo cancelarlo. */
@@ -281,7 +332,7 @@ function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   malla.visible = false
   const grupo = new THREE.Group()
   grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.llegada, salida: titulo.salida }, grupo, malla, material, uniforms, contorno, colocado: false }
+  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, contorno, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 } }
 }
 
 function soltar(a: Armado): void {

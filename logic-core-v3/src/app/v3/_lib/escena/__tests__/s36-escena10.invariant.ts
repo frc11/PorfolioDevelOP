@@ -271,7 +271,8 @@ const domT3 = deLaRaiz('src/app/v3/_componentes/titulos3d/TituloDeVolumen.tsx')
 afirmar(/\{listo && <span className="sr-only hidden escritorio:block">\{texto\}<\/span>\}/.test(domT3) && /<span ref=\{lugar\} className=\{listo \? 'block escritorio:invisible' : 'block'\}>/.test(domT3) && /aria-hidden="true"/.test(leer('EscenaDelHome.tsx')), 'accesible: con el título armado, en el DOM el texto entero para el lector (sr-only) y su lugar guardado sin anunciar (invisible); el 3D vive en el lienzo, que va con aria-hidden; antes, el texto de siempre')
 const piezasT3 = deLaRaiz('src/app/v3/_secciones/trabajos/piezas.tsx')
 const porQueT3 = deLaRaiz('src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx')
-afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\} \/>/.test(piezasT3) && /salidaDelTitulo\.set\(huida\.current\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase, salida: levantada \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase, se va con la levantada)')
+// [RETOQUE 3D] B1: Portfolio se queda (`queda`) y su `salida` sólo lo esconde con la primera foto del túnel tapando el cuadro.
+afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\} queda \/>/.test(piezasT3) && /salidaDelTitulo\.set\(primeraFotoTapa\(p\) \? 1 : 0\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase, salida: levantada \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase, se va con la levantada)')
 
 // De noche se leen como el logo; y las reglas de rendimiento.
 const escena3d = leer('titulos3d/TitulosDeVolumen.tsx')
@@ -283,7 +284,8 @@ const reglas = (c: string): boolean =>
   /dithering: true/.test(c) &&
   // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM.
   /void gl\.compileAsync\(escena, camara\)\.then\(\(\) => \{\s*if \(!vivo\) return\s*calentar\(gl, escena, camara\)/.test(c) &&
-  /colocar\(a\.grupo, nudo, lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\), FUENTE\.data\) \/\/ una vez por llegada/.test(c)
+  // [RETOQUE 3D] B1: la colocación se mudó a `colocarElArmado` (guarda el lugar para el que se queda).
+  /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, FUENTE\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
 controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
 

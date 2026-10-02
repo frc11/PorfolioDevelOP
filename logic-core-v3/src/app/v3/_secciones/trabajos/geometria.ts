@@ -44,6 +44,7 @@ import {
   type PuntoDelCuadro,
   type TiemposDelGesto,
   capaDelVacio,
+  escalaDeLaCapa,
 } from './tunel'
 
 /** Lo que hay que PEDIR de un medio (ancho × alto) más el `sizes` con el que se
@@ -362,6 +363,15 @@ export function ventanaDelTunel(cuantas: number): { readonly desde: number; read
 /** El píxel del túnel —contado desde su arranque— para un progreso de la sección. */
 export function pxDelTunelEn(progreso: number): number {
   return (progreso - ARRANQUE_DEL_TUNEL) * PX_DE_LA_SECCION
+}
+
+/**
+ * [RETOQUE 3D] B1 · ¿La primera foto del túnel ya tapa el cuadro entero? (su ancho en pantalla, en anchos de cuadro, con
+ * el escenario en el mismo píxel). El título de volumen de Portfolio se queda hasta que lo tapa y recién ahí se esconde.
+ */
+export function primeraFotoTapa(progreso: number): boolean {
+  const y = pxDelTunelEn(progreso) + ORIGEN_DEL_TUNEL
+  return escalaDeLaCapa(CAPAS_DEL_TUNEL.escenario, y) * escalaDeLaCapa(CAPAS_DEL_TUNEL.proyectos[0], y) >= 1.02
 }
 
 /** La inversa: el progreso de la sección en un píxel del túnel. */

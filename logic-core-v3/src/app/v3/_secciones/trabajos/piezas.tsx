@@ -19,7 +19,7 @@ import { CONTENIDO } from './contenido'
 import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
 import { ESTILO_DEL_CUERPO_QUE_ESCALA } from './ventana'
-import { DESTINO_DEL_CTA } from './geometria'
+import { DESTINO_DEL_CTA, primeraFotoTapa } from './geometria'
 import {
   CLASE_DE_LA_BAJADA_ANGOSTA,
   CLASE_DE_LA_FRASE_ANGOSTA,
@@ -125,14 +125,14 @@ export function PortadaDeTrabajos({
   const [huidaInicial] = useState(() => enLaVentana(progreso.get(), HUIDA_DEL_CARTEL.bajando))
   /** Cuánto huyó el cartel. La histéresis necesita el cuadro anterior. */
   const huida = useRef(huidaInicial)
-  /** [ESCENA 10] T3 · la huida, para el título de volumen del titular (con la prueba `titulos`): llega con la máscara y sus letras se van con esta huida (0 a 1). */
-  const salidaDelTitulo = useMotionValue(huidaInicial)
+  /** [ESCENA 10] T3 · para el título de volumen del titular. [RETOQUE 3D] B1: sin salida propia; 1 lo esconde, con la primera foto tapando el cuadro. */
+  const salidaDelTitulo = useMotionValue(primeraFotoTapa(progreso.get()) ? 1 : 0)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
     huida.current = huidaConHisteresis(huida.current, p, HUIDA_DEL_CARTEL)
-    salidaDelTitulo.set(huida.current)
+    salidaDelTitulo.set(primeraFotoTapa(p) ? 1 : 0)
     const pose = poseDeLaHuida(huida.current)
     if (pose === null) {
       el.style.setProperty('visibility', 'hidden')
@@ -193,7 +193,7 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} /></ConInercia>
+                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} queda /></ConInercia>
                 </Titular>
               </CanalDeUnaPieza>
             </span>
