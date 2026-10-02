@@ -75,7 +75,8 @@ afirmar(terminarElVuelo.includes('if (llego && destino !== null) repetirLaLlegad
 afirmar(leer('_secciones/trabajos/piezas.tsx').includes('<CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>') && (leer('_secciones/por-que-develop/PorQueDevelop.tsx').match(/<CanalDeUnaPieza progreso=\{frase\} patron="P5" como="span" className="block" llegadaDe="por-que-develop">/g) ?? []).length === 2 && leer('_secciones/_contrato/canales.tsx').includes('progreso={useLlegadaDelTitulo(id, progreso)}'), '  la escuchan «Portfolio» (su máscara) y las dos mitades de la frase de Por qué develOP, en su canal: sólo el texto, sin cámara ni página')
 afirmar(!repetirLaLlegadaDelTitulo('servicios', 0) && MS_DE_LA_LLEGADA_DEL_TITULO >= 600 && MS_DE_LA_LLEGADA_DEL_TITULO <= 1200, `  las demás secciones no la tienen, y dura ${String(MS_DE_LA_LLEGADA_DEL_TITULO)} ms, encima del viaje y después`)
 const LLEGADA = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
-afirmar(LLEGADA.includes('(r < 0 ? p : Math.min(p, r))') && LLEGADA.includes('void control.then(() => repeticion.set(-1))'), '  el progreso del título: el del scroll, salvo mientras corre la llegada (y nunca más adelante que el scroll); al terminar vuelve al del scroll, que en el nudo ya vale 1')
+// [RONDA 2] F2: al terminar, además de volver al scroll, baja el contador de llegadas que corren (`REPETICIONES`).
+afirmar(LLEGADA.includes('(r < 0 ? p : Math.min(p, r))') && /void control\.then\(\(\) => \{\s*repeticion\.set\(-1\)/.test(LLEGADA), '  el progreso del título: el del scroll, salvo mientras corre la llegada (y nunca más adelante que el scroll); al terminar vuelve al del scroll, que en el nudo ya vale 1')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T2 · La barra de escritorio, propia de /v3')
@@ -229,7 +230,8 @@ afirmarIgual(controles(campos(true)), controles(campos(false)), 'los MISMOS camp
 afirmar(controles(campos(true)).length === 12 && /<textarea[^>]*rows="2"/.test(campos(true)) && /<textarea[^>]*rows="3"/.test(campos(false)), '  el mensaje en dos renglones en el teléfono (tres en escritorio)')
 const HOJA = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 afirmar(HOJA.includes('const compacto = !desdeArriba') && HOJA.includes("compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]'") && HOJA.includes('compacto={compacto}'), 'compacta sólo la hoja del teléfono (la que sube de abajo, en el modo del menú): la de escritorio queda como estaba')
-afirmar(HOJA.includes("compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]'") && HOJA.includes('<Cta type="submit" rotulo={ROTULO_DEL_ENVIO}'), '  el pie al lado del botón de enviar: el botón a la vista sin deslizar (medido: 390 × 844, 375 × 667 y 390 × 664 entran; navbar/t4-contacto)')
+// [RONDA 2] F1: el botón dice «Enviando…» mientras viaja.
+afirmar(HOJA.includes("compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]'") && HOJA.includes('<Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO}'), '  el pie al lado del botón de enviar: el botón a la vista sin deslizar (medido: 390 × 844, 375 × 667 y 390 × 664 entran; navbar/t4-contacto)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Retoque 4 · El hover de la barra: tranquilo, el resaltado que se desliza')
