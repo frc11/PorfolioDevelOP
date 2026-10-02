@@ -5,17 +5,14 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { entornoDeLaEscena, hayBanco } from '../entorno'
-import { crearCronometro, type Medida } from '../gpu/cronometro'
-import { crearPingPong } from '../gpu/pingPong'
+import type { Medida } from '../gpu/cronometro'
 import { vecesQueSeMovioLaPagina } from '../paginaMovida'
 import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
-import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
+import { alPaso, armar, correr, hornearDeAPoco, mallasDelLogo, pasoInicial, publicar, type MedidaDelCampo } from './armadoDeLaFisica'
 import { AIRE } from './parche'
-import { CAMPO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo, type MallaDelLogo } from './campoDelLogo'
-import { PISO_EN_VIVO } from '../piso/enVivo'
+import { CAMPO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo } from './campoDelLogo'
 import { POSARSE, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from './posarse'
-import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
 
 /**
  * [ESCENA 6] LA FÍSICA DEL POLVO — corre la simulación de `simulacion.ts` una vez por cuadro, después del
@@ -31,26 +28,6 @@ import { conchasDelPolvoParejo, posicionesDelPolvoParejo } from './volumen'
  * [ESCENA 9] T1: sólo para el polvo que se posa sobre el logo; el campo del flujo y la pose del logo del cuadro
  * anterior (la velocidad de su superficie, para el contacto) se borraron con el obstáculo.
  */
-
-/** [CALIDAD 1] B1 · cuánto trabaja el horno en cada momento libre (ms): lejos de un cuadro largo. */
-const PRESUPUESTO_DEL_HORNO_MS = 6
-
-/**
- * [CALIDAD 1] B1 · hornea un campo en momentos libres, con presupuesto: ninguna tarea larga al cargar (antes, dos de
- * ~90 ms). Sin `requestIdleCallback`, en tareas sueltas del mismo presupuesto. Avisa con el campo terminado.
- */
-function hornearDeAPoco(horno: ReturnType<typeof campoDeAPoco>, listo: (ms: number) => void): void {
-  const t0 = performance.now()
-  const seguir = (plazo?: IdleDeadline): void => {
-    // Con la GPU al límite casi no hay momentos libres: si vence la espera, el presupuesto entero igual.
-    const ms = plazo === undefined || plazo.didTimeout ? PRESUPUESTO_DEL_HORNO_MS : Math.min(PRESUPUESTO_DEL_HORNO_MS, Math.max(2, plazo.timeRemaining() - 1))
-    if (horno.paso(ms)) listo(Math.round(performance.now() - t0))
-    else if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(seguir, { timeout: 60 })
-    else window.setTimeout(seguir, 0)
-  }
-  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(seguir, { timeout: 60 })
-  else window.setTimeout(seguir, 0)
-}
 
 interface PropsDeLaFisica {
   readonly rig: ProbeRigStore
@@ -68,27 +45,6 @@ export function Fisica(props: PropsDeLaFisica) {
   const e = entornoDeLaEscena()
   if (!e.polvoParejo || !e.posarse) return null
   return <FisicaPrendida {...props} />
-}
-
-/** [ESCENA 8] T5 · las mallas del logo en el espacio de su grupo (el que lee la simulación con `uLogoInverso`). */
-function mallasDelLogo(grupo: THREE.Group): MallaDelLogo[] {
-  grupo.updateMatrixWorld(true)
-  const inversa = grupo.matrixWorld.clone().invert()
-  const mallas: MallaDelLogo[] = []
-  grupo.traverse((o) => {
-    if (!(o instanceof THREE.Mesh) || !(o.geometry instanceof THREE.BufferGeometry)) return
-    const posicion = o.geometry.getAttribute('position')
-    if (posicion === undefined) return
-    mallas.push({ posiciones: posicion.array, indices: o.geometry.index?.array ?? null, matriz: inversa.clone().multiply(o.matrixWorld) })
-  })
-  return mallas
-}
-
-/** Lo que el banco lee de un campo horneado: cuánto tardó, sus celdas y los tramos del contorno. */
-interface MedidaDelCampo {
-  readonly ms: number
-  readonly celdas: number[]
-  readonly tramos: number
 }
 
 function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFisica) {
@@ -282,106 +238,4 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
   })
 
   return null
-}
-
-/** [CALIDAD 1] B2: uno solo, escribible, que el cuadro rellena. */
-interface Paso {
-  conchas: readonly THREE.Matrix4[]
-  camara: THREE.Vector3
-  adelante: THREE.Vector3
-  dt: number
-  reloj: number
-  posarse: number
-  quieto: number
-  desperto: number
-  origen: readonly [number, number, number]
-  remolino: number
-  movimiento: number
-}
-
-function pasoInicial(): Paso {
-  const cero = new THREE.Vector3()
-  return { conchas: [], camara: cero, adelante: cero, dt: 0, reloj: 0, posarse: 0, quieto: 0, desperto: 0, origen: [0, 0, 0], remolino: 0, movimiento: 0 }
-}
-
-function alPaso(u: Record<string, THREE.IUniform>, p: Paso): void {
-  const conchas = u.uConcha.value as THREE.Matrix4[]
-  for (let i = 0; i < p.conchas.length; i += 1) conchas[i].copy(p.conchas[i])
-  ;(u.uCamara.value as THREE.Vector3).copy(p.camara)
-  ;(u.uAdelante.value as THREE.Vector3).copy(p.adelante)
-  u.uDt.value = p.dt
-  u.uReloj.value = p.reloj
-  u.uPosarse.value = p.posarse
-  u.uQuieto.value = p.quieto
-  u.uDesperto.value = p.desperto
-  ;(u.uOrigen.value as THREE.Vector3).set(p.origen[0], p.origen[1], p.origen[2])
-  u.uRemolino.value = p.remolino
-  u.uMovimiento.value = p.movimiento
-}
-
-/** Un paso de la simulación (medido si el banco lo pidió), con la pasada armada una vez ([CALIDAD 1] B2). */
-function correr(armado: ReturnType<typeof armar>, gl: THREE.WebGLRenderer): void {
-  armado.gl.current = gl
-  armado.cronometro.correr(gl, armado.pasar)
-}
-
-function publicar(textura: THREE.Texture): void {
-  AIRE.uFisica.value = textura
-}
-
-function armar() {
-  const posiciones = posicionesDelPolvoParejo()
-  const cuantas = posiciones.length / 3
-  const ancho = FISICA.ancho
-  const alto = Math.ceil(cuantas / ancho)
-  const origenes = new Float32Array(ancho * alto * 4)
-  const conchas = conchasDelPolvoParejo(cuantas)
-  for (let k = 0; k < cuantas; k += 1) origenes.set([posiciones[k * 3], posiciones[k * 3 + 1], posiciones[k * 3 + 2], conchas[k]], k * 4)
-  const texturaDeOrigenes = new THREE.DataTexture(origenes, ancho, alto, THREE.RGBAFormat, THREE.FloatType)
-  texturaDeOrigenes.needsUpdate = true
-  const sim = crearPingPong(
-    ancho,
-    alto,
-    2,
-    SIMULACION_DEL_POLVO_GLSL,
-    {
-      uOrigenes: { value: texturaDeOrigenes },
-      uCuantas: { value: cuantas },
-      uConcha: { value: [new THREE.Matrix4(), new THREE.Matrix4(), new THREE.Matrix4()] },
-      uCamara: { value: new THREE.Vector3() },
-      uAdelante: { value: new THREE.Vector3(0, 0, -1) },
-      uDeriva: AIRE.uDeriva,
-      uDt: { value: 0 },
-      uReloj: { value: 0 },
-      uPosarse: { value: 0 },
-      uQuieto: { value: 1e9 },
-      uDesperto: { value: -1e9 },
-      uOrigen: { value: new THREE.Vector3() },
-      uRemolino: { value: 0 },
-      uMovimiento: { value: 0 },
-      uVientoDelAire: AIRE.uVientoDelAire,
-      uPisoVivo: PISO_EN_VIVO.uPisoVivo,
-      uGrillaDelPiso: PISO_EN_VIVO.uGrillaDelPiso,
-      uLogo: AIRE.uLogo,
-      uLogoInverso: AIRE.uLogoInverso,
-      // [ESCENA 8] T5: el campo de la malla real (donde se posa el polvo que cae sobre el logo).
-      ...CAMPO_EN_VIVO,
-    },
-    true,
-  )
-  const gl = { current: null as THREE.WebGLRenderer | null }
-  return {
-    cuantas,
-    sim,
-    gl,
-    // [CALIDAD 1] B2: la pasada de la simulación, armada una vez (el cronómetro la corre en cada cuadro).
-    pasar: (): void => {
-      if (gl.current !== null) sim.paso(gl.current)
-    },
-    cronometro: crearCronometro(),
-    soltar: () => {
-      sim.soltar()
-      texturaDeOrigenes.dispose()
-    },
-  }
 }

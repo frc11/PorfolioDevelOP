@@ -216,7 +216,9 @@ const cortado = (() => {
   return horno.campo().datos
 })()
 controlPositivo('el detector VE un horno cortado a mitad de camino', cortado, (d: Float32Array) => igualito(d, fino.datos))
-const fisicaB1 = leer('polvo/Fisica.tsx')
+// [CIERRE RETOQUE 3D] Deuda: el horno se mudó con el armado (`armadoDeLaFisica.ts`); la física lo llama.
+const fisicaB1 = `${leer('polvo/Fisica.tsx')}
+${leer('polvo/armadoDeLaFisica.ts')}`
 afirmar(/const PRESUPUESTO_DEL_HORNO_MS = [1-8]\b/.test(fisicaB1) && /hornearDeAPoco\(fino,/.test(fisicaB1) && !/campoDelLogo\(contorno/.test(fisicaB1), '  la física hornea el campo de a poco, con un presupuesto por momento libre (antes, una tarea de ~90 ms al cargar; [ESCENA 9] T1 borró el del flujo)')
 
 // ── B2 · cero reservas por cuadro ─────────────────────────────────────────

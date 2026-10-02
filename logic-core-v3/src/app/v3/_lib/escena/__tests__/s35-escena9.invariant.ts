@@ -45,7 +45,9 @@ const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8
 titulo('T1 · el obstáculo, afuera: el polvo en vuelo atraviesa al logo')
 const simulacion = leer('polvo/simulacion.ts')
 const parche = leer('polvo/parche.ts')
-const fisica = leer('polvo/Fisica.tsx')
+// [CIERRE RETOQUE 3D] Deuda: la física se partió (el armado y el horno, en `armadoDeLaFisica.ts`): se leen los dos.
+const fisica = `${leer('polvo/Fisica.tsx')}
+${leer('polvo/armadoDeLaFisica.ts')}`
 const campo = leer('polvo/campoDelLogo.ts')
 /** Restos del obstáculo en vuelo: el rodeo, su campo, el contacto, la velocidad de la cara, la holgura y el deslizar. */
 const OBSTACULO = /alrededorDelLogo|flujoDelLogo|normalDelFlujo|FLUJO_EN_VIVO|CAMPO_DEL_FLUJO|publicarElFlujo|velocidadDelLogo|uLogoAntes|\bchocar\(|FISICA\.contacto|FISICA\.obstaculo|AIRE_OBSTACULO|afueraDelLogo|afueraDelCampo|HOLGURA|modoConPeso\( 4\.0|modo = 4\.0/
