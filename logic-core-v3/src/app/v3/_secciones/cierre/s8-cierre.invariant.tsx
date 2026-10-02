@@ -39,8 +39,9 @@ afirmar((FUENTE.match(/w-\[calc\(50%-var\(--hueco-del-pie\)\)\]/g) ?? []).length
 const hueco = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
 afirmar(hueco > 10 && hueco < 25, `el hueco sale de la pose E (a ${String(POSES_DEL_FINAL.pie.distance)}): ${hueco.toFixed(1)} svh`)
 afirmar(!/CabeceraDeSeccion|MarcaDeSeccion|PrefijoDeServicio|Isotipo/.test(FUENTE) && !/data-pieza="(marca-de-seccion|prefijo-de-servicio|isotipo)"/.test(quieto + movido), 'sin el punto azul (ni la marca de sección ni el prefijo) y sin el logo chico: el 3D ya está detrás')
-afirmar(!/<form\b|<input\b/.test(quieto), 'el newsletter no está: vive en el panel')
-afirmar(/href="#contacto"/.test(quieto) && CONTACTO_DEL_PIE.rotulo === 'Hablanos', 'la columna de contacto enlaza al contacto («Hablanos», a #contacto)')
+// [RETOQUE 3D] 3I: el único formulario del pie es el de contacto (era el enlace «Hablanos» a la hoja); el newsletter sigue en el panel.
+afirmar(!/data-pieza="novedades-forma"/.test(quieto) && (quieto.match(/<form\b/g) ?? []).length === 1, 'el newsletter no está: vive en el panel')
+afirmar(/<form id="contacto"[^>]*data-pieza="contacto-del-pie"/.test(quieto) && CONTACTO_DEL_PIE.destino === '#contacto' && ['contacto-nombre', 'contacto-mail', 'contacto-mensaje'].every((c) => quieto.includes(`id="${c}"`)) && /<button type="submit" disabled=""/.test(quieto), 'la columna de contacto es el formulario (`#contacto`): nombre, mail y mensaje, con el envío deshabilitado y su aviso')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · [FINAL 3] El contenido: datos reales, sin un solo marcador')
@@ -51,7 +52,8 @@ controlPositivo('  el chequeo vería un marcador que quedó', '[ENLACE] las rede
 afirmar(!/cuando exista/.test(textoVisible(quieto)), '  ni un «cuando exista»')
 afirmarIgual(PEDIDO.length, 0, '  y el pedido del pie quedó vacío')
 afirmar(quieto.includes(`href="${HREF_DEL_MAIL}"`) && MAIL === 'contacto@develop.com.ar', `el mail (${MAIL}), con su mailto`)
-afirmar(WHATSAPP.href.startsWith('https://wa.me/5493814154708?text=') && quieto.includes('data-pieza="whatsapp"'), 'WhatsApp abre wa.me con el mensaje precargado')
+// [RETOQUE 3D] 3I: WhatsApp se sacó del pie hasta que esté configurado (el dato queda en `contacto.ts`).
+afirmar(WHATSAPP.href.startsWith('https://wa.me/5493814154708?text=') && !quieto.includes('data-pieza="whatsapp"') && !quieto.includes('wa.me'), 'WhatsApp no está en el pie hasta que esté configurado')
 afirmarIgual(REDES.map((r) => r.rotulo), ['Instagram', 'LinkedIn', 'TikTok', 'Facebook'], 'las cuatro redes, en orden')
 afirmar(REDES.every((r) => quieto.includes(`aria-label="${r.rotulo}"`)), '  cada una con su nombre accesible (son sólo íconos)')
 afirmar(textoVisible(quieto).includes(LINEA_LEGAL), `la línea legal: «${LINEA_LEGAL}»`)

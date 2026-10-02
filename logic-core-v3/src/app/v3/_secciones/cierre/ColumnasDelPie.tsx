@@ -11,9 +11,9 @@ import { CanalDePieza, CanalDeTexto } from '../_contrato/canales'
 import {
   COLUMNAS,
   DESTINOS_DE_LA_RUTA,
-  CONTACTO_DEL_PIE,
   type ClaseDeColumna,
 } from './contenido'
+import { FormularioDelPie } from './FormularioDelPie'
 
 /**
  * LAS COLUMNAS QUE SUBEN — P2 con escalonado, sobre la grilla del pie.
@@ -106,7 +106,7 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           cantidad={COLUMNAS.length}
           indice={indice}
           // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
-          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA} ${columna.clase === 'contacto' ? 'max-escritorio:hidden' : ''}`}
+          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`}
         >
           {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. */}
           <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
@@ -129,18 +129,9 @@ function CuerpoDeColumna({ clase }: { readonly clase: ClaseDeColumna }): React.J
 }
 
 /** [FINAL] La columna de contacto: el enlace al contacto, con el mismo gesto que la del recorrido. */
+/** [RETOQUE 3D] 3I · el formulario (era el enlace «Hablanos» al formulario de la hoja); en todos los anchos. */
 function ColumnaDeContacto(): React.JSX.Element {
-  return (
-    <ul className="flex flex-col gap-[var(--spacing-2)]">
-      <li>
-        <EnlaceDelPieConIcono
-          href={CONTACTO_DEL_PIE.destino}
-          rotulo={CONTACTO_DEL_PIE.rotulo}
-          icono={<ArrowUpRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
-        />
-      </li>
-    </ul>
-  )
+  return <FormularioDelPie />
 }
 
 /**

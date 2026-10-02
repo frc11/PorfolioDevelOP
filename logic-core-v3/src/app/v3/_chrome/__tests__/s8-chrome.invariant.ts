@@ -54,7 +54,8 @@ afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ENLAZADAS.map((s) => (s.i
 const HREFS_DEL_PIE = S.hrefsDe(PIE)
 const esExterno = (h: string): boolean => /^(mailto:|https:\/\/)/.test(h)
 const HREFS_INTERNOS = HREFS_DEL_PIE.filter((h) => !esExterno(h) && h !== CONTACTO_DEL_PIE.destino)
-afirmarIgual(HREFS_DEL_PIE.filter((h) => h === CONTACTO_DEL_PIE.destino).length, 1, 'el pie tiene UN enlace que abre el formulario de contacto')
+// [RETOQUE 3D] 3I: el pie ya no ENLAZA al contacto: lo ES (el formulario `#contacto`, destino de todo lo que lleva a contacto).
+afirmarIgual(HREFS_DEL_PIE.filter((h) => h === CONTACTO_DEL_PIE.destino).length, 0, 'el pie no enlaza al contacto: el formulario de contacto está en el pie')
 afirmarIgual(S.aLaNada(HREFS_INTERNOS, ANCLAS_QUE_EXISTEN), [], `los ${HREFS_INTERNOS.length} enlaces internos del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp y las redes)`)
 afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino).filter((d) => d !== '#contacto'), ANCLAS_QUE_EXISTEN), [], `y los de la pastilla también; «Contacto» abre el formulario`)
 afirmar(ENLACES_DE_MUESTRA.at(-1)?.destino === '#contacto' && ENLACES_DE_MUESTRA.at(-1)?.rotulo === 'Contacto', '  «Contacto» de la pastilla va a `#contacto`, que el chrome intercepta para abrir el formulario')

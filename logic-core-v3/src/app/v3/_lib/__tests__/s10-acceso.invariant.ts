@@ -72,6 +72,8 @@ const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length + CATALOGO_DE_DEM
 const DELTA_DE_LA_VIDA = { paradas: 1 } as const
 // [NAVBAR] T1 · «Panel» es un ítem nuevo de la barra (lleva a Tu panel): una parada más, en las dos ramas.
 const DELTA_DEL_NAVBAR = { paradas: 1 } as const
+/** [RETOQUE 3D] 3I · el contacto del pie es un formulario: + nombre, mail, mensaje y el mail del aviso; − WhatsApp y «Hablanos». */
+const DELTA_DEL_RETOQUE = { paradas: 4 - 2 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -164,8 +166,8 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo y «Panel» en la barra`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

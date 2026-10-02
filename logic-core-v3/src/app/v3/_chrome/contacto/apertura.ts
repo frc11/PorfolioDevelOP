@@ -61,8 +61,27 @@ export function useContacto(): EstadoDelContacto {
   return useSyncExternalStore(suscribir, leer, leer)
 }
 
-/** El selector de lo que abre el contacto. */
-export const SELECTOR_DE_APERTURA = 'a[href="#contacto"], [data-abre-contacto]'
+/**
+ * El selector de lo que abre el contacto. [RETOQUE 3D] 3I: los `a[href="#contacto"]` son enlaces de verdad al formulario
+ * del pie (el viaje los lleva); quedan los disparadores que no son enlaces (los CTA de Servicios), que viajan ahí también.
+ */
+export const SELECTOR_DE_APERTURA = '[data-abre-contacto]'
+
+/**
+ * [RETOQUE 3D] 3I · TODO APUNTA A CONTACTO: al formulario del pie. Si hay un enlace del viaje a `#contacto` (la barra o
+ * el menú del teléfono) se lo aprieta: el viaje hace el resto, con su velo y su foco al llegar. Sin viaje (movimiento
+ * reducido), un salto y el foco.
+ */
+export function viajarAlContacto(selectorDeLosViajes: string): void {
+  const enlace = document.querySelector<HTMLAnchorElement>(`:is(${selectorDeLosViajes})[href="#contacto"]`)
+  if (enlace !== null) {
+    enlace.click()
+    return
+  }
+  const formulario = document.getElementById('contacto')
+  formulario?.scrollIntoView()
+  formulario?.focus({ preventScroll: true })
+}
 
 /** La precarga que pide el disparador: `data-precarga` es el id de un servicio. */
 export function precargaDe(disparador: Element): readonly Interes[] {
@@ -70,17 +89,16 @@ export function precargaDe(disparador: Element): readonly Interes[] {
   return servicio === null ? [] : (PRECARGA_POR_SERVICIO[servicio] ?? [])
 }
 
-/** Intercepta los clics de apertura en todo el documento. Se monta una vez, en el chrome. */
-export function useAperturaDelContacto(): void {
+/** Intercepta los clics de apertura en todo el documento. Se monta una vez, en el chrome. [RETOQUE 3D] 3I: viajan al pie. */
+export function useAperturaDelContacto(selectorDeLosViajes: string): void {
   useEffect(() => {
     const alTocar = (e: MouseEvent): void => {
       const objetivo = e.target instanceof Element ? e.target.closest(SELECTOR_DE_APERTURA) : null
       if (objetivo === null) return
       e.preventDefault()
-      const foco = objetivo instanceof HTMLElement && objetivo.matches('a, button') ? objetivo : objetivo.querySelector<HTMLElement>('a, button')
-      abrirContacto(precargaDe(objetivo), foco)
+      viajarAlContacto(selectorDeLosViajes)
     }
     document.addEventListener('click', alTocar)
     return () => document.removeEventListener('click', alTocar)
-  }, [])
+  }, [selectorDeLosViajes])
 }

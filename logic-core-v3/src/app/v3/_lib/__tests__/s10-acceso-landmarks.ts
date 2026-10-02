@@ -41,8 +41,9 @@ export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMA
   const CANDIDATOS = candidatosALandmark(QUIETA)
   imprimirLandmarks(CANDIDATOS)
   const LANDMARKS = CANDIDATOS.filter((l) => esRolDeLandmark(l.rol))
-  afirmarIgual(LANDMARKS.length, 11, 'el documento tiene ONCE landmarks, contra los DOS que S10 midió y los DIEZ de S11')
-  afirmarIgual([...new Set(LANDMARKS.map((l) => l.rol))].sort(), ['banner', 'main', 'navigation', 'region'], '  y son de cuatro clases: el `banner`, el `main`, la `navigation` y las ocho `region`')
+  // [RETOQUE 3D] 3I: + el `form` del contacto del pie (un formulario con nombre accesible es un landmark).
+  afirmarIgual(LANDMARKS.length, 12, 'el documento tiene DOCE landmarks, contra los DOS que S10 midió y los DIEZ de S11 (el último, el contacto del pie)')
+  afirmarIgual([...new Set(LANDMARKS.map((l) => l.rol))].sort(), ['banner', 'form', 'main', 'navigation', 'region'], '  y son de cinco clases: el `banner`, el `main`, la `navigation`, las ocho `region` y el `form` del contacto')
   afirmarIgual(LANDMARKS.filter((l) => l.rol === 'region').length, 8, '  una `region` por sección, las ocho')
   /**
    * ⚠ **LAS DOS AFIRMACIONES DEL DEFECTO 15, ESCRITAS CONTRA LA PROPIEDAD Y NO

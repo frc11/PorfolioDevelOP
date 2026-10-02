@@ -3,7 +3,8 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { abrirContacto, useContacto } from '../contacto/apertura'
+import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
+import { useContacto, viajarAlContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { Menu, type ControlDelMenu } from './MenuDeVidrio'
@@ -80,7 +81,8 @@ export function MenuMovil(): React.JSX.Element | null {
   const alSoltar = useCallback((): void => {
     if (haciaElContacto.current) {
       haciaElContacto.current = false
-      abrirContacto([], boton.current)
+      // [RETOQUE 3D] 3I · todo apunta a contacto: al formulario del pie.
+      viajarAlContacto(SELECTOR_DE_LOS_VIAJES)
     } else boton.current?.focus({ preventScroll: true })
   }, [])
 

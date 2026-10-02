@@ -63,8 +63,9 @@ const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
 afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
 afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (su «Contacto» es un botón)')
-afirmarIgual(BARRA.filter((h) => !esSeccion(h)), ['#contacto'], '«Contacto» no viaja: `#contacto` no es una sección, el efecto lo deja pasar y lo abre el formulario')
-afirmar(/const seccion = document\.getElementById\(ancla\.slice\(1\)\)\s*if \(seccion === null\) return/.test(EFECTO), '  y el efecto sale ANTES del `preventDefault` cuando el ancla no es una sección')
+// [RETOQUE 3D] 3I: «Contacto» VIAJA: `#contacto` es el formulario del pie, y el efecto resuelve un ancla que no es sección a la suya.
+afirmarIgual(BARRA.filter((h) => !esSeccion(h)), ['#contacto'], '«Contacto» va a `#contacto`, el formulario del pie: no es una sección')
+afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla\s*if \(seccion === null \|\| elAncla === null\) return/.test(EFECTO), '  y el efecto lo lleva a la sección que lo contiene (el Cierre) y le da el foco a él al llegar; sin ancla, sale antes del `preventDefault`')
 controlPositivo('  el chequeo de secciones vería un destino inventado', '#inventada', esSeccion)
 
 // ═══════════════════════════════════════════════════════════════════════════

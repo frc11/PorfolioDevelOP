@@ -21,6 +21,8 @@
  *   3G · cada valor de Por qué develOP (ícono, título y texto) llega desde un lugar distinto de la sala (CSS 3D).
  *   3H · el cierre del túnel: sin «Hablemos» ni «(un clic y arrancamos)»; abajo y centrado «Clickeá acá para empezar»,
  *        el gris más tenue con 3:1 (texto grande) sobre el papel de la ventana; lleva al pie.
+ *   3I · el pie en volumen (CSS 3D: paredes y piso que miran al logo; todo lo que se toca, del DOM); el contacto es un
+ *        formulario (nombre, mail, mensaje) que no envía y lo dice; WhatsApp afuera; todo apunta a contacto.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -41,6 +43,7 @@ import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-devel
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_secciones/trabajos/contenido'
 import { PORCENTAJE_DE_TINTA_TENUE } from '../../_secciones/trabajos/ventana'
+import { PLANOS_DEL_PIE, poseDelPlano } from '../../_secciones/cierre/planoDelPie'
 import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -212,5 +215,21 @@ const mezcla = (pct: number): string => {
 const masTenueCon3 = (pct: number): boolean => razonDeContraste(mezcla(pct), '#F7F7F5') >= 3 && razonDeContraste(mezcla(pct - 1), '#F7F7F5') < 3
 afirmar(masTenueCon3(PORCENTAJE_DE_TINTA_TENUE), '  gris claro: lo más tenue con 3:1 (texto grande) sobre el papel de la ventana, en pasos enteros de la mezcla', `${mezcla(PORCENTAJE_DE_TINTA_TENUE)} ${razonDeContraste(mezcla(PORCENTAJE_DE_TINTA_TENUE), '#F7F7F5').toFixed(2)}:1; con ${String(PORCENTAJE_DE_TINTA_TENUE - 1)} %, ${razonDeContraste(mezcla(PORCENTAJE_DE_TINTA_TENUE - 1), '#F7F7F5').toFixed(2)}:1`)
 controlPositivo('el detector VE un gris que no llega a 3:1', PORCENTAJE_DE_TINTA_TENUE - 1, masTenueCon3)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3I · El pie en volumen, con el contacto de verdad')
+
+const cierre = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
+afirmar((cierre.match(/<PlanoDelPie progreso=\{progreso\} ventana=\{LLEGADAS_DEL_PIE\.(izquierda|derecha|abajo)\} lado="(izquierda|derecha|abajo)">/g) ?? []).length === 3, 'los tres bloques del pie son planos de una sala alrededor del logo: las dos paredes y el piso')
+const miranAlLogo = (pose: typeof poseDelPlano): boolean => pose(1, 'izquierda') === `translateZ(0.0px) rotateY(${PLANOS_DEL_PIE.pared.toFixed(2)}deg)` && pose(1, 'derecha') === `translateZ(0.0px) rotateY(${(-PLANOS_DEL_PIE.pared).toFixed(2)}deg)` && pose(1, 'abajo') === `translateZ(0.0px) rotateX(${PLANOS_DEL_PIE.piso.toFixed(2)}deg)` && /translateZ\(-1000\.0px\)/.test(pose(0, 'izquierda'))
+afirmar(miranAlLogo(poseDelPlano), '  quietos miran al logo (las paredes giradas sobre su borde de afuera, el piso acostado); llegan desde atrás y más girados, con el tramo de siempre (al revés para atrás)')
+controlPositivo('el detector VE un pie plano', ((p: number) => (p >= 1 ? 'translateZ(0.0px) rotateY(0.00deg)' : 'translateZ(-1000.0px)')) as unknown as typeof poseDelPlano, miranAlLogo)
+afirmar(/if \(progreso === null\) return <>\{children\}<\/>/.test(sinComentarios(leer('_secciones/cierre/planoDelPie.tsx'))), '  sin coreografía (abajo de 1025, movimiento reducido), plano')
+const formulario = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+afirmar(/<form id="contacto"/.test(formulario) && ['contacto-nombre', 'contacto-mail', 'contacto-mensaje'].every((c) => formulario.includes(`htmlFor="${c}"`) && formulario.includes(`id="${c}"`)) && /<button type="submit" disabled aria-describedby="contacto-aviso"/.test(formulario) && /id="contacto-aviso"/.test(formulario), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo); no envía todavía y lo dice un aviso, con el mail como salida')
+const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
+afirmar(!/WHATSAPP|whatsapp/.test(piezasDeContacto) && !/<FormularioDeContacto/.test(sinComentarios(leer('_chrome/contacto/Contacto.tsx'))), '  WhatsApp se fue del pie, y la hoja de contacto (que enviaba por WhatsApp) ya no se monta: no se muestra lo que no anda')
+const efecto = sinComentarios(readFileSync('src/app/v3/_componentes/useDeslizamientoDelCta.ts', 'utf8'))
+afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla/.test(efecto) && /const foco = llego \? \(objetivo \?\? destino\) : origen/.test(efecto), '  todo apunta a contacto: `#contacto` (la barra, el menú, el «Hablemos» del hero) viaja a la sección del pie y le da el foco al formulario; los CTA de Servicios viajan ahí también')
 
 cerrar('s41-retoque-3d')

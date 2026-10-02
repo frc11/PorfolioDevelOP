@@ -91,7 +91,8 @@ titulo('3 · Los ítems, y Contacto abre el formulario')
 const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].map((m) => m[1])
 afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], '[NAVBAR] los seis, en el orden de la barra')
 afirmarIgual(items, ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`)')
-afirmar(/<button type="button" data-parte="item-del-menu"[^>]*>Contacto</.test(MENU) && /abrirContacto\(\[\], boton\.current\)/.test(FUENTE), 'Contacto es un botón: cierra el menú y abre el formulario, con el foco de vuelta al botón del menú')
+// [RETOQUE 3D] 3I: todo apunta a contacto: el del menú, al cerrarse, viaja al formulario del pie (ya no abre la hoja).
+afirmar(/<button type="button" data-parte="item-del-menu"[^>]*>Contacto</.test(MENU) && /viajarAlContacto\(SELECTOR_DE_LOS_VIAJES\)/.test(FUENTE), 'Contacto es un botón: cierra el menú y viaja al contacto del pie')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El modo del chrome sale del ancho real')

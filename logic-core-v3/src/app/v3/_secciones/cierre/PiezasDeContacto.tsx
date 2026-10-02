@@ -1,6 +1,6 @@
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { Micro } from '../../_componentes/tipografia/Textos'
-import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
+import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES } from './contacto'
 import { IconoDeMarca } from './IconosDeMarca'
 
 /**
@@ -8,22 +8,12 @@ import { IconoDeMarca } from './IconosDeMarca'
  * desde 1024 hereda la tinta del pie y abajo, la del papel que usa la mezcla.
  */
 
-/** El mail subrayado y el botón de WhatsApp. */
+/** El mail subrayado. [RETOQUE 3D] 3I: sin el botón de WhatsApp hasta que esté configurado (no se muestra lo que no anda). */
 export function ContactoDelPie(): React.JSX.Element {
   return (
     <div className="flex flex-col items-start gap-[var(--spacing-4)]">
       <a href={HREF_DEL_MAIL} className="text-cuerpo font-semi underline decoration-1 underline-offset-4">
         <DosCopias>{MAIL}</DosCopias>
-      </a>
-      <a
-        href={WHATSAPP.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-pieza="whatsapp"
-        className="inline-flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-current px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi"
-      >
-        <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
-        <DosCopias>{WHATSAPP.rotulo}</DosCopias>
       </a>
     </div>
   )

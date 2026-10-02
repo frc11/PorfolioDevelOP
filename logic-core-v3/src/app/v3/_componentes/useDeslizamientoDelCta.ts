@@ -22,6 +22,7 @@ import {
   type ModoDelViaje,
 } from './deslizamiento'
 import { destinoDelViaje } from './destinosDelViaje'
+import { ATRIBUTO_DE_PANEL } from '../_secciones/_contrato/forma'
 import { repetirLaLlegadaDelTitulo } from './llegadaDelTitulo'
 import { viajarSinLenis } from './viajeSinLenis'
 
@@ -149,6 +150,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
     let origen: HTMLElement | null = null
     /** El `<section>` al que se viaja, para darle el foco al llegar. */
     let destino: HTMLElement | null = null
+    /** [RETOQUE 3D] 3I · el ancla, si no es la sección (el contacto del pie): recibe el foco al llegar. */
+    let objetivo: HTMLElement | null = null
     let enVuelo = false
     let soltarLaRueda: (() => void) | null = null
     /** El cancelador del viaje sin Lenis. Con Lenis se queda en `null`. */
@@ -209,7 +212,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       // la sala de abajo no se ve mientras el `<main>` todavía es transparente.
       relojDeLaEscena = window.setTimeout(terminarElViaje, duracionDelFundido(zona))
 
-      const foco = llego ? destino : origen
+      const foco = llego ? (objetivo ?? destino) : origen
       if (foco !== null) {
         /**
          * ⚠ El destino es un `<section>` y **no es focalizable**: `Panel` le pone
@@ -229,6 +232,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       }
       origen = null
       destino = null
+      objetivo = null
     }
 
     const alClick = (evento: MouseEvent): void => {
@@ -250,8 +254,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
 
       const ancla = enlace.getAttribute('href')
       if (ancla === null || !ancla.startsWith('#')) return
-      const seccion = document.getElementById(ancla.slice(1))
-      if (seccion === null) return
+      // [RETOQUE 3D] 3I · un ancla adentro de una sección (`#contacto`, el formulario del pie) viaja a su sección.
+      const elAncla = document.getElementById(ancla.slice(1))
+      const seccion = elAncla?.closest<HTMLElement>(`[${ATRIBUTO_DE_PANEL}]`) ?? elAncla
+      if (seccion === null || elAncla === null) return
 
       // ⚠️ **SIN INSTANCIA YA NO SE SALE.** Acá había un `return`, y era la
       // línea que hacía que abajo de 1025 el CTA se teletransportara: sin Lenis
@@ -286,6 +292,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
 
       origen = enlace
       destino = seccion
+      objetivo = elAncla === seccion ? null : elAncla
       enVuelo = true
       // [VIAJES] El destino es un nudo de la coreografía (`destinosDelViaje.ts`), medido en el click; y
       // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).

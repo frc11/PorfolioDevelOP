@@ -71,7 +71,8 @@ afirmarIgual(precargaDe(disparadorDe(null)), [], '  y el resto de los disparador
 controlPositivo('  el chequeo vería una precarga equivocada', { ...PRECARGA_POR_SERVICIO, web: ['tienda'] as const }, (tabla: Readonly<Record<string, readonly string[]>>) => tabla.web.join() === 'web')
 const SERVICIOS = ['src/app/v3/_secciones/servicios/CtaDelServicio.tsx', 'src/app/v3/_secciones/servicios/CtaQueRota.tsx'].map(leer)
 afirmar(SERVICIOS.every((f) => /data-abre-contacto=""/.test(f) && /data-precarga=\{/.test(f)), 'los dos CTA de Servicios (el de móvil y el que rota) abren el contacto con su servicio')
-afirmar(SELECTOR_DE_APERTURA.includes('a[href="#contacto"]') && SELECTOR_DE_APERTURA.includes('[data-abre-contacto]'), 'lo abre todo `#contacto` y todo `[data-abre-contacto]`')
+// [RETOQUE 3D] 3I: `#contacto` es el formulario del pie (el viaje lo lleva); los `[data-abre-contacto]` viajan ahí también.
+afirmar(!SELECTOR_DE_APERTURA.includes('a[href="#contacto"]') && SELECTOR_DE_APERTURA.includes('[data-abre-contacto]') && /viajarAlContacto\(selectorDeLosViajes\)/.test(leer('src/app/v3/_chrome/contacto/apertura.ts')), 'todo apunta al contacto del pie: `#contacto` es su ancla y `[data-abre-contacto]` viaja ahí')
 const HOJA_WEB = renderToStaticMarkup(<HojaParaElInvariante precarga={['web']} />)
 const marcados = (h: string): string[] => [...h.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].filter((m) => /checked/.test(m[0])).map((m) => /value="([^"]+)"/.exec(m[0])?.[1] ?? '?')
 afirmarIgual(marcados(HOJA_WEB), ['web'], '  y la hoja abre con ese chip marcado de verdad, y sólo ese')

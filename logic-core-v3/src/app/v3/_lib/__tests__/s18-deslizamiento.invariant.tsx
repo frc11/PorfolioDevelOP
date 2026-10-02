@@ -113,7 +113,8 @@ afirmar(
 )
 /** CONTACTO · el hero tiene dos `<a>`: el selector resuelve a los dos y sólo desliza el que apunta a una sección de la tabla. «Hablemos» va a `#contacto`, que no es sección: el deslizamiento lo deja pasar y lo abre el formulario. */
 afirmarIgual(veces(quieto, '<a '), 2, '  y la sección tiene DOS `<a>`: «Mirá los trabajos» y «Hablemos»')
-afirmar(!IDS_DE_SECCION.includes(CONTENIDO.ctaContacto.destino.slice(1) as (typeof IDS_DE_SECCION)[number]) && /if \(seccion === null\) return/.test(quitarComentarios(leer(EFECTO))), '  y el segundo no desliza: `#contacto` no es una sección y el efecto sale antes del `preventDefault`')
+// [RETOQUE 3D] 3I: «Hablemos» ahora viaja: `#contacto` es el formulario del pie y el efecto lo resuelve a su sección.
+afirmar(!IDS_DE_SECCION.includes(CONTENIDO.ctaContacto.destino.slice(1) as (typeof IDS_DE_SECCION)[number]) && /if \(seccion === null \|\| elAncla === null\) return/.test(quitarComentarios(leer(EFECTO))), '  y el segundo viaja al contacto del pie: `#contacto` no es una sección y el efecto lo lleva a la que lo contiene')
 afirmar(
   quieto.includes(`href="${CONTENIDO.cta.destino}"`),
   `  que apunta a ${CONTENIDO.cta.destino}`,

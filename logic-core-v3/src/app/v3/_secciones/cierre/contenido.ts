@@ -147,6 +147,20 @@ export const CONTACTO_DEL_PIE = {
   destino: '#contacto',
 } as const
 
+/**
+ * [RETOQUE 3D] 3I · EL CONTACTO DEL PIE es un formulario (`FormularioDelPie.tsx`) y ya no el enlace «Hablanos»: su `id`
+ * es el destino de todo lo que lleva a contacto (`CONTACTO_DEL_PIE.destino`). No envía todavía: lo dice el aviso.
+ */
+export const CONTACTO_DEL_FORMULARIO = {
+  nombreAccesible: 'Contacto',
+  nombre: 'Nombre',
+  mail: 'Mail',
+  ejemploDeMail: 'nombre@dominio',
+  mensaje: 'Mensaje',
+  enviar: 'Enviar',
+  aviso: 'Todavía no envía: lo conectamos en la próxima etapa. Mientras tanto, escribinos a',
+} as const
+
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */
 export type ClaseDeColumna = 'recorrido' | 'contacto'
 
