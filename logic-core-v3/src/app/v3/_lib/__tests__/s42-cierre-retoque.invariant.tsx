@@ -4,6 +4,7 @@
  * Una sección por ticket, con sus controles positivos (cada detector ve el defecto que vigila):
  *   D6 · el túnel lento se borró (código y bandera); la tabla medida de heatbureau sigue igual.
  *   P1 · el polvo en facetas (la variante b) pasó al producto; la a y la c se borraron, con su bandera.
+ *   B2 · una muesca levanta el polvo posado en toda la página: también después del último nudo (el progreso en 1).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -38,5 +39,14 @@ const soloAspecto = (glsl: string): boolean => !/transformed\s*=/.test(glsl) && 
 afirmar(soloAspecto(FACETAS_VERTEX_GLSL), '  cambia cuántas se ven, su tamaño, su brillo y su forma, nunca su lugar: la física aprobada anda igual')
 controlPositivo('el detector VE una variante que mueve las motas', `${FACETAS_VERTEX_GLSL}\ntransformed = vec3( 0.0 );`, soloAspecto)
 afirmar(!existsSync(`${V3}/_lib/escena/polvo/variantes.ts`) && Object.keys(PRUEBAS_APAGADAS).length === 0 && !/POLVO_VARIANTE|VARIANTE_/.test(parche), '  la a y la c se borraron, con la bandera `polvo=`: no queda ninguna prueba')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B2 · Una muesca levanta el polvo, en toda la página')
+
+const fisica = sinComentarios(leer('_lib/escena/polvo/Fisica.tsx'))
+const atadura = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
+const despiertaConLaPagina = (c: string): boolean => /const scroll = \(!Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6\) \|\| pagina !== m\.pagina/.test(c)
+afirmar(despiertaConLaPagina(fisica) && /const alDesplazar = \(\): void => \{\s*avisarQueSeMovioLaPagina\(\)/.test(atadura), 'el despertar es cualquier scroll de la página, no sólo el del recorrido: después del último nudo (el pie) el progreso queda en 1 y una muesca no lo despertaba', 'medido al final de la página: una muesca, 13.987 posadas → 13.889 levantadas en 2 s')
+controlPositivo('el detector VE el despertar sólo por el progreso', fisica.replace(' || pagina !== m.pagina', ''), despiertaConLaPagina)
 
 cerrar('s42-cierre-retoque')

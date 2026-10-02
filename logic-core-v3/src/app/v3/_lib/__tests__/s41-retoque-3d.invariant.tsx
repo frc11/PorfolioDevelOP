@@ -93,7 +93,8 @@ afirmar(sube(simulacion), 'la levantada SUBE a su lugar en el aire (cerca de las
 controlPositivo('el detector VE la levantada con gravedad de antes', simulacion.replace('viento + hacia, ', 'viento + vec3( 0.0, - ${FISICA.soplo.gravedad.toFixed(2)}, 0.0 ), '), sube)
 afirmar(/bool llego = distance\( p, f \) < /.test(simulacion) && /if \( !cercaDeLasCaras && llego \) \{/.test(simulacion), '  se le entrega al aire cuando llegó a su lugar (o el suyo es debajo del piso, donde se funde): sin salto')
 const fisica = leer('_lib/escena/polvo/Fisica.tsx')
-afirmar(/const scroll = !Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6/.test(fisica), '  el despertar es cualquier cambio del scroll (un píxel de los 27.705 de la página es 3,6e-5 > 1e-6)')
+// [CIERRE RETOQUE 3D] B2: o la página se movió (s42 · B2).
+afirmar(/const scroll = \(!Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6\)/.test(fisica), '  el despertar es cualquier cambio del scroll (un píxel de los 27.705 de la página es 3,6e-5 > 1e-6)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B3 · El remolino de noche: sólo el cursor arma remolino')

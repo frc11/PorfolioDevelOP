@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/home-intro/introHandoff'
 
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
+import { avisarQueSeMovioLaPagina } from './paginaMovida'
 import { aplicarElDiaDelFinal, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
@@ -166,6 +167,7 @@ export function useEscenaAtadaAlScroll(
     // [FINAL 2] El día del final se escribe también EN el evento: los eventos de scroll se despachan
     // antes que los cuadros de animación, así que la escena lo ve en el mismo cuadro del salto.
     const alDesplazar = (): void => {
+      avisarQueSeMovioLaPagina()
       aplicarElDiaDelFinal(medirElBloqueOpacoEn(document, window.innerHeight, bloque))
       pedir()
     }

@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearCronometro, type Medida } from '../gpu/cronometro'
 import { crearPingPong } from '../gpu/pingPong'
+import { vecesQueSeMovioLaPagina } from '../paginaMovida'
 import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
@@ -100,6 +101,7 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     escala: 1,
     polvo: null as EstadoDelPolvoVivo | null,
     progreso: Number.NaN,
+    pagina: 0,
     puntero: new THREE.Vector2(9, 9),
     rayo: new THREE.Raycaster(),
     plano: new THREE.Plane(new THREE.Vector3(0, 1, 0), -FLOOR_Y),
@@ -209,7 +211,10 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     // La quietud y el despertar (en el reloj de la física): el cursor, desde el piso bajo el puntero;
     // el scroll, desde el piso delante de la cámara.
     const progreso = rig.current.progress
-    const scroll = !Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6
+    // [CIERRE RETOQUE 3D] B2: o la página se movió (después del último nudo el progreso queda en 1).
+    const pagina = vecesQueSeMovioLaPagina()
+    const scroll = (!Number.isNaN(m.progreso) && Math.abs(progreso - m.progreso) > 1e-6) || pagina !== m.pagina
+    m.pagina = pagina
     const velocidadDelScroll = Number.isNaN(m.progreso) || dtReal <= 0 ? 0 : Math.abs(progreso - m.progreso) / dtReal
     const cursor = m.puntero.x < 5 && m.puntero.distanceToSquared(state.pointer) > 1e-8
     m.progreso = progreso
