@@ -146,8 +146,8 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
 
 /** La mitad de la frase: un titular que nunca pasa del lugar que el logo le deja. La variante
  *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca).
- *  [ESCENA 10] T3 · con `volumen`, el título de volumen de la prueba: llega con la frase y se va con la levantada; se
- *  lee con la cámara de los valores y en el lugar al que la frase sube con ellos. */
+ *  [ESCENA 10] T3 · con `volumen`, el título de volumen ([3D Y SONIDO] T1: del producto): llega con la frase y se va con
+ *  la levantada; se lee con la cámara de los valores y en el lugar al que la frase sube con ellos. */
 function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
@@ -155,7 +155,7 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} />}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} llegadaDe="por-que-develop" />}
     </Titular>
   )
 }

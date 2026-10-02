@@ -50,7 +50,8 @@ afirmar(ENTORNO.logoDeNoche && ENTORNO.materialDelLogo && ENTORNO.sombraDelLogo,
 const sinCadaUno = entornoPedido('producto,logo-noche=no,material=no,sombra-logo=no')
 afirmar(!sinCadaUno.logoDeNoche && !sinCadaUno.materialDelLogo && !sinCadaUno.sombraDelLogo && !BASE_LIMPIA.logoDeNoche && !BASE_LIMPIA.materialDelLogo && !BASE_LIMPIA.sombraDelLogo, '  el banco los apaga con `=no` para comparar; la base limpia no los tiene')
 // [INTERFAZ 2] Las pruebas de ese sprint pasaron al producto o se borraron en su cierre: la única que queda es la de T3.
-afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'titulos' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (la que hay es la de T3)', Object.keys(PRUEBAS_APAGADAS).join())
+// [3D Y SONIDO] T1: los títulos de T3 pasaron al producto; la prueba que queda es el sonido (T2 de ese sprint).
+afirmar(Object.keys(PRUEBAS_APAGADAS).join() === 'sonido' && !('aa' in entornoPedido('producto,aa=taa').pruebas), '  de las pruebas de ESCENA 9 no queda ninguna: el antialiasing es el del lienzo (CALIDAD 1); TAA y 8 muestras, con su bandera, se borraron (la que hay es la del sonido)', Object.keys(PRUEBAS_APAGADAS).join())
 
 // El logo de noche: la variante clara (el filo casi blanco), la única.
 const exportsDelLogo = Object.keys(logoDeNoche)
@@ -182,11 +183,12 @@ controlPositivo('el lector VE un video de 30 cuadros por segundo', de30, (x: Buf
 afirmar(existsSync(path.join(process.cwd(), 'docs/rediseno/VIDEO-DE-SERVICIOS.md')) && /VIDEO-DE-SERVICIOS\.md/.test(deLaRaiz('src/app/v3/_secciones/servicios/contenido.ts')), '  cómo codificar el video de verdad queda escrito (`docs/rediseno/VIDEO-DE-SERVICIOS.md`) y el contenido lo nombra')
 
 // ── T3 · los títulos de volumen ───────────────────────────────────────────
-titulo('T3 · los títulos de volumen: extruidos con la Chivo, quietos en el mundo, con su llegada (prueba)')
-afirmar(ENTORNO.pruebas.titulos === 'no' && entornoPedido('producto,titulos=negro').pruebas.titulos === 'negro' && entornoPedido('producto,titulos=blanco').pruebas.titulos === 'blanco' && entornoPedido('producto,titulos=otro').pruebas.titulos === 'no', 'apagada en el producto; `titulos=negro` o `titulos=blanco` la piden (con banco o en la URL)')
+titulo('T3 · los títulos de volumen: extruidos con la Chivo, quietos en el mundo, con su llegada (en el producto desde 3D Y SONIDO)')
+// [3D Y SONIDO] T1: pasaron al producto, el negro; `titulos=blanco` para comparar y `titulos=no` los apaga (s40).
+afirmar(ENTORNO.titulos === 'negro' && entornoPedido('producto,titulos=blanco').titulos === 'blanco' && entornoPedido('producto,titulos=no').titulos === 'no' && entornoPedido('producto,titulos=otro').titulos === 'negro' && BASE_LIMPIA.titulos === 'no', 'en el producto, el negro; `titulos=blanco` los pide blancos y `titulos=no` los apaga (con banco o en la URL); la base no los tiene')
 const pruebasDeLaEscena = leer('PruebasDeLaEscena.tsx')
-const soloPerezoso = (c: string): boolean => /const TitulosDeVolumen = lazy\(\(\) => import\('\.\/titulos3d\/TitulosDeVolumen'\)\)/.test(c) && !/^import[^\n]*titulos3d\/TitulosDeVolumen/m.test(c) && /if \(entornoDeLaEscena\(\)\.pruebas\.titulos === 'no'\) return null/.test(c)
-afirmar(soloPerezoso(pruebasDeLaEscena), '  un módulo aparte que sólo se descarga con la bandera (la geometría de la Chivo y su fuente no viajan con la escena)')
+const soloPerezoso = (c: string): boolean => /const TitulosDeVolumen = lazy\(\(\) => import\('\.\/titulos3d\/TitulosDeVolumen'\)\)/.test(c) && !/^import[^\n]*titulos3d\/TitulosDeVolumen/m.test(c) && /if \(entornoDeLaEscena\(\)\.titulos === 'no' \|\| !escritorio\) return null/.test(c)
+afirmar(soloPerezoso(pruebasDeLaEscena), '  un módulo aparte que se descarga después, y sólo desde 1024 (la geometría de la Chivo y su fuente no viajan con la escena)')
 controlPositivo('el detector VE la importación directa', `import TitulosDeVolumen from './titulos3d/TitulosDeVolumen'\n${pruebasDeLaEscena}`, soloPerezoso)
 
 // La fuente: la Chivo del sitio en 400 (OFL), convertida a geometría; cada carácter de los títulos tiene su glifo.
@@ -241,7 +243,7 @@ const tardaEnLlegar = (f: typeof persigue): number => {
   }
   return t
 }
-afirmar(tardaEnLlegar(persigue) >= LLEGADA_DE_LAS_LETRAS.minimoS - 1e-6 && LLEGADA_DE_LAS_LETRAS.minimoS >= 1 && /a\.mostrado\.llegada = persigue\(a\.mostrado\.llegada, a\.titulo\.llegada, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')) && /a\.mostrado\.salida = persigue\(a\.mostrado\.salida, a\.titulo\.salida, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), '  y se nota a cualquier velocidad: lo que se muestra persigue al scroll, entera en 1,4 s como mínimo, en las dos direcciones (en segundos: regla 1)', `${tardaEnLlegar(persigue).toFixed(2)} s con un tirón (la ventana del scroll son ~300 px: medio segundo con la rueda)`)
+afirmar(tardaEnLlegar(persigue) >= LLEGADA_DE_LAS_LETRAS.minimoS - 1e-6 && LLEGADA_DE_LAS_LETRAS.minimoS >= 1 && /a\.mostrado\.llegada = persigue\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')) && /a\.mostrado\.salida = persigue\(a\.mostrado\.salida, a\.titulo\.salida, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), '  y se nota a cualquier velocidad: lo que se muestra persigue al scroll, entera en 1,4 s como mínimo, en las dos direcciones (en segundos: regla 1)', `${tardaEnLlegar(persigue).toFixed(2)} s con un tirón (la ventana del scroll son ~300 px: medio segundo con la rueda)`)
 controlPositivo('el detector VE la llegada pegada al scroll', (_m: number, p: number) => p, (f: typeof persigue) => tardaEnLlegar(f) >= LLEGADA_DE_LAS_LETRAS.minimoS - 1e-6)
 afirmar(LLEGADA_DE_LAS_LETRAS.profundidad >= 8 && LLEGADA_DE_LAS_LETRAS.vueltas >= 1, '  la llegada se nota: vienen de atrás (em) y giran sobre sí mismas', `${String(LLEGADA_DE_LAS_LETRAS.profundidad)} em, ${String(LLEGADA_DE_LAS_LETRAS.vueltas)} vueltas`)
 
@@ -265,10 +267,11 @@ controlPositivo('el detector VE la cámara de otro momento (el nudo `trabajos`)'
 
 // Accesible: el texto del DOM queda para el lector y los buscadores; lo que se ve vive en el lienzo (aria-hidden).
 const domT3 = deLaRaiz('src/app/v3/_componentes/titulos3d/TituloDeVolumen.tsx')
-afirmar(/<span className="sr-only">\{texto\}<\/span>/.test(domT3) && /<span ref=\{lugar\} aria-hidden="true" className="invisible block">/.test(domT3) && /if \(prueba === 'no'\) return <>\{texto\}<\/>/.test(domT3) && /aria-hidden="true"/.test(leer('EscenaDelHome.tsx')), 'accesible: en el DOM, el texto entero para el lector (sr-only) y su lugar guardado sin anunciar; el 3D vive en el lienzo, que va con aria-hidden; sin la prueba, el texto de siempre')
+// [3D Y SONIDO] T1: el DOM esconde su texto recién con el título armado (`listo`) y sólo desde 1024 (s40).
+afirmar(/\{listo && <span className="sr-only hidden escritorio:block">\{texto\}<\/span>\}/.test(domT3) && /<span ref=\{lugar\} className=\{listo \? 'block escritorio:invisible' : 'block'\}>/.test(domT3) && /aria-hidden="true"/.test(leer('EscenaDelHome.tsx')), 'accesible: con el título armado, en el DOM el texto entero para el lector (sr-only) y su lugar guardado sin anunciar (invisible); el 3D vive en el lienzo, que va con aria-hidden; antes, el texto de siempre')
 const piezasT3 = deLaRaiz('src/app/v3/_secciones/trabajos/piezas.tsx')
 const porQueT3 = deLaRaiz('src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx')
-afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} \/>/.test(piezasT3) && /salidaDelTitulo\.set\(huida\.current\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase, salida: levantada \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase, se va con la levantada)')
+afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\} \/>/.test(piezasT3) && /salidaDelTitulo\.set\(huida\.current\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase, salida: levantada \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase, se va con la levantada)')
 
 // De noche se leen como el logo; y las reglas de rendimiento.
 const escena3d = leer('titulos3d/TitulosDeVolumen.tsx')
@@ -278,7 +281,8 @@ const reglas = (c: string): boolean =>
   /a\.malla\.visible = llegada > 0 && salida < 1/.test(c) &&
   /malla\.name = `titulo de volumen · \$\{titulo\.id\}`/.test(c) &&
   /dithering: true/.test(c) &&
-  /void gl\.compileAsync\(escena, camara\)\.then\(\(\) => \{\s*if \(vivo\) calentar\(gl, escena, camara\)/.test(c) &&
+  // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM.
+  /void gl\.compileAsync\(escena, camara\)\.then\(\(\) => \{\s*if \(!vivo\) return\s*calentar\(gl, escena, camara\)/.test(c) &&
   /colocar\(a\.grupo, nudo, lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\), FUENTE\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
 controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)

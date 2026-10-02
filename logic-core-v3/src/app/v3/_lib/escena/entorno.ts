@@ -69,18 +69,19 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * Las pruebas del banco. [CALIDAD 1] Ninguna: el cielo de día pasó al producto (A2). [ESCENA 9] Las de ese sprint, para
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
  * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
- * volumen, para que decida Valentino.
+ * volumen, para que decida Valentino. [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`); la prueba
+ * que queda es el sonido (T2).
  */
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
 
 export interface Pruebas {
-  /** [ESCENA 10] T3 · los títulos de Portfolio y Por qué develOP extruidos, en el mundo (`escena/titulos3d/`); `titulos=negro|blanco`. */
-  readonly titulos: TitulosDeVolumen | 'no'
+  /** [3D Y SONIDO] T2 · el sonido (`_lib/sonido/`): el control del parlante y lo que suena; `sonido=si`. */
+  readonly sonido: 'si' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { titulos: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { sonido: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -90,7 +91,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
-    titulos: unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
+    sonido: unoDe<'si'>(['si'], valor('sonido')),
   }
 }
 
@@ -148,6 +149,12 @@ export interface Entorno {
   readonly materialDelLogo: boolean
   /** [ESCENA 10] T1 · la sombra del logo sobre el piso vivo, de día (`sombra/delLogo.ts`; era T3 de ESCENA 9). */
   readonly sombraDelLogo: boolean
+  /**
+   * [3D Y SONIDO] T1 · los títulos de volumen de Portfolio y de la frase de Por qué develOP (`escena/titulos3d/`; eran T3
+   * de ESCENA 10): el negro satinado del logo. `titulos=blanco` (con banco o en la URL) los pide blancos, para comparar;
+   * `titulos=no` los apaga.
+   */
+  readonly titulos: TitulosDeVolumen | 'no'
   /** [ESCENA 5] Las pruebas: apagadas salvo en el banco. */
   readonly pruebas: Pruebas
 }
@@ -181,6 +188,7 @@ export const ENTORNO: Entorno = {
   logoDeNoche: true,
   materialDelLogo: true,
   sombraDelLogo: true,
+  titulos: 'negro',
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -213,6 +221,7 @@ export const BASE_LIMPIA: Entorno = {
   logoDeNoche: false,
   materialDelLogo: false,
   sombraDelLogo: false,
+  titulos: 'no',
   pruebas: PRUEBAS_APAGADAS,
 }
 
@@ -260,6 +269,7 @@ export function entornoPedido(pedido: string): Entorno {
     logoDeNoche: producto ? valor('logo-noche') !== 'no' : partes.has('logo-noche'),
     materialDelLogo: producto ? valor('material') !== 'no' : partes.has('material'),
     sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
+    titulos: producto ? (valor('titulos') === 'no' ? 'no' : valor('titulos') === 'blanco' ? 'blanco' : ENTORNO.titulos) : unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
     pruebas: pruebasDe(valor),
   }
 }
@@ -276,9 +286,11 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=titulos=negro`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=sonido=si`.
+    // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
-    resuelto = pruebas === null ? ENTORNO : { ...ENTORNO, pruebas: entornoPedido(`producto,${pruebas}`).pruebas }
+    const pedido = pruebas === null ? null : entornoPedido(`producto,${pruebas}`)
+    resuelto = pedido === null ? ENTORNO : { ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas }
   }
   return resuelto
 }

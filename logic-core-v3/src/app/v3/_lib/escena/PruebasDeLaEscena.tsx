@@ -3,13 +3,17 @@
 import { Suspense, lazy, type RefObject } from 'react'
 import type * as THREE from 'three'
 
+import { CONSULTA_ESCENARIO } from '../compuerta'
+import { useAnchoMinimo } from '../useAnchoMinimo'
+
 import { entornoDeLaEscena } from './entorno'
 import type { ProbeRigStore, ProbeStatsStore } from './probeStore'
 
 /**
- * LAS PRUEBAS DE LA ESCENA — un solo montaje en `ProbeStage` (que no pasa de 300 líneas), y cada una sólo con su
- * bandera: sin ninguna, no se monta ni se descarga nada. [ESCENA 10] T3: los títulos de volumen (`titulos=negro|blanco`),
- * en un módulo aparte (la geometría de la Chivo y su fuente viajan sólo con la bandera).
+ * LO PEREZOSO DE LA ESCENA — un solo montaje en `ProbeStage` (que no pasa de 300 líneas): lo que viaja en un módulo
+ * aparte y se descarga sólo si hace falta. [ESCENA 10] T3: los títulos de volumen, en su módulo (la geometría de la Chivo
+ * y su fuente). [3D Y SONIDO] T1: pasaron al producto (`Entorno.titulos`, el negro; `titulos=blanco` para comparar,
+ * `titulos=no` los apaga): el módulo sigue perezoso, llega después del primer cuadro.
  */
 const TitulosDeVolumen = lazy(() => import('./titulos3d/TitulosDeVolumen'))
 
@@ -21,7 +25,9 @@ interface Props {
 }
 
 export function PruebasDeLaEscena(props: Props) {
-  if (entornoDeLaEscena().pruebas.titulos === 'no') return null
+  // Abajo de 1025 las secciones no tienen escenario: ningún título se anota y el módulo no se descarga.
+  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
+  if (entornoDeLaEscena().titulos === 'no' || !escritorio) return null
   return (
     <Suspense fallback={null}>
       <TitulosDeVolumen {...props} />

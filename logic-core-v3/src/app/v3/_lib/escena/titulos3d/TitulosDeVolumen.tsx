@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import datosDeLaFuente from '../../../_fuentes/chivo-400-titulos.json'
-import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos, type TituloDeVolumen } from '../../titulos3d/registro'
+import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos, type TituloDeVolumen } from '../../titulos3d/registro'
 import { conElAmanecer } from '../amanecer/luz'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio, SATINADO } from '../estudio'
@@ -16,13 +16,15 @@ import { EMISION_EN_LA_NOCHE } from '../logoEmision'
 import { KEY_INTENSITY } from '../probeLighting'
 import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
+import { viajeEnCurso } from '../viaje'
 import { camaraDeLaLectura, colocar, lugarDeLectura, posicionesDelDom } from './colocacion'
 import { armarElTitulo } from './geometria'
 import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, persigue } from './llegada'
 
 /**
- * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — una prueba (bandera `titulos=negro|blanco`), en un módulo que
- * sólo se descarga con ella. Cada título que anota una sección (`_lib/titulos3d/registro.ts`) se arma extruido con la
+ * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
+ * para comparar), en un módulo que se descarga aparte y sólo desde 1024. Cada título que anota una sección
+ * (`_lib/titulos3d/registro.ts`) se arma extruido con la
  * Chivo (`geometria.ts`), se pone quieto en el mundo (`colocacion.ts`) y sus letras llegan y se van con el progreso de
  * la pieza (`llegada.ts`). Una malla (una llamada) por título.
  *
@@ -37,7 +39,12 @@ import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GL
  *
  * **Cuándo se arma.** Con las fuentes del DOM cargadas y la página ociosa (la x de cada letra se lee del DOM: el
  * interletrado y el kerning del navegador), nunca en medio de la llegada; al montarse se compila y se calienta (regla 2:
- * el módulo llega después del precompilado). Se coloca al empezar cada llegada y al cambiar el tamaño del cuadro.
+ * el módulo llega después del precompilado). Se coloca al empezar cada llegada y al cambiar el tamaño del cuadro. Recién
+ * compilado y calentado avisa al DOM (`marcarListo`), que entonces esconde su texto.
+ *
+ * **Con los viajes del menú** ([3D Y SONIDO] T1): mientras dura un viaje, ningún título llega (lo pedido es 0: si uno se
+ * veía, se va como siempre); al terminar, el viaje a Portfolio o a Por qué develOP repite la llegada del título
+ * (`llegadaDelTitulo.ts`) y las letras llegan desde la profundidad con ese progreso, con la cámara ya quieta en el nudo.
  */
 
 /**
@@ -78,7 +85,7 @@ interface Props {
 type VentanaDelBanco = Window & { __titulosDelBanco?: { titulos: () => unknown; camara: () => unknown; progreso: () => number } }
 
 export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, rig }: Props) {
-  const variante: Variante = entornoDeLaEscena().pruebas.titulos === 'blanco' ? 'blanco' : 'negro'
+  const variante: Variante = entornoDeLaEscena().titulos === 'blanco' ? 'blanco' : 'negro'
   const version = useSyncExternalStore(suscribirALosTitulos, versionDeLosTitulos, versionDeLosTitulos)
   const gl = useThree((s) => s.gl)
   const escena = useThree((s) => s.scene)
@@ -131,9 +138,11 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
             armados.push(a)
           }
           s.armados = armados
-          // Regla 2: llega después del precompilado de la escena; se compila y se calienta al armarse.
+          // Regla 2: llega después del precompilado de la escena; se compila y se calienta al armarse. Recién ahí, el DOM.
           void gl.compileAsync(escena, camara).then(() => {
-            if (vivo) calentar(gl, escena, camara)
+            if (!vivo) return
+            calentar(gl, escena, camara)
+            for (const a of armados) marcarListo(a.titulo.id, true)
           })
         },
       )
@@ -143,6 +152,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
       soltarElPedido()
       s.armados = []
       for (const a of armados) {
+        marcarListo(a.titulo.id, false)
         g.remove(a.grupo)
         soltar(a)
       }
@@ -204,8 +214,10 @@ function descolocar(armados: readonly Armado[], ancho: number): void {
 function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number): void {
   if (s.armados.length === 0) return
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
+  // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
+  const enViaje = viajeEnCurso() !== null
   for (const a of s.armados) {
-    a.mostrado.llegada = persigue(a.mostrado.llegada, a.titulo.llegada, dt)
+    a.mostrado.llegada = persigue(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, dt)
     a.mostrado.salida = persigue(a.mostrado.salida, a.titulo.salida, dt)
     const { llegada, salida } = a.mostrado
     a.uniforms.uLlegada.value = llegada

@@ -11,9 +11,10 @@ import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
  * (`escena/titulos3d/`) lo arma extruido y lo pone en el mundo. El DOM lo sigue teniendo entero para los lectores de
  * pantalla y los buscadores (`_componentes/titulos3d/TituloDeVolumen.tsx`).
  *
- * Una prueba (bandera `titulos=negro|blanco`; decide Valentino). La bandera se lee DESPUÉS de hidratar: el servidor no
- * la conoce (sale de la URL o del banco), así que el primer render es el del producto y React vuelve a pintar con la
- * prueba, sin un desajuste de hidratación.
+ * [3D Y SONIDO] T1 · en el producto (el negro; `titulos=blanco` o `titulos=no` con banco o en la URL). La bandera se lee
+ * DESPUÉS de hidratar: el servidor no la conoce, así que el primer render es el del texto de siempre. Y el DOM esconde su
+ * texto recién cuando la escena avisa que el título está armado y compilado (`listo`): sin WebGL, o mientras el módulo
+ * llega, el título se sigue leyendo en el DOM.
  */
 export interface TituloDeVolumen {
   readonly id: string
@@ -96,7 +97,31 @@ export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, lleg
 
 const sinCambios = (): (() => void) => () => undefined
 
-/** La prueba de esta carga: `no` en el servidor y en el primer render; la pedida, después. */
+/** El material de esta carga: `no` en el servidor y en el primer render; el del producto (o el pedido), después. */
 export function useTitulosDeVolumen(): TitulosDeVolumen | 'no' {
-  return useSyncExternalStore(sinCambios, () => entornoDeLaEscena().pruebas.titulos, () => 'no')
+  return useSyncExternalStore(sinCambios, () => entornoDeLaEscena().titulos, () => 'no')
+}
+
+/** [3D Y SONIDO] T1 · los títulos que la escena ya armó y compiló: recién ahí el DOM esconde el suyo. */
+const listos = new Set<string>()
+const oyentesDeLosListos = new Set<() => void>()
+
+/** Lo escribe la escena: listo al armarse y compilarse; no, al soltarlo. */
+export function marcarListo(id: string, listo: boolean): void {
+  if (listos.has(id) === listo) return
+  if (listo) listos.add(id)
+  else listos.delete(id)
+  for (const f of oyentesDeLosListos) f()
+}
+
+function suscribirALosListos(f: () => void): () => void {
+  oyentesDeLosListos.add(f)
+  return () => {
+    oyentesDeLosListos.delete(f)
+  }
+}
+
+/** ¿El título `id` se ve en la escena? `false` en el servidor y en el primer render. */
+export function useTituloListo(id: string): boolean {
+  return useSyncExternalStore(suscribirALosListos, () => listos.has(id), () => false)
 }

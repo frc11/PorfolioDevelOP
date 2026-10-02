@@ -100,7 +100,7 @@ afirmar(/campoDeAPoco\(contorno\)/.test(fisica) && (fisica.match(/hornearDeAPoco
 // ── T2 · el logo de noche ─────────────────────────────────────────────────
 titulo('T2 · el logo de noche: costados negros, tapas con borde (en el producto desde ESCENA 10: s36)')
 const entornoFuente = leer('entorno.ts')
-afirmar(/const pruebas = new URLSearchParams\(window\.location\.search\)\.get\('pruebas'\)/.test(entornoFuente) && /\{ \.\.\.ENTORNO, pruebas: entornoPedido\(`producto,\$\{pruebas\}`\)\.pruebas \}/.test(entornoFuente), 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas, el resto del producto intacto y sin los ganchos del banco')
+afirmar(/const pruebas = new URLSearchParams\(window\.location\.search\)\.get\('pruebas'\)/.test(entornoFuente) && /const pedido = pruebas === null \? null : entornoPedido\(`producto,\$\{pruebas\}`\)/.test(entornoFuente) && /\{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(entornoFuente), 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas (y, desde 3D Y SONIDO, el material de los títulos), el resto del producto intacto y sin los ganchos del banco')
 // Qué cara es cuál: en una extrusión como la del logo (bisel 1/1/5 y los costados suaves de B7), las tapas tienen la
 // normal ±z exacta y los costados nunca llegan al corte del shader.
 const formaDePrueba = new THREE.Shape()
@@ -281,7 +281,8 @@ afirmar(/process\.env\.BANCO_GPU === 'alta' \? \['--force_high_performance_gpu'\
 titulo('T5 · los títulos en 3D de ESCENA 9: borrados (los reemplaza T3 de ESCENA 10)')
 const deV3 = (rel: string): string => path.join(process.cwd(), 'src/app/v3', rel)
 const restos = ['_componentes/titulos3d/LetrasQueLlegan.tsx', '_componentes/titulos3d/TituloDePrueba.tsx', '_lib/titulos3d/llegada.ts', '_lib/titulos3d/enLaEscena.ts', '_lib/escena/titulos', '_fuentes/chivo-400-latin.ttf'].filter((r) => existsSync(deV3(r)))
-const titulosPedidos = (v: string): unknown => (entornoPedido(`producto,titulos=${v}`).pruebas as unknown as Record<string, unknown>).titulos
+// [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`): `dom` y `webgl` no los piden.
+const titulosPedidos = (v: string): unknown => entornoPedido(`producto,titulos=${v}`).titulos
 afirmar(restos.length === 0 && titulosPedidos('dom') !== 'dom' && titulosPedidos('webgl') !== 'webgl', 'V1 (DOM) y V2 (troika) no existen: ni sus archivos, ni la TTF, ni sus banderas', restos.join(', ') || 'nada')
 const secciones = readFileSync(deV3('_secciones/trabajos/piezas.tsx'), 'utf8') + readFileSync(deV3('_secciones/por-que-develop/PorQueDevelop.tsx'), 'utf8')
 afirmar(!/TituloDePrueba|usePruebaDeTitulos|LetrasQueLlegan/.test(secciones), '  y las secciones volvieron a su pieza de siempre')

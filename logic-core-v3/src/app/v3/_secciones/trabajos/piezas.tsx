@@ -193,7 +193,7 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} /></ConInercia>
+                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} /></ConInercia>
                 </Titular>
               </CanalDeUnaPieza>
             </span>
