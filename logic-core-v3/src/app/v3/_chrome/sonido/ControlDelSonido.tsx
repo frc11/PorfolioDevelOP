@@ -101,7 +101,7 @@ export default function ControlDelSonido(): React.JSX.Element {
       aria-pressed={prendido}
       aria-label="Sonido"
       onClick={() => guardarPrendido(!prendido)}
-      className="text-tinta fixed right-[calc(var(--spacing-4)+var(--spacing-2))] bottom-[calc(var(--spacing-4)+var(--spacing-12))] z-[var(--z-cabecera)] flex h-[var(--spacing-8)] w-[var(--spacing-8)] items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)] escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2+var(--spacing-3))] escritorio:bottom-[var(--spacing-6)]"
+      className="text-tinta fixed right-[calc(var(--spacing-4)+var(--spacing-2))] bottom-[calc(var(--spacing-4)+var(--spacing-12))] z-[var(--z-cabecera)] flex h-[var(--spacing-8)] w-[var(--spacing-8)] items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)] escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2.6+var(--spacing-3))] escritorio:bottom-[var(--spacing-6)]"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-[var(--spacing-5)] w-[var(--spacing-5)] overflow-visible" fill="none" strokeLinecap="round" strokeLinejoin="round">
         {/* El borde del tono contrario, debajo (como el infinito): se lee sobre cualquier fondo. */}

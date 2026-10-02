@@ -26,6 +26,7 @@
  *   3J · el túnel lento, con bandera (`tunel=lento`): la tabla del producto no se toca; el túnel se estira en escritorio.
  *   N1 · «Contacto» sale de la pastilla: con «Login» (el login del sitio) en la esquina de arriba a la derecha; en el
  *        teléfono, los dos separados al pie del menú de vidrio.
+ *   N2 · el infinito del recorrido, 1,3 veces más grande (y el parlante corrido con él).
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -262,5 +263,14 @@ const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
 afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (al pie del hero están el infinito y el parlante); si no entra al lado de la pastilla, el menú del teléfono')
 const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
 afirmar(/<ul data-parte="pie-del-menu"[\s\S]*href=\{ENLACE_DE_CONTACTO\.destino\}[\s\S]*href=\{ENLACE_DE_LOGIN\.destino\}/.test(menu) && /\{ENLACES_DE_SECCION\.map\(/.test(menu), '  en el teléfono, separados al pie del menú de vidrio')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('N2 · El infinito, 1,3 veces más grande')
+
+const infinito = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
+const masGrande = (c: string): boolean => c.includes('w-[calc(var(--spacing-12)*1.3)]') && c.includes('escritorio:w-[calc(var(--spacing-8)*2.6)]')
+afirmar(masGrande(infinito), 'de 48 a 62 px en el teléfono y de 64 a 83 en escritorio (el trazo crece con él: es del dibujo)')
+controlPositivo('el detector VE el de antes', infinito.replace('*1.3)]', ')]').replace('*2.6)]', '*2)]'), masGrande)
+afirmar(leer('_chrome/sonido/ControlDelSonido.tsx').includes('escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2.6+var(--spacing-3))]'), '  y el parlante, a su izquierda en escritorio, se corre con él (medido: 12 px de aire entre los dos)')
 
 cerrar('s41-retoque-3d')

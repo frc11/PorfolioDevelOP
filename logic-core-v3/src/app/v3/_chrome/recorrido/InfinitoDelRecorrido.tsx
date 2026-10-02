@@ -95,11 +95,12 @@ export function InfinitoDelRecorrido(): React.JSX.Element {
   }, [avance])
 
   return (
+    // [RETOQUE 3D] N2 · 1,3 veces más grande (48 → 62 px en el teléfono, 64 → 83 en escritorio); el trazo crece con él.
     <div
       ref={caja}
       data-pieza="infinito-del-recorrido"
       aria-hidden="true"
-      className="text-tinta pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[var(--spacing-12)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2)]"
+      className="text-tinta pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]"
     >
       <svg viewBox={CAJA_DEL_INFINITO} className="block h-auto w-full overflow-visible">
         {/* El borde del tono contrario, debajo de todo: se lee sobre cualquier fondo (los dos tonos del anillo de foco). */}
