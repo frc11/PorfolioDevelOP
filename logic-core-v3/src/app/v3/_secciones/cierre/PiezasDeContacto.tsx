@@ -1,7 +1,7 @@
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
-import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES } from './contacto'
+import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
 import { IconoDeMarca } from './IconosDeMarca'
 
 /**
@@ -10,13 +10,25 @@ import { IconoDeMarca } from './IconosDeMarca'
  * [CIERRE RETOQUE 3D] D5: cada enlace es un bloque sólido que flota (`BloqueSolido`, desde 1025).
  */
 
-/** El mail subrayado. [RETOQUE 3D] 3I: sin el botón de WhatsApp hasta que esté configurado (no se muestra lo que no anda). */
+/** El mail subrayado y el botón de WhatsApp. [RONDA 2] F1: WhatsApp vuelve al pie, donde estaba (sólo queda fuera del formulario de contacto). */
 export function ContactoDelPie(): React.JSX.Element {
   return (
     <div className="flex flex-col items-start gap-[var(--spacing-4)]">
       <BloqueSolido>
         <a href={HREF_DEL_MAIL} className="block text-cuerpo font-semi underline decoration-1 underline-offset-4 escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-2)]">
           <DosCopias>{MAIL}</DosCopias>
+        </a>
+      </BloqueSolido>
+      <BloqueSolido>
+        <a
+          href={WHATSAPP.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-pieza="whatsapp"
+          className="inline-flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi"
+        >
+          <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
+          <DosCopias>{WHATSAPP.rotulo}</DosCopias>
         </a>
       </BloqueSolido>
     </div>

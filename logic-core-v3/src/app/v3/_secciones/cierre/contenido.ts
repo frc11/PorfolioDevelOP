@@ -158,7 +158,9 @@ export const CONTACTO_DEL_FORMULARIO = {
   ejemploDeMail: 'nombre@dominio',
   mensaje: 'Mensaje',
   enviar: 'Enviar',
-  aviso: 'Todavía no envía: lo conectamos en la próxima etapa. Mientras tanto, escribinos a',
+  /** [RONDA 2] F1: mientras viaja y cuando llegó (sin carteles de «todavía no envía»). */
+  enviando: 'Enviando…',
+  listo: '¡Listo! Te escribimos pronto.',
 } as const
 
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */

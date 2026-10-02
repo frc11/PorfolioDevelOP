@@ -11,7 +11,7 @@ import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
 import { CamposDelContacto } from './CamposDelContacto'
-import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, TITULO, avisoDeErrores, type Interes } from './contenido'
+import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, TITULO, avisoDeErrores, type Interes } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from './enviarContacto'
 
 /**
@@ -49,8 +49,12 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [datos, setDatos] = useState<DatosDeContacto>({ intereses: precarga, ...VACIO })
   const [errores, setErrores] = useState<ErroresDeContacto>({})
   const [intento, setIntento] = useState(false)
-  const [abiertoEn, setAbiertoEn] = useState<string | null>(null)
+  // [RONDA 2] F1: mientras viaja, y si llegó.
+  const [enviando, setEnviando] = useState(false)
+  const [enviado, setEnviado] = useState(false)
+  // UNA región de alerta: el resumen de los datos (sólo para el lector) o el error del servidor (a la vista).
   const [aviso, setAviso] = useState('')
+  const [avisoALaVista, setAvisoALaVista] = useState(false)
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -64,10 +68,17 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     actualizar({ ...datos, intereses: datos.intereses.includes(id) ? datos.intereses.filter((i) => i !== id) : [...datos.intereses, id] })
   const escribir = (campo: keyof typeof VACIO, valor: string): void => actualizar({ ...datos, [campo]: valor })
 
-  const alEnviar = (e: React.FormEvent<HTMLFormElement>): void => {
+  const alEnviar = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
+    if (enviando) return
     setIntento(true)
-    const r = enviarContacto(datos)
+    setEnviado(false)
+    setAvisoALaVista(false)
+    const form = e.currentTarget
+    const errores = validarContacto(datos)
+    if (Object.keys(errores).length === 0) setEnviando(true)
+    const r = await enviarContacto(datos)
+    setEnviando(false)
     if (r.estado === 'invalido') {
       setErrores(r.errores)
       // [INTERFAZ 1] T3: un aviso, vaciado y vuelto a escribir para que un segundo intento también se anuncie.
@@ -75,14 +86,21 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
       const n = Object.keys(r.errores).length
       requestAnimationFrame(() => setAviso(avisoDeErrores(n)))
       // El foco va al primer campo con error, después de que el render lo marque.
-      const form = e.currentTarget
       const primero = r.errores.intereses !== undefined ? '[data-pieza="chip-de-contacto"] input' : '[aria-invalid="true"]'
       requestAnimationFrame(() => form.querySelector<HTMLElement>(primero)?.focus())
       return
     }
     setErrores({})
     setAviso('')
-    setAbiertoEn(r.url)
+    if (r.estado === 'error') {
+      // El error normal del formulario, a la vista (en la misma región viva).
+      setAvisoALaVista(true)
+      requestAnimationFrame(() => setAviso(r.mensaje))
+      return
+    }
+    setEnviado(true)
+    setIntento(false)
+    setDatos({ intereses: [], ...VACIO })
   }
 
   const desdeArriba = modo === 'barra'
@@ -155,7 +173,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             </button>
           </div>
 
-          <form noValidate onSubmit={alEnviar} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
+          <form noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
             <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
             <div
               className={cn(
@@ -164,23 +182,15 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               )}
             >
               <p className="text-caption leading-texto">{PIE}</p>
-              <Cta type="submit" rotulo={ROTULO_DEL_ENVIO} className={compacto ? 'shrink-0' : undefined} />
+              <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
             </div>
             {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
                 siempre se anuncia); lo que cambia es lo de adentro. */}
-            <p role="alert" className="sr-only">
+            <p role="alert" className={avisoALaVista ? 'text-caption leading-texto' : 'sr-only'}>
               {aviso}
             </p>
             <p role="status" className="text-caption leading-texto empty:hidden">
-              {abiertoEn !== null && (
-                <>
-                  {DESPUES_DEL_ENVIO.texto}{' '}
-                  <a href={abiertoEn} className="underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2">
-                    {DESPUES_DEL_ENVIO.reintento}
-                  </a>
-                  .
-                </>
-              )}
+              {enviado ? DESPUES_DEL_ENVIO : ''}
             </p>
           </form>
         </div>

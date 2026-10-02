@@ -1,59 +1,122 @@
+'use client'
+
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
+
+import { cn } from '@/lib/utils'
+
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
-import { HREF_DEL_MAIL, MAIL } from './contacto'
+import { enviarAlServidor } from '../../_lib/formularios/enviar'
+import { validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { CONTACTO_DEL_FORMULARIO } from './contenido'
 
 /**
  * [RETOQUE 3D] 3I · EL CONTACTO DEL PIE — un formulario simple (nombre, mail y mensaje) con campos de verdad: se
- * enfocan, se escriben y los anuncia el lector. TODAVÍA NO ENVÍA: el botón está deshabilitado y lo dice un aviso honesto
- * (como el newsletter de Tu panel), con el mail como salida mientras tanto; el envío (y su validación del lado del
- * servidor) se configura en la etapa siguiente. Es el destino de todo lo que lleva a contacto (`#contacto`: el viaje lo
- * resuelve a su sección y le da el foco al llegar). El borde, el límite de componente del sistema (3:1 de día y de noche).
- * [CIERRE RETOQUE 3D] D5: cada campo y el botón son un bloque sólido (`BloqueSolido`): desde 1025 el borde lo pone su tapa.
+ * enfocan, se escriben y los anuncia el lector. Es el destino de todo lo que lleva a contacto (`#contacto`: el viaje lo
+ * resuelve a su sección y le da el foco al llegar). [CIERRE RETOQUE 3D] D5: cada campo y el botón son un bloque sólido.
+ *
+ * [RONDA 2] F1 · ENVÍA: a `/api/contacto` (validación en el navegador y en el servidor). Al enviar, cada campo con error
+ * lo dice a su lado y el foco va al primero; mientras viaja, el botón ocupado; el resultado, en sus regiones vivas (el
+ * error del servidor, normal; el «listo», y el formulario vacío). Sin carteles de «todavía no envía».
  */
-const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60'
+const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
 const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
+const ERROR = 'text-micro leading-micro tracking-micro'
+const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
+
+type Estado = { readonly fase: 'quieto' | 'enviando' | 'listo' } | { readonly fase: 'error'; readonly mensaje: string }
 
 export function FormularioDelPie(): React.JSX.Element {
   const c = CONTACTO_DEL_FORMULARIO
+  const [datos, setDatos] = useState<DatosDelPie>(VACIO)
+  const [errores, setErrores] = useState<ErroresDelPie>({})
+  const [intento, setIntento] = useState(false)
+  const [estado, setEstado] = useState<Estado>({ fase: 'quieto' })
+  const enviando = estado.fase === 'enviando'
+
+  const escribir = (campo: CampoDelPie, valor: string): void => {
+    const siguiente = { ...datos, [campo]: valor }
+    setDatos(siguiente)
+    // Después del primer intento, los errores se corrigen mientras se escribe.
+    if (intento) setErrores(validarElPie(siguiente))
+    if (estado.fase === 'listo' || estado.fase === 'error') setEstado({ fase: 'quieto' })
+  }
+
+  const alEnviar = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    if (enviando) return
+    setIntento(true)
+    const encontrados = validarElPie(datos)
+    setErrores(encontrados)
+    const primero = (['nombre', 'mail', 'mensaje'] as const).find((k) => encontrados[k] !== undefined)
+    if (primero !== undefined) {
+      const form = e.currentTarget
+      requestAnimationFrame(() => form.querySelector<HTMLElement>(`#contacto-${primero}`)?.focus())
+      return
+    }
+    setEstado({ fase: 'enviando' })
+    const r = await enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() })
+    if (r.ok) {
+      setEstado({ fase: 'listo' })
+      setDatos(VACIO)
+      setIntento(false)
+    } else setEstado({ fase: 'error', mensaje: r.error })
+  }
+
+  const campo = (k: CampoDelPie): { readonly id: string; readonly invalido: boolean; readonly describe: string | undefined } => ({
+    id: `contacto-${k}`,
+    invalido: errores[k] !== undefined,
+    describe: errores[k] !== undefined ? `contacto-${k}-error` : undefined,
+  })
+
   return (
-    <form id="contacto" tabIndex={-1} data-pieza="contacto-del-pie" aria-label={c.nombreAccesible} className="flex flex-col gap-[var(--spacing-3)]">
-      <div className="flex flex-col gap-[var(--spacing-1)]">
-        <label htmlFor="contacto-nombre" className={ROTULO}>
-          {c.nombre}
-        </label>
-        <BloqueSolido className="block w-full">
-          <input id="contacto-nombre" name="nombre" type="text" autoComplete="name" required className={CAMPO} />
-        </BloqueSolido>
-      </div>
-      <div className="flex flex-col gap-[var(--spacing-1)]">
-        <label htmlFor="contacto-mail" className={ROTULO}>
-          {c.mail}
-        </label>
-        <BloqueSolido className="block w-full">
-          <input id="contacto-mail" name="mail" type="email" autoComplete="email" required placeholder={c.ejemploDeMail} className={CAMPO} />
-        </BloqueSolido>
-      </div>
-      <div className="flex flex-col gap-[var(--spacing-1)]">
-        <label htmlFor="contacto-mensaje" className={ROTULO}>
-          {c.mensaje}
-        </label>
-        <BloqueSolido className="block w-full">
-          <textarea id="contacto-mensaje" name="mensaje" rows={3} required className={`${CAMPO} resize-none`} />
-        </BloqueSolido>
-      </div>
+    <form id="contacto" tabIndex={-1} noValidate data-pieza="contacto-del-pie" aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)]">
+      {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
+        const f = campo(k)
+        return (
+          <div key={k} className="flex flex-col gap-[var(--spacing-1)]">
+            <label htmlFor={f.id} className={ROTULO}>
+              {c[k]}
+            </label>
+            <BloqueSolido className="block w-full">
+              {k === 'mensaje' ? (
+                <textarea id={f.id} name={k} rows={3} required value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none')} />
+              ) : (
+                <input
+                  id={f.id}
+                  name={k}
+                  type={k === 'mail' ? 'email' : 'text'}
+                  autoComplete={k === 'mail' ? 'email' : 'name'}
+                  required
+                  placeholder={k === 'mail' ? c.ejemploDeMail : undefined}
+                  value={datos[k]}
+                  onChange={(e) => escribir(k, e.target.value)}
+                  aria-invalid={f.invalido || undefined}
+                  aria-describedby={f.describe}
+                  className={CAMPO}
+                />
+              )}
+            </BloqueSolido>
+            {f.invalido && (
+              <p id={f.describe} className={ERROR}>
+                {errores[k]}
+              </p>
+            )}
+          </div>
+        )
+      })}
       <BloqueSolido className="self-start">
-        <button type="submit" disabled aria-describedby="contacto-aviso" className="block rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi disabled:cursor-not-allowed disabled:opacity-60">
-          {c.enviar}
+        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi disabled:cursor-wait">
+          {enviando && <Loader2 aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-4)] animate-spin motion-reduce:animate-none" />}
+          {enviando ? c.enviando : c.enviar}
         </button>
       </BloqueSolido>
-      <p id="contacto-aviso" className="text-micro leading-micro tracking-micro">
-        {c.aviso}{' '}
-        <BloqueSolido>
-          <a href={HREF_DEL_MAIL} className="block underline decoration-1 underline-offset-4 escritorio:px-[var(--spacing-2)] escritorio:py-[var(--spacing-1)]">
-            {MAIL}
-          </a>
-        </BloqueSolido>
-        .
+      {/* Las dos regiones vivas existen desde el principio (una que nace con su texto no siempre se anuncia). */}
+      <p role="alert" className={cn(ERROR, estado.fase !== 'error' && 'sr-only')}>
+        {estado.fase === 'error' ? estado.mensaje : ''}
+      </p>
+      <p role="status" className={cn(ERROR, 'empty:hidden')}>
+        {estado.fase === 'listo' ? c.listo : ''}
       </p>
     </form>
   )

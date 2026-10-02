@@ -2,8 +2,8 @@
  * EL FORMULARIO DE CONTACTO — el copy, las opciones y la precarga. **[CONTACTO]**
  *
  * PROPUESTA del planificador, adaptada del de nk: voseo, frases cortas y sin genéricos.
- * El mail sale del archivo de contacto del pie, que es la única fuente. [CIERRE RETOQUE 3D] N1: sin WhatsApp (se fue de
- * todos lados en el RETOQUE 3D): el envío arma un mail.
+ * El mail sale del archivo de contacto del pie, que es la única fuente. [CIERRE RETOQUE 3D] N1: sin WhatsApp. [RONDA 2]
+ * F1: el envío va a `/api/contacto` (sin `mailto`); WhatsApp volvió al pie, pero acá, en el formulario, no está.
  */
 
 import { HREF_DEL_MAIL, MAIL } from '../../_secciones/cierre/contacto'
@@ -47,14 +47,12 @@ export const CAMPOS = {
 
 export const PIE = 'Todo es obligatorio salvo la empresa. Si es vago, está perfecto.'
 
-/** Mientras no haya backend el envío abre el correo: el rótulo lo dice. Cambia junto con `enviarContacto`. */
-export const ROTULO_DEL_ENVIO = 'Enviar por mail'
+/** [RONDA 2] F1 · el envío va al endpoint propio (`/api/contacto`): el rótulo de siempre, y mientras viaja. */
+export const ROTULO_DEL_ENVIO = 'Enviar'
+export const ROTULO_ENVIANDO = 'Enviando…'
 
-/** Lo que se dice después de enviar. Nunca un «¡Enviado!»: el mensaje todavía no salió. */
-export const DESPUES_DEL_ENVIO = {
-  texto: 'Te abrimos tu correo con el mensaje armado: sólo falta que lo mandes desde ahí.',
-  reintento: 'Si no se abrió, abrilo acá',
-} as const
+/** Lo que se dice cuando el servidor contestó que llegó. */
+export const DESPUES_DEL_ENVIO = '¡Gracias! Te escribimos pronto.'
 
 export const ROTULO_DE_CERRAR = 'Cerrar el formulario de contacto'
 

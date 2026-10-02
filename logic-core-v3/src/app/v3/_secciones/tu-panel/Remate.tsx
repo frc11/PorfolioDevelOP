@@ -1,13 +1,12 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { FormularioDeNovedades } from '../../_componentes/chrome/Novedades'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
+import { NewsletterDelPanel } from './NewsletterDelPanel'
 import { CORRIDAS_DEL_REMATE, DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
 import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
 
@@ -22,8 +21,8 @@ import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
  * puntos, después la frase y el newsletter—. El discriminador de los cuatro
  * cruces es el de Trabajos (`_contrato/cruce.ts`); acá no hay uno propio.
  *
- * El newsletter es `FormularioDeNovedades`, el mismo componente que vivía en el
- * pie del Cierre, y sigue deshabilitado: no hay un destino al que mandarlo.
+ * El newsletter era `FormularioDeNovedades`, el mismo componente que vivía en el
+ * pie del Cierre. [RONDA 2] F1: ahora es `NewsletterDelPanel`, que envía.
  *
  * Sin coreografía (abajo de 1025 o con movimiento reducido) está quieto desde el
  * principio y el newsletter va debajo, a todo el ancho.
@@ -130,15 +129,8 @@ export function Remate(): React.JSX.Element {
         <Titular nivel="titulo-s" como="h3">
           {NEWSLETTER.titulo}
         </Titular>
-        <FormularioDeNovedades
-          id={NEWSLETTER.id}
-          rotulo={NEWSLETTER.rotulo}
-          placeholder={NEWSLETTER.placeholder}
-          textoDeAyuda={NEWSLETTER.ayuda}
-          rotuloDeEnvio={NEWSLETTER.rotuloDeEnvio}
-          icono={<ArrowRight className="size-[var(--spacing-4)]" strokeWidth={1.5} aria-hidden="true" />}
-          deshabilitado
-        />
+        {/* [RONDA 2] F1 · el newsletter que envía (el mismo marcado que el compartido, propio de Tu panel). */}
+        <NewsletterDelPanel />
       </div>
     </div>
   )

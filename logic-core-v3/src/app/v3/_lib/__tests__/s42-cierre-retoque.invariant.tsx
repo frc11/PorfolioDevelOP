@@ -121,7 +121,8 @@ const abreElPanel = (c: string, a: string, b: string): boolean => /return <Formu
 afirmar(abreElPanel(contactoTsx, apertura, barra), 'el panel (la hoja de SPRINT CONTACTO) vuelve a montarse; el Contacto de la esquina lo abre (en la captura: antes que el viaje, que deja pasar lo ya atendido) y el del menú del teléfono también, al cerrarse el menú')
 controlPositivo('el detector VE el Contacto que viaja al pie', [contactoTsx, apertura, barra.replace(' data-abre-contacto={ABRE_EL_PANEL}', '')], ([c, a, b]: string[]) => abreElPanel(c, a, b))
 const delPanel = ['_chrome/contacto/contenido.ts', '_chrome/contacto/enviarContacto.ts', '_chrome/contacto/FormularioDeContacto.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
-afirmar(!/whatsapp|wa\.me|WHATSAPP/i.test(delPanel) && /mailto:\$\{MAIL\}\?subject=/.test(delPanel), '  sin WhatsApp (se fue de todos lados): el envío valida y arma un mail con el mensaje; nunca dice «enviado»')
+// [RONDA 2] F1: el panel envía al endpoint propio (no arma un mail); WhatsApp, fuera del formulario.
+afirmar(!/whatsapp|wa\.me|WHATSAPP/i.test(delPanel) && /enviarAlServidor/.test(delPanel) && !/mailto:\$\{MAIL\}\?subject=/.test(delPanel), '  sin WhatsApp en el panel; el envío va al endpoint propio (`/api/contacto`) y dice «enviado» sólo con la respuesta')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D1 · Todo el 3D fijo en el mundo')
@@ -156,9 +157,10 @@ titulo('D5 · El pie: bloques sólidos que flotan')
 
 const delPie = ['_secciones/cierre/FormularioDelPie.tsx', '_secciones/cierre/PiezasDeContacto.tsx', '_secciones/cierre/ColumnasDelPie.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
 const cuantos = (c: string, re: RegExp): number => (c.match(re) ?? []).length
-const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) === 8 && cuantos(c, /<BloqueSolido[^>]*>\s*<(input|textarea|button|a|EnlaceDelPieConIcono)\b/g) === 8
-afirmar(todoEsUnBloque(delPie), 'cada enlace (el mail, el recorrido, las redes, el mail del aviso), cada campo (nombre, mail, mensaje) y el botón son un bloque sólido, con el elemento de verdad adentro (se enfoca, se escribe)')
-controlPositivo('el detector VE un campo sin su bloque', delPie.replace(/<BloqueSolido className="block w-full">(\r?\n\s*<input id="contacto-nombre")/, '<div>$1'), todoEsUnBloque)
+// [RONDA 2] F1: los campos van en un `map` y volvió WhatsApp; el aviso y su mail se fueron.
+const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) >= 6 && /<BloqueSolido className="block w-full">\s*\{k === 'mensaje' \? \(/.test(c) && /<BloqueSolido className="self-start">\s*<button type="submit"/.test(c) && /<BloqueSolido>\s*<a\s+href=\{WHATSAPP\.href\}/.test(c) && /<BloqueSolido>\s*<EnlaceDelPieConIcono/.test(c)
+afirmar(todoEsUnBloque(delPie), 'cada enlace (el mail, WhatsApp, el recorrido, las redes), cada campo (nombre, mail, mensaje) y el botón son un bloque sólido, con el elemento de verdad adentro (se enfoca, se escribe)')
+controlPositivo('el detector VE un campo sin su bloque', delPie.replace('<BloqueSolido className="block w-full">', '<div>'), todoEsUnBloque)
 const cierreTsx = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
 afirmar(!/PlanoDelPie/.test(cierreTsx) && !existsSync(`${V3}/_secciones/cierre/planoDelPie.tsx`), '  ya no es una sala alrededor del logo: las paredes y el piso se borraron')
 const quieto = renderToStaticMarkup(<BloqueSolido><a href="#x">x</a></BloqueSolido>)

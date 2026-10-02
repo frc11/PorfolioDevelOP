@@ -77,7 +77,7 @@ const ORDEN = [
 afirmarIgual(TARJETAS.map((t) => t.titulo), ORDEN, 'las ocho features, con el texto y el orden del sprint anterior')
 afirmarIgual(TITULO, 'Tu Panel', 'el título de la sección es «Tu Panel»')
 
-const TEXTOS = [TITULO, DESCRIPCION, ...TARJETAS.map((t) => t.titulo), ...TARJETAS.map((t) => t.etiqueta), Y_MAS, NEWSLETTER.titulo, NEWSLETTER.rotulo, NEWSLETTER.ayuda]
+const TEXTOS = [TITULO, DESCRIPCION, ...TARJETAS.map((t) => t.titulo), ...TARJETAS.map((t) => t.etiqueta), Y_MAS, NEWSLETTER.titulo, NEWSLETTER.rotulo]
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
   const visible = textoAccesible(html)
   afirmarIgual(TEXTOS.filter((t) => !visible.includes(t)), [], `${rama}: los ${TEXTOS.length} textos se anuncian enteros`)
@@ -141,7 +141,8 @@ const TARJETA = fuenteDe('Tarjeta.tsx')
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
   // [INTERFAZ 2] Más el botón de pausa del panel en vivo (`_componentes/vida/PanelEnVivo.tsx`): se mueve solo más de cinco
   // segundos y WCAG 2.2.2 pide poder pausarlo. Está en las dos ramas.
-  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 2, `${rama}: ${TARJETAS.length + 2} focalizables — una por feature, el campo del newsletter y la pausa del panel en vivo`)
+  // [RONDA 2] F1: + el botón del newsletter, que ahora envía (ya no está deshabilitado).
+  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 3, `${rama}: ${TARJETAS.length + 3} focalizables — una por feature, el campo y el botón del newsletter y la pausa del panel en vivo`)
   afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), TARJETAS.length, `${rama}: cada feature avisa que abre un diálogo`)
 }
 const hovers = [...TARJETA.matchAll(/group-hover:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()
@@ -254,16 +255,16 @@ afirmar(ENTRADAS_AL_TRAMO.every((e) => puestoTras(e) === (e !== 'arriba-subiendo
 controlPositivo('el control ve un disparo por visibilidad (salir por arriba lo sacaría)', (c: { cruza: boolean }): string => (c.cruza ? 'ida' : 'vuelta'), (f) => f(CASOS['abajo-bajando']) === 'nada')
 afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.curva === 'expo.out'), 'declarado en el contrato como gesto por tiempo')
 
-const forma = /<form[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? ''
-const sinExitoFalso = (html: string): boolean => {
+// [RONDA 2] F1: el newsletter ENVÍA (a `/api/newsletter`, `NewsletterDelPanel.tsx`): el envío habilitado y sin `action`
+// (lo manda el script, no el navegador a esta misma página); el resultado, en sus regiones vivas, sin un «listo» de entrada.
+const enviaDeVerdad = (html: string, fuente: string): boolean => {
   const f = /<form[\s\S]*?<\/form>/.exec(html)?.[0] ?? ''
   const envios = [...f.matchAll(/<button[^>]*type="submit"[^>]*>/g)].map((m) => m[0])
-  return f.length > 0 && envios.length > 0 && envios.every((b) => /\bdisabled=""/.test(b)) && !/<form[^>]*\s(action|method)=/.test(f)
+  return f.length > 0 && envios.length > 0 && envios.every((b) => !/\bdisabled=""/.test(b)) && !/<form[^>]*\s(action|method)=/.test(f) && /enviarAlServidor\('\/api\/newsletter', \{ mail: mail\.trim\(\) \}\)/.test(fuente) && /role="status"/.test(f) && !f.includes(NEWSLETTER.listo)
 }
-afirmar(sinExitoFalso(QUIETO), 'el newsletter no puede fingir un éxito: envío `disabled` y sin `action` — NO HAY DESTINO en el repo')
-afirmar(forma.includes(`aria-describedby="${NEWSLETTER.id}-ayuda"`) && forma.includes(NEWSLETTER.ayuda), '  y el motivo se anuncia con `aria-describedby`')
-controlPositivo('el predicado ve un envío habilitado', QUIETO.replace(' disabled=""', ''), sinExitoFalso)
-controlPositivo('y un <form> con action', QUIETO.replace('<form ', '<form action="/x" '), sinExitoFalso)
+const NEWSLETTER_FUENTE = fuenteDe('NewsletterDelPanel.tsx')
+afirmar(enviaDeVerdad(QUIETO, NEWSLETTER_FUENTE), 'el newsletter envía al endpoint propio: habilitado, sin `action`, y el «listo» sólo con la respuesta')
+controlPositivo('el predicado ve un envío deshabilitado', [QUIETO.replace('type="submit"', 'type="submit" disabled=""'), NEWSLETTER_FUENTE], ([h, f]: string[]) => enviaDeVerdad(h, f))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo("11 · El fondo: el contraste del «What's new» de nk, y fuera del árbol de lectura")

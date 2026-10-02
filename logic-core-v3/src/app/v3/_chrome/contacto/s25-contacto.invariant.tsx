@@ -17,9 +17,8 @@ import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { siguienteFoco } from '../../_secciones/trabajos/demos/dialogo'
 import { abrirContacto, cerrarContacto, devolverElFoco, precargaDe, SELECTOR_DE_APERTURA } from './apertura'
 import { DESPUES_DEL_ENVIO, INTERESES, PRECARGA_POR_SERVICIO, ROTULO_DEL_ENVIO, TITULO } from './contenido'
-import { enviarContacto, mensajeDeContacto, validarContacto, type DatosDeContacto } from './enviarContacto'
+import { enviarContacto, validarContacto, type DatosDeContacto } from './enviarContacto'
 import { HojaParaElInvariante } from './FormularioDeContacto'
-import { MAIL } from '../../_secciones/cierre/contacto'
 
 const leer = (r: string): string => readFileSync(path.join(RAIZ, r), 'utf8')
 const HOJA = renderToStaticMarkup(<HojaParaElInvariante />)
@@ -83,18 +82,26 @@ afirmarIgual(marcados(HOJA_WEB), ['web'], '  y la hoja abre con ese chip marcado
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El envío: una sola puerta, validación real y nunca un «enviado» falso')
 
+// [RONDA 2] F1: envía a `/api/contacto` (el endpoint propio); sin `mailto` ni WhatsApp. El que envía se cambia acá por uno de prueba.
 const VALIDO: DatosDeContacto = { intereses: ['web'], presupuesto: 'todavía no sé', nombre: 'Ana', medio: 'ana@tuempresa.com', empresa: '', mensaje: 'Una web para el negocio' }
 afirmarIgual(Object.keys(validarContacto(VALIDO)), [], 'con todo lo obligatorio, no hay errores (la empresa es opcional)')
 afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana' })).sort(), ['intereses', 'medio'], '  y se marca lo que falta: sin opción y con un contacto que no es email ni teléfono')
-let abierta: string | null = null
-const invalido = enviarContacto({ ...VALIDO, nombre: '' }, (u) => { abierta = u })
-afirmar(invalido.estado === 'invalido' && abierta === null, 'con errores no sale nada')
-const valido = enviarContacto(VALIDO, (u) => { abierta = u })
-// [CIERRE RETOQUE 3D] N1: sin WhatsApp (se fue de todos lados): el mail, con el mensaje armado.
-afirmar(valido.estado === 'abierto-en-el-mail' && abierta !== null && (abierta as string).startsWith(`mailto:${MAIL}?subject=`) && (abierta as string).includes(encodeURIComponent(mensajeDeContacto(VALIDO))), 'válido, abre el correo con el mensaje armado')
-afirmar(!/whatsapp|wa\.me/i.test(HOJA), '  y la hoja no nombra WhatsApp')
-controlPositivo('  el chequeo vería un envío que abre con errores', () => 'abierto', (f: () => string) => f() === 'invalido')
-afirmar(ROTULO_DEL_ENVIO === 'Enviar por mail' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO.texto + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
+afirmar(ROTULO_DEL_ENVIO === 'Enviar' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
 afirmar(INTERESES.length === 7 && !/newsletter|novedades/i.test(HOJA), 'siete opciones y sin casilla de newsletter')
+afirmar(!/whatsapp|wa\.me|mailto:/i.test(HOJA.replace(/<a href="mailto:[^"]*"[^>]*>[^<]*<\/a>/, '')), '  la hoja no nombra WhatsApp ni manda por `mailto` (el mail de la bajada es un enlace para escribir, no el envío)')
 
-cerrar('s25-contacto.invariant')
+void (async (): Promise<void> => {
+  const pedidos: { ruta: string; datos: Readonly<Record<string, unknown>> }[] = []
+  const servidor = (respuesta: { ok: true } | { ok: false; error: string }) => async (ruta: string, datos: Readonly<Record<string, unknown>>) => {
+    pedidos.push({ ruta, datos })
+    return respuesta
+  }
+  const invalido = await enviarContacto({ ...VALIDO, nombre: '' }, servidor({ ok: true }))
+  afirmar(invalido.estado === 'invalido' && pedidos.length === 0, 'con errores no sale nada')
+  const valido = await enviarContacto(VALIDO, servidor({ ok: true }))
+  afirmar(valido.estado === 'enviado' && pedidos.length === 1 && pedidos[0].ruta === '/api/contacto' && pedidos[0].datos.origen === 'panel' && pedidos[0].datos.nombre === 'Ana', 'válido, va al endpoint propio (`/api/contacto`, origen `panel`) y dice «enviado» sólo con la respuesta')
+  const caido = await enviarContacto(VALIDO, servidor({ ok: false, error: 'No pudimos enviarlo.' }))
+  afirmar(caido.estado === 'error' && caido.mensaje === 'No pudimos enviarlo.', '  y si el servidor no puede, el error normal del formulario')
+  controlPositivo('  el chequeo vería un envío que dice «enviado» sin esperar la respuesta', { estado: 'enviado' } as const, (r: { estado: string }) => r.estado === 'error')
+  cerrar('s25-contacto.invariant')
+})()

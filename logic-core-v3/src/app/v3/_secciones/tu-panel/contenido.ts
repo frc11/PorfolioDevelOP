@@ -69,10 +69,8 @@ export const PUNTOS_DE_Y_MAS = 3
 /**
  * EL NEWSLETTER — se mudó del pie del Cierre (SPRINT PANEL 2).
  *
- * ⚠️ Sigue DESHABILITADO, y por la misma razón que en el pie: no hay a dónde
- * mandarlo. No existe una ruta ni una acción de suscripción en el repo (lo de
- * Brevo son campañas y correos del panel de clientes), y un formulario habilitado
- * sin destino se enviaría a esta misma página y parecería que funcionó.
+ * [RONDA 2] F1 · Ya envía: a `/api/newsletter` (`NewsletterDelPanel.tsx`), que hoy recibe y
+ * valida; la conexión a la lista real es de la etapa siguiente.
  */
 export const NEWSLETTER = {
   id: 'tu-panel-novedades',
@@ -80,7 +78,8 @@ export const NEWSLETTER = {
   rotulo: 'Tu correo',
   placeholder: 'nombre@dominio',
   rotuloDeEnvio: 'Suscribirme',
-  ayuda: 'Todavía no hay a dónde mandarlo: el envío se habilita cuando exista la lista.',
+  /** [RONDA 2] F1: envía (`/api/newsletter`); lo que dice cuando llegó. */
+  listo: '¡Listo! Te avisamos de lo nuevo.',
 } as const
 
 /** Las palabras del fondo. Decorativas: no se anuncian. */

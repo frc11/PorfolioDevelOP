@@ -209,10 +209,12 @@ titulo('3I · El pie en volumen, con el contacto de verdad')
 
 // [CIERRE RETOQUE 3D] D5: el pie ya no es una sala alrededor del logo (paredes y piso): bloques sólidos, s42 · D5.
 const formulario = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
-afirmar(/<form id="contacto"/.test(formulario) && ['contacto-nombre', 'contacto-mail', 'contacto-mensaje'].every((c) => formulario.includes(`htmlFor="${c}"`) && formulario.includes(`id="${c}"`)) && /<button type="submit" disabled aria-describedby="contacto-aviso"/.test(formulario) && /id="contacto-aviso"/.test(formulario), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo); no envía todavía y lo dice un aviso, con el mail como salida')
+// [RONDA 2] F1: el formulario envía (al endpoint propio, sin aviso): s43 · F1.
+afirmar(/<form id="contacto"/.test(formulario) && ['nombre', 'mail', 'mensaje'].every((c) => formulario.includes(`'${c}'`)), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo)')
 const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
 // [CIERRE RETOQUE 3D] N1: la hoja vuelve (sin WhatsApp, por mail): s42 · N1.
-afirmar(!/WHATSAPP|whatsapp/.test(piezasDeContacto), '  WhatsApp se fue del pie')
+// [RONDA 2] F1: WhatsApp volvió al pie (sólo queda fuera del formulario de contacto): s43 · F1.
+afirmar(piezasDeContacto.length > 0, 'las piezas de contacto del pie')
 const efecto = sinComentarios(readFileSync('src/app/v3/_componentes/useDeslizamientoDelCta.ts', 'utf8'))
 afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla/.test(efecto) && /const foco = llego \? \(objetivo \?\? destino\) : origen/.test(efecto), '  todo apunta a contacto: `#contacto` (la barra, el menú, el «Hablemos» del hero) viaja a la sección del pie y le da el foco al formulario; los CTA de Servicios viajan ahí también')
 

@@ -252,8 +252,8 @@ afirmarIgual(veces(rollover, 'Escribinos por WhatsApp'), 2, 'dos copias del rót
 afirmarIgual(textoVisible(quitarSubarbolesConAtributo(rollover, 'aria-hidden')), 'Escribinos por WhatsApp', '  y el nombre del link, UNA vez: la segunda va aria-hidden (en nk el lector lee las dos pegadas)')
 controlPositivo('el chequeo del nombre ve dos copias sin aria-hidden', rollover.replace('aria-hidden="true"', ''), (h: string) => textoVisible(quitarSubarbolesConAtributo(h, 'aria-hidden')) === 'Escribinos por WhatsApp')
 const DONDE_HAY_ROLLOVER = [
-  // [RETOQUE 3D] 3I · se fue el de WhatsApp: queda el del mail.
-  ['_secciones/cierre/PiezasDeContacto.tsx', 1],
+  // [RONDA 2] F1 · WhatsApp volvió al pie: el del mail y el suyo.
+  ['_secciones/cierre/PiezasDeContacto.tsx', 2],
   ['_secciones/trabajos/Proyecto.tsx', 1],
   ['_secciones/trabajos/CapaDelTunel.tsx', 1],
 ] as const
@@ -400,7 +400,8 @@ const sinComentarios = (fuente: string): string => fuente.replace(/\/\*[\s\S]*?\
 afirmarIgual(veces(sinComentarios(CAMPOS_DEL_CONTACTO + FORMULARIO), 'role="alert"'), 1, 'el contacto avisa los errores UNA vez, al enviar (antes, una alerta por campo que volvía a sonar con cada tecla)')
 afirmar(CAMPOS_DEL_CONTACTO.includes("aria-invalid={errores.intereses !== undefined || undefined}"), '  los intereses dicen que están mal (aria-invalid), no sólo el texto de abajo')
 afirmar(veces(CAMPOS_DEL_CONTACTO, "'border-tinta border-dashed'") === 2, '  el error con borde punteado: no se confunde con el foco (liso)')
-afirmar(/<p role="status"[^>]*>\s*\{abiertoEn !== null/.test(FORMULARIO), '  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia)')
+// [RONDA 2] F1: el «listo» del envío de verdad.
+afirmar(/<p role="status"[^>]*>\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(FORMULARIO),'  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia)')
 afirmar(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('aria-busy={abierta && !cargada}'), 'la ventana de una demo dice que está cargando (aria-busy y una región de estado; el esqueleto es sólo para la vista)')
 afirmar(leer('_secciones/servicios/ContenidoDeServicio.tsx').includes('<CtaDelServicio servicio={servicio} enEscritorio />'), 'Servicios con menos movimiento en escritorio tiene sus CTA (antes, ninguno)')
 afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_secciones/cierre/PiezasDeContacto.tsx')), 'las redes del pie responden al pasar y al enfocar')

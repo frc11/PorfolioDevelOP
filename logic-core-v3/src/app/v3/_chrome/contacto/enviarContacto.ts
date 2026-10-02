@@ -1,13 +1,14 @@
 /**
  * EL ENVÍO DEL CONTACTO — una sola puerta. **[CONTACTO]**
  *
- * Todavía no hay backend: `enviarContacto` arma el mensaje con lo que cargó la persona y
- * abre el correo con ese texto ([CIERRE RETOQUE 3D] N1: era WhatsApp, que se fue de todos lados). Conectar el backend es
- * cambiar SÓLO esta función (y el rótulo del botón, `ROTULO_DEL_ENVIO`). La validación es pura y vive acá, al lado.
+ * [RONDA 2] F1 · ENVÍA: valida y lo manda a `/api/contacto` (el servidor vuelve a validar con Zod y lo frena el límite
+ * por IP); hoy el endpoint recibe y valida, y la conexión al servicio real es de la etapa siguiente. Sin `mailto` ni
+ * WhatsApp. La validación es pura y vive acá, al lado.
  */
 
-import { MAIL } from '../../_secciones/cierre/contacto'
-import { INTERESES, type Interes } from './contenido'
+import { enviarAlServidor, type ResultadoDelEnvio as RespuestaDelServidor } from '../../_lib/formularios/enviar'
+import { EMAIL, TELEFONO } from '../../_lib/formularios/validar'
+import type { Interes } from './contenido'
 
 export interface DatosDeContacto {
   readonly intereses: readonly Interes[]
@@ -21,9 +22,6 @@ export interface DatosDeContacto {
 export type CampoConError = 'intereses' | 'presupuesto' | 'nombre' | 'medio' | 'mensaje'
 export type ErroresDeContacto = Partial<Record<CampoConError, string>>
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-const TELEFONO = /^\+?[\d\s()-]{8,}$/
-
 /** Lo que falta o está mal, campo por campo. Vacío = se puede enviar. */
 export function validarContacto(d: DatosDeContacto): ErroresDeContacto {
   const e: ErroresDeContacto = {}
@@ -36,34 +34,15 @@ export function validarContacto(d: DatosDeContacto): ErroresDeContacto {
   return e
 }
 
-/** El texto del mail. */
-export function mensajeDeContacto(d: DatosDeContacto): string {
-  const rotulos = d.intereses.map((id) => INTERESES.find((i) => i.id === id)?.rotulo ?? id)
-  const empresa = d.empresa.trim()
-  return [
-    `Hola develOP, soy ${d.nombre.trim()}${empresa.length > 0 ? `, de ${empresa}` : ''}.`,
-    `Quiero: ${rotulos.join(', ')}.`,
-    `Presupuesto: ${d.presupuesto.trim()}.`,
-    d.mensaje.trim(),
-    `Me contactan por: ${d.medio.trim()}`,
-  ].join('\n')
-}
-
-export const ASUNTO_DEL_MAIL = 'Contacto desde la web de develOP'
-
-export function urlDelMail(d: DatosDeContacto): string {
-  return `mailto:${MAIL}?subject=${encodeURIComponent(ASUNTO_DEL_MAIL)}&body=${encodeURIComponent(mensajeDeContacto(d))}`
-}
-
 export type ResultadoDelEnvio =
   | { readonly estado: 'invalido'; readonly errores: ErroresDeContacto }
-  | { readonly estado: 'abierto-en-el-mail'; readonly url: string }
+  | { readonly estado: 'enviado' }
+  | { readonly estado: 'error'; readonly mensaje: string }
 
-/** LA puerta del envío. Hoy: valida y abre el correo. Nunca dice «enviado». */
-export function enviarContacto(d: DatosDeContacto, abrir: (url: string) => void = (u) => window.location.assign(u)): ResultadoDelEnvio {
+/** LA puerta del envío: valida y lo manda al endpoint (el que envía se puede cambiar, para el invariante). Nunca dice «enviado» sin la respuesta. */
+export async function enviarContacto(d: DatosDeContacto, enviar: (ruta: string, datos: Readonly<Record<string, unknown>>) => Promise<RespuestaDelServidor> = enviarAlServidor): Promise<ResultadoDelEnvio> {
   const errores = validarContacto(d)
   if (Object.keys(errores).length > 0) return { estado: 'invalido', errores }
-  const url = urlDelMail(d)
-  abrir(url)
-  return { estado: 'abierto-en-el-mail', url }
+  const r = await enviar('/api/contacto', { origen: 'panel', intereses: d.intereses, presupuesto: d.presupuesto.trim(), nombre: d.nombre.trim(), medio: d.medio.trim(), empresa: d.empresa.trim(), mensaje: d.mensaje.trim() })
+  return r.ok ? { estado: 'enviado' } : { estado: 'error', mensaje: r.error }
 }
