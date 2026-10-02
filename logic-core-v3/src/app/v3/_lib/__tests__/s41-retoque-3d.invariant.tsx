@@ -30,6 +30,8 @@
  *   Sonido · al producto (el parlante, apagado por defecto); los volúmenes finales; sin túnel ni amanecer; el hover de los
  *        CTA con el tic de la barra; candidatos para elegir (cuatro clics de la barra, cuatro de los CTA) y UN ambiente
  *        (tres candidatos) en su propio archivo, diferido.
+ *   Partículas · tres variantes con bandera (`polvo=a|b|c`; la de hoy, la referencia): cambian cuántas, el tamaño, el
+ *        brillo y la forma; la posición la sigue escribiendo la física (lo aprobado anda igual en las tres).
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -59,6 +61,7 @@ import { existsSync, statSync } from 'node:fs'
 import { CANDIDATOS, SONIDOS, VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
 import { ELEGIDOS_DE_FABRICA, leerElegidos } from '../sonido/preferencia'
 import { CORTES_DEL_AMBIENTE, CORTES_DEL_SPRITE } from '../sonido/sprite'
+import { NUMERO_DE_LA_VARIANTE, VARIANTE_VERTEX_GLSL } from '../escena/polvo/variantes'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -305,5 +308,15 @@ g.window = { localStorage: almacenQueTira }
 const sinAlmacen = leerElegidos()
 g.window = antes
 afirmar(sinAlmacen === ELEGIDOS_DE_FABRICA, '  la elección se recuerda con try/catch (con el almacenamiento bloqueado, los de fábrica)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Partículas · tres variantes para comparar')
+
+afirmar(ENTORNO.pruebas.polvo === 'no' && (['a', 'b', 'c'] as const).every((v) => entornoPedido(`producto,polvo=${v}`).pruebas.polvo === v) && entornoPedido('producto,polvo=z').pruebas.polvo === 'no', 'con bandera (`?pruebas=polvo=a|b|c`, o el pedido del banco); el producto es la de hoy (la referencia)')
+const parche = sinComentarios(leer('_lib/escena/polvo/parche.ts'))
+afirmar(/campo === 'polvo' && e\.nitidez && e\.pruebas\.polvo !== 'no' \? `#define POLVO_VARIANTE \$\{String\(NUMERO_DE_LA_VARIANTE\[e\.pruebas\.polvo\]\)\}` : ''/.test(parche) && NUMERO_DE_LA_VARIANTE.a === 1 && NUMERO_DE_LA_VARIANTE.c === 3, '  un `define` del polvo: sin la bandera, el programa es el de siempre (ni una cuenta de más)')
+const soloAspecto = (glsl: string): boolean => !/transformed\s*=/.test(glsl) && /vParejo \*=/.test(glsl) && /gl_PointSize = /.test(glsl)
+afirmar(soloAspecto(VARIANTE_VERTEX_GLSL), '  cambian cuántas se ven, su tamaño, su brillo y su forma, nunca su lugar: la estela, la inercia, el posarse y el obstáculo (la física) andan igual en las tres')
+controlPositivo('el detector VE una variante que mueve las motas', `${VARIANTE_VERTEX_GLSL}\ntransformed = vec3( 0.0 );`, soloAspecto)
 
 cerrar('s41-retoque-3d')

@@ -78,10 +78,12 @@ export type TitulosDeVolumen = 'negro' | 'blanco'
 export interface Pruebas {
   /** [RETOQUE 3D] 3J · el túnel de Trabajos más lento en escritorio (`trabajos/ritmo.ts`); `tunel=lento`. */
   readonly tunel: 'lento' | 'no'
+  /** [RETOQUE 3D] Las tres variantes del polvo para comparar (`polvo/variantes.ts`); `polvo=a`, `polvo=b`, `polvo=c`. */
+  readonly polvo: 'a' | 'b' | 'c' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { tunel: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { tunel: 'no', polvo: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -92,6 +94,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
   return {
     tunel: unoDe<'lento'>(['lento'], valor('tunel')),
+    polvo: unoDe<'a' | 'b' | 'c'>(['a', 'b', 'c'], valor('polvo')),
   }
 }
 

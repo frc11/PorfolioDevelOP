@@ -7,6 +7,7 @@ import { MOTAS_FRAGMENT_GLSL, MOTAS_GLSL, MOTAS_PARS_GLSL, MOTAS_TAM_GLSL } from
 import { NITIDEZ, NITIDEZ_FRAGMENT_GLSL, NITIDEZ_VERTEX_GLSL } from './nitidez'
 import { AMANECER_EN_VIVO, AMANECER_GLSL, hayAmanecer } from '../amanecer/luz'
 import { FISICA_EN_LA_MOTA_GLSL } from './simulacion'
+import { NUMERO_DE_LA_VARIANTE, VARIANTE_FRAGMENT_GLSL, VARIANTE_PARS_GLSL, VARIANTE_VERTEX_GLSL } from './variantes'
 import { POLVO_PAREJO, VOLUMEN_GLSL } from './volumen'
 
 /**
@@ -85,6 +86,7 @@ varying float vParejo;
 	varying vec3 vMundoDelAmanecer;
 #endif
 uniform float uTiempo;
+${VARIANTE_PARS_GLSL}
 `
 
 const CUERPO = /* glsl */ `
@@ -122,6 +124,7 @@ varying float vDestello;
 	varying vec3 vMundoDelAmanecer;
 	${AMANECER_GLSL}
 #endif
+${VARIANTE_PARS_GLSL}
 `
 
 const FRAGMENTO = /* glsl */ `
@@ -147,6 +150,8 @@ function definesDe(campo: Campo, concha: number): string {
     campo === 'polvo' && e.motas && e.E1 ? '#define AIRE_MOTAS' : '',
     campo === 'polvo' && e.nitidez ? '#define POLVO_NITIDO' : '',
     campo === 'polvo' && hayAmanecer() ? '#define AMANECER' : '',
+    // [RETOQUE 3D] Una de las tres variantes (`variantes.ts`), sólo con su prueba y con el polvo nítido.
+    campo === 'polvo' && e.nitidez && e.pruebas.polvo !== 'no' ? `#define POLVO_VARIANTE ${String(NUMERO_DE_LA_VARIANTE[e.pruebas.polvo])}` : '',
   ].filter(Boolean)
   if (partes.length === 0) return ''
   // [ESCENA 7] T10: con el polvo nítido, la mota se desvanece contra la lente más cerca (quedan unas pocas desenfocadas).
@@ -170,11 +175,11 @@ export function conAire<T extends THREE.Material>(material: T, campo: Campo, con
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_VERTEX}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CUERPO}`)
-      .replace('#include <logdepthbuf_vertex>', `${NITIDEZ_VERTEX_GLSL}\n#ifdef AIRE_MOTAS\n${MOTAS_TAM_GLSL}\n#endif\n#include <logdepthbuf_vertex>`)
+      .replace('#include <logdepthbuf_vertex>', `${NITIDEZ_VERTEX_GLSL}\n${VARIANTE_VERTEX_GLSL}\n#ifdef AIRE_MOTAS\n${MOTAS_TAM_GLSL}\n#endif\n#include <logdepthbuf_vertex>`)
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${defines}\n${PARS_FRAGMENT}`)
       // [ESCENA 7] T10: el perfil de la mota, nítido (o desenfocado si está muy cerca), en lugar del sprite blando.
-      .replace('diffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );', `#ifdef POLVO_NITIDO\n${NITIDEZ_FRAGMENT_GLSL}\n#else\n\t\tdiffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );\n#endif`)
+      .replace('diffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );', `#if defined( POLVO_VARIANTE )\n${VARIANTE_FRAGMENT_GLSL}\n#elif defined( POLVO_NITIDO )\n${NITIDEZ_FRAGMENT_GLSL}\n#else\n\t\tdiffuseColor *= texture2D( map, vec2( 0.5 + min( r, 0.5 ), 0.5 ) );\n#endif`)
       .replace('#include <alphatest_fragment>', `${FRAGMENTO}\n#include <alphatest_fragment>`)
   }
   material.customProgramCacheKey = () => `${clavePrevia()}|aire|${defines.replace(/\s+/g, ' ')}`
