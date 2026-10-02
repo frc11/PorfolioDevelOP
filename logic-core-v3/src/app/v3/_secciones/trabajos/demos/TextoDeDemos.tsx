@@ -1,7 +1,13 @@
+'use client'
+
 import type { Ref } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { Cuerpo } from '../../../_componentes/tipografia/Textos'
-import { CanalDeTitular, CanalDeUnaPieza } from '../../_contrato/canales'
+import { Titular } from '../../../_componentes/tipografia/Titular'
+import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../../_componentes/titulos3d/useTextoDeVolumen'
+import { CanalDeUnaPieza } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
 import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULO_DE_DEMOS } from '../angosto'
@@ -37,7 +43,7 @@ export function TextoDeDemos({
 }): React.JSX.Element {
   return (
     <div className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
-      <CanalDeTitular progreso={progresoDelTitulo} patron="P1" texto={TEXTO_DE_DEMOS.titulo} nivel="titulo-l" como="h3" className={CLASE_DEL_TITULO_DE_DEMOS} />
+      <TituloDeDemos progreso={progresoDelTitulo} />
       <div ref={refDelParrafo}>
         <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
           <Cuerpo className={CLASE_DEL_CUERPO_DE_DEMOS}>
@@ -47,5 +53,29 @@ export function TextoDeDemos({
         </CanalDeUnaPieza>
       </div>
     </div>
+  )
+}
+
+/**
+ * [CIERRE RETOQUE 3D] D3 · EL TÍTULO DE DEMOS EN VOLUMEN — con el mismo gesto que «El equipo»: se levanta de acostado a
+ * parado con el progreso de su llegada (y se acuesta al volver); acostado no se ve. Desde 1024 va en sus dos renglones
+ * (cada uno, un título de volumen de una línea: el 3D arma una línea por título) y el DOM se apaga con el título armado
+ * (sigue siendo el encabezado para el lector); abajo, el texto corrido de siempre. La llegada del DOM, de una pieza.
+ */
+function TituloDeDemos({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
+  const [renglon1, renglon2] = TEXTO_DE_DEMOS.renglonesDelTitulo
+  const uno = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-1', texto: renglon1, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  const dos = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-2', texto: renglon2, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  return (
+    <CanalDeUnaPieza progreso={progreso} patron="P1">
+      <Titular nivel="titulo-l" como="h3" className={CLASE_DEL_TITULO_DE_DEMOS}>
+        <span ref={uno.lugar} className={cn('escritorio:block', uno.listo && TEXTO_REEMPLAZADO)}>
+          {renglon1}
+        </span>{' '}
+        <span ref={dos.lugar} className={cn('escritorio:block', dos.listo && TEXTO_REEMPLAZADO)}>
+          {renglon2}
+        </span>
+      </Titular>
+    </CanalDeUnaPieza>
   )
 }

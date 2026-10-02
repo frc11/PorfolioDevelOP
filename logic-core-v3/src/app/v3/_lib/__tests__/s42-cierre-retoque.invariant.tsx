@@ -16,6 +16,7 @@
  *   D2 · el hero, fijo después de armarse (sin salida): con D1 se le ven los costados.
  *   D5 · el pie: cada enlace, campo y botón es un bloque sólido que flota (CSS 3D, el elemento de verdad en su cara de
  *        adelante); ya no una sala alrededor del logo. Abajo de 1025 y con movimiento reducido, plano.
+ *   D3 · el título de Demos en volumen, con el gesto de «El equipo» (se levanta y se acuesta al volver).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -29,6 +30,8 @@ import { EXAGERACION_DEL_CSS, giroDeLaPieza } from '../escena/miradaDeLaCamara'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
+import { TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
+import datosDeLaChivo from '../../_fuentes/chivo-400-titulos.json'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -157,5 +160,17 @@ afirmar(plano(quieto), '  en el servidor (y abajo de 1025, y con movimiento redu
 controlPositivo('el detector VE un bloque con sus cantos', quieto.replace('<a href', '<span data-parte="canto" style="transform:rotateX(90deg)"></span><a href'), plano)
 const solido = sinComentarios(leer('_componentes/volumen/BloqueSolido.tsx'))
 afirmar(/const solido = escritorio && !reducido/.test(solido) && /useGiroDeLaMirada\(giro, solido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 2, '  desde 1025 tiene tapa, cuatro cantos y cara de atrás (`aria-hidden`) y gira al revés de la cámara (D1): se le ven la perspectiva y los costados')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D3 · El título de Demos, en volumen')
+
+const textoDeDemos = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
+const seLevanta = (c: string): boolean => (c.match(/useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos-[12]', texto: renglon[12], fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/g) ?? []).length === 2
+afirmar(seLevanta(textoDeDemos) && TEXTO_DE_DEMOS.renglonesDelTitulo.join(' ') === TEXTO_DE_DEMOS.titulo, '«Demos para abrir acá mismo» se levanta de acostado a parado con el progreso de su llegada, como «El equipo» (y se acuesta al volver): desde 1024, en sus dos renglones (el 3D arma una línea por título)')
+controlPositivo('el detector VE el título plano', textoDeDemos.replace(/gesto: 'levanta'/g, "gesto: 'letras'"), seLevanta)
+const glifos = new Set(Object.keys((datosDeLaChivo as { glyphs: Record<string, unknown> }).glyphs))
+const faltan = [...TEXTO_DE_DEMOS.renglonesDelTitulo.join('')].filter((ch) => ch !== ' ' && !glifos.has(ch))
+afirmar(faltan.length === 0, '  cada letra está en la Chivo 400 de los títulos (la «á» incluida)', faltan.join(''))
+afirmar(/\{' '\}/.test(textoDeDemos), '  y el lector anuncia el título entero (un espacio entre los renglones): las dos ramas, el mismo texto')
 
 cerrar('s42-cierre-retoque')

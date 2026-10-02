@@ -7,7 +7,8 @@ el formato «typeface» que lee el `FontLoader` de three: `m`, `l` y `q` (el pun
 en unidades de la fuente, y sólo los caracteres de sus títulos (más el espacio). Las tres son OFL (`_fuentes/OFL-*.txt`):
 la licencia permite convertirlas y redistribuirlas con la fuente.
 
-  chivo-400-titulos.json           Portfolio, la frase de Por qué develOP (ESCENA 10) y «El equipo» (3C)
+  chivo-400-titulos.json           Portfolio, la frase de Por qué develOP (ESCENA 10), «El equipo» (3C) y el título de
+                                   Demos (CIERRE RETOQUE 3D, D3)
   archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»
   chivo-300-italica-titulos.json   el registro 2 del hero: «LAS 24 HS»
 
@@ -25,7 +26,7 @@ FUENTES = os.path.join(RAIZ, 'src', 'app', 'v3', '_fuentes')
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
-     'textos': ['Portfolio', 'Seis razones', 'para elegirnos', 'El equipo'], 'destino': 'chivo-400-titulos.json'},
+     'textos': ['Portfolio', 'Seis razones', 'para elegirnos', 'El equipo', 'Demos para abrir', 'acá mismo'], 'destino': 'chivo-400-titulos.json'},
     {'origen': 'archivo-display-latin.woff2', 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
      'textos': ['TU NEGOCIO VENDIENDO'], 'destino': 'archivo-700-titulos.json'},
     {'origen': 'chivo-italic-latin.woff2', 'peso': 300, 'familia': 'Chivo Italic', 'licencia': 'OFL-chivo.txt',
