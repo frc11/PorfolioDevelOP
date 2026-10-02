@@ -7,6 +7,7 @@
  *        el cuadro, y mientras tanto no cambia (la llegada después de un viaje espera a que se vea).
  *   B2 · el polvo posado: cualquier scroll lo levanta (la levantada sube a su lugar en el aire).
  *   B3 · el remolino de noche: el remolino del despertar sólo con el cursor; el del scroll, sólo el frente.
+ *   B4 · «Y más…» de Tu panel aparece y se va en su lugar (una corrida corta con fundido), no cruzando la pantalla.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -14,6 +15,7 @@ import { readFileSync } from 'node:fs'
 
 import { avanzarElPolvo, polvoInicial } from '../escena/polvo/posarse'
 import { corrimiento } from '../escena/titulos3d/colocacion'
+import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -63,5 +65,13 @@ afirmar(/p\.remolino = despertar\.delCursor \? 1 : 0/.test(fisica) && /delCursor
 const delScroll = avanzarElPolvo(polvoInicial(0), 10, [0, 0, 0], false)
 const delCursor = avanzarElPolvo(polvoInicial(0), 10, [1, 0, 1], false, true)
 afirmar(!delScroll.delCursor && delCursor.delCursor && avanzarElPolvo(delCursor, 10.1, [5, 0, 5], false).delCursor, '  y lo guarda mientras dura el movimiento (sólo cambia al despertar de una quietud)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B4 · «Y más…»: aparece y se va en su lugar')
+
+const remate = sinComentarios(leer('_secciones/tu-panel/Remate.tsx'))
+const enSuLugar = (c: string): boolean => /const desde = t\.pieza === 'punto' \? corrida : corrida \* CORRIDAS_DEL_REMATE/.test(c) && !/window\.innerWidth/.test(c) && /\{ opacity: 0, transform: `translateX\(\$\{desde\}px\)` \}/.test(c)
+afirmar(enSuLugar(remate) && CORRIDAS_DEL_REMATE <= 4, 'la frase y el newsletter entran con una corrida corta desde la derecha y un fundido (y se van igual, en espejo): no salen del borde del cuadro', `${String(CORRIDAS_DEL_REMATE)} corridas de --spacing-8`)
+controlPositivo('el detector VE la entrada desde el borde del cuadro', remate.replace('corrida * CORRIDAS_DEL_REMATE', 'window.innerWidth - el.getBoundingClientRect().left'), enSuLugar)
 
 cerrar('s41-retoque-3d')

@@ -8,7 +8,7 @@ import { Titular } from '../../_componentes/tipografia/Titular'
 import { useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
-import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
+import { CORRIDAS_DEL_REMATE, DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
 import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
 
 /**
@@ -53,19 +53,19 @@ export function Remate(): React.JSX.Element {
         milisegundosDe(leerToken('--duracion-rapida')) * LENTITUD_DEL_REMATE,
         PUNTOS_DE_Y_MAS,
       )
-      const derecha = window.innerWidth
       const corrida = pixelesDe(leerToken('--spacing-8'))
       const piezas = [frase.current, ...puntos.current, novedades.current]
       animaciones = tramos.flatMap((t, i) => {
         const el = piezas[i]
         if (el === null || el === undefined) return []
-        const desde = t.pieza === 'punto' ? corrida : derecha - el.getBoundingClientRect().left
-        const opacidad = t.pieza === 'punto' ? [{ opacity: 0 }, { opacity: 1 }] : [{}, {}]
+        // [RETOQUE 3D] B4 · aparecen y se van EN SU LUGAR: una corrida corta desde la derecha con fundido. Antes la frase y el
+        // newsletter salían del borde derecho del cuadro y cruzaban la pantalla (la frase se veía en el medio, encima del newsletter).
+        const desde = t.pieza === 'punto' ? corrida : corrida * CORRIDAS_DEL_REMATE
         return [
           el.animate(
             [
-              { ...opacidad[0], transform: `translateX(${desde}px)` },
-              { ...opacidad[1], transform: 'none' },
+              { opacity: 0, transform: `translateX(${desde}px)` },
+              { opacity: 1, transform: 'none' },
             ],
             { delay: t.delay, duration: t.duration, endDelay: t.endDelay, easing: curva, fill: 'both' },
           ),

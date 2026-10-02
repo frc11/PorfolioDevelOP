@@ -1,6 +1,6 @@
 /**
  * LA ENTRADA DE «Y MÁS…» — de derecha a izquierda, una vez, con la curva que el
- * catálogo no tenía.
+ * catálogo no tenía. [RETOQUE 3D] B4: en su lugar (una corrida corta con fundido), no desde el borde del cuadro.
  *
  * ⚠️ **No hay un patrón del catálogo que haga esto.** Los nueve de
  * `_lib/motion/patrones*.ts` están ligados al scroll (`scrub`) y ninguno entra
@@ -66,6 +66,9 @@ export function cronogramaDelRemate(duracion: number, duracionDelPunto: number, 
 
 /** SPRINT PANEL 3 · la línea de disparo del remate sube a 35 % del cuadro desde abajo: entra más tarde. */
 export const DISPARO_DEL_REMATE = 35
+
+/** [RETOQUE 3D] B4 · cuánto corren la frase y el newsletter al entrar, en corridas de los puntos (`--spacing-8`): cerca de su lugar. */
+export const CORRIDAS_DEL_REMATE = 3
 
 /** SPRINT PANEL 3 · el remate corre 1,6 veces más lento que los tokens (700 → 1120 ms la frase). */
 export const LENTITUD_DEL_REMATE = 1.6
