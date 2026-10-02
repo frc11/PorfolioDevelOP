@@ -1,4 +1,3 @@
-import type { Ambiente } from './ambienteGenerativo'
 import type { Sonido } from './sprite'
 
 /**
@@ -11,7 +10,7 @@ import type { Sonido } from './sprite'
  *
  * [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el mismo: el pestillo (el candidato d); los demás
  * candidatos de clic se borraron. S2 · el ambiente ya no es un bucle en un archivo: es generativo, en tiempo real
- * (`ambienteGenerativo.ts`), con tres caracteres para elegir en `/v3?sonidos=1`.
+ * (`ambienteGenerativo.ts`). [RONDA 2] F6 · queda Bruma, de fábrica, al 0,5 (Vidrio y Gotas se borraron).
  *
  *   · `separacionMs`: lo mínimo entre dos del mismo (un hover que barre la barra no ametralla).
  *   · `exclusivo`: mientras suena no se vuelve a largar (el encendido).
@@ -37,13 +36,9 @@ export const SONIDOS: Readonly<Record<Sonido, DelSonido>> = {
 /** Lo que pide el sitio: un sonido del sprite. */
 export type Pedido = Sonido
 
-/** Los tres ambientes generativos: qué es cada uno (los arma `ambienteGenerativo.ts`, sin archivo). */
-export const AMBIENTES: Readonly<Record<Ambiente, string>> = {
-  a: 'Vidrio — campanitas altas y raras, espaciadas, que se apagan en varios segundos',
-  b: 'Bruma — colchones lentos de dos o tres notas que entran y se van muy despacio',
-  c: 'Gotas — frases cortas de punteos con un eco que se pierde en la sala',
-}
+/** El ambiente generativo: qué es (lo arma `ambienteGenerativo.ts`, sin archivo). */
+export const AMBIENTE = 'Bruma — colchones lentos de dos o tres notas que entran y se van muy despacio, con silencios largos'
 
-/** El volumen del ambiente (muy bajo: es el fondo) y el general (todo pasa por acá: el sitio suena bajo). */
-export const VOLUMEN_DEL_AMBIENTE = 0.15
+/** El volumen del ambiente ([RONDA 2] F6: 0,5) y el general (todo pasa por acá: el sitio suena bajo). */
+export const VOLUMEN_DEL_AMBIENTE = 0.5
 export const VOLUMEN_GENERAL = 0.7

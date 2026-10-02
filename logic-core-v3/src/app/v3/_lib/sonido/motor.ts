@@ -1,9 +1,9 @@
 import { Howl, Howler } from 'howler'
 
-import { crearElAmbiente, type Ambiente, type AmbienteGenerativo } from './ambienteGenerativo'
+import { crearElAmbiente, type AmbienteGenerativo } from './ambienteGenerativo'
 import type { Oido } from './bus'
 import { SONIDOS, type Pedido } from './catalogo'
-import type { Elegidos, Volumenes } from './preferencia'
+import type { Volumenes } from './preferencia'
 import { CORTES_DEL_SPRITE, type Sonido } from './sprite'
 
 /**
@@ -19,14 +19,14 @@ import { CORTES_DEL_SPRITE, type Sonido } from './sprite'
  * [CIERRE RETOQUE 3D] S1 · sin candidatos de clic: la barra y los CTA piden el pestillo. S2 · el ambiente es generativo
  * (`ambienteGenerativo.ts`): se arma sobre el contexto de howler la primera vez que tiene que sonar (nada de archivo);
  * `ambiente(false)` (movimiento reducido, la pestaña oculta) lo funde a silencio y deja de programar notas.
+ * [RONDA 2] F6 · un solo ambiente (Bruma): ya no se elige.
  */
 export interface MotorDelSonido extends Oido {
   /** El sonido del sprite tal cual (la página de prueba). */
   readonly sonarCrudo: (s: Sonido) => void
   readonly ambiente: (suena: boolean) => void
-  /** La página de prueba: tocar un ambiente en particular (o ninguno: el elegido, con `ambiente`). */
-  readonly probarAmbiente: (a: Ambiente | null) => void
-  readonly elegir: (e: Elegidos) => void
+  /** La página de prueba: escucharlo aunque el sitio no lo pida (o dejar de probarlo). */
+  readonly probarAmbiente: (suena: boolean) => void
   readonly volumen: (s: keyof Volumenes, v: number) => void
   readonly cargado: () => boolean
   readonly soltar: () => void
@@ -35,9 +35,8 @@ export interface MotorDelSonido extends Oido {
 const FUENTES = ['/v3/sonido/sonidos.webm', '/v3/sonido/sonidos.m4a']
 const CALLAR_MS = 300
 
-export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): MotorDelSonido {
+export function crearElMotor(inicial: Volumenes): MotorDelSonido {
   const volumenes = { ...inicial }
-  let elegidos = elegidosAlEmpezar
   const sprite: Record<string, [number, number]> = {}
   for (const [nombre, corte] of Object.entries(CORTES_DEL_SPRITE)) sprite[nombre] = [corte[0], corte[1]]
   let cargado = false
@@ -83,12 +82,12 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     if (generativo === null && Howler.usingWebAudio && Howler.ctx !== undefined && Howler.masterGain !== undefined) generativo = crearElAmbiente(Howler.ctx, Howler.masterGain, volumenes.ambiente)
     return generativo
   }
-  const tocar = (a: Ambiente | null): void => {
-    if (a === null && generativo === null) return
-    elAmbiente()?.tocar(a)
+  const tocar = (suena: boolean): void => {
+    if (!suena && generativo === null) return
+    elAmbiente()?.tocar(suena)
   }
   let suenaElAmbiente = false
-  let probando: Ambiente | null = null
+  let probando = false
 
   return {
     sonar: sonarCrudo,
@@ -96,15 +95,11 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     callar,
     ambiente: (suena) => {
       suenaElAmbiente = suena
-      if (probando === null) tocar(suena ? elegidos.ambiente : null)
+      if (!probando) tocar(suena)
     },
-    probarAmbiente: (a) => {
-      probando = a
-      tocar(a ?? (suenaElAmbiente ? elegidos.ambiente : null))
-    },
-    elegir: (e) => {
-      elegidos = e
-      if (probando === null && suenaElAmbiente) tocar(e.ambiente)
+    probarAmbiente: (suena) => {
+      probando = suena
+      tocar(suena || suenaElAmbiente)
     },
     cargado: () => cargado,
     volumen: (s, v) => {

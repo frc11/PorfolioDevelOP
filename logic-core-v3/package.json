@@ -270,6 +270,8 @@
     "test:s41": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s41",
     "test:s42-cierre-retoque": "npx tsx src/app/v3/_lib/__tests__/s42-cierre-retoque.invariant.tsx",
     "test:s42": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s42",
+    "test:s43-ronda2": "npx tsx src/app/v3/_lib/__tests__/s43-ronda2.invariant.tsx",
+    "test:s43": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s43",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",

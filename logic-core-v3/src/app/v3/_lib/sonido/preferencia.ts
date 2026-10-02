@@ -1,24 +1,16 @@
-import type { Ambiente } from './ambienteGenerativo'
 import { SONIDOS, VOLUMEN_DEL_AMBIENTE, VOLUMEN_GENERAL } from './catalogo'
 import type { Sonido } from './sprite'
 
 /**
  * [3D Y SONIDO] T2 · LO QUE SE RECUERDA — si el sonido está prendido (apagado por defecto), los volúmenes que se movieron
  * en la página de prueba y [RETOQUE 3D] lo elegido en `localStorage` con try/catch: sin almacenamiento (privado,
- * bloqueado), lo que dura la página. [CIERRE RETOQUE 3D] Se elige sólo el ambiente (S2, uno de tres generativos; los clics
- * ya no tienen candidatos, S1); su clave es nueva: lo elegido entre los bucles de antes no vale para estos.
+ * bloqueado), lo que dura la página. [RONDA 2] F6 · ya no se elige nada (queda un solo ambiente, Bruma); la clave de los
+ * volúmenes es nueva, así el ambiente arranca en su 0,5 de fábrica aunque se hubiera movido el de antes.
  */
 const CLAVE = 'develop-v3-sonido'
-const CLAVE_DE_LOS_VOLUMENES = 'develop-v3-sonido-volumenes'
-const CLAVE_DE_LOS_ELEGIDOS = 'develop-v3-sonido-ambiente'
+const CLAVE_DE_LOS_VOLUMENES = 'develop-v3-sonido-volumenes-2'
 
 export type Volumenes = Record<Sonido | 'general' | 'ambiente', number>
-
-export interface Elegidos {
-  readonly ambiente: Ambiente
-}
-
-export const ELEGIDOS_DE_FABRICA: Elegidos = { ambiente: 'a' }
 
 let enLaPagina: boolean | null = null
 const oyentes = new Set<() => void>()
@@ -69,31 +61,5 @@ export function guardarVolumenes(v: Volumenes | null): void {
     else window.localStorage.setItem(CLAVE_DE_LOS_VOLUMENES, JSON.stringify(v))
   } catch {
     // Sin almacenamiento: los valores duran lo que dura la página.
-  }
-}
-
-const esAmbiente = (v: unknown): v is Ambiente => v === 'a' || v === 'b' || v === 'c'
-
-let elegidosEnLaPagina: Elegidos | null = null
-
-export function leerElegidos(): Elegidos {
-  if (elegidosEnLaPagina !== null) return elegidosEnLaPagina
-  try {
-    const g: unknown = JSON.parse(window.localStorage.getItem(CLAVE_DE_LOS_ELEGIDOS) ?? '{}')
-    if (typeof g !== 'object' || g === null) return ELEGIDOS_DE_FABRICA
-    const { ambiente } = g as Record<string, unknown>
-    return { ambiente: esAmbiente(ambiente) ? ambiente : ELEGIDOS_DE_FABRICA.ambiente }
-  } catch {
-    return ELEGIDOS_DE_FABRICA
-  }
-}
-
-export function guardarElegidos(e: Elegidos | null): void {
-  elegidosEnLaPagina = e
-  try {
-    if (e === null) window.localStorage.removeItem(CLAVE_DE_LOS_ELEGIDOS)
-    else window.localStorage.setItem(CLAVE_DE_LOS_ELEGIDOS, JSON.stringify(e))
-  } catch {
-    // Sin almacenamiento: la elección dura lo que dura la página.
   }
 }

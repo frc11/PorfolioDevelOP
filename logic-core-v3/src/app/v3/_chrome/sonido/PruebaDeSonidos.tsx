@@ -2,19 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import type { Ambiente } from '../../_lib/sonido/ambienteGenerativo'
-import { AMBIENTES, SONIDOS } from '../../_lib/sonido/catalogo'
+import { AMBIENTE, SONIDOS } from '../../_lib/sonido/catalogo'
 import type { MotorDelSonido } from '../../_lib/sonido/motor'
-import { ELEGIDOS_DE_FABRICA, guardarElegidos, guardarVolumenes, leerElegidos, leerVolumenes, type Elegidos, type Volumenes } from '../../_lib/sonido/preferencia'
+import { guardarVolumenes, leerVolumenes, type Volumenes } from '../../_lib/sonido/preferencia'
 import type { Sonido } from '../../_lib/sonido/sprite'
 import { pedirElMotor, soltarElMotor } from './motorCompartido'
 
 /**
  * [3D Y SONIDO] T2 · LA PÁGINA DE PRUEBA — `/v3?sonidos=1`: un panel sobre el sitio para escuchar cada sonido y moverle el
  * volumen (se guarda en el navegador y lo usa el sitio). Nada suena hasta «Cargar los sonidos» (la acción que habilita el
- * audio). [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (sin candidatos). S2 · para ELEGIR
- * de oído, el ambiente: tres generativos (uno a la vez; no se repiten ni suenan todo el tiempo: hay que esperarlos). Lo
- * elegido es lo que suena en el sitio. Abajo, los valores escritos para pasarlos.
+ * audio). [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (sin candidatos). [RONDA 2] F6 · el
+ * ambiente es uno (Bruma, generativo: no se repite ni suena todo el tiempo, hay que esperarlo): escucharlo y moverle el
+ * volumen. Abajo, los valores escritos para pasarlos.
  */
 const DEL_SPRITE = Object.keys(SONIDOS) as Sonido[]
 
@@ -22,13 +21,12 @@ export default function PruebaDeSonidos(): React.JSX.Element {
   const motor = useRef<MotorDelSonido | null>(null)
   const [estado, setEstado] = useState<'sin-cargar' | 'cargando' | 'listo'>('sin-cargar')
   const [volumenes, setVolumenes] = useState<Volumenes>(() => leerVolumenes())
-  const [elegidos, setElegidos] = useState<Elegidos>(() => leerElegidos())
-  const [probando, setProbando] = useState<Ambiente | null>(null)
+  const [probando, setProbando] = useState(false)
   const [abierto, setAbierto] = useState(true)
 
   useEffect(() => () => {
     if (motor.current !== null) {
-      motor.current.probarAmbiente(null)
+      motor.current.probarAmbiente(false)
       soltarElMotor()
     }
   }, [])
@@ -49,25 +47,15 @@ export default function PruebaDeSonidos(): React.JSX.Element {
     motor.current?.volumen(s, v)
   }
 
-  const elegir = (e: Elegidos): void => {
-    setElegidos(e)
-    guardarElegidos(e)
-    motor.current?.elegir(e)
-  }
-
-  const probar = (a: Ambiente): void => {
-    const siguiente = probando === a ? null : a
-    setProbando(siguiente)
-    motor.current?.probarAmbiente(siguiente)
+  const probar = (): void => {
+    setProbando(!probando)
+    motor.current?.probarAmbiente(!probando)
   }
 
   const restablecer = (): void => {
     guardarVolumenes(null)
-    guardarElegidos(null)
     const base = leerVolumenes()
     setVolumenes(base)
-    setElegidos(ELEGIDOS_DE_FABRICA)
-    motor.current?.elegir(ELEGIDOS_DE_FABRICA)
     for (const [s, v] of Object.entries(base)) motor.current?.volumen(s as keyof Volumenes, v)
   }
 
@@ -113,20 +101,13 @@ export default function PruebaDeSonidos(): React.JSX.Element {
         </div>
       ))}
 
-      <h3 className={titulo}>El ambiente — elegí uno (generativo: tarda en sonar y nunca se repite igual)</h3>
-      {(Object.keys(AMBIENTES) as Ambiente[]).map((a) => (
-        <div key={a} className={fila}>
-          <span className="flex-1">
-            <strong>{a}</strong> — {AMBIENTES[a]}
-          </span>
-          <button type="button" disabled={!listo} aria-pressed={probando === a} onClick={() => probar(a)} className={boton}>
-            {probando === a ? 'Parar' : 'Escuchar'}
-          </button>
-          <button type="button" aria-pressed={elegidos.ambiente === a} onClick={() => elegir({ ...elegidos, ambiente: a })} className={boton}>
-            {elegidos.ambiente === a ? 'Elegido' : 'Elegir'}
-          </button>
-        </div>
-      ))}
+      <h3 className={titulo}>El ambiente (generativo: tarda en sonar y nunca se repite igual)</h3>
+      <div className={fila}>
+        <span className="flex-1">{AMBIENTE}</span>
+        <button type="button" disabled={!listo} aria-pressed={probando} onClick={probar} className={boton}>
+          {probando ? 'Parar' : 'Escuchar'}
+        </button>
+      </div>
       <Volumen etiqueta="Volumen del ambiente" valor={volumenes.ambiente} alMover={(v) => mover('ambiente', v)} />
 
       <div className="flex flex-wrap gap-[var(--spacing-2)] border-t border-tinta/20 pt-[var(--spacing-3)]">
@@ -134,7 +115,7 @@ export default function PruebaDeSonidos(): React.JSX.Element {
           Volver a los de fábrica
         </button>
       </div>
-      <pre className="overflow-x-auto pt-[var(--spacing-3)] whitespace-pre-wrap">{JSON.stringify({ elegidos, volumenes })}</pre>
+      <pre className="overflow-x-auto pt-[var(--spacing-3)] whitespace-pre-wrap">{JSON.stringify({ volumenes })}</pre>
     </section>
   )
 }

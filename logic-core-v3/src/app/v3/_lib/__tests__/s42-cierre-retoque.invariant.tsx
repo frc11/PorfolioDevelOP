@@ -36,9 +36,8 @@ import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import datosDeLaChivo from '../../_fuentes/chivo-400-titulos.json'
-import { SONIDOS, VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
-import { CARACTERES } from '../sonido/ambienteGenerativo'
-import { ELEGIDOS_DE_FABRICA, leerElegidos } from '../sonido/preferencia'
+import { SONIDOS } from '../sonido/catalogo'
+import { BRUMA } from '../sonido/ambienteGenerativo'
 import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -200,17 +199,10 @@ const generativo = sinComentarios(leer('_lib/sonido/ambienteGenerativo.ts'))
 const sinBucle = (c: string): boolean => /createOscillator\(\)/.test(c) && /window\.setTimeout\(/.test(c) && /Math\.random\(\)/.test(c) && !/loop\s*[:=]\s*true|\.loop\b|new Howl/.test(c)
 afirmar(sinBucle(generativo) && !existsSync('public/v3/sonido/ambiente-a.webm') && !existsSync('public/v3/sonido/ambiente-a.m4a'), 'sin archivo ni bucle: Web Audio en tiempo real, eventos sueltos programados al azar (los tres bucles de antes se borraron, código y archivos)')
 controlPositivo('el detector VE un bucle', `${generativo}\nconst b = new Howl({ src: [], loop: true })`, sinBucle)
-const espaciado = Object.values(CARACTERES).every((c) => c.huecoS[0] >= 3 && c.silencio.probabilidad > 0 && c.silencio.s[0] >= 15 && c.escala.length >= 7)
-afirmar(espaciado, '  tranquilos y espaciados: al menos 3 s entre eventos, silencios largos (15 s o más) de vez en cuando y notas al azar en una escala de siete o más: nunca se repite igual')
-afirmar(Object.keys(CARACTERES).join() === 'a,b,c' && VOLUMEN_DEL_AMBIENTE <= 0.2, '  tres para elegir en `/v3?sonidos=1` (Vidrio, Bruma, Gotas), muy bajos')
+const espaciado = [BRUMA].every((c) => c.huecoS[0] >= 3 && c.silencio.probabilidad > 0 && c.silencio.s[0] >= 15 && c.escala.length >= 7)
+afirmar(espaciado, '  tranquilo y espaciado: al menos 3 s entre eventos, silencios largos (15 s o más) de vez en cuando y notas al azar en una escala de siete o más: nunca se repite igual')
+// [RONDA 2] F6: queda Bruma sola, al 0,5 (los tres para elegir pasaron a uno): s43 · F6.
 const motorDelSonido = sinComentarios(leer('_lib/sonido/motor.ts'))
 afirmar(/crearElAmbiente\(Howler\.ctx, Howler\.masterGain, volumenes\.ambiente\)/.test(motorDelSonido) && /motor\.current\?\.ambiente\(!reducido && document\.visibilityState === 'visible'\)/.test(controlDelSonido), '  las reglas siguen: se arma sobre el contexto de howler (que habilitó la acción: apagado por defecto, nada antes de una acción) y sin él con movimiento reducido o con la pestaña oculta')
-const almacenQueTira = { getItem: (): never => { throw new Error('bloqueado') }, setItem: (): never => { throw new Error('bloqueado') } }
-const g = globalThis as unknown as { window?: unknown }
-const antes = g.window
-g.window = { localStorage: almacenQueTira }
-const sinAlmacen = leerElegidos()
-g.window = antes
-afirmar(sinAlmacen === ELEGIDOS_DE_FABRICA, '  la elección se recuerda con try/catch (con el almacenamiento bloqueado, el de fábrica)')
 
 cerrar('s42-cierre-retoque')

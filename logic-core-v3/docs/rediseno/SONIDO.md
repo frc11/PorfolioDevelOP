@@ -12,6 +12,9 @@
 > **generativo**, con Web Audio en tiempo real y sin archivo (`_lib/sonido/ambienteGenerativo.ts`): eventos sueltos y
 > espaciados, con silencios largos y notas al azar dentro de una escala, para que nunca se repita igual. Tres para elegir
 > en `/v3?sonidos=1` (Vidrio, Bruma, Gotas); de fábrica, `a`. Los bucles se borraron, código y archivos.
+>
+> **[RONDA 2] F6** · queda **Bruma**, de fábrica, al **0,5**; Vidrio y Gotas se borraron y ya no se elige nada (la página
+> de prueba lo deja escuchar y moverle el volumen). La clave de los volúmenes en el navegador es nueva.
 
 ## Licencias
 
@@ -64,13 +67,13 @@ segundos; de vez en cuando, un silencio largo. Las notas salen al azar de una es
 duración al azar también: nunca se repite igual. Todo pasa por una sala (una reverb de ruido que decae, armada en el
 momento) y, en dos de ellos, por un eco.
 
-| Candidato | Qué es | Entre eventos | Silencio largo |
+| Ambiente | Qué es | Entre eventos | Silencio largo |
 |---|---|---|---|
-| `a` · Vidrio | Campanitas de FM (moduladora ×3,5 que se apaga antes que la nota), altas, de a una o dos, sobre la pentatónica de do; cada una se apaga en 3 a 5,5 s | 3,5 a 11 s | 25 %: 16 a 30 s |
-| `b` · Bruma | Colchones de dos o tres notas (re dórico): tres triángulos apenas desafinados por un pasabajos, que entran en 2,5 a 4 s, quedan unos segundos y se van en 5 a 8 s | 9 a 18 s | 30 %: 20 a 40 s |
-| `c` · Gotas | Frases de dos a cuatro punteos (mi menor pentatónica): un seno con su cuarto armónico, con un eco que se pierde en la sala | 5 a 14 s | 30 %: 18 a 35 s |
+| Bruma | Colchones de dos o tres notas (re dórico): tres triángulos apenas desafinados por un pasabajos, que entran en 2,5 a 4 s, quedan unos segundos y se van en 5 a 8 s, por una sala | 9 a 18 s | 30 %: 20 a 40 s |
 
-Suena muy bajo (0,15 por el general), entra y se va con un fundido de 1,6 s, y no suena con movimiento reducido ni con
+[RONDA 2] F6: Vidrio (campanitas FM) y Gotas (punteos con eco) se borraron.
+
+Suena bajo (0,5 del ambiente por el 0,7 general), entra y se va con un fundido de 1,6 s, y no suena con movimiento reducido ni con
 la pestaña oculta (deja de programar notas). No cambia con el día y la noche.
 
 ## Las reglas (del pedido)
