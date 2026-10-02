@@ -49,9 +49,10 @@ titulo('Cierre · lo aprobado pasó al producto: las banderas del sprint ya no e
 // [3D Y SONIDO] T1: los títulos de ESCENA 10 pasaron al producto; la prueba que queda es el sonido.
 // [RETOQUE 3D] 3J: + la del túnel lento; el sonido pasó al producto (su bandera se borró).
 // [CIERRE RETOQUE 3D] D6 y P1: el túnel lento se borró y el polvo en facetas pasó al producto.
-afirmarIgual(Object.keys(PRUEBAS_APAGADAS), [], 'no queda ninguna prueba: el sonido y el polvo en facetas pasaron al producto y el túnel lento se borró')
+// [RONDA 2] F4: la única prueba es el filo de los títulos de día (s43 · F4).
+afirmarIgual(Object.keys(PRUEBAS_APAGADAS), ['filo'], 'no queda ninguna de antes: el sonido y el polvo en facetas pasaron al producto y el túnel lento se borró (queda el filo de RONDA 2)')
 const pedidas = entornoPedido('producto,responde=si,anticipa=si,vida=si,recorrido=logo').pruebas as unknown as Record<string, unknown>
-afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && Object.keys(ENTORNO.pruebas).length === 0, '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
+afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && Object.values(ENTORNO.pruebas).every((v) => v === 'no'), '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
 afirmar(!/usePrueba|pruebasDeLaInterfaz/.test(['_chrome/ChromeDelHome.tsx', '_chrome/menu/MenuMovil.tsx', '_chrome/escena/RespuestaDeLaEscena.tsx', '_chrome/escena/AnticipacionDelMenu.tsx', '_secciones/tu-panel/TuPanel.tsx', '_secciones/servicios/ServiciosEnSecuencia.tsx'].map(leer).join('\n')), '  y nada del DOM pregunta por ellas')
 
 // ═══════════════════════════════════════════════════════════════════════════
