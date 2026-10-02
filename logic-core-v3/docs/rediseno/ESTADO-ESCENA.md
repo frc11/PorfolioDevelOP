@@ -23,6 +23,11 @@
 > **RETOQUE 3D:** los bugs del polvo y de los títulos, los títulos y bloques nuevos en 3D, el túnel lento y las variantes
 > del polvo con bandera (§8). Un commit por ticket; las entregas, en `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt`
 > por bloque y el `LEEME.txt`). Invariante: `npm run test:s41-retoque-3d`.
+>
+> **CIERRE DEL RETOQUE 3D:** el polvo en facetas al producto (la b), el despertar con cualquier scroll, el encendido que
+> parpadea entero, la frase sin salida, todo el 3D fijo en el mundo (la cámara sin el mouse) y el título de Demos en
+> volumen; el túnel lento se borró (§9). Las entregas, en `~/.cache/b4-medicion/retoque-3d/cierre/`. Invariante:
+> `npm run test:s42-cierre-retoque`.
 
 ---
 
@@ -427,4 +432,19 @@ Las pruebas que quedan (`Pruebas`): `tunel` y `polvo`. La de `sonido` se borró:
 `ESTADO-INTERFAZ.md` §8: no son de la escena.
 
 Visto y no tocado: el arco de luz que cruza la pantalla ~3 s después de un scroll de noche es el anillo del pulso (E4).
+
+## 9 · CIERRE DEL RETOQUE 3D
+
+| Ticket | Qué cambió en la escena | Dónde |
+|---|---|---|
+| D6 `99dac2f2` | **El túnel lento, borrado** (código y bandera): `Pruebas` vuelve a no tener ninguna | `trabajos/ritmo.ts`, `trabajos/Trabajos.tsx`, `entorno.ts` |
+| P1 `4c53ec46` | **El polvo en facetas al producto** (la variante b: cuadraditos que giran, cuatro caras de luz); la a y la c se borraron, con la bandera `polvo=`. Bandera del producto `facetas` (el banco la apaga con `facetas=no`) | `polvo/facetas.ts`, `polvo/parche.ts` |
+| B2 `71c33491` | **Cualquier scroll despierta el polvo**, también después del último nudo (el progreso en 1): un contador de la página (`paginaMovida.ts`) además del progreso. Medido: la física del hero ya levantaba con una muesca, en el producto y con la b por igual | `paginaMovida.ts`, `ataduraAlScroll.ts`, `polvo/Fisica.tsx` |
+| B3 `4263caa5` | **El encendido parpadea entero**: el embudo era el polvo del haz (0,30 contra 0,05 de la columna) y su cono crecía con el haz apagado. `repartoDelEncendido`: la lámpara (columna, charco, mancha dura) con la raíz de `k/FIRME`, el cono del polvo con `k/FIRME` (`uConoDelHaz`) y las motas con su cuadrado. Prendido, como antes | `entorno/encendido.ts`, `entorno/Entorno.tsx`, `entorno/polvoVivo.ts`, `polvo/Aire.tsx`, `ContactOcclusion.tsx` |
+| B6 `c19ee988` | La frase de Por qué develOP **sin salida** (`queda`, como Portfolio) | `por-que-develop/PorQueDevelop.tsx` |
+| D1+D2 `5e1bcd49` | **Todo el 3D fijo en el mundo**: `OrbitRig` publica la misma cámara sin el mouse (`sinElMouse.ts`) y los títulos que van con la página se colocan con ella; y lo que el mouse le suma, para el DOM (`miradaDeLaCamara.ts`) | `OrbitRig.tsx`, `titulos3d/TitulosDeVolumen.tsx` |
+| D3 `13ec1bf5` | El título de Demos en volumen, en dos títulos de una línea, con el gesto `levanta` | `_fuentes/chivo-400-titulos.json` (`scripts-retoque/fuentes-3d.py`) |
+| Deuda `3591fb79` | `polvo/Fisica.tsx` partido: el armado de la simulación, en `armadoDeLaFisica.ts` (de 387 a 245 líneas) | `polvo/` |
+
+Lo de CSS 3D (los valores, el pie) y el resto del cierre, en `ESTADO-INTERFAZ.md` §9.
 

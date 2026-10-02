@@ -45,6 +45,11 @@
 > infinito más grande y el sonido en el producto con candidatos para elegir (§8). Las entregas, en
 > `~/.cache/b4-medicion/retoque-3d/`. Invariante: `npm run test:s41-retoque-3d`.
 >
+> **CIERRE DEL RETOQUE 3D:** «Y más…» que entra al asomar, las fotos del equipo como antes, Contacto que abre el panel
+> (sin WhatsApp: por mail), los valores y el pie en bloques de CSS 3D fijos en el mundo, el título de Demos en volumen,
+> el clic que es el pestillo y el ambiente generativo (§9). Las entregas, en `~/.cache/b4-medicion/retoque-3d/cierre/`.
+> Invariante: `npm run test:s42-cierre-retoque`.
+>
 > **Insumo que no existe:** la instrucción mandaba leer `OBSERVACION.md`; no está en el disco. La medición de nk de la que
 > sale «la sensación de caro viene de completitud, no de espectáculo» es `docs/rediseno/sprints/SITIO-S2-motion.md`.
 
@@ -212,4 +217,21 @@ descarga y cuándo, y qué sonido pide cada gesto) y el generador, `t2-sonidos.t
 Ajustados por el sprint (con su porqué en el fuente): `s8-cierre`, `s8-chrome`, `s25-contacto`, `s26-menu`, `s27-viajes`,
 `s18-deslizamiento`, `s10-acceso` (+3 paradas: el formulario y Login; el landmark del formulario), `s39-navbar`, `s38`,
 `s36`, `s40`, `s34` (la vuelta de la levantada).
+
+## 9 · CIERRE DEL RETOQUE 3D
+
+| Ticket | Qué cambió | Dónde |
+|---|---|---|
+| B4 `2e80f8c1` | «Y más…» y el newsletter entran ni bien asoman y se van recién cuando están por salir: la línea de disparo del remate, de 35 a 6 % | `tu-panel/entrada.ts` |
+| D4 `0ce449c9` | Las fotos del equipo sin el marco 3D: la llegada en curva de antes y el hover desde el punto | `quienes-somos/equipo.tsx` (se borró `fotoEnVolumen.tsx`) |
+| N1 `4ed82139` | «Contacto» (la esquina y el menú del teléfono) abre el panel de SPRINT CONTACTO (`data-abre-contacto="panel"`, en la captura; el del menú, un botón que lo abre al cerrarse el menú). Sin WhatsApp: «Enviar por mail» arma el mail. Lo demás que lleva a contacto sigue viajando al pie | `_chrome/contacto/`, `_chrome/menu/`, `barra/BarraDelHome.tsx` |
+| D1 `5e1bcd49` | Los bloques de CSS 3D giran al revés de lo que el mouse le suma a la cámara (`useGiroDeLaMirada`, exagerado ×2); los valores, con espesor en el ícono y el título (`ConEspesor`, capas `aria-hidden`) | `_componentes/volumen/`, `por-que-develop/` |
+| D5 `9ed241a1` | El pie ya no es una sala: cada enlace, campo y botón es un bloque sólido que flota (`BloqueSolido`: tapa, cantos y cara de atrás); abajo de 1025 y con movimiento reducido, plano | `_componentes/volumen/BloqueSolido.tsx`, `cierre/` (se borró `planoDelPie.tsx`) |
+| D3 `13ec1bf5` | «Demos para abrir acá mismo» se levanta como «El equipo»; desde 1024, en dos renglones | `trabajos/demos/TextoDeDemos.tsx` |
+| S1+S2 `1786c03c` | El clic de la barra y de los CTA, el pestillo (los otros siete candidatos se borraron); el ambiente, generativo en tiempo real (Vidrio, Bruma, Gotas), sin archivo. `SONIDO.md` al día | `_lib/sonido/`, `_chrome/sonido/`, `scripts-retoque/sonidos.ts` |
+| Deuda `0f554494` | El lint de `s37` (`no-this-alias`) | `s37-interfaz1` |
+
+Ajustados por el cierre (con su porqué en el fuente): `s41` (lo reemplazado pasó a `s42`), `s36`, `s38`, `s32`, `s34`,
+`s35`, `s40`, `s25`, `s26`, `s27`, `s5-archivos`, `s6-tu-panel`, `s7-por-que-develop` (lo anunciado, sin subárboles
+`aria-hidden`).
 
