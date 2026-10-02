@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import type { Caja } from '../../_secciones/trabajos/demos/genie'
-import { ENLACES_DEL_HOME } from '../enlaces'
+import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
 
 /**
  * [NAVBAR] T3 · EL PANEL DEL MENÚ, LO QUE NO SE MUEVE — su adentro (el botón de cerrar y los ítems, con sus clases) y la
@@ -52,41 +52,48 @@ export const mismaGeometria = (a: Geometria, b: Geometria): boolean =>
 /** La cruz del botón de cerrar (la misma en la copia plana del Genie). */
 export const CRUZ = <X aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-5)]" />
 
-/** El adentro del panel: su botón de cerrar (arriba al centro, en el lugar del botón del menú) y los ítems. */
-export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
+/**
+ * El adentro del panel: su botón de cerrar (arriba al centro, en el lugar del botón del menú), las secciones y, al pie,
+ * separados, Contacto (viaja al formulario del pie, como las secciones) y Login (el del sitio) [RETOQUE 3D] N1.
+ */
+export function ContenidoDelMenu({ alCerrar }: { readonly alCerrar: () => void }): React.JSX.Element {
   return (
     <div className="flex size-full flex-col">
       <button type="button" data-parte="cerrar-el-menu" aria-label={ROTULO_DEL_MENU.cerrar} onClick={alCerrar} className={CLASE_DEL_CERRAR}>
         {CRUZ}
       </button>
-      <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-12)]">
+      <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-6)]">
         <ul className="flex flex-col gap-[var(--spacing-1)]">
-          {ENLACES_DEL_HOME.map((enlace) => (
+          {ENLACES_DE_SECCION.map((enlace) => (
             <li key={enlace.id}>
-              {enlace.destino === '#contacto' ? (
-                <button
-                  type="button"
-                  data-parte="item-del-menu"
-                  onClick={() => {
-                    alContacto()
-                    alCerrar()
-                  }}
-                  className={CLASE_DEL_ITEM}
-                >
-                  {enlace.rotulo}
-                </button>
-              ) : (
-                <a href={enlace.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
-                  {enlace.rotulo}
-                </a>
-              )}
+              <a href={enlace.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
+                {enlace.rotulo}
+              </a>
             </li>
           ))}
         </ul>
       </nav>
+      <ul data-parte="pie-del-menu" className="grid grid-cols-2 gap-[var(--spacing-2)] px-[var(--spacing-6)] pb-[var(--spacing-6)]">
+        <li>
+          <a href={ENLACE_DE_CONTACTO.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM_DEL_PIE}>
+            {ENLACE_DE_CONTACTO.rotulo}
+          </a>
+        </li>
+        <li>
+          <a href={ENLACE_DE_LOGIN.destino} data-parte="item-del-menu" className={CLASE_DEL_ITEM_DEL_PIE}>
+            {ENLACE_DE_LOGIN.rotulo}
+          </a>
+        </li>
+      </ul>
     </div>
   )
 }
+
+/** [RETOQUE 3D] N1 · Contacto y Login, al pie del menú: el renglón de un ítem, con borde y centrado. */
+export const CLASE_DEL_ITEM_DEL_PIE = cn(
+  'text-cuerpo font-semi leading-texto tracking-texto flex min-h-[var(--spacing-12)] w-full items-center justify-center rounded-[var(--radius-pastilla-s)] border border-current px-[var(--spacing-4)]',
+  'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
+)
 
 export const CLASE_DEL_CERRAR = 'bg-fondo text-tinta border-borde mx-auto grid size-[var(--spacing-12)] shrink-0 place-items-center rounded-full border'
 

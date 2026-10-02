@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { sonar } from '../../_lib/sonido/bus'
 import { fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
-import { ENLACES_DEL_HOME } from '../enlaces'
+import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
 
 /**
  * [NAVBAR] LA BARRA DEL HOME — la pastilla de escritorio, propia de /v3 (antes `NavegacionDelHome` montaba la pieza
@@ -25,6 +25,9 @@ import { ENLACES_DEL_HOME } from '../enlaces'
  * de `medio` la pastilla está apagada (`CLASE_DE_LA_PASTILLA_APAGADA`, en el montaje) y es el menú, aunque la lista
  * entrara: antes quedaba una franja (de 628 a 860) sin barra a la vista y sin menú.
  */
+
+/** [RETOQUE 3D] N1 · el aire mínimo (px) entre la pastilla centrada y la esquina: si no entra, el menú del teléfono. */
+const AIRE_DE_LA_ESQUINA = 16
 
 /** Los ids de la barra que son secciones del home. */
 const EN_LA_BARRA = new Set(ENLACES_DEL_HOME.map((e) => e.id))
@@ -76,8 +79,11 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     const pastilla = pastillaRef.current
     const cabecera = pastilla?.parentElement
     if (pastilla === null || pastilla === undefined || cabecera === null || cabecera === undefined) return
+    const esquina = cabecera.querySelector<HTMLElement>('[data-parte="esquina"]')
     const medir = (): void => {
-      const modo = modoDelChrome(pastilla.scrollWidth, pastilla.clientWidth, getComputedStyle(cabecera).visibility === 'hidden')
+      // [RETOQUE 3D] N1 · y la esquina (Contacto y Login) tiene que entrar al lado de la pastilla centrada.
+      const cabe = esquina === null || cabecera.clientWidth - (parseFloat(getComputedStyle(esquina).right) || 0) - esquina.offsetWidth - (cabecera.clientWidth + pastilla.offsetWidth) / 2 >= AIRE_DE_LA_ESQUINA
+      const modo = modoDelChrome(pastilla.scrollWidth, pastilla.clientWidth, getComputedStyle(cabecera).visibility === 'hidden' || !cabe)
       cabecera.setAttribute('data-modo', modo)
       fijarModoDelChrome(modo)
     }
@@ -144,7 +150,7 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     <header data-pieza="barra" className={className}>
       <nav ref={pastillaRef} data-parte="pastilla" aria-label="Navegación principal">
         <ul data-parte="lista">
-          {ENLACES_DEL_HOME.map((enlace) => {
+          {ENLACES_DE_SECCION.map((enlace) => {
             const esActivo = enlace.id === activo
             return (
               <li key={enlace.id}>
@@ -164,6 +170,22 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
         </ul>
         <span ref={resaltado} data-parte="resaltado" aria-hidden="true" />
       </nav>
+      {/* [RETOQUE 3D] N1 · Contacto (viaja al formulario del pie) y Login (el del sitio), en la esquina de arriba a la derecha. */}
+      <div data-parte="esquina" onPointerEnter={() => sonar('tic')}>
+        <a
+          href={ENLACE_DE_CONTACTO.destino}
+          data-pieza="barra-enlace"
+          data-nav-id={ENLACE_DE_CONTACTO.id}
+          data-activo={activo === ENLACE_DE_CONTACTO.id ? 'true' : undefined}
+          aria-current={activo === ENLACE_DE_CONTACTO.id ? 'true' : undefined}
+          className="text-cuerpo tracking-texto leading-texto font-semi"
+        >
+          <span data-parte="rotulo">{ENLACE_DE_CONTACTO.rotulo}</span>
+        </a>
+        <a href={ENLACE_DE_LOGIN.destino} data-pieza="barra-login" className="text-cuerpo tracking-texto leading-texto font-semi">
+          {ENLACE_DE_LOGIN.rotulo}
+        </a>
+      </div>
     </header>
   )
 }

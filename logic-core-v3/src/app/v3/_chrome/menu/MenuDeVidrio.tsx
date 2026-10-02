@@ -38,7 +38,6 @@ export function Menu({
   boton,
   alCubrir,
   alCerrado,
-  alContacto,
   alSoltar,
   ref,
 }: {
@@ -47,7 +46,6 @@ export function Menu({
   readonly boton: RefObject<HTMLButtonElement | null>
   readonly alCubrir: (cubierto: boolean) => void
   readonly alCerrado: () => void
-  readonly alContacto: () => void
   readonly alSoltar: () => void
   readonly ref?: Ref<ControlDelMenu>
 }): React.JSX.Element {
@@ -296,7 +294,7 @@ export function Menu({
         <svg data-parte="filo-del-genie" aria-hidden="true" className="pointer-events-none absolute inset-0 size-full overflow-visible">
           <path ref={filo} />
         </svg>
-        <ContenidoDelMenu alCerrar={cerrar} alContacto={alContacto} />
+        <ContenidoDelMenu alCerrar={cerrar} />
       </div>
       {/* El texto del Genie va ENCIMA del vidrio. */}
       {geometria !== null && !reducido && (

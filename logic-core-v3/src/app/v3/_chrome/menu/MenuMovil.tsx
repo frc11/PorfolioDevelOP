@@ -3,8 +3,7 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
-import { useContacto, viajarAlContacto } from '../contacto/apertura'
+import { useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { Menu, type ControlDelMenu } from './MenuDeVidrio'
@@ -53,7 +52,6 @@ export function MenuMovil(): React.JSX.Element | null {
   const [abierto, setAbierto] = useState(false)
   const boton = useRef<HTMLButtonElement>(null)
   const menu = useRef<ControlDelMenu>(null)
-  const haciaElContacto = useRef(false)
   const enMenu = modo === 'menu'
   const invertido = vaInvertido(useTonoDebajo(boton, enMenu))
 
@@ -73,24 +71,18 @@ export function MenuMovil(): React.JSX.Element | null {
   // El panel abierto tapa al botón (su botón de cerrar va en el mismo lugar): a mano, sin volver a dibujar.
   const cubrir = useCallback((si: boolean) => boton.current?.style.setProperty('visibility', si ? 'hidden' : 'visible'), [])
   const alCerrado = useCallback(() => setAbierto(false), [])
-  const alContacto = useCallback(() => {
-    haciaElContacto.current = true
-  }, [])
 
   // Al cerrar del todo, con la trampa de foco y el bloqueo de scroll ya soltados.
+  // [RETOQUE 3D] N1 · Contacto es un enlace del viaje, como las secciones: al soltar, el foco vuelve al botón.
   const alSoltar = useCallback((): void => {
-    if (haciaElContacto.current) {
-      haciaElContacto.current = false
-      // [RETOQUE 3D] 3I · todo apunta a contacto: al formulario del pie.
-      viajarAlContacto(SELECTOR_DE_LOS_VIAJES)
-    } else boton.current?.focus({ preventScroll: true })
+    boton.current?.focus({ preventScroll: true })
   }, [])
 
   if (!enMenu) return null
   return (
     // [NAVBAR] Arriba del resto del chrome (el infinito del recorrido, la barra): el panel abierto lo tapa todo.
     <div data-pieza="menu-movil" className="fixed inset-x-0 top-0 z-[var(--z-overlay)]">
-      <Menu ref={menu} abierto={abierto} boton={boton} alCubrir={cubrir} alCerrado={alCerrado} alContacto={alContacto} alSoltar={alSoltar} />
+      <Menu ref={menu} abierto={abierto} boton={boton} alCubrir={cubrir} alCerrado={alCerrado} alSoltar={alSoltar} />
       <button
         ref={boton}
         type="button"

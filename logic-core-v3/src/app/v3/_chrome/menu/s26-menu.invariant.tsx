@@ -67,7 +67,7 @@ titulo('2 · El menú es un diálogo accesible: foco atrapado y devuelto, Esc, t
 
 const nada = (): void => undefined
 // [NAVBAR] T3 · el menú queda montado y escondido; abre con el Genie y la trampa se monta sólo abierto.
-const MENU = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alContacto={nada} alSoltar={nada} />)
+const MENU = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} />)
 const esDialogo = (h: string): boolean => /role="dialog"/.test(h) && /aria-modal="true"/.test(h) && /aria-label="Menú"/.test(h) && /id="menu-movil"/.test(h)
 afirmar(esDialogo(MENU), 'el menú es un diálogo modal con nombre')
 controlPositivo('  el chequeo vería un menú sin rol de diálogo', MENU.replace('role="dialog"', ''), esDialogo)
@@ -89,10 +89,11 @@ afirmarIgual(renderToStaticMarkup(<MenuMovil />), '', '  con la barra de escrito
 titulo('3 · Los ítems, y Contacto abre el formulario')
 
 const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].map((m) => m[1])
-afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], '[NAVBAR] los seis, en el orden de la barra')
-afirmarIgual(items, ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`)')
-// [RETOQUE 3D] 3I: todo apunta a contacto: el del menú, al cerrarse, viaja al formulario del pie (ya no abre la hoja).
-afirmar(/<button type="button" data-parte="item-del-menu"[^>]*>Contacto</.test(MENU) && /viajarAlContacto\(SELECTOR_DE_LOS_VIAJES\)/.test(FUENTE), 'Contacto es un botón: cierra el menú y viaja al contacto del pie')
+// [RETOQUE 3D] N1: las cinco secciones y, al pie del menú, separados, Contacto y Login.
+afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto', 'Login'], '[NAVBAR] las cinco secciones, en el orden de la barra, y al pie Contacto y Login')
+afirmarIgual(items.slice(0, 6), ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`), más el login')
+// [RETOQUE 3D] 3I y N1: todo apunta a contacto: el del menú es un enlace del viaje (al formulario del pie), al pie del menú.
+afirmar(/<ul data-parte="pie-del-menu"[\s\S]*<a href="#contacto" data-parte="item-del-menu"[^>]*>Contacto<[\s\S]*<a href="\/login" data-parte="item-del-menu"[^>]*>Login</.test(MENU), 'Contacto es un enlace del viaje (al contacto del pie) y Login el del sitio, separados al pie del menú')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El modo del chrome sale del ancho real')
@@ -102,6 +103,7 @@ afirmarIgual(modoDelChrome(562, 561), 'menu', '  y si se pasa un píxel, el men�
 controlPositivo('  el chequeo vería un modo que siempre es barra', (() => 'barra') as typeof modoDelChrome, (f: typeof modoDelChrome) => f(562, 561) === 'menu')
 afirmarIgual(modoDelChrome(562, 600, true), 'menu', '  [NAVBAR] y con la pastilla apagada (abajo de `medio`), el menú aunque la lista entre: no queda una franja sin barra ni menú')
 const NAV = leer('src/app/v3/_chrome/barra/BarraDelHome.tsx')
-afirmar(/modoDelChrome\(pastilla\.scrollWidth, pastilla\.clientWidth, getComputedStyle\(cabecera\)\.visibility === 'hidden'\)/.test(NAV) && /new ResizeObserver\(medir\)/.test(NAV) && /fijarModoDelChrome\(modo\)/.test(NAV), '  una medición en el chrome, al cambiar el ancho o la lista; las secciones no preguntan el ancho')
+// [RETOQUE 3D] N1: y la esquina (Contacto y Login) tiene que entrar al lado de la pastilla.
+afirmar(/modoDelChrome\(pastilla\.scrollWidth, pastilla\.clientWidth, getComputedStyle\(cabecera\)\.visibility === 'hidden' \|\| !cabe\)/.test(NAV) && /new ResizeObserver\(medir\)/.test(NAV) && /fijarModoDelChrome\(modo\)/.test(NAV), '  una medición en el chrome, al cambiar el ancho o la lista; las secciones no preguntan el ancho')
 
 cerrar('s26-menu.invariant')

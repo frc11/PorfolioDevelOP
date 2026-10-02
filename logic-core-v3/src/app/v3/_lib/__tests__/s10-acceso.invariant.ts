@@ -73,7 +73,7 @@ const DELTA_DE_LA_VIDA = { paradas: 1 } as const
 // [NAVBAR] T1 · «Panel» es un ítem nuevo de la barra (lleva a Tu panel): una parada más, en las dos ramas.
 const DELTA_DEL_NAVBAR = { paradas: 1 } as const
 /** [RETOQUE 3D] 3I · el contacto del pie es un formulario: + nombre, mail, mensaje y el mail del aviso; − WhatsApp y «Hablanos». */
-const DELTA_DEL_RETOQUE = { paradas: 4 - 2 } as const
+const DELTA_DEL_RETOQUE = { paradas: 4 - 2 + 1 } as const // N1: + «Login» en la esquina de la barra
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -204,7 +204,8 @@ afirmarIgual(DESCUENTO_NACIMIENTO_PX, 72, 'el nacimiento es `100svh − 72px`, d
  * donde está (`sticky` de alto cero con la pastilla `absolute` a `100svh − 72`),
  * y bajarla la haría nacer más abajo.
  */
-afirmar(PARADAS[7].seccion === 'hero', 'la primera parada que vive en el CONTENIDO es la 8ª ([NAVBAR] seis ítems) — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[7]).rotulo} → ${PARADAS[7].destino}`)
+// [RETOQUE 3D] N1: + «Login» en la esquina: la 9ª.
+afirmar(PARADAS[8].seccion === 'hero', 'la primera parada que vive en el CONTENIDO es la 9ª ([NAVBAR] seis ítems y [RETOQUE 3D] Login) — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[7]).rotulo} → ${PARADAS[7].destino}`)
 afirmar(PARADAS[0].seccion === null || PARADAS[0].seccion === undefined || PARADAS[0].destino === '#hero', '  y la 1ª es el escape: el enlace de salto vive en el chrome y apunta al contenido')
 console.log(
   '  ✅ HALLAZGOS 1 y 2 — CERRADOS en SITIO-S11 · `_chrome/SaltarAlContenido.tsx` + `_estilos/foco.css` — el enlace de salto es la parada 1 ' +

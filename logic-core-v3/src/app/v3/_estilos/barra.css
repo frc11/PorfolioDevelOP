@@ -106,6 +106,45 @@
 }
 
 /* El modo lo decide `BarraDelHome`: la barra si entra y está encendida (desde `medio`), si no el menú del teléfono. */
-[data-v3] [data-pieza="barra"][data-modo="menu"] > [data-parte="pastilla"] {
+[data-v3] [data-pieza="barra"][data-modo="menu"] > :is([data-parte="pastilla"], [data-parte="esquina"]) {
   visibility: hidden;
+}
+
+/*
+ * [RETOQUE 3D] N1 · LA ESQUINA — «Contacto» salió de la pastilla y va arriba a la derecha con «Login», en su propia
+ * pastilla del mismo vidrio. Siempre arriba (no nace al pie como la barra: ahí abajo están el infinito y el parlante).
+ */
+[data-v3] [data-pieza="barra"] > [data-parte="esquina"] {
+  position: fixed;
+  top: var(--barra-reposo);
+  right: var(--pad-lateral-compacto);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  block-size: var(--barra-alto);
+  padding-inline: var(--spacing-2) var(--spacing-1);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-fuerte);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+}
+
+/* «Login» es un botón: la tinta llena y el papel encima, con el mismo renglón que los ítems. */
+[data-v3] [data-pieza="barra-login"] {
+  display: inline-flex;
+  align-items: center;
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-3);
+  border-radius: var(--radius-pastilla-s);
+  background-color: var(--color-tinta);
+  color: var(--color-fondo);
+  text-decoration: none;
+  transition-property: opacity;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra-login"]:is(:hover, :focus-visible) {
+  opacity: var(--opacity-casi);
 }

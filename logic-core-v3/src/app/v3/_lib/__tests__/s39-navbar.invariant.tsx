@@ -43,7 +43,8 @@ const secciones = ENLACES_DEL_HOME.filter((e) => e.destino !== '#contacto')
 afirmar(secciones.every((e) => (IDS_DE_SECCION as readonly string[]).includes(e.destino.slice(1)) && e.destino === `#${e.id}`), '  cada uno lleva a una sección de la tabla («Portfolio» sigue siendo `#trabajos`, «Panel» es `#tu-panel`)')
 afirmarIgual(ENLACES_DEL_HOME[ENLACES_DEL_HOME.length - 1], { id: 'cierre', rotulo: 'Contacto', destino: '#contacto' }, '  y «Contacto» sigue siendo el de hoy: abre el formulario')
 const USAN_LA_LISTA = ['_chrome/menu/PanelDelMenu.tsx']
-afirmar(USAN_LA_LISTA.every((r) => leer(r).includes('ENLACES_DEL_HOME.map(')) && !/ENLACES_DE_MUESTRA/.test(USAN_LA_LISTA.map(leer).join('\n')), '  el menú del teléfono usa la lista del home, no la de muestra de la pastilla compartida')
+// [RETOQUE 3D] N1: las secciones de la lista del home (`ENLACES_DE_SECCION`) y Contacto aparte.
+afirmar(USAN_LA_LISTA.every((r) => leer(r).includes('ENLACES_DE_SECCION.map(')) && !/ENLACES_DE_MUESTRA/.test(USAN_LA_LISTA.map(leer).join('\n')), '  el menú del teléfono usa la lista del home, no la de muestra de la pastilla compartida')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T1 · Los destinos nuevos: un tramo centrado debajo de la barra')

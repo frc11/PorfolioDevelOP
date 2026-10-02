@@ -24,6 +24,8 @@
  *   3I · el pie en volumen (CSS 3D: paredes y piso que miran al logo; todo lo que se toca, del DOM); el contacto es un
  *        formulario (nombre, mail, mensaje) que no envía y lo dice; WhatsApp afuera; todo apunta a contacto.
  *   3J · el túnel lento, con bandera (`tunel=lento`): la tabla del producto no se toca; el túnel se estira en escritorio.
+ *   N1 · «Contacto» sale de la pastilla: con «Login» (el login del sitio) en la esquina de arriba a la derecha; en el
+ *        teléfono, los dos separados al pie del menú de vidrio.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -48,6 +50,8 @@ import { PLANOS_DEL_PIE, poseDelPlano } from '../../_secciones/cierre/planoDelPi
 import { ESTIRAMIENTO_DEL_TUNEL_LENTO, PX_DEL_ARRANQUE_DEL_TUNEL, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
 import { CAPAS_DEL_TUNEL } from '../../_secciones/trabajos/tunel'
 import { ENTORNO, entornoPedido } from '../escena/entorno'
+import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../../_chrome/enlaces'
+import { existsSync } from 'node:fs'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -245,5 +249,18 @@ const masDespacio = (k: number): boolean => k > 1 && Math.abs((pxDeLaTabla(PX_DE
 afirmar(masDespacio(ESTIRAMIENTO_DEL_TUNEL_LENTO), '  el túnel cuesta 1,6 veces el scroll: el reloj de los anchos angostos, en escritorio (la sección crece lo mismo)', `×${String(ESTIRAMIENTO_DEL_TUNEL_LENTO)}: 1.480 px → ${String(Math.round(1480 * ESTIRAMIENTO_DEL_TUNEL_LENTO))}`)
 controlPositivo('el detector VE el túnel de siempre', 1, masDespacio)
 afirmar(/<CapaDelTunel progreso=\{progreso\} mostrado=\{mostrado\} key=\{lento \? 'lento' : 'tabla'\}/.test(sinComentarios(leer('_secciones/trabajos/Trabajos.tsx'))), '  con la bandera el túnel se vuelve a montar y lee su ritmo nuevo')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('N1 · Contacto y Login, en la esquina')
+
+afirmar(ENLACES_DE_SECCION.every((e) => e.destino.startsWith('#') && e.destino !== '#contacto') && ENLACES_DE_SECCION.length === 5 && ENLACE_DE_CONTACTO.destino === '#contacto' && ENLACE_DE_LOGIN.destino === '/login' && existsSync('src/app/login/page.tsx'), 'la pastilla lleva las cinco secciones; Contacto va al formulario del pie y Login al login que el sitio ya tiene (`/login`)')
+const barra = sinComentarios(leer('_chrome/barra/BarraDelHome.tsx'))
+const enLaEsquina = (c: string): boolean => /\{ENLACES_DE_SECCION\.map\(/.test(c) && /<div data-parte="esquina"[\s\S]*href=\{ENLACE_DE_CONTACTO\.destino\}[\s\S]*data-pieza="barra-login"/.test(c)
+afirmar(enLaEsquina(barra), '  la esquina: Contacto (un enlace del viaje, como los de la pastilla) y Login (un botón)')
+controlPositivo('el detector VE a Contacto adentro de la pastilla', barra.replace('ENLACES_DE_SECCION.map(', 'ENLACES_DEL_HOME.map('), enLaEsquina)
+const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
+afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (al pie del hero están el infinito y el parlante); si no entra al lado de la pastilla, el menú del teléfono')
+const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
+afirmar(/<ul data-parte="pie-del-menu"[\s\S]*href=\{ENLACE_DE_CONTACTO\.destino\}[\s\S]*href=\{ENLACE_DE_LOGIN\.destino\}/.test(menu) && /\{ENLACES_DE_SECCION\.map\(/.test(menu), '  en el teléfono, separados al pie del menú de vidrio')
 
 cerrar('s41-retoque-3d')
