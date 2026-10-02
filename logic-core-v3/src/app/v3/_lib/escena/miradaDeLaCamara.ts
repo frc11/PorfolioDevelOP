@@ -30,9 +30,16 @@ export function suscribirALaMirada(f: (m: MiradaDeLaCamara) => void): () => void
 }
 
 /**
+ * Cuánto se exagera el giro en las piezas de CSS: están en el plano de la pantalla, más cerca que el logo, y con el giro
+ * real (8° a lo sumo al final del recorrido, 2,6° de altura) un canto de 12 px apenas asomaba 2 px. Al doble, se leen.
+ */
+export const EXAGERACION_DEL_CSS = 2
+
+/**
  * La pieza fija en el mundo vista por la cámara de ahora: la cámara se corre a la derecha (el giro sube) y se ve más su
  * costado derecho; sube y se ve más su cara de arriba. El orden: primero la inclinación, como la órbita.
  */
 export function giroDeLaPieza(m: MiradaDeLaCamara): string {
-  return `rotateX(${m.inclinacion.toFixed(3)}deg) rotateY(${(-m.giro).toFixed(3)}deg)`
+  const k = EXAGERACION_DEL_CSS
+  return `rotateX(${(m.inclinacion * k).toFixed(3)}deg) rotateY(${(-m.giro * k).toFixed(3)}deg)`
 }

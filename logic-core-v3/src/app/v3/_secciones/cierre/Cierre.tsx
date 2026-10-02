@@ -16,7 +16,6 @@ import { Seccion } from '../_contrato/Seccion'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { TITULAR_DE_CIERRE } from './contenido'
 import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
-import { PlanoDelPie } from './planoDelPie'
 
 /**
  * 08 · CIERRE — el pie, armado alrededor del logo. **[FINAL]**
@@ -66,9 +65,8 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
       claseDeContenido="relative grid content-between gap-[var(--spacing-12)] tablet:grid-cols-2 tablet:gap-x-[var(--spacing-12)] escritorio:block"
     >
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
-      {/* [RETOQUE 3D] 3I · los tres bloques, planos de una sala alrededor del logo (`planoDelPie.tsx`). */}
+      {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
-        <PlanoDelPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} lado="izquierda">
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
           <Logotipo className="max-escritorio:hidden" />
           <div id={idDelTitularDeSeccion(seccion.id)}>
@@ -83,22 +81,17 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
           </div>
           <ContactoDelPie />
         </Llega>
-        </PlanoDelPie>
       </div>
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:right-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
-        <PlanoDelPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.derecha} lado="derecha">
-          <LlegaConProgreso progreso={progreso} ventana={LLEGADAS_DEL_PIE.derecha}>
-            {(p) => <ColumnasDelPie progreso={p} />}
-          </LlegaConProgreso>
-        </PlanoDelPie>
+        <LlegaConProgreso progreso={progreso} ventana={LLEGADAS_DEL_PIE.derecha}>
+          {(p) => <ColumnasDelPie progreso={p} />}
+        </LlegaConProgreso>
       </div>
       <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
-        <PlanoDelPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} lado="abajo">
-          <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
-            <RedesDelPie />
-            <LineaLegal />
-          </Llega>
-        </PlanoDelPie>
+        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
+          <RedesDelPie />
+          <LineaLegal />
+        </Llega>
       </div>
     </Pie>
   )

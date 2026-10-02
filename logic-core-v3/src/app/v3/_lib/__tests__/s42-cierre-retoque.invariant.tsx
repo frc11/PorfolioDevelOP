@@ -14,6 +14,8 @@
  *   D1 · todo el 3D fijo en el mundo: los títulos que van con la página se colocan con la cámara SIN el mouse, y los
  *        bloques de CSS 3D giran al revés de lo que el mouse le suma (se les ve la perspectiva y los costados).
  *   D2 · el hero, fijo después de armarse (sin salida): con D1 se le ven los costados.
+ *   D5 · el pie: cada enlace, campo y botón es un bloque sólido que flota (CSS 3D, el elemento de verdad en su cara de
+ *        adelante); ya no una sala alrededor del logo. Abajo de 1025 y con movimiento reducido, plano.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -23,9 +25,10 @@ import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena
 import { FACETAS_DEL_POLVO, FACETAS_VERTEX_GLSL } from '../escena/polvo/facetas'
 import { FIRME, GUION, repartoDelEncendido } from '../escena/entorno/encendido'
 import { DISPARO_DEL_REMATE, margenDelDisparo } from '../../_secciones/tu-panel/entrada'
-import { giroDeLaPieza } from '../escena/miradaDeLaCamara'
+import { EXAGERACION_DEL_CSS, giroDeLaPieza } from '../escena/miradaDeLaCamara'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
+import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -122,7 +125,7 @@ const fijosEnElMundo = (o: string, t: string): boolean =>
   /Math\.min\(delta, 0\.1\), CAMARA_SIN_EL_MOUSE\)\)/.test(t)
 afirmar(fijosEnElMundo(orbita, titulosDeLaEscena), 'los títulos que van con la página (el hero, «El equipo», las demos) se colocan con la cámara SIN el mouse; Portfolio y la frase ya estaban fijos (su cámara de lectura): el paralaje les deja ver la perspectiva y los costados')
 controlPositivo('el detector VE los títulos pegados a la cámara viva', [orbita, titulosDeLaEscena.replace('CAMARA_SIN_EL_MOUSE))', 'camara))')], ([o, t]: string[]) => fijosEnElMundo(o, t))
-const alReves = (f: typeof giroDeLaPieza): boolean => f({ giro: 10, inclinacion: 4 }) === 'rotateX(4.000deg) rotateY(-10.000deg)' && f({ giro: 0, inclinacion: 0 }) === 'rotateX(0.000deg) rotateY(0.000deg)'
+const alReves = (f: typeof giroDeLaPieza): boolean => f({ giro: 10, inclinacion: 4 }) === `rotateX(${(4 * EXAGERACION_DEL_CSS).toFixed(3)}deg) rotateY(${(-10 * EXAGERACION_DEL_CSS).toFixed(3)}deg)` && f({ giro: 0, inclinacion: 0 }) === 'rotateX(0.000deg) rotateY(0.000deg)'
 afirmar(alReves(giroDeLaPieza), '  los bloques de CSS 3D giran AL REVÉS de la cámara (la cámara se corre a la derecha: se ve su costado derecho; sube: su cara de arriba); quieto el mouse, de frente')
 controlPositivo('el detector VE el bloque que acompaña a la cámara', ((m: { giro: number; inclinacion: number }) => `rotateX(${(-m.inclinacion).toFixed(3)}deg) rotateY(${m.giro.toFixed(3)}deg)`) as typeof giroDeLaPieza, alReves)
 const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
@@ -137,5 +140,22 @@ titulo('D2 · El hero, fijo después de armarse')
 
 const hero = sinComentarios(leer('_secciones/hero/Hero.tsx'))
 afirmar(/gesto: 'azar', llegada: null, queda: true, rearma: false/.test(hero) && /colocacion: 'pantalla'/.test(sinComentarios(leer('_componentes/titulos3d/useTextoDeVolumen.ts'))), 'el titular del hero llega una vez por carga y se queda (sin salida); va con la página con la cámara sin el mouse (D1): se le ven los costados')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D5 · El pie: bloques sólidos que flotan')
+
+const delPie = ['_secciones/cierre/FormularioDelPie.tsx', '_secciones/cierre/PiezasDeContacto.tsx', '_secciones/cierre/ColumnasDelPie.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
+const cuantos = (c: string, re: RegExp): number => (c.match(re) ?? []).length
+const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) === 8 && cuantos(c, /<BloqueSolido[^>]*>\s*<(input|textarea|button|a|EnlaceDelPieConIcono)\b/g) === 8
+afirmar(todoEsUnBloque(delPie), 'cada enlace (el mail, el recorrido, las redes, el mail del aviso), cada campo (nombre, mail, mensaje) y el botón son un bloque sólido, con el elemento de verdad adentro (se enfoca, se escribe)')
+controlPositivo('el detector VE un campo sin su bloque', delPie.replace(/<BloqueSolido className="block w-full">(\r?\n\s*<input id="contacto-nombre")/, '<div>$1'), todoEsUnBloque)
+const cierreTsx = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
+afirmar(!/PlanoDelPie/.test(cierreTsx) && !existsSync(`${V3}/_secciones/cierre/planoDelPie.tsx`), '  ya no es una sala alrededor del logo: las paredes y el piso se borraron')
+const quieto = renderToStaticMarkup(<BloqueSolido><a href="#x">x</a></BloqueSolido>)
+const plano = (h: string): boolean => !/data-parte="(canto|tapa)"/.test(h) && !/transform:|perspective/.test(h) && /<a href="#x">x<\/a>/.test(h)
+afirmar(plano(quieto), '  en el servidor (y abajo de 1025, y con movimiento reducido) el bloque es plano: ni cantos ni tapa ni transformadas; el elemento, tal cual')
+controlPositivo('el detector VE un bloque con sus cantos', quieto.replace('<a href', '<span data-parte="canto" style="transform:rotateX(90deg)"></span><a href'), plano)
+const solido = sinComentarios(leer('_componentes/volumen/BloqueSolido.tsx'))
+afirmar(/const solido = escritorio && !reducido/.test(solido) && /useGiroDeLaMirada\(giro, solido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 2, '  desde 1025 tiene tapa, cuatro cantos y cara de atrás (`aria-hidden`) y gira al revés de la cámara (D1): se le ven la perspectiva y los costados')
 
 cerrar('s42-cierre-retoque')

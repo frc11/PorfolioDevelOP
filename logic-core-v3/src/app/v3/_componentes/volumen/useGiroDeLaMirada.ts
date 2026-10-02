@@ -13,8 +13,14 @@ import { giroDeLaPieza, suscribirALaMirada } from '../../_lib/escena/miradaDeLaC
 export function useGiroDeLaMirada(ref: RefObject<HTMLElement | null>, activo = true): void {
   useEffect(() => {
     if (!activo) return undefined
-    return suscribirALaMirada((m) => {
+    const desuscribir = suscribirALaMirada((m) => {
       if (ref.current !== null) ref.current.style.transform = giroDeLaPieza(m)
     })
+    const el = ref.current
+    return () => {
+      desuscribir()
+      // Si deja de valer (el ancho cruzó el umbral), la pieza vuelve a quedar de frente.
+      if (el !== null) el.style.transform = ''
+    }
   }, [ref, activo])
 }

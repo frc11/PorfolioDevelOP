@@ -14,6 +14,7 @@ import {
   type ClaseDeColumna,
 } from './contenido'
 import { FormularioDelPie } from './FormularioDelPie'
+import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 
 /**
  * LAS COLUMNAS QUE SUBEN — P2 con escalonado, sobre la grilla del pie.
@@ -144,11 +145,15 @@ function ColumnaDelRecorrido(): React.JSX.Element {
     <ul className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
         <li key={destino.ancla}>
-          <EnlaceDelPieConIcono
-            href={destino.ancla}
-            rotulo={destino.rotulo}
-            icono={<ArrowUpRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
-          />
+          {/* [CIERRE RETOQUE 3D] D5 · cada enlace, un bloque sólido que flota (desde 1025). */}
+          <BloqueSolido>
+            <EnlaceDelPieConIcono
+              href={destino.ancla}
+              rotulo={destino.rotulo}
+              icono={<ArrowUpRight className={CLASE_ICONO} strokeWidth={1.5} aria-hidden="true" />}
+              className="block escritorio:px-[var(--spacing-3)] escritorio:py-[var(--spacing-1)]"
+            />
+          </BloqueSolido>
         </li>
       ))}
     </ul>

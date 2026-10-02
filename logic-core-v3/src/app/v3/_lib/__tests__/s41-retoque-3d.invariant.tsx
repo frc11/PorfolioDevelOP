@@ -50,7 +50,6 @@ import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-devel
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_secciones/trabajos/contenido'
 import { PORCENTAJE_DE_TINTA_TENUE } from '../../_secciones/trabajos/ventana'
-import { PLANOS_DEL_PIE, poseDelPlano } from '../../_secciones/cierre/planoDelPie'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../../_chrome/enlaces'
 import { existsSync, statSync } from 'node:fs'
 import { CANDIDATOS, SONIDOS, VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
@@ -215,12 +214,7 @@ controlPositivo('el detector VE un gris que no llega a 3:1', PORCENTAJE_DE_TINTA
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3I · El pie en volumen, con el contacto de verdad')
 
-const cierre = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
-afirmar((cierre.match(/<PlanoDelPie progreso=\{progreso\} ventana=\{LLEGADAS_DEL_PIE\.(izquierda|derecha|abajo)\} lado="(izquierda|derecha|abajo)">/g) ?? []).length === 3, 'los tres bloques del pie son planos de una sala alrededor del logo: las dos paredes y el piso')
-const miranAlLogo = (pose: typeof poseDelPlano): boolean => pose(1, 'izquierda') === `translateZ(0.0px) rotateY(${PLANOS_DEL_PIE.pared.toFixed(2)}deg)` && pose(1, 'derecha') === `translateZ(0.0px) rotateY(${(-PLANOS_DEL_PIE.pared).toFixed(2)}deg)` && pose(1, 'abajo') === `translateZ(0.0px) rotateX(${PLANOS_DEL_PIE.piso.toFixed(2)}deg)` && /translateZ\(-1000\.0px\)/.test(pose(0, 'izquierda'))
-afirmar(miranAlLogo(poseDelPlano), '  quietos miran al logo (las paredes giradas sobre su borde de afuera, el piso acostado); llegan desde atrás y más girados, con el tramo de siempre (al revés para atrás)')
-controlPositivo('el detector VE un pie plano', ((p: number) => (p >= 1 ? 'translateZ(0.0px) rotateY(0.00deg)' : 'translateZ(-1000.0px)')) as unknown as typeof poseDelPlano, miranAlLogo)
-afirmar(/if \(progreso === null\) return <>\{children\}<\/>/.test(sinComentarios(leer('_secciones/cierre/planoDelPie.tsx'))), '  sin coreografía (abajo de 1025, movimiento reducido), plano')
+// [CIERRE RETOQUE 3D] D5: el pie ya no es una sala alrededor del logo (paredes y piso): bloques sólidos, s42 · D5.
 const formulario = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 afirmar(/<form id="contacto"/.test(formulario) && ['contacto-nombre', 'contacto-mail', 'contacto-mensaje'].every((c) => formulario.includes(`htmlFor="${c}"`) && formulario.includes(`id="${c}"`)) && /<button type="submit" disabled aria-describedby="contacto-aviso"/.test(formulario) && /id="contacto-aviso"/.test(formulario), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo); no envía todavía y lo dice un aviso, con el mail como salida')
 const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
