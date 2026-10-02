@@ -10,7 +10,6 @@ import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
 import { callar, sonar } from '../../sonido/bus'
-import { TUNEL_EN_LA_ESCENA } from '../tunelEnLaEscena'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
@@ -142,8 +141,6 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     if (e.E4 && !quieto) {
       const progreso = rig.current.progress
       if (progreso !== m.progreso) {
-        // [3D Y SONIDO] T2: entrar al túnel de Trabajos (de cualquier lado) suena un soplido; al cargar adentro, no.
-        if (!Number.isNaN(m.progreso) && !enElTunel(m.progreso) && enElTunel(progreso)) sonar('tunel')
         m.progreso = progreso
         m.ultimoMovimiento = t
       }
@@ -196,11 +193,6 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
 /** 6e: lo que leen las motas y la sombra. */
 function encender(k: number): void {
   HAZ_ENCENDIDO.k = k
-}
-
-/** [3D Y SONIDO] T2 · ¿el progreso está en el túnel? */
-function enElTunel(p: number): boolean {
-  return p >= TUNEL_EN_LA_ESCENA.desde && p <= TUNEL_EN_LA_ESCENA.hasta
 }
 
 /** [3D Y SONIDO] T2 · ¿nació un principal en el instante `t`? Sin reservar nada (sólo se pregunta si cambiaron los anillos). */

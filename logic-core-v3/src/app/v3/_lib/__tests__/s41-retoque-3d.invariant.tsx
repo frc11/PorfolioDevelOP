@@ -27,6 +27,9 @@
  *   N1 · «Contacto» sale de la pastilla: con «Login» (el login del sitio) en la esquina de arriba a la derecha; en el
  *        teléfono, los dos separados al pie del menú de vidrio.
  *   N2 · el infinito del recorrido, 1,3 veces más grande (y el parlante corrido con él).
+ *   Sonido · al producto (el parlante, apagado por defecto); los volúmenes finales; sin túnel ni amanecer; el hover de los
+ *        CTA con el tic de la barra; candidatos para elegir (cuatro clics de la barra, cuatro de los CTA) y UN ambiente
+ *        (tres candidatos) en su propio archivo, diferido.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -52,7 +55,10 @@ import { ESTIRAMIENTO_DEL_TUNEL_LENTO, PX_DEL_ARRANQUE_DEL_TUNEL, pxDeLaTabla } 
 import { CAPAS_DEL_TUNEL } from '../../_secciones/trabajos/tunel'
 import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../../_chrome/enlaces'
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
+import { CANDIDATOS, SONIDOS, VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
+import { ELEGIDOS_DE_FABRICA, leerElegidos } from '../sonido/preferencia'
+import { CORTES_DEL_AMBIENTE, CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -272,5 +278,32 @@ const masGrande = (c: string): boolean => c.includes('w-[calc(var(--spacing-12)*
 afirmar(masGrande(infinito), 'de 48 a 62 px en el teléfono y de 64 a 83 en escritorio (el trazo crece con él: es del dibujo)')
 controlPositivo('el detector VE el de antes', infinito.replace('*1.3)]', ')]').replace('*2.6)]', '*2)]'), masGrande)
 afirmar(leer('_chrome/sonido/ControlDelSonido.tsx').includes('escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2.6+var(--spacing-3))]'), '  y el parlante, a su izquierda en escritorio, se corre con él (medido: 12 px de aire entre los dos)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Sonido · al producto, con los candidatos para elegir')
+
+const montajeDelSonido = sinComentarios(leer('_chrome/sonido/SonidoDelHome.tsx'))
+afirmar(/const control = useSyncExternalStore\(sinCambios, \(\) => true, \(\) => false\)/.test(montajeDelSonido) && !/pruebas\.sonido/.test(montajeDelSonido), 'el parlante en el producto (apagado por defecto: nada suena ni se descarga hasta prenderlo); la bandera `sonido=si` se borró')
+const finales = (c: typeof SONIDOS): boolean => c.tic.volumen === 0.1 && c.foto.volumen === 0.1 && c.abre.volumen === 0.1 && c.cierra.volumen === 0.1 && c.pulso.volumen === 1 && c.encendido.volumen === 0.2
+afirmar(finales(SONIDOS), '  los volúmenes finales: el tic 0,1; el roce de las fotos 0,1; abrir y cerrar 0,1; el pulso 1; el encendido 0,2')
+controlPositivo('el detector VE un volumen de antes', { ...SONIDOS, tic: { ...SONIDOS.tic, volumen: 0.14 } }, finales)
+const enElSprite = Object.keys(CORTES_DEL_SPRITE)
+afirmar(['tunel', 'amanecer', 'dia', 'noche'].every((n) => !enElSprite.includes(n)) && CANDIDATOS.barra.length === 4 && CANDIDATOS.cta.length === 4 && [...CANDIDATOS.barra, ...CANDIDATOS.cta].every((n) => enElSprite.includes(n)), '  se fueron el túnel, el amanecer y los dos ambientes; llegaron cuatro candidatos del clic de la barra y cuatro del de los CTA', enElSprite.join(', '))
+const control = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+const enruta = (c: string): boolean => /if \(blanco\.closest\(DE_LA_BARRA\) !== null\) sonar\('clic-de-la-barra'\)\s*else if \(blanco\.closest\(DE_LOS_CTA\) !== null\) sonar\('clic-del-cta'\)\s*else if \(blanco\.closest\(ENLACES_Y_BOTONES\) !== null\) sonar\('clic'\)/.test(c) && /if \(cta !== null && cta !== ctaSenalado\) sonar\('tic'\)/.test(c)
+afirmar(enruta(control), '  el clic de la barra y el de los CTA suenan con el candidato elegido (el de siempre para lo demás); el hover de los CTA, el tic de la barra')
+controlPositivo('el detector VE el clic de siempre para todo', control.replace("sonar('clic-de-la-barra')", "sonar('clic')"), enruta)
+const motorDelSonido = sinComentarios(leer('_lib/sonido/motor.ts'))
+afirmar(/const delPedido = \(p: Pedido\): Sonido => \(p === 'clic-de-la-barra' \? `barra-\$\{elegidos\.barra\}` : p === 'clic-del-cta' \? `cta-\$\{elegidos\.cta\}` : p\)/.test(motorDelSonido), '  el motor resuelve el pedido al candidato elegido (de fábrica, el `a`; se elige en `/v3?sonidos=1`)')
+const ambientes = (['a', 'b', 'c'] as const).map((a) => ({ a, webm: statSync(`public/v3/sonido/ambiente-${a}.webm`).size, m4a: statSync(`public/v3/sonido/ambiente-${a}.m4a`).size }))
+afirmar(ambientes.every((x) => x.webm < 500 * 1024 && x.m4a < 500 * 1024) && Object.values(CORTES_DEL_AMBIENTE).every(([, dura]) => dura === 24000), 'UN ambiente para toda la página, tres candidatos: un bucle de 24 s cada uno, en su propio archivo (menos de ~500 KB)', ambientes.map((x) => `${x.a}: ${String(Math.round(x.webm / 1024))} KB`).join(', '))
+afirmar(/new Howl\(\{ src: fuentesDelAmbiente\(a\), sprite: \{ bucle: \[desde, dura, true\] \}/.test(motorDelSonido) && /motor\.current\?\.ambiente\(!reducido && document\.visibilityState === 'visible'\)/.test(control) && VOLUMEN_DEL_AMBIENTE <= 0.25, '  descargado recién la primera vez que suena (sólo el elegido), tocado entre sus cortes (sin costura), sin cambio día/noche, sin él con movimiento reducido; muy bajo')
+const almacenQueTira = { getItem: (): never => { throw new Error('bloqueado') }, setItem: (): never => { throw new Error('bloqueado') } }
+const g = globalThis as unknown as { window?: unknown }
+const antes = g.window
+g.window = { localStorage: almacenQueTira }
+const sinAlmacen = leerElegidos()
+g.window = antes
+afirmar(sinAlmacen === ELEGIDOS_DE_FABRICA, '  la elección se recuerda con try/catch (con el almacenamiento bloqueado, los de fábrica)')
 
 cerrar('s41-retoque-3d')

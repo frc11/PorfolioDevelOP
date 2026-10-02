@@ -14,6 +14,7 @@
  *   { "viajar": "trabajos" }           el viaje de la barra
  *   { "raton": [x, y] }
  *   { "recargar": "?consulta" }       vuelve a cargar /v3 (con esa consulta) y sigue sin esperar
+ *   { "clic": [x, y] }                un clic de verdad (CDP): cuenta como acción del usuario (el audio lo pide)
  */
 import { readFileSync } from 'node:fs'
 
@@ -29,6 +30,7 @@ type Paso =
   | { readonly viajar: string }
   | { readonly raton: readonly [number, number] }
   | { readonly recargar: string }
+  | { readonly clic: readonly [number, number] }
 
 interface Pedido {
   readonly ancho: number
@@ -63,6 +65,11 @@ async function main(): Promise<void> {
         console.log(`captura: ${salida}/${paso.captura}.png`)
       } else if ('viajar' in paso) await viajarA(b, paso.viajar)
       else if ('recargar' in paso) await b.p.conexion.enviar('Page.navigate', { url: `http://localhost:3000/v3${paso.recargar}` }, b.p.sessionId)
+      else if ('clic' in paso) {
+        const [x, y] = paso.clic
+        await raton(b, [x, y], [x, y])
+        for (const type of ['mousePressed', 'mouseReleased'] as const) await b.p.conexion.enviar('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mousePressed' ? 1 : 0, clickCount: 1 }, b.p.sessionId)
+      }
       else await raton(b, paso.raton, paso.raton)
     }
   } finally {

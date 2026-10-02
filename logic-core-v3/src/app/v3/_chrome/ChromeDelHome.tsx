@@ -170,7 +170,7 @@ export function ChromeDelHome(): React.JSX.Element {
       <OndaDeLasPortadas />
       {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). */}
       <InfinitoDelRecorrido />
-      {/* [3D Y SONIDO] T2: el sonido, sólo con `?pruebas=sonido=si` (el parlante) o `?sonidos=1` (la página de prueba). */}
+      {/* [3D Y SONIDO] T2: el sonido. [RETOQUE 3D] El parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de prueba. */}
       <SonidoDelHome />
 
       {/**

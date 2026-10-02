@@ -4,7 +4,6 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
-import { callar, sonar } from '../../sonido/bus'
 import { hayBanco } from '../entorno'
 import { ESCENAS_APARTE } from '../gpu/Precompilar'
 import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
@@ -49,8 +48,6 @@ import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 /** [ESCENA 10] CIERRE · La prioridad del paso del estado: antes que el rig y que todo lo que lee la noche. */
 const ANTES_QUE_EL_RIG = -1
 
-/** [3D Y SONIDO] T2 · el crescendo: suena si el avance arranca (2 %) sin saltar (menos de 30 % al notarse); se calla bajo el 1 %. */
-const SONIDO_DEL_AMANECER = { arranca: 0.02, salto: 0.3, vuelve: 0.01 } as const
 
 type VentanaDelBanco = Window & {
   __amanecerDelBanco?: {
@@ -87,7 +84,7 @@ function pieALaVista(m: { pie: Element | null }): boolean {
 
 
 function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanecer) {
-  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false }, deUnViaje: false, destello: false, sonando: false })
+  const memoria = useRef({ activo: false, avance: 0, pedido: 0, cuadros: 0, pie: null as Element | null, logo: null as THREE.MeshStandardMaterial | null, congelado: null as number | null, entero: false, pedidoAlLlegar: 0, bloque: bloqueVivo(), momento: momentoEn(0) as MomentoVivo, cuadro: { recien: false, carga: false, quieto: false, viaje: false, oculto: false, pie: false }, deUnViaje: false, destello: false })
   const haces = useMemo(() => armarLosHaces(), [])
   useEffect(() => {
     // [CALIDAD 1] B5: la escena de los haces se dibuja aparte: que también se precompile y se caliente al arrancar.
@@ -168,14 +165,6 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
       pasoDelAmanecer(m, enLaLlegada !== null, m.pedido, dt, c)
     }
     m.deUnViaje = cambiaDeLuz
-    // [3D Y SONIDO] T2: el crescendo suena cuando el avance arranca de a poco; si vuelve a la noche, se calla.
-    if (!m.sonando && m.avance > SONIDO_DEL_AMANECER.arranca) {
-      if (m.avance < SONIDO_DEL_AMANECER.salto) sonar('amanecer')
-      m.sonando = true
-    } else if (m.sonando && m.avance < SONIDO_DEL_AMANECER.vuelve) {
-      callar('amanecer')
-      m.sonando = false
-    }
     DIA_DEL_TEXTO.frase.set(m.activo ? diaParaElTexto(m.avance, 'frase') : 1)
     DIA_DEL_TEXTO.abajo.set(m.activo ? diaParaElTexto(m.avance, 'abajo') : 1)
     const momento = momentoEn(m.activo ? m.avance * AMANECER.final : AMANECER.final + 1, m.momento)

@@ -1,6 +1,6 @@
 import { instalarElSonido } from '../../_lib/sonido/bus'
 import type { MotorDelSonido } from '../../_lib/sonido/motor'
-import { leerVolumenes } from '../../_lib/sonido/preferencia'
+import { leerElegidos, leerVolumenes } from '../../_lib/sonido/preferencia'
 
 /**
  * [3D Y SONIDO] T2 · UN SOLO MOTOR para el control del parlante y la página de prueba (`/v3?sonidos=1`), si están los
@@ -14,7 +14,7 @@ export function pedirElMotor(): Promise<MotorDelSonido> {
   usuarios += 1
   if (promesa === null) {
     const esta: Promise<MotorDelSonido> = import('../../_lib/sonido/motor').then(({ crearElMotor }) => {
-      const motor = crearElMotor(leerVolumenes())
+      const motor = crearElMotor(leerVolumenes(), leerElegidos())
       // Si lo soltaron mientras llegaba, no se instala (y el que lo soltó lo apaga).
       if (promesa === esta) instalarElSonido(motor)
       return motor

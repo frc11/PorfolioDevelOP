@@ -6,23 +6,26 @@ import { sonar } from '../../_lib/sonido/bus'
 import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
-import { nocheQueSeVe } from '../cursor/estado'
+import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
 import { pedirElMotor, soltarElMotor } from './motorCompartido'
 
 /**
  * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico junto al infinito del recorrido (en escritorio a su izquierda;
  * en el teléfono encima, para no ocupar más ancho sobre el contenido), en su mismo lenguaje
  * (trazo fino, puntas redondas, el borde tenue del tono contrario) y con su mismo tono: copia el que el infinito leyó de
- * lo que hay debajo (`data-seccion`), así no hay una segunda lectura. Sólo con la prueba (`?pruebas=sonido=si`).
+ * lo que hay debajo (`data-seccion`), así no hay una segunda lectura. [RETOQUE 3D] En el producto (era sólo con la prueba).
  *
  *   · **Apagado por defecto**, y la elección se recuerda (`preferencia.ts`, con try/catch).
  *   · **Nada suena sin una acción.** Prenderlo es un clic; si quedó prendido de otra visita, el motor (howler y el
  *     archivo) se carga recién con la primera acción en la página (un toque, una tecla): antes, ni se descarga.
- *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento), y el ambiente sigue a la
- *     noche que se ve (la de día y la de noche se funden), salvo con movimiento reducido o con la pestaña oculta.
+ *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con su
+ *     candidato elegido), el hover de los CTA suena el tic de la barra y suena UN ambiente para toda la página (descargado
+ *     recién ahí), salvo con movimiento reducido o con la pestaña oculta.
  */
-const CADA_MS_DEL_AMBIENTE = 500
 const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
+/** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: su clic es el candidato elegido. */
+const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
+const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto]`
 
 export default function ControlDelSonido(): React.JSX.Element {
   const boton = useRef<HTMLButtonElement>(null)
@@ -75,21 +78,37 @@ export default function ControlDelSonido(): React.JSX.Element {
     }
   }, [prendido])
 
-  // Prendido: el clic de los enlaces y botones, y el ambiente con la noche que se ve.
+  // Prendido: el clic (el de la barra y el de los CTA, con su candidato; el de siempre para lo demás), el tic del hover
+  // de los CTA (el mismo de la barra) y [RETOQUE 3D] UN ambiente para toda la página (sin día ni noche); sin él con
+  // movimiento reducido o con la pestaña oculta.
   useEffect(() => {
     if (!prendido) return undefined
     const alClic = (e: MouseEvent): void => {
       const blanco = e.target instanceof Element ? e.target : null
-      if (blanco !== null && blanco.closest(ENLACES_Y_BOTONES) !== null && blanco.closest('[data-pieza="control-del-sonido"]') === null) sonar('clic')
+      if (blanco === null || blanco.closest('[data-pieza="control-del-sonido"]') !== null) return
+      if (blanco.closest(DE_LA_BARRA) !== null) sonar('clic-de-la-barra')
+      else if (blanco.closest(DE_LOS_CTA) !== null) sonar('clic-del-cta')
+      else if (blanco.closest(ENLACES_Y_BOTONES) !== null) sonar('clic')
     }
+    let ctaSenalado: Element | null = null
+    const alPasar = (e: PointerEvent): void => {
+      if (e.pointerType !== 'mouse') return
+      const cta = e.target instanceof Element ? e.target.closest(DE_LOS_CTA) : null
+      if (cta !== null && cta !== ctaSenalado) sonar('tic')
+      ctaSenalado = cta
+    }
+    const ambiente = (): void => motor.current?.ambiente(!reducido && document.visibilityState === 'visible')
     document.addEventListener('click', alClic)
-    const ambiente = window.setInterval(() => {
-      motor.current?.ambiente(reducido || document.visibilityState !== 'visible' ? null : nocheQueSeVe())
-    }, CADA_MS_DEL_AMBIENTE)
+    document.addEventListener('pointerover', alPasar)
+    document.addEventListener('visibilitychange', ambiente)
+    const reintento = window.setInterval(ambiente, 1000)
+    ambiente()
     return () => {
       document.removeEventListener('click', alClic)
-      window.clearInterval(ambiente)
-      motor.current?.ambiente(null)
+      document.removeEventListener('pointerover', alPasar)
+      document.removeEventListener('visibilitychange', ambiente)
+      window.clearInterval(reintento)
+      motor.current?.ambiente(false)
     }
   }, [prendido, reducido])
 

@@ -47,10 +47,10 @@ const sinComentarios = (fuente: string): string => fuente.replace(/\/\*[\s\S]*?\
 titulo('Cierre · lo aprobado pasó al producto: las banderas del sprint ya no existen')
 
 // [3D Y SONIDO] T1: los títulos de ESCENA 10 pasaron al producto; la prueba que queda es el sonido.
-// [RETOQUE 3D] 3J: + la del túnel lento.
-afirmarIgual(Object.keys(PRUEBAS_APAGADAS), ['sonido', 'tunel'], 'las únicas pruebas que quedan son la del sonido (3D Y SONIDO, T2) y la del túnel lento (RETOQUE 3D, 3J)')
+// [RETOQUE 3D] 3J: + la del túnel lento; el sonido pasó al producto (su bandera se borró).
+afirmarIgual(Object.keys(PRUEBAS_APAGADAS), ['tunel'], 'la única prueba que queda es la del túnel lento (RETOQUE 3D, 3J): el sonido pasó al producto')
 const pedidas = entornoPedido('producto,responde=si,anticipa=si,vida=si,recorrido=logo').pruebas as unknown as Record<string, unknown>
-afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && ENTORNO.pruebas.sonido === 'no', '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
+afirmar(['responde', 'anticipa', 'vida', 'recorrido'].every((k) => !(k in pedidas)) && ENTORNO.pruebas.tunel === 'no', '  `responde`, `anticipa`, `vida` y `recorrido`, borradas: en la URL no piden nada')
 afirmar(!/usePrueba|pruebasDeLaInterfaz/.test(['_chrome/ChromeDelHome.tsx', '_chrome/menu/MenuMovil.tsx', '_chrome/escena/RespuestaDeLaEscena.tsx', '_chrome/escena/AnticipacionDelMenu.tsx', '_secciones/tu-panel/TuPanel.tsx', '_secciones/servicios/ServiciosEnSecuencia.tsx'].map(leer).join('\n')), '  y nada del DOM pregunta por ellas')
 
 // ═══════════════════════════════════════════════════════════════════════════
