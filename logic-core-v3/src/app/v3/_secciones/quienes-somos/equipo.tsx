@@ -6,11 +6,12 @@ import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
 import { CONTENIDO } from './contenido'
 import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
+import { FotoEnVolumen } from './fotoEnVolumen'
 import { MarcoDeDosTomas } from './marco'
 import { CalleDerecha, Pantalla } from './pantalla'
 
@@ -131,17 +132,13 @@ export function ElEquipo(): React.JSX.Element {
                     aLaDerecha ? GEOMETRIA.fila.fotoAIzquierda : GEOMETRIA.fila.fotoADerecha,
                   )}
                 >
-                  {/* La llegada es scrubbeada y va sin recorte: el recorrido es en curva y
-                      con giro, y una máscara le cortaría las esquinas al girar. */}
+                  {/* La llegada es scrubbeada y va sin recorte. [RETOQUE 3D] 3D: ya no en curva; desde atrás de
+                      la sala, en un marco con espesor (`fotoEnVolumen.tsx`), y al revés con el scroll para arriba. */}
                   <Bloque patron="P2" rango="llegada-de-la-foto" className="w-full">
                     {(progreso) => (
                       <ProgresoAmortiguado progreso={progreso}>
                         {(perseguido) => (
-                      <LlegadaEnCurva
-                        progreso={perseguido}
-                        sentido={aLaDerecha ? 'desde-la-derecha' : 'desde-la-izquierda'}
-                        className="block"
-                      >
+                      <FotoEnVolumen progreso={perseguido} lado={aLaDerecha ? 'izquierda' : 'derecha'}>
                         <MarcoDeDosTomas
                           seria={persona.seria}
                           suelta={persona.suelta}
@@ -153,7 +150,7 @@ export function ElEquipo(): React.JSX.Element {
                           alto={GEOMETRIA.retrato.alto}
                           sizes={SIZES_DEL_RETRATO}
                         />
-                      </LlegadaEnCurva>
+                      </FotoEnVolumen>
                         )}
                       </ProgresoAmortiguado>
                     )}
@@ -238,6 +235,7 @@ export function LaFoto(): React.JSX.Element {
                   {CONTENIDO.equipo.descripcion}
                 </Cuerpo>
 
+                <FotoEnVolumen progreso={progreso} lado="derecha">
                 <MarcoDeDosTomas
                   seria={CONTENIDO.equipo.seria}
                   suelta={CONTENIDO.equipo.suelta}
@@ -252,6 +250,7 @@ export function LaFoto(): React.JSX.Element {
                   // sin esto se repetiría adentro del revelado (ver `banda.css`).
                   descripcionYaVisible
                 />
+                </FotoEnVolumen>
               </figure>
             </CanalDeUnaPieza>
           )}
