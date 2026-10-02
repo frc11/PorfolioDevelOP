@@ -10,7 +10,9 @@ import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
 import { callar, sonar } from '../../sonido/bus'
-import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, repartoDelEncendido, type EstadoDelEncendido } from './encendido'
+import { CHOREO_TRAMOS } from '../choreography'
+import { viajeEnCurso } from '../viaje'
+import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, noPasoDePortfolio, repartoDelEncendido, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
 import { nocheDelLogo } from './nocheDelLogo'
@@ -89,7 +91,10 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       if (e.hazEncendido) {
         const antesDelHaz = m.encendido
         const noche = VIVO.uNocheDelLogo.value
-        m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, quieto)
+        // [RONDA 2] F3 · el guion (parpadeo y zumbido) sólo con la noche empezando en Portfolio, scrolleando: en un viaje del
+        // menú que la cruza, o fuera de Portfolio, el haz prende callado y sin fallar.
+        const sinGuion = quieto || viajeEnCurso() !== null || !noPasoDePortfolio(rig.current.progress, CHOREO_TRAMOS)
+        m.encendido = avanzarElEncendido(m.encendido ?? encendidoInicial(noche, t), noche, t, sinGuion)
         // [3D Y SONIDO] T2: el guion suena (el zumbido sigue a los intentos); si se apaga a mitad, se calla.
         if (antesDelHaz !== null && m.encendido.fase !== antesDelHaz.fase) {
           if (m.encendido.fase === 'encendiendo') sonar('encendido')

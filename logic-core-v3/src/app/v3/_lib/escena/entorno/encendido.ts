@@ -91,16 +91,20 @@ export function guionEn(s: number): number {
   return s >= GUION_S ? FIRME : 0
 }
 
-/** Un paso: la noche de este cuadro y el reloj. Con `reducido`, sin guion: sigue a la noche sin parpadear. */
-export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: number, reducido: boolean): EstadoDelEncendido {
+/**
+ * Un paso: la noche de este cuadro y el reloj. `sinGuion` (movimiento reducido; [RONDA 2] F3: un viaje del menú, o la noche
+ * que llega fuera de Portfolio): sigue a la noche sin parpadear, y si el guion estaba corriendo, lo deja prendido.
+ */
+export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: number, sinGuion: boolean): EstadoDelEncendido {
   const en = t - e.desde
   switch (e.fase) {
     case 'apagado':
       if (noche < ENCENDIDO.prende) return e
-      if (reducido || t - e.apagadoEn < ENCENDIDO.reposoS) return { ...e, fase: 'prendido', desde: t, kInicial: e.k }
+      if (sinGuion || t - e.apagadoEn < ENCENDIDO.reposoS) return { ...e, fase: 'prendido', desde: t, kInicial: e.k }
       return { ...e, fase: 'encendiendo', desde: t, kInicial: 0 }
     case 'encendiendo':
       if (noche < ENCENDIDO.apaga) return { ...e, fase: 'apagando', desde: t, kInicial: e.k }
+      if (sinGuion) return { ...e, fase: 'prendido', desde: t, kInicial: e.k }
       if (en >= GUION_S) return { ...e, fase: 'prendido', desde: t, k: FIRME, kInicial: FIRME }
       return { ...e, k: guionEn(en) }
     case 'prendido': {
@@ -142,4 +146,15 @@ export function repartoDelEncendido(k: number): RepartoDelEncendido {
   if (k >= FIRME) return { luz: k, cono: 1, motas: k }
   const u = Math.max(0, k) / FIRME
   return { luz: FIRME * Math.sqrt(u), cono: u, motas: k * u }
+}
+
+/**
+ * [RONDA 2] F3 · ¿EL VISITANTE TODAVÍA NO PASÓ DE PORTFOLIO? La noche «de verdad» es la que dispara el círculo de entrada a
+ * Trabajos (`nocheDisparada.ts`), que puede caer antes del nudo del tramo `trabajos`: vale todo lo que no pasó del final de
+ * Portfolio (antes no hay noche). El guion del encendido (el parpadeo y su zumbido) es para el que llega scrolleando ahí; el
+ * que vuelve a la noche desde más abajo, o la cruza en un viaje del menú, la ve prendida, sin fallas.
+ */
+export function noPasoDePortfolio(progreso: number, tramos: readonly { readonly name: string; readonly from: number; readonly to: number }[]): boolean {
+  const t = tramos.find((x) => x.name === 'trabajos')
+  return t !== undefined && progreso < t.to
 }

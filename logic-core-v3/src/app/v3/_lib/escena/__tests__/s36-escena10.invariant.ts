@@ -123,7 +123,7 @@ controlPositivo('el detector VE el polvo del haz con la noche de la sala', [haz,
 afirmar(/cono\.current\.visible = dia\.x > 0 \|\| \(noche\.x > 0 && n > 0\)/.test(haz), '  sin haz la columna no se dibuja (regla 5)')
 const entornoTsx = leer('entorno/Entorno.tsx')
 const i = entornoTsx.indexOf('VIVO.uNocheDelLogo.value = nocheDelLogo(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)')
-afirmar(i > entornoTsx.indexOf('VIVO.uNoche.value = BRILLO_DE_LA_NOCHE.uNoche.value') && i < entornoTsx.indexOf('if (e.E1) {') && /const noche = VIVO\.uNocheDelLogo\.value\s*m\.encendido = avanzarElEncendido/.test(entornoTsx), '  la escribe el entorno en cada cuadro, antes del haz; el encendido también la sigue (no se apaga al empezar el barrido)')
+afirmar(i > entornoTsx.indexOf('VIVO.uNoche.value = BRILLO_DE_LA_NOCHE.uNoche.value') && i < entornoTsx.indexOf('if (e.E1) {') && /* [RONDA 2] F3: con el `sinGuion` en el medio. */ /const noche = VIVO\.uNocheDelLogo\.value[\s\S]{0,400}?m\.encendido = avanzarElEncendido\(m\.encendido \?\? encendidoInicial\(noche, t\), noche,/.test(entornoTsx), '  la escribe el entorno en cada cuadro, antes del haz; el encendido también la sigue (no se apaga al empezar el barrido)')
 
 // Las manchas: de noche sólo la dura del haz; el haz apagado un instante, ninguna. [Cierre de INTERFAZ 2] De día tampoco
 // hay mancha blanda: la sombra de día es la real del logo (`sombra/delLogo.ts`); dos sombras no tenían sentido.
