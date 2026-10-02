@@ -35,6 +35,11 @@ export interface TituloDeVolumen {
    * (sigue el corrimiento de su escenario). `salida` deja de animar: en 1 lo esconde (otra cosa lo tapa).
    */
   readonly queda: boolean
+  /**
+   * [RETOQUE 3D] B5 · cuánto está corrida la pieza del DOM por una transformación de más arriba que no es su lectura
+   * (fracción del cuadro, positivo hacia abajo): la levantada de la frase de Por qué develOP. El título va corrido igual.
+   */
+  corrida: number
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -75,22 +80,23 @@ interface Anotacion {
   readonly llegada: MotionValue<number> | null
   readonly salida: MotionValue<number> | null
   readonly queda?: boolean
+  readonly corrida?: MotionValue<number> | null
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0 })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, activo])
+  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p
@@ -98,6 +104,10 @@ export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, lleg
   useMotionValueEvent(salida ?? NADA, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.salida = p
+  })
+  useMotionValueEvent(corrida ?? NADA, 'change', (c) => {
+    const t = TITULOS_DE_VOLUMEN.get(id)
+    if (t !== undefined) t.corrida = c
   })
 }
 

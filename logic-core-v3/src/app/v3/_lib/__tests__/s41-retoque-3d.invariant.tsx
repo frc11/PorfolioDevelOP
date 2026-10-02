@@ -8,6 +8,8 @@
  *   B2 · el polvo posado: cualquier scroll lo levanta (la levantada sube a su lugar en el aire).
  *   B3 · el remolino de noche: el remolino del despertar sólo con el cursor; el del scroll, sólo el frente.
  *   B4 · «Y más…» de Tu panel aparece y se va en su lugar (una corrida corta con fundido), no cruzando la pantalla.
+ *   B5 · «para elegirnos» separado del primer valor: la frase sube más (con el mismo lugar de las columnas) y el título
+ *        de volumen sube con la levantada, como su pieza del DOM.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -16,6 +18,7 @@ import { readFileSync } from 'node:fs'
 import { avanzarElPolvo, polvoInicial } from '../escena/polvo/posarse'
 import { corrimiento } from '../escena/titulos3d/colocacion'
 import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
+import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -33,9 +36,9 @@ const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
 const terminaLaLlegada = (c: string): boolean => /m\.llegada = persigue\(m\.llegada, enViaje \? 0 : m\.llegada > 0 \? 1 : a\.titulo\.llegada, dt\)/.test(c)
 afirmar(terminaLaLlegada(escena), '  la llegada, una vez empezada, termina: el scroll para atrás a mitad de camino no la deja a medio armar («Portf\'o»)')
 controlPositivo('el detector VE la llegada que sigue al scroll para atrás', escena.replace('m.llegada > 0 ? 1 : a.titulo.llegada', 'a.titulo.llegada'), terminaLaLlegada)
-const conSuSeccion = (c: string): boolean => /a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -d \* a\.mundoPorPx\)/.test(c) && /const d = corrimiento\(a\.pin, y\)/.test(c)
+const conSuSeccion = (c: string): boolean => /correr\(a, d\)/.test(c) && /const d = corrimiento\(a\.pin, y\)/.test(c)
 afirmar(conSuSeccion(escena), '  llegado, va corrido con su escenario: sale con la sección, sin animación propia')
-controlPositivo('el detector VE el título clavado en el mundo', escena.replace('-d * a.mundoPorPx', '0'), conSuSeccion)
+controlPositivo('el detector VE el título clavado en el mundo', escena.replace('correr(a, d)', 'correr(a, 0)'), conSuSeccion)
 const pin = { inicio: 5073, fin: 10986 }
 afirmar(corrimiento(pin, 4573) === 500 && corrimiento(pin, 7000) === 0 && corrimiento(pin, 11486) === -500, '  el corrimiento: antes del escenario clavado baja con la sección, clavado no se mueve, después sube con ella')
 afirmar(/if \(fuera\) m\.llegada = 0/.test(escena) && /return m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja y se rearma para la próxima llegada (desde Por qué develOP ya no se ve de espaldas)')
@@ -73,5 +76,19 @@ const remate = sinComentarios(leer('_secciones/tu-panel/Remate.tsx'))
 const enSuLugar = (c: string): boolean => /const desde = t\.pieza === 'punto' \? corrida : corrida \* CORRIDAS_DEL_REMATE/.test(c) && !/window\.innerWidth/.test(c) && /\{ opacity: 0, transform: `translateX\(\$\{desde\}px\)` \}/.test(c)
 afirmar(enSuLugar(remate) && CORRIDAS_DEL_REMATE <= 4, 'la frase y el newsletter entran con una corrida corta desde la derecha y un fundido (y se van igual, en espejo): no salen del borde del cuadro', `${String(CORRIDAS_DEL_REMATE)} corridas de --spacing-8`)
 controlPositivo('el detector VE la entrada desde el borde del cuadro', remate.replace('corrida * CORRIDAS_DEL_REMATE', 'window.innerWidth - el.getBoundingClientRect().left'), enSuLugar)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B5 · «para elegirnos» y el primer valor, separados')
+
+const geoPorQue = leer('_secciones/por-que-develop/geometria.ts')
+const arribaDeLosValores = (): number => {
+  const m = /const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH \+ (\d+)/.exec(geoPorQue)
+  return m === null ? NaN : 50 - SUBIDA_DE_LA_FRASE_SVH + Number(m[1])
+}
+afirmar(SUBIDA_DE_LA_FRASE_SVH === 33 && arribaDeLosValores() === 27, 'la frase sube 3 svh más y las columnas quedan donde estaban (27 svh): el aire entre los dos pasa de 7 a 10 svh', 'medido a 1440 × 900: de la «g» del 3D al ícono de «Calidad que se nota», 16 px → 43 px')
+const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/salida: levantada, corrida \}\}/g) ?? []).length === 2
+afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
+controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/salida: levantada, corrida \}\}/g, 'salida: levantada }}'), subeConLaLevantada)
+afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
 
 cerrar('s41-retoque-3d')

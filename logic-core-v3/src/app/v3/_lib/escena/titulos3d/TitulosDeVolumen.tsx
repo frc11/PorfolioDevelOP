@@ -247,8 +247,15 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       continue
     }
     if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats)
+    correr(a, 0)
     iluminar(a, logo, nivel)
   }
+}
+
+/** [RETOQUE 3D] B5 · el título, corrido desde donde se colocó: `d` px (su escenario) más la corrida de su pieza del DOM. */
+function correr(a: Armado, d: number): void {
+  const alto = a.lugar === null ? 0 : a.lugar.alto
+  a.grupo.position.copy(a.base).addScaledVector(a.arriba, -(d + a.titulo.corrida * alto) * a.mundoPorPx)
 }
 
 /** Una vez por llegada (y al cambiar el cuadro): el título donde la cámara de su lectura lo ve en su lugar del DOM. */
@@ -287,7 +294,7 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, y: number, dt: number)
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0
-  a.grupo.position.copy(a.base).addScaledVector(a.arriba, -d * a.mundoPorPx)
+  correr(a, d)
   return m.llegada > 0 && !fuera && !tapado
 }
 

@@ -20,15 +20,20 @@ export { huecoDelLogo }
 
 const AIRE_SVH = AIRE_DEL_LOGO_SVH
 
-/** Cuánto sube la frase, en `svh`: la deja arriba del logo de B y de las columnas. */
-export const SUBIDA_DE_LA_FRASE_SVH = 30
+/**
+ * Cuánto sube la frase, en `svh`: la deja arriba del logo de B y de las columnas. [RETOQUE 3D] B5: 33 (era 30) y el aire
+ * bajo ella 10 (era 7): las columnas quedan donde estaban y la frase 3 svh más arriba. El título de volumen, extruido y
+ * visto desde la cámara de los valores, baja 23 px más que su renglón del DOM: la «g» de «elegirnos» quedaba a 16 px del
+ * ícono de «Calidad que se nota».
+ */
+export const SUBIDA_DE_LA_FRASE_SVH = 33
 
 /**
  * Dónde arrancan las columnas de valores: debajo de la frase ya subida —su centro queda en
- * `50 − subida`, y medio renglón de `titulo-xl` más el aire son 7 svh—. Sin esto, a 1024 ×
+ * `50 − subida`, y medio renglón de `titulo-xl` más el aire son 10 svh—. Sin esto, a 1024 ×
  * 768 las columnas angostas crecían para arriba y el primer valor le caía a la frase.
  */
-const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 7
+const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 10
 
 /**
  * **[FINAL 2]** El CTA va DEBAJO del logo: de día el logo es negro y la tinta también, así

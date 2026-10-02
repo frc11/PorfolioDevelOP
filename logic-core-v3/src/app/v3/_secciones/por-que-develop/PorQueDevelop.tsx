@@ -94,6 +94,8 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   const subeLaFrase = useTransform(useTramo(pin, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE), (u) => `${(-u * SUBIDA_DE_LA_FRASE_SVH).toFixed(3)}svh`)
   const levantada = useTramo(pin, VENTANA_DE_LA_LEVANTADA)
   const y = useTransform(levantada, (u) => `${(-u * SUBIDA_DE_LA_LEVANTADA_SVH).toFixed(3)}svh`)
+  // [RETOQUE 3D] B5 · la misma subida, para el título de volumen (fracción del cuadro): sube con los valores y no se cruzan.
+  const corrida = useTransform(levantada, (u) => (-u * SUBIDA_DE_LA_LEVANTADA_SVH) / 100)
   const opacity = useTransform(levantada, [0, 1], [1, 0])
   return (
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
@@ -105,12 +107,12 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: levantada, corrida }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: levantada, corrida }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>
         </motion.p>
@@ -148,14 +150,14 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
  *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca).
  *  [ESCENA 10] T3 · con `volumen`, el título de volumen ([3D Y SONIDO] T1: del producto): llega con la frase y se va con
  *  la levantada; se lee con la cámara de los valores y en el lugar al que la frase sube con ellos. */
-function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number> } }): React.JSX.Element {
+function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number>; readonly corrida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
       nivel="titulo-xl"
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} llegadaDe="por-que-develop" />}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} llegadaDe="por-que-develop" />}
     </Titular>
   )
 }

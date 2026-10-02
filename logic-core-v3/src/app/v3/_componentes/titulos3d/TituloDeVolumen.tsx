@@ -31,6 +31,7 @@ export function TituloDeVolumen({
   salida,
   llegadaDe,
   queda = false,
+  corrida = null,
 }: {
   readonly id: string
   readonly texto: string
@@ -42,13 +43,15 @@ export function TituloDeVolumen({
   readonly llegadaDe: string
   /** [RETOQUE 3D] B1 · sin salida propia (`registro.ts`): `salida` en 1 sólo lo esconde. */
   readonly queda?: boolean
+  /** [RETOQUE 3D] B5 · lo que la pieza está corrida por una transformación de más arriba (fracción del cuadro, `registro.ts`). */
+  readonly corrida?: MotionValue<number> | null
 }): React.JSX.Element {
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const listo = useTituloListo(id)
   const lugar = useRef<HTMLSpanElement | null>(null)
   const repetible = useLlegadaDelTitulo(llegadaDe, llegada ?? LLEGADO)
-  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, activo: material !== 'no' && escritorio })
+  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, activo: material !== 'no' && escritorio })
   return (
     <>
       {listo && <span className="sr-only hidden escritorio:block">{texto}</span>}
