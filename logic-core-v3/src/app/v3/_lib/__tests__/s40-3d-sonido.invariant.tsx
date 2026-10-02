@@ -90,7 +90,7 @@ const dom = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 afirmar(/const repetible = useLlegadaDelTitulo\(llegadaDe, llegada \?\? LLEGADO\)/.test(dom) && /llegada: llegada === null \? null : repetible/.test(dom), 'al terminar, la llegada que el viaje repite (`llegadaDelTitulo.ts`, la del retoque 3) es la que persigue el título: las letras desde la profundidad, sin mover la cámara')
 const piezas = leer('_secciones/trabajos/piezas.tsx')
 const porQue = leer('_secciones/por-que-develop/PorQueDevelop.tsx')
-afirmar(/<CanalDeUnaPieza[^>]*llegadaDe=\{seccion\.id\}>[\s\S]{0,400}<TituloDeVolumen [^>]*llegadaDe=\{seccion\.id\}( queda)? \/>/.test(piezas) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop" \/>/.test(porQue) && (porQue.match(/llegadaDe="por-que-develop"/g) ?? []).length === 3, '  Portfolio y la frase, con la MISMA sección que su pieza del DOM (la que el viaje nombra al llegar)')
+afirmar(/<CanalDeUnaPieza[^>]*llegadaDe=\{seccion\.id\}>[\s\S]{0,400}<TituloDeVolumen [^>]*llegadaDe=\{seccion\.id\}( queda)? \/>/.test(piezas) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop"( queda)? \/>/.test(porQue) && (porQue.match(/llegadaDe="por-que-develop"/g) ?? []).length === 3, '  Portfolio y la frase, con la MISMA sección que su pieza del DOM (la que el viaje nombra al llegar)')
 
 titulo('T1 · El DOM: el texto de siempre hasta que el título está armado; desde 1024')
 const html = renderToStaticMarkup(<TituloDeVolumen id="portfolio" texto="Portfolio" lectura={0.47} llegada={null} salida={null} llegadaDe="trabajos" />)
@@ -166,7 +166,8 @@ afirmar(liviano(pesos), 'un sprite de menos de 200 KB en cada formato (Opus y, p
 controlPositivo('el detector VE un sprite de 250 KB', { webm: 250 * 1024, m4a: 100 }, liviano)
 const nombres = Object.keys(CORTES_DEL_SPRITE)
 // [RETOQUE 3D] Se fueron el túnel, el amanecer y los ambientes (el ambiente es uno, en su archivo); llegaron los candidatos.
-afirmarIgual(nombres.sort(), ['abre', 'barra-a', 'barra-b', 'barra-c', 'barra-d', 'cierra', 'clic', 'cta-a', 'cta-b', 'cta-c', 'cta-d', 'encendido', 'foto', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
+// [CIERRE RETOQUE 3D] S1: el clic de la barra y de los CTA, el pestillo (los otros candidatos se borraron).
+afirmarIgual(nombres.sort(), ['abre', 'cierra', 'clic', 'encendido', 'foto', 'pestillo', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
 afirmar(Object.values(CORTES_DEL_SPRITE).every((c) => (c.length as number) === 2 && c[1] <= 6000), '  ninguno es un bucle (el ambiente va aparte); ninguno pasa de 6 s')
 afirmar(VOLUMEN_GENERAL <= 0.7 && Object.values(SONIDOS).every((s) => s.volumen <= 1), '  bajo: el general 0,7 (cada uno con el volumen que eligió Valentino)')
 const doc = readFileSync('docs/rediseno/SONIDO.md', 'utf8')

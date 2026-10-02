@@ -1,24 +1,24 @@
-import { SONIDOS, VOLUMEN_DEL_AMBIENTE, VOLUMEN_GENERAL, type Candidato } from './catalogo'
-import type { Ambiente, Sonido } from './sprite'
+import type { Ambiente } from './ambienteGenerativo'
+import { SONIDOS, VOLUMEN_DEL_AMBIENTE, VOLUMEN_GENERAL } from './catalogo'
+import type { Sonido } from './sprite'
 
 /**
  * [3D Y SONIDO] T2 · LO QUE SE RECUERDA — si el sonido está prendido (apagado por defecto), los volúmenes que se movieron
- * en la página de prueba y [RETOQUE 3D] los candidatos elegidos (el clic de la barra, el de los CTA y el ambiente), en
- * `localStorage` con try/catch: sin almacenamiento (privado, bloqueado), lo que dura la página.
+ * en la página de prueba y [RETOQUE 3D] lo elegido en `localStorage` con try/catch: sin almacenamiento (privado,
+ * bloqueado), lo que dura la página. [CIERRE RETOQUE 3D] Se elige sólo el ambiente (S2, uno de tres generativos; los clics
+ * ya no tienen candidatos, S1); su clave es nueva: lo elegido entre los bucles de antes no vale para estos.
  */
 const CLAVE = 'develop-v3-sonido'
 const CLAVE_DE_LOS_VOLUMENES = 'develop-v3-sonido-volumenes'
-const CLAVE_DE_LOS_ELEGIDOS = 'develop-v3-sonido-elegidos'
+const CLAVE_DE_LOS_ELEGIDOS = 'develop-v3-sonido-ambiente'
 
 export type Volumenes = Record<Sonido | 'general' | 'ambiente', number>
 
 export interface Elegidos {
-  readonly barra: Candidato
-  readonly cta: Candidato
   readonly ambiente: Ambiente
 }
 
-export const ELEGIDOS_DE_FABRICA: Elegidos = { barra: 'a', cta: 'a', ambiente: 'a' }
+export const ELEGIDOS_DE_FABRICA: Elegidos = { ambiente: 'a' }
 
 let enLaPagina: boolean | null = null
 const oyentes = new Set<() => void>()
@@ -72,7 +72,6 @@ export function guardarVolumenes(v: Volumenes | null): void {
   }
 }
 
-const esCandidato = (v: unknown): v is Candidato => v === 'a' || v === 'b' || v === 'c' || v === 'd'
 const esAmbiente = (v: unknown): v is Ambiente => v === 'a' || v === 'b' || v === 'c'
 
 let elegidosEnLaPagina: Elegidos | null = null
@@ -82,8 +81,8 @@ export function leerElegidos(): Elegidos {
   try {
     const g: unknown = JSON.parse(window.localStorage.getItem(CLAVE_DE_LOS_ELEGIDOS) ?? '{}')
     if (typeof g !== 'object' || g === null) return ELEGIDOS_DE_FABRICA
-    const { barra, cta, ambiente } = g as Record<string, unknown>
-    return { barra: esCandidato(barra) ? barra : ELEGIDOS_DE_FABRICA.barra, cta: esCandidato(cta) ? cta : ELEGIDOS_DE_FABRICA.cta, ambiente: esAmbiente(ambiente) ? ambiente : ELEGIDOS_DE_FABRICA.ambiente }
+    const { ambiente } = g as Record<string, unknown>
+    return { ambiente: esAmbiente(ambiente) ? ambiente : ELEGIDOS_DE_FABRICA.ambiente }
   } catch {
     return ELEGIDOS_DE_FABRICA
   }

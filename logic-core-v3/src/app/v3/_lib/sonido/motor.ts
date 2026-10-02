@@ -1,9 +1,10 @@
 import { Howl, Howler } from 'howler'
 
+import { crearElAmbiente, type Ambiente, type AmbienteGenerativo } from './ambienteGenerativo'
 import type { Oido } from './bus'
-import { FUNDIDO_DEL_AMBIENTE_MS, SONIDOS, type Pedido } from './catalogo'
+import { SONIDOS, type Pedido } from './catalogo'
 import type { Elegidos, Volumenes } from './preferencia'
-import { CORTES_DEL_AMBIENTE, CORTES_DEL_SPRITE, type Ambiente, type Sonido } from './sprite'
+import { CORTES_DEL_SPRITE, type Sonido } from './sprite'
 
 /**
  * [3D Y SONIDO] T2 · EL MOTOR — howler.js (MIT) con UN sprite (`public/v3/sonido/sonidos.{webm,m4a}`: Opus y, para
@@ -15,13 +16,12 @@ import { CORTES_DEL_AMBIENTE, CORTES_DEL_SPRITE, type Ambiente, type Sonido } fr
  *   · Cada uno con su volumen (el del catálogo o el de la página de prueba) por el general (`Howler.volume`).
  *   · `callar` lo funde a cero en 300 ms y lo para (el haz que se apaga a mitad del guion).
  *
- * [RETOQUE 3D] El clic de la barra y el de los CTA suenan con el candidato elegido (`Elegidos`). Y UN ambiente para toda la
- * página, en su propio archivo (`ambiente-{a,b,c}`), que se descarga recién la primera vez que tiene que sonar: un bucle
- * que se toca entre sus cortes (adentro del colchón: sin costura), con un fundido al entrar, al irse y al cambiar de
- * candidato; `ambiente(false)` (movimiento reducido, la pestaña oculta) lo funde a cero.
+ * [CIERRE RETOQUE 3D] S1 · sin candidatos de clic: la barra y los CTA piden el pestillo. S2 · el ambiente es generativo
+ * (`ambienteGenerativo.ts`): se arma sobre el contexto de howler la primera vez que tiene que sonar (nada de archivo);
+ * `ambiente(false)` (movimiento reducido, la pestaña oculta) lo funde a silencio y deja de programar notas.
  */
 export interface MotorDelSonido extends Oido {
-  /** El sonido del sprite tal cual (la página de prueba: cada candidato). */
+  /** El sonido del sprite tal cual (la página de prueba). */
   readonly sonarCrudo: (s: Sonido) => void
   readonly ambiente: (suena: boolean) => void
   /** La página de prueba: tocar un ambiente en particular (o ninguno: el elegido, con `ambiente`). */
@@ -33,7 +33,6 @@ export interface MotorDelSonido extends Oido {
 }
 
 const FUENTES = ['/v3/sonido/sonidos.webm', '/v3/sonido/sonidos.m4a']
-const fuentesDelAmbiente = (a: Ambiente): string[] => [`/v3/sonido/ambiente-${a}.webm`, `/v3/sonido/ambiente-${a}.m4a`]
 const CALLAR_MS = 300
 
 export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): MotorDelSonido {
@@ -55,7 +54,6 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     }
     return ids
   }
-  const delPedido = (p: Pedido): Sonido => (p === 'clic-de-la-barra' ? `barra-${elegidos.barra}` : p === 'clic-del-cta' ? `cta-${elegidos.cta}` : p)
 
   const sonarCrudo = (s: Sonido): void => {
     const de = SONIDOS[s]
@@ -71,8 +69,7 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     howl.once('end', () => ids.delete(id), id)
   }
 
-  const callar = (p: Pedido): void => {
-    const s = delPedido(p)
+  const callar = (s: Pedido): void => {
     for (const id of vivos(s)) {
       howl.fade(volumenes[s], 0, CALLAR_MS, id)
       window.setTimeout(() => howl.stop(id), CALLAR_MS + 20)
@@ -80,42 +77,21 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     vivos(s).clear()
   }
 
-  // El ambiente: uno por archivo, descargado la primera vez que suena; el que toca ahora suena, los otros se funden a cero.
-  const bucles = new Map<Ambiente, { readonly howl: Howl; id: number | null; vol: number; listo: boolean }>()
-  let queSuena: Ambiente | null = null
-  const llevar = (a: Ambiente, objetivo: number): void => {
-    let b = bucles.get(a)
-    if (b === undefined) {
-      if (objetivo <= 0) return
-      const [desde, dura] = CORTES_DEL_AMBIENTE[a]
-      const nuevo = { howl: new Howl({ src: fuentesDelAmbiente(a), sprite: { bucle: [desde, dura, true] }, preload: true }), id: null as number | null, vol: 0, listo: false }
-      nuevo.howl.once('load', () => {
-        nuevo.listo = true
-        llevar(a, queSuena === a ? volumenes.ambiente : 0)
-      })
-      bucles.set(a, nuevo)
-      b = nuevo
-    }
-    if (!b.listo) return
-    if (b.id === null) {
-      if (objetivo <= 0) return
-      b.id = b.howl.play('bucle')
-      b.howl.volume(0, b.id)
-      b.vol = 0
-    }
-    if (Math.abs(objetivo - b.vol) < 0.002) return
-    b.howl.fade(b.vol, objetivo, FUNDIDO_DEL_AMBIENTE_MS, b.id)
-    b.vol = objetivo
+  // El ambiente: se arma sobre el contexto de howler (ya habilitado por la acción) la primera vez que tiene que sonar.
+  let generativo: AmbienteGenerativo | null = null
+  const elAmbiente = (): AmbienteGenerativo | null => {
+    if (generativo === null && Howler.usingWebAudio && Howler.ctx !== undefined && Howler.masterGain !== undefined) generativo = crearElAmbiente(Howler.ctx, Howler.masterGain, volumenes.ambiente)
+    return generativo
   }
   const tocar = (a: Ambiente | null): void => {
-    queSuena = a
-    for (const otro of ['a', 'b', 'c'] as const) llevar(otro, otro === a ? volumenes.ambiente : 0)
+    if (a === null && generativo === null) return
+    elAmbiente()?.tocar(a)
   }
   let suenaElAmbiente = false
   let probando: Ambiente | null = null
 
   return {
-    sonar: (p) => sonarCrudo(delPedido(p)),
+    sonar: sonarCrudo,
     sonarCrudo,
     callar,
     ambiente: (suena) => {
@@ -134,13 +110,13 @@ export function crearElMotor(inicial: Volumenes, elegidosAlEmpezar: Elegidos): M
     volumen: (s, v) => {
       volumenes[s] = v
       if (s === 'general') Howler.volume(v)
-      else if (s === 'ambiente') tocar(queSuena)
+      else if (s === 'ambiente') generativo?.volumen(v)
       else for (const id of vivos(s)) howl.volume(v, id)
     },
     soltar: () => {
       howl.unload()
-      for (const b of bucles.values()) b.howl.unload()
-      bucles.clear()
+      generativo?.soltar()
+      generativo = null
       sonando.clear()
     },
   }

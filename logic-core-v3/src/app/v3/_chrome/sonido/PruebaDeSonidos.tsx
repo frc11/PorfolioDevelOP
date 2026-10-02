@@ -2,24 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { AMBIENTES, CANDIDATOS, SONIDOS, type Candidato, type GrupoConCandidatos } from '../../_lib/sonido/catalogo'
+import type { Ambiente } from '../../_lib/sonido/ambienteGenerativo'
+import { AMBIENTES, SONIDOS } from '../../_lib/sonido/catalogo'
 import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { ELEGIDOS_DE_FABRICA, guardarElegidos, guardarVolumenes, leerElegidos, leerVolumenes, type Elegidos, type Volumenes } from '../../_lib/sonido/preferencia'
-import type { Ambiente, Sonido } from '../../_lib/sonido/sprite'
+import type { Sonido } from '../../_lib/sonido/sprite'
 import { pedirElMotor, soltarElMotor } from './motorCompartido'
 
 /**
  * [3D Y SONIDO] T2 · LA PÁGINA DE PRUEBA — `/v3?sonidos=1`: un panel sobre el sitio para escuchar cada sonido y moverle el
  * volumen (se guarda en el navegador y lo usa el sitio). Nada suena hasta «Cargar los sonidos» (la acción que habilita el
- * audio). [RETOQUE 3D] Y para ELEGIR de oído: el clic de la barra (cuatro candidatos), el clic de los CTA (cuatro) y el
- * ambiente (tres bucles, uno a la vez); lo elegido es lo que suena en el sitio. Abajo, los valores escritos para pasarlos.
+ * audio). [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (sin candidatos). S2 · para ELEGIR
+ * de oído, el ambiente: tres generativos (uno a la vez; no se repiten ni suenan todo el tiempo: hay que esperarlos). Lo
+ * elegido es lo que suena en el sitio. Abajo, los valores escritos para pasarlos.
  */
-const SUELTOS = (Object.keys(SONIDOS) as Sonido[]).filter((s) => !s.startsWith('barra-') && !s.startsWith('cta-'))
-const GRUPOS: readonly { readonly grupo: GrupoConCandidatos; readonly titulo: string }[] = [
-  { grupo: 'barra', titulo: 'El clic de la barra — elegí uno' },
-  { grupo: 'cta', titulo: 'El clic de los CTA — elegí uno' },
-]
-const candidatoDe = (s: Sonido): Candidato => s.slice(-1) as Candidato
+const DEL_SPRITE = Object.keys(SONIDOS) as Sonido[]
 
 export default function PruebaDeSonidos(): React.JSX.Element {
   const motor = useRef<MotorDelSonido | null>(null)
@@ -50,15 +47,6 @@ export default function PruebaDeSonidos(): React.JSX.Element {
     setVolumenes(nuevos)
     guardarVolumenes(nuevos)
     motor.current?.volumen(s, v)
-  }
-
-  /** El volumen de un grupo: el mismo para sus cuatro candidatos (se comparan a la par). */
-  const moverElGrupo = (g: GrupoConCandidatos, v: number): void => {
-    const nuevos = { ...volumenes }
-    for (const s of CANDIDATOS[g]) nuevos[s] = v
-    setVolumenes(nuevos)
-    guardarVolumenes(nuevos)
-    for (const s of CANDIDATOS[g]) motor.current?.volumen(s, v)
   }
 
   const elegir = (e: Elegidos): void => {
@@ -112,8 +100,8 @@ export default function PruebaDeSonidos(): React.JSX.Element {
       <p className="pt-[var(--spacing-3)]">Volumen general</p>
       <Volumen etiqueta="Volumen general" valor={volumenes.general} alMover={(v) => mover('general', v)} />
 
-      <h3 className={titulo}>Los de siempre</h3>
-      {SUELTOS.map((s) => (
+      <h3 className={titulo}>Los sonidos (el clic de la barra y de los CTA es el pestillo)</h3>
+      {DEL_SPRITE.map((s) => (
         <div key={s} className={fila}>
           <span className="flex-1">
             <strong>{s}</strong> — {SONIDOS[s].que}
@@ -125,32 +113,14 @@ export default function PruebaDeSonidos(): React.JSX.Element {
         </div>
       ))}
 
-      {GRUPOS.map(({ grupo, titulo: t }) => (
-        <div key={grupo}>
-          <h3 className={titulo}>{t}</h3>
-          {CANDIDATOS[grupo].map((s) => (
-            <div key={s} className={fila}>
-              <span className="flex-1">{SONIDOS[s].que}</span>
-              <button type="button" disabled={!listo} onClick={() => motor.current?.sonarCrudo(s)} className={boton}>
-                Sonar
-              </button>
-              <button type="button" aria-pressed={elegidos[grupo] === candidatoDe(s)} onClick={() => elegir({ ...elegidos, [grupo]: candidatoDe(s) })} className={boton}>
-                {elegidos[grupo] === candidatoDe(s) ? 'Elegido' : 'Elegir'}
-              </button>
-            </div>
-          ))}
-          <Volumen etiqueta={`Volumen del clic de ${grupo === 'barra' ? 'la barra' : 'los CTA'}`} valor={volumenes[CANDIDATOS[grupo][0]]} alMover={(v) => moverElGrupo(grupo, v)} />
-        </div>
-      ))}
-
-      <h3 className={titulo}>El ambiente — elegí uno (un bucle para toda la página)</h3>
+      <h3 className={titulo}>El ambiente — elegí uno (generativo: tarda en sonar y nunca se repite igual)</h3>
       {(Object.keys(AMBIENTES) as Ambiente[]).map((a) => (
         <div key={a} className={fila}>
           <span className="flex-1">
             <strong>{a}</strong> — {AMBIENTES[a]}
           </span>
           <button type="button" disabled={!listo} aria-pressed={probando === a} onClick={() => probar(a)} className={boton}>
-            {probando === a ? 'Parar' : 'Bucle'}
+            {probando === a ? 'Parar' : 'Escuchar'}
           </button>
           <button type="button" aria-pressed={elegidos.ambiente === a} onClick={() => elegir({ ...elegidos, ambiente: a })} className={boton}>
             {elegidos.ambiente === a ? 'Elegido' : 'Elegir'}

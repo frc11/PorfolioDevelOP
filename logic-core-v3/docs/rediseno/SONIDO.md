@@ -6,6 +6,12 @@
 > oído en la página de prueba, `/v3?sonidos=1`: el clic de la barra (cuatro), el clic de los CTA (cuatro) y UN ambiente
 > para toda la página (tres). Lo que se elige ahí (y los volúmenes) queda guardado en el navegador y es lo que suena en
 > el sitio; de fábrica, el `a` de cada uno. El estado, en `ESTADO-INTERFAZ.md` §7.
+>
+> **[CIERRE RETOQUE 3D]** S1 · el clic de la barra y el de los CTA son el mismo: el **pestillo** (era el candidato `d`
+> de la barra); los otros siete candidatos de clic se borraron. S2 · ninguno de los tres bucles: el ambiente ahora es
+> **generativo**, con Web Audio en tiempo real y sin archivo (`_lib/sonido/ambienteGenerativo.ts`): eventos sueltos y
+> espaciados, con silencios largos y notas al azar dentro de una escala, para que nunca se repita igual. Tres para elegir
+> en `/v3?sonidos=1` (Vidrio, Bruma, Gotas); de fábrica, `a`. Los bucles se borraron, código y archivos.
 
 ## Licencias
 
@@ -14,7 +20,7 @@
 | **howler.js** 2.2.4 (`node_modules/howler`) | MIT | La biblioteca de audio; se descarga recién al prender el sonido (un `import()`). |
 | **@types/howler** 2.2.13 | MIT | Sólo tipos (desarrollo). |
 | **Los sonidos del sprite** (`public/v3/sonido/sonidos.webm` y `.m4a`) | **CC0 1.0** (dominio público) | **Generados en este repo**, no descargados: síntesis propia en `scripts-retoque/sonidos.ts`. Nadie más tiene derechos sobre ellos; se dedican al dominio público con CC0. |
-| **Los tres ambientes** (`public/v3/sonido/ambiente-{a,b,c}.webm` y `.m4a`) | **CC0 1.0** (dominio público) | **Generados en este repo** (el mismo archivo): compuestos y sintetizados acá, inspirados en el clima del de nk.studio pero sin copiar nada de él (ni notas, ni muestras, ni la grabación). |
+| **El ambiente generativo** (`src/app/v3/_lib/sonido/ambienteGenerativo.ts`) | Código propio del sitio | No hay archivo de audio: lo sintetiza el navegador en tiempo real (osciladores, filtros, una reverb de ruido armada en el momento). |
 
 No se descargó ningún sonido de terceros: así no hay licencia ajena que seguir ni atribución que mantener. Si un día
 se reemplaza alguno por uno descargado, va con su fuente (URL), su autor y su licencia en esta tabla, y sólo si la
@@ -29,21 +35,11 @@ Kellet), filtros de dos polos (el «Audio EQ Cookbook» de R. Bristow-Johnson), 
 una reverb de Schroeder. Escribe:
 
 - **El sprite**, mono a 48 kHz, en Opus (32 kbit/s, WebM: Chrome, Firefox, Edge) y en AAC (40 kbit/s, M4A: Safari):
-  **59 KB** y **61 KB**.
-- **Los tres ambientes**, cada uno en su archivo, en estéreo, en Opus (48 kbit/s) y AAC (64 kbit/s): entre **200 y
-  264 KB** cada uno (el pedido: hasta ~500 KB). Se descarga sólo el elegido, recién la primera vez que tiene que sonar.
+  **46 KB** y **45 KB** (9,9 s: los siete de siempre y el pestillo).
 - Los cortes, en `src/app/v3/_lib/sonido/sprite.ts`.
+- [CIERRE RETOQUE 3D] Ya no escribe ambientes: el ambiente es generativo, en el navegador.
 
 Volver a correrlo da los mismos archivos.
-
-### Cómo empalma el ambiente sin corte
-
-Cada bucle dura 24 s exactos (múltiplo del cuadro de Opus, 20 ms, y de los compases de los tres). Se arma en un búfer más
-largo: cada nota con su caída, el retardo y la reverb con su cola; después, lo que pasa del final se suma al principio
-(lo que una vuelta le deja a la siguiente), así el principio ya trae las colas del final. Lo que se mueve (el filtro que
-se abre en `b`) lo hace con el período del bucle. En el archivo va con un colchón (su final antes y su principio
-después) y howler lo toca entre sus cortes: el relleno del decodificador cae afuera. Medido sobre el WAV: el salto en la
-costura es menor que la diferencia normal entre dos muestras seguidas (0,002–0,010 contra 0,018–0,066).
 
 ## Los sonidos
 
@@ -55,21 +51,27 @@ costura es menor que la diferencia normal entre dos muestras seguidas (0,002–0
 | `pulso` | El principal del pulso del logo | Un golpe grave: un seno que cae de 78 a 44 Hz con un armónico | 900 ms | 1 |
 | `encendido` | El haz que se enciende al caer la noche | Un zumbido eléctrico (100 Hz y armónicos) que sigue al guion de la escena (los intentos que fallan, el golpe a los 1,94 s, el zumbido firme) | 4,5 s | 0,2 |
 | `foto` | El hover de las fotos del equipo (el mouse, el foco, el toque) | Un roce: ruido agudo granulado | 170 ms | 0,1 |
-| `barra-a` · `barra-b` · `barra-c` · `barra-d` | **El clic de la barra** (la pastilla, la esquina y el menú del teléfono): suena el elegido | a: tecla de madera (ruido en una banda de 1,25 kHz con un cuerpo grave). b: burbuja (un seno que sube de 520 a 1.150 Hz en 45 ms). c: cristal (una campanita de FM en 1,76 kHz). d: pestillo (dos golpes a 18 ms, el segundo más grave) | 80–160 ms | 0,15 |
-| `cta-a` · `cta-b` · `cta-c` · `cta-d` | **El clic de los CTA** (los del sistema, la ventana del final del túnel, «Clickeá acá», los de Servicios): suena el elegido | a: confirmación (dos notas que suben, mi y si). b: golpe de fieltro (un grave que cae de 150 a 95 Hz). c: destello (tres campanitas que suben: do, mi, sol). d: tecla grave (un «bonk» de 220 Hz filtrado) | 220–340 ms | 0,18 |
+| `pestillo` | **El clic de la barra** (la pastilla, la esquina y el menú del teléfono) **y el de los CTA** (los del sistema, la ventana del final del túnel, «Clickeá acá», los de Servicios) | Dos golpes mecánicos a 18 ms (ruido en 3,4 kHz y en 1,7 kHz), el segundo más grave, con un cuerpo de 190 Hz: un cerrojo que encaja | 80 ms | 0,15 |
 
-Se borraron: `tunel` (el soplido del túnel), `amanecer` (el crescendo) y `dia` · `noche` (los dos ambientes).
+Se borraron: `tunel` (el soplido del túnel), `amanecer` (el crescendo), `dia` · `noche` (los dos ambientes) y
+[CIERRE RETOQUE 3D] los otros siete candidatos de clic (`barra-a` a `barra-c`, `cta-a` a `cta-d`).
 
-## El ambiente (uno para toda la página)
+## El ambiente (uno para toda la página): generativo
 
-| Candidato | Qué es | Archivo |
-|---|---|---|
-| `a` · Cristales | 80 BPM, ocho compases. Un arpegio de campanitas de FM en corcheas sobre un colchón cálido (la m9 → fa maj9 → do maj9 → sol6, dos compases cada uno) y la fundamental abajo; el retardo de ida y vuelta abre el estéreo y la reverb lo lleva lejos. El más cercano al clima del de nk: melódico y quieto, con algo que se mueve siempre | `ambiente-a` |
-| `b` · Datos | 120 BPM, doce compases. Pellizcos en semicorcheas (pentatónica de re menor) que cambian de fundamental cada cuatro compases (re, si bemol, fa), con un filtro que se abre y se cierra con el bucle; un pulso grave muy bajo en cada negra y un tic de ruido en las semicorcheas. El más tecnológico | `ambiente-b` |
-| `c` · Niebla | 60 BPM, seis compases. Colchones largos (re maj9 → si m9 → sol maj9) y una melodía de vidrio espaciada, con un retardo largo y mucha sala. El más tranquilo | `ambiente-c` |
+Sin archivo y sin bucle: Web Audio en tiempo real, sobre el contexto de howler (que habilitó la acción de la persona) y
+su volumen general. Cada tanto suena un evento (una nota, un acorde o una frase corta) y entre uno y otro pasan varios
+segundos; de vez en cuando, un silencio largo. Las notas salen al azar de una escala, con su volumen, su paneo y su
+duración al azar también: nunca se repite igual. Todo pasa por una sala (una reverb de ruido que decae, armada en el
+momento) y, en dos de ellos, por un eco.
 
-Suena muy bajo (0,2 por el general), entra y se va con un fundido de 1,2 s, y no suena con movimiento reducido ni con la
-pestaña oculta. No cambia con el día y la noche.
+| Candidato | Qué es | Entre eventos | Silencio largo |
+|---|---|---|---|
+| `a` · Vidrio | Campanitas de FM (moduladora ×3,5 que se apaga antes que la nota), altas, de a una o dos, sobre la pentatónica de do; cada una se apaga en 3 a 5,5 s | 3,5 a 11 s | 25 %: 16 a 30 s |
+| `b` · Bruma | Colchones de dos o tres notas (re dórico): tres triángulos apenas desafinados por un pasabajos, que entran en 2,5 a 4 s, quedan unos segundos y se van en 5 a 8 s | 9 a 18 s | 30 %: 20 a 40 s |
+| `c` · Gotas | Frases de dos a cuatro punteos (mi menor pentatónica): un seno con su cuarto armónico, con un eco que se pierde en la sala | 5 a 14 s | 30 %: 18 a 35 s |
+
+Suena muy bajo (0,15 por el general), entra y se va con un fundido de 1,6 s, y no suena con movimiento reducido ni con
+la pestaña oculta (deja de programar notas). No cambia con el día y la noche.
 
 ## Las reglas (del pedido)
 
@@ -78,5 +80,5 @@ pestaña oculta. No cambia con el día y la noche.
   descargan recién con la primera acción en la página (un toque o una tecla).
 - **Bajo y corto**: el volumen general es 0,7 y cada sonido tiene el suyo (`_lib/sonido/catalogo.ts`). La página de
   prueba los mueve y los guarda en el navegador; el sitio usa esos.
-- **Un sprite con carga diferida, y el ambiente en su archivo** (también diferido: sólo el elegido, cuando suena).
+- **Un sprite con carga diferida**; el ambiente no se descarga: se arma en el navegador recién cuando tiene que sonar.
 - **Con movimiento reducido, sin ambiente.**

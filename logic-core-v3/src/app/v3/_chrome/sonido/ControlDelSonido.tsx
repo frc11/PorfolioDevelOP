@@ -18,12 +18,12 @@ import { pedirElMotor, soltarElMotor } from './motorCompartido'
  *   · **Apagado por defecto**, y la elección se recuerda (`preferencia.ts`, con try/catch).
  *   · **Nada suena sin una acción.** Prenderlo es un clic; si quedó prendido de otra visita, el motor (howler y el
  *     archivo) se carga recién con la primera acción en la página (un toque, una tecla): antes, ni se descarga.
- *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con su
- *     candidato elegido), el hover de los CTA suena el tic de la barra y suena UN ambiente para toda la página (descargado
- *     recién ahí), salvo con movimiento reducido o con la pestaña oculta.
+ *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con el
+ *     pestillo, [CIERRE RETOQUE 3D] S1), el hover de los CTA suena el tic de la barra y suena UN ambiente generativo para
+ *     toda la página (S2: sin archivo), salvo con movimiento reducido o con la pestaña oculta.
  */
 const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
-/** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: su clic es el candidato elegido. */
+/** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: [CIERRE RETOQUE 3D] S1 · su clic, el pestillo. */
 const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
 const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto]`
 
@@ -78,16 +78,15 @@ export default function ControlDelSonido(): React.JSX.Element {
     }
   }, [prendido])
 
-  // Prendido: el clic (el de la barra y el de los CTA, con su candidato; el de siempre para lo demás), el tic del hover
-  // de los CTA (el mismo de la barra) y [RETOQUE 3D] UN ambiente para toda la página (sin día ni noche); sin él con
-  // movimiento reducido o con la pestaña oculta.
+  // Prendido: el clic (el de la barra y el de los CTA, el pestillo; el de siempre para lo demás), el tic del hover de los
+  // CTA (el mismo de la barra) y [RETOQUE 3D] UN ambiente para toda la página (sin día ni noche); sin él con movimiento
+  // reducido o con la pestaña oculta.
   useEffect(() => {
     if (!prendido) return undefined
     const alClic = (e: MouseEvent): void => {
       const blanco = e.target instanceof Element ? e.target : null
       if (blanco === null || blanco.closest('[data-pieza="control-del-sonido"]') !== null) return
-      if (blanco.closest(DE_LA_BARRA) !== null) sonar('clic-de-la-barra')
-      else if (blanco.closest(DE_LOS_CTA) !== null) sonar('clic-del-cta')
+      if (blanco.closest(DE_LA_BARRA) !== null || blanco.closest(DE_LOS_CTA) !== null) sonar('pestillo')
       else if (blanco.closest(ENLACES_Y_BOTONES) !== null) sonar('clic')
     }
     let ctaSenalado: Element | null = null

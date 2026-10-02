@@ -17,6 +17,10 @@
  *   D5 · el pie: cada enlace, campo y botón es un bloque sólido que flota (CSS 3D, el elemento de verdad en su cara de
  *        adelante); ya no una sala alrededor del logo. Abajo de 1025 y con movimiento reducido, plano.
  *   D3 · el título de Demos en volumen, con el gesto de «El equipo» (se levanta y se acuesta al volver).
+ *   S1 · el clic de la barra y el de los CTA son el mismo, el pestillo; los demás candidatos de clic se borraron.
+ *   S2 · el ambiente: tres generativos (Web Audio en tiempo real, sin archivo), espaciados y al azar en su escala; los
+ *        bucles de antes se borraron. Siguen las reglas: apagado por defecto, nada antes de una acción, sin él con
+ *        movimiento reducido.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -32,6 +36,10 @@ import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import datosDeLaChivo from '../../_fuentes/chivo-400-titulos.json'
+import { SONIDOS, VOLUMEN_DEL_AMBIENTE } from '../sonido/catalogo'
+import { CARACTERES } from '../sonido/ambienteGenerativo'
+import { ELEGIDOS_DE_FABRICA, leerElegidos } from '../sonido/preferencia'
+import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -172,5 +180,37 @@ const glifos = new Set(Object.keys((datosDeLaChivo as { glyphs: Record<string, u
 const faltan = [...TEXTO_DE_DEMOS.renglonesDelTitulo.join('')].filter((ch) => ch !== ' ' && !glifos.has(ch))
 afirmar(faltan.length === 0, '  cada letra está en la Chivo 400 de los títulos (la «á» incluida)', faltan.join(''))
 afirmar(/\{' '\}/.test(textoDeDemos), '  y el lector anuncia el título entero (un espacio entre los renglones): las dos ramas, el mismo texto')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('S1 · El clic de la barra y de los CTA: el pestillo')
+
+const enElSprite = Object.keys(CORTES_DEL_SPRITE)
+const unSoloClic = (claves: readonly string[]): boolean => claves.includes('pestillo') && !claves.some((k) => /^(barra|cta)-/.test(k))
+afirmar(unSoloClic(enElSprite) && unSoloClic(Object.keys(SONIDOS)), 'el pestillo (el candidato d) es el clic de la barra y el de los CTA; los otros siete candidatos se borraron del sprite y del catálogo', enElSprite.join(', '))
+controlPositivo('el detector VE un candidato que quedó', [...enElSprite, 'cta-a'], unSoloClic)
+const controlDelSonido = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+afirmar(/if \(blanco\.closest\(DE_LA_BARRA\) !== null \|\| blanco\.closest\(DE_LOS_CTA\) !== null\) sonar\('pestillo'\)/.test(controlDelSonido) && /if \(cta !== null && cta !== ctaSenalado\) sonar\('tic'\)/.test(controlDelSonido), '  el clic de la barra y el de los CTA suenan el pestillo (el de siempre para lo demás); el hover de los CTA, el tic de la barra')
+const finales = (c: typeof SONIDOS): boolean => c.tic.volumen === 0.1 && c.foto.volumen === 0.1 && c.abre.volumen === 0.1 && c.cierra.volumen === 0.1 && c.pulso.volumen === 1 && c.encendido.volumen === 0.2
+afirmar(finales(SONIDOS), '  los volúmenes finales de siempre: el tic 0,1; el roce 0,1; abrir y cerrar 0,1; el pulso 1; el encendido 0,2')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('S2 · El ambiente, generativo')
+
+const generativo = sinComentarios(leer('_lib/sonido/ambienteGenerativo.ts'))
+const sinBucle = (c: string): boolean => /createOscillator\(\)/.test(c) && /window\.setTimeout\(/.test(c) && /Math\.random\(\)/.test(c) && !/loop\s*[:=]\s*true|\.loop\b|new Howl/.test(c)
+afirmar(sinBucle(generativo) && !existsSync('public/v3/sonido/ambiente-a.webm') && !existsSync('public/v3/sonido/ambiente-a.m4a'), 'sin archivo ni bucle: Web Audio en tiempo real, eventos sueltos programados al azar (los tres bucles de antes se borraron, código y archivos)')
+controlPositivo('el detector VE un bucle', `${generativo}\nconst b = new Howl({ src: [], loop: true })`, sinBucle)
+const espaciado = Object.values(CARACTERES).every((c) => c.huecoS[0] >= 3 && c.silencio.probabilidad > 0 && c.silencio.s[0] >= 15 && c.escala.length >= 7)
+afirmar(espaciado, '  tranquilos y espaciados: al menos 3 s entre eventos, silencios largos (15 s o más) de vez en cuando y notas al azar en una escala de siete o más: nunca se repite igual')
+afirmar(Object.keys(CARACTERES).join() === 'a,b,c' && VOLUMEN_DEL_AMBIENTE <= 0.2, '  tres para elegir en `/v3?sonidos=1` (Vidrio, Bruma, Gotas), muy bajos')
+const motorDelSonido = sinComentarios(leer('_lib/sonido/motor.ts'))
+afirmar(/crearElAmbiente\(Howler\.ctx, Howler\.masterGain, volumenes\.ambiente\)/.test(motorDelSonido) && /motor\.current\?\.ambiente\(!reducido && document\.visibilityState === 'visible'\)/.test(controlDelSonido), '  las reglas siguen: se arma sobre el contexto de howler (que habilitó la acción: apagado por defecto, nada antes de una acción) y sin él con movimiento reducido o con la pestaña oculta')
+const almacenQueTira = { getItem: (): never => { throw new Error('bloqueado') }, setItem: (): never => { throw new Error('bloqueado') } }
+const g = globalThis as unknown as { window?: unknown }
+const antes = g.window
+g.window = { localStorage: almacenQueTira }
+const sinAlmacen = leerElegidos()
+g.window = antes
+afirmar(sinAlmacen === ELEGIDOS_DE_FABRICA, '  la elección se recuerda con try/catch (con el almacenamiento bloqueado, el de fábrica)')
 
 cerrar('s42-cierre-retoque')
