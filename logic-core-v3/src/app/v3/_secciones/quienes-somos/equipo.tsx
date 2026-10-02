@@ -4,7 +4,8 @@ import { cn } from '@/lib/utils'
 
 import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { Bloque } from '../_contrato/coreografia'
+import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
+import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
@@ -46,18 +47,32 @@ import { CalleDerecha, Pantalla } from './pantalla'
  * `overflow-hidden` afuera y P2 adentro, que sube la pieza desde su media altura con
  * su opacidad. Ni una duración ni una curva nuevas: el patrón las trae.
  */
+/**
+ * [RETOQUE 3D] 3C · «EL EQUIPO» EN VOLUMEN: con el progreso de su máscara se levanta en su lugar, de acostado a parado
+ * (visto de costado, de _ a |); acostado, su línea lo tapa y aparece de la nada recién cuando se levanta. Con el scroll
+ * para atrás se vuelve a acostar. El canal del texto sigue (sin WebGL, o hasta que el título se arma, es el de siempre).
+ */
+function TituloDelEquipo({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
+  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  return (
+    <CanalDeTexto progreso={progreso} tipo="titulo" texto={CONTENIDO.tituloDelEquipo}>
+      {(contenido) => (
+        <h3 ref={lugar} className={cn(GEOMETRIA.tituloDelEquipo, MEZCLA_SOBRE_LA_ESCENA, listo && TEXTO_REEMPLAZADO)}>
+          {contenido}
+        </h3>
+      )}
+    </CanalDeTexto>
+  )
+}
+
 export function ElEquipo(): React.JSX.Element {
   return (
     <div data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
       <CalleDerecha className="grow">
         <div data-composicion="equipo" className="flex w-full flex-col gap-[var(--spacing-12)]">
           <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="@container w-full" style={GEOMETRIA.estilos.tituloDelEquipo}>
-            {/* [INTERFAZ 1] T1 · el título por línea, con su máscara por línea y la inercia (el canal del texto). */}
-            {(progreso) => (
-              <CanalDeTexto progreso={progreso} tipo="titulo" texto={CONTENIDO.tituloDelEquipo}>
-                {(contenido) => <h3 className={cn(GEOMETRIA.tituloDelEquipo, MEZCLA_SOBRE_LA_ESCENA)}>{contenido}</h3>}
-              </CanalDeTexto>
-            )}
+            {/* [INTERFAZ 1] T1 · el título por línea, con su máscara por línea y la inercia (el canal del texto). [RETOQUE 3D] 3C · en volumen. */}
+            {(progreso) => <TituloDelEquipo progreso={progreso} />}
           </Bloque>
 
           {CONTENIDO.personas.map((persona, indice) => {

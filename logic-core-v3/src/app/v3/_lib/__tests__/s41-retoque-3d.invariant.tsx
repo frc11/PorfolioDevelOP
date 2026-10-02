@@ -13,6 +13,8 @@
  *   3A · el titular del hero en volumen (Archivo 700 y la Chivo 300 itálica): las letras llegan una vez por carga desde
  *        lugares al azar de la sala; el DOM se pinta primero (LCP) y se apaga con una opacidad (sigue en el árbol
  *        accesible); va con la página (`pantalla`), sin salida.
+ *   3C · «El equipo» se levanta de acostado a parado con el progreso de su máscara (y se acuesta para atrás); acostado,
+ *        su línea lo tapa: lo que queda debajo del pie de la palabra no se dibuja.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -22,7 +24,9 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import { avanzarElPolvo, polvoInicial } from '../escena/polvo/posarse'
 import { corrimiento } from '../escena/titulos3d/colocacion'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
+import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_POSICION_GLSL } from '../escena/titulos3d/llegada'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
+import { CONTENIDO as CONTENIDO_DE_QUIENES } from '../../_secciones/quienes-somos/contenido'
 import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
@@ -124,5 +128,22 @@ const repetido = armarElTitulo(fuenteDelHero, registro1, null, 'azar').geometria
 afirmar(distintos.size === conAzar.letras && repetido.getX(0) === desde.getX(0) && [...distintos].every((d) => Number(d.split(',')[2]) < 0), '  cada letra sale de un lugar distinto de la sala (sembrado: el mismo en cada carga), nunca de delante de la cámara', `${String(distintos.size)} lugares para ${String(conAzar.letras)} letras`)
 const enFila = armarElTitulo(fuenteDelHero, registro1).geometria.getAttribute('aDesde')
 afirmar(enFila.getX(0) === 0 && enFila.getZ(0) < 0, '  y los títulos de siempre (`letras`) salen de donde salían (de atrás, `aDesde` constante)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3C · «El equipo» se levanta en su lugar; acostado, su línea lo tapa')
+
+const equipo = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
+const seLevantaConLaMascara = (c: string): boolean => /useTextoDeVolumen<HTMLHeadingElement>\(\{ id: 'equipo', texto: CONTENIDO\.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/.test(c)
+afirmar(seLevantaConLaMascara(equipo) && CONTENIDO_DE_QUIENES.tituloDelEquipo === 'El equipo', 'con el progreso de su máscara (y se acuesta con el scroll para atrás: no se queda), con la Chivo del DOM')
+controlPositivo('el detector VE el que se queda', equipo.replace('queda: false', 'queda: true'), seLevantaConLaMascara)
+afirmar(/<CanalDeTexto progreso=\{progreso\} tipo="titulo" texto=\{CONTENIDO\.tituloDelEquipo\}>/.test(equipo) && /listo && TEXTO_REEMPLAZADO/.test(equipo), '  el canal del texto sigue (sin WebGL o hasta que se arma, el de siempre); armado, el DOM se apaga')
+afirmar(/mat3 alzado = mat3\( 1\.0, 0\.0, 0\.0, 0\.0, cos\( acostada \), sin\( acostada \), 0\.0, - sin\( acostada \), cos\( acostada \) \);/.test(LLEGADA_NORMAL_GLSL) && /transformed = mix\( enCamino, pieDeLaLetra \+ alzado \* \( transformed - pieDeLaLetra \), uLevanta \);/.test(LLEGADA_POSICION_GLSL), '  acostada hacia adelante sobre el pie de atrás de la palabra (de _ a |)')
+// La cuenta del giro, en el plano (y, z) relativo al pie (atrás y abajo de la palabra): acostada, a 90°.
+const giro = (y: number, z: number, a: number): readonly [number, number] => [y * Math.cos(a) - z * Math.sin(a), y * Math.sin(a) + z * Math.cos(a)]
+const espesor = 0.15
+const debajoDelPie = (ps: readonly (readonly [number, number])[]): boolean => ps.every(([y]) => y <= 1e-9)
+afirmar(debajoDelPie([giro(0.7, espesor, Math.PI / 2), giro(0, espesor, Math.PI / 2), giro(0.7, 0, Math.PI / 2)]), '  la cuenta: acostada, cada punto de la letra queda a la altura del pie o debajo (el recorte la tapa entera)')
+controlPositivo('el detector VE la acostada hacia atrás (se vería arriba de la línea)', [giro(0.7, espesor, -Math.PI / 2)], debajoDelPie)
+afirmar(/if \( vSobreElPie < 0\.002 \) discard;/.test(DISOLVER_GLSL), '  lo que queda debajo del pie no se dibuja: aparece de la nada recién cuando se levanta')
 
 cerrar('s41-retoque-3d')
