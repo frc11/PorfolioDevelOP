@@ -16,6 +16,7 @@ import { POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, progresoDelPin } from '../../_lib/e
 import { seccionDe } from '../_contrato/forma'
 import { LISTA_DE_INVENTOS } from '../_contrato/inventado'
 import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
+import { quitarSubarbolesConAtributo } from '../_invariantes/marcado'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
@@ -39,7 +40,8 @@ const FUENTE = codigoDeLaSeccion(ID)
   .filter((a) => !a.includes('invariant'))
   .map((a) => quitarComentarios(leer(a)))
   .join('\n')
-const anunciado = (html: string): string => textoVisible(html.replace(/<[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>/g, ' ')).replace(/\s+/g, ' ').trim()
+// [CIERRE RETOQUE 3D] D1: sin ningún subárbol `aria-hidden` (los íconos y las capas del espesor de los valores), como un lector.
+const anunciado = (html: string): string => textoVisible(quitarSubarbolesConAtributo(html, 'aria-hidden').replace(/<[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/svg>/g, ' ')).replace(/\s+/g, ' ').trim()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El copy, textual, y ni una cifra')

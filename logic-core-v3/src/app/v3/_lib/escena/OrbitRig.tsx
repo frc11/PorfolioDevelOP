@@ -47,6 +47,8 @@ import {
   type MutableLightLevels,
 } from './choreographyTypes'
 import { escribirEmisionDelLogo } from './logoEmision'
+import { publicarLaMirada } from './miradaDeLaCamara'
+import { crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
 import {
   applyLightRig,
   createLightRigCache,
@@ -167,6 +169,8 @@ type RigScratch = {
   readonly mouse: PunteroAmortiguado
   /** Lo que el mouse le SUMA a la pose del progreso. Ver `modulacionDeLaPose.ts`. */
   readonly desplazamiento: DesplazamientoDePose
+  /** [CIERRE RETOQUE 3D] D1 · la pose sin el mouse (`sinElMouse.ts`). */
+  readonly sinElMouse: PoseSinElMouse
   readonly lightTargets: LightRigTargets
   readonly lightInput: LightRigInput
   readonly lightCache: LightRigCache
@@ -260,6 +264,7 @@ export function OrbitRig({
     },
     mouse: crearPuntero(),
     desplazamiento: crearDesplazamiento(),
+    sinElMouse: crearPoseSinElMouse(),
     lightTargets: createLightRigTargets(),
     lightInput: createLightRigInput(),
     lightCache: createLightRigCache(),
@@ -436,10 +441,14 @@ export function OrbitRig({
       soltarElPuntero(mouse)
       sinDesplazamiento(desplazamiento)
     }
-    angleDeg += desplazamiento.angleDeg
-    height += desplazamiento.height
     // [INTERFAZ 2] T2 · el giro de la vista previa del destino (con su bandera, y sólo con la física: no con movimiento reducido).
-    if (physics) angleDeg += giroDeLaInterfaz()
+    const giroDeLaVista = physics ? giroDeLaInterfaz() : 0
+    // [CIERRE RETOQUE 3D] D1 · la pose antes del mouse: la de los títulos que van con la página (`sinElMouse.ts`).
+    const sinElMouse = scratch.sinElMouse
+    sinElMouse.angleDeg = angleDeg + giroDeLaVista
+    sinElMouse.height = height
+    angleDeg += desplazamiento.angleDeg + giroDeLaVista
+    height += desplazamiento.height
 
     // 3 · Cámara sobre la órbita. Ángulo 0° = de frente al logo (se lee bien);
     // 90° y 270° son los perfiles; 180° es de atrás, con el logo espejado.
@@ -467,6 +476,15 @@ export function OrbitRig({
         frameY
       )
     }
+
+    // 3c · [CIERRE RETOQUE 3D] D1 · la misma cámara sin el mouse, y lo que el mouse le suma para el DOM (`miradaDeLaCamara.ts`).
+    sinElMouse.distance = distance
+    sinElMouse.frameX = frameX
+    sinElMouse.frameY = frameY
+    sinElMouse.logoW = logoWidth
+    sinElMouse.logoH = logoHeight
+    posarLaCamaraSinElMouse(state.camera, sinElMouse, state.size.width / Math.max(1, state.size.height))
+    publicarLaMirada(desplazamiento.angleDeg, THREE.MathUtils.radToDeg(Math.atan(desplazamiento.height / Math.max(1e-6, distance))))
 
     // 4 · El rig de luz entero: las tres luces, el hemisférico, la niebla y el
     //     fondo. El contraluz necesita saber dónde está la cámara —en azimut y

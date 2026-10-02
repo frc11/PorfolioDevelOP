@@ -1,6 +1,7 @@
 import { BadgeCheck, LayoutDashboard, MessagesSquare, PenTool, Ruler, Timer, type LucideIcon } from 'lucide-react'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
+import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import type { IconoDeValor, Valor } from './contenido'
 
@@ -31,17 +32,33 @@ export const ICONOS: Readonly<Record<IconoDeValor, LucideIcon>> = {
  * es la oscura y plena —la línea en `tinta-media` daba 2,98–4,44:1 sobre las sombras de la
  * celosía, a 1440 y a 1024—, y abajo de 1024 es la del papel que usa la mezcla.
  */
-export function PiezaDeValor({ valor, className }: { readonly valor: Valor; readonly className?: string }): React.JSX.Element {
-  const Icono = ICONOS[valor.clave]
+export function PiezaDeValor({ valor, className, espesor = false }: { readonly valor: Valor; readonly className?: string; readonly espesor?: boolean }): React.JSX.Element {
   return (
-    <div data-pieza="valor" data-valor={valor.clave} className={`flex flex-col gap-[var(--spacing-2)] ${className ?? ''}`}>
-      <Icono aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-6)] shrink-0" />
-      <Titular nivel="titulo-s" como="h3">
-        {valor.titulo}
-      </Titular>
+    <div data-pieza="valor" data-valor={valor.clave} className={`flex flex-col gap-[var(--spacing-2)] ${espesor ? 'transform-3d' : ''} ${className ?? ''}`}>
+      {/* [CIERRE RETOQUE 3D] D1 · en el escenario el ícono y el título tienen espesor: al moverse la cámara se les ven los costados. */}
+      {espesor ? (
+        <ConEspesor copia={<CabezaDelValor valor={valor} como="p" />}>
+          <CabezaDelValor valor={valor} como="h3" />
+        </ConEspesor>
+      ) : (
+        <CabezaDelValor valor={valor} como="h3" />
+      )}
       <Cuerpo como="p">
         {valor.linea}
       </Cuerpo>
+    </div>
+  )
+}
+
+/** El ícono y el título de un valor (como `p`, la copia del espesor: el índice de encabezados no la cuenta). */
+function CabezaDelValor({ valor, como }: { readonly valor: Valor; readonly como: 'h3' | 'p' }): React.JSX.Element {
+  const Icono = ICONOS[valor.clave]
+  return (
+    <div className="flex flex-col gap-[var(--spacing-2)]">
+      <Icono aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-6)] shrink-0" />
+      <Titular nivel="titulo-s" como={como}>
+        {valor.titulo}
+      </Titular>
     </div>
   )
 }

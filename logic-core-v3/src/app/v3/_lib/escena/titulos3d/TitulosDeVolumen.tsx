@@ -18,6 +18,7 @@ import { EMISION_EN_LA_NOCHE } from '../logoEmision'
 import { KEY_INTENSITY } from '../probeLighting'
 import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
+import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { armarElTitulo } from './geometria'
@@ -222,7 +223,9 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     }
   }, [camara, rig, stats, tam.width, tam.height])
 
-  useFrame((_, delta) => alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), camara))
+  // [CIERRE RETOQUE 3D] D1 · los que van con la página se colocan con la cámara SIN el mouse: fijos en el mundo, el paralaje les
+  // deja ver la perspectiva y los costados (con la viva, mouse incluido, acompañaban a la cámara).
+  useFrame((_, delta) => alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE))
 
   return <group ref={raiz} name="titulos de volumen" />
 }

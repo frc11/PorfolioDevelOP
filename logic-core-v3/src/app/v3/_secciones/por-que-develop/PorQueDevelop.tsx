@@ -170,7 +170,7 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
     <li>
       {/* [RETOQUE 3D] 3G · cada valor llega desde un lugar distinto de la sala (CSS 3D; antes, P5). */}
       <ValorEnVolumen progreso={tramo} indice={indice}>
-        <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" />
+        <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" espesor />
       </ValorEnVolumen>
     </li>
   )

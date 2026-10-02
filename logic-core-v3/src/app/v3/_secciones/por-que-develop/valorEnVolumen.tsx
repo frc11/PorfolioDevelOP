@@ -3,6 +3,8 @@
 import { useMotionValueEvent, type MotionValue } from 'motion/react'
 import { useRef } from 'react'
 
+import { useGiroDeLaMirada } from '../../_componentes/volumen/useGiroDeLaMirada'
+
 /**
  * [RETOQUE 3D] 3G · CADA VALOR LLEGA DESDE LA SALA — el bloque entero (el ícono, el título y el texto) con CSS 3D: sale
  * de un lugar distinto del entorno para cada uno (lejos, a un costado, arriba o abajo, girado y apagado) y se asienta en
@@ -51,6 +53,9 @@ export function poseDelValor(p: number, indice: number): { readonly transform: s
 
 export function ValorEnVolumen({ progreso, indice, children }: { readonly progreso: MotionValue<number>; readonly indice: number; readonly children: React.ReactNode }): React.JSX.Element {
   const pieza = useRef<HTMLDivElement | null>(null)
+  // [CIERRE RETOQUE 3D] D1 · fijo en el mundo: gira al revés de lo que el mouse le suma a la cámara.
+  const mirada = useRef<HTMLDivElement | null>(null)
+  useGiroDeLaMirada(mirada)
   useMotionValueEvent(progreso, 'change', (p) => {
     const el = pieza.current
     if (el === null) return
@@ -63,8 +68,10 @@ export function ValorEnVolumen({ progreso, indice, children }: { readonly progre
   const desdeElLogo = `${String(x)}% ${String(y)}%`
   return (
     <div data-pieza="valor-en-volumen" style={{ perspective: `${String(PERSPECTIVA_DE_LOS_VALORES)}px`, perspectiveOrigin: desdeElLogo }}>
-      <div ref={pieza} style={{ transform: inicial.transform, opacity: inicial.opacidad }}>
-        {children}
+      <div ref={mirada} className="transform-3d">
+        <div ref={pieza} className="transform-3d" style={{ transform: inicial.transform, opacity: inicial.opacidad }}>
+          {children}
+        </div>
       </div>
     </div>
   )

@@ -11,6 +11,9 @@
  *   D4 · las fotos del equipo sin el marco 3D: vuelven a como estaban antes del RETOQUE 3D (la llegada en curva y el hover).
  *   N1 · «Contacto» (la esquina de la barra y el menú del teléfono) abre el panel de contacto de SPRINT CONTACTO, sin
  *        WhatsApp (el envío arma un mail); lo demás que lleva a contacto sigue viajando al pie.
+ *   D1 · todo el 3D fijo en el mundo: los títulos que van con la página se colocan con la cámara SIN el mouse, y los
+ *        bloques de CSS 3D giran al revés de lo que el mouse le suma (se les ve la perspectiva y los costados).
+ *   D2 · el hero, fijo después de armarse (sin salida): con D1 se le ven los costados.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -20,6 +23,9 @@ import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena
 import { FACETAS_DEL_POLVO, FACETAS_VERTEX_GLSL } from '../escena/polvo/facetas'
 import { FIRME, GUION, repartoDelEncendido } from '../escena/entorno/encendido'
 import { DISPARO_DEL_REMATE, margenDelDisparo } from '../../_secciones/tu-panel/entrada'
+import { giroDeLaPieza } from '../escena/miradaDeLaCamara'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -103,5 +109,33 @@ afirmar(abreElPanel(contactoTsx, apertura, barra), 'el panel (la hoja de SPRINT 
 controlPositivo('el detector VE el Contacto que viaja al pie', [contactoTsx, apertura, barra.replace(' data-abre-contacto={ABRE_EL_PANEL}', '')], ([c, a, b]: string[]) => abreElPanel(c, a, b))
 const delPanel = ['_chrome/contacto/contenido.ts', '_chrome/contacto/enviarContacto.ts', '_chrome/contacto/FormularioDeContacto.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
 afirmar(!/whatsapp|wa\.me|WHATSAPP/i.test(delPanel) && /mailto:\$\{MAIL\}\?subject=/.test(delPanel), '  sin WhatsApp (se fue de todos lados): el envío valida y arma un mail con el mensaje; nunca dice «enviado»')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D1 · Todo el 3D fijo en el mundo')
+
+const orbita = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
+const titulosDeLaEscena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const fijosEnElMundo = (o: string, t: string): boolean =>
+  /sinElMouse\.angleDeg = angleDeg \+ giroDeLaVista\s*sinElMouse\.height = height\s*angleDeg \+= desplazamiento\.angleDeg \+ giroDeLaVista/.test(o) &&
+  /posarLaCamaraSinElMouse\(state\.camera, sinElMouse,/.test(o) &&
+  /publicarLaMirada\(desplazamiento\.angleDeg,/.test(o) &&
+  /Math\.min\(delta, 0\.1\), CAMARA_SIN_EL_MOUSE\)\)/.test(t)
+afirmar(fijosEnElMundo(orbita, titulosDeLaEscena), 'los títulos que van con la página (el hero, «El equipo», las demos) se colocan con la cámara SIN el mouse; Portfolio y la frase ya estaban fijos (su cámara de lectura): el paralaje les deja ver la perspectiva y los costados')
+controlPositivo('el detector VE los títulos pegados a la cámara viva', [orbita, titulosDeLaEscena.replace('CAMARA_SIN_EL_MOUSE))', 'camara))')], ([o, t]: string[]) => fijosEnElMundo(o, t))
+const alReves = (f: typeof giroDeLaPieza): boolean => f({ giro: 10, inclinacion: 4 }) === 'rotateX(4.000deg) rotateY(-10.000deg)' && f({ giro: 0, inclinacion: 0 }) === 'rotateX(0.000deg) rotateY(0.000deg)'
+afirmar(alReves(giroDeLaPieza), '  los bloques de CSS 3D giran AL REVÉS de la cámara (la cámara se corre a la derecha: se ve su costado derecho; sube: su cara de arriba); quieto el mouse, de frente')
+controlPositivo('el detector VE el bloque que acompaña a la cámara', ((m: { giro: number; inclinacion: number }) => `rotateX(${(-m.inclinacion).toFixed(3)}deg) rotateY(${m.giro.toFixed(3)}deg)`) as typeof giroDeLaPieza, alReves)
+const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
+afirmar(/useGiroDeLaMirada\(mirada\)/.test(valor) && /<div ref=\{mirada\} className="transform-3d">/.test(valor) && /espesor \/>/.test(sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))), '  los valores giran con la mirada y su ícono y su título tienen espesor (se les ven los costados)')
+const espesor = renderToStaticMarkup(<ConEspesor copia={<p>copia</p>}><h3>titulo</h3></ConEspesor>)
+const capasMudas = (h: string): boolean => (h.match(/<h3/g) ?? []).length === 1 && (h.match(/aria-hidden="true"[^>]*data-parte="espesor"|data-parte="espesor"[^>]*aria-hidden="true"/g) ?? []).length === (h.match(/data-parte="espesor"/g) ?? []).length && (h.match(/data-parte="espesor"/g) ?? []).length > 0
+afirmar(capasMudas(espesor), '  las capas del espesor son `aria-hidden` y sin encabezados: el lector y el índice ven una sola vez el título')
+controlPositivo('el detector VE una capa que se anuncia', espesor.replace('aria-hidden="true" ', ''), capasMudas)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D2 · El hero, fijo después de armarse')
+
+const hero = sinComentarios(leer('_secciones/hero/Hero.tsx'))
+afirmar(/gesto: 'azar', llegada: null, queda: true, rearma: false/.test(hero) && /colocacion: 'pantalla'/.test(sinComentarios(leer('_componentes/titulos3d/useTextoDeVolumen.ts'))), 'el titular del hero llega una vez por carga y se queda (sin salida); va con la página con la cámara sin el mouse (D1): se le ven los costados')
 
 cerrar('s42-cierre-retoque')
