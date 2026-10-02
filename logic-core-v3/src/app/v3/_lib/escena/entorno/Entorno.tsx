@@ -10,7 +10,7 @@ import { BRILLO_DE_LA_NOCHE } from '../particleGlow'
 import type { ProbeRigStore } from '../probeStore'
 import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
 import { callar, sonar } from '../../sonido/bus'
-import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, type EstadoDelEncendido } from './encendido'
+import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, repartoDelEncendido, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
 import { nocheDelLogo } from './nocheDelLogo'
@@ -100,7 +100,12 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       }
       VIVO.uHaz.value = 1
       VIVO.uHazDia.value.set(nivel.dia[0], nivel.dia[1], nivel.dia[2])
-      VIVO.uHazNoche.value.set(nivel.noche[0] * k, nivel.noche[1] * k, nivel.noche[2] * k)
+      // [CIERRE RETOQUE 3D] B3 · la luz entera parpadea: la lámpara con la raíz, el cono del polvo y las motas con menos.
+      const reparto = e.hazEncendido ? repartoDelEncendido(k) : SIN_ENCENDIDO
+      VIVO.uHazNoche.value.set(nivel.noche[0] * reparto.luz, nivel.noche[1] * reparto.luz, nivel.noche[2] * k)
+      VIVO.uConoDelHaz.value = reparto.cono
+      HAZ_ENCENDIDO.luz = reparto.luz
+      HAZ_ENCENDIDO.motas = reparto.motas
     }
 
     if (e.E6) {
@@ -189,6 +194,9 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
     </>
   )
 }
+
+/** Sin el encendido, el haz como siempre (`k` = 1). */
+const SIN_ENCENDIDO = { luz: 1, cono: 1, motas: 1 } as const satisfies ReturnType<typeof repartoDelEncendido>
 
 /** 6e: lo que leen las motas y la sombra. */
 function encender(k: number): void {

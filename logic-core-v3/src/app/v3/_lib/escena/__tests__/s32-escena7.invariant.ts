@@ -296,8 +296,9 @@ const otra = correr(vuelta.e, noche(1), GUION_S + 0.5 + ENCENDIDO.apagaS + 0.2)
 afirmar(!otra.fases.includes('encendiendo') && otra.e.fase === 'prendido', 'otra vez de noche enseguida: prende sin repetir la falla (histéresis)')
 const aireTsx = leer('polvo/Aire.tsx')
 // [ESCENA 10] T1: con la noche EN EL LOGO (la del amanecer, hasta que su frente lo alcanza), no la de la sala.
-afirmar(/Math\.min\(1, VIVO\.uNocheDelLogo\.value \* HAZ_ENCENDIDO\.k\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
-afirmar(/manchasDelHaz\(VIVO\.uNocheDelLogo\.value, HAZ_ENCENDIDO\.k,/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* k/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
+// [CIERRE RETOQUE 3D] B3: las motas, la sombra y la lámpara con su parte del encendido (`repartoDelEncendido`, s42).
+afirmar(/Math\.min\(1, VIVO\.uNocheDelLogo\.value \* HAZ_ENCENDIDO\.motas\)/.test(aireTsx) && /uBrilloDeLasMotas\.value = Math\.max\(1, HAZ_ENCENDIDO\.k\)/.test(aireTsx), 'las motas siguen su intensidad (el destello sube; el freno no pasa del de siempre)')
+afirmar(/manchasDelHaz\(VIVO\.uNocheDelLogo\.value, HAZ_ENCENDIDO\.luz,/.test(leer('ContactOcclusion.tsx')) && /nivel\.noche\[0\] \* reparto\.luz/.test(leer('entorno/Entorno.tsx')), '  y la sombra según el haz, la columna, el charco y el polvo del haz también')
 
 // ── T10 · la nitidez del polvo ────────────────────────────────────────────
 titulo('T10 · el polvo nítido')
@@ -325,7 +326,8 @@ controlPositivo('el detector VE la pasada de las sombritas', "import { SOMBRAS_E
 const rebote = leer('entorno/Rebote.tsx')
 afirmar(/uRebote\.current\.value = REBOTE\.cuanto \* VIVO\.uNocheDelLogo\.value/.test(rebote) && /charcoDelHaz\( vMundoDelRebote\.xz \) \* uRebote \* abajo \* cerca/.test(rebote) && REBOTE.cuanto <= 1, 'de noche, la luz del charco aclara la cara de abajo del logo (más cerca del piso, más)')
 afirmar(!/Rebote|rebote/.test(readFileSync(path.join(ESCENA, 'ProbeLogo.tsx'), 'utf8')), '  sin tocar `ProbeLogo`: el parche es sobre su material')
-afirmar(/nivel\.noche\[1\] \* k/.test(leer('entorno/Entorno.tsx')), '  sigue la intensidad del haz (el charco de noche lleva el encendido, T9)')
+// [CIERRE RETOQUE 3D] B3: el charco con la luz del reparto del encendido.
+afirmar(/nivel\.noche\[1\] \* reparto\.luz/.test(leer('entorno/Entorno.tsx')), '  sigue la intensidad del haz (el charco de noche lleva el encendido, T9)')
 
 // ── T11 · el amanecer ─────────────────────────────────────────────────────
 titulo('T11 · el amanecer: un evento de luz ([ESCENA 8] encendido)')

@@ -119,4 +119,27 @@ export function avanzarElEncendido(e: EstadoDelEncendido, noche: number, t: numb
 }
 
 /** Lo que leen los demás (las motas, la sombra, el rebote): la intensidad del haz de noche (1 sin el encendido). */
-export const HAZ_ENCENDIDO = { k: 1 }
+export const HAZ_ENCENDIDO = { k: 1, luz: 1, motas: 1 }
+
+/**
+ * [CIERRE RETOQUE 3D] B3 · LA LUZ ENTERA PARPADEA — cómo se reparte `k` entre las partes del haz. El embudo que se veía solo
+ * en los intentos era el POLVO del haz (`polvoVivo.ts`): de noche pesa 0,30 contra 0,05 de la columna y 0,06 del charco, y
+ * adentro del cono crecía y se volvía más opaco aunque el haz estuviera apagado (`uHaz` vale 1 siempre). En cada intento se
+ * prendía sólo el cono de polvo, con su borde (y las motas 5d destellando en él); la luz casi no se veía. Ahora la columna y
+ * el charco (la lámpara) llevan la raíz de `k / FIRME`, el cono del polvo crece y pesa con `k / FIRME` y las motas con su
+ * cuadrado: en un intento tiembla la luz entera y el polvo apenas. Prendido (`k` en `FIRME` o más), todo como antes.
+ */
+export interface RepartoDelEncendido {
+  /** La columna y el charco (y la mancha dura): la luz de la lámpara. */
+  readonly luz: number
+  /** Cuánto crece y pesa el polvo dentro del cono (0 a 1). */
+  readonly cono: number
+  /** Las motas del haz (5d). */
+  readonly motas: number
+}
+
+export function repartoDelEncendido(k: number): RepartoDelEncendido {
+  if (k >= FIRME) return { luz: k, cono: 1, motas: k }
+  const u = Math.max(0, k) / FIRME
+  return { luz: FIRME * Math.sqrt(u), cono: u, motas: k * u }
+}

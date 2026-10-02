@@ -115,10 +115,11 @@ const polvoVivo = leer('entorno/polvoVivo.ts')
 const conLaNocheDelLogo = (h: string, p: string): boolean =>
   /float cuanto = mix\( uHazDia\.x, uHazNoche\.x, uNocheDelLogo \);/.test(h) &&
   /return luz \* charco \* mix\( uHazDia\.y, uHazNoche\.y, uNocheDelLogo \);/.test(h) &&
-  /vEnElHaz = uHaz \* uNocheDelLogo \* \(/.test(p) &&
+  // [CIERRE RETOQUE 3D] B3: con el cono del encendido.
+  /vEnElHaz = uHaz \* uConoDelHaz \* uNocheDelLogo \* \(/.test(p) &&
   /float cuantoHaz = vEnElHaz \* mix\( uHazDia\.z, uHazNoche\.z, uNocheDelLogo \);/.test(p)
 afirmar(conLaNocheDelLogo(haz, polvoVivo), '  la columna, el charco y el polvo del haz siguen a la noche en el logo (en el amanecer se van cuando el frente lo alcanza)')
-controlPositivo('el detector VE el polvo del haz con la noche de la sala', [haz, polvoVivo.replace('vEnElHaz = uHaz * uNocheDelLogo * (', 'vEnElHaz = uHaz * (')], ([h, p]: string[]) => conLaNocheDelLogo(h, p))
+controlPositivo('el detector VE el polvo del haz con la noche de la sala', [haz, polvoVivo.replace('vEnElHaz = uHaz * uConoDelHaz * uNocheDelLogo * (', 'vEnElHaz = uHaz * uConoDelHaz * (')], ([h, p]: string[]) => conLaNocheDelLogo(h, p))
 afirmar(/cono\.current\.visible = dia\.x > 0 \|\| \(noche\.x > 0 && n > 0\)/.test(haz), '  sin haz la columna no se dibuja (regla 5)')
 const entornoTsx = leer('entorno/Entorno.tsx')
 const i = entornoTsx.indexOf('VIVO.uNocheDelLogo.value = nocheDelLogo(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)')
@@ -138,7 +139,7 @@ const continua = (f: typeof manchasDelHaz): boolean => {
 }
 afirmar(continua(manchasDelHaz), '  y el paso de la una a la otra es continuo en la noche')
 controlPositivo('el detector VE una mancha que cambia de golpe a media noche', (n: number, k: number, h: boolean) => manchasDelHaz(n < 0.5 ? 0 : 1, k, h), continua)
-afirmar(/const haz = manchasDelHaz\(VIVO\.uNocheDelLogo\.value, HAZ_ENCENDIDO\.k, conElHaz && entorno\.E1\)/.test(leer('ContactOcclusion.tsx')), '  la sombra de contacto la lee con la noche en el logo')
+afirmar(/const haz = manchasDelHaz\(VIVO\.uNocheDelLogo\.value, HAZ_ENCENDIDO\.luz, conElHaz && entorno\.E1\)/.test(leer('ContactOcclusion.tsx')), '  la sombra de contacto la lee con la noche en el logo')
 
 // La sombra del logo: de día con la principal; cuánto, el día que hay en el logo (sin el corte al 3 % de ESCENA 9).
 const luzDelLogo = leer('LuzDelLogo.tsx')

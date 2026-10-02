@@ -5,6 +5,7 @@
  *   D6 · el túnel lento se borró (código y bandera); la tabla medida de heatbureau sigue igual.
  *   P1 · el polvo en facetas (la variante b) pasó al producto; la a y la c se borraron, con su bandera.
  *   B2 · una muesca levanta el polvo posado en toda la página: también después del último nudo (el progreso en 1).
+ *   B3 · el encendido del haz: en los intentos parpadea la luz entera (la columna y el charco), no el cono de polvo solo.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/cierre/` (el `mirar.txt` y el `LEEME.txt`).
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -12,6 +13,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { CAPAS_DEL_TUNEL } from '../../_secciones/trabajos/tunel'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { FACETAS_DEL_POLVO, FACETAS_VERTEX_GLSL } from '../escena/polvo/facetas'
+import { FIRME, GUION, repartoDelEncendido } from '../escena/entorno/encendido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -48,5 +50,17 @@ const atadura = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
 const despiertaConLaPagina = (c: string): boolean => /const scroll = \(!Number\.isNaN\(m\.progreso\) && Math\.abs\(progreso - m\.progreso\) > 1e-6\) \|\| pagina !== m\.pagina/.test(c)
 afirmar(despiertaConLaPagina(fisica) && /const alDesplazar = \(\): void => \{\s*avisarQueSeMovioLaPagina\(\)/.test(atadura), 'el despertar es cualquier scroll de la página, no sólo el del recorrido: después del último nudo (el pie) el progreso queda en 1 y una muesca no lo despertaba', 'medido al final de la página: una muesca, 13.987 posadas → 13.889 levantadas en 2 s')
 controlPositivo('el detector VE el despertar sólo por el progreso', fisica.replace(' || pagina !== m.pagina', ''), despiertaConLaPagina)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B3 · El encendido: parpadea la luz entera, no el embudo de polvo')
+
+const intentos = GUION.slice(0, -1).map(([, , k]) => k)
+const luzEntera = (reparto: typeof repartoDelEncendido): boolean =>
+  intentos.every((k) => reparto(k).luz > k && reparto(k).cono < 1 && reparto(k).motas < k) && reparto(0).cono === 0 && [FIRME, 2.4].every((k) => reparto(k).luz === k && reparto(k).cono === 1 && reparto(k).motas === k)
+afirmar(luzEntera(repartoDelEncendido), 'en los intentos la lámpara (columna y charco) pesa más y el cono de polvo y las motas menos; apagado, el cono no existe; prendido, igual que antes', intentos.map((k) => `k ${k.toFixed(2)}: luz ${repartoDelEncendido(k).luz.toFixed(2)}, cono ${repartoDelEncendido(k).cono.toFixed(2)}, motas ${repartoDelEncendido(k).motas.toFixed(2)}`).join(' · '))
+controlPositivo('el detector VE el reparto de antes (todo con k)', ((k: number) => ({ luz: k, cono: 1, motas: k })) as typeof repartoDelEncendido, luzEntera)
+const polvoVivo = sinComentarios(leer('_lib/escena/entorno/polvoVivo.ts'))
+const entornoTsx = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
+afirmar(/vEnElHaz = uHaz \* uConoDelHaz \* uNocheDelLogo \* \(/.test(polvoVivo) && /VIVO\.uConoDelHaz\.value = reparto\.cono/.test(entornoTsx) && /nivel\.noche\[0\] \* reparto\.luz, nivel\.noche\[1\] \* reparto\.luz, nivel\.noche\[2\] \* k/.test(entornoTsx), '  el polvo del cono (el que dibujaba el embudo: pesa 0,30 contra 0,05 de la columna) crece y pesa con el encendido, ya no con el haz apagado')
 
 cerrar('s42-cierre-retoque')

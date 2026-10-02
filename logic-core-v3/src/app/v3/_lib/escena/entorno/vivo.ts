@@ -34,6 +34,8 @@ export const VIVO = {
   uCursorAlcance: { value: new THREE.Vector3(0.06, 10, 0) },
   /** E1 · 1 si el haz está prendido: el polvo lo lee para saber si hay columna. */
   uHaz: { value: 0 },
+  /** [CIERRE RETOQUE 3D] B3 · cuánto crece y pesa el polvo dentro del cono con el encendido (`repartoDelEncendido`). */
+  uConoDelHaz: { value: 1 },
   /** E1 · cuánto se nota el haz: (columna, mancha en el piso, polvo), de día y de noche. */
   uHazDia: { value: new THREE.Vector3() },
   uHazNoche: { value: new THREE.Vector3() },

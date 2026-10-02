@@ -67,6 +67,7 @@ uniform float uEmpuje;
 uniform float uAspecto;
 uniform vec3 uCursorAlcance;
 uniform float uHaz;
+uniform float uConoDelHaz;
 uniform float uNoche;
 uniform float uNocheDelLogo;
 varying vec2 vDireccion;
@@ -102,7 +103,7 @@ const CUERPO_VERTEX = /* glsl */ `
 		float alto = clamp( ( mundo.y - ${FLOOR_Y.toFixed(4)} ) / ( ${HAZ.arriba.toFixed(1)} - ${FLOOR_Y.toFixed(4)} ), 0.0, 1.0 );
 		float radio = mix( ${HAZ.radioAbajo.toFixed(2)}, ${HAZ.radioArriba.toFixed(2)}, alto );
 		// [ESCENA 10] T1: el haz existe sólo con la noche en el logo (de día se sacó).
-		vEnElHaz = uHaz * uNocheDelLogo * ( 1.0 - smoothstep( 0.55, 1.0, length( mundo.xz ) / radio ) );
+		vEnElHaz = uHaz * uConoDelHaz * uNocheDelLogo * ( 1.0 - smoothstep( 0.55, 1.0, length( mundo.xz ) / radio ) );
 		gl_PointSize *= 1.0 + mix( 0.55, 0.35, uNocheDelLogo ) * vEnElHaz;
 	#endif
 	#ifdef POLVO_ESTELA
