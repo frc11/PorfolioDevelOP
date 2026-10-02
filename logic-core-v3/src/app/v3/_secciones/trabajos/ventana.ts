@@ -54,3 +54,15 @@ export const ESTILO_DEL_CUERPO_QUE_ESCALA = {
   '--aire-arriba-del-cta': enLaVentana(MEDIDAS_DE_REFERENCIA.aireArriba),
   '--aire-abajo-de-la-ventana': enLaVentana(MEDIDAS_DE_REFERENCIA.aireAbajo),
 } as CSSProperties
+
+/**
+ * [RETOQUE 3D] 3H · «CLICKEÁ ACÁ PARA EMPEZAR» — gris claro, lo más tenue posible con 3:1 (texto grande) sobre el papel
+ * de la ventana: la mezcla de los dos tokens que la ventana ya usa (adentro, `--color-tinta` es el papel claro y
+ * `--color-fondo` la tinta oscura). Con 45 % de tinta da #8E8E8D, 3,05:1 sobre #F7F7F5; con 44 %, 2,96:1 (el
+ * invariante hace la cuenta). Abajo de 1025 va sobre la noche de la sección: ahí la misma mezcla da 5,9:1.
+ */
+export const PORCENTAJE_DE_TINTA_TENUE = 45
+export const TINTA_TENUE_DE_LA_VENTANA = `color-mix(in srgb, var(--color-fondo) ${String(PORCENTAJE_DE_TINTA_TENUE)}%, var(--color-tinta))`
+
+/** Su estilo: grande (el escalón del CTA de la ventana, `titulo-l` como mucho) y tenue. */
+export const ESTILO_DE_EMPEZAR = { color: TINTA_TENUE_DE_LA_VENTANA, fontSize: 'var(--cta-en-uso, var(--text-titulo-l))' } as const

@@ -177,9 +177,8 @@ export const CONTENIDO = {
   cta: {
     frase: '¿El próximo proyecto sos vos?',
     direccion: 'tu-empresa.com.ar',
-    rotulo: 'Hablemos',
-    // Al lado del botón, en mono chico: dice que la ventana entera se aprieta.
-    aclaracion: '(un clic y arrancamos)',
+    // [RETOQUE 3D] 3H: sin «Hablemos» ni «(un clic y arrancamos)»: abajo y centrado, grande y tenue, lleva al contacto del pie.
+    empezar: 'Clickeá acá para empezar',
   },
 } as const
 

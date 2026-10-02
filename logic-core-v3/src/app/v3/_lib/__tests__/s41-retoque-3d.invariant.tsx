@@ -19,6 +19,8 @@
  *        revés con el scroll para arriba; planas sin coreografía.
  *   3E · los libros de las demos se levantan desde atrás sobre su base (y se acuestan para atrás).
  *   3G · cada valor de Por qué develOP (ícono, título y texto) llega desde un lugar distinto de la sala (CSS 3D).
+ *   3H · el cierre del túnel: sin «Hablemos» ni «(un clic y arrancamos)»; abajo y centrado «Clickeá acá para empezar»,
+ *        el gris más tenue con 3:1 (texto grande) sobre el papel de la ventana; lleva al pie.
  *
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/` (un `mirar.txt` por bloque y el `LEEME.txt`).
  */
@@ -37,7 +39,9 @@ import { FOTO_EN_VOLUMEN, poseDeLaFoto } from '../../_secciones/quienes-somos/fo
 import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-develop/valorEnVolumen'
 import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
-import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_secciones/trabajos/contenido'
+import { PORCENTAJE_DE_TINTA_TENUE } from '../../_secciones/trabajos/ventana'
+import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
@@ -190,5 +194,23 @@ const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4,
 afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
 controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
 afirmar(/<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor/.test(porQue) && !/requestAnimationFrame|setTimeout/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')
+
+const cta = CONTENIDO_DE_TRABAJOS.cta as Record<string, string>
+afirmar(cta.empezar === 'Clickeá acá para empezar' && cta.rotulo === undefined && cta.aclaracion === undefined && cta.frase === '¿El próximo proyecto sos vos?', 'la frase queda; «Hablemos» y «(un clic y arrancamos)» se fueron')
+const piezasDeTrabajos = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const lleva = (c: string): boolean => (c.match(/<a href=\{DESTINO_DEL_CTA\} data-pieza="empezar"[^>]*style=\{ESTILO_DE_EMPEZAR\}>\s*\{CONTENIDO\.cta\.empezar\}/g) ?? []).length === 2 && !/CtaEnlace/.test(c)
+afirmar(lleva(piezasDeTrabajos) && /mt-auto self-center/.test(piezasDeTrabajos) && /after:absolute after:inset-0/.test(piezasDeTrabajos), '  en las dos ramas lleva al pie (el contacto); arriba de 1025 abajo y centrado en la ventana, que sigue siendo entera el enlace; sin 3D')
+controlPositivo('el detector VE el «Hablemos» de antes', `${piezasDeTrabajos}<CtaEnlace href={DESTINO_DEL_CTA} />`, lleva)
+// La mezcla de la ventana: `--color-fondo` (la tinta, #0E0E0E en la sala invertida) sobre `--color-tinta` (el papel, #F7F7F5).
+const mezcla = (pct: number): string => {
+  const canal = (a: number, b: number): string => Math.round((a * pct + b * (100 - pct)) / 100).toString(16).padStart(2, '0')
+  return `#${canal(0x0e, 0xf7)}${canal(0x0e, 0xf7)}${canal(0x0e, 0xf5)}`
+}
+const masTenueCon3 = (pct: number): boolean => razonDeContraste(mezcla(pct), '#F7F7F5') >= 3 && razonDeContraste(mezcla(pct - 1), '#F7F7F5') < 3
+afirmar(masTenueCon3(PORCENTAJE_DE_TINTA_TENUE), '  gris claro: lo más tenue con 3:1 (texto grande) sobre el papel de la ventana, en pasos enteros de la mezcla', `${mezcla(PORCENTAJE_DE_TINTA_TENUE)} ${razonDeContraste(mezcla(PORCENTAJE_DE_TINTA_TENUE), '#F7F7F5').toFixed(2)}:1; con ${String(PORCENTAJE_DE_TINTA_TENUE - 1)} %, ${razonDeContraste(mezcla(PORCENTAJE_DE_TINTA_TENUE - 1), '#F7F7F5').toFixed(2)}:1`)
+controlPositivo('el detector VE un gris que no llega a 3:1', PORCENTAJE_DE_TINTA_TENUE - 1, masTenueCon3)
 
 cerrar('s41-retoque-3d')

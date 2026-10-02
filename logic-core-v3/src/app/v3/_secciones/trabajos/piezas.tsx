@@ -3,7 +3,6 @@
 import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/react'
 import { Fragment, useRef, useState } from 'react'
 
-import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
@@ -18,7 +17,7 @@ import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimient
 import { CONTENIDO } from './contenido'
 import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
-import { ESTILO_DEL_CUERPO_QUE_ESCALA } from './ventana'
+import { ESTILO_DEL_CUERPO_QUE_ESCALA, ESTILO_DE_EMPEZAR } from './ventana'
 import { DESTINO_DEL_CTA, primeraFotoTapa } from './geometria'
 import {
   CLASE_DE_LA_BAJADA_ANGOSTA,
@@ -287,12 +286,9 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
           <Titular nivel="titulo-l" como="p">
             {CONTENIDO.cta.frase}
           </Titular>
-          <div className="flex flex-wrap items-baseline gap-4">
-            <CtaEnlace href={DESTINO_DEL_CTA} rotulo={CONTENIDO.cta.rotulo} />
-            <Micro como="span" className="font-codigo">
-              {CONTENIDO.cta.aclaracion}
-            </Micro>
-          </div>
+          <a href={DESTINO_DEL_CTA} data-pieza="empezar" className="font-titulo leading-titulo tracking-titulo pt-4" style={ESTILO_DE_EMPEZAR}>
+            {CONTENIDO.cta.empezar}
+          </a>
         </div>
       </div>
       {/* Después del CTA, las demos: arriba de 1025 se ven por el vacío. */}
@@ -301,12 +297,6 @@ export function RamaQuieta({ seccion }: PropsDeSeccion): React.JSX.Element {
   )
 }
 
-/** Las dos redefiniciones de la caja de «Hablemos». Ver el docblock en el marcado. */
-const ESTILO_DEL_CTA_EN_LA_VENTANA = {
-  // MÓVIL 2: desde 1024 lo achica la ventana (`ventana.ts`); abajo, `titulo-l` (FINAL 3: un escalón más grande).
-  '--text-cuerpo': 'var(--cta-en-uso, var(--text-titulo-l))',
-  '--color-tinta': 'var(--color-fondo)',
-} as React.CSSProperties
 
 /**
  * LA VENTANA DE NAVEGADOR DEL CTA — el marcado, y nada más. **[PORTFOLIO]**
@@ -512,18 +502,10 @@ export function VentanaDelCta({
                * entera: todo el cuadro sigue siendo el enlace a contacto, sin un
                * ancla adentro de otra.
                */}
-              <div className="flex items-baseline gap-4 pt-12 escritorio:pt-[min(calc(var(--spacing)*12),var(--aire-arriba-del-cta))] max-escritorio:flex-wrap max-escritorio:gap-x-4 max-escritorio:gap-y-2 max-movil:pt-8">
-                <span style={ESTILO_DEL_CTA_EN_LA_VENTANA}>
-                  <CtaEnlace
-                    href={DESTINO_DEL_CTA}
-                    rotulo={CONTENIDO.cta.rotulo}
-                    className="pointer-events-auto after:absolute after:inset-0"
-                  />
-                </span>
-                <Micro como="span" className="font-codigo">
-                  {CONTENIDO.cta.aclaracion}
-                </Micro>
-              </div>
+              {/* [RETOQUE 3D] 3H · abajo y centrado, grande y tenue (≥ 3:1: `ventana.ts`); la ventana entera sigue siendo el enlace. */}
+              <a href={DESTINO_DEL_CTA} data-pieza="empezar" className="font-titulo leading-titulo tracking-titulo pointer-events-auto mt-auto self-center pt-12 text-center after:absolute after:inset-0 max-movil:pt-8" style={ESTILO_DE_EMPEZAR}>
+                {CONTENIDO.cta.empezar}
+              </a>
             </div>
           </div>
         </div>
