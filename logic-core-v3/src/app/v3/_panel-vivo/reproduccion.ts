@@ -30,8 +30,12 @@ export function useReproduccion(): Reproduccion {
   return useContext(ReproduccionDeLaDemo)
 }
 
-/** Lo que la miniatura repite del final de su guion en cada entrada (pasos), y cada cuánto avanza un paso (ms). */
-export const MINIATURA = { pasosAlFinal: 3, msMaximoPorPaso: 1600 } as const
+/**
+ * Lo que la miniatura repite del final de su guion en cada entrada (pasos), cada cuánto avanza un paso (ms) y cuánto
+ * se mueve en cada entrada (ms): después queda quieta del todo, también las animaciones de CSS del panel (los puntos que
+ * laten, los íconos que giran). Menos de cinco segundos: WCAG 2.2.2; y quieta, no cuesta nada.
+ */
+export const MINIATURA = { pasosAlFinal: 3, msMaximoPorPaso: 1600, vivaMs: 5000 } as const
 
 export interface Pasos {
   /** El paso de ahora: de 0 a `total`. */

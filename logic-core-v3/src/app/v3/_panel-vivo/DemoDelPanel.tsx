@@ -1,13 +1,13 @@
 'use client'
 
-import { lazy, Suspense, useEffect, useState, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
 import { usePrefiereMenosMovimiento } from '../_lib/usePrefiereMenosMovimiento'
 import { NOMBRE_DE_LA_DEMO, type IdDeDemo } from './catalogo'
-import { ReproduccionDeLaDemo, marcarLaDemoGrande, useDemoGrandeAbierta, usePestanaVisible, type Reproduccion } from './reproduccion'
+import { MINIATURA, ReproduccionDeLaDemo, marcarLaDemoGrande, useDemoGrandeAbierta, usePestanaVisible, type Reproduccion } from './reproduccion'
 
 /**
  * [NOCTURNO] B · LA DEMO DEL PANEL, EN LA PÁGINA — liviana: lo pesado (los componentes del dashboard, los datos de
@@ -48,6 +48,9 @@ export const PANTALLA_DE_LA_MINIATURA = { escritorio: { ancho: 1120, alto: 700 }
 export function MiniaturaDeLaDemo({ demo }: { readonly demo: IdDeDemo }): React.JSX.Element | null {
   const [caja, setCaja] = useState<HTMLSpanElement | null>(null)
   const [vista, setVista] = useState({ aLaVista: false, entrada: 0 })
+  // La entrada cuyos cinco segundos ya pasaron: desde ahí, quieta.
+  const [apagada, setApagada] = useState(0)
+  const entradas = useRef({ n: 0, aLaVista: false })
   const [escala, setEscala] = useState(0)
   const reducido = usePrefiereMenosMovimiento()
   const grande = useDemoGrandeAbierta()
@@ -56,9 +59,20 @@ export function MiniaturaDeLaDemo({ demo }: { readonly demo: IdDeDemo }): React.
   const Demo = DEMOS[demo]
   useEffect(() => {
     if (caja === null || Demo === undefined) return undefined
-    const vigia = new IntersectionObserver((entradas) => {
-      const ahora = entradas.some((e) => e.isIntersecting)
-      setVista((v) => (v.aLaVista === ahora ? v : { aLaVista: ahora, entrada: ahora ? v.entrada + 1 : v.entrada }))
+    const relojes: number[] = []
+    const vigia = new IntersectionObserver((cambios) => {
+      const ahora = cambios.some((e) => e.isIntersecting)
+      const e = entradas.current
+      if (ahora === e.aLaVista) return
+      e.aLaVista = ahora
+      if (!ahora) {
+        setVista((v) => ({ ...v, aLaVista: false }))
+        return
+      }
+      e.n += 1
+      const n = e.n
+      setVista({ aLaVista: true, entrada: n })
+      relojes.push(window.setTimeout(() => setApagada(n), MINIATURA.vivaMs))
     })
     const medida = new ResizeObserver(() => setEscala(caja.clientWidth / pantalla.ancho))
     vigia.observe(caja)
@@ -66,17 +80,19 @@ export function MiniaturaDeLaDemo({ demo }: { readonly demo: IdDeDemo }): React.
     return () => {
       vigia.disconnect()
       medida.disconnect()
+      relojes.forEach((r) => window.clearTimeout(r))
     }
   }, [caja, Demo, pantalla.ancho])
   if (Demo === undefined) return null
-  const reproduccion: Reproduccion = { modo: 'miniatura', corre: vista.aLaVista && pestana && !grande && !reducido, reducido, entrada: vista.entrada, pausada: false, alternarPausa: () => undefined }
+  const corre = vista.aLaVista && apagada < vista.entrada && pestana && !grande && !reducido
+  const reproduccion: Reproduccion = { modo: 'miniatura', corre, reducido, entrada: vista.entrada, pausada: false, alternarPausa: () => undefined }
   return (
     <span ref={setCaja} aria-hidden="true" inert data-pieza="miniatura-de-la-demo" className="absolute inset-0 block overflow-hidden">
       {caja !== null &&
         vista.entrada > 0 &&
         escala > 0 &&
         createPortal(
-          <span className="absolute top-0 left-0 block origin-top-left" style={{ width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` }}>
+          <span className={`absolute top-0 left-0 block origin-top-left ${corre ? '' : '[&_*]:[animation-play-state:paused]'}`} style={{ width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` }}>
             <ReproduccionDeLaDemo.Provider value={reproduccion}>
               <Suspense fallback={null}>
                 <Demo />
