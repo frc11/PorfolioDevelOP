@@ -6,6 +6,7 @@ import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
+import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
@@ -99,6 +100,9 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   // [RETOQUE 3D] B5 · la misma subida, para el título de volumen (fracción del cuadro): sube con los valores y no se cruzan.
   const corrida = useTransform(levantada, (u) => (-u * SUBIDA_DE_LA_LEVANTADA_SVH) / 100)
   const opacity = useTransform(levantada, [0, 1], [1, 0])
+  // [NOCTURNO] A1 · cada columna de valores va en el plano de su mitad de la frase de volumen.
+  const valoresDeLaIzquierda = useAcompananteDelTitulo<HTMLDivElement>('frase-izquierda')
+  const valoresDeLaDerecha = useAcompananteDelTitulo<HTMLDivElement>('frase-derecha')
   return (
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
       <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
@@ -121,7 +125,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         {/* Los valores: tres a la izquierda del logo y tres a la derecha. */}
         {/* Cada columna es un contenedor: a 1024×768 mide 159 px y, con el aire de siempre, la de la derecha se desbordaba 41 px. */}
         {/* [FINAL 3] Cada columna mide lo que su mitad del título (una copia invisible le da el ancho) y se pega a su lado del logo: simétricas. */}
-        <div className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+        <div ref={valoresDeLaIzquierda} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
           <AnchoDeLaFrase texto={FRASE.izquierda} />
           {/* El contenedor va adentro: con contención de tamaño no aportaría ancho y la columna mediría 0. */}
           <div className="@container">
@@ -132,7 +136,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
             </ul>
           </div>
         </div>
-        <div className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+        <div ref={valoresDeLaDerecha} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
           <AnchoDeLaFrase texto={FRASE.derecha} />
           <div className="@container">
             <ul className={CLASE_DE_LA_COLUMNA}>

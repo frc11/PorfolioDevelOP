@@ -25,6 +25,8 @@ import { armarElTitulo } from './geometria'
 import { ASIENTO, DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
 import { costadoDeDiaGlsl } from './filo'
+import { enOcio } from './ocio'
+import { llevarLosAcompanantes } from './acompanantes'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -227,8 +229,12 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   }, [camara, rig, stats, tam.width, tam.height])
 
   // [CIERRE RETOQUE 3D] D1 · los que van con la página se colocan con la cámara SIN el mouse: fijos en el mundo, el paralaje les
-  // deja ver la perspectiva y los costados (con la viva, mouse incluido, acompañaban a la cámara).
-  useFrame((_, delta) => alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE))
+  // deja ver la perspectiva y los costados (con la viva, mouse incluido, acompañaban a la cámara). [NOCTURNO] A1: y su texto
+  // 2D (la bajada, los CTA, los valores), en el plano de cada uno con la cámara viva (`acompanantes.ts`).
+  useFrame((state, delta) => {
+    alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE)
+    llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
+  })
 
   return <group ref={raiz} name="titulos de volumen" />
 }
@@ -356,16 +362,6 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, y: n
   const visible = m.llegada > 0 && !fuera && !tapado
   if (visible) ubicar(a, d, viva)
   return visible
-}
-
-/** Con la página ociosa (a lo sumo en 1,5 s); Safari no tiene `requestIdleCallback`: ahí, en 200 ms. Devuelve cómo cancelarlo. */
-function enOcio(f: () => void): () => void {
-  if (typeof window.requestIdleCallback === 'function') {
-    const pedido = window.requestIdleCallback(f, { timeout: 1500 })
-    return () => window.cancelIdleCallback(pedido)
-  }
-  const pedido = window.setTimeout(f, 200)
-  return () => window.clearTimeout(pedido)
 }
 
 function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRenderTarget): void {

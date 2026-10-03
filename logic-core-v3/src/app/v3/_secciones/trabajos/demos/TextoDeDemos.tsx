@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../../_componentes/titulos3d/useTextoDeVolumen'
+import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
 import { CanalDeUnaPieza } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
@@ -41,16 +42,20 @@ export function TextoDeDemos({
   readonly progresoDelParrafo?: Progreso
   readonly refDelParrafo?: Ref<HTMLDivElement>
 }): React.JSX.Element {
+  // [NOCTURNO] A1 · el párrafo va en el plano del título de volumen (la cámara lo corre con él).
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos-2')
   return (
     <div className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
       <TituloDeDemos progreso={progresoDelTitulo} />
-      <div ref={refDelParrafo}>
-        <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
-          <Cuerpo className={CLASE_DEL_CUERPO_DE_DEMOS}>
-            {TEXTO_DE_DEMOS.parrafo} <span className="max-escritorio:hidden">{TEXTO_DE_DEMOS.enEscritorio}</span>{' '}
-            <span className="escritorio:hidden">{TEXTO_DE_DEMOS.enMovil}</span>
-          </Cuerpo>
-        </CanalDeUnaPieza>
+      <div ref={enElPlano}>
+        <div ref={refDelParrafo}>
+          <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
+            <Cuerpo className={CLASE_DEL_CUERPO_DE_DEMOS}>
+              {TEXTO_DE_DEMOS.parrafo} <span className="max-escritorio:hidden">{TEXTO_DE_DEMOS.enEscritorio}</span>{' '}
+              <span className="escritorio:hidden">{TEXTO_DE_DEMOS.enMovil}</span>
+            </Cuerpo>
+          </CanalDeUnaPieza>
+        </div>
       </div>
     </div>
   )

@@ -134,9 +134,9 @@ const fijosEnElMundo = (o: string, t: string): boolean =>
   /sinElMouse\.angleDeg = angleDeg \+ giroDeLaVista\s*sinElMouse\.height = height\s*angleDeg \+= desplazamiento\.angleDeg \+ giroDeLaVista/.test(o) &&
   /posarLaCamaraSinElMouse\(state\.camera, sinElMouse,/.test(o) &&
   /publicarLaMirada\(desplazamiento\.angleDeg,/.test(o) &&
-  /Math\.min\(delta, 0\.1\), CAMARA_SIN_EL_MOUSE\)\)/.test(t)
+  /Math\.min\(delta, 0\.1\), CAMARA_SIN_EL_MOUSE\)/.test(t)
 afirmar(fijosEnElMundo(orbita, titulosDeLaEscena), 'los títulos que van con la página (el hero, «El equipo», las demos) se colocan con la cámara SIN el mouse; Portfolio y la frase ya estaban fijos (su cámara de lectura): el paralaje les deja ver la perspectiva y los costados')
-controlPositivo('el detector VE los títulos pegados a la cámara viva', [orbita, titulosDeLaEscena.replace('CAMARA_SIN_EL_MOUSE))', 'camara))')], ([o, t]: string[]) => fijosEnElMundo(o, t))
+controlPositivo('el detector VE los títulos pegados a la cámara viva', [orbita, titulosDeLaEscena.replace('Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE)', 'Math.min(delta, 0.1), camara)')], ([o, t]: string[]) => fijosEnElMundo(o, t))
 const alReves = (f: typeof giroDeLaPieza): boolean => f({ giro: 10, inclinacion: 4 }) === `rotateX(${(4 * EXAGERACION_DEL_CSS).toFixed(3)}deg) rotateY(${(-10 * EXAGERACION_DEL_CSS).toFixed(3)}deg)` && f({ giro: 0, inclinacion: 0 }) === 'rotateX(0.000deg) rotateY(0.000deg)'
 afirmar(alReves(giroDeLaPieza), '  los bloques de CSS 3D giran AL REVÉS de la cámara (la cámara se corre a la derecha: se ve su costado derecho; sube: su cara de arriba); quieto el mouse, de frente')
 controlPositivo('el detector VE el bloque que acompaña a la cámara', ((m: { giro: number; inclinacion: number }) => `rotateX(${(-m.inclinacion).toFixed(3)}deg) rotateY(${m.giro.toFixed(3)}deg)`) as typeof giroDeLaPieza, alReves)

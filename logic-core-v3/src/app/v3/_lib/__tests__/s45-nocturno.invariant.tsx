@@ -8,14 +8,21 @@
  *   A5 · la salida de «Seis razones / para elegirnos», con el mismo mecanismo y bastante más lenta (se iba volando).
  *   A3 · los enlaces del recorrido del pie viajan como los ítems del menú (el mismo escucha, el mismo plan de la escena y
  *        la misma llegada repetida del título del destino).
+ *   A1 · el texto 2D que acompaña a un título 3D (la bajada y los CTA del hero, la bajada de Portfolio, los valores de la
+ *        frase, el párrafo de Demos) va en el plano de su título como lo ve la cámara viva: queda siempre debajo de él.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno/LEEME.txt`.
  */
 import { readFileSync } from 'node:fs'
+
+import * as THREE from 'three'
 
 import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
 import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { LLEGADA_DE_LAS_LETRAS, mostradoDelScroll } from '../escena/titulos3d/llegada'
+import { cuadrilateroEnElPlano } from '../escena/titulos3d/acompanantes'
+import { colocar, lineaDeBase } from '../escena/titulos3d/colocacion'
+import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { ASIENTO, LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -107,5 +114,72 @@ afirmar(viajan(SELECTOR_DE_LOS_VIAJES, columnas), 'los enlaces del recorrido del
 controlPositivo('el detector VE los enlaces del pie afuera del viaje (el salto de antes)', SELECTOR_DE_LOS_VIAJES.replace(`, ${DEL_PIE}`, ''), (sel: string) => viajan(sel, columnas))
 const secciones = IDS_DE_SECCION as readonly string[]
 afirmar(DESTINOS_DE_LA_RUTA.length > 0 && DESTINOS_DE_LA_RUTA.every((d) => d.ancla.startsWith('#') && secciones.includes(d.ancla.slice(1))), '  cada destino es el ancla de una sección (el viaje la resuelve a su nudo); ninguno es `#contacto` (ése abre el panel)', DESTINOS_DE_LA_RUTA.map((d) => d.ancla).join(' '))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A1 · El texto 2D pegado a su título 3D')
+
+// Un título colocado como lo coloca la escena (a la profundidad del logo, de frente a la cámara con que se coloca) y su
+// bajada debajo. La cámara viva: la misma (el mouse quieto) o corrida 8° alrededor del logo (el mouse, la órbita).
+const CUADRO = { ancho: 1440, alto: 900 }
+const camaraEn = (grados: number): THREE.PerspectiveCamera => {
+  const c = new THREE.PerspectiveCamera(CAMERA_FOV, CUADRO.ancho / CUADRO.alto, CAMERA_NEAR, CAMERA_FAR)
+  const a = THREE.MathUtils.degToRad(grados)
+  c.position.set(Math.sin(a) * 30, 4, Math.cos(a) * 30)
+  c.lookAt(0, ORBIT_TARGET_Y, 0)
+  c.updateMatrixWorld(true)
+  return c
+}
+const deLaColocacion = camaraEn(0)
+const LUGAR = { izquierda: 180, arriba: 300, linea: 110, cuerpo: 96, ancho: CUADRO.ancho, alto: CUADRO.alto }
+const FUENTE = { ascender: 900, descender: -250, resolution: 1000 }
+const grupo = new THREE.Group()
+colocar(grupo, deLaColocacion, LUGAR, FUENTE)
+const ancla = { x: LUGAR.izquierda, y: lineaDeBase(LUGAR, FUENTE) }
+const bajadaDelTitulo = { x: 184, y: 440, ancho: 520, alto: 150 }
+type Caja = typeof bajadaDelTitulo
+type Cuenta = (camara: THREE.Camera, caja: Caja, destino: number[]) => boolean
+const enElPlano: Cuenta = (camara, caja, destino) => cuadrilateroEnElPlano(grupo, ancla, LUGAR.cuerpo, caja, camara, CUADRO, destino)
+const q: number[] = []
+const enSuLugar = enElPlano(deLaColocacion, bajadaDelTitulo, q) && [0, 0, 520, 0, 520, 150, 0, 150].every((v, k) => Math.abs(q[k] - v) < 0.01)
+afirmar(enSuLugar, 'con la cámara viva en la pose con que se colocó el título (el mouse quieto), el texto queda donde el DOM lo puso: la transformada es la identidad')
+/** Sigue al título: el origen del título, puesto como una caja de un px, cae donde la cámara viva ve el título; y la bajada queda debajo. */
+const sigueAlTitulo = (f: Cuenta): boolean => {
+  const viva = camaraEn(8)
+  const punto: number[] = []
+  if (!f(viva, { x: ancla.x, y: ancla.y, ancho: 1, alto: 1 }, punto)) return false
+  const visto = grupo.position.clone().project(viva)
+  const [vx, vy] = [((visto.x + 1) / 2) * CUADRO.ancho, ((1 - visto.y) / 2) * CUADRO.alto]
+  const enElTitulo = Math.hypot(ancla.x + punto[0] - vx, ancla.y + punto[1] - vy) < 0.5
+  const bajada: number[] = []
+  if (!f(viva, bajadaDelTitulo, bajada)) return false
+  const seMovio = Math.hypot(bajada[0], bajada[1]) > 5
+  const debajo = bajadaDelTitulo.y + Math.min(bajada[1], bajada[3]) > vy
+  return enElTitulo && seMovio && debajo
+}
+afirmar(sigueAlTitulo(enElPlano), '  con la cámara corrida 8° (el paralaje, la órbita), el texto se corre con el título: su origen cae donde se ve el título y la bajada sigue debajo de él')
+controlPositivo('el detector VE el texto quieto en la pantalla (el defecto de la captura)', ((_c: THREE.Camera, caja: Caja, destino: number[]) => enElPlano(deLaColocacion, caja, destino)) as Cuenta, sigueAlTitulo)
+const deEspaldas = new THREE.PerspectiveCamera(CAMERA_FOV, CUADRO.ancho / CUADRO.alto, CAMERA_NEAR, CAMERA_FAR)
+deEspaldas.position.set(0, 4, 30)
+deEspaldas.lookAt(0, 4, 60)
+deEspaldas.updateMatrixWorld(true)
+afirmar(!enElPlano(deEspaldas, bajadaDelTitulo, []), '  con el plano detrás de la cámara no hay transformada: el texto queda en su lugar')
+// En el código: la escena lo lleva con la cámara VIVA, por cuadro, escribiendo el estilo (sin `setState`); el DOM se anota
+// desde 1024 con el título armado (abajo la mezcla del texto no se toca) y vuelve a su lugar al soltarse.
+const delDom = sinComentarios(leer('_lib/titulos3d/acompanantes.ts'))
+const deLaEscena = sinComentarios(leer('_lib/escena/titulos3d/acompanantes.ts'))
+const conLaViva = (c: string): boolean => /llevarLosAcompanantes\(m\.current\.armados, state\.camera, /.test(c)
+afirmar(conLaViva(escena) && /el\.style\.transform = css/.test(deLaEscena) && !/setState|useState/.test(deLaEscena) && /const activo = material !== 'no' && escritorio && listo/.test(delDom) && /el\.style\.transform = ''/.test(delDom), '  la escena lo lleva por cuadro con la cámara viva (escribe el estilo, sin `setState`); sólo desde 1024 y con el título armado; al soltarse, vuelve a su lugar')
+controlPositivo('el detector VE el texto llevado con la cámara sin el mouse', escena.replace('llevarLosAcompanantes(m.current.armados, state.camera, ', 'llevarLosAcompanantes(m.current.armados, CAMARA_SIN_EL_MOUSE, '), conLaViva)
+const PEGADOS: readonly (readonly [string, RegExp])[] = [
+  ['_secciones/hero/Hero.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('hero-registro-2'\)[\s\S]{0,120}<div ref=\{enElPlano\}/],
+  ['_secciones/trabajos/piezas.tsx', /const bajada = useAcompananteDelTitulo<HTMLDivElement>\('portfolio'\)[\s\S]*<div ref=\{bajada\} style=\{\{ maxWidth/],
+  ['_secciones/por-que-develop/PorQueDevelop.tsx', /useAcompananteDelTitulo<HTMLDivElement>\('frase-izquierda'\)[\s\S]*useAcompananteDelTitulo<HTMLDivElement>\('frase-derecha'\)[\s\S]*<div ref=\{valoresDeLaIzquierda\}[\s\S]*<div ref=\{valoresDeLaDerecha\}/],
+  ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos-2'\)[\s\S]*<div ref=\{enElPlano\}>\s*<div ref=\{refDelParrafo\}>/],
+]
+const pegados = PEGADOS.map(([ruta, patron]) => patron.test(sinComentarios(leer(ruta))))
+afirmar(pegados.every(Boolean), '  en el hero (la bajada y los CTA), en Portfolio (su bajada), en Por qué develOP (cada columna de valores con su mitad de la frase) y en Demos (el párrafo)', pegados.map((v, k) => `${PEGADOS[k][0].split('/').pop() ?? ''}: ${v ? 'sí' : 'NO'}`).join(' · '))
+const ids = ['hero-registro-2', 'portfolio', 'frase-izquierda', 'frase-derecha', 'demos-2']
+const anotados = ['_secciones/hero/Hero.tsx', '_secciones/trabajos/piezas.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/trabajos/demos/TextoDeDemos.tsx'].map(leer).join('\n')
+afirmar(ids.every((id) => anotados.includes(`id: '${id}'`) || anotados.includes(`id="${id}"`)), '  cada uno acompaña a un título que existe (el mismo id con que la sección lo anota)')
 
 cerrar('s45-nocturno')

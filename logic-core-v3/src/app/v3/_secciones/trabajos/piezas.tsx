@@ -8,6 +8,7 @@ import { Grilla } from '../../_componentes/layout/Grilla'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
+import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { CanalDeTexto, CanalDeUnaPieza, ConInercia, VENTANA_QUE_RECORTA } from '../_contrato/canales'
@@ -115,6 +116,8 @@ export function PortadaDeTrabajos({
   readonly mostrado: MotionValue<number>
 }): React.JSX.Element {
   const cartel = useRef<HTMLDivElement | null>(null)
+  // [NOCTURNO] A1 · la bajada va en el plano del título de volumen (la cámara la corre con él).
+  const bajada = useAcompananteDelTitulo<HTMLDivElement>('portfolio')
   /**
    * Cuánto huyó el cartel en el primer cuadro: sale del scroll, como la pose del
    * túnel. ⚠️ Se calcula UNA vez: si se recalculara en cada render, un re-render
@@ -210,7 +213,7 @@ export function PortadaDeTrabajos({
           La medida va como estilo en línea y no como clase arbitraria: el número
           vive en `geometria.ts`, que es donde se decide, y así no hay una medida
           deletreada en ningún fuente que el escaneo de Tailwind pueda levantar. */}
-      <div style={{ maxWidth: `${MEDIDA_DEL_CUERPO_CH}ch` }}>
+      <div ref={bajada} style={{ maxWidth: `${MEDIDA_DEL_CUERPO_CH}ch` }}>
         <Bloque patron="P2" rango="ventana-visible" className="block w-full">
           {(progresoDelCuerpo) => (
             <CanalDeTexto progreso={progresoDelCuerpo} tipo="parrafo" texto={CONTENIDO.bajada}>

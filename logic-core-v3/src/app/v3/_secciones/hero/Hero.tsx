@@ -8,6 +8,7 @@ import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TextoBase } from '../../_componentes/tipografia/Textos'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
+import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
@@ -171,8 +172,10 @@ import {
  */
 
 function BajadaYCta(): React.JSX.Element {
+  // [NOCTURNO] A1 · la bajada y los CTA van en el plano del titular de volumen: la cámara los corre con él.
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('hero-registro-2')
   return (
-    <>
+    <div ref={enElPlano} className="flex flex-col items-start gap-2 escritorio:gap-6">
       {/* ⚠️ **COMPO-1 · `TextoBase` Y NO `Cuerpo`, Y ES UN ESCALÓN DE LA ESCALA
           Y NO UN VALOR NUEVO.** Pedido del dueño: la bajada «un poco más
           grande» a 1440 y a 1920. Era `cuerpo` (15 px) y pasa a `base` (16 px),
@@ -235,7 +238,7 @@ function BajadaYCta(): React.JSX.Element {
         <CtaEnlace href={CONTENIDO.cta.destino} rotulo={CONTENIDO.cta.rotulo} registro="rotulo" mezcla className={MEZCLA_SOBRE_LA_ESCENA} />
         <CtaEnlace href={CONTENIDO.ctaContacto.destino} rotulo={CONTENIDO.ctaContacto.rotulo} registro="rotulo" mezcla className={MEZCLA_SOBRE_LA_ESCENA} />
       </div>
-    </>
+    </div>
   )
 }
 
