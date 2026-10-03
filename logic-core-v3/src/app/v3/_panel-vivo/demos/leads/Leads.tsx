@@ -10,7 +10,6 @@ import { CLASS_META, CLASS_ORDER, groupByClassification, type LeadClass } from '
 import { LeadPipelineColumn } from '@/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn'
 import type { LeadWithScore } from '@/modules/chatbot/components/dashboard/ClientLeadsTable'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { mostrarArriba } from '../../desplazar'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
 import { usePasos, useReproduccion } from '../../reproduccion'
@@ -49,9 +48,8 @@ const chip = (activo: boolean, acento = TODOS): string => `min-h-[44px] rounded-
 /** Lo que dura «Nuevo», en pasos de llegada (el sistema: 6 s; un lead llega cada 2,6 s). */
 const PASOS_DE_NUEVO = 2
 
-export default function Leads({ irA }: PropsDeLaDemo): React.JSX.Element {
+export default function Leads(): React.JSX.Element {
   const r = useReproduccion()
-  const grande = r.modo === 'completa'
   const [ahora] = useState(() => Date.now())
   const datos = useMemo(() => leadsDeEjemplo(ahora), [ahora])
   const { paso, avanzar } = usePasos(datos.llegan.length + PASOS_DE_NUEVO, RITMO_DE_LOS_LEADS.llegaMs)
@@ -70,7 +68,7 @@ export default function Leads({ irA }: PropsDeLaDemo): React.JSX.Element {
 
   const todos = [...datos.antes, ...datos.llegan.slice(0, llegaron), datos.descartado]
   const estadoDe = (l: LeadWithScore): ChatbotLeadStatus => estados[l.id] ?? l.status
-  const cambiar = grande ? (id: string) => (s: ChatbotLeadStatus) => setEstados((e) => ({ ...e, [id]: s })) : () => undefined
+  const cambiar = (id: string) => (s: ChatbotLeadStatus) => setEstados((e) => ({ ...e, [id]: s }))
   const esNuevo = (id: string): boolean => {
     const i = datos.llegan.findIndex((d) => d.lead.id === id)
     return i >= 0 && i < llegaron && paso - 1 - i < PASOS_DE_NUEVO
@@ -82,21 +80,18 @@ export default function Leads({ irA }: PropsDeLaDemo): React.JSX.Element {
     .filter((l) => (ahora - l.capturedAt.getTime()) / 60_000 <= RANGOS[filtro.rango].min)
     .sort((a, b) => (b.effectiveScore ?? 0) - (a.effectiveScore ?? 0))
   const grupos = groupByClassification(visibles)
-  const tarjeta = (l: LeadWithScore): ReactNode => <TarjetaDeLead key={l.id} lead={l} estado={estadoDe(l)} alCambiarEstado={grande ? cambiar(l.id) : undefined} alAbrir={grande ? setAbierto : undefined} nuevo={esNuevo(l.id)} isDq={l.effectiveClassification === 'dq'} />
+  const tarjeta = (l: LeadWithScore): ReactNode => <TarjetaDeLead key={l.id} lead={l} estado={estadoDe(l)} alCambiarEstado={cambiar(l.id)} alAbrir={setAbierto} nuevo={esNuevo(l.id)} isDq={l.effectiveClassification === 'dq'} />
   const elAbierto = todos.find((d) => d.lead.id === abierto)
-  const botonSi = (activo: boolean, contenido: ReactNode, alTocar: () => void, clase: string): ReactNode =>
-    grande ? (
-      <button type="button" aria-pressed={activo} onClick={alTocar} className={`${clase} cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400`}>
-        {contenido}
-      </button>
-    ) : (
-      <span className={`${clase} inline-flex items-center`}>{contenido}</span>
-    )
+  const botonSi = (activo: boolean, contenido: ReactNode, alTocar: () => void, clase: string): ReactNode => (
+    <button type="button" aria-pressed={activo} onClick={alTocar} className={`${clase} cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400`}>
+      {contenido}
+    </button>
+  )
 
   return (
-    <MarcoDelPanel item="chatbot" irA={irA} conPausa>
+    <MarcoDelPanel item="chatbot" conPausa>
       <div ref={raiz} className="flex flex-col gap-6">
-        <EncabezadoDelChatbot activa="leads" irA={irA} />
+        <EncabezadoDelChatbot activa="leads" />
         {elAbierto !== undefined ? (
           <DetalleDelLead de={elAbierto} estado={estadoDe(elAbierto.lead)} alCambiarEstado={cambiar(elAbierto.lead.id)} alVolver={() => setAbierto(null)} />
         ) : (
@@ -117,13 +112,13 @@ export default function Leads({ irA }: PropsDeLaDemo): React.JSX.Element {
                 )}
               </div>
             </div>
-            {grande && !r.corre && llegaron < datos.llegan.length && (
+            {!r.corre && llegaron < datos.llegan.length && (
               <button type="button" onClick={avanzar} className="inline-flex items-center gap-1.5 self-start rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-400">
                 <Plus className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden />
                 Que llegue un lead (ejemplo)
               </button>
             )}
-            <div ref={tuberia} aria-live={grande ? 'polite' : undefined}>
+            <div ref={tuberia}>
               {filtro.dq ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{visibles.map(tarjeta)}</div>
               ) : vistaDe !== null ? (
@@ -131,7 +126,7 @@ export default function Leads({ irA }: PropsDeLaDemo): React.JSX.Element {
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {CLASS_ORDER.map((c) => (
-                    <LeadPipelineColumn key={c} leadClass={c} leads={grupos[c]} bodyMaxHeight={460} onOpenOverview={grande ? setVistaDe : () => undefined} renderCard={tarjeta} />
+                    <LeadPipelineColumn key={c} leadClass={c} leads={grupos[c]} bodyMaxHeight={460} onOpenOverview={setVistaDe} renderCard={tarjeta} />
                   ))}
                 </div>
               )}

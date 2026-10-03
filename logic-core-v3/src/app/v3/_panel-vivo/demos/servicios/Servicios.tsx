@@ -9,10 +9,8 @@ import { PREMIUM_MODULES_CATALOG } from '@/lib/data/premium-modules'
 import { adminHoverCls } from '@/lib/hover'
 import { buildShowroom } from '@/lib/modules/showroom'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
-import { mostrarArriba } from '../../desplazar'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
-import { usePasos, useReproduccion } from '../../reproduccion'
+import { useReproduccion } from '../../reproduccion'
 import { ICONOS, NIVELES, TarjetaDeModulo, type ModuloDeLaVitrina } from './TarjetaDeModulo'
 
 /**
@@ -21,8 +19,7 @@ import { ICONOS, NIVELES, TarjetaDeModulo, type ModuloDeLaVitrina } from './Tarj
  * `<Link>`), tus módulos, «Subí al Siguiente Nivel», los disponibles y los próximos. La vitrina sale de la lógica REAL:
  * el catálogo (`PREMIUM_MODULES_CATALOG`, IMPORTADO) clasificado por `buildShowroom` (IMPORTADO) contra los módulos del
  * negocio de ejemplo. Se piden módulos («Desbloquear», «Avisame cuando esté») y se ven sus detalles (COPIA de
- * `ServiceDetailModal.tsx`, que es un portal al `body`: acá, adentro del marco), sin precios. La miniatura recorre la
- * vitrina sola.
+ * `ServiceDetailModal.tsx`, que es un portal al `body`: acá, adentro del marco), sin precios.
  */
 const MODULOS_DEL_NEGOCIO = new Map([['motor-resenas', 'ACTIVE' as const]])
 const VITRINA = buildShowroom(
@@ -45,21 +42,15 @@ const CONTRATADOS: readonly { readonly label: string; readonly description: stri
   { label: 'Inteligencia Artificial', description: 'Integración de modelos de lenguaje, asistentes inteligentes y soluciones de IA adaptadas a tu negocio.', glowRgb: '167,139,250', Icon: Bot, haceDias: 90 },
 ]
 
-export default function Servicios({ irA }: PropsDeLaDemo): React.JSX.Element {
+export default function Servicios(): React.JSX.Element {
   const r = useReproduccion()
-  const grande = r.modo === 'completa'
   const [ahora] = useState(() => Date.now())
   const [detalle, setDetalle] = useState<string | null>(null)
   const raiz = useRef<HTMLDivElement>(null)
-  const secciones = useRef<(HTMLElement | null)[]>([])
-  const { paso } = usePasos(2, 1500)
-  useEffect(() => {
-    if (!grande && paso > 0) mostrarArriba(secciones.current[paso] ?? null, false)
-  }, [grande, paso])
   const elDetalle = TODOS.find((m) => m.slug === detalle)
 
   return (
-    <MarcoDelPanel item="servicios" irA={irA} encima={elDetalle ? <DetalleDelModulo modulo={elDetalle} alCerrar={() => setDetalle(null)} /> : null}>
+    <MarcoDelPanel item="servicios" encima={elDetalle ? <DetalleDelModulo modulo={elDetalle} alCerrar={() => setDetalle(null)} /> : null}>
       <div ref={raiz} className="flex w-full flex-col gap-6">
         <PageHeader
           eyebrow="Mis servicios"
@@ -80,7 +71,7 @@ export default function Servicios({ irA }: PropsDeLaDemo): React.JSX.Element {
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">Contratados</p>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {CONTRATADOS.map((s) => (
-              <ServicioContratado key={s.label} servicio={s} desde={new Date(ahora - s.haceDias * 86_400_000)} irA={grande ? irA : undefined} />
+              <ServicioContratado key={s.label} servicio={s} desde={new Date(ahora - s.haceDias * 86_400_000)} />
             ))}
           </div>
         </section>
@@ -97,12 +88,12 @@ export default function Servicios({ irA }: PropsDeLaDemo): React.JSX.Element {
                 <p className="pl-7 text-sm text-zinc-400">Potenciá tu negocio con nuestras soluciones premium exclusivas</p>
               </div>
             )}
-            <section ref={(el) => { secciones.current[k] = el }} className="rounded-[30px] border border-white/10 bg-white/5 p-6">
+            <section className="rounded-[30px] border border-white/10 bg-white/5 p-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">{s.titulo}</p>
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {s.modulos.map((m, i) => (
                   <motion.div key={m.slug} initial={r.reducido ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i, duration: 0.4 }}>
-                    <TarjetaDeModulo modulo={m} alVerDetalle={setDetalle} interactivo={grande} reducido={r.reducido} />
+                    <TarjetaDeModulo modulo={m} alVerDetalle={setDetalle} interactivo reducido={r.reducido} />
                   </motion.div>
                 ))}
               </div>
@@ -115,7 +106,7 @@ export default function Servicios({ irA }: PropsDeLaDemo): React.JSX.Element {
 }
 
 /** Un servicio contratado (COPIA de `ServiceCard` de `services/page.tsx`; su «Ver detalles» era un `<Link>` a Mensajes). */
-function ServicioContratado({ servicio: s, desde, irA }: { readonly servicio: (typeof CONTRATADOS)[number]; readonly desde: Date; readonly irA?: PropsDeLaDemo['irA'] }): React.JSX.Element {
+function ServicioContratado({ servicio: s, desde }: { readonly servicio: (typeof CONTRATADOS)[number]; readonly desde: Date }): React.JSX.Element {
   return (
     <div className={`group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20 p-6 shadow-xl ${adminHoverCls}`}>
       <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-10 blur-[60px] transition-opacity duration-500 group-hover:opacity-25" style={{ background: `rgb(${s.glowRgb})` }} />
@@ -141,13 +132,7 @@ function ServicioContratado({ servicio: s, desde, irA }: { readonly servicio: (t
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600">Activo desde</p>
           <p className="mt-1 text-xs font-medium tabular-nums text-zinc-300">{desde.toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
         </div>
-        {irA ? (
-          <button type="button" onClick={() => irA('mensajes')} className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 transition-all hover:border-white/15 hover:bg-white/[0.05] hover:text-zinc-200 focus-visible:outline-2 focus-visible:outline-cyan-400">
-            Ver detalles
-          </button>
-        ) : (
-          <span className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">Ver detalles</span>
-        )}
+        <span className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">Ver detalles</span>
       </div>
     </div>
   )

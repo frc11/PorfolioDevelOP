@@ -11,7 +11,6 @@
  * Lo que necesita navegador está en los bancos de `scripts-interfaz2/` y sus entregas en `~/.cache/b4-medicion/interfaz2/`.
  */
 import { readFileSync } from 'node:fs'
-import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
 import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
@@ -19,8 +18,6 @@ import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from 
 import { demoBajo, estadoBajo, nocheQueSeVe, tonoBajo } from '../../_chrome/cursor/estado'
 import { CAJA_DEL_INFINITO, TRAMOS, TRAZO_DEL_INFINITO, porcentajeDelRecorrido, puntoDeLaLemniscata, textoDelPorcentaje } from '../../_chrome/recorrido/recorrido'
 import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
-import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
-import { PEDIDOS_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD } from '../../_componentes/vida/ejemplos'
 import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { ENCENDIDO } from '../escena/entorno/encendido'
@@ -196,15 +193,19 @@ afirmar(ANILLOS_GLSL.includes('( 1.0 - pow( 1.0 - t, 2.2 ) )') && Math.abs(frent
 const [r0, g0] = pixelDelMapa(0, 0)
 afirmar(Math.abs(r0 - 0.5) < 1e-6 && Math.abs(g0 - 0.5) < 1e-6 && pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa, 0)[2] > 0.99, '  su mapa es neutro lejos del frente y lleva la banda en el frente')
 afirmar(!/will-change|willChange/.test(sinComentarios(leer('_secciones/trabajos/demos/ondaDeLaPortada.ts'))) && leer('_chrome/ChromeDelHome.tsx').includes('<OndaDeLasPortadas />'), '  sin promover capas (la cara no puede llevar will-change), en el producto')
-const TEXTOS_DE_EJEMPLO = [ROTULO_DE_EJEMPLO, QUIEN_DE_EJEMPLO, ROTULO_DE_LA_ACTIVIDAD, ...PEDIDOS_DE_EJEMPLO.flatMap((p) => [p.que, p.desde])]
-const sinCifras = (textos: readonly string[]): boolean => textos.every((t) => !/[0-9%$+×]/.test(t))
-afirmar(sinCifras(TEXTOS_DE_EJEMPLO), 'ningún texto de ejemplo trae una cifra (CONTENIDO_INVENTADO)', `${String(TEXTOS_DE_EJEMPLO.length)} textos`)
-controlPositivo('el chequeo de las cifras ve un ejemplo con una cifra de negocio', ['Ventas +38 %'], sinCifras)
-const PANEL_HTML = renderToStaticMarkup(<PanelEnVivo />)
-afirmar(!/>[^<]*\d[^<]*</.test(PANEL_HTML) && PANEL_HTML.includes(`>${ROTULO_DE_LA_ACTIVIDAD}<`), 'Tu panel: la barra de actividad, SIN número (decisión del cierre): ni un dígito en la tarjeta', PANEL_HTML.match(/>[^<]*\d[^<]*</)?.[0] ?? '')
-controlPositivo('el chequeo del número ve la tarjeta con el contador de antes', '<span class="tabular-nums">3</span>', (h: string) => !/>[^<]*\d[^<]*</.test(h))
-afirmar(PANEL_HTML.includes('aria-label="Pausar el ejemplo"') && veces(PANEL_HTML, '<div aria-hidden="true"') === 2 && !/<(ul|li)/.test(PANEL_HTML) && !/style="/.test(PANEL_HTML), '  se puede pausar, lo que se mueve no se anuncia, y sin listas ni estilos en línea (las reglas de la sección)')
-afirmar(leer('_secciones/tu-panel/TuPanel.tsx').includes('      <PanelEnVivo />'), '  Tu panel, en el producto')
+// [RETOQUE PANEL] T1 · la tarjeta «En vivo · datos de ejemplo» se fue de Tu panel (y sus tres archivos, que nadie más usaba).
+const TU_PANEL = leer('_secciones/tu-panel/TuPanel.tsx')
+const sinElPanelEnVivo = (f: string): boolean => !/PanelEnVivo|_componentes\/vida\//.test(f)
+const borrado = (ruta: string): boolean => {
+  try {
+    leer(ruta)
+    return false
+  } catch {
+    return true
+  }
+}
+afirmar(sinElPanelEnVivo(TU_PANEL) && borrado('_componentes/vida/PanelEnVivo.tsx'), 'Tu panel, sin el panel en vivo: lo vivo son las demos de cada feature')
+controlPositivo('  el chequeo vería el panel en vivo montado', '      <PanelEnVivo />', sinElPanelEnVivo)
 afirmar(!/ProcesoEnVivo|proceso-en-vivo/.test(leer('_secciones/servicios/ServiciosEnSecuencia.tsx')), 'Servicios, como antes de INTERFAZ 2: sin el recorrido del pedido de ejemplo (cierre final)')
 controlPositivo('el chequeo de Servicios ve el recorrido montado', '<ProcesoEnVivo posicion={posicion} />', (f: string) => !/ProcesoEnVivo|proceso-en-vivo/.test(f))
 

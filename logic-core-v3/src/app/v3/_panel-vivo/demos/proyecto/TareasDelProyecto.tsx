@@ -15,7 +15,7 @@ import type { EstadoDeLaTarea, TareaDeEjemplo } from './datos'
  * `components/ui/Tabs.tsx`, las tareas con su estado, su impacto, su descripción al pasar y su vencimiento) y de
  * `TaskApprovalButtons.tsx` (aprobar con confirmación, pedir cambios con su texto). Lo que cambia, y por qué: aprobar y
  * pedir cambios llaman a server actions (acá, estado local con su aviso); «Hablar con el equipo» era un `<Link>` a
- * Mensajes (acá lleva a la demo del chat); el indicador de la pestaña usa un `layoutId` propio de esta demo (con el de
+ * Mensajes (acá no está: [RETOQUE PANEL] T1, la demo se usa en su lugar); el indicador de la pestaña usa un `layoutId` propio de esta demo (con el de
  * siempre volaría entre la miniatura y la grande).
  */
 const IMPACT_MAP: Readonly<Record<string, string>> = {

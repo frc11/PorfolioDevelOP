@@ -11,10 +11,9 @@ import { StatCard } from '@/components/ui/StatCard'
 import { ChatBubble } from '@/components/dashboard/ChatBubble'
 import { adminHoverCls } from '@/lib/hover'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { mostrarArriba } from '../../desplazar'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
-import { usePasos, useReproduccion } from '../../reproduccion'
+import { usePasos } from '../../reproduccion'
 import { CICLO_DE_EJEMPLO, RITMO_DE_LOS_TICKETS, TICKETS_DE_EJEMPLO, type EstadoDelTicket, type MensajeDelTicket, type TicketDeEjemplo } from './datos'
 import { FormularioDeTicket, type TicketNuevo } from './FormularioDeTicket'
 import { CATEGORIAS, COLUMNAS, PRIORIDADES, TableroDeSoporte, TarjetaDeTicket, type TicketDelTablero } from './TableroDeSoporte'
@@ -29,9 +28,7 @@ import { CATEGORIAS, COLUMNAS, PRIORIDADES, TableroDeSoporte, TarjetaDeTicket, t
  */
 const ETIQUETA_DEL_ESTADO: Readonly<Record<EstadoDelTicket, string>> = { OPEN: 'Abierto', IN_PROGRESS: 'En Progreso', RESOLVED: 'Resuelto' }
 
-export default function Tickets({ irA }: PropsDeLaDemo): React.JSX.Element {
-  const r = useReproduccion()
-  const grande = r.modo === 'completa'
+export default function Tickets(): React.JSX.Element {
   const [ahora] = useState(() => Date.now())
   const { paso } = usePasos(CICLO_DE_EJEMPLO.length, RITMO_DE_LOS_TICKETS.pasoMs)
   const [creados, setCreados] = useState<readonly TicketDeEjemplo[]>([])
@@ -59,21 +56,14 @@ export default function Tickets({ irA }: PropsDeLaDemo): React.JSX.Element {
   const abiertos = tickets.filter((t) => t.status !== 'RESOLVED').length
 
   return (
-    <MarcoDelPanel item="soporte" irA={irA} conPausa encima={formulario ? <FormularioDeTicket alCrear={crear} alCerrar={() => { setFormulario(false); boton.current?.querySelector('button')?.focus() }} /> : null}>
+    <MarcoDelPanel item="soporte" conPausa encima={formulario ? <FormularioDeTicket alCrear={crear} alCerrar={() => { setFormulario(false); boton.current?.querySelector('button')?.focus() }} /> : null}>
       <div ref={raiz} className="flex w-full flex-col gap-4">
         <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <PageHeader eyebrow="Soporte" title="Centro de Soporte" description="Un canal directo para ordenar consultas, prioridades y próximos pasos con el equipo." icon={Headphones} className="pt-0 sm:pt-1" />
           <div ref={boton} className="shrink-0 sm:mt-3">
-            {grande ? (
-              <Button variant="primary" onClick={() => setFormulario(true)} icon={<MessageSquarePlus size={16} strokeWidth={1.5} />}>
-                Abrir Nuevo Ticket
-              </Button>
-            ) : (
-              <span className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-black">
-                <MessageSquarePlus size={16} strokeWidth={1.5} aria-hidden />
-                Abrir Nuevo Ticket
-              </span>
-            )}
+            <Button variant="primary" onClick={() => setFormulario(true)} icon={<MessageSquarePlus size={16} strokeWidth={1.5} />}>
+              Abrir Nuevo Ticket
+            </Button>
           </div>
         </div>
         <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-3">
@@ -96,7 +86,7 @@ export default function Tickets({ irA }: PropsDeLaDemo): React.JSX.Element {
             </div>
           </Card>
         ) : (
-          <TableroDeSoporte tickets={delTablero} alAbrir={grande ? setAbierto : undefined} alVerTodos={grande ? setVista : undefined} />
+          <TableroDeSoporte tickets={delTablero} alAbrir={setAbierto} alVerTodos={setVista} />
         )}
       </div>
     </MarcoDelPanel>

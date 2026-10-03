@@ -7,9 +7,8 @@ import { AnimatedCounter } from '@/components/dashboard/AnimatedCounter'
 import { AnimatedProgressBar } from '@/components/dashboard/AnimatedProgressBar'
 import { adminHoverCls } from '@/lib/hover'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
-import { usePasos, useReproduccion } from '../../reproduccion'
+import { usePasos } from '../../reproduccion'
 import { AVANCES_DE_EJEMPLO, PROYECTO_DE_EJEMPLO, RITMO_DEL_PROYECTO, TAREAS_DE_EJEMPLO, type Aprobacion } from './datos'
 import { TareasDelProyecto } from './TareasDelProyecto'
 
@@ -21,9 +20,7 @@ import { TareasDelProyecto } from './TareasDelProyecto'
  * (en la landing no hay precios). El equipo termina una tarea y entrega otra para aprobar; el visitante la aprueba (o
  * pide cambios) y el avance se mueve.
  */
-export default function Proyecto({ irA }: PropsDeLaDemo): React.JSX.Element {
-  const r = useReproduccion()
-  const grande = r.modo === 'completa'
+export default function Proyecto(): React.JSX.Element {
   const [ahora] = useState(() => Date.now())
   const { paso } = usePasos(AVANCES_DE_EJEMPLO.length, RITMO_DEL_PROYECTO.pasoMs)
   const [decisiones, setDecisiones] = useState<Readonly<Record<string, Aprobacion>>>({})
@@ -43,7 +40,7 @@ export default function Proyecto({ irA }: PropsDeLaDemo): React.JSX.Element {
   ]
 
   return (
-    <MarcoDelPanel item="proyecto" irA={irA} conPausa>
+    <MarcoDelPanel item="proyecto" conPausa>
       <div className="flex flex-col gap-8">
         <header className="rounded-[28px] border border-white/10 bg-white/5 p-5">
           <p className="text-xs tracking-tight text-zinc-500">Tablero</p>
@@ -88,7 +85,7 @@ export default function Proyecto({ irA }: PropsDeLaDemo): React.JSX.Element {
         <TareasDelProyecto
           tareas={tareas}
           ahora={ahora}
-          interactivo={grande}
+          interactivo
           alAprobar={(id) => {
             setDecisiones((d) => ({ ...d, [id]: 'APPROVED' }))
             toast.success('Entregable aprobado correctamente (ejemplo)')
@@ -97,7 +94,6 @@ export default function Proyecto({ irA }: PropsDeLaDemo): React.JSX.Element {
             setDecisiones((d) => ({ ...d, [id]: 'REJECTED' }))
             toast.success('Cambios solicitados enviados a develOP (ejemplo)')
           }}
-          alHablar={grande && irA ? () => irA('mensajes') : undefined}
         />
       </div>
     </MarcoDelPanel>

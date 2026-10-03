@@ -25,7 +25,7 @@ import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { preciosEncontrados } from '../../_secciones/_contrato/escaneo'
 import { TARJETAS } from '../../_secciones/tu-panel/contenido'
-import { DEMO_DEL_ITEM, ITEM_DE_LA_DEMO, ROTULO_DE_EJEMPLO } from '../../_panel-vivo/catalogo'
+import { ITEM_DE_LA_DEMO, ROTULO_DE_EJEMPLO } from '../../_panel-vivo/catalogo'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from './s8-largos'
 import { LLEGADA_DE_LAS_LETRAS, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { cuadrilateroEnElPlano } from '../escena/titulos3d/acompanantes'
@@ -231,19 +231,14 @@ afirmar(TARJETAS.every((t) => t.demo in ITEM_DE_LA_DEMO) && new Set(TARJETAS.map
 const modulos = [...cargador.matchAll(/import\('(\.\/demos\/[^']+)'\)/g)].map((m) => `${CARPETA}/${m[1].slice(2)}.tsx`)
 afirmar(modulos.length === conDemo.length && modulos.every((m) => /<MarcoDelPanel item="/.test(fuenteViva(m))), '  cada demo va en el marco del panel (que lleva siempre «Ejemplo»)', modulos.map((m) => path.basename(m)).join(' · '))
 const marco = sinComentarios(fuenteViva(`${CARPETA}/MarcoDelPanel.tsx`))
-afirmar(ROTULO_DE_EJEMPLO === 'Ejemplo' && /\{ROTULO_DE_EJEMPLO\}<\/span>/.test(marco) && !/\{grande && [^}]*ROTULO_DE_EJEMPLO/.test(marco), '  el rótulo «Ejemplo» va en el marco, en los dos modos (la miniatura y la grande)')
-afirmar(Object.values(DEMO_DEL_ITEM).every((d) => d !== undefined && d in ITEM_DE_LA_DEMO), '  la barra lateral de la grande lleva a demos que existen')
+// [RETOQUE PANEL] T1 · la miniatura y la grande se fueron: cada demo se usa en su lugar (s6-tu-panel y s46 lo cuidan).
+afirmar(ROTULO_DE_EJEMPLO === 'Ejemplo' && /\{ROTULO_DE_EJEMPLO\}<\/span>/.test(marco), '  el rótulo «Ejemplo» va siempre en el marco')
 // Diferida, pausada fuera de cuadro y accesible.
-// La clase que frena las animaciones de CSS adentro de la miniatura quieta, armada partida (el escáner de Tailwind lee este archivo).
-const PAUSA_DE_LAS_ANIMACIONES = ['[&_*]', ['[animation-play-state', 'paused]'].join(':')].join(':')
-const miniatura = /<span ref=\{setCaja\} aria-hidden="true" inert /.test(cargador) && /new IntersectionObserver\(/.test(cargador) && /createPortal\(/.test(cargador) && /vista\.entrada > 0 &&/.test(cargador)
-const corre = /const corre = vista\.aLaVista && apagada < vista\.entrada && pestana && !grande && !reducido/.test(cargador) && /setApagada\(n\), MINIATURA\.vivaMs/.test(cargador) && cargador.includes(PAUSA_DE_LAS_ANIMACIONES) && /corre: pestana && !pausada && !reducido/.test(cargador)
-afirmar(miniatura && corre, '  la miniatura se monta recién al entrar en pantalla (en un portal, inerte y fuera del árbol de lectura) y corre sólo a la vista, los primeros cinco segundos de cada entrada, con la pestaña visible, sin la grande abierta y sin movimiento reducido; quieta, también se frenan las animaciones de CSS')
-controlPositivo('el detector VE una miniatura que se monta siempre', cargador.replace('vista.entrada > 0 &&', ''), (c: string) => /vista\.entrada > 0 &&/.test(c))
+const demoEnSuLugar = (c: string): boolean => (c.match(/new IntersectionObserver\(/g) ?? []).length === 2 && /rootMargin: ANTES_DE_ENTRAR/.test(c) && /\{montada && \(/.test(c) && /corre: aLaVista && pestana && !pausada && !reducido/.test(c)
+afirmar(demoEnSuLugar(cargador), '  la demo se monta recién al acercarse a la pantalla y corre sólo a la vista, con la pestaña visible, sin pausa y sin movimiento reducido')
+controlPositivo('el detector VE una demo que se monta siempre', cargador.replace('{montada && (', '{('), demoEnSuLugar)
 const reproduccion = sinComentarios(fuenteViva(`${CARPETA}/reproduccion.ts`))
-afirmar(/if \(!r\.corre \|\| paso >= total\) return undefined/.test(reproduccion) && /MINIATURA = \{ pasosAlFinal: 3, msMaximoPorPaso: 1600, vivaMs: 5000 \}/.test(reproduccion), '  los pasos avanzan solos sólo mientras corre (con movimiento reducido, a mano); la miniatura repite su final: tres pasos de 1,6 s como mucho (menos de cinco segundos, WCAG 2.2.2)')
-afirmar(/role="region" aria-label=\{`Demo de \$\{NOMBRE_DE_LA_DEMO\[demo\]\}, con datos de ejemplo`\}/.test(cargador) && /aria-pressed=\{r\.pausada\}/.test(marco), '  la grande es una región con nombre, y la que se mueve sola tiene su botón de pausa')
-const ampliacion = sinComentarios(readFileSync(`${V3}/_secciones/tu-panel/Ampliacion.tsx`, 'utf8'))
-afirmar(/querySelectorAll<HTMLElement>\(FOCALIZABLES\)/.test(ampliacion) && /e\.key === 'ArrowRight' && !enLaDemo\(e\)/.test(ampliacion) && /imagen\.current\?\.contains\(e\.target\) === true\) return/.test(ampliacion) && /<DemoCompleta demo=\{tarjeta\.demo\}/.test(ampliacion), '  en la ampliación: el foco da la vuelta por TODO lo enfocable (campos y enlaces de la demo), las flechas y la rueda adentro de la demo son de la demo')
+afirmar(/if \(!r\.corre \|\| paso >= total\) return undefined/.test(reproduccion), '  los pasos avanzan solos sólo mientras corre (con movimiento reducido, a mano)')
+afirmar(/role="region"\s+aria-label=\{`Demo de \$\{NOMBRE_DE_LA_DEMO\[demo\]\}, con datos de ejemplo`\}/.test(cargador) && /aria-pressed=\{r\.pausada\}/.test(marco) && /data-parte="saltar-la-demo"/.test(cargador), '  es una región con nombre, la que se mueve sola tiene su botón de pausa, y el teclado la puede saltar entera')
 
 cerrar('s45-nocturno')

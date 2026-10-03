@@ -19,16 +19,6 @@ export const ITEM_DE_LA_DEMO: Readonly<Record<IdDeDemo, ItemDelPanel>> = {
   informacion: 'chatbot',
 }
 
-/** Desde la barra lateral de la demo grande: a qué demo lleva cada ítem (los que no tienen demo no llevan a ningún lado). */
-export const DEMO_DEL_ITEM: Readonly<Partial<Record<ItemDelPanel, IdDeDemo>>> = {
-  proyecto: 'proyecto',
-  resultados: 'resultados',
-  servicios: 'servicios',
-  chatbot: 'conversaciones',
-  mensajes: 'mensajes',
-  soporte: 'tickets',
-}
-
 /** El nombre de cada demo para el lector de pantalla («Demo de … con datos de ejemplo»). */
 export const NOMBRE_DE_LA_DEMO: Readonly<Record<IdDeDemo, string>> = {
   conversaciones: 'las conversaciones del chatbot',

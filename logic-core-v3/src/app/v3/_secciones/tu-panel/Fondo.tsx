@@ -38,24 +38,27 @@ interface Lugar {
   readonly y: number
 }
 
-/** Dónde va cada palabra: x en % del ancho útil, y en svh desde el tope del caos. */
+/**
+ * Dónde va cada palabra: x en % del ancho útil, y en svh desde el tope del caos. [RETOQUE PANEL] T1: más espaciadas (las
+ * demos ocupan más): cada una en el aire que deja una demo de costado o entre dos filas.
+ */
 const LUGARES_DE_PALABRAS: readonly Lugar[] = [
-  { x: 34, y: 2 },
-  { x: 1, y: 58 },
-  { x: 38, y: 118 },
-  { x: 8, y: 176 },
-  { x: 52, y: 236 },
-  { x: 2, y: 292 },
-  { x: 40, y: 352 },
+  { x: 2, y: 30 },
+  { x: 1, y: 170 },
+  { x: 60, y: 338 },
+  { x: 54, y: 236 },
+  { x: 2, y: 408 },
+  { x: 2, y: 322 },
+  { x: 62, y: 480 },
 ]
 
 /** Los objetos, con su ancho en % del ancho útil. */
 const OBJETOS: readonly (Lugar & { readonly objeto: Objeto; readonly ancho: number })[] = [
-  { objeto: 'curva', x: 36, y: 64, ancho: 20 },
-  { objeto: 'interruptor', x: 88, y: 150, ancho: 6 },
-  { objeto: 'burbuja', x: 6, y: 214, ancho: 14 },
-  { objeto: 'cursor', x: 44, y: 300, ancho: 3 },
-  { objeto: 'fila', x: 58, y: 336, ancho: 30 },
+  { objeto: 'curva', x: 4, y: 64, ancho: 20 },
+  { objeto: 'interruptor', x: 88, y: 352, ancho: 6 },
+  { objeto: 'burbuja', x: 6, y: 205, ancho: 14 },
+  { objeto: 'cursor', x: 48, y: 250, ancho: 3 },
+  { objeto: 'fila', x: 64, y: 506, ancho: 30 },
 ]
 
 function Trazo({ objeto }: { readonly objeto: Objeto }): React.JSX.Element {

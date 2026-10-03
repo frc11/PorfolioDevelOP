@@ -34,23 +34,12 @@ import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, aperturasDe, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
 import { CAPTURA, DESCRIPCION, ID, NEWSLETTER, NOMBRE, PALABRAS_DEL_FONDO, PUNTOS_DE_Y_MAS, TARJETAS, TITULO, Y_MAS } from './contenido'
 import { ALFA_DEL_FONDO, VELOCIDAD_DEL_FONDO } from './Fondo'
-import {
-  ALTO_DE_LA_IMAGEN,
-  TABLA_DEL_CAOS,
-  TAMANOS,
-  cajasDelCaos,
-  cajasEn,
-  ESCALA_DE_LAS_FEATURES_A_1024,
-  convivenciaEn,
-  corrimientoDelParallax,
-  fueraDelCuadro,
-  velocidadDe,
-  type FilaDelCaos,
-} from './geometria'
+import { ANCHO_CON_BARRA } from '../../_panel-vivo/DemoDelPanel'
+import { BORDE_ELEGIDO, CLASE_DEL_BORDE } from './borde'
+import { DISPOSICION, escalaDeLaDemo, type LugarDeLaFeature } from './geometria'
 import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
 import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { cruceDelTramo as cruceDeTrabajos, gestoDelCruce as gestoDeTrabajos } from '../trabajos/gota'
-import { cajaAmpliada, transformadaEntre, vecino } from './vuelo'
 import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
 
 const montada = <TuPanel seccion={seccionDe(ID)} />
@@ -99,7 +88,8 @@ afirmarIgual(cuentaDe(ANIMADO, /data-inercia/g), 1, 'el titular lleva la inercia
 afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2 + 1, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo), más la inclinación del titular`)
 afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
 const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
-const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|arranque-final|escala-a-1024):[^;]*;?)+(opacity:[\d.]+)?)$/
+// [RETOQUE PANEL] T1 · + las medidas de cada demo (su proporción, su alto angosto y el fondo del panel, que se funde).
+const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|proporcion|alto-angosto|fondo-del-panel):[^;]*;?)+(opacity:[\d.]+)?)$/
 // MÓVIL 2: la palabra quieta de abajo de 1024 lleva sólo el alfa del fondo, que es de la tabla.
 const ALFA_SOLO = `opacity:${String(ALFA_DEL_FONDO)}`
 afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e) && e !== ALFA_SOLO), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
@@ -135,93 +125,63 @@ for (const archivo of ARCHIVOS) {
 controlPositivo('el detector de arbitrarios sin token no está ciego', 'className="gap-[16px]"', (t) => arbitrariosSinVar(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Foco y hover — cada feature es un botón, y el hover tiene su gemelo de foco')
+titulo('5 · [RETOQUE PANEL] T1 · Cada feature es su demo, usable en su lugar: sin botón que abra, sin hover que agrande')
 
 const TARJETA = fuenteDe('Tarjeta.tsx')
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  // [INTERFAZ 2] Más el botón de pausa del panel en vivo (`_componentes/vida/PanelEnVivo.tsx`): se mueve solo más de cinco
-  // segundos y WCAG 2.2.2 pide poder pausarlo. Está en las dos ramas.
-  // [RONDA 2] F1: + el botón del newsletter, que ahora envía (ya no está deshabilitado).
-  afirmarIgual(focalizablesDe(html).length, TARJETAS.length + 3, `${rama}: ${TARJETAS.length + 3} focalizables — una por feature, el campo y el botón del newsletter y la pausa del panel en vivo`)
-  afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), TARJETAS.length, `${rama}: cada feature avisa que abre un diálogo`)
+  // Lo enfocable de cada demo llega con la demo (en el navegador, al acercarse); en el HTML del servidor quedan el campo y
+  // el botón del newsletter. La tarjeta se enfoca sólo desde el código (`tabindex="-1"`: adonde lleva «Saltar la demo»).
+  afirmarIgual(focalizablesDe(html).length, 2, `${rama}: 2 focalizables en el HTML del servidor — el campo y el botón del newsletter`)
+  afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), 0, `${rama}: ninguna feature abre un diálogo (la demo grande se fue)`)
+  afirmarIgual(cuentaDe(html, /<li data-pieza="feature-del-panel"[^>]*tabindex="-1"[^>]*aria-labelledby=/g), TARJETAS.length, `${rama}: cada feature se puede enfocar desde el código y se nombra con su título`)
 }
-const hovers = [...TARJETA.matchAll(/group-hover:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()
-const focos = [...TARJETA.matchAll(/group-focus-visible:([\w-]+(?:\[[^\]]+\])?)/g)].map((m) => m[1]).sort()
-afirmarIgual(focos, hovers, `los ${hovers.length} cambios de hover tienen su gemelo en focus-visible`)
-afirmar(TARJETA.includes('group-hover:scale-105') && TARJETA.includes('group-hover:translate-x-[var(--spacing-8)]'), 'se quedan la imagen a 1,05 y el título corrido 32 px del sprint anterior')
+afirmar(!/group-hover:|hover:scale/.test(TARJETA) && !/<button/.test(TARJETA), 'la tarjeta no es un botón y nada se agranda con el hover')
+afirmar(/<DemoEnSuLugar demo=\{tarjeta\.demo\} pantalla=\{lugar\.pantalla\} respaldo=\{respaldo\} \/>/.test(TARJETA), '  la demo va en su lugar, con su pantalla y la captura de respaldo debajo')
+afirmar(ARCHIVOS.every((a) => !/Ampliacion\.tsx$|vuelo\.ts$/.test(a)) && !/Ampliacion|cajaAmpliada/.test(quitarComentarios(CODIGO)), '  la ampliación y su cuenta se borraron')
 afirmarIgual(ARCHIVOS.flatMap((a) => apagadosDeFoco(quitarComentarios(leer(a)))), [], 'ningún archivo apaga el anillo de foco')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El caos: una TABLA fija, cuatro tamaños, nada aleatorio')
+titulo('6 · La disposición: una TABLA fija, cada demo con la pantalla que necesita')
 
-afirmarIgual(TABLA_DEL_CAOS.length, TARJETAS.length, 'una fila por feature')
+afirmarIgual(DISPOSICION.length, TARJETAS.length, 'una fila por feature')
 afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /Math\.random|crypto\.getRandomValues/g), 0, 'nada se sortea en tiempo de ejecución: la hidratación ve lo mismo que el servidor')
-afirmarIgual(Object.keys(TAMANOS).length, 4, 'cuatro clases de tamaño')
-afirmar(Object.values(TAMANOS).every((t) => t.ancho <= 45), 'ninguna pasa del 45 % del ancho', Object.values(TAMANOS).map((t) => `${t.ancho} %`).join(' · '))
-afirmar(new Set(TABLA_DEL_CAOS.map((f) => f.tamano)).size === 4, 'y las cuatro se usan: tamaños distintos, nada fijo')
-const ordenPorAncho = Object.values(TAMANOS).sort((a, b) => a.ancho - b.ancho)
-afirmar(ordenPorAncho.every((t, i) => i === 0 || t.velocidad > ordenPorAncho[i - 1].velocidad), 'las más grandes van un poco más rápido (profundidad)')
-afirmarIgual(velocidadDe(TABLA_DEL_CAOS.length - 1), 0, 'la última queda asentada: velocidad 0')
-afirmar(TABLA_DEL_CAOS[0].columna >= 40, 'la primera llega en el 60 % derecho, al lado del encabezado', `columna ${TABLA_DEL_CAOS[0].columna} %`)
-afirmar(VELOCIDAD_DEL_FONDO < 0 && Object.values(TAMANOS).every((t) => t.velocidad > VELOCIDAD_DEL_FONDO), 'el fondo va más lento que cualquier feature: está más lejos')
+afirmarIgual([...new Set(DISPOSICION.map((l) => l.forma))].sort(), ['ancha', 'entera', 'media', 'par', 'primera'], 'las cinco formas se usan: tamaños distintos, nada igual')
+const pares = DISPOSICION.flatMap((l, i) => (l.forma === 'par' ? [i] : []))
+afirmar(pares.length === 2 && pares[1] === pares[0] + 1 && DISPOSICION[pares[0]].lado === 'izquierda' && DISPOSICION[pares[1]].lado === 'derecha', 'el par va junto: izquierda y derecha')
+const ritmo = (t: readonly LugarDeLaFeature[]): boolean => t.every((l, i) => i === 0 || l.forma === 'par' || `${l.forma}-${l.lado}` !== `${t[i - 1].forma}-${t[i - 1].lado}`)
+afirmar(ritmo(DISPOSICION), 'ninguna fila repite la forma y el lado de la anterior: el ritmo alterna')
+controlPositivo('  el chequeo vería dos anchas seguidas del mismo lado', [DISPOSICION[2], DISPOSICION[2]], ritmo)
+afirmar(DISPOSICION.every((l) => l.pantalla.ancho >= 640 && l.pantalla.alto >= 540 && l.altoAngosto >= 560), 'cada demo se dibuja a una pantalla de panel de verdad (ninguna de menos de 640 × 540) y abajo de 1024 tiene su alto')
+afirmar(DISPOSICION.filter((l) => l.pantalla.ancho >= ANCHO_CON_BARRA).length >= 4, `  las anchas (desde ${String(ANCHO_CON_BARRA)} px) llevan la barra lateral del panel; las angostas la cierran`)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · BARRIDO de convivencia sobre el modelo, a tres pantallas')
+titulo('7 · Sin zoom: la escala de cada demo, a tres anchos de escritorio')
 
-/** Barre el caos de a 5 px y devuelve el peor caso. */
-function barrer(tabla: readonly FilaDelCaos[], ancho: number, alto: number, escala = 1): { max: number; tapados: string[]; altoMaximo: number } {
-  const cajas = cajasDelCaos(ancho, alto, tabla, escala)
-  const fin = cajas[cajas.length - 1].titulo.arriba + alto
-  let max = 0
-  const tapados = new Set<string>()
-  for (let s = -alto; s <= fin; s += 5) {
-    const r = convivenciaEn(cajasEn(cajas, s, alto), alto)
-    max = Math.max(max, r.visibles)
-    r.tapados.forEach((t) => tapados.add(t))
-  }
-  return { max, tapados: [...tapados], altoMaximo: Math.max(...cajas.map((c) => (c.imagen.alto + c.titulo.alto) / alto)) }
-}
-for (const [ancho, alto] of [[1376, 900], [1856, 1080], [1216, 800]] as const) {
-  const r = barrer(TABLA_DEL_CAOS, ancho, alto)
-  afirmar(r.max <= 3, `${ancho} × ${alto}: nunca más de 3 features a la vez`, `máximo ${r.max}`)
-  afirmarIgual(r.tapados, [], `${ancho} × ${alto}: ningún título queda bajo otra imagen`)
-  afirmar(r.altoMaximo <= 0.55, `${ancho} × ${alto}: ninguna pasa del 55 % del alto`, `${(r.altoMaximo * 100).toFixed(1)} %`)
-}
-afirmarIgual(fueraDelCuadro(), [], 'ninguna se sale por los costados (con aire para el título corrido del hover)')
-// MÓVIL 2: a 1024 las imágenes crecen y las de la derecha se corren hacia adentro lo que crecen (el `min()` de `Tarjeta.tsx`).
-const aLas1024 = (e: number): FilaDelCaos[] => TABLA_DEL_CAOS.map((f) => ({ ...f, columna: Math.min(f.columna, 98 - TAMANOS[f.tamano].ancho * e) }))
-const r1024 = barrer(aLas1024(ESCALA_DE_LAS_FEATURES_A_1024), 960, 768, ESCALA_DE_LAS_FEATURES_A_1024)
-afirmar(ESCALA_DE_LAS_FEATURES_A_1024 > 1 && r1024.max <= 3 && r1024.tapados.length === 0 && r1024.altoMaximo <= 0.55, `1024 × 768 con las imágenes ×${String(ESCALA_DE_LAS_FEATURES_A_1024)}: más grandes, nunca más de 3 a la vez y ningún título tapado`, `máximo ${r1024.max} · tapados ${r1024.tapados.length} · alto ${(r1024.altoMaximo * 100).toFixed(1)} %`)
-controlPositivo('  el barrido de 1024 vería una escala que ya tapa', 1.08, (e: number) => barrer(aLas1024(e), 960, 768, e).tapados.length === 0)
-const apretada = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, separacion: 8 } : f))
-controlPositivo('el barrido ve una fila que junta cuatro', apretada, (t) => barrer(t, 1376, 900).max <= 3)
-const encima = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, columna: 52, separacion: 30 } : f))
-controlPositivo('y ve un título tapado', encima, (t) => barrer(t, 1376, 900).tapados.length === 0)
-controlPositivo('y una que se sale', [{ columna: 70, tamano: 'l' as const, separacion: 0 }], (t) => fueraDelCuadro(t).length === 0)
+const escalas = (anchoUtil: number): number[] => DISPOSICION.map((l) => escalaDeLaDemo(l, anchoUtil))
+const fmt = (e: readonly number[]): string => e.map((x) => x.toFixed(2)).join(' · ')
+const a1440 = escalas(1376)
+afirmar(a1440.every((e) => e >= 0.95 && e <= 1.1), '1440: cada demo a tamaño casi real (de 0,95 a 1,1)', fmt(a1440))
+const a1280 = escalas(1216)
+afirmar(a1280.every((e) => e >= 0.85), '1280: ninguna por debajo de 0,85', fmt(a1280))
+const a1024 = escalas(960)
+afirmar(a1024.every((e) => e >= 0.74 && e <= 1.1), '1024 (en columna): ninguna por debajo de 0,74 ni agrandada de más', fmt(a1024))
+controlPositivo('  el chequeo vería una demo a la mitad (el caos de antes: 42 % del ancho, dibujada a 1120)', [0.52], (e: readonly number[]) => e.every((x) => x >= 0.95 && x <= 1.1))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Parallax: la imagen adentro del marco (nk) y UNA suscripción')
+titulo('8 · UNA suscripción de scroll: la profundidad del fondo (las demos no se mueven con el scroll)')
 
-afirmar(Math.abs(corrimientoDelParallax(683, 571, 900) - -164.261) < 1, 'nk: marco de 571 a 683 px del tope → −164,261', corrimientoDelParallax(683, 571, 900).toFixed(3))
-afirmar(Array.from({ length: 301 }, (_, k) => corrimientoDelParallax(-600 + k * 5, 571, 900)).every((y) => y <= 0 && y >= -(ALTO_DE_LA_IMAGEN - 1) * 571), 'el borde de la imagen nunca entra al marco')
 const GALERIA = fuenteDe('Galeria.tsx')
-afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /addEventListener\('scroll'/g), 1, 'UNA suscripción de scroll para la profundidad, el fondo y las imágenes')
-// MÓVIL 2: el lazo corre con movimiento en todo ancho (el parallax interno); la profundidad, sólo con la composición.
-afirmar(/if \(!movimiento \|\| raiz === null\) return/.test(GALERIA) && /const profundas = anima \?/.test(GALERIA), '  que no se instala con movimiento reducido, y abajo de 1024 mueve sólo la imagen adentro de su marco: sin profundidad ni fondo')
-afirmar(GALERIA.includes('el.offsetTop'), '  y mide la profundidad con `offsetTop`, que no ve la transformada que escribe')
+afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /addEventListener\('scroll'/g), 1, 'UNA suscripción de scroll para la profundidad del fondo')
+afirmar(/if \(!anima \|\| raiz === null\) return/.test(GALERIA) && GALERIA.includes('el.offsetTop'), '  que sólo corre con la coreografía, y mide con `offsetTop` (no ve la transformada que escribe)')
+afirmar(VELOCIDAD_DEL_FONDO < 0, '  y el fondo va más lento que el scroll: está más lejos', String(VELOCIDAD_DEL_FONDO))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · La ampliación se queda: elemento compartido, flechas, Esc, foco')
+titulo('9 · Los bordes se funden con la sección: sin esquinas ni recuadro')
 
-const caja = cajaAmpliada(1440, 900, 80, 80)
-afirmar(Math.abs(caja.width / caja.height - 1.6) < 1e-9, 'la caja final es 16:10', `${caja.width.toFixed(1)} × ${caja.height.toFixed(1)}`)
-afirmarIgual(transformadaEntre(caja, caja), 'translate(0px, 0px) scale(1, 1)', 'desde la caja final a sí misma: identidad')
-afirmarIgual([vecino(7, 1, 8), vecino(0, -1, 8)], [0, 7], 'las flechas dan la vuelta')
-const AMPLIACION = fuenteDe('Ampliacion.tsx')
-for (const [que, patron] of [['role="dialog"', /role="dialog"/], ['aria-modal', /aria-modal="true"/], ['Esc', /'Escape'/], ['flechas', /'ArrowRight'[\s\S]*'ArrowLeft'/], ['Tab atrapado', /'Tab'/], ['la cruz', /aria-label="Cerrar"/]] as const) {
-  afirmar(patron.test(AMPLIACION), `el diálogo tiene ${que}`)
-}
-afirmar(/botones\.current\[abierta\]\?\.focus/.test(GALERIA), '  y el foco vuelve a la feature abierta')
+afirmarIgual(BORDE_ELEGIDO, 'a', 'la elegida es la `a` (el degradé): el panel se pierde en el papel')
+afirmar(CLASE_DEL_BORDE.a.includes('[mask-image:linear-gradient(to_right,transparent,black_var(--sangrado)') && CLASE_DEL_BORDE.a.includes('bg-[var(--fondo-del-panel)]'), '  `a`: el color del panel extendido y apagado en línea recta')
+afirmar(CLASE_DEL_BORDE.b.includes('var(--fondo-del-panel)') && CLASE_DEL_BORDE.b.startsWith('inset-0 shadow-'), '  `b`: un halo del color del panel (`?pruebas=panelborde=b`)')
+afirmar(/data-parte="borde-del-panel"/.test(QUIETO) && /data-borde="a"/.test(QUIETO), '  y el HTML del servidor ya trae la elegida (sin parpadeo al hidratar)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('10 · El remate: llega, SE VA en espejo, y el newsletter no finge un éxito')

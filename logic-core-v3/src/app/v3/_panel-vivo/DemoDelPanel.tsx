@@ -1,33 +1,28 @@
 'use client'
 
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
 import { usePrefiereMenosMovimiento } from '../_lib/usePrefiereMenosMovimiento'
 import { NOMBRE_DE_LA_DEMO, type IdDeDemo } from './catalogo'
-import { MINIATURA, ReproduccionDeLaDemo, marcarLaDemoGrande, useDemoGrandeAbierta, usePestanaVisible, type Reproduccion } from './reproduccion'
+import { ReproduccionDeLaDemo, usePestanaVisible, type Reproduccion } from './reproduccion'
 
 /**
  * [NOCTURNO] B · LA DEMO DEL PANEL, EN LA PÁGINA — liviana: lo pesado (los componentes del dashboard, los datos de
- * ejemplo, el marco) llega en un `import()` por demo, recién cuando su tarjeta entra en pantalla (o se abre la grande).
+ * ejemplo, el marco) llega en un `import()` por demo, recién cuando su tarjeta se acerca a la pantalla.
  *
- *   · `MiniaturaDeLaDemo` va en el marco de la tarjeta, encima de la captura (que queda debajo: es el HTML del servidor, el
- *     respaldo sin JS y lo que se ve mientras la demo llega). Es la demo entera, dibujada a un tamaño de pantalla de panel
- *     y escalada al marco; inerte y fuera del árbol de lectura (la tarjeta sigue siendo UN botón que abre la grande). Se
- *     monta en un portal: así sus botones no quedan anidados en el botón de la tarjeta para React.
- *   · `DemoCompleta` va en la ampliación: la misma demo, a tamaño real y usable (teclado, foco, lector).
+ * [RETOQUE PANEL] T1 · EN SU LUGAR: la demo se usa ahí mismo, en su tarjeta (la miniatura y la ampliación se fueron).
+ *   · Escritorio: se dibuja a la pantalla de panel que necesita para leerse sin zoom (`pantalla`, px) y se escala a la
+ *     caja de la tarjeta, que tiene su misma proporción: a 1440, a tamaño casi real.
+ *   · Abajo de 1024: el ancho de la columna y su alto, sin escala: el diseño del propio panel en el teléfono.
+ *   · Se mueve sola sólo a la vista y con la pestaña visible, con su «Pausar» (WCAG 2.2.2); con movimiento reducido, a mano.
+ *   · Debajo queda la captura (`respaldo`): el HTML del servidor, lo que se ve sin JS y mientras la demo llega.
+ *   · Teclado: arranca con «Saltar la demo», que lleva a la tarjeta siguiente (o a lo que sigue a la galería).
  */
-export interface PropsDeLaDemo {
-  /** En la grande: ir a otra demo (la barra lateral del panel). */
-  readonly irA?: (demo: IdDeDemo) => void
-}
+type Demo = LazyExoticComponent<ComponentType>
 
-type Demo = LazyExoticComponent<ComponentType<PropsDeLaDemo>>
-
-/** Las demos que ya existen; las demás features siguen con su captura. */
-const DEMOS: Partial<Record<IdDeDemo, Demo>> = {
+const DEMOS: Readonly<Record<IdDeDemo, Demo>> = {
   conversaciones: lazy(() => import('./demos/chatbot/Conversaciones')),
   leads: lazy(() => import('./demos/leads/Leads')),
   tickets: lazy(() => import('./demos/tickets/Tickets')),
@@ -38,92 +33,91 @@ const DEMOS: Partial<Record<IdDeDemo, Demo>> = {
   informacion: lazy(() => import('./demos/chatbot/LoQueSabe')),
 }
 
-export function hayDemo(demo: IdDeDemo): boolean {
-  return DEMOS[demo] !== undefined
+/** La pantalla de panel a la que se dibuja una demo en escritorio (px). */
+export interface PantallaDeLaDemo {
+  readonly ancho: number
+  readonly alto: number
 }
 
-/** El tamaño de pantalla al que se dibuja la miniatura (px): un panel de escritorio, o uno angosto abajo de 1024. */
-export const PANTALLA_DE_LA_MINIATURA = { escritorio: { ancho: 1120, alto: 700 }, angosto: { ancho: 640, alto: 400 } } as const
+/** Desde qué ancho de pantalla de panel (px) la demo lleva la barra lateral: más angosta, se cierra (como el panel real abajo de `lg`). */
+export const ANCHO_CON_BARRA = 860
 
-export function MiniaturaDeLaDemo({ demo }: { readonly demo: IdDeDemo }): React.JSX.Element | null {
-  const [caja, setCaja] = useState<HTMLSpanElement | null>(null)
-  const [vista, setVista] = useState({ aLaVista: false, entrada: 0 })
-  // La entrada cuyos cinco segundos ya pasaron: desde ahí, quieta.
-  const [apagada, setApagada] = useState(0)
-  const entradas = useRef({ n: 0, aLaVista: false })
+/** Cuánto antes de entrar al cuadro se descarga y se monta: el paso de la captura a la demo no se ve. */
+const ANTES_DE_ENTRAR = '0px 0px 50% 0px'
+
+/** Lo que se puede enfocar (para saltar la demo con el teclado). */
+const FOCALIZABLES = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdDeDemo; readonly pantalla: PantallaDeLaDemo; readonly respaldo: ReactNode }): React.JSX.Element {
+  const caja = useRef<HTMLDivElement>(null)
+  const [montada, setMontada] = useState(false)
+  const [aLaVista, setALaVista] = useState(false)
   const [escala, setEscala] = useState(0)
-  const reducido = usePrefiereMenosMovimiento()
-  const grande = useDemoGrandeAbierta()
-  const pestana = usePestanaVisible()
-  const pantalla = useAnchoMinimo(CONSULTA_ESCENARIO) ? PANTALLA_DE_LA_MINIATURA.escritorio : PANTALLA_DE_LA_MINIATURA.angosto
-  const Demo = DEMOS[demo]
-  useEffect(() => {
-    if (caja === null || Demo === undefined) return undefined
-    const relojes: number[] = []
-    const vigia = new IntersectionObserver((cambios) => {
-      const ahora = cambios.some((e) => e.isIntersecting)
-      const e = entradas.current
-      if (ahora === e.aLaVista) return
-      e.aLaVista = ahora
-      if (!ahora) {
-        setVista((v) => ({ ...v, aLaVista: false }))
-        return
-      }
-      e.n += 1
-      const n = e.n
-      setVista({ aLaVista: true, entrada: n })
-      relojes.push(window.setTimeout(() => setApagada(n), MINIATURA.vivaMs))
-    })
-    const medida = new ResizeObserver(() => setEscala(caja.clientWidth / pantalla.ancho))
-    vigia.observe(caja)
-    medida.observe(caja)
-    return () => {
-      vigia.disconnect()
-      medida.disconnect()
-      relojes.forEach((r) => window.clearTimeout(r))
-    }
-  }, [caja, Demo, pantalla.ancho])
-  if (Demo === undefined) return null
-  const corre = vista.aLaVista && apagada < vista.entrada && pestana && !grande && !reducido
-  const reproduccion: Reproduccion = { modo: 'miniatura', corre, reducido, entrada: vista.entrada, pausada: false, alternarPausa: () => undefined }
-  return (
-    <span ref={setCaja} aria-hidden="true" inert data-pieza="miniatura-de-la-demo" className="absolute inset-0 block overflow-hidden">
-      {caja !== null &&
-        vista.entrada > 0 &&
-        escala > 0 &&
-        createPortal(
-          <span className={`absolute top-0 left-0 block origin-top-left ${corre ? '' : '[&_*]:[animation-play-state:paused]'}`} style={{ width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` }}>
-            <ReproduccionDeLaDemo.Provider value={reproduccion}>
-              <Suspense fallback={null}>
-                <Demo />
-              </Suspense>
-            </ReproduccionDeLaDemo.Provider>
-          </span>,
-          caja,
-        )}
-    </span>
-  )
-}
-
-/** La demo grande, usable, en la ampliación. Mientras llega (o si la feature no tiene demo), el `respaldo`: la captura. */
-export function DemoCompleta({ demo, irA, respaldo }: { readonly demo: IdDeDemo; readonly irA?: (demo: IdDeDemo) => void; readonly respaldo: ReactNode }): ReactNode {
-  const reducido = usePrefiereMenosMovimiento()
-  const pestana = usePestanaVisible()
   const [pausada, setPausada] = useState(false)
+  const reducido = usePrefiereMenosMovimiento()
+  const pestana = usePestanaVisible()
+  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   useEffect(() => {
-    marcarLaDemoGrande(true)
-    return () => marcarLaDemoGrande(false)
-  }, [])
+    const el = caja.current
+    if (el === null) return undefined
+    const cerca = new IntersectionObserver(
+      (c) => {
+        if (c.some((e) => e.isIntersecting)) setMontada(true)
+      },
+      { rootMargin: ANTES_DE_ENTRAR },
+    )
+    const vista = new IntersectionObserver((c) => setALaVista(c.some((e) => e.isIntersecting)))
+    const medida = new ResizeObserver(() => setEscala(el.clientWidth / pantalla.ancho))
+    cerca.observe(el)
+    vista.observe(el)
+    medida.observe(el)
+    return () => {
+      cerca.disconnect()
+      vista.disconnect()
+      medida.disconnect()
+    }
+  }, [pantalla.ancho])
   const Demo = DEMOS[demo]
-  if (Demo === undefined) return respaldo
-  const reproduccion: Reproduccion = { modo: 'completa', corre: pestana && !pausada && !reducido, reducido, entrada: 1, pausada, alternarPausa: () => setPausada((p) => !p) }
+  const reproduccion: Reproduccion = { corre: aLaVista && pestana && !pausada && !reducido, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: pantalla.ancho >= ANCHO_CON_BARRA }
+  const escalada = escritorio && escala > 0
   return (
-    <div role="region" aria-label={`Demo de ${NOMBRE_DE_LA_DEMO[demo]}, con datos de ejemplo`} data-pieza="demo-del-panel" className="h-full w-full">
-      <ReproduccionDeLaDemo.Provider value={reproduccion}>
-        <Suspense fallback={respaldo}>
-          <Demo irA={irA} />
-        </Suspense>
-      </ReproduccionDeLaDemo.Provider>
+    <div ref={caja} className="absolute inset-0 overflow-hidden">
+      {respaldo}
+      {montada && (
+        <div
+          role="region"
+          aria-label={`Demo de ${NOMBRE_DE_LA_DEMO[demo]}, con datos de ejemplo`}
+          data-pieza="demo-del-panel"
+          className={escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'}
+          style={escalada ? { width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` } : undefined}
+        >
+          <button type="button" data-parte="saltar-la-demo" onClick={(e) => saltarLaDemo(e.currentTarget)} className="sr-only z-30 rounded-full bg-zinc-900 px-4 py-2 text-sm text-zinc-100 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus-visible:outline-2 focus-visible:outline-cyan-400">
+            Saltar la demo
+          </button>
+          <ReproduccionDeLaDemo.Provider value={reproduccion}>
+            <Suspense fallback={null}>
+              <Demo />
+            </Suspense>
+          </ReproduccionDeLaDemo.Provider>
+        </div>
+      )}
     </div>
   )
+}
+
+/**
+ * Con el teclado, la demo entera es un salto: a la tarjeta siguiente (que se enfoca, se pone a la vista y monta su demo)
+ * o, después de la última, a lo primero enfocable que sigue a la galería.
+ */
+function saltarLaDemo(boton: HTMLElement): void {
+  const tarjeta = boton.closest('li')
+  const siguiente = tarjeta?.nextElementSibling
+  if (siguiente instanceof HTMLElement) {
+    siguiente.focus()
+    return
+  }
+  const lista = tarjeta?.parentElement
+  if (lista === null || lista === undefined) return
+  const despues = [...document.querySelectorAll<HTMLElement>(FOCALIZABLES)].find((el) => (lista.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 && !lista.contains(el))
+  despues?.focus()
 }

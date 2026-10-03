@@ -6,6 +6,14 @@ datos de ejemplo locales. Este documento es el mapeo **feature → módulo → c
 IMPORTA (sólo la parte visual, sin servidor ni sesión) o se COPIA a `src/app/v3/_panel-vivo/` (copia, no edición: el
 dashboard no se toca), con su origen.
 
+> **[RETOQUE PANEL] T1 · en su lugar.** La miniatura y la ampliación se fueron: cada demo se usa ahí mismo, en su
+> tarjeta, dibujada a la pantalla de panel que necesita para leerse sin zoom (`_secciones/tu-panel/geometria.ts`,
+> `DISPOSICION`: formas entera, ancha, par y media) y escalada a su caja (a 1440, casi 1:1); abajo de 1024, al ancho de la
+> columna y sin escala. Corre sola sólo a la vista (con «Pausar»), se monta al acercarse y empieza con «Saltar la demo»
+> para el teclado. Los bordes se funden con la sección (`tu-panel/borde.ts`; `?pruebas=panelborde=a|b`, la `a` por
+> defecto). Sin saltos entre demos: la barra lateral y las pestañas sólo marcan dónde está cada una. Las tablas de abajo
+> que hablan de la miniatura o de la grande describen el SPRINT NOCTURNO.
+
 ## Las reglas (del pedido)
 
 - **No se modifica nada del dashboard real** ni de las zonas de Franco (OsLead*, `/leados/`, `/setter`, ActivityChannel).
@@ -29,11 +37,10 @@ dashboard no se toca), con su origen.
 |---|---|
 | `src/app/v3/_panel-vivo/` | la carpeta de las demos (fuera de `_secciones/`: no es una sección, y su código importa del dashboard, que el lane de las secciones no permite) |
 | `_panel-vivo/catalogo.ts` | qué demo va en cada tarjeta y qué ítem del panel se marca |
-| `_panel-vivo/DemoDelPanel.tsx` | la carga diferida (un `import()` por demo), la miniatura escalada y la pausa fuera de cuadro |
+| `_panel-vivo/DemoDelPanel.tsx` | la carga diferida (un `import()` por demo), la demo en su lugar escalada a su caja y la pausa fuera de cuadro |
 | `_panel-vivo/MarcoDelPanel.tsx` | el marco que se ve como el panel (la carcasa oscura, la barra lateral, la barra de arriba) con «Ejemplo» |
 | `_panel-vivo/demos/*` | una demo por feature (su copia del dashboard, si la hay, al lado, con el origen en su cabecera) |
-| `_secciones/tu-panel/Tarjeta.tsx` | la captura queda debajo (es el respaldo y el HTML del servidor); encima, la demo en miniatura |
-| `_secciones/tu-panel/Ampliacion.tsx` | la ampliación muestra la demo grande, usable, en lugar de la imagen |
+| `_secciones/tu-panel/Tarjeta.tsx` | la captura queda debajo (es el respaldo y el HTML del servidor); encima, la demo usable en su lugar |
 
 ## El mapeo
 

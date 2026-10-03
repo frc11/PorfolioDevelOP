@@ -10,9 +10,7 @@ import { ResultEmptyState } from '@/components/dashboard/results/_shared/ResultE
 import { SessionsChart } from '@/components/dashboard/SessionsChart'
 import { Tabs, type ValueTabItem } from '@/components/ui/Tabs'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
-import { useReproduccion } from '../../reproduccion'
 
 /**
  * [NOCTURNO] B · FEATURE 7 — «Seguí tus resultados». Resultados del panel (`/dashboard/resultados/trafico`): las cuatro
@@ -48,16 +46,15 @@ function sesionesDiarias(ahora: number): { date: string; sessions: number }[] {
   })
 }
 
-export default function Resultados({ irA }: PropsDeLaDemo): React.JSX.Element {
-  const grande = useReproduccion().modo === 'completa'
+export default function Resultados(): React.JSX.Element {
   const [ahora] = useState(() => Date.now())
   const [pestana, setPestana] = useState<Pestana>('trafico')
   const indicador = useId()
   const otra = PESTANAS.find((p) => p.value === pestana && p.value !== 'trafico')
   return (
-    <MarcoDelPanel item="resultados" irA={irA}>
+    <MarcoDelPanel item="resultados">
       <div className="flex w-full flex-col gap-6">
-        <Tabs layoutId={`resultados-${indicador}`} value={pestana} onValueChange={(v) => grande && setPestana(v as Pestana)} items={PESTANAS.map<ValueTabItem>((p) => ({ value: p.value, label: p.label, icon: p.icon }))} />
+        <Tabs layoutId={`resultados-${indicador}`} value={pestana} onValueChange={(v) => setPestana(v as Pestana)} items={PESTANAS.map<ValueTabItem>((p) => ({ value: p.value, label: p.label, icon: p.icon }))} />
         {otra !== undefined ? (
           <ResultEmptyState icon={otra.icon} title={otra.label} description={otra.texto} />
         ) : (

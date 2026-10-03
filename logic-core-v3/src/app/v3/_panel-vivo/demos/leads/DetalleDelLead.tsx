@@ -38,7 +38,7 @@ export function DetalleDelLead({ de, estado, alCambiarEstado, alVolver }: { read
       <Card padding="lg">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="truncate text-xl font-semibold text-zinc-100 sm:text-2xl">{lead.name ?? 'Sin nombre'}</h2>
+            <h2 className="break-words text-xl font-semibold text-zinc-100 sm:text-2xl">{lead.name ?? 'Sin nombre'}</h2>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
               <Clock className="h-3 w-3 shrink-0" strokeWidth={1.5} aria-hidden />
               Dejó sus datos hace {haceCuanto(lead.capturedAt)}

@@ -8,7 +8,7 @@ import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
 import { NewsletterDelPanel } from './NewsletterDelPanel'
 import { CORRIDAS_DEL_REMATE, DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
-import { leerToken, milisegundosDe, pixelesDe } from './vuelo'
+import { leerToken, milisegundosDe, pixelesDe } from './tokens'
 
 /**
  * EL REMATE — «Y más…» a la izquierda y el newsletter a la derecha (SPRINT PANEL 2).

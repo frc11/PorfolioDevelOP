@@ -3,7 +3,6 @@
 import { MessageCircle, SkipForward } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { useSeguir } from '../../desplazar'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
 import { usePasos, useReproduccion } from '../../reproduccion'
@@ -19,9 +18,8 @@ import { TablaDeConversaciones, Transcript, type FilaDeConversacion } from './Ta
  * escribe como si fuera un visitante del sitio y ve la respuesta de ejemplo llegar a su panel, como una conversación
  * nueva. Con movimiento reducido no se mueve sola: «Siguiente mensaje» la avanza.
  */
-export default function Conversaciones({ irA }: PropsDeLaDemo): React.JSX.Element {
+export default function Conversaciones(): React.JSX.Element {
   const r = useReproduccion()
-  const grande = r.modo === 'completa'
   const [ahora] = useState(() => Date.now())
   const enVivo = CONVERSACION_EN_VIVO.mensajes
   const { paso, termino, avanzar } = usePasos(enVivo.length, RITMO_DEL_CHAT.mensajeMs)
@@ -31,19 +29,19 @@ export default function Conversaciones({ irA }: PropsDeLaDemo): React.JSX.Elemen
   const { seguir, reanudar } = useSeguir(raiz)
 
   const llegaron = enVivo.slice(0, paso)
-  const sigueElAsistente = !termino && enVivo[paso].rol === 'ASSISTANT' && (r.corre || r.modo === 'miniatura')
+  const sigueElAsistente = !termino && enVivo[paso].rol === 'ASSISTANT' && r.corre
   const filas: FilaDeConversacion[] = [
     ...(tuya.mensajes.length > 0 ? [{ id: 'tuya', ultima: new Date(ahora), mensajes: tuya.mensajes.length, tokens: [118 * tuya.mensajes.length, 141 * tuya.mensajes.length] as const, ruta: '/', lead: null }] : []),
     { id: CONVERSACION_EN_VIVO.id, ultima: new Date(ahora), mensajes: llegaron.length, tokens: CONVERSACION_EN_VIVO.tokens, ruta: CONVERSACION_EN_VIVO.ruta, lead: termino ? CONVERSACION_EN_VIVO.lead : null },
     ...CONVERSACIONES_ANTERIORES.map((c) => ({ id: c.id, ultima: new Date(ahora - c.haceMin * 60_000), mensajes: c.mensajes.length, tokens: c.tokens, ruta: c.ruta, lead: c.lead })),
   ]
   const transcript = (id: string): React.ReactNode => {
-    if (id === 'tuya') return <Transcript mensajes={tuya.mensajes} escribiendo={tuya.escribiendo} vivo seguir={grande} suave={!r.reducido} />
+    if (id === 'tuya') return <Transcript mensajes={tuya.mensajes} escribiendo={tuya.escribiendo} vivo seguir suave={!r.reducido} />
     if (id === CONVERSACION_EN_VIVO.id) {
       return (
         <div className="flex flex-col gap-3">
-          <Transcript mensajes={llegaron} escribiendo={sigueElAsistente} vivo={grande} seguir={grande && seguir && tuya.mensajes.length === 0} suave={!r.reducido} />
-          {grande && !termino && !r.corre && (
+          <Transcript mensajes={llegaron} escribiendo={sigueElAsistente} seguir={seguir && tuya.mensajes.length === 0} suave={!r.reducido} />
+          {!termino && !r.corre && (
             <button type="button" onClick={avanzar} className="inline-flex items-center gap-1.5 self-start rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-400">
               <SkipForward className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
               Siguiente mensaje
@@ -62,11 +60,11 @@ export default function Conversaciones({ irA }: PropsDeLaDemo): React.JSX.Elemen
   }
 
   return (
-    <MarcoDelPanel item="chatbot" irA={irA} conPausa>
+    <MarcoDelPanel item="chatbot" conPausa>
       <div ref={raiz} className="flex flex-col gap-5">
-        <EncabezadoDelChatbot activa="conversations" irA={irA} />
-        <Probalo preguntar={grande ? preguntar : undefined} ocupado={tuya.escribiendo} />
-        <TablaDeConversaciones filas={filas} abierta={abierta} alAlternar={grande ? (id) => setAbierta((a) => (a === id ? null : id)) : undefined} transcript={transcript} />
+        <EncabezadoDelChatbot activa="conversations" />
+        <Probalo preguntar={preguntar} ocupado={tuya.escribiendo} />
+        <TablaDeConversaciones filas={filas} abierta={abierta} alAlternar={(id) => setAbierta((a) => (a === id ? null : id))} transcript={transcript} />
       </div>
     </MarcoDelPanel>
   )

@@ -12,7 +12,10 @@ Base cerrada en `base-terminada` (rama `rediseno/home`). Una línea por ítem.
 - Testimonios reales: van en «Por qué develOP», sin cifras inventadas.
 - Redes del pie: reemplazar las URLs provisorias de Instagram, LinkedIn, TikTok y Facebook (`_secciones/cierre/contacto.ts`, con TODO).
 - Tu panel: capturas reales del panel en lugar de los recuadros de muestra.
-- Tu panel · sprint propio (idea del cierre de INTERFAZ 2): que la sección simule el producto con los componentes REALES del panel del cliente (código real, no una maqueta), con datos de ejemplo, para mostrar lo que el texto promete. Hoy hay una tarjeta con la barra de actividad sola (`_componentes/vida/PanelEnVivo.tsx`).
+- Tu panel · hecho (SPRINT NOCTURNO y RETOQUE PANEL): las ocho features son demos con los componentes reales del panel, usables en su lugar (`_panel-vivo/`, mapeo en `PANEL-VIVO.md`); la tarjeta «En vivo» se borró.
+- Para Franco (panel real, no se tocó; en las copias de la landing ya está resuelto): `ConversationsTable` muestra la intención del lead en crudo, «(HUMAN_REQUEST)» (usar `intentLabel` de `modules/chatbot/lead-intent-labels.ts`, como los leads).
+- Para Franco: `LeadDetail` muestra los roles de su charla en minúscula («user», «assistant»; su código lo anota): con mayúscula o con «Visitante» / «Chatbot».
+- Para Franco: `BusinessLeadCard` corta el nombre del lead con `truncate` cuando la columna es angosta («Sofí…»): que baje de renglón (`break-words`) y que el chip «Nuevo» vaya atrás con `flex-wrap`.
 - Saltos de teclado: con la escena a la vista, el primer cuadro del salto puede mostrar el canvas anterior (compositor contra hilo principal).
 - Alejamiento D: «Hablanos» cruza el anillo del logo durante el alejamiento.
 - Desborde: los 4 px de desborde a 1440.

@@ -66,8 +66,9 @@ export function TarjetaDeLead({ lead, estado, alCambiarEstado, alAbrir, nuevo = 
         <div className="pointer-events-none relative z-20">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="truncate text-base font-semibold text-zinc-100">{lead.name ?? 'Sin nombre'}</h3>
+              {/* [RETOQUE PANEL] T1 · el nombre entero (el panel lo cortaba, «Sofí…»): baja de renglón y el «Nuevo» va atrás. */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h3 className="break-words text-base font-semibold text-zinc-100">{lead.name ?? 'Sin nombre'}</h3>
                 {nuevo && (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-medium text-cyan-300" aria-label="Lead nuevo">
                     <span className="relative flex h-1.5 w-1.5">

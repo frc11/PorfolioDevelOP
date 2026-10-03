@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from 'react'
 import { ChatBubble } from '@/components/dashboard/ChatBubble'
 import { getMessageForContext } from '@/lib/data/message-context'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
 import { usePasos, useReproduccion } from '../../reproduccion'
 import { ComposerDelChat } from './ComposerDelChat'
@@ -28,9 +27,8 @@ const QUICK_REPLIES = [
   { label: 'Tengo una idea / nueva función', context: 'mejora' },
 ] as const
 
-export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
+export default function Mensajes(): React.JSX.Element {
   const r = useReproduccion()
-  const grande = r.modo === 'completa'
   const [ahora] = useState(() => Date.now())
   const { paso } = usePasos(LLEGAN_AL_CHAT.length, RITMO_DEL_CHAT_CON_DEVELOP.llegaMs)
   const [propios, setPropios] = useState<readonly MensajeDelChat[]>([])
@@ -63,7 +61,7 @@ export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
   }
 
   return (
-    <MarcoDelPanel item="mensajes" irA={irA} conPausa>
+    <MarcoDelPanel item="mensajes" conPausa>
       <div className="flex h-full min-h-0 flex-col gap-3">
         <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 px-5 py-3">
           <div className="flex items-center justify-between gap-3">
@@ -76,7 +74,7 @@ export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
                 <p className="text-base font-semibold tracking-tight text-white">develOP — Soporte</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400">Respondemos en horario laboral</div>
+            <div className="hidden items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 sm:flex">Respondemos en horario laboral</div>
           </div>
         </div>
         <section aria-label="Conversación con el equipo (ejemplo)" className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/5">
@@ -86,7 +84,7 @@ export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
               <span>{mensajes.length} mensajes en la conversación</span>
             </div>
           </div>
-          <div ref={hilo} aria-live={grande ? 'polite' : undefined} className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden overscroll-contain px-5 py-5">
+          <div ref={hilo} aria-live={propios.length > 0 ? 'polite' : undefined} className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-5 py-5">
             {mensajes.map((m, k) => (
               <ChatBubble key={k} message={{ id: String(k), content: m.texto, isAgency: m.deDevelop, authorLabel: m.deDevelop ? 'DevelOP' : 'Tu negocio', createdAt: new Date(ahora - m.haceMin * 60_000) }} />
             ))}
@@ -97,12 +95,11 @@ export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
           onValueChange={setValor}
           alEnviar={enviar}
           isPending={enviando}
-          interactivo={grande}
+          interactivo
           aboveForm={
             <div className="mb-3 flex flex-wrap gap-2">
-              {QUICK_REPLIES.map((qr) =>
-                grande ? (
-                  <motion.button
+              {QUICK_REPLIES.map((qr) => (
+                <motion.button
                     key={qr.label}
                     type="button"
                     onClick={() => {
@@ -115,13 +112,8 @@ export default function Mensajes({ irA }: PropsDeLaDemo): React.JSX.Element {
                     className="flex cursor-pointer items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:border-cyan-500/25 hover:bg-cyan-500/10 hover:text-cyan-300 focus-visible:outline-2 focus-visible:outline-cyan-400"
                   >
                     {qr.label}
-                  </motion.button>
-                ) : (
-                  <span key={qr.label} className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                    {qr.label}
-                  </span>
-                ),
-              )}
+                </motion.button>
+              ))}
             </div>
           }
         />

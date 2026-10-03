@@ -1,44 +1,30 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef } from 'react'
 
-import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
-import { useCoreografiaActiva, useMovimientoEnTodoAncho } from '../_contrato/coreografia'
-import { Ampliacion } from './Ampliacion'
+import { useCoreografiaActiva } from '../_contrato/coreografia'
 import { TARJETAS } from './contenido'
 import { Fondo } from './Fondo'
-import { ESCALA_DE_LAS_FEATURES_A_1024, arranques, corrimientoDeProfundidad, corrimientoDelParallax } from './geometria'
+import { corrimientoDeProfundidad } from './geometria'
 import { Tarjeta } from './Tarjeta'
 
-const ULTIMO_ARRANQUE = arranques()[TARJETAS.length - 1]
-
 /**
- * EL CAOS — el encabezado, el fondo y las ocho features en sus lugares de la tabla.
+ * LA GALERÍA — el encabezado, el fondo y las ocho features, cada una con su demo usable en su lugar ([RETOQUE PANEL]
+ * T1: la ampliación y el caos de imágenes chicas se fueron; las formas y los anchos, en `geometria.ts`).
  *
- * Con la coreografía activa (≥ 1025 y sin movimiento reducido) corre UNA
- * suscripción de scroll para todo: la profundidad de cada pieza con
- * `data-profundidad` (features y fondo) y el parallax interno de cada imagen.
- * La profundidad se mide con `offsetTop`, que no ve la transformada que se le
- * está escribiendo, y no con `getBoundingClientRect`, que sí la ve.
- *
- * Abajo de 1025 es una columna: sin parallax, sin fondo, con el eco del caos en
- * los anchos alternados de `claseMovil`.
+ * El caos es un contenedor (`@container`): desde 72rem de contenido la composición va de costado; antes, en columna.
+ * Con la coreografía activa (≥ 1025 y sin movimiento reducido) corre UNA suscripción de scroll: la profundidad de las
+ * piezas del fondo (`data-profundidad`). Las demos no se mueven con el scroll: se usan. La profundidad se mide con
+ * `offsetTop`, que no ve la transformada que se le está escribiendo, y no con `getBoundingClientRect`, que sí la ve.
  */
 export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }): React.JSX.Element {
   const anima = useCoreografiaActiva()
-  // MÓVIL 2: el parallax INTERNO de las imágenes corre en todo ancho; la profundidad, sólo con la composición.
-  const movimiento = useMovimientoEnTodoAncho()
-  const reducido = usePrefiereMenosMovimiento()
-  const [abierta, setAbierta] = useState<number | null>(null)
   const caos = useRef<HTMLDivElement>(null)
-  const botones = useRef<(HTMLButtonElement | null)[]>([])
-  const marcos = useRef<(HTMLSpanElement | null)[]>([])
-  const capas = useRef<(HTMLSpanElement | null)[]>([])
 
   useEffect(() => {
     const raiz = caos.current
-    if (!movimiento || raiz === null) return
-    const profundas = anima ? [...raiz.querySelectorAll<HTMLElement>('[data-profundidad]')] : []
+    if (!anima || raiz === null) return
+    const profundas = [...raiz.querySelectorAll<HTMLElement>('[data-profundidad]')]
     let pedido = 0
     const pintar = (): void => {
       pedido = 0
@@ -50,18 +36,10 @@ export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }
         if (centro < -alto || centro > 2 * alto) continue
         el.style.transform = `translate3d(0, ${corrimientoDeProfundidad(centro, alto, Number(el.dataset.profundidad))}px, 0)`
       }
-      marcos.current.forEach((marco, i) => {
-        const capa = capas.current[i]
-        if (marco === null || capa === null || capa === undefined) return
-        const caja = marco.getBoundingClientRect()
-        if (caja.bottom < 0 || caja.top > alto) return
-        capa.style.transform = `translate3d(0, ${corrimientoDelParallax(caja.top, caja.height, alto)}px, 0)`
-      })
     }
     const pedir = (): void => {
       if (pedido === 0) pedido = requestAnimationFrame(pintar)
     }
-    const capasAlMontar = capas.current
     pintar()
     window.addEventListener('scroll', pedir, { passive: true })
     window.addEventListener('resize', pedir)
@@ -69,47 +47,19 @@ export function Galeria({ encabezado }: { readonly encabezado: React.ReactNode }
       window.removeEventListener('scroll', pedir)
       window.removeEventListener('resize', pedir)
       if (pedido !== 0) cancelAnimationFrame(pedido)
-      for (const el of [...profundas, ...capasAlMontar]) if (el !== null) el.style.transform = ''
+      for (const el of profundas) el.style.transform = ''
     }
-  }, [anima, movimiento])
-
-  const marcoDe = useCallback((i: number): HTMLElement | null => marcos.current[i] ?? null, [])
-
-  // El foco vuelve a la tarjeta que estaba abierta al cerrar, no a la que se abrió.
-  const cerrar = useCallback((): void => {
-    if (abierta !== null) botones.current[abierta]?.focus({ preventScroll: true })
-    setAbierta(null)
-  }, [abierta])
-
-  // La última feature va en el flujo: el caos reserva arriba el lugar donde arranca.
-  const alto = { '--arranque-final': `${ULTIMO_ARRANQUE}svh`, '--escala-a-1024': String(ESCALA_DE_LAS_FEATURES_A_1024) } as CSSProperties
+  }, [anima])
 
   return (
-    <div ref={caos} data-pieza="caos-del-panel" style={alto} className="relative flex flex-col gap-[var(--spacing-12)] escritorio:block">
+    <div ref={caos} data-pieza="caos-del-panel" className="@container relative flex flex-col gap-[var(--spacing-12)] escritorio:block">
       <Fondo />
       {encabezado}
-      <ul data-pieza="galeria-del-panel" className="flex flex-col gap-y-[calc(var(--spacing-20)*0.875)] escritorio:relative escritorio:block escritorio:pt-[var(--arranque-final)]">
+      <ul data-pieza="galeria-del-panel" className="flex flex-col gap-y-[calc(var(--spacing-20)*0.875)] escritorio:relative escritorio:flex-row escritorio:flex-wrap escritorio:items-start escritorio:gap-x-[var(--spacing-20)] escritorio:gap-y-[var(--spacing-20)] escritorio:@max-6xl:flex-col escritorio:@max-6xl:flex-nowrap">
         {TARJETAS.map((tarjeta, i) => (
-          <Tarjeta
-            key={tarjeta.titulo}
-            tarjeta={tarjeta}
-            indice={i}
-            alAbrir={setAbierta}
-            refDelBoton={(el) => {
-              botones.current[i] = el
-            }}
-            refDelMarco={(el) => {
-              marcos.current[i] = el
-            }}
-            refDelParallax={(el) => {
-              capas.current[i] = el
-            }}
-          />
+          <Tarjeta key={tarjeta.titulo} tarjeta={tarjeta} indice={i} />
         ))}
       </ul>
-      {abierta !== null && (
-        <Ampliacion tarjetas={TARJETAS} indice={abierta} reducido={reducido} marcoDe={marcoDe} alCambiar={setAbierta} alCerrar={cerrar} />
-      )}
     </div>
   )
 }

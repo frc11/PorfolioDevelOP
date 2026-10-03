@@ -1,7 +1,6 @@
 'use client'
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
-import { PanelEnVivo } from '../../_componentes/vida/PanelEnVivo'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeTexto, CanalDeTitular } from '../_contrato/canales'
@@ -14,10 +13,10 @@ import { Remate } from './Remate'
 /**
  * SECCIÓN 06 — TU PANEL. Un caos ordenado de features (SPRINT PANEL 2).
  *
- * El encabezado ocupa el 30 % izquierdo y la primera feature llega en el 60 %
- * derecho; después, las demás aparecen más abajo en los lugares de
- * `TABLA_DEL_CAOS` (`geometria.ts`), con el fondo decorativo por detrás. Cierra
- * el remate: «Y más…» y el newsletter.
+ * El encabezado ocupa el 30 % izquierdo y la primera feature llega a su lado;
+ * después, las demás, cada una con su demo usable en su lugar ([RETOQUE PANEL]
+ * T1, `geometria.ts`), con el fondo decorativo por detrás. Cierra el remate:
+ * «Y más…» y el newsletter.
  *
  * ⚠ Sin `CabeceraDeSeccion`: lo único que montaba acá era `MarcaDeSeccion`, el
  * cuadradito de acento arriba a la izquierda. Es una pieza compartida por todas
@@ -40,11 +39,11 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
   )
 }
 
-/** «Tu Panel» y su descripción. En escritorio, el 30 % izquierdo arriba del caos. */
+/** «Tu Panel» y su descripción. En escritorio, el 30 % izquierdo arriba de la galería (en columna, encima). [RETOQUE PANEL] T1: sin el panel en vivo. */
 function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.JSX.Element {
   return (
     // MÓVIL 2: a 1024 el titular sube a 1,3 `display` (de 48 a 65 px) y el cuerpo a `titulo-s`.
-    <div data-pieza="encabezado-del-panel" className="flex flex-col gap-[var(--spacing-6)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-fluido-titulo-xl:calc(var(--text-fluido-display)*1.3)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-cuerpo:var(--text-titulo-s)] escritorio:absolute escritorio:top-0 escritorio:left-0 escritorio:z-[var(--z-elevado)] escritorio:w-3/10">
+    <div data-pieza="encabezado-del-panel" className="flex flex-col gap-[var(--spacing-6)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-fluido-titulo-xl:calc(var(--text-fluido-display)*1.3)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-cuerpo:var(--text-titulo-s)] escritorio:absolute escritorio:top-0 escritorio:left-0 escritorio:z-[var(--z-elevado)] escritorio:w-3/10 escritorio:@max-6xl:static escritorio:@max-6xl:mb-[var(--spacing-12)] escritorio:@max-6xl:w-full">
       <Bloque patron="P1" rango="ventana-visible">
         {(progreso) => (
           /* El `id` con el que la `<section>` se nombra va en el envoltorio:
@@ -62,8 +61,6 @@ function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.
           </CanalDeTexto>
         )}
       </Bloque>
-      {/* [INTERFAZ 2] T3 · el panel funcionando con datos de ejemplo. */}
-      <PanelEnVivo />
     </div>
   )
 }

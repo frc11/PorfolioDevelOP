@@ -28,7 +28,7 @@ export function mostrarArriba(el: HTMLElement | null, suave: boolean): void {
   caja.scrollTo({ top: caja.scrollTop + (r.top - c.top) / escalaDe(caja, c) - 16, behavior: suave ? 'smooth' : 'auto' })
 }
 
-/** La escala con que se ve la caja (la miniatura va escalada): las medidas en pantalla, a px de la caja. */
+/** La escala con que se ve la caja (la demo va escalada en escritorio): las medidas en pantalla, a px de la caja. */
 function escalaDe(caja: HTMLElement, c: DOMRect): number {
   return caja.offsetHeight > 0 && c.height > 0 ? c.height / caja.offsetHeight : 1
 }

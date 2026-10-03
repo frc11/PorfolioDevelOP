@@ -1,16 +1,15 @@
 'use client'
 
 import { BookOpen, MessageCircle, ShieldOff } from 'lucide-react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import { adminHoverCls } from '@/lib/hover'
 
-import type { PropsDeLaDemo } from '../../DemoDelPanel'
 import { mostrarArriba } from '../../desplazar'
 import { MarcoDelPanel } from '../../MarcoDelPanel'
-import { usePasos, useReproduccion } from '../../reproduccion'
+import { useReproduccion } from '../../reproduccion'
 import { BASE_DE_EJEMPLO, type BaseDeEjemplo } from './conocimiento'
 import { EncabezadoDelChatbot } from './EncabezadoDelChatbot'
 
@@ -19,8 +18,8 @@ import { EncabezadoDelChatbot } from './EncabezadoDelChatbot'
  * panel (`/dashboard/chatbot/knowledge`). COPIA de `modules/chatbot/components/dashboard/ClientKnowledgeView.tsx` (sus
  * siete campos con sus títulos, descripciones y la marca «Configurado por develOP»; `Card` y `Section` IMPORTADOS de
  * `components/ui/`): su llamado «Pedinos el cambio desde Mensajes» es un `<Link>` a `/dashboard/messages`; acá lleva a la
- * demo del chat. Navegable: el índice de las siete secciones lleva a cada una adentro del panel (y le da el foco). La
- * miniatura recorre tres secciones sola.
+ * demo del chat. Navegable: el índice de las siete secciones lleva a cada una adentro del panel (y le da el foco).
+ * [RETOQUE PANEL] T1 · en su lugar, el llamado queda como texto (no hay otra demo a la que saltar).
  */
 interface Campo {
   readonly key: keyof BaseDeEjemplo
@@ -39,15 +38,10 @@ const FIELDS: readonly Campo[] = [
   { key: 'forbiddenStatements', title: 'Frases prohibidas', description: 'Cosas que el bot tiene prohibido decir.', protegido: true },
 ]
 
-/** Lo que recorre la miniatura sola: tres secciones. */
-const RECORRIDO_DE_LA_MINIATURA: readonly (keyof BaseDeEjemplo)[] = ['faq', 'salesGuidance', 'toneExamples']
-
-export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
+export default function LoQueSabe(): React.JSX.Element {
   const r = useReproduccion()
-  const grande = r.modo === 'completa'
   const raiz = useRef<HTMLDivElement>(null)
   const [marcada, setMarcada] = useState<keyof BaseDeEjemplo | null>(null)
-  const { paso } = usePasos(RECORRIDO_DE_LA_MINIATURA.length, 1500)
   const base = useId()
   const idDe = (k: keyof BaseDeEjemplo): string => `${base}-kb-${k}`
   const ir = (k: keyof BaseDeEjemplo): void => {
@@ -56,16 +50,11 @@ export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
     el?.focus({ preventScroll: true })
     setMarcada(k)
   }
-  // La miniatura, sola: cada paso, a la sección que le toca (moviendo sólo su caja).
-  useEffect(() => {
-    if (grande || paso === 0) return
-    mostrarArriba(document.getElementById(`${base}-kb-${RECORRIDO_DE_LA_MINIATURA[paso - 1]}`), false)
-  }, [grande, paso, base])
 
   return (
-    <MarcoDelPanel item="chatbot" irA={irA}>
+    <MarcoDelPanel item="chatbot">
       <div ref={raiz} className="flex flex-col gap-6">
-        <EncabezadoDelChatbot activa="knowledge" irA={irA} />
+        <EncabezadoDelChatbot activa="knowledge" />
         <div className="space-y-8">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-500/10">
@@ -85,13 +74,7 @@ export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
                 <div className="text-sm font-medium text-zinc-100">¿Necesitás actualizar algo?</div>
                 <p className="text-xs leading-relaxed text-zinc-400">
                   Cambió algo, sumaste un servicio, querés agregar una respuesta — lo que sea.{' '}
-                  {grande && irA !== undefined ? (
-                    <button type="button" onClick={() => irA('mensajes')} className="cursor-pointer text-cyan-400 underline-offset-2 hover:text-cyan-300 hover:underline focus-visible:outline-2 focus-visible:outline-cyan-400">
-                      Pedinos el cambio desde Mensajes
-                    </button>
-                  ) : (
-                    <span className="text-cyan-400">Pedinos el cambio desde Mensajes</span>
-                  )}{' '}
+                  <span className="text-cyan-400">Pedinos el cambio desde Mensajes</span>{' '}
                   y lo aplicamos por vos.
                 </p>
               </div>
@@ -99,17 +82,11 @@ export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
           </Card>
           <Section title="Contenido actual" description="Lo que tu chatbot tiene cargado hoy. Si encontrás algo desactualizado o incorrecto, avisanos.">
             <nav aria-label="Secciones de lo que sabe tu chatbot" className="flex flex-wrap gap-2">
-              {FIELDS.map((f) =>
-                grande ? (
-                  <button key={f.key} type="button" onClick={() => ir(f.key)} aria-current={marcada === f.key ? 'true' : undefined} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-cyan-400 ${marcada === f.key ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-300' : 'border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white'}`}>
-                    {f.title}
-                  </button>
-                ) : (
-                  <span key={f.key} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-zinc-300">
-                    {f.title}
-                  </span>
-                ),
-              )}
+              {FIELDS.map((f) => (
+                <button key={f.key} type="button" onClick={() => ir(f.key)} aria-current={marcada === f.key ? 'true' : undefined} className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-cyan-400 ${marcada === f.key ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-300' : 'border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white'}`}>
+                  {f.title}
+                </button>
+              ))}
             </nav>
             <div className="space-y-7">
               {FIELDS.map((f) => (
