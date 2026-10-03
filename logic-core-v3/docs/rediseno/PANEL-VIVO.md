@@ -131,6 +131,28 @@ Módulo: `/dashboard/chatbot/knowledge` (pestaña «Información») — `DASH/ch
 
 **Ninguna feature quedó sin su módulo real.** Lo que no se pudo, si hay algo, está al final.
 
-## Lo que quedó (se completa al cerrar cada demo)
+## Lo que quedó
 
-(pendiente)
+Las ocho tienen su demo (commits B1 07d31058 · B2 ad493b87 · B3 3788e401 · B4 fa2d6afa · B5 49edb3af · B6 4af921a3 ·
+B7 3f2f0534 · B8 bd683268, más f487b7b1, 5e26006a y 7b9cc020: la miniatura corre cinco segundos por entrada y queda
+quieta del todo). Lo que no se pudo o quedó afuera, y por qué:
+
+- **El botón de emojis del chat**: `EmojiPopover` abre su selector en un portal al `body` (z 210), por debajo de la
+  ampliación (z 10000): no se vería. El campo del chat es el real sin ese botón.
+- **Los modales que son portales al `body`** quedarían detrás de la ampliación: la vista general de una lista de leads
+  o de tickets va en lugar de las columnas; el formulario de ticket nuevo y el detalle de un módulo van encima, ADENTRO
+  del marco de la demo (`MarcoDelPanel`, prop `encima`), con Escape para cerrarlos (el formulario, además, atrapa el
+  foco). Por lo mismo, los selects del formulario de ticket son los nativos (el `Select` de `components/ui` abre su
+  lista en un portal).
+- **Pestañas sin demo**: en el chatbot, Overview, Configuración (`BotPersonalization` carga avatares 3D y guarda con una
+  server action) e Instalación quedan como texto; en Resultados, SEO, Reputación y Análisis dicen qué muestran en el
+  panel. En la barra lateral, Inicio, Mi plan, Recomendá y ganá y Mi cuenta no llevan a ninguna demo.
+- **Sin «Exportar»** en los leads (descarga de la API) ni el aviso de vista previa de Resultados.
+- **Sin precios ni cifras reales de develOP**: la columna «Costo», «Monto acordado», el precio por mes de los módulos,
+  el tiempo de respuesta del panel y la fecha de lanzamiento escrita a mano en los módulos.
+
+En el teléfono: la misma demo, con el diseño del propio panel en celular (la grande ocupa el alto de la pantalla; la
+tabla de conversaciones, sin tokens ni ruta abajo de `sm`).
+
+Visto en el panel real, no tocado: `ConversationsTable` muestra la intención del lead en crudo («(HUMAN_REQUEST)»; la
+demo usa `intentLabel`), y `LeadDetail` sólo muestra los roles en minúscula en su charla (lo anota su propio código).
