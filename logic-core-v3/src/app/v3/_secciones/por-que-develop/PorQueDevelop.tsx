@@ -5,6 +5,7 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
+import { LENTOS } from '../../_lib/titulos3d/repeticiones'
 import { DIA_DEL_TEXTO } from '../../_lib/escena/amanecer/diaDelTexto'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
@@ -151,7 +152,8 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
  *  `escritorio:` deja viva la clase del nivel (`cn()` la borraba y `s6-render` lo marca).
  *  [ESCENA 10] T3 · con `volumen`, el título de volumen ([3D Y SONIDO] T1: del producto): llega con la frase; se lee con la
  *  cámara de los valores y en el lugar al que la frase sube con ellos. [RONDA 2] F2: vuelve a irse con la levantada, y la
- *  llegada y la salida son función del scroll (con el asiento al frenar): ninguna velocidad la deja a medio armar. */
+ *  llegada y la salida son función del scroll (con el asiento al frenar): ninguna velocidad la deja a medio armar.
+ *  [NOCTURNO] A5: la salida, con un mínimo de tiempo (bastante más lenta: se iba volando). */
 function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number>; readonly corrida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
@@ -159,7 +161,7 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} llegadaDe="por-que-develop" />}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} salidaMinimaS={LENTOS.salidaDeLaFraseS} llegadaDe="por-que-develop" />}
     </Titular>
   )
 }

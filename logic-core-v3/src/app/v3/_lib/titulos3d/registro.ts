@@ -55,6 +55,8 @@ export interface TituloDeVolumen {
   readonly colocacion: 'lectura' | 'pantalla'
   readonly rearma: boolean
   readonly minimoS: number | null
+  /** [NOCTURNO] A5 · cuánto tarda la salida como mínimo (s): la frase de Por qué develOP se iba volando. */
+  readonly salidaMinimaS: number | null
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -101,22 +103,23 @@ interface Anotacion {
   readonly colocacion?: 'lectura' | 'pantalla'
   readonly rearma?: boolean
   readonly minimoS?: number | null
+  readonly salidaMinimaS?: number | null
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, activo])
+  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p

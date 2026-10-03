@@ -264,7 +264,7 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     }
     // [RONDA 2] F2 · función del scroll (la llegada y la salida), con el asiento al frenar; en un viaje, desarmado.
     a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)
-    a.mostrado.salida = mostradoDelScroll(a.mostrado.salida, a.titulo.salida, asentar, dt)
+    a.mostrado.salida = mostradoDelScroll(a.mostrado.salida, a.titulo.salida, asentar, dt, a.titulo.salidaMinimaS)
     const { llegada, salida } = a.mostrado
     a.uniforms.uLlegada.value = llegada
     a.uniforms.uSalida.value = salida

@@ -5,6 +5,7 @@
  *   A2 · el pie: la llegada de prueba borrada y la onda en el producto (en s44-pie, que es su invariante).
  *   A4 · la llegada de Portfolio vuelve a ser la larga de ESCENA 10 (persigue al scroll con un mínimo de tiempo), con lo
  *        que arregló F2: se da vuelta con el scroll y al frenar termina armada o desarmada.
+ *   A5 · la salida de «Seis razones / para elegirnos», con el mismo mecanismo y bastante más lenta (se iba volando).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno/LEEME.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -73,7 +74,22 @@ const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const componente = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 const enchufada = (c: string): boolean => /<TituloDeVolumen id="portfolio"[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(c)
-afirmar(enchufada(piezas) && /salida, queda, corrida, minimoS, activo:/.test(componente) && /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(escena), '  Portfolio pide su mínimo (sección → registro → escena); en un viaje del menú se desarma rápido, como antes')
+afirmar(enchufada(piezas) && /salida, queda, corrida, minimoS,( salidaMinimaS,)? activo:/.test(componente) && /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(escena), '  Portfolio pide su mínimo (sección → registro → escena); en un viaje del menú se desarma rápido, como antes')
 controlPositivo('el detector VE a Portfolio sin su mínimo', piezas.replace(' minimoS={LENTOS.llegadaDePortfolioS}', ''), enchufada)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A5 · «Seis razones / para elegirnos»: la salida, bastante más lenta')
+
+const salida: Seguidor = (m, p, a, dt) => mostradoDelScroll(m, p, a, dt, LENTOS.salidaDeLaFraseS)
+const lenta = (f: Seguidor): boolean => cuantoTarda(f, 0, 1, false, 1) >= 1.4 * LENTOS.llegadaDePortfolioS - DT
+const seVaEn = cuantoTarda(salida, 0, 1, false, 1)
+afirmar(lenta(salida), 'con un scroll que cruza la levantada de una, las letras se van en el mínimo (de vuelta a la profundidad, girando), no en lo que tarda el scroll', `de 0 a 1 en ${seVaEn.toFixed(2)} s (antes, ${cuantoTarda(deF2, 0, 1, false, 1).toFixed(2)} s; la llegada de Portfolio, ${String(LENTOS.llegadaDePortfolioS)} s)`)
+controlPositivo('el detector VE la salida que se iba volando', deF2, lenta)
+afirmar(seDaVuelta(salida) && convergeSiempre(salida, LENTOS.salidaDeLaFraseS), '  con la robustez de F2: se da vuelta si el scroll vuelve y al frenar a mitad queda ida o armada del todo')
+const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const registro = sinComentarios(leer('_lib/titulos3d/registro.ts'))
+const lentaEnLaFrase = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*salidaMinimaS=\{LENTOS\.salidaDeLaFraseS\}[^>]*llegadaDe="por-que-develop" \/>/.test(c)
+afirmar(lentaEnLaFrase(porQue) && /salida, queda, corrida, minimoS, salidaMinimaS, activo:/.test(componente) && /rearma, minimoS, salidaMinimaS \}\)/.test(registro) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt, a\.titulo\.salidaMinimaS\)/.test(escena), '  la frase pide su salida lenta (sección → registro → escena); los demás títulos (sin `salidaMinimaS`) siguen con la de F2')
+controlPositivo('el detector VE la frase sin su salida lenta', porQue.replace(' salidaMinimaS={LENTOS.salidaDeLaFraseS}', ''), lentaEnLaFrase)
 
 cerrar('s45-nocturno')

@@ -15,6 +15,7 @@ export const ASIENTO = { quietoMs: 180, s: 0.35, alcanceS: 0.12 } as const
 /**
  * [NOCTURNO] A4 · LO QUE VA LENTO (s, de punta a punta): la llegada de Portfolio vuelve a ser la de ESCENA 10 (lo mostrado
  * persigue al scroll con este mínimo, y asienta a la misma velocidad), con lo que arregló F2: se corta y se da vuelta con
- * el scroll, y al frenar siempre termina armada o desarmada.
+ * el scroll, y al frenar siempre termina armada o desarmada. [NOCTURNO] A5 · la salida de la frase de Por qué develOP
+ * («Seis razones / para elegirnos»), con el mismo mecanismo y bastante más lenta: se iba volando con el scroll.
  */
-export const LENTOS = { llegadaDePortfolioS: 1.4 } as const
+export const LENTOS = { llegadaDePortfolioS: 1.4, salidaDeLaFraseS: 2 } as const

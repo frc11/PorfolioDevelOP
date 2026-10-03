@@ -33,6 +33,7 @@ export function TituloDeVolumen({
   queda = false,
   corrida = null,
   minimoS = null,
+  salidaMinimaS = null,
 }: {
   readonly id: string
   readonly texto: string
@@ -48,13 +49,15 @@ export function TituloDeVolumen({
   readonly corrida?: MotionValue<number> | null
   /** [NOCTURNO] A4 · lo mínimo que tarda lo mostrado en llegar, de punta a punta (s): la llegada larga de Portfolio. */
   readonly minimoS?: number | null
+  /** [NOCTURNO] A5 · lo mínimo que tarda en irse (s): la salida lenta de la frase. */
+  readonly salidaMinimaS?: number | null
 }): React.JSX.Element {
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const listo = useTituloListo(id)
   const lugar = useRef<HTMLSpanElement | null>(null)
   const repetible = useLlegadaDelTitulo(llegadaDe, llegada ?? LLEGADO)
-  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, activo: material !== 'no' && escritorio })
+  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, activo: material !== 'no' && escritorio })
   return (
     <>
       {listo && <span className="sr-only hidden escritorio:block">{texto}</span>}
