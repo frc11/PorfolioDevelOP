@@ -205,8 +205,17 @@ controlPositivo('el detector VE un import prohibido', [`${CARPETA}/x.tsx`], (l: 
 // Un nivel más: lo que se importa del dashboard tampoco trae esas cosas (lo que trae, se copió).
 const DEL_DASHBOARD = [...new Set(ARCHIVOS_VIVOS.flatMap((a) => importsDe(fuenteViva(a))).filter((i) => /^@\/(components|modules|lib)\//.test(i)))]
 const resolver = (i: string): string => ['.tsx', '.ts'].map((x) => `src/${i.slice(2)}${x}`).find((r) => { try { return statSync(r).isFile() } catch { return false } }) ?? ''
-const importadosLimpios = DEL_DASHBOARD.filter((i) => resolver(i) !== '' && sinLoProhibido([resolver(i)], fuenteViva).length === 0 && !/^\s*['"]use server['"]/m.test(fuenteViva(resolver(i))))
-afirmar(DEL_DASHBOARD.length > 0 && importadosLimpios.length === DEL_DASHBOARD.length, '  lo que se IMPORTA del panel real es sólo su parte visual: tampoco trae server actions, `<Link>` ni navegación', DEL_DASHBOARD.join(' · '))
+/**
+ * Las excepciones, con su motivo: `ui/Tabs` importa `next/link` para su modo ENLACE; las demos lo usan en modo VALOR
+ * (`value` y `onValueChange`, como `ProjectTaskTabs`), que no pinta ningún `<Link>` (sin `<Link>` no hay prefetch).
+ */
+const CON_MOTIVO: Readonly<Record<string, string>> = { '@/components/ui/Tabs': 'modo valor: no pinta ningún <Link>' }
+const importadosLimpios = DEL_DASHBOARD.filter((i) => i in CON_MOTIVO || (resolver(i) !== '' && sinLoProhibido([resolver(i)], fuenteViva).length === 0 && !/^\s*['"]use server['"]/m.test(fuenteViva(resolver(i)))))
+afirmar(DEL_DASHBOARD.length > 0 && importadosLimpios.length === DEL_DASHBOARD.length, '  lo que se IMPORTA del panel real es sólo su parte visual: tampoco trae server actions, `<Link>` ni navegación', DEL_DASHBOARD.filter((i) => !importadosLimpios.includes(i)).join(' · ') || `${String(DEL_DASHBOARD.length)} módulos`)
+const usosDeTabs = ARCHIVOS_VIVOS.flatMap((a) => [...sinComentarios(fuenteViva(a)).matchAll(/<Tabs\b[\s\S]*?\/>/g)].map((m) => m[0]))
+const enModoValor = (usos: readonly string[]): boolean => usos.every((u) => /\bvalue=\{/.test(u) && /\bonValueChange=\{/.test(u) && !/\bhref/.test(u))
+afirmar(usosDeTabs.length > 0 && enModoValor(usosDeTabs), '  `ui/Tabs` (que importa `next/link` para su modo enlace) va siempre en modo valor: ningún `<Link>` pintado', `${String(usosDeTabs.length)} uso(s)`)
+controlPositivo('el detector VE un Tabs en modo enlace', ["<Tabs items={[{ href: '/dashboard/resultados' }]} />"], enModoValor)
 const RED = /\bfetch\(|XMLHttpRequest|EventSource|WebSocket|sendBeacon|\baxios\b/
 const conRed = ARCHIVOS_VIVOS.filter((a) => RED.test(sinComentarios(fuenteViva(a))))
 afirmar(conRed.length === 0, '  cero red: ninguna demo pide nada (todo es de ejemplo y local)', conRed.join(' · '))
