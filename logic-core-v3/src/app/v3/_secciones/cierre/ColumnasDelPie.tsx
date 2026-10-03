@@ -15,6 +15,7 @@ import {
 } from './contenido'
 import { FormularioDelPie } from './FormularioDelPie'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
+import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
 
 /**
  * LAS COLUMNAS QUE SUBEN — P2 con escalonado, sobre la grilla del pie.
@@ -109,14 +110,16 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
           className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`}
         >
-          {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. */}
-          <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
-            {(contenido) => (
-              <EtiquetaDeSeccion como="h3" sangria={false}>
-                {contenido}
-              </EtiquetaDeSeccion>
-            )}
-          </CanalDeTexto>
+          {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. [RETOQUE DEL PIE] P2: en 3D desde 1025. */}
+          <TextoDelPie>
+            <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
+              {(contenido) => (
+                <EtiquetaDeSeccion como="h3" sangria={false}>
+                  {contenido}
+                </EtiquetaDeSeccion>
+              )}
+            </CanalDeTexto>
+          </TextoDelPie>
           <CuerpoDeColumna clase={columna.clase} />
         </CanalDePieza>
       ))}

@@ -1,62 +1,81 @@
 'use client'
 
-import { useRef } from 'react'
+import { useId, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
-import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
-import { PIEZA, RANURA, cantosDeLaPieza, sombraDeLaPieza, tapaDeLaPieza, type FormaDeLaPieza } from './piezaSolida'
-import { usePoseDeLaPieza } from './usePoseDeLaPieza'
+import { useHundido, useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
+import { useGiroDeLaMirada } from './useGiroDeLaMirada'
 
 /**
- * [CIERRE RETOQUE 3D] D5 · UN BLOQUE SÓLIDO DE CSS 3D — una tecla que flota: la cara de adelante es el elemento de verdad
- * (el enlace, el campo, el botón: se enfoca, se escribe, lo anuncia el lector) sobre su tapa, y cuatro cantos y una cara de
- * atrás van hacia el fondo. El elemento de adentro lleva su propio aire (la tecla entera se toca). Abajo de 1025 y con
- * movimiento reducido, plano: sin tapa, sin cantos y sin giro (abajo el pie mezcla contra la escena; el árbol quieto no
- * escribe transformadas). Las caras son `aria-hidden`.
+ * [CIERRE RETOQUE 3D] D5 · UN BLOQUE SÓLIDO — [RETOQUE DEL PIE] P2: la pieza del pie del lado del DOM, en sus tres modos
+ * (`useModoDelPie`):
  *
- * [RONDA 2] F5 · LA PIEZA PREMIUM (`piezaSolida.ts`): en el negro satinado del logo, con la tinta clara (la pieza es una
- * sala invertida: el texto y el foco se dan vuelta solos), el filo claro en el contorno, los cantos en otro gris y una
- * sombra de contacto atrás. Siempre se le ven los cantos (la pose de base por su lugar en el pie) y el paralaje del mouse,
- * exagerado, revela la perspectiva. Con el mouse encima (o el foco del teclado) se hunde como una tecla, y más al apretar.
- * Tres formas: `tecla` (los enlaces), `ranura` (los campos: una placa con la ranura hundida) y `principal` (Enviar).
+ *   · `volumen` (desde 1025): la pieza la dibuja la escena en WebGL (`escena/pie3d/`). `placa` (un enlace) se anota
+ *     sola y la escena le escribe, cada cuadro, la transformada que la deja sobre su placa; `principal` (Enviar) y
+ *     `ranura` (un campo) son parte de la placa del formulario, que se anota entera. Con el 3D listo, lo de adentro se
+ *     vuelve transparente (el anillo del foco no: es de la pieza). La placa y Enviar se hunden con el mouse, el foco y
+ *     al apretar, y suenan como los CTA (`data-solido`: el tic y el pestillo);
+ *   · `antes` (`?pruebas=pie=antes`): el bloque de CSS 3D de antes de RONDA 2, que gira al revés del mouse;
+ *   · `plano` (abajo de 1025, sin títulos de volumen): el elemento y nada más.
  */
-export function BloqueSolido({ children, className, forma = 'tecla' }: { readonly children: React.ReactNode; readonly className?: string; readonly forma?: FormaDeLaPieza }): React.JSX.Element {
-  const raiz = useRef<HTMLSpanElement | null>(null)
-  const pose = useRef<HTMLSpanElement | null>(null)
-  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
-  const reducido = useMovimientoReducido()
-  const solido = escritorio && !reducido
-  usePoseDeLaPieza(raiz, pose, solido)
-  const d = PIEZA.profundidad[forma]
-  const estilo = { perspective: `${String(PIEZA.perspectiva)}px`, ['--pieza-encima' as string]: `${String(PIEZA.hundida.encima)}px`, ['--pieza-apretada' as string]: `${String(PIEZA.hundida.apretada)}px` }
+export type FormaDelBloque = 'placa' | 'ranura' | 'principal'
+
+export function BloqueSolido({ children, forma = 'placa', className }: { readonly children: React.ReactNode; readonly forma?: FormaDelBloque; readonly className?: string }): React.JSX.Element {
+  const modo = useModoDelPie()
+  if (modo === 'volumen') return <BloqueEnVolumen forma={forma} className={className}>{children}</BloqueEnVolumen>
+  if (modo === 'antes') return <BloqueDeAntes className={className}>{children}</BloqueDeAntes>
   return (
-    <span
-      ref={raiz}
-      data-pieza="bloque-solido"
-      data-forma={forma}
-      data-solido={solido || undefined}
-      data-seccion={solido ? 'invertida' : undefined}
-      // La tinta, declarada: el `color` que hereda del pie ya viene resuelto (oscuro) y no se da vuelta con la sala.
-      className={cn('group/pieza relative inline-block', solido && 'text-tinta', className)}
-      style={solido ? estilo : undefined}
-    >
-      <span ref={pose} className="relative block transform-3d">
-        {solido && <span aria-hidden="true" data-parte="sombra" className="pointer-events-none absolute inset-0 rounded-[var(--radius-sutil)]" style={sombraDeLaPieza(d)} />}
-        <span
-          data-parte="cuerpo"
-          className={cn(
-            'relative block transform-3d',
-            solido && 'transition-transform duration-[var(--duracion-rapida)] group-hover/pieza:-translate-z-[var(--pieza-encima)] group-has-[:focus-visible]/pieza:-translate-z-[var(--pieza-encima)] group-active/pieza:-translate-z-[var(--pieza-apretada)]',
-          )}
-        >
-          {solido && cantosDeLaPieza(d).map((c, k) => <span key={k} aria-hidden="true" data-parte="canto" className={cn('pointer-events-none absolute', c.clase)} style={c.estilo} />)}
-          {solido && <span aria-hidden="true" data-parte="tapa" className="pointer-events-none absolute inset-0 rounded-[var(--radius-sutil)]" style={tapaDeLaPieza(forma)} />}
-          {solido && forma === 'ranura' && <span aria-hidden="true" data-parte="ranura" className="pointer-events-none absolute inset-[var(--spacing-1)] rounded-[var(--radius-sutil)]" style={RANURA} />}
-          <span className="relative block">{children}</span>
-        </span>
+    <span data-pieza="bloque-solido" className={cn('relative inline-block', className)}>
+      {children}
+    </span>
+  )
+}
+
+function BloqueEnVolumen({ children, forma, className }: { readonly children: React.ReactNode; readonly forma: FormaDelBloque; readonly className?: string }): React.JSX.Element {
+  const raiz = useRef<HTMLSpanElement | null>(null)
+  const id = useId()
+  const listo = usePieListo()
+  const solido = forma !== 'ranura'
+  usePiezaDelPie(raiz, { id, forma: 'placa', activo: forma === 'placa' })
+  useHundido(raiz, solido)
+  // Transparente también lo que trae su color (los enlaces del recorrido, `pie.css`): el importante le gana a la hoja.
+  return (
+    <span ref={raiz} data-pieza="bloque-solido" data-forma={forma} data-solido={solido ? '' : undefined} className={cn('relative inline-block', solido && listo && 'text-transparent [&_*]:text-transparent!', className)}>
+      {children}
+    </span>
+  )
+}
+
+/** El bloque de [CIERRE RETOQUE 3D] D5 (antes de RONDA 2): cuatro cantos y una cara de atrás de CSS 3D, girando al revés del mouse. */
+const BLOQUE_DE_ANTES = { profundidad: 20, perspectiva: 700 } as const
+
+type Cara = { readonly clase: string; readonly estilo: React.CSSProperties }
+
+function carasDelBloque(d: number): readonly Cara[] {
+  const px = `${String(d)}px`
+  return [
+    { clase: 'inset-0 bg-superficie-3', estilo: { transform: `translateZ(-${px})` } },
+    { clase: 'inset-x-0 top-0 bg-superficie-2', estilo: { height: px, transformOrigin: 'top', transform: 'rotateX(-90deg)' } },
+    { clase: 'inset-x-0 bottom-0 bg-superficie-3', estilo: { height: px, transformOrigin: 'bottom', transform: 'rotateX(90deg)' } },
+    { clase: 'inset-y-0 left-0 bg-superficie-3', estilo: { width: px, transformOrigin: 'left', transform: 'rotateY(90deg)' } },
+    { clase: 'inset-y-0 right-0 bg-superficie-3', estilo: { width: px, transformOrigin: 'right', transform: 'rotateY(-90deg)' } },
+  ]
+}
+
+const CARAS = carasDelBloque(BLOQUE_DE_ANTES.profundidad)
+
+function BloqueDeAntes({ children, className }: { readonly children: React.ReactNode; readonly className?: string }): React.JSX.Element {
+  const giro = useRef<HTMLSpanElement | null>(null)
+  const reducido = useMovimientoReducido()
+  useGiroDeLaMirada(giro, !reducido)
+  return (
+    <span data-pieza="bloque-solido" className={cn('relative inline-block', className)} style={reducido ? undefined : { perspective: `${String(BLOQUE_DE_ANTES.perspectiva)}px` }}>
+      <span ref={giro} className="relative block transform-3d">
+        {!reducido && CARAS.map((c, k) => <span key={k} aria-hidden="true" data-parte="canto" className={cn('pointer-events-none absolute border border-borde', c.clase)} style={c.estilo} />)}
+        {!reducido && <span aria-hidden="true" data-parte="tapa" className="pointer-events-none absolute inset-0 rounded-[var(--radius-sutil)] border border-borde-fuerte bg-superficie-1 shadow-[var(--shadow-flotante)]" />}
+        <span className="relative block">{children}</span>
       </span>
     </span>
   )

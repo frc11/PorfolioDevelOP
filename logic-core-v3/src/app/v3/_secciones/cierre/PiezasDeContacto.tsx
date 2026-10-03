@@ -1,6 +1,7 @@
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
+import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
 import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
 import { IconoDeMarca } from './IconosDeMarca'
 
@@ -9,6 +10,7 @@ import { IconoDeMarca } from './IconosDeMarca'
  * desde 1024 hereda la tinta del pie y abajo, la del papel que usa la mezcla.
  * [CIERRE RETOQUE 3D] D5: cada enlace es un bloque sólido que flota (`BloqueSolido`, desde 1025).
  * [RONDA 2] F5: las piezas, separadas del titular y entre sí (los cantos y la sombra piden aire).
+ * [RETOQUE DEL PIE] P2: desde 1025, en WebGL: los enlaces, placas (`BloqueSolido`); la línea legal, texto extruido.
  */
 
 /** El mail subrayado y el botón de WhatsApp. [RONDA 2] F1: WhatsApp vuelve al pie, donde estaba (sólo queda fuera del formulario de contacto). */
@@ -55,5 +57,9 @@ export function RedesDelPie(): React.JSX.Element {
 
 /** La línea legal, chica. Sin enlaces: todavía no hay páginas de privacidad ni de términos. */
 export function LineaLegal(): React.JSX.Element {
-  return <Micro como="p">{LINEA_LEGAL}</Micro>
+  return (
+    <TextoDelPie>
+      <Micro como="p">{LINEA_LEGAL}</Micro>
+    </TextoDelPie>
+  )
 }

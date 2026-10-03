@@ -1,13 +1,14 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { enviarAlServidor } from '../../_lib/formularios/enviar'
 import { validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
+import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
 import { CONTACTO_DEL_FORMULARIO } from './contenido'
 
 /**
@@ -21,6 +22,11 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  *
  * [RONDA 2] F5 · cada campo es una placa con la ranura hundida (`forma="ranura"`) y Enviar, la tecla principal (más
  * grande y más alta); entre los campos, más aire.
+ *
+ * [RETOQUE DEL PIE] P2 · desde 1025, UNA placa en WebGL (`escena/pie3d/`): el formulario entero se anota como pieza, con
+ * su aire alrededor; los campos son pozos en su cara y Enviar, una tecla que sale de ella. Los campos y el botón siguen
+ * siendo los del DOM, sobre la placa (la escena les escribe la transformada cada cuadro). Con el 3D listo, la sala se
+ * invierte (`data-seccion`: la tinta clara sobre el negro, como el foco) y los rótulos los dibuja la placa en relieve.
  */
 const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
 const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
@@ -36,6 +42,11 @@ export function FormularioDelPie(): React.JSX.Element {
   const [intento, setIntento] = useState(false)
   const [estado, setEstado] = useState<Estado>({ fase: 'quieto' })
   const enviando = estado.fase === 'enviando'
+  const volumen = useModoDelPie() === 'volumen'
+  const listo = usePieListo()
+  const enVolumen = volumen && listo
+  const placa = useRef<HTMLFormElement | null>(null)
+  usePiezaDelPie(placa, { id: 'formulario-del-pie', forma: 'formulario', activo: volumen })
 
   const escribir = (campo: CampoDelPie, valor: string): void => {
     const siguiente = { ...datos, [campo]: valor }
@@ -73,12 +84,12 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <form id="contacto" tabIndex={-1} noValidate data-pieza="contacto-del-pie" aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)] escritorio:gap-[var(--spacing-5)]">
+    <form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col gap-[var(--spacing-3)] escritorio:gap-[var(--spacing-5)]', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
       {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
         const f = campo(k)
         return (
           <div key={k} className="flex flex-col gap-[var(--spacing-1)]">
-            <label htmlFor={f.id} className={ROTULO}>
+            <label htmlFor={f.id} className={cn(ROTULO, enVolumen && 'text-transparent')}>
               {c[k]}
             </label>
             <BloqueSolido forma="ranura" className="block w-full">

@@ -11,6 +11,7 @@ la licencia permite convertirlas y redistribuirlas con la fuente.
                                    Demos (CIERRE RETOQUE 3D, D3)
   archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»
   chivo-300-italica-titulos.json   el registro 2 del hero: «LAS 24 HS»
+  chivo-{400,500,600}-pie.json     [RETOQUE DEL PIE] P2 · los textos del pie en 3D, cada uno con su peso
 
 Sin instalar nada: fontTools necesita brotli para abrir WOFF2 y, si no está, se usa el zlib de Node (que lo trae).
 Si cambian los títulos, se vuelve a correr (los invariantes afirman que cada carácter está en su JSON).
@@ -31,6 +32,15 @@ PEDIDOS = [
      'textos': ['TU NEGOCIO VENDIENDO'], 'destino': 'archivo-700-titulos.json'},
     {'origen': 'chivo-italic-latin.woff2', 'peso': 300, 'familia': 'Chivo Italic', 'licencia': 'OFL-chivo.txt',
      'textos': ['LAS 24 HS'], 'destino': 'chivo-300-italica-titulos.json'},
+    # [RETOQUE DEL PIE] P2 · el pie en 3D, con el peso con que el DOM pinta cada texto (los de `_secciones/cierre/contenido.ts`
+    # y `contacto.ts`, y el logotipo): 400 el titular y la línea legal (con los dígitos, por el año); 500 los rótulos, en
+    # mayúsculas (`uppercase` del DOM); 600 el logotipo, los enlaces, el mail, WhatsApp y Enviar.
+    {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
+     'textos': ['Lo que sigue lo armamos con vos', '© 2026 develOP. Todos los derechos reservados.', '0123456789'], 'destino': 'chivo-400-pie.json'},
+    {'origen': 'chivo-latin.woff2', 'peso': 500, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
+     'textos': ['EL RECORRIDO', 'CONTACTO', 'NOMBRE', 'MAIL', 'MENSAJE'], 'destino': 'chivo-500-pie.json'},
+    {'origen': 'chivo-latin.woff2', 'peso': 600, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
+     'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Trabajos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…'], 'destino': 'chivo-600-pie.json'},
 ]
 
 try:

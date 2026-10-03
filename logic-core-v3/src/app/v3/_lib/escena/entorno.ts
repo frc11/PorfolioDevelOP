@@ -73,15 +73,18 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
  * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
  * volumen, para que decida Valentino. [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`); la prueba
- * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera) y el polvo en facetas pasó al producto (`facetas`). [RONDA 2] F4: el filo de los títulos de día (`filo`). [RETOQUE DEL PIE] P1: la b pasó al producto; la a, la c y la bandera se borraron.
+ * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera) y el polvo en facetas pasó al producto (`facetas`). [RONDA 2] F4: el filo de los títulos de día (`filo`). [RETOQUE DEL PIE] P1: la b pasó al producto; la a, la c y la bandera se borraron. P2: el pie de antes (`pie=antes`).
  */
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
 
-export type Pruebas = Readonly<Record<string, never>>
+export interface Pruebas {
+  /** [RETOQUE DEL PIE] P2 · `pie=antes`: el pie de antes de RONDA 2 (las teclas de CSS 3D), para comparar con el de volumen. */
+  readonly pie: 'antes' | 'no'
+}
 
 /** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = {}
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -89,8 +92,8 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 }
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
-function pruebasDe(): Pruebas {
-  return {}
+function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
 }
 
 export interface Entorno {
@@ -273,7 +276,7 @@ export function entornoPedido(pedido: string): Entorno {
     sombraDelLogo: producto ? valor('sombra-logo') !== 'no' : partes.has('sombra-logo'),
     facetas: producto ? valor('facetas') !== 'no' : partes.has('facetas'),
     titulos: producto ? (valor('titulos') === 'no' ? 'no' : valor('titulos') === 'blanco' ? 'blanco' : ENTORNO.titulos) : unoDe<TitulosDeVolumen>(['negro', 'blanco'], valor('titulos')),
-    pruebas: pruebasDe(),
+    pruebas: pruebasDe(valor),
   }
 }
 
@@ -289,7 +292,7 @@ export function entornoDeLaEscena(): Entorno {
   const pedido = (window as VentanaConEntorno).__entornoDeLaEscena
   if (typeof pedido === 'string') resuelto = entornoPedido(pedido)
   else {
-    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=filo=a`.
+    // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=pie=antes`.
     // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
     const pruebas = new URLSearchParams(window.location.search).get('pruebas')
     const pedido = pruebas === null ? null : entornoPedido(`producto,${pruebas}`)

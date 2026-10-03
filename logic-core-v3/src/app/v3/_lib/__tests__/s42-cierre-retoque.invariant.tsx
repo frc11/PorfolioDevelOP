@@ -169,8 +169,8 @@ const plano = (h: string): boolean => !/data-parte="(canto|tapa)"/.test(h) && !/
 afirmar(plano(quieto), '  en el servidor (y abajo de 1025, y con movimiento reducido) el bloque es plano: ni cantos ni tapa ni transformadas; el elemento, tal cual')
 controlPositivo('el detector VE un bloque con sus cantos', quieto.replace('<a href', '<span data-parte="canto" style="transform:rotateX(90deg)"></span><a href'), plano)
 const solido = sinComentarios(leer('_componentes/volumen/BloqueSolido.tsx'))
-// [RONDA 2] F5: la pose es la de su lugar en el pie más el paralaje (`usePoseDeLaPieza`); suman la sombra y la ranura, también mudas.
-afirmar(/const solido = escritorio && !reducido/.test(solido) && /usePoseDeLaPieza\(raiz, pose, solido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 4, '  desde 1025 tiene tapa, cuatro cantos y cara de atrás (`aria-hidden`) y gira al revés de la cámara (D1): se le ven la perspectiva y los costados')
+// [RONDA 2] F5: la pose de su lugar más el paralaje. [RETOQUE DEL PIE] P2: desde 1025 la pieza es de WebGL (s44); el bloque de CSS 3D, con `pie=antes`.
+afirmar(/if \(modo === 'antes'\) return <BloqueDeAntes/.test(solido) && /useGiroDeLaMirada\(giro, !reducido\)/.test(solido) && (solido.match(/aria-hidden="true"/g) ?? []).length === 2, '  el bloque de CSS 3D de antes (tapa y cantos `aria-hidden`, gira al revés de la cámara) queda para `?pruebas=pie=antes`')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D3 · El título de Demos, en volumen')

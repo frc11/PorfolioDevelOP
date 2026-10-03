@@ -13,6 +13,8 @@ import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/core
 import { CanalDeTexto, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
+import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
+import { useModoDelPie } from '../../_lib/pie3d/registro'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { TITULAR_DE_CIERRE } from './contenido'
 import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
@@ -54,7 +56,12 @@ export const LLEGADAS_DEL_PIE = {
   abajo: [0.55, 0.9],
 } as const
 
-function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+  // [RETOQUE DEL PIE] P2 · desde 1025 el pie es de volumen (WebGL, `escena/pie3d/`): sin la llegada del DOM (lo que se ve
+  // es el 3D; lo interactivo queda quieto en su lugar, donde la escena lo lleva sobre su pieza), y con la fila de abajo
+  // en la columna izquierda: a la profundidad del logo, lo que está más abajo que su base queda bajo el piso.
+  const volumen = useModoDelPie() === 'volumen'
+  const progreso = volumen ? null : deLaSeccion
   const tramoIzquierdo = useTramo(progreso, LLEGADAS_DEL_PIE.izquierda)
   return (
     <Pie
@@ -68,18 +75,24 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
       {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
-          <Logotipo className="max-escritorio:hidden" />
+          <TextoDelPie className="max-escritorio:hidden">
+            <Logotipo />
+          </TextoDelPie>
           <div id={idDelTitularDeSeccion(seccion.id)}>
             {/* [INTERFAZ 1] T1 · el titular por línea (el canal del texto), con el tramo de su llegada. */}
-            <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
-              {(contenido) => (
-                <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
-                  {contenido}
-                </Titular>
-              )}
-            </CanalDeTexto>
+            <TextoDelPie>
+              <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
+                {(contenido) => (
+                  <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
+                    {contenido}
+                  </Titular>
+                )}
+              </CanalDeTexto>
+            </TextoDelPie>
           </div>
           <ContactoDelPie />
+          {volumen && <RedesDelPie />}
+          {volumen && <LineaLegal />}
         </Llega>
       </div>
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:right-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
@@ -87,12 +100,14 @@ function PieDelFinal({ seccion, progreso }: PropsDeSeccion & { readonly progreso
           {(p) => <ColumnasDelPie progreso={p} />}
         </LlegaConProgreso>
       </div>
-      <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
-        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
-          <RedesDelPie />
-          <LineaLegal />
-        </Llega>
-      </div>
+      {!volumen && (
+        <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
+          <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
+            <RedesDelPie />
+            <LineaLegal />
+          </Llega>
+        </div>
+      )}
     </Pie>
   )
 }
