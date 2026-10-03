@@ -63,9 +63,10 @@ const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && porQue.length > 0, 'Portfolio se queda (`queda`)')
 const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 // [RONDA 2] F2: la llegada de Portfolio ya no «termina lo que empezó» (con el scroll rápido quedaba en «Portfoli»): es función del scroll, con el asiento al frenar (s43 · F2).
-const terminaLaLlegada = (c: string): boolean => /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)
+// [NOCTURNO] A4: con su mínimo de tiempo (la llegada larga de ESCENA 10; s45 · A4).
+const terminaLaLlegada = (c: string): boolean => /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(c)
 afirmar(terminaLaLlegada(escena), '  la llegada de Portfolio es función del scroll: a cualquier velocidad, un estado coherente; al frenar, armado o desarmado del todo')
-controlPositivo('el detector VE la llegada que termina lo que empezó', escena.replace('mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)', 'persigue(m.llegada, m.llegada > 0 ? 1 : a.titulo.llegada, dt)'), terminaLaLlegada)
+controlPositivo('el detector VE la llegada que termina lo que empezó', escena.replace('mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS)', 'persigue(m.llegada, m.llegada > 0 ? 1 : a.titulo.llegada, dt)'), terminaLaLlegada)
 const conSuSeccion = (c: string): boolean => /correr\(a, d\)/.test(c) && /const d = corrimiento\(a\.pin, y\)/.test(c)
 afirmar(conSuSeccion(escena), '  llegado, va corrido con su escenario: sale con la sección, sin animación propia')
 controlPositivo('el detector VE el título clavado en el mundo', escena.replace('correr(a, d)', 'correr(a, 0)'), conSuSeccion)

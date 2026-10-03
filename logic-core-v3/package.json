@@ -274,6 +274,8 @@
     "test:s43": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s43",
     "test:s44-pie": "npx tsx src/app/v3/_lib/__tests__/s44-pie.invariant.tsx",
     "test:s44": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s44",
+    "test:s45-nocturno": "npx tsx src/app/v3/_lib/__tests__/s45-nocturno.invariant.tsx",
+    "test:s45": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s45",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",

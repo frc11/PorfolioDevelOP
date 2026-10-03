@@ -341,14 +341,14 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
  *
  * [RONDA 2] F2 · Portfolio ya no «termina lo que empezó» (eso, con el scroll rápido, lo dejaba en «Portfoli»): su llegada
  * es función del scroll, con el asiento al frenar, como la de todos. El hero (no se rearma: llega una vez por carga) sigue
- * con su llegada por tiempo, que converge sola.
+ * con su llegada por tiempo, que converge sola. [NOCTURNO] A4: con su `minimoS`, la llegada larga de ESCENA 10.
  */
 function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
   const d = corrimiento(a.pin, y)
   const fuera = fueraDelCuadro(a, d)
   const tapado = a.titulo.salida >= 0.999
-  if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)
+  if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS)
   else if (!fuera && !tapado) m.llegada = persigue(m.llegada, a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada

@@ -38,12 +38,16 @@ export function persigue(mostrado: number, pedido: number, dt: number, minimoS: 
  * dan un estado coherente. Lo único con tiempo es el ASIENTO: con el scroll quieto (`asentar`), lo que quedó a mitad se
  * completa o se deshace (al extremo más cercano) en `ASIENTO.s`; al volver el scroll, alcanza al progreso en `alcanceS`
  * (para no saltar) y desde ahí lo sigue tal cual. Converge siempre: armado o desarmado del todo al frenar.
+ *
+ * [NOCTURNO] A4 · con `minimoS`, lo de ESCENA 10: lo mostrado persigue al scroll sin ir más rápido que eso (de punta a
+ * punta), y el asiento va a la misma velocidad (si fuera más rápido, frenar el scroll acortaría la llegada).
  */
 
 export { ASIENTO }
 
-export function mostradoDelScroll(mostrado: number, pedido: number, asentar: boolean, dt: number): number {
+export function mostradoDelScroll(mostrado: number, pedido: number, asentar: boolean, dt: number, minimoS: number | null = null): number {
   const p = Math.min(1, Math.max(0, pedido))
+  if (minimoS !== null) return persigue(mostrado, asentar && p > 0 && p < 1 ? Math.round(p) : p, dt, minimoS)
   if (asentar && p > 0 && p < 1) return persigue(mostrado, p >= 0.5 ? 1 : 0, dt, ASIENTO.s)
   if (Math.abs(mostrado - p) < 0.02) return p
   return persigue(mostrado, p, dt, ASIENTO.alcanceS)

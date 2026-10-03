@@ -7,6 +7,7 @@ import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
+import { LENTOS } from '../../_lib/titulos3d/repeticiones'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { CanalDeTexto, CanalDeUnaPieza, ConInercia, VENTANA_QUE_RECORTA } from '../_contrato/canales'
@@ -192,7 +193,7 @@ export function PortadaDeTrabajos({
             <span className={VENTANA_QUE_RECORTA}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} queda /></ConInercia>
+                  <ConInercia><TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} queda /></ConInercia>
                 </Titular>
               </CanalDeUnaPieza>
             </span>

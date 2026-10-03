@@ -91,7 +91,7 @@ const dom = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 afirmar(/const repetible = useLlegadaDelTitulo\(llegadaDe, llegada \?\? LLEGADO\)/.test(dom) && /llegada: llegada === null \? null : repetible/.test(dom), 'al terminar, la llegada que el viaje repite (`llegadaDelTitulo.ts`, la del retoque 3) es la que persigue el título: las letras desde la profundidad, sin mover la cámara')
 const piezas = leer('_secciones/trabajos/piezas.tsx')
 const porQue = leer('_secciones/por-que-develop/PorQueDevelop.tsx')
-afirmar(/<CanalDeUnaPieza[^>]*llegadaDe=\{seccion\.id\}>[\s\S]{0,400}<TituloDeVolumen [^>]*llegadaDe=\{seccion\.id\}( queda)? \/>/.test(piezas) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop"( queda)? \/>/.test(porQue) && (porQue.match(/llegadaDe="por-que-develop"/g) ?? []).length === 3, '  Portfolio y la frase, con la MISMA sección que su pieza del DOM (la que el viaje nombra al llegar)')
+afirmar(/<CanalDeUnaPieza[^>]*llegadaDe=\{seccion\.id\}>[\s\S]{0,400}<TituloDeVolumen [^>]*llegadaDe=\{seccion\.id\}( minimoS=\{LENTOS\.llegadaDePortfolioS\})?( queda)? \/>/.test(piezas) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop"( queda)? \/>/.test(porQue) && (porQue.match(/llegadaDe="por-que-develop"/g) ?? []).length === 3, '  Portfolio y la frase, con la MISMA sección que su pieza del DOM (la que el viaje nombra al llegar)')
 
 titulo('T1 · El DOM: el texto de siempre hasta que el título está armado; desde 1024')
 const html = renderToStaticMarkup(<TituloDeVolumen id="portfolio" texto="Portfolio" lectura={0.47} llegada={null} salida={null} llegadaDe="trabajos" />)
