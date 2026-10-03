@@ -17,6 +17,8 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import { CURVAS } from '../motion/curvas'
 import { entornoPedido } from '../escena/entorno'
 import { TIEMPOS_DEL_FINAL, progresoDelPin } from '../escena/finalDelRecorrido'
+import { pantallasDe } from '../escena/anclaje'
+import { seccionDe } from '../../_secciones/_contrato/forma'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { DISOLVER_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL } from '../escena/titulos3d/llegada'
 import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE, ventanaDelValor } from '../../_secciones/por-que-develop/geometria'
@@ -67,6 +69,11 @@ const enPantallas = (p: number): number => p * (progresoDelPin(1) === 0 ? 1 : 1 
 const sostenida = quieta(TIEMPOS_DEL_FINAL.frase, enPantallas(VENTANA_DE_LA_FRASE.hasta), enPantallas(VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.desde))
 afirmar(sostenida >= 0.5, 'después de llegar, la frase queda quieta media pantalla (la cámara y la frase no se mueven)', `${sostenida.toFixed(2)} pantallas`)
 controlPositivo('  el chequeo vería la de antes (la cámara se movía apenas llegaba: 0,05 pantallas)', quieta({ hasta: 0.5 }, 0.45, 0.5), (q: number) => q >= 0.5)
+// El tramo quieto se cumple sólo si la escena llega a la sección a tiempo: el mapeo es proporcional a la tabla de
+// secciones, y Tu panel (5,9 pantallas a 1440 desde T1) declaraba 2 (la cámara llegaba media pantalla antes).
+const declarado = pantallasDe(seccionDe('tu-panel').alto)
+afirmar(declarado >= 5.5, '  y la escena llega a tiempo: la tabla declara el alto real de Tu panel (el mapeo es proporcional)', `${String(declarado)} pantallas`)
+controlPositivo('  el chequeo vería la tabla de antes (200svh)', pantallasDe('200svh'), (d: number) => d >= 5.5)
 afirmar(VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta <= Math.min(...[0, 1, 2, 3, 4, 5].map((i) => ventanaDelValor(i).desde)) && VENTANA_DE_LA_LEVANTADA.desde === progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta), '  después sube, llegan los valores, y recién con la levantada se va (con la salida lenta de A5)')
 
 // ═══════════════════════════════════════════════════════════════════════════

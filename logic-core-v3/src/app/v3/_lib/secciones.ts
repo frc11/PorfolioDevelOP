@@ -561,8 +561,15 @@ export const SECCIONES: readonly Seccion[] = [
    * ⚠ El `alto` de la tabla es un `min-height`, así que con 100svh la sección
    * no se rompía: **subestimaba el recorrido**, que es peor que romperse
    * porque no se ve. La cuenta de ritmo salía mal y nadie se enteraba.
+   *
+   * **[RETOQUE PANEL] T3 · 600svh.** Le volvió a pasar: desde el caos (SPRINT PANEL 2) la sección medía
+   * ~4,8 pantallas y la tabla seguía en 2, y con las demos en su lugar (T1) mide 5,9 a 1440 × 900. Como el
+   * mapeo es proporcional, todo lo que viene después llegaba ANTES: Por qué develOP se clavaba con el
+   * progreso en 0,8714 (su ancla es 0,8525), media pantalla de cámara adelantada, y la frase se empezaba a
+   * ir apenas llegaba. Con el alto real arranca en 0,8527 (medido con el banco). Tu panel es `papel-opaco`:
+   * el tramo que corre detrás no se ve.
    */
-  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '200svh' },
+  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '600svh' },
   /**
    * POR QUÉ develOP — **[FINAL]** el escenario de los tres primeros tiempos del final
    * (frase, valores, CTA; `escena/finalDelRecorrido.ts`). Cuatro pantallas con el
