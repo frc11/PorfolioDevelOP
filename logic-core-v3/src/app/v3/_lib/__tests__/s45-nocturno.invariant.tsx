@@ -10,15 +10,23 @@
  *        la misma llegada repetida del título del destino).
  *   A1 · el texto 2D que acompaña a un título 3D (la bajada y los CTA del hero, la bajada de Portfolio, los valores de la
  *        frase, el párrafo de Demos) va en el plano de su título como lo ve la cámara viva: queda siempre debajo de él.
+ *   B  · Tu panel vivo: cada feature con su demo armada con los componentes del panel real (importados o copiados a
+ *        `_panel-vivo/`), sin red, sin server actions ni sesión, sin las zonas de Franco, sin precios, con «Ejemplo»,
+ *        diferida (se monta al entrar en pantalla) y accesible (la grande, usable; la miniatura, inerte).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno/LEEME.txt`.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import path from 'node:path'
 
 import * as THREE from 'three'
 
 import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
 import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
+import { preciosEncontrados } from '../../_secciones/_contrato/escaneo'
+import { TARJETAS } from '../../_secciones/tu-panel/contenido'
+import { DEMO_DEL_ITEM, ITEM_DE_LA_DEMO, ROTULO_DE_EJEMPLO } from '../../_panel-vivo/catalogo'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from './s8-largos'
 import { LLEGADA_DE_LAS_LETRAS, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { cuadrilateroEnElPlano } from '../escena/titulos3d/acompanantes'
 import { colocar, lineaDeBase } from '../escena/titulos3d/colocacion'
@@ -181,5 +189,50 @@ afirmar(pegados.every(Boolean), '  en el hero (la bajada y los CTA), en Portfoli
 const ids = ['hero-registro-2', 'portfolio', 'frase-izquierda', 'frase-derecha', 'demos-2']
 const anotados = ['_secciones/hero/Hero.tsx', '_secciones/trabajos/piezas.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/trabajos/demos/TextoDeDemos.tsx'].map(leer).join('\n')
 afirmar(ids.every((id) => anotados.includes(`id: '${id}'`) || anotados.includes(`id="${id}"`)), '  cada uno acompaña a un título que existe (el mismo id con que la sección lo anota)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B · Tu panel vivo: las demos del panel real')
+
+const CARPETA = `${V3}/_panel-vivo`
+const deLaCarpeta = (dir: string): string[] => readdirSync(dir).flatMap((n) => (statSync(path.join(dir, n)).isDirectory() ? deLaCarpeta(path.join(dir, n)) : /\.tsx?$/.test(n) ? [path.join(dir, n).replace(/\\/g, '/')] : []))
+const ARCHIVOS_VIVOS = deLaCarpeta(CARPETA)
+const fuenteViva = (a: string): string => readFileSync(a, 'utf8')
+const importsDe = (c: string): string[] => [...c.matchAll(/^import\s+(type\s+)?[\s\S]*?from\s+'([^']+)'/gm)].filter((m) => m[1] === undefined).map((m) => m[2])
+const PROHIBIDO = /^(next\/link|next\/navigation|next\/router|next-auth|server-only|@\/auth|@\/lib\/prisma|@\/lib\/db|@prisma\/client)$|\/actions?(\/|$)|\/server(\/|$)|\.server$|OsLead|\/leados|\/setter|ActivityChannel/
+const sinLoProhibido = (archivos: readonly string[], leer: (a: string) => string): string[] => archivos.flatMap((a) => importsDe(leer(a)).filter((i) => PROHIBIDO.test(i)).map((i) => `${path.basename(a)} → ${i}`))
+afirmar(ARCHIVOS_VIVOS.length >= 6 && sinLoProhibido(ARCHIVOS_VIVOS, fuenteViva).length === 0, `ningún archivo de las demos importa una server action, prisma, auth, \`next/link\`, \`next/navigation\` ni las zonas de Franco (${String(ARCHIVOS_VIVOS.length)} archivos)`, sinLoProhibido(ARCHIVOS_VIVOS, fuenteViva).join(' · '))
+controlPositivo('el detector VE un import prohibido', [`${CARPETA}/x.tsx`], (l: readonly string[]) => sinLoProhibido(l, () => "import Link from 'next/link'\nimport { createTicketAction } from '@/lib/tickets/actions'\n").length === 0)
+// Un nivel más: lo que se importa del dashboard tampoco trae esas cosas (lo que trae, se copió).
+const DEL_DASHBOARD = [...new Set(ARCHIVOS_VIVOS.flatMap((a) => importsDe(fuenteViva(a))).filter((i) => /^@\/(components|modules|lib)\//.test(i)))]
+const resolver = (i: string): string => ['.tsx', '.ts'].map((x) => `src/${i.slice(2)}${x}`).find((r) => { try { return statSync(r).isFile() } catch { return false } }) ?? ''
+const importadosLimpios = DEL_DASHBOARD.filter((i) => resolver(i) !== '' && sinLoProhibido([resolver(i)], fuenteViva).length === 0 && !/^\s*['"]use server['"]/m.test(fuenteViva(resolver(i))))
+afirmar(DEL_DASHBOARD.length > 0 && importadosLimpios.length === DEL_DASHBOARD.length, '  lo que se IMPORTA del panel real es sólo su parte visual: tampoco trae server actions, `<Link>` ni navegación', DEL_DASHBOARD.join(' · '))
+const RED = /\bfetch\(|XMLHttpRequest|EventSource|WebSocket|sendBeacon|\baxios\b/
+const conRed = ARCHIVOS_VIVOS.filter((a) => RED.test(sinComentarios(fuenteViva(a))))
+afirmar(conRed.length === 0, '  cero red: ninguna demo pide nada (todo es de ejemplo y local)', conRed.join(' · '))
+const literales = ARCHIVOS_VIVOS.flatMap((a) => [...sinComentarios(fuenteViva(a)).matchAll(/'((?:[^'\\\n]|\\.)*)'/g)].map((m) => m[1])).join(' · ')
+afirmar(preciosEncontrados(literales).length === 0, '  ningún precio en los datos de ejemplo (ni de ejemplo: `inventado.ts`)', preciosEncontrados(literales).map((h) => h.fragmento).join(' '))
+controlPositivo('el detector VE un precio de ejemplo', 'Plan Pro, USD 49 por mes', (t: string) => preciosEncontrados(t).length === 0)
+const largos = ARCHIVOS_VIVOS.filter((a) => contarLineasDeCodigo(fuenteViva(a)) > LIMITE_DE_LINEAS_DE_CODIGO)
+afirmar(largos.length === 0, `  ningún archivo de las demos pasa las ${String(LIMITE_DE_LINEAS_DE_CODIGO)} líneas de código`, largos.join(' · '))
+// Cada feature con su demo; cada demo, en el marco del panel (con «Ejemplo») y con el ítem del panel que le toca.
+const cargador = sinComentarios(fuenteViva(`${CARPETA}/DemoDelPanel.tsx`))
+const conDemo = TARJETAS.filter((t) => new RegExp(`\\b${t.demo}: lazy\\(\\(\\) => import\\('\\./demos/`).test(cargador))
+afirmar(TARJETAS.every((t) => t.demo in ITEM_DE_LA_DEMO) && new Set(TARJETAS.map((t) => t.demo)).size === TARJETAS.length, 'cada una de las ocho features nombra su demo (una distinta cada una)', `con demo: ${conDemo.map((t) => t.demo).join(', ')}`)
+const modulos = [...cargador.matchAll(/import\('(\.\/demos\/[^']+)'\)/g)].map((m) => `${CARPETA}/${m[1].slice(2)}.tsx`)
+afirmar(modulos.length === conDemo.length && modulos.every((m) => /<MarcoDelPanel item="/.test(fuenteViva(m))), '  cada demo va en el marco del panel (que lleva siempre «Ejemplo»)', modulos.map((m) => path.basename(m)).join(' · '))
+const marco = sinComentarios(fuenteViva(`${CARPETA}/MarcoDelPanel.tsx`))
+afirmar(ROTULO_DE_EJEMPLO === 'Ejemplo' && /\{ROTULO_DE_EJEMPLO\}<\/span>/.test(marco) && !/\{grande && [^}]*ROTULO_DE_EJEMPLO/.test(marco), '  el rótulo «Ejemplo» va en el marco, en los dos modos (la miniatura y la grande)')
+afirmar(Object.values(DEMO_DEL_ITEM).every((d) => d !== undefined && d in ITEM_DE_LA_DEMO), '  la barra lateral de la grande lleva a demos que existen')
+// Diferida, pausada fuera de cuadro y accesible.
+const miniatura = /<span ref=\{setCaja\} aria-hidden="true" inert /.test(cargador) && /new IntersectionObserver\(/.test(cargador) && /createPortal\(/.test(cargador) && /vista\.entrada > 0 &&/.test(cargador)
+const corre = /corre: vista\.aLaVista && pestana && !grande && !reducido/.test(cargador) && /corre: pestana && !pausada && !reducido/.test(cargador)
+afirmar(miniatura && corre, '  la miniatura se monta recién al entrar en pantalla (en un portal, inerte y fuera del árbol de lectura) y corre sólo a la vista, con la pestaña visible, sin la grande abierta y sin movimiento reducido')
+controlPositivo('el detector VE una miniatura que se monta siempre', cargador.replace('vista.entrada > 0 &&', ''), (c: string) => /vista\.entrada > 0 &&/.test(c))
+const reproduccion = sinComentarios(fuenteViva(`${CARPETA}/reproduccion.ts`))
+afirmar(/if \(!r\.corre \|\| paso >= total\) return undefined/.test(reproduccion) && /MINIATURA = \{ pasosAlFinal: 3, msMaximoPorPaso: 1600 \}/.test(reproduccion), '  los pasos avanzan solos sólo mientras corre (con movimiento reducido, a mano); la miniatura repite su final: tres pasos de 1,6 s como mucho (menos de cinco segundos, WCAG 2.2.2)')
+afirmar(/role="region" aria-label=\{`Demo de \$\{NOMBRE_DE_LA_DEMO\[demo\]\}, con datos de ejemplo`\}/.test(cargador) && /aria-pressed=\{r\.pausada\}/.test(marco), '  la grande es una región con nombre, y la que se mueve sola tiene su botón de pausa')
+const ampliacion = sinComentarios(readFileSync(`${V3}/_secciones/tu-panel/Ampliacion.tsx`, 'utf8'))
+afirmar(/querySelectorAll<HTMLElement>\(FOCALIZABLES\)/.test(ampliacion) && /e\.key === 'ArrowRight' && !enLaDemo\(e\)/.test(ampliacion) && /imagen\.current\?\.contains\(e\.target\) === true\) return/.test(ampliacion) && /<DemoCompleta demo=\{tarjeta\.demo\}/.test(ampliacion), '  en la ampliación: el foco da la vuelta por TODO lo enfocable (campos y enlaces de la demo), las flechas y la rueda adentro de la demo son de la demo')
 
 cerrar('s45-nocturno')

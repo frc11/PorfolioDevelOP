@@ -12,6 +12,7 @@
  */
 
 import { sizesPorViewport } from '../../_lib/imagen'
+import type { IdDeDemo } from '../../_panel-vivo/catalogo'
 import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
@@ -41,6 +42,8 @@ export interface Tarjeta {
   readonly alt: string
   /** RECURSOS: dónde se ancla la captura: el marco (con el 130 % del parallax) le recorta los costados. */
   readonly encuadre: EncuadreDeCaptura
+  /** [NOCTURNO] B · la demo viva que reemplaza a la captura (`_panel-vivo/`); la captura queda debajo, de respaldo. */
+  readonly demo: IdDeDemo
 }
 
 /** El placeholder rayado de B12 §4.3, con la medida de una captura real. */
@@ -52,14 +55,14 @@ const PLACEHOLDER = '/placeholders/panel.png'
  */
 export const TARJETAS: readonly Tarjeta[] = [
   // RECURSOS: las capturas reales del panel.
-  { titulo: 'Revisá cada conversación de tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/conversaciones.webp', encuadre: 'izquierda', alt: 'El panel con la lista de conversaciones del chatbot: fecha, mensajes y el lead que dejó cada una, con una conversación abierta.' },
-  { titulo: 'Recibí los leads ya calificados que consultaron tu página', etiqueta: 'Leads', imagen: '/recursos/panel/leads.webp', encuadre: 'derecha', alt: 'El panel de leads en tres columnas, calientes, tibios y fríos, con la ficha de un lead de prueba y sus datos de contacto.' },
-  { titulo: 'Creá tickets para que cambiemos lo que necesites', etiqueta: 'Soporte', imagen: '/recursos/panel/tickets.webp', encuadre: 'izquierda', alt: 'El centro de soporte del panel con los tickets abiertos, en curso y resueltos, y el botón para abrir uno nuevo.' },
-  { titulo: 'Chateá con nosotros directo, por lo que sea', etiqueta: 'Soporte', imagen: '/recursos/panel/mensajes.webp', encuadre: 'centro', alt: 'El chat del panel con el equipo de develOP: una conversación con mensajes de ida y vuelta y el campo para escribir.' },
-  { titulo: 'Pedí servicios nuevos a medida que los sumamos', etiqueta: 'Servicios', imagen: '/recursos/panel/servicios-nuevos.webp', encuadre: 'izquierda', alt: 'La vitrina de servicios del panel: un módulo disponible para desbloquear y los próximos, con el aviso para enterarse.' },
-  { titulo: 'Mirá el resumen de tu proyecto', etiqueta: 'Proyecto', imagen: '/recursos/panel/mi-proyecto.webp', encuadre: 'izquierda', alt: 'El resumen del proyecto en el panel: el avance en porcentaje, el tipo, las fechas y una entrega esperando aprobación.' },
-  { titulo: 'Seguí tus resultados', etiqueta: 'Resultados', imagen: '/recursos/panel/resultados.webp', encuadre: 'izquierda', alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.' },
-  { titulo: 'Configurá cómo responde tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/modifica-chatbot.webp', encuadre: 'izquierda', alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.' },
+  { titulo: 'Revisá cada conversación de tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/conversaciones.webp', encuadre: 'izquierda', demo: 'conversaciones', alt: 'El panel con la lista de conversaciones del chatbot: fecha, mensajes y el lead que dejó cada una, con una conversación abierta.' },
+  { titulo: 'Recibí los leads ya calificados que consultaron tu página', etiqueta: 'Leads', imagen: '/recursos/panel/leads.webp', encuadre: 'derecha', demo: 'leads', alt: 'El panel de leads en tres columnas, calientes, tibios y fríos, con la ficha de un lead de prueba y sus datos de contacto.' },
+  { titulo: 'Creá tickets para que cambiemos lo que necesites', etiqueta: 'Soporte', imagen: '/recursos/panel/tickets.webp', encuadre: 'izquierda', demo: 'tickets', alt: 'El centro de soporte del panel con los tickets abiertos, en curso y resueltos, y el botón para abrir uno nuevo.' },
+  { titulo: 'Chateá con nosotros directo, por lo que sea', etiqueta: 'Soporte', imagen: '/recursos/panel/mensajes.webp', encuadre: 'centro', demo: 'mensajes', alt: 'El chat del panel con el equipo de develOP: una conversación con mensajes de ida y vuelta y el campo para escribir.' },
+  { titulo: 'Pedí servicios nuevos a medida que los sumamos', etiqueta: 'Servicios', imagen: '/recursos/panel/servicios-nuevos.webp', encuadre: 'izquierda', demo: 'servicios', alt: 'La vitrina de servicios del panel: un módulo disponible para desbloquear y los próximos, con el aviso para enterarse.' },
+  { titulo: 'Mirá el resumen de tu proyecto', etiqueta: 'Proyecto', imagen: '/recursos/panel/mi-proyecto.webp', encuadre: 'izquierda', demo: 'proyecto', alt: 'El resumen del proyecto en el panel: el avance en porcentaje, el tipo, las fechas y una entrega esperando aprobación.' },
+  { titulo: 'Seguí tus resultados', etiqueta: 'Resultados', imagen: '/recursos/panel/resultados.webp', encuadre: 'izquierda', demo: 'resultados', alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.' },
+  { titulo: 'Configurá cómo responde tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/modifica-chatbot.webp', encuadre: 'izquierda', demo: 'informacion', alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.' },
 ]
 
 /** El cierre de la galería, a tamaño de titular. Los puntos van aparte: entran uno por uno. */

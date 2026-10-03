@@ -32,6 +32,26 @@ export function cajaAmpliada(anchoDePantalla: number, altoDePantalla: number, ma
   }
 }
 
+/**
+ * [NOCTURNO] B · LA CAJA DE LA DEMO: la demo se USA, así que va lo más grande que entra. En escritorio, 16:10 (la
+ * proporción del marco: el vuelo no la deforma) entre los costados de las flechas (`margen`), arriba desde `arriba` (la
+ * cruz queda afuera, a la derecha) y el título de abajo (`pie`). En una pantalla angosta una demo a 16:10 no se puede
+ * usar (a 390 mide 358 × 224): ocupa el ancho y el alto que quedan entre la cruz de arriba y el título.
+ */
+export function cajaDeLaDemo(anchoDePantalla: number, altoDePantalla: number, margen: number, pie: number, arriba: number, angosta: boolean): Caja {
+  const anchoLibre = Math.max(0, anchoDePantalla - 2 * margen)
+  const altoLibre = Math.max(0, altoDePantalla - arriba - pie)
+  if (angosta) return { left: margen, top: arriba, width: anchoLibre, height: altoLibre }
+  const width = Math.min(anchoLibre, altoLibre * RELACION_DEL_MARCO)
+  const height = width / RELACION_DEL_MARCO
+  return { left: (anchoDePantalla - width) / 2, top: arriba + (altoLibre - height) / 2, width, height }
+}
+
+/** ¿Dos cajas tienen la misma proporción? (Si no, el vuelo las deformaría: va un fundido.) */
+export function mismaProporcion(a: Caja, b: Caja): boolean {
+  return a.height > 0 && b.height > 0 && Math.abs(a.width / a.height / (b.width / b.height) - 1) < 0.05
+}
+
 /** La transformada que pone la caja `hasta` exactamente encima de `desde` (origen arriba a la izquierda). */
 export function transformadaEntre(desde: Caja, hasta: Caja): string {
   if (hasta.width === 0 || hasta.height === 0) return 'none'

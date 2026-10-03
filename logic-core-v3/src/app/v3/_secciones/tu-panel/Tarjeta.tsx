@@ -8,6 +8,7 @@ import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { sizesPorViewport } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
+import { MiniaturaDeLaDemo } from '../../_panel-vivo/DemoDelPanel'
 import { ALFA_DEL_FONDO } from './Fondo'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CAPTURA, PALABRAS_DEL_FONDO, type Tarjeta as DatosDeTarjeta } from './contenido'
@@ -66,6 +67,8 @@ export function Tarjeta({
                   <span ref={refDelParallax} data-parte="parallax" className="absolute inset-x-0 top-0 block h-13/10">
                     <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(tamano.ancho, 88)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
                   </span>
+                  {/* [NOCTURNO] B · la demo viva, encima de la captura (que queda: respaldo y HTML del servidor). */}
+                  <MiniaturaDeLaDemo demo={tarjeta.demo} />
                 </span>
                 {/* El marcador se VE (es un placeholder) pero no se anuncia: repetido
                     ocho veces le ensuciaría el nombre a cada botón. */}

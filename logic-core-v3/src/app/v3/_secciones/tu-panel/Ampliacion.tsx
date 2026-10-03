@@ -6,8 +6,13 @@ import { createPortal } from 'react-dom'
 import { Imagen } from '../../_componentes/medios/Imagen'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { cajaAmpliada, leerToken, milisegundosDe, pixelesDe, transformadaEntre, vecino } from './vuelo'
+import { DemoCompleta, hayDemo } from '../../_panel-vivo/DemoDelPanel'
+import type { IdDeDemo } from '../../_panel-vivo/catalogo'
+import { cajaAmpliada, cajaDeLaDemo, leerToken, milisegundosDe, mismaProporcion, pixelesDe, transformadaEntre, vecino } from './vuelo'
 import { CAPTURA, type Tarjeta } from './contenido'
+
+/** [NOCTURNO] B · lo que se puede enfocar adentro (la demo trae campos y enlaces, no sólo botones). */
+const FOCALIZABLES = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
  * LA AMPLIACIÓN — la imagen sale de su marco hasta el centro de la pantalla.
@@ -22,6 +27,10 @@ import { CAPTURA, type Tarjeta } from './contenido'
  * da la vuelta adentro, y al cerrar vuelve a la tarjeta (lo hace `Galeria`).
  * Se monta en `[data-v3]` con un portal: un `position: fixed` adentro de una
  * sección transformada quedaría atado a ella.
+ *
+ * [NOCTURNO] B · en lugar de la imagen, la DEMO del panel (`_panel-vivo/`), usable: la captura queda de respaldo mientras
+ * llega. Adentro de la demo, las flechas y la rueda son de la demo (no cambian de feature ni se frenan); en una pantalla
+ * angosta la caja ocupa el alto que queda (`cajaDeLaDemo`) y, si no tiene la proporción del marco, va un fundido.
  */
 export function Ampliacion({
   tarjetas,
@@ -49,6 +58,7 @@ export function Ampliacion({
     typeof document === 'undefined' ? null : (document.querySelector<HTMLElement>('[data-v3]') ?? document.body),
   )
   const tarjeta = tarjetas[indice]
+  const conDemo = hayDemo(tarjeta.demo)
 
   /** Ubica la imagen en su caja final. Se llama al abrir y al cambiar el tamaño de la pantalla. */
   const ubicar = useCallback((): void => {
@@ -57,13 +67,15 @@ export function Ampliacion({
     // Abajo de 1025 el margen es el de la grilla compacta: con 80 px, a 390 la imagen quedaba de 230.
     const pie = pixelesDe(leerToken('--spacing-20'))
     // El corte es el de las clases `escritorio:` (el token), no la compuerta: las secciones no la consultan (s7-contrato).
-    const margen = window.innerWidth > pixelesDe(leerToken('--breakpoint-escritorio')) ? pie : pixelesDe(leerToken('--spacing-4'))
-    const caja = cajaAmpliada(window.innerWidth, window.innerHeight, margen, pie)
+    const angosta = window.innerWidth <= pixelesDe(leerToken('--breakpoint-escritorio'))
+    const margen = angosta ? pixelesDe(leerToken('--spacing-4')) : pie
+    // [NOCTURNO] B · con demo, lo más grande que entra: en escritorio sube hasta la altura de la cruz.
+    const caja = conDemo ? cajaDeLaDemo(window.innerWidth, window.innerHeight, margen, pie, angosta ? pie : pixelesDe(leerToken('--spacing-6')), angosta) : cajaAmpliada(window.innerWidth, window.innerHeight, margen, pie)
     el.style.left = `${caja.left}px`
     el.style.top = `${caja.top}px`
     el.style.width = `${caja.width}px`
     el.style.height = `${caja.height}px`
-  }, [])
+  }, [conDemo])
 
   const animar = useCallback(
     (abrir: boolean, alTerminar?: () => void): void => {
@@ -76,7 +88,7 @@ export function Ampliacion({
       velo.current?.animate(fundido, opciones)
       resto.current?.animate(fundido, opciones)
       let ultima: Animation | undefined
-      if (el !== null && marco !== null && !reducido) {
+      if (el !== null && marco !== null && !reducido && mismaProporcion(marco.getBoundingClientRect(), el.getBoundingClientRect())) {
         const sobre = transformadaEntre(marco.getBoundingClientRect(), el.getBoundingClientRect())
         const cuadros: Keyframe[] = abrir ? [{ transform: sobre }, { transform: 'none' }] : [{ transform: 'none' }, { transform: sobre }]
         ultima = el.animate(cuadros, opciones)
@@ -110,7 +122,11 @@ export function Ampliacion({
   useEffect(() => {
     const el = dialogo.current
     if (el === null) return
-    const frenar = (e: Event): void => e.preventDefault()
+    // [NOCTURNO] B · adentro de la demo, la rueda es suya (la demo contiene su scroll: `overscroll-contain`).
+    const frenar = (e: Event): void => {
+      if (e.target instanceof Node && imagen.current?.contains(e.target) === true) return
+      e.preventDefault()
+    }
     el.addEventListener('wheel', frenar, { passive: false })
     el.addEventListener('touchmove', frenar, { passive: false })
     window.addEventListener('resize', ubicar)
@@ -129,18 +145,19 @@ export function Ampliacion({
     [alCambiar, indice, tarjetas.length],
   )
 
+  const enLaDemo = (e: React.KeyboardEvent<HTMLDivElement>): boolean => e.target instanceof Node && imagen.current?.contains(e.target) === true
   const alTeclear = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (e.key === 'Escape') {
       e.preventDefault()
       cerrar()
-    } else if (e.key === 'ArrowRight') {
+    } else if (e.key === 'ArrowRight' && !enLaDemo(e)) {
       e.preventDefault()
       pasar(1)
-    } else if (e.key === 'ArrowLeft') {
+    } else if (e.key === 'ArrowLeft' && !enLaDemo(e)) {
       e.preventDefault()
       pasar(-1)
     } else if (e.key === 'Tab') {
-      const focos = dialogo.current?.querySelectorAll<HTMLElement>('button')
+      const focos = dialogo.current?.querySelectorAll<HTMLElement>(FOCALIZABLES)
       if (focos === undefined || focos.length === 0) return
       const primero = focos[0]
       const ultimo = focos[focos.length - 1]
@@ -152,6 +169,12 @@ export function Ampliacion({
         primero.focus()
       }
     }
+  }
+
+  // [NOCTURNO] B · la barra lateral de la demo lleva a la feature de otra demo.
+  const irA = (demo: IdDeDemo): void => {
+    const i = tarjetas.findIndex((t) => t.demo === demo)
+    if (i >= 0) alCambiar(i)
   }
 
   if (destino === null) return null
@@ -174,7 +197,7 @@ export function Ampliacion({
       <div ref={velo} data-parte="velo" onClick={cerrar} className="bg-tinta/90 absolute inset-0" />
 
       <div ref={imagen} data-parte="imagen" className="bg-superficie-2 absolute origin-top-left overflow-hidden">
-        <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={CAPTURA.sizes} className="h-full object-cover" />
+        <DemoCompleta demo={tarjeta.demo} irA={irA} respaldo={<Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={CAPTURA.sizes} className="h-full object-cover" />} />
       </div>
 
       <div ref={resto} className="pointer-events-none absolute inset-0">
