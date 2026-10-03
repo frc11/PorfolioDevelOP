@@ -339,8 +339,7 @@ varying vec4 vVecinos;
 varying float vEscalon;
 varying float vAltoDelBloque;
 ${ANILLOS_GLSL}
-${MANCHA_GLSL}
-${SOMBRAS_DEL_PIE_GLSL}
+${MANCHA_GLSL}${SOMBRAS_DEL_PIE_GLSL}
 ${CHARCO_DEL_HAZ_GLSL}
 ${conContacto ? CONTACTO_DE_LA_TRAMA_GLSL : ''}
 ${conSombra ? SOMBRA_DEL_LOGO_GLSL : ''}`,
@@ -373,8 +372,7 @@ ${conSombra ? SOMBRA_DEL_LOGO_GLSL : ''}`,
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.x );
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, m.y );
 		// [ESCENA 10] T1 · la sombra proyectada del logo (con la luz principal, de día), conviviendo con la mancha.
-		${conSombra ? APLICAR_LA_SOMBRA_GLSL : ''}
-		${APLICAR_LAS_SOMBRAS_DEL_PIE_GLSL}
+		${conSombra ? APLICAR_LA_SOMBRA_GLSL : ''} ${APLICAR_LAS_SOMBRAS_DEL_PIE_GLSL}
 		gl_FragColor.rgb += charcoDelHaz( vPiso.xz ) * uHaz;
 		gl_FragColor.rgb = mix( gl_FragColor.rgb, vec3( uNoche ), cuantoDelPulso( length( vPiso.xz ) ) );
 	}`,

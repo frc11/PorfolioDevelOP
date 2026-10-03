@@ -27,7 +27,7 @@ import { COLOCACION_DEL_PIE, colocarLaPieza, profundidadDeLaPieza, profundidadDe
 import { VOLUMEN_DEL_PIE, armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
 import { materialDelPie } from '../escena/pie3d/material'
 import { LLEGADA_DEL_PIE, alFinalDeLaPagina, aplicarLaLlegada, cuantoLeFalta, llegadaDe } from '../escena/pie3d/llegada'
-import { HUNDIDA_DEL_PIE } from '../escena/pie3d/PieDeVolumen'
+import { HUNDIDA_DEL_PIE } from '../escena/pie3d/armadas'
 import { SOMBRAS_DEL_PIE_GLSL, formaDeLaSombra } from '../escena/pie3d/sombras'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
 import { COSTADO_DE_DIA, costadoDeDiaGlsl } from '../escena/titulos3d/filo'
@@ -103,7 +103,7 @@ const mpp = colocarLaPieza(g, camara, 900, 300, 1440, 900, dLogo)
 g.updateMatrixWorld(true)
 const enSuLugar = new THREE.Vector3(100, -50, 0).applyMatrix4(g.matrixWorld).project(camara)
 afirmar(cerca([((enSuLugar.x + 1) / 2) * 1440, ((1 - enSuLugar.y) / 2) * 900], [1000, 350], 0.05) && g.quaternion.angleTo(camara.quaternion) < 1e-6 && mpp > 0, '  la cámara de la pose la ve en su lugar del DOM y de su tamaño (un px de la pieza, un px del cuadro), mirando al frente')
-const escena = sinComentarios(leer('_lib/escena/pie3d/PieDeVolumen.tsx'))
+const escena = ['_lib/escena/pie3d/PieDeVolumen.tsx', '_lib/escena/pie3d/armadas.ts'].map((r) => sinComentarios(leer(r))).join('\n')
 const fijaEnElMundo = (c: string): boolean => /colocarLaPieza\(a\.grupo, CAMARA_SIN_EL_MOUSE, /.test(c) && /profundidadDeLaPieza\(CAMARA_SIN_EL_MOUSE, /.test(c) && !/suscribirALaMirada|puntero|rotation\.|rotate[XYZ]\(/.test(c)
 afirmar(fijaEnElMundo(escena), '  fija en el mundo: se coloca con la cámara SIN el mouse (lo único que se mueve es la cámara); ninguna pieza gira ni lee el mouse')
 controlPositivo('el detector VE una pieza que gira con el mouse', `${escena}\na.grupo.rotation.y = puntero.x`, fijaEnElMundo)
@@ -200,7 +200,7 @@ const grupo = new THREE.Group()
 grupo.position.set(1, 2, 3)
 aplicarLaLlegada(grupo, ll, 0)
 afirmar(grupo.position.equals(new THREE.Vector3(1, 2, 3)) && grupo.quaternion.equals(new THREE.Quaternion()) && alFinalDeLaPagina(26786, 900, 27686) && !alFinalDeLaPagina(26300, 900, 27686), '  llegada, la pieza queda exacta (de frente, en su lugar); se arma al llegar al final de la página, no antes')
-const delPie = sinComentarios(leer('_lib/escena/pie3d/PieDeVolumen.tsx'))
+const delPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
 const soloConLaPrueba = (c: string): boolean => /const conLlegada = s\.prueba === 'llegada' && !s\.quieto/.test(c) && /if \(conLlegada\) aplicarLaLlegada\(/.test(c) && /if \(conLlegada && s\.inicio === null && alFinalDeLaPagina\(/.test(c) && (c.match(/aplicarLaLlegada\(/g) ?? []).length === 1
 afirmar(soloConLaPrueba(delPie), '  sólo con la prueba (y sin movimiento reducido): una vez por carga; en el producto ninguna pieza se mueve sola')
 controlPositivo('el detector VE la llegada en el producto', delPie.replace('if (conLlegada) aplicarLaLlegada(', 'aplicarLaLlegada('), soloConLaPrueba)
