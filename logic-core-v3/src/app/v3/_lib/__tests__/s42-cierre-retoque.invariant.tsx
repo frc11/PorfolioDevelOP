@@ -65,7 +65,7 @@ afirmar(FACETAS_DEL_POLVO.quedan === 0.6 && FACETAS_DEL_POLVO.tam[0] === 2.4 && 
 const soloAspecto = (glsl: string): boolean => !/transformed\s*=/.test(glsl) && /vParejo \*=/.test(glsl) && /gl_PointSize = /.test(glsl)
 afirmar(soloAspecto(FACETAS_VERTEX_GLSL), '  cambia cuántas se ven, su tamaño, su brillo y su forma, nunca su lugar: la física aprobada anda igual')
 controlPositivo('el detector VE una variante que mueve las motas', `${FACETAS_VERTEX_GLSL}\ntransformed = vec3( 0.0 );`, soloAspecto)
-afirmar(!existsSync(`${V3}/_lib/escena/polvo/variantes.ts`) && Object.keys(PRUEBAS_APAGADAS).every((k) => k === 'filo') && !/POLVO_VARIANTE|VARIANTE_/.test(parche), '  la a y la c se borraron, con la bandera `polvo=`: no queda ninguna prueba')
+afirmar(!existsSync(`${V3}/_lib/escena/polvo/variantes.ts`) && !('polvo' in PRUEBAS_APAGADAS) && !/POLVO_VARIANTE|VARIANTE_/.test(parche), '  la a y la c se borraron, con la bandera `polvo=`: no queda ninguna prueba')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B2 · Una muesca levanta el polvo, en toda la página')

@@ -24,7 +24,7 @@ import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar, p
 import { armarElTitulo } from './geometria'
 import { ASIENTO, DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
-import { filoDeDiaGlsl } from './filo'
+import { costadoDeDiaGlsl } from './filo'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -374,7 +374,6 @@ function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRen
 }
 
 function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
-  const filo = entornoDeLaEscena().pruebas.filo
   const fuente = FUENTES[titulo.fuente]
   const { geometria, contornos } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto)
   const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
@@ -390,10 +389,10 @@ function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
     shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\n${DISOLVER_PARS_GLSL}`).replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_GLSL}`)
     // El blanco, de día: el filo oscuro (la función del borde la trae el dibujo de noche, que se instala abajo).
     if (variante === 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${FILO_DE_DIA_GLSL}`)
-    // [RONDA 2] F4 · la prueba del filo de día en el negro (`filo.ts`): el producto no cambia.
-    else if (filo !== 'no') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${filoDeDiaGlsl(filo).replace(/EMISION_DE_LA_NOCHE/g, EMISION_EN_LA_NOCHE.toFixed(3))}`)
+    // [RETOQUE DEL PIE] P1 · el negro, de día: los costados en otro gris (`filo.ts`; era la b de la prueba de RONDA 2).
+    else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`)
   }
-  material.customProgramCacheKey = () => `titulo-de-volumen-${variante}-filo-${filo}`
+  material.customProgramCacheKey = () => `titulo-de-volumen-${variante}`
   // De noche, el dibujo del logo (en em: el filo y el campo de su contorno); y el amanecer, como el resto de la sala.
   const contorno = hornearContornos(contornos, NOCHE_DEL_TITULO.contorno)
   conLogoDeNoche(material, contorno, variante === 'blanco' ? { ancho: NOCHE_DEL_TITULO.filo, tapa: NOCHE_DEL_TITULO.tapaDelBlanco } : { ancho: NOCHE_DEL_TITULO.filo })

@@ -8,6 +8,7 @@
  *   F1 · los formularios envían de verdad (el contacto del pie y el del panel a `/api/contacto`, el newsletter a
  *        `/api/newsletter`): Zod y límite por IP en el servidor, validación al lado del campo, sin carteles de «todavía
  *        no envía» ni `mailto`; WhatsApp vuelve al pie (fuera del formulario).
+ *   F4 · [RETOQUE DEL PIE] P1: cerrado (la b, en el producto; s44-pie).
  *   F2 · las llegadas y salidas de los títulos 3D (Portfolio, la frase, El equipo, las demos) y de los valores son función
  *        del scroll, con el asiento al frenar (armado o desarmado del todo); la frase vuelve a tener salida; la llegada
  *        después de un viaje se puede interrumpir y converge.
@@ -23,8 +24,6 @@ import { leerVolumenes } from '../sonido/preferencia'
 import { validarElMail, validarElPie } from '../formularios/validar'
 import { mostradoDelScroll, persigue } from '../escena/titulos3d/llegada'
 import { ASIENTO } from '../titulos3d/repeticiones'
-import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
-import { filoDeDiaGlsl } from '../escena/titulos3d/filo'
 import { PIEZA, ladoEn, poseDeLaPieza } from '../../_componentes/volumen/piezaSolida'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -141,26 +140,7 @@ afirmar(/REPETICIONES\.activas \+= 1/.test(repetida) && /repeticion\.set\(-1\)\s
 const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
 afirmar(/a\.reloj = window\.setTimeout\(\(\) => \{\s*a\.control = animate\(p, destino,/.test(valor) && /a\.control\?\.stop\(\)/.test(valor), 'los valores (CSS 3D): la pose, función de su tramo; quietos a mitad, se asientan; cualquier scroll lo interrumpe')
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('F4 · La legibilidad del 3D de día, a prueba')
-
-const apagadoEnElProducto = (e: typeof ENTORNO): boolean => e.pruebas.filo === 'no'
-afirmar(PRUEBAS_APAGADAS.filo === 'no' && apagadoEnElProducto(ENTORNO), 'el producto no cambia: el filo de día es una prueba, apagada')
-controlPositivo('el detector VE el filo prendido en el producto', { ...ENTORNO, pruebas: { filo: 'a' } }, apagadoEnElProducto)
-const pedido = (v: string): string => entornoPedido(`producto,filo=${v}`).pruebas.filo
-afirmar(pedido('a') === 'a' && pedido('b') === 'b' && pedido('c') === 'c' && pedido('x') === 'no', '  `?pruebas=filo=a|b|c` pide cada variante (otra cosa, ninguna)')
-const variantes = (f: typeof filoDeDiaGlsl): boolean => {
-  const [a, b, c] = (['a', 'b', 'c'] as const).map(f)
-  const filo = (g: string): boolean => /uContornoDelLogo/.test(g) && /filoDeDia \*/.test(g)
-  const costado = (g: string): boolean => /mix\( 1\.0, vTapaDelLogo/.test(g)
-  return filo(a) && !costado(a) && costado(b) && !filo(b) && filo(c) && costado(c) && [a, b, c].every((g) => /emissive\.r \/ EMISION_DE_LA_NOCHE/.test(g))
-}
-afirmar(variantes(filoDeDiaGlsl), '  a: el filo claro en el contorno de la cara; b: los costados en otro gris; c: las dos; todas se apagan con la noche')
-controlPositivo('el detector VE la c sin el costado', ((v: 'a' | 'b' | 'c') => (v === 'c' ? filoDeDiaGlsl('a') : filoDeDiaGlsl(v))) as typeof filoDeDiaGlsl, variantes)
-const material = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
-afirmar(/else if \(filo !== 'no'\) shader\.fragmentShader/.test(material) && /customProgramCacheKey = \(\) => `titulo-de-volumen-\$\{variante\}-filo-\$\{filo\}`/.test(material), '  sólo en los títulos negros (el blanco tiene su filo oscuro), y cada variante con su programa')
-const delLogo = ['_lib/escena/logoDeNoche.ts', '_lib/escena/logoEmision.ts'].map(leer).join('\n')
-afirmar(!/filo\.ts|filoDeDiaGlsl|pruebas\.filo/.test(delLogo), '  el logo no se toca')
+// [RETOQUE DEL PIE] P1 · F4 se cerró: la b pasó al producto, la a, la c y la bandera se borraron (lo afirma s44-pie).
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('F5 · El pie premium')
