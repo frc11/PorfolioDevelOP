@@ -73,7 +73,7 @@ export type NivelDelHaz = 'sutil' | 'medio'
  * que decida Valentino: cada una con su bandera, apagada en el producto. [ESCENA 10] T1: decididas; el antialiasing de
  * prueba (TAA u 8 muestras) también: queda el del lienzo de CALIDAD 1, y la bandera `aa=` se borró. T3: los títulos de
  * volumen, para que decida Valentino. [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`); la prueba
- * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera) y el polvo en facetas pasó al producto (`facetas`). [RONDA 2] F4: el filo de los títulos de día (`filo`). [RETOQUE DEL PIE] P1: la b pasó al producto; la a, la c y la bandera se borraron. P2: el pie de antes (`pie=antes`). P3: dos pruebas del pie (`pie=llegada`, `pie=onda`).
+ * que queda es el sonido (T2). [RETOQUE 3D] El sonido pasó al producto (su bandera se borró). [CIERRE] El túnel lento se borró (código y bandera) y el polvo en facetas pasó al producto (`facetas`). [RONDA 2] F4: el filo de los títulos de día (`filo`). [RETOQUE DEL PIE] P1: la b pasó al producto; la a, la c y la bandera se borraron. P2: el pie de antes (`pie=antes`). P3: dos pruebas del pie; [NOCTURNO] A2: la llegada se borró y la onda pasó al producto.
  */
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
@@ -81,10 +81,9 @@ export type TitulosDeVolumen = 'negro' | 'blanco'
 export interface Pruebas {
   /**
    * [RETOQUE DEL PIE] P2 · `pie=antes`: el pie de antes de RONDA 2 (las teclas de CSS 3D), para comparar con el de volumen.
-   * P3 · `pie=llegada`: las piezas se arman al llegar al final de la página (`pie3d/llegada.ts`); `pie=onda`: el mouse sobre
-   * una pieza hace ondear el piso vivo debajo de ella (como los valores de Por qué develOP).
+   * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
-  readonly pie: 'antes' | 'llegada' | 'onda' | 'no'
+  readonly pie: 'antes' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. */
@@ -97,7 +96,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes' | 'llegada' | 'onda'>(['antes', 'llegada', 'onda'], valor('pie')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
 }
 
 export interface Entorno {

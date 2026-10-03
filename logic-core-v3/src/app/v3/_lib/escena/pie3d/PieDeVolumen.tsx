@@ -5,7 +5,7 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { PIEZAS_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
-import { entornoDeLaEscena, hayBanco } from '../entorno'
+import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
@@ -43,10 +43,9 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<EstadoDelPie>({ armadas: [], material: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, prueba: 'no', inicio: null, cuadrilatero: [], matriz: [] })
+  const m = useRef<EstadoDelPie>({ armadas: [], material: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [] })
 
   useEffect(() => {
-    m.current.prueba = entornoDeLaEscena().pruebas.pie
     const q = matchMedia('(prefers-reduced-motion: reduce)')
     const leer = (): void => {
       m.current.quieto = q.matches
@@ -130,7 +129,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
           const r = a.pieza.elemento.getBoundingClientRect()
           return { id: a.pieza.id, forma: a.pieza.forma, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
         }),
-      // [RETOQUE DEL PIE] P3 · cuántas ondas pidió el piso (`pie=onda`).
+      // [RETOQUE DEL PIE] P3 · cuántas ondas pidió el piso ([NOCTURNO] A2: la onda, en el producto).
       ondas: () => ONDA_PEDIDA.n,
     }
     return () => {

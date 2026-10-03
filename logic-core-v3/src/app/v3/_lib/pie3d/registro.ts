@@ -121,12 +121,10 @@ export function useHundido(ref: RefObject<HTMLElement | null>, activo: boolean):
     const h: Hundido = { encima: false, foco: false, apretada: false }
     HUNDIDOS.set(el, h)
     const esPuntero = (e: PointerEvent): boolean => e.pointerType === 'mouse' || e.pointerType === 'pen'
-    // [RETOQUE DEL PIE] P3 · `pie=onda`, a prueba: el piso vivo ondea hacia la pieza (la onda de los valores).
-    const conOnda = entornoDeLaEscena().pruebas.pie === 'onda'
+    // [RETOQUE DEL PIE] P3 · el piso vivo ondea hacia la pieza (la onda de los valores). [NOCTURNO] A2: en el producto.
     const entra = (e: PointerEvent): void => {
       if (!esPuntero(e)) return
       h.encima = true
-      if (!conOnda) return
       const r = el.getBoundingClientRect()
       pedirLaOnda(((r.left + r.width / 2) / innerWidth) * 2 - 1, 1 - ((r.top + r.height / 2) / innerHeight) * 2, performance.now())
     }

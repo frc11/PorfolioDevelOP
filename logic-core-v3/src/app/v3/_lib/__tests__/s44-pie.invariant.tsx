@@ -7,10 +7,11 @@
  *        extruido, los enlaces en placas, el formulario en una placa con pozos y su tecla; lo interactivo es el DOM, sobre
  *        su pieza; se hunde sin girar; sombras de contacto en el piso vivo; abajo de 1025 plano; `pie=antes`.
  *   P3 · `pie=llegada` (se arma al final de la página) y `pie=onda` (el piso ondea hacia la pieza), apagadas; `pie=luz`,
- *        descartada (el pie siempre es de día).
+ *        descartada (el pie siempre es de día). [NOCTURNO] A2: la llegada se borró (el pie sólo aparece desde abajo, con el
+ *        scroll) y la onda pasó al producto.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-3d/pie/LEEME.txt`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
@@ -26,7 +27,6 @@ import { SATINADO } from '../escena/estudio'
 import { COLOCACION_DEL_PIE, colocarLaPieza, profundidadDeLaPieza, profundidadDelLogo } from '../escena/pie3d/colocacion'
 import { VOLUMEN_DEL_PIE, armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
 import { materialDelPie } from '../escena/pie3d/material'
-import { LLEGADA_DEL_PIE, alFinalDeLaPagina, aplicarLaLlegada, cuantoLeFalta, llegadaDe } from '../escena/pie3d/llegada'
 import { HUNDIDA_DEL_PIE } from '../escena/pie3d/armadas'
 import { SOMBRAS_DEL_PIE_GLSL, formaDeLaSombra } from '../escena/pie3d/sombras'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
@@ -185,29 +185,19 @@ const piso = leer('_lib/escena/piso/bloques.ts')
 afirmar(/Object\.assign\(shader\.uniforms, uniforms, SOMBRAS_DEL_PIE\)/.test(piso) && /\$\{SOMBRAS_DEL_PIE_GLSL\}/.test(piso) && /\$\{APLICAR_LAS_SOMBRAS_DEL_PIE_GLSL\}/.test(piso) && /if \( i >= uCuantasSombrasDelPie \) break;/.test(SOMBRAS_DEL_PIE_GLSL), '  las pinta el propio piso vivo (siguen sus olas); sin pie a la vista, el lazo sale enseguida')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('P3 · Pruebas chicas del pie (apagadas)')
+titulo('P3 · Pruebas chicas del pie — [NOCTURNO] A2: la llegada, borrada; la onda, en el producto')
 
 const prueba = (v: string): string => entornoPedido(`producto,pie=${v}`).pruebas.pie
-afirmar(prueba('llegada') === 'llegada' && prueba('onda') === 'onda' && prueba('luz') === 'no' && ENTORNO.pruebas.pie === 'no', '`?pruebas=pie=llegada` y `?pruebas=pie=onda`, apagadas en el producto; `pie=luz` se descartó (el pie siempre es de día: la compuerta del final prende el día después de Tu panel)')
-// La llegada: desde un lugar sembrado, girada, y llega con la curva de salida; después, quieta.
-const ll = llegadaDe(3)
-const igual = llegadaDe(3)
-const dentro = (v: number, [a, b]: readonly [number, number]): boolean => v >= a && v <= b
-afirmar(ll.desde.equals(igual.desde) && ll.giro.equals(igual.giro) && dentro(ll.desde.x, LLEGADA_DEL_PIE.desde.x) && dentro(ll.desde.z, LLEGADA_DEL_PIE.desde.z) && ll.retrasoS >= 3 * LLEGADA_DEL_PIE.escalonS, '  pie=llegada: cada pieza sale de un lugar sembrado de la sala (de atrás, girada), como las letras del titular del hero, escalonadas')
-const curva = [0, 0.3, 0.6, 1, 2].map((t) => cuantoLeFalta(t, { retrasoS: 0 }))
-afirmar(curva[0] === 1 && curva.every((v, k) => k === 0 || v <= curva[k - 1]) && cuantoLeFalta(LLEGADA_DEL_PIE.duracionS, { retrasoS: 0 }) === 0 && curva[4] === 0, '  llega en su tiempo, sin pasarse, y queda en su lugar')
-const grupo = new THREE.Group()
-grupo.position.set(1, 2, 3)
-aplicarLaLlegada(grupo, ll, 0)
-afirmar(grupo.position.equals(new THREE.Vector3(1, 2, 3)) && grupo.quaternion.equals(new THREE.Quaternion()) && alFinalDeLaPagina(26786, 900, 27686) && !alFinalDeLaPagina(26300, 900, 27686), '  llegada, la pieza queda exacta (de frente, en su lugar); se arma al llegar al final de la página, no antes')
+afirmar(prueba('llegada') === 'no' && prueba('onda') === 'no' && prueba('luz') === 'no' && prueba('antes') === 'antes' && ENTORNO.pruebas.pie === 'no', 'las banderas `pie=llegada` y `pie=onda` ya no existen (queda `pie=antes`); `pie=luz` se había descartado')
+// La llegada: el módulo y su uso, fuera; el pie sólo aparece desde abajo, con el scroll.
 const delPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
-const soloConLaPrueba = (c: string): boolean => /const conLlegada = s\.prueba === 'llegada' && !s\.quieto/.test(c) && /if \(conLlegada\) aplicarLaLlegada\(/.test(c) && /if \(conLlegada && s\.inicio === null && alFinalDeLaPagina\(/.test(c) && (c.match(/aplicarLaLlegada\(/g) ?? []).length === 1
-afirmar(soloConLaPrueba(delPie), '  sólo con la prueba (y sin movimiento reducido): una vez por carga; en el producto ninguna pieza se mueve sola')
-controlPositivo('el detector VE la llegada en el producto', delPie.replace('if (conLlegada) aplicarLaLlegada(', 'aplicarLaLlegada('), soloConLaPrueba)
-// La onda: el mouse sobre una pieza pide la de los valores, hacia ella.
+const sinLlegada = (c: string): boolean => !/aplicarLaLlegada|alFinalDeLaPagina|cuantoLeFalta|conLlegada|SIN_ARMAR|s\.inicio/.test(c)
+afirmar(!existsSync(`${V3}/_lib/escena/pie3d/llegada.ts`) && sinLlegada(delPie), '  la llegada de prueba se borró: ninguna pieza sale de la sala ni espera al final de la página')
+controlPositivo('el detector VE la llegada si vuelve', `${delPie}\nif (conLlegada) aplicarLaLlegada(a.grupo, a.llegada, 1)`, sinLlegada)
+// La onda: el mouse sobre una pieza pide la de los valores, hacia ella, siempre.
 const registro = sinComentarios(leer('_lib/pie3d/registro.ts'))
-const conOnda = (c: string): boolean => /const conOnda = entornoDeLaEscena\(\)\.pruebas\.pie === 'onda'/.test(c) && /h\.encima = true\s*if \(!conOnda\) return\s*const r = el\.getBoundingClientRect\(\)\s*pedirLaOnda\(/.test(c)
-afirmar(conOnda(registro), '  pie=onda: el mouse sobre una pieza hace ondear el piso vivo hacia ella (la onda de los valores de Por qué develOP), sólo con la prueba')
-controlPositivo('el detector VE la onda sin bandera', registro.replace('      if (!conOnda) return\n', ''), conOnda)
+const conOnda = (c: string): boolean => !/conOnda|pruebas\.pie === 'onda'/.test(c) && /h\.encima = true\s*const r = el\.getBoundingClientRect\(\)\s*pedirLaOnda\(/.test(c)
+afirmar(conOnda(registro), '  la onda, en el producto: el mouse sobre una pieza hace ondear el piso vivo hacia ella (la onda de los valores de Por qué develOP)')
+controlPositivo('el detector VE la onda si vuelve a tener bandera', registro.replace('      h.encima = true\n', "      h.encima = true\n      if (!conOnda) return\n"), conOnda)
 
 cerrar('s44-pie')
