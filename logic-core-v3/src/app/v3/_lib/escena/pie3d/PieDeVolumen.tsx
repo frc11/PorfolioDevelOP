@@ -11,14 +11,16 @@ import datos600 from '../../../_fuentes/chivo-600-pie.json'
 import { homografia, matrix3dCss } from '../../pie3d/homografia'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, cuantoSeHunde, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas, type PiezaDelPie } from '../../pie3d/registro'
-import { hayBanco } from '../entorno'
+import { entornoDeLaEscena, hayBanco, type Pruebas } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
 import { KEY_INTENSITY } from '../probeLighting'
 import { FLOOR_Y } from '../probeScene'
+import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
+import { alFinalDeLaPagina, aplicarLaLlegada, cuantoLeFalta, llegadaDe, type LlegadaDeLaPieza } from './llegada'
 import { materialDelPie } from './material'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE, SOMBRA_DEL_PIE, formaDeLaSombra } from './sombras'
 
@@ -46,6 +48,9 @@ export const HUNDIDA_DEL_PIE = { encima: 5, apretada: 12, tau: 0.05 } as const
 /** Lo que se dibuja fuera del cuadro (px): una pieza que entra ya está. */
 const MARGEN = 120
 
+/** [RETOQUE DEL PIE] P3 · lo interactivo de una pieza que todavía no se armó (`pie=llegada`). */
+const SIN_ARMAR = 'scale(0)'
+
 interface Armada {
   readonly pieza: PiezaDelPie
   medida: MedidaDeLaPieza
@@ -57,6 +62,8 @@ interface Armada {
   readonly espesor: number
   readonly contenido: ReturnType<typeof contenidoDe>
   readonly delHundido: Element | null
+  /** [RETOQUE DEL PIE] P3 · de dónde sale con `pie=llegada`. */
+  readonly llegada: LlegadaDeLaPieza
   hundido: number
   css: string
   d: number
@@ -73,6 +80,9 @@ interface Estado {
   compilando: boolean
   listo: boolean
   montado: boolean
+  /** [RETOQUE DEL PIE] P3 · la prueba de esta carga, y cuándo se llegó al final de la página (la llegada, una vez). */
+  prueba: Pruebas['pie']
+  inicio: number | null
   readonly cuadrilatero: number[]
   readonly matriz: number[]
 }
@@ -81,7 +91,7 @@ interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
 }
 
-type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown } }
+type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number } }
 
 const PUNTO = new THREE.Vector3()
 
@@ -92,9 +102,10 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<Estado>({ armadas: [], material: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [] })
+  const m = useRef<Estado>({ armadas: [], material: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, prueba: 'no', inicio: null, cuadrilatero: [], matriz: [] })
 
   useEffect(() => {
+    m.current.prueba = entornoDeLaEscena().pruebas.pie
     const q = matchMedia('(prefers-reduced-motion: reduce)')
     const leer = (): void => {
       m.current.quieto = q.matches
@@ -178,6 +189,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
           const r = a.pieza.elemento.getBoundingClientRect()
           return { id: a.pieza.id, forma: a.pieza.forma, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
         }),
+      // [RETOQUE DEL PIE] P3 · cuántas ondas pidió el piso (`pie=onda`).
+      ondas: () => ONDA_PEDIDA.n,
     }
     return () => {
       delete ventana.__pieDelBanco
@@ -193,6 +206,10 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
 function alCuadro(s: Estado, viva: THREE.Camera, principal: THREE.DirectionalLight | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
   if (!s.listo || s.material === null || s.armadas.length === 0) return
   viva.updateMatrixWorld()
+  // [RETOQUE DEL PIE] P3 · `pie=llegada`: hasta el final de la página no están; ahí se arman (una vez) y quedan fijas.
+  const conLlegada = s.prueba === 'llegada' && !s.quieto
+  if (conLlegada && s.inicio === null && alFinalDeLaPagina(scrollY, cuadro.alto, document.documentElement.scrollHeight)) s.inicio = performance.now()
+  const desdeElInicioS = s.inicio === null ? 0 : (performance.now() - s.inicio) / 1000
   s.material.envMapIntensity = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // A la profundidad del logo, o adelante si ahí alguna quedaría bajo el piso (`colocacion.ts`): todas en el mismo plano
   // (el pie se mueve entero con el paralaje: un rótulo no se despega de su columna).
@@ -200,7 +217,9 @@ function alCuadro(s: Estado, viva: THREE.Camera, principal: THREE.DirectionalLig
   for (const a of s.armadas) {
     const arriba = a.medida.caja.y - scrollY
     const c = a.contenido
-    a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN
+    a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN && !(conLlegada && s.inicio === null)
+    // Sin armar todavía, lo interactivo tampoco está (se ve el placeholder de un campo, si no).
+    if (conLlegada && s.inicio === null && a.pieza.forma !== 'texto' && a.css !== SIN_ARMAR) a.pieza.elemento.style.transform = a.css = SIN_ARMAR
     if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(CAMARA_SIN_EL_MOUSE, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
   }
   let sombras = 0
@@ -210,6 +229,7 @@ function alCuadro(s: Estado, viva: THREE.Camera, principal: THREE.DirectionalLig
     const arriba = a.medida.caja.y - scrollY
     a.d = d
     a.mundoPorPx = colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
+    if (conLlegada) aplicarLaLlegada(a.grupo, a.llegada, cuantoLeFalta(desdeElInicioS, a.llegada))
     const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
     a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
     a.cuerpo.position.z = -a.hundido
@@ -224,7 +244,7 @@ function alCuadro(s: Estado, viva: THREE.Camera, principal: THREE.DirectionalLig
 function rearmar(s: Estado, raiz: THREE.Group, material: THREE.Material): void {
   const antes = new Map(s.armadas.map((a) => [a.pieza.id, a]))
   const ahora: Armada[] = []
-  for (const p of [...PIEZAS_DEL_PIE.values()].sort((a, b) => a.orden - b.orden)) {
+  for (const [k, p] of [...PIEZAS_DEL_PIE.values()].sort((a, b) => a.orden - b.orden).entries()) {
     const medida = medirLaPieza(p.elemento, p.forma)
     const firma = firmaDeLaForma(medida)
     const vieja = antes.get(p.id)
@@ -234,7 +254,7 @@ function rearmar(s: Estado, raiz: THREE.Group, material: THREE.Material): void {
       ahora.push(vieja)
       continue
     }
-    const a = armar(p, medida, firma, material)
+    const a = armar(p, medida, firma, material, k)
     if (vieja !== undefined) a.hundido = vieja.hundido
     raiz.add(a.grupo)
     ahora.push(a)
@@ -246,7 +266,7 @@ function rearmar(s: Estado, raiz: THREE.Group, material: THREE.Material): void {
   s.armadas = ahora
 }
 
-function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, material: THREE.Material): Armada {
+function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, material: THREE.Material, indice: number): Armada {
   const { fija, hundible, espesor } = armarLaPieza(pieza.forma, medida, FUENTES)
   const grupo = new THREE.Group()
   const cuerpo = new THREE.Group()
@@ -262,7 +282,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, mater
   grupo.visible = false
   if (pieza.forma !== 'texto') pieza.elemento.style.transformOrigin = '0 0'
   const delHundido = pieza.forma === 'placa' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
-  return { pieza, medida, firma, grupo, cuerpo, mallas, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0 }
+  return { pieza, medida, firma, grupo, cuerpo, mallas, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, llegada: llegadaDe(indice), hundido: 0, css: '', d: 0, mundoPorPx: 0 }
 }
 
 function soltar(a: Armada): void {
