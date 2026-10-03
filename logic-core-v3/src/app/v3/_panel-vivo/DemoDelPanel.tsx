@@ -34,6 +34,7 @@ const DEMOS: Partial<Record<IdDeDemo, Demo>> = {
   mensajes: lazy(() => import('./demos/mensajes/Mensajes')),
   servicios: lazy(() => import('./demos/servicios/Servicios')),
   proyecto: lazy(() => import('./demos/proyecto/Proyecto')),
+  resultados: lazy(() => import('./demos/resultados/Resultados')),
   informacion: lazy(() => import('./demos/chatbot/LoQueSabe')),
 }
 
