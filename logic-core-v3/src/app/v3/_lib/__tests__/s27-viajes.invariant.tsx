@@ -53,7 +53,7 @@ const literales: readonly [string, string][] = [
   ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-pieza="menu-movil"'],
   ['src/app/v3/_chrome/menu/PanelDelMenu.tsx', 'data-parte="item-del-menu"'],
   // [NOCTURNO] A3: los enlaces del recorrido del pie viajan igual (s45 · A3).
-  ['src/app/v3/_secciones/cierre/ColumnasDelPie.tsx', 'data-pieza="recorrido-del-pie"'],
+  ['src/app/v3/_secciones/cierre/ColumnasDelPie.tsx', 'data-pieza="destinos-del-pie"'],
   ['src/app/v3/_componentes/chrome/PiePiezas.tsx', 'data-pieza="pie-enlace-icono"'],
 ]
 for (const [archivo, literal] of literales) {

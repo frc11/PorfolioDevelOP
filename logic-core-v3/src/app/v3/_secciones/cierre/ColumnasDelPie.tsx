@@ -142,12 +142,12 @@ function ColumnaDeContacto(): React.JSX.Element {
  * Una lista de verdad y no tres `div`: quien navega por listas la encuentra, y
  * anuncia cuántos destinos hay antes de recorrerlos.
  *
- * [NOCTURNO] A3 · `data-pieza="recorrido-del-pie"`: sus enlaces viajan como los del menú (`SELECTOR_DE_LOS_VIAJES`).
+ * [NOCTURNO] A3 · `data-pieza="destinos-del-pie"`: sus enlaces viajan como los del menú (`SELECTOR_DE_LOS_VIAJES`).
  */
 function ColumnaDelRecorrido(): React.JSX.Element {
   return (
     // [FINAL 3] En móvil, dos columnas compactas.
-    <ul data-pieza="recorrido-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1 escritorio:gap-y-[var(--spacing-4)]">
+    <ul data-pieza="destinos-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1 escritorio:gap-y-[var(--spacing-4)]">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
         <li key={destino.ancla}>
           {/* [CIERRE RETOQUE 3D] D5 · cada enlace, un bloque sólido que flota (desde 1025). */}

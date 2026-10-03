@@ -234,7 +234,7 @@ export const SELECTOR_DE_LOS_VIAJES = [
   SELECTOR_DEL_CTA_DEL_HERO,
   '[data-pieza="barra"] a[data-pieza="barra-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
-  '[data-pieza="recorrido-del-pie"] a[data-pieza="pie-enlace-icono"]',
+  '[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace-icono"]',
 ].join(', ')
 
 /** [VIAJES] Con movimiento reducido no hay viaje: un salto al mismo destino, tapado por un fundido corto. */

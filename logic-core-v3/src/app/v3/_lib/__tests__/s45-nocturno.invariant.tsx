@@ -107,9 +107,9 @@ controlPositivo('el detector VE la frase sin su salida lenta', porQue.replace(' 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A3 · Los enlaces del pie viajan como los del menú')
 
-const DEL_PIE = '[data-pieza="recorrido-del-pie"] a[data-pieza="pie-enlace-icono"]'
+const DEL_PIE = '[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace-icono"]'
 const columnas = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
-const viajan = (selector: string, fuente: string): boolean => selector.split(', ').includes(DEL_PIE) && /<ul data-pieza="recorrido-del-pie"[^>]*>[\s\S]{0,600}<EnlaceDelPieConIcono\s+href=\{destino\.ancla\}/.test(fuente)
+const viajan = (selector: string, fuente: string): boolean => selector.split(', ').includes(DEL_PIE) && /<ul data-pieza="destinos-del-pie"[^>]*>[\s\S]{0,600}<EnlaceDelPieConIcono\s+href=\{destino\.ancla\}/.test(fuente)
 afirmar(viajan(SELECTOR_DE_LOS_VIAJES, columnas), 'los enlaces del recorrido del pie entran en el MISMO selector que la barra y el menú: el mismo escucha, el mismo plan de la escena (día y noche) y la misma llegada del título al terminar')
 controlPositivo('el detector VE los enlaces del pie afuera del viaje (el salto de antes)', SELECTOR_DE_LOS_VIAJES.replace(`, ${DEL_PIE}`, ''), (sel: string) => viajan(sel, columnas))
 const secciones = IDS_DE_SECCION as readonly string[]
