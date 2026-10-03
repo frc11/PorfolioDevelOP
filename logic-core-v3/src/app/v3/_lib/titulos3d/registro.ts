@@ -65,7 +65,7 @@ export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
  * Cuándo se lee cada título, medido a 1440 con `scripts-escena10/t3-lectura.ts` (la ventana donde llegó entero y
  * todavía no se fue, en el progreso de la coreografía). Portfolio: de 0,4426 a 0,5009, con la cámara orbitando unos 30°
  * de Quiénes somos a Números; se coloca con la del medio. La frase: de 0,8811 a 0,926; se coloca con la de los valores
- * (el nudo `valores`, 0,9078), que es cuando la frase ya subió.
+ * (el nudo `valores`, 0,9189 desde RETOQUE PANEL T3), que es cuando la frase ya subió.
  */
 export const LECTURA = { portfolio: 0.4718, frase: 'valores' } as const
 

@@ -41,8 +41,9 @@ export const ANCLA_DE_POR_QUE_DEVELOP = 0.8525
  * el primer cuadro en que se ve la escena ya es A.
  */
 export const TIEMPOS_DEL_FINAL = {
-  frase: { llega: -1, hasta: 0.5 },
-  valores: { llega: 1.5, hasta: 1.8 },
+  // [RETOQUE PANEL] T3 · la frase se sostiene quieta media pantalla más (hasta 1, era 0,5): llega y se deja leer.
+  frase: { llega: -1, hasta: 1 },
+  valores: { llega: 1.8, hasta: 2 },
   cta: { llega: 2.7, hasta: PANTALLAS_DE_POR_QUE_DEVELOP - 1 },
   // El alejamiento D es el camino de `cta.hasta` a `pie.llega`: un cuarto de pantalla.
   pie: { llega: PANTALLAS_DE_POR_QUE_DEVELOP - 1 + 0.25, hasta: PANTALLAS_DE_POR_QUE_DEVELOP },

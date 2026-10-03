@@ -369,7 +369,8 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
   // `s23-final` afirma que estos literales son los de ese archivo.
   {
-    at: 0.8709,
+    // [RETOQUE PANEL] T3 · la frase se sostiene hasta 1 (era 0,5); los valores llegan en 1,8 y se sostienen hasta 2.
+    at: 0.8894,
     name: 'frase · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -377,14 +378,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
   {
     // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
-    at: 0.9078,
+    at: 0.9189,
     name: 'valores',
     ease: 'shift',
     turn: 'literal',
     pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
   },
   {
-    at: 0.9189,
+    at: 0.92625,
     name: 'valores · sostén',
     ease: 'linear',
     turn: 'literal',

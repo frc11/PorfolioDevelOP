@@ -73,8 +73,9 @@ export const VENTANA_DE_LA_FRASE: Ventana = { desde: progresoDelPin(0), hasta: p
  * no usa esto: llega de arriba abajo, cada pieza sobre su ventana visible.
  */
 const LLEGADA_DE_LOS_VALORES = frase.hasta + 0.2
-const PASO_ENTRE_PARES = 0.3
-const DURACION_DE_UN_VALOR = 0.4
+// [RETOQUE PANEL] T3 · más juntos (0,2 y 0,3; eran 0,3 y 0,4): la frase se sostiene antes y los valores entran igual.
+const PASO_ENTRE_PARES = 0.2
+const DURACION_DE_UN_VALOR = 0.3
 export function ventanaDelValor(indice: number): Ventana {
   const fila = 2 - (indice % 3)
   const desde = LLEGADA_DE_LOS_VALORES + fila * PASO_ENTRE_PARES
