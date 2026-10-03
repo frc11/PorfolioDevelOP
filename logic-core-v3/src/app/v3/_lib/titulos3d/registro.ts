@@ -7,7 +7,26 @@ import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
 import type { LlegadaDelTitulo } from '../escena/titulos3d/llegada'
 
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
-export type FuenteDelTitulo = 'chivo-400' | 'archivo-700' | 'chivo-300-italica'
+export type FuenteDelTitulo = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
+
+/**
+ * [RETOQUE PANEL] T4 · UNA RAYA DEL TÍTULO (el subrayado, el tachado, un trazo del ≠): una barra extruida en el plano del
+ * título que crece con su `avance` (0 a 1), como la del DOM. `medir` la ubica una vez, al armarse (recibe el lugar del
+ * título): px CSS desde la esquina de arriba a la izquierda de su caja, sin transformaciones (de la punta 1 a la 2, y su grosor). Nace en la punta 1
+ * y crece hacia la 2 (`punta`), o en el medio hacia las dos (`medio`).
+ */
+export interface SegmentoDelTrazo {
+  readonly x1: number
+  readonly y1: number
+  readonly x2: number
+  readonly y2: number
+  readonly grosor: number
+}
+export interface TrazoDelTitulo {
+  readonly medir: (lugar: HTMLElement) => SegmentoDelTrazo | null
+  readonly nace: 'punta' | 'medio'
+  readonly avance: MotionValue<number>
+}
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN, del lado del DOM — sin three: la sección anota acá su título (el lugar que
@@ -57,6 +76,8 @@ export interface TituloDeVolumen {
   readonly minimoS: number | null
   /** [NOCTURNO] A5 · cuánto tarda la salida como mínimo (s): la frase de Por qué develOP se iba volando. */
   readonly salidaMinimaS: number | null
+  /** [RETOQUE PANEL] T4 · sus rayas (hasta cuatro): el título puede no tener letras (el ≠ de Quiénes somos). */
+  readonly trazos: readonly TrazoDelTitulo[]
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -104,22 +125,25 @@ interface Anotacion {
   readonly rearma?: boolean
   readonly minimoS?: number | null
   readonly salidaMinimaS?: number | null
+  readonly trazos?: readonly TrazoDelTitulo[]
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, activo }: Anotacion): void {
+const SIN_TRAZOS: readonly TrazoDelTitulo[] = []
+
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, trazos = SIN_TRAZOS, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, trazos })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, activo])
+  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, trazos, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p

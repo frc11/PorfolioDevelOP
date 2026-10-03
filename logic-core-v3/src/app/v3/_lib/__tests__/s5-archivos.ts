@@ -145,6 +145,9 @@ export const ARCHIVOS_DE_APOYO = [
   // `geometria.ts` salió del mismo archivo al entrar el ≠: los números por un lado
   // y la composición por el otro, igual que en Trabajos y en el Hero.
   `${RAIZ_DE_SECCIONES}/quienes-somos/geometria.ts`,
+  // [RETOQUE PANEL] T4 · el titular y el ≠ en volumen (`titular3d.tsx`) y la cuenta y la medida de sus rayas (`trazos3d.ts`).
+  `${RAIZ_DE_SECCIONES}/quienes-somos/titular3d.tsx`,
+  `${RAIZ_DE_SECCIONES}/quienes-somos/trazos3d.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
   // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
   // `geometria.ts` son los números de la sección —el mismo corte que Servicios

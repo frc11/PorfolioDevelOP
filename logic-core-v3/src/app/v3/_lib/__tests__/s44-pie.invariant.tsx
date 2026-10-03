@@ -47,7 +47,7 @@ const glsl = costadoDeDiaGlsl(2)
 const esLaB = (g: string): boolean => /mix\( vec3\( 0\.200 \), diffuseColor\.rgb, mix\( 1\.0, vTapaDelLogo, /.test(g) && /emissive\.r \/ 2\.000/.test(g) && !/uContornoDelLogo/.test(g)
 afirmar(esLaB(glsl) && COSTADO_DE_DIA === 0.2, 'de día, los costados en un gris (0,2 lineal) distinto de la cara; se apaga con la noche del logo; sin el filo claro de la a')
 controlPositivo('el detector VE el filo claro de la a', `${glsl}\nfloat d = texture2D( uContornoDelLogo, vPlanoDelLogo ).r;`, esLaB)
-const material = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const material = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 const enTodos = (c: string): boolean =>
   /if \(variante === 'blanco'\) shader\.fragmentShader = [^\n]*FILO_DE_DIA_GLSL[^\n]*\n\s*else shader\.fragmentShader = shader\.fragmentShader\.replace\('#include <map_fragment>', `#include <map_fragment>\\n\$\{costadoDeDiaGlsl\(EMISION_EN_LA_NOCHE\)\}`\)/.test(c) &&
   /customProgramCacheKey = \(\) => `titulo-de-volumen-\$\{variante\}`/.test(c)

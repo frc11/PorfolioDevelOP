@@ -32,7 +32,29 @@ export interface TituloArmado {
   readonly contornos: THREE.Vector2[][]
   /** Cuántas letras (sin los espacios). */
   readonly letras: number
+  /** [RETOQUE PANEL] T4 · la caja de las letras solas (sin las rayas): de ahí sale el pie de la palabra que se levanta. */
+  readonly cajaDeLasLetras: THREE.Box3
 }
+
+/**
+ * [RETOQUE PANEL] T4 · UNA RAYA DEL TÍTULO, en em desde el origen (el comienzo de la línea de base), de la punta 1 a la 2:
+ * una barra extruida con el mismo espesor y el mismo bisel que las letras. Sus vértices llevan qué raya son (`aTrazo`,
+ * desde 1; las letras, 0), de dónde crece (`aOrigenDelTrazo`) y en qué dirección (`aEjeDelTrazo`): la escena la estira
+ * con su avance (`llegada.ts`).
+ */
+export interface RayaEnEm {
+  /** Cuál de las rayas del título es (su avance en el sombreador). */
+  readonly indice: number
+  readonly x1: number
+  readonly y1: number
+  readonly x2: number
+  readonly y2: number
+  readonly grosor: number
+  readonly nace: 'punta' | 'medio'
+}
+
+/** Hasta cuántas rayas lleva un título (un `vec4` de avances en el sombreador). */
+export const RAYAS_POR_TITULO = 4
 
 /**
  * La x (em) de cada carácter: la medida en el DOM o, sin ella, la suma de los avances de la fuente. [RETOQUE 3D] El DOM
@@ -66,7 +88,7 @@ function desdeDe(llegada: LlegadaDelTitulo, letras: number): (readonly [number, 
 }
 
 /** Arma el título: cada letra extruida en su lugar; después, todas en una malla con su orden, su centro y de dónde sale. */
-export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras'): TituloArmado {
+export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras', rayas: readonly RayaEnEm[] = []): TituloArmado {
   const { profundidad, bisel, curvas } = VOLUMEN_DEL_TITULO
   const equis = equisDe(fuente, texto, posiciones)
   const caracteres = [...texto]
@@ -92,6 +114,7 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     const deDonde = new Float32Array(n * 3)
     for (let i = 0; i < n; i += 1) deDonde.set(desde[orden], i * 3)
     pieza.setAttribute('aDesde', new THREE.BufferAttribute(deDonde, 3))
+    sinRaya(pieza)
     piezas.push(pieza)
     for (const f of formas) {
       const { shape, holes } = f.extractPoints(curvas)
@@ -99,10 +122,60 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     }
     orden += 1
   })
-  const geometria = mergeGeometries(piezas, false)
+  const cajaDeLasLetras = new THREE.Box3()
+  for (const p of piezas) {
+    p.computeBoundingBox()
+    if (p.boundingBox !== null) cajaDeLasLetras.union(p.boundingBox)
+  }
+  if (rayas.some((r) => r.indice >= RAYAS_POR_TITULO)) throw new Error(`«${texto}»: más de ${String(RAYAS_POR_TITULO)} rayas`)
+  rayas.forEach((r) => {
+    const { pieza, contorno } = armarLaRaya(r)
+    piezas.push(pieza)
+    contornos.push(contorno)
+  })
+  const geometria = piezas.length === 0 ? null : mergeGeometries(piezas, false)
   for (const p of piezas) p.dispose()
   if (geometria === null) throw new Error(`no se pudo armar «${texto}»`)
   geometria.computeBoundingBox()
   geometria.computeBoundingSphere()
-  return { geometria, contornos, letras: conLetra }
+  return { geometria, contornos, letras: conLetra, cajaDeLasLetras }
+}
+
+/** Las letras no son rayas: sus atributos de raya, en cero. */
+function sinRaya(pieza: THREE.BufferGeometry): void {
+  const n = pieza.getAttribute('position').count
+  pieza.setAttribute('aTrazo', new THREE.BufferAttribute(new Float32Array(n), 1))
+  pieza.setAttribute('aOrigenDelTrazo', new THREE.BufferAttribute(new Float32Array(n * 3), 3))
+  pieza.setAttribute('aEjeDelTrazo', new THREE.BufferAttribute(new Float32Array(n * 3), 3))
+}
+
+/** Una raya: el rectángulo de su largo y su grosor, extruido como una letra, girado a su dirección y puesto en su punta 1. */
+function armarLaRaya(r: RayaEnEm): { readonly pieza: THREE.BufferGeometry; readonly contorno: THREE.Vector2[] } {
+  const { profundidad, bisel, curvas } = VOLUMEN_DEL_TITULO
+  const largo = Math.hypot(r.x2 - r.x1, r.y2 - r.y1)
+  const angulo = Math.atan2(r.y2 - r.y1, r.x2 - r.x1)
+  const medio = r.grosor / 2
+  const forma = new THREE.Shape([new THREE.Vector2(0, -medio), new THREE.Vector2(largo, -medio), new THREE.Vector2(largo, medio), new THREE.Vector2(0, medio)])
+  const tamano = Math.min(bisel.tamano, medio * 0.4)
+  const pieza = new THREE.ExtrudeGeometry(forma, { depth: profundidad, curveSegments: curvas, bevelEnabled: true, bevelThickness: bisel.grosor, bevelSize: tamano, bevelOffset: -tamano, bevelSegments: bisel.segmentos })
+  pieza.rotateZ(angulo)
+  pieza.translate(r.x1, r.y1, -profundidad)
+  pieza.computeBoundingBox()
+  const centro = (pieza.boundingBox ?? new THREE.Box3()).getCenter(new THREE.Vector3())
+  const eje = new THREE.Vector3(Math.cos(angulo), Math.sin(angulo), 0)
+  const origen = r.nace === 'medio' ? new THREE.Vector3((r.x1 + r.x2) / 2, (r.y1 + r.y2) / 2, 0) : new THREE.Vector3(r.x1, r.y1, 0)
+  const n = pieza.getAttribute('position').count
+  const repetir = (v: readonly number[]): Float32Array => {
+    const a = new Float32Array(n * v.length)
+    for (let i = 0; i < n; i += 1) a.set(v, i * v.length)
+    return a
+  }
+  pieza.setAttribute('aLetra', new THREE.BufferAttribute(new Float32Array(n), 1))
+  pieza.setAttribute('aPivote', new THREE.BufferAttribute(repetir([centro.x, centro.y, centro.z]), 3))
+  pieza.setAttribute('aDesde', new THREE.BufferAttribute(new Float32Array(n * 3), 3))
+  pieza.setAttribute('aTrazo', new THREE.BufferAttribute(new Float32Array(n).fill(r.indice + 1), 1))
+  pieza.setAttribute('aOrigenDelTrazo', new THREE.BufferAttribute(repetir([origen.x, origen.y, origen.z]), 3))
+  pieza.setAttribute('aEjeDelTrazo', new THREE.BufferAttribute(repetir([eje.x, eje.y, eje.z]), 3))
+  const esquina = (x: number, y: number): THREE.Vector2 => new THREE.Vector2(r.x1 + x * eje.x - y * eje.y, r.y1 + x * eje.y + y * eje.x)
+  return { pieza, contorno: [esquina(0, -medio), esquina(largo, -medio), esquina(largo, medio), esquina(0, medio)] }
 }

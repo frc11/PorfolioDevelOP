@@ -236,10 +236,10 @@ const llegaBien = (f: (p: number, orden: number) => number): boolean => [0, 0.5,
 afirmar(llegaBien(llegadaDeLaLetra), 'cada letra llega de 0 a 1 sin volver atrás, la primera antes que la última')
 controlPositivo('el detector VE la llegada al revés', (p: number, o: number) => llegadaDeLaLetra(p, 1 - o), llegaBien)
 const mismaCuenta = (glsl: string): boolean => glsl.includes(`( p - orden * ${(1 - LLEGADA_DE_LAS_LETRAS.dura).toFixed(5)} ) / ${LLEGADA_DE_LAS_LETRAS.dura.toFixed(5)}`) && /return 1\.0 - pow\( 1\.0 - u, 3\.0 \);/.test(glsl)
-afirmar(mismaCuenta(LLEGADA_PARS_GLSL) && /float eDeLaLetra = llegadaDeLaLetra\( uLlegada, aLetra \) \* \( 1\.0 - llegadaDeLaLetra\( uSalida, aLetra \) \);/.test(LLEGADA_NORMAL_GLSL), '  el vértice hace la misma cuenta (y se van igual: la salida con la misma curva)')
+afirmar(mismaCuenta(LLEGADA_PARS_GLSL) && /float eDeLaLetra = (mix\( )?llegadaDeLaLetra\( uLlegada, aLetra \) \* \( 1\.0 - llegadaDeLaLetra\( uSalida, aLetra \) \)/.test(LLEGADA_NORMAL_GLSL), '  el vértice hace la misma cuenta (y se van igual: la salida con la misma curva)')
 afirmar(/float faltaDeLaLetra = \( 1\.0 - eDeLaLetra \) \* \( 1\.0 - uQuieto \);/.test(LLEGADA_NORMAL_GLSL) && /vAparece = smoothstep\( 0\.0, [0-9.]+, eDeLaLetra \);/.test(LLEGADA_NORMAL_GLSL), '  con movimiento reducido no se mueven ni giran: sólo se disuelven en su lugar')
 // [RONDA 2] F2: lo que se muestra ya no persigue con un mínimo de tiempo: es función del scroll, con el asiento al frenar (s43 · F2).
-afirmar(/a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt(, a\.titulo\.salidaMinimaS)?\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), '  y se nota a cualquier velocidad: lo que se muestra es función del scroll en las dos direcciones, con el asiento al frenar (s43 · F2)')
+afirmar(/a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test((leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt(, a\.titulo\.salidaMinimaS)?\)/.test((leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))), '  y se nota a cualquier velocidad: lo que se muestra es función del scroll en las dos direcciones, con el asiento al frenar (s43 · F2)')
 controlPositivo('el detector VE la persecución de antes', `a.mostrado.llegada = persigue(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, dt)`, (c: string) => /mostradoDelScroll\(a\.mostrado\.llegada/.test(c))
 afirmar(LLEGADA_DE_LAS_LETRAS.profundidad >= 8 && LLEGADA_DE_LAS_LETRAS.vueltas >= 1, '  la llegada se nota: vienen de atrás (em) y giran sobre sí mismas', `${String(LLEGADA_DE_LAS_LETRAS.profundidad)} em, ${String(LLEGADA_DE_LAS_LETRAS.vueltas)} vueltas`)
 
@@ -271,11 +271,11 @@ const porQueT3 = deLaRaiz('src/app/v3/_secciones/por-que-develop/PorQueDevelop.t
 afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\}( minimoS=\{LENTOS\.llegadaDePortfolioS\})? queda \/>/.test(piezasT3) && /salidaDelTitulo\.set\(primeraFotoTapa\(p\) \? 1 : 0\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase(, salida: levantada)?(, corrida)? \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase; [CIERRE RETOQUE 3D] B6: sin salida, s42)')
 
 // De noche se leen como el logo; y las reglas de rendimiento.
-const escena3d = leer('titulos3d/TitulosDeVolumen.tsx')
-afirmar(/if \(variante === 'blanco'\) shader\.fragmentShader = shader\.fragmentShader\.replace\('#include <map_fragment>', `#include <map_fragment>\\n\$\{FILO_DE_DIA_GLSL\}`\)/.test(leer('titulos3d/TitulosDeVolumen.tsx')), 'el blanco, de día, lleva un filo oscuro en el borde de las tapas (sobre el cielo claro se perdía); de noche lo reemplaza el claro')
+const escena3d = (leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))
+afirmar(/if \(variante === 'blanco'\) shader\.fragmentShader = shader\.fragmentShader\.replace\('#include <map_fragment>', `#include <map_fragment>\\n\$\{FILO_DE_DIA_GLSL\}`\)/.test((leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))), 'el blanco, de día, lleva un filo oscuro en el borde de las tapas (sobre el cielo claro se perdía); de noche lo reemplaza el claro')
 afirmar(/conLogoDeNoche\(material, contorno, variante === 'blanco' \? \{ ancho: NOCHE_DEL_TITULO\.filo, tapa: NOCHE_DEL_TITULO\.tapaDelBlanco \} : \{ ancho: NOCHE_DEL_TITULO\.filo \}\)/.test(escena3d) && /if \(logo !== null\) a\.material\.emissive\.copy\(logo\.emissive\)/.test(escena3d) && /conElAmanecer\(material\)/.test(escena3d), 'de noche se leen como el logo: su misma emisión en el mismo cuadro y su dibujo (costados negros, tapas claras con filo); el amanecer los oscurece como a la sala')
 const reglas = (c: string): boolean =>
-  /a\.malla\.visible = llegada > 0 && salida < 1/.test(c) &&
+  /a\.malla\.visible = (a\.sinLetras \? conRaya : )?llegada > 0 && salida < 1/.test(c) &&
   /malla\.name = `titulo de volumen · \$\{titulo\.id\}`/.test(c) &&
   /dithering: true/.test(c) &&
   // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM.
@@ -283,7 +283,7 @@ const reglas = (c: string): boolean =>
   // [RETOQUE 3D] B1: la colocación se mudó a `colocarElArmado` (guarda el lugar para el que se queda).
   /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, a\.fuente\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
-controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
+controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = a.sinLetras ? conRaya : llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
 
 // ── CIERRE · el destello de un cuadro ─────────────────────────────────────
 // Con scroll real lo mide `npm run test:escena-destello` (pide el servidor); acá, el orden del cuadro y el viaje.

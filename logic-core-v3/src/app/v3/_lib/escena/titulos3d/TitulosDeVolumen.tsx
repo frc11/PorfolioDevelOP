@@ -3,28 +3,19 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
-import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
-import datosDeLaFuente from '../../../_fuentes/chivo-400-titulos.json'
-import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'
-import datosDeLaItalica from '../../../_fuentes/chivo-300-italica-titulos.json'
-import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos, type FuenteDelTitulo, type TituloDeVolumen } from '../../titulos3d/registro'
-import { conElAmanecer } from '../amanecer/luz'
+import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
-import { crearElEstudio, SATINADO } from '../estudio'
+import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
-import { conLogoDeNoche, hornearContornos, type ContornoDelLogo } from '../logoDeNoche'
-import { EMISION_EN_LA_NOCHE } from '../logoEmision'
 import { KEY_INTENSITY } from '../probeLighting'
-import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
-import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
-import { armarElTitulo } from './geometria'
-import { ASIENTO, DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll, persigue } from './llegada'
+import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } from './colocacion'
+import { armar, avancesDeLasRayas, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
+import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
-import { costadoDeDiaGlsl } from './filo'
 import { enOcio } from './ocio'
 import { llevarLosAcompanantes } from './acompanantes'
 
@@ -52,56 +43,9 @@ import { llevarLosAcompanantes } from './acompanantes'
  * **Con los viajes del menú** ([3D Y SONIDO] T1): mientras dura un viaje, ningún título llega (lo pedido es 0: si uno se
  * veía, se va como siempre); al terminar, el viaje a Portfolio o a Por qué develOP repite la llegada del título
  * (`llegadaDelTitulo.ts`) y las letras llegan desde la profundidad con ese progreso, con la cámara ya quieta en el nudo.
+ *
+ * [RETOQUE PANEL] T4 · cómo se arma cada uno (la geometría con sus rayas y el material), en `armado.ts`.
  */
-
-/**
- * El filo de noche (em), el campo de su contorno (em) y las tapas del blanco de noche (valor en pantalla). Y el filo
- * del blanco de DÍA (su color, lineal): sobre el cielo claro las tapas blancas casi no se separan del fondo; con el filo
- * oscuro, el mismo dibujo de la noche al revés, se leen. De noche lo reemplaza el filo claro.
- */
-const NOCHE_DEL_TITULO = { filo: 0.018, contorno: { alcance: 0.06, celda: 0.005 }, tapaDelBlanco: 0.86, filoDelBlancoDeDia: 0.06 } as const
-
-/** El filo oscuro del blanco de día: el albedo del borde de las tapas, apagado con la noche (la del logo, por la emisiva). */
-const FILO_DE_DIA_GLSL = /* glsl */ `
-	diffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${NOCHE_DEL_TITULO.filoDelBlancoDeDia.toFixed(3)} ), bordeDelLogoDeNoche() * ( 1.0 - clamp( emissive.r / ${EMISION_EN_LA_NOCHE.toFixed(3)}, 0.0, 1.0 ) ) );
-`
-
-type Variante = 'negro' | 'blanco'
-
-const FUENTE = new Font(datosDeLaFuente as FontData)
-/** [RETOQUE 3D] Las fuentes de los títulos: la Chivo 400 de siempre, Archivo 700 y la Chivo 300 itálica del hero. */
-const FUENTES: Readonly<Record<FuenteDelTitulo, Font>> = {
-  'chivo-400': FUENTE,
-  'archivo-700': new Font(datosDeArchivo as FontData),
-  'chivo-300-italica': new Font(datosDeLaItalica as FontData),
-}
-
-/** [RETOQUE 3D] El lugar de un título en el cuadro, escribible: el de `pantalla` se recalcula en cada cuadro sin reservar. */
-type LugarVivo = { -readonly [K in keyof LugarEnElCuadro]: LugarEnElCuadro[K] }
-
-interface Armado {
-  readonly titulo: TituloDeVolumen
-  /** Lo que se muestra: persigue a la llegada y a la salida de la pieza (`persigue`). */
-  readonly mostrado: { llegada: number; salida: number }
-  readonly grupo: THREE.Group
-  readonly malla: THREE.Mesh
-  readonly material: THREE.MeshStandardMaterial
-  readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number }; readonly uLevanta: { value: number }; readonly uPieDeLaPalabra: { value: THREE.Vector2 } }
-  readonly fuente: Font
-  readonly contorno: ContornoDelLogo
-  colocado: boolean
-  /**
-   * [RETOQUE 3D] B1 · lo que el que se queda necesita para irse con su sección: dónde quedó colocado (el lugar de lectura,
-   * el grupo y la dirección de arriba de la cámara que lo colocó), cuánto mundo es un píxel ahí y el recorrido del escenario.
-   */
-  readonly base: THREE.Vector3
-  readonly arriba: THREE.Vector3
-  mundoPorPx: number
-  lugar: LugarEnElCuadro | null
-  pin: PinDelLugar
-  /** [RETOQUE 3D] El de `pantalla`, en cada cuadro: su lugar de ahora en el cuadro. */
-  readonly ahora: LugarVivo
-}
 
 interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
@@ -264,6 +208,7 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     if (a.titulo.queda) {
       if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
+      avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
       a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
       continue
@@ -275,8 +220,10 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     a.uniforms.uLlegada.value = llegada
     a.uniforms.uSalida.value = salida
     a.uniforms.uQuieto.value = s.quieto ? 1 : 0
-    // Regla 5: sin ninguna letra en camino, no se dibuja; al empezar la próxima llegada se vuelve a colocar.
-    a.malla.visible = llegada > 0 && salida < 1
+    // Regla 5: sin ninguna letra en camino, no se dibuja; al empezar la próxima llegada se vuelve a colocar. [RETOQUE PANEL]
+    // T4: el que no tiene letras (el ≠), sólo con alguna raya empezada.
+    const conRaya = avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
+    a.malla.visible = a.sinLetras ? conRaya : llegada > 0 && salida < 1
     if (!a.malla.visible) {
       if (llegada <= 0) a.colocado = false
       continue
@@ -364,47 +311,3 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, y: n
   return visible
 }
 
-function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRenderTarget): void {
-  material.envMap = rt.texture
-  material.needsUpdate = true
-}
-
-function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
-  const fuente = FUENTES[titulo.fuente]
-  const { geometria, contornos } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto)
-  const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
-  // [RETOQUE 3D] `levanta`: el pie de atrás de la palabra (el más bajo y el más atrás de su caja, em) es el eje del giro y la línea.
-  const caja = geometria.boundingBox ?? new THREE.Box3()
-  const uniforms = { uLlegada: { value: 0 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: titulo.gesto === 'levanta' ? 1 : 0 }, uPieDeLaPalabra: { value: new THREE.Vector2(caja.min.y, caja.min.z) } }
-  material.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, uniforms)
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${LLEGADA_PARS_GLSL}`)
-      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${LLEGADA_NORMAL_GLSL}`)
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${LLEGADA_POSICION_GLSL}`)
-    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\n${DISOLVER_PARS_GLSL}`).replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_GLSL}`)
-    // El blanco, de día: el filo oscuro (la función del borde la trae el dibujo de noche, que se instala abajo).
-    if (variante === 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${FILO_DE_DIA_GLSL}`)
-    // [RETOQUE DEL PIE] P1 · el negro, de día: los costados en otro gris (`filo.ts`; era la b de la prueba de RONDA 2).
-    else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`)
-  }
-  material.customProgramCacheKey = () => `titulo-de-volumen-${variante}`
-  // De noche, el dibujo del logo (en em: el filo y el campo de su contorno); y el amanecer, como el resto de la sala.
-  const contorno = hornearContornos(contornos, NOCHE_DEL_TITULO.contorno)
-  conLogoDeNoche(material, contorno, variante === 'blanco' ? { ancho: NOCHE_DEL_TITULO.filo, tapa: NOCHE_DEL_TITULO.tapaDelBlanco } : { ancho: NOCHE_DEL_TITULO.filo })
-  conElAmanecer(material)
-  const malla = new THREE.Mesh(geometria, material)
-  malla.name = `titulo de volumen · ${titulo.id}`
-  // Las letras que llegan salen de la caja de la geometría quieta: sin descarte por encuadre (son una o dos mallas).
-  malla.frustumCulled = false
-  malla.visible = false
-  const grupo = new THREE.Group()
-  grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 } }
-}
-
-function soltar(a: Armado): void {
-  a.malla.geometry.dispose()
-  a.material.dispose()
-  a.contorno.textura.dispose()
-}

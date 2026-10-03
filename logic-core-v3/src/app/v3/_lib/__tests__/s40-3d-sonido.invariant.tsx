@@ -81,7 +81,7 @@ const entorno = leer('_lib/escena/entorno.ts')
 afirmar(/resuelto = pedido === null \? ENTORNO : \{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(entorno), '  la URL (`?pruebas=titulos=blanco`) cambia el material y nada más del producto')
 
 titulo('T1 · Con los viajes del menú: durante el viaje no llegan; al terminar, la llegada repetida')
-const escena3d = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 // [RETOQUE 3D] B1: entre los dos, el scroll del cuadro (el que se queda va corrido con su escenario).
 // [RONDA 2] F2: con el asiento entre la lectura del scroll y el recorrido; lo mostrado, función del scroll.
 const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY[\s\S]{0,700}?for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)

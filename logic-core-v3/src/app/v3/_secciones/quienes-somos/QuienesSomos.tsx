@@ -7,15 +7,17 @@ import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, ConInercia, ProgresoAmortiguado, SignoDistinto, Trazo } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto, ConInercia, Trazo } from '../_contrato/canales'
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
+import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
 import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from './contenido'
 import { ElEquipo, LaFoto } from './equipo'
 import { Pantalla } from './pantalla'
 import { CLASES_DEL_REPARTO, GEOMETRIA } from './geometria'
+import { RenglonDeVolumen, SignoDeVolumen } from './titular3d'
 
 /** Se re-exportan para que quien ya las importaba de acá —los instrumentos— no cambie de puerta. */
 export { GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
@@ -24,6 +26,8 @@ export { GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
 /** PANTALLA 1 · LA AGENCIA — quiénes somos y qué somos, repartido sobre la pantalla
  *  entera. El lugar cierra abajo a la derecha: juntura pareja, y esquiva la pastilla. */
 function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
+  // [RETOQUE PANEL] T4 · el cuerpo va en el plano del ≠ de volumen, el título que tiene encima (como A1).
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('agencia-signo')
   return (
     <Pantalla nombre="agencia">
       {/* ⚠️ **LA COLUMNA LATERAL COLAPSA HASTA EL CORTE, NO HASTA 768.** `lateral`
@@ -99,6 +103,10 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
                         >
                           {reparto.tramos.map((renglon, indice) => (
                             <span key={`${renglon.antes}${renglon.marcado}`} className={GEOMETRIA.ventanaDelTexto}>
+                              {/* [RETOQUE PANEL] T4 · desde la banda de tablet, cada renglón con sus títulos de volumen. */}
+                              {reparto.tramos === TRAMOS_DEL_TITULAR ? (
+                                <RenglonDeVolumen renglon={TRAMOS_DEL_TITULAR[indice]} indice={indice} entrada={progresoDeEntrada} trazo={progresoDelTrazo} />
+                              ) : (
                               <CanalDePieza
                                 progreso={progresoDeEntrada}
                                 patron="P1"
@@ -122,6 +130,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
                                   </>
                                 )}
                               </CanalDePieza>
+                              )}
                             </span>
                           ))}
                         </div>
@@ -144,7 +153,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
             style={GEOMETRIA.estilos.titular}
           >
-            {(progresoDelSigno) => <SignoDistinto progreso={progresoDelSigno} className={MEZCLA_SOBRE_LA_ESCENA} />}
+            {(progresoDelSigno) => <SignoDeVolumen progreso={progresoDelSigno} />}
           </Bloque>
 
           <Bloque
@@ -154,9 +163,11 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             style={GEOMETRIA.estilos.bajada}
           >
             {(progreso) => (
-              <CanalDeTexto progreso={progreso} tipo="parrafo" texto={CONTENIDO.bajada}>
-                {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
-              </CanalDeTexto>
+              <div ref={enElPlano}>
+                <CanalDeTexto progreso={progreso} tipo="parrafo" texto={CONTENIDO.bajada}>
+                  {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
+                </CanalDeTexto>
+              </div>
             )}
           </Bloque>
 

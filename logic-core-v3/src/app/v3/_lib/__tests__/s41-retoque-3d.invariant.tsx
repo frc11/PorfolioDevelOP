@@ -61,7 +61,7 @@ const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [CIERRE RETOQUE 3D] B6: la frase de Por qué develOP también se queda (s42 · B6).
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && porQue.length > 0, 'Portfolio se queda (`queda`)')
-const escena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const escena = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 // [RONDA 2] F2: la llegada de Portfolio ya no «termina lo que empezó» (con el scroll rápido quedaba en «Portfoli»): es función del scroll, con el asiento al frenar (s43 · F2).
 // [NOCTURNO] A4: con su mínimo de tiempo (la llegada larga de ESCENA 10; s45 · A4).
 const terminaLaLlegada = (c: string): boolean => /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(c)

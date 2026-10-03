@@ -75,6 +75,16 @@ export function lineaDeBase(l: LugarEnElCuadro, f: MedidasDeLaFuente): number {
   return l.arriba + (l.linea - caja) / 2 + (f.ascender / f.resolution) * l.cuerpo
 }
 
+/**
+ * [RETOQUE PANEL] T4 · un punto de la caja de un lugar (px CSS desde su esquina de arriba a la izquierda, sin
+ * transformaciones), en em desde el origen del título (el comienzo de la línea de base): la cuenta con que se coloca.
+ */
+export function enEmDelLugar(el: HTMLElement, fuente: MedidasDeLaFuente): (x: number, y: number) => readonly [number, number] {
+  const cuerpo = parseFloat(getComputedStyle(el).fontSize)
+  const base = lineaDeBase({ izquierda: 0, arriba: 0, linea: el.offsetHeight, cuerpo, ancho: 0, alto: 0 }, fuente)
+  return (x, y) => [x / cuerpo, (base - y) / cuerpo]
+}
+
 const RAYO = new THREE.Vector3()
 const ADELANTE = new THREE.Vector3()
 const CENTRO = new THREE.Vector3()

@@ -130,7 +130,7 @@ const alcanza = (f: Seguidor): boolean => {
   return m === 0.4
 }
 afirmar(alcanza(mostradoDelScroll), '  al volver el scroll después de un asiento, alcanza al progreso sin saltar (en lo que dura el alcance) y desde ahí lo sigue tal cual')
-const escena3d = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 afirmar(/const asentar = !enViaje && REPETICIONES\.activas === 0 && ahora - s\.scroll\.cuando > ASIENTO\.quietoMs/.test(escena3d) && (escena3d.match(/mostradoDelScroll\(/g) ?? []).length === 3 && !/m\.llegada > 0 \? 1 :/.test(escena3d), '  en la escena: Portfolio, la frase, El equipo y las demos (la llegada y la salida), sin «termina lo que empezó»; el asiento, sólo con el scroll quieto y sin un viaje ni una llegada repetida corriendo')
 const porQueDevelop = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 afirmar((porQueDevelop.match(/salida: levantada, corrida \}/g) ?? []).length === 2 && /salida=\{volumen\.salida\}/.test(porQueDevelop) && !/llegadaDe="por-que-develop" queda/.test(porQueDevelop), 'la frase de Por qué develOP vuelve a irse con la levantada (con la misma regla)')

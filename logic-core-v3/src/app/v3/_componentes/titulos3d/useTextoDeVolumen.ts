@@ -5,7 +5,7 @@ import { useRef, type RefObject } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import type { LlegadaDelTitulo } from '../../_lib/escena/titulos3d/llegada'
-import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen, type FuenteDelTitulo } from '../../_lib/titulos3d/registro'
+import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen, type FuenteDelTitulo, type TrazoDelTitulo } from '../../_lib/titulos3d/registro'
 import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 
 /**
@@ -26,6 +26,8 @@ export interface TextoDeVolumen {
   readonly queda: boolean
   readonly rearma?: boolean
   readonly minimoS?: number | null
+  /** [RETOQUE PANEL] T4 · sus rayas (memorizadas: cambiarlas lo vuelve a armar). */
+  readonly trazos?: readonly TrazoDelTitulo[]
 }
 
 /** El texto del DOM, apagado desde 1024 con el título armado (sigue en el árbol accesible y en su lugar). */
@@ -49,6 +51,7 @@ export function useTextoDeVolumen<T extends HTMLElement>(t: TextoDeVolumen): { r
     colocacion: 'pantalla',
     rearma: t.rearma ?? true,
     minimoS: t.minimoS ?? null,
+    trazos: t.trazos,
     activo: material !== 'no' && escritorio,
   })
   return { lugar, listo }

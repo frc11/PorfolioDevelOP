@@ -100,6 +100,17 @@ uniform float uLevanta;
 uniform vec2 uPieDeLaPalabra;
 varying float vAparece;
 varying float vSobreElPie;
+// [RETOQUE PANEL] T4 · las rayas del título (el subrayado, el tachado, los trazos del ≠): cuál es cada vértice (0: una
+// letra), desde dónde crece, hacia dónde, y el avance de cada una.
+attribute float aTrazo;
+attribute vec3 aOrigenDelTrazo;
+attribute vec3 aEjeDelTrazo;
+uniform vec4 uTrazos;
+varying float vDelTrazo;
+float avanceDelTrazo() {
+	float k = floor( aTrazo + 0.5 );
+	return k < 1.5 ? uTrazos.x : k < 2.5 ? uTrazos.y : k < 3.5 ? uTrazos.z : uTrazos.w;
+}
 float llegadaDeLaLetra( float p, float orden ) {
 	float u = clamp( ( p - orden * ${f(1 - LLEGADA_DE_LAS_LETRAS.dura)} ) / ${f(LLEGADA_DE_LAS_LETRAS.dura)}, 0.0, 1.0 );
 	return 1.0 - pow( 1.0 - u, 3.0 );
@@ -115,7 +126,9 @@ mat3 giroDeLaLetraEn( float falta ) {
 
 export const LLEGADA_NORMAL_GLSL = /* glsl */ `
 	// [ESCENA 10] T3 · cuánto le falta a esta letra (la llegada por lo que no se fue) y su giro.
-	float eDeLaLetra = llegadaDeLaLetra( uLlegada, aLetra ) * ( 1.0 - llegadaDeLaLetra( uSalida, aLetra ) );
+	// [RETOQUE PANEL] T4 · una raya no llega como las letras: está en su lugar y crece con su avance.
+	float esTrazo = step( 0.5, aTrazo );
+	float eDeLaLetra = mix( llegadaDeLaLetra( uLlegada, aLetra ) * ( 1.0 - llegadaDeLaLetra( uSalida, aLetra ) ), 1.0, esTrazo );
 	float faltaDeLaLetra = ( 1.0 - eDeLaLetra ) * ( 1.0 - uQuieto );
 	// [RETOQUE 3D] \`levanta\`: sin el giro propio; la letra se acuesta hacia adelante sobre el pie de atrás de la palabra.
 	mat3 giroDeLaLetra = giroDeLaLetraEn( faltaDeLaLetra * ( 1.0 - uLevanta ) );
@@ -133,14 +146,22 @@ export const LLEGADA_POSICION_GLSL = /* glsl */ `
 	transformed = mix( enCamino, pieDeLaLetra + alzado * ( transformed - pieDeLaLetra ), uLevanta );
 	// Cuánto queda arriba del pie (em): debajo, la línea lo tapa.
 	vSobreElPie = ( transformed.y - uPieDeLaPalabra.x ) * uLevanta + ( 1.0 - uLevanta );
+	// [RETOQUE PANEL] T4 · la raya, estirada desde su origen a lo largo de su eje con su avance (en las letras, esTrazo es 0).
+	float sDelTrazo = avanceDelTrazo();
+	transformed += esTrazo * aEjeDelTrazo * dot( transformed - aOrigenDelTrazo, aEjeDelTrazo ) * ( sDelTrazo - 1.0 );
+	vSobreElPie = mix( vSobreElPie, 1.0, esTrazo );
+	vDelTrazo = mix( 1.0, sDelTrazo, esTrazo );
 `
 
 /** El fragmento: el tramado que la disuelve (ruido de gradiente intercalado, fijo en la pantalla). */
 export const DISOLVER_PARS_GLSL = /* glsl */ `
 varying float vAparece;
 varying float vSobreElPie;
+varying float vDelTrazo;
 `
 export const DISOLVER_GLSL = /* glsl */ `
 	if ( vAparece < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= vAparece ) discard;
 	if ( vSobreElPie < 0.002 ) discard;
+	// Una raya sin dibujar no deja un punto pintado (el remate a ras de la del DOM).
+	if ( vDelTrazo < 0.002 ) discard;
 `

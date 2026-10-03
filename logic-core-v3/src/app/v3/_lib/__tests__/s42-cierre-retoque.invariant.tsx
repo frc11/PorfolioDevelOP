@@ -129,7 +129,7 @@ afirmar(!/whatsapp|wa\.me|WHATSAPP/i.test(delPanel) && /enviarAlServidor/.test(d
 titulo('D1 · Todo el 3D fijo en el mundo')
 
 const orbita = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
-const titulosDeLaEscena = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const titulosDeLaEscena = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 const fijosEnElMundo = (o: string, t: string): boolean =>
   /sinElMouse\.angleDeg = angleDeg \+ giroDeLaVista\s*sinElMouse\.height = height\s*angleDeg \+= desplazamiento\.angleDeg \+ giroDeLaVista/.test(o) &&
   /posarLaCamaraSinElMouse\(state\.camera, sinElMouse,/.test(o) &&

@@ -8,6 +8,7 @@ import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
+import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
 import { CONTENIDO } from './contenido'
 import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
@@ -66,6 +67,8 @@ function TituloDelEquipo({ progreso }: { readonly progreso: Progreso }): React.J
 }
 
 export function ElEquipo(): React.JSX.Element {
+  // [RETOQUE PANEL] T4 · las personas (sus textos y sus fotos, con su hover y su toque) van en el plano de «El equipo» (como A1).
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('equipo')
   return (
     <div data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
       <CalleDerecha className="grow">
@@ -75,6 +78,7 @@ export function ElEquipo(): React.JSX.Element {
             {(progreso) => <TituloDelEquipo progreso={progreso} />}
           </Bloque>
 
+          <div ref={enElPlano} className="flex w-full flex-col gap-[var(--spacing-12)]">
           {CONTENIDO.personas.map((persona, indice) => {
             const aLaDerecha = indice === 1
             return (
@@ -162,6 +166,7 @@ export function ElEquipo(): React.JSX.Element {
               </div>
             )
           })}
+          </div>
         </div>
       </CalleDerecha>
     </div>
