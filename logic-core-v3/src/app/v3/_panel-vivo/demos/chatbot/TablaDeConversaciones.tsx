@@ -16,7 +16,9 @@ import type { MensajeDeEjemplo } from './datos'
  *   · el transcript recibe los mensajes que ya llegaron (la demo los despliega de a uno) y el «pensando» del asistente
  *     (los tres puntos del widget público, `modules/chatbot/components/chat/ChatWindow.tsx`);
  *   · la intención del lead, con su nombre de dueño (`intentLabel`, IMPORTADO de `modules/chatbot/lead-intent-labels.ts`);
- *   · sin el estado vacío (traía un `<Link>` a `/dashboard`): la demo siempre tiene conversaciones.
+ *   · sin el estado vacío (traía un `<Link>` a `/dashboard`): la demo siempre tiene conversaciones;
+ *   · en el teléfono (abajo de `sm`) sin las columnas de tokens y de ruta: con las seis, el transcript (que va adentro de
+ *     la tabla) quedaba más ancho que la pantalla y cortaba las burbujas.
  */
 export interface FilaDeConversacion {
   readonly id: string
@@ -42,8 +44,8 @@ export function TablaDeConversaciones({ filas, abierta, alAlternar, transcript }
               <th className="w-8 py-3 pr-2" aria-hidden="true" />
               <th className="py-3 pr-4">Última actividad</th>
               <th className="py-3 pr-4">Mensajes</th>
-              <th className="py-3 pr-4">Tokens (in / out)</th>
-              <th className="py-3 pr-4">Ruta</th>
+              <th className="hidden py-3 pr-4 sm:table-cell">Tokens (in / out)</th>
+              <th className="hidden py-3 pr-4 sm:table-cell">Ruta</th>
               <th className="py-3 pr-4">Lead</th>
             </tr>
           </thead>
@@ -75,10 +77,10 @@ export function TablaDeConversaciones({ filas, abierta, alAlternar, transcript }
                     </td>
                     <td className="py-3 pr-4 text-zinc-300">{formatDate(c.ultima)}</td>
                     <td className="py-3 pr-4 text-zinc-400">{c.mensajes}</td>
-                    <td className="py-3 pr-4 font-mono text-xs text-zinc-400">
+                    <td className="hidden py-3 pr-4 font-mono text-xs text-zinc-400 sm:table-cell">
                       {c.tokens[0]} / {c.tokens[1]}
                     </td>
-                    <td className="py-3 pr-4 text-xs text-zinc-500">{c.ruta}</td>
+                    <td className="hidden py-3 pr-4 text-xs text-zinc-500 sm:table-cell">{c.ruta}</td>
                     <td className="py-3 pr-4">
                       {c.lead ? (
                         <span className="text-xs text-emerald-400">
