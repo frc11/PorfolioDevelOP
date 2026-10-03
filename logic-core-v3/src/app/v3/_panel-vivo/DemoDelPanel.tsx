@@ -30,6 +30,7 @@ type Demo = LazyExoticComponent<ComponentType<PropsDeLaDemo>>
 const DEMOS: Partial<Record<IdDeDemo, Demo>> = {
   conversaciones: lazy(() => import('./demos/chatbot/Conversaciones')),
   leads: lazy(() => import('./demos/leads/Leads')),
+  tickets: lazy(() => import('./demos/tickets/Tickets')),
   informacion: lazy(() => import('./demos/chatbot/LoQueSabe')),
 }
 

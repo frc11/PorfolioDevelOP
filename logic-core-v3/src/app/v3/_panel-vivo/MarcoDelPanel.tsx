@@ -66,7 +66,7 @@ const CLASE_DEL_ITEM = 'relative flex w-full items-center gap-3 rounded-md px-3 
 const ITEM_ACTIVO = 'bg-cyan-500/10 text-cyan-400 shadow-[inset_2px_0_0_0_rgba(6,182,212,1)]'
 const ITEM_QUIETO = 'text-zinc-400'
 
-export function MarcoDelPanel({ item, irA, conPausa = false, children }: { readonly item: ItemDelPanel; readonly irA?: (demo: IdDeDemo) => void; readonly conPausa?: boolean; readonly children: React.ReactNode }): React.JSX.Element {
+export function MarcoDelPanel({ item, irA, conPausa = false, encima, children }: { readonly item: ItemDelPanel; readonly irA?: (demo: IdDeDemo) => void; readonly conPausa?: boolean; readonly encima?: React.ReactNode; readonly children: React.ReactNode }): React.JSX.Element {
   const r = useReproduccion()
   const grande = r.modo === 'completa'
   const iniciales = NEGOCIO_DE_EJEMPLO.split(/\s+/)
@@ -134,6 +134,8 @@ export function MarcoDelPanel({ item, irA, conPausa = false, children }: { reado
         </header>
         <div data-parte="contenido-del-panel" className={cn('mt-3 min-h-0 flex-1 rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6', grande ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden')}>{children}</div>
       </div>
+      {/* Lo que en el panel es un modal (un formulario, una vista): adentro del marco, no sobre toda la pantalla. */}
+      {encima}
     </div>
   )
 }
