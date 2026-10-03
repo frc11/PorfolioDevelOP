@@ -27,6 +27,8 @@ const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
 const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
 // [RONDA 2] F5 · y las piezas del pie (desde 1025): el hover, el tic; el clic, el pestillo, como una tecla.
 const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido]`
+/** [RETOQUE PANEL] T2 · las demos de Tu panel: sin clic propio; lo que se toca adentro suena el pestillo de la barra y los CTA. */
+const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 
 export default function ControlDelSonido(): React.JSX.Element {
   const boton = useRef<HTMLButtonElement>(null)
@@ -87,6 +89,10 @@ export default function ControlDelSonido(): React.JSX.Element {
     const alClic = (e: MouseEvent): void => {
       const blanco = e.target instanceof Element ? e.target : null
       if (blanco === null || blanco.closest('[data-pieza="control-del-sonido"]') !== null) return
+      if (blanco.closest(DE_LAS_DEMOS_DEL_PANEL) !== null) {
+        if (blanco.closest(ENLACES_Y_BOTONES) !== null) sonar('pestillo')
+        return
+      }
       if (blanco.closest(DE_LA_BARRA) !== null || blanco.closest(DE_LOS_CTA) !== null) sonar('pestillo')
       else if (blanco.closest(ENLACES_Y_BOTONES) !== null) sonar('clic')
     }
