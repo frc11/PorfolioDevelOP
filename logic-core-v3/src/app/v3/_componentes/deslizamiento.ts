@@ -226,11 +226,15 @@ export const SELECTOR_DEL_CTA_DEL_HERO = `[${ATRIBUTO_DE_PANEL}="${IDS_DE_SECCIO
  * también es un ítem, pero va a `#contacto`, que no es una sección: el efecto lo deja pasar y lo
  * abre el formulario. Los dos literales salen de `BarraDelHome.tsx` ([NAVBAR] la barra propia) y de `MenuMovil.tsx`, y
  * `s27-viajes` afirma que aparecen tal cual en esos fuentes.
+ *
+ * [NOCTURNO] A3 · y los enlaces del recorrido del pie (`ColumnasDelPie.tsx`), que saltaban de golpe: viajan con el
+ * mismo gesto, el mismo plan de la escena (el día y la noche) y la misma llegada repetida del título del destino.
  */
 export const SELECTOR_DE_LOS_VIAJES = [
   SELECTOR_DEL_CTA_DEL_HERO,
   '[data-pieza="barra"] a[data-pieza="barra-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
+  '[data-pieza="recorrido-del-pie"] a[data-pieza="pie-enlace-icono"]',
 ].join(', ')
 
 /** [VIAJES] Con movimiento reducido no hay viaje: un salto al mismo destino, tapado por un fundido corto. */

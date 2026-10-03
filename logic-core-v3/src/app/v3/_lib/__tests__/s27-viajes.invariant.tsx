@@ -52,6 +52,9 @@ const literales: readonly [string, string][] = [
   ['src/app/v3/_chrome/barra/BarraDelHome.tsx', 'data-pieza="barra-enlace"'],
   ['src/app/v3/_chrome/menu/MenuMovil.tsx', 'data-pieza="menu-movil"'],
   ['src/app/v3/_chrome/menu/PanelDelMenu.tsx', 'data-parte="item-del-menu"'],
+  // [NOCTURNO] A3: los enlaces del recorrido del pie viajan igual (s45 · A3).
+  ['src/app/v3/_secciones/cierre/ColumnasDelPie.tsx', 'data-pieza="recorrido-del-pie"'],
+  ['src/app/v3/_componentes/chrome/PiePiezas.tsx', 'data-pieza="pie-enlace-icono"'],
 ]
 for (const [archivo, literal] of literales) {
   afirmar(SELECTOR_DE_LOS_VIAJES.includes(literal) && leer(archivo).includes(literal), `  \`${literal}\` está en el selector y lo EMITE \`${path.basename(archivo)}\` tal cual`)

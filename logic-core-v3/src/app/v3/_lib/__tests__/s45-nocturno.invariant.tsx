@@ -6,10 +6,15 @@
  *   A4 · la llegada de Portfolio vuelve a ser la larga de ESCENA 10 (persigue al scroll con un mínimo de tiempo), con lo
  *        que arregló F2: se da vuelta con el scroll y al frenar termina armada o desarmada.
  *   A5 · la salida de «Seis razones / para elegirnos», con el mismo mecanismo y bastante más lenta (se iba volando).
+ *   A3 · los enlaces del recorrido del pie viajan como los ítems del menú (el mismo escucha, el mismo plan de la escena y
+ *        la misma llegada repetida del título del destino).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno/LEEME.txt`.
  */
 import { readFileSync } from 'node:fs'
 
+import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
+import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
+import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { LLEGADA_DE_LAS_LETRAS, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { ASIENTO, LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -91,5 +96,16 @@ const registro = sinComentarios(leer('_lib/titulos3d/registro.ts'))
 const lentaEnLaFrase = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*salidaMinimaS=\{LENTOS\.salidaDeLaFraseS\}[^>]*llegadaDe="por-que-develop" \/>/.test(c)
 afirmar(lentaEnLaFrase(porQue) && /salida, queda, corrida, minimoS, salidaMinimaS, activo:/.test(componente) && /rearma, minimoS, salidaMinimaS \}\)/.test(registro) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt, a\.titulo\.salidaMinimaS\)/.test(escena), '  la frase pide su salida lenta (sección → registro → escena); los demás títulos (sin `salidaMinimaS`) siguen con la de F2')
 controlPositivo('el detector VE la frase sin su salida lenta', porQue.replace(' salidaMinimaS={LENTOS.salidaDeLaFraseS}', ''), lentaEnLaFrase)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A3 · Los enlaces del pie viajan como los del menú')
+
+const DEL_PIE = '[data-pieza="recorrido-del-pie"] a[data-pieza="pie-enlace-icono"]'
+const columnas = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
+const viajan = (selector: string, fuente: string): boolean => selector.split(', ').includes(DEL_PIE) && /<ul data-pieza="recorrido-del-pie"[^>]*>[\s\S]{0,600}<EnlaceDelPieConIcono\s+href=\{destino\.ancla\}/.test(fuente)
+afirmar(viajan(SELECTOR_DE_LOS_VIAJES, columnas), 'los enlaces del recorrido del pie entran en el MISMO selector que la barra y el menú: el mismo escucha, el mismo plan de la escena (día y noche) y la misma llegada del título al terminar')
+controlPositivo('el detector VE los enlaces del pie afuera del viaje (el salto de antes)', SELECTOR_DE_LOS_VIAJES.replace(`, ${DEL_PIE}`, ''), (sel: string) => viajan(sel, columnas))
+const secciones = IDS_DE_SECCION as readonly string[]
+afirmar(DESTINOS_DE_LA_RUTA.length > 0 && DESTINOS_DE_LA_RUTA.every((d) => d.ancla.startsWith('#') && secciones.includes(d.ancla.slice(1))), '  cada destino es el ancla de una sección (el viaje la resuelve a su nudo); ninguno es `#contacto` (ése abre el panel)', DESTINOS_DE_LA_RUTA.map((d) => d.ancla).join(' '))
 
 cerrar('s45-nocturno')
