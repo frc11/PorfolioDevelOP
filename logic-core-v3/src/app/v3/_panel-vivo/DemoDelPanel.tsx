@@ -29,6 +29,7 @@ type Demo = LazyExoticComponent<ComponentType<PropsDeLaDemo>>
 /** Las demos que ya existen; las demás features siguen con su captura. */
 const DEMOS: Partial<Record<IdDeDemo, Demo>> = {
   conversaciones: lazy(() => import('./demos/chatbot/Conversaciones')),
+  informacion: lazy(() => import('./demos/chatbot/LoQueSabe')),
 }
 
 export function hayDemo(demo: IdDeDemo): boolean {

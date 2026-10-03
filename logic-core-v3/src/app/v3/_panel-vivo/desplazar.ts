@@ -15,8 +15,22 @@ export function mostrarAlFondo(el: HTMLElement | null, suave: boolean): void {
   if (el === null || caja === null) return
   const r = el.getBoundingClientRect()
   const c = caja.getBoundingClientRect()
-  const sobra = r.bottom - (c.bottom - 16)
+  const sobra = (r.bottom - c.bottom) / escalaDe(caja, c) + 16
   if (sobra > 0) caja.scrollTo({ top: caja.scrollTop + sobra, behavior: suave ? 'smooth' : 'auto' })
+}
+
+/** Deja la cabeza de `el` arriba en el contenido del panel (el índice de «Lo que sabe tu chatbot»). */
+export function mostrarArriba(el: HTMLElement | null, suave: boolean): void {
+  const caja = el?.closest<HTMLElement>(CONTENIDO_DEL_PANEL) ?? null
+  if (el === null || caja === null) return
+  const r = el.getBoundingClientRect()
+  const c = caja.getBoundingClientRect()
+  caja.scrollTo({ top: caja.scrollTop + (r.top - c.top) / escalaDe(caja, c) - 16, behavior: suave ? 'smooth' : 'auto' })
+}
+
+/** La escala con que se ve la caja (la miniatura va escalada): las medidas en pantalla, a px de la caja. */
+function escalaDe(caja: HTMLElement, c: DOMRect): number {
+  return caja.offsetHeight > 0 && c.height > 0 ? c.height / caja.offsetHeight : 1
 }
 
 /**
