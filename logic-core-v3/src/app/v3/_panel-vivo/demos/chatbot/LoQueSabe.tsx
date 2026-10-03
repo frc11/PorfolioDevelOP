@@ -1,7 +1,7 @@
 'use client'
 
 import { BookOpen, MessageCircle, ShieldOff } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
@@ -48,9 +48,10 @@ export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
   const raiz = useRef<HTMLDivElement>(null)
   const [marcada, setMarcada] = useState<keyof BaseDeEjemplo | null>(null)
   const { paso } = usePasos(RECORRIDO_DE_LA_MINIATURA.length, 1500)
-  const idDe = (k: keyof BaseDeEjemplo): string => `demo-kb-${k}`
+  const base = useId()
+  const idDe = (k: keyof BaseDeEjemplo): string => `${base}-kb-${k}`
   const ir = (k: keyof BaseDeEjemplo): void => {
-    const el = raiz.current?.querySelector<HTMLElement>(`#${idDe(k)}`) ?? null
+    const el = document.getElementById(idDe(k))
     mostrarArriba(el, !r.reducido)
     el?.focus({ preventScroll: true })
     setMarcada(k)
@@ -58,8 +59,8 @@ export default function LoQueSabe({ irA }: PropsDeLaDemo): React.JSX.Element {
   // La miniatura, sola: cada paso, a la sección que le toca (moviendo sólo su caja).
   useEffect(() => {
     if (grande || paso === 0) return
-    mostrarArriba(raiz.current?.querySelector<HTMLElement>(`#demo-kb-${RECORRIDO_DE_LA_MINIATURA[paso - 1]}`) ?? null, false)
-  }, [grande, paso])
+    mostrarArriba(document.getElementById(`${base}-kb-${RECORRIDO_DE_LA_MINIATURA[paso - 1]}`), false)
+  }, [grande, paso, base])
 
   return (
     <MarcoDelPanel item="chatbot" irA={irA}>
