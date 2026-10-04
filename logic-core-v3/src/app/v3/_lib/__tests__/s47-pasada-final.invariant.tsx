@@ -26,6 +26,7 @@
  *   C3 · la sombra de los títulos en el piso vivo: [AJUSTES FINALES] A2 la pasó al producto, mejorada (s48); acá queda que
  *        la del logo sigue igual byte por byte.
  *   C4 · Servicios: los nanobots (la nube, el globo de red, los engranajes, el robot con su flujo) en lugar de la torta,
+ *        [AJUSTES FINALES] A6 los rehízo macizos y parejos (s48): acá quedan el motor, el traspaso y lo que no cambió.
  *        que queda de respaldo; el traspaso con el disparo del rodillo, por nanobot, con inercia y dispersión; three
  *        perezoso; pausa fuera de pantalla; con movimiento reducido, quieto; en el teléfono, menos.
  *   B  · Tu panel: el caos del nocturno con las demos usables a escala, la rueda que no queda atrapada, el marco que flota,
@@ -56,7 +57,8 @@ import { ALTO_DEL_CTA_EN_LISTA_SVH, VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA
 import { pantallasDe } from '../escena/anclaje'
 import { CURVAS } from '../motion/curvas'
 import { ACENTOS_DEL_ENJAMBRE, FISICA_DEL_ENJAMBRE, VERTICE_DEL_ENJAMBRE, resorteDelEnjambre, tramoDelEnjambre } from '../nanobots/enjambre'
-import { CUANTOS_SIMBOLOS, ENGRANAJES, FLUJO, PUNTOS_DEL_ENJAMBRE, radioDelDiente, simbolosDelEnjambre } from '../nanobots/simbolos'
+import { FLUJO } from '../nanobots/robot'
+import { CUANTOS_SIMBOLOS, ENGRANAJES, GLOBO, PUNTOS_DEL_ENJAMBRE, radioDelDiente, simbolosDelEnjambre } from '../nanobots/simbolos'
 import type { LetraDelPie } from '../pie3d/medida'
 import { laEscenaCayo, marcarLaEscenaCaida, suscribirALaCaida } from '../escena/caida'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
@@ -450,11 +452,12 @@ const N4 = 600
 const [nubeC4, globoC4, engranajesC4, robotC4] = simbolosDelEnjambre(N4)
 const puntosDe = (d: Float32Array): [number, number, number, number][] => Array.from({ length: d.length / 4 }, (_, i) => [d[4 * i], d[4 * i + 1], d[4 * i + 2], d[4 * i + 3]])
 const mismos = simbolosDelEnjambre(N4).every((d, k) => d.every((v, i) => v === [nubeC4, globoC4, engranajesC4, robotC4][k][i]))
-afirmar([nubeC4, globoC4, engranajesC4, robotC4].every((d) => d.length === N4 * 4 && d.every((v) => Number.isFinite(v) && Math.abs(v) < 2.1)) && mismos && CUANTOS_SIMBOLOS === 4, 'cuatro símbolos de exactamente n nanobots cada uno (cada nanobot tiene un lugar en cada uno), los mismos en cada carga')
-const enLaEsferaC4 = puntosDe(globoC4).filter((p) => p[3] < 1.5).every((p) => Math.abs(Math.hypot(p[0], p[1], p[2]) - 0.8) < 0.03)
-const nodosC4 = puntosDe(globoC4).filter((p) => p[3] > 0.5 && p[3] < 1.5).length
-const arcosC4 = puntosDe(globoC4).filter((p) => p[3] > 1.5)
-afirmar(enLaEsferaC4 && nodosC4 > 0 && arcosC4.length > 0 && arcosC4.every((p) => Math.hypot(p[0], p[1], p[2]) >= 0.8 - 1e-6), 'web: un globo de red (meridianos y paralelos sobre la esfera, nodos y conexiones que la cruzan por encima)', `${String(nodosC4)} en nodos · ${String(arcosC4.length)} en conexiones`)
+// [AJUSTES FINALES] A6 · `w` llega a 5 (las capas del robot); las coordenadas, dentro del espacio de −1 a 1.
+afirmar([nubeC4, globoC4, engranajesC4, robotC4].every((d) => d.length === N4 * 4 && d.every((v, i) => Number.isFinite(v) && (i % 4 === 3 ? v >= 0 && v < 5 : Math.abs(v) < 1.1))) && mismos && CUANTOS_SIMBOLOS === 4, 'cuatro símbolos de exactamente n nanobots cada uno (cada nanobot tiene un lugar en cada uno), los mismos en cada carga')
+// [AJUSTES FINALES] A6 · el globo se rehízo limpio, sin los nodos ni las conexiones al azar: acá queda que la red sigue sobre la esfera (lo demás, en s48 A6).
+const enLaEsferaC4 = puntosDe(globoC4).every((p) => Math.abs(Math.hypot(p[0], p[1], p[2]) - GLOBO.radio) < 0.03)
+const aroC4 = puntosDe(globoC4).filter((p) => p[3] > 0.5)
+afirmar(enLaEsferaC4 && aroC4.length > 0 && aroC4.every((p) => Math.abs(p[2] - GLOBO.aro.z) < 1e-6), 'web: un globo de red (meridianos y paralelos sobre la esfera, y el aro de la silueta, también sobre ella: donde la mirada la toca)', `${String(aroC4.length)} en el aro`)
 const [gA, gB] = [ENGRANAJES.a, ENGRANAJES.b]
 const encajan = Math.abs(Math.hypot(gB.centro[0] - gA.centro[0], gB.centro[1] - gA.centro[1]) - (gA.primitivo + gB.primitivo)) < 1e-9 && ENGRANAJES.razon === gA.dientes / gB.dientes
 const deCadaUno = puntosDe(engranajesC4).every((p) => {
@@ -462,12 +465,13 @@ const deCadaUno = puntosDe(engranajesC4).every((p) => {
   return Math.hypot(p[0] - c.centro[0], p[1] - c.centro[1]) <= c.punta + 0.02
 })
 afirmar(encajan && deCadaUno && Math.abs(radioDelDiente(gA, gA.fase + (0.25 * 2 * Math.PI) / gA.dientes) - gA.punta) < 1e-9 && Math.abs(radioDelDiente(gA, gA.fase + (0.75 * 2 * Math.PI) / gA.dientes) - gA.pie) < 1e-9, 'software: dos engranajes que encajan (sus círculos primitivos tangentes, 12 y 8 dientes: el chico gira 1,5 veces más rápido y al revés), cada nanobot en el suyo', `${String(gA.dientes)}:${String(gB.dientes)}`)
-const flujoC4 = puntosDe(robotC4).filter((p) => p[3] >= 1)
+// [AJUSTES FINALES] A6 · el robot se rehízo (habla por un globo de diálogo; el flujo es de anillos, con bifurcación): las capas de `w` son las de `robot.ts` (s48 A6 mide la forma).
+const flujoC4 = puntosDe(robotC4).filter((p) => p[3] >= 3)
 const robotSolo = puntosDe(robotC4).filter((p) => p[3] < 1)
-const enDiagonal = flujoC4.length > 0 && flujoC4.every((p) => p[0] > 0 && p[1] < 0 && p[3] < 2) && robotSolo.every((p) => p[0] < 0.1)
-afirmar(enDiagonal && FLUJO.nodos.every(([x, y], k) => k === 0 || x > FLUJO.nodos[0][0] || y < FLUJO.nodos[0][1]), 'IA y automatización: el robot del chatbot (cabeza, antena, ojos, boca, globito) y su flujo de nodos conectados, que sale en diagonal hacia abajo a la derecha (con su recorrido, para el pulso)')
+const enDiagonal = flujoC4.length > 0 && flujoC4.every((p) => p[0] > -0.3 && p[1] < 0.2 && p[3] < 5) && robotSolo.every((p) => p[0] < 0)
+afirmar(enDiagonal && FLUJO.nodos.every(([x, y], k) => k === 0 || x > FLUJO.nodos[0][0] || y < FLUJO.nodos[0][1]), 'IA y automatización: el robot del chatbot (cabeza, antena, ojos, boca) a la izquierda y su flujo de nodos conectados, que sale en diagonal hacia abajo a la derecha (con su recorrido, para el pulso)')
 const sombreadorC4 = VERTICE_DEL_ENJAMBRE
-afirmar(ACENTOS_DEL_ENJAMBRE.web === '#06b6d4' && ACENTOS_DEL_ENJAMBRE.ia === '#10b981' && ACENTOS_DEL_ENJAMBRE.automatizacion === '#f59e0b' && ACENTOS_DEL_ENJAMBRE.software === '#8b5cf6' && sombreadorC4.includes('return d.w < 0.5 ? uColores[ 3 ] : uColores[ 4 ];'), '  con los acentos de marca (web, software, IA; el flujo, el de automatización) y el color pasa de uno al otro con el avance')
+afirmar(ACENTOS_DEL_ENJAMBRE.web === '#06b6d4' && ACENTOS_DEL_ENJAMBRE.ia === '#10b981' && ACENTOS_DEL_ENJAMBRE.automatizacion === '#f59e0b' && ACENTOS_DEL_ENJAMBRE.software === '#8b5cf6' && sombreadorC4.includes('return d.w < 3.00000 ? uColores[ 3 ] : uColores[ 4 ];'), '  con los acentos de marca (web, software, IA; el flujo, el de automatización) y el color pasa de uno al otro con el avance')
 
 // El traspaso: con el disparo del rodillo, por nanobot, con inercia y dispersión; nunca un fundido.
 const tramos4 = [0, 0.5, 1, 1.5, 2.25, 3].map((p) => tramoDelEnjambre(p, false))

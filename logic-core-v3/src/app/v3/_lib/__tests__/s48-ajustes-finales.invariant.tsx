@@ -19,6 +19,8 @@
  *        terminado cae el titular del hero con su llegada (y con él la bajada y los CTA, en su plano); a los 4 s el fundido
  *        arranca igual (con el respaldo 2D si el 3D no llegó), también sin JavaScript; con movimiento reducido, corto.
  *   A5 · la cabeza fija de Servicios (abajo de 1024) libre del menú pasa al producto, sin bandera.
+ *   A6 · los nanobots macizos y parejos: trazos por longitud de arco (`nanobots/trazos.ts`); el globo como el 🌐, los
+ *        engranajes completos, el robot que habla (`robot.ts`) y su flujo que se enciende tramo a tramo (`vida.ts`).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -39,11 +41,17 @@ import { SOMBRA_DEL_LOGO } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, BASE_EN_TEXELES, CHARCO_CON_LOS_TITULOS_GLSL, DISTANCIA_DEL_LOGO, FONDO_DEL_MAPA, PENUMBRA_DEL_LOGO, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, SOMBRA_DE_LOS_TITULOS_GLSL, TEXEL_DE_LA_LETRA_GLSL, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, lodDeLaPenumbra, materialDeLaSombraDelTitulo, penumbraEn } from '../escena/sombra/deLosTitulos'
 import { poseDeLaLectura } from '../escena/titulos3d/colocacion'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll } from '../escena/titulos3d/llegada'
+import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
+import { CAPAS_DEL_ROBOT, FLUJO, GLOBO_DE_DIALOGO } from '../nanobots/robot'
+import { ENGRANAJES, GLOBO, PUNTOS_DEL_ENJAMBRE, simbolosDelEnjambre } from '../nanobots/simbolos'
+import { type Trazo, circulo, disco, rectanguloRedondeado, repartir, trazar } from '../nanobots/trazos'
+import { RELOJ_DEL_ROBOT, VIDA_DEL_ROBOT_GLSL, textoEscrito, vidaDelRobot } from '../nanobots/vida'
 import { LECTURA, LLEGADA_DE_PORTFOLIO } from '../titulos3d/registro'
 import { LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DE_ESTILO } from './s3-archivos'
 import { REGISTRO_POR_NOMBRE } from './s3-registro-de-tokens'
+import { LIMITE_DE_LINEAS_DE_CODIGO, lineasDeCodigo } from './s8-largos'
 import { valorDeToken } from './s10-css'
 
 const V3 = 'src/app/v3'
@@ -329,5 +337,104 @@ const cabezaLibreSiempre = (a: string, e: string): boolean =>
   !/cabeza/.test(e) && !('cabeza' in PRUEBAS_APAGADAS) && !('cabeza' in entornoPedido('producto,cabeza=libre').pruebas)
 afirmar(cabezaLibreSiempre(angostoA5, entornoA5), 'la cabeza deja arriba el reposo y el alto de la barra (sus mismos tokens: 24 + 48) y aire, siempre: la bandera `cabeza=libre` se borró (medido en PASADA FINAL D10: a 390 el botón del menú tapaba «…PROBLEMAS» y a 1000 la pastilla tapaba el antetítulo y Contacto / Login al gráfico)')
 controlPositivo('el detector VE la cabeza de antes (el relleno parejo)', [angostoA5.replace('pt-[calc(var(--spacing-6)+var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto)+var(--spacing-2))] pb-[var(--spacing-4)]', 'py-[var(--spacing-4)]'), entornoA5] as const, ([a, e]: readonly [string, string]) => cabezaLibreSiempre(a, e))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A6 · Los nanobots macizos y parejos: trazos por longitud de arco; el globo como el 🌐, los engranajes completos, el robot que habla y su flujo que se enciende')
+
+type PuntoA6 = [number, number, number, number]
+const puntosA6 = (d: Float32Array): PuntoA6[] => Array.from({ length: d.length / 4 }, (_, i) => [d[4 * i], d[4 * i + 1], d[4 * i + 2], d[4 * i + 3]])
+const [, globoA6, engranajesA6, robotA6] = simbolosDelEnjambre(PUNTOS_DEL_ENJAMBRE.ancho).map(puntosA6)
+const sombreadorA6 = VERTICE_DEL_ENJAMBRE
+
+// El trazo: los nanobots van a paso constante por el LARGO de cada trazo (no por su parámetro), y un símbolo da exactamente n.
+const trazosDePrueba: Trazo[] = [{ vertices: rectanguloRedondeado(0, 0, 0.5, 0.3, 0.1), w: 0, cerrado: true }, { vertices: circulo(0.8, 0.8, 0.2), w: 1, cerrado: true }, { vertices: [[-1, -1], [1, -1]], w: 2 }]
+const pasoConstante = (f: typeof trazar): boolean => {
+  const ps = f(trazosDePrueba, 500, 0, () => 0.5)
+  const pasos = ps.slice(1).map((p, i): [number, boolean] => [Math.hypot(p[0] - ps[i][0], p[1] - ps[i][1]), p[3] === ps[i][3]]).filter(([, mismo]) => mismo).map(([d]) => d)
+  const mediana = [...pasos].sort((a, b) => a - b)[Math.floor(pasos.length / 2)]
+  return ps.length === 500 && pasos.every((d) => Math.abs(d - mediana) < mediana * 0.05)
+}
+const discoParejo = (ps: readonly PuntoA6[]): boolean => {
+  const adentro = (r: number): number => ps.filter((p) => Math.hypot(p[0], p[1]) < r).length / ps.length
+  return ps.length === 400 && Math.abs(adentro(0.5) - 0.25) < 0.03 && Math.abs(adentro(Math.SQRT1_2) - 0.5) < 0.03
+}
+afirmar(pasoConstante(trazar) && discoParejo(disco(0, 0, 1, 400, 0)) && repartir(10, [1, 1, 1]).reduce((s, x) => s + x, 0) === 10, 'los nanobots van sobre cada trazo a PASO CONSTANTE por longitud de arco (el mismo paso en todos los trazos de un símbolo: el mismo grosor de línea), las superficies se llenan parejas (el girasol: la mitad de los nanobots en la mitad del área) y un símbolo da exactamente n')
+controlPositivo('el detector VE un trazo muestreado al azar (el de antes)', ((trazos, n, espesor, azar) => trazar(trazos, n, espesor, azar).map((p, i): PuntoA6 => [p[0] + (((i * 7919) % 13) / 13 - 0.5) * 0.06, p[1], p[2], p[3]])) as typeof trazar, pasoConstante)
+controlPositivo('  y VE una superficie llena por radio al azar (densa en el centro)', Array.from({ length: 400 }, (_, i): PuntoA6 => [(i / 400) * Math.cos(i), (i / 400) * Math.sin(i), 0, 0]), discoParejo)
+const parejo = (ps: readonly PuntoA6[], trazos: number, en3d = false): boolean => {
+  const d = ps.slice(1).map((p, i) => Math.hypot(p[0] - ps[i][0], p[1] - ps[i][1], en3d ? p[2] - ps[i][2] : 0))
+  const mediana = [...d].sort((a, b) => a - b)[Math.floor(d.length / 2)]
+  // Un salto por cambio de trazo, no más; y lo demás, al paso (±20 %).
+  return d.filter((x) => x > mediana * 2).length <= trazos && d.filter((x) => Math.abs(x - mediana) < mediana * 0.2).length / d.length > 0.97
+}
+const soloTrazos = robotA6.filter((p) => p[3] >= 1 && !(p[3] >= 3 && p[3] < 4 && (p[3] - 3) * 10 - Math.floor((p[3] - 3) * 10 + 0.001) > 0.25))
+afirmar(parejo(engranajesA6, 2 * 3 + ENGRANAJES.a.rayos + ENGRANAJES.b.rayos) && parejo(soloTrazos, 2 + 3 + 5 + 5) && parejo(globoA6, GLOBO.meridianos + GLOBO.paralelos.length + 1, true), 'y así salen los tres símbolos de líneas (los engranajes, el robot con su globo y su flujo, el globo): el paso entre nanobots consecutivos es el mismo en el 97 % de los pares, salvo un salto por trazo')
+
+// El globo, como el 🌐: la red simétrica sobre la esfera y el aro de la silueta aparte, que no gira.
+const redA6 = globoA6.filter((p) => p[3] < 0.5)
+const aroA6 = globoA6.filter((p) => p[3] > 0.5)
+const hayCerca = (q: PuntoA6): boolean => redA6.some((p) => Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]) < 0.02)
+const simetrico = redA6.every((p) => hayCerca([-p[0], p[1], p[2], 0]) && hayCerca([p[0], -p[1], p[2], 0]) && hayCerca([-p[0], p[1], -p[2], 0]))
+const aroDondeLaMiradaToca = (aro: { readonly z: number; readonly radio: number }): boolean => Math.abs(aro.z - GLOBO.radio ** 2 / GLOBO.mirada) < 1e-9 && Math.abs(aro.radio - GLOBO.radio * Math.sqrt(1 - (GLOBO.radio / GLOBO.mirada) ** 2)) < 1e-9
+afirmar(GLOBO.meridianos === 4 && GLOBO.paralelos.join() === '-45,0,45' && simetrico && aroA6.length > 0 && aroA6.every((p) => Math.abs(Math.hypot(p[0], p[1]) - GLOBO.aro.radio) < 1e-3 && Math.abs(p[2] - GLOBO.aro.z) < 1e-6) && aroDondeLaMiradaToca(GLOBO.aro) && GLOBO.mirada === 3 && sombreadorA6.includes('float cerca = 3.0 / ( 3.0 - p.z );') && sombreadorA6.includes('if ( d.w < 0.5 ) {\n\t\t\tp.xz = girar( p.xz, t * 0.35 );'), 'web: el globo como el 🌐 — cuatro meridianos (cada 45°), el ecuador y dos paralelos (±45°), simétrico de izquierda a derecha, de arriba abajo y al girar media vuelta; y el aro de la silueta aparte (w 1), que no gira y está donde la mirada toca la esfera (en perspectiva, con la mirada a 3 del centro: coincide con la red)', `${String(redA6.length)} en la red · ${String(aroA6.length)} en el aro`)
+controlPositivo('el detector VE un aro en el ecuador (que en perspectiva queda adentro de la red)', { z: 0, radio: GLOBO.radio }, aroDondeLaMiradaToca)
+
+// Los engranajes, completos: el contorno dentado, la llanta, el cubo y los rayos, cada nanobot en el suyo.
+const completos = ([ENGRANAJES.a, ENGRANAJES.b] as const).every((g, k) => {
+  const mios = engranajesA6.filter((p) => (p[3] < 0.5) === (k === 0))
+  const polar = mios.map((p) => ({ r: Math.hypot(p[0] - g.centro[0], p[1] - g.centro[1]), a: Math.atan2(p[1] - g.centro[1], p[0] - g.centro[0]) }))
+  const en = (radio: number): number => polar.filter(({ r }) => Math.abs(r - radio) < 0.012).length
+  const llanta = g.pie * ENGRANAJES.llanta
+  const rayos = polar.filter(({ r }) => r > g.cubo + 0.02 && r < llanta - 0.02)
+  const sobreUnRayo = rayos.every(({ a }) => Array.from({ length: g.rayos }, (_, i) => g.fase + (i / g.rayos) * 2 * Math.PI).some((ar) => Math.abs(Math.atan2(Math.sin(a - ar), Math.cos(a - ar))) < 0.02))
+  const puntas = Array.from({ length: g.dientes }, (_, i) => g.fase + ((i + 0.25) * 2 * Math.PI) / g.dientes).every((ad) => polar.some(({ r, a }) => Math.abs(r - g.punta) < 0.012 && Math.abs(Math.atan2(Math.sin(a - ad), Math.cos(a - ad))) < 0.03))
+  return en(g.cubo) > 20 && en(llanta) > 40 && en(g.punta) > 40 && en(g.pie) > 40 && rayos.length > 20 && sobreUnRayo && puntas
+})
+afirmar(completos && ENGRANAJES.llanta === 0.8, 'software: los dos engranajes completos — el contorno dentado (las doce y las ocho puntas, todas), la llanta, el cubo y los rayos (sólo sobre sus ángulos): nada suelto')
+
+// El robot: la cabeza a la izquierda; el globo de diálogo arriba a la derecha con sus renglones, en orden; el flujo abajo a la derecha.
+const K6 = CAPAS_DEL_ROBOT
+const capa = (w: number): PuntoA6[] => robotA6.filter((p) => Math.floor(p[3]) === w)
+const [cuerpoA6, dialogoA6, textoA6, nodosA6, tramosA6] = [K6.robot, K6.globo, K6.texto, K6.nodos, K6.tramos].map(capa)
+const G6 = GLOBO_DE_DIALOGO
+const sinRectanguloAbajo = robotA6.every((p) => !(p[0] < -0.5 && p[1] < -0.1))
+const textoEnOrden = [...textoA6].sort((p, q) => p[3] - q[3]).every((p, i, ps) => i === 0 || p[1] <= ps[i - 1][1] + 1e-9)
+const dentroDelGlobo = textoA6.every((p) => Math.abs(p[0] - G6.cx) < G6.mx - G6.margen + 1e-9 && Math.abs(p[1] - G6.cy) < G6.my)
+afirmar(sinRectanguloAbajo && cuerpoA6.every((p) => p[0] < 0) && dialogoA6.length > 0 && dialogoA6.every((p) => p[0] > -0.1 && p[1] > 0.3) && textoA6.length > 0 && dentroDelGlobo && textoEnOrden && Math.min(...textoA6.map((p) => p[3])) >= K6.texto && Math.max(...textoA6.map((p) => p[3])) < K6.nodos, 'IA: el rectángulo de abajo a la izquierda se fue; el robot habla por un globo de diálogo arriba a la derecha, con tres renglones adentro y cada nanobot del texto sabe en qué punto del texto está (2 + f, en orden: de arriba abajo)', `${String(G6.renglones.length)} renglones`)
+const nodoEn = (k: number, relleno: boolean): PuntoA6[] => nodosA6.filter((p) => Math.abs(p[3] - (K6.nodos + (k + (relleno ? 0.5 : 0)) / 10)) < 1e-4)
+const anillosYRellenos = FLUJO.nodos.every(([x, y], k) => nodoEn(k, false).length > 0 && nodoEn(k, false).every((p) => Math.abs(Math.hypot(p[0] - x, p[1] - y) - FLUJO.anillo) < 0.003) && nodoEn(k, true).length > 0 && nodoEn(k, true).every((p) => Math.hypot(p[0] - x, p[1] - y) <= FLUJO.relleno + 1e-9))
+const [n0, n1, n2, n3, n4] = FLUJO.nodos
+const enLinea = Math.abs((n1[0] - n0[0]) * (n2[1] - n0[1]) - (n1[1] - n0[1]) * (n2[0] - n0[0])) < 1e-9 && n1[0] > n0[0] && n1[1] < n0[1] && Math.abs(Math.abs(n1[0] - n0[0]) - Math.abs(n1[1] - n0[1])) < 1e-9
+const anguloDesde = (d: readonly [number, number]): number => Math.atan2(d[1] - n2[1], d[0] - n2[0]) - Math.atan2(n2[1] - n1[1], n2[0] - n1[0])
+const bifurcacion = FLUJO.tramos.filter(([de]) => de === 2).length === 2 && Math.abs(anguloDesde(n3) + anguloDesde(n4)) < 0.02 && Math.abs(anguloDesde(n3)) > 0.5 && Math.abs(anguloDesde(n3)) < 0.9
+const tramoRecorrido = FLUJO.tramos.every(([de, a], L) => {
+  const mios = tramosA6.filter((p) => p[3] >= K6.tramos + L / 10 && p[3] < K6.tramos + (L + 1) / 10).sort((p, q) => p[3] - q[3])
+  const desde = de < 0 ? FLUJO.arranque : FLUJO.nodos[de]
+  const [primero, ultimo] = [mios[0], mios[mios.length - 1]]
+  return mios.length > 10 && Math.hypot(primero[0] - desde[0], primero[1] - desde[1]) < Math.hypot(ultimo[0] - desde[0], ultimo[1] - desde[1]) && Math.hypot(ultimo[0] - FLUJO.nodos[a][0], ultimo[1] - FLUJO.nodos[a][1]) < FLUJO.anillo + 0.02
+})
+afirmar(anillosYRellenos && enLinea && bifurcacion && tramoRecorrido && sombreadorA6.includes(`return d.w < ${K6.nodos.toFixed(5)} ? uColores[ 3 ] : uColores[ 4 ];`), 'automatización: el flujo es nuestro — nodos que son anillos (con su relleno aparte), tres en línea en diagonal hacia abajo a la derecha y del tercero una bifurcación simétrica (±40°); cada tramo sabe cuánto de sí es cada nanobot (4 + (L + u) / 10), de borde de anillo a borde de anillo; el robot y su globo en verde (#10b981), el flujo en ámbar (#f59e0b)')
+
+// La vida del robot: el texto se tipea y se borra; el flujo se enciende tramo a tramo con el pulso, y vuelve a empezar. Con movimiento reducido, el final quieto.
+const RT = RELOJ_DEL_ROBOT
+const visibles = (ps: readonly PuntoA6[], t: number, quieto = false): number => ps.filter((p) => vidaDelRobot(p[3], t, quieto).ve > 0.5).length
+const pulsoEn = (ps: readonly PuntoA6[], t: number): number => ps.reduce((s, p) => s + vidaDelRobot(p[3], t, false).pulso, 0)
+const escrituras = Array.from({ length: 12 }, (_, i) => visibles(textoA6, (i / 11) * RT.tipeo.escribe * RT.tipeo.periodoS))
+const seTipea = escrituras.every((v, i) => i === 0 || v >= escrituras[i - 1]) && escrituras[0] === 0 && escrituras[11] === textoA6.length && visibles(textoA6, (RT.tipeo.borraDesde - 0.01) * RT.tipeo.periodoS) === textoA6.length && visibles(textoA6, (RT.tipeo.borraHasta + 0.01) * RT.tipeo.periodoS) === 0
+const rellenosA6 = nodosA6.filter((p) => (p[3] - K6.nodos) * 10 - Math.floor((p[3] - K6.nodos) * 10 + 0.001) > 0.25)
+const alTiempo = (fase: number): number => fase * RT.flujo.periodoS
+const seEnciende = [0, 1, 2].every((k) => visibles(rellenosA6, alTiempo((k + 1) * RT.flujo.porTramo + 0.01)) === nodoEn(0, true).length * (k + 1) + (k === 2 ? 0 : 0)) && visibles(rellenosA6, alTiempo(4 * RT.flujo.porTramo + 0.01)) === rellenosA6.length && visibles(rellenosA6, alTiempo(RT.flujo.reinicio + 0.01)) === 0
+const tramoDe = (L: number): PuntoA6[] => tramosA6.filter((p) => p[3] >= K6.tramos + L / 10 && p[3] < K6.tramos + (L + 1) / 10)
+const pulsoPorTramo = [0, 1, 2].every((L) => pulsoEn(tramoDe(L), alTiempo((L + 0.5) * RT.flujo.porTramo)) > 0 && [0, 1, 2, 3, 4].filter((otro) => otro !== L).every((otro) => pulsoEn(tramoDe(otro), alTiempo((L + 0.5) * RT.flujo.porTramo)) === 0)) && pulsoEn(tramoDe(3), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramoDe(4), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramosA6, alTiempo(0.5)) === 0
+const quietoAlFinal = robotA6.filter((p) => p[3] >= K6.texto).every((p) => vidaDelRobot(p[3], 0, true).ve === 1 && vidaDelRobot(p[3], 0, true).pulso === 0)
+afirmar(seTipea && textoEscrito(0) === 0 && textoEscrito(RT.tipeo.escribe) === 1 && textoEscrito(0.95) === 0, 'el texto se tipea en orden hasta `escribe`, se queda, se borra (de atrás para adelante) y vuelve a empezar', `${String(RT.tipeo.periodoS)} s por ciclo`)
+afirmar(seEnciende && pulsoPorTramo, 'el flujo se enciende tramo a tramo: el pulso recorre un tramo (y sólo ese), el nodo al que llega se llena, sigue al siguiente, en la bifurcación va por las dos ramas a la vez, queda encendido y se apaga todo para volver a empezar', `${String(RT.flujo.periodoS)} s por ciclo`)
+afirmar(quietoAlFinal && sombreadorA6.includes('vidaDelRobot( d, t, uQuieto )') && sombreadorA6.includes('* deNube * vida.x;') && sombreadorA6.includes('float pulso = vida.y;') && VIDA_DEL_ROBOT_GLSL.includes(`fract( t / ${RT.tipeo.periodoS.toFixed(5)} )`) && VIDA_DEL_ROBOT_GLSL.includes(`fract( t / ${RT.flujo.periodoS.toFixed(5)} )`) && VIDA_DEL_ROBOT_GLSL.includes(`step( fase, ${RT.flujo.reinicio.toFixed(5)} )`) && VIDA_DEL_ROBOT_GLSL.includes(`quieto > 0.5 ? ${(RT.flujo.reinicio - 0.01).toFixed(5)}`), 'con movimiento reducido el robot queda en su estado final (todo escrito, todo encendido, sin pulso); y el sombreador corre la misma cuenta, con los mismos números (la copia en TypeScript es la que acaba de medirse)')
+controlPositivo('el detector VE una vida que con movimiento reducido arranca vacía', robotA6.filter((p) => p[3] >= K6.texto).every((p) => vidaDelRobot(p[3], 0, false).ve === 1), (x: boolean) => x)
+
+// Lo mismo de siempre, que no se perdió: una llamada, el lazo que para fuera de pantalla (s47 C4), y menos nanobots en el teléfono; archivos bajo las 300 líneas de código.
+const lineasDeCodigoA6 = (ruta: string): number => lineasDeCodigo(leer(ruta)).length
+const nanobotsA6 = ['trazos', 'robot', 'vida', 'simbolos', 'enjambre', 'montaje'].map((a) => `_lib/nanobots/${a}.ts`)
+afirmar(PUNTOS_DEL_ENJAMBRE.ancho === 3000 && PUNTOS_DEL_ENJAMBRE.angosto === 1200 && nanobotsA6.every((a) => lineasDeCodigoA6(a) <= LIMITE_DE_LINEAS_DE_CODIGO) && sinComentarios(leer('_lib/nanobots/enjambre.ts')).includes("Math.min(2.6, Math.max(1.6, ancho / 140))"), 'el enjambre sigue siendo UNA llamada con el morph en la GPU (s47 C4 lo fija); en el teléfono 1200 nanobots (eran 900: a paso constante el trazo pide más) y el punto no baja de 1,6 px (tocan al siguiente); cada módulo de `_lib/nanobots/` bajo las 300 líneas de código', nanobotsA6.map((a) => `${a.slice(14)} ${String(lineasDeCodigoA6(a))}`).join(' · '))
 
 cerrar('s48-ajustes-finales')
