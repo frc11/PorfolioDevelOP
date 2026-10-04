@@ -8,16 +8,16 @@ import { hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { ESCENAS_APARTE } from '../gpu/Precompilar'
 import { KEY_INTENSITY } from '../probeLighting'
-import { crearMapaDeLaSombra } from '../sombra/delLogo'
-import { SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, ajustarLaCamara, direccionDeLaLuz, fuerzasDeLaSombra, materialDeLaSombraDelTitulo } from '../sombra/deLosTitulos'
+import { SOMBRA_DE_LOS_TITULOS_EN_VIVO, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, materialDeLaSombraDelTitulo } from '../sombra/deLosTitulos'
 import type { Armado } from './armado'
 import { FORMA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada } from './llegada'
 
 /**
- * [PASADA FINAL] C3 · LA SOMBRA DE LOS TÍTULOS, EN CADA CUADRO — con la prueba `sombratitulos=si` (la monta
- * `TitulosDeVolumen`). Cada título armado tiene su copia en la escena del mapa (su geometría, con un material que repite
- * su llegada y su disuelto: `sombra/deLosTitulos.ts`), con su matriz copiada en cada cuadro; la cámara de la luz abraza
- * a los que se ven, desde el sol de día y desde arriba de noche (el haz). Sin luz (o sin títulos a la vista), no se dibuja.
+ * [AJUSTES FINALES] A2 · LA SOMBRA DE LOS TÍTULOS, EN CADA CUADRO (en el producto; la monta `TitulosDeVolumen`; era la
+ * prueba de PASADA FINAL C3). Cada título armado tiene su copia en la escena del mapa (su geometría, con un material que
+ * repite su llegada y su disuelto: `sombra/deLosTitulos.ts`), con su matriz copiada en cada cuadro; la cámara de la luz
+ * abraza a los que se ven, desde el sol de día y desde arriba de noche (el haz). Sin luz (o sin títulos a la vista), no
+ * se dibuja. El mapa es de cobertura, con mipmaps: el piso lee el nivel que le da la distancia de las letras al piso.
  */
 interface Props {
   readonly armados: () => readonly Armado[]
@@ -29,12 +29,12 @@ interface Copia {
   readonly material: THREE.ShaderMaterial
 }
 
-type VentanaDelBanco = Window & { __sombraDeLosTitulosDelBanco?: { poner: (prendida: boolean) => void; estado: () => { readonly dia: number; readonly noche: number; readonly copias: number; readonly radio: number } } }
+type VentanaDelBanco = Window & { __sombraDeLosTitulosDelBanco?: { poner: (prendida: boolean) => void; estado: () => { readonly dia: number; readonly noche: number; readonly copias: number; readonly radio: number; readonly texel: number } } }
 
 export function SombraDeLosTitulos({ armados, keyLightRef }: Props) {
   const gl = useThree((s) => s.gl)
-  const mapa = useMemo(() => crearMapaDeLaSombra(SOMBRA_DE_LOS_TITULOS, 'sombra de los títulos'), [])
-  const m = useRef({ copias: new Map<Armado, Copia>(), esfera: new THREE.Sphere(), caja: new THREE.Box3(), unaCaja: new THREE.Box3(), direccion: new THREE.Vector3(), apagada: false, fuerzas: { dia: 0, noche: 0 } })
+  const mapa = useMemo(() => crearMapaDeLosTitulos(), [])
+  const m = useRef({ copias: new Map<Armado, Copia>(), esfera: new THREE.Sphere(), caja: new THREE.Box3(), unaCaja: new THREE.Box3(), direccion: new THREE.Vector3(), apagada: false, fuerzas: { dia: 0, noche: 0 }, texel: 0 })
 
   useEffect(() => {
     const u = SOMBRA_DE_LOS_TITULOS_EN_VIVO
@@ -64,7 +64,7 @@ export function SombraDeLosTitulos({ armados, keyLightRef }: Props) {
       poner: (prendida) => {
         m.current.apagada = !prendida
       },
-      estado: () => ({ dia: m.current.fuerzas.dia, noche: m.current.fuerzas.noche, copias: m.current.copias.size, radio: m.current.esfera.radius }),
+      estado: () => ({ dia: m.current.fuerzas.dia, noche: m.current.fuerzas.noche, copias: m.current.copias.size, radio: m.current.esfera.radius, texel: m.current.texel }),
     }
     return () => {
       delete ventana.__sombraDeLosTitulosDelBanco
@@ -104,14 +104,11 @@ export function SombraDeLosTitulos({ armados, keyLightRef }: Props) {
     u.uNocheDeLosTitulos.value = hay ? fuerzas.noche : 0
     if (!hay) return
     s.caja.getBoundingSphere(s.esfera)
-    ajustarLaCamara(mapa.camara, s.esfera, direccionDeLaLuz(principal.position, VIVO.uNocheDelLogo.value, s.direccion))
+    s.texel = ajustarLaCamara(mapa.camara, s.esfera, direccionDeLaLuz(principal.position, VIVO.uNocheDelLogo.value, s.direccion))
+    u.uTexelDeLosTitulos.value = s.texel
     u.uVistaDeLosTitulos.value.copy(mapa.camara.matrixWorldInverse)
     u.uLuzDeLosTitulos.value.multiplyMatrices(mapa.camara.projectionMatrix, mapa.camara.matrixWorldInverse)
-    const previo = gl.getRenderTarget()
-    gl.setRenderTarget(mapa.bufer)
-    gl.render(mapa.escena, mapa.camara)
-    mapa.desenfocar(gl)
-    gl.setRenderTarget(previo)
+    mapa.dibujar(gl)
   })
   return null
 }

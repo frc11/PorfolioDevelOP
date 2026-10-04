@@ -160,11 +160,11 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
   })
 
-  // [PASADA FINAL] C3 · con la prueba, su sombra en el piso vivo (`sombra/deLosTitulos.ts`).
+  // [AJUSTES FINALES] A2 · su sombra en el piso vivo (`sombra/deLosTitulos.ts`; era la prueba de PASADA FINAL C3).
   return (
     <>
       <group ref={raiz} name="titulos de volumen" />
-      {entornoDeLaEscena().pruebas.sombratitulos === 'si' ? <SombraDeLosTitulos armados={() => m.current.armados} keyLightRef={keyLightRef} /> : null}
+      <SombraDeLosTitulos armados={() => m.current.armados} keyLightRef={keyLightRef} />
     </>
   )
 }

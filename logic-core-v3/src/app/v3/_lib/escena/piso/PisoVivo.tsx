@@ -205,8 +205,8 @@ function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THRE
 
 function armar(grilla: Grilla, conContacto: boolean) {
   const conSombra = entornoDeLaEscena().sombraDelLogo
-  // [PASADA FINAL] C3 · con la prueba `sombratitulos`, la sombra de los títulos (de día; de noche, lo que le quitan al haz).
-  const conTitulos = entornoDeLaEscena().pruebas.sombratitulos === 'si'
+  // [AJUSTES FINALES] A2 · la sombra de los títulos de volumen (de día con el sol; de noche, lo que le quitan al haz y a la sala).
+  const conTitulos = entornoDeLaEscena().titulos !== 'no'
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }

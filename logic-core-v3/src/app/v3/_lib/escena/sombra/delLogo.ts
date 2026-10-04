@@ -48,7 +48,7 @@ const f = (x: number): string => x.toFixed(6)
 
 /**
  * [PASADA FINAL] C3 · lo que distingue un mapa de otro: el del logo (por defecto, sus cifras de siempre) y el de los
- * títulos (`deLosTitulos.ts`, con la prueba `sombratitulos`). La técnica es la misma; cambian la caja, la resolución, la
+ * títulos (`deLosTitulos.ts`; [AJUSTES FINALES] A2: en el producto, con su propio mapa). La técnica es la misma; cambian la caja, la resolución, la
  * penumbra y cómo se llaman sus uniformes en el piso.
  */
 export interface ParametrosDelMapa {

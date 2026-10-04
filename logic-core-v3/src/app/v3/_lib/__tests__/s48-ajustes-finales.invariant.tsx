@@ -7,13 +7,22 @@
  *        tramo es la de ESCENA 10 (sólo la cámara) y el título se coloca con la cámara de 0,4718, como entonces. Una
  *        sola transición: la llegada (bajando) y su inversa exacta (subiendo, antes de la sección); pasada la llegada
  *        el estado es «armado» y no cambia más (sin efecto de salida; desde abajo vuelve armado).
+ *   A2 · la sombra de los títulos de volumen pasa al producto (sin bandera) y mejora: el borde según la distancia de la
+ *        letra al piso (un mapa de cobertura por niveles, calibrado con la penumbra del logo y con tope: sin dientes, sin
+ *        sangrado ni grietas), la misma dirección y fuerza que la del logo de día, y de noche cenital:
+ *        le quita luz al charco del haz y apenas a la sala. La del logo no se tocó (s47 C3).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
+import * as THREE from 'three'
+
 
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
+import { FLOOR_Y } from '../escena/probeScene'
+import { SOMBRA_DEL_LOGO } from '../escena/sombra/delLogo'
+import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, BASE_EN_TEXELES, CHARCO_CON_LOS_TITULOS_GLSL, DISTANCIA_DEL_LOGO, FONDO_DEL_MAPA, PENUMBRA_DEL_LOGO, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, SOMBRA_DE_LOS_TITULOS_GLSL, TEXEL_DE_LA_LETRA_GLSL, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, lodDeLaPenumbra, materialDeLaSombraDelTitulo, penumbraEn } from '../escena/sombra/deLosTitulos'
 import { poseDeLaLectura } from '../escena/titulos3d/colocacion'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { LECTURA, LLEGADA_DE_PORTFOLIO } from '../titulos3d/registro'
@@ -132,5 +141,89 @@ const funcionDelScroll = (f: Modelo): boolean => {
 }
 afirmar(funcionDelScroll(deProducto), '  subiendo despacio, cada letra deshace exactamente lo que hizo bajando (el mismo estado en el mismo scroll): la única transición es la llegada y su inversa')
 controlPositivo('el detector VE un título que no se desarma al subir', ((m, y, a) => Math.max(m, deProducto(m, y, a))) as Modelo, funcionDelScroll)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A2 · La sombra de los títulos, al producto y mejor: el borde según la distancia al piso, sin dientes, coherente con la del logo de día y con el haz de noche')
+
+// Sin bandera: la monta la escena de los títulos y el piso la lee siempre que haya títulos de volumen en esta carga.
+const entornoA2 = sinComentarios(leer('_lib/escena/entorno.ts'))
+const titulosA2 = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const pisoVivoA2 = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
+const alProducto = (e: string, t: string, pv: string): boolean => !/sombratitulos/.test(e) && !('sombratitulos' in PRUEBAS_APAGADAS) && !('sombratitulos' in entornoPedido('producto,sombratitulos=si').pruebas) && /<group ref=\{raiz\} name="titulos de volumen" \/>\s*<SombraDeLosTitulos armados=\{\(\) => m\.current\.armados\} keyLightRef=\{keyLightRef\} \/>/.test(t) && !/sombratitulos/.test(t) && /const conTitulos = entornoDeLaEscena\(\)\.titulos !== 'no'/.test(pv)
+afirmar(alProducto(entornoA2, titulosA2, pisoVivoA2), 'la bandera `sombratitulos` se borró: la sombra se monta con los títulos de volumen y el piso la lee en esta carga si hay títulos (`titulos` no es `no`)')
+controlPositivo('el detector VE la sombra detrás de la bandera', titulosA2.replace('<SombraDeLosTitulos armados', "{entornoDeLaEscena().pruebas.sombratitulos === 'si' ? <SombraDeLosTitulos armados"), (t: string) => alProducto(entornoA2, t, pisoVivoA2))
+
+// Coherente con la del logo: la misma fuerza de día y, a la distancia del logo, la MISMA penumbra; después crece con la
+// distancia de la letra al piso (el contacto), con tope.
+const S2 = SOMBRA_DE_LOS_TITULOS
+const penumbraDelLogo = SOMBRA_DEL_LOGO.desenfoque.sigma * Math.sqrt(SOMBRA_DEL_LOGO.desenfoque.pasadas) * ((2 * SOMBRA_DEL_LOGO.radio) / SOMBRA_DEL_LOGO.resolucion)
+const comoElLogo = (p: { readonly fuerza: number; readonly penumbra: { readonly tope: number } }): boolean => p.fuerza === SOMBRA_DEL_LOGO.fuerza && Math.abs(penumbraEn(DISTANCIA_DEL_LOGO) - PENUMBRA_DEL_LOGO) / PENUMBRA_DEL_LOGO < 0.05 && Math.abs(p.penumbra.tope - PENUMBRA_DEL_LOGO) / PENUMBRA_DEL_LOGO < 0.05 && Math.abs(PENUMBRA_DEL_LOGO - penumbraDelLogo) < 1e-12 && Math.abs(DISTANCIA_DEL_LOGO + FLOOR_Y * Math.SQRT2) < 1e-12
+afirmar(comoElLogo(S2), 'de día oscurece como la del logo (la misma fuerza), a la distancia del logo (su centro al piso, con el sol a 45°) su penumbra es la del logo, y nunca es más blanda que ésa (el tope): las letras se siguen leyendo', `penumbra del logo ${PENUMBRA_DEL_LOGO.toFixed(4)} u a ${DISTANCIA_DEL_LOGO.toFixed(2)} u · la de los títulos ahí ${penumbraEn(DISTANCIA_DEL_LOGO).toFixed(4)} u · tope ${String(S2.penumbra.tope)} u`)
+controlPositivo('el detector VE la fuerza de la prueba (0,32: más clara que la del logo)', { ...S2, fuerza: 0.32 }, comoElLogo)
+controlPositivo('el detector VE un tope más blando que el logo (0,25: las letras se volvían un manchón)', { ...S2, penumbra: { ...S2.penumbra, tope: 0.25 } }, comoElLogo)
+const crece = (f: (d: number) => number): boolean => {
+  let previo = f(0)
+  for (let d = 0.5; d <= 60; d += 0.5) {
+    const v = f(d)
+    if (v < previo - 1e-12) return false
+    previo = v
+  }
+  return f(0) === 0 && f(1) > 0 && f(1) < f(2) && f(60) === S2.penumbra.tope && f(60) < 1
+}
+afirmar(crece(penumbraEn), '  la penumbra crece con la distancia de la letra al piso (una letra que casi toca el piso, nítida; una que flota alto, blanda) y tiene tope: un título alto sigue dibujando sus letras', `tope ${String(S2.penumbra.tope)} u`)
+controlPositivo('el detector VE una penumbra que no depende de la distancia', (d: number) => (d > 0 ? 0.12 : 0), crece)
+const nivelBien = (lod: (sigma: number) => number): boolean => lod(0) === 0 && lod(BASE_EN_TEXELES) === 0 && lod(4) > 0 && lod(8) > lod(4) && lod(64) === S2.penumbra.hastaLod && lod(1000) === S2.penumbra.hastaLod && Math.abs(lod(Math.hypot(BASE_EN_TEXELES, 8 / Math.sqrt(12))) - 3) < 1e-9
+afirmar(nivelBien(lodDeLaPenumbra), '  el nivel del mapa sale de la penumbra pedida: 0 hasta el desenfoque nítido, un nivel por octava de la caja de la mipmap (una caja de 8 texeles es el nivel 3), hasta el tope')
+controlPositivo('el detector VE un nivel que no sube', (sigma: number) => (sigma > BASE_EN_TEXELES ? 1 : 0), nivelBien)
+
+// En el piso: dos lecturas (la nítida dice cuánto tapan las letras y a qué distancia están; la del nivel, la cota de
+// Chebyshev), con las MISMAS cifras que la cuenta de JS; de día hacia el color del contacto, de noche al charco y a la sala.
+const f6 = (x: number): string => x.toFixed(6)
+const glslA2 = SOMBRA_DE_LOS_TITULOS_GLSL
+const dosLecturas = (g: string): boolean => g.includes(`vec4 ancho = texture2DLodEXT( uMapaDeLosTitulos, uv, ${f6(S2.penumbra.hastaLod)} );`) && g.includes('if ( ancho.b < 0.001 ) return 0.0;') && g.includes('float letras = ancho.a / ancho.b;') && g.includes(`float distancia = ( receptor - letras ) * ${f6(S2.lejos)};`) && g.includes(`float sigma = max( ${f6(BASE_EN_TEXELES)}, min( ${f6(S2.penumbra.tope)}, ${f6(S2.penumbra.porUnidad)} * distancia ) / uTexelDeLosTitulos );`) && g.includes(`float lod = clamp( log2( max( 1.0, faltante / ${f6(1 / Math.sqrt(12))} ) ), 0.0, ${f6(S2.penumbra.hastaLod)} );`) && g.includes('float cobertura = texture2DLodEXT( uMapaDeLosTitulos, uv, lod ).b;') && g.indexOf('vec4 ancho = ') < g.indexOf('float cobertura = ') && !/varianza|Chebyshev/.test(g) && g.includes('return cobertura * smoothstep( 0.0, 0.04, min( alBorde.x, alBorde.y ) );')
+afirmar(dosLecturas(glslA2), 'el piso lee el nivel más ancho (si hay letras cerca y a qué profundidad) y con la distancia de ahí al piso elige el nivel, con las mismas cifras que la cuenta de JS; la sombra es la cobertura de las letras en ese nivel (sin cota de varianza: ni sangrado ni grietas)')
+controlPositivo('el detector VE la cota de Chebyshev de la primera versión', glslA2.replace('float cobertura = texture2DLodEXT( uMapaDeLosTitulos, uv, lod ).b;', 'vec4 m = texture2DLodEXT( uMapaDeLosTitulos, uv, lod );\n\tfloat varianza = max( m.y - m.x * m.x, 0.000002 );\n\tfloat cobertura = 1.0 - varianza / ( varianza + ( receptor - m.x ) * ( receptor - m.x ) );'), dosLecturas)
+const bloquesA2 = sinComentarios(leer('_lib/escena/piso/bloques.ts'))
+const diaYNoche = (ap: string, ch: string, bl: string): boolean => ap.includes('mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, sombraDeLosTitulosAca * uFuerzaDeLosTitulos )') && ap.includes(`gl_FragColor.rgb *= 1.0 - sombraDeLosTitulosAca * uNocheDeLosTitulos * ${S2.noche.sala.toFixed(3)};`) && ch === ` * ( 1.0 - sombraDeLosTitulosAca * uNocheDeLosTitulos * ${S2.noche.charco.toFixed(3)} )` && bl.indexOf('${APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL}') < bl.indexOf('charcoDelHaz( vPiso.xz ) * uHaz${conTitulos ? CHARCO_CON_LOS_TITULOS_GLSL') && S2.noche.sala < S2.noche.charco
+afirmar(diaYNoche(APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, CHARCO_CON_LOS_TITULOS_GLSL, bloquesA2), '  de día oscurece hacia el color del contacto (como la del logo); de noche le quita luz al charco del haz (0,8) y apenas a la sala (0,35), así se lee también donde el haz no llega, sin ensuciar', `sala ${String(S2.noche.sala)} · charco ${String(S2.noche.charco)}`)
+controlPositivo('el detector VE la noche sólo en el charco (la prueba: donde el haz no llegaba no había sombra)', APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL.replace(/\n\s*gl_FragColor\.rgb \*= 1\.0 - sombraDeLosTitulosAca[^\n]*/, ''), (ap: string) => diaYNoche(ap, CHARCO_CON_LOS_TITULOS_GLSL, bloquesA2))
+const fDia = fuerzasDeLaSombra(1, 0)
+const fNoche = fuerzasDeLaSombra(1, 1)
+const fMedia = fuerzasDeLaSombra(0.5, 0.5)
+afirmar(fDia.dia === S2.fuerza && fDia.noche === 0 && fNoche.dia === 0 && fNoche.noche === 1 && Math.abs(fMedia.dia - S2.fuerza * 0.25) < 1e-9 && fMedia.noche === 0.5, '  cuánto: de día con el nivel de la principal y el día que hay; de noche, la noche que hay (sin saltos entre las dos)')
+const sol = new THREE.Vector3(-6, 9, 4)
+const [deDia, deNoche, entre] = [0, 1, 0.5].map((n) => direccionDeLaLuz(sol, n, new THREE.Vector3()))
+afirmar(deDia.distanceTo(sol.clone().normalize()) < 1e-9 && deNoche.distanceTo(new THREE.Vector3(0, 1, 0)) < 1e-9 && entre.y > deDia.y && entre.y < 1, '  desde dónde: el sol de día (la misma dirección que la del logo), desde arriba de noche (el haz es cenital), entre los dos con la noche')
+
+// El mapa: de cobertura (cada letra escribe que tapa y a qué profundidad; lo que no tapa, limpio con alfa 0), flotante
+// con mipmaps (el piso elige el nivel), y el desenfoque de los cuatro canales.
+const mapaA2 = crearMapaDeLosTitulos()
+const desenfoqueA2 = mapaA2.desenfoque.escena.children[0] as THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>
+const mapaBien = (m: typeof mapaA2): boolean => m.bufer.texture.generateMipmaps && m.bufer.texture.minFilter === THREE.LinearMipmapLinearFilter && m.bufer.texture.type === THREE.FloatType && m.bufer.width === S2.resolucion && !m.desenfoque.bufer.texture.generateMipmaps && m.escena.background === null
+afirmar(mapaBien(mapaA2) && TEXEL_DE_LA_LETRA_GLSL === 'gl_FragColor = vec4( vProfundidad, 0.0, 1.0, vProfundidad );' && FONDO_DEL_MAPA.b === 0 && FONDO_DEL_MAPA.r === 1 && /gl_FragColor = m;/.test(desenfoqueA2.material.fragmentShader) && /vec4 m = texture2DLodEXT\( uMapa, vUv, 0\.0 \)/.test(desenfoqueA2.material.fragmentShader), 'el mapa es de cobertura (una letra: tapa en b, su profundidad en r y en a por la cobertura; el fondo, lejos y sin tapar), flotante con mipmaps, y el desenfoque es de los cuatro canales', `${String(S2.resolucion)} texeles`)
+controlPositivo('el detector VE el mapa de la prueba (sin mipmaps)', { ...mapaA2, bufer: { ...mapaA2.bufer, texture: { ...mapaA2.bufer.texture, generateMipmaps: false } } } as unknown as typeof mapaA2, mapaBien)
+mapaA2.soltar()
+const sombraFuente = sinComentarios(leer('_lib/escena/sombra/deLosTitulos.ts'))
+const limpioConAlfaCero = (c: string): boolean => /gl\.setClearColor\(FONDO_DEL_MAPA, 0\)\s*gl\.setRenderTarget\(bufer\)\s*gl\.render\(escena, camara\)\s*gl\.setClearColor\(COLOR_DE_ANTES, alfaDeAntes\)/.test(c)
+afirmar(limpioConAlfaCero(sombraFuente), '  el mapa se limpia con el fondo y alfa 0 antes de dibujar los títulos (el fondo de una escena de three no sabe de alfa, y un alfa 1 contaría como profundidad de letra), y el lienzo recupera su color de limpieza')
+controlPositivo('el detector VE el fondo de la escena de antes (alfa 1)', sombraFuente.replace('gl.setClearColor(FONDO_DEL_MAPA, 0)', 'gl.setClearColor(FONDO_DEL_MAPA, 1)'), limpioConAlfaCero)
+const uniformesDelTitulo = { uLlegada: { value: 0.3 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: 0 }, uPieDeLaPalabra: { value: new THREE.Vector2() }, uTrazos: { value: new THREE.Vector4() } }
+const deLaSombra = materialDeLaSombraDelTitulo({ pars: LLEGADA_PARS_GLSL, normal: LLEGADA_NORMAL_GLSL, posicion: LLEGADA_POSICION_GLSL }, uniformesDelTitulo)
+const conSuLlegada = (mat: THREE.ShaderMaterial, u: Record<string, THREE.IUniform>): boolean => {
+  const v = mat.vertexShader
+  const orden = [v.indexOf(LLEGADA_PARS_GLSL), v.indexOf('vec3 objectNormal = vec3( normal );'), v.indexOf(LLEGADA_NORMAL_GLSL), v.indexOf('vec3 transformed = vec3( position );'), v.indexOf(LLEGADA_POSICION_GLSL), v.indexOf('vec4 vista = viewMatrix * modelMatrix * vec4( transformed, 1.0 );')]
+  return orden.every((k, i) => k >= 0 && (i === 0 || k > orden[i - 1])) && mat.fragmentShader.indexOf(DISOLVER_GLSL) > 0 && mat.fragmentShader.indexOf(DISOLVER_GLSL) < mat.fragmentShader.indexOf(TEXEL_DE_LA_LETRA_GLSL) && mat.uniforms === u && mat.uniforms.uLlegada === u.uLlegada
+}
+afirmar(conSuLlegada(deLaSombra, uniformesDelTitulo), '  cada letra proyecta donde está: el material del mapa hace la llegada de su título con sus mismos uniformes (en el mismo cuadro) y su tramado, y escribe que tapa (b: 1) y a qué profundidad (r, y a por la cobertura)')
+controlPositivo('el detector VE un mapa con las letras quietas (sus propios uniformes)', { ...uniformesDelTitulo }, (u: Record<string, THREE.IUniform>) => conSuLlegada(deLaSombra, u))
+deLaSombra.dispose()
+const camaraA2 = new THREE.OrthographicCamera()
+const camaraSana = (direccion: THREE.Vector3): boolean => {
+  const texel = ajustarLaCamara(camaraA2, new THREE.Sphere(new THREE.Vector3(2, 6, -3), 4), direccion)
+  return camaraA2.matrixWorld.elements.every(Number.isFinite) && Math.abs(camaraA2.right - 4 * S2.margen) < 1e-9 && Math.abs(texel - (2 * 4 * S2.margen) / S2.resolucion) < 1e-12 && camaraA2.position.distanceTo(new THREE.Vector3(2, 6, -3).addScaledVector(direccion, S2.lejos / 2)) < 1e-9 && Math.abs(camaraA2.up.dot(direccion)) < 1e-6
+}
+afirmar(camaraSana(deDia) && camaraSana(deNoche), '  la cámara de la luz abraza a los títulos (con aire) desde su luz y dice cuánto mundo es un texel (lo que el piso necesita para la penumbra); de noche mira derecho hacia abajo sin quedar indefinida')
+const copiaA2 = sinComentarios(leer('_lib/escena/titulos3d/SombraDeLosTitulos.tsx'))
+afirmar(/c\.copia\.matrixWorld\.copy\(a\.malla\.matrixWorld\)/.test(copiaA2) && /c\.copia\.visible = a\.malla\.visible/.test(copiaA2) && /s\.texel = ajustarLaCamara\(mapa\.camara, s\.esfera, direccionDeLaLuz\(principal\.position, VIVO\.uNocheDelLogo\.value, s\.direccion\)\)\s*u\.uTexelDeLosTitulos\.value = s\.texel/.test(copiaA2) && 'uTexelDeLosTitulos' in SOMBRA_DE_LOS_TITULOS_EN_VIVO, '  una copia por título armado (su geometría, su llegada, su matriz y si se ve, en cada cuadro), y el texel del cuadro va al piso; sin luz o sin títulos a la vista, no se dibuja')
 
 cerrar('s48-ajustes-finales')
