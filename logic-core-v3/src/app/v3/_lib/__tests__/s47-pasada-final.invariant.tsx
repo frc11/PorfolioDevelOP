@@ -32,6 +32,7 @@
  *        una sola demo corriendo; y la causa principal de los cuadros perdidos (segunda tanda): ningún `:has()` en la raíz
  *        con algo debajo (la barra se esconde con una marca que pone el formulario de contacto).
  *   D  · la pasada senior: cada arreglo directo con lo que lo fija (desbordes, contraste, foco, tokens, rendimiento).
+ *        D10 (la cabeza de Servicios libre del menú) iba con bandera: [AJUSTES FINALES] A5 la pasó al producto (s48).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { createHash } from 'node:crypto'
@@ -647,18 +648,12 @@ const pisoPartido = (b: string): boolean => lineasDeCodigo(b).length <= LIMITE_D
 afirmar(pisoPartido(bloquesD8) && lineasDeCodigo(geometriaD8).length <= LIMITE_DE_LINEAS_DE_CODIGO && geometriaD8.includes('export function geometriaDelBloque(lado: number): THREE.BufferGeometry {'), 'el piso (`piso/bloques.ts`) queda bajo las 300 líneas de código con el criterio de s8 (`lineasDeCodigo`) y la geometría del bloque vive en su archivo, tal cual (s8-montaje sigue en rojo por s32 y s34, de antes de esta pasada)', `${String(lineasDeCodigo(bloquesD8).length)} y ${String(lineasDeCodigo(geometriaD8).length)} líneas de código`)
 controlPositivo('el detector VE el piso con la geometría de vuelta adentro', `${bloquesD8}\n${geometriaD8}`, pisoPartido)
 
-// D10 · la cabeza fija de Servicios (abajo de 1024) y el menú: con bandera, porque cambia la cabeza aprobada de MÓVIL 2.
-afirmar(PRUEBAS_APAGADAS.cabeza === 'no' && entornoPedido('producto').pruebas.cabeza === 'no' && entornoPedido('producto,cabeza=otra').pruebas.cabeza === 'no' && entornoPedido('producto,cabeza=libre').pruebas.cabeza === 'libre', 'D10 · `?pruebas=cabeza=libre`: apagada en el producto (Valentino decide); sólo `cabeza=libre` la prende')
-const angostoD10 = sinComentarios(leer('_secciones/servicios/angosto.tsx'))
+// D10 · la cabeza fija de Servicios (abajo de 1024) y el menú: iba con bandera; [AJUSTES FINALES] A5 la aprobó y la pasó al
+// producto (s48 A5 la fija). Acá queda que los tokens de la barra que la cabeza despeja siguen siendo los mismos.
 const barraD10 = leer('_estilos/barra.css')
 const menuD10 = leer('_chrome/menu/MenuMovil.tsx')
-const cabezaLibre = (a: string): boolean =>
-  /useSyncExternalStore\(sinCambios, \(\) => entornoDeLaEscena\(\)\.pruebas\.cabeza === 'libre', \(\) => false\)/.test(a) &&
-  /const libre = useCabezaLibre\(\)/.test(a) &&
-  /px-\[var\(--pad-lateral-compacto\)\] \$\{libre \? 'pt-\[calc\(var\(--spacing-6\)\+var\(--spacing-3\)\*2\+var\(--text-cuerpo\)\*var\(--leading-texto\)\+var\(--spacing-2\)\)\] pb-\[var\(--spacing-4\)\]' : 'py-\[var\(--spacing-4\)\]'\} escritorio:hidden/.test(a)
 const delMenu = (b: string, m: string): boolean => b.includes('--barra-reposo: var(--spacing-6);') && b.includes('--barra-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));') && /fixed inset-x-0 top-\[var\(--spacing-4\)\] mx-auto grid size-\[var\(--spacing-12\)\]/.test(m)
-afirmar(cabezaLibre(angostoD10) && delMenu(barraD10, menuD10), '  sin la prueba, la cabeza es la de siempre (el mismo relleno, y apagada en el servidor y al hidratar); con ella, arriba deja el reposo y el alto de la barra (sus mismos tokens: 24 + 48) y aire, que también despeja el botón del menú (16 + 48) — medido: a 390 el botón tapaba «…PROBLEMAS» del antetítulo y a 1000 la pastilla tapaba el final del antetítulo y «Contacto / Login» al gráfico; con la prueba, nada')
-controlPositivo('el detector VE la cabeza que cambia aunque nadie pida la prueba', angostoD10.replace('${libre ? ', '${true ? '), cabezaLibre)
-controlPositivo('  y VE la barra que cambió de alto (el relleno dejaría de despejarla)', barraD10.replace('--barra-alto: calc(var(--spacing-3) * 2', '--barra-alto: calc(var(--spacing-4) * 2'), (b: string) => delMenu(b, menuD10))
+afirmar(delMenu(barraD10, menuD10), 'D10 · la barra (24 de reposo + 48 de alto) y el botón del menú del teléfono (16 + 48) miden lo que la cabeza de Servicios despeja (A5)')
+controlPositivo('el detector VE la barra que cambió de alto (el relleno dejaría de despejarla)', barraD10.replace('--barra-alto: calc(var(--spacing-3) * 2', '--barra-alto: calc(var(--spacing-4) * 2'), (b: string) => delMenu(b, menuD10))
 
 cerrar('s47-pasada-final')

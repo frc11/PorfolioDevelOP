@@ -1,9 +1,8 @@
 'use client'
 
 import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/react'
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
-import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 import { ATRIBUTO_DE_SERVICIO } from '../_contrato/acento'
 import { Bloque, CoreografiaEnTodoAncho, useCoreografiaActiva, type Progreso } from '../_contrato/coreografia'
 import { useEstadoDisparado } from './disparo'
@@ -66,13 +65,6 @@ function useMedidaAngosta(caja: RefObject<HTMLDivElement | null>, cabeza: RefObj
   return medida
 }
 
-const sinCambios = (): (() => void) => () => undefined
-
-/** [PASADA FINAL] D10 · la prueba `cabeza=libre` de esta carga: apagada en el servidor y al hidratar; la pedida, después. */
-function useCabezaLibre(): boolean {
-  return useSyncExternalStore(sinCambios, () => entornoDeLaEscena().pruebas.cabeza === 'libre', () => false)
-}
-
 /** Pasa el progreso del pin de la regla al de la caja, que la cabeza lee. */
 function Enlazar({ de, a }: { readonly de: MotionValue<number>; readonly a: MotionValue<number> }): null {
   useMotionValueEvent(de, 'change', (v) => a.set(v))
@@ -101,7 +93,6 @@ function CajaAngosta({ children }: { readonly children: React.ReactNode }): Reac
   const progreso = useMotionValue(0)
   const medida = useMedidaAngosta(caja, cabeza, activa)
   const posicion = useEstadoDisparado(progreso, fronterasDeEstado(medida, LINEA_ANGOSTA))
-  const libre = useCabezaLibre()
 
   return (
     <div ref={caja} data-pieza="servicios-angostos" className="relative flex w-full flex-col">
@@ -118,8 +109,9 @@ function CajaAngosta({ children }: { readonly children: React.ReactNode }): Reac
             /* El nombre baja un nivel (`titulo-m`): la caja del rodillo se deriva del mismo token y lo
                sigue. `data-cabeza` le dice al encabezado y a los rótulos que la cabeza los muestra. */
             data-cabeza=""
-            /* [PASADA FINAL] D10 · con `cabeza=libre`, el antetítulo baja debajo del menú: el reposo y el alto de la barra, y aire. */
-            className={`bg-fondo sticky top-0 z-10 flex items-center [--text-fluido-titulo-l:var(--text-fluido-titulo-m)] gap-[var(--spacing-4)] px-[var(--pad-lateral-compacto)] ${libre ? 'pt-[calc(var(--spacing-6)+var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto)+var(--spacing-2))] pb-[var(--spacing-4)]' : 'py-[var(--spacing-4)]'} escritorio:hidden`}
+            /* [AJUSTES FINALES] A5 · (era la prueba D10 de PASADA FINAL, aprobada) el antetítulo baja debajo del menú: arriba deja el
+               reposo y el alto de la barra (sus mismos tokens) y aire, que también despeja el botón del menú del teléfono. */
+            className="bg-fondo sticky top-0 z-10 flex items-center [--text-fluido-titulo-l:var(--text-fluido-titulo-m)] gap-[var(--spacing-4)] px-[var(--pad-lateral-compacto)] pt-[calc(var(--spacing-6)+var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto)+var(--spacing-2))] pb-[var(--spacing-4)] escritorio:hidden"
           >
             <div className="min-w-0 flex-1">
               <RodilloDeEstados posicion={posicion} />

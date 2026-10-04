@@ -18,6 +18,7 @@
  *        cuadro de la escena, las fuentes y el titular 3D armado, todo aparece junto en un fundido de 0,8 s; recién
  *        terminado cae el titular del hero con su llegada (y con él la bajada y los CTA, en su plano); a los 4 s el fundido
  *        arranca igual (con el respaldo 2D si el 3D no llegó), también sin JavaScript; con movimiento reducido, corto.
+ *   A5 · la cabeza fija de Servicios (abajo de 1024) libre del menú pasa al producto, sin bandera.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -316,5 +317,17 @@ const otroA4 = { rearma: true } as unknown as Parameters<typeof opacidadDelAcomp
 afirmar(opacidadDelAcompanante(titularA4, 0) === '0.000' && opacidadDelAcompanante(titularA4, APARECE_CON_EL_TITULO / 2) === '0.500' && opacidadDelAcompanante(titularA4, APARECE_CON_EL_TITULO) === '1.000' && opacidadDelAcompanante(titularA4, 1) === '1.000' && opacidadDelAcompanante(otroA4, 0) === '' && APARECE_CON_EL_TITULO > 0.35 && APARECE_CON_EL_TITULO < 1, '  la bajada y los CTA (los acompañantes del hero) aparecen con las letras que caen: su opacidad sigue a la llegada mostrada hasta el 60 %; los acompañantes de los demás títulos no cambian', `hasta ${String(APARECE_CON_EL_TITULO)}`)
 afirmar(/const opacidad = a === undefined \? '' : opacidadDelAcompanante\(a\.titulo, a\.mostrado\.llegada\)\s*if \(opacidad !== ac\.opacidad\) \{\s*ac\.opacidad = opacidad\s*el\.style\.opacity = opacidad\s*\}/.test(acompA4) && /el\.style\.opacity = ''/.test(delDom), '  la escena la escribe en cada cuadro (sólo si cambió) y al soltarse el acompañante vuelve a la suya')
 afirmar(RESPALDO_2D_CON_ESCENA_MS === CARGA.plazoMs && RESPALDO_2D_MS < CARGA.plazoMs, '  el respaldo 2D del titular con la escena montada comparte el plazo del velo: si el 3D no llegó, el 2D aparece con el fundido del velo (sin lienzo, a los 2,5 s como antes)', `${String(RESPALDO_2D_CON_ESCENA_MS)} ms`)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A5 · La cabeza de Servicios libre del menú (abajo de 1024), al producto')
+
+const angostoA5 = sinComentarios(leer('_secciones/servicios/angosto.tsx'))
+const entornoA5 = sinComentarios(leer('_lib/escena/entorno.ts'))
+const cabezaLibreSiempre = (a: string, e: string): boolean =>
+  !/useCabezaLibre|pruebas\.cabeza|useSyncExternalStore/.test(a) &&
+  /px-\[var\(--pad-lateral-compacto\)\] pt-\[calc\(var\(--spacing-6\)\+var\(--spacing-3\)\*2\+var\(--text-cuerpo\)\*var\(--leading-texto\)\+var\(--spacing-2\)\)\] pb-\[var\(--spacing-4\)\] escritorio:hidden/.test(a) &&
+  !/cabeza/.test(e) && !('cabeza' in PRUEBAS_APAGADAS) && !('cabeza' in entornoPedido('producto,cabeza=libre').pruebas)
+afirmar(cabezaLibreSiempre(angostoA5, entornoA5), 'la cabeza deja arriba el reposo y el alto de la barra (sus mismos tokens: 24 + 48) y aire, siempre: la bandera `cabeza=libre` se borró (medido en PASADA FINAL D10: a 390 el botón del menú tapaba «…PROBLEMAS» y a 1000 la pastilla tapaba el antetítulo y Contacto / Login al gráfico)')
+controlPositivo('el detector VE la cabeza de antes (el relleno parejo)', [angostoA5.replace('pt-[calc(var(--spacing-6)+var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto)+var(--spacing-2))] pb-[var(--spacing-4)]', 'py-[var(--spacing-4)]'), entornoA5] as const, ([a, e]: readonly [string, string]) => cabezaLibreSiempre(a, e))
 
 cerrar('s48-ajustes-finales')
