@@ -78,6 +78,7 @@ import { LENTOS } from '../titulos3d/repeticiones'
 import { LLEGADAS_DE_PORTFOLIO } from '../titulos3d/variantesDePortfolio'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { valorDeToken } from './s10-css'
+import { LIMITE_DE_LINEAS_DE_CODIGO, lineasDeCodigo } from './s8-largos'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -767,5 +768,12 @@ const mainRecortado = (c: string): boolean => {
 }
 afirmar(mainRecortado(paginaD7), 'el `<main>` de /v3 recorta a lo ancho con `overflow: clip` (no abre contexto de apilamiento ni caja de scroll: la mezcla de Quiénes somos abajo de 1025 y los sticky siguen): medido, el documento mide lo que la ventana a 1440 y 1024 con el puntero en los dos bordes (antes, 1551 y 1042 con el puntero a la derecha; 1183 a 1024 a la izquierda) y a 390')
 controlPositivo('el detector VE un main que recorta con hidden (eso sí rompería los sticky)', paginaD7.replace('overflow-x-clip', 'overflow-x-hidden'), mainRecortado)
+
+// D8 · el piso bajo las 300 líneas de código: ya tenía 303 y C3 lo llevó a 305 (s8-montaje). La geometría del bloque, aparte.
+const bloquesD8 = leer('_lib/escena/piso/bloques.ts')
+const geometriaD8 = leer('_lib/escena/piso/geometriaDelBloque.ts')
+const pisoPartido = (b: string): boolean => lineasDeCodigo(b).length <= LIMITE_DE_LINEAS_DE_CODIGO && !b.includes('function geometriaDelBloque')
+afirmar(pisoPartido(bloquesD8) && lineasDeCodigo(geometriaD8).length <= LIMITE_DE_LINEAS_DE_CODIGO && geometriaD8.includes('export function geometriaDelBloque(lado: number): THREE.BufferGeometry {'), 'el piso (`piso/bloques.ts`) queda bajo las 300 líneas de código con el criterio de s8 (`lineasDeCodigo`) y la geometría del bloque vive en su archivo, tal cual (s8-montaje sigue en rojo por s32 y s34, de antes de esta pasada)', `${String(lineasDeCodigo(bloquesD8).length)} y ${String(lineasDeCodigo(geometriaD8).length)} líneas de código`)
+controlPositivo('el detector VE el piso con la geometría de vuelta adentro', `${bloquesD8}\n${geometriaD8}`, pisoPartido)
 
 cerrar('s47-pasada-final')

@@ -18,7 +18,8 @@ import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
-import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
+import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, grillaDelPiso, type Grilla } from './bloques'
+import { geometriaDelBloque } from './geometriaDelBloque'
 import { ORDEN_DE_LA_GRILLA, armarLosOrdenes, ponerElOrden, profundidadEstricta, sectorDe } from './ordenDeLosBloques'
 
 /**
