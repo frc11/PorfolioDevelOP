@@ -19,13 +19,42 @@ import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, ORBIT_TARGET_Y } from '../probeSce
  */
 
 let pista: ChoreoTrack | null = null
-const POSE: { -readonly [K in keyof ChoreoPose]: ChoreoPose[K] } = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
+type PoseEscribible = { -readonly [K in keyof ChoreoPose]: ChoreoPose[K] }
+const POSE: PoseEscribible = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
+const DESDE: PoseEscribible = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
+const HASTA: PoseEscribible = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
 
-/** La pose de la cámara en un momento: un nudo por su nombre o un progreso (la pista del home, sin el mouse ni la inercia). */
-export function poseDeLaLectura(lectura: string | number): ChoreoPose {
-  if (typeof lectura === 'number') {
-    pista ??= buildTrack(CHOREO_KEYFRAMES)
-    sampleTrack(pista, lectura, POSE)
+/**
+ * [PASADA FINAL] A2 · UNA LECTURA RELATIVA: la pose del progreso `en` más lo que la cámara cambia entre `comoEntre[0]` y
+ * `comoEntre[1]` (azimut, altura y distancia; el encuadre es el de `en`). Es la relación de cámara que se aprobó en un
+ * momento (Portfolio en ESCENA 10: la llegada terminaba en 0,4426 y el título se colocaba con la cámara de 0,4718, y por
+ * eso las letras, que vienen por el eje del título, se veían venir desde el fondo de la sala), aplicada a donde la
+ * llegada termina HOY: si el mapeo scroll → progreso se corre (la tabla de secciones es proporcional), la relación con
+ * la cámara se conserva en vez de que la colocación quede encima de la llegada y las letras vengan de frente, cortas.
+ */
+export interface LecturaRelativa {
+  readonly en: number
+  readonly comoEntre: readonly [number, number]
+}
+
+export type Lectura = string | number | LecturaRelativa
+
+function muestrear(progreso: number, destino: PoseEscribible): PoseEscribible {
+  pista ??= buildTrack(CHOREO_KEYFRAMES)
+  sampleTrack(pista, progreso, destino)
+  return destino
+}
+
+/** La pose de la cámara en un momento: un nudo por su nombre, un progreso (la pista del home, sin el mouse ni la inercia) o una relativa. */
+export function poseDeLaLectura(lectura: Lectura): ChoreoPose {
+  if (typeof lectura === 'number') return muestrear(lectura, POSE)
+  if (typeof lectura === 'object') {
+    muestrear(lectura.comoEntre[0], DESDE)
+    muestrear(lectura.comoEntre[1], HASTA)
+    muestrear(lectura.en, POSE)
+    POSE.angleDeg += HASTA.angleDeg - DESDE.angleDeg
+    POSE.height += HASTA.height - DESDE.height
+    POSE.distance += HASTA.distance - DESDE.distance
     return POSE
   }
   const nudo = CHOREO_KEYFRAMES.find((k) => k.name === lectura)
@@ -34,7 +63,7 @@ export function poseDeLaLectura(lectura: string | number): ChoreoPose {
 }
 
 /** La cámara del momento de la lectura, armada como la arma `OrbitRig` (la órbita y el encuadre). */
-export function camaraDeLaLectura(lectura: string | number, aspecto: number, logoW: number, logoH: number, destino: THREE.PerspectiveCamera): THREE.PerspectiveCamera {
+export function camaraDeLaLectura(lectura: Lectura, aspecto: number, logoW: number, logoH: number, destino: THREE.PerspectiveCamera): THREE.PerspectiveCamera {
   const { angleDeg, height, distance, frameX, frameY } = poseDeLaLectura(lectura)
   const c = destino
   c.fov = CAMERA_FOV

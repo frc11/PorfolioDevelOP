@@ -4,6 +4,7 @@ import { motionValue, useMotionValueEvent, type MotionValue } from 'motion/react
 import { useEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
+import type { Lectura } from '../escena/titulos3d/colocacion'
 import type { LlegadaDelTitulo } from '../escena/titulos3d/llegada'
 import type { AsientoDeLaLlegada } from './repeticiones'
 
@@ -49,7 +50,7 @@ export interface TituloDeVolumen {
    * Cuándo se lee: un nudo de la coreografía por su nombre o un progreso (`LECTURA`), con cuya cámara se coloca; y lo
    * que la pieza sube en su lectura (fracción del cuadro).
    */
-  readonly lectura: string | number
+  readonly lectura: Lectura
   readonly subida: number
   /** Cuánto llegó (0 a 1: el progreso que movía la pieza) y cuánto se fue (0 a 1). Se escriben al cambiar. */
   llegada: number
@@ -86,12 +87,26 @@ export interface TituloDeVolumen {
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
 
 /**
- * Cuándo se lee cada título, medido a 1440 con `scripts-escena10/t3-lectura.ts` (la ventana donde llegó entero y
- * todavía no se fue, en el progreso de la coreografía). Portfolio: de 0,4426 a 0,5009, con la cámara orbitando unos 30°
- * de Quiénes somos a Números; se coloca con la del medio. La frase: de 0,8811 a 0,926; se coloca con la de los valores
- * (el nudo `valores`, 0,9189 desde RETOQUE PANEL T3), que es cuando la frase ya subió.
+ * [PASADA FINAL] A2 · DÓNDE TERMINA DE LLEGAR PORTFOLIO (progreso de la coreografía) y con qué cámara se coloca su título.
+ * En ESCENA 10 (la llegada aprobada) la ventana de la máscara terminaba en 0,4426 y el título se colocaba con la cámara
+ * de 0,4718: la cámara seguía orbitando hacia Números (8° de azimut y 1,8 de altura entre las dos) y las letras, que
+ * vienen por el eje del título (16 em atrás), se veían venir desde el fondo de la sala. La tabla de secciones de RETOQUE
+ * PANEL T3 corrió el mapeo scroll → progreso (es proporcional a los altos declarados) y la MISMA llegada terminó cayendo
+ * en 0,4713, al final de la órbita, donde la cámara ya casi no se mueve: con la colocación en 0,4718 las letras venían de
+ * frente, cortas; y correr la colocación por progreso no alcanza (la órbita termina en 0,5). Lo que se restituye es la
+ * RELACIÓN DE CÁMARA: la pose de donde termina la llegada hoy más lo que la cámara cambiaba entre 0,4426 y 0,4718
+ * (`LecturaRelativa`, `colocacion.ts`). `termina` es medida (scroll 4993 a 1440×900, `scripts-pasada/a2-ventana.ts`): si
+ * el mapeo vuelve a moverse, se vuelve a medir y se escribe acá; s47 ata la relación.
  */
-export const LECTURA = { portfolio: 0.4718, frase: 'valores' } as const
+export const LLEGADA_DE_PORTFOLIO = { termina: 0.4713, comoEnEscena10: [0.4426, 0.4718] } as const
+
+/**
+ * Cuándo se lee cada título, medido a 1440 con `scripts-escena10/t3-lectura.ts` (la ventana donde llegó entero y
+ * todavía no se fue, en el progreso de la coreografía). Portfolio: la cámara orbita unos 30° de Quiénes somos a Números;
+ * se coloca con la relación de arriba. La frase: se coloca con la de los valores (el nudo `valores`, 0,9233 desde
+ * PASADA FINAL A3), que es cuando la frase ya subió.
+ */
+export const LECTURA: { readonly portfolio: Lectura; readonly frase: Lectura } = { portfolio: { en: LLEGADA_DE_PORTFOLIO.termina, comoEntre: LLEGADA_DE_PORTFOLIO.comoEnEscena10 }, frase: 'valores' }
 
 /** Quién se entera cuando un título entra o sale del registro (la escena, para armarlo o soltarlo). */
 const oyentes = new Set<() => void>()

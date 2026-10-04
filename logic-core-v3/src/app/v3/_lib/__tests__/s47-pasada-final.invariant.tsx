@@ -7,6 +7,9 @@
  *        letras de volumen, armadas apenas la escena monta; el 2D sólo como respaldo (la escena caída, sin títulos, o el
  *        3D que no llega a tiempo), con un plazo que el hook y la hoja comparten; y nada de lo armado se rearma porque
  *        otro título entre o salga del registro.
+ *   A2 · la llegada de Portfolio es la de ESCENA 10: los números de las letras (16 em atrás, una vuelta y cuarto, la
+ *        curva cúbica, 1,4 s de mínimo) y la cámara con que se ve (el título se coloca con la cámara que guarda, con la
+ *        del final de la llegada de hoy, la relación de ESCENA 10: la tabla de secciones había corrido el mapeo).
  *   A3 · «Seis razones / para elegirnos»: los tres tramos fijados en pantallas del pin (se arma en 0,6, queda quieta 1,
  *        se va en 0,4), la cámara quieta hasta que termina el tramo quieto, la llegada 3D con el mínimo de ESCENA 10 y el
  *        asiento «armado» (frenar a mitad la termina; subir la desarma), la salida con los 2 s de A5.
@@ -25,10 +28,11 @@ import { pantallasDe } from '../escena/anclaje'
 import { laEscenaCayo, marcarLaEscenaCaida, suscribirALaCaida } from '../escena/caida'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../escena/finalDelRecorrido'
-import { mostradoDelScroll } from '../escena/titulos3d/llegada'
+import { poseDeLaLectura, type Lectura } from '../escena/titulos3d/colocacion'
+import { LLEGADA_DE_LAS_LETRAS, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaDeLaLetra, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { mismaForma } from '../escena/titulos3d/sincronia'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
-import type { TituloDeVolumen } from '../titulos3d/registro'
+import { LECTURA, LLEGADA_DE_PORTFOLIO, type TituloDeVolumen } from '../titulos3d/registro'
 import { LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { valorDeToken } from './s10-css'
@@ -104,6 +108,32 @@ marcarLaEscenaCaida()
 marcarLaEscenaCaida()
 afirmar(laEscenaCayo() && avisos === 1, '  caída una vez: los oyentes se enteran una vez (el titular pasa al respaldo en el acto)')
 dejarDeOir()
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A2 · La llegada de Portfolio: la de ESCENA 10 (distancia, curva, duración y la cámara con que se ve), fijada')
+
+const L = LLEGADA_DE_LAS_LETRAS
+const ESCENA_10 = { profundidad: 16, subida: 1.2, vueltas: 1.25, inclinacion: 0.12, dura: 0.6, aparece: 0.35, minimoS: 1.4 } as const
+const comoEscena10 = (l: Record<keyof typeof ESCENA_10, number>): boolean => (Object.keys(ESCENA_10) as (keyof typeof ESCENA_10)[]).every((k) => l[k] === ESCENA_10[k])
+afirmar(comoEscena10(L) && LENTOS.llegadaDePortfolioS === L.minimoS, 'las letras vienen de 16 em atrás y 1,2 arriba, girando una vuelta y cuarto, cada una en el 60 % del progreso con la curva cúbica, disolviéndose hasta el 35 %, y en no menos de 1,4 s de punta a punta (los números de ESCENA 10, eec0b4e3)', JSON.stringify(L))
+controlPositivo('el detector VE una llegada más corta (8 em)', { ...L, profundidad: 8 }, comoEscena10)
+const llegada = (p: number, orden: number): number => 1 - (1 - Math.min(1, Math.max(0, (p - orden * 0.4) / 0.6))) ** 3
+afirmar([0, 0.3, 0.5, 0.8, 1].every((p) => Math.abs(llegadaDeLaLetra(p, 0) - llegada(p, 0)) < 1e-12 && Math.abs(llegadaDeLaLetra(p, 1) - llegada(p, 1)) < 1e-12) && /return 1\.0 - pow\( 1\.0 - u, 3\.0 \);/.test(LLEGADA_PARS_GLSL) && /aPivote \+ giroDeLaLetra \* \( transformed - aPivote \) \+ faltaDeLaLetra \* aDesde/.test(LLEGADA_POSICION_GLSL), '  la curva (cúbica, frenando al final) y el recorrido (desde `aDesde`, girando sobre su pivote) son los mismos en JS y en el sombreador')
+// La cámara: en ESCENA 10 el título se colocaba 0,0292 de progreso DESPUÉS de terminar de llegar (0,4718 − 0,4426), con
+// la cámara orbitando hacia Números: por eso las letras se veían venir desde el fondo. La tabla de RETOQUE PANEL T3 corrió
+// el mapeo y la llegada terminó cayendo en 0,4727: con la colocación en 0,4718 venían de frente, cortas.
+const pose = (l: Lectura): { readonly angleDeg: number; readonly height: number; readonly distance: number } => ({ ...poseDeLaLectura(l) })
+const aprobada = { az: pose(0.4718).angleDeg - pose(0.4426).angleDeg, y: pose(0.4718).height - pose(0.4426).height, d: pose(0.4718).distance - pose(0.4426).distance }
+const relacion = (lectura: Lectura): boolean => {
+  const colocacion = pose(lectura)
+  const fin = pose(LLEGADA_DE_PORTFOLIO.termina)
+  return Math.abs(colocacion.angleDeg - fin.angleDeg - aprobada.az) < 1e-9 && Math.abs(colocacion.height - fin.height - aprobada.y) < 1e-9 && Math.abs(colocacion.distance - fin.distance - aprobada.d) < 1e-9
+}
+afirmar(aprobada.az > 5 && aprobada.y > 1 && relacion(LECTURA.portfolio), 'el título se coloca con la cámara que guarda, con la del final de la llegada de HOY, la relación de ESCENA 10 (la cámara seguía orbitando: 8° de azimut y 1,8 de altura entre terminar de llegar y colocarse)', `aprobada Δaz ${aprobada.az.toFixed(2)}° Δy ${aprobada.y.toFixed(2)} Δd ${aprobada.d.toFixed(2)} · colocación hoy az ${pose(LECTURA.portfolio).angleDeg.toFixed(1)} y ${pose(LECTURA.portfolio).height.toFixed(2)}`)
+controlPositivo('el detector VE la colocación de antes (0,4718: hoy, encima de la llegada, con la órbita ya terminada)', 0.4718, relacion)
+afirmar(LLEGADA_DE_PORTFOLIO.termina > 0.4426 && LLEGADA_DE_PORTFOLIO.termina < 0.5 && typeof LECTURA.portfolio === 'object' && LECTURA.portfolio.en === LLEGADA_DE_PORTFOLIO.termina, '  y la medida es la de hoy: la llegada termina después de donde terminaba en ESCENA 10 y antes del nudo de Números; la lectura relativa parte de ahí', String(LLEGADA_DE_PORTFOLIO.termina))
+const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+afirmar(/<TituloDeVolumen id="portfolio"[^>]*lectura=\{LECTURA\.portfolio\}[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\} queda \/>/.test(piezasDePortfolio), '  Portfolio sigue pidiendo esa lectura, su mínimo y quedarse (lo robusto de F2 y A4 lo cubre s45: se da vuelta con el scroll, nunca a medias, converge)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A3 · «Seis razones / para elegirnos»: llegada lenta, un tramo quieto, salida lenta — los tres tramos, fijados')
