@@ -5,7 +5,7 @@ import { useEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
 import type { Lectura } from '../escena/titulos3d/colocacion'
-import type { LlegadaDelTitulo } from '../escena/titulos3d/llegada'
+import type { FormaDeLaLlegada, LlegadaDelTitulo } from '../escena/titulos3d/llegada'
 import type { AsientoDeLaLlegada } from './repeticiones'
 
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
@@ -82,6 +82,8 @@ export interface TituloDeVolumen {
   readonly asiento: AsientoDeLaLlegada
   /** [RETOQUE PANEL] T4 · sus rayas (hasta cuatro): el título puede no tener letras (el ≠ de Quiénes somos). */
   readonly trazos: readonly TrazoDelTitulo[]
+  /** [PASADA FINAL] 0 · la forma de su llegada (`llegada.ts`): `null`, la de siempre; las pruebas de Portfolio traen la suya. */
+  readonly forma: FormaDeLaLlegada | null
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -145,24 +147,25 @@ interface Anotacion {
   readonly salidaMinimaS?: number | null
   readonly asiento?: AsientoDeLaLlegada
   readonly trazos?: readonly TrazoDelTitulo[]
+  readonly forma?: FormaDeLaLlegada | null
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
 const SIN_TRAZOS: readonly TrazoDelTitulo[] = []
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, activo])
+  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p

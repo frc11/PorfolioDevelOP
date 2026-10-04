@@ -74,6 +74,32 @@ export type LlegadaDelTitulo = 'letras' | 'azar' | 'levanta'
 /** De dónde sale cada letra en `letras` (em): la de ESCENA 10, de atrás y un poco más arriba. */
 export const DESDE_DE_LAS_LETRAS: readonly [number, number, number] = [0, LLEGADA_DE_LAS_LETRAS.subida, -LLEGADA_DE_LAS_LETRAS.profundidad]
 
+/**
+ * [PASADA FINAL] 0 · LA FORMA DE UNA LLEGADA — lo que la distingue de otra: de dónde sale cada letra (em), cuánto gira
+ * (vueltas sobre su eje vertical y sobre el horizontal), qué parte del progreso ocupa cada letra (el resto es el
+ * escalonado), hasta dónde se disuelve y sobre qué gira (su centro, o su base: «la tapa que se levanta» de ESCENA 9).
+ * La de siempre es la de ESCENA 10; las pruebas de Portfolio (`_lib/titulos3d/variantesDePortfolio.ts`) traen otras, y
+ * cada forma distinta es su propio programa (los sombreadores de abajo se generan con sus cifras).
+ */
+export interface FormaDeLaLlegada {
+  readonly id: string
+  /** De dónde sale cada letra: em; con `porAlto`, en alturas de esa letra (la caja de su glifo), como en ESCENA 9. */
+  readonly desde: readonly [number, number, number]
+  readonly porAlto: boolean
+  readonly vueltas: number
+  readonly inclinacion: number
+  readonly dura: number
+  readonly aparece: number
+  readonly pivote: 'centro' | 'base'
+}
+
+export const FORMA_DE_LAS_LETRAS: FormaDeLaLlegada = { id: 'letras', desde: DESDE_DE_LAS_LETRAS, porAlto: false, vueltas: LLEGADA_DE_LAS_LETRAS.vueltas, inclinacion: LLEGADA_DE_LAS_LETRAS.inclinacion, dura: LLEGADA_DE_LAS_LETRAS.dura, aparece: LLEGADA_DE_LAS_LETRAS.aparece, pivote: 'centro' }
+
+/** ¿Dos formas dibujan lo mismo? (La de una prueba que coincide con la de siempre usa el mismo programa.) */
+export function mismaLlegada(a: FormaDeLaLlegada, b: FormaDeLaLlegada): boolean {
+  return a.desde.every((v, k) => v === b.desde[k]) && a.porAlto === b.porAlto && a.vueltas === b.vueltas && a.inclinacion === b.inclinacion && a.dura === b.dura && a.aparece === b.aparece && a.pivote === b.pivote
+}
+
 /** `azar`: la caja de la sala de donde salen (em, alrededor del título; nunca de delante de la cámara) y la semilla. */
 export const AZAR_DE_LAS_LETRAS = { x: [-38, 38], y: [-10, 18], z: [-55, -6], semilla: 0x24e5 } as const
 
@@ -90,7 +116,8 @@ export function sembrar(semilla: number): () => number {
 }
 
 /** El vértice: en `beginnormal` se arma el giro de la letra (y gira la normal); en `begin`, la posición. */
-export const LLEGADA_PARS_GLSL = /* glsl */ `
+export function llegadaParsGlsl(forma: FormaDeLaLlegada): string {
+  return /* glsl */ `
 attribute float aLetra;
 attribute vec3 aPivote;
 attribute vec3 aDesde;
@@ -113,19 +140,22 @@ float avanceDelTrazo() {
 	return k < 1.5 ? uTrazos.x : k < 2.5 ? uTrazos.y : k < 3.5 ? uTrazos.z : uTrazos.w;
 }
 float llegadaDeLaLetra( float p, float orden ) {
-	float u = clamp( ( p - orden * ${f(1 - LLEGADA_DE_LAS_LETRAS.dura)} ) / ${f(LLEGADA_DE_LAS_LETRAS.dura)}, 0.0, 1.0 );
+	float u = clamp( ( p - orden * ${f(1 - forma.dura)} ) / ${f(forma.dura)}, 0.0, 1.0 );
 	return 1.0 - pow( 1.0 - u, 3.0 );
 }
 mat3 giroDeLaLetraEn( float falta ) {
-	float a = falta * ${f(LLEGADA_DE_LAS_LETRAS.vueltas * 2 * Math.PI)};
-	float b = falta * ${f(LLEGADA_DE_LAS_LETRAS.inclinacion * 2 * Math.PI)};
+	float a = falta * ${f(forma.vueltas * 2 * Math.PI)};
+	float b = falta * ${f(forma.inclinacion * 2 * Math.PI)};
 	mat3 y = mat3( cos( a ), 0.0, - sin( a ), 0.0, 1.0, 0.0, sin( a ), 0.0, cos( a ) );
 	mat3 x = mat3( 1.0, 0.0, 0.0, 0.0, cos( b ), sin( b ), 0.0, - sin( b ), cos( b ) );
 	return y * x;
 }
 `
+}
+export const LLEGADA_PARS_GLSL = llegadaParsGlsl(FORMA_DE_LAS_LETRAS)
 
-export const LLEGADA_NORMAL_GLSL = /* glsl */ `
+export function llegadaNormalGlsl(forma: FormaDeLaLlegada): string {
+  return /* glsl */ `
 	// [ESCENA 10] T3 · cuánto le falta a esta letra (la llegada por lo que no se fue) y su giro.
 	// [RETOQUE PANEL] T4 · una raya no llega como las letras: está en su lugar y crece con su avance.
 	float esTrazo = step( 0.5, aTrazo );
@@ -136,14 +166,21 @@ export const LLEGADA_NORMAL_GLSL = /* glsl */ `
 	float acostada = faltaDeLaLetra * uLevanta * ${f(Math.PI / 2)};
 	mat3 alzado = mat3( 1.0, 0.0, 0.0, 0.0, cos( acostada ), sin( acostada ), 0.0, - sin( acostada ), cos( acostada ) );
 	objectNormal = alzado * giroDeLaLetra * objectNormal;
-	vAparece = smoothstep( 0.0, ${f(LLEGADA_DE_LAS_LETRAS.aparece)}, eDeLaLetra );
+	vAparece = smoothstep( 0.0, ${f(forma.aparece)}, eDeLaLetra );
 	// La que se levanta aparece por la línea, no por el tramado (salvo con movimiento reducido, que no se mueve).
 	vAparece = mix( vAparece, 1.0, uLevanta * ( 1.0 - uQuieto ) );
 `
+}
+export const LLEGADA_NORMAL_GLSL = llegadaNormalGlsl(FORMA_DE_LAS_LETRAS)
 
-export const LLEGADA_POSICION_GLSL = /* glsl */ `
+/** [PASADA FINAL] 0 · girar sobre la base: el centro de la letra bajado a su línea de base (la tapa de ESCENA 9). */
+const EN_CAMINO_SOBRE_LA_BASE = `vec3 pivoteDeLaLetra = vec3( aPivote.x, 0.0, aPivote.z );
+	vec3 enCamino = pivoteDeLaLetra + giroDeLaLetra * ( transformed - pivoteDeLaLetra ) + faltaDeLaLetra * aDesde;`
+
+export function llegadaPosicionGlsl(forma: FormaDeLaLlegada): string {
+  return /* glsl */ `
 	vec3 pieDeLaLetra = vec3( transformed.x, uPieDeLaPalabra );
-	vec3 enCamino = aPivote + giroDeLaLetra * ( transformed - aPivote ) + faltaDeLaLetra * aDesde;
+	${forma.pivote === 'base' ? EN_CAMINO_SOBRE_LA_BASE : 'vec3 enCamino = aPivote + giroDeLaLetra * ( transformed - aPivote ) + faltaDeLaLetra * aDesde;'}
 	transformed = mix( enCamino, pieDeLaLetra + alzado * ( transformed - pieDeLaLetra ), uLevanta );
 	// Cuánto queda arriba del pie (em): debajo, la línea lo tapa.
 	vSobreElPie = ( transformed.y - uPieDeLaPalabra.x ) * uLevanta + ( 1.0 - uLevanta );
@@ -153,6 +190,8 @@ export const LLEGADA_POSICION_GLSL = /* glsl */ `
 	vSobreElPie = mix( vSobreElPie, 1.0, esTrazo );
 	vDelTrazo = mix( 1.0, sDelTrazo, esTrazo );
 `
+}
+export const LLEGADA_POSICION_GLSL = llegadaPosicionGlsl(FORMA_DE_LAS_LETRAS)
 
 /** El fragmento: el tramado que la disuelve (ruido de gradiente intercalado, fijo en la pantalla). */
 export const DISOLVER_PARS_GLSL = /* glsl */ `

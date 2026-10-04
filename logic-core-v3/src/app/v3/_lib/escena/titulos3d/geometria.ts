@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
-import { AZAR_DE_LAS_LETRAS, DESDE_DE_LAS_LETRAS, sembrar, type LlegadaDelTitulo } from './llegada'
+import { AZAR_DE_LAS_LETRAS, FORMA_DE_LAS_LETRAS, sembrar, type FormaDeLaLlegada, type LlegadaDelTitulo } from './llegada'
 
 /**
  * [ESCENA 10] T3 · LA GEOMETRÍA DE UN TÍTULO — el texto extruido con la Chivo de la marca, letra por letra, en UNA
@@ -80,20 +80,20 @@ function equisDe(fuente: Font, texto: string, posiciones: readonly number[] | nu
  * [RETOQUE 3D] De dónde sale cada letra (em, `aDesde`): en `letras` y `levanta`, la de ESCENA 10 (en `levanta` no se usa);
  * en `azar`, un lugar sembrado de la caja de la sala, distinto para cada letra.
  */
-function desdeDe(llegada: LlegadaDelTitulo, letras: number): (readonly [number, number, number])[] {
-  if (llegada !== 'azar') return Array.from({ length: letras }, () => DESDE_DE_LAS_LETRAS)
+function desdeDe(llegada: LlegadaDelTitulo, letras: number, comun: readonly [number, number, number]): (readonly [number, number, number])[] {
+  if (llegada !== 'azar') return Array.from({ length: letras }, () => comun)
   const azar = sembrar(AZAR_DE_LAS_LETRAS.semilla + letras)
   const entre = ([a, b]: readonly [number, number]): number => a + (b - a) * azar()
   return Array.from({ length: letras }, () => [entre(AZAR_DE_LAS_LETRAS.x), entre(AZAR_DE_LAS_LETRAS.y), entre(AZAR_DE_LAS_LETRAS.z)] as const)
 }
 
 /** Arma el título: cada letra extruida en su lugar; después, todas en una malla con su orden, su centro y de dónde sale. */
-export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras', rayas: readonly RayaEnEm[] = []): TituloArmado {
+export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras', rayas: readonly RayaEnEm[] = [], forma: FormaDeLaLlegada = FORMA_DE_LAS_LETRAS): TituloArmado {
   const { profundidad, bisel, curvas } = VOLUMEN_DEL_TITULO
   const equis = equisDe(fuente, texto, posiciones)
   const caracteres = [...texto]
   const conLetra = caracteres.filter((c) => c.trim() !== '').length
-  const desde = desdeDe(llegada, conLetra)
+  const desde = desdeDe(llegada, conLetra, forma.desde)
   const piezas: THREE.BufferGeometry[] = []
   const contornos: THREE.Vector2[][] = []
   let orden = 0
@@ -112,7 +112,10 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     pieza.setAttribute('aLetra', new THREE.BufferAttribute(new Float32Array(n).fill(conLetra > 1 ? orden / (conLetra - 1) : 0), 1))
     pieza.setAttribute('aPivote', new THREE.BufferAttribute(pivote, 3))
     const deDonde = new Float32Array(n * 3)
-    for (let i = 0; i < n; i += 1) deDonde.set(desde[orden], i * 3)
+    // [PASADA FINAL] 0 · con `porAlto` (ESCENA 9), la distancia en alturas de esta letra.
+    const alto = forma.porAlto && pieza.boundingBox !== null ? pieza.boundingBox.max.y - pieza.boundingBox.min.y : 1
+    const suDesde = desde[orden].map((v) => v * alto)
+    for (let i = 0; i < n; i += 1) deDonde.set(suDesde, i * 3)
     pieza.setAttribute('aDesde', new THREE.BufferAttribute(deDonde, 3))
     sinRaya(pieza)
     piezas.push(pieza)

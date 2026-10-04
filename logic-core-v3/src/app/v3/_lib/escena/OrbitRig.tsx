@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { progresoDeLaCamara } from './camaraDeEntonces'
 import { aimWithFraming } from './cameraFraming'
 import {
   BOKEH_BOB_AMPLITUDE,
@@ -316,7 +317,8 @@ export function OrbitRig({
       }
 
       const progress = rigValues.progress
-      sampleTrack(track, progress, target)
+      // [PASADA FINAL] 0 · con una prueba de Portfolio, la cámara de entonces en su tramo (`camaraDeEntonces.ts`).
+      sampleTrack(track, progresoDeLaCamara(progress), target)
       sampleLightArc(progress, arc)
       // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.
       arc.level = nivelConLaNocheDisparada(arc.level)

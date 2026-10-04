@@ -31,7 +31,7 @@ export interface Taller {
 
 /** ¿El armado que hay sirve para este título? La misma forma: lo que decide su geometría (sin rayas medidas) y su modo. */
 export function mismaForma(a: TituloDeVolumen, b: TituloDeVolumen): boolean {
-  return a.texto === b.texto && a.fuente === b.fuente && a.gesto === b.gesto && a.trazos.length === 0 && b.trazos.length === 0 && a.queda === b.queda && a.rearma === b.rearma && a.colocacion === b.colocacion
+  return a.texto === b.texto && a.fuente === b.fuente && a.gesto === b.gesto && a.trazos.length === 0 && b.trazos.length === 0 && a.queda === b.queda && a.rearma === b.rearma && a.colocacion === b.colocacion && a.forma === b.forma
 }
 
 export function soltarElArmado(t: Taller, armados: Armado[], a: Armado): void {

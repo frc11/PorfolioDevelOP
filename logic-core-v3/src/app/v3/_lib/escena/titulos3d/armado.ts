@@ -15,7 +15,7 @@ import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import { enEmDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { costadoDeDiaGlsl } from './filo'
 import { armarElTitulo, type RayaEnEm } from './geometria'
-import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL } from './llegada'
+import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada } from './llegada'
 
 /**
  * [RETOQUE PANEL] T4 · CÓMO SE ARMA UN TÍTULO DE VOLUMEN — salió de `TitulosDeVolumen.tsx` (que quedaba en el tope de las
@@ -102,7 +102,11 @@ export function avancesDeLasRayas(titulo: TituloDeVolumen, destino: THREE.Vector
 
 export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   const fuente = FUENTES[titulo.fuente]
-  const { geometria, contornos, cajaDeLasLetras, letras } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto, rayasDe(titulo, fuente))
+  // [PASADA FINAL] 0 · la forma de su llegada: la de siempre o la de una prueba de Portfolio, con su propio programa.
+  const forma = titulo.forma ?? FORMA_DE_LAS_LETRAS
+  const propia = !mismaLlegada(forma, FORMA_DE_LAS_LETRAS)
+  const glsl = propia ? { pars: llegadaParsGlsl(forma), normal: llegadaNormalGlsl(forma), posicion: llegadaPosicionGlsl(forma) } : { pars: LLEGADA_PARS_GLSL, normal: LLEGADA_NORMAL_GLSL, posicion: LLEGADA_POSICION_GLSL }
+  const { geometria, contornos, cajaDeLasLetras, letras } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto, rayasDe(titulo, fuente), forma)
   const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
   // [RETOQUE 3D] `levanta`: el pie de atrás de la palabra (el más bajo y el más atrás de sus LETRAS, em) es el eje del giro y la línea.
   // [RETOQUE PANEL] T4 · sin letras (el ≠), en 0: la caja vacía es infinita y el sombreador daría NaN aunque no se levante.
@@ -110,9 +114,9 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${LLEGADA_PARS_GLSL}`)
-      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${LLEGADA_NORMAL_GLSL}`)
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${LLEGADA_POSICION_GLSL}`)
+      .replace('#include <common>', `#include <common>\n${glsl.pars}`)
+      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${glsl.normal}`)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${glsl.posicion}`)
     shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\n${DISOLVER_PARS_GLSL}`).replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_GLSL}`)
     // El blanco, de día: el filo oscuro (la función del borde la trae el dibujo de noche, que se instala abajo).
     if (variante === 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${FILO_DE_DIA_GLSL}`)
@@ -120,6 +124,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
     else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`)
   }
   material.customProgramCacheKey = () => `titulo-de-volumen-${variante}`
+  if (propia) material.customProgramCacheKey = () => `titulo-de-volumen-${variante}|${forma.id}`
   // De noche, el dibujo del logo (en em: el filo y el campo de su contorno); y el amanecer, como el resto de la sala.
   const contorno = hornearContornos(contornos, NOCHE_DEL_TITULO.contorno)
   conLogoDeNoche(material, contorno, variante === 'blanco' ? { ancho: NOCHE_DEL_TITULO.filo, tapa: NOCHE_DEL_TITULO.tapaDelBlanco } : { ancho: NOCHE_DEL_TITULO.filo })
