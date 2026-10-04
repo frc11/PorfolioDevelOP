@@ -87,8 +87,8 @@ afirmarIgual(cuentaDe(ANIMADO, /data-inercia/g), 1, 'el titular lleva la inercia
 afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2 + 1, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo), más la inclinación del titular`)
 afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
 const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
-// [RETOQUE PANEL] T1 · + las medidas de cada demo (su proporción, su alto angosto y el fondo del panel, que se funde).
-const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|proporcion|alto-angosto|arranque-final):[^;]*;?)+(opacity:[\d.]+)?)$/
+// [RETOQUE PANEL] T1 · + las medidas de cada demo (su proporción). [AJUSTES FINALES] A8: el alto angosto se fue.
+const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|proporcion|arranque-final):[^;]*;?)+(opacity:[\d.]+)?)$/
 // MÓVIL 2: la palabra quieta de abajo de 1024 lleva sólo el alfa del fondo, que es de la tabla.
 const ALFA_SOLO = `opacity:${String(ALFA_DEL_FONDO)}`
 afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e) && e !== ALFA_SOLO), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
@@ -153,7 +153,7 @@ afirmar(ordenPorAncho.every((t, i) => i === 0 || t.velocidad > ordenPorAncho[i -
 afirmarIgual(velocidadDe(TABLA_DEL_CAOS.length - 1), 0, 'la última queda asentada: velocidad 0')
 afirmar(TABLA_DEL_CAOS[0].columna >= 40, 'la primera llega en el 60 % derecho, al lado del encabezado', `columna ${String(TABLA_DEL_CAOS[0].columna)} %`)
 afirmar(VELOCIDAD_DEL_FONDO < 0 && Object.values(TAMANOS).every((t) => t.velocidad > VELOCIDAD_DEL_FONDO), 'el fondo va más lento que cualquier feature: está más lejos')
-afirmar(TABLA_DEL_CAOS.every((f) => f.pantalla.ancho >= 760 && f.pantalla.alto >= 700 && f.altoAngosto >= 600), 'cada demo se dibuja a una pantalla de panel de verdad (ninguna de menos de 760 × 700: más alta que la del retoque, se ve más panel) y abajo de 1024 tiene su alto')
+afirmar(TABLA_DEL_CAOS.every((f) => f.pantalla.ancho >= 760 && f.pantalla.alto >= 700), 'cada demo se dibuja a una pantalla de panel de verdad (ninguna de menos de 760 × 700: más alta que la del retoque, se ve más panel); abajo de 1024 la misma, a escala ([AJUSTES FINALES] A8)')
 afirmar(TABLA_DEL_CAOS.filter((f) => f.pantalla.ancho >= ANCHO_CON_BARRA).length >= 4, `  las anchas (desde ${String(ANCHO_CON_BARRA)} px) llevan la barra lateral del panel; las angostas la cierran`)
 afirmar(/data-profundidad=\{velocidadDe\(indice\)\}/.test(TARJETA) && /CLASE_DEL_LUGAR\.asentada : CLASE_DEL_LUGAR\.flota/.test(TARJETA), '  cada tarjeta lleva su profundidad y flota en su lugar; la última, asentada en el flujo')
 

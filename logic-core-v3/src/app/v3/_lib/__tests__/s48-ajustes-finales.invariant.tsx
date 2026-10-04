@@ -23,6 +23,7 @@
  *        engranajes completos, el robot que habla (`robot.ts`) y su flujo que se enciende tramo a tramo (`vida.ts`).
  *   A7 · las demos de Tu panel llegan más despacio (`ventana-de-la-demo`) y la sección es un 12 % más larga; la tabla
  *        declara el alto real (700svh): REGLA DE ALTURAS.
+ *   A8 · abajo de 1024 cada demo es el panel de escritorio a escala, como un video: sin puntero, en bucle, con su pausa.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -33,6 +34,7 @@ import * as THREE from 'three'
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
 import { VeloDeCarga } from '../../_componentes/VeloDeCarga'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/titulos3d/titular2d'
+import { RESPIRO_DEL_BUCLE } from '../../_panel-vivo/reproduccion'
 import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/_contrato/bloqueAnimado'
 import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
 import { CARGA, abrirLaCarga, cargaLista, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
@@ -455,5 +457,25 @@ const animadaA7 = sinComentarios(leer('_secciones/_contrato/coreografia-animada.
 const destinosA7 = sinComentarios(leer('_componentes/destinosDelViaje.ts'))
 afirmar(anclaDeLaDemo(ANCLA_DE_LA_DEMO) && /<Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">/.test(tarjetaA7) && animadaA7.includes("if (props.rango === 'ventana-de-la-demo') return ANCLA_DE_LA_DEMO") && destinosA7.includes("'ventana-de-la-demo': ANCLA_DE_LA_DEMO,") && /rango="ventana-visible"/.test(leer('_secciones/tu-panel/Fondo.tsx')), 'cada feature llega con `ventana-de-la-demo`: la misma entrada que la ventana visible (asoma y arranca) pero termina de subir cuando su pie cruza la MITAD del cuadro, no 240 px antes de salir (a 1440 × 900 y 600 px de demo, 970 px de recorrido en vez de 760: un 28 % más despacio, con P2 intacto); los viajes del menú la conocen; las palabras del fondo siguen con la ventana visible')
 controlPositivo('el detector VE la ventana visible de antes (llegada 240 px antes de salir)', ANCLA_DE_LA_VENTANA_VISIBLE, anclaDeLaDemo)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A8 · Tu panel abajo de 1024: cada demo es el panel de escritorio a escala, corriendo como un video')
+
+const cargadorA8 = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
+const reproduccionA8 = sinComentarios(leer('_panel-vivo/reproduccion.ts'))
+const geometriaA8 = sinComentarios(leer('_secciones/tu-panel/geometria.ts'))
+const comoVideo = (c: string): boolean =>
+  c.includes('const escalada = escala > 0') &&
+  c.includes('bucle: !escritorio }') &&
+  /className=\{`\$\{escalada \? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'\} max-escritorio:pointer-events-none\$\{corre \? '' : ` \$\{CONGELADA\}`\}`\}/.test(c) &&
+  /data-parte="pausa-del-video"[\s\S]{0,400}aria-pressed=\{pausada\}[\s\S]{0,600}escritorio:hidden/.test(c) &&
+  c.includes('const corre = laMasVisible && pestana && !pausada && !reducido')
+afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero (nada que tocar adentro), va en bucle, y su pausa es un botón afuera de la escala (WCAG 2.2.2), sólo ahí; sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
+controlPositivo('el detector VE la demo del teléfono de antes (a su alto, sin escala)', cargadorA8.replace('const escalada = escala > 0', 'const escalada = escritorio && escala > 0'), comoVideo)
+const enBucle = (r: string): boolean => /readonly bucle: boolean/.test(r) && r.includes('bucle: false })') && /if \(!\(r\.corre && r\.bucle\) \|\| paso < total\) return undefined\s*const reloj = window\.setTimeout\(\(\) => setTicks\(0\), cadaMs \* RESPIRO_DEL_BUCLE\)/.test(r) && RESPIRO_DEL_BUCLE >= 1
+afirmar(enBucle(reproduccionA8), 'el bucle: terminado el guion, un respiro (dos pasos) y arranca de nuevo — sólo mientras corre y sólo en bucle (el escritorio, donde la demo se usa, sigue parándose en el último paso)', `${String(RESPIRO_DEL_BUCLE)} pasos de respiro`)
+controlPositivo('el detector VE un bucle que reinicia aunque la demo no corra', reproduccionA8.replace('if (!(r.corre && r.bucle) || paso < total) return undefined', 'if (!r.bucle || paso < total) return undefined'), enBucle)
+const marcoA8 = /<div\s+data-parte="marco"[\s\S]*?className="([^"]*)"/.exec(tarjetaA7)?.[1] ?? ''
+afirmar(/^relative aspect-\[var\(--proporcion\)\] w-full overflow-hidden /.test(marcoA8) && !/alto-angosto|escritorio:h-auto|escritorio:aspect/.test(marcoA8) && !/altoAngosto|alto-angosto/.test(geometriaA8) && !/alto-angosto/.test(sinComentarios(tarjetaA7)), 'el marco tiene SIEMPRE la proporción de su pantalla (el alto propio de abajo de 1024 se fue de la tabla, de la tarjeta y del estilo inline)', marcoA8.split(' ').slice(0, 3).join(' '))
 
 cerrar('s48-ajustes-finales')

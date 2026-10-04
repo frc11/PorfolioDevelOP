@@ -18,11 +18,13 @@ export interface Reproduccion {
   readonly alternarPausa: () => void
   /** Con la barra lateral del panel: sólo si la pantalla de la demo es ancha (en una angosta se cierra, como en el panel). */
   readonly conBarra: boolean
+  /** [AJUSTES FINALES] A8 · en bucle (el teléfono, donde la demo es un video): terminado el guion, un respiro y de nuevo. */
+  readonly bucle: boolean
 }
 
 const NADA = (): void => undefined
 
-export const ReproduccionDeLaDemo = createContext<Reproduccion>({ corre: false, reducido: true, pausada: false, alternarPausa: NADA, conBarra: true })
+export const ReproduccionDeLaDemo = createContext<Reproduccion>({ corre: false, reducido: true, pausada: false, alternarPausa: NADA, conBarra: true, bucle: false })
 
 export function useReproduccion(): Reproduccion {
   return useContext(ReproduccionDeLaDemo)
@@ -39,6 +41,9 @@ export interface Pasos {
 
 /** Mientras la página se mueve, un paso espera esto (ms) y vuelve a mirar: ningún árbol de demo se dibuja en medio del scroll. */
 const REINTENTO_EN_MOVIMIENTO_MS = 200
+
+/** [AJUSTES FINALES] A8 · en bucle, cuántos pasos de espera hay entre el final del guion y el arranque siguiente. */
+export const RESPIRO_DEL_BUCLE = 2
 
 /**
  * Los pasos de una demo con guion: avanza uno cada `cadaMs` mientras corre y se queda en el último. [PASADA FINAL] B3 ·
@@ -62,6 +67,12 @@ export function usePasos(total: number, cadaMs: number): Pasos {
     reloj = window.setTimeout(alTocar, cadaMs)
     return () => window.clearTimeout(reloj)
   }, [r.corre, paso, total, cadaMs, sumar])
+  // [AJUSTES FINALES] A8 · en bucle: terminado el guion, `RESPIRO_DEL_BUCLE` pasos de espera y arranca de nuevo (sólo mientras corre).
+  useEffect(() => {
+    if (!(r.corre && r.bucle) || paso < total) return undefined
+    const reloj = window.setTimeout(() => setTicks(0), cadaMs * RESPIRO_DEL_BUCLE)
+    return () => window.clearTimeout(reloj)
+  }, [r.corre, r.bucle, paso, total, cadaMs])
   const reiniciar = useCallback(() => setTicks(0), [])
   return { paso, termino: paso >= total, avanzar: sumar, reiniciar }
 }

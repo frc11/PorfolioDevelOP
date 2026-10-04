@@ -1,5 +1,6 @@
 'use client'
 
+import { Pause, Play } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
@@ -16,7 +17,9 @@ import { ReproduccionDeLaDemo, usePestanaVisible, type Reproduccion } from './re
  * [RETOQUE PANEL] T1 · EN SU LUGAR: la demo se usa ahí mismo, en su tarjeta (la miniatura y la ampliación se fueron).
  *   · Escritorio: se dibuja a la pantalla de panel que necesita (`pantalla`, px) y se escala a la caja de la tarjeta, que
  *     tiene su misma proporción ([PASADA FINAL] B1: el panel entero a escala reducida, sin scroll adentro casi nunca).
- *   · Abajo de 1024: el ancho de la columna y su alto, sin escala: el diseño del propio panel en el teléfono.
+ *   · Abajo de 1024 ([AJUSTES FINALES] A8): el MISMO panel de escritorio a escala, como un video: sin puntero (nada que
+ *     tocar adentro), el guion en bucle (termina, respira y vuelve a empezar: `reproduccion.ts`) y sólo la que está en
+ *     pantalla se mueve; su botón de pausa va afuera de la escala, donde se puede tocar (WCAG 2.2.2).
  *   · Se mueve sola sólo a la vista y con la pestaña visible, con su «Pausar» (WCAG 2.2.2); con movimiento reducido, a mano.
  *     [PASADA FINAL] B3: y sólo LA MÁS VISIBLE de las que están en cuadro (`escenario.ts`); las demás, congeladas (sus
  *     pasos no avanzan y sus animaciones de CSS quedan pausadas).
@@ -94,8 +97,8 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
   }, [demo, pantalla.ancho])
   const Demo = DEMOS[demo]
   const corre = laMasVisible && pestana && !pausada && !reducido
-  const reproduccion: Reproduccion = { corre, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: pantalla.ancho >= ANCHO_CON_BARRA }
-  const escalada = escritorio && escala > 0
+  const reproduccion: Reproduccion = { corre, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: pantalla.ancho >= ANCHO_CON_BARRA, bucle: !escritorio }
+  const escalada = escala > 0
   return (
     <div ref={caja} className="absolute inset-0 overflow-hidden">
       {respaldo}
@@ -105,7 +108,7 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
           aria-label={`Demo de ${NOMBRE_DE_LA_DEMO[demo]}, con datos de ejemplo`}
           data-pieza="demo-del-panel"
           data-corre={corre ? '' : undefined}
-          className={`${escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'}${corre ? '' : ` ${CONGELADA}`}`}
+          className={`${escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'} max-escritorio:pointer-events-none${corre ? '' : ` ${CONGELADA}`}`}
           style={escalada ? { width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` } : undefined}
         >
           <button type="button" data-parte="saltar-la-demo" onClick={(e) => saltarLaDemo(e.currentTarget)} className="sr-only z-30 rounded-full bg-zinc-900 px-4 py-2 text-sm text-zinc-100 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus-visible:outline-2 focus-visible:outline-cyan-400">
@@ -117,6 +120,19 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
             </Suspense>
           </ReproduccionDeLaDemo.Provider>
         </div>
+      )}
+      {/* [AJUSTES FINALES] A8 · en el teléfono la demo es un video: su pausa va afuera de la escala, donde se puede tocar. */}
+      {montada && !reducido && (
+        <button
+          type="button"
+          data-parte="pausa-del-video"
+          onClick={() => setPausada((p) => !p)}
+          aria-pressed={pausada}
+          className="absolute right-[var(--spacing-3)] bottom-[var(--spacing-3)] z-30 flex size-[calc(var(--spacing-6)*1.5)] items-center justify-center rounded-full border border-white/10 bg-zinc-900/70 text-zinc-100 focus-visible:outline-2 focus-visible:outline-cyan-400 escritorio:hidden"
+        >
+          {pausada ? <Play className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> : <Pause className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
+          <span className="sr-only">{pausada ? 'Seguir la demo' : 'Pausar la demo'}</span>
+        </button>
       )}
     </div>
   )

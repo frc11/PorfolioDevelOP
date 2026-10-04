@@ -30,7 +30,8 @@ const TOPES = arranques()
  * El `<li>` se puede enfocar desde el código: es adonde lleva «Saltar la demo» de la anterior.
  *
  * [AJUSTES FINALES] A7 · la feature llega con `ventana-de-la-demo`: termina de subir cuando su pie cruza la mitad del cuadro
- * (más despacio que la ventana visible, que la dejaba llegada 240 px antes de salir).
+ * (más despacio que la ventana visible, que la dejaba llegada 240 px antes de salir). A8 · abajo de 1024 el marco ya no
+ * tiene un alto propio: es la misma caja a la proporción de su pantalla, y adentro el panel entero a escala, como un video.
  */
 export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta; readonly indice: number }): React.JSX.Element {
   const fila = TABLA_DEL_CAOS[indice]
@@ -38,7 +39,7 @@ export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta;
   const esLaUltima = indice === TABLA_DEL_CAOS.length - 1
   const idDelTitulo = useId()
   const lugar = { '--x': `${String(fila.columna)}%`, '--w': `${String(tamano.ancho)}%`, '--y': `${String(TOPES[indice])}svh` } as CSSProperties
-  const medidas = { '--proporcion': `${String(fila.pantalla.ancho)} / ${String(fila.pantalla.alto)}`, '--alto-angosto': `${String(fila.altoAngosto)}px` } as CSSProperties
+  const medidas = { '--proporcion': `${String(fila.pantalla.ancho)} / ${String(fila.pantalla.alto)}` } as CSSProperties
   const respaldo = <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(vwDe(fila), 88)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
 
   return (
@@ -57,7 +58,7 @@ export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta;
             <div
               data-parte="marco"
               style={medidas}
-              className="relative h-[var(--alto-angosto)] w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint escritorio:h-auto escritorio:aspect-[var(--proporcion)]"
+              className="relative aspect-[var(--proporcion)] w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint"
             >
               <DemoEnSuLugar demo={tarjeta.demo} pantalla={fila.pantalla} respaldo={respaldo} />
             </div>

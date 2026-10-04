@@ -13,7 +13,8 @@
  * Las columnas y los anchos van en % del ancho útil; la separación, en `svh`, para que la densidad —2 o 3 features en
  * pantalla— se sostenga con cualquier alto. El modelo de abajo es el que `s6-tu-panel` barre (nunca más de tres a la
  * vez, ningún título bajo otra imagen, ninguna fuera del cuadro). Hasta 72rem de contenido (un escritorio angosto) van
- * en una columna, con el eco del caos en los anchos alternados; abajo de 1024, a lo ancho y con su alto, sin escala.
+ * en una columna, con el eco del caos en los anchos alternados; abajo de 1024, en columna y cada demo el panel entero a
+ * escala, como un video ([AJUSTES FINALES] A8: el alto propio de abajo de 1024 se fue).
  *
  * Clases escritas enteras: el escáner de Tailwind lee este archivo tal cual.
  */
@@ -49,8 +50,6 @@ export interface FilaDelCaos {
   readonly separacion: number
   /** La pantalla de panel a la que se dibuja la demo (px): la tarjeta tiene su proporción y la escala a su ancho. */
   readonly pantalla: PantallaDeLaDemo
-  /** El alto de la demo abajo de 1024 (px): el ancho es el de la columna, sin escala. */
-  readonly altoAngosto: number
 }
 
 /**
@@ -65,14 +64,14 @@ export interface FilaDelCaos {
  * demasiado rápido una tras otra. REGLA DE ALTURAS: la tabla de secciones declara el alto nuevo (700svh, medido).
  */
 export const TABLA_DEL_CAOS: readonly FilaDelCaos[] = [
-  { columna: 42, tamano: 'l', separacion: 16, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 640 },
-  { columna: 4, tamano: 'l', separacion: 92, pantalla: { ancho: 1100, alto: 800 }, altoAngosto: 680 },
-  { columna: 50, tamano: 'm', separacion: 92, pantalla: { ancho: 960, alto: 780 }, altoAngosto: 660 },
-  { columna: 14, tamano: 's', separacion: 87, pantalla: { ancho: 760, alto: 720 }, altoAngosto: 680 },
-  { columna: 42, tamano: 'l', separacion: 87, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 680 },
-  { columna: 2, tamano: 'm', separacion: 92, pantalla: { ancho: 920, alto: 780 }, altoAngosto: 660 },
-  { columna: 54, tamano: 's', separacion: 40, pantalla: { ancho: 820, alto: 700 }, altoAngosto: 640 },
-  { columna: 6, tamano: 'l', separacion: 78, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 600 },
+  { columna: 42, tamano: 'l', separacion: 16, pantalla: { ancho: 1000, alto: 720 } },
+  { columna: 4, tamano: 'l', separacion: 92, pantalla: { ancho: 1100, alto: 800 } },
+  { columna: 50, tamano: 'm', separacion: 92, pantalla: { ancho: 960, alto: 780 } },
+  { columna: 14, tamano: 's', separacion: 87, pantalla: { ancho: 760, alto: 720 } },
+  { columna: 42, tamano: 'l', separacion: 87, pantalla: { ancho: 1000, alto: 720 } },
+  { columna: 2, tamano: 'm', separacion: 92, pantalla: { ancho: 920, alto: 780 } },
+  { columna: 54, tamano: 's', separacion: 40, pantalla: { ancho: 820, alto: 700 } },
+  { columna: 6, tamano: 'l', separacion: 78, pantalla: { ancho: 1000, alto: 720 } },
 ]
 
 /** El encabezado ocupa el 30 % izquierdo. */
