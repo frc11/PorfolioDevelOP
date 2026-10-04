@@ -71,10 +71,12 @@ const CLASES_DE_LA_RAMA = {
   // `overflow-x-clip`: el cartel termina su huida grande y oculto, y sin recorte la página se ensanchaba
   // a 584 px en un teléfono de 375 (el navegador la alejaba para que entrara). `clip` no crea caja de scroll.
   // MÓVIL 2: la sección crece lo que el túnel se estira (`ritmo.ts`) y el pin baja al bloque.
+  // [PASADA FINAL] D: el recorte, en todo ancho: en escritorio el margen del recorte del túnel (6 px, para los anillos de
+  // foco de sus anclas) dejaba al escenario escalado estirar la página a 1446 en 1440 (afuera del cuadro no se ve nada).
   animada: {
     seccion:
       'relative max-escritorio:[--estiramiento-en-uso:var(--estiramiento-tablet)] max-movil:[--estiramiento-en-uso:var(--estiramiento-movil)] max-escritorio:min-h-[calc(var(--alto-minimo-del-panel)+(var(--estiramiento-en-uso)-1)*var(--tunel-en-pantallas)*100svh)]',
-    bloque: 'relative h-full w-full max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh max-escritorio:overflow-x-clip',
+    bloque: 'relative h-full w-full overflow-x-clip max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh',
   },
 } as const
 

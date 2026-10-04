@@ -31,6 +31,7 @@
  *   B  · Tu panel: el caos del nocturno con las demos usables a escala, la rueda que no queda atrapada, el marco que flota,
  *        una sola demo corriendo; y la causa principal de los cuadros perdidos (segunda tanda): ningún `:has()` en la raíz
  *        con algo debajo (la barra se esconde con una marca que pone el formulario de contacto).
+ *   D  · la pasada senior: cada arreglo directo con lo que lo fija (desbordes, contraste, foco, tokens, rendimiento).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { createHash } from 'node:crypto'
@@ -690,5 +691,17 @@ const formularioB3 = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.
 const conLaMarca = (f: string, barra: string): boolean => /const v3 = raiz\.current\?\.closest\('\[data-v3\]'\) \?\? null\s*v3\?\.setAttribute\(MARCA_DEL_CONTACTO_ABIERTO, ''\)\s*return \(\) => v3\?\.removeAttribute\(MARCA_DEL_CONTACTO_ABIERTO\)/.test(f) && /<div ref=\{raiz\} data-pieza="contacto"/.test(f) && barra.includes('[data-v3][data-contacto-abierto] [data-pieza="barra"] > [data-parte="pastilla"] {') && MARCA_DEL_CONTACTO_ABIERTO === 'data-contacto-abierto'
 afirmar(conLaMarca(formularioB3, leer('_estilos/barra.css')), '  la barra se sigue escondiendo con el formulario abierto (también en su salida): el formulario pone la marca en la raíz al montarse y la saca al desmontarse (medido en vivo: abierto y saliendo, marca y pastilla en 0; cerrado, sin marca y en 1)')
 controlPositivo('el detector VE un formulario que no saca la marca', formularioB3.replace('return () => v3?.removeAttribute(MARCA_DEL_CONTACTO_ABIERTO)', 'return undefined'), (f: string) => conLaMarca(f, leer('_estilos/barra.css')))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D · La pasada senior: lo que se arregló directo, cada cosa con lo que la fija')
+
+// D1 · los 6 px de más en Trabajos a 1440: el margen del recorte del túnel (para los anillos de foco) se escapaba del cuadro.
+const trabajosD = sinComentarios(leer('_secciones/trabajos/Trabajos.tsx'))
+const bloqueRecortado = (c: string): boolean => {
+  const bloque = /animada: \{[\s\S]*?bloque: '([^']*)'/.exec(c)?.[1] ?? ''
+  return bloque.split(' ').includes('overflow-x-clip') && !bloque.includes('max-escritorio:overflow-x-clip')
+}
+afirmar(bloqueRecortado(trabajosD) && /overflowClipMargin: `\$\{MARGEN_DEL_RECORTE_PX\}px`/.test(sinComentarios(leer('_secciones/trabajos/CapaDelTunel.tsx'))), 'Trabajos recorta a lo ancho en todos los anchos (no sólo abajo de 1024): el túnel sigue pintando sus anillos de foco con su margen, y lo que ese margen deja afuera del cuadro ya no ensancha la página (medido: el documento mide lo que la ventana a 1440, 1024 y 390, en todo el recorrido; antes, 1446 a 1440)')
+controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.replace("'relative h-full w-full overflow-x-clip max-escritorio:sticky", "'relative h-full w-full max-escritorio:overflow-x-clip max-escritorio:sticky"), bloqueRecortado)
 
 cerrar('s47-pasada-final')
