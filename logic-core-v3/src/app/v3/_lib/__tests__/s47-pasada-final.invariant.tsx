@@ -23,8 +23,11 @@
  *   C2 · el pie llega por columnas (en 3D, desde 1025): el titular, el mail y WhatsApp desde atrás y abajo (las letras
  *        como Portfolio), el formulario como una tapa, lo demás en un fundido escalonado; tres tramos seguidos sobre la
  *        última pantalla, con su mínimo, que asientan por columna (función del scroll, como F2).
+ *   C3 · la sombra de los títulos en el piso vivo, con `?pruebas=sombratitulos=si` (apagada en el producto): la técnica de la
+ *        del logo (que queda igual byte por byte), de día con el sol, de noche quitándole luz al haz; cada letra donde está.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -47,11 +50,13 @@ import { PRUEBAS_APAGADAS, VARIANTES_DE_PORTFOLIO, entornoPedido } from '../esce
 import { GESTOS_DEL_PIE, LIBRE_DEL_PIE_S, TRAMOS_DEL_PIE, apareceDeLaPieza, asientoDelPie, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, salida, uniformesDelPie, type TramoDelPie, type UniformesDelPie } from '../escena/pie3d/coreografia'
 import { armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
 import { materialDelPie } from '../escena/pie3d/material'
+import { APLICAR_LA_SOMBRA_GLSL, SOMBRA_DEL_LOGO_GLSL, crearMapaDeLaSombra, materialDelMapa } from '../escena/sombra/delLogo'
+import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, CHARCO_CON_LOS_TITULOS_GLSL, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_GLSL, ajustarLaCamara, direccionDeLaLuz, fuerzasDeLaSombra, materialDeLaSombraDelTitulo } from '../escena/sombra/deLosTitulos'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../escena/finalDelRecorrido'
 import { poseDeLaLectura, type Lectura } from '../escena/titulos3d/colocacion'
-import { FORMA_DE_LAS_LETRAS, LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaDeLaLetra, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada, mostradoDelScroll, type FormaDeLaLlegada } from '../escena/titulos3d/llegada'
+import { DISOLVER_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaDeLaLetra, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada, mostradoDelScroll, type FormaDeLaLlegada } from '../escena/titulos3d/llegada'
 import { mismaForma } from '../escena/titulos3d/sincronia'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { LECTURA, LLEGADA_DE_PORTFOLIO, type TituloDeVolumen } from '../titulos3d/registro'
@@ -499,5 +504,55 @@ const elDomEspera = (c: string): boolean => {
 }
 afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la sombra en el piso va con la pieza en camino')
 controlPositivo('el detector VE el DOM que viaja con la pieza', armadasFuente.replace('a.viaje.matrix.identity()', '').replace('llegar(a, s)\n', 'llegar(a, s)\n    a.viaje.matrix.identity()\n'), elDomEspera)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C3 · La sombra de los títulos en el piso vivo, con `?pruebas=sombratitulos=si` (apagada en el producto): de día la del sol, de noche lo que le quitan al haz')
+
+afirmar(PRUEBAS_APAGADAS.sombratitulos === 'no' && entornoPedido('producto').pruebas.sombratitulos === 'no' && entornoPedido('producto,sombratitulos=otra').pruebas.sombratitulos === 'no' && entornoPedido('producto,sombratitulos=si').pruebas.sombratitulos === 'si', 'apagada en el producto; sólo `sombratitulos=si` la prende (Valentino decide)')
+const titulosC3 = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const pisoVivoC3 = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
+const bloquesC3 = sinComentarios(leer('_lib/escena/piso/bloques.ts'))
+const soloConLaBandera = (t: string, pv: string, bl: string): boolean => /\{entornoDeLaEscena\(\)\.pruebas\.sombratitulos === 'si' \? <SombraDeLosTitulos armados=\{\(\) => m\.current\.armados\} keyLightRef=\{keyLightRef\} \/> : null\}/.test(t) && /const conTitulos = entornoDeLaEscena\(\)\.pruebas\.sombratitulos === 'si'/.test(pv) && /\.\.\.\(conTitulos \? SOMBRA_DE_LOS_TITULOS_EN_VIVO : \{\}\),\s*\}, conContacto, conSombra, conTitulos\)/.test(pv) && bl.includes("${conSombra ? SOMBRA_DEL_LOGO_GLSL : ''}${conTitulos ? SOMBRA_DE_LOS_TITULOS_GLSL : ''}`") && bl.includes("${APLICAR_LAS_SOMBRAS_DEL_PIE_GLSL}${conTitulos ? `\n\t\t${APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL}` : ''}") && bl.includes("gl_FragColor.rgb += charcoDelHaz( vPiso.xz ) * uHaz${conTitulos ? CHARCO_CON_LOS_TITULOS_GLSL : ''};") && bl.includes("${conSombra ? '-sombra-del-logo' : ''}${conTitulos ? '-sombra-de-los-titulos' : ''}`")
+afirmar(soloConLaBandera(titulosC3, pisoVivoC3, bloquesC3), '  sin la bandera no se monta nada y el sombreador del piso es el de siempre, letra por letra (lo nuevo entra sólo con ella, con su propio programa)')
+controlPositivo('el detector VE la sombra montada siempre', titulosC3.replace("entornoDeLaEscena().pruebas.sombratitulos === 'si' ? <SombraDeLosTitulos", 'true ? <SombraDeLosTitulos'), (t: string) => soloConLaBandera(t, pisoVivoC3, bloquesC3))
+
+// La del logo no se tocó: la misma técnica, generalizada, con sus cifras por defecto (huellas tomadas antes del cambio).
+const huella = (s: string): string => createHash('sha256').update(s).digest('hex').slice(0, 16)
+const mapaDelLogo = crearMapaDeLaSombra()
+const desenfoqueDelLogo = mapaDelLogo.desenfoque.escena.children[0] as THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>
+const materialDelLogo = materialDelMapa()
+const huellasDelLogo = [huella(SOMBRA_DEL_LOGO_GLSL), huella(APLICAR_LA_SOMBRA_GLSL), huella(materialDelLogo.vertexShader), huella(materialDelLogo.fragmentShader), huella(desenfoqueDelLogo.material.vertexShader), huella(desenfoqueDelLogo.material.fragmentShader)].join(' ')
+afirmar(huellasDelLogo === '4aa416f79b7aa847 b1f90f07d0eb5e67 6d148c00feb63165 39cc5e0d40066745 ff349f9b99ca6ea6 e6cc9d8f63e2778e' && mapaDelLogo.bufer.width === 256 && mapaDelLogo.camara.right === 4.4 && mapaDelLogo.camara.far === 40, 'la sombra del logo, la misma byte por byte (sus sombreadores, su mapa de 256 y su caja): la técnica se generalizó sin moverla')
+mapaDelLogo.soltar()
+
+// La de los títulos: su mapa, su lectura (lo que el mapa no tapa es luz) y cómo se aplica de día y de noche.
+const P3 = SOMBRA_DE_LOS_TITULOS
+afirmar(P3.resolucion === 512 && P3.lejos === 120 && P3.fuerza === 0.32 && P3.fuerzaDeNoche === 0.8 && SOMBRA_DE_LOS_TITULOS_GLSL.includes('float sombraDeLosTitulos( vec3 mundo )') && SOMBRA_DE_LOS_TITULOS_GLSL.includes('if ( receptor <= m.x || m.x > 0.999 ) return 0.0;') && APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL.includes('mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, sombraDeLosTitulosAca * uFuerzaDeLosTitulos )') && CHARCO_CON_LOS_TITULOS_GLSL === ' * ( 1.0 - sombraDeLosTitulosAca * uNocheDeLosTitulos )', 'su mapa (512, una caja que abraza a los que se ven), de día oscurece hacia el color del contacto como la del logo, de noche le quita luz al charco del haz; lo que el mapa no tapa es luz (con el sol bajo, el piso lejano no se oscurece)')
+const fDia = fuerzasDeLaSombra(1, 0)
+const fNoche = fuerzasDeLaSombra(1, 1)
+const fMedia = fuerzasDeLaSombra(0.5, 0.5)
+afirmar(fDia.dia === 0.32 && fDia.noche === 0 && fNoche.dia === 0 && fNoche.noche === 0.8 && Math.abs(fMedia.dia - 0.08) < 1e-9 && Math.abs(fMedia.noche - 0.4) < 1e-9, '  cuánto: de día con el nivel de la principal y el día que hay; de noche, con la noche (sin saltos entre las dos)')
+const sol = new THREE.Vector3(-6, 9, 4)
+const [deDia, deNoche, entre] = [0, 1, 0.5].map((n) => direccionDeLaLuz(sol, n, new THREE.Vector3()))
+afirmar(deDia.distanceTo(sol.clone().normalize()) < 1e-9 && deNoche.distanceTo(new THREE.Vector3(0, 1, 0)) < 1e-9 && entre.y > deDia.y && entre.y < 1, '  desde dónde: el sol de día, desde arriba de noche (el haz es cenital), entre los dos con la noche')
+const camaraC3 = new THREE.OrthographicCamera()
+const camaraSana = (direccion: THREE.Vector3): boolean => {
+  ajustarLaCamara(camaraC3, new THREE.Sphere(new THREE.Vector3(2, 6, -3), 4), direccion)
+  return camaraC3.matrixWorld.elements.every(Number.isFinite) && Math.abs(camaraC3.right - 4 * P3.margen) < 1e-9 && camaraC3.position.distanceTo(new THREE.Vector3(2, 6, -3).addScaledVector(direccion, P3.lejos / 2)) < 1e-9 && Math.abs(camaraC3.up.dot(direccion)) < 1e-6
+}
+afirmar(camaraSana(deDia) && camaraSana(deNoche), '  la cámara de la luz abraza a los títulos (con aire) desde su luz; de noche mira derecho hacia abajo sin quedar indefinida (su arriba nunca es la luz)')
+// Cada letra proyecta donde está: el mapa repite la llegada del título (con SUS uniformes) y su disuelto.
+const uniformesDelTitulo = { uLlegada: { value: 0.3 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: 0 }, uPieDeLaPalabra: { value: new THREE.Vector2() }, uTrazos: { value: new THREE.Vector4() } }
+const deLaSombra = materialDeLaSombraDelTitulo({ pars: LLEGADA_PARS_GLSL, normal: LLEGADA_NORMAL_GLSL, posicion: LLEGADA_POSICION_GLSL }, uniformesDelTitulo)
+const conSuLlegada = (mat: THREE.ShaderMaterial, u: Record<string, THREE.IUniform>): boolean => {
+  const v = mat.vertexShader
+  const orden = [v.indexOf(LLEGADA_PARS_GLSL), v.indexOf('vec3 objectNormal = vec3( normal );'), v.indexOf(LLEGADA_NORMAL_GLSL), v.indexOf('vec3 transformed = vec3( position );'), v.indexOf(LLEGADA_POSICION_GLSL), v.indexOf('vec4 vista = viewMatrix * modelMatrix * vec4( transformed, 1.0 );')]
+  return orden.every((k, i) => k >= 0 && (i === 0 || k > orden[i - 1])) && mat.fragmentShader.indexOf(DISOLVER_GLSL) > 0 && mat.fragmentShader.indexOf(DISOLVER_GLSL) < mat.fragmentShader.indexOf('gl_FragColor = vec4( d,') && mat.uniforms === u && mat.uniforms.uLlegada === u.uLlegada
+}
+afirmar(conSuLlegada(deLaSombra, uniformesDelTitulo), '  cada letra proyecta donde está: el material del mapa hace la llegada de su título con sus mismos uniformes (en el mismo cuadro) y su tramado (una letra que aparece, aparece su sombra)')
+controlPositivo('el detector VE un mapa con las letras quietas (sus propios uniformes)', { ...uniformesDelTitulo }, (u: Record<string, THREE.IUniform>) => conSuLlegada(deLaSombra, u))
+deLaSombra.dispose()
+const copiaC3 = sinComentarios(leer('_lib/escena/titulos3d/SombraDeLosTitulos.tsx'))
+afirmar(/c\.copia\.matrixWorld\.copy\(a\.malla\.matrixWorld\)/.test(copiaC3) && /c\.copia\.visible = a\.malla\.visible/.test(copiaC3) && /const material = materialDeLaSombraDelTitulo\(llegada, a\.uniforms\)/.test(copiaC3) && /const propia = !mismaLlegada\(forma, FORMA_DE_LAS_LETRAS\)/.test(copiaC3), '  una copia por título armado (su geometría, su llegada —también la de una prueba de Portfolio—, su matriz y si se ve, en cada cuadro); sin luz o sin títulos a la vista, no se dibuja')
 
 cerrar('s47-pasada-final')

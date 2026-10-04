@@ -93,10 +93,12 @@ export interface Pruebas {
    * la de ESCENA 10 naciendo el doble de lejos; con la cámara de entonces en ese tramo (`camaraDeEntonces.ts`).
    */
   readonly portfolio: VarianteDePortfolio | 'no'
+  /** [PASADA FINAL] C3 · `sombratitulos=si`: los títulos de volumen proyectan su sombra en el piso vivo (`sombra/deLosTitulos.ts`). */
+  readonly sombratitulos: 'si' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. [PASADA FINAL] B2: `panelborde=a|b` se borró (las demos de Tu panel van con esquinas redondeadas y sombra). */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', portfolio: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', portfolio: 'no', sombratitulos: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -105,7 +107,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), portfolio: unoDe<VarianteDePortfolio>(VARIANTES_DE_PORTFOLIO, valor('portfolio')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), portfolio: unoDe<VarianteDePortfolio>(VARIANTES_DE_PORTFOLIO, valor('portfolio')), sombratitulos: unoDe<'si'>(['si'], valor('sombratitulos')) }
 }
 
 export interface Entorno {

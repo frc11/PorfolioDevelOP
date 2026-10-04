@@ -46,16 +46,30 @@ export const SOMBRA_EN_VIVO = {
 const S = SOMBRA_DEL_LOGO
 const f = (x: number): string => x.toFixed(6)
 
+/**
+ * [PASADA FINAL] C3 · lo que distingue un mapa de otro: el del logo (por defecto, sus cifras de siempre) y el de los
+ * títulos (`deLosTitulos.ts`, con la prueba `sombratitulos`). La técnica es la misma; cambian la caja, la resolución, la
+ * penumbra y cómo se llaman sus uniformes en el piso.
+ */
+export interface ParametrosDelMapa {
+  readonly resolucion: number
+  readonly radio: number
+  readonly lejos: number
+  readonly desenfoque: { readonly pasadas: number; readonly sigma: number }
+  readonly varianzaMinima: number
+  readonly sangrado: number
+}
+
 /** El material del mapa: los dos momentos de la profundidad lineal a lo largo de la luz (0 a 1 en la caja). */
-export function materialDelMapa(): THREE.ShaderMaterial {
+export function materialDelMapa(p: ParametrosDelMapa = S, nombre = 'sombra del logo'): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    name: 'sombra del logo · profundidad',
+    name: `${nombre} · profundidad`,
     side: THREE.DoubleSide,
     vertexShader: /* glsl */ `
 varying float vProfundidad;
 void main() {
 	vec4 vista = viewMatrix * modelMatrix * vec4( position, 1.0 );
-	vProfundidad = - vista.z / ${f(S.lejos)};
+	vProfundidad = - vista.z / ${f(p.lejos)};
 	gl_Position = projectionMatrix * vista;
 }`,
     fragmentShader: /* glsl */ `
@@ -71,12 +85,12 @@ void main() {
 }
 
 /** Una pasada del desenfoque: 9 muestras gaussianas en `uPaso` (un texel en x o en y). */
-function materialDelDesenfoque(): THREE.ShaderMaterial {
-  const w = Array.from({ length: 5 }, (_, i) => Math.exp(-(i * i) / (2 * S.desenfoque.sigma * S.desenfoque.sigma)))
+function materialDelDesenfoque(p: ParametrosDelMapa, nombre: string): THREE.ShaderMaterial {
+  const w = Array.from({ length: 5 }, (_, i) => Math.exp(-(i * i) / (2 * p.desenfoque.sigma * p.desenfoque.sigma)))
   const suma = w[0] + 2 * (w[1] + w[2] + w[3] + w[4])
   const pesos = w.map((x) => (x / suma).toFixed(6))
   return new THREE.ShaderMaterial({
-    name: 'sombra del logo · desenfoque',
+    name: `${nombre} · desenfoque`,
     uniforms: { uMapa: { value: null }, uPaso: { value: new THREE.Vector2() } },
     depthTest: false,
     depthWrite: false,
@@ -98,30 +112,43 @@ void main() {
   })
 }
 
-/** En el piso: `sombraDelLogo( mundo )`, de 0 (a la luz) a 1 (del todo a la sombra). Una lectura. */
-export const SOMBRA_DEL_LOGO_GLSL = /* glsl */ `
-uniform sampler2D uMapaDeLaSombra;
-uniform mat4 uLuzDeLaSombra;
-uniform mat4 uVistaDeLaSombra;
-uniform float uFuerzaDeLaSombra;
-float sombraDelLogo( vec3 mundo ) {
-	if ( uFuerzaDeLaSombra <= 0.001 ) return 0.0;
-	vec4 recorte = uLuzDeLaSombra * vec4( mundo, 1.0 );
+/** Los nombres de una sombra en el piso: su función y sus uniformes (el mapa, la luz, la vista y cuánto oscurece). */
+export interface NombresDeLaSombra {
+  readonly funcion: string
+  readonly mapa: string
+  readonly luz: string
+  readonly vista: string
+  readonly fuerza: string
+}
+
+/** En el piso: `<funcion>( mundo )`, de 0 (a la luz) a 1 (del todo a la sombra). Una lectura. */
+export function sombraProyectadaGlsl(n: NombresDeLaSombra, p: ParametrosDelMapa): string {
+  return /* glsl */ `
+uniform sampler2D ${n.mapa};
+uniform mat4 ${n.luz};
+uniform mat4 ${n.vista};
+uniform float ${n.fuerza};
+float ${n.funcion}( vec3 mundo ) {
+	if ( ${n.fuerza} <= 0.001 ) return 0.0;
+	vec4 recorte = ${n.luz} * vec4( mundo, 1.0 );
 	vec2 uv = recorte.xy * 0.5 + 0.5;
 	if ( uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0 ) return 0.0;
-	float receptor = - ( uVistaDeLaSombra * vec4( mundo, 1.0 ) ).z / ${f(S.lejos)};
-	vec2 m = texture2D( uMapaDeLaSombra, uv ).rg;
+	float receptor = - ( ${n.vista} * vec4( mundo, 1.0 ) ).z / ${f(p.lejos)};
+	vec2 m = texture2D( ${n.mapa}, uv ).rg;
 	if ( receptor <= m.x ) return 0.0;
 	// Chebyshev: la cota de cuánta luz pasa, con el sangrado cortado (una sola capa proyecta: casi no hay).
-	float varianza = max( m.y - m.x * m.x, ${f(S.varianzaMinima)} );
+	float varianza = max( m.y - m.x * m.x, ${f(p.varianzaMinima)} );
 	float d = receptor - m.x;
 	float luz = varianza / ( varianza + d * d );
-	luz = clamp( ( luz - ${S.sangrado.toFixed(3)} ) / ${(1 - S.sangrado).toFixed(3)}, 0.0, 1.0 );
+	luz = clamp( ( luz - ${p.sangrado.toFixed(3)} ) / ${(1 - p.sangrado).toFixed(3)}, 0.0, 1.0 );
 	// El borde de la caja de la luz, sin corte.
 	vec2 alBorde = min( uv, 1.0 - uv );
 	return ( 1.0 - luz ) * smoothstep( 0.0, 0.04, min( alBorde.x, alBorde.y ) );
 }
 `
+}
+
+export const SOMBRA_DEL_LOGO_GLSL = sombraProyectadaGlsl({ funcion: 'sombraDelLogo', mapa: 'uMapaDeLaSombra', luz: 'uLuzDeLaSombra', vista: 'uVistaDeLaSombra', fuerza: 'uFuerzaDeLaSombra' }, S)
 
 /** La línea que la aplica en el piso (en el espacio del búfer, como la mancha). */
 export const APLICAR_LA_SOMBRA_GLSL = /* glsl */ `gl_FragColor.rgb = mix( gl_FragColor.rgb, COLOR_DEL_CONTACTO, sombraDelLogo( vPiso ) * uFuerzaDeLaSombra );`
@@ -138,30 +165,30 @@ export interface MapaDeLaSombra {
   readonly soltar: () => void
 }
 
-export function crearMapaDeLaSombra(): MapaDeLaSombra {
+export function crearMapaDeLaSombra(p: ParametrosDelMapa = S, nombre = 'sombra del logo'): MapaDeLaSombra {
   // Flotante de 32 bits: la varianza es una resta de dos números parecidos (con medio punto se la comía el redondeo).
   const opciones = { type: THREE.FloatType, format: THREE.RGBAFormat, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false }
-  const bufer = new THREE.WebGLRenderTarget(S.resolucion, S.resolucion, { ...opciones, depthBuffer: true })
-  bufer.texture.name = 'sombra del logo · mapa'
-  const paso = new THREE.WebGLRenderTarget(S.resolucion, S.resolucion, { ...opciones, depthBuffer: false })
-  paso.texture.name = 'sombra del logo · desenfoque'
+  const bufer = new THREE.WebGLRenderTarget(p.resolucion, p.resolucion, { ...opciones, depthBuffer: true })
+  bufer.texture.name = `${nombre} · mapa`
+  const paso = new THREE.WebGLRenderTarget(p.resolucion, p.resolucion, { ...opciones, depthBuffer: false })
+  paso.texture.name = `${nombre} · desenfoque`
   const escena = new THREE.Scene()
-  escena.name = 'sombra del logo'
+  escena.name = nombre
   escena.background = new THREE.Color(1, 1, 1) // lo que no tapa: lejos
-  const camara = new THREE.OrthographicCamera(-S.radio, S.radio, S.radio, -S.radio, 0.05, S.lejos)
-  const material = materialDelMapa()
-  const desenfoque = materialDelDesenfoque()
+  const camara = new THREE.OrthographicCamera(-p.radio, p.radio, p.radio, -p.radio, 0.05, p.lejos)
+  const material = materialDelMapa(p, nombre)
+  const desenfoque = materialDelDesenfoque(p, nombre)
   const cuadrado = new THREE.PlaneGeometry(2, 2)
   const malla = new THREE.Mesh(cuadrado, desenfoque)
-  malla.name = 'sombra del logo · desenfoque'
+  malla.name = `${nombre} · desenfoque`
   malla.frustumCulled = false
   const escenaDelDesenfoque = new THREE.Scene()
   escenaDelDesenfoque.add(malla)
   const camaraDelDesenfoque = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
-  const texel = 1 / S.resolucion
+  const texel = 1 / p.resolucion
   const desenfocar = (gl: THREE.WebGLRenderer): void => {
     const u = desenfoque.uniforms
-    for (let k = 0; k < S.desenfoque.pasadas; k += 1) {
+    for (let k = 0; k < p.desenfoque.pasadas; k += 1) {
       u.uMapa.value = bufer.texture
       ;(u.uPaso.value as THREE.Vector2).set(texel, 0)
       gl.setRenderTarget(paso)

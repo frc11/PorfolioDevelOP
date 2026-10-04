@@ -15,6 +15,7 @@ import { FLOOR_RADIUS, FLOOR_Y, PAPER_COLOR } from '../probeScene'
 import { conElAmanecer } from '../amanecer/luz'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
+import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, geometriaDelBloque, grillaDelPiso, type Grilla } from './bloques'
@@ -203,6 +204,8 @@ function alCuadro(armado: ReturnType<typeof armar>, haz: number, principal: THRE
 
 function armar(grilla: Grilla, conContacto: boolean) {
   const conSombra = entornoDeLaEscena().sombraDelLogo
+  // [PASADA FINAL] C3 · con la prueba `sombratitulos`, la sombra de los títulos (de día; de noche, lo que le quitan al haz).
+  const conTitulos = entornoDeLaEscena().pruebas.sombratitulos === 'si'
   const uAlturas: { value: THREE.Texture | null } = { value: null }
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
@@ -241,7 +244,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     ...MANCHA_EN_EL_PISO,
     // [ESCENA 10] T1 · la sombra proyectada del logo (era la prueba T3 de ESCENA 9).
     ...(conSombra ? SOMBRA_EN_VIVO : {}),
-  }, conContacto, conSombra)
+    ...(conTitulos ? SOMBRA_DE_LOS_TITULOS_EN_VIVO : {}),
+  }, conContacto, conSombra, conTitulos)
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   conLaOndaEnElPiso(material)

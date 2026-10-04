@@ -18,6 +18,7 @@ import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
 import { llevarLosAcompanantes } from './acompanantes'
 import { sincronizar, soltarTodos } from './sincronia'
+import { SombraDeLosTitulos } from './SombraDeLosTitulos'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -159,7 +160,13 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
   })
 
-  return <group ref={raiz} name="titulos de volumen" />
+  // [PASADA FINAL] C3 · con la prueba, su sombra en el piso vivo (`sombra/deLosTitulos.ts`).
+  return (
+    <>
+      <group ref={raiz} name="titulos de volumen" />
+      {entornoDeLaEscena().pruebas.sombratitulos === 'si' ? <SombraDeLosTitulos armados={() => m.current.armados} keyLightRef={keyLightRef} /> : null}
+    </>
+  )
 }
 
 /** Al cambiar el tamaño del cuadro, cada título se vuelve a colocar en su próxima llegada (o ya, si está a la vista). */
