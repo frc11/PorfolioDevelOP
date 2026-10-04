@@ -17,6 +17,7 @@ import { ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { CTA, FRASE, NOMBRE_DE_SECCION, VALORES, type Valor } from './contenido'
 import {
   ESTILO_DEL_ESCENARIO,
+  ESTILO_DE_LA_LISTA,
   SUBIDA_DE_LA_FRASE_SVH,
   SUBIDA_DE_LA_LEVANTADA_SVH,
   VENTANA_DEL_CTA,
@@ -125,10 +126,11 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         {/* Los valores: tres a la izquierda del logo y tres a la derecha. */}
         {/* Cada columna es un contenedor: a 1024×768 mide 159 px y, con el aire de siempre, la de la derecha se desbordaba 41 px. */}
         {/* [FINAL 3] Cada columna mide lo que su mitad del título (una copia invisible le da el ancho) y se pega a su lado del logo: simétricas. */}
-        <div ref={valoresDeLaIzquierda} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+        <div ref={valoresDeLaIzquierda} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] right-[calc(50%+var(--hueco-de-los-valores))] flex w-min flex-col">
           <AnchoDeLaFrase texto={FRASE.izquierda} />
-          {/* El contenedor va adentro: con contención de tamaño no aportaría ancho y la columna mediría 0. */}
-          <div className="@container">
+          {/* El contenedor va adentro: con contención de tamaño no aportaría ancho y la columna mediría 0. [PASADA FINAL] D3:
+              la columna es flex (era una grilla `auto 1fr` escrita a mano): el ancho de la frase arriba y esto, el resto. */}
+          <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(0, 3).map((valor, i) => (
                 <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
@@ -136,9 +138,9 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
             </ul>
           </div>
         </div>
-        <div ref={valoresDeLaDerecha} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[calc(50%+var(--hueco-de-los-valores))] grid w-min grid-rows-[auto_1fr]">
+        <div ref={valoresDeLaDerecha} className="absolute top-[var(--arriba-de-los-valores)] bottom-[var(--abajo-de-los-valores)] left-[calc(50%+var(--hueco-de-los-valores))] flex w-min flex-col">
           <AnchoDeLaFrase texto={FRASE.derecha} />
-          <div className="@container">
+          <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(3).map((valor, i) => (
                 <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
@@ -269,7 +271,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           ))}
         </ul>
         {/* [FINAL 3] Separado de los valores, en su propio espacio; centrado desde tablet. */}
-        <div data-pieza="cta-del-final" className="flex min-h-[70svh] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
+        <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
           <Llega>
             <Titular nivel="titulo-xl" como="p">
               {CTA.frase}

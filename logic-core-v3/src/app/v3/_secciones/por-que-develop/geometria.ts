@@ -44,6 +44,13 @@ const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 10
 export const ARRIBA_DEL_CTA_SVH = pieDelLogo(POSES_DEL_FINAL.cta.distance) + AIRE_SVH
 export const ABAJO_DEL_CTA_SVH = 4
 
+/**
+ * [PASADA FINAL] D3 · el alto del CTA en la lista (abajo de 1024 y con menos movimiento), en `svh`: era un `70svh` escrito
+ * en la clase, que s6-tokens marca (un literal con unidad y un arbitrario sin token). Ahora sale de acá, como los demás.
+ */
+export const ALTO_DEL_CTA_EN_LISTA_SVH = 70
+export const ESTILO_DE_LA_LISTA = { '--alto-del-cta-en-lista': `${String(ALTO_DEL_CTA_EN_LISTA_SVH)}svh` } as CSSProperties
+
 /** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
 export const ESTILO_DEL_ESCENARIO = {
   '--arriba-del-cta': `${ARRIBA_DEL_CTA_SVH.toFixed(1)}svh`,

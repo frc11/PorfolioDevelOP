@@ -51,7 +51,7 @@ import { seccionDe } from '../../_secciones/_contrato/forma'
 import { TABLA_DEL_CAOS, TAMANOS } from '../../_secciones/tu-panel/geometria'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { Hero } from '../../_secciones/hero/Hero'
-import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
+import { ALTO_DEL_CTA_EN_LISTA_SVH, VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
 import { pantallasDe } from '../escena/anclaje'
 import { CURVAS } from '../motion/curvas'
 import { ACENTOS_DEL_ENJAMBRE, FISICA_DEL_ENJAMBRE, VERTICE_DEL_ENJAMBRE, resorteDelEnjambre, tramoDelEnjambre } from '../nanobots/enjambre'
@@ -719,5 +719,12 @@ afirmar(despinteDelTitulo(tituloConTrazos([{ avance: 0.6, despinta: true }])) ==
 const conElDespinte = (a: string, e: string): boolean => a.includes(".replace('#include <common>', '#include <common>\\nuniform float uDespinte;')") && a.includes('${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}\\n${DESPINTE_GLSL}') && /const DESPINTE_GLSL = `\\tdiffuseColor\.rgb = mix\( diffuseColor\.rgb, vec3\( \$\{despintado\.r\.toFixed\(5\)\}, \$\{despintado\.g\.toFixed\(5\)\}, \$\{despintado\.b\.toFixed\(5\)\} \), uDespinte \);`/.test(a) && (e.match(/a\.uniforms\.uDespinte\.value = despinteDelTitulo\(a\.titulo\)/g) ?? []).length === 2
 afirmar(conElDespinte(armadoD2, escenaD2), '  el negro mezcla sus letras (y su raya) hacia ese gris con el despinte, que la escena escribe en cada cuadro (en los dos caminos: el que se queda y el que va con el scroll) — medido en vivo: tachado entero, «lo mismo de siempre» queda gris y «no» negro, como en el DOM')
 controlPositivo('el detector VE la escena que no escribe el despinte', escenaD2.replace('a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)', ''), (e: string) => conElDespinte(armadoD2, e))
+
+
+// D3 · Por qué develOP sin valores escritos a mano (s6-tokens fallaba desde FINAL 3: un `70svh` y una grilla `auto 1fr`).
+const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const sinAMano = (c: string): boolean => !/\b70svh\b|grid-rows-\[auto_1fr\]/.test(c) && /<div data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\} className="flex min-h-\[var\(--alto-del-cta-en-lista\)\]/.test(c) && (c.match(/<div className="@container min-h-0 flex-1">/g) ?? []).length === 2
+afirmar(sinAMano(porQueD3) && ALTO_DEL_CTA_EN_LISTA_SVH === 70, 'el alto del CTA de la lista sale de la geometría (70 svh, como era) y las columnas de valores son flex (el ancho de la frase arriba y el contenedor, el resto): s6-tokens vuelve a verde (medido: columnas de 626 px de alto con su contenedor entero a 1440; CTA de 590,8 px a 390×844)')
+controlPositivo('el detector VE el 70svh escrito a mano', porQueD3.replace('min-h-[var(--alto-del-cta-en-lista)]', 'min-h-[70svh]'), sinAMano)
 
 cerrar('s47-pasada-final')
