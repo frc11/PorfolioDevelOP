@@ -5,11 +5,9 @@ import { Fragment, useRef, useState } from 'react'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { PortfolioDePrueba } from '../../_componentes/titulos3d/PortfolioDePrueba'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
-import { useVarianteDePortfolio } from '../../_lib/titulos3d/variantesDePortfolio'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
@@ -130,18 +128,19 @@ export function PortadaDeTrabajos({
   const [huidaInicial] = useState(() => enLaVentana(progreso.get(), HUIDA_DEL_CARTEL.bajando))
   /** Cuánto huyó el cartel. La histéresis necesita el cuadro anterior. */
   const huida = useRef(huidaInicial)
-  /** [ESCENA 10] T3 · para el título de volumen del titular. [RETOQUE 3D] B1: sin salida propia; 1 lo esconde, con la primera foto tapando el cuadro. */
+  /**
+   * [ESCENA 10] T3 · para el título de volumen del titular. [RETOQUE 3D] B1: sin salida propia; 1 lo esconde, con la primera
+   * foto tapando el cuadro. [AJUSTES FINALES] A1: y nada más: una sola transición (la llegada y su inversa, antes de la
+   * sección); pasada la llegada el título queda armado, se queda hasta que lo tapa el túnel y vuelve armado desde abajo.
+   * La huida del cartel es del DOM: al título de volumen no lo mueve.
+   */
   const salidaDelTitulo = useMotionValue(primeraFotoTapa(progreso.get()) ? 1 : 0)
-  // [PASADA FINAL] 0 · con una prueba de su llegada (`?pruebas=portfolio=…`), el título se va con la huida, como entonces.
-  const variante = useVarianteDePortfolio()
-  const huidaDelTitulo = useMotionValue(huidaInicial)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
     huida.current = huidaConHisteresis(huida.current, p, HUIDA_DEL_CARTEL)
     salidaDelTitulo.set(primeraFotoTapa(p) ? 1 : 0)
-    huidaDelTitulo.set(huida.current)
     const pose = poseDeLaHuida(huida.current)
     if (pose === null) {
       el.style.setProperty('visibility', 'hidden')
@@ -203,11 +202,7 @@ export function PortadaDeTrabajos({
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
                 <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
                   <ConInercia>
-                    {variante === 'no' ? (
-                      <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} queda />
-                    ) : (
-                      <PortfolioDePrueba variante={variante} texto={CONTENIDO.titular} llegada={progresoDeLaMascara} huida={huidaDelTitulo} llegadaDe={seccion.id} />
-                    )}
+                    <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} queda />
                   </ConInercia>
                 </Titular>
               </CanalDeUnaPieza>

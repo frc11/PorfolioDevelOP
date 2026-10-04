@@ -317,7 +317,7 @@ export function OrbitRig({
       }
 
       const progress = rigValues.progress
-      // [PASADA FINAL] 0 · con una prueba de Portfolio, la cámara de entonces en su tramo (`camaraDeEntonces.ts`).
+      // [AJUSTES FINALES] A1 · la cámara de ESCENA 10 en el tramo de Portfolio (`camaraDeEntonces.ts`); sólo la cámara.
       sampleTrack(track, progresoDeLaCamara(progress), target)
       sampleLightArc(progress, arc)
       // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.

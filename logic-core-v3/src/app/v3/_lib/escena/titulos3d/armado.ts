@@ -118,7 +118,7 @@ export function avancesDeLasRayas(titulo: TituloDeVolumen, destino: THREE.Vector
 
 export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   const fuente = FUENTES[titulo.fuente]
-  // [PASADA FINAL] 0 · la forma de su llegada: la de siempre o la de una prueba de Portfolio, con su propio programa.
+  // [PASADA FINAL] 0 · la forma de su llegada: la de siempre, o una propia con su propio programa (hoy ninguno la trae).
   const forma = titulo.forma ?? FORMA_DE_LAS_LETRAS
   const propia = !mismaLlegada(forma, FORMA_DE_LAS_LETRAS)
   const glsl = propia ? { pars: llegadaParsGlsl(forma), normal: llegadaNormalGlsl(forma), posicion: llegadaPosicionGlsl(forma) } : { pars: LLEGADA_PARS_GLSL, normal: LLEGADA_NORMAL_GLSL, posicion: LLEGADA_POSICION_GLSL }

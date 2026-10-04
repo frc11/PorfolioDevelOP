@@ -1,21 +1,21 @@
-import { entornoDeLaEscena } from './entorno'
-
 /**
- * [PASADA FINAL] 0 · LA CÁMARA DE ENTONCES, con las pruebas de la llegada de Portfolio (`?pruebas=portfolio=…`).
+ * [AJUSTES FINALES] A1 · LA CÁMARA DE ESCENA 10 EN EL TRAMO DE PORTFOLIO — la del producto. (Era la prueba
+ * `?pruebas=portfolio=…` de PASADA FINAL 0; Valentino eligió e10, que es la llegada de ESCENA 10 vista con esta cámara.)
  *
  * El mapeo scroll → progreso es proporcional a los altos DECLARADOS de las secciones. Hasta el nocturno Tu panel declaraba
  * 200svh midiendo bastante más, y la cámara del tramo de Portfolio iba ~0,03 de progreso ATRÁS: cuando llegaban las letras
  * todavía giraba de Quiénes somos a Números (8 a 13° de órbita durante la llegada), y eso es lo que hacía que se vieran
- * venir de lejos. RETOQUE PANEL T3 corrigió la tabla y la cámara de ese tramo se adelantó: hoy las letras llegan con la
- * órbita casi terminada y se ven de frente, cortas. Con la prueba, la cámara se mueve como entonces en ese tramo y como
- * hoy en el resto (sólo la cámara: la luz, la noche y todo lo demás siguen al scroll como hoy).
+ * venir de lejos. RETOQUE PANEL T3 corrigió la tabla y la cámara de ese tramo se adelantó: las letras llegaban con la
+ * órbita casi terminada y se veían de frente, cortas. Acá la cámara se mueve como entonces en ese tramo y como la tabla
+ * de hoy en el resto (sólo la cámara: la luz, la noche y todo lo demás siguen al scroll con la tabla de hoy).
  *
- * `PARES`: el progreso de hoy y el de entonces EN EL MISMO SCROLL, a 1440×900, cada 60 px de 4173 a 7473 (de Quiénes
- * somos al medio de Trabajos): el de entonces, de `escena10/t3-titulos/lectura-1440.json` (ESCENA 10, medido con
+ * `PARES`: el progreso de la tabla de hoy y el de entonces EN EL MISMO SCROLL, a 1440×900, cada 60 px de 4173 a 7473 (de
+ * Quiénes somos al medio de Trabajos): el de entonces, de `escena10/t3-titulos/lectura-1440.json` (ESCENA 10, medido con
  * `scripts-escena10/t3-lectura.ts`); el de hoy, de `scripts-pasada/p0-camara.ts`. Antes del primero, la de entonces se va
  * atrasando de a poco desde el comienzo de Quiénes somos (`TRAMO.desde`); después del último, alcanza a la de hoy antes
  * del nudo de las demos (`TRAMO.hasta`). En otros anchos se usa la misma cuenta en progreso (aproximada). Si la tabla de
- * secciones vuelve a cambiar, se corre el banco y se pegan sus pares.
+ * secciones vuelve a cambiar ANTES de Trabajos, se corre el banco y se pegan sus pares (la cuenta es en progreso: lo que
+ * se alargue después de Trabajos no la mueve).
  */
 export const PARES_DE_LA_CAMARA: readonly (readonly [number, number])[] = [
   [0.41152, 0.38937], [0.41564, 0.39317], [0.41976, 0.39697], [0.42388, 0.40077], [0.428, 0.40457], [0.43212, 0.40837],
@@ -53,7 +53,7 @@ export function comoEntonces(p: number): number {
   return ea + ((p - ha) / (hb - ha)) * (eb - ea)
 }
 
-/** El progreso con que se muestrea la cámara: el de hoy, o con una prueba de Portfolio el de entonces. */
+/** El progreso con que el rig muestrea la cámara: el de entonces en el tramo de Portfolio, el de hoy en el resto. */
 export function progresoDeLaCamara(p: number): number {
-  return entornoDeLaEscena().pruebas.portfolio === 'no' ? p : comoEntonces(p)
+  return comoEntonces(p)
 }

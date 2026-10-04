@@ -78,8 +78,8 @@ export const DESDE_DE_LAS_LETRAS: readonly [number, number, number] = [0, LLEGAD
  * [PASADA FINAL] 0 · LA FORMA DE UNA LLEGADA — lo que la distingue de otra: de dónde sale cada letra (em), cuánto gira
  * (vueltas sobre su eje vertical y sobre el horizontal), qué parte del progreso ocupa cada letra (el resto es el
  * escalonado), hasta dónde se disuelve y sobre qué gira (su centro, o su base: «la tapa que se levanta» de ESCENA 9).
- * La de siempre es la de ESCENA 10; las pruebas de Portfolio (`_lib/titulos3d/variantesDePortfolio.ts`) traen otras, y
- * cada forma distinta es su propio programa (los sombreadores de abajo se generan con sus cifras).
+ * La de siempre es la de ESCENA 10 (hoy ningún título trae otra: las pruebas de Portfolio se borraron en AJUSTES FINALES
+ * A1); cada forma distinta es su propio programa (los sombreadores de abajo se generan con sus cifras).
  */
 export interface FormaDeLaLlegada {
   readonly id: string

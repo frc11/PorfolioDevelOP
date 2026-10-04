@@ -78,29 +78,24 @@ export type NivelDelHaz = 'sutil' | 'medio'
 /** [ESCENA 10] T3 · los dos materiales de los títulos de volumen: el negro satinado del logo y blanco. */
 export type TitulosDeVolumen = 'negro' | 'blanco'
 
-/** [PASADA FINAL] 0 · las llegadas de Portfolio de antes, para elegir (`_lib/titulos3d/variantesDePortfolio.ts`). */
-export const VARIANTES_DE_PORTFOLIO = ['e9', 'e10', '3ds', 'lejos'] as const
-export type VarianteDePortfolio = (typeof VARIANTES_DE_PORTFOLIO)[number]
-
 export interface Pruebas {
   /**
    * [RETOQUE DEL PIE] P2 · `pie=antes`: el pie de antes de RONDA 2 (las teclas de CSS 3D), para comparar con el de volumen.
    * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
   readonly pie: 'antes' | 'no'
-  /**
-   * [PASADA FINAL] 0 · `portfolio=e9|e10|3ds|lejos`: la llegada de Portfolio de ESCENA 9, de ESCENA 10, de 3D Y SONIDO, o
-   * la de ESCENA 10 naciendo el doble de lejos; con la cámara de entonces en ese tramo (`camaraDeEntonces.ts`).
-   */
-  readonly portfolio: VarianteDePortfolio | 'no'
   /** [PASADA FINAL] C3 · `sombratitulos=si`: los títulos de volumen proyectan su sombra en el piso vivo (`sombra/deLosTitulos.ts`). */
   readonly sombratitulos: 'si' | 'no'
   /** [PASADA FINAL] D10 · `cabeza=libre`: abajo de 1024 la cabeza fija de Servicios deja libre la franja del menú (el botón o la barra). */
   readonly cabeza: 'libre' | 'no'
 }
 
-/** Todo apagado: así van en el producto y en la base. [PASADA FINAL] B2: `panelborde=a|b` se borró (las demos de Tu panel van con esquinas redondeadas y sombra). */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', portfolio: 'no', sombratitulos: 'no', cabeza: 'no' }
+/**
+ * Todo apagado: así van en el producto y en la base. [PASADA FINAL] B2: `panelborde=a|b` se borró (las demos de Tu panel van
+ * con esquinas redondeadas y sombra). [AJUSTES FINALES] A1: `portfolio=e9|e10|3ds|lejos` se borró: la de ESCENA 10 (e10) es
+ * la del producto (`_lib/titulos3d/registro.ts`, `camaraDeEntonces.ts`).
+ */
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', sombratitulos: 'no', cabeza: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -109,7 +104,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), portfolio: unoDe<VarianteDePortfolio>(VARIANTES_DE_PORTFOLIO, valor('portfolio')), sombratitulos: unoDe<'si'>(['si'], valor('sombratitulos')), cabeza: unoDe<'libre'>(['libre'], valor('cabeza')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), sombratitulos: unoDe<'si'>(['si'], valor('sombratitulos')), cabeza: unoDe<'libre'>(['libre'], valor('cabeza')) }
 }
 
 export interface Entorno {

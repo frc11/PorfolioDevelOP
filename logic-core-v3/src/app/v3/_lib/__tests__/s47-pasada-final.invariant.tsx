@@ -8,16 +8,16 @@
  *        3D que no llega a tiempo), con un plazo que el hook y la hoja comparten; y nada de lo armado se rearma porque
  *        otro título entre o salga del registro.
  *   A2 · la llegada de Portfolio es la de ESCENA 10: los números de las letras (16 em atrás, una vuelta y cuarto, la
- *        curva cúbica, 1,4 s de mínimo) y la cámara con que se ve (el título se coloca con la cámara que guarda, con la
- *        del final de la llegada de hoy, la relación de ESCENA 10: la tabla de secciones había corrido el mapeo).
+ *        curva cúbica, 1,4 s de mínimo) y la cámara con que se ve ([AJUSTES FINALES] A1: la cámara de ESCENA 10 en ese
+ *        tramo y la colocación de entonces, 0,4718; la relación entre las dos la ata s48).
  *   A3 · «Seis razones / para elegirnos»: los tres tramos fijados en pantallas del pin (se arma en 0,6, queda quieta 1,
  *        se va en 0,4), la cámara quieta hasta que termina el tramo quieto, la llegada 3D con el mínimo de ESCENA 10 y el
  *        asiento «armado» (frenar a mitad la termina; subir la desarma), la salida con los 2 s de A5.
  *   A4 · el sonido guardado como prendido arranca solo: el motor se carga con la PRIMERA interacción (la rueda también),
  *        cada acción despierta el contexto, howler no lo suspende solo (el ambiente generativo se quedaba mudo a los
  *        30 s) y el botón muestra lo real (`data-estado`).
- *   0  · las llegadas de Portfolio de antes, con bandera (`?pruebas=portfolio=e9|e10|3ds|lejos`): las cifras de cada
- *        commit escritas acá, F2 en las cuatro, la de hoy por defecto, y la cámara de entonces (los pares medidos).
+ *   0  · las llegadas de Portfolio de antes, con bandera: [AJUSTES FINALES] A1 las borró (Valentino eligió e10, que pasó
+ *        al producto: s48).
  *   C1 · el parlante, justo encima del infinito y centrado con él (una sola columna fija en la esquina): el ícono que
  *        dibuja o corta sus ondas, el cartel «Sonido / activado|desactivado» que se va solo y el anuncio aparte.
  *   C2 · el pie llega por columnas (en 3D, desde 1025): el titular, el mail y WhatsApp desde atrás y abajo (las letras
@@ -58,24 +58,20 @@ import { ACENTOS_DEL_ENJAMBRE, FISICA_DEL_ENJAMBRE, VERTICE_DEL_ENJAMBRE, resort
 import { CUANTOS_SIMBOLOS, ENGRANAJES, FLUJO, PUNTOS_DEL_ENJAMBRE, radioDelDiente, simbolosDelEnjambre } from '../nanobots/simbolos'
 import type { LetraDelPie } from '../pie3d/medida'
 import { laEscenaCayo, marcarLaEscenaCaida, suscribirALaCaida } from '../escena/caida'
-import { PARES_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
-import { PRUEBAS_APAGADAS, VARIANTES_DE_PORTFOLIO, entornoPedido } from '../escena/entorno'
+import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { GESTOS_DEL_PIE, LIBRE_DEL_PIE_S, TRAMOS_DEL_PIE, apareceDeLaPieza, asientoDelPie, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, salida, uniformesDelPie, type TramoDelPie, type UniformesDelPie } from '../escena/pie3d/coreografia'
 import { armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
 import { materialDelPie } from '../escena/pie3d/material'
 import { APLICAR_LA_SOMBRA_GLSL, SOMBRA_DEL_LOGO_GLSL, crearMapaDeLaSombra, materialDelMapa } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, CHARCO_CON_LOS_TITULOS_GLSL, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_GLSL, ajustarLaCamara, direccionDeLaLuz, fuerzasDeLaSombra, materialDeLaSombraDelTitulo } from '../escena/sombra/deLosTitulos'
 import { TINTA_MEDIA_DEL_TEMA, despinteDelTitulo } from '../escena/titulos3d/armado'
-import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../escena/finalDelRecorrido'
-import { poseDeLaLectura, type Lectura } from '../escena/titulos3d/colocacion'
-import { DISOLVER_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaDeLaLetra, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada, mostradoDelScroll, type FormaDeLaLlegada } from '../escena/titulos3d/llegada'
+import { DISOLVER_GLSL, LLEGADA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaDeLaLetra, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import { mismaForma } from '../escena/titulos3d/sincronia'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { LECTURA, LLEGADA_DE_PORTFOLIO, type TituloDeVolumen } from '../titulos3d/registro'
 import { LENTOS } from '../titulos3d/repeticiones'
-import { LLEGADAS_DE_PORTFOLIO } from '../titulos3d/variantesDePortfolio'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { valorDeToken } from './s10-css'
 import { LIMITE_DE_LINEAS_DE_CODIGO, lineasDeCodigo } from './s8-largos'
@@ -162,19 +158,8 @@ afirmar(comoEscena10(L) && LENTOS.llegadaDePortfolioS === L.minimoS, 'las letras
 controlPositivo('el detector VE una llegada más corta (8 em)', { ...L, profundidad: 8 }, comoEscena10)
 const llegada = (p: number, orden: number): number => 1 - (1 - Math.min(1, Math.max(0, (p - orden * 0.4) / 0.6))) ** 3
 afirmar([0, 0.3, 0.5, 0.8, 1].every((p) => Math.abs(llegadaDeLaLetra(p, 0) - llegada(p, 0)) < 1e-12 && Math.abs(llegadaDeLaLetra(p, 1) - llegada(p, 1)) < 1e-12) && /return 1\.0 - pow\( 1\.0 - u, 3\.0 \);/.test(LLEGADA_PARS_GLSL) && /aPivote \+ giroDeLaLetra \* \( transformed - aPivote \) \+ faltaDeLaLetra \* aDesde/.test(LLEGADA_POSICION_GLSL), '  la curva (cúbica, frenando al final) y el recorrido (desde `aDesde`, girando sobre su pivote) son los mismos en JS y en el sombreador')
-// La cámara: en ESCENA 10 el título se colocaba 0,0292 de progreso DESPUÉS de terminar de llegar (0,4718 − 0,4426), con
-// la cámara orbitando hacia Números: por eso las letras se veían venir desde el fondo. La tabla de RETOQUE PANEL T3 corrió
-// el mapeo y la llegada terminó cayendo en 0,4727: con la colocación en 0,4718 venían de frente, cortas.
-const pose = (l: Lectura): { readonly angleDeg: number; readonly height: number; readonly distance: number } => ({ ...poseDeLaLectura(l) })
-const aprobada = { az: pose(0.4718).angleDeg - pose(0.4426).angleDeg, y: pose(0.4718).height - pose(0.4426).height, d: pose(0.4718).distance - pose(0.4426).distance }
-const relacion = (lectura: Lectura): boolean => {
-  const colocacion = pose(lectura)
-  const fin = pose(LLEGADA_DE_PORTFOLIO.termina)
-  return Math.abs(colocacion.angleDeg - fin.angleDeg - aprobada.az) < 1e-9 && Math.abs(colocacion.height - fin.height - aprobada.y) < 1e-9 && Math.abs(colocacion.distance - fin.distance - aprobada.d) < 1e-9
-}
-afirmar(aprobada.az > 5 && aprobada.y > 1 && relacion(LECTURA.portfolio), 'el título se coloca con la cámara que guarda, con la del final de la llegada de HOY, la relación de ESCENA 10 (la cámara seguía orbitando: 8° de azimut y 1,8 de altura entre terminar de llegar y colocarse)', `aprobada Δaz ${aprobada.az.toFixed(2)}° Δy ${aprobada.y.toFixed(2)} Δd ${aprobada.d.toFixed(2)} · colocación hoy az ${pose(LECTURA.portfolio).angleDeg.toFixed(1)} y ${pose(LECTURA.portfolio).height.toFixed(2)}`)
-controlPositivo('el detector VE la colocación de antes (0,4718: hoy, encima de la llegada, con la órbita ya terminada)', 0.4718, relacion)
-afirmar(LLEGADA_DE_PORTFOLIO.termina > 0.4426 && LLEGADA_DE_PORTFOLIO.termina < 0.5 && typeof LECTURA.portfolio === 'object' && LECTURA.portfolio.en === LLEGADA_DE_PORTFOLIO.termina, '  y la medida es la de hoy: la llegada termina después de donde terminaba en ESCENA 10 y antes del nudo de Números; la lectura relativa parte de ahí', String(LLEGADA_DE_PORTFOLIO.termina))
+// La cámara con que se ve: [AJUSTES FINALES] A1 · la de ESCENA 10 en ese tramo y la colocación de entonces (s48 ata la relación).
+afirmar(LECTURA.portfolio === 0.4718 && LLEGADA_DE_PORTFOLIO.termina > 0.4426 && LLEGADA_DE_PORTFOLIO.termina < 0.5, 'el título se coloca con la cámara de ESCENA 10 (0,4718), y la medida de dónde termina la llegada hoy sigue siendo la de la tabla de hoy (después de donde terminaba entonces, antes del nudo de Números)', `${String(LECTURA.portfolio)} · termina ${String(LLEGADA_DE_PORTFOLIO.termina)}`)
 const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*lectura=\{LECTURA\.portfolio\}[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\} queda \/>/.test(piezasDePortfolio), '  Portfolio sigue pidiendo esa lectura, su mínimo y quedarse (lo robusto de F2 y A4 lo cubre s45: se da vuelta con el scroll, nunca a medias, converge)')
 
@@ -265,83 +250,6 @@ controlPositivo('el detector VE un botón que sólo muestra la elección', contr
 afirmar(estadoDelMotor() === 'sin-motor' && /export function estadoDelMotor\(\): EstadoDelMotor \{\s*if \(promesa === null\) return 'sin-motor'\s*if \(motorActual === null\) return 'cargando'\s*return motorActual\.estado\(\)/.test(sinComentarios(leer('_chrome/sonido/motorCompartido.ts'))), '  sin motor pedido no hay nada que mostrar (el producto): el estado real sale del motor compartido')
 
 const fuenteDe = (archivo: string): FontData => JSON.parse(readFileSync(`${V3}/_fuentes/${archivo}`, 'utf8')) as FontData
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('0 · Las llegadas de Portfolio de antes, con bandera (`?pruebas=portfolio=e9|e10|3ds|lejos`): las cifras de cada commit, F2 y la cámara de entonces')
-
-afirmar(PRUEBAS_APAGADAS.portfolio === 'no' && entornoPedido('producto').pruebas.portfolio === 'no' && entornoPedido('producto,portfolio=otra').pruebas.portfolio === 'no' && VARIANTES_DE_PORTFOLIO.every((v) => entornoPedido(`producto,portfolio=${v}`).pruebas.portfolio === v), 'la bandera pide cada una por su nombre; sin ella (o con otro nombre), ninguna: la de hoy queda como predeterminada', VARIANTES_DE_PORTFOLIO.join(' · '))
-const piezasConPrueba = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
-const laDeHoyPorDefecto = (c: string): boolean => /\{variante === 'no' \? \(\s*<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\} minimoS=\{LENTOS\.llegadaDePortfolioS\} queda \/>\s*\) : \(\s*<PortfolioDePrueba variante=\{variante\} texto=\{CONTENIDO\.titular\} llegada=\{progresoDeLaMascara\} huida=\{huidaDelTitulo\} llegadaDe=\{seccion\.id\} \/>/.test(c) && /huidaDelTitulo\.set\(huida\.current\)/.test(c)
-afirmar(laDeHoyPorDefecto(piezasConPrueba), '  sin la bandera, Portfolio es el de hoy tal cual; con ella, el de la prueba, que se va con la huida del cartel (como entonces)')
-controlPositivo('el detector VE la prueba montada siempre', piezasConPrueba.replace("variante === 'no' ?", 'false ?'), laDeHoyPorDefecto)
-
-// Las cifras, escritas acá desde cada commit (la tabla las copia; si alguien las «retoca», esto se pone rojo).
-const V = LLEGADAS_DE_PORTFOLIO
-const E9 = { desde: [0, -0.3, -3], porAlto: true, vueltas: 0, inclinacion: -84 / 360, dura: 0.5, aparece: 1, pivote: 'base' } as const // 64bb4a96: LLEGADA_3D (giro 84°, subida 0,3, dura 0,5) y TITULOS_3D.profundidad (3 alturas)
-const E10 = { desde: [0, 1.2, -16], porAlto: false, vueltas: 1.25, inclinacion: 0.12, dura: 0.6, aparece: 0.35, pivote: 'centro' } as const // eec0b4e3: LLEGADA_DE_LAS_LETRAS
-const igualA = (f: FormaDeLaLlegada, h: typeof E9 | typeof E10): boolean => f.desde.every((x, k) => x === h.desde[k]) && f.porAlto === h.porAlto && f.vueltas === h.vueltas && f.inclinacion === h.inclinacion && f.dura === h.dura && f.aparece === h.aparece && f.pivote === h.pivote
-afirmar(igualA(V.e9.forma, E9) && V.e9.minimoS === null && V.e9.colocacion === 'pantalla', 'e9 (ESCENA 9 T5, 64bb4a96): acostada 84° hacia atrás sobre su base, 3 alturas de letra atrás y 0,3 abajo, escalonado 0,5, disuelta en toda la llegada, con el scroll (sin mínimo) y pegada a su lugar de la pantalla')
-afirmar(igualA(V.e10.forma, E10) && mismaLlegada(V.e10.forma, FORMA_DE_LAS_LETRAS) && V.e10.minimoS === 1.4 && V.e10.salidaMinimaS === 1.4 && V.e10.lectura === 0.4718 && V.e10.colocacion === 'lectura', '  e10 (ESCENA 10 T3, eec0b4e3): 16 em atrás y 1,2 arriba, 1,25 vueltas, inclinación 0,12, escalonado 0,6, 1,4 s, quieta en el mundo colocada con la cámara de 0,4718')
-afirmar(igualA(V['3ds'].forma, E10) && V['3ds'].minimoS === V.e10.minimoS && V['3ds'].lectura === V.e10.lectura && V['3ds'].colocacion === V.e10.colocacion, '  3ds (3D Y SONIDO T1, 92d345e8): la misma de ESCENA 10 (ese sprint no tocó ni las cifras ni la cámara)')
-afirmar(V.lejos.forma.desde.every((x, k) => x === 2 * E10.desde[k]) && V.lejos.forma.vueltas === E10.vueltas && V.lejos.forma.dura === E10.dura && V.lejos.minimoS !== null && V.lejos.minimoS > 1.4 && V.lejos.lectura === 0.4718, '  lejos: la de ESCENA 10 naciendo el doble de lejos (32 em atrás, 2,4 arriba) y un poco más lenta', `${String(V.lejos.minimoS)} s`)
-controlPositivo('el detector VE una e10 con la mitad de distancia', { ...V.e10.forma, desde: [0, 1.2, -8] as const }, (f: FormaDeLaLlegada) => igualA(f, E10))
-
-// Cada forma, su programa: la de siempre no cambia de texto; e9 gira sobre la base.
-const conLaDeSiempre = llegadaParsGlsl(FORMA_DE_LAS_LETRAS) === LLEGADA_PARS_GLSL && llegadaNormalGlsl(FORMA_DE_LAS_LETRAS) === LLEGADA_NORMAL_GLSL && llegadaPosicionGlsl(FORMA_DE_LAS_LETRAS) === LLEGADA_POSICION_GLSL
-const deE9 = llegadaParsGlsl(V.e9.forma) + llegadaPosicionGlsl(V.e9.forma)
-afirmar(conLaDeSiempre && deE9.includes('vec3 pivoteDeLaLetra = vec3( aPivote.x, 0.0, aPivote.z );') && deE9.includes(`orden * ${(0.5).toFixed(5)} ) / ${(0.5).toFixed(5)}`) && deE9.includes(`falta * ${((-84 / 360) * 2 * Math.PI).toFixed(5)}`), 'los sombreadores salen de la forma: con la de siempre, el MISMO texto de antes; e9, con su escalonado, su giro y sobre la base')
-const armadoFuente = sinComentarios(leer('_lib/escena/titulos3d/armado.ts'))
-afirmar(/const propia = !mismaLlegada\(forma, FORMA_DE_LAS_LETRAS\)/.test(armadoFuente) && /if \(propia\) material\.customProgramCacheKey = \(\) => `titulo-de-volumen-\$\{variante\}\|\$\{forma\.id\}`/.test(armadoFuente), '  una forma distinta de la de siempre es su propio programa (la de e10 y 3ds coincide con la de siempre: el mismo)')
-const deTapa = armarElTitulo(new Font(fuenteDe('chivo-400-titulos.json')), 'Po', null, 'letras', [], V.e9.forma).geometria.getAttribute('aDesde')
-const deSiempre = armarElTitulo(new Font(fuenteDe('chivo-400-titulos.json')), 'Po', null, 'letras', [], FORMA_DE_LAS_LETRAS).geometria.getAttribute('aDesde')
-const zDeLaP = deTapa.getZ(0)
-const zDeLaO = deTapa.getZ(deTapa.count - 1)
-afirmar(zDeLaP < -1.8 && zDeLaP > -2.4 && zDeLaO > zDeLaP && deSiempre.getZ(0) === -16 && deSiempre.getY(0) === Math.fround(1.2), '  e9 mide la distancia en alturas de cada letra (la «P», más alta, viene de más atrás que la «o»); la de siempre, en em', `P ${zDeLaP.toFixed(2)} · o ${zDeLaO.toFixed(2)} em`)
-
-// Con lo robusto de F2: se dan vuelta con el scroll y al frenar a mitad terminan armadas o desarmadas.
-const DT0 = 1 / 60
-type SeguidorDeLaPrueba = (m: number, p: number, asentar: boolean, dt: number) => number
-const robusta = (f: SeguidorDeLaPrueba): boolean => {
-  // Hasta un tercio del camino (la que va con el scroll llega enseguida; la de mínimo, en su tiempo) y el scroll vuelve.
-  let m = 0
-  for (let t = 0; t < 3 && m < 0.3; t += DT0) m = f(m, 1, false, DT0)
-  const antes = m
-  const seDaVuelta = antes > 0.02 && antes < 0.98 && f(m, 0, false, DT0) < antes
-  let azar = 7
-  for (let k = 0; k < 600; k += 1) {
-    azar = (azar * 9301 + 49297) % 233280
-    m = f(m, azar / 233280, false, DT0)
-    if (!(m >= 0 && m <= 1)) return false
-  }
-  for (let t = 0; t < 4; t += DT0) m = f(m, 0.62, true, DT0)
-  return seDaVuelta && (m === 0 || m === 1)
-}
-const seguidorDe = (minimoS: number | null): SeguidorDeLaPrueba => (m, p, a, dt) => mostradoDelScroll(m, p, a, dt, minimoS)
-afirmar(VARIANTES_DE_PORTFOLIO.every((v) => robusta(seguidorDe(V[v].minimoS))), 'las cuatro, con lo robusto de F2: se dan vuelta en el cuadro siguiente, nunca salen de [0, 1] y al frenar a mitad asientan en armado o desarmado del todo')
-controlPositivo('el detector VE un seguidor sin asiento (al frenar a mitad queda a mitad)', ((m, p, _a, dt) => mostradoDelScroll(m, p, false, dt, 1.4)) as SeguidorDeLaPrueba, robusta)
-
-// La cámara de entonces: la misma afuera de su tramo; adentro, la de ESCENA 10 en el mismo scroll.
-const PARES = PARES_DE_LA_CAMARA
-afirmar([0, 0.05, 0.125, 0.625, 0.8, 1].every((p) => comoEntonces(p) === p) && progresoDeLaCamara(0.47) === 0.47, 'sin la bandera la cámara es la de hoy; con ella, la de hoy fuera de Quiénes somos → Trabajos')
-afirmar(PARES.every(([h, e]) => Math.abs(comoEntonces(h) - e) < 1e-9), '  en cada scroll medido es la de entonces (los pares de ESCENA 10 contra hoy, a 1440×900)', `${String(PARES.length)} pares`)
-const monotona = (f: (p: number) => number): boolean => {
-  let previo = f(0)
-  for (let p = 0.0005; p <= 1; p += 0.0005) {
-    const v = f(p)
-    if (!(v > previo) || v - previo > 0.01) return false
-    previo = v
-  }
-  return true
-}
-afirmar(monotona(comoEntonces), '  y nunca va para atrás ni salta: creciente y continua en todo el recorrido')
-controlPositivo('el detector VE una cámara que vuelve atrás', (p: number) => (p > 0.45 && p < 0.46 ? 0.4 : comoEntonces(p)), monotona)
-const az = (p: number): number => poseDeLaLectura(p).angleDeg
-const barridoHoy = az(0.4713) - az(0.4561)
-const barridoEntonces = az(comoEntonces(0.4713)) - az(comoEntonces(0.4561))
-afirmar(Math.abs(comoEntonces(0.4713) - 0.4426) < 0.003 && barridoEntonces > 2 * barridoHoy, 'mientras llegan las letras la cámara gira como entonces (el doble que hoy): eso es lo que las hacía venir de lejos', `hoy ${barridoHoy.toFixed(1)}° · entonces ${barridoEntonces.toFixed(1)}°`)
-afirmar(/sampleTrack\(track, progresoDeLaCamara\(progress\), target\)/.test(sinComentarios(leer('_lib/escena/OrbitRig.tsx'))), '  sólo la cámara: el rig la muestrea con ese progreso (la luz, la noche y el resto siguen al scroll como hoy)')
-const prueba = sinComentarios(leer('_componentes/titulos3d/PortfolioDePrueba.tsx'))
-afirmar(/useTituloDeVolumen\(\{ id: 'portfolio', texto, lugar, lectura: v\.lectura, llegada: llegada === null \? null : repetible, salida: huida, forma: v\.forma, colocacion: v\.colocacion, minimoS: v\.minimoS, salidaMinimaS: v\.salidaMinimaS, activo:/.test(prueba), '  el título de la prueba se anota con la forma, la colocación, los tiempos y la huida de su variante (y la llegada repetida de los viajes)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C1 · El parlante: justo encima del infinito, con el ícono animado, el cartel «Sonido / activado» y su anuncio')
