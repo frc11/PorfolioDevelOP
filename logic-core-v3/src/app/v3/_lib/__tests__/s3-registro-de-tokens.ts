@@ -174,6 +174,9 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--rollover-intercambio', valor: 'calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida))', evidencia: 'derivado', procedencia: 'los 1,3 s medidos del intercambio, compuestos con los tokens como en `cta.css`' },
   // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D.
   { nombre: '--respaldo-2d', valor: '2500ms', evidencia: 'decidido', procedencia: 'el plazo en que el 3D del titular tiene que llegar antes de que aparezca el 2D; el mismo RESPALDO_2D_MS de `titular2d.ts` (s47 los ata)' },
+  // [AJUSTES FINALES] A4 · el velo de carga.
+  { nombre: '--velo-fundido', valor: '800ms', evidencia: 'decidido', procedencia: 'el fundido con que todo aparece junto (~0,8 s, pedido); el mismo CARGA.fundidoMs de `_lib/carga.ts` (s48 los ata)' },
+  { nombre: '--velo-espera', valor: '4000ms', evidencia: 'decidido', procedencia: 'el plazo desde el arranque en que el fundido arranca igual aunque no esté todo (~4 s, pedido); el mismo CARGA.plazoMs de `_lib/carga.ts` (s48 los ata)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

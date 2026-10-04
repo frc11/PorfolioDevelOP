@@ -76,7 +76,8 @@ afirmar(/const visible = m\.llegada > 0 && !fuera && !tapado/.test(escena), '  f
 const tapa = (f: (p: number) => boolean): boolean => !f(progresoDelPxDelTunel(0)) && !f(progresoDelPxDelTunel(400)) && f(progresoDelPxDelTunel(910))
 afirmar(tapa(primeraFotoTapa), '  lo esconde la primera foto del túnel recién cuando tapa el cuadro entero (no la huida del cartel: ahí todavía se veía)')
 controlPositivo('el detector VE el escondido con la foto chica', (p: number) => p >= progresoDelPxDelTunel(300), tapa)
-afirmar(/else if \(!fuera && !tapado\) m\.llegada = persigue\(m\.llegada, a\.titulo\.llegada, dt, a\.titulo\.minimoS/.test(escena), '  tapado o fuera, el que llega por tiempo (el hero) espera; Portfolio sigue al scroll')
+// [AJUSTES FINALES] A4 · el hero, además, espera a que la carga se abra (el velo terminó de fundirse): hasta ahí lo pedido es 0.
+afirmar(/else if \(!fuera && !tapado\) m\.llegada = persigue\(m\.llegada, cargaLista\(\) \? a\.titulo\.llegada : 0, dt, a\.titulo\.minimoS/.test(escena), '  tapado o fuera, el que llega por tiempo (el hero) espera (y hasta que la carga se abre); Portfolio sigue al scroll')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B2 · El polvo posado: cualquier scroll lo levanta')

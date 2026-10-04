@@ -1,0 +1,57 @@
+/* =========================================================================
+ * [AJUSTES FINALES] A4 · EL VELO DE CARGA
+ * =========================================================================
+ * La página arranca toda blanca: un velo del color de fondo, en el HTML del
+ * servidor, encima de todo y sin recibir el puntero (`_componentes/VeloDeCarga.tsx`;
+ * el porqué, en `_lib/carga.ts`). Sus etapas van en `data-velo`:
+ *
+ *   · `espera`     opaco. ⚠️ EL SEGURO SIN HIDRATAR: si el script tarda (o nunca
+ *                  corre), nadie pediría el fundido; la animación lo hace sola a los
+ *                  `--velo-espera` del arranque (el mismo `CARGA.plazoMs` del hook, que
+ *                  s48 ata), con el mismo fundido. Con JavaScript el hook llega antes
+ *                  (cuando está todo) y pasa a `saliendo`; si llega después, la deja
+ *                  terminar (reiniciarla sería un destello blanco).
+ *   · `saliendo`   el fundido, ya: la misma curva sin espera (otro nombre de animación,
+ *                  así arranca de opaco).
+ *
+ * El fin de cualquiera de las dos (`animationend`) es lo que desmonta el velo.
+ *
+ * ⚠️ Con movimiento reducido la política del sitio corta toda animación a 1 ms
+ * (`globals.css`): el fundido de la espera sería un parpadeo instantáneo y la página
+ * quedaría destapada antes de tiempo. Ahí la espera no se anima (queda opaca hasta
+ * que el hook pide salir, y la salida es de golpe); sin JavaScript, el `<noscript>`
+ * del componente la saca. Las dos propiedades de componente están registradas en
+ * `s3-registro-de-tokens.ts`.
+ * ========================================================================= */
+
+[data-v3] [data-pieza='velo-de-carga'] {
+  --velo-fundido: 800ms;
+  --velo-espera: 4000ms;
+  opacity: 1;
+}
+
+[data-v3] [data-pieza='velo-de-carga'][data-velo='espera'] {
+  animation: velo-de-carga-sale var(--velo-fundido) var(--ease-salida) var(--velo-espera) both;
+}
+
+[data-v3] [data-pieza='velo-de-carga'][data-velo='saliendo'] {
+  animation: velo-de-carga-sale-ya var(--velo-fundido) var(--ease-salida) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza='velo-de-carga'][data-velo='espera'] {
+    animation: none;
+  }
+}
+
+@keyframes velo-de-carga-sale {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes velo-de-carga-sale-ya {
+  to {
+    opacity: 0;
+  }
+}

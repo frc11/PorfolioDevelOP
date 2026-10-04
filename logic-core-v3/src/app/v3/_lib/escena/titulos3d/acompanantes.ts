@@ -25,6 +25,17 @@ export interface TituloConPlano {
   readonly titulo: TituloDeVolumen
   readonly fuente: { readonly data: MedidasDeLaFuente }
   readonly lugar: LugarEnElCuadro | null
+  /** [AJUSTES FINALES] A4 · cuánto llegó (lo mostrado): el acompañante del que llega una vez por carga aparece con sus letras. */
+  readonly mostrado: { readonly llegada: number }
+}
+
+/** [AJUSTES FINALES] A4 · en qué parte de la llegada del título su acompañante termina de aparecer (las letras se disuelven hasta 0,35). */
+export const APARECE_CON_EL_TITULO = 0.6
+
+/** La opacidad del acompañante de un título que llega una vez por carga: con sus letras; el de los demás, la suya (''). */
+export function opacidadDelAcompanante(t: TituloDeVolumen, llegada: number): string {
+  if (t.rearma) return ''
+  return String(Math.min(1, Math.max(0, llegada / APARECE_CON_EL_TITULO)).toFixed(3))
 }
 
 interface Plano {
@@ -62,6 +73,11 @@ export function llevarLosAcompanantes(armados: readonly TituloConPlano[], viva: 
   viva.updateMatrixWorld()
   for (const [el, ac] of ACOMPANANTES) {
     const a = armados.find((x) => x.titulo.id === ac.titulo)
+    const opacidad = a === undefined ? '' : opacidadDelAcompanante(a.titulo, a.mostrado.llegada)
+    if (opacidad !== ac.opacidad) {
+      ac.opacidad = opacidad
+      el.style.opacity = opacidad
+    }
     const css = a === undefined ? '' : enSuPlano(el, ac, a, viva, cuadro, logo)
     if (css === ac.css) continue
     ac.css = css

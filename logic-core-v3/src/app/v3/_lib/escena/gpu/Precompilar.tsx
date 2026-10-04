@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useRef, type RefObject } from 'react'
 import type * as THREE from 'three'
 
+import { marcarElPrimerCuadro } from '../../carga'
 import { hayBanco } from '../entorno'
 
 /**
@@ -68,9 +69,14 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
   const gl = useThree((s) => s.gl)
   const escena = useThree((s) => s.scene)
   const camara = useThree((s) => s.camera)
-  const estado = useRef({ cuadros: 0, compilado: false, calentar: false, hecho: false, compilarMs: 0 })
+  const estado = useRef({ cuadros: 0, compilado: false, calentar: false, hecho: false, compilarMs: 0, primerCuadro: false })
   useFrame(() => {
     const e = estado.current
+    // [AJUSTES FINALES] A4 · el primer cuadro de la escena, cuando ya se pintó (el cuadro siguiente): el velo de carga lo espera.
+    if (!e.primerCuadro) {
+      e.primerCuadro = true
+      requestAnimationFrame(marcarElPrimerCuadro)
+    }
     if (e.hecho) return
     if (e.calentar) {
       e.calentar = false

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { ChromeDelHome } from './_chrome/ChromeDelHome'
+import { VeloDeCarga } from './_componentes/VeloDeCarga'
 import { IntroDelHome } from './_intro/IntroDelHome'
 import { CompuertaDelHome } from './_secciones/CompuertaDelHome'
 import { Home } from './_secciones/Home'
@@ -63,6 +64,8 @@ export const metadata: Metadata = {
 export default function PaginaV3() {
   return (
     <>
+      {/* [AJUSTES FINALES] A4 · la página arranca toda blanca y todo aparece junto cuando está todo (`_lib/carga.ts`). */}
+      <VeloDeCarga />
       <ChromeDelHome />
       <IntroDelHome />
       <CompuertaDelHome>

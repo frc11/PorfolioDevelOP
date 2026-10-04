@@ -19,6 +19,8 @@ export interface Acompanante {
   readonly titulo: string
   /** Lo último que la escena le escribió (`''`: en su lugar). */
   css: string
+  /** [AJUSTES FINALES] A4 · y su opacidad (`''`: la suya): el del titular del hero aparece con las letras que caen. */
+  opacidad: string
 }
 
 export const ACOMPANANTES = new Map<HTMLElement, Acompanante>()
@@ -33,11 +35,12 @@ export function useAcompananteDelTitulo<T extends HTMLElement>(titulo: string): 
   useEffect(() => {
     const el = ref.current
     if (!activo || el === null) return undefined
-    ACOMPANANTES.set(el, { titulo, css: '' })
+    ACOMPANANTES.set(el, { titulo, css: '', opacidad: '' })
     return () => {
       ACOMPANANTES.delete(el)
       el.style.transform = ''
       el.style.transformOrigin = ''
+      el.style.opacity = ''
     }
   }, [titulo, activo])
   return ref

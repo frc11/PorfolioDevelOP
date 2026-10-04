@@ -5,6 +5,7 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { acotar01 } from '../../acotar'
+import { cargaLista } from '../../carga'
 import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
@@ -297,6 +298,7 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
  * [RONDA 2] F2 · Portfolio ya no «termina lo que empezó» (eso, con el scroll rápido, lo dejaba en «Portfoli»): su llegada
  * es función del scroll, con el asiento al frenar, como la de todos. El hero (no se rearma: llega una vez por carga) sigue
  * con su llegada por tiempo, que converge sola. [NOCTURNO] A4: con su `minimoS`, la llegada larga de ESCENA 10.
+ * [AJUSTES FINALES] A4: y arranca recién cuando la carga se abre (`_lib/carga.ts`: el velo terminó de fundirse).
  */
 function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, reanudado: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
@@ -306,7 +308,8 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, rean
   // [PASADA FINAL] A3 · al reanudarse el lazo, el que se rearma vuelve a lo que dice el scroll (el hero llega una vez, por tiempo).
   if (reanudado && a.titulo.rearma) m.llegada = acotar01(enViaje ? 0 : a.titulo.llegada)
   if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS)
-  else if (!fuera && !tapado) m.llegada = persigue(m.llegada, a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
+  // [AJUSTES FINALES] A4 · el que llega una vez por carga (el hero) espera a que la carga se abra (el velo terminó de fundirse).
+  else if (!fuera && !tapado) m.llegada = persigue(m.llegada, cargaLista() ? a.titulo.llegada : 0, dt, a.titulo.minimoS ?? undefined)
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0

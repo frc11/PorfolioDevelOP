@@ -14,6 +14,10 @@
  *   A3 · el sonido sin gesto: guardado como prendido, el primer clic, toque o tecla en CUALQUIER parte desbloquea el audio y
  *        arranca todo (el ambiente, en el acto); mientras no hubo gesto el botón muestra «en espera» (las ondas tenues
  *        latiendo despacio), no «activado». Medido en Chrome con el perfil limpio (mirar.txt).
+ *   A4 · la carga: la página arranca toda blanca (el velo, en el HTML del servidor, sin bloquear el scroll); con el primer
+ *        cuadro de la escena, las fuentes y el titular 3D armado, todo aparece junto en un fundido de 0,8 s; recién
+ *        terminado cae el titular del hero con su llegada (y con él la bajada y los CTA, en su plano); a los 4 s el fundido
+ *        arranca igual (con el respaldo 2D si el 3D no llegó), también sin JavaScript; con movimiento reducido, corto.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -22,9 +26,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
+import { VeloDeCarga } from '../../_componentes/VeloDeCarga'
+import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/titulos3d/titular2d'
+import { CARGA, abrirLaCarga, cargaLista, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
 
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
+import { APARECE_CON_EL_TITULO, opacidadDelAcompanante } from '../escena/titulos3d/acompanantes'
 import { FLOOR_Y } from '../escena/probeScene'
 import { SOMBRA_DEL_LOGO } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, BASE_EN_TEXELES, CHARCO_CON_LOS_TITULOS_GLSL, DISTANCIA_DEL_LOGO, FONDO_DEL_MAPA, PENUMBRA_DEL_LOGO, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, SOMBRA_DE_LOS_TITULOS_GLSL, TEXEL_DE_LA_LETRA_GLSL, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, lodDeLaPenumbra, materialDeLaSombraDelTitulo, penumbraEn } from '../escena/sombra/deLosTitulos'
@@ -33,6 +41,9 @@ import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION
 import { LECTURA, LLEGADA_DE_PORTFOLIO } from '../titulos3d/registro'
 import { LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { ARCHIVOS_DE_ESTILO } from './s3-archivos'
+import { REGISTRO_POR_NOMBRE } from './s3-registro-de-tokens'
+import { valorDeToken } from './s10-css'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -249,5 +260,61 @@ const controlA3 = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
 const arrancaTodo = (c: string): boolean => ["window.addEventListener('pointerdown', cargar, true)", "window.addEventListener('keydown', cargar, true)", "window.addEventListener('touchstart', cargar, true)", "window.addEventListener('wheel', cargar, true)", "window.addEventListener('pointerdown', despertar, true)", "window.addEventListener('keydown', despertar, true)", "window.addEventListener('touchend', despertar, true)"].every((l) => c.includes(l)) && /const soltarElMotor = suscribirAlMotor\(\(\) => \{\s*if \(estadoDelMotor\(\) === 'listo'\) ambiente\(\)\s*\}\)/.test(c) && /soltarElMotor\(\)\s*window\.clearInterval\(reintento\)/.test(c)
 afirmar(arrancaTodo(controlA3), 'guardado como prendido: la primera interacción en CUALQUIER parte (la ventana, en captura) carga el motor, cada clic, toque o tecla lo despierta, y apenas está listo el ambiente arranca en el acto (medido en Chrome con perfil limpio: la rueda carga pero no desbloquea; el primer clic o tecla, sí)')
 controlPositivo('el detector VE el ambiente que espera al reintento de cada segundo', controlA3.replace("if (estadoDelMotor() === 'listo') ambiente()", ''), arrancaTodo)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4 · La carga: toda blanca, todo junto con un fundido cuando está todo, y recién después cae el titular')
+
+// El velo sale del servidor opaco (en espera), encima de todo y sin recibir el puntero.
+const veloHtml = renderToStaticMarkup(<VeloDeCarga />)
+const claseDelVelo = /class="([^"]*)"/.exec(veloHtml)?.[1] ?? ''
+const velaDesdeElServidor = (html: string, clase: string): boolean => html.includes('<div data-pieza="velo-de-carga" data-velo="espera" aria-hidden="true"') && /<noscript><style>\[data-v3\] \[data-pieza='velo-de-carga'\] \{ display: none; \}<\/style><\/noscript>/.test(html) && clase.split(' ').includes('fixed') && clase.split(' ').includes('inset-0') && clase.split(' ').includes('pointer-events-none') && clase.split(' ').includes('bg-fondo') && new RegExp(`(^| )z-\\[var\\(--z-${'overlay'}\\)\\]( |$)`).test(clase)
+afirmar(velaDesdeElServidor(veloHtml, claseDelVelo), 'el velo viaja en el HTML del servidor, en espera: del color de fondo, fijo sobre el cuadro entero, por encima de todo y sin recibir el puntero (no bloquea el scroll ni un cuadro); sin JavaScript, `<noscript>` lo saca')
+controlPositivo('el detector VE un velo que atrapa el puntero', [veloHtml, claseDelVelo.replace('pointer-events-none', 'pointer-events-auto')] as const, ([h, c]: readonly [string, string]) => velaDesdeElServidor(h, c))
+const paginaA4 = sinComentarios(readFileSync(`${V3}/page.tsx`, 'utf8').replace(/\r\n/g, '\n'))
+afirmar(paginaA4.indexOf('<VeloDeCarga />') > 0 && paginaA4.indexOf('<VeloDeCarga />') < paginaA4.indexOf('<ChromeDelHome />'), '  lo monta la página de /v3, antes que el chrome')
+// La hoja: el seguro sin JavaScript (a los 4 s se funde sola), el fundido ya cuando el hook lo pide, y corto con movimiento reducido.
+const hojaA4 = leer('_estilos/carga.css')
+const seguroSinJs = (h: string): boolean => /\[data-v3\] \[data-pieza='velo-de-carga'\] \{\s*--velo-fundido: (\d+)ms;\s*--velo-espera: (\d+)ms;\s*opacity: 1;/.test(h) && /\[data-velo='espera'\] \{\s*animation: velo-de-carga-sale var\(--velo-fundido\) var\(--ease-salida\) var\(--velo-espera\) both;/.test(h) && /\[data-velo='saliendo'\] \{\s*animation: velo-de-carga-sale-ya var\(--velo-fundido\) var\(--ease-salida\) both;/.test(h) && /@keyframes velo-de-carga-sale \{\s*to \{\s*opacity: 0;/.test(h) && /@keyframes velo-de-carga-sale-ya \{\s*to \{\s*opacity: 0;/.test(h) && /@media \(prefers-reduced-motion: reduce\) \{\s*\[data-v3\] \[data-pieza='velo-de-carga'\]\[data-velo='espera'\] \{\s*animation: none;/.test(h)
+const [fundidoDeLaHoja, esperaDeLaHoja] = [Number(/--velo-fundido: (\d+)ms/.exec(hojaA4)?.[1]), Number(/--velo-espera: (\d+)ms/.exec(hojaA4)?.[1])]
+const politicaReducida = leer('../globals.css')
+afirmar(seguroSinJs(hojaA4) && fundidoDeLaHoja === CARGA.fundidoMs && esperaDeLaHoja === CARGA.plazoMs && CARGA.fundidoMs === 800 && CARGA.plazoMs === 4000 && CARGA.margenMs > 0 && CARGA.margenMs < CARGA.fundidoMs && /prefers-reduced-motion: reduce[\s\S]*animation-duration: 1ms !important/.test(politicaReducida), 'la hoja lleva el seguro sin hidratar (en espera se funde sola a los 4 s, con el mismo fundido de 0,8 s) y el fundido ya cuando el hook lo pide: los mismos números que el hook; con movimiento reducido la espera no se anima (la política del sitio corta toda animación a 1 ms: el velo quedaría destapado antes de tiempo, medido) y la salida es de golpe', `${String(CARGA.fundidoMs)} ms · plazo ${String(CARGA.plazoMs)} ms · margen ${String(CARGA.margenMs)} ms`)
+controlPositivo('el detector VE la hoja sin el seguro sin JS', hojaA4.replace(/animation: velo-de-carga-sale var[^;]*;/, ''), seguroSinJs)
+afirmar(ARCHIVOS_DE_ESTILO.includes(`${V3}/_estilos/carga.css`) && /import '\.\/_estilos\/carga\.css'/.test(leer('layout.tsx')) && REGISTRO_POR_NOMBRE.get('--velo-fundido')?.valor === `${String(CARGA.fundidoMs)}ms` && REGISTRO_POR_NOMBRE.get('--velo-espera')?.valor === `${String(CARGA.plazoMs)}ms`, '  la hoja entra por el layout (cómo se importa), está en el padrón de s3 y sus dos propiedades de componente están registradas con esos números')
+// Qué espera: las fuentes, el primer cuadro de la escena (o la escena caída) y el titular del hero armado si está anotado; o el plazo.
+const veloFuente = sinComentarios(leer('_componentes/VeloDeCarga.tsx'))
+const esperaTodo = (c: string): boolean => /const todo = fuentes && \(primerCuadro \|\| caida\) && \(!conTitular \|\| \(titular1 && titular2\)\)/.test(c) && /if \(etapa !== 'espera' \|\| !\(todo \|\| vencido\)\) return undefined\s*const ya = performance\.now\(\)\s*if \(ya < CARGA\.plazoMs\) \{\s*setEtapa\('saliendo'\)/.test(c) && /window\.setTimeout\(terminar, Math\.max\(0, CARGA\.plazoMs \+ CARGA\.fundidoMs - ya\) \+ CARGA\.margenMs\)/.test(c) && /void document\.fonts\.ready\.then/.test(c) && /Math\.max\(0, CARGA\.plazoMs - performance\.now\(\)\)/.test(c) && /TITULOS_DE_VOLUMEN\.has\(IDS_DEL_TITULAR_DEL_HERO\[0\]\)/.test(c) && /const terminar = useCallback\(\(\): void => \{\s*abrirLaCarga\(\)\s*setEtapa\('fuera'\)/.test(c) && /if \(e\.animationName\.startsWith\('velo-de-carga-sale'\)\) terminar\(\)/.test(c) && /onAnimationEnd=\{alTerminarLaAnimacion\}/.test(c)
+afirmar(esperaTodo(veloFuente), '  el fundido arranca cuando están las fuentes, el primer cuadro de la escena (o la escena se cayó) y, si el titular del hero está anotado como título de volumen, sus dos registros armados; o al vencer el plazo. Si el DOM se entera después del plazo, deja terminar el fundido de la hoja (no lo reinicia: era un destello blanco con CPU ×4). El fin de la animación es lo que desmonta el velo y abre la carga (con un seguro por si no llega)')
+controlPositivo('el detector VE un velo que no espera al titular', veloFuente.replace('(!conTitular || (titular1 && titular2))', 'true'), esperaTodo)
+controlPositivo('el detector VE el velo que reiniciaba el fundido aunque la hoja ya lo estuviera fundiendo', veloFuente.replace('if (ya < CARGA.plazoMs) {', 'if (true) {'), esperaTodo)
+const titular2dFuente = sinComentarios(leer('_componentes/titulos3d/titular2d.ts'))
+const vencidoQueda = (c: string): boolean => /let plazoVencido = false/.test(c) && /useState\(\(\) => plazoVencido\)/.test(c) && /const vencer = \(\): void => \{\s*plazoVencido = true\s*setVencido\(true\)\s*\}\s*if \(plazoVencido\) \{\s*vencer\(\)\s*return undefined\s*\}/.test(c)
+afirmar(vencidoQueda(titular2dFuente), '  el plazo del respaldo 2D, vencido, queda vencido para toda la carga: al remontarse el `h1` (llega la coreografía) el respaldo no desaparece un segundo (medido con CPU ×4)')
+controlPositivo('el detector VE el respaldo que volvía a `oculto` al remontarse', titular2dFuente.replace('if (plazoVencido) {', 'if (false) {'), vencidoQueda)
+// Los bits: el primer cuadro lo marca el motor de la escena (cuando ya se pintó); la carga se abre una vez; los oyentes se enteran.
+let avisosA4 = 0
+const soltarA4 = suscribirALaCarga(() => {
+  avisosA4 += 1
+})
+const antesA4 = { cuadro: hayPrimerCuadro(), lista: cargaLista() }
+marcarElPrimerCuadro()
+marcarElPrimerCuadro()
+abrirLaCarga()
+abrirLaCarga()
+soltarA4()
+afirmar(!antesA4.cuadro && !antesA4.lista && hayPrimerCuadro() && cargaLista() && avisosA4 === 2, '  los dos bits (el primer cuadro, la carga abierta) arrancan apagados, se prenden una vez y avisan una vez cada uno')
+const precompilarA4 = sinComentarios(leer('_lib/escena/gpu/Precompilar.tsx'))
+afirmar(/if \(!e\.primerCuadro\) \{\s*e\.primerCuadro = true\s*requestAnimationFrame\(marcarElPrimerCuadro\)\s*\}/.test(precompilarA4) && precompilarA4.indexOf('if (!e.primerCuadro)') < precompilarA4.indexOf('if (e.hecho) return'), '  el motor de la escena marca el primer cuadro en su primer paso del lazo, cuando ese cuadro ya se pintó (el siguiente)')
+// Recién abierta la carga cae el titular del hero, y con él la bajada y los CTA (en su plano): aparecen con sus letras.
+const escenaA4 = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const esperaLaCarga = (c: string): boolean => /else if \(!fuera && !tapado\) m\.llegada = persigue\(m\.llegada, cargaLista\(\) \? a\.titulo\.llegada : 0, dt, a\.titulo\.minimoS \?\? undefined\)/.test(c)
+afirmar(esperaLaCarga(escenaA4), '  el título que llega una vez por carga (el hero) no arranca hasta que la carga se abre: hasta ahí lo pedido es 0 (nada se dibuja)')
+controlPositivo('el detector VE el hero que caía apenas armado (la pasada final)', escenaA4.replace('cargaLista() ? a.titulo.llegada : 0', 'a.titulo.llegada'), esperaLaCarga)
+const acompA4 = sinComentarios(leer('_lib/escena/titulos3d/acompanantes.ts'))
+const delDom = sinComentarios(leer('_lib/titulos3d/acompanantes.ts'))
+const titularA4 = { rearma: false } as unknown as Parameters<typeof opacidadDelAcompanante>[0]
+const otroA4 = { rearma: true } as unknown as Parameters<typeof opacidadDelAcompanante>[0]
+afirmar(opacidadDelAcompanante(titularA4, 0) === '0.000' && opacidadDelAcompanante(titularA4, APARECE_CON_EL_TITULO / 2) === '0.500' && opacidadDelAcompanante(titularA4, APARECE_CON_EL_TITULO) === '1.000' && opacidadDelAcompanante(titularA4, 1) === '1.000' && opacidadDelAcompanante(otroA4, 0) === '' && APARECE_CON_EL_TITULO > 0.35 && APARECE_CON_EL_TITULO < 1, '  la bajada y los CTA (los acompañantes del hero) aparecen con las letras que caen: su opacidad sigue a la llegada mostrada hasta el 60 %; los acompañantes de los demás títulos no cambian', `hasta ${String(APARECE_CON_EL_TITULO)}`)
+afirmar(/const opacidad = a === undefined \? '' : opacidadDelAcompanante\(a\.titulo, a\.mostrado\.llegada\)\s*if \(opacidad !== ac\.opacidad\) \{\s*ac\.opacidad = opacidad\s*el\.style\.opacity = opacidad\s*\}/.test(acompA4) && /el\.style\.opacity = ''/.test(delDom), '  la escena la escribe en cada cuadro (sólo si cambió) y al soltarse el acompañante vuelve a la suya')
+afirmar(RESPALDO_2D_CON_ESCENA_MS === CARGA.plazoMs && RESPALDO_2D_MS < CARGA.plazoMs, '  el respaldo 2D del titular con la escena montada comparte el plazo del velo: si el 3D no llegó, el 2D aparece con el fundido del velo (sin lienzo, a los 2,5 s como antes)', `${String(RESPALDO_2D_CON_ESCENA_MS)} ms`)
 
 cerrar('s48-ajustes-finales')

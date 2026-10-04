@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
+import { CARGA } from '../../_lib/carga'
 import { laEscenaCayo, suscribirALaCaida } from '../../_lib/escena/caida'
 import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 
@@ -31,24 +32,40 @@ export const RESPALDO_2D_MS = 2500
  * arma apenas la escena termina de montar— y mostrar el 2D sería el parpadeo al revés (2D un instante y después el 3D):
  * se le da hasta este plazo largo. Sin lienzo a los 2,5 s (una máquina o una red lentas, o sin JS), el 2D ya.
  */
-export const RESPALDO_2D_CON_ESCENA_MS = 4500
+export const RESPALDO_2D_CON_ESCENA_MS = CARGA.plazoMs // [AJUSTES FINALES] A4 · el mismo plazo que el velo de carga: el 2D aparece con el fundido del velo
 
 export type EstadoDelTitular2D = 'oculto' | 'respaldo' | 'reemplazado'
 
 /** El estado del texto 2D de un titular que espera a su volumen (`listo`: la escena lo armó y compiló). */
 const sinCambios = (): (() => void) => () => undefined
 
+/**
+ * [AJUSTES FINALES] A4 · el plazo, vencido, queda vencido para toda la carga: el `h1` se vuelve a montar cuando llega la
+ * coreografía y, con una máquina lenta (CPU ×4), su estado nuevo arrancaba en `oculto` y el respaldo que ya se veía
+ * desaparecía un segundo hasta que sus relojes volvían a vencer.
+ */
+let plazoVencido = false
+
 export function useTitular2D(listo: boolean): EstadoDelTitular2D {
   const caida = useSyncExternalStore(suscribirALaCaida, laEscenaCayo, () => false)
   // Si en esta carga no va a haber títulos de volumen, el 2D ya: `false` en el servidor y al hidratar (no lo sabe).
   const sinVolumen = useSyncExternalStore(sinCambios, () => entornoDeLaEscena().titulos === 'no', () => false)
-  const [vencido, setVencido] = useState(false)
+  // Ya vencido (el `h1` remontado): arranca en el respaldo, sin pasar un render por `oculto`.
+  const [vencido, setVencido] = useState(() => plazoVencido)
   useEffect(() => {
+    const vencer = (): void => {
+      plazoVencido = true
+      setVencido(true)
+    }
+    if (plazoVencido) {
+      vencer()
+      return undefined
+    }
     const desdeElArranque = (ms: number): number => Math.max(0, ms - performance.now())
     let reloj = window.setTimeout(() => {
       // Con la escena montada el 3D viene en camino: el plazo largo. Sin lienzo todavía, el 2D ya.
-      if (document.querySelector('[data-escena] canvas') !== null) reloj = window.setTimeout(() => setVencido(true), desdeElArranque(RESPALDO_2D_CON_ESCENA_MS))
-      else setVencido(true)
+      if (document.querySelector('[data-escena] canvas') !== null) reloj = window.setTimeout(vencer, desdeElArranque(RESPALDO_2D_CON_ESCENA_MS))
+      else vencer()
     }, desdeElArranque(RESPALDO_2D_MS))
     return () => window.clearTimeout(reloj)
   }, [])

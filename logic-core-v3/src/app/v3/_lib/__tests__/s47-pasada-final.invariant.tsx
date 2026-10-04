@@ -105,7 +105,8 @@ afirmar(plazoDeLaHoja !== null && Number(plazoDeLaHoja[1]) === RESPALDO_2D_MS &&
 controlPositivo('el detector VE la hoja con otro plazo', hoja.replace('2500ms', '3000ms'), (h: string) => Number(/--respaldo-2d:\s*(\d+)ms/.exec(h)?.[1]) === RESPALDO_2D_MS)
 afirmar(RESPALDO_2D_CON_ESCENA_MS > RESPALDO_2D_MS && RESPALDO_2D_CON_ESCENA_MS <= 5000, '  con la escena ya montada (el lienzo existe) el 3D viene en camino: se le da más, y no más de 5 s', `${String(RESPALDO_2D_CON_ESCENA_MS)} ms`)
 const hook = sinComentarios(leer('_componentes/titulos3d/titular2d.ts'))
-afirmar(/document\.querySelector\('\[data-escena\] canvas'\) !== null\) reloj = window\.setTimeout\(\(\) => setVencido\(true\), desdeElArranque\(RESPALDO_2D_CON_ESCENA_MS\)\)/.test(hook) && /else setVencido\(true\)/.test(hook) && /desdeElArranque\(RESPALDO_2D_MS\)/.test(hook), '  los dos plazos se cuentan desde el arranque de la página (la misma cuenta que la animación de la hoja)')
+// [AJUSTES FINALES] A4 · `vencer` deja el plazo vencido para toda la carga (el `h1` se remonta con la coreografía); la cuenta es la misma.
+afirmar(/document\.querySelector\('\[data-escena\] canvas'\) !== null\) reloj = window\.setTimeout\(vencer, desdeElArranque\(RESPALDO_2D_CON_ESCENA_MS\)\)/.test(hook) && /else vencer\(\)/.test(hook) && /desdeElArranque\(RESPALDO_2D_MS\)/.test(hook), '  los dos plazos se cuentan desde el arranque de la página (la misma cuenta que la animación de la hoja)')
 afirmar(/if \(listo\) return 'reemplazado'/.test(hook) && /return caida \|\| vencido \|\| sinVolumen \? 'respaldo' : 'oculto'/.test(hook), '  el 3D armado manda; sin él, el respaldo con la escena caída, sin títulos de volumen o vencido el plazo')
 
 // La hoja: los estados rigen desde 1024 (el corte, literal, atado al token) y el oculto sólo con movimiento.
