@@ -1,5 +1,6 @@
 import { posicionDeAncla, type ParDeAnclas } from '../_lib/motion/anclas'
 import {
+  ANCLA_DE_LA_DEMO,
   ANCLA_DE_LA_LLEGADA,
   ANCLA_DE_LA_MASCARA,
   ANCLA_DE_LA_VENTANA_VISIBLE,
@@ -53,6 +54,7 @@ const ANCLAS_DEL_RANGO: Readonly<Record<string, ParDeAnclas>> = {
   'ventana-del-trazo': ANCLA_DEL_TRAZO,
   'ventana-de-la-mascara': ANCLA_DE_LA_MASCARA,
   'llegada-de-la-foto': ANCLA_DE_LA_LLEGADA,
+  'ventana-de-la-demo': ANCLA_DE_LA_DEMO,
 }
 
 const SELECTOR_DEL_BLOQUE_ANIMADO = `[data-arbol="${MARCA_COREOGRAFIA_DEL_HOME}"]`

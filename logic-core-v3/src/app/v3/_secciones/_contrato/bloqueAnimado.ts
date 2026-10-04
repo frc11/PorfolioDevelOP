@@ -123,6 +123,18 @@ export const ANCLA_DE_LA_VENTANA_VISIBLE: ParDeAnclas = {
 }
 
 /**
+ * [AJUSTES FINALES] A7 · EL ANCLA DE LA DEMO — `top bottom-=80px` → `bottom 50%`: la misma entrada que la ventana visible
+ * (la pieza arranca apenas asoma) pero llega recién cuando su pie cruza la MITAD del cuadro, no 240 px antes de salir. A
+ * 1440 × 900 y con una demo de 600 px, el recorrido de la subida pasa de 760 a 970 px: la demo aparece un 28 % más
+ * despacio con el MISMO gesto (P2 intacto: cambia el recorrido sobre el que se consume, nunca el patrón). Es de las
+ * features de Tu panel, que llegaban demasiado rápido; las palabras del fondo siguen con la ventana visible.
+ */
+export const ANCLA_DE_LA_DEMO: ParDeAnclas = {
+  inicio: anclaEnCuadroInicio,
+  fin: { declarado: 'bottom 50%', elemento: LADO_FONDO, viewport: { fraccion: 0.5, px: 0 } },
+}
+
+/**
  * EL ANCLA DEL TRAZO — `top 95%` → `top 35%`, la ventana en la que un trazo se
  * dibuja. Modo pulido: la misma ventana corrida entera hacia arriba. Con
  * `75% → 10%` el último tramo caía con el titular saliendo por arriba —se

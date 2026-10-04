@@ -60,16 +60,19 @@ export interface FilaDelCaos {
  * La primera llega en el 60 % derecho, al lado del encabezado (el 30 % izquierdo). La última queda asentada al final:
  * velocidad 0, en el flujo, antes del cierre. Las pantallas (px) son más altas que las de RETOQUE PANEL T1: se ve más
  * panel; los leads, con sus tres columnas, piden la más ancha.
+ *
+ * [AJUSTES FINALES] A7 · las separaciones crecieron un 12 % (de 522 a 584 svh hasta la última): las demos llegaban
+ * demasiado rápido una tras otra. REGLA DE ALTURAS: la tabla de secciones declara el alto nuevo (700svh, medido).
  */
 export const TABLA_DEL_CAOS: readonly FilaDelCaos[] = [
-  { columna: 42, tamano: 'l', separacion: 14, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 640 },
-  { columna: 4, tamano: 'l', separacion: 82, pantalla: { ancho: 1100, alto: 800 }, altoAngosto: 680 },
-  { columna: 50, tamano: 'm', separacion: 82, pantalla: { ancho: 960, alto: 780 }, altoAngosto: 660 },
-  { columna: 14, tamano: 's', separacion: 78, pantalla: { ancho: 760, alto: 720 }, altoAngosto: 680 },
-  { columna: 42, tamano: 'l', separacion: 78, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 680 },
-  { columna: 2, tamano: 'm', separacion: 82, pantalla: { ancho: 920, alto: 780 }, altoAngosto: 660 },
-  { columna: 54, tamano: 's', separacion: 36, pantalla: { ancho: 820, alto: 700 }, altoAngosto: 640 },
-  { columna: 6, tamano: 'l', separacion: 70, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 600 },
+  { columna: 42, tamano: 'l', separacion: 16, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 640 },
+  { columna: 4, tamano: 'l', separacion: 92, pantalla: { ancho: 1100, alto: 800 }, altoAngosto: 680 },
+  { columna: 50, tamano: 'm', separacion: 92, pantalla: { ancho: 960, alto: 780 }, altoAngosto: 660 },
+  { columna: 14, tamano: 's', separacion: 87, pantalla: { ancho: 760, alto: 720 }, altoAngosto: 680 },
+  { columna: 42, tamano: 'l', separacion: 87, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 680 },
+  { columna: 2, tamano: 'm', separacion: 92, pantalla: { ancho: 920, alto: 780 }, altoAngosto: 660 },
+  { columna: 54, tamano: 's', separacion: 40, pantalla: { ancho: 820, alto: 700 }, altoAngosto: 640 },
+  { columna: 6, tamano: 'l', separacion: 78, pantalla: { ancho: 1000, alto: 720 }, altoAngosto: 600 },
 ]
 
 /** El encabezado ocupa el 30 % izquierdo. */

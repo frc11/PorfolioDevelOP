@@ -21,6 +21,8 @@
  *   A5 · la cabeza fija de Servicios (abajo de 1024) libre del menú pasa al producto, sin bandera.
  *   A6 · los nanobots macizos y parejos: trazos por longitud de arco (`nanobots/trazos.ts`); el globo como el 🌐, los
  *        engranajes completos, el robot que habla (`robot.ts`) y su flujo que se enciende tramo a tramo (`vida.ts`).
+ *   A7 · las demos de Tu panel llegan más despacio (`ventana-de-la-demo`) y la sección es un 12 % más larga; la tabla
+ *        declara el alto real (700svh): REGLA DE ALTURAS.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -31,6 +33,8 @@ import * as THREE from 'three'
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
 import { VeloDeCarga } from '../../_componentes/VeloDeCarga'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/titulos3d/titular2d'
+import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/_contrato/bloqueAnimado'
+import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
 import { CARGA, abrirLaCarga, cargaLista, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
 
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
@@ -41,11 +45,13 @@ import { SOMBRA_DEL_LOGO } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, BASE_EN_TEXELES, CHARCO_CON_LOS_TITULOS_GLSL, DISTANCIA_DEL_LOGO, FONDO_DEL_MAPA, PENUMBRA_DEL_LOGO, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, SOMBRA_DE_LOS_TITULOS_GLSL, TEXEL_DE_LA_LETRA_GLSL, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, lodDeLaPenumbra, materialDeLaSombraDelTitulo, penumbraEn } from '../escena/sombra/deLosTitulos'
 import { poseDeLaLectura } from '../escena/titulos3d/colocacion'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll } from '../escena/titulos3d/llegada'
+import type { ParDeAnclas } from '../motion/anclas'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { CAPAS_DEL_ROBOT, FLUJO, GLOBO_DE_DIALOGO } from '../nanobots/robot'
 import { ENGRANAJES, GLOBO, PUNTOS_DEL_ENJAMBRE, simbolosDelEnjambre } from '../nanobots/simbolos'
 import { type Trazo, circulo, disco, rectanguloRedondeado, repartir, trazar } from '../nanobots/trazos'
 import { RELOJ_DEL_ROBOT, VIDA_DEL_ROBOT_GLSL, textoEscrito, vidaDelRobot } from '../nanobots/vida'
+import { seccionPorId } from '../secciones'
 import { LECTURA, LLEGADA_DE_PORTFOLIO } from '../titulos3d/registro'
 import { LENTOS } from '../titulos3d/repeticiones'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -436,5 +442,18 @@ controlPositivo('el detector VE una vida que con movimiento reducido arranca vac
 const lineasDeCodigoA6 = (ruta: string): number => lineasDeCodigo(leer(ruta)).length
 const nanobotsA6 = ['trazos', 'robot', 'vida', 'simbolos', 'enjambre', 'montaje'].map((a) => `_lib/nanobots/${a}.ts`)
 afirmar(PUNTOS_DEL_ENJAMBRE.ancho === 3000 && PUNTOS_DEL_ENJAMBRE.angosto === 1200 && nanobotsA6.every((a) => lineasDeCodigoA6(a) <= LIMITE_DE_LINEAS_DE_CODIGO) && sinComentarios(leer('_lib/nanobots/enjambre.ts')).includes("Math.min(2.6, Math.max(1.6, ancho / 140))"), 'el enjambre sigue siendo UNA llamada con el morph en la GPU (s47 C4 lo fija); en el teléfono 1200 nanobots (eran 900: a paso constante el trazo pide más) y el punto no baja de 1,6 px (tocan al siguiente); cada módulo de `_lib/nanobots/` bajo las 300 líneas de código', nanobotsA6.map((a) => `${a.slice(14)} ${String(lineasDeCodigoA6(a))}`).join(' · '))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A7 · Las demos de Tu panel llegan más despacio y la sección es un poco más larga (REGLA DE ALTURAS: la tabla declara lo real)')
+
+const arranquesA7 = arranques()
+afirmar(arranquesA7[arranquesA7.length - 1] === 584 && TABLA_DEL_CAOS.map((f) => f.separacion).join() === '16,92,92,87,87,92,40,78', 'las separaciones del caos crecieron un 12 % (de 522 a 584 svh hasta la última feature): las demos llegaban demasiado rápido una tras otra', `${String(arranquesA7[arranquesA7.length - 1])} svh`)
+afirmar(seccionPorId('tu-panel').alto === '700svh', 'y la tabla de secciones declara el alto nuevo (700svh: medido 6,9–7,0 pantallas a 1440 × 900 con el banco; con 600 contra 6,33 medidas todo lo que venía después llegaba 0,0035 de progreso tarde)')
+const anclaDeLaDemo = (a: ParDeAnclas): boolean => a.inicio === ANCLA_DE_LA_VENTANA_VISIBLE.inicio && a.fin.declarado === 'bottom 50%' && a.fin.elemento.fraccion === 1 && a.fin.elemento.px === 0 && a.fin.viewport.fraccion === 0.5 && a.fin.viewport.px === 0
+const tarjetaA7 = leer('_secciones/tu-panel/Tarjeta.tsx')
+const animadaA7 = sinComentarios(leer('_secciones/_contrato/coreografia-animada.tsx'))
+const destinosA7 = sinComentarios(leer('_componentes/destinosDelViaje.ts'))
+afirmar(anclaDeLaDemo(ANCLA_DE_LA_DEMO) && /<Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">/.test(tarjetaA7) && animadaA7.includes("if (props.rango === 'ventana-de-la-demo') return ANCLA_DE_LA_DEMO") && destinosA7.includes("'ventana-de-la-demo': ANCLA_DE_LA_DEMO,") && /rango="ventana-visible"/.test(leer('_secciones/tu-panel/Fondo.tsx')), 'cada feature llega con `ventana-de-la-demo`: la misma entrada que la ventana visible (asoma y arranca) pero termina de subir cuando su pie cruza la MITAD del cuadro, no 240 px antes de salir (a 1440 × 900 y 600 px de demo, 970 px de recorrido en vez de 760: un 28 % más despacio, con P2 intacto); los viajes del menú la conocen; las palabras del fondo siguen con la ventana visible')
+controlPositivo('el detector VE la ventana visible de antes (llegada 240 px antes de salir)', ANCLA_DE_LA_VENTANA_VISIBLE, anclaDeLaDemo)
 
 cerrar('s48-ajustes-finales')

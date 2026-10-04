@@ -570,8 +570,13 @@ export const SECCIONES: readonly Seccion[] = [
    * progreso en 0,8714 (su ancla es 0,8525), media pantalla de cámara adelantada, y la frase se empezaba a
    * ir apenas llegaba. Con el alto real arranca en 0,8527 (medido con el banco). Tu panel es `papel-opaco`:
    * el tramo que corre detrás no se ve.
+   *
+   * **[AJUSTES FINALES] A7 · 700svh.** Las separaciones del caos crecieron un 12 % (las demos llegaban demasiado
+   * rápido una tras otra): la sección mide ~7,0 pantallas a 1440 × 900 (medido con el banco). REGLA DE ALTURAS:
+   * se declara lo real, así el mapeo no corre a lo que viene después (con 600 contra 6,33 medidas, Portfolio llegaba
+   * 0,0035 de progreso tarde).
    */
-  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '600svh' },
+  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '700svh' },
   /**
    * POR QUÉ develOP — **[FINAL]** el escenario de los tres primeros tiempos del final
    * (frase, valores, CTA; `escena/finalDelRecorrido.ts`). Cuatro pantallas con el

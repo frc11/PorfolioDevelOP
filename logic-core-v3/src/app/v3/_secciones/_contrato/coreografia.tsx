@@ -252,6 +252,8 @@ export type RangoDelBloque =
   | 'ventana-de-la-mascara'
   /** `ANCLA_DE_LA_LLEGADA`: de `top bottom` a `center 55%` — el viaje entero con la pieza a la vista. */
   | 'llegada-de-la-foto'
+  /** `ANCLA_DE_LA_DEMO`: de `top bottom-=80px` a `bottom 50%` — la ventana visible, pero la llegada en la mitad del cuadro ([AJUSTES FINALES] A7: las demos de Tu panel). */
+  | 'ventana-de-la-demo'
 
 export interface BloqueProps {
   /** Qué mide. Por NOMBRE: ningún objeto del sistema cruza el seam. */

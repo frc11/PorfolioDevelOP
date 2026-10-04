@@ -28,6 +28,9 @@ const TOPES = arranques()
  * pintura de la demo: lo que pasa adentro (una tabla que cambia, un chat que escribe) no le cuesta a la página.
  *
  * El `<li>` se puede enfocar desde el código: es adonde lleva «Saltar la demo» de la anterior.
+ *
+ * [AJUSTES FINALES] A7 · la feature llega con `ventana-de-la-demo`: termina de subir cuando su pie cruza la mitad del cuadro
+ * (más despacio que la ventana visible, que la dejaba llegada 240 px antes de salir).
  */
 export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta; readonly indice: number }): React.JSX.Element {
   const fila = TABLA_DEL_CAOS[indice]
@@ -48,7 +51,7 @@ export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta;
       style={lugar}
       className={cn('relative focus-visible:outline-2 focus-visible:outline-offset-4 escritorio:z-[var(--z-elevado)]', claseEnColumna(indice), esLaUltima ? CLASE_DEL_LUGAR.asentada : CLASE_DEL_LUGAR.flota)}
     >
-      <Bloque patron="P2" rango="ventana-visible" className="w-full">
+      <Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">
         {(progreso) => (
           <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-[var(--spacing-3)]">
             <div

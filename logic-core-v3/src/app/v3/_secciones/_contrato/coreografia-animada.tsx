@@ -31,7 +31,7 @@ import type {
 import type { BloqueProps, PrimitivasDeCoreografia } from './coreografia'
 import { ATRIBUTO_DE_PANEL } from './forma'
 import { MARCA_COREOGRAFIA_DEL_HOME } from './marcaCoreografia'
-import { ANCLA_DEL_PIN, ANCLA_DEL_TRAZO, ANCLA_DE_LA_LLEGADA, ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, CORTE_DE_LA_VENTANA_DEL_TRAZO, DESFASE_DE_LAS_BARRAS, LLEGADA_EN_CURVA, PERSECUCION_DEL_SCROLL, especificacionDe, inerciaDe } from './bloqueAnimado'
+import { ANCLA_DEL_PIN, ANCLA_DEL_TRAZO, ANCLA_DE_LA_DEMO, ANCLA_DE_LA_LLEGADA, ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, CORTE_DE_LA_VENTANA_DEL_TRAZO, DESFASE_DE_LAS_BARRAS, LLEGADA_EN_CURVA, PERSECUCION_DEL_SCROLL, especificacionDe, inerciaDe } from './bloqueAnimado'
 
 /**
  * LAS PRIMITIVAS ANIMADAS — el único módulo del home que importa el sistema.
@@ -87,6 +87,7 @@ function anclasDe(props: BloqueProps): ParDeAnclas {
   if (props.rango === 'ventana-del-trazo') return ANCLA_DEL_TRAZO
   if (props.rango === 'ventana-de-la-mascara') return ANCLA_DE_LA_MASCARA
   if (props.rango === 'llegada-de-la-foto') return ANCLA_DE_LA_LLEGADA
+  if (props.rango === 'ventana-de-la-demo') return ANCLA_DE_LA_DEMO
   return PATRONES[props.patron].anclas
 }
 
