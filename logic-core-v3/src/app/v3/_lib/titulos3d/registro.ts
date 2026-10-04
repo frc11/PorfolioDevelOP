@@ -28,6 +28,8 @@ export interface TrazoDelTitulo {
   readonly medir: (lugar: HTMLElement) => SegmentoDelTrazo | null
   readonly nace: 'punta' | 'medio'
   readonly avance: MotionValue<number>
+  /** [PASADA FINAL] D2 · el tachado: con su avance despinta las letras de su título, como el DOM (`trazo.css`). */
+  readonly despinta?: boolean
 }
 
 /**

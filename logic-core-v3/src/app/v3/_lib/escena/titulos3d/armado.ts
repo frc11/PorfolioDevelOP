@@ -55,7 +55,7 @@ export interface Armado {
   readonly grupo: THREE.Group
   readonly malla: THREE.Mesh
   readonly material: THREE.MeshStandardMaterial
-  readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number }; readonly uLevanta: { value: number }; readonly uPieDeLaPalabra: { value: THREE.Vector2 }; readonly uTrazos: { value: THREE.Vector4 } }
+  readonly uniforms: { readonly uLlegada: { value: number }; readonly uSalida: { value: number }; readonly uQuieto: { value: number }; readonly uLevanta: { value: number }; readonly uPieDeLaPalabra: { value: THREE.Vector2 }; readonly uTrazos: { value: THREE.Vector4 }; readonly uDespinte: { value: number } }
   readonly fuente: Font
   readonly contorno: ContornoDelLogo
   /** [RETOQUE PANEL] T4 · sin letras (el ≠): se dibuja sólo con alguna raya empezada. */
@@ -93,6 +93,22 @@ function rayasDe(titulo: TituloDeVolumen, fuente: Font): RayaEnEm[] {
   })
 }
 
+/**
+ * [PASADA FINAL] D2 · LO TACHADO SE DESPINTA, COMO EN EL DOM — el tachado de «lo mismo de siempre» aclara sus letras con el
+ * mismo avance con que se dibuja (`trazo.css`: de `--color-tinta` a `--color-tinta-media`); en volumen las letras y su raya
+ * van del negro a la tinta media del tema (`TINTA_MEDIA_DEL_TEMA`, que s47 compara con el token). Sólo el negro.
+ */
+export const TINTA_MEDIA_DEL_TEMA = '#535353'
+const despintado = new THREE.Color(TINTA_MEDIA_DEL_TEMA)
+const DESPINTE_GLSL = `\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${despintado.r.toFixed(5)}, ${despintado.g.toFixed(5)}, ${despintado.b.toFixed(5)} ), uDespinte );`
+
+/** Cuánto se despintó el título: el avance de su trazo que despinta (el tachado); sin uno, 0. */
+export function despinteDelTitulo(titulo: TituloDeVolumen): number {
+  let d = 0
+  for (const t of titulo.trazos) if (t.despinta === true) d = Math.max(d, Math.min(1, Math.max(0, t.avance.get())))
+  return d
+}
+
 /** Avances de las rayas de un título (los que no tiene, en 0): el uniform de su sombreador. */
 export function avancesDeLasRayas(titulo: TituloDeVolumen, destino: THREE.Vector4): boolean {
   const a = (k: number): number => Math.min(1, Math.max(0, titulo.trazos[k]?.avance.get() ?? 0))
@@ -110,7 +126,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
   // [RETOQUE 3D] `levanta`: el pie de atrás de la palabra (el más bajo y el más atrás de sus LETRAS, em) es el eje del giro y la línea.
   // [RETOQUE PANEL] T4 · sin letras (el ≠), en 0: la caja vacía es infinita y el sombreador daría NaN aunque no se levante.
-  const uniforms = { uLlegada: { value: 0 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: titulo.gesto === 'levanta' ? 1 : 0 }, uPieDeLaPalabra: { value: cajaDeLasLetras.isEmpty() ? new THREE.Vector2() : new THREE.Vector2(cajaDeLasLetras.min.y, cajaDeLasLetras.min.z) }, uTrazos: { value: new THREE.Vector4() } }
+  const uniforms = { uLlegada: { value: 0 }, uSalida: { value: 0 }, uQuieto: { value: 0 }, uLevanta: { value: titulo.gesto === 'levanta' ? 1 : 0 }, uPieDeLaPalabra: { value: cajaDeLasLetras.isEmpty() ? new THREE.Vector2() : new THREE.Vector2(cajaDeLasLetras.min.y, cajaDeLasLetras.min.z) }, uTrazos: { value: new THREE.Vector4() }, uDespinte: { value: 0 } }
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
@@ -121,7 +137,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
     // El blanco, de día: el filo oscuro (la función del borde la trae el dibujo de noche, que se instala abajo).
     if (variante === 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${FILO_DE_DIA_GLSL}`)
     // [RETOQUE DEL PIE] P1 · el negro, de día: los costados en otro gris (`filo.ts`; era la b de la prueba de RONDA 2).
-    else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`)
+    else shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uDespinte;').replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}\n${DESPINTE_GLSL}`)
   }
   material.customProgramCacheKey = () => `titulo-de-volumen-${variante}`
   if (propia) material.customProgramCacheKey = () => `titulo-de-volumen-${variante}|${forma.id}`

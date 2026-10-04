@@ -13,7 +13,7 @@ import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } from './colocacion'
-import { avancesDeLasRayas, ponerElEstudio, type Armado, type Variante } from './armado'
+import { avancesDeLasRayas, despinteDelTitulo, ponerElEstudio, type Armado, type Variante } from './armado'
 import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
 import { llevarLosAcompanantes } from './acompanantes'
@@ -205,6 +205,7 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
       avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
+      a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)
       a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, reanudado, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
       continue
@@ -223,6 +224,7 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     // Regla 5: sin ninguna letra en camino, no se dibuja; al empezar la próxima llegada se vuelve a colocar. [RETOQUE PANEL]
     // T4: el que no tiene letras (el ≠), sólo con alguna raya empezada.
     const conRaya = avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
+    a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)
     a.malla.visible = a.sinLetras ? conRaya : llegada > 0 && salida < 1
     if (!a.malla.visible) {
       if (llegada <= 0) a.colocado = false

@@ -37,6 +37,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 
+import { motionValue } from 'motion/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
@@ -64,6 +65,7 @@ import { armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
 import { materialDelPie } from '../escena/pie3d/material'
 import { APLICAR_LA_SOMBRA_GLSL, SOMBRA_DEL_LOGO_GLSL, crearMapaDeLaSombra, materialDelMapa } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, CHARCO_CON_LOS_TITULOS_GLSL, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_GLSL, ajustarLaCamara, direccionDeLaLuz, fuerzasDeLaSombra, materialDeLaSombraDelTitulo } from '../escena/sombra/deLosTitulos'
+import { TINTA_MEDIA_DEL_TEMA, despinteDelTitulo } from '../escena/titulos3d/armado'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../escena/finalDelRecorrido'
@@ -703,5 +705,19 @@ const bloqueRecortado = (c: string): boolean => {
 }
 afirmar(bloqueRecortado(trabajosD) && /overflowClipMargin: `\$\{MARGEN_DEL_RECORTE_PX\}px`/.test(sinComentarios(leer('_secciones/trabajos/CapaDelTunel.tsx'))), 'Trabajos recorta a lo ancho en todos los anchos (no sólo abajo de 1024): el túnel sigue pintando sus anillos de foco con su margen, y lo que ese margen deja afuera del cuadro ya no ensancha la página (medido: el documento mide lo que la ventana a 1440, 1024 y 390, en todo el recorrido; antes, 1446 a 1440)')
 controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.replace("'relative h-full w-full overflow-x-clip max-escritorio:sticky", "'relative h-full w-full max-escritorio:overflow-x-clip max-escritorio:sticky"), bloqueRecortado)
+
+
+// D2 · el tachado 3D de «lo mismo de siempre» se despinta como el del DOM (de la tinta a la tinta media), con su avance.
+const titularD2 = sinComentarios(leer('_secciones/quienes-somos/titular3d.tsx'))
+const armadoD2 = sinComentarios(leer('_lib/escena/titulos3d/armado.ts'))
+const escenaD2 = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const tachadoQueDespinta = (t: string): boolean => /\[\{ medir: rayaDelTrazo, nace: 'punta', avance, despinta: renglon\.tipo === 'tachado' \}\]/.test(t)
+afirmar(tachadoQueDespinta(titularD2) && TINTA_MEDIA_DEL_TEMA.toLowerCase() === valorDeToken('--color-tinta-media').toLowerCase(), 'el tachado despinta su título (sólo el tachado, como en el DOM), hacia la tinta media del tema (el mismo valor que el token)', TINTA_MEDIA_DEL_TEMA)
+controlPositivo('el detector VE el tachado que no despinta', titularD2.replace(", despinta: renglon.tipo === 'tachado'", ''), tachadoQueDespinta)
+const tituloConTrazos = (trazos: readonly { readonly avance: number; readonly despinta?: boolean }[]): TituloDeVolumen => ({ trazos: trazos.map((t) => ({ medir: () => null, nace: 'punta' as const, avance: motionValue(t.avance), despinta: t.despinta })) }) as unknown as TituloDeVolumen
+afirmar(despinteDelTitulo(tituloConTrazos([{ avance: 0.6, despinta: true }])) === 0.6 && despinteDelTitulo(tituloConTrazos([{ avance: 0.8 }])) === 0 && despinteDelTitulo(tituloConTrazos([{ avance: 1.4, despinta: true }])) === 1 && despinteDelTitulo(tituloConTrazos([])) === 0, '  con el MISMO avance que dibuja la raya (acotado de 0 a 1); un subrayado no despinta nada')
+const conElDespinte = (a: string, e: string): boolean => a.includes(".replace('#include <common>', '#include <common>\\nuniform float uDespinte;')") && a.includes('${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}\\n${DESPINTE_GLSL}') && /const DESPINTE_GLSL = `\\tdiffuseColor\.rgb = mix\( diffuseColor\.rgb, vec3\( \$\{despintado\.r\.toFixed\(5\)\}, \$\{despintado\.g\.toFixed\(5\)\}, \$\{despintado\.b\.toFixed\(5\)\} \), uDespinte \);`/.test(a) && (e.match(/a\.uniforms\.uDespinte\.value = despinteDelTitulo\(a\.titulo\)/g) ?? []).length === 2
+afirmar(conElDespinte(armadoD2, escenaD2), '  el negro mezcla sus letras (y su raya) hacia ese gris con el despinte, que la escena escribe en cada cuadro (en los dos caminos: el que se queda y el que va con el scroll) — medido en vivo: tachado entero, «lo mismo de siempre» queda gris y «no» negro, como en el DOM')
+controlPositivo('el detector VE la escena que no escribe el despinte', escenaD2.replace('a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)', ''), (e: string) => conElDespinte(armadoD2, e))
 
 cerrar('s47-pasada-final')
