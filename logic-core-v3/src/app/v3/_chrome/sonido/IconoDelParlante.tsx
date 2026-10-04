@@ -8,8 +8,9 @@ import { CURVAS } from '../../_lib/motion/curvas'
  * [PASADA FINAL] C1 · EL PARLANTE, ANIMADO — el mismo dibujo de siempre (el parlante, las dos ondas; apagado, tachado),
  * con el trazo fino y el borde del tono contrario debajo (como el infinito). Al prenderlo las ondas se dibujan, la corta
  * y enseguida la larga, y la cruz se retira; al apagarlo las ondas se cortan (primero la larga) y la cruz se dibuja. Con el
- * motor todavía esperando la primera acción (`suena` falso con el parlante prendido) las ondas quedan tenues: lo que se ve
- * es lo real. Apagado, la cruz de siempre (sus dos trazos se dibujan uno después del otro). Con la curva principal y sin
+ * motor todavía esperando la primera acción (`suena` falso con el parlante prendido) las ondas quedan tenues y laten
+ * despacio ([AJUSTES FINALES] A3: un estado «en espera» honesto, no «activado»): lo que se ve es lo real. Apagado, la cruz
+ * de siempre (sus dos trazos se dibujan uno después del otro). Con la curva principal y sin
  * resorte: medido, el de los íconos (400/15) pasa al cortar por un largo de −0,27, y el SVG dibuja ENTERO un trazo con
  * guiones negativos (y al dibujar, la punta tiembla). Con movimiento reducido, sin dibujarse: aparecen y desaparecen.
  */
@@ -21,16 +22,24 @@ const CRUZ = ['M16 9.5l4.5 5', 'M20.5 9.5l-4.5 5'] as const
 /** Cómo se dibuja o se corta cada trazo (nunca sale de 0…1: un tween interrumpido arranca de donde está) y cuánto espera el siguiente (s). */
 export const TRAZO_DEL_ICONO = { duration: 0.3, ease: CURVAS.principal } as const
 export const ESCALON_DE_LAS_ONDAS_S = 0.08
-/** Cuánto se ven las ondas mientras el motor espera la primera acción. */
+/** Cuánto se ven las ondas mientras el motor espera la primera acción, hasta dónde laten y cada cuánto (s). */
 export const ONDAS_EN_ESPERA = 0.45
+export const PULSO_DE_LA_ESPERA = { hasta: 0.75, s: 1.8 } as const
+/** El latido de la espera: la opacidad de las ondas va y vuelve, sin parar, suave. */
+const LATIDO = { duration: PULSO_DE_LA_ESPERA.s, repeat: Infinity, ease: 'easeInOut' } as const
 
 function Trazos({ prendido, suena, reducido, ...trazo }: { readonly prendido: boolean; readonly suena: boolean; readonly reducido: boolean; readonly stroke: string; readonly strokeWidth: number; readonly opacity?: number }): React.JSX.Element {
   const visible = prendido ? (suena ? 1 : ONDAS_EN_ESPERA) : 0
-  const onda = (demora: number) => ({
-    initial: false as const,
-    animate: reducido ? { opacity: visible } : { pathLength: prendido ? 1 : 0, opacity: visible },
-    transition: reducido ? { duration: 0 } : { ...TRAZO_DEL_ICONO, delay: demora },
-  })
+  // En espera (prendido, sin la primera acción): las ondas laten entre tenues y un poco más; con movimiento reducido, quietas.
+  const espera = prendido && !suena && !reducido
+  const onda = (demora: number) => {
+    const transicion = espera ? { ...TRAZO_DEL_ICONO, delay: demora, opacity: LATIDO } : { ...TRAZO_DEL_ICONO, delay: demora }
+    return {
+      initial: false as const,
+      animate: reducido ? { opacity: visible } : { pathLength: prendido ? 1 : 0, opacity: espera ? [ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA.hasta, ONDAS_EN_ESPERA] : visible },
+      transition: reducido ? { duration: 0 } : transicion,
+    }
+  }
   return (
     <g {...trazo}>
       <path d={PARLANTE} />

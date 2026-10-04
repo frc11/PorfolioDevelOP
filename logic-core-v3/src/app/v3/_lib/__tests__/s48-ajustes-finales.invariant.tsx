@@ -11,12 +11,17 @@
  *        letra al piso (un mapa de cobertura por niveles, calibrado con la penumbra del logo y con tope: sin dientes, sin
  *        sangrado ni grietas), la misma dirección y fuerza que la del logo de día, y de noche cenital:
  *        le quita luz al charco del haz y apenas a la sala. La del logo no se tocó (s47 C3).
+ *   A3 · el sonido sin gesto: guardado como prendido, el primer clic, toque o tecla en CUALQUIER parte desbloquea el audio y
+ *        arranca todo (el ambiente, en el acto); mientras no hubo gesto el botón muestra «en espera» (las ondas tenues
+ *        latiendo despacio), no «activado». Medido en Chrome con el perfil limpio (mirar.txt).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
+import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
+import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
 
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
@@ -225,5 +230,24 @@ const camaraSana = (direccion: THREE.Vector3): boolean => {
 afirmar(camaraSana(deDia) && camaraSana(deNoche), '  la cámara de la luz abraza a los títulos (con aire) desde su luz y dice cuánto mundo es un texel (lo que el piso necesita para la penumbra); de noche mira derecho hacia abajo sin quedar indefinida')
 const copiaA2 = sinComentarios(leer('_lib/escena/titulos3d/SombraDeLosTitulos.tsx'))
 afirmar(/c\.copia\.matrixWorld\.copy\(a\.malla\.matrixWorld\)/.test(copiaA2) && /c\.copia\.visible = a\.malla\.visible/.test(copiaA2) && /s\.texel = ajustarLaCamara\(mapa\.camara, s\.esfera, direccionDeLaLuz\(principal\.position, VIVO\.uNocheDelLogo\.value, s\.direccion\)\)\s*u\.uTexelDeLosTitulos\.value = s\.texel/.test(copiaA2) && 'uTexelDeLosTitulos' in SOMBRA_DE_LOS_TITULOS_EN_VIVO, '  una copia por título armado (su geometría, su llegada, su matriz y si se ve, en cada cuadro), y el texel del cuadro va al piso; sin luz o sin títulos a la vista, no se dibuja')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A3 · El sonido sin gesto: el primer clic, toque o tecla en cualquier parte arranca todo; mientras tanto, «en espera» honesto')
+
+// El botón: prendido y esperando la primera acción, las ondas tenues laten (entre lo tenue y un poco más, sin parar);
+// sonando, enteras; apagado, cortadas. Con movimiento reducido no late. Lo que sale del servidor sigue siendo lo tenue.
+const iconoA3 = (prendido: boolean, suena: boolean, reducido: boolean): string => renderToStaticMarkup(<IconoDelParlante prendido={prendido} suena={suena} reducido={reducido} />)
+const ondasDe = (html: string): number[] => Array.from(html.matchAll(/<path data-parte="onda"[^>]*opacity="([\d.]+)"/g), (m) => Number(m[1]))
+afirmar(ondasDe(iconoA3(true, false, false)).every((o) => o === ONDAS_EN_ESPERA) && ondasDe(iconoA3(true, true, false)).every((o) => o === 1) && ondasDe(iconoA3(false, false, false)).every((o) => o === 0), 'en espera las ondas salen tenues (lo que se ve es lo real, también en el HTML del servidor); sonando, enteras; apagado, cortadas', `en espera ${String(ONDAS_EN_ESPERA)}`)
+const iconoFuente = sinComentarios(leer('_chrome/sonido/IconoDelParlante.tsx'))
+const late = (c: string): boolean => /const espera = prendido && !suena && !reducido/.test(c) && /opacity: espera \? \[ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA\.hasta, ONDAS_EN_ESPERA\] : visible/.test(c) && /const LATIDO = \{ duration: PULSO_DE_LA_ESPERA\.s, repeat: Infinity, ease: 'easeInOut' \} as const/.test(c) && /const transicion = espera \? \{ \.\.\.TRAZO_DEL_ICONO, delay: demora, opacity: LATIDO \} : \{ \.\.\.TRAZO_DEL_ICONO, delay: demora \}/.test(c) && /transition: reducido \? \{ duration: 0 \} : transicion/.test(c)
+afirmar(late(iconoFuente) && PULSO_DE_LA_ESPERA.hasta > ONDAS_EN_ESPERA && PULSO_DE_LA_ESPERA.hasta < 1 && PULSO_DE_LA_ESPERA.s >= 1.2 && PULSO_DE_LA_ESPERA.s <= 2.5 && ESCALON_DE_LAS_ONDAS_S === 0.08, '  y en espera laten: la opacidad va y vuelve entre lo tenue y un poco más (nunca a «activado»), despacio y sin parar; con movimiento reducido, quietas', `${String(ONDAS_EN_ESPERA)} ↔ ${String(PULSO_DE_LA_ESPERA.hasta)} cada ${String(PULSO_DE_LA_ESPERA.s)} s`)
+controlPositivo('el detector VE las ondas en espera quietas (la pasada final)', iconoFuente.replace('opacity: espera ? [ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA.hasta, ONDAS_EN_ESPERA] : visible', 'opacity: visible'), late)
+// El control: cualquier parte de la página (la ventana, en captura) carga el motor con la primera interacción y lo despierta
+// con cada gesto de verdad; y apenas el motor queda listo, el ambiente arranca en el acto (no espera el reintento).
+const controlA3 = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+const arrancaTodo = (c: string): boolean => ["window.addEventListener('pointerdown', cargar, true)", "window.addEventListener('keydown', cargar, true)", "window.addEventListener('touchstart', cargar, true)", "window.addEventListener('wheel', cargar, true)", "window.addEventListener('pointerdown', despertar, true)", "window.addEventListener('keydown', despertar, true)", "window.addEventListener('touchend', despertar, true)"].every((l) => c.includes(l)) && /const soltarElMotor = suscribirAlMotor\(\(\) => \{\s*if \(estadoDelMotor\(\) === 'listo'\) ambiente\(\)\s*\}\)/.test(c) && /soltarElMotor\(\)\s*window\.clearInterval\(reintento\)/.test(c)
+afirmar(arrancaTodo(controlA3), 'guardado como prendido: la primera interacción en CUALQUIER parte (la ventana, en captura) carga el motor, cada clic, toque o tecla lo despierta, y apenas está listo el ambiente arranca en el acto (medido en Chrome con perfil limpio: la rueda carga pero no desbloquea; el primer clic o tecla, sí)')
+controlPositivo('el detector VE el ambiente que espera al reintento de cada segundo', controlA3.replace("if (estadoDelMotor() === 'listo') ambiente()", ''), arrancaTodo)
 
 cerrar('s48-ajustes-finales')

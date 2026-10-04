@@ -22,10 +22,13 @@ import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from '.
  *   · **Apagado por defecto**, y la elección se recuerda (`preferencia.ts`, con try/catch).
  *   · **Nada suena sin una acción.** Prenderlo es un clic; si quedó prendido de otra visita, el motor (howler y el
  *     archivo) se carga recién con la primera interacción en la página (un toque, una tecla, [PASADA FINAL] A4: la rueda
- *     también): antes, ni se descarga. El contexto nace suspendido hasta la primera acción de verdad y cada acción lo
- *     despierta si hizo falta (Safari lo exige dentro del gesto); howler no lo suspende solo (`autoSuspend` apagado: el
- *     ambiente generativo se quedaba mudo a los 30 s con el parlante prendido). Lo que el botón muestra es lo real
- *     (`data-estado`: apagado, esperando la primera acción, o suena).
+ *     también): antes, ni se descarga. El contexto nace suspendido hasta la primera acción de verdad (un clic, un toque o
+ *     una tecla en CUALQUIER parte de la página: el navegador no cuenta el scroll ni el hover) y cada acción lo despierta
+ *     si hizo falta (Safari lo exige dentro del gesto); howler no lo suspende solo (`autoSuspend` apagado: el ambiente
+ *     generativo se quedaba mudo a los 30 s con el parlante prendido). Lo que el botón muestra es lo real (`data-estado`:
+ *     apagado, esperando la primera acción —las ondas tenues, latiendo—, o suena). [AJUSTES FINALES] A3 · apenas el motor
+ *     queda listo arranca todo lo que no depende de una interacción (el ambiente ya; el pulso del logo y el encendido del
+ *     haz, cuando les toque).
  *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con el
  *     pestillo, [CIERRE RETOQUE 3D] S1), el hover de los CTA suena el tic de la barra y suena UN ambiente generativo para
  *     toda la página (S2: sin archivo), salvo con movimiento reducido o con la pestaña oculta.
@@ -142,12 +145,18 @@ export default function ControlDelSonido(): React.JSX.Element {
     document.addEventListener('click', alClic)
     document.addEventListener('pointerover', alPasar)
     document.addEventListener('visibilitychange', ambiente)
+    // [AJUSTES FINALES] A3 · apenas el motor está listo (el archivo cargado y el contexto corriendo, o sea después del primer
+    // gesto de verdad) el ambiente arranca en el acto, sin esperar el reintento de cada segundo.
+    const soltarElMotor = suscribirAlMotor(() => {
+      if (estadoDelMotor() === 'listo') ambiente()
+    })
     const reintento = window.setInterval(ambiente, 1000)
     ambiente()
     return () => {
       document.removeEventListener('click', alClic)
       document.removeEventListener('pointerover', alPasar)
       document.removeEventListener('visibilitychange', ambiente)
+      soltarElMotor()
       window.clearInterval(reintento)
       motor.current?.ambiente(false)
     }

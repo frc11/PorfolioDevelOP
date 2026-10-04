@@ -291,7 +291,8 @@ const sinRebote = (c: string, t: { readonly ease: unknown }): boolean => !/sprin
 afirmar(sinRebote(fuenteDelIcono, TRAZO_DEL_ICONO), '  sin resorte: con la curva principal, el largo de cada trazo nunca sale de 0…1 (un tween interrumpido arranca de donde está), así no hay destello ni punta que tiembla')
 controlPositivo('el detector VE un trazo con resorte', fuenteDelIcono.replace('{ ...TRAZO_DEL_ICONO, delay: demora }', "{ type: 'spring', stiffness: 400, damping: 15, delay: demora }"), (c: string) => sinRebote(c, TRAZO_DEL_ICONO))
 const sinDibujo = (html: string): boolean => !html.includes('stroke-dasharray') && partesDe(html, 'cruz').every((p) => p.opacidad === 1) && partesDe(html, 'onda').every((p) => p.opacidad === 0)
-afirmar(sinDibujo(icono(false, false, true)) && fuenteDelIcono.includes('transition: reducido ? { duration: 0 } : { ...TRAZO_DEL_ICONO, delay: demora }') && fuenteDelIcono.includes('stroke="currentColor" strokeWidth={1.5}'), '  con movimiento reducido no se dibuja (aparece y desaparece); el trazo, de 1,5 como los íconos')
+// [AJUSTES FINALES] A3 · la transición del trazo pasó a una constante local (`transicion`: la de siempre, y en espera con el latido de la opacidad): lo que se fija es lo mismo.
+afirmar(sinDibujo(icono(false, false, true)) && fuenteDelIcono.includes('transition: reducido ? { duration: 0 } : transicion') && fuenteDelIcono.includes("const transicion = espera ? { ...TRAZO_DEL_ICONO, delay: demora, opacity: LATIDO } : { ...TRAZO_DEL_ICONO, delay: demora }") && fuenteDelIcono.includes('stroke="currentColor" strokeWidth={1.5}'), '  con movimiento reducido no se dibuja ni late (aparece y desaparece); el trazo, de 1,5 como los íconos')
 controlPositivo('el detector VE el dibujo con movimiento reducido', icono(false, false, false), sinDibujo)
 
 // El cartel: dos líneas encima, cambia con su animación y se va solo; lo que se ve no se anuncia, se anuncia aparte.
