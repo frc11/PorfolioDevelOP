@@ -15,6 +15,7 @@ import {
 } from './contenido'
 import { FormularioDelPie } from './FormularioDelPie'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
+import { LlegadaDelPie } from '../../_lib/pie3d/registro'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
 
 /**
@@ -135,7 +136,12 @@ function CuerpoDeColumna({ clase }: { readonly clase: ClaseDeColumna }): React.J
 /** [FINAL] La columna de contacto: el enlace al contacto, con el mismo gesto que la del recorrido. */
 /** [RETOQUE 3D] 3I · el formulario (era el enlace «Hablanos» al formulario de la hoja); en todos los anchos. */
 function ColumnaDeContacto(): React.JSX.Element {
-  return <FormularioDelPie />
+  // [PASADA FINAL] C2 · en 3D se levanta como una tapa que se abre.
+  return (
+    <LlegadaDelPie value="tapa">
+      <FormularioDelPie />
+    </LlegadaDelPie>
+  )
 }
 
 /**

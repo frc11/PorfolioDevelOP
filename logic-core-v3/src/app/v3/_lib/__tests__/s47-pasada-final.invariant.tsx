@@ -20,11 +20,15 @@
  *        commit escritas acá, F2 en las cuatro, la de hoy por defecto, y la cámara de entonces (los pares medidos).
  *   C1 · el parlante, justo encima del infinito y centrado con él (una sola columna fija en la esquina): el ícono que
  *        dibuja o corta sus ondas, el cartel «Sonido / activado|desactivado» que se va solo y el anuncio aparte.
+ *   C2 · el pie llega por columnas (en 3D, desde 1025): el titular, el mail y WhatsApp desde atrás y abajo (las letras
+ *        como Portfolio), el formulario como una tapa, lo demás en un fundido escalonado; tres tramos seguidos sobre la
+ *        última pantalla, con su mínimo, que asientan por columna (función del scroll, como F2).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
+import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, TRAZO_DEL_ICONO } from '../../_chrome/sonido/IconoDelParlante'
@@ -36,9 +40,13 @@ import { Hero } from '../../_secciones/hero/Hero'
 import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
 import { pantallasDe } from '../escena/anclaje'
 import { CURVAS } from '../motion/curvas'
+import type { LetraDelPie } from '../pie3d/medida'
 import { laEscenaCayo, marcarLaEscenaCaida, suscribirALaCaida } from '../escena/caida'
 import { PARES_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, VARIANTES_DE_PORTFOLIO, entornoPedido } from '../escena/entorno'
+import { GESTOS_DEL_PIE, LIBRE_DEL_PIE_S, TRAMOS_DEL_PIE, apareceDeLaPieza, asientoDelPie, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, salida, uniformesDelPie, type TramoDelPie, type UniformesDelPie } from '../escena/pie3d/coreografia'
+import { armarLaPieza, type FuentesDelPie } from '../escena/pie3d/geometria'
+import { materialDelPie } from '../escena/pie3d/material'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { TIEMPOS_DEL_FINAL, progresoDelFinal } from '../escena/finalDelRecorrido'
@@ -373,5 +381,123 @@ const anuncia = (c: string): boolean => {
 }
 afirmar(anuncia(control), '  accesible: el botón dice su estado (`aria-pressed`) y una región viva que está SIEMPRE (no el cartel, que es visual y se desmonta) anuncia «Sonido activado» o «Sonido desactivado» al tocarlo')
 controlPositivo('el detector VE un anuncio que sólo existe con el cartel', control.replace('<span role="status" data-pieza="anuncio-del-sonido" className="sr-only">', '').replace('{cartel && (', '{cartel && (<span role="status" data-pieza="anuncio-del-sonido" className="sr-only">'), anuncia)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C2 · La llegada del pie por columnas: atrás (titular, mail, WhatsApp), tapa (formulario), fundido (lo demás) — función del scroll, robusta como F2')
+
+// Los tramos: en orden, sin pisarse (así asienta cada columna), donde cada columna ya se ve, con su mínimo.
+const TP = TRAMOS_DEL_PIE
+const tramosEnOrden = (ts: readonly TramoDelPie[]): boolean => ts.length === 3 && ts.map((t) => t.llegada).join(',') === 'atras,tapa,fundido' && ts.every((t, k) => t.desde < t.hasta && (k === 0 || Math.abs(t.desde - ts[k - 1].hasta) < 1e-9)) && ts[0].desde >= 0.5 && ts[2].hasta <= 1
+afirmar(tramosEnOrden(TP) && TP[0].desde === 0.56 && TP[0].hasta === 0.8 && TP[1].hasta === 0.92 && TP[2].hasta === 1 && TP[0].minimoS === 1.4 && TP[1].minimoS === 0.9 && TP[2].minimoS === 0.9, 'tres tramos seguidos y sin pisarse sobre la última pantalla, donde cada columna ya se ve (0,56–0,80 · 0,80–0,92 · 0,92–1), con su mínimo (1,4 s la de atrás, como Portfolio; 0,9 s las otras)', TP.map((t) => `${t.llegada} ${String(t.desde)}–${String(t.hasta)} ${String(t.minimoS)} s`).join(' · '))
+controlPositivo('el detector VE dos tramos que se pisan', TP.map((t, k) => (k === 1 ? { ...t, desde: 0.7 } : t)), tramosEnOrden)
+
+// El seguidor: nunca fuera de 0…1, se da vuelta en el cuadro siguiente, asienta por columna, respeta los mínimos y el orden.
+const DTP = 1 / 60
+type SeguidorDelPie = (m: number, p: number, asentar: boolean, dt: number, libre?: boolean) => number
+const robustoComoF2 = (f: SeguidorDelPie): boolean => {
+  let m = 0
+  for (let t = 0; t < 0.4; t += DTP) m = f(m, 1, false, DTP)
+  const antes = m
+  const seDaVuelta = antes > 0.01 && antes < 0.99 && f(m, 0, false, DTP) < antes
+  let azar = 11
+  for (let k = 0; k < 900; k += 1) {
+    azar = (azar * 9301 + 49297) % 233280
+    m = f(m, azar / 233280, false, DTP)
+    if (!(m >= 0 && m <= 1)) return false
+  }
+  return seDaVuelta
+}
+afirmar(robustoComoF2(avanceDelPie), 'lo mostrado persigue al scroll: se da vuelta en el cuadro siguiente y nunca sale de 0…1, con cualquier ida y vuelta')
+controlPositivo('el detector VE un seguidor que se pasa de largo', ((m, p, a, dt) => avanceDelPie(m, p, a, dt) * 1.02) as SeguidorDelPie, robustoComoF2)
+const asientaPorColumna = (f: SeguidorDelPie): boolean => {
+  for (let pedido = 0.4; pedido <= 1; pedido += 0.013) {
+    let m = 0
+    for (let t = 0; t < 8; t += DTP) m = f(m, pedido, t > 0.5, DTP)
+    if (TP.some((t) => m > t.desde + 1e-6 && m < t.hasta - 1e-6)) return false
+  }
+  return true
+}
+afirmar(asientaPorColumna(avanceDelPie) && asientoDelPie(0.62) === 0.56 && asientoDelPie(0.88) === 0.92 && asientoDelPie(0.5) === 0.5, '  con el scroll quieto a mitad de un tramo, se asienta en su extremo más cercano: ninguna columna queda a medias (0,62 → se deshace, 0,88 → se completa; fuera de los tramos, lo pedido)')
+controlPositivo('el detector VE un seguidor sin asiento', ((m, p, _a, dt) => avanceDelPie(m, p, false, dt)) as SeguidorDelPie, asientaPorColumna)
+const cuandoCruza = (f: SeguidorDelPie): number[] => {
+  const cruces: number[] = []
+  let [m, t] = [0, 0]
+  for (const b of [TP[0].desde, TP[0].hasta, TP[1].hasta, TP[2].hasta]) {
+    while (m < b - 1e-9 && t < 20) {
+      m = f(m, 1, false, DTP)
+      t += DTP
+    }
+    cruces.push(t)
+  }
+  return cruces
+}
+const enOrdenYConSuMinimo = (f: SeguidorDelPie): boolean => {
+  const [a, b, c, d] = cuandoCruza(f)
+  return b - a >= TP[0].minimoS - DTP && c - b >= TP[1].minimoS - DTP && d - c >= TP[2].minimoS - DTP && a < 0.5
+}
+const [c0, c1, c2, c3] = cuandoCruza(avanceDelPie)
+afirmar(enOrdenYConSuMinimo(avanceDelPie), '  un salto al último píxel: las columnas se ven una después de la otra, cada una con su mínimo (nunca llegan de golpe)', `atrás ${(c1 - c0).toFixed(2)} s · tapa ${(c2 - c1).toFixed(2)} s · fundido ${(c3 - c2).toFixed(2)} s`)
+controlPositivo('el detector VE un seguidor a una sola velocidad', ((m, p, _a, dt) => m + Math.max(-dt / 0.5, Math.min(dt / 0.5, p - m))) as SeguidorDelPie, enOrdenYConSuMinimo)
+let trasElViaje = 1
+for (let t = 0; t < LIBRE_DEL_PIE_S + 0.05; t += DTP) trasElViaje = avanceDelPie(trasElViaje, 0, false, DTP, true)
+afirmar(trasElViaje === 0 && LIBRE_DEL_PIE_S === 0.5, '  en un viaje del menú se desarma rápido (de punta a punta en medio segundo), y llega con sus tramos al terminar')
+const armadasFuente = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+afirmar(/const pedido = enViaje \? 0 : \(PROGRESO_DEL_PIE\.valor\?\.get\(\) \?\? 1\)/.test(armadasFuente) && /c\.mostrado = avanceDelPie\(c\.mostrado, pedido, !enViaje && ahora - c\.cuando > ASIENTO\.quietoMs, dt, enViaje\)/.test(armadasFuente), '  la escena lo avanza cada cuadro con el progreso de la última pantalla (sin pie anotado, todo llegado) y el asiento de F2 (180 ms quieto, sin viaje)')
+
+// Los gestos de cada columna, en el espacio de la pieza (px; y hacia arriba; la cara en z = 0, el cuerpo hacia atrás).
+const CAJA = { ancho: 240, alto: 40, espesor: 22 } as const
+const M = new THREE.Matrix4()
+const punto = (x: number, y: number, z: number): THREE.Vector3 => new THREE.Vector3(x, y, z).applyMatrix4(M)
+const normal = (): THREE.Vector3 => new THREE.Vector3(0, 0, 1).applyMatrix3(new THREE.Matrix3().setFromMatrix4(M)).normalize()
+poseDeLaPieza('atras', 0, CAJA, false, false, M)
+const centroAtras = punto(120, -20, -11)
+const desdeAtras = Math.abs(centroAtras.x - 120) < 1e-6 && Math.abs(centroAtras.y - (-20 - 1.2 * 40)) < 1e-6 && Math.abs(centroAtras.z - (-11 - 16 * 40)) < 1e-6
+poseDeLaPieza('atras', 1, CAJA, false, false, M)
+const atrasLlega = M.equals(new THREE.Matrix4())
+afirmar(desdeAtras && atrasLlega && apareceDeLaPieza('atras', 0, false) === 0 && apareceDeLaPieza('atras', 0.35, false) === 1, 'atrás: el mail y WhatsApp salen 16 altos de placa atrás y 1,2 abajo, girados, y llegan a su lugar (disueltos al salir, enteros desde el 35 % de su llegada)', `centro ${centroAtras.toArray().map((v) => v.toFixed(0)).join(', ')}`)
+const tapaAcostada = (llegada: 'tapa' | 'fundido'): boolean => {
+  poseDeLaPieza(llegada, 0, CAJA, false, false, M)
+  const n = normal()
+  const bisagra = punto(120, -40, -22)
+  const arriba = punto(120, 0, 0)
+  return n.y > 0.99 && Math.abs(bisagra.x - 120) < 1e-6 && Math.abs(bisagra.y - (-40 - GESTOS_DEL_PIE.tapa.subida * 40)) < 1e-6 && Math.abs(bisagra.z + 22) < 1e-6 && arriba.z < -30
+}
+afirmar(tapaAcostada('tapa') && M.equals(new THREE.Matrix4()) === false && (poseDeLaPieza('tapa', 1, CAJA, false, false, M), M.equals(new THREE.Matrix4())), 'tapa: el formulario empieza acostado hacia atrás sobre su canto de abajo (la cara mirando arriba), más abajo, y se levanta hasta quedar de pie', `subida ${String(GESTOS_DEL_PIE.tapa.subida)} altos`)
+controlPositivo('el detector VE un formulario que no se acuesta (sube derecho)', 'fundido' as const, tapaAcostada)
+poseDeLaPieza('fundido', 0, CAJA, false, false, M)
+const fundidoSube = Math.abs(punto(0, 0, 0).y + GESTOS_DEL_PIE.fundido.subida) < 1e-9 && apareceDeLaPieza('fundido', 0, false) === 0 && apareceDeLaPieza('fundido', 1, false) === 1
+const quietas = (['atras', 'tapa', 'fundido'] as const).every((l) => (poseDeLaPieza(l, 0.2, CAJA, false, true, M), M.equals(new THREE.Matrix4()))) && (poseDeLaPieza('atras', 0.2, CAJA, true, false, M), M.equals(new THREE.Matrix4()))
+afirmar(fundidoSube && quietas && apareceDeLaPieza('atras', 0, true) === 1, 'fundido: aparece subiendo 12 px; con movimiento reducido nada se mueve (sólo se disuelven); el titular no se mueve entero: llega cada letra')
+const orden = ordenesDelGrupo([{ x: 500, y: 100 }, { x: 0, y: 300 }, { x: 0, y: 100 }, { x: 900, y: 103 }])
+afirmar(orden.join(',') === [1 / 3, 1, 0, 2 / 3].join(',') && deLaPieza(0.5, 0, 0.5) === 1 && deLaPieza(0.5, 1, 0.5) === 0 && salida(0.5) === 1 - 0.5 ** 3, '  escalonadas de arriba abajo y de izquierda a derecha (filas de 8 px), cada pieza con su parte del tramo y la curva cúbica de las letras')
+
+// El titular, letra por letra en el sombreador; un material por pieza con un solo programa; la cara, de la letra quieta.
+const shaderDelPie = { uniforms: {} as Record<string, unknown>, vertexShader: '#include <common>\n#include <beginnormal_vertex>\n#include <begin_vertex>', fragmentShader: '#include <common>\n#include <clipping_planes_fragment>\n#include <color_fragment>' }
+const uA = uniformesDelPie()
+const matA = materialDelPie(uA)
+matA.onBeforeCompile(shaderDelPie as unknown as Parameters<THREE.Material['onBeforeCompile']>[0], {} as THREE.WebGLRenderer)
+const programaDelPie = (s: typeof shaderDelPie, u: UniformesDelPie, otro: UniformesDelPie): boolean => s.vertexShader.includes('attribute vec4 aLetraDelPie;') && s.vertexShader.indexOf('vTapaDelPie = step( 0.999, abs( objectNormal.z ) );') < s.vertexShader.indexOf('objectNormal = giroDelPie * objectNormal;') && s.vertexShader.includes('transformed = aLetraDelPie.xyz + giroDelPie * ( transformed - aLetraDelPie.xyz )') && s.fragmentShader.includes('>= vApareceDelPie ) discard;') && s.uniforms.uLetrasDelPie === u.uLetrasDelPie && u.uLetrasDelPie !== otro.uLetrasDelPie && matA.customProgramCacheKey() === 'pie-de-volumen'
+afirmar(programaDelPie(shaderDelPie, uA, uniformesDelPie()), 'el titular llega letra por letra en el sombreador (desde atrás y abajo, girando, como Portfolio); cada pieza tiene su material y sus uniformes, con un solo programa; la cara negra se lee de la letra quieta y todo se disuelve con el tramado de los títulos')
+controlPositivo('el detector VE dos piezas con los mismos uniformes', uA, (u: UniformesDelPie) => programaDelPie(shaderDelPie, uA, u))
+const FUENTES_DEL_PIE: FuentesDelPie = { 400: new Font(fuenteDe('chivo-400-pie.json')), 500: new Font(fuenteDe('chivo-500-pie.json')), 600: new Font(fuenteDe('chivo-600-pie.json')) }
+const letraDelPie = (ch: string, x: number): LetraDelPie => ({ ch, x, arriba: 10, alto: 56 * 1.2, cuerpo: 56, peso: 400, enLaTecla: false })
+const delTitular = armarLaPieza('texto', { caja: { x: 0, y: 0, ancho: 300, alto: 80, radio: 0 }, letras: [...'Lo'].map((c, k) => letraDelPie(c, k * 34)), trazos: [], pozos: [], tecla: null }, FUENTES_DEL_PIE).fija?.getAttribute('aLetraDelPie')
+const deLaPlaca = armarLaPieza('placa', { caja: { x: 0, y: 0, ancho: 120, alto: 34, radio: 0 }, letras: [], trazos: [], pozos: [], tecla: null }, FUENTES_DEL_PIE).hundible?.getAttribute('aLetraDelPie')
+afirmar(delTitular !== undefined && delTitular.getW(0) === 0 && delTitular.getW(delTitular.count - 1) === 1 && delTitular.getX(0) < delTitular.getX(delTitular.count - 1) && deLaPlaca !== undefined && deLaPlaca.getW(0) === 0 && deLaPlaca.getX(0) === 0, '  cada vértice del texto lleva su letra (su centro y su orden: la «L» primero, la «o» última); la placa, en cero (llega entera)')
+
+// Lo del DOM: los grupos, por contexto; el progreso de la pantalla; el DOM donde la pieza va a quedar, sin clics hasta que llega.
+const cierreC2 = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
+const columnasC2 = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
+const registroC2 = sinComentarios(leer('_lib/pie3d/registro.ts'))
+const porColumnas = (ci: string): boolean => /<LlegadaDelPie value="atras">\s*<div id=\{idDelTitularDeSeccion\(seccion\.id\)\}>[\s\S]*?<\/div>\s*<ContactoDelPie \/>\s*<\/LlegadaDelPie>/.test(ci) && /useProgresoDelPie\(volumen \? deLaSeccion : null\)/.test(ci) && /<LlegadaDelPie value="tapa">\s*<FormularioDelPie \/>\s*<\/LlegadaDelPie>/.test(columnasC2) && /createContext<LlegadaDeLaPieza>\('fundido'\)/.test(registroC2) && /PIEZAS_DEL_PIE\.set\(id, \{ id, forma, elemento: el, orden, llegada \}\)/.test(registroC2)
+afirmar(porColumnas(cierreC2), 'las columnas: el titular, el mail y WhatsApp, atrás; el formulario, tapa; lo demás, fundido (el que no dice nada); la escena lee el progreso de la última pantalla')
+controlPositivo('el detector VE el mail fuera de su columna', cierreC2.replace('<ContactoDelPie />\n          </LlegadaDelPie>', '</LlegadaDelPie>\n          <ContactoDelPie />'), porColumnas)
+afirmar(/const progreso = volumen \? null : deLaSeccion/.test(cierreC2) && /export const LLEGADAS_DEL_PIE = \{\s*izquierda: \[0\.3, 0\.6\],\s*derecha: \[0\.4, 0\.75\],\s*abajo: \[0\.55, 0\.9\],\s*\} as const/.test(cierreC2), '  abajo de 1025 (el pie plano) no cambia nada: las mismas ventanas del DOM')
+const elDomEspera = (c: string): boolean => {
+  const [i, s, l] = [c.indexOf('a.viaje.matrix.identity()'), c.indexOf('seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)'), c.indexOf('llegar(a, s)\n')]
+  return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /applyMatrix4\(a\.viaje\.matrixWorld\)/.test(c)
+}
+afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la sombra en el piso va con la pieza en camino')
+controlPositivo('el detector VE el DOM que viaja con la pieza', armadasFuente.replace('a.viaje.matrix.identity()', '').replace('llegar(a, s)\n', 'llegar(a, s)\n    a.viaje.matrix.identity()\n'), elDomEspera)
 
 cerrar('s47-pasada-final')

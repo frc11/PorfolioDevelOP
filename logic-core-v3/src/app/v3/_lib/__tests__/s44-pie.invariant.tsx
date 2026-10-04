@@ -105,8 +105,13 @@ const enSuLugar = new THREE.Vector3(100, -50, 0).applyMatrix4(g.matrixWorld).pro
 afirmar(cerca([((enSuLugar.x + 1) / 2) * 1440, ((1 - enSuLugar.y) / 2) * 900], [1000, 350], 0.05) && g.quaternion.angleTo(camara.quaternion) < 1e-6 && mpp > 0, '  la cámara de la pose la ve en su lugar del DOM y de su tamaño (un px de la pieza, un px del cuadro), mirando al frente')
 const escena = ['_lib/escena/pie3d/PieDeVolumen.tsx', '_lib/escena/pie3d/armadas.ts'].map((r) => sinComentarios(leer(r))).join('\n')
 const fijaEnElMundo = (c: string): boolean => /colocarLaPieza\(a\.grupo, CAMARA_SIN_EL_MOUSE, /.test(c) && /profundidadDeLaPieza\(CAMARA_SIN_EL_MOUSE, /.test(c) && !/suscribirALaMirada|puntero|rotation\.|rotate[XYZ]\(/.test(c)
-afirmar(fijaEnElMundo(escena), '  fija en el mundo: se coloca con la cámara SIN el mouse (lo único que se mueve es la cámara); ninguna pieza gira ni lee el mouse')
+afirmar(fijaEnElMundo(escena), '  fija en el mundo: se coloca con la cámara SIN el mouse (lo único que se mueve es la cámara); ninguna pieza gira con el mouse ni lo lee ([PASADA FINAL] C2: su llegada por columnas va aparte, en `coreografia.ts`)')
 controlPositivo('el detector VE una pieza que gira con el mouse', `${escena}\na.grupo.rotation.y = puntero.x`, fijaEnElMundo)
+// [PASADA FINAL] C2 · la llegada (lo único que gira, y sólo mientras llega) tampoco lee el mouse: es función del scroll.
+const coreografiaDelPie = sinComentarios(leer('_lib/escena/pie3d/coreografia.ts'))
+const sinMouse = (c: string): boolean => !/suscribirALaMirada|puntero|pointer|mouse|clientX/.test(c)
+afirmar(sinMouse(coreografiaDelPie), '  y su llegada por columnas tampoco lo lee: la pose sale sólo de cuánto llegó cada pieza (el scroll)')
+controlPositivo('el detector VE una llegada que mira el mouse', `${coreografiaDelPie}\nconst giro = puntero.x`, sinMouse)
 afirmar(/a\.d = d\b/.test(escena) && /d = Math\.min\(d, profundidadDeLaPieza\(/.test(escena), '  todas en un plano (el más cercano que pide el piso): el paralaje mueve el pie entero, un rótulo no se despega de su columna')
 
 // La geometría: el texto suelto extruido; la placa con su relieve; el formulario, una placa con pozos y la tecla de Enviar.
@@ -192,7 +197,7 @@ afirmar(prueba('llegada') === 'no' && prueba('onda') === 'no' && prueba('luz') =
 // La llegada: el módulo y su uso, fuera; el pie sólo aparece desde abajo, con el scroll.
 const delPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
 const sinLlegada = (c: string): boolean => !/aplicarLaLlegada|alFinalDeLaPagina|cuantoLeFalta|conLlegada|SIN_ARMAR|s\.inicio/.test(c)
-afirmar(!existsSync(`${V3}/_lib/escena/pie3d/llegada.ts`) && sinLlegada(delPie), '  la llegada de prueba se borró: ninguna pieza sale de la sala ni espera al final de la página')
+afirmar(!existsSync(`${V3}/_lib/escena/pie3d/llegada.ts`) && sinLlegada(delPie), '  la llegada de prueba se borró (piezas sembradas por la sala, con reloj, al llegar al final de la página) y no vuelve; [PASADA FINAL] C2 trae otra, por columnas y función del scroll (s47 · C2)')
 controlPositivo('el detector VE la llegada si vuelve', `${delPie}\nif (conLlegada) aplicarLaLlegada(a.grupo, a.llegada, 1)`, sinLlegada)
 // La onda: el mouse sobre una pieza pide la de los valores, hacia ella, siempre.
 const registro = sinComentarios(leer('_lib/pie3d/registro.ts'))

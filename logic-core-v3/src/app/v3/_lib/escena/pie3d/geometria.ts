@@ -16,6 +16,10 @@ import { INK_COLOR } from '../probeScene'
  *   · la placa: un rectángulo redondeado con bisel (el canto que agarra la luz), y su texto y sus íconos en relieve;
  *   · el formulario: una placa con un pozo por campo (agujeros con su pared y su fondo) y la tecla de Enviar aparte (se
  *     hunde sola).
+ *
+ * [PASADA FINAL] C2 · cada vértice lleva también su letra (`aLetraDelPie`: el centro de la letra y su orden, de 0 a 1): el
+ * titular llega letra por letra en el sombreador (`coreografia.ts`). En las placas y el formulario va en cero (llegan
+ * enteras, con la CPU).
  */
 export const VOLUMEN_DEL_PIE = {
   /** El espesor de la placa de un enlace y el del formulario (px). */
@@ -77,6 +81,23 @@ function pintar(g: THREE.BufferGeometry, color: THREE.Color): THREE.BufferGeomet
   const colores = new Float32Array(n * 3)
   for (let i = 0; i < n; i += 1) colores.set([color.r, color.g, color.b], i * 3)
   g.setAttribute('color', new THREE.BufferAttribute(colores, 3))
+  return g
+}
+
+/** [PASADA FINAL] C2 · la letra de cada vértice: el centro de su glifo extruido y su orden (0 la primera, 1 la última). */
+function conSuLetra(g: THREE.BufferGeometry, orden: number): THREE.BufferGeometry {
+  g.computeBoundingBox()
+  const c = (g.boundingBox ?? new THREE.Box3()).getCenter(new THREE.Vector3())
+  const n = g.getAttribute('position').count
+  const datos = new Float32Array(n * 4)
+  for (let i = 0; i < n; i += 1) datos.set([c.x, c.y, c.z, orden], i * 4)
+  g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(datos, 4))
+  return g
+}
+
+/** Lo que llega entero: sin letra (el atributo en cero, para que todas las piezas compartan el programa). */
+function sinLetra(g: THREE.BufferGeometry): THREE.BufferGeometry {
+  g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 4), 4))
   return g
 }
 
@@ -196,24 +217,24 @@ export function armarLaPieza(forma: 'texto' | 'placa' | 'formulario', m: MedidaD
   const v = VOLUMEN_DEL_PIE
   const cara = { x: 0, y: 0, ancho: m.caja.ancho, alto: m.caja.alto }
   if (forma === 'texto') {
-    const geos = letras(m.letras, fuentes, 0, null).map((g) => pintar(g, COLORES_DEL_PIE.negro))
+    const geos = letras(m.letras, fuentes, 0, null).map((g, k, todas) => conSuLetra(pintar(g, COLORES_DEL_PIE.negro), todas.length > 1 ? k / (todas.length - 1) : 0))
     const cuerpo = m.letras.reduce((a, l) => Math.max(a, l.cuerpo), 0)
     return { fija: geos.length === 0 ? null : unir(geos), hundible: null, espesor: v.texto.profundidad * cuerpo }
   }
   if (forma === 'placa') {
     const placa = pintar(solido(rectanguloRedondeado(new THREE.Shape(), cara, m.caja.radio > 0 ? m.caja.radio : v.radio), v.placa, v.bisel), COLORES_DEL_PIE.negro)
-    return { fija: null, hundible: unir([placa, ...relieveDe(m, fuentes, false, 0)]), espesor: v.placa }
+    return { fija: null, hundible: sinLetra(unir([placa, ...relieveDe(m, fuentes, false, 0)])), espesor: v.placa }
   }
   // El formulario: la placa con un agujero por campo (su pared es la del pozo) y el fondo de cada pozo, más adentro.
   const contorno = rectanguloRedondeado(new THREE.Shape(), cara, m.caja.radio > 0 ? m.caja.radio : 2 * v.radio)
   for (const p of m.pozos) contorno.holes.push(rectanguloRedondeado(new THREE.Path(), p, p.radio))
   const placa = pintar(solido(contorno, v.formulario, v.bisel), COLORES_DEL_PIE.negro)
   const fondos = m.pozos.map((p) => pintar(solido(rectanguloRedondeado(new THREE.Shape(), { x: p.x - 2, y: p.y - 2, ancho: p.ancho + 4, alto: p.alto + 4 }, p.radio + 2), 1, 0, -v.pozo), COLORES_DEL_PIE.pozo))
-  const fija = unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0)])
+  const fija = sinLetra(unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0)]))
   if (m.tecla === null) return { fija, hundible: null, espesor: v.formulario }
   // La tecla: sale `tecla` px de la cara (y entra 4 en la placa, para que hundida no deje luz); su texto, en su cara.
   const tecla = pintar(solido(rectanguloRedondeado(new THREE.Shape(), m.tecla, m.tecla.radio > 0 ? m.tecla.radio : v.radio), v.tecla + 4, v.bisel, v.tecla), COLORES_DEL_PIE.negro)
-  return { fija, hundible: unir([tecla, ...relieveDe(m, fuentes, true, v.tecla)]), espesor: v.formulario }
+  return { fija, hundible: sinLetra(unir([tecla, ...relieveDe(m, fuentes, true, v.tecla)])), espesor: v.formulario }
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */

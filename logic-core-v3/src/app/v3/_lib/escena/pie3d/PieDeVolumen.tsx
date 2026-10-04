@@ -4,13 +4,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
-import { PIEZAS_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
+import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
 import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { alCuadro, rearmar, soltar, type EstadoDelPie } from './armadas'
-import { materialDelPie } from './material'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -28,13 +27,16 @@ import { SOMBRAS_DEL_PIE } from './sombras'
  * (los escuchas del DOM escriben `HUNDIDOS`; el tic y el pestillo, los del sonido). **Sombras de contacto** en el piso
  * vivo (`sombras.ts`). Se arma con las fuentes cargadas, al anotarse y cuando cambia una caja (el formulario con sus
  * errores, «Enviando…»); se compila una vez y recién ahí el DOM apaga lo que el 3D dibuja (`marcarElPieListo`). Lo que se arma y lo que pasa en cada cuadro, en `armadas.ts`.
+ *
+ * [PASADA FINAL] C2 · **Llega por columnas** (`coreografia.ts`), con el progreso de la última pantalla: cada pieza con su
+ * material (sus uniformes), un solo programa.
  */
 
 interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
 }
 
-type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number } }
+type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null } } }
 
 export default function PieDeVolumen({ keyLightRef }: Props) {
   const version = useSyncExternalStore(suscribirALasPiezas, versionDeLasPiezas, versionDeLasPiezas)
@@ -43,7 +45,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<EstadoDelPie>({ armadas: [], material: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [] })
+  const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 } })
 
   useEffect(() => {
     const q = matchMedia('(prefers-reduced-motion: reduce)')
@@ -55,23 +57,20 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     return () => q.removeEventListener('change', leer)
   }, [])
 
-  // El material y el estudio de sus reflejos (como los de los títulos); al irse, todo lo armado y el DOM como estaba.
+  // El estudio de los reflejos (como los de los títulos; el material, uno por pieza); al irse, todo lo armado y el DOM como estaba.
   useEffect(() => {
     const s = m.current
-    const material = materialDelPie()
     const rt = crearElEstudio(gl)
-    material.envMap = rt.texture
-    s.material = material
+    s.estudio = rt.texture
     s.montado = true
     return () => {
       s.montado = false
       s.listo = false
       for (const a of s.armadas) soltar(a)
       s.armadas = []
-      s.material = null
+      s.estudio = null
       SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
       marcarElPieListo(false)
-      material.dispose()
       rt.dispose()
     }
   }, [gl])
@@ -85,8 +84,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     let vivo = true
     let reloj = 0
     const armarYa = (): void => {
-      if (!vivo || !s.fuentes || s.material === null) return
-      rearmar(s, g, s.material)
+      if (!vivo || !s.fuentes || s.estudio === null) return
+      rearmar(s, g, s.estudio)
       if (s.listo || s.compilando || s.armadas.length === 0) return
       s.compilando = true
       void gl.compileAsync(escena, camara).then(() => {
@@ -127,10 +126,12 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       piezas: () =>
         m.current.armadas.map((a) => {
           const r = a.pieza.elemento.getBoundingClientRect()
-          return { id: a.pieza.id, forma: a.pieza.forma, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
+          return { id: a.pieza.id, forma: a.pieza.forma, llegada: a.pieza.llegada, orden: a.orden, llego: a.llego, aparece: a.uniformes.uApareceDelPie.value, tocable: a.tocable, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
         }),
       // [RETOQUE DEL PIE] P3 · cuántas ondas pidió el piso ([NOCTURNO] A2: la onda, en el producto).
       ondas: () => ONDA_PEDIDA.n,
+      // [PASADA FINAL] C2 · lo mostrado de la coreografía y lo que pide el scroll.
+      coreografia: () => ({ mostrado: m.current.coreografia.mostrado, pedido: PROGRESO_DEL_PIE.valor?.get() ?? null }),
     }
     return () => {
       delete ventana.__pieDelBanco

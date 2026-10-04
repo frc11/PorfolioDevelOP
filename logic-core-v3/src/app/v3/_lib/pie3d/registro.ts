@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useSyncExternalStore, type RefObject } from 'react'
+import type { MotionValue } from 'motion/react'
+import { createContext, useContext, useEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../compuerta'
 import { entornoDeLaEscena } from '../escena/entorno'
@@ -19,8 +20,19 @@ import { useAnchoMinimo } from '../useAnchoMinimo'
  *
  * El estado de cada pieza que se hunde (el mouse encima, el foco del teclado, apretada) lo escriben sus escuchas acá y
  * la escena lo lee en su cuadro: ningún `setState` por cuadro.
+ *
+ * [PASADA FINAL] C2 · cada pieza dice también CÓMO llega (`LlegadaDeLaPieza`, por columna: lo pone el pie con
+ * `LlegadaDelPie` alrededor de cada grupo; sin él, `fundido`) y el pie anota el progreso de su última pantalla
+ * (`useProgresoDelPie`): la escena arma con eso la coreografía (`escena/pie3d/coreografia.ts`).
  */
 export type FormaDeLaPieza = 'texto' | 'placa' | 'formulario'
+
+/** [PASADA FINAL] C2 · `atras`: desde atrás y abajo, como las letras de Portfolio; `tapa`: se levanta; `fundido`: aparece. */
+export type LlegadaDeLaPieza = 'atras' | 'tapa' | 'fundido'
+
+const LlegadaDelGrupo = createContext<LlegadaDeLaPieza>('fundido')
+/** Cómo llegan las piezas que anota lo que envuelve. */
+export const LlegadaDelPie = LlegadaDelGrupo.Provider
 
 export interface PiezaDelPie {
   readonly id: string
@@ -29,6 +41,8 @@ export interface PiezaDelPie {
   readonly elemento: HTMLElement
   /** En qué orden se anotó. */
   readonly orden: number
+  /** [PASADA FINAL] C2 · cómo llega (la columna de la coreografía). */
+  readonly llegada: LlegadaDeLaPieza
 }
 
 export const PIEZAS_DEL_PIE = new Map<string, PiezaDelPie>()
@@ -50,18 +64,33 @@ export const versionDeLasPiezas = (): number => version
 
 /** Anota la pieza mientras está montada (y `activo`: el pie de volumen, desde 1025). */
 export function usePiezaDelPie(ref: RefObject<HTMLElement | null>, { id, forma, activo }: { readonly id: string; readonly forma: FormaDeLaPieza; readonly activo: boolean }): void {
+  const llegada = useContext(LlegadaDelGrupo)
   useEffect(() => {
     const el = ref.current
     if (!activo || el === null) return undefined
     orden += 1
-    PIEZAS_DEL_PIE.set(id, { id, forma, elemento: el, orden })
+    PIEZAS_DEL_PIE.set(id, { id, forma, elemento: el, orden, llegada })
     avisar()
     return () => {
       PIEZAS_DEL_PIE.delete(id)
       el.style.transform = ''
+      el.style.pointerEvents = ''
       avisar()
     }
-  }, [ref, id, forma, activo])
+  }, [ref, id, forma, activo, llegada])
+}
+
+/** [PASADA FINAL] C2 · el progreso de la última pantalla (0: el pie asoma; 1: el último píxel), para la escena; sin pie, null. */
+export const PROGRESO_DEL_PIE: { valor: MotionValue<number> | null } = { valor: null }
+
+export function useProgresoDelPie(progreso: MotionValue<number> | null): void {
+  useEffect(() => {
+    if (progreso === null) return undefined
+    PROGRESO_DEL_PIE.valor = progreso
+    return () => {
+      if (PROGRESO_DEL_PIE.valor === progreso) PROGRESO_DEL_PIE.valor = null
+    }
+  }, [progreso])
 }
 
 /** Cómo va el pie en esta carga: `plano` (abajo de 1025, sin títulos de volumen, en el servidor), `volumen` o `antes` (la prueba). */

@@ -14,7 +14,7 @@ import { CanalDeTexto, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
-import { useModoDelPie } from '../../_lib/pie3d/registro'
+import { LlegadaDelPie, useModoDelPie, useProgresoDelPie } from '../../_lib/pie3d/registro'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { TITULAR_DE_CIERRE } from './contenido'
 import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
@@ -62,6 +62,8 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
   // en la columna izquierda: a la profundidad del logo, lo que está más abajo que su base queda bajo el piso.
   const volumen = useModoDelPie() === 'volumen'
   const progreso = volumen ? null : deLaSeccion
+  // [PASADA FINAL] C2 · en 3D llega por columnas (`escena/pie3d/coreografia.ts`), con el progreso de esta pantalla.
+  useProgresoDelPie(volumen ? deLaSeccion : null)
   const tramoIzquierdo = useTramo(progreso, LLEGADAS_DEL_PIE.izquierda)
   return (
     <Pie
@@ -78,19 +80,22 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
           <TextoDelPie className="max-escritorio:hidden">
             <Logotipo />
           </TextoDelPie>
-          <div id={idDelTitularDeSeccion(seccion.id)}>
-            {/* [INTERFAZ 1] T1 · el titular por línea (el canal del texto), con el tramo de su llegada. */}
-            <TextoDelPie>
-              <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
-                {(contenido) => (
-                  <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
-                    {contenido}
-                  </Titular>
-                )}
-              </CanalDeTexto>
-            </TextoDelPie>
-          </div>
-          <ContactoDelPie />
+          {/* [PASADA FINAL] C2 · el titular, el mail y WhatsApp llegan desde atrás y abajo (en 3D; en el pie plano no cambia nada). */}
+          <LlegadaDelPie value="atras">
+            <div id={idDelTitularDeSeccion(seccion.id)}>
+              {/* [INTERFAZ 1] T1 · el titular por línea (el canal del texto), con el tramo de su llegada. */}
+              <TextoDelPie>
+                <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
+                  {(contenido) => (
+                    <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
+                      {contenido}
+                    </Titular>
+                  )}
+                </CanalDeTexto>
+              </TextoDelPie>
+            </div>
+            <ContactoDelPie />
+          </LlegadaDelPie>
           {volumen && <RedesDelPie />}
           {volumen && <LineaLegal />}
         </Llega>
