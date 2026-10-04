@@ -13,12 +13,16 @@
  *   A3 · «Seis razones / para elegirnos»: los tres tramos fijados en pantallas del pin (se arma en 0,6, queda quieta 1,
  *        se va en 0,4), la cámara quieta hasta que termina el tramo quieto, la llegada 3D con el mínimo de ESCENA 10 y el
  *        asiento «armado» (frenar a mitad la termina; subir la desarma), la salida con los 2 s de A5.
+ *   A4 · el sonido guardado como prendido arranca solo: el motor se carga con la PRIMERA interacción (la rueda también),
+ *        cada acción despierta el contexto, howler no lo suspende solo (el ambiente generativo se quedaba mudo a los
+ *        30 s) y el botón muestra lo real (`data-estado`).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 
+import { estadoDelMotor } from '../../_chrome/sonido/motorCompartido'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS, useTitular2D } from '../../_componentes/titulos3d/titular2d'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -196,5 +200,29 @@ afirmar(vuelta === 0, '  y subiendo el scroll por encima de la ventana se desarm
 const reanuda = (c: string): boolean => /const reanudado = s\.ultimoCuadro > 0 && ahora - s\.ultimoCuadro > PAUSA_DEL_LAZO_MS\s*s\.ultimoCuadro = ahora/.test(c) && /if \(reanudado\) \{\s*a\.mostrado\.llegada = acotar01\(enViaje \? 0 : a\.titulo\.llegada\)\s*a\.mostrado\.salida = acotar01\(a\.titulo\.salida\)/.test(c) && /if \(reanudado && a\.titulo\.rearma\) m\.llegada = acotar01\(enViaje \? 0 : a\.titulo\.llegada\)/.test(c) && /const PAUSA_DEL_LAZO_MS = 250/.test(c)
 afirmar(reanuda(escena3d), '  al reanudarse el lazo de la escena (se para detras de Tu panel) lo mostrado vuelve a lo que dice el scroll: ningun estado viejo se deshace delante de quien vuelve')
 controlPositivo('el detector VE la escena que persigue desde el estado congelado', escena3d.replace('if (reanudado) {', 'if (false) {'), reanuda)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4 · El sonido que no arrancaba: se desbloquea y carga con la primera interacción, y lo mostrado es lo real')
+
+const motorDelSonido = sinComentarios(leer('_lib/sonido/motor.ts'))
+const sinSuspension = (c: string): boolean => c.indexOf('Howler.autoSuspend = false') > 0 && c.indexOf('Howler.autoSuspend = false') < c.indexOf('const howl = new Howl(')
+afirmar(sinSuspension(motorDelSonido), 'howler ya no suspende el contexto solo a los 30 s (el ambiente generativo no es un sonido suyo y se quedaba mudo con el parlante prendido): `autoSuspend` apagado antes de crear el Howl')
+controlPositivo('el detector VE el motor con la suspensión automática', motorDelSonido.replace('Howler.autoSuspend = false', ''), sinSuspension)
+afirmar(/if \(ctx !== undefined && ctx\.state !== 'running'\) void ctx\.resume\(\)\.then\(alCambiar, \(\) => undefined\)/.test(motorDelSonido) && /estado: \(\) => \(!cargado \? 'cargando' : Howler\.ctx\?\.state === 'running' \? 'listo' : 'suspendido'\)/.test(motorDelSonido) && /onload: \(\) => \{\s*cargado = true\s*alCambiar\(\)/.test(motorDelSonido) && /Howler\.ctx\.onstatechange = alCambiar/.test(motorDelSonido), '  el motor despierta el contexto suspendido y publica lo real (el archivo cargado y el contexto corriendo), avisando con cada cambio')
+const generativo = sinComentarios(leer('_lib/sonido/ambienteGenerativo.ts'))
+const despiertaAlPedir = (c: string): boolean => /tocar: \(si\) => \{\s*if \(si && ctx\.state === 'suspended'\) void ctx\.resume\(\)\s*if \(si === suena\) return/.test(c)
+afirmar(despiertaAlPedir(generativo), '  pedir que el ambiente suene despierta el contexto aunque ya «sonara»: el reintento de cada segundo lo cura')
+controlPositivo('el detector VE el ambiente que vuelve temprano con el contexto parado', generativo.replace("if (si && ctx.state === 'suspended') void ctx.resume()\n", ''), despiertaAlPedir)
+const control = sinComentarios(leer('_chrome/sonido/ControlDelSonido.tsx'))
+const cargaConLaPrimera = (c: string): boolean => ["window.addEventListener('pointerdown', cargar, true)", "window.addEventListener('keydown', cargar, true)", "window.addEventListener('wheel', cargar, true)", "window.addEventListener('touchstart', cargar, true)"].every((l) => c.includes(l))
+afirmar(cargaConLaPrimera(control), 'guardado como prendido, el motor se carga con la PRIMERA interacción: un toque, una tecla, la rueda o el dedo (antes, sólo un toque o una tecla: quien sólo scrolleaba no oía nada con el parlante prendido)')
+controlPositivo('el detector VE el control de antes (sin la rueda)', control.replace("window.addEventListener('wheel', cargar, true)", ''), cargaConLaPrimera)
+const despiertaEnCadaAccion = (c: string): boolean => /const despertar = \(\): void => motor\.current\?\.despertar\(\)/.test(c) && ["window.addEventListener('pointerdown', despertar, true)", "window.addEventListener('keydown', despertar, true)", "window.addEventListener('touchend', despertar, true)"].every((l) => c.includes(l)) && ["window.removeEventListener('pointerdown', despertar, true)", "window.removeEventListener('keydown', despertar, true)", "window.removeEventListener('touchend', despertar, true)"].every((l) => c.includes(l))
+afirmar(despiertaEnCadaAccion(control), '  y cada acción de verdad despierta el contexto si quedó suspendido (dentro del gesto, como pide Safari), mientras el parlante está prendido')
+controlPositivo('el detector VE el control sin despertar', control.replace("window.addEventListener('pointerdown', despertar, true)", ''), despiertaEnCadaAccion)
+const estadoMostrado = (c: string): boolean => /const estadoReal = useSyncExternalStore\(suscribirAlMotor, estadoDelMotor, \(\) => 'sin-motor'\)/.test(c) && /data-estado=\{!prendido \? 'apagado' : estadoReal === 'listo' \? 'suena' : 'esperando'\}/.test(c) && /aria-pressed=\{prendido\}/.test(c)
+afirmar(estadoMostrado(control), '  lo mostrado coincide con lo real: `aria-pressed` es la elección y `data-estado` lo que pasa (apagado · esperando la primera acción · suena)')
+controlPositivo('el detector VE un botón que sólo muestra la elección', control.replace(/ data-estado=\{[^}]*\}/, ''), estadoMostrado)
+afirmar(estadoDelMotor() === 'sin-motor' && /export function estadoDelMotor\(\): EstadoDelMotor \{\s*if \(promesa === null\) return 'sin-motor'\s*if \(motorActual === null\) return 'cargando'\s*return motorActual\.estado\(\)/.test(sinComentarios(leer('_chrome/sonido/motorCompartido.ts'))), '  sin motor pedido no hay nada que mostrar (el producto): el estado real sale del motor compartido')
 
 cerrar('s47-pasada-final')

@@ -21,10 +21,16 @@ import { CORTES_DEL_SPRITE, type Sonido } from './sprite'
  * `ambiente(false)` (movimiento reducido, la pestaña oculta) lo funde a silencio y deja de programar notas.
  * [RONDA 2] F6 · un solo ambiente (Bruma): ya no se elige.
  */
+export type EstadoDelSonido = 'cargando' | 'suspendido' | 'listo'
+
 export interface MotorDelSonido extends Oido {
   /** El sonido del sprite tal cual (la página de prueba). */
   readonly sonarCrudo: (s: Sonido) => void
   readonly ambiente: (suena: boolean) => void
+  /** [PASADA FINAL] A4 · despierta el contexto si quedó suspendido (se llama dentro de una acción del usuario). */
+  readonly despertar: () => void
+  /** [PASADA FINAL] A4 · lo real: el archivo cargado y el contexto corriendo (`listo`), o no. */
+  readonly estado: () => EstadoDelSonido
   /** La página de prueba: escucharlo aunque el sitio no lo pida (o dejar de probarlo). */
   readonly probarAmbiente: (suena: boolean) => void
   readonly volumen: (s: keyof Volumenes, v: number) => void
@@ -35,13 +41,30 @@ export interface MotorDelSonido extends Oido {
 const FUENTES = ['/v3/sonido/sonidos.webm', '/v3/sonido/sonidos.m4a']
 const CALLAR_MS = 300
 
-export function crearElMotor(inicial: Volumenes): MotorDelSonido {
+export function crearElMotor(inicial: Volumenes, alCambiar: () => void = () => undefined): MotorDelSonido {
   const volumenes = { ...inicial }
   const sprite: Record<string, [number, number]> = {}
   for (const [nombre, corte] of Object.entries(CORTES_DEL_SPRITE)) sprite[nombre] = [corte[0], corte[1]]
   let cargado = false
-  const howl = new Howl({ src: FUENTES, sprite, preload: true, onload: () => (cargado = true) })
+  // [PASADA FINAL] A4 · howler suspende el contexto a los 30 s sin un sonido del sprite, y el ambiente generativo (que no es
+  // un sonido de howler) se quedaba mudo con el parlante prendido hasta apagarlo y prenderlo. El contexto vive lo que vive
+  // el motor: se suelta con él.
+  Howler.autoSuspend = false
+  const howl = new Howl({
+    src: FUENTES,
+    sprite,
+    preload: true,
+    onload: () => {
+      cargado = true
+      alCambiar()
+    },
+  })
   Howler.volume(volumenes.general)
+  if (Howler.ctx !== undefined) Howler.ctx.onstatechange = alCambiar
+  const despertar = (): void => {
+    const ctx = Howler.ctx
+    if (ctx !== undefined && ctx.state !== 'running') void ctx.resume().then(alCambiar, () => undefined)
+  }
 
   const ultimo = new Map<Sonido, number>()
   const sonando = new Map<Sonido, Set<number>>()
@@ -102,6 +125,8 @@ export function crearElMotor(inicial: Volumenes): MotorDelSonido {
       tocar(suena || suenaElAmbiente)
     },
     cargado: () => cargado,
+    despertar,
+    estado: () => (!cargado ? 'cargando' : Howler.ctx?.state === 'running' ? 'listo' : 'suspendido'),
     volumen: (s, v) => {
       volumenes[s] = v
       if (s === 'general') Howler.volume(v)

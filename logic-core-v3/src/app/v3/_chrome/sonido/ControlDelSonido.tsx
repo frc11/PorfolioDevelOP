@@ -7,7 +7,7 @@ import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
-import { pedirElMotor, soltarElMotor } from './motorCompartido'
+import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from './motorCompartido'
 
 /**
  * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico junto al infinito del recorrido (en escritorio a su izquierda;
@@ -17,7 +17,11 @@ import { pedirElMotor, soltarElMotor } from './motorCompartido'
  *
  *   · **Apagado por defecto**, y la elección se recuerda (`preferencia.ts`, con try/catch).
  *   · **Nada suena sin una acción.** Prenderlo es un clic; si quedó prendido de otra visita, el motor (howler y el
- *     archivo) se carga recién con la primera acción en la página (un toque, una tecla): antes, ni se descarga.
+ *     archivo) se carga recién con la primera interacción en la página (un toque, una tecla, [PASADA FINAL] A4: la rueda
+ *     también): antes, ni se descarga. El contexto nace suspendido hasta la primera acción de verdad y cada acción lo
+ *     despierta si hizo falta (Safari lo exige dentro del gesto); howler no lo suspende solo (`autoSuspend` apagado: el
+ *     ambiente generativo se quedaba mudo a los 30 s con el parlante prendido). Lo que el botón muestra es lo real
+ *     (`data-estado`: apagado, esperando la primera acción, o suena).
  *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con el
  *     pestillo, [CIERRE RETOQUE 3D] S1), el hover de los CTA suena el tic de la barra y suena UN ambiente generativo para
  *     toda la página (S2: sin archivo), salvo con movimiento reducido o con la pestaña oculta.
@@ -35,6 +39,8 @@ export default function ControlDelSonido(): React.JSX.Element {
   const prendido = useSyncExternalStore(suscribirAlPrendido, leerPrendido, () => false)
   const reducido = useMovimientoReducido()
   const motor = useRef<MotorDelSonido | null>(null)
+  // [PASADA FINAL] A4 · lo real del motor, para que lo mostrado coincida (sin motor en el servidor).
+  const estadoReal = useSyncExternalStore(suscribirAlMotor, estadoDelMotor, () => 'sin-motor')
 
   // El tono: el del infinito, que ya lo lee de lo que hay debajo (los dos están en la misma esquina).
   useEffect(() => {
@@ -67,15 +73,29 @@ export default function ControlDelSonido(): React.JSX.Element {
     const quitar = (): void => {
       window.removeEventListener('pointerdown', cargar, true)
       window.removeEventListener('keydown', cargar, true)
+      window.removeEventListener('wheel', cargar, true)
+      window.removeEventListener('touchstart', cargar, true)
     }
     if ((navigator as Navigator & { readonly userActivation?: { readonly hasBeenActive: boolean } }).userActivation?.hasBeenActive === true) cargar()
     else {
       window.addEventListener('pointerdown', cargar, true)
       window.addEventListener('keydown', cargar, true)
+      // [PASADA FINAL] A4 · la rueda y el toque son la primera interacción de casi todos: howler y el archivo se cargan ya
+      // (el contexto nace suspendido) y el primer clic de verdad ya suena, en vez de perderse cargando.
+      window.addEventListener('wheel', cargar, true)
+      window.addEventListener('touchstart', cargar, true)
     }
+    // [PASADA FINAL] A4 · cada acción de verdad despierta el contexto si quedó suspendido (dentro del gesto, como pide Safari).
+    const despertar = (): void => motor.current?.despertar()
+    window.addEventListener('pointerdown', despertar, true)
+    window.addEventListener('keydown', despertar, true)
+    window.addEventListener('touchend', despertar, true)
     return () => {
       vivo = false
       quitar()
+      window.removeEventListener('pointerdown', despertar, true)
+      window.removeEventListener('keydown', despertar, true)
+      window.removeEventListener('touchend', despertar, true)
       motor.current = null
       if (pedido) soltarElMotor()
     }
@@ -123,6 +143,7 @@ export default function ControlDelSonido(): React.JSX.Element {
       ref={boton}
       type="button"
       data-pieza="control-del-sonido"
+      data-estado={!prendido ? 'apagado' : estadoReal === 'listo' ? 'suena' : 'esperando'}
       aria-pressed={prendido}
       aria-label="Sonido"
       onClick={() => guardarPrendido(!prendido)}

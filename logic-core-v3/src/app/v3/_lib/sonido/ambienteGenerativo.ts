@@ -140,11 +140,13 @@ export function crearElAmbiente(ctx: AudioContext, salida: AudioNode, volumenIni
 
   return {
     tocar: (si) => {
+      // [PASADA FINAL] A4 · pedir que suene despierta el contexto si quedó suspendido, aunque el ambiente ya «sonara»: el
+      // reintento de cada segundo del control lo cura en vez de volver temprano con el contexto parado.
+      if (si && ctx.state === 'suspended') void ctx.resume()
       if (si === suena) return
       suena = si
       if (temporizador !== null) window.clearTimeout(temporizador)
       temporizador = null
-      if (ctx.state === 'suspended') void ctx.resume()
       llevarA(si ? volumen : 0)
       programar(true)
     },
