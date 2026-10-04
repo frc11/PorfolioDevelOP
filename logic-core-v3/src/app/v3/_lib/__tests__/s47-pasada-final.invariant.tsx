@@ -757,4 +757,15 @@ const tresIguales = (c: string): boolean => radioDe(c, '[data-v3] [data-pieza="c
 afirmar(tresIguales(cursorD5), '  el cartel del cursor (sobre un libro), el del estante y la pastilla del navbar, con el mismo radio: s38 y s5-trabajos en verde a la vez')
 controlPositivo('el detector VE el cartel del cursor con el radio de antes', cursorD5.replace('border-radius: var(--radius-fuerte);', 'border-radius: var(--radius-pastilla-l);'), tresIguales)
 
+
+// D7 · la página no se ensancha con el puntero en un borde: lo que sigue a la cámara viva se salía del cuadro.
+const paginaD7 = sinComentarios(readFileSync(`${V3}/page.tsx`, 'utf8').replace(/\r\n/g, '\n'))
+const mainRecortado = (c: string): boolean => {
+  const clase = /<main className="([^"]+)"/.exec(c)?.[1] ?? ''
+  const partes = clase.split(' ')
+  return partes.includes('overflow-x-clip') && partes.includes('max-escritorio:z-auto') && !partes.some((p) => /^(max-escritorio:)?(transform|filter|opacity|mask|will-change|isolate|overflow-hidden|overflow-x-hidden)/.test(p))
+}
+afirmar(mainRecortado(paginaD7), 'el `<main>` de /v3 recorta a lo ancho con `overflow: clip` (no abre contexto de apilamiento ni caja de scroll: la mezcla de Quiénes somos abajo de 1025 y los sticky siguen): medido, el documento mide lo que la ventana a 1440 y 1024 con el puntero en los dos bordes (antes, 1551 y 1042 con el puntero a la derecha; 1183 a 1024 a la izquierda) y a 390')
+controlPositivo('el detector VE un main que recorta con hidden (eso sí rompería los sticky)', paginaD7.replace('overflow-x-clip', 'overflow-x-hidden'), mainRecortado)
+
 cerrar('s47-pasada-final')

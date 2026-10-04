@@ -68,8 +68,11 @@ export default function PaginaV3() {
       <CompuertaDelHome>
         {/* `max-escritorio:z-auto`: abajo del corte de composición el `<main>` no puede abrir contexto de
             apilamiento propio, o la bajada de «Quienes somos» mezclaria contra un grupo
-            que no tiene la escena adentro. Arriba del umbral queda igual. */}
-        <main className="relative z-10 max-escritorio:z-auto">
+            que no tiene la escena adentro. Arriba del umbral queda igual. [PASADA FINAL] D7: recortado a lo ancho
+            (`overflow: clip` no abre contexto de apilamiento ni caja de scroll: la mezcla y los sticky siguen): lo que
+            sigue a la cámara viva (el bloque que se inclina en Quiénes somos, el DOM del pie de volumen) se salía del
+            cuadro con el puntero en un borde y ensanchaba la página. */}
+        <main className="relative z-10 overflow-x-clip max-escritorio:z-auto">
           <Home />
         </main>
       </CompuertaDelHome>
