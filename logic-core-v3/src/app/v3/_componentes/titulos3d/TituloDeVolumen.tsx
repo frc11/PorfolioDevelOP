@@ -5,6 +5,7 @@ import { useRef } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen, type TituloDeVolumen as Titulo } from '../../_lib/titulos3d/registro'
+import type { AsientoDeLaLlegada } from '../../_lib/titulos3d/repeticiones'
 import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { useLlegadaDelTitulo } from '../llegadaDelTitulo'
 
@@ -34,6 +35,7 @@ export function TituloDeVolumen({
   corrida = null,
   minimoS = null,
   salidaMinimaS = null,
+  asiento = 'cercano',
 }: {
   readonly id: string
   readonly texto: string
@@ -51,13 +53,15 @@ export function TituloDeVolumen({
   readonly minimoS?: number | null
   /** [NOCTURNO] A5 · lo mínimo que tarda en irse (s): la salida lenta de la frase. */
   readonly salidaMinimaS?: number | null
+  /** [PASADA FINAL] A3 · dónde asienta la llegada con mínimo al frenar a mitad (`repeticiones.ts`): la frase termina de armarse. */
+  readonly asiento?: AsientoDeLaLlegada
 }): React.JSX.Element {
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const listo = useTituloListo(id)
   const lugar = useRef<HTMLSpanElement | null>(null)
   const repetible = useLlegadaDelTitulo(llegadaDe, llegada ?? LLEGADO)
-  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, activo: material !== 'no' && escritorio })
+  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, asiento, activo: material !== 'no' && escritorio })
   return (
     <>
       {listo && <span className="sr-only hidden escritorio:block">{texto}</span>}

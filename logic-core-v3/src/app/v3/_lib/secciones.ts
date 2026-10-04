@@ -330,10 +330,12 @@ const PASOS_DE_SERVICIOS = 3
 export const PANTALLAS_DE_NUMEROS = 2
 
 /**
- * [FINAL] Las pantallas de «Por qué develOP»: la entrada y tres de pin, con la frase, los
+ * [FINAL] Las pantallas de «Por qué develOP»: la entrada y cuatro de pin, con la frase, los
  * valores y el CTA (`escena/finalDelRecorrido.ts` reparte los tiempos sobre ellas).
+ * [PASADA FINAL] A3 · eran tres de pin: la frase se arma en 0,6 pantallas y se queda quieta
+ * UNA entera antes de subir, y lo demás corre una pantalla después.
  */
-export const PANTALLAS_DE_POR_QUE_DEVELOP = 4
+export const PANTALLAS_DE_POR_QUE_DEVELOP = 5
 
 /**
  * ⚠️ SERVICIOS SE ESTIRÓ: su alto ya NO es `pasos × 100svh`.

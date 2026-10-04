@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { acotar01 } from '../../acotar'
 import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
@@ -66,7 +67,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
   // [RONDA 2] F2 · `scroll`: dónde estaba la página y desde cuándo (el asiento, con el scroll quieto).
-  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera(), scroll: { y: Number.NaN, cuando: 0 } })
+  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera(), scroll: { y: Number.NaN, cuando: 0 }, ultimoCuadro: 0 })
 
   // Movimiento reducido: sin llegada (se disuelven en su lugar). Se lee al cambiar, no por cuadro.
   useEffect(() => {
@@ -167,8 +168,16 @@ function descolocar(armados: readonly Armado[], ancho: number): void {
   for (const a of armados) a.colocado = false
 }
 
+/**
+ * [PASADA FINAL] A3 · El lazo de la escena se para detrás de un panel opaco (`visibilidad.ts`) y lo mostrado de cada título
+ * queda congelado donde iba; si al reanudarse persiguiera desde ahí con su mínimo, se vería un estado viejo deshaciéndose
+ * (la frase a medio armar retrocediendo al volver de Tu panel). Un hueco mayor que esto entre dos cuadros es una
+ * reanudación: lo mostrado vuelve a ser lo que dice el scroll, y desde ahí sigue. Función del scroll, también al volver.
+ */
+const PAUSA_DEL_LAZO_MS = 250
+
 /** Un cuadro: la llegada y la salida de cada título (perseguidas), si se dibuja, dónde va (al empezar a llegar) y su luz. */
-function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number } }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
+function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number }; ultimoCuadro: number }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
   if (s.armados.length === 0) return
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
@@ -182,17 +191,23 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     s.scroll.cuando = ahora
   }
   const asentar = !enViaje && REPETICIONES.activas === 0 && ahora - s.scroll.cuando > ASIENTO.quietoMs
+  const reanudado = s.ultimoCuadro > 0 && ahora - s.ultimoCuadro > PAUSA_DEL_LAZO_MS
+  s.ultimoCuadro = ahora
   for (const a of s.armados) {
     if (a.titulo.queda) {
       if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
       avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
-      a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, y, dt, viva)
+      a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, reanudado, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
       continue
     }
     // [RONDA 2] F2 · función del scroll (la llegada y la salida), con el asiento al frenar; en un viaje, desarmado.
-    a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt)
+    if (reanudado) {
+      a.mostrado.llegada = acotar01(enViaje ? 0 : a.titulo.llegada)
+      a.mostrado.salida = acotar01(a.titulo.salida)
+    }
+    a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS, a.titulo.asiento)
     a.mostrado.salida = mostradoDelScroll(a.mostrado.salida, a.titulo.salida, asentar, dt, a.titulo.salidaMinimaS)
     const { llegada, salida } = a.mostrado
     a.uniforms.uLlegada.value = llegada
@@ -274,11 +289,13 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
  * es función del scroll, con el asiento al frenar, como la de todos. El hero (no se rearma: llega una vez por carga) sigue
  * con su llegada por tiempo, que converge sola. [NOCTURNO] A4: con su `minimoS`, la llegada larga de ESCENA 10.
  */
-function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
+function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, reanudado: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
   const d = corrimiento(a.pin, y)
   const fuera = fueraDelCuadro(a, d)
   const tapado = a.titulo.salida >= 0.999
+  // [PASADA FINAL] A3 · al reanudarse el lazo, el que se rearma vuelve a lo que dice el scroll (el hero llega una vez, por tiempo).
+  if (reanudado && a.titulo.rearma) m.llegada = acotar01(enViaje ? 0 : a.titulo.llegada)
   if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS)
   else if (!fuera && !tapado) m.llegada = persigue(m.llegada, a.titulo.llegada, dt, a.titulo.minimoS ?? undefined)
   m.salida = 0

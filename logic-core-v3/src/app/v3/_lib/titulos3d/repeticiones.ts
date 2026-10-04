@@ -18,4 +18,12 @@ export const ASIENTO = { quietoMs: 180, s: 0.35, alcanceS: 0.12 } as const
  * el scroll, y al frenar siempre termina armada o desarmada. [NOCTURNO] A5 · la salida de la frase de Por qué develOP
  * («Seis razones / para elegirnos»), con el mismo mecanismo y bastante más lenta: se iba volando con el scroll.
  */
-export const LENTOS = { llegadaDePortfolioS: 1.4, salidaDeLaFraseS: 2 } as const
+export const LENTOS = { llegadaDePortfolioS: 1.4, salidaDeLaFraseS: 2, llegadaDeLaFraseS: 1.4 } as const
+
+/**
+ * [PASADA FINAL] A3 · EL ASIENTO DE UNA LLEGADA con mínimo de tiempo, al frenar a mitad: `cercano` (F2: al extremo más
+ * cercano; Portfolio) o `armado` (termina de armarse: la frase, que es un título para leer y en su ventana de media
+ * pantalla una pausa a un cuarto del camino la dejaba desarmarse delante de quien la estaba leyendo). Subir el scroll
+ * la sigue desarmando: lo mostrado es función del scroll; el asiento sólo decide dónde se queda al frenar.
+ */
+export type AsientoDeLaLlegada = 'cercano' | 'armado'

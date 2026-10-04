@@ -1,4 +1,4 @@
-import { ASIENTO } from '../../titulos3d/repeticiones'
+import { ASIENTO, type AsientoDeLaLlegada } from '../../titulos3d/repeticiones'
 
 /**
  * [ESCENA 10] T3 · LA LLEGADA DE LAS LETRAS — cada letra entra desde la profundidad (de atrás del título, con la niebla
@@ -45,9 +45,10 @@ export function persigue(mostrado: number, pedido: number, dt: number, minimoS: 
 
 export { ASIENTO }
 
-export function mostradoDelScroll(mostrado: number, pedido: number, asentar: boolean, dt: number, minimoS: number | null = null): number {
+export function mostradoDelScroll(mostrado: number, pedido: number, asentar: boolean, dt: number, minimoS: number | null = null, asiento: AsientoDeLaLlegada = 'cercano'): number {
   const p = Math.min(1, Math.max(0, pedido))
-  if (minimoS !== null) return persigue(mostrado, asentar && p > 0 && p < 1 ? Math.round(p) : p, dt, minimoS)
+  // [PASADA FINAL] A3 · con mínimo, el asiento al frenar a mitad: al extremo más cercano, o armado (`AsientoDeLaLlegada`).
+  if (minimoS !== null) return persigue(mostrado, asentar && p > 0 && p < 1 ? (asiento === 'armado' ? 1 : Math.round(p)) : p, dt, minimoS)
   if (asentar && p > 0 && p < 1) return persigue(mostrado, p >= 0.5 ? 1 : 0, dt, ASIENTO.s)
   if (Math.abs(mostrado - p) < 0.02) return p
   return persigue(mostrado, p, dt, ASIENTO.alcanceS)

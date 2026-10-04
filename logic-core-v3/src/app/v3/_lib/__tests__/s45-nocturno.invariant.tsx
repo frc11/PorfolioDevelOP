@@ -94,7 +94,7 @@ const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const componente = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 const escena = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 const enchufada = (c: string): boolean => /<TituloDeVolumen id="portfolio"[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(c)
-afirmar(enchufada(piezas) && /salida, queda, corrida, minimoS,( salidaMinimaS,)? activo:/.test(componente) && /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(escena), '  Portfolio pide su mínimo (sección → registro → escena); en un viaje del menú se desarma rápido, como antes')
+afirmar(enchufada(piezas) && /salida, queda, corrida, minimoS,( salidaMinimaS,)?( asiento,)? activo:/.test(componente) && /if \(a\.titulo\.rearma\) m\.llegada = mostradoDelScroll\(m\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS\)/.test(escena), '  Portfolio pide su mínimo (sección → registro → escena); en un viaje del menú se desarma rápido, como antes')
 controlPositivo('el detector VE a Portfolio sin su mínimo', piezas.replace(' minimoS={LENTOS.llegadaDePortfolioS}', ''), enchufada)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -109,7 +109,7 @@ afirmar(seDaVuelta(salida) && convergeSiempre(salida, LENTOS.salidaDeLaFraseS), 
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const registro = sinComentarios(leer('_lib/titulos3d/registro.ts'))
 const lentaEnLaFrase = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*salidaMinimaS=\{LENTOS\.salidaDeLaFraseS\}[^>]*llegadaDe="por-que-develop" \/>/.test(c)
-afirmar(lentaEnLaFrase(porQue) && /salida, queda, corrida, minimoS, salidaMinimaS, activo:/.test(componente) && /rearma, minimoS, salidaMinimaS(, trazos)? \}\)/.test(registro) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt, a\.titulo\.salidaMinimaS\)/.test(escena), '  la frase pide su salida lenta (sección → registro → escena); los demás títulos (sin `salidaMinimaS`) siguen con la de F2')
+afirmar(lentaEnLaFrase(porQue) && /salida, queda, corrida, minimoS, salidaMinimaS,( asiento,)? activo:/.test(componente) && /rearma, minimoS, salidaMinimaS(, asiento)?(, trazos)? \}\)/.test(registro) && /a\.mostrado\.salida = mostradoDelScroll\(a\.mostrado\.salida, a\.titulo\.salida, asentar, dt, a\.titulo\.salidaMinimaS\)/.test(escena), '  la frase pide su salida lenta (sección → registro → escena); los demás títulos (sin `salidaMinimaS`) siguen con la de F2')
 controlPositivo('el detector VE la frase sin su salida lenta', porQue.replace(' salidaMinimaS={LENTOS.salidaDeLaFraseS}', ''), lentaEnLaFrase)
 
 // ═══════════════════════════════════════════════════════════════════════════

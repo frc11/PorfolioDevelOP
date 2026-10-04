@@ -84,9 +84,10 @@ titulo('T1 · Con los viajes del menú: durante el viaje no llegan; al terminar,
 const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts') + leer('_lib/escena/titulos3d/sincronia.ts')))
 // [RETOQUE 3D] B1: entre los dos, el scroll del cuadro (el que se queda va corrido con su escenario).
 // [RONDA 2] F2: con el asiento entre la lectura del scroll y el recorrido; lo mostrado, función del scroll.
-const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY[\s\S]{0,700}?for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)
+const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY[\s\S]{0,700}?for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt, enViaje \? null : a\.titulo\.minimoS, a\.titulo\.asiento\)/.test(c)
 afirmar(sostieneEnElViaje(escena3d), 'en un viaje lo pedido es 0 (ninguna letra llega con el velo puesto; la cámara viaja sola), leído una vez por cuadro')
-controlPositivo('el detector VE la llegada que corre con el scroll del viaje', escena3d.replace('enViaje ? 0 : a.titulo.llegada', 'a.titulo.llegada'), sostieneEnElViaje)
+// [PASADA FINAL] A3 · todas las lecturas (la reanudacion del lazo tambien lee lo pedido): el control cambia cada una.
+controlPositivo('el detector VE la llegada que corre con el scroll del viaje', escena3d.split('enViaje ? 0 : a.titulo.llegada').join('a.titulo.llegada'), sostieneEnElViaje)
 const dom = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 afirmar(/const repetible = useLlegadaDelTitulo\(llegadaDe, llegada \?\? LLEGADO\)/.test(dom) && /llegada: llegada === null \? null : repetible/.test(dom), 'al terminar, la llegada que el viaje repite (`llegadaDelTitulo.ts`, la del retoque 3) es la que persigue el título: las letras desde la profundidad, sin mover la cámara')
 const piezas = leer('_secciones/trabajos/piezas.tsx')

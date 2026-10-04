@@ -369,8 +369,9 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
   // `s23-final` afirma que estos literales son los de ese archivo.
   {
-    // [RETOQUE PANEL] T3 · la frase se sostiene hasta 1 (era 0,5); los valores llegan en 1,8 y se sostienen hasta 2.
-    at: 0.8894,
+    // [PASADA FINAL] A3 · la frase se arma en 0,6 y se sostiene hasta 1,6 de las cinco pantallas; los valores llegan en
+    // 2,4 y se sostienen hasta 2,6; el CTA llega en 3,6 (`progresoDelFinal`, con el ancla 0,8525).
+    at: 0.8997,
     name: 'frase · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -378,14 +379,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
   {
     // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
-    at: 0.9189,
+    at: 0.9233,
     name: 'valores',
     ease: 'shift',
     turn: 'literal',
     pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
   },
   {
-    at: 0.92625,
+    at: 0.9292,
     name: 'valores · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -393,14 +394,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
   {
     // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.
-    at: 0.9521,
+    at: 0.9587,
     name: 'cta',
     ease: 'shift',
     turn: 'literal',
     pose: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
   },
   {
-    at: 0.9631,
+    at: 0.9705,
     name: 'cta · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -409,7 +410,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   {
     // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo
     // al 19 % del alto, centrado. Es la excepción con nombre al techo de velocidad.
-    at: 0.9723,
+    at: 0.977875,
     name: 'pie',
     ease: 'arrive',
     turn: 'literal',

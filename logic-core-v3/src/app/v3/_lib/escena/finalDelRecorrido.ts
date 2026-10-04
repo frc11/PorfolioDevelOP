@@ -41,10 +41,12 @@ export const ANCLA_DE_POR_QUE_DEVELOP = 0.8525
  * el primer cuadro en que se ve la escena ya es A.
  */
 export const TIEMPOS_DEL_FINAL = {
-  // [RETOQUE PANEL] T3 · la frase se sostiene quieta media pantalla más (hasta 1, era 0,5): llega y se deja leer.
-  frase: { llega: -1, hasta: 1 },
-  valores: { llega: 1.8, hasta: 2 },
-  cta: { llega: 2.7, hasta: PANTALLAS_DE_POR_QUE_DEVELOP - 1 },
+  // [PASADA FINAL] A3 · la frase se ARMA en las primeras 0,6 pantallas del pin (`armada`: la ventana de su llegada, con
+  // un mínimo de 1,4 s para que se vea armarse a cualquier velocidad) y se sostiene quieta UNA pantalla entera (hasta
+  // 1,6; [RETOQUE PANEL] T3 la dejaba hasta 1 con la llegada en 0,45). Los valores y el CTA corren detrás.
+  frase: { llega: -1, armada: 0.6, hasta: 1.6 },
+  valores: { llega: 2.4, hasta: 2.6 },
+  cta: { llega: 3.6, hasta: PANTALLAS_DE_POR_QUE_DEVELOP - 1 },
   // El alejamiento D es el camino de `cta.hasta` a `pie.llega`: un cuarto de pantalla.
   pie: { llega: PANTALLAS_DE_POR_QUE_DEVELOP - 1 + 0.25, hasta: PANTALLAS_DE_POR_QUE_DEVELOP },
 } as const

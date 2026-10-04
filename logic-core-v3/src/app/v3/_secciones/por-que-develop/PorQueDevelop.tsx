@@ -157,7 +157,8 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
  *  [ESCENA 10] T3 · con `volumen`, el título de volumen ([3D Y SONIDO] T1: del producto): llega con la frase; se lee con la
  *  cámara de los valores y en el lugar al que la frase sube con ellos. [RONDA 2] F2: vuelve a irse con la levantada, y la
  *  llegada y la salida son función del scroll (con el asiento al frenar): ninguna velocidad la deja a medio armar.
- *  [NOCTURNO] A5: la salida, con un mínimo de tiempo (bastante más lenta: se iba volando). */
+ *  [NOCTURNO] A5: la salida, con un mínimo de tiempo (bastante más lenta: se iba volando). [PASADA FINAL] A3: y la llegada,
+ *  con el mínimo de ESCENA 10 (1,4 s: se ve armarse a cualquier velocidad) y el asiento «armado» al frenar a mitad. */
 function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number>; readonly corrida: MotionValue<number> } }): React.JSX.Element {
   return (
     <Titular
@@ -165,7 +166,7 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
       como="span"
       className="block whitespace-nowrap escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((50vw-var(--hueco-de-la-frase)-var(--spacing-8))/7.2))]"
     >
-      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} salidaMinimaS={LENTOS.salidaDeLaFraseS} llegadaDe="por-que-develop" />}
+      {volumen === undefined ? texto : <TituloDeVolumen id={volumen.id} texto={texto} lectura={LECTURA.frase} subida={SUBIDA_DE_LA_FRASE_SVH / 100} llegada={volumen.llegada} salida={volumen.salida} corrida={volumen.corrida} minimoS={LENTOS.llegadaDeLaFraseS} asiento="armado" salidaMinimaS={LENTOS.salidaDeLaFraseS} llegadaDe="por-que-develop" />}
     </Titular>
   )
 }

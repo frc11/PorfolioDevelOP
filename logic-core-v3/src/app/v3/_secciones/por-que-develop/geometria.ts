@@ -63,8 +63,8 @@ export interface Ventana {
   readonly hasta: number
 }
 
-/** La frase llega apenas se clava el escenario, con la cámara quieta en A. */
-export const VENTANA_DE_LA_FRASE: Ventana = { desde: progresoDelPin(0), hasta: progresoDelPin(0.45) }
+/** La frase llega apenas se clava el escenario, con la cámara quieta en A. [PASADA FINAL] A3: en `frase.armada` pantallas. */
+export const VENTANA_DE_LA_FRASE: Ventana = { desde: progresoDelPin(0), hasta: progresoDelPin(frase.armada) }
 
 /**
  * Los valores entran de a pares —izquierda y derecha a la vez— mientras la cámara baja a B.
