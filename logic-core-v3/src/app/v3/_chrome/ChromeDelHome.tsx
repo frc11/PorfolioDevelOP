@@ -168,10 +168,10 @@ export function ChromeDelHome(): React.JSX.Element {
       <AnticipacionDelMenu />
       {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar. */}
       <OndaDeLasPortadas />
-      {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). */}
-      <InfinitoDelRecorrido />
-      {/* [3D Y SONIDO] T2: el sonido. [RETOQUE 3D] El parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de prueba. */}
-      <SonidoDelHome />
+      {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). [3D Y SONIDO] T2: el
+          sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de prueba. [PASADA
+          FINAL] C1: el parlante va en la esquina del infinito, justo encima de él. */}
+      <InfinitoDelRecorrido encima={<SonidoDelHome />} />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

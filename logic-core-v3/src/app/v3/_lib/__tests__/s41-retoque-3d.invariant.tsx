@@ -244,7 +244,8 @@ const infinito = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
 const masGrande = (c: string): boolean => c.includes('w-[calc(var(--spacing-12)*1.3)]') && c.includes('escritorio:w-[calc(var(--spacing-8)*2.6)]')
 afirmar(masGrande(infinito), 'de 48 a 62 px en el teléfono y de 64 a 83 en escritorio (el trazo crece con él: es del dibujo)')
 controlPositivo('el detector VE el de antes', infinito.replace('*1.3)]', ')]').replace('*2.6)]', '*2)]'), masGrande)
-afirmar(leer('_chrome/sonido/ControlDelSonido.tsx').includes('escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2.6+var(--spacing-3))]'), '  y el parlante, a su izquierda en escritorio, se corre con él (medido: 12 px de aire entre los dos)')
+// [PASADA FINAL] C1 · el parlante dejó la izquierda del infinito: va justo encima, centrado, en la misma columna (s47 · C1).
+afirmar(leer('_chrome/ChromeDelHome.tsx').includes('<InfinitoDelRecorrido encima={<SonidoDelHome />} />') && leer('_chrome/recorrido/InfinitoDelRecorrido.tsx').includes('{encima}'), '  y el parlante se corre con él: [PASADA FINAL] C1, justo encima, en su misma columna (medido en vivo con scripts-pasada/c1-esquina.ts)')
 
 // [CIERRE] Sonido · el clic, el pestillo (S1), y el ambiente, generativo (S2): s42 · S1 y S2.
 

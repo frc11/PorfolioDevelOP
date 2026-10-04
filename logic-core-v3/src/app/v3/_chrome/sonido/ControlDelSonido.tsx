@@ -1,17 +1,21 @@
 'use client'
 
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
+import { Micro } from '../../_componentes/tipografia/Textos'
+import { CURVAS } from '../../_lib/motion/curvas'
 import { sonar } from '../../_lib/sonido/bus'
 import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
+import { IconoDelParlante } from './IconoDelParlante'
 import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from './motorCompartido'
 
 /**
- * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico junto al infinito del recorrido (en escritorio a su izquierda;
- * en el teléfono encima, para no ocupar más ancho sobre el contenido), en su mismo lenguaje
+ * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico, [PASADA FINAL] C1: justo encima del infinito del recorrido y
+ * centrado con él, en la columna de su esquina (`recorrido/InfinitoDelRecorrido.tsx`, que lo recibe en `encima`), en su mismo lenguaje
  * (trazo fino, puntas redondas, el borde tenue del tono contrario) y con su mismo tono: copia el que el infinito leyó de
  * lo que hay debajo (`data-seccion`), así no hay una segunda lectura. [RETOQUE 3D] En el producto (era sólo con la prueba).
  *
@@ -25,6 +29,10 @@ import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from '.
  *   · Prendido: el clic de cualquier enlace o botón suena (uno solo, delegado en el documento; la barra y los CTA con el
  *     pestillo, [CIERRE RETOQUE 3D] S1), el hover de los CTA suena el tic de la barra y suena UN ambiente generativo para
  *     toda la página (S2: sin archivo), salvo con movimiento reducido o con la pestaña oculta.
+ *   · [PASADA FINAL] C1 · al tocarlo, el ícono se anima (`IconoDelParlante.tsx`: las ondas se dibujan o se cortan) y encima
+ *     aparece un cartel de dos líneas, «Sonido / activado» o «Sonido / desactivado», que cambia con su animación y se va
+ *     solo (`CARTEL_MS`). El cartel se ve y no se anuncia; lo anuncia una región viva que está siempre (`role="status"`),
+ *     con el mismo texto, y el botón dice su estado con `aria-pressed`. Con movimiento reducido, sólo fundidos.
  */
 const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
 /** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: [CIERRE RETOQUE 3D] S1 · su clic, el pestillo. */
@@ -34,18 +42,25 @@ const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-c
 /** [RETOQUE PANEL] T2 · las demos de Tu panel: sin clic propio; lo que se toca adentro suena el pestillo de la barra y los CTA. */
 const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 
+/** Cuánto se queda el cartel después de tocar el parlante (ms), y su salida: corta, así el cambio de texto no se arrastra. */
+export const CARTEL_MS = 1800
+const SALIDA_DEL_CARTEL = { duration: 0.14, ease: CURVAS.principal } as const
+
 export default function ControlDelSonido(): React.JSX.Element {
-  const boton = useRef<HTMLButtonElement>(null)
+  const raiz = useRef<HTMLDivElement>(null)
   const prendido = useSyncExternalStore(suscribirAlPrendido, leerPrendido, () => false)
   const reducido = useMovimientoReducido()
   const motor = useRef<MotorDelSonido | null>(null)
   // [PASADA FINAL] A4 · lo real del motor, para que lo mostrado coincida (sin motor en el servidor).
   const estadoReal = useSyncExternalStore(suscribirAlMotor, estadoDelMotor, () => 'sin-motor')
+  // [PASADA FINAL] C1 · el cartel (se ve) y el anuncio (se oye): los escribe el toque, no la carga.
+  const [cartel, setCartel] = useState(false)
+  const [anuncio, setAnuncio] = useState('')
 
   // El tono: el del infinito, que ya lo lee de lo que hay debajo (los dos están en la misma esquina).
   useEffect(() => {
     const infinito = document.querySelector('[data-pieza="infinito-del-recorrido"]')
-    const el = boton.current
+    const el = raiz.current
     if (infinito === null || el === null) return undefined
     const copiar = (): void => {
       if (infinito.getAttribute('data-seccion') === 'invertida') el.setAttribute('data-seccion', 'invertida')
@@ -138,33 +153,59 @@ export default function ControlDelSonido(): React.JSX.Element {
     }
   }, [prendido, reducido])
 
+  // El cartel se va solo; otro toque lo renueva.
+  useEffect(() => {
+    if (!cartel) return undefined
+    const reloj = window.setTimeout(() => setCartel(false), CARTEL_MS)
+    return () => window.clearTimeout(reloj)
+  }, [cartel, prendido])
+
+  const tocar = (): void => {
+    guardarPrendido(!prendido)
+    setCartel(true)
+    setAnuncio(prendido ? 'Sonido desactivado' : 'Sonido activado')
+  }
+
   return (
-    <button
-      ref={boton}
-      type="button"
-      data-pieza="control-del-sonido"
-      data-estado={!prendido ? 'apagado' : estadoReal === 'listo' ? 'suena' : 'esperando'}
-      aria-pressed={prendido}
-      aria-label="Sonido"
-      onClick={() => guardarPrendido(!prendido)}
-      className="text-tinta fixed right-[calc(var(--spacing-4)+var(--spacing-2))] bottom-[calc(var(--spacing-4)+var(--spacing-12))] z-[var(--z-cabecera)] flex h-[var(--spacing-8)] w-[var(--spacing-8)] items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)] escritorio:right-[calc(var(--spacing-6)+var(--spacing-8)*2.6+var(--spacing-3))] escritorio:bottom-[var(--spacing-6)]"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-[var(--spacing-5)] w-[var(--spacing-5)] overflow-visible" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {/* El borde del tono contrario, debajo (como el infinito): se lee sobre cualquier fondo. */}
-        <g stroke="var(--color-fondo)" strokeWidth={3.5} opacity={0.35}>
-          <path d={PARLANTE} />
-          <path d={prendido ? ONDAS : CALLADO} />
-        </g>
-        <g stroke="currentColor" strokeWidth={1.5}>
-          <path d={PARLANTE} />
-          <path d={prendido ? ONDAS : CALLADO} />
-        </g>
-      </svg>
-    </button>
+    // En la columna de la esquina (que no recibe el puntero): sólo esto lo recibe. Lleva el tono del infinito (`data-seccion`).
+    <div ref={raiz} data-pieza="sonido-de-la-esquina" className="text-tinta pointer-events-auto relative flex justify-center">
+      <span role="status" data-pieza="anuncio-del-sonido" className="sr-only">
+        {anuncio}
+      </span>
+      {/* El cartel: centrado sobre el parlante en escritorio; en el teléfono, apoyado a su derecha (no se sale del cuadro). */}
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-full left-1/2 mb-[var(--spacing-2)] -translate-x-1/2 max-escritorio:right-0 max-escritorio:left-auto max-escritorio:translate-x-0">
+        <AnimatePresence mode="wait">
+          {cartel && (
+            <motion.div
+              key={prendido ? 'activado' : 'desactivado'}
+              data-pieza="cartel-del-sonido"
+              initial={reducido ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reducido ? { opacity: 0, transition: SALIDA_DEL_CARTEL } : { opacity: 0, y: -4, scale: 0.98, transition: SALIDA_DEL_CARTEL }}
+              transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.9 }}
+              className="bg-fondo text-tinta flex flex-col items-center gap-[var(--spacing-1)] rounded-[var(--radius-medio)] border border-borde px-[var(--spacing-3)] py-[var(--spacing-2)] whitespace-nowrap shadow-flotante"
+            >
+              <Micro como="span" className="text-tinta-tenue leading-none">
+                Sonido
+              </Micro>
+              <Micro como="span" peso="medio" className="leading-none">
+                {prendido ? 'activado' : 'desactivado'}
+              </Micro>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <button
+        type="button"
+        data-pieza="control-del-sonido"
+        data-estado={!prendido ? 'apagado' : estadoReal === 'listo' ? 'suena' : 'esperando'}
+        aria-pressed={prendido}
+        aria-label="Sonido"
+        onClick={tocar}
+        className="flex h-[var(--spacing-8)] w-[var(--spacing-8)] cursor-pointer items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)]"
+      >
+        <IconoDelParlante prendido={prendido} suena={estadoReal === 'listo'} reducido={reducido} />
+      </button>
+    </div>
   )
 }
-
-/** El parlante, las dos ondas (prendido) y la cruz (apagado), en una caja de 24. */
-const PARLANTE = 'M4 9.5h3.2L12 5.5v13l-4.8-4H4z'
-const ONDAS = 'M15.5 9.2a4 4 0 0 1 0 5.6M18.2 6.6a7.6 7.6 0 0 1 0 10.8'
-const CALLADO = 'M16 9.5l4.5 5M20.5 9.5l-4.5 5'

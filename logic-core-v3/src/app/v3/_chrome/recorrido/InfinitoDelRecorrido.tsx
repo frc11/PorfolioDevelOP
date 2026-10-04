@@ -26,7 +26,8 @@ import { CAJA_DEL_INFINITO, TRAZO_DEL_INFINITO, textoDelPorcentaje } from './rec
  *   · Por cuadro: el resorte y dos propiedades del trazo (un MotionValue): React no se vuelve a dibujar. El número se
  *     escribe sólo cuando cambia el entero.
  *   · Escritorio: abajo a la derecha. Teléfono: el mismo infinito, más chico, abajo a la derecha (el botón del menú está
- *     arriba al centro).
+ *     arriba al centro). [PASADA FINAL] C1 · la esquina es una columna: lo que llega en `encima` (el parlante) va justo
+ *     encima del infinito y centrado con él; la columna no recibe el puntero (sólo lo que va encima, si lo pide).
  *
  * ── `aria-hidden`, y no `role="progressbar"` ─────────────────────────────
  *
@@ -47,7 +48,7 @@ function escribirElNumero(el: HTMLSpanElement | null, p: number): void {
   if (el !== null && el.textContent !== texto) el.textContent = texto
 }
 
-export function InfinitoDelRecorrido(): React.JSX.Element {
+export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: React.ReactNode }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
   const numero = useRef<HTMLSpanElement>(null)
   const reducido = useMovimientoReducido()
@@ -96,23 +97,21 @@ export function InfinitoDelRecorrido(): React.JSX.Element {
 
   return (
     // [RETOQUE 3D] N2 · 1,3 veces más grande (48 → 62 px en el teléfono, 64 → 83 en escritorio); el trazo crece con él.
-    <div
-      ref={caja}
-      data-pieza="infinito-del-recorrido"
-      aria-hidden="true"
-      className="text-tinta pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]"
-    >
-      <svg viewBox={CAJA_DEL_INFINITO} className="block h-auto w-full overflow-visible">
-        {/* El borde del tono contrario, debajo de todo: se lee sobre cualquier fondo (los dos tonos del anillo de foco). */}
-        <path d={TRAZO_DEL_INFINITO} fill="none" stroke="var(--color-fondo)" strokeWidth={GRUESO_DEL_INFINITO + 2} strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />
-        {/* La pista: el infinito entero, tenue. */}
-        <path d={TRAZO_DEL_INFINITO} fill="none" stroke="currentColor" strokeWidth={GRUESO_DEL_INFINITO} strokeLinecap="round" strokeLinejoin="round" opacity={0.2} />
-        {/* El recorrido: el mismo trazo, dibujado hasta donde llegaste. */}
-        <motion.path d={TRAZO_DEL_INFINITO} fill="none" stroke="currentColor" strokeWidth={GRUESO_DEL_INFINITO} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray="1 1" style={{ strokeDashoffset: resto, opacity: visible }} />
-      </svg>
-      <Micro como="span" className="[text-shadow:0_0_var(--spacing-1)_var(--color-fondo)] tabular-nums">
-        <span ref={numero} />
-      </Micro>
+    <div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]">
+      {encima}
+      <div ref={caja} data-pieza="infinito-del-recorrido" aria-hidden="true" className="text-tinta flex w-full flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)]">
+        <svg viewBox={CAJA_DEL_INFINITO} className="block h-auto w-full overflow-visible">
+          {/* El borde del tono contrario, debajo de todo: se lee sobre cualquier fondo (los dos tonos del anillo de foco). */}
+          <path d={TRAZO_DEL_INFINITO} fill="none" stroke="var(--color-fondo)" strokeWidth={GRUESO_DEL_INFINITO + 2} strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />
+          {/* La pista: el infinito entero, tenue. */}
+          <path d={TRAZO_DEL_INFINITO} fill="none" stroke="currentColor" strokeWidth={GRUESO_DEL_INFINITO} strokeLinecap="round" strokeLinejoin="round" opacity={0.2} />
+          {/* El recorrido: el mismo trazo, dibujado hasta donde llegaste. */}
+          <motion.path d={TRAZO_DEL_INFINITO} fill="none" stroke="currentColor" strokeWidth={GRUESO_DEL_INFINITO} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray="1 1" style={{ strokeDashoffset: resto, opacity: visible }} />
+        </svg>
+        <Micro como="span" className="[text-shadow:0_0_var(--spacing-1)_var(--color-fondo)] tabular-nums">
+          <span ref={numero} />
+        </Micro>
+      </div>
     </div>
   )
 }

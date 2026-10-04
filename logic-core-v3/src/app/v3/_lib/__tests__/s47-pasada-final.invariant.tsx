@@ -18,6 +18,8 @@
  *        30 s) y el botón muestra lo real (`data-estado`).
  *   0  · las llegadas de Portfolio de antes, con bandera (`?pruebas=portfolio=e9|e10|3ds|lejos`): las cifras de cada
  *        commit escritas acá, F2 en las cuatro, la de hoy por defecto, y la cámara de entonces (los pares medidos).
+ *   C1 · el parlante, justo encima del infinito y centrado con él (una sola columna fija en la esquina): el ícono que
+ *        dibuja o corta sus ondas, el cartel «Sonido / activado|desactivado» que se va solo y el anuncio aparte.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -25,6 +27,7 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
+import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, TRAZO_DEL_ICONO } from '../../_chrome/sonido/IconoDelParlante'
 import { estadoDelMotor } from '../../_chrome/sonido/motorCompartido'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS, useTitular2D } from '../../_componentes/titulos3d/titular2d'
 import { seccionDe } from '../../_secciones/_contrato/forma'
@@ -32,6 +35,7 @@ import { marcar } from '../../_secciones/_invariantes/render'
 import { Hero } from '../../_secciones/hero/Hero'
 import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
 import { pantallasDe } from '../escena/anclaje'
+import { CURVAS } from '../motion/curvas'
 import { laEscenaCayo, marcarLaEscenaCaida, suscribirALaCaida } from '../escena/caida'
 import { PARES_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, VARIANTES_DE_PORTFOLIO, entornoPedido } from '../escena/entorno'
@@ -310,5 +314,64 @@ afirmar(Math.abs(comoEntonces(0.4713) - 0.4426) < 0.003 && barridoEntonces > 2 *
 afirmar(/sampleTrack\(track, progresoDeLaCamara\(progress\), target\)/.test(sinComentarios(leer('_lib/escena/OrbitRig.tsx'))), '  sólo la cámara: el rig la muestrea con ese progreso (la luz, la noche y el resto siguen al scroll como hoy)')
 const prueba = sinComentarios(leer('_componentes/titulos3d/PortfolioDePrueba.tsx'))
 afirmar(/useTituloDeVolumen\(\{ id: 'portfolio', texto, lugar, lectura: v\.lectura, llegada: llegada === null \? null : repetible, salida: huida, forma: v\.forma, colocacion: v\.colocacion, minimoS: v\.minimoS, salidaMinimaS: v\.salidaMinimaS, activo:/.test(prueba), '  el título de la prueba se anota con la forma, la colocación, los tiempos y la huida de su variante (y la llegada repetida de los viajes)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C1 · El parlante: justo encima del infinito, con el ícono animado, el cartel «Sonido / activado» y su anuncio')
+
+// La esquina: una columna fija; el parlante, encima del infinito y centrado con él (antes, a su izquierda en escritorio).
+const esquinaDelRecorrido = sinComentarios(leer('_chrome/recorrido/InfinitoDelRecorrido.tsx'))
+const parlanteEncima = (c: string): boolean => {
+  const columna = c.indexOf('data-pieza="esquina-del-recorrido"')
+  const encima = c.indexOf('{encima}')
+  const infinito = c.indexOf('data-pieza="infinito-del-recorrido"')
+  return columna > 0 && columna < encima && encima < infinito && /data-pieza="esquina-del-recorrido" className="pointer-events-none fixed [^"]*flex-col items-center/.test(c) && /data-pieza="infinito-del-recorrido" aria-hidden="true"/.test(c)
+}
+afirmar(parlanteEncima(esquinaDelRecorrido), 'la esquina es UNA columna fija: lo que va encima (el parlante), justo encima del infinito y centrado con él; la columna no se come el puntero y el infinito sigue mudo')
+controlPositivo('el detector VE el parlante debajo del infinito', esquinaDelRecorrido.replace('{encima}', '').replace('</svg>', '</svg>{encima}'), parlanteEncima)
+const chromeDelHome = sinComentarios(leer('_chrome/ChromeDelHome.tsx'))
+const claseDe = (c: string, pieza: string): string => new RegExp(`data-pieza="${pieza}"[^>]*?className="([^"]*)"`).exec(c)?.[1] ?? 'no está'
+const enLaColumna = (ch: string): boolean => ch.includes('<InfinitoDelRecorrido encima={<SonidoDelHome />} />') && !ch.replace('<InfinitoDelRecorrido encima={<SonidoDelHome />} />', '').includes('<SonidoDelHome />')
+const sueltoDeLaEsquina = (c: string): boolean => claseDe(c, 'sonido-de-la-esquina').split(' ').includes('pointer-events-auto') && !/\bfixed\b/.test(claseDe(c, 'sonido-de-la-esquina')) && !/\bfixed\b/.test(claseDe(c, 'control-del-sonido'))
+afirmar(enLaColumna(chromeDelHome) && sueltoDeLaEsquina(control), '  el chrome se lo da al infinito (no se ubica solo: ya no hay dos cajas fijas que puedan chocar) y sólo él recibe el puntero')
+controlPositivo('el detector VE el parlante suelto de antes (montado aparte)', chromeDelHome.replace('<InfinitoDelRecorrido encima={<SonidoDelHome />} />', '<InfinitoDelRecorrido />\n      <SonidoDelHome />'), enLaColumna)
+controlPositivo('el detector VE el botón fijo por su cuenta', control.replace('data-pieza="control-del-sonido"', 'data-pieza="control-del-sonido" className="fixed"'), sueltoDeLaEsquina)
+
+// El ícono: las ondas se dibujan o se cortan (una tras otra), la cruz de siempre al apagarlo; con movimiento reducido, fundidos.
+type Icono = (prendido: boolean, suena: boolean, reducido: boolean) => string
+const icono: Icono = (prendido, suena, reducido) => renderToStaticMarkup(<IconoDelParlante prendido={prendido} suena={suena} reducido={reducido} />)
+const partesDe = (html: string, parte: string): { readonly opacidad: number; readonly trazo: string | null }[] => Array.from(html.matchAll(new RegExp(`<path data-parte="${parte}"[^>]*>`, 'g')), (m) => ({ opacidad: Number(/opacity="([\d.]+)"/.exec(m[0])?.[1] ?? 'NaN'), trazo: /stroke-dasharray="([^"]+)"/.exec(m[0])?.[1] ?? null }))
+const asi = (html: string, parte: string, opacidad: number): boolean => {
+  const ps = partesDe(html, parte)
+  return ps.length === 4 && ps.every((p) => p.opacidad === opacidad && p.trazo === (opacidad === 0 ? '0 1' : '1 1'))
+}
+const estadosDelIcono = (f: Icono): boolean => asi(f(true, true, false), 'onda', 1) && asi(f(true, true, false), 'cruz', 0) && asi(f(true, false, false), 'onda', ONDAS_EN_ESPERA) && asi(f(false, false, false), 'onda', 0) && asi(f(false, false, false), 'cruz', 1)
+afirmar(estadosDelIcono(icono), 'el ícono: sonando, las dos ondas dibujadas; prendido esperando la primera acción, tenues (lo que se ve es lo real); apagado, cortadas y la cruz de siempre', `en espera ${String(ONDAS_EN_ESPERA)}`)
+controlPositivo('el detector VE un ícono que apagado no tacha', ((p, s, r) => icono(p, s, r).replace(/data-parte="cruz"([^>]*)opacity="1"/g, 'data-parte="cruz"$1opacity="0"')) as Icono, estadosDelIcono)
+const fuenteDelIcono = sinComentarios(leer('_chrome/sonido/IconoDelParlante.tsx'))
+const unaTrasOtra = (c: string): boolean => c.includes('d={ONDA_CORTA} {...onda(prendido ? 0 : ESCALON_DE_LAS_ONDAS_S)}') && c.includes('d={ONDA_LARGA} {...onda(prendido ? ESCALON_DE_LAS_ONDAS_S : 0)}') && c.includes('delay: prendido ? 0 : (2 + k) * ESCALON_DE_LAS_ONDAS_S') && c.includes('{ ...TRAZO_DEL_ICONO, delay: demora }')
+afirmar(unaTrasOtra(fuenteDelIcono) && ESCALON_DE_LAS_ONDAS_S === 0.08 && TRAZO_DEL_ICONO.duration === 0.3, '  en orden: al prender, la onda corta y 80 ms después la larga; al apagar, la larga primero, la corta y después los dos trazos de la cruz (0,3 s cada trazo)')
+controlPositivo('el detector VE las ondas a la vez', fuenteDelIcono.replace('onda(prendido ? ESCALON_DE_LAS_ONDAS_S : 0)', 'onda(0)'), unaTrasOtra)
+// Medido en vivo: con el resorte de los íconos (400/15) el largo pasaba por −0,27 al cortar, y un trazo con guiones negativos se dibuja ENTERO.
+const sinRebote = (c: string, t: { readonly ease: unknown }): boolean => !/spring|stiffness|damping/.test(c) && t.ease === CURVAS.principal
+afirmar(sinRebote(fuenteDelIcono, TRAZO_DEL_ICONO), '  sin resorte: con la curva principal, el largo de cada trazo nunca sale de 0…1 (un tween interrumpido arranca de donde está), así no hay destello ni punta que tiembla')
+controlPositivo('el detector VE un trazo con resorte', fuenteDelIcono.replace('{ ...TRAZO_DEL_ICONO, delay: demora }', "{ type: 'spring', stiffness: 400, damping: 15, delay: demora }"), (c: string) => sinRebote(c, TRAZO_DEL_ICONO))
+const sinDibujo = (html: string): boolean => !html.includes('stroke-dasharray') && partesDe(html, 'cruz').every((p) => p.opacidad === 1) && partesDe(html, 'onda').every((p) => p.opacidad === 0)
+afirmar(sinDibujo(icono(false, false, true)) && fuenteDelIcono.includes('transition: reducido ? { duration: 0 } : { ...TRAZO_DEL_ICONO, delay: demora }') && fuenteDelIcono.includes('stroke="currentColor" strokeWidth={1.5}'), '  con movimiento reducido no se dibuja (aparece y desaparece); el trazo, de 1,5 como los íconos')
+controlPositivo('el detector VE el dibujo con movimiento reducido', icono(false, false, false), sinDibujo)
+
+// El cartel: dos líneas encima, cambia con su animación y se va solo; lo que se ve no se anuncia, se anuncia aparte.
+const cartelMs = Number(/export const CARTEL_MS = (\d+)/.exec(control)?.[1] ?? 'NaN')
+const conCartel = (c: string): boolean => /<AnimatePresence mode="wait">\s*\{cartel && \(\s*<motion\.div\s+key=\{prendido \? 'activado' : 'desactivado'\}\s+data-pieza="cartel-del-sonido"/.test(c) && /<Micro como="span"[^>]*>\s*Sonido\s*<\/Micro>\s*<Micro como="span"[^>]*>\s*\{prendido \? 'activado' : 'desactivado'\}\s*<\/Micro>/.test(c) && /<div aria-hidden="true" className="pointer-events-none absolute bottom-full [^"]*">\s*<AnimatePresence/.test(c) && /const reloj = window\.setTimeout\(\(\) => setCartel\(false\), CARTEL_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)\s*\}, \[cartel, prendido\]\)/.test(c)
+afirmar(conCartel(control) && cartelMs >= 1200 && cartelMs <= 2500, 'al tocarlo, un cartel encima en dos líneas, «Sonido» y «activado» o «desactivado»: cambia con su animación (sale uno y entra el otro) y se va solo; otro toque lo renueva', `${String(cartelMs)} ms`)
+controlPositivo('el detector VE un cartel que no se va', control.replace('const reloj = window.setTimeout(() => setCartel(false), CARTEL_MS)', 'const reloj = 0'), conCartel)
+const conSusMovimientos = (c: string): boolean => /initial=\{reducido \? \{ opacity: 0 \} : \{ opacity: 0, y: 6, scale: 0\.96 \}\}/.test(c) && /exit=\{reducido \? \{ opacity: 0, transition: SALIDA_DEL_CARTEL \} : \{ opacity: 0, y: -4, scale: 0\.98, transition: SALIDA_DEL_CARTEL \}\}/.test(c) && /transition=\{\{ type: 'spring', stiffness: 380, damping: 38, mass: 0\.9 \}\}/.test(c) && /const SALIDA_DEL_CARTEL = \{ duration: 0\.14, ease: CURVAS\.principal \} as const/.test(c)
+afirmar(conSusMovimientos(control), '  sube un poco al entrar, con el resorte de la interfaz (380/38/0,9), y se va subiendo en 140 ms (medido: con el resorte también a la salida, el cambio de texto tardaba ~700 ms, con 300 ms sin cartel); con movimiento reducido, sólo fundidos')
+controlPositivo('el detector VE el cartel que se mueve con movimiento reducido', control.replace('initial={reducido ? { opacity: 0 } :', 'initial={'), conSusMovimientos)
+const anuncia = (c: string): boolean => {
+  const region = c.indexOf('<span role="status" data-pieza="anuncio-del-sonido" className="sr-only">')
+  return region > 0 && region < c.indexOf('{cartel && (') && /const tocar = \(\): void => \{\s*guardarPrendido\(!prendido\)\s*setCartel\(true\)\s*setAnuncio\(prendido \? 'Sonido desactivado' : 'Sonido activado'\)\s*\}/.test(c) && /onClick=\{tocar\}/.test(c) && /aria-pressed=\{prendido\}/.test(c) && /aria-label="Sonido"/.test(c)
+}
+afirmar(anuncia(control), '  accesible: el botón dice su estado (`aria-pressed`) y una región viva que está SIEMPRE (no el cartel, que es visual y se desmonta) anuncia «Sonido activado» o «Sonido desactivado» al tocarlo')
+controlPositivo('el detector VE un anuncio que sólo existe con el cartel', control.replace('<span role="status" data-pieza="anuncio-del-sonido" className="sr-only">', '').replace('{cartel && (', '{cartel && (<span role="status" data-pieza="anuncio-del-sonido" className="sr-only">'), anuncia)
 
 cerrar('s47-pasada-final')

@@ -66,13 +66,13 @@ export default function PruebaDeSonidos(): React.JSX.Element {
 
   if (!abierto)
     return (
-      <button type="button" onClick={() => setAbierto(true)} className={`bg-fondo text-tinta font-codigo text-caption fixed top-[var(--spacing-4)] left-[var(--spacing-4)] z-[var(--z-overlay)] ${boton}`}>
+      <button type="button" onClick={() => setAbierto(true)} className={`bg-fondo text-tinta font-codigo text-caption pointer-events-auto fixed top-[var(--spacing-4)] left-[var(--spacing-4)] z-[var(--z-overlay)] ${boton}`}>
         Sonidos
       </button>
     )
 
   return (
-    <section aria-label="Prueba de los sonidos" data-pieza="prueba-de-sonidos" className="bg-fondo text-tinta font-codigo text-caption fixed top-[var(--spacing-4)] left-[var(--spacing-4)] z-[var(--z-overlay)] max-h-[calc(100svh-var(--spacing-8))] w-[min(calc(var(--spacing-20)*5),calc(100vw-var(--spacing-8)))] overflow-auto rounded-[var(--radius-medio)] border border-tinta/30 p-[var(--spacing-4)]">
+    <section aria-label="Prueba de los sonidos" data-pieza="prueba-de-sonidos" className="bg-fondo text-tinta font-codigo text-caption pointer-events-auto fixed top-[var(--spacing-4)] left-[var(--spacing-4)] z-[var(--z-overlay)] max-h-[calc(100svh-var(--spacing-8))] w-[min(calc(var(--spacing-20)*5),calc(100vw-var(--spacing-8)))] overflow-auto rounded-[var(--radius-medio)] border border-tinta/30 p-[var(--spacing-4)]">
       <div className="flex items-center justify-between gap-[var(--spacing-3)]">
         <h2 className="text-cuerpo font-semi">Sonidos · prueba</h2>
         <button type="button" onClick={() => setAbierto(false)} className={boton}>
