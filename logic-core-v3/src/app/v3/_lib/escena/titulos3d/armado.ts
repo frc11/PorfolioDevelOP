@@ -137,7 +137,9 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
     // El blanco, de día: el filo oscuro (la función del borde la trae el dibujo de noche, que se instala abajo).
     if (variante === 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${FILO_DE_DIA_GLSL}`)
     // [RETOQUE DEL PIE] P1 · el negro, de día: los costados en otro gris (`filo.ts`; era la b de la prueba de RONDA 2).
-    else shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uDespinte;').replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}\n${DESPINTE_GLSL}`)
+    else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`)
+    // [PASADA FINAL] D2 · y el negro despinta lo tachado, después de sus costados (aparte: la línea de arriba la fija s44).
+    if (variante !== 'blanco') shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float uDespinte;').replace(`#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}`, `#include <map_fragment>\n${costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)}\n${DESPINTE_GLSL}`)
   }
   material.customProgramCacheKey = () => `titulo-de-volumen-${variante}`
   if (propia) material.customProgramCacheKey = () => `titulo-de-volumen-${variante}|${forma.id}`
