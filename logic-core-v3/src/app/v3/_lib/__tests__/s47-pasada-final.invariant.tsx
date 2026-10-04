@@ -750,4 +750,11 @@ const mismoRadio = (c: string): boolean => radioDe(c, '[data-v3] [data-pieza="ca
 afirmar(mismoRadio(cartelD5), 'el cartel de las demos lleva el radio de la pastilla del navbar (el de CONTACTO): s5-trabajos vuelve a verde (su lector ahora salta los comentarios: uno se comía el radio del navbar)')
 controlPositivo('el detector VE el cartel con el radio de antes', cartelD5.replace('border-radius: var(--radius-fuerte);', 'border-radius: var(--radius-pastilla-l);'), mismoRadio)
 
+
+// D5 (2) · y el cartel del cursor sobre los libros, la misma pastilla del estante (s38): el mismo radio, el del navbar.
+const cursorD5 = leer('_estilos/cursor-sala.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const tresIguales = (c: string): boolean => radioDe(c, '[data-v3] [data-pieza="cursor-sala"] [data-parte="cartel"]') === radioDe(cartelD5, '[data-v3] [data-pieza="cartel-de-demos"]') && radioDe(cartelD5, '[data-v3] [data-pieza="cartel-de-demos"]') === 'var(--radius-fuerte)'
+afirmar(tresIguales(cursorD5), '  el cartel del cursor (sobre un libro), el del estante y la pastilla del navbar, con el mismo radio: s38 y s5-trabajos en verde a la vez')
+controlPositivo('el detector VE el cartel del cursor con el radio de antes', cursorD5.replace('border-radius: var(--radius-fuerte);', 'border-radius: var(--radius-pastilla-l);'), tresIguales)
+
 cerrar('s47-pasada-final')

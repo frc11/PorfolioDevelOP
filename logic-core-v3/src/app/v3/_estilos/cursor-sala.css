@@ -104,7 +104,8 @@
   scroll-margin-block-start: calc(var(--spacing-6) + var(--spacing-3));
   color: var(--color-tinta);
   border: var(--border-hairline) solid var(--color-borde);
-  border-radius: var(--radius-pastilla-l);
+  /* [PASADA FINAL] D5 · el radio de la pastilla del navbar desde CONTACTO, como el cartel del estante (s38: la misma pastilla). */
+  border-radius: var(--radius-fuerte);
   background-color: var(--color-superficie-translucida);
   backdrop-filter: blur(var(--blur-panel));
   box-shadow: var(--shadow-flotante);
