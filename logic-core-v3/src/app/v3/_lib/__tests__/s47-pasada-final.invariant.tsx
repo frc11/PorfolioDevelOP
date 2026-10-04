@@ -727,4 +727,15 @@ const sinAMano = (c: string): boolean => !/\b70svh\b|grid-rows-\[auto_1fr\]/.tes
 afirmar(sinAMano(porQueD3) && ALTO_DEL_CTA_EN_LISTA_SVH === 70, 'el alto del CTA de la lista sale de la geometría (70 svh, como era) y las columnas de valores son flex (el ancho de la frase arriba y el contenedor, el resto): s6-tokens vuelve a verde (medido: columnas de 626 px de alto con su contenedor entero a 1440; CTA de 590,8 px a 390×844)')
 controlPositivo('el detector VE el 70svh escrito a mano', porQueD3.replace('min-h-[var(--alto-del-cta-en-lista)]', 'min-h-[70svh]'), sinAMano)
 
+
+// D4 · los libros de la biblioteca: el hover y el foco en la misma regla (la paridad de s3-foco), sin perder el foco sin hover.
+const demosD4 = leer('_estilos/demos.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const libroConParidad = (css: string): boolean => {
+  const dentro = /@media \(hover: hover\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? ''
+  const afuera = css.replace(/@media \(hover: hover\) \{[\s\S]*?\n\}/, '')
+  return (dentro.match(/:is\(:hover, :focus-visible\)/g) ?? []).length === 4 && !/libro"\]:hover/.test(dentro) && (afuera.match(/\[data-pieza="libro"\]:focus-visible|:has\(\+ \[data-pieza="libro"\]:focus-visible\)/g) ?? []).length === 4
+}
+afirmar(libroConParidad(demosD4), 'cada regla de hover de los libros nombra también el foco (s3-foco vuelve a verde), y las de foco de afuera siguen para los dispositivos sin hover (medido: con el mouse y con Tab el libro pasa a la misma pose abierta)')
+controlPositivo('el detector VE un hover sin su foco', demosD4.replace('[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"]', '[data-v3] [data-pieza="libro"]:hover > [data-parte="cara"]'), libroConParidad)
+
 cerrar('s47-pasada-final')

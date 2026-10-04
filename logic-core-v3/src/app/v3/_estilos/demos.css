@@ -90,13 +90,15 @@
 }
 
 /* ── EL HOVER, sólo con puntero que pasa por encima; el foco hace lo mismo ── */
+/* [PASADA FINAL] D4 · adentro, el hover y el foco en la misma regla (la paridad de s3-foco, regla por regla); las de foco
+   de abajo siguen, para los dispositivos sin hover (un teclado en una tablet). */
 
 @media (hover: hover) {
-  [data-v3] [data-pieza="libro"]:hover {
+  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {
     z-index: var(--z-elevado);
   }
 
-  [data-v3] [data-pieza="libro"]:hover > [data-parte="cara"] {
+  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"] {
     transform: perspective(calc(var(--libro-ancho) * 6)) translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
     box-shadow: var(--shadow-flotante), var(--shadow-flotante);
     transition:
@@ -104,12 +106,12 @@
       box-shadow var(--duracion-lenta) var(--demos-resorte);
   }
 
-  [data-v3] [data-pieza="libro"]:hover + [data-pieza="libro"] > [data-parte="cara"] {
+  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) + [data-pieza="libro"] > [data-parte="cara"] {
     transform: perspective(calc(var(--libro-ancho) * 6)) translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
     transition: transform var(--duracion-lenta) var(--demos-resorte);
   }
 
-  [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:hover) > [data-parte="cara"] {
+  [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:is(:hover, :focus-visible)) > [data-parte="cara"] {
     transform: perspective(calc(var(--libro-ancho) * 6)) translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
     transition: transform var(--duracion-lenta) var(--demos-resorte);
   }
