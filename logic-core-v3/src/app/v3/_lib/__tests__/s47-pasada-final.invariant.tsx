@@ -28,19 +28,25 @@
  *   C4 · Servicios: los nanobots (la nube, el globo de red, los engranajes, el robot con su flujo) en lugar de la torta,
  *        que queda de respaldo; el traspaso con el disparo del rodillo, por nanobot, con inercia y dispersión; three
  *        perezoso; pausa fuera de pantalla; con movimiento reducido, quieto; en el teléfono, menos.
+ *   B  · Tu panel: el caos del nocturno con las demos usables a escala, la rueda que no queda atrapada, el marco que flota,
+ *        una sola demo corriendo; y la causa principal de los cuadros perdidos (segunda tanda): ningún `:has()` en la raíz
+ *        con algo debajo (la barra se esconde con una marca que pone el formulario de contacto).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/pasada-final/mirar.txt`.
  */
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, TRAZO_DEL_ICONO } from '../../_chrome/sonido/IconoDelParlante'
+import { MARCA_DEL_CONTACTO_ABIERTO } from '../../_chrome/contacto/FormularioDeContacto'
 import { estadoDelMotor } from '../../_chrome/sonido/motorCompartido'
+import { ENTRE_MONTAJES_MS, informarVisibilidad, laQueCorre } from '../../_panel-vivo/escenario'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS, useTitular2D } from '../../_componentes/titulos3d/titular2d'
 import { seccionDe } from '../../_secciones/_contrato/forma'
+import { TABLA_DEL_CAOS, TAMANOS } from '../../_secciones/tu-panel/geometria'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { Hero } from '../../_secciones/hero/Hero'
 import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
@@ -622,5 +628,67 @@ controlPositivo('el detector VE three importado de entrada', `import { crearEnja
 const pausaFuera = (m: string): boolean => /if \(!visible \|\| pausado \|\| document\.visibilityState !== 'visible'\) return/.test(m) && /new IntersectionObserver\(\(entradas\) => \{\s*visible = entradas\.some\(\(e\) => e\.isIntersecting\)/.test(m) && /lienzo\.addEventListener\('webglcontextlost', perdido\)/.test(m)
 afirmar(pausaFuera(montajeC4), '  pausa fuera de pantalla (y con la pestaña oculta): el lazo sólo corre con el gráfico a la vista (medido: 0 cuadros en un segundo fuera de pantalla)')
 controlPositivo('el detector VE un lazo que no para', montajeC4.replace("if (!visible || pausado || document.visibilityState !== 'visible') return", 'if (pausado) return'), pausaFuera)
+
+/** Los `.ts`/`.tsx` de una carpeta, con sus subcarpetas. */
+const archivosDe = (dir: string): string[] => readdirSync(dir).flatMap((a) => (statSync(`${dir}/${a}`).isDirectory() ? archivosDe(`${dir}/${a}`) : /\.tsx?$/.test(a) ? [`${dir}/${a}`] : []))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B · Tu panel: el caos del nocturno con las demos usables, el marco que flota, y una sola demo corriendo')
+
+// B1 · la distribución (la tabla, los tamaños y el barrido los fija s6-tu-panel §6-§7); acá, lo que cruza carpetas.
+afirmar(Object.values(TAMANOS).every((t) => t.ancho >= 42 && t.ancho < 60) && TABLA_DEL_CAOS.length === 8, 'ningún módulo a lo ancho: las ocho features van del 42 al 56 % del ancho útil (más chicas que las del retoque, más grandes que las del nocturno)', Object.values(TAMANOS).map((t) => String(t.ancho)).join(' · '))
+const cargador = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
+const escalada = (c: string): boolean => /style=\{escalada \? \{ width: pantalla\.ancho, height: pantalla\.alto, transform: `scale\(\$\{escala\.toFixed\(4\)\}\)` \} : undefined\}/.test(c) && /new ResizeObserver\(\(\) => setEscala\(el\.clientWidth \/ pantalla\.ancho\)\)/.test(c)
+afirmar(escalada(cargador), '  adentro de cada tarjeta el panel se dibuja a su pantalla natural y se escala con `transform` al ancho de la tarjeta (se ve entero, se usa ahí mismo)')
+controlPositivo('el detector VE una demo dibujada al tamaño de la tarjeta (sin escala)', cargador.replace('transform: `scale(${escala.toFixed(4)})`', 'transform: undefined'), escalada)
+const rueda = sinComentarios(leer('_panel-vivo/rueda.ts'))
+const marco = sinComentarios(leer('_panel-vivo/MarcoDelPanel.tsx'))
+const ruedaAdentro = (r: string, m: string): boolean =>
+  /const puede = e\.deltaY > 0 \? el\.scrollTop \+ el\.clientHeight < el\.scrollHeight - 1 : e\.deltaY < 0 \? el\.scrollTop > 0 : false/.test(r) &&
+  /if \(puede\) el\.setAttribute\('data-lenis-prevent', ''\)\s*else el\.removeAttribute\('data-lenis-prevent'\)/.test(r) &&
+  /el\.addEventListener\('wheel', decidir, \{ capture: true, passive: true \}\)/.test(r) &&
+  /const contenido = useRuedaAdentro<HTMLDivElement>\(\)/.test(m) &&
+  /<div ref=\{contenido\} data-parte="contenido-del-panel"/.test(m) &&
+  !/data-lenis-prevent=""/.test(m)
+afirmar(ruedaAdentro(rueda, marco), '  la rueda scrollea adentro sólo con el puntero encima y mientras haya recorrido: `data-lenis-prevent` se decide en cada rueda, antes de que Lenis la vea; en el borde, la rueda es de la página')
+controlPositivo('el detector VE el contenido del panel que secuestraba la rueda (el atributo fijo)', [rueda, marco.replace('<div ref={contenido} data-parte="contenido-del-panel"', '<div data-parte="contenido-del-panel" data-lenis-prevent=""')] as const, ([r, m]: readonly [string, string]) => ruedaAdentro(r, m))
+afirmar(/const textoDelDetalle = useRuedaAdentro<HTMLDivElement>\(\)/.test(sinComentarios(leer('_panel-vivo/demos/servicios/Servicios.tsx'))), '  y el detalle de un módulo (que vive encima del marco) también')
+
+// B2 · el marco que flota (las clases las fija s6-tu-panel §9); la prueba de los bordes se borró.
+afirmar(!existsSync(`${V3}/_secciones/tu-panel/borde.ts`) && !('panelBorde' in PRUEBAS_APAGADAS) && !/panelborde/.test(sinComentarios(leer('_lib/escena/entorno.ts'))), 'las variantes `panelborde=a|b` se borraron: el marco es un módulo con esquinas y sombra, sin halo ni fundido')
+
+// B3 · una sola demo corriendo, congeladas las demás, montaje escalonado, `contain`, sin desenfoques.
+informarVisibilidad('demo-a', 0.4)
+informarVisibilidad('demo-b', 0.9)
+const correLaB = laQueCorre() === 'demo-b'
+informarVisibilidad('demo-a', 0.9)
+const sigueLaB = laQueCorre() === 'demo-b'
+informarVisibilidad('demo-b', 0)
+const pasaALaA = laQueCorre() === 'demo-a'
+informarVisibilidad('demo-a', 0)
+afirmar(correLaB && sigueLaB && pasaALaA && laQueCorre() === null, 'corre la demo más visible; con empate sigue la que corría; al irse, pasa a la otra; sin ninguna a la vista, ninguna', `${String(correLaB)} · ${String(sigueLaB)} · ${String(pasaALaA)}`)
+const unaSola = (c: string): boolean => /const laMasVisible = useSyncExternalStore\(suscribirAlEscenario, \(\) => laQueCorre\(\) === demo, \(\) => false\)/.test(c) && /const corre = laMasVisible && pestana && !pausada && !reducido/.test(c) && /threshold: FRACCIONES/.test(c) && /informarVisibilidad\(demo, 0\)/.test(c)
+afirmar(unaSola(cargador), '  cada demo informa qué fracción de sí está en cuadro y corre sólo si es la más visible (al desmontarse, se olvida)')
+controlPositivo('el detector VE las demos de antes (todas las que estaban a la vista corrían)', cargador.replace('const corre = laMasVisible && pestana && !pausada && !reducido', 'const corre = pestana && !pausada && !reducido'), unaSola)
+afirmar(/const CONGELADA = '\[&_\*\]:\[animation-play-state:paused\]'/.test(cargador) && /\$\{corre \? '' : ` \$\{CONGELADA\}`\}/.test(cargador), '  las que no corren quedan congeladas: sus animaciones de CSS (latidos, giros) se pausan')
+afirmar(/cancelarElTurno = montarEnTurno\(\(\) => setMontada\(true\)\)/.test(cargador) && ENTRE_MONTAJES_MS >= 100 && /const cuando = Math\.max\(ahora, ultimoMontaje \+ ENTRE_MONTAJES_MS\)/.test(sinComentarios(leer('_panel-vivo/escenario.ts'))), `  el montaje es escalonado: las que se acercan juntas se montan de a una, con ${String(ENTRE_MONTAJES_MS)} ms entre cada una`)
+const conBlur = archivosDe(`${V3}/_panel-vivo/demos`).filter((a) => /\bblur-\[|backdrop-blur/.test(sinComentarios(readFileSync(a, 'utf8'))))
+afirmar(conBlur.length === 0, '  ninguna demo lleva un desenfoque (`blur-[…]`, `backdrop-blur`): los brillos son degradés radiales', conBlur.join(' · ') || 'ninguna')
+afirmar(/contain-layout contain-paint/.test(sinComentarios(leer('_secciones/tu-panel/Tarjeta.tsx'))), '  el marco aísla el layout y la pintura de la demo (`contain`): lo que pasa adentro no le cuesta a la página')
+
+// B3 (segunda tanda) · la causa principal a ×1: un `:has()` en la raíz con algo debajo (medido con la traza de Chrome).
+const HOJAS_V3 = readdirSync(`${V3}/_estilos`).filter((a) => a.endsWith('.css')).map((a) => `_estilos/${a}`)
+const conHasEnLaRaiz = (css: string): string[] => [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/(?:^|[},])\s*((?:html|body|\[data-v3\])(?:\[[^\]]*\]|\.[\w-]+|:[\w-]+)*:has\([^{}]*?\)\s*[^{},\s][^{},]*)\{/g)].map((m) => m[1].trim())
+// Exclusión con su motivo: `navegacion.css` es la pieza compartida de la galería (s39 la fija byte por byte desde b3e2dc31);
+// su regla del contacto no se monta en el home (no hay `[data-pieza="navegacion"]`) y, medido, no cuesta (2 y 1 por pasada).
+const EXCLUIDAS_DEL_HAS = new Set(['_estilos/navegacion.css'])
+const peligrosas = HOJAS_V3.filter((h) => !EXCLUIDAS_DEL_HAS.has(h)).flatMap((h) => conHasEnLaRaiz(leer(h)).map((r) => `${h}: ${r}`))
+afirmar(peligrosas.length === 0 && HOJAS_V3.length > 5, 'ninguna hoja de /v3 pone un `:has()` en la raíz (html, body, [data-v3]) con algo debajo: Chrome recalcula la página ENTERA ante cualquier nodo nuevo (era la causa de los ~25 cuadros perdidos por pasada en Tu panel: el número del infinito, 5437 elementos, 28 ms)', peligrosas.join(' · ') || `${String(HOJAS_V3.length)} hojas`)
+controlPositivo('el detector VE la regla de antes de la barra', '[data-v3]:has([data-pieza="contacto"]) [data-pieza="barra"] > [data-parte="pastilla"] { opacity: 0; }', (css: string) => conHasEnLaRaiz(css).length === 0)
+afirmar(conHasEnLaRaiz('html:has([data-v3]) { scroll-padding-top: 1px; }').length === 0 && conHasEnLaRaiz('[data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:hover) > [data-parte="cara"] { }').length === 0, '  (no cuentan un `:has()` que sólo estiliza a la raíz misma, como el `scroll-padding` de html, ni uno de una pieza de adentro)')
+const formularioB3 = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
+const conLaMarca = (f: string, barra: string): boolean => /const v3 = raiz\.current\?\.closest\('\[data-v3\]'\) \?\? null\s*v3\?\.setAttribute\(MARCA_DEL_CONTACTO_ABIERTO, ''\)\s*return \(\) => v3\?\.removeAttribute\(MARCA_DEL_CONTACTO_ABIERTO\)/.test(f) && /<div ref=\{raiz\} data-pieza="contacto"/.test(f) && barra.includes('[data-v3][data-contacto-abierto] [data-pieza="barra"] > [data-parte="pastilla"] {') && MARCA_DEL_CONTACTO_ABIERTO === 'data-contacto-abierto'
+afirmar(conLaMarca(formularioB3, leer('_estilos/barra.css')), '  la barra se sigue escondiendo con el formulario abierto (también en su salida): el formulario pone la marca en la raíz al montarse y la saca al desmontarse (medido en vivo: abierto y saliendo, marca y pastilla en 0; cerrado, sin marca y en 1)')
+controlPositivo('el detector VE un formulario que no saca la marca', formularioB3.replace('return () => v3?.removeAttribute(MARCA_DEL_CONTACTO_ABIERTO)', 'return undefined'), (f: string) => conLaMarca(f, leer('_estilos/barra.css')))
 
 cerrar('s47-pasada-final')

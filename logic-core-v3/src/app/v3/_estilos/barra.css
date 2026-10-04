@@ -98,8 +98,9 @@
   transition-timing-function: var(--ease-principal);
 }
 
-/* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. */
-[data-v3]:has([data-pieza="contacto"]) [data-pieza="barra"] > [data-parte="pastilla"] {
+/* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. [PASADA FINAL] B3:
+   con la marca que el formulario pone en la raíz (un `:has()` acá recalculaba la página entera ante cualquier nodo nuevo). */
+[data-v3][data-contacto-abierto] [data-pieza="barra"] > [data-parte="pastilla"] {
   opacity: 0;
   translate: 0 calc(var(--spacing-6) * -1);
   pointer-events: none;

@@ -16,6 +16,11 @@ import { seguirElScroll } from '../_lib/scrollEnMovimiento'
  *     sea que ningún árbol de demo se vuelve a dibujar en medio del scroll; al frenar, la más visible retoma.
  * Y el MONTAJE DIFERIDO ESCALONADO: cuando varias se acercan a la vez (un scroll rápido), se montan de a una, con un
  * respiro entre cada una. Sin React: un registro y sus oyentes.
+ *
+ * [PASADA FINAL] B3, segunda tanda · con la traza de Chrome (`scripts-pasada/b3-traza.ts`), los ~25 cuadros que seguían
+ * perdiéndose a ×1 eran otra cosa: un `:has()` en la raíz (`barra.css`) hacía recalcular el estilo de la página ENTERA
+ * con cada nodo nuevo (el número del infinito), y con las ocho demos montadas eso no entraba en un cuadro. Se fue (ver
+ * `_chrome/contacto/FormularioDeContacto.tsx`): queda uno por pasada. Lo de acá sigue valiendo con la CPU ×4.
  */
 const visibles = new Map<string, number>()
 let laQueCorreAhora: string | null = null

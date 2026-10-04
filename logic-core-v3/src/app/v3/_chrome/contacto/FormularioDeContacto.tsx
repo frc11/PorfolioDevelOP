@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -42,8 +42,22 @@ export function HojaParaElInvariante({ precarga = [] }: { readonly precarga?: re
   return <Hoja precarga={precarga} modo="barra" />
 }
 
+/**
+ * [PASADA FINAL] B3 · con el formulario montado (también durante su salida), la raíz de /v3 lleva esta marca: la barra y
+ * el navbar se esconden con ella (`barra.css`, `navegacion.css`). Era `[data-v3]:has([data-pieza="contacto"]) …`, y un
+ * `:has()` en la raíz con un descendiente hace que Chrome recalcule el estilo de la página ENTERA ante cualquier nodo
+ * que entra o sale (medido: cada cambio del número del infinito, 5437 elementos, 28 ms con las demos de Tu panel).
+ */
+export const MARCA_DEL_CONTACTO_ABIERTO = 'data-contacto-abierto'
+
 function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; readonly modo: ModoDelChrome }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
+  const raiz = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const v3 = raiz.current?.closest('[data-v3]') ?? null
+    v3?.setAttribute(MARCA_DEL_CONTACTO_ABIERTO, '')
+    return () => v3?.removeAttribute(MARCA_DEL_CONTACTO_ABIERTO)
+  }, [])
   const reducido = useMovimientoReducido()
   useDialogo(caja, cerrarContacto)
   const [datos, setDatos] = useState<DatosDeContacto>({ intereses: precarga, ...VACIO })
@@ -116,7 +130,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
 
   return (
-    <div data-pieza="contacto" data-modo={modo} className="fixed inset-0 z-[var(--z-overlay)]">
+    <div ref={raiz} data-pieza="contacto" data-modo={modo} className="fixed inset-0 z-[var(--z-overlay)]">
       {/* El velo: oscurece y desenfoca. Un click afuera cierra. */}
       <motion.div
         data-parte="velo"
