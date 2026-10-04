@@ -95,10 +95,12 @@ export interface Pruebas {
   readonly portfolio: VarianteDePortfolio | 'no'
   /** [PASADA FINAL] C3 · `sombratitulos=si`: los títulos de volumen proyectan su sombra en el piso vivo (`sombra/deLosTitulos.ts`). */
   readonly sombratitulos: 'si' | 'no'
+  /** [PASADA FINAL] D10 · `cabeza=libre`: abajo de 1024 la cabeza fija de Servicios deja libre la franja del menú (el botón o la barra). */
+  readonly cabeza: 'libre' | 'no'
 }
 
 /** Todo apagado: así van en el producto y en la base. [PASADA FINAL] B2: `panelborde=a|b` se borró (las demos de Tu panel van con esquinas redondeadas y sombra). */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', portfolio: 'no', sombratitulos: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', portfolio: 'no', sombratitulos: 'no', cabeza: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -107,7 +109,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), portfolio: unoDe<VarianteDePortfolio>(VARIANTES_DE_PORTFOLIO, valor('portfolio')), sombratitulos: unoDe<'si'>(['si'], valor('sombratitulos')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), portfolio: unoDe<VarianteDePortfolio>(VARIANTES_DE_PORTFOLIO, valor('portfolio')), sombratitulos: unoDe<'si'>(['si'], valor('sombratitulos')), cabeza: unoDe<'libre'>(['libre'], valor('cabeza')) }
 }
 
 export interface Entorno {
