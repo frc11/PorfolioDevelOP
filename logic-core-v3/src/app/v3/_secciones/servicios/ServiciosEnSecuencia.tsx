@@ -16,7 +16,8 @@ import {
   NIVEL_DEL_TITULAR_DE_SECCION,
 } from './geometria'
 import { CtaQueRota } from './CtaQueRota'
-import { GraficoDeTorta } from './GraficoDeTorta'
+import { PUNTOS_DEL_ENJAMBRE } from '../../_lib/nanobots/simbolos'
+import { GraficoDeServicios } from './GraficoDeServicios'
 import { RodilloDeEstados } from './RodilloDeEstados'
 import { useEstadoDisparado } from './disparo'
 import { TiraDeServicios, fronterasDeEstado, useMedidaDeLaTira } from './TiraDeServicios'
@@ -103,9 +104,10 @@ export function PanelDeSecuencia({ progreso }: ServiciosEnSecuenciaProps): React
           <div className={CLASE_DE_LA_COLUMNA_FIJA}>
             <RodilloDeEstados posicion={posicion} />
             {/* La torta va centrada en el hueco, no colgada del flujo: así no
-                se mueve cuando el bloque del título cambia de alto. */}
+                se mueve cuando el bloque del título cambia de alto. [PASADA FINAL] C4: los nanobots
+                (la torta queda de respaldo adentro), con el mismo disparo. */}
             <div className={CLASE_DEL_HUECO_DE_LA_TORTA}>
-              <GraficoDeTorta progreso={progreso} medida={medida} posicion={posicion} />
+              <GraficoDeServicios progreso={progreso} medida={medida} posicion={posicion} puntos={PUNTOS_DEL_ENJAMBRE.ancho} />
             </div>
             {/* `mt-auto` y no un hueco: el CTA se apoya en el borde de abajo del
                 panel y se queda ahí todo el pin, sin empujar a la torta ni

@@ -6,7 +6,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 're
 import { ATRIBUTO_DE_SERVICIO } from '../_contrato/acento'
 import { Bloque, CoreografiaEnTodoAncho, useCoreografiaActiva, type Progreso } from '../_contrato/coreografia'
 import { useEstadoDisparado } from './disparo'
-import { GraficoDeTorta } from './GraficoDeTorta'
+import { PUNTOS_DEL_ENJAMBRE } from '../../_lib/nanobots/simbolos'
+import { GraficoDeServicios } from './GraficoDeServicios'
 import { RodilloDeEstados } from './RodilloDeEstados'
 import { SIN_MEDIR, fronterasDeEstado, type MedidaDeLaTira } from './TiraDeServicios'
 
@@ -114,7 +115,8 @@ function CajaAngosta({ children }: { readonly children: React.ReactNode }): Reac
               <RodilloDeEstados posicion={posicion} />
             </div>
             <div className="w-[calc(var(--spacing-20)*1.25)] shrink-0">
-              <GraficoDeTorta progreso={progreso} medida={medida} posicion={posicion} />
+              {/* [PASADA FINAL] C4 · los nanobots, con menos puntos (la torta, de respaldo). */}
+              <GraficoDeServicios progreso={progreso} medida={medida} posicion={posicion} puntos={PUNTOS_DEL_ENJAMBRE.angosto} />
             </div>
           </div>
         </>
