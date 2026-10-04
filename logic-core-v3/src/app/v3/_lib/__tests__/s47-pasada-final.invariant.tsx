@@ -738,4 +738,16 @@ const libroConParidad = (css: string): boolean => {
 afirmar(libroConParidad(demosD4), 'cada regla de hover de los libros nombra también el foco (s3-foco vuelve a verde), y las de foco de afuera siguen para los dispositivos sin hover (medido: con el mouse y con Tab el libro pasa a la misma pose abierta)')
 controlPositivo('el detector VE un hover sin su foco', demosD4.replace('[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"]', '[data-v3] [data-pieza="libro"]:hover > [data-parte="cara"]'), libroConParidad)
 
+
+// D5 · el cartel de las demos es la pastilla del navbar token por token, también el radio (se había quedado con el de antes).
+const cartelD5 = leer('_estilos/demos.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const navD5 = leer('_estilos/navegacion.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const radioDe = (css: string, selector: string): string => {
+  const i = css.indexOf(`${selector} {`)
+  return i < 0 ? '?' : (/border-radius: ([^;]+);/.exec(css.slice(i, css.indexOf('}', i)))?.[1] ?? '?')
+}
+const mismoRadio = (c: string): boolean => radioDe(c, '[data-v3] [data-pieza="cartel-de-demos"]') === radioDe(navD5, '[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"]') && radioDe(navD5, '[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"]') === 'var(--radius-fuerte)'
+afirmar(mismoRadio(cartelD5), 'el cartel de las demos lleva el radio de la pastilla del navbar (el de CONTACTO): s5-trabajos vuelve a verde (su lector ahora salta los comentarios: uno se comía el radio del navbar)')
+controlPositivo('el detector VE el cartel con el radio de antes', cartelD5.replace('border-radius: var(--radius-fuerte);', 'border-radius: var(--radius-pastilla-l);'), mismoRadio)
+
 cerrar('s47-pasada-final')

@@ -159,7 +159,8 @@
   white-space: nowrap;
   color: var(--color-tinta);
   border: var(--border-hairline) solid var(--color-borde);
-  border-radius: var(--radius-pastilla-l);
+  /* [PASADA FINAL] D5 · el radio de la pastilla del navbar desde CONTACTO (era el de la pastilla de antes: se quedó atrás). */
+  border-radius: var(--radius-fuerte);
   background-color: var(--color-superficie-translucida);
   backdrop-filter: blur(var(--blur-panel));
   box-shadow: var(--shadow-flotante);

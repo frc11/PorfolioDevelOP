@@ -38,7 +38,9 @@ function catalogoDelSitioVivo(fuente: string): { nombre: string; url: string }[]
 }
 
 /** Las declaraciones de una regla, por su selector exacto. */
-function declaracionesDe(hoja: string, selector: string): Map<string, string> {
+function declaracionesDe(hojaConComentarios: string, selector: string): Map<string, string> {
+  // [PASADA FINAL] D5 · sin los comentarios: uno entre dos declaraciones se comía la que seguía (el radio del navbar).
+  const hoja = hojaConComentarios.replace(/\/\*[\s\S]*?\*\//g, '')
   const inicio = hoja.indexOf(`${selector} {`)
   const cuerpo = inicio < 0 ? '' : hoja.slice(inicio + selector.length + 2, hoja.indexOf('}', inicio))
   const mapa = new Map<string, string>()
