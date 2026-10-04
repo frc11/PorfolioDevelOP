@@ -4,20 +4,19 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
-import { TITULOS_DE_VOLUMEN, marcarListo, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
+import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
-import { calentar } from '../gpu/Precompilar'
 import { KEY_INTENSITY } from '../probeLighting'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } from './colocacion'
-import { armar, avancesDeLasRayas, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
+import { avancesDeLasRayas, ponerElEstudio, type Armado, type Variante } from './armado'
 import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
-import { enOcio } from './ocio'
 import { llevarLosAcompanantes } from './acompanantes'
+import { sincronizar, soltarTodos } from './sincronia'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -38,7 +37,9 @@ import { llevarLosAcompanantes } from './acompanantes'
  * **Cuándo se arma.** Con las fuentes del DOM cargadas y la página ociosa (la x de cada letra se lee del DOM: el
  * interletrado y el kerning del navegador), nunca en medio de la llegada; al montarse se compila y se calienta (regla 2:
  * el módulo llega después del precompilado). Se coloca al empezar cada llegada y al cambiar el tamaño del cuadro. Recién
- * compilado y calentado avisa al DOM (`marcarListo`), que entonces esconde su texto.
+ * compilado y calentado avisa al DOM (`marcarListo`), que entonces esconde su texto. [PASADA FINAL] A1: el registro se
+ * sincroniza por diferencia (`sincronia.ts`): el hero, que llega una vez por carga, se arma apenas están las fuentes (su
+ * texto 2D no se pinta hasta que él llega) y nada de lo armado se rearma porque otro título entre o salga.
  *
  * **Con los viajes del menú** ([3D Y SONIDO] T1): mientras dura un viaje, ningún título llega (lo pedido es 0: si uno se
  * veía, se va como siempre); al terminar, el viaje a Portfolio o a Por qué develOP repite la llegada del título
@@ -90,46 +91,23 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     }
   }, [gl])
 
-  // Los títulos anotados: se arman con las fuentes cargadas y la página ociosa; se sueltan al irse.
+  // [PASADA FINAL] A1 · los títulos anotados, en sincronía con el registro (`sincronia.ts`): lo nuevo se arma (el hero ya;
+  // los demás con la página ociosa), lo que se fue se suelta y un título remontado sólo cambia de lugar. Al irse, todo.
+  const vivo = useRef(true)
+  useEffect(() => {
+    const g = raiz.current
+    const s = m.current
+    vivo.current = true
+    return () => {
+      vivo.current = false
+      if (g !== null) soltarTodos({ gl, escena, camara, raiz: g, variante, estudio: () => estudio.current }, s.armados)
+    }
+  }, [variante, gl, escena, camara])
   useEffect(() => {
     void version
     const g = raiz.current
-    const s = m.current
     if (g === null) return undefined
-    let vivo = true
-    let soltarElPedido = (): void => undefined
-    const armados: Armado[] = []
-    void document.fonts.ready.then(() => {
-      if (!vivo) return
-      soltarElPedido = enOcio(
-        () => {
-          if (!vivo) return
-          for (const t of TITULOS_DE_VOLUMEN.values()) {
-            const a = armar(t, variante)
-            if (estudio.current !== null) ponerElEstudio(a.material, estudio.current)
-            g.add(a.grupo)
-            armados.push(a)
-          }
-          s.armados = armados
-          // Regla 2: llega después del precompilado de la escena; se compila y se calienta al armarse. Recién ahí, el DOM.
-          void gl.compileAsync(escena, camara).then(() => {
-            if (!vivo) return
-            calentar(gl, escena, camara)
-            for (const a of armados) marcarListo(a.titulo.id, true)
-          })
-        },
-      )
-    })
-    return () => {
-      vivo = false
-      soltarElPedido()
-      s.armados = []
-      for (const a of armados) {
-        marcarListo(a.titulo.id, false)
-        g.remove(a.grupo)
-        soltar(a)
-      }
-    }
+    return sincronizar({ gl, escena, camara, raiz: g, variante, estudio: () => estudio.current }, m.current.armados, TITULOS_DE_VOLUMEN.values(), () => vivo.current)
   }, [version, variante, gl, escena, camara])
 
   // Al cambiar el tamaño del cuadro, cada título se vuelve a colocar en su próxima llegada (o ya, si está a la vista).

@@ -140,7 +140,8 @@ afirmar(unaVezDesdeElAzar(hero) && /fuente: 'archivo-700'/.test(hero) && /fuente
 controlPositivo('el detector VE un registro que se rearma', hero.replace('rearma: false', 'rearma: true'), unaVezDesdeElAzar)
 const usa = sinComentarios(leer('_componentes/titulos3d/useTextoDeVolumen.ts'))
 const clase = /TEXTO_REEMPLAZADO = '([^']*)'/.exec(usa)?.[1] ?? ''
-afirmar(/listo1 && TEXTO_REEMPLAZADO/.test(hero) && /listo2 && TEXTO_REEMPLAZADO/.test(hero) && clase.startsWith('escritorio:opacity-0 ') && !clase.includes('invisible'), '  el DOM se pinta primero (el LCP) y, con el título armado, se apaga con una opacidad desde 1024: sigue en el árbol accesible (es el `h1`)')
+// [PASADA FINAL] A1 · el hero ya no se pinta primero: su texto 2D lleva el estado de `titular2d.ts` (s47); `TEXTO_REEMPLAZADO` sigue para los demás textos de volumen (El equipo, Demos).
+afirmar(/useTitular2D\(listo1 && listo2\)/.test(hero) && (hero.match(/data-titular-2d=\{titular2d\}/g) ?? []).length === 2 && !/TEXTO_REEMPLAZADO/.test(hero) && clase.startsWith('escritorio:opacity-0 ') && !clase.includes('invisible'), '  el texto 2D del hero lleva su estado (oculto desde 1024 hasta que el 3D llega; `titular2d.ts`) y sigue en el árbol accesible (es el `h1`); los otros textos de volumen se apagan con una opacidad desde 1024')
 const fuenteDelHero = new Font(archivo)
 const conAzar = armarElTitulo(fuenteDelHero, registro1, null, 'azar')
 const desde = conAzar.geometria.getAttribute('aDesde')

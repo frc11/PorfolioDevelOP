@@ -33,6 +33,7 @@ import './_estilos/tipeo.css'
 import './_estilos/demos.css'
 import './_estilos/rollover.css' // [INTERFAZ 1] T2 · el rollover de dos copias
 import './_estilos/cursor-sala.css' // [INTERFAZ 1] T2 · el cursor de la sala
+import './_estilos/titular.css' // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D (el seguro sin JS)
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

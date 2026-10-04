@@ -172,6 +172,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--rollover-entrada-y', valor: '1.65em', evidencia: 'derivado', procedencia: 'los +24,75 px medidos de la entrada ÷ los 15 px del CTA' },
   { nombre: '--rollover-recorte-inicial', valor: 'inset(80% 0 0)', evidencia: 'medido', procedencia: 'COMPONENTS.md §3.2: el clip-path de la copia B en reposo' },
   { nombre: '--rollover-intercambio', valor: 'calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida))', evidencia: 'derivado', procedencia: 'los 1,3 s medidos del intercambio, compuestos con los tokens como en `cta.css`' },
+  // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D.
+  { nombre: '--respaldo-2d', valor: '2500ms', evidencia: 'decidido', procedencia: 'el plazo en que el 3D del titular tiene que llegar antes de que aparezca el 2D; el mismo RESPALDO_2D_MS de `titular2d.ts` (s47 los ata)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

@@ -271,15 +271,15 @@ const porQueT3 = deLaRaiz('src/app/v3/_secciones/por-que-develop/PorQueDevelop.t
 afirmar(/<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\}( minimoS=\{LENTOS\.llegadaDePortfolioS\})? queda \/>/.test(piezasT3) && /salidaDelTitulo\.set\(primeraFotoTapa\(p\) \? 1 : 0\)/.test(piezasT3) && (porQueT3.match(/volumen=\{\{ id: 'frase-(izquierda|derecha)', llegada: frase(, salida: levantada)?(, corrida)? \}\}/g) ?? []).length === 2 && /lectura=\{LECTURA\.frase\} subida=\{SUBIDA_DE_LA_FRASE_SVH \/ 100\}/.test(porQueT3), '  en Portfolio (llega con la máscara, se va con la huida del cartel) y en la frase de Por qué develOP (llega con la frase; [CIERRE RETOQUE 3D] B6: sin salida, s42)')
 
 // De noche se leen como el logo; y las reglas de rendimiento.
-const escena3d = (leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))
+const escena3d = (leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts') + leer('titulos3d/sincronia.ts'))
 afirmar(/if \(variante === 'blanco'\) shader\.fragmentShader = shader\.fragmentShader\.replace\('#include <map_fragment>', `#include <map_fragment>\\n\$\{FILO_DE_DIA_GLSL\}`\)/.test((leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))), 'el blanco, de día, lleva un filo oscuro en el borde de las tapas (sobre el cielo claro se perdía); de noche lo reemplaza el claro')
 afirmar(/conLogoDeNoche\(material, contorno, variante === 'blanco' \? \{ ancho: NOCHE_DEL_TITULO\.filo, tapa: NOCHE_DEL_TITULO\.tapaDelBlanco \} : \{ ancho: NOCHE_DEL_TITULO\.filo \}\)/.test(escena3d) && /if \(logo !== null\) a\.material\.emissive\.copy\(logo\.emissive\)/.test(escena3d) && /conElAmanecer\(material\)/.test(escena3d), 'de noche se leen como el logo: su misma emisión en el mismo cuadro y su dibujo (costados negros, tapas claras con filo); el amanecer los oscurece como a la sala')
 const reglas = (c: string): boolean =>
   /a\.malla\.visible = (a\.sinLetras \? conRaya : )?llegada > 0 && salida < 1/.test(c) &&
   /malla\.name = `titulo de volumen · \$\{titulo\.id\}`/.test(c) &&
   /dithering: true/.test(c) &&
-  // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM.
-  /void gl\.compileAsync\(escena, camara\)\.then\(\(\) => \{\s*if \(!vivo\) return\s*calentar\(gl, escena, camara\)/.test(c) &&
+  // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM. [PASADA FINAL] A1: por lote, en `sincronia.ts`.
+  /void Promise\.all\(nuevos\.map\(\(a\) => t\.gl\.compileAsync\(a\.grupo, t\.camara, t\.escena\)\)\)\.then\(\(\) => \{\s*if \(!vivo\(\)\) return\s*calentar\(t\.gl, t\.escena, t\.camara\)/.test(c) &&
   // [RETOQUE 3D] B1: la colocación se mudó a `colocarElArmado` (guarda el lugar para el que se queda).
   /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, a\.fuente\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')

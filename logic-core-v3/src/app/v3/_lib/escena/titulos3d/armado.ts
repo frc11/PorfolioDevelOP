@@ -48,7 +48,8 @@ const FUENTES: Readonly<Record<FuenteDelTitulo, Font>> = {
 export type LugarVivo = { -readonly [K in keyof LugarEnElCuadro]: LugarEnElCuadro[K] }
 
 export interface Armado {
-  readonly titulo: TituloDeVolumen
+  /** [PASADA FINAL] A1 · escribible: el mismo título vuelto a anotar en otro elemento (el `h1` remontado) no se rearma (`sincronia.ts`). */
+  titulo: TituloDeVolumen
   /** Lo que se muestra: persigue a la llegada y a la salida de la pieza (`persigue`). */
   readonly mostrado: { llegada: number; salida: number }
   readonly grupo: THREE.Group

@@ -81,7 +81,7 @@ const entorno = leer('_lib/escena/entorno.ts')
 afirmar(/resuelto = pedido === null \? ENTORNO : \{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(entorno), '  la URL (`?pruebas=titulos=blanco`) cambia el material y nada más del producto')
 
 titulo('T1 · Con los viajes del menú: durante el viaje no llegan; al terminar, la llegada repetida')
-const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
+const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts') + leer('_lib/escena/titulos3d/sincronia.ts')))
 // [RETOQUE 3D] B1: entre los dos, el scroll del cuadro (el que se queda va corrido con su escenario).
 // [RONDA 2] F2: con el asiento entre la lectura del scroll y el recorrido; lo mostrado, función del scroll.
 const sostieneEnElViaje = (c: string): boolean => /const enViaje = viajeEnCurso\(\) !== null\s*const y = window\.scrollY[\s\S]{0,700}?for \(const a of s\.armados\)/.test(c) && /a\.mostrado\.llegada = mostradoDelScroll\(a\.mostrado\.llegada, enViaje \? 0 : a\.titulo\.llegada, asentar, dt\)/.test(c)
@@ -100,7 +100,8 @@ afirmar(seLee(html), 'en el servidor y hasta que la escena avisa: el texto, visi
 controlPositivo('el detector VE el texto escondido de entrada (el de la prueba de ESCENA 10)', '<span class="sr-only">Portfolio</span><span aria-hidden="true" class="invisible block">Portfolio</span>', seLee)
 afirmar(/\{listo && <span className="sr-only hidden escritorio:block">\{texto\}<\/span>\}/.test(dom) && /className=\{listo \? 'block escritorio:invisible' : 'block'\}/.test(dom), '  armado: desde 1024 el lugar invisible y el texto para el lector; abajo, el de siempre (el corte es de CSS)')
 afirmar(/activo: material !== 'no' && escritorio/.test(dom) && /const escritorio = useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(dom), '  abajo de 1024 ningún título se anota (las secciones no tienen escenario)')
-afirmar(/calentar\(gl, escena, camara\)\s*for \(const a of armados\) marcarListo\(a\.titulo\.id, true\)/.test(escena3d) && /marcarListo\(a\.titulo\.id, false\)/.test(escena3d), '  la escena avisa «listo» recién compilado y calentado, y lo retira al soltarlo')
+// [PASADA FINAL] A1 · el armado por lotes vive en `sincronia.ts`: compila el lote (con las luces de la escena), calienta y recién ahí avisa.
+afirmar(/calentar\(t\.gl, t\.escena, t\.camara\)\s*for \(const a of nuevos\) if \(armados\.includes\(a\)\) marcarListo\(a\.titulo\.id, true\)/.test(escena3d) && /marcarListo\(a\.titulo\.id, false\)/.test(escena3d), '  la escena avisa «listo» recién compilado y calentado, y lo retira al soltarlo')
 const perezoso = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
 afirmar(/const escritorio = useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(perezoso) && /if \(entornoDeLaEscena\(\)\.titulos === 'no' \|\| !escritorio\) return null/.test(perezoso), '  y abajo de 1024 el módulo de los títulos ni se descarga')
 

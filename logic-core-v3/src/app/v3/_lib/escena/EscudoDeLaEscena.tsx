@@ -2,6 +2,8 @@
 
 import { Component, type ReactNode } from 'react'
 
+import { marcarLaEscenaCaida } from './caida'
+
 /**
  * CONTENCIÓN DEL CANVAS EN EL HOME.
  *
@@ -33,6 +35,8 @@ export class EscudoDeLaEscena extends Component<{ children: ReactNode }, { fallo
 
   componentDidCatch(error: Error) {
     console.warn('v3/escena: el canvas falló y quedó contenido. El home sigue entero.', error)
+    // [PASADA FINAL] A1 · lo que esperaba al 3D (el titular del hero) muestra su respaldo 2D en el acto.
+    marcarLaEscenaCaida()
   }
 
   render() {

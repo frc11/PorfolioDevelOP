@@ -1,9 +1,12 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useEffect } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { calidadPorAncho } from '../_lib/escena/calidad'
+import { entornoDeLaEscena } from '../_lib/escena/entorno'
+import { precargarLosTitulos } from '../_lib/escena/titulos3d/precarga'
 import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
 
 /**
@@ -84,6 +87,12 @@ const EscenaDelHome = dynamic(() => import('../_lib/escena/EscenaDelHome'), { ss
 export function EscenarioCompuerta() {
   const arribaDelUmbral = useAnchoMinimo(CONSULTA_ESCENARIO)
   const calidad = calidadPorAncho(arribaDelUmbral)
+
+  // [PASADA FINAL] A1 · desde 1024 el módulo de los títulos de volumen se pide ya (el titular del hero lo necesita en los
+  // primeros cuadros): el mismo trozo que `PruebasDeLaEscena` carga perezoso, en la caché antes de que el lienzo monte.
+  useEffect(() => {
+    if (arribaDelUmbral && entornoDeLaEscena().titulos !== 'no') void precargarLosTitulos()
+  }, [arribaDelUmbral])
 
   return <EscenaDelHome key={calidad} calidad={calidad} />
 }

@@ -53,6 +53,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/barra.css`,
   // [NAVBAR] T3 · el vidrio líquido del menú del teléfono.
   `${V3}/_estilos/vidrio.css`,
+  // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D: el seguro sin JS del respaldo.
+  `${V3}/_estilos/titular.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

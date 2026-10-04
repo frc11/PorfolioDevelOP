@@ -7,7 +7,8 @@ import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TextoBase } from '../../_componentes/tipografia/Textos'
-import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
+import { useTitular2D } from '../../_componentes/titulos3d/titular2d'
+import { useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
@@ -245,8 +246,9 @@ function BajadaYCta(): React.JSX.Element {
 /**
  * [RETOQUE 3D] 3A · EL TITULAR EN VOLUMEN: los dos registros, cada uno con su fuente (Archivo 700 y la Chivo 300 itálica,
  * en mayúsculas como los pinta el DOM). Llegan UNA vez por carga, al armarse: cada letra desde un lugar distinto de la
- * sala, y se ensamblan donde está el texto, que se pintó primero (el LCP) y se apaga mientras llegan. Sin salida: se van
- * con la página.
+ * sala, y se ensamblan donde está el texto. [PASADA FINAL] A1: desde 1024 ese texto ya no se pinta primero (quedaba un
+ * parpadeo 2D → 3D en cada carga): sale invisible del servidor y sólo aparece como respaldo si el 3D no llega
+ * (`titular2d.ts`). Sin salida: se van con la página.
  */
 const LLEGADA_DEL_TITULAR_S = 2.4
 
@@ -465,6 +467,8 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
 function TitularDelHero({ seccion, progreso }: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
   const { lugar: lugar1, listo: listo1 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'hero-registro-1', texto: `${CONTENIDO.titularFila1} ${CONTENIDO.titularFila2}`.toUpperCase(), fuente: 'archivo-700', gesto: 'azar', llegada: null, queda: true, rearma: false, minimoS: LLEGADA_DEL_TITULAR_S })
   const { lugar: lugar2, listo: listo2 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'hero-registro-2', texto: CONTENIDO.titularFila3.toUpperCase(), fuente: 'chivo-300-italica', gesto: 'azar', llegada: null, queda: true, rearma: false, minimoS: LLEGADA_DEL_TITULAR_S })
+  // [PASADA FINAL] A1 · el estado del texto 2D de los dos registros (se arman juntos): oculto, respaldo o reemplazado.
+  const titular2d = useTitular2D(listo1 && listo2)
   return (
     // El `h1` es el nombre accesible de la región del Hero (S11,
     // defecto 10), y acá es además el que junta las tres filas
@@ -509,7 +513,7 @@ function TitularDelHero({ seccion, progreso }: PropsDeSeccion & { readonly progr
           con la clase adentro saldría en la familia y el
           tamaño heredados —cuerpo, 15 px— y en escritorio las
           dos palabras quedarían casi pegadas. */}
-      <span ref={lugar1} className={cn(TIPOGRAFIA_DEL_TITULAR, GEOMETRIA.claseDelEnvoltorioDeFilas, listo1 && TEXTO_REEMPLAZADO)}>
+      <span ref={lugar1} className={cn(TIPOGRAFIA_DEL_TITULAR, GEOMETRIA.claseDelEnvoltorioDeFilas)} data-titular-2d={titular2d}>
         <span>{CONTENIDO.titularFila1}</span>
         {/* El mismo separador que el de abajo, y por el mismo
             motivo: sin él el nombre accesible dice «Tu
@@ -537,7 +541,7 @@ function TitularDelHero({ seccion, progreso }: PropsDeSeccion & { readonly progr
         como="span"
         className={TIPOGRAFIA_DEL_REGISTRO_2}
       >
-        <span ref={lugar2} className={cn('block', listo2 && TEXTO_REEMPLAZADO)}>
+        <span ref={lugar2} className="block" data-titular-2d={titular2d}>
           {CONTENIDO.titularFila3}
         </span>
       </CanalDePieza>

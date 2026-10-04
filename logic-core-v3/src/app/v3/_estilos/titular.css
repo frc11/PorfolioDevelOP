@@ -1,0 +1,53 @@
+/* =========================================================================
+ * [PASADA FINAL] A1 · EL TITULAR DEL HERO SIN PARPADEO 2D
+ * =========================================================================
+ * Desde 1024 el texto 2D del titular sale del servidor con `data-titular-2d="oculto"`
+ * y opacidad cero, porque lo que se ve son sus letras de volumen; los tres estados
+ * los decide `_componentes/titulos3d/titular2d.ts` y acá se resuelven:
+ *
+ *   · `oculto`       invisible, sólo con movimiento (con movimiento reducido el 3D se
+ *                    disuelve en su lugar y el 2D se funde con él, como antes);
+ *   · `respaldo`     visible, con el fundido de la transición (la escena se cayó, no
+ *                    hay títulos de volumen, o el 3D no llegó a tiempo);
+ *   · `reemplazado`  apagado (el 3D está); si venía del respaldo, con el fundido.
+ *
+ * ── ⚠️ EL SEGURO SIN JAVASCRIPT ───────────────────────────────────────────
+ * Si el script nunca corre (o nunca hidrata), nadie pasaría el texto a `respaldo`:
+ * la animación de `oculto` lo hace sola, a los mismos `RESPALDO_2D_MS` que el hook
+ * (`--respaldo-2d`, propiedad de componente registrada en `s3-registro-de-tokens.ts`),
+ * con el mismo fundido. Con JavaScript el hook llega antes y la animación no corre.
+ *
+ * ── ⚠️ Y POR QUÉ EL CORTE VA COMO LITERAL ────────────────────────────────
+ * Lo mismo que `banda.css`: `theme()` no resuelve en estas hojas (CSS plano que
+ * `layout.tsx` importa) y una variante de Tailwind con `data-[…=…]` es un valor
+ * arbitrario que `hero.invariant` §4 rechaza. Va el número, `s3-tokens` §6 lo
+ * excluye por archivo y con motivo, y `s47-pasada-final` lo ata a
+ * `--breakpoint-escritorio`, como `s7-mezcla` §8 ata el de `banda.css`.
+ * ========================================================================= */
+
+[data-v3] [data-titular-2d] {
+  --respaldo-2d: 2500ms;
+}
+
+@media (width >= 1024px) {
+  [data-v3] [data-titular-2d] {
+    transition: opacity var(--duracion-media) var(--ease-salida);
+  }
+
+  [data-v3] [data-titular-2d='reemplazado'] {
+    opacity: 0;
+  }
+}
+
+@media (width >= 1024px) and (prefers-reduced-motion: no-preference) {
+  [data-v3] [data-titular-2d='oculto'] {
+    opacity: 0;
+    animation: titular-2d-respaldo var(--duracion-media) var(--ease-salida) var(--respaldo-2d) both;
+  }
+}
+
+@keyframes titular-2d-respaldo {
+  to {
+    opacity: 1;
+  }
+}

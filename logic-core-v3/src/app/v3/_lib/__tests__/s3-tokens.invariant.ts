@@ -245,7 +245,10 @@ function mediasConLiteral(css: string): string[] {
  * `--breakpoint-escritorio`. La exclusión se enumera por archivo y con motivo: la
  * regla sigue viva para las otras nueve hojas.
  */
-const CON_MEDIA_DECLARADA: readonly string[] = ['banda.css']
+// [PASADA FINAL] A1 · `titular.css` también: los estados del texto 2D del titular del hero rigen desde 1024 y con
+// movimiento, y una variante `data-[…=…]` de Tailwind es un valor arbitrario que `hero.invariant` §4 rechaza. El literal
+// lo ata `s47-pasada-final` a `--breakpoint-escritorio`.
+const CON_MEDIA_DECLARADA: readonly string[] = ['banda.css', 'titular.css']
 
 const mediasSospechosas = ARCHIVOS_DE_ESTILO.filter(
   (a) => !CON_MEDIA_DECLARADA.includes(a.split('/').pop() ?? ''),
@@ -254,7 +257,7 @@ afirmarIgual([...new Set(mediasSospechosas)], [], 'los breakpoints entran por la
 afirmar(
   ARCHIVOS_DE_ESTILO.filter((a) => CON_MEDIA_DECLARADA.includes(a.split('/').pop() ?? '')).length ===
     CON_MEDIA_DECLARADA.length,
-  `  y la única excepción declarada sigue existiendo: ${CON_MEDIA_DECLARADA.join(', ')}`,
+  `  y las excepciones declaradas siguen existiendo: ${CON_MEDIA_DECLARADA.join(', ')}`,
 )
 afirmar(
   CON_MEDIA_DECLARADA.every((n) => mediasConLiteral(leer(ARCHIVOS_DE_ESTILO.find((a) => a.endsWith(n)) ?? '')).length > 0),
