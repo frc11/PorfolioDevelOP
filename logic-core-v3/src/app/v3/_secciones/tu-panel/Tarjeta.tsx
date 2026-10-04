@@ -9,46 +9,57 @@ import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { sizesPorViewport } from '../../_lib/imagen'
 import { DemoEnSuLugar } from '../../_panel-vivo/DemoDelPanel'
-import { FONDO_DEL_PANEL } from '../../_panel-vivo/MarcoDelPanel'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { ALFA_DEL_FONDO } from './Fondo'
-import { CLASE_DEL_BORDE, useBordeDelPanel } from './borde'
 import { CAPTURA, PALABRAS_DEL_FONDO, type Tarjeta as DatosDeTarjeta } from './contenido'
-import { CLASE_DE_ENCUADRE, CLASE_DE_LA_DEMO, CLASE_DE_LA_FILA, CLASE_DEL_REPARTO, CLASE_DEL_TITULO, DISPOSICION, VW_DE_LA_FORMA } from './geometria'
+import { CLASE_DEL_LUGAR, CLASE_DE_ENCUADRE, TABLA_DEL_CAOS, TAMANOS, arranques, claseEnColumna, velocidadDe, vwDe } from './geometria'
+
+const TOPES = arranques()
 
 /**
- * UNA FEATURE DE TU PANEL — [RETOQUE PANEL] T1 · su demo, usable en su lugar (sin abrir nada y sin agrandarse con el
- * hover), con su título y su rótulo. La demo se dibuja a la pantalla de panel que necesita (`DISPOSICION`) y la caja
- * tiene su misma proporción; abajo de 1024, el ancho de la columna y su alto. Los bordes se funden con la sección
- * (`borde.ts`): no es una imagen pegada.
+ * UNA FEATURE DE TU PANEL — [PASADA FINAL] B1 · flota en su lugar de la tabla del caos (`geometria.ts`) y adentro se usa
+ * el panel ENTERO a escala: la demo se dibuja a su pantalla y se escala al ancho de la tarjeta (nada de abrir, nada que
+ * se agrande con el hover), con su título y su rótulo debajo. La tarjeta lleva su profundidad (`data-profundidad`, la
+ * misma suscripción de scroll del fondo) y la última queda asentada en el flujo.
+ *
+ * B2 · El marco es un módulo que flota sobre la página: esquinas redondeadas y una sombra suave y física (dos capas: el
+ * contacto y la ambiental, con la tinta al 25 %), sin halo, sin degradé y sin filtros. `contain` aísla el layout y la
+ * pintura de la demo: lo que pasa adentro (una tabla que cambia, un chat que escribe) no le cuesta a la página.
  *
  * El `<li>` se puede enfocar desde el código: es adonde lleva «Saltar la demo» de la anterior.
  */
 export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta; readonly indice: number }): React.JSX.Element {
-  const lugar = DISPOSICION[indice]
-  const borde = useBordeDelPanel()
+  const fila = TABLA_DEL_CAOS[indice]
+  const tamano = TAMANOS[fila.tamano]
+  const esLaUltima = indice === TABLA_DEL_CAOS.length - 1
   const idDelTitulo = useId()
-  const medidas = {
-    '--proporcion': `${String(lugar.pantalla.ancho)} / ${String(lugar.pantalla.alto)}`,
-    '--alto-angosto': `${String(lugar.altoAngosto)}px`,
-    '--fondo-del-panel': FONDO_DEL_PANEL,
-  } as CSSProperties
-  const respaldo = (
-    <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(VW_DE_LA_FORMA[lugar.forma], 100)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
-  )
+  const lugar = { '--x': `${String(fila.columna)}%`, '--w': `${String(tamano.ancho)}%`, '--y': `${String(TOPES[indice])}svh` } as CSSProperties
+  const medidas = { '--proporcion': `${String(fila.pantalla.ancho)} / ${String(fila.pantalla.alto)}`, '--alto-angosto': `${String(fila.altoAngosto)}px` } as CSSProperties
+  const respaldo = <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(vwDe(fila), 88)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
 
   return (
-    <li data-pieza="feature-del-panel" data-forma={lugar.forma} tabIndex={-1} aria-labelledby={idDelTitulo} className={cn('relative w-full [--sangrado:var(--spacing-4)] focus-visible:outline-2 focus-visible:outline-offset-4 escritorio:z-[var(--z-elevado)] escritorio:[--sangrado:var(--spacing-8)]', CLASE_DE_LA_FILA[lugar.forma][lugar.lado])}>
+    <li
+      data-pieza="feature-del-panel"
+      data-tamano={fila.tamano}
+      data-profundidad={velocidadDe(indice)}
+      tabIndex={-1}
+      aria-labelledby={idDelTitulo}
+      style={lugar}
+      className={cn('relative focus-visible:outline-2 focus-visible:outline-offset-4 escritorio:z-[var(--z-elevado)]', claseEnColumna(indice), esLaUltima ? CLASE_DEL_LUGAR.asentada : CLASE_DEL_LUGAR.flota)}
+    >
       <Bloque patron="P2" rango="ventana-visible" className="w-full">
         {(progreso) => (
-          <CanalDeUnaPieza progreso={progreso} patron="P2" className={cn('flex flex-col gap-[calc(var(--sangrado)+var(--spacing-3))]', CLASE_DEL_REPARTO[lugar.forma][lugar.lado])}>
-            <div data-parte="marco" data-borde={borde} style={medidas} className={cn('relative w-full h-[var(--alto-angosto)] escritorio:h-auto escritorio:aspect-[var(--proporcion)]', CLASE_DE_LA_DEMO[lugar.forma])}>
-              <span aria-hidden="true" data-parte="borde-del-panel" className={cn('pointer-events-none absolute', CLASE_DEL_BORDE[borde])} />
-              <DemoEnSuLugar demo={tarjeta.demo} pantalla={lugar.pantalla} respaldo={respaldo} />
+          <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-[var(--spacing-3)]">
+            <div
+              data-parte="marco"
+              style={medidas}
+              className="relative h-[var(--alto-angosto)] w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint escritorio:h-auto escritorio:aspect-[var(--proporcion)]"
+            >
+              <DemoEnSuLugar demo={tarjeta.demo} pantalla={fila.pantalla} respaldo={respaldo} />
             </div>
-            <div className={cn('flex flex-col items-start gap-[var(--spacing-2)]', CLASE_DEL_TITULO[lugar.forma])}>
-              <Titular id={idDelTitulo} nivel="titulo-m" como="h3" className="block">
+            <div className="flex flex-col items-start gap-[var(--spacing-2)]">
+              <Titular id={idDelTitulo} nivel={tamano.nivel} como="h3" className="block">
                 {tarjeta.titulo}
               </Titular>
               <Micro como="span" className="text-tinta-tenue uppercase">

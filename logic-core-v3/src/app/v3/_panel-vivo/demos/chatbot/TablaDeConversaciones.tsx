@@ -120,7 +120,7 @@ export function Transcript({ mensajes, escribiendo, vivo = false, seguir = false
     mostrarAlFondo(el, suave)
   }, [mensajes.length, escribiendo, seguir, suave])
   return (
-    <div ref={caja} className="max-h-[400px] space-y-3 overflow-y-auto overscroll-contain pr-1" aria-live={vivo ? 'polite' : undefined}>
+    <div ref={caja} className="max-h-[260px] space-y-3 overflow-y-auto overscroll-contain pr-1" aria-live={vivo ? 'polite' : undefined}>
       {mensajes.map((m, k) => {
         const isUser = m.rol === 'USER'
         return (

@@ -97,7 +97,8 @@ export function TarjetaDeModulo({ modulo, alVerDetalle, interactivo, reducido }:
   const exito = pedido === 'success'
   return (
     <div className={['relative flex h-full min-h-[260px] flex-col gap-4 overflow-hidden rounded-[24px] border p-5', esPropio || (exito && !proximamente) ? 'border-emerald-500/25 bg-emerald-500/[0.03]' : proximamente ? (exito ? 'border-amber-400/25 bg-amber-500/[0.05]' : 'border-white/10 bg-black/20 opacity-90') : `border-white/10 bg-black/20 ${adminHoverCls}`].join(' ')}>
-      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-20 blur-[50px]" style={{ background: acento }} />
+      {/* [PASADA FINAL] B3 · el brillo era un `blur-[50px]`: un degradé radial, sin filtro. */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full opacity-40" style={{ background: `radial-gradient(closest-side, ${acento}, transparent)` }} />
       <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${acento}1A`, border: `1px solid ${acento}33`, boxShadow: `0 0 16px ${acento}26`, color: acento }}>

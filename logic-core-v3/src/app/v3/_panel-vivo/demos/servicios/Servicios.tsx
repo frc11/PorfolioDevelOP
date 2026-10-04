@@ -11,6 +11,7 @@ import { buildShowroom } from '@/lib/modules/showroom'
 
 import { MarcoDelPanel } from '../../MarcoDelPanel'
 import { useReproduccion } from '../../reproduccion'
+import { useRuedaAdentro } from '../../rueda'
 import { ICONOS, NIVELES, TarjetaDeModulo, type ModuloDeLaVitrina } from './TarjetaDeModulo'
 
 /**
@@ -109,7 +110,8 @@ export default function Servicios(): React.JSX.Element {
 function ServicioContratado({ servicio: s, desde }: { readonly servicio: (typeof CONTRATADOS)[number]; readonly desde: Date }): React.JSX.Element {
   return (
     <div className={`group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20 p-6 shadow-xl ${adminHoverCls}`}>
-      <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-10 blur-[60px] transition-opacity duration-500 group-hover:opacity-25" style={{ background: `rgb(${s.glowRgb})` }} />
+      {/* [PASADA FINAL] B3 · el brillo era un `blur-[60px]`: un degradé radial da el mismo resplandor sin un filtro que se recalcula por cuadro. */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full opacity-25 transition-opacity duration-500 group-hover:opacity-50" style={{ background: `radial-gradient(closest-side, rgb(${s.glowRgb}), transparent)` }} />
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl" style={{ background: `rgba(${s.glowRgb}, 0.1)`, border: `1px solid rgba(${s.glowRgb}, 0.2)`, color: `rgb(${s.glowRgb})`, boxShadow: `0 0 20px rgba(${s.glowRgb}, 0.15)` }}>
           <s.Icon size={24} aria-hidden />
@@ -141,6 +143,8 @@ function ServicioContratado({ servicio: s, desde }: { readonly servicio: (typeof
 /** El detalle de un módulo (COPIA de `ServiceDetailModal.tsx`, adentro del marco y sin el precio). */
 function DetalleDelModulo({ modulo: m, alCerrar }: { readonly modulo: ModuloDeLaVitrina; readonly alCerrar: () => void }): React.JSX.Element {
   const cerrar = useRef<HTMLButtonElement>(null)
+  // [PASADA FINAL] B1 · el texto del detalle scrollea adentro sólo si tiene recorrido; si no, la rueda es de la página.
+  const textoDelDetalle = useRuedaAdentro<HTMLDivElement>()
   useEffect(() => cerrar.current?.focus(), [])
   const Icon = ICONOS[m.iconName] ?? Bot
   const acento = m.accentColor
@@ -156,7 +160,7 @@ function DetalleDelModulo({ modulo: m, alCerrar }: { readonly modulo: ModuloDeLa
       }}
     >
       <div role="dialog" aria-modal="true" aria-label={`Detalle del módulo ${m.name}`} onClick={(e) => e.stopPropagation()} className="relative flex max-h-[88%] w-full max-w-lg flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#0c1016]/95 shadow-[0_30px_120px_rgba(0,0,0,0.55)]">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-[60px]" style={{ background: acento }} />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full opacity-40" style={{ background: `radial-gradient(closest-side, ${acento}, transparent)` }} />
         <div className="relative z-10 flex items-start justify-between gap-4 border-b border-white/10 p-6">
           <div className="flex min-w-0 items-start gap-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${acento}1A`, border: `1px solid ${acento}33`, boxShadow: `0 0 16px ${acento}26`, color: acento }}>
@@ -175,7 +179,7 @@ function DetalleDelModulo({ modulo: m, alCerrar }: { readonly modulo: ModuloDeLa
             <X size={16} strokeWidth={1.5} aria-hidden />
           </button>
         </div>
-        <div className="relative z-10 flex-1 overflow-y-auto p-6">
+        <div ref={textoDelDetalle} className="relative z-10 flex-1 overflow-y-auto p-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Descripción general</p>
           <p className="mt-3 text-sm leading-7 text-zinc-300">{m.longDescription}</p>
         </div>

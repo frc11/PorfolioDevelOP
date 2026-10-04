@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 
 import { NEGOCIO_DE_EJEMPLO, ROTULO_DE_EJEMPLO, type ItemDelPanel } from './catalogo'
 import { useReproduccion } from './reproduccion'
+import { useRuedaAdentro } from './rueda'
 
 /**
  * [NOCTURNO] B · EL MARCO QUE SE VE COMO EL PANEL — la carcasa del panel de clientes, copiada (no importada) de
@@ -14,7 +15,8 @@ import { useReproduccion } from './reproduccion'
  * ítem activo): la de verdad cierra sesión, lee las notificaciones y navega a `/dashboard/*` (server actions, `<Link>`).
  * Lleva siempre el rótulo «Ejemplo» y, si la demo se mueve sola, la barra de arriba tiene su botón de pausa (WCAG 2.2.2).
  * [RETOQUE PANEL] T1 · en su lugar: la barra lateral sólo marca dónde está (sin saltos entre demos) y el contenido scrollea
- * con la rueda (`data-lenis-prevent`: el scroll suave de la página no se lo lleva; en la punta, sigue la página).
+ * con la rueda. [PASADA FINAL] B1: sólo cuando tiene recorrido hacia donde va la rueda (`rueda.ts` decide `data-lenis-prevent`
+ * en cada rueda); en el borde, o sin recorrido, la rueda es de la página, que sigue suave.
  */
 /** El fondo del panel: la tarjeta lo usa para fundir los bordes con la sección. */
 export const FONDO_DEL_PANEL = '#080a0c'
@@ -75,6 +77,7 @@ const ITEM_QUIETO = 'text-zinc-400'
 
 export function MarcoDelPanel({ item, conPausa = false, encima, children }: { readonly item: ItemDelPanel; readonly conPausa?: boolean; readonly encima?: React.ReactNode; readonly children: React.ReactNode }): React.JSX.Element {
   const r = useReproduccion()
+  const contenido = useRuedaAdentro<HTMLDivElement>()
   const iniciales = NEGOCIO_DE_EJEMPLO.split(/\s+/)
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? '')
@@ -125,7 +128,7 @@ export function MarcoDelPanel({ item, conPausa = false, encima, children }: { re
             <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300">{ROTULO_DE_EJEMPLO}</span>
           </div>
         </header>
-        <div data-parte="contenido-del-panel" data-lenis-prevent="" className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6">
+        <div ref={contenido} data-parte="contenido-del-panel" className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6">
           {children}
         </div>
       </div>

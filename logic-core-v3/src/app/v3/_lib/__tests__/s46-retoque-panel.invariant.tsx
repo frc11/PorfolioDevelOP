@@ -25,8 +25,7 @@ import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_L
 import { CORTE_DE_LA_VENTANA_DEL_TRAZO } from '../../_secciones/_contrato/bloqueAnimado'
 import { TRAMOS_DEL_TITULAR } from '../../_secciones/quienes-somos/contenido'
 import { avanceDelTrazo, avancesDelSigno, principal } from '../../_secciones/quienes-somos/trazos3d'
-import { BORDE_ELEGIDO } from '../../_secciones/tu-panel/borde'
-import { DISPOSICION, escalaDeLaDemo } from '../../_secciones/tu-panel/geometria'
+import { TABLA_DEL_CAOS, escalaDeLaDemo } from '../../_secciones/tu-panel/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -41,9 +40,11 @@ const TARJETA = sinComentarios(leer('_secciones/tu-panel/Tarjeta.tsx'))
 const enSuLugar = (tuPanel: string, tarjeta: string): boolean => !/PanelEnVivo/.test(tuPanel) && /<DemoEnSuLugar /.test(tarjeta) && !/MiniaturaDeLaDemo|Ampliacion|<button/.test(tarjeta)
 afirmar(enSuLugar(TU_PANEL, TARJETA), 'sin la tarjeta «En vivo», sin la miniatura y sin la ampliación: la tarjeta no es un botón, lleva la demo usable')
 controlPositivo('  el chequeo vería la tarjeta de antes (un botón con la miniatura)', [TU_PANEL, '<button><MiniaturaDeLaDemo demo={tarjeta.demo} /></button>'], ([a, b]: string[]) => enSuLugar(a, b))
-const a1440 = DISPOSICION.map((l) => escalaDeLaDemo(l, 1376))
-afirmar(a1440.every((e) => e >= 0.95 && e <= 1.1), 'a 1440 cada demo se ve a tamaño casi real: se lee y se usa sin zoom', a1440.map((e) => e.toFixed(2)).join(' · '))
-afirmar(BORDE_ELEGIDO === 'a' && entornoPedido('producto,panelborde=b').pruebas.panelBorde === 'b' && entornoPedido('producto').pruebas.panelBorde === 'no', 'los bordes se funden con la sección: la `a` por defecto, la `b` con `?pruebas=panelborde=b`')
+// [PASADA FINAL] B1/B2 · la especificación cambió: el panel entero a escala reducida (0,65 a 0,9 a 1440) en el caos del
+// nocturno, y el marco con esquinas y sombra (la prueba `panelborde` se borró). Lo fija `s6-tu-panel` §6-§9 y s47 (B).
+const a1440 = TABLA_DEL_CAOS.map((_, i) => escalaDeLaDemo(i, 1376))
+afirmar(a1440.every((e) => e >= 0.65 && e <= 0.9), 'a 1440 cada demo se ve entera a escala reducida (0,65 a 0,9): se lee y se usa en su lugar', a1440.map((e) => e.toFixed(2)).join(' · '))
+afirmar(!('panelBorde' in entornoPedido('producto').pruebas), 'la prueba `panelborde` ya no existe: el marco flota con esquinas y sombra (B2)')
 const tarjetaDeLead = sinComentarios(leer('_panel-vivo/demos/leads/TarjetaDeLead.tsx'))
 const detalleDelLead = sinComentarios(leer('_panel-vivo/demos/leads/DetalleDelLead.tsx'))
 const nombreEntero = (f: string): boolean => /\{lead\.name \?\? 'Sin nombre'\}/.test(f) && !/className="truncate[^"]*">\{lead\.name/.test(f)

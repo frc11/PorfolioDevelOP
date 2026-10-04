@@ -126,7 +126,7 @@ export default function Leads(): React.JSX.Element {
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {CLASS_ORDER.map((c) => (
-                    <LeadPipelineColumn key={c} leadClass={c} leads={grupos[c]} bodyMaxHeight={460} onOpenOverview={setVistaDe} renderCard={tarjeta} />
+                    <LeadPipelineColumn key={c} leadClass={c} leads={grupos[c]} bodyMaxHeight={300} onOpenOverview={setVistaDe} renderCard={tarjeta} />
                   ))}
                 </div>
               )}

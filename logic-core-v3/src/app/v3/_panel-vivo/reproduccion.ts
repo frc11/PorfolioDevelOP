@@ -2,6 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, useSyncExternalStore } from 'react'
 
+import { paginaEnMovimiento } from './escenario'
+
 /**
  * [NOCTURNO] B · CÓMO CORRE UNA DEMO DEL PANEL — el contexto que la demo lee para saber si se mueve sola, y los pasos de
  * su guion. [RETOQUE PANEL] T1 · un solo modo: la demo en su lugar, en la tarjeta, usable (la miniatura y la grande se
@@ -35,7 +37,13 @@ export interface Pasos {
   readonly reiniciar: () => void
 }
 
-/** Los pasos de una demo con guion: avanza uno cada `cadaMs` mientras corre y se queda en el último. */
+/** Mientras la página se mueve, un paso espera esto (ms) y vuelve a mirar: ningún árbol de demo se dibuja en medio del scroll. */
+const REINTENTO_EN_MOVIMIENTO_MS = 200
+
+/**
+ * Los pasos de una demo con guion: avanza uno cada `cadaMs` mientras corre y se queda en el último. [PASADA FINAL] B3 ·
+ * y nunca en medio del scroll: si la página se mueve cuando toca el paso, lo espera (`escenario.ts`).
+ */
 export function usePasos(total: number, cadaMs: number): Pasos {
   const r = useReproduccion()
   const [ticks, setTicks] = useState(0)
@@ -43,7 +51,15 @@ export function usePasos(total: number, cadaMs: number): Pasos {
   const sumar = useCallback(() => setTicks((t) => t + 1), [])
   useEffect(() => {
     if (!r.corre || paso >= total) return undefined
-    const reloj = window.setTimeout(sumar, cadaMs)
+    let reloj = 0
+    const alTocar = (): void => {
+      if (paginaEnMovimiento()) {
+        reloj = window.setTimeout(alTocar, REINTENTO_EN_MOVIMIENTO_MS)
+        return
+      }
+      sumar()
+    }
+    reloj = window.setTimeout(alTocar, cadaMs)
     return () => window.clearTimeout(reloj)
   }, [r.corre, paso, total, cadaMs, sumar])
   const reiniciar = useCallback(() => setTicks(0), [])

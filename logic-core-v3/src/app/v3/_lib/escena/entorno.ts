@@ -84,12 +84,10 @@ export interface Pruebas {
    * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
   readonly pie: 'antes' | 'no'
-  /** [RETOQUE PANEL] T1 · `panelborde=a|b`: cómo se funden los bordes de las demos de Tu panel (`tu-panel/borde.ts`). */
-  readonly panelBorde: 'a' | 'b' | 'no'
 }
 
-/** Todo apagado: así van en el producto y en la base. */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', panelBorde: 'no' }
+/** Todo apagado: así van en el producto y en la base. [PASADA FINAL] B2: `panelborde=a|b` se borró (las demos de Tu panel van con esquinas redondeadas y sombra). */
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -98,7 +96,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), panelBorde: unoDe<'a' | 'b'>(['a', 'b'], valor('panelborde')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
 }
 
 export interface Entorno {
