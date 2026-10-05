@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { INK_COLOR } from '../escena/probeScene'
+import { PUNTERO_DEL_ENJAMBRE, type PunteroDelEnjambre } from './puntero'
 import { CAPAS_DEL_ROBOT } from './robot'
 import { ENGRANAJES, GLOBO, simbolosDelEnjambre } from './simbolos'
 import { VIDA_DEL_ROBOT_GLSL } from './vida'
@@ -57,6 +58,30 @@ export function tramoDelEnjambre(posicion: number, quieto: boolean): { readonly 
 
 const f = (x: number): string => x.toFixed(5)
 const F = FISICA_DEL_ENJAMBRE
+const P = PUNTERO_DEL_ENJAMBRE
+
+/**
+ * [EL ENCASTRE] 1C · el desarme bajo el mouse (`puntero.ts`): en el cuadro del lienzo, los que caen en el radio (cada uno
+ * con el suyo) se apartan del cursor —más los del centro—, se corren un poco de costado y tiemblan sueltos; con la fuerza
+ * en cero no se toca nada. La fuerza de cada uno lleva la velocidad del resorte con su azar: no se mueven todos juntos.
+ */
+const APARTADO_GLSL = /* glsl */ `
+uniform vec4 uPuntero;
+uniform float uAspecto;
+vec2 apartadoPorElPuntero( vec2 q, float t ) {
+	float fuerza = uPuntero.z + uPuntero.w * ( aAzar.w - 0.5 ) * 0.12;
+	if ( abs( fuerza ) < 0.0005 ) return q;
+	vec2 d = ( q - uPuntero.xy ) * vec2( uAspecto, 1.0 );
+	float radio = ${f(P.radio)} * ( 0.85 + 0.3 * aAzar.y );
+	float r = length( d );
+	if ( r >= radio ) return q;
+	float s = 1.0 - r / radio;
+	vec2 dir = r > 0.0001 ? d / r : vec2( cos( aAzar.x * 6.2832 ), sin( aAzar.x * 6.2832 ) );
+	vec2 costado = vec2( - dir.y, dir.x ) * radio * ${f(P.costado)} * ( aAzar.y - 0.5 ) * s;
+	vec2 suelto = radio * ${f(P.tiembla)} * s * vec2( sin( t * ${f(P.ritmo)} + aAzar.x * 6.2832 ), cos( t * ${f(P.ritmo * 0.8)} + aAzar.z * 6.2832 ) );
+	vec2 mueve = ( dir * radio * ${f(P.empuje)} * pow( s, 1.4 ) * ( 0.6 + 0.8 * aAzar.z ) + costado + suelto ) * fuerza;
+	return q + mueve / vec2( uAspecto, 1.0 );
+}`
 
 export const VERTICE_DEL_ENJAMBRE = /* glsl */ `
 attribute vec4 aS0;
@@ -78,6 +103,7 @@ varying float vAlfa;
 vec4 destino( float k ) { return k < 0.5 ? aS0 : ( k < 1.5 ? aS1 : ( k < 2.5 ? aS2 : aS3 ) ); }
 vec2 girar( vec2 p, float a ) { float c = cos( a ); float s = sin( a ); return vec2( c * p.x - s * p.y, s * p.x + c * p.y ); }
 ${VIDA_DEL_ROBOT_GLSL}
+${APARTADO_GLSL}
 // Cada símbolo, vivo en el tiempo.
 vec3 vivo( float k, vec4 d, float t ) {
 	vec3 p = d.xyz;
@@ -131,7 +157,8 @@ void main() {
 	p += ( aAzar.yzw * 2.0 - 1.0 ) * ${f(F.dispersion)} * sin( 3.14159265 * u );
 	// La perspectiva: lo cercano, más grande; lo lejano, más tenue.
 	float cerca = 3.0 / ( 3.0 - p.z );
-	gl_Position = vec4( p.xy * cerca * 0.82, 0.0, 1.0 );
+	// [EL ENCASTRE] 1C · bajo el mouse, se apartan (en el cuadro del lienzo, donde está el cursor).
+	gl_Position = vec4( apartadoPorElPuntero( p.xy * cerca * 0.82, t ), 0.0, 1.0 );
 	float ec = clamp( e, 0.0, 1.0 );
 	vec2 vida = mix( vidaDe( uDesde, dA, t ), vidaDe( uHacia, dB, t ), ec );
 	float pulso = vida.y;
@@ -158,6 +185,8 @@ export interface Enjambre {
   readonly dibujar: (segundos: number, posicion: number, quieto: boolean) => void
   /** El tamaño del lienzo (px CSS). */
   readonly medir: (ancho: number, alto: number) => void
+  /** [EL ENCASTRE] 1C · el hueco del mouse de este cuadro (`puntero.ts`). */
+  readonly apuntar: (p: Readonly<PunteroDelEnjambre>) => void
   readonly soltar: () => void
 }
 
@@ -196,6 +225,8 @@ export function crearEnjambre(lienzo: HTMLCanvasElement, puntos: number): Enjamb
     uColores: { value: [A.nube, A.web, A.software, A.ia, A.automatizacion].map(enSrgb) },
     uCentroA: { value: new THREE.Vector2(...ENGRANAJES.a.centro) },
     uCentroB: { value: new THREE.Vector2(...ENGRANAJES.b.centro) },
+    uPuntero: { value: new THREE.Vector4(0, 0, 0, 0) },
+    uAspecto: { value: 1 },
   }
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE_DEL_ENJAMBRE, fragmentShader: FRAGMENTO_DEL_ENJAMBRE, transparent: true, depthTest: false, depthWrite: false, premultipliedAlpha: true })
   const nanobots = new THREE.Points(geometria, material)
@@ -219,6 +250,10 @@ export function crearEnjambre(lienzo: HTMLCanvasElement, puntos: number): Enjamb
       // El punto, en px del lienzo: crece con el gráfico (de 1,6 en la cabeza angosta a 2,6 en el panel). [AJUSTES FINALES] A6 ·
       // el piso subió de 1,4: a paso constante, un nanobot tiene que tocar al siguiente para que el trazo sea una línea.
       uniforms.uTamano.value = Math.min(2.6, Math.max(1.6, ancho / 140)) * renderer.getPixelRatio()
+      uniforms.uAspecto.value = ancho / alto
+    },
+    apuntar: (p) => {
+      uniforms.uPuntero.value.set(p.x, p.y, p.fuerza, p.velocidad)
     },
     soltar: () => {
       geometria.dispose()
