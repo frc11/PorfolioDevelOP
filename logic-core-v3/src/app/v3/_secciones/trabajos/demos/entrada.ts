@@ -1,5 +1,5 @@
-import { CAPA_DEL_VACIO, pxDelTunelEn } from '../geometria'
-import { fraccionDelVacio, poseDelTunel } from '../tunel'
+import { CAPA_DEL_VACIO, LLEGADA_DE_LOS_DEMOS, pxDelTunelEn } from '../geometria'
+import { ORIGEN_DEL_TUNEL, PX_DEL_VACIO, fraccionDelVacio, poseDelTunel } from '../tunel'
 
 /**
  * LA ENTRADA A DEMOS — el vacío crece solo y después LLEGAN las cosas. **[DEMOS]**
@@ -26,8 +26,12 @@ import { fraccionDelVacio, poseDelTunel } from '../tunel'
  *   68 – 80 %  el párrafo, con el gesto del cuerpo de la casa (P2).
  *   72 – 100 % los libros, de izquierda a derecha y uno detrás del otro: entran
  *              desde abajo con un sobrepaso elástico al asentarse y un leve giro
- *              que se acomoda. El último se asienta EXACTAMENTE en el 100 %, que
- *              es cuando el vacío llena el cuadro.
+ *              que se acomoda. El último se asienta EXACTAMENTE en el 100 %.
+ *
+ * [CIERRE] 1B · los porcentajes de la llegada son de SU reloj (`llegadaDeDemos`):
+ * hasta el 60 % es la fracción del vacío, y desde ahí corre a la mitad. El título
+ * sube donde siempre y el último libro se asienta 388 px de la regla DESPUÉS de que
+ * el vacío llenó el cuadro (la llegada dura el doble de scroll). El vacío no cambia.
  *
  * Ya no hay recuadro que escala: la capa está en su lugar desde el principio y lo
  * que la muestra es el agujero. Lo rígido era eso.
@@ -43,7 +47,7 @@ export interface Tramo {
 }
 
 export const LLEGADA = {
-  titulo: { desde: 0.6, hasta: 0.72 },
+  titulo: { desde: LLEGADA_DE_LOS_DEMOS.desde, hasta: 0.72 },
   parrafo: { desde: 0.68, hasta: 0.8 },
   libros: { desde: 0.72, hasta: 1 },
 } as const
@@ -59,6 +63,13 @@ export const TRAMO_DE_UN_LIBRO = 0.14
 export const LIBRO_QUE_LLEGA = { acostado: 90, perspectiva: 700 } as const
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
+
+/** [CIERRE] 1B · el reloj de la llegada: la fracción del vacío (sin su tope) hasta el título; desde ahí, a la mitad. */
+export function llegadaDeDemos(mostrado: number): number {
+  const vacio = (pxDelTunelEn(mostrado) + ORIGEN_DEL_TUNEL - CAPA_DEL_VACIO.arranca) / PX_DEL_VACIO
+  const { desde, lenta } = LLEGADA_DE_LOS_DEMOS
+  return acotar01(vacio <= desde ? vacio : desde + (vacio - desde) / lenta)
+}
 
 /** Cuánto va de un tramo en la fracción `u` del vacío. */
 export function enElTramo(u: number, tramo: Tramo): number {

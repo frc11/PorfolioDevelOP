@@ -30,6 +30,7 @@ import {
   CARTEL,
   HUIDA_DEL_CARTEL,
   PX_DE_LA_APROXIMACION,
+  PX_DEL_FIN_DE_LA_LLEGADA,
   PX_DE_LA_SECCION,
   PX_DE_UNA_RAFAGA,
   arranqueDeDemos,
@@ -257,14 +258,15 @@ export function afirmarElRegulador(cuantas: number): void {
   controlPositivo('  el detector vería el túnel que se pasa y vuelve', [0, 40, 80, 60, 50], (p: number[]) => movimiento(p).vueltas === 0)
 
   // ── LA GARANTÍA: AL DESPINEARSE, NADA A MEDIO CAMINO ───────────────────
-  const demos = pxDeLaSeccion(arranqueDeDemos(cuantas))
+  // [CIERRE] 1B · la llegada de los demos termina después de la salida: al despinearse tiene que estar ENTERA.
+  const demos = Math.max(pxDeLaSeccion(arranqueDeDemos(cuantas)), PX_DEL_FIN_DE_LA_LLEGADA)
   const vuelta = pxDeLaSeccion(HUIDA_DEL_CARTEL.subiendo.desde)
   const terminado = (e: EstadoDelTunelMostrado): boolean => e.tunel.posicion >= demos && e.escenario.posicion >= demos
   const deVuelta = (r: { final: EstadoDelTunelMostrado; huida: number }): boolean => r.final.tunel.posicion <= vuelta + 1e-6 && r.huida === 0
   for (const v of VELOCIDADES) {
     for (const frenando of [false, true]) {
       const abajo = recorrer(v, 'bajando', BANDA_DEL_EFECTO, frenando).final
-      afirmar(terminado(abajo), `bajando a ${v} px/s${frenando ? ' con el freno puesto TODO el camino' : ''}: al despinearse lo mostrado está en ${abajo.tunel.posicion.toFixed(0)}, en los demos (${demos}): túnel y salida terminados`)
+      afirmar(terminado(abajo), `bajando a ${v} px/s${frenando ? ' con el freno puesto TODO el camino' : ''}: al despinearse lo mostrado está en ${abajo.tunel.posicion.toFixed(0)}, en los demos (${demos.toFixed(0)}): túnel, salida y llegada de los demos terminados`)
     }
     const arriba = recorrer(v, 'subiendo', BANDA_DEL_EFECTO, false)
     afirmar(deVuelta(arriba), `subiendo a ${v} px/s: al despinearse arriba lo mostrado está en ${arriba.final.tunel.posicion.toFixed(0)} (≤ ${vuelta.toFixed(0)}): túnel en 0 y el cartel entero`)

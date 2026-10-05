@@ -5,14 +5,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 
 import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
 import { CONTENIDO } from '../contenido'
-import { arranqueDeDemos } from '../geometria'
+import { PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, arranqueDeDemos } from '../geometria'
 
 import { cn } from '@/lib/utils'
 
 import { Biblioteca } from './Biblioteca'
 import { Carrusel } from './Carrusel'
 import type { Demo } from './catalogo'
-import { LLEGADA, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
+import { LLEGADA, enElTramo, escalaDeDemos, llegadaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
 import { llevarALaLlegada } from './llevarALaLlegada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
@@ -27,6 +27,10 @@ import { VentanaDeDemo } from './VentanaDeDemo'
  * atadas a la fracción del vacío (`entrada.ts`): el título, el párrafo y los
  * libros de a uno, y el último se asienta cuando el vacío llena el cuadro. Desde
  * ahí queda FIJA con el pin, y al despinearse se va con la sección.
+ *
+ * [CIERRE] 1B · desde 1024 lo que llega sigue el reloj de la llegada (`llegadaDeDemos`,
+ * el doble de scroll: el último libro se asienta ya con el vacío lleno); abajo, la capa
+ * rígida sigue escalando con el vacío.
  *
  * ⚠️ **VA DESPUÉS DEL TÚNEL EN EL MARCADO Y SE PINTA DETRÁS.** El orden del
  * marcado es el orden de lectura, y `s10-acceso` exige el mismo en las dos ramas:
@@ -46,12 +50,13 @@ export function CapaDeDemos({
   readonly className?: string
 }): React.JSX.Element {
   const capa = useRef<HTMLDivElement | null>(null)
-  const [inicial] = useState(() => escalaDeDemos(mostrado.get()))
-  const escala = useRef(inicial)
+  const [inicial] = useState(() => ({ escala: escalaDeDemos(mostrado.get()), llegada: llegadaDeDemos(mostrado.get()) }))
+  const escala = useRef(inicial.escala)
+  const llegada = useRef(inicial.llegada)
   const libros = useRef<HTMLElement[]>([])
   const parrafo = useRef<HTMLDivElement | null>(null)
-  const progresoDelTitulo = useMotionValue(enElTramo(inicial, LLEGADA.titulo))
-  const progresoDelParrafo = useMotionValue(enElTramo(inicial, LLEGADA.parrafo))
+  const progresoDelTitulo = useMotionValue(enElTramo(inicial.llegada, LLEGADA.titulo))
+  const progresoDelParrafo = useMotionValue(enElTramo(inicial.llegada, LLEGADA.parrafo))
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const [alejada, setAlejada] = useState(false)
   /**
@@ -61,9 +66,9 @@ export function CapaDeDemos({
    */
   const rigida = useRef(false)
 
-  /** Escribe la llegada entera para una fracción del vacío. Pura: subiendo se deshace. */
+  /** Escribe la llegada entera para una fracción del vacío (`u`) y su reloj (`l`). Pura: subiendo se deshace. */
   const llegar = useCallback(
-    (u: number): void => {
+    (u: number, l: number): void => {
       if (rigida.current) {
         capa.current?.style.setProperty('--demos-escala', u.toFixed(5))
         progresoDelTitulo.set(1)
@@ -71,12 +76,12 @@ export function CapaDeDemos({
         parrafo.current?.style.setProperty('opacity', '1')
         return
       }
-      progresoDelTitulo.set(enElTramo(u, LLEGADA.titulo))
-      const delParrafo = enElTramo(u, LLEGADA.parrafo)
+      progresoDelTitulo.set(enElTramo(l, LLEGADA.titulo))
+      const delParrafo = enElTramo(l, LLEGADA.parrafo)
       progresoDelParrafo.set(delParrafo)
       parrafo.current?.style.setProperty('opacity', delParrafo.toFixed(3))
       libros.current.forEach((libro, i) => {
-        const pose = poseDelLibro(enElTramo(u, tramoDelLibro(i, libros.current.length)))
+        const pose = poseDelLibro(enElTramo(l, tramoDelLibro(i, libros.current.length)))
         libro.style.setProperty('transform', pose.transform)
         libro.style.setProperty('opacity', pose.opacidad.toFixed(3))
       })
@@ -89,35 +94,39 @@ export function CapaDeDemos({
     const leerLaEntrada = (): void => {
       const el = capa.current
       rigida.current = el !== null && getComputedStyle(el).getPropertyValue('--demos-entrada').trim() === 'rigida'
-      llegar(escala.current)
+      llegar(escala.current, llegada.current)
     }
     leerLaEntrada()
     window.addEventListener('resize', leerLaEntrada)
     return () => window.removeEventListener('resize', leerLaEntrada)
   }, [llegar])
 
-  /** El carrusel arranca cuando el vacío llenó la pantalla. */
-  const carruselEnMarcha = useCallback((): boolean => escala.current >= 1, [])
+  /** El carrusel arranca cuando todo llegó: abajo de 1024, cuando el vacío llenó la pantalla. */
+  const carruselEnMarcha = useCallback((): boolean => (rigida.current ? escala.current : llegada.current) >= 1, [])
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     escala.current = escalaDeDemos(p)
-    llegar(escala.current)
+    llegada.current = llegadaDeDemos(p)
+    llegar(escala.current, llegada.current)
   })
 
   useEffect(() => {
     const el = capa.current
     const panel = el?.closest<HTMLElement>('[data-panel]') ?? null
     if (el === null || panel === null) return
-    const arranque = arranqueDeDemos(CONTENIDO.proyectos.length)
+    // [CIERRE] 1B · adonde la llegada termina (desde 1024, pasado el arranque de demos); abajo, el arranque de demos.
+    const llegaEntera = (): number => (rigida.current ? escala.current : llegada.current)
+    const demos = arranqueDeDemos(CONTENIDO.proyectos.length)
     let cancelar = (): void => undefined
     const alEntrarElFoco = (e: FocusEvent): void => {
       // Sólo el teclado: un clic en una pieza a medio crecer abre la demo ahí mismo.
-      if (escala.current >= 1 || !(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
+      if (llegaEntera() >= 1 || !(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
+      const arranque = rigida.current ? demos : Math.max(demos, PX_DEL_FIN_DE_LA_LLEGADA / PX_DE_LA_SECCION)
       // El progreso de la sección arranca con su borde de arriba en el pie del cuadro.
       const cero = panel.getBoundingClientRect().top + window.scrollY - window.innerHeight
       cancelar()
       // [INTERFAZ 1] Cierre: y si lo mostrado se asienta antes de que la capa llegue, la página sigue (`llevarALaLlegada`).
-      cancelar = llevarALaLlegada({ destino: cero + arranque * panel.offsetHeight, alto: panel.offsetHeight, arranque, mostrado: () => mostrado.get(), llego: () => escala.current >= 0.999 })
+      cancelar = llevarALaLlegada({ destino: cero + arranque * panel.offsetHeight, alto: panel.offsetHeight, arranque, mostrado: () => mostrado.get(), llego: () => llegaEntera() >= 0.999 })
     }
     el.addEventListener('focusin', alEntrarElFoco)
     return () => {

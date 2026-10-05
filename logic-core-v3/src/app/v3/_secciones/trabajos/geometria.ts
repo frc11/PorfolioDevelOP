@@ -38,6 +38,7 @@ import {
   ORIGEN_DEL_TUNEL,
   PX_DEL_ESPACIO_DE_DEMOS,
   PX_DEL_TUNEL,
+  PX_DEL_VACIO,
   PX_DE_LA_SALIDA,
   PX_POR_SCROLL,
   type Caja,
@@ -450,6 +451,17 @@ export const HUIDA_DEL_CARTEL = {
 export const pxDeLaSeccion = (progreso: number): number => progreso * PX_DE_LA_SECCION
 
 /**
+ * [CIERRE] 1B · LA LLEGADA DE LOS DEMOS DURA EL DOBLE DE SCROLL — el título, el párrafo y los libros. Arranca donde
+ * siempre (el vacío al 60 %, cuando sube el título) y desde ahí su reloj corre a la MITAD (`lenta`): lo que llegaba en
+ * 388 px de la regla llega en 776, y el último libro se asienta ya en el espacio de demos (con el vacío lleno). Medido con
+ * la rueda (`cierre-final/1b`): 0,91 s a 500 px/s y 0,63 s a 2.000 px/s. El vacío no cambia.
+ */
+export const LLEGADA_DE_LOS_DEMOS = { desde: 0.6, lenta: 2 } as const
+
+/** Dónde termina la llegada, en fracciones del vacío sin su tope: 0,6 + 0,4 × 2 = 1,4. */
+export const FIN_DE_LA_LLEGADA_EN_EL_VACIO = LLEGADA_DE_LOS_DEMOS.desde + (1 - LLEGADA_DE_LOS_DEMOS.desde) * LLEGADA_DE_LOS_DEMOS.lenta
+
+/**
  * ⚠️ **LOS DOS RIELES DEL EFECTO REGULADO — cada punta es un lugar de la sección.**
  *
  * **El piso (bajando).** El pin se suelta en el progreso 1, y ahí lo mostrado
@@ -478,6 +490,8 @@ const PX_DEL_ARRANQUE_DEL_TUNEL = pxDeLaSeccion(ARRANQUE_DEL_TUNEL)
 const PX_DEL_FIN_DEL_TUNEL = PX_DEL_ARRANQUE_DEL_TUNEL + PX_DEL_TUNEL
 const PX_DEL_ARRANQUE_DE_LA_SALIDA = pxDeLaSeccion(arranqueDeLaSalida(CAPAS_DEL_TUNEL.proyectos.length))
 export const MARGEN_DEL_DESPINEADO = PX_POR_SCROLL
+/** [CIERRE] 1B · el fin de la llegada de los demos, en px de la sección (el vacío nace donde arranca la salida). */
+export const PX_DEL_FIN_DE_LA_LLEGADA = PX_DEL_ARRANQUE_DE_LA_SALIDA + FIN_DE_LA_LLEGADA_EN_EL_VACIO * PX_DEL_VACIO
 const SCROLL_DEL_SALTO_BAJANDO = PX_DEL_ARRANQUE_DE_LA_SALIDA + PX_DEL_ESPACIO_DE_DEMOS - MARGEN_DEL_DESPINEADO
 const SCROLL_DEL_SALTO_SUBIENDO = PX_DEL_FIN_DEL_TUNEL - ATRASO_DEL_RESORTE_PX
 
@@ -489,6 +503,9 @@ export const BANDA_DEL_EFECTO: BandaDelEfecto = {
     { scroll: PX_DEL_ARRANQUE_DEL_TUNEL + PX_DE_UNA_RAFAGA, efecto: PX_DEL_ARRANQUE_DEL_TUNEL },
     { scroll: SCROLL_DEL_SALTO_BAJANDO, efecto: PX_DEL_FIN_DEL_TUNEL },
     { scroll: SCROLL_DEL_SALTO_BAJANDO, efecto: PX_DEL_ARRANQUE_DE_LA_SALIDA },
+    // [CIERRE] 1B · la llegada de los demos sigue después de la salida: el piso la termina una muesca antes del despineado
+    // (el tramo del túnel y el salto, los de siempre; del salto al final la salida y la llegada van a 1,2 veces el scroll).
+    { scroll: PX_DE_LA_SECCION - MARGEN_DEL_DESPINEADO, efecto: Math.max(PX_DEL_FIN_DE_LA_LLEGADA, PX_DEL_ARRANQUE_DE_LA_SALIDA + PX_DE_LA_SALIDA) },
   ],
   techo: [
     { scroll: PX_DE_LA_APROXIMACION + MARGEN_DEL_DESPINEADO, efecto: pxDeLaSeccion(HUIDA_DEL_CARTEL.subiendo.desde) },

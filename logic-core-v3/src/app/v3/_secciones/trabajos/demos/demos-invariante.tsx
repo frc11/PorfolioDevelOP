@@ -110,7 +110,7 @@ export function afirmarLasDemos(): void {
   const libros = CATALOGO_DE_DEMOS.length
   const tramos = [LLEGADA.titulo, LLEGADA.parrafo, ...CATALOGO_DE_DEMOS.map((_, i) => tramoDelLibro(i, libros))]
   afirmar(tramos.every((t) => t.desde >= 0.6), 'hasta el 60 % del vacío no llega nada: sólo crece el vacío y se ve la escena')
-  afirmarIgual(tramoDelLibro(libros - 1, libros).hasta, 1, `  y el último de los ${String(libros)} libros se asienta en el 100 % exacto: cuando el vacío llena el cuadro`)
+  afirmarIgual(tramoDelLibro(libros - 1, libros).hasta, 1, `  y el último de los ${String(libros)} libros se asienta en el 100 % exacto de la llegada ([CIERRE] 1B: su reloj, \`llegadaDeDemos\`)`)
   afirmar(CATALOGO_DE_DEMOS.every((_, i) => i === 0 || tramoDelLibro(i, libros).desde > tramoDelLibro(i - 1, libros).desde), '  los libros llegan de izquierda a derecha, uno detrás del otro')
   afirmar(LLEGADA.titulo.desde < LLEGADA.parrafo.desde && LLEGADA.parrafo.desde <= LLEGADA.libros.desde, '  el orden es título, párrafo y libros')
   let pico = 0
@@ -120,9 +120,10 @@ export function afirmarLasDemos(): void {
   afirmar(enElTramo(0.5, LLEGADA.titulo) === 0 && enElTramo(0.9, LLEGADA.titulo) === 1, '  el título está abajo antes de su tramo y en su lugar después')
   const sinReloj = (capa: string): boolean => {
     const codigo = sinComentarios(capa)
-    return codigo.includes('llegar(escala.current)') && !/requestAnimationFrame|setTimeout|setInterval|performance\.now/.test(codigo)
+    // [CIERRE] 1B · desde 1024 lo que llega sigue `llegadaDeDemos` (el doble de scroll): también una función de lo mostrado.
+    return codigo.includes('llegar(escala.current, llegada.current)') && codigo.includes('escala.current = escalaDeDemos(p)') && codigo.includes('llegada.current = llegadaDeDemos(p)') && !/requestAnimationFrame|setTimeout|setInterval|performance\.now/.test(codigo)
   }
-  afirmar(sinReloj(CAPA), '  la llegada no tiene reloj propio: es una función de la fracción del vacío, así que subiendo se deshace exacta y al revés')
+  afirmar(sinReloj(CAPA), '  la llegada no tiene reloj propio: es una función de lo mostrado (la fracción del vacío; desde 1024, su reloj `llegadaDeDemos`), así que subiendo se deshace exacta y al revés')
   controlPositivo('  el detector ve una llegada con reloj', `${CAPA}\nrequestAnimationFrame(() => llegar(escala.current))\n`, sinReloj)
   // [INTERFAZ 1] Cierre · el empujón del teclado tiene reloj, y por eso vive aparte: sólo puede mover la PÁGINA (scroll),
   // nunca la capa. La llegada sigue siendo una función de la fracción del vacío.
