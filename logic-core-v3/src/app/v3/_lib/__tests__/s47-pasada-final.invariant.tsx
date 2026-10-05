@@ -468,8 +468,9 @@ afirmar(encajan && deCadaUno && Math.abs(radioDelDiente(gA, gA.fase + (0.25 * 2 
 // [AJUSTES FINALES] A6 · el robot se rehízo (habla por un globo de diálogo; el flujo es de anillos, con bifurcación): las capas de `w` son las de `robot.ts` (s48 A6 mide la forma).
 const flujoC4 = puntosDe(robotC4).filter((p) => p[3] >= 3)
 const robotSolo = puntosDe(robotC4).filter((p) => p[3] < 1)
-const enDiagonal = flujoC4.length > 0 && flujoC4.every((p) => p[0] > -0.3 && p[1] < 0.2 && p[3] < 5) && robotSolo.every((p) => p[0] < 0)
-afirmar(enDiagonal && FLUJO.nodos.every(([x, y], k) => k === 0 || x > FLUJO.nodos[0][0] || y < FLUJO.nodos[0][1]), 'IA y automatización: el robot del chatbot (cabeza, antena, ojos, boca) a la izquierda y su flujo de nodos conectados, que sale en diagonal hacia abajo a la derecha (con su recorrido, para el pulso)')
+// [CIERRE] 2A · el flujo ya no sale de la cabeza en diagonal: es una figura aparte, horizontal, debajo del robot (s49 2A).
+const debajoDelRobot = flujoC4.length > 0 && flujoC4.every((p) => p[1] < 0 && p[3] < 5) && robotSolo.every((p) => p[0] < 0 && p[1] > 0.1)
+afirmar(debajoDelRobot && FLUJO.nodos.every(([x], k) => k === 0 || x > FLUJO.nodos[0][0]), 'IA y automatización: el robot del chatbot (cabeza, antena, ojos, boca) a la izquierda y su flujo de nodos conectados, aparte y debajo, de izquierda a derecha (con su recorrido, para el pulso)')
 const sombreadorC4 = VERTICE_DEL_ENJAMBRE
 afirmar(ACENTOS_DEL_ENJAMBRE.web === '#06b6d4' && ACENTOS_DEL_ENJAMBRE.ia === '#10b981' && ACENTOS_DEL_ENJAMBRE.automatizacion === '#f59e0b' && ACENTOS_DEL_ENJAMBRE.software === '#8b5cf6' && sombreadorC4.includes('return d.w < 3.00000 ? uColores[ 3 ] : uColores[ 4 ];'), '  con los acentos de marca (web, software, IA; el flujo, el de automatización) y el color pasa de uno al otro con el avance')
 

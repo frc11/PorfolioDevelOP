@@ -9,6 +9,8 @@
  *   1C · el túnel: la misma animación (la tabla de heatbureau, sus rampas, sus resortes y su regulador), estirada por `k`
  *        desde 1024 (1,5; `?pruebas=tunelk=1.3|1.8`); con k = 1, el de antes cuadro a cuadro; las leyes de prueba de
  *        AJUSTES FINALES B1 se borraron; REGLA DE ALTURAS: la escena descuenta el tramo estirado.
+ *   2A · los nanobots de IA y automatización: el flujo es una figura aparte, horizontal, debajo del robot, sin línea que los
+ *        una; el robot que habla y el flujo que se enciende tramo a tramo, como estaban.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/cierre-final/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -24,6 +26,8 @@ import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { progresoDelScroll } from '../escena/recorrido'
 import { sinElEstiramiento } from '../escena/tramoEstirado'
 import { CARGA, SEGURO_DEL_VELO_MS, estaTodo, type EstadoDeLaCarga } from '../carga'
+import { CAPAS_DEL_ROBOT, FLUJO, ROBOT, robot } from '../nanobots/robot'
+import { RELOJ_DEL_ROBOT, vidaDelRobot } from '../nanobots/vida'
 import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -183,5 +187,39 @@ const cableado = (a: string): boolean =>
   estira.includes('TRAMO_ESTIRADO.valor = tramo') && estira.includes("return pedido === 'no' ? ESTIRAMIENTO_DEL_TUNEL.escritorio : Number(pedido)")
 afirmar(cableado(atadura), '  el cableado: el lazo de la escena y la luz de los viajes miden sin el tramo estirado; el túnel lee su ritmo (el CSS abajo de 1024, el k de la carga desde 1024), estira el panel y lo suelta al desmontarse')
 controlPositivo('el detector VE la escena midiendo el scroll crudo', atadura.replace('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)', 'progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)'), cableado)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2A · Nanobots de IA y automatización: el flujo es una figura aparte, horizontal, debajo del robot y sin línea que los una')
+
+interface FormaDelFlujo {
+  readonly nodos: readonly (readonly [number, number])[]
+  readonly tramos: readonly (readonly [number, number])[]
+}
+const C = ROBOT.cabeza
+const aparteYHorizontal = (f: FormaDelFlujo): boolean => {
+  const [n0, n1, n2] = f.nodos
+  const horizontal = n0[1] === n1[1] && n1[1] === n2[1] && n0[0] < n1[0] && n1[0] < n2[0]
+  // Ningún tramo sale del robot (todos van de nodo a nodo) y todo el flujo queda debajo de la cabeza, con aire.
+  const deNodoANodo = f.tramos.every(([de, a]) => de >= 0 && a >= 0 && de < f.nodos.length && a < f.nodos.length)
+  const debajo = f.nodos.every(([, y]) => y + FLUJO.anillo < C.cy - C.my - 0.15)
+  return horizontal && deNodoANodo && debajo
+}
+afirmar(aparteYHorizontal(FLUJO), 'el flujo va aparte: tres nodos en línea horizontal, de izquierda a derecha, debajo de la cabeza del robot y con aire (más de 0,15 del símbolo); ningún tramo sale del robot', `nodos en y = ${String(FLUJO.nodos[0][1])} · la cabeza termina en ${(C.cy - C.my).toFixed(2)}`)
+const flujoDeAntes: FormaDelFlujo = { nodos: [[-0.05, -0.05], [0.17, -0.27], [0.39, -0.49], [0.69, -0.52], [0.42, -0.79]], tramos: [[-1, 0], [0, 1], [1, 2], [2, 3], [2, 4]] }
+controlPositivo('el detector VE el flujo de A6 (salía de la cabeza en diagonal)', flujoDeAntes, aparteYHorizontal)
+// En los nanobots: ningún punto del flujo cerca del robot (sin línea que los una), y el robot sigue siendo el mismo.
+let azar = 7
+const aleatorio = (): number => ((azar = (azar * 16807) % 2147483647) / 2147483647)
+const puntos = robot(4000, aleatorio)
+const delRobot = puntos.filter((p) => p[3] < CAPAS_DEL_ROBOT.globo)
+const delFlujo = puntos.filter((p) => p[3] >= CAPAS_DEL_ROBOT.nodos)
+const aire = Math.min(...delFlujo.map((f) => Math.min(...delRobot.map((r) => Math.hypot(f[0] - r[0], f[1] - r[1])))))
+afirmar(delFlujo.length > 200 && aire > 0.2, '  en el enjambre: entre el flujo y el robot no hay ningún nanobot que los una (la distancia mínima entre los dos)', `${aire.toFixed(3)} del símbolo`)
+// El flujo se sigue encendiendo como antes: el primer nodo a 0,1 del ciclo, el pulso por el tramo y en la bifurcación por las dos ramas.
+const F = RELOJ_DEL_ROBOT.flujo
+const rellenoDe = (k: number): readonly number[] | undefined => delFlujo.find((p) => Math.abs(p[3] - (CAPAS_DEL_ROBOT.nodos + (k + 0.5) / 10)) < 1e-4)
+const primero = rellenoDe(0)
+const enciendeIgual = primero !== undefined && vidaDelRobot(primero[3], (F.porTramo - 0.01) * F.periodoS, false).ve === 0 && vidaDelRobot(primero[3], (F.porTramo + 0.01) * F.periodoS, false).ve === 1 && F.periodoS === 8
+afirmar(enciendeIgual, '  y se enciende como antes: el primer nodo se llena a 0,1 del ciclo de 8 s (antes de eso, la pausa: donde corría el tramo que salía del robot), y de ahí tramo a tramo (s48 A6)')
 
 cerrar('s49-cierre-final')

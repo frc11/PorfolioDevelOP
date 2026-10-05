@@ -57,7 +57,7 @@ import { poseDeLaLectura } from '../escena/titulos3d/colocacion'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import type { ParDeAnclas } from '../motion/anclas'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
-import { CAPAS_DEL_ROBOT, FLUJO, GLOBO_DE_DIALOGO } from '../nanobots/robot'
+import { CAPAS_DEL_ROBOT, FLUJO, GLOBO_DE_DIALOGO, PRIMER_TRAMO_EN_EL_RELOJ } from '../nanobots/robot'
 import { ENGRANAJES, GLOBO, PUNTOS_DEL_ENJAMBRE, simbolosDelEnjambre } from '../nanobots/simbolos'
 import { type Trazo, circulo, disco, rectanguloRedondeado, repartir, trazar } from '../nanobots/trazos'
 import { RELOJ_DEL_ROBOT, VIDA_DEL_ROBOT_GLSL, textoEscrito, vidaDelRobot } from '../nanobots/vida'
@@ -410,7 +410,8 @@ const completos = ([ENGRANAJES.a, ENGRANAJES.b] as const).every((g, k) => {
 })
 afirmar(completos && ENGRANAJES.llanta === 0.8, 'software: los dos engranajes completos — el contorno dentado (las doce y las ocho puntas, todas), la llanta, el cubo y los rayos (sólo sobre sus ángulos): nada suelto')
 
-// El robot: la cabeza a la izquierda; el globo de diálogo arriba a la derecha con sus renglones, en orden; el flujo abajo a la derecha.
+// El robot: la cabeza a la izquierda; el globo de diálogo arriba a la derecha con sus renglones, en orden; el flujo abajo
+// ([CIERRE] 2A: una figura aparte, horizontal, debajo del robot y sin línea que los una; s49 2A).
 const K6 = CAPAS_DEL_ROBOT
 const capa = (w: number): PuntoA6[] => robotA6.filter((p) => Math.floor(p[3]) === w)
 const [cuerpoA6, dialogoA6, textoA6, nodosA6, tramosA6] = [K6.robot, K6.globo, K6.texto, K6.nodos, K6.tramos].map(capa)
@@ -422,16 +423,17 @@ afirmar(sinRectanguloAbajo && cuerpoA6.every((p) => p[0] < 0) && dialogoA6.lengt
 const nodoEn = (k: number, relleno: boolean): PuntoA6[] => nodosA6.filter((p) => Math.abs(p[3] - (K6.nodos + (k + (relleno ? 0.5 : 0)) / 10)) < 1e-4)
 const anillosYRellenos = FLUJO.nodos.every(([x, y], k) => nodoEn(k, false).length > 0 && nodoEn(k, false).every((p) => Math.abs(Math.hypot(p[0] - x, p[1] - y) - FLUJO.anillo) < 0.003) && nodoEn(k, true).length > 0 && nodoEn(k, true).every((p) => Math.hypot(p[0] - x, p[1] - y) <= FLUJO.relleno + 1e-9))
 const [n0, n1, n2, n3, n4] = FLUJO.nodos
-const enLinea = Math.abs((n1[0] - n0[0]) * (n2[1] - n0[1]) - (n1[1] - n0[1]) * (n2[0] - n0[0])) < 1e-9 && n1[0] > n0[0] && n1[1] < n0[1] && Math.abs(Math.abs(n1[0] - n0[0]) - Math.abs(n1[1] - n0[1])) < 1e-9
+const enLinea = n0[1] === n1[1] && n1[1] === n2[1] && n1[0] > n0[0] && n2[0] > n1[0] && Math.abs(n1[0] - n0[0] - (n2[0] - n1[0])) < 1e-9
 const anguloDesde = (d: readonly [number, number]): number => Math.atan2(d[1] - n2[1], d[0] - n2[0]) - Math.atan2(n2[1] - n1[1], n2[0] - n1[0])
 const bifurcacion = FLUJO.tramos.filter(([de]) => de === 2).length === 2 && Math.abs(anguloDesde(n3) + anguloDesde(n4)) < 0.02 && Math.abs(anguloDesde(n3)) > 0.5 && Math.abs(anguloDesde(n3)) < 0.9
 const tramoRecorrido = FLUJO.tramos.every(([de, a], L) => {
-  const mios = tramosA6.filter((p) => p[3] >= K6.tramos + L / 10 && p[3] < K6.tramos + (L + 1) / 10).sort((p, q) => p[3] - q[3])
-  const desde = de < 0 ? FLUJO.arranque : FLUJO.nodos[de]
+  const enElReloj = L + PRIMER_TRAMO_EN_EL_RELOJ
+  const mios = tramosA6.filter((p) => p[3] >= K6.tramos + enElReloj / 10 && p[3] < K6.tramos + (enElReloj + 1) / 10).sort((p, q) => p[3] - q[3])
+  const desde = FLUJO.nodos[de]
   const [primero, ultimo] = [mios[0], mios[mios.length - 1]]
   return mios.length > 10 && Math.hypot(primero[0] - desde[0], primero[1] - desde[1]) < Math.hypot(ultimo[0] - desde[0], ultimo[1] - desde[1]) && Math.hypot(ultimo[0] - FLUJO.nodos[a][0], ultimo[1] - FLUJO.nodos[a][1]) < FLUJO.anillo + 0.02
 })
-afirmar(anillosYRellenos && enLinea && bifurcacion && tramoRecorrido && sombreadorA6.includes(`return d.w < ${K6.nodos.toFixed(5)} ? uColores[ 3 ] : uColores[ 4 ];`), 'automatización: el flujo es nuestro — nodos que son anillos (con su relleno aparte), tres en línea en diagonal hacia abajo a la derecha y del tercero una bifurcación simétrica (±40°); cada tramo sabe cuánto de sí es cada nanobot (4 + (L + u) / 10), de borde de anillo a borde de anillo; el robot y su globo en verde (#10b981), el flujo en ámbar (#f59e0b)')
+afirmar(anillosYRellenos && enLinea && bifurcacion && tramoRecorrido && sombreadorA6.includes(`return d.w < ${K6.nodos.toFixed(5)} ? uColores[ 3 ] : uColores[ 4 ];`), 'automatización: el flujo es nuestro — nodos que son anillos (con su relleno aparte), tres en línea HORIZONTAL de izquierda a derecha ([CIERRE] 2A: era en diagonal desde la cabeza) y del tercero una bifurcación simétrica (±34°); cada tramo sabe cuánto de sí es cada nanobot (4 + (L + u) / 10, desde el 1 del reloj), de borde de anillo a borde de anillo; el robot y su globo en verde (#10b981), el flujo en ámbar (#f59e0b)')
 
 // La vida del robot: el texto se tipea y se borra; el flujo se enciende tramo a tramo con el pulso, y vuelve a empezar. Con movimiento reducido, el final quieto.
 const RT = RELOJ_DEL_ROBOT
@@ -443,7 +445,8 @@ const rellenosA6 = nodosA6.filter((p) => (p[3] - K6.nodos) * 10 - Math.floor((p[
 const alTiempo = (fase: number): number => fase * RT.flujo.periodoS
 const seEnciende = [0, 1, 2].every((k) => visibles(rellenosA6, alTiempo((k + 1) * RT.flujo.porTramo + 0.01)) === nodoEn(0, true).length * (k + 1) + (k === 2 ? 0 : 0)) && visibles(rellenosA6, alTiempo(4 * RT.flujo.porTramo + 0.01)) === rellenosA6.length && visibles(rellenosA6, alTiempo(RT.flujo.reinicio + 0.01)) === 0
 const tramoDe = (L: number): PuntoA6[] => tramosA6.filter((p) => p[3] >= K6.tramos + L / 10 && p[3] < K6.tramos + (L + 1) / 10)
-const pulsoPorTramo = [0, 1, 2].every((L) => pulsoEn(tramoDe(L), alTiempo((L + 0.5) * RT.flujo.porTramo)) > 0 && [0, 1, 2, 3, 4].filter((otro) => otro !== L).every((otro) => pulsoEn(tramoDe(otro), alTiempo((L + 0.5) * RT.flujo.porTramo)) === 0)) && pulsoEn(tramoDe(3), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramoDe(4), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramosA6, alTiempo(0.5)) === 0
+// [CIERRE] 2A · el lugar 0 del reloj no tiene nanobots (era el tramo que salía del robot): es la pausa antes del primer nodo.
+const pulsoPorTramo = tramoDe(0).length === 0 && [1, 2].every((L) => pulsoEn(tramoDe(L), alTiempo((L + 0.5) * RT.flujo.porTramo)) > 0 && [1, 2, 3, 4].filter((otro) => otro !== L).every((otro) => pulsoEn(tramoDe(otro), alTiempo((L + 0.5) * RT.flujo.porTramo)) === 0)) && pulsoEn(tramoDe(3), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramoDe(4), alTiempo(3.5 * RT.flujo.porTramo)) > 0 && pulsoEn(tramosA6, alTiempo(0.5)) === 0
 const quietoAlFinal = robotA6.filter((p) => p[3] >= K6.texto).every((p) => vidaDelRobot(p[3], 0, true).ve === 1 && vidaDelRobot(p[3], 0, true).pulso === 0)
 afirmar(seTipea && textoEscrito(0) === 0 && textoEscrito(RT.tipeo.escribe) === 1 && textoEscrito(0.95) === 0, 'el texto se tipea en orden hasta `escribe`, se queda, se borra (de atrás para adelante) y vuelve a empezar', `${String(RT.tipeo.periodoS)} s por ciclo`)
 afirmar(seEnciende && pulsoPorTramo, 'el flujo se enciende tramo a tramo: el pulso recorre un tramo (y sólo ese), el nodo al que llega se llena, sigue al siguiente, en la bifurcación va por las dos ramas a la vez, queda encendido y se apaga todo para volver a empezar', `${String(RT.flujo.periodoS)} s por ciclo`)
