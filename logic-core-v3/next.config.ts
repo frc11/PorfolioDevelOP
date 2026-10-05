@@ -22,6 +22,10 @@ const nextConfig = {
   // de MIME type y 500s que parecen bugs de producto. La doc de Next exige
   // además que el directorio NO salga del proyecto (`../build` es inválido).
   distDir: process.env.E2E_DIST_DIR ?? '.next',
+  // Solo `next dev`: el teléfono entra por la IP de la red (http://192.168.1.x:3000) y Next 16 rechaza
+  // desde ese origen la conexión de recarga, de la que cuelga la hidratación en desarrollo: la página
+  // quedaba muerta bajo el velo de carga (/v3, CIERRE 1A). En producción no existe.
+  allowedDevOrigins: ['192.168.1.*'],
   serverExternalPackages: [
     '@react-pdf/renderer',
     '@prisma/client',

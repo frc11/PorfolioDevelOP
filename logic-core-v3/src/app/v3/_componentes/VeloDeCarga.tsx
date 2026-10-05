@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore, type AnimationEvent } from 'react'
 
-import { CARGA, abrirLaCarga, hayPrimerCuadro, suscribirALaCarga } from '../_lib/carga'
+import { CARGA, SEGURO_DEL_VELO_MS, abrirLaCarga, estaTodo, hayPrimerCuadro, suscribirALaCarga } from '../_lib/carga'
+import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { laEscenaCayo, suscribirALaCaida } from '../_lib/escena/caida'
 import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, useTituloListo } from '../_lib/titulos3d/registro'
+import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
 
 /**
  * [AJUSTES FINALES] A4 · EL VELO DE CARGA — la página arranca toda blanca y todo aparece junto, con un fundido, cuando está
@@ -17,13 +19,15 @@ import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, useTituloListo } from '../_li
  *   · (fuera)      terminado el fundido (`animationend`, el de la hoja: así dura lo que dura aunque el hilo esté ocupado)
  *                  se desmonta y se abre la carga: el titular del hero cae.
  *
- * Qué espera: las fuentes, el primer cuadro de la escena (o que la escena se haya caído) y, si el registro de los títulos
- * tiene anotado el titular del hero (desde 1024, con títulos de volumen), que sus dos registros estén armados y compilados.
+ * Qué espera (`estaTodo`, en `_lib/carga.ts`): las fuentes, el primer cuadro de la escena (o que la escena se haya caído)
+ * y, sólo desde 1024 y si el registro de los títulos tiene anotado el titular del hero, que sus dos registros estén armados
+ * y compilados. [CIERRE] 1A: abajo de 1024 el titular de volumen no existe y el velo no lo espera nunca.
  *
  * ⚠️ Si el DOM se entera DESPUÉS del plazo (una máquina lenta: hidratar tardó más de 4 s), la hoja ya está fundiendo el velo
  * sola: no se pasa a `saliendo` (reiniciaría el fundido desde opaco: un destello blanco, medido con CPU ×4), se la deja
- * terminar. Con movimiento reducido no hay fundido en espera (la política del sitio corta toda animación a 1 ms): el velo
- * queda opaco hasta que está todo y se va de golpe; sin JavaScript, `<noscript>` lo saca.
+ * terminar. Con movimiento reducido no hay fundido (la política del sitio corta toda animación a 1 ms): el velo queda opaco
+ * hasta que está todo, o hasta el plazo, y se va de golpe; sin JavaScript, `<noscript>` lo saca. Y el seguro, sin
+ * condiciones: a `SEGURO_DEL_VELO_MS` del arranque se va, esté lo que esté (si el fin de una animación no llegó).
  */
 export const IDS_DEL_TITULAR_DEL_HERO = ['hero-registro-1', 'hero-registro-2'] as const
 
@@ -46,27 +50,17 @@ function useFuentesListas(): boolean {
   return listas
 }
 
-/** Vencido el plazo desde el arranque de la página (la misma cuenta que la hoja y que el respaldo 2D del titular). */
-function usePlazoVencido(): boolean {
-  const [vencido, setVencido] = useState(false)
-  useEffect(() => {
-    const reloj = window.setTimeout(() => setVencido(true), Math.max(0, CARGA.plazoMs - performance.now()))
-    return () => window.clearTimeout(reloj)
-  }, [])
-  return vencido
-}
-
 export function VeloDeCarga(): React.JSX.Element | null {
   const [etapa, setEtapa] = useState<Etapa>('espera')
   const fuentes = useFuentesListas()
-  const vencido = usePlazoVencido()
+  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const primerCuadro = useSyncExternalStore(suscribirALaCarga, hayPrimerCuadro, () => false)
   const caida = useSyncExternalStore(suscribirALaCaida, laEscenaCayo, () => false)
-  // Si el titular del hero está anotado como título de volumen, se lo espera armado; si no (el teléfono, sin títulos), no.
+  // Si el titular del hero está anotado como título de volumen (desde 1024), se lo espera armado; si no, no.
   const conTitular = useSyncExternalStore(suscribirALosTitulos, () => TITULOS_DE_VOLUMEN.has(IDS_DEL_TITULAR_DEL_HERO[0]), () => false)
   const titular1 = useTituloListo(IDS_DEL_TITULAR_DEL_HERO[0])
   const titular2 = useTituloListo(IDS_DEL_TITULAR_DEL_HERO[1])
-  const todo = fuentes && (primerCuadro || caida) && (!conTitular || (titular1 && titular2))
+  const todo = estaTodo({ fuentes, primerCuadro, caida, escritorio, conTitular, titularListo: titular1 && titular2 })
 
   // Terminado el fundido: afuera, y la carga se abre (el titular del hero cae recién ahora).
   const terminar = useCallback((): void => {
@@ -74,17 +68,16 @@ export function VeloDeCarga(): React.JSX.Element | null {
     setEtapa('fuera')
   }, [])
 
+  // Todo antes del plazo: el fundido, ya. Después, la hoja ya lo funde sola (o ya lo fundió): no se lo reinicia.
   useEffect(() => {
-    if (etapa !== 'espera' || !(todo || vencido)) return undefined
-    const ya = performance.now()
-    if (ya < CARGA.plazoMs) {
-      setEtapa('saliendo')
-      return undefined
-    }
-    // Vencido antes de que el DOM se enterara: la hoja ya lo funde sola (o ya lo fundió); si su fin no llega, igual se va.
-    const reloj = window.setTimeout(terminar, Math.max(0, CARGA.plazoMs + CARGA.fundidoMs - ya) + CARGA.margenMs)
+    if (etapa === 'espera' && todo && performance.now() < CARGA.plazoMs) setEtapa('saliendo')
+  }, [etapa, todo])
+
+  // [CIERRE] 1A · el seguro, sin condiciones: a `SEGURO_DEL_VELO_MS` del arranque se va, esté lo que esté.
+  useEffect(() => {
+    const reloj = window.setTimeout(terminar, Math.max(0, SEGURO_DEL_VELO_MS - performance.now()))
     return () => window.clearTimeout(reloj)
-  }, [etapa, todo, vencido, terminar])
+  }, [terminar])
 
   // El seguro del fundido pedido: si el fin de la animación no llega (la hoja no cargó), igual se va.
   useEffect(() => {

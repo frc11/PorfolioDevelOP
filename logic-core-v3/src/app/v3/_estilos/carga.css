@@ -16,12 +16,16 @@
  *
  * El fin de cualquiera de las dos (`animationend`) es lo que desmonta el velo.
  *
- * ⚠️ Con movimiento reducido la política del sitio corta toda animación a 1 ms
- * (`globals.css`): el fundido de la espera sería un parpadeo instantáneo y la página
- * quedaría destapada antes de tiempo. Ahí la espera no se anima (queda opaca hasta
- * que el hook pide salir, y la salida es de golpe); sin JavaScript, el `<noscript>`
- * del componente la saca. Las dos propiedades de componente están registradas en
- * `s3-registro-de-tokens.ts`.
+ * ⚠️ Con movimiento reducido la política del sitio corta toda animación a 1 ms y
+ * le saca la espera (`globals.css`): el fundido de la espera sería un parpadeo
+ * instantáneo y la página quedaría destapada antes de tiempo. Ahí la espera es un
+ * CORTE: opaca hasta el plazo y, a los `--velo-espera`, de golpe (el 1 ms de la
+ * política, en escalón). [CIERRE] 1A: antes no se animaba nada y, si la página no
+ * hidrataba (el teléfono por la IP de la red), quedaba opaca para siempre; el
+ * `!important` le devuelve la espera a este velo solo, como `deslizamiento.css` le
+ * devuelve su fundido al del viaje. Sin JavaScript, el
+ * `<noscript>` del componente la saca. Las dos propiedades de componente están
+ * registradas en `s3-registro-de-tokens.ts`.
  * ========================================================================= */
 
 [data-v3] [data-pieza='velo-de-carga'] {
@@ -40,7 +44,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-v3] [data-pieza='velo-de-carga'][data-velo='espera'] {
-    animation: none;
+    animation-timing-function: step-end;
+    animation-delay: var(--velo-espera) !important;
   }
 }
 
