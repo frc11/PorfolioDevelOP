@@ -6,6 +6,8 @@
  *        las dos direcciones; abajo de 1024 la capa rígida crece en 1,4 vacíos; el título es «Demos», como Portfolio.
  *   1C · los nanobots bajo el mouse: se desarman en un radio chico alrededor del cursor (en el sombreador, con el cursor
  *        como uniforme) y vuelven con resorte; conservan su color; sólo con mouse y con movimiento.
+ *   1D · la placa del contacto: mientras viaja desde el fondo no responde al mouse; al llegar entra suave el paralaje
+ *        inverso (se corre al revés del mouse y se le ve el costado de ese lado).
  * (1A, el túnel en k = 1,8 sin la bandera `tunelk`, lo afirma s49 1C al día.) Lo que se mira en vivo:
  * `~/.cache/b4-medicion/encastre/mirar.txt`.
  */
@@ -14,6 +16,7 @@ import { readFileSync } from 'node:fs'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { APARICION, LLEGADA, aparicionPedida, enElTramo, escalaDeDemos, llegadaDeDemos, llegadaDeLaAparicion, perseguirLaAparicion, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { FIN_DE_LA_LLEGADA_EN_EL_VACIO, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
+import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../../_chrome/contacto/placa'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -150,5 +153,24 @@ const oidoBien = (m: string): boolean =>
   m.includes("if (e.pointerType === 'touch') return") && /if \(mouse\.medir\) \{\s*mouse\.medir = false\s*const r = lienzo\.getBoundingClientRect\(\)/.test(m) && m.includes('return quieto ? { ...objetivo, dentro: false } : objetivo') && m.includes('oido.soltar()') && m.includes('enjambre.apuntar(puntero)')
 afirmar(oidoBien(montajeDelEnjambre), '  el oído: sólo mouse o lápiz (el dedo no), medido al moverse o al scrollear (no en cada cuadro), apagado con movimiento reducido y soltado al desmontarse; el lazo de siempre (pausa fuera de pantalla) le pasa el hueco al sombreador')
 controlPositivo('el detector VE el dedo desarmando el símbolo', montajeDelEnjambre.replace("if (e.pointerType === 'touch') return", ''), oidoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1D · La placa del contacto: quieta mientras viaja; al llegar, el paralaje inverso entra suave')
+
+// Al revés del mouse: con el mouse a la izquierda se corre a la derecha (y se le ve el costado izquierdo: s49 2B).
+const inverso = (par: typeof paralajeDe): boolean =>
+  par(0.04, 0.5).corrimientoX > 0 && par(0.96, 0.5).corrimientoX < 0 && par(0.5, 0.04).corrimientoY > 0 && par(0.5, 0.96).corrimientoY < 0 &&
+  par(0.5, 0.5).corrimientoX === 0 && par(0.04, 0.5).rotateY > 0 && Math.abs(par(0, 0.5).corrimientoX - CORRIMIENTO_DE_LA_PLACA.x) < 1e-12
+afirmar(inverso(paralajeDe), 'al revés del mouse: con el mouse a la izquierda la placa se corre a la derecha (hasta 3,5 % del cuadro) y gira mostrando su costado izquierdo; arriba, se corre hacia abajo; al centro, quieta', `${(paralajeDe(0, 0.5).corrimientoX * 1440).toFixed(0)} px a 1440 con el mouse en el borde`)
+controlPositivo('el detector VE una placa que sigue al mouse (se corre hacia él)', ((x: number, y: number) => ({ ...paralajeDe(x, y), corrimientoX: -paralajeDe(x, y).corrimientoX, corrimientoY: -paralajeDe(x, y).corrimientoY })) as typeof paralajeDe, inverso)
+// Todo multiplicado por la ganancia: 0 hasta que el viaje terminó (el punto de vista en el centro: antes, la que viajaba
+// seguía al mouse porque el punto de vista se corría con él), y al llegar sube a 1, suave.
+const placaTs = sinComentarios(leer('_chrome/contacto/placa.ts'))
+const placaTsx = sinComentarios(leer('_chrome/contacto/PlacaDelContacto.tsx'))
+const quietaAlViajar = (ts: string, tsx: string): boolean =>
+  ts.includes('rotateY.set(p.rotateY * g)') && ts.includes('origenX.set(50 + (p.origenX - 50) * g)') && ts.includes('x.set(p.corrimientoX * g * window.innerWidth)') && /if \(!activo \|\| !llego\) \{\s*ganancia\.set\(0\)/.test(ts) && ts.includes('animate(ganancia, 1, ENTRADA_DEL_PARALAJE)') && ts.includes("ganancia.on('change', aplicar)") &&
+  tsx.includes('const paralaje = useParalaje(activa, llego)') && tsx.includes('onAnimationComplete={() => setLlego(true)}') && tsx.includes('x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY')
+afirmar(quietaAlViajar(placaTs, placaTsx) && ENTRADA_DEL_PARALAJE.duration >= 0.5, 'mientras viaja desde el fondo no responde (ganancia 0: sin giro, sin corrimiento y con el punto de vista en el centro); cuando el viaje termina la ganancia sube a 1 en 0,8 s con el último puntero (entra suave, desde quieta); cada apertura monta la placa de nuevo', `${String(ENTRADA_DEL_PARALAJE.duration)} s`)
+controlPositivo('el detector VE la placa de CIERRE (respondía desde el primer cuadro del viaje)', placaTs.replace('rotateY.set(p.rotateY * g)', 'rotateY.set(p.rotateY)'), (ts: string) => quietaAlViajar(ts, placaTsx))
 
 cerrar('s50-encastre')

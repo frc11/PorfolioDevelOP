@@ -272,7 +272,7 @@ const costados = (par: typeof paralajeDe): boolean =>
   seVeElCostadoIzquierdo(0.04, ANCHO_DE_LA_PLACA, 1440, par) && seVeElCostadoIzquierdo(0.25, ANCHO_DE_LA_PLACA, 1440, par) && !seVeElCostadoIzquierdo(0.5, ANCHO_DE_LA_PLACA, 1440, par) &&
   Math.abs(par(0.96, 0.5).rotateY + par(0.04, 0.5).rotateY) < 1e-9 && par(0.96, 0.5).origenX > 50 && par(0.5, 0.04).rotateX < 0 && par(0.5, 0.96).rotateX > 0 && par(0.5, 0.04).origenY < 50 && Math.abs(par(0.04, 0.5).rotateY) >= 15
 afirmar(costados(paralajeDe) && /if \(e\.pointerType === 'touch'\) return/.test(sinComentarios(leer('_chrome/contacto/placa.ts'))), 'el puntero es la cámara y exagera: con el mouse a la izquierda la cara izquierda gira hacia adelante y el punto de vista se corre (se ve el costado ya desde un cuarto del cuadro; al centro, sólo el frente); a la derecha el derecho; arriba la de arriba y abajo la de abajo. Con el dedo no gira', `${paralajeDe(0.04, 0.5).rotateY.toFixed(1)}° · punto de vista al ${paralajeDe(0.04, 0.5).origenX.toFixed(0)} %`)
-const paralajeDeAntes: typeof paralajeDe = (x, y) => ({ rotateY: (x - 0.5) * 2 * 3, rotateX: -(y - 0.5) * 2 * 3, origenX: 50, origenY: 50 })
+const paralajeDeAntes: typeof paralajeDe = (x, y) => ({ rotateY: (x - 0.5) * 2 * 3, rotateX: -(y - 0.5) * 2 * 3, origenX: 50, origenY: 50, corrimientoX: 0, corrimientoY: 0 })
 controlPositivo('el detector VE el paralaje de AJUSTES FINALES (±3°, hacia el puntero: el costado no se ve nunca)', paralajeDeAntes, costados)
 
 // La llegada: nace en un PUNTO del fondo y viaja hasta adelante, con el tamaño aparente creciendo casi en recta (como el túnel).

@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -14,6 +15,9 @@ import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, useParal
  *
  * El escenario no recibe el puntero (un clic al lado de la placa cae en el velo, que cierra); el bloque sí. La opacidad
  * va en el escenario y no en el viaje: un `opacity` menor que 1 sobre un elemento `preserve-3d` lo aplana.
+ *
+ * [EL ENCASTRE] 1D · el paralaje recién cuando el viaje terminó (`llego`, al completarse su animación: cada apertura monta
+ * la placa de nuevo) y el bloque se corre al revés del mouse.
  */
 const VIAJE = viajeDesdeElFondo()
 const E = ESPESOR_DE_LA_PLACA_PX
@@ -27,7 +31,8 @@ const CARAS = [
 ] as const
 
 export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
-  const paralaje = useParalaje(activa)
+  const [llego, setLlego] = useState(false)
+  const paralaje = useParalaje(activa, llego)
   if (!activa) return <>{children}</>
   return (
     <motion.div
@@ -45,8 +50,9 @@ export function PlacaDelContacto({ activa, children }: { readonly activa: boolea
         animate={{ z: [...VIAJE], rotateX: 0 }}
         exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}
         transition={TRANSICIONES.viaje}
+        onAnimationComplete={() => setLlego(true)}
       >
-        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
+        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
           {children}
           {CARAS.map((c) => (
             <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className)} style={c.style} />
