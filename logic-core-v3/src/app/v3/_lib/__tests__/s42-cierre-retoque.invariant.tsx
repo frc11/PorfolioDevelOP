@@ -51,7 +51,8 @@ titulo('D6 · El túnel lento, borrado')
 afirmarIgual(CAPAS_DEL_TUNEL, { escenario: { de: 1, a: 1.3, arranca: 199, topa: 1420 }, proyectos: [{ de: 0, a: 0.9, arranca: 810, topa: 1720 }, { de: 0, a: 1.2, arranca: 1303, topa: 1983 }, { de: 0, a: 1.05, arranca: 1636, topa: 2236 }], cta: { de: 0, a: 0.4, arranca: 1873, topa: 2290 } }, 'la tabla medida de heatbureau, la de siempre')
 const sinLento = (fuentes: string): boolean => !/LENTO|lento|pruebas\.tunel/.test(fuentes)
 const delTunel = ['_secciones/trabajos/Trabajos.tsx', '_secciones/trabajos/ritmo.ts'].map((r) => sinComentarios(leer(r))).join('\n')
-afirmar(sinLento(delTunel) && !('tunel' in PRUEBAS_APAGADAS) && !('tunel' in entornoPedido('producto,tunel=lento').pruebas), 'ni el estiramiento ni la clase ni la bandera: `?pruebas=tunel=lento` no pide nada')
+// [AJUSTES FINALES] B1: la clave `tunel` volvió con OTRA prueba (`constante|tope|largo`, apagada en el producto); `lento` sigue sin pedir nada.
+afirmar(sinLento(delTunel) && PRUEBAS_APAGADAS.tunel === 'no' && entornoPedido('producto,tunel=lento').pruebas.tunel === 'no', 'ni el estiramiento ni la clase ni la bandera: `?pruebas=tunel=lento` no pide nada')
 controlPositivo('el detector VE el túnel lento', `${delTunel}\nconst lento = useTunelLento()`, sinLento)
 
 // ═══════════════════════════════════════════════════════════════════════════
