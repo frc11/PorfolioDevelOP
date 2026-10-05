@@ -13,7 +13,8 @@ import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from 
 import { CamposDelContacto } from './CamposDelContacto'
 import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, TITULO, avisoDeErrores, type Interes } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from './enviarContacto'
-import { CURVA_DE_LA_PLACA, DESENFOQUE_DEL_FONDO_PX, MS_DEL_FONDO, MS_DE_LA_PLACA, PERSPECTIVA_DE_LA_PLACA, PROFUNDIDAD_DE_LA_PLACA_PX, useFondoDeLaPrueba, useParalaje } from './placa'
+import { DESENFOQUE_DEL_FONDO_PX, TRANSICIONES } from './placa'
+import { PlacaDelContacto } from './PlacaDelContacto'
 
 /**
  * EL FORMULARIO DE CONTACTO — la hoja y su velo. **[CONTACTO]**
@@ -26,9 +27,10 @@ import { CURVA_DE_LA_PLACA, DESENFOQUE_DEL_FONDO_PX, MS_DEL_FONDO, MS_DE_LA_PLAC
  *
  * La curva es la medida en nk: `cubic-bezier(.77,0,.175,1)`, 0,7 s la hoja y 0,4 s el velo.
  *
- * [AJUSTES FINALES] B2 · con `?pruebas=contactofondo=blur|blanco` (escritorio, con movimiento) el contacto es una
- * TRANSICIÓN: el fondo cambia primero (0,5 s) y la hoja llega como una PLACA desde el fondo, con la perspectiva del foco de
- * la sala y el paralaje del puntero; Esc y la cruz la devuelven por donde vino. Los números y el porqué, en `placa.ts`.
+ * [CIERRE] 2B · desde la barra y con movimiento el contacto es una TRANSICIÓN (era la prueba B2 de AJUSTES FINALES): el
+ * fondo se desenfoca primero (0,5 s) y la hoja llega como una PLACA con espesor desde un punto del fondo, y gira con el
+ * puntero hasta mostrar sus costados (`PlacaDelContacto.tsx`); al cerrar se acuesta y recién después se va el desenfoque.
+ * En el teléfono (el modo del menú) y con movimiento reducido, la hoja de siempre. Los números y el porqué, en `placa.ts`.
  */
 
 const CURVA = [0.77, 0, 0.175, 1] as const
@@ -133,29 +135,24 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const fuera = desdeArriba ? '-100%' : '100%'
   const hoja = reducido ? { duration: 0 } : { duration: MS_DE_LA_HOJA / 1000, ease: CURVA }
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
-  // [AJUSTES FINALES] B2 · con la prueba, en escritorio y con movimiento: el fondo cambia en 0,5 s y la hoja llega como una placa desde el fondo.
-  const fondo = useFondoDeLaPrueba()
-  const placa = fondo !== 'no' && desdeArriba && !reducido
-  const paralaje = useParalaje(placa)
-  const llegada = { duration: MS_DE_LA_PLACA / 1000, ease: CURVA_DE_LA_PLACA, delay: (MS_DEL_FONDO / 1000) * 0.6 }
-  const cambioDelFondo = { duration: MS_DEL_FONDO / 1000, ease: CURVA }
-  const desenfocado = placa && fondo === 'blur'
+  // [CIERRE] 2B · desde la barra y con movimiento: el fondo se desenfoca en 0,5 s y la hoja llega como una placa (`placa.ts`).
+  const placa = desdeArriba && !reducido
 
   return (
-    <div ref={raiz} data-pieza="contacto" data-modo={modo} data-placa={placa ? fondo : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
+    <div ref={raiz} data-pieza="contacto" data-modo={modo} data-placa={placa ? '' : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
       {/* El velo: oscurece y desenfoca. Un click afuera cierra. */}
       <motion.div
         data-parte="velo"
         aria-hidden="true"
         onClick={cerrarContacto}
-        className={cn('absolute inset-0', placa && fondo === 'blanco' ? 'bg-fondo' : 'bg-[color-mix(in_srgb,var(--color-tinta)_35%,transparent)] backdrop-blur-[var(--blur-panel)]')}
-        initial={desenfocado ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}
-        animate={desenfocado ? { opacity: 1, backdropFilter: `blur(${String(DESENFOQUE_DEL_FONDO_PX)}px)` } : { opacity: 1 }}
-        exit={desenfocado ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}
-        transition={placa ? cambioDelFondo : velo}
+        className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_35%,transparent)] backdrop-blur-[var(--blur-panel)]"
+        initial={placa ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}
+        animate={placa ? { opacity: 1, backdropFilter: `blur(${String(DESENFOQUE_DEL_FONDO_PX)}px)` } : { opacity: 1 }}
+        exit={placa ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}
+        transition={placa ? TRANSICIONES.fondo : velo}
       />
-      {/* [AJUSTES FINALES] B2 · con la prueba la hoja es una PLACA: llega desde el fondo (translateZ con la perspectiva del foco de la sala) y gira apenas hacia el puntero. */}
-      <div className={placa ? 'absolute inset-0 grid place-items-center p-[var(--pad-lateral-compacto)]' : 'contents'} style={placa ? { perspective: PERSPECTIVA_DE_LA_PLACA } : undefined}>
+      {/* [CIERRE] 2B · desde la barra la hoja es el frente de una PLACA con espesor (`PlacaDelContacto.tsx`). */}
+      <PlacaDelContacto activa={placa}>
       <motion.div
         ref={caja}
         role="dialog"
@@ -166,14 +163,13 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         className={cn(
           'bg-fondo text-tinta overflow-y-auto overscroll-contain will-change-transform',
           placa
-            ? 'relative max-h-[90svh] w-full max-w-[calc(var(--spacing-20)*14+2*var(--pad-lateral-compacto))] rounded-[calc(var(--radius-fuerte)*2)] [box-shadow:0_var(--spacing-3)_0_0_var(--color-tinta),var(--shadow-flotante)]'
+            ? 'relative max-h-[86svh] w-full rounded-[var(--radius-medio)]'
             : cn('absolute inset-x-0 shadow-[var(--shadow-flotante)]', desdeArriba ? 'top-0 max-h-[90svh] rounded-b-[calc(var(--radius-fuerte)*2)]' : 'bottom-0 h-[100dvh]'),
         )}
-        style={placa ? { rotateX: paralaje.rotateX, rotateY: paralaje.rotateY, transformStyle: 'preserve-3d' } : undefined}
-        initial={placa ? { opacity: 0, z: -PROFUNDIDAD_DE_LA_PLACA_PX } : { y: fuera }}
-        animate={placa ? { opacity: 1, z: 0 } : { y: 0 }}
-        exit={placa ? { opacity: 0, z: -PROFUNDIDAD_DE_LA_PLACA_PX } : { y: fuera }}
-        transition={placa ? llegada : hoja}
+        initial={placa ? false : { y: fuera }}
+        animate={placa ? undefined : { y: 0 }}
+        exit={placa ? undefined : { y: fuera }}
+        transition={placa ? undefined : hoja}
       >
         <div
           className={cn(
@@ -226,7 +222,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           </form>
         </div>
       </motion.div>
-      </div>
+      </PlacaDelContacto>
     </div>
   )
 }

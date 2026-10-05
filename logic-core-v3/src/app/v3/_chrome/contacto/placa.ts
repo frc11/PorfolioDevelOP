@@ -1,63 +1,113 @@
 'use client'
 
-import { useMotionValue, type MotionValue } from 'motion/react'
-import { useEffect, useSyncExternalStore } from 'react'
+import { useMotionTemplate, useSpring, type MotionValue } from 'motion/react'
+import { useEffect } from 'react'
 
-import { entornoDeLaEscena, type Pruebas } from '../../_lib/escena/entorno'
 import { FOCO_DE_LA_ESCENA_PX } from '../../_secciones/trabajos/tunel'
 
 /**
- * [AJUSTES FINALES] B2 · EL CONTACTO COMO TRANSICIÓN — dos pruebas, apagadas en el producto, sólo en escritorio (la hoja
- * de la barra) y con movimiento: `?pruebas=contactofondo=blur` y `?pruebas=contactofondo=blanco`.
+ * [CIERRE] 2B · EL CONTACTO COMO PLACA — en el producto, desde la barra (escritorio y tablet) y con movimiento. Era la
+ * prueba `?pruebas=contactofondo=blur|blanco` de AJUSTES FINALES B2: Valentino eligió el desenfoque; el fundido a blanco y
+ * la bandera se borraron. Abajo de la barra (el teléfono, con el menú) y con movimiento reducido, la hoja deslizante de hoy.
  *
- *   1. El FONDO cambia primero, progresivo y rápido (`MS_DEL_FONDO`): con `blur`, el sitio se desenfoca hasta
- *      `DESENFOQUE_DEL_FONDO_PX` mientras se oscurece (el velo de siempre, pero animando el desenfoque desde cero); con
- *      `blanco`, se funde al papel.
- *   2. Después LLEGA el formulario como una PLACA sólida desde el fondo, con el efecto del túnel: `translateZ` desde
- *      `PROFUNDIDAD_DE_LA_PLACA_PX` (dos focos: nace a un tercio de su tamaño) con la perspectiva en el foco de la cámara
- *      de la sala (`FOCO_DE_LA_ESCENA_PX`, el mismo con que huye el cartel de Portfolio), y con el paralaje de cámara: gira
- *      apenas hacia el puntero (`GIRO_DEL_PARALAJE_GRADOS`). Es la hoja de siempre —los campos del DOM, la trampa de foco,
- *      Esc y la cruz que cierran con la animación inversa (la salida de `AnimatePresence`), el envío—: lo que cambia es
- *      cómo entra y cómo se ve (un canto de tinta debajo: una placa, no una hoja). Abajo de 1024 y con movimiento reducido,
- *      el panel deslizante de hoy.
+ *   1. El FONDO cambia primero (`MS_DEL_FONDO`): el sitio se desenfoca hasta `DESENFOQUE_DEL_FONDO_PX` mientras se oscurece.
+ *   2. Llega la PLACA, un bloque con ESPESOR de verdad (`ESPESOR_DE_LA_PLACA_PX`: el frente es el formulario del DOM y las
+ *      cuatro caras de los costados y la de atrás son cajas de CSS 3D, en tinta). Nace en un PUNTO del fondo
+ *      (`ESCALA_AL_NACER` de su tamaño) y viaja hasta adelante como las fotos del túnel: su tamaño aparente crece casi en
+ *      recta y se asienta al final (`viajeDesdeElFondo`).
+ *   3. El puntero es la cámara, y exagerada: con el mouse a la izquierda se le ve el costado izquierdo, a la derecha el
+ *      derecho, arriba la cara de arriba y abajo la de abajo (`paralajeDe`: la placa gira hasta `GIRO_DE_LA_PLACA` y el
+ *      punto de vista se corre con el mouse). Con el dedo no gira.
+ *   4. Al cerrar (Esc, la cruz, el velo, después de enviar), primero la placa se ACUESTA hacia atrás sobre su base, como
+ *      los títulos y los libros (`MS_DE_LA_SALIDA_DE_LA_PLACA`), y RECIÉN DESPUÉS se va el desenfoque del fondo.
  *
- * Lo que NO es: la placa de WebGL del pie (`escena/pie3d`). Ésa vive en el lienzo de la escena, detrás de la página; el
- * contacto va encima de todo y una segunda escena para una placa no entró en este sprint. Queda anotado en el LEEME.
+ * Lo interactivo es el DOM de siempre (los campos, la trampa de foco, Esc, el envío): girado en CSS 3D, el navegador lo
+ * sigue tocando donde se ve. No hizo falta la placa de WebGL del pie: con las caras de CSS el espesor se ve.
  */
 export const MS_DEL_FONDO = 500
-export const MS_DE_LA_PLACA = 900
+export const MS_DE_LA_PLACA = 1000
+export const MS_DE_LA_SALIDA_DE_LA_PLACA = 650
+/** La perspectiva: el foco de la cámara de la sala (el mismo con que huye el cartel de Portfolio). */
 export const PERSPECTIVA_DE_LA_PLACA = FOCO_DE_LA_ESCENA_PX
-export const PROFUNDIDAD_DE_LA_PLACA_PX = 2 * FOCO_DE_LA_ESCENA_PX
-/** La llegada: rápida al salir del fondo, frenando al asentarse (como `expo.out`). */
-export const CURVA_DE_LA_PLACA = [0.16, 1, 0.3, 1] as const
 export const DESENFOQUE_DEL_FONDO_PX = 24
-export const GIRO_DEL_PARALAJE_GRADOS = 3
+/** El espesor del bloque (px): lo que se le ve de costado. */
+export const ESPESOR_DE_LA_PLACA_PX = 56
+/** Cuánto mide al nacer, en el fondo: un punto. */
+export const ESCALA_AL_NACER = 0.02
+/** La cámara del puntero: cuánto gira la placa en cada eje (grados) y cuánto se corre el punto de vista (fracción del cuadro). */
+export const GIRO_DE_LA_PLACA = { y: 22, x: 13 } as const
+export const PUNTO_DE_VISTA = { x: 0.42, y: 0.3 } as const
 
-const sinCambios = (): (() => void) => () => undefined
+const CURVA = [0.77, 0, 0.175, 1] as const
 
-/** La prueba de esta carga: apagada en el servidor y al hidratar; la pedida, después. */
-export function useFondoDeLaPrueba(): Pruebas['contactofondo'] {
-  return useSyncExternalStore(sinCambios, () => entornoDeLaEscena().pruebas.contactofondo, () => 'no')
+/**
+ * EL VIAJE DESDE EL FONDO: las posiciones en `z` (px, con la perspectiva de la placa) para que su tamaño aparente crezca de
+ * `ESCALA_AL_NACER` a 1 casi en recta (1 − (1 − t)^1,35: el túnel crece en recta y su resorte lo asienta), en `pasos`
+ * tramos iguales de tiempo. Con perspectiva `d`, una caja en `z` se ve `d / (d − z)` veces: para verse `s`, `z = d − d / s`.
+ */
+export function viajeDesdeElFondo(pasos = 16): readonly number[] {
+  const d = PERSPECTIVA_DE_LA_PLACA
+  return Array.from({ length: pasos + 1 }, (_, i) => {
+    const t = i / pasos
+    const s = ESCALA_AL_NACER + (1 - ESCALA_AL_NACER) * (1 - (1 - t) ** 1.35)
+    return i === pasos ? 0 : d - d / s
+  })
 }
 
-/** El paralaje de cámara: la placa gira apenas hacia el puntero (±`GIRO_DEL_PARALAJE_GRADOS`), y vuelve al centro al irse. */
-export function useParalaje(activo: boolean): { readonly rotateX: MotionValue<number>; readonly rotateY: MotionValue<number> } {
-  const rotateX = useMotionValue(0)
-  const rotateY = useMotionValue(0)
+/** La cámara para un puntero en `x`, `y` (fracciones del cuadro, 0 a 1): el giro de la placa y el punto de vista (%). */
+export function paralajeDe(x: number, y: number): { readonly rotateX: number; readonly rotateY: number; readonly origenX: number; readonly origenY: number } {
+  const [dx, dy] = [Math.min(1, Math.max(0, x)) - 0.5, Math.min(1, Math.max(0, y)) - 0.5]
+  // Mouse a la izquierda: la cara izquierda gira hacia adelante (rotateY > 0) y el punto de vista se corre a la izquierda.
+  return { rotateY: -dx * 2 * GIRO_DE_LA_PLACA.y, rotateX: dy * 2 * GIRO_DE_LA_PLACA.x, origenX: 50 + dx * 200 * PUNTO_DE_VISTA.x, origenY: 50 + dy * 200 * PUNTO_DE_VISTA.y }
+}
+
+/**
+ * ¿Se ve la cara del costado izquierdo de una placa de `ancho` px, con el puntero en `x`? (la normal de la cara mira hacia
+ * el ojo: d·sen(a) − ancho/2 − ox·cos(a) > 0, con el ojo corrido `ox` px y la placa girada `a`). Para el invariante.
+ */
+export function seVeElCostadoIzquierdo(x: number, ancho: number, anchoDelCuadro: number, paralaje: typeof paralajeDe = paralajeDe): boolean {
+  const p = paralaje(x, 0.5)
+  const a = (p.rotateY * Math.PI) / 180
+  const ox = ((p.origenX - 50) / 100) * anchoDelCuadro
+  return PERSPECTIVA_DE_LA_PLACA * Math.sin(a) - ancho / 2 - ox * Math.cos(a) > 0
+}
+
+/** Las transiciones: el fondo; el viaje de la placa (después de que el fondo arrancó); la salida (se acuesta) y el fondo después. */
+export const TRANSICIONES = {
+  fondo: { duration: MS_DEL_FONDO / 1000, ease: CURVA },
+  fondoAlCerrar: { duration: MS_DEL_FONDO / 1000, ease: CURVA, delay: MS_DE_LA_SALIDA_DE_LA_PLACA / 1000 },
+  viaje: { duration: MS_DE_LA_PLACA / 1000, ease: 'linear', delay: (MS_DEL_FONDO / 1000) * 0.6 },
+  acostarse: { duration: MS_DE_LA_SALIDA_DE_LA_PLACA / 1000, ease: [0.55, 0, 0.8, 0.4] },
+} as const
+
+const RESORTE = { stiffness: 140, damping: 22, mass: 0.9 } as const
+
+/** La cámara del puntero, con resorte: el giro de la placa y el punto de vista. Vuelve al centro al irse. */
+export function useParalaje(activo: boolean): { readonly rotateX: MotionValue<number>; readonly rotateY: MotionValue<number>; readonly origen: MotionValue<string> } {
+  const rotateX = useSpring(0, RESORTE)
+  const rotateY = useSpring(0, RESORTE)
+  const origenX = useSpring(50, RESORTE)
+  const origenY = useSpring(50, RESORTE)
+  const origen = useMotionTemplate`${origenX}% ${origenY}%`
   useEffect(() => {
     if (!activo) return undefined
     const mover = (e: PointerEvent): void => {
-      const x = e.clientX / window.innerWidth - 0.5
-      const y = e.clientY / window.innerHeight - 0.5
-      rotateY.set(x * 2 * GIRO_DEL_PARALAJE_GRADOS)
-      rotateX.set(-y * 2 * GIRO_DEL_PARALAJE_GRADOS)
+      // Sólo el mouse (y el lápiz): con el dedo, deslizar el formulario no tiene que girar la placa.
+      if (e.pointerType === 'touch') return
+      const p = paralajeDe(e.clientX / window.innerWidth, e.clientY / window.innerHeight)
+      rotateX.set(p.rotateX)
+      rotateY.set(p.rotateY)
+      origenX.set(p.origenX)
+      origenY.set(p.origenY)
     }
     window.addEventListener('pointermove', mover, { passive: true })
     return () => {
       window.removeEventListener('pointermove', mover)
       rotateX.set(0)
       rotateY.set(0)
+      origenX.set(50)
+      origenY.set(50)
     }
-  }, [activo, rotateX, rotateY])
-  return { rotateX, rotateY }
+  }, [activo, rotateX, rotateY, origenX, origenY])
+  return { rotateX, rotateY, origen }
 }

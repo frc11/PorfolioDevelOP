@@ -90,11 +90,6 @@ export interface Pruebas {
    * leyes de prueba `tunel=constante|tope|largo` se borraron con su bandera.
    */
   readonly tunelk: '1' | '1.3' | '1.8' | 'no'
-  /**
-   * [AJUSTES FINALES] B2 · `contactofondo=blur|blanco`: el contacto como transición (escritorio, con movimiento): el fondo se
-   * desenfoca o se funde a blanco en 0,5 s y la hoja llega como una placa desde el fondo (`_chrome/contacto/placa.ts`).
-   */
-  readonly contactofondo: 'blur' | 'blanco' | 'no'
 }
 
 /**
@@ -102,9 +97,10 @@ export interface Pruebas {
  * con esquinas redondeadas y sombra). [AJUSTES FINALES] A1: `portfolio=e9|e10|3ds|lejos` se borró: la de ESCENA 10 (e10) es
  * la del producto (`_lib/titulos3d/registro.ts`, `camaraDeEntonces.ts`). A2: `sombratitulos=si` se borró: la sombra de los
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
- * pasó al producto (`_secciones/servicios/angosto.tsx`).
+ * pasó al producto (`_secciones/servicios/angosto.tsx`). [CIERRE] 2B: `contactofondo=blur|blanco` se borró: el contacto como
+ * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunelk: 'no', contactofondo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunelk: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -113,7 +109,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunelk: unoDe<'1' | '1.3' | '1.8'>(['1', '1.3', '1.8'], valor('tunelk')), contactofondo: unoDe<'blur' | 'blanco'>(['blur', 'blanco'], valor('contactofondo')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunelk: unoDe<'1' | '1.3' | '1.8'>(['1', '1.3', '1.8'], valor('tunelk')) }
 }
 
 export interface Entorno {

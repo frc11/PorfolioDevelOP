@@ -11,10 +11,17 @@
  *        AJUSTES FINALES B1 se borraron; REGLA DE ALTURAS: la escena descuenta el tramo estirado.
  *   2A · los nanobots de IA y automatización: el flujo es una figura aparte, horizontal, debajo del robot, sin línea que los
  *        una; el robot que habla y el flujo que se enciende tramo a tramo, como estaban.
+ *   2B · el contacto como placa, al producto (desde la barra y con movimiento): un bloque con espesor que llega desde un
+ *        punto del fondo, deja ver sus costados con el puntero y al cerrar se acuesta antes de que se vaya el desenfoque;
+ *        `contactofondo` y el fundido a blanco se borraron; el teléfono y el movimiento reducido, la hoja de siempre.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/cierre-final/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
+import { ESCALA_AL_NACER, ESPESOR_DE_LA_PLACA_PX, MS_DE_LA_SALIDA_DE_LA_PLACA, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, paralajeDe, seVeElCostadoIzquierdo, viajeDesdeElFondo } from '../../_chrome/contacto/placa'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { LLEGADA, escalaDeDemos, llegadaDeDemos, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { BANDA_DEL_EFECTO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, MARGEN_DEL_DESPINEADO, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
@@ -221,5 +228,59 @@ const rellenoDe = (k: number): readonly number[] | undefined => delFlujo.find((p
 const primero = rellenoDe(0)
 const enciendeIgual = primero !== undefined && vidaDelRobot(primero[3], (F.porTramo - 0.01) * F.periodoS, false).ve === 0 && vidaDelRobot(primero[3], (F.porTramo + 0.01) * F.periodoS, false).ve === 1 && F.periodoS === 8
 afirmar(enciendeIgual, '  y se enciende como antes: el primer nodo se llena a 0,1 del ciclo de 8 s (antes de eso, la pausa: donde corría el tramo que salía del robot), y de ahí tramo a tramo (s48 A6)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2B · El contacto como placa, al producto: espesor de verdad, desde un punto del fondo, y se acuesta antes de que se vaya el desenfoque')
+
+// La prueba se fue con el fundido a blanco: desde la barra y con movimiento, la placa; si no, la hoja de siempre.
+const formulario = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
+const placaDelContacto = sinComentarios(leer('_chrome/contacto/PlacaDelContacto.tsx'))
+const alProducto = (f: string): boolean => f.includes('const placa = desdeArriba && !reducido') && !/contactofondo|useFondoDeLaPrueba|'blanco'|fondo === /.test(f) && f.includes('<PlacaDelContacto activa={placa}>')
+afirmar(alProducto(formulario) && !('contactofondo' in PRUEBAS_APAGADAS) && !('contactofondo' in entornoPedido('producto,contactofondo=blanco').pruebas) && placaDelContacto.includes('if (!activa) return <>{children}</>'), 'la placa pasó al producto (desde la barra y con movimiento) con el fondo desenfocado; `?pruebas=contactofondo=` y el fundido a blanco se borraron; apagada (el teléfono, con el menú, y con movimiento reducido) la placa no envuelve nada: la hoja de siempre')
+controlPositivo('el detector VE la prueba de AJUSTES FINALES (la placa sólo con la bandera)', formulario.replace('const placa = desdeArriba && !reducido', "const placa = fondo !== 'no' && desdeArriba && !reducido"), alProducto)
+
+// El bloque: el frente es la hoja (el diálogo, con sus campos) y detrás, cinco caras de CSS 3D con el espesor.
+const hojaDelServidor = renderToStaticMarkup(<HojaParaElInvariante />)
+const E = String(ESPESOR_DE_LA_PLACA_PX)
+const conEspesor = (h: string): boolean => {
+  const bloque = h.indexOf('data-parte="bloque-de-la-placa"')
+  const hoja = h.indexOf('data-parte="hoja"')
+  const caras: readonly (readonly [string, string])[] = [['izquierda', 'rotateY(90deg)'], ['derecha', 'rotateY(-90deg)'], ['arriba', 'rotateX(-90deg)'], ['abajo', 'rotateX(90deg)'], ['atras', `translateZ(-${E}px)`]]
+  return bloque > 0 && hoja > bloque && /transform-style:preserve-3d/.test(h) && caras.every(([cara, giro]) => new RegExp(`data-cara="${cara}" aria-hidden="true"[^>]*style="[^"]*transform:${giro.replace(/[()]/g, '\\$&')}`).test(h))
+}
+afirmar(conEspesor(hojaDelServidor) && ESPESOR_DE_LA_PLACA_PX >= 40 && /role="dialog"/.test(hojaDelServidor), 'un bloque con espesor de verdad: el frente es el formulario (el diálogo del DOM) y detrás los cuatro costados y la cara de atrás, girados en CSS 3D (preserve-3d)', `${E} px de espesor`)
+controlPositivo('el detector VE la placa de AJUSTES FINALES (una hoja sin caras, con un canto pintado)', hojaDelServidor.replace(/<div data-cara="[^"]+"[^>]*><\/div>/g, ''), conEspesor)
+
+// El puntero es la cámara, exagerada: a la izquierda se le ve el costado izquierdo; a la derecha, el derecho; arriba, la cara de arriba.
+const ANCHO_DE_LA_PLACA = 944
+const costados = (par: typeof paralajeDe): boolean =>
+  seVeElCostadoIzquierdo(0.04, ANCHO_DE_LA_PLACA, 1440, par) && seVeElCostadoIzquierdo(0.25, ANCHO_DE_LA_PLACA, 1440, par) && !seVeElCostadoIzquierdo(0.5, ANCHO_DE_LA_PLACA, 1440, par) &&
+  Math.abs(par(0.96, 0.5).rotateY + par(0.04, 0.5).rotateY) < 1e-9 && par(0.96, 0.5).origenX > 50 && par(0.5, 0.04).rotateX < 0 && par(0.5, 0.96).rotateX > 0 && par(0.5, 0.04).origenY < 50 && Math.abs(par(0.04, 0.5).rotateY) >= 15
+afirmar(costados(paralajeDe) && /if \(e\.pointerType === 'touch'\) return/.test(sinComentarios(leer('_chrome/contacto/placa.ts'))), 'el puntero es la cámara y exagera: con el mouse a la izquierda la cara izquierda gira hacia adelante y el punto de vista se corre (se ve el costado ya desde un cuarto del cuadro; al centro, sólo el frente); a la derecha el derecho; arriba la de arriba y abajo la de abajo. Con el dedo no gira', `${paralajeDe(0.04, 0.5).rotateY.toFixed(1)}° · punto de vista al ${paralajeDe(0.04, 0.5).origenX.toFixed(0)} %`)
+const paralajeDeAntes: typeof paralajeDe = (x, y) => ({ rotateY: (x - 0.5) * 2 * 3, rotateX: -(y - 0.5) * 2 * 3, origenX: 50, origenY: 50 })
+controlPositivo('el detector VE el paralaje de AJUSTES FINALES (±3°, hacia el puntero: el costado no se ve nunca)', paralajeDeAntes, costados)
+
+// La llegada: nace en un PUNTO del fondo y viaja hasta adelante, con el tamaño aparente creciendo casi en recta (como el túnel).
+const d = PERSPECTIVA_DE_LA_PLACA
+const escalaDe = (z: number): number => d / (d - z)
+const desdeUnPunto = (zs: readonly number[]): boolean => {
+  const escalas = zs.map(escalaDe)
+  const crece = escalas.every((e, i) => i === 0 || e > escalas[i - 1])
+  const pasos = escalas.slice(1).map((e, i) => e - escalas[i])
+  return escalas[0] <= 0.03 && zs[zs.length - 1] === 0 && crece && pasos[0] > 0.04 && pasos[pasos.length - 1] < pasos[0]
+}
+afirmar(desdeUnPunto(viajeDesdeElFondo()) && ESCALA_AL_NACER === 0.02 && TRANSICIONES.viaje.ease === 'linear', 'llega desde un punto del fondo (al 2 % de su tamaño, no al tercio) y viaja hasta adelante: su tamaño aparente crece casi en recta y se asienta al final', `z al nacer ${viajeDesdeElFondo()[0].toFixed(0)} px`)
+controlPositivo('el detector VE la llegada de AJUSTES FINALES (nacía a un tercio: dos focos atrás)', [-2 * d, -d, 0], desdeUnPunto)
+const viajeCableado = /animate=\{\{ z: \[\.\.\.VIAJE\], rotateX: 0 \}\}/.test(placaDelContacto) && /initial=\{\{ z: VIAJE\[0\], rotateX: 0 \}\}/.test(placaDelContacto) && placaDelContacto.includes('transition={TRANSICIONES.viaje}')
+afirmar(viajeCableado, '  y el viaje es ése: de `z` en `z`, en tramos iguales de tiempo, después de que el fondo empezó a desenfocarse')
+
+// La salida: primero la placa se acuesta hacia atrás sobre su base (como los títulos y los libros) y recién después se va el desenfoque.
+const sale = (placa: string, form: string, t: typeof TRANSICIONES): boolean =>
+  placa.includes("transformOrigin: 'center bottom'") && placa.includes('exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}') &&
+  form.includes("exit={placa ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}") &&
+  t.fondoAlCerrar.delay >= t.acostarse.duration && t.acostarse.duration === MS_DE_LA_SALIDA_DE_LA_PLACA / 1000
+afirmar(sale(placaDelContacto, formulario, TRANSICIONES), 'al cerrar (Esc, la cruz, el velo), primero la placa se acuesta hacia atrás sobre su base y RECIÉN DESPUÉS se va el desenfoque del fondo', `${String(MS_DE_LA_SALIDA_DE_LA_PLACA)} ms la placa, después ${String(TRANSICIONES.fondoAlCerrar.duration * 1000)} ms el fondo`)
+controlPositivo('el detector VE el fondo que se iba a la vez que la placa', { ...TRANSICIONES, fondoAlCerrar: { ...TRANSICIONES.fondoAlCerrar, delay: 0 } }, (t: typeof TRANSICIONES) => sale(placaDelContacto, formulario, t))
+afirmar(/className="pointer-events-none absolute inset-0 grid place-items-center/.test(placaDelContacto) && /data-parte="bloque-de-la-placa" className="pointer-events-auto relative"/.test(placaDelContacto), '  un clic al lado de la placa cae en el velo (que cierra): el escenario no recibe el puntero, el bloque sí')
 
 cerrar('s49-cierre-final')
