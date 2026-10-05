@@ -26,6 +26,8 @@
  *   A8 · abajo de 1024 cada demo es el panel de escritorio a escala, como un video: sin puntero, en bucle, con su pausa.
  *   B1 · (bandera, apagada) `tunel=constante|tope`: el túnel con la profundidad lineal con el scroll — cada proyecto nace en
  *        el arranque y se acerca a velocidad constante, más recorrido por proyecto; `tope` además sin resortes.
+ *   B2 · (bandera, apagada) `contactofondo=blur|blanco`: el contacto como transición — el fondo cambia en 0,5 s y la hoja
+ *        llega como una placa desde el fondo, con la perspectiva del foco de la sala y el paralaje del puntero.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -34,6 +36,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
+import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
+import { DESENFOQUE_DEL_FONDO_PX, GIRO_DEL_PARALAJE_GRADOS, MS_DEL_FONDO, MS_DE_LA_PLACA, PERSPECTIVA_DE_LA_PLACA, PROFUNDIDAD_DE_LA_PLACA_PX } from '../../_chrome/contacto/placa'
 import { VeloDeCarga } from '../../_componentes/VeloDeCarga'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/titulos3d/titular2d'
 import { RESPIRO_DEL_BUCLE } from '../../_panel-vivo/reproduccion'
@@ -41,7 +45,7 @@ import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/
 import { CAPA_DEL_VACIO } from '../../_secciones/trabajos/geometria'
 import { CADENA_FINAL, SEMILLA_DE_LA_PROFUNDIDAD, anchoEnProfundidad, leyDeLaPrueba, leyMostrada, poseEnProfundidad, pxParaQueMidaEnProfundidad, sinResortesLaPrueba, sinResortesMostrado } from '../../_secciones/trabajos/profundidad'
 import { VELOCIDAD_MAXIMA_DEL_EFECTO_PX_S, avanzarLoMostrado, reposoEn, type BandaDelEfecto } from '../../_secciones/trabajos/regulador'
-import { CAPAS_DEL_TUNEL, ORIGEN_DEL_TUNEL, PX_DEL_TUNEL, fraccionDelVacio, poseDelTunel } from '../../_secciones/trabajos/tunel'
+import { CAPAS_DEL_TUNEL, FOCO_DE_LA_ESCENA_PX, ORIGEN_DEL_TUNEL, PX_DEL_TUNEL, fraccionDelVacio, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
 import { CARGA, abrirLaCarga, cargaLista, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
 
@@ -551,5 +555,35 @@ const enchufado = (c: string, p: string): boolean =>
   (p.match(/primeraFotoTapaMostrada\(/g) ?? []).length === 2 && !/\bprimeraFotoTapa\(/.test(p)
 afirmar(enchufado(capaB1, piezasB1), 'la capa del túnel pinta, frena y pone el piso del foco con la pose de la ley de esta carga, y avanza lo mostrado sin resortes si la prueba lo pide; el título de Portfolio se esconde cuando la primera foto tapa el cuadro CON esa ley; la pose del servidor es la tabla')
 controlPositivo('el detector VE la capa pintando siempre con la tabla', capaB1.replace('const pose = poseMostrada(pxDelTunelEn(p), pxDelTunelEn(pEscenario))', 'const pose = poseDelTunel(pxDelTunelEn(p), pxDelTunelEn(pEscenario))'), (c: string) => enchufado(c, piezasB1))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B2 · El contacto como transición, con bandera y apagado: `contactofondo=blur` y `contactofondo=blanco`')
+
+afirmar(PRUEBAS_APAGADAS.contactofondo === 'no' && entornoPedido('producto').pruebas.contactofondo === 'no' && entornoPedido('producto,contactofondo=otro').pruebas.contactofondo === 'no' && entornoPedido('producto,contactofondo=blur').pruebas.contactofondo === 'blur' && entornoPedido('producto,contactofondo=blanco').pruebas.contactofondo === 'blanco', '`?pruebas=contactofondo=blur|blanco`: apagada en el producto (Valentino decide); sólo esos dos valores la prenden')
+afirmar(MS_DEL_FONDO === 500 && MS_DE_LA_PLACA === 900 && PERSPECTIVA_DE_LA_PLACA === FOCO_DE_LA_ESCENA_PX && PROFUNDIDAD_DE_LA_PLACA_PX === 2 * FOCO_DE_LA_ESCENA_PX && DESENFOQUE_DEL_FONDO_PX > 12 && GIRO_DEL_PARALAJE_GRADOS > 0 && GIRO_DEL_PARALAJE_GRADOS <= 5, 'el fondo cambia en 0,5 s y la placa llega en 0,9 s desde dos focos de la cámara de la sala (nace a un tercio: f / (f + 2f)), con la perspectiva en ese foco (el mismo con que huye el cartel de Portfolio); el desenfoque es notable (más que el del panel) y el paralaje, apenas (≤ 5°)', `foco ${String(FOCO_DE_LA_ESCENA_PX)} px · desenfoque ${String(DESENFOQUE_DEL_FONDO_PX)} px · giro ±${String(GIRO_DEL_PARALAJE_GRADOS)}°`)
+
+const formularioB2 = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
+const placaB2 = sinComentarios(leer('_chrome/contacto/placa.ts'))
+const comoTransicion = (f: string): boolean =>
+  f.includes("const placa = fondo !== 'no' && desdeArriba && !reducido") &&
+  f.includes("const desenfocado = placa && fondo === 'blur'") &&
+  f.includes("initial={desenfocado ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}") &&
+  f.includes("animate={desenfocado ? { opacity: 1, backdropFilter: `blur(${String(DESENFOQUE_DEL_FONDO_PX)}px)` } : { opacity: 1 }}") &&
+  f.includes("placa && fondo === 'blanco' ? 'bg-fondo' : 'bg-[color-mix(in_srgb,var(--color-tinta)_35%,transparent)] backdrop-blur-[var(--blur-panel)]'") &&
+  f.includes('transition={placa ? cambioDelFondo : velo}') &&
+  f.includes('style={placa ? { perspective: PERSPECTIVA_DE_LA_PLACA } : undefined}') &&
+  f.includes('initial={placa ? { opacity: 0, z: -PROFUNDIDAD_DE_LA_PLACA_PX } : { y: fuera }}') &&
+  f.includes('animate={placa ? { opacity: 1, z: 0 } : { y: 0 }}') &&
+  f.includes('exit={placa ? { opacity: 0, z: -PROFUNDIDAD_DE_LA_PLACA_PX } : { y: fuera }}') &&
+  f.includes('transition={placa ? llegada : hoja}') &&
+  f.includes('style={placa ? { rotateX: paralaje.rotateX, rotateY: paralaje.rotateY, transformStyle: \'preserve-3d\' } : undefined}') &&
+  f.includes('delay: (MS_DEL_FONDO / 1000) * 0.6') &&
+  f.includes('useDialogo(caja, cerrarContacto)') && f.includes('onExitComplete={devolverElFoco}') && f.includes('onClick={cerrarContacto}')
+afirmar(comoTransicion(formularioB2), 'con la prueba, sólo en escritorio (la hoja de la barra) y con movimiento: el velo anima el desenfoque de 0 a 24 px (`blur`) o se funde al papel (`blanco`) en 0,5 s; la hoja llega como una placa (translateZ desde dos focos, con la perspectiva del foco; el paralaje del puntero en su transformada) cuando el fondo ya va por el 60 %, y la salida es la inversa (el `exit` de AnimatePresence); la trampa de foco, Esc, el velo que cierra y la devolución del foco son las de siempre; abajo de 1024 y con movimiento reducido, la hoja deslizante de hoy')
+controlPositivo('el detector VE la placa también en el teléfono (sin el modo de la barra)', formularioB2.replace("const placa = fondo !== 'no' && desdeArriba && !reducido", "const placa = fondo !== 'no' && !reducido"), comoTransicion)
+controlPositivo('  y VE una salida que no es la inversa', formularioB2.replace('exit={placa ? { opacity: 0, z: -PROFUNDIDAD_DE_LA_PLACA_PX } : { y: fuera }}', 'exit={placa ? { opacity: 0 } : { y: fuera }}'), comoTransicion)
+afirmar(/useSyncExternalStore\(sinCambios, \(\) => entornoDeLaEscena\(\)\.pruebas\.contactofondo, \(\) => 'no'\)/.test(placaB2) && /window\.addEventListener\('pointermove', mover, \{ passive: true \}\)/.test(placaB2) && /rotateY\.set\(x \* 2 \* GIRO_DEL_PARALAJE_GRADOS\)/.test(placaB2), '  la prueba se lee apagada en el servidor y al hidratar (la pedida, después); el paralaje escucha el puntero pasivo y vuelve al centro al irse')
+const hojaB2 = renderToStaticMarkup(<HojaParaElInvariante />)
+afirmar(!/data-placa=/.test(hojaB2) && /data-parte="hoja"[^>]*data-lenis-prevent=""/.test(hojaB2) && /role="dialog"/.test(hojaB2) && /data-parte="velo"/.test(hojaB2) && /class="contents"/.test(hojaB2), '  el HTML del servidor es la hoja de siempre (sin placa; el envoltorio de la perspectiva es `display: contents`), con su diálogo, su velo y su `data-lenis-prevent` (s25 lo sigue fijando)')
 
 cerrar('s48-ajustes-finales')

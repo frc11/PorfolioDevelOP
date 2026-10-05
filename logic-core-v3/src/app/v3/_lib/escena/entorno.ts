@@ -90,6 +90,11 @@ export interface Pruebas {
    * mostrado persigue al scroll a velocidad máxima constante, sin resortes (como el amanecer). `_secciones/trabajos/profundidad.ts`.
    */
   readonly tunel: 'constante' | 'tope' | 'no'
+  /**
+   * [AJUSTES FINALES] B2 · `contactofondo=blur|blanco`: el contacto como transición (escritorio, con movimiento): el fondo se
+   * desenfoca o se funde a blanco en 0,5 s y la hoja llega como una placa desde el fondo (`_chrome/contacto/placa.ts`).
+   */
+  readonly contactofondo: 'blur' | 'blanco' | 'no'
 }
 
 /**
@@ -99,7 +104,7 @@ export interface Pruebas {
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
  * pasó al producto (`_secciones/servicios/angosto.tsx`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunel: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunel: 'no', contactofondo: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -108,7 +113,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunel: unoDe<'constante' | 'tope'>(['constante', 'tope'], valor('tunel')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunel: unoDe<'constante' | 'tope'>(['constante', 'tope'], valor('tunel')), contactofondo: unoDe<'blur' | 'blanco'>(['blur', 'blanco'], valor('contactofondo')) }
 }
 
 export interface Entorno {
