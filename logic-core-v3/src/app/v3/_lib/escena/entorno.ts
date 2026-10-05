@@ -84,6 +84,12 @@ export interface Pruebas {
    * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
   readonly pie: 'antes' | 'no'
+  /**
+   * [AJUSTES FINALES] B1 · `tunel=constante`: el túnel con la profundidad lineal con el scroll (cada proyecto nace en el
+   * arranque del túnel y se acerca a velocidad constante: más recorrido por proyecto); `tunel=tope`: lo mismo, y lo
+   * mostrado persigue al scroll a velocidad máxima constante, sin resortes (como el amanecer). `_secciones/trabajos/profundidad.ts`.
+   */
+  readonly tunel: 'constante' | 'tope' | 'no'
 }
 
 /**
@@ -93,7 +99,7 @@ export interface Pruebas {
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
  * pasó al producto (`_secciones/servicios/angosto.tsx`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunel: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -102,7 +108,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunel: unoDe<'constante' | 'tope'>(['constante', 'tope'], valor('tunel')) }
 }
 
 export interface Entorno {

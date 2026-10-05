@@ -292,9 +292,10 @@ export function afirmarElRegulador(cuantas: number): void {
   afirmar(quieto(avanzarLoMostrado(enMarcha, 2700, DT, BANDA_DEL_EFECTO, true)), 'mientras frena, el objetivo y los dos resortes quedan quietos y en reposo —velocidad cero—: al soltar retoman desde ahí y no saltan')
   controlPositivo('  el detector vería un freno que deja correr a los resortes', avanzarLoMostrado(enMarcha, 2700, DT, BANDA_DEL_EFECTO, false), quieto)
   const pasaElFreno = (src: string): boolean =>
-    src.includes('avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))')
+    // [AJUSTES FINALES] B1 · y si la prueba `tunel=tope` pide ir sin resortes (`profundidad.ts`).
+    src.includes('avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()), undefined, sinResortesMostrado())')
   afirmar(pasaElFreno(CAPA), '  y el lazo le pasa al regulador el scroll de la página, el freno y el piso del foco, con la banda de su ancho')
-  controlPositivo('  el detector vería un lazo que frena fuera del regulador', 'avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, false, pxDeLaSeccion(pisoDelFoco()))', pasaElFreno)
+  controlPositivo('  el detector vería un lazo que frena fuera del regulador', 'avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, false, pxDeLaSeccion(pisoDelFoco()), undefined, sinResortesMostrado())', pasaElFreno)
 
   // ── LA HISTÉRESIS DEL CARTEL ────────────────────────────────────────────
   afirmarIgual(

@@ -113,6 +113,7 @@ export function avanzarLoMostrado(
   frenando: boolean,
   pisoDelFoco = 0,
   velocidadMaxima: number = VELOCIDAD_MAXIMA_DEL_EFECTO_PX_S,
+  sinResortes = false,
 ): EstadoDelTunelMostrado {
   const segundos = Math.min(Math.max(dtMs, 0), DT_MAXIMO_MS) / 1000
   const paso = velocidadMaxima * segundos
@@ -138,6 +139,11 @@ export function avanzarLoMostrado(
     return { scroll: visto, levantado, objetivo, tunel: quieto(estado.tunel), escenario: quieto(estado.escenario) }
   }
   const objetivo = enLaBanda(estado.objetivo + Math.max(-paso, Math.min(paso, visto - estado.objetivo)), visto, banda)
+  // [AJUSTES FINALES] B1 · `tunel=tope`: sin resortes, lo mostrado ES el objetivo (que ya persigue al scroll a lo sumo a la velocidad máxima).
+  if (sinResortes) {
+    const derecho = acotado({ posicion: objetivo, velocidad: segundos > 0 ? (objetivo - estado.objetivo) / segundos : 0 })
+    return { scroll: visto, levantado, objetivo, tunel: derecho, escenario: derecho }
+  }
   return {
     scroll: visto,
     levantado,
