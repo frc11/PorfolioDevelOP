@@ -77,6 +77,9 @@ export default function PaginaV3() {
             cuadro con el puntero en un borde y ensanchaba la página. */}
         <main className="relative z-10 overflow-x-clip max-escritorio:z-auto">
           <Home />
+          {/* [CIERRE] 3 · la cola del final del pie: scroll sin contenido después del pie, fuera de la tabla de secciones
+              (desde 1024 y con movimiento: `pie.css`; la escena lo lee en `_lib/escena/final/`). */}
+          <div data-pieza="cola-del-final" aria-hidden="true" className="hidden escritorio:motion-safe:block escritorio:motion-safe:h-[var(--cola-del-final)]" />
         </main>
       </CompuertaDelHome>
     </>

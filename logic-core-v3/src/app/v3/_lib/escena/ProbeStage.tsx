@@ -16,6 +16,7 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
+import { FinalDelPie } from './final/FinalDelPie'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
 import { Fugaz } from './estrellas/Fugaz'
@@ -272,6 +273,8 @@ export default function ProbeStage({
           bokehGroupRef={bokehGroupRef}
           moireRef={moireRef}
         />
+        {/* [CIERRE] 3 · el final del pie, justo después del rig (le suma el final a su cámara y al logo): desde 1024 y con movimiento. */}
+        {calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}

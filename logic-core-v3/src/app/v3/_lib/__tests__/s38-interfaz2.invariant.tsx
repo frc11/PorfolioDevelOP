@@ -104,7 +104,8 @@ controlPositivo('la inyección se niega si la simulación cambió (no entra a ci
 })
 afirmar(ANILLOS_GLSL.includes(ANCLAS_DEL_DIBUJO.funcion) && leer('_lib/escena/piso/bloques.ts').includes(ANCLAS_DEL_DIBUJO.mezcla), 'las dos anclas del dibujo existen: la onda se ve con la banda de los anillos')
 const PISO_VIVO_TSX = leer('_lib/escena/piso/PisoVivo.tsx')
-afirmar(PISO_VIVO_TSX.includes('crearPingPong(grilla.n, grilla.n, 1, conOndaDirigida(SIMULACION_GLSL), {') && PISO_VIVO_TSX.includes('  conLaOndaEnElPiso(material)'), 'el piso vivo del producto arma la onda: la simulación y el dibujo')
+// [CIERRE] 3 · la simulación lleva además el final del pie, por afuera (`final/enElPiso.ts`): la onda sigue adentro.
+afirmar(PISO_VIVO_TSX.includes('crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)), {') && PISO_VIVO_TSX.includes('  conLaOndaEnElPiso(material)'), 'el piso vivo del producto arma la onda: la simulación y el dibujo')
 const camara = new THREE.PerspectiveCamera(40, 1440 / 900, 0.1, 400)
 camara.position.set(0, FLOOR_Y + 1.6, 15.6)
 camara.lookAt(0, 0, 0)

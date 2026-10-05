@@ -10,6 +10,7 @@ import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDe
 import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
 import { FLOOR_Y } from '../probeScene'
+import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDelFinal'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
@@ -87,18 +88,22 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   // A la profundidad del logo, o adelante si ahí alguna quedaría bajo el piso (`colocacion.ts`): todas en el mismo plano
   // (el pie se mueve entero con el paralaje: un rótulo no se despega de su columna).
   let d = Number.POSITIVE_INFINITY
+  // [CIERRE] 3 · en la cola del final el pie queda pegado arriba: sus piezas, con el scroll en que se pegó.
+  const sy = scrollDelPie(scrollY)
   for (const a of s.armadas) {
-    const arriba = a.medida.caja.y - scrollY
+    const arriba = a.medida.caja.y - sy
     const c = a.contenido
     a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN
     if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(CAMARA_SIN_EL_MOUSE, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
   }
+  // [CIERRE] 3 · en el final del pie van con la cámara (que sube a mirar el logo desde arriba): adelante del piso, con aire.
+  d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))
   let sombras = 0
   for (const a of s.armadas) {
     if (!a.grupo.visible) continue
     a.material.envMapIntensity = nivel
     const izquierda = a.medida.caja.x - scrollX
-    const arriba = a.medida.caja.y - scrollY
+    const arriba = a.medida.caja.y - sy
     a.d = d
     a.mundoPorPx = colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
     const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
@@ -148,7 +153,9 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
   const antes = new Map(s.armadas.map((a) => [a.pieza.id, a]))
   const ahora: Armada[] = []
   for (const p of [...PIEZAS_DEL_PIE.values()].sort((a, b) => a.orden - b.orden)) {
-    const medida = medirLaPieza(p.elemento, p.forma)
+    // [CIERRE] 3 · medida con el pie pegado (en la cola del final): en el documento, donde estaba al pegarse.
+    const cruda = medirLaPieza(p.elemento, p.forma)
+    const medida = { ...cruda, caja: { ...cruda.caja, y: cruda.caja.y - (scrollY - scrollDelPie(scrollY)) } }
     const firma = firmaDeLaForma(medida)
     const vieja = antes.get(p.id)
     if (vieja !== undefined && vieja.pieza === p && vieja.firma === firma) {
@@ -234,9 +241,11 @@ function sombraDe(a: Armada, n: number): number {
   const { alfa, blanda } = formaDeLaSombra(PUNTO.y - FLOOR_Y)
   // [PASADA FINAL] C2 · lo que todavía no se ve no deja sombra (el titular, letra por letra: con lo que llegó).
   const ve = a.uniformes.uLetrasDelPie.value >= 0 ? a.llego : a.uniformes.uApareceDelPie.value
-  if (alfa * ve < 0.01) return n
+  // [CIERRE] 3 · en el final las piezas se levantan con la cámara: su sombra de contacto se va.
+  const final = 1 - EN_VIVO.camara
+  if (alfa * ve * final < 0.01) return n
   const mpp = a.mundoPorPx
   SOMBRAS_DEL_PIE.uSombrasDelPie.value[n].set(PUNTO.x, PUNTO.z, ((c.derecha - c.izquierda) / 2) * mpp + SOMBRA_DEL_PIE.sobra, (a.espesor / 2) * mpp + SOMBRA_DEL_PIE.sobra)
-  SOMBRAS_DEL_PIE.uFormaDeLasSombrasDelPie.value[n].set(blanda, alfa * ve, 0, 0)
+  SOMBRAS_DEL_PIE.uFormaDeLasSombrasDelPie.value[n].set(blanda, alfa * ve * final, 0, 0)
   return n + 1
 }

@@ -16,6 +16,7 @@ import { conElAmanecer } from '../amanecer/luz'
 import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
+import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, grillaDelPiso, type Grilla } from './bloques'
@@ -211,8 +212,11 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
   // [INTERFAZ 2] T1 · la simulación con la onda hacia lo señalado (`ondaDirigida.ts`, inyectada en `SIMULACION_GLSL`).
-  const sim = crearPingPong(grilla.n, grilla.n, 1, conOndaDirigida(SIMULACION_GLSL), {
+  // [CIERRE] 3 · y el final del pie: el golpe del encastre y el piso que vibra debajo del mouse (`final/enElPiso.ts`).
+  const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)), {
     uOnda: ONDA_EN_VIVO.uOnda,
+    uGolpe: FINAL_EN_EL_PISO.uGolpe,
+    uVibraDelFinal: FINAL_EN_EL_PISO.uVibraDelFinal,
     uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
     uRadio: { value: grilla.radio / grilla.lado },
@@ -250,6 +254,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   conLaOndaEnElPiso(material)
+  conElFinalEnElPiso(material)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

@@ -14,11 +14,16 @@
  *   2B · el contacto como placa, al producto (desde la barra y con movimiento): un bloque con espesor que llega desde un
  *        punto del fondo, deja ver sus costados con el puntero y al cerrar se acuesta antes de que se vaya el desenfoque;
  *        `contactofondo` y el fundido a blanco se borraron; el teléfono y el movimiento reducido, la hoja de siempre.
+ *   3  · el final del pie: una cola de scroll después del pie (fuera de la tabla de secciones) donde el logo se acuesta y
+ *        se encastra en el piso mientras la cámara sube a mirarlo desde arriba; el golpe (partículas de tinta en un solo
+ *        dibujo y una onda en el piso), el piso que vibra y se oscurece bajo el mouse, el quieto que gira y se aleja con
+ *        tope, y la vuelta en reversa; las piezas del pie van con la cámara. Desde 1024 y con movimiento.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/cierre-final/mirar.txt`.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
+import * as THREE from 'three'
 
 import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
 import { ESCALA_AL_NACER, ESPESOR_DE_LA_PLACA_PX, MS_DE_LA_SALIDA_DE_LA_PLACA, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, paralajeDe, seVeElCostadoIzquierdo, viajeDesdeElFondo } from '../../_chrome/contacto/placa'
@@ -28,7 +33,13 @@ import { BANDA_DEL_EFECTO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, 
 import { enElRiel } from '../../_secciones/trabajos/regulador'
 import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, progresoDeLaTabla, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
 import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
-import { ANCLAJE } from '../escena/anclaje'
+import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
+import { EXPLOSION, crearLaExplosion } from '../escena/final/explosion'
+import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { FINAL_DEL_PIE, acostado, avanceDeLaCola, camaraDelFinal, hundido, poseDelLogo, relojDelQuieto } from '../escena/final/recorridoDelFinal'
+import { conOndaDirigida } from '../escena/piso/ondaDirigida'
+import { SIMULACION_GLSL } from '../escena/piso/bloques'
+import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { progresoDelScroll } from '../escena/recorrido'
 import { sinElEstiramiento } from '../escena/tramoEstirado'
@@ -282,5 +293,87 @@ const sale = (placa: string, form: string, t: typeof TRANSICIONES): boolean =>
 afirmar(sale(placaDelContacto, formulario, TRANSICIONES), 'al cerrar (Esc, la cruz, el velo), primero la placa se acuesta hacia atrás sobre su base y RECIÉN DESPUÉS se va el desenfoque del fondo', `${String(MS_DE_LA_SALIDA_DE_LA_PLACA)} ms la placa, después ${String(TRANSICIONES.fondoAlCerrar.duration * 1000)} ms el fondo`)
 controlPositivo('el detector VE el fondo que se iba a la vez que la placa', { ...TRANSICIONES, fondoAlCerrar: { ...TRANSICIONES.fondoAlCerrar, delay: 0 } }, (t: typeof TRANSICIONES) => sale(placaDelContacto, formulario, t))
 afirmar(/className="pointer-events-none absolute inset-0 grid place-items-center/.test(placaDelContacto) && /data-parte="bloque-de-la-placa" className="pointer-events-auto relative"/.test(placaDelContacto), '  un clic al lado de la placa cae en el velo (que cierra): el escenario no recibe el puntero, el bloque sí')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3 · El final del pie: el logo se acuesta y se encastra, la cámara lo mira desde arriba; el golpe, el piso que vibra, el quieto y la vuelta')
+
+// La cola: un scroll sin contenido después del pie, FUERA de la tabla de secciones; mientras se la recorre el pie queda
+// pegado arriba. Sólo desde 1024 y con movimiento; abajo y con movimiento reducido no existe (el pie termina la página).
+const pagina = sinComentarios(leer('page.tsx'))
+const hojaDelPie = leer('_estilos/pie.css')
+const colaBien = (pg: string, css: string): boolean =>
+  /<Home \/>\s*(\{\}\s*)?<div data-pieza="cola-del-final" aria-hidden="true" className="hidden escritorio:motion-safe:block escritorio:motion-safe:h-\[var\(--cola-del-final\)\]" \/>\s*<\/main>/.test(pg) &&
+  /\[data-v3\] \[data-pieza="cola-del-final"\] \{\s*--cola-del-final: \d+svh;\s*\}/.test(css) &&
+  /\[data-v3\] \[data-panel="cierre"\] \{\s*position: sticky;\s*top: 0;\s*\}/.test(css) && !/@media/.test(css.slice(css.indexOf('[CIERRE] 3')))
+afirmar(colaBien(pagina, hojaDelPie), 'la cola del final: un `div` sin contenido después de las secciones, adentro del `<main>`, que sólo existe desde 1024 y con movimiento (sus variantes, sin media query escrita); mientras se la recorre el pie queda pegado arriba (sin cola el `sticky` no hace nada: el pie es lo último)')
+controlPositivo('el detector VE una cola que también estaría con movimiento reducido', [pagina.replace('escritorio:motion-safe:block', 'escritorio:block'), hojaDelPie] as const, ([pg, css]: readonly [string, string]) => colaBien(pg, css))
+// Nada de lo de antes se mueve: la cola no es una sección, y la escena se queda en su último nudo (la cuenta se acota).
+const v = 900
+const abajoDeLasSecciones = ANCLAJE.pantallasDelDocumento * v
+afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v + dentro, 0, abajoDeLasSecciones, v) === ANCLAJE.pantallasDeScroll) && !/data-panel/.test(/<div data-pieza="cola-del-final"[^>]*>/.exec(pagina)?.[0] ?? 'data-panel'), '  la cola no cuenta para la escena: no es una sección, y recorriéndola el progreso queda en el último nudo (la pose E): Portfolio, la frase, la noche y el amanecer no se mueven')
+const avance = [avanceDeLaCola(900, 720, 900), avanceDeLaCola(540, 720, 900), avanceDeLaCola(180, 720, 900), avanceDeLaCola(-200, 720, 900), avanceDeLaCola(500, 0, 900)]
+afirmar(avance.join() === '0,0.5,1,1,0', '  `fin` es lo recorrido de la cola: 0 con su tope en el pie del cuadro, 1 al final del documento, 0 sin cola', avance.join(' · '))
+
+// La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra con un rebote. Con `fin` 0, el logo de hoy.
+const tam = { alto: 4.78, espesor: 0.56 }
+const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
+poseDelLogo(0, tam, pose)
+const deHoy = pose.centro.length() < 1e-12 && pose.rotacionX === 0
+poseDelLogo(1, tam, pose)
+const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && Math.abs(pose.centro.z + tam.alto / 2) < 1e-9 && Math.abs(pose.centro.y - (FLOOR_Y + tam.espesor / 2 - FINAL_DEL_PIE.hundimiento.encajado * tam.espesor)) < 0.002
+let monotono = true
+for (let f = 0; f < 1; f += 0.005) if (acostado(f + 0.005) < acostado(f)) monotono = false
+const rebote = Array.from({ length: 101 }, (_, i) => hundido(FINAL_DEL_PIE.encastre.desde + ((FINAL_DEL_PIE.encastre.hasta - FINAL_DEL_PIE.encastre.desde) * i) / 100))
+const conRebote = rebote[0] === 0 && Math.max(...rebote) > FINAL_DEL_PIE.hundimiento.encajado * 1.1 && Math.abs(rebote[100] - FINAL_DEL_PIE.hundimiento.encajado) < 0.01 && hundido(FINAL_DEL_PIE.encastre.desde - 0.01) === 0
+afirmar(deHoy && alFinal && monotono && acostado(FINAL_DEL_PIE.acuestaHasta) === 1 && conRebote, 'el logo: con `fin` 0 es el de hoy (sin saltos al engancharse en la pose E); se acuesta sobre su base hacia atrás (−90°) bajando al piso, y se encastra con un rebote (se hunde más y vuelve a quedar encajado un 30 % de su espesor)', `rebote hasta ${(Math.max(...rebote) * 100).toFixed(0)} % del espesor`)
+controlPositivo('el detector VE un encastre sin rebote', (u: number) => u, (h: (u: number) => number) => Math.max(...Array.from({ length: 101 }, (_, i) => h(i / 100))) > 1.1 * h(1))
+
+// La cámara: sin final, intacta; al final, mirando el logo desde arriba (el cenit), sin vuelco; el paso es continuo.
+const camara = (): THREE.PerspectiveCamera => {
+  const c = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 400)
+  c.position.set(0, 5, 40)
+  c.lookAt(0, 0, 0)
+  c.updateMatrixWorld()
+  return c
+}
+const quieta = camara()
+const antesDeTocar = quieta.matrixWorld.clone()
+camaraDelFinal(quieta, 0, new THREE.Vector3(0, -4, -2.39), 0, 0, null)
+const desdeArriba = camara()
+const blanco = new THREE.Vector3(0, FLOOR_Y + 0.28, -2.39)
+camaraDelFinal(desdeArriba, 1, blanco, 0, 0, null)
+const adelante = desdeArriba.getWorldDirection(new THREE.Vector3())
+const alBlanco = blanco.clone().sub(desdeArriba.position).normalize()
+const arribaDeLaPantalla = new THREE.Vector3(0, 1, 0).applyQuaternion(desdeArriba.quaternion)
+const casiCero = camara()
+camaraDelFinal(casiCero, 1e-6, blanco, 0, 0, null)
+afirmar(quieta.matrixWorld.equals(antesDeTocar) && adelante.y < -0.99 && adelante.dot(alBlanco) > 0.9999 && arribaDeLaPantalla.z < -0.99 && casiCero.position.distanceTo(new THREE.Vector3(0, 5, 40)) < 1e-3 && Math.abs(desdeArriba.position.distanceTo(blanco) - Math.hypot(5, 40) * FINAL_DEL_PIE.camara.lejos) < 1e-6, 'la cámara: sin final no la toca; al final mira el logo acostado desde arriba (89°: «arriba» en la pantalla es la cabeza del logo, sin vuelco en el cenit) y el paso desde la pose E es continuo', `elevación ${String(FINAL_DEL_PIE.camara.elevacion)}°`)
+
+// Quieto en el pie: gira sin fin y se aleja con tope; al moverse, todo vuelve rápido.
+const quieto = { giro: 0, aleja: 0 }
+let tQuieto = 0
+for (let i = 0; i < 6000; i += 1) tQuieto = relojDelQuieto(tQuieto, true, 99, 0.1, quieto)
+const conTope = quieto.aleja <= FINAL_DEL_PIE.quieto.alejaHasta && quieto.aleja > 0.99 * FINAL_DEL_PIE.quieto.alejaHasta && quieto.giro > 2500
+for (let i = 0; i < 40; i += 1) relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
+const aLos2s = Math.abs(quieto.giro) < 0.02 * 180 && quieto.aleja < 0.02 * FINAL_DEL_PIE.quieto.alejaHasta
+for (let i = 0; i < 80; i += 1) relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
+afirmar(conTope && aLos2s && quieto.giro === 0 && quieto.aleja === 0 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): la cámara gira sin fin y se aleja hacia un tope que nunca pasa (sin perder el logo); al volver a scrollear, el giro (por el camino corto) y el alejamiento vuelven: a los 2 s queda menos del 2 % (aun desde media vuelta) y a los 6 s, cero', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u`)
+
+// El golpe: las partículas de tinta, en UN dibujo; y el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
+const explosion = crearLaExplosion()
+const unDibujo = explosion.puntos instanceof THREE.Points && !explosion.puntos.visible && (explosion.puntos.material as THREE.ShaderMaterial).vertexShader.includes('-0.5 * 15.0 * t * t') && (explosion.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString() && EXPLOSION.cuantas >= 1000
+explosion.soltar()
+const simulacion = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+const pisoBien = simulacion.includes('float empujeDelGolpe( vec2 xz )') && simulacion.includes(`${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + uVibraDelFinal * uCursor.w`) && conOndaDirigida(SIMULACION_GLSL).length < simulacion.length
+afirmar(unDibujo && pisoBien, 'el golpe: partículas de tinta (no se ven sobre el piso claro si no son oscuras) en un solo `Points`, invisibles fuera del final, que salen del contorno del logo, caen con gravedad y se posan; y en el piso, la onda del golpe y la vibración debajo del mouse, sumadas por afuera de la onda dirigida', `${String(EXPLOSION.cuantas)} partículas · 1 dibujo`)
+const montaje = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
+const pisoVivo = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
+const armadas = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const cableadoDelFinal = (mo: string): boolean =>
+  mo.includes("{calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}") &&
+  mo.indexOf('<FinalDelPie') > mo.indexOf('<OrbitRig') && mo.indexOf('<FinalDelPie') < mo.indexOf('<Entorno') &&
+  pisoVivo.includes('conElFinalEnElPiso(material)') && armadas.includes('d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))') && armadas.includes('const sy = scrollDelPie(scrollY)')
+afirmar(cableadoDelFinal(montaje), '  el cableado: el final va justo después del rig (le suma el final a su cámara y al logo antes que nadie lo lea), sólo desde 1024 y con movimiento; las piezas del pie se colocan con la cámara del final, adelante del piso, con el scroll en que el pie se pegó')
+controlPositivo('el detector VE el final montado también con movimiento reducido', montaje.replace("{calidad === 'plena' && !reducedMotion && <FinalDelPie", "{calidad === 'plena' && <FinalDelPie"), cableadoDelFinal)
 
 cerrar('s49-cierre-final')

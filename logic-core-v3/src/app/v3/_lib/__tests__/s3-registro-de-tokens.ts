@@ -177,6 +177,7 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   // [AJUSTES FINALES] A4 · el velo de carga.
   { nombre: '--velo-fundido', valor: '800ms', evidencia: 'decidido', procedencia: 'el fundido con que todo aparece junto (~0,8 s, pedido); el mismo CARGA.fundidoMs de `_lib/carga.ts` (s48 los ata)' },
   { nombre: '--velo-espera', valor: '4000ms', evidencia: 'decidido', procedencia: 'el plazo desde el arranque en que el fundido arranca igual aunque no esté todo (~4 s, pedido); el mismo CARGA.plazoMs de `_lib/carga.ts` (s48 los ata)' },
+  { nombre: '--cola-del-final', valor: '80svh', evidencia: 'decidido', procedencia: '[CIERRE] 3 · el scroll del final del pie después del pie (el logo se acuesta y se encastra): un gesto de rueda o de trackpad lo recorre y lo deshace; desde 1024 y con movimiento (`pie.css`)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

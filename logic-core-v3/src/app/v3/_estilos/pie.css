@@ -295,3 +295,26 @@
   opacity: var(--opacity-tenue);
   cursor: not-allowed;
 }
+
+/* =========================================================================
+ * [CIERRE] 3 · EL FINAL DEL PIE — la cola de scroll después del pie
+ * =========================================================================
+ * Desde 1024 y con movimiento, después del pie hay una cola de scroll
+ * (`page.tsx`: un `div` sin contenido, fuera de la tabla de secciones, así la
+ * escena no cuenta su alto y nada de lo de antes se mueve; quién la muestra lo
+ * dicen sus clases, con las variantes `escritorio:` y `motion-safe:`) y
+ * mientras se la recorre el pie queda pegado arriba: la escena hace el final
+ * sobre el scroll (`_lib/escena/final/`). Sin la cola (abajo de 1024, con
+ * movimiento reducido) el `sticky` no hace nada: el pie es lo último del
+ * `<main>` y no tiene dónde pegarse. La propiedad está registrada en
+ * `s3-registro-de-tokens.ts`.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="cola-del-final"] {
+  --cola-del-final: 80svh;
+}
+
+[data-v3] [data-panel="cierre"] {
+  position: sticky;
+  top: 0;
+}
