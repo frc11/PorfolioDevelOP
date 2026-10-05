@@ -5,9 +5,9 @@ import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../navegacion'
  *
  * El mapeo de la escena es PROPORCIONAL a la extensión de las secciones (`pantallaDeScroll`, `anclaje.ts`): si una
  * sección mide más de lo que declara `secciones.ts`, TODO lo que viene después llega tarde (así se corrieron Portfolio y
- * «Seis razones»). [CIERRE] 1C: desde 1024 el túnel de Trabajos se estira por un factor `k` (1,5 en el producto, o el de
- * `?pruebas=tunelk=`) y la sección crece lo que el túnel se estiró (`_secciones/trabajos/estiramiento.ts`); la tabla
- * declara el alto sin estirar (el `k` cambia con la prueba y abajo de 1024 es otro). Así que el que estira se anota acá, y la
+ * «Seis razones»). [CIERRE] 1C: desde 1024 el túnel de Trabajos se estira por un factor `k` (1,8 en el producto desde
+ * [EL ENCASTRE] 1A) y la sección crece lo que el túnel se estiró (`_secciones/trabajos/estiramiento.ts`); la tabla
+ * declara el alto sin estirar (abajo de 1024 el `k` es otro). Así que el que estira se anota acá, y la
  * escena mide el scroll COMO SI NO ESTUVIERA ESTIRADO: antes del tramo, igual; adentro, a 1/k (la sala avanza al ritmo
  * de la tabla, que es el del túnel); después, sin lo que se agregó. Afuera del túnel el progreso es bit a bit el de
  * siempre: Portfolio, la frase, el amanecer y la noche no se mueven (s49 1C lo afirma sobre el mapeo).

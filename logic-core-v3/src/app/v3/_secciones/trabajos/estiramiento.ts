@@ -1,8 +1,7 @@
-import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 import { TRAMO_ESTIRADO } from '../../_lib/escena/tramoEstirado'
 
 import { BANDA_DEL_EFECTO } from './geometria'
-import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, ritmoDe, type RitmoDelAncho } from './ritmo'
+import { PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, ritmoDe, type RitmoDelAncho } from './ritmo'
 import { PX_DEL_TUNEL } from './tunel'
 
 /**
@@ -12,25 +11,13 @@ import { PX_DEL_TUNEL } from './tunel'
  * mismo (el cartel, la huida, Portfolio) y después va corrido lo que el túnel se estiró: la espera, la salida por el vacío
  * y los demos duran lo mismo.
  *
- *   · `k` es el del producto (`ESTIRAMIENTO_DEL_TUNEL.escritorio`, 1,5) o el pedido: `?pruebas=tunelk=1.3|1.8` (y `=1`, el
- *     de antes, para comparar). Abajo de 1024 manda el del CSS (tablet 1,5, teléfono 2), como siempre.
+ *   · `k` es el del producto (`ESTIRAMIENTO_DEL_TUNEL.escritorio`: 1,8 desde [EL ENCASTRE] 1A, que borró la prueba
+ *     `tunelk`). Abajo de 1024 manda el del CSS (tablet 1,5, teléfono 2), como siempre.
  *   · El panel crece lo que el túnel se estiró (k − 1 túneles, contados contra 900) y la escena lo DESCUENTA
  *     (`_lib/escena/tramoEstirado.ts`): la tabla de secciones declara el alto sin estirar y, afuera del túnel, el progreso
  *     de la escena es el de siempre (REGLA DE ALTURAS: Portfolio, la frase, la noche y el amanecer no se mueven).
  *   · Con `k = 1` no se estira nada y no se anota nada: el túnel de antes, cuadro a cuadro (s49).
  */
-
-/** El `k` de escritorio de esta carga: el del producto, o el que pide la prueba. */
-export function estiramientoDeEscritorio(): number {
-  const pedido = entornoDeLaEscena().pruebas.tunelk
-  return pedido === 'no' ? ESTIRAMIENTO_DEL_TUNEL.escritorio : Number(pedido)
-}
-
-/** El ritmo del túnel donde vive `el`: el que decidió su CSS (`ritmoDe`) y, desde 1024, con el `k` de esta carga. */
-export function ritmoDelTunel(el: Element): RitmoDelAncho {
-  const delCss = ritmoDe(el)
-  return delCss.banda === BANDA_DEL_EFECTO ? { estiramiento: estiramientoDeEscritorio(), banda: delCss.banda } : delCss
-}
 
 /**
  * Desde 1024 el panel crece lo que el túnel se estiró (su alto de la tabla, el solape incluido, más k − 1 túneles) y se
@@ -50,11 +37,11 @@ export function estirarElPanel(panel: Element, ritmo: RitmoDelAncho): () => void
 
 /** El ritmo del túnel que sigue al ancho (lo relee en cada `resize`) con el panel estirado desde 1024. */
 export function seguirElRitmo(caja: Element, panel: Element): { readonly actual: () => RitmoDelAncho; readonly soltar: () => void } {
-  let ritmo = ritmoDelTunel(caja)
+  let ritmo = ritmoDe(caja)
   let soltarElPanel = estirarElPanel(panel, ritmo)
   const leer = (): void => {
     soltarElPanel()
-    ritmo = ritmoDelTunel(caja)
+    ritmo = ritmoDe(caja)
     soltarElPanel = estirarElPanel(panel, ritmo)
   }
   window.addEventListener('resize', leer)

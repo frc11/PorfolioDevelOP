@@ -84,12 +84,6 @@ export interface Pruebas {
    * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
   readonly pie: 'antes' | 'no'
-  /**
-   * [CIERRE] 1C · `tunelk=1.3|1.8`: cuánto se estira el túnel de escritorio (el producto, 1,5; `1`, el de antes, para
-   * comparar). La misma animación, más o menos larga (`_secciones/trabajos/estiramiento.ts`). [AJUSTES FINALES] B1: las
-   * leyes de prueba `tunel=constante|tope|largo` se borraron con su bandera.
-   */
-  readonly tunelk: '1' | '1.3' | '1.8' | 'no'
 }
 
 /**
@@ -98,9 +92,10 @@ export interface Pruebas {
  * la del producto (`_lib/titulos3d/registro.ts`, `camaraDeEntonces.ts`). A2: `sombratitulos=si` se borró: la sombra de los
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
  * pasó al producto (`_secciones/servicios/angosto.tsx`). [CIERRE] 2B: `contactofondo=blur|blanco` se borró: el contacto como
- * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue.
+ * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue. [EL ENCASTRE]
+ * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunelk: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -109,7 +104,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunelk: unoDe<'1' | '1.3' | '1.8'>(['1', '1.3', '1.8'], valor('tunelk')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
 }
 
 export interface Entorno {

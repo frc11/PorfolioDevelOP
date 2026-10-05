@@ -7,8 +7,8 @@
  *   1B · la llegada de los demos de Trabajos (título, párrafo y libros, en el vacío del túnel) dura el doble de scroll:
  *        arranca donde siempre y su reloj corre a la mitad; el vacío no cambia; el piso del regulador la espera entera.
  *   1C · el túnel: la misma animación (la tabla de heatbureau, sus rampas, sus resortes y su regulador), estirada por `k`
- *        desde 1024 (1,5; `?pruebas=tunelk=1.3|1.8`); con k = 1, el de antes cuadro a cuadro; las leyes de prueba de
- *        AJUSTES FINALES B1 se borraron; REGLA DE ALTURAS: la escena descuenta el tramo estirado.
+ *        desde 1024 ([EL ENCASTRE] 1A: 1,8, y la prueba `tunelk` se borró); con k = 1, el de antes cuadro a cuadro; las
+ *        leyes de prueba de AJUSTES FINALES B1 se borraron; REGLA DE ALTURAS: la escena descuenta el tramo estirado.
  *   2A · los nanobots de IA y automatización: el flujo es una figura aparte, horizontal, debajo del robot, sin línea que los
  *        una; el robot que habla y el flujo que se enciende tramo a tramo, como estaban.
  *   2B · el contacto como placa, al producto (desde la barra y con movimiento): un bloque con espesor que llega desde un
@@ -135,16 +135,18 @@ afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros siguen 
 controlPositivo('el detector VE los libros atados al vacío', capa.replace('poseDelLibro(enElTramo(l, ', 'poseDelLibro(enElTramo(u, '), cableada)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1C · El túnel: la misma animación, más larga — la tabla de siempre estirada por k desde 1024 (1,5; `tunelk=1.3|1.8`)')
+titulo('1C · El túnel: la misma animación, más larga — la tabla de siempre estirada por k desde 1024 (1,8 desde EL ENCASTRE 1A)')
 
-// Las tres leyes de prueba de AJUSTES FINALES se fueron con su bandera y sus archivos; queda la prueba del k.
+// Las tres leyes de prueba de AJUSTES FINALES se fueron con su bandera y sus archivos; [EL ENCASTRE] 1A: y la prueba del k.
 const T = '_secciones/trabajos'
 const sinLasLeyes = (codigo: string): boolean => !/profundidad|tunel=constante|tunel=tope|tunel=largo|sinResortes|poseMostrada|ritmoMostrado/.test(codigo)
 const delTunel = ['CapaDelTunel.tsx', 'piezas.tsx', 'regulador.ts', 'estiramiento.ts', 'ritmo.ts'].map((r) => sinComentarios(leer(`${T}/${r}`))).join('\n')
 afirmar(sinLasLeyes(delTunel) && !existsSync(`${V3}/${T}/profundidad.ts`) && !existsSync(`${V3}/${T}/largo.ts`) && !('tunel' in PRUEBAS_APAGADAS) && !('tunel' in entornoPedido('producto,tunel=largo').pruebas), '`tunel=constante|tope|largo` se borraron: ni archivos (profundidad.ts, largo.ts), ni ley, ni bandera')
 controlPositivo('el detector VE la ley de prueba de antes', `${delTunel}\nconst pose = poseMostrada(px)`, sinLasLeyes)
-const pide = (k: string): string => entornoPedido(`producto,tunelk=${k}`).pruebas.tunelk
-afirmar(PRUEBAS_APAGADAS.tunelk === 'no' && pide('1.3') === '1.3' && pide('1.8') === '1.8' && pide('1') === '1' && pide('2') === 'no' && pide('1.5') === 'no' && ESTIRAMIENTO_DEL_TUNEL.escritorio === 1.5, 'k = 1,5 en el producto; `?pruebas=tunelk=1.3` y `=1.8` lo ajustan (y `=1`, el túnel de antes, para comparar); cualquier otro valor no pide nada')
+// [EL ENCASTRE] 1A · lo que esta línea afirmaba (k = 1,5 y `tunelk=1|1.3|1.8`) cambió por pedido: k = 1,8 y sin la prueba.
+const sinLaPruebaDelK = (pruebas: object, codigo: string): boolean => !('tunelk' in pruebas) && !/tunelk|estiramientoDeEscritorio|ritmoDelTunel/.test(codigo)
+afirmar(sinLaPruebaDelK(PRUEBAS_APAGADAS, delTunel) && sinLaPruebaDelK(entornoPedido('producto,tunelk=1.3').pruebas, delTunel) && ESTIRAMIENTO_DEL_TUNEL.escritorio === 1.8, 'k = 1,8 en el producto (EL ENCASTRE 1A); la prueba `tunelk` se borró: `?pruebas=tunelk=1.3` no pide nada y el túnel no la lee')
+controlPositivo('el detector VE la prueba del k de CIERRE (la bandera en las pruebas y su lectura en el túnel)', { ...PRUEBAS_APAGADAS, tunelk: 'no' }, (p: object) => sinLaPruebaDelK(p, delTunel))
 
 // Con k = 1, el reloj es la identidad en cada píxel: lo que llega al regulador es lo de hoy, cuadro a cuadro.
 const identidad = (reloj: (px: number) => number): boolean => {
@@ -175,7 +177,8 @@ const mismasCurvas = (k: number, reloj: Reloj = pxDeLaTabla): boolean => {
 afirmar([1.3, 1.5, 1.8].every((k) => mismasCurvas(k)), 'las mismas curvas en el progreso de la tabla, para k = 1,3, 1,5 y 1,8: la pose en el scroll A + k·x es la de la tabla en A + x; antes del túnel el mismo píxel; después del túnel la espera, la salida por el vacío y los demos duran el mismo scroll')
 const desparejo: Reloj = (px, k) => (px <= A || px >= A + k * PX_DEL_TUNEL ? pxDeLaTabla(px, k) : A + ((px - A) / (k * PX_DEL_TUNEL)) ** 2 * PX_DEL_TUNEL)
 controlPositivo('el detector VE un túnel estirado desparejo (otra curva: lento al principio, rápido al final)', desparejo, (r: Reloj) => mismasCurvas(1.5, r))
-afirmar(Math.abs(pantallasExtra(1.5) - (0.5 * PX_DEL_TUNEL) / 900) < 1e-12 && /panel\.style\.minHeight = `calc\(var\(--alto-minimo-del-panel\) \+ \$\{\(pantallasExtra\(ritmo\.estiramiento\) \* 100\)\.toFixed\(4\)\}svh\)`/.test(estira), '  el panel crece exactamente lo que el túnel se estiró: (k − 1) túneles contados contra 900 (1,5 → +82,2 svh)', `${(pantallasExtra(1.5) * 100).toFixed(1)} svh`)
+const kDelProducto = ESTIRAMIENTO_DEL_TUNEL.escritorio
+afirmar(Math.abs(pantallasExtra(1.5) - (0.5 * PX_DEL_TUNEL) / 900) < 1e-12 && Math.abs(pantallasExtra(kDelProducto) - ((kDelProducto - 1) * PX_DEL_TUNEL) / 900) < 1e-12 && /panel\.style\.minHeight = `calc\(var\(--alto-minimo-del-panel\) \+ \$\{\(pantallasExtra\(ritmo\.estiramiento\) \* 100\)\.toFixed\(4\)\}svh\)`/.test(estira), '  el panel crece exactamente lo que el túnel se estiró: (k − 1) túneles contados contra 900', `1,5 → +${(pantallasExtra(1.5) * 100).toFixed(1)} svh · el producto (${String(kDelProducto)}) → +${(pantallasExtra(kDelProducto) * 100).toFixed(1)} svh`)
 
 // REGLA DE ALTURAS: con la sección estirada y el descuento de la escena, el mapeo es el de la tabla declarada fuera del túnel.
 const H = 900
@@ -202,8 +205,8 @@ const cableado = (a: string): boolean =>
   a.includes('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)') &&
   viaje.includes('sampleLightArc(progresoDelScroll(m.y, secciones.arriba, m.abajo, v), arco)') &&
   capaDelTunel.includes('const ritmo = seguirElRitmo(caja, panel)') && capaDelTunel.includes('progresoDeLaTabla(progreso.get(), ritmo.actual().estiramiento)') && capaDelTunel.includes('ritmo.soltar()') &&
-  estira.includes('TRAMO_ESTIRADO.valor = tramo') && estira.includes("return pedido === 'no' ? ESTIRAMIENTO_DEL_TUNEL.escritorio : Number(pedido)")
-afirmar(cableado(atadura), '  el cableado: el lazo de la escena y la luz de los viajes miden sin el tramo estirado; el túnel lee su ritmo (el CSS abajo de 1024, el k de la carga desde 1024), estira el panel y lo suelta al desmontarse')
+  estira.includes('TRAMO_ESTIRADO.valor = tramo') && estira.includes('let ritmo = ritmoDe(caja)') && estira.includes('soltarElPanel()\n    ritmo = ritmoDe(caja)')
+afirmar(cableado(atadura), '  el cableado: el lazo de la escena y la luz de los viajes miden sin el tramo estirado; el túnel lee su ritmo (el CSS abajo de 1024, el k del producto desde 1024, también al cambiar el ancho), estira el panel y lo suelta al desmontarse')
 controlPositivo('el detector VE la escena midiendo el scroll crudo', atadura.replace('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)', 'progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)'), cableado)
 
 // ═══════════════════════════════════════════════════════════════════════════
