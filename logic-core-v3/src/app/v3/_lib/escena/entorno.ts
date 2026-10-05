@@ -85,13 +85,11 @@ export interface Pruebas {
    */
   readonly pie: 'antes' | 'no'
   /**
-   * [AJUSTES FINALES] B1 · `tunel=constante`: el túnel con la profundidad lineal con el scroll (cada proyecto nace en el
-   * arranque del túnel y se acerca a velocidad constante: más recorrido por proyecto); `tunel=tope`: lo mismo, y lo
-   * mostrado persigue al scroll a velocidad máxima constante, sin resortes (como el amanecer). `_secciones/trabajos/profundidad.ts`.
-   * `tunel=largo`: lineal naciendo más cerca, con el tope y la sección más alta, para que cada proyecto se lea ~1,5 s
-   * (`_secciones/trabajos/largo.ts`).
+   * [CIERRE] 1C · `tunelk=1.3|1.8`: cuánto se estira el túnel de escritorio (el producto, 1,5; `1`, el de antes, para
+   * comparar). La misma animación, más o menos larga (`_secciones/trabajos/estiramiento.ts`). [AJUSTES FINALES] B1: las
+   * leyes de prueba `tunel=constante|tope|largo` se borraron con su bandera.
    */
-  readonly tunel: 'constante' | 'tope' | 'largo' | 'no'
+  readonly tunelk: '1' | '1.3' | '1.8' | 'no'
   /**
    * [AJUSTES FINALES] B2 · `contactofondo=blur|blanco`: el contacto como transición (escritorio, con movimiento): el fondo se
    * desenfoca o se funde a blanco en 0,5 s y la hoja llega como una placa desde el fondo (`_chrome/contacto/placa.ts`).
@@ -106,7 +104,7 @@ export interface Pruebas {
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
  * pasó al producto (`_secciones/servicios/angosto.tsx`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunel: 'no', contactofondo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', tunelk: 'no', contactofondo: 'no' }
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -115,7 +113,7 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunel: unoDe<'constante' | 'tope' | 'largo'>(['constante', 'tope', 'largo'], valor('tunel')), contactofondo: unoDe<'blur' | 'blanco'>(['blur', 'blanco'], valor('contactofondo')) }
+  return { pie: unoDe<'antes'>(['antes'], valor('pie')), tunelk: unoDe<'1' | '1.3' | '1.8'>(['1', '1.3', '1.8'], valor('tunelk')), contactofondo: unoDe<'blur' | 'blanco'>(['blur', 'blanco'], valor('contactofondo')) }
 }
 
 export interface Entorno {

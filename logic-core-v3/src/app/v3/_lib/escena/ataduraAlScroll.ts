@@ -115,7 +115,7 @@ export function useEscenaAtadaAlScroll(
     let pedido = 0
     // [CALIDAD 1] B2: lo que se mide en cada cuadro, escrito siempre en los mismos objetos.
     const extension = { arriba: 0, abajo: 0 }
-    // [AJUSTES FINALES] B1 · el scroll y el pie de las secciones sin el tramo que estira `tunel=largo` (REGLA DE ALTURAS).
+    // [AJUSTES FINALES] B1 · el scroll y el pie de las secciones sin el tramo estirado del túnel ([CIERRE] 1C; REGLA DE ALTURAS).
     const sinEstirar = { y: 0, abajo: 0 }
     const bloque = bloqueVivo()
 

@@ -117,13 +117,14 @@ export function afirmarElRitmo(): void {
     const px = nacen.map((y) => alScroll(y - CAPAS_DEL_TUNEL.proyectos[0].arranca + A))
     return px.slice(1).map((y, i) => Math.round(y - px[i]))
   }
-  const deEscritorio = relevos(ESTIRAMIENTO_DEL_TUNEL.escritorio)
-  for (const aparato of ['tablet', 'movil'] as const) {
+  // [CIERRE] 1C · la base es la tabla (k = 1): desde 1024 también se estira (1,5 en el producto, `estiramiento.ts`).
+  const deLaTabla = relevos(1)
+  for (const aparato of ['escritorio', 'tablet', 'movil'] as const) {
     const k = ESTIRAMIENTO_DEL_TUNEL[aparato]
     const suyos = relevos(k)
-    afirmar(suyos.every((d, i) => Math.abs(d - deEscritorio[i] * k) <= 1), `en ${aparato} cada proyecto dura ×${String(k)} de scroll antes de que nazca el siguiente: ${suyos.join(' · ')} px contra ${deEscritorio.join(' · ')}`)
+    afirmar(suyos.every((d, i) => Math.abs(d - deLaTabla[i] * k) <= 1), `en ${aparato} cada proyecto dura ×${String(k)} de scroll antes de que nazca el siguiente: ${suyos.join(' · ')} px contra ${deLaTabla.join(' · ')} de la tabla`)
   }
-  afirmarIgual([progresoDeLaTabla(0, 2), progresoDeLaTabla(1, 2), progresoDeLaTabla(0.3, 1)], [0, 1, 0.3], 'el reloj cierra en las dos puntas, y con 1 es la identidad: escritorio no cambia')
+  afirmarIgual([progresoDeLaTabla(0, 2), progresoDeLaTabla(1, 2), progresoDeLaTabla(0.3, 1)], [0, 1, 0.3], 'el reloj cierra en las dos puntas, y con 1 es la identidad: el túnel de la tabla, cuadro a cuadro')
   let crece = true
   for (let u = 0; u <= 1; u += 1 / 4000) if (progresoDeLaTabla(u + 1 / 4000, 2) < progresoDeLaTabla(u, 2)) crece = false
   afirmar(crece, '  y nunca vuelve para atrás: un scroll que baja no hace volver al túnel')

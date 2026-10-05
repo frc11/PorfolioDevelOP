@@ -22,8 +22,8 @@ import {
   pxDelTunelEn,
   ventanaDelTunel,
 } from './geometria'
+import { seguirElRitmo } from './estiramiento'
 import { VentanaDelCta } from './piezas'
-import { poseMostrada, pxParaQueMidaMostrado, ritmoMostrado, sinResortesMostrado } from './profundidad'
 import { avanzarLoMostrado, reposoEn, type EstadoDelTunelMostrado } from './regulador'
 import { progresoDeLaTabla } from './ritmo'
 import { pintarElTipeo } from './trabajos-tipeo'
@@ -35,6 +35,7 @@ import {
   fraccionDelVacio,
   opacidadDelRotulo,
   poseDelTunel,
+  pxParaQueElProyectoMida,
   recorteDelVacio,
   transformDeLaCapa,
   transformDelRotulo,
@@ -184,8 +185,7 @@ export function CapaDelTunel({
    * su cadena por la misma vía.
    */
   const pintar = useCallback((p: number, pEscenario: number): void => {
-    // [AJUSTES FINALES] B1 · la pose con la ley de esta carga: la tabla, o la profundidad lineal de la prueba (`profundidad.ts`).
-    const pose = poseMostrada(pxDelTunelEn(p), pxDelTunelEn(pEscenario))
+    const pose = poseDelTunel(pxDelTunelEn(p), pxDelTunelEn(pEscenario))
     escenario.current?.style.setProperty('transform', transformDeLaCapa(pose.escenario))
     for (let i = 0; i < CAPTURAS.length; i += 1) {
       envoltorios.current[i]?.style.setProperty('transform', transformDeLaCapa(pose.proyectos[i]))
@@ -253,11 +253,11 @@ export function CapaDelTunel({
 
     let cuadro = 0
     let anterior = 0
-    // MÓVIL 2: abajo de 1024 el CSS estira el túnel y le da el techo angosto (`ritmo.ts`).
-    let ritmo = ritmoMostrado(caja)
-    const leerElRitmo = (): void => void (ritmo = ritmoMostrado(caja))
+    // MÓVIL 2: abajo de 1024 el CSS estira el túnel y le da el techo angosto (`ritmo.ts`). [CIERRE] 1C: desde 1024 también se
+    // estira (el k de esta carga) y el panel crece lo mismo, anotado a la escena; lo sigue en cada `resize` (`estiramiento.ts`).
+    const ritmo = seguirElRitmo(caja, panel)
     /** El progreso de la página en la tabla: con el túnel estirado, el reloj de `ritmo.ts`. */
-    const progresoDeAhora = (): number => progresoDeLaTabla(progreso.get(), ritmo.estiramiento)
+    const progresoDeAhora = (): number => progresoDeLaTabla(progreso.get(), ritmo.actual().estiramiento)
     /** Qué tiene el foco adentro del túnel: una captura por su índice, o el CTA. */
     let enfocada: number | 'cta' | null = null
     let frenoHasta = 0
@@ -275,7 +275,7 @@ export function CapaDelTunel({
     const pisoDelFoco = (): number => {
       if (enfocada === null) return 0
       if (enfocada === 'cta') return progresoDelPxDelTunel(PX_DEL_TUNEL)
-      return progresoDelPxDelTunel(pxParaQueMidaMostrado(enfocada, ANCHO_CON_EL_ROTULO_ENTERO))
+      return progresoDelPxDelTunel(pxParaQueElProyectoMida(enfocada, ANCHO_CON_EL_ROTULO_ENTERO))
     }
 
     /** El scroll que el efecto persigue, en px: el de la página, o el piso del foco si es mayor. */
@@ -306,7 +306,7 @@ export function CapaDelTunel({
      * quedar a medio camino, lo mostrado se mueve igual.
      */
     const frenaSiCorresponde = (ahora: number): boolean => {
-      const uCta = poseMostrada(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta
+      const uCta = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta
       if (uCta <= 0) yaFreno = false
       if (!yaFreno && uCta >= 1) {
         yaFreno = true
@@ -321,7 +321,7 @@ export function CapaDelTunel({
       const pagina = pxDeLaSeccion(progresoDeAhora())
       // [VIAJES] Durante un viaje el túnel no reproduce su zoom: lo mostrado va con la página, quieto.
       if (viajeEnCurso() !== null) reposarEn(scrollDeAhora())
-      else estado.current = avanzarLoMostrado(estado.current, pagina, dt, ritmo.banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()), undefined, sinResortesMostrado())
+      else estado.current = avanzarLoMostrado(estado.current, pagina, dt, ritmo.actual().banda, frenaSiCorresponde(ahora), pxDeLaSeccion(pisoDelFoco()))
       mostrar()
       cuadro = requestAnimationFrame(paso)
     }
@@ -332,7 +332,7 @@ export function CapaDelTunel({
       reposarEn(scrollDeAhora())
       // Entrar con la frase ya escrita —recargando más abajo, o volviendo desde
       // Servicios— no es terminar de escribirla: ahí no se frena.
-      yaFreno = poseMostrada(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
+      yaFreno = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
       mostrar()
       cuadro = requestAnimationFrame(paso)
     }
@@ -371,17 +371,16 @@ export function CapaDelTunel({
     const bajaDelViaje = suscribirAlViaje(() => {
       if (viajeEnCurso() !== null) return
       reposarEn(scrollDeAhora())
-      yaFreno = poseMostrada(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
+      yaFreno = poseDelTunel(pxDelTunelEn(fraccionDeScroll(estado.current.tunel.posicion))).fraccionDelCta >= 1
       mostrar()
     })
-    window.addEventListener('resize', leerElRitmo)
     caja.addEventListener('focusin', alEntrarElFoco)
     caja.addEventListener('focusout', alSalirElFoco)
 
     return () => {
       observador.disconnect()
       bajaDelViaje()
-      window.removeEventListener('resize', leerElRitmo)
+      ritmo.soltar()
       caja.removeEventListener('focusin', alEntrarElFoco)
       caja.removeEventListener('focusout', alSalirElFoco)
       if (cuadro !== 0) cancelAnimationFrame(cuadro)

@@ -81,15 +81,14 @@ export function afirmarElRotulo(cuantas: number, conMotion: string): void {
   )
   controlPositivo('  el detector vería el piso en el borde de la banda, que dejaba el nombre en 0', FRACCION_DEL_ROTULO, (a: number) => pisoConElRotuloEntero(a, cuantas))
   const pisoDeLaCapa = (src: string): boolean =>
-    // [AJUSTES FINALES] B1 · con la ley de la carga (`profundidad.ts`): la tabla, o la profundidad lineal de la prueba.
-    src.includes('pxParaQueMidaMostrado(enfocada, ANCHO_CON_EL_ROTULO_ENTERO)') &&
+    src.includes('pxParaQueElProyectoMida(enfocada, ANCHO_CON_EL_ROTULO_ENTERO)') &&
     src.includes("enfocada === 'cta'") &&
     src.includes('progresoDelPxDelTunel(PX_DEL_TUNEL)')
   afirmar(
     pisoDeLaCapa(FUENTE_DE_LA_CAPA),
     '  y es ese piso el que la capa usa, con uno propio para el CTA —el final del túnel—: su enlace no vive en una captura y sin él quedaba en escala 0 al enfocarlo',
   )
-  controlPositivo('  el detector vería el piso viejo, sin el CTA', 'pxParaQueMidaMostrado(enfocada, FRACCION_DEL_ROTULO)', pisoDeLaCapa)
+  controlPositivo('  el detector vería el piso viejo, sin el CTA', 'pxParaQueElProyectoMida(enfocada, FRACCION_DEL_ROTULO)', pisoDeLaCapa)
 
   /**
    * ⚠️ **Y LA BANDA ABRE DONDE EL RÓTULO ENTRA, que es el mismo número.** Una

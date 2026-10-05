@@ -188,10 +188,8 @@ export const ARCHIVOS_DE_APOYO = [
   // por las 300 líneas, y su §24 de `soporte.ts` por la misma regla y el mismo tema.
   `${RAIZ_DE_SECCIONES}/trabajos/regulador.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-regulador.ts`,
-  // [AJUSTES FINALES] B1 · la prueba del túnel con la profundidad lineal (`?pruebas=tunel=…`), apagada en el producto.
-  `${RAIZ_DE_SECCIONES}/trabajos/profundidad.ts`,
-  // [AJUSTES FINALES] B1 · `tunel=largo`: la profundidad lineal que se alcanza a leer (la sección más alta, sólo con la bandera).
-  `${RAIZ_DE_SECCIONES}/trabajos/largo.ts`,
+  // [CIERRE] 1C · el túnel de escritorio estirado (el k de la carga, el panel que crece y lo que la escena descuenta).
+  `${RAIZ_DE_SECCIONES}/trabajos/estiramiento.ts`,
   // TITULAR · los DOS que salieron del Hero al pasar las 300 líneas, mismo corte que Trabajos:
   // `geometria.ts` los números y las dos tipografías (el nivel `display` DERIVA del ancho de la
   // caja) y `soporte.ts` las cuatro cuentas. §11 del invariante escanea el primero, y lo dice.

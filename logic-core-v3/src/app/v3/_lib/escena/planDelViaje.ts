@@ -42,7 +42,7 @@ export function planDelViaje(destino: string, y1: number): ViajeEnCurso {
   const nivelDelArcoEn = (y: number): number => {
     if (secciones === null) return 1
     const arco: MutableLightLevels = { level: 1, kelvin: 0, azimuthDeg: 0, elevationDeg: 0 }
-    // [AJUSTES FINALES] B1 · sin el tramo que estira `tunel=largo` (la luz del viaje es la del recorrido).
+    // [AJUSTES FINALES] B1 · sin el tramo estirado del túnel ([CIERRE] 1C; la luz del viaje es la del recorrido).
     const m = medidaSinElEstiramiento(y, secciones.abajo, y0, v, { y: 0, abajo: 0 })
     sampleLightArc(progresoDelScroll(m.y, secciones.arriba, m.abajo, v), arco)
     return arco.level

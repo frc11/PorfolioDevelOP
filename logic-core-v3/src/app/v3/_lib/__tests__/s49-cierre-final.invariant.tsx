@@ -6,14 +6,23 @@
  *        JavaScript, el seguro de 4 s sin condiciones; sin hidratar, la hoja lo saca en los dos modos de movimiento.
  *   1B · la llegada de los demos de Trabajos (título, párrafo y libros, en el vacío del túnel) dura el doble de scroll:
  *        arranca donde siempre y su reloj corre a la mitad; el vacío no cambia; el piso del regulador la espera entera.
+ *   1C · el túnel: la misma animación (la tabla de heatbureau, sus rampas, sus resortes y su regulador), estirada por `k`
+ *        desde 1024 (1,5; `?pruebas=tunelk=1.3|1.8`); con k = 1, el de antes cuadro a cuadro; las leyes de prueba de
+ *        AJUSTES FINALES B1 se borraron; REGLA DE ALTURAS: la escena descuenta el tramo estirado.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/cierre-final/mirar.txt`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { LLEGADA, escalaDeDemos, llegadaDeDemos, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { BANDA_DEL_EFECTO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, MARGEN_DEL_DESPINEADO, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { enElRiel } from '../../_secciones/trabajos/regulador'
+import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, progresoDeLaTabla, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
+import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
+import { ANCLAJE } from '../escena/anclaje'
+import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
+import { progresoDelScroll } from '../escena/recorrido'
+import { sinElEstiramiento } from '../escena/tramoEstirado'
 import { CARGA, SEGURO_DEL_VELO_MS, estaTodo, type EstadoDeLaCarga } from '../carga'
 import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -102,5 +111,77 @@ const capa = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
 const cableada = (c: string): boolean => /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)/.test(c) && /const delParrafo = enElTramo\(l, LLEGADA\.parrafo\)/.test(c) && /poseDelLibro\(enElTramo\(l, tramoDelLibro\(i, libros\.current\.length\)\)\)/.test(c) && /setProperty\('--demos-escala', u\.toFixed\(5\)\)/.test(c) && /\(rigida\.current \? escala\.current : llegada\.current\) >= 1/.test(c)
 afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros siguen el reloj de la llegada; el carrusel arranca cuando todo llegó; abajo de 1024 la capa rígida sigue con el vacío')
 controlPositivo('el detector VE los libros atados al vacío', capa.replace('poseDelLibro(enElTramo(l, ', 'poseDelLibro(enElTramo(u, '), cableada)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1C · El túnel: la misma animación, más larga — la tabla de siempre estirada por k desde 1024 (1,5; `tunelk=1.3|1.8`)')
+
+// Las tres leyes de prueba de AJUSTES FINALES se fueron con su bandera y sus archivos; queda la prueba del k.
+const T = '_secciones/trabajos'
+const sinLasLeyes = (codigo: string): boolean => !/profundidad|tunel=constante|tunel=tope|tunel=largo|sinResortes|poseMostrada|ritmoMostrado/.test(codigo)
+const delTunel = ['CapaDelTunel.tsx', 'piezas.tsx', 'regulador.ts', 'estiramiento.ts', 'ritmo.ts'].map((r) => sinComentarios(leer(`${T}/${r}`))).join('\n')
+afirmar(sinLasLeyes(delTunel) && !existsSync(`${V3}/${T}/profundidad.ts`) && !existsSync(`${V3}/${T}/largo.ts`) && !('tunel' in PRUEBAS_APAGADAS) && !('tunel' in entornoPedido('producto,tunel=largo').pruebas), '`tunel=constante|tope|largo` se borraron: ni archivos (profundidad.ts, largo.ts), ni ley, ni bandera')
+controlPositivo('el detector VE la ley de prueba de antes', `${delTunel}\nconst pose = poseMostrada(px)`, sinLasLeyes)
+const pide = (k: string): string => entornoPedido(`producto,tunelk=${k}`).pruebas.tunelk
+afirmar(PRUEBAS_APAGADAS.tunelk === 'no' && pide('1.3') === '1.3' && pide('1.8') === '1.8' && pide('1') === '1' && pide('2') === 'no' && pide('1.5') === 'no' && ESTIRAMIENTO_DEL_TUNEL.escritorio === 1.5, 'k = 1,5 en el producto; `?pruebas=tunelk=1.3` y `=1.8` lo ajustan (y `=1`, el túnel de antes, para comparar); cualquier otro valor no pide nada')
+
+// Con k = 1, el reloj es la identidad en cada píxel: lo que llega al regulador es lo de hoy, cuadro a cuadro.
+const identidad = (reloj: (px: number) => number): boolean => {
+  for (let px = 0; px <= 9000; px += 0.5) if (reloj(px) !== px) return false
+  return true
+}
+let progresoIgual = true
+for (let p = 0; p <= 1; p += 1 / 8192) if (progresoDeLaTabla(p, 1) !== p) progresoIgual = false
+afirmar(identidad((px) => pxDeLaTabla(px, 1)) && progresoIgual, 'con k = 1 el túnel es el de hoy cuadro a cuadro: el reloj devuelve el MISMO número en cada píxel y en cada progreso (bit a bit), así que el regulador, los resortes y la pose reciben lo de siempre')
+controlPositivo('el detector VE un reloj que no es la identidad (el de 1,5)', (px: number) => pxDeLaTabla(px, 1.5), identidad)
+const estira = sinComentarios(leer(`${T}/estiramiento.ts`))
+afirmar(/if \(!\(panel instanceof HTMLElement\) \|\| ritmo\.banda !== BANDA_DEL_EFECTO \|\| !\(ritmo\.estiramiento > 1\)\) return \(\) => undefined/.test(estira), '  y con k = 1 (o abajo de 1024, donde estira el CSS de MÓVIL 2) el panel no crece y la escena no descuenta nada')
+
+// Las mismas curvas en el progreso de la tabla: adentro del túnel cada píxel de la tabla cuesta k de scroll; después, 1.
+const A = PX_DEL_ARRANQUE_DEL_TUNEL
+type Reloj = (px: number, k: number) => number
+const mismasCurvas = (k: number, reloj: Reloj = pxDeLaTabla): boolean => {
+  for (let x = 0; x <= PX_DEL_TUNEL; x += 7) {
+    if (Math.abs(reloj(A + k * x, k) - (A + x)) > 1e-9) return false
+    const [a, b] = [poseDelTunel(reloj(A + k * x, k) - A), poseDelTunel(x)]
+    if (a.anchos.some((v, i) => Math.abs(v - b.anchos[i]) > 1e-12) || Math.abs(a.fraccionDelCta - b.fraccionDelCta) > 1e-12) return false
+  }
+  // Antes del túnel, el mismo píxel (el cartel, la huida, Portfolio); después, corrido: la espera, la salida y los demos duran lo mismo.
+  const antes = [0, A / 3, A].every((y) => reloj(y, k) === y)
+  const despues = [0, 552, 1131, 2000, 2931].every((d) => Math.abs(reloj(A + k * PX_DEL_TUNEL + d, k) - (A + PX_DEL_TUNEL + d)) < 1e-9)
+  return antes && despues
+}
+afirmar([1.3, 1.5, 1.8].every((k) => mismasCurvas(k)), 'las mismas curvas en el progreso de la tabla, para k = 1,3, 1,5 y 1,8: la pose en el scroll A + k·x es la de la tabla en A + x; antes del túnel el mismo píxel; después del túnel la espera, la salida por el vacío y los demos duran el mismo scroll')
+const desparejo: Reloj = (px, k) => (px <= A || px >= A + k * PX_DEL_TUNEL ? pxDeLaTabla(px, k) : A + ((px - A) / (k * PX_DEL_TUNEL)) ** 2 * PX_DEL_TUNEL)
+controlPositivo('el detector VE un túnel estirado desparejo (otra curva: lento al principio, rápido al final)', desparejo, (r: Reloj) => mismasCurvas(1.5, r))
+afirmar(Math.abs(pantallasExtra(1.5) - (0.5 * PX_DEL_TUNEL) / 900) < 1e-12 && /panel\.style\.minHeight = `calc\(var\(--alto-minimo-del-panel\) \+ \$\{\(pantallasExtra\(ritmo\.estiramiento\) \* 100\)\.toFixed\(4\)\}svh\)`/.test(estira), '  el panel crece exactamente lo que el túnel se estiró: (k − 1) túneles contados contra 900 (1,5 → +82,2 svh)', `${(pantallasExtra(1.5) * 100).toFixed(1)} svh`)
+
+// REGLA DE ALTURAS: con la sección estirada y el descuento de la escena, el mapeo es el de la tabla declarada fuera del túnel.
+const H = 900
+const trabajosG = ANCLAJE.geometria.find((g) => g.id === 'trabajos')
+const desdeDelTunel = ((trabajosG?.desdePantalla ?? 0) - 1) * H + A
+const abajoDeclarado = ANCLAJE.pantallasDelDocumento * H
+const mapeoIntacto = (k: number, descontar: (y: number, k: number) => number): boolean => {
+  const estirar = (y: number): number => (y <= desdeDelTunel ? y : y <= desdeDelTunel + PX_DEL_TUNEL ? desdeDelTunel + (y - desdeDelTunel) * k : y + (k - 1) * PX_DEL_TUNEL)
+  for (let y = 0; y <= abajoDeclarado - H; y += 37) {
+    const declarado = progresoDelScroll(y, 0, abajoDeclarado, H)
+    const medido = progresoDelScroll(descontar(estirar(y), k), 0, descontar(estirar(abajoDeclarado), k), H)
+    if (Math.abs(declarado - medido) > 1e-9) return false
+  }
+  return true
+}
+const descuento = (y: number, k: number): number => sinElEstiramiento(y, desdeDelTunel, k * PX_DEL_TUNEL, k)
+afirmar(trabajosG !== undefined && [1.3, 1.5, 1.8].every((k) => mapeoIntacto(k, descuento)), 'REGLA DE ALTURAS: con la sección estirada (k = 1,3, 1,5 y 1,8) y el descuento de la escena (`tramoEstirado.ts`), el progreso de la escena en cada punto es el de la tabla declarada — antes del túnel igual, adentro a 1/k, después sin lo agregado —: Portfolio, la frase, la noche y el amanecer no se mueven')
+controlPositivo('el detector VE el mapeo sin el descuento (todo lo de después llegaría tarde)', (y: number) => y, (sin: (y: number) => number) => mapeoIntacto(1.5, (y) => sin(y)))
+const atadura = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
+const viaje = sinComentarios(leer('_lib/escena/planDelViaje.ts'))
+const capaDelTunel = sinComentarios(leer(`${T}/CapaDelTunel.tsx`))
+const cableado = (a: string): boolean =>
+  a.includes('const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)') &&
+  a.includes('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)') &&
+  viaje.includes('sampleLightArc(progresoDelScroll(m.y, secciones.arriba, m.abajo, v), arco)') &&
+  capaDelTunel.includes('const ritmo = seguirElRitmo(caja, panel)') && capaDelTunel.includes('progresoDeLaTabla(progreso.get(), ritmo.actual().estiramiento)') && capaDelTunel.includes('ritmo.soltar()') &&
+  estira.includes('TRAMO_ESTIRADO.valor = tramo') && estira.includes("return pedido === 'no' ? ESTIRAMIENTO_DEL_TUNEL.escritorio : Number(pedido)")
+afirmar(cableado(atadura), '  el cableado: el lazo de la escena y la luz de los viajes miden sin el tramo estirado; el túnel lee su ritmo (el CSS abajo de 1024, el k de la carga desde 1024), estira el panel y lo suelta al desmontarse')
+controlPositivo('el detector VE la escena midiendo el scroll crudo', atadura.replace('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)', 'progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)'), cableado)
 
 cerrar('s49-cierre-final')

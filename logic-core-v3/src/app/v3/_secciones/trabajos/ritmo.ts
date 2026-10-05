@@ -22,11 +22,13 @@ import type { BandaDelEfecto } from './regulador'
 import { PX_DEL_TUNEL } from './tunel'
 
 /**
- * ⚠️ **CUÁNTO SE ESTIRA EL TÚNEL EN CADA ANCHO.** Escritorio y portátil: 1, la
- * tabla a su ritmo. Tablet: una vez y media. Teléfono: el doble. Es el único
- * parámetro por ancho del túnel, y el alto que la sección suma sale de él.
+ * ⚠️ **CUÁNTO SE ESTIRA EL TÚNEL EN CADA ANCHO.** Escritorio y portátil: una vez y
+ * media ([CIERRE] 1C: era 1, la tabla a su ritmo; Valentino lo quiso más largo, la
+ * misma animación). Tablet: una vez y media. Teléfono: el doble. Es el único
+ * parámetro por ancho del túnel, y el alto que la sección suma sale de él. Desde
+ * 1024 lo aplica `estiramiento.ts` (la prueba `tunelk` lo ajusta); abajo, el CSS.
  */
-export const ESTIRAMIENTO_DEL_TUNEL = { escritorio: 1, tablet: 1.5, movil: 2 } as const
+export const ESTIRAMIENTO_DEL_TUNEL = { escritorio: 1.5, tablet: 1.5, movil: 2 } as const
 
 /** El arranque del túnel en px de la tabla: donde el cartel empieza a huir. */
 export const PX_DEL_ARRANQUE_DEL_TUNEL = pxDeLaSeccion(HUIDA_DEL_CARTEL.bajando.desde)

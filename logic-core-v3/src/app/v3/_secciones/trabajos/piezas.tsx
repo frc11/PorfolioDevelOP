@@ -20,8 +20,7 @@ import { CONTENIDO } from './contenido'
 import { DemosQuietos } from './demos/DemosQuietos'
 import { RUTA_DEL_CTA, TRANSICION_DE_LA_ELEVACION, recorteDeLaRuta, useEncimaDelCta } from './encimaDelCta'
 import { ESTILO_DEL_CUERPO_QUE_ESCALA, ESTILO_DE_EMPEZAR } from './ventana'
-import { DESTINO_DEL_CTA } from './geometria'
-import { primeraFotoTapaMostrada } from './profundidad'
+import { DESTINO_DEL_CTA, primeraFotoTapa } from './geometria'
 import {
   CLASE_DE_LA_BAJADA_ANGOSTA,
   CLASE_DE_LA_FRASE_ANGOSTA,
@@ -135,13 +134,13 @@ export function PortadaDeTrabajos({
    * sección); pasada la llegada el título queda armado, se queda hasta que lo tapa el túnel y vuelve armado desde abajo.
    * La huida del cartel es del DOM: al título de volumen no lo mueve.
    */
-  const salidaDelTitulo = useMotionValue(primeraFotoTapaMostrada(progreso.get()) ? 1 : 0)
+  const salidaDelTitulo = useMotionValue(primeraFotoTapa(progreso.get()) ? 1 : 0)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
     huida.current = huidaConHisteresis(huida.current, p, HUIDA_DEL_CARTEL)
-    salidaDelTitulo.set(primeraFotoTapaMostrada(p) ? 1 : 0)
+    salidaDelTitulo.set(primeraFotoTapa(p) ? 1 : 0)
     const pose = poseDeLaHuida(huida.current)
     if (pose === null) {
       el.style.setProperty('visibility', 'hidden')
