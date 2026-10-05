@@ -3,6 +3,7 @@ import { SUPERFICIES, type DefinicionSuperficie } from '../superficies'
 import { sampleLightArc } from './choreographySampler'
 import type { MutableLightLevels } from './choreographyTypes'
 import { medirLasSecciones, panelEn, SELECTOR_DE_LAS_SECCIONES, ATRIBUTO_DEL_PANEL } from './extensionDeLasSecciones'
+import { medidaSinElEstiramiento } from './tramoEstirado'
 import { NIVEL_NATURAL } from './nocheDisparada'
 import { RIM_NIGHT_LEVEL } from './probeLighting'
 import { progresoDelScroll } from './recorrido'
@@ -41,7 +42,9 @@ export function planDelViaje(destino: string, y1: number): ViajeEnCurso {
   const nivelDelArcoEn = (y: number): number => {
     if (secciones === null) return 1
     const arco: MutableLightLevels = { level: 1, kelvin: 0, azimuthDeg: 0, elevationDeg: 0 }
-    sampleLightArc(progresoDelScroll(y, secciones.arriba, secciones.abajo, v), arco)
+    // [AJUSTES FINALES] B1 · sin el tramo que estira `tunel=largo` (la luz del viaje es la del recorrido).
+    const m = medidaSinElEstiramiento(y, secciones.abajo, y0, v, { y: 0, abajo: 0 })
+    sampleLightArc(progresoDelScroll(m.y, secciones.arriba, m.abajo, v), arco)
     return arco.level
   }
   const paneles = [...document.querySelectorAll<HTMLElement>(SELECTOR_DE_LAS_SECCIONES)].map((p) => {

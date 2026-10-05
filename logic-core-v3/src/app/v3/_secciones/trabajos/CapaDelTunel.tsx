@@ -23,9 +23,9 @@ import {
   ventanaDelTunel,
 } from './geometria'
 import { VentanaDelCta } from './piezas'
-import { poseMostrada, pxParaQueMidaMostrado, sinResortesMostrado } from './profundidad'
+import { poseMostrada, pxParaQueMidaMostrado, ritmoMostrado, sinResortesMostrado } from './profundidad'
 import { avanzarLoMostrado, reposoEn, type EstadoDelTunelMostrado } from './regulador'
-import { progresoDeLaTabla, ritmoDe } from './ritmo'
+import { progresoDeLaTabla } from './ritmo'
 import { pintarElTipeo } from './trabajos-tipeo'
 import {
   ANCHO_CON_EL_ROTULO_ENTERO,
@@ -254,8 +254,8 @@ export function CapaDelTunel({
     let cuadro = 0
     let anterior = 0
     // MÓVIL 2: abajo de 1024 el CSS estira el túnel y le da el techo angosto (`ritmo.ts`).
-    let ritmo = ritmoDe(caja)
-    const leerElRitmo = (): void => void (ritmo = ritmoDe(caja))
+    let ritmo = ritmoMostrado(caja)
+    const leerElRitmo = (): void => void (ritmo = ritmoMostrado(caja))
     /** El progreso de la página en la tabla: con el túnel estirado, el reloj de `ritmo.ts`. */
     const progresoDeAhora = (): number => progresoDeLaTabla(progreso.get(), ritmo.estiramiento)
     /** Qué tiene el foco adentro del túnel: una captura por su índice, o el CTA. */

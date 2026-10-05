@@ -1,6 +1,8 @@
 import { entornoDeLaEscena, type Pruebas } from '../../_lib/escena/entorno'
 
 import { primeraFotoTapa, pxDelTunelEn } from './geometria'
+import { alargarElPanel, anchoLargo, primeraFotoTapaLarga, pxParaQueMidaLargo, ritmoLargo } from './largo'
+import { ritmoDe, type RitmoDelAncho } from './ritmo'
 import { CAPAS_DEL_TUNEL, ORIGEN_DEL_TUNEL, PX_DEL_TUNEL, poseDelTunel, pxParaQueElProyectoMida, type PoseDelTunel } from './tunel'
 
 /**
@@ -15,20 +17,22 @@ import { CAPAS_DEL_TUNEL, ORIGEN_DEL_TUNEL, PX_DEL_TUNEL, poseDelTunel, pxParaQu
  *     recorrido por proyecto: 910 / 1.173 / 1.426 px de la regla en vez de 910 / 680 / 600.
  *   · `?pruebas=tunel=tope` · lo mismo, y lo MOSTRADO persigue al scroll sin resortes, a lo sumo a la velocidad máxima
  *     del efecto (`regulador.ts`): como el amanecer (`escena/amanecer/linea.ts`, `perseguir`).
+ *   · `?pruebas=tunel=largo` · lineal naciendo más cerca, con el tope y la sección más alta: cada proyecto legible ~1,5 s
+ *     con un scroll normal (`largo.ts`, donde está el porqué).
  *
  * Las capas siguen anidadas: la escala PROPIA de cada proyecto sale de dividir su cadena por la de su padre. La ley se lee
  * una vez por carga (la bandera no cambia) y en el servidor es la tabla.
  */
-export type LeyDelTunel = 'tabla' | 'profundidad'
+export type LeyDelTunel = 'tabla' | 'profundidad' | 'largo'
 
 /** Cuánto de su tamaño final mide un proyecto al nacer, en el arranque del túnel (2 %: 42 px del más grande a 1440). */
 export const SEMILLA_DE_LA_PROFUNDIDAD = 0.02
 
 export function leyDeLaPrueba(prueba: Pruebas['tunel']): LeyDelTunel {
-  return prueba === 'no' ? 'tabla' : 'profundidad'
+  return prueba === 'no' ? 'tabla' : prueba === 'largo' ? 'largo' : 'profundidad'
 }
 
-export const sinResortesLaPrueba = (prueba: Pruebas['tunel']): boolean => prueba === 'tope'
+export const sinResortesLaPrueba = (prueba: Pruebas['tunel']): boolean => prueba === 'tope' || prueba === 'largo'
 
 /** La cadena final de cada proyecto —lo que mide en pantalla en su tope, en anchos de cuadro—: la de la tabla. */
 export const CADENA_FINAL: readonly number[] = CAPAS_DEL_TUNEL.proyectos.map((_, i) =>
@@ -45,11 +49,11 @@ export function anchoEnProfundidad(indice: number, y: number): number {
   return CADENA_FINAL[indice] / (1 + (lejos * (capa.topa - y)) / (capa.topa - ORIGEN_DEL_TUNEL))
 }
 
-/** La pose con la profundidad lineal: el escenario y el CTA, los de la tabla; los proyectos, por su cadena. */
-export function poseEnProfundidad(pxDelTunel: number, pxDelEscenario: number = pxDelTunel): PoseDelTunel {
+/** La pose con la profundidad lineal: el escenario y el CTA, los de la tabla; los proyectos, por su cadena (con la ley `ancho`). */
+export function poseEnProfundidad(pxDelTunel: number, pxDelEscenario: number = pxDelTunel, ancho: (indice: number, y: number) => number = anchoEnProfundidad): PoseDelTunel {
   const base = poseDelTunel(pxDelTunel, pxDelEscenario)
   const y = pxDelTunel + ORIGEN_DEL_TUNEL
-  const anchos = CAPAS_DEL_TUNEL.proyectos.map((_, i) => anchoEnProfundidad(i, y))
+  const anchos = CAPAS_DEL_TUNEL.proyectos.map((_, i) => ancho(i, y))
   const proyectos = anchos.map((ancho, i) => {
     const padre = i === 0 ? base.escenario : anchos[i - 1]
     return padre > 0 ? ancho / padre : 0
@@ -78,6 +82,8 @@ function leerLaPrueba(): void {
   const prueba = entornoDeLaEscena().pruebas.tunel
   ley = leyDeLaPrueba(prueba)
   directo = sinResortesLaPrueba(prueba)
+  // `tunel=largo` alarga el panel en escritorio y se lo anota a la escena; fuera del render (esto se lee también en uno).
+  if (ley === 'largo') requestAnimationFrame(alargarElPanel)
 }
 
 export function leyMostrada(): LeyDelTunel {
@@ -92,14 +98,23 @@ export function sinResortesMostrado(): boolean {
 }
 
 export function poseMostrada(pxDelTunel: number, pxDelEscenario: number = pxDelTunel): PoseDelTunel {
-  return leyMostrada() === 'tabla' ? poseDelTunel(pxDelTunel, pxDelEscenario) : poseEnProfundidad(pxDelTunel, pxDelEscenario)
+  const l = leyMostrada()
+  return l === 'tabla' ? poseDelTunel(pxDelTunel, pxDelEscenario) : poseEnProfundidad(pxDelTunel, pxDelEscenario, l === 'largo' ? anchoLargo : anchoEnProfundidad)
 }
 
 export function pxParaQueMidaMostrado(indice: number, ancho: number): number {
-  return leyMostrada() === 'tabla' ? pxParaQueElProyectoMida(indice, ancho) : pxParaQueMidaEnProfundidad(indice, ancho)
+  const l = leyMostrada()
+  return l === 'tabla' ? pxParaQueElProyectoMida(indice, ancho) : l === 'largo' ? pxParaQueMidaLargo(indice, ancho) : pxParaQueMidaEnProfundidad(indice, ancho)
 }
 
 /** [RETOQUE 3D] B1 · ¿la primera foto ya tapa el cuadro? (el título de Portfolio se esconde recién ahí), con la ley de la carga. */
 export function primeraFotoTapaMostrada(progreso: number): boolean {
-  return leyMostrada() === 'tabla' ? primeraFotoTapa(progreso) : anchoEnProfundidad(0, pxDelTunelEn(progreso) + ORIGEN_DEL_TUNEL) >= 1.02
+  const l = leyMostrada()
+  if (l === 'largo') return primeraFotoTapaLarga(progreso)
+  return l === 'tabla' ? primeraFotoTapa(progreso) : anchoEnProfundidad(0, pxDelTunelEn(progreso) + ORIGEN_DEL_TUNEL) >= 1.02
+}
+
+/** El ritmo del túnel (su estiramiento y su banda) con la ley de la carga: el del CSS, o el del túnel largo en escritorio. */
+export function ritmoMostrado(el: Element): RitmoDelAncho {
+  return leyMostrada() === 'largo' ? ritmoLargo(el) : ritmoDe(el)
 }

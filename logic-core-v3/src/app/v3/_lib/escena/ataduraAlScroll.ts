@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/home-intro/introHandoff'
 
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
+import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
 import { aplicarElDiaDelFinal, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
@@ -114,6 +115,8 @@ export function useEscenaAtadaAlScroll(
     let pedido = 0
     // [CALIDAD 1] B2: lo que se mide en cada cuadro, escrito siempre en los mismos objetos.
     const extension = { arriba: 0, abajo: 0 }
+    // [AJUSTES FINALES] B1 · el scroll y el pie de las secciones sin el tramo que estira `tunel=largo` (REGLA DE ALTURAS).
+    const sinEstirar = { y: 0, abajo: 0 }
     const bloque = bloqueVivo()
 
     const leer = (): void => {
@@ -124,11 +127,12 @@ export function useEscenaAtadaAlScroll(
       const desplazamiento = window.scrollY
       const secciones = medirLasSeccionesEn(document, desplazamiento, extension)
       if (secciones === null) return
+      const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
       const progreso = quieta
         ? PROGRESO_RETENIDO
-        : progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)
+        : progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)
       rig.set('progress', progreso)
       // [FINAL 2] El día del final, con la misma medida y en el mismo cuadro que el progreso.
       aplicarElDiaDelFinal(medirElBloqueOpacoEn(document, ventana, bloque))
@@ -138,9 +142,9 @@ export function useEscenaAtadaAlScroll(
       const enCuadro =
         viajando ||
         escenaEnCuadro(
-          desplazamiento,
+          medida.y,
           secciones.arriba,
-          secciones.abajo,
+          medida.abajo,
           ventana,
         )
       // `siguiente` devuelve el MISMO objeto cuando no hay transición, así que

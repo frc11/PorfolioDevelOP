@@ -25,7 +25,9 @@
  *        declara el alto real (700svh): REGLA DE ALTURAS.
  *   A8 · abajo de 1024 cada demo es el panel de escritorio a escala, como un video: sin puntero, en bucle, con su pausa.
  *   B1 · (bandera, apagada) `tunel=constante|tope`: el túnel con la profundidad lineal con el scroll — cada proyecto nace en
- *        el arranque y se acerca a velocidad constante, más recorrido por proyecto; `tope` además sin resortes.
+ *        el arranque y se acerca a velocidad constante, más recorrido por proyecto; `tope` además sin resortes;
+ *        `largo`: lineal naciendo más cerca + el tope + la sección más alta, cada proyecto legible ~1,5 s (REGLA DE ALTURAS:
+ *        la escena descuenta el tramo estirado).
  *   B2 · (bandera, apagada) `contactofondo=blur|blanco`: el contacto como transición — el fondo cambia en 0,5 s y la hoja
  *        llega como una placa desde el fondo, con la perspectiva del foco de la sala y el paralaje del puntero.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/ajustes-finales/mirar.txt`.
@@ -43,19 +45,24 @@ import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/ti
 import { RESPIRO_DEL_BUCLE } from '../../_panel-vivo/reproduccion'
 import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/_contrato/bloqueAnimado'
 import { CAPA_DEL_VACIO } from '../../_secciones/trabajos/geometria'
+import { ESTIRAMIENTO_LARGO, SVH_DEL_ALARGUE, TUNEL_LARGO, anchoLargo, pxLegibleLargo, pxParaQueMidaLargo } from '../../_secciones/trabajos/largo'
 import { CADENA_FINAL, SEMILLA_DE_LA_PROFUNDIDAD, anchoEnProfundidad, leyDeLaPrueba, leyMostrada, poseEnProfundidad, pxParaQueMidaEnProfundidad, sinResortesLaPrueba, sinResortesMostrado } from '../../_secciones/trabajos/profundidad'
 import { VELOCIDAD_MAXIMA_DEL_EFECTO_PX_S, avanzarLoMostrado, reposoEn, type BandaDelEfecto } from '../../_secciones/trabajos/regulador'
+import { PX_DEL_ARRANQUE_DEL_TUNEL } from '../../_secciones/trabajos/ritmo'
 import { CAPAS_DEL_TUNEL, FOCO_DE_LA_ESCENA_PX, ORIGEN_DEL_TUNEL, PX_DEL_TUNEL, fraccionDelVacio, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
 import { CARGA, abrirLaCarga, cargaLista, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
 
+import { ANCLAJE } from '../escena/anclaje'
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { APARECE_CON_EL_TITULO, opacidadDelAcompanante } from '../escena/titulos3d/acompanantes'
 import { FLOOR_Y } from '../escena/probeScene'
+import { progresoDelScroll } from '../escena/recorrido'
 import { SOMBRA_DEL_LOGO } from '../escena/sombra/delLogo'
 import { APLICAR_LA_SOMBRA_DE_LOS_TITULOS_GLSL, BASE_EN_TEXELES, CHARCO_CON_LOS_TITULOS_GLSL, DISTANCIA_DEL_LOGO, FONDO_DEL_MAPA, PENUMBRA_DEL_LOGO, SOMBRA_DE_LOS_TITULOS, SOMBRA_DE_LOS_TITULOS_EN_VIVO, SOMBRA_DE_LOS_TITULOS_GLSL, TEXEL_DE_LA_LETRA_GLSL, ajustarLaCamara, crearMapaDeLosTitulos, direccionDeLaLuz, fuerzasDeLaSombra, lodDeLaPenumbra, materialDeLaSombraDelTitulo, penumbraEn } from '../escena/sombra/deLosTitulos'
 import { poseDeLaLectura } from '../escena/titulos3d/colocacion'
+import { sinElEstiramiento } from '../escena/tramoEstirado'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, mostradoDelScroll } from '../escena/titulos3d/llegada'
 import type { ParDeAnclas } from '../motion/anclas'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
@@ -492,7 +499,7 @@ afirmar(/^relative aspect-\[var\(--proporcion\)\] w-full overflow-hidden /.test(
 titulo('B1 · El túnel con la profundidad lineal con el scroll, con bandera y apagado: `tunel=constante` y `tunel=tope`')
 
 const entornoB1 = sinComentarios(leer('_lib/escena/entorno.ts'))
-afirmar(PRUEBAS_APAGADAS.tunel === 'no' && entornoPedido('producto').pruebas.tunel === 'no' && entornoPedido('producto,tunel=otra').pruebas.tunel === 'no' && entornoPedido('producto,tunel=constante').pruebas.tunel === 'constante' && entornoPedido('producto,tunel=tope').pruebas.tunel === 'tope' && /readonly tunel: 'constante' \| 'tope' \| 'no'/.test(entornoB1), '`?pruebas=tunel=constante|tope`: apagada en el producto (Valentino decide); sólo esos dos valores la prenden')
+afirmar(PRUEBAS_APAGADAS.tunel === 'no' && entornoPedido('producto').pruebas.tunel === 'no' && entornoPedido('producto,tunel=otra').pruebas.tunel === 'no' && entornoPedido('producto,tunel=constante').pruebas.tunel === 'constante' && entornoPedido('producto,tunel=tope').pruebas.tunel === 'tope' && /readonly tunel: 'constante' \| 'tope' \| 'largo' \| 'no'/.test(entornoB1), '`?pruebas=tunel=constante|tope|largo`: apagada en el producto (Valentino decide); sólo esos valores la prenden (`largo`, abajo)')
 afirmar(leyDeLaPrueba('no') === 'tabla' && leyDeLaPrueba('constante') === 'profundidad' && leyDeLaPrueba('tope') === 'profundidad' && !sinResortesLaPrueba('constante') && sinResortesLaPrueba('tope') && leyMostrada() === 'tabla' && !sinResortesMostrado(), 'las dos pruebas usan la profundidad lineal; `tope` además va sin resortes; sin ventana (el servidor, el invariante) la ley es la tabla')
 
 // La ley: 1 / ancho recta en el scroll, cada proyecto desde el arranque del túnel hasta SU tope de la tabla, con SU tamaño final.
@@ -546,7 +553,7 @@ controlPositivo('el detector VE los resortes de siempre (lo mostrado se atrasa d
 const capaB1 = sinComentarios(leer('_secciones/trabajos/CapaDelTunel.tsx'))
 const piezasB1 = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
 const enchufado = (c: string, p: string): boolean =>
-  c.includes("import { poseMostrada, pxParaQueMidaMostrado, sinResortesMostrado } from './profundidad'") &&
+  c.includes("import { poseMostrada, pxParaQueMidaMostrado, ritmoMostrado, sinResortesMostrado } from './profundidad'") &&
   (c.match(/poseMostrada\(pxDelTunelEn\(/g) ?? []).length === 4 &&
   !/poseDelTunel\(pxDelTunelEn\(p\)|poseDelTunel\(pxDelTunelEn\(fraccionDeScroll/.test(c) &&
   c.includes('const POSE_INICIAL = poseDelTunel(pxDelTunelEn(0))') &&
@@ -555,6 +562,79 @@ const enchufado = (c: string, p: string): boolean =>
   (p.match(/primeraFotoTapaMostrada\(/g) ?? []).length === 2 && !/\bprimeraFotoTapa\(/.test(p)
 afirmar(enchufado(capaB1, piezasB1), 'la capa del túnel pinta, frena y pone el piso del foco con la pose de la ley de esta carga, y avanza lo mostrado sin resortes si la prueba lo pide; el título de Portfolio se esconde cuando la primera foto tapa el cuadro CON esa ley; la pose del servidor es la tabla')
 controlPositivo('el detector VE la capa pintando siempre con la tabla', capaB1.replace('const pose = poseMostrada(pxDelTunelEn(p), pxDelTunelEn(pEscenario))', 'const pose = poseDelTunel(pxDelTunelEn(p), pxDelTunelEn(pEscenario))'), (c: string) => enchufado(c, piezasB1))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B1 · `tunel=largo`: lineal naciendo más cerca + tope de velocidad + la sección más alta — cada proyecto legible ~1,5 s (REGLA DE ALTURAS)')
+
+afirmar(entornoPedido('producto,tunel=largo').pruebas.tunel === 'largo' && PRUEBAS_APAGADAS.tunel === 'no' && leyDeLaPrueba('largo') === 'largo' && sinResortesLaPrueba('largo'), '`?pruebas=tunel=largo`: apagada en el producto; su ley es la larga y va sin resortes (el tope de velocidad, como `tope`)')
+
+// La ley: nace en su arranque de la TABLA, rampa recta de escala hasta la semilla, y 1 / ancho recto hasta su tope y su tamaño final.
+const leyLarga = (ancho: (i: number, y: number) => number): boolean =>
+  CAPAS_DEL_TUNEL.proyectos.every((capa, i) => {
+    const nace = TUNEL_LARGO.semilla * CADENA_FINAL[i]
+    const finDeLaRampa = capa.arranca + TUNEL_LARGO.rampaPx
+    const rampaRecta = Math.abs(ancho(i, capa.arranca + TUNEL_LARGO.rampaPx / 2) - nace / 2) < 1e-9
+    const [y1, y2, y3] = [finDeLaRampa + 10, (finDeLaRampa + capa.topa) / 2, capa.topa - 10]
+    const [i1, i2, i3] = [y1, y2, y3].map((y) => 1 / ancho(i, y))
+    const recta = Math.abs((i2 - i1) / (y2 - y1) - (i3 - i2) / (y3 - y2)) < 1e-9
+    return ancho(i, capa.arranca) === 0 && rampaRecta && Math.abs(ancho(i, finDeLaRampa) - nace) < 1e-9 && recta && ancho(i, capa.topa) === CADENA_FINAL[i]
+  })
+afirmar(leyLarga(anchoLargo) && TUNEL_LARGO.semilla === 0.2 && TUNEL_LARGO.rampaPx === 60, 'la ley larga: cada proyecto nace en su arranque de la tabla (uno dentro del otro, como siempre), crece en recta de escala hasta el 20 % de su tamaño final en 60 px (sin aparecer de golpe) y de ahí avanza a velocidad constante en profundidad (1 / ancho recto en el scroll) hasta su tope y su tamaño final de la tabla')
+controlPositivo('el detector VE la ley de `constante` (nace en el origen del túnel, al 2 %)', anchoEnProfundidad, leyLarga)
+const igualesAlFinal = [PX_DEL_TUNEL, PX_DEL_TUNEL + 300, PX_DEL_TUNEL + 2000].every((px) => {
+  const [a, b] = [poseDelTunel(px), poseEnProfundidad(px, px, anchoLargo)]
+  return a.anchos.every((v, i) => Math.abs(v - b.anchos[i]) < 1e-12) && Math.abs(a.fraccionDelCta - b.fraccionDelCta) < 1e-12 && fraccionDelVacio(a, CAPA_DEL_VACIO, px) === fraccionDelVacio(b, CAPA_DEL_VACIO, px)
+})
+afirmar(igualesAlFinal && [0, 1, 2].every((i) => Math.abs(anchoLargo(i, pxParaQueMidaLargo(i, 0.5) + ORIGEN_DEL_TUNEL) - 0.5) < 1e-9 && Math.abs(anchoLargo(i, pxParaQueMidaLargo(i, 0.1) + ORIGEN_DEL_TUNEL) - 0.1) < 1e-9), '  desde el fin del túnel la pose es la de la tabla (el CTA, el vacío y los demos no cambian) y la inversa (el piso del foco del teclado) es exacta, en la rampa y en la recta')
+
+// Lo legible: con un scroll normal (400 px/s) el proyecto que menos se lee, 1,5 s; el estiramiento SALE de esa cuenta.
+const segundosLegibles = (k: number): number[] => [0, 1, 2].map((i) => (pxLegibleLargo(i) * k) / TUNEL_LARGO.scrollNormalPxS)
+const legibles = segundosLegibles(ESTIRAMIENTO_LARGO)
+afirmar(legibles.every((s) => s >= TUNEL_LARGO.legibleS) && Math.min(...legibles) < TUNEL_LARGO.legibleS + 0.01 && TUNEL_LARGO.legibleS === 1.5 && TUNEL_LARGO.scrollNormalPxS === 400, 'cada proyecto queda legible —de su rótulo entero a llenar el cuadro— por lo menos 1,5 s con un scroll normal de 400 px/s, y el estiramiento es el justo (el menos legible, 1,5 s)', `k ${ESTIRAMIENTO_LARGO.toFixed(2)} · ${legibles.map((s) => `${s.toFixed(2)} s`).join(' · ')}`)
+controlPositivo('el detector VE el túnel sin estirar (k = 1: ~0,8 s)', segundosLegibles(1), (l: readonly number[]) => l.every((s) => s >= TUNEL_LARGO.legibleS))
+afirmar(Math.abs(SVH_DEL_ALARGUE - ((ESTIRAMIENTO_LARGO - 1) * PX_DEL_TUNEL) / 9) < 1e-9 && ESTIRAMIENTO_LARGO > 1 && ESTIRAMIENTO_LARGO < 2.5, 'la sección crece exactamente lo que el túnel se estiró (contado contra 900 como todo): menos de 2,5 veces el túnel', `${SVH_DEL_ALARGUE.toFixed(1)} svh`)
+afirmar(sinResortesLaPrueba('largo') && VELOCIDAD_MAXIMA_DEL_EFECTO_PX_S * ESTIRAMIENTO_LARGO > TUNEL_LARGO.scrollNormalPxS, '  y el tope de velocidad no frena a un scroll normal (en la regla del túnel estirado va a 400 / k px/s, por debajo de 500): sólo una ráfaga se reparte en el tiempo')
+
+// REGLA DE ALTURAS: la escena descuenta el tramo estirado, así el mapeo es bit a bit el de siempre fuera del túnel.
+const H = 900
+const trabajosG = ANCLAJE.geometria.find((g) => g.id === 'trabajos')
+const desdeDelTunel = ((trabajosG?.desdePantalla ?? 0) - 1) * H + PX_DEL_ARRANQUE_DEL_TUNEL
+const largoEstirado = ESTIRAMIENTO_LARGO * PX_DEL_TUNEL
+const abajoDeclarado = ANCLAJE.pantallasDelDocumento * H
+const estirar = (y: number): number => (y <= desdeDelTunel ? y : y <= desdeDelTunel + PX_DEL_TUNEL ? desdeDelTunel + (y - desdeDelTunel) * ESTIRAMIENTO_LARGO : y + largoEstirado - PX_DEL_TUNEL)
+const mapeoIntacto = (descontar: (y: number) => number): boolean => {
+  for (let y = 0; y <= abajoDeclarado - H; y += 37) {
+    const declarado = progresoDelScroll(y, 0, abajoDeclarado, H)
+    const medido = progresoDelScroll(descontar(estirar(y)), 0, descontar(estirar(abajoDeclarado)), H)
+    if (Math.abs(declarado - medido) > 1e-9) return false
+  }
+  return true
+}
+const descuento = (y: number): number => sinElEstiramiento(y, desdeDelTunel, largoEstirado, ESTIRAMIENTO_LARGO)
+afirmar(trabajosG !== undefined && mapeoIntacto(descuento) && Math.abs(descuento(desdeDelTunel + largoEstirado) - (desdeDelTunel + PX_DEL_TUNEL)) < 1e-9, 'REGLA DE ALTURAS: con la sección estirada y el descuento de la escena (`tramoEstirado.ts`), el progreso de la escena en cada punto es el de la tabla declarada — antes del túnel igual, adentro a 1/k, después sin lo agregado —: Portfolio, la frase, el amanecer y la noche no se mueven')
+controlPositivo('el detector VE el mapeo sin el descuento (todo lo de después llegaría tarde)', (y: number) => y, mapeoIntacto)
+const porQueAntes = progresoDelScroll(((ANCLAJE.geometria.find((g) => g.id === 'por-que-develop')?.desdePantalla ?? 0) - 1) * H, 0, abajoDeclarado, H)
+afirmar(porQueAntes > LLEGADA_DE_PORTFOLIO.comoEnEscena10[1] && trabajosG !== undefined, '  (Portfolio se coloca antes del túnel y Por qué develOP después: los dos lados del tramo quedan cubiertos por el barrido)', `Portfolio ${LECTURA.portfolio} · Por qué develOP desde ${porQueAntes.toFixed(4)}`)
+
+// El cableado: la escena mide sin el estiramiento (el lazo del scroll y la luz de los viajes), el túnel usa su ritmo, el panel se alarga.
+const ataduraB1 = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
+const viajeB1 = sinComentarios(leer('_lib/escena/planDelViaje.ts'))
+const capaB1L = sinComentarios(leer('_secciones/trabajos/CapaDelTunel.tsx'))
+const largoB1 = sinComentarios(leer('_secciones/trabajos/largo.ts'))
+const profundidadB1 = sinComentarios(leer('_secciones/trabajos/profundidad.ts'))
+const cableado = (a: string): boolean =>
+  a.includes('const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)') &&
+  a.includes('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)') &&
+  /escenaEnCuadro\(\s*medida\.y,\s*secciones\.arriba,\s*medida\.abajo,\s*ventana,\s*\)/.test(a) &&
+  !/progresoDelScroll\(desplazamiento/.test(a) &&
+  viajeB1.includes('sampleLightArc(progresoDelScroll(m.y, secciones.arriba, m.abajo, v), arco)') &&
+  (capaB1L.match(/ritmoMostrado\(caja\)/g) ?? []).length === 2 && !/ritmoDe\(caja\)/.test(capaB1L) &&
+  largoB1.includes('panel.style.minHeight = `calc(var(--alto-minimo-del-panel) + ${SVH_DEL_ALARGUE.toFixed(4)}svh)`') &&
+  largoB1.includes('TRAMO_ESTIRADO.valor = { panel, k: ESTIRAMIENTO_LARGO, arranque: PX_DEL_ARRANQUE_DEL_TUNEL, largo: PX_DEL_TUNEL }') &&
+  largoB1.includes('if (ritmoDe(seccion).estiramiento === 1) {') && !/compuerta|matchMedia/.test(largoB1) &&
+  profundidadB1.includes("if (ley === 'largo') requestAnimationFrame(alargarElPanel)")
+afirmar(cableado(ataduraB1), 'el cableado: el lazo de la escena y la luz de los viajes miden sin el tramo estirado; el túnel lee su ritmo con la ley de la carga (el estiramiento largo en escritorio, el del CSS abajo de 1024); el panel se alarga sólo desde escritorio y se anota a la escena; todo, sólo con la bandera')
+controlPositivo('el detector VE la escena midiendo el scroll crudo', ataduraB1.replace('progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)', 'progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)'), cableado)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B2 · El contacto como transición, con bandera y apagado: `contactofondo=blur` y `contactofondo=blanco`')
