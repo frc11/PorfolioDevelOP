@@ -1,4 +1,4 @@
-import { CAPA_DEL_VACIO, LLEGADA_DE_LOS_DEMOS, pxDelTunelEn } from '../geometria'
+import { CAPA_DEL_VACIO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, pxDelTunelEn } from '../geometria'
 import { ORIGEN_DEL_TUNEL, PX_DEL_VACIO, fraccionDelVacio, poseDelTunel } from '../tunel'
 
 /**
@@ -64,11 +64,44 @@ export const LIBRO_QUE_LLEGA = { acostado: 90, perspectiva: 700 } as const
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 
+/** La fracción del vacío sin su tope (pasa de 1 después de que el vacío llenó el cuadro). */
+function vacioSinTope(mostrado: number): number {
+  return (pxDelTunelEn(mostrado) + ORIGEN_DEL_TUNEL - CAPA_DEL_VACIO.arranca) / PX_DEL_VACIO
+}
+
 /** [CIERRE] 1B · el reloj de la llegada: la fracción del vacío (sin su tope) hasta el título; desde ahí, a la mitad. */
 export function llegadaDeDemos(mostrado: number): number {
-  const vacio = (pxDelTunelEn(mostrado) + ORIGEN_DEL_TUNEL - CAPA_DEL_VACIO.arranca) / PX_DEL_VACIO
+  const vacio = vacioSinTope(mostrado)
   const { desde, lenta } = LLEGADA_DE_LOS_DEMOS
   return acotar01(vacio <= desde ? vacio : desde + (vacio - desde) / lenta)
+}
+
+/**
+ * [EL ENCASTRE] 1B · LA APARICIÓN PERSIGUE AL SCROLL CON UNA VELOCIDAD TOPE (el molde es el amanecer de ESCENA 8). Lo que
+ * pide el scroll sale de los relojes de arriba; lo que se muestra lo persigue sin ir más rápido que `minimoS` de punta a
+ * punta, en las dos direcciones: con un scroll lento va con el scroll; con uno rápido la aparición se ve entera, a su
+ * ritmo, y lo alcanza. Desde 1024 se persigue la parte que se VE de la llegada (del título por salir al último libro
+ * asentado: el vacío solo no espera a nadie). Abajo, la escala de la capa rígida, que ahora crece en 1,4 vacíos (antes,
+ * en uno): termina donde termina la llegada de escritorio, que el piso del regulador ya espera entera.
+ */
+export const APARICION = { minimoS: 1.8, escalaEnVacios: FIN_DE_LA_LLEGADA_EN_EL_VACIO } as const
+
+/** Lo que pide el scroll: desde 1024, la parte que se ve de la llegada; abajo (`rigida`), la escala de la capa. */
+export function aparicionPedida(mostrado: number, rigida: boolean): number {
+  if (rigida) return acotar01(vacioSinTope(mostrado) / APARICION.escalaEnVacios)
+  return acotar01((llegadaDeDemos(mostrado) - LLEGADA.titulo.desde) / (1 - LLEGADA.titulo.desde))
+}
+
+/** Desde 1024, el reloj de la llegada que corresponde a una aparición (en 0, el título todavía por salir). */
+export function llegadaDeLaAparicion(a: number): number {
+  return LLEGADA.titulo.desde + acotar01(a) * (1 - LLEGADA.titulo.desde)
+}
+
+/** Un paso de lo que se muestra hacia lo pedido: a lo sumo `dt / minimoS`, en las dos direcciones (y lo alcanza exacto). */
+export function perseguirLaAparicion(mostrada: number, pedida: number, dt: number): number {
+  const tope = Math.max(0, dt) / APARICION.minimoS
+  const falta = pedida - mostrada
+  return Math.abs(falta) <= tope ? pedida : mostrada + Math.sign(falta) * tope
 }
 
 /** Cuánto va de un tramo en la fracción `u` del vacío. */

@@ -12,11 +12,39 @@ import { cn } from '@/lib/utils'
 import { Biblioteca } from './Biblioteca'
 import { Carrusel } from './Carrusel'
 import type { Demo } from './catalogo'
-import { LLEGADA, enElTramo, escalaDeDemos, llegadaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
+import { LLEGADA, aparicionPedida, enElTramo, llegadaDeLaAparicion, perseguirLaAparicion, poseDelLibro, tramoDelLibro } from './entrada'
 import { llevarALaLlegada } from './llevarALaLlegada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
 
+/** [EL ENCASTRE] 1B · lo que pide el scroll, lo que se muestra y el cuadro que los acerca (0: quieto). */
+interface Persecucion {
+  pedida: number
+  mostrada: number
+  cuadro: number
+  antes: number
+}
+
+/** Persigue a lo pedido cuadro a cuadro con la velocidad tope (`entrada.ts`) hasta alcanzarlo; después, nada corre. */
+function perseguir(p: Persecucion, llegar: (a: number) => void): void {
+  if (p.cuadro !== 0 || p.mostrada === p.pedida) return
+  p.antes = performance.now()
+  const paso = (ahora: number): void => {
+    const dt = Math.min(0.1, Math.max(0, (ahora - p.antes) / 1000))
+    p.antes = ahora
+    p.mostrada = perseguirLaAparicion(p.mostrada, p.pedida, dt)
+    llegar(p.mostrada)
+    p.cuadro = p.mostrada === p.pedida ? 0 : requestAnimationFrame(paso)
+  }
+  p.cuadro = requestAnimationFrame(paso)
+}
+
+/** Lo alcanza de una vez (al cargar, al cambiar de ancho, al desmontarse). */
+function alcanzar(p: Persecucion): void {
+  if (p.cuadro !== 0) cancelAnimationFrame(p.cuadro)
+  p.cuadro = 0
+  p.mostrada = p.pedida
+}
 
 /**
  * LA CAPA DE DEMOS — la sección que se ve a través del vacío. **[DEMOS]**
@@ -31,6 +59,11 @@ import { VentanaDeDemo } from './VentanaDeDemo'
  * [CIERRE] 1B · desde 1024 lo que llega sigue el reloj de la llegada (`llegadaDeDemos`,
  * el doble de scroll: el último libro se asienta ya con el vacío lleno); abajo, la capa
  * rígida sigue escalando con el vacío.
+ *
+ * [EL ENCASTRE] 1B · lo que se muestra PERSIGUE a lo que pide el scroll con una
+ * velocidad tope (`APARICION` en `entrada.ts`, como el amanecer), en los dos anchos y en
+ * las dos direcciones: con un scroll rápido la aparición se ve entera y a su ritmo.
+ * Abajo de 1024 la capa rígida crece ahora en 1,4 vacíos (antes, en uno) con el mismo tope.
  *
  * ⚠️ **VA DESPUÉS DEL TÚNEL EN EL MARCADO Y SE PINTA DETRÁS.** El orden del
  * marcado es el orden de lectura, y `s10-acceso` exige el mismo en las dos ramas:
@@ -50,32 +83,34 @@ export function CapaDeDemos({
   readonly className?: string
 }): React.JSX.Element {
   const capa = useRef<HTMLDivElement | null>(null)
-  const [inicial] = useState(() => ({ escala: escalaDeDemos(mostrado.get()), llegada: llegadaDeDemos(mostrado.get()) }))
-  const escala = useRef(inicial.escala)
-  const llegada = useRef(inicial.llegada)
+  // [EL ENCASTRE] 1B · al cargar, lo mostrado es lo pedido (nadie vio el camino); después lo persigue.
+  const [inicial] = useState(() => aparicionPedida(mostrado.get(), false))
+  const aparicion = useRef<Persecucion>({ pedida: inicial, mostrada: inicial, cuadro: 0, antes: 0 })
   const libros = useRef<HTMLElement[]>([])
   const parrafo = useRef<HTMLDivElement | null>(null)
-  const progresoDelTitulo = useMotionValue(enElTramo(inicial.llegada, LLEGADA.titulo))
-  const progresoDelParrafo = useMotionValue(enElTramo(inicial.llegada, LLEGADA.parrafo))
+  const progresoDelTitulo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.titulo))
+  const progresoDelParrafo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.parrafo))
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const [alejada, setAlejada] = useState(false)
   /**
    * ⚠️ **MÓVIL-TRABAJOS · ABAJO DE 1024 LA ENTRADA ES LA VIEJA: la capa entera, rígida,
    * crece con el vacío** —una escala y nada más, para ahorrar—. Quién está de qué lado
-   * lo dice el CSS (`--demos-entrada`), no una consulta de ancho en JS.
+   * lo dice el CSS (`--demos-entrada`), no una consulta de ancho en JS. [EL ENCASTRE] 1B:
+   * en 1,4 vacíos y con la velocidad tope.
    */
   const rigida = useRef(false)
 
-  /** Escribe la llegada entera para una fracción del vacío (`u`) y su reloj (`l`). Pura: subiendo se deshace. */
+  /** Escribe la llegada entera para una aparición mostrada (`a`: abajo de 1024, la escala de la capa). Subiendo se deshace. */
   const llegar = useCallback(
-    (u: number, l: number): void => {
+    (a: number): void => {
       if (rigida.current) {
-        capa.current?.style.setProperty('--demos-escala', u.toFixed(5))
+        capa.current?.style.setProperty('--demos-escala', a.toFixed(5))
         progresoDelTitulo.set(1)
         progresoDelParrafo.set(1)
         parrafo.current?.style.setProperty('opacity', '1')
         return
       }
+      const l = llegadaDeLaAparicion(a)
       progresoDelTitulo.set(enElTramo(l, LLEGADA.titulo))
       const delParrafo = enElTramo(l, LLEGADA.parrafo)
       progresoDelParrafo.set(delParrafo)
@@ -91,37 +126,45 @@ export function CapaDeDemos({
 
   useLayoutEffect(() => {
     libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
+    const p = aparicion.current
+    // Al cambiar de ancho (o de lado de 1024) la aparición pedida es otra: se alcanza de una vez.
     const leerLaEntrada = (): void => {
       const el = capa.current
       rigida.current = el !== null && getComputedStyle(el).getPropertyValue('--demos-entrada').trim() === 'rigida'
-      llegar(escala.current, llegada.current)
+      p.pedida = aparicionPedida(mostrado.get(), rigida.current)
+      alcanzar(p)
+      llegar(p.mostrada)
     }
     leerLaEntrada()
     window.addEventListener('resize', leerLaEntrada)
-    return () => window.removeEventListener('resize', leerLaEntrada)
-  }, [llegar])
+    return () => {
+      window.removeEventListener('resize', leerLaEntrada)
+      alcanzar(p)
+    }
+  }, [llegar, mostrado])
 
-  /** El carrusel arranca cuando todo llegó: abajo de 1024, cuando el vacío llenó la pantalla. */
-  const carruselEnMarcha = useCallback((): boolean => (rigida.current ? escala.current : llegada.current) >= 1, [])
+  /** El carrusel arranca cuando todo llegó (la aparición mostrada entera). */
+  const carruselEnMarcha = useCallback((): boolean => aparicion.current.mostrada >= 1, [])
 
-  useMotionValueEvent(mostrado, 'change', (p) => {
-    escala.current = escalaDeDemos(p)
-    llegada.current = llegadaDeDemos(p)
-    llegar(escala.current, llegada.current)
+  // [EL ENCASTRE] 1B · el scroll pide; lo mostrado lo persigue con la velocidad tope.
+  useMotionValueEvent(mostrado, 'change', (valor) => {
+    const p = aparicion.current
+    p.pedida = aparicionPedida(valor, rigida.current)
+    perseguir(p, llegar)
   })
 
   useEffect(() => {
     const el = capa.current
     const panel = el?.closest<HTMLElement>('[data-panel]') ?? null
     if (el === null || panel === null) return
-    // [CIERRE] 1B · adonde la llegada termina (desde 1024, pasado el arranque de demos); abajo, el arranque de demos.
-    const llegaEntera = (): number => (rigida.current ? escala.current : llegada.current)
+    // [CIERRE] 1B · adonde la llegada termina, pasado el arranque de demos ([EL ENCASTRE] 1B: también abajo de 1024).
+    const llegaEntera = (): number => aparicion.current.mostrada
     const demos = arranqueDeDemos(CONTENIDO.proyectos.length)
     let cancelar = (): void => undefined
     const alEntrarElFoco = (e: FocusEvent): void => {
       // Sólo el teclado: un clic en una pieza a medio crecer abre la demo ahí mismo.
       if (llegaEntera() >= 1 || !(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
-      const arranque = rigida.current ? demos : Math.max(demos, PX_DEL_FIN_DE_LA_LLEGADA / PX_DE_LA_SECCION)
+      const arranque = Math.max(demos, PX_DEL_FIN_DE_LA_LLEGADA / PX_DE_LA_SECCION)
       // El progreso de la sección arranca con su borde de arriba en el pie del cuadro.
       const cero = panel.getBoundingClientRect().top + window.scrollY - window.innerHeight
       cancelar()

@@ -8,10 +8,11 @@ import { Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../../_componentes/titulos3d/useTextoDeVolumen'
 import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
-import { CanalDeUnaPieza } from '../../_contrato/canales'
+import { LENTOS } from '../../../_lib/titulos3d/repeticiones'
+import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
-import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULO_DE_DEMOS } from '../angosto'
+import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULAR_DEL_CARTEL } from '../angosto'
 import { TEXTO_DE_DEMOS } from './catalogo'
 
 /** La medida del párrafo, en caracteres: la misma del cuerpo del cartel de Portfolio. */
@@ -25,8 +26,8 @@ const MEDIDA_DEL_TEXTO_CH = 44
  * texto anunciado de las dos ramas carácter por carácter, y así es el mismo.
  *
  * Arriba de 1025 llegan con los gestos de la casa y su progreso lo da el vacío
- * (`entrada.ts`): el título renglón por renglón (P1) y el párrafo como el cuerpo
- * de la agencia (P2). Sin progreso —la rama quieta— son texto quieto.
+ * (`entrada.ts`): el título como el de Portfolio ([EL ENCASTRE] 1B) y el párrafo
+ * como el cuerpo de la agencia (P2). Sin progreso —la rama quieta— son texto quieto.
  *
  * ⚠️ P2 sólo DESPLAZA (medio alto propio) y no oculta: en la casa el bloque entra al
  * cuadro desde abajo y eso lo esconde, pero acá la capa está quieta detrás del
@@ -43,7 +44,7 @@ export function TextoDeDemos({
   readonly refDelParrafo?: Ref<HTMLDivElement>
 }): React.JSX.Element {
   // [NOCTURNO] A1 · el párrafo va en el plano del título de volumen (la cámara lo corre con él).
-  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos-2')
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos')
   return (
     <div className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
       <TituloDeDemos progreso={progresoDelTitulo} />
@@ -62,25 +63,23 @@ export function TextoDeDemos({
 }
 
 /**
- * [CIERRE RETOQUE 3D] D3 · EL TÍTULO DE DEMOS EN VOLUMEN — con el mismo gesto que «El equipo»: se levanta de acostado a
- * parado con el progreso de su llegada (y se acuesta al volver); acostado no se ve. Desde 1024 va en sus dos renglones
- * (cada uno, un título de volumen de una línea: el 3D arma una línea por título) y el DOM se apaga con el título armado
- * (sigue siendo el encabezado para el lector); abajo, el texto corrido de siempre. La llegada del DOM, de una pieza.
+ * [EL ENCASTRE] 1B · EL TÍTULO DE DEMOS, COMO EL DE PORTFOLIO — sólo «Demos» (el párrafo ya lo explica), con el mismo
+ * nivel y las mismas clases angostas que el titular del cartel, la misma cara en volumen y la misma llegada: las letras
+ * desde la profundidad, girando, en no menos de `LENTOS.llegadaDePortfolioS` (y al volver se van igual). Va con la página
+ * (la capa está pineada); desde 1024 el DOM se apaga con el título armado y sigue siendo el encabezado para el lector.
+ * El DOM llega como el de Portfolio (P2 en su ventana). [CIERRE RETOQUE 3D] D3: antes, dos renglones que se levantaban.
  */
 function TituloDeDemos({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
-  const [renglon1, renglon2] = TEXTO_DE_DEMOS.renglonesDelTitulo
-  const { lugar: lugar1, listo: listo1 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-1', texto: renglon1, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
-  const { lugar: lugar2, listo: listo2 } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos-2', texto: renglon2, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  const { lugar, listo } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos', texto: TEXTO_DE_DEMOS.titulo, fuente: 'chivo-400', gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS.llegadaDePortfolioS })
   return (
-    <CanalDeUnaPieza progreso={progreso} patron="P1">
-      <Titular nivel="titulo-l" como="h3" className={CLASE_DEL_TITULO_DE_DEMOS}>
-        <span ref={lugar1} className={cn('escritorio:block', listo1 && TEXTO_REEMPLAZADO)}>
-          {renglon1}
-        </span>{' '}
-        <span ref={lugar2} className={cn('escritorio:block', listo2 && TEXTO_REEMPLAZADO)}>
-          {renglon2}
-        </span>
-      </Titular>
-    </CanalDeUnaPieza>
+    <div className={VENTANA_QUE_RECORTA}>
+      <CanalDeUnaPieza progreso={progreso} patron="P2">
+        <Titular nivel="display-xl" como="h3" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
+          <span ref={lugar} className={cn('block', listo && TEXTO_REEMPLAZADO)}>
+            {TEXTO_DE_DEMOS.titulo}
+          </span>
+        </Titular>
+      </CanalDeUnaPieza>
+    </div>
   )
 }

@@ -176,13 +176,17 @@ afirmar(/if \(modo === 'antes'\) return <BloqueDeAntes/.test(solido) && /useGiro
 titulo('D3 · El título de Demos, en volumen')
 
 const textoDeDemos = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
-const seLevanta = (c: string): boolean => (c.match(/\{ lugar: lugar[12], listo: listo[12] \} = useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos-[12]', texto: renglon[12], fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/g) ?? []).length === 2
-afirmar(seLevanta(textoDeDemos) && TEXTO_DE_DEMOS.renglonesDelTitulo.join(' ') === TEXTO_DE_DEMOS.titulo, '«Demos para abrir acá mismo» se levanta de acostado a parado con el progreso de su llegada, como «El equipo» (y se acuesta al volver): desde 1024, en sus dos renglones (el 3D arma una línea por título)')
-controlPositivo('el detector VE el título plano', textoDeDemos.replace(/gesto: 'levanta'/g, "gesto: 'letras'"), seLevanta)
+// [EL ENCASTRE] 1B · lo que D3 afirmaba («Demos para abrir acá mismo», dos renglones que se levantan) cambió por pedido:
+// sólo «Demos», en volumen, con el tamaño y la llegada de Portfolio (las letras desde la profundidad, con su mínimo).
+const comoPortfolio = (c: string): boolean =>
+  /const \{ lugar, listo \} = useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos', texto: TEXTO_DE_DEMOS\.titulo, fuente: 'chivo-400', gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS \}\)/.test(c) &&
+  /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(c)
+afirmar(comoPortfolio(textoDeDemos) && TEXTO_DE_DEMOS.titulo === 'Demos', '«Demos» (EL ENCASTRE 1B): en volumen, con el nivel y las clases del titular de Portfolio y su llegada (las letras desde la profundidad, girando, en no menos de su mínimo); al volver se va igual')
+controlPositivo('el detector VE el título de D3 (se levantaba de acostado, como «El equipo»)', textoDeDemos.replace("gesto: 'letras'", "gesto: 'levanta'"), comoPortfolio)
 const glifos = new Set(Object.keys((datosDeLaChivo as { glyphs: Record<string, unknown> }).glyphs))
-const faltan = [...TEXTO_DE_DEMOS.renglonesDelTitulo.join('')].filter((ch) => ch !== ' ' && !glifos.has(ch))
-afirmar(faltan.length === 0, '  cada letra está en la Chivo 400 de los títulos (la «á» incluida)', faltan.join(''))
-afirmar(/\{' '\}/.test(textoDeDemos), '  y el lector anuncia el título entero (un espacio entre los renglones): las dos ramas, el mismo texto')
+const faltan = [...TEXTO_DE_DEMOS.titulo].filter((ch) => ch !== ' ' && !glifos.has(ch))
+afirmar(faltan.length === 0, '  cada letra está en la Chivo 400 de los títulos', faltan.join(''))
+afirmar(/\{TEXTO_DE_DEMOS\.titulo\}/.test(textoDeDemos), '  y el lector anuncia el título entero: el DOM lo sigue teniendo (las dos ramas, el mismo texto)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('S1 · El clic de la barra y de los CTA: el pestillo')

@@ -66,10 +66,9 @@ export const CLASE_DEL_TITULAR_DEL_CARTEL =
 export const CLASE_DE_LA_BAJADA_ANGOSTA = 'max-escritorio:text-[length:var(--text-titulo-s)]'
 
 /**
- * EL TEXTO DE LAS DEMOS abajo de 1024. En el teléfono crece el título; en tablet
- * crecen el título y el cuerpo.
+ * EL TEXTO DE LAS DEMOS abajo de 1024: en tablet crece el cuerpo. [EL ENCASTRE] 1B: el
+ * título usa las clases del titular del cartel (el mismo tamaño que «Portfolio»).
  */
-export const CLASE_DEL_TITULO_DE_DEMOS = 'max-escritorio:text-[length:var(--text-fluido-display)] max-movil:text-[length:var(--text-fluido-titulo-xl)]'
 export const CLASE_DEL_CUERPO_DE_DEMOS = 'max-escritorio:text-[length:var(--text-titulo-s)] max-movil:text-[length:var(--text-cuerpo)]'
 
 /** La frase del CTA en el iPhone: un cartel de tres o cuatro renglones, no uno por palabra. */

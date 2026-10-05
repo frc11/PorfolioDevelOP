@@ -57,9 +57,8 @@ export const CATALOGO_DE_DEMOS: readonly Demo[] = [
  * las dos en el marcado, y el ancho muestra la que corresponde.
  */
 export const TEXTO_DE_DEMOS = {
-  titulo: 'Demos para abrir acá mismo',
-  /** [CIERRE RETOQUE 3D] D3 · el título en sus dos renglones de escritorio (cada uno, un título de volumen de una línea). */
-  renglonesDelTitulo: ['Demos para abrir', 'acá mismo'],
+  /** [EL ENCASTRE] 1B · sólo «Demos» (el párrafo ya lo explica); era «Demos para abrir acá mismo», en dos renglones. */
+  titulo: 'Demos',
   parrafo: 'Son sitios de ejemplo hechos por develOP, con clientes ficticios. Muestran lo que se puede hacer y se adaptan a cualquier rubro.',
   enEscritorio: 'Elegí uno y usalo sin salir de esta página.',
   enMovil: 'Tocá uno y se abre en otra pestaña.',

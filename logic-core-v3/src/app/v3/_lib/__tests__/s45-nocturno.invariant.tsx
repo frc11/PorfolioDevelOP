@@ -182,11 +182,12 @@ const PEGADOS: readonly (readonly [string, RegExp])[] = [
   ['_secciones/hero/Hero.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('hero-registro-2'\)[\s\S]{0,120}<div ref=\{enElPlano\}/],
   ['_secciones/trabajos/piezas.tsx', /const bajada = useAcompananteDelTitulo<HTMLDivElement>\('portfolio'\)[\s\S]*<div ref=\{bajada\} style=\{\{ maxWidth/],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', /useAcompananteDelTitulo<HTMLDivElement>\('frase-izquierda'\)[\s\S]*useAcompananteDelTitulo<HTMLDivElement>\('frase-derecha'\)[\s\S]*<div ref=\{valoresDeLaIzquierda\}[\s\S]*<div ref=\{valoresDeLaDerecha\}/],
-  ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos-2'\)[\s\S]*<div ref=\{enElPlano\}>\s*<div ref=\{refDelParrafo\}>/],
+  // [EL ENCASTRE] 1B · el título de Demos es uno solo («Demos», id `demos`): el párrafo va en su plano.
+  ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos'\)[\s\S]*<div ref=\{enElPlano\}>\s*<div ref=\{refDelParrafo\}>/],
 ]
 const pegados = PEGADOS.map(([ruta, patron]) => patron.test(sinComentarios(leer(ruta))))
 afirmar(pegados.every(Boolean), '  en el hero (la bajada y los CTA), en Portfolio (su bajada), en Por qué develOP (cada columna de valores con su mitad de la frase) y en Demos (el párrafo)', pegados.map((v, k) => `${PEGADOS[k][0].split('/').pop() ?? ''}: ${v ? 'sí' : 'NO'}`).join(' · '))
-const ids = ['hero-registro-2', 'portfolio', 'frase-izquierda', 'frase-derecha', 'demos-2']
+const ids = ['hero-registro-2', 'portfolio', 'frase-izquierda', 'frase-derecha', 'demos']
 const anotados = ['_secciones/hero/Hero.tsx', '_secciones/trabajos/piezas.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/trabajos/demos/TextoDeDemos.tsx'].map(leer).join('\n')
 afirmar(ids.every((id) => anotados.includes(`id: '${id}'`) || anotados.includes(`id="${id}"`)), '  cada uno acompaña a un título que existe (el mismo id con que la sección lo anota)')
 

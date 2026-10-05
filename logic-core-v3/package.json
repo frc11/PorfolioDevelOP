@@ -284,6 +284,8 @@
     "test:s48": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s48",
     "test:s49-cierre-final": "npx tsx src/app/v3/_lib/__tests__/s49-cierre-final.invariant.tsx",
     "test:s49": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s49",
+    "test:s50-encastre": "npx tsx src/app/v3/_lib/__tests__/s50-encastre.invariant.tsx",
+    "test:s50": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s50",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",

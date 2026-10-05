@@ -128,10 +128,11 @@ const piso = BANDA_DEL_EFECTO.piso
 const ultimo = piso[piso.length - 1]
 afirmar(piso.length === 4 && ultimo.scroll === PX_DE_LA_SECCION - MARGEN_DEL_DESPINEADO && ultimo.efecto === PX_DEL_FIN_DE_LA_LLEGADA && enElRiel(piso, PX_DE_LA_SECCION - MARGEN_DEL_DESPINEADO) >= PX_DEL_FIN_DE_LA_LLEGADA && piso[1].scroll === piso[2].scroll, '  el piso del regulador termina la llegada una muesca antes del despineado (el túnel y el salto sobre la espera, los de siempre: s5-trabajos lo simula a todas las velocidades)')
 
-// La capa: lo que llega usa el reloj de la llegada; abajo de 1024 la capa rígida sigue escalando con el vacío.
+// La capa: lo que llega usa el reloj de la llegada. [EL ENCASTRE] 1B · abajo de 1024 la capa rígida ya no sigue al vacío
+// (cambió por pedido: también más lenta, y las dos con la velocidad tope); lo afirma s50.
 const capa = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
-const cableada = (c: string): boolean => /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)/.test(c) && /const delParrafo = enElTramo\(l, LLEGADA\.parrafo\)/.test(c) && /poseDelLibro\(enElTramo\(l, tramoDelLibro\(i, libros\.current\.length\)\)\)/.test(c) && /setProperty\('--demos-escala', u\.toFixed\(5\)\)/.test(c) && /\(rigida\.current \? escala\.current : llegada\.current\) >= 1/.test(c)
-afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros siguen el reloj de la llegada; el carrusel arranca cuando todo llegó; abajo de 1024 la capa rígida sigue con el vacío')
+const cableada = (c: string): boolean => /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)/.test(c) && /const delParrafo = enElTramo\(l, LLEGADA\.parrafo\)/.test(c) && /poseDelLibro\(enElTramo\(l, tramoDelLibro\(i, libros\.current\.length\)\)\)/.test(c) && /setProperty\('--demos-escala', a\.toFixed\(5\)\)/.test(c) && /aparicion\.current\.mostrada >= 1/.test(c)
+afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros siguen el reloj de la llegada; el carrusel arranca cuando todo llegó (lo mostrado); abajo de 1024 la capa rígida escala con la aparición mostrada')
 controlPositivo('el detector VE los libros atados al vacío', capa.replace('poseDelLibro(enElTramo(l, ', 'poseDelLibro(enElTramo(u, '), cableada)
 
 // ═══════════════════════════════════════════════════════════════════════════

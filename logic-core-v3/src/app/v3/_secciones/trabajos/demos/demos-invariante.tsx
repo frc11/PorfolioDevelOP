@@ -118,13 +118,14 @@ export function afirmarLasDemos(): void {
   afirmar(pico > 1.05 && conSobrepaso(1) === 1, `el sobrepaso elástico es la FORMA de la curva: llega a ${pico.toFixed(3)} y termina en 1`)
   afirmarIgual(poseDelLibro(1), { transform: 'none', opacidad: 1 }, '  y un libro asentado queda sin transformada y entero')
   afirmar(enElTramo(0.5, LLEGADA.titulo) === 0 && enElTramo(0.9, LLEGADA.titulo) === 1, '  el título está abajo antes de su tramo y en su lugar después')
-  const sinReloj = (capa: string): boolean => {
+  // [EL ENCASTRE] 1B · lo que esta línea afirmaba («sin reloj propio») cambió por pedido: lo pedido sigue siendo una función
+  // de lo mostrado del túnel, y lo que se muestra lo PERSIGUE con una velocidad tope (como el amanecer), hasta alcanzarlo.
+  const persigue = (capa: string): boolean => {
     const codigo = sinComentarios(capa)
-    // [CIERRE] 1B · desde 1024 lo que llega sigue `llegadaDeDemos` (el doble de scroll): también una función de lo mostrado.
-    return codigo.includes('llegar(escala.current, llegada.current)') && codigo.includes('escala.current = escalaDeDemos(p)') && codigo.includes('llegada.current = llegadaDeDemos(p)') && !/requestAnimationFrame|setTimeout|setInterval|performance\.now/.test(codigo)
+    return codigo.includes('p.pedida = aparicionPedida(valor, rigida.current)') && codigo.includes('perseguir(p, llegar)') && codigo.includes('p.mostrada = perseguirLaAparicion(p.mostrada, p.pedida, dt)') && codigo.includes('p.cuadro = p.mostrada === p.pedida ? 0 : requestAnimationFrame(paso)') && !/setTimeout|setInterval/.test(codigo)
   }
-  afirmar(sinReloj(CAPA), '  la llegada no tiene reloj propio: es una función de lo mostrado (la fracción del vacío; desde 1024, su reloj `llegadaDeDemos`), así que subiendo se deshace exacta y al revés')
-  controlPositivo('  el detector ve una llegada con reloj', `${CAPA}\nrequestAnimationFrame(() => llegar(escala.current))\n`, sinReloj)
+  afirmar(persigue(CAPA), '  lo que pide el scroll es una función de lo mostrado del túnel; lo que se muestra lo persigue con la velocidad tope cuadro a cuadro y, al alcanzarlo, no corre nada (subiendo se deshace al revés, con el mismo tope)')
+  controlPositivo('  el detector ve una llegada atada sin tope (lo mostrado, igual a lo pedido)', CAPA.replace('perseguir(p, llegar)', 'p.mostrada = p.pedida\n    llegar(p.mostrada)'), persigue)
   // [INTERFAZ 1] Cierre · el empujón del teclado tiene reloj, y por eso vive aparte: sólo puede mover la PÁGINA (scroll),
   // nunca la capa. La llegada sigue siendo una función de la fracción del vacío.
   const LLEVAR = sinComentarios(leer('llevarALaLlegada.ts'))
