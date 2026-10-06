@@ -18,6 +18,7 @@ import {
   calma,
   camaraDelFinal,
   pasoDelReloj,
+  poder,
   poseDelLogo,
   relojDelQuieto,
   relojQuieto,
@@ -47,6 +48,8 @@ export interface EstadoDelFinal {
   quietoS: number
   golpeEn: number
   golpes: number
+  /** [EL ENCASTRE] 2E · cuándo tocó el piso (el golpecito), en el reloj de la escena. */
+  tocoEn: number
   antes: number
   aplicado: boolean
   readonly puntero: THREE.Vector2
@@ -77,6 +80,7 @@ export function crearElEstado(contorno: readonly THREE.Vector2[], formas: readon
     quietoS: 0,
     golpeEn: Number.NaN,
     golpes: 0,
+    tocoEn: Number.NaN,
     antes: 0,
     aplicado: false,
     puntero: new THREE.Vector2(9, 9),
@@ -107,6 +111,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uApertura.value = 0
   p.uCalmaDelFinal.value = 0
   p.uSinMancha.value = 0
+  p.uPoder.value = 0
   s.vapor.puntos.visible = false
   s.pozo.grupo.visible = false
   s.aplicado = false
@@ -167,15 +172,19 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   piso.uSinMancha.value = EN_VIVO.camara
   s.pozo.grupo.visible = piso.uApertura.value > 0
 
-  // 3 · El golpe: al tocar el piso bajando (una vez por bajada), la onda. [EL ENCASTRE] 2C · y el vapor, que sopla mientras
-  // se acuesta y se queda posado en el piso; al revertir se hunde (`vapor.ts`).
-  const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
+  // 3 · [EL ENCASTRE] 2E · El golpe: al quedar al ras (una vez por bajada) se libera el poder: su pulso corre por el piso,
+  // centrado en el logo, y las juntas de alrededor se encienden. Al tocar el piso, sólo un golpecito. [2C] Y el vapor, que
+  // sopla mientras se acuesta y se queda posado en el piso; al revertir se hunde (`vapor.ts`).
+  const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
+  const aterriza = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
+  if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t
   if (s.antes < golpe && fin >= golpe) {
     s.golpeEn = t
     s.golpes += 1
-    piso.uGolpe.value.set(t, s.pose.centro.x, s.pose.centro.z, 1)
+    piso.uGolpe.value.set(t, 0, 0, 1)
   }
   s.antes = fin
+  piso.uPoder.value = poder(fin)
   const desdeElGolpe = t - s.golpeEn
   s.vapor.uniformes.uT.value = s.estadoDelVapor.reloj
   s.vapor.uniformes.uHundir.value = s.estadoDelVapor.hundir
@@ -194,6 +203,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     s.sacudon.y += Math.sin(desdeElGolpe * 71 + 1) * a
     s.sacudon.z += Math.sin(desdeElGolpe * 61 + 2) * a
   }
+  const desdeQueToco = t - s.tocoEn
+  if (Number.isFinite(desdeQueToco) && desdeQueToco < 0.4) s.sacudon.y += FINAL_DEL_PIE.poder.golpecito * Math.exp(-desdeQueToco / 0.08) * Math.sin(desdeQueToco * 90)
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
 

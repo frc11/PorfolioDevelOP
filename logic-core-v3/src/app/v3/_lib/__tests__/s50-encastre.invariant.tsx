@@ -32,10 +32,10 @@ import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../..
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
-import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poder as poderDelFinal, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
-import { conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { PODER_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { VAPOR, crearElVapor, pasoDelVapor, vaporPosado, vaporQuieto, type EstadoDelVapor } from '../escena/final/vapor'
@@ -460,5 +460,26 @@ const pozoBien = !pozo.grupo.visible && Math.abs(caja3.max.y - FLOOR_Y) < 1e-6 &
 pozo.soltar()
 afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de arriba taparía el hueco) y el fondo, de un espesor del logo y un pelo de hondo, con su tope al ras del piso; invisible hasta que el hueco se abre', `${(TAM.espesor * HUECO.hondo).toFixed(3)} u de hondo`)
 afirmar(sinComentarios(leer('_lib/escena/final/vapor.ts')).includes('p.y = enElHueco( p.xz ) ?'), '  y el vapor que cae adentro del hueco queda debajo del logo (no se posa sobre él)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2E · El poder: al quedar al ras, un pulso centrado en el logo y el resplandor de tinta desde las juntas de alrededor')
+
+// El poder: 0 hasta quedar al ras; un destello y después entero; función de `fin` (al revertir se apaga).
+const alRasS = FINAL_DEL_PIE.presion.hastaS
+const enS = (s: number): number => poderDelFinal(s / RELOJ_DEL_FINAL.duracionS)
+const pico = Math.max(...Array.from({ length: 60 }, (_, i) => enS(alRasS + (i * 0.6) / 60)))
+const poderBien = enS(alRasS - 0.01) === 0 && enS(alRasS - 1) === 0 && pico > 1.3 && Math.abs(enS(RELOJ_DEL_FINAL.duracionS) - 1) < 1e-9 && enS(alRasS + 0.05) > 0
+afirmar(poderBien, 'el poder se libera cuando el logo queda al ras (ni antes): un destello y se asienta entero; es función de `fin`, así que al revertir se apaga', `destello ${pico.toFixed(2)} · al ras a los ${String(alRasS)} s`)
+// El golpe (su pulso) cae al quedar al ras y nace en el centro del logo; al tocar el piso, sólo un golpecito.
+const golpeBien = (c: string): boolean => c.includes('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t')
+afirmar(golpeBien(finalTsx), '  el pulso nace en el centro del logo al quedar al ras (una vez por bajada) y corre por el piso con su física; al tocar el piso, sólo un golpecito de la cámara')
+controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx.replace('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS', 'const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS'), golpeBien)
+// El dibujo: el resplandor sale de las JUNTAS (núcleo negro en la junta, halo y aura que entran a la tapa; el costado lleno),
+// vivo (fluye, respira, vetea), alrededor del logo y en el frente del pulso. La banda oscura de CIERRE (una mancha) se fue.
+const deLasJuntas = (c: string): boolean =>
+  c.includes('vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;') && c.includes('if ( vTapa > 0.5 ) {') && c.includes('float halo = min( 1.0, h.x + h.y + h.z + h.w );') &&
+  c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );') && c.includes('ruidoDelPoder(') && !/GOLPE_EN_EL_PISO\.banda|\bbanda:/.test(c)
+afirmar(deLasJuntas(enElPisoTs) && PODER_EN_EL_PISO.nucleo < PODER_EN_EL_PISO.halo && PODER_EN_EL_PISO.halo < PODER_EN_EL_PISO.aura && PODER_EN_EL_PISO.aura < 0.8 && PODER_EN_EL_PISO.oscuroDelNucleo > 0.9, 'el resplandor sale de las juntas de los bloques (un núcleo de tinta justo en la junta, un halo y un aura que entran a la tapa, el costado lleno), más fuerte cerca del logo, vivo y veteado; el frente del pulso enciende las juntas por donde pasa (la banda oscura de CIERRE, que se leía como una mancha, se fue)', `núcleo ${String(PODER_EN_EL_PISO.nucleo)} u · halo ${String(PODER_EN_EL_PISO.halo)} u · aura ${String(PODER_EN_EL_PISO.aura)} u`)
+controlPositivo('el detector VE la banda de CIERRE (un anillo oscuro parejo, sin juntas)', enElPisoTs.replace('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );', '') + '\nbanda: 0.55', deLasJuntas)
 
 cerrar('s50-encastre')

@@ -44,6 +44,12 @@ export const FINAL_DEL_PIE = {
   presion: { hastaS: 4.7, tramos: [0.34, 0.27, 0.22, 0.17], resiste: 0.55, cedeAlResistir: 0.06, temblor: 0.006, sacudon: 0.022 },
   /** El mar alrededor del logo se calma antes de que caiga (s del reloj). */
   calma: { desdeS: 1.4, hastaS: 2.4 },
+  /**
+   * [EL ENCASTRE] 2E · EL PODER: al quedar al ras (`presion.hastaS`) se libera: un destello (sube a `destello` en
+   * `subeS`) que se asienta en el poder entero en `asientaS`. El golpe (su pulso) cae ahí; al tocar el piso, sólo un
+   * golpecito (`golpecito`, u, de la cámara).
+   */
+  poder: { destello: 1.45, subeS: 0.12, asientaS: 0.9, golpecito: 0.03 },
   /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
   camara: { elevacion: 89.2, lejos: 1.06 },
   /** Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s). */
@@ -292,4 +298,13 @@ export function profundidadDelFinal(camara: THREE.Camera): number {
   if (EN_VIVO.camara <= 0) return Number.POSITIVE_INFINITY
   BLANCO.set(0, ORBIT_TARGET_Y, 0).lerp(EN_VIVO.blanco, EN_VIVO.camara)
   return camara.position.distanceTo(BLANCO) - FINAL_DEL_PIE.aireDelPie * EN_VIVO.camara
+}
+
+/** [EL ENCASTRE] 2E · el poder liberado (0 hasta quedar al ras; un destello y después 1). Función de `fin`: se deshace al revertir. */
+export function poder(fin: number): number {
+  const p = FINAL_DEL_PIE.poder
+  const s = segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS
+  if (s <= 0) return 0
+  if (s < p.subeS) return p.destello * suave(s / p.subeS)
+  return 1 + (p.destello - 1) * (1 - suave((s - p.subeS) / p.asientaS))
 }

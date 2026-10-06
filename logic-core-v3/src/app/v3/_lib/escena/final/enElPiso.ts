@@ -7,7 +7,7 @@ import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
  * INTERFAZ 2): sin final todo vale cero y el piso es exactamente el de siempre.
  *
  *   · EL GOLPE (`uGolpe`): cuando el logo se encastra, un anillo fuerte que nace en él y corre por el piso (en la ecuación
- *     de ondas: el piso se levanta con su física, se refleja y se amortigua), y su banda oscura en el dibujo.
+ *     de ondas: el piso se levanta con su física, se refleja y se amortigua). [2E] Lo dibuja el resplandor de las juntas.
  *   · EL PISO QUE VIBRA CON LUZ (`uVibraDelFinal`, `uCursorDelFinal`): después del golpe, debajo del mouse el piso vibra
  *     (más que la loma de siempre) y se OSCURECE alrededor: de día el piso es claro y la luz que se ve es oscura (la misma
  *     mezcla hacia la noche que los anillos del pulso).
@@ -17,6 +17,12 @@ import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
  * (`uApertura`: se abre desde el medio de los trazos hacia el borde exacto); el borde del corte se oscurece apenas (el
  * labio del pozo). Alrededor del logo el mar se calma (`uCalmaDelFinal`, en la simulación: el piso queda al ras) y el
  * techo que lo esquivaba se apaga (el logo entra en el piso). La mancha de contacto se va con la cámara (`uSinMancha`).
+ *
+ * [EL ENCASTRE] 2E · EL PODER: cuando el logo queda al ras, desde las JUNTAS de los bloques alrededor del logo sale un
+ * resplandor de tinta (`uPoder`): un núcleo negro justo en la junta y un halo denso que se abre de la junta hacia la tapa,
+ * con el costado del bloque lleno (la rendija); vivo (fluye y respira con un ruido lento, no es una sombra quieta) y más
+ * fuerte cerca del logo. El golpe es su pulso: el frente corre por el piso con su física y enciende las juntas por donde
+ * pasa (la banda oscura de CIERRE, que se leía como una mancha, se fue).
  */
 export const GOLPE_EN_EL_PISO = {
   duracionS: 1.7,
@@ -24,8 +30,6 @@ export const GOLPE_EN_EL_PISO = {
   alcance: 32,
   fuerza: 70,
   ancho: 1.3,
-  /** La banda que se ve en el dibujo (cuánto oscurece). */
-  banda: 0.55,
 } as const
 
 export const VIBRA_EN_EL_PISO = {
@@ -61,7 +65,18 @@ export const FINAL_EN_EL_PISO = {
   uCajaDelLogo: { value: new THREE.Vector2(2.7, 2.4) },
   /** 0 a 1: cuánto se fue la mancha de contacto (con la cámara que sube). */
   uSinMancha: { value: 0 },
+  /** [EL ENCASTRE] 2E · el poder liberado: 0 sin poder, 1 entero (con un destello al liberarse, un poco más). */
+  uPoder: { value: 0 },
 }
+
+/**
+ * [EL ENCASTRE] 2E · EL RESPLANDOR DE LAS JUNTAS (u y fracciones): el núcleo (ancho desde la junta), el halo y el aura
+ * (lo que se derrama de la rendija); cuánto oscurece cada uno como mucho; cuánto lejos llega alrededor del logo (en medias
+ * cajas: entero hasta `cerca`, y se apaga con `alcance`); el ancho del frente del pulso (u); el ruido que lo hace fluir y
+ * respirar (escala 1/u, velocidad 1/s) y la veta: el ancho del halo cambia a lo largo de la junta (no es una línea pareja,
+ * que se leía como la sombra de una grilla).
+ */
+export const PODER_EN_EL_PISO = { nucleo: 0.018, halo: 0.15, aura: 0.5, oscuroDelNucleo: 0.97, oscuroDelHalo: 0.66, oscuroDelAura: 0.3, cerca: 1.0, alcance: 0.75, frente: 1.6, ruido: { escala: 0.9, corre: 0.55 }, veta: { escala: 2.3, corre: 0.45 } } as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
 
@@ -116,21 +131,60 @@ uniform sampler2D uHueco;
 uniform vec4 uMarcoDelHueco;
 uniform float uApertura;
 uniform float uSinMancha;
+uniform vec2 uCajaDelLogo;
 float cuantoDelFinal( vec2 xz ) {
 	float c = 0.0;
 	if ( uCursorDelFinal.w > 0.0 ) {
 		float d = length( xz - uCursorDelFinal.xy ) / ${f(VIBRA_EN_EL_PISO.radio)};
 		c += uCursorDelFinal.w * ${f(VIBRA_EN_EL_PISO.oscuro)} * exp( - d * d );
 	}
+	return c;
+}
+// [EL ENCASTRE] 2E · el resplandor de las juntas: cuánto en este punto (el poder alrededor del logo y el frente del pulso).
+uniform float uPoder;
+float azarDelPoder( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
+float ruidoDelPoder( vec2 p ) {
+	vec2 i = floor( p );
+	vec2 f = fract( p );
+	vec2 u = f * f * ( 3.0 - 2.0 * f );
+	return mix( mix( azarDelPoder( i ), azarDelPoder( i + vec2( 1.0, 0.0 ) ), u.x ), mix( azarDelPoder( i + vec2( 0.0, 1.0 ) ), azarDelPoder( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
+}
+float resplandorDelFinal( vec2 xz ) {
+	float r = 0.0;
+	if ( uPoder > 0.0 ) {
+		float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
+		float vivo = 0.62 + 0.38 * ruidoDelPoder( xz * ${f(PODER_EN_EL_PISO.ruido.escala)} + vec2( uTiempo * ${f(PODER_EN_EL_PISO.ruido.corre)}, - uTiempo * ${f(PODER_EN_EL_PISO.ruido.corre * 0.7)} ) );
+		float respira = 0.9 + 0.1 * sin( uTiempo * 2.4 - d * 3.0 );
+		r += uPoder * exp( - max( d - ${f(PODER_EN_EL_PISO.cerca)}, 0.0 ) / ${f(PODER_EN_EL_PISO.alcance)} ) * vivo * respira;
+	}
 	if ( uGolpe.w > 0.0 ) {
 		float t = ( uTiempo - uGolpe.x ) / ${f(GOLPE_EN_EL_PISO.duracionS)};
 		if ( t >= 0.0 && t <= 1.0 ) {
 			float frente = 1.5 + ${f(GOLPE_EN_EL_PISO.alcance)} * ( 1.0 - pow( 1.0 - t, 2.2 ) );
-			float d = ( length( xz - uGolpe.yz ) - frente ) / ( 0.5 + 1.6 * t );
-			c += uGolpe.w * ${f(GOLPE_EN_EL_PISO.banda)} * exp( - d * d ) * pow( 1.0 - t, 1.8 ) * smoothstep( 0.0, 0.05, t );
+			float d = ( length( xz - uGolpe.yz ) - frente ) / ${f(PODER_EN_EL_PISO.frente)};
+			r += uGolpe.w * exp( - d * d ) * pow( 1.0 - t, 1.2 ) * smoothstep( 0.0, 0.04, t );
 		}
 	}
-	return c;
+	return r;
+}
+// La junta: en la tapa, un núcleo negro justo en el borde y un halo que entra hacia la tapa; el costado (la rendija), lleno.
+vec3 conLasJuntas( vec3 color, vec2 xz ) {
+	float r = resplandorDelFinal( xz );
+	if ( r <= 0.0 ) return color;
+	float junta = 1.0;
+	if ( vTapa > 0.5 ) {
+		vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
+		float d = min( min( filo.x, filo.y ), min( filo.z, filo.w ) );
+		float veta = 0.55 + 0.9 * ruidoDelPoder( xz * ${f(PODER_EN_EL_PISO.veta.escala)} + vec2( - uTiempo * ${f(PODER_EN_EL_PISO.veta.corre)}, uTiempo * ${f(PODER_EN_EL_PISO.veta.corre * 0.8)} ) );
+		float nucleo = exp( - d / ${f(PODER_EN_EL_PISO.nucleo)} );
+		// El halo y el aura suman las cuatro juntas (con la más cercana sola, cada tapa se veía como una pirámide).
+		vec4 h = exp( - filo / ( ${f(PODER_EN_EL_PISO.halo)} * veta ) );
+		vec4 a = exp( - filo / ${f(PODER_EN_EL_PISO.aura)} );
+		float halo = min( 1.0, h.x + h.y + h.z + h.w );
+		float aura = min( 1.0, 0.6 * ( a.x + a.y + a.z + a.w ) );
+		junta = ${f(PODER_EN_EL_PISO.oscuroDelNucleo)} * nucleo + ( 1.0 - nucleo ) * min( 1.0, ${f(PODER_EN_EL_PISO.oscuroDelHalo)} * halo + ${f(PODER_EN_EL_PISO.oscuroDelAura)} * aura );
+	}
+	return mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {
@@ -157,7 +211,7 @@ export const ANCLAS_DEL_HUECO = {
   niebla: '#include <fog_fragment>',
 } as const
 
-/** El dibujo del piso con el final: el hueco, su labio, la banda del golpe y la luz oscura del cursor, y la mancha que se va. */
+/** El dibujo del piso con el final: el hueco, su labio, el resplandor de las juntas, la luz oscura del cursor y la mancha que se va. */
 export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
   const previo = material.onBeforeCompile.bind(material)
   const clavePrevia = material.customProgramCacheKey.bind(material)
@@ -174,7 +228,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       .replace(ANCLAS_DEL_DIBUJO.mezcla, `( ${ANCLAS_DEL_DIBUJO.mezcla} + cuantoDelFinal( vPiso.xz ) )`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }
