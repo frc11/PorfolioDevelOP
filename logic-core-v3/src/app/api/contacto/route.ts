@@ -13,29 +13,32 @@ import { getClientIpHash } from '@/lib/security/auth-rate-limit'
  * por su esquema de Zod. Al visitante nunca le llega un error interno: sólo uno escrito para él.
  *
  * Hoy recibe y valida; la conexión al servicio real (el CRM, el aviso por mail) es de la etapa siguiente.
+ *
+ * [EL ENCASTRE] 1E · el único dato obligatorio es el contacto (el mail en el pie; el email o el teléfono en el panel): lo
+ * demás es opcional (puede venir vacío) y sólo se frena por su largo máximo.
  */
 const IDS = INTERESES.map((i) => i.id) as [Interes, ...Interes[]]
-const texto = (min: number, max: number): z.ZodString => z.string().trim().min(min).max(max)
+const opcional = (max: number): z.ZodString => z.string().trim().max(max)
 
 const DelPie = z.object({
   origen: z.literal('pie'),
-  nombre: texto(2, MAXIMOS.nombre),
+  nombre: opcional(MAXIMOS.nombre),
   mail: z.string().trim().max(MAXIMOS.contacto).regex(EMAIL),
-  mensaje: texto(3, MAXIMOS.mensaje),
+  mensaje: opcional(MAXIMOS.mensaje),
 })
 
 const DelPanel = z.object({
   origen: z.literal('panel'),
-  intereses: z.array(z.enum(IDS)).min(1).max(IDS.length),
-  presupuesto: texto(1, MAXIMOS.presupuesto),
-  nombre: texto(2, MAXIMOS.nombre),
+  intereses: z.array(z.enum(IDS)).max(IDS.length),
+  presupuesto: opcional(MAXIMOS.presupuesto),
+  nombre: opcional(MAXIMOS.nombre),
   medio: z
     .string()
     .trim()
     .max(MAXIMOS.contacto)
     .refine((m) => EMAIL.test(m) || (TELEFONO.test(m) && m.replace(/\D/g, '').length >= 8)),
-  empresa: z.string().trim().max(MAXIMOS.empresa),
-  mensaje: texto(3, MAXIMOS.mensaje),
+  empresa: opcional(MAXIMOS.empresa),
+  mensaje: opcional(MAXIMOS.mensaje),
 })
 
 const ESQUEMA_DEL_CONTACTO = z.discriminatedUnion('origen', [DelPie, DelPanel])

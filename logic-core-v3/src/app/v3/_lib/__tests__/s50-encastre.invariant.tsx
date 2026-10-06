@@ -8,17 +8,27 @@
  *        como uniforme) y vuelven con resorte; conservan su color; sólo con mouse y con movimiento.
  *   1D · la placa del contacto: mientras viaja desde el fondo no responde al mouse; al llegar entra suave el paralaje
  *        inverso (se corre al revés del mouse y se le ve el costado de ese lado).
+ *   1E · los formularios del contacto (el panel y el pie): el foco lo dibuja la pastilla (sin el recuadro adentro), el Tab
+ *        llega a los campos, sin «/» delante de las preguntas, el único obligatorio es el contacto (en el cliente y en
+ *        el endpoint) y la nota nueva.
  * (1A, el túnel en k = 1,8 sin la bandera `tunelk`, lo afirma s49 1C al día.) Lo que se mira en vivo:
  * `~/.cache/b4-medicion/encastre/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
 
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { CAMPOS, PIE } from '../../_chrome/contacto/contenido'
+import { validarContacto, type DatosDeContacto } from '../../_chrome/contacto/enviarContacto'
+import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
+import { SELECTOR_DE_FOCALIZABLES } from '../../_secciones/trabajos/demos/dialogo'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { APARICION, LLEGADA, aparicionPedida, enElTramo, escalaDeDemos, llegadaDeDemos, llegadaDeLaAparicion, perseguirLaAparicion, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { FIN_DE_LA_LLEGADA_EN_EL_VACIO, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
 import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../../_chrome/contacto/placa'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
+import { validarElPie } from '../formularios/validar'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -172,5 +182,49 @@ const quietaAlViajar = (ts: string, tsx: string): boolean =>
   tsx.includes('const paralaje = useParalaje(activa, llego)') && tsx.includes('onAnimationComplete={() => setLlego(true)}') && tsx.includes('x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY')
 afirmar(quietaAlViajar(placaTs, placaTsx) && ENTRADA_DEL_PARALAJE.duration >= 0.5, 'mientras viaja desde el fondo no responde (ganancia 0: sin giro, sin corrimiento y con el punto de vista en el centro); cuando el viaje termina la ganancia sube a 1 en 0,8 s con el último puntero (entra suave, desde quieta); cada apertura monta la placa de nuevo', `${String(ENTRADA_DEL_PARALAJE.duration)} s`)
 controlPositivo('el detector VE la placa de CIERRE (respondía desde el primer cuadro del viaje)', placaTs.replace('rotateY.set(p.rotateY * g)', 'rotateY.set(p.rotateY)'), (ts: string) => quietaAlViajar(ts, placaTsx))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1E · Los formularios del contacto: el foco en la pastilla, el Tab en los campos, sin «/», sólo el contacto obligatorio')
+
+// El foco: el anillo del control se MUDA a la caja que se ve (su borde, más oscuro y más grueso); nunca transparente solo.
+const foco = leer('_estilos/foco.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const reglaDe = (css: string, selector: string): string => {
+  const i = css.indexOf(`${selector} {`)
+  return i < 0 ? '' : css.slice(i, css.indexOf('}', i))
+}
+const seMuda = (css: string): boolean => {
+  const pastilla = reglaDe(css, '[data-v3] [data-foco="pastilla"]:has(:focus-visible)')
+  const campo = reglaDe(css, '[data-v3][data-v3] [data-foco="campo"]:focus-visible')
+  const adentro = reglaDe(css, '[data-v3][data-v3] [data-foco="pastilla"] :focus-visible')
+  const dibuja = (r: string): boolean => r.includes('border-color: var(--color-tinta);') && r.includes('box-shadow: inset 0 0 0 var(--border-hairline) var(--color-tinta);')
+  // Cada contorno transparente vive SÓLO adentro de una caja que dibuja el foco.
+  const transparentes = [...css.matchAll(/([^{}]+)\{[^}]*outline-color: transparent;/g)].map((m) => m[1].trim())
+  const soloEnCajas = transparentes.every((s) => s.includes('[data-foco="pastilla"]') || s.includes('[data-foco="campo"]') || s.includes('[data-pieza="carrusel"]'))
+  return dibuja(pastilla) && dibuja(campo) && campo.includes('outline-color: transparent;') && adentro.includes('outline-color: transparent;') && soloEnCajas
+}
+afirmar(seMuda(foco), 'el foco de un campo lo dibuja su caja: el borde (con su redondeo) pasa a la tinta y al doble de grueso (una línea por dentro: nada se corre); el contorno del control queda transparente SÓLO adentro de esas cajas')
+controlPositivo('el detector VE un contorno apagado sin caja que lo reemplace', `${foco}\n[data-v3][data-v3] input:focus-visible { outline-color: transparent; }`, seMuda)
+controlPositivo('  y una pastilla que no dibuja nada', foco.replace('[data-v3] [data-foco="pastilla"]:has(:focus-visible) {\n  border-color: var(--color-tinta);', '[data-v3] [data-foco="pastilla"]:has(:focus-visible) {\n  border-color: var(--color-borde-fuerte);'), seMuda)
+// En el marcado: cada campo de texto del panel, en su pastilla; los del pie, su propia caja; sin «/»; un solo obligatorio.
+const hoja = renderToStaticMarkup(<HojaParaElInvariante />)
+const panelBien = (h: string): boolean =>
+  (h.match(/<label data-foco="pastilla"/g) ?? []).length === 5 && !/>\/ </.test(h) && /<p[^>]*>1\. ¿Qué querés hacer\?<\/p>/.test(h) &&
+  [...h.matchAll(/<(input|textarea)[^>]*\srequired=""[^>]*>/g)].map((m) => /name="([^"]+)"/.exec(m[0])?.[1]).join() === 'medio' && h.includes(PIE)
+afirmar(panelBien(hoja) && PIE === 'Si sos vago, con tu mail alcanza.' && CAMPOS.empresa.rotulo === 'Empresa', 'el panel: los cinco campos de texto en su pastilla (`data-foco`); las preguntas sin la barra de nk («1. ¿Qué querés hacer?»); el único `required`, el del email o teléfono; la nota nueva; la empresa sin «(opcional)» (ahora todo lo es)')
+controlPositivo('el detector VE la barra de antes', hoja.replace('>1. ¿Qué', '><span aria-hidden="true" class="text-tinta-media">/ </span>1. ¿Qué'), panelBien)
+const pie = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+afirmar((pie.match(/data-foco="campo"/g) ?? []).length === 2 && pie.includes("required={k === 'mail'}") && !/\srequired\s/.test(pie), '  el pie: sus campos son su propia caja (`data-foco="campo"`: el borde del pozo, claro sobre la placa) y el único obligatorio es el mail')
+// El Tab llega a los campos: la trampa del diálogo (la del contacto) cuenta los controles de formulario.
+const focalizables = (sel: string): boolean => ['input', 'textarea', 'select'].every((t) => sel.includes(`${t}:not([disabled])`)) && sel.includes(':not([type="hidden"])')
+afirmar(focalizables(SELECTOR_DE_FOCALIZABLES), 'el Tab llega a los campos del panel: la trampa de foco (la de las demos, que el contacto usa) cuenta los controles de formulario (antes daba la vuelta entre la cruz, Enviar y el mail sin entrar NUNCA a un campo)')
+controlPositivo('el detector VE la trampa de antes', 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])', focalizables)
+// Sólo el contacto es obligatorio, en el navegador y en el servidor.
+const NADA: DatosDeContacto = { intereses: [], presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
+const soloElContacto = Object.keys(validarContacto({ ...NADA, medio: 'ana@empresa.com' })).length === 0 && Object.keys(validarContacto({ ...NADA, medio: '11 5566 7788' })).length === 0 && Object.keys(validarContacto(NADA)).join() === 'medio' && Object.keys(validarElPie({ nombre: '', mail: 'ana@empresa.com', mensaje: '' })).length === 0 && Object.keys(validarElPie({ nombre: '', mail: '', mensaje: '' })).join() === 'mail'
+const ruta = sinComentarios(readFileSync('src/app/api/contacto/route.ts', 'utf8').replace(/\r\n/g, '\n'))
+const servidorBien = (r: string): boolean =>
+  r.includes('const opcional = (max: number): z.ZodString => z.string().trim().max(max)') && !/\.min\(/.test(r) && r.includes('intereses: z.array(z.enum(IDS)).max(IDS.length)') && r.includes('mail: z.string().trim().max(MAXIMOS.contacto).regex(EMAIL)') && /medio: z\s*\.string\(\)\s*\.trim\(\)\s*\.max\(MAXIMOS\.contacto\)\s*\.refine/.test(r)
+afirmar(soloElContacto && servidorBien(ruta), 'el único obligatorio es el contacto: en el panel el email o el teléfono, en el pie el mail; lo demás puede ir vacío, en el navegador y en el endpoint (que sigue frenando el largo y el límite por IP)')
+controlPositivo('el detector VE el endpoint de RONDA 2 (pedía nombre y mensaje)', ruta.replace('nombre: opcional(MAXIMOS.nombre),\n  mail', 'nombre: z.string().trim().min(2).max(MAXIMOS.nombre),\n  mail'), servidorBien)
 
 cerrar('s50-encastre')

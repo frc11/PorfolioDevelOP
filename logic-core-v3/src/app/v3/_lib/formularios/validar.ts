@@ -17,15 +17,16 @@ export interface DatosDelPie {
 export type CampoDelPie = keyof DatosDelPie
 export type ErroresDelPie = Partial<Record<CampoDelPie, string>>
 
-/** El contacto del pie: lo que falta o está mal, campo por campo. Vacío = se puede enviar. */
+/**
+ * El contacto del pie: lo que falta o está mal, campo por campo. Vacío = se puede enviar. [EL ENCASTRE] 1E · el único
+ * obligatorio es el mail; el nombre y el mensaje son opcionales (sólo su largo máximo, que también frena el campo).
+ */
 export function validarElPie(d: DatosDelPie): ErroresDelPie {
   const e: ErroresDelPie = {}
-  const nombre = d.nombre.trim()
-  if (nombre.length < 2 || nombre.length > MAXIMOS.nombre) e.nombre = 'Decinos cómo te llamás.'
+  if (d.nombre.trim().length > MAXIMOS.nombre) e.nombre = 'Un nombre más corto, por favor.'
   const mail = d.mail.trim()
   if (!EMAIL.test(mail) || mail.length > MAXIMOS.contacto) e.mail = 'Un mail válido, así te respondemos.'
-  const mensaje = d.mensaje.trim()
-  if (mensaje.length < 3 || mensaje.length > MAXIMOS.mensaje) e.mensaje = 'Contanos aunque sea en una línea.'
+  if (d.mensaje.trim().length > MAXIMOS.mensaje) e.mensaje = 'Es largo: resumilo un poco, por favor.'
   return e
 }
 

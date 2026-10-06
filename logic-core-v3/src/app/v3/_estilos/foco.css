@@ -176,3 +176,46 @@
     inset 0 0 0 calc(var(--foco-desplazamiento) + 2 * var(--foco-grosor)) var(--color-fondo);
   pointer-events: none;
 }
+
+/* =========================================================================
+ * [EL ENCASTRE] 1E · EL FOCO DE UN CAMPO LO DIBUJA SU PASTILLA
+ * =========================================================================
+ * En los formularios del contacto (el panel y el pie) el anillo del sistema
+ * caía en el control de adentro: un recuadro casi cuadrado dentro de la
+ * pastilla redondeada. No se apaga: se MUDA a la caja que se ve. Su borde, con
+ * su redondeo, pasa a la tinta y al doble de grueso (el borde más una línea por
+ * dentro: el contenido no se corre), en media `--duracion-rapida`. Sobre el
+ * papel la tinta da 17,60:1, y contra el borde de reposo (la tinta al 47 %),
+ * 5,5:1: el cambio se ve. En la sección invertida (el pie en volumen) la tinta
+ * es el papel: el foco es claro sobre la placa.
+ *
+ *   · `data-foco="pastilla"`: la caja que envuelve al control (la píldora).
+ *   · `data-foco="campo"`: el control que ES la caja (los campos del pie).
+ *
+ * El contorno del control queda transparente SÓLO ahí (en colores forzados el
+ * sistema lo pinta, como en el carrusel), y va después del anillo de dos tonos
+ * con su misma especificidad. `s50-encastre` 1E afirma que cada caja con
+ * `data-foco` dibuja el foco. Los chips siguen con su anillo propio (INTERFAZ 1).
+ * ========================================================================= */
+[data-v3] [data-foco="pastilla"],
+[data-v3] [data-foco="campo"] {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: calc(var(--duracion-rapida) / 2);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3] [data-foco="pastilla"]:has(:focus-visible) {
+  border-color: var(--color-tinta);
+  box-shadow: inset 0 0 0 var(--border-hairline) var(--color-tinta);
+}
+
+[data-v3][data-v3] [data-foco="pastilla"] :focus-visible {
+  outline-color: transparent;
+  box-shadow: none;
+}
+
+[data-v3][data-v3] [data-foco="campo"]:focus-visible {
+  outline-color: transparent;
+  border-color: var(--color-tinta);
+  box-shadow: inset 0 0 0 var(--border-hairline) var(--color-tinta);
+}

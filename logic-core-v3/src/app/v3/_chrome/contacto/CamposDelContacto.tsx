@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 
+import { MAXIMOS } from '../../_lib/formularios/validar'
 import { CAMPOS, INTERESES, PREGUNTAS, type Interes } from './contenido'
 import type { CampoConError, DatosDeContacto, ErroresDeContacto } from './enviarContacto'
 
@@ -32,8 +33,8 @@ const idDelError = (campo: CampoConError): string => `contacto-error-${campo}`
 
 function Pregunta({ numero, texto, id, compacto = false }: { readonly numero: number; readonly texto: string; readonly id?: string; readonly compacto?: boolean }): React.JSX.Element {
   return (
+    // [EL ENCASTRE] 1E · sin la barra «/» delante (era un recurso de nk).
     <p id={id} className={cn(compacto ? 'text-caption' : 'text-cuerpo', 'font-medio leading-texto')}>
-      <span aria-hidden="true" className="text-tinta-media">/ </span>
       {numero}. {texto}
     </p>
   )
@@ -52,16 +53,19 @@ function Error({ campo, errores }: { readonly campo: CampoConError; readonly err
 }
 
 const FILA = 'grid gap-[var(--spacing-4)] tablet:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] tablet:gap-[var(--spacing-8)]'
-const PILDORA = 'flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte px-[var(--spacing-4)] py-[var(--spacing-2)] focus-within:border-tinta transition-colors'
+/** [EL ENCASTRE] 1E · el foco lo dibuja la píldora (`data-foco="pastilla"`, en `foco.css`): su borde, más oscuro y más grueso. */
+const PILDORA = 'flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte px-[var(--spacing-4)] py-[var(--spacing-2)]'
 /** [NAVBAR] T4 · en el teléfono la pregunta va pegada a sus campos. */
 const FILA_COMPACTA = 'grid gap-[var(--spacing-2)]'
+/** [EL ENCASTRE] 1E · lo máximo de cada campo (lo mismo exige el servidor): con todo opcional, el largo lo frena el campo. */
+const MAXIMO_DE: Record<Exclude<CampoDeTexto, 'mensaje'>, number> = { presupuesto: MAXIMOS.presupuesto, nombre: MAXIMOS.nombre, medio: MAXIMOS.contacto, empresa: MAXIMOS.empresa }
 
 function Pildora({
   campo,
   datos,
   errores,
   escribir,
-  requerido = true,
+  requerido = false,
   compacto = false,
 }: {
   readonly campo: Exclude<CampoDeTexto, 'mensaje'>
@@ -75,7 +79,7 @@ function Pildora({
   return (
     <div className="flex flex-col gap-[var(--spacing-1)]">
       {/* [INTERFAZ 1] T3: el error con borde punteado (el foco es liso: no se confunden). */}
-      <label className={cn(PILDORA, compacto && 'py-[var(--spacing-1)]', conError && 'border-tinta border-dashed')}>
+      <label data-foco="pastilla" className={cn(PILDORA, compacto && 'py-[var(--spacing-1)]', conError && 'border-tinta border-dashed')}>
         <span className="text-caption shrink-0 font-medio">{CAMPOS[campo].rotulo}</span>
         <input
           name={campo}
@@ -83,13 +87,14 @@ function Pildora({
           inputMode={campo === 'medio' ? 'email' : undefined}
           autoComplete={campo === 'nombre' ? 'name' : campo === 'empresa' ? 'organization' : campo === 'medio' ? 'email' : 'off'}
           required={requerido}
+          maxLength={MAXIMO_DE[campo]}
           value={datos[campo]}
           onChange={(e) => escribir(campo, e.target.value)}
           onFocus={alEnfocar}
           placeholder={CAMPOS[campo].ejemplo}
           aria-invalid={conError || undefined}
           aria-describedby={conError ? idDelError(campo) : undefined}
-          className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent outline-none"
+          className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent"
         />
       </label>
       {campo !== 'empresa' && <Error campo={campo} errores={errores} />}
@@ -151,23 +156,24 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir, c
         <div className="flex flex-col gap-[var(--spacing-2)]">
           <div className="grid gap-[var(--spacing-2)] escritorio:grid-cols-3">
             <Pildora campo="nombre" datos={datos} errores={errores} escribir={escribir} compacto={compacto} />
-            <Pildora campo="medio" datos={datos} errores={errores} escribir={escribir} compacto={compacto} />
-            <Pildora campo="empresa" datos={datos} errores={errores} escribir={escribir} requerido={false} compacto={compacto} />
+            {/* [EL ENCASTRE] 1E · el único obligatorio: el email o el teléfono. */}
+            <Pildora campo="medio" datos={datos} errores={errores} escribir={escribir} requerido compacto={compacto} />
+            <Pildora campo="empresa" datos={datos} errores={errores} escribir={escribir} compacto={compacto} />
           </div>
           <div className="flex flex-col gap-[var(--spacing-1)]">
-            <label className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)]', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
+            <label data-foco="pastilla" className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)]', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
               <span className="text-caption shrink-0 font-medio">{CAMPOS.mensaje.rotulo}</span>
               <textarea
                 name="mensaje"
-                required
                 rows={compacto ? 2 : 3}
+                maxLength={MAXIMOS.mensaje}
                 value={datos.mensaje}
                 onChange={(e) => escribir('mensaje', e.target.value)}
                 onFocus={alEnfocar}
                 placeholder={CAMPOS.mensaje.ejemplo}
                 aria-invalid={errores.mensaje !== undefined || undefined}
                 aria-describedby={errores.mensaje === undefined ? undefined : idDelError('mensaje')}
-                className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent outline-none"
+                className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent"
               />
             </label>
             <Error campo="mensaje" errores={errores} />

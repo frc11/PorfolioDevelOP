@@ -23,7 +23,11 @@ import { useEffect, type RefObject } from 'react'
  * sabe cuándo terminó de cerrarse.
  */
 
-export const SELECTOR_DE_FOCALIZABLES = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+/**
+ * [EL ENCASTRE] 1E · con los controles de formulario: el contacto usa esta trampa y, sin ellos, el Tab daba la vuelta
+ * entre la cruz, Enviar y el mail de la bajada sin entrar NUNCA a los campos (medido con Tab real).
+ */
+export const SELECTOR_DE_FOCALIZABLES = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export function focalizablesDe(caja: HTMLElement): HTMLElement[] {
   return [...caja.querySelectorAll<HTMLElement>(SELECTOR_DE_FOCALIZABLES)]

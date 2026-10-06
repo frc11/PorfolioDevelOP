@@ -85,7 +85,10 @@ titulo('4 · El envío: una sola puerta, validación real y nunca un «enviado»
 // [RONDA 2] F1: envía a `/api/contacto` (el endpoint propio); sin `mailto` ni WhatsApp. El que envía se cambia acá por uno de prueba.
 const VALIDO: DatosDeContacto = { intereses: ['web'], presupuesto: 'todavía no sé', nombre: 'Ana', medio: 'ana@tuempresa.com', empresa: '', mensaje: 'Una web para el negocio' }
 afirmarIgual(Object.keys(validarContacto(VALIDO)), [], 'con todo lo obligatorio, no hay errores (la empresa es opcional)')
-afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana' })).sort(), ['intereses', 'medio'], '  y se marca lo que falta: sin opción y con un contacto que no es email ni teléfono')
+// [EL ENCASTRE] 1E · cambió por pedido: el único obligatorio es el email o el teléfono (antes, todo salvo la empresa).
+const SOLO_EL_MEDIO: DatosDeContacto = { intereses: [], presupuesto: '', nombre: '', medio: '1155667788', empresa: '', mensaje: '' }
+afirmarIgual(Object.keys(validarContacto(SOLO_EL_MEDIO)), [], '  con sólo el email o el teléfono alcanza (EL ENCASTRE 1E: lo demás es opcional)')
+afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana' })).sort(), ['medio'], '  y se marca lo que falta: un contacto que no es email ni teléfono (sin opción marcada, se puede enviar)')
 afirmar(ROTULO_DEL_ENVIO === 'Enviar' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
 afirmar(INTERESES.length === 7 && !/newsletter|novedades/i.test(HOJA), 'siete opciones y sin casilla de newsletter')
 afirmar(!/whatsapp|wa\.me|mailto:/i.test(HOJA.replace(/<a href="mailto:[^"]*"[^>]*>[^<]*<\/a>/, '')), '  la hoja no nombra WhatsApp ni manda por `mailto` (el mail de la bajada es un enlace para escribir, no el envío)')
@@ -96,7 +99,8 @@ void (async (): Promise<void> => {
     pedidos.push({ ruta, datos })
     return respuesta
   }
-  const invalido = await enviarContacto({ ...VALIDO, nombre: '' }, servidor({ ok: true }))
+  // [EL ENCASTRE] 1E · lo inválido ahora es el contacto (el nombre vacío se puede enviar).
+  const invalido = await enviarContacto({ ...VALIDO, medio: '' }, servidor({ ok: true }))
   afirmar(invalido.estado === 'invalido' && pedidos.length === 0, 'con errores no sale nada')
   const valido = await enviarContacto(VALIDO, servidor({ ok: true }))
   afirmar(valido.estado === 'enviado' && pedidos.length === 1 && pedidos[0].ruta === '/api/contacto' && pedidos[0].datos.origen === 'panel' && pedidos[0].datos.nombre === 'Ana', 'válido, va al endpoint propio (`/api/contacto`, origen `panel`) y dice «enviado» sólo con la respuesta')

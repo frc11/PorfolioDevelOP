@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { enviarAlServidor } from '../../_lib/formularios/enviar'
-import { validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
+import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
 import { CONTACTO_DEL_FORMULARIO } from './contenido'
 
@@ -27,8 +27,12 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * su aire alrededor; los campos son pozos en su cara y Enviar, una tecla que sale de ella. Los campos y el botón siguen
  * siendo los del DOM, sobre la placa (la escena les escribe la transformada cada cuadro). Con el 3D listo, la sala se
  * invierte (`data-seccion`: la tinta clara sobre el negro, como el foco) y los rótulos los dibuja la placa en relieve.
+ *
+ * [EL ENCASTRE] 1E · el único obligatorio es el mail (el nombre y el mensaje, opcionales; el largo lo frena cada campo) y
+ * el foco lo dibuja la caja del campo (`data-foco="campo"`, `foco.css`): su borde, más oscuro y más grueso, sin anillo.
  */
-const CAMPO = 'block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
+const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
+const CAMPO ='block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
 const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
 const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
@@ -94,14 +98,16 @@ export function FormularioDelPie(): React.JSX.Element {
             </label>
             <BloqueSolido forma="ranura" className="block w-full">
               {k === 'mensaje' ? (
-                <textarea id={f.id} name={k} rows={3} required value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none')} />
+                <textarea id={f.id} name={k} rows={3} maxLength={MAXIMO_DE[k]} data-foco="campo" value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none')} />
               ) : (
                 <input
                   id={f.id}
                   name={k}
                   type={k === 'mail' ? 'email' : 'text'}
                   autoComplete={k === 'mail' ? 'email' : 'name'}
-                  required
+                  required={k === 'mail'}
+                  maxLength={MAXIMO_DE[k]}
+                  data-foco="campo"
                   placeholder={k === 'mail' ? c.ejemploDeMail : undefined}
                   value={datos[k]}
                   onChange={(e) => escribir(k, e.target.value)}

@@ -22,15 +22,15 @@ export interface DatosDeContacto {
 export type CampoConError = 'intereses' | 'presupuesto' | 'nombre' | 'medio' | 'mensaje'
 export type ErroresDeContacto = Partial<Record<CampoConError, string>>
 
-/** Lo que falta o está mal, campo por campo. Vacío = se puede enviar. */
+/**
+ * Lo que falta o está mal, campo por campo. Vacío = se puede enviar. [EL ENCASTRE] 1E · el único obligatorio es el email
+ * o el teléfono; lo demás es opcional (los largos máximos los pone cada campo, `maxLength`, y el servidor los vuelve a
+ * exigir).
+ */
 export function validarContacto(d: DatosDeContacto): ErroresDeContacto {
   const e: ErroresDeContacto = {}
-  if (d.intereses.length === 0) e.intereses = 'Elegí al menos una opción.'
-  if (d.presupuesto.trim().length === 0) e.presupuesto = 'Contanos un número, un rango o «todavía no sé».'
-  if (d.nombre.trim().length < 2) e.nombre = 'Decinos cómo te llamás.'
   const medio = d.medio.trim()
   if (!EMAIL.test(medio) && !(TELEFONO.test(medio) && medio.replace(/\D/g, '').length >= 8)) e.medio = 'Un email o un teléfono.'
-  if (d.mensaje.trim().length < 3) e.mensaje = 'Contanos aunque sea en una línea.'
   return e
 }
 

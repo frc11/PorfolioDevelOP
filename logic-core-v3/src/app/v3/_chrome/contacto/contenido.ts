@@ -41,11 +41,13 @@ export const CAMPOS = {
   presupuesto: { rotulo: 'Presupuesto', ejemplo: 'Un número, un rango o «todavía no sé»' },
   nombre: { rotulo: 'Nombre', ejemplo: 'ej.: Ana Pérez' },
   medio: { rotulo: 'Email o teléfono', ejemplo: 'ej.: ana@tuempresa.com' },
-  empresa: { rotulo: 'Empresa (opcional)', ejemplo: 'ej.: Tu Empresa' },
+  // [EL ENCASTRE] 1E · sin «(opcional)»: ahora todo lo es, salvo el email o el teléfono (lo dice la nota de abajo).
+  empresa: { rotulo: 'Empresa', ejemplo: 'ej.: Tu Empresa' },
   mensaje: { rotulo: '¿Qué tenés en mente?', ejemplo: 'ej.: Que la gente nos encuentre y nos escriba' },
 } as const
 
-export const PIE = 'Todo es obligatorio salvo la empresa. Si es vago, está perfecto.'
+/** [EL ENCASTRE] 1E · la nota: sólo el email o el teléfono es obligatorio. */
+export const PIE = 'Si sos vago, con tu mail alcanza.'
 
 /** [RONDA 2] F1 · el envío va al endpoint propio (`/api/contacto`): el rótulo de siempre, y mientras viaja. */
 export const ROTULO_DEL_ENVIO = 'Enviar'
