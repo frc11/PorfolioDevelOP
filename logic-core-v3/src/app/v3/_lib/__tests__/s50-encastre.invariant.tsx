@@ -534,4 +534,24 @@ const esperaAlFinal = (c: string): boolean => c.includes('s.enteroS = fin > 0.99
 afirmar(esperaAlFinal(finalTsx) && FINAL_DEL_PIE.quieto.desdeS === 1.4, 'el quieto (la cámara que gira sin fin y se aleja hacia su tope, s49) arranca 1,4 s después de que el final quedó entero y sin scroll: no en el mismo instante en que termina el encastre', `${String(FINAL_DEL_PIE.quieto.desdeS)} s`)
 controlPositivo('el detector VE el quieto de CIERRE (sólo el scroll: con el arranque solo, empezaba al terminar)', finalTsx.replace('Math.min(s.sinScrollS, s.enteroS)', 's.sinScrollS'), esperaAlFinal)
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2H · Las piezas del pie de frente y usables; sólo desde 1024 (abajo y con movimiento reducido, el pie de hoy, s49); costo acotado')
+
+// De frente: cada pieza copia la orientación de la cámara sin el mouse, y el final mueve esa cámara con la viva (sube,
+// gira en el quieto): las piezas van con ella durante toda la secuencia.
+const colocacion = sinComentarios(leer('_lib/escena/pie3d/colocacion.ts'))
+const armadasTs = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)')
+afirmar(deFrente(colocacion, armadasTs, finalTsx), 'las piezas del pie miran siempre a la cámara sin el mouse, que el final lleva con la viva (sube, gira en el quieto): de frente durante toda la secuencia; su DOM va por la homografía (usable donde se ve)')
+controlPositivo('el detector VE un final que mueve sólo la cámara viva (las piezas se quedarían mirando al costado)', finalTsx.replace('camaraDelFinal(CAMARA_SIN_EL_MOUSE,', 'camaraDelFinal(null,'), (fi: string) => deFrente(colocacion, armadasTs, fi))
+// Costo: el final suma como mucho tres dibujos (el vapor en un Points; las paredes y el fondo del pozo), invisibles fuera
+// del final; el resplandor, el hueco y el rastro van adentro del shader del piso (cero dibujos), con lazos acotados.
+const vaporDeCosto = crearElVapor([new THREE.Vector2(1, 0), new THREE.Vector2(0, 1)], Math.random)
+const pozoDeCosto = crearElPozo([new THREE.Shape([new THREE.Vector2(-1, -1), new THREE.Vector2(1, -1), new THREE.Vector2(1, 1)])], TAM.espesor)
+const dibujosDelFinal = [vaporDeCosto.puntos, ...pozoDeCosto.grupo.children]
+const costoBien = dibujosDelFinal.length <= 3 && !vaporDeCosto.puntos.visible && !pozoDeCosto.grupo.visible && RASTRO_EN_EL_PISO.puntos <= 8 && !/new THREE\.(Mesh|Points|Line)/.test(enElPisoTs)
+vaporDeCosto.soltar()
+pozoDeCosto.soltar()
+afirmar(costoBien, 'costo acotado: el final suma como mucho 3 dibujos (vapor, paredes y fondo del pozo), invisibles fuera del final (nada fuera del pie); el resplandor y el rastro van en el shader del piso, sin dibujos nuevos', `${String(dibujosDelFinal.length)} dibujos · ${String(VAPOR.columnas * VAPOR.porColumna)} partículas en 1 · rastro de ${String(RASTRO_EN_EL_PISO.puntos)}`)
+
 cerrar('s50-encastre')
