@@ -11,9 +11,9 @@ import { FLOOR_Y, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { FINAL_EN_EL_PISO } from './enElPiso'
-import { EXPLOSION, cargarLaExplosion, crearLaExplosion } from './explosion'
+import { crearElVapor, pasoDelVapor, vaporQuieto, type EstadoDelVapor, type Vapor } from './vapor'
 import { viajeEnCurso } from '../viaje'
-import { EN_VIVO, FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, subida, type RelojDelFinal, type TamanoDelLogo } from './recorridoDelFinal'
+import { EN_VIVO, FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, segundosDelFinal, subida, type RelojDelFinal, type TamanoDelLogo } from './recorridoDelFinal'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE EN LA ESCENA — va justo después del rig (`OrbitRig` pone la cámara del recorrido en la pose
@@ -50,8 +50,9 @@ interface EstadoDelFinal {
   readonly pose: { centro: THREE.Vector3; rotacionX: number }
   readonly sacudon: THREE.Vector3
   haz: THREE.Object3D | null
-  readonly explosion: ReturnType<typeof crearLaExplosion>
-  readonly contorno: readonly THREE.Vector3[]
+  /** [EL ENCASTRE] 2C · el vapor (reemplaza a la explosión de CIERRE) y lo que recuerda. */
+  readonly vapor: Vapor
+  readonly estadoDelVapor: EstadoDelVapor
 }
 
 function crearElEstado(contorno: readonly THREE.Vector3[]): EstadoDelFinal {
@@ -74,8 +75,9 @@ function crearElEstado(contorno: readonly THREE.Vector3[]): EstadoDelFinal {
     pose: { centro: new THREE.Vector3(), rotacionX: 0 },
     sacudon: new THREE.Vector3(),
     haz: null,
-    explosion: crearLaExplosion(),
-    contorno,
+    // El contorno del logo acostado, en el piso: (x, −y) del grupo del logo.
+    vapor: crearElVapor(contorno.map((p) => new THREE.Vector2(p.x, -p.y)), Math.random),
+    estadoDelVapor: vaporQuieto(),
   }
 }
 
@@ -97,7 +99,7 @@ function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): void {
   EN_VIVO.camara = 0
   FINAL_EN_EL_PISO.uVibraDelFinal.value = 0
   FINAL_EN_EL_PISO.uCursorDelFinal.value.w = 0
-  s.explosion.puntos.visible = false
+  s.vapor.puntos.visible = false
   s.aplicado = false
 }
 
@@ -114,14 +116,14 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
     if (g === null) return undefined
     const estado = crearElEstado(contorno)
     m.current = estado
-    g.add(estado.explosion.puntos)
+    g.add(estado.vapor.puntos)
     return () => {
-      g.remove(estado.explosion.puntos)
+      g.remove(estado.vapor.puntos)
       soltarElFinal(estado, logo)
       EN_VIVO.fin = 0
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
       FINAL_EN_EL_PISO.uGolpe.value.w = 0
-      estado.explosion.soltar()
+      estado.vapor.soltar()
       m.current = null
     }
   }, [contorno, logoGroupRef])
@@ -129,7 +131,7 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
-    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, particulas: m.current?.explosion.puntos.visible ?? false, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [] })
+    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, particulas: m.current?.vapor.puntos.visible ?? false, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [] })
     return () => {
       delete ventana.__finalDelBanco
     }
@@ -153,7 +155,6 @@ interface CuadroDeLaEscena {
 function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: number, logo: THREE.Group | null, tamano: TamanoDelLogo): void {
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
-  const explosion = s.explosion
   // 1 · [EL ENCASTRE] 2A · el reloj: arranca solo al llegar al pie (pegado), el scroll hacia abajo lo adelanta y un gesto
   // hacia arriba (o salir del pie, o un viaje del menú) lo revierte.
   s.cola ??= document.querySelector(SELECTOR_DE_LA_COLA)
@@ -166,8 +167,10 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
   s.scroll = window.scrollY
   s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, s.sinScrollS, dt, EN_VIVO)
-  const vivas = Number.isFinite(s.golpeEn) && t - s.golpeEn < EXPLOSION.vidaS + 0.5
-  const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0 || vivas
+  // [EL ENCASTRE] 2C · el vapor: se arma con el final en cero (por eso antes de la salida temprana) y sigue mientras se
+  // hunde (aunque `fin` ya volvió a 0).
+  pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)
+  const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0 || s.estadoDelVapor.reloj > 0
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)
     s.antes = fin
@@ -190,21 +193,20 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
     logo.updateMatrixWorld()
   }
 
-  // 3 · El golpe: al tocar el piso bajando (una vez por bajada), las partículas y la onda; subiendo, se apagan.
+  // 3 · El golpe: al tocar el piso bajando (una vez por bajada), la onda. [EL ENCASTRE] 2C · y el vapor, que sopla mientras
+  // se acuesta y se queda posado en el piso; al revertir se hunde (`vapor.ts`).
   const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
-  if (s.antes < golpe && fin >= golpe && logo !== null) {
-    cargarLaExplosion(explosion.puntos, s.contorno.map((p) => p.clone().applyMatrix4(logo.matrixWorld)), s.pose.centro, Math.random)
+  if (s.antes < golpe && fin >= golpe) {
     s.golpeEn = t
     s.golpes += 1
     FINAL_EN_EL_PISO.uGolpe.value.set(t, s.pose.centro.x, s.pose.centro.z, 1)
   }
   s.antes = fin
   const desdeElGolpe = t - s.golpeEn
-  explosion.uniformes.uT.value = Number.isFinite(desdeElGolpe) ? desdeElGolpe : 0
-  const objetivoDeLaOpacidad = fin >= golpe - 0.03 ? 1 : 0
-  explosion.uniformes.uOpacidad.value += (objetivoDeLaOpacidad - explosion.uniformes.uOpacidad.value) * (1 - Math.exp(-dt / 0.18))
-  explosion.uniformes.uPixel.value = state.viewport.dpr
-  explosion.puntos.visible = vivas && explosion.uniformes.uOpacidad.value > 0.01
+  s.vapor.uniformes.uT.value = s.estadoDelVapor.reloj
+  s.vapor.uniformes.uHundir.value = s.estadoDelVapor.hundir
+  s.vapor.uniformes.uPixel.value = state.viewport.dpr
+  s.vapor.puntos.visible = s.estadoDelVapor.reloj > 0
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
   // desde arriba, centrada en el logo (su blanco baja al piso con la caída).

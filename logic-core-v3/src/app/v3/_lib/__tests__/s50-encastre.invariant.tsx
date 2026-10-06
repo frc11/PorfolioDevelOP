@@ -16,7 +16,7 @@
  * (1A, el túnel en k = 1,8 sin la bandera `tunelk`, lo afirma s49 1C al día.) Lo que se mira en vivo:
  * `~/.cache/b4-medicion/encastre/mirar.txt`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
@@ -33,7 +33,8 @@ import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
-import { FLOOR_Y } from '../escena/probeScene'
+import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
+import { VAPOR, crearElVapor, pasoDelVapor, vaporPosado, vaporQuieto, type EstadoDelVapor } from '../escena/final/vapor'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -346,5 +347,62 @@ afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subid
 const golpeS = aterrizaje(TAM)
 const rebote = Array.from({ length: 101 }, (_, i) => hundido((golpeS + (FINAL_DEL_PIE.hundimiento.duracionS * i) / 100) / RELOJ_DEL_FINAL.duracionS, TAM))
 afirmar(rebote[0] === 0 && Math.max(...rebote) > FINAL_DEL_PIE.hundimiento.encajado * 1.1 && Math.abs(rebote[100] - FINAL_DEL_PIE.hundimiento.encajado) < 0.01 && hundido((golpeS - 0.05) / RELOJ_DEL_FINAL.duracionS, TAM) === 0, '  al tocar el piso se encastra con el rebote de CIERRE (2D lo cambia)', `rebote hasta ${(Math.max(...rebote) * 100).toFixed(0)} % del espesor`)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2C · El vapor al acostarse: columnas que suben, se curvan hacia afuera, caen y se quedan en el piso; sólo se van hundiéndose')
+
+let semilla = 11
+const azarDelVapor = (): number => ((semilla = (semilla * 16807) % 2147483647) / 2147483647)
+const anillo = Array.from({ length: 120 }, (_, i) => new THREE.Vector2(2.4 * Math.cos((i / 120) * Math.PI * 2), 2.4 * Math.sin((i / 120) * Math.PI * 2)))
+const vapor = crearElVapor(anillo, azarDelVapor)
+const g = vapor.puntos.geometry
+const vuelo = g.getAttribute('aVuelo') as THREE.BufferAttribute
+const afuera = g.getAttribute('aAfuera') as THREE.BufferAttribute
+const base = g.getAttribute('position') as THREE.BufferAttribute
+const N = VAPOR.columnas * VAPOR.porColumna
+let [mientrasSeAcuesta, haciaAfuera, enColumnas] = [true, true, true]
+for (let i = 0; i < N; i += 1) {
+  if (vuelo.getX(i) < 0 || vuelo.getX(i) > FINAL_DEL_PIE.acostarseS) mientrasSeAcuesta = false
+  // Hacia afuera del centro: el rumbo de la caída y la base apuntan al mismo lado.
+  if (afuera.getX(i) * base.getX(i) + afuera.getY(i) * base.getZ(i) <= 0) haciaAfuera = false
+  const primera = Math.floor(i / VAPOR.porColumna) * VAPOR.porColumna
+  if (Math.hypot(base.getX(i) - base.getX(primera), base.getZ(i) - base.getZ(primera)) > 0.12) enColumnas = false
+}
+const sombreadorDelVapor = (vapor.puntos.material as THREE.ShaderMaterial).vertexShader
+const trayectoria = (v: string): boolean => v.includes('p.xz += aAfuera * u * u') && v.includes('p.y += 4.0 * aVuelo.z * u * ( 1.0 - u );') && v.includes('if ( u >= 1.0 ) p.y = alturaDelPiso( p.xz ) + 0.03;') && v.includes('p.y -= uHundir *')
+afirmar(N >= 1500 && mientrasSeAcuesta && haciaAfuera && enColumnas && trayectoria(sombreadorDelVapor) && vapor.puntos instanceof THREE.Points && !vapor.puntos.visible && (vapor.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString(), 'columnas de partículas de tinta, en UN dibujo: cada columna sopla de un punto alrededor del hueco mientras el logo se acuesta; cada partícula sube (lo horizontal crece con u²), se curva hacia afuera con su variación, cae y se posa en su bloque del piso', `${String(VAPOR.columnas)} columnas × ${String(VAPOR.porColumna)} · posadas a los ${vaporPosado().toFixed(1)} s`)
+controlPositivo('el detector VE la explosión de CIERRE (tiro oblicuo con gravedad, que se apagaba)', sombreadorDelVapor.replace('p.xz += aAfuera * u * u', 'p.xz += aAfuera * u'), trayectoria)
+vapor.soltar()
+// No desaparecen: se van sólo hundiéndose al revertir (y el hundimiento, una vez empezado, termina).
+type PasoDelVapor = (v: EstadoDelVapor, segundos: number, avanza: boolean, dt: number) => void
+const ciclo = (paso: PasoDelVapor): { readonly soplaYSeQueda: boolean; readonly seHunde: boolean; readonly nuncaDeGolpe: boolean; readonly sinRepetir: boolean } => {
+  const v = vaporQuieto()
+  paso(v, 0, false, DT)
+  for (let s = DT; s <= 9; s += DT) paso(v, Math.min(s, RELOJ_DEL_FINAL.duracionS), true, DT)
+  const soplaYSeQueda = v.reloj >= vaporPosado() && v.hundir === 0
+  let nuncaDeGolpe = true
+  let hundido = 0
+  for (let k = 0; k < 120; k += 1) {
+    const antes = v.hundir
+    paso(v, Math.max(0, RELOJ_DEL_FINAL.duracionS - k * 0.1), false, DT)
+    if (v.reloj === 0 && antes < 0.95) nuncaDeGolpe = false
+    if (v.reloj === 0) break
+    hundido = Math.max(hundido, v.hundir)
+  }
+  // Vuelve a avanzar sin pasar por cero: no sopla de nuevo.
+  const w = vaporQuieto()
+  paso(w, 0, false, DT)
+  for (let s = DT; s <= 3; s += DT) paso(w, s, true, DT)
+  for (let k = 0; k < 80; k += 1) paso(w, 3 - k * 0.01, false, DT)
+  for (let s = 2.2; s <= 4; s += DT) paso(w, s, true, DT)
+  return { soplaYSeQueda, seHunde: hundido > 0.9, nuncaDeGolpe, sinRepetir: w.reloj === 0 }
+}
+const cicloBien = (c: ReturnType<typeof ciclo>): boolean => c.soplaYSeQueda && c.seHunde && c.nuncaDeGolpe && c.sinRepetir
+afirmar(cicloBien(ciclo(pasoDelVapor)), 'no desaparecen: hacia adelante soplan y quedan posadas; al revertir se hunden en el piso (que las tapa) y recién hundidas se van; si vuelve a avanzar sin pasar por cero, no soplan de nuevo')
+const deGolpe: PasoDelVapor = (v, segundos, avanza) => {
+  v.reloj = avanza ? Math.max(v.reloj, segundos) : 0
+}
+controlPositivo('el detector VE un vapor que se apaga de golpe al revertir', deGolpe, (p: PasoDelVapor) => cicloBien(ciclo(p)))
+afirmar(finalTsx.includes('pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)') && finalTsx.indexOf('pasoDelVapor(') < finalTsx.indexOf('if (!activo)') && !existsSync(`${V3}/_lib/escena/final/explosion.ts`), '  el cableado: el paso del vapor va antes de la salida temprana (se arma con el final en cero); la explosión se fue')
 
 cerrar('s50-encastre')
