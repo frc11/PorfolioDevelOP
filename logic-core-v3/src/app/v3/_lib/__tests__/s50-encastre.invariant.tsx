@@ -414,11 +414,12 @@ const sinInercia: PasoDelRastro = (puntos, e, x, z, vale, dt) => {
 controlPositivo('el detector VE un piso que se apaga de golpe al irse el mouse', sinInercia, (p: PasoDelRastro) => conInercia(rastroDe(p)))
 // En el piso: levanta los bloques (la simulación) y el resplandor sale por las juntas, más por las rendijas que se abren
 // (el vecino más bajo); el círculo oscuro de CIERRE (una mancha plana que seguía al mouse) se fue.
+// [RETOQUE DEL ENCASTRE] 1E · cambió por pedido: lo que sale por las rendijas bajo el mouse es LUZ, no tinta (s51 1E).
 const conElRastro = (piso: string, simulacion: string): boolean =>
-  simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && piso.includes('float rastro = resplandorDelRastro( xz );') &&
-  piso.includes('smoothstep( 0.0, 0.1, - vVecinos )') && piso.includes('clamp( junta * ( r + rastro ), 0.0, 0.96 )') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
+  simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && piso.includes('vec2 rastro = resplandorDelRastro( xz );') &&
+  piso.includes('abs( vVecinos )') && piso.includes('color = conLaLuz( color, rastro.x, rastro.y );') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
 const simulacionDelRastro = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
-afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor) y por las rendijas que se abren sale el resplandor oscuro con la forma de las juntas; el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
+afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor) y por las rendijas que se abren sale la luz de abajo con la forma de las juntas (RETOQUE DEL ENCASTRE 1E); el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
 controlPositivo('el detector VE el círculo oscuro de CIERRE', enElPisoTs + '\nfloat cuantoDelFinal( vec2 xz ) {', (c: string) => conElRastro(c, simulacionDelRastro))
 // Con el poder: antes de quedar al ras, el mouse no deja nada.
 afirmar(finalTsx.includes('const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0') && finalTsx.includes('apagarElRastro(p.uRastro.value, s.rastro)'), '  sólo con el poder liberado (antes, el mouse no deja nada) y se apaga entero al soltar el final')

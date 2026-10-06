@@ -13,6 +13,7 @@ import { HUECO } from './hueco'
  *     que se leía como una sombra que seguía al mouse): por donde pasa el mouse queda un rastro de puntos que se apagan
  *     con inercia (`rastro.ts`); en la simulación, levanta un poco los bloques; en el dibujo, por las rendijas que se
  *     abren (un bloque más alto que su vecino) sale el resplandor de abajo, con la forma de las juntas. Con el poder.
+ *     [RETOQUE DEL ENCASTRE] 1E · ese resplandor era de tinta (oscuro, denso): ahora es LUZ (`LUZ_EN_EL_PISO`).
  *
  * [EL ENCASTRE] 2D · EL HUECO EXACTO (`hueco.ts`): el piso descarta sus tapas y costados donde la máscara del logo
  * acostado dice «adentro» (`uHueco`, en el plano del logo: (x, −z)) y su campo ancho pasa el umbral de la apertura
@@ -76,6 +77,21 @@ export const FINAL_EN_EL_PISO = {
  * que se leía como la sombra de una grilla).
  */
 export const PODER_EN_EL_PISO = { nucleo: 0.018, halo: 0.15, aura: 0.5, oscuroDelNucleo: 0.97, oscuroDelHalo: 0.66, oscuroDelAura: 0.3, cerca: 1.0, alcance: 0.75, frente: 1.6, ruido: { escala: 0.9, corre: 0.55 }, veta: { escala: 2.3, corre: 0.45 } } as const
+
+/**
+ * [RETOQUE DEL ENCASTRE] 1E · LA LUZ DE ABAJO — bajo el mouse se veía oscuro, denso y de baja calidad: el resplandor era de
+ * tinta. Ahora es luz que nace abajo y se escapa por las rendijas de los bloques levantados: en la tapa, cada junta es una
+ * línea de luz con un halo suave que entra hacia la tapa (más fuerte y más ancho donde la rendija se abre: el vecino más
+ * bajo); donde la luz es más fuerte (el núcleo, bajo el mouse) inunda la tapa entera; la pared de la rendija, iluminada.
+ * Sobre el piso claro, el contraste lo da la sombra: donde hay luz la tapa se sombrea (los bloques levantados tapan la luz
+ * de la sala), menos en el núcleo. Sin dientes: la línea y el halo nunca son más finos que un píxel (`fwidth`); sin
+ * bandas: todo es exponencial y continuo (y el piso lleva el tramado de siempre).
+ *
+ * La luz (lineal, a la salida), cuánto se sombrea la tapa, el ancho de la línea y del halo (u), desde qué diferencia de
+ * alto (u) una rendija está abierta del todo, y el núcleo: alrededor de la cabeza del rastro, bajo el mouse (su radio,
+ * u), y desde y hasta cuánto calor inunda la tapa (lo que suma el rastro entero no inunda nada).
+ */
+export const LUZ_EN_EL_PISO = { luz: 1, sombra: 0.36, linea: 0.022, halo: 0.16, abre: 0.12, nucleo: { radio: 0.75, desde: 0.3, hasta: 0.85 } } as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
 
@@ -170,22 +186,47 @@ float resplandorDelFinal( vec2 xz ) {
 	}
 	return r;
 }
-// [EL ENCASTRE] 2F · cuánto resplandor deja el rastro del mouse en este punto.
-float resplandorDelRastro( vec2 xz ) {
+// [EL ENCASTRE] 2F · cuánta luz deja el rastro del mouse en este punto: x, lo que suma (hasta 1); y, [RETOQUE DEL ENCASTRE]
+// 1E · el núcleo (alrededor de la cabeza: bajo el mouse).
+vec2 resplandorDelRastro( vec2 xz ) {
 	float r = 0.0;
+	float nucleo = 0.0;
 	for ( int i = 0; i < ${String(RASTRO_EN_EL_PISO.puntos)}; i++ ) {
 		vec4 q = uRastro[ i ];
 		if ( q.z <= 0.0 ) continue;
-		vec2 d = ( xz - q.xy ) / ${f(RASTRO_EN_EL_PISO.radio)};
-		r += q.z * exp( - dot( d, d ) );
+		vec2 d = xz - q.xy;
+		float d2 = dot( d, d );
+		r += q.z * exp( - d2 / ${f(RASTRO_EN_EL_PISO.radio * RASTRO_EN_EL_PISO.radio)} );
+		nucleo = max( nucleo, q.w * q.z * exp( - d2 / ${f(LUZ_EN_EL_PISO.nucleo.radio * LUZ_EN_EL_PISO.nucleo.radio)} ) );
 	}
-	return min( 1.2, r );
+	return vec2( min( 1.0, r ), nucleo );
 }
 // La junta: en la tapa, un núcleo negro justo en el borde y un halo que entra hacia la tapa; el costado (la rendija), lleno.
+// [RETOQUE DEL ENCASTRE] 1E · la luz de abajo en este fragmento: \`cuanto\`, su fuerza (0 a 1); \`caliente\`, el núcleo.
+vec3 conLaLuz( vec3 color, float cuanto, float caliente ) {
+	if ( cuanto <= 0.001 ) return color;
+	float k = min( cuanto, 1.0 );
+	vec3 luz = vec3( ${f(LUZ_EN_EL_PISO.luz)} );
+	// La pared de la rendija: la luz le pega de abajo.
+	if ( vTapa < 0.5 ) return mix( color, luz, k );
+	vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
+	// Un píxel, en u: la línea y el halo nunca más finos (sin dientes).
+	float px = length( fwidth( vPiso.xz ) );
+	vec4 abre = smoothstep( 0.0, ${f(LUZ_EN_EL_PISO.abre)}, abs( vVecinos ) );
+	vec4 linea = exp( - filo / ( ${f(LUZ_EN_EL_PISO.linea)} * ( 0.6 + 0.4 * k ) + px ) ) * ( 0.6 + 0.4 * abre );
+	vec4 halo = exp( - filo / ( ${f(LUZ_EN_EL_PISO.halo)} * ( 0.5 + k ) * ( 0.6 + 0.6 * abre ) + px ) ) * ( 0.25 + 0.75 * abre );
+	float junta = min( 1.0, dot( linea, vec4( 1.0 ) ) + 0.8 * dot( halo, vec4( 1.0 ) ) );
+	float nucleo = smoothstep( ${f(LUZ_EN_EL_PISO.nucleo.desde)}, ${f(LUZ_EN_EL_PISO.nucleo.hasta)}, caliente );
+	// La sombra de los bloques levantados (menos en el núcleo, que es luz): el contraste sobre el piso claro.
+	color *= 1.0 - ${f(LUZ_EN_EL_PISO.sombra)} * smoothstep( 0.0, 0.6, k ) * ( 1.0 - nucleo );
+	return mix( color, luz, clamp( max( k * junta, nucleo ), 0.0, 1.0 ) );
+}
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float r = resplandorDelFinal( xz );
-	float rastro = resplandorDelRastro( xz );
-	if ( r + rastro <= 0.0 ) return color;
+	// [RETOQUE DEL ENCASTRE] 1E · el rastro del mouse es luz (\`conLaLuz\`); el poder y el pulso, todavía de tinta.
+	vec2 rastro = resplandorDelRastro( xz );
+	color = conLaLuz( color, rastro.x, rastro.y );
+	if ( r <= 0.0 ) return color;
 	float junta = 1.0;
 	if ( vTapa > 0.5 ) {
 		vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
@@ -195,15 +236,11 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 		// El halo y el aura suman las cuatro juntas (con la más cercana sola, cada tapa se veía como una pirámide).
 		vec4 h = exp( - filo / ( ${f(PODER_EN_EL_PISO.halo)} * veta ) );
 		vec4 a = exp( - filo / ${f(PODER_EN_EL_PISO.aura)} );
-		// [2F] La rendija que se abre (el vecino más bajo que esta tapa) deja salir más: el rastro pesa sobre todo ahí.
-		vec4 abre = mix( vec4( r / max( r + rastro, 1e-4 ) ), vec4( 1.0 ), smoothstep( 0.0, 0.1, - vVecinos ) );
-		h *= abre;
-		a *= abre;
 		float halo = min( 1.0, h.x + h.y + h.z + h.w );
 		float aura = min( 1.0, 0.6 * ( a.x + a.y + a.z + a.w ) );
 		junta = ${f(PODER_EN_EL_PISO.oscuroDelNucleo)} * nucleo + ( 1.0 - nucleo ) * min( 1.0, ${f(PODER_EN_EL_PISO.oscuroDelHalo)} * halo + ${f(PODER_EN_EL_PISO.oscuroDelAura)} * aura );
 	}
-	return mix( color, vec3( 0.045 ), clamp( junta * ( r + rastro ), 0.0, 0.96 ) );
+	return mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {

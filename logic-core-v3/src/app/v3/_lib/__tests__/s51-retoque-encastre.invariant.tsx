@@ -8,13 +8,17 @@
  *   1D · la cinemática automática con rebobinado: sin cola; al fondo arranca cuando el pie llegó entero y corre a una
  *        velocidad (el scroll hacia abajo no la acelera); un gesto hacia arriba retenido la rebobina mientras siga y al
  *        soltar retoma; rebobinada del todo espera, y el siguiente gesto mueve la página; los viajes del menú salen.
+ *   1E · el brillo bajo el mouse es LUZ que nace abajo: línea y halo en las juntas (más en las rendijas abiertas), un núcleo
+ *        bajo el mouse, la tapa sombreada para el contraste; sin dientes (un píxel como mínimo) ni bandas.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 
 import * as THREE from 'three'
 
-import { CALMA_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, LUZ_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
+import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
 import { RELOJ_DEL_FINAL, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { sentidoDeLaRueda, sentidoDeLaTecla, sentidoDelDedo } from '../gestosDelScroll'
@@ -197,5 +201,55 @@ afirmar(cableado(gestos), '  el cableado: la rueda, el dedo y las teclas se ven 
 controlPositivo('  el detector VE una rueda pasiva (no se puede retener)', gestos.replace("window.addEventListener('wheel', alRodar, { capture: true, passive: false })", "window.addEventListener('wheel', alRodar, { passive: true })"), cableado)
 const pagina = sinComentarios(leer('page.tsx'))
 afirmar(!pagina.includes('cola-del-final') && !leer('_estilos/pie.css').includes('--cola-del-final'), '  sin cola: la página termina en el pie (el scroll hacia abajo no tiene adónde ir)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1E · El brillo bajo el mouse: luz que nace abajo y sale por las rendijas, con núcleo y halo; la tapa sombreada; sin dientes ni bandas')
+
+// El dibujo del piso de verdad: el material con el final inyectado, compilado sobre un sombreador con sus anclas.
+const dibujoDelPiso = (): string => {
+  const material = conElFinalEnElPiso(new THREE.MeshStandardMaterial())
+  const sombreador = { fragmentShader: [ANCLAS_DEL_DIBUJO.funcion, ...Object.values(ANCLAS_DEL_HUECO)].join('\n'), vertexShader: '', uniforms: {} as Record<string, THREE.IUniform> }
+  material.onBeforeCompile(sombreador as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer)
+  material.dispose()
+  return sombreador.fragmentShader
+}
+const dibujo = dibujoDelPiso()
+const cuerpo = (glsl: string, firma: string): string => {
+  const i = glsl.indexOf(firma)
+  return i < 0 ? '' : glsl.slice(i, glsl.indexOf('\n}', i) + 2)
+}
+const luzBien = (glsl: string): boolean => {
+  const luz = cuerpo(glsl, 'vec3 conLaLuz( vec3 color, float cuanto, float caliente ) {')
+  return luz.includes('vec3 luz = vec3( 1.0 );') && luz.includes('return mix( color, luz, clamp( max( k * junta, nucleo ), 0.0, 1.0 ) );') && luz.includes('if ( vTapa < 0.5 ) return mix( color, luz, k );') &&
+    luz.includes('float px = length( fwidth( vPiso.xz ) );') && (luz.match(/\+ px \)/g) ?? []).length === 2 && luz.includes('smoothstep( 0.0, 0.12, abs( vVecinos ) )') && !/[^h]step\(/.test(luz) &&
+    glsl.includes('color = conLaLuz( color, rastro.x, rastro.y );') && glsl.includes('nucleo = max( nucleo, q.w * q.z * exp(') && !/vec3\( 0\.045 \), clamp\( junta \* \( r \+ rastro \)/.test(glsl)
+}
+afirmar(luzBien(dibujo) && LUZ_EN_EL_PISO.sombra <= 0.4 && LUZ_EN_EL_PISO.luz === 1, 'por las juntas bajo el mouse sale LUZ (blanca, hacia arriba del papel; antes, tinta): una línea y un halo que entra a la tapa en cada junta, más fuertes donde la rendija se abre; la pared de la rendija, iluminada; el núcleo, sólo alrededor de la cabeza del rastro; la tapa, sombreada (no más de 0,4) para el contraste; sin dientes (nunca más fino que un píxel, con `fwidth`) y sin bandas (sin umbrales: sólo exponenciales y `smoothstep`)', `sombra ${String(LUZ_EN_EL_PISO.sombra)} · halo ${String(LUZ_EN_EL_PISO.halo)} u · núcleo ${String(LUZ_EN_EL_PISO.nucleo.radio)} u`)
+controlPositivo('el detector VE el resplandor de tinta de EL ENCASTRE', dibujo.replace('color = conLaLuz( color, rastro.x, rastro.y );', ''), luzBien)
+controlPositivo('  y un núcleo en cada punto del rastro (la hilera de perlas)', dibujo.replace('q.w * q.z * exp(', 'q.z * exp('), luzBien)
+controlPositivo('  y una línea sin el píxel mínimo (con dientes)', dibujo.replace('float px = length( fwidth( vPiso.xz ) );', 'float px = 0.0;'), luzBien)
+// La cabeza del rastro (la del núcleo): una sola, siempre bajo el mouse; al nacer otra, la de antes la suelta.
+type PasoDelRastro = typeof pasoDelRastro
+const cabezas = (paso: PasoDelRastro): { readonly unaSola: boolean; readonly bajoElMouse: boolean } => {
+  const puntos = Array.from({ length: RASTRO_EN_EL_PISO.puntos }, () => new THREE.Vector4(9999, 9999, 0, 0))
+  const e = rastroQuieto()
+  let unaSola = true
+  let bajoElMouse = true
+  for (let i = 0; i <= 90; i += 1) {
+    const x = -3 + i * 0.07
+    paso(puntos, e, x, 1, 1, 1 / 60)
+    const conNucleo = puntos.filter((q) => q.w > 0)
+    if (conNucleo.length !== 1) unaSola = false
+    if (conNucleo.length === 1 && Math.hypot(conNucleo[0].x - x, conNucleo[0].y - 1) > 1e-9) bajoElMouse = false
+  }
+  return { unaSola, bajoElMouse }
+}
+const cabezaBien = (c: ReturnType<typeof cabezas>): boolean => c.unaSola && c.bajoElMouse
+afirmar(cabezaBien(cabezas(pasoDelRastro)), '  el núcleo va en la cabeza del rastro: una sola, siempre bajo el mouse (la nueva nace donde quedó la anterior: no salta)')
+const todasConNucleo: PasoDelRastro = (puntos, e, x, z, vale, dt) => {
+  pasoDelRastro(puntos, e, x, z, vale, dt)
+  for (const q of puntos) if (q.z > 0) q.w = 1
+}
+controlPositivo('  el detector VE un núcleo en cada punto', todasConNucleo, (p: PasoDelRastro) => cabezaBien(cabezas(p)))
 
 cerrar('s51-retoque-encastre')
