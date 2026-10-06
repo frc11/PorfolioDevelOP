@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { PISO_EN_VIVO } from '../piso/enVivo'
+import { FINAL_EN_EL_PISO } from './enElPiso'
 import { FLOOR_Y, INK_COLOR } from '../probeScene'
 
 /**
@@ -15,8 +16,8 @@ import { FLOOR_Y, INK_COLOR } from '../probeScene'
  * con u²), con un vaivén de vapor que se apaga al caer.
  */
 export const VAPOR = {
-  columnas: 56,
-  porColumna: 36,
+  columnas: 48,
+  porColumna: 32,
   /** Cuándo salen (s del reloj): la primera columna y cuánto más tarde puede arrancar otra; cada columna sopla `soplaS`. */
   desdeS: 0.15,
   desfaseS: 0.5,
@@ -43,6 +44,9 @@ uniform float uPixel;
 uniform float uEscala;
 uniform sampler2D uPisoVivo;
 uniform vec4 uGrillaDelPiso;
+uniform sampler2D uHueco;
+uniform vec4 uMarcoDelHueco;
+uniform float uApertura;
 attribute vec2 aAfuera;
 attribute vec4 aVuelo;
 attribute vec4 aAzar;
@@ -52,6 +56,13 @@ float alturaDelPiso( vec2 xz ) {
 	ivec2 c = ivec2( floor( xz / uGrillaDelPiso.y + uGrillaDelPiso.x * 0.5 ) );
 	ivec2 n = ivec2( uGrillaDelPiso.x );
 	return ${f(FLOOR_Y)} + texelFetch( uPisoVivo, clamp( c, ivec2( 0 ), n - 1 ), 0 ).b;
+}
+// [EL ENCASTRE] 2D · lo que cae adentro del hueco queda debajo del logo (no se posa sobre él).
+bool enElHueco( vec2 xz ) {
+	if ( uApertura <= 0.0 ) return false;
+	vec2 uv = ( vec2( xz.x, - xz.y ) - uMarcoDelHueco.xy ) / uMarcoDelHueco.zw;
+	if ( any( lessThan( uv, vec2( 0.0 ) ) ) || any( greaterThan( uv, vec2( 1.0 ) ) ) ) return false;
+	return texture( uHueco, uv ).r > 0.5;
 }
 void main() {
 	// aVuelo: cuándo sale (s), cuánto vuela (s), a qué altura llega (u), la fase de su vaivén.
@@ -63,7 +74,7 @@ void main() {
 	p.xz += aAfuera * u * u + lado * ( 0.12 + 0.18 * aAzar.y ) * sin( tau * ( 5.0 + 3.0 * aAzar.w ) + aVuelo.w ) * ( 1.0 - u );
 	p.y += 4.0 * aVuelo.z * u * ( 1.0 - u );
 	// Posada: sobre su bloque (con el mar), un pelo arriba de la tapa.
-	if ( u >= 1.0 ) p.y = alturaDelPiso( p.xz ) + 0.03;
+	if ( u >= 1.0 ) p.y = enElHueco( p.xz ) ? ${f(FLOOR_Y)} - 2.0 : alturaDelPiso( p.xz ) + 0.03;
 	// Al revertir se hunde en el piso (que la tapa).
 	p.y -= uHundir * mix( ${f(V.hundeU[0])}, ${f(V.hundeU[1])}, aAzar.z );
 	vVe = step( 0.0, tau ) * ( 1.0 - 0.6 * uHundir );
@@ -132,6 +143,9 @@ export function crearElVapor(contorno: readonly THREE.Vector2[], azar: () => num
     uColor: { value: new THREE.Color(INK_COLOR) },
     uPisoVivo: PISO_EN_VIVO.uPisoVivo,
     uGrillaDelPiso: PISO_EN_VIVO.uGrillaDelPiso,
+    uHueco: FINAL_EN_EL_PISO.uHueco,
+    uMarcoDelHueco: FINAL_EN_EL_PISO.uMarcoDelHueco,
+    uApertura: FINAL_EN_EL_PISO.uApertura,
   }
   const material = new THREE.ShaderMaterial({ vertexShader: VERTICE, fragmentShader: FRAGMENTO, uniforms: uniformes, transparent: true, depthWrite: false })
   const puntos = new THREE.Points(geometria, material)

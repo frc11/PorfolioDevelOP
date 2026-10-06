@@ -217,6 +217,9 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uOnda: ONDA_EN_VIVO.uOnda,
     uGolpe: FINAL_EN_EL_PISO.uGolpe,
     uVibraDelFinal: FINAL_EN_EL_PISO.uVibraDelFinal,
+    // [EL ENCASTRE] 2D · el mar calmo alrededor del logo que se encastra (y sin el techo que lo esquivaba).
+    uCalmaDelFinal: FINAL_EN_EL_PISO.uCalmaDelFinal,
+    uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo,
     uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
     uRadio: { value: grilla.radio / grilla.lado },

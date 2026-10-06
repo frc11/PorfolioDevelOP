@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
+import { HUECO } from './hueco'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -28,14 +29,21 @@ import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
 export const FINAL_DEL_PIE = {
   /**
    * [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). Se acuesta EN SU LUGAR:
-   * gira sobre su propio centro (no se corre) hasta `acostarseS`; la cámara sube en paralelo (`subidaS`).
+   * gira sobre su propio centro (no se corre) hasta `acostarseS`; la cámara sube en paralelo: [2D] el `conElLogo` de su
+   * camino mientras se acuesta (desde el cenit el logo acostado tapaba su hueco) y el resto mientras se encastra.
    */
   acostarseS: 2.2,
-  subidaS: 2.4,
+  subida: { conElLogo: 0.8 },
   /** Y cae derecho al piso, con gravedad (u/s²), desde `desdeS`; el blanco de la cámara baja al piso en `blancoS`. */
   caida: { desdeS: 2.2, gravedad: 26, blancoS: 0.9 },
-  /** Al tocar el piso se hunde con un rebote (lo de CIERRE: fracción del espesor, e^(−a·u)·cos(b·u), en `duracionS`). */
-  hundimiento: { encajado: 0.3, a: 5, b: 10, duracionS: 1.2 },
+  /**
+   * [EL ENCASTRE] 2D · cae justo en el hueco (la cara de abajo al ras del borde) y se hunde A PRESIÓN hasta quedar al ras
+   * (un espesor) a los `hastaS`: en tramos que ceden de a poco (`tramos`, fracciones del espesor, cada uno más chico);
+   * en cada tramo resiste temblando (`resiste` del tramo, apenas cede: `cedeAlResistir`) y después cede de golpe.
+   */
+  presion: { hastaS: 4.7, tramos: [0.34, 0.27, 0.22, 0.17], resiste: 0.55, cedeAlResistir: 0.06, temblor: 0.006, sacudon: 0.022 },
+  /** El mar alrededor del logo se calma antes de que caiga (s del reloj). */
+  calma: { desdeS: 1.4, hastaS: 2.4 },
   /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
   camara: { elevacion: 89.2, lejos: 1.06 },
   /** Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s). */
@@ -127,7 +135,10 @@ export function acostado(fin: number): number {
 
 /** Cuánto subió la cámara, de 0 a 1: en paralelo con el logo que se acuesta. */
 export function subida(fin: number): number {
-  return suave(segundosDelFinal(fin) / FINAL_DEL_PIE.subidaS)
+  const s = segundosDelFinal(fin)
+  const { conElLogo } = FINAL_DEL_PIE.subida
+  const desde = FINAL_DEL_PIE.caida.desdeS
+  return conElLogo * suave(s / FINAL_DEL_PIE.acostarseS) + (1 - conElLogo) * suave((s - desde) / (FINAL_DEL_PIE.presion.hastaS - desde))
 }
 
 /** El tamaño del logo (u): su alto de tinta y su espesor. Lo publica `ProbeLogo` en las estadísticas. */
@@ -147,12 +158,63 @@ export function aterrizaje(t: TamanoDelLogo): number {
   return caidaDe(t).aterrizaS
 }
 
-/** Cuánto se hundió (fracción del espesor): 0 hasta que toca el piso; un rebote que se asienta en `encajado`. */
+/** [EL ENCASTRE] 2D · en qué tramo de la presión está y cuánto lleva de él (0 a 1); `null` fuera de la presión. */
+function tramoDeLaPresion(fin: number, t: TamanoDelLogo): { readonly i: number; readonly u: number; readonly antes: number } | null {
+  const p = FINAL_DEL_PIE.presion
+  const s = segundosDelFinal(fin)
+  const t0 = caidaDe(t).aterrizaS
+  if (s <= t0 || s >= p.hastaS) return null
+  const x = ((s - t0) / (p.hastaS - t0)) * p.tramos.length
+  const i = Math.min(p.tramos.length - 1, Math.floor(x))
+  return { i, u: x - i, antes: p.tramos.slice(0, i).reduce((a, b) => a + b, 0) }
+}
+
+/**
+ * Cuánto se hundió en el hueco (fracción del espesor, de 0 con la cara de abajo al ras del borde a 1 al ras del piso): a
+ * presión, tramo a tramo. En cada uno resiste (apenas cede) y después cede de golpe (frena al final: 1 − (1 − v)³).
+ */
 export function hundido(fin: number, t: TamanoDelLogo): number {
-  const h = FINAL_DEL_PIE.hundimiento
-  const u = acotar01((segundosDelFinal(fin) - caidaDe(t).aterrizaS) / h.duracionS)
-  if (u <= 0) return 0
-  return h.encajado * (1 - Math.exp(-h.a * u) * Math.cos(h.b * u))
+  const p = FINAL_DEL_PIE.presion
+  const s = segundosDelFinal(fin)
+  if (s >= p.hastaS) return 1
+  const tramo = tramoDeLaPresion(fin, t)
+  if (tramo === null) return 0
+  const v = (tramo.u - p.resiste) / (1 - p.resiste)
+  const dentro = tramo.u < p.resiste ? p.cedeAlResistir * (tramo.u / p.resiste) : p.cedeAlResistir + (1 - p.cedeAlResistir) * (1 - (1 - v) ** 3)
+  return tramo.antes + p.tramos[tramo.i] * dentro
+}
+
+/** Mientras resiste, el logo tiembla en su lugar (u, en el piso): el temblor de la presión. Fuera de eso, nada. */
+export function temblorDelLogo(fin: number, t: TamanoDelLogo, destino: THREE.Vector3): THREE.Vector3 {
+  const tramo = tramoDeLaPresion(fin, t)
+  const p = FINAL_DEL_PIE.presion
+  if (tramo === null || tramo.u >= p.resiste) return destino.set(0, 0, 0)
+  const s = segundosDelFinal(fin)
+  const a = p.temblor * Math.sin((Math.PI * tramo.u) / p.resiste)
+  return destino.set(a * Math.sin(s * 211), 0, a * Math.sin(s * 173 + 1))
+}
+
+/** El sacudón chico de la cámara cada vez que cede (u): uno por tramo, que se apaga en una décima. */
+export function sacudonDeLaPresion(fin: number, t: TamanoDelLogo, destino: THREE.Vector3): THREE.Vector3 {
+  const tramo = tramoDeLaPresion(fin, t)
+  const p = FINAL_DEL_PIE.presion
+  if (tramo === null || tramo.u < p.resiste) return destino.set(0, 0, 0)
+  // Los segundos desde que empezó a ceder en este tramo.
+  const desde = (tramo.u - p.resiste) * ((p.hastaS - caidaDe(t).aterrizaS) / p.tramos.length)
+  const a = p.sacudon * Math.exp(-desde / 0.1)
+  const s = segundosDelFinal(fin)
+  return destino.set(Math.sin(s * 97) * a, Math.sin(s * 83 + 2) * a, Math.sin(s * 71 + 1) * a)
+}
+
+/** [EL ENCASTRE] 2D · cuánto se abrió el hueco (0 a 1): desde el medio de los trazos hasta el borde exacto. */
+export function apertura(fin: number): number {
+  return suave((segundosDelFinal(fin) - HUECO.abre.desdeS) / (HUECO.abre.hastaS - HUECO.abre.desdeS))
+}
+
+/** Cuánto se calmó el mar alrededor del logo (0 a 1). */
+export function calma(fin: number): number {
+  const c = FINAL_DEL_PIE.calma
+  return suave((segundosDelFinal(fin) - c.desdeS) / (c.hastaS - c.desdeS))
 }
 
 /**

@@ -32,8 +32,12 @@ import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../..
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
-import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
+import { HUECO, crearElPozo } from '../escena/final/hueco'
+import { conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { conOndaDirigida } from '../escena/piso/ondaDirigida'
+import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { VAPOR, crearElVapor, pasoDelVapor, vaporPosado, vaporQuieto, type EstadoDelVapor } from '../escena/final/vapor'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -298,7 +302,8 @@ const deLaCola: PasoDelReloj = (r, enElPie, scroll, cola) => {
   r.fin = enElPie ? Math.min(1, Math.max(0, (scroll - 9000) / cola)) : 0
 }
 controlPositivo('el detector VE el final de CIERRE (función del scroll de la cola: llegado al pie no arranca)', deLaCola, (p: PasoDelReloj) => relojBien(comportamiento(p)))
-const finalTsx = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
+// [2D] el cuadro del final vive en `cuadroDelFinal.ts` (el componente lo llama).
+const finalTsx = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 afirmar(finalTsx.includes('const enElPie = window.scrollY >= EN_VIVO.pegadoDesde - 2') && finalTsx.includes('pasoDelReloj(s.reloj, enElPie, window.scrollY, caja?.height ?? 0, dt, viajeEnCurso() !== null, EN_VIVO.pegadoDesde)') && finalTsx.includes('EN_VIVO.fin = s.reloj.fin'), '  el cableado: llegar al pie es que el pie quedó pegado (el arranque de la cola); la cola entera adelanta la secuencia entera; el viaje del menú, el de `viaje.ts`')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -341,12 +346,10 @@ for (let i = 0; i <= 64; i += 1) {
   if (blanco.x !== 0 || blanco.z !== 0 || (segundosDelFinal(fin) <= FINAL_DEL_PIE.caida.desdeS && blanco.y !== 0)) blancoBien = false
 }
 blancoDelFinal(1, blanco)
-const enParalelo = [0.25, 0.5, 0.75].every((u) => Math.abs(subida((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS) - acostado((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS)) < 0.12)
-afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subida(FINAL_DEL_PIE.subidaS / RELOJ_DEL_FINAL.duracionS) === 1, 'la cámara sube en paralelo con el logo (a cada momento, casi lo mismo) y mira siempre al eje: el centro del logo mientras se acuesta y, con la caída, el piso donde se encastra')
-// Hasta 2D, el encastre de CIERRE (el rebote): se hunde más y vuelve a quedar encajado un 30 % de su espesor.
-const golpeS = aterrizaje(TAM)
-const rebote = Array.from({ length: 101 }, (_, i) => hundido((golpeS + (FINAL_DEL_PIE.hundimiento.duracionS * i) / 100) / RELOJ_DEL_FINAL.duracionS, TAM))
-afirmar(rebote[0] === 0 && Math.max(...rebote) > FINAL_DEL_PIE.hundimiento.encajado * 1.1 && Math.abs(rebote[100] - FINAL_DEL_PIE.hundimiento.encajado) < 0.01 && hundido((golpeS - 0.05) / RELOJ_DEL_FINAL.duracionS, TAM) === 0, '  al tocar el piso se encastra con el rebote de CIERRE (2D lo cambia)', `rebote hasta ${(Math.max(...rebote) * 100).toFixed(0)} % del espesor`)
+// [2D] El 80 % de la subida va en paralelo con el logo (justo lo que se acostó, por 0,8) y el resto mientras se encastra:
+// desde el cenit el logo acostado tapaba su propio hueco.
+const enParalelo = [0.25, 0.5, 0.75, 1].every((u) => Math.abs(subida((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS) - FINAL_DEL_PIE.subida.conElLogo * acostado((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS)) < 1e-9)
+afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subida(FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS) === 1, 'la cámara sube en paralelo con el logo (el 80 % de su camino mientras se acuesta; el resto, mientras se encastra) y mira siempre al eje: el centro del logo mientras se acuesta y, con la caída, el piso donde se encastra')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2C · El vapor al acostarse: columnas que suben, se curvan hacia afuera, caen y se quedan en el piso; sólo se van hundiéndose')
@@ -369,7 +372,7 @@ for (let i = 0; i < N; i += 1) {
   if (Math.hypot(base.getX(i) - base.getX(primera), base.getZ(i) - base.getZ(primera)) > 0.12) enColumnas = false
 }
 const sombreadorDelVapor = (vapor.puntos.material as THREE.ShaderMaterial).vertexShader
-const trayectoria = (v: string): boolean => v.includes('p.xz += aAfuera * u * u') && v.includes('p.y += 4.0 * aVuelo.z * u * ( 1.0 - u );') && v.includes('if ( u >= 1.0 ) p.y = alturaDelPiso( p.xz ) + 0.03;') && v.includes('p.y -= uHundir *')
+const trayectoria = (v: string): boolean => v.includes('p.xz += aAfuera * u * u') && v.includes('p.y += 4.0 * aVuelo.z * u * ( 1.0 - u );') && v.includes('if ( u >= 1.0 ) p.y = enElHueco( p.xz ) ?') && v.includes(': alturaDelPiso( p.xz ) + 0.03;') && v.includes('p.y -= uHundir *')
 afirmar(N >= 1500 && mientrasSeAcuesta && haciaAfuera && enColumnas && trayectoria(sombreadorDelVapor) && vapor.puntos instanceof THREE.Points && !vapor.puntos.visible && (vapor.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString(), 'columnas de partículas de tinta, en UN dibujo: cada columna sopla de un punto alrededor del hueco mientras el logo se acuesta; cada partícula sube (lo horizontal crece con u²), se curva hacia afuera con su variación, cae y se posa en su bloque del piso', `${String(VAPOR.columnas)} columnas × ${String(VAPOR.porColumna)} · posadas a los ${vaporPosado().toFixed(1)} s`)
 controlPositivo('el detector VE la explosión de CIERRE (tiro oblicuo con gravedad, que se apagaba)', sombreadorDelVapor.replace('p.xz += aAfuera * u * u', 'p.xz += aAfuera * u'), trayectoria)
 vapor.soltar()
@@ -404,5 +407,58 @@ const deGolpe: PasoDelVapor = (v, segundos, avanza) => {
 }
 controlPositivo('el detector VE un vapor que se apaga de golpe al revertir', deGolpe, (p: PasoDelVapor) => cicloBien(ciclo(p)))
 afirmar(finalTsx.includes('pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)') && finalTsx.indexOf('pasoDelVapor(') < finalTsx.indexOf('if (!activo)') && !existsSync(`${V3}/_lib/escena/final/explosion.ts`), '  el cableado: el paso del vapor va antes de la salida temprana (se arma con el final en cero); la explosión se fue')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2D · El hueco exacto: se abre cuando el logo está por llegar, el logo cae justo ahí y se hunde lento, a presión, hasta el ras')
+
+// El hundimiento: de la cara de abajo al ras del borde (0) al ras del piso (1), en tramos que resisten y ceden.
+type Hundido = (fin: number, t: typeof TAM) => number
+const presionDe = (h: Hundido): { readonly sube: boolean; readonly completo: boolean; readonly lento: boolean; readonly cedeDeGolpe: boolean; readonly duraS: number } => {
+  const t0 = aterrizaje(TAM)
+  const t1 = FINAL_DEL_PIE.presion.hastaS
+  const muestras = Array.from({ length: 2001 }, (_, i) => t0 + ((t1 - t0) * i) / 2000).map((s) => h(s / RELOJ_DEL_FINAL.duracionS, TAM))
+  const sube = muestras.every((v, i) => i === 0 || v >= muestras[i - 1] - 1e-12)
+  const completo = muestras[0] === 0 && h(t1 / RELOJ_DEL_FINAL.duracionS, TAM) === 1 && h(1, TAM) === 1
+  // Lento: en ningún momento baja más rápido que un espesor en 0,4 s (una caída libre lo haría en centésimas).
+  const paso = (t1 - t0) / 2000
+  const velocidades = muestras.slice(1).map((v, i) => (v - muestras[i]) / paso)
+  const lento = Math.max(...velocidades) < 1 / 0.12
+  // A presión: hay momentos de casi nada (resiste) y momentos de mucho (cede), no una bajada pareja.
+  const quietos = velocidades.filter((v) => v < 0.2).length / velocidades.length
+  const cedeDeGolpe = quietos > 0.4 && Math.max(...velocidades) > 3 * (1 / (t1 - t0))
+  return { sube, completo, lento, cedeDeGolpe, duraS: t1 - t0 }
+}
+const aPresion = (p: ReturnType<typeof presionDe>): boolean => p.sube && p.completo && p.lento && p.cedeDeGolpe && p.duraS > 1.5
+const medidaLaPresion = presionDe(hundido)
+afirmar(aPresion(medidaLaPresion), 'cae justo en el hueco y se hunde LENTO y a presión hasta quedar al ras: en tramos que resisten (casi no baja, tiembla) y ceden de a poco, sin volver nunca para arriba', `${medidaLaPresion.duraS.toFixed(2)} s, en ${String(FINAL_DEL_PIE.presion.tramos.length)} tramos`)
+const conRebote: Hundido = (fin, t) => {
+  const u = Math.min(1, Math.max(0, (segundosDelFinal(fin) - aterrizaje(t)) / 1.2))
+  return u <= 0 ? 0 : 1 - Math.exp(-5 * u) * Math.cos(10 * u)
+}
+controlPositivo('el detector VE el encastre de CIERRE (un rebote rápido)', conRebote, (h: Hundido) => aPresion(presionDe(h)))
+const parejo: Hundido = (fin, t) => Math.min(1, Math.max(0, (segundosDelFinal(fin) - aterrizaje(t)) / (FINAL_DEL_PIE.presion.hastaS - aterrizaje(t))))
+controlPositivo('  y uno parejo (sin presión: baja siempre igual)', parejo, (h: Hundido) => aPresion(presionDe(h)))
+const alRas = { centro: new THREE.Vector3(), rotacionX: 0 }
+poseDelLogo(1, TAM, alRas)
+afirmar(Math.abs(alRas.centro.y + TAM.espesor / 2 - FLOOR_Y) < 1e-9, '  al final, al ras: la cara de arriba del logo en el piso')
+// Se abre cuando el logo está por llegar (cerrado mientras se acuesta, abierto antes de que caiga adentro).
+afirmar(aperturaDelHueco(1.5 / RELOJ_DEL_FINAL.duracionS) === 0 && aperturaDelHueco(HUECO.abre.hastaS / RELOJ_DEL_FINAL.duracionS) === 1 && HUECO.abre.hastaS < aterrizaje(TAM) && HUECO.abre.desdeS > FINAL_DEL_PIE.caida.desdeS - 1, 'el hueco se abre cuando el logo está por llegar: arranca en el último tramo del acostarse y está abierto antes de que el logo toque', `de ${String(HUECO.abre.desdeS)} a ${String(HUECO.abre.hastaS)} s · toca a los ${aterrizaje(TAM).toFixed(2)} s`)
+// En el piso: descarta sus tapas y costados donde la máscara (en el plano del logo: x, −z) dice adentro y la apertura deja.
+const enElPisoTs = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
+const huecoEnElPiso = (c: string): boolean =>
+  c.includes('vec2 uv = ( vec2( xz.x, - xz.y ) - uMarcoDelHueco.xy ) / uMarcoDelHueco.zw;') && c.includes('return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;') && c.includes('\\n\\tif ( enElHueco( vPiso.xz ) ) discard;') &&
+  c.includes("'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );'") && c.includes("'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {'") && c.includes('dibujo *= 1.0 - calmaDelFinal( xz );')
+afirmar(huecoEnElPiso(enElPisoTs), '  en el piso: las tapas y los costados se descartan donde la máscara del logo acostado dice adentro (y la apertura deja: se abre desde el medio de los trazos hasta el borde exacto); alrededor el mar se calma y el techo que esquivaba al logo se apaga (entra en el piso); la mancha de contacto se va con la cámara')
+controlPositivo('el detector VE un hueco que no se abre (sin descarte)', enElPisoTs.replace('\\n\\tif ( enElHueco( vPiso.xz ) ) discard;', ''), huecoEnElPiso)
+const simulacionConElFinal = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+afirmar(simulacionConElFinal.includes('if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {') && simulacionConElFinal.includes('dibujo *= 1.0 - calmaDelFinal( xz );'), '  y la simulación del piso de verdad lo lleva (las anclas siguen ahí)')
+// El pozo: las paredes con la forma del logo y el fondo, de un espesor y un pelo de hondo, acostado al ras del piso.
+const cuadrado = new THREE.Shape([new THREE.Vector2(-1, -1), new THREE.Vector2(1, -1), new THREE.Vector2(1, 1), new THREE.Vector2(-1, 1)])
+const pozo = crearElPozo([cuadrado], TAM.espesor)
+const caja3 = new THREE.Box3().setFromObject(pozo.grupo)
+const pozoBien = !pozo.grupo.visible && Math.abs(caja3.max.y - FLOOR_Y) < 1e-6 && Math.abs(caja3.min.y - (FLOOR_Y - TAM.espesor * HUECO.hondo)) < 1e-6 && pozo.grupo.children.length === 2 && (((pozo.grupo.children[0] as THREE.Mesh).material as THREE.Material[])[0].visible === false)
+pozo.soltar()
+afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de arriba taparía el hueco) y el fondo, de un espesor del logo y un pelo de hondo, con su tope al ras del piso; invisible hasta que el hueco se abre', `${(TAM.espesor * HUECO.hondo).toFixed(3)} u de hondo`)
+afirmar(sinComentarios(leer('_lib/escena/final/vapor.ts')).includes('p.y = enElHueco( p.xz ) ?'), '  y el vapor que cae adentro del hueco queda debajo del logo (no se posa sobre él)')
 
 cerrar('s50-encastre')
