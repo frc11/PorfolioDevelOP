@@ -19,6 +19,7 @@
 import { readFileSync } from 'node:fs'
 
 import { renderToStaticMarkup } from 'react-dom/server'
+import * as THREE from 'three'
 
 import { CAMPOS, PIE } from '../../_chrome/contacto/contenido'
 import { validarContacto, type DatosDeContacto } from '../../_chrome/contacto/enviarContacto'
@@ -31,7 +32,8 @@ import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../..
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
-import { RELOJ_DEL_FINAL, pasoDelReloj, relojQuieto, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FLOOR_Y } from '../escena/probeScene'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -297,5 +299,52 @@ const deLaCola: PasoDelReloj = (r, enElPie, scroll, cola) => {
 controlPositivo('el detector VE el final de CIERRE (función del scroll de la cola: llegado al pie no arranca)', deLaCola, (p: PasoDelReloj) => relojBien(comportamiento(p)))
 const finalTsx = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
 afirmar(finalTsx.includes('const enElPie = window.scrollY >= EN_VIVO.pegadoDesde - 2') && finalTsx.includes('pasoDelReloj(s.reloj, enElPie, window.scrollY, caja?.height ?? 0, dt, viajeEnCurso() !== null, EN_VIVO.pegadoDesde)') && finalTsx.includes('EN_VIVO.fin = s.reloj.fin'), '  el cableado: llegar al pie es que el pie quedó pegado (el arranque de la cola); la cola entera adelanta la secuencia entera; el viaje del menú, el de `viaje.ts`')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2B · El logo se acuesta en su lugar (sobre su centro), cae derecho al piso; la cámara sube en paralelo, centrada en el logo')
+
+const TAM = { alto: 4.78, espesor: 0.56 } as const
+type Pose = (fin: number, t: typeof TAM, destino: { centro: THREE.Vector3; rotacionX: number }) => void
+const recorrerLaPose = (pose: Pose): { readonly enSuLugar: boolean; readonly quietoAlAcostarse: boolean; readonly acostadoA: number; readonly cae: boolean; readonly enElPiso: number } => {
+  const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+  let [enSuLugar, quietoAlAcostarse, cae, antesY] = [true, true, true, Number.POSITIVE_INFINITY]
+  let acostadoA = Number.NaN
+  for (let i = 0; i <= 640; i += 1) {
+    const fin = i / 640
+    const s = segundosDelFinal(fin)
+    pose(fin, TAM, p)
+    if (Math.abs(p.centro.x) > 1e-9 || Math.abs(p.centro.z) > 1e-9) enSuLugar = false
+    if (s <= FINAL_DEL_PIE.acostarseS && Math.abs(p.centro.y) > 1e-9) quietoAlAcostarse = false
+    if (Number.isNaN(acostadoA) && Math.abs(p.rotacionX + Math.PI / 2) < 1e-6) acostadoA = s
+    if (s >= FINAL_DEL_PIE.caida.desdeS && s <= aterrizaje(TAM) && p.centro.y > antesY + 1e-9) cae = false
+    antesY = p.centro.y
+  }
+  return { enSuLugar, quietoAlAcostarse, acostadoA, cae, enElPiso: antesY }
+}
+const laPose = recorrerLaPose(poseDelLogo)
+afirmar(laPose.enSuLugar && laPose.quietoAlAcostarse && Math.abs(laPose.acostadoA - FINAL_DEL_PIE.acostarseS) < 0.02 && laPose.cae && laPose.enElPiso < FLOOR_Y + TAM.espesor / 2, 'se acuesta EN SU LUGAR: gira sobre su propio centro (el centro quieto, sobre el eje) hasta −90° y recién ahí cae derecho al piso, con gravedad', `acostado a los ${laPose.acostadoA.toFixed(2)} s · toca el piso a los ${aterrizaje(TAM).toFixed(2)} s`)
+// El control: la pose de CIERRE (giraba sobre su base: el centro se corría hacia el fondo la mitad del alto).
+const poseDeCierre: Pose = (fin, t, d) => {
+  const k = acostado(fin)
+  const tita = (-Math.PI / 2) * k
+  d.centro.set(0, -t.alto / 2 + (t.alto / 2) * Math.cos(tita), (t.alto / 2) * Math.sin(tita))
+  d.rotacionX = tita
+}
+controlPositivo('el detector VE la pose de CIERRE (sobre su base: el logo se corría)', poseDeCierre, (p: Pose) => recorrerLaPose(p).enSuLugar)
+// La cámara: sube en paralelo con el logo que se acuesta; su blanco es el centro del logo y con la caída baja al piso, centrado.
+const blanco = new THREE.Vector3()
+let blancoBien = true
+for (let i = 0; i <= 64; i += 1) {
+  const fin = i / 64
+  blancoDelFinal(fin, blanco)
+  if (blanco.x !== 0 || blanco.z !== 0 || (segundosDelFinal(fin) <= FINAL_DEL_PIE.caida.desdeS && blanco.y !== 0)) blancoBien = false
+}
+blancoDelFinal(1, blanco)
+const enParalelo = [0.25, 0.5, 0.75].every((u) => Math.abs(subida((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS) - acostado((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS)) < 0.12)
+afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subida(FINAL_DEL_PIE.subidaS / RELOJ_DEL_FINAL.duracionS) === 1, 'la cámara sube en paralelo con el logo (a cada momento, casi lo mismo) y mira siempre al eje: el centro del logo mientras se acuesta y, con la caída, el piso donde se encastra')
+// Hasta 2D, el encastre de CIERRE (el rebote): se hunde más y vuelve a quedar encajado un 30 % de su espesor.
+const golpeS = aterrizaje(TAM)
+const rebote = Array.from({ length: 101 }, (_, i) => hundido((golpeS + (FINAL_DEL_PIE.hundimiento.duracionS * i) / 100) / RELOJ_DEL_FINAL.duracionS, TAM))
+afirmar(rebote[0] === 0 && Math.max(...rebote) > FINAL_DEL_PIE.hundimiento.encajado * 1.1 && Math.abs(rebote[100] - FINAL_DEL_PIE.hundimiento.encajado) < 0.01 && hundido((golpeS - 0.05) / RELOJ_DEL_FINAL.duracionS, TAM) === 0, '  al tocar el piso se encastra con el rebote de CIERRE (2D lo cambia)', `rebote hasta ${(Math.max(...rebote) * 100).toFixed(0)} % del espesor`)
 
 cerrar('s50-encastre')

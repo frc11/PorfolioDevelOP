@@ -13,7 +13,7 @@ import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { EXPLOSION, cargarLaExplosion, crearLaExplosion } from './explosion'
 import { viajeEnCurso } from '../viaje'
-import { EN_VIVO, FINAL_DEL_PIE, acostado, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, type RelojDelFinal, type TamanoDelLogo } from './recorridoDelFinal'
+import { EN_VIVO, FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, aterrizaje, blancoDelFinal, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, subida, type RelojDelFinal, type TamanoDelLogo } from './recorridoDelFinal'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE EN LA ESCENA — va justo después del rig (`OrbitRig` pone la cámara del recorrido en la pose
@@ -179,7 +179,8 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
   s.haz ??= state.scene.getObjectByName('haz') ?? null
   if (s.haz !== null) s.haz.visible = false
 
-  // 2 · El logo: se acuesta sobre su base y se encastra (el balanceo del rig se apaga mientras tanto).
+  // 2 · El logo: [EL ENCASTRE] 2B · se acuesta en su lugar (sobre su centro), cae al piso y se encastra (el balanceo del rig
+  // se apaga mientras tanto).
   const k = acostado(fin)
   poseDelLogo(fin, tamano, s.pose)
   if (logo !== null) {
@@ -189,8 +190,8 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
     logo.updateMatrixWorld()
   }
 
-  // 3 · El golpe: al pasar el fondo del rebote bajando (una vez por bajada), las partículas y la onda; subiendo, se apagan.
-  const golpe = FINAL_DEL_PIE.encastre.golpe
+  // 3 · El golpe: al tocar el piso bajando (una vez por bajada), las partículas y la onda; subiendo, se apagan.
+  const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
   if (s.antes < golpe && fin >= golpe && logo !== null) {
     cargarLaExplosion(explosion.puntos, s.contorno.map((p) => p.clone().applyMatrix4(logo.matrixWorld)), s.pose.centro, Math.random)
     s.golpeEn = t
@@ -200,22 +201,23 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
   s.antes = fin
   const desdeElGolpe = t - s.golpeEn
   explosion.uniformes.uT.value = Number.isFinite(desdeElGolpe) ? desdeElGolpe : 0
-  const objetivoDeLaOpacidad = fin >= golpe - 0.06 ? 1 : 0
+  const objetivoDeLaOpacidad = fin >= golpe - 0.03 ? 1 : 0
   explosion.uniformes.uOpacidad.value += (objetivoDeLaOpacidad - explosion.uniformes.uOpacidad.value) * (1 - Math.exp(-dt / 0.18))
   explosion.uniformes.uPixel.value = state.viewport.dpr
   explosion.puntos.visible = vivas && explosion.uniformes.uOpacidad.value > 0.01
 
-  // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube hasta mirarlo desde arriba.
-  poseDelLogo(fin, tamano, s.pose, false)
-  EN_VIVO.camara = k
-  EN_VIVO.blanco.copy(s.pose.centro)
+  // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
+  // desde arriba, centrada en el logo (su blanco baja al piso con la caída).
+  const sube = subida(fin)
+  EN_VIVO.camara = sube
+  blancoDelFinal(fin, EN_VIVO.blanco)
   const sacude = Number.isFinite(desdeElGolpe) && desdeElGolpe < 4 * FINAL_DEL_PIE.sacudon.s
   if (sacude) {
     const a = FINAL_DEL_PIE.sacudon.amplitud * Math.exp(-desdeElGolpe / FINAL_DEL_PIE.sacudon.s)
     s.sacudon.set(Math.sin(desdeElGolpe * 53) * a, Math.sin(desdeElGolpe * 71 + 1) * a, Math.sin(desdeElGolpe * 61 + 2) * a)
   }
-  camaraDelFinal(state.camera, k, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, sacude ? s.sacudon : null)
-  camaraDelFinal(CAMARA_SIN_EL_MOUSE, k, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
+  camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, sacude ? s.sacudon : null)
+  camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
 
   // 5 · El piso: después del golpe vibra y se oscurece debajo del mouse (con el puntero que se movió hace poco).
   const vibra = Math.min(1, Math.max(0, (fin - golpe) / 0.12))

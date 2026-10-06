@@ -36,7 +36,7 @@ import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
 import { EXPLOSION, crearLaExplosion } from '../escena/final/explosion'
 import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
-import { FINAL_DEL_PIE, acostado, camaraDelFinal, hundido, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, acostado, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto } from '../escena/final/recorridoDelFinal'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
@@ -324,19 +324,18 @@ pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
 for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
 afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj (EL ENCASTRE 2A): llegado al pie avanza solo, sin scroll, y un gesto hacia arriba lo devuelve a 0', `en 1 s solo: ${solo.toFixed(2)}`)
 
-// La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra con un rebote. Con `fin` 0, el logo de hoy.
+// La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra. Con `fin` 0, el logo de hoy.
+// [EL ENCASTRE] 2B · cambió por pedido: se acuesta EN SU LUGAR (antes, sobre su base: el centro se corría al fondo) y cae
+// derecho al piso; cómo se encastra lo afirma s50 (2B, y 2D el hundimiento a presión que reemplaza al rebote).
 const tam = { alto: 4.78, espesor: 0.56 }
 const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
 poseDelLogo(0, tam, pose)
 const deHoy = pose.centro.length() < 1e-12 && pose.rotacionX === 0
 poseDelLogo(1, tam, pose)
-const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && Math.abs(pose.centro.z + tam.alto / 2) < 1e-9 && Math.abs(pose.centro.y - (FLOOR_Y + tam.espesor / 2 - FINAL_DEL_PIE.hundimiento.encajado * tam.espesor)) < 0.002
+const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && pose.centro.x === 0 && pose.centro.z === 0 && pose.centro.y < FLOOR_Y + tam.espesor / 2 + 1e-9
 let monotono = true
 for (let f = 0; f < 1; f += 0.005) if (acostado(f + 0.005) < acostado(f)) monotono = false
-const rebote = Array.from({ length: 101 }, (_, i) => hundido(FINAL_DEL_PIE.encastre.desde + ((FINAL_DEL_PIE.encastre.hasta - FINAL_DEL_PIE.encastre.desde) * i) / 100))
-const conRebote = rebote[0] === 0 && Math.max(...rebote) > FINAL_DEL_PIE.hundimiento.encajado * 1.1 && Math.abs(rebote[100] - FINAL_DEL_PIE.hundimiento.encajado) < 0.01 && hundido(FINAL_DEL_PIE.encastre.desde - 0.01) === 0
-afirmar(deHoy && alFinal && monotono && acostado(FINAL_DEL_PIE.acuestaHasta) === 1 && conRebote, 'el logo: con `fin` 0 es el de hoy (sin saltos al engancharse en la pose E); se acuesta sobre su base hacia atrás (−90°) bajando al piso, y se encastra con un rebote (se hunde más y vuelve a quedar encajado un 30 % de su espesor)', `rebote hasta ${(Math.max(...rebote) * 100).toFixed(0)} % del espesor`)
-controlPositivo('el detector VE un encastre sin rebote', (u: number) => u, (h: (u: number) => number) => Math.max(...Array.from({ length: 101 }, (_, i) => h(i / 100))) > 1.1 * h(1))
+afirmar(deHoy && alFinal && monotono && acostado(1) === 1, 'el logo: con `fin` 0 es el de hoy (sin saltos al engancharse en la pose E); al final está acostado hacia atrás (−90°), sobre el eje (no se corrió) y encastrado en el piso (EL ENCASTRE 2B)')
 
 // La cámara: sin final, intacta; al final, mirando el logo desde arriba (el cenit), sin vuelco; el paso es continuo.
 const camara = (): THREE.PerspectiveCamera => {

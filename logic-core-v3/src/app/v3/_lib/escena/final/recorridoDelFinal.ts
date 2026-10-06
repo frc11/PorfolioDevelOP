@@ -26,12 +26,16 @@ import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
  * viaje del menú la deshace enseguida. La cola sigue (el pie pegado y el scroll que adelanta), con el mismo alto.
  */
 export const FINAL_DEL_PIE = {
-  /** Hasta dónde se acuesta el logo (y sube la cámara), en `fin`. */
-  acuestaHasta: 0.66,
-  /** El encastre: el hundimiento con rebote, en `fin`; el golpe cae en `golpe`. */
-  encastre: { desde: 0.62, hasta: 0.86, golpe: 0.7 },
-  /** Cuánto se hunde al final (fracción del espesor) y el rebote: e^(−a·u)·cos(b·u). */
-  hundimiento: { encajado: 0.3, a: 5, b: 10 },
+  /**
+   * [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). Se acuesta EN SU LUGAR:
+   * gira sobre su propio centro (no se corre) hasta `acostarseS`; la cámara sube en paralelo (`subidaS`).
+   */
+  acostarseS: 2.2,
+  subidaS: 2.4,
+  /** Y cae derecho al piso, con gravedad (u/s²), desde `desdeS`; el blanco de la cámara baja al piso en `blancoS`. */
+  caida: { desdeS: 2.2, gravedad: 26, blancoS: 0.9 },
+  /** Al tocar el piso se hunde con un rebote (lo de CIERRE: fracción del espesor, e^(−a·u)·cos(b·u), en `duracionS`). */
+  hundimiento: { encajado: 0.3, a: 5, b: 10, duracionS: 1.2 },
   /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
   camara: { elevacion: 89.2, lejos: 1.06 },
   /** Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s). */
@@ -111,18 +115,19 @@ const suave = (x: number): number => {
   return u * u * u * (u * (u * 6 - 15) + 10)
 }
 
-/** Cuánto se acostó el logo (y subió la cámara), de 0 a 1. */
-export function acostado(fin: number): number {
-  return suave(fin / FINAL_DEL_PIE.acuestaHasta)
+/** [EL ENCASTRE] 2B · el reloj de la secuencia en segundos: `fin` por lo que dura. */
+export function segundosDelFinal(fin: number): number {
+  return fin * RELOJ_DEL_FINAL.duracionS
 }
 
-/** Cuánto se hundió (fracción del espesor): 0 hasta el encastre; un rebote que se asienta en `encajado`. */
-export function hundido(fin: number): number {
-  const e = FINAL_DEL_PIE.encastre
-  const u = acotar01((fin - e.desde) / (e.hasta - e.desde))
-  if (u <= 0) return 0
-  const h = FINAL_DEL_PIE.hundimiento
-  return h.encajado * (1 - Math.exp(-h.a * u) * Math.cos(h.b * u))
+/** Cuánto se acostó el logo, de 0 a 1 (gira sobre su propio centro). */
+export function acostado(fin: number): number {
+  return suave(segundosDelFinal(fin) / FINAL_DEL_PIE.acostarseS)
+}
+
+/** Cuánto subió la cámara, de 0 a 1: en paralelo con el logo que se acuesta. */
+export function subida(fin: number): number {
+  return suave(segundosDelFinal(fin) / FINAL_DEL_PIE.subidaS)
 }
 
 /** El tamaño del logo (u): su alto de tinta y su espesor. Lo publica `ProbeLogo` en las estadísticas. */
@@ -131,17 +136,43 @@ export interface TamanoDelLogo {
   readonly espesor: number
 }
 
+/** La altura del centro del logo acostado sobre el piso (u) y cuándo llega ahí (s del reloj). */
+function caidaDe(t: TamanoDelLogo): { readonly enElPiso: number; readonly aterrizaS: number } {
+  const enElPiso = FLOOR_Y + t.espesor / 2
+  return { enElPiso, aterrizaS: FINAL_DEL_PIE.caida.desdeS + Math.sqrt((2 * (ORBIT_TARGET_Y - enElPiso)) / FINAL_DEL_PIE.caida.gravedad) }
+}
+
+/** Cuándo toca el piso (s del reloj): ahí cae el golpe. */
+export function aterrizaje(t: TamanoDelLogo): number {
+  return caidaDe(t).aterrizaS
+}
+
+/** Cuánto se hundió (fracción del espesor): 0 hasta que toca el piso; un rebote que se asienta en `encajado`. */
+export function hundido(fin: number, t: TamanoDelLogo): number {
+  const h = FINAL_DEL_PIE.hundimiento
+  const u = acotar01((segundosDelFinal(fin) - caidaDe(t).aterrizaS) / h.duracionS)
+  if (u <= 0) return 0
+  return h.encajado * (1 - Math.exp(-h.a * u) * Math.cos(h.b * u))
+}
+
 /**
- * La pose del logo en el final: gira sobre su base hacia atrás (`rotacionX`, de 0 a −90°) mientras la base baja al piso, y
- * se hunde. Devuelve el centro (`centro`, en el mundo) y el giro; con `fin` 0, el logo de siempre (centro en el origen).
+ * La pose del logo en el final: gira EN SU LUGAR, sobre su propio centro, hacia atrás (`rotacionX`, de 0 a −90°: la cabeza
+ * va al fondo), y después cae derecho al piso con gravedad y se hunde. Devuelve el centro (`centro`, en el mundo: siempre
+ * sobre el eje, x = z = 0) y el giro; con `fin` 0, el logo de siempre (centro en el origen).
  */
 export function poseDelLogo(fin: number, t: TamanoDelLogo, destino: { centro: THREE.Vector3; rotacionX: number }, conRebote = true): void {
-  const k = acostado(fin)
-  const tita = (-Math.PI / 2) * k
-  const base = -t.alto / 2 + (FLOOR_Y + t.espesor / 2 + t.alto / 2) * k
-  destino.centro.set(0, base + (t.alto / 2) * Math.cos(tita), (t.alto / 2) * Math.sin(tita))
-  if (conRebote) destino.centro.y -= hundido(fin) * t.espesor
-  destino.rotacionX = tita
+  const s = segundosDelFinal(fin)
+  const { enElPiso } = caidaDe(t)
+  const c = Math.max(0, s - FINAL_DEL_PIE.caida.desdeS)
+  const y = Math.max(enElPiso, ORBIT_TARGET_Y - 0.5 * FINAL_DEL_PIE.caida.gravedad * c * c)
+  destino.centro.set(0, y - (conRebote ? hundido(fin, t) * t.espesor : 0), 0)
+  destino.rotacionX = (-Math.PI / 2) * acostado(fin)
+}
+
+/** El blanco de la cámara: el centro del logo mientras se acuesta; con la caída baja al piso, un poco después que él. */
+export function blancoDelFinal(fin: number, destino: THREE.Vector3): THREE.Vector3 {
+  const b = suave((segundosDelFinal(fin) - FINAL_DEL_PIE.caida.desdeS) / FINAL_DEL_PIE.caida.blancoS)
+  return destino.set(0, ORBIT_TARGET_Y + (FLOOR_Y - ORBIT_TARGET_Y) * b, 0)
 }
 
 const BLANCO = new THREE.Vector3()
