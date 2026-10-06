@@ -7,21 +7,29 @@ import { FLOOR_Y, PAPER_COLOR, PROBE_SVG_SCALE } from '../probeScene'
  * se abre cuando el logo está por llegar; el logo cae justo ahí y se hunde a presión hasta quedar al ras.
  *
  *   · LA MÁSCARA (una vez, al montar): las formas del SVG en el plano del logo acostado, dibujadas en una textura. R: la
- *     forma, con una holgura mínima (el logo entra sin rozar); G: la misma, muy desenfocada (un campo que vale ~1 en el
- *     medio de los trazos y baja hacia afuera). El piso descarta sus tapas y costados donde R dice «adentro» y G pasa el
- *     umbral de la apertura: el hueco se abre desde el medio de los trazos hacia sus bordes exactos (`enElPiso.ts`).
+ *     forma, [RETOQUE DEL ENCASTRE] 1C · apenas achicada (`solape`: el piso pisa el borde del logo); G: la misma, muy
+ *     desenfocada (un campo que vale ~1 en el medio de los trazos y baja hacia afuera). El piso descarta sus tapas y
+ *     costados donde R dice «adentro» y G pasa el umbral de la apertura: el hueco se abre desde el medio de los trazos
+ *     hacia sus bordes (`enElPiso.ts`).
  *   · EL POZO: las paredes (el contorno extruido hacia abajo) y el fondo, de un espesor del logo y un pelo más: por el
  *     hueco se ve un pozo con la forma del logo, y el logo entra en él. [RETOQUE DEL ENCASTRE] 1B · del tono del piso,
  *     un poco más sombreado adentro (de tinta, el hueco se leía como un logo negro pintado en el piso).
+ *
+ * [RETOQUE DEL ENCASTRE] 1C · SIN LÍNEA BLANCA: el corte iba 0,035 u por AFUERA del contorno (la holgura) y las paredes
+ * del pozo, en el contorno: por ese anillo se veía el fondo claro de la escena, una línea fina alrededor del logo
+ * encastrado. Ahora el corte va por ADENTRO (el piso pisa el borde del logo), y el piso calmo y el borde del pozo quedan
+ * un pelo debajo de la cara del logo al ras (`bajoElRas`): la cara del logo queda encima, su canto es el borde.
  *
  * En el plano del piso, un punto del logo acostado de coordenadas (X, Y) en su grupo cae en (x, z) = (X, −Y): el grupo
  * del logo lleva el SVG dado vuelta (Y = −y del SVG) y acostado gira −90° sobre x.
  */
 export const HUECO = {
-  /** La textura (px por lado), su margen alrededor de la caja del logo (u), la holgura del hueco (u) y el desenfoque de G (px). */
+  /** La textura (px por lado), su margen alrededor de la caja del logo (u), cuánto pisa el piso el borde del logo (u) y el desenfoque de G (px). */
   lado: 512,
   margen: 0.8,
-  holgura: 0.035,
+  solape: 0.02,
+  /** [RETOQUE DEL ENCASTRE] 1C · cuánto debajo de la cara del logo al ras quedan el piso calmo y el borde del pozo (u). */
+  bajoElRas: 0.005,
   desenfoque: 14,
   /** Cuándo se abre (s del reloj): el logo cae a los 2,2 s y toca a los 2,76. */
   abre: { desdeS: 1.6, hastaS: 2.4 },
@@ -59,7 +67,16 @@ export interface MascaraDelLogo {
   readonly marco: THREE.Vector4
 }
 
-function dibujar(formas: readonly THREE.Shape[], marco: THREE.Vector4, lado: number, desenfoque: number, holguraPx: number): Uint8ClampedArray {
+/**
+ * [RETOQUE DEL ENCASTRE] 1C · el trazo del borde de la forma, para agrandarla (`bordePx` > 0: blanco) o achicarla (< 0:
+ * negro, por adentro); sin borde, ninguno. Puro (lo usa el invariante).
+ */
+export function trazoDelBorde(bordePx: number): { readonly color: '#fff' | '#000'; readonly ancho: number } | null {
+  if (bordePx === 0) return null
+  return { color: bordePx > 0 ? '#fff' : '#000', ancho: 2 * Math.abs(bordePx) }
+}
+
+function dibujar(formas: readonly THREE.Shape[], marco: THREE.Vector4, lado: number, desenfoque: number, bordePx: number): Uint8ClampedArray {
   const lienzo = document.createElement('canvas')
   lienzo.width = lado
   lienzo.height = lado
@@ -79,9 +96,10 @@ function dibujar(formas: readonly THREE.Shape[], marco: THREE.Vector4, lado: num
   }
   ctx.fillStyle = '#fff'
   ctx.fill('evenodd')
-  if (holguraPx > 0) {
-    ctx.strokeStyle = '#fff'
-    ctx.lineWidth = 2 * holguraPx
+  const trazo = trazoDelBorde(bordePx)
+  if (trazo !== null) {
+    ctx.strokeStyle = trazo.color
+    ctx.lineWidth = trazo.ancho
     ctx.stroke()
   }
   return ctx.getImageData(0, 0, lado, lado).data
@@ -95,7 +113,7 @@ export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2)
   const lado = Math.max(ancho, alto)
   const marco = new THREE.Vector4(caja.min.x - m - (lado - ancho) / 2, caja.min.y - m - (lado - alto) / 2, lado, lado)
   const n = HUECO.lado
-  const nitida = dibujar(formas, marco, n, 0, (HUECO.holgura / lado) * n)
+  const nitida = dibujar(formas, marco, n, 0, -(HUECO.solape / lado) * n)
   const ancha = dibujar(formas, marco, n, HUECO.desenfoque, 0)
   const datos = new Uint8Array(n * n * 4)
   for (let i = 0; i < n * n; i += 1) {
@@ -110,7 +128,7 @@ export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2)
   return { textura, marco }
 }
 
-/** El pozo: las paredes y el fondo, debajo del hueco (el grupo, acostado, con el tope al ras del piso). Invisible al armarse. */
+/** El pozo: las paredes y el fondo, debajo del hueco (el grupo, acostado, con el tope apenas debajo del piso). Invisible al armarse. */
 export function crearElPozo(formas: readonly THREE.Shape[], espesor: number): { readonly grupo: THREE.Group; readonly soltar: () => void } {
   const hondo = espesor * HUECO.hondo
   const paredes = new THREE.ExtrudeGeometry([...formas], { depth: hondo, bevelEnabled: false, curveSegments: 12 })
@@ -125,7 +143,7 @@ export function crearElPozo(formas: readonly THREE.Shape[], espesor: number): { 
   grupo.name = 'pozo del final'
   grupo.add(new THREE.Mesh(paredes, [sinTapas, pared]), new THREE.Mesh(fondo, deFondo))
   grupo.rotation.x = -Math.PI / 2
-  grupo.position.set(0, FLOOR_Y, 0)
+  grupo.position.set(0, FLOOR_Y - HUECO.bajoElRas, 0)
   grupo.visible = false
   return {
     grupo,

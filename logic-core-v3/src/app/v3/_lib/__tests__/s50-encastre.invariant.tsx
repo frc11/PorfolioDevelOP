@@ -404,9 +404,10 @@ afirmar(simulacionConElFinal.includes('if ( uConLogo > 0.5 && uCalmaDelFinal <= 
 const cuadrado = new THREE.Shape([new THREE.Vector2(-1, -1), new THREE.Vector2(1, -1), new THREE.Vector2(1, 1), new THREE.Vector2(-1, 1)])
 const pozo = crearElPozo([cuadrado], TAM.espesor)
 const caja3 = new THREE.Box3().setFromObject(pozo.grupo)
-const pozoBien = !pozo.grupo.visible && Math.abs(caja3.max.y - FLOOR_Y) < 1e-6 && Math.abs(caja3.min.y - (FLOOR_Y - TAM.espesor * HUECO.hondo)) < 1e-6 && pozo.grupo.children.length === 2 && (((pozo.grupo.children[0] as THREE.Mesh).material as THREE.Material[])[0].visible === false)
+// [RETOQUE DEL ENCASTRE] 1C · cambió por pedido: el tope del pozo, un pelo debajo del piso (`HUECO.bajoElRas`: sin contorno; s51 1C).
+const pozoBien = !pozo.grupo.visible && Math.abs(caja3.max.y - (FLOOR_Y - HUECO.bajoElRas)) < 1e-6 && Math.abs(caja3.min.y - (FLOOR_Y - HUECO.bajoElRas - TAM.espesor * HUECO.hondo)) < 1e-6 && pozo.grupo.children.length === 2 && (((pozo.grupo.children[0] as THREE.Mesh).material as THREE.Material[])[0].visible === false)
 pozo.soltar()
-afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de arriba taparía el hueco) y el fondo, de un espesor del logo y un pelo de hondo, con su tope al ras del piso; invisible hasta que el hueco se abre', `${(TAM.espesor * HUECO.hondo).toFixed(3)} u de hondo`)
+afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de arriba taparía el hueco) y el fondo, de un espesor del logo y un pelo de hondo, con su tope apenas debajo del piso; invisible hasta que el hueco se abre', `${(TAM.espesor * HUECO.hondo).toFixed(3)} u de hondo`)
 // [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: el vapor que caía adentro del hueco se fue con el vapor (s51 1A).
 
 // ═══════════════════════════════════════════════════════════════════════════
