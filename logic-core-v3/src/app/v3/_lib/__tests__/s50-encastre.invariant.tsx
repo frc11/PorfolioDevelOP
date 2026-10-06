@@ -226,5 +226,13 @@ const servidorBien = (r: string): boolean =>
   r.includes('const opcional = (max: number): z.ZodString => z.string().trim().max(max)') && !/\.min\(/.test(r) && r.includes('intereses: z.array(z.enum(IDS)).max(IDS.length)') && r.includes('mail: z.string().trim().max(MAXIMOS.contacto).regex(EMAIL)') && /medio: z\s*\.string\(\)\s*\.trim\(\)\s*\.max\(MAXIMOS\.contacto\)\s*\.refine/.test(r)
 afirmar(soloElContacto && servidorBien(ruta), 'el único obligatorio es el contacto: en el panel el email o el teléfono, en el pie el mail; lo demás puede ir vacío, en el navegador y en el endpoint (que sigue frenando el largo y el límite por IP)')
 controlPositivo('el detector VE el endpoint de RONDA 2 (pedía nombre y mensaje)', ruta.replace('nombre: opcional(MAXIMOS.nombre),\n  mail', 'nombre: z.string().trim().min(2).max(MAXIMOS.nombre),\n  mail'), servidorBien)
+// El contacto pedido con el menú del teléfono abierto: primero se cierra el menú y la hoja se abre al soltar su trampa.
+const apertura = sinComentarios(leer('_chrome/contacto/apertura.ts'))
+const menuMovil = sinComentarios(leer('_chrome/menu/MenuMovil.tsx'))
+const cierraElMenu = (a: string, m: string): boolean =>
+  /if \(menuAbierto !== null\) \{\s*const cerrarElMenu = menuAbierto\s*menuAbierto = null\s*cerrarElMenu\(\(\) => abrirContacto\(precarga, origen\)\)\s*return/.test(a) &&
+  m.includes('despuesDelMenu.current = despues') && m.includes('menu.current?.cerrar()') && m.includes('if (despues !== null || haciaElContacto.current) anotarElMenuAbierto(null)')
+afirmar(cierraElMenu(apertura, menuMovil), 'con el menú del teléfono abierto, un pedido del contacto primero lo cierra (su Genie) y abre la hoja al soltar la trampa: el foco entra a la hoja (antes la trampa del menú lo retenía)')
+controlPositivo('el detector VE la apertura de antes (con el menú abierto, la hoja detrás)', apertura.replace(/if \(menuAbierto !== null\) \{[\s\S]*?return\s*\}/, ''), (a: string) => cierraElMenu(a, menuMovil))
 
 cerrar('s50-encastre')

@@ -23,6 +23,8 @@ type Fase = 'cerrado' | 'abriendo' | 'abierto' | 'cerrando'
 /** Lo que el botón del menú le pide al panel: abrir, con el vidrio oscuro (sobre una zona clara) o claro. */
 export interface ControlDelMenu {
   readonly abrir: (vidrioOscuro: boolean) => void
+  /** [EL ENCASTRE] · cerrarlo (con su Genie), como la cruz. */
+  readonly cerrar: () => void
 }
 
 /** La trampa del diálogo, montada sólo con el menú abierto. Su desmontaje suelta el foco y el scroll (en ese orden). */
@@ -195,33 +197,6 @@ export function Menu({
     }
   }, [geometria, reducido, mostrar, forma])
 
-  // LA APERTURA, que pide el botón. Si la geometría cambió (el teclado del teléfono, una rotación) se re-mide y arranca
-  // cuando las tiras ya están a medida. El tono va a mano: abrir no vuelve a dibujar nada.
-  useImperativeHandle(
-    ref,
-    () => ({
-      abrir: (vidrioOscuro: boolean) => {
-        if (fase.current !== 'cerrado') return
-        for (const el of [caja.current, capaDelGenie.current]) {
-          if (vidrioOscuro) el?.setAttribute('data-seccion', 'invertida')
-          else el?.removeAttribute('data-seccion')
-        }
-        const ahora = medirLaGeometria(caja.current, boton.current)
-        if (geometria !== null && mismaGeometria(ahora, geometria)) arrancar()
-        else {
-          arrancarAlMedir.current = true
-          setGeometria(ahora)
-        }
-      },
-    }),
-    [geometria, arrancar, boton],
-  )
-  useLayoutEffect(() => {
-    if (!arrancarAlMedir.current || geometria === null) return
-    arrancarAlMedir.current = false
-    arrancar()
-  }, [geometria, arrancar])
-
   // EL CIERRE: la forma vuelve al botón con el vidrio adentro (desde donde iba, si se cierra abriendo).
   const cerrar = useCallback((): void => {
     if (fase.current === 'cerrando' || fase.current === 'cerrado') return
@@ -248,6 +223,35 @@ export function Menu({
     const ms = MS_DEL_GENIE * (1 - desde)
     cancelar.current = correrPorTiempo(ms, (t) => cuadro(desde + (1 - desde) * (ms === 0 ? 1 : t / ms)), terminar)
   }, [reducido, fundir, cuadro, mostrar, alCubrir, alCerrado])
+
+  // LA APERTURA, que pide el botón. Si la geometría cambió (el teclado del teléfono, una rotación) se re-mide y arranca
+  // cuando las tiras ya están a medida. El tono va a mano: abrir no vuelve a dibujar nada.
+  useImperativeHandle(
+    ref,
+    () => ({
+      abrir: (vidrioOscuro: boolean) => {
+        if (fase.current !== 'cerrado') return
+        for (const el of [caja.current, capaDelGenie.current]) {
+          if (vidrioOscuro) el?.setAttribute('data-seccion', 'invertida')
+          else el?.removeAttribute('data-seccion')
+        }
+        const ahora = medirLaGeometria(caja.current, boton.current)
+        if (geometria !== null && mismaGeometria(ahora, geometria)) arrancar()
+        else {
+          arrancarAlMedir.current = true
+          setGeometria(ahora)
+        }
+      },
+      // [EL ENCASTRE] · el contacto pedido con el menú abierto: primero se cierra (`MenuMovil`, `apertura.ts`).
+      cerrar,
+    }),
+    [geometria, arrancar, boton, cerrar],
+  )
+  useLayoutEffect(() => {
+    if (!arrancarAlMedir.current || geometria === null) return
+    arrancarAlMedir.current = false
+    arrancar()
+  }, [geometria, arrancar])
 
   // Si el chrome vuelve a la barra con el menú abierto, el padre lo da por cerrado: acá se apaga todo de golpe.
   useEffect(() => {

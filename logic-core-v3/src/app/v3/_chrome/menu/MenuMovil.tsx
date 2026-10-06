@@ -3,7 +3,7 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Isotipo } from '../../_componentes/marca/Marca'
-import { abrirContacto, useContacto } from '../contacto/apertura'
+import { abrirContacto, anotarElMenuAbierto, useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { Menu, type ControlDelMenu } from './MenuDeVidrio'
@@ -78,8 +78,26 @@ export function MenuMovil(): React.JSX.Element | null {
   const alContacto = useCallback(() => {
     haciaElContacto.current = true
   }, [])
+  // [EL ENCASTRE] · un contacto pedido desde afuera con el menú abierto: el menú se cierra y lo abre al soltar su trampa.
+  const despuesDelMenu = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    if (!abierto) return undefined
+    anotarElMenuAbierto((despues) => {
+      despuesDelMenu.current = despues
+      menu.current?.cerrar()
+    })
+    return () => anotarElMenuAbierto(null)
+  }, [abierto])
   const alSoltar = useCallback((): void => {
-    if (haciaElContacto.current) {
+    const despues = despuesDelMenu.current
+    despuesDelMenu.current = null
+    // Si se abre el contacto: el menú ya se fue (sin esto, el pedido volvería a pasar por él). Sólo entonces: en desarrollo
+    // React monta la trampa dos veces y esta limpieza corre con el menú abierto, que tiene que seguir anotado.
+    if (despues !== null || haciaElContacto.current) anotarElMenuAbierto(null)
+    if (despues !== null) {
+      haciaElContacto.current = false
+      despues()
+    } else if (haciaElContacto.current) {
       haciaElContacto.current = false
       abrirContacto([], boton.current)
     } else boton.current?.focus({ preventScroll: true })

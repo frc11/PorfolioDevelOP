@@ -27,7 +27,25 @@ let estado: EstadoDelContacto = { abierto: false, precarga: [], modo: 'barra', o
 const oyentes = new Set<() => void>()
 const avisar = (): void => oyentes.forEach((f) => f())
 
+/**
+ * [EL ENCASTRE] · CON EL MENÚ DEL TELÉFONO ABIERTO, PRIMERO SE CIERRA EL MENÚ. Su trampa de foco retenía el foco y la hoja
+ * quedaba detrás sin poder recibirlo (pasaba con un disparador de la página; su propio «Contacto» ya esperaba). Mientras
+ * está abierto, el menú se anota acá: un pedido del contacto lo cierra y se cumple cuando el menú soltó su trampa.
+ */
+let menuAbierto: ((despues: () => void) => void) | null = null
+
+/** El menú del teléfono anota cómo cerrarse mientras está abierto (`null` al cerrarse). */
+export function anotarElMenuAbierto(cerrarYDespues: ((despues: () => void) => void) | null): void {
+  menuAbierto = cerrarYDespues
+}
+
 export function abrirContacto(precarga: readonly Interes[] = [], origen: HTMLElement | null = null): void {
+  if (menuAbierto !== null) {
+    const cerrarElMenu = menuAbierto
+    menuAbierto = null
+    cerrarElMenu(() => abrirContacto(precarga, origen))
+    return
+  }
   estado = { ...estado, abierto: true, precarga, origen }
   avisar()
 }
