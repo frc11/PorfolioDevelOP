@@ -46,6 +46,8 @@ export interface EstadoDelFinal {
   readonly reloj: RelojDelFinal
   scroll: number
   sinScrollS: number
+  /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
+  enteroS: number
   quietoS: number
   golpeEn: number
   golpes: number
@@ -80,6 +82,7 @@ export function crearElEstado(contorno: readonly THREE.Vector2[], formas: readon
     reloj: relojQuieto(),
     scroll: Number.NaN,
     sinScrollS: 0,
+    enteroS: 0,
     quietoS: 0,
     golpeEn: Number.NaN,
     golpes: 0,
@@ -142,7 +145,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
   s.scroll = window.scrollY
-  s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, s.sinScrollS, dt, EN_VIVO)
+  // [EL ENCASTRE] 2G · el quieto espera también al final entero (arranca solo: sin esto ya llevaba 1,4 s sin scroll al terminar).
+  s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
+  s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS), dt, EN_VIVO)
   // [EL ENCASTRE] 2C · el vapor: se arma con el final en cero (por eso antes de la salida temprana) y sigue mientras se
   // hunde (aunque `fin` ya volvió a 0).
   pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)

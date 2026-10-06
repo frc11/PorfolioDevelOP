@@ -526,4 +526,12 @@ controlPositivo('el detector VE el círculo oscuro de CIERRE', enElPisoTs + '\nf
 // Con el poder: antes de quedar al ras, el mouse no deja nada.
 afirmar(finalTsx.includes('const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0') && finalTsx.includes('apagarElRastro(p.uRastro.value, s.rastro)'), '  sólo con el poder liberado (antes, el mouse no deja nada) y se apaga entero al soltar el final')
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2G · Quieto en el pie: como ahora, la cámara gira y se aleja; arranca 1,4 s después de que el final quedó entero')
+
+// El final arranca solo, así que al terminar ya llevaba más de 1,4 s sin scroll: el quieto espera también al final entero.
+const esperaAlFinal = (c: string): boolean => c.includes('s.enteroS = fin > 0.995 ? s.enteroS + dt : 0') && c.includes('relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS), dt, EN_VIVO)')
+afirmar(esperaAlFinal(finalTsx) && FINAL_DEL_PIE.quieto.desdeS === 1.4, 'el quieto (la cámara que gira sin fin y se aleja hacia su tope, s49) arranca 1,4 s después de que el final quedó entero y sin scroll: no en el mismo instante en que termina el encastre', `${String(FINAL_DEL_PIE.quieto.desdeS)} s`)
+controlPositivo('el detector VE el quieto de CIERRE (sólo el scroll: con el arranque solo, empezaba al terminar)', finalTsx.replace('Math.min(s.sinScrollS, s.enteroS)', 's.sinScrollS'), esperaAlFinal)
+
 cerrar('s50-encastre')
