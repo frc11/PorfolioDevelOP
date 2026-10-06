@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { FLOOR_Y, PROBE_SVG_SCALE } from '../probeScene'
+import { FLOOR_Y, PAPER_COLOR, PROBE_SVG_SCALE } from '../probeScene'
 
 /**
  * [EL ENCASTRE] 2D · EL HUECO EXACTO — en el piso, un hueco con la forma exacta del logo (la pieza de un rompecabezas) que
@@ -10,8 +10,9 @@ import { FLOOR_Y, PROBE_SVG_SCALE } from '../probeScene'
  *     forma, con una holgura mínima (el logo entra sin rozar); G: la misma, muy desenfocada (un campo que vale ~1 en el
  *     medio de los trazos y baja hacia afuera). El piso descarta sus tapas y costados donde R dice «adentro» y G pasa el
  *     umbral de la apertura: el hueco se abre desde el medio de los trazos hacia sus bordes exactos (`enElPiso.ts`).
- *   · EL POZO: las paredes (el contorno extruido hacia abajo) y el fondo, oscuros, de un espesor del logo y un pelo más:
- *     por el hueco se ve un pozo con la forma del logo, y el logo entra en él.
+ *   · EL POZO: las paredes (el contorno extruido hacia abajo) y el fondo, de un espesor del logo y un pelo más: por el
+ *     hueco se ve un pozo con la forma del logo, y el logo entra en él. [RETOQUE DEL ENCASTRE] 1B · del tono del piso,
+ *     un poco más sombreado adentro (de tinta, el hueco se leía como un logo negro pintado en el piso).
  *
  * En el plano del piso, un punto del logo acostado de coordenadas (X, Y) en su grupo cae en (x, z) = (X, −Y): el grupo
  * del logo lleva el SVG dado vuelta (Y = −y del SVG) y acostado gira −90° sobre x.
@@ -26,9 +27,8 @@ export const HUECO = {
   abre: { desdeS: 1.6, hastaS: 2.4 },
   /** La profundidad del pozo, en espesores del logo (un pelo más: el fondo no toca la cara de abajo). */
   hondo: 1.06,
-  /** El color de las paredes y del fondo del pozo (tinta y casi negro). */
-  pared: '#2a2a2a',
-  fondo: '#121212',
+  /** [RETOQUE DEL ENCASTRE] 1B · el color de las paredes y del fondo del pozo: el papel del piso, un poco más sombreado adentro. */
+  sombra: { pared: 0.86, fondo: 0.74 },
 } as const
 
 export interface SvgDelLogo {
@@ -119,8 +119,8 @@ export function crearElPozo(formas: readonly THREE.Shape[], espesor: number): { 
   fondo.translate(0, 0, -hondo)
   // Las tapas de la extrusión no se dibujan (la de arriba taparía el hueco): sólo las paredes.
   const sinTapas = new THREE.MeshBasicMaterial({ visible: false })
-  const pared = new THREE.MeshStandardMaterial({ color: HUECO.pared, roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
-  const deFondo = new THREE.MeshStandardMaterial({ color: HUECO.fondo, roughness: 1, metalness: 0, side: THREE.DoubleSide })
+  const pared = new THREE.MeshStandardMaterial({ color: new THREE.Color(PAPER_COLOR).multiplyScalar(HUECO.sombra.pared), roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
+  const deFondo = new THREE.MeshStandardMaterial({ color: new THREE.Color(PAPER_COLOR).multiplyScalar(HUECO.sombra.fondo), roughness: 1, metalness: 0, side: THREE.DoubleSide })
   const grupo = new THREE.Group()
   grupo.name = 'pozo del final'
   grupo.add(new THREE.Mesh(paredes, [sinTapas, pared]), new THREE.Mesh(fondo, deFondo))

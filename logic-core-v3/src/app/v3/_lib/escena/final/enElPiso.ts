@@ -18,6 +18,7 @@ import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
  * (`uApertura`: se abre desde el medio de los trazos hacia el borde exacto); el borde del corte se oscurece apenas (el
  * labio del pozo). Alrededor del logo el mar se calma (`uCalmaDelFinal`, en la simulación: el piso queda al ras) y el
  * techo que lo esquivaba se apaga (el logo entra en el piso). La mancha de contacto se va con la cámara (`uSinMancha`).
+ * [RETOQUE DEL ENCASTRE] 1B · el labio, apenas (el hueco es del tono del piso) y se va al quedar al ras.
  *
  * [EL ENCASTRE] 2E · EL PODER: cuando el logo queda al ras, desde las JUNTAS de los bloques alrededor del logo sale un
  * resplandor de tinta (`uPoder`): un núcleo negro justo en la junta y un halo denso que se abre de la junta hacia la tapa,
@@ -43,7 +44,7 @@ export const RASTRO_EN_EL_PISO = { puntos: 8, cada: 0.55, apagaS: 0.9, radio: 1.
  * [EL ENCASTRE] 2D · el mar calmo alrededor del logo: en la elipse de su caja, entero hasta `entero` veces su media caja y
  * nada desde `hasta` (una elipse, no la caja: una caja se leía como un rectángulo en el piso); y cuánto oscurece el labio.
  */
-export const CALMA_EN_EL_PISO = { entero: 1.15, hasta: 1.9, labio: 0.3 } as const
+export const CALMA_EN_EL_PISO = { entero: 1.15, hasta: 1.9, labio: 0.1 } as const
 
 /** Los uniformes del final en el piso: los comparten la simulación y el dibujo; los escribe `FinalDelPie`. */
 export const FINAL_EN_EL_PISO = {
@@ -216,7 +217,7 @@ bool enElHueco( vec2 xz ) {
 float labioDelHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return 0.0;
 	vec2 m = mascaraDelHueco( xz );
-	return uApertura * smoothstep( 0.12, 0.45, m.g ) * ( 1.0 - smoothstep( 0.3, 0.6, m.r ) );
+	return uApertura * ( 1.0 - min( 1.0, uPoder ) ) * smoothstep( 0.12, 0.45, m.g ) * ( 1.0 - smoothstep( 0.3, 0.6, m.r ) );
 }
 `
 
