@@ -36,7 +36,7 @@ import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
 import { EXPLOSION, crearLaExplosion } from '../escena/final/explosion'
 import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
-import { FINAL_DEL_PIE, acostado, avanceDeLaCola, camaraDelFinal, hundido, poseDelLogo, relojDelQuieto } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, acostado, camaraDelFinal, hundido, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto } from '../escena/final/recorridoDelFinal'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
@@ -315,8 +315,14 @@ controlPositivo('el detector VE una cola que también estaría con movimiento re
 const v = 900
 const abajoDeLasSecciones = ANCLAJE.pantallasDelDocumento * v
 afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v + dentro, 0, abajoDeLasSecciones, v) === ANCLAJE.pantallasDeScroll) && !/data-panel/.test(/<div data-pieza="cola-del-final"[^>]*>/.exec(pagina)?.[0] ?? 'data-panel'), '  la cola no cuenta para la escena: no es una sección, y recorriéndola el progreso queda en el último nudo (la pose E): Portfolio, la frase, la noche y el amanecer no se mueven')
-const avance = [avanceDeLaCola(900, 720, 900), avanceDeLaCola(540, 720, 900), avanceDeLaCola(180, 720, 900), avanceDeLaCola(-200, 720, 900), avanceDeLaCola(500, 0, 900)]
-afirmar(avance.join() === '0,0.5,1,1,0', '  `fin` es lo recorrido de la cola: 0 con su tope en el pie del cuadro, 1 al final del documento, 0 sin cola', avance.join(' · '))
+// [EL ENCASTRE] 2A · cambió por pedido: `fin` ya no es lo recorrido de la cola, tiene su reloj (lo detalla s50 2A).
+const reloj = relojQuieto()
+pasoDelReloj(reloj, true, 5000, 720, 1 / 60, false)
+for (let i = 0; i < 60; i += 1) pasoDelReloj(reloj, true, 5000, 720, 1 / 60, false)
+const solo = reloj.fin
+pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
+for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
+afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj (EL ENCASTRE 2A): llegado al pie avanza solo, sin scroll, y un gesto hacia arriba lo devuelve a 0', `en 1 s solo: ${solo.toFixed(2)}`)
 
 // La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra con un rebote. Con `fin` 0, el logo de hoy.
 const tam = { alto: 4.78, espesor: 0.56 }

@@ -19,6 +19,11 @@ import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
  *
  * Los objetos del pie (los títulos, los enlaces, el formulario, las redes) van con la cámara: se colocan con la cámara sin
  * el mouse, que también hace el final (`pie3d/armadas.ts`), así quedan de frente, legibles e interactivos.
+ *
+ * [EL ENCASTRE] 2A · `fin` YA NO ES EL SCROLL DE LA COLA: tiene su RELOJ (`pasoDelReloj`). Apenas se llega al pie (el pie
+ * se pega arriba) la secuencia arranca sola y corre a su ritmo (`RELOJ_DEL_FINAL.duracionS`); scrollear hacia abajo la
+ * adelanta (la cola entera, la secuencia entera); un gesto hacia arriba (o salir del pie) la revierte (`vueltaS`), y un
+ * viaje del menú la deshace enseguida. La cola sigue (el pie pegado y el scroll que adelanta), con el mismo alto.
  */
 export const FINAL_DEL_PIE = {
   /** Hasta dónde se acuesta el logo (y sube la cámara), en `fin`. */
@@ -35,9 +40,48 @@ export const FINAL_DEL_PIE = {
   aireDelPie: 7,
   /** El golpe en la cámara: cuánto la sacude (u) y en cuánto se apaga (s). */
   sacudon: { amplitud: 0.07, s: 0.38 },
-  /** El seguimiento de la cola: lo que tarda `fin` en alcanzar al scroll (s). */
-  sigueS: 0.12,
 } as const
+
+/**
+ * [EL ENCASTRE] 2A · EL RELOJ DEL FINAL: lo que dura la secuencia a su ritmo (s), lo que tarda en volver con un gesto hacia
+ * arriba (s) y con un viaje del menú (s), y desde cuántos px por cuadro un scroll es un gesto (no un temblor del trackpad).
+ */
+export const RELOJ_DEL_FINAL = { duracionS: 6.4, vueltaS: 1.5, vueltaDelViajeS: 0.35, gestoPx: 2 } as const
+
+/** Lo que el reloj recuerda de un cuadro al otro. */
+export interface RelojDelFinal {
+  fin: number
+  /** 1: avanza (llegó al pie, o scrollea hacia abajo); −1: vuelve (un gesto hacia arriba, o salió del pie). */
+  direccion: 1 | -1
+  scroll: number
+  enElPie: boolean
+}
+
+export function relojQuieto(): RelojDelFinal {
+  return { fin: 0, direccion: -1, scroll: Number.NaN, enElPie: false }
+}
+
+/**
+ * Un cuadro del reloj. `enElPie`: el pie está pegado arriba (se llegó); `scroll`: el de este cuadro; `cola`: el alto de la
+ * cola (px: recorrerla entera adelanta la secuencia entera); `enViaje`: hay un viaje del menú en curso; `pegadoDesde`:
+ * dónde arranca la cola (sólo el scroll recorrido ADENTRO de ella adelanta o atrasa: llegar de un salto no cuenta). Escribe
+ * en `r`.
+ */
+export function pasoDelReloj(r: RelojDelFinal, enElPie: boolean, scroll: number, cola: number, dt: number, enViaje: boolean, pegadoDesde = Number.NEGATIVE_INFINITY): void {
+  const R = RELOJ_DEL_FINAL
+  const antes = Number.isNaN(r.scroll) ? scroll : r.scroll
+  const delta = scroll - antes
+  r.scroll = scroll
+  const llega = enElPie && !r.enElPie
+  r.enElPie = enElPie
+  if (enViaje || !enElPie) r.direccion = -1
+  else if (llega || delta > R.gestoPx) r.direccion = 1
+  else if (delta < -R.gestoPx) r.direccion = -1
+  const enLaCola = Math.abs(Math.max(scroll, pegadoDesde) - Math.max(antes, pegadoDesde))
+  const porScroll = cola > 0 ? enLaCola / cola : 0
+  if (r.direccion > 0) r.fin = Math.min(1, r.fin + dt / R.duracionS + (delta > 0 ? porScroll : 0))
+  else r.fin = Math.max(0, r.fin - dt / (enViaje ? R.vueltaDelViajeS : R.vueltaS) - (delta < 0 ? porScroll : 0))
+}
 
 /** Lo que el final tiene en vivo: lo escribe `FinalDelPie` en cada cuadro y lo leen las piezas del pie y el piso. */
 export const EN_VIVO = {
@@ -128,12 +172,6 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   c.lookAt(BLANCO)
   c.up.set(0, 1, 0)
   c.updateMatrixWorld()
-}
-
-/** El avance de la cola en el cuadro: 0 con su tope en el pie del cuadro (o sin cola), 1 al final del documento. */
-export function avanceDeLaCola(tope: number, alto: number, ventana: number): number {
-  if (!(alto > 0)) return 0
-  return acotar01((ventana - tope) / alto)
 }
 
 /**

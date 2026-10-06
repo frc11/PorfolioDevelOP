@@ -12,7 +12,8 @@ import type { ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { EXPLOSION, cargarLaExplosion, crearLaExplosion } from './explosion'
-import { EN_VIVO, FINAL_DEL_PIE, acostado, avanceDeLaCola, camaraDelFinal, poseDelLogo, relojDelQuieto, type TamanoDelLogo } from './recorridoDelFinal'
+import { viajeEnCurso } from '../viaje'
+import { EN_VIVO, FINAL_DEL_PIE, acostado, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, type RelojDelFinal, type TamanoDelLogo } from './recorridoDelFinal'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE EN LA ESCENA — va justo después del rig (`OrbitRig` pone la cámara del recorrido en la pose
@@ -31,6 +32,8 @@ const SELECTOR_DE_LA_COLA = '[data-pieza="cola-del-final"]'
 /** Lo del final que vive entre cuadros: lo arma `FinalDelPie` una vez y lo usa `alCuadroDelFinal`. */
 interface EstadoDelFinal {
   cola: Element | null
+  /** [EL ENCASTRE] 2A · el reloj de `fin`. */
+  readonly reloj: RelojDelFinal
   scroll: number
   sinScrollS: number
   quietoS: number
@@ -54,6 +57,7 @@ interface EstadoDelFinal {
 function crearElEstado(contorno: readonly THREE.Vector3[]): EstadoDelFinal {
   return {
     cola: null,
+    reloj: relojQuieto(),
     scroll: Number.NaN,
     sinScrollS: 0,
     quietoS: 0,
@@ -150,12 +154,14 @@ function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: num
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
   const explosion = s.explosion
-  // 1 · Cuánto se recorrió de la cola (el scroll), con un seguimiento corto: un salto de teclado no es un corte.
+  // 1 · [EL ENCASTRE] 2A · el reloj: arranca solo al llegar al pie (pegado), el scroll hacia abajo lo adelanta y un gesto
+  // hacia arriba (o salir del pie, o un viaje del menú) lo revierte.
   s.cola ??= document.querySelector(SELECTOR_DE_LA_COLA)
   const caja = s.cola?.getBoundingClientRect()
-  const objetivo = caja === undefined ? 0 : avanceDeLaCola(caja.top, caja.height, window.innerHeight)
   EN_VIVO.pegadoDesde = caja !== undefined && caja.height > 0 ? caja.top + window.scrollY - window.innerHeight : Number.POSITIVE_INFINITY
-  EN_VIVO.fin = Math.abs(objetivo - EN_VIVO.fin) < 1e-4 ? objetivo : EN_VIVO.fin + (objetivo - EN_VIVO.fin) * (1 - Math.exp(-dt / FINAL_DEL_PIE.sigueS))
+  const enElPie = window.scrollY >= EN_VIVO.pegadoDesde - 2
+  pasoDelReloj(s.reloj, enElPie, window.scrollY, caja?.height ?? 0, dt, viajeEnCurso() !== null, EN_VIVO.pegadoDesde)
+  EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
   s.scroll = window.scrollY

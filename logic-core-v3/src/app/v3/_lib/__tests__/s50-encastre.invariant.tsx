@@ -11,6 +11,8 @@
  *   1E · los formularios del contacto (el panel y el pie): el foco lo dibuja la pastilla (sin el recuadro adentro), el Tab
  *        llega a los campos, sin «/» delante de las preguntas, el único obligatorio es el contacto (en el cliente y en
  *        el endpoint) y la nota nueva.
+ *   2A · el final del pie arranca solo al llegar al pie y corre a su ritmo; el scroll hacia abajo lo adelanta; un gesto
+ *        hacia arriba, salir del pie o un viaje del menú lo revierten.
  * (1A, el túnel en k = 1,8 sin la bandera `tunelk`, lo afirma s49 1C al día.) Lo que se mira en vivo:
  * `~/.cache/b4-medicion/encastre/mirar.txt`.
  */
@@ -29,6 +31,7 @@ import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../..
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
+import { RELOJ_DEL_FINAL, pasoDelReloj, relojQuieto, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -234,5 +237,65 @@ const cierraElMenu = (a: string, m: string): boolean =>
   m.includes('despuesDelMenu.current = despues') && m.includes('menu.current?.cerrar()') && m.includes('if (despues !== null || haciaElContacto.current) anotarElMenuAbierto(null)')
 afirmar(cierraElMenu(apertura, menuMovil), 'con el menú del teléfono abierto, un pedido del contacto primero lo cierra (su Genie) y abre la hoja al soltar la trampa: el foco entra a la hoja (antes la trampa del menú lo retenía)')
 controlPositivo('el detector VE la apertura de antes (con el menú abierto, la hoja detrás)', apertura.replace(/if \(menuAbierto !== null\) \{[\s\S]*?return\s*\}/, ''), (a: string) => cierraElMenu(a, menuMovil))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2A · El final del pie arranca solo al llegar al pie; el scroll lo adelanta; un gesto hacia arriba lo revierte')
+
+// El reloj a 60 cuadros por segundo: cuántos segundos hasta que `fin` llega a `meta`, con un scroll por cuadro dado.
+type PasoDelReloj = (r: RelojDelFinal, enElPie: boolean, scroll: number, cola: number, dt: number, enViaje: boolean, pegadoDesde?: number) => void
+const COLA = 720
+const correr = (paso: PasoDelReloj, r: RelojDelFinal, cuadros: number, opciones: { enElPie?: boolean; pxPorCuadro?: number; enViaje?: boolean } = {}): void => {
+  for (let i = 0; i < cuadros; i += 1) paso(r, opciones.enElPie ?? true, r.scroll + (opciones.pxPorCuadro ?? 0), COLA, DT, opciones.enViaje ?? false)
+}
+const hastaMeta = (paso: PasoDelReloj, r: RelojDelFinal, meta: number, opciones: { enElPie?: boolean; pxPorCuadro?: number; enViaje?: boolean } = {}): number => {
+  for (let i = 1; i <= 2000; i += 1) {
+    correr(paso, r, 1, opciones)
+    if (r.fin === meta) return i * DT
+  }
+  return Number.POSITIVE_INFINITY
+}
+const comportamiento = (paso: PasoDelReloj): { readonly solo: number; readonly conScroll: number; readonly vuelta: number; readonly seQueda: number; readonly retoma: number; readonly temblor: number; readonly saliendo: number; readonly viaje: number; readonly deUnSalto: number } => {
+  // Llegar de un salto (la tecla Fin, un `scrollTo`): el camino hasta la cola no adelanta nada.
+  const salto = relojQuieto()
+  paso(salto, false, 0, COLA, DT, false, 9000)
+  paso(salto, true, 9000, COLA, DT, false, 9000)
+  const deUnSalto = salto.fin
+  const llegar = (): RelojDelFinal => {
+    const r = relojQuieto()
+    r.scroll = 9000
+    paso(r, true, 9000, COLA, DT, false)
+    return r
+  }
+  const a = llegar()
+  const solo = hastaMeta(paso, a, 1)
+  const b = llegar()
+  const conScroll = hastaMeta(paso, b, 1, { pxPorCuadro: COLA / 30 })
+  const vuelta = hastaMeta(paso, a, 0, { pxPorCuadro: -6 })
+  correr(paso, a, 120)
+  const seQueda = a.fin
+  const retoma = hastaMeta(paso, a, 1, { pxPorCuadro: 3 })
+  const c = llegar()
+  correr(paso, c, 120, { pxPorCuadro: 1 })
+  correr(paso, c, 60, { pxPorCuadro: -1 })
+  const temblor = c.fin
+  const saliendo = hastaMeta(paso, c, 0, { enElPie: false })
+  const d = llegar()
+  correr(paso, d, 600)
+  const viaje = hastaMeta(paso, d, 0, { enViaje: true })
+  return { solo, conScroll, vuelta, seQueda, retoma, temblor, saliendo, viaje, deUnSalto }
+}
+const R2 = RELOJ_DEL_FINAL
+const relojBien = (m: ReturnType<typeof comportamiento>): boolean =>
+  Math.abs(m.solo - R2.duracionS) <= 2 * DT && m.conScroll < 0.6 && m.vuelta <= R2.vueltaS && m.vuelta > 0.3 && m.seQueda === 0 && Number.isFinite(m.retoma) && m.temblor > 0.4 && m.saliendo <= R2.vueltaS + DT && m.viaje <= R2.vueltaDelViajeS + DT && m.deUnSalto < 0.01
+const medidoDelReloj = comportamiento(pasoDelReloj)
+afirmar(relojBien(medidoDelReloj), 'llegado al pie, la secuencia corre sola y entera a su ritmo (también si se llegó de un salto: sólo el scroll adentro de la cola la adelanta); scrollear la cola la adelanta; un gesto hacia arriba la devuelve a 0 (y se queda ahí hasta que se vuelve a bajar); un temblor del trackpad no la da vuelta; salir del pie la revierte y un viaje del menú la deshace enseguida', `sola ${medidoDelReloj.solo.toFixed(2)} s · con la cola en 0,5 s: ${medidoDelReloj.conScroll.toFixed(2)} s · vuelta ${medidoDelReloj.vuelta.toFixed(2)} s · viaje ${medidoDelReloj.viaje.toFixed(2)} s · de un salto ${medidoDelReloj.deUnSalto.toFixed(3)}`)
+// El control: el `fin` de CIERRE, lo recorrido de la cola (sin scroll no avanza).
+const deLaCola: PasoDelReloj = (r, enElPie, scroll, cola) => {
+  r.scroll = scroll
+  r.fin = enElPie ? Math.min(1, Math.max(0, (scroll - 9000) / cola)) : 0
+}
+controlPositivo('el detector VE el final de CIERRE (función del scroll de la cola: llegado al pie no arranca)', deLaCola, (p: PasoDelReloj) => relojBien(comportamiento(p)))
+const finalTsx = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
+afirmar(finalTsx.includes('const enElPie = window.scrollY >= EN_VIVO.pegadoDesde - 2') && finalTsx.includes('pasoDelReloj(s.reloj, enElPie, window.scrollY, caja?.height ?? 0, dt, viajeEnCurso() !== null, EN_VIVO.pegadoDesde)') && finalTsx.includes('EN_VIVO.fin = s.reloj.fin'), '  el cableado: llegar al pie es que el pie quedó pegado (el arranque de la cola); la cola entera adelanta la secuencia entera; el viaje del menú, el de `viaje.ts`')
 
 cerrar('s50-encastre')
