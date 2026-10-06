@@ -33,13 +33,12 @@ import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poder as poderDelFinal, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
-import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
+import { FLOOR_Y } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
 import { PODER_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
-import { VAPOR, crearElVapor, pasoDelVapor, vaporPosado, vaporQuieto, type EstadoDelVapor } from '../escena/final/vapor'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -353,61 +352,9 @@ const enParalelo = [0.25, 0.5, 0.75, 1].every((u) => Math.abs(subida((u * FINAL_
 afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subida(FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS) === 1, 'la cámara sube en paralelo con el logo (el 80 % de su camino mientras se acuesta; el resto, mientras se encastra) y mira siempre al eje: el centro del logo mientras se acuesta y, con la caída, el piso donde se encastra')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2C · El vapor al acostarse: columnas que suben, se curvan hacia afuera, caen y se quedan en el piso; sólo se van hundiéndose')
+titulo('2C · El vapor: [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: se fue entero (sin partículas; lo afirma s51 1A)')
 
-let semilla = 11
-const azarDelVapor = (): number => ((semilla = (semilla * 16807) % 2147483647) / 2147483647)
-const anillo = Array.from({ length: 120 }, (_, i) => new THREE.Vector2(2.4 * Math.cos((i / 120) * Math.PI * 2), 2.4 * Math.sin((i / 120) * Math.PI * 2)))
-const vapor = crearElVapor(anillo, azarDelVapor)
-const g = vapor.puntos.geometry
-const vuelo = g.getAttribute('aVuelo') as THREE.BufferAttribute
-const afuera = g.getAttribute('aAfuera') as THREE.BufferAttribute
-const base = g.getAttribute('position') as THREE.BufferAttribute
-const N = VAPOR.columnas * VAPOR.porColumna
-let [mientrasSeAcuesta, haciaAfuera, enColumnas] = [true, true, true]
-for (let i = 0; i < N; i += 1) {
-  if (vuelo.getX(i) < 0 || vuelo.getX(i) > FINAL_DEL_PIE.acostarseS) mientrasSeAcuesta = false
-  // Hacia afuera del centro: el rumbo de la caída y la base apuntan al mismo lado.
-  if (afuera.getX(i) * base.getX(i) + afuera.getY(i) * base.getZ(i) <= 0) haciaAfuera = false
-  const primera = Math.floor(i / VAPOR.porColumna) * VAPOR.porColumna
-  if (Math.hypot(base.getX(i) - base.getX(primera), base.getZ(i) - base.getZ(primera)) > 0.12) enColumnas = false
-}
-const sombreadorDelVapor = (vapor.puntos.material as THREE.ShaderMaterial).vertexShader
-const trayectoria = (v: string): boolean => v.includes('p.xz += aAfuera * u * u') && v.includes('p.y += 4.0 * aVuelo.z * u * ( 1.0 - u );') && v.includes('if ( u >= 1.0 ) p.y = enElHueco( p.xz ) ?') && v.includes(': alturaDelPiso( p.xz ) + 0.03;') && v.includes('p.y -= uHundir *')
-afirmar(N >= 1500 && mientrasSeAcuesta && haciaAfuera && enColumnas && trayectoria(sombreadorDelVapor) && vapor.puntos instanceof THREE.Points && !vapor.puntos.visible && (vapor.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString(), 'columnas de partículas de tinta, en UN dibujo: cada columna sopla de un punto alrededor del hueco mientras el logo se acuesta; cada partícula sube (lo horizontal crece con u²), se curva hacia afuera con su variación, cae y se posa en su bloque del piso', `${String(VAPOR.columnas)} columnas × ${String(VAPOR.porColumna)} · posadas a los ${vaporPosado().toFixed(1)} s`)
-controlPositivo('el detector VE la explosión de CIERRE (tiro oblicuo con gravedad, que se apagaba)', sombreadorDelVapor.replace('p.xz += aAfuera * u * u', 'p.xz += aAfuera * u'), trayectoria)
-vapor.soltar()
-// No desaparecen: se van sólo hundiéndose al revertir (y el hundimiento, una vez empezado, termina).
-type PasoDelVapor = (v: EstadoDelVapor, segundos: number, avanza: boolean, dt: number) => void
-const ciclo = (paso: PasoDelVapor): { readonly soplaYSeQueda: boolean; readonly seHunde: boolean; readonly nuncaDeGolpe: boolean; readonly sinRepetir: boolean } => {
-  const v = vaporQuieto()
-  paso(v, 0, false, DT)
-  for (let s = DT; s <= 9; s += DT) paso(v, Math.min(s, RELOJ_DEL_FINAL.duracionS), true, DT)
-  const soplaYSeQueda = v.reloj >= vaporPosado() && v.hundir === 0
-  let nuncaDeGolpe = true
-  let hundido = 0
-  for (let k = 0; k < 120; k += 1) {
-    const antes = v.hundir
-    paso(v, Math.max(0, RELOJ_DEL_FINAL.duracionS - k * 0.1), false, DT)
-    if (v.reloj === 0 && antes < 0.95) nuncaDeGolpe = false
-    if (v.reloj === 0) break
-    hundido = Math.max(hundido, v.hundir)
-  }
-  // Vuelve a avanzar sin pasar por cero: no sopla de nuevo.
-  const w = vaporQuieto()
-  paso(w, 0, false, DT)
-  for (let s = DT; s <= 3; s += DT) paso(w, s, true, DT)
-  for (let k = 0; k < 80; k += 1) paso(w, 3 - k * 0.01, false, DT)
-  for (let s = 2.2; s <= 4; s += DT) paso(w, s, true, DT)
-  return { soplaYSeQueda, seHunde: hundido > 0.9, nuncaDeGolpe, sinRepetir: w.reloj === 0 }
-}
-const cicloBien = (c: ReturnType<typeof ciclo>): boolean => c.soplaYSeQueda && c.seHunde && c.nuncaDeGolpe && c.sinRepetir
-afirmar(cicloBien(ciclo(pasoDelVapor)), 'no desaparecen: hacia adelante soplan y quedan posadas; al revertir se hunden en el piso (que las tapa) y recién hundidas se van; si vuelve a avanzar sin pasar por cero, no soplan de nuevo')
-const deGolpe: PasoDelVapor = (v, segundos, avanza) => {
-  v.reloj = avanza ? Math.max(v.reloj, segundos) : 0
-}
-controlPositivo('el detector VE un vapor que se apaga de golpe al revertir', deGolpe, (p: PasoDelVapor) => cicloBien(ciclo(p)))
-afirmar(finalTsx.includes('pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)') && finalTsx.indexOf('pasoDelVapor(') < finalTsx.indexOf('if (!activo)') && !existsSync(`${V3}/_lib/escena/final/explosion.ts`), '  el cableado: el paso del vapor va antes de la salida temprana (se arma con el final en cero); la explosión se fue')
+afirmar(!existsSync(`${V3}/_lib/escena/final/vapor.ts`) && !existsSync(`${V3}/_lib/escena/final/explosion.ts`) && !/vapor|Points/i.test(finalTsx), 'el final no tiene partículas: ni el vapor de EL ENCASTRE ni la explosión de CIERRE (se abre el hueco y el logo encaja)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2D · El hueco exacto: se abre cuando el logo está por llegar, el logo cae justo ahí y se hunde lento, a presión, hasta el ras')
@@ -460,7 +407,7 @@ const caja3 = new THREE.Box3().setFromObject(pozo.grupo)
 const pozoBien = !pozo.grupo.visible && Math.abs(caja3.max.y - FLOOR_Y) < 1e-6 && Math.abs(caja3.min.y - (FLOOR_Y - TAM.espesor * HUECO.hondo)) < 1e-6 && pozo.grupo.children.length === 2 && (((pozo.grupo.children[0] as THREE.Mesh).material as THREE.Material[])[0].visible === false)
 pozo.soltar()
 afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de arriba taparía el hueco) y el fondo, de un espesor del logo y un pelo de hondo, con su tope al ras del piso; invisible hasta que el hueco se abre', `${(TAM.espesor * HUECO.hondo).toFixed(3)} u de hondo`)
-afirmar(sinComentarios(leer('_lib/escena/final/vapor.ts')).includes('p.y = enElHueco( p.xz ) ?'), '  y el vapor que cae adentro del hueco queda debajo del logo (no se posa sobre él)')
+// [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: el vapor que caía adentro del hueco se fue con el vapor (s51 1A).
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2E · El poder: al quedar al ras, un pulso centrado en el logo y el resplandor de tinta desde las juntas de alrededor')
@@ -544,14 +491,13 @@ const armadasTs = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
 const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)')
 afirmar(deFrente(colocacion, armadasTs, finalTsx), 'las piezas del pie miran siempre a la cámara sin el mouse, que el final lleva con la viva (sube, gira en el quieto): de frente durante toda la secuencia; su DOM va por la homografía (usable donde se ve)')
 controlPositivo('el detector VE un final que mueve sólo la cámara viva (las piezas se quedarían mirando al costado)', finalTsx.replace('camaraDelFinal(CAMARA_SIN_EL_MOUSE,', 'camaraDelFinal(null,'), (fi: string) => deFrente(colocacion, armadasTs, fi))
-// Costo: el final suma como mucho tres dibujos (el vapor en un Points; las paredes y el fondo del pozo), invisibles fuera
-// del final; el resplandor, el hueco y el rastro van adentro del shader del piso (cero dibujos), con lazos acotados.
-const vaporDeCosto = crearElVapor([new THREE.Vector2(1, 0), new THREE.Vector2(0, 1)], Math.random)
+// Costo: el final suma como mucho dos dibujos (las paredes y el fondo del pozo), invisibles fuera del final; el resplandor,
+// el hueco y el rastro van adentro del shader del piso (cero dibujos), con lazos acotados. [RETOQUE DEL ENCASTRE] 1A · eran
+// tres con el vapor (cambió por pedido: el vapor se fue).
 const pozoDeCosto = crearElPozo([new THREE.Shape([new THREE.Vector2(-1, -1), new THREE.Vector2(1, -1), new THREE.Vector2(1, 1)])], TAM.espesor)
-const dibujosDelFinal = [vaporDeCosto.puntos, ...pozoDeCosto.grupo.children]
-const costoBien = dibujosDelFinal.length <= 3 && !vaporDeCosto.puntos.visible && !pozoDeCosto.grupo.visible && RASTRO_EN_EL_PISO.puntos <= 8 && !/new THREE\.(Mesh|Points|Line)/.test(enElPisoTs)
-vaporDeCosto.soltar()
+const dibujosDelFinal = [...pozoDeCosto.grupo.children]
+const costoBien = dibujosDelFinal.length <= 2 && !pozoDeCosto.grupo.visible && RASTRO_EN_EL_PISO.puntos <= 8 && !/new THREE\.(Mesh|Points|Line)/.test(enElPisoTs)
 pozoDeCosto.soltar()
-afirmar(costoBien, 'costo acotado: el final suma como mucho 3 dibujos (vapor, paredes y fondo del pozo), invisibles fuera del final (nada fuera del pie); el resplandor y el rastro van en el shader del piso, sin dibujos nuevos', `${String(dibujosDelFinal.length)} dibujos · ${String(VAPOR.columnas * VAPOR.porColumna)} partículas en 1 · rastro de ${String(RASTRO_EN_EL_PISO.puntos)}`)
+afirmar(costoBien, 'costo acotado: el final suma como mucho 2 dibujos (paredes y fondo del pozo), invisibles fuera del final (nada fuera del pie); el resplandor y el rastro van en el shader del piso, sin dibujos nuevos', `${String(dibujosDelFinal.length)} dibujos · rastro de ${String(RASTRO_EN_EL_PISO.puntos)}`)
 
 cerrar('s50-encastre')

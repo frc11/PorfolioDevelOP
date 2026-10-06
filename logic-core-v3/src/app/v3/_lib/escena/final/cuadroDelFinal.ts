@@ -7,7 +7,6 @@ import { viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
-import { crearElVapor, pasoDelVapor, vaporQuieto, type EstadoDelVapor, type Vapor } from './vapor'
 import {
   EN_VIVO,
   FINAL_DEL_PIE,
@@ -24,7 +23,6 @@ import {
   relojDelQuieto,
   relojQuieto,
   sacudonDeLaPresion,
-  segundosDelFinal,
   subida,
   temblorDelLogo,
   type RelojDelFinal,
@@ -33,8 +31,8 @@ import {
 
 /**
  * [EL ENCASTRE] · EL CUADRO DEL FINAL — lo que `FinalDelPie` corre en cada cuadro, aparte del componente (para que ninguno
- * pase las 300 líneas): el reloj, el logo, el hueco, el vapor, el golpe, la cámara y el piso. El porqué de cada cosa, en
- * `recorridoDelFinal.ts` (los tiempos), `hueco.ts`, `vapor.ts` y `enElPiso.ts`.
+ * pase las 300 líneas): el reloj, el logo, el hueco, el golpe, la cámara y el piso. El porqué de cada cosa, en
+ * `recorridoDelFinal.ts` (los tiempos), `hueco.ts` y `enElPiso.ts`. [RETOQUE DEL ENCASTRE] 1A · el vapor se fue entero.
  */
 
 const SELECTOR_DE_LA_COLA = '[data-pieza="cola-del-final"]'
@@ -66,17 +64,14 @@ export interface EstadoDelFinal {
   readonly sacudonChico: THREE.Vector3
   readonly temblor: THREE.Vector3
   haz: THREE.Object3D | null
-  /** [EL ENCASTRE] 2C · el vapor (reemplaza a la explosión de CIERRE) y lo que recuerda. */
-  readonly vapor: Vapor
-  readonly estadoDelVapor: EstadoDelVapor
   /** [EL ENCASTRE] 2D · el pozo debajo del hueco. */
   readonly pozo: ReturnType<typeof crearElPozo>
   /** [EL ENCASTRE] 2F · el rastro del mouse en el piso. */
   readonly rastro: EstadoDelRastro
 }
 
-/** `contorno`: el del logo acostado en el piso (x, z); `formas`: las del logo en su plano (`hueco.ts`). */
-export function crearElEstado(contorno: readonly THREE.Vector2[], formas: readonly THREE.Shape[], espesor: number): EstadoDelFinal {
+/** `formas`: las del logo en su plano (`hueco.ts`). */
+export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): EstadoDelFinal {
   return {
     cola: null,
     reloj: relojQuieto(),
@@ -100,8 +95,6 @@ export function crearElEstado(contorno: readonly THREE.Vector2[], formas: readon
     sacudonChico: new THREE.Vector3(),
     temblor: new THREE.Vector3(),
     haz: null,
-    vapor: crearElVapor(contorno, Math.random),
-    estadoDelVapor: vaporQuieto(),
     pozo: crearElPozo(formas, espesor),
     rastro: rastroQuieto(),
   }
@@ -118,7 +111,6 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uCalmaDelFinal.value = 0
   p.uSinMancha.value = 0
   p.uPoder.value = 0
-  s.vapor.puntos.visible = false
   s.pozo.grupo.visible = false
   s.aplicado = false
 }
@@ -127,10 +119,9 @@ export interface CuadroDeLaEscena {
   readonly camera: THREE.Camera
   readonly scene: THREE.Scene
   readonly pointer: THREE.Vector2
-  readonly viewport: { readonly dpr: number }
 }
 
-/** Un cuadro del final: la cola, el reloj del quieto, el logo, el hueco, el golpe, el vapor, la cámara y el piso. */
+/** Un cuadro del final: la cola, el reloj del quieto, el logo, el hueco, el golpe, la cámara y el piso. */
 export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: number, logo: THREE.Group | null, tamano: TamanoDelLogo): void {
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
@@ -148,10 +139,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [EL ENCASTRE] 2G · el quieto espera también al final entero (arranca solo: sin esto ya llevaba 1,4 s sin scroll al terminar).
   s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
   s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS), dt, EN_VIVO)
-  // [EL ENCASTRE] 2C · el vapor: se arma con el final en cero (por eso antes de la salida temprana) y sigue mientras se
-  // hunde (aunque `fin` ya volvió a 0).
-  pasoDelVapor(s.estadoDelVapor, segundosDelFinal(fin), s.reloj.direccion > 0, dt)
-  const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0 || s.estadoDelVapor.reloj > 0
+  const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)
     s.antes = fin
@@ -181,8 +169,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   s.pozo.grupo.visible = piso.uApertura.value > 0
 
   // 3 · [EL ENCASTRE] 2E · El golpe: al quedar al ras (una vez por bajada) se libera el poder: su pulso corre por el piso,
-  // centrado en el logo, y las juntas de alrededor se encienden. Al tocar el piso, sólo un golpecito. [2C] Y el vapor, que
-  // sopla mientras se acuesta y se queda posado en el piso; al revertir se hunde (`vapor.ts`).
+  // centrado en el logo, y las juntas de alrededor se encienden. Al tocar el piso, sólo un golpecito.
   const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
   const aterriza = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
   if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t
@@ -194,10 +181,6 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   s.antes = fin
   piso.uPoder.value = poder(fin)
   const desdeElGolpe = t - s.golpeEn
-  s.vapor.uniformes.uT.value = s.estadoDelVapor.reloj
-  s.vapor.uniformes.uHundir.value = s.estadoDelVapor.hundir
-  s.vapor.uniformes.uPixel.value = state.viewport.dpr
-  s.vapor.puntos.visible = s.estadoDelVapor.reloj > 0
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
   // desde arriba, centrada en el logo (su blanco baja al piso con la caída); cada vez que el encastre cede, un sacudón chico.

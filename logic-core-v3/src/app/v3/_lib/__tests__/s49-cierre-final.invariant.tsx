@@ -34,12 +34,11 @@ import { enElRiel } from '../../_secciones/trabajos/regulador'
 import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, progresoDeLaTabla, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
 import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
-import { VAPOR, crearElVapor } from '../escena/final/vapor'
 import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { FINAL_DEL_PIE, acostado, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto } from '../escena/final/recorridoDelFinal'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
-import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
+import { FLOOR_Y } from '../escena/probeScene'
 import { PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { progresoDelScroll } from '../escena/recorrido'
 import { sinElEstiramiento } from '../escena/tramoEstirado'
@@ -368,15 +367,14 @@ const aLos2s = Math.abs(quieto.giro) < 0.02 * 180 && quieto.aleja < 0.02 * FINAL
 for (let i = 0; i < 80; i += 1) relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
 afirmar(conTope && aLos2s && quieto.giro === 0 && quieto.aleja === 0 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): la cámara gira sin fin y se aleja hacia un tope que nunca pasa (sin perder el logo); al volver a scrollear, el giro (por el camino corto) y el alejamiento vuelven: a los 2 s queda menos del 2 % (aun desde media vuelta) y a los 6 s, cero', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u`)
 
-// El golpe: las partículas de tinta, en UN dibujo; y el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
-// [EL ENCASTRE] 2C · cambió por pedido: la explosión del golpe se fue; las partículas son el vapor al acostarse (s50 2C).
+// El golpe: el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
+// [EL ENCASTRE] 2C · cambió por pedido: la explosión del golpe se fue; las partículas eran el vapor al acostarse.
+// [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: el vapor se fue entero; el final no tiene partículas (lo afirma s51 1A).
 // [EL ENCASTRE] 2F · cambió por pedido: la vibración debajo del mouse se fue; es el rastro que levanta los bloques (s50 2F).
-const vapor = crearElVapor([new THREE.Vector2(1, 0), new THREE.Vector2(0, 1)], Math.random)
-const unDibujo = vapor.puntos instanceof THREE.Points && !vapor.puntos.visible && (vapor.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString() && VAPOR.columnas * VAPOR.porColumna >= 1000
-vapor.soltar()
 const simulacion = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
-const pisoBien = simulacion.includes('float empujeDelGolpe( vec2 xz )') && simulacion.includes(`${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );`) && conOndaDirigida(SIMULACION_GLSL).length < simulacion.length
-afirmar(unDibujo && pisoBien, 'las partículas: de tinta (no se ven sobre el piso claro si no son oscuras) en un solo `Points`, invisibles fuera del final (EL ENCASTRE 2C: el vapor); y en el piso, la onda del golpe y el rastro del mouse (EL ENCASTRE 2F), sumados por afuera de la onda dirigida', `${String(VAPOR.columnas * VAPOR.porColumna)} partículas · 1 dibujo`)
+const pisoBien = simulacion.includes('float empujeDelGolpe( vec2 xz )') && simulacion.includes(`${ANCLAS_DEL_FINAL.empuje}
+	fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );`) && conOndaDirigida(SIMULACION_GLSL).length < simulacion.length
+afirmar(pisoBien && !existsSync(`${V3}/_lib/escena/final/vapor.ts`), 'en el piso, la onda del golpe y el rastro del mouse (EL ENCASTRE 2F), sumados por afuera de la onda dirigida; sin partículas (RETOQUE DEL ENCASTRE 1A: el vapor se fue, s51)')
 const montaje = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
 const pisoVivo = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
 const armadas = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))

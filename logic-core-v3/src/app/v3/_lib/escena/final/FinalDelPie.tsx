@@ -18,25 +18,18 @@ import { EN_VIVO } from './recorridoDelFinal'
  * E y el balanceo del logo; acá se les suma el final, en el mismo cuadro y antes que todo lo que los lee: el piso, el aire,
  * los títulos, las piezas del pie). Desde 1024 y con movimiento (`ProbeStage`). Lo que hace y el porqué, en `recorridoDelFinal.ts`.
  *
- * [EL ENCASTRE] · el componente arma lo de una vez (las formas del logo, la máscara del hueco, el pozo y el vapor) y en cada
- * cuadro llama a `alCuadroDelFinal` (`cuadroDelFinal.ts`).
+ * [EL ENCASTRE] · el componente arma lo de una vez (las formas del logo, la máscara del hueco y el pozo) y en cada cuadro
+ * llama a `alCuadroDelFinal` (`cuadroDelFinal.ts`). [RETOQUE DEL ENCASTRE] 1A · sin el vapor: se abre el hueco y el logo encaja.
  */
 interface Props {
   readonly logoGroupRef: RefObject<THREE.Group | null>
   readonly stats: ProbeStatsStore
 }
 
-type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; camara: number; giro: number; aleja: number; golpes: number; particulas: boolean; logo: number[]; apertura: number } }
+type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; camara: number; giro: number; aleja: number; golpes: number; logo: number[]; apertura: number } }
 
 /** El espesor del logo (u): la extrusión y sus dos biseles, en la escala del SVG (el mismo que publica `ProbeLogo`). */
 const ESPESOR_DEL_LOGO = (PROBE_EXTRUDE.depth + 2 * PROBE_EXTRUDE.bevelThickness) * PROBE_SVG_SCALE
-
-/** El contorno del logo acostado, en el piso (x, z = −y de su plano): puntos parejos de sus formas, para el vapor. */
-function contornoEnElPiso(formas: readonly THREE.Shape[]): THREE.Vector2[] {
-  const todos = formas.flatMap((f) => [f.getPoints(), ...f.holes.map((h) => h.getPoints())]).flat()
-  const paso = Math.max(1, Math.floor(todos.length / 360))
-  return todos.filter((_, k) => k % paso === 0).map((q) => new THREE.Vector2(q.x, -q.y))
-}
 
 export function FinalDelPie({ logoGroupRef, stats }: Props) {
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
@@ -44,28 +37,27 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
   const grupo = useRef<THREE.Group>(null)
   const m = useRef<EstadoDelFinal | null>(null)
 
-  // Se arma al montarse (el vapor y el pozo, al grupo; la máscara, al piso); al irse (abajo de 1024, o con movimiento
-  // reducido), todo como estaba.
+  // Se arma al montarse (el pozo, al grupo; la máscara, al piso); al irse (abajo de 1024, o con movimiento reducido), todo
+  // como estaba.
   useLayoutEffect(() => {
     const g = grupo.current
     const grupoDelLogo = logoGroupRef.current
     if (g === null) return undefined
-    const estado = crearElEstado(contornoEnElPiso(logo.formas), logo.formas, ESPESOR_DEL_LOGO)
+    const estado = crearElEstado(logo.formas, ESPESOR_DEL_LOGO)
     const mascara = mascaraDelLogo(logo.formas, logo.caja)
     const piso = FINAL_EN_EL_PISO
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
     m.current = estado
-    g.add(estado.vapor.puntos, estado.pozo.grupo)
+    g.add(estado.pozo.grupo)
     return () => {
-      g.remove(estado.vapor.puntos, estado.pozo.grupo)
+      g.remove(estado.pozo.grupo)
       soltarElFinal(estado, grupoDelLogo)
       EN_VIVO.fin = 0
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
       piso.uGolpe.value.w = 0
       piso.uHueco.value = null
-      estado.vapor.soltar()
       estado.pozo.soltar()
       mascara.textura.dispose()
       m.current = null
@@ -75,7 +67,7 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
-    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, particulas: m.current?.vapor.puntos.visible ?? false, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value })
+    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value })
     return () => {
       delete ventana.__finalDelBanco
     }
