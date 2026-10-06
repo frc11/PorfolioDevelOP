@@ -370,12 +370,13 @@ afirmar(conTope && aLos2s && quieto.giro === 0 && quieto.aleja === 0 && relojDel
 
 // El golpe: las partículas de tinta, en UN dibujo; y el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
 // [EL ENCASTRE] 2C · cambió por pedido: la explosión del golpe se fue; las partículas son el vapor al acostarse (s50 2C).
+// [EL ENCASTRE] 2F · cambió por pedido: la vibración debajo del mouse se fue; es el rastro que levanta los bloques (s50 2F).
 const vapor = crearElVapor([new THREE.Vector2(1, 0), new THREE.Vector2(0, 1)], Math.random)
 const unDibujo = vapor.puntos instanceof THREE.Points && !vapor.puntos.visible && (vapor.puntos.material as THREE.ShaderMaterial).uniforms.uColor.value.getHexString() === new THREE.Color(INK_COLOR).getHexString() && VAPOR.columnas * VAPOR.porColumna >= 1000
 vapor.soltar()
 const simulacion = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
-const pisoBien = simulacion.includes('float empujeDelGolpe( vec2 xz )') && simulacion.includes(`${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + uVibraDelFinal * uCursor.w`) && conOndaDirigida(SIMULACION_GLSL).length < simulacion.length
-afirmar(unDibujo && pisoBien, 'las partículas: de tinta (no se ven sobre el piso claro si no son oscuras) en un solo `Points`, invisibles fuera del final (EL ENCASTRE 2C: el vapor); y en el piso, la onda del golpe y la vibración debajo del mouse, sumadas por afuera de la onda dirigida', `${String(VAPOR.columnas * VAPOR.porColumna)} partículas · 1 dibujo`)
+const pisoBien = simulacion.includes('float empujeDelGolpe( vec2 xz )') && simulacion.includes(`${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );`) && conOndaDirigida(SIMULACION_GLSL).length < simulacion.length
+afirmar(unDibujo && pisoBien, 'las partículas: de tinta (no se ven sobre el piso claro si no son oscuras) en un solo `Points`, invisibles fuera del final (EL ENCASTRE 2C: el vapor); y en el piso, la onda del golpe y el rastro del mouse (EL ENCASTRE 2F), sumados por afuera de la onda dirigida', `${String(VAPOR.columnas * VAPOR.porColumna)} partículas · 1 dibujo`)
 const montaje = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
 const pisoVivo = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
 const armadas = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))

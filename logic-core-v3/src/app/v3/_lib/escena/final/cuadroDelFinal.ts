@@ -6,6 +6,7 @@ import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { crearElPozo } from './hueco'
+import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import { crearElVapor, pasoDelVapor, vaporQuieto, type EstadoDelVapor, type Vapor } from './vapor'
 import {
   EN_VIVO,
@@ -68,6 +69,8 @@ export interface EstadoDelFinal {
   readonly estadoDelVapor: EstadoDelVapor
   /** [EL ENCASTRE] 2D · el pozo debajo del hueco. */
   readonly pozo: ReturnType<typeof crearElPozo>
+  /** [EL ENCASTRE] 2F · el rastro del mouse en el piso. */
+  readonly rastro: EstadoDelRastro
 }
 
 /** `contorno`: el del logo acostado en el piso (x, z); `formas`: las del logo en su plano (`hueco.ts`). */
@@ -97,6 +100,7 @@ export function crearElEstado(contorno: readonly THREE.Vector2[], formas: readon
     vapor: crearElVapor(contorno, Math.random),
     estadoDelVapor: vaporQuieto(),
     pozo: crearElPozo(formas, espesor),
+    rastro: rastroQuieto(),
   }
 }
 
@@ -106,8 +110,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   if (s.haz !== null) s.haz.visible = true
   EN_VIVO.camara = 0
   const p = FINAL_EN_EL_PISO
-  p.uVibraDelFinal.value = 0
-  p.uCursorDelFinal.value.w = 0
+  apagarElRastro(p.uRastro.value, s.rastro)
   p.uApertura.value = 0
   p.uCalmaDelFinal.value = 0
   p.uSinMancha.value = 0
@@ -208,15 +211,14 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
 
-  // 5 · El piso: después del golpe vibra y se oscurece debajo del mouse (con el puntero que se movió hace poco).
-  const vibra = Math.min(1, Math.max(0, (fin - golpe) / 0.12))
-  piso.uVibraDelFinal.value = vibra
+  // 5 · [EL ENCASTRE] 2F · El piso bajo el mouse (con el poder, y el puntero que se movió hace poco): deja un rastro que
+  // levanta los bloques y enciende sus rendijas, y que se apaga con inercia cuando el mouse se va (`rastro.ts`).
   if (s.puntero.distanceToSquared(state.pointer) > 1e-8) s.punteroEn = t
   s.puntero.copy(state.pointer)
   s.rayo.setFromCamera(state.pointer, state.camera)
   const toca = s.rayo.ray.intersectPlane(s.plano, s.punto)
   const presente = toca !== null && t - s.punteroEn < 2.5
   s.presencia += ((presente ? 1 : 0) - s.presencia) * (1 - Math.exp(-dt / (presente ? 0.12 : 0.7)))
-  if (toca !== null) piso.uCursorDelFinal.value.set(s.punto.x, s.punto.z, 0, vibra * s.presencia)
-  else piso.uCursorDelFinal.value.w = 0
+  const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0
+  pasoDelRastro(piso.uRastro.value, s.rastro, s.punto.x, s.punto.z, vale, dt)
 }

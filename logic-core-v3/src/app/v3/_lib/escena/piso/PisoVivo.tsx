@@ -212,11 +212,11 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uHaz = { value: 0 }
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
   // [INTERFAZ 2] T1 · la simulación con la onda hacia lo señalado (`ondaDirigida.ts`, inyectada en `SIMULACION_GLSL`).
-  // [CIERRE] 3 · y el final del pie: el golpe del encastre y el piso que vibra debajo del mouse (`final/enElPiso.ts`).
+  // [CIERRE] 3 · y el final del pie: el golpe del encastre y [EL ENCASTRE] 2F el rastro del mouse (`final/enElPiso.ts`).
   const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)), {
     uOnda: ONDA_EN_VIVO.uOnda,
     uGolpe: FINAL_EN_EL_PISO.uGolpe,
-    uVibraDelFinal: FINAL_EN_EL_PISO.uVibraDelFinal,
+    uRastro: FINAL_EN_EL_PISO.uRastro,
     // [EL ENCASTRE] 2D · el mar calmo alrededor del logo que se encastra (y sin el techo que lo esquivaba).
     uCalmaDelFinal: FINAL_EN_EL_PISO.uCalmaDelFinal,
     uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo,

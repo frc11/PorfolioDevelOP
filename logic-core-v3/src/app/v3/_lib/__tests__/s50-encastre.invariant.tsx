@@ -35,7 +35,8 @@ import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, pasoDelReloj, poder as poderDelFinal, poseDelLogo, relojQuieto, segundosDelFinal, subida, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { FLOOR_Y, INK_COLOR } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
-import { PODER_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { PODER_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { VAPOR, crearElVapor, pasoDelVapor, vaporPosado, vaporQuieto, type EstadoDelVapor } from '../escena/final/vapor'
@@ -481,5 +482,48 @@ const deLasJuntas = (c: string): boolean =>
   c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );') && c.includes('ruidoDelPoder(') && !/GOLPE_EN_EL_PISO\.banda|\bbanda:/.test(c)
 afirmar(deLasJuntas(enElPisoTs) && PODER_EN_EL_PISO.nucleo < PODER_EN_EL_PISO.halo && PODER_EN_EL_PISO.halo < PODER_EN_EL_PISO.aura && PODER_EN_EL_PISO.aura < 0.8 && PODER_EN_EL_PISO.oscuroDelNucleo > 0.9, 'el resplandor sale de las juntas de los bloques (un núcleo de tinta justo en la junta, un halo y un aura que entran a la tapa, el costado lleno), más fuerte cerca del logo, vivo y veteado; el frente del pulso enciende las juntas por donde pasa (la banda oscura de CIERRE, que se leía como una mancha, se fue)', `núcleo ${String(PODER_EN_EL_PISO.nucleo)} u · halo ${String(PODER_EN_EL_PISO.halo)} u · aura ${String(PODER_EN_EL_PISO.aura)} u`)
 controlPositivo('el detector VE la banda de CIERRE (un anillo oscuro parejo, sin juntas)', enElPisoTs.replace('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );', '') + '\nbanda: 0.55', deLasJuntas)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2F · El piso bajo el mouse: los bloques se levantan y por las rendijas sale el resplandor de abajo; se calma con inercia')
+
+// El rastro: la cabeza sigue al mouse y deja puntos cada `cada`; al irse el mouse, todos se apagan de a poco (no de golpe).
+type PasoDelRastro = typeof pasoDelRastro
+const rastroDe = (paso: PasoDelRastro): { readonly dejados: number; readonly separados: boolean; readonly alIrse: number; readonly aLos3s: number; readonly aLos5s: number; readonly quieto: number } => {
+  const puntos = Array.from({ length: RASTRO_EN_EL_PISO.puntos }, () => new THREE.Vector4(9999, 9999, 0, 0))
+  const e = rastroQuieto()
+  for (let i = 0; i <= 60; i += 1) paso(puntos, e, -3 + i * 0.05, 1, 1, 1 / 60)
+  const vivos = puntos.filter((q) => q.z > 0.2)
+  // Los que quedaron atrás (sin la cabeza, que sigue al mouse y acaba de nacer junto al último).
+  const xs = vivos.map((q) => q.x).sort((a, b) => a - b).slice(0, -1)
+  const separados = xs.length > 2 && xs.slice(1).every((x, i) => x - xs[i] > RASTRO_EN_EL_PISO.cada * 0.8)
+  for (let i = 0; i < 6; i += 1) paso(puntos, e, 0, 1, 0, 1 / 60)
+  const alIrse = Math.max(...puntos.map((q) => q.z))
+  for (let i = 0; i < 180; i += 1) paso(puntos, e, 0, 1, 0, 1 / 60)
+  const aLos3s = Math.max(...puntos.map((q) => q.z))
+  for (let i = 0; i < 120; i += 1) paso(puntos, e, 0, 1, 0, 1 / 60)
+  const aLos5s = Math.max(...puntos.map((q) => q.z))
+  const otros = Array.from({ length: RASTRO_EN_EL_PISO.puntos }, () => new THREE.Vector4(9999, 9999, 0, 0))
+  const eq = rastroQuieto()
+  for (let i = 0; i < 120; i += 1) paso(otros, eq, 2, 2, 1, 1 / 60)
+  return { dejados: vivos.length, separados, alIrse, aLos3s, aLos5s, quieto: Math.max(...otros.map((q) => q.z)) }
+}
+const conInercia = (r: ReturnType<typeof rastroDe>): boolean => r.dejados >= 4 && r.separados && r.alIrse > 0.8 && r.aLos3s < 0.05 && r.aLos5s === 0 && r.quieto === 1
+const medidoElRastro = rastroDe(pasoDelRastro)
+afirmar(conInercia(medidoElRastro), 'donde pasa el mouse deja un rastro (puntos separados, no un círculo que lo sigue); con el mouse quieto, la cabeza queda entera; al irse, se calma con inercia (a los 0,1 s sigue casi entero; a los 3 s, casi nada; a los 5 s, nada)', `${String(medidoElRastro.dejados)} puntos vivos · al irse ${medidoElRastro.alIrse.toFixed(2)}`)
+const sinInercia: PasoDelRastro = (puntos, e, x, z, vale, dt) => {
+  if (vale <= 0) for (const q of puntos) q.z = 0
+  else pasoDelRastro(puntos, e, x, z, vale, dt)
+}
+controlPositivo('el detector VE un piso que se apaga de golpe al irse el mouse', sinInercia, (p: PasoDelRastro) => conInercia(rastroDe(p)))
+// En el piso: levanta los bloques (la simulación) y el resplandor sale por las juntas, más por las rendijas que se abren
+// (el vecino más bajo); el círculo oscuro de CIERRE (una mancha plana que seguía al mouse) se fue.
+const conElRastro = (piso: string, simulacion: string): boolean =>
+  simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && piso.includes('float rastro = resplandorDelRastro( xz );') &&
+  piso.includes('smoothstep( 0.0, 0.1, - vVecinos )') && piso.includes('clamp( junta * ( r + rastro ), 0.0, 0.96 )') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
+const simulacionDelRastro = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor) y por las rendijas que se abren sale el resplandor oscuro con la forma de las juntas; el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
+controlPositivo('el detector VE el círculo oscuro de CIERRE', enElPisoTs + '\nfloat cuantoDelFinal( vec2 xz ) {', (c: string) => conElRastro(c, simulacionDelRastro))
+// Con el poder: antes de quedar al ras, el mouse no deja nada.
+afirmar(finalTsx.includes('const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0') && finalTsx.includes('apagarElRastro(p.uRastro.value, s.rastro)'), '  sólo con el poder liberado (antes, el mouse no deja nada) y se apaga entero al soltar el final')
 
 cerrar('s50-encastre')

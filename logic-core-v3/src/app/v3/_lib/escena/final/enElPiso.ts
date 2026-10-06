@@ -8,9 +8,10 @@ import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
  *
  *   · EL GOLPE (`uGolpe`): cuando el logo se encastra, un anillo fuerte que nace en él y corre por el piso (en la ecuación
  *     de ondas: el piso se levanta con su física, se refleja y se amortigua). [2E] Lo dibuja el resplandor de las juntas.
- *   · EL PISO QUE VIBRA CON LUZ (`uVibraDelFinal`, `uCursorDelFinal`): después del golpe, debajo del mouse el piso vibra
- *     (más que la loma de siempre) y se OSCURECE alrededor: de día el piso es claro y la luz que se ve es oscura (la misma
- *     mezcla hacia la noche que los anillos del pulso).
+ *   · [EL ENCASTRE] 2F · EL PISO BAJO EL MOUSE (`uRastro`; reemplaza al piso que vibraba y al círculo oscuro de CIERRE,
+ *     que se leía como una sombra que seguía al mouse): por donde pasa el mouse queda un rastro de puntos que se apagan
+ *     con inercia (`rastro.ts`); en la simulación, levanta un poco los bloques; en el dibujo, por las rendijas que se
+ *     abren (un bloque más alto que su vecino) sale el resplandor de abajo, con la forma de las juntas. Con el poder.
  *
  * [EL ENCASTRE] 2D · EL HUECO EXACTO (`hueco.ts`): el piso descarta sus tapas y costados donde la máscara del logo
  * acostado dice «adentro» (`uHueco`, en el plano del logo: (x, −z)) y su campo ancho pasa el umbral de la apertura
@@ -32,14 +33,11 @@ export const GOLPE_EN_EL_PISO = {
   ancho: 1.3,
 } as const
 
-export const VIBRA_EN_EL_PISO = {
-  /** La vibración debajo del cursor: su fuerza en la ecuación de ondas y su frecuencia (rad/s). */
-  fuerza: 230,
-  pulsacion: 34,
-  /** La luz oscura: cuánto oscurece en el centro y su radio (u). */
-  oscuro: 0.38,
-  radio: 3.2,
-} as const
+/**
+ * [EL ENCASTRE] 2F · EL RASTRO DEL MOUSE en el piso: cuántos puntos, cada cuánto se agrega uno (u), en cuánto se apaga
+ * (s: la inercia), su radio (u), cuánto levanta los bloques (u) y con qué fuerza los lleva (como la loma del cursor).
+ */
+export const RASTRO_EN_EL_PISO = { puntos: 8, cada: 0.55, apagaS: 0.9, radio: 1.7, alto: 0.3, rigidez: 120 } as const
 
 /**
  * [EL ENCASTRE] 2D · el mar calmo alrededor del logo: en la elipse de su caja, entero hasta `entero` veces su media caja y
@@ -51,10 +49,8 @@ export const CALMA_EN_EL_PISO = { entero: 1.15, hasta: 1.9, labio: 0.3 } as cons
 export const FINAL_EN_EL_PISO = {
   /** nace (reloj de la escena), x, z (u), fuerza (0: ninguno). */
   uGolpe: { value: new THREE.Vector4(0, 0, 0, 0) },
-  /** 0 a 1: cuánto vibra y se oscurece el piso debajo del cursor. */
-  uVibraDelFinal: { value: 0 },
-  /** x, z del cursor en el piso (u), y cuánto se ve (la presencia del puntero por la vibración). */
-  uCursorDelFinal: { value: new THREE.Vector4(9999, 9999, 0, 0) },
+  /** [EL ENCASTRE] 2F · el rastro del mouse: x, z (u) y cuánto vale cada punto (0: apagado). */
+  uRastro: { value: Array.from({ length: RASTRO_EN_EL_PISO.puntos }, () => new THREE.Vector4(9999, 9999, 0, 0)) },
   /** [EL ENCASTRE] 2D · la máscara del logo acostado (R: la forma; G: el campo ancho) y su marco en el plano del logo. */
   uHueco: { value: null as THREE.Texture | null },
   uMarcoDelHueco: { value: new THREE.Vector4(0, 0, 1, 1) },
@@ -90,7 +86,7 @@ export const ANCLAS_DEL_FINAL = {
 
 const SIMULACION_GLSL = /* glsl */ `
 uniform vec4 uGolpe;
-uniform float uVibraDelFinal;
+uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform float uCalmaDelFinal;
 uniform vec2 uCajaDelLogo;
 float empujeDelGolpe( vec2 xz ) {
@@ -101,6 +97,18 @@ float empujeDelGolpe( vec2 xz ) {
 	float d = ( length( xz - uGolpe.yz ) - frente ) / ${f(GOLPE_EN_EL_PISO.ancho)};
 	return uGolpe.w * ${f(GOLPE_EN_EL_PISO.fuerza)} * exp( - d * d ) * pow( 1.0 - t, 1.5 ) * smoothstep( 0.0, 0.04, t );
 }
+// [EL ENCASTRE] 2F · el rastro del mouse levanta un poco los bloques (un resorte hacia una loma bajo cada punto).
+float empujeDelRastro( vec2 p, float h ) {
+	float f = 0.0;
+	for ( int i = 0; i < ${String(RASTRO_EN_EL_PISO.puntos)}; i++ ) {
+		vec4 q = uRastro[ i ];
+		if ( q.z <= 0.0 ) continue;
+		vec2 d = p - q.xy / uLado;
+		float g = exp( - dot( d, d ) * uLado * uLado / ${f(RASTRO_EN_EL_PISO.radio * RASTRO_EN_EL_PISO.radio)} );
+		f += q.z * ${f(RASTRO_EN_EL_PISO.rigidez)} * g * ( ${f(RASTRO_EN_EL_PISO.alto)} * g - h );
+	}
+	return f;
+}
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z).
 float calmaDelFinal( vec2 xz ) {
 	if ( uCalmaDelFinal <= 0.0 ) return 0.0;
@@ -109,7 +117,7 @@ float calmaDelFinal( vec2 xz ) {
 }
 `
 
-/** La simulación del piso con el final: el golpe, la vibración debajo del cursor (la loma de siempre, `g`) y la calma. */
+/** La simulación del piso con el final: el golpe, el rastro del mouse y la calma. */
 export function conElFinalEnLaSimulacion(glsl: string): string {
   if (Object.values(ANCLAS_DEL_FINAL).some((ancla) => !glsl.includes(ancla))) {
     throw new Error('[CIERRE] 3 · la simulación del piso cambió: el final no encuentra dónde entrar')
@@ -118,7 +126,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
     .replace(ANCLAS_DEL_FINAL.main, `${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
     .replace(
       ANCLAS_DEL_FINAL.empuje,
-      `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + uVibraDelFinal * uCursor.w * ${f(VIBRA_EN_EL_PISO.fuerza)} * g * sin( uTiempo * ${f(VIBRA_EN_EL_PISO.pulsacion)} );`,
+      `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );`,
     )
     .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );`)
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
@@ -126,20 +134,12 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
 
 const DIBUJO_GLSL = /* glsl */ `
 uniform vec4 uGolpe;
-uniform vec4 uCursorDelFinal;
+uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform sampler2D uHueco;
 uniform vec4 uMarcoDelHueco;
 uniform float uApertura;
 uniform float uSinMancha;
 uniform vec2 uCajaDelLogo;
-float cuantoDelFinal( vec2 xz ) {
-	float c = 0.0;
-	if ( uCursorDelFinal.w > 0.0 ) {
-		float d = length( xz - uCursorDelFinal.xy ) / ${f(VIBRA_EN_EL_PISO.radio)};
-		c += uCursorDelFinal.w * ${f(VIBRA_EN_EL_PISO.oscuro)} * exp( - d * d );
-	}
-	return c;
-}
 // [EL ENCASTRE] 2E · el resplandor de las juntas: cuánto en este punto (el poder alrededor del logo y el frente del pulso).
 uniform float uPoder;
 float azarDelPoder( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
@@ -167,10 +167,22 @@ float resplandorDelFinal( vec2 xz ) {
 	}
 	return r;
 }
+// [EL ENCASTRE] 2F · cuánto resplandor deja el rastro del mouse en este punto.
+float resplandorDelRastro( vec2 xz ) {
+	float r = 0.0;
+	for ( int i = 0; i < ${String(RASTRO_EN_EL_PISO.puntos)}; i++ ) {
+		vec4 q = uRastro[ i ];
+		if ( q.z <= 0.0 ) continue;
+		vec2 d = ( xz - q.xy ) / ${f(RASTRO_EN_EL_PISO.radio)};
+		r += q.z * exp( - dot( d, d ) );
+	}
+	return min( 1.2, r );
+}
 // La junta: en la tapa, un núcleo negro justo en el borde y un halo que entra hacia la tapa; el costado (la rendija), lleno.
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float r = resplandorDelFinal( xz );
-	if ( r <= 0.0 ) return color;
+	float rastro = resplandorDelRastro( xz );
+	if ( r + rastro <= 0.0 ) return color;
 	float junta = 1.0;
 	if ( vTapa > 0.5 ) {
 		vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
@@ -180,11 +192,15 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 		// El halo y el aura suman las cuatro juntas (con la más cercana sola, cada tapa se veía como una pirámide).
 		vec4 h = exp( - filo / ( ${f(PODER_EN_EL_PISO.halo)} * veta ) );
 		vec4 a = exp( - filo / ${f(PODER_EN_EL_PISO.aura)} );
+		// [2F] La rendija que se abre (el vecino más bajo que esta tapa) deja salir más: el rastro pesa sobre todo ahí.
+		vec4 abre = mix( vec4( r / max( r + rastro, 1e-4 ) ), vec4( 1.0 ), smoothstep( 0.0, 0.1, - vVecinos ) );
+		h *= abre;
+		a *= abre;
 		float halo = min( 1.0, h.x + h.y + h.z + h.w );
 		float aura = min( 1.0, 0.6 * ( a.x + a.y + a.z + a.w ) );
 		junta = ${f(PODER_EN_EL_PISO.oscuroDelNucleo)} * nucleo + ( 1.0 - nucleo ) * min( 1.0, ${f(PODER_EN_EL_PISO.oscuroDelHalo)} * halo + ${f(PODER_EN_EL_PISO.oscuroDelAura)} * aura );
 	}
-	return mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );
+	return mix( color, vec3( 0.045 ), clamp( junta * ( r + rastro ), 0.0, 0.96 ) );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {
@@ -211,21 +227,20 @@ export const ANCLAS_DEL_HUECO = {
   niebla: '#include <fog_fragment>',
 } as const
 
-/** El dibujo del piso con el final: el hueco, su labio, el resplandor de las juntas, la luz oscura del cursor y la mancha que se va. */
+/** El dibujo del piso con el final: el hueco, su labio, el resplandor de las juntas (el poder, el pulso, el rastro) y la mancha que se va. */
 export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
   const previo = material.onBeforeCompile.bind(material)
   const clavePrevia = material.customProgramCacheKey.bind(material)
   material.customProgramCacheKey = () => `${clavePrevia()}|final-del-pie`
   material.onBeforeCompile = (shader, renderer) => {
     previo(shader, renderer)
-    const anclas = [ANCLAS_DEL_DIBUJO.funcion, ANCLAS_DEL_DIBUJO.mezcla, ...Object.values(ANCLAS_DEL_HUECO)]
+    const anclas = [ANCLAS_DEL_DIBUJO.funcion, ...Object.values(ANCLAS_DEL_HUECO)]
     if (anclas.some((ancla) => !shader.fragmentShader.includes(ancla))) {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
     Object.assign(shader.uniforms, FINAL_EN_EL_PISO)
     shader.fragmentShader = shader.fragmentShader
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
-      .replace(ANCLAS_DEL_DIBUJO.mezcla, `( ${ANCLAS_DEL_DIBUJO.mezcla} + cuantoDelFinal( vPiso.xz ) )`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
       .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
