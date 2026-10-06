@@ -25,6 +25,9 @@ import { HUECO } from './hueco'
  * se pega arriba) la secuencia arranca sola y corre a su ritmo (`RELOJ_DEL_FINAL.duracionS`); scrollear hacia abajo la
  * adelanta (la cola entera, la secuencia entera); un gesto hacia arriba (o salir del pie) la revierte (`vueltaS`), y un
  * viaje del menú la deshace enseguida. La cola sigue (el pie pegado y el scroll que adelanta), con el mismo alto.
+ *
+ * [RETOQUE DEL ENCASTRE] 1D · la cola se fue: la página termina en el pie, la secuencia arranca cuando el pie llegó
+ * entero, no se adelanta con el scroll y un gesto hacia arriba la rebobina (`RELOJ_DEL_FINAL`).
  */
 export const FINAL_DEL_PIE = {
   /**
@@ -61,44 +64,77 @@ export const FINAL_DEL_PIE = {
 } as const
 
 /**
- * [EL ENCASTRE] 2A · EL RELOJ DEL FINAL: lo que dura la secuencia a su ritmo (s), lo que tarda en volver con un gesto hacia
- * arriba (s) y con un viaje del menú (s), y desde cuántos px por cuadro un scroll es un gesto (no un temblor del trackpad).
+ * [EL ENCASTRE] 2A · EL RELOJ DEL FINAL. [RETOQUE DEL ENCASTRE] 1D · CINEMÁTICA AUTOMÁTICA CON REBOBINADO: sin la cola, la
+ * página termina en el pie. Al fondo, la secuencia arranca sola recién cuando el pie terminó de aparecer entero (todas sus
+ * piezas en su lugar) y corre a UNA velocidad (`duracionS`): el scroll hacia abajo no la adelanta. Un gesto hacia arriba
+ * mientras no está en su inicio no mueve la página (lo retiene `gestosDelScroll.ts`): la REBOBINA (`rebobinaS` de punta
+ * a punta) mientras siga; si suelta (`sueltaS` sin gesto), retoma sola hacia adelante desde donde quedó. Rebobinada del
+ * todo, espera parada: el gesto que la llevó a cero sigue retenido hasta que se suelta y el SIGUIENTE mueve la página
+ * (un gesto hacia abajo, en cambio, la vuelve a correr). Salir del fondo sin un gesto (la barra) la revierte (`vueltaS`)
+ * y un viaje del menú la deshace enseguida (`vueltaDelViajeS`). La velocidad se persigue con una inercia corta
+ * (`inerciaS`): ningún cambio de sentido es de golpe.
  */
-export const RELOJ_DEL_FINAL = { duracionS: 6.4, vueltaS: 1.5, vueltaDelViajeS: 0.35, gestoPx: 2 } as const
+export const RELOJ_DEL_FINAL = { duracionS: 6.4, rebobinaS: 2.2, vueltaS: 1.5, vueltaDelViajeS: 0.35, sueltaS: 0.25, inerciaS: 0.12 } as const
+
+/** `espera`: no corre (no está al fondo, el pie llega o hay un viaje): vuelve a cero. `corre`: adelante, o rebobinando. `rebobinada`: quieta en cero. */
+export type FaseDelFinal = 'espera' | 'corre' | 'rebobinada'
 
 /** Lo que el reloj recuerda de un cuadro al otro. */
 export interface RelojDelFinal {
   fin: number
-  /** 1: avanza (llegó al pie, o scrollea hacia abajo); −1: vuelve (un gesto hacia arriba, o salió del pie). */
-  direccion: 1 | -1
-  scroll: number
-  enElPie: boolean
+  /** Cuánto `fin` por segundo (la que persigue a la de su fase, con la inercia). */
+  velocidad: number
+  fase: FaseDelFinal
 }
 
 export function relojQuieto(): RelojDelFinal {
-  return { fin: 0, direccion: -1, scroll: Number.NaN, enElPie: false }
+  return { fin: 0, velocidad: 0, fase: 'espera' }
+}
+
+/** Lo que el reloj necesita saber en cada cuadro. */
+export interface EntradaDelReloj {
+  /** La página está al fondo (no queda scroll hacia abajo). */
+  readonly alFondo: boolean
+  /** Todas las piezas del pie llegaron a su lugar. */
+  readonly pieEntero: boolean
+  /** Hay un gesto hacia arriba sin soltar (el último, hace menos de `sueltaS`). */
+  readonly rebobina: boolean
+  /** Hubo un gesto hacia abajo desde el cuadro anterior. */
+  readonly haciaAbajo: boolean
+  /** Hay un viaje del menú en curso. */
+  readonly enViaje: boolean
+}
+
+/** Un cuadro del reloj (escribe en `r`). */
+export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): void {
+  const R = RELOJ_DEL_FINAL
+  let objetivo = -1 / R.vueltaS
+  if (e.enViaje || !e.alFondo) {
+    r.fase = 'espera'
+    if (e.enViaje) objetivo = -1 / R.vueltaDelViajeS
+  } else {
+    if (r.fase === 'espera' && e.pieEntero) r.fase = 'corre'
+    else if (r.fase === 'rebobinada' && e.haciaAbajo && !e.rebobina) r.fase = 'corre'
+    if (r.fase === 'corre') objetivo = e.rebobina ? -1 / R.rebobinaS : 1 / R.duracionS
+    else if (r.fase === 'rebobinada') objetivo = 0
+  }
+  const paso = Math.max(0, dt)
+  r.velocidad += (objetivo - r.velocidad) * (1 - Math.exp(-paso / R.inerciaS))
+  const fin = r.fin + r.velocidad * paso
+  r.fin = Math.min(1, Math.max(0, fin))
+  // Contra un tope, quieta (al dar vuelta no arranca con la velocidad que traía contra el tope).
+  if (r.fin !== fin) r.velocidad = 0
+  if (r.fase === 'corre' && e.rebobina && r.fin === 0) r.fase = 'rebobinada'
 }
 
 /**
- * Un cuadro del reloj. `enElPie`: el pie está pegado arriba (se llegó); `scroll`: el de este cuadro; `cola`: el alto de la
- * cola (px: recorrerla entera adelanta la secuencia entera); `enViaje`: hay un viaje del menú en curso; `pegadoDesde`:
- * dónde arranca la cola (sólo el scroll recorrido ADENTRO de ella adelanta o atrasa: llegar de un salto no cuenta). Escribe
- * en `r`.
+ * ¿Se retiene este gesto (no mueve la página)? Sólo al fondo y hacia arriba, mientras la cinemática no está en su inicio
+ * (corre, o `fin` > 0) y, rebobinada del todo, mientras siga el gesto que la llevó a cero (`desdeElUltimoArribaS`: cuánto
+ * hace del último gesto hacia arriba, sin contar éste).
  */
-export function pasoDelReloj(r: RelojDelFinal, enElPie: boolean, scroll: number, cola: number, dt: number, enViaje: boolean, pegadoDesde = Number.NEGATIVE_INFINITY): void {
-  const R = RELOJ_DEL_FINAL
-  const antes = Number.isNaN(r.scroll) ? scroll : r.scroll
-  const delta = scroll - antes
-  r.scroll = scroll
-  const llega = enElPie && !r.enElPie
-  r.enElPie = enElPie
-  if (enViaje || !enElPie) r.direccion = -1
-  else if (llega || delta > R.gestoPx) r.direccion = 1
-  else if (delta < -R.gestoPx) r.direccion = -1
-  const enLaCola = Math.abs(Math.max(scroll, pegadoDesde) - Math.max(antes, pegadoDesde))
-  const porScroll = cola > 0 ? enLaCola / cola : 0
-  if (r.direccion > 0) r.fin = Math.min(1, r.fin + dt / R.duracionS + (delta > 0 ? porScroll : 0))
-  else r.fin = Math.max(0, r.fin - dt / (enViaje ? R.vueltaDelViajeS : R.vueltaS) - (delta < 0 ? porScroll : 0))
+export function retieneElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, desdeElUltimoArribaS: number): boolean {
+  if (!alFondo || sentido > 0) return false
+  return r.fase === 'corre' || r.fin > 0 || (r.fase === 'rebobinada' && desdeElUltimoArribaS < RELOJ_DEL_FINAL.sueltaS)
 }
 
 /** Lo que el final tiene en vivo: lo escribe `FinalDelPie` en cada cuadro y lo leen las piezas del pie y el piso. */
@@ -112,10 +148,15 @@ export const EN_VIVO = {
   /** El blanco de la cámara de este cuadro (el centro del logo acostado, sin el rebote). */
   blanco: new THREE.Vector3(0, ORBIT_TARGET_Y, 0),
   /**
-   * Desde qué scroll (px del documento) el pie queda pegado arriba: el arranque de la cola menos un cuadro. Sin cola,
-   * infinito. Mientras se recorre la cola el pie no se mueve en la pantalla: sus piezas se colocan con este scroll.
+   * Desde qué scroll (px del documento) el pie queda quieto: [RETOQUE DEL ENCASTRE] 1D · sin cola, el fondo de la página
+   * (antes, el arranque de la cola). Sin final, infinito. Las piezas del pie se colocan con este scroll como tope.
    */
   pegadoDesde: Number.POSITIVE_INFINITY,
+  /**
+   * [RETOQUE DEL ENCASTRE] 1D · si el pie terminó de aparecer entero (todas sus piezas en su lugar): lo escribe el pie de
+   * volumen en cada cuadro; sin pie de volumen, `true` (el final no espera nada).
+   */
+  pieEntero: true,
 }
 
 /** El scroll con el que se colocan las piezas del pie: el de la página hasta que el pie se pega; después, ése. */

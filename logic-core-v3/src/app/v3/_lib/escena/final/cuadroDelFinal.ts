@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import { VIVO } from '../entorno/vivo'
 import { FLOOR_Y } from '../probeScene'
+import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO } from './enElPiso'
@@ -22,6 +23,7 @@ import {
   poseDelLogo,
   relojDelQuieto,
   relojQuieto,
+  retieneElGesto,
   sacudonDeLaPresion,
   subida,
   temblorDelLogo,
@@ -35,13 +37,13 @@ import {
  * `recorridoDelFinal.ts` (los tiempos), `hueco.ts` y `enElPiso.ts`. [RETOQUE DEL ENCASTRE] 1A · el vapor se fue entero.
  */
 
-const SELECTOR_DE_LA_COLA = '[data-pieza="cola-del-final"]'
-
 /** Lo del final que vive entre cuadros: lo arma `FinalDelPie` una vez y lo usa `alCuadroDelFinal`. */
 export interface EstadoDelFinal {
-  cola: Element | null
   /** [EL ENCASTRE] 2A · el reloj de `fin`. */
   readonly reloj: RelojDelFinal
+  /** [RETOQUE DEL ENCASTRE] 1D · el fondo de la página (px de scroll, el del último cuadro) y los últimos gestos (s, en `performance.now`). */
+  fondo: number
+  readonly gestos: { arriba: number; abajo: number; leido: number }
   scroll: number
   sinScrollS: number
   /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
@@ -73,8 +75,9 @@ export interface EstadoDelFinal {
 /** `formas`: las del logo en su plano (`hueco.ts`). */
 export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): EstadoDelFinal {
   return {
-    cola: null,
     reloj: relojQuieto(),
+    fondo: Number.POSITIVE_INFINITY,
+    gestos: { arriba: Number.NEGATIVE_INFINITY, abajo: Number.NEGATIVE_INFINITY, leido: 0 },
     scroll: Number.NaN,
     sinScrollS: 0,
     enteroS: 0,
@@ -121,24 +124,44 @@ export interface CuadroDeLaEscena {
   readonly pointer: THREE.Vector2
 }
 
-/** Un cuadro del final: la cola, el reloj del quieto, el logo, el hueco, el golpe, la cámara y el piso. */
+const AL_FONDO_PX = 2
+const ahoraS = (): number => performance.now() / 1000
+
+/**
+ * [RETOQUE DEL ENCASTRE] 1D · un gesto de scroll (`gestosDelScroll.ts`): lo anota y dice si se retiene (un gesto hacia
+ * arriba al fondo, mientras la cinemática no está en su inicio, la rebobina en vez de subir la página). Con el fondo del
+ * último cuadro: no se mide el documento en medio de la rueda.
+ */
+export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
+  const ahora = ahoraS()
+  const alFondo = window.scrollY >= s.fondo - AL_FONDO_PX
+  const retiene = retieneElGesto(s.reloj, alFondo, g.sentido, ahora - s.gestos.arriba)
+  if (g.sentido < 0) s.gestos.arriba = ahora
+  else s.gestos.abajo = ahora
+  return retiene
+}
+
+/** Un cuadro del final: el reloj, el quieto, el logo, el hueco, el golpe, la cámara y el piso. */
 export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: number, logo: THREE.Group | null, tamano: TamanoDelLogo): void {
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
-  // 1 · [EL ENCASTRE] 2A · el reloj: arranca solo al llegar al pie (pegado), el scroll hacia abajo lo adelanta y un gesto
-  // hacia arriba (o salir del pie, o un viaje del menú) lo revierte.
-  s.cola ??= document.querySelector(SELECTOR_DE_LA_COLA)
-  const caja = s.cola?.getBoundingClientRect()
-  EN_VIVO.pegadoDesde = caja !== undefined && caja.height > 0 ? caja.top + window.scrollY - window.innerHeight : Number.POSITIVE_INFINITY
-  const enElPie = window.scrollY >= EN_VIVO.pegadoDesde - 2
-  pasoDelReloj(s.reloj, enElPie, window.scrollY, caja?.height ?? 0, dt, viajeEnCurso() !== null, EN_VIVO.pegadoDesde)
+  // 1 · [RETOQUE DEL ENCASTRE] 1D · el reloj: al fondo, arranca solo cuando el pie llegó entero y corre a su ritmo (el
+  // scroll hacia abajo no lo adelanta); un gesto hacia arriba retenido lo rebobina mientras siga; al soltar, retoma.
+  s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+  EN_VIVO.pegadoDesde = s.fondo
+  const ahora = ahoraS()
+  const haciaAbajo = s.gestos.abajo > s.gestos.leido
+  s.gestos.leido = ahora
+  pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobina: ahora - s.gestos.arriba < RELOJ_DEL_FINAL.sueltaS, haciaAbajo, enViaje: viajeEnCurso() !== null }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
   s.scroll = window.scrollY
   // [EL ENCASTRE] 2G · el quieto espera también al final entero (arranca solo: sin esto ya llevaba 1,4 s sin scroll al terminar).
+  // [RETOQUE DEL ENCASTRE] 1D · y a un rato sin gestos (al fondo la página no se mueve: un gesto no cambia el scroll).
   s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
-  s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS), dt, EN_VIVO)
+  const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
+  s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)

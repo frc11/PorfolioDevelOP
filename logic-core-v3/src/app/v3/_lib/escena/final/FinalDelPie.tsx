@@ -5,10 +5,11 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'rea
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
+import { retenerLosGestos } from '../../gestosDelScroll'
 import { hayBanco } from '../entorno'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
-import { alCuadroDelFinal, crearElEstado, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
+import { alCuadroDelFinal, crearElEstado, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { formasDelLogo, mascaraDelLogo } from './hueco'
 import { EN_VIVO } from './recorridoDelFinal'
@@ -26,7 +27,7 @@ interface Props {
   readonly stats: ProbeStatsStore
 }
 
-type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; camara: number; giro: number; aleja: number; golpes: number; logo: number[]; apertura: number } }
+type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; fase: string; pieEntero: boolean; camara: number; giro: number; aleja: number; golpes: number; logo: number[]; apertura: number } }
 
 /** El espesor del logo (u): la extrusión y sus dos biseles, en la escala del SVG (el mismo que publica `ProbeLogo`). */
 const ESPESOR_DEL_LOGO = (PROBE_EXTRUDE.depth + 2 * PROBE_EXTRUDE.bevelThickness) * PROBE_SVG_SCALE
@@ -67,11 +68,14 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
-    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value })
+    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value })
     return () => {
       delete ventana.__finalDelBanco
     }
   }, [logoGroupRef])
+
+  // [RETOQUE DEL ENCASTRE] 1D · los gestos de scroll, antes que Lenis: hacia arriba al fondo rebobinan (`cuadroDelFinal.ts`).
+  useEffect(() => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g))), [])
 
   useFrame((state, delta) => {
     if (m.current !== null) alCuadroDelFinal(m.current, state, delta, logoGroupRef.current, { alto: stats.current.logoH || 4.78, espesor: stats.current.logoD || ESPESOR_DEL_LOGO })

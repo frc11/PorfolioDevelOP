@@ -81,6 +81,8 @@ const PUNTO = new THREE.Vector3()
 
 /** Un cuadro: cada pieza a la vista, en su lugar del mundo; su llegada; su hundido; lo interactivo sobre ella; su sombra. */
 export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.DirectionalLight | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
+  // [RETOQUE DEL ENCASTRE] 1D · el final del pie espera a que el pie haya aparecido entero (lo de abajo, al terminar el cuadro).
+  EN_VIVO.pieEntero = false
   if (!s.listo || s.estudio === null || s.armadas.length === 0) return
   viva.updateMatrixWorld()
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
@@ -118,6 +120,7 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)
   }
   SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = sombras
+  EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)
 }
 
 /** [PASADA FINAL] C2 · lo mostrado persigue al scroll por tramos (en un viaje del menú, desarmado); con el scroll quieto, se asienta. */

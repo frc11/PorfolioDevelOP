@@ -300,28 +300,26 @@ afirmar(/className="pointer-events-none absolute inset-0 grid place-items-center
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El final del pie: el logo se acuesta y se encastra, la cámara lo mira desde arriba; el golpe, el piso que vibra, el quieto y la vuelta')
 
-// La cola: un scroll sin contenido después del pie, FUERA de la tabla de secciones; mientras se la recorre el pie queda
-// pegado arriba. Sólo desde 1024 y con movimiento; abajo y con movimiento reducido no existe (el pie termina la página).
+// La cola: un scroll sin contenido después del pie, FUERA de la tabla de secciones; mientras se la recorría el pie quedaba
+// pegado arriba. [RETOQUE DEL ENCASTRE] 1D · cambió por pedido: la cola se fue (la página termina en el pie, la cinemática
+// corre sola y el scroll ya no la adelanta): sin el `div`, sin la propiedad de su alto y sin el pie pegado (s51 1D).
 const pagina = sinComentarios(leer('page.tsx'))
 const hojaDelPie = leer('_estilos/pie.css')
-const colaBien = (pg: string, css: string): boolean =>
-  /<Home \/>\s*(\{\}\s*)?<div data-pieza="cola-del-final" aria-hidden="true" className="hidden escritorio:motion-safe:block escritorio:motion-safe:h-\[var\(--cola-del-final\)\]" \/>\s*<\/main>/.test(pg) &&
-  /\[data-v3\] \[data-pieza="cola-del-final"\] \{\s*--cola-del-final: \d+svh;\s*\}/.test(css) &&
-  /\[data-v3\] \[data-panel="cierre"\] \{\s*position: sticky;\s*top: 0;\s*\}/.test(css) && !/@media/.test(css.slice(css.indexOf('[CIERRE] 3')))
-afirmar(colaBien(pagina, hojaDelPie), 'la cola del final: un `div` sin contenido después de las secciones, adentro del `<main>`, que sólo existe desde 1024 y con movimiento (sus variantes, sin media query escrita); mientras se la recorre el pie queda pegado arriba (sin cola el `sticky` no hace nada: el pie es lo último)')
-controlPositivo('el detector VE una cola que también estaría con movimiento reducido', [pagina.replace('escritorio:motion-safe:block', 'escritorio:block'), hojaDelPie] as const, ([pg, css]: readonly [string, string]) => colaBien(pg, css))
-// Nada de lo de antes se mueve: la cola no es una sección, y la escena se queda en su último nudo (la cuenta se acota).
+const sinCola = (pg: string, css: string): boolean => /<Home \/>\s*(\{\}\s*)?<\/main>/.test(pg) && !pg.includes('cola-del-final') && !/--cola-del-final|\[data-panel="cierre"\] \{\s*position: sticky/.test(css)
+afirmar(sinCola(pagina, hojaDelPie), 'sin la cola del final (RETOQUE DEL ENCASTRE 1D): el pie es lo último del `<main>`, sin la propiedad del alto de la cola ni el pie pegado arriba')
+controlPositivo('el detector VE la cola de CIERRE', [pagina.replace('<Home />', '<Home /><div data-pieza="cola-del-final" aria-hidden="true" />'), hojaDelPie] as const, ([pg, css]: readonly [string, string]) => sinCola(pg, css))
+// Nada de lo de antes se mueve: al fondo, la escena se queda en su último nudo (la cuenta se acota).
 const v = 900
 const abajoDeLasSecciones = ANCLAJE.pantallasDelDocumento * v
-afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v + dentro, 0, abajoDeLasSecciones, v) === ANCLAJE.pantallasDeScroll) && !/data-panel/.test(/<div data-pieza="cola-del-final"[^>]*>/.exec(pagina)?.[0] ?? 'data-panel'), '  la cola no cuenta para la escena: no es una sección, y recorriéndola el progreso queda en el último nudo (la pose E): Portfolio, la frase, la noche y el amanecer no se mueven')
-// [EL ENCASTRE] 2A · cambió por pedido: `fin` ya no es lo recorrido de la cola, tiene su reloj (lo detalla s50 2A).
+afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v + dentro, 0, abajoDeLasSecciones, v) === ANCLAJE.pantallasDeScroll), '  al fondo la escena queda en su último nudo (la pose E): Portfolio, la frase, la noche y el amanecer no se mueven')
+// [EL ENCASTRE] 2A · cambió por pedido: `fin` ya no es lo recorrido de la cola, tiene su reloj. [RETOQUE DEL ENCASTRE] 1D ·
+// cambió por pedido: al fondo, con el pie entero, avanza solo; un gesto hacia arriba lo rebobina (lo detalla s51 1D).
 const reloj = relojQuieto()
-pasoDelReloj(reloj, true, 5000, 720, 1 / 60, false)
-for (let i = 0; i < 60; i += 1) pasoDelReloj(reloj, true, 5000, 720, 1 / 60, false)
+const alFondo = { alFondo: true, pieEntero: true, rebobina: false, haciaAbajo: false, enViaje: false }
+for (let i = 0; i < 60; i += 1) pasoDelReloj(reloj, alFondo, 1 / 60)
 const solo = reloj.fin
-pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
-for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, true, 4900, 720, 1 / 60, false)
-afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj (EL ENCASTRE 2A): llegado al pie avanza solo, sin scroll, y un gesto hacia arriba lo devuelve a 0', `en 1 s solo: ${solo.toFixed(2)}`)
+for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, { ...alFondo, rebobina: true }, 1 / 60)
+afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj: al fondo con el pie entero avanza solo, sin scroll, y un gesto hacia arriba sostenido lo rebobina a 0', `en 1 s solo: ${solo.toFixed(2)}`)
 
 // La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra. Con `fin` 0, el logo de hoy.
 // [EL ENCASTRE] 2B · cambió por pedido: se acuesta EN SU LUGAR (antes, sobre su base: el centro se corría al fondo) y cae

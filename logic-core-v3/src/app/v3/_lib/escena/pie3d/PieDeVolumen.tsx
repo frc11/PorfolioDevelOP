@@ -8,6 +8,7 @@ import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas
 import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
+import { EN_VIVO } from '../final/recorridoDelFinal'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { alCuadro, rearmar, soltar, type EstadoDelPie } from './armadas'
 import { SOMBRAS_DEL_PIE } from './sombras'
@@ -70,6 +71,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       s.armadas = []
       s.estudio = null
       SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
+      // [RETOQUE DEL ENCASTRE] 1D · sin pie de volumen, el final no espera nada.
+      EN_VIVO.pieEntero = true
       marcarElPieListo(false)
       rt.dispose()
     }
