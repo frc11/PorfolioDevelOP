@@ -12,6 +12,8 @@
  *        bajo el mouse, la tapa sombreada para el contraste; sin dientes (un píxel como mínimo) ni bandas.
  *   1F · después del encastre el piso entero queda energizado: las rendijas que abren las ondas, el mar y el pulso dejan
  *        salir la misma luz, más tenue, por junta (sin parches ni anillos grises), fuera del mar calmo del logo.
+ *   1G · el pie no recibe la luz de la cinemática: su normal y su vista giran con la cámara del final (la luz y los
+ *        reflejos, como antes de la cinemática, en cualquier pose).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -22,7 +24,8 @@ import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, LUZ_EN_EL_PISO, RASTRO_EN_EL_PISO, 
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
-import { RELOJ_DEL_FINAL, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { RELOJ_DEL_FINAL, camaraDelFinal, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from '../escena/pie3d/material'
 import { sentidoDeLaRueda, sentidoDeLaTecla, sentidoDelDedo } from '../gestosDelScroll'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -272,5 +275,62 @@ const automaticoBien = (glsl: string): boolean => {
 afirmar(automaticoBien(dibujo) && A.ondas < 1 && A.sombra < LUZ_EN_EL_PISO.sombra && A.abre[0] >= 0.05 && A.banda <= 0.1, 'después del encastre (con el poder) las rendijas que abren las ondas, el mar y el pulso del golpe dejan salir la misma luz, más tenue que bajo el mouse: por junta, sólo donde la rendija está abierta de verdad (el mar quieto no se enciende), con su sombra en una banda angosta junto a la junta; fuera del mar calmo del logo (su borde, encendido, dibujaba un marco de bloques); sin el brillo parejo alrededor del logo ni la banda del pulso (se leían como manchas grises)', `${String(A.ondas)} de la luz · rendija desde ${String(A.abre[0])} u · banda ${String(A.banda)} u`)
 controlPositivo('el detector VE la sombra de la tapa entera (el parche en escalones de bloque)', dibujo.replace(`dot( solo, exp( - filo / ( ${String(A.banda)} + px ) ) )`, 'max( max( solo.x, solo.y ), max( solo.z, solo.w ) )'), automaticoBien)
 controlPositivo('  y un brillo que no espera al encastre', dibujo.replace('uPoder * fueraDeLaCalma( xz )', 'fueraDeLaCalma( xz )'), automaticoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1G · El pie no recibe la luz de la cinemática: se ve como antes, en cualquier pose de la cámara')
+
+// La cuenta: una pieza de frente a la cámara sin el mouse tiene la misma normal y la misma vista en el espacio de la
+// cámara antes y durante el final; lo que cambia es dónde quedan las luces (quietas en el mundo). Con el giro, la luz
+// (difusa y especular) y el reflejo del estudio son los de antes del final; sin él, otros.
+type GiroDeLaLuz = typeof giroDeLaLuzDelPie
+const comoAntes = (giroDe: GiroDeLaLuz): { readonly peor: number; readonly cambio: number } => {
+  const camara = (): THREE.PerspectiveCamera => {
+    const c = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 400)
+    c.position.set(6, 1.5, 21)
+    c.lookAt(0, -0.5, 0)
+    c.updateMatrixWorld()
+    return c
+  }
+  let [peor, cambio] = [0, 0]
+  for (const [k, giro, aleja] of [[0.3, 0, 0], [0.8, 0, 0], [1, 0, 0], [1, 40, 6], [1, 215, 12]] as const) {
+    const antes = camara()
+    const ahora = camara()
+    camaraDelFinal(ahora, k, new THREE.Vector3(0, -4, 0), giro, aleja, null)
+    // El giro del final, en el mundo: de la orientación de ahora a la de antes (lo que escribe `cuadroDelFinal.ts`).
+    const delFinal = ahora.quaternion.clone().invert().premultiply(antes.quaternion)
+    const enVista = giroDe(ahora.quaternion, delFinal, new THREE.Matrix3())
+    for (const luzDelMundo of [new THREE.Vector3(0.4, 1, 0.6), new THREE.Vector3(-0.8, 0.3, 0.2), new THREE.Vector3(0, 1, 0)].map((v) => v.normalize())) {
+      for (const normal of [new THREE.Vector3(0, 0, 1), new THREE.Vector3(0.3, 0.2, 0.93).normalize(), new THREE.Vector3(-0.9, 0, 0.44).normalize()]) {
+        const vista = new THREE.Vector3(0.1, -0.05, 1).normalize()
+        const luzAntes = luzDelMundo.clone().applyQuaternion(antes.quaternion.clone().invert())
+        const luzAhora = luzDelMundo.clone().applyQuaternion(ahora.quaternion.clone().invert())
+        const medio = (n: THREE.Vector3, v: THREE.Vector3, l: THREE.Vector3): number => n.dot(v.clone().add(l).normalize())
+        const n2 = normal.clone().applyMatrix3(enVista)
+        const v2 = vista.clone().applyMatrix3(enVista)
+        peor = Math.max(peor, Math.abs(n2.dot(luzAhora) - normal.dot(luzAntes)), Math.abs(medio(n2, v2, luzAhora) - medio(normal, vista, luzAntes)))
+        cambio = Math.max(cambio, Math.abs(normal.dot(luzAhora) - normal.dot(luzAntes)))
+      }
+    }
+  }
+  return { peor, cambio }
+}
+const medidoElPie = comoAntes(giroDeLaLuzDelPie)
+afirmar(medidoElPie.peor < 1e-9 && medidoElPie.cambio > 0.3, 'con la cámara del final (subiendo, arriba del todo, girando y alejándose en el quieto) la luz difusa y la especular sobre las piezas del pie son las de antes de la cinemática: su normal y su vista giran con el giro que el final le dio a la cámara (sin eso, la luz cambiaba hasta 0,3 o más)', `diferencia ${medidoElPie.peor.toExponential(1)} · sin el giro, ${medidoElPie.cambio.toFixed(2)}`)
+controlPositivo('el detector VE el pie de EL ENCASTRE (sin girar la luz)', ((_viva, _giro, destino) => destino.identity()) as GiroDeLaLuz, (g: GiroDeLaLuz) => comoAntes(g).peor < 1e-9)
+// El sombreador de verdad (el material compilado sobre el estándar de three) y el cableado.
+const sombreadorDelPie = (): { readonly fragmento: string; readonly uniforme: boolean } => {
+  const m = materialDelPie()
+  const s = { fragmentShader: THREE.ShaderLib.standard.fragmentShader, vertexShader: THREE.ShaderLib.standard.vertexShader, uniforms: {} as Record<string, THREE.IUniform> }
+  m.onBeforeCompile(s as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer)
+  m.dispose()
+  return { fragmento: s.fragmentShader, uniforme: s.uniforms.uGiroDeLaLuz === LUZ_DEL_PIE.uGiroDeLaLuz }
+}
+const delPie = sombreadorDelPie()
+const armadasDelPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const pieBien = (f: string, armadasTs: string, finalTs2: string): boolean =>
+  delPie.uniforme && f.includes('uniform mat3 uGiroDeLaLuz;') && f.includes('#include <normal_fragment_maps>\n\tnormal = normalize( uGiroDeLaLuz * normal );') && f.includes('geometryViewDir = normalize( uGiroDeLaLuz * geometryViewDir );') && !f.includes('#include <lights_fragment_begin>') &&
+  armadasTs.includes('giroDeLaLuzDelPie(viva.quaternion, EN_VIVO.giroDelPie, LUZ_DEL_PIE.uGiroDeLaLuz.value)') && finalTs2.includes('EN_VIVO.giroDelPie.copy(CAMARA_SIN_EL_MOUSE.quaternion).invert().premultiply(ANTES_DEL_FINAL)') && finalTs2.includes('EN_VIVO.giroDelPie.identity()')
+afirmar(pieBien(delPie.fragmento, armadasDelPie, finalTs), '  en el sombreador del pie la normal y la vista giran (después de los mapas de normales, antes de las luces: también el reflejo del estudio); el pie lo escribe en cada cuadro con la cámara viva y el giro que publica el final (sin final, la identidad)')
+controlPositivo('  el detector VE una vista sin girar (el brillo especular, de otro lado)', delPie.fragmento.replace('geometryViewDir = normalize( uGiroDeLaLuz * geometryViewDir );', ''), (f: string) => pieBien(f, armadasDelPie, finalTs))
 
 cerrar('s51-retoque-encastre')

@@ -108,6 +108,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   logo?.position.set(0, 0, 0)
   if (s.haz !== null) s.haz.visible = true
   EN_VIVO.camara = 0
+  EN_VIVO.giroDelPie.identity()
   const p = FINAL_EN_EL_PISO
   apagarElRastro(p.uRastro.value, s.rastro)
   p.uApertura.value = 0
@@ -125,6 +126,7 @@ export interface CuadroDeLaEscena {
 }
 
 const AL_FONDO_PX = 2
+const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
 
 /**
@@ -220,7 +222,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const desdeQueToco = t - s.tocoEn
   if (Number.isFinite(desdeQueToco) && desdeQueToco < 0.4) s.sacudon.y += FINAL_DEL_PIE.poder.golpecito * Math.exp(-desdeQueToco / 0.08) * Math.sin(desdeQueToco * 90)
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null)
+  // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
+  ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
+  EN_VIVO.giroDelPie.copy(CAMARA_SIN_EL_MOUSE.quaternion).invert().premultiply(ANTES_DEL_FINAL)
 
   // 5 · [EL ENCASTRE] 2F · El piso bajo el mouse (con el poder, y el puntero que se movió hace poco): deja un rastro que
   // levanta los bloques y enciende sus rendijas, y que se apaga con inercia cuando el mouse se va (`rastro.ts`).

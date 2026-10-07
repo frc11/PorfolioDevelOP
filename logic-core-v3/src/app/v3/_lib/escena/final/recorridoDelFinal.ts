@@ -157,6 +157,11 @@ export const EN_VIVO = {
    * volumen en cada cuadro; sin pie de volumen, `true` (el final no espera nada).
    */
   pieEntero: true,
+  /**
+   * [RETOQUE DEL ENCASTRE] 1G · cuánto giró la cámara sin el mouse por el final (en el mundo: de su orientación de ahora a
+   * la de antes del final; sin final, ninguno). Con eso el pie ve la luz como antes de la cinemática (`pie3d/material.ts`).
+   */
+  giroDelPie: new THREE.Quaternion(),
 }
 
 /** El scroll con el que se colocan las piezas del pie: el de la página hasta que el pie se pega; después, ése. */

@@ -16,7 +16,7 @@ import { viajeEnCurso } from '../viaje'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
-import { materialDelPie } from './material'
+import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE, SOMBRA_DEL_PIE, formaDeLaSombra } from './sombras'
 
 /**
@@ -86,6 +86,8 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   if (!s.listo || s.estudio === null || s.armadas.length === 0) return
   viva.updateMatrixWorld()
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
+  // [RETOQUE DEL ENCASTRE] 1G · la luz como antes de la cinemática (`material.ts`).
+  giroDeLaLuzDelPie(viva.quaternion, EN_VIVO.giroDelPie, LUZ_DEL_PIE.uGiroDeLaLuz.value)
   avanzarLaCoreografia(s.coreografia, dt)
   // A la profundidad del logo, o adelante si ahí alguna quedaría bajo el piso (`colocacion.ts`): todas en el mismo plano
   // (el pie se mueve entero con el paralaje: un rótulo no se despega de su columna).
