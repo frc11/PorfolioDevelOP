@@ -112,6 +112,7 @@ pedido (`producto,cta=a`); sin banco, en la URL con `?pruebas=` o sueltas (`/v3?
 | `brillo=suave` / `brillo=fuerte` | P1 | la intensidad del brillo del piso (y de cuánto se oscurece la sala) | `medio` (`brillo=medio` es el producto) |
 | `cta=a` … `cta=d` | P17 | las variantes del CTA del final para elegir | el CTA de hoy |
 | `encastre=desvanece` | P22 | abajo de 1024 el pie se desvanece mientras corre el encastre, sin escenario | el formulario arriba y el encastre en su propio escenario al final |
+| `vuelta=corta` | P5 (sumada en su commit) | en un viaje del menú el final vuelve en el 35 % del viaje (≈ 1 s en el más corto) | a la velocidad del rebobinado de P2 (1,6 s), con techo en el 56 % del viaje |
 
 Decisión de P22 tomada acá para que la bandera quede estable: por defecto, el formulario arriba y la cinemática en su
 propio escenario después del pie, porque la cinemática arranca sola al llegar al fondo y, si el pie se desvaneciera, el
@@ -382,3 +383,74 @@ muere), el oscurecimiento del piso (control: el atardecer de antes) y las intens
 **Gate**: lint limpio en lo tocado; `tsc --noEmit` 0 errores; s47–s52 verdes (s50 61, s51 44, s52-nocturno-final 104,
 s52-pulido-1 60, todas sin fallas); `verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a
 1440 y 390 capturado con el banco.
+
+### P5 · El viaje del menú con la cinemática avanzada: en paralelo
+
+**Dónde vivía** (leído, no asumido): NOCTURNO FINAL A2. El efecto del viaje (`_componentes/useDeslizamientoDelCta.ts`) no
+movía el scroll hasta que el final del pie estaba en reposo (`FINAL_EN_REPOSO`, a lo sumo `ESPERA_MAXIMA_DEL_FINAL_MS`), y la
+escena lo deshacía con tope (`velocidadDeSalida`: 2,2 s desde el final entero). Desde el pie, cualquier viaje tardaba eso de
+más.
+
+**Qué cambió**:
+- El viaje ya no espera: sale como cualquiera (el preludio y el recorrido de siempre, por la misma secuencia: sin
+  `router.push`, TransitionContext sin tocar) y le dice a la escena cuánto dura (`ViajeEnCurso.duracionMs` = preludio +
+  recorrido; `planDelViaje` devuelve el `PlanDelViaje` y el efecto le agrega la duración). `enReposo.ts` y
+  `ESPERA_MAXIMA_DEL_FINAL_MS` se borraron (nadie más los leía); el reloj de seguridad vuelve a sus tres términos.
+- La escena (`pasoDelReloj`, fase nueva `viaje`): en un viaje, el final vuelve a cero EN PARALELO con el recorrido, desde
+  donde esté (corriendo, rebobinando o saliendo), con la curva del rebobinado de P2; mientras, la cámara pasa de la del final
+  a la del recorrido (que ya sigue al scroll). El giro y el alejamiento del quieto vuelven con el mismo reloj (si el viaje
+  corta un rebobinado, se toman de nuevo desde donde quedaron). Al terminar el viaje el reloj vuelve a `espera` (al fondo con
+  el pie entero, corre de nuevo, como al llegar por scroll).
+- El tiempo de la vuelta no se reparte por `fin` sino por lo que se VE cambiar (`VIAJE_DEL_FINAL`): `fin`, la subida de la
+  cámara (×3), la bajada del logo (×3: de que empieza a caer a que queda al ras) y el piso (×1: el oscurecimiento y la
+  energía del brillo). Con `fin` solo el brillo se apagaba de un cuadro al otro; con la cámara sola, el logo salía del hueco
+  en cuatro cuadros (4 u por cuadro, visto en la grabación).
+- **La lectura del «~30 %»** (era un ejemplo; el requisito era «sin saltos de cámara»): con la vuelta en el 35 % del viaje
+  más corto (1,0 s) la cámara giraba hasta 5,2°/cuadro en la página, más rápido que el rebobinado que se pidió en P2
+  (4,4°/cuadro, medido igual). El producto vuelve a la velocidad de P2 (1,6 s desde el final entero, proporcional a lo que
+  haya), con techo en el 56 % del viaje: en el más corto (2,9 s) termina a los 1,6 s; en uno de 4,6 s o más, en el primer
+  35 %. La lectura literal queda atrás de **`?vuelta=corta`** (el 35 % del viaje: ≈ 1 s).
+- **«El estado del encastre se resetea en un momento en que no se ve»** (la otra mitad del ejemplo): no hay ese momento.
+  Durante el viaje el `<main>` está transparente y la cámara del recorrido mira siempre al logo (es el centro de la órbita),
+  así que un reseteo de golpe se vería como un salto del logo. Por eso el encastre se deshace a la vista, pero en paralelo y
+  sin ir más rápido que el rebobinado de P2: la cámara, el logo y el piso vuelven juntos y coherentes en cada cuadro.
+
+**Medido** (`pulido-1/p5/`, banco a 1440 y 390, la AMD integrada; del click a que el `<main>` vuelve):
+
+| Viaje desde el pie | Antes, final entero | Después, final entero | En reposo (la vara) |
+|---|---|---|---|
+| 1440 → Por qué develOP | llega 4,87 s · el scroll arranca a 2,38 s | llega 2,93 s · arranca a 0,46 s · el final en cero a 1,60 s | 2,94 s · 0,45 s |
+| 1440 → Servicios | llega 6,99 s · arranca a 2,36 s | llega 5,00 s · arranca a 0,43 s · en cero a 1,60 s | 5,04 s · 0,43 s |
+| 390 → Por qué develOP | — | llega 2,94 s · arranca a 0,47 s · en cero a 1,60 s | 2,93 s · 0,47 s |
+| 1440, `?vuelta=corta` | — | llega 2,93 s · en cero a 1,02 s | — |
+
+La cámara durante la vuelta, lo más que gira en un cuadro (a 60 cuadros): 3,4°/cuadro a 1440 (3,1 a 390); el rebobinado de
+P2 medido igual en la página, 4,4°; el propio viaje a Servicios, sin final, 3,9°; con `vuelta=corta`, 5,2°. Grabado por
+screencast (no congela la página): sin cambios de luz bruscos después del fundido del velo (el mayor salto de luminancia
+media entre cuadros, 4 de 255, en el fundido del texto); el brillo se apaga en varios cuadros; la cámara baja del cenit pareja.
+
+**Las aserciones viejas que cambiaron** (P5 invierte por pedido la espera de A2; el resto son literales):
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` A2 · la salida con tope | un viaje del menú deshacía el final con tope (cámara ≤ 1,2 s de punta a punta, `fin` ≤ 1,2 s, < 3 s) | lo mismo, saliendo del fondo (la página sube) | Es el mismo código y el mismo tope, con el mismo control; el viaje ya no pasa por ahí y lo fija `s52-pulido-1` P5 con más que eso |
+| `s52-nocturno-final` A2 · la espera | el viaje no mueve el scroll hasta el final en reposo (a lo sumo 3,5 s) | el viaje NO espera (sin `FINAL_EN_REPOSO`), el reloj suma preludio + recorrido + margen y la escena recibe la duración | P5 lo pide al revés; el control nuevo detecta la espera de A2 |
+| `s18-deslizamiento` §4 · el reloj de seguridad | cuatro términos (con la espera del final) | tres términos (preludio, recorrido, margen) | Es la suma que vuelve a ser el total; sigue exigiendo cada término |
+| `s39-navbar` R3 · derecho al nudo | `empezarElViaje(planDelViaje(seccion.id, destinoEnPx))` | la misma llamada con `duracionMs: PRELUDIO_MS + duracionMs` | Más estricta: además fija que la duración es la de todos |
+| `s27-viajes` §4 · la noche en el viaje | los viajes de prueba sin duración | con `duracionMs: 2900` (el tipo la pide; la luz no la mira) | Literal |
+| `s49`, `s51`, `s52-nocturno-final`, `s52-pulido-1` · la entrada del reloj | `enViaje: boolean` | `viajeS: number` (0: sin viaje) | Literal; `s51` 1D sigue exigiendo que un viaje lo lleve a cero en menos de 3 s, y su cableado, el texto nuevo |
+
+`s52-pulido-1` P5: la vuelta en un viaje (2,9 / 4,75 / 7,3 s, desde el final entero y desde la mitad) termina adentro del
+viaje (≤ 56 % y ≤ 1,6 s), siempre hacia atrás, y ni la cámara, ni el logo, ni el oscurecimiento del piso cambian por cuadro
+más que en el rebobinado de P2; el brillo, en varios cuadros (controles: la vuelta de A2, el reparto por `fin` solo, el
+reparto sin el logo); `?vuelta=corta`; la salida de la fase del viaje (control: un reloj que se queda en `viaje`) y un viaje
+a mitad de un rebobinado sin saltos; el cableado del quieto (control: sin tomarlo de nuevo).
+
+**Visto y no tocado** (fuera de P5; son función de `fin` y pasan igual en el rebobinado de P2 y en el encastre hacia
+adelante): (1) la sombra del logo aparece de un cuadro al otro cuando el logo sale del hueco (en la grabación, entre 913 y
+930 ms); (2) en el rebobinado de P2, el brillo de P1 se apaga de un cuadro al otro (su energía cae entera en un cuadro al
+pasar por el golpe). La vuelta del viaje ya no tiene el (2).
+
+**Gate**: lint limpio en lo tocado; `tsc --noEmit` 0 errores; s31–s52 verdes (más s18, s27 y s39, que tocaba); `verificar`:
+los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a 1440 y 390 capturado con el banco, sin errores en
+la consola.

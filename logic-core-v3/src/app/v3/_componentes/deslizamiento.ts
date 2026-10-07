@@ -117,12 +117,6 @@ export function duracionDelViaje(distanciaPx: number, altoPx: number): number {
 }
 
 /**
- * [NOCTURNO FINAL] A2 · desde el pie con la cinemática avanzada, el viaje espera a que la escena la deshaga (con tope:
- * `RELOJ_DEL_FINAL.salida`) antes de mover el scroll; a lo sumo esto (ms), por si la escena no dibuja.
- */
-export const ESPERA_MAXIMA_DEL_FINAL_MS = 3500
-
-/**
  * 🔴 **LA CURVA DEL VIAJE — Y ESTE SPRINT LE DA UNA PROPIA, QUE ES UN COSTO.**
  *
  * ── Lo que DESLIZAR-1 hacía, y por qué estaba bien ────────────────────────

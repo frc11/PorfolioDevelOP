@@ -316,7 +316,8 @@ afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v
 // cambió por pedido: al fondo, con el pie entero, avanza solo; un gesto hacia arriba lo rebobina (lo detalla s51 1D).
 // [NOCTURNO FINAL] A1 · cambió por pedido: UN gesto hacia arriba lo rebobina entero, solo (lo detalla s52 A1).
 const reloj = relojQuieto()
-const alFondo = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, enViaje: false }
+// [PULIDO 1] P5 · el viaje entra con su duración (`viajeS`; 0: sin viaje), no con un sí o no.
+const alFondo = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, viajeS: 0 }
 for (let i = 0; i < 60; i += 1) pasoDelReloj(reloj, alFondo, 1 / 60)
 const solo = reloj.fin
 pasoDelReloj(reloj, { ...alFondo, rebobinar: true }, 1 / 60)

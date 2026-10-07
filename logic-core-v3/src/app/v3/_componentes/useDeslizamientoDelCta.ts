@@ -5,7 +5,6 @@ import { useEffect, type RefObject } from 'react'
 
 import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
 
-import { FINAL_EN_REPOSO } from '../_lib/escena/final/enReposo'
 import { planDelViaje } from '../_lib/escena/planDelViaje'
 import { retenerLosGestos } from '../_lib/gestosDelScroll'
 import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
@@ -13,7 +12,6 @@ import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
 import {
   ATRIBUTO_DEL_VELO,
   CURVA_DEL_VIAJE,
-  ESPERA_MAXIMA_DEL_FINAL_MS,
   PRELUDIO_MS,
   RETARDO_ANTES_DE_DESAPARECER_MS,
   SELECTOR_DE_LOS_VIAJES,
@@ -47,10 +45,10 @@ const MARGEN_DEL_RELOJ_MS = 500
 
 /**
  * El total del reloj: el del deslizamiento más el margen. Derivado. [NOCTURNO FINAL] A2 · ya no es una constante: el
- * recorrido dura según la distancia (`duracionDelViaje`, con tope de velocidad) y, desde el pie con la cinemática
- * avanzada, el viaje espera a que se deshaga (a lo sumo `ESPERA_MAXIMA_DEL_FINAL_MS`): el reloj cubre las cuatro.
+ * recorrido dura según la distancia (`duracionDelViaje`, con tope de velocidad). [PULIDO 1] P5 · y ya no hay espera del
+ * final del pie (vuelve en paralelo con el recorrido): el reloj cubre las tres de nuevo.
  */
-const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS + duracionMs + MARGEN_DEL_RELOJ_MS
+const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracionMs + MARGEN_DEL_RELOJ_MS
 
 /**
  * EL DESLIZAMIENTO, EN UN EFECTO — el escucha delegado, el velo y las salidas.
@@ -305,9 +303,9 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       const destinoEnPx = destinoDelViaje(seccion)
       // [NOCTURNO FINAL] A2 · la velocidad con tope: un viaje largo tarda más (`deslizamiento.ts`).
       const duracionMs = duracionDelViaje(destinoEnPx - window.scrollY, window.innerHeight)
-      const desdeElClick = performance.now()
       window.clearTimeout(relojDeLaEscena)
-      empezarElViaje(planDelViaje(seccion.id, destinoEnPx))
+      // [PULIDO 1] P5 · y cuánto dura, del click al frenazo: el final del pie vuelve a cero adentro de esto, en paralelo.
+      empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
 
       // El velo espera `RETARDO_ANTES_DE_DESAPARECER_MS`; con 0 va en el mismo cuadro.
       const encenderElVelo = (): void => {
@@ -362,12 +360,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
           terminar(true)
           return
         }
-        // [NOCTURNO FINAL] A2 · desde el pie con la cinemática avanzada: primero la escena la deshace (la cámara baja del
-        // cenit con tope, sin saltos), después se viaja. Con la escena sin dibujar, a lo sumo `ESPERA_MAXIMA_DEL_FINAL_MS`.
-        if (!FINAL_EN_REPOSO.valor && performance.now() - desdeElClick < PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS) {
-          relojDeArranque = window.setTimeout(arrancar, 50)
-          return
-        }
+        // [PULIDO 1] P5 · desde el pie con la cinemática avanzada ya no se espera a que se deshaga (A2 esperaba hasta 2,2 s
+        // y el viaje quedaba lento): el final vuelve a cero en paralelo con el recorrido, adentro de la misma duración.
         /**
          * 🔴 **LOS DOS MOTORES, Y LA SECUENCIA ES UNA SOLA.** Lo que cambia entre
          * las dos ramas es QUIÉN mueve el scroll; el retardo, el fundido, la

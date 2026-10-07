@@ -6,7 +6,6 @@ import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
-import { FINAL_EN_REPOSO } from './enReposo'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import {
@@ -32,6 +31,7 @@ import {
   sacudonDeLaPresion,
   subida,
   temblorDelLogo,
+  type FaseDelFinal,
   type RelojDelFinal,
   type TamanoDelLogo,
 } from './recorridoDelFinal'
@@ -58,8 +58,11 @@ export interface EstadoDelFinal {
   /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
   enteroS: number
   quietoS: number
-  /** [PULIDO 1] P2 · el giro y el alejamiento del quieto al empezar el rebobinado (vuelven con él). */
-  readonly quietoAlRebobinar: { activo: boolean; giro: number; aleja: number }
+  /**
+   * [PULIDO 1] P2 · el giro y el alejamiento del quieto al empezar el rebobinado (vuelven con él). P5 · o la vuelta de un
+   * viaje: `de` es la fase con la que se tomaron (si cambia, se toman de nuevo desde donde quedaron).
+   */
+  readonly quietoAlRebobinar: { de: FaseDelFinal | null; giro: number; aleja: number }
   golpeEn: number
   golpes: number
   /** [EL ENCASTRE] 2E · cuándo tocó el piso (el golpecito), en el reloj de la escena. */
@@ -97,7 +100,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     sinScrollS: 0,
     enteroS: 0,
     quietoS: 0,
-    quietoAlRebobinar: { activo: false, giro: 0, aleja: 0 },
+    quietoAlRebobinar: { de: null, giro: 0, aleja: 0 },
     golpeEn: Number.NaN,
     golpes: 0,
     tocoEn: Number.NaN,
@@ -197,7 +200,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
   // [PULIDO 1] P22 · quieto (movimiento reducido): sin reloj, el estado final al fondo y el de siempre fuera.
   if (s.estatico) estadoQuieto(s.reloj, window.scrollY >= s.fondo - AL_FONDO_PX && EN_VIVO.pieEntero && viajeEnCurso() === null)
-  else pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)
+  else pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
@@ -207,18 +210,20 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
   // [PULIDO 1] P2 · rebobinando, el quieto vuelve con el mismo reloj y la misma curva que el logo (en a lo sumo 1,6 s); si
   // no, con su vuelta con tope de siempre (cortado a la mitad por un gesto hacia abajo, sigue desde donde quedó).
+  // [PULIDO 1] P5 · en un viaje, igual (con el reloj de su vuelta; sin vuelta —el logo ya estaba en cero—, con la de siempre);
+  // si empieza a mitad de un rebobinado, desde donde quedó.
   const alRebobinar = s.quietoAlRebobinar
-  if (s.reloj.fase === 'rebobina') {
-    if (!alRebobinar.activo) {
-      alRebobinar.activo = true
+  if (s.reloj.fase === 'rebobina' || (s.reloj.fase === 'viaje' && s.reloj.rebobinado.dura > 0)) {
+    if (alRebobinar.de !== s.reloj.fase) {
+      alRebobinar.de = s.reloj.fase
       alRebobinar.giro = ((((EN_VIVO.giro + 180) % 360) + 360) % 360) - 180
       alRebobinar.aleja = EN_VIVO.aleja
     }
     quietoRebobinado(alRebobinar, quedaDelRebobinado(s.reloj.rebobinado.s, s.reloj.rebobinado.dura), EN_VIVO)
     s.quietoS = 0
   } else {
-    if (alRebobinar.activo) {
-      alRebobinar.activo = false
+    if (alRebobinar.de !== null) {
+      alRebobinar.de = null
       if (s.reloj.fase === 'parada') quietoRebobinado(alRebobinar, 0, EN_VIVO)
     }
     // [PULIDO 1] P22 · quieto, sin el giro ni el alejamiento del que se quedó (son movimiento).
@@ -226,8 +231,6 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   }
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
-  // [NOCTURNO FINAL] A2 · el viaje del menú espera a esto para mover el scroll.
-  FINAL_EN_REPOSO.valor = !activo
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)
     s.antes = fin

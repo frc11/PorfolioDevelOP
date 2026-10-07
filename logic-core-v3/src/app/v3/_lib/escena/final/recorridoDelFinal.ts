@@ -87,9 +87,9 @@ export const FINAL_DEL_PIE = {
  *
  * [NOCTURNO FINAL] A2 · LA SALIDA: fuera del fondo (la página subió) o en un viaje del menú se deshace sola, con tope
  * (`salida`, `velocidadDeSalida`): `fin` a lo sumo de punta a punta en `finS` y la cámara (su subida) a lo sumo en
- * `camaraS`. Antes un viaje la deshacía en 0,35 s: la cámara bajaba del cenit 10 u por cuadro (un salto). El viaje no
- * mueve el scroll hasta que el final está en reposo (`enReposo.ts`). La velocidad se persigue con una inercia corta
- * (`inerciaS`): ningún cambio de sentido es de golpe.
+ * `camaraS`. Antes un viaje la deshacía en 0,35 s: la cámara bajaba del cenit 10 u por cuadro (un salto). La velocidad se
+ * persigue con una inercia corta (`inerciaS`): ningún cambio de sentido es de golpe. [PULIDO 1] P5 · eso queda para salir
+ * del fondo; en un viaje del menú el final vuelve en paralelo con el recorrido (`VIAJE_DEL_FINAL`).
  */
 export const RELOJ_DEL_FINAL = { duracionS: 6.4, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
 
@@ -133,11 +133,63 @@ export function quietoRebobinado(alEmpezar: { readonly giro: number; readonly al
 }
 
 /**
- * `espera`: no corre (no está al fondo, el pie llega o hay un viaje): se deshace con tope. `corre`: adelante.
- * `rebobina`: hacia atrás, sola ([PULIDO 1] P2 · en `duracionDelRebobinado`, con su curva). `parada`: rebobinada, quieta en
- * cero hasta que vuelve a empezar.
+ * [PULIDO 1] P5 · EN UN VIAJE DEL MENÚ, EN PARALELO. Antes (A2) el viaje esperaba a que el final volviera a cero (con tope:
+ * 2,2 s desde el final entero) y recién ahí movía el scroll: desde el pie, cualquier viaje tardaba 2 s más que los demás.
+ * Ahora dura lo mismo que cualquiera y el final vuelve adentro de él mientras el scroll ya viaja: la cámara pasa de la del
+ * final a la del recorrido. Vuelve a la velocidad del rebobinado de P2 (1,6 s desde el final entero, proporcional a lo que
+ * haya), con techo en `fraccion` del viaje (en el más corto, 2,9 s, justo alcanza: 1,6 s); con `vuelta=corta`, en `corta` (≈ 1 s:
+ * la cámara gira más rápido que en P2 y el logo sale del hueco más ligero). El tiempo no se reparte por `fin` sino por lo
+ * que se VE cambiar: `fin`, la subida de la cámara (pesada `camara`), la bajada del logo (`logo`: de que empieza a caer a
+ * que queda al ras) y el piso (`piso`: su oscurecimiento y la energía del brillo). Con `fin` solo el brillo se apagaba de un
+ * cuadro al otro; con la cámara sola, el logo salía del hueco en cuatro cuadros. Así ninguna cambia por cuadro más que en P2.
  */
-export type FaseDelFinal = 'espera' | 'corre' | 'rebobina' | 'parada'
+export const VIAJE_DEL_FINAL = { fraccion: 0.56, corta: 0.35, camara: 3, logo: 3, piso: 1 } as const
+
+/** [PULIDO 1] P5 · cuánto bajó el logo, de 0 a 1: de que empieza a caer a que queda al ras (lineal en el reloj del final). */
+function bajadaDelLogo(fin: number): number {
+  const desde = FINAL_DEL_PIE.caida.desdeS
+  return Math.min(1, Math.max(0, (segundosDelFinal(fin) - desde) / (FINAL_DEL_PIE.presion.hastaS - desde)))
+}
+
+/** [PULIDO 1] P5 · la medida con la que se reparte el tiempo de la vuelta (crece con `fin`: todo lo que suma nunca baja). */
+const medidaDelViaje = (fin: number): number =>
+  fin + VIAJE_DEL_FINAL.camara * subida(fin) + VIAJE_DEL_FINAL.logo * bajadaDelLogo(fin) + VIAJE_DEL_FINAL.piso * (oscuroDelFinal(fin) + Math.min(1, poder(fin)))
+
+/** [PULIDO 1] P5 · la `fraccion` del viaje de esta carga (`vuelta=corta`: la otra lectura), leída una vez. */
+let fraccionDelViaje: number | null = null
+const fraccionPedida = (): number => (fraccionDelViaje ??= entornoDeLaEscena().pruebas.vuelta === 'corta' ? VIAJE_DEL_FINAL.corta : VIAJE_DEL_FINAL.fraccion)
+
+/**
+ * [PULIDO 1] P5 · cuánto tarda el final en volver desde `desde` en un viaje de `viajeS` segundos (del click al frenazo): a la
+ * velocidad de P2 (lo que haya de la medida, por `REBOBINADO.topeS`), con techo en `fraccion` del viaje.
+ */
+export function vueltaEnElViaje(desde: number, viajeS: number, fraccion: number = VIAJE_DEL_FINAL.fraccion): number {
+  return Math.min((REBOBINADO.topeS * medidaDelViaje(Math.max(0, desde))) / medidaDelViaje(1), fraccion * Math.max(0, viajeS))
+}
+
+/**
+ * [PULIDO 1] P5 · el `fin` de la vuelta en un viaje cuando queda `queda` (de 1 a 0) de la medida que había al empezar (desde
+ * `desde`): la medida crece con `fin`, así que se invierte por bisección.
+ */
+export function finEnElViaje(desde: number, queda: number): number {
+  if (queda <= 0 || desde <= 0) return 0
+  if (queda >= 1) return desde
+  const meta = medidaDelViaje(desde) * queda
+  let [abajo, arriba] = [0, desde]
+  for (let i = 0; i < 40; i += 1) {
+    const medio = (abajo + arriba) / 2
+    if (medidaDelViaje(medio) < meta) abajo = medio
+    else arriba = medio
+  }
+  return (abajo + arriba) / 2
+}
+
+/**
+ * `espera`: no corre (no está al fondo o el pie llega): se deshace con tope. `corre`: adelante. `rebobina`: hacia atrás,
+ * sola ([PULIDO 1] P2 · en `duracionDelRebobinado`, con su curva). `parada`: rebobinada, quieta en cero hasta que vuelve a
+ * empezar. `viaje`: [PULIDO 1] P5 · hay un viaje del menú: vuelve a cero en `vueltaEnElViaje`, en paralelo.
+ */
+export type FaseDelFinal = 'espera' | 'corre' | 'rebobina' | 'parada' | 'viaje'
 
 /** Lo que el reloj recuerda de un cuadro al otro. */
 export interface RelojDelFinal {
@@ -147,7 +199,7 @@ export interface RelojDelFinal {
   fase: FaseDelFinal
   /** [NOCTURNO FINAL] A1 · cuánto lleva parada (s). */
   paradaS: number
-  /** [PULIDO 1] P2 · el rebobinado en curso: desde dónde (`fin` al empezar), cuánto lleva (s) y cuánto dura (s). */
+  /** [PULIDO 1] P2 · el rebobinado en curso: desde dónde (`fin` al empezar), cuánto lleva (s) y cuánto dura (s). P5 · y la vuelta de un viaje. */
   readonly rebobinado: { desde: number; s: number; dura: number }
 }
 
@@ -167,8 +219,8 @@ export interface EntradaDelReloj {
   readonly haciaAbajo: boolean
   /** [NOCTURNO FINAL] A1 · cuánto hace del último gesto, de cualquier sentido (s). */
   readonly sinGestoS: number
-  /** Hay un viaje del menú en curso. */
-  readonly enViaje: boolean
+  /** [PULIDO 1] P5 · cuánto dura el viaje del menú en curso, del click al frenazo (s); sin viaje, 0. */
+  readonly viajeS: number
 }
 
 /** [NOCTURNO FINAL] A2 · la pendiente de la subida de la cámara (cuánto se mueve por unidad de `fin`). */
@@ -198,7 +250,25 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
   const R = RELOJ_DEL_FINAL
   const paso = Math.max(0, dt)
   let objetivo: number
-  if (e.enViaje || !e.alFondo) {
+  // [PULIDO 1] P5 · en un viaje: vuelve a cero en `vueltaEnElViaje` (con la curva del rebobinado, sobre la medida que
+  // reparte el tiempo por lo que se ve), desde donde esté (corriendo, rebobinando o saliendo: sin saltos). Al terminar el
+  // viaje, a esperar (de ahí sale como siempre: al fondo con el pie entero, corre).
+  if (e.viajeS > 0) {
+    const b = r.rebobinado
+    if (r.fase !== 'viaje') {
+      r.fase = 'viaje'
+      b.desde = r.fin
+      b.s = 0
+      b.dura = vueltaEnElViaje(r.fin, e.viajeS, fraccionPedida())
+    }
+    b.s += paso
+    const fin = finEnElViaje(b.desde, quedaDelRebobinado(b.s, b.dura))
+    r.velocidad = paso > 0 ? (fin - r.fin) / paso : 0
+    r.fin = fin
+    return
+  }
+  if (r.fase === 'viaje') r.fase = 'espera'
+  if (!e.alFondo) {
     r.fase = 'espera'
     objetivo = -velocidadDeSalida(r.fin)
   } else {

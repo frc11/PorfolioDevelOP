@@ -378,9 +378,11 @@ afirmar(
  */
 // [NOCTURNO FINAL] A2 · cambió por pedido: el total ya no es una constante (el recorrido dura según la distancia y, desde
 // el pie con la cinemática avanzada, el viaje espera a que se deshaga): el reloj suma los CUATRO términos.
+// [PULIDO 1] P5 · cambió por pedido: el viaje ya no espera al final del pie (vuelve en paralelo): son TRES de nuevo, y
+// ninguno puede faltar.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS + duracionMs + MARGEN_DEL_RELOJ_MS'),
-  '  🔴 el reloj de seguridad sale del TOTAL (el preludio, la espera del final, el recorrido de ESTE viaje y el margen): si se olvidara uno, abortaría un viaje válido a mitad de camino',
+  FUENTE_DEL_EFECTO.includes('const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracionMs + MARGEN_DEL_RELOJ_MS'),
+  '  🔴 el reloj de seguridad sale del TOTAL (el preludio, el recorrido de ESTE viaje y el margen): si se olvidara uno, abortaría un viaje válido a mitad de camino',
 )
 afirmar(
   FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), relojDeSeguridadMs(duracionMs))'),

@@ -32,11 +32,20 @@ export interface LuzDelViaje {
   readonly y1: number
 }
 
-export interface ViajeEnCurso {
+/** Adónde va y con qué luz (lo que mide `planDelViaje`, también para anticiparlo). */
+export interface PlanDelViaje {
   readonly destino: string
   readonly clase: ClaseDelViaje
   /** Sólo en los de día a día. */
   readonly luz: LuzDelViaje | null
+}
+
+export interface ViajeEnCurso extends PlanDelViaje {
+  /**
+   * [PULIDO 1] P5 · cuánto dura, del click al frenazo (ms): el preludio más el recorrido. El final del pie vuelve a cero
+   * adentro de esto, en paralelo con el recorrido (`VIAJE_DEL_FINAL`).
+   */
+  readonly duracionMs: number
 }
 
 /**

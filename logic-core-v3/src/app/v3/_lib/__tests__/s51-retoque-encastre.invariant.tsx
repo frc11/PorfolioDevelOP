@@ -116,7 +116,8 @@ titulo('1D · Cinemática automática con rebobinado: arranca con el pie entero,
 
 const DT = 1 / 60
 type PasoDelReloj = (r: RelojDelFinal, e: EntradaDelReloj, dt: number) => void
-const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, enViaje: false }
+// [PULIDO 1] P5 · el viaje entra con su duración (`viajeS`; 0: sin viaje), no con un sí o no.
+const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, viajeS: 0 }
 const correr = (paso: PasoDelReloj, r: RelojDelFinal, s: number, e: Partial<EntradaDelReloj> = {}): void => {
   for (let i = 0; i < Math.round(s / DT); i += 1) paso(r, { ...AL_FONDO, ...e }, DT)
 }
@@ -151,7 +152,7 @@ const cinematica = (paso: PasoDelReloj): Cinematica => {
   const saliendo = hasta(paso, c, 0, { alFondo: false })
   const d = relojQuieto()
   correr(paso, d, 8)
-  const viaje = hasta(paso, d, 0, { enViaje: true })
+  const viaje = hasta(paso, d, 0, { viajeS: 2.9 })
   return { esperaAlPie, sola, conRuedaAbajo, rebobinaSola, saliendo, viaje }
 }
 const R = RELOJ_DEL_FINAL
@@ -163,7 +164,7 @@ afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UN
 // RETOQUE DEL ENCASTRE 1D (rebobina sólo mientras siga el gesto: sin gesto en el cuadro, vuelve a correr).
 const conRueda: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
-  if (e.haciaAbajo && e.alFondo && !e.enViaje) r.fin = Math.min(1, r.fin + 0.03)
+  if (e.haciaAbajo && e.alFondo && e.viajeS === 0) r.fin = Math.min(1, r.fin + 0.03)
 }
 controlPositivo('el detector VE el reloj de EL ENCASTRE (el scroll hacia abajo lo adelanta)', conRueda, (p: PasoDelReloj) => cinematicaBien(cinematica(p)))
 const mientrasSiga: PasoDelReloj = (r, e, dt) => {
@@ -201,7 +202,7 @@ const cableado = (g: string): boolean =>
   /function retener\(e: Event\): void \{\s*if \(e\.cancelable\) e\.preventDefault\(\)\s*e\.stopPropagation\(\)/.test(g) &&
   // [PULIDO 1] P22 · en escritorio, al montarse (como antes); abajo de 1024, mientras se ve el escenario (o el pie, con la otra lectura).
   componenteDelFinal.includes('const retener = (): (() => void) => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g)))') && componenteDelFinal.includes('if (!angosto) return retener()') &&
-  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)') &&
+  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)') &&
   finalTs.includes('s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)') &&
   armadas.includes('EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)') && pieDeVolumen.includes('EN_VIVO.pieEntero = true')
 afirmar(cableado(gestos), '  el cableado: la rueda, el dedo y las teclas se ven en la captura de la ventana (antes que Lenis) y, retenidos, no le llegan a nadie; el final los pide al montarse; el reloj va con el fondo de la página, el pie entero (lo escribe el pie de volumen; sin él, no espera) y los gestos; un viaje del menú lo deshace (sus scroll no son gestos)')

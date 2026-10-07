@@ -6,7 +6,7 @@
  *        (no acelerada), sin mover la página; parada, vuelve a empezar a los 2,5 s sin gestos; un gesto nuevo hacia arriba
  *        sube la página; rueda (con su inercia), dedo y teclas.
  *   A2 · los viajes del menú con la cinemática avanzada: primero se deshace con tope (la cámara baja del cenit sin saltos)
- *        y después se viaja; la cámara del final conserva el encuadre del recorrido (no se teletransporta al soltar); el
+ *        y después se viaja ([PULIDO 1] P5 · ya no: en paralelo, s52-pulido-1 P5; el tope queda para salir del fondo); la cámara del final conserva el encuadre del recorrido (no se teletransporta al soltar); el
  *        viaje largo tarda más (velocidad con tope) y un cuadro largo no lo hace saltar.
  *   A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición alcanza lo pedido en un viaje).
  *   A4 · la sombra cuadrada: en un viaje la altura del sol es la de su luz (la del logo no se estira por el piso); las
@@ -64,7 +64,8 @@ const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '')
 const R = RELOJ_DEL_FINAL
 const DT = 1 / 60
 type PasoDelReloj = (r: RelojDelFinal, e: EntradaDelReloj, dt: number) => void
-const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, enViaje: false }
+// [PULIDO 1] P5 · el viaje entra con su duración (`viajeS`; 0: sin viaje), no con un sí o no.
+const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, viajeS: 0 }
 const entero = (paso: PasoDelReloj): RelojDelFinal => {
   const r = relojQuieto()
   for (let i = 0; i < 1200 && r.fin < 1; i += 1) paso(r, AL_FONDO, DT)
@@ -188,17 +189,21 @@ afirmar(cableadoA1(gestos, cuadro), '  el cableado: los gestos marcan si empieza
 controlPositivo('  el detector VE el temblor hacia abajo contado', [gestos, cuadro.replace('else if (ahora - G.arriba > RELOJ_DEL_FINAL.cambioDeSentidoS) G.abajo = ahora', 'else G.abajo = ahora')] as const, ([g, c]: readonly [string, string]) => cableadoA1(g, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('A2 · Viajes con la cinemática avanzada: se deshace con tope y después se viaja; sin saltos de cámara; velocidad con tope')
+titulo('A2 · Viajes con la cinemática avanzada: se deshace con tope y después se viaja ([PULIDO 1] P5: en paralelo); sin saltos de cámara; velocidad con tope')
 
 interface Salida { readonly s: number; readonly camaraPorCuadro: number; readonly finPorCuadro: number }
-/** Desde el final entero, un viaje del menú: cuánto tarda en volver a cero y lo más que se mueve la cámara (su subida) en un cuadro. */
+/**
+ * Desde el final entero, salir del fondo (la página subió): cuánto tarda en volver a cero y lo más que se mueve la cámara (su
+ * subida) en un cuadro. [PULIDO 1] P5 · cambió por pedido: medía con un viaje del menú, que ahora vuelve en paralelo con el
+ * recorrido (lo fija s52-pulido-1 P5); salir del fondo pasa por el mismo código de antes y queda con el mismo tope.
+ */
 const salida = (paso: PasoDelReloj): Salida => {
   const r = entero(paso)
   let camaraPorCuadro = 0
   let finPorCuadro = 0
   for (let i = 1; i <= 600; i += 1) {
     const [antes, k] = [r.fin, subida(r.fin)]
-    paso(r, { ...AL_FONDO, enViaje: true }, DT)
+    paso(r, { ...AL_FONDO, alFondo: false }, DT)
     camaraPorCuadro = Math.max(camaraPorCuadro, Math.abs(subida(r.fin) - k))
     finPorCuadro = Math.max(finPorCuadro, Math.abs(r.fin - antes))
     if (r.fin === 0) return { s: i * DT, camaraPorCuadro, finPorCuadro }
@@ -207,10 +212,10 @@ const salida = (paso: PasoDelReloj): Salida => {
 }
 const salidaBien = (x: Salida): boolean => x.s < 3 && x.camaraPorCuadro <= (1.25 * DT) / R.salida.camaraS && x.finPorCuadro <= (1.05 * DT) / R.salida.finS
 const sa = salida(pasoDelReloj)
-afirmar(salidaBien(sa), 'un viaje del menú (o salir del fondo) deshace la cinemática con tope: la cámara (su subida) a lo sumo de punta a punta en 1,2 s, `fin` en 1,2 s; vuelve a cero en menos de 3 s, sin saltos', `${sa.s.toFixed(2)} s · cámara ${(sa.camaraPorCuadro * 60).toFixed(2)}/s como mucho`)
+afirmar(salidaBien(sa), 'salir del fondo (y antes, un viaje del menú: [PULIDO 1] P5) deshace la cinemática con tope: la cámara (su subida) a lo sumo de punta a punta en 1,2 s, `fin` en 1,2 s; vuelve a cero en menos de 3 s, sin saltos', `${sa.s.toFixed(2)} s · cámara ${(sa.camaraPorCuadro * 60).toFixed(2)}/s como mucho`)
 const comoAntes: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
-  if (e.enViaje && r.fin > 0) r.fin = Math.max(0, r.fin - dt / 0.35)
+  if (!e.alFondo && r.fin > 0) r.fin = Math.max(0, r.fin - dt / 0.35)
 }
 controlPositivo('el detector VE la vuelta de antes (0,35 s: la cámara bajaba del cenit 10 u por cuadro)', comoAntes, (p: PasoDelReloj) => salidaBien(salida(p)))
 
@@ -281,14 +286,16 @@ const centrada: CamaraDelFinal = (c, k, b, giro, aleja, sacudon) => {
 }
 controlPositivo('  el detector VE la cámara de antes (mira al centro de la órbita y tira el encuadre)', centrada, encuadreBien)
 
-// El viaje espera a la escena: no mueve el scroll hasta que el final está en reposo.
+// [PULIDO 1] P5 · cambió por pedido: el viaje ya NO espera a la escena (esperaba a que el final volviera, hasta 2,2 s, y desde
+// el pie quedaba lento). El final vuelve en paralelo con el recorrido, adentro de la misma duración (lo detalla s52-pulido-1
+// P5). Lo que se fija acá: el efecto no mira el estado del final; el reloj de seguridad cubre el preludio, el recorrido y el
+// margen; y la escena recibe cuánto dura el viaje.
 const efecto = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
-const componenteDelFinal = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
-const esperaBien = (ef: string): boolean =>
-  ef.includes('if (!FINAL_EN_REPOSO.valor && performance.now() - desdeElClick < PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS) {') && ef.includes('relojDeArranque = window.setTimeout(arrancar, 50)') &&
-  cuadro.includes('FINAL_EN_REPOSO.valor = !activo') && componenteDelFinal.includes('FINAL_EN_REPOSO.valor = true')
-afirmar(esperaBien(efecto), '  el viaje desde el pie con la cinemática avanzada espera a que la escena la deshaga (el final en reposo; a lo sumo 3,5 s, por si la escena no dibuja) y recién ahí mueve el scroll; el reloj de seguridad cubre esa espera')
-controlPositivo('  el detector VE un viaje que no espera (la cámara bajaría del cenit mientras el scroll ya vuela)', efecto.replace('if (!FINAL_EN_REPOSO.valor && performance.now() - desdeElClick < PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS) {', 'if (false) {'), esperaBien)
+const sinEsperaBien = (ef: string): boolean =>
+  !/FINAL_EN_REPOSO|ESPERA_MAXIMA_DEL_FINAL_MS|window\.setTimeout\(arrancar, 50\)/.test(ef) && ef.includes('empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })') &&
+  ef.includes('const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracionMs + MARGEN_DEL_RELOJ_MS') && !/FINAL_EN_REPOSO/.test(cuadro)
+afirmar(sinEsperaBien(efecto), '  el viaje desde el pie con la cinemática avanzada NO espera a la escena ([PULIDO 1] P5): sale como cualquiera, y la escena sabe cuánto dura para deshacerla adentro')
+controlPositivo('  el detector VE la espera de A2 (no mover el scroll hasta el final en reposo)', efecto.replace('if (lenis === null) {', 'if (!FINAL_EN_REPOSO.valor) { relojDeArranque = window.setTimeout(arrancar, 50); return } if (lenis === null) {'), sinEsperaBien)
 
 // La velocidad con tope: el mínimo de siempre para los cortos; los largos tardan más, sin pasar 4,5 pantallas por segundo.
 const velocidadBien = (f: typeof duracionDelViaje): boolean => {

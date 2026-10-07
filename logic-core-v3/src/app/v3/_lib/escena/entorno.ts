@@ -97,6 +97,11 @@ export interface Pruebas {
    * queda arriba, usable); `encastre=desvanece` es la otra lectura: el pie se desvanece mientras corre, sin escenario.
    */
   readonly encastre: 'desvanece' | 'no'
+  /**
+   * [PULIDO 1] P5 · `vuelta=corta`: en un viaje del menú el final vuelve en el 35 % del viaje (≈ 1 s en el más corto), la
+   * lectura literal del «~30 %»; el producto lo vuelve a la velocidad del rebobinado de P2 (1,6 s desde el final entero).
+   */
+  readonly vuelta: 'corta' | 'no'
 }
 
 /**
@@ -108,10 +113,10 @@ export interface Pruebas {
  * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue. [EL ENCASTRE]
  * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', brillo: 'no', cta: 'no', encastre: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', brillo: 'no', cta: 'no', encastre: 'no', vuelta: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'brillo', 'cta', 'encastre'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'brillo', 'cta', 'encastre', 'vuelta'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -127,6 +132,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     brillo: unoDe<'suave' | 'fuerte'>(['suave', 'fuerte'], valor('brillo')),
     cta: unoDe<'a' | 'b' | 'c' | 'd'>(['a', 'b', 'c', 'd'], valor('cta')),
     encastre: unoDe<'desvanece'>(['desvanece'], valor('encastre')),
+    vuelta: unoDe<'corta'>(['corta'], valor('vuelta')),
   }
 }
 

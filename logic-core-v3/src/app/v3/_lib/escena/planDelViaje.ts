@@ -7,7 +7,7 @@ import { medidaSinElEstiramiento } from './tramoEstirado'
 import { NIVEL_NATURAL } from './nocheDisparada'
 import { RIM_NIGHT_LEVEL } from './probeLighting'
 import { progresoDelScroll } from './recorrido'
-import { claseDelViaje, type Luz, type ViajeEnCurso } from './viaje'
+import { claseDelViaje, type Luz, type PlanDelViaje } from './viaje'
 
 /**
  * EL PLAN DE LUZ DE UN VIAJE — qué se ve al salir y al llegar, decidido en el click. **[VIAJES]**
@@ -35,7 +35,7 @@ function luzDe(superficie: DefinicionSuperficie, nivel: number): Luz {
 
 const verLaSala = (s: DefinicionSuperficie): boolean => s.dejaVerElCanvas && !s.invertida
 
-export function planDelViaje(destino: string, y1: number): ViajeEnCurso {
+export function planDelViaje(destino: string, y1: number): PlanDelViaje {
   const v = window.innerHeight
   const y0 = window.scrollY
   const secciones = medirLasSecciones(document, y0)

@@ -191,7 +191,8 @@ afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECT
 titulo('4 · La noche durante el viaje')
 
 const NOCHE_ANTES = NOCHE_DISPARADA.cantidad
-const diaADia: ViajeEnCurso = { destino: 'por-que-develop', clase: 'dia-a-dia', luz: { desde: 1, hasta: 0.95, y0: 0, y1: 20_000 } }
+// [PULIDO 1] P5 · el viaje en curso lleva su duración (la usa el final del pie, no la luz): la del viaje más corto.
+const diaADia: ViajeEnCurso = { destino: 'por-que-develop', clase: 'dia-a-dia', luz: { desde: 1, hasta: 0.95, y0: 0, y1: 20_000 }, duracionMs: 2900 }
 /** El nivel mínimo que se ve recorriendo TODO el arco con la noche disparada puesta, con o sin viaje de día a día. */
 function peorNivel(conViaje: boolean): number {
   return conDomFalso(900, 72, () => {
@@ -215,7 +216,7 @@ afirmarIgual([claseDelViaje('dia', 'dia'), claseDelViaje('noche', 'dia'), claseD
 const bloqueTapando = { servicios: { tope: -100, pie: 2000 }, tuPanel: { tope: 2000, pie: 4000 }, alto: 900 }
 NOCHE_DISPARADA.cantidad = 0.3
 DIA_DEL_FINAL.activo = true
-empezarElViaje({ destino: 'trabajos', clase: 'dia-a-noche', luz: null })
+empezarElViaje({ destino: 'trabajos', clase: 'dia-a-noche', luz: null, duracionMs: 2900 })
 afirmarIgual(nocheEfectiva(), 0.3, 'en un viaje que cambia de luz el día del final no corta: la noche es la del reloj')
 aplicarElDiaDelFinal(bloqueTapando)
 afirmarIgual(NOCHE_DISPARADA.cantidad, 0.3, '  y la noche no se repone de golpe detrás del bloque: se vería')
