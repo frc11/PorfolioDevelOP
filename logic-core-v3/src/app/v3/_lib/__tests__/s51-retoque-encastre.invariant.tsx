@@ -30,7 +30,7 @@ import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnElPi
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
-import { RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, pasoDelReloj, poseDelLogo, relojQuieto, type EntradaDelReloj, type FaseDelFinal, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, pasoDelReloj, poseDelLogo, relojQuieto, type EntradaDelReloj, type FaseDelFinal, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from '../escena/pie3d/material'
 import { TRAMOS_DEL_PIE, avanceDelPie } from '../escena/pie3d/coreografia'
 import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
@@ -156,9 +156,9 @@ const cinematica = (paso: PasoDelReloj): Cinematica => {
 }
 const R = RELOJ_DEL_FINAL
 const cinematicaBien = (c: Cinematica): boolean =>
-  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && Math.abs(c.rebobinaSola - R.duracionS) < 0.3 && c.saliendo < 3 && c.viaje < 3
+  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && Math.abs(c.rebobinaSola - REBOBINADO.topeS) < 0.1 && c.saliendo < 3 && c.viaje < 3
 const medida = cinematica(pasoDelReloj)
-afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UNA velocidad (la rueda hacia abajo no la adelanta); UN gesto hacia arriba la rebobina entera, sola, a la misma velocidad; fuera del fondo o con un viaje del menú vuelve a cero', `sola ${medida.sola.toFixed(2)} s · con la rueda abajo ${medida.conRuedaAbajo.toFixed(2)} s · rebobina sola en ${medida.rebobinaSola.toFixed(2)} s · saliendo ${medida.saliendo.toFixed(2)} s · viaje ${medida.viaje.toFixed(2)} s`)
+afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UNA velocidad (la rueda hacia abajo no la adelanta); UN gesto hacia arriba la rebobina entera, sola ([PULIDO 1] P2: en 1,6 s desde el final entero, no a la velocidad de la cinemática); fuera del fondo o con un viaje del menú vuelve a cero', `sola ${medida.sola.toFixed(2)} s · con la rueda abajo ${medida.conRuedaAbajo.toFixed(2)} s · rebobina sola en ${medida.rebobinaSola.toFixed(2)} s · saliendo ${medida.saliendo.toFixed(2)} s · viaje ${medida.viaje.toFixed(2)} s`)
 // Los controles: el reloj de EL ENCASTRE (la rueda hacia abajo lo adelanta: la cola entera, la secuencia entera) y el de
 // RETOQUE DEL ENCASTRE 1D (rebobina sólo mientras siga el gesto: sin gesto en el cuadro, vuelve a correr).
 const conRueda: PasoDelReloj = (r, e, dt) => {
@@ -173,7 +173,7 @@ const mientrasSiga: PasoDelReloj = (r, e, dt) => {
 controlPositivo('  y el de RETOQUE DEL ENCASTRE 1D (rebobina sólo mientras siga el gesto: al soltar, se vuelve a encastrar)', mientrasSiga, (p: PasoDelReloj) => cinematicaBien(cinematica(p)))
 // Qué se retiene: sólo al fondo y hacia arriba; el gesto que EMPIEZA mientras corre pide el rebobinado y se retiene entero
 // (hasta su tope); un gesto nuevo rebobinando o parada sube la página.
-const enFase = (fase: FaseDelFinal, fin: number): RelojDelFinal => ({ fin, velocidad: 0, fase, paradaS: 0 })
+const enFase = (fase: FaseDelFinal, fin: number): RelojDelFinal => ({ ...relojQuieto(), fin, fase })
 type Decide = typeof decidirElGesto
 const retencionBien = (f: Decide): boolean => {
   const corre = enFase('corre', 0.4)

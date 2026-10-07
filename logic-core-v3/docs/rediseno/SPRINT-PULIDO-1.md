@@ -122,3 +122,44 @@ Ajustado: `s35-escena9` (T2) fijaba el texto literal de la lectura de la URL; ah
 `pedidoDeLaUrl`, y además por comportamiento. `s52-pulido-1` suma la sección de las banderas (con dos controles: un
 traductor que acepta cualquier valor y una URL que sólo lee `?pruebas=`). Gate: lint y `tsc` limpios; las 17 suites que
 importan `entorno.ts` en verde (s29–s36, s38, s40, s42, s44, s46–s49, s52).
+
+### P2 · El rebobinado del encastre, más rápido
+
+**Antes** (medido en la página a 1440, `pulido-1/p2/antes-1440.json`): UN gesto rebobinaba a la velocidad de la
+cinemática: desde 0,2 tardaba 1,6 s; desde la mitad, 3,5 s; desde el final entero y desde el quieto, más de 5 s (6,4 s
+la cinemática entera).
+
+**Qué cambió** (`escena/final/recorridoDelFinal.ts`, `cuadroDelFinal.ts`): el mecanismo de A1 es el mismo (un gesto,
+solo, sin mover la página, hasta el logo parado; el reinicio a los 2,5 s no se tocó). Al rebobinar, `fin` deja de
+perseguir una velocidad y pasa a ser función del tiempo del rebobinado: dura lo avanzado por 1,6 s (`REBOBINADO.topeS`;
+desde el final entero 1,6 s, desde la mitad 0,8 s) con la curva `simetrica` del vocabulario (`_lib/motion/curvas.ts`,
+`power1.inOut`: arranca y llega quieta). El giro y el alejamiento del quieto vuelven con el mismo reloj y la misma curva
+(`quietoRebobinado`): antes volvían por su cuenta con tope (90°/s) y media vuelta tardaba 2,2 s. Un gesto hacia abajo a
+mitad lo retoma desde la velocidad que traía (sin salto) y el quieto sigue desde donde quedó.
+
+**Después** (medido en la página a 1440, `pulido-1/p2/despues-1440.json`): desde 0,2 → 0,32 s; desde 0,5 → 0,80 s; desde
+el final entero → 1,55–1,59 s; desde el quieto girado 31° → 1,59 s. La página no se movió en ninguno.
+
+**La lectura del pedido** («entre 1 y 2 s como máximo… proporcional a cuánto avanzó, con tope de ~1,6 s»): proporcional
+con tope, así que desde muy cerca del principio dura menos de 1 s (hay poco que deshacer). La otra lectura (al menos 1 s
+desde cualquier punto) está atrás de `?rebobinado=minimo`: medida, 0,99 / 0,99 / 1,57 / 1,59 s.
+
+**Las aserciones viejas que cambiaron** (por cada una: qué afirmaba, qué afirma, por qué no es debilitarla):
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` A1 · `unGestoBien` (duración) | rebobina en 6,4 s ± 0,3 (la velocidad de la cinemática) | rebobina entre 1 y 2 s y en 1,6 s ± 0,1 | La duración es la de P2 (lo pedido), con tolerancia más chica (0,1 contra 0,3). Lo demás que fija (UN gesto basta, entera y sola hasta `parada`, el reinicio a los 2,5 s ± 0,05) no cambió |
+| `s52-nocturno-final` A1 · `unGestoBien` (velocidad) | ningún cuadro más rápido que la velocidad de la cinemática (1/6,4 por s, + 0,1 %) | ningún cuadro más rápido que el pico de la curva de P2 (2/1,6 por s, + 0,1 %) | Mismo tope relativo (0,1 %) sobre la velocidad máxima que ahora corresponde. En la primera versión del cambio había quedado + 5 %: se volvió a + 0,1 % (medido: 1,237/s contra 1,25 de tope) |
+| `s52-nocturno-final` A1 · control «acelerado» | rebobinar al doble (3,2 s) tenía que fallar | rebobinar al doble (0,8 s) tiene que fallar | El mismo control, con su número nuevo: sigue cazando un rebobinado acelerado (cae fuera de 1–2 s) |
+| `s52-nocturno-final` A1 · `enFase` (ayuda de la retención) | `{ fin, velocidad: 0, fase, paradaS: 0 }` | `{ ...relojQuieto(), fin, fase }` | Equivalente: el reloj tiene un campo más (`rebobinado`, en cero) y la ayuda arma el mismo estado; las afirmaciones de qué se retiene no cambiaron |
+| `s51-retoque-encastre` 1D · `cinematicaBien` | rebobina sola en 6,4 s ± 0,3 | rebobina sola en 1,6 s ± 0,1 | Lo mismo que A1: la duración pedida, con tolerancia más chica; el resto de 1D (espera al pie entero, corre a una velocidad, la rueda abajo no la adelanta, fuera del fondo y en un viaje vuelve) igual |
+| `s51-retoque-encastre` 1D · `enFase` | literal sin `rebobinado` | `{ ...relojQuieto(), fin, fase }` | Equivalente (ver arriba) |
+
+`s52-pulido-1` P2 fija el detalle: proporcional desde 0,1, 0,25, 0,5, 0,75 y 1 (± dos cuadros), nunca más de 2 s, in-out
+(el primer y el último paso por debajo del 25 % del pico desde la mitad para arriba), siempre hacia atrás y termina
+parada; el quieto con lo que queda del rebobinado y el cuadro del final usándolo; la alternativa `rebobinado=minimo`.
+Controles: el rebobinado de antes (6,4 s), uno del mismo largo pero lineal, un quieto que vuelve por su cuenta y una
+alternativa sin el mínimo.
+
+Reposo (en lugar de `visual-qa`): `pulido-1/reposo/hoja-p2.png`, el hero y el pie a 1440 y 390, sin errores en la consola.
+La coreografía del rebobinado la mira el humano (`entregas/pulido-1/mirar.txt`).

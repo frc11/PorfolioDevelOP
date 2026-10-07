@@ -34,7 +34,7 @@ import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
-import { ATARDECER_DEL_FINAL, FINAL_DEL_PIE, RELOJ_DEL_FINAL, atardecer, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { ATARDECER_DEL_FINAL, FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, atardecer, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
@@ -103,9 +103,12 @@ const unGesto = (paso: PasoDelReloj): UnGesto => {
   }
   return { rebobinaS, velocidadMaxima, fase, paradaS }
 }
-const unGestoBien = (g: UnGesto): boolean => Math.abs(g.rebobinaS - R.duracionS) < 0.3 && g.velocidadMaxima <= (1 / R.duracionS) * 1.001 && g.fase === 'parada' && Math.abs(g.paradaS - R.vuelveAEmpezarS) < 0.05
+// [PULIDO 1] P2 · la velocidad cambió por pedido (de la de la cinemática, 6,4 s, a lo avanzado por 1,6 s con curva in-out):
+// lo que A1 fija sigue igual de fuerte (entero, solo, hasta parada; el reinicio a los 2,5 s) y la velocidad es la de P2 (el
+// detalle, en `s52-pulido-1`): desde el final entero entre 1 y 2 s, sin pasar el pico de su curva (2/`topeS` por segundo).
+const unGestoBien = (g: UnGesto): boolean => g.rebobinaS >= 1 && g.rebobinaS <= 2 && Math.abs(g.rebobinaS - REBOBINADO.topeS) < 0.1 && g.velocidadMaxima <= (2 / REBOBINADO.topeS) * 1.001 && g.fase === 'parada' && Math.abs(g.paradaS - R.vuelveAEmpezarS) < 0.05
 const g1 = unGesto(pasoDelReloj)
-afirmar(unGestoBien(g1), 'UN gesto hacia arriba (un solo cuadro con el pedido) rebobina la cinemática ENTERA, sola, a la velocidad de la cinemática (no acelerada) hasta el logo parado; parada, vuelve a empezar sola a los 2,5 s sin gestos', `rebobina en ${g1.rebobinaS.toFixed(2)} s · a lo sumo ${g1.velocidadMaxima.toFixed(4)}/s · parada ${g1.paradaS.toFixed(2)} s`)
+afirmar(unGestoBien(g1), 'UN gesto hacia arriba (un solo cuadro con el pedido) rebobina la cinemática ENTERA, sola, en lo de P2 de PULIDO 1 (1,6 s desde el final entero, nunca más de 2) hasta el logo parado; parada, vuelve a empezar sola a los 2,5 s sin gestos', `rebobina en ${g1.rebobinaS.toFixed(2)} s · a lo sumo ${g1.velocidadMaxima.toFixed(4)}/s · parada ${g1.paradaS.toFixed(2)} s`)
 const mientrasSiga: PasoDelReloj = (r, e, dt) => {
   if (r.fase === 'rebobina' && !e.rebobinar) r.fase = 'corre'
   pasoDelReloj(r, e, dt)
@@ -115,7 +118,7 @@ const acelerado: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
   if (r.fase === 'rebobina') pasoDelReloj(r, e, dt)
 }
-controlPositivo('  y uno acelerado (rebobina al doble)', acelerado, (p: PasoDelReloj) => unGestoBien(unGesto(p)))
+controlPositivo('  y uno acelerado (rebobina al doble: 0,8 s)', acelerado, (p: PasoDelReloj) => unGestoBien(unGesto(p)))
 const sinVolver: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
   if (r.fase === 'corre' && r.fin < 0.01 && !e.haciaAbajo) {
@@ -148,7 +151,7 @@ for (let i = 0; i < 60; i += 1) pasoDelReloj(r3, AL_FONDO, DT)
 afirmar(conGestos && p2.fase === 'corre' && p2.fin > 0 && r3.fase === 'corre' && r3.fin > enMedio, '  parada con gestos recientes no arranca (espera 2,5 s sin gestos); un gesto hacia abajo la corre ya, parada o a mitad del rebobinado')
 
 // Qué se retiene y qué pide rebobinar.
-const enFase = (fase: RelojDelFinal['fase'], fin: number): RelojDelFinal => ({ fin, velocidad: 0, fase, paradaS: 0 })
+const enFase = (fase: RelojDelFinal['fase'], fin: number): RelojDelFinal => ({ ...relojQuieto(), fin, fase })
 type Decide = typeof decidirElGesto
 const decisionBien = (f: Decide): boolean => {
   const corre = enFase('corre', 1)

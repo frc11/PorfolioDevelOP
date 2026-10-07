@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
+import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
 import { HUECO } from './hueco'
 
@@ -77,7 +79,7 @@ export const FINAL_DEL_PIE = {
  * [NOCTURNO FINAL] A1 · EL REBOBINADO DE UN GESTO (antes rebobinaba sólo mientras siguiera el gesto: había que scrollear
  * mucho para sacar el logo y al soltar se volvía a encastrar). UN gesto hacia arriba mientras corre o ya terminó (uno: la
  * rueda hasta un silencio, un dedo, una tecla; `gestosDelScroll.ts`) dispara el rebobinado ENTERO, que corre solo a la
- * velocidad de la cinemática (`duracionS`, no acelerado) hasta el logo parado; ese gesto se retiene (no mueve la página):
+ * velocidad de la cinemática (`duracionS`, no acelerado; [PULIDO 1] P2 · ahora en `REBOBINADO`) hasta el logo parado; ese gesto se retiene (no mueve la página):
  * lo que sigue de él, durante `topeDelGestoS`, y su cola entera (la inercia de un trackpad, que se va apagando: cada
  * evento a lo sumo `colaDelGesto` del más fuerte); el que sigue girando la rueda después, sube. Rebobinada, espera PARADA: sin gestos durante `vuelveAEmpezarS` vuelve a correr
  * sola; un gesto hacia abajo la corre ya; un gesto NUEVO hacia arriba (rebobinando o parada) sube la página normal. Un
@@ -92,9 +94,48 @@ export const FINAL_DEL_PIE = {
 export const RELOJ_DEL_FINAL = { duracionS: 6.4, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
 
 /**
+ * [PULIDO 1] P2 · EL REBOBINADO, MÁS RÁPIDO. El mecanismo de A1 (un gesto, solo, hasta el logo parado; el reinicio a los
+ * `vuelveAEmpezarS`) no cambia: cambia la velocidad. Antes volvía a la de la cinemática (6,4 s desde el final entero); ahora
+ * dura lo que avanzó por `topeS` (desde el final entero, `topeS`; desde la mitad, la mitad) con la curva `simetrica` del
+ * vocabulario (arranca y llega quieto). El giro y el alejamiento del quieto vuelven con el mismo reloj y la misma curva
+ * (`quietoRebobinado`): desde cualquier punto, todo vuelve en a lo sumo `topeS`.
+ */
+export const REBOBINADO = { topeS: 1.6, curva: 'simetrica', minimoS: 1 } as const satisfies { readonly topeS: number; readonly curva: NombreDeCurva; readonly minimoS: number }
+
+/**
+ * [PULIDO 1] P2 · cuánto dura el rebobinado desde `desde` (lo avanzado, 0 a 1). Con `minimo` (la prueba
+ * `rebobinado=minimo`: «entre 1 y 2 s desde cualquier punto»), nunca menos que eso.
+ */
+export function duracionDelRebobinado(desde: number, minimo = 0): number {
+  const d = Math.min(1, Math.max(0, desde))
+  return d <= 0 ? 0 : Math.max(minimo, REBOBINADO.topeS * d)
+}
+
+/** [PULIDO 1] P2 · el mínimo de la prueba, leído una vez. */
+let minimoDelRebobinado: number | null = null
+const minimoPedido = (): number => (minimoDelRebobinado ??= entornoDeLaEscena().pruebas.rebobinado === 'minimo' ? REBOBINADO.minimoS : 0)
+
+/** [PULIDO 1] P2 · cuánto queda de lo que había al empezar el rebobinado (de 1 a 0) a los `s` de `dura` segundos. */
+export function quedaDelRebobinado(s: number, dura: number): number {
+  if (dura <= 0) return 0
+  return 1 - CURVAS[REBOBINADO.curva](Math.min(1, Math.max(0, s / dura)))
+}
+
+/**
+ * [PULIDO 1] P2 · el quieto mientras rebobina: lo que tenía al empezar por lo que queda (el mismo reloj y la misma curva
+ * que el logo). Antes volvía por su cuenta con tope (`quieto.vuelta`, 90°/s): media vuelta tardaba más de 2 s.
+ */
+export function quietoRebobinado(alEmpezar: { readonly giro: number; readonly aleja: number }, queda: number, estado: { giro: number; aleja: number; giroV: number; alejaV: number }): void {
+  estado.giro = queda > 0 ? alEmpezar.giro * queda : 0
+  estado.aleja = queda > 0 ? alEmpezar.aleja * queda : 0
+  estado.giroV = 0
+  estado.alejaV = 0
+}
+
+/**
  * `espera`: no corre (no está al fondo, el pie llega o hay un viaje): se deshace con tope. `corre`: adelante.
- * `rebobina`: hacia atrás, sola, a la velocidad de la cinemática. `parada`: rebobinada, quieta en cero hasta que vuelve a
- * empezar.
+ * `rebobina`: hacia atrás, sola ([PULIDO 1] P2 · en `duracionDelRebobinado`, con su curva). `parada`: rebobinada, quieta en
+ * cero hasta que vuelve a empezar.
  */
 export type FaseDelFinal = 'espera' | 'corre' | 'rebobina' | 'parada'
 
@@ -106,10 +147,12 @@ export interface RelojDelFinal {
   fase: FaseDelFinal
   /** [NOCTURNO FINAL] A1 · cuánto lleva parada (s). */
   paradaS: number
+  /** [PULIDO 1] P2 · el rebobinado en curso: desde dónde (`fin` al empezar), cuánto lleva (s) y cuánto dura (s). */
+  readonly rebobinado: { desde: number; s: number; dura: number }
 }
 
 export function relojQuieto(): RelojDelFinal {
-  return { fin: 0, velocidad: 0, fase: 'espera', paradaS: 0 }
+  return { fin: 0, velocidad: 0, fase: 'espera', paradaS: 0, rebobinado: { desde: 0, s: 0, dura: 0 } }
 }
 
 /** Lo que el reloj necesita saber en cada cuadro. */
@@ -160,14 +203,33 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
     objetivo = -velocidadDeSalida(r.fin)
   } else {
     if (r.fase === 'espera' && e.pieEntero) r.fase = 'corre'
-    else if (r.fase === 'corre' && e.rebobinar && r.fin > 0) r.fase = 'rebobina'
-    else if (r.fase === 'rebobina' && e.haciaAbajo) r.fase = 'corre'
+    else if (r.fase === 'corre' && e.rebobinar && r.fin > 0) {
+      r.fase = 'rebobina'
+      r.rebobinado.desde = r.fin
+      r.rebobinado.s = 0
+      r.rebobinado.dura = duracionDelRebobinado(r.fin, minimoPedido())
+    } else if (r.fase === 'rebobina' && e.haciaAbajo) r.fase = 'corre'
     else if (r.fase === 'parada') {
       r.paradaS += paso
       if (e.haciaAbajo || (r.paradaS >= R.vuelveAEmpezarS && e.sinGestoS >= R.vuelveAEmpezarS)) r.fase = 'corre'
     }
+    // [PULIDO 1] P2 · rebobinando, `fin` es función del tiempo del rebobinado (su curva), no de una velocidad perseguida; la
+    // velocidad queda anotada para que un gesto hacia abajo a mitad la retome sin salto.
+    if (r.fase === 'rebobina') {
+      const b = r.rebobinado
+      b.s += paso
+      const fin = b.desde * quedaDelRebobinado(b.s, b.dura)
+      r.velocidad = paso > 0 ? (fin - r.fin) / paso : 0
+      r.fin = fin
+      if (r.fin <= 0) {
+        r.fin = 0
+        r.velocidad = 0
+        r.fase = 'parada'
+        r.paradaS = 0
+      }
+      return
+    }
     if (r.fase === 'corre') objetivo = 1 / R.duracionS
-    else if (r.fase === 'rebobina') objetivo = -1 / R.duracionS
     else if (r.fase === 'parada') objetivo = 0
     else objetivo = -velocidadDeSalida(r.fin)
   }
@@ -176,10 +238,6 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
   r.fin = Math.min(1, Math.max(0, fin))
   // Contra un tope, quieta (al dar vuelta no arranca con la velocidad que traía contra el tope).
   if (r.fin !== fin) r.velocidad = 0
-  if (r.fase === 'rebobina' && r.fin === 0) {
-    r.fase = 'parada'
-    r.paradaS = 0
-  }
 }
 
 /** [NOCTURNO FINAL] A1 · lo que un gesto hace con el final: si lo retiene (no mueve la página) y si pide rebobinar. */

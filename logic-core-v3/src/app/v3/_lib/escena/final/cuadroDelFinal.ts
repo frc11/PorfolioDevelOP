@@ -23,6 +23,8 @@ import {
   pasoDelReloj,
   poder,
   poseDelLogo,
+  quedaDelRebobinado,
+  quietoRebobinado,
   relojDelQuieto,
   relojQuieto,
   sacudonDeLaPresion,
@@ -54,6 +56,8 @@ export interface EstadoDelFinal {
   /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
   enteroS: number
   quietoS: number
+  /** [PULIDO 1] P2 · el giro y el alejamiento del quieto al empezar el rebobinado (vuelven con él). */
+  readonly quietoAlRebobinar: { activo: boolean; giro: number; aleja: number }
   golpeEn: number
   golpes: number
   /** [EL ENCASTRE] 2E · cuándo tocó el piso (el golpecito), en el reloj de la escena. */
@@ -87,6 +91,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): 
     sinScrollS: 0,
     enteroS: 0,
     quietoS: 0,
+    quietoAlRebobinar: { activo: false, giro: 0, aleja: 0 },
     golpeEn: Number.NaN,
     golpes: 0,
     tocoEn: Number.NaN,
@@ -181,7 +186,24 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [EL ENCASTRE] 2G · el quieto espera también al final entero (arranca solo: sin esto ya llevaba 1,4 s sin scroll al terminar).
   // [RETOQUE DEL ENCASTRE] 1D · y a un rato sin gestos (al fondo la página no se mueve: un gesto no cambia el scroll).
   s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
-  s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
+  // [PULIDO 1] P2 · rebobinando, el quieto vuelve con el mismo reloj y la misma curva que el logo (en a lo sumo 1,6 s); si
+  // no, con su vuelta con tope de siempre (cortado a la mitad por un gesto hacia abajo, sigue desde donde quedó).
+  const alRebobinar = s.quietoAlRebobinar
+  if (s.reloj.fase === 'rebobina') {
+    if (!alRebobinar.activo) {
+      alRebobinar.activo = true
+      alRebobinar.giro = ((((EN_VIVO.giro + 180) % 360) + 360) % 360) - 180
+      alRebobinar.aleja = EN_VIVO.aleja
+    }
+    quietoRebobinado(alRebobinar, quedaDelRebobinado(s.reloj.rebobinado.s, s.reloj.rebobinado.dura), EN_VIVO)
+    s.quietoS = 0
+  } else {
+    if (alRebobinar.activo) {
+      alRebobinar.activo = false
+      if (s.reloj.fase === 'parada') quietoRebobinado(alRebobinar, 0, EN_VIVO)
+    }
+    s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
+  }
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   // [NOCTURNO FINAL] A2 · el viaje del menú espera a esto para mover el scroll.
   FINAL_EN_REPOSO.valor = !activo
