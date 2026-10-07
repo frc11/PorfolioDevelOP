@@ -8,6 +8,7 @@
  *   A2 · los viajes del menú con la cinemática avanzada: primero se deshace con tope (la cámara baja del cenit sin saltos)
  *        y después se viaja; la cámara del final conserva el encuadre del recorrido (no se teletransporta al soltar); el
  *        viaje largo tarda más (velocidad con tope) y un cuadro largo no lo hace saltar.
+ *   A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición alcanza lo pedido en un viaje).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -326,5 +327,19 @@ const topesBien = (ss: string, rg: string): boolean =>
   rg.includes('const pasoDeLaInercia = Math.min(delta, TOPE_DEL_CUADRO_DEL_VIAJE_MS / 1000)') && /SETTLE_EPSILON\[channel\],\s*pasoDeLaInercia/.test(rg)
 afirmar(topesBien(scrollSuave, rig), '  con Lenis, su reloj en un viaje avanza con el mismo tope; y la inercia de la cámara también (con 100 ms de delta recuperaba de golpe lo que venía atrás)')
 controlPositivo('  el detector VE a Lenis con el reloj de pared', [scrollSuave.replace('lenis.raf(reloj)', 'lenis.raf(tiempo)'), rig] as const, ([ss, rg]: readonly [string, string]) => topesBien(ss, rg))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición no persigue al scroll en un viaje)')
+
+// La aparición de las Demos persigue al scroll con un tope (1,8 s de punta a punta): en un viaje que las cruza, al llegar a
+// Portfolio seguían a medio irse y su título 3D entraba y salía apenas terminaba el viaje. En un viaje, lo mostrado ES lo
+// pedido (el `<main>` está apagado: no hay nada que ver de la persecución).
+const capaDeDemos = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
+const demosSinPersecucion = (c: string): boolean => /p\.pedida = aparicionPedida\(valor, rigida\.current\)\s*if \(viajeEnCurso\(\) !== null\) \{\s*alcanzar\(p\)\s*llegar\(p\.mostrada\)\s*return\s*\}\s*perseguir\(p, llegar\)/.test(c)
+afirmar(demosSinPersecucion(capaDeDemos), 'en un viaje del menú la aparición de las Demos alcanza lo pedido en el acto (al llegar a Portfolio está en cero: su título, su párrafo y sus libros no entran ni salen)')
+controlPositivo('el detector VE la persecución de siempre en un viaje', capaDeDemos.replace(/if \(viajeEnCurso\(\) !== null\) \{\s*alcanzar\(p\)\s*llegar\(p\.mostrada\)\s*return\s*\}/, ''), demosSinPersecucion)
+// Y los títulos de volumen, en un viaje, desarmados (la regla de 3D Y SONIDO T1, que esto completa).
+const titulos = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+afirmar(titulos.includes('a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS, a.titulo.asiento)'), '  y en un viaje los títulos de volumen van desarmados, sin mínimo: al terminar llegan desde lo que pide el scroll del destino')
 
 cerrar('s52-nocturno-final')

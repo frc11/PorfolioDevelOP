@@ -9,6 +9,8 @@ import { PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, arranqueDeDemos } from '../
 
 import { cn } from '@/lib/utils'
 
+import { viajeEnCurso } from '../../../_lib/escena/viaje'
+
 import { Biblioteca } from './Biblioteca'
 import { Carrusel } from './Carrusel'
 import type { Demo } from './catalogo'
@@ -150,6 +152,13 @@ export function CapaDeDemos({
   useMotionValueEvent(mostrado, 'change', (valor) => {
     const p = aparicion.current
     p.pedida = aparicionPedida(valor, rigida.current)
+    // [NOCTURNO FINAL] A3 · en un viaje del menú (el `<main>` apagado), sin persecución: lo mostrado es lo pedido. Si no, al
+    // llegar a Portfolio las Demos seguían a medio irse y su título entraba y salía apenas terminaba el viaje.
+    if (viajeEnCurso() !== null) {
+      alcanzar(p)
+      llegar(p.mostrada)
+      return
+    }
     perseguir(p, llegar)
   })
 
