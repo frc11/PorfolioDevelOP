@@ -109,7 +109,9 @@ function SombraDelLogo({ keyLightRef, logoGroupRef }: Props) {
         m.copias.push({ origen: o, copia }) // una vez
       })
     }
-    const fuerza = SOMBRA_DEL_LOGO.fuerza * Math.min(1, principal.intensity / KEY_INTENSITY) * (1 - VIVO.uNocheDelLogo.value)
+    // [NOCTURNO FINAL] B1 · y se apaga con el logo en el aire (cuando cae al cargar): lejos del piso, estirada, cruzaba el cuadro.
+    const enElAire = Math.min(1, Math.max(0, (logo.position.y - SOMBRA_DEL_LOGO.aire[0]) / (SOMBRA_DEL_LOGO.aire[1] - SOMBRA_DEL_LOGO.aire[0])))
+    const fuerza = SOMBRA_DEL_LOGO.fuerza * Math.min(1, principal.intensity / KEY_INTENSITY) * (1 - VIVO.uNocheDelLogo.value) * (1 - enElAire)
     m.fuerza = fuerza
     SOMBRA_EN_VIVO.uFuerzaDeLaSombra.value = fuerza
     if (fuerza < 0.001) return

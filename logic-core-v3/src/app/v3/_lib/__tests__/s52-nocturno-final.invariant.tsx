@@ -14,6 +14,7 @@
  *   A5 · teléfono: al pasar a las Demos la escena de atrás no se congela (se suspende sólo con el bloque opaco tapando).
  *   A6 · «Hablemos» del hero abre el panel de contacto (no lleva al pie).
  *   A7 · «Quiero mi…» de Servicios abre el panel de contacto con su opción marcada.
+ *   B1 · el intro del logo: cae desde arriba y llega cuando termina de armarse el titular; la súper onda (la del encastre).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -23,6 +24,10 @@ import * as THREE from 'three'
 import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, VIAJE_CON_TOPE, duracionDelViaje } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
+import { GOLPE_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
+import { SIMULACION_GLSL } from '../escena/piso/bloques'
+import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
@@ -408,5 +413,36 @@ const mapeo = PRECARGA_POR_SERVICIO.web.join() === 'web' && PRECARGA_POR_SERVICI
 const rotulo = (id: string): string => INTERESES.find((i) => i.id === id)?.rotulo ?? '?'
 afirmar(abrenElPanel(ctasDeServicios) && mapeo, 'los «Quiero mi…» abren el panel con su opción marcada: web → «Una página web», software → «Software a medida», IA → «Un chatbot con IA» y «Automatizaciones»', [rotulo('web'), rotulo('software'), rotulo('chatbot'), rotulo('automatizaciones')].join(' · '))
 controlPositivo('el detector VE los CTA que viajaban al pie', ctasDeServicios.map((f) => f.replace(`data-abre-contacto="${ABRE_EL_PANEL}"`, 'data-abre-contacto=""')), abrenElPanel)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B1 · El intro del logo: cae desde arriba y llega cuando termina de armarse el titular; la súper onda')
+
+// La caída: arriba (fuera del cuadro) mientras se arma el titular; después cae con gravedad (cada vez más rápido) y llega
+// exactamente al terminar el armado: los dos con el mismo reloj, desde que se abre la carga.
+const heroFuente = leer('_secciones/hero/Hero.tsx')
+const delTitular = Number(/const LLEGADA_DEL_TITULAR_S = ([0-9.]+)/.exec(heroFuente)?.[1] ?? Number.NaN)
+const caidaBien = (h: typeof alturaDeLaCaida): boolean => {
+  const muestras = Array.from({ length: 201 }, (_, i) => h(i / 200))
+  const baja = muestras.every((y, i) => i === 0 || y <= muestras[i - 1] + 1e-12)
+  const acelera = muestras.slice(Math.ceil(CAIDA_DEL_LOGO.espera * 200) + 2).every((_, k, arr) => k < 2 || arr[k] - arr[k - 1] <= arr[k - 1] - arr[k - 2] + 1e-9)
+  return h(0) === CAIDA_DEL_LOGO.alto && h(CAIDA_DEL_LOGO.espera) === CAIDA_DEL_LOGO.alto && h(1) === 0 && h(0.999) > 0 && baja && acelera
+}
+afirmar(caidaBien(alturaDeLaCaida) && CAIDA_DEL_LOGO.duracionS === delTitular, 'el logo espera arriba, cae con gravedad (cada vez más rápido) y llega a su lugar justo cuando termina de armarse el titular (el mismo reloj: lo que tarda el titular en armarse)', `${String(CAIDA_DEL_LOGO.duracionS)} s · desde ${String(CAIDA_DEL_LOGO.alto)} u`)
+controlPositivo('el detector VE una caída que llega antes que el titular', ((u: number) => alturaDeLaCaida(Math.min(1, u * 1.3))) as typeof alturaDeLaCaida, caidaBien)
+const caidaTsx = sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))
+const escenario = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
+const montada = (c: string, e: string): boolean => c.includes('if (cargaLista()) s.u = Math.min(1, s.u + Math.min(Math.max(delta, 0), 0.1) / CAIDA_DEL_LOGO.duracionS)') && c.includes('FINAL_EN_EL_PISO.uGolpe.value.set(VIVO.uTiempo.value, logo.position.x, logo.position.z, 1)') && c.includes('window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba') && e.includes('{!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}')
+afirmar(montada(caidaTsx, escenario), '  arranca con la carga abierta, sólo si la página cargó arriba (si no, el logo ya está en su lugar), al llegar hace la súper onda desde el logo, y con movimiento reducido no se monta (ni caída ni onda)')
+controlPositivo('  el detector VE una caída con movimiento reducido', [caidaTsx, escenario.replace('{!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}', '<CaidaDelLogo logoGroupRef={logoGroupRef} />')] as const, ([c, e]: readonly [string, string]) => montada(c, e))
+// La súper onda: la del golpe (la misma del encastre), mucho más grande que antes y dibujada más alta que el tope de siempre.
+const sim = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+const G = GOLPE_EN_EL_PISO
+type Golpe = { readonly alcance: number; readonly fuerza: number; readonly ancho: number; readonly masAlta: number }
+const superOnda = (g: Golpe, s: string): boolean => g.alcance >= 1.7 * 32 && g.fuerza >= 1.6 * 70 && g.ancho >= 1.5 * 1.3 && g.masAlta >= 2 * 0.42 && /float topeDeLaOnda = topeConElGolpe\( [0-9.]+ \);\s*float onda = topeDeLaOnda \* tanh\( nueva \/ topeDeLaOnda \);/.test(s)
+afirmar(superOnda(G, sim), '  la súper onda (la de la llegada y la del encastre): llega casi el doble de lejos, más fuerte y más ancha, y se dibuja hasta 1 u más alta que el tope de las ondas de siempre (0,42)', `${String(G.alcance)} u · ${String(G.fuerza)} · ${String(G.ancho)} u · +${String(G.masAlta)} u`)
+controlPositivo('  el detector VE el golpe de antes', [{ alcance: 32, fuerza: 70, ancho: 1.3, masAlta: 0 }, sim] as readonly [Golpe, string], ([g, s]: readonly [Golpe, string]) => superOnda(g, s))
+// Y la sombra del logo se va con el logo en el aire (cayendo, lejos del piso, cruzaba el cuadro estirada).
+const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
+afirmar(luzDelLogo.includes('* (1 - enElAire)') && /const enElAire = Math\.min\(1, Math\.max\(0, \(logo\.position\.y - SOMBRA_DEL_LOGO\.aire\[0\]\)/.test(luzDelLogo), '  y la sombra del logo se apaga con el logo en el aire (cayendo, lejos del piso, se estiraba por el cuadro)')
 
 cerrar('s52-nocturno-final')

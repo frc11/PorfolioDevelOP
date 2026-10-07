@@ -26,6 +26,8 @@ export const SOMBRA_DEL_LOGO = {
   lejos: 40,
   /** Cuánto oscurece con la principal entera (la mezcla hacia el color del contacto). */
   fuerza: 0.4,
+  /** [NOCTURNO FINAL] B1 · con el logo en el aire (u sobre su lugar: desde, hasta), la sombra se va: al cargar, el logo cae. */
+  aire: [1, 4],
   /** El desenfoque (la penumbra): pasadas de 9 muestras gaussianas, cada una de este sigma (texeles). */
   desenfoque: { pasadas: 2, sigma: 2.5 },
   /** La varianza mínima (contra el ruido) y el corte del sangrado de luz (Chebyshev). */

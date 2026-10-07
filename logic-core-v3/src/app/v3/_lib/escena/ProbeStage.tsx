@@ -17,6 +17,7 @@ import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
 import { FinalDelPie } from './final/FinalDelPie'
+import { CaidaDelLogo } from './intro/CaidaDelLogo'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
 import { Fugaz } from './estrellas/Fugaz'
@@ -274,6 +275,8 @@ export default function ProbeStage({
           moireRef={moireRef}
         />
         {/* [CIERRE] 3 · el final del pie, justo después del rig (le suma el final a su cámara y al logo): desde 1024 y con movimiento. */}
+        {/* [NOCTURNO FINAL] B1 · el logo cae al cargar y llega con el titular del hero (súper onda); con movimiento. */}
+        {!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}
         {calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />

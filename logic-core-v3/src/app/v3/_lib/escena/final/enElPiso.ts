@@ -30,11 +30,21 @@ import { HUECO } from './hueco'
  * energizado: las ondas y el mar dejan escapar la luz por las rendijas que abren al pasar.
  */
 export const GOLPE_EN_EL_PISO = {
-  duracionS: 1.7,
-  /** Hasta dónde llega el frente (u), su empuje y su ancho (u): más que un principal del pulso (34). */
-  alcance: 32,
-  fuerza: 70,
-  ancho: 1.3,
+  /**
+   * [NOCTURNO FINAL] B1 · LA SÚPER ONDA: la del encastre y la de la llegada del logo al cargar (`intro/caida.ts`),
+   * mucho más grande que las de siempre (que se note): más lejos, más fuerte, más ancha y más larga. Antes: 1,7 s, 32 u,
+   * 70 y 1,3 u (apenas más que un principal del pulso).
+   */
+  duracionS: 2.6,
+  /** Hasta dónde llega el frente (u), su empuje y su ancho (u). */
+  alcance: 58,
+  fuerza: 120,
+  ancho: 2.1,
+  /**
+   * Cuánto más alta se dibuja mientras dura (u): el piso dibuja sus ondas con un tope suave (`tanh`, 0,42 u: «llamativa,
+   * no invasiva»), y con ese tope la súper onda no podía verse más alta que una de siempre.
+   */
+  masAlta: 1,
 } as const
 
 /**
@@ -117,6 +127,13 @@ uniform vec4 uGolpe;
 uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform float uCalmaDelFinal;
 uniform vec2 uCajaDelLogo;
+// [NOCTURNO FINAL] B1 · el tope del dibujo de la onda, más alto mientras dura la súper onda.
+float topeConElGolpe( float tope ) {
+	if ( uGolpe.w <= 0.0 ) return tope;
+	float t = ( uTiempo - uGolpe.x ) / ${f(GOLPE_EN_EL_PISO.duracionS)};
+	if ( t < 0.0 || t > 1.0 ) return tope;
+	return tope + uGolpe.w * ${f(GOLPE_EN_EL_PISO.masAlta)} * pow( 1.0 - t, 1.2 );
+}
 float empujeDelGolpe( vec2 xz ) {
 	if ( uGolpe.w <= 0.0 ) return 0.0;
 	float t = ( uTiempo - uGolpe.x ) / ${f(GOLPE_EN_EL_PISO.duracionS)};
@@ -147,7 +164,7 @@ float calmaDelFinal( vec2 xz ) {
 
 /** La simulación del piso con el final: el golpe, el rastro del mouse y la calma. */
 export function conElFinalEnLaSimulacion(glsl: string): string {
-  if (Object.values(ANCLAS_DEL_FINAL).some((ancla) => !glsl.includes(ancla))) {
+  if (Object.values(ANCLAS_DEL_FINAL).some((ancla) => !glsl.includes(ancla)) || !ONDA_CON_TOPE.test(glsl)) {
     throw new Error('[CIERRE] 3 · la simulación del piso cambió: el final no encuentra dónde entrar')
   }
   return glsl
@@ -158,7 +175,11 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
     )
     .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );`)
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
+    .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
 }
+
+/** [NOCTURNO FINAL] B1 · el dibujo de la onda con su tope suave (el número es el de `PISO_VIVO.onda.tope`). */
+const ONDA_CON_TOPE = /float onda = ([0-9.]+) \* tanh\( nueva \/ \1 \);/
 
 const DIBUJO_GLSL = /* glsl */ `
 uniform vec4 uGolpe;
