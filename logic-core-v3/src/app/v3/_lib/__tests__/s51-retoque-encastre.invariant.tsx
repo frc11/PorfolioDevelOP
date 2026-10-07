@@ -199,7 +199,8 @@ const pieDeVolumen = sinComentarios(leer('_lib/escena/pie3d/PieDeVolumen.tsx'))
 const cableado = (g: string): boolean =>
   g.includes("window.addEventListener('wheel', alRodar, { capture: true, passive: false })") && g.includes("window.addEventListener('touchmove', alArrastrar, { capture: true, passive: false })") && g.includes("window.addEventListener('keydown', alApretar, { capture: true })") &&
   /function retener\(e: Event\): void \{\s*if \(e\.cancelable\) e\.preventDefault\(\)\s*e\.stopPropagation\(\)/.test(g) &&
-  componenteDelFinal.includes('useEffect(() => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g))), [])') &&
+  // [PULIDO 1] P22 · en escritorio, al montarse (como antes); abajo de 1024, mientras se ve el escenario (o el pie, con la otra lectura).
+  componenteDelFinal.includes('const retener = (): (() => void) => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g)))') && componenteDelFinal.includes('if (!angosto) return retener()') &&
   finalTs.includes('pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)') &&
   finalTs.includes('s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)') &&
   armadas.includes('EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)') && pieDeVolumen.includes('EN_VIVO.pieEntero = true')

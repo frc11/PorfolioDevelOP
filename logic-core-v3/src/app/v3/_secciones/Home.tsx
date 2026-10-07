@@ -35,6 +35,10 @@ export function Home(): React.JSX.Element {
       {REGISTRO.map(({ id, Componente, seccion }) => (
         <Componente key={id} seccion={seccion} />
       ))}
+      {/* [PULIDO 1] P22 · el escenario del encastre abajo de 1024: una pantalla sin contenido después del pie, FUERA de la
+          tabla de secciones (la escena no cuenta su alto: el recorrido se acota en 1 y el mapeo de las secciones no se
+          mueve), donde corre la cinemática del final con el formulario ya arriba (`pie.css`, `escena/final/`). */}
+      <div data-pieza="escenario-del-encastre" aria-hidden="true" className="h-[var(--escenario-del-encastre)] escritorio:hidden" />
     </>
   )
 }

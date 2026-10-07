@@ -19,6 +19,8 @@ interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
   readonly logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
   readonly logoGroupRef: RefObject<THREE.Group | null>
+  /** [PULIDO 1] P22 · abajo de 1024: el mapa de la sombra a la mitad de resolución (el costo del teléfono). */
+  readonly compacta?: boolean
 }
 
 export function LuzDelLogo(props: Props) {
@@ -48,9 +50,10 @@ function ReflejosDelLogo({ keyLightRef, logoMaterialRef }: Props) {
  * vuelve cuando el frente del amanecer alcanza al logo, sin saltos; de noche vale cero y no se dibuja. Las copias de las
  * mallas del logo se arman una vez; nada se reserva por cuadro. Su escena se precompila con el resto (`ESCENAS_APARTE`).
  */
-function SombraDelLogo({ keyLightRef, logoGroupRef }: Props) {
+function SombraDelLogo({ keyLightRef, logoGroupRef, compacta = false }: Props) {
   const gl = useThree((s) => s.gl)
-  const mapa = useMemo(() => crearMapaDeLaSombra(), [])
+  const resolucion = compacta ? SOMBRA_DEL_LOGO.resolucion / 2 : SOMBRA_DEL_LOGO.resolucion
+  const mapa = useMemo(() => crearMapaDeLaSombra({ ...SOMBRA_DEL_LOGO, resolucion }), [resolucion])
   const memoria = useRef({ copias: [] as { readonly origen: THREE.Object3D; readonly copia: THREE.Mesh }[], centro: new THREE.Vector3(), direccion: new THREE.Vector3(), fuerza: 0 })
   useEffect(() => {
     // Con banco: la sombra se prende y se apaga en la misma tarea (para compararla en el mismo cuadro).
@@ -63,7 +66,7 @@ function SombraDelLogo({ keyLightRef, logoGroupRef }: Props) {
       fuerza: () => memoria.current.fuerza,
       // Cuántos texeles del mapa tapa el logo y la profundidad más cercana (0 a 1).
       mapa: () => {
-        const lado = SOMBRA_DEL_LOGO.resolucion
+        const lado = resolucion
         const datos = new Float32Array(lado * lado * 4) // banco
         gl.readRenderTargetPixels(mapa.bufer, 0, 0, lado, lado, datos)
         let [tapados, minimo] = [0, 1]
@@ -78,7 +81,7 @@ function SombraDelLogo({ keyLightRef, logoGroupRef }: Props) {
     return () => {
       delete ventana.__sombraDelLogoDelBanco
     }
-  }, [gl, mapa])
+  }, [gl, mapa, resolucion])
   useEffect(() => {
     SOMBRA_EN_VIVO.uMapaDeLaSombra.value = mapa.bufer.texture
     const aparte = { escena: mapa.escena, bufer: mapa.bufer }

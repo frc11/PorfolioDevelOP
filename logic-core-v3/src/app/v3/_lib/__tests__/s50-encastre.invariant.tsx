@@ -371,7 +371,7 @@ const pico = Math.max(...Array.from({ length: 60 }, (_, i) => enS(alRasS + (i * 
 const poderBien = enS(alRasS - 0.01) === 0 && enS(alRasS - 1) === 0 && pico > 1.3 && Math.abs(enS(RELOJ_DEL_FINAL.duracionS) - 1) < 1e-9 && enS(alRasS + 0.05) > 0
 afirmar(poderBien, 'el poder se libera cuando el logo queda al ras (ni antes): un destello y se asienta entero; es función de `fin`, así que al revertir se apaga', `destello ${pico.toFixed(2)} · al ras a los ${String(alRasS)} s`)
 // El golpe (su pulso) cae al quedar al ras y nace en el centro del logo; al tocar el piso, sólo un golpecito.
-const golpeBien = (c: string): boolean => c.includes('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t')
+const golpeBien = (c: string): boolean => c.includes('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (!s.estatico && s.antes < aterriza && fin >= aterriza) s.tocoEn = t') && c.includes('if (!s.estatico && s.antes < golpe && fin >= golpe) {')
 afirmar(golpeBien(finalTsx), '  el pulso nace en el centro del logo al quedar al ras (una vez por bajada) y corre por el piso con su física; al tocar el piso, sólo un golpecito de la cámara')
 controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx.replace('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS', 'const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS'), golpeBien)
 // El dibujo: [RETOQUE DEL ENCASTRE] 1F · cambió por pedido: el resplandor de tinta alrededor del logo (núcleo negro en la
@@ -442,7 +442,7 @@ titulo('2H · Las piezas del pie de frente y usables; sólo desde 1024 (abajo y 
 // gira en el quieto): las piezas van con ella durante toda la secuencia.
 const colocacion = sinComentarios(leer('_lib/escena/pie3d/colocacion.ts'))
 const armadasTs = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
-const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)')
+const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,') && fi.includes('camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia)') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia)')
 afirmar(deFrente(colocacion, armadasTs, finalTsx), 'las piezas del pie miran siempre a la cámara sin el mouse, que el final lleva con la viva (sube, gira en el quieto): de frente durante toda la secuencia; su DOM va por la homografía (usable donde se ve)')
 controlPositivo('el detector VE un final que mueve sólo la cámara viva (las piezas se quedarían mirando al costado)', finalTsx.replace('camaraDelFinal(CAMARA_SIN_EL_MOUSE,', 'camaraDelFinal(null,'), (fi: string) => deFrente(colocacion, armadasTs, fi))
 // Costo: el final suma como mucho dos dibujos (las paredes y el fondo del pozo), invisibles fuera del final; el resplandor,

@@ -268,3 +268,63 @@ pedido. Ahora fija lo mismo contra la caja de vidrio (UNA caja propia con su ró
 adentro, mezclan sólo las otras tres), y suma que el rótulo esté adentro. `s52-pulido-1` P18: el material una sola vez
 (control: un material copiado), lo propio del formulario (control: el ejemplo de base), la caja sólo con el pie plano y con
 el tono de la zona (control: el vidrio también en escritorio). Capturas: `entregas/pulido-1/p18-antes-despues-*.png`.
+
+### P22 · El encastre también en el teléfono y la tablet
+
+**Antes:** el final del pie se montaba sólo con calidad plena (desde 1024) y con movimiento; abajo de 1024 la página
+terminaba en el pie plano y no había cinemática.
+
+**Layout elegido** (decidido con las banderas, arriba): el formulario arriba, usable, y la cinemática en su propio
+ESCENARIO, una pantalla sin contenido después del pie (`_secciones/Home.tsx`, `pie.css`). Va FUERA de la tabla de
+secciones (no lleva `data-panel`): la escena mide su recorrido sobre la extensión de las secciones
+(`extensionDeLasSecciones.ts`), así que el escenario no la corre y el progreso se acota en 1 mientras se lo recorre (lo
+mismo que hacía la «cola» de CIERRE 3, que se borró en RETOQUE DEL ENCASTRE 1D). La otra lectura, atrás de
+`?encastre=desvanece`: sin escenario; el pie se desvanece en el primer 15 % de la cinemática y vuelve al rebobinar.
+
+**REGLA DE ALTURAS** (`pulido-1/p22/alturas/`, a 390): la extensión de las secciones es la misma con y sin el escenario
+(0–22267 px); el documento crece 844 px (el escenario). En anclas de las ocho secciones la escena da el mismo estado (el
+amanecer pedido, la noche); lo único distinto es el final (antes corría al llegar al pie; ahora, en el escenario) y 0,006
+del avance perseguido del amanecer (con el mismo pedido: es el tiempo de la persecución).
+
+**Qué cambió en la escena:**
+- `ProbeStage.tsx`: el final se monta también con calidad compacta; ahí, con movimiento reducido, en modo quieto. En
+  escritorio con movimiento reducido sigue sin montarse (como antes: P22 es del teléfono y la tablet).
+- `FinalDelPie.tsx`: la máscara del hueco a la mitad de resolución en el teléfono; los gestos se retienen sólo con el
+  escenario a la vista (un escucha de `touchmove` no pasivo puesto todo el tiempo le costaría el scroll a iOS); el modo
+  quieto y la otra lectura.
+- `cuadroDelFinal.ts`: el modo quieto (`estadoQuieto`: el final entero de una vez al llegar al fondo y en cero fuera; sin
+  el golpe, sin el golpecito, sin el giro ni el alejamiento del quieto y sin retener gestos) y la distancia del encuadre
+  angosto.
+- `recorridoDelFinal.ts`: EL ENCUADRE ANGOSTO (`distanciaDelFinalAngosto`): desde arriba, a la distancia en que el logo (y
+  su hueco, que es su misma huella) ocupa la mitad de la dimensión del cuadro que lo limita. Con la distancia de escritorio
+  (que deja lugar para el pie 3D alrededor) en un teléfono apaisado el logo quedaba en el 13 % del ancho.
+- `LuzDelLogo.tsx`: el mapa de la sombra del logo a la mitad de resolución en el teléfono (128 en vez de 256).
+- El rebobinado con el dedo es el de A1 + P2: el gesto que empieza hacia arriba (el dedo que baja) se retiene
+  (`gestosDelScroll.ts`, `touchmove` no pasivo) y rebobina sin mover la página; abajo de 1024 no hay Lenis.
+
+**Medido** (`pulido-1/p22/`):
+- La cinemática corre en el escenario a 390 × 844, 375 × 667, 768 × 1024, 844 × 390 y 667 × 375 (capturas a fin 0,02, 0,35,
+  0,7 y 1). Al final el logo y el hueco quedan enteros y centrados: ocupan el 49–50 % del ancho en vertical y el 49–50 %
+  del alto en apaisado (antes de recalcular: 12–14 % del ancho en apaisado). `hoja-encuadre.png`.
+- El dedo (eventos táctiles por CDP: el dedo baja 200 px): en los cinco tamaños rebobina hasta parada sin mover la página
+  (el scroll queda fijo en el fondo).
+- Movimiento reducido, a 390: al fondo, `fin` = 1 de una vez y quieto; el dedo sube la página normal.
+- `encastre=desvanece`, a 390: sin escenario; el pie pasa a 0,7 al empezar y a 0 enseguida; el dedo rebobina.
+- El costo, a 375 (el Chrome del banco tomó la AMD integrada): GPU por cuadro 3,81 ms con el pie en reposo, 3,40 a mitad de
+  la cinemática y 3,87 con el final entero: la cinemática no suma (dentro del ruido). Lo que más cuesta con el final entero:
+  el piso vivo, 0,97 ms; el polvo, 0,38. Ese piso de ~3,8 ms en el teléfono es de antes de P22 (el pie en reposo ya lo
+  marca) y pasa los 3 ms del presupuesto de §4: anotado abajo, no lo toqué.
+
+Las aserciones viejas que cambiaron por P22 (todas fijaban «el final sólo desde 1024»):
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s49-cierre-final` · el cableado | el final montado con `calidad === 'plena' && !reducedMotion` | montado con movimiento, o abajo de 1024 en modo quieto | La posición en el cuadro (después del rig, antes del entorno) y el resto del cableado siguen igual; el control ahora caza el final montado con movimiento reducido EN ESCRITORIO |
+| `s50-encastre` · el golpe | `if (s.antes < aterriza …) s.tocoEn = t` | lo mismo con la guarda del modo quieto, y además la línea del golpe | Más estricta: fija también que el golpe no sale en el modo quieto |
+| `s50-encastre` · las piezas de frente | `camaraDelFinal(CAMARA_SIN_EL_MOUSE, …, null)` | la viva y la sin el mouse con la MISMA distancia | Más estricta: fija las dos cámaras |
+| `s51-retoque-encastre` · el cableado | `useEffect(() => retenerLosGestos(…), [])` | en escritorio al montarse (`if (!angosto) return retener()`), abajo de 1024 con el escenario a la vista | En escritorio, lo mismo; el resto del cableado igual |
+
+`s52-pulido-1` P22: el escenario (fuera de las secciones, sólo abajo de 1024, sin él con la otra lectura), el montaje, el
+encuadre en los cinco tamaños (también girando), el modo quieto y la otra lectura. Controles: un escenario que es una
+sección, uno también en escritorio, el final sólo desde 1024, la distancia de escritorio en un apaisado y un reloj quieto
+que anima.

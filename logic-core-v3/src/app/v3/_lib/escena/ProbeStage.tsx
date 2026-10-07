@@ -274,10 +274,11 @@ export default function ProbeStage({
           bokehGroupRef={bokehGroupRef}
           moireRef={moireRef}
         />
-        {/* [CIERRE] 3 · el final del pie, justo después del rig (le suma el final a su cámara y al logo): desde 1024 y con movimiento. */}
+        {/* [CIERRE] 3 · el final del pie, justo después del rig (le suma el final a su cámara y al logo): desde 1024 y con movimiento.
+            [PULIDO 1] P22 · también abajo de 1024 (en su escenario); ahí, con movimiento reducido, el estado final quieto. */}
         {/* [NOCTURNO FINAL] B1 · el logo cae al cargar y llega con el titular del hero (súper onda); con movimiento. */}
         {!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}
-        {calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}
+        {(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
@@ -298,7 +299,7 @@ export default function ProbeStage({
         {/* [CALIDAD 1] El motor: el precompilado (B1), la calidad adaptativa (B11) y el perfil de la GPU con banco. */}
         <MotorDeLaEscena logoMaterialRef={logoMaterialRef} dpr={ajustes.dpr} />
         {/* [ESCENA 10] T1 · los reflejos del satinado y la sombra del logo; T3 · los títulos de volumen, con su bandera. */}
-        <LuzDelLogo keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} />
+        <LuzDelLogo keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} compacta={calidad === 'compacta'} />
         <PruebasDeLaEscena keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} stats={stats} rig={rig} />
       </Suspense>
     </Canvas>

@@ -323,6 +323,8 @@ export function subida(fin: number): number {
 export interface TamanoDelLogo {
   readonly alto: number
   readonly espesor: number
+  /** [PULIDO 1] P22 · el ancho (el encuadre del final abajo de 1024). */
+  readonly ancho?: number
 }
 
 /** La altura del centro del logo acostado sobre el piso (u) y cuándo llega ahí (s del reloj). */
@@ -436,7 +438,7 @@ const ARRIBA_DE_SIEMPRE = new THREE.Vector3(0, 1, 0)
  * encuadre de verdad. Ahora ese corrimiento (en la cámara) se conserva y se va con la subida: con `k` 0 la cámara del
  * final es la del rig girada; arriba, centrada en el logo. Continua con el rig en los dos extremos.
  */
-export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3, giro: number, aleja: number, sacudon: THREE.Vector3 | null): void {
+export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3, giro: number, aleja: number, sacudon: THREE.Vector3 | null, distancia: number | null = null): void {
   if (k <= 0 && giro === 0 && aleja === 0) return
   MIRA.lookAt(c.position, CENTRO_DE_LA_ORBITA, ARRIBA_DE_SIEMPRE)
   DE_FRENTE.setFromRotationMatrix(MIRA)
@@ -448,7 +450,8 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   const r0 = Math.hypot(dx, dy, dz)
   const e0 = Math.atan2(dy, Math.hypot(dx, dz))
   const e = e0 + (THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion) - e0) * k
-  const r = r0 * (1 + (FINAL_DEL_PIE.camara.lejos - 1) * k) + aleja
+  // [PULIDO 1] P22 · arriba, a `distancia` si la hay (el encuadre del teléfono); si no, un poco más lejos que en la pose E.
+  const r = r0 + ((distancia ?? r0 * FINAL_DEL_PIE.camara.lejos) - r0) * k + aleja
   const az = az0 + THREE.MathUtils.degToRad(giro)
   BLANCO.set(0, ORBIT_TARGET_Y, 0).lerp(blanco, k)
   c.position.set(BLANCO.x + r * Math.cos(e) * Math.sin(az), BLANCO.y + r * Math.sin(e), BLANCO.z + r * Math.cos(e) * Math.cos(az))
@@ -459,6 +462,20 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   c.quaternion.multiply(PARTE_DEL_ENCUADRE.identity().slerp(ENCUADRE, 1 - k))
   c.up.set(0, 1, 0)
   c.updateMatrixWorld()
+}
+
+/**
+ * [PULIDO 1] P22 · EL ENCUADRE DEL FINAL ABAJO DE 1024: desde arriba, la distancia a la que el logo acostado (y su hueco, que
+ * es su misma huella) ocupa `ocupa` de la dimensión del cuadro que lo limita: el ancho en un teléfono vertical, el alto en uno
+ * apaisado. En escritorio la cámara se aleja apenas (`camara.lejos`) porque alrededor están las piezas del pie; abajo de 1024
+ * no hay piezas en el escenario y, con esa distancia, en un teléfono apaisado el logo quedaba en el 13 % del ancho.
+ */
+export const ENCUADRE_ANGOSTO = { ocupa: 0.5 } as const
+
+/** [PULIDO 1] P22 · esa distancia (u), con el campo vertical de la cámara (grados), su aspecto y la huella del logo (u). */
+export function distanciaDelFinalAngosto(fovGrados: number, aspecto: number, ancho: number, fondo: number): number {
+  const visible = 2 * Math.tan(THREE.MathUtils.degToRad(fovGrados) / 2) * ENCUADRE_ANGOSTO.ocupa
+  return Math.max(ancho / (visible * aspecto), fondo / visible)
 }
 
 /** [NOCTURNO FINAL] A1/A2 · lo que deja `haciaCero` (sin reservas por cuadro). */

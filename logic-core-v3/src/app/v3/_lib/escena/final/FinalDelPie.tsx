@@ -6,13 +6,14 @@ import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
 import { retenerLosGestos } from '../../gestosDelScroll'
-import { hayBanco } from '../entorno'
+import type { NivelDeCalidad } from '../calidad'
+import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
-import { alCuadroDelFinal, crearElEstado, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
+import { alCuadroDelFinal, crearElEstado, desvanecerElPie, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { FINAL_EN_REPOSO } from './enReposo'
-import { formasDelLogo, mascaraDelLogo } from './hueco'
+import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { EN_VIVO } from './recorridoDelFinal'
 
 /**
@@ -22,10 +23,18 @@ import { EN_VIVO } from './recorridoDelFinal'
  *
  * [EL ENCASTRE] · el componente arma lo de una vez (las formas del logo, la máscara del hueco y el pozo) y en cada cuadro
  * llama a `alCuadroDelFinal` (`cuadroDelFinal.ts`). [RETOQUE DEL ENCASTRE] 1A · sin el vapor: se abre el hueco y el logo encaja.
+ *
+ * [PULIDO 1] P22 · TAMBIÉN EN EL TELÉFONO Y LA TABLET (calidad `compacta`): la misma cinemática, en el escenario que sigue al
+ * pie (`Home.tsx`); la máscara del hueco a la mitad de resolución; los gestos se retienen sólo con el escenario a la vista
+ * (un escucha de `touchmove` que no es pasivo, siempre puesto, le costaría el scroll a iOS). Con movimiento reducido
+ * (`estatico`, abajo de 1024): sin cinemática, el estado final quieto al llegar al fondo. Con `encastre=desvanece` (la
+ * otra lectura), sin escenario: el pie se desvanece mientras corre.
  */
 interface Props {
   readonly logoGroupRef: RefObject<THREE.Group | null>
   readonly stats: ProbeStatsStore
+  readonly calidad: NivelDeCalidad
+  readonly estatico: boolean
 }
 
 type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; fase: string; pieEntero: boolean; camara: number; giro: number; aleja: number; golpes: number; logo: number[]; apertura: number } }
@@ -33,7 +42,9 @@ type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; fase: s
 /** El espesor del logo (u): la extrusión y sus dos biseles, en la escala del SVG (el mismo que publica `ProbeLogo`). */
 const ESPESOR_DEL_LOGO = (PROBE_EXTRUDE.depth + 2 * PROBE_EXTRUDE.bevelThickness) * PROBE_SVG_SCALE
 
-export function FinalDelPie({ logoGroupRef, stats }: Props) {
+export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
+  const angosto = calidad === 'compacta'
+  const desvanece = angosto && entornoDeLaEscena().pruebas.encastre === 'desvanece'
   const svg = useLoader(SVGLoader, '/logodevelOP.svg')
   const logo = useMemo(() => formasDelLogo(svg), [svg])
   const grupo = useRef<THREE.Group>(null)
@@ -45,8 +56,8 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
     const g = grupo.current
     const grupoDelLogo = logoGroupRef.current
     if (g === null) return undefined
-    const estado = crearElEstado(logo.formas, ESPESOR_DEL_LOGO)
-    const mascara = mascaraDelLogo(logo.formas, logo.caja)
+    const estado = crearElEstado(logo.formas, ESPESOR_DEL_LOGO, estatico, angosto)
+    const mascara = mascaraDelLogo(logo.formas, logo.caja, angosto ? HUECO.lado / 2 : HUECO.lado)
     const piso = FINAL_EN_EL_PISO
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
@@ -65,7 +76,7 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
       mascara.textura.dispose()
       m.current = null
     }
-  }, [logo, logoGroupRef])
+  }, [logo, logoGroupRef, angosto, estatico])
 
   useEffect(() => {
     if (!hayBanco()) return undefined
@@ -77,10 +88,42 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
   }, [logoGroupRef])
 
   // [RETOQUE DEL ENCASTRE] 1D · los gestos de scroll, antes que Lenis: hacia arriba al fondo rebobinan (`cuadroDelFinal.ts`).
-  useEffect(() => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g))), [])
+  // [PULIDO 1] P22 · en el teléfono, sólo mientras se ve el escenario (o el pie, con `encastre=desvanece`); quieto, nunca.
+  useEffect(() => {
+    if (estatico) return undefined
+    const retener = (): (() => void) => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g)))
+    if (!angosto) return retener()
+    const vigilado = document.querySelector(desvanece ? '#cierre' : '[data-pieza="escenario-del-encastre"]')
+    if (vigilado === null) return undefined
+    let soltar: (() => void) | null = null
+    const vigia = new IntersectionObserver(([e]) => {
+      if (e?.isIntersecting && soltar === null) soltar = retener()
+      else if (!e?.isIntersecting && soltar !== null) {
+        soltar()
+        soltar = null
+      }
+    })
+    vigia.observe(vigilado)
+    return () => {
+      vigia.disconnect()
+      soltar?.()
+    }
+  }, [angosto, desvanece, estatico])
+
+  // [PULIDO 1] P22 · la otra lectura (`encastre=desvanece`): sin escenario (`pie.css` lo saca); el pie se va mientras corre.
+  useEffect(() => {
+    const raiz = document.querySelector('[data-v3]')
+    if (!desvanece || raiz === null) return undefined
+    raiz.setAttribute('data-encastre', 'desvanece')
+    return () => {
+      raiz.removeAttribute('data-encastre')
+      desvanecerElPie(0)
+    }
+  }, [desvanece])
 
   useFrame((state, delta) => {
-    if (m.current !== null) alCuadroDelFinal(m.current, state, delta, logoGroupRef.current, { alto: stats.current.logoH || 4.78, espesor: stats.current.logoD || ESPESOR_DEL_LOGO })
+    if (m.current !== null) alCuadroDelFinal(m.current, state, delta, logoGroupRef.current, { alto: stats.current.logoH || 4.78, espesor: stats.current.logoD || ESPESOR_DEL_LOGO, ancho: stats.current.logoW || undefined })
+    if (desvanece) desvanecerElPie(EN_VIVO.fin)
   })
 
   return <group ref={grupo} name="final del pie" />

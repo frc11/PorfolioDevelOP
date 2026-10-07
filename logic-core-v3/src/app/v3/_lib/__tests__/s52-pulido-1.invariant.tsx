@@ -7,6 +7,7 @@
  *   P2  · el rebobinado del encastre: proporcional a lo avanzado, con tope de 1,6 s y curva in-out; el quieto vuelve con él.
  *   P6  · el logo del intro baja con el titular: de su primera letra a la última, a velocidad constante (`?angel=asentado`).
  *   P18 · el formulario del pie abajo de 1024: vidrio líquido (el material del menú, compartido), en AA de día y de noche.
+ *   P22 · el encastre abajo de 1024: en su escenario (fuera de las secciones), encuadrado, con el dedo; quieto con movimiento reducido.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -14,7 +15,8 @@ import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
-import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, duracionDelRebobinado, haciaCero, pasoDelReloj, quietoRebobinado, relojQuieto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { estadoQuieto } from '../escena/final/cuadroDelFinal'
+import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, distanciaDelFinalAngosto, duracionDelRebobinado, haciaCero, pasoDelReloj, quietoRebobinado, relojQuieto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { CAIDA_DEL_LOGO, altoDesdeElBorde, alturaDeLaCaida, pasoDeLaBajada } from '../escena/intro/caida'
 import { persigue } from '../escena/titulos3d/llegada'
 import { LLEGADA_DEL_TITULAR_S } from '../titulos3d/titular'
@@ -359,5 +361,64 @@ const columnas = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
 const cajaBien = (c: string): boolean => /const angosto = useModoDelPie\(\) === 'plano'/.test(c) && /data-material=\{angosto \? 'vidrio' : undefined\}/.test(c) && /data-seccion=\{angosto && debajo === 'oscuro' \? 'invertida' : undefined\}/.test(c) && /const debajo = useTonoDebajo\(caja, angosto && aLaVista\)/.test(c) && /new IntersectionObserver/.test(c) && !/max-escritorio:bg-fondo|max-escritorio:shadow-flotante/.test(c)
 afirmar(cajaBien(columnas), '  la caja de vidrio sólo abajo de 1024, del tono de la zona (vidrio claro sobre la sala de día, oscuro sobre la noche), leído sólo con la caja a la vista; la tarjeta sólida se fue')
 controlPositivo('  el detector VE el vidrio también en escritorio', columnas.replace("data-material={angosto ? 'vidrio' : undefined}", 'data-material="vidrio"'), cajaBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('P22 · El encastre también en el teléfono y la tablet: en su escenario, encuadrado, con el dedo, quieto con movimiento reducido')
+
+// El escenario: una pantalla sin contenido después del pie, FUERA de la tabla de secciones (no lleva `data-panel`: la escena
+// mide su recorrido sobre las secciones, así que el mapeo de todas queda igual; medido a 390: la extensión, 0–22267 con y
+// sin él). Sólo abajo de 1024. Con `encastre=desvanece` (la otra lectura) no está.
+const home = sinComentarios(leer('_secciones/Home.tsx'))
+const pieCss = leer('_estilos/pie.css')
+const escenarioBien = (h: string, css: string): boolean => {
+  const tag = /<div data-pieza="escenario-del-encastre"[^>]*\/>/.exec(h)?.[0] ?? ''
+  return tag.includes('aria-hidden="true"') && tag.includes('className="h-[var(--escenario-del-encastre)] escritorio:hidden"') && !tag.includes('data-panel') && h.indexOf(tag) > h.indexOf('REGISTRO.map(') &&
+    /\[data-v3\] \[data-pieza='escenario-del-encastre'\] \{\s*--escenario-del-encastre: 100svh;/.test(css) && /\[data-v3\]\[data-encastre='desvanece'\] \[data-pieza='escenario-del-encastre'\] \{\s*display: none;/.test(css)
+}
+afirmar(escenarioBien(home, pieCss), 'abajo de 1024 hay un escenario de una pantalla después del pie, fuera de la tabla de secciones (el mapeo de la escena no se mueve); con `encastre=desvanece`, no')
+controlPositivo('el detector VE un escenario que es una sección (sumaría al recorrido de la escena)', [home.replace('<div data-pieza="escenario-del-encastre"', '<div data-panel="escenario" data-pieza="escenario-del-encastre"'), pieCss] as const, ([h, c]: readonly [string, string]) => escenarioBien(h, c))
+controlPositivo('  y uno que también está en escritorio', [home.replace('h-[var(--escenario-del-encastre)] escritorio:hidden', 'h-[var(--escenario-del-encastre)]'), pieCss] as const, ([h, c]: readonly [string, string]) => escenarioBien(h, c))
+
+// Montado también abajo de 1024 (y ahí, con movimiento reducido, quieto); en escritorio con movimiento reducido, como antes.
+const etapa = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
+const finalDelPie = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
+const cuadroP22 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
+const montajeBien = (e: string, f: string): boolean => e.includes("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}") &&
+  f.includes('mascaraDelLogo(logo.formas, logo.caja, angosto ? HUECO.lado / 2 : HUECO.lado)') && /if \(estatico\) return undefined[\s\S]{0,300}if \(!angosto\) return retener\(\)[\s\S]{0,400}new IntersectionObserver/.test(f) &&
+  e.includes("compacta={calidad === 'compacta'}")
+afirmar(montajeBien(etapa, finalDelPie), '  montado abajo de 1024 (la misma cinemática), con la máscara del hueco y la sombra del logo a la mitad de resolución, y los gestos retenidos sólo con el escenario a la vista (un escucha de `touchmove` no pasivo siempre puesto le costaría el scroll a iOS)')
+controlPositivo('  el detector VE el final sólo desde 1024 (el de antes)', [etapa.replace("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}", "{calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}"), finalDelPie] as const, ([e, f]: readonly [string, string]) => montajeBien(e, f))
+
+// El encuadre del final abajo de 1024: desde arriba, el logo (y su hueco, su misma huella) ocupa la mitad de la dimensión que
+// lo limita; girando en el quieto (su círculo) sigue entero. Medido en la página: 49–50 % en 390, 375, 768, 844 y 667 de ancho.
+const HUELLA = { ancho: 6.9, fondo: 4.8 }
+const TAMANOS: ReadonlyArray<readonly [number, number]> = [[390, 844], [375, 667], [768, 1024], [844, 390], [667, 375]]
+type Distancia = typeof distanciaDelFinalAngosto
+const encuadreBien = (f: Distancia): boolean => TAMANOS.every(([w, h]) => {
+  const d = f(35, w / h, HUELLA.ancho, HUELLA.fondo)
+  const alto = 2 * d * Math.tan(THREE.MathUtils.degToRad(35) / 2)
+  const ancho = alto * (w / h)
+  const ocupa = Math.max(HUELLA.ancho / ancho, HUELLA.fondo / alto)
+  const circulo = Math.hypot(HUELLA.ancho, HUELLA.fondo)
+  return ocupa >= 0.45 && ocupa <= 0.55 && circulo <= 0.95 * Math.min(ancho, alto)
+})
+afirmar(encuadreBien(distanciaDelFinalAngosto) && /const distancia = s\.angosto && state\.camera instanceof THREE\.PerspectiveCamera \? distanciaDelFinalAngosto\(/.test(cuadroP22), '  el encuadre del final abajo de 1024: el logo y el hueco ocupan la mitad de lo que los limita (vertical u apaisado) y, girando, siguen enteros', TAMANOS.map(([w, h]) => `${String(w)}×${String(h)}`).join(' · '))
+controlPositivo('  el detector VE la distancia de escritorio en un teléfono apaisado (el logo quedaba en el 13 % del ancho)', (() => 42.4) as Distancia, encuadreBien)
+
+// Con movimiento reducido (abajo de 1024): sin cinemática, el estado final quieto al llegar al fondo (sin golpe, sin quieto).
+const quietoBienP22 = (f: typeof estadoQuieto): boolean => {
+  const r = relojQuieto()
+  f(r, true)
+  const alFondo = r.fin === 1 && r.velocidad === 0
+  f(r, false)
+  return alFondo && r.fin === 0
+}
+afirmar(quietoBienP22(estadoQuieto) && cuadroP22.includes('if (s.estatico) estadoQuieto(s.reloj,') && cuadroP22.includes('if (!s.estatico && s.antes < golpe && fin >= golpe) {') && cuadroP22.includes('if (s.estatico) quietoRebobinado(alRebobinar, 0, EN_VIVO)') && /gestoDelFinal\(s: EstadoDelFinal, g: GestoDeScroll\): boolean \{\s*if \(s\.estatico\) return false/.test(cuadroP22), '  con movimiento reducido, el final entero de una vez al fondo (y en cero fuera), sin el golpe, sin el giro del quieto y sin retener gestos')
+controlPositivo('  el detector VE un reloj quieto que anima (sube de a poco)', ((r: RelojDelFinal, al: boolean) => {
+  r.fin = al ? Math.min(1, r.fin + 0.1) : 0
+}) as typeof estadoQuieto, quietoBienP22)
+
+// La otra lectura (`encastre=desvanece`): sin escenario, el pie se desvanece mientras corre (en el primer 15 %).
+afirmar(cuadroP22.includes('const opacidad = Math.round(Math.max(0, 1 - fin / 0.15) * 100) / 100') && finalDelPie.includes("const desvanece = angosto && entornoDeLaEscena().pruebas.encastre === 'desvanece'") && finalDelPie.includes("raiz.setAttribute('data-encastre', 'desvanece')"), '  la otra lectura, atrás de `?encastre=desvanece`: sin escenario, el pie se va mientras corre la cinemática')
 
 cerrar('s52-pulido-1')

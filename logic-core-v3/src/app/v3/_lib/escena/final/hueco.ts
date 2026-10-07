@@ -106,13 +106,14 @@ function dibujar(formas: readonly THREE.Shape[], marco: THREE.Vector4, lado: num
 }
 
 /** Arma la máscara una vez (necesita el DOM: un lienzo 2D). */
-export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2): MascaraDelLogo {
+/** [PULIDO 1] P22 · `resolucion`: en el teléfono, la mitad (se arma una vez y el piso la lee en cada píxel). */
+export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2, resolucion: number = HUECO.lado): MascaraDelLogo {
   const m = HUECO.margen
   const ancho = caja.max.x - caja.min.x + 2 * m
   const alto = caja.max.y - caja.min.y + 2 * m
   const lado = Math.max(ancho, alto)
   const marco = new THREE.Vector4(caja.min.x - m - (lado - ancho) / 2, caja.min.y - m - (lado - alto) / 2, lado, lado)
-  const n = HUECO.lado
+  const n = resolucion
   const nitida = dibujar(formas, marco, n, 0, -(HUECO.solape / lado) * n)
   const ancha = dibujar(formas, marco, n, HUECO.desenfoque, 0)
   const datos = new Uint8Array(n * n * 4)

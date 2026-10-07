@@ -20,6 +20,7 @@ import {
   calma,
   camaraDelFinal,
   decidirElGesto,
+  distanciaDelFinalAngosto,
   pasoDelReloj,
   poder,
   poseDelLogo,
@@ -79,10 +80,14 @@ export interface EstadoDelFinal {
   readonly pozo: ReturnType<typeof crearElPozo>
   /** [EL ENCASTRE] 2F · el rastro del mouse en el piso. */
   readonly rastro: EstadoDelRastro
+  /** [PULIDO 1] P22 · con movimiento reducido (abajo de 1024): sin cinemática, el estado final quieto al llegar al fondo. */
+  readonly estatico: boolean
+  /** [PULIDO 1] P22 · abajo de 1024: el encuadre del final es el del teléfono (`distanciaDelFinalAngosto`). */
+  readonly angosto: boolean
 }
 
 /** `formas`: las del logo en su plano (`hueco.ts`). */
-export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): EstadoDelFinal {
+export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, estatico = false, angosto = false): EstadoDelFinal {
   return {
     reloj: relojQuieto(),
     fondo: Number.POSITIVE_INFINITY,
@@ -110,6 +115,8 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): 
     haz: null,
     pozo: crearElPozo(formas, espesor),
     rastro: rastroQuieto(),
+    estatico,
+    angosto,
   }
 }
 
@@ -136,6 +143,8 @@ export interface CuadroDeLaEscena {
 }
 
 const AL_FONDO_PX = 2
+/** [PULIDO 1] P22 · el ancho del logo (u) si la escena todavía no lo publicó: el del SVG a su escala. */
+const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
 
@@ -146,6 +155,7 @@ const ahoraS = (): number => performance.now() / 1000
  * levantarse). Con el fondo del último cuadro: no se mide el documento en medio de la rueda.
  */
 export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
+  if (s.estatico) return false
   const ahora = ahoraS()
   const alFondo = window.scrollY >= s.fondo - AL_FONDO_PX
   const G = s.gestos
@@ -178,7 +188,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const rebobinar = s.gestos.rebobinar
   s.gestos.rebobinar = false
   const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
-  pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)
+  // [PULIDO 1] P22 · quieto (movimiento reducido): sin reloj, el estado final al fondo y el de siempre fuera.
+  if (s.estatico) estadoQuieto(s.reloj, window.scrollY >= s.fondo - AL_FONDO_PX && EN_VIVO.pieEntero && viajeEnCurso() === null)
+  else pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
@@ -202,7 +214,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
       alRebobinar.activo = false
       if (s.reloj.fase === 'parada') quietoRebobinado(alRebobinar, 0, EN_VIVO)
     }
-    s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
+    // [PULIDO 1] P22 · quieto, sin el giro ni el alejamiento del que se quedó (son movimiento).
+    if (s.estatico) quietoRebobinado(alRebobinar, 0, EN_VIVO)
+    s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   }
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   // [NOCTURNO FINAL] A2 · el viaje del menú espera a esto para mover el scroll.
@@ -239,8 +253,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // centrado en el logo, y las juntas de alrededor se encienden. Al tocar el piso, sólo un golpecito.
   const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
   const aterriza = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS
-  if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t
-  if (s.antes < golpe && fin >= golpe) {
+  // [PULIDO 1] P22 · quieto, sin el golpecito ni la súper onda (son movimiento).
+  if (!s.estatico && s.antes < aterriza && fin >= aterriza) s.tocoEn = t
+  if (!s.estatico && s.antes < golpe && fin >= golpe) {
     s.golpeEn = t
     s.golpes += 1
     piso.uGolpe.value.set(t, 0, 0, 1)
@@ -263,10 +278,12 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   }
   const desdeQueToco = t - s.tocoEn
   if (Number.isFinite(desdeQueToco) && desdeQueToco < 0.4) s.sacudon.y += FINAL_DEL_PIE.poder.golpecito * Math.exp(-desdeQueToco / 0.08) * Math.sin(desdeQueToco * 90)
-  camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null)
+  // [PULIDO 1] P22 · abajo de 1024, a la distancia del encuadre del teléfono (el logo ocupa la mitad de lo que lo limita).
+  const distancia = s.angosto && state.camera instanceof THREE.PerspectiveCamera ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : null
+  camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia)
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
-  camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null)
+  camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia)
   EN_VIVO.giroDelPie.copy(CAMARA_SIN_EL_MOUSE.quaternion).invert().premultiply(ANTES_DEL_FINAL)
 
   // 5 · [EL ENCASTRE] 2F · El piso bajo el mouse (con el poder, y el puntero que se movió hace poco): deja un rastro que
@@ -279,4 +296,24 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   s.presencia += ((presente ? 1 : 0) - s.presencia) * (1 - Math.exp(-dt / (presente ? 0.12 : 0.7)))
   const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0
   pasoDelRastro(piso.uRastro.value, s.rastro, s.punto.x, s.punto.z, vale, dt)
+}
+
+/** [PULIDO 1] P22 · el reloj quieto (movimiento reducido): el final entero al fondo, en cero fuera; sin pasos intermedios. */
+export function estadoQuieto(r: RelojDelFinal, alFondo: boolean): void {
+  r.fin = alFondo ? 1 : 0
+  r.velocidad = 0
+  r.fase = alFondo ? 'parada' : 'espera'
+}
+
+/** [PULIDO 1] P22 · la otra lectura (`encastre=desvanece`): el pie se va mientras el final corre (en su primer 15 %). */
+let pieDesvanecido: HTMLElement | null = null
+let opacidadDelPie = -1
+export function desvanecerElPie(fin: number): void {
+  pieDesvanecido ??= document.getElementById('cierre')
+  if (pieDesvanecido === null) return
+  const opacidad = Math.round(Math.max(0, 1 - fin / 0.15) * 100) / 100
+  if (opacidad === opacidadDelPie) return
+  opacidadDelPie = opacidad
+  pieDesvanecido.style.opacity = opacidad >= 1 ? '' : String(opacidad)
+  pieDesvanecido.style.pointerEvents = opacidad <= 0 ? 'none' : ''
 }
