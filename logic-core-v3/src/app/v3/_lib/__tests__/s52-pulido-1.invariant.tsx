@@ -5,12 +5,18 @@
  *   P12 · el texto de Trabajos sobre el logo de noche, en el teléfono y la tablet: halo denso + velo detrás de la bajada.
  *   Las banderas del sprint (apagadas en el producto; en la URL, con `?pruebas=` o sueltas: `?cta=a`).
  *   P2  · el rebobinado del encastre: proporcional a lo avanzado, con tope de 1,6 s y curva in-out; el quieto vuelve con él.
+ *   P6  · el logo del intro baja con el titular: de su primera letra a la última, a velocidad constante (`?angel=asentado`).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
 
+import * as THREE from 'three'
+
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, duracionDelRebobinado, haciaCero, pasoDelReloj, quietoRebobinado, relojQuieto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { CAIDA_DEL_LOGO, altoDesdeElBorde, alturaDeLaCaida, pasoDeLaBajada } from '../escena/intro/caida'
+import { persigue } from '../escena/titulos3d/llegada'
+import { LLEGADA_DEL_TITULAR_S } from '../titulos3d/titular'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -190,5 +196,139 @@ afirmar(tMedia > 2, '  (con la vuelta con tope, media vuelta del quieto tardaba 
 const minimoBien = (f: typeof duracionDelRebobinado): boolean => [0.05, 0.3, 0.6].every((d) => f(d, REBOBINADO.minimoS) >= 1 && f(d, REBOBINADO.minimoS) <= 2) && f(1, REBOBINADO.minimoS) === REBOBINADO.topeS && f(0.05) < 0.1
 afirmar(minimoBien(duracionDelRebobinado) && entornoPedido('producto,rebobinado=minimo').pruebas.rebobinado === 'minimo' && ENTORNO.pruebas.rebobinado === 'no', '  la alternativa `?rebobinado=minimo` (al menos 1 s desde cualquier punto) existe y está apagada en el producto')
 controlPositivo('  el detector VE una alternativa que no pone el mínimo', ((d: number) => REBOBINADO.topeS * d) as typeof duracionDelRebobinado, minimoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('P6 · El logo del intro baja «como un ángel»: con la primera letra del titular, a velocidad constante, y llega con la última')
+
+// Antes esperaba arriba el 40 % de su reloj (fuera del cuadro: aparecía tarde) y después caía con gravedad para llegar a
+// tiempo. Ahora sigue lo que la escena muestra del titular en volumen: el logo va antes en el cuadro, así que toma lo del
+// cuadro anterior y le suma lo que el titular suma en éste (el mismo `dt` y el mismo tope de `persigue`).
+interface Sincronia { readonly igual: boolean; readonly arrancaJuntos: boolean; readonly llegaJuntos: boolean; readonly lineal: boolean }
+type PasoDeLaBajada = typeof pasoDeLaBajada
+/** Un cuadro de la escena con titular: el logo (antes) y el titular (después), con cuadros de duración variable y un tirón. */
+const conTitular = (paso: PasoDeLaBajada, abreEn: number, armaEn: number): Sincronia => {
+  const titular = { llegada: 0, armado: armaEn <= 0, enCamino: true }
+  const b = { u: 0, propio: false }
+  const cuadros = Array.from({ length: 600 }, (_, i) => [1 / 60, 1 / 75, 1 / 144, 1 / 120][i % 4] + (i === 90 ? 0.12 : 0))
+  let t = 0
+  let igual = true
+  let primeroLogo = -1
+  let primeroTitular = -1
+  let finLogo = -1
+  let finTitular = -1
+  const pasos: number[] = []
+  for (let i = 0; i < cuadros.length && (finLogo < 0 || finTitular < 0); i += 1) {
+    const dt = Math.min(cuadros[i], 0.1)
+    t += dt
+    const carga = t >= abreEn
+    const antes = b.u
+    paso(b, { conTitular: true, titular, cargaLista: carga, vencido: false }, dt)
+    titular.armado = t >= armaEn
+    if (titular.armado) titular.llegada = persigue(titular.llegada, carga ? 1 : 0, dt, LLEGADA_DEL_TITULAR_S)
+    if (Math.abs(b.u - titular.llegada) > 1e-12) igual = false
+    if (primeroLogo < 0 && b.u > 0) primeroLogo = i
+    if (primeroTitular < 0 && titular.llegada > 0) primeroTitular = i
+    if (finLogo < 0 && b.u >= 1) finLogo = i
+    if (finTitular < 0 && titular.llegada >= 1) finTitular = i
+    if (b.u > 0 && b.u < 1) pasos.push((b.u - antes) / dt)
+  }
+  const lineal = pasos.length > 0 && pasos.slice(1).every((v) => Math.abs(v - 1 / LLEGADA_DEL_TITULAR_S) < 1e-9)
+  return { igual, arrancaJuntos: primeroLogo === primeroTitular && primeroLogo >= 0, llegaJuntos: finLogo === finTitular && finLogo >= 0, lineal }
+}
+// La carga se abre a los 0, 0,3 o 1,1 s, con el titular ya armado (el velo de la carga espera a que lo esté).
+const sincroniaBien = (paso: PasoDeLaBajada): boolean => [[0, 0], [0.3, 0], [1.1, 0.5]].every(([abre, arma]) => {
+  const x = conTitular(paso, abre, arma)
+  return x.igual && x.arrancaJuntos && x.llegaJuntos && x.lineal
+})
+afirmar(sincroniaBien(pasoDeLaBajada), 'con el titular en volumen, el logo arranca en el MISMO cuadro que la primera letra, llega en el mismo cuadro que la última y baja a velocidad constante (1/2,4 por segundo), con cuadros de 60, 75, 120 y 144 Hz y un tirón')
+const relojPropio: PasoDeLaBajada = (b, f, dt) => {
+  // El de NOCTURNO FINAL B1: su propio reloj desde la carga abierta, sin mirar al titular.
+  if (f.cargaLista) b.u = Math.min(1, b.u + dt / CAIDA_DEL_LOGO.duracionS)
+}
+controlPositivo('el detector VE un logo con su propio reloj de otra duración (el titular cambió y el logo no)', ((b, f, dt) => {
+  if (f.cargaLista) b.u = Math.min(1, b.u + dt / 2)
+}) as PasoDeLaBajada, sincroniaBien)
+controlPositivo('  y uno que sigue al titular con un cuadro de atraso (sin sumar lo de este cuadro)', ((b, f) => {
+  if (f.titular.armado) b.u = f.titular.llegada
+}) as PasoDeLaBajada, sincroniaBien)
+
+// Sin titular en volumen (abajo de 1024, `titulos=no`, o vencido el plazo de la carga sin que se arme): su propio reloj, lineal
+// y de la misma duración, desde la carga abierta; con un titular anotado que todavía no se armó, espera arriba.
+const sinTitularBien = (paso: PasoDeLaBajada): boolean => {
+  const quieto = { llegada: 0, armado: false, enCamino: false }
+  const a = { u: 0, propio: false }
+  for (let i = 0; i < 30; i += 1) paso(a, { conTitular: true, titular: quieto, cargaLista: true, vencido: false }, 1 / 60)
+  const espera = a.u === 0
+  const b = { u: 0, propio: false }
+  let n = 0
+  while (b.u < 1 && n < 1000) {
+    paso(b, { conTitular: false, titular: quieto, cargaLista: true, vencido: false }, 1 / 60)
+    n += 1
+  }
+  const c = { u: 0, propio: false }
+  paso(c, { conTitular: true, titular: quieto, cargaLista: true, vencido: true }, 1 / 60)
+  return espera && Math.abs(n / 60 - LLEGADA_DEL_TITULAR_S) <= 1 / 60 && c.u > 0 && c.propio
+}
+afirmar(sinTitularBien(pasoDeLaBajada) && /if \(FUENTE\.cargaLista && FUENTE\.conTitular && !TITULAR_EN_VIVO\.armado\) s\.esperaS \+= dt\s*FUENTE\.vencido = s\.esperaS > CAIDA_DEL_LOGO\.esperaMaximaS/.test(sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))), '  sin titular en volumen, su propio reloj lineal de 2,4 s desde la carga abierta; con uno anotado que no se armó, espera arriba (a lo sumo 2,5 s con la carga abierta)')
+controlPositivo('  el detector VE uno que no espera al titular anotado', relojPropio, sinTitularBien)
+
+// Si el titular se pausa a mitad (quien carga bajó: queda fuera de la vista y no avanza), el logo no se cuelga en el aire
+// (se vería desde la sección siguiente): sigue con su reloj desde donde iba, a la misma velocidad, y aterriza.
+const pausaBien = (paso: PasoDeLaBajada): boolean => {
+  const titular = { llegada: 0, armado: true, enCamino: true }
+  const b = { u: 0, propio: false }
+  let n = 0
+  while (titular.llegada < 0.5) {
+    paso(b, { conTitular: true, titular, cargaLista: true, vencido: false }, 1 / 60)
+    titular.llegada = persigue(titular.llegada, 1, 1 / 60, LLEGADA_DEL_TITULAR_S)
+    n += 1
+  }
+  titular.enCamino = false
+  while (b.u < 1 && n < 1000) {
+    paso(b, { conTitular: true, titular, cargaLista: true, vencido: false }, 1 / 60)
+    n += 1
+  }
+  return b.u === 1 && Math.abs(n / 60 - LLEGADA_DEL_TITULAR_S) <= 2 / 60
+}
+afirmar(pausaBien(pasoDeLaBajada), '  si el titular se pausa a mitad (fuera de la vista), el logo sigue a la misma velocidad y aterriza a tiempo: no queda colgado')
+controlPositivo('  el detector VE un logo que se queda con el titular pausado', ((b, f, dt) => {
+  if (f.titular.armado) b.u = f.titular.enCamino && f.cargaLista ? Math.min(1, f.titular.llegada + dt / LLEGADA_DEL_TITULAR_S) : f.titular.llegada
+}) as PasoDeLaBajada, pausaBien)
+
+// Los tiempos salen de la MISMA constante (importada en el hero, en la escena y en la caída; ningún 2,4 escrito a mano).
+const caidaFuente = sinComentarios(leer('_lib/escena/intro/caida.ts'))
+const heroP6 = leer('_secciones/hero/Hero.tsx')
+const unaConstante = (caida: string, hero: string): boolean => /duracionS: LLEGADA_DEL_TITULAR_S,/.test(caida) && !/2\.4/.test(caida) && /import \{ LLEGADA_DEL_TITULAR_S \} from '\.\.\/\.\.\/_lib\/titulos3d\/titular'/.test(hero) && !/const LLEGADA_DEL_TITULAR_S/.test(hero)
+afirmar(unaConstante(caidaFuente, heroP6) && CAIDA_DEL_LOGO.duracionS === LLEGADA_DEL_TITULAR_S, '  la duración es una sola constante (`_lib/titulos3d/titular.ts`), importada por el hero y por la caída: si el titular cambia, el logo lo acompaña')
+controlPositivo('  el detector VE una copia a mano', [caidaFuente.replace('duracionS: LLEGADA_DEL_TITULAR_S,', 'duracionS: 2.4,'), heroP6] as const, ([c, h]: readonly [string, string]) => unaConstante(c, h))
+const titulos = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+afirmar(/TITULAR_EN_VIVO\.llegada = TITULAR_EN_VIVO\.armado \? llegadaDelTitular : 0/.test(titulos) && /llegadaDelTitular = Math\.min\(llegadaDelTitular, a\.mostrado\.llegada\)/.test(titulos) && /DEL_QUE_QUEDA\.enCamino = !fuera && !tapado/.test(titulos), '  la escena publica lo que MUESTRA del titular (el menor de sus dos registros) y si su llegada sigue su camino')
+
+// Aparece apenas empieza: arranca con el borde de abajo del logo justo arriba del cuadro (no esperando fuera de él).
+const camara = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 200)
+camara.position.set(0, 1.6, 18)
+camara.lookAt(0, 0, 0)
+camara.updateMatrixWorld(true)
+const logoDePrueba = new THREE.Group()
+logoDePrueba.add(new THREE.Mesh(new THREE.BoxGeometry(6.9, 4.8, 0.6)))
+const h0 = altoDesdeElBorde(camara, logoDePrueba)
+const bordeY = new THREE.Vector3(0, h0 - 2.4, 0).project(camara).y
+afirmar(Math.abs(bordeY - (1 + 2 * CAIDA_DEL_LOGO.desdeElBorde)) < 1e-3 && h0 < CAIDA_DEL_LOGO.alto, '  arranca justo arriba del borde de arriba del cuadro (se ve desde el primer instante), más cerca que la espera de antes', `${h0.toFixed(2)} u (antes ${String(CAIDA_DEL_LOGO.alto)} u, fuera del cuadro)`)
+afirmar(/if \(antes === 0 && s\.u > 0 && !s\.medido\) \{\s*s\.alto = altoDesdeElBorde\(state\.camera, logo\)/.test(sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))), '  y la mide con la cámara de ese cuadro, al arrancar')
+
+// `?angel=asentado`: un asentado mínimo en los últimos ~120 ms (llega en el mismo instante; continuo en altura y velocidad).
+const asentadoBien = (h: typeof alturaDeLaCaida): boolean => {
+  const n = 2400
+  const y = Array.from({ length: n + 1 }, (_, i) => h(i / n, 10, true))
+  const v = y.slice(1).map((x, i) => (y[i] - x) * n)
+  const tAsienta = 1 - CAIDA_DEL_LOGO.asentadoS / LLEGADA_DEL_TITULAR_S
+  const antesDeAsentar = v.slice(0, Math.floor(tAsienta * n) - 1)
+  const constante = antesDeAsentar.every((x) => Math.abs(x - antesDeAsentar[0]) < 1e-6)
+  const frena = v.slice(Math.ceil(tAsienta * n) + 1).every((x, i, a) => i === 0 || x <= a[i - 1] + 1e-9)
+  const saltos = v.slice(1).every((x, i) => Math.abs(x - v[i]) < 0.2)
+  return y[0] === 10 && y[n] === 0 && constante && frena && saltos && v[n - 1] < 0.05 * antesDeAsentar[0]
+}
+afirmar(asentadoBien(alturaDeLaCaida) && ENTORNO.pruebas.angel === 'no' && entornoPedido('producto,angel=asentado').pruebas.angel === 'asentado' && /entornoDeLaEscena\(\)\.pruebas\.angel === 'asentado'/.test(sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))), '  con `?angel=asentado`, constante y en los últimos 0,12 s frena parejo hasta posarse, llegando en el mismo instante; apagado en el producto (lineal puro)')
+controlPositivo('  el detector VE un asentado que salta (frena de golpe)', ((u: number, alto?: number) => ((alto ?? 10) * (u >= 0.97 ? 0 : 1 - u / 0.97))) as typeof alturaDeLaCaida, asentadoBien)
 
 cerrar('s52-pulido-1')

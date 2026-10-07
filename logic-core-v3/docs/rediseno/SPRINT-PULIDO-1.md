@@ -163,3 +163,58 @@ alternativa sin el mínimo.
 
 Reposo (en lugar de `visual-qa`): `pulido-1/reposo/hoja-p2.png`, el hero y el pie a 1440 y 390, sin errores en la consola.
 La coreografía del rebobinado la mira el humano (`entregas/pulido-1/mirar.txt`).
+
+### P6 · El logo del intro baja «como un ángel»
+
+**Antes:** el logo esperaba arriba, fuera del cuadro, el 40 % de su reloj y después caía con gravedad (cada vez más
+rápido) para llegar cuando terminaba de armarse el titular: aparecía tarde y bajaba de golpe. El reloj era el suyo
+(desde la carga abierta) y la duración, una copia a mano: `LLEGADA_DEL_TITULAR_S` vivía en `Hero.tsx` y s52 comparaba
+los dos números leyendo el fuente.
+
+**Dónde vive el timing:** `HeroArtifact.tsx` no interviene (el logo de /v3 es `ProbeLogo`, en la escena); la bajada está
+en `escena/intro/` y el titular en volumen en `escena/titulos3d/` (su llegada por tiempo: `persigue`, lineal, con
+`minimoS` = la duración; la primera letra arranca con la llegada y la última termina con ella, `llegadaDeLaLetra`).
+
+**Qué cambió:**
+- La duración y los ids del titular viven en un módulo compartido, `_lib/titulos3d/titular.ts`; el hero y la escena la
+  importan (ya no hay una copia). El velo de la carga (`VeloDeCarga.tsx`) conserva su propia lista de ids: tocarlo arrastraba
+  dos fallas de lint anteriores al sprint en un archivo que P6 no necesita.
+- La escena publica lo que MUESTRA del titular cada cuadro (`TITULAR_EN_VIVO`: lo llegado, el menor de los dos registros;
+  si está armado; si su llegada sigue su camino). El logo va antes en el cuadro: toma lo del cuadro anterior y le suma lo
+  que el titular suma en éste (el mismo `dt` y el mismo tope), así arrancan y llegan en el mismo cuadro y el logo baja a
+  velocidad constante (`pasoDeLaBajada`, `caida.ts`).
+- Sin titular en volumen (abajo de 1024, `titulos=no`, o si no se arma en 2,5 s con la carga abierta), el logo baja con
+  su propio reloj, lineal y de la misma duración, desde la carga abierta. Si el titular se pausa a mitad (quien carga bajó
+  antes de que termine: el titular queda fuera de la vista y no avanza), el logo sigue a la misma velocidad desde donde
+  iba: si lo siguiera, quedaría colgado en el aire, visible desde la sección siguiente.
+- Arranca con el borde de abajo del logo apenas arriba del borde de arriba del cuadro (`altoDesdeElBorde`, medido con la
+  cámara de ese cuadro): se ve desde el primer instante. Antes esperaba a 14 u, bien afuera.
+- `?angel=asentado`: hasta los últimos 0,12 s a velocidad constante (un poco mayor) y ahí frena parejo hasta posarse,
+  llegando en el mismo instante (altura y velocidad continuas). El producto es lineal puro.
+
+**Medido en la página** (un registrador por cuadro puesto antes de cargar, `pulido-1/p6/`): a 1440 el logo y la primera
+letra arrancan en el mismo cuadro (el 9 del registro) y el logo y la última letra llegan en el mismo cuadro (el 141): 2,39 s,
+velocidad mediana 0,4167 por segundo (1/2,4), p10–p90 0,395–0,431 (el registrador mide con el reloj de la página y la
+escena con el `delta` del cuadro). La diferencia máxima entre lo bajado y lo llegado del titular, en todos los cuadros: 0.
+A 390 (sin titular en volumen) baja con su reloj a la misma velocidad. Con `angel=asentado`, el mismo arranque y la misma
+llegada (cuadros 46 y 178). Al primer intento el logo iba con su reloj aunque coincidía: en desarrollo la escena monta
+después del plazo de la carga (4 s) y yo usaba ese plazo como «el titular no viene»; ahora espera al titular anotado hasta
+2,5 s con la carga abierta.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` B1 · `caidaBien` | espera arriba hasta el 40 %, después acelera (cada paso mayor o igual que el anterior), llega en 1 | baja con todos los pasos iguales (lineal) desde `alto` hasta 0 en 1 | La curva es la pedida en P6 y la condición es más estricta (pasos iguales a 1e-9, no sólo crecientes). Sigue fijando que sale de arriba, que no llega antes (`h(0,999) > 0`) y que llega en 1 |
+| `s52-nocturno-final` B1 · el mismo reloj | leía `const LLEGADA_DEL_TITULAR_S = …` en `Hero.tsx` y lo comparaba con `CAIDA_DEL_LOGO.duracionS` | lee la constante en `_lib/titulos3d/titular.ts`, exige que el hero la importe de ahí (sin una copia local) y que la use en sus dos registros | Más fuerte: antes dos números iguales escritos en dos lugares pasaban; ahora tiene que ser la misma constante |
+| `s52-nocturno-final` B1 · `montada` | buscaba la línea del reloj propio (`if (cargaLista()) s.u = …`) | busca la lectura de la carga y el paso de la bajada con el mismo `dt` acotado | Las mismas cuatro condiciones (la carga abierta, sólo si cargó arriba, la súper onda al llegar, sin montar con movimiento reducido) contra el código nuevo |
+| `s52-nocturno-final` B1 · controles | la caída que llega antes | la caída que llega antes y la de antes (40 % arriba y gravedad) | Un control más |
+
+`s52-pulido-1` P6 fija la sincronía cuadro a cuadro (60, 75, 120 y 144 Hz y un tirón; la carga abierta a 0, 0,3 y 1,1 s),
+el reloj propio sin titular y la espera máxima, la pausa del titular, la constante única, lo que publica la escena, el
+arranque apenas arriba del cuadro (con una cámara de verdad) y el asentado. Controles: un logo con su reloj de otra
+duración, uno que sigue al titular con un cuadro de atraso, uno que no espera al titular anotado, uno que se queda con el
+titular pausado, una copia a mano de la duración y un asentado que frena de golpe.
+
+Reposo: `pulido-1/reposo/hoja-p6.png` (1440 y 390). En esta corrida el Chrome del banco usó la AMD integrada (la placa no
+es fija: CLAUDE.md); las mediciones de tiempo no dependen de ella.

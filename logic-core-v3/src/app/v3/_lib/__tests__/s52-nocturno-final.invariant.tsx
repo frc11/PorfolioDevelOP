@@ -440,21 +440,26 @@ controlPositivo('el detector VE los CTA que viajaban al pie', ctasDeServicios.ma
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B1 · El intro del logo: cae desde arriba y llega cuando termina de armarse el titular; la súper onda')
 
-// La caída: arriba (fuera del cuadro) mientras se arma el titular; después cae con gravedad (cada vez más rápido) y llega
-// exactamente al terminar el armado: los dos con el mismo reloj, desde que se abre la carga.
+// La caída: [PULIDO 1] P6 la cambió por pedido (antes esperaba arriba el 40 % y caía con gravedad): ahora baja a velocidad
+// constante en el tramo del titular. Lo que B1 fija sigue igual de fuerte (llega con el titular, con su misma duración; arranca
+// con la carga abierta y sólo si la página cargó arriba; la súper onda al llegar; sin montar con movimiento reducido) y lo de
+// la curva es más estricto (lineal: todos los pasos iguales). El detalle de P6 (que sigue al titular en volumen), en s52-pulido-1.
 const heroFuente = leer('_secciones/hero/Hero.tsx')
-const delTitular = Number(/const LLEGADA_DEL_TITULAR_S = ([0-9.]+)/.exec(heroFuente)?.[1] ?? Number.NaN)
+const titularFuente = leer('_lib/titulos3d/titular.ts')
+const delTitular = Number(/export const LLEGADA_DEL_TITULAR_S = ([0-9.]+)/.exec(titularFuente)?.[1] ?? Number.NaN)
+const delMismoReloj = /import \{ LLEGADA_DEL_TITULAR_S \} from '\.\.\/\.\.\/_lib\/titulos3d\/titular'/.test(heroFuente) && !/const LLEGADA_DEL_TITULAR_S =/.test(heroFuente) && (heroFuente.match(/minimoS: LLEGADA_DEL_TITULAR_S/g) ?? []).length === 2
 const caidaBien = (h: typeof alturaDeLaCaida): boolean => {
   const muestras = Array.from({ length: 201 }, (_, i) => h(i / 200))
-  const baja = muestras.every((y, i) => i === 0 || y <= muestras[i - 1] + 1e-12)
-  const acelera = muestras.slice(Math.ceil(CAIDA_DEL_LOGO.espera * 200) + 2).every((_, k, arr) => k < 2 || arr[k] - arr[k - 1] <= arr[k - 1] - arr[k - 2] + 1e-9)
-  return h(0) === CAIDA_DEL_LOGO.alto && h(CAIDA_DEL_LOGO.espera) === CAIDA_DEL_LOGO.alto && h(1) === 0 && h(0.999) > 0 && baja && acelera
+  const pasos = muestras.slice(1).map((y, i) => muestras[i] - y)
+  const lineal = pasos.every((d) => Math.abs(d - pasos[0]) < 1e-9 && d > 0)
+  return h(0) === CAIDA_DEL_LOGO.alto && h(1) === 0 && h(0.999) > 0 && lineal
 }
-afirmar(caidaBien(alturaDeLaCaida) && CAIDA_DEL_LOGO.duracionS === delTitular, 'el logo espera arriba, cae con gravedad (cada vez más rápido) y llega a su lugar justo cuando termina de armarse el titular (el mismo reloj: lo que tarda el titular en armarse)', `${String(CAIDA_DEL_LOGO.duracionS)} s · desde ${String(CAIDA_DEL_LOGO.alto)} u`)
+afirmar(caidaBien(alturaDeLaCaida) && CAIDA_DEL_LOGO.duracionS === delTitular && delMismoReloj, 'el logo baja a velocidad constante y llega a su lugar justo cuando termina de armarse el titular (la misma constante, importada por el hero y por la escena: no hay una copia)', `${String(CAIDA_DEL_LOGO.duracionS)} s · desde ${String(CAIDA_DEL_LOGO.alto)} u`)
 controlPositivo('el detector VE una caída que llega antes que el titular', ((u: number) => alturaDeLaCaida(Math.min(1, u * 1.3))) as typeof alturaDeLaCaida, caidaBien)
+controlPositivo('  y la de NOCTURNO FINAL B1 (espera arriba el 40 % y cae con gravedad)', ((u: number) => (u <= 0.4 ? CAIDA_DEL_LOGO.alto : u >= 1 ? 0 : CAIDA_DEL_LOGO.alto * (1 - ((u - 0.4) / 0.6) ** 2))) as typeof alturaDeLaCaida, caidaBien)
 const caidaTsx = sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))
 const escenario = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
-const montada = (c: string, e: string): boolean => c.includes('if (cargaLista()) s.u = Math.min(1, s.u + Math.min(Math.max(delta, 0), 0.1) / CAIDA_DEL_LOGO.duracionS)') && c.includes('FINAL_EN_EL_PISO.uGolpe.value.set(VIVO.uTiempo.value, logo.position.x, logo.position.z, 1)') && c.includes('window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba') && e.includes('{!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}')
+const montada = (c: string, e: string): boolean => c.includes('FUENTE.cargaLista = cargaLista()') && c.includes('const dt = Math.min(Math.max(delta, 0), 0.1)') && c.includes('pasoDeLaBajada(s, FUENTE, dt)') && c.includes('FINAL_EN_EL_PISO.uGolpe.value.set(VIVO.uTiempo.value, logo.position.x, logo.position.z, 1)') && c.includes('window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba') && e.includes('{!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}')
 afirmar(montada(caidaTsx, escenario), '  arranca con la carga abierta, sólo si la página cargó arriba (si no, el logo ya está en su lugar), al llegar hace la súper onda desde el logo, y con movimiento reducido no se monta (ni caída ni onda)')
 controlPositivo('  el detector VE una caída con movimiento reducido', [caidaTsx, escenario.replace('{!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}', '<CaidaDelLogo logoGroupRef={logoGroupRef} />')] as const, ([c, e]: readonly [string, string]) => montada(c, e))
 // La súper onda: la del golpe (la misma del encastre), mucho más grande que antes y dibujada más alta que el tope de siempre.

@@ -10,6 +10,7 @@ import { TextoBase } from '../../_componentes/tipografia/Textos'
 import { useTitular2D } from '../../_componentes/titulos3d/titular2d'
 import { useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
+import { LLEGADA_DEL_TITULAR_S } from '../../_lib/titulos3d/titular'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
@@ -248,9 +249,9 @@ function BajadaYCta(): React.JSX.Element {
  * en mayúsculas como los pinta el DOM). Llegan UNA vez por carga, al armarse: cada letra desde un lugar distinto de la
  * sala, y se ensamblan donde está el texto. [PASADA FINAL] A1: desde 1024 ese texto ya no se pinta primero (quedaba un
  * parpadeo 2D → 3D en cada carga): sale invisible del servidor y sólo aparece como respaldo si el 3D no llega
- * (`titular2d.ts`). Sin salida: se van con la página.
+ * (`titular2d.ts`). Sin salida: se van con la página. [PULIDO 1] P6 · lo que tarda (`LLEGADA_DEL_TITULAR_S`) es una constante
+ * compartida con el logo del intro, que baja en ese mismo tramo (`_lib/titulos3d/titular.ts`).
  */
-const LLEGADA_DEL_TITULAR_S = 2.4
 
 export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (

@@ -17,6 +17,7 @@ import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } 
 import { avancesDeLasRayas, despinteDelTitulo, ponerElEstudio, type Armado, type Variante } from './armado'
 import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
+import { IDS_DEL_TITULAR_DEL_HERO, TITULAR_EN_VIVO } from '../../titulos3d/titular'
 import { llevarLosAcompanantes } from './acompanantes'
 import { sincronizar, soltarTodos } from './sincronia'
 import { SombraDeLosTitulos } from './SombraDeLosTitulos'
@@ -103,6 +104,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     vivo.current = true
     return () => {
       vivo.current = false
+      TITULAR_EN_VIVO.armado = false
       if (g !== null) soltarTodos({ gl, escena, camara, raiz: g, variante, estudio: () => estudio.current }, s.armados)
     }
   }, [variante, gl, escena, camara])
@@ -184,9 +186,19 @@ function descolocar(armados: readonly Armado[], ancho: number): void {
  */
 const PAUSA_DEL_LAZO_MS = 250
 
+/** [PULIDO 1] P6 · lo que deja `alCuadroDelQueQueda` además de si se dibuja: si su llegada sigue su camino (una vez). */
+const DEL_QUE_QUEDA = { enCamino: false }
+
 /** Un cuadro: la llegada y la salida de cada título (perseguidas), si se dibuja, dónde va (al empezar a llegar) y su luz. */
 function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number }; ultimoCuadro: number }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
-  if (s.armados.length === 0) return
+  // [PULIDO 1] P6 · lo que se muestra del titular del hero, para el logo del intro (que lo sigue): el menor de sus registros.
+  let llegadaDelTitular = 1
+  let registrosDelTitular = 0
+  let titularEnCamino = true
+  if (s.armados.length === 0) {
+    TITULAR_EN_VIVO.armado = false
+    return
+  }
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [3D Y SONIDO] T1: en un viaje del menú no llega ninguno; al terminar, la llegada repetida del destino.
   const enViaje = viajeEnCurso() !== null
@@ -209,6 +221,11 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)
       a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, reanudado, y, dt, viva)
       if (a.malla.visible) iluminar(a, logo, nivel)
+      if ((IDS_DEL_TITULAR_DEL_HERO as readonly string[]).includes(a.titulo.id)) {
+        llegadaDelTitular = Math.min(llegadaDelTitular, a.mostrado.llegada)
+        registrosDelTitular += 1
+        titularEnCamino = titularEnCamino && DEL_QUE_QUEDA.enCamino
+      }
       continue
     }
     // [RONDA 2] F2 · función del scroll (la llegada y la salida), con el asiento al frenar; en un viaje, desarmado.
@@ -241,6 +258,9 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     ubicar(a, d, viva)
     iluminar(a, logo, nivel)
   }
+  TITULAR_EN_VIVO.armado = registrosDelTitular === IDS_DEL_TITULAR_DEL_HERO.length
+  TITULAR_EN_VIVO.llegada = TITULAR_EN_VIVO.armado ? llegadaDelTitular : 0
+  TITULAR_EN_VIVO.enCamino = TITULAR_EN_VIVO.armado && titularEnCamino
 }
 
 /** [RETOQUE 3D] ¿Su renglón, corrido `d` px, quedó entero fuera del cuadro? */
@@ -310,6 +330,7 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, rean
   if (a.titulo.rearma) m.llegada = mostradoDelScroll(m.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS)
   // [AJUSTES FINALES] A4 · el que llega una vez por carga (el hero) espera a que la carga se abra (el velo terminó de fundirse).
   else if (!fuera && !tapado) m.llegada = persigue(m.llegada, cargaLista() ? a.titulo.llegada : 0, dt, a.titulo.minimoS ?? undefined)
+  DEL_QUE_QUEDA.enCamino = !fuera && !tapado
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0
