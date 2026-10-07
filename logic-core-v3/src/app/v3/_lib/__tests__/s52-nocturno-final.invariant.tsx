@@ -51,9 +51,11 @@ import { WHATSAPP } from '../../_secciones/cierre/contacto'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
+import { CONTENIDO as CONTENIDO_DE_QUIENES_D1 } from '../../_secciones/quienes-somos/contenido'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
+const leerDeLaRaiz = (ruta: string): string => readFileSync(ruta, 'utf8').replace(/\r\n/g, '\n')
 const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const R = RELOJ_DEL_FINAL
 const DT = 1 / 60
@@ -666,5 +668,31 @@ const pokebola = (v: string, f: string): boolean => {
 }
 afirmar(pokebola(vidrioDelMenuC5, franjaC5), '  al tocarla, la franja vuelve al círculo y recién ahí el panel se va en él (como una pokébola que se cierra); al abrir, el círculo se estira cuando el panel terminó de salir')
 controlPositivo('  el detector VE el Genie que arranca sin esperar a la franja', [vidrioDelMenuC5.replace('const reloj = window.setTimeout(genie, recogida)', 'genie()\n    const reloj = 0'), franjaC5] as const, ([v, f]) => pokebola(v, f))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D1 · La foto de «Nosotros» se comporta como las del equipo: en el plano de su título, con la misma llegada')
+
+const equipoD1 = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
+const deLaFoto = (f: string): string => f.slice(f.indexOf('export function LaFoto'))
+const comoLasDelEquipo = (f: string): boolean => {
+  const foto = deLaFoto(f)
+  const [titulo, plano, llegada, marco] = [foto.indexOf('<TituloDeLaFoto progreso={progreso} />'), foto.indexOf('<div ref={enElPlano}'), foto.indexOf('<Bloque patron="P2" rango="llegada-de-la-foto"'), foto.indexOf('<MarcoDeDosTomas')]
+  return (
+    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })") &&
+    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })") &&
+    foto.includes("useAcompananteDelTitulo<HTMLDivElement>('nosotros')") &&
+    titulo > 0 && titulo < plano && plano < llegada && llegada < marco &&
+    /<ProgresoAmortiguado progreso=\{progreso\}>\s*\{\(perseguido\) => \(\s*<LlegadaEnCurva progreso=\{perseguido\} sentido="desde-la-derecha"/.test(foto) &&
+    !foto.includes('CanalDeUnaPieza')
+  )
+}
+afirmar(comoLasDelEquipo(equipoD1), '«Nosotros» tiene su volumen (se levanta con su máscara, como «El equipo») y la foto va en su plano (perspectiva con el mouse) y llega en curva, como las de las personas (y se va al revés con el scroll para atrás)')
+controlPositivo('el detector VE la foto suelta (fuera del plano de su título)', equipoD1.replace("useAcompananteDelTitulo<HTMLDivElement>('nosotros')", 'useRef<HTMLDivElement>(null)'), comoLasDelEquipo)
+controlPositivo('el detector VE la llegada de antes (la figura entera con P2)', equipoD1.replace('<LlegadaEnCurva progreso={perseguido} sentido="desde-la-derecha"', '<CanalDeUnaPieza progreso={perseguido} patron="P2"'), comoLasDelEquipo)
+// La fuente 3D de los títulos es un subconjunto (`scripts-retoque/fuentes-3d.py`): sin la «N» el título no se armaba.
+const glifosD1 = (JSON.parse(leer('_fuentes/chivo-400-titulos.json')) as { readonly glyphs: Record<string, unknown> }).glyphs
+const cubreD1 = (g: Record<string, unknown>): boolean => [...CONTENIDO_DE_QUIENES_D1.equipo.titulo].every((c) => c in g)
+afirmar(cubreD1(glifosD1) && /'Nosotros'\], 'destino': 'chivo-400-titulos\.json'/.test(leerDeLaRaiz('scripts-retoque/fuentes-3d.py')), '  la fuente 3D de los títulos tiene todas las letras de «Nosotros» (y su generador las pide)')
+controlPositivo('  el detector VE la fuente sin la «N»', Object.fromEntries(Object.entries(glifosD1).filter(([k]) => k !== 'N')), cubreD1)
 
 cerrar('s52-nocturno-final')

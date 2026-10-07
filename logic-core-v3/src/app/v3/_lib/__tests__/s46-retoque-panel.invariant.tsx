@@ -105,7 +105,10 @@ const EQUIPO = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
 const TITULAR = sinComentarios(leer('_secciones/quienes-somos/titular3d.tsx'))
 afirmar(/<RenglonDeVolumen renglon=\{TRAMOS_DEL_TITULAR\[indice\]\}/.test(QUIENES) && /<SignoDeVolumen progreso=\{progresoDelSigno\} \/>/.test(QUIENES) && (TITULAR.match(/useTextoDeVolumen</g) ?? []).length === 3, 'el titular (dos títulos por renglón) y el ≠ van en volumen, desde 1024 (`useTextoDeVolumen` sólo se anota en escritorio)')
 const enElPlano = (f: string, id: string): boolean => new RegExp(`useAcompananteDelTitulo<HTMLDivElement>\\('${id}'\\)`).test(f) && /<div ref=\{enElPlano\}/.test(f)
-afirmar(enElPlano(QUIENES, 'agencia-signo') && enElPlano(EQUIPO, 'equipo'), 'el cuerpo va en el plano del ≠ y las personas (textos y fotos) en el de «El equipo», como A1')
-controlPositivo('  el chequeo vería el equipo suelto', EQUIPO.replace('<div ref={enElPlano}', '<div'), (f: string) => enElPlano(f, 'equipo'))
+// [NOCTURNO FINAL] D1 · la foto de «Nosotros» también va en el plano de su título (otro `enElPlano` en el archivo): el
+// chequeo del equipo mira el cuerpo de `ElEquipo`.
+const deElEquipo = (f: string): string => f.slice(f.indexOf('export function ElEquipo'), f.indexOf('export function LaFoto'))
+afirmar(enElPlano(QUIENES, 'agencia-signo') && enElPlano(deElEquipo(EQUIPO), 'equipo'), 'el cuerpo va en el plano del ≠ y las personas (textos y fotos) en el de «El equipo», como A1')
+controlPositivo('  el chequeo vería el equipo suelto', EQUIPO.replace('<div ref={enElPlano}', '<div'), (f: string) => enElPlano(deElEquipo(f), 'equipo'))
 
 cerrar('s46-retoque-panel')

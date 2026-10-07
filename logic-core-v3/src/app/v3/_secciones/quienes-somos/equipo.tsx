@@ -6,7 +6,7 @@ import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeTexto, CanalDeUnaPieza, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
+import { CanalDePieza, CanalDeTexto, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
@@ -63,6 +63,19 @@ function TituloDelEquipo({ progreso }: { readonly progreso: Progreso }): React.J
         </h3>
       )}
     </CanalDeTexto>
+  )
+}
+
+/**
+ * [NOCTURNO FINAL] D1 · «NOSOTROS» EN VOLUMEN, como «El equipo»: con el progreso de su máscara se levanta en su lugar (y
+ * con el scroll para atrás se vuelve a acostar). Es el plano de la foto: la foto va en él (`LaFoto`).
+ */
+function TituloDeLaFoto({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
+  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })
+  return (
+    <h3 ref={lugar} data-pieza="titular" data-nivel="titulo-m" className={cn(GEOMETRIA.tituloDeLaFoto, MEZCLA_SOBRE_LA_ESCENA, listo && TEXTO_REEMPLAZADO)}>
+      {CONTENIDO.equipo.titulo}
+    </h3>
   )
 }
 
@@ -188,6 +201,9 @@ export function ElEquipo(): React.JSX.Element {
  * banda. El `--foto-ancho` se queda vivo para la composición de escritorio.
  */
 export function LaFoto(): React.JSX.Element {
+  // [NOCTURNO FINAL] D1 · la foto va en el plano de «Nosotros» (como las de las personas en el de «El equipo»): la cámara
+  // la corre con el mouse y llega en curva, como ellas (y se va al revés con el scroll para atrás).
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('nosotros')
   return (
     <div
       /* ⚠️ **ABAJO DEL CORTE LA FOTO NO FLOTA EN EL MEDIO DE SU PANTALLA.** Con
@@ -200,67 +216,70 @@ export function LaFoto(): React.JSX.Element {
       className="flex min-h-svh w-full flex-col justify-center py-20 max-escritorio:justify-start max-escritorio:pt-[var(--spacing-8)] escritorio:py-2"
     >
       <CalleDerecha>
-        {/* La entrada es la que esta pantalla ya tenía —P2 sin recorte— y no la de los
-            retratos: el pedido la deja como está. */}
-        <Bloque patron="P2" rango="ventana-visible" className="w-full">
-          {(progreso) => (
-            <CanalDeUnaPieza progreso={progreso} patron="P2">
-              <figure
-                style={GEOMETRIA.estilos.fotoDelEquipo}
-                className="mx-auto flex w-[var(--foto-ancho)] flex-col gap-[var(--spacing-3)] max-escritorio:w-full escritorio:mx-0 escritorio:w-full"
-              >
-                {/* ⚠️ **EL TÍTULO ABRE EL BLOQUE, arriba y a la izquierda.** Va en el
-                    mismo escalón que «Franco» y «Valentino» porque es el mismo nivel de
-                    la jerarquía: son los tres rótulos de una persona o de un grupo. El
-                    `figcaption` es su lugar semántico —nombra la figura— y de paso deja
-                    de estar debajo, que es donde estaba el epígrafe que se fue. */}
-                <figcaption>
-                  <Titular
-                    nivel="titulo-m"
-                    como="h3"
-                    className={cn('max-escritorio:text-fluido-titulo-l', MEZCLA_SOBRE_LA_ESCENA)}
-                  >
-                    {CONTENIDO.equipo.titulo}
-                  </Titular>
-                </figcaption>
+        {/* [NOCTURNO FINAL] D1 · cada pieza con la llegada de las del equipo: el título se levanta (su máscara) y la foto
+            llega en curva desde la derecha; antes subía la figura entera con P2. */}
+        <figure
+          style={GEOMETRIA.estilos.fotoDelEquipo}
+          className="mx-auto flex w-[var(--foto-ancho)] flex-col gap-[var(--spacing-3)] max-escritorio:w-full escritorio:mx-0 escritorio:w-full"
+        >
+          {/* ⚠️ **EL TÍTULO ABRE EL BLOQUE, arriba y a la izquierda.** Va en el
+              mismo escalón que «Franco» y «Valentino» porque es el mismo nivel de
+              la jerarquía: son los tres rótulos de una persona o de un grupo. El
+              `figcaption` es su lugar semántico —nombra la figura— y de paso deja
+              de estar debajo, que es donde estaba el epígrafe que se fue. */}
+          <figcaption>
+            <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="w-full">
+              {(progreso) => <TituloDeLaFoto progreso={progreso} />}
+            </Bloque>
+          </figcaption>
 
-                {/* ⚠️ **LA DESCRIPCIÓN SE VE SÓLO EN LA BANDA MÓVIL, y es una decisión
-                    de ancho y no de gusto.** Hasta 425 va debajo del título, siempre
-                    visible: ahí la columna es angosta, el texto se lee cómodo y el
-                    revelado sobre una foto de 256 px de ancho competiría con la imagen.
-                    De 426 para arriba vuelve a `sr-only` y la trae el clic, que es donde
-                    el gesto tiene sentido y donde el texto entra adentro con holgura
-                    —medido: 121 px de sobra a 425 y 203 a 768—. En los dos casos el
-                    marcado la trae: quien no puede hacer clic la tiene siempre. */}
-                <Cuerpo
-                  como="p"
-                  className={cn(
-                    'sr-only max-movil:not-sr-only',
-                    GEOMETRIA.medidaMovilDelCuerpo,
-                    MEZCLA_SOBRE_LA_ESCENA,
+          {/* El plano de «Nosotros»: la descripción y la foto (el título no: es el dueño del plano). */}
+          <div ref={enElPlano} className="flex w-full flex-col gap-[var(--spacing-3)]">
+            {/* ⚠️ **LA DESCRIPCIÓN SE VE SÓLO EN LA BANDA MÓVIL, y es una decisión
+                de ancho y no de gusto.** Hasta 425 va debajo del título, siempre
+                visible: ahí la columna es angosta, el texto se lee cómodo y el
+                revelado sobre una foto de 256 px de ancho competiría con la imagen.
+                De 426 para arriba vuelve a `sr-only` y la trae el clic, que es donde
+                el gesto tiene sentido y donde el texto entra adentro con holgura
+                —medido: 121 px de sobra a 425 y 203 a 768—. En los dos casos el
+                marcado la trae: quien no puede hacer clic la tiene siempre. */}
+            <Cuerpo
+              como="p"
+              className={cn(
+                'sr-only max-movil:not-sr-only',
+                GEOMETRIA.medidaMovilDelCuerpo,
+                MEZCLA_SOBRE_LA_ESCENA,
+              )}
+            >
+              {CONTENIDO.equipo.descripcion}
+            </Cuerpo>
+
+            <Bloque patron="P2" rango="llegada-de-la-foto" className="w-full">
+              {(progreso) => (
+                <ProgresoAmortiguado progreso={progreso}>
+                  {(perseguido) => (
+                    <LlegadaEnCurva progreso={perseguido} sentido="desde-la-derecha" className="block">
+                      <MarcoDeDosTomas
+                        seria={CONTENIDO.equipo.seria}
+                        suelta={CONTENIDO.equipo.suelta}
+                        texto={CONTENIDO.equipo.descripcion}
+                        registro="cuerpo"
+                        relacion={CLASE_DE_RELACION.foto}
+                        ancho={GEOMETRIA.foto.ancho}
+                        alto={GEOMETRIA.foto.alto}
+                        sizes={SIZES_DE_LA_FOTO}
+                        proporcion={GEOMETRIA.proporcionDeLaFotoEnPapel}
+                        // La descripción ya se lee arriba, siempre visible en la banda móvil:
+                        // sin esto se repetiría adentro del revelado (ver `banda.css`).
+                        descripcionYaVisible
+                      />
+                    </LlegadaEnCurva>
                   )}
-                >
-                  {CONTENIDO.equipo.descripcion}
-                </Cuerpo>
-
-                <MarcoDeDosTomas
-                  seria={CONTENIDO.equipo.seria}
-                  suelta={CONTENIDO.equipo.suelta}
-                  texto={CONTENIDO.equipo.descripcion}
-                  registro="cuerpo"
-                  relacion={CLASE_DE_RELACION.foto}
-                  ancho={GEOMETRIA.foto.ancho}
-                  alto={GEOMETRIA.foto.alto}
-                  sizes={SIZES_DE_LA_FOTO}
-                  proporcion={GEOMETRIA.proporcionDeLaFotoEnPapel}
-                  // La descripción ya se lee arriba, siempre visible en la banda móvil:
-                  // sin esto se repetiría adentro del revelado (ver `banda.css`).
-                  descripcionYaVisible
-                />
-              </figure>
-            </CanalDeUnaPieza>
-          )}
-        </Bloque>
+                </ProgresoAmortiguado>
+              )}
+            </Bloque>
+          </div>
+        </figure>
       </CalleDerecha>
     </div>
   )

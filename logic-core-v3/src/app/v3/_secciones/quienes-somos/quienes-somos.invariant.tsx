@@ -105,11 +105,13 @@ afirmar(conMotion.includes('transform:'), 'con coreografía los bloques P2 SÍ e
 // [INTERFAZ 1] T1: SIETE piezas y SEIS divisores. El rótulo del equipo, los dos nombres, sus dos descripciones y la bajada
 // pasaron al canal del texto (por línea, con máscara): sus piezas existen recién cuando el divisor mide en el navegador,
 // así que en este marcado son seis divisores en su fase de medición (`data-lineas-piezas`), no seis piezas. Quedan como
-// piezas los seis renglones del titular y la foto.
+// piezas los seis renglones del titular y la foto. [NOCTURNO FINAL] D1 · cambió por pedido: la foto llega como las de las
+// personas (en curva, con `LlegadaEnCurva`, que no escribe la clase del sistema), en el plano de «Nosotros»: quedan los seis
+// renglones. La llegada de la foto la fija s52 D1.
 afirmarIgual(
   veces(conMotion, 'will-change-transform'),
-  7,
-  'y son siete piezas: los SEIS renglones de los dos repartos del titular (P1) y la foto',
+  6,
+  'y son seis piezas: los SEIS renglones de los dos repartos del titular (P1); la foto llega en curva, como las de las personas',
 )
 afirmarIgual(
   veces(conMotion, 'data-lineas-piezas'),

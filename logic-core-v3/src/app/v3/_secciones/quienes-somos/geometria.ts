@@ -114,6 +114,12 @@ export const GEOMETRIA = {
    */
   tituloDelEquipo: 'font-titulo text-[length:var(--equipo-titulo-tamano)] max-escritorio:text-fluido-titulo-xl leading-titulo tracking-titulo',
   /**
+   * [NOCTURNO FINAL] D1 · «NOSOTROS», el título de la foto: las mismas clases que le daba el `Titular` (`titulo-m`, y abajo
+   * del corte `titulo-l`), escritas acá porque ahora es un encabezado con su volumen (la foto va en su plano) y el `Titular`
+   * no pasa la `ref` del lugar que pinta el texto.
+   */
+  tituloDeLaFoto: 'font-titulo text-fluido-titulo-m leading-titulo tracking-texto font-normal max-escritorio:text-fluido-titulo-l',
+  /**
    * DÓNDE ARRANCA UNA MÁSCARA DE RENGLÓN. Con `ventana-visible` el gesto empezaba con
    * la pieza 80 px adentro del borde de abajo: para cuando el ojo llegaba al renglón,
    * el recorrido ya estaba consumido y la aparición no se veía. Este rango arranca
