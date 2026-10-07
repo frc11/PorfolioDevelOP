@@ -133,6 +133,10 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--vidrio-filo', valor: '40%', evidencia: 'decidido', procedencia: 'el filo de luz de un filete alrededor' },
   { nombre: '--vidrio-reflejo', valor: '28%', evidencia: 'decidido', procedencia: 'la luz que baja desde arriba, detrás del texto' },
   { nombre: '--vidrio-reflejo-hasta', valor: '24%', evidencia: 'decidido', procedencia: 'hasta dónde baja: el primer cuarto, arriba de los ítems' },
+  // ── [NOCTURNO FINAL] C5 · La franja de cerrar del menú del teléfono (`vidrio.css`) ──
+  { nombre: '--franja-tinte', valor: '78%', evidencia: 'decidido', procedencia: 'el tinte de la franja, más denso que el del vidrio (56 %): sostiene el gris de «Click para cerrar» en AA sobre cualquier fondo (sobre el negro, el vidrio claro solo deja ~4:1 al gris)' },
+  { nombre: '--franja-ancho', valor: '10%', evidencia: 'decidido', procedencia: 'la mitad del ancho de la banda del brillo, sobre el recorrido del degradado' },
+  { nombre: '--franja-recorrido', valor: '300%', evidencia: 'decidido', procedencia: 'el degradado mide tres franjas: la banda entra por la izquierda y sale por la derecha' },
   { nombre: '--vidrio-radio', valor: 'calc(var(--radius-fuerte) * 3)', evidencia: 'decidido', procedencia: '30 px: el radio grande de los paneles de iOS a pantalla casi completa' },
 
   // ── Cursor ─────────────────────────────────────────────────────────────

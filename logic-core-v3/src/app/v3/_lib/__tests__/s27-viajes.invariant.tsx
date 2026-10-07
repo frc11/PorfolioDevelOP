@@ -66,7 +66,8 @@ const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
 afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
 // [RETOQUE 3D] N1: y al pie, Login (otra ruta: no viaja). [CIERRE RETOQUE 3D] N1: Contacto es un botón que abre el panel.
-afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop', '/login'], '  y el menú móvil a las mismas cinco, y al pie Login (Contacto abre el panel: no es un enlace)')
+// [NOCTURNO FINAL] C5 · cambió por pedido: sin Login en el menú del teléfono (por ahora).
+afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (Contacto abre el panel: no es un enlace; sin Login)')
 // [RETOQUE 3D] 3I: «Contacto» VIAJA: `#contacto` es el formulario del pie, y el efecto resuelve un ancla que no es sección a la suya.
 afirmarIgual(BARRA.filter((h) => !esSeccion(h)), ['#contacto'], '«Contacto» va a `#contacto`, el formulario del pie: no es una sección')
 afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla\s*if \(seccion === null \|\| elAncla === null\) return/.test(EFECTO), '  y el efecto lo lleva a la sección que lo contiene (el Cierre) y le da el foco a él al llegar; sin ancla, sale antes del `preventDefault`')

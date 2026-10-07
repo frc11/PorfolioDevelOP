@@ -1,11 +1,11 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { Menu as TresBarras } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
 import type { Caja } from '../../_secciones/trabajos/demos/genie'
-import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
+import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO } from '../enlaces'
 
 /**
  * [NAVBAR] T3 · EL PANEL DEL MENÚ, LO QUE NO SE MUEVE — su adentro (el botón de cerrar y los ítems, con sus clases) y la
@@ -13,7 +13,8 @@ import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enla
  * `MenuMovil.tsx`, que lleva el botón, las fases y el Genie (el chrome no pasa de 300 líneas: `s8-montaje`).
  */
 
-export const ROTULO_DEL_MENU = { abrir: 'Abrir el menú', cerrar: 'Cerrar el menú', menu: 'Menú' } as const
+/** [NOCTURNO FINAL] C5 · `franja`: lo que dice la franja de cerrar (su nombre accesible lo contiene: «… el menú»). */
+export const ROTULO_DEL_MENU = { abrir: 'Abrir el menú', cerrar: 'Cerrar el menú', menu: 'Menú', franja: 'Click para cerrar' } as const
 
 /** Una pieza del panel medida en su lugar (relativa al panel): lo que la copia plana del Genie repite. */
 export interface PiezaMedida {
@@ -49,19 +50,28 @@ const mismaCaja = (a: Caja, b: Caja): boolean => a.x === b.x && a.y === b.y && a
 export const mismaGeometria = (a: Geometria, b: Geometria): boolean =>
   mismaCaja(a.ventana, b.ventana) && mismaCaja(a.destino, b.destino) && a.radio === b.radio && a.piezas.length === b.piezas.length && a.piezas.every((p, i) => mismaCaja(p.caja, b.piezas[i].caja))
 
-/** La cruz del botón de cerrar (la misma en la copia plana del Genie). */
-export const CRUZ = <X aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-5)]" />
+/** [NOCTURNO FINAL] C5 · las tres barras del botón del menú: las mismas en el círculo de la franja y en el Genie. */
+export const TRES_BARRAS = <TresBarras aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-5)]" />
 
 /**
- * El adentro del panel: su botón de cerrar (arriba al centro, en el lugar del botón del menú), las secciones y, al pie,
- * separados, Contacto y Login (el del sitio) [RETOQUE 3D] N1. [CIERRE RETOQUE 3D] N1: Contacto es un botón: cierra el
- * menú y abre el panel de contacto (`MenuMovil`).
+ * El adentro del panel. [NOCTURNO FINAL] C5 · Arriba, LA FRANJA DE CERRAR: el círculo del botón del menú, que con el panel
+ * abierto se estira a lo ancho y se vuelve la franja de arriba del vidrio, con «Click para cerrar» y un brillo que la
+ * recorre (`vidrio.css`); al tocarla se recoge en el círculo y el panel se va en él (`MenuDeVidrio`). Nada de cruz. Después,
+ * las secciones y, como una más debajo de «Por qué develOP», Contacto: un botón que cierra el menú y abre el panel de
+ * contacto (`MenuMovil`). Sin Login.
  */
 export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
   return (
     <div className="flex size-full flex-col">
-      <button type="button" data-parte="cerrar-el-menu" aria-label={ROTULO_DEL_MENU.cerrar} onClick={alCerrar} className={CLASE_DEL_CERRAR}>
-        {CRUZ}
+      <button type="button" data-parte="cerrar-el-menu" onClick={alCerrar} className="text-tinta">
+        <span data-parte="franja" aria-hidden="true" />
+        <span data-parte="circulo" aria-hidden="true" className={CLASE_DEL_CIRCULO}>
+          {TRES_BARRAS}
+        </span>
+        <span data-parte="rotulo-de-la-franja" className="text-caption leading-texto tracking-texto font-medio">
+          {ROTULO_DEL_MENU.franja}
+          <span className="sr-only"> el menú</span>
+        </span>
       </button>
       <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-6)]">
         <ul className="flex flex-col gap-[var(--spacing-1)]">
@@ -72,39 +82,27 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
               </a>
             </li>
           ))}
+          <li>
+            <button
+              type="button"
+              data-parte="item-del-menu"
+              onClick={() => {
+                alContacto()
+                alCerrar()
+              }}
+              className={CLASE_DEL_ITEM}
+            >
+              {ENLACE_DE_CONTACTO.rotulo}
+            </button>
+          </li>
         </ul>
       </nav>
-      <ul data-parte="pie-del-menu" className="grid grid-cols-2 gap-[var(--spacing-2)] px-[var(--spacing-6)] pb-[var(--spacing-6)]">
-        <li>
-          <button
-            type="button"
-            data-parte="item-del-menu"
-            onClick={() => {
-              alContacto()
-              alCerrar()
-            }}
-            className={CLASE_DEL_ITEM_DEL_PIE}
-          >
-            {ENLACE_DE_CONTACTO.rotulo}
-          </button>
-        </li>
-        <li>
-          <a href={ENLACE_DE_LOGIN.destino} data-parte="item-del-menu" className={CLASE_DEL_ITEM_DEL_PIE}>
-            {ENLACE_DE_LOGIN.rotulo}
-          </a>
-        </li>
-      </ul>
     </div>
   )
 }
 
-/** [RETOQUE 3D] N1 · Contacto y Login, al pie del menú: el renglón de un ítem, con borde y centrado. */
-export const CLASE_DEL_ITEM_DEL_PIE = cn(
-  'text-cuerpo font-semi leading-texto tracking-texto flex min-h-[var(--spacing-12)] w-full items-center justify-center rounded-[var(--radius-pastilla-s)] border border-current px-[var(--spacing-4)]',
-  'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
-)
-
-export const CLASE_DEL_CERRAR = 'bg-fondo text-tinta border-borde mx-auto grid size-[var(--spacing-12)] shrink-0 place-items-center rounded-full border'
+/** [NOCTURNO FINAL] C5 · el círculo del botón del menú (el mismo papel y borde): adentro de la franja y en el Genie. */
+export const CLASE_DEL_CIRCULO = 'bg-fondo text-tinta border-borde grid size-[var(--spacing-12)] place-items-center rounded-full border'
 
 export const CLASE_DEL_ITEM = cn(
   'text-titulo-m font-titulo leading-titulo tracking-titulo flex min-h-[var(--spacing-12)] w-full items-center rounded-[var(--radius-medio)] px-[var(--spacing-4)] py-[var(--spacing-2)] text-left',

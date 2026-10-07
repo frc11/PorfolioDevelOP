@@ -94,6 +94,107 @@
   stroke: color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent);
 }
 
+/* ── [NOCTURNO FINAL] C5 · LA FRANJA DE CERRAR ──────────────────────────────────────────────────────────────────────
+ * El botón del menú es un círculo; con el panel abierto, ese círculo (`circulo`, el mismo papel y borde) se estira a lo
+ * ancho y se vuelve la franja de arriba del vidrio (`franja`: el recorte va de su círculo a todo el ancho), un tinte más
+ * denso del mismo vidrio con un filete abajo, y adentro «Click para cerrar» en gris con un brillo que lo recorre de
+ * izquierda a derecha. Al tocarla se recoge en el círculo y el panel se va en él (`MenuDeVidrio`). El gris es la tinta
+ * media del tono del vidrio; el tinte de la franja lo sostiene en AA sobre cualquier fondo. Con movimiento reducido, sin
+ * transiciones ni brillo. */
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"] {
+  --franja-tinte: 78%;
+  --franja-ancho: 10%;
+  --franja-recorrido: 300%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 100%;
+  height: var(--spacing-12);
+  border-radius: var(--vidrio-radio) var(--vidrio-radio) 0 0;
+}
+
+/* Las tres capas en la misma celda y posicionadas: se apilan en el orden del árbol (el recorte de la franja le da su
+   propio contexto de apilamiento y, sin esto, se pintaba ENCIMA del rótulo y lo lavaba). */
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"] > * {
+  position: relative;
+  grid-area: 1 / 1;
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="franja"] {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-fondo);
+  clip-path: inset(0 calc(50% - var(--spacing-6)) round var(--spacing-6));
+  transition-property: clip-path, background-color;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"][data-franja="abierta"] [data-parte="franja"] {
+  clip-path: inset(0 0 round var(--vidrio-radio) var(--vidrio-radio) 0 0);
+  background-color: color-mix(in srgb, var(--color-fondo) var(--franja-tinte), transparent);
+  box-shadow: inset 0 calc(var(--border-hairline) * -1) 0 0 var(--color-borde);
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"] [data-parte="circulo"] {
+  transition: opacity calc(var(--duracion-rapida) / 2) var(--ease-principal) calc(var(--duracion-rapida) / 2);
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"][data-franja="abierta"] [data-parte="circulo"] {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+/* El brillo: una banda del papel que cruza las letras grises (en el vidrio claro el papel es el fondo; en el oscuro, la tinta). */
+[data-v3] [data-pieza="vidrio"] [data-parte="rotulo-de-la-franja"] {
+  opacity: 0;
+  color: transparent;
+  background-image: linear-gradient(to right, var(--color-tinta-media) calc(50% - var(--franja-ancho)), var(--color-fondo) 50%, var(--color-tinta-media) calc(50% + var(--franja-ancho)));
+  background-size: var(--franja-recorrido) 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: opacity calc(var(--duracion-rapida) / 3) var(--ease-principal);
+}
+
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"] [data-parte="rotulo-de-la-franja"] {
+  background-image: linear-gradient(to right, var(--color-tinta-media) calc(50% - var(--franja-ancho)), var(--color-tinta) 50%, var(--color-tinta-media) calc(50% + var(--franja-ancho)));
+}
+
+[data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"][data-franja="abierta"] [data-parte="rotulo-de-la-franja"] {
+  opacity: 1;
+  transition-duration: calc(var(--duracion-rapida) * 2 / 3);
+  transition-delay: calc(var(--duracion-rapida) / 2);
+  animation: brillo-de-la-franja calc(var(--duracion-lenta) * 6) linear calc(var(--duracion-rapida) * 2) infinite;
+}
+
+@keyframes brillo-de-la-franja {
+  0% {
+    background-position: 100% 0;
+  }
+
+  55%,
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza="vidrio"] [data-parte="cerrar-el-menu"] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Con colores forzados el texto recortado sobre su fondo desaparecería: vuelve a ser texto. */
+@media (forced-colors: active) {
+  [data-v3] [data-pieza="vidrio"] [data-parte="rotulo-de-la-franja"] {
+    color: CanvasText;
+    background-image: none;
+  }
+}
+
 /* Sin `backdrop-filter` (un navegador viejo) el fondo se vería nítido detrás de los ítems: un tinte opaco, el papel con
    algo de tinta (claro) o al revés (oscuro). */
 @supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {

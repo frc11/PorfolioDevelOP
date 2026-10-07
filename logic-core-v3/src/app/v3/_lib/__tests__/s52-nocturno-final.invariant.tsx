@@ -632,4 +632,39 @@ const corto = (w: Rotulos, html: string): boolean => w.rotulo.includes(w.corto) 
 afirmar(corto(WHATSAPP, pieAngosto) && /max-tablet:text-fluido-titulo-l/.test(sinComentarios(leer('_secciones/cierre/Cierre.tsx'))), '  en el teléfono el titular va un nivel abajo (dos renglones) y WhatsApp con su rótulo corto (el nombre del enlace lo contiene): el mail y WhatsApp en una fila', `«${WHATSAPP.corto}»`)
 controlPositivo('  el detector VE un rótulo corto que no está en el largo', { rotulo: WHATSAPP.rotulo, corto: 'WA' } as Rotulos, (w) => corto(w, pieAngosto))
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C5 · El menú del teléfono: tres barras, Contacto como un ítem más, sin Login; la franja que cierra (sin cruz)')
+
+const menuMovilC5 = sinComentarios(leer('_chrome/menu/MenuMovil.tsx'))
+const panelC5 = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
+const vidrioDelMenuC5 = sinComentarios(leer('_chrome/menu/MenuDeVidrio.tsx'))
+const franjaC5 = sinComentarios(leer('_chrome/menu/franja.ts'))
+const hojaDelVidrio = leer('_estilos/vidrio.css')
+const botonBien = (m: string, p: string): boolean =>
+  m.includes('{TRES_BARRAS}') && !/Isotipo/.test(m) && m.includes("data-seccion={invertido ? 'invertida' : undefined}") && /import \{ Menu as TresBarras \} from 'lucide-react'/.test(p) && /<TresBarras aria-hidden="true" strokeWidth=\{1\.5\}/.test(p)
+afirmar(botonBien(menuMovilC5, panelC5), 'el botón del menú son las tres barras (era el logo), con el mismo tono por zona que tenía: el del botón (`data-seccion`)')
+controlPositivo('el detector VE el logo de antes', [menuMovilC5.replace('{TRES_BARRAS}', '<Isotipo />'), panelC5] as const, ([m, p]) => botonBien(m, p))
+const sinLoginNiCruz = (p: string): boolean => !/ENLACE_DE_LOGIN|pie-del-menu|lucide-react'.*\bX\b|\{CRUZ\}/.test(p) && /\{ENLACE_DE_CONTACTO\.rotulo\}\s*<\/button>\s*<\/li>\s*<\/ul>\s*<\/nav>/.test(p)
+afirmar(sinLoginNiCruz(panelC5), '  adentro: las secciones y Contacto como la última (abre el panel de contacto); sin Login ni el pie del menú, y sin cruz')
+controlPositivo('  el detector VE el Login de antes', panelC5 + '\n<a href={ENLACE_DE_LOGIN.destino}>', sinLoginNiCruz)
+// La franja: el círculo del botón (recorte de 48 px redondo, en el centro) que con el panel abierto llega a todo el ancho.
+const franjaCss = (c: string): boolean =>
+  c.includes('clip-path: inset(0 calc(50% - var(--spacing-6)) round var(--spacing-6));') &&
+  /\[data-franja="abierta"\] \[data-parte="franja"\] \{\s*clip-path: inset\(0 0 round var\(--vidrio-radio\) var\(--vidrio-radio\) 0 0\);/.test(c) &&
+  /transition-property: clip-path, background-color;\s*transition-duration: var\(--duracion-rapida\);/.test(c) &&
+  /\[data-parte="cerrar-el-menu"\] > \* \{\s*position: relative;\s*grid-area: 1 \/ 1;/.test(c) &&
+  /@keyframes brillo-de-la-franja \{\s*0% \{\s*background-position: 100% 0;\s*\}\s*55%,\s*100% \{\s*background-position: 0 0;/.test(c) &&
+  /@media \(prefers-reduced-motion: reduce\) \{\s*\[data-v3\] \[data-pieza="vidrio"\] \[data-parte="cerrar-el-menu"\] \* \{\s*transition: none !important;\s*animation: none !important;/.test(c)
+afirmar(franjaCss(hojaDelVidrio), '  la franja: el círculo del botón se estira a todo el ancho de arriba del vidrio (y vuelve), con «Click para cerrar» en gris y un brillo de izquierda a derecha; las capas, apiladas en el orden del árbol (el recorte, si no, se pintaba encima del rótulo); con movimiento reducido, quieta')
+controlPositivo('  el detector VE las capas sin posicionar (el rótulo lavado)', hojaDelVidrio.replace('position: relative;\n  grid-area: 1 / 1;', 'grid-area: 1 / 1;'), franjaCss)
+// El cierre: primero la franja se recoge en el círculo (lo que tarda sale de su transición) y recién después el Genie, con
+// el botón que reaparece cuando arranca; al abrir, se estira cuando el panel terminó de abrir.
+const pokebola = (v: string, f: string): boolean => {
+  const i = [v.indexOf('const recogida = estabaAbierto ? msDeLaFranja(caja.current) : 0'), v.indexOf('estirarLaFranja(caja.current, false)\n    if (recogida === 0)'), v.indexOf('const reloj = window.setTimeout(genie, recogida)')]
+  const g = v.indexOf('const genie = (): void => {\n      alCubrir(false)')
+  return i.every((x) => x > 0) && i[0] < i[1] && i[1] < i[2] && g > 0 && g < i[0] && /if \(!reducido\) requestAnimationFrame\(\(\) => estirarLaFranja\(caja\.current, true\)\)/.test(v) && /transitionDuration/.test(f) && !/\b300\b/.test(f)
+}
+afirmar(pokebola(vidrioDelMenuC5, franjaC5), '  al tocarla, la franja vuelve al círculo y recién ahí el panel se va en él (como una pokébola que se cierra); al abrir, el círculo se estira cuando el panel terminó de salir')
+controlPositivo('  el detector VE el Genie que arranca sin esperar a la franja', [vidrioDelMenuC5.replace('const reloj = window.setTimeout(genie, recogida)', 'genie()\n    const reloj = 0'), franjaC5] as const, ([v, f]) => pokebola(v, f))
+
 cerrar('s52-nocturno-final')

@@ -81,20 +81,30 @@ fijarModoDelChrome('menu')
 const BOTON = renderToStaticMarkup(<MenuMovil />)
 fijarModoDelChrome('barra')
 afirmar(/aria-expanded="false"/.test(BOTON) && /aria-controls="menu-movil"/.test(BOTON) && BOTON.includes(`aria-label="${ROTULO_DEL_MENU.abrir}"`), 'el botón dice lo que hace, si está abierto y qué controla')
-afirmar(new RegExp(`role="dialog"[\\s\\S]*<button type="button" data-parte="cerrar-el-menu" aria-label="${ROTULO_DEL_MENU.cerrar}"`).test(MENU), '  [NAVBAR] y el que cierra está ADENTRO del diálogo, en el lugar del botón del menú: el lector lo encuentra y Tab no se escapa')
-afirmar(/<svg[^>]*data-pieza="isotipo"/.test(BOTON), '  y lleva el logo de develOP')
+// [NOCTURNO FINAL] C5 · cambió por pedido: el que cierra es la franja de arriba (el círculo del botón estirado, «Click para
+// cerrar»), sin cruz; su nombre es lo que dice más «el menú» (contiene el rótulo visible), sin `aria-label`.
+const franjaAdentro = (h: string): boolean =>
+  new RegExp(`role="dialog"[\\s\\S]*<button type="button" data-parte="cerrar-el-menu"[^>]*>[\\s\\S]*?${ROTULO_DEL_MENU.franja}<span class="sr-only"> el menú</span>`).test(h) && !/data-parte="cerrar-el-menu" aria-label=/.test(h) && !/lucide-x/.test(h)
+afirmar(franjaAdentro(MENU), '  [NAVBAR] y el que cierra está ADENTRO del diálogo, en el lugar del botón del menú (la franja «Click para cerrar»): el lector lo encuentra y Tab no se escapa')
+controlPositivo('  el detector VE el botón de cerrar de antes (con su nombre aparte)', MENU.replace('data-parte="cerrar-el-menu"', `data-parte="cerrar-el-menu" aria-label="${ROTULO_DEL_MENU.cerrar}"`), franjaAdentro)
+// [NOCTURNO FINAL] C5 · cambió por pedido: las tres barras (era el logo de develOP); el tono por zona sigue siendo el del botón.
+afirmar(/<svg[^>]*class="lucide lucide-menu/.test(BOTON) && !/data-pieza="isotipo"/.test(BOTON), '  y lleva las tres barras (no el logo)')
 afirmarIgual(renderToStaticMarkup(<MenuMovil />), '', '  con la barra de escritorio entera, el menú no existe')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Los ítems, y Contacto abre el formulario')
 
 const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].map((m) => m[1])
-// [RETOQUE 3D] N1: las cinco secciones y, al pie del menú, separados, Contacto y Login.
-afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto', 'Login'], '[NAVBAR] las cinco secciones, en el orden de la barra, y al pie Contacto y Login')
-afirmarIgual(items.slice(0, 6), ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`), más el login')
+// [RETOQUE 3D] N1: las cinco secciones y, al pie del menú, separados, Contacto y Login. [NOCTURNO FINAL] C5 · cambió por
+// pedido: Contacto va como un ítem más, debajo de «Por qué develOP», y sin Login (por ahora).
+afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], '[NAVBAR] las cinco secciones, en el orden de la barra, y Contacto como una más; sin Login')
+afirmarIgual(items, ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`)')
 // [RETOQUE 3D] 3I y N1: todo apunta a contacto: el del menú es un enlace del viaje (al formulario del pie), al pie del menú.
 // [CIERRE RETOQUE 3D] N1: Contacto vuelve a ser un botón que abre el panel de contacto (al cerrarse el menú).
-afirmar(/<ul data-parte="pie-del-menu"[\s\S]*<button type="button" data-parte="item-del-menu"[^>]*>Contacto<[\s\S]*<a href="\/login" data-parte="item-del-menu"[^>]*>Login</.test(MENU) && /abrirContacto\(\[\], boton\.current\)/.test(leer('src/app/v3/_chrome/menu/MenuMovil.tsx')), 'Contacto es un botón (cierra el menú y abre el panel de contacto, con el foco de vuelta al botón del menú) y Login el del sitio, separados al pie del menú')
+// [NOCTURNO FINAL] C5 · el ítem de Contacto, el último de la lista; ni el pie del menú ni Login.
+const contactoComoItem = (h: string): boolean => /<nav aria-label="Navegación principal"[\s\S]*>Por qué develOP<\/a><\/li><li><button type="button" data-parte="item-del-menu"[^>]*>Contacto<\/button><\/li><\/ul><\/nav>/.test(h) && !/pie-del-menu|\/login|>Login</.test(h)
+afirmar(contactoComoItem(MENU) && /abrirContacto\(\[\], boton\.current\)/.test(leer('src/app/v3/_chrome/menu/MenuMovil.tsx')), 'Contacto es un botón (cierra el menú y abre el panel de contacto, con el foco de vuelta al botón del menú), como un ítem más debajo de «Por qué develOP»; sin Login')
+controlPositivo('  el detector VE el Login de antes al pie del menú', MENU.replace('</ul></nav>', '</ul></nav><ul data-parte="pie-del-menu"><li><a href="/login" data-parte="item-del-menu">Login</a></li></ul>'), contactoComoItem)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El modo del chrome sale del ancho real')

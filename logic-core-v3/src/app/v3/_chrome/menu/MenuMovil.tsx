@@ -2,17 +2,17 @@
 
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
-import { Isotipo } from '../../_componentes/marca/Marca'
 import { abrirContacto, anotarElMenuAbierto, useContacto } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { salaDetrasDelMenu } from '../escena/salaDetrasDelMenu'
 import { Menu, type ControlDelMenu } from './MenuDeVidrio'
-import { ROTULO_DEL_MENU } from './PanelDelMenu'
+import { ROTULO_DEL_MENU, TRES_BARRAS } from './PanelDelMenu'
 import { vaInvertido } from './tono'
 import { useTonoDebajo } from './useTonoDebajo'
 
 /**
- * EL MENÚ DEL TELÉFONO — un círculo con el logo arriba al centro y un panel de vidrio líquido. **[CONTACTO]** ·
+ * EL MENÚ DEL TELÉFONO — un círculo con las tres barras arriba al centro ([NOCTURNO FINAL] C5: era el logo) y un panel
+ * de vidrio líquido. **[CONTACTO]** ·
  * **[NAVBAR] T3 y retoques 1 y 2**
  *
  * Se monta cuando el chrome está en modo menú (abajo de `medio`, o si la barra no entra: lo mide `BarraDelHome`).
@@ -125,7 +125,8 @@ export function MenuMovil(): React.JSX.Element | null {
         }}
         className="bg-fondo text-tinta border-borde fixed inset-x-0 top-[var(--spacing-4)] mx-auto grid size-[var(--spacing-12)] place-items-center rounded-full border shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)]"
       >
-        <Isotipo className="h-[var(--spacing-5)]" />
+        {/* [NOCTURNO FINAL] C5 · las tres barras (era el logo): el tono por zona es el del botón (`data-seccion`), como antes. */}
+        {TRES_BARRAS}
       </button>
     </div>
   )

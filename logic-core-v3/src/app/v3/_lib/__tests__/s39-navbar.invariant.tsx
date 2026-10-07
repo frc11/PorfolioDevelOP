@@ -155,7 +155,8 @@ afirmar(peorContraste(tinte) >= 4.5, `el texto en AA contra CUALQUIER fondo: con
 controlPositivo('  el chequeo vería un tinte demasiado transparente', 0.4, (t: number) => peorContraste(t) >= 4.5)
 afirmar(MENU.includes('menu.current?.abrir(!zonaOscura())') && MENU.includes('tonoBajo(debajo, nocheQueSeVe())') && MENU.includes("el?.setAttribute('data-seccion', 'invertida')"), 'el tono de la zona, leído al abrir: sobre zona oscura vidrio claro, sobre zona clara vidrio oscuro (los tokens de la sala invertida)')
 
-afirmar(MENU.includes('{abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}') && /data-parte="cerrar-el-menu" aria-label=\{ROTULO_DEL_MENU\.cerrar\}/.test(MENU), 'el diálogo: la trampa de foco sólo abierto, y el que cierra está adentro')
+// [NOCTURNO FINAL] C5 · el que cierra es la franja de arriba (su nombre, lo que dice: «Click para cerrar» y «el menú»).
+afirmar(MENU.includes('{abierto && <TrampaDelMenu caja={caja} alCerrar={cerrar} alSoltar={alSoltar} />}') && /data-parte="cerrar-el-menu" onClick=\{alCerrar\}/.test(MENU) && MENU.includes('{ROTULO_DEL_MENU.franja}'), 'el diálogo: la trampa de foco sólo abierto, y el que cierra está adentro')
 afirmar(MENU.includes('min-h-[var(--spacing-12)]') && MENU.includes('text-titulo-m'), '  ítems grandes y tocables: un renglón de 48 px como mínimo, en `titulo-m`')
 afirmar(MENU.includes("caja.current?.querySelector<HTMLElement>('[data-parte=\"item-del-menu\"]')?.focus({ preventScroll: true })") && MENU.includes('boton.current?.focus({ preventScroll: true })'), '  al abrir, el foco al primer ítem; al cerrar, de vuelta al botón del menú')
 

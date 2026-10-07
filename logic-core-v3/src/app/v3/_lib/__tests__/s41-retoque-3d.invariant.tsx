@@ -235,8 +235,9 @@ controlPositivo('el detector VE a Contacto adentro de la pastilla', barra.replac
 const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
 afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (al pie del hero están el infinito y el parlante); si no entra al lado de la pastilla, el menú del teléfono')
 const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
-// [CIERRE RETOQUE 3D] N1: Contacto, un botón que abre el panel.
-afirmar(/<ul data-parte="pie-del-menu"[\s\S]*\{ENLACE_DE_CONTACTO\.rotulo\}[\s\S]*href=\{ENLACE_DE_LOGIN\.destino\}/.test(menu) && /\{ENLACES_DE_SECCION\.map\(/.test(menu), '  en el teléfono, separados al pie del menú de vidrio')
+// [CIERRE RETOQUE 3D] N1: Contacto, un botón que abre el panel. [NOCTURNO FINAL] C5 · cambió por pedido: en el teléfono
+// Contacto es el último ítem de la lista (debajo de «Por qué develOP») y Login queda sólo en la barra de escritorio.
+afirmar(/\{ENLACES_DE_SECCION\.map\([\s\S]*\{ENLACE_DE_CONTACTO\.rotulo\}\s*<\/button>\s*<\/li>\s*<\/ul>\s*<\/nav>/.test(menu) && !/ENLACE_DE_LOGIN|pie-del-menu/.test(menu), '  en el teléfono, Contacto al final de la lista del menú de vidrio, y sin Login')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('N2 · El infinito, 1,3 veces más grande')

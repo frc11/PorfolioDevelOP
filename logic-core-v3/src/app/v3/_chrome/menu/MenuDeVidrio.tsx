@@ -9,7 +9,8 @@ import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { MS_DEL_GENIE, correrPorTiempo, liderDelGenie } from '../../_secciones/trabajos/demos/genie'
 import { GenieDelMenu, type ControlDelGenieDelMenu, type PiezaDelGenie } from './GenieDelMenu'
 import { LenteDelVidrio, conLente } from './LenteDelVidrio'
-import { CLASE_DEL_CERRAR, CLASE_DEL_ITEM, CRUZ, ContenidoDelMenu, ROTULO_DEL_MENU, medirLaGeometria, mismaGeometria, type Geometria } from './PanelDelMenu'
+import { CLASE_DEL_CIRCULO, CLASE_DEL_ITEM, ContenidoDelMenu, ROTULO_DEL_MENU, TRES_BARRAS, medirLaGeometria, mismaGeometria, type Geometria } from './PanelDelMenu'
+import { estirarLaFranja, msDeLaFranja, tonoDelCirculo } from './franja'
 import { aplicarLaSilueta, soltarLaSilueta } from './silueta'
 
 /**
@@ -143,10 +144,13 @@ export function Menu({
     // Las tiras también: si el clic cae durante el precalentado, ninguna queda casi transparente.
     for (const el of [caja.current, capaDelGenie.current]) el?.style.removeProperty('opacity')
     caja.current?.style.removeProperty('scale')
+    // [NOCTURNO FINAL] C5 · sale como el círculo del botón; con el panel abierto, se estira (con movimiento reducido, ya estirada).
+    estirarLaFranja(caja.current, reducido)
     const listo = (): void => {
       fase.current = 'abierto'
       alCubrir(true)
       caja.current?.querySelector<HTMLElement>('[data-parte="item-del-menu"]')?.focus({ preventScroll: true })
+      if (!reducido) requestAnimationFrame(() => estirarLaFranja(caja.current, true))
     }
     if (reducido) {
       cancelar.current = fundir(1, listo)
@@ -198,13 +202,14 @@ export function Menu({
   }, [geometria, reducido, mostrar, forma])
 
   // EL CIERRE: la forma vuelve al botón con el vidrio adentro (desde donde iba, si se cierra abriendo).
+  // [NOCTURNO FINAL] C5 · abierto, primero la franja se recoge en el círculo (como una pokébola que se cierra) y recién
+  // después el panel se va en él; el botón del menú reaparece cuando arranca el Genie.
   const cerrar = useCallback((): void => {
     if (fase.current === 'cerrando' || fase.current === 'cerrado') return
     const estabaAbierto = fase.current === 'abierto'
     fase.current = 'cerrando'
     sonar('cierra') // [3D Y SONIDO] T2
     cancelar.current()
-    alCubrir(false)
     const terminar = (): void => {
       fase.current = 'cerrado'
       mostrar('cerrado')
@@ -214,14 +219,26 @@ export function Menu({
       alCerrado()
     }
     if (reducido) {
+      alCubrir(false)
       cancelar.current = fundir(0, terminar)
       return
     }
-    const desde = estabaAbierto ? 0 : metido.current
-    cuadro(desde)
-    mostrar('genie')
-    const ms = MS_DEL_GENIE * (1 - desde)
-    cancelar.current = correrPorTiempo(ms, (t) => cuadro(desde + (1 - desde) * (ms === 0 ? 1 : t / ms)), terminar)
+    const genie = (): void => {
+      alCubrir(false)
+      const desde = estabaAbierto ? 0 : metido.current
+      cuadro(desde)
+      mostrar('genie')
+      const ms = MS_DEL_GENIE * (1 - desde)
+      cancelar.current = correrPorTiempo(ms, (t) => cuadro(desde + (1 - desde) * (ms === 0 ? 1 : t / ms)), terminar)
+    }
+    const recogida = estabaAbierto ? msDeLaFranja(caja.current) : 0
+    estirarLaFranja(caja.current, false)
+    if (recogida === 0) {
+      genie()
+      return
+    }
+    const reloj = window.setTimeout(genie, recogida)
+    cancelar.current = () => window.clearTimeout(reloj)
   }, [reducido, fundir, cuadro, mostrar, alCubrir, alCerrado])
 
   // LA APERTURA, que pide el botón. Si la geometría cambió (el teclado del teléfono, una rotación) se re-mide y arranca
@@ -235,6 +252,8 @@ export function Menu({
           if (vidrioOscuro) el?.setAttribute('data-seccion', 'invertida')
           else el?.removeAttribute('data-seccion')
         }
+        // [NOCTURNO FINAL] C5 · el círculo de la franja (y el del Genie), con el tono del botón.
+        tonoDelCirculo([caja.current, capaDelGenie.current], boton.current?.getAttribute('data-seccion') === 'invertida')
         const ahora = medirLaGeometria(caja.current, boton.current)
         if (geometria !== null && mismaGeometria(ahora, geometria)) arrancar()
         else {
@@ -258,6 +277,7 @@ export function Menu({
     if (abierto || fase.current === 'cerrado' || fase.current === 'cerrando') return
     cancelar.current()
     fase.current = 'cerrado'
+    estirarLaFranja(caja.current, false)
     mostrar('cerrado')
   }, [abierto, mostrar])
   useEffect(() => () => cancelar.current(), [])
@@ -268,7 +288,16 @@ export function Menu({
       (geometria?.piezas ?? []).map((p, i) => ({
         clave: String(i),
         caja: p.caja,
-        nodo: p.cerrar ? <span className={`${CLASE_DEL_CERRAR} size-full`}>{CRUZ}</span> : <span className={`${CLASE_DEL_ITEM} h-full`}>{p.texto}</span>,
+        // [NOCTURNO FINAL] C5 · la franja viaja en el Genie como el círculo del botón (el que se estira con el panel abierto).
+        nodo: p.cerrar ? (
+          <span className="grid size-full place-items-center">
+            <span data-parte="circulo" className={CLASE_DEL_CIRCULO}>
+              {TRES_BARRAS}
+            </span>
+          </span>
+        ) : (
+          <span className={`${CLASE_DEL_ITEM} h-full`}>{p.texto}</span>
+        ),
       })),
     [geometria],
   )
