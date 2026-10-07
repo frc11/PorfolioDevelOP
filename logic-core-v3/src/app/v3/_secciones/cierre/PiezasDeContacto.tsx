@@ -16,7 +16,8 @@ import { IconoDeMarca } from './IconosDeMarca'
 /** El mail subrayado y el botón de WhatsApp. [RONDA 2] F1: WhatsApp vuelve al pie, donde estaba (sólo queda fuera del formulario de contacto). */
 export function ContactoDelPie(): React.JSX.Element {
   return (
-    <div className="flex flex-col items-start gap-[var(--spacing-4)] escritorio:mt-[var(--spacing-6)] escritorio:gap-[var(--spacing-5)]">
+    // [NOCTURNO FINAL] C4 · en el teléfono, el mail y WhatsApp en una fila (si no entran, en dos); desde la tablet, apilados.
+    <div className="flex flex-wrap items-center gap-x-[var(--spacing-2)] gap-y-[var(--spacing-2)] tablet:flex-col tablet:flex-nowrap tablet:items-start tablet:gap-[var(--spacing-4)] escritorio:mt-[var(--spacing-6)] escritorio:gap-[var(--spacing-5)]">
       <BloqueSolido>
         <a href={HREF_DEL_MAIL} className="block text-cuerpo font-semi underline decoration-1 underline-offset-4 escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-2)]">
           <DosCopias>{MAIL}</DosCopias>
@@ -28,20 +29,29 @@ export function ContactoDelPie(): React.JSX.Element {
           target="_blank"
           rel="noopener noreferrer"
           data-pieza="whatsapp"
-          className="inline-flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi"
+          className="inline-flex items-center gap-[var(--spacing-1)] tablet:gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-1)] tablet:px-[var(--spacing-5)] py-[var(--spacing-2)] text-cuerpo font-semi"
         >
           <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
-          <DosCopias>{WHATSAPP.rotulo}</DosCopias>
+          {/* [NOCTURNO FINAL] C4 · en el teléfono, el rótulo corto; desde la tablet, el entero (el oculto no se anuncia ni se mide). */}
+          <span className="max-tablet:hidden">
+            <DosCopias>{WHATSAPP.rotulo}</DosCopias>
+          </span>
+          <span className="tablet:hidden">
+            <DosCopias>{WHATSAPP.corto}</DosCopias>
+          </span>
         </a>
       </BloqueSolido>
     </div>
   )
 }
 
-/** Las redes: sólo íconos, del mismo trazo y tamaño; el nombre va en el enlace. En móvil, repartidas a lo ancho. */
+/**
+ * Las redes: sólo íconos, del mismo trazo y tamaño; el nombre va en el enlace. [NOCTURNO FINAL] C4 · en el teléfono, juntas a
+ * la izquierda (repartidas a lo ancho, la última quedaba debajo de la esquina del recorrido).
+ */
 export function RedesDelPie(): React.JSX.Element {
   return (
-    <ul className="flex justify-between tablet:justify-start tablet:gap-[var(--spacing-6)] escritorio:gap-[var(--spacing-8)]">
+    <ul className="flex gap-[var(--spacing-5)] tablet:gap-[var(--spacing-6)] escritorio:gap-[var(--spacing-8)]">
       {REDES.map((r) => (
         <li key={r.red}>
           <BloqueSolido>

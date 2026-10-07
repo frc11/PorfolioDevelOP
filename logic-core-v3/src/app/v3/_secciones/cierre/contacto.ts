@@ -13,6 +13,8 @@ export const NUMERO_DE_WHATSAPP = '5493814154708'
 const MENSAJE_DE_WHATSAPP = 'Hola develOP, vi el sitio y quiero contarles mi proyecto.'
 export const WHATSAPP = {
   rotulo: 'Escribinos por WhatsApp',
+  /** [NOCTURNO FINAL] C4 · el rótulo del teléfono: el mail y WhatsApp entran en una fila (el nombre del enlace lo contiene). */
+  corto: 'WhatsApp',
   href: `https://wa.me/${NUMERO_DE_WHATSAPP}?text=${encodeURIComponent(MENSAJE_DE_WHATSAPP)}`,
 } as const
 

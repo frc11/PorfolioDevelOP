@@ -91,6 +91,17 @@ import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
 /** 16px, el tamaño de icono de sección de la convención. Token, no `size`. */
 const CLASE_ICONO = 'size-[var(--spacing-4)]'
 
+/**
+ * [NOCTURNO FINAL] C4 · la caja de cada columna. El recorrido mezcla con la escena abajo de 1024 (como antes). El contacto,
+ * abajo de 1024, es una TARJETA SÓLIDA: el papel, con borde y sombra, y sin mezcla (la mezcla invertía también los campos,
+ * que sin fondo desaparecían sobre el logo). Desde 1024, la placa 3D: sin tarjeta.
+ */
+const CAJA_DE_LA_COLUMNA: Readonly<Record<ClaseDeColumna, string>> = {
+  recorrido: `flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`,
+  contacto:
+    'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] max-escritorio:rounded-[var(--radius-medio)] max-escritorio:border max-escritorio:border-borde-fuerte max-escritorio:bg-fondo max-escritorio:p-[var(--spacing-3)] max-escritorio:shadow-flotante',
+}
+
 export interface ColumnasDelPieProps {
   /** El progreso del bloque de P2. `null` cuando no hay coreografía. */
   readonly progreso: MotionValue<number> | null
@@ -108,8 +119,8 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           patron="P2"
           cantidad={COLUMNAS.length}
           indice={indice}
-          // [FINAL 2] Cada columna mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`.
-          className={`flex flex-col gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`}
+          // [FINAL 2] El recorrido mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`. El contacto, tarjeta.
+          className={CAJA_DE_LA_COLUMNA[columna.clase]}
         >
           {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. [RETOQUE DEL PIE] P2: en 3D desde 1025. */}
           <TextoDelPie>
@@ -152,8 +163,8 @@ function ColumnaDeContacto(): React.JSX.Element {
  */
 function ColumnaDelRecorrido(): React.JSX.Element {
   return (
-    // [FINAL 3] En móvil, dos columnas compactas.
-    <ul data-pieza="destinos-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-2)] tablet:grid-cols-1 escritorio:gap-y-[var(--spacing-4)]">
+    // [FINAL 3] En móvil, dos columnas compactas. [NOCTURNO FINAL] C4 · más juntas en el teléfono.
+    <ul data-pieza="destinos-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)] tablet:grid-cols-1 tablet:gap-y-[var(--spacing-2)] escritorio:gap-y-[var(--spacing-4)]">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
         <li key={destino.ancla}>
           {/* [CIERRE RETOQUE 3D] D5 · cada enlace, un bloque sólido que flota (desde 1025). */}

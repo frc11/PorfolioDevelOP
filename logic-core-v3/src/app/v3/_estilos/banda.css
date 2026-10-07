@@ -103,6 +103,18 @@
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
     text-shadow: var(--halo-sobre-la-escena);
   }
+
+  /* ── 5 · [NOCTURNO FINAL] C4 · EL PIE ANGOSTO ENTRA EN UNA PANTALLA ──
+   * Arriba, lo justo para no pisar el botón del menú (termina a 64 px del borde); abajo, menos: la esquina del recorrido
+   * queda a la derecha y la última fila del pie arranca a la izquierda. Pisa el relleno de pie.css (0-3-0 contra 0-2-0). */
+  [data-v3] [data-panel='cierre'] [data-pieza='pie'] {
+    padding-block: calc(var(--spacing-12) + var(--spacing-6)) var(--spacing-12);
+  }
+
+  /* El recorrido en dos columnas: la flecha más cerca de su destino, así «Por qué develOP» no se parte a 375. */
+  [data-v3] [data-panel='cierre'] [data-pieza='destinos-del-pie'] [data-pieza='pie-enlace-icono'] {
+    gap: var(--spacing-2);
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse

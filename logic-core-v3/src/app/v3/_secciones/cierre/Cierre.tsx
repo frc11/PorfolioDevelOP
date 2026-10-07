@@ -71,12 +71,13 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
       claseDeEnvoltorio="grid"
       // Sin alto ni padding propios: el del `<footer>` sale de pie.css y la grilla estira la caja, así la sección mide 100svh.
       // [FINAL 3] Móvil: una columna. Tablet: frase y contacto | navegación, y abajo a todo el ancho. Sin logo chico: el 3D está detrás.
-      claseDeContenido="relative grid content-between gap-[var(--spacing-12)] tablet:grid-cols-2 tablet:gap-x-[var(--spacing-12)] escritorio:block"
+      // [NOCTURNO FINAL] C4 · en el teléfono, los bloques más juntos: el pie entero entra en una pantalla.
+      claseDeContenido="relative grid content-between gap-[var(--spacing-4)] tablet:grid-cols-2 tablet:gap-[var(--spacing-12)] escritorio:block"
     >
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}
       <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
-        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-6)]">
+        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-3)] tablet:gap-[var(--spacing-6)]">
           <TextoDelPie className="max-escritorio:hidden">
             <Logotipo />
           </TextoDelPie>
@@ -87,7 +88,8 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
               <TextoDelPie>
                 <CanalDeTexto progreso={tramoIzquierdo} tipo="titulo" texto={TITULAR_DE_CIERRE}>
                   {(contenido) => (
-                    <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance">
+                    // [NOCTURNO FINAL] C4 · en el teléfono, un nivel menos: dos renglones en vez de tres.
+                    <Titular nivel="titulo-xl" como="h2" peso="normal" className="text-balance max-tablet:text-fluido-titulo-l">
                       {contenido}
                     </Titular>
                   )}
@@ -107,7 +109,7 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
       </div>
       {!volumen && (
         <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
-          <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
+          <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
             <RedesDelPie />
             <LineaLegal />
           </Llega>

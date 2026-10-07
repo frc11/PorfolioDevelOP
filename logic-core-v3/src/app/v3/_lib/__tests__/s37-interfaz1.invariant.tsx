@@ -252,8 +252,9 @@ afirmarIgual(veces(rollover, 'Escribinos por WhatsApp'), 2, 'dos copias del rót
 afirmarIgual(textoVisible(quitarSubarbolesConAtributo(rollover, 'aria-hidden')), 'Escribinos por WhatsApp', '  y el nombre del link, UNA vez: la segunda va aria-hidden (en nk el lector lee las dos pegadas)')
 controlPositivo('el chequeo del nombre ve dos copias sin aria-hidden', rollover.replace('aria-hidden="true"', ''), (h: string) => textoVisible(quitarSubarbolesConAtributo(h, 'aria-hidden')) === 'Escribinos por WhatsApp')
 const DONDE_HAY_ROLLOVER = [
-  // [RONDA 2] F1 · WhatsApp volvió al pie: el del mail y el suyo.
-  ['_secciones/cierre/PiezasDeContacto.tsx', 2],
+  // [RONDA 2] F1 · WhatsApp volvió al pie: el del mail y el suyo. [NOCTURNO FINAL] C4 · y el rótulo corto de WhatsApp del
+  // teléfono (en cada ancho se ve uno solo de los dos de WhatsApp: el otro va oculto y no se anuncia).
+  ['_secciones/cierre/PiezasDeContacto.tsx', 3],
   ['_secciones/trabajos/Proyecto.tsx', 1],
   ['_secciones/trabajos/CapaDelTunel.tsx', 1],
 ] as const

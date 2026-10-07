@@ -46,6 +46,8 @@ import { ANCHO_CON_BARRA, DEMO_ANGOSTA, pantallaAngosta } from '../../_panel-viv
 import { claseEnColumna } from '../../_secciones/tu-panel/geometria'
 import { INTERESES, PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { Hero } from '../../_secciones/hero/Hero'
+import { Cierre } from '../../_secciones/cierre/Cierre'
+import { WHATSAPP } from '../../_secciones/cierre/contacto'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
@@ -592,5 +594,42 @@ type FilaDeAlto = { readonly alto: string; readonly altoAngosto?: 'contenido' }
 const sinBlanco = (fila: FilaDeAlto, panel: string): boolean => fila.altoAngosto === 'contenido' && fila.alto === '700svh' && panel.includes("seccion.altoAngosto === 'contenido' ? 'max-escritorio:min-h-0!' : undefined")
 afirmar(sinBlanco(seccionDe('tu-panel'), panelTsx), 'abajo de 1024 Tu panel mide su contenido (el piso del alto se apaga); en escritorio sigue en 700svh', `${seccionDe('tu-panel').alto} · ${String(seccionDe('tu-panel').altoAngosto)}`)
 controlPositivo('el detector VE la fila de antes (700svh también en el teléfono)', { alto: '700svh' } as FilaDeAlto, (f) => sinBlanco(f, panelTsx))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C4 · El pie angosto: entra en una pantalla y el formulario es una tarjeta sólida')
+
+// Medido (c4/): a 390 × 844 el pie medía 967 px (el titular se cortaba arriba) y sus campos, sin fondo y adentro de la
+// mezcla `difference`, desaparecían sobre el logo negro (también a 768). Ahora entra en 375 × 635, 390 × 664 (un iPhone con
+// las barras de Safari) y 768 × 1024. Acá, lo que lo hace: la tarjeta sin mezcla, la grilla del formulario, el relleno.
+const pieAngosto = marcar(<Cierre seccion={seccionDe('cierre')} />, { anima: false })
+const clasesDe = (html: string): string[] => [...html.matchAll(/class="([^"]*)"/g)].map((m) => m[1])
+const tarjetaBien = (html: string): boolean => {
+  const tarjeta = clasesDe(html).filter((c) => /max-escritorio:bg-fondo/.test(c) && /max-escritorio:border\b/.test(c) && /max-escritorio:shadow-flotante/.test(c))
+  const iForm = html.indexOf('<form id="contacto"')
+  const iTarjeta = tarjeta.length === 1 ? html.indexOf(`class="${tarjeta[0]}"`) : -1
+  // Entre la tarjeta y el formulario: sólo el rótulo «Contacto»; nada que mezcle adentro de la tarjeta.
+  const adentro = iTarjeta >= 0 && iForm > iTarjeta ? html.slice(iTarjeta, html.indexOf('</form>', iForm)) : ''
+  return tarjeta.length === 1 && !tarjeta[0].includes('mix-blend-difference') && adentro.length > 0 && !adentro.includes('mix-blend-difference') && clasesDe(html).filter((c) => c.includes('mix-blend-difference')).length === 3
+}
+afirmar(tarjetaBien(pieAngosto), 'abajo de 1024 el contacto es UNA tarjeta sólida (el papel, borde y sombra) sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
+controlPositivo('el detector VE la tarjeta mezclando (los campos de antes)', pieAngosto.replace('max-escritorio:shadow-flotante', 'max-escritorio:shadow-flotante max-escritorio:mix-blend-difference'), tarjetaBien)
+const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+const grillaBien = (f: string): boolean =>
+  f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&
+  f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4' }") &&
+  f.includes('className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]"') &&
+  /max-escritorio:bg-tinta max-escritorio:px-\[var\(--spacing-3\)\] max-escritorio:text-fondo/.test(f) &&
+  /text-cuerpo max-escritorio:text-base leading-texto/.test(f)
+afirmar(grillaBien(formularioTsx), '  el formulario angosto: el nombre y el mail lado a lado, el mensaje y Enviar (lleno, de tinta) abajo; los campos a 16 px (Safari no agranda al tocar); en escritorio, una columna como antes')
+controlPositivo('  el detector VE los campos a 15 px en el teléfono', formularioTsx.replace('text-cuerpo max-escritorio:text-base leading-texto', 'text-cuerpo leading-texto'), grillaBien)
+const bandaC4 = leer('_estilos/banda.css')
+const enLaBandaC4 = bandaC4.slice(bandaC4.indexOf('@media (width < 1024px) {'), bandaC4.indexOf('/* ── HOVER DONDE HAY'))
+const rellenoBien = (c: string): boolean => /\[data-v3\] \[data-panel='cierre'\] \[data-pieza='pie'\] \{\s*padding-block: calc\(var\(--spacing-12\) \+ var\(--spacing-6\)\) var\(--spacing-12\);/.test(c)
+afirmar(rellenoBien(enLaBandaC4), '  el relleno del pie angosto: 72 px arriba (el botón del menú termina a 64) y 48 abajo (la esquina del recorrido queda a la derecha)')
+controlPositivo('  el detector VE el relleno de escritorio (80 y 80)', enLaBandaC4.replace("[data-v3] [data-panel='cierre'] [data-pieza='pie'] {", '[data-v3] [data-x] {'), rellenoBien)
+type Rotulos = { readonly rotulo: string; readonly corto: string }
+const corto = (w: Rotulos, html: string): boolean => w.rotulo.includes(w.corto) && w.corto.length < w.rotulo.length && html.includes(`<span class="max-tablet:hidden">`) && html.includes(`<span class="tablet:hidden">`)
+afirmar(corto(WHATSAPP, pieAngosto) && /max-tablet:text-fluido-titulo-l/.test(sinComentarios(leer('_secciones/cierre/Cierre.tsx'))), '  en el teléfono el titular va un nivel abajo (dos renglones) y WhatsApp con su rótulo corto (el nombre del enlace lo contiene): el mail y WhatsApp en una fila', `«${WHATSAPP.corto}»`)
+controlPositivo('  el detector VE un rótulo corto que no está en el largo', { rotulo: WHATSAPP.rotulo, corto: 'WA' } as Rotulos, (w) => corto(w, pieAngosto))
 
 cerrar('s52-nocturno-final')

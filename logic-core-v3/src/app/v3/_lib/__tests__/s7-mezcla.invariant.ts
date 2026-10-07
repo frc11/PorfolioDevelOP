@@ -402,7 +402,9 @@ for (const etiqueta of ['h3', 'h4', 'svg', 'p']) {
 const EN_POR_QUE = CON_MEZCLA(POR_QUE)
 afirmar(EN_POR_QUE.length >= 9, `«Por qué develOP» mezcla ${EN_POR_QUE.length} piezas: la frase, los seis valores, el CTA y su botón`, EN_POR_QUE.join(' · '))
 const EN_EL_PIE = CON_MEZCLA(PIE_DEL_FINAL)
-afirmar(EN_EL_PIE.length >= 4, `el pie mezcla ${EN_EL_PIE.length} piezas: el isotipo, la identidad y las dos columnas (la fila de abajo no: lleva el acento)`, EN_EL_PIE.join(' · '))
+// [NOCTURNO FINAL] C4 · cambió por pedido: la columna del contacto ya no mezcla (la mezcla invertía también sus campos, que
+// desaparecían sobre el logo); abajo de 1024 es una tarjeta sólida. Lo afirma s52 C4, con su control.
+afirmar(EN_EL_PIE.length >= 3, `el pie mezcla ${EN_EL_PIE.length} piezas: la identidad, el recorrido y la fila de abajo (el contacto no: es una tarjeta sólida)`, EN_EL_PIE.join(' · '))
 
 /**
  * ⚠️ **Y EL TEXTO DE LA FOTO NO ENTRA, QUE ES LA MITAD DE LA REGLA.** Ahí el
