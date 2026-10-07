@@ -15,6 +15,7 @@
  *   1G · el pie no recibe la luz de la cinemática: su normal y su vista giran con la cámara del final (la luz y los
  *        reflejos, como antes de la cinemática, en cualquier pose).
  *   2A · los nanobots se desarman donde se VE el cursor de la sala (su halo, interpolado), no en el puntero nativo.
+ *   2B · el pie llega y se va bastante más rápido (1,4 s de punta a punta; eran 3,2), con el escalonado por columnas.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -27,6 +28,7 @@ import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
 import { RELOJ_DEL_FINAL, camaraDelFinal, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from '../escena/pie3d/material'
+import { TRAMOS_DEL_PIE, avanceDelPie } from '../escena/pie3d/coreografia'
 import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { sentidoDeLaRueda, sentidoDeLaTecla, sentidoDelDedo } from '../gestosDelScroll'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
@@ -370,5 +372,35 @@ const cursorBien = (cursor: string, montaje: string): boolean =>
   montaje.includes('const conCursor = CURSOR_EN_VIVO.activo') && montaje.includes('((conCursor ? CURSOR_EN_VIVO.x : mouse.x) - caja.izquierda)') && montaje.includes('((conCursor ? CURSOR_EN_VIVO.y : mouse.y) - caja.arriba)')
 afirmar(cursorBien(cursorDeLaSala, montajeDelEnjambre), '  el cursor de la sala publica dónde se ve (su halo) en cada cuadro de su bucle y se apaga al irse el puntero o al desmontarse; el enjambre lo sigue cuando está (sin él —táctil, movimiento reducido, abajo de 1024—, el puntero)')
 controlPositivo('  el detector VE el enjambre siguiendo al puntero nativo', montajeDelEnjambre.replace('((conCursor ? CURSOR_EN_VIVO.x : mouse.x) - caja.izquierda)', '(mouse.x - caja.izquierda)'), (m: string) => cursorBien(cursorDeLaSala, m))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2B · La llegada y la salida del pie, bastante más cortas (con el escalonado por columnas): reciben clics antes')
+
+// Un salto al último píxel (llegar) y otro afuera de la última pantalla (irse): cuánto tarda, y si las columnas siguen
+// llegando una después de la otra.
+type Seguidor = (m: number, p: number, asentar: boolean, dt: number) => number
+const tiemposDelPie = (f: Seguidor): { readonly llega: number; readonly seVa: number; readonly enOrden: boolean } => {
+  const DTP = 1 / 60
+  let [m, t] = [0, 0]
+  const cruces: number[] = []
+  for (const b of [TRAMOS_DEL_PIE[0].hasta, TRAMOS_DEL_PIE[1].hasta, TRAMOS_DEL_PIE[2].hasta]) {
+    while (m < b - 1e-9 && t < 30) {
+      m = f(m, 1, false, DTP)
+      t += DTP
+    }
+    cruces.push(t)
+  }
+  const llega = t
+  let s = 0
+  while (m > TRAMOS_DEL_PIE[0].desde + 1e-9 && s < 30) {
+    m = f(m, 0.3, false, DTP)
+    s += DTP
+  }
+  return { llega, seVa: s, enOrden: cruces[0] < cruces[1] && cruces[1] < cruces[2] && cruces[1] - cruces[0] >= 0.3 && cruces[2] - cruces[1] >= 0.3 }
+}
+const tiemposBien = (m: ReturnType<typeof tiemposDelPie>): boolean => m.llega <= 1.7 && m.seVa <= 1.7 && m.enOrden
+const medidosDelPie = tiemposDelPie(avanceDelPie)
+afirmar(tiemposBien(medidosDelPie), 'el pie llega entero en menos de 1,7 s desde que asoma la última pantalla y se va en menos de 1,7 s al salir de ella (eran 3,2 s), con las columnas una después de la otra; las piezas reciben clics al llegar (antes, entonces)', `llega ${medidosDelPie.llega.toFixed(2)} s · se va ${medidosDelPie.seVa.toFixed(2)} s`)
+controlPositivo('el detector VE el ritmo de antes (3,2 s)', ((m, p, a, dt) => avanceDelPie(m, p, a, dt * 0.44)) as Seguidor, (f: Seguidor) => tiemposBien(tiemposDelPie(f)))
 
 cerrar('s51-retoque-encastre')

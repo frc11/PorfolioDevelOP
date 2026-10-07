@@ -38,11 +38,13 @@ export interface TramoDelPie {
  * Los tres tramos, en orden, donde cada columna ya se ve: medido (`scripts-pasada/c2-ventanas.ts`, de 1100 a 1920 de
  * ancho), la columna izquierda queda entera en el cuadro desde 0,62–0,68 de la última pantalla, el formulario desde
  * 0,70–0,78 y lo demás desde 0,72–0,80. El titular arranca un poco antes: sus letras llegan mientras termina de subir.
+ * [RETOQUE DEL ENCASTRE] 2B · más cortos: de punta a punta 1,4 s (eran 3,2: al terminar de irse ya se había salido de la
+ * sección); el escalonado por columnas no cambia, y las piezas reciben clics antes (al llegar).
  */
 export const TRAMOS_DEL_PIE: readonly TramoDelPie[] = [
-  { llegada: 'atras', desde: 0.56, hasta: 0.8, minimoS: 1.4, dura: 0.7 },
-  { llegada: 'tapa', desde: 0.8, hasta: 0.92, minimoS: 0.9, dura: 1 },
-  { llegada: 'fundido', desde: 0.92, hasta: 1, minimoS: 0.9, dura: 0.5 },
+  { llegada: 'atras', desde: 0.56, hasta: 0.8, minimoS: 0.6, dura: 0.7 },
+  { llegada: 'tapa', desde: 0.8, hasta: 0.92, minimoS: 0.4, dura: 1 },
+  { llegada: 'fundido', desde: 0.92, hasta: 1, minimoS: 0.4, dura: 0.5 },
 ]
 
 /** Fuera de los tramos (el alejamiento, el final) y en un viaje del menú: de punta a punta en esto (s). */

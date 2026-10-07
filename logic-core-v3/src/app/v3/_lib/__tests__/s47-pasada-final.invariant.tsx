@@ -320,7 +320,8 @@ titulo('C2 · La llegada del pie por columnas: atrás (titular, mail, WhatsApp),
 // Los tramos: en orden, sin pisarse (así asienta cada columna), donde cada columna ya se ve, con su mínimo.
 const TP = TRAMOS_DEL_PIE
 const tramosEnOrden = (ts: readonly TramoDelPie[]): boolean => ts.length === 3 && ts.map((t) => t.llegada).join(',') === 'atras,tapa,fundido' && ts.every((t, k) => t.desde < t.hasta && (k === 0 || Math.abs(t.desde - ts[k - 1].hasta) < 1e-9)) && ts[0].desde >= 0.5 && ts[2].hasta <= 1
-afirmar(tramosEnOrden(TP) && TP[0].desde === 0.56 && TP[0].hasta === 0.8 && TP[1].hasta === 0.92 && TP[2].hasta === 1 && TP[0].minimoS === 1.4 && TP[1].minimoS === 0.9 && TP[2].minimoS === 0.9, 'tres tramos seguidos y sin pisarse sobre la última pantalla, donde cada columna ya se ve (0,56–0,80 · 0,80–0,92 · 0,92–1), con su mínimo (1,4 s la de atrás, como Portfolio; 0,9 s las otras)', TP.map((t) => `${t.llegada} ${String(t.desde)}–${String(t.hasta)} ${String(t.minimoS)} s`).join(' · '))
+// [RETOQUE DEL ENCASTRE] 2B · cambió por pedido: los mínimos, más cortos (1,4 / 0,9 / 0,9 → 0,6 / 0,4 / 0,4 s; s51 2B).
+afirmar(tramosEnOrden(TP) && TP[0].desde === 0.56 && TP[0].hasta === 0.8 && TP[1].hasta === 0.92 && TP[2].hasta === 1 && TP[0].minimoS === 0.6 && TP[1].minimoS === 0.4 && TP[2].minimoS === 0.4, 'tres tramos seguidos y sin pisarse sobre la última pantalla, donde cada columna ya se ve (0,56–0,80 · 0,80–0,92 · 0,92–1), con su mínimo (RETOQUE DEL ENCASTRE 2B: 0,6 s la de atrás; 0,4 s las otras)', TP.map((t) => `${t.llegada} ${String(t.desde)}–${String(t.hasta)} ${String(t.minimoS)} s`).join(' · '))
 controlPositivo('el detector VE dos tramos que se pisan', TP.map((t, k) => (k === 1 ? { ...t, desde: 0.7 } : t)), tramosEnOrden)
 
 // El seguidor: nunca fuera de 0…1, se da vuelta en el cuadro siguiente, asienta por columna, respeta los mínimos y el orden.
