@@ -16,6 +16,7 @@
  *   A7 · «Quiero mi…» de Servicios abre el panel de contacto con su opción marcada.
  *   B1 · el intro del logo: cae desde arriba y llega cuando termina de armarse el titular; la súper onda (la del encastre).
  *   B2 · el piso volcán: el mouse sólo levanta; destellos de lava al azar por las juntas de todo el piso; el atardecer parejo.
+ *   B3 · el círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -25,7 +26,7 @@ import * as THREE from 'three'
 import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, VIAJE_CON_TOPE, duracionDelViaje } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
-import { ANCLAS_DEL_HUECO, GOLPE_EN_EL_PISO, LAVA_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, GOLPE_EN_EL_PISO, LAVA_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -500,5 +501,27 @@ const atardecerBien = (c: string): boolean => /const tarde = atardecer\(EN_VIVO\
 const alRas = FINAL_DEL_PIE.presion.hastaS / R.duracionS
 afirmar(atardecerBien(rigB2) && atardecer(0) === 0 && atardecer(alRas - 0.01) === 0 && atardecer(1) === 1 && ATARDECER_DEL_FINAL.nivel < 0.6, '  para que se lea, toda la sala atardece pareja después del encastre (el rig de luz entero: nunca un sector) y vuelve al rebobinar', `−${String(ATARDECER_DEL_FINAL.nivel * 100)} % · ${String(ATARDECER_DEL_FINAL.kelvin)} K`)
 controlPositivo('  el detector VE un atardecer que no está en el rig', rigB2.replace('arc.level *= 1 - ATARDECER_DEL_FINAL.nivel * tarde', ''), atardecerBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B3 · El círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas')
+
+// Un CÍRCULO (antes una elipse angosta en la caja del logo, que sólo ocultaba el dibujo: el rectángulo hundido en
+// escalones), de radio acorde (el logo y un margen, no mucho más) y con un borde ancho y suave (varios bloques: sin
+// escalones). Adentro, quieto de verdad: los empujes (el mouse, el pulso, el golpe, las ondas) se apagan con la calma y la
+// onda se amortigua; y el logo no larga anillos durante el final.
+const C = CALMA_EN_EL_PISO
+const mitadDelLogo = 6.86 / 2
+const simB3 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+type Calma = { readonly radio: number; readonly borde: number; readonly amortigua: number }
+const circuloBien = (sim: string, dib: string, c: Calma): boolean =>
+  sim.includes(`return uCalmaDelFinal * ( 1.0 - smoothstep( ${c.radio.toFixed(1)}, ${(c.radio + c.borde).toFixed(1)}, length( xz ) ) );`) &&
+  /float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/.test(sim) && sim.includes('dibujo *= 1.0 - calmaDelFinal( xz );') &&
+  /return mix\( 1\.0, smoothstep\( [0-9.]+, [0-9.]+, length\( xz \) \), uCalmaDelFinal \);/.test(dib) &&
+  c.radio > mitadDelLogo && c.radio < 1.6 * mitadDelLogo && c.borde >= 4 * 0.8 && c.amortigua >= 10
+afirmar(circuloBien(simB3, dibujoDelPisoB2, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; la lava empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
+controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), dibujoDelPisoB2, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
+controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, dibujoDelPisoB2, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
+const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
+afirmar(entornoB3.includes('entradas.reducido = quieto || EN_VIVO.fin > 0'), '  y durante el final el logo no larga anillos del pulso (cruzaban el círculo quieto: anillos y ondas en escalones)')
 
 cerrar('s52-nocturno-final')

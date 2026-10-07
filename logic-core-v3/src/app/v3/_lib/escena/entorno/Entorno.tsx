@@ -12,6 +12,7 @@ import { PULSO_PEDIDO, vigente } from '../interfaz/pedidos'
 import { callar, sonar } from '../../sonido/bus'
 import { CHOREO_TRAMOS } from '../choreography'
 import { viajeEnCurso } from '../viaje'
+import { EN_VIVO } from '../final/recorridoDelFinal'
 import { HAZ_ENCENDIDO, avanzarElEncendido, encendidoInicial, noPasoDePortfolio, repartoDelEncendido, type EstadoDelEncendido } from './encendido'
 import { Haz } from './Haz'
 import { LOGO_BAJO_EL_PUNTERO, crearHoverDelLogo, type HoverDelLogo } from './hoverDelLogo'
@@ -163,7 +164,8 @@ export function Entorno({ rig, quieto, logoGroupRef }: PropsDelEntorno) {
       entradas.t = t
       entradas.scrollEnMovimiento = scrollEnMovimiento
       entradas.hover = m.hover
-      entradas.reducido = quieto
+      // [NOCTURNO FINAL] B3 · durante el final el logo no larga anillos: alrededor, el círculo quieto (el orden en medio del caos).
+      entradas.reducido = quieto || EN_VIVO.fin > 0
       // [INTERFAZ 2] T1 · un CTA pide el principal: sólo un pedido nuevo y reciente.
       entradas.pedido = false
       if (PULSO_PEDIDO.n !== m.pulsoAtendido) {

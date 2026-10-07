@@ -54,10 +54,15 @@ export const GOLPE_EN_EL_PISO = {
 export const RASTRO_EN_EL_PISO = { puntos: 8, cada: 0.55, apagaS: 0.9, radio: 1.7, alto: 0.3, rigidez: 120 } as const
 
 /**
- * [EL ENCASTRE] 2D · el mar calmo alrededor del logo: en la elipse de su caja, entero hasta `entero` veces su media caja y
- * nada desde `hasta` (una elipse, no la caja: una caja se leía como un rectángulo en el piso); y cuánto oscurece el labio.
+ * [EL ENCASTRE] 2D · el mar calmo alrededor del logo; y cuánto oscurece el labio.
+ * [NOCTURNO FINAL] B3 · EL CÍRCULO ESTABLE (antes, una elipse angosta en la caja del logo, que sólo ocultaba el dibujo: el
+ * mar seguía debajo y en el borde, en dos bloques y medio, el piso pasaba de las olas a cero: un rectángulo hundido en
+ * escalones, que el golpe dejaba bien a la vista). Ahora es un CÍRCULO alrededor del centro del logo: entero hasta `radio`
+ * (u: el logo y un margen) y con un borde ancho y suave (`borde`, u: cinco bloques), sin escalones; y es de verdad quieto:
+ * adentro los bloques se asientan (la onda se amortigua, `amortigua` 1/s más) y no reaccionan al mouse, al pulso, al golpe
+ * ni a las ondas (sus empujes se apagan con la calma). El orden en medio del caos.
  */
-export const CALMA_EN_EL_PISO = { entero: 1.15, hasta: 1.9, labio: 0.1 } as const
+export const CALMA_EN_EL_PISO = { radio: 4.2, borde: 4, amortigua: 30, labio: 0.1 } as const
 
 /** Los uniformes del final en el piso: los comparten la simulación y el dibujo; los escribe `FinalDelPie`. */
 export const FINAL_EN_EL_PISO = {
@@ -102,8 +107,8 @@ export const LAVA_EN_EL_PISO = {
   linea: 0.03,
   resplandor: 0.16,
   color: { nucleo: [1, 0.86, 0.6], halo: [1, 0.38, 0.08] },
-  /** Cuánto más allá del mar calmo arranca (en medias cajas del logo). */
-  margen: 0.15,
+  /** Cuánto más allá del círculo calmo termina de aparecer (u; empieza a mitad de su borde). */
+  margen: 1,
 } as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
@@ -151,8 +156,7 @@ float empujeDelRastro( vec2 p, float h ) {
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z).
 float calmaDelFinal( vec2 xz ) {
 	if ( uCalmaDelFinal <= 0.0 ) return 0.0;
-	float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
-	return uCalmaDelFinal * ( 1.0 - smoothstep( ${f(CALMA_EN_EL_PISO.entero)}, ${f(CALMA_EN_EL_PISO.hasta)}, d ) );
+	return uCalmaDelFinal * ( 1.0 - smoothstep( ${f(CALMA_EN_EL_PISO.radio)}, ${f(CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde)}, length( xz ) ) );
 }
 `
 
@@ -165,7 +169,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
     .replace(ANCLAS_DEL_FINAL.main, `${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
     .replace(
       ANCLAS_DEL_FINAL.empuje,
-      `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );`,
+      `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
     .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );`)
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
@@ -189,8 +193,7 @@ uniform float uPoder;
 uniform float uCalmaDelFinal;
 float fueraDeLaCalma( vec2 xz ) {
 	if ( uCalmaDelFinal <= 0.0 ) return 1.0;
-	float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
-	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.hasta)}, ${f(CALMA_EN_EL_PISO.hasta + LAVA_EN_EL_PISO.margen)}, d ), uCalmaDelFinal );
+	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde)}, ${f(CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + LAVA_EN_EL_PISO.margen)}, length( xz ) ), uCalmaDelFinal );
 }
 // [NOCTURNO FINAL] B2 · EL PISO VOLCÁN: los focos de lava (LAVA_EN_EL_PISO). x: el halo; y: el núcleo (0 a 1).
 float azarDeLaLava( vec2 p ) {
