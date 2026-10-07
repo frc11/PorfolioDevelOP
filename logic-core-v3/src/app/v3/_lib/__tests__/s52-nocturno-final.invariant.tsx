@@ -18,6 +18,7 @@
  *   B2 · el piso volcán: el mouse sólo levanta; destellos de lava al azar por las juntas de todo el piso; el atardecer parejo.
  *   B3 · el círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas.
  *   B4 · el polvo en el pie: en la cinemática no se posa; el que cae no atraviesa las piezas del pie (un cupo se apoya).
+ *   C1 · teléfono y tablet: el texto de Trabajos se lee sobre el logo de noche (un halo: la mezcla no atraviesa el pin).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -546,5 +547,17 @@ const choqueBien = (sim: string, ar: string, glsl: string): boolean =>
 afirmar(choqueBien(simB4, armadasB4, CAJAS_DEL_PIE_GLSL) && POLVO_EN_EL_PIE.cupo <= 0.35 && POLVO_EN_EL_PIE.cajas >= 10, '  la mota que cae no atraviesa las piezas del pie (sale por la cara más cercana que no es la de arriba); por la de arriba se apoya sólo un cupo (no se acumula), y sólo si recién la cruzó; la apoyada queda frenada en su cara (si la pieza se mueve, la lleva)', `cupo ${String(POLVO_EN_EL_PIE.cupo * 100)} % · hasta ${String(POLVO_EN_EL_PIE.cajas)} piezas`)
 controlPositivo('  el detector VE un polvo que atraviesa las piezas', [simB4.replace(/chocarConElPie\( p, v, azar \);\s*/, ''), armadasB4, CAJAS_DEL_PIE_GLSL] as const, ([si, ar, gl]: readonly [string, string, string]) => choqueBien(si, ar, gl))
 controlPositivo('  y uno que apoya a todas (se acumularían)', [simB4, armadasB4, CAJAS_DEL_PIE_GLSL.replace('if ( arriba ) continue;', '')] as const, ([si, ar, gl]: readonly [string, string, string]) => choqueBien(si, ar, gl))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C1 · Teléfono y tablet: el texto de Trabajos se lee sobre el logo de noche')
+
+// La mezcla de s7 no llega al lienzo a través del pin de Trabajos (un sticky: su propio contexto de apilamiento; medido en
+// nocturno-final/c1). Abajo de 1024 el texto del cartel y de las demos lleva un halo del color del fondo de su superficie
+// (la oscura, en Trabajos): sobre la noche no se ve; sobre el logo, separa las letras de su filo claro.
+const banda = leer('_estilos/banda.css')
+const enLaBanda = banda.slice(banda.indexOf('@media (width < 1024px) {'), banda.indexOf('/* ── HOVER DONDE HAY'))
+const haloBien = (c: string): boolean => /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\],\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \{\s*text-shadow: var\(--halo-sobre-la-escena\);/.test(c) && /--halo-sobre-la-escena: 0 0 [0-9.]+em var\(--color-fondo\)/.test(c)
+afirmar(haloBien(enLaBanda), 'abajo de 1024 el texto del cartel de Portfolio y el de las demos lleva un halo del fondo de su superficie: se lee sobre el logo de noche (la mezcla no atraviesa el pin)')
+controlPositivo('el detector VE el cartel sin halo', enLaBanda.replace('text-shadow: var(--halo-sobre-la-escena);', ''), haloBien)
 
 cerrar('s52-nocturno-final')

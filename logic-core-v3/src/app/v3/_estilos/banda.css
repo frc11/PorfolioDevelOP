@@ -87,6 +87,22 @@
   [data-v3] [data-panel='cierre'] [data-pieza='pie-enlace-icono'] {
     color: var(--color-fondo);
   }
+
+  /* ── 4 · [NOCTURNO FINAL] C1 · EL TEXTO DE TRABAJOS SOBRE EL LOGO DE NOCHE ──
+   * Abajo de 1024 el texto blanco del cartel («Portfolio» y su bajada) y el de las demos cae sobre el logo de noche (gris,
+   * con un filo blanco) y se perdía. La mezcla de arriba no llega: el cartel y las demos viven adentro del pin, un
+   * `sticky`, que es su propio contexto de apilamiento, y la mezcla no ve el lienzo a través de él (medido: con
+   * `difference` en el texto o en el cartel, la captura queda igual). Y sobre el gris del frente del logo una diferencia
+   * daría gris sobre gris. Un halo oscuro, corto y suave, detrás de las letras: sobre la noche no se ve; sobre el logo, las
+   * separa de él. Del color del fondo de su superficie (en Trabajos, la oscura: el halo es oscuro). */
+  [data-v3] [data-panel='trabajos'] {
+    --halo-sobre-la-escena: 0 0 0.06em var(--color-fondo), 0 0 0.2em color-mix(in srgb, var(--color-fondo) 90%, transparent), 0 0 0.6em color-mix(in srgb, var(--color-fondo) 55%, transparent);
+  }
+
+  [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
+  [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
+    text-shadow: var(--halo-sobre-la-escena);
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse
