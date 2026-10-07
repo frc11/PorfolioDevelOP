@@ -129,9 +129,11 @@ check(
   `${CHOREO_KEYFRAMES.length} keyframes = ${distintas.size} poses + ${sostenes.length} sostén`
 )
 
+// [NOCTURNO FINAL] D3 · cambió por pedido: el CTA del final va centrado y el logo, abajo: la pose C y su sostén llevan
+// `frameY` −1; todas las demás siguen en cero.
 check(
-  '`frameY` sigue en cero en todas',
-  CHOREO_KEYFRAMES.every((keyframe) => keyframe.pose.frameY === 0)
+  '`frameY` sigue en cero en todas, salvo la del CTA (−1: el logo abajo, el CTA al centro)',
+  CHOREO_KEYFRAMES.every((keyframe) => (keyframe.name === 'cta' || keyframe.name === 'cta · sostén' ? keyframe.pose.frameY === -1 : keyframe.pose.frameY === 0))
 )
 
 section('Una pose por tramo, en el borde de su tramo')
