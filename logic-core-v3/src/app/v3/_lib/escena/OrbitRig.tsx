@@ -47,9 +47,10 @@ import {
   type MutableChoreoPose,
   type MutableLightLevels,
 } from './choreographyTypes'
+import { elevacionDe } from './lightArc'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
-import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from './viaje'
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
 import { crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
 import {
   applyLightRig,
@@ -325,6 +326,10 @@ export function OrbitRig({
       arc.level = nivelConLaNocheDisparada(arc.level)
       // [INTERFAZ 2] La sala responde a la interfaz (con su bandera; sin ella, el mismo nivel) — `interfaz/respuesta.ts`.
       arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))
+      // [NOCTURNO FINAL] A4 · en un viaje del menú la luz no es la del recorrido (`viaje.ts`): la altura del sol, la de su
+      // nivel. Con la del recorrido (la noche de Trabajos, 3°) y la fuerza del día, la sombra del logo se estiraba por
+      // todo el piso: la «sombra cuadrada» que aparecía usando el menú.
+      if (viajeEnCurso() !== null) arc.elevationDeg = elevacionDe(arc.level)
 
       // 1b · Al ENTRAR al modo, la pose amortiguada arranca desde donde estaban
       //      los sliders: el cambio de modo desliza en vez de saltar.

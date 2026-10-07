@@ -9,7 +9,6 @@ import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
 import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
-import { FLOOR_Y } from '../probeScene'
 import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDelFinal'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
@@ -17,12 +16,12 @@ import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocaci
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
-import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE, SOMBRA_DEL_PIE, formaDeLaSombra } from './sombras'
+import { SOMBRAS_DEL_PIE } from './sombras'
 
 /**
  * [RETOQUE DEL PIE] P2 · LAS PIEZAS ARMADAS DEL PIE Y SU CUADRO — sin React (el componente, `PieDeVolumen.tsx`, sólo
  * engancha esto a la escena): medir y armar las piezas (`rearmar`), y en cada cuadro ponerlas en su lugar del mundo,
- * hundirlas, llevar lo interactivo del DOM sobre su cara y escribir sus sombras en el piso (`alCuadro`).
+ * hundirlas y llevar lo interactivo del DOM sobre su cara (`alCuadro`; [NOCTURNO FINAL] A4 · ya sin sombras en el piso).
  *
  * [PASADA FINAL] C2 · y su coreografía por columnas (`coreografia.ts`): entre su lugar en el mundo y su geometría, cada
  * pieza tiene su viaje (`viaje`, la pose de su llegada); el DOM se lleva con el viaje en cero (donde la pieza va a quedar)
@@ -77,9 +76,7 @@ export interface EstadoDelPie {
   readonly coreografia: { mostrado: number; y: number; cuando: number }
 }
 
-const PUNTO = new THREE.Vector3()
-
-/** Un cuadro: cada pieza a la vista, en su lugar del mundo; su llegada; su hundido; lo interactivo sobre ella; su sombra. */
+/** Un cuadro: cada pieza a la vista, en su lugar del mundo; su llegada; su hundido; lo interactivo sobre ella. */
 export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.DirectionalLight | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
   // [RETOQUE DEL ENCASTRE] 1D · el final del pie espera a que el pie haya aparecido entero (lo de abajo, al terminar el cuadro).
   EN_VIVO.pieEntero = false
@@ -102,7 +99,6 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   }
   // [CIERRE] 3 · en el final del pie van con la cámara (que sube a mirar el logo desde arriba): adelante del piso, con aire.
   d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))
-  let sombras = 0
   for (const a of s.armadas) {
     if (!a.grupo.visible) continue
     a.material.envMapIntensity = nivel
@@ -119,9 +115,9 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     if (a.pieza.forma !== 'texto') seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)
     llegar(a, s)
     a.viaje.updateMatrixWorld(true)
-    if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)
   }
-  SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = sombras
+  // [NOCTURNO FINAL] A4 · las piezas del pie no proyectan sombra sobre la escena (eran sombras de contacto en el piso vivo).
+  SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
   EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)
 }
 
@@ -237,20 +233,4 @@ function seguirLaPieza(a: Armada, viva: THREE.Camera, cuadro: { readonly ancho: 
   if (css === a.css) return
   a.css = css
   a.pieza.elemento.style.transform = css
-}
-
-/** La sombra de la pieza en el piso: debajo de su borde de abajo (y de la mitad de su espesor), con su ancho; en camino, con ella. */
-function sombraDe(a: Armada, n: number): number {
-  const c = a.contenido
-  PUNTO.set((c.izquierda + c.derecha) / 2, -c.abajo, -a.espesor / 2).applyMatrix4(a.viaje.matrixWorld)
-  const { alfa, blanda } = formaDeLaSombra(PUNTO.y - FLOOR_Y)
-  // [PASADA FINAL] C2 · lo que todavía no se ve no deja sombra (el titular, letra por letra: con lo que llegó).
-  const ve = a.uniformes.uLetrasDelPie.value >= 0 ? a.llego : a.uniformes.uApareceDelPie.value
-  // [CIERRE] 3 · en el final las piezas se levantan con la cámara: su sombra de contacto se va.
-  const final = 1 - EN_VIVO.camara
-  if (alfa * ve * final < 0.01) return n
-  const mpp = a.mundoPorPx
-  SOMBRAS_DEL_PIE.uSombrasDelPie.value[n].set(PUNTO.x, PUNTO.z, ((c.derecha - c.izquierda) / 2) * mpp + SOMBRA_DEL_PIE.sobra, (a.espesor / 2) * mpp + SOMBRA_DEL_PIE.sobra)
-  SOMBRAS_DEL_PIE.uFormaDeLasSombrasDelPie.value[n].set(blanda, alfa * ve * final, 0, 0)
-  return n + 1
 }

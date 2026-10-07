@@ -9,6 +9,8 @@
  *        y después se viaja; la cámara del final conserva el encuadre del recorrido (no se teletransporta al soltar); el
  *        viaje largo tarda más (velocidad con tope) y un cuadro largo no lo hace saltar.
  *   A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición alcanza lo pedido en un viaje).
+ *   A4 · la sombra cuadrada: en un viaje la altura del sol es la de su luz (la del logo no se estira por el piso); las
+ *        piezas del pie no proyectan sombra y fuera de su sección no se dibujan.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -18,6 +20,7 @@ import * as THREE from 'three'
 import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, VIAJE_CON_TOPE, duracionDelViaje } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
+import { elevacionDe } from '../escena/lightArc'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
@@ -341,5 +344,23 @@ controlPositivo('el detector VE la persecución de siempre en un viaje', capaDeD
 // Y los títulos de volumen, en un viaje, desarmados (la regla de 3D Y SONIDO T1, que esto completa).
 const titulos = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 afirmar(titulos.includes('a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS, a.titulo.asiento)'), '  y en un viaje los títulos de volumen van desarmados, sin mínimo: al terminar llegan desde lo que pide el scroll del destino')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4 · La sombra cuadrada: en un viaje la altura del sol es la de su luz; las piezas del pie no proyectan sombra')
+
+// La «sombra cuadrada» que aparecía usando el menú era la del LOGO, estirada por todo el piso: en un viaje de día la luz
+// tiene la fuerza del día (`viaje.ts`), pero la altura del sol seguía al arco del recorrido (en la noche de Trabajos, 3°):
+// una sombra de 17 veces su alto. En un viaje, la altura es la que le corresponde a su nivel (`elevacionDe`).
+const orbit = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
+const alturaDelViaje = (c: string): boolean => /arc\.level = nivelConLaInterfaz\(arc\.level, Math\.min\(delta, 0\.1\)\)\s*if \(viajeEnCurso\(\) !== null\) arc\.elevationDeg = elevacionDe\(arc\.level\)/.test(c)
+const largoDeLaSombra = (grados: number): number => 1 / Math.tan(THREE.MathUtils.degToRad(grados))
+afirmar(alturaDelViaje(orbit) && elevacionDe(1) === 36 && largoDeLaSombra(elevacionDe(1)) < 1.4 && largoDeLaSombra(elevacionDe(0.1)) > 15, 'en un viaje del menú la altura del sol es la de su nivel (de día, 36°: la sombra del logo mide 1,4 veces su alto), no la del recorrido (en la noche de Trabajos, 3°: 17 veces, por todo el piso)', `de día ${largoDeLaSombra(elevacionDe(1)).toFixed(2)}× · con la del recorrido ${largoDeLaSombra(elevacionDe(0.1)).toFixed(1)}×`)
+controlPositivo('el detector VE la altura del recorrido en un viaje', orbit.replace('if (viajeEnCurso() !== null) arc.elevationDeg = elevacionDe(arc.level)', ''), alturaDelViaje)
+// Las piezas del pie no proyectan sombra sobre la escena (sus sombras de contacto en el piso vivo, apagadas).
+const armadasDelPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const sinSombrasDelPie = (c: string): boolean => c.includes('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0') && !c.includes('sombraDe(') && !c.includes('uSombrasDelPie.value[')
+afirmar(sinSombrasDelPie(armadasDelPie), '  las placas y piezas del pie no proyectan sombra sobre la escena (ninguna sombra de contacto en el piso vivo); fuera de su sección no se dibujan (ya: sólo con su caja a la vista)')
+controlPositivo('  el detector VE las sombras de contacto de antes', armadasDelPie.replace('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0', 'if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)'), sinSombrasDelPie)
+afirmar(/a\.grupo\.visible = arriba \+ c\.abajo > -MARGEN && arriba \+ c\.arriba < cuadro\.alto \+ MARGEN/.test(armadasDelPie), '  y una pieza del pie se dibuja sólo con su caja del DOM a la vista (con el margen)')
 
 cerrar('s52-nocturno-final')
