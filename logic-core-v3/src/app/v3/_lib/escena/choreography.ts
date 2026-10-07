@@ -391,19 +391,19 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
   },
   {
-    // C · el mismo plano: la cámara sube hasta quedar derecha y frontal.
+    // C · la cámara sube hasta quedar derecha y frontal. [NOCTURNO FINAL] D3 · y se aleja con el logo abajo: el CTA, al centro.
     at: 0.9587,
     name: 'cta',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
+    pose: { angleDeg: 360, height: 0, distance: 32, frameX: 0, frameY: -1 },
   },
   {
     at: 0.9705,
     name: 'cta · sostén',
     ease: 'linear',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
+    pose: { angleDeg: 360, height: 0, distance: 32, frameX: 0, frameY: -1 },
   },
   {
     // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo

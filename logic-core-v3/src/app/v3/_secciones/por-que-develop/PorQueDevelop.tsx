@@ -186,10 +186,14 @@ function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; rea
   )
 }
 
-/** Dos renglones en el lugar que queda entre el logo y su sombra: nunca más grande que el `titulo-xl` fluido. */
-const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc((var(--lugar-del-cta)-var(--spacing-20))/2.3))]'
-/** [FINAL 3] «Hablanos» más grande: el mismo botón, con su tipografía redefinida a `titulo-m`. */
-const BOTON_GRANDE = '[--text-cuerpo:var(--text-titulo-m)]'
+/**
+ * [NOCTURNO FINAL] D3 · el CTA centrado en la pantalla: la frase en dos renglones y «Hablanos», bastante más grande (el
+ * display), en el lugar que deja el logo (`--lugar-del-cta`). Los divisores reparten ese lugar entre los dos renglones, el
+ * aire y el botón (su caja mide ~1,8 veces su letra, con el subrayado): a 1440 × 900, 56 y 100 px; en una pantalla baja, menos.
+ */
+const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)/5))]'
+/** [FINAL 3] «Hablanos» más grande: el mismo botón, con su tipografía redefinida. [NOCTURNO FINAL] D3 · al display. */
+const BOTON_GRANDE = '[--text-cuerpo:var(--text-fluido-display-xl)] escritorio:[--text-cuerpo:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'
 
 /**
  * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
@@ -213,8 +217,9 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
   return (
     <motion.div
       data-pieza="cta-del-final"
-      // [FINAL 2] Debajo del logo: de día el logo es negro y encima no se leía.
-      className="absolute inset-x-0 top-[var(--arriba-del-cta)] flex flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
+      // [FINAL 2] Nunca encima del logo: de día es negro y no se leía. [NOCTURNO FINAL] D3 · centrado en la pantalla, con
+      // el logo abajo (la pose C).
+      className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
       style={{ pointerEvents }}
       onFocus={(e) => llevarAlCta(e.currentTarget, destacado.get())}
     >
@@ -230,7 +235,7 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
         </Titular>
       </CanalDeUnaPieza>
       {/* [BASE] El botón abajo, solo y más grande, sin fondo: sólo el texto y su subrayado, como el resto. */}
-      <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-4)]">
+      <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-6)]">
         <div className={BOTON_GRANDE}>
           <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
         </div>
@@ -285,8 +290,9 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
               </li>
             ))}
           </ul>
-          {/* [FINAL 3] Separado de los valores, en su propio espacio; centrado desde tablet. */}
-          <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
+          {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
+              una pantalla entera. */}
+          <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">
             <Llega>
               <Titular nivel="titulo-xl" como="p">
                 {CTA.frase}

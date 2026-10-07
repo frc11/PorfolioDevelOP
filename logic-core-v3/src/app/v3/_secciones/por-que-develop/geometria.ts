@@ -14,7 +14,7 @@
 
 import type { CSSProperties } from 'react'
 
-import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, huecoDelLogo, pieDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
+import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, arribaDelLogoEncuadrado, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 
 export { huecoDelLogo }
 
@@ -41,20 +41,25 @@ const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 10
  * termina antes de la sombra de contacto del piso, que en C arranca al 90 % del alto: el
  * tamaño de la letra sale de ese lugar.
  */
-export const ARRIBA_DEL_CTA_SVH = pieDelLogo(POSES_DEL_FINAL.cta.distance) + AIRE_SVH
-export const ABAJO_DEL_CTA_SVH = 4
+/**
+ * [NOCTURNO FINAL] D3 · cambió por pedido: el CTA va CENTRADO en la pantalla y el logo, abajo (la pose C). El lugar del CTA
+ * es una franja centrada que llega hasta el aire de arriba del logo, igual hacia arriba (queda lejos de la barra): de ella
+ * sale el tamaño de la letra, así entra en cualquier alto. El logo arranca al 71,4 % del alto (en cualquier ancho).
+ */
+export const ARRIBA_DEL_LOGO_EN_EL_CTA_SVH = arribaDelLogoEncuadrado(POSES_DEL_FINAL.cta.distance, POSES_DEL_FINAL.cta.frameY)
+export const LUGAR_DEL_CTA_SVH = Math.round((ARRIBA_DEL_LOGO_EN_EL_CTA_SVH - 50 - AIRE_SVH) * 2 * 10) / 10
 
 /**
  * [PASADA FINAL] D3 · el alto del CTA en la lista (abajo de 1024 y con menos movimiento), en `svh`: era un `70svh` escrito
  * en la clase, que s6-tokens marca (un literal con unidad y un arbitrario sin token). Ahora sale de acá, como los demás.
  */
-export const ALTO_DEL_CTA_EN_LISTA_SVH = 70
+// [NOCTURNO FINAL] D3 · una pantalla entera (era 70): el CTA queda solo y centrado en la pantalla cuando llega.
+export const ALTO_DEL_CTA_EN_LISTA_SVH = 100
 export const ESTILO_DE_LA_LISTA = { '--alto-del-cta-en-lista': `${String(ALTO_DEL_CTA_EN_LISTA_SVH)}svh` } as CSSProperties
 
 /** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
 export const ESTILO_DEL_ESCENARIO = {
-  '--arriba-del-cta': `${ARRIBA_DEL_CTA_SVH.toFixed(1)}svh`,
-  '--lugar-del-cta': `${(100 - ARRIBA_DEL_CTA_SVH - ABAJO_DEL_CTA_SVH).toFixed(1)}svh`,
+  '--lugar-del-cta': `${LUGAR_DEL_CTA_SVH.toFixed(1)}svh`,
   // [FINAL 3] La frase usa el hueco de B (el más ancho): así cada mitad arranca donde arranca su columna de valores.
   '--hueco-de-la-frase': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
   '--hueco-de-los-valores': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,

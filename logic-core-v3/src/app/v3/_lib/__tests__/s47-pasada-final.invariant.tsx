@@ -606,7 +606,8 @@ controlPositivo('el detector VE la escena que no escribe el despinte', escenaD2.
 // D3 · Por qué develOP sin valores escritos a mano (s6-tokens fallaba desde FINAL 3: un `70svh` y una grilla `auto 1fr`).
 const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const sinAMano = (c: string): boolean => !/\b70svh\b|grid-rows-\[auto_1fr\]/.test(c) && /<div data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\} className="flex min-h-\[var\(--alto-del-cta-en-lista\)\]/.test(c) && (c.match(/<div className="@container min-h-0 flex-1">/g) ?? []).length === 2
-afirmar(sinAMano(porQueD3) && ALTO_DEL_CTA_EN_LISTA_SVH === 70, 'el alto del CTA de la lista sale de la geometría (70 svh, como era) y las columnas de valores son flex (el ancho de la frase arriba y el contenedor, el resto): s6-tokens vuelve a verde (medido: columnas de 626 px de alto con su contenedor entero a 1440; CTA de 590,8 px a 390×844)')
+// [NOCTURNO FINAL] D3 · cambió por pedido: el CTA de la lista ocupa una pantalla entera (era 70 svh), centrado.
+afirmar(sinAMano(porQueD3) && ALTO_DEL_CTA_EN_LISTA_SVH === 100, 'el alto del CTA de la lista sale de la geometría (una pantalla, desde NOCTURNO FINAL D3) y las columnas de valores son flex (el ancho de la frase arriba y el contenedor, el resto): s6-tokens vuelve a verde (medido: columnas de 626 px de alto con su contenedor entero a 1440; CTA de 590,8 px a 390×844)')
 controlPositivo('el detector VE el 70svh escrito a mano', porQueD3.replace('min-h-[var(--alto-del-cta-en-lista)]', 'min-h-[70svh]'), sinAMano)
 
 

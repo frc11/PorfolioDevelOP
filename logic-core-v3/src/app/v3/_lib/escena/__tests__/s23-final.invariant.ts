@@ -86,7 +86,10 @@ const D = { desde: progresoDelFinal(TIEMPOS_DEL_FINAL.cta.hasta), hasta: progres
 const fueraDeD = (pista: Track): number => Math.max(pico(pista, 0.125, D.desde), pico(pista, D.hasta, 1))
 const EN_D = pico(PISTA, D.desde, D.hasta)
 afirmar(fueraDeD(PISTA) <= ARRANQUE, `fuera de D ningún tramo pasa al arranque: pico ${fueraDeD(PISTA).toFixed(3)} contra ${ARRANQUE.toFixed(3)} alturas de cuadro por pantalla`)
-afirmar(EN_D > ARRANQUE, `**la excepción declarada: el alejamiento D va a ${EN_D.toFixed(2)} por pantalla, ${(EN_D / ARRANQUE).toFixed(2)} veces el arranque**`, `D ocupa ${((TIEMPOS_DEL_FINAL.pie.llega - TIEMPOS_DEL_FINAL.cta.hasta)).toFixed(2)} pantallas, de p ${D.desde.toFixed(4)} a ${D.hasta.toFixed(4)}`)
+// [NOCTURNO FINAL] D3 · cambió por pedido: el CTA va centrado en la pantalla con el logo abajo, así que en C la cámara ya
+// se alejó (de 16 a 32) y el alejamiento D (de C al pie) dejó de ser de golpe: ahora también va dentro del techo. Sigue
+// siendo un alejamiento, en dos pasos: B → C (le deja el centro al CTA) y C → E (el pie).
+afirmar(EN_D <= ARRANQUE && POSES_DEL_FINAL.valores.distance < POSES_DEL_FINAL.cta.distance && POSES_DEL_FINAL.cta.distance < POSES_DEL_FINAL.pie.distance, `el alejamiento va en dos pasos y ninguno pasa el techo: D a ${EN_D.toFixed(2)} por pantalla, ${(EN_D / ARRANQUE).toFixed(2)} veces el arranque`)
 // El control: un final donde los VALORES llegan de golpe tiene que poner esto en rojo.
 const conValoresDeGolpe: ChoreoKeyframe[] = CHOREO_KEYFRAMES.map((k) =>
   k.name === 'valores' ? { ...k, at: progresoDelFinal(TIEMPOS_DEL_FINAL.frase.hasta) + 0.002 } : k,

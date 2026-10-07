@@ -53,6 +53,9 @@ import { seccionDe } from '../../_secciones/_contrato/forma'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
 import { CONTENIDO as CONTENIDO_DE_QUIENES_D1 } from '../../_secciones/quienes-somos/contenido'
 import { PARED_ILUMINADA, modoDelAmanecer } from '../../_secciones/por-que-develop/PorQueDevelop'
+import { ALTO_DEL_CTA_EN_LISTA_SVH, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH, LUGAR_DEL_CTA_SVH } from '../../_secciones/por-que-develop/geometria'
+import { POSES_DEL_FINAL, arribaDelLogoEncuadrado } from '../escena/finalDelRecorrido'
+import { CHOREO_KEYFRAMES } from '../escena/choreography'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -728,5 +731,26 @@ const listaD2 = (f: string): boolean =>
   f.includes('modoDelAmanecer(DIA_DEL_TEXTO.frase.get(), DIA_DEL_TEXTO.abajo.get())')
 afirmar(listaD2(porQueD2), '  la lista se marca con el día del texto (la pared y el piso), sin caja propia (`contents`: la mezcla no se corta)')
 controlPositivo('  el detector VE una caja que cortaría la mezcla', porQueD2.replace('className="contents"', 'className="flex flex-col"'), listaD2)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D3 · El CTA del final, centrado en la pantalla, y «Hablanos» bastante más grande')
+
+// Antes, en escritorio, el CTA iba en la franja de abajo (del 77 al 97 % del alto), debajo del logo centrado; en el teléfono,
+// alineado a la izquierda; «Hablanos» a 32 px. Ahora: en C la cámara se aleja y baja el logo contra el borde de abajo, el
+// CTA va al centro de la pantalla y «Hablanos» va al display (104 px fluido; a 1440 × 900, 100).
+const poseC = POSES_DEL_FINAL.cta
+const keyC = CHOREO_KEYFRAMES.filter((k) => k.name === 'cta' || k.name === 'cta · sostén').map((k) => k.pose)
+type PoseC = { readonly distance: number; readonly frameY: number }
+const logoAbajo = (p: PoseC, arriba: number): boolean => p.distance === 32 && p.frameY === -1 && arriba > 50 + 3 && arribaDelLogoEncuadrado(16, 0) === 26
+afirmar(logoAbajo(poseC, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH) && keyC.length === 2 && keyC.every((k) => k.distance === poseC.distance && k.frameY === poseC.frameY), 'en C la cámara se aleja (16 → 32) y baja el logo contra el borde (`frameY` −1): el logo arranca abajo de la mitad, y la coreografía dice lo mismo', `el logo arranca al ${String(ARRIBA_DEL_LOGO_EN_EL_CTA_SVH)} % del alto; antes, al 26`)
+controlPositivo('el detector VE el logo de antes (centrado, a 16)', { distance: 16, frameY: 0 } as PoseC, (p) => logoAbajo(p, arribaDelLogoEncuadrado(p.distance, p.frameY)))
+const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const centrado = (f: string): boolean =>
+  f.includes('className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"') &&
+  f.includes("const BOTON_GRANDE = '[--text-cuerpo:var(--text-fluido-display-xl)] escritorio:[--text-cuerpo:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'") &&
+  /<div data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\} className="flex min-h-\[var\(--alto-del-cta-en-lista\)\] flex-col items-center justify-center gap-\[var\(--spacing-8\)\] text-center">/.test(f) &&
+  ALTO_DEL_CTA_EN_LISTA_SVH === 100 && LUGAR_DEL_CTA_SVH > 30
+afirmar(centrado(porQueD3), '  el CTA al centro de la pantalla en escritorio (en el lugar que deja el logo, que da el tamaño) y en la lista (una pantalla, centrado en todos los anchos); «Hablanos» al display', `lugar ${String(LUGAR_DEL_CTA_SVH)} svh`)
+controlPositivo('  el detector VE el CTA de la lista alineado a la izquierda', porQueD3.replace('flex-col items-center justify-center gap-[var(--spacing-8)] text-center', 'flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center'), centrado)
 
 cerrar('s52-nocturno-final')

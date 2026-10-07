@@ -24,6 +24,7 @@
  */
 
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
+import { recorridoDeEncuadre } from './encuadre'
 
 /**
  * EL ANCLA DE «POR QUÉ develOP»: el progreso en que la sección llena el cuadro, que es
@@ -63,7 +64,9 @@ export const POSES_DEL_FINAL = {
   // contrapicado a 14: 797 × 547 px a 1440 × 900), así que a 1024 × 768 los valores de los
   // costados no entraban. Contrapicado de 11°; el piso admite −3,584 a 16.
   valores: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
-  cta: { angleDeg: 360, height: 0, distance: 16, frameX: 0, frameY: 0 },
+  // [NOCTURNO FINAL] D3 · C: el CTA va centrado en la pantalla; la cámara se aleja (de 16 a 32) y el logo baja al quinto de
+  // abajo, contra el borde (`frameY` −1: del 71 al 95 % del alto). Después, el pie lo sube al centro mientras se achica.
+  cta: { angleDeg: 360, height: 0, distance: 32, frameX: 0, frameY: -1 },
   pie: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
 } as const
 
@@ -94,6 +97,17 @@ export function huecoDelLogo(distancia: number): number {
  * 1920×1080 —el campo es vertical, así que no depende del ancho—: `0,48 × 16 = 7,68`.
  */
 const ALTO_DEL_LOGO_POR_DISTANCIA = 7.68
+/**
+ * [NOCTURNO FINAL] D3 · Dónde empieza el logo por arriba, en `svh`, con su encuadre vertical (`frameY`: ±1 lo deja contra el
+ * borde, con la franja de papel del margen de seguridad; negativo, abajo). El recorrido es el de la cámara
+ * (`recorridoDeEncuadre`, en por ciento del alto). Medido a 1440 × 900 con −0,9: del 67,8 al 92,9 % (la cuenta, 68,1 y 92,1).
+ */
+export function arribaDelLogoEncuadrado(distancia: number, frameY: number): number {
+  const alto = (ALTO_DEL_LOGO_POR_DISTANCIA / distancia) * 100
+  const centro = 50 - frameY * recorridoDeEncuadre(50, alto)
+  return Math.round((centro - alto / 2) * 10) / 10
+}
+
 export function pieDelLogo(distancia: number): number {
   return 50 + Math.round((ALTO_DEL_LOGO_POR_DISTANCIA / distancia / 2) * 1000) / 10
 }
