@@ -94,14 +94,26 @@
    * `sticky`, que es su propio contexto de apilamiento, y la mezcla no ve el lienzo a través de él (medido: con
    * `difference` en el texto o en el cartel, la captura queda igual). Y sobre el gris del frente del logo una diferencia
    * daría gris sobre gris. Un halo oscuro, corto y suave, detrás de las letras: sobre la noche no se ve; sobre el logo, las
-   * separa de él. Del color del fondo de su superficie (en Trabajos, la oscura: el halo es oscuro). */
+   * separa de él. Del color del fondo de su superficie (en Trabajos, la oscura: el halo es oscuro).
+   * [PULIDO 1] P12 · no alcanzaba: era UNA sombra fina y difusa, y sobre el filo blanco y la tapa gris del logo la bajada
+   * quedaba en 3,2–4,4:1 (medido a 390). Ahora el halo es denso (la misma sombra corta apilada, la receta de D2) y la
+   * bajada lleva un VELO del color de la noche (fondo y sombra de caja: oscurece el logo sólo detrás del texto; sobre la
+   * noche no se ve). Medido: sobre el logo, la bajada en 10–12:1, lo mismo que sobre la noche. */
   [data-v3] [data-panel='trabajos'] {
-    --halo-sobre-la-escena: 0 0 0.06em var(--color-fondo), 0 0 0.2em color-mix(in srgb, var(--color-fondo) 90%, transparent), 0 0 0.6em color-mix(in srgb, var(--color-fondo) 55%, transparent);
+    --halo-sobre-la-escena: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
+    --velo-sobre-la-escena: color-mix(in srgb, var(--color-fondo) 76%, transparent);
+    --sombra-del-velo: 0 0 1.4em 1em var(--velo-sobre-la-escena);
   }
 
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
     text-shadow: var(--halo-sobre-la-escena);
+  }
+
+  [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p,
+  [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto'] {
+    background-color: var(--velo-sobre-la-escena);
+    box-shadow: var(--sombra-del-velo);
   }
 
   /* ── 5 · [NOCTURNO FINAL] C4 · EL PIE ANGOSTO ENTRA EN UNA PANTALLA ──
