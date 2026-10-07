@@ -81,35 +81,29 @@ export const FINAL_EN_EL_PISO = {
 
 
 /**
- * [RETOQUE DEL ENCASTRE] 1E · LA LUZ DE ABAJO — bajo el mouse se veía oscuro, denso y de baja calidad: el resplandor era de
- * tinta. Ahora es luz que nace abajo y se escapa por las rendijas de los bloques levantados: en la tapa, cada junta es una
- * línea de luz con un halo suave que entra hacia la tapa (más fuerte y más ancho donde la rendija se abre: el vecino más
- * bajo); donde la luz es más fuerte (el núcleo, bajo el mouse) inunda la tapa entera; la pared de la rendija, iluminada.
- * Sobre el piso claro, el contraste lo da la sombra: donde hay luz la tapa se sombrea (los bloques levantados tapan la luz
- * de la sala), menos en el núcleo. Sin dientes: la línea y el halo nunca son más finos que un píxel (`fwidth`); sin
- * bandas: todo es exponencial y continuo (y el piso lleva el tramado de siempre).
- *
- * La luz (lineal, a la salida), cuánto se sombrea la tapa, el ancho de la línea y del halo (u), desde qué diferencia de
- * alto (u) una rendija está abierta del todo, y el núcleo: alrededor de la cabeza del rastro, bajo el mouse (su radio,
- * u), y desde y hasta cuánto calor inunda la tapa (lo que suma el rastro entero no inunda nada).
+ * [NOCTURNO FINAL] B2 · EL PISO VOLCÁN (reemplaza a la luz de abajo de RETOQUE DEL ENCASTRE 1E y 1F: el mouse ya no hace
+ * brillo, sólo levanta los bloques, como antes). Después del encastre, debajo del piso entero hay LAVA: focos que se
+ * encienden al azar (uno por celda de `celda` u, en un lugar al azar de la celda), cada uno con su ritmo (un período
+ * entre `periodo[0]` y `periodo[1]` s y una fase propia: encendido una parte del período, `encendido`, con subida y bajada
+ * suaves y un titileo), así que pulsan, se encienden y se apagan, nunca todos a la vez. Su luz sale POR LAS JUNTAS entre
+ * los bloques: un núcleo intenso (`nucleo`, u; su luz desborda apenas las tapas, `desborde`) y un halo suave (`halo`, u),
+ * gaussianos (sin anillos ni bordes), por foco el más fuerte (sin sumar: sin manchas donde se cruzan). La línea de la
+ * junta y su resplandor (`linea`, `resplandor`, u) nunca más finos que un píxel (sin dientes). Los colores (lineales):
+ * el núcleo casi blanco de tan caliente y el halo naranja. Fuera del mar calmo alrededor del logo (B3: el círculo quieto).
  */
-export const LUZ_EN_EL_PISO = {
-  luz: 1,
-  sombra: 0.36,
-  linea: 0.022,
-  halo: 0.16,
-  abre: 0.12,
-  nucleo: { radio: 0.75, desde: 0.3, hasta: 0.85 },
-  /**
-   * [RETOQUE DEL ENCASTRE] 1F · LO AUTOMÁTICO, más tenue que bajo el mouse (que llega a 1): cuánto pesan las rendijas que
-   * abren las ondas, el mar y el pulso del golpe (desde y hasta qué diferencia de alto con el vecino, u: el mar quieto no
-   * llega: sólo una rendija de verdad abierta, la de una ola, el pulso o la onda hacia una pieza), su halo (u: angosto,
-   * fijo), su sombra en una banda angosta junto a la junta encendida (u: el contraste; sombrear la tapa entera daba un
-   * parche en escalones de bloque, y una sombra ancha donde el piso se agita, un anillo gris que seguía al pulso y bandas
-   * grises del mar) y cuánto más allá del mar calmo arranca (en medias cajas del logo). Un brillo parejo alrededor del logo
-   * o en el frente del pulso (sin rendija) se leía como una mancha gris: no hay.
-   */
-  automatico: { ondas: 0.7, abre: [0.06, 0.2], halo: 0.05, sombra: 0.3, banda: 0.09, margen: 0.15 },
+export const LAVA_EN_EL_PISO = {
+  celda: 7,
+  periodo: [2.6, 5.4],
+  encendido: 0.38,
+  titileo: 0.22,
+  halo: 2.4,
+  nucleo: 0.7,
+  desborde: 0.35,
+  linea: 0.03,
+  resplandor: 0.16,
+  color: { nucleo: [1, 0.86, 0.6], halo: [1, 0.38, 0.08] },
+  /** Cuánto más allá del mar calmo arranca (en medias cajas del logo). */
+  margen: 0.15,
 } as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
@@ -183,7 +177,6 @@ const ONDA_CON_TOPE = /float onda = ([0-9.]+) \* tanh\( nueva \/ \1 \);/
 
 const DIBUJO_GLSL = /* glsl */ `
 uniform vec4 uGolpe;
-uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform sampler2D uHueco;
 uniform vec4 uMarcoDelHueco;
 uniform float uApertura;
@@ -197,57 +190,56 @@ uniform float uCalmaDelFinal;
 float fueraDeLaCalma( vec2 xz ) {
 	if ( uCalmaDelFinal <= 0.0 ) return 1.0;
 	float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
-	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.hasta)}, ${f(CALMA_EN_EL_PISO.hasta + LUZ_EN_EL_PISO.automatico.margen)}, d ), uCalmaDelFinal );
+	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.hasta)}, ${f(CALMA_EN_EL_PISO.hasta + LAVA_EN_EL_PISO.margen)}, d ), uCalmaDelFinal );
 }
-// [EL ENCASTRE] 2F · cuánta luz deja el rastro del mouse en este punto: x, lo que suma (hasta 1); y, [RETOQUE DEL ENCASTRE]
-// 1E · el núcleo (alrededor de la cabeza: bajo el mouse).
-vec2 resplandorDelRastro( vec2 xz ) {
-	float r = 0.0;
+// [NOCTURNO FINAL] B2 · EL PISO VOLCÁN: los focos de lava (LAVA_EN_EL_PISO). x: el halo; y: el núcleo (0 a 1).
+float azarDeLaLava( vec2 p ) {
+	vec3 q = fract( vec3( p.xyx ) * 0.1031 );
+	q += dot( q, q.yzx + 33.33 );
+	return fract( ( q.x + q.y ) * q.z );
+}
+vec2 lavaEn( vec2 xz, float t ) {
+	vec2 celda = floor( xz / ${f(LAVA_EN_EL_PISO.celda)} );
+	float halo = 0.0;
 	float nucleo = 0.0;
-	for ( int i = 0; i < ${String(RASTRO_EN_EL_PISO.puntos)}; i++ ) {
-		vec4 q = uRastro[ i ];
-		if ( q.z <= 0.0 ) continue;
-		vec2 d = xz - q.xy;
-		float d2 = dot( d, d );
-		r += q.z * exp( - d2 / ${f(RASTRO_EN_EL_PISO.radio * RASTRO_EN_EL_PISO.radio)} );
-		nucleo = max( nucleo, q.w * q.z * exp( - d2 / ${f(LUZ_EN_EL_PISO.nucleo.radio * LUZ_EN_EL_PISO.nucleo.radio)} ) );
+	for ( int j = -1; j <= 1; j++ ) {
+		for ( int i = -1; i <= 1; i++ ) {
+			vec2 c = celda + vec2( float( i ), float( j ) );
+			vec2 foco = ( c + 0.15 + 0.7 * vec2( azarDeLaLava( c ), azarDeLaLava( c + 7.31 ) ) ) * ${f(LAVA_EN_EL_PISO.celda)};
+			float semilla = azarDeLaLava( c + 19.7 );
+			float periodo = ${f(LAVA_EN_EL_PISO.periodo[0])} + ${f(LAVA_EN_EL_PISO.periodo[1] - LAVA_EN_EL_PISO.periodo[0])} * semilla;
+			float x = fract( t / periodo + azarDeLaLava( c + 3.17 ) ) / ${f(LAVA_EN_EL_PISO.encendido)};
+			if ( x >= 1.0 ) continue;
+			float a = sin( 3.14159265 * x );
+			a *= a * ( 1.0 - ${f(LAVA_EN_EL_PISO.titileo)} * ( 0.5 + 0.5 * sin( t * ( 6.0 + 7.0 * semilla ) + semilla * 40.0 ) ) );
+			vec2 d = xz - foco;
+			float d2 = dot( d, d );
+			float r = ${f(LAVA_EN_EL_PISO.halo)} * ( 0.7 + 0.6 * azarDeLaLava( c + 11.3 ) );
+			halo = max( halo, a * exp( - d2 / ( r * r ) ) );
+			nucleo = max( nucleo, a * exp( - d2 / ${f(LAVA_EN_EL_PISO.nucleo * LAVA_EN_EL_PISO.nucleo)} ) );
+		}
 	}
-	return vec2( min( 1.0, r ), nucleo );
+	return vec2( halo, nucleo );
 }
-// [RETOQUE DEL ENCASTRE] 1E · 1F · la junta: la luz de abajo (el rastro del mouse y lo automático: el poder, el pulso, las ondas).
-// [RETOQUE DEL ENCASTRE] 1E · 1F · la luz de abajo en este fragmento, POR JUNTA (la diferencia de alto es la misma de los
-// dos lados: continua de una tapa a la otra). \`raton\`: la del rastro del mouse (0 a 1) y \`caliente\`, su núcleo; \`energia\`:
-// el poder liberado (con él, las rendijas que abren las ondas, el mar y el pulso del golpe dejan salir la luz: lo automático).
-vec3 conLaLuz( vec3 color, float raton, float caliente, float energia ) {
-	vec4 delta = abs( vVecinos );
-	vec4 solo = min( vec4( 1.0 ), ${f(LUZ_EN_EL_PISO.automatico.ondas)} * energia * smoothstep( ${f(LUZ_EN_EL_PISO.automatico.abre[0])}, ${f(LUZ_EN_EL_PISO.automatico.abre[1])}, delta ) );
-	float mayor = min( 1.0, raton + max( max( solo.x, solo.y ), max( solo.z, solo.w ) ) );
-	if ( mayor <= 0.001 ) return color;
-	vec3 luz = vec3( ${f(LUZ_EN_EL_PISO.luz)} );
-	// La pared de la rendija: la luz le pega de abajo.
-	if ( vTapa < 0.5 ) return mix( color, luz, mayor );
+// La luz de la lava en este fragmento: por la junta (la línea y su resplandor, que se ensanchan con la luz), la pared de
+// la rendija encendida y, en el núcleo, la tapa apenas desbordada.
+vec3 conLaLava( vec3 color, float halo, float nucleo ) {
+	if ( halo <= 0.002 ) return color;
+	vec3 lava = mix( vec3( ${LAVA_EN_EL_PISO.color.halo.map(f).join(', ')} ), vec3( ${LAVA_EN_EL_PISO.color.nucleo.map(f).join(', ')} ), nucleo );
+	if ( vTapa < 0.5 ) return mix( color, lava, halo );
 	vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
-	// Un píxel, en u: la línea y el halo nunca más finos (sin dientes).
 	float px = length( fwidth( vPiso.xz ) );
-	vec4 abre = smoothstep( 0.0, ${f(LUZ_EN_EL_PISO.abre)}, delta );
-	// Bajo el mouse, la línea y un halo que se ensancha con la luz; lo automático, sólo la línea y un halo angosto (si se
-	// ensanchaba, una ola que levanta muchos bloques inundaba de blanco las tapas: un fogonazo, no rendijas).
-	vec4 linea = exp( - filo / ( ${f(LUZ_EN_EL_PISO.linea)} * ( 0.6 + 0.4 * raton ) + px ) ) * ( 0.6 + 0.4 * abre );
-	vec4 halo = exp( - filo / ( ${f(LUZ_EN_EL_PISO.halo)} * ( 0.5 + raton ) * ( 0.6 + 0.6 * abre ) + px ) ) * ( 0.25 + 0.75 * abre );
-	vec4 haloDeLaOla = exp( - filo / ( ${f(LUZ_EN_EL_PISO.automatico.halo)} + px ) );
-	float junta = min( 1.0, dot( vec4( raton ), linea + 0.8 * halo ) + dot( solo, linea + 0.6 * haloDeLaOla ) );
-	float nucleo = smoothstep( ${f(LUZ_EN_EL_PISO.nucleo.desde)}, ${f(LUZ_EN_EL_PISO.nucleo.hasta)}, caliente );
-	// La sombra (el contraste sobre el piso claro): la del mouse, ancha (los bloques levantados tapan la luz de la sala);
-	// la de lo automático, en una banda angosta junto a la junta encendida. Ninguna en el núcleo, que es luz.
-	float sombra = ${f(LUZ_EN_EL_PISO.sombra)} * smoothstep( 0.0, 0.6, raton ) + ${f(LUZ_EN_EL_PISO.automatico.sombra)} * min( 1.0, dot( solo, exp( - filo / ( ${f(LUZ_EN_EL_PISO.automatico.banda)} + px ) ) ) );
-	color *= 1.0 - min( ${f(LUZ_EN_EL_PISO.sombra)}, sombra ) * ( 1.0 - nucleo );
-	return mix( color, luz, clamp( max( junta, nucleo ), 0.0, 1.0 ) );
+	vec4 linea = exp( - filo / ( ${f(LAVA_EN_EL_PISO.linea)} * ( 0.6 + 0.8 * halo ) + px ) );
+	vec4 resplandor = exp( - filo / ( ${f(LAVA_EN_EL_PISO.resplandor)} * ( 0.3 + 1.2 * halo ) + px ) );
+	float junta = min( 1.0, halo * dot( vec4( 1.0 ), linea + 0.6 * resplandor ) );
+	return mix( color, lava, clamp( max( junta, ${f(LAVA_EN_EL_PISO.desborde)} * nucleo ), 0.0, 1.0 ) );
 }
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
-	// [RETOQUE DEL ENCASTRE] 1E · bajo el mouse; 1F · y lo automático, más tenue: las rendijas que abren las ondas, el mar y
-	// el pulso del golpe en el piso entero, con el poder liberado (después del encastre; en el destello, un poco más).
-	vec2 rastro = resplandorDelRastro( xz );
-	return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );
+	// Con el poder liberado (después del encastre; en el destello, un poco más) y fuera del mar calmo.
+	float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );
+	if ( energia <= 0.0 ) return color;
+	vec2 lava = lavaEn( xz, uTiempo ) * energia;
+	return conLaLava( color, lava.x, lava.y );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {

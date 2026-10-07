@@ -26,7 +26,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
-import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, LUZ_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
@@ -209,7 +209,7 @@ const pagina = sinComentarios(leer('page.tsx'))
 afirmar(!pagina.includes('cola-del-final') && !leer('_estilos/pie.css').includes('--cola-del-final'), '  sin cola: la página termina en el pie (el scroll hacia abajo no tiene adónde ir)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1E · El brillo bajo el mouse: luz que nace abajo y sale por las rendijas, con núcleo y halo; la tapa sombreada; sin dientes ni bandas')
+titulo('1E · El brillo bajo el mouse (NOCTURNO FINAL B2: ya no; el rastro sólo levanta los bloques)')
 
 // El dibujo del piso de verdad: el material con el final inyectado, compilado sobre un sombreador con sus anclas.
 const dibujoDelPiso = (): string => {
@@ -224,17 +224,13 @@ const cuerpo = (glsl: string, firma: string): string => {
   const i = glsl.indexOf(firma)
   return i < 0 ? '' : glsl.slice(i, glsl.indexOf('\n}', i) + 2)
 }
-const FIRMA_DE_LA_LUZ = 'vec3 conLaLuz( vec3 color, float raton, float caliente, float energia ) {'
-const luzBien = (glsl: string): boolean => {
-  const luz = cuerpo(glsl, FIRMA_DE_LA_LUZ)
-  return luz.includes('vec3 luz = vec3( 1.0 );') && luz.includes('return mix( color, luz, clamp( max( junta, nucleo ), 0.0, 1.0 ) );') && luz.includes('if ( vTapa < 0.5 ) return mix( color, luz, mayor );') &&
-    luz.includes('float px = length( fwidth( vPiso.xz ) );') && (luz.match(/\+ px \)/g) ?? []).length === 4 && luz.includes('vec4 delta = abs( vVecinos );') && luz.includes('vec4 abre = smoothstep( 0.0, 0.12, delta );') && !/[^h]step\(/.test(luz) &&
-    luz.includes('float junta = min( 1.0, dot( vec4( raton ), linea + 0.8 * halo )') && glsl.includes('return conLaLuz( color, rastro.x, rastro.y, ') && glsl.includes('nucleo = max( nucleo, q.w * q.z * exp(') && !/vec3\( 0\.045 \)/.test(glsl)
-}
-afirmar(luzBien(dibujo) && LUZ_EN_EL_PISO.sombra <= 0.4 && LUZ_EN_EL_PISO.luz === 1, 'por las juntas bajo el mouse sale LUZ (blanca, hacia arriba del papel; antes, tinta): una línea y un halo que entra a la tapa en cada junta, más fuertes donde la rendija se abre; la pared de la rendija, iluminada; el núcleo, sólo alrededor de la cabeza del rastro; la tapa, sombreada (no más de 0,4) para el contraste; sin dientes (nunca más fino que un píxel, con `fwidth`) y sin bandas (sin umbrales: sólo exponenciales y `smoothstep`)', `sombra ${String(LUZ_EN_EL_PISO.sombra)} · halo ${String(LUZ_EN_EL_PISO.halo)} u · núcleo ${String(LUZ_EN_EL_PISO.nucleo.radio)} u`)
-controlPositivo('el detector VE el resplandor de tinta de EL ENCASTRE', dibujo.replace('return conLaLuz( color, rastro.x, rastro.y, ', 'return mix( color, vec3( 0.045 ), rastro.x ); conLaLuz( color, rastro.x, rastro.y, '), luzBien)
-controlPositivo('  y un núcleo en cada punto del rastro (la hilera de perlas)', dibujo.replace('q.w * q.z * exp(', 'q.z * exp('), luzBien)
-controlPositivo('  y una línea sin el píxel mínimo (con dientes)', dibujo.replace('float px = length( fwidth( vPiso.xz ) );', 'float px = 0.0;'), luzBien)
+// [NOCTURNO FINAL] B2 · cambió por pedido: el mouse ya NO hace brillo (sólo levanta los bloques, como antes de esta luz) y
+// el brillo pasa a ser la lava de todo el piso después del encastre (lo detalla s52 B2). Lo que queda de 1E: el rastro sigue
+// levantando los bloques en la simulación y su cabeza sigue siendo una sola, bajo el mouse; el dibujo ya no lo lee.
+const simDelPiso = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
+const sinBrilloDelMouse = (glsl: string, sim: string): boolean => !glsl.includes('uRastro') && !glsl.includes('resplandorDelRastro') && sim.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );')
+afirmar(sinBrilloDelMouse(dibujo, simDelPiso), 'el mouse ya no hace brillo (NOCTURNO FINAL B2): su rastro sólo levanta los bloques, como antes de la luz de abajo')
+controlPositivo('el detector VE el brillo bajo el mouse de 1E', [`${dibujo}\nuniform vec4 uRastro[ 8 ];`, simDelPiso] as const, ([g, m]: readonly [string, string]) => sinBrilloDelMouse(g, m))
 // La cabeza del rastro (la del núcleo): una sola, siempre bajo el mouse; al nacer otra, la de antes la suelta.
 type PasoDelRastro = typeof pasoDelRastro
 const cabezas = (paso: PasoDelRastro): { readonly unaSola: boolean; readonly bajoElMouse: boolean } => {
@@ -260,22 +256,15 @@ const todasConNucleo: PasoDelRastro = (puntos, e, x, z, vale, dt) => {
 controlPositivo('  el detector VE un núcleo en cada punto', todasConNucleo, (p: PasoDelRastro) => cabezaBien(cabezas(p)))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1F · Brillo también en lo automático: con el poder liberado, las ondas, el mar y el pulso dejan salir la luz por las rendijas, más tenue')
+titulo('1F · Brillo en lo automático (NOCTURNO FINAL B2: ahora es la lava del piso entero, después del encastre)')
 
-// Lo automático: por junta (la diferencia de alto es la misma de los dos lados: continua, sin escalones de bloque), sólo
-// donde la rendija está de verdad abierta (el mar quieto no llega), más tenue que el mouse, con el poder (después del
-// encastre) y fuera del mar calmo del logo; su sombra, sólo en una banda angosta junto a la junta encendida.
-const A = LUZ_EN_EL_PISO.automatico
-const automaticoBien = (glsl: string): boolean => {
-  const luz = cuerpo(glsl, FIRMA_DE_LA_LUZ)
-  const juntas = cuerpo(glsl, 'vec3 conLasJuntas( vec3 color, vec2 xz ) {')
-  return luz.includes(`vec4 solo = min( vec4( 1.0 ), ${String(A.ondas)} * energia * smoothstep( ${String(A.abre[0])}, ${String(A.abre[1])}, delta ) );`) &&
-    luz.includes('dot( solo, linea + 0.6 * haloDeLaOla )') && luz.includes(`${String(A.sombra)} * min( 1.0, dot( solo, exp( - filo / ( ${String(A.banda)} + px ) ) ) )`) &&
-    juntas.includes('return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );') && glsl.includes('float fueraDeLaCalma( vec2 xz ) {') && !/resplandorDelFinal|ruidoDelPoder/.test(glsl)
-}
-afirmar(automaticoBien(dibujo) && A.ondas < 1 && A.sombra < LUZ_EN_EL_PISO.sombra && A.abre[0] >= 0.05 && A.banda <= 0.1, 'después del encastre (con el poder) las rendijas que abren las ondas, el mar y el pulso del golpe dejan salir la misma luz, más tenue que bajo el mouse: por junta, sólo donde la rendija está abierta de verdad (el mar quieto no se enciende), con su sombra en una banda angosta junto a la junta; fuera del mar calmo del logo (su borde, encendido, dibujaba un marco de bloques); sin el brillo parejo alrededor del logo ni la banda del pulso (se leían como manchas grises)', `${String(A.ondas)} de la luz · rendija desde ${String(A.abre[0])} u · banda ${String(A.banda)} u`)
-controlPositivo('el detector VE la sombra de la tapa entera (el parche en escalones de bloque)', dibujo.replace(`dot( solo, exp( - filo / ( ${String(A.banda)} + px ) ) )`, 'max( max( solo.x, solo.y ), max( solo.z, solo.w ) )'), automaticoBien)
-controlPositivo('  y un brillo que no espera al encastre', dibujo.replace('uPoder * fueraDeLaCalma( xz )', 'fueraDeLaCalma( xz )'), automaticoBien)
+// [NOCTURNO FINAL] B2 · cambió por pedido: lo automático (las rendijas que abrían las ondas) pasó a ser la LAVA del piso
+// entero: focos al azar que pulsan, por las juntas (lo detalla s52 B2). Lo que queda de 1F: espera al encastre (el poder) y
+// no entra al mar calmo del logo (su borde encendido dibujaba un marco de bloques).
+const juntasDelPiso = cuerpo(dibujo, 'vec3 conLasJuntas( vec3 color, vec2 xz ) {')
+const lavaConElPoder = (j: string): boolean => j.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && j.includes('vec2 lava = lavaEn( xz, uTiempo ) * energia;')
+afirmar(lavaConElPoder(juntasDelPiso) && dibujo.includes('float fueraDeLaCalma( vec2 xz ) {'), 'el brillo del piso espera al encastre (con el poder liberado) y queda fuera del mar calmo del logo (NOCTURNO FINAL B2: la lava)')
+controlPositivo('el detector VE un brillo que no espera al encastre', juntasDelPiso.replace('min( 1.0, uPoder ) * fueraDeLaCalma( xz )', 'fueraDeLaCalma( xz )'), lavaConElPoder)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1G · El pie no recibe la luz de la cinemática: se ve como antes, en cualquier pose de la cámara')

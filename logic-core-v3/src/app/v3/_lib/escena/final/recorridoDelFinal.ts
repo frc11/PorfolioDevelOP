@@ -451,6 +451,18 @@ export function profundidadDelFinal(camara: THREE.Camera): number {
   return camara.position.distanceTo(BLANCO) - FINAL_DEL_PIE.aireDelPie * EN_VIVO.camara
 }
 
+/**
+ * [NOCTURNO FINAL] B2 · EL ATARDECER DEL FINAL: para que se lea la lava del piso, después del encastre la sala ENTERA baja
+ * su luz (`nivel`: cuánto, en fracción) y se entibia (`kelvin`), pareja (las luces, el ambiente, la niebla y el fondo: el
+ * rig de luz), nunca un sector; en `duraS` desde que queda al ras. Función de `fin`: al rebobinar vuelve a la luz normal.
+ */
+export const ATARDECER_DEL_FINAL = { nivel: 0.45, kelvin: 3600, duraS: 1.4 } as const
+
+/** [NOCTURNO FINAL] B2 · cuánto atardeció (0 a 1). */
+export function atardecer(fin: number): number {
+  return suave((segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / ATARDECER_DEL_FINAL.duraS)
+}
+
 /** [EL ENCASTRE] 2E · el poder liberado (0 hasta quedar al ras; un destello y después 1). Función de `fin`: se deshace al revertir. */
 export function poder(fin: number): number {
   const p = FINAL_DEL_PIE.poder

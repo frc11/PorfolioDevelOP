@@ -377,8 +377,9 @@ controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx
 // El dibujo: [RETOQUE DEL ENCASTRE] 1F · cambió por pedido: el resplandor de tinta alrededor del logo (núcleo negro en la
 // junta, halo y aura) se fue: después del encastre el piso entero queda energizado y la luz sale por las rendijas que abren
 // las ondas, el mar y el pulso del golpe (s51 1F). Sin tinta en el dibujo, y sin la banda oscura de CIERRE.
-const sinTinta = (c: string): boolean => c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );') && !/vec3\( 0\.045 \)/.test(c) && !/GOLPE_EN_EL_PISO\.banda|\bbanda: 0\.55/.test(c)
-afirmar(sinTinta(enElPisoTs), 'el poder liberado no dibuja tinta: energiza el piso (la luz sale por las rendijas que abre el pulso al pasar); la banda oscura de CIERRE, que se leía como una mancha, no vuelve')
+// [NOCTURNO FINAL] B2 · cambió por pedido: lo que energiza el piso después del encastre es la lava del piso entero (s52 B2).
+const sinTinta = (c: string): boolean => c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && c.includes('return conLaLava( color, lava.x, lava.y );') && !/vec3\( 0\.045 \)/.test(c) && !/GOLPE_EN_EL_PISO\.banda|\bbanda: 0\.55/.test(c)
+afirmar(sinTinta(enElPisoTs), 'el poder liberado no dibuja tinta: energiza el piso (NOCTURNO FINAL B2: la lava, por las juntas); la banda oscura de CIERRE, que se leía como una mancha, no vuelve')
 controlPositivo('el detector VE la tinta de EL ENCASTRE', enElPisoTs + "\nreturn mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );", sinTinta)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -416,11 +417,11 @@ controlPositivo('el detector VE un piso que se apaga de golpe al irse el mouse',
 // En el piso: levanta los bloques (la simulación) y el resplandor sale por las juntas, más por las rendijas que se abren
 // (el vecino más bajo); el círculo oscuro de CIERRE (una mancha plana que seguía al mouse) se fue.
 // [RETOQUE DEL ENCASTRE] 1E · cambió por pedido: lo que sale por las rendijas bajo el mouse es LUZ, no tinta (s51 1E).
+// [NOCTURNO FINAL] B2 · cambió por pedido: el mouse ya no hace brillo; su rastro sólo levanta los bloques (s51 1E, s52 B2).
 const conElRastro = (piso: string, simulacion: string): boolean =>
-  simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && piso.includes('vec2 rastro = resplandorDelRastro( xz );') &&
-  piso.includes('abs( vVecinos )') && piso.includes('return conLaLuz( color, rastro.x, rastro.y, ') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
+  simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && !piso.includes('resplandorDelRastro') && !piso.slice(piso.indexOf('const DIBUJO_GLSL'), piso.indexOf('export const ANCLAS_DEL_HUECO')).includes('uRastro[') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
 const simulacionDelRastro = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
-afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor) y por las rendijas que se abren sale la luz de abajo con la forma de las juntas (RETOQUE DEL ENCASTRE 1E); el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
+afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor), sin brillo (NOCTURNO FINAL B2); el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
 controlPositivo('el detector VE el círculo oscuro de CIERRE', enElPisoTs + '\nfloat cuantoDelFinal( vec2 xz ) {', (c: string) => conElRastro(c, simulacionDelRastro))
 // Con el poder: antes de quedar al ras, el mouse no deja nada.
 afirmar(finalTsx.includes('const vale = toca !== null ? Math.min(1, piso.uPoder.value) * s.presencia : 0') && finalTsx.includes('apagarElRastro(p.uRastro.value, s.rastro)'), '  sólo con el poder liberado (antes, el mouse no deja nada) y se apaga entero al soltar el final')
