@@ -1,0 +1,71 @@
+PULIDO 1 — QUÉ MIRAR, EN ORDEN
+================================
+
+Dónde:
+  local  http://localhost:3000/v3
+  LAN    http://192.168.1.116:3000/v3   (el teléfono y la tablet, en la misma red; con el servidor de desarrollo levantado)
+
+Las banderas van sueltas en la URL (/v3?cta=a) o juntas con ?pruebas= (/v3?pruebas=cta=a,brillo=fuerte). Sin bandera es el
+producto. Con movimiento reducido en el sistema, las animaciones quedan quietas (eso también se puede mirar).
+
+Lo que va EN CELULAR REAL (por la LAN): P12, P18, P22, el gesto de rebobinar (P2/P22) y P17 con el dedo.
+
+
+1 · P12 — El texto de Portfolio sobre el logo, de noche (teléfono y tablet)
+   URL: /v3 en el teléfono (390 / 375) y la tablet (768), vertical.
+   Bajá hasta Portfolio (la noche) y seguí bajando por los proyectos y las demos: donde el texto pasa por encima del logo,
+   tiene que leerse igual que sobre la noche (un velo oscuro detrás de la bajada, sin que se note como caja).
+   Escritorio: igual que antes.
+   Antes/después: p12-antes-despues-390.png, -375.png, -768.png.
+
+2 · P2 — El rebobinado del encastre, más rápido
+   URL: /v3 (escritorio). Bajá hasta el pie y esperá que el logo se encastre en el piso.
+   Un gesto hacia arriba (rueda, trackpad o flecha): rebobina solo en ~1,6 s si estaba entero (proporcional si estaba a
+   medias), arrancando y frenando suave; la página no se mueve. Quieto 2,5 s, vuelve a empezar.
+   Otra lectura: /v3?rebobinado=minimo (al menos 1 s desde cualquier punto).
+
+3 · P6 — El logo del intro baja «como un ángel»
+   URL: /v3 (recargá). El logo baja desde arriba a velocidad constante: arranca con la primera letra del titular y llega con
+   la última.
+   Otra lectura: /v3?angel=asentado (en los últimos ~120 ms se posa).
+
+4 · P18 — El formulario del pie en el teléfono y la tablet: vidrio líquido
+   URL: /v3 en el teléfono y la tablet; bajá hasta el pie. El formulario es de vidrio (el mismo material del menú), más
+   compacto; los campos, el texto de ejemplo, el foco y los errores tienen que leerse. Escritorio: igual que antes.
+   Antes/después: p18-antes-despues-390.png, -375.png, -768.png.
+
+5 · P22 — El encastre también en el teléfono y la tablet
+   URL: /v3 en el teléfono (vertical y apaisado) y la tablet. Después del pie (el formulario queda arriba, usable) hay un
+   escenario: ahí corre la cinemática, con el logo y su hueco enteros en cuadro.
+   Con el dedo: arrastrar hacia abajo (como para subir la página) rebobina sin mover la página; el segundo gesto sí sube.
+   Otra lectura: /v3?encastre=desvanece (sin escenario: el pie se desvanece mientras corre).
+   Imágenes: p22-encuadre-del-final.png, p22-cinematica-390.png.
+
+6 · P1 — El brillo del piso: zonas blancas de bloques
+   URL: /v3 (escritorio), al pie, con el encastre terminado. Una o dos zonas blancas de bloques enteros nacen (1,5 a 3 s),
+   respiran, se mueven apenas y mueren; la siguiente aparece en otro lugar. Sin rojo, sin damero, sin círculos. El piso se
+   oscurece apenas para que el blanco se lea.
+   Intensidades: /v3?brillo=suave  y  /v3?brillo=fuerte  (sin bandera, la media).
+
+7 · P5 — Un viaje del menú con el encastre avanzado
+   URL: /v3 (escritorio y teléfono). Al pie, con el encastre entero, tocá un ítem del menú (Servicios, Por qué develOP):
+   el viaje sale enseguida y dura lo mismo que cualquier otro; el encastre se deshace en paralelo mientras la cámara pasa a
+   la del recorrido. Sin saltos, sin flash.
+   Otra lectura: /v3?vuelta=corta (el encastre se deshace en ~1 s: más rápido que el rebobinado de P2).
+
+8 · P17-A — La cámara del CTA final
+   URL: /v3, bajá hasta «Por qué develOP» hasta el «Hablanos» (1440, 1024, 768, 390, 375). Arriba ya no entra el techo del
+   domo; la cámara mira desde arriba y, quieto en el CTA, se acerca apenas.
+   Antes/después: p17a-antes-despues-1440.png, -1024.png, -768.png, -390.png, -375.png.
+
+9 · P17-B/C — Las variantes del CTA final (pruebas; sin bandera queda el de hoy)
+   En cada una: mirá la llegada (bajando hasta el CTA), el hover (en el celular: un toque) y el clic (abre Contacto).
+   /v3?cta=a   LOSA     el CTA en una placa que nace acostada y se levanta; en hover el filo recorre el borde; al abrir
+                        Contacto se vuelve a acostar.
+   /v3?cta=b   HAZ      el haz baja sobre el CTA con el parpadeo de su encendido y las letras se prenden en secuencia; en
+                        hover sube la luz; al abrir Contacto se apaga.
+   /v3?cta=c   BLOQUES  los bloques del piso detrás del logo arman un escalón; en hover salen anillos blancos; al abrir
+                        Contacto bajan.
+   /v3?cta=d   PORTAL   un marco se dibuja alrededor del CTA; en hover el moiré de atrás se pliega hacia el cursor; al
+                        hacer clic, la placa de Contacto sale desde ese punto (en el teléfono Contacto es la hoja de
+                        siempre, sin placa).

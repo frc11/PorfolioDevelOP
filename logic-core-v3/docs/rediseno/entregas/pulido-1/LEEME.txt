@@ -1,0 +1,67 @@
+PULIDO 1 — RESUMEN POR PUNTO
+==============================
+
+El detalle (causas, mediciones, lo que cambió en los invariantes viejos y por qué no es aflojarlos) está en
+docs/rediseno/SPRINT-PULIDO-1.md. Qué mirar y dónde: mirar.txt. Un commit por punto (P17 en dos: la cámara y las variantes).
+
+Banderas (todas apagadas en el producto; en la URL sueltas o con ?pruebas=):
+  rebobinado=minimo · angel=asentado · brillo=suave|fuerte · cta=a|b|c|d · encastre=desvanece · vuelta=corta
+
+
+P12 · El texto de Portfolio sobre el logo de noche, teléfono y tablet                                      (dff1f160)
+  Qué: abajo de 1024, el halo del texto pasó a ser denso (la misma sombra corta apilada) y la bajada del cartel y el texto de
+  las demos llevan un velo del color de la noche detrás. La causa: el halo era una sola sombra fina y difusa (sobre el logo
+  la bajada quedaba en 3,2–4,4:1). Medido después: 10–12:1, como sobre la noche. Escritorio igual.
+  Archivos: _estilos/banda.css, s3-registro-de-tokens.ts.  Default: el arreglo (no hay bandera).
+
+Banderas del sprint                                                                                         (757fc9f2)
+  entorno.ts: las pruebas del sprint y su lectura de la URL (pedidoDeLaUrl).
+
+P2 · El rebobinado más rápido                                                                                (10b7646f)
+  Qué: el mismo mecanismo (un gesto, solo, hasta el logo parado; vuelve a empezar a los 2,5 s), más rápido: dura lo avanzado
+  por 1,6 s, con curva in-out; el giro del quieto vuelve con el mismo reloj.
+  Archivos: escena/final/recorridoDelFinal.ts, cuadroDelFinal.ts.  Bandera: rebobinado=minimo (al menos 1 s).
+
+P6 · El logo del intro baja con el titular                                                                    (869fb187)
+  Qué: baja lineal desde la primera letra hasta la última; los tiempos salen de las mismas constantes del titular
+  (titulos3d/titular.ts, que importan los dos). HeroArtifact sin tocar.
+  Archivos: escena/intro/caida.ts, CaidaDelLogo.tsx, titulos3d/TitulosDeVolumen.tsx, titulos3d/titular.ts, hero/Hero.tsx.
+  Bandera: angel=asentado (se posa en los últimos ~120 ms).
+
+P18 · El formulario del pie de vidrio, teléfono y tablet                                                     (c16ed336)
+  Qué: el material del menú extraído a vidrio.css como material compartido (sin duplicar) y usado por la caja del
+  formulario abajo de 1024; los campos, el texto de ejemplo y el foco en AA de día y de noche; más compacto. Escritorio igual.
+  Archivos: _estilos/vidrio.css, cierre/ColumnasDelPie.tsx, s3-registro-de-tokens.ts.
+
+P22 · El encastre en el teléfono y la tablet                                                                  (857af5c7)
+  Qué: el final se monta también abajo de 1024, en su propio escenario después del pie (el formulario queda arriba y usable),
+  con un encuadre propio (logo y hueco enteros, vertical y apaisado), el dedo rebobina sin mover la página, sombras a media
+  resolución en el teléfono; con movimiento reducido, el estado final quieto. La extensión de las secciones no cambia (la
+  regla de alturas).
+  Archivos: escena/final/*, ProbeStage.tsx, LuzDelLogo.tsx, Home.tsx, pie.css.  Bandera: encastre=desvanece.
+
+P1 · El brillo del piso: zonas blancas de bloques                                                              (32844ad4)
+  Qué: la lava se fue; una o dos zonas blancas orgánicas, cuantizadas al bloque, nacen, viven y mueren, con semilla fija, en
+  el sombreador del piso que ya había; el piso se oscurece 10 a 15 % sólo mientras corre. Costo medido: +0,33 ms a 1440
+  (dpr 1), +0,17 ms a 375.
+  Archivos: escena/final/enElPiso.ts, cuadroDelFinal.ts, FinalDelPie.tsx, OrbitRig.tsx.  Bandera: brillo=suave|fuerte.
+
+P5 · El viaje del menú con la cinemática avanzada                                                             (1714e3c1)
+  Qué: el viaje ya no espera: dura lo mismo que cualquiera y el encastre se deshace en paralelo, a la velocidad del
+  rebobinado de P2 (1,6 s desde el entero, con techo en el 56 % del viaje), repartiendo el tiempo por cámara, logo y piso
+  (nada cambia por cuadro más rápido que en P2). Medido: llega en 2,93 s (en reposo, 2,94).
+  Archivos: _componentes/useDeslizamientoDelCta.ts, deslizamiento.ts, escena/viaje.ts, planDelViaje.ts,
+  escena/final/recorridoDelFinal.ts, cuadroDelFinal.ts (enReposo.ts se borró).  Bandera: vuelta=corta (el 35 % del viaje).
+
+P17-A · La cámara del CTA final                                                                                (47d5655a)
+  Qué: la pose del CTA mira desde arriba (el techo del domo ya no entra en ningún ancho, ni con el mouse en sus puntas) y,
+  quieto en el CTA, un dolly-in leve por tiempo. Invariante con la coreografía de verdad en cinco aspectos.
+  Archivos: escena/finalDelRecorrido.ts, choreography.ts, OrbitRig.tsx, por-que-develop/geometria.ts,
+  probe-escena/_components/choreographyNotes.ts.
+
+P17-B/C · Las variantes del CTA final                                                                           (este commit)
+  Qué: cuatro variantes de prueba con su entrada, su hover (con el dedo, un toque) y su salida al abrir Contacto; sin
+  bandera, el CTA de hoy. a Losa, b Haz, c Bloques, d Portal (ver mirar.txt y p17b-variantes.png).
+  Archivos: escena/ctaDelFinal/*, _componentes/ctaDelFinal/CtaDelFinal.tsx, ProbeStage.tsx, piso/PisoVivo.tsx,
+  MoireScreen.tsx, _chrome/contacto/apertura.ts, placa.ts, PlacaDelContacto.tsx, por-que-develop/PorQueDevelop.tsx,
+  _estilos/banda.css.  Bandera: cta=a|b|c|d.  Default: el de hoy, hasta que se elija.

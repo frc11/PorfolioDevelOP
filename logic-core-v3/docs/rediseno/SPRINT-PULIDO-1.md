@@ -509,3 +509,83 @@ movimiento.
 **Gate de P17-A**: lint sin errores en lo tocado (un aviso viejo en `choreography.ts`, línea 1, que no es de acá); `tsc`
 0 errores; s23, s7e, s9e, s31–s52 verdes; `verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes);
 reposo a 1440, 390 y 768 capturado con el banco, sin errores en la consola.
+
+#### P17-B/C · Las variantes del CTA (`?cta=a|b|c|d`) y el toque
+
+**Sin bandera, el CTA de hoy, igual**: el envoltorio (`_componentes/ctaDelFinal/CtaDelFinal.tsx`) devuelve sus hijos tal
+cual y las letras su texto (el marcado es el mismo; la bandera se lee después de hidratar, así el primer render es el de
+hoy); el botón sigue yendo al pie. Con una variante, el botón abre Contacto (`abreElContacto="panel"`, como el «Hablemos» del
+hero) y la variante pone lo suyo. Todo lo de la escena se monta, se parchea o se escribe sólo con su variante: sin bandera
+el piso, la trama y el escenario no cambian ni una línea de sombreador.
+
+| Variante | Entrada | Hover (con el dedo: un toque) | Salida al abrir Contacto |
+|---|---|---|---|
+| a · Losa | el CTA en una placa de papel con espesor (CSS 3D, la perspectiva de la placa de Contacto) que nace acostada y se levanta con la llegada | el filo blanco (con su canto de tinta, para leerse sobre el papel) recorre el borde: una vuelta cada 1,4 s | la losa se vuelve a acostar (0,65 s, como la placa de Contacto al irse) |
+| b · Haz | el haz baja por el eje del logo (detrás del CTA en la pose C) del óculo hasta el botón, ancho como el botón, con el parpadeo del encendido del haz (`guionEn`, apretado a 1,3 s); las letras de la frase se encienden en secuencia con ese parpadeo (de 0,14 a 1, cada una 35 ms después de la anterior); un charco de luz detrás del botón | el haz sube un 35 % | el haz se apaga (0,35 s) |
+| c · Bloques | los bloques del piso detrás del logo (lo único de piso que se ve en la pose C) suben del centro a los bordes y arman un escalón ancho bajo el CTA (en la simulación del piso: cada bloque entero) | un anillo blanco sale del escalón cada 1,2 s sobre la zona apenas oscurecida (12 %: como en P1, el blanco no se lee sobre el papel si no) | el escalón baja (0,6 s) |
+| d · Portal | un marco de tinta se dibuja alrededor del CTA con la llegada | el moiré de detrás se deforma hacia el cursor (un pellizco en el espacio de la pantalla, en las dos tramas) y el marco se abre apenas | la placa de Contacto sale del punto del clic (se ve ahí al nacer y en el centro al llegar) y el marco se agranda y se va |
+
+**Mobile (C)**: sin hover; el toque (`pointerdown` con el dedo) hace el gesto del hover una vez (0,7 s: el filo, el haz más
+fuerte, un anillo del pulso, el tirón del moiré) y el clic abre Contacto. **Movimiento reducido**: quietas (la losa de pie,
+el haz prendido y parejo, el escalón armado, el marco dibujado; sin pulso ni tirón).
+
+**Archivos**: `escena/ctaDelFinal/` (`estado.ts`: el estado en vivo, las cuentas puras y los números; `PiezaDelCta.tsx`:
+el haz, el escalón y el tirón; `enElPiso.ts`: el escalón en la simulación y el pulso en el dibujo; `portal.ts`: el tirón
+en las tramas) y `_componentes/ctaDelFinal/CtaDelFinal.tsx` (el envoltorio, la losa, el marco, las letras); cableado en
+`ProbeStage.tsx`, `piso/PisoVivo.tsx` (sobre el material de la simulación ya armada), `MoireScreen.tsx`,
+`_chrome/contacto/apertura.ts` (el punto del clic, sólo desde el portal), `placa.ts` (`viajeDesdeElPunto`),
+`PlacaDelContacto.tsx` (el corrimiento en un envoltorio propio, sólo con punto: sin él, el viaje de siempre),
+`_secciones/por-que-develop/PorQueDevelop.tsx` (el CTA envuelto, en el escenario y en la lista) y `banda.css` (abajo de
+1024, dentro de la losa la tinta sin mezcla: la placa aísla su grupo y la diferencia contra su papel lavaba el texto).
+
+**Medido / visto** (`pulido-1/p17/var-<v>-<ancho>/`, banco: la entrada por screencast, el reposo, el hover o el toque y el
+clic; a 1440, 768 y 390): las cuatro llegan, responden y salen como dice la tabla; a 390 «Losa» dejaba el texto lavado
+(arreglado, ver arriba); el haz bajaba hasta el piso (la cámara de ese momento del cuadro tenía las matrices de antes del
+encuadre: ahora se actualizan antes de proyectar) y teñía el logo (arreglado); el pulso blanco no se leía sobre el piso
+blanco (ahora es un anillo sobre la zona oscurecida). «Portal» grabado: la placa nace a la izquierda del botón (donde fue el
+clic) y llega al centro.
+
+**Ajustado para no tocar los invariantes viejos** (fijan texto del código que toqué): la simulación del piso se crea con
+la misma línea de siempre (`s38`) y el escalón se cose después sobre su material; `abrirContacto` y su vuelta con el menú
+abierto quedan como estaban (`s50`) y el punto viaja aparte; la apertura del panel sigue en una línea (`s25`); el
+formulario no cambia y la placa lee el punto sola, con su viaje intacto (`s49`).
+
+`s52-pulido-1` P17-B/C: sin bandera nada cambia (control: un envoltorio que agrega una caja); la losa (control: no se
+acuesta al salir), el haz y las letras en secuencia (control: todas a la vez), el escalón del centro a los bordes y el toque
+(control: sube entero de una vez), la placa desde el punto (control: un corrimiento lineal, que con la perspectiva volaría
+fuera de la pantalla); el cableado (control: la pieza montada siempre) y el escalón en la simulación de verdad.
+
+**No sumé una «e»**: las cuatro cubren los registros que pedías (material, luz, piso, trama); una quinta sin una idea mejor
+sería relleno.
+
+**Gate de P17-B/C**: lint limpio en lo tocado; `tsc` 0 errores; s25, s31–s52 verdes (s38, s49 y s50 sin tocarlos: el
+código guarda los textos que fijan); `verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a
+1440, 390 y 768 capturado con el banco.
+
+## 4 · Lo que no quedó bien (o no pude resolver)
+
+- **visual-qa no captura en este entorno** (no tiene herramientas de captura): el gate visual de cada punto se hizo con el
+  banco (capturas y screencast por CDP), y las animaciones las tiene que mirar el humano en vivo (mirar.txt).
+- **P17-A cuesta un 4 % del CTA en escritorio**: el techo de velocidad del final (s23) no deja subir la cámara sin acercarla;
+  con el dolly-in el logo termina a 30,8 de ojo (era 32) y el lugar del CTA baja de 36,8 a 35,2 svh («Hablanos» de 100 a
+  96 px a 1440 × 900). En la lista (abajo de 1024) no cambia. El dolly-in es por tiempo (no por scroll), porque s9e fija que
+  la cámara se clava en el sostén.
+- **P5 no es el «~30 %» literal**: con el encastre deshaciéndose en un tercio del viaje más corto (1 s) la cámara iba más
+  rápido que el rebobinado de P2 y el logo saltaba del hueco; el producto lo hace a la velocidad de P2 (hasta el 56 % del
+  viaje más corto; en los largos, dentro del primer 35 %). La lectura literal está atrás de `?vuelta=corta`. Y el «reseteo
+  cuando no se ve» no existe en un viaje (el logo está siempre a la vista): la vuelta es visible, pareja.
+- **Visto y no tocado (fuera de alcance)**: (1) la sombra del logo aparece de un cuadro al otro cuando el logo sale del
+  hueco (en el rebobinado, en el viaje y en el encastre hacia adelante); (2) en el rebobinado de P2 el brillo de P1 se
+  apaga de un cuadro al otro (la vuelta del viaje ya no lo tiene); (3) con movimiento reducido, en escritorio, el CTA del
+  final queda encima del logo (ya pasaba antes del sprint).
+- **P17-B/C con el dedo**: el toque hace el gesto del hover, pero el mismo toque abre Contacto, así que el gesto se ve lo que
+  tarda el velo en cubrir (≈ 0,3 s). En el teléfono «Portal» no tiene placa (Contacto es la hoja): su «sale desde el punto»
+  es sólo de escritorio y tablet con barra.
+- **P18**: la noche no se alcanza en el pie (el formulario se midió en AA forzando el caso más oscuro); el rótulo
+  «CONTACTO» queda en 4,2:1 en ese caso forzado de 768.
+- **P22**: en el teléfono el cuadro de la GPU ya estaba en ~3,8 ms antes del sprint (sobre el presupuesto de 3 ms de §4);
+  el final no le suma, pero tampoco lo baja. Con movimiento reducido en escritorio no hay final (como antes).
+- **El banco cambió de placa** a mitad del sprint (de la NVIDIA a la AMD integrada): las mediciones de costo de P1 y P22 son
+  de la AMD; las de antes, de la NVIDIA (cada una lo dice).
+- **P6**: si el titular llegara a armarse en el mismo cuadro que la carga (no pasa en la página), el logo podría arrancar un
+  cuadro tarde.

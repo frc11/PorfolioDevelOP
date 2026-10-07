@@ -4,6 +4,7 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { CtaDelFinal, LetrasDelCta, useVarianteDelCta } from '../../_componentes/ctaDelFinal/CtaDelFinal'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
@@ -214,6 +215,8 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
   const destacado = useLlegadaDeDia(pin, VENTANA_DEL_DESTACADO, 'abajo')
   // Mientras no llegó, el botón no se puede tocar aunque esté en su lugar.
   const pointerEvents = useTransform(destacado, (u) => (u > 0.5 ? 'auto' : 'none'))
+  // [PULIDO 1] P17-B · las variantes de prueba (`?cta=a|b|c|d`): sin bandera, el CTA de hoy, igual.
+  const variante = useVarianteDelCta()
   return (
     <motion.div
       data-pieza="cta-del-final"
@@ -223,23 +226,25 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
       style={{ pointerEvents }}
       onFocus={(e) => llevarAlCta(e.currentTarget, destacado.get())}
     >
-      <CanalDeUnaPieza progreso={frase} patron="P5">
-        <Titular nivel="titulo-xl" como="p" className={TAMANO_DEL_CTA}>
-          {CTA.frase}
-        </Titular>
-      </CanalDeUnaPieza>
-      {/* Destacado por el peso, como el «let's create it» de nk. */}
-      <CanalDeUnaPieza progreso={destacado} patron="P5">
-        <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
-          {CTA.destacado}
-        </Titular>
-      </CanalDeUnaPieza>
-      {/* [BASE] El botón abajo, solo y más grande, sin fondo: sólo el texto y su subrayado, como el resto. */}
-      <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-6)]">
-        <div className={BOTON_GRANDE}>
-          <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
-        </div>
-      </CanalDeUnaPieza>
+      <CtaDelFinal llegada={destacado} className="flex flex-col items-center">
+        <CanalDeUnaPieza progreso={frase} patron="P5">
+          <Titular nivel="titulo-xl" como="p" className={TAMANO_DEL_CTA}>
+            <LetrasDelCta texto={CTA.frase} />
+          </Titular>
+        </CanalDeUnaPieza>
+        {/* Destacado por el peso, como el «let's create it» de nk. */}
+        <CanalDeUnaPieza progreso={destacado} patron="P5">
+          <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
+            <LetrasDelCta texto={CTA.destacado} desde={CTA.frase.length} />
+          </Titular>
+        </CanalDeUnaPieza>
+        {/* [BASE] El botón abajo, solo y más grande, sin fondo: sólo el texto y su subrayado, como el resto. */}
+        <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-6)]">
+          <div className={BOTON_GRANDE}>
+            <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} abreElContacto={variante === null ? undefined : 'panel'} />
+          </div>
+        </CanalDeUnaPieza>
+      </CtaDelFinal>
     </motion.div>
   )
 }
@@ -251,6 +256,7 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
  * ventana visible; sin movimiento, queda quieta.
  */
 function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
+  const variante = useVarianteDelCta()
   // [NOCTURNO FINAL] D2 · mientras el piso no está iluminado la lista va sin mezcla (`banda.css` §6): `data-amanecer`.
   const lista = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -293,19 +299,22 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
           <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">
-            <Llega>
-              <Titular nivel="titulo-xl" como="p">
-                {CTA.frase}
-              </Titular>
-              <Titular nivel="titulo-xl" como="p" peso="fuerte">
-                {CTA.destacado}
-              </Titular>
-            </Llega>
-            <Llega>
-              <div className={BOTON_GRANDE}>
-                <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
-              </div>
-            </Llega>
+            {/* [PULIDO 1] P17-B · las variantes de prueba (`?cta=`): sin bandera, el CTA de hoy, igual. */}
+            <CtaDelFinal llegada={null} className="flex flex-col items-center gap-[var(--spacing-8)]">
+              <Llega>
+                <Titular nivel="titulo-xl" como="p">
+                  <LetrasDelCta texto={CTA.frase} />
+                </Titular>
+                <Titular nivel="titulo-xl" como="p" peso="fuerte">
+                  <LetrasDelCta texto={CTA.destacado} desde={CTA.frase.length} />
+                </Titular>
+              </Llega>
+              <Llega>
+                <div className={BOTON_GRANDE}>
+                  <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla abreElContacto={variante === null ? undefined : 'panel'} />
+                </div>
+              </Llega>
+            </CtaDelFinal>
           </div>
         </CoreografiaEnTodoAncho>
       </div>

@@ -172,6 +172,23 @@
   [data-v3] [data-parte='lista-del-final'][data-amanecer] [data-pieza='cta-del-final'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
     background-color: var(--color-fondo);
   }
+
+  /* [PULIDO 1] P17-B · a · dentro de la losa (la prueba del CTA del final), la tinta sobre el papel de la placa y sin mezcla:
+     la placa aísla su grupo y la diferencia contra su propio papel lavaba el texto. Después de las del amanecer, a su altura. */
+  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] .max-escritorio\:mix-blend-difference {
+    color: var(--color-tinta);
+    mix-blend-mode: normal;
+    text-shadow: none;
+  }
+
+  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] {
+    color: var(--color-tinta);
+  }
+
+  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::before,
+  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
+    background-color: var(--color-tinta);
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse

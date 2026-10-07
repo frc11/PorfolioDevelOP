@@ -5,6 +5,8 @@ import * as THREE from 'three'
 
 import { entornoDeLaEscena } from './entorno'
 import { conDesajusteVivo } from './moire/parche'
+import { conElPortal } from './ctaDelFinal/portal'
+import { varianteDelCta } from './ctaDelFinal/estado'
 import { conElAmanecer } from './amanecer/luz'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
 import {
@@ -227,6 +229,11 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     // [ESCENA 7] T11: con la bandera, el amanecer (no hace nada sin ella).
     conElAmanecer(capas.coarse.material)
     conElAmanecer(capas.fine.material)
+    // [PULIDO 1] P17-B · d · con `?cta=d`, las dos tramas se deforman hacia el cursor sobre el CTA (`ctaDelFinal/portal.ts`).
+    if (varianteDelCta() === 'd') {
+      conElPortal(capas.coarse.material)
+      conElPortal(capas.fine.material)
+    }
     return capas
   }, [store, hastaElPiso, anclada])
 
