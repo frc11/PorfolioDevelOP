@@ -3,10 +3,12 @@
  *
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   P12 · el texto de Trabajos sobre el logo de noche, en el teléfono y la tablet: halo denso + velo detrás de la bajada.
+ *   Las banderas del sprint (apagadas en el producto; en la URL, con `?pruebas=` o sueltas: `?cta=a`).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
 
+import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -56,5 +58,37 @@ controlPositivo('y un velo demasiado tenue (50 %)', banda.replace(/(--velo-sobre
 // Escritorio no cambia: nada del velo fuera de la banda de abajo de 1024.
 const fueraDeLaBanda = banda.replace(enLaBanda(banda), '')
 afirmar(!/velo-sobre-la-escena|sombra-del-velo/.test(fueraDeLaBanda), 'desde 1024 nada cambia: el velo y su sombra viven sólo en la banda de abajo de 1024')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; sin él, en la URL (`?pruebas=` o sueltas)')
+
+// Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
+// `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`, P22 `encastre=desvanece`.
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'], encastre: ['desvanece'] }
+type Traductor = typeof entornoPedido
+const banderasBien = (f: Traductor): boolean => {
+  const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
+  const pedidas = PRUEBAS_SUELTAS.every((k) => PEDIDAS[k].every((v) => f(`producto,${k}=${v}`).pruebas[k] === v))
+  const otras = PRUEBAS_SUELTAS.every((k) => f(`producto,${k}=cualquiera`).pruebas[k] === 'no')
+  const juntas = f('producto,cta=b,brillo=fuerte,angel=asentado').pruebas
+  return apagadas && pedidas && otras && juntas.cta === 'b' && juntas.brillo === 'fuerte' && juntas.angel === 'asentado' && f('producto,brillo=medio').pruebas.brillo === 'no' && f('producto,cta=b').E1 === ENTORNO.E1
+}
+afirmar(banderasBien(entornoPedido), 'cada prueba del sprint se pide por su nombre y vale sólo sus valores (otro valor es el producto); van juntas; en el producto están todas apagadas (`brillo=medio` es el producto)', PRUEBAS_SUELTAS.join(' · '))
+controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedido: string) => {
+  const e = entornoPedido(pedido)
+  const cta = /cta=(\w+)/.exec(pedido)
+  return cta === null ? e : { ...e, pruebas: { ...e.pruebas, cta: cta[1] as 'a' } }
+}) as Traductor, banderasBien)
+type DeLaUrl = typeof pedidoDeLaUrl
+const urlBien = (f: DeLaUrl): boolean => {
+  const sueltas = f('?cta=a&brillo=fuerte')
+  const ambas = f('?pruebas=pie=antes&angel=asentado')
+  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'a' && entornoPedido(sueltas).pruebas.brillo === 'fuerte' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
+}
+afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=a`, `/v3?brillo=fuerte`) y con `?pruebas=`; sin nada, el producto')
+controlPositivo('el detector VE una URL que sólo lee `?pruebas=` (las sueltas no llegarían)', ((b: string) => {
+  const v = new URLSearchParams(b).get('pruebas')
+  return v === null ? null : `producto,${v}`
+}) as DeLaUrl, urlBien)
 
 cerrar('s52-pulido-1')

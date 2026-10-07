@@ -98,3 +98,27 @@ logo.
 Invariante: `s52-pulido-1` P12 (falla con el código anterior: se corrió antes del arreglo, 2 fallas; control positivo
 con el CSS de C1). Tokens nuevos registrados en `s3-registro-de-tokens.ts`. Capturas antes/después:
 `entregas/pulido-1/p12-antes-despues-{390,375,768}.png`.
+
+### Banderas del sprint (commit aparte, antes de P2)
+
+Todas en `escena/entorno.ts` (`Pruebas`), apagadas en el producto (`PRUEBAS_APAGADAS`: todas en `no`). Con banco van en el
+pedido (`producto,cta=a`); sin banco, en la URL con `?pruebas=` o sueltas (`/v3?cta=a`), que arma la función pura
+`pedidoDeLaUrl` (antes la lectura vivía adentro de `entornoDeLaEscena`).
+
+| Bandera | Punto | Qué hace | Producto |
+|---|---|---|---|
+| `rebobinado=minimo` | P2 | la otra lectura del pedido: desde cualquier punto, al menos 1 s | proporcional (sin mínimo) |
+| `angel=asentado` | P6 | el logo del intro se asienta en sus últimos ~120 ms | lineal puro |
+| `brillo=suave` / `brillo=fuerte` | P1 | la intensidad del brillo del piso (y de cuánto se oscurece la sala) | `medio` (`brillo=medio` es el producto) |
+| `cta=a` … `cta=d` | P17 | las variantes del CTA del final para elegir | el CTA de hoy |
+| `encastre=desvanece` | P22 | abajo de 1024 el pie se desvanece mientras corre el encastre, sin escenario | el formulario arriba y el encastre en su propio escenario al final |
+
+Decisión de P22 tomada acá para que la bandera quede estable: por defecto, el formulario arriba y la cinemática en su
+propio escenario después del pie, porque la cinemática arranca sola al llegar al fondo y, si el pie se desvaneciera, el
+formulario desaparecería justo cuando alguien llega a usarlo.
+
+Ajustado: `s35-escena9` (T2) fijaba el texto literal de la lectura de la URL; ahora fija las mismas tres cosas (lee
+`?pruebas=`, el pedido va sobre el producto, del pedido se toman sólo las pruebas y el material de los títulos) contra
+`pedidoDeLaUrl`, y además por comportamiento. `s52-pulido-1` suma la sección de las banderas (con dos controles: un
+traductor que acepta cualquier valor y una URL que sólo lee `?pruebas=`). Gate: lint y `tsc` limpios; las 17 suites que
+importan `entorno.ts` en verde (s29–s36, s38, s40, s42, s44, s46–s49, s52).

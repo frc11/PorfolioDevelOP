@@ -25,7 +25,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
-import { BASE_LIMPIA, ENTORNO, entornoPedido } from '../entorno'
+import { BASE_LIMPIA, ENTORNO, entornoPedido, pedidoDeLaUrl } from '../entorno'
 import { FISICA } from '../polvo/simulacion'
 import { conCantosSuaves } from '../cantosDelLogo'
 import { PROBE_EXTRUDE } from '../probeScene'
@@ -102,7 +102,11 @@ afirmar(/campoDeAPoco\(contorno\)/.test(fisica) && (fisica.match(/hornearDeAPoco
 // ── T2 · el logo de noche ─────────────────────────────────────────────────
 titulo('T2 · el logo de noche: costados negros, tapas con borde (en el producto desde ESCENA 10: s36)')
 const entornoFuente = leer('entorno.ts')
-afirmar(/const pruebas = new URLSearchParams\(window\.location\.search\)\.get\('pruebas'\)/.test(entornoFuente) && /const pedido = pruebas === null \? null : entornoPedido\(`producto,\$\{pruebas\}`\)/.test(entornoFuente) && /\{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(entornoFuente), 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas (y, desde 3D Y SONIDO, el material de los títulos), el resto del producto intacto y sin los ganchos del banco')
+// [PULIDO 1] la lectura de la URL pasó a una función pura (`pedidoDeLaUrl`, que suma las pruebas del sprint sueltas): se
+// fija lo mismo que antes (lee `?pruebas=`, el pedido va sobre el producto y de él se toman sólo las pruebas y el material
+// de los títulos) contra esa estructura, y además por comportamiento.
+const urlDelEntorno = entornoFuente.slice(entornoFuente.indexOf('export function pedidoDeLaUrl('), entornoFuente.indexOf('/** ¿Hay un banco mirando?'))
+afirmar(/consulta\.get\('pruebas'\)/.test(urlDelEntorno) && /return lista === '' \? null : `producto,\$\{lista\}`/.test(urlDelEntorno) && /const lista = pedidoDeLaUrl\(window\.location\.search\)/.test(urlDelEntorno) && /const pedido = lista === null \? null : entornoPedido\(lista\)/.test(urlDelEntorno) && /\{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(urlDelEntorno) && pedidoDeLaUrl('?pruebas=pie=antes') === 'producto,pie=antes' && pedidoDeLaUrl('') === null, 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas (y, desde 3D Y SONIDO, el material de los títulos), el resto del producto intacto y sin los ganchos del banco')
 // Qué cara es cuál: en una extrusión como la del logo (bisel 1/1/5 y los costados suaves de B7), las tapas tienen la
 // normal ±z exacta y los costados nunca llegan al corte del shader.
 const formaDePrueba = new THREE.Shape()

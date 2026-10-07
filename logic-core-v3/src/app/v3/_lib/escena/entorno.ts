@@ -84,6 +84,19 @@ export interface Pruebas {
    * P3 · [NOCTURNO] A2: `pie=llegada` se borró y `pie=onda` pasó al producto (el piso ondea debajo de la pieza del mouse).
    */
   readonly pie: 'antes' | 'no'
+  /** [PULIDO 1] P2 · `rebobinado=minimo`: la otra lectura del pedido (desde cualquier punto, al menos 1 s; el producto es proporcional). */
+  readonly rebobinado: 'minimo' | 'no'
+  /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
+  readonly angel: 'asentado' | 'no'
+  /** [PULIDO 1] P1 · la intensidad del brillo del piso en el final: `suave` o `fuerte`; `no` es la del producto (`medio`, también en la URL). */
+  readonly brillo: 'suave' | 'fuerte' | 'no'
+  /** [PULIDO 1] P17 · las variantes del CTA del final para elegir (`no`: el de hoy, el producto). */
+  readonly cta: 'a' | 'b' | 'c' | 'd' | 'no'
+  /**
+   * [PULIDO 1] P22 · el encastre abajo de 1024: el producto lo corre en su propio escenario después del pie (el formulario
+   * queda arriba, usable); `encastre=desvanece` es la otra lectura: el pie se desvanece mientras corre, sin escenario.
+   */
+  readonly encastre: 'desvanece' | 'no'
 }
 
 /**
@@ -95,7 +108,10 @@ export interface Pruebas {
  * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue. [EL ENCASTRE]
  * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', brillo: 'no', cta: 'no', encastre: 'no' }
+
+/** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'brillo', 'cta', 'encastre'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -104,7 +120,14 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  return { pie: unoDe<'antes'>(['antes'], valor('pie')) }
+  return {
+    pie: unoDe<'antes'>(['antes'], valor('pie')),
+    rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
+    angel: unoDe<'asentado'>(['asentado'], valor('angel')),
+    brillo: unoDe<'suave' | 'fuerte'>(['suave', 'fuerte'], valor('brillo')),
+    cta: unoDe<'a' | 'b' | 'c' | 'd'>(['a', 'b', 'c', 'd'], valor('cta')),
+    encastre: unoDe<'desvanece'>(['desvanece'], valor('encastre')),
+  }
 }
 
 export interface Entorno {
@@ -294,6 +317,20 @@ export function entornoPedido(pedido: string): Entorno {
 let resuelto: Entorno | null = null
 
 /**
+ * [PULIDO 1] El pedido de la URL, sin banco: lo de `?pruebas=` y las pruebas del sprint sueltas (`?cta=a`), sobre el
+ * producto; `null` si no pide nada. Pura: el invariante la prueba sin navegador.
+ */
+export function pedidoDeLaUrl(busqueda: string): string | null {
+  const consulta = new URLSearchParams(busqueda)
+  const sueltas = PRUEBAS_SUELTAS.map((k) => {
+    const v = consulta.get(k)
+    return v === null ? null : `${k}=${v}`
+  })
+  const lista = [consulta.get('pruebas'), ...sueltas].filter((x): x is string => x !== null && x !== '').join(',')
+  return lista === '' ? null : `producto,${lista}`
+}
+
+/**
  * Las banderas de esta carga: las de arriba, o las que pidió el banco antes de cargar. Se resuelve
  * UNA vez y queda fija, para que todos los componentes vean la misma escena.
  */
@@ -305,8 +342,9 @@ export function entornoDeLaEscena(): Entorno {
   else {
     // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=pie=antes`.
     // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
-    const pruebas = new URLSearchParams(window.location.search).get('pruebas')
-    const pedido = pruebas === null ? null : entornoPedido(`producto,${pruebas}`)
+    // [PULIDO 1] y las del sprint, también sueltas: `/v3?cta=a`, `/v3?brillo=fuerte` (`pedidoDeLaUrl`).
+    const lista = pedidoDeLaUrl(window.location.search)
+    const pedido = lista === null ? null : entornoPedido(lista)
     resuelto = pedido === null ? ENTORNO : { ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas }
   }
   return resuelto
