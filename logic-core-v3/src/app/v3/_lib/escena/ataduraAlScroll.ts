@@ -9,7 +9,7 @@ import {
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
 import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
-import { aplicarElDiaDelFinal, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
+import { aplicarElDiaDelFinal, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
 import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
@@ -135,7 +135,8 @@ export function useEscenaAtadaAlScroll(
         : progresoDelScroll(medida.y, secciones.arriba, medida.abajo, ventana)
       rig.set('progress', progreso)
       // [FINAL 2] El día del final, con la misma medida y en el mismo cuadro que el progreso.
-      aplicarElDiaDelFinal(medirElBloqueOpacoEn(document, ventana, bloque))
+      const elBloque = medirElBloqueOpacoEn(document, ventana, bloque)
+      aplicarElDiaDelFinal(elBloque)
 
       // [VIAJES] Durante un viaje el `<main>` está apagado y se ve la sala entera: dibuja también en la banda opaca.
       const viajando = viajeEnCurso() !== null
@@ -146,7 +147,11 @@ export function useEscenaAtadaAlScroll(
           secciones.arriba,
           medida.abajo,
           ventana,
-        )
+        ) ||
+        // [NOCTURNO FINAL] A5 · abajo de 1024 las ventanas del recorrido (en pantallas del escritorio) daban por tapada la sala
+        // en las Demos, que en el teléfono la dejan ver: quedaba el último cuadro, congelado. Ahí se dibuja salvo que el
+        // bloque opaco (Servicios y Tu panel) tape el cuadro entero.
+        (window.innerWidth < 1024 && elBloque !== null && !bloqueTapaElCuadro(elBloque))
       // `siguiente` devuelve el MISMO objeto cuando no hay transición, así que
       // React descarta la actualización y esto no re-renderiza por cuadro de
       // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por

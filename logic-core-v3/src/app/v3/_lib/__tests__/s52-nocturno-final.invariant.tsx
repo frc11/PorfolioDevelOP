@@ -11,6 +11,7 @@
  *   A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición alcanza lo pedido en un viaje).
  *   A4 · la sombra cuadrada: en un viaje la altura del sol es la de su luz (la del logo no se estira por el piso); las
  *        piezas del pie no proyectan sombra y fuera de su sección no se dibujan.
+ *   A5 · teléfono: al pasar a las Demos la escena de atrás no se congela (se suspende sólo con el bloque opaco tapando).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -22,6 +23,7 @@ import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
 import { elevacionDe } from '../escena/lightArc'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
 import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
@@ -362,5 +364,19 @@ const sinSombrasDelPie = (c: string): boolean => c.includes('SOMBRAS_DEL_PIE.uCu
 afirmar(sinSombrasDelPie(armadasDelPie), '  las placas y piezas del pie no proyectan sombra sobre la escena (ninguna sombra de contacto en el piso vivo); fuera de su sección no se dibujan (ya: sólo con su caja a la vista)')
 controlPositivo('  el detector VE las sombras de contacto de antes', armadasDelPie.replace('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0', 'if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)'), sinSombrasDelPie)
 afirmar(/a\.grupo\.visible = arriba \+ c\.abajo > -MARGEN && arriba \+ c\.arriba < cuadro\.alto \+ MARGEN/.test(armadasDelPie), '  y una pieza del pie se dibuja sólo con su caja del DOM a la vista (con el margen)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A5 · Teléfono: al pasar a las Demos la escena de atrás no se congela')
+
+// Abajo de 1024 las ventanas de la escena (en pantallas del escritorio) daban por tapada la sala en las Demos, que en el
+// teléfono la dejan ver: la escena se suspendía y quedaba su último cuadro, congelado. Ahí se dibuja salvo que el bloque
+// opaco (Servicios y Tu panel, seguidos) tape el cuadro entero.
+const atadura = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
+const enElTelefono = (c: string): boolean => c.includes('const elBloque = medirElBloqueOpacoEn(document, ventana, bloque)') && /escenaEnCuadro\(\s*medida\.y,\s*secciones\.arriba,\s*medida\.abajo,\s*ventana,\s*\) \|\|\s*\(window\.innerWidth < 1024 && elBloque !== null && !bloqueTapaElCuadro\(elBloque\)\)/.test(c)
+const caja = (tope: number, pie: number): { tope: number; pie: number } => ({ tope, pie })
+const tapa = bloqueTapaElCuadro({ servicios: caja(-400, 2000), tuPanel: caja(2000, 5000), alto: 844 }) && bloqueTapaElCuadro({ servicios: caja(-3000, -10), tuPanel: caja(-10, 900), alto: 844 })
+const enLasDemos = !bloqueTapaElCuadro({ servicios: caja(500, 3000), tuPanel: caja(3000, 6000), alto: 844 }) && !bloqueTapaElCuadro({ servicios: caja(-6000, -3000), tuPanel: caja(-3000, 300), alto: 844 })
+afirmar(enElTelefono(atadura) && tapa && enLasDemos, 'abajo de 1024 la escena se dibuja mientras se vea algo de la sala (en las Demos, translúcidas, ya no se congela) y se suspende sólo con Servicios y Tu panel tapando el cuadro entero')
+controlPositivo('el detector VE la regla de antes (sólo las ventanas del escritorio)', atadura.replace(/ \|\|\s*\(window\.innerWidth < 1024 && elBloque !== null && !bloqueTapaElCuadro\(elBloque\)\)/, ''), enElTelefono)
 
 cerrar('s52-nocturno-final')
