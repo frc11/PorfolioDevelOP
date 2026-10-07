@@ -575,8 +575,12 @@ export const SECCIONES: readonly Seccion[] = [
    * rápido una tras otra): la sección mide ~7,0 pantallas a 1440 × 900 (medido con el banco). REGLA DE ALTURAS:
    * se declara lo real, así el mapeo no corre a lo que viene después (con 600 contra 6,33 medidas, Portfolio llegaba
    * 0,0035 de progreso tarde).
+   *
+   * **[NOCTURNO FINAL] C3 · abajo de 1024 mide su contenido** (como Servicios y Por qué develOP): los 700svh son del
+   * caos de escritorio; en la columna del teléfono el contenido mide ~5,8 pantallas y lo que sobraba (1,2 pantallas a
+   * 390 × 844) era el blanco después de «Y más…».
    */
-  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '700svh' },
+  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '700svh', altoAngosto: 'contenido' },
   /**
    * POR QUÉ develOP — **[FINAL]** el escenario de los tres primeros tiempos del final
    * (frase, valores, CTA; `escena/finalDelRecorrido.ts`). Cuatro pantallas con el

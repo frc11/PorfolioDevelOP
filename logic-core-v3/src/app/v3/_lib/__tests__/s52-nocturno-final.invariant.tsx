@@ -581,4 +581,16 @@ const columnaBien = (d: string, t: string, clase: (i: number) => string): boolea
 afirmar(columnaBien(demoTsx, tarjetaTsx, claseEnColumna), '  cada bloque a todo el ancho abajo de 1024 (sin la columna escalonada), con el marco de la pantalla angosta; en escritorio, como estaba')
 controlPositivo('  el detector VE la columna escalonada de antes', [demoTsx, tarjetaTsx, ((i: number) => (i % 2 === 0 ? 'w-22/25 escritorio:@max-6xl:w-22/25' : 'ml-auto w-18/25 escritorio:@max-6xl:w-18/25')) as typeof claseEnColumna] as const, ([d, t, c]: readonly [string, string, typeof claseEnColumna]) => columnaBien(d, t, c))
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C3 · Después de «Y más…»: en el teléfono y la tablet, Tu panel mide su contenido (sin el blanco)')
+
+// Los 700svh son del caos de escritorio; en la columna angosta el contenido mide ~5,8 pantallas a 390 × 844 y lo que sobraba
+// (1015 px) era el blanco después del newsletter. Como Servicios y Por qué develOP: abajo de 1024, su contenido. La escena de
+// ahí (el amanecer, la noche) se ata a las cajas MEDIDAS, así que no se corre: está medido igual con el alto viejo y el nuevo.
+const panelTsx = sinComentarios(leer('_componentes/Panel.tsx'))
+type FilaDeAlto = { readonly alto: string; readonly altoAngosto?: 'contenido' }
+const sinBlanco = (fila: FilaDeAlto, panel: string): boolean => fila.altoAngosto === 'contenido' && fila.alto === '700svh' && panel.includes("seccion.altoAngosto === 'contenido' ? 'max-escritorio:min-h-0!' : undefined")
+afirmar(sinBlanco(seccionDe('tu-panel'), panelTsx), 'abajo de 1024 Tu panel mide su contenido (el piso del alto se apaga); en escritorio sigue en 700svh', `${seccionDe('tu-panel').alto} · ${String(seccionDe('tu-panel').altoAngosto)}`)
+controlPositivo('el detector VE la fila de antes (700svh también en el teléfono)', { alto: '700svh' } as FilaDeAlto, (f) => sinBlanco(f, panelTsx))
+
 cerrar('s52-nocturno-final')
