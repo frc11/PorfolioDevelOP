@@ -1,3 +1,4 @@
+import { CURSOR_EN_VIVO } from '../cursorEnVivo'
 import { hayBanco } from '../escena/entorno'
 import type { Enjambre } from './enjambre'
 import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero } from './puntero'
@@ -5,10 +6,13 @@ import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero } from './punter
 /**
  * [EL ENCASTRE] 1C · el mouse sobre el lienzo (que no recibe el puntero: se escucha la ventana), en el cuadro del lienzo
  * (de −1 a 1). Se mide al moverse o al scrollear (el lienzo corre debajo del cursor quieto), no en cada cuadro. El dedo no.
+ * [RETOQUE DEL ENCASTRE] 2A · con el cursor de la sala, donde se VE el cursor (su halo, interpolado: `cursorEnVivo.ts`),
+ * no el puntero nativo; sin él, el puntero. La caja del lienzo se relee al moverse o al scrollear; el cursor, en cada cuadro.
  */
 function escucharElPuntero(lienzo: HTMLCanvasElement): { readonly objetivo: (quieto: boolean) => ObjetivoDelPuntero; readonly soltar: () => void } {
-  const mouse = { x: 0, y: 0, hay: false, medir: false }
+  const mouse = { x: 0, y: 0, hay: false, medir: true }
   const objetivo = { x: 0, y: 0, dentro: false }
+  const caja = { izquierda: 0, arriba: 0, ancho: 1, alto: 1 }
   const alMover = (e: PointerEvent): void => {
     if (e.pointerType === 'touch') return
     mouse.x = e.clientX
@@ -31,10 +35,15 @@ function escucharElPuntero(lienzo: HTMLCanvasElement): { readonly objetivo: (qui
       if (mouse.medir) {
         mouse.medir = false
         const r = lienzo.getBoundingClientRect()
-        objetivo.x = ((mouse.x - r.left) / Math.max(1, r.width)) * 2 - 1
-        objetivo.y = 1 - ((mouse.y - r.top) / Math.max(1, r.height)) * 2
-        objetivo.dentro = mouse.hay && Math.abs(objetivo.x) <= 1 && Math.abs(objetivo.y) <= 1
+        caja.izquierda = r.left
+        caja.arriba = r.top
+        caja.ancho = Math.max(1, r.width)
+        caja.alto = Math.max(1, r.height)
       }
+      const conCursor = CURSOR_EN_VIVO.activo
+      objetivo.x = (((conCursor ? CURSOR_EN_VIVO.x : mouse.x) - caja.izquierda) / caja.ancho) * 2 - 1
+      objetivo.y = 1 - (((conCursor ? CURSOR_EN_VIVO.y : mouse.y) - caja.arriba) / caja.alto) * 2
+      objetivo.dentro = mouse.hay && Math.abs(objetivo.x) <= 1 && Math.abs(objetivo.y) <= 1
       return quieto ? { ...objetivo, dentro: false } : objetivo
     },
     soltar: () => {

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 
 import { SEGUIMIENTO_DE_LA_REFERENCIA } from '../../_lib/cursor'
+import { CURSOR_EN_VIVO } from '../../_lib/cursorEnVivo'
 import { LOGO_BAJO_EL_PUNTERO } from '../../_lib/escena/entorno/hoverDelLogo'
 import { MARCA_CURSOR_DE_LA_SALA } from './marca'
 import { PRESENCIA_DEL_CURSOR } from './presencia'
@@ -141,6 +142,10 @@ export default function CursorDeLaSala(): React.JSX.Element {
       nucleo.y += (destino.y - nucleo.y) * fn
       halo.x += (destino.x - halo.x) * fh
       halo.y += (destino.y - halo.y) * fh
+      // RETOQUE DEL ENCASTRE 2A · dónde se ve el cursor (su halo): lo siguen los nanobots (sin corchetes: s37 busca reservas acá).
+      CURSOR_EN_VIVO.x = halo.x
+      CURSOR_EN_VIVO.y = halo.y
+      CURSOR_EN_VIVO.activo = adentro
       // El cartel: arriba de la cara del libro bajo el puntero, siguiendo su x; sin demo, de vuelta al cursor, cerrándose.
       const conCartel = cartel.pieza !== null && estado === 'demo'
       const medio = cartel.anchoObjetivo / 2 + MARGEN_DEL_CARTEL_PX
@@ -189,6 +194,7 @@ export default function CursorDeLaSala(): React.JSX.Element {
     const alSalir = (e: PointerEvent): void => {
       if (e.relatedTarget !== null) return
       adentro = false
+      CURSOR_EN_VIVO.activo = false
       cartel.pieza = null
       el.removeAttribute('data-activo')
     }
@@ -214,6 +220,7 @@ export default function CursorDeLaSala(): React.JSX.Element {
     window.addEventListener('resize', medirLaCaja, { passive: true })
     return () => {
       PRESENCIA_DEL_CURSOR.montado = false
+      CURSOR_EN_VIVO.activo = false
       window.removeEventListener('pointermove', alMover)
       window.removeEventListener('pointerdown', alApretar)
       document.removeEventListener('pointerout', alSalir)

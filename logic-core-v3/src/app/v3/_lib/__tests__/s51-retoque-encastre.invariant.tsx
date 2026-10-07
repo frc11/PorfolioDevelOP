@@ -14,6 +14,7 @@
  *        salir la misma luz, más tenue, por junta (sin parches ni anillos grises), fuera del mar calmo del logo.
  *   1G · el pie no recibe la luz de la cinemática: su normal y su vista giran con la cámara del final (la luz y los
  *        reflejos, como antes de la cinemática, en cualquier pose).
+ *   2A · los nanobots se desarman donde se VE el cursor de la sala (su halo, interpolado), no en el puntero nativo.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -26,6 +27,7 @@ import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
 import { RELOJ_DEL_FINAL, camaraDelFinal, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from '../escena/pie3d/material'
+import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { sentidoDeLaRueda, sentidoDeLaTecla, sentidoDelDedo } from '../gestosDelScroll'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -332,5 +334,41 @@ const pieBien = (f: string, armadasTs: string, finalTs2: string): boolean =>
   armadasTs.includes('giroDeLaLuzDelPie(viva.quaternion, EN_VIVO.giroDelPie, LUZ_DEL_PIE.uGiroDeLaLuz.value)') && finalTs2.includes('EN_VIVO.giroDelPie.copy(CAMARA_SIN_EL_MOUSE.quaternion).invert().premultiply(ANTES_DEL_FINAL)') && finalTs2.includes('EN_VIVO.giroDelPie.identity()')
 afirmar(pieBien(delPie.fragmento, armadasDelPie, finalTs), '  en el sombreador del pie la normal y la vista giran (después de los mapas de normales, antes de las luces: también el reflejo del estudio); el pie lo escribe en cada cuadro con la cámara viva y el giro que publica el final (sin final, la identidad)')
 controlPositivo('  el detector VE una vista sin girar (el brillo especular, de otro lado)', delPie.fragmento.replace('geometryViewDir = normalize( uGiroDeLaLuz * geometryViewDir );', ''), (f: string) => pieBien(f, armadasDelPie, finalTs))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2A · Los nanobots siguen al cursor de la sala (donde se ve, interpolado), no al puntero nativo')
+
+// El hueco va justo donde está el objetivo (el cursor que se ve ya trae su interpolación: un resorte encima lo dejaba
+// atrás); la fuerza conserva su resorte (se abre pasándose un poco).
+type PasoDelEnjambre = (p: PunteroDelEnjambre, o: ObjetivoDelPuntero, dt: number) => void
+const siguiendo = (paso: PasoDelEnjambre): { readonly peorAtraso: number; readonly pico: number } => {
+  const p = punteroQuieto()
+  let [peorAtraso, pico] = [0, 0]
+  for (let i = 0; i < 120; i += 1) {
+    const o = { x: -0.6 + i * 0.01, y: 0.2 * Math.sin(i * 0.1), dentro: true }
+    paso(p, o, 1 / 60)
+    peorAtraso = Math.max(peorAtraso, Math.hypot(p.x - o.x, p.y - o.y))
+    pico = Math.max(pico, p.fuerza)
+  }
+  return { peorAtraso, pico }
+}
+const enElCursor = (m: ReturnType<typeof siguiendo>): boolean => m.peorAtraso < 1e-9 && m.pico > 1.05
+afirmar(enElCursor(siguiendo(pasoDelPuntero)), 'el hueco va justo donde está el cursor que se ve (sin un resorte encima que lo atrase); la fuerza sigue abriéndose con su resorte')
+const conResorteDeLugar: PasoDelEnjambre = (p, o, dt) => {
+  const [x, y] = [p.x, p.y]
+  pasoDelPuntero(p, o, dt)
+  p.x = x + (p.x - x) * 0.25
+  p.y = y + (p.y - y) * 0.25
+}
+controlPositivo('el detector VE el hueco de EL ENCASTRE (con un resorte que lo atrasa)', conResorteDeLugar, (p: PasoDelEnjambre) => enElCursor(siguiendo(p)))
+// El cableado: el cursor de la sala publica su halo en cada cuadro (y se apaga al irse el puntero o al desmontarse); el
+// enjambre lo usa cuando está, y si no, el puntero.
+const cursorDeLaSala = sinComentarios(readFileSync(`${V3}/_chrome/cursor/CursorDeLaSala.tsx`, 'utf8').replace(/\r\n/g, '\n'))
+const montajeDelEnjambre = sinComentarios(leer('_lib/nanobots/montaje.ts'))
+const cursorBien = (cursor: string, montaje: string): boolean =>
+  /halo\.y \+= \(destino\.y - halo\.y\) \* fh\s*CURSOR_EN_VIVO\.x = halo\.x\s*CURSOR_EN_VIVO\.y = halo\.y\s*CURSOR_EN_VIVO\.activo = adentro/.test(cursor) && (cursor.match(/CURSOR_EN_VIVO\.activo = false/g) ?? []).length === 2 &&
+  montaje.includes('const conCursor = CURSOR_EN_VIVO.activo') && montaje.includes('((conCursor ? CURSOR_EN_VIVO.x : mouse.x) - caja.izquierda)') && montaje.includes('((conCursor ? CURSOR_EN_VIVO.y : mouse.y) - caja.arriba)')
+afirmar(cursorBien(cursorDeLaSala, montajeDelEnjambre), '  el cursor de la sala publica dónde se ve (su halo) en cada cuadro de su bucle y se apaga al irse el puntero o al desmontarse; el enjambre lo sigue cuando está (sin él —táctil, movimiento reducido, abajo de 1024—, el puntero)')
+controlPositivo('  el detector VE el enjambre siguiendo al puntero nativo', montajeDelEnjambre.replace('((conCursor ? CURSOR_EN_VIVO.x : mouse.x) - caja.izquierda)', '(mouse.x - caja.izquierda)'), (m: string) => cursorBien(cursorDeLaSala, m))
 
 cerrar('s51-retoque-encastre')

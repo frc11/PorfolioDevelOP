@@ -150,9 +150,11 @@ const recorrer = (paso: Paso): Recorrido => {
   }
   return { picoAlEntrar: pico, asentado, valleAlSalir: valle, cerradoEnS, atrasoA50ms, atrasoA400ms, saltoAlEntrar }
 }
-const conResorte = (r: Recorrido): boolean => r.picoAlEntrar > 1.05 && Math.abs(r.asentado - 1) < 0.02 && r.valleAlSalir < -0.05 && r.cerradoEnS <= 2.5 && r.atrasoA50ms > 0.1 && r.atrasoA400ms < 0.01 && r.saltoAlEntrar < 1e-6
+// [RETOQUE DEL ENCASTRE] 2A · cambió por pedido: el hueco va JUSTO donde se ve el cursor (el de la sala ya trae su
+// interpolación); antes seguía al puntero nativo con un resorte, con atraso (s51 2A).
+const conResorte = (r: Recorrido): boolean => r.picoAlEntrar > 1.05 && Math.abs(r.asentado - 1) < 0.02 && r.valleAlSalir < -0.05 && r.cerradoEnS <= 2.5 && r.atrasoA50ms < 1e-9 && r.atrasoA400ms < 1e-9 && r.saltoAlEntrar < 1e-6
 const medido = recorrer(pasoDelPuntero)
-afirmar(conResorte(medido), 'la fuerza se abre al entrar pasándose un poco y, al salir, vuelve a cero pasándose hacia adentro y se asienta en cero exacto (el resorte); el hueco sigue al cursor con atraso y, cerrado, salta adonde entra el mouse (no cruza el símbolo)', `pico ${medido.picoAlEntrar.toFixed(2)} · valle ${medido.valleAlSalir.toFixed(2)} · cerrado en ${medido.cerradoEnS.toFixed(2)} s · atraso a 50 ms ${medido.atrasoA50ms.toFixed(2)}`)
+afirmar(conResorte(medido), 'la fuerza se abre al entrar pasándose un poco y, al salir, vuelve a cero pasándose hacia adentro y se asienta en cero exacto (el resorte); el hueco va justo donde se ve el cursor (RETOQUE DEL ENCASTRE 2A) y, al entrar, aparece ahí (no cruza el símbolo)', `pico ${medido.picoAlEntrar.toFixed(2)} · valle ${medido.valleAlSalir.toFixed(2)} · cerrado en ${medido.cerradoEnS.toFixed(2)} s · atraso a 50 ms ${medido.atrasoA50ms.toFixed(2)}`)
 const sinResorte: Paso = (p, o) => {
   p.x = o.x
   p.y = o.y
