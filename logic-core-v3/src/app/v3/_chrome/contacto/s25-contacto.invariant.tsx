@@ -70,7 +70,9 @@ afirmarIgual(precargaDe(disparadorDe('ia-automatizacion')), ['chatbot', 'automat
 afirmarIgual(precargaDe(disparadorDe(null)), [], '  y el resto de los disparadores abre sin nada marcado')
 controlPositivo('  el chequeo vería una precarga equivocada', { ...PRECARGA_POR_SERVICIO, web: ['tienda'] as const }, (tabla: Readonly<Record<string, readonly string[]>>) => tabla.web.join() === 'web')
 const SERVICIOS = ['src/app/v3/_secciones/servicios/CtaDelServicio.tsx', 'src/app/v3/_secciones/servicios/CtaQueRota.tsx'].map(leer)
-afirmar(SERVICIOS.every((f) => /data-abre-contacto=""/.test(f) && /data-precarga=\{/.test(f)), 'los dos CTA de Servicios (el de móvil y el que rota) abren el contacto con su servicio')
+// [NOCTURNO FINAL] A7 · cambió por pedido: los «Quiero mi…» abren el PANEL de contacto (la hoja) con su servicio marcado,
+// no viajan al formulario del pie.
+afirmar(SERVICIOS.every((f) => /data-abre-contacto="panel"/.test(f) && /data-precarga=\{/.test(f)), 'los dos CTA de Servicios (el de móvil y el que rota) abren el panel de contacto con su servicio marcado')
 // [RETOQUE 3D] 3I: `#contacto` es el formulario del pie (el viaje lo lleva); los `[data-abre-contacto]` viajan ahí también.
 // [CIERRE RETOQUE 3D] N1: menos los del panel (`data-abre-contacto="panel"`), que abren la hoja.
 const APERTURA = leer('src/app/v3/_chrome/contacto/apertura.ts')

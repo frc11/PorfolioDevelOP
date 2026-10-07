@@ -13,6 +13,7 @@
  *        piezas del pie no proyectan sombra y fuera de su sección no se dibujan.
  *   A5 · teléfono: al pasar a las Demos la escena de atrás no se congela (se suspende sólo con el bloque opaco tapando).
  *   A6 · «Hablemos» del hero abre el panel de contacto (no lleva al pie).
+ *   A7 · «Quiero mi…» de Servicios abre el panel de contacto con su opción marcada.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -30,6 +31,7 @@ import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
 import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { ABRE_EL_PANEL } from '../../_chrome/contacto/apertura'
+import { INTERESES, PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { Hero } from '../../_secciones/hero/Hero'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { seccionDe } from '../../_secciones/_contrato/forma'
@@ -394,5 +396,17 @@ const heroHtml = marcar(<Hero seccion={seccionDe('hero')} />, { anima: false })
 const hablemos = (h: string): boolean => new RegExp(`<a href="#contacto"[^>]*data-abre-contacto="${ABRE_EL_PANEL}"[^>]*>`).test(h) && (h.match(/data-abre-contacto=/g) ?? []).length === 1
 afirmar(hablemos(heroHtml) && CONTENIDO_DEL_HERO.ctaContacto.abre === ABRE_EL_PANEL, '«Hablemos» abre el PANEL de contacto, como el Contacto de la barra (y sólo él: «Mirá los trabajos» sigue viajando)')
 controlPositivo('el detector VE el «Hablemos» que viajaba al pie', heroHtml.replace(` data-abre-contacto="${ABRE_EL_PANEL}"`, ''), hablemos)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A7 · «Quiero mi…» de Servicios abre el panel de contacto con su opción marcada')
+
+// Los dos CTA de Servicios (el que rota, desde 1024, y el de cada servicio, en la rama apilada) abren la HOJA con la
+// precarga de su servicio en «¿Qué querés hacer?» (antes viajaban al formulario del pie, sin marcar nada).
+const ctasDeServicios = ['_secciones/servicios/CtaDelServicio.tsx', '_secciones/servicios/CtaQueRota.tsx'].map((r) => sinComentarios(leer(r)))
+const abrenElPanel = (fs: readonly string[]): boolean => fs.every((f) => f.includes(`data-abre-contacto="${ABRE_EL_PANEL}"`) && /data-precarga=\{/.test(f))
+const mapeo = PRECARGA_POR_SERVICIO.web.join() === 'web' && PRECARGA_POR_SERVICIO.software.join() === 'software' && PRECARGA_POR_SERVICIO['ia-automatizacion'].join() === 'chatbot,automatizaciones'
+const rotulo = (id: string): string => INTERESES.find((i) => i.id === id)?.rotulo ?? '?'
+afirmar(abrenElPanel(ctasDeServicios) && mapeo, 'los «Quiero mi…» abren el panel con su opción marcada: web → «Una página web», software → «Software a medida», IA → «Un chatbot con IA» y «Automatizaciones»', [rotulo('web'), rotulo('software'), rotulo('chatbot'), rotulo('automatizaciones')].join(' · '))
+controlPositivo('el detector VE los CTA que viajaban al pie', ctasDeServicios.map((f) => f.replace(`data-abre-contacto="${ABRE_EL_PANEL}"`, 'data-abre-contacto=""')), abrenElPanel)
 
 cerrar('s52-nocturno-final')

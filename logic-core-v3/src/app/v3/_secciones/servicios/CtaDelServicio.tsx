@@ -15,8 +15,8 @@ export function CtaDelServicio({ servicio, enEscritorio = false }: { readonly se
     // El acento lo hereda del bloque, que es el `[data-servicio]`: acá no va otro.
     <div
       data-pieza="cta-del-servicio"
-      // CONTACTO: abre el formulario con el servicio precargado.
-      data-abre-contacto=""
+      // CONTACTO: abre el formulario con el servicio precargado. [NOCTURNO FINAL] A7 · el panel (la hoja), con la opción marcada.
+      data-abre-contacto="panel"
       data-precarga={servicio.id}
       style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}
       className={enEscritorio ? undefined : 'escritorio:hidden'}
