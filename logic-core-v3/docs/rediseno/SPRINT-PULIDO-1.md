@@ -454,3 +454,58 @@ pasar por el golpe). La vuelta del viaje ya no tiene el (2).
 **Gate**: lint limpio en lo tocado; `tsc --noEmit` 0 errores; s31–s52 verdes (más s18, s27 y s39, que tocaba); `verificar`:
 los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a 1440 y 390 capturado con el banco, sin errores en
 la consola.
+
+### P17 · El CTA del final
+
+P17 va en dos commits: **A** (la cámara) y **B + C** (las variantes y el toque), porque A cambia la coreografía del
+producto y B/C viven atrás de banderas; se verifican por separado.
+
+#### P17-A · La cámara sin el techo del domo
+
+**Dónde vivía**: la pose C de `escena/finalDelRecorrido.ts` (`POSES_DEL_FINAL.cta`: altura 0, distancia 32, `frameY` −1) y
+sus dos keyframes en `choreography.ts` (`cta` y `cta · sostén`, la misma pose). **La causa**: a la altura del logo y con el
+logo contra el borde de abajo, el encuadre hace mirar la cámara para arriba (unos 12°): el borde de arriba del cuadro tocaba
+la pared lejana (radio 44) a 42,9 de altura —46,1 con el mouse abajo, que baja la cámara—, y el techo del domo está a 40
+(`HAZ.arriba`): el anillo del techo entraba arriba, en todos los anchos (el campo es vertical).
+
+**Qué cambió**:
+- C mira desde arriba: altura 4,5 y distancia 31, en las dos keyframes (el pitch baja y el horizonte queda bajo la cúpula).
+- El dolly-in leve al llegar va POR TIEMPO en el rig (`DOLLY_DEL_CTA`: 0,5 de mundo, 1,6 % de la distancia, en 1,6 s con
+  curva suave, mientras el progreso está en el sostén del CTA; fuera vuelve en el mismo tiempo; sólo con movimiento).
+- El lugar del CTA (de donde sale el tamaño de «Hablanos» en escritorio) se calcula con la distancia de ojo menos el dolly:
+  donde el logo queda más grande, así el CTA nunca lo pisa (`geometria.ts`).
+- La nota del keyframe para el exportador de la sonda (`probe-escena/_components/choreographyNotes.ts`), para que el
+  bloque exportado siga siendo el del archivo (`s7e-export-sprites`).
+
+**Por qué así** (buscado con la pista de verdad, no a ojo; lo que probé y no quedó):
+1. Subir la cámara a 8 y acercarla en el sostén (de 33,5 a 31 por scroll, para terminar a 32 de ojo y no tocar el CTA):
+   rompía `s23-final` §3 —fuera del alejamiento D ningún tramo pasa la velocidad del arranque, 3,413 alturas de cuadro por
+   pantalla; daba 4,05: subir cuesta recorrido en B → C—.
+2. Llegar a 4,5 / 31 y subir a 7,5 / 30 en el sostén (el dolly por scroll): cumplía s23, pero rompía `s9e-recorrido` y
+   `s7e-export-sprites` —un sostén es copia exacta de su pose (por eso la cámara se clava) y el bloque exportado tiene que
+   ser el del archivo—. No se aflojaron: el dolly pasó al rig, por tiempo.
+3. La pose fija elegida queda en 3,402 de velocidad y el borde de arriba no pasa de 35,9 en ningún punto del camino
+   (valores → CTA → pie), en ningún aspecto, con el mouse en sus dos puntas y con el dolly puesto.
+
+Lo que cuesta está en «Lo que no quedó bien»: el logo termina a 30,8 de ojo (era 32) y el lugar del CTA en escritorio baja
+de 36,8 a 35,2 svh («Hablanos» ~4 % más chico a 1440 × 900: de 100 a 96 px; en la lista de abajo de 1024 no cambia).
+
+**Medido** (`pulido-1/p17/`, banco en la pose del CTA, 1440 / 1024 / 768 / 390 / 375): antes, el anillo claro del techo
+arriba al centro en los cinco; después, la retícula de la pared hasta el borde y el horizonte (el anillo de logos y el piso)
+debajo del CTA. Entregas: `entregas/pulido-1/p17a-antes-despues-<ancho>.png`.
+
+**Las aserciones viejas que cambiaron**:
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` D3 · el logo abajo en C | distancia 32 exacta | la distancia de ojo (con el dolly) a más del doble de B, `frameY` −1, las dos keyframes iguales a su pose y el lugar del CTA desde donde el logo queda más grande | Fija lo mismo (el logo contra el borde de abajo y el CTA en el lugar que deja) con la pose nueva; el control de antes sigue rojo |
+
+`s23-final`, `s9e-recorrido` y `s7e-export-sprites` no se tocaron (pasan con la pose fija). `s52-pulido-1` P17-A: el borde
+de arriba del cuadro, con la pista de la coreografía de los valores al pie, en los cinco aspectos, con el mouse en sus dos
+puntas y con el dolly, toca la pared lejana por debajo del techo con 2 de aire (control: la cámara de antes); y el dolly-in
+por tiempo (menos del 5 %, en 1,6 s, suave, vuelve fuera del sostén; control: un dolly de golpe), que el rig aplica sólo con
+movimiento.
+
+**Gate de P17-A**: lint sin errores en lo tocado (un aviso viejo en `choreography.ts`, línea 1, que no es de acá); `tsc`
+0 errores; s23, s7e, s9e, s31–s52 verdes; `verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes);
+reposo a 1440, 390 y 768 capturado con el banco, sin errores en la consola.

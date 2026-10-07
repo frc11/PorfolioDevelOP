@@ -10,6 +10,7 @@
  *   P1  · el brillo del piso: zonas blancas de bloques que nacen, viven y mueren; el piso se oscurece apenas mientras corre.
  *   P22 · el encastre abajo de 1024: en su escenario (fuera de las secciones), encuadrado, con el dedo; quieto con movimiento reducido.
  *   P5  · un viaje del menú con el encastre avanzado: dura lo mismo que cualquiera; el final vuelve en paralelo, sin saltos.
+ *   P17 · el CTA del final: A, la cámara sin el techo del domo en ningún aspecto (desde arriba, con un dolly-in leve por tiempo).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -21,7 +22,13 @@ import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escen
 import { estadoQuieto } from '../escena/final/cuadroDelFinal'
 import { ANCLAS_DEL_HUECO, BRILLO_EN_EL_PISO, conElFinalEnElPiso } from '../escena/final/enElPiso'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
-import { ORBIT_TARGET_Y } from '../escena/probeScene'
+import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
+import { CHOREO_KEYFRAMES } from '../escena/choreography'
+import { MOUSE_HEIGHT_FACTOR } from '../escena/choreographyPhysics'
+import { buildTrack, sampleTrack } from '../escena/choreographySampler'
+import { HAZ } from '../escena/entorno/vivo'
+import { DOLLY_DEL_CTA, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, dollyDelCta, enElSostenDelCta, pasoDelDolly, progresoDelFinal } from '../escena/finalDelRecorrido'
+import { MOIRE_FAR_RADIUS } from '../escena/probeMoire'
 import {
   FINAL_DEL_PIE,
   REBOBINADO,
@@ -686,5 +693,76 @@ const cableadoP5 = (c: string): boolean =>
   /quietoRebobinado\(alRebobinar, quedaDelRebobinado\(s\.reloj\.rebobinado\.s, s\.reloj\.rebobinado\.dura\), EN_VIVO\)/.test(c)
 afirmar(cableadoP5(cuadroP5), '  el cableado: la escena lee cuánto dura el viaje en curso y el giro y el alejamiento del quieto vuelven con el mismo reloj (tomados de nuevo si un viaje corta un rebobinado)')
 controlPositivo('  el detector VE un quieto que no se toma de nuevo (saltaría al giro del principio del rebobinado)', cuadroP5.replace('if (alRebobinar.de !== s.reloj.fase) {', 'if (alRebobinar.de === null) {'), cableadoP5)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('P17-A · El CTA del final: la cámara sin el techo del domo en cuadro (1440, 1024, 768, 390, 375)')
+
+// Antes: en C la cámara estaba a la altura del logo (0) y, con el logo contra el borde de abajo (`frameY` −1), miraba para
+// arriba: el borde de arriba del cuadro tocaba la pared lejana a 42,9 de altura (46 con el mouse abajo) y el techo del domo
+// (a `HAZ.arriba`, 40) entraba arriba. Ahora llega desde arriba y en el sostén sube y se acerca apenas (el dolly-in leve).
+// Se mira la coreografía de verdad (la pista con sus curvas) de los valores al pie, con el mouse en sus dos puntas de altura,
+// en los cinco aspectos: cada rayo del borde de arriba tiene que tocar la pared lejana por debajo del techo, con aire.
+const ASPECTOS_P17 = [[1440, 900], [1024, 768], [768, 1024], [390, 844], [375, 812]] as const
+const AIRE_DEL_TECHO = 2
+/** Lo más alto que el borde de arriba del cuadro toca la pared lejana, en una pista, de los valores al pie. */
+const bordeDeArriba = (pista: ReturnType<typeof buildTrack>): number => {
+  const pose = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
+  const c = new THREE.PerspectiveCamera(CAMERA_FOV, 1, 0.1, 400)
+  const rayo = new THREE.Vector3()
+  let peor = Number.NEGATIVE_INFINITY
+  for (let p = progresoDelFinal(TIEMPOS_DEL_FINAL.valores.hasta); p <= 1; p += 2e-4) {
+    sampleTrack(pista, p, pose)
+    for (const [ancho, alto] of ASPECTOS_P17) {
+      c.aspect = ancho / alto
+      c.updateProjectionMatrix()
+      for (const [mouse, dolly] of [[-1, 0], [1, 0], [-1, DOLLY_DEL_CTA.u], [1, DOLLY_DEL_CTA.u]]) {
+        // Como el rig: la cámara en la órbita (con la altura que le suma el mouse y, por las dudas en todo el camino, el
+        // dolly-in del CTA), mirando al centro, y el encuadre.
+        const az = THREE.MathUtils.degToRad(pose.angleDeg)
+        const distancia = pose.distance - dolly
+        const altura = pose.height + mouse * MOUSE_HEIGHT_FACTOR * distancia
+        c.position.set(Math.sin(az) * distancia, altura, Math.cos(az) * distancia)
+        c.lookAt(0, ORBIT_TARGET_Y, 0)
+        if (pose.frameX !== 0 || pose.frameY !== 0) aimWithFraming(c, c.aspect, 6.86, 4.78, Math.hypot(distancia, altura - ORBIT_TARGET_Y), pose.frameX, pose.frameY)
+        c.updateMatrixWorld()
+        for (let i = 0; i <= 16; i += 1) {
+          rayo.set(-1 + i / 8, 1, 0.5).unproject(c).sub(c.position).normalize()
+          const o = c.position
+          const a = rayo.x * rayo.x + rayo.z * rayo.z
+          const b = 2 * (o.x * rayo.x + o.z * rayo.z)
+          const k = o.x * o.x + o.z * o.z - MOIRE_FAR_RADIUS * MOIRE_FAR_RADIUS
+          peor = Math.max(peor, o.y + ((-b + Math.sqrt(b * b - 4 * a * k)) / (2 * a)) * rayo.y)
+        }
+      }
+    }
+  }
+  return peor
+}
+const PISTA_P17 = buildTrack(CHOREO_KEYFRAMES)
+const techoBien = (pista: ReturnType<typeof buildTrack>): boolean => bordeDeArriba(pista) <= HAZ.arriba - AIRE_DEL_TECHO
+const bordeHoy = bordeDeArriba(PISTA_P17)
+afirmar(techoBien(PISTA_P17), 'en ningún aspecto ni con el mouse en sus puntas el borde de arriba del cuadro llega al techo del domo: de los valores al pie, toca la pared lejana por debajo del techo con aire', `lo más alto: ${bordeHoy.toFixed(1)} (el techo, a ${String(HAZ.arriba)})`)
+const conLaDeAntes = CHOREO_KEYFRAMES.map((k) => (k.name === 'cta' || k.name === 'cta · sostén' ? { ...k, pose: { ...k.pose, height: 0, distance: 32 } } : k))
+controlPositivo('el detector VE la cámara de antes (a la altura del logo, a 32: el techo arriba)', buildTrack(conLaDeAntes), techoBien)
+// El dolly-in leve al llegar, por tiempo (la pista sostiene la pose: s9e): en el sostén del CTA se acerca menos del 5 % de
+// la distancia en `entraS`, con curva suave; fuera vuelve; lo aplica el rig sólo con movimiento.
+const C = POSES_DEL_FINAL.cta
+type PasoDelDolly = typeof pasoDelDolly
+const dollyBien = (paso: PasoDelDolly): boolean => {
+  let k = 0
+  const enElCta = progresoDelFinal((TIEMPOS_DEL_FINAL.cta.llega + TIEMPOS_DEL_FINAL.cta.hasta) / 2)
+  const muestras: number[] = []
+  for (let i = 0; i < 240; i += 1) {
+    k = paso(k, enElSostenDelCta(enElCta), DT)
+    muestras.push(dollyDelCta(k))
+  }
+  const llega = muestras.findIndex((d) => d >= DOLLY_DEL_CTA.u - 1e-9) * DT
+  const maxPorCuadro = Math.max(...muestras.map((d, i) => (i === 0 ? d : d - muestras[i - 1])))
+  for (let i = 0; i < 240; i += 1) k = paso(k, enElSostenDelCta(progresoDelFinal(TIEMPOS_DEL_FINAL.pie.llega)), DT)
+  return C.height > 0 && C.frameY === -1 && DOLLY_DEL_CTA.u < 0.05 * Math.hypot(C.distance, C.height) && Math.abs(llega - DOLLY_DEL_CTA.entraS) <= 2 * DT && maxPorCuadro < (2 * DOLLY_DEL_CTA.u * DT) / DOLLY_DEL_CTA.entraS && k === 0 && !enElSostenDelCta(progresoDelFinal(TIEMPOS_DEL_FINAL.valores.hasta))
+}
+const rigP17 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
+afirmar(dollyBien(pasoDelDolly) && rigP17.includes('scratch.dolly.k = pasoDelDolly(scratch.dolly.k, physics && enElSostenDelCta(rigValues.progress), delta)') && rigP17.includes('distance -= dollyDelCta(scratch.dolly.k)'), '  al llegar, un dolly-in leve por tiempo (menos del 5 % de la distancia, en 1,6 s, con curva suave; fuera del sostén vuelve), sólo con movimiento', `ojo ${Math.hypot(C.distance, C.height).toFixed(2)} → ${(Math.hypot(C.distance, C.height) - DOLLY_DEL_CTA.u).toFixed(2)}`)
+controlPositivo('  el detector VE un dolly de golpe (en un cuadro)', ((k: number, en: boolean) => (en ? 1 : 0)) as PasoDelDolly, dollyBien)
 
 cerrar('s52-pulido-1')

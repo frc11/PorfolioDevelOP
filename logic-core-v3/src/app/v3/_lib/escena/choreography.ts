@@ -392,18 +392,19 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
   {
     // C · la cámara sube hasta quedar derecha y frontal. [NOCTURNO FINAL] D3 · y se aleja con el logo abajo: el CTA, al centro.
+    // [PULIDO 1] P17-A · desde arriba, sin el techo del domo en cuadro; el dolly-in leve al llegar va por tiempo (el rig).
     at: 0.9587,
     name: 'cta',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 0, distance: 32, frameX: 0, frameY: -1 },
+    pose: { angleDeg: 360, height: 4.5, distance: 31, frameX: 0, frameY: -1 },
   },
   {
     at: 0.9705,
     name: 'cta · sostén',
     ease: 'linear',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 0, distance: 32, frameX: 0, frameY: -1 },
+    pose: { angleDeg: 360, height: 4.5, distance: 31, frameX: 0, frameY: -1 },
   },
   {
     // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo

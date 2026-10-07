@@ -189,7 +189,10 @@ export const CHOREO_NOTES: KeyframeNotes = {
   // [FINAL] Las notas de los tiempos del final: B, C y el alejamiento D → E.
   valores: ['B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).'],
 
-  cta: ['C · la cámara sube hasta quedar derecha y frontal. [NOCTURNO FINAL] D3 · y se aleja con el logo abajo: el CTA, al centro.'],
+  cta: [
+    'C · la cámara sube hasta quedar derecha y frontal. [NOCTURNO FINAL] D3 · y se aleja con el logo abajo: el CTA, al centro.',
+    '[PULIDO 1] P17-A · desde arriba, sin el techo del domo en cuadro; el dolly-in leve al llegar va por tiempo (el rig).',
+  ],
 
   pie: [
     'D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo',

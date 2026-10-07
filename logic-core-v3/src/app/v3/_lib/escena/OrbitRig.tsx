@@ -47,6 +47,7 @@ import {
   type MutableChoreoPose,
   type MutableLightLevels,
 } from './choreographyTypes'
+import { dollyDelCta, enElSostenDelCta, pasoDelDolly } from './finalDelRecorrido'
 import { elevacionDe } from './lightArc'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
@@ -177,6 +178,8 @@ type RigScratch = {
   readonly lightTargets: LightRigTargets
   readonly lightInput: LightRigInput
   readonly lightCache: LightRigCache
+  /** [PULIDO 1] P17-A · el dolly-in leve al llegar al CTA (0 a 1, por tiempo: `finalDelRecorrido.ts`). */
+  readonly dolly: { k: number }
 }
 
 type OrbitRigProps = {
@@ -271,6 +274,7 @@ export function OrbitRig({
     lightTargets: createLightRigTargets(),
     lightInput: createLightRigInput(),
     lightCache: createLightRigCache(),
+    dolly: { k: 0 },
   })
 
   useFrame((state, delta) => {
@@ -411,6 +415,9 @@ export function OrbitRig({
       distance = live.distance
       frameX = live.frameX
       frameY = live.frameY
+      // [PULIDO 1] P17-A · al llegar al CTA, un dolly-in leve por tiempo (la pista sostiene la pose; sólo con movimiento).
+      scratch.dolly.k = pasoDelDolly(scratch.dolly.k, physics && enElSostenDelCta(rigValues.progress), delta)
+      distance -= dollyDelCta(scratch.dolly.k)
     } else {
       modeRef.current = 'manual'
 

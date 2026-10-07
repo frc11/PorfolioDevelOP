@@ -14,7 +14,7 @@
 
 import type { CSSProperties } from 'react'
 
-import { AIRE_DEL_LOGO_SVH, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, arribaDelLogoEncuadrado, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
+import { AIRE_DEL_LOGO_SVH, DOLLY_DEL_CTA, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, arribaDelLogoEncuadrado, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 
 export { huecoDelLogo }
 
@@ -46,7 +46,10 @@ const ARRIBA_DE_LOS_VALORES_SVH = 50 - SUBIDA_DE_LA_FRASE_SVH + 10
  * es una franja centrada que llega hasta el aire de arriba del logo, igual hacia arriba (queda lejos de la barra): de ella
  * sale el tamaño de la letra, así entra en cualquier alto. El logo arranca al 71,4 % del alto (en cualquier ancho).
  */
-export const ARRIBA_DEL_LOGO_EN_EL_CTA_SVH = arribaDelLogoEncuadrado(POSES_DEL_FINAL.cta.distance, POSES_DEL_FINAL.cta.frameY)
+// [PULIDO 1] P17-A · con la distancia de ojo (la cámara está arriba) menos el dolly-in del final: es donde el logo queda más
+// grande (a 30,8; era 32), así que el CTA nunca lo pisa.
+const POSE_C = POSES_DEL_FINAL.cta
+export const ARRIBA_DEL_LOGO_EN_EL_CTA_SVH = arribaDelLogoEncuadrado(Math.hypot(POSE_C.distance, POSE_C.height) - DOLLY_DEL_CTA.u, POSE_C.frameY)
 export const LUGAR_DEL_CTA_SVH = Math.round((ARRIBA_DEL_LOGO_EN_EL_CTA_SVH - 50 - AIRE_SVH) * 2 * 10) / 10
 
 /**

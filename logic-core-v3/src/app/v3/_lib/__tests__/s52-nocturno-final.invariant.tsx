@@ -54,7 +54,7 @@ import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido
 import { CONTENIDO as CONTENIDO_DE_QUIENES_D1 } from '../../_secciones/quienes-somos/contenido'
 import { PARED_ILUMINADA, modoDelAmanecer } from '../../_secciones/por-que-develop/PorQueDevelop'
 import { ALTO_DEL_CTA_EN_LISTA_SVH, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH, LUGAR_DEL_CTA_SVH } from '../../_secciones/por-que-develop/geometria'
-import { POSES_DEL_FINAL, arribaDelLogoEncuadrado } from '../escena/finalDelRecorrido'
+import { DOLLY_DEL_CTA, POSES_DEL_FINAL, arribaDelLogoEncuadrado } from '../escena/finalDelRecorrido'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 
 const V3 = 'src/app/v3'
@@ -742,12 +742,18 @@ titulo('D3 · El CTA del final, centrado en la pantalla, y «Hablanos» bastante
 // Antes, en escritorio, el CTA iba en la franja de abajo (del 77 al 97 % del alto), debajo del logo centrado; en el teléfono,
 // alineado a la izquierda; «Hablanos» a 32 px. Ahora: en C la cámara se aleja y baja el logo contra el borde de abajo, el
 // CTA va al centro de la pantalla y «Hablanos» va al display (104 px fluido; a 1440 × 900, 100).
+// [PULIDO 1] P17-A · cambió por pedido: C mira desde arriba (altura 4,5, distancia 31) para que no entre el techo del domo,
+// y el dolly-in leve al llegar va por tiempo en el rig (la pista sostiene); la distancia de ojo ya no es 32 exacta (31,3;
+// con el dolly, 30,8). Lo que se fija sigue igual: lejos de B (más del doble, aun con el dolly), el logo contra el borde de
+// abajo (`frameY` −1), las dos keyframes de C iguales a su pose y el lugar del CTA desde donde el logo queda más grande.
 const poseC = POSES_DEL_FINAL.cta
 const keyC = CHOREO_KEYFRAMES.filter((k) => k.name === 'cta' || k.name === 'cta · sostén').map((k) => k.pose)
-type PoseC = { readonly distance: number; readonly frameY: number }
-const logoAbajo = (p: PoseC, arriba: number): boolean => p.distance === 32 && p.frameY === -1 && arriba > 50 + 3 && arribaDelLogoEncuadrado(16, 0) === 26
-afirmar(logoAbajo(poseC, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH) && keyC.length === 2 && keyC.every((k) => k.distance === poseC.distance && k.frameY === poseC.frameY), 'en C la cámara se aleja (16 → 32) y baja el logo contra el borde (`frameY` −1): el logo arranca abajo de la mitad, y la coreografía dice lo mismo', `el logo arranca al ${String(ARRIBA_DEL_LOGO_EN_EL_CTA_SVH)} % del alto; antes, al 26`)
-controlPositivo('el detector VE el logo de antes (centrado, a 16)', { distance: 16, frameY: 0 } as PoseC, (p) => logoAbajo(p, arribaDelLogoEncuadrado(p.distance, p.frameY)))
+type PoseC = { readonly distance: number; readonly height: number; readonly frameY: number }
+const ojoDe = (p: PoseC): number => Math.hypot(p.distance, p.height) - DOLLY_DEL_CTA.u
+const logoAbajo = (p: PoseC, arriba: number): boolean => ojoDe(p) >= 2 * POSES_DEL_FINAL.valores.distance * 0.95 && p.frameY === -1 && arriba > 50 + 3 && arribaDelLogoEncuadrado(16, 0) === 26
+const igual = (a: PoseC, b: PoseC): boolean => a.distance === b.distance && a.height === b.height && a.frameY === b.frameY
+afirmar(logoAbajo(poseC, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH) && ARRIBA_DEL_LOGO_EN_EL_CTA_SVH === arribaDelLogoEncuadrado(ojoDe(poseC), -1) && keyC.length === 2 && keyC.every((k) => igual(k, poseC)), 'en C la cámara se aleja (de 16 a más del doble; [PULIDO 1] P17-A: desde arriba, con un dolly-in leve por tiempo) y baja el logo contra el borde (`frameY` −1): el logo arranca abajo de la mitad, el lugar del CTA sale de donde el logo queda más grande y la coreografía dice lo mismo', `el logo arranca al ${String(ARRIBA_DEL_LOGO_EN_EL_CTA_SVH)} % del alto; antes, al 26`)
+controlPositivo('el detector VE el logo de antes (centrado, a 16)', { distance: 16, height: 0, frameY: 0 } as PoseC, (p) => logoAbajo(p, arribaDelLogoEncuadrado(p.distance, p.frameY)))
 const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const centrado = (f: string): boolean =>
   f.includes('className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"') &&
