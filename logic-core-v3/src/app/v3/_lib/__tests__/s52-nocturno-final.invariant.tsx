@@ -19,6 +19,7 @@
  *   B3 · el círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas.
  *   B4 · el polvo en el pie: en la cinemática no se posa; el que cae no atraviesa las piezas del pie (un cupo se apoya).
  *   C1 · teléfono y tablet: el texto de Trabajos se lee sobre el logo de noche (un halo: la mezcla no atraviesa el pin).
+ *   C2 · Tu panel en el teléfono y la tablet: una columna, cada bloque al ancho; las demos se leen (pantalla angosta).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -41,6 +42,8 @@ import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
 import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { ABRE_EL_PANEL } from '../../_chrome/contacto/apertura'
+import { ANCHO_CON_BARRA, DEMO_ANGOSTA, pantallaAngosta } from '../../_panel-vivo/DemoDelPanel'
+import { claseEnColumna } from '../../_secciones/tu-panel/geometria'
 import { INTERESES, PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { Hero } from '../../_secciones/hero/Hero'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -559,5 +562,23 @@ const enLaBanda = banda.slice(banda.indexOf('@media (width < 1024px) {'), banda.
 const haloBien = (c: string): boolean => /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\],\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \{\s*text-shadow: var\(--halo-sobre-la-escena\);/.test(c) && /--halo-sobre-la-escena: 0 0 [0-9.]+em var\(--color-fondo\)/.test(c)
 afirmar(haloBien(enLaBanda), 'abajo de 1024 el texto del cartel de Portfolio y el de las demos lleva un halo del fondo de su superficie: se lee sobre el logo de noche (la mezcla no atraviesa el pin)')
 controlPositivo('el detector VE el cartel sin halo', enLaBanda.replace('text-shadow: var(--halo-sobre-la-escena);', ''), haloBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C2 · Tu panel en el teléfono y la tablet: una columna, cada bloque al ancho; las demos se leen')
+
+// Abajo de 1024 cada bloque va a todo el ancho (con los márgenes de la sección) y la demo se dibuja a una pantalla angosta,
+// la de su tarjeta: se ve a ~85 % (antes al 35 %: dibujada a ~1000 px en una tarjeta de 300), sin la barra lateral.
+const escalaAngosta = (anchoDeLaTarjeta: number): number => anchoDeLaTarjeta / pantallaAngosta(anchoDeLaTarjeta).ancho
+const tarjetas = [330, 350, 380, 600, 688, 714]
+const angostaBien = (f: typeof pantallaAngosta): boolean => tarjetas.every((w) => { const p = f(w); const e = w / p.ancho; return e >= 0.8 && e <= 0.9 && p.ancho < ANCHO_CON_BARRA && Math.abs(p.alto / p.ancho - DEMO_ANGOSTA.proporcion) < 0.01 })
+afirmar(angostaBien(pantallaAngosta), 'abajo de 1024 la demo se dibuja a la pantalla angosta de su tarjeta: se ve a ~85 % (se lee), sin la barra lateral, en 4:5', tarjetas.map((w) => `${String(w)} px → ${escalaAngosta(w).toFixed(2)}`).join(' · '))
+controlPositivo('el detector VE la de escritorio en el teléfono (dibujada a 1000 px: al 35 %)', ((w: number) => ({ ancho: Math.max(1000, w), alto: 720 })) as typeof pantallaAngosta, angostaBien)
+const demoTsx = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
+const tarjetaTsx = sinComentarios(leer('_secciones/tu-panel/Tarjeta.tsx'))
+const columnaBien = (d: string, t: string, clase: (i: number) => string): boolean =>
+  d.includes('const enUso = escritorio ? pantalla : pantallaAngosta(el.clientWidth)') && t.includes('max-escritorio:aspect-4/5') && DEMO_ANGOSTA.proporcion === 5 / 4 &&
+  [0, 1, 2, 3].every((i) => clase(i).split(' ')[0] === 'w-full' && !/(^| )ml-auto/.test(clase(i)) && /escritorio:@max-6xl:w-(22|18)\/25/.test(clase(i)))
+afirmar(columnaBien(demoTsx, tarjetaTsx, claseEnColumna), '  cada bloque a todo el ancho abajo de 1024 (sin la columna escalonada), con el marco de la pantalla angosta; en escritorio, como estaba')
+controlPositivo('  el detector VE la columna escalonada de antes', [demoTsx, tarjetaTsx, ((i: number) => (i % 2 === 0 ? 'w-22/25 escritorio:@max-6xl:w-22/25' : 'ml-auto w-18/25 escritorio:@max-6xl:w-18/25')) as typeof claseEnColumna] as const, ([d, t, c]: readonly [string, string, typeof claseEnColumna]) => columnaBien(d, t, c))
 
 cerrar('s52-nocturno-final')

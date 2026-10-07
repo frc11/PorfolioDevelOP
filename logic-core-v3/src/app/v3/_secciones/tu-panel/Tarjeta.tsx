@@ -58,7 +58,8 @@ export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta;
             <div
               data-parte="marco"
               style={medidas}
-              className="relative aspect-[var(--proporcion)] w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint"
+              // [NOCTURNO FINAL] C2 · abajo de 1024 el marco toma la proporción de la pantalla angosta de la demo (4:5, la de `DEMO_ANGOSTA`).
+              className="relative aspect-[var(--proporcion)] max-escritorio:aspect-4/5 w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint"
             >
               <DemoEnSuLugar demo={tarjeta.demo} pantalla={fila.pantalla} respaldo={respaldo} />
             </div>

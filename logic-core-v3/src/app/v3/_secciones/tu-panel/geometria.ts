@@ -186,9 +186,13 @@ export function fueraDelCuadro(tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): 
 
 // ── Las clases ─────────────────────────────────────────────────────────────
 
-/** El ancho de la columna de cada fila (todo ancho; en el caos lo pisa el de la tabla). Clases enteras. */
+/**
+ * El ancho de la columna de cada fila (en el caos lo pisa el de la tabla). Clases enteras. [NOCTURNO FINAL] C2 · abajo de
+ * 1024, cada bloque a todo el ancho (con los márgenes de la sección): una columna; la columna escalonada (22/25 y 18/25
+ * corrida a la derecha) queda para el escritorio angosto.
+ */
 export function claseEnColumna(indice: number): string {
-  return indice % 2 === 0 ? 'w-22/25 escritorio:@max-6xl:w-22/25' : 'ml-auto w-18/25 escritorio:@max-6xl:w-18/25'
+  return indice % 2 === 0 ? 'w-full escritorio:@max-6xl:w-22/25' : 'w-full escritorio:@max-6xl:ml-auto escritorio:@max-6xl:w-18/25'
 }
 
 /** Dónde flota cada fila en el caos (desde 72rem de contenido); en la columna angosta, en el flujo. La última, en el flujo siempre. */

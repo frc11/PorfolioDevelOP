@@ -49,6 +49,20 @@ export interface PantallaDeLaDemo {
 /** Desde qué ancho de pantalla de panel (px) la demo lleva la barra lateral: más angosta, se cierra (como el panel real abajo de `lg`). */
 export const ANCHO_CON_BARRA = 860
 
+/**
+ * [NOCTURNO FINAL] C2 · EN EL TELÉFONO Y LA TABLET la demo se dibuja a una pantalla ANGOSTA, la de su tarjeta (que ocupa el
+ * ancho, con márgenes, en `proporcion` alto/ancho): apenas más ancha que la tarjeta (se ve a `escala`, así se lee), entre
+ * `minimo` y `maximo` px, sin la barra lateral (como el panel real en el teléfono). Antes se dibujaba a la de escritorio
+ * (~1000 px) y en un teléfono quedaba al 35 %: ilegible.
+ */
+export const DEMO_ANGOSTA = { escala: 0.85, minimo: 400, maximo: 840, proporcion: 5 / 4 } as const
+
+/** [NOCTURNO FINAL] C2 · la pantalla angosta para una tarjeta de `anchoDeLaTarjeta` px. */
+export function pantallaAngosta(anchoDeLaTarjeta: number): PantallaDeLaDemo {
+  const ancho = Math.round(Math.min(DEMO_ANGOSTA.maximo, Math.max(DEMO_ANGOSTA.minimo, anchoDeLaTarjeta / DEMO_ANGOSTA.escala)))
+  return { ancho, alto: Math.round(ancho * DEMO_ANGOSTA.proporcion) }
+}
+
 /** Cuánto antes de entrar al cuadro se descarga y se monta: el paso de la captura a la demo no se ve. */
 const ANTES_DE_ENTRAR = '0px 0px 50% 0px'
 
@@ -64,7 +78,8 @@ const CONGELADA = '[&_*]:[animation-play-state:paused]'
 export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdDeDemo; readonly pantalla: PantallaDeLaDemo; readonly respaldo: ReactNode }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
   const [montada, setMontada] = useState(false)
-  const [escala, setEscala] = useState(0)
+  // La pantalla a la que se dibuja (la de escritorio, o abajo de 1024 la angosta de su tarjeta) y su escala.
+  const [dibujo, setDibujo] = useState<{ readonly pantalla: PantallaDeLaDemo; readonly escala: number }>({ pantalla, escala: 0 })
   const [pausada, setPausada] = useState(false)
   const reducido = usePrefiereMenosMovimiento()
   const pestana = usePestanaVisible()
@@ -83,7 +98,10 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
       { rootMargin: ANTES_DE_ENTRAR },
     )
     const vista = new IntersectionObserver((c) => informarVisibilidad(demo, c[c.length - 1]?.isIntersecting === true ? (c[c.length - 1]?.intersectionRatio ?? 0) : 0), { threshold: FRACCIONES })
-    const medida = new ResizeObserver(() => setEscala(el.clientWidth / pantalla.ancho))
+    const medida = new ResizeObserver(() => {
+      const enUso = escritorio ? pantalla : pantallaAngosta(el.clientWidth)
+      setDibujo({ pantalla: enUso, escala: el.clientWidth / enUso.ancho })
+    })
     cerca.observe(el)
     vista.observe(el)
     medida.observe(el)
@@ -94,11 +112,11 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
       medida.disconnect()
       informarVisibilidad(demo, 0)
     }
-  }, [demo, pantalla.ancho])
+  }, [demo, pantalla, escritorio])
   const Demo = DEMOS[demo]
   const corre = laMasVisible && pestana && !pausada && !reducido
-  const reproduccion: Reproduccion = { corre, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: pantalla.ancho >= ANCHO_CON_BARRA, bucle: !escritorio }
-  const escalada = escala > 0
+  const reproduccion: Reproduccion = { corre, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: dibujo.pantalla.ancho >= ANCHO_CON_BARRA, bucle: !escritorio }
+  const escalada = dibujo.escala > 0
   return (
     <div ref={caja} className="absolute inset-0 overflow-hidden">
       {respaldo}
@@ -109,7 +127,7 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
           data-pieza="demo-del-panel"
           data-corre={corre ? '' : undefined}
           className={`${escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'} max-escritorio:pointer-events-none${corre ? '' : ` ${CONGELADA}`}`}
-          style={escalada ? { width: pantalla.ancho, height: pantalla.alto, transform: `scale(${escala.toFixed(4)})` } : undefined}
+          style={escalada ? { width: dibujo.pantalla.ancho, height: dibujo.pantalla.alto, transform: `scale(${dibujo.escala.toFixed(4)})` } : undefined}
         >
           <button type="button" data-parte="saltar-la-demo" onClick={(e) => saltarLaDemo(e.currentTarget)} className="sr-only z-30 rounded-full bg-zinc-900 px-4 py-2 text-sm text-zinc-100 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus-visible:outline-2 focus-visible:outline-cyan-400">
             Saltar la demo
