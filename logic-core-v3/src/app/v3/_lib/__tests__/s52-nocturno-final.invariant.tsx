@@ -610,23 +610,26 @@ afirmar(sinBlanco(seccionDe('tu-panel'), panelTsx), 'abajo de 1024 Tu panel mide
 controlPositivo('el detector VE la fila de antes (700svh también en el teléfono)', { alto: '700svh' } as FilaDeAlto, (f) => sinBlanco(f, panelTsx))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('C4 · El pie angosto: entra en una pantalla y el formulario es una tarjeta sólida')
+titulo('C4 · El pie angosto: entra en una pantalla y el formulario va en su caja (PULIDO 1 P18: de vidrio)')
 
 // Medido (c4/): a 390 × 844 el pie medía 967 px (el titular se cortaba arriba) y sus campos, sin fondo y adentro de la
 // mezcla `difference`, desaparecían sobre el logo negro (también a 768). Ahora entra en 375 × 635, 390 × 664 (un iPhone con
 // las barras de Safari) y 768 × 1024. Acá, lo que lo hace: la tarjeta sin mezcla, la grilla del formulario, el relleno.
 const pieAngosto = marcar(<Cierre seccion={seccionDe('cierre')} />, { anima: false })
 const clasesDe = (html: string): string[] => [...html.matchAll(/class="([^"]*)"/g)].map((m) => m[1])
+// [PULIDO 1] P18 · la caja del contacto dejó de ser la tarjeta sólida (el papel, borde y sombra) y es de vidrio líquido
+// (`data-material="vidrio"`, el material del menú): lo pidió P18 (la sólida era demasiado invasiva). Lo que C4 fija sigue
+// igual de fuerte: UNA caja propia con el rótulo y el formulario, nada que mezcle adentro, mezclan sólo las otras tres.
 const tarjetaBien = (html: string): boolean => {
-  const tarjeta = clasesDe(html).filter((c) => /max-escritorio:bg-fondo/.test(c) && /max-escritorio:border\b/.test(c) && /max-escritorio:shadow-flotante/.test(c))
+  const cajas = [...html.matchAll(/<div[^>]*data-material="vidrio"[^>]*>/g)]
   const iForm = html.indexOf('<form id="contacto"')
-  const iTarjeta = tarjeta.length === 1 ? html.indexOf(`class="${tarjeta[0]}"`) : -1
-  // Entre la tarjeta y el formulario: sólo el rótulo «Contacto»; nada que mezcle adentro de la tarjeta.
+  const iTarjeta = cajas.length === 1 ? (cajas[0].index ?? -1) : -1
+  // Entre la caja y el formulario: sólo el rótulo «Contacto»; nada que mezcle adentro de la caja.
   const adentro = iTarjeta >= 0 && iForm > iTarjeta ? html.slice(iTarjeta, html.indexOf('</form>', iForm)) : ''
-  return tarjeta.length === 1 && !tarjeta[0].includes('mix-blend-difference') && adentro.length > 0 && !adentro.includes('mix-blend-difference') && clasesDe(html).filter((c) => c.includes('mix-blend-difference')).length === 3
+  return cajas.length === 1 && !cajas[0][0].includes('mix-blend-difference') && adentro.length > 0 && !adentro.includes('mix-blend-difference') && /<h3/.test(adentro) && clasesDe(html).filter((c) => c.includes('mix-blend-difference')).length === 3
 }
-afirmar(tarjetaBien(pieAngosto), 'abajo de 1024 el contacto es UNA tarjeta sólida (el papel, borde y sombra) sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
-controlPositivo('el detector VE la tarjeta mezclando (los campos de antes)', pieAngosto.replace('max-escritorio:shadow-flotante', 'max-escritorio:shadow-flotante max-escritorio:mix-blend-difference'), tarjetaBien)
+afirmar(tarjetaBien(pieAngosto), 'abajo de 1024 el contacto va en UNA caja propia (desde PULIDO 1 P18, de vidrio) con su rótulo, sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
+controlPositivo('el detector VE la caja mezclando (los campos de antes)', pieAngosto.replace('<form id="contacto"', '<form data-x="max-escritorio:mix-blend-difference" id="contacto"'), tarjetaBien)
 const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 const grillaBien = (f: string): boolean =>
   f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&

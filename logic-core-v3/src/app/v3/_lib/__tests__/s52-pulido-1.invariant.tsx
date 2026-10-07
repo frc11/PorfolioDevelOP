@@ -6,6 +6,7 @@
  *   Las banderas del sprint (apagadas en el producto; en la URL, con `?pruebas=` o sueltas: `?cta=a`).
  *   P2  · el rebobinado del encastre: proporcional a lo avanzado, con tope de 1,6 s y curva in-out; el quieto vuelve con él.
  *   P6  · el logo del intro baja con el titular: de su primera letra a la última, a velocidad constante (`?angel=asentado`).
+ *   P18 · el formulario del pie abajo de 1024: vidrio líquido (el material del menú, compartido), en AA de día y de noche.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -330,5 +331,33 @@ const asentadoBien = (h: typeof alturaDeLaCaida): boolean => {
 }
 afirmar(asentadoBien(alturaDeLaCaida) && ENTORNO.pruebas.angel === 'no' && entornoPedido('producto,angel=asentado').pruebas.angel === 'asentado' && /entornoDeLaEscena\(\)\.pruebas\.angel === 'asentado'/.test(sinComentarios(leer('_lib/escena/intro/CaidaDelLogo.tsx'))), '  con `?angel=asentado`, constante y en los últimos 0,12 s frena parejo hasta posarse, llegando en el mismo instante; apagado en el producto (lineal puro)')
 controlPositivo('  el detector VE un asentado que salta (frena de golpe)', ((u: number, alto?: number) => ((alto ?? 10) * (u >= 0.97 ? 0 : 1 - u / 0.97))) as typeof alturaDeLaCaida, asentadoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('P18 · El formulario del pie en el teléfono y la tablet: vidrio líquido (el material del menú, sin duplicarlo)')
+
+// La tarjeta sólida de C4 (el papel, borde y sombra) era demasiado invasiva. Abajo de 1024 la caja del contacto lleva el
+// material del menú del teléfono: una sola definición en `vidrio.css`, compartida por selector (`[data-material="vidrio"]`).
+const vidrio = sinComentarios(leer('_estilos/vidrio.css'))
+const DESENFOQUE = '-webkit-backdrop-filter: blur(var(--vidrio-desenfoque)) saturate(var(--vidrio-saturacion));'
+const materialBien = (css: string): boolean => {
+  const veces = css.split(DESENFOQUE).length - 1
+  const bloque = css.slice(0, css.indexOf(DESENFOQUE))
+  const selector = bloque.slice(bloque.lastIndexOf('}') + 1)
+  const compartido = (sel: string): boolean => new RegExp(`\\[data-v3\\] \\[data-pieza="vidrio"\\]${sel},\\s*\\[data-v3\\] \\[data-material="vidrio"\\]${sel}`).test(css)
+  return veces === 1 && /\[data-pieza="vidrio"\]/.test(selector) && /\[data-material="vidrio"\]/.test(selector) && !/position: fixed/.test(selector) &&
+    compartido('\\[data-seccion="invertida"\\]') && compartido('::before') && compartido('\\[data-seccion="invertida"\\]::before') && /\[data-v3\] \[data-pieza="vidrio"\] \{\s*position: fixed;\s*\}/.test(css)
+}
+afirmar(materialBien(vidrio), 'el material (tinte, desenfoque, especular y filo, claro y oscuro) se define UNA vez y lo comparten el menú y el formulario; el lugar fijo es sólo del menú')
+controlPositivo('el detector VE un material copiado para el formulario', `${vidrio}\n[data-v3] [data-material="vidrio"] { ${DESENFOQUE} }`, materialBien)
+// Lo propio del formulario, en su regla: el radio de una tarjeta, un tinte un poco más denso (rótulos chicos), el relleno de
+// los campos y el color del texto de ejemplo (el de base caía a ~2:1). Medido a 390, 375 y 768: AA de día y de noche.
+const propioBien = (css: string): boolean => /\[data-v3\] \[data-material="vidrio"\] \{[^}]*--vidrio-tinte-del-formulario: 66%;[^}]*border-radius: var\(--radius-medio\);[^}]*background-color: color-mix\(in srgb, var\(--color-fondo\) var\(--vidrio-tinte-del-formulario\), transparent\);/.test(css) && /\[data-v3\] \[data-material="vidrio"\] \[data-foco="campo"\] \{\s*background-color: var\(--campo-del-vidrio\);/.test(css) && /\[data-v3\] \[data-material="vidrio"\] \[data-foco="campo"\]::placeholder \{\s*color: var\(--ejemplo-del-campo\);\s*opacity: 1;/.test(css)
+afirmar(propioBien(vidrio), '  lo propio del formulario: el radio de tarjeta, el tinte al 66 %, el relleno de los campos y el texto de ejemplo con su color (AA sobre el logo negro)')
+controlPositivo('  el detector VE el texto de ejemplo de base (la tinta a la mitad, con la opacidad del campo encima)', vidrio.replace('color: var(--ejemplo-del-campo);', ''), propioBien)
+// La caja: sólo abajo de 1024 (desde ahí, la placa 3D: escritorio no cambia), con el tono de la zona donde está.
+const columnas = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
+const cajaBien = (c: string): boolean => /const angosto = useModoDelPie\(\) === 'plano'/.test(c) && /data-material=\{angosto \? 'vidrio' : undefined\}/.test(c) && /data-seccion=\{angosto && debajo === 'oscuro' \? 'invertida' : undefined\}/.test(c) && /const debajo = useTonoDebajo\(caja, angosto && aLaVista\)/.test(c) && /new IntersectionObserver/.test(c) && !/max-escritorio:bg-fondo|max-escritorio:shadow-flotante/.test(c)
+afirmar(cajaBien(columnas), '  la caja de vidrio sólo abajo de 1024, del tono de la zona (vidrio claro sobre la sala de día, oscuro sobre la noche), leído sólo con la caja a la vista; la tarjeta sólida se fue')
+controlPositivo('  el detector VE el vidrio también en escritorio', columnas.replace("data-material={angosto ? 'vidrio' : undefined}", 'data-material="vidrio"'), cajaBien)
 
 cerrar('s52-pulido-1')

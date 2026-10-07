@@ -17,9 +17,14 @@
  * `clip-path` por cuadro, con `data-genie`): su contenido se esconde (el texto viaja en las tiras, encima), las sombras
  * de adentro se apagan y un filo de luz (`filo-del-genie`) sigue la forma. Sin copia plana ni relevo: el material es el
  * mismo de punta a punta. Sin sombra de afuera: el recorte la cortaría y aparecería de golpe al final.
+ *
+ * [PULIDO 1] P18 · EL MATERIAL SE COMPARTE: lo lleva también `[data-material="vidrio"]` (el formulario del pie en el
+ * teléfono y la tablet, `cierre/ColumnasDelPie.tsx`): el tinte, el desenfoque, el especular y el filo son los mismos (una
+ * sola definición). Lo que es del menú queda sólo en `[data-pieza="vidrio"]`: el lugar fijo, la lente, el Genie y la franja.
  */
 
-[data-v3] [data-pieza="vidrio"] {
+[data-v3] [data-pieza="vidrio"],
+[data-v3] [data-material="vidrio"] {
   --vidrio-tinte: 56%;
   --vidrio-tinte-plano: 64%;
   --vidrio-desenfoque: var(--blur-panel);
@@ -29,7 +34,6 @@
   --vidrio-reflejo: 28%;
   --vidrio-reflejo-hasta: 24%;
   --vidrio-radio: calc(var(--radius-fuerte) * 3);
-  position: fixed;
   isolation: isolate;
   border-radius: var(--vidrio-radio);
   color: var(--color-tinta);
@@ -41,8 +45,35 @@
     inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-fondo) var(--vidrio-filo), transparent);
 }
 
+[data-v3] [data-pieza="vidrio"] {
+  position: fixed;
+}
+
+/* [PULIDO 1] P18 · el formulario: en su lugar (no fijo), con el radio de una tarjeta y un tinte un poco más denso que el del
+   menú (sus rótulos son chicos: con el logo negro detrás, al 56 % quedaban justos en AA). Sus campos llevan un relleno del
+   papel (del tono del vidrio) y el texto de ejemplo con su color propio: el de base es la tinta a la mitad (el preflight)
+   y con la opacidad del campo caía a ~2:1. */
+[data-v3] [data-material="vidrio"] {
+  --vidrio-tinte-del-formulario: 66%;
+  --campo-del-vidrio: color-mix(in srgb, var(--color-fondo) 72%, transparent);
+  --ejemplo-del-campo: color-mix(in srgb, currentColor 72%, transparent);
+  position: relative;
+  border-radius: var(--radius-medio);
+  background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-del-formulario), transparent);
+}
+
+[data-v3] [data-material="vidrio"] [data-foco="campo"] {
+  background-color: var(--campo-del-vidrio);
+}
+
+[data-v3] [data-material="vidrio"] [data-foco="campo"]::placeholder {
+  color: var(--ejemplo-del-campo);
+  opacity: 1;
+}
+
 /* En el vidrio oscuro la luz es el papel, que en la sala invertida es la tinta. */
-[data-v3] [data-pieza="vidrio"][data-seccion="invertida"] {
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"],
+[data-v3] [data-material="vidrio"][data-seccion="invertida"] {
   box-shadow:
     inset 0 var(--border-hairline) 0 0 color-mix(in srgb, var(--color-tinta) var(--vidrio-brillo), transparent),
     inset 0 0 0 var(--border-hairline) color-mix(in srgb, var(--color-tinta) var(--vidrio-filo), transparent);
@@ -53,7 +84,8 @@
 }
 
 /* El especular: una luz que baja desde el borde de arriba y se apaga, detrás del texto. */
-[data-v3] [data-pieza="vidrio"]::before {
+[data-v3] [data-pieza="vidrio"]::before,
+[data-v3] [data-material="vidrio"]::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -63,7 +95,8 @@
   pointer-events: none;
 }
 
-[data-v3] [data-pieza="vidrio"][data-seccion="invertida"]::before {
+[data-v3] [data-pieza="vidrio"][data-seccion="invertida"]::before,
+[data-v3] [data-material="vidrio"][data-seccion="invertida"]::before {
   background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-tinta) var(--vidrio-reflejo), transparent), transparent var(--vidrio-reflejo-hasta));
 }
 
@@ -198,7 +231,8 @@
 /* Sin `backdrop-filter` (un navegador viejo) el fondo se vería nítido detrás de los ítems: un tinte opaco, el papel con
    algo de tinta (claro) o al revés (oscuro). */
 @supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
-  [data-v3] [data-pieza="vidrio"] {
+  [data-v3] [data-pieza="vidrio"],
+  [data-v3] [data-material="vidrio"] {
     background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-plano), var(--color-tinta));
   }
 }

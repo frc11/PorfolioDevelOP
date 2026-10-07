@@ -2,10 +2,12 @@
 
 import { ArrowUpRight } from 'lucide-react'
 import type { MotionValue } from 'motion/react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
 import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
+import { useTonoDebajo } from '../../_chrome/menu/useTonoDebajo'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { CanalDePieza, CanalDeTexto } from '../_contrato/canales'
 import {
@@ -15,7 +17,7 @@ import {
 } from './contenido'
 import { FormularioDelPie } from './FormularioDelPie'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
-import { LlegadaDelPie } from '../../_lib/pie3d/registro'
+import { LlegadaDelPie, useModoDelPie } from '../../_lib/pie3d/registro'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
 
 /**
@@ -93,13 +95,43 @@ const CLASE_ICONO = 'size-[var(--spacing-4)]'
 
 /**
  * [NOCTURNO FINAL] C4 · la caja de cada columna. El recorrido mezcla con la escena abajo de 1024 (como antes). El contacto,
- * abajo de 1024, es una TARJETA SÓLIDA: el papel, con borde y sombra, y sin mezcla (la mezcla invertía también los campos,
- * que sin fondo desaparecían sobre el logo). Desde 1024, la placa 3D: sin tarjeta.
+ * abajo de 1024, va en una caja propia, sin mezcla (la mezcla invertía también los campos, que sin fondo desaparecían sobre
+ * el logo): [PULIDO 1] P18 · de VIDRIO LÍQUIDO (`CajaDeVidrio`), no la tarjeta sólida de C4. Desde 1024, la placa 3D.
  */
 const CAJA_DE_LA_COLUMNA: Readonly<Record<ClaseDeColumna, string>> = {
   recorrido: `flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] ${MEZCLA_SOBRE_LA_ESCENA}`,
-  contacto:
-    'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] max-escritorio:rounded-[var(--radius-medio)] max-escritorio:border max-escritorio:border-borde-fuerte max-escritorio:bg-fondo max-escritorio:p-[var(--spacing-3)] max-escritorio:shadow-flotante',
+  contacto: 'flex flex-col',
+}
+
+/** [PULIDO 1] P18 · la caja del contacto: el rótulo y el formulario (el material, de `vidrio.css`). */
+const CAJA_DEL_CONTACTO = 'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] max-escritorio:p-[var(--spacing-3)]'
+
+/**
+ * [PULIDO 1] P18 · EL CONTACTO DE VIDRIO, abajo de 1024: la tarjeta sólida de C4 era demasiado invasiva. Lleva el material
+ * del menú del teléfono (`[data-material="vidrio"]`: el mismo tinte, desenfoque, especular y filo, una sola definición) y
+ * el tono de la zona donde está (`useTonoDebajo`, el del botón del menú): sobre la sala de día, vidrio claro; sobre la
+ * noche, oscuro (`data-seccion="invertida"`): discreto, el logo se ve detrás. Los campos llevan un relleno del papel adentro
+ * del vidrio (`vidrio.css`): con el logo negro detrás, los placeholders siguen en AA. El tono se lee sólo con la caja a la
+ * vista. Con el pie de volumen (desde 1024) no hay caja: la placa 3D.
+ */
+function CajaDeVidrio({ children }: { readonly children: ReactNode }): React.JSX.Element {
+  // El pie plano es el de abajo de 1024 (desde ahí, el de volumen): la compuerta ya se resolvió arriba.
+  const angosto = useModoDelPie() === 'plano'
+  const caja = useRef<HTMLDivElement>(null)
+  const [aLaVista, setALaVista] = useState(false)
+  useEffect(() => {
+    const el = caja.current
+    if (!angosto || el === null) return undefined
+    const vigia = new IntersectionObserver(([e]) => setALaVista(e?.isIntersecting ?? false))
+    vigia.observe(el)
+    return () => vigia.disconnect()
+  }, [angosto])
+  const debajo = useTonoDebajo(caja, angosto && aLaVista)
+  return (
+    <div ref={caja} data-material={angosto ? 'vidrio' : undefined} data-seccion={angosto && debajo === 'oscuro' ? 'invertida' : undefined} className={CAJA_DEL_CONTACTO}>
+      {children}
+    </div>
+  )
 }
 
 export interface ColumnasDelPieProps {
@@ -122,21 +154,28 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
           // [FINAL 2] El recorrido mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`. El contacto, tarjeta.
           className={CAJA_DE_LA_COLUMNA[columna.clase]}
         >
-          {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. [RETOQUE DEL PIE] P2: en 3D desde 1025. */}
-          <TextoDelPie>
-            <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
-              {(contenido) => (
-                <EtiquetaDeSeccion como="h3" sangria={false}>
-                  {contenido}
-                </EtiquetaDeSeccion>
-              )}
-            </CanalDeTexto>
-          </TextoDelPie>
-          <CuerpoDeColumna clase={columna.clase} />
+          <ContenidoDeColumna clase={columna.clase}>
+            {/* [INTERFAZ 1] T1 · la etiqueta, por palabra (el canal del texto), con el progreso de su columna. [RETOQUE DEL PIE] P2: en 3D desde 1025. */}
+            <TextoDelPie>
+              <CanalDeTexto progreso={progreso} tipo="etiqueta" texto={columna.titulo}>
+                {(contenido) => (
+                  <EtiquetaDeSeccion como="h3" sangria={false}>
+                    {contenido}
+                  </EtiquetaDeSeccion>
+                )}
+              </CanalDeTexto>
+            </TextoDelPie>
+            <CuerpoDeColumna clase={columna.clase} />
+          </ContenidoDeColumna>
         </CanalDePieza>
       ))}
     </BloqueDeColumnasDelPie>
   )
+}
+
+/** [PULIDO 1] P18 · el contacto va en su caja de vidrio; el recorrido, tal cual. */
+function ContenidoDeColumna({ clase, children }: { readonly clase: ClaseDeColumna; readonly children: ReactNode }): React.JSX.Element {
+  return clase === 'contacto' ? <CajaDeVidrio>{children}</CajaDeVidrio> : <>{children}</>
 }
 
 function CuerpoDeColumna({ clase }: { readonly clase: ClaseDeColumna }): React.JSX.Element {

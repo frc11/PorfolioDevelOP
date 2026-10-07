@@ -218,3 +218,53 @@ titular pausado, una copia a mano de la duración y un asentado que frena de gol
 
 Reposo: `pulido-1/reposo/hoja-p6.png` (1440 y 390). En esta corrida el Chrome del banco usó la AMD integrada (la placa no
 es fija: CLAUDE.md); las mediciones de tiempo no dependen de ella.
+
+### P18 · El formulario del pie en el teléfono y la tablet: vidrio líquido
+
+**Antes:** abajo de 1024 el contacto era la tarjeta sólida de C4 (el papel, un borde y la sombra flotante): tapaba la
+parte de abajo del logo y pesaba. Medido además: su texto de ejemplo («nombre@dominio») daba 2,9:1 (el preflight de
+Tailwind 4 lo pinta con la tinta a la mitad y la opacidad del campo, 60 %, va encima): no llegaba a AA.
+
+**Qué cambió:**
+- `vidrio.css`: el material del menú del teléfono (tinte, desenfoque y saturación, especular, filo, la variante oscura y el
+  respaldo sin `backdrop-filter`) se define UNA vez y lo comparten dos selectores: `[data-pieza="vidrio"]` (el menú) y
+  `[data-material="vidrio"]` (el formulario). Lo que es sólo del menú (el lugar fijo, la lente, el Genie, la franja) quedó
+  sólo en el suyo. Lo propio del formulario, en su regla: el radio de una tarjeta, un tinte un poco más denso (66 % contra
+  56 %: sus rótulos son chicos y, con el logo negro detrás, al 56 % quedaban en 4,8:1), un relleno del papel en los campos
+  y el texto de ejemplo con su color (`--ejemplo-del-campo`, la tinta al 72 %). Tres tokens nuevos registrados.
+- `cierre/ColumnasDelPie.tsx`: la columna del contacto envuelve su rótulo y el formulario en `CajaDeVidrio`, que lleva el
+  material sólo con el pie plano (abajo de 1024; `useModoDelPie`, porque una sección no consulta la compuerta de ancho:
+  s7-contrato) y el tono de la zona donde está (`useTonoDebajo`, el del botón del menú, leído sólo con la caja a la vista):
+  vidrio claro sobre la sala de día, oscuro sobre la noche. Es el tono de la zona y no el contrario (el menú va al revés
+  para resaltar): el formulario tiene que ser discreto. En escritorio no hay caja (la placa 3D): medido a 1440, ningún
+  `data-material` en el pie.
+
+**Medido** (`pulido-1/p18/`, con un nombre escrito, el mail vacío —se ve el ejemplo—, Enviar vacío —el error del mail y el
+foco en él—; el contraste del COLOR, como WCAG: el núcleo de la letra contra la mediana de lo que tiene detrás, con el
+vidrio y la escena):
+
+| | rótulos | error | texto escrito | ejemplo | Enviar |
+|---|---|---|---|---|---|
+| antes (la tarjeta sólida, emulada), 390 | 16,2–17,5 | 11,7 | 17,6 | **2,9** | 17,6 |
+| después, de día, 390 | 10,6–17,9 | 10,8 | 17,1 | 7,3 | 17,6 |
+| después, de día, 375 | 11,7–17,1 | 10,1 | 17,3 | 7,3 | 17,6 |
+| después, de día, 768 | 15,4–16,7 | 11,6 | 17,3 | 7,3 | 17,6 |
+| vidrio oscuro sobre la sala de día (el peor caso), 390 | 5,9–10,6 | 6,6 | 14,6 | 8,2 | 18,0 |
+| vidrio oscuro sobre la sala de día (el peor caso), 768 | 4,2–6,7 | 5,8 | 14,6 | 8,2 | 18,0 |
+
+El foco: el borde del campo, oscuro y de dos filetes (`foco.css`), sobre el relleno claro (visible en
+`p18/despues-*/uso-C.png`).
+
+**De noche:** el pie fuerza el día (el amanecer salta a 0,9 si se llega antes) y en el banco no lo pude poner de noche
+(congelar el amanecer no alcanza). Medí el peor caso posible: el vidrio oscuro forzado sobre la sala de día (la caja nunca
+elige esa combinación: el tono es el de la zona). Ahí los campos, los ejemplos, el foco y los errores siguen en AA; el
+único bajo 4,5 es el rótulo «CONTACTO» a 768 (4,2:1), en una combinación que el producto no muestra.
+
+**Ocupa menos:** sin el borde, sin la sombra flotante y sin el papel opaco; el logo se ve detrás (desenfocado). El tamaño
+de la caja no cambió (los campos siguen a 16 px por Safari).
+
+`s52-nocturno-final` C4 fijaba «una tarjeta sólida» por sus clases (el papel, el borde y la sombra): P18 la cambia por
+pedido. Ahora fija lo mismo contra la caja de vidrio (UNA caja propia con su rótulo y el formulario, nada que mezcle
+adentro, mezclan sólo las otras tres), y suma que el rótulo esté adentro. `s52-pulido-1` P18: el material una sola vez
+(control: un material copiado), lo propio del formulario (control: el ejemplo de base), la caja sólo con el pie plano y con
+el tono de la zona (control: el vidrio también en escritorio). Capturas: `entregas/pulido-1/p18-antes-despues-*.png`.
