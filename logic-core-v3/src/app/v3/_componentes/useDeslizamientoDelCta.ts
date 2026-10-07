@@ -6,6 +6,7 @@ import { useEffect, type RefObject } from 'react'
 import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
 
 import { planDelViaje } from '../_lib/escena/planDelViaje'
+import { retenerLosGestos } from '../_lib/gestosDelScroll'
 import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
 
 import {
@@ -116,7 +117,8 @@ const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS
  * Por eso hay UNA función idempotente y cinco lugares que la llaman:
  *
  *   1. `onComplete` — llegó. El foco va al destino.
- *   2. `virtual-scroll` con delta — la rueda canceló. El foco vuelve al CTA.
+ *   2. ~~`virtual-scroll` con delta — la rueda canceló~~. [RETOQUE DEL ENCASTRE] 2C · se fue: mientras viaja, el scroll se
+ *      ignora (los gestos se retienen) y el viaje termina siempre en su destino.
  *   3. `popstate` — apretaron atrás (o adelante) a mitad de vuelo.
  *   4. el reloj de seguridad — ver abajo, no es cinturón de más. Cubre
  *      `preludio + recorrido + margen`, no sólo el recorrido.
@@ -320,46 +322,15 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       if (RETARDO_ANTES_DE_DESAPARECER_MS === 0) encenderElVelo()
       else relojDelVelo = window.setTimeout(encenderElVelo, RETARDO_ANTES_DE_DESAPARECER_MS)
 
-      // El vigía de la cancelación. `virtual-scroll` se emite en la PRIMERA línea
-      // de `onVirtualScroll` (`lenis.mjs:579`), antes de todas las guardas, así
-      // que ve la rueda que después va a reemplazar la animación. Se filtra el
-      // delta cero, que es el `touchstart` sin gesto —el mismo `isClickOrTap` que
-      // la librería descarta dos líneas más abajo.
       /**
-       * ⚠️ **EL VIGÍA TIENE DOS FORMAS PORQUE HAY DOS MOTORES, y las dos dicen
-       * lo mismo: «el visitante retomó el control».**
-       *
-       * Con Lenis se escucha `virtual-scroll`, que se emite en la PRIMERA línea
-       * de `onVirtualScroll` (`lenis.mjs:579`), antes de todas las guardas, así
-       * que ve la rueda que después va a reemplazar la animación. Se filtra el
-       * delta cero, que es el `touchstart` sin gesto.
-       *
-       * Sin Lenis no hay ese evento, así que se escuchan los gestos crudos:
-       * `wheel`, `touchstart` y `keydown`. ⚠️ **No se puede escuchar `scroll`**:
-       * el viaje sin Lenis mueve el scroll con `window.scrollTo`, o sea que
-       * dispararía su propia cancelación en el primer cuadro. `wheel` y
-       * `touchstart` los produce una persona, nunca el animador.
+       * [RETOQUE DEL ENCASTRE] 2C · SIN FRENO: mientras viaja, el scroll se IGNORA. La rueda, el dedo y las teclas que
+       * scrollean se retienen antes que nadie (en la captura de la ventana, antes que Lenis: `gestosDelScroll.ts`), así
+       * que el viaje termina siempre en su destino y recién ahí se puede scrollear. Antes un gesto lo cancelaba donde
+       * estaba (la salida 2: `virtual-scroll` con Lenis; `wheel`, `touchstart` y `keydown` sin él): un viaje frenado en
+       * el medio del túnel dejaba la página en cualquier lado. Lo que no se puede retener —arrastrar la barra— lo corrige
+       * el motor en el cuadro siguiente (los dos escriben la posición absoluta).
        */
-      if (lenis !== null) {
-        soltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {
-          if (deltaX === 0 && deltaY === 0) return
-          terminar(false)
-        })
-      } else {
-        const alGesto = (): void => terminar(false)
-        window.addEventListener('wheel', alGesto, { passive: true })
-        window.addEventListener('touchstart', alGesto, { passive: true })
-        window.addEventListener('keydown', alGesto)
-        soltarLaRueda = () => {
-          window.removeEventListener('wheel', alGesto)
-          window.removeEventListener('touchstart', alGesto)
-          window.removeEventListener('keydown', alGesto)
-          if (cancelarElViaje !== null) {
-            cancelarElViaje()
-            cancelarElViaje = null
-          }
-        }
-      }
+      soltarLaRueda = retenerLosGestos(() => true)
 
       reloj = window.setTimeout(() => terminar(false), RELOJ_DE_SEGURIDAD_MS)
 
@@ -411,10 +382,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
            * `DIRECCION-ESCENA.md` §7.74.
            */
           easing: CURVA_DEL_VIAJE,
-          // ⚠ Va explícito aunque sea el default: ES la decisión que hace al viaje
-          // cancelable. Con `lock: true` la rueda entraría a `onVirtualScroll` y
-          // saldría por la guarda de `isLocked` con un `preventDefault()`, y el
-          // visitante quedaría encerrado los cuatro segundos.
+          // ⚠ Va explícito aunque sea el default. [RETOQUE DEL ENCASTRE] 2C · ya no es
+          // lo que hace al viaje cancelable (no lo es: la rueda no le llega a Lenis
+          // mientras viaja, la retiene `gestosDelScroll.ts`); Lenis no encierra nada
+          // por su cuenta.
           lock: false,
           onComplete: () => terminar(true),
         })

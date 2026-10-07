@@ -517,14 +517,19 @@ afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función
  * Lo que esta afirmación cuida no es el número sino que no haya una llamada
  * suelta: 5 + 2 gemelas = 7, y cada una tiene su renglón arriba.
  */
-afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 8, '  y exactamente OCHO sitios la llaman: cinco salidas, dos con gemela por el segundo motor y la llegada del salto')
+// [RETOQUE DEL ENCASTRE] 2C · cambió por pedido: la salida 2 (la rueda que cancelaba) y su gemela se fueron: mientras
+// viaja, el scroll se ignora y el viaje termina en su destino. Quedan seis llamadas: cuatro salidas, la gemela de la
+// llegada (el motor de abajo) y la llegada del salto.
+afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 6, '  y exactamente SEIS sitios la llaman: cuatro salidas (sin la de la rueda: RETOQUE DEL ENCASTRE 2C), la gemela de la llegada por el segundo motor y la llegada del salto')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')
 afirmar(EFECTO_LIMPIO.includes('onComplete: () => terminar(true)'), '  salida 1 — llegó')
-afirmar(EFECTO_LIMPIO.includes("lenis.on('virtual-scroll'"), '  salida 2 — la rueda: el evento se emite ANTES de todas las guardas de `onVirtualScroll`')
+const sinFreno = (f: string): boolean => f.includes('soltarLaRueda = retenerLosGestos(() => true)') && !f.includes("lenis.on('virtual-scroll'") && !/addEventListener\('(wheel|touchstart|keydown)', alGesto/.test(f)
+afirmar(sinFreno(EFECTO_LIMPIO), '  salida 2 — [RETOQUE DEL ENCASTRE] 2C · cambió por pedido: la rueda ya no cancela; mientras viaja, los gestos de scroll se retienen (antes que Lenis) y el viaje termina en su destino')
+controlPositivo('  el detector VE la rueda que cancelaba (con Lenis)', EFECTO_LIMPIO + "\nsoltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {", sinFreno)
 afirmar(EFECTO_LIMPIO.includes("window.addEventListener('popstate'"), '  salida 3 — el botón de atrás a mitad de vuelo')
 afirmar(EFECTO_LIMPIO.includes('window.setTimeout(() => terminar(false)'), '  salida 4 — el reloj, que es la única que corre con la pestaña tapada')
 afirmar(/return \(\) => \{[\s\S]*terminar\(false\)/.test(EFECTO_LIMPIO), '  salida 5 — la limpieza: desmontar no deja un `<main>` inerte')
-afirmar(EFECTO_LIMPIO.includes('lock: false'), 'el viaje va con `lock: false`, EXPLÍCITO: es lo que deja entrar la rueda por el camino normal de Lenis')
+afirmar(EFECTO_LIMPIO.includes('lock: false'), 'el viaje va con `lock: false`, EXPLÍCITO: Lenis no encierra nada por su cuenta (RETOQUE DEL ENCASTRE 2C: la rueda no le llega mientras viaja; la retiene `gestosDelScroll.ts`)')
 afirmar(
   LIBRO.includes('this.scrollTo(this.targetScroll + delta, {') && LIBRO.includes('programmatic: false,'),
   '  y ése es el camino: la rueda termina en `scrollTo(targetScroll + delta, { programmatic: false })`',

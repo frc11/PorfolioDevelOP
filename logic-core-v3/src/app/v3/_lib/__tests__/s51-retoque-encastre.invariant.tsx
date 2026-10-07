@@ -16,6 +16,7 @@
  *        reflejos, como antes de la cinemática, en cualquier pose).
  *   2A · los nanobots se desarman donde se VE el cursor de la sala (su halo, interpolado), no en el puntero nativo.
  *   2B · el pie llega y se va bastante más rápido (1,4 s de punta a punta; eran 3,2), con el escalonado por columnas.
+ *   2C · los viajes del menú sin freno: durante el viaje el scroll se ignora y termina siempre en su destino.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -402,5 +403,20 @@ const tiemposBien = (m: ReturnType<typeof tiemposDelPie>): boolean => m.llega <=
 const medidosDelPie = tiemposDelPie(avanceDelPie)
 afirmar(tiemposBien(medidosDelPie), 'el pie llega entero en menos de 1,7 s desde que asoma la última pantalla y se va en menos de 1,7 s al salir de ella (eran 3,2 s), con las columnas una después de la otra; las piezas reciben clics al llegar (antes, entonces)', `llega ${medidosDelPie.llega.toFixed(2)} s · se va ${medidosDelPie.seVa.toFixed(2)} s`)
 controlPositivo('el detector VE el ritmo de antes (3,2 s)', ((m, p, a, dt) => avanceDelPie(m, p, a, dt * 0.44)) as Seguidor, (f: Seguidor) => tiemposBien(tiemposDelPie(f)))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2C · Los viajes del menú sin freno: durante el viaje se ignora el scroll; termina en su destino y recién ahí se puede scrollear')
+
+// Al despegar, el viaje retiene todos los gestos de scroll (la rueda, el dedo y las teclas, antes que Lenis); al terminar
+// (por cualquiera de sus salidas) los suelta. Ningún gesto lo cancela: ni `virtual-scroll` de Lenis ni los crudos.
+const deslizamiento = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
+const viajeSinFreno = (d: string): boolean => {
+  const alClick = d.slice(d.indexOf('const alClick = (evento: MouseEvent): void => {'))
+  const terminar = d.slice(d.indexOf('const terminar = (llego: boolean): void => {'), d.indexOf('const alClick = (evento: MouseEvent): void => {'))
+  return alClick.indexOf('soltarLaRueda = retenerLosGestos(() => true)') > alClick.indexOf('enVuelo = true') && /if \(soltarLaRueda !== null\) \{\s*soltarLaRueda\(\)\s*soltarLaRueda = null/.test(terminar) &&
+    !d.includes("lenis.on('virtual-scroll'") && !/addEventListener\('(wheel|touchstart|keydown)'/.test(d)
+}
+afirmar(viajeSinFreno(deslizamiento), 'al despegar, el viaje retiene todos los gestos de scroll (rueda, dedo, teclas; antes que Lenis) y los suelta al terminar por cualquier salida; ningún gesto lo cancela: termina en su destino (medido en vivo: con rueda y flechas durante todo el vuelo, cae en el mismo píxel que sin ellas)')
+controlPositivo('el detector VE el viaje de antes (la rueda lo cancelaba)', deslizamiento.replace('soltarLaRueda = retenerLosGestos(() => true)', "soltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => terminar(false))"), viajeSinFreno)
 
 cerrar('s51-retoque-encastre')
