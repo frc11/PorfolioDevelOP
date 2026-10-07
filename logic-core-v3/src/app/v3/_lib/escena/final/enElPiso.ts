@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import { entornoDeLaEscena } from '../entorno'
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
 import { HUECO } from './hueco'
 
@@ -64,6 +65,52 @@ export const RASTRO_EN_EL_PISO = { puntos: 8, cada: 0.55, apagaS: 0.9, radio: 1.
  */
 export const CALMA_EN_EL_PISO = { radio: 4.2, borde: 4, amortigua: 30, labio: 0.1 } as const
 
+/**
+ * [PULIDO 1] P1 · EL BRILLO DEL PISO: SECTORES BLANCOS QUE NACEN Y MUEREN (reemplaza al piso volcán de NOCTURNO FINAL B2: sus
+ * focos naranjas al azar, que se leían como círculos rojos). Después del encastre (con el poder), una o dos ZONAS del piso vivo
+ * se prenden en blanco, cada bloque entero (la zona se mide en el centro del bloque: cuantizada al bloque). Cada zona es
+ * mayormente contigua y orgánica: la distancia a su centro, deformada por un ruido, contra un borde que crece con su vida
+ * (sin damero, sin grilla regular, sin círculos perfectos). Su ciclo: NACE desde el centro (`nace`, s), VIVE respirando y
+ * desplazándose apenas (`vive`, `respira`, `deriva`), MUERE achicándose (`muere`) y otra aparece «de la nada» en otro lugar de
+ * lo que se ve (`uAlcanceDelBrillo`, fuera del mar calmo). Cada zona va con su reloj (`periodo`, más largo que su vida: queda un
+ * hueco), desfasadas: nunca más de dos a la vez. Todo en el sombreador del piso, con una semilla fija (`semilla`). La intensidad
+ * con `?brillo=suave|fuerte` (el producto, `medio`): cuánto blanco, cuánto halo en el borde y cuánto se oscurece la sala.
+ */
+export const BRILLO_EN_EL_PISO = {
+  zonas: 2,
+  periodo: [10.8, 12.4],
+  desfase: 0.47,
+  nace: [1.5, 3],
+  vive: [3, 5],
+  muere: [1.5, 2.5],
+  radio: [3, 4.6],
+  deriva: 0.16,
+  respira: { amplitud: 0.08, periodoS: 3.2 },
+  irregular: 0.55,
+  ruido: 0.6,
+  suave: 0.22,
+  semilla: 17.31,
+  /** Con movimiento reducido el brillo queda quieto en este instante de su reloj (una zona viva). */
+  quietoEn: 10.5,
+  /** Cuánto más allá del círculo calmo puede empezar (u, sobre la mitad de su borde). */
+  margen: 1,
+  intensidad: { suave: { blanco: 0.7, halo: 0 }, medio: { blanco: 0.9, halo: 0.22 }, fuerte: { blanco: 1, halo: 0.38 } },
+  /** Cuánto se oscurece el piso mientras corre (10 a 15 % de lo que se ve, parejo), para que el blanco se lea. */
+  oscurece: { suave: 0.1, medio: 0.12, fuerte: 0.15 },
+} as const
+
+/** [PULIDO 1] P1 · la intensidad pedida (`?brillo=`; el producto, `medio`). */
+export type IntensidadDelBrillo = keyof typeof BRILLO_EN_EL_PISO.intensidad
+
+/** [PULIDO 1] P1 · la de esta carga: la prueba, o `medio`. */
+export function intensidadDelBrillo(): IntensidadDelBrillo {
+  const pedida = entornoDeLaEscena().pruebas.brillo
+  return pedida === 'no' ? 'medio' : pedida
+}
+
+/** [PULIDO 1] P1 · sólo para el banco: el brillo apagado (para medir su costo por diferencia, en el mismo cuadro). */
+export const BRILLO_DEL_BANCO = { apagado: false }
+
 /** Los uniformes del final en el piso: los comparten la simulación y el dibujo; los escribe `FinalDelPie`. */
 export const FINAL_EN_EL_PISO = {
   /** nace (reloj de la escena), x, z (u), fuerza (0: ninguno). */
@@ -82,34 +129,20 @@ export const FINAL_EN_EL_PISO = {
   uSinMancha: { value: 0 },
   /** [EL ENCASTRE] 2E · el poder liberado: 0 sin poder, 1 entero (con un destello al liberarse, un poco más). */
   uPoder: { value: 0 },
+  /**
+   * [PULIDO 1] P1 · lo que se ve del piso alrededor del logo, donde nacen las zonas: el medio ancho y el medio fondo del cuadro
+   * (u) y el ángulo de su derecha sobre el piso (rad: la cámara gira en el quieto).
+   */
+  uAlcanceDelBrillo: { value: new THREE.Vector3(16, 10, 0) },
+  /**
+   * [PULIDO 1] P1 · cuánto se oscurece el piso entero mientras corre el brillo (0 a `oscurece`): en el color que se ve, porque
+   * el tono de ACES aplasta los blancos (con la luz de la sala 12 % más baja el piso seguía en 0,96 de luminancia).
+   */
+  uOscuroDelBrillo: { value: 0 },
+  /** [PULIDO 1] P1 · cuánto blanco y cuánto halo (`?brillo=`), y si queda quieto (movimiento reducido: 1). */
+  uBrillo: { value: new THREE.Vector3(BRILLO_EN_EL_PISO.intensidad.medio.blanco, BRILLO_EN_EL_PISO.intensidad.medio.halo, 0) },
 }
 
-
-/**
- * [NOCTURNO FINAL] B2 · EL PISO VOLCÁN (reemplaza a la luz de abajo de RETOQUE DEL ENCASTRE 1E y 1F: el mouse ya no hace
- * brillo, sólo levanta los bloques, como antes). Después del encastre, debajo del piso entero hay LAVA: focos que se
- * encienden al azar (uno por celda de `celda` u, en un lugar al azar de la celda), cada uno con su ritmo (un período
- * entre `periodo[0]` y `periodo[1]` s y una fase propia: encendido una parte del período, `encendido`, con subida y bajada
- * suaves y un titileo), así que pulsan, se encienden y se apagan, nunca todos a la vez. Su luz sale POR LAS JUNTAS entre
- * los bloques: un núcleo intenso (`nucleo`, u; su luz desborda apenas las tapas, `desborde`) y un halo suave (`halo`, u),
- * gaussianos (sin anillos ni bordes), por foco el más fuerte (sin sumar: sin manchas donde se cruzan). La línea de la
- * junta y su resplandor (`linea`, `resplandor`, u) nunca más finos que un píxel (sin dientes). Los colores (lineales):
- * el núcleo casi blanco de tan caliente y el halo naranja. Fuera del mar calmo alrededor del logo (B3: el círculo quieto).
- */
-export const LAVA_EN_EL_PISO = {
-  celda: 7,
-  periodo: [2.6, 5.4],
-  encendido: 0.38,
-  titileo: 0.22,
-  halo: 2.4,
-  nucleo: 0.7,
-  desborde: 0.35,
-  linea: 0.03,
-  resplandor: 0.16,
-  color: { nucleo: [1, 0.86, 0.6], halo: [1, 0.38, 0.08] },
-  /** Cuánto más allá del círculo calmo termina de aparecer (u; empieza a mitad de su borde). */
-  margen: 1,
-} as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
 
@@ -193,56 +226,72 @@ uniform float uPoder;
 uniform float uCalmaDelFinal;
 float fueraDeLaCalma( vec2 xz ) {
 	if ( uCalmaDelFinal <= 0.0 ) return 1.0;
-	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde)}, ${f(CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + LAVA_EN_EL_PISO.margen)}, length( xz ) ), uCalmaDelFinal );
+	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde)}, ${f(CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + BRILLO_EN_EL_PISO.margen)}, length( xz ) ), uCalmaDelFinal );
 }
-// [NOCTURNO FINAL] B2 · EL PISO VOLCÁN: los focos de lava (LAVA_EN_EL_PISO). x: el halo; y: el núcleo (0 a 1).
-float azarDeLaLava( vec2 p ) {
+// [PULIDO 1] P1 · EL BRILLO DEL PISO (BRILLO_EN_EL_PISO): una o dos zonas blancas, orgánicas, cuantizadas al bloque.
+uniform vec3 uAlcanceDelBrillo;
+uniform vec3 uBrillo;
+uniform float uOscuroDelBrillo;
+float azarDelBrillo( vec2 p ) {
 	vec3 q = fract( vec3( p.xyx ) * 0.1031 );
 	q += dot( q, q.yzx + 33.33 );
 	return fract( ( q.x + q.y ) * q.z );
 }
-vec2 lavaEn( vec2 xz, float t ) {
-	vec2 celda = floor( xz / ${f(LAVA_EN_EL_PISO.celda)} );
-	float halo = 0.0;
-	float nucleo = 0.0;
-	for ( int j = -1; j <= 1; j++ ) {
-		for ( int i = -1; i <= 1; i++ ) {
-			vec2 c = celda + vec2( float( i ), float( j ) );
-			vec2 foco = ( c + 0.15 + 0.7 * vec2( azarDeLaLava( c ), azarDeLaLava( c + 7.31 ) ) ) * ${f(LAVA_EN_EL_PISO.celda)};
-			float semilla = azarDeLaLava( c + 19.7 );
-			float periodo = ${f(LAVA_EN_EL_PISO.periodo[0])} + ${f(LAVA_EN_EL_PISO.periodo[1] - LAVA_EN_EL_PISO.periodo[0])} * semilla;
-			float x = fract( t / periodo + azarDeLaLava( c + 3.17 ) ) / ${f(LAVA_EN_EL_PISO.encendido)};
-			if ( x >= 1.0 ) continue;
-			float a = sin( 3.14159265 * x );
-			a *= a * ( 1.0 - ${f(LAVA_EN_EL_PISO.titileo)} * ( 0.5 + 0.5 * sin( t * ( 6.0 + 7.0 * semilla ) + semilla * 40.0 ) ) );
-			vec2 d = xz - foco;
-			float d2 = dot( d, d );
-			float r = ${f(LAVA_EN_EL_PISO.halo)} * ( 0.7 + 0.6 * azarDeLaLava( c + 11.3 ) );
-			halo = max( halo, a * exp( - d2 / ( r * r ) ) );
-			nucleo = max( nucleo, a * exp( - d2 / ${f(LAVA_EN_EL_PISO.nucleo * LAVA_EN_EL_PISO.nucleo)} ) );
-		}
-	}
-	return vec2( halo, nucleo );
+float ruidoDelBrillo( vec2 p ) {
+	vec2 i = floor( p );
+	vec2 u = fract( p );
+	u = u * u * ( 3.0 - 2.0 * u );
+	return mix( mix( azarDelBrillo( i ), azarDelBrillo( i + vec2( 1.0, 0.0 ) ), u.x ), mix( azarDelBrillo( i + vec2( 0.0, 1.0 ) ), azarDelBrillo( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
 }
-// La luz de la lava en este fragmento: por la junta (la línea y su resplandor, que se ensanchan con la luz), la pared de
-// la rendija encendida y, en el núcleo, la tapa apenas desbordada.
-vec3 conLaLava( vec3 color, float halo, float nucleo ) {
-	if ( halo <= 0.002 ) return color;
-	vec3 lava = mix( vec3( ${LAVA_EN_EL_PISO.color.halo.map(f).join(', ')} ), vec3( ${LAVA_EN_EL_PISO.color.nucleo.map(f).join(', ')} ), nucleo );
-	if ( vTapa < 0.5 ) return mix( color, lava, halo );
-	vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
-	float px = length( fwidth( vPiso.xz ) );
-	vec4 linea = exp( - filo / ( ${f(LAVA_EN_EL_PISO.linea)} * ( 0.6 + 0.8 * halo ) + px ) );
-	vec4 resplandor = exp( - filo / ( ${f(LAVA_EN_EL_PISO.resplandor)} * ( 0.3 + 1.2 * halo ) + px ) );
-	float junta = min( 1.0, halo * dot( vec4( 1.0 ), linea + 0.6 * resplandor ) );
-	return mix( color, lava, clamp( max( junta, ${f(LAVA_EN_EL_PISO.desborde)} * nucleo ), 0.0, 1.0 ) );
+// Una zona (k: su número) en el bloque de centro b, a los t s: x, cuánto se prende el bloque; y, el halo de su borde.
+vec2 zonaDelBrillo( vec2 b, float k, float t ) {
+	float periodo = ${f(BRILLO_EN_EL_PISO.periodo[0])} + ${f(BRILLO_EN_EL_PISO.periodo[1] - BRILLO_EN_EL_PISO.periodo[0])} * azarDelBrillo( vec2( k, 7.3 ) );
+	float tz = t + ( k * ${f(BRILLO_EN_EL_PISO.desfase)} ) * periodo + ${f(BRILLO_EN_EL_PISO.semilla)};
+	float n = floor( tz / periodo );
+	float tau = tz - n * periodo;
+	vec2 s = vec2( n, k * 13.1 + 0.7 );
+	float nace = ${f(BRILLO_EN_EL_PISO.nace[0])} + ${f(BRILLO_EN_EL_PISO.nace[1] - BRILLO_EN_EL_PISO.nace[0])} * azarDelBrillo( s + 1.1 );
+	float vive = ${f(BRILLO_EN_EL_PISO.vive[0])} + ${f(BRILLO_EN_EL_PISO.vive[1] - BRILLO_EN_EL_PISO.vive[0])} * azarDelBrillo( s + 2.3 );
+	float muere = ${f(BRILLO_EN_EL_PISO.muere[0])} + ${f(BRILLO_EN_EL_PISO.muere[1] - BRILLO_EN_EL_PISO.muere[0])} * azarDelBrillo( s + 3.7 );
+	// La vida: nace (0 a 1), vive (1), muere (1 a 0) y queda un hueco hasta el próximo período.
+	float vida = smoothstep( 0.0, nace, tau ) * ( 1.0 - smoothstep( nace + vive, nace + vive + muere, tau ) );
+	if ( vida <= 0.0 ) return vec2( 0.0 );
+	// El lugar: en lo que se ve, fuera del mar calmo; y se desplaza apenas mientras vive.
+	// En otro lugar que la anterior: el ángulo avanza 0,382 de vuelta por ciclo (la razón áurea) más un desvío (a lo sumo un cuarto).
+	float a = 6.2831853 * fract( azarDelBrillo( vec2( k, 3.9 ) ) + n * 0.381966 + 0.25 * azarDelBrillo( s + 4.9 ) );
+	vec2 e = vec2( cos( a ) * uAlcanceDelBrillo.x, sin( a ) * uAlcanceDelBrillo.y ) * ( 0.5 + 0.4 * azarDelBrillo( s + 5.3 ) );
+	float cg = cos( uAlcanceDelBrillo.z );
+	float sg = sin( uAlcanceDelBrillo.z );
+	vec2 c = vec2( e.x * cg - e.y * sg, e.x * sg + e.y * cg );
+	float minimo = ${f(CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde + BRILLO_EN_EL_PISO.margen + BRILLO_EN_EL_PISO.radio[0])};
+	float lejos = length( c );
+	if ( lejos < minimo ) c *= minimo / max( 0.001, lejos );
+	float da = 6.2831853 * azarDelBrillo( s + 6.1 );
+	c += vec2( cos( da ), sin( da ) ) * ${f(BRILLO_EN_EL_PISO.deriva)} * tau;
+	float radio = ( ${f(BRILLO_EN_EL_PISO.radio[0])} + ${f(BRILLO_EN_EL_PISO.radio[1] - BRILLO_EN_EL_PISO.radio[0])} * azarDelBrillo( s + 7.7 ) ) * ( 1.0 + ${f(BRILLO_EN_EL_PISO.respira.amplitud)} * sin( 6.2831853 * tau / ${f(BRILLO_EN_EL_PISO.respira.periodoS)} ) );
+	// La forma: la distancia deformada por el ruido (orgánica, no un círculo) contra un borde que crece con la vida. Lejos de
+	// todo borde posible (ni el ruido ni el halo llegan), nada: la mayoría del piso no paga el ruido.
+	float lejosDelCentro = length( b - c ) / radio;
+	if ( lejosDelCentro > vida + 0.45 + ${f(0.5 * BRILLO_EN_EL_PISO.irregular)} ) return vec2( 0.0 );
+	float d = lejosDelCentro + ${f(BRILLO_EN_EL_PISO.irregular)} * ( ruidoDelBrillo( b * ${f(BRILLO_EN_EL_PISO.ruido)} + s * 3.1 ) - 0.5 );
+	float prendido = 1.0 - smoothstep( vida - ${f(BRILLO_EN_EL_PISO.suave)}, vida, d );
+	float halo = ( 1.0 - smoothstep( vida, vida + 0.45, d ) ) * ( 1.0 - prendido ) * vida;
+	return vec2( prendido * min( 1.0, vida * 2.0 ), halo );
+}
+// El brillo en este fragmento: el de su bloque (el centro del bloque: cada uno se prende entero), el mayor de las zonas.
+vec3 conElBrillo( vec3 color, float energia ) {
+	vec2 b = vPiso.xz - ( vEnElBloque - 0.5 ) * uLado;
+	float t = mix( uTiempo, ${f(BRILLO_EN_EL_PISO.quietoEn)}, uBrillo.z );
+	vec2 z = max( zonaDelBrillo( b, 0.0, t ), zonaDelBrillo( b, 1.0, t ) ) * energia;
+	float k = clamp( z.x * uBrillo.x + z.y * uBrillo.y, 0.0, 1.0 );
+	// La tapa se prende blanca; el costado, un poco menos (el bloque sigue leyéndose como un bloque).
+	return mix( color, vec3( mix( 0.9, 1.0, vTapa ) ), k );
 }
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	// Con el poder liberado (después del encastre; en el destello, un poco más) y fuera del mar calmo.
 	float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );
 	if ( energia <= 0.0 ) return color;
-	vec2 lava = lavaEn( xz, uTiempo ) * energia;
-	return conLaLava( color, lava.x, lava.y );
+	return conElBrillo( color, energia );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {
@@ -285,7 +334,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

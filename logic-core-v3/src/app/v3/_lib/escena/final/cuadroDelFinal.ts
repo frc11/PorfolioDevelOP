@@ -5,7 +5,7 @@ import { FLOOR_Y } from '../probeScene'
 import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
-import { FINAL_EN_EL_PISO } from './enElPiso'
+import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
 import { FINAL_EN_REPOSO } from './enReposo'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
@@ -22,6 +22,7 @@ import {
   decidirElGesto,
   distanciaDelFinalAngosto,
   pasoDelReloj,
+  oscuroDelFinal,
   poder,
   poseDelLogo,
   quedaDelRebobinado,
@@ -132,6 +133,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uCalmaDelFinal.value = 0
   p.uSinMancha.value = 0
   p.uPoder.value = 0
+  p.uOscuroDelBrillo.value = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
 }
@@ -143,6 +145,11 @@ export interface CuadroDeLaEscena {
 }
 
 const AL_FONDO_PX = 2
+/** [PULIDO 1] P1 · las zonas del brillo nacen adentro de esta fracción de lo que se ve (no cortadas por el borde). */
+const ALCANCE_DEL_BRILLO = 0.85
+const DERECHA = new THREE.Vector3()
+/** [PULIDO 1] P1 · cuánto se oscurece el piso con el brillo (la intensidad de esta carga, leída una vez). */
+const OSCURECE = BRILLO_EN_EL_PISO.oscurece[intensidadDelBrillo()]
 /** [PULIDO 1] P22 · el ancho del logo (u) si la escena todavía no lo publicó: el del SVG a su escala. */
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
@@ -262,6 +269,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   }
   s.antes = fin
   piso.uPoder.value = poder(fin)
+  if (BRILLO_DEL_BANCO.apagado) piso.uPoder.value = 0
+  // [PULIDO 1] P1 · el piso se oscurece parejo mientras corre el brillo (y vuelve al rebobinar: es función de `fin`).
+  piso.uOscuroDelBrillo.value = OSCURECE * oscuroDelFinal(fin)
   const desdeElGolpe = t - s.golpeEn
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
@@ -281,6 +291,12 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [PULIDO 1] P22 · abajo de 1024, a la distancia del encuadre del teléfono (el logo ocupa la mitad de lo que lo limita).
   const distancia = s.angosto && state.camera instanceof THREE.PerspectiveCamera ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : null
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia)
+  // [PULIDO 1] P1 · lo que se ve del piso alrededor del logo (donde nacen las zonas del brillo), con la cámara de este cuadro.
+  if (state.camera instanceof THREE.PerspectiveCamera) {
+    const medio = state.camera.position.distanceTo(EN_VIVO.blanco) * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2) * ALCANCE_DEL_BRILLO
+    DERECHA.set(1, 0, 0).applyQuaternion(state.camera.quaternion)
+    piso.uAlcanceDelBrillo.value.set(medio * state.camera.aspect, medio, Math.atan2(DERECHA.z, DERECHA.x))
+  }
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia)

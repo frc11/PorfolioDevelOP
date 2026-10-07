@@ -262,9 +262,10 @@ titulo('1F · Brillo en lo automático (NOCTURNO FINAL B2: ahora es la lava del 
 // [NOCTURNO FINAL] B2 · cambió por pedido: lo automático (las rendijas que abrían las ondas) pasó a ser la LAVA del piso
 // entero: focos al azar que pulsan, por las juntas (lo detalla s52 B2). Lo que queda de 1F: espera al encastre (el poder) y
 // no entra al mar calmo del logo (su borde encendido dibujaba un marco de bloques).
+// [PULIDO 1] P1 · la lava pasó a ser el brillo blanco por zonas (s52-pulido-1 P1): lo que fija esto sigue igual.
 const juntasDelPiso = cuerpo(dibujo, 'vec3 conLasJuntas( vec3 color, vec2 xz ) {')
-const lavaConElPoder = (j: string): boolean => j.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && j.includes('vec2 lava = lavaEn( xz, uTiempo ) * energia;')
-afirmar(lavaConElPoder(juntasDelPiso) && dibujo.includes('float fueraDeLaCalma( vec2 xz ) {'), 'el brillo del piso espera al encastre (con el poder liberado) y queda fuera del mar calmo del logo (NOCTURNO FINAL B2: la lava)')
+const lavaConElPoder = (j: string): boolean => j.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && j.includes('return conElBrillo( color, energia );')
+afirmar(lavaConElPoder(juntasDelPiso) && dibujo.includes('float fueraDeLaCalma( vec2 xz ) {'), 'el brillo del piso espera al encastre (con el poder liberado) y queda fuera del mar calmo del logo ([PULIDO 1] P1: las zonas blancas)')
 controlPositivo('el detector VE un brillo que no espera al encastre', juntasDelPiso.replace('min( 1.0, uPoder ) * fueraDeLaCalma( xz )', 'fueraDeLaCalma( xz )'), lavaConElPoder)
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -29,12 +29,12 @@ import * as THREE from 'three'
 import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, VIAJE_CON_TOPE, duracionDelViaje } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
-import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, GOLPE_EN_EL_PISO, LAVA_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, GOLPE_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
-import { ATARDECER_DEL_FINAL, FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, atardecer, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, oscuroDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
@@ -389,7 +389,10 @@ const orbit = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
 // (Después del nivel con la interfaz y del atardecer del final, B2: la altura es la del nivel que queda.)
 const alturaDelViaje = (c: string): boolean => {
   const linea = c.indexOf('if (viajeEnCurso() !== null) arc.elevationDeg = elevacionDe(arc.level)')
-  return linea > c.indexOf('arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))') && linea > c.indexOf('arc.level *= 1 - ATARDECER_DEL_FINAL.nivel * tarde') && c.indexOf('arc.level *= 1 - ATARDECER_DEL_FINAL.nivel * tarde') > 0
+  // [PULIDO 1] P1 · el atardecer del final ya no toca el nivel del rig (oscurece el piso): la altura va después del último
+  // ajuste del nivel que queda (la interfaz), y ninguno la sigue.
+  const ultimoNivel = Math.max(c.lastIndexOf('arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))'), c.lastIndexOf('arc.level *= '))
+  return linea > 0 && linea > ultimoNivel && c.indexOf('arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))') > 0
 }
 const largoDeLaSombra = (grados: number): number => 1 / Math.tan(THREE.MathUtils.degToRad(grados))
 afirmar(alturaDelViaje(orbit) && elevacionDe(1) === 36 && largoDeLaSombra(elevacionDe(1)) < 1.4 && largoDeLaSombra(elevacionDe(0.1)) > 15, 'en un viaje del menú la altura del sol es la de su nivel (de día, 36°: la sombra del logo mide 1,4 veces su alto), no la del recorrido (en la noche de Trabajos, 3°: 17 veces, por todo el piso)', `de día ${largoDeLaSombra(elevacionDe(1)).toFixed(2)}× · con la del recorrido ${largoDeLaSombra(elevacionDe(0.1)).toFixed(1)}×`)
@@ -474,7 +477,7 @@ const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
 afirmar(luzDelLogo.includes('* (1 - enElAire)') && /const enElAire = Math\.min\(1, Math\.max\(0, \(logo\.position\.y - SOMBRA_DEL_LOGO\.aire\[0\]\)/.test(luzDelLogo), '  y la sombra del logo se apaga con el logo en el aire (cayendo, lejos del piso, se estiraba por el cuadro)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('B2 · El piso volcán: el mouse sólo levanta; destellos de lava al azar por las juntas de todo el piso; el atardecer parejo')
+titulo('B2 · El brillo del piso después del encastre (PULIDO 1 P1: zonas blancas); el mouse sólo levanta; la sala se oscurece pareja')
 
 // El dibujo del piso de verdad (el material con el final inyectado).
 const dibujoDelPisoB2 = (() => {
@@ -484,45 +487,28 @@ const dibujoDelPisoB2 = (() => {
   material.dispose()
   return sombreador.fragmentShader
 })()
-const L = LAVA_EN_EL_PISO
-// La lava, simulada en JS con la misma cuenta del sombreador: en el piso entero, focos que se encienden y se apagan (nunca
-// todos a la vez), núcleo y halo gaussianos (sin anillos: decrece con la distancia al foco).
-const azar = (x: number, y: number): number => {
-  let [a, b, c] = [x * 0.1031, y * 0.1031, x * 0.1031].map((v) => v - Math.floor(v))
-  const d = a * (b + 33.33) + b * (c + 33.33) + c * (a + 33.33)
-  ;[a, b, c] = [a + d, b + d, c + d]
-  const v = (a + b) * c
-  return v - Math.floor(v)
-}
-const focosEncendidos = (t: number): number => {
-  let n = 0
-  for (let i = -5; i <= 5; i += 1) {
-    for (let j = -5; j <= 5; j += 1) {
-      const semilla = azar(i + 19.7, j + 19.7)
-      const periodo = L.periodo[0] + (L.periodo[1] - L.periodo[0]) * semilla
-      const f = (t / periodo + azar(i + 3.17, j + 3.17)) % 1
-      if (f / L.encendido < 1) n += 1
-    }
-  }
-  return n
-}
-const encendidos = Array.from({ length: 60 }, (_, k) => focosEncendidos(k * 0.37))
-const nuncaTodos = encendidos.every((n) => n > 0 && n < 121) && Math.max(...encendidos) - Math.min(...encendidos) >= 3
-const lavaBien = (g: string): boolean => {
+// [PULIDO 1] P1 · la lava (focos naranjas al azar por las juntas, núcleo y halo gaussianos) y el atardecer cálido (−45 %,
+// 3600 K) se reemplazaron por pedido: el brillo son zonas blancas, orgánicas y cuantizadas al bloque, que nacen y mueren
+// (el detalle, con sus controles, en s52-pulido-1 P1), y la sala se oscurece apenas y neutra. Lo que B2 fija sigue igual de
+// fuerte: el mouse sólo levanta (sin brillo), el brillo espera al encastre (con el poder) y nace fuera del mar calmo, y lo que
+// oscurece es la sala entera (el rig de luz, nunca un sector), función de `fin` (al rebobinar, vuelve).
+const brilloBien = (g: string): boolean => {
   const juntas = g.slice(g.indexOf('vec3 conLasJuntas( vec3 color, vec2 xz ) {'))
-  return g.includes('vec2 lavaEn( vec2 xz, float t ) {') && g.includes('halo = max( halo, a * exp( - d2 / ( r * r ) ) );') && g.includes('nucleo = max( nucleo, a * exp( - d2 / ') && g.includes('float px = length( fwidth( vPiso.xz ) );') &&
-    juntas.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
+  return juntas.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && juntas.includes('return conElBrillo( color, energia );') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
 }
-afirmar(lavaBien(dibujoDelPisoB2) && nuncaTodos && L.color.halo[0] === 1 && L.color.nucleo[1] > L.color.halo[1], 'después del encastre, destellos de lava al azar por las juntas de TODO el piso: focos que pulsan, se encienden y se apagan, nunca todos a la vez; núcleo intenso y halo suave, gaussianos (por foco, el más fuerte: sin manchas ni anillos), sin dientes (un píxel como mínimo); el mouse ya no hace brillo (sólo levanta los bloques)', `encendidos de 121: ${String(Math.min(...encendidos))} a ${String(Math.max(...encendidos))}`)
-controlPositivo('el detector VE un brillo que no espera al encastre', dibujoDelPisoB2.replace('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );', 'float energia = fueraDeLaCalma( xz );'), lavaBien)
-controlPositivo('  y el brillo bajo el mouse de antes', `${dibujoDelPisoB2}\nvec2 resplandorDelRastro( vec2 xz ) { return vec2( 0.0 ); }`, lavaBien)
-// El atardecer: la sala ENTERA (el nivel y la temperatura del rig de luz: las luces, el ambiente, la niebla, el fondo) baja
-// y se entibia después del encastre; función de `fin` (al rebobinar, vuelve).
+afirmar(brilloBien(dibujoDelPisoB2), 'después del encastre (con el poder) y fuera del mar calmo, el brillo del piso ([PULIDO 1] P1: zonas blancas que nacen y mueren); el mouse ya no hace brillo (sólo levanta los bloques)')
+controlPositivo('el detector VE un brillo que no espera al encastre', dibujoDelPisoB2.replace('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );', 'float energia = fueraDeLaCalma( xz );'), brilloBien)
+controlPositivo('  y el brillo bajo el mouse de antes', `${dibujoDelPisoB2}\nvec2 resplandorDelRastro( vec2 xz ) { return vec2( 0.0 ); }`, brilloBien)
+// La sala ENTERA (el nivel del rig de luz: las luces, el ambiente, la niebla, el fondo) baja después del encastre; función
+// de `fin` (al rebobinar, vuelve). [PULIDO 1] P1: neutra (sin el tinte cálido) y apenas: 10 a 15 % según `?brillo=`.
+// [PULIDO 1] P1 · lo que se oscurece es el PISO ENTERO, en el color que se ve (con el tono de ACES, bajar la luz del rig casi
+// no movía su blanco y oscurecía el logo y el pie): parejo, nunca un sector; función de `fin` (al rebobinar, vuelve).
 const rigB2 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
-const atardecerBien = (c: string): boolean => /const tarde = atardecer\(EN_VIVO\.fin\)\s*if \(tarde > 0\) \{\s*arc\.level \*= 1 - ATARDECER_DEL_FINAL\.nivel \* tarde\s*arc\.kelvin \+= \(ATARDECER_DEL_FINAL\.kelvin - arc\.kelvin\) \* tarde/.test(c)
+const cuadroB2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
+const oscuroBien = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && cuadroB2.includes('piso.uOscuroDelBrillo.value = OSCURECE * oscuroDelFinal(fin)') && !/arc\.kelvin \+=/.test(rigB2)
 const alRas = FINAL_DEL_PIE.presion.hastaS / R.duracionS
-afirmar(atardecerBien(rigB2) && atardecer(0) === 0 && atardecer(alRas - 0.01) === 0 && atardecer(1) === 1 && ATARDECER_DEL_FINAL.nivel < 0.6, '  para que se lea, toda la sala atardece pareja después del encastre (el rig de luz entero: nunca un sector) y vuelve al rebobinar', `−${String(ATARDECER_DEL_FINAL.nivel * 100)} % · ${String(ATARDECER_DEL_FINAL.kelvin)} K`)
-controlPositivo('  el detector VE un atardecer que no está en el rig', rigB2.replace('arc.level *= 1 - ATARDECER_DEL_FINAL.nivel * tarde', ''), atardecerBien)
+afirmar(oscuroBien(dibujoDelPisoB2) && oscuroDelFinal(0) === 0 && oscuroDelFinal(alRas - 0.01) === 0 && oscuroDelFinal(1) === 1, '  para que se lea, el piso entero se oscurece parejo después del encastre (nunca un sector) y vuelve al rebobinar')
+controlPositivo('  el detector VE un oscurecimiento que no está en el piso', dibujoDelPisoB2.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;', ''), oscuroBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B3 · El círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas')
@@ -540,7 +526,7 @@ const circuloBien = (sim: string, dib: string, c: Calma): boolean =>
   /float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/.test(sim) && sim.includes('dibujo *= 1.0 - calmaDelFinal( xz );') &&
   /return mix\( 1\.0, smoothstep\( [0-9.]+, [0-9.]+, length\( xz \) \), uCalmaDelFinal \);/.test(dib) &&
   c.radio > mitadDelLogo && c.radio < 1.6 * mitadDelLogo && c.borde >= 4 * 0.8 && c.amortigua >= 10
-afirmar(circuloBien(simB3, dibujoDelPisoB2, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; la lava empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
+afirmar(circuloBien(simB3, dibujoDelPisoB2, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; el brillo empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
 controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), dibujoDelPisoB2, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
 controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, dibujoDelPisoB2, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
 const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))

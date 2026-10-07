@@ -47,7 +47,6 @@ import {
   type MutableChoreoPose,
   type MutableLightLevels,
 } from './choreographyTypes'
-import { ATARDECER_DEL_FINAL, EN_VIVO, atardecer } from './final/recorridoDelFinal'
 import { elevacionDe } from './lightArc'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
@@ -327,12 +326,9 @@ export function OrbitRig({
       arc.level = nivelConLaNocheDisparada(arc.level)
       // [INTERFAZ 2] La sala responde a la interfaz (con su bandera; sin ella, el mismo nivel) — `interfaz/respuesta.ts`.
       arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))
-      // [NOCTURNO FINAL] B2 · el atardecer del final (después del encastre): toda la sala, pareja; al rebobinar, vuelve.
-      const tarde = atardecer(EN_VIVO.fin)
-      if (tarde > 0) {
-        arc.level *= 1 - ATARDECER_DEL_FINAL.nivel * tarde
-        arc.kelvin += (ATARDECER_DEL_FINAL.kelvin - arc.kelvin) * tarde
-      }
+      // [NOCTURNO FINAL] B2 · acá el final oscurecía y entibiaba la sala entera (el atardecer). [PULIDO 1] P1 · se fue: con el
+      // tono de ACES la luz más baja casi no movía el blanco del piso y oscurecía el logo y el pie; lo que se oscurece es el
+      // piso, en el color que se ve (`final/enElPiso.ts`, `uOscuroDelBrillo`).
       // [NOCTURNO FINAL] A4 · en un viaje del menú la luz no es la del recorrido (`viaje.ts`): la altura del sol, la de su
       // nivel. Con la del recorrido (la noche de Trabajos, 3°) y la fuerza del día, la sombra del logo se estiraba por
       // todo el piso: la «sombra cuadrada» que aparecía usando el menú.

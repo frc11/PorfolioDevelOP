@@ -11,7 +11,7 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
 import { alCuadroDelFinal, crearElEstado, desvanecerElPie, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
-import { FINAL_EN_EL_PISO } from './enElPiso'
+import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
 import { FINAL_EN_REPOSO } from './enReposo'
 import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { EN_VIVO } from './recorridoDelFinal'
@@ -62,6 +62,9 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
+    // [PULIDO 1] P1 · la intensidad del brillo (`?brillo=`) y, quieto (movimiento reducido), el brillo quieto.
+    const intensidad = BRILLO_EN_EL_PISO.intensidad[intensidadDelBrillo()]
+    piso.uBrillo.value.set(intensidad.blanco, intensidad.halo, estatico ? 1 : 0)
     m.current = estado
     g.add(estado.pozo.grupo)
     return () => {
@@ -82,8 +85,17 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
     ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value })
+    // [PULIDO 1] P1 · el brillo del piso apagado y prendido, para medir su costo por diferencia.
+    const conBrillo = ventana as Window & { __brilloDelBanco?: { apagar: (apagado: boolean) => void } }
+    conBrillo.__brilloDelBanco = {
+      apagar: (apagado) => {
+        BRILLO_DEL_BANCO.apagado = apagado
+      },
+    }
     return () => {
       delete ventana.__finalDelBanco
+      delete conBrillo.__brilloDelBanco
+      BRILLO_DEL_BANCO.apagado = false
     }
   }, [logoGroupRef])
 

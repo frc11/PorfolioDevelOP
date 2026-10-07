@@ -328,3 +328,57 @@ Las aserciones viejas que cambiaron por P22 (todas fijaban «el final sólo desd
 encuadre en los cinco tamaños (también girando), el modo quieto y la otra lectura. Controles: un escenario que es una
 sección, uno también en escritorio, el final sólo desde 1024, la distancia de escritorio en un apaisado y un reloj quieto
 que anima.
+
+### P1 · El brillo del piso: sectores blancos que nacen y mueren
+
+**Dónde vivía el efecto del punto 1 del nocturno** (buscado en el log y en el código, no asumido): es el «piso volcán» de
+NOCTURNO FINAL B2, en `escena/final/enElPiso.ts` (`LAVA_EN_EL_PISO`, `lavaEn`, `conLaLava`): un foco por celda de 7 u en
+un lugar al azar, encendido el 38 % de su período, con núcleo casi blanco y halo naranja gaussianos por las juntas: los
+«círculos rojos al azar». Y el «atardecer» del final (`ATARDECER_DEL_FINAL`: la sala −45 % y a 3600 K, en `OrbitRig`).
+
+**Qué cambió** (la lava y el atardecer se borraron, código y constantes):
+- `BRILLO_EN_EL_PISO` + `zonaDelBrillo` / `conElBrillo`, en el MISMO sombreador del piso (ni un piso nuevo ni una malla por
+  bloque): una o dos ZONAS, cada una con su reloj (período de 10,8 a 12,4 s, desfasadas). Cada zona nace desde su centro
+  (1,5 a 3 s), vive (3 a 5 s) respirando (±8 % del radio) y desplazándose apenas (0,16 u/s), muere achicándose (1,5 a 2,5 s)
+  y la siguiente aparece en otro lugar (el ángulo avanza 0,382 de vuelta por ciclo más un desvío: dos seguidas quedan al menos
+  a 47°). Simulado con la misma cuenta del sombreador: nunca más de dos a la vez; la mitad del tiempo una, la otra mitad dos;
+  el hueco más largo sin ninguna, 2,7 s.
+- Cuantizado al bloque: la zona se mide en el CENTRO del bloque (`vPiso.xz − (vEnElBloque − 0,5) · uLado`): cada bloque se
+  prende entero. Orgánica: la distancia al centro deformada por un ruido de valor (nada de círculos, de damero ni de grilla
+  regular). La tapa del bloque va a blanco y el costado a 0,9 (sigue leyéndose como bloque); un halo suave en el borde.
+- Dónde nacen: adentro de lo que la cámara ve del piso (`uAlcanceDelBrillo`: el medio ancho y el medio fondo del cuadro,
+  girado con la cámara del quieto) y fuera del mar calmo del logo.
+- Semilla fija (`semilla`, y los ángulos y tamaños salen de un hash del número de ciclo): el mismo brillo en cada carga.
+- Con movimiento reducido (el final quieto del teléfono, P22): el brillo queda quieto en un instante con una zona viva.
+- **El oscurecimiento**: lo primero que probé fue bajar la luz de la sala un 12 % (el rig): con el tono de ACES el piso
+  seguía en 0,95–0,96 de luminancia (medido en la captura) y el blanco de las zonas no tenía contra qué leerse (1,04:1).
+  Lo que se oscurece ahora es el PISO ENTERO en el color que se ve (`uOscuroDelBrillo`, parejo, neutro), 10 / 12 / 15 % según
+  `?brillo=suave|medio|fuerte`, con la transición de 1,4 s desde que el logo queda al ras y sólo mientras corre el brillo
+  (al rebobinar vuelve). Medido: el piso a 0,85 y las zonas a 1,0. El rig ya no oscurece (oscurecía también el logo y las
+  piezas del pie).
+- `?brillo=suave|fuerte` (el producto, `medio`): cuánto blanco (0,7 / 0,9 / 1), cuánto halo (0 / 0,22 / 0,38) y cuánto se
+  oscurece el piso.
+
+**Medido** (`pulido-1/p1/`): una captura cada 1,2–1,5 s durante ~20 s a 1440 y 390: ningún píxel rojo en ninguna; las zonas
+nacen, crecen, se achican y aparecen en otro lugar (`hoja-movil2.png`). El costo (el piso con el brillo y sin él, alternando
+en la misma carga con un gancho del banco, `__brilloDelBanco`; la AMD integrada): a 1440 con el dpr del banco (1,5), +0,74 ms
+(≈0,33 con dpr 1, dentro de los 0,5 de §4) después de una salida temprana por distancia (sin ella, +0,99); a 375, +0,17 ms
+(dentro de los 0,2).
+
+**Las aserciones viejas que cambiaron** (fijaban la lava y el atardecer, que P1 reemplaza por pedido):
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` B2 · el brillo | la lava: focos que pulsan (simulados: nunca todos a la vez), núcleo y halo gaussianos, colores de lava; espera al encastre; sin brillo bajo el mouse | espera al encastre y nace fuera del mar calmo (el brillo de P1); sin brillo bajo el mouse | Lo de la lava se fue por pedido y su detalle lo fija ahora `s52-pulido-1` P1 con cuatro afirmaciones y cinco controles; lo que seguía valiendo, igual y con los mismos dos controles |
+| `s52-nocturno-final` B2 · el atardecer | el rig baja el nivel 45 % y entibia a 3600 K | el piso entero se oscurece parejo (`uOscuroDelBrillo`), sin tinte | La misma regla («la sala pareja, nunca un sector, función de `fin`»), contra el código nuevo, con su control |
+| `s52-nocturno-final` A4 · la altura del sol en un viaje | iba después del nivel con la interfaz y del atardecer | va después del ÚLTIMO ajuste del nivel (el atardecer ya no toca el nivel) | Más general: ningún ajuste del nivel puede quedar después de la altura |
+| `s50-encastre` · sin tinta | `return conLaLava(…)` | `return conElBrillo( color, energia )` | Lo mismo (el poder energiza el piso, sin tinta ni la banda de CIERRE) |
+| `s51-retoque-encastre` 1F · espera al encastre | la lava con la energía | el brillo con la energía | Lo mismo |
+
+`s52-pulido-1` P1: blanco sin rojo (control: la lava), cuantizado al bloque (control: medido punto a punto), orgánico
+(control: una zona circular), el ciclo de vida con a lo sumo dos zonas en otro lugar (controles: tres a la vez, una que no
+muere), el oscurecimiento del piso (control: el atardecer de antes) y las intensidades y el quieto.
+
+**Gate**: lint limpio en lo tocado; `tsc --noEmit` 0 errores; s47–s52 verdes (s50 61, s51 44, s52-nocturno-final 104,
+s52-pulido-1 60, todas sin fallas); `verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a
+1440 y 390 capturado con el banco.

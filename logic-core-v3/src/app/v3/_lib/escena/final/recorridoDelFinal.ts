@@ -527,15 +527,16 @@ export function profundidadDelFinal(camara: THREE.Camera): number {
 }
 
 /**
- * [NOCTURNO FINAL] B2 · EL ATARDECER DEL FINAL: para que se lea la lava del piso, después del encastre la sala ENTERA baja
- * su luz (`nivel`: cuánto, en fracción) y se entibia (`kelvin`), pareja (las luces, el ambiente, la niebla y el fondo: el
- * rig de luz), nunca un sector; en `duraS` desde que queda al ras. Función de `fin`: al rebobinar vuelve a la luz normal.
+ * [NOCTURNO FINAL] B2 · el atardecer del final (−45 % y a 3600 K, para que se leyera la lava). [PULIDO 1] P1 · ahora es UN
+ * OSCURECIMIENTO PAREJO Y NEUTRO de la sala entera (sin el tinte cálido): un 10 a 15 % de la luz (`BRILLO_EN_EL_PISO.oscurece`,
+ * según `?brillo=`), para que el blanco del brillo del piso se lea; en `duraS` desde que el logo queda al ras y sólo mientras
+ * corre el brillo (es función de `fin`: al rebobinar vuelve).
  */
-export const ATARDECER_DEL_FINAL = { nivel: 0.45, kelvin: 3600, duraS: 1.4 } as const
+export const OSCURO_DEL_FINAL = { duraS: 1.4 } as const
 
-/** [NOCTURNO FINAL] B2 · cuánto atardeció (0 a 1). */
-export function atardecer(fin: number): number {
-  return suave((segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / ATARDECER_DEL_FINAL.duraS)
+/** [PULIDO 1] P1 · cuánto se oscureció (0 a 1, por la fracción de `BRILLO_EN_EL_PISO.oscurece`). */
+export function oscuroDelFinal(fin: number): number {
+  return suave((segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / OSCURO_DEL_FINAL.duraS)
 }
 
 /** [EL ENCASTRE] 2E · el poder liberado (0 hasta quedar al ras; un destello y después 1). Función de `fin`: se deshace al revertir. */
