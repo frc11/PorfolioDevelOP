@@ -12,6 +12,7 @@
  *   A4 · la sombra cuadrada: en un viaje la altura del sol es la de su luz (la del logo no se estira por el piso); las
  *        piezas del pie no proyectan sombra y fuera de su sección no se dibujan.
  *   A5 · teléfono: al pasar a las Demos la escena de atrás no se congela (se suspende sólo con el bloque opaco tapando).
+ *   A6 · «Hablemos» del hero abre el panel de contacto (no lleva al pie).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -28,6 +29,11 @@ import { ORBIT_TARGET_Y } from '../escena/probeScene'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
 import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { ABRE_EL_PANEL } from '../../_chrome/contacto/apertura'
+import { Hero } from '../../_secciones/hero/Hero'
+import { marcar } from '../../_secciones/_invariantes/render'
+import { seccionDe } from '../../_secciones/_contrato/forma'
+import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -378,5 +384,15 @@ const tapa = bloqueTapaElCuadro({ servicios: caja(-400, 2000), tuPanel: caja(200
 const enLasDemos = !bloqueTapaElCuadro({ servicios: caja(500, 3000), tuPanel: caja(3000, 6000), alto: 844 }) && !bloqueTapaElCuadro({ servicios: caja(-6000, -3000), tuPanel: caja(-3000, 300), alto: 844 })
 afirmar(enElTelefono(atadura) && tapa && enLasDemos, 'abajo de 1024 la escena se dibuja mientras se vea algo de la sala (en las Demos, translúcidas, ya no se congela) y se suspende sólo con Servicios y Tu panel tapando el cuadro entero')
 controlPositivo('el detector VE la regla de antes (sólo las ventanas del escritorio)', atadura.replace(/ \|\|\s*\(window\.innerWidth < 1024 && elBloque !== null && !bloqueTapaElCuadro\(elBloque\)\)/, ''), enElTelefono)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A6 · «Hablemos» del hero abre el panel de contacto (no lleva al pie)')
+
+// El chrome atiende los `[data-abre-contacto]` en la captura, antes que el viaje: los de `panel` abren la hoja
+// (`_chrome/contacto/apertura.ts`). «Hablemos» lo lleva; su `href` (`#contacto`) queda para cuando no hay JavaScript.
+const heroHtml = marcar(<Hero seccion={seccionDe('hero')} />, { anima: false })
+const hablemos = (h: string): boolean => new RegExp(`<a href="#contacto"[^>]*data-abre-contacto="${ABRE_EL_PANEL}"[^>]*>`).test(h) && (h.match(/data-abre-contacto=/g) ?? []).length === 1
+afirmar(hablemos(heroHtml) && CONTENIDO_DEL_HERO.ctaContacto.abre === ABRE_EL_PANEL, '«Hablemos» abre el PANEL de contacto, como el Contacto de la barra (y sólo él: «Mirá los trabajos» sigue viajando)')
+controlPositivo('el detector VE el «Hablemos» que viajaba al pie', heroHtml.replace(` data-abre-contacto="${ABRE_EL_PANEL}"`, ''), hablemos)
 
 cerrar('s52-nocturno-final')

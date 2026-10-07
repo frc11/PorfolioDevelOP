@@ -150,6 +150,11 @@ export function Cta({
 
 export interface CtaEnlaceProps extends CtaComun {
   readonly href: string
+  /**
+   * [NOCTURNO FINAL] A6 · si abre el panel de contacto en vez de viajar (`data-abre-contacto`, lo atiende el chrome:
+   * `_chrome/contacto/apertura.ts`). El `href` queda: sin JavaScript, el ancla lleva al formulario del pie.
+   */
+  readonly abreElContacto?: 'panel'
 }
 
 export function CtaEnlace({
@@ -160,6 +165,7 @@ export function CtaEnlace({
   forzado,
   mezcla = false,
   className,
+  abreElContacto,
 }: CtaEnlaceProps) {
   return (
     <a
@@ -169,6 +175,7 @@ export function CtaEnlace({
       data-registro={registro}
       data-forzado={forzado}
       {...(mezcla ? { 'data-mezcla': '' } : {})}
+      {...(abreElContacto === undefined ? {} : { 'data-abre-contacto': abreElContacto })}
       className={cn('text-base no-underline', className)}
     >
       <ContenidoDelCta rotulo={rotulo} />

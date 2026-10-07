@@ -188,10 +188,14 @@ export const CONTENIDO = {
     destino: '#trabajos',
   },
 
-  /** [CONTACTO] El gemelo del CTA: mismo registro y mismo rollover; `#contacto` lo intercepta el chrome y abre el formulario. */
+  /**
+   * [CONTACTO] El gemelo del CTA: mismo registro y mismo rollover; `#contacto` lo intercepta el chrome y abre el formulario.
+   * [NOCTURNO FINAL] A6 · abre el PANEL de contacto (la hoja, como el Contacto de la barra), no lleva al pie: `abre`.
+   */
   ctaContacto: {
     rotulo: 'Hablemos',
     destino: '#contacto',
+    abre: 'panel',
   },
 } as const
 
