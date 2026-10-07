@@ -24,10 +24,10 @@ import { HUECO } from './hueco'
  * calmo queda `HUECO.bajoElRas` debajo de la cara del logo al ras (sin contorno: `hueco.ts`).
  *
  * [EL ENCASTRE] 2E · EL PODER: cuando el logo queda al ras, desde las JUNTAS de los bloques alrededor del logo sale un
- * resplandor de tinta (`uPoder`): un núcleo negro justo en la junta y un halo denso que se abre de la junta hacia la tapa,
- * con el costado del bloque lleno (la rendija); vivo (fluye y respira con un ruido lento, no es una sombra quieta) y más
- * fuerte cerca del logo. El golpe es su pulso: el frente corre por el piso con su física y enciende las juntas por donde
- * pasa (la banda oscura de CIERRE, que se leía como una mancha, se fue).
+ * resplandor (`uPoder`), vivo (fluye y respira con un ruido lento) y más fuerte cerca del logo. El golpe es su pulso: el
+ * frente corre por el piso con su física y enciende las juntas por donde pasa. [RETOQUE DEL ENCASTRE] 1F · ese resplandor
+ * era de tinta: ahora es la luz de abajo (`LUZ_EN_EL_PISO`), más tenue que bajo el mouse, y el piso entero queda
+ * energizado: las ondas y el mar dejan escapar la luz por las rendijas que abren al pasar.
  */
 export const GOLPE_EN_EL_PISO = {
   duracionS: 1.7,
@@ -69,14 +69,6 @@ export const FINAL_EN_EL_PISO = {
   uPoder: { value: 0 },
 }
 
-/**
- * [EL ENCASTRE] 2E · EL RESPLANDOR DE LAS JUNTAS (u y fracciones): el núcleo (ancho desde la junta), el halo y el aura
- * (lo que se derrama de la rendija); cuánto oscurece cada uno como mucho; cuánto lejos llega alrededor del logo (en medias
- * cajas: entero hasta `cerca`, y se apaga con `alcance`); el ancho del frente del pulso (u); el ruido que lo hace fluir y
- * respirar (escala 1/u, velocidad 1/s) y la veta: el ancho del halo cambia a lo largo de la junta (no es una línea pareja,
- * que se leía como la sombra de una grilla).
- */
-export const PODER_EN_EL_PISO = { nucleo: 0.018, halo: 0.15, aura: 0.5, oscuroDelNucleo: 0.97, oscuroDelHalo: 0.66, oscuroDelAura: 0.3, cerca: 1.0, alcance: 0.75, frente: 1.6, ruido: { escala: 0.9, corre: 0.55 }, veta: { escala: 2.3, corre: 0.45 } } as const
 
 /**
  * [RETOQUE DEL ENCASTRE] 1E · LA LUZ DE ABAJO — bajo el mouse se veía oscuro, denso y de baja calidad: el resplandor era de
@@ -91,7 +83,24 @@ export const PODER_EN_EL_PISO = { nucleo: 0.018, halo: 0.15, aura: 0.5, oscuroDe
  * alto (u) una rendija está abierta del todo, y el núcleo: alrededor de la cabeza del rastro, bajo el mouse (su radio,
  * u), y desde y hasta cuánto calor inunda la tapa (lo que suma el rastro entero no inunda nada).
  */
-export const LUZ_EN_EL_PISO = { luz: 1, sombra: 0.36, linea: 0.022, halo: 0.16, abre: 0.12, nucleo: { radio: 0.75, desde: 0.3, hasta: 0.85 } } as const
+export const LUZ_EN_EL_PISO = {
+  luz: 1,
+  sombra: 0.36,
+  linea: 0.022,
+  halo: 0.16,
+  abre: 0.12,
+  nucleo: { radio: 0.75, desde: 0.3, hasta: 0.85 },
+  /**
+   * [RETOQUE DEL ENCASTRE] 1F · LO AUTOMÁTICO, más tenue que bajo el mouse (que llega a 1): cuánto pesan las rendijas que
+   * abren las ondas, el mar y el pulso del golpe (desde y hasta qué diferencia de alto con el vecino, u: el mar quieto no
+   * llega: sólo una rendija de verdad abierta, la de una ola, el pulso o la onda hacia una pieza), su halo (u: angosto,
+   * fijo), su sombra en una banda angosta junto a la junta encendida (u: el contraste; sombrear la tapa entera daba un
+   * parche en escalones de bloque, y una sombra ancha donde el piso se agita, un anillo gris que seguía al pulso y bandas
+   * grises del mar) y cuánto más allá del mar calmo arranca (en medias cajas del logo). Un brillo parejo alrededor del logo
+   * o en el frente del pulso (sin rendija) se leía como una mancha gris: no hay.
+   */
+  automatico: { ondas: 0.7, abre: [0.06, 0.2], halo: 0.05, sombra: 0.3, banda: 0.09, margen: 0.15 },
+} as const
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
 
@@ -159,32 +168,15 @@ uniform vec4 uMarcoDelHueco;
 uniform float uApertura;
 uniform float uSinMancha;
 uniform vec2 uCajaDelLogo;
-// [EL ENCASTRE] 2E · el resplandor de las juntas: cuánto en este punto (el poder alrededor del logo y el frente del pulso).
+// [EL ENCASTRE] 2E · el poder liberado (0 sin poder, 1 entero; en el destello, un poco más).
 uniform float uPoder;
-float azarDelPoder( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
-float ruidoDelPoder( vec2 p ) {
-	vec2 i = floor( p );
-	vec2 f = fract( p );
-	vec2 u = f * f * ( 3.0 - 2.0 * f );
-	return mix( mix( azarDelPoder( i ), azarDelPoder( i + vec2( 1.0, 0.0 ) ), u.x ), mix( azarDelPoder( i + vec2( 0.0, 1.0 ) ), azarDelPoder( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
-}
-float resplandorDelFinal( vec2 xz ) {
-	float r = 0.0;
-	if ( uPoder > 0.0 ) {
-		float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
-		float vivo = 0.62 + 0.38 * ruidoDelPoder( xz * ${f(PODER_EN_EL_PISO.ruido.escala)} + vec2( uTiempo * ${f(PODER_EN_EL_PISO.ruido.corre)}, - uTiempo * ${f(PODER_EN_EL_PISO.ruido.corre * 0.7)} ) );
-		float respira = 0.9 + 0.1 * sin( uTiempo * 2.4 - d * 3.0 );
-		r += uPoder * exp( - max( d - ${f(PODER_EN_EL_PISO.cerca)}, 0.0 ) / ${f(PODER_EN_EL_PISO.alcance)} ) * vivo * respira;
-	}
-	if ( uGolpe.w > 0.0 ) {
-		float t = ( uTiempo - uGolpe.x ) / ${f(GOLPE_EN_EL_PISO.duracionS)};
-		if ( t >= 0.0 && t <= 1.0 ) {
-			float frente = 1.5 + ${f(GOLPE_EN_EL_PISO.alcance)} * ( 1.0 - pow( 1.0 - t, 2.2 ) );
-			float d = ( length( xz - uGolpe.yz ) - frente ) / ${f(PODER_EN_EL_PISO.frente)};
-			r += uGolpe.w * exp( - d * d ) * pow( 1.0 - t, 1.2 ) * smoothstep( 0.0, 0.04, t );
-		}
-	}
-	return r;
+// [RETOQUE DEL ENCASTRE] 1F · fuera del mar calmo alrededor del logo: su borde son escalones del mar contra el piso quieto
+// y, encendidos, dibujaban un marco de bloques alrededor del logo.
+uniform float uCalmaDelFinal;
+float fueraDeLaCalma( vec2 xz ) {
+	if ( uCalmaDelFinal <= 0.0 ) return 1.0;
+	float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );
+	return mix( 1.0, smoothstep( ${f(CALMA_EN_EL_PISO.hasta)}, ${f(CALMA_EN_EL_PISO.hasta + LUZ_EN_EL_PISO.automatico.margen)}, d ), uCalmaDelFinal );
 }
 // [EL ENCASTRE] 2F · cuánta luz deja el rastro del mouse en este punto: x, lo que suma (hasta 1); y, [RETOQUE DEL ENCASTRE]
 // 1E · el núcleo (alrededor de la cabeza: bajo el mouse).
@@ -201,46 +193,40 @@ vec2 resplandorDelRastro( vec2 xz ) {
 	}
 	return vec2( min( 1.0, r ), nucleo );
 }
-// La junta: en la tapa, un núcleo negro justo en el borde y un halo que entra hacia la tapa; el costado (la rendija), lleno.
-// [RETOQUE DEL ENCASTRE] 1E · la luz de abajo en este fragmento: \`cuanto\`, su fuerza (0 a 1); \`caliente\`, el núcleo.
-vec3 conLaLuz( vec3 color, float cuanto, float caliente ) {
-	if ( cuanto <= 0.001 ) return color;
-	float k = min( cuanto, 1.0 );
+// [RETOQUE DEL ENCASTRE] 1E · 1F · la junta: la luz de abajo (el rastro del mouse y lo automático: el poder, el pulso, las ondas).
+// [RETOQUE DEL ENCASTRE] 1E · 1F · la luz de abajo en este fragmento, POR JUNTA (la diferencia de alto es la misma de los
+// dos lados: continua de una tapa a la otra). \`raton\`: la del rastro del mouse (0 a 1) y \`caliente\`, su núcleo; \`energia\`:
+// el poder liberado (con él, las rendijas que abren las ondas, el mar y el pulso del golpe dejan salir la luz: lo automático).
+vec3 conLaLuz( vec3 color, float raton, float caliente, float energia ) {
+	vec4 delta = abs( vVecinos );
+	vec4 solo = min( vec4( 1.0 ), ${f(LUZ_EN_EL_PISO.automatico.ondas)} * energia * smoothstep( ${f(LUZ_EN_EL_PISO.automatico.abre[0])}, ${f(LUZ_EN_EL_PISO.automatico.abre[1])}, delta ) );
+	float mayor = min( 1.0, raton + max( max( solo.x, solo.y ), max( solo.z, solo.w ) ) );
+	if ( mayor <= 0.001 ) return color;
 	vec3 luz = vec3( ${f(LUZ_EN_EL_PISO.luz)} );
 	// La pared de la rendija: la luz le pega de abajo.
-	if ( vTapa < 0.5 ) return mix( color, luz, k );
+	if ( vTapa < 0.5 ) return mix( color, luz, mayor );
 	vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
 	// Un píxel, en u: la línea y el halo nunca más finos (sin dientes).
 	float px = length( fwidth( vPiso.xz ) );
-	vec4 abre = smoothstep( 0.0, ${f(LUZ_EN_EL_PISO.abre)}, abs( vVecinos ) );
-	vec4 linea = exp( - filo / ( ${f(LUZ_EN_EL_PISO.linea)} * ( 0.6 + 0.4 * k ) + px ) ) * ( 0.6 + 0.4 * abre );
-	vec4 halo = exp( - filo / ( ${f(LUZ_EN_EL_PISO.halo)} * ( 0.5 + k ) * ( 0.6 + 0.6 * abre ) + px ) ) * ( 0.25 + 0.75 * abre );
-	float junta = min( 1.0, dot( linea, vec4( 1.0 ) ) + 0.8 * dot( halo, vec4( 1.0 ) ) );
+	vec4 abre = smoothstep( 0.0, ${f(LUZ_EN_EL_PISO.abre)}, delta );
+	// Bajo el mouse, la línea y un halo que se ensancha con la luz; lo automático, sólo la línea y un halo angosto (si se
+	// ensanchaba, una ola que levanta muchos bloques inundaba de blanco las tapas: un fogonazo, no rendijas).
+	vec4 linea = exp( - filo / ( ${f(LUZ_EN_EL_PISO.linea)} * ( 0.6 + 0.4 * raton ) + px ) ) * ( 0.6 + 0.4 * abre );
+	vec4 halo = exp( - filo / ( ${f(LUZ_EN_EL_PISO.halo)} * ( 0.5 + raton ) * ( 0.6 + 0.6 * abre ) + px ) ) * ( 0.25 + 0.75 * abre );
+	vec4 haloDeLaOla = exp( - filo / ( ${f(LUZ_EN_EL_PISO.automatico.halo)} + px ) );
+	float junta = min( 1.0, dot( vec4( raton ), linea + 0.8 * halo ) + dot( solo, linea + 0.6 * haloDeLaOla ) );
 	float nucleo = smoothstep( ${f(LUZ_EN_EL_PISO.nucleo.desde)}, ${f(LUZ_EN_EL_PISO.nucleo.hasta)}, caliente );
-	// La sombra de los bloques levantados (menos en el núcleo, que es luz): el contraste sobre el piso claro.
-	color *= 1.0 - ${f(LUZ_EN_EL_PISO.sombra)} * smoothstep( 0.0, 0.6, k ) * ( 1.0 - nucleo );
-	return mix( color, luz, clamp( max( k * junta, nucleo ), 0.0, 1.0 ) );
+	// La sombra (el contraste sobre el piso claro): la del mouse, ancha (los bloques levantados tapan la luz de la sala);
+	// la de lo automático, en una banda angosta junto a la junta encendida. Ninguna en el núcleo, que es luz.
+	float sombra = ${f(LUZ_EN_EL_PISO.sombra)} * smoothstep( 0.0, 0.6, raton ) + ${f(LUZ_EN_EL_PISO.automatico.sombra)} * min( 1.0, dot( solo, exp( - filo / ( ${f(LUZ_EN_EL_PISO.automatico.banda)} + px ) ) ) );
+	color *= 1.0 - min( ${f(LUZ_EN_EL_PISO.sombra)}, sombra ) * ( 1.0 - nucleo );
+	return mix( color, luz, clamp( max( junta, nucleo ), 0.0, 1.0 ) );
 }
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
-	float r = resplandorDelFinal( xz );
-	// [RETOQUE DEL ENCASTRE] 1E · el rastro del mouse es luz (\`conLaLuz\`); el poder y el pulso, todavía de tinta.
+	// [RETOQUE DEL ENCASTRE] 1E · bajo el mouse; 1F · y lo automático, más tenue: las rendijas que abren las ondas, el mar y
+	// el pulso del golpe en el piso entero, con el poder liberado (después del encastre; en el destello, un poco más).
 	vec2 rastro = resplandorDelRastro( xz );
-	color = conLaLuz( color, rastro.x, rastro.y );
-	if ( r <= 0.0 ) return color;
-	float junta = 1.0;
-	if ( vTapa > 0.5 ) {
-		vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;
-		float d = min( min( filo.x, filo.y ), min( filo.z, filo.w ) );
-		float veta = 0.55 + 0.9 * ruidoDelPoder( xz * ${f(PODER_EN_EL_PISO.veta.escala)} + vec2( - uTiempo * ${f(PODER_EN_EL_PISO.veta.corre)}, uTiempo * ${f(PODER_EN_EL_PISO.veta.corre * 0.8)} ) );
-		float nucleo = exp( - d / ${f(PODER_EN_EL_PISO.nucleo)} );
-		// El halo y el aura suman las cuatro juntas (con la más cercana sola, cada tapa se veía como una pirámide).
-		vec4 h = exp( - filo / ( ${f(PODER_EN_EL_PISO.halo)} * veta ) );
-		vec4 a = exp( - filo / ${f(PODER_EN_EL_PISO.aura)} );
-		float halo = min( 1.0, h.x + h.y + h.z + h.w );
-		float aura = min( 1.0, 0.6 * ( a.x + a.y + a.z + a.w ) );
-		junta = ${f(PODER_EN_EL_PISO.oscuroDelNucleo)} * nucleo + ( 1.0 - nucleo ) * min( 1.0, ${f(PODER_EN_EL_PISO.oscuroDelHalo)} * halo + ${f(PODER_EN_EL_PISO.oscuroDelAura)} * aura );
-	}
-	return mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );
+	return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {

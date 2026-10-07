@@ -10,6 +10,8 @@
  *        soltar retoma; rebobinada del todo espera, y el siguiente gesto mueve la página; los viajes del menú salen.
  *   1E · el brillo bajo el mouse es LUZ que nace abajo: línea y halo en las juntas (más en las rendijas abiertas), un núcleo
  *        bajo el mouse, la tapa sombreada para el contraste; sin dientes (un píxel como mínimo) ni bandas.
+ *   1F · después del encastre el piso entero queda energizado: las rendijas que abren las ondas, el mar y el pulso dejan
+ *        salir la misma luz, más tenue, por junta (sin parches ni anillos grises), fuera del mar calmo del logo.
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -218,14 +220,15 @@ const cuerpo = (glsl: string, firma: string): string => {
   const i = glsl.indexOf(firma)
   return i < 0 ? '' : glsl.slice(i, glsl.indexOf('\n}', i) + 2)
 }
+const FIRMA_DE_LA_LUZ = 'vec3 conLaLuz( vec3 color, float raton, float caliente, float energia ) {'
 const luzBien = (glsl: string): boolean => {
-  const luz = cuerpo(glsl, 'vec3 conLaLuz( vec3 color, float cuanto, float caliente ) {')
-  return luz.includes('vec3 luz = vec3( 1.0 );') && luz.includes('return mix( color, luz, clamp( max( k * junta, nucleo ), 0.0, 1.0 ) );') && luz.includes('if ( vTapa < 0.5 ) return mix( color, luz, k );') &&
-    luz.includes('float px = length( fwidth( vPiso.xz ) );') && (luz.match(/\+ px \)/g) ?? []).length === 2 && luz.includes('smoothstep( 0.0, 0.12, abs( vVecinos ) )') && !/[^h]step\(/.test(luz) &&
-    glsl.includes('color = conLaLuz( color, rastro.x, rastro.y );') && glsl.includes('nucleo = max( nucleo, q.w * q.z * exp(') && !/vec3\( 0\.045 \), clamp\( junta \* \( r \+ rastro \)/.test(glsl)
+  const luz = cuerpo(glsl, FIRMA_DE_LA_LUZ)
+  return luz.includes('vec3 luz = vec3( 1.0 );') && luz.includes('return mix( color, luz, clamp( max( junta, nucleo ), 0.0, 1.0 ) );') && luz.includes('if ( vTapa < 0.5 ) return mix( color, luz, mayor );') &&
+    luz.includes('float px = length( fwidth( vPiso.xz ) );') && (luz.match(/\+ px \)/g) ?? []).length === 4 && luz.includes('vec4 delta = abs( vVecinos );') && luz.includes('vec4 abre = smoothstep( 0.0, 0.12, delta );') && !/[^h]step\(/.test(luz) &&
+    luz.includes('float junta = min( 1.0, dot( vec4( raton ), linea + 0.8 * halo )') && glsl.includes('return conLaLuz( color, rastro.x, rastro.y, ') && glsl.includes('nucleo = max( nucleo, q.w * q.z * exp(') && !/vec3\( 0\.045 \)/.test(glsl)
 }
 afirmar(luzBien(dibujo) && LUZ_EN_EL_PISO.sombra <= 0.4 && LUZ_EN_EL_PISO.luz === 1, 'por las juntas bajo el mouse sale LUZ (blanca, hacia arriba del papel; antes, tinta): una línea y un halo que entra a la tapa en cada junta, más fuertes donde la rendija se abre; la pared de la rendija, iluminada; el núcleo, sólo alrededor de la cabeza del rastro; la tapa, sombreada (no más de 0,4) para el contraste; sin dientes (nunca más fino que un píxel, con `fwidth`) y sin bandas (sin umbrales: sólo exponenciales y `smoothstep`)', `sombra ${String(LUZ_EN_EL_PISO.sombra)} · halo ${String(LUZ_EN_EL_PISO.halo)} u · núcleo ${String(LUZ_EN_EL_PISO.nucleo.radio)} u`)
-controlPositivo('el detector VE el resplandor de tinta de EL ENCASTRE', dibujo.replace('color = conLaLuz( color, rastro.x, rastro.y );', ''), luzBien)
+controlPositivo('el detector VE el resplandor de tinta de EL ENCASTRE', dibujo.replace('return conLaLuz( color, rastro.x, rastro.y, ', 'return mix( color, vec3( 0.045 ), rastro.x ); conLaLuz( color, rastro.x, rastro.y, '), luzBien)
 controlPositivo('  y un núcleo en cada punto del rastro (la hilera de perlas)', dibujo.replace('q.w * q.z * exp(', 'q.z * exp('), luzBien)
 controlPositivo('  y una línea sin el píxel mínimo (con dientes)', dibujo.replace('float px = length( fwidth( vPiso.xz ) );', 'float px = 0.0;'), luzBien)
 // La cabeza del rastro (la del núcleo): una sola, siempre bajo el mouse; al nacer otra, la de antes la suelta.
@@ -251,5 +254,23 @@ const todasConNucleo: PasoDelRastro = (puntos, e, x, z, vale, dt) => {
   for (const q of puntos) if (q.z > 0) q.w = 1
 }
 controlPositivo('  el detector VE un núcleo en cada punto', todasConNucleo, (p: PasoDelRastro) => cabezaBien(cabezas(p)))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1F · Brillo también en lo automático: con el poder liberado, las ondas, el mar y el pulso dejan salir la luz por las rendijas, más tenue')
+
+// Lo automático: por junta (la diferencia de alto es la misma de los dos lados: continua, sin escalones de bloque), sólo
+// donde la rendija está de verdad abierta (el mar quieto no llega), más tenue que el mouse, con el poder (después del
+// encastre) y fuera del mar calmo del logo; su sombra, sólo en una banda angosta junto a la junta encendida.
+const A = LUZ_EN_EL_PISO.automatico
+const automaticoBien = (glsl: string): boolean => {
+  const luz = cuerpo(glsl, FIRMA_DE_LA_LUZ)
+  const juntas = cuerpo(glsl, 'vec3 conLasJuntas( vec3 color, vec2 xz ) {')
+  return luz.includes(`vec4 solo = min( vec4( 1.0 ), ${String(A.ondas)} * energia * smoothstep( ${String(A.abre[0])}, ${String(A.abre[1])}, delta ) );`) &&
+    luz.includes('dot( solo, linea + 0.6 * haloDeLaOla )') && luz.includes(`${String(A.sombra)} * min( 1.0, dot( solo, exp( - filo / ( ${String(A.banda)} + px ) ) ) )`) &&
+    juntas.includes('return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );') && glsl.includes('float fueraDeLaCalma( vec2 xz ) {') && !/resplandorDelFinal|ruidoDelPoder/.test(glsl)
+}
+afirmar(automaticoBien(dibujo) && A.ondas < 1 && A.sombra < LUZ_EN_EL_PISO.sombra && A.abre[0] >= 0.05 && A.banda <= 0.1, 'después del encastre (con el poder) las rendijas que abren las ondas, el mar y el pulso del golpe dejan salir la misma luz, más tenue que bajo el mouse: por junta, sólo donde la rendija está abierta de verdad (el mar quieto no se enciende), con su sombra en una banda angosta junto a la junta; fuera del mar calmo del logo (su borde, encendido, dibujaba un marco de bloques); sin el brillo parejo alrededor del logo ni la banda del pulso (se leían como manchas grises)', `${String(A.ondas)} de la luz · rendija desde ${String(A.abre[0])} u · banda ${String(A.banda)} u`)
+controlPositivo('el detector VE la sombra de la tapa entera (el parche en escalones de bloque)', dibujo.replace(`dot( solo, exp( - filo / ( ${String(A.banda)} + px ) ) )`, 'max( max( solo.x, solo.y ), max( solo.z, solo.w ) )'), automaticoBien)
+controlPositivo('  y un brillo que no espera al encastre', dibujo.replace('uPoder * fueraDeLaCalma( xz )', 'fueraDeLaCalma( xz )'), automaticoBien)
 
 cerrar('s51-retoque-encastre')

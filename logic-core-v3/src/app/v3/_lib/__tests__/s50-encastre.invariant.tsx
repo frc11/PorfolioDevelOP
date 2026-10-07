@@ -35,7 +35,7 @@ import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, poder as poderDelFinal, poseDelLogo, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { FLOOR_Y } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
-import { PODER_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
@@ -360,7 +360,7 @@ afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de
 // [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: el vapor que caía adentro del hueco se fue con el vapor (s51 1A).
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2E · El poder: al quedar al ras, un pulso centrado en el logo y el resplandor de tinta desde las juntas de alrededor')
+titulo('2E · El poder: al quedar al ras, un pulso centrado en el logo; [RETOQUE DEL ENCASTRE] 1F · energiza el piso (luz, no tinta)')
 
 // El poder: 0 hasta quedar al ras; un destello y después entero; función de `fin` (al revertir se apaga).
 const alRasS = FINAL_DEL_PIE.presion.hastaS
@@ -372,13 +372,12 @@ afirmar(poderBien, 'el poder se libera cuando el logo queda al ras (ni antes): u
 const golpeBien = (c: string): boolean => c.includes('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (s.antes < aterriza && fin >= aterriza) s.tocoEn = t')
 afirmar(golpeBien(finalTsx), '  el pulso nace en el centro del logo al quedar al ras (una vez por bajada) y corre por el piso con su física; al tocar el piso, sólo un golpecito de la cámara')
 controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx.replace('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS', 'const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS'), golpeBien)
-// El dibujo: el resplandor sale de las JUNTAS (núcleo negro en la junta, halo y aura que entran a la tapa; el costado lleno),
-// vivo (fluye, respira, vetea), alrededor del logo y en el frente del pulso. La banda oscura de CIERRE (una mancha) se fue.
-const deLasJuntas = (c: string): boolean =>
-  c.includes('vec4 filo = vec4( 1.0 - vEnElBloque.x, vEnElBloque.x, 1.0 - vEnElBloque.y, vEnElBloque.y ) * uLado;') && c.includes('if ( vTapa > 0.5 ) {') && c.includes('float halo = min( 1.0, h.x + h.y + h.z + h.w );') &&
-  c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('float d = length( vec2( xz.x, - xz.y ) / uCajaDelLogo );') && c.includes('ruidoDelPoder(') && !/GOLPE_EN_EL_PISO\.banda|\bbanda:/.test(c)
-afirmar(deLasJuntas(enElPisoTs) && PODER_EN_EL_PISO.nucleo < PODER_EN_EL_PISO.halo && PODER_EN_EL_PISO.halo < PODER_EN_EL_PISO.aura && PODER_EN_EL_PISO.aura < 0.8 && PODER_EN_EL_PISO.oscuroDelNucleo > 0.9, 'el resplandor sale de las juntas de los bloques (un núcleo de tinta justo en la junta, un halo y un aura que entran a la tapa, el costado lleno), más fuerte cerca del logo, vivo y veteado; el frente del pulso enciende las juntas por donde pasa (la banda oscura de CIERRE, que se leía como una mancha, se fue)', `núcleo ${String(PODER_EN_EL_PISO.nucleo)} u · halo ${String(PODER_EN_EL_PISO.halo)} u · aura ${String(PODER_EN_EL_PISO.aura)} u`)
-controlPositivo('el detector VE la banda de CIERRE (un anillo oscuro parejo, sin juntas)', enElPisoTs.replace('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );', '') + '\nbanda: 0.55', deLasJuntas)
+// El dibujo: [RETOQUE DEL ENCASTRE] 1F · cambió por pedido: el resplandor de tinta alrededor del logo (núcleo negro en la
+// junta, halo y aura) se fue: después del encastre el piso entero queda energizado y la luz sale por las rendijas que abren
+// las ondas, el mar y el pulso del golpe (s51 1F). Sin tinta en el dibujo, y sin la banda oscura de CIERRE.
+const sinTinta = (c: string): boolean => c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('return conLaLuz( color, rastro.x, rastro.y, uPoder * fueraDeLaCalma( xz ) );') && !/vec3\( 0\.045 \)/.test(c) && !/GOLPE_EN_EL_PISO\.banda|\bbanda: 0\.55/.test(c)
+afirmar(sinTinta(enElPisoTs), 'el poder liberado no dibuja tinta: energiza el piso (la luz sale por las rendijas que abre el pulso al pasar); la banda oscura de CIERRE, que se leía como una mancha, no vuelve')
+controlPositivo('el detector VE la tinta de EL ENCASTRE', enElPisoTs + "\nreturn mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );", sinTinta)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2F · El piso bajo el mouse: los bloques se levantan y por las rendijas sale el resplandor de abajo; se calma con inercia')
@@ -417,7 +416,7 @@ controlPositivo('el detector VE un piso que se apaga de golpe al irse el mouse',
 // [RETOQUE DEL ENCASTRE] 1E · cambió por pedido: lo que sale por las rendijas bajo el mouse es LUZ, no tinta (s51 1E).
 const conElRastro = (piso: string, simulacion: string): boolean =>
   simulacion.includes('fuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );') && piso.includes('vec2 rastro = resplandorDelRastro( xz );') &&
-  piso.includes('abs( vVecinos )') && piso.includes('color = conLaLuz( color, rastro.x, rastro.y );') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
+  piso.includes('abs( vVecinos )') && piso.includes('return conLaLuz( color, rastro.x, rastro.y, ') && !/cuantoDelFinal|uCursorDelFinal|uVibraDelFinal/.test(piso)
 const simulacionDelRastro = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 afirmar(conElRastro(enElPisoTs, simulacionDelRastro) && RASTRO_EN_EL_PISO.alto < 0.6, 'los bloques del rastro se levantan un poco (menos que la loma del cursor) y por las rendijas que se abren sale la luz de abajo con la forma de las juntas (RETOQUE DEL ENCASTRE 1E); el círculo oscuro de CIERRE se fue', `${String(RASTRO_EN_EL_PISO.alto)} u · radio ${String(RASTRO_EN_EL_PISO.radio)} u`)
 controlPositivo('el detector VE el círculo oscuro de CIERRE', enElPisoTs + '\nfloat cuantoDelFinal( vec2 xz ) {', (c: string) => conElRastro(c, simulacionDelRastro))
