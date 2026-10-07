@@ -17,10 +17,13 @@
  *   2A · los nanobots se desarman donde se VE el cursor de la sala (su halo, interpolado), no en el puntero nativo.
  *   2B · el pie llega y se va bastante más rápido (1,4 s de punta a punta; eran 3,2), con el escalonado por columnas.
  *   2C · los viajes del menú sin freno: durante el viaje el scroll se ignora y termina siempre en su destino.
+ *   2D · cada destino del menú (Quiénes somos, Portfolio, Servicios, Panel, Por qué develOP; Contacto abre la hoja) cae
+ *        en su punto de lectura, con su llegada completa (y la llegada aislada de Portfolio y de la frase, entera).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/retoque-encastre/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 
+import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
 import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, LUZ_EN_EL_PISO, RASTRO_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
@@ -35,7 +38,16 @@ import { sentidoDeLaRueda, sentidoDeLaTecla, sentidoDelDedo } from '../gestosDel
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { FLOOR_Y, PAPER_COLOR, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../escena/probeScene'
+import { BarraDelHome } from '../../_chrome/barra/BarraDelHome'
+import { ABRE_EL_PANEL } from '../../_chrome/contacto/apertura'
+import { Menu } from '../../_chrome/menu/MenuMovil'
+import { DESTINOS_CON_NUDO, destinoDelViaje } from '../../_componentes/destinosDelViaje'
+import { ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, ANCLA_DEL_TRAZO } from '../../_secciones/_contrato/bloqueAnimado'
+import { MARCA_COREOGRAFIA_DEL_HOME } from '../../_secciones/_contrato/marcaCoreografia'
+import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
+import { posicionDeAncla } from '../motion/anclas'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { NodoFalso, VENTANA, conDomFalso } from './s27-dom-falso'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -418,5 +430,83 @@ const viajeSinFreno = (d: string): boolean => {
 }
 afirmar(viajeSinFreno(deslizamiento), 'al despegar, el viaje retiene todos los gestos de scroll (rueda, dedo, teclas; antes que Lenis) y los suelta al terminar por cualquier salida; ningún gesto lo cancela: termina en su destino (medido en vivo: con rueda y flechas durante todo el vuelo, cae en el mismo píxel que sin ellas)')
 controlPositivo('el detector VE el viaje de antes (la rueda lo cancelaba)', deslizamiento.replace('soltarLaRueda = retenerLosGestos(() => true)', "soltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => terminar(false))"), viajeSinFreno)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2D · Cada destino del menú cae en su punto de lectura, con su llegada completa; Contacto abre la hoja')
+
+// Los destinos: la barra y el menú del teléfono llevan a las cinco secciones, y cada una tiene su nudo (si no, el viaje iría
+// al ancla nativa, que deja el título a medio llegar); el Contacto de la barra abre la hoja (no viaja).
+const nada = (): void => undefined
+const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
+const barraHtml = renderToStaticMarkup(<BarraDelHome />)
+const delMenu = [...hrefsDe(barraHtml, 'data-pieza="barra-enlace"'), ...hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />), 'data-parte="item-del-menu"')]
+const secciones = delMenu.filter((h) => h.startsWith('#') && h !== '#contacto').map((h) => h.slice(1))
+const conNudo = (ids: readonly string[], nudos: readonly string[]): boolean => ids.length === 10 && ['quienes-somos', 'trabajos', 'servicios', 'tu-panel', 'por-que-develop'].every((id) => ids.filter((x) => x === id).length === 2) && ids.every((id) => nudos.includes(id))
+afirmar(conNudo(secciones, DESTINOS_CON_NUDO) && new RegExp(`href="#contacto"[^>]*data-abre-contacto="${ABRE_EL_PANEL}"`).test(barraHtml), 'la barra y el menú del teléfono llevan a Quiénes somos, Portfolio, Servicios, Panel y Por qué develOP, y cada uno tiene su nudo (su punto de lectura); el Contacto de la barra abre la hoja', secciones.join(' '))
+controlPositivo('el detector VE un destino sin nudo (iría al ancla nativa)', DESTINOS_CON_NUDO.filter((id) => id !== 'tu-panel'), (nudos: readonly string[]) => conNudo(secciones, nudos))
+
+// El punto de lectura con la llegada completa, en cada nudo (con la mecánica de verdad sobre un documento falso; los
+// números de la sección, los de 1440 × 900 con el túnel en k = 1,8): el título ya llegó (su ventana terminó) y queda
+// despejado debajo de la barra; Servicios en su 00; la cabecera del panel entera en el cuadro libre.
+const BLOQUE = `[data-arbol="${MARCA_COREOGRAFIA_DEL_HOME}"]`
+const PAR: Readonly<Record<string, typeof ANCLA_DEL_TRAZO>> = { 'ventana-visible': ANCLA_DE_LA_VENTANA_VISIBLE, 'ventana-del-trazo': ANCLA_DEL_TRAZO, 'ventana-de-la-mascara': ANCLA_DE_LA_MASCARA }
+const bloque = (tope: number, alto: number, rango: string): NodoFalso => new NodoFalso({ tope, alto }, { 'data-rango': rango, 'data-arbol': MARCA_COREOGRAFIA_DEL_HOME })
+const finDe = (b: NodoFalso, v: number): number => {
+  const caja = b.getBoundingClientRect()
+  return posicionDeAncla(PAR[b.getAttribute('data-rango') ?? ''].fin, { topDoc: caja.top + VENTANA.scrollY, alto: caja.height }, v)
+}
+type Destino = (seccion: HTMLElement) => number
+const DESPEJE = 72
+const V = 900
+const enSuPuntoDeLectura = (destino: Destino): Record<string, boolean> => conDomFalso(V, DESPEJE, () => {
+  VENTANA.scrollY = 0
+  const r: Record<string, boolean> = {}
+  // Quiénes somos: el título (máscara y trazo) y la primera pantalla.
+  const tituloQs = bloque(900 + 224, 100, 'ventana-de-la-mascara')
+  const trazoQs = bloque(900 + 224, 100, 'ventana-del-trazo')
+  const qs = new NodoFalso({ tope: 900, alto: 2700 }, { 'data-panel': 'quienes-somos' })
+    .lista(BLOQUE, [tituloQs, trazoQs, bloque(900 + 450, 120, 'ventana-del-trazo'), bloque(900 + 600, 150, 'ventana-visible'), bloque(900 + 1000, 200, 'ventana-de-la-mascara')])
+    .responde('[data-composicion="agencia"] > [data-arbol]', tituloQs)
+  const dQs = destino(qs as unknown as HTMLElement)
+  r.quienes = dQs >= Math.max(finDe(tituloQs, V), finDe(trazoQs, V)) - 1 && 900 + 224 - dQs >= DESPEJE
+  // Portfolio: el título del cartel termina de subir (su máscara) antes del pin o después; las dos.
+  for (const [nombre, alto] of [['portfolio', 300], ['portfolioTarde', 600]] as const) {
+    const titulo = bloque(5073 + alto, 180, 'ventana-de-la-mascara')
+    const trabajos = new NodoFalso({ tope: 5073, alto: 7997 }, { 'data-panel': 'trabajos' }).responde(`[data-pieza="cartel"] ${BLOQUE}`, titulo)
+    const d = destino(trabajos as unknown as HTMLElement)
+    r[nombre] = d >= finDe(titulo, V) - 1 && d >= 5073 && 5073 + alto - d >= DESPEJE - 1 && 5073 + alto + 180 - d <= V
+  }
+  // Servicios: en su 00 (el pin, sin pasar al 01).
+  const servicios = new NodoFalso({ tope: 13069.6, alto: 7200 }, { 'data-panel': 'servicios' })
+  const dS = destino(servicios as unknown as HTMLElement)
+  r.servicios = dS <= 13069.6 && 13069.6 - dS < 1
+  // Panel: la cabecera (título, bajada y panel en vivo) entera en el cuadro que deja la barra.
+  const cabecera = new NodoFalso({ tope: 20270 + 160, alto: 640 })
+  const panel = new NodoFalso({ tope: 20270, alto: 6300 }, { 'data-panel': 'tu-panel' }).responde('[data-pieza="encabezado-del-panel"]', cabecera)
+  const dP = destino(panel as unknown as HTMLElement)
+  r.panel = 20270 + 160 - dP >= DESPEJE - 1 && 20270 + 160 + 640 - dP <= V && dP >= 20270
+  // Por qué develOP: la frase subida entera (el fin de su ventana), sin valores en camino.
+  const pin = new NodoFalso({ tope: 26570, alto: 3600 })
+  const escenario = new NodoFalso({ tope: 26570, alto: V }).cercano(BLOQUE, pin)
+  const porQue = new NodoFalso({ tope: 26570, alto: 3600 }, { 'data-panel': 'por-que-develop' }).responde('[data-pieza="escenario-del-final"]', escenario)
+  const dQ = destino(porQue as unknown as HTMLElement)
+  r.porQue = dQ >= 26570 + VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta * (3600 - V) - 1 && dQ < 26570 + VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta * (3600 - V) + 2
+  return r
+})
+const todosEnSuPunto = (r: Record<string, boolean>): boolean => Object.values(r).length === 6 && Object.values(r).every(Boolean)
+const enLosNudos = enSuPuntoDeLectura(destinoDelViaje)
+afirmar(todosEnSuPunto(enLosNudos), '  cada destino cae en su punto de lectura con su llegada completa: Quiénes somos con el título llegado y despejado; Portfolio con «Portfolio» subido entero (llegue antes o después del pin), debajo de la barra; Servicios en su 00; la cabecera del panel entera en el cuadro libre; la frase de Por qué develOP subida entera, sin valores en camino', Object.entries(enLosNudos).map(([k, v]) => `${k} ${v ? 'sí' : 'NO'}`).join(' · '))
+const alAncla: Destino = (seccion) => Math.round(seccion.getBoundingClientRect().top + VENTANA.scrollY - DESPEJE)
+controlPositivo('  el detector VE el ancla nativa (el tope menos la barra: títulos a medio llegar)', alAncla, (d: Destino) => todosEnSuPunto(enSuPuntoDeLectura(d)))
+// La llegada aislada (Portfolio y la frase): al llegar, el título de la sección repite su llegada, entera, después del fundido.
+const efectoDelViaje = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
+const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const fraseDePorQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const llegadaDelTitulo = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
+const aislada = (efecto: string): boolean =>
+  efecto.includes('if (llego && destino !== null) repetirLaLlegadaDelTitulo(destino.id, duracionDelFundido(zona))') && /<TituloDeVolumen id="portfolio"[^>]*llegadaDe=\{seccion\.id\}/.test(piezasDePortfolio) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop" \/>/.test(fraseDePorQue) &&
+  /control = animate\(repeticion, 1,/.test(llegadaDelTitulo) && /void control\.then\(\(\) => \{\s*repeticion\.set\(-1\)/.test(llegadaDelTitulo)
+afirmar(aislada(efectoDelViaje), '  y al llegar, el título de Portfolio (y la frase de Por qué develOP) repite su llegada aislada, entera hasta 1, después del fundido del velo; al terminar vuelve al scroll (que en el nudo ya vale 1: no salta)')
+controlPositivo('  el detector VE un viaje que no la pide', efectoDelViaje.replace('if (llego && destino !== null) repetirLaLlegadaDelTitulo(destino.id, duracionDelFundido(zona))', ''), aislada)
 
 cerrar('s51-retoque-encastre')
