@@ -28,6 +28,7 @@ import { HUECO } from './hueco'
  *
  * [RETOQUE DEL ENCASTRE] 1D · la cola se fue: la página termina en el pie, la secuencia arranca cuando el pie llegó
  * entero, no se adelanta con el scroll y un gesto hacia arriba la rebobina (`RELOJ_DEL_FINAL`).
+ * [NOCTURNO FINAL] A1 · UN gesto hacia arriba la rebobina entera, sola; A2 · al salir o en un viaje se deshace con tope.
  */
 export const FINAL_DEL_PIE = {
   /**
@@ -55,8 +56,13 @@ export const FINAL_DEL_PIE = {
   poder: { destello: 1.45, subeS: 0.12, asientaS: 0.9, golpecito: 0.03 },
   /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
   camara: { elevacion: 89.2, lejos: 1.06 },
-  /** Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s). */
-  quieto: { desdeS: 1.4, giroGradosS: 4.5, alejaHasta: 17, alejaS: 38, vuelveS: 0.45 },
+  /**
+   * Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s).
+   * [NOCTURNO FINAL] A1/A2 · la VUELTA (al rebobinar, al salir, en un viaje) va con tope: el giro a lo sumo a `giroS`
+   * (°/s) y frenando con `giroFreno` (°/s²), el alejamiento igual (u/s, u/s²). Llega a cero en un tiempo finito, sin el
+   * coletazo de antes (media vuelta salía a 400°/s) ni su cola de segundos (la cámara seguía mirando al centro del logo).
+   */
+  quieto: { desdeS: 1.4, giroGradosS: 4.5, alejaHasta: 17, alejaS: 38, vuelta: { giroS: 90, giroFreno: 140, alejaS: 9, alejaFreno: 14 } },
   /** Cuánto adelante del blanco quedan las piezas del pie al final (u): las olas del piso no las tocan. */
   aireDelPie: 7,
   /** El golpe en la cámara: cuánto la sacude (u) y en cuánto se apaga (s). */
@@ -64,20 +70,33 @@ export const FINAL_DEL_PIE = {
 } as const
 
 /**
- * [EL ENCASTRE] 2A · EL RELOJ DEL FINAL. [RETOQUE DEL ENCASTRE] 1D · CINEMÁTICA AUTOMÁTICA CON REBOBINADO: sin la cola, la
- * página termina en el pie. Al fondo, la secuencia arranca sola recién cuando el pie terminó de aparecer entero (todas sus
- * piezas en su lugar) y corre a UNA velocidad (`duracionS`): el scroll hacia abajo no la adelanta. Un gesto hacia arriba
- * mientras no está en su inicio no mueve la página (lo retiene `gestosDelScroll.ts`): la REBOBINA (`rebobinaS` de punta
- * a punta) mientras siga; si suelta (`sueltaS` sin gesto), retoma sola hacia adelante desde donde quedó. Rebobinada del
- * todo, espera parada: el gesto que la llevó a cero sigue retenido hasta que se suelta y el SIGUIENTE mueve la página
- * (un gesto hacia abajo, en cambio, la vuelve a correr). Salir del fondo sin un gesto (la barra) la revierte (`vueltaS`)
- * y un viaje del menú la deshace enseguida (`vueltaDelViajeS`). La velocidad se persigue con una inercia corta
+ * [EL ENCASTRE] 2A · EL RELOJ DEL FINAL. [RETOQUE DEL ENCASTRE] 1D · CINEMÁTICA AUTOMÁTICA: sin la cola, la página termina
+ * en el pie. Al fondo, la secuencia arranca sola recién cuando el pie terminó de aparecer entero (todas sus piezas en su
+ * lugar) y corre a UNA velocidad (`duracionS`): el scroll hacia abajo no la adelanta.
+ *
+ * [NOCTURNO FINAL] A1 · EL REBOBINADO DE UN GESTO (antes rebobinaba sólo mientras siguiera el gesto: había que scrollear
+ * mucho para sacar el logo y al soltar se volvía a encastrar). UN gesto hacia arriba mientras corre o ya terminó (uno: la
+ * rueda hasta un silencio, un dedo, una tecla; `gestosDelScroll.ts`) dispara el rebobinado ENTERO, que corre solo a la
+ * velocidad de la cinemática (`duracionS`, no acelerado) hasta el logo parado; ese gesto se retiene (no mueve la página):
+ * lo que sigue de él, durante `topeDelGestoS`, y su cola entera (la inercia de un trackpad, que se va apagando: cada
+ * evento a lo sumo `colaDelGesto` del más fuerte); el que sigue girando la rueda después, sube. Rebobinada, espera PARADA: sin gestos durante `vuelveAEmpezarS` vuelve a correr
+ * sola; un gesto hacia abajo la corre ya; un gesto NUEVO hacia arriba (rebobinando o parada) sube la página normal. Un
+ * gesto hacia abajo justo después de uno hacia arriba (`cambioDeSentidoS`: el temblor de un dedo al levantarse) no cuenta.
+ *
+ * [NOCTURNO FINAL] A2 · LA SALIDA: fuera del fondo (la página subió) o en un viaje del menú se deshace sola, con tope
+ * (`salida`, `velocidadDeSalida`): `fin` a lo sumo de punta a punta en `finS` y la cámara (su subida) a lo sumo en
+ * `camaraS`. Antes un viaje la deshacía en 0,35 s: la cámara bajaba del cenit 10 u por cuadro (un salto). El viaje no
+ * mueve el scroll hasta que el final está en reposo (`enReposo.ts`). La velocidad se persigue con una inercia corta
  * (`inerciaS`): ningún cambio de sentido es de golpe.
  */
-export const RELOJ_DEL_FINAL = { duracionS: 6.4, rebobinaS: 2.2, vueltaS: 1.5, vueltaDelViajeS: 0.35, sueltaS: 0.25, inerciaS: 0.12 } as const
+export const RELOJ_DEL_FINAL = { duracionS: 6.4, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
 
-/** `espera`: no corre (no está al fondo, el pie llega o hay un viaje): vuelve a cero. `corre`: adelante, o rebobinando. `rebobinada`: quieta en cero. */
-export type FaseDelFinal = 'espera' | 'corre' | 'rebobinada'
+/**
+ * `espera`: no corre (no está al fondo, el pie llega o hay un viaje): se deshace con tope. `corre`: adelante.
+ * `rebobina`: hacia atrás, sola, a la velocidad de la cinemática. `parada`: rebobinada, quieta en cero hasta que vuelve a
+ * empezar.
+ */
+export type FaseDelFinal = 'espera' | 'corre' | 'rebobina' | 'parada'
 
 /** Lo que el reloj recuerda de un cuadro al otro. */
 export interface RelojDelFinal {
@@ -85,10 +104,12 @@ export interface RelojDelFinal {
   /** Cuánto `fin` por segundo (la que persigue a la de su fase, con la inercia). */
   velocidad: number
   fase: FaseDelFinal
+  /** [NOCTURNO FINAL] A1 · cuánto lleva parada (s). */
+  paradaS: number
 }
 
 export function relojQuieto(): RelojDelFinal {
-  return { fin: 0, velocidad: 0, fase: 'espera' }
+  return { fin: 0, velocidad: 0, fase: 'espera', paradaS: 0 }
 }
 
 /** Lo que el reloj necesita saber en cada cuadro. */
@@ -97,44 +118,89 @@ export interface EntradaDelReloj {
   readonly alFondo: boolean
   /** Todas las piezas del pie llegaron a su lugar. */
   readonly pieEntero: boolean
-  /** Hay un gesto hacia arriba sin soltar (el último, hace menos de `sueltaS`). */
-  readonly rebobina: boolean
+  /** [NOCTURNO FINAL] A1 · un gesto hacia arriba pidió rebobinar (desde el cuadro anterior). */
+  readonly rebobinar: boolean
   /** Hubo un gesto hacia abajo desde el cuadro anterior. */
   readonly haciaAbajo: boolean
+  /** [NOCTURNO FINAL] A1 · cuánto hace del último gesto, de cualquier sentido (s). */
+  readonly sinGestoS: number
   /** Hay un viaje del menú en curso. */
   readonly enViaje: boolean
+}
+
+/** [NOCTURNO FINAL] A2 · la pendiente de la subida de la cámara (cuánto se mueve por unidad de `fin`). */
+function pendienteDeLaSubida(fin: number): number {
+  const h = 1e-3
+  const a = Math.max(0, fin - h)
+  const b = Math.min(1, fin + h)
+  return Math.abs(subida(b) - subida(a)) / (b - a)
+}
+
+/**
+ * [NOCTURNO FINAL] A2 · lo más rápido que `fin` vuelve a cero al salir o en un viaje (por segundo): de punta a punta en
+ * `salida.finS` como mucho, y más despacio donde la cámara se mueve más (su subida, `subida`, de punta a punta en
+ * `salida.camaraS` como mucho). Mira la pendiente un poco hacia adelante (`salida.mira`, en `fin`): con la inercia del
+ * reloj, frenar recién al entrar donde la cámara baja dejaba pasar el doble. Cerca de cero la cámara casi no se mueve:
+ * llega en un tiempo finito.
+ */
+export function velocidadDeSalida(fin: number): number {
+  const { finS, camaraS, mira } = RELOJ_DEL_FINAL.salida
+  let pendiente = 0
+  for (let i = 0; i <= 6; i += 1) pendiente = Math.max(pendiente, pendienteDeLaSubida(Math.max(0, fin - (mira * i) / 6)))
+  return Math.min(1 / finS, 1 / (camaraS * Math.max(1e-6, pendiente)))
 }
 
 /** Un cuadro del reloj (escribe en `r`). */
 export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): void {
   const R = RELOJ_DEL_FINAL
-  let objetivo = -1 / R.vueltaS
+  const paso = Math.max(0, dt)
+  let objetivo: number
   if (e.enViaje || !e.alFondo) {
     r.fase = 'espera'
-    if (e.enViaje) objetivo = -1 / R.vueltaDelViajeS
+    objetivo = -velocidadDeSalida(r.fin)
   } else {
     if (r.fase === 'espera' && e.pieEntero) r.fase = 'corre'
-    else if (r.fase === 'rebobinada' && e.haciaAbajo && !e.rebobina) r.fase = 'corre'
-    if (r.fase === 'corre') objetivo = e.rebobina ? -1 / R.rebobinaS : 1 / R.duracionS
-    else if (r.fase === 'rebobinada') objetivo = 0
+    else if (r.fase === 'corre' && e.rebobinar && r.fin > 0) r.fase = 'rebobina'
+    else if (r.fase === 'rebobina' && e.haciaAbajo) r.fase = 'corre'
+    else if (r.fase === 'parada') {
+      r.paradaS += paso
+      if (e.haciaAbajo || (r.paradaS >= R.vuelveAEmpezarS && e.sinGestoS >= R.vuelveAEmpezarS)) r.fase = 'corre'
+    }
+    if (r.fase === 'corre') objetivo = 1 / R.duracionS
+    else if (r.fase === 'rebobina') objetivo = -1 / R.duracionS
+    else if (r.fase === 'parada') objetivo = 0
+    else objetivo = -velocidadDeSalida(r.fin)
   }
-  const paso = Math.max(0, dt)
   r.velocidad += (objetivo - r.velocidad) * (1 - Math.exp(-paso / R.inerciaS))
   const fin = r.fin + r.velocidad * paso
   r.fin = Math.min(1, Math.max(0, fin))
   // Contra un tope, quieta (al dar vuelta no arranca con la velocidad que traía contra el tope).
   if (r.fin !== fin) r.velocidad = 0
-  if (r.fase === 'corre' && e.rebobina && r.fin === 0) r.fase = 'rebobinada'
+  if (r.fase === 'rebobina' && r.fin === 0) {
+    r.fase = 'parada'
+    r.paradaS = 0
+  }
 }
 
+/** [NOCTURNO FINAL] A1 · lo que un gesto hace con el final: si lo retiene (no mueve la página) y si pide rebobinar. */
+export interface DecisionDelGesto {
+  readonly retiene: boolean
+  readonly rebobina: boolean
+}
+const NADA: DecisionDelGesto = { retiene: false, rebobina: false }
+const REBOBINA: DecisionDelGesto = { retiene: true, rebobina: true }
+const SIGUE: DecisionDelGesto = { retiene: true, rebobina: false }
+
 /**
- * ¿Se retiene este gesto (no mueve la página)? Sólo al fondo y hacia arriba, mientras la cinemática no está en su inicio
- * (corre, o `fin` > 0) y, rebobinada del todo, mientras siga el gesto que la llevó a cero (`desdeElUltimoArribaS`: cuánto
- * hace del último gesto hacia arriba, sin contar éste).
+ * [NOCTURNO FINAL] A1 · sólo al fondo y hacia arriba. Un gesto que EMPIEZA (`nuevo`) mientras corre (o ya terminó) pide el
+ * rebobinado y se retiene; los eventos que lo siguen (`retenido`: el gesto en curso se retuvo; `duraS`: cuánto lleva) se
+ * retienen hasta `topeDelGestoS`, y después sólo su cola (`enLaCola`: la inercia que se apaga). Un gesto nuevo
+ * rebobinando o parada no se retiene: la página sube normal.
  */
-export function retieneElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, desdeElUltimoArribaS: number): boolean {
-  if (!alFondo || sentido > 0) return false
-  return r.fase === 'corre' || r.fin > 0 || (r.fase === 'rebobinada' && desdeElUltimoArribaS < RELOJ_DEL_FINAL.sueltaS)
+export function decidirElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, nuevo: boolean, retenido: boolean, duraS: number, enLaCola: boolean): DecisionDelGesto {
+  if (!alFondo || sentido > 0) return NADA
+  if (nuevo) return r.fase === 'corre' && r.fin > 0 ? REBOBINA : NADA
+  return retenido && (duraS < RELOJ_DEL_FINAL.topeDelGestoS || enLaCola) ? SIGUE : NADA
 }
 
 /** Lo que el final tiene en vivo: lo escribe `FinalDelPie` en cada cuadro y lo leen las piezas del pie y el piso. */
@@ -142,9 +208,11 @@ export const EN_VIVO = {
   fin: 0,
   /** Cuánto subió la cámara (0 a 1): `acostado(fin)`. */
   camara: 0,
-  /** Lo que el reloj sumó estando quieto: el giro (grados) y el alejamiento (u). */
+  /** Lo que el reloj sumó estando quieto: el giro (grados) y el alejamiento (u); [NOCTURNO FINAL] A1 · y sus velocidades al volver. */
   giro: 0,
   aleja: 0,
+  giroV: 0,
+  alejaV: 0,
   /** El blanco de la cámara de este cuadro (el centro del logo acostado, sin el rebote). */
   blanco: new THREE.Vector3(0, ORBIT_TARGET_Y, 0),
   /**
@@ -291,15 +359,30 @@ export function blancoDelFinal(fin: number, destino: THREE.Vector3): THREE.Vecto
 
 const BLANCO = new THREE.Vector3()
 const ARRIBA = new THREE.Vector3()
+const MIRA = new THREE.Matrix4()
+const DE_FRENTE = new THREE.Quaternion()
+const ENCUADRE = new THREE.Quaternion()
+const PARTE_DEL_ENCUADRE = new THREE.Quaternion()
+const CENTRO_DE_LA_ORBITA = new THREE.Vector3(0, ORBIT_TARGET_Y, 0)
+const ARRIBA_DE_SIEMPRE = new THREE.Vector3(0, 1, 0)
 
 /**
  * LA CÁMARA DEL FINAL: toma la cámara como la dejó el recorrido (en la pose E, mirando al origen) y la lleva por encima del
  * logo hasta mirarlo desde arriba, alrededor del blanco que baja con él; con `giro` y `aleja`, la vuelta y el alejamiento
  * del que se quedó. La «arriba» de la cámara es la de la órbita que pasa por encima (la derivada de la dirección respecto
  * de la elevación): sin vuelco en ningún punto, ni en el cenit. Con `k` 0 y sin giro ni alejamiento no la toca.
+ *
+ * [NOCTURNO FINAL] A2 · con el ENCUADRE del recorrido: la cámara del rig no mira al centro de la órbita, corre la mirada
+ * para dejar el logo a un costado (`cameraFraming.ts`). El final miraba al centro y lo tiraba: mientras el giro del quieto
+ * volvía (segundos después de un viaje del menú), la cámara quedaba centrada en el logo y, al apagarse, saltaba 8° al
+ * encuadre de verdad. Ahora ese corrimiento (en la cámara) se conserva y se va con la subida: con `k` 0 la cámara del
+ * final es la del rig girada; arriba, centrada en el logo. Continua con el rig en los dos extremos.
  */
 export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3, giro: number, aleja: number, sacudon: THREE.Vector3 | null): void {
   if (k <= 0 && giro === 0 && aleja === 0) return
+  MIRA.lookAt(c.position, CENTRO_DE_LA_ORBITA, ARRIBA_DE_SIEMPRE)
+  DE_FRENTE.setFromRotationMatrix(MIRA)
+  ENCUADRE.copy(DE_FRENTE).invert().multiply(c.quaternion)
   const dx = c.position.x
   const dz = c.position.z
   const dy = c.position.y - ORBIT_TARGET_Y
@@ -315,27 +398,49 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   ARRIBA.set(-Math.sin(e) * Math.sin(az), Math.cos(e), -Math.sin(e) * Math.cos(az))
   c.up.copy(ARRIBA)
   c.lookAt(BLANCO)
+  c.quaternion.multiply(PARTE_DEL_ENCUADRE.identity().slerp(ENCUADRE, 1 - k))
   c.up.set(0, 1, 0)
   c.updateMatrixWorld()
 }
 
+/** [NOCTURNO FINAL] A1/A2 · lo que deja `haciaCero` (sin reservas por cuadro). */
+const HACIA_CERO = { x: 0, v: 0 }
+
+/**
+ * [NOCTURNO FINAL] A1/A2 · un paso hacia cero con tope: la velocidad persigue (con la inercia del reloj) la más alta que
+ * todavía frena a tiempo (`√(2·freno·|x|)`) sin pasar `maxima`. Llega en un tiempo finito y sin pasarse.
+ */
+export function haciaCero(x: number, v: number, maxima: number, freno: number, dt: number): { readonly x: number; readonly v: number } {
+  const objetivo = -Math.sign(x) * Math.min(maxima, Math.sqrt(2 * freno * Math.abs(x)))
+  const nv = v + (objetivo - v) * (1 - Math.exp(-Math.max(0, dt) / RELOJ_DEL_FINAL.inerciaS))
+  const nx = x + nv * dt
+  const llego = x === 0 || Math.sign(nx) !== Math.sign(x) || Math.abs(nx) < 1e-4
+  HACIA_CERO.x = llego ? 0 : nx
+  HACIA_CERO.v = llego ? 0 : nv
+  return HACIA_CERO
+}
+
 /**
  * QUIETO EN EL PIE: el reloj del que se quedó. Con el final entero y sin scroll hace `quieto.desdeS`, la cámara gira sin
- * fin y se aleja hacia su tope (1 − e^(−t/τ): siempre un poco más, nunca más que el tope); si no, todo vuelve a cero rápido
- * (el giro por el camino corto). Devuelve el nuevo tiempo quieto.
+ * fin y se aleja hacia su tope (1 − e^(−t/τ): siempre un poco más, nunca más que el tope); si no, todo vuelve a cero (el
+ * giro por el camino corto) con tope ([NOCTURNO FINAL] A1/A2 · `quieto.vuelta`). Devuelve el nuevo tiempo quieto.
  */
-export function relojDelQuieto(quietoS: number, finEntero: boolean, sinScrollS: number, dt: number, estado: { giro: number; aleja: number }): number {
+export function relojDelQuieto(quietoS: number, finEntero: boolean, sinScrollS: number, dt: number, estado: { giro: number; aleja: number; giroV: number; alejaV: number }): number {
   const q = FINAL_DEL_PIE.quieto
   if (finEntero && sinScrollS >= q.desdeS) {
     const t = quietoS + dt
     estado.giro += q.giroGradosS * dt
     estado.aleja = q.alejaHasta * (1 - Math.exp(-t / q.alejaS))
+    estado.giroV = q.giroGradosS
+    estado.alejaV = (q.alejaHasta / q.alejaS) * Math.exp(-t / q.alejaS)
     return t
   }
-  const k = Math.exp(-dt / q.vuelveS)
-  const giro = ((((estado.giro + 180) % 360) + 360) % 360) - 180
-  estado.giro = Math.abs(giro * k) < 1e-3 ? 0 : giro * k
-  estado.aleja = estado.aleja * k < 1e-3 ? 0 : estado.aleja * k
+  const giro = haciaCero(((((estado.giro + 180) % 360) + 360) % 360) - 180, estado.giroV, q.vuelta.giroS, q.vuelta.giroFreno, dt)
+  estado.giro = giro.x
+  estado.giroV = giro.v
+  const aleja = haciaCero(estado.aleja, estado.alejaV, q.vuelta.alejaS, q.vuelta.alejaFreno, dt)
+  estado.aleja = aleja.x
+  estado.alejaV = aleja.v
   return 0
 }
 

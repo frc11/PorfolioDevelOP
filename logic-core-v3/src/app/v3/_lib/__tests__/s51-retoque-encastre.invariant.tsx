@@ -30,7 +30,7 @@ import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, LUZ_EN_EL_PISO, RASTRO_EN_EL_PISO, 
 import { pasoDelRastro, rastroQuieto } from '../escena/final/rastro'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { HUECO, crearElPozo, trazoDelBorde } from '../escena/final/hueco'
-import { RELOJ_DEL_FINAL, camaraDelFinal, pasoDelReloj, poseDelLogo, relojQuieto, retieneElGesto, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { RELOJ_DEL_FINAL, camaraDelFinal, decidirElGesto, pasoDelReloj, poseDelLogo, relojQuieto, type EntradaDelReloj, type FaseDelFinal, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from '../escena/pie3d/material'
 import { TRAMOS_DEL_PIE, avanceDelPie } from '../escena/pie3d/coreografia'
 import { pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
@@ -112,11 +112,11 @@ afirmar(encima(simulacion, HUECO.bajoElRas), '  la cara del logo al ras queda en
 controlPositivo('  el detector VE el piso calmo justo al ras (pelea con la cara del logo en el solape)', simulacion.replace(`dibujo -= ${String(HUECO.bajoElRas)} * calmaDelFinal( xz );`, ''), (s: string) => encima(s, HUECO.bajoElRas))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1D · Cinemática automática con rebobinado: arranca con el pie entero, a una velocidad; hacia arriba rebobina; al soltar retoma')
+titulo('1D · Cinemática automática con rebobinado: arranca con el pie entero, a una velocidad; hacia arriba rebobina (NOCTURNO FINAL A1: entera, con un gesto)')
 
 const DT = 1 / 60
 type PasoDelReloj = (r: RelojDelFinal, e: EntradaDelReloj, dt: number) => void
-const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobina: false, haciaAbajo: false, enViaje: false }
+const AL_FONDO: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, enViaje: false }
 const correr = (paso: PasoDelReloj, r: RelojDelFinal, s: number, e: Partial<EntradaDelReloj> = {}): void => {
   for (let i = 0; i < Math.round(s / DT); i += 1) paso(r, { ...AL_FONDO, ...e }, DT)
 }
@@ -127,7 +127,12 @@ const hasta = (paso: PasoDelReloj, r: RelojDelFinal, meta: number, e: Partial<En
   }
   return Number.POSITIVE_INFINITY
 }
-interface Cinematica { readonly esperaAlPie: number; readonly sola: number; readonly conRuedaAbajo: number; readonly rebobino: number; readonly retoma: boolean; readonly enCero: number; readonly fase: string; readonly sigueEnCero: number; readonly vuelveAbajo: boolean; readonly saliendo: number; readonly viaje: number; readonly saltoMaximo: number }
+// [NOCTURNO FINAL] A1 · cambió por pedido: ya no rebobina «mientras siga el gesto» ni retoma al soltar (había que
+// scrollear mucho para sacar el logo y al soltar se volvía a encastrar): UN gesto hacia arriba la rebobina ENTERA, sola, a
+// la velocidad de la cinemática; parada, vuelve a empezar a los 2,5 s sin gestos (el detalle y sus controles, en s52 A1).
+// Lo que sigue de 1D: arranca con el pie entero y corre a UNA velocidad (la rueda hacia abajo no la acelera); fuera del
+// fondo o en un viaje, vuelve a cero (A2: con tope, sin saltos).
+interface Cinematica { readonly esperaAlPie: number; readonly sola: number; readonly conRuedaAbajo: number; readonly rebobinaSola: number; readonly saliendo: number; readonly viaje: number }
 const cinematica = (paso: PasoDelReloj): Cinematica => {
   // Al fondo con el pie llegando: no arranca.
   const a = relojQuieto()
@@ -137,21 +142,9 @@ const cinematica = (paso: PasoDelReloj): Cinematica => {
   // La rueda hacia abajo en cada cuadro: el mismo ritmo.
   const b = relojQuieto()
   const conRuedaAbajo = hasta(paso, b, 1, { haciaAbajo: true })
-  // Desde el final entero: 0,6 s rebobinando; después suelta.
-  correr(paso, b, 0.6, { rebobina: true })
-  const rebobino = 1 - b.fin
-  const enElValle = b.fin
-  correr(paso, b, 0.6)
-  const retoma = b.fin > enElValle + 0.02
-  // Rebobinada del todo: queda en cero (con la fase), aunque suelte; un gesto hacia abajo la vuelve a correr.
-  const enCero = hasta(paso, b, 0, { rebobina: true })
-  correr(paso, b, 0.2, { rebobina: true })
-  const fase = b.fase
-  correr(paso, b, 2)
-  const sigueEnCero = b.fin
-  paso(b, { ...AL_FONDO, haciaAbajo: true }, DT)
-  correr(paso, b, 0.5)
-  const vuelveAbajo = b.fin > 0
+  // Desde el final entero, UN gesto (un cuadro) y nada más: rebobina sola hasta cero.
+  paso(b, { ...AL_FONDO, rebobinar: true }, DT)
+  const rebobinaSola = hasta(paso, b, 0) + DT
   // Fuera del fondo (la barra) y con un viaje del menú: vuelve a cero.
   const c = relojQuieto()
   correr(paso, c, 8)
@@ -159,46 +152,37 @@ const cinematica = (paso: PasoDelReloj): Cinematica => {
   const d = relojQuieto()
   correr(paso, d, 8)
   const viaje = hasta(paso, d, 0, { enViaje: true })
-  // Ningún cambio de sentido de golpe: lo más que cambia `fin` en un cuadro al pasar de adelante a rebobinar y vuelta.
-  const e = relojQuieto()
-  correr(paso, e, 3)
-  let saltoMaximo = 0
-  for (const rebobina of [true, false, true]) {
-    for (let i = 0; i < 30; i += 1) {
-      const antes = e.fin
-      paso(e, { ...AL_FONDO, rebobina }, DT)
-      saltoMaximo = Math.max(saltoMaximo, Math.abs(e.fin - antes))
-    }
-  }
-  return { esperaAlPie, sola, conRuedaAbajo, rebobino, retoma, enCero, fase, sigueEnCero, vuelveAbajo, saliendo, viaje, saltoMaximo }
+  return { esperaAlPie, sola, conRuedaAbajo, rebobinaSola, saliendo, viaje }
 }
 const R = RELOJ_DEL_FINAL
 const cinematicaBien = (c: Cinematica): boolean =>
-  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && c.rebobino > 0.15 && c.retoma && c.enCero < R.rebobinaS && c.fase === 'rebobinada' && c.sigueEnCero === 0 && c.vuelveAbajo &&
-  c.saliendo <= R.vueltaS + 0.3 && c.viaje <= R.vueltaDelViajeS + 0.3 && c.saltoMaximo <= 1.05 / (R.rebobinaS * 60)
+  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && Math.abs(c.rebobinaSola - R.duracionS) < 0.3 && c.saliendo < 3 && c.viaje < 3
 const medida = cinematica(pasoDelReloj)
-afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UNA velocidad (la rueda hacia abajo no la adelanta); un gesto hacia arriba la rebobina mientras siga y al soltar retoma desde donde quedó; rebobinada del todo se queda en cero (aunque suelte) hasta un gesto hacia abajo; fuera del fondo o con un viaje del menú vuelve a cero; ningún cambio de sentido de golpe', `sola ${medida.sola.toFixed(2)} s · con la rueda abajo ${medida.conRuedaAbajo.toFixed(2)} s · rebobinó ${medida.rebobino.toFixed(2)} en 0,6 s · a cero en ${medida.enCero.toFixed(2)} s · viaje ${medida.viaje.toFixed(2)} s`)
-// Los controles: el reloj de EL ENCASTRE (la rueda hacia abajo lo adelanta: la cola entera, la secuencia entera) y uno sin
-// la espera en cero (al soltar, retoma desde cero: el siguiente gesto rebobinaría de nuevo y la página no subiría nunca).
+afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UNA velocidad (la rueda hacia abajo no la adelanta); UN gesto hacia arriba la rebobina entera, sola, a la misma velocidad; fuera del fondo o con un viaje del menú vuelve a cero', `sola ${medida.sola.toFixed(2)} s · con la rueda abajo ${medida.conRuedaAbajo.toFixed(2)} s · rebobina sola en ${medida.rebobinaSola.toFixed(2)} s · saliendo ${medida.saliendo.toFixed(2)} s · viaje ${medida.viaje.toFixed(2)} s`)
+// Los controles: el reloj de EL ENCASTRE (la rueda hacia abajo lo adelanta: la cola entera, la secuencia entera) y el de
+// RETOQUE DEL ENCASTRE 1D (rebobina sólo mientras siga el gesto: sin gesto en el cuadro, vuelve a correr).
 const conRueda: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
   if (e.haciaAbajo && e.alFondo && !e.enViaje) r.fin = Math.min(1, r.fin + 0.03)
 }
 controlPositivo('el detector VE el reloj de EL ENCASTRE (el scroll hacia abajo lo adelanta)', conRueda, (p: PasoDelReloj) => cinematicaBien(cinematica(p)))
-const sinEspera: PasoDelReloj = (r, e, dt) => {
+const mientrasSiga: PasoDelReloj = (r, e, dt) => {
+  if (r.fase === 'rebobina' && !e.rebobinar) r.fase = 'corre'
   pasoDelReloj(r, e, dt)
-  if (r.fase === 'rebobinada' && !e.rebobina) r.fase = 'corre'
 }
-controlPositivo('  y uno que retoma sola desde cero (atraparía al visitante abajo)', sinEspera, (p: PasoDelReloj) => cinematicaBien(cinematica(p)))
-// Qué se retiene: sólo al fondo y hacia arriba, mientras no está en su inicio; rebobinada, sólo mientras sigue el gesto.
-const corriendo: RelojDelFinal = { fin: 0.4, velocidad: 0, fase: 'corre' }
-const enEspera: RelojDelFinal = { fin: 0, velocidad: 0, fase: 'espera' }
-const rebobinada: RelojDelFinal = { fin: 0, velocidad: 0, fase: 'rebobinada' }
-type Retiene = typeof retieneElGesto
-const retencionBien = (f: Retiene): boolean =>
-  f(corriendo, true, -1, 9) && !f(corriendo, true, 1, 9) && !f(corriendo, false, -1, 9) && !f(enEspera, true, -1, 9) && f(rebobinada, true, -1, 0.05) && !f(rebobinada, true, -1, R.sueltaS + 0.01)
-afirmar(retencionBien(retieneElGesto), '  se retiene (no mueve la página) sólo el gesto hacia arriba al fondo mientras la cinemática no está en su inicio; rebobinada del todo, sólo mientras sigue el gesto que la llevó a cero: el siguiente gesto sube la página; hacia abajo, nunca', `soltar: ${String(R.sueltaS)} s`)
-controlPositivo('  el detector VE una retención que no suelta nunca (la página no subiría)', ((r, alFondo, sentido) => alFondo && sentido < 0) as Retiene, retencionBien)
+controlPositivo('  y el de RETOQUE DEL ENCASTRE 1D (rebobina sólo mientras siga el gesto: al soltar, se vuelve a encastrar)', mientrasSiga, (p: PasoDelReloj) => cinematicaBien(cinematica(p)))
+// Qué se retiene: sólo al fondo y hacia arriba; el gesto que EMPIEZA mientras corre pide el rebobinado y se retiene entero
+// (hasta su tope); un gesto nuevo rebobinando o parada sube la página.
+const enFase = (fase: FaseDelFinal, fin: number): RelojDelFinal => ({ fin, velocidad: 0, fase, paradaS: 0 })
+type Decide = typeof decidirElGesto
+const retencionBien = (f: Decide): boolean => {
+  const corre = enFase('corre', 0.4)
+  const rebobinando = enFase('rebobina', 0.3)
+  return f(corre, true, -1, true, false, 0, false).retiene && f(corre, true, -1, true, false, 0, false).rebobina && !f(corre, true, 1, true, false, 0, false).retiene && !f(corre, false, -1, true, false, 0, false).retiene && !f(enFase('espera', 0), true, -1, true, false, 0, false).retiene &&
+    f(rebobinando, true, -1, false, true, 0.5, false).retiene && !f(rebobinando, true, -1, false, true, R.topeDelGestoS + 0.1, false).retiene && f(rebobinando, true, -1, false, true, R.topeDelGestoS + 0.1, true).retiene && !f(rebobinando, true, -1, true, false, 0, false).retiene && !f(enFase('parada', 0), true, -1, true, false, 0, false).retiene
+}
+afirmar(retencionBien(decidirElGesto), '  se retiene (no mueve la página) sólo hacia arriba al fondo: el gesto que empieza mientras corre (lo rebobina) y lo que queda de ese gesto, hasta su tope; un gesto nuevo rebobinando o parada sube la página; hacia abajo, nunca', `tope del gesto: ${String(R.topeDelGestoS)} s`)
+controlPositivo('  el detector VE una retención que no suelta nunca (la página no subiría)', ((r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1) => (alFondo && sentido < 0 ? { retiene: true, rebobina: true } : { retiene: false, rebobina: false })) as Decide, retencionBien)
 // Los gestos: la rueda (sin pellizcos ni de costado), el dedo (hacia abajo sube la página) y las teclas (no en un campo).
 const sentidosBien = (rueda: typeof sentidoDeLaRueda, tecla: typeof sentidoDeLaTecla, dedo: typeof sentidoDelDedo): boolean =>
   rueda(0, -100, false) === -1 && rueda(0, 3, false) === 1 && rueda(0, 0.5, false) === null && rueda(40, 10, false) === null && rueda(0, -100, true) === null &&
@@ -216,7 +200,7 @@ const cableado = (g: string): boolean =>
   g.includes("window.addEventListener('wheel', alRodar, { capture: true, passive: false })") && g.includes("window.addEventListener('touchmove', alArrastrar, { capture: true, passive: false })") && g.includes("window.addEventListener('keydown', alApretar, { capture: true })") &&
   /function retener\(e: Event\): void \{\s*if \(e\.cancelable\) e\.preventDefault\(\)\s*e\.stopPropagation\(\)/.test(g) &&
   componenteDelFinal.includes('useEffect(() => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g))), [])') &&
-  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobina: ahora - s.gestos.arriba < RELOJ_DEL_FINAL.sueltaS, haciaAbajo, enViaje: viajeEnCurso() !== null }, dt)') &&
+  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)') &&
   finalTs.includes('s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)') &&
   armadas.includes('EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)') && pieDeVolumen.includes('EN_VIVO.pieEntero = true')
 afirmar(cableado(gestos), '  el cableado: la rueda, el dedo y las teclas se ven en la captura de la ventana (antes que Lenis) y, retenidos, no le llegan a nadie; el final los pide al montarse; el reloj va con el fondo de la página, el pie entero (lo escribe el pie de volumen; sin él, no espera) y los gestos; un viaje del menú lo deshace (sus scroll no son gestos)')

@@ -360,9 +360,11 @@ afirmarIgual(
   '§4d · el recorrido se le pasa a `scrollTo` en SEGUNDOS, derivados de los ms que el dueño toca',
 )
 const FUENTE_DEL_EFECTO = quitarComentarios(leer(EFECTO))
+// [NOCTURNO FINAL] A2 · cambió por pedido (velocidad con tope): la duración ya no es una sola; la calcula el módulo para
+// cada viaje (`duracionDelViaje`, con `DURACION_DEL_VIAJE_MS` como mínimo) y el efecto la pasa en segundos (s52 A2).
 afirmar(
-  FUENTE_DEL_EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S'),
-  '  el efecto la consume del módulo, no escribe un 4',
+  FUENTE_DEL_EFECTO.includes('const duracionMs = duracionDelViaje(destinoEnPx - window.scrollY, window.innerHeight)') && FUENTE_DEL_EFECTO.includes('duration: duracionMs / 1000'),
+  '  el efecto la consume del módulo (`duracionDelViaje`, por viaje), no escribe un 4',
 )
 afirmar(
   FUENTE_DEL_EFECTO.includes('easing: CURVA_DEL_VIAJE'),
@@ -374,12 +376,14 @@ afirmar(
  * Se afirma sobre el FUENTE porque el numero no existe como constante sola: es
  * una suma, y lo que hay que custodiar es que los tres terminos esten.
  */
+// [NOCTURNO FINAL] A2 · cambió por pedido: el total ya no es una constante (el recorrido dura según la distancia y, desde
+// el pie con la cinemática avanzada, el viaje espera a que se deshaga): el reloj suma los CUATRO términos.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const RELOJ_DE_SEGURIDAD_MS = TOTAL_DEL_DESLIZAMIENTO_MS + MARGEN_DEL_RELOJ_MS'),
-  '  🔴 el reloj de seguridad sale del TOTAL: si se olvidara el preludio, abortaría un viaje válido a mitad de camino',
+  FUENTE_DEL_EFECTO.includes('const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + ESPERA_MAXIMA_DEL_FINAL_MS + duracionMs + MARGEN_DEL_RELOJ_MS'),
+  '  🔴 el reloj de seguridad sale del TOTAL (el preludio, la espera del final, el recorrido de ESTE viaje y el margen): si se olvidara uno, abortaría un viaje válido a mitad de camino',
 )
 afirmar(
-  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), RELOJ_DE_SEGURIDAD_MS)'),
+  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), relojDeSeguridadMs(duracionMs))'),
   '  y es ese total el que se le pasa al reloj, no una cuenta escrita de nuevo',
 )
 afirmar(
@@ -388,7 +392,7 @@ afirmar(
 )
 // [VIAJES] La espera es `PRELUDIO_MS` en el viaje y el fundido del velo en el salto (movimiento reducido).
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS') && FUENTE_DEL_EFECTO.includes('}, espera)'),
+  FUENTE_DEL_EFECTO.includes('const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS') && FUENTE_DEL_EFECTO.includes('relojDeArranque = window.setTimeout(arrancar, espera)'),
   '  el viaje arranca a los `PRELUDIO_MS`, no en el mismo cuadro que el velo: es la pausa que el dueño pidió',
 )
 

@@ -6,6 +6,7 @@ import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO } from './enElPiso'
+import { FINAL_EN_REPOSO } from './enReposo'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import {
@@ -18,12 +19,12 @@ import {
   blancoDelFinal,
   calma,
   camaraDelFinal,
+  decidirElGesto,
   pasoDelReloj,
   poder,
   poseDelLogo,
   relojDelQuieto,
   relojQuieto,
-  retieneElGesto,
   sacudonDeLaPresion,
   subida,
   temblorDelLogo,
@@ -41,9 +42,13 @@ import {
 export interface EstadoDelFinal {
   /** [EL ENCASTRE] 2A · el reloj de `fin`. */
   readonly reloj: RelojDelFinal
-  /** [RETOQUE DEL ENCASTRE] 1D · el fondo de la página (px de scroll, el del último cuadro) y los últimos gestos (s, en `performance.now`). */
+  /**
+   * [RETOQUE DEL ENCASTRE] 1D · el fondo de la página (px de scroll, el del último cuadro) y los últimos gestos (s, en
+   * `performance.now`). [NOCTURNO FINAL] A1 · y el gesto en curso: cuándo empezó, si se retuvo, su evento más fuerte (px)
+   * y si pidió rebobinar.
+   */
   fondo: number
-  readonly gestos: { arriba: number; abajo: number; leido: number }
+  readonly gestos: { arriba: number; abajo: number; leido: number; desde: number; retenido: boolean; pico: number; rebobinar: boolean }
   scroll: number
   sinScrollS: number
   /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
@@ -77,7 +82,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number): 
   return {
     reloj: relojQuieto(),
     fondo: Number.POSITIVE_INFINITY,
-    gestos: { arriba: Number.NEGATIVE_INFINITY, abajo: Number.NEGATIVE_INFINITY, leido: 0 },
+    gestos: { arriba: Number.NEGATIVE_INFINITY, abajo: Number.NEGATIVE_INFINITY, leido: 0, desde: Number.NEGATIVE_INFINITY, retenido: false, pico: 0, rebobinar: false },
     scroll: Number.NaN,
     sinScrollS: 0,
     enteroS: 0,
@@ -130,17 +135,27 @@ const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
 
 /**
- * [RETOQUE DEL ENCASTRE] 1D · un gesto de scroll (`gestosDelScroll.ts`): lo anota y dice si se retiene (un gesto hacia
- * arriba al fondo, mientras la cinemática no está en su inicio, la rebobina en vez de subir la página). Con el fondo del
- * último cuadro: no se mide el documento en medio de la rueda.
+ * [RETOQUE DEL ENCASTRE] 1D · un gesto de scroll (`gestosDelScroll.ts`): lo anota y dice si se retiene. [NOCTURNO FINAL] A1
+ * · UN gesto hacia arriba al fondo, mientras corre o ya terminó, pide el rebobinado entero y se retiene ese gesto entero
+ * (`decidirElGesto`). Un gesto hacia abajo justo después de uno hacia arriba no cuenta (el temblor de un dedo al
+ * levantarse). Con el fondo del último cuadro: no se mide el documento en medio de la rueda.
  */
 export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
   const ahora = ahoraS()
   const alFondo = window.scrollY >= s.fondo - AL_FONDO_PX
-  const retiene = retieneElGesto(s.reloj, alFondo, g.sentido, ahora - s.gestos.arriba)
-  if (g.sentido < 0) s.gestos.arriba = ahora
-  else s.gestos.abajo = ahora
-  return retiene
+  const G = s.gestos
+  if (g.nuevo) {
+    G.desde = ahora
+    G.pico = 0
+  }
+  const enLaCola = g.magnitud > 0 && g.magnitud <= RELOJ_DEL_FINAL.colaDelGesto * G.pico
+  G.pico = Math.max(G.pico, g.magnitud)
+  const d = decidirElGesto(s.reloj, alFondo, g.sentido, g.nuevo, G.retenido, ahora - G.desde, enLaCola)
+  G.retenido = d.retiene
+  if (d.rebobina) G.rebobinar = true
+  if (g.sentido < 0) G.arriba = ahora
+  else if (ahora - G.arriba > RELOJ_DEL_FINAL.cambioDeSentidoS) G.abajo = ahora
+  return d.retiene
 }
 
 /** Un cuadro del final: el reloj, el quieto, el logo, el hueco, el golpe, la cámara y el piso. */
@@ -148,13 +163,17 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
   // 1 · [RETOQUE DEL ENCASTRE] 1D · el reloj: al fondo, arranca solo cuando el pie llegó entero y corre a su ritmo (el
-  // scroll hacia abajo no lo adelanta); un gesto hacia arriba retenido lo rebobina mientras siga; al soltar, retoma.
+  // scroll hacia abajo no lo adelanta). [NOCTURNO FINAL] A1 · un gesto hacia arriba lo rebobina entero, solo; parado,
+  // vuelve a empezar a los 2,5 s sin gestos. A2 · fuera del fondo o en un viaje, se deshace con tope.
   s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
   EN_VIVO.pegadoDesde = s.fondo
   const ahora = ahoraS()
   const haciaAbajo = s.gestos.abajo > s.gestos.leido
   s.gestos.leido = ahora
-  pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobina: ahora - s.gestos.arriba < RELOJ_DEL_FINAL.sueltaS, haciaAbajo, enViaje: viajeEnCurso() !== null }, dt)
+  const rebobinar = s.gestos.rebobinar
+  s.gestos.rebobinar = false
+  const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
+  pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, enViaje: viajeEnCurso() !== null }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
@@ -162,9 +181,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [EL ENCASTRE] 2G · el quieto espera también al final entero (arranca solo: sin esto ya llevaba 1,4 s sin scroll al terminar).
   // [RETOQUE DEL ENCASTRE] 1D · y a un rato sin gestos (al fondo la página no se mueve: un gesto no cambia el scroll).
   s.enteroS = fin > 0.995 ? s.enteroS + dt : 0
-  const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
   s.quietoS = relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
+  // [NOCTURNO FINAL] A2 · el viaje del menú espera a esto para mover el scroll.
+  FINAL_EN_REPOSO.valor = !activo
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)
     s.antes = fin

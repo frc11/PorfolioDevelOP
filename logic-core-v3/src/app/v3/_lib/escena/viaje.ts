@@ -76,3 +76,11 @@ export function suscribirAlViaje(f: () => void): () => void {
     oyentes.delete(f)
   }
 }
+
+/**
+ * [NOCTURNO FINAL] A2 · NINGÚN CUADRO AVANZA EL VIAJE MÁS QUE ESTO (ms). El reloj del viaje es el de pared, pero un cuadro
+ * largo (un tirón de 100 ms al cruzar las Demos, medido) lo hacía saltar: a 7.000 px/s eran 800 px de página y 17° de
+ * cámara en un solo cuadro. Con el tope, el tirón se ve como un tirón (la imagen se queda), no como un salto; un
+ * dispositivo a 30 cuadros no pierde tiempo (34 ms por cuadro), uno más lento, un poco.
+ */
+export const TOPE_DEL_CUADRO_DEL_VIAJE_MS = 34

@@ -49,6 +49,7 @@ import {
 } from './choreographyTypes'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from './viaje'
 import { crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
 import {
   applyLightRig,
@@ -346,6 +347,9 @@ export function OrbitRig({
       // 1c · Inercia: la cámara PERSIGUE la pose del progreso, no salta a ella.
       //      Cuando el progreso se detiene, sigue asentándose un momento.
       const settleScale = rigValues.settleScale
+      // [NOCTURNO FINAL] A2 · con el paso acotado: un cuadro largo (un tirón) no deja que la cámara recupere de golpe todo
+      // lo que venía atrás del progreso (en un viaje eran 17° en un cuadro). Es el tope del cuadro del viaje.
+      const pasoDeLaInercia = Math.min(delta, TOPE_DEL_CUADRO_DEL_VIAJE_MS / 1000)
       for (const channel of CHOREO_CHANNELS) {
         live[channel] = physics
           ? dampTowards(
@@ -353,7 +357,7 @@ export function OrbitRig({
               target[channel],
               SETTLE_TAU[channel] * settleScale,
               SETTLE_EPSILON[channel],
-              delta
+              pasoDeLaInercia
             )
           : target[channel]
       }

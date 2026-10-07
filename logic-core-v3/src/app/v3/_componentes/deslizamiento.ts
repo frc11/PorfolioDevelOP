@@ -103,6 +103,26 @@ export const DURACION_DEL_DESLIZAMIENTO_S = DURACION_DEL_VIAJE_MS / 1000
 export const TOTAL_DEL_DESLIZAMIENTO_MS = PRELUDIO_MS + DURACION_DEL_VIAJE_MS
 
 /**
+ * [NOCTURNO FINAL] A2 · LA VELOCIDAD CON TOPE. El recorrido duraba siempre `DURACION_DEL_VIAJE_MS`, fuera de una pantalla
+ * o de treinta y cinco: «Inicio» desde el pie cruzaba 31.000 px en 2,6 s y la cámara volaba (hasta 7° por cuadro en el
+ * medio). Ahora `DURACION_DEL_VIAJE_MS` es el MÍNIMO: un viaje largo no pasa de `pantallasPorS` pantallas por segundo
+ * en promedio (la curva del viaje llega al doble en su mitad), así que tarda más, hasta `maximoMs`.
+ */
+export const VIAJE_CON_TOPE = { pantallasPorS: 4.5, maximoMs: 7000 } as const
+
+/** [NOCTURNO FINAL] A2 · cuánto dura el recorrido de `distanciaPx` con una ventana de `altoPx`: crece con la distancia, con tope. */
+export function duracionDelViaje(distanciaPx: number, altoPx: number): number {
+  const porVelocidad = (Math.abs(distanciaPx) / Math.max(1, altoPx) / VIAJE_CON_TOPE.pantallasPorS) * 1000
+  return Math.min(VIAJE_CON_TOPE.maximoMs, Math.max(DURACION_DEL_VIAJE_MS, porVelocidad))
+}
+
+/**
+ * [NOCTURNO FINAL] A2 · desde el pie con la cinemática avanzada, el viaje espera a que la escena la deshaga (con tope:
+ * `RELOJ_DEL_FINAL.salida`) antes de mover el scroll; a lo sumo esto (ms), por si la escena no dibuja.
+ */
+export const ESPERA_MAXIMA_DEL_FINAL_MS = 3500
+
+/**
  * 🔴 **LA CURVA DEL VIAJE — Y ESTE SPRINT LE DA UNA PROPIA, QUE ES UN COSTO.**
  *
  * ── Lo que DESLIZAR-1 hacía, y por qué estaba bien ────────────────────────

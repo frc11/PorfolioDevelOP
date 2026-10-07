@@ -1,5 +1,7 @@
 import type { Curva } from '../_lib/motion/curvas'
 
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../_lib/escena/viaje'
+
 /**
  * EL VIAJE CUANDO NO HAY LENIS — abajo del umbral de 1025.
  *
@@ -61,6 +63,10 @@ export function destinoDelAncla(seccion: HTMLElement): number {
  * reloj de pared la duración es la misma en los dos, y lo que un teléfono
  * lento pierde es suavidad, no tiempo — que es la forma correcta de degradar.
  *
+ * [NOCTURNO FINAL] A2 · con un TOPE por cuadro (`TOPE_DEL_CUADRO_DEL_VIAJE_MS`): un
+ * cuadro largo (un tirón) avanza a lo sumo eso. Sin el tope, el tirón era un salto
+ * de la página (y de la cámara); a 30 cuadros por segundo no cambia nada.
+ *
  * ── Y por qué `window.scrollTo` y no `scrollBy` ──────────────────────────
  *
  * Porque `scrollTo` es absoluto: si algo más mueve el scroll a mitad de vuelo
@@ -77,13 +83,17 @@ export function viajarSinLenis(
 ): () => void {
   const salida = window.scrollY
   const recorrido = destino - salida
-  const arranque = performance.now()
+  let antes = performance.now()
+  let reloj = 0
   let pedido = 0
   let vivo = true
 
   const cuadro = (): void => {
     if (!vivo) return
-    const t = Math.min(1, (performance.now() - arranque) / duracionMs)
+    const ahora = performance.now()
+    reloj += Math.min(ahora - antes, TOPE_DEL_CUADRO_DEL_VIAJE_MS)
+    antes = ahora
+    const t = Math.min(1, reloj / duracionMs)
     window.scrollTo(0, salida + recorrido * curva(t))
     if (t < 1) {
       pedido = requestAnimationFrame(cuadro)

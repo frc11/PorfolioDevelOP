@@ -11,6 +11,7 @@ import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
 import { alCuadroDelFinal, crearElEstado, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
 import { FINAL_EN_EL_PISO } from './enElPiso'
+import { FINAL_EN_REPOSO } from './enReposo'
 import { formasDelLogo, mascaraDelLogo } from './hueco'
 import { EN_VIVO } from './recorridoDelFinal'
 
@@ -57,6 +58,7 @@ export function FinalDelPie({ logoGroupRef, stats }: Props) {
       soltarElFinal(estado, grupoDelLogo)
       EN_VIVO.fin = 0
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
+      FINAL_EN_REPOSO.valor = true
       piso.uGolpe.value.w = 0
       piso.uHueco.value = null
       estado.pozo.soltar()

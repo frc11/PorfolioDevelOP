@@ -314,12 +314,14 @@ const abajoDeLasSecciones = ANCLAJE.pantallasDelDocumento * v
 afirmar([0, 200, 720].every((dentro) => pantallaDeScroll(abajoDeLasSecciones - v + dentro, 0, abajoDeLasSecciones, v) === ANCLAJE.pantallasDeScroll), '  al fondo la escena queda en su último nudo (la pose E): Portfolio, la frase, la noche y el amanecer no se mueven')
 // [EL ENCASTRE] 2A · cambió por pedido: `fin` ya no es lo recorrido de la cola, tiene su reloj. [RETOQUE DEL ENCASTRE] 1D ·
 // cambió por pedido: al fondo, con el pie entero, avanza solo; un gesto hacia arriba lo rebobina (lo detalla s51 1D).
+// [NOCTURNO FINAL] A1 · cambió por pedido: UN gesto hacia arriba lo rebobina entero, solo (lo detalla s52 A1).
 const reloj = relojQuieto()
-const alFondo = { alFondo: true, pieEntero: true, rebobina: false, haciaAbajo: false, enViaje: false }
+const alFondo = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, enViaje: false }
 for (let i = 0; i < 60; i += 1) pasoDelReloj(reloj, alFondo, 1 / 60)
 const solo = reloj.fin
-for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, { ...alFondo, rebobina: true }, 1 / 60)
-afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj: al fondo con el pie entero avanza solo, sin scroll, y un gesto hacia arriba sostenido lo rebobina a 0', `en 1 s solo: ${solo.toFixed(2)}`)
+pasoDelReloj(reloj, { ...alFondo, rebobinar: true }, 1 / 60)
+for (let i = 0; i < 300; i += 1) pasoDelReloj(reloj, alFondo, 1 / 60)
+afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj: al fondo con el pie entero avanza solo, sin scroll, y UN gesto hacia arriba lo rebobina a 0 (solo, sin sostenerlo)', `en 1 s solo: ${solo.toFixed(2)}`)
 
 // La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra. Con `fin` 0, el logo de hoy.
 // [EL ENCASTRE] 2B · cambió por pedido: se acuesta EN SU LUGAR (antes, sobre su base: el centro se corría al fondo) y cae
@@ -356,14 +358,21 @@ camaraDelFinal(casiCero, 1e-6, blanco, 0, 0, null)
 afirmar(quieta.matrixWorld.equals(antesDeTocar) && adelante.y < -0.99 && adelante.dot(alBlanco) > 0.9999 && arribaDeLaPantalla.z < -0.99 && casiCero.position.distanceTo(new THREE.Vector3(0, 5, 40)) < 1e-3 && Math.abs(desdeArriba.position.distanceTo(blanco) - Math.hypot(5, 40) * FINAL_DEL_PIE.camara.lejos) < 1e-6, 'la cámara: sin final no la toca; al final mira el logo acostado desde arriba (89°: «arriba» en la pantalla es la cabeza del logo, sin vuelco en el cenit) y el paso desde la pose E es continuo', `elevación ${String(FINAL_DEL_PIE.camara.elevacion)}°`)
 
 // Quieto en el pie: gira sin fin y se aleja con tope; al moverse, todo vuelve rápido.
-const quieto = { giro: 0, aleja: 0 }
+// [NOCTURNO FINAL] A1/A2 · cambió por pedido: la vuelta va con tope de velocidad (media vuelta salía a 400°/s, un
+// coletazo, y la cola de la exponencial duraba segundos): a los 3 s, cero (aun desde media vuelta), sin pasar el tope.
+const quieto = { giro: 0, aleja: 0, giroV: 0, alejaV: 0 }
 let tQuieto = 0
 for (let i = 0; i < 6000; i += 1) tQuieto = relojDelQuieto(tQuieto, true, 99, 0.1, quieto)
 const conTope = quieto.aleja <= FINAL_DEL_PIE.quieto.alejaHasta && quieto.aleja > 0.99 * FINAL_DEL_PIE.quieto.alejaHasta && quieto.giro > 2500
-for (let i = 0; i < 40; i += 1) relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
-const aLos2s = Math.abs(quieto.giro) < 0.02 * 180 && quieto.aleja < 0.02 * FINAL_DEL_PIE.quieto.alejaHasta
-for (let i = 0; i < 80; i += 1) relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
-afirmar(conTope && aLos2s && quieto.giro === 0 && quieto.aleja === 0 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): la cámara gira sin fin y se aleja hacia un tope que nunca pasa (sin perder el logo); al volver a scrollear, el giro (por el camino corto) y el alejamiento vuelven: a los 2 s queda menos del 2 % (aun desde media vuelta) y a los 6 s, cero', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u`)
+let vueltaMasRapida = 0
+let alejaMasRapida = 0
+for (let i = 0; i < 60; i += 1) {
+  relojDelQuieto(tQuieto, false, 0, 0.05, quieto)
+  vueltaMasRapida = Math.max(vueltaMasRapida, Math.abs(quieto.giroV))
+  alejaMasRapida = Math.max(alejaMasRapida, Math.abs(quieto.alejaV))
+}
+const V = FINAL_DEL_PIE.quieto.vuelta
+afirmar(conTope && quieto.giro === 0 && quieto.aleja === 0 && vueltaMasRapida <= V.giroS + 1e-9 && vueltaMasRapida > 0.5 * V.giroS && alejaMasRapida <= V.alejaS + 1e-9 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0, giroV: 0, alejaV: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): la cámara gira sin fin y se aleja hacia un tope que nunca pasa (sin perder el logo); al volver a scrollear, el giro (por el camino corto) y el alejamiento vuelven con tope de velocidad: a los 3 s, cero, aun desde media vuelta', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u · vuelta a lo sumo ${vueltaMasRapida.toFixed(1)}°/s`)
 
 // El golpe: el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
 // [EL ENCASTRE] 2C · cambió por pedido: la explosión del golpe se fue; las partículas eran el vapor al acostarse.

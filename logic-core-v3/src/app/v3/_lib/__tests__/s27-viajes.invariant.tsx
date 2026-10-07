@@ -106,7 +106,9 @@ afirmar(Math.abs(largo - DURACION_DEL_VIAJE_MS) <= CUADRO_MS, `  y lo que tardan
 const porVelocidad: typeof viajarSinLenis = (destino, _ms, curva, alTerminar) => viajarSinLenis(destino, Math.abs(destino - window.scrollY) / 8, curva, alTerminar)
 controlPositivo('  el chequeo vería un viaje que va por velocidad', porVelocidad, (f: typeof viajarSinLenis) => Math.abs(cuantoTarda(0, 900, f) - cuantoTarda(0, 21_000, f)) < CUADRO_MS)
 afirmarIgual((EFECTO.match(/duration:/g) ?? []).length, 1, 'con Lenis hay UNA sola duración en el efecto ([NAVBAR] retoque 3: Portfolio y Por qué develOP vuelven a viajar como todos)')
-afirmar(EFECTO.includes('duration: DURACION_DEL_DESLIZAMIENTO_S') && EFECTO.includes('DURACION_DEL_VIAJE_MS,'), '  y es la constante, la misma que recibe el motor de abajo: ninguna se calcula con la distancia')
+// [NOCTURNO FINAL] A2 · cambió por pedido (velocidad con tope): los dos motores siguen yendo por TIEMPO, pero el efecto les
+// pasa la duración de ESTE viaje (`duracionDelViaje`: el mínimo de siempre y, si es largo, más; s52 A2), la misma a los dos.
+afirmar(EFECTO.includes('duration: duracionMs / 1000') && /viajarSinLenis\(\s*destinoEnPx,\s*duracionMs,/.test(EFECTO), '  y es la misma para los dos motores (la de Lenis en segundos, la de abajo en ms): `duracionDelViaje`, por viaje')
 afirmarIgual(DURACION_DEL_DESLIZAMIENTO_S * 1000, DURACION_DEL_VIAJE_MS, '  la de Lenis va en segundos, derivada de los mismos milisegundos')
 const LIBRERIA = leer('node_modules/lenis/dist/lenis.mjs')
 afirmar(LIBRERIA.includes('if (this.duration && this.easing) {') && LIBRERIA.includes('const linearProgress = clamp(0, this.currentTime / this.duration, 1);'), '  y Lenis, con `duration` y `easing`, anima por TIEMPO: el `lerp` (que va por distancia) sólo corre sin duración')
