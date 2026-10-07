@@ -39,6 +39,7 @@ import * as THREE from 'three'
 import { ESCALON_DE_LAS_ONDAS_S, IconoDelParlante, ONDAS_EN_ESPERA, PULSO_DE_LA_ESPERA } from '../../_chrome/sonido/IconoDelParlante'
 import { VeloDeCarga } from '../../_componentes/VeloDeCarga'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/titulos3d/titular2d'
+import { DEMO_ANGOSTA } from '../../_panel-vivo/DemoDelPanel'
 import { RESPIRO_DEL_BUCLE } from '../../_panel-vivo/reproduccion'
 import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/_contrato/bloqueAnimado'
 import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
@@ -474,18 +475,21 @@ titulo('A8 · Tu panel abajo de 1024: cada demo es el panel de escritorio a esca
 const cargadorA8 = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
 const reproduccionA8 = sinComentarios(leer('_panel-vivo/reproduccion.ts'))
 const geometriaA8 = sinComentarios(leer('_secciones/tu-panel/geometria.ts'))
+// [NOCTURNO FINAL] C2 · la escala es la de la pantalla en uso (`dibujo`): la natural en escritorio, la angosta abajo de 1024.
 const comoVideo = (c: string): boolean =>
-  c.includes('const escalada = escala > 0') &&
+  c.includes('const escalada = dibujo.escala > 0') &&
   c.includes('bucle: !escritorio }') &&
   /className=\{`\$\{escalada \? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'\} max-escritorio:pointer-events-none\$\{corre \? '' : ` \$\{CONGELADA\}`\}`\}/.test(c) &&
   /data-parte="pausa-del-video"[\s\S]{0,400}aria-pressed=\{pausada\}[\s\S]{0,600}escritorio:hidden/.test(c) &&
   c.includes('const corre = laMasVisible && pestana && !pausada && !reducido')
 afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero (nada que tocar adentro), va en bucle, y su pausa es un botón afuera de la escala (WCAG 2.2.2), sólo ahí; sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
-controlPositivo('el detector VE la demo del teléfono de antes (a su alto, sin escala)', cargadorA8.replace('const escalada = escala > 0', 'const escalada = escritorio && escala > 0'), comoVideo)
+controlPositivo('el detector VE la demo del teléfono de antes (a su alto, sin escala)', cargadorA8.replace('const escalada = dibujo.escala > 0', 'const escalada = escritorio && dibujo.escala > 0'), comoVideo)
 const enBucle = (r: string): boolean => /readonly bucle: boolean/.test(r) && r.includes('bucle: false })') && /if \(!\(r\.corre && r\.bucle\) \|\| paso < total\) return undefined\s*const reloj = window\.setTimeout\(\(\) => setTicks\(0\), cadaMs \* RESPIRO_DEL_BUCLE\)/.test(r) && RESPIRO_DEL_BUCLE >= 1
 afirmar(enBucle(reproduccionA8), 'el bucle: terminado el guion, un respiro (dos pasos) y arranca de nuevo — sólo mientras corre y sólo en bucle (el escritorio, donde la demo se usa, sigue parándose en el último paso)', `${String(RESPIRO_DEL_BUCLE)} pasos de respiro`)
 controlPositivo('el detector VE un bucle que reinicia aunque la demo no corra', reproduccionA8.replace('if (!(r.corre && r.bucle) || paso < total) return undefined', 'if (!r.bucle || paso < total) return undefined'), enBucle)
 const marcoA8 = /<div\s+data-parte="marco"[\s\S]*?className="([^"]*)"/.exec(tarjetaA7)?.[1] ?? ''
-afirmar(/^relative aspect-\[var\(--proporcion\)\] w-full overflow-hidden /.test(marcoA8) && !/alto-angosto|escritorio:h-auto|escritorio:aspect/.test(marcoA8) && !/altoAngosto|alto-angosto/.test(geometriaA8) && !/alto-angosto/.test(sinComentarios(tarjetaA7)), 'el marco tiene SIEMPRE la proporción de su pantalla (el alto propio de abajo de 1024 se fue de la tabla, de la tarjeta y del estilo inline)', marcoA8.split(' ').slice(0, 3).join(' '))
+// [NOCTURNO FINAL] C2 · abajo de 1024 su pantalla es la angosta de la demo (4:5, `DEMO_ANGOSTA`): el marco toma ESA proporción, la única excepción.
+const marcoSinLaAngosta = marcoA8.replace(' max-escritorio:aspect-4/5', '')
+afirmar(/^relative aspect-\[var\(--proporcion\)\] max-escritorio:aspect-4\/5 w-full overflow-hidden /.test(marcoA8) && DEMO_ANGOSTA.proporcion === 5 / 4 && !/alto-angosto|escritorio:h-auto|escritorio:aspect/.test(marcoSinLaAngosta) && !/altoAngosto|alto-angosto/.test(geometriaA8) && !/alto-angosto/.test(sinComentarios(tarjetaA7)), 'el marco tiene SIEMPRE la proporción de su pantalla (la natural; abajo de 1024 la angosta de la demo, 4:5) y ningún alto propio en la tabla, la tarjeta ni el estilo inline', marcoA8.split(' ').slice(0, 4).join(' '))
 
 cerrar('s48-ajustes-finales')

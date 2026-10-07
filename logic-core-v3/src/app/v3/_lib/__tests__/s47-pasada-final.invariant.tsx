@@ -426,11 +426,12 @@ const porColumnas = (ci: string): boolean => /<LlegadaDelPie value="atras">\s*<d
 afirmar(porColumnas(cierreC2), 'las columnas: el titular, el mail y WhatsApp, atrás; el formulario, tapa; lo demás, fundido (el que no dice nada); la escena lee el progreso de la última pantalla')
 controlPositivo('el detector VE el mail fuera de su columna', cierreC2.replace('<ContactoDelPie />\n          </LlegadaDelPie>', '</LlegadaDelPie>\n          <ContactoDelPie />'), porColumnas)
 afirmar(/const progreso = volumen \? null : deLaSeccion/.test(cierreC2) && /export const LLEGADAS_DEL_PIE = \{\s*izquierda: \[0\.3, 0\.6\],\s*derecha: \[0\.4, 0\.75\],\s*abajo: \[0\.55, 0\.9\],\s*\} as const/.test(cierreC2), '  abajo de 1025 (el pie plano) no cambia nada: las mismas ventanas del DOM')
+// [NOCTURNO FINAL] A4 · el pie ya no proyecta sombra en el piso (lo pide el ticket): lo que va en el piso con la pieza en camino es su caja para el polvo (B4).
 const elDomEspera = (c: string): boolean => {
   const [i, s, l] = [c.indexOf('a.viaje.matrix.identity()'), c.indexOf('seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)'), c.indexOf('llegar(a, s)\n')]
-  return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /applyMatrix4\(a\.viaje\.matrixWorld\)/.test(c)
+  return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /escribirLaCaja\(cajas, a\.viaje\.matrixWorld, a\.caja\)/.test(c) && /SOMBRAS_DEL_PIE\.uCuantasSombrasDelPie\.value = 0/.test(c)
 }
-afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la sombra en el piso va con la pieza en camino')
+afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la caja del polvo va con la pieza en camino (sombra del pie, ninguna)')
 controlPositivo('el detector VE el DOM que viaja con la pieza', armadasFuente.replace('a.viaje.matrix.identity()', '').replace('llegar(a, s)\n', 'llegar(a, s)\n    a.viaje.matrix.identity()\n'), elDomEspera)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -520,9 +521,11 @@ titulo('B · Tu panel: el caos del nocturno con las demos usables, el marco que 
 // B1 · la distribución (la tabla, los tamaños y el barrido los fija s6-tu-panel §6-§7); acá, lo que cruza carpetas.
 afirmar(Object.values(TAMANOS).every((t) => t.ancho >= 42 && t.ancho < 60) && TABLA_DEL_CAOS.length === 8, 'ningún módulo a lo ancho: las ocho features van del 42 al 56 % del ancho útil (más chicas que las del retoque, más grandes que las del nocturno)', Object.values(TAMANOS).map((t) => String(t.ancho)).join(' · '))
 const cargador = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
-const escalada = (c: string): boolean => /style=\{escalada \? \{ width: pantalla\.ancho, height: pantalla\.alto, transform: `scale\(\$\{escala\.toFixed\(4\)\}\)` \} : undefined\}/.test(c) && /new ResizeObserver\(\(\) => setEscala\(el\.clientWidth \/ pantalla\.ancho\)\)/.test(c)
-afirmar(escalada(cargador), '  adentro de cada tarjeta el panel se dibuja a su pantalla natural y se escala con `transform` al ancho de la tarjeta (se ve entero, se usa ahí mismo)')
-controlPositivo('el detector VE una demo dibujada al tamaño de la tarjeta (sin escala)', cargador.replace('transform: `scale(${escala.toFixed(4)})`', 'transform: undefined'), escalada)
+// [NOCTURNO FINAL] C2 · en escritorio, la pantalla natural (como antes); abajo de 1024, la angosta de su tarjeta (`pantallaAngosta`), también a escala.
+const escalada = (c: string): boolean => /style=\{escalada \? \{ width: dibujo\.pantalla\.ancho, height: dibujo\.pantalla\.alto, transform: `scale\(\$\{dibujo\.escala\.toFixed\(4\)\}\)` \} : undefined\}/.test(c) && /const enUso = escritorio \? pantalla : pantallaAngosta\(el\.clientWidth\)\s*setDibujo\(\{ pantalla: enUso, escala: el\.clientWidth \/ enUso\.ancho \}\)/.test(c)
+afirmar(escalada(cargador), '  adentro de cada tarjeta el panel se dibuja a su pantalla natural (abajo de 1024, a la angosta de su tarjeta) y se escala con `transform` al ancho de la tarjeta (se ve entero, se usa ahí mismo)')
+controlPositivo('el detector VE una demo dibujada al tamaño de la tarjeta (sin escala)', cargador.replace('transform: `scale(${dibujo.escala.toFixed(4)})`', 'transform: undefined'), escalada)
+controlPositivo('el detector VE la pantalla angosta también en escritorio', cargador.replace('const enUso = escritorio ? pantalla : pantallaAngosta(el.clientWidth)', 'const enUso = pantallaAngosta(el.clientWidth)'), escalada)
 const rueda = sinComentarios(leer('_panel-vivo/rueda.ts'))
 const marco = sinComentarios(leer('_panel-vivo/MarcoDelPanel.tsx'))
 const ruedaAdentro = (r: string, m: string): boolean =>
