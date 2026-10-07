@@ -1,4 +1,5 @@
 import { FLOOR_Y } from '../probeScene'
+import { CAJAS_DEL_PIE_GLSL } from '../pie3d/cajasDelPolvo'
 import { CAMPO_DEL_LOGO_GLSL } from './campoDelLogo'
 import { POSARSE } from './posarse'
 import { POLVO_PAREJO } from './volumen'
@@ -157,6 +158,7 @@ in vec2 vUv;
 layout( location = 0 ) out vec4 salida0;
 layout( location = 1 ) out vec4 salida1;
 ${CAMPO_DEL_LOGO_GLSL}
+${CAJAS_DEL_PIE_GLSL}
 
 float azar1( float n ) { return fract( sin( n * 12.9898 + 4.1414 ) * 43758.5453 ); }
 float azar3( vec3 p ) { return fract( sin( dot( p, vec3( 127.1, 311.7, 74.7 ) ) ) * 43758.5453 ); }
@@ -315,6 +317,8 @@ void main() {
 			vec3 objetivo = turbulencia( p ) + vec3( 0.0, - baja, 0.0 );
 			vec3 antes = p;
 			p += relajar( v, objetivo, ${(1 / FISICA.caida.arrastre).toFixed(4)}, dt );
+			// [NOCTURNO FINAL] B4 · no atraviesa las piezas del pie: sale por una cara (un cupo se apoya en la de arriba).
+			chocarConElPie( p, v, azar );
 			if ( posarseEnElLogo( p, antes ) ) {
 				salida0 = vec4( ( uLogoInverso * vec4( p, 1.0 ) ).xyz, modoConPeso( 3.0, peso, dt ) );
 				salida1 = vec4( 0.0, 0.0, 0.0, desde );

@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { crearCronometro } from '../gpu/cronometro'
 import { crearPingPong } from '../gpu/pingPong'
 import { PISO_EN_VIVO } from '../piso/enVivo'
+import { CAJAS_DEL_PIE } from '../pie3d/cajasDelPolvo'
 import { CAMPO_EN_VIVO, type campoDeAPoco, type MallaDelLogo } from './campoDelLogo'
 import { AIRE } from './parche'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from './simulacion'
@@ -137,6 +138,8 @@ export function armar() {
       uLogoInverso: AIRE.uLogoInverso,
       // [ESCENA 8] T5: el campo de la malla real (donde se posa el polvo que cae sobre el logo).
       ...CAMPO_EN_VIVO,
+      // [NOCTURNO FINAL] B4 · las piezas del pie (las escribe el pie de volumen en cada cuadro).
+      ...CAJAS_DEL_PIE,
     },
     true,
   )

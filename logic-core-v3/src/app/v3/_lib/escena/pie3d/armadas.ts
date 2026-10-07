@@ -16,6 +16,7 @@ import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocaci
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
+import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -42,6 +43,8 @@ export interface Armada {
   readonly grupo: THREE.Group
   /** [PASADA FINAL] C2 · la pose de su llegada, entre su lugar (`grupo`) y su geometría. */
   readonly viaje: THREE.Group
+  /** [NOCTURNO FINAL] B4 · su caja en la pieza (px): para que el polvo que cae no la atraviese. */
+  readonly caja: THREE.Box3
   /** Lo que se hunde: la placa de un enlace; en el formulario, la tecla. */
   readonly cuerpo: THREE.Group
   readonly mallas: readonly THREE.Mesh[]
@@ -80,7 +83,10 @@ export interface EstadoDelPie {
 export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.DirectionalLight | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
   // [RETOQUE DEL ENCASTRE] 1D · el final del pie espera a que el pie haya aparecido entero (lo de abajo, al terminar el cuadro).
   EN_VIVO.pieEntero = false
-  if (!s.listo || s.estudio === null || s.armadas.length === 0) return
+  if (!s.listo || s.estudio === null || s.armadas.length === 0) {
+    CAJAS_DEL_PIE.uCuantasCajasDelPie.value = 0
+    return
+  }
   viva.updateMatrixWorld()
   const nivel = principal === null ? 1 : Math.min(1, principal.intensity / KEY_INTENSITY)
   // [RETOQUE DEL ENCASTRE] 1G · la luz como antes de la cinemática (`material.ts`).
@@ -118,6 +124,10 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   }
   // [NOCTURNO FINAL] A4 · las piezas del pie no proyectan sombra sobre la escena (eran sombras de contacto en el piso vivo).
   SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
+  // [NOCTURNO FINAL] B4 · y el polvo que cae no las atraviesa: sus cajas, para la simulación (`cajasDelPolvo.ts`).
+  let cajas = 0
+  for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)
+  CAJAS_DEL_PIE.uCuantasCajasDelPie.value = cajas
   EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)
 }
 
@@ -209,8 +219,14 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   }
   grupo.visible = false
   if (pieza.forma !== 'texto') pieza.elemento.style.transformOrigin = '0 0'
+  // [NOCTURNO FINAL] B4 · su caja en la pieza (lo de la tecla, en la placa: lo que se hunde es apenas).
+  const caja = new THREE.Box3()
+  for (const malla of mallas) {
+    malla.geometry.computeBoundingBox()
+    if (malla.geometry.boundingBox !== null) caja.union(malla.geometry.boundingBox)
+  }
   const delHundido = pieza.forma === 'placa' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja }
 }
 
 export function soltar(a: Armada): void {

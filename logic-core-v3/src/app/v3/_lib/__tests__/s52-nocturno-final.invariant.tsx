@@ -17,6 +17,7 @@
  *   B1 · el intro del logo: cae desde arriba y llega cuando termina de armarse el titular; la súper onda (la del encastre).
  *   B2 · el piso volcán: el mouse sólo levanta; destellos de lava al azar por las juntas de todo el piso; el atardecer parejo.
  *   B3 · el círculo estable: alrededor del logo, liso y quieto, sin bordes; no reacciona al mouse ni a las ondas.
+ *   B4 · el polvo en el pie: en la cinemática no se posa; el que cae no atraviesa las piezas del pie (un cupo se apoya).
  * Lo que se mira en vivo: `~/.cache/b4-medicion/nocturno-final/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -33,6 +34,7 @@ import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
 import { ATARDECER_DEL_FINAL, FINAL_DEL_PIE, RELOJ_DEL_FINAL, atardecer, camaraDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
+import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../escena/viaje'
 import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
@@ -523,5 +525,26 @@ controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las
 controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, dibujoDelPisoB2, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
 const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 afirmar(entornoB3.includes('entradas.reducido = quieto || EN_VIVO.fin > 0'), '  y durante el final el logo no larga anillos del pulso (cruzaban el círculo quieto: anillos y ondas en escalones)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B4 · El polvo en el pie: en la cinemática no se posa; el que cae no atraviesa las piezas del pie (un cupo se apoya)')
+
+// En la cinemática la página está quieta (la cinemática es automática) y el polvo se posaba a los 4 s: ahora el final cuenta
+// como movimiento (desde el logo) y el polvo sigue flotando como siempre.
+const fisicaB4 = sinComentarios(leer('_lib/escena/polvo/Fisica.tsx'))
+const flotaEnElFinal = (c: string): boolean => /if \(!hayOrigen && EN_VIVO\.fin > 0\) \{\s*m\.origen\[0\] = 0\s*m\.origen\[1\] = FLOOR_Y\s*m\.origen\[2\] = 0\s*hayOrigen = true\s*\}\s*if \(!hayOrigen && \(scroll \|\| cursor\)\) \{/.test(c)
+afirmar(flotaEnElFinal(fisicaB4), 'durante la cinemática final el polvo no se posa ni cae: el final cuenta como movimiento (desde el logo) y sigue flotando como siempre')
+controlPositivo('el detector VE el polvo que se posa en la cinemática (la página quieta)', fisicaB4.replace(/if \(!hayOrigen && EN_VIVO\.fin > 0\) \{[\s\S]*?hayOrigen = true\s*\}\s*/, ''), flotaEnElFinal)
+// Lo que cae no atraviesa las piezas del pie (placas, botones, enlaces, el formulario; no el texto suelto): sale por una cara;
+// por la de arriba se apoya un cupo (al azar, por mota), sólo si recién la cruzó (no salta desde el costado).
+const simB4 = sinComentarios(leer('_lib/escena/polvo/simulacion.ts'))
+const armadasB4 = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const choqueBien = (sim: string, ar: string, glsl: string): boolean =>
+  /p \+= relajar\( v, objetivo, [^;]+;\s*chocarConElPie\( p, v, azar \);\s*if \( posarseEnElLogo\( p, antes \) \) \{/.test(sim) && sim.includes('${CAJAS_DEL_PIE_GLSL}') &&
+  ar.includes("for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)") &&
+  glsl.includes('if ( arriba && apoya && h < 0.25 * medida ) { k = j; menor = -1.0; break; }') && glsl.includes('if ( arriba ) continue;') && glsl.includes('if ( hondo.x <= 0.0 || hondo.y <= 0.0 || hondo.z <= 0.0 ) continue;')
+afirmar(choqueBien(simB4, armadasB4, CAJAS_DEL_PIE_GLSL) && POLVO_EN_EL_PIE.cupo <= 0.35 && POLVO_EN_EL_PIE.cajas >= 10, '  la mota que cae no atraviesa las piezas del pie (sale por la cara más cercana que no es la de arriba); por la de arriba se apoya sólo un cupo (no se acumula), y sólo si recién la cruzó; la apoyada queda frenada en su cara (si la pieza se mueve, la lleva)', `cupo ${String(POLVO_EN_EL_PIE.cupo * 100)} % · hasta ${String(POLVO_EN_EL_PIE.cajas)} piezas`)
+controlPositivo('  el detector VE un polvo que atraviesa las piezas', [simB4.replace(/chocarConElPie\( p, v, azar \);\s*/, ''), armadasB4, CAJAS_DEL_PIE_GLSL] as const, ([si, ar, gl]: readonly [string, string, string]) => choqueBien(si, ar, gl))
+controlPositivo('  y uno que apoya a todas (se acumularían)', [simB4, armadasB4, CAJAS_DEL_PIE_GLSL.replace('if ( arriba ) continue;', '')] as const, ([si, ar, gl]: readonly [string, string, string]) => choqueBien(si, ar, gl))
 
 cerrar('s52-nocturno-final')

@@ -9,6 +9,7 @@ import type { Medida } from '../gpu/cronometro'
 import { vecesQueSeMovioLaPagina } from '../paginaMovida'
 import { FLOOR_Y } from '../probeScene'
 import type { ProbeRigStore } from '../probeStore'
+import { EN_VIVO } from '../final/recorridoDelFinal'
 import { alPaso, armar, correr, hornearDeAPoco, mallasDelLogo, pasoInicial, publicar, type MedidaDelCampo } from './armadoDeLaFisica'
 import { AIRE } from './parche'
 import { CAMPO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo } from './campoDelLogo'
@@ -187,6 +188,14 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
         hayOrigen = true
         delCursor = true
       }
+    }
+    // [NOCTURNO FINAL] B4 · durante la cinemática final el polvo no se posa ni cae: sigue flotando (la página está quieta
+    // pero la escena no: cuenta como movimiento, desde el logo; si ya se había posado, se levanta con el frente).
+    if (!hayOrigen && EN_VIVO.fin > 0) {
+      m.origen[0] = 0
+      m.origen[1] = FLOOR_Y
+      m.origen[2] = 0
+      hayOrigen = true
     }
     if (!hayOrigen && (scroll || cursor)) {
       const adelante = state.camera.getWorldDirection(m.punto.set(0, 0, 0)).setY(0).normalize()
