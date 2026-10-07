@@ -1,6 +1,7 @@
 'use client'
 
 import { motion, useTransform, type MotionValue } from 'motion/react'
+import { useEffect, useRef } from 'react'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
@@ -245,50 +246,76 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
  * ventana visible; sin movimiento, queda quieta.
  */
 function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
+  // [NOCTURNO FINAL] D2 · mientras el piso no está iluminado la lista va sin mezcla (`banda.css` §6): `data-amanecer`.
+  const lista = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const poner = (): void => {
+      const modo = modoDelAmanecer(DIA_DEL_TEXTO.frase.get(), DIA_DEL_TEXTO.abajo.get())
+      if (modo === null) lista.current?.removeAttribute('data-amanecer')
+      else lista.current?.setAttribute('data-amanecer', modo)
+    }
+    poner()
+    const quitar = [DIA_DEL_TEXTO.frase.on('change', poner), DIA_DEL_TEXTO.abajo.on('change', poner)]
+    return () => quitar.forEach((q) => q())
+  }, [])
   return (
     <ContenidoDeSeccion className="py-[var(--spacing-20)]" claseDeContenido="flex flex-col gap-[var(--spacing-12)]">
       <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
         {NOMBRE_DE_SECCION}
       </h2>
-      <CoreografiaEnTodoAncho>
-        <Llega>
-          <p data-pieza="frase-del-final">
-            <Titular nivel="titulo-xl" como="span" className="block">
-              {FRASE.izquierda}
-            </Titular>{' '}
-            <Titular nivel="titulo-xl" como="span" className="block">
-              {FRASE.derecha}
-            </Titular>
-          </p>
-        </Llega>
-        <ul className="grid grid-cols-1 gap-[var(--spacing-8)] movil:grid-cols-2">
-          {VALORES.map((valor) => (
-            <li key={valor.clave}>
-              <Llega>
-                <PiezaDeValor valor={valor} />
-              </Llega>
-            </li>
-          ))}
-        </ul>
-        {/* [FINAL 3] Separado de los valores, en su propio espacio; centrado desde tablet. */}
-        <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
+      {/* `contents`: sin caja propia, las piezas siguen siendo hijas de la columna (y la mezcla no se corta). */}
+      <div ref={lista} data-parte="lista-del-final" className="contents">
+        <CoreografiaEnTodoAncho>
           <Llega>
-            <Titular nivel="titulo-xl" como="p">
-              {CTA.frase}
-            </Titular>
-            <Titular nivel="titulo-xl" como="p" peso="fuerte">
-              {CTA.destacado}
-            </Titular>
+            <p data-pieza="frase-del-final">
+              <Titular nivel="titulo-xl" como="span" className="block">
+                {FRASE.izquierda}
+              </Titular>{' '}
+              <Titular nivel="titulo-xl" como="span" className="block">
+                {FRASE.derecha}
+              </Titular>
+            </p>
           </Llega>
-          <Llega>
-            <div className={BOTON_GRANDE}>
-              <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
-            </div>
-          </Llega>
-        </div>
-      </CoreografiaEnTodoAncho>
+          <ul className="grid grid-cols-1 gap-[var(--spacing-8)] movil:grid-cols-2">
+            {VALORES.map((valor) => (
+              <li key={valor.clave}>
+                <Llega>
+                  <PiezaDeValor valor={valor} />
+                </Llega>
+              </li>
+            ))}
+          </ul>
+          {/* [FINAL 3] Separado de los valores, en su propio espacio; centrado desde tablet. */}
+          <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center">
+            <Llega>
+              <Titular nivel="titulo-xl" como="p">
+                {CTA.frase}
+              </Titular>
+              <Titular nivel="titulo-xl" como="p" peso="fuerte">
+                {CTA.destacado}
+              </Titular>
+            </Llega>
+            <Llega>
+              <div className={BOTON_GRANDE}>
+                <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
+              </div>
+            </Llega>
+          </div>
+        </CoreografiaEnTodoAncho>
+      </div>
     </ContenidoDeSeccion>
   )
+}
+
+/**
+ * [NOCTURNO FINAL] D2 · el texto de la lista mientras amanece (abajo de 1024): con la pared todavía oscura, `noche` (el
+ * papel con un halo de la tinta); con la pared iluminada y el piso no, `pared` (la tinta con un halo del papel); con el
+ * piso iluminado, `null`: la mezcla. Medido en el banco: cada uno se lee donde el otro no.
+ */
+export const PARED_ILUMINADA = 0.5
+export function modoDelAmanecer(frase: number, abajo: number): 'noche' | 'pared' | null {
+  if (abajo >= 1) return null
+  return frase < PARED_ILUMINADA ? 'noche' : 'pared'
 }
 
 /** Una pieza que llega con P5 sobre su ventana visible. Sin coreografía, está puesta. */

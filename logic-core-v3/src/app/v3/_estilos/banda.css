@@ -115,6 +115,51 @@
   [data-v3] [data-panel='cierre'] [data-pieza='destinos-del-pie'] [data-pieza='pie-enlace-icono'] {
     gap: var(--spacing-2);
   }
+
+  /* ── 6 · [NOCTURNO FINAL] D2 · «POR QUÉ DEVELOP» MIENTRAS AMANECE ──
+   * La mezcla invierte bien sobre el negro y sobre el blanco, pero el amanecer pasa por grises medios (la noche que se
+   * va, el logo de noche, el piso a medio iluminar) y ahí `difference` pinta el mismo gris que el fondo: la frase y las
+   * razones se perdían (medido: ~3,8:1 la frase, hasta 1,9:1 las razones). Mientras el piso no está iluminado, sin
+   * mezcla, en dos tiempos (`data-amanecer`, lo pone la lista con el día del texto): con la pared todavía oscura
+   * (`noche`), el papel con un halo denso de la tinta, como un subtítulo sobre un video; con la pared ya iluminada
+   * (`pared`), la tinta con un halo denso del papel. Con el día vuelve la mezcla. */
+  [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference {
+    mix-blend-mode: normal;
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='noche'] .max-escritorio\:mix-blend-difference {
+    text-shadow: var(--halo-del-amanecer);
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='noche'] .max-escritorio\:mix-blend-difference svg {
+    filter: drop-shadow(0 0 var(--spacing-1) var(--color-tinta));
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='pared'] .max-escritorio\:mix-blend-difference {
+    color: var(--color-tinta);
+    text-shadow: var(--halo-del-final);
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='pared'] .max-escritorio\:mix-blend-difference svg {
+    filter: drop-shadow(0 0 var(--spacing-1) var(--color-fondo));
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='pared'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::before,
+  [data-v3] [data-parte='lista-del-final'][data-amanecer='pared'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
+    background-color: var(--color-tinta);
+  }
+
+  /* El CTA del final es lo más bajo de la lista: mientras amanece está sobre el piso, que se ilumina último. Hasta el día,
+     el papel con el halo de la tinta (con la pared ya iluminada también: la tinta sobre el piso oscuro no se leía). */
+  [data-v3] [data-parte='lista-del-final'][data-amanecer] [data-pieza='cta-del-final'] .max-escritorio\:mix-blend-difference {
+    color: var(--color-fondo);
+    text-shadow: var(--halo-del-amanecer);
+  }
+
+  [data-v3] [data-parte='lista-del-final'][data-amanecer] [data-pieza='cta-del-final'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::before,
+  [data-v3] [data-parte='lista-del-final'][data-amanecer] [data-pieza='cta-del-final'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
+    background-color: var(--color-fondo);
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse
@@ -185,4 +230,13 @@
   [data-v3] [data-marco='dos-tomas'][data-descripcion-afuera] [data-parte='revelado-texto'] {
     display: none;
   }
+}
+
+/* ── [NOCTURNO FINAL] D2 · LOS HALOS DE «POR QUÉ DEVELOP» MIENTRAS AMANECE (abajo de 1024, la sección 6) ────────────────
+ * Densos: la misma sombra corta apilada (la opacidad se suma; una sola, larga, se diluye y no separa la letra del
+ * fondo, medido en el banco). El de la tinta rodea al papel (`noche`); el del papel rodea a la tinta (`pared`). De día y
+ * desde 1024 no hace falta: la tinta sobre la pared del escenario da 11,7:1 (mediana) y 8,7:1 (percentil 25). */
+[data-v3] [data-panel='por-que-develop'] {
+  --halo-del-final: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
+  --halo-del-amanecer: 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.45em color-mix(in srgb, var(--color-tinta) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-tinta) 50%, transparent);
 }

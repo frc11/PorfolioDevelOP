@@ -52,6 +52,7 @@ import { marcar } from '../../_secciones/_invariantes/render'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
 import { CONTENIDO as CONTENIDO_DE_QUIENES_D1 } from '../../_secciones/quienes-somos/contenido'
+import { PARED_ILUMINADA, modoDelAmanecer } from '../../_secciones/por-que-develop/PorQueDevelop'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -694,5 +695,38 @@ const glifosD1 = (JSON.parse(leer('_fuentes/chivo-400-titulos.json')) as { reado
 const cubreD1 = (g: Record<string, unknown>): boolean => [...CONTENIDO_DE_QUIENES_D1.equipo.titulo].every((c) => c in g)
 afirmar(cubreD1(glifosD1) && /'Nosotros'\], 'destino': 'chivo-400-titulos\.json'/.test(leerDeLaRaiz('scripts-retoque/fuentes-3d.py')), '  la fuente 3D de los títulos tiene todas las letras de «Nosotros» (y su generador las pide)')
 controlPositivo('  el detector VE la fuente sin la «N»', Object.fromEntries(Object.entries(glifosD1).filter(([k]) => k !== 'N')), cubreD1)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D2 · «Seis razones» se lee en todo el tramo: el amanecer sin la mezcla, en dos tiempos; con el día, la mezcla')
+
+// Medido (d2/, contraste bajo la letra contra lo que se ve alrededor): abajo de 1024 la mezcla daba gris sobre los grises
+// del amanecer (390: la frase en 3,8:1 a mitad, razones en 1,9:1 cerca del día; 768: TODO en ~1,1:1 al final). Ahora
+// cada tiempo con lo que se lee ahí. Desde 1024 el texto espera al día (`DIA_DEL_TEXTO`) y de día da 11,7:1 (clásico).
+type Modo = typeof modoDelAmanecer
+const tiempos = (f: Modo): boolean =>
+  f(0, 0) === 'noche' && f(PARED_ILUMINADA - 0.01, 0.5) === 'noche' && f(PARED_ILUMINADA, 0) === 'pared' && f(1, 0.99) === 'pared' && f(1, 1) === null && f(0.2, 1) === null
+afirmar(tiempos(modoDelAmanecer), 'mientras el piso no está iluminado, sin mezcla: con la pared oscura `noche`, con la pared iluminada `pared`; con el piso iluminado, la mezcla', `pared desde ${String(PARED_ILUMINADA)}`)
+controlPositivo('el detector VE la mezcla de antes (en todo el amanecer)', (() => null) as Modo, tiempos)
+const bandaD2 = leer('_estilos/banda.css')
+const angostaD2 = bandaD2.slice(bandaD2.indexOf('@media (width < 1024px) {'), bandaD2.indexOf('/* ── HOVER DONDE HAY'))
+const MEZCLADO = String.raw`\.max-escritorio\\:mix-blend-difference`
+const reglasD2 = (c: string): boolean =>
+  new RegExp(String.raw`\[data-parte='lista-del-final'\]\[data-amanecer\] ${MEZCLADO} \{\s*mix-blend-mode: normal;`).test(c) &&
+  new RegExp(String.raw`\[data-amanecer='noche'\] ${MEZCLADO} \{\s*text-shadow: var\(--halo-del-amanecer\);`).test(c) &&
+  new RegExp(String.raw`\[data-amanecer='pared'\] ${MEZCLADO} \{\s*color: var\(--color-tinta\);\s*text-shadow: var\(--halo-del-final\);`).test(c) &&
+  new RegExp(String.raw`\[data-amanecer\] \[data-pieza='cta-del-final'\] ${MEZCLADO} \{\s*color: var\(--color-fondo\);\s*text-shadow: var\(--halo-del-amanecer\);`).test(c)
+afirmar(reglasD2(angostaD2), '  la hoja (abajo de 1024): sin mezcla mientras amanece; `noche`, el papel con el halo de la tinta; `pared`, la tinta con el halo del papel; el CTA, sobre el piso, el papel hasta el día')
+controlPositivo('  el detector VE la lista que sigue mezclando al amanecer', angostaD2.replace('mix-blend-mode: normal;', ''), reglasD2)
+const denso = (halo: string, color: string): boolean => (halo.match(new RegExp(String.raw`0 0 0\.1em var\(--color-${color}\)`, 'g')) ?? []).length === 3 && (halo.match(new RegExp(String.raw`0 0 0\.2em var\(--color-${color}\)`, 'g')) ?? []).length === 3
+const haloDe = (c: string, nombre: string): string => new RegExp(String.raw`  ${nombre}: ([^;]+);`).exec(c)?.[1] ?? ''
+afirmar(denso(haloDe(bandaD2, '--halo-del-amanecer'), 'tinta') && denso(haloDe(bandaD2, '--halo-del-final'), 'fondo'), '  los dos halos son densos: la misma sombra corta apilada (una sola, larga, se diluía y no separaba la letra del fondo)')
+controlPositivo('  el detector VE un halo de una sola sombra', '0 0 0.6em var(--color-tinta)', (h) => denso(h, 'tinta'))
+const porQueD2 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const listaD2 = (f: string): boolean =>
+  f.includes('<div ref={lista} data-parte="lista-del-final" className="contents">') &&
+  f.includes("DIA_DEL_TEXTO.frase.on('change', poner)") && f.includes("DIA_DEL_TEXTO.abajo.on('change', poner)") &&
+  f.includes('modoDelAmanecer(DIA_DEL_TEXTO.frase.get(), DIA_DEL_TEXTO.abajo.get())')
+afirmar(listaD2(porQueD2), '  la lista se marca con el día del texto (la pared y el piso), sin caja propia (`contents`: la mezcla no se corta)')
+controlPositivo('  el detector VE una caja que cortaría la mezcla', porQueD2.replace('className="contents"', 'className="flex flex-col"'), listaD2)
 
 cerrar('s52-nocturno-final')
