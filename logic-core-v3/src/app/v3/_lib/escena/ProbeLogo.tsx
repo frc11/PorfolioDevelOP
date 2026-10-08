@@ -8,6 +8,7 @@ import * as THREE from 'three'
 import { conCantosSuaves } from './cantosDelLogo'
 import { entornoDeLaEscena } from './entorno'
 import { SATINADO, ponerElEstudio } from './estudio'
+import { conElLogoDelFinal } from './final/logoDelFinal'
 import { conLogoDeNoche, hornearElContorno } from './logoDeNoche'
 import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
@@ -136,9 +137,14 @@ export function ProbeLogo({ stats, onReady, materialRef }: ProbeLogoProps) {
       dithering: true,
     })
     // [ESCENA 10] T1: el logo de noche, costados negros y tapas con un filo claro (el banco lo apaga con `logo-noche=no`).
-    if (!e.logoDeNoche) return { material: built, contorno: null }
+    if (!e.logoDeNoche) {
+      conElLogoDelFinal(built)
+      return { material: built, contorno: null }
+    }
     const horneado = hornearElContorno(geometries.shapes, CURVAS_DE_LA_EXTRUSION, geometries.center)
     conLogoDeNoche(built, horneado)
+    // [PULIDO 5] D2 · en el final, lo que más se ve: sin niebla y, en las variantes con filo, su borde blanco (`final/logoDelFinal.ts`).
+    conElLogoDelFinal(built)
     return { material: built, contorno: horneado }
   }, [geometries])
 

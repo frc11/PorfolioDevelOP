@@ -105,3 +105,58 @@ cámara viva ve la caja de «HABLANOS» en su plano; con la cámara de la lectur
 | `s54` B1 · el CTA en Archivo | la frase (400) y el destacado (700) de los JSON viejos; «HABLANOS» del de los títulos | los JSON nuevos (600 y 900); «HABLANOS» del 900 | D1·3 |
 | `s52-pulido-1` · las banderas | `rebobinado`, `angel`, `golpe`, `meta` | más `ancho=normal\|expandido` | Bandera nueva (D1·3) |
 | `s52-nocturno-final` D3 · el CTA centrado | «HABLANOS» a `min(display-xl, lugar/3,3)` | `lugar/2,8` | En proporción con la frase, que creció (D1·3); lo demás que afirma (centrado, la lista de una pantalla) no cambió |
+
+## D2 · La luz del encastre: marcada y sólida
+
+El círculo de luz difusa de PULIDO 4 se borró (`final/luzDelCirculo.ts`). La luz nueva está en `final/anilloDeLuz.ts`, con
+`?anillo=`. El piso la dibuja **después del oscurecimiento y de la niebla**, así queda nítida encima de todo. Todo es función de
+`fin` (al rebobinar se desarma igual), salvo los pulsos, que son de las ondas y del golpe.
+
+**Las variantes:**
+- **`tubo` (el producto):** un anillo de luz blanca de 0,24 u, embutido al ras adentro del borde de la zona lisa (r = 4,2, el
+  círculo quieto). El borde es de un píxel (`fwidth`) y el brillo, parejo (0,86 más 0,14 con cada onda y con el golpe).
+  - Aparece en 12 segmentos, con la mitad de hueco, mientras el logo presiona (de que toca el piso al golpe).
+  - En el golpe se ensambla: los huecos se cierran en 0,35 s y desde ahí queda sólido, sin una costura.
+- **`disco`:** toda la zona lisa como una pieza emisiva, de borde nítido y brillo parejo (0,8). El logo queda recortado encima
+  (el piso no se dibuja en su hueco).
+- **`filo`:** sin luz en el piso. El logo con el filo blanco del logo de noche, al doble de su ancho (2,2) y casi blanco (0,97).
+  Se enciende con la luz del encastre.
+- **`tubo+filo`:** las dos cosas.
+
+**El logo, lo que más se ve** (`final/logoDelFinal.ts`). Desde el cenit, el negro satinado salía gris medio por tres cosas: los
+reflejos del estudio (la cara reflejaba su cielo claro), la niebla de la sala (la cámara está a más de 40 u) y las motas de polvo
+posadas encima. En el final, con la cámara que sube:
+- sin niebla en el logo;
+- con un 20 % del reflejo del estudio (queda el satinado en los bordes);
+- sin polvo en un cilindro de 4,6 u sobre el logo y su círculo (`polvo/parche.ts`).
+
+El oscurecimiento de la sala es del piso: el logo nunca lo tuvo. **Medido en el banco**, la mediana de los píxeles del logo en el
+quieto es 12/255 en las cuatro variantes; en PULIDO 4 era ~85, gris medio.
+
+**El golpe:** ganó `golpe-b` («golpe-a se escucha saturado»). Ahora es `golpe` y es el único; `golpe-a` y `?golpe=` se borraron.
+El sprite queda en 56 KB (Opus) y 59 KB (AAC), 12,6 s. Medido decodificado: −13,5 dB RMS (el pulso, −16,3) y pico −0,44 dB.
+
+**Un arreglo de D1 que vio el banco de D2.** El CTA anclado en el mundo se quedaba en la sala al irse su sección: desde el cenit
+del pie, sus letras se veían de canto, como una banda que cruzaba la pantalla. Ahora:
+- su plano sube con el escenario cuando éste se suelta (`correrElPlano`, como los títulos de volumen que se quedan);
+- no se dibuja cuando el escenario se fue más de una pantalla o cuando la cámara del final empieza a subir.
+
+**Gate:**
+- lint limpio en los tocados;
+- `tsc` 0;
+- `s53` 54/0, `s54` 50/0, `s55` 27/0, `s56` 50/0;
+- verdes: s22, s32, s34, s35, s36, s38, s40, s42, s44, s49, s50, s51, s52-nocturno-final y s52-pulido-1.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s55` C2 · el golpe suena | `sonar(sonidoDelGolpe)` con `?golpe=a\|b` | `sonar('golpe')`, sin bandera (y sin `golpe-a` en el código) | Ganó `b` y se borró `a` (D2); el evento y sus veces (una al bajar, ninguna al rebobinar, otra en el reinicio) no cambiaron |
+| `s55` C2 · las variantes | `golpe-a` y `golpe-b` en el sprite y el catálogo; `?golpe=a\|b` | un solo `golpe`; ni `golpe-a`, ni `golpe-b`, ni la bandera | Ídem |
+| `s55` C2 · los niveles | los dos golpes sobre el pulso y sin saturar | el golpe (la misma vara: +2 dB RMS sobre el pulso, pico < −0,1 dB) | Ídem |
+| `s55` C2 · la luz | el círculo difuso (su radio, su luz, su pulso, su GLSL) y su control de radio | sólo lo que sigue valiendo (el logo sin el filo de B0) y que `luzDelCirculo.ts` ya no existe | El círculo se borró por pedido; el anillo lo fija `s56` D2 (radio, nitidez, ensamble, pulsos), con sus controles |
+| `s54` B0 · la luz del final | `conLaLuzDelCirculo` después del oscurecimiento; el pulso del círculo | `conElAnillo` después del oscurecimiento (y de la niebla); el pulso del anillo | El mismo pedido de PULIDO 4 (fuera del oscurecimiento, pulsa con cada onda) sobre la luz nueva |
+| `s52-pulido-1` · las banderas | `golpe=a\|b` entre las pedidas y en la URL | `anillo=tubo\|disco\|filo\|tubo+filo` (y el «+» de la URL como espacio) | `golpe` se borró y `anillo` es nueva (D2) |
+| `s40` · el sprite | `golpe-a`, `golpe-b` | `golpe` | Ídem |
+| `s35` · los reflejos del logo | `envMapIntensity = min(1, principal / KEY)` | lo mismo por `reflejoDelLogo` (en el final, el 20 %; fuera, igual) | El logo del final (D2·5) |
+| `s36` · el logo de noche | sin noche, `return` directo | sin noche, el parche del final y `return` | Ídem |

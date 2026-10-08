@@ -54,7 +54,6 @@ import ARCHIVO_EXPANDIDO_CTA_FUERTE from '../../_fuentes/archivo-expandido-cta-f
 import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
 import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import { CALMA_EN_EL_PISO } from '../escena/final/enElPiso'
-import { CIRCULO_DE_LUZ, LUZ_DEL_CIRCULO_GLSL, pulsoDelCirculo } from '../escena/final/luzDelCirculo'
 import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { ORBITA_DEL_MOUSE, gradosVerticales, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/orbitaDelMouse'
 import { SONIDOS } from '../sonido/catalogo'
@@ -260,8 +259,9 @@ const golpeBien = (c: string, cruza: (antes: number, fin: number, golpe: number)
   const bloque = i < 0 ? '' : c.slice(i, c.indexOf('\n  }', i))
   const recorrido = [...Array(41).keys()].map((k) => k / 40)
   const veces = (fins: readonly number[]): number => fins.slice(1).filter((f, k) => cruza(fins[k], f, 0.6)).length
-  return bloque.includes('s.golpeEn = t') && bloque.includes('sonar(sonidoDelGolpe)') && c.includes("import { sonar } from '../../sonido/bus'") && !/howler/i.test(c) &&
-    c.includes("sonidoDelGolpe ??= entornoDeLaEscena().pruebas.golpe === 'b' ? 'golpe-b' : 'golpe-a'") &&
+  // [PULIDO 5] D2 · uno solo: `golpe` (era `golpe-b`; la variante por bandera se borró).
+  return bloque.includes('s.golpeEn = t') && bloque.includes("sonar('golpe')") && c.includes("import { sonar } from '../../sonido/bus'") && !/howler/i.test(c) &&
+    !c.includes("'golpe-a'") && !c.includes('pruebas.golpe') &&
     veces(recorrido) === 1 && veces([...recorrido].reverse()) === 0 && veces([...recorrido, ...recorrido]) === 2
 }
 const cruzaComoElCuadro = (antes: number, fin: number, golpe: number): boolean => antes < golpe && fin >= golpe
@@ -269,10 +269,11 @@ afirmar(golpeBien(cuadroC2, cruzaComoElCuadro), 'el golpe suena desde su mismo e
 controlPositivo('el detector VE un golpe que suena también al rebobinar', [cuadroC2, (a: number, f: number, g: number) => (a < g) !== (f < g)] as const, ([c, f]: readonly [string, (a: number, f: number, g: number) => boolean]) => golpeBien(c, f))
 
 // LAS DOS VARIANTES (`?golpe=a|b`; sin bandera, `a`), en el sprite y en el catálogo, por encima del pulso SIN SATURAR: se mide el
-// sprite (Opus, decodificado): la energía (RMS) de cada golpe sobre la del pulso, y su pico debajo de 0 dB.
-const variantesBien = (): boolean => ENTORNO.pruebas.golpe === 'no' && entornoPedido('producto,golpe=b').pruebas.golpe === 'b' && entornoPedido('producto,golpe=c').pruebas.golpe === 'no' &&
-  'golpe-a' in CORTES_DEL_SPRITE && 'golpe-b' in CORTES_DEL_SPRITE && SONIDOS['golpe-a'].volumen >= SONIDOS.pulso.volumen && SONIDOS['golpe-b'].volumen >= SONIDOS.pulso.volumen
-afirmar(variantesBien(), '  `?golpe=a|b` (sin bandera, `a`), en el sprite y en el catálogo, con el volumen del pulso o más')
+// sprite (Opus, decodificado): la energía (RMS) de cada golpe sobre la del pulso, y su pico debajo de 0 dB. [PULIDO 5] D2 · ganó
+// `b` (`a` «se escucha saturado»): uno solo, `golpe`, sin bandera.
+const variantesBien = (): boolean => !('golpe' in ENTORNO.pruebas) && !('golpe-a' in CORTES_DEL_SPRITE) && !('golpe-b' in CORTES_DEL_SPRITE) &&
+  'golpe' in CORTES_DEL_SPRITE && SONIDOS.golpe.volumen >= SONIDOS.pulso.volumen
+afirmar(variantesBien(), '  un solo golpe (el de la sala), en el sprite y en el catálogo, con el volumen del pulso o más; sin bandera')
 interface Nivel { readonly pico: number; readonly rms: number }
 const nivelesDelSprite = (): Record<string, Nivel> | null => {
   let crudo: Buffer
@@ -291,30 +292,28 @@ const nivelesDelSprite = (): Record<string, Nivel> | null => {
     }
     return { pico: 20 * Math.log10(Math.max(1e-9, pico)), rms: 10 * Math.log10(Math.max(1e-12, suma / Math.max(1, tramoDeMuestras.length))) }
   }
-  return { pulso: nivel(CORTES_DEL_SPRITE.pulso), 'golpe-a': nivel(CORTES_DEL_SPRITE['golpe-a']), 'golpe-b': nivel(CORTES_DEL_SPRITE['golpe-b']) }
+  return { pulso: nivel(CORTES_DEL_SPRITE.pulso), golpe: nivel(CORTES_DEL_SPRITE.golpe) }
 }
-const nivelesBien = (n: Record<string, Nivel>): boolean => ['golpe-a', 'golpe-b'].every((k) => n[k].rms > n.pulso.rms + 2 && n[k].pico < -0.1)
+const nivelesBien = (n: Record<string, Nivel>): boolean => ['golpe'].every((k) => n[k].rms > n.pulso.rms + 2 && n[k].pico < -0.1)
 const niveles = existsSync('public/v3/sonido/sonidos.webm') ? nivelesDelSprite() : null
 if (niveles === null) noCorre('  los niveles del golpe en el sprite', 'sin ffmpeg no se decodifica el Opus')
 else {
-  afirmar(nivelesBien(niveles), '  los golpes, más fuertes que el pulso (RMS) y sin saturar (pico debajo de 0 dB, decodificado)', `pulso ${niveles.pulso.rms.toFixed(1)} dB · golpe-a ${niveles['golpe-a'].rms.toFixed(1)} dB (pico ${niveles['golpe-a'].pico.toFixed(2)}) · golpe-b ${niveles['golpe-b'].rms.toFixed(1)} dB (pico ${niveles['golpe-b'].pico.toFixed(2)})`)
-  controlPositivo('  el detector VE un golpe que satura', { ...niveles, 'golpe-a': { pico: 0.4, rms: niveles['golpe-a'].rms } }, nivelesBien)
+  afirmar(nivelesBien(niveles), '  el golpe, más fuerte que el pulso (RMS) y sin saturar (pico debajo de 0 dB, decodificado)', `pulso ${niveles.pulso.rms.toFixed(1)} dB · golpe ${niveles.golpe.rms.toFixed(1)} dB (pico ${niveles.golpe.pico.toFixed(2)})`)
+  controlPositivo('  el detector VE un golpe que satura', { ...niveles, golpe: { pico: 0.4, rms: niveles.golpe.rms } }, nivelesBien)
 }
 
 // LA LUZ: el logo volvió a como era (sin el filo encendido de B0: ni su parche ni el hilo del piso) y el brillo es TODO el
 // círculo quieto alrededor (su radio es el del círculo quieto), en blanco, fuera del oscurecimiento (lo fija `s54` B0), con la
 // energía, y con un pulso en cada onda y uno más fuerte y más largo en el golpe (con el poder: en el golpe la energía todavía
-// no se extendió). Con movimiento reducido, sin pulso.
+// no se extendió). Con movimiento reducido, sin pulso. [PULIDO 5] D2 · el círculo difuso se borró por pedido (`luzDelCirculo.ts`):
+// la luz es el anillo, que fija `s56` D2; acá queda lo que sigue valiendo: el logo sin el filo encendido de B0.
 const luzDelLogoC2 = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
 const pisoC2 = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
-const circuloBien = (radio: number, luz: typeof CIRCULO_DE_LUZ, logo: string, piso: string, c: string): boolean =>
-  !logo.includes('RimDelLogo') && !logo.includes('conElRimDeLaLuz') && !existsSync(`${V3}/_lib/escena/final/rimDeLaLuz.ts`) && !/filoDelLogo/.test(piso) &&
-  luz.radio === radio && luz.base > 0.5 && luz.golpe > luz.onda && luz.golpeS >= luz.ondaS && pulsoDelCirculo(0, luz.golpeS) === 1 && pulsoDelCirculo(3 * luz.golpeS, luz.golpeS) < 0.06 &&
-  LUZ_DEL_CIRCULO_GLSL.includes('return mix( color, vec3( 1.0 ), clamp( luz, 0.0, 1.0 ) * disco ) + vec3( halo );') &&
-  c.includes('LUZ_DEL_CIRCULO.uLuzDelCirculo.value = CIRCULO_DE_LUZ.base * extendida') && c.includes('LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 :')
-afirmar(circuloBien(CALMA_EN_EL_PISO.radio, CIRCULO_DE_LUZ, luzDelLogoC2, pisoC2, cuadroC2), 'la luz pasó del filo del logo (como era) a todo el círculo quieto: en blanco, con la energía, un pulso con cada onda y más fuerte en el golpe', `luz ${String(CIRCULO_DE_LUZ.base)}, onda +${String(CIRCULO_DE_LUZ.onda)} (${String(CIRCULO_DE_LUZ.ondaS)} s), golpe +${String(CIRCULO_DE_LUZ.golpe)} (${String(CIRCULO_DE_LUZ.golpeS)} s), radio ${String(CIRCULO_DE_LUZ.radio)} u`)
-controlPositivo('el detector VE el logo con el filo de B0', [CALMA_EN_EL_PISO.radio, CIRCULO_DE_LUZ, `${luzDelLogoC2}\n<RimDelLogo />`, pisoC2, cuadroC2] as const, ([a, b, c, d, e]: readonly [number, typeof CIRCULO_DE_LUZ, string, string, string]) => circuloBien(a, b, c, d, e))
-controlPositivo('y un círculo de otro radio que el quieto', [CALMA_EN_EL_PISO.radio + 1, CIRCULO_DE_LUZ, luzDelLogoC2, pisoC2, cuadroC2] as const, ([a, b, c, d, e]: readonly [number, typeof CIRCULO_DE_LUZ, string, string, string]) => circuloBien(a, b, c, d, e))
+const circuloBien = (logo: string, piso: string): boolean =>
+  !logo.includes('RimDelLogo') && !logo.includes('conElRimDeLaLuz') && !existsSync(`${V3}/_lib/escena/final/rimDeLaLuz.ts`) && !/filoDelLogo/.test(piso) && !existsSync(`${V3}/_lib/escena/final/luzDelCirculo.ts`)
+afirmar(circuloBien(luzDelLogoC2, pisoC2), 'el logo como era (sin el filo encendido de B0); [PULIDO 5] el círculo difuso se borró: la luz es el anillo (`s56` D2)')
+controlPositivo('el detector VE el logo con el filo de B0', [`${luzDelLogoC2}\n<RimDelLogo />`, pisoC2] as const, ([a, b]: readonly [string, string]) => circuloBien(a, b))
+void CALMA_EN_EL_PISO
 
 
 // ═══════════════════════════════════════════════════════════════════════════

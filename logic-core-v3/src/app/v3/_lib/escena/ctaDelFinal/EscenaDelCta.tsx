@@ -12,6 +12,7 @@ import type { ProbeStatsStore } from '../probeStore'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import type { Variante } from '../titulos3d/armado'
 import { corrimiento, pinDelLugar } from '../titulos3d/colocacion'
+import { EN_VIVO as EN_VIVO_DEL_FINAL } from '../final/recorridoDelFinal'
 import { viajeEnCurso } from '../viaje'
 import { armarElCta, fondoDelMarco, fuentesDeLaMetamorfosis, letrasEnLaPantalla, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
 import { armarElContorno, type CajaDelValor } from './contorno'
@@ -20,7 +21,7 @@ import { anchoDeLaEscena } from './fuentesDelCta'
 import { armarLaFusion, ponerLaFusion, soltarLaFusion, type CuadroDeLaMetamorfosis } from './fusion'
 import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type MetricasDeLaFuente, type RenglonDeLaFrase, type ValorMedido } from './medidaDeLosValores'
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
-import { ANCLAJE_DEL_CTA, camaraDelCta, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
+import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
 import { ATRAS, apareceDeLosValores, armadoSobreElCta, estadoDeLaMetamorfosis, posesDe, valoresAPlano, type VarianteDeLaMetamorfosis } from './transformacion'
 
 /**
@@ -231,6 +232,9 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         letrasDeLosValores: s.medidas?.valores.reduce((n, x) => n + (x?.letras.length ?? 0), 0) ?? 0,
         iconos: s.medidas?.valores.reduce((n, x) => n + (x?.iconos.length ?? 0), 0) ?? 0,
         enlace: s.enlace,
+        corrido: a?.destino.fijo ? corrimiento(a.destino.fijo.pin, window.scrollY) : null,
+        pin: a?.destino.fijo?.pin ?? null,
+        scroll: window.scrollY,
         camara: CAMARA_SIN_EL_MOUSE.position.toArray().map((x) => Math.round(x * 100) / 100),
         camaraDelCta: camaraDelCta().position.toArray().map((x) => Math.round(x * 100) / 100),
         delCta,
@@ -257,6 +261,15 @@ interface EstadoDeLaEscenaDelCta {
   readonly planos: PlanosDelCta
   /** La transformada que tiene el enlace (sólo se escribe si cambia). */
   enlace: string
+}
+
+/**
+ * [PULIDO 5] D1 · el CTA ya se fue: su escenario subió más de una pantalla (se fue con su sección) o la cámara del final empezó a
+ * subir (desde el cenit, una pieza vertical que quedó en la sala se ve de canto, atravesando el pie).
+ */
+function seFue(a: ArmadoDelCta, alto: number): boolean {
+  const caja = a.destino.fijo
+  return EN_VIVO_DEL_FINAL.camara > 0 || (caja !== null && corrimiento(caja.pin, window.scrollY) < -alto)
 }
 
 /** [PULIDO 5] D1 · A1 · la transformada del enlace del CTA (sólo si cambió). */
@@ -307,8 +320,9 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   const a = s.armado
   if (a === null) return
   const p = CTA_EN_VIVO.progreso
-  // [PULIDO 4] C1 · 5 · en un viaje del menú el CTA no se dibuja (el recorrido sólo pasa por la sección).
-  const enPantalla = ctaVisibleEnElViaje(viajeEnCurso() !== null) && (CTA_EN_VIVO.donde === 'lista' || p > 0)
+  // [PULIDO 4] C1 · 5 · en un viaje del menú el CTA no se dibuja (el recorrido sólo pasa por la sección). [PULIDO 5] D1 · y,
+  // anclado en el mundo, tampoco cuando ya se fue (`seFue`): su escenario se soltó más de una pantalla o la cámara del final subió.
+  const enPantalla = ctaVisibleEnElViaje(viajeEnCurso() !== null) && (CTA_EN_VIVO.donde === 'lista' || p > 0) && !seFue(a, tam.height)
   a.marco.visible = enPantalla
   a.lienzo.visible = enPantalla
   if (!enPantalla || !(viva instanceof THREE.PerspectiveCamera)) {
@@ -318,12 +332,14 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   // [PULIDO 5] D1 · los planos del mundo: el giro sale del de la frase (en la lista, de la pantalla: no hay título del que
   // salir) y la metamorfosis de la pantalla; en el primer tramo los dos llegan al del CTA y desde ahí quedan quietos en la sala.
   ponerLosPlanos(s.planos, viva, tam.height, tam.width / Math.max(1, tam.height), medidasDelLogo)
+  const caja = a.destino.fijo
+  // Y se va con su sección (fuera de su escenario clavado), como los títulos de volumen.
+  if (caja !== null) correrElPlano(s.planos.cta, corrimiento(caja.pin, window.scrollY))
   const anclado = suaveEntre(p, ANCLAJE_DEL_CTA.desde, ANCLAJE_DEL_CTA.hasta)
   ponerElMarco(a.marco, CTA_EN_VIVO.donde === 'lista' ? s.planos.pantalla : s.planos.frase, s.planos.cta, anclado)
   ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)
   letrasEnLaPantalla(a, window.scrollY)
   const destino = a.letras.destino
-  const caja = a.destino.fijo
   posesDe(p, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino) }, a.poses)
   // El hover (con el mouse, ya llegado): el CTA se levanta apenas hacia la cámara.
   s.hover += ((CTA_EN_VIVO.hover && p >= 0.97 ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
@@ -341,8 +357,7 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano.
   const enlace = enlaceDelCta()
   if (caja !== null && enlace !== null) {
-    const y = caja.lugar.arriba + corrimiento(caja.pin, window.scrollY)
-    const dom = { x: caja.lugar.izquierda, y, ancho: enlace.offsetWidth, alto: enlace.offsetHeight }
+    const dom = { x: caja.lugar.izquierda, y: caja.lugar.arriba + corrimiento(caja.pin, window.scrollY), ancho: enlace.offsetWidth, alto: enlace.offsetHeight }
     llevarElEnlace(s, homografiaDelCta(s.planos.cta, { x: caja.lugar.izquierda + caja.dx, y: caja.lugar.arriba, ancho: caja.ancho, alto: caja.lugar.linea }, dom, viva, { ancho: tam.width, alto: tam.height }))
   }
   // La luz de los títulos: la noche del logo (su emisiva, en el mismo cuadro) y los reflejos con la luz de la sala.

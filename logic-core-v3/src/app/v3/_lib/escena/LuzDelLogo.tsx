@@ -6,6 +6,7 @@ import * as THREE from 'three'
 
 import { entornoDeLaEscena, hayBanco } from './entorno'
 import { VIVO } from './entorno/vivo'
+import { LOGO_DEL_FINAL_EN_VIVO, reflejoDelLogo } from './final/logoDelFinal'
 import { ESCENAS_APARTE } from './gpu/Precompilar'
 import { KEY_INTENSITY } from './probeLighting'
 import { SOMBRA_DEL_LOGO, SOMBRA_EN_EL_FINAL, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
@@ -33,13 +34,16 @@ export function LuzDelLogo(props: Props) {
   )
 }
 
-/** Los reflejos del estudio siguen a la luz de la sala: cuánto se ven es el nivel de la principal (de noche, nada). */
+/**
+ * Los reflejos del estudio siguen a la luz de la sala: cuánto se ven es el nivel de la principal (de noche, nada). [PULIDO 5] D2 ·
+ * en el final, menos (`reflejoDelLogo`): desde el cenit la cara reflejaba el cielo del estudio y el negro salía gris.
+ */
 function ReflejosDelLogo({ keyLightRef, logoMaterialRef }: Props) {
   useFrame(() => {
     const material = logoMaterialRef.current
     const principal = keyLightRef.current
     if (material === null || principal === null) return
-    material.envMapIntensity = Math.min(1, principal.intensity / KEY_INTENSITY)
+    material.envMapIntensity = reflejoDelLogo(Math.min(1, principal.intensity / KEY_INTENSITY), LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value)
   })
   return null
 }

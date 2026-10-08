@@ -63,6 +63,7 @@
  */
 
 import { ANCHOS_DEL_CTA, VARIANTES_DE_LA_METAMORFOSIS, type AnchoDelCta, type VarianteDeLaMetamorfosis } from './ctaDelFinal/transformacion'
+import { ANILLOS_DEL_ENCASTRE, type AnilloDelEncastre } from './final/anilloDeLuz'
 
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
@@ -90,8 +91,6 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
-  /** [PULIDO 4] C2 · `golpe=a|b`: el sonido del golpe del encastre (`a`, el pulso más grave con un sub-golpe; `b`, más la sala). Sin bandera, `a`. */
-  readonly golpe: 'a' | 'b' | 'no'
   /**
    * [PULIDO 4] C1 · `meta=fusion|contorno`: la técnica de la metamorfosis de los seis valores en la frase del CTA del final
    * (`ctaDelFinal/transformacion.ts`). Sin bandera, `fusion` (la del producto). [PULIDO 5] D1 · sin bandera, `contorno` (ganó;
@@ -100,6 +99,11 @@ export interface Pruebas {
   readonly meta: VarianteDeLaMetamorfosis | 'no'
   /** [PULIDO 5] D1 · `ancho=normal|expandido`: el ancho de Archivo en la frase y el CTA del final (wdth 100 o 120). */
   readonly ancho: AnchoDelCta | 'no'
+  /**
+   * [PULIDO 5] D2 · `anillo=tubo|disco|filo|tubo+filo`: la luz del encastre (`final/anilloDeLuz.ts`). Sin bandera, `tubo`. En
+   * la URL el «+» llega como espacio: se acepta igual.
+   */
+  readonly anillo: AnilloDelEncastre | 'no'
 }
 
 /**
@@ -115,12 +119,13 @@ export interface Pruebas {
  * `brillo=suave|fuerte` se borró: el brillo de P1 se rehízo como la luz que sale de abajo (`final/luzDeAbajo.ts`). [PULIDO 3]
  * A1: `velo=escena` se borró (el velo del DOM quedó aprobado) y `chispas=si` pasó a `energia=inestable`. [PULIDO 3B] B0:
  * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
- * borró: `cruce` es el producto. [PULIDO 4] C2: `energia=intensa` se borró (la energía de B0 es la del producto).
+ * borró: `cruce` es el producto. [PULIDO 4] C2: `energia=intensa` se borró (la energía de B0 es la del producto). [PULIDO 5]
+ * D2: `golpe=a|b` se borró (el de la sala, `b`, es el producto).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', golpe: 'no', meta: 'no', ancho: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', meta: 'no', ancho: 'no', anillo: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'golpe', 'meta', 'ancho'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'meta', 'ancho', 'anillo'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -133,9 +138,9 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    golpe: unoDe<'a' | 'b'>(['a', 'b'], valor('golpe')),
     meta: unoDe<VarianteDeLaMetamorfosis>(VARIANTES_DE_LA_METAMORFOSIS, valor('meta')),
     ancho: unoDe<AnchoDelCta>(ANCHOS_DEL_CTA, valor('ancho')),
+    anillo: unoDe<AnilloDelEncastre>(ANILLOS_DEL_ENCASTRE, valor('anillo')?.replace(' ', '+')),
   }
 }
 

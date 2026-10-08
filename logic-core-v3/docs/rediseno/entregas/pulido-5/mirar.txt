@@ -15,3 +15,14 @@ D1 · El CTA
    - /v3?meta=fusion       la otra técnica (hasta que la confirmes y se borre)
    Hojas: d1-contorno-1440.png y d1-contorno-390.png (6 cuadros), d1-camara-mouse-1440.png y d1-camara-hacia-el-pie-1440.png
    (la cámara corrida), d1-anchos-1440.png (normal contra expandido).
+
+D2 · La luz del encastre
+   /v3, bajá hasta el pie y dejá que el logo encastre:
+   - Mientras el logo presiona aparece el anillo en segmentos; en el golpe se cierra de un saque y queda sólido, al ras del
+     piso, nítido. Pulsa con cada onda. Suena el golpe (el de la sala), si el sonido está prendido.
+   - En el quieto: el logo, negro profundo y lo que más se ve (sin niebla, sin el reflejo gris, sin motas encima).
+   Variantes:
+   - /v3?anillo=disco       toda la zona lisa encendida, el logo encima
+   - /v3?anillo=filo        sin luz en el piso: el logo con su filo blanco
+   - /v3?anillo=tubo+filo   las dos (el «+» se puede escribir así)
+   Hojas: d2-anillo-1440.png y d2-anillo-390.png (cada variante en el golpe y en el quieto).

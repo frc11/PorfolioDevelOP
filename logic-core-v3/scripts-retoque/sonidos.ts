@@ -9,7 +9,8 @@
  *
  * Escribe:
  *   · UN sprite mono (`public/v3/sonido/sonidos.{webm,m4a}`): tic, clic, pestillo, abre, cierra, pulso, encendido y foto.
- *     [PULIDO 4] C2 · y el golpe del encastre, en dos variantes (`golpe-a`, `golpe-b`: con la cola de la sala).
+ *     [PULIDO 4] C2 · y el golpe del encastre, en dos variantes (`golpe-a`, `golpe-b`: con la cola de la sala). [PULIDO 5] D2 ·
+ *     ganó la de la sala: es `golpe` (la seca se borró).
  *     [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (era el candidato `barra-d`); los otros
  *     siete candidatos se borraron. S2 · los ambientes ya no son archivos: el ambiente es generativo, en el navegador
  *     (`src/app/v3/_lib/sonido/ambienteGenerativo.ts`); los bucles de antes se borraron (código y archivos).
@@ -244,7 +245,7 @@ function sala(x: Float32Array, decaeS: number, n: number): Float32Array {
 }
 
 /**
- * `golpe-a`: el pulso más grave (un seno que cae de 62 a 34 Hz, más largo) con un sub-golpe debajo (27 Hz) y el «toc» del
+ * El golpe seco (era `golpe-a`, que se borró: sólo queda como la base de `golpe`): el pulso más grave (un seno que cae de 62 a 34 Hz, más largo) con un sub-golpe debajo (27 Hz) y el «toc» del
  * contacto (ruido grave, muy corto). Saturado suave (tanh) para que suene más fuerte que el pulso sin pasarse: pico a −0,5 dB.
  */
 function golpe(): Float32Array {
@@ -259,7 +260,7 @@ function golpe(): Float32Array {
   return bordes(pico(pico1.map((v) => Math.tanh(1.6 * v) / Math.tanh(1.6)), -0.5), 0.001, 0.12)
 }
 
-/** `golpe-b`: el mismo, más una cola corta de reverberación de la sala (0,9 s; húmeda al 30 %, sin saturar). */
+/** `golpe` (era `golpe-b`): el seco, más una cola corta de reverberación de la sala (0,9 s; húmeda al 30 %, sin saturar). */
 function golpeConSala(): Float32Array {
   const seco = golpe()
   const n = seco.length + muestras(0.9)
@@ -316,8 +317,7 @@ function principal(): void {
     ['encendido', encendido()],
     ['foto', foto()],
     ['pestillo', pestillo()],
-    ['golpe-a', golpe()],
-    ['golpe-b', golpeConSala()],
+    ['golpe', golpeConSala()],
   ]
   const trozos: Float32Array[] = []
   const cortes: Record<string, readonly [number, number]> = {}

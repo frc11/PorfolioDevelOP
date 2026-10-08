@@ -46,6 +46,20 @@ export function ponerLosPlanos(p: PlanosDelCta, viva: THREE.PerspectiveCamera, a
   lugarDelMarco(viva, alto, MARCO_DEL_CTA.cerca, p.pantalla)
 }
 
+const ARRIBA = new THREE.Vector3()
+
+/**
+ * Corre un plano `d` px hacia abajo de la pantalla (`d` positivo; negativo, hacia arriba), en su propio plano: el CTA se va con su
+ * sección, como los títulos de volumen que se quedan (`titulos3d/acompanantes.ts`: el corrimiento de su escenario). Mientras
+ * corre la transformación el escenario está clavado (`d` = 0); al soltarse, el CTA sube con él y no queda en la sala, a la vista
+ * de la cámara del pie (de canto, desde arriba).
+ */
+export function correrElPlano(lugar: LugarDelMarco, d: number): void {
+  if (d === 0) return
+  ARRIBA.set(0, 1, 0).applyQuaternion(lugar.giro)
+  lugar.posicion.addScaledVector(ARRIBA, -d * lugar.escala)
+}
+
 /** La cámara con que se colocó el CTA (para el banco). */
 export const camaraDelCta = (): THREE.PerspectiveCamera => DEL_CTA
 

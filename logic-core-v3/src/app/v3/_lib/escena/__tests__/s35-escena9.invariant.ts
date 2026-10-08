@@ -163,7 +163,8 @@ controlPositivo('el detector VE la tira a la altura del logo (la primera versió
 const escenaEstudio = escenaDelEstudio()
 afirmar(escenaEstudio.escena.children.length === 2 + ESTUDIO.softbox.length, '  la escena del estudio: la sala, el piso y un plano por softbox')
 escenaEstudio.soltar()
-afirmar(/material\.envMapIntensity = Math\.min\(1, principal\.intensity \/ KEY_INTENSITY\)/.test(luzDelLogo), '  los reflejos siguen a la luz de la sala: de noche el estudio se apaga')
+// [PULIDO 5] D2 · la misma ley, con lo que queda en el final (`reflejoDelLogo`: desde el cenit, menos reflejo; fuera del final, igual).
+afirmar(/material\.envMapIntensity = reflejoDelLogo\(Math\.min\(1, principal\.intensity \/ KEY_INTENSITY\), LOGO_DEL_FINAL_EN_VIVO\.uLogoDelFinal\.value\)/.test(luzDelLogo), '  los reflejos siguen a la luz de la sala: de noche el estudio se apaga')
 
 // La sombra: VSM, una lectura por píxel, sólo el logo proyecta, y de noche no se dibuja.
 afirmar((SOMBRA_DEL_LOGO_GLSL.match(/texture2D\(/g) ?? []).length === 1 && !/for \(/.test(SOMBRA_DEL_LOGO_GLSL), 'la sombra en el piso: UNA lectura por píxel (el mapa de varianza desenfocado; la primera versión, PCSS, leía 36)')

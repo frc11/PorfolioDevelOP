@@ -6,6 +6,8 @@
  *        la tipografía de título (Archivo ancho, 600 y 900, con kerning y más grande), cada glifo con su agujero, y `contorno`
  *        de producto (emparejado por posición y área, remuestreo equidistante con el arranque alineado, turbulencia en campana
  *        que llega a cero, rígida al formarse, topología fija con tapas por stencil y la malla exacta al final).
+ *   D2 · la luz del encastre, marcada y sólida (`?anillo=tubo|disco|filo|tubo+filo`; el círculo difuso se borró), el logo como lo
+ *        que más se ve (sin niebla, con menos reflejo y sin polvo encima) y un solo golpe (el de la sala).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-5.md`.
  */
 import { readFileSync } from 'node:fs'
@@ -21,7 +23,7 @@ import { FUENTES_DEL_CTA, TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } f
 import type { CuadroDeLaMetamorfosis } from '../escena/ctaDelFinal/fusion'
 import type { ValorMedido } from '../escena/ctaDelFinal/medidaDeLosValores'
 import { letrasDeLaFrase } from '../escena/ctaDelFinal/piezasDeLaMetamorfosis'
-import { ANCLAJE_DEL_CTA, LECTURA_DEL_CTA, homografiaDelCta, nuevosPlanosDelCta } from '../escena/ctaDelFinal/planosDelCta'
+import { ANCLAJE_DEL_CTA, LECTURA_DEL_CTA, correrElPlano, homografiaDelCta, nuevosPlanosDelCta } from '../escena/ctaDelFinal/planosDelCta'
 import {
   ANCHO_DEL_CTA,
   ANCHOS_DEL_CTA,
@@ -37,6 +39,12 @@ import {
   type PosesDeLaTransformacion,
 } from '../escena/ctaDelFinal/transformacion'
 import { aplicar, homografia } from '../pie3d/homografia'
+import { ANILLOS_DEL_ENCASTRE, ANILLO_DEL_PRODUCTO, ANILLO_DE_LUZ, LUZ_DEL_ANILLO_GLSL, partesDelAnillo, pulsoDelAnillo } from '../escena/final/anilloDeLuz'
+import { CALMA_EN_EL_PISO } from '../escena/final/enElPiso'
+import { LOGO_DEL_FINAL, reflejoDelLogo } from '../escena/final/logoDelFinal'
+import { CORTES_DEL_SPRITE } from '../sonido/sprite'
+import { SONIDOS } from '../sonido/catalogo'
+import { existsSync } from 'node:fs'
 import { CTA, FRASE } from '../../_secciones/por-que-develop/contenido'
 import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import ARCHIVO_NORMAL_CTA from '../../_fuentes/archivo-normal-cta.json'
@@ -155,6 +163,22 @@ const enlaceBien = (h: typeof homografiaDelCta): boolean => {
 }
 afirmar(enlaceBien(homografiaDelCta), '  A1 · el enlace del DOM va en el plano del CTA: con la cámara de la lectura, en su lugar; con la cámara corrida, sobre «HABLANOS»')
 controlPositivo('  A1 · el detector VE un enlace que se queda en la caja del DOM', ((cta, caja, dom) => (homografia(dom.ancho, dom.alto, [0, 0, dom.ancho, 0, dom.ancho, dom.alto, 0, dom.alto], []) ? 'matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)' : '')) as typeof homografiaDelCta, enlaceBien)
+
+// Y SE VA CON SU SECCIÓN: anclado en el mundo, al soltarse su escenario el plano del CTA sube con él (como los títulos de volumen
+// que se quedan) y, cuando el escenario se fue más de una pantalla o la cámara del final sube, no se dibuja: desde el cenit, una
+// pieza vertical que quedó en la sala se veía de canto, atravesando el pie (lo vio el banco de D2).
+const seVaBien = (correr: typeof correrElPlano, e: string): boolean => {
+  const lugar = lugarDelMarco(C, 900, MARCO_DEL_CTA.cerca, nuevoLugarDelMarco())
+  const antes = lugar.posicion.clone()
+  correr(lugar, -300)
+  const arriba = new THREE.Vector3(0, 1, 0).applyQuaternion(lugar.giro)
+  const movido = lugar.posicion.clone().sub(antes)
+  return Math.abs(movido.dot(arriba) - 300 * lugar.escala) < 1e-9 && movido.clone().sub(arriba.multiplyScalar(300 * lugar.escala)).length() < 1e-9 &&
+    e.includes('if (caja !== null) correrElPlano(s.planos.cta, corrimiento(caja.pin, window.scrollY))') && e.includes("(CTA_EN_VIVO.donde === 'lista' || p > 0) && !seFue(a, tam.height)") &&
+    e.includes('return EN_VIVO_DEL_FINAL.camara > 0 || (caja !== null && corrimiento(caja.pin, window.scrollY) < -alto)')
+}
+afirmar(seVaBien(correrElPlano, escena), '  y se va con su sección: el plano sube con su escenario y, ido (o con la cámara del final subiendo), no se dibuja')
+controlPositivo('  el detector VE un CTA que se queda en la sala', (() => undefined) as typeof correrElPlano, (f: typeof correrElPlano) => seVaBien(f, escena))
 
 // 3 · LA TIPOGRAFÍA DE TÍTULO: Archivo más ancha (`?ancho=normal|expandido`: wdth 100 y 120; el sitio pincha 62), la frase en
 // 600 y el destacado y «HABLANOS» en 900, con el KERNING de la fuente (los pares del GPOS) y el interletrado apretado; más grande
@@ -383,5 +407,91 @@ afirmar(topologiaBien(contorno, lienzo, peor), '  topología fija (por cuadro, s
 controlPositivo('  el detector VE el lienzo sin stencil', [contorno, lienzo.replace('stencil: true,', ''), peor] as const, ([a, b, c]: readonly [string, string, number]) => topologiaBien(a, b, c))
 controlPositivo('  y el costo de antes (re-triangular: 8 ms)', [contorno, lienzo, 8] as const, ([a, b, c]: readonly [string, string, number]) => topologiaBien(a, b, c))
 armada.soltar()
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D2 · La luz del encastre: marcada y sólida; el logo, lo que más se ve')
+
+// 1 · LAS VARIANTES (`?anillo=`; sin bandera, `tubo`) y qué dibuja cada una. En la URL el «+» llega como espacio: vale igual.
+const variantesDelAnilloBien = (f: typeof entornoPedido): boolean => ANILLOS_DEL_ENCASTRE.join() === 'tubo,disco,filo,tubo+filo' && ANILLO_DEL_PRODUCTO === 'tubo' && ENTORNO.pruebas.anillo === 'no' &&
+  ANILLOS_DEL_ENCASTRE.every((v) => f(`producto,anillo=${v}`).pruebas.anillo === v) && f('producto,anillo=tubo filo').pruebas.anillo === 'tubo+filo' && f('producto,anillo=otro').pruebas.anillo === 'no' &&
+  JSON.stringify(ANILLOS_DEL_ENCASTRE.map(partesDelAnillo)) === JSON.stringify([{ tubo: true, disco: false, filo: false }, { tubo: false, disco: true, filo: false }, { tubo: false, disco: false, filo: true }, { tubo: true, disco: false, filo: true }])
+afirmar(variantesDelAnilloBien(entornoPedido), '1 · `?anillo=tubo|disco|filo|tubo+filo` (sin bandera, `tubo`; el «+» de la URL, también como espacio): el tubo, el disco, el filo o el tubo y el filo')
+controlPositivo('1 · el detector VE una bandera que no acepta el «+» de la URL', ((pedido: string) => {
+  const e = entornoPedido(pedido)
+  return pedido.includes('anillo=tubo filo') ? { ...e, pruebas: { ...e.pruebas, anillo: 'no' } } : e
+}) as typeof entornoPedido, variantesDelAnilloBien)
+
+// 2 · EL TUBO: un anillo embutido al ras en el borde de la zona lisa (adentro del círculo quieto), de bordes nítidos (un píxel,
+// `fwidth`) y brillo parejo (sin caída hacia los bordes). En segmentos hasta el golpe; ensamblado, entero: sin una costura.
+// El espejo del GLSL en la CPU: lo lleno a lo largo del anillo con el ensamble `e` (y un píxel de borde `aa`, en u).
+const llenoDelAnillo = (angulo: number, e: number, aa: number): number => {
+  const A = ANILLO_DE_LUZ
+  const hueco = A.hueco * (1 - Math.min(1, Math.max(0, e)))
+  if (hueco <= 0) return 1
+  const enElSegmento = Math.abs(((angulo * A.segmentos) / (2 * Math.PI)) - Math.floor((angulo * A.segmentos) / (2 * Math.PI)) - 0.5) * 2
+  const aaDelArco = ((2 * aa) / A.radio) * (A.segmentos / (2 * Math.PI))
+  const t = Math.min(1, Math.max(0, (enElSegmento - (1 - hueco)) / (2 * aaDelArco)))
+  return 1 - t * t * (3 - 2 * t)
+}
+const tuboBien = (glsl: string, piso: string): boolean => {
+  const A = ANILLO_DE_LUZ
+  const angulos = [...Array(3600).keys()].map((k) => (k / 3600) * 2 * Math.PI)
+  const ensamblado = angulos.every((a) => llenoDelAnillo(a, 1, 0.02) === 1)
+  const enSegmentos = angulos.filter((a) => llenoDelAnillo(a, 0, 0.002) > 0.5).length / angulos.length
+  const nitido = glsl.includes('float aa = max( fwidth( r ), 1e-4 );') && glsl.includes(`float banda = 1.0 - smoothstep( ${String(A.ancho / 2)} - aa, ${String(A.ancho / 2)} + aa, abs( r - ${String(A.radio - A.ancho / 2)} ) );`)
+  const parejo = glsl.includes('c = mix( c, vec3( 1.0 ), clamp( uLuzDelAnillo, 0.0, 1.0 ) * banda * lleno );')
+  return A.radio === CALMA_EN_EL_PISO.radio && A.ancho > 0 && A.ancho < 0.5 && ensamblado && Math.abs(enSegmentos - (1 - A.hueco)) < 0.02 && nitido && parejo && glsl.includes('if ( hueco > 0.0 ) {') &&
+    !existsSync(`${V3}/_lib/escena/final/luzDelCirculo.ts`) && !piso.includes('conLaLuzDelCirculo')
+}
+const pisoD2 = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
+afirmar(tuboBien(LUZ_DEL_ANILLO_GLSL, pisoD2), '2 · el tubo: al ras en el borde de la zona lisa, de borde nítido (un píxel) y brillo parejo; en segmentos hasta el golpe y, ensamblado, entero (sin costuras); el círculo difuso se borró', `radio ${String(ANILLO_DE_LUZ.radio)} u, ancho ${String(ANILLO_DE_LUZ.ancho)} u, ${String(ANILLO_DE_LUZ.segmentos)} segmentos con ${String(ANILLO_DE_LUZ.hueco * 100)} % de hueco`)
+controlPositivo('2 · el detector VE un anillo difuso (con el borde ancho del círculo de antes)', LUZ_DEL_ANILLO_GLSL.replace('float aa = max( fwidth( r ), 1e-4 );', 'float aa = 1.6;'), (g: string) => tuboBien(g, pisoD2))
+// SE ENSAMBLA EN EL GOLPE: aparece mientras el logo presiona (de que toca el piso al golpe), los huecos se cierran en `ensambleS`
+// desde el golpe, función de `fin` (al rebobinar se desarma igual); pulsa con cada onda y con el golpe; quieto, entero y sin pulso.
+const cuadroD2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
+const ensambleBien = (c: string): boolean => c.includes('const conLuz = s.estatico ? (fin >= golpe ? 1 : 0) : suave((fin - aterriza) / Math.max(1e-6, golpe - aterriza))') &&
+  c.includes('LUZ_DEL_ANILLO.uEnsambleDelAnillo.value = s.estatico ? 1 : suave((fin - golpe) / (ANILLO_DE_LUZ.ensambleS / RELOJ_DEL_FINAL.duracionS))') &&
+  c.includes('LUZ_DEL_ANILLO.uLuzDelAnillo.value = partes.tubo ? conLuz * (ANILLO_DE_LUZ.base + pulso) : 0') && c.includes('LUZ_DEL_ANILLO.uLuzDelDisco.value = partes.disco ? conLuz * (ANILLO_DE_LUZ.disco + pulso) : 0') &&
+  pulsoDelAnillo(0, ANILLO_DE_LUZ.ondaS) === 1 && pulsoDelAnillo(3 * ANILLO_DE_LUZ.golpeS, ANILLO_DE_LUZ.golpeS) < 0.06 && ANILLO_DE_LUZ.base > 0.8 && ANILLO_DE_LUZ.base + ANILLO_DE_LUZ.onda <= 1.0001 && ANILLO_DE_LUZ.ensambleS < 0.6
+afirmar(ensambleBien(cuadroD2), '  se ensambla en el golpe (los huecos se cierran) y queda sólido; aparece mientras el logo presiona; pulsa con cada onda y con el golpe; función de `fin`', `se cierra en ${String(ANILLO_DE_LUZ.ensambleS)} s; luz ${String(ANILLO_DE_LUZ.base)}, +${String(ANILLO_DE_LUZ.onda)} con la onda`)
+controlPositivo('  el detector VE un anillo que se ensambla con el reloj y no con el final (no se desarma al rebobinar)', cuadroD2.replace('suave((fin - golpe) / (ANILLO_DE_LUZ.ensambleS / RELOJ_DEL_FINAL.duracionS))', 'suave(desdeElGolpe / ANILLO_DE_LUZ.ensambleS)'), ensambleBien)
+
+// 3 · NÍTIDO Y ENCIMA: el anillo y el disco se dibujan DESPUÉS del oscurecimiento de la sala y de la niebla (la pieza que se ve).
+const ordenBien = (piso: string): boolean => {
+  const i = piso.indexOf('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;')
+  const niebla = piso.indexOf('${ANCLAS_DEL_HUECO.niebla}\\n\\tgl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );')
+  return i > 0 && niebla > i
+}
+afirmar(ordenBien(pisoD2), '3 · el anillo y el disco, fuera del oscurecimiento y de la niebla (se dibujan después)')
+controlPositivo('3 · el detector VE el anillo antes de la niebla', pisoD2.replace('${ANCLAS_DEL_HUECO.niebla}\\n\\tgl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );', 'gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );\\n${ANCLAS_DEL_HUECO.niebla}'), ordenBien)
+
+// 4 · EL DISCO (toda la zona lisa, de borde nítido; el logo, recortado encima: el piso no se dibuja en su hueco) y EL FILO (el
+// borde de las tapas del logo de noche, más ancho y en blanco).
+const logoDelFinal = sinComentarios(leer('_lib/escena/final/logoDelFinal.ts'))
+const discoYFiloBien = (glsl: string, lf: string): boolean => glsl.includes('float disco = 1.0 - smoothstep( 4.2 - aa, 4.2 + aa, r );') && pisoD2.includes('if ( enElHueco( vPiso.xz ) ) discard;') &&
+  lf.includes('float anchoDelFilo = uAnchoDelBorde * ${LOGO_DEL_FINAL.anchoDelFilo.toFixed(2)};') && LOGO_DEL_FINAL.anchoDelFilo >= 2 && LOGO_DEL_FINAL.filo >= 0.95 &&
+  cuadroD2.includes('LOGO_DEL_FINAL_EN_VIVO.uFiloDelFinal.value = partes.filo ? conLuz : 0')
+afirmar(discoYFiloBien(LUZ_DEL_ANILLO_GLSL, logoDelFinal), '4 · el disco: la zona lisa entera, de borde nítido, con el logo recortado encima; el filo: el borde del logo de noche, más ancho y blanco')
+controlPositivo('4 · el detector VE el filo del ancho de noche', [LUZ_DEL_ANILLO_GLSL, logoDelFinal.replace('uAnchoDelBorde * ${LOGO_DEL_FINAL.anchoDelFilo.toFixed(2)}', 'uAnchoDelBorde')] as const, ([a, b]: readonly [string, string]) => discoYFiloBien(a, b))
+
+// 5 · EL LOGO, LO QUE MÁS SE VE: en el final (con la cámara que sube), sin niebla, con menos reflejo del estudio (desde el cenit
+// reflejaba su cielo claro) y sin polvo encima (un cilindro sin motas sobre el logo y su círculo). Medido en el banco, en el
+// quieto: la mediana del logo, 12 de 255 en las cuatro variantes (en PULIDO 4, ~85: gris medio).
+const parche = sinComentarios(leer('_lib/escena/polvo/parche.ts'))
+const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
+const probeLogo = sinComentarios(leer('_lib/escena/ProbeLogo.tsx'))
+const logoProfundoBien = (lf: string, reflejo: typeof reflejoDelLogo): boolean => lf.includes('gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor * ( 1.0 - uLogoDelFinal ) );') && lf.includes(".replace('#include <fog_fragment>', NIEBLA_GLSL)") &&
+  reflejo(1, 0) === 1 && reflejo(1, 1) <= 0.25 && luzDelLogo.includes('material.envMapIntensity = reflejoDelLogo(Math.min(1, principal.intensity / KEY_INTENSITY), LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value)') &&
+  (probeLogo.match(/conElLogoDelFinal\(built\)/g) ?? []).length === 2 && cuadroD2.includes('LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value = sube') &&
+  parche.includes('uSinPolvoSobreElLogo.z + 1.5') && cuadroD2.includes('AIRE.uSinPolvoSobreElLogo.value.set(logo?.position.x ?? 0, logo?.position.z ?? 0, LOGO_DEL_FINAL.sinPolvo, sube)') && LOGO_DEL_FINAL.sinPolvo > ANILLO_DE_LUZ.radio
+afirmar(logoProfundoBien(logoDelFinal, reflejoDelLogo), '5 · el logo, lo que más se ve: en el final sin niebla, con menos reflejo del estudio y sin polvo encima', `reflejo ${String(LOGO_DEL_FINAL.reflejo)} del de siempre; sin polvo hasta ${String(LOGO_DEL_FINAL.sinPolvo)} u`)
+controlPositivo('5 · el detector VE el logo con todo el reflejo del estudio', ((nivel: number) => nivel) as typeof reflejoDelLogo, (r: typeof reflejoDelLogo) => logoProfundoBien(logoDelFinal, r))
+
+// 6 · UN SOLO GOLPE (ganó `b`, el de la sala; `a` «se escucha saturado»): en el sprite, el catálogo y el doc; sin bandera.
+const sonidoDoc = leerDeLaRaiz('docs/rediseno/SONIDO.md')
+const golpeBien = (cortes: Record<string, unknown>): boolean => 'golpe' in cortes && !('golpe-a' in cortes) && !('golpe-b' in cortes) && SONIDOS.golpe.volumen >= SONIDOS.pulso.volumen &&
+  /^\| `golpe` \|/m.test(sonidoDoc) && !/^\| `golpe-[ab]` \|/m.test(sonidoDoc) && cuadroD2.includes("sonar('golpe')") && !('golpe' in ENTORNO.pruebas)
+afirmar(golpeBien(CORTES_DEL_SPRITE), '6 · un solo golpe, el de la sala (era `golpe-b`; `golpe-a` y `?golpe=` se borraron)', `${String(CORTES_DEL_SPRITE.golpe[1])} ms`)
+controlPositivo('6 · el detector VE el sprite con los dos golpes', { ...CORTES_DEL_SPRITE, 'golpe-a': [0, 0] }, golpeBien)
 
 cerrar('s56-pulido-5')

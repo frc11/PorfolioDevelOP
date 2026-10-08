@@ -60,7 +60,8 @@ afirmar(!('aa' in PRUEBAS_APAGADAS) && !('aa' in entornoPedido('producto,aa=taa'
 const exportsDelLogo = Object.keys(logoDeNoche)
 afirmar(logoDeNoche.BORDE_DEL_LOGO_DE_NOCHE.luz > 0.5 && logoDeNoche.BORDE_DEL_LOGO_DE_NOCHE.ancho === 10 && !exportsDelLogo.includes('VARIANTES_DEL_LOGO_DE_NOCHE') && !exportsDelLogo.includes('aplicarVariante'), 'el logo de noche es el claro, borde blanco (ancho 10 del SVG, luz 0,88): el negro fino y el grueso se borraron', JSON.stringify(logoDeNoche.BORDE_DEL_LOGO_DE_NOCHE))
 const logo = leer('ProbeLogo.tsx')
-afirmar(/if \(!e\.logoDeNoche\) return \{ material: built, contorno: null \}/.test(logo) && /conLogoDeNoche\(built, horneado\)/.test(logo), '  se instala en el material del logo salvo con `logo-noche=no`')
+// [PULIDO 5] D2 · sin el logo de noche, antes de volver, el parche del final (`conElLogoDelFinal`): lo mismo, con un paso más.
+afirmar(/if \(!e\.logoDeNoche\) \{\s*conElLogoDelFinal\(built\)\s*return \{ material: built, contorno: null \}\s*\}/.test(logo) && /conLogoDeNoche\(built, horneado\)/.test(logo), '  se instala en el material del logo salvo con `logo-noche=no`')
 
 // El material: el negro satinado en el material de siempre (sin laca, el físico daba el mismo reflejo).
 const satinado = (c: string): boolean => /new THREE\.MeshStandardMaterial\(\{\s*color: INK_COLOR,\s*\/\/[^\n]*\n\s*roughness: e\.materialDelLogo \? SATINADO\.roughness : INK_ROUGHNESS,/.test(c) && !/MeshPhysicalMaterial/.test(codigo(c))

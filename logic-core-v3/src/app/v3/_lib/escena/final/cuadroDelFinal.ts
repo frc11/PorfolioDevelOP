@@ -8,7 +8,9 @@ import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { entornoDeLaEscena } from '../entorno'
 import { CAMPO_QUIETO_EN, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
-import { CIRCULO_DE_LUZ, LUZ_DEL_CIRCULO, pulsoDelCirculo } from './luzDelCirculo'
+import { ANILLO_DE_LUZ, ANILLO_DEL_PRODUCTO, LUZ_DEL_ANILLO, partesDelAnillo, pulsoDelAnillo } from './anilloDeLuz'
+import { LOGO_DEL_FINAL, LOGO_DEL_FINAL_EN_VIVO } from './logoDelFinal'
+import { AIRE } from '../polvo/parche'
 import { sonar } from '../../sonido/bus'
 import { ORBITA_EN_VIVO, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita, type EstadoDeLaOrbita } from './orbitaDelMouse'
 import { crearElPozo } from './hueco'
@@ -168,8 +170,12 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uOscuroDelBrillo.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(0, 0)
-  LUZ_DEL_CIRCULO.uLuzDelCirculo.value = 0
-  LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = 0
+  LUZ_DEL_ANILLO.uLuzDelAnillo.value = 0
+  LUZ_DEL_ANILLO.uEnsambleDelAnillo.value = 0
+  LUZ_DEL_ANILLO.uLuzDelDisco.value = 0
+  LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value = 0
+  LOGO_DEL_FINAL_EN_VIVO.uFiloDelFinal.value = 0
+  AIRE.uSinPolvoSobreElLogo.value.w = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
   Object.assign(s.orbita, nuevaOrbita())
@@ -190,8 +196,12 @@ const CALMA_DE_LA_LUZ = [CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde, 
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
-/** [PULIDO 4] C2 · el sonido del golpe de esta carga (`?golpe=a|b`; sin bandera, `a`), leído una vez. */
-let sonidoDelGolpe: 'golpe-a' | 'golpe-b' | null = null
+/** [PULIDO 5] D2 · la variante de la luz del encastre de esta carga (`?anillo=`; sin bandera, `tubo`), leída una vez. */
+let partesDeLaLuz: ReturnType<typeof partesDelAnillo> | null = null
+const suave = (u: number): number => {
+  const x = Math.min(1, Math.max(0, u))
+  return x * x * (3 - 2 * x)
+}
 
 /** [PULIDO 2] 2 · cuánto tarda el poder del piso en irse (s) cuando el final vuelve (sube de una: llega con el golpe). */
 export const BAJA_DEL_PODER_S = 0.3
@@ -339,8 +349,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     piso.uGolpe.value.set(t, 0, 0, 1)
     // [PULIDO 4] C2 · el golpe suena en este mismo instante (el logo conecta y nace la súper onda). Sólo cuando `fin` cruza el
     // golpe hacia adelante: también en el reinicio automático, nunca en el rebobinado. Apagado o sin el gesto, `sonar` no hace nada.
-    sonidoDelGolpe ??= entornoDeLaEscena().pruebas.golpe === 'b' ? 'golpe-b' : 'golpe-a'
-    sonar(sonidoDelGolpe)
+    // [PULIDO 5] D2 · uno solo: el de la sala (era `golpe-b`; `golpe-a` se borró).
+    sonar('golpe')
   }
   s.antes = fin
   piso.uPoder.value = poder(fin)
@@ -386,10 +396,21 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // nacían las chispas) se fue con ellas.
   const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
   piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida
-  // [PULIDO 4] C2 · la luz del círculo quieto alrededor del logo (era el filo del logo, B0): con la energía extendida, y un pulso
-  // con cada onda de energía y con fuerza en el golpe (con el poder: en el golpe la energía todavía no se extendió).
-  LUZ_DEL_CIRCULO.uLuzDelCirculo.value = CIRCULO_DE_LUZ.base * extendida
-  LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 : Math.max(CIRCULO_DE_LUZ.onda * pulsoDelCirculo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), CIRCULO_DE_LUZ.ondaS) * extendida, CIRCULO_DE_LUZ.golpe * pulsoDelCirculo(desdeElGolpe, CIRCULO_DE_LUZ.golpeS) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)
+  // [PULIDO 5] D2 · la luz del encastre (`anilloDeLuz.ts`; era el círculo difuso de PULIDO 4): aparece mientras el logo presiona
+  // (de que toca el piso al golpe), en el golpe el anillo se ensambla (sus huecos se cierran) y desde ahí queda sólido; pulsa con
+  // cada onda y con el golpe. Función de `fin` (al rebobinar se desarma igual); quieto, ensamblado y sin pulsos.
+  const pedido = entornoDeLaEscena().pruebas.anillo
+  const partes = (partesDeLaLuz ??= partesDelAnillo(pedido === 'no' ? ANILLO_DEL_PRODUCTO : pedido))
+  const conLuz = s.estatico ? (fin >= golpe ? 1 : 0) : suave((fin - aterriza) / Math.max(1e-6, golpe - aterriza))
+  const pulso = s.estatico ? 0 : Math.max(ANILLO_DE_LUZ.onda * pulsoDelAnillo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), ANILLO_DE_LUZ.ondaS) * extendida, ANILLO_DE_LUZ.golpe * pulsoDelAnillo(desdeElGolpe, ANILLO_DE_LUZ.golpeS))
+  LUZ_DEL_ANILLO.uLuzDelAnillo.value = partes.tubo ? conLuz * (ANILLO_DE_LUZ.base + pulso) : 0
+  LUZ_DEL_ANILLO.uEnsambleDelAnillo.value = s.estatico ? 1 : suave((fin - golpe) / (ANILLO_DE_LUZ.ensambleS / RELOJ_DEL_FINAL.duracionS))
+  LUZ_DEL_ANILLO.uLuzDelDisco.value = partes.disco ? conLuz * (ANILLO_DE_LUZ.disco + pulso) : 0
+  // [PULIDO 5] D2 · el logo, lo que más se ve (`logoDelFinal.ts`): con la cámara que sube, sin niebla, con menos reflejo y sin
+  // polvo encima; con filo, su borde blanco (con la luz del encastre).
+  LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value = sube
+  LOGO_DEL_FINAL_EN_VIVO.uFiloDelFinal.value = partes.filo ? conLuz : 0
+  AIRE.uSinPolvoSobreElLogo.value.set(logo?.position.x ?? 0, logo?.position.z ?? 0, LOGO_DEL_FINAL.sinPolvo, sube)
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)

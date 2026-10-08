@@ -55,6 +55,11 @@ export const AIRE = {
   uPixel: { value: 1 },
   /** [CALIDAD 1] B11 · qué fracción de las motas está encendida (la calidad adaptativa la baja con un fundido). */
   uFraccionDeMotas: { value: 1 },
+  /**
+   * [PULIDO 5] D2 · en el final, sin polvo sobre el logo (`final/logoDelFinal.ts`): el centro del logo en el piso (x, z), el
+   * radio del cilindro (u) y cuánto (0 a 1). Desde el cenit, lo que hay entre la cámara y el logo; lo escribe `cuadroDelFinal.ts`.
+   */
+  uSinPolvoSobreElLogo: { value: new THREE.Vector4(0, 0, 1, 0) },
 }
 
 export type Campo = 'polvo' | 'bokeh'
@@ -62,6 +67,7 @@ export type Campo = 'polvo' | 'bokeh'
 const PARS_VERTEX = /* glsl */ `
 uniform vec3 uTintaCerca;
 uniform vec3 uTintaLejos;
+uniform vec4 uSinPolvoSobreElLogo;
 varying float vParejo;
 #ifdef AIRE_FISICA
 	uniform mat4 uLogo;
@@ -109,6 +115,8 @@ const CUERPO = /* glsl */ `
 	#ifdef AMANECER
 		vMundoDelAmanecer = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
 	#endif
+	// [PULIDO 5] D2 · en el final, nada de polvo en el cilindro sobre el logo y su círculo (con un borde de 1,5 u).
+	if ( uSinPolvoSobreElLogo.w > 0.0 ) vParejo *= 1.0 - uSinPolvoSobreElLogo.w * ( 1.0 - smoothstep( uSinPolvoSobreElLogo.z, uSinPolvoSobreElLogo.z + 1.5, length( ( modelMatrix * vec4( transformed, 1.0 ) ).xz - uSinPolvoSobreElLogo.xy ) ) );
 	// Lo que queda afuera de la sala va detrás de la cámara: no pinta un píxel.
 	if ( vParejo < 0.002 ) transformed = ( transpose( mat3( modelMatrix ) ) * ( cameraPosition - modelMatrix[ 3 ].xyz ) ) - transpose( mat3( modelMatrix ) ) * vec3( viewMatrix[ 0 ][ 2 ], viewMatrix[ 1 ][ 2 ], viewMatrix[ 2 ][ 2 ] ) * -50.0;
 `

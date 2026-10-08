@@ -11,3 +11,13 @@ D1 · El CTA
   _secciones/por-que-develop/{CtaTransformado,PorQueDevelop}.tsx; _fuentes/archivo-{normal,expandido}-cta(-fuerte).json (se
   borran archivo-400-cta.json y archivo-700-cta.json); scripts-retoque/fuentes-3d.py.
   Hojas: d1-contorno-1440.png, d1-contorno-390.png, d1-camara-mouse-1440.png, d1-camara-hacia-el-pie-1440.png, d1-anchos-1440.png.
+
+D2 · La luz del encastre
+  Qué: el anillo de luz (tubo, el producto; disco, filo y tubo+filo con ?anillo=) en lugar del círculo difuso; el logo en el final
+  sin niebla, con menos reflejo y sin polvo encima (mediana 12/255; era ~85); un solo golpe (el de la sala). Y un arreglo de D1:
+  el CTA se va con su sección (no queda en la sala, de canto, desde el cenit del pie).
+  Archivos: escena/final/{anilloDeLuz,logoDelFinal}.ts (nuevos), escena/final/{cuadroDelFinal,enElPiso}.ts (se borra
+  luzDelCirculo.ts), escena/{ProbeLogo,LuzDelLogo}.tsx, escena/polvo/parche.ts, escena/entorno.ts,
+  escena/ctaDelFinal/{EscenaDelCta.tsx,planosDelCta.ts}, sonido/{catalogo,sprite}.ts, scripts-retoque/sonidos.ts,
+  public/v3/sonido/sonidos.{webm,m4a}, docs/rediseno/SONIDO.md.
+  Hojas: d2-anillo-1440.png, d2-anillo-390.png.

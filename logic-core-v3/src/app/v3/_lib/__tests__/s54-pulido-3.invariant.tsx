@@ -36,7 +36,7 @@ import {
   naceLaOnda,
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
-import { CIRCULO_DE_LUZ, pulsoDelCirculo } from '../escena/final/luzDelCirculo'
+import { ANILLO_DE_LUZ as CIRCULO_DE_LUZ, pulsoDelAnillo as pulsoDelCirculo } from '../escena/final/anilloDeLuz'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
@@ -323,9 +323,11 @@ const entornoDelPulso = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 // [PULIDO 4] C2 · cambió por pedido: el brillo del filo del logo no gustó; el logo volvió a como era y el brillo pasó al círculo
 // quieto alrededor (`luzDelCirculo.ts`, que fija `s55` C2). Lo de acá es lo mismo sobre el círculo: fuera del oscurecimiento,
 // con la energía y un pulso con cada onda (corridas al azar), sin volver a encender los anillos del pulso en el final.
+// [PULIDO 5] D2 · el círculo difuso se borró por pedido: la luz es el anillo (`anilloDeLuz.ts`, que fija `s56` D2), con las mismas
+// condiciones: después del oscurecimiento (y ahora también de la niebla), con un pulso con cada onda.
 const logoBien = (g: string, logo: string, c: string): boolean => {
   const oscurece = g.indexOf('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;')
-  const filo = g.indexOf('gl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );')
+  const filo = g.indexOf('gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );')
   const nacimientos = Array.from({ length: 40 }, (_, n) => naceLaOnda(n))
   const intervalos = nacimientos.slice(1).map((v, i) => v - nacimientos[i])
   const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length
@@ -334,12 +336,12 @@ const logoBien = (g: string, logo: string, c: string): boolean => {
   return oscurece > 0 && filo > oscurece && !logo.includes('RimDelLogo') && !/energia === 'inestable'/.test(logo) &&
     CIRCULO_DE_LUZ.base > 0.5 && pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
     ENERGIA_EN_LA_SIMULACION_GLSL.includes(`float tau = uRelojDeLaLuz - ( m + ${String(L.ondas.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${String(L.ondas.cadaS)};`) &&
-    c.includes('LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 : Math.max(CIRCULO_DE_LUZ.onda * pulsoDelCirculo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), CIRCULO_DE_LUZ.ondaS) * extendida, CIRCULO_DE_LUZ.golpe * pulsoDelCirculo(desdeElGolpe, CIRCULO_DE_LUZ.golpeS) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)') &&
+    c.includes('const pulso = s.estatico ? 0 : Math.max(ANILLO_DE_LUZ.onda * pulsoDelAnillo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), ANILLO_DE_LUZ.ondaS) * extendida, ANILLO_DE_LUZ.golpe * pulsoDelAnillo(desdeElGolpe, ANILLO_DE_LUZ.golpeS))') &&
     entornoDelPulso.includes('entradas.reducido = quieto || EN_VIVO.fin > 0')
 }
-afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era): fuera del oscurecimiento, con la energía y un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `luz ${String(CIRCULO_DE_LUZ.base)}, pulso ${String(CIRCULO_DE_LUZ.ondaS)} s`)
-controlPositivo('  el detector VE la luz del círculo oscurecida con la sala', dibujoB0.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );', 'gl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );'), (g: string) => logoBien(g, luzDelLogo, cuadro))
-controlPositivo('  y un círculo sin pulso', cuadro.replace('LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 :', 'LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
+afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era); [PULIDO 5] en el anillo: fuera del oscurecimiento, con un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `luz ${String(CIRCULO_DE_LUZ.base)}, pulso ${String(CIRCULO_DE_LUZ.ondaS)} s`)
+controlPositivo('  el detector VE la luz del anillo oscurecida con la sala', ['gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );\n\t', dibujoB0.replace('\n\tgl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );', '')].reduce((anillo, g) => g.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;', `${anillo}gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;`)), (g: string) => logoBien(g, luzDelLogo, cuadro))
+controlPositivo('  y un anillo sin pulso', cuadro.replace('const pulso = s.estatico ? 0 :', 'const pulso = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
 
 // EL FRENTE DESDE EL GOLPE: la meseta de la súper onda tapaba las rendijas el primer segundo o dos; los cantos de las tapas (que
 // se ven desde arriba aunque la rendija sea honda) y el frente de la expansión brillan más: el frente se lee desde el golpe.
