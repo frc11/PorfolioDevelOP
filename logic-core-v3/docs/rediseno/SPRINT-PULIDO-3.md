@@ -288,3 +288,19 @@ segundo, queda debajo, aunque cerca. No choca.
 **Las aserciones viejas que cambiaron:** ninguna. Lo nuevo va en `s54-pulido-3` B2: el rango, la amortiguación, la vuelta al
 centro, la atenuación y la entrada sólo en escritorio, con el cableado del cuadro (controles: una órbita sin amortiguar; una de
 ±40°). Debajo del techo de s23 (control: sin amortiguar). Sin el domo en cuadro (control: 20° vertical, entera).
+
+### B3 · El salto de cámara en el primer cuadro del viaje Panel → Inicio (20 min)
+
+**No hay código: lo que medí es que ese salto no se ve.** Repetí la sonda de PULIDO 2 (`p2-uno`) sumando, cuadro por cuadro,
+la opacidad del `<main>`:
+- **1440:** 8,4° en el primer cuadro (t = 33 ms). En ese cuadro el `<main>` está al **99,1 %**, y la pose de antes nunca se
+  pintó. En Tu panel la escena está suspendida (sin cuadros, `visibilidad.ts`): al arrancar el viaje vuelve a dibujar y su
+  primer cuadro sale con la pose exacta del progreso (la fase `reanudando`, con la física apagada). El «salto» va desde la
+  pose vieja que la sonda lee del objeto cámara, que en pantalla no existió. Detrás del panel opaco quedaba un cuadro de hace
+  diez pantallas, tapado. Los 30° de PULIDO 2 son el mismo salto, con la escena suspendida en otra pose.
+- **390:** 0° en el primer cuadro (abajo de 1024 la escena ya dibujaba en Tu panel: A5 de NOCTURNO FINAL).
+- Lo más grande por cuadro va a mitad del viaje y con el `<main>` en 0: 7,5° a 1440 y 8,7° a 390. Es la velocidad del
+  recorrido (22 pantallas a 1440 y 17 a 390, en la duración aprobada de los viajes), no un salto. Para bajarlo habría que
+  alargar el viaje, y eso es el presupuesto aprobado: no lo toqué.
+
+Las tablas: `~/.cache/b4-medicion/pulido-3/b3/uno-tu-panel-hero-{1440,390}.tsv`.
