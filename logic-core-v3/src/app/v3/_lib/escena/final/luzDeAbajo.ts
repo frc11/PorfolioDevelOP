@@ -81,8 +81,6 @@ export const CORRIENTES = { porJunta: 3, periodoS: [1.6, 4.4], tuerce: 0.7, desc
  */
 export const PISTONES = { racimo: 3, periodoS: [1.4, 4], cuantos: 0.32, alto: [0.25, 0.75], abre: 1.2 } as const
 
-/** [PULIDO 3B] B0 · `?energia=intensa`: más brillo y más velocidad (para comparar contra el producto). */
-export const INTENSA = { brillo: 1.4, ritmo: 1.6 } as const
 
 /** Con movimiento reducido, el campo quieto en este instante de su reloj (s). */
 export const CAMPO_QUIETO_EN = 23
@@ -208,9 +206,9 @@ export const LUZ_DE_ABAJO_EN_VIVO = {
   uCalmaDeLaLuz: { value: new THREE.Vector3(0, 1, 0) },
   /** [PULIDO 3] A1 · la expansión desde el hueco: el radio (u) y el progreso (0 a 1). */
   uExpansionDeLaLuz: { value: new THREE.Vector2(0, 0) },
-  /** [PULIDO 3] A1 · el reloj de la luz (s): el de la escena (más rápido con `?energia=intensa`); quieto con movimiento reducido. */
+  /** [PULIDO 3] A1 · el reloj de la luz (s): el de la escena; quieto con movimiento reducido. */
   uRelojDeLaLuz: { value: 0 },
-  /** [PULIDO 3B] B0 · cuánto brilla la luz (1; más con `?energia=intensa`). */
+  /** [PULIDO 3B] B0 · cuánto brilla la luz (1: [PULIDO 4] C2 · `?energia=intensa`, que la subía, se borró). */
   uBrilloDeLaLuz: { value: 1 },
 }
 

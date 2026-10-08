@@ -106,3 +106,42 @@ final y ninguna letra delante del logo (el plano del CTA, detrás del centro del
 | `s41` 3G · el valor | `<li>` y la pieza adentro | `<li ref={lugar}>` (su caja para la escena) | La misma pieza; el `li` le da su caja a la escena |
 | `s43` F2 · el asiento | `a.control = animate(p, destino, …)` | `animate(s.mostrado, destino, …)` y `seguirAlScroll(…)` antes de posar | La causa del salto de la reversa: más estricta (también fija que lo mostrado sigue al scroll) |
 | `s52-pulido-1` · las banderas | `rebobinado`, `angel`, `energia` | y `meta` (`fusion`, `contorno`) | La bandera nueva, con el mismo control |
+
+### C2 · El encastre: el sonido del golpe y la luz que pasa al círculo
+
+**El sonido.** Dos nuevos en el sprite, sintetizados como los demás (`scripts-retoque/sonidos.ts`, nada bajado; `SONIDO.md`):
+`golpe-a`, el pulso más grave (un seno que cae de 62 a 34 Hz, más largo) con un sub-golpe de 27 Hz debajo y el «toc» del
+contacto, saturado suave; `golpe-b`, el mismo con una cola corta de la sala (una reverb de Schroeder propia, 0,9 s, húmeda al
+30 %). Medido en el sprite decodificado (Opus): el pulso, −16,3 dB RMS; `golpe-a`, −10,6 dB (pico −0,21 dB); `golpe-b`,
+−13,5 dB (pico −0,42 dB; la cola baja el promedio). Más fuertes que el pulso, sin saturar. El sprite pasa de 46 a 64 KB (Opus)
+y de 45 a 67 KB (AAC).
+
+Suena desde el MISMO evento del golpe (`cuadroDelFinal.ts`, el bloque que marca `golpeEn` y nace la súper onda): cuando
+`fin` cruza el golpe hacia adelante. Así suena otra vez en el reinicio automático y nunca en el rebobinado (ahí `fin` baja),
+ni en la vuelta de un viaje, ni con movimiento reducido (no hay golpe). Pasa por el bus de siempre: con el sonido apagado o
+antes del gesto, no hace nada. `?golpe=a|b`; sin bandera, `a`. Se escuchan sueltos en `/v3?sonidos=1`.
+
+**La luz.** El brillo del filo (B0) se sacó entero: ni el parche del logo ni el hilo de luz en el piso (`rimDeLaLuz.ts` se
+borró). El logo quedó como era antes de PULIDO 3 (`LuzDelLogo.tsx`). El brillo pasó a todo el círculo quieto alrededor del
+logo (`final/luzDelCirculo.ts`, el radio del círculo quieto: 4,2 u): el piso va hacia el blanco ahí, dibujado después del
+oscurecimiento de la sala, con la energía extendida (0,62). Con cada onda de energía pulsa (+0,32, en 0,32 s) y en el golpe,
+fuerte (+0,75, en 0,7 s): el borde se abre y un halo sale del círculo. El logo, negro, se lee recortado contra esa luz. Con
+movimiento reducido, la luz sin el pulso.
+
+**`?energia=intensa` se borró** (código y bandera): la energía es la de B0.
+
+**Un rojo que dejó C1, arreglado acá:** `s52-nocturno-final` D3 (el bloque clavado del CTA de la lista, tal cual). En C1,
+después de correrlo, le sumé al bloque el estilo que lo esconde en un viaje: ahora va en un envoltorio sin caja (`contents`)
+y el bloque queda igual.
+
+**Gate:** lint limpio en lo tocado; `tsc` 0 errores; `s53` 54/0, `s54` 50/0, `s55` 26/0; y los 22 que leen lo tocado (s10-medida,
+s29–s36, s38, s40, s42–s44, s46–s52-nocturno-final, s6-tu-panel): verdes.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s54` B0 · una versión | `?energia=intensa` (más brillo y ritmo) existe | no existe (ni la bandera ni `INTENSA`) | Por pedido (se borra); más estricta: fija que no vuelve |
+| `s54` B0 · el logo brilla | el filo del logo encendido, fuera del oscurecimiento, y el pulso del logo con cada onda (dos controles) | lo mismo sobre el círculo quieto (la luz después del oscurecimiento, el pulso con cada onda) y el logo sin su parche (los mismos dos controles, sobre el círculo) | Por pedido (C2 · b): el brillo pasó del filo al círculo; lo nuevo (el golpe, el radio) lo fija `s55` C2 |
+| `s52-pulido-1` · las banderas | `energia` (`intensa`) | `golpe` (`a`, `b`) | La que se borró y la nueva, con el mismo control |
+| `s40` T2 · los sonidos | ocho en el sprite | diez (`golpe-a`, `golpe-b`) | Los nuevos, con su fila en `SONIDO.md` |

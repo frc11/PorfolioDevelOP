@@ -8,3 +8,10 @@ C1 · El CTA (escritorio y teléfono)
    terminan juntos. Volvé para arriba despacio, frenando a mitad: nada salta.
    Variantes: /v3?meta=contorno (los contornos que se interpolan; pesa 8–11 ms por cuadro)   ·   sin bandera: fusion.
    Un viaje del menú desde el pie a Inicio: el CTA no aparece.
+
+C2 · El golpe del encastre (escritorio y teléfono)
+   Prendé el sonido (el parlante, abajo a la derecha) y bajá hasta el pie. Cuando el logo conecta suena el golpe (más fuerte
+   que el pulso) y nace la onda. Al rebobinar no suena; en el reinicio automático, sí. Variantes: /v3?golpe=a (de fábrica)
+   ·  /v3?golpe=b (con la cola de la sala). Sueltos: /v3?sonidos=1.
+   La luz: el logo ya no tiene el filo encendido; todo el círculo liso alrededor se ilumina en blanco, pulsa con cada onda y
+   fuerte en el golpe. El logo se lee recortado contra la luz.

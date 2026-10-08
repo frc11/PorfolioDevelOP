@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
 import { HUECO } from './hueco'
 import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
-import { BRILLO_DEL_LOGO, RIM_DE_LA_LUZ } from './rimDeLaLuz'
+import { LUZ_DEL_CIRCULO, LUZ_DEL_CIRCULO_GLSL } from './luzDelCirculo'
 
 /**
  * [CIERRE] 3 · EL FINAL EN EL PISO VIVO — lo que el final le suma al piso, inyectado al armarlo (como la onda dirigida de
@@ -224,15 +224,8 @@ bool enElHueco( vec2 xz ) {
 	vec2 m = mascaraDelHueco( xz );
 	return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;
 }
-// [PULIDO 3B] B0 · EL FILO DEL LOGO ENCENDIDO: un hilo de luz blanca justo afuera de su forma (entre el logo y su hueco), con
-// la energía y con el pulso de cada onda que larga. Desde arriba el bisel del logo no se ve: el filo se lee en el piso.
-uniform float uRimDeLaLuz;
-uniform float uPulsoDelLogo;
-float filoDelLogo( vec2 xz ) {
-	if ( uApertura <= 0.0 || uRimDeLaLuz + uPulsoDelLogo <= 0.0 ) return 0.0;
-	vec2 m = mascaraDelHueco( xz );
-	return ( uRimDeLaLuz + ${f(BRILLO_DEL_LOGO.pulsoEnElFilo)} * uPulsoDelLogo ) * smoothstep( 0.2, 0.45, m.g ) * ( 1.0 - smoothstep( 0.3, 0.6, m.r ) );
-}
+// [PULIDO 4] C2 · el filo del logo encendido (PULIDO 3B · B0) se fue: la luz es la del círculo quieto (luzDelCirculo.ts).
+${LUZ_DEL_CIRCULO_GLSL}
 float labioDelHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return 0.0;
 	vec2 m = mascaraDelHueco( xz );
@@ -261,7 +254,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
     if (anclas.some((ancla) => !shader.fragmentShader.includes(ancla))) {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
-    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, RIM_DE_LA_LUZ)
+    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, LUZ_DEL_CIRCULO)
     // [PULIDO 2] 4 · con energía los bloques se separan un poco (se achican sobre su centro): se abren las rendijas. [PULIDO 3]
     // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
@@ -273,7 +266,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

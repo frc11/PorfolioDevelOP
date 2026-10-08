@@ -113,26 +113,29 @@ export function CtaTransformadoEnLaLista({ caja, progreso, entrada }: { readonly
   const quieto = usePrefiereMenosMovimiento()
   return (
     <div ref={caja} data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className={quieto ? CON_MOVIMIENTO_REDUCIDO : 'min-h-[calc(var(--alto-del-cta-en-lista)*3)]'}>
-      <div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center" style={estiloEnElViaje(enViaje)}>
-        <div className="relative">
-          <motion.p aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 bottom-full mb-[var(--spacing-8)]">
-            <Titular nivel="titulo-xl" como="span" className="block">
-              <span ref={primero} className="block">{FRASE.izquierda}</span>
-            </Titular>
-            <Titular nivel="titulo-xl" como="span" className="block">
-              <span ref={segundo} className="block">{FRASE.derecha}</span>
-            </Titular>
-          </motion.p>
-          <motion.ul aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center gap-[var(--spacing-1)]">
-            {VALORES.map((v, k) => (
-              <CopiaDelValor key={v.clave} indice={k} titulo={v.titulo} />
-            ))}
-          </motion.ul>
-          <motion.div style={{ opacity: texto }}>
-            <FraseDelCta />
-          </motion.div>
+      <div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">
+        {/* En un viaje, sin verse: el envoltorio no tiene caja (`contents`), el bloque se arma igual. */}
+        <div className="contents" style={estiloEnElViaje(enViaje)}>
+          <div className="relative">
+            <motion.p aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 bottom-full mb-[var(--spacing-8)]">
+              <Titular nivel="titulo-xl" como="span" className="block">
+                <span ref={primero} className="block">{FRASE.izquierda}</span>
+              </Titular>
+              <Titular nivel="titulo-xl" como="span" className="block">
+                <span ref={segundo} className="block">{FRASE.derecha}</span>
+              </Titular>
+            </motion.p>
+            <motion.ul aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center gap-[var(--spacing-1)]">
+              {VALORES.map((v, k) => (
+                <CopiaDelValor key={v.clave} indice={k} titulo={v.titulo} />
+              ))}
+            </motion.ul>
+            <motion.div style={{ opacity: texto }}>
+              <FraseDelCta />
+            </motion.div>
+          </div>
+          <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} />
         </div>
-        <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} />
       </div>
     </div>
   )

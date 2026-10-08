@@ -10,3 +10,10 @@ C1 · El CTA bien hecho
   chivo-400-valores}.json, scripts-retoque/fuentes-3d.py.
   Hojas: c1-fusion-1440.png, c1-fusion-390.png, c1-contorno-1440.png, c1-contorno-390.png (0, 20, 32, 50, 70 y 100 %),
   c1-reducido-1440.png, c1-reducido-390.png.
+
+C2 · El encastre: el sonido del golpe y la luz del círculo
+  Qué: el golpe suena desde su evento (golpe-a; ?golpe=b con la sala; sprite regenerado), el brillo pasa del filo del logo
+  al círculo quieto (pulsa con cada onda y en el golpe); ?energia=intensa se borró.
+  Archivos: scripts-retoque/sonidos.ts, public/v3/sonido/sonidos.{webm,m4a}, _lib/sonido/{sprite,catalogo}.ts,
+  escena/final/{cuadroDelFinal,enElPiso,luzDeAbajo,luzDelCirculo}.ts (rimDeLaLuz.ts borrado), escena/LuzDelLogo.tsx,
+  escena/entorno.ts, docs/rediseno/SONIDO.md.

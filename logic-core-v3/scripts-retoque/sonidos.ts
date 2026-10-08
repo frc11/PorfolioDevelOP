@@ -9,6 +9,7 @@
  *
  * Escribe:
  *   · UN sprite mono (`public/v3/sonido/sonidos.{webm,m4a}`): tic, clic, pestillo, abre, cierra, pulso, encendido y foto.
+ *     [PULIDO 4] C2 · y el golpe del encastre, en dos variantes (`golpe-a`, `golpe-b`: con la cola de la sala).
  *     [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (era el candidato `barra-d`); los otros
  *     siete candidatos se borraron. S2 · los ambientes ya no son archivos: el ambiente es generativo, en el navegador
  *     (`src/app/v3/_lib/sonido/ambienteGenerativo.ts`); los bucles de antes se borraron (código y archivos).
@@ -203,6 +204,69 @@ function pestillo(): Float32Array {
   return bordes(pico(sumar([golpe(0, 3400, 211), 0.8], [golpe(0.018, 1700, 223), 1], [cuerpo, 0.4]), -4), 0.0003, 0.015)
 }
 
+// ── [PULIDO 4] C2 · El golpe del encastre: el logo conecta y nace la súper onda ───────────────────────────────
+
+/**
+ * Una sala chica (Schroeder: cuatro peines con amortiguación en paralelo y dos pasatodos en serie): `decaeS` es lo que tarda la
+ * cola en bajar 60 dB. Sólo la parte húmeda.
+ */
+function sala(x: Float32Array, decaeS: number, n: number): Float32Array {
+  const salida = new Float32Array(n)
+  for (const retardoS of [0.0297, 0.0371, 0.0411, 0.0437]) {
+    const d = muestras(retardoS)
+    const g = 10 ** ((-3 * retardoS) / decaeS)
+    const linea = new Float32Array(d)
+    let [k, previo] = [0, 0]
+    for (let i = 0; i < n; i += 1) {
+      const sale = linea[k]
+      previo = sale * 0.6 + previo * 0.4
+      linea[k] = (i < x.length ? x[i] : 0) + previo * g
+      k = (k + 1) % d
+      salida[i] += sale * 0.25
+    }
+  }
+  let y = salida
+  for (const [retardoS, g] of [[0.005, 0.7], [0.0017, 0.7]] as const) {
+    const d = muestras(retardoS)
+    const linea = new Float32Array(d)
+    const z = new Float32Array(n)
+    let k = 0
+    for (let i = 0; i < n; i += 1) {
+      const sale = linea[k]
+      const entra = y[i] + sale * g
+      linea[k] = entra
+      z[i] = sale - entra * g
+      k = (k + 1) % d
+    }
+    y = z
+  }
+  return y
+}
+
+/**
+ * `golpe-a`: el pulso más grave (un seno que cae de 62 a 34 Hz, más largo) con un sub-golpe debajo (27 Hz) y el «toc» del
+ * contacto (ruido grave, muy corto). Saturado suave (tanh) para que suene más fuerte que el pulso sin pasarse: pico a −0,5 dB.
+ */
+function golpe(): Float32Array {
+  const n = muestras(1.5)
+  const f = (t: number): number => 34 + 28 * exp(t, 0.07)
+  const grave = por(seno(n, f), (t) => (1 - exp(t, 0.004)) * exp(t, 0.36))
+  const arm = por(seno(n, (t) => 2.5 * f(t)), (t) => (1 - exp(t, 0.004)) * exp(t, 0.14))
+  const sub = por(seno(n, () => 27), (t) => (1 - exp(t, 0.012)) * exp(t, 0.5))
+  const toc = por(filtrar(ruido(n, 307), 'pasabajos', () => 180, 0.8), (t) => exp(t, 0.018))
+  const mezcla = filtrar(sumar([grave, 1], [arm, 0.32], [sub, 0.7], [toc, 0.9]), 'pasabajos', () => 240, 0.7)
+  const pico1 = pico(mezcla, 0)
+  return bordes(pico(pico1.map((v) => Math.tanh(1.6 * v) / Math.tanh(1.6)), -0.5), 0.001, 0.12)
+}
+
+/** `golpe-b`: el mismo, más una cola corta de reverberación de la sala (0,9 s; húmeda al 30 %, sin saturar). */
+function golpeConSala(): Float32Array {
+  const seco = golpe()
+  const n = seco.length + muestras(0.9)
+  const humedo = sala(seco, 0.9, n)
+  return bordes(pico(sumar([seco, 1], [humedo, 0.3]), -0.5), 0.001, 0.25)
+}
+
 // ── Los archivos ────────────────────────────────────────────────────────────
 
 const HUECO_S = 0.3
@@ -252,6 +316,8 @@ function principal(): void {
     ['encendido', encendido()],
     ['foto', foto()],
     ['pestillo', pestillo()],
+    ['golpe-a', golpe()],
+    ['golpe-b', golpeConSala()],
   ]
   const trozos: Float32Array[] = []
   const cortes: Record<string, readonly [number, number]> = {}

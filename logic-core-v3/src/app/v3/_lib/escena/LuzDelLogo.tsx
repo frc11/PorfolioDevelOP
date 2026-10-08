@@ -9,7 +9,6 @@ import { VIVO } from './entorno/vivo'
 import { ESCENAS_APARTE } from './gpu/Precompilar'
 import { KEY_INTENSITY } from './probeLighting'
 import { SOMBRA_DEL_LOGO, SOMBRA_EN_EL_FINAL, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
-import { conElRimDeLaLuz } from './final/rimDeLaLuz'
 
 /**
  * [ESCENA 10] T1 · LA LUZ DEL LOGO — lo que de ESCENA 9 (T3) pasó al producto y corre por cuadro: los reflejos del
@@ -30,22 +29,8 @@ export function LuzDelLogo(props: Props) {
     <>
       {e.materialDelLogo ? <ReflejosDelLogo {...props} /> : null}
       {e.sombraDelLogo && e.pisoVivo ? <SombraDelLogo {...props} /> : null}
-      {/* [PULIDO 3B] B0 · el logo brilla con la energía: su filo y el pulso de cada onda (`final/rimDeLaLuz.ts`). */}
-      <RimDelLogo logoMaterialRef={props.logoMaterialRef} />
     </>
   )
-}
-
-/** [PULIDO 3] A1 · parchea el logo una vez (cuando su material existe) con el brillo de la energía. */
-function RimDelLogo({ logoMaterialRef }: Pick<Props, 'logoMaterialRef'>) {
-  const parcheado = useRef<THREE.MeshStandardMaterial | null>(null)
-  useFrame(() => {
-    const material = logoMaterialRef.current
-    if (material === null || parcheado.current === material) return
-    conElRimDeLaLuz(material)
-    parcheado.current = material
-  })
-  return null
 }
 
 /** Los reflejos del estudio siguen a la luz de la sala: cuánto se ven es el nivel de la principal (de noche, nada). */

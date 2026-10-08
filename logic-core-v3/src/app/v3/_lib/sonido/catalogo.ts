@@ -31,6 +31,9 @@ export const SONIDOS: Readonly<Record<Sonido, DelSonido>> = {
   pulso: { que: 'El pulso del logo: un golpe grave casi imperceptible', volumen: 1, separacionMs: 900, exclusivo: false },
   encendido: { que: 'El haz que se enciende: el zumbido sigue a los intentos que fallan y al golpe', volumen: 0.2, separacionMs: 0, exclusivo: true },
   foto: { que: 'El hover de las fotos del equipo: un roce mínimo', volumen: 0.1, separacionMs: 120, exclusivo: false },
+  // [PULIDO 4] C2 · el golpe del encastre (el logo conecta y nace la súper onda): por encima del pulso, sin saturar. `?golpe=b`, con la sala.
+  'golpe-a': { que: 'El golpe del encastre: el pulso más grave con un sub-golpe debajo', volumen: 1, separacionMs: 1500, exclusivo: false },
+  'golpe-b': { que: 'El golpe del encastre, con una cola corta de la sala', volumen: 1, separacionMs: 1500, exclusivo: false },
 }
 
 /** Lo que pide el sitio: un sonido del sprite. */

@@ -7,8 +7,9 @@ import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { entornoDeLaEscena } from '../entorno'
-import { CAMPO_QUIETO_EN, INTENSA, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
-import { BRILLO_DEL_LOGO, RIM_DE_LA_LUZ, pulsoDelLogo } from './rimDeLaLuz'
+import { CAMPO_QUIETO_EN, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
+import { CIRCULO_DE_LUZ, LUZ_DEL_CIRCULO, pulsoDelCirculo } from './luzDelCirculo'
+import { sonar } from '../../sonido/bus'
 import { ORBITA_EN_VIVO, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita, type EstadoDeLaOrbita } from './orbitaDelMouse'
 import { crearElPozo } from './hueco'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
@@ -167,8 +168,8 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uOscuroDelBrillo.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(0, 0)
-  RIM_DE_LA_LUZ.uRimDeLaLuz.value = 0
-  RIM_DE_LA_LUZ.uPulsoDelLogo.value = 0
+  LUZ_DEL_CIRCULO.uLuzDelCirculo.value = 0
+  LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
   Object.assign(s.orbita, nuevaOrbita())
@@ -189,8 +190,8 @@ const CALMA_DE_LA_LUZ = [CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde, 
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
-/** [PULIDO 3B] B0 · `?energia=intensa`, leída una vez. */
-let intensa: boolean | null = null
+/** [PULIDO 4] C2 · el sonido del golpe de esta carga (`?golpe=a|b`; sin bandera, `a`), leído una vez. */
+let sonidoDelGolpe: 'golpe-a' | 'golpe-b' | null = null
 
 /** [PULIDO 2] 2 · cuánto tarda el poder del piso en irse (s) cuando el final vuelve (sube de una: llega con el golpe). */
 export const BAJA_DEL_PODER_S = 0.3
@@ -336,6 +337,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     s.golpeEn = t
     s.golpes += 1
     piso.uGolpe.value.set(t, 0, 0, 1)
+    // [PULIDO 4] C2 · el golpe suena en este mismo instante (el logo conecta y nace la súper onda). Sólo cuando `fin` cruza el
+    // golpe hacia adelante: también en el reinicio automático, nunca en el rebobinado. Apagado o sin el gesto, `sonar` no hace nada.
+    sonidoDelGolpe ??= entornoDeLaEscena().pruebas.golpe === 'b' ? 'golpe-b' : 'golpe-a'
+    sonar(sonidoDelGolpe)
   }
   s.antes = fin
   piso.uPoder.value = poder(fin)
@@ -347,10 +352,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)
   // [PULIDO 3] A1 · y sale del hueco en el golpe, hasta cubrir la escena (función de `fin`: al rebobinar se retira igual).
   const expansion = expansionDeLaLuz(fin)
-  // [PULIDO 3B] B0 · con `?energia=intensa`, más rápido y más brillante.
-  intensa ??= entornoDeLaEscena().pruebas.energia === 'intensa'
-  LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t * (intensa ? INTENSA.ritmo : 1)
-  LUZ_DE_ABAJO_EN_VIVO.uBrilloDeLaLuz.value = intensa ? INTENSA.brillo : 1
+  // [PULIDO 4] C2 · `?energia=intensa` se borró: la energía es la del producto (B0).
+  LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t
   LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(expansion > 0 ? radioDeLaExpansion(expansion, CALMA_DE_LA_LUZ[0]) : 0, expansion)
   const desdeElGolpe = t - s.golpeEn
 
@@ -383,9 +386,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // nacían las chispas) se fue con ellas.
   const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
   piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida
-  // [PULIDO 3B] B0 · el logo brilla: su filo con la energía extendida y un pulso con cada onda que larga (con el golpe, con el poder).
-  RIM_DE_LA_LUZ.uRimDeLaLuz.value = BRILLO_DEL_LOGO.filo * extendida * LUZ_DE_ABAJO_EN_VIVO.uBrilloDeLaLuz.value
-  RIM_DE_LA_LUZ.uPulsoDelLogo.value = s.estatico ? 0 : Math.max(pulsoDelLogo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)) * extendida, pulsoDelLogo(desdeElGolpe) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)
+  // [PULIDO 4] C2 · la luz del círculo quieto alrededor del logo (era el filo del logo, B0): con la energía extendida, y un pulso
+  // con cada onda de energía y con fuerza en el golpe (con el poder: en el golpe la energía todavía no se extendió).
+  LUZ_DEL_CIRCULO.uLuzDelCirculo.value = CIRCULO_DE_LUZ.base * extendida
+  LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 : Math.max(CIRCULO_DE_LUZ.onda * pulsoDelCirculo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), CIRCULO_DE_LUZ.ondaS) * extendida, CIRCULO_DE_LUZ.golpe * pulsoDelCirculo(desdeElGolpe, CIRCULO_DE_LUZ.golpeS) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)

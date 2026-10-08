@@ -172,7 +172,8 @@ controlPositivo('el detector VE un sprite de 250 KB', { webm: 250 * 1024, m4a: 1
 const nombres = Object.keys(CORTES_DEL_SPRITE)
 // [RETOQUE 3D] Se fueron el túnel, el amanecer y los ambientes (el ambiente es uno, en su archivo); llegaron los candidatos.
 // [CIERRE RETOQUE 3D] S1: el clic de la barra y de los CTA, el pestillo (los otros candidatos se borraron).
-afirmarIgual(nombres.sort(), ['abre', 'cierra', 'clic', 'encendido', 'foto', 'pestillo', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
+// [PULIDO 4] C2: el golpe del encastre, en sus dos variantes (`?golpe=a|b`).
+afirmarIgual(nombres.sort(), ['abre', 'cierra', 'clic', 'encendido', 'foto', 'golpe-a', 'golpe-b', 'pestillo', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
 afirmar(Object.values(CORTES_DEL_SPRITE).every((c) => (c.length as number) === 2 && c[1] <= 6000), '  ninguno es un bucle (el ambiente va aparte); ninguno pasa de 6 s')
 afirmar(VOLUMEN_GENERAL <= 0.7 && Object.values(SONIDOS).every((s) => s.volumen <= 1), '  bajo: el general 0,7 (cada uno con el volumen que eligió Valentino)')
 const doc = readFileSync('docs/rediseno/SONIDO.md', 'utf8')

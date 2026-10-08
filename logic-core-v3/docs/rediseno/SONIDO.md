@@ -38,7 +38,8 @@ Kellet), filtros de dos polos (el «Audio EQ Cookbook» de R. Bristow-Johnson), 
 una reverb de Schroeder. Escribe:
 
 - **El sprite**, mono a 48 kHz, en Opus (32 kbit/s, WebM: Chrome, Firefox, Edge) y en AAC (40 kbit/s, M4A: Safari):
-  **46 KB** y **45 KB** (9,9 s: los siete de siempre y el pestillo).
+  **46 KB** y **45 KB** (9,9 s: los siete de siempre y el pestillo). [PULIDO 4] C2 · con el golpe del encastre (sus dos
+  variantes): **64 KB** y **67 KB** (14,4 s).
 - Los cortes, en `src/app/v3/_lib/sonido/sprite.ts`.
 - [CIERRE RETOQUE 3D] Ya no escribe ambientes: el ambiente es generativo, en el navegador.
 
@@ -55,6 +56,8 @@ Volver a correrlo da los mismos archivos.
 | `encendido` | El haz que se enciende al caer la noche | Un zumbido eléctrico (100 Hz y armónicos) que sigue al guion de la escena (los intentos que fallan, el golpe a los 1,94 s, el zumbido firme) | 4,5 s | 0,2 |
 | `foto` | El hover de las fotos del equipo (el mouse, el foco, el toque) | Un roce: ruido agudo granulado | 170 ms | 0,1 |
 | `pestillo` | **El clic de la barra** (la pastilla, la esquina y el menú del teléfono) **y el de los CTA** (los del sistema, la ventana del final del túnel, «Clickeá acá», los de Servicios) | Dos golpes mecánicos a 18 ms (ruido en 3,4 kHz y en 1,7 kHz), el segundo más grave, con un cuerpo de 190 Hz: un cerrojo que encaja | 80 ms | 0,15 |
+| `golpe-a` | [PULIDO 4] C2 · **El golpe del encastre**: en el instante en que el logo conecta y nace la súper onda (el mismo evento del código, `cuadroDelFinal.ts`); otra vez en el reinicio automático, nunca en el rebobinado. El de fábrica | El pulso más grave (un seno que cae de 62 a 34 Hz, más largo), un sub-golpe de 27 Hz debajo y el «toc» del contacto (ruido grave muy corto), con una saturación suave: ~6 dB más que el pulso (RMS), pico a −0,5 dB (−0,2 dB después de codificar: no satura) | 1,5 s | 1 |
+| `golpe-b` | El mismo, con `?golpe=b` | `golpe-a` y una cola corta de la sala (una reverb de Schroeder: cuatro peines amortiguados y dos pasatodos, 0,9 s, húmeda al 30 %) | 2,4 s | 1 |
 
 Se borraron: `tunel` (el soplido del túnel), `amanecer` (el crescendo), `dia` · `noche` (los dos ambientes) y
 [CIERRE RETOQUE 3D] los otros siete candidatos de clic (`barra-a` a `barra-c`, `cta-a` a `cta-d`).

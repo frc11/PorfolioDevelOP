@@ -6,7 +6,7 @@
  *        (cobertura, fluye, nunca se apaga, sin ciclos), la expansión desde el hueco (función de `fin`: el rebobinado sin
  *        cortes), las ondas del logo y la sala gradual.
  *   A2 · el contacto del pie a 768: vidrio (el claro, más liviano) y en columna hasta las redes; sólo en la tablet.
- *   B0 · [PULIDO 3B] la energía, versión final: una sola (sin `red` ni `inestable`; `?energia=intensa` para comparar), más
+ *   B0 · [PULIDO 3B] la energía, versión final: una sola (sin `red` ni `inestable`; `?energia=intensa` se borró en PULIDO 4), más
  *        movimiento y más brillo, las corrientes sin patrón, los pistones sin vibración, el logo que brilla (fuera del
  *        oscurecimiento, su filo y el pulso de cada onda), el frente desde el golpe y la cobertura nunca bajo el 65 %.
  *   B1 · el CTA: gana `cruce` (sin bandera); todo en Archivo y en 3D; la metamorfosis de «Seis razones» en la frase (atrás,
@@ -25,7 +25,6 @@ import {
   CORRIENTES,
   CORRIENTES_DE_LA_LUZ_GLSL,
   ENERGIA_EN_LA_SIMULACION_GLSL,
-  INTENSA,
   LUZ_DE_ABAJO,
   PISTONES,
   campoDeLaLuz,
@@ -37,7 +36,7 @@ import {
   naceLaOnda,
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
-import { BRILLO_DEL_LOGO, BRILLO_DEL_LOGO_GLSL, pulsoDelLogo } from '../escena/final/rimDeLaLuz'
+import { CIRCULO_DE_LUZ, pulsoDelCirculo } from '../escena/final/luzDelCirculo'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
@@ -237,15 +236,14 @@ controlPositivo('  el detector VE una franja corrida (hasta 1025)', vidrioA2.rep
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B0 · La energía, versión final: una sola, viva, con corrientes y pistones, y el logo que brilla')
 
-// UNA VERSIÓN: sin las variantes del 3A (ni sus defines, ni su código, ni las chispas); una bandera, `?energia=intensa` (más
-// brillo y más velocidad), para comparar con el producto.
+// UNA VERSIÓN: sin las variantes del 3A (ni sus defines, ni su código, ni las chispas). [PULIDO 4] C2 · cambió por pedido:
+// `?energia=intensa` (más brillo y más velocidad, para comparar) se borró: la energía de B0 es la del producto.
 const finalDir = `${V3}/_lib/escena/final`
 const delFinal = readdirSync(finalDir).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${finalDir}/${a}`, 'utf8'))).join('\n')
 const unaBien = (fuentes: string, c: string): boolean => !/ENERGIA_RED|ENERGIA_INESTABLE|redDeLaLuz|RED_DE_LA_LUZ|INESTABLE\b|crearLasChispas|VarianteDeLaEnergia/.test(fuentes) && !existsSync(`${finalDir}/chispasDeLaLuz.ts`) &&
-  ENTORNO.pruebas.energia === 'no' && entornoPedido('producto,energia=intensa').pruebas.energia === 'intensa' && entornoPedido('producto,energia=red').pruebas.energia === 'no' && entornoPedido('producto,energia=inestable').pruebas.energia === 'no' &&
-  PRUEBAS_SUELTAS.some((k: string) => k === 'energia') && INTENSA.brillo > 1 && INTENSA.ritmo > 1 &&
-  c.includes('LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t * (intensa ? INTENSA.ritmo : 1)') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uBrilloDeLaLuz.value = intensa ? INTENSA.brillo : 1')
-afirmar(unaBien(delFinal, cuadro), 'una sola versión (las variantes del 3A y las chispas se borraron); `?energia=intensa`, más brillo y más velocidad', `intensa: brillo ×${String(INTENSA.brillo)}, ritmo ×${String(INTENSA.ritmo)}`)
+  !('energia' in ENTORNO.pruebas) && !('energia' in entornoPedido('producto,energia=intensa').pruebas) && !PRUEBAS_SUELTAS.some((k: string) => k === 'energia') && !/INTENSA|intensa/.test(fuentes) &&
+  c.includes('LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t')
+afirmar(unaBien(delFinal, cuadro), 'una sola versión (las variantes del 3A y las chispas se borraron); [PULIDO 4] `?energia=intensa` también')
 controlPositivo('el detector VE la variante `red` de vuelta', `${delFinal}\n#define ENERGIA_RED`, (f: string) => unaBien(f, cuadro))
 
 // MÁS MOVIMIENTO Y MÁS BRILLO: el fondo de la energía cambia de un cuadro al otro casi nada (continuo) pero en medio segundo ya
@@ -323,23 +321,26 @@ const dibujoB0 = (() => {
 })()
 const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
 const entornoDelPulso = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
+// [PULIDO 4] C2 · cambió por pedido: el brillo del filo del logo no gustó; el logo volvió a como era y el brillo pasó al círculo
+// quieto alrededor (`luzDelCirculo.ts`, que fija `s55` C2). Lo de acá es lo mismo sobre el círculo: fuera del oscurecimiento,
+// con la energía y un pulso con cada onda (corridas al azar), sin volver a encender los anillos del pulso en el final.
 const logoBien = (g: string, logo: string, c: string): boolean => {
   const oscurece = g.indexOf('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;')
-  const filo = g.indexOf('gl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );')
+  const filo = g.indexOf('gl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );')
   const nacimientos = Array.from({ length: 40 }, (_, n) => naceLaOnda(n))
   const intervalos = nacimientos.slice(1).map((v, i) => v - nacimientos[i])
   const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length
   const desvio = Math.sqrt(intervalos.reduce((a, b) => a + (b - media) ** 2, 0) / intervalos.length)
-  const pulsa = nacimientos.slice(1, 30).every((t0) => pulsoDelLogo(desdeLaUltimaOnda(t0 + 0.01)) > 0.9 && pulsoDelLogo(desdeLaUltimaOnda(t0 + 1)) < 0.1)
-  return oscurece > 0 && filo > oscurece && logo.includes('<RimDelLogo logoMaterialRef={props.logoMaterialRef} />') && !/energia === 'inestable'/.test(logo) &&
-    BRILLO_DEL_LOGO_GLSL.startsWith('gl_FragColor.rgb += vec3( ( uRimDeLaLuz + ') && BRILLO_DEL_LOGO.filo >= 1 && pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
+  const pulsa = nacimientos.slice(1, 30).every((t0) => pulsoDelCirculo(desdeLaUltimaOnda(t0 + 0.01), CIRCULO_DE_LUZ.ondaS) > 0.9 && pulsoDelCirculo(desdeLaUltimaOnda(t0 + 1), CIRCULO_DE_LUZ.ondaS) < 0.1)
+  return oscurece > 0 && filo > oscurece && !logo.includes('RimDelLogo') && !/energia === 'inestable'/.test(logo) &&
+    CIRCULO_DE_LUZ.base > 0.5 && pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
     ENERGIA_EN_LA_SIMULACION_GLSL.includes(`float tau = uRelojDeLaLuz - ( m + ${String(L.ondas.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${String(L.ondas.cadaS)};`) &&
-    c.includes('RIM_DE_LA_LUZ.uPulsoDelLogo.value = s.estatico ? 0 : Math.max(pulsoDelLogo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)) * extendida, pulsoDelLogo(desdeElGolpe) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)') &&
+    c.includes('LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 : Math.max(CIRCULO_DE_LUZ.onda * pulsoDelCirculo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), CIRCULO_DE_LUZ.ondaS) * extendida, CIRCULO_DE_LUZ.golpe * pulsoDelCirculo(desdeElGolpe, CIRCULO_DE_LUZ.golpeS) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)') &&
     entornoDelPulso.includes('entradas.reducido = quieto || EN_VIVO.fin > 0')
 }
-afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  el logo brilla: fuera del oscurecimiento, su filo en blanco con la energía y un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `filo ${String(BRILLO_DEL_LOGO.filo)}, pulso ${String(BRILLO_DEL_LOGO.pulsoS)} s`)
-controlPositivo('  el detector VE el filo oscurecido con la sala', dibujoB0.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );', 'gl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );'), (g: string) => logoBien(g, luzDelLogo, cuadro))
-controlPositivo('  y un logo sin pulso', cuadro.replace('RIM_DE_LA_LUZ.uPulsoDelLogo.value = s.estatico ? 0 :', 'RIM_DE_LA_LUZ.uPulsoDelLogo.value = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
+afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era): fuera del oscurecimiento, con la energía y un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `luz ${String(CIRCULO_DE_LUZ.base)}, pulso ${String(CIRCULO_DE_LUZ.ondaS)} s`)
+controlPositivo('  el detector VE la luz del círculo oscurecida con la sala', dibujoB0.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );', 'gl_FragColor.rgb = conLaLuzDelCirculo( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );'), (g: string) => logoBien(g, luzDelLogo, cuadro))
+controlPositivo('  y un círculo sin pulso', cuadro.replace('LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = s.estatico ? 0 :', 'LUZ_DEL_CIRCULO.uPulsoDelCirculo.value = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
 
 // EL FRENTE DESDE EL GOLPE: la meseta de la súper onda tapaba las rendijas el primer segundo o dos; los cantos de las tapas (que
 // se ven desde arriba aunque la rendija sea honda) y el frente de la expansión brillan más: el frente se lee desde el golpe.
