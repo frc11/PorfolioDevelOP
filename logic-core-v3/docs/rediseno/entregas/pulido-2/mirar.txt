@@ -32,3 +32,10 @@ Lo que va EN CELULAR REAL (por la LAN): 1, 3 y 5.
    Portfolio (la noche) → Por qué develOP: el amanecer se completa adentro del viaje (antes saltaba al llegar).
    Quiénes somos por el menú: el ≠ aparece con el titular (antes, en el viaje, antes que todo).
    La matriz entera, antes y después: p2-matriz-de-viajes.txt.
+
+3 · El velo del texto de Portfolio (teléfono y tablet, de noche) sin rectángulo
+   URL: /v3 en el teléfono (390 / 375) y la tablet (768), vertical. En Portfolio, donde la bajada pasa sobre el logo, el
+   oscurecimiento detrás del texto es una elipse que se desvanece muy por fuera del bloque: ningún borde recto.
+   La otra lectura: /v3?velo=escena (sin capa: el logo mismo se oscurece detrás del texto).
+   Hoja: p3-velo-antes-elipse-escena.png (antes con el rectángulo, la elipse y la de la escena, en los tres anchos).
+

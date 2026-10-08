@@ -6,6 +6,7 @@
  *       entre los elementos del pie, el teclado que no lo dispara, y el pie en AA mientras corre.
  *   2 · los viajes del menú: la duración por la distancia con saturación, un solo reloj (con lo retenido devuelto), el
  *       reparto por lo que se ve cambiar, el amanecer que se completa en el viaje y el ≠ que llega con el titular.
+ *   3 · el velo del texto de Trabajos sin rectángulo: una elipse detrás del texto (o, con `?velo=escena`, en el logo).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-2.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-2/mirar.txt`.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -18,7 +19,9 @@ import { AMANECER_EN_EL_VIAJE, completoDelViaje } from '../escena/amanecer/linea
 import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPantalla } from '../escena/final/encuadreDelPie'
 import { camaraDelFinal, distanciaParaElAncho } from '../escena/final/recorridoDelFinal'
 import { TECLADO, pasoDelTeclado, tecladoQuieto, type EstadoDelTeclado, type LecturaDelTeclado } from '../escena/final/teclado'
+import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
+import { VELO_EN_LA_ESCENA } from '../escena/veloDelTexto'
 import { curvaRepartida, type MuestrasDelViaje } from '../escena/repartoDelViaje'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, empezarElViaje, relojDelCuadro, segundosDelViaje, sostenerElReloj, terminarElViaje } from '../escena/viaje'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -323,5 +326,42 @@ const signoBien = (q: string, t3: string, tv: string): boolean =>
   tv.includes('if (a.sinLetras) a.uniforms.uTrazos.value.multiplyScalar(llegada * (1 - salida))') && tv.includes('a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1')
 afirmar(signoBien(quienes, signo3d, titulos3d), '  el ≠ llega con el titular (su misma función de llegada, pura del scroll) y en un viaje se desarma como los demás')
 controlPositivo('  el detector VE el ≠ sin llegada (el de antes: aparecía en el viaje)', [quienes, signo3d.replace("gesto: 'letras', llegada: entrada,", "gesto: 'letras', llegada: null,"), titulos3d] as const, ([q, t3, tv]: readonly [string, string, string]) => signoBien(q, t3, tv))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3 · El velo del texto de Trabajos sin rectángulo (abajo de 1024): una elipse que se desvanece; `?velo=escena`, en el logo')
+
+// Antes (P12): el velo era el fondo del párrafo con una sombra de caja: «se nota el rectángulo» (bordes rectos arriba y a la
+// izquierda, la captura del humano). Ahora, por defecto, un PSEUDO-ELEMENTO detrás del texto con un `radial-gradient`
+// (`closest-side`): entero en el medio y desvanecido muy por fuera del bloque (la caja del pseudo-elemento es 1,9 veces el
+// ancho del texto y 2,8 veces su alto), sin fondo ni sombra de caja en el texto. Con `?velo=escena`, sin capa del DOM: el
+// sombreador del logo baja su luminancia en una elipse de pantalla del mismo tamaño detrás de cada texto.
+const bandaP3 = leer('_estilos/banda.css')
+const enLaBandaP3 = (css: string): string => css.slice(css.indexOf('@media (width < 1024px) {'), css.indexOf('/* ── HOVER DONDE HAY'))
+const veloEliptico = (css: string): boolean => {
+  const b = enLaBandaP3(css)
+  const alcance = /--alcance-del-velo: -(\d+)% -(\d+)%;/.exec(b)
+  const regla = /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\]::before \{\s*content: '';\s*position: absolute;\s*inset: var\(--alcance-del-velo\);\s*z-index: -1;\s*pointer-events: none;\s*background: var\(--degrade-del-velo\);/.exec(b)
+  const degrade = /--degrade-del-velo: radial-gradient\(closest-side, var\(--velo-sobre-la-escena\) (\d+)%, transparent\);/.exec(b)
+  const sinCaja = !/background-color: var\(--velo-sobre-la-escena\)|box-shadow: var\(--sombra-del-velo\)|--sombra-del-velo/.test(css)
+  const posicion = /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p,\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\] \{\s*position: relative;\s*\}/.test(b)
+  return alcance !== null && Number(alcance[1]) >= 80 && Number(alcance[2]) >= 40 && regla !== null && degrade !== null && Number(degrade[1]) <= 60 && sinCaja && posicion
+}
+afirmar(veloEliptico(bandaP3), 'el velo es una elipse detrás del texto (un pseudo-elemento con un degradé radial, `closest-side`) que se desvanece muy por fuera del bloque: sin fondo ni sombra de caja (ningún borde recto)')
+const RECTANGULO_DE_P12 = bandaP3.replace(/\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,[\s\S]*?\}\n/, "[data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p { background-color: var(--velo-sobre-la-escena); box-shadow: var(--sombra-del-velo); }\n")
+controlPositivo('el detector VE el velo de P12 (el fondo con su sombra de caja: el rectángulo)', RECTANGULO_DE_P12, veloEliptico)
+
+// `?velo=escena`: la prueba se pide por su nombre; con ella la escena monta el velo del logo y marca la raíz, y la hoja
+// saca el del DOM; el sombreador lo aplica al FINAL (después del color de noche del logo, que si no lo pisaría) con la
+// misma elipse que el del DOM (`ancho`/`alto` en mitades del texto: 1,9 y 2,8, la caja del pseudo-elemento).
+const luzDelLogoP3 = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
+const veloTs = sinComentarios(leer('_lib/escena/veloDelTexto.ts'))
+const veloEscena = (css: string, luz: string, sombreador: string): boolean =>
+  entornoPedido('producto,velo=escena').pruebas.velo === 'escena' && ENTORNO.pruebas.velo === 'no' &&
+  /e\.pruebas\.velo === 'escena' \? <VeloEnElLogo logoMaterialRef=\{props\.logoMaterialRef\} \/> : null/.test(luz) &&
+  /\[data-v3\]\[data-velo='escena'\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,\s*\[data-v3\]\[data-velo='escena'\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\]::before \{\s*content: none;/.test(enLaBandaP3(css)) &&
+  sombreador.includes(".replace(/\\}\\s*$/, '\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();\\n}\\n')") &&
+  VELO_EN_LA_ESCENA.ancho === 1.9 && VELO_EN_LA_ESCENA.alto === 2.8 && VELO_EN_LA_ESCENA.fuerza >= 0.7
+afirmar(veloEscena(bandaP3, luzDelLogoP3, veloTs), '  `?velo=escena`: sin capa del DOM; el logo se oscurece en una elipse de pantalla detrás de cada texto (al final del sombreador, la misma elipse)')
+controlPositivo('  el detector VE el velo de la escena puesto antes del color de noche (que lo pisaba)', [bandaP3, luzDelLogoP3, veloTs.replace(".replace(/\\}\\s*$/, '\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();\\n}\\n')", ".replace('#include <dithering_fragment>', '#include <dithering_fragment>\\n\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();')")] as const, ([c, l, s]: readonly [string, string, string]) => veloEscena(c, l, s))
 
 cerrar('s53-pulido-2')

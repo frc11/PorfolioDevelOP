@@ -217,6 +217,56 @@ sin repartir); el amanecer adentro del viaje (control: quieto y salto); el ≠ c
 
 **Gate:** lint limpio en lo tocado (en `QuienesSomos.tsx` quedan dos avisos de imports sin usar que ya estaban: no los toqué); `tsc --noEmit` 0 errores; s47–s53 verdes (más s18, s27, s34, s36 y s46, que tocaba); `verificar`: los 8 grupos rojos de la base con sus 14 invariantes, más s34 y s36, que fijaban el amanecer quieto en los viajes que cambian de luz y la regla vieja del ≠: ajustados (tabla) y corridos de nuevo, verdes; reposo a 1440 y 390 (`pulido-2/reposo/p2-*`) sin errores en la consola.
 
+### 3 · El velo de P12 sin rectángulo
+
+**Antes:** el velo de P12 era el fondo del párrafo (76 % del color de la noche) con una sombra de caja ancha: sobre el logo
+se leía como una caja, con bordes rectos arriba y a la izquierda (la captura del humano, `p12-rectangulo`).
+
+**Qué cambió:**
+- **Por defecto, una elipse** (`banda.css` §4, tokens `--alcance-del-velo` y `--degrade-del-velo`): el velo pasa a un
+  pseudo-elemento `::before` detrás de la bajada del cartel y del texto de las demos, con un `radial-gradient(closest-side, …)`
+  entero hasta el 55 % de su radio y desvanecido hasta el borde de su caja, que es 1,9 veces el ancho del texto y 2,8 veces su
+  alto (`inset: -90% -45%`): se desvanece muy por fuera del bloque. Sin fondo ni sombra de caja en el texto (se fueron
+  `--sombra-del-velo` y el `background-color`). El párrafo sólo pasa a `position: relative` (para la caja del pseudo-elemento;
+  medido: era `static`, no cambia el layout, y la página no gana scroll horizontal); sin `isolation`, el velo queda detrás de
+  todo el cartel, también del título (con aislamiento lo tapaba: «Portfolio» se veía gris en la primera captura).
+- **`?velo=escena`, sin capa del DOM** (`escena/veloDelTexto.ts` y `VeloEnElLogo.tsx`, montado desde `LuzDelLogo.tsx` sólo con la
+  bandera): el sombreador del logo baja su luminancia (hasta el 80 %) en una elipse de pantalla del mismo tamaño detrás de cada
+  texto (dos a la vez), que el DOM mide en cada cuadro con la opacidad con que se ve el texto. El velo va al FINAL del sombreador
+  (después del color de noche del logo, que si no lo pisaba). Con la bandera, la raíz lleva `data-velo="escena"` y la hoja saca
+  la elipse del DOM.
+
+**Medido** (`pulido-2/p3/contraste/`; el método de P12: la máscara de las letras, lo de atrás sin el texto ni el velo, lo que
+se ve; mediana del contraste de las letras sobre el logo y sobre la noche, en los pasos con el texto quieto):
+
+| | 390 × 844 | 375 × 667 | 768 × 1024 |
+|---|---|---|---|
+| Antes (P12, emulado) · la bajada | logo 12,1 / noche 12,8 | 12,2 / 12,6 | 12,0–12,1 / 13,2–13,6 |
+| Elipse (por defecto) · la bajada | 12,1 / 12,8 | 12,4 / 12,6 | 12,1 / 13,3–13,6 |
+| `?velo=escena` · la bajada | 12,3–12,4 / 12,6 | 12,5–12,7 / 12,2–12,3 | 12,3 / 13,1–13,2 |
+| Elipse · el texto de las demos | 7,0–10,5 / 9,1–11,2 | 9,6–11,6 / 10,9–11,5 | 5,4–12,3 / 8,3–12,9 |
+| `?velo=escena` · el de las demos | 7,4–10,5 / 8,2–10,4 | 7,7–10,7 / 9,7–10,6 | 5,4–12,7 / 8,2–12,4 |
+
+Las dos variantes mantienen el AA de P12 (la bajada sobre el logo ≈ sobre la noche). En la captura no queda ningún borde
+recto ni silueta de caja en ninguna (hoja: `entregas/pulido-2/p3-velo-antes-elipse-escena.png`, los tres anchos). **El
+default es la elipse del DOM**: el mismo contraste, sin trabajo por cuadro; `?velo=escena` da un logo apenas más limpio
+alrededor del texto (sólo se oscurece el logo) a cambio de medir el DOM en cada cuadro. Los valores bajos de las demos son
+pasos en que el texto todavía aparece (pasa igual antes y en las dos variantes).
+
+**Gate:** lint limpio en lo tocado; `tsc --noEmit` 0 errores; s47–s53 verdes (más s3-tokens, por los dos tokens nuevos); `verificar`: los 8 grupos rojos de la base con sus 14 invariantes; reposo a 1440, 390 y 768 (`pulido-2/reposo/p3-*`) sin errores en la consola.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-pulido-1` P12 · el velo | el párrafo con `background-color` y `box-shadow` del velo (≥ 70 %) | el pseudo-elemento con el degradé radial del velo (≥ 70 %) y ningún fondo ni sombra de caja del velo | Lo pide PULIDO 2 (sin rectángulo); el mismo umbral de color y los mismos dos controles; la forma la fija `s53` |
+| `s52-pulido-1` P12 · desde 1024 nada cambia | el velo y su sombra sólo en la banda | el velo y su forma (los dos tokens nuevos) sólo en la banda | Más estricta: cubre los tokens nuevos |
+| `s52-pulido-1` · las banderas | sin `velo` | con `velo=escena` | Suma la prueba nueva al mismo control |
+
+`s53-pulido-2` §3: la elipse (alcance de al menos 80 % y 40 %, entera hasta ≤ 60 %, sin caja; control: el rectángulo de P12) y
+`?velo=escena` (la prueba, el montaje, la hoja que saca la elipse, el velo al final del sombreador con la misma elipse;
+control: el velo puesto antes del color de noche).
+
 ## 4 · Lo que no quedó bien (o no pude resolver)
 
 (se completa al cerrar)

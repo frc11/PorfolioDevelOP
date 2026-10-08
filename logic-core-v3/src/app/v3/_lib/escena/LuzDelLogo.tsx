@@ -9,6 +9,7 @@ import { VIVO } from './entorno/vivo'
 import { ESCENAS_APARTE } from './gpu/Precompilar'
 import { KEY_INTENSITY } from './probeLighting'
 import { SOMBRA_DEL_LOGO, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
+import { VeloEnElLogo } from './VeloEnElLogo'
 
 /**
  * [ESCENA 10] T1 · LA LUZ DEL LOGO — lo que de ESCENA 9 (T3) pasó al producto y corre por cuadro: los reflejos del
@@ -29,6 +30,8 @@ export function LuzDelLogo(props: Props) {
     <>
       {e.materialDelLogo ? <ReflejosDelLogo {...props} /> : null}
       {e.sombraDelLogo && e.pisoVivo ? <SombraDelLogo {...props} /> : null}
+      {/* [PULIDO 2] 3 · `?velo=escena`: el velo del texto de Trabajos en el logo (sin capa del DOM). */}
+      {e.pruebas.velo === 'escena' ? <VeloEnElLogo logoMaterialRef={props.logoMaterialRef} /> : null}
     </>
   )
 }

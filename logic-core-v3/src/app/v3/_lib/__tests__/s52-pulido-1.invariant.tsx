@@ -91,12 +91,17 @@ const haloDenso = (css: string): boolean => {
   const cortas = sombras.filter((s) => /^0 0 0\.1em var\(--color-fondo\)$/.test(s)).length
   return cortas >= 3
 }
-/** ¿La bajada del cartel y el texto de las demos llevan el velo, con al menos 70 % del fondo? */
+/**
+ * ¿La bajada del cartel y el texto de las demos llevan el velo, con al menos 70 %? [PULIDO 2] 3 · sin rectángulo: un
+ * pseudo-elemento detrás del texto con un degradé radial (no el fondo del párrafo con su sombra de caja, que se leía como
+ * una caja: lo fija `s53-pulido-2` §3); y en ningún lado el fondo o la sombra de caja del velo.
+ */
 const conVelo = (css: string): boolean => {
   const velo = /--velo-sobre-la-escena: color-mix\(in srgb, var\(--color-fondo\) (\d+)%, transparent\);/.exec(css)
-  const regla = /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p,\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\] \{\s*background-color: var\(--velo-sobre-la-escena\);\s*box-shadow: var\(--sombra-del-velo\);/.test(css)
-  const sombra = /--sombra-del-velo: 0 0 [0-9.]+em [0-9.]+em var\(--velo-sobre-la-escena\);/.test(css)
-  return velo !== null && Number(velo[1]) >= 70 && regla && sombra
+  const regla = /\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,\s*\[data-v3\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\]::before \{[^}]*background: var\(--degrade-del-velo\);/.test(css)
+  const degrade = /--degrade-del-velo: radial-gradient\(closest-side, var\(--velo-sobre-la-escena\) \d+%, transparent\);/.test(css)
+  const sinCaja = !/background-color: var\(--velo-sobre-la-escena\)|--sombra-del-velo/.test(css)
+  return velo !== null && Number(velo[1]) >= 70 && regla && degrade && sinCaja
 }
 const p12Bien = (css: string): boolean => haloDenso(enLaBanda(css)) && conVelo(enLaBanda(css))
 afirmar(haloDenso(enLaBanda(banda)), 'abajo de 1024 el halo del texto de Trabajos es denso: la misma sombra corta del fondo apilada (no una sola fina y difusa)')
@@ -117,7 +122,7 @@ controlPositivo('el detector VE el halo de C1 (el código anterior: fino, sin ve
 controlPositivo('y un velo demasiado tenue (50 %)', banda.replace(/(--velo-sobre-la-escena: color-mix\(in srgb, var\(--color-fondo\) )\d+%/, '$150%'), p12Bien)
 // Escritorio no cambia: nada del velo fuera de la banda de abajo de 1024.
 const fueraDeLaBanda = banda.replace(enLaBanda(banda), '')
-afirmar(!/velo-sobre-la-escena|sombra-del-velo/.test(fueraDeLaBanda), 'desde 1024 nada cambia: el velo y su sombra viven sólo en la banda de abajo de 1024')
+afirmar(!/velo-sobre-la-escena|sombra-del-velo|degrade-del-velo|alcance-del-velo/.test(fueraDeLaBanda), 'desde 1024 nada cambia: el velo (y su forma) vive sólo en la banda de abajo de 1024')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; sin él, en la URL (`?pruebas=` o sueltas)')
@@ -125,7 +130,7 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
 // `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`. (P22 `encastre=desvanece` y P5 `vuelta=corta` se
 // borraron en PULIDO 2 · 1 y 2, rechazadas.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'] }
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'], velo: ['escena'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')

@@ -98,11 +98,16 @@
    * [PULIDO 1] P12 · no alcanzaba: era UNA sombra fina y difusa, y sobre el filo blanco y la tapa gris del logo la bajada
    * quedaba en 3,2–4,4:1 (medido a 390). Ahora el halo es denso (la misma sombra corta apilada, la receta de D2) y la
    * bajada lleva un VELO del color de la noche (fondo y sombra de caja: oscurece el logo sólo detrás del texto; sobre la
-   * noche no se ve). Medido: sobre el logo, la bajada en 10–12:1, lo mismo que sobre la noche. */
+   * noche no se ve). Medido: sobre el logo, la bajada en 10–12:1, lo mismo que sobre la noche.
+   * [PULIDO 2] 3 · sin rectángulo («se nota el rectángulo»: el fondo con su sombra de caja dejaba bordes rectos arriba y a la
+   * izquierda). El velo pasa a un PSEUDO-ELEMENTO detrás del texto con un degradé radial (`closest-side`): entero en el medio
+   * y desvanecido muy por fuera del bloque (su caja: 1,9 veces el ancho del texto y 2,8 veces su alto), sin caja ni sombra de
+   * caja. Con `velo=escena` (la otra lectura) no hay capa: el logo se oscurece en una elipse de pantalla (`escena/veloDelTexto.ts`). */
   [data-v3] [data-panel='trabajos'] {
     --halo-sobre-la-escena: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
     --velo-sobre-la-escena: color-mix(in srgb, var(--color-fondo) 76%, transparent);
-    --sombra-del-velo: 0 0 1.4em 1em var(--velo-sobre-la-escena);
+    --alcance-del-velo: -90% -45%;
+    --degrade-del-velo: radial-gradient(closest-side, var(--velo-sobre-la-escena) 55%, transparent);
   }
 
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
@@ -112,8 +117,22 @@
 
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto'] {
-    background-color: var(--velo-sobre-la-escena);
-    box-shadow: var(--sombra-del-velo);
+    position: relative;
+  }
+
+  [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p::before,
+  [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto']::before {
+    content: '';
+    position: absolute;
+    inset: var(--alcance-del-velo);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--degrade-del-velo);
+  }
+
+  [data-v3][data-velo='escena'] [data-panel='trabajos'] [data-pieza='cartel'] p::before,
+  [data-v3][data-velo='escena'] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto']::before {
+    content: none;
   }
 
   /* ── 5 · [NOCTURNO FINAL] C4 · EL PIE ANGOSTO ENTRA EN UNA PANTALLA ──

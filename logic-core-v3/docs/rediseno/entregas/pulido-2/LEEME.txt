@@ -25,3 +25,11 @@ Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=
   planDelViaje.ts, repartoDelViaje.ts (nuevo), OrbitRig.tsx, final/recorridoDelFinal.ts y cuadroDelFinal.ts, amanecer/Amanecer.tsx
   y linea.ts, titulos3d/TitulosDeVolumen.tsx; _secciones/quienes-somos/QuienesSomos.tsx y titular3d.tsx.  Sin bandera
   (se borró vuelta=corta).
+
+3 · El velo de P12 sin rectángulo
+  Qué: el velo detrás del texto de Portfolio pasa a ser una elipse (un pseudo-elemento con un degradé radial que se desvanece
+  muy por fuera del bloque, sin caja ni sombra de caja); la otra lectura, ?velo=escena, oscurece el logo en el sombreador en
+  una elipse de pantalla detrás del texto. Las dos mantienen el AA de P12 (la bajada sobre el logo ≈ sobre la noche: 12:1).
+  Archivos: _estilos/banda.css; escena/veloDelTexto.ts y VeloEnElLogo.tsx (nuevos), LuzDelLogo.tsx, entorno.ts.
+  Bandera: velo=escena.  Default: la elipse.
+
