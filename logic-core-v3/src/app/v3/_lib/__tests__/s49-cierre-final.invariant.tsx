@@ -388,10 +388,10 @@ const pisoVivo = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
 const armadas = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
 const cableadoDelFinal = (mo: string): boolean =>
   // [PULIDO 1] P22 · por pedido, también abajo de 1024 (en su escenario); ahí, con movimiento reducido, quieto. En escritorio,
-  // con movimiento reducido sigue sin montarse.
+  // con movimiento reducido sigue sin montarse. [PULIDO 3] A1 · el dibujo del final, con la variante de la energía (`?energia=`).
   mo.includes("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}") &&
   mo.indexOf('<FinalDelPie') > mo.indexOf('<OrbitRig') && mo.indexOf('<FinalDelPie') < mo.indexOf('<Entorno') &&
-  pisoVivo.includes('conElFinalEnElPiso(material)') && armadas.includes('d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))') && armadas.includes('const sy = scrollDelPie(scrollY)')
+  pisoVivo.includes('conElFinalEnElPiso(material, energia)') && armadas.includes('d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))') && armadas.includes('const sy = scrollDelPie(scrollY)')
 afirmar(cableadoDelFinal(montaje), '  el cableado: el final va justo después del rig (le suma el final a su cámara y al logo antes que nadie lo lea), con movimiento ([PULIDO 1] P22: también abajo de 1024, y ahí quieto con movimiento reducido); las piezas del pie se colocan con la cámara del final, adelante del piso, con el scroll en que el pie se pegó')
 controlPositivo('el detector VE el final montado también con movimiento reducido en escritorio', montaje.replace("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie", "{<FinalDelPie"), cableadoDelFinal)
 

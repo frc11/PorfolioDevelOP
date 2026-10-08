@@ -6,7 +6,8 @@ import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
-import { LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from './luzDeAbajo'
+import { CAMPO_QUIETO_EN, INESTABLE, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, radioDeLaExpansion } from './luzDeAbajo'
+import { RIM_DE_LA_LUZ } from './rimDeLaLuz'
 import { crearElPozo } from './hueco'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
@@ -26,7 +27,7 @@ import {
   distanciaDelFinalAngosto,
   distanciaParaElAncho,
   pasoDelReloj,
-  oscuroDelFinal,
+  expansionDeLaLuz,
   poder,
   poseDelLogo,
   quedaDelRebobinado,
@@ -103,8 +104,7 @@ export interface EstadoDelFinal {
   poder: number
   /** [PULIDO 2] 6 · cuánto de la sombra del logo se ve (`sombraConFundido`). */
   sombra: number
-  /** [PULIDO 2] 4 · las zonas de la luz de abajo de este cuadro y lo que se ve del piso (donde nacen). */
-  readonly zonas: ZonaDeLaLuz[]
+  /** [PULIDO 3] A1 · lo que se ve del piso (donde nacen las chispas de `?energia=inestable`). */
   readonly alcance: { x: number; y: number; giro: number; cx: number; cz: number }
 }
 
@@ -143,7 +143,6 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     alFondo: false,
     poder: 0,
     sombra: 1,
-    zonas: [],
     alcance: { x: 16, y: 10, giro: 0, cx: 0, cz: 0 },
   }
 }
@@ -163,6 +162,8 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   s.poder = 0
   p.uOscuroDelBrillo.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = 0
+  LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(0, 0)
+  RIM_DE_LA_LUZ.uRimDeLaLuz.value = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
 }
@@ -176,12 +177,10 @@ export interface CuadroDeLaEscena {
 const AL_FONDO_PX = 2
 /** [PULIDO 2] 1 · sólo para el banco: el reloj clavado en un `fin` (para medir el contraste del pie en un cuadro quieto). */
 export const FINAL_DEL_BANCO: { fijo: number | null } = { fijo: null }
-/** [PULIDO 1] P1 · las zonas de la luz nacen adentro de esta fracción de lo que se ve (no cortadas por el borde). */
+/** [PULIDO 1] P1 · lo que se ve del piso, en esta fracción del cuadro (no cortado por el borde). */
 const ALCANCE_DE_LA_LUZ = 0.85
 const DERECHA = new THREE.Vector3()
 const CENTRO_DEL_CUADRO = new THREE.Vector2(0, 0)
-/** [PULIDO 2] 4 · lo más cerca del centro que nace una zona (u): fuera del mar calmo del logo, con su radio más chico. */
-const LEJOS_DE_LA_CALMA = CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde + LUZ_DE_ABAJO.margen + LUZ_DE_ABAJO.radio[0]
 /** [PULIDO 2] 4 · dónde la luz se apaga contra el mar calmo (u, desde y hasta: el anillo de su borde, más el margen). */
 const CALMA_DE_LA_LUZ = [CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde, CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + LUZ_DE_ABAJO.margen] as const
 /** [PULIDO 1] P22 · el ancho del logo (u) si la escena todavía no lo publicó: el del SVG a su escala. */
@@ -342,6 +341,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   piso.uPoder.value = s.poder
   // [PULIDO 2] 4 · la energía de la luz de abajo es el poder del piso (con su inercia: en el rebobinado se va en varios cuadros).
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)
+  // [PULIDO 3] A1 · y sale del hueco en el golpe, hasta cubrir la escena (función de `fin`: al rebobinar se retira igual).
+  const expansion = expansionDeLaLuz(fin)
+  LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t
+  LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(expansion > 0 ? radioDeLaExpansion(expansion, CALMA_DE_LA_LUZ[0]) : 0, expansion)
   const desdeElGolpe = t - s.golpeEn
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
@@ -365,7 +368,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const distancia = !s.angosto || !(state.camera instanceof THREE.PerspectiveCamera) ? null : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
   const corrimiento = encuadre === null ? null : { x: (2 * encuadre.cx) / vista.ancho - 1, y: 1 - (2 * encuadre.cy) / vista.alto }
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)
-  // [PULIDO 1] P1 · lo que se ve del piso alrededor del logo (donde nacen las zonas de la luz), con la cámara de este cuadro.
+  // [PULIDO 1] P1 · lo que se ve del piso alrededor del logo, con la cámara de este cuadro.
   if (state.camera instanceof THREE.PerspectiveCamera) {
     const medio = state.camera.position.distanceTo(EN_VIVO.blanco) * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2) * ALCANCE_DE_LA_LUZ
     DERECHA.set(1, 0, 0).applyQuaternion(state.camera.quaternion)
@@ -378,12 +381,12 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     s.alcance.cx = enElPiso ? s.punto.x : 0
     s.alcance.cz = enElPiso ? s.punto.z : 0
   }
-  // [PULIDO 2] 4 · las zonas de la luz de abajo (dónde, de qué tamaño y cuánto viven: `luzDeAbajo.ts`), como uniformes; quieto
-  // (movimiento reducido), en un instante con una prendida. La sala se oscurece gradual con lo prendido y con el final.
-  zonasDeLaLuz(s.estatico ? LUZ_DE_ABAJO.quietoEn : t, s.alcance, LEJOS_DE_LA_CALMA, s.zonas)
-  s.zonas.forEach((z, k) => LUZ_DE_ABAJO_EN_VIVO.uZonasDeLaLuz.value[k].set(z.cx, z.cz, z.radio, z.vida))
-  LUZ_DE_ABAJO_EN_VIVO.uSemillasDeLaLuz.value.set(s.zonas[0]?.semilla ?? 0, s.zonas[1]?.semilla ?? 0)
-  piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * oscuroDelFinal(fin) * prendidoDeLaLuz(s.zonas) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
+  // [PULIDO 3] A1 · lo que se ve (las chispas nacen ahí); la sala se oscurece gradual con la expansión de la energía; el canto
+  // del logo (`?energia=inestable`) se enciende con ella.
+  LUZ_DE_ABAJO_EN_VIVO.uVistaDeLaLuz.value.set(s.alcance.cx, s.alcance.cz, Math.hypot(s.alcance.x, s.alcance.y))
+  const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
+  piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida
+  RIM_DE_LA_LUZ.uRimDeLaLuz.value = INESTABLE.rim * extendida
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
   camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)

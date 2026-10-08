@@ -24,7 +24,7 @@ import { aimWithFraming } from '../escena/cameraFraming'
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { estadoQuieto, poderSuave } from '../escena/final/cuadroDelFinal'
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso } from '../escena/final/enElPiso'
-import { LUZ_DE_ABAJO, SECTOR_DE_LA_LUZ_GLSL, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from '../escena/final/luzDeAbajo'
+import { CAMPO_QUIETO_EN, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, campoDeLaLuz, energiaDelCampo } from '../escena/final/luzDeAbajo'
 import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
@@ -43,7 +43,7 @@ import {
   distanciaDelFinalAngosto,
   duracionDelRebobinado,
   haciaCero,
-  oscuroDelFinal,
+  expansionDeLaLuz,
   pasoDelReloj,
   poder,
   poseDelLogo,
@@ -123,15 +123,16 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
 // `angel=asentado`; PULIDO 2 · 5, `cta=capas|relevo|giro|cruce|tipo` (las de P17, `cta=a|b|c|d`, se borraron). (P22 `encastre=desvanece`, P5 `vuelta=corta` y P1 `brillo=suave|fuerte` se borraron en
-// PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], chispas: ['si'], cta: ['capas', 'relevo', 'giro', 'cruce', 'tipo'], velo: ['escena'] }
+// PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`; PULIDO 3 · A1 borra las dos y agrega
+// `energia=red|inestable`.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['red', 'inestable'], cta: ['capas', 'relevo', 'giro', 'cruce', 'tipo'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
   const pedidas = PRUEBAS_SUELTAS.every((k) => PEDIDAS[k].every((v) => f(`producto,${k}=${v}`).pruebas[k] === v))
   const otras = PRUEBAS_SUELTAS.every((k) => f(`producto,${k}=cualquiera`).pruebas[k] === 'no')
-  const juntas = f('producto,cta=giro,chispas=si,angel=asentado').pruebas
-  return apagadas && pedidas && otras && juntas.cta === 'giro' && juntas.chispas === 'si' && juntas.angel === 'asentado' && f('producto,cta=giro').E1 === ENTORNO.E1
+  const juntas = f('producto,cta=giro,energia=red,angel=asentado').pruebas
+  return apagadas && pedidas && otras && juntas.cta === 'giro' && juntas.energia === 'red' && juntas.angel === 'asentado' && f('producto,cta=giro').E1 === ENTORNO.E1
 }
 afirmar(banderasBien(entornoPedido), 'cada prueba del sprint se pide por su nombre y vale sólo sus valores (otro valor es el producto); van juntas; en el producto están todas apagadas', PRUEBAS_SUELTAS.join(' · '))
 controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedido: string) => {
@@ -141,11 +142,11 @@ controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedi
 }) as Traductor, banderasBien)
 type DeLaUrl = typeof pedidoDeLaUrl
 const urlBien = (f: DeLaUrl): boolean => {
-  const sueltas = f('?cta=relevo&chispas=si')
+  const sueltas = f('?cta=relevo&energia=inestable')
   const ambas = f('?pruebas=pie=antes&angel=asentado')
-  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'relevo' && entornoPedido(sueltas).pruebas.chispas === 'si' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
+  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'relevo' && entornoPedido(sueltas).pruebas.energia === 'inestable' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
 }
-afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=relevo`, `/v3?chispas=si`) y con `?pruebas=`; sin nada, el producto')
+afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=relevo`, `/v3?energia=inestable`) y con `?pruebas=`; sin nada, el producto')
 controlPositivo('el detector VE una URL que sólo lee `?pruebas=` (las sueltas no llegarían)', ((b: string) => {
   const v = new URLSearchParams(b).get('pruebas')
   return v === null ? null : `producto,${v}`
@@ -478,74 +479,42 @@ const dibujoP1 = (() => {
 })()
 const brilloP1 = dibujoP1.slice(dibujoP1.indexOf('vec3 conLasJuntas('), dibujoP1.indexOf('vec2 mascaraDelHueco('))
 // Blanca y sin blanquear las tapas: la luz se SUMA en los costados (desde su base) y en los cantos, nunca la tapa entera.
-const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* s \);/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
+const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* junta \);/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
 afirmar(blancoBien(brilloP1), 'la luz es BLANCA (cero rojo) y se suma por las juntas (los costados y los cantos): las tapas no se ponen blancas')
 controlPositivo('el detector VE las tapas blancas de P1 (rechazadas)', `${brilloP1}\nreturn mix( color, vec3( mix( 0.9, 1.0, vTapa ) ), k );`, blancoBien)
-// Cuantizado al bloque: el sector se mide en el CENTRO del bloque (cada bloque se prende entero), no en cada punto del piso.
-const bloqueBien = (g: string): boolean => g.includes('float s = sectorDeLaLuz( vCentroDelBloque, 0.0 );')
-afirmar(bloqueBien(brilloP1), '  cuantizado al bloque: cada bloque se prende entero (el sector se mide en su centro)')
-controlPositivo('  el detector VE una luz medida punto a punto (manchas que cortan los bloques)', brilloP1.replace('sectorDeLaLuz( vCentroDelBloque, 0.0 )', 'sectorDeLaLuz( vPiso.xz, 0.0 )'), bloqueBien)
-// Orgánica: la distancia al centro deformada por un ruido (ni un círculo perfecto ni una grilla: nada de damero ni de mod).
-const organicaBien = (g: string): boolean => /float d = lejos \+ [0-9.]+ \* \( ruidoDeLaLuz\( b \* [0-9.]+ \+ semilla \) - 0\.5 \);/.test(g) && LUZ_DE_ABAJO.irregular >= 0.3 && !/mod\(|step\( 0\.5, fract/.test(g)
-afirmar(organicaBien(SECTOR_DE_LA_LUZ_GLSL), '  orgánica: la distancia al centro de la zona deformada por un ruido (sin círculos perfectos), sin damero ni grilla regular')
-controlPositivo('  el detector VE una zona circular (sin el ruido)', SECTOR_DE_LA_LUZ_GLSL.replace(/float d = lejos \+ [^;]+;/, 'float d = lejos;'), organicaBien)
+// Cuantizado al bloque: la energía es UNA por bloque (cada bloque se prende entero), no en cada punto del piso. [PULIDO 3] A1 ·
+// la de su celda en la simulación (una por bloque), que el vértice lee y pasa entera al dibujo; antes, el sector en su centro.
+const bloqueBien = (g: string): boolean => g.includes('float s = vEnergiaDelBloque;')
+afirmar(bloqueBien(brilloP1), '  cuantizado al bloque: cada bloque se prende entero (la energía de su celda)')
+controlPositivo('  el detector VE una luz medida punto a punto (manchas que cortan los bloques)', brilloP1.replace('float s = vEnergiaDelBloque;', 'float s = ruidoDeLaLuz( vPiso.xz );'), bloqueBien)
+// Orgánica: ni un círculo perfecto ni una grilla (nada de damero ni de mod). [PULIDO 3] A1 · el campo es un ruido torcido por
+// otro (domain warping); antes, la distancia al centro de la zona deformada por un ruido.
+const organicaBien = (g: string): boolean => /return fbmDeLaLuz\( p \+ [0-9.]+ \* \( q - 0\.5 \) \);/.test(g) && LUZ_DE_ABAJO.campo.tuerce >= 1 && !/mod\(|step\( 0\.5, fract/.test(g)
+afirmar(organicaBien(ENERGIA_EN_LA_SIMULACION_GLSL), '  orgánica: un campo de ruido torcido (domain warping), sin círculos perfectos, sin damero ni grilla regular')
+controlPositivo('  el detector VE un ruido sin torcer', ENERGIA_EN_LA_SIMULACION_GLSL.replace(/return fbmDeLaLuz\( p \+ [^;]+;/, 'return fbmDeLaLuz( p );'), organicaBien)
 
-// El ciclo de vida, con la función de la escena (las zonas se calculan por cuadro y van como uniformes): nace (1,5 a 3 s),
-// vive, se retira y otra aparece en otro lugar; una o dos a la vez como máximo; con una semilla fija.
+// [PULIDO 3] A1 · cambió por pedido: «cada zona nace en 1,5 a 3 s, vive y se retira; nunca más de dos a la vez» se borró (no
+// hay más zonas: «nada de ciclos de nacer y morir, y nunca se apaga»). La cobertura y el movimiento del campo nuevo, en s54 A1.
+
+// La sala se oscurece (en el color que se ve, parejo y neutro) GRADUAL y vuelve (y con el final: al rebobinar, también). El rig
+// de luz, no (sin el tinte cálido del atardecer de B2). [PULIDO 2] 4 · antes, 10 a 15 % fijo con el final; ahora hasta 40 %:
+// la luz blanca de las juntas no se leía sobre el papel. [PULIDO 3] A1 · gradual con la expansión de la energía (antes, con el
+// sector prendido).
 const LA = LUZ_DE_ABAJO
-const ALCANCE_P1 = { x: 16, y: 10, giro: 0 }
-type Zonas = typeof zonasDeLaLuz
-const cicloBien = (zonas: Zonas, cuantas: number): boolean => {
-  let maximo = 0
-  let conUna = 0
-  let conDos = 0
-  let hueco = 0
-  let huecoMaximo = 0
-  const lugares: [number, number][][] = Array.from({ length: cuantas }, () => [])
-  const ciclos: number[] = Array.from({ length: cuantas }, () => -1)
-  const buf: ZonaDeLaLuz[] = []
-  for (let t = 0; t < 180; t += 0.1) {
-    const z = zonas(t, ALCANCE_P1, 6, buf)
-    let vivas = 0
-    for (let k = 0; k < cuantas; k += 1) {
-      if ((z[k]?.vida ?? 0) > 0.02) vivas += 1
-      const semilla = z[k]?.semilla ?? 0
-      if (semilla !== ciclos[k]) {
-        ciclos[k] = semilla
-        lugares[k].push([z[k]?.cx ?? 0, z[k]?.cz ?? 0])
-      }
-    }
-    maximo = Math.max(maximo, vivas)
-    if (vivas === 1) conUna += 1
-    if (vivas === 2) conDos += 1
-    hueco = vivas === 0 ? hueco + 0.1 : 0
-    huecoMaximo = Math.max(huecoMaximo, hueco)
-  }
-  // Cada zona nueva, en otro lugar: de un ciclo al siguiente se mueve más de 2 u.
-  const otroLugar = lugares.every((l) => l.every((p, i) => i === 0 || Math.hypot(p[0] - l[i - 1][0], p[1] - l[i - 1][1]) > 2))
-  return maximo <= 2 && conUna > 0 && conDos > 0 && huecoMaximo < 4 && otroLugar && LA.nace[0] >= 1.5 && LA.nace[1] <= 3 && LA.periodo[0] > LA.nace[1] + LA.vive[1] + LA.muere[1]
-}
-afirmar(cicloBien(zonasDeLaLuz, LA.zonas) && LA.zonas === 2, '  cada zona nace en 1,5 a 3 s, vive y se retira, y la próxima aparece en otro lugar; nunca más de dos a la vez (a veces una, a veces dos, con huecos cortos)')
-controlPositivo('  el detector VE una zona que no se retira nunca (siempre la misma, en el mismo lugar)', ((t: number, a: { x: number; y: number; giro: number }, m: number, s: ZonaDeLaLuz[]) => {
-  s[0] = { cx: 5, cz: 0, radio: 4, vida: 1, semilla: 0 }
-  s[1] = { cx: -5, cz: 0, radio: 4, vida: 0, semilla: 0 }
-  return s
-}) as Zonas, (z: Zonas) => cicloBien(z, 2))
-
-// La sala se oscurece (en el color que se ve, parejo y neutro) GRADUAL con el sector prendido y vuelve cuando se apaga (y con
-// el final: al rebobinar, también). El rig de luz, no (sin el tinte cálido del atardecer de B2). [PULIDO 2] 4 · antes, 10 a 15 %
-// fijo con el final; ahora hasta 40 % con el sector entero prendido: la luz blanca de las juntas no se leía sobre el papel.
 const cuadroP1 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const rigP1 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
 const alRasP1 = FINAL_DEL_PIE.presion.hastaS / R.duracionS
 const oscuroBienP1 = (g: string, c: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') &&
-  c.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * oscuroDelFinal(fin) * prendidoDeLaLuz(s.zonas) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value') &&
-  LA.oscurece >= 0.1 && LA.oscurece <= 0.4 && oscuroDelFinal(0) === 0 && oscuroDelFinal(alRasP1 - 0.01) === 0 && oscuroDelFinal(1) === 1 && oscuroDelFinal(alRasP1 + 0.05) < 1 && !/arc\.kelvin \+=/.test(rigP1)
-afirmar(oscuroBienP1(dibujoP1, cuadroP1), '  la sala se oscurece (parejo, neutro; hasta un 40 % con el sector entero) gradual con el sector prendido y con el final; sin el tinte cálido del atardecer', `oscurece ${String(LA.oscurece)}`)
-controlPositivo('  el detector VE el atardecer de antes (−45 %, de golpe con el final)', [dibujoP1, cuadroP1.replace('LUZ_DE_ABAJO.oscurece * oscuroDelFinal(fin) * prendidoDeLaLuz(s.zonas) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value', '0.45 * oscuroDelFinal(fin)')] as const, ([g, c]: readonly [string, string]) => oscuroBienP1(g, c))
-// Quieto (movimiento reducido): un instante con una zona viva. Y `?brillo=` se borró (las intensidades de P1, rechazadas).
-const quietoVivo = prendidoDeLaLuz(zonasDeLaLuz(LA.quietoEn, ALCANCE_P1, 6, []))
-afirmar(quietoVivo > 0.8 && !('brillo' in ENTORNO.pruebas), '  quieto (movimiento reducido) queda una zona prendida; `?brillo=` ya no existe', `quieto: ${quietoVivo.toFixed(2)}`)
+  c.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida') && c.includes('const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value') &&
+  LA.oscurece >= 0.1 && LA.oscurece <= 0.4 && expansionDeLaLuz(0) === 0 && expansionDeLaLuz(alRasP1 - 0.01) === 0 && expansionDeLaLuz(1) === 1 && expansionDeLaLuz(alRasP1 + 0.05) < 1 && !/arc\.kelvin \+=/.test(rigP1)
+afirmar(oscuroBienP1(dibujoP1, cuadroP1), '  la sala se oscurece (parejo, neutro; hasta un 40 % con la energía extendida) gradual con la expansión y con el final; sin el tinte cálido del atardecer', `oscurece ${String(LA.oscurece)}`)
+controlPositivo('  el detector VE el atardecer de antes (−45 %, de golpe con el final)', [dibujoP1, cuadroP1.replace('LUZ_DE_ABAJO.oscurece * extendida', '0.45')] as const, ([g, c]: readonly [string, string]) => oscuroBienP1(g, c))
+// Quieto (movimiento reducido): el campo clavado en un instante, con la mayor parte prendida. Y `?brillo=` se borró (las
+// intensidades de P1, rechazadas). [PULIDO 3] A1 · antes, «una zona prendida».
+const quietos: number[] = []
+for (let x = -16; x <= 16; x += 0.8) for (let z = -10; z <= 10; z += 0.8) if (Math.hypot(x, z) > 8) quietos.push(energiaDelCampo(campoDeLaLuz(x, z, CAMPO_QUIETO_EN)))
+const quietoVivo = quietos.filter((e) => e > 0.02).length / quietos.length
+afirmar(quietoVivo > 0.6 && cuadroP1.includes('LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t') && !('brillo' in ENTORNO.pruebas), '  quieto (movimiento reducido) el campo queda clavado con la mayor parte prendida; `?brillo=` ya no existe', `quieto: ${(100 * quietoVivo).toFixed(0)} % con luz`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P5 · Un viaje del menú con el encastre avanzado: dura lo mismo que cualquiera y el final vuelve EN PARALELO, sin saltos')
@@ -582,7 +551,7 @@ interface PorCuadro { grados: number; logo: number; oscuro: number; energia: num
 const anotar = (p: PorCuadro, antes: number, ahora: number, camaraAntes: THREE.Camera, camaraAhora: THREE.Camera): void => {
   p.grados = Math.max(p.grados, THREE.MathUtils.radToDeg(camaraAhora.quaternion.angleTo(camaraAntes.quaternion)))
   p.logo = Math.max(p.logo, Math.abs(alturaDelLogoP5(ahora) - alturaDelLogoP5(antes)))
-  p.oscuro = Math.max(p.oscuro, Math.abs(oscuroDelFinal(ahora) - oscuroDelFinal(antes)))
+  p.oscuro = Math.max(p.oscuro, Math.abs(expansionDeLaLuz(ahora) - expansionDeLaLuz(antes)))
   p.energia = Math.max(p.energia, Math.abs(energiaP5(ahora) - energiaP5(antes)))
 }
 interface VueltaP5 extends PorCuadro { readonly s: number; readonly monotona: boolean }

@@ -34,7 +34,8 @@ import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
-import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, oscuroDelFinal, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { ENERGIA_EN_LA_SIMULACION_GLSL } from '../escena/final/luzDeAbajo'
+import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, expansionDeLaLuz, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
@@ -509,11 +510,12 @@ const dibujoDelPisoB2 = (() => {
 // fuerte: el mouse sólo levanta (sin brillo), el brillo espera al encastre (con el poder) y nace fuera del mar calmo, y lo que
 // oscurece es la sala entera (el rig de luz, nunca un sector), función de `fin` (al rebobinar, vuelve).
 // [PULIDO 2] 4 · el brillo es la luz que sale de abajo, por las juntas (s53-pulido-2 §4): la energía (el poder) y la calma
-// están en su sector (`sectorDeLaLuz`); lo que fija esto sigue igual.
+// están en su sector (`sectorDeLaLuz`); lo que fija esto sigue igual. [PULIDO 3] A1 · en la energía de cada bloque, que calcula
+// la simulación (`energiaDeLaLuz`) y el dibujo lee por el vértice; lo que fija esto sigue igual.
 const cuadroDeLaLuzB2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const brilloBien = (g: string, c: string): boolean => {
   const juntas = g.slice(g.indexOf('vec3 conLasJuntas( vec3 color, vec2 xz ) {'))
-  return juntas.includes('float s = sectorDeLaLuz( vCentroDelBloque, 0.0 );') && g.includes('return s * uEnergiaDeLaLuz * ( 1.0 - calma );') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
+  return juntas.includes('float s = vEnergiaDelBloque;') && ENERGIA_EN_LA_SIMULACION_GLSL.includes('return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
 }
 afirmar(brilloBien(dibujoDelPisoB2, cuadroDeLaLuzB2), 'después del encastre (con el poder) y fuera del mar calmo, el brillo del piso ([PULIDO 2] 4: la luz de abajo, por las juntas); el mouse ya no hace brillo (sólo levanta los bloques)')
 controlPositivo('el detector VE un brillo que no espera al encastre', cuadroDeLaLuzB2.replace('Math.min(1, s.poder)', '1'), (c: string) => brilloBien(dibujoDelPisoB2, c))
@@ -525,9 +527,10 @@ controlPositivo('  y el brillo bajo el mouse de antes', `${dibujoDelPisoB2}\nvec
 const rigB2 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
 const cuadroB2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 // [PULIDO 2] 4 · sigue parejo (un número para el piso entero); ahora además gradual con lo prendido de la luz (s52-pulido-1 P1).
-const oscuroBien = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && cuadroB2.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * oscuroDelFinal(fin) * prendidoDeLaLuz(s.zonas)') && !/arc\.kelvin \+=/.test(rigB2)
+// [PULIDO 3] A1 · gradual con la expansión de la energía (función de `fin`: `expansionDeLaLuz`), en vez de lo prendido.
+const oscuroBien = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && cuadroB2.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida') && cuadroB2.includes('const expansion = expansionDeLaLuz(fin)') && !/arc\.kelvin \+=/.test(rigB2)
 const alRas = FINAL_DEL_PIE.presion.hastaS / R.duracionS
-afirmar(oscuroBien(dibujoDelPisoB2) && oscuroDelFinal(0) === 0 && oscuroDelFinal(alRas - 0.01) === 0 && oscuroDelFinal(1) === 1, '  para que se lea, el piso entero se oscurece parejo después del encastre (nunca un sector) y vuelve al rebobinar')
+afirmar(oscuroBien(dibujoDelPisoB2) && expansionDeLaLuz(0) === 0 && expansionDeLaLuz(alRas - 0.01) === 0 && expansionDeLaLuz(1) === 1, '  para que se lea, el piso entero se oscurece parejo después del encastre (nunca un sector) y vuelve al rebobinar')
 controlPositivo('  el detector VE un oscurecimiento que no está en el piso', dibujoDelPisoB2.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;', ''), oscuroBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -546,11 +549,12 @@ type Calma = { readonly radio: number; readonly borde: number; readonly amortigu
 const circuloBien = (sim: string, dib: string, c: Calma): boolean =>
   sim.includes(`return uCalmaDelFinal * ( 1.0 - smoothstep( ${c.radio.toFixed(1)}, ${(c.radio + c.borde).toFixed(1)}, length( xz ) ) );`) &&
   /float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/.test(sim) && sim.includes('dibujo *= 1.0 - calmaDelFinal( xz );') &&
-  dib.includes('float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, length( b ) ) );') && dib.includes('return s * uEnergiaDeLaLuz * ( 1.0 - calma );') &&
+  dib.includes('float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, r ) );') && dib.includes('return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );') &&
   c.radio > mitadDelLogo && c.radio < 1.6 * mitadDelLogo && c.borde >= 4 * 0.8 && c.amortigua >= 10
-afirmar(circuloBien(simB3, dibujoDelPisoB2, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; el brillo empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
-controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), dibujoDelPisoB2, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
-controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, dibujoDelPisoB2, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
+// [PULIDO 3] A1 · la calma de la luz se lee en la energía de la simulación (`ENERGIA_EN_LA_SIMULACION_GLSL`), no en el dibujo.
+afirmar(circuloBien(simB3, ENERGIA_EN_LA_SIMULACION_GLSL, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; el brillo empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
+controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
+controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, ENERGIA_EN_LA_SIMULACION_GLSL, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
 const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 afirmar(entornoB3.includes('entradas.reducido = quieto || EN_VIVO.fin > 0'), '  y durante el final el logo no larga anillos del pulso (cruzaban el círculo quieto: anillos y ondas en escalones)')
 

@@ -15,6 +15,7 @@ import { FINAL_DEL_BANCO, alCuadroDelFinal, crearElEstado, gestoDelFinal, soltar
 import { crearLasChispas } from './chispasDeLaLuz'
 import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
+import { LUZ_DE_ABAJO_EN_VIVO, varianteDeLaEnergia } from './luzDeAbajo'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
 import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
@@ -70,9 +71,10 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
-    // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas del sector) y, con `?chispas=si`, las chispas.
-    const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
-    const chispas = entornoDeLaEscena().pruebas.chispas === 'si' && !estatico ? crearLasChispas() : null
+    // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas) y, [PULIDO 3] A1 con `?energia=inestable`, las chispas.
+    const energia = entornoDeLaEscena().pruebas.energia
+    const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1, varianteDeLaEnergia(energia))
+    const chispas = energia === 'inestable' && !estatico ? crearLasChispas() : null
     m.current = estado
     g.add(estado.pozo.grupo, plano)
     if (chispas !== null) g.add(chispas)
@@ -102,13 +104,13 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
     ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value, encuadre: ENCUADRE_EN_VIVO.valor, teclado: m.current === null ? null : { ...m.current.teclado, alFondo: m.current.alFondo, ultimo: m.current.gestos.ultimo, ahora: performance.now() / 1000 } })
-    // [PULIDO 2] 4 · la luz de abajo apagada y prendida (su costo, por diferencia) y sus zonas de este cuadro.
-    const conLuz = ventana as Window & { __luzDelBanco?: { apagar: (apagada: boolean) => void; zonas: () => unknown } }
+    // [PULIDO 2] 4 · la luz de abajo apagada y prendida (su costo, por diferencia) y [PULIDO 3] A1 su energía y su expansión.
+    const conLuz = ventana as Window & { __luzDelBanco?: { apagar: (apagada: boolean) => void; energia: () => unknown } }
     conLuz.__luzDelBanco = {
       apagar: (apagada) => {
         LUZ_DEL_BANCO.apagada = apagada
       },
-      zonas: () => m.current?.zonas.map((z) => ({ ...z })) ?? [],
+      energia: () => ({ poder: LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value, radio: LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.x, expansion: LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.y }),
     }
     // [PULIDO 2] 1 · el reloj clavado en un `fin` (el contraste del pie en un cuadro quieto); `null` lo suelta.
     const conFijo = ventana as Window & { __finalFijoDelBanco?: (fin: number | null) => void }

@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
 import { HUECO } from './hueco'
-import { LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, SECTOR_DE_LA_LUZ_GLSL } from './luzDeAbajo'
+import { ENERGIA_EN_LA_SIMULACION_GLSL, INESTABLE, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RED_DE_LA_LUZ_GLSL, RUIDO_DE_LA_LUZ_GLSL, type VarianteDeLaEnergia } from './luzDeAbajo'
 
 /**
  * [CIERRE] 3 · EL FINAL EN EL PISO VIVO — lo que el final le suma al piso, inyectado al armarlo (como la onda dirigida de
@@ -92,7 +92,7 @@ export const FINAL_EN_EL_PISO = {
   uPoder: { value: 0 },
   /**
    * [PULIDO 1] P1 · cuánto se oscurece el piso entero mientras corre la luz (0 a `oscurece`): en el color que se ve, porque
-   * el tono de ACES aplasta los blancos. [PULIDO 2] 4 · gradual con el sector prendido (`cuadroDelFinal.ts`).
+   * el tono de ACES aplasta los blancos. [PULIDO 3] A1 · gradual con la expansión de la energía (`cuadroDelFinal.ts`).
    */
   uOscuroDelBrillo: { value: 0 },
 }
@@ -106,6 +106,8 @@ export const ANCLAS_DEL_FINAL = {
   empuje: 'fuerza += empujeDeLaOnda( p, r * uLado );',
   dibujo: 'float dibujo = ( onda + marEn( xz, uTiempo ) ) * enElMar;',
   techo: 'if ( uConLogo > 0.5 ) {',
+  /** [PULIDO 3] A1 · la salida: la energía del bloque va al canal libre. */
+  salida: 'salida = vec4( nueva, h, dibujo, 1.0 );',
 } as const
 
 const SIMULACION_GLSL = /* glsl */ `
@@ -140,12 +142,23 @@ float empujeDelRastro( vec2 p, float h ) {
 	}
 	return f;
 }
-// [PULIDO 2] 4 · en el sector de la luz cada bloque queda a su alto (un azar por bloque entre \`alturas\`): el sector se desordena.
-${SECTOR_DE_LA_LUZ_GLSL}
-float alturaDeLaLuz( vec2 xz ) {
-	float s = sectorDeLaLuz( xz, 0.0 );
-	if ( s <= 0.0 ) return 0.0;
-	return s * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( floor( xz / uLado ) + 0.37 ) );
+// [PULIDO 2] 4 · con energía cada bloque queda a su alto (un azar por bloque entre \`alturas\`): el piso se desordena.
+// [PULIDO 3] A1 · la energía es la del campo (\`luzDeAbajo.ts\`); con \`?energia=inestable\`, además, donde está más alta los
+// bloques tiemblan apenas y cada tanto un pico levanta un racimo y lo suelta.
+${ENERGIA_EN_LA_SIMULACION_GLSL}
+float alturaDeLaLuz( vec2 xz, float e ) {
+	if ( e <= 0.0 ) return 0.0;
+	vec2 celda = floor( xz / uLado );
+	float h = min( e, 1.4 ) * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( celda + 0.37 ) );
+#ifdef ENERGIA_INESTABLE
+	h += ${f(INESTABLE.temblor)} * smoothstep( 0.6, 1.0, e ) * sin( uTiempo * 43.0 + 6.2832 * azarDeLaLuz( celda + 0.91 ) );
+	vec2 racimo = floor( xz / ( uLado * ${f(INESTABLE.racimo)} ) );
+	float ciclo = uTiempo / ${f(INESTABLE.cicloS)} + azarDeLaLuz( racimo + 2.3 );
+	float n = floor( ciclo );
+	float u = ( ciclo - n ) * ${f(INESTABLE.cicloS / INESTABLE.duraS)};
+	if ( u < 1.0 && azarDeLaLuz( racimo + n * 7.13 ) < ${f(INESTABLE.cuantos)} ) h += ${f(INESTABLE.levanta)} * smoothstep( 0.4, 0.9, e ) * sin( 3.14159 * u ) * ( 0.6 + 0.4 * azarDeLaLuz( celda + n ) );
+#endif
+	return h;
 }
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z).
 float calmaDelFinal( vec2 xz ) {
@@ -154,18 +167,22 @@ float calmaDelFinal( vec2 xz ) {
 }
 `
 
-/** La simulación del piso con el final: el golpe, el rastro del mouse y la calma. */
-export function conElFinalEnLaSimulacion(glsl: string): string {
+/** [PULIDO 3] A1 · lo que agrega cada variante de la energía (`?energia=`) al sombreador. */
+const DEFINE_DE_LA_VARIANTE: Readonly<Record<VarianteDeLaEnergia, string>> = { sobrecarga: '', red: '#define ENERGIA_RED\n', inestable: '#define ENERGIA_INESTABLE\n' }
+
+/** La simulación del piso con el final: el golpe, el rastro del mouse, la calma y [PULIDO 3] A1 la energía de cada bloque. */
+export function conElFinalEnLaSimulacion(glsl: string, variante: VarianteDeLaEnergia = 'sobrecarga'): string {
   if (Object.values(ANCLAS_DEL_FINAL).some((ancla) => !glsl.includes(ancla)) || !ONDA_CON_TOPE.test(glsl)) {
     throw new Error('[CIERRE] 3 · la simulación del piso cambió: el final no encuentra dónde entrar')
   }
   return glsl
-    .replace(ANCLAS_DEL_FINAL.main, `${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
+    .replace(ANCLAS_DEL_FINAL.main, `${DEFINE_DE_LA_VARIANTE[variante]}${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
     .replace(
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tdibujo += alturaDeLaLuz( xz );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat energiaAqui = energiaDeLaLuz( xz );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui );\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );`)
+    .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
 }
@@ -182,14 +199,18 @@ uniform float uSinMancha;
 uniform vec2 uCajaDelLogo;
 // [EL ENCASTRE] 2E · el poder liberado (0 sin poder, 1 entero; en el destello, un poco más).
 uniform float uPoder;
-// [PULIDO 2] 4 · LA LUZ DE ABAJO EN EL PISO (\`luzDeAbajo.ts\`): el sector, medido en el centro del bloque (cada uno se prende
-// entero); la luz se SUMA en los costados (desde su base: más fuerte abajo, se apaga hacia arriba) y en los cantos de la tapa
-// que dan a una rendija. La tapa no se blanquea; lo que brilla por las rendijas es el plano de abajo.
+// [PULIDO 2] 4 · LA LUZ DE ABAJO EN EL PISO (\`luzDeAbajo.ts\`): la energía del bloque (cada uno se prende entero; [PULIDO 3]
+// A1 · la de la simulación, que el vértice lee de la textura de alturas); la luz se SUMA en los costados (desde su base: más
+// fuerte abajo, se apaga hacia arriba) y en los cantos de la tapa que dan a una rendija. La tapa no se blanquea; lo que brilla
+// por las rendijas es el plano de abajo. Con \`?energia=red\`, además, las corrientes que corren por las juntas.
 uniform float uOscuroDelBrillo;
-varying vec2 vCentroDelBloque;
-${SECTOR_DE_LA_LUZ_GLSL}
+varying float vEnergiaDelBloque;
+${RUIDO_DE_LA_LUZ_GLSL}
+#ifdef ENERGIA_RED
+${RED_DE_LA_LUZ_GLSL}
+#endif
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
-	float s = sectorDeLaLuz( vCentroDelBloque, 0.0 );
+	float s = vEnergiaDelBloque;
 	if ( s <= 0.0 ) return color;
 	float luz;
 	if ( vTapa < 0.5 ) {
@@ -198,10 +219,13 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 		vec2 borde = min( vEnElBloque, 1.0 - vEnElBloque ) * uLado;
 		luz = ${f(LUZ_DE_ABAJO.canto)} * exp( - min( borde.x, borde.y ) / ${f(0.04)} );
 		// La tapa no se blanquea: la luz viene de abajo, así que en el sector queda apenas más en sombra.
-		color *= 1.0 - ${f(LUZ_DE_ABAJO.sombraDeLaTapa)} * s;
+		color *= 1.0 - ${f(LUZ_DE_ABAJO.sombraDeLaTapa)} * min( s, 1.0 );
 	}
-	luz *= brilloDeLaJunta( vPiso.xz, uTiempo );
-	return color + vec3( luz * s );
+	float junta = brilloDeLaJunta( vPiso.xz, uTiempo ) * s;
+#ifdef ENERGIA_RED
+	junta += redDeLaLuz( vPiso.xz, uLado );
+#endif
+	return color + vec3( luz * junta );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {
@@ -232,10 +256,10 @@ export const ANCLAS_DEL_HUECO = {
 } as const
 
 /** El dibujo del piso con el final: el hueco, su labio, el resplandor de las juntas (el poder, el pulso, el rastro) y la mancha que se va. */
-export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
+export function conElFinalEnElPiso<T extends THREE.Material>(material: T, variante: VarianteDeLaEnergia = 'sobrecarga'): T {
   const previo = material.onBeforeCompile.bind(material)
   const clavePrevia = material.customProgramCacheKey.bind(material)
-  material.customProgramCacheKey = () => `${clavePrevia()}|final-del-pie`
+  material.customProgramCacheKey = () => `${clavePrevia()}|final-del-pie-${variante}`
   material.onBeforeCompile = (shader, renderer) => {
     previo(shader, renderer)
     const anclas = [ANCLAS_DEL_DIBUJO.funcion, ...Object.values(ANCLAS_DEL_HUECO)]
@@ -243,13 +267,14 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
     Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO)
-    // [PULIDO 2] 4 · en el sector de la luz los bloques se separan un poco (se achican sobre su centro): se abren las rendijas.
+    // [PULIDO 2] 4 · con energía los bloques se separan un poco (se achican sobre su centro): se abren las rendijas. [PULIDO 3]
+    // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', `#include <common>\nvarying vec2 vCentroDelBloque;\n${SECTOR_DE_LA_LUZ_GLSL}`)
-        .replace(ANCLA_DEL_BLOQUE, `vCentroDelBloque = centro;\n\t\ttransformed.xz *= 1.0 - ${f(2 * LUZ_DE_ABAJO.separa)} * sectorDeLaLuz( centro, 0.0 ) * ( ${f(1 - LUZ_DE_ABAJO.variaLaSeparacion)} + ${f(LUZ_DE_ABAJO.variaLaSeparacion)} * azarDeLaLuz( floor( centro / uLado ) + 0.71 ) );\n\t\t${ANCLA_DEL_BLOQUE}`)
+        .replace('#include <common>', `#include <common>\nvarying float vEnergiaDelBloque;\n${RUIDO_DE_LA_LUZ_GLSL}`)
+        .replace(ANCLA_DEL_BLOQUE, `vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;\n\t\ttransformed.xz *= 1.0 - ${f(2 * LUZ_DE_ABAJO.separa)} * min( vEnergiaDelBloque, 1.6 ) * ( ${f(1 - LUZ_DE_ABAJO.variaLaSeparacion)} + ${f(LUZ_DE_ABAJO.variaLaSeparacion)} * azarDeLaLuz( floor( centro / uLado ) + 0.71 ) );\n\t\t${ANCLA_DEL_BLOQUE}`)
     }
-    shader.fragmentShader = shader.fragmentShader
+    shader.fragmentShader = `${DEFINE_DE_LA_VARIANTE[variante]}${shader.fragmentShader}`
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')

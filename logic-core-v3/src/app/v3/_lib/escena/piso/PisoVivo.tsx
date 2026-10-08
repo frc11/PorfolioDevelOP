@@ -17,7 +17,7 @@ import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
-import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
+import { LUZ_DE_ABAJO_EN_VIVO, varianteDeLaEnergia } from '../final/luzDeAbajo'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, grillaDelPiso, type Grilla } from './bloques'
@@ -39,7 +39,7 @@ type VentanaDelBanco = Window & {
     celdas: number
     medir: (pasos: number) => Promise<Medida>
     /** La altura dibujada más alta y la más baja, la presencia del cursor y cuántos pasos corrió el último cuadro. */
-    estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number; onda: number[] }
+    estado: () => { maximo: number; minimo: number; presencia: number; cursor: number[]; pasos: number; onda: number[]; energia: number[] }
     /** [ESCENA 9] T4 · los bloques de adelante hacia atrás (o en el orden de la grilla) y la profundidad estricta. */
     orden: (prendido: boolean, estricta: boolean) => void
   }
@@ -99,9 +99,18 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
           maximo = Math.max(maximo, datos[k])
           minimo = Math.min(minimo, datos[k])
         }
+        // [PULIDO 3] A1 · la energía de la luz de abajo (el canal `a`): qué fracción de los bloques tiene algo, por anillos de 10 u.
+        const n = armado.grilla.n
+        const anillos = [0, 0, 0, 0].map(() => ({ con: 0, todos: 0 }))
+        for (let k = 0; k < n * n; k += 1) {
+          const r = Math.hypot((k % n) + 0.5 - n / 2, Math.floor(k / n) + 0.5 - n / 2) * armado.grilla.lado
+          const anillo = anillos[Math.min(3, Math.floor(r / 10))]
+          anillo.todos += 1
+          if (datos[k * 4 + 3] > 0.02) anillo.con += 1
+        }
         const m = memoria.current
         // [INTERFAZ 2] T1 · la onda hacia lo señalado: cuándo nació, su dirección y su fuerza.
-        return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos, onda: ONDA_EN_VIVO.uOnda.value.toArray() }
+        return { maximo, minimo, presencia: m.presencia, cursor: [m.cursor.x, m.cursor.y], pasos: m.pasos, onda: ONDA_EN_VIVO.uOnda.value.toArray(), energia: anillos.map((x) => x.con / Math.max(1, x.todos)) }
       },
       medir: (pasos) => armado.cronometro.pedir(pasos),
       orden: (prendido, estricta) => {
@@ -214,7 +223,9 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
   // [INTERFAZ 2] T1 · la simulación con la onda hacia lo señalado (`ondaDirigida.ts`, inyectada en `SIMULACION_GLSL`).
   // [CIERRE] 3 · y el final del pie: el golpe del encastre y [EL ENCASTRE] 2F el rastro del mouse (`final/enElPiso.ts`).
-  const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)), {
+  // [PULIDO 3] A1 · con la variante de la energía bajo el piso (`?energia=`).
+  const energia = varianteDeLaEnergia(entornoDeLaEscena().pruebas.energia)
+  const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL), energia), {
     uOnda: ONDA_EN_VIVO.uOnda,
     uGolpe: FINAL_EN_EL_PISO.uGolpe,
     uRastro: FINAL_EN_EL_PISO.uRastro,
@@ -260,7 +271,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   conLaOndaEnElPiso(material)
-  conElFinalEnElPiso(material)
+  conElFinalEnElPiso(material, energia)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

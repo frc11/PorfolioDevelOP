@@ -1,0 +1,10 @@
+PULIDO 3A — los entregables
+
+A1 · La energía bajo el piso
+  Qué: de un sector a toda la escena: un campo continuo (domain warping) por bloque, calculado en la simulación del piso;
+  expansión desde el hueco en el golpe (función de `fin`), ondas del logo, la sala gradual; la mancha negra (las tapas no
+  bajan del plano). Variantes `?energia=red|inestable`. Se borraron `?velo=escena` y `?chispas=si`.
+  Archivos: escena/final/luzDeAbajo.ts, enElPiso.ts, planoDeLaLuz.ts, chispasDeLaLuz.ts, rimDeLaLuz.ts (nuevo),
+  cuadroDelFinal.ts, FinalDelPie.tsx, recorridoDelFinal.ts; escena/piso/PisoVivo.tsx; escena/LuzDelLogo.tsx; escena/entorno.ts;
+  _estilos/banda.css. Borrados: escena/VeloEnElLogo.tsx, escena/veloDelTexto.ts.
+  Hojas: a1-energia-1440.png y a1-energia-390.png (arranque, pleno y rebobinando, por variante).

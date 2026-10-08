@@ -602,16 +602,15 @@ export function profundidadDelFinal(camara: THREE.Camera): number {
 }
 
 /**
- * [NOCTURNO FINAL] B2 · el atardecer del final (−45 % y a 3600 K, para que se leyera la lava). [PULIDO 1] P1 · ahora es UN
- * OSCURECIMIENTO PAREJO Y NEUTRO de la sala entera (sin el tinte cálido): un 10 a 15 % de la luz (`BRILLO_EN_EL_PISO.oscurece`,
- * según `?brillo=`), para que el blanco del brillo del piso se lea; en `duraS` desde que el logo queda al ras y sólo mientras
- * corre el brillo (es función de `fin`: al rebobinar vuelve).
+ * [NOCTURNO FINAL] B2 · el atardecer del final; [PULIDO 1] P1 · un oscurecimiento parejo y neutro de la sala. [PULIDO 3] A1 ·
+ * LA EXPANSIÓN DE LA ENERGÍA: en el golpe del logo la energía sale del hueco y cubre la escena en `duraS` (y la sala se
+ * oscurece con ella). Es función de `fin`: al rebobinar se retira hacia el hueco con la curva del rebobinado (P2), sin cortes.
  */
-export const OSCURO_DEL_FINAL = { duraS: 1.4 } as const
+export const EXPANSION_DE_LA_LUZ = { duraS: 1.5 } as const
 
-/** [PULIDO 1] P1 · cuánto se oscureció (0 a 1, por la fracción de `BRILLO_EN_EL_PISO.oscurece`). */
-export function oscuroDelFinal(fin: number): number {
-  return suave((segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / OSCURO_DEL_FINAL.duraS)
+/** [PULIDO 3] A1 · cuánto se expandió la energía (0 a 1) desde el golpe. */
+export function expansionDeLaLuz(fin: number): number {
+  return Math.min(1, Math.max(0, (segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / EXPANSION_DE_LA_LUZ.duraS))
 }
 
 /** [EL ENCASTRE] 2E · el poder liberado (0 hasta quedar al ras; un destello y después 1). Función de `fin`: se deshace al revertir. */

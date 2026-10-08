@@ -88,15 +88,16 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
-  /** [PULIDO 2] 4 · `chispas=si`: las chispas de la luz que sale de abajo del piso (apagadas en el producto). */
-  readonly chispas: 'si' | 'no'
+  /**
+   * [PULIDO 3] A1 · `energia=red|inestable`: la energía bajo el piso con corrientes por las juntas, o con tensión (temblor,
+   * picos, chispas y el canto del logo). Sin bandera, la sobrecarga (el producto). Absorbe `chispas=si`, que se borró.
+   */
+  readonly energia: 'red' | 'inestable' | 'no'
   /**
    * [PULIDO 2] 5 · cómo se llega al CTA del final desde «Seis razones» (`no`: el de hoy, el producto). Las de PULIDO 1
    * (`a|b|c|d`) se borraron, rechazadas.
    */
   readonly cta: VarianteDelCta | 'no'
-  /** [PULIDO 2] 3 · `velo=escena`: el velo del texto de Trabajos en el sombreador del logo (sin capa del DOM); el producto, la elipse del DOM. */
-  readonly velo: 'escena' | 'no'
 }
 
 /**
@@ -109,12 +110,13 @@ export interface Pruebas {
  * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`). [PULIDO 2] 1:
  * `encastre=desvanece` se borró: abajo de 1024 el final corre detrás del pie, sin escenario (`escena/final/`). 2:
  * `vuelta=corta` se borró: en un viaje el final vuelve con el rebobinado de P2 comprimido (`recorridoDelFinal.ts`). 4:
- * `brillo=suave|fuerte` se borró: el brillo de P1 se rehízo como la luz que sale de abajo (`final/luzDeAbajo.ts`).
+ * `brillo=suave|fuerte` se borró: el brillo de P1 se rehízo como la luz que sale de abajo (`final/luzDeAbajo.ts`). [PULIDO 3]
+ * A1: `velo=escena` se borró (el velo del DOM quedó aprobado) y `chispas=si` pasó a `energia=inestable`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', chispas: 'no', cta: 'no', velo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', cta: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'chispas', 'cta', 'velo'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'cta'] as const
 
 /** [PULIDO 2] 5 · las transformaciones del CTA del final (`ctaDelFinal/variantes.ts`), cada una función pura del scroll. */
 export const VARIANTES_DEL_CTA = ['capas', 'relevo', 'giro', 'cruce', 'tipo'] as const
@@ -131,9 +133,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    chispas: unoDe<'si'>(['si'], valor('chispas')),
+    energia: unoDe<'red' | 'inestable'>(['red', 'inestable'], valor('energia')),
     cta: unoDe<VarianteDelCta>(VARIANTES_DEL_CTA, valor('cta')),
-    velo: unoDe<'escena'>(['escena'], valor('velo')),
   }
 }
 

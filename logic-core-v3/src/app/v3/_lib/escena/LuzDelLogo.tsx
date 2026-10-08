@@ -9,7 +9,7 @@ import { VIVO } from './entorno/vivo'
 import { ESCENAS_APARTE } from './gpu/Precompilar'
 import { KEY_INTENSITY } from './probeLighting'
 import { SOMBRA_DEL_LOGO, SOMBRA_EN_EL_FINAL, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
-import { VeloEnElLogo } from './VeloEnElLogo'
+import { conElRimDeLaLuz } from './final/rimDeLaLuz'
 
 /**
  * [ESCENA 10] T1 · LA LUZ DEL LOGO — lo que de ESCENA 9 (T3) pasó al producto y corre por cuadro: los reflejos del
@@ -30,10 +30,22 @@ export function LuzDelLogo(props: Props) {
     <>
       {e.materialDelLogo ? <ReflejosDelLogo {...props} /> : null}
       {e.sombraDelLogo && e.pisoVivo ? <SombraDelLogo {...props} /> : null}
-      {/* [PULIDO 2] 3 · `?velo=escena`: el velo del texto de Trabajos en el logo (sin capa del DOM). */}
-      {e.pruebas.velo === 'escena' ? <VeloEnElLogo logoMaterialRef={props.logoMaterialRef} /> : null}
+      {/* [PULIDO 3] A1 · `?energia=inestable`: la luz de abajo alcanza el canto del logo (`final/rimDeLaLuz.ts`). */}
+      {e.pruebas.energia === 'inestable' ? <RimDelLogo logoMaterialRef={props.logoMaterialRef} /> : null}
     </>
   )
+}
+
+/** [PULIDO 3] A1 · parchea el logo una vez (cuando su material existe) con el rim light desde abajo. */
+function RimDelLogo({ logoMaterialRef }: Pick<Props, 'logoMaterialRef'>) {
+  const parcheado = useRef<THREE.MeshStandardMaterial | null>(null)
+  useFrame(() => {
+    const material = logoMaterialRef.current
+    if (material === null || parcheado.current === material) return
+    conElRimDeLaLuz(material)
+    parcheado.current = material
+  })
+  return null
 }
 
 /** Los reflejos del estudio siguen a la luz de la sala: cuánto se ven es el nivel de la principal (de noche, nada). */

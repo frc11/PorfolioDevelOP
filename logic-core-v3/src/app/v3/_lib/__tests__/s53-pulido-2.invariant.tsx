@@ -53,7 +53,7 @@ import {
 import { CHISPAS_DE_LA_LUZ, crearLasChispas } from '../escena/final/chispasDeLaLuz'
 import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPantalla } from '../escena/final/encuadreDelPie'
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
-import { LUZ_DE_ABAJO, SECTOR_DE_LA_LUZ_GLSL, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from '../escena/final/luzDeAbajo'
+import { LUZ_DE_ABAJO } from '../escena/final/luzDeAbajo'
 import { crearElPlanoDeLaLuz } from '../escena/final/planoDeLaLuz'
 import { SOMBRA_EN_LA_CAIDA, camaraDelFinal, distanciaParaElAncho, sombraConFundido, sombraDeLaPose } from '../escena/final/recorridoDelFinal'
 import { TECLADO, pasoDelTeclado, tecladoQuieto, type EstadoDelTeclado, type LecturaDelTeclado } from '../escena/final/teclado'
@@ -61,7 +61,6 @@ import { ENTORNO, VARIANTES_DEL_CTA, entornoPedido, type VarianteDelCta } from '
 import { PISO_VIVO, SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
-import { VELO_EN_LA_ESCENA } from '../escena/veloDelTexto'
 import { curvaRepartida, type MuestrasDelViaje } from '../escena/repartoDelViaje'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, empezarElViaje, relojDelCuadro, segundosDelViaje, sostenerElReloj, terminarElViaje } from '../escena/viaje'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -390,28 +389,21 @@ afirmar(veloEliptico(bandaP3), 'el velo es una elipse detrás del texto (un pseu
 const RECTANGULO_DE_P12 = bandaP3.replace(/\[data-v3\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,[\s\S]*?\}\n/, "[data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p { background-color: var(--velo-sobre-la-escena); box-shadow: var(--sombra-del-velo); }\n")
 controlPositivo('el detector VE el velo de P12 (el fondo con su sombra de caja: el rectángulo)', RECTANGULO_DE_P12, veloEliptico)
 
-// `?velo=escena`: la prueba se pide por su nombre; con ella la escena monta el velo del logo y marca la raíz, y la hoja
-// saca el del DOM; el sombreador lo aplica al FINAL (después del color de noche del logo, que si no lo pisaría) con la
-// misma elipse que el del DOM (`ancho`/`alto` en mitades del texto: 1,9 y 2,8, la caja del pseudo-elemento).
+// [PULIDO 3] A1 · cambió por pedido: el velo del DOM quedó aprobado y la otra lectura (`?velo=escena`, el logo oscurecido en
+// una elipse) se BORRÓ: ni la prueba, ni su componente (`VeloEnElLogo.tsx`, `veloDelTexto.ts`), ni su regla de la hoja.
 const luzDelLogoP3 = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
-const veloTs = sinComentarios(leer('_lib/escena/veloDelTexto.ts'))
-const veloEscena = (css: string, luz: string, sombreador: string): boolean =>
-  entornoPedido('producto,velo=escena').pruebas.velo === 'escena' && ENTORNO.pruebas.velo === 'no' &&
-  /e\.pruebas\.velo === 'escena' \? <VeloEnElLogo logoMaterialRef=\{props\.logoMaterialRef\} \/> : null/.test(luz) &&
-  /\[data-v3\]\[data-velo='escena'\] \[data-panel='trabajos'\] \[data-pieza='cartel'\] p::before,\s*\[data-v3\]\[data-velo='escena'\] \[data-panel='trabajos'\] \[data-capa='demos'\] \[data-pieza='texto'\]::before \{\s*content: none;/.test(enLaBandaP3(css)) &&
-  sombreador.includes(".replace(/\\}\\s*$/, '\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();\\n}\\n')") &&
-  VELO_EN_LA_ESCENA.ancho === 1.9 && VELO_EN_LA_ESCENA.alto === 2.8 && VELO_EN_LA_ESCENA.fuerza >= 0.7
-afirmar(veloEscena(bandaP3, luzDelLogoP3, veloTs), '  `?velo=escena`: sin capa del DOM; el logo se oscurece en una elipse de pantalla detrás de cada texto (al final del sombreador, la misma elipse)')
-controlPositivo('  el detector VE el velo de la escena puesto antes del color de noche (que lo pisaba)', [bandaP3, luzDelLogoP3, veloTs.replace(".replace(/\\}\\s*$/, '\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();\\n}\\n')", ".replace('#include <dithering_fragment>', '#include <dithering_fragment>\\n\\tgl_FragColor.rgb *= 1.0 - veloDelTexto();')")] as const, ([c, l, s]: readonly [string, string, string]) => veloEscena(c, l, s))
+const sinVeloEscena = (css: string, luz: string): boolean => !('velo' in ENTORNO.pruebas) && !luz.includes('VeloEnElLogo') && !enLaBandaP3(css).includes("data-velo='escena'") && !existsSync(`${V3}/_lib/escena/veloDelTexto.ts`)
+afirmar(sinVeloEscena(bandaP3, luzDelLogoP3), '  `?velo=escena` ya no existe (ni la prueba, ni el velo en el logo, ni su regla): queda el velo del DOM')
+controlPositivo('  el detector VE el velo en el logo de PULIDO 2', [bandaP3, `${luzDelLogoP3} <VeloEnElLogo logoMaterialRef={props.logoMaterialRef} />`] as const, ([c, l]: readonly [string, string]) => sinVeloEscena(c, l))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · La luz sale de ABAJO del piso, por las juntas: un sector que se separa, a alturas distintas, sin tapas blancas')
+titulo('4 · La luz sale de ABAJO del piso, por las juntas: los bloques se separan, a alturas distintas, sin tapas blancas')
 
-// El brillo de PULIDO 1 (las tapas a blanco) se rechazó: «no entendiste mi concepto». Ahora, después del encastre, un SECTOR
-// de bloques se enciende desde abajo (`final/luzDeAbajo.ts`): sus bloques se separan un poco y quedan a alturas distintas;
-// por las rendijas se ve un plano que brilla al pie de los bloques; los costados reciben la luz desde su base y los cantos
-// la atrapan; las tapas NO se blanquean. Lo que P1 pedía y sigue (blanca, por bloque, orgánica, su ciclo y la sala más
-// oscura) lo fija `s52-pulido-1` P1.
+// El brillo de PULIDO 1 (las tapas a blanco) se rechazó: «no entendiste mi concepto». Ahora, después del encastre, los bloques
+// con energía se encienden desde abajo (`final/luzDeAbajo.ts`): se separan un poco y quedan a alturas distintas; por las
+// rendijas se ve un plano que brilla al pie de los bloques; los costados reciben la luz desde su base y los cantos la atrapan;
+// las tapas NO se blanquean. [PULIDO 3] A1 · cambió por pedido: de UN sector (zonas que nacen, viven y mueren) a TODA la
+// escena (un campo continuo); lo nuevo lo fija `s54-pulido-3` A1. Acá sigue lo que se aprobó de la luz.
 const L4 = LUZ_DE_ABAJO
 const LADO4 = PISO_VIVO.lado
 const f4 = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
@@ -426,48 +418,51 @@ const juntas4 = sombreadoresDelPiso4.dibujo.slice(sombreadoresDelPiso4.dibujo.in
 
 // Las TAPAS no se blanquean: en la tapa sólo brilla el canto que da a una rendija (cae en ~0,04 u: en el medio de la tapa,
 // nada) y la tapa queda apenas más en sombra; la luz de los COSTADOS es la más fuerte y nace en su base (donde se abre la
-// rendija, a la altura del vecino) y se apaga hacia arriba. Nunca un `mix` del color hacia el blanco.
+// rendija, a la altura del vecino) y se apaga hacia arriba. Nunca un `mix` del color hacia el blanco. [PULIDO 3] A1 · la
+// sombra de la tapa, con la energía hasta 1 (con las ondas pasa de 1); lo que se suma es la luz por la junta (`junta`).
 const tapaBien = (g: string): boolean => {
   const canto = /luz = ([0-9.]+) \* exp\( - min\( borde\.x, borde\.y \) \/ ([0-9.]+) \);/.exec(g)
   const costado = /if \( vTapa < 0\.5 \) \{\s*luz = ([0-9.]+) \* exp\( - max\( 0\.0, vAlto - vVecino \) \/ ([0-9.]+) \);/.exec(g)
-  const sombra = /color \*= 1\.0 - ([0-9.]+) \* s;/.exec(g)
+  const sombra = /color \*= 1\.0 - ([0-9.]+) \* min\( s, 1\.0 \);/.exec(g)
   if (canto === null || costado === null || sombra === null) return false
   const enElMedioDeLaTapa = Number(canto[1]) * Math.exp(-(LADO4 / 2) / Number(canto[2]))
   const unoMasArriba = Math.exp(-1 / Number(costado[2]))
-  return enElMedioDeLaTapa < 0.01 && Number(canto[1]) < Number(costado[1]) && Number(costado[1]) >= 1 && unoMasArriba < 0.1 && Number(sombra[1]) > 0 && !/mix\( color, vec3\(/.test(g) && g.includes('return color + vec3( luz * s );')
+  return enElMedioDeLaTapa < 0.01 && Number(canto[1]) < Number(costado[1]) && Number(costado[1]) >= 1 && unoMasArriba < 0.1 && Number(sombra[1]) > 0 && !/mix\( color, vec3\(/.test(g) &&
+    g.includes('float junta = brilloDeLaJunta( vPiso.xz, uTiempo ) * s;') && g.includes('return color + vec3( luz * junta );')
 }
 afirmar(tapaBien(juntas4), 'las tapas no se blanquean: en la tapa sólo el canto que da a la rendija (en su medio, nada) y un poco más de sombra; los costados reciben la luz desde su base y se apagan hacia arriba', `canto ${String(L4.canto)} · costado ${String(L4.costado)} (cae en ${String(L4.caeEn)} u) · sombra de la tapa ${String(L4.sombraDeLaTapa)}`)
-controlPositivo('el detector VE las tapas blancas de PULIDO 1', juntas4.replace('return color + vec3( luz * s );', 'return mix( color, vec3( 1.0 ), s );'), tapaBien)
+controlPositivo('el detector VE las tapas blancas de PULIDO 1', juntas4.replace('return color + vec3( luz * junta );', 'return mix( color, vec3( 1.0 ), s );'), tapaBien)
 controlPositivo('  y un canto que ocupa la tapa entera', juntas4.replace(/(luz = [0-9.]+ \* exp\( - min\( borde\.x, borde\.y \) \/ )[0-9.]+( \);)/, '$10.5$2'), tapaBien)
 controlPositivo('  y un costado parejo (sin nacer en la base)', juntas4.replace(/(if \( vTapa < 0\.5 \) \{\s*luz = [0-9.]+ \* exp\( - max\( 0\.0, vAlto - vVecino \) \/ )[0-9.]+( \);)/, '$19.0$2'), tapaBien)
 
-// Los bloques del sector SE SEPARAN un poco (en el vértice: se achican sobre su centro, cada uno distinto, entre 2 × 4,5 % ×
-// 0,45 y 2 × 4,5 % del lado: las rendijas no son todas iguales) y quedan A ALTURAS DISTINTAS (en la simulación: un azar por
-// bloque, de abajo y de arriba del resto). Fuera del sector, nada cambia: los bloques siguen pegados y tapan el plano.
+// Los bloques con energía SE SEPARAN un poco (en el vértice: se achican sobre su centro, cada uno distinto: las rendijas no
+// son todas iguales) y quedan A ALTURAS DISTINTAS (en la simulación: un azar por bloque, de abajo y de arriba del resto). Sin
+// energía, nada cambia: los bloques siguen pegados y tapan el plano. [PULIDO 3] A1 · la energía del bloque la lee el vértice
+// de la simulación (el canal libre de su textura), y con las ondas pasa de 1 (la separación, hasta 1,6).
 const sim4 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 const separaBien = (v: string, sim: string): boolean => {
-  const achica = new RegExp(`transformed\\.xz \\*= 1\\.0 - ${f4(2 * L4.separa).replace('.', '\\.')} \\* sectorDeLaLuz\\( centro, 0\\.0 \\) \\* \\( ([0-9.]+) \\+ ([0-9.]+) \\* azarDeLaLuz\\( floor\\( centro / uLado \\) \\+ [0-9.]+ \\) \\);`).exec(v)
-  const alturas = /return s \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( floor\( xz \/ uLado \) \+ [0-9.]+ \) \);/.exec(sim)
+  const achica = new RegExp(`transformed\\.xz \\*= 1\\.0 - ${f4(2 * L4.separa).replace('.', '\\.')} \\* min\\( vEnergiaDelBloque, 1\\.6 \\) \\* \\( ([0-9.]+) \\+ ([0-9.]+) \\* azarDeLaLuz\\( floor\\( centro / uLado \\) \\+ [0-9.]+ \\) \\);`).exec(v)
+  const alturas = /float h = min\( e, 1\.4 \) \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( celda \+ [0-9.]+ \) \);/.exec(sim)
   if (achica === null || alturas === null) return false
-  return L4.separa >= 0.02 && L4.separa <= 0.08 && Number(achica[1]) > 0.2 && Math.abs(Number(achica[1]) + Number(achica[2]) - 1) < 1e-9 && v.includes('vCentroDelBloque = centro;') &&
-    Number(alturas[1]) < 0 && Number(alturas[2]) > 0 && Number(alturas[2]) - Number(alturas[1]) >= 0.3 && sim.includes('dibujo += alturaDeLaLuz( xz );')
+  return L4.separa >= 0.02 && L4.separa <= 0.08 && Number(achica[1]) > 0.2 && Math.abs(Number(achica[1]) + Number(achica[2]) - 1) < 1e-9 && v.includes('vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;') &&
+    Number(alturas[1]) < 0 && Number(alturas[2]) > 0 && Number(alturas[2]) - Number(alturas[1]) >= 0.3 && sim.includes('dibujo += alturaDeLaLuz( xz, energiaAqui );')
 }
-afirmar(separaBien(sombreadoresDelPiso4.vertice, sim4), '  en el sector los bloques se separan un poco (cada rendija de su ancho) y quedan a alturas distintas (más abajo y más arriba que el resto)', `separa ${String(L4.separa)} del lado por costado · alturas ${String(L4.alturas[0])} a +${String(L4.alturas[1])} u`)
-controlPositivo('  el detector VE el sector de bloques pegados', [sombreadoresDelPiso4.vertice.replace(/transformed\.xz \*= [^;]+;/, ''), sim4] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
-controlPositivo('  y el sector todo a la misma altura', [sombreadoresDelPiso4.vertice, sim4.replace('dibujo += alturaDeLaLuz( xz );', '')] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
+afirmar(separaBien(sombreadoresDelPiso4.vertice, sim4), '  con energía los bloques se separan un poco (cada rendija de su ancho) y quedan a alturas distintas (más abajo y más arriba que el resto)', `separa ${String(L4.separa)} del lado por costado · alturas ${String(L4.alturas[0])} a +${String(L4.alturas[1])} u`)
+controlPositivo('  el detector VE los bloques pegados', [sombreadoresDelPiso4.vertice.replace(/transformed\.xz \*= [^;]+;/, ''), sim4] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
+controlPositivo('  y todos a la misma altura', [sombreadoresDelPiso4.vertice, sim4.replace('dibujo += alturaDeLaLuz( xz, energiaAqui );', '')] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
 
-// El PLANO que brilla debajo: al pie de los bloques (apenas sobre el fondo del zócalo, más hondo que el valle más hondo: ninguna
-// tapa baja hasta él), blanco, sólo en el sector y su resplandor (fuera, descartado: nada que tape); sin tono (el blanco
-// llega blanco). Sin bloom en ningún archivo del final: el resplandor es falso y local.
+// El PLANO que brilla debajo: al pie de los bloques (apenas sobre el fondo del zócalo), blanco donde hay energía (donde no,
+// descartado: nada que tape); sin tono (el blanco llega blanco). Sin bloom en ningún archivo del final: el resplandor es falso
+// y local. [PULIDO 3] A1 · la energía la lee de la simulación (`energiaEnElPiso`); antes, del sector con su resplandor.
 const plano4 = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
 const materialDelPlano4 = plano4.material instanceof THREE.ShaderMaterial ? plano4.material : null
 const finalDir4 = `${V3}/_lib/escena/final`
 const delFinal4 = readdirSync(finalDir4).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${finalDir4}/${a}`, 'utf8')))
 const planoBien = (p: THREE.Mesh, m: THREE.ShaderMaterial | null, fuentesDelFinal: readonly string[]): boolean =>
   m !== null && Math.abs(p.position.y - (FLOOR_Y - PISO_VIVO.zocalo + 0.02)) < 1e-9 && m.fragmentShader.includes('if ( luz <= 0.002 ) discard;') &&
-  m.fragmentShader.includes(`gl_FragColor = vec4( vec3( ${f4(L4.plano)} * luz ), 1.0 );`) && m.fragmentShader.includes(`sectorDeLaLuz( vXZ, ${f4(L4.resplandor)} )`) && !m.toneMapped &&
+  m.fragmentShader.includes(`gl_FragColor = vec4( vec3( ${f4(L4.plano)} * luz ), 1.0 );`) && m.fragmentShader.includes('float e = energiaEnElPiso( vXZ );') && !m.toneMapped &&
   fuentesDelFinal.every((s) => !/Bloom|EffectComposer|UnrealBloomPass/.test(s))
-afirmar(planoBien(plano4, materialDelPlano4, delFinal4), '  por las rendijas se ve un plano blanco al pie de los bloques, sólo en el sector (con su resplandor alrededor); sin bloom en el final', `a ${String(PISO_VIVO.zocalo - 0.02)} u bajo el ras · resplandor ${String(L4.resplandor)} radios`)
+afirmar(planoBien(plano4, materialDelPlano4, delFinal4), '  por las rendijas se ve un plano blanco al pie de los bloques, donde hay energía; sin bloom en el final', `a ${String(PISO_VIVO.zocalo - 0.02)} u bajo el ras`)
 controlPositivo('  el detector VE el bloom global', [plano4, materialDelPlano4, [...delFinal4, "import { Bloom } from '@react-three/postprocessing'"]] as const, ([p, m, fu]: readonly [THREE.Mesh, THREE.ShaderMaterial | null, readonly string[]]) => planoBien(p, m, fu))
 const planoArriba4 = plano4.clone()
 planoArriba4.position.y = FLOOR_Y + 0.02
@@ -475,132 +470,24 @@ controlPositivo('  y un plano a ras del piso (taparía las tapas en los valles)'
 plano4.geometry.dispose()
 materialDelPlano4?.dispose()
 
-// El sector NACE EN UN PUNTO Y SE PROPAGA por las juntas: su borde es la vida de la zona (con la vida crece desde el centro,
-// bloque a bloque); mayormente CONTIGUO (un solo grupo de bloques) y ORGÁNICO (el borde no es un círculo). La forma, con la
-// cuenta del sombreador (la misma fórmula, que se lee de él), sobre los bloques alrededor de una zona.
-const fr4 = (x: number): number => x - Math.floor(x)
-const azar4 = (x: number, y: number): number => {
-  let [a, b, c] = [fr4(x * 0.1031), fr4(y * 0.1031), fr4(x * 0.1031)]
-  const d = a * (b + 33.33) + b * (c + 33.33) + c * (a + 33.33)
-  ;[a, b, c] = [a + d, b + d, c + d]
-  return fr4((a + b) * c)
-}
-const suave4 = (e0: number, e1: number, x: number): number => {
-  const u = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)))
-  return u * u * (3 - 2 * u)
-}
-const ruido4 = (x: number, y: number): number => {
-  const [ix, iy] = [Math.floor(x), Math.floor(y)]
-  const [ux, uy] = [fr4(x) * fr4(x) * (3 - 2 * fr4(x)), fr4(y) * fr4(y) * (3 - 2 * fr4(y))]
-  const ab = azar4(ix, iy) + (azar4(ix + 1, iy) - azar4(ix, iy)) * ux
-  const cd = azar4(ix, iy + 1) + (azar4(ix + 1, iy + 1) - azar4(ix, iy + 1)) * ux
-  return ab + (cd - ab) * uy
-}
-interface FormaDelSector { readonly irregular: number; readonly ruido: number; readonly suave: number; readonly crece: boolean }
-const formaDelSombreador = (g: string): FormaDelSector | null => {
-  const d = /float d = lejos \+ ([0-9.]+) \* \( ruidoDeLaLuz\( b \* ([0-9.]+) \+ semilla \) - 0\.5 \);/.exec(g)
-  const borde = /s = max\( s, 1\.0 - smoothstep\( z\.w - ([0-9.]+), z\.w \+ ancho, d \) \);/.exec(g)
-  if (d === null) return null
-  return { irregular: Number(d[1]), ruido: Number(d[2]), suave: borde === null ? 0.3 : Number(borde[1]), crece: borde !== null }
-}
-interface LecturaDelSector { readonly alcance: readonly number[]; readonly contiguo: number; readonly redondez: number }
-const leerElSector = (forma: FormaDelSector): LecturaDelSector => {
-  const [cx, cz, radio, semilla] = [10.4, 0.0, 4, 3.1]
-  const prendido = (bx: number, bz: number, vida: number): number => {
-    const lejos = Math.hypot(bx - cx, bz - cz) / radio
-    const d = lejos + forma.irregular * (ruido4(bx * forma.ruido + semilla, bz * forma.ruido + semilla) - 0.5)
-    // Sin el borde en la vida (`crece: false`), la vida sólo daría la intensidad de un sector de tamaño fijo.
-    return forma.crece ? 1 - suave4(vida - forma.suave, vida, d) : vida * (1 - suave4(1 - forma.suave, 1, d))
-  }
-  const n = 14
-  const celdas: [number, number][] = []
-  for (let i = -n; i < n; i += 1) for (let j = -n; j < n; j += 1) celdas.push([cx + (i + 0.5) * LADO4, cz + (j + 0.5) * LADO4])
-  const alcance = [0.05, 0.25, 0.5, 0.75, 1].map((v) => celdas.filter(([x, z]) => prendido(x, z, v) > 0.02).length)
-  const llenos = new Set(celdas.flatMap(([x, z], k) => (prendido(x, z, 1) > 0.5 ? [k] : [])))
-  // El grupo de bloques prendidos más grande (vecinos por los lados), sobre el total prendido.
-  const vistos = new Set<number>()
-  let mayor = 0
-  for (const k of llenos) {
-    if (vistos.has(k)) continue
-    let tamano = 0
-    const pila = [k]
-    vistos.add(k)
-    while (pila.length > 0) {
-      const q = pila.pop() ?? 0
-      tamano += 1
-      const [i, j] = [Math.floor(q / (2 * n)), q % (2 * n)]
-      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
-        const [a, b] = [i + di, j + dj]
-        const v = a * 2 * n + b
-        if (a >= 0 && a < 2 * n && b >= 0 && b < 2 * n && llenos.has(v) && !vistos.has(v)) {
-          vistos.add(v)
-          pila.push(v)
-        }
-      }
-    }
-    mayor = Math.max(mayor, tamano)
-  }
-  // La redondez: por 16 direcciones, hasta dónde llega el sector; el más lejos sobre el más cerca (un círculo: ~1).
-  const porDireccion = Array.from({ length: 16 }, () => 0)
-  for (const k of llenos) {
-    const [x, z] = celdas[k]
-    const a = Math.floor(((Math.atan2(z - cz, x - cx) + Math.PI) / (2 * Math.PI)) * 16) % 16
-    porDireccion[a] = Math.max(porDireccion[a], Math.hypot(x - cx, z - cz))
-  }
-  return { alcance, contiguo: llenos.size === 0 ? 0 : mayor / llenos.size, redondez: Math.max(...porDireccion) / Math.max(0.001, Math.min(...porDireccion)) }
-}
-const formaReal4 = formaDelSombreador(SECTOR_DE_LA_LUZ_GLSL)
-const sectorBien = (g: string): boolean => {
-  const forma = formaDelSombreador(g)
-  if (forma === null) return false
-  const s = leerElSector(forma)
-  const crece = s.alcance.every((c, i) => i === 0 || c > s.alcance[i - 1])
-  return crece && s.alcance[0] <= 0.1 * s.alcance[s.alcance.length - 1] && s.alcance[s.alcance.length - 1] >= 40 && s.contiguo >= 0.9 && s.redondez >= 1.3
-}
-const lecturaReal4 = formaReal4 === null ? null : leerElSector(formaReal4)
-afirmar(sectorBien(SECTOR_DE_LA_LUZ_GLSL), '  el sector nace en un punto y se propaga bloque a bloque con su vida; mayormente contiguo y de borde orgánico (no un círculo)', lecturaReal4 === null ? 'sin forma' : `bloques con luz por vida (0,05 a 1): ${lecturaReal4.alcance.join(' · ')} · contiguo ${(100 * lecturaReal4.contiguo).toFixed(0)} % · el más lejos / el más cerca ${lecturaReal4.redondez.toFixed(2)}`)
-controlPositivo('  el detector VE un sector de tamaño fijo que sólo sube su intensidad (no nace en un punto)', SECTOR_DE_LA_LUZ_GLSL.replace(/s = max\( s, 1\.0 - smoothstep\( z\.w - [0-9.]+, z\.w \+ ancho, d \) \);/, 's = max( s, z.w );'), sectorBien)
-controlPositivo('  y un círculo (sin el ruido)', SECTOR_DE_LA_LUZ_GLSL.replace(/float d = lejos \+ [0-9.]+ \*/, 'float d = lejos + 0.0 *'), sectorBien)
+// [PULIDO 3] A1 · cambió por pedido: «el sector nace en un punto y se propaga con su vida» y «respira (el radio late mientras
+// vive)» se borraron (no hay más zonas: «nada de ciclos de nacer y morir, y nunca se apaga»). Lo nuevo (el campo, la
+// cobertura, la expansión desde el hueco, las ondas, la sala gradual) lo fija `s54-pulido-3` A1.
 
-// RESPIRA (el radio late mientras vive y la luz de cada junta se corre despacio con el reloj) y la sala se oscurece GRADUAL
-// (nunca de un cuadro al otro: a 60 cuadros por segundo, lo más que cambia en uno) y se recupera entre zona y zona.
-type Zonas4 = typeof zonasDeLaLuz
-const ALCANCE4 = { x: 16, y: 10, giro: 0 }
-const respiraBien = (zonas: Zonas4, sector: string): boolean => {
-  const buf: ZonaDeLaLuz[] = []
-  let [chico, grande] = [Infinity, 0]
-  let [salto, mas, menos] = [0, 0, 1]
-  let antes = -1
-  for (let t = 0; t < 180; t += 1 / 60) {
-    const z = zonas(t, ALCANCE4, 6, buf)
-    if ((z[0]?.vida ?? 0) > 0.99) {
-      chico = Math.min(chico, z[0].radio)
-      grande = Math.max(grande, z[0].radio)
-    }
-    const oscuro = L4.oscurece * prendidoDeLaLuz(z)
-    if (antes >= 0) salto = Math.max(salto, Math.abs(oscuro - antes))
-    antes = oscuro
-    mas = Math.max(mas, oscuro)
-    menos = Math.min(menos, oscuro)
-  }
-  return grande / chico > 1.1 && sector.includes('ruidoDeLaLuz( xz * ') && /\+ vec2\( t \* [0-9.]+, - t \* [0-9.]+ \)/.test(sector) && salto <= 0.01 && mas >= 0.3 && menos <= 0.02
-}
-afirmar(respiraBien(zonasDeLaLuz, SECTOR_DE_LA_LUZ_GLSL), '  respira (el radio late mientras vive y la luz de las juntas se corre) y la sala se oscurece gradual con el sector y se recupera')
-controlPositivo('  el detector VE una zona que no respira (de radio fijo)', ((t: number, a: { x: number; y: number; giro: number }, m: number, s: ZonaDeLaLuz[]) => zonasDeLaLuz(t, a, m, s).map((z) => Object.assign(z, { radio: 4 }))) as Zonas4, (z: Zonas4) => respiraBien(z, SECTOR_DE_LA_LUZ_GLSL))
-controlPositivo('  y un sector que se prende de golpe (la sala, de un cuadro al otro)', ((t: number, a: { x: number; y: number; giro: number }, m: number, s: ZonaDeLaLuz[]) => zonasDeLaLuz(t, a, m, s).map((z) => Object.assign(z, { vida: z.vida > 0.5 ? 1 : 0 }))) as Zonas4, (z: Zonas4) => respiraBien(z, SECTOR_DE_LA_LUZ_GLSL))
-
-// Las CHISPAS de la referencia: atrás de `?chispas=si` (apagadas en el producto; quietas con movimiento reducido, no se
-// crean), pocas, chicas, blancas y sumadas; nacen en el sector vivo y se apagan subiendo.
+// Las CHISPAS de la referencia: [PULIDO 3] A1 · ahora de `?energia=inestable` (se borró `?chispas=si`; apagadas en el producto;
+// quietas con movimiento reducido, no se crean): chicas, blancas y sumadas, y sólo se prenden donde la energía está más alta
+// (son más puntos que antes, 140, porque la mayoría no se prende: la cuenta que se ve la pone la energía).
 const chispas4 = crearLasChispas()
 const materialDeLasChispas4 = chispas4.material instanceof THREE.ShaderMaterial ? chispas4.material : null
 const finalDelPie4 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
-type Chispas4 = { readonly cuantas: number; readonly tamano: number }
+type Chispas4 = { readonly cuantas: number; readonly tamano: number; readonly desde: number }
 const chispasBien = (c: Chispas4, m: THREE.ShaderMaterial | null, componente: string): boolean =>
-  m !== null && c.cuantas <= 64 && c.tamano <= 4 && m.blending === THREE.AdditiveBlending && m.fragmentShader.includes('gl_FragColor = vec4( vec3( 1.0 ), ') &&
-  ENTORNO.pruebas.chispas === 'no' && entornoPedido('producto,chispas=si').pruebas.chispas === 'si' && componente.includes("entornoDeLaEscena().pruebas.chispas === 'si' && !estatico ? crearLasChispas() : null")
-afirmar(chispasBien(CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4), '  las chispas, sólo con `?chispas=si` (y nunca quietas): pocas, chicas, blancas y sumadas', `${String(CHISPAS_DE_LA_LUZ.cuantas)} chispas de ${String(CHISPAS_DE_LA_LUZ.tamano)} px`)
+  m !== null && c.cuantas <= 160 && c.tamano <= 4 && c.desde >= 0.8 && m.blending === THREE.AdditiveBlending && m.fragmentShader.includes('gl_FragColor = vec4( vec3( 1.0 ), ') &&
+  /vAlfa = smoothstep\( [0-9.]+, [0-9.]+, energiaEnElPiso\( xz \) \)/.test(m.vertexShader) &&
+  ENTORNO.pruebas.energia === 'no' && entornoPedido('producto,energia=inestable').pruebas.energia === 'inestable' && componente.includes("const chispas = energia === 'inestable' && !estatico ? crearLasChispas() : null")
+afirmar(chispasBien(CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4), '  las chispas, sólo con `?energia=inestable` (y nunca quietas): chicas, blancas, sumadas y sólo donde la energía está más alta', `${String(CHISPAS_DE_LA_LUZ.cuantas)} puntos de ${String(CHISPAS_DE_LA_LUZ.tamano)} px, desde la energía ${String(CHISPAS_DE_LA_LUZ.desde)}`)
 controlPositivo('  el detector VE una nube de partículas', [{ ...CHISPAS_DE_LA_LUZ, cuantas: 600 }, materialDeLasChispas4, finalDelPie4] as const, ([c, m, k]: readonly [Chispas4, THREE.ShaderMaterial | null, string]) => chispasBien(c, m, k))
-controlPositivo('  y las chispas en el producto', [CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4.replace("entornoDeLaEscena().pruebas.chispas === 'si' && !estatico ? crearLasChispas() : null", 'crearLasChispas()')] as const, ([c, m, k]: readonly [Chispas4, THREE.ShaderMaterial | null, string]) => chispasBien(c, m, k))
+controlPositivo('  y las chispas en el producto', [CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4.replace("energia === 'inestable' && !estatico ? crearLasChispas() : null", 'crearLasChispas()')] as const, ([c, m, k]: readonly [Chispas4, THREE.ShaderMaterial | null, string]) => chispasBien(c, m, k))
 chispas4.geometry.dispose()
 materialDeLasChispas4?.dispose()
 

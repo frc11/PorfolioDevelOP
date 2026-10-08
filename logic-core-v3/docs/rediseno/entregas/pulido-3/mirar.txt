@@ -1,0 +1,9 @@
+PULIDO 3A — qué mirar en vivo
+Local: http://localhost:3000/v3   ·   LAN (teléfono y tablet en la misma red): http://192.168.1.116:3000/v3
+
+A1 · La energía bajo el piso (escritorio y teléfono)
+   /v3, bajá hasta el pie y dejá que termine el encastre. En el golpe la energía sale del hueco y cubre la escena; queda
+   fluyendo por todo el piso, sin apagarse. Cada pocos segundos el logo larga una onda que la sube a su paso. Rebobiná
+   (rueda o dedo hacia arriba): se retira hacia el hueco. La mancha negra del arranque ya no tendría que aparecer.
+   Variantes: /v3?energia=red (corrientes por las juntas)   ·   /v3?energia=inestable (temblor, picos, chispas, el canto
+   del logo). Sin bandera: la sobrecarga.
