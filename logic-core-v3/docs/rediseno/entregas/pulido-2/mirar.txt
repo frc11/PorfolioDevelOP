@@ -59,3 +59,9 @@ Lo que va EN CELULAR REAL (por la LAN): 1, 3 y 5.
    Con movimiento reducido (del sistema): el CTA directo en su estado final, arriba del logo.
    Hojas: p5-capas.png, p5-relevo.png, p5-giro.png, p5-cruce.png, p5-tipo.png (0, 25, 50, 75 y 100 % de la
    transformación, a 1440 y a 390).
+
+6 · Los pendientes de PULIDO 1 (escritorio y teléfono)
+   La sombra: /v3, bajá al pie, dejá que termine el encastre y rebobiná (rueda o dedo hacia arriba). Cuando el logo sale del
+   hueco y sube, su sombra en el piso entra con un fundido (antes, de un cuadro al otro).
+   «CONTACTO»: el rótulo del formulario del pie en la tablet (768). En el producto el vidrio toma el tono de la zona (de día,
+   claro), así que el caso oscuro no aparece solo: es el que se midió forzado (4,98:1; antes 3,8:1).

@@ -8,6 +8,7 @@ import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from './luzDeAbajo'
 import { crearElPozo } from './hueco'
+import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
 import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
@@ -33,6 +34,8 @@ import {
   relojDelQuieto,
   relojQuieto,
   sacudonDeLaPresion,
+  sombraConFundido,
+  sombraDeLaPose,
   subida,
   temblorDelLogo,
   type FaseDelFinal,
@@ -98,6 +101,8 @@ export interface EstadoDelFinal {
   alFondo: boolean
   /** [PULIDO 2] 2 · el poder del piso que se muestra (baja con inercia: `poderSuave`). */
   poder: number
+  /** [PULIDO 2] 6 · cuánto de la sombra del logo se ve (`sombraConFundido`). */
+  sombra: number
   /** [PULIDO 2] 4 · las zonas de la luz de abajo de este cuadro y lo que se ve del piso (donde nacen). */
   readonly zonas: ZonaDeLaLuz[]
   readonly alcance: { x: number; y: number; giro: number; cx: number; cz: number }
@@ -137,6 +142,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     teclado: tecladoQuieto(),
     alFondo: false,
     poder: 0,
+    sombra: 1,
     zonas: [],
     alcance: { x: 16, y: 10, giro: 0, cx: 0, cz: 0 },
   }
@@ -284,6 +290,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     // [PULIDO 2] 1 · escribiendo, el quieto tampoco se mueve (el teclado mueve el scroll: no es el visitante).
     if (!teclado.congelado) s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   }
+  // [PULIDO 2] 6 · la sombra del logo se va al apoyarse y vuelve con un fundido (también después de soltar el final).
+  s.sombra = s.estatico ? sombraDeLaPose(fin, tamano) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano), dt)
+  SOMBRA_EN_EL_FINAL.fundido = s.sombra
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   if (!activo) {
     if (s.aplicado) soltarElFinal(s, logo)

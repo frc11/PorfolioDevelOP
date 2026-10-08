@@ -8,7 +8,7 @@ import { entornoDeLaEscena, hayBanco } from './entorno'
 import { VIVO } from './entorno/vivo'
 import { ESCENAS_APARTE } from './gpu/Precompilar'
 import { KEY_INTENSITY } from './probeLighting'
-import { SOMBRA_DEL_LOGO, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
+import { SOMBRA_DEL_LOGO, SOMBRA_EN_EL_FINAL, SOMBRA_EN_VIVO, crearMapaDeLaSombra } from './sombra/delLogo'
 import { VeloEnElLogo } from './VeloEnElLogo'
 
 /**
@@ -117,7 +117,8 @@ function SombraDelLogo({ keyLightRef, logoGroupRef, compacta = false }: Props) {
     }
     // [NOCTURNO FINAL] B1 · y se apaga con el logo en el aire (cuando cae al cargar): lejos del piso, estirada, cruzaba el cuadro.
     const enElAire = Math.min(1, Math.max(0, (logo.position.y - SOMBRA_DEL_LOGO.aire[0]) / (SOMBRA_DEL_LOGO.aire[1] - SOMBRA_DEL_LOGO.aire[0])))
-    const fuerza = SOMBRA_DEL_LOGO.fuerza * Math.min(1, principal.intensity / KEY_INTENSITY) * (1 - VIVO.uNocheDelLogo.value) * (1 - enElAire)
+    // [PULIDO 2] 6 · y por el fundido del final (al rebobinar, el logo sale del hueco en cinco cuadros).
+    const fuerza = SOMBRA_DEL_LOGO.fuerza * Math.min(1, principal.intensity / KEY_INTENSITY) * (1 - VIVO.uNocheDelLogo.value) * (1 - enElAire) * SOMBRA_EN_EL_FINAL.fundido
     m.fuerza = fuerza
     SOMBRA_EN_VIVO.uFuerzaDeLaSombra.value = fuerza
     if (fuerza < 0.001) return

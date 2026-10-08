@@ -18,6 +18,7 @@ import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
 import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
+import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { EN_VIVO } from './recorridoDelFinal'
 
 /**
@@ -86,6 +87,8 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
       }
       soltarElFinal(estado, grupoDelLogo)
       EN_VIVO.fin = 0
+      // [PULIDO 2] 6 · sin el final, la sombra del logo entera.
+      SOMBRA_EN_EL_FINAL.fundido = 1
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
       piso.uGolpe.value.w = 0
       piso.uHueco.value = null

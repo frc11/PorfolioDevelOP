@@ -441,12 +441,28 @@ export function calma(fin: number): number {
  * sobre el eje, x = z = 0) y el giro; con `fin` 0, el logo de siempre (centro en el origen).
  */
 export function poseDelLogo(fin: number, t: TamanoDelLogo, destino: { centro: THREE.Vector3; rotacionX: number }, conRebote = true): void {
-  const s = segundosDelFinal(fin)
-  const { enElPiso } = caidaDe(t)
-  const c = Math.max(0, s - FINAL_DEL_PIE.caida.desdeS)
-  const y = Math.max(enElPiso, ORBIT_TARGET_Y - 0.5 * FINAL_DEL_PIE.caida.gravedad * c * c)
-  destino.centro.set(0, y - (conRebote ? hundido(fin, t) * t.espesor : 0), 0)
+  destino.centro.set(0, alturaDeLaCaida(fin, t) - (conRebote ? hundido(fin, t) * t.espesor : 0), 0)
   destino.rotacionX = (-Math.PI / 2) * acostado(fin)
+}
+
+/** La altura del centro del logo en la caída (u), sin lo que se hunde: con gravedad, hasta quedar apoyado. */
+function alturaDeLaCaida(fin: number, t: TamanoDelLogo): number {
+  const c = Math.max(0, segundosDelFinal(fin) - FINAL_DEL_PIE.caida.desdeS)
+  return Math.max(caidaDe(t).enElPiso, ORBIT_TARGET_Y - 0.5 * FINAL_DEL_PIE.caida.gravedad * c * c)
+}
+
+/** [PULIDO 2] 6 · la sombra del logo en el final: se va en el último tramo de la caída (u) y vuelve con un fundido (s). */
+export const SOMBRA_EN_LA_CAIDA = { tramo: 1.5, entraS: 0.3 } as const
+
+/** [PULIDO 2] 6 · cuánta sombra pide la pose (0 apoyado o en el hueco, 1 en el aire); la que se ve la lleva `sombraConFundido`. */
+export function sombraDeLaPose(fin: number, t: TamanoDelLogo): number {
+  return suave((alturaDeLaCaida(fin, t) - caidaDe(t).enElPiso) / SOMBRA_EN_LA_CAIDA.tramo)
+}
+
+/** [PULIDO 2] 6 · la sombra que se muestra: baja con la pose; sube hacia ella con un fundido (nunca de un cuadro al otro). */
+export function sombraConFundido(anterior: number, objetivo: number, dt: number): number {
+  if (!(objetivo > anterior)) return objetivo
+  return objetivo + (anterior - objetivo) * Math.exp(-Math.max(0, dt) / SOMBRA_EN_LA_CAIDA.entraS)
 }
 
 /** El blanco de la cámara: el centro del logo mientras se acuesta; con la caída baja al piso, un poco después que él. */

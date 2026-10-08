@@ -54,3 +54,10 @@ Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=
   y geometria.ts; escena/PruebasDeLaEscena.tsx, titulos3d/TitulosDeVolumen.tsx y armado.ts, _lib/titulos3d/registro.ts,
   escena/entorno.ts; _fuentes/ (archivo-700 con HABLANOS, archivo-100-cta y chivo-100-cta) y scripts-retoque/fuentes-3d.py.
   Bandera: cta=capas|relevo|giro|cruce|tipo.  Default: el CTA de hoy hasta que el humano elija.
+
+6 · Los pendientes de PULIDO 1
+  Qué: la sombra del logo entra con fundido al salir del hueco (la pose la pide entera en el aire y nada apoyado; la que se
+  ve sube con 0,3 s de constante y baja con la pose); «CONTACTO» a 768 en AA: el especular del vidrio oscuro del formulario,
+  más tenue (de 3,8 a 4,98:1; el del menú no cambia).
+  Archivos: escena/final/recorridoDelFinal.ts, cuadroDelFinal.ts y FinalDelPie.tsx; escena/LuzDelLogo.tsx y
+  sombra/delLogo.ts; _estilos/vidrio.css (y su token en s3-registro-de-tokens.ts).  Sin bandera.

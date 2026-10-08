@@ -11,6 +11,7 @@
  *       base, el plano de abajo, sin tapas blancas ni bloom; nace en un punto, respira; la sala, gradual; `?chispas=si`.
  *   5 · el CTA del final desde «Seis razones» (`?cta=capas|relevo|giro|cruce|tipo`): cada una pura del scroll, sus gestos,
  *       la fuente del hero con el material de los títulos, el clic a Contacto, el teléfono, el movimiento reducido.
+ *   6 · los pendientes de PULIDO 1: la sombra del logo que entra con fundido al salir del hueco; «CONTACTO» a 768 en AA.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-2.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-2/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
@@ -54,7 +55,7 @@ import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPant
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { LUZ_DE_ABAJO, SECTOR_DE_LA_LUZ_GLSL, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from '../escena/final/luzDeAbajo'
 import { crearElPlanoDeLaLuz } from '../escena/final/planoDeLaLuz'
-import { camaraDelFinal, distanciaParaElAncho } from '../escena/final/recorridoDelFinal'
+import { SOMBRA_EN_LA_CAIDA, camaraDelFinal, distanciaParaElAncho, sombraConFundido, sombraDeLaPose } from '../escena/final/recorridoDelFinal'
 import { TECLADO, pasoDelTeclado, tecladoQuieto, type EstadoDelTeclado, type LecturaDelTeclado } from '../escena/final/teclado'
 import { ENTORNO, VARIANTES_DEL_CTA, entornoPedido, type VarianteDelCta } from '../escena/entorno'
 import { PISO_VIVO, SIMULACION_GLSL } from '../escena/piso/bloques'
@@ -881,5 +882,52 @@ const sinP17 = (f: (r: string) => boolean): boolean => ['_lib/escena/ctaDelFinal
   [fuentes(V3).map((r) => readFileSync(r, 'utf8')).join('\n')].every((todo) => !/data-cta-desde-el-punto|viajeDesdeElPunto|conElEscalon|conElPortal|LetrasDelCta|data-cta-variante/.test(todo))
 afirmar(sinP17((r) => existsSync(`${V3}/${r}`)), '  las variantes de PULIDO 1 (`a|b|c|d`) no dejan código: ni sus archivos, ni la placa desde el punto del clic, ni el escalón del piso, ni el portal de la trama')
 controlPositivo('  el detector VE un archivo de PULIDO 1 que quedó', (r: string) => r.endsWith('estado.ts'), sinP17)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · Pendientes de PULIDO 1: la sombra del logo entra con fundido al salir del hueco; «CONTACTO» a 768 en AA')
+
+// LA SOMBRA: la pose pide la sombra entera en el aire y ninguna apoyada o en el hueco; la que se ve baja con la pose y SUBE
+// con un fundido. Al rebobinar, el logo sale del hueco en cinco cuadros (medido: `fin` de 0,43 a 0,35 en 67 ms, 4 u de
+// subida) y la sombra aparecía de un cuadro al otro.
+const TAMANO6 = { alto: 4, espesor: 0.55 }
+const finas6 = Array.from({ length: 1001 }, (_, k) => k / 1000)
+const poseBien6 = (f: (fin: number) => number): boolean =>
+  f(0) === 1 && f(0.3) === 1 && f(0.45) === 0 && f(0.734) === 0 && f(1) === 0 && finas6.every((x, k) => f(x) >= 0 && f(x) <= 1 && (k === 0 || f(x) <= f(finas6[k - 1]) + 1e-9))
+afirmar(poseBien6((x) => sombraDeLaPose(x, TAMANO6)), '  la pose: entera en el aire, nada apoyado ni en el hueco, y se va de a poco en el último tramo de la caída (nunca vuelve sola)')
+controlPositivo('  el detector VE una sombra que no se va al apoyarse', (x: number) => (x < 0.2 ? 1 : 0.4), poseBien6)
+// El fundido, en el rebobinado a 60 cuadros por segundo: la pose pide la sombra entera de golpe.
+const fundidoBien6 = (f: (a: number, o: number, dt: number) => number): boolean => {
+  const vistas: number[] = []
+  let v = 0
+  for (let k = 0; k < 90; k += 1) {
+    v = f(v, 1, 1 / 60)
+    vistas.push(v)
+  }
+  return vistas[0] < 0.1 && vistas[4] < 0.3 && vistas.every((x, k) => k === 0 || x >= vistas[k - 1]) && (vistas.findIndex((x) => x >= 0.9) + 1) / 60 <= 1 && f(1, 0, 1 / 60) === 0 && SOMBRA_EN_LA_CAIDA.entraS >= 0.2
+}
+afirmar(fundidoBien6(sombraConFundido), '  la que se ve: entra con fundido (menos de un décimo en el primer cuadro, entera antes de un segundo) y se va con la pose')
+controlPositivo('  el detector VE la sombra que aparece de un cuadro al otro', (_a: number, o: number) => o, fundidoBien6)
+const finalDelPie6 = leer('_lib/escena/final/cuadroDelFinal.ts')
+const luzDelLogo6 = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
+const componenteDelFinal6 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
+const LINEA_DEL_FUNDIDO = 'SOMBRA_EN_EL_FINAL.fundido = s.sombra'
+const cableadoBien6 = (c: string): boolean =>
+  c.includes('s.sombra = s.estatico ? sombraDeLaPose(fin, tamano) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano), dt)') && c.indexOf(LINEA_DEL_FUNDIDO) > 0 && c.indexOf(LINEA_DEL_FUNDIDO) < c.indexOf('if (!activo) {') &&
+  luzDelLogo6.includes('* (1 - enElAire) * SOMBRA_EN_EL_FINAL.fundido') && componenteDelFinal6.includes('SOMBRA_EN_EL_FINAL.fundido = 1')
+afirmar(cableadoBien6(finalDelPie6), '  el cableado: el final la lleva en cada cuadro (también después de soltarse, así el fundido termina), la sombra la multiplica y al irse el final queda entera; quieto, sin fundido')
+controlPositivo('  el detector VE el fundido que se corta al soltar el final', `${finalDelPie6.replace(LINEA_DEL_FUNDIDO, '')}\n${LINEA_DEL_FUNDIDO}`, cableadoBien6)
+
+// «CONTACTO» A 768: en el vidrio oscuro del formulario (forzado sobre la sala de día, el peor caso de PULIDO 1) el especular
+// aclaraba el fondo del rótulo, arriba de la caja: 3,8:1 medido (PULIDO 1 lo anotó en 4,2). Más tenue SÓLO ahí: 4,98:1 (los
+// rótulos de los campos, de 5,1 a 5,6). El del menú no cambia.
+const vidrio6 = leer('_estilos/vidrio.css')
+// El valor del formulario va en su bloque (el del menú no lo declara: toma el de siempre por el respaldo del `var`).
+const contactoBien6 = (css: string): boolean => {
+  const formulario = /\[data-v3\] \[data-material="vidrio"\] \{[^}]*--vidrio-reflejo-del-formulario: (\d+)%;[^}]*\}/.exec(css)
+  const oscuro = /\[data-v3\] \[data-material="vidrio"\]\[data-seccion="invertida"\]::before \{\s*background-image: linear-gradient\(to bottom, color-mix\(in srgb, var\(--color-tinta\) var\(--vidrio-reflejo-del-formulario, var\(--vidrio-reflejo\)\), transparent\)/.test(css)
+  return formulario !== null && Number(formulario[1]) <= 10 && oscuro && css.includes('--vidrio-reflejo: 28%;') && (css.match(/--vidrio-reflejo-del-formulario:/g) ?? []).length === 1
+}
+afirmar(contactoBien6(vidrio6), '  «CONTACTO» en AA a 768: el especular del vidrio oscuro del formulario, más tenue (sólo ahí; el del menú, el de siempre)')
+controlPositivo('  el detector VE el especular de siempre en el formulario', vidrio6.replace('--vidrio-reflejo-del-formulario: 10%;', '--vidrio-reflejo-del-formulario: 28%;'), contactoBien6)
 
 cerrar('s53-pulido-2')

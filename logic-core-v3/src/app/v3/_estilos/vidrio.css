@@ -57,6 +57,8 @@
   --vidrio-tinte-del-formulario: 66%;
   --campo-del-vidrio: color-mix(in srgb, var(--color-fondo) 72%, transparent);
   --ejemplo-del-campo: color-mix(in srgb, currentColor 72%, transparent);
+  /* [PULIDO 2] 6 · el especular del vidrio oscuro, más tenue: aclaraba el fondo de «CONTACTO» (3,8:1 a 768; así, 5:1). */
+  --vidrio-reflejo-del-formulario: 10%;
   position: relative;
   border-radius: var(--radius-medio);
   background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-del-formulario), transparent);
@@ -97,7 +99,7 @@
 
 [data-v3] [data-pieza="vidrio"][data-seccion="invertida"]::before,
 [data-v3] [data-material="vidrio"][data-seccion="invertida"]::before {
-  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-tinta) var(--vidrio-reflejo), transparent), transparent var(--vidrio-reflejo-hasta));
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-tinta) var(--vidrio-reflejo-del-formulario, var(--vidrio-reflejo)), transparent), transparent var(--vidrio-reflejo-hasta));
 }
 
 /* [Retoque 1] Durante el Genie: el contenido viaja en las tiras, el filo sigue a la silueta, sin sombras de adentro. */

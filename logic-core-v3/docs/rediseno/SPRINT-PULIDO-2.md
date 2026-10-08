@@ -435,6 +435,62 @@ grueso); capas y la pila (control: capas antes del pliegue); la fuente y el mate
 (control: hover con el dedo); el CTA de hoy sin bandera (control: la escena montada siempre); el teléfono y el movimiento
 reducido (control: el estado final animado); sin P17-B (control: un archivo que quedó).
 
+### 6 · Los pendientes de PULIDO 1
+
+**La sombra del logo al salir del hueco.** Medido cuadro a cuadro (`pulido-2/p6/antes-1440.json`, la sonda
+`_scripts/p6-sombra.ts`): la fuerza de la sombra nunca saltaba (0,4 de punta a punta); lo que salta es la geometría. Al
+rebobinar, el logo pasa de apoyado (`fin` 0,43) a su lugar en el aire (0,35) en cinco cuadros (67 ms, 4 u de subida) y su
+sombra salía de debajo de él de golpe (en la grabación de PULIDO 1, entre 913 y 930 ms: es este mismo tramo). Hacia
+adelante la caída dura medio segundo y la sombra se mete abajo del logo a la vista.
+
+Ahora (`recorridoDelFinal.ts`, `cuadroDelFinal.ts`, `LuzDelLogo.tsx`, `sombra/delLogo.ts`): la pose pide la sombra entera en
+el aire y ninguna apoyada o en el hueco (se va en el último 1,5 u de la caída: `sombraDeLaPose`); la que se ve baja con la
+pose y SUBE con un fundido (0,3 s de constante: `sombraConFundido`). El final la lleva en cada cuadro, también después de
+soltarse (así el fundido termina), y al irse el final queda entera; quieto (movimiento reducido), sin fundido. Medido
+después: al rebobinar entra de 0 a 0,31 (de 0,4) en 0,45 s, mientras el logo se vuelve a parar; hacia adelante se va en los
+110 ms antes de apoyarse, cuando ya estaba casi toda abajo del logo.
+
+**«CONTACTO» a 768.** Con la sonda de P18 (copiada en `_scripts/p6-contacto.ts`: el vidrio oscuro forzado sobre la sala de
+día, el peor caso de PULIDO 1): 3,8:1 hoy (PULIDO 1 lo anotó en 4,2:1). El rótulo va arriba de la caja, donde el especular
+del vidrio oscuro (la tinta al 28 % que baja desde el borde) le aclara el fondo. Probé dos salidas inyectando la regla: el
+especular al 10 % (4,98:1) y el tinte al 76 % (4,96:1, con la caja más opaca). Quedó la primera, sólo en el formulario:
+`--vidrio-reflejo-del-formulario` (10 %) en su bloque de `vidrio.css`, registrado en `s3-registro-de-tokens.ts`; el
+especular oscuro lo lee con el respaldo de `--vidrio-reflejo`, así el del menú sigue en 28 %. Medido después: «CONTACTO»
+4,98:1; los rótulos de los campos, de 5,1 a 5,6; el resto igual.
+
+**Gate** (el corto que pidió el humano): lint limpio en lo tocado; `tsc --noEmit` 0 errores; `s53` verde (87 afirmaciones,
+0 fallas). Además, porque leen los archivos tocados: s3-tokens, s35, s36, s39 y s47–s52 verdes (s3-tokens se puso rojo con
+la primera versión, que redefinía `--vidrio-reflejo` con otro valor: de ahí el token propio). Sin `verificar` completo.
+
+**Las aserciones viejas que cambiaron:** ninguna.
+
+`s53-pulido-2` §6: la pose (control: una sombra que no se va al apoyarse); el fundido (control: la sombra de un cuadro al
+otro); el cableado (control: el fundido que se corta al soltar el final); «CONTACTO» (control: el especular de siempre en
+el formulario).
+
 ## 4 · Lo que no quedó bien (o no pude resolver)
 
-(se completa al cerrar)
+- **Nada se probó en un teléfono real** (1, 3 y 5): todo es del banco (Chrome emulando 390 × 844 y 768 × 1024, la NVIDIA).
+  El tacto, el teclado de verdad y Safari quedan para vos (`mirar.txt`).
+- **2 · los viajes:** el giro más grande de la cámara en un cuadro subió (a 390, de 5,6° a 10,2°; a 1440, de 9,1° a 9,6°).
+  A 1440, Panel → Inicio dio una vez 30° en el primer cuadro (la escena volviendo de estar suspendida; aislado: 8,4°, 8,4° y
+  17°, este después de un tirón en frío).
+- **4 · la luz de abajo:** el final corre siempre de día, así que la luz se vio y se ajustó sólo de día. Su costo (+0,05 ms a
+  375 en la NVIDIA) se midió antes de sumar la calma al sector (un `smoothstep` más por fragmento).
+- **5 · el CTA:**
+  - `capas` en el teléfono: en el primer ~30 % del recorrido no se ve nada (la copia aparece recién con el logo abajo) y las
+    capas entran desde arriba. En escritorio, a la mitad, hay muchas copias de «HABLANOS» volando a la vez: se lee como
+    repetición más que como una pila.
+  - En escritorio, en algunos cuadros las letras pasan por delante del logo negro (`capas` y `relevo` a mitad de camino:
+    negro sobre negro).
+  - En el teléfono «Seis razones para elegirnos» queda dos veces en la página: la de la sección y la copia que se
+    transforma (oculta para el lector de pantalla).
+  - `tipo`: la letra fina (el peso 100) se extruye sin bisel (la deformación pide la misma triangulación en los dos pesos).
+  - Sin bandera, con movimiento reducido en escritorio, el CTA de hoy sigue encima del logo: lo resolví para las variantes,
+    pero el de hoy no lo toqué (el pedido era «sin bandera, el CTA de hoy»).
+  - El banco: el servidor de desarrollo dejó de ver la carpeta `ctaDelFinal/` recreada (hubo que reiniciarlo) y el sistema lo
+    cortó una vez por memoria. Además una tanda de cuadros de `cruce` a 1440 salió desfasada (el progreso leído era el de un
+    scroll anterior) y la rehíce.
+- **6 · los pendientes:** lo que entra con fundido es la intensidad de la sombra, no su forma: sigue saliendo de debajo del
+  logo en cinco cuadros, pero tenue (en el primer cuadro afuera, ~3 % de la sombra). «CONTACTO» quedó en 4,98:1, con poco
+  margen sobre AA, y medido sólo en el caso oscuro forzado a 768 (en el producto el vidrio toma el tono de la zona).

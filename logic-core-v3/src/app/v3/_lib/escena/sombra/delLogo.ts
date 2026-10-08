@@ -45,6 +45,9 @@ export const SOMBRA_EN_VIVO = {
   uFuerzaDeLaSombra: { value: 0 },
 }
 
+/** [PULIDO 2] 6 · cuánto de la sombra deja el final del pie (0 a 1): se va al apoyarse y vuelve con un fundido. */
+export const SOMBRA_EN_EL_FINAL = { fundido: 1 }
+
 const S = SOMBRA_DEL_LOGO
 const f = (x: number): string => x.toFixed(6)
 
