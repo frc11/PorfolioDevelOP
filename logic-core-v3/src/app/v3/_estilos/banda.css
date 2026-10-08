@@ -189,6 +189,34 @@
   [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
     background-color: var(--color-tinta);
   }
+
+  /* ── 7 · [PULIDO 2] 1 · EL PIE MIENTRAS CORRE EL FINAL ──
+   * Desde que el final corre detrás del pie, sus textos pasan sobre la cinemática, y la mezcla pinta gris sobre los grises
+   * que atraviesa (la tapa del logo inclinado, su sombra, el borde del hueco: los enlaces hasta 1,1:1, medido). Mientras
+   * corre (`data-final-del-pie`, lo pone la escena), sin mezcla: la tinta con un halo denso del papel, como en D2 con la
+   * pared iluminada; también las etiquetas del vidrio (el logo desenfocado detrás lo oscurece) y la fila de abajo. */
+  [data-v3] [data-panel='cierre'][data-final-del-pie] {
+    --halo-del-pie: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.15em var(--color-fondo), 0 0 0.15em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
+  }
+
+  [data-v3] [data-panel='cierre'][data-final-del-pie] .max-escritorio\:mix-blend-difference {
+    mix-blend-mode: normal;
+    color: var(--color-tinta);
+    text-shadow: var(--halo-del-pie);
+  }
+
+  [data-v3] [data-panel='cierre'][data-final-del-pie] [data-pieza='pie-enlace-icono'] {
+    color: var(--color-tinta);
+  }
+
+  [data-v3] [data-panel='cierre'][data-final-del-pie] [data-material='vidrio'] label,
+  [data-v3] [data-panel='cierre'][data-final-del-pie] p[data-pieza='texto'] {
+    text-shadow: var(--halo-del-pie);
+  }
+
+  [data-v3] [data-panel='cierre'][data-final-del-pie] [data-pieza='pie'] svg {
+    filter: drop-shadow(0 0 var(--spacing-1) var(--color-fondo));
+  }
 }
 
 /* ── HOVER DONDE HAY, TOQUE DONDE NO — el botón se aparta del camino del mouse

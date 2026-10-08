@@ -93,11 +93,6 @@ export interface Pruebas {
   /** [PULIDO 1] P17 · las variantes del CTA del final para elegir (`no`: el de hoy, el producto). */
   readonly cta: 'a' | 'b' | 'c' | 'd' | 'no'
   /**
-   * [PULIDO 1] P22 · el encastre abajo de 1024: el producto lo corre en su propio escenario después del pie (el formulario
-   * queda arriba, usable); `encastre=desvanece` es la otra lectura: el pie se desvanece mientras corre, sin escenario.
-   */
-  readonly encastre: 'desvanece' | 'no'
-  /**
    * [PULIDO 1] P5 · `vuelta=corta`: en un viaje del menú el final vuelve en el 35 % del viaje (≈ 1 s en el más corto), la
    * lectura literal del «~30 %»; el producto lo vuelve a la velocidad del rebobinado de P2 (1,6 s desde el final entero).
    */
@@ -111,12 +106,13 @@ export interface Pruebas {
  * títulos pasó al producto (`sombra/deLosTitulos.ts`). A5: `cabeza=libre` se borró: la cabeza de Servicios libre del menú
  * pasó al producto (`_secciones/servicios/angosto.tsx`). [CIERRE] 2B: `contactofondo=blur|blanco` se borró: el contacto como
  * placa con el fondo desenfocado pasó al producto (`_chrome/contacto/placa.ts`); el fundido a blanco se fue. [EL ENCASTRE]
- * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`).
+ * 1A: `tunelk=1|1.3|1.8` se borró: el túnel de escritorio quedó en k = 1,8 (`_secciones/trabajos/ritmo.ts`). [PULIDO 2] 1:
+ * `encastre=desvanece` se borró: abajo de 1024 el final corre detrás del pie, sin escenario (`escena/final/`).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', brillo: 'no', cta: 'no', encastre: 'no', vuelta: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', brillo: 'no', cta: 'no', vuelta: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'brillo', 'cta', 'encastre', 'vuelta'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'brillo', 'cta', 'vuelta'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -131,7 +127,6 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     brillo: unoDe<'suave' | 'fuerte'>(['suave', 'fuerte'], valor('brillo')),
     cta: unoDe<'a' | 'b' | 'c' | 'd'>(['a', 'b', 'c', 'd'], valor('cta')),
-    encastre: unoDe<'desvanece'>(['desvanece'], valor('encastre')),
     vuelta: unoDe<'corta'>(['corta'], valor('vuelta')),
   }
 }

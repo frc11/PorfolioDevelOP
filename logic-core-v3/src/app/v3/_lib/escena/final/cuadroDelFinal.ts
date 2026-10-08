@@ -8,6 +8,8 @@ import { viajeEnCurso } from '../viaje'
 import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
+import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
+import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
 import {
   EN_VIVO,
   FINAL_DEL_PIE,
@@ -20,6 +22,7 @@ import {
   camaraDelFinal,
   decidirElGesto,
   distanciaDelFinalAngosto,
+  distanciaParaElAncho,
   pasoDelReloj,
   oscuroDelFinal,
   poder,
@@ -52,7 +55,7 @@ export interface EstadoDelFinal {
    * y si pidió rebobinar.
    */
   fondo: number
-  readonly gestos: { arriba: number; abajo: number; leido: number; desde: number; retenido: boolean; pico: number; rebobinar: boolean }
+  readonly gestos: { arriba: number; abajo: number; ultimo: number; leido: number; desde: number; retenido: boolean; pico: number; rebobinar: boolean }
   scroll: number
   sinScrollS: number
   /** [EL ENCASTRE] 2G · cuánto hace que el final está entero (s). */
@@ -88,6 +91,10 @@ export interface EstadoDelFinal {
   readonly estatico: boolean
   /** [PULIDO 1] P22 · abajo de 1024: el encuadre del final es el del teléfono (`distanciaDelFinalAngosto`). */
   readonly angosto: boolean
+  /** [PULIDO 2] 1 · abajo de 1024, el final con el formulario del pie encima: escribiendo, quieto (`teclado.ts`). */
+  readonly teclado: EstadoDelTeclado
+  /** [PULIDO 2] 1 · el fondo que valió el último cuadro (abajo de 1024 lo decide el teclado; lo lee el gesto). */
+  alFondo: boolean
 }
 
 /** `formas`: las del logo en su plano (`hueco.ts`). */
@@ -95,7 +102,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
   return {
     reloj: relojQuieto(),
     fondo: Number.POSITIVE_INFINITY,
-    gestos: { arriba: Number.NEGATIVE_INFINITY, abajo: Number.NEGATIVE_INFINITY, leido: 0, desde: Number.NEGATIVE_INFINITY, retenido: false, pico: 0, rebobinar: false },
+    gestos: { arriba: Number.NEGATIVE_INFINITY, abajo: Number.NEGATIVE_INFINITY, ultimo: Number.NEGATIVE_INFINITY, leido: 0, desde: Number.NEGATIVE_INFINITY, retenido: false, pico: 0, rebobinar: false },
     scroll: Number.NaN,
     sinScrollS: 0,
     enteroS: 0,
@@ -121,6 +128,8 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     rastro: rastroQuieto(),
     estatico,
     angosto,
+    teclado: tecladoQuieto(),
+    alFondo: false,
   }
 }
 
@@ -148,6 +157,8 @@ export interface CuadroDeLaEscena {
 }
 
 const AL_FONDO_PX = 2
+/** [PULIDO 2] 1 · sólo para el banco: el reloj clavado en un `fin` (para medir el contraste del pie en un cuadro quieto). */
+export const FINAL_DEL_BANCO: { fijo: number | null } = { fijo: null }
 /** [PULIDO 1] P1 · las zonas del brillo nacen adentro de esta fracción de lo que se ve (no cortadas por el borde). */
 const ALCANCE_DEL_BRILLO = 0.85
 const DERECHA = new THREE.Vector3()
@@ -167,7 +178,11 @@ const ahoraS = (): number => performance.now() / 1000
 export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
   if (s.estatico) return false
   const ahora = ahoraS()
-  const alFondo = window.scrollY >= s.fondo - AL_FONDO_PX
+  // [PULIDO 2] 1 · escribiendo en el formulario del pie (abajo de 1024), un gesto no rebobina ni se retiene: mueve la página
+  // (y queda anotado: al salir del campo, el visitante ya movió la página él).
+  s.gestos.ultimo = ahora
+  if (s.angosto && s.teclado.escribiendo) return false
+  const alFondo = s.angosto ? s.alFondo : window.scrollY >= s.fondo - AL_FONDO_PX
   const G = s.gestos
   if (g.nuevo) {
     G.desde = ahora
@@ -198,9 +213,17 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const rebobinar = s.gestos.rebobinar
   s.gestos.rebobinar = false
   const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)
+  // [PULIDO 2] 1 · abajo de 1024, con el foco en un campo del pie el reloj queda donde está y el teclado (el viewport que se
+  // achica, el scroll que acomoda el campo) no cambia el fondo que vale; en escritorio, el fondo medido de siempre.
+  const alFondoMedido = window.scrollY >= s.fondo - AL_FONDO_PX
+  const teclado = s.angosto ? pasoDelTeclado(s.teclado, escribiendoEnUnCampo(), alFondoMedido, window.visualViewport?.height ?? window.innerHeight, window.scrollY, ahora, s.gestos.ultimo) : sinTeclado(alFondoMedido)
+  s.alFondo = teclado.alFondo
   // [PULIDO 1] P22 · quieto (movimiento reducido): sin reloj, el estado final al fondo y el de siempre fuera.
-  if (s.estatico) estadoQuieto(s.reloj, window.scrollY >= s.fondo - AL_FONDO_PX && EN_VIVO.pieEntero && viajeEnCurso() === null)
-  else pasoDelReloj(s.reloj, { alFondo: window.scrollY >= s.fondo - AL_FONDO_PX, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)
+  if (FINAL_DEL_BANCO.fijo !== null) {
+    s.reloj.fin = FINAL_DEL_BANCO.fijo
+    s.reloj.velocidad = 0
+  } else if (s.estatico) estadoQuieto(s.reloj, teclado.alFondo && EN_VIVO.pieEntero && viajeEnCurso() === null)
+  else if (!teclado.congelado) pasoDelReloj(s.reloj, { alFondo: teclado.alFondo, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
@@ -228,7 +251,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     }
     // [PULIDO 1] P22 · quieto, sin el giro ni el alejamiento del que se quedó (son movimiento).
     if (s.estatico) quietoRebobinado(alRebobinar, 0, EN_VIVO)
-    s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
+    // [PULIDO 2] 1 · escribiendo, el quieto tampoco se mueve (el teclado mueve el scroll: no es el visitante).
+    if (!teclado.congelado) s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   }
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   if (!activo) {
@@ -292,8 +316,12 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const desdeQueToco = t - s.tocoEn
   if (Number.isFinite(desdeQueToco) && desdeQueToco < 0.4) s.sacudon.y += FINAL_DEL_PIE.poder.golpecito * Math.exp(-desdeQueToco / 0.08) * Math.sin(desdeQueToco * 90)
   // [PULIDO 1] P22 · abajo de 1024, a la distancia del encuadre del teléfono (el logo ocupa la mitad de lo que lo limita).
-  const distancia = s.angosto && state.camera instanceof THREE.PerspectiveCamera ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : null
-  camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia)
+  // [PULIDO 2] 1 · y, detrás del pie, en el hueco más grande entre sus elementos (`encuadreDelPie.ts`): ahí y de ese ancho.
+  const encuadre = s.angosto ? ENCUADRE_EN_VIVO.valor : null
+  const vista = ENCUADRE_EN_VIVO.vista
+  const distancia = !s.angosto || !(state.camera instanceof THREE.PerspectiveCamera) ? null : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
+  const corrimiento = encuadre === null ? null : { x: (2 * encuadre.cx) / vista.ancho - 1, y: 1 - (2 * encuadre.cy) / vista.alto }
+  camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)
   // [PULIDO 1] P1 · lo que se ve del piso alrededor del logo (donde nacen las zonas del brillo), con la cámara de este cuadro.
   if (state.camera instanceof THREE.PerspectiveCamera) {
     const medio = state.camera.position.distanceTo(EN_VIVO.blanco) * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2) * ALCANCE_DEL_BRILLO
@@ -302,7 +330,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   }
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)
-  camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia)
+  camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)
   EN_VIVO.giroDelPie.copy(CAMARA_SIN_EL_MOUSE.quaternion).invert().premultiply(ANTES_DEL_FINAL)
 
   // 5 · [EL ENCASTRE] 2F · El piso bajo el mouse (con el poder, y el puntero que se movió hace poco): deja un rastro que
@@ -322,17 +350,4 @@ export function estadoQuieto(r: RelojDelFinal, alFondo: boolean): void {
   r.fin = alFondo ? 1 : 0
   r.velocidad = 0
   r.fase = alFondo ? 'parada' : 'espera'
-}
-
-/** [PULIDO 1] P22 · la otra lectura (`encastre=desvanece`): el pie se va mientras el final corre (en su primer 15 %). */
-let pieDesvanecido: HTMLElement | null = null
-let opacidadDelPie = -1
-export function desvanecerElPie(fin: number): void {
-  pieDesvanecido ??= document.getElementById('cierre')
-  if (pieDesvanecido === null) return
-  const opacidad = Math.round(Math.max(0, 1 - fin / 0.15) * 100) / 100
-  if (opacidad === opacidadDelPie) return
-  opacidadDelPie = opacidad
-  pieDesvanecido.style.opacity = opacidad >= 1 ? '' : String(opacidad)
-  pieDesvanecido.style.pointerEvents = opacidad <= 0 ? 'none' : ''
 }

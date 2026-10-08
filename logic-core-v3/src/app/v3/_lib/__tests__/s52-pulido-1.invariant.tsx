@@ -8,7 +8,8 @@
  *   P6  · el logo del intro baja con el titular: de su primera letra a la última, a velocidad constante (`?angel=asentado`).
  *   P18 · el formulario del pie abajo de 1024: vidrio líquido (el material del menú, compartido), en AA de día y de noche.
  *   P1  · el brillo del piso: zonas blancas de bloques que nacen, viven y mueren; el piso se oscurece apenas mientras corre.
- *   P22 · el encastre abajo de 1024: en su escenario (fuera de las secciones), encuadrado, con el dedo; quieto con movimiento reducido.
+ *   P22 · el encastre abajo de 1024: encuadrado, con el dedo; quieto con movimiento reducido. (El escenario y `encastre=desvanece`
+ *         se borraron en PULIDO 2 · 1: el final corre detrás del pie; lo fija `s53-pulido-2`.)
  *   P5  · un viaje del menú con el encastre avanzado: dura lo mismo que cualquiera; el final vuelve en paralelo, sin saltos.
  *   P17 · el CTA del final: A, la cámara sin el techo del domo en ningún aspecto (desde arriba, con un dolly-in leve por tiempo).
  *         B/C, las variantes de prueba (`?cta=a|b|c|d`): sin bandera el CTA de hoy; cada una con entrada, hover (toque) y salida.
@@ -122,8 +123,9 @@ afirmar(!/velo-sobre-la-escena|sombra-del-velo/.test(fueraDeLaBanda), 'desde 102
 titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; sin él, en la URL (`?pruebas=` o sueltas)')
 
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
-// `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`, P22 `encastre=desvanece`.
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'], encastre: ['desvanece'], vuelta: ['corta'] }
+// `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`. (P22 `encastre=desvanece` se borró en
+// PULIDO 2 · 1, rechazada.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'], vuelta: ['corta'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
@@ -406,21 +408,16 @@ afirmar(cajaBien(columnas), '  la caja de vidrio sólo abajo de 1024, del tono d
 controlPositivo('  el detector VE el vidrio también en escritorio', columnas.replace("data-material={angosto ? 'vidrio' : undefined}", 'data-material="vidrio"'), cajaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('P22 · El encastre también en el teléfono y la tablet: en su escenario, encuadrado, con el dedo, quieto con movimiento reducido')
+titulo('P22 · El encastre también en el teléfono y la tablet: encuadrado, con el dedo, quieto con movimiento reducido')
 
-// El escenario: una pantalla sin contenido después del pie, FUERA de la tabla de secciones (no lleva `data-panel`: la escena
-// mide su recorrido sobre las secciones, así que el mapeo de todas queda igual; medido a 390: la extensión, 0–22267 con y
-// sin él). Sólo abajo de 1024. Con `encastre=desvanece` (la otra lectura) no está.
+// [PULIDO 2] 1 · el escenario de una pantalla después del pie (y su otra lectura, `encastre=desvanece`) se borró, rechazado:
+// la página termina en el pie y el final corre detrás de sus elementos (el encuadre entre ellos y el teclado, en `s53-pulido-2`).
+// Lo que queda fijado acá: no hay nada después de las secciones, ni la hoja del escenario.
 const home = sinComentarios(leer('_secciones/Home.tsx'))
 const pieCss = leer('_estilos/pie.css')
-const escenarioBien = (h: string, css: string): boolean => {
-  const tag = /<div data-pieza="escenario-del-encastre"[^>]*\/>/.exec(h)?.[0] ?? ''
-  return tag.includes('aria-hidden="true"') && tag.includes('className="h-[var(--escenario-del-encastre)] escritorio:hidden"') && !tag.includes('data-panel') && h.indexOf(tag) > h.indexOf('REGISTRO.map(') &&
-    /\[data-v3\] \[data-pieza='escenario-del-encastre'\] \{\s*--escenario-del-encastre: 100svh;/.test(css) && /\[data-v3\]\[data-encastre='desvanece'\] \[data-pieza='escenario-del-encastre'\] \{\s*display: none;/.test(css)
-}
-afirmar(escenarioBien(home, pieCss), 'abajo de 1024 hay un escenario de una pantalla después del pie, fuera de la tabla de secciones (el mapeo de la escena no se mueve); con `encastre=desvanece`, no')
-controlPositivo('el detector VE un escenario que es una sección (sumaría al recorrido de la escena)', [home.replace('<div data-pieza="escenario-del-encastre"', '<div data-panel="escenario" data-pieza="escenario-del-encastre"'), pieCss] as const, ([h, c]: readonly [string, string]) => escenarioBien(h, c))
-controlPositivo('  y uno que también está en escritorio', [home.replace('h-[var(--escenario-del-encastre)] escritorio:hidden', 'h-[var(--escenario-del-encastre)]'), pieCss] as const, ([h, c]: readonly [string, string]) => escenarioBien(h, c))
+const sinEscenario = (h: string, css: string): boolean => /\{REGISTRO\.map\([\s\S]*?\)\)\}\s*<\/>/.test(h) && !h.includes('escenario-del-encastre') && !css.includes('escenario-del-encastre') && !css.includes('data-encastre')
+afirmar(sinEscenario(home, pieCss), 'abajo de 1024 la página termina en el pie: no hay escenario después de las secciones (PULIDO 2 · 1; medido a 390, el scroll máximo es 21423, el de antes de P22)')
+controlPositivo('el detector VE el escenario de P22 después de las secciones', [home.replace(/\}\s*<\/>/, '}<div data-pieza="escenario-del-encastre" aria-hidden="true" /></>'), pieCss] as const, ([h, c]: readonly [string, string]) => sinEscenario(h, c))
 
 // Montado también abajo de 1024 (y ahí, con movimiento reducido, quieto); en escritorio con movimiento reducido, como antes.
 const etapa = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
@@ -429,7 +426,7 @@ const cuadroP22 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const montajeBien = (e: string, f: string): boolean => e.includes("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}") &&
   f.includes('mascaraDelLogo(logo.formas, logo.caja, angosto ? HUECO.lado / 2 : HUECO.lado)') && /if \(estatico\) return undefined[\s\S]{0,300}if \(!angosto\) return retener\(\)[\s\S]{0,400}new IntersectionObserver/.test(f) &&
   e.includes("compacta={calidad === 'compacta'}")
-afirmar(montajeBien(etapa, finalDelPie), '  montado abajo de 1024 (la misma cinemática), con la máscara del hueco y la sombra del logo a la mitad de resolución, y los gestos retenidos sólo con el escenario a la vista (un escucha de `touchmove` no pasivo siempre puesto le costaría el scroll a iOS)')
+afirmar(montajeBien(etapa, finalDelPie), '  montado abajo de 1024 (la misma cinemática), con la máscara del hueco y la sombra del logo a la mitad de resolución, y los gestos retenidos sólo con el pie a la vista (un escucha de `touchmove` no pasivo siempre puesto le costaría el scroll a iOS)')
 controlPositivo('  el detector VE el final sólo desde 1024 (el de antes)', [etapa.replace("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}", "{calidad === 'plena' && !reducedMotion && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} />}"), finalDelPie] as const, ([e, f]: readonly [string, string]) => montajeBien(e, f))
 
 // El encuadre del final abajo de 1024: desde arriba, el logo (y su hueco, su misma huella) ocupa la mitad de la dimensión que
@@ -445,7 +442,7 @@ const encuadreBien = (f: Distancia): boolean => TAMANOS.every(([w, h]) => {
   const circulo = Math.hypot(HUELLA.ancho, HUELLA.fondo)
   return ocupa >= 0.45 && ocupa <= 0.55 && circulo <= 0.95 * Math.min(ancho, alto)
 })
-afirmar(encuadreBien(distanciaDelFinalAngosto) && /const distancia = s\.angosto && state\.camera instanceof THREE\.PerspectiveCamera \? distanciaDelFinalAngosto\(/.test(cuadroP22), '  el encuadre del final abajo de 1024: el logo y el hueco ocupan la mitad de lo que los limita (vertical u apaisado) y, girando, siguen enteros', TAMANOS.map(([w, h]) => `${String(w)}×${String(h)}`).join(' · '))
+afirmar(encuadreBien(distanciaDelFinalAngosto) && /: encuadre === null \? distanciaDelFinalAngosto\(state\.camera\.fov, state\.camera\.aspect, tamano\.ancho \?\? ANCHO_DEL_LOGO, tamano\.alto\) :/.test(cuadroP22), '  el encuadre del final abajo de 1024: el logo y el hueco ocupan la mitad de lo que los limita (vertical u apaisado) y, girando, siguen enteros', TAMANOS.map(([w, h]) => `${String(w)}×${String(h)}`).join(' · '))
 controlPositivo('  el detector VE la distancia de escritorio en un teléfono apaisado (el logo quedaba en el 13 % del ancho)', (() => 42.4) as Distancia, encuadreBien)
 
 // Con movimiento reducido (abajo de 1024): sin cinemática, el estado final quieto al llegar al fondo (sin golpe, sin quieto).
@@ -461,8 +458,10 @@ controlPositivo('  el detector VE un reloj quieto que anima (sube de a poco)', (
   r.fin = al ? Math.min(1, r.fin + 0.1) : 0
 }) as typeof estadoQuieto, quietoBienP22)
 
-// La otra lectura (`encastre=desvanece`): sin escenario, el pie se desvanece mientras corre (en el primer 15 %).
-afirmar(cuadroP22.includes('const opacidad = Math.round(Math.max(0, 1 - fin / 0.15) * 100) / 100') && finalDelPie.includes("const desvanece = angosto && entornoDeLaEscena().pruebas.encastre === 'desvanece'") && finalDelPie.includes("raiz.setAttribute('data-encastre', 'desvanece')"), '  la otra lectura, atrás de `?encastre=desvanece`: sin escenario, el pie se va mientras corre la cinemática')
+// [PULIDO 2] 1 · la otra lectura (`encastre=desvanece`: el pie se desvanecía mientras corría) se borró, rechazada: sin código muerto.
+const sinDesvanecer = (c: string, f: string): boolean => !c.includes('desvanecerElPie') && !f.includes('desvanece') && !f.includes('data-encastre')
+afirmar(sinDesvanecer(cuadroP22, finalDelPie), '  `encastre=desvanece` ya no existe (ni el pie que se desvanece, ni su marca): los elementos del pie quedan donde están')
+controlPositivo('  el detector VE el pie que se desvanece de P22', [`${cuadroP22} export function desvanecerElPie(fin: number): void {}`, finalDelPie] as const, ([c, f]: readonly [string, string]) => sinDesvanecer(c, f))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P1 · El brillo del piso: sectores blancos de bloques que nacen, viven y mueren (sin rojo, sin damero, sin círculos)')

@@ -299,13 +299,5 @@
 /* [CIERRE] 3 · la cola de scroll del final del pie (y el pie pegado arriba) se fue en [RETOQUE DEL ENCASTRE] 1D: la
  * página termina en el pie y la cinemática corre sola (`_lib/escena/final/`). */
 
-/* [PULIDO 1] P22 · EL ESCENARIO DEL ENCASTRE abajo de 1024: una pantalla después del pie, fuera de la tabla de secciones
- * (`Home.tsx`), donde corre la cinemática del final con el formulario arriba, usable. Con `encastre=desvanece` (la otra
- * lectura) no hay escenario: el pie se desvanece mientras corre (`escena/final/`). */
-[data-v3] [data-pieza='escenario-del-encastre'] {
-  --escenario-del-encastre: 100svh;
-}
-
-[data-v3][data-encastre='desvanece'] [data-pieza='escenario-del-encastre'] {
-  display: none;
-}
+/* [PULIDO 2] 1 · el escenario del encastre de PULIDO 1 P22 (una pantalla después del pie) y su otra lectura se fueron: abajo
+ * de 1024 el final corre al fondo, detrás de los elementos del pie, que quedan donde están (`_lib/escena/final/`). */

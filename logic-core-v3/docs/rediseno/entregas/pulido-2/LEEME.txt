@@ -1,0 +1,16 @@
+PULIDO 2 — RESUMEN POR PUNTO
+==============================
+
+El detalle (causas, mediciones, lo que cambió en los invariantes viejos y por qué no es aflojarlos) está en
+docs/rediseno/SPRINT-PULIDO-2.md. Qué mirar y dónde: mirar.txt. Un commit por punto.
+
+Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=desvanece, vuelta=corta, cta=a|b|c|d y brillo=.
+
+
+1 · El encastre detrás del pie (teléfono y tablet)
+  Qué: sin el escenario de P22 (la página termina en el pie: scroll máximo a 390 = 21423, el de antes de 857af5c7); el final
+  corre al fondo detrás de los elementos del pie, con el logo en el hueco más grande entre ellos; con el foco en un campo
+  (el teclado), el final no arranca ni rebobina y el teclado no lo dispara; al fondo, el pie sin la mezcla (la tinta con un
+  halo del papel) para que se lea sobre la cinemática (medido: 4,5:1 o más en los cinco tamaños).
+  Archivos: escena/final/encuadreDelPie.ts y teclado.ts (nuevos), cuadroDelFinal.ts, FinalDelPie.tsx, recorridoDelFinal.ts,
+  _secciones/Home.tsx, _estilos/pie.css y banda.css, escena/entorno.ts.  Sin bandera.

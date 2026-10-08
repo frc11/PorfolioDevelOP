@@ -291,6 +291,8 @@
     "test:s52-nocturno-final": "npx tsx src/app/v3/_lib/__tests__/s52-nocturno-final.invariant.tsx",
     "test:s52-pulido-1": "npx tsx src/app/v3/_lib/__tests__/s52-pulido-1.invariant.tsx",
     "test:s52": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s52",
+    "test:s53-pulido-2": "npx tsx src/app/v3/_lib/__tests__/s53-pulido-2.invariant.tsx",
+    "test:s53": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s53",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",

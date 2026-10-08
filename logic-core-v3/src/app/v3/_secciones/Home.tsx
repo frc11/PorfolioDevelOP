@@ -28,6 +28,9 @@ import { REGISTRO } from './_contrato/registro'
  * primitivas de la coreografía, que necesitan contexto— pero esta función sólo
  * las referencia, y referenciar un componente de cliente desde el servidor es
  * exactamente lo que el modelo espera.
+ *
+ * [PULIDO 2] 1 · después de las secciones no hay nada: el escenario del encastre de PULIDO 1 P22 se fue y, abajo de
+ * 1024, el final corre detrás de los elementos del pie, como en escritorio (`_lib/escena/final/`).
  */
 export function Home(): React.JSX.Element {
   return (
@@ -35,10 +38,6 @@ export function Home(): React.JSX.Element {
       {REGISTRO.map(({ id, Componente, seccion }) => (
         <Componente key={id} seccion={seccion} />
       ))}
-      {/* [PULIDO 1] P22 · el escenario del encastre abajo de 1024: una pantalla sin contenido después del pie, FUERA de la
-          tabla de secciones (la escena no cuenta su alto: el recorrido se acota en 1 y el mapeo de las secciones no se
-          mueve), donde corre la cinemática del final con el formulario ya arriba (`pie.css`, `escena/final/`). */}
-      <div data-pieza="escenario-del-encastre" aria-hidden="true" className="h-[var(--escenario-del-encastre)] escritorio:hidden" />
     </>
   )
 }

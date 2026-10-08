@@ -494,6 +494,14 @@ const DE_FRENTE = new THREE.Quaternion()
 const ENCUADRE = new THREE.Quaternion()
 const PARTE_DEL_ENCUADRE = new THREE.Quaternion()
 const CENTRO_DE_LA_ORBITA = new THREE.Vector3(0, ORBIT_TARGET_Y, 0)
+const DERECHA_DE_LA_CAMARA = new THREE.Vector3()
+const ARRIBA_DE_LA_CAMARA = new THREE.Vector3()
+
+/** [PULIDO 2] 1 · dónde va el logo en la pantalla (coordenadas normalizadas, −1 a 1): el encuadre detrás del pie. */
+export interface CorrimientoDelFinal {
+  readonly x: number
+  readonly y: number
+}
 const ARRIBA_DE_SIEMPRE = new THREE.Vector3(0, 1, 0)
 
 /**
@@ -508,7 +516,7 @@ const ARRIBA_DE_SIEMPRE = new THREE.Vector3(0, 1, 0)
  * encuadre de verdad. Ahora ese corrimiento (en la cámara) se conserva y se va con la subida: con `k` 0 la cámara del
  * final es la del rig girada; arriba, centrada en el logo. Continua con el rig en los dos extremos.
  */
-export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3, giro: number, aleja: number, sacudon: THREE.Vector3 | null, distancia: number | null = null): void {
+export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3, giro: number, aleja: number, sacudon: THREE.Vector3 | null, distancia: number | null = null, corrimiento: CorrimientoDelFinal | null = null): void {
   if (k <= 0 && giro === 0 && aleja === 0) return
   MIRA.lookAt(c.position, CENTRO_DE_LA_ORBITA, ARRIBA_DE_SIEMPRE)
   DE_FRENTE.setFromRotationMatrix(MIRA)
@@ -530,6 +538,14 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   c.up.copy(ARRIBA)
   c.lookAt(BLANCO)
   c.quaternion.multiply(PARTE_DEL_ENCUADRE.identity().slerp(ENCUADRE, 1 - k))
+  // [PULIDO 2] 1 · el logo fuera del centro (abajo de 1024, en el hueco entre los elementos del pie): la cámara se corre en
+  // su propio plano, sin girar, lo que pide el punto a la distancia del logo (así queda ahí también al alejarse el quieto).
+  if (corrimiento !== null && c instanceof THREE.PerspectiveCamera) {
+    const medioAlto = c.position.distanceTo(BLANCO) * Math.tan(THREE.MathUtils.degToRad(c.fov) / 2)
+    DERECHA_DE_LA_CAMARA.set(1, 0, 0).applyQuaternion(c.quaternion)
+    ARRIBA_DE_LA_CAMARA.set(0, 1, 0).applyQuaternion(c.quaternion)
+    c.position.addScaledVector(DERECHA_DE_LA_CAMARA, -corrimiento.x * medioAlto * c.aspect * k).addScaledVector(ARRIBA_DE_LA_CAMARA, -corrimiento.y * medioAlto * k)
+  }
   c.up.set(0, 1, 0)
   c.updateMatrixWorld()
 }
@@ -546,6 +562,11 @@ export const ENCUADRE_ANGOSTO = { ocupa: 0.5 } as const
 export function distanciaDelFinalAngosto(fovGrados: number, aspecto: number, ancho: number, fondo: number): number {
   const visible = 2 * Math.tan(THREE.MathUtils.degToRad(fovGrados) / 2) * ENCUADRE_ANGOSTO.ocupa
   return Math.max(ancho / (visible * aspecto), fondo / visible)
+}
+
+/** [PULIDO 2] 1 · la distancia (u) a la que la huella del logo (`ancho`, u) ocupa `fraccion` del ancho del cuadro. */
+export function distanciaParaElAncho(fovGrados: number, aspecto: number, ancho: number, fraccion: number): number {
+  return ancho / (2 * Math.tan(THREE.MathUtils.degToRad(fovGrados) / 2) * aspecto * Math.max(0.05, fraccion))
 }
 
 /** [NOCTURNO FINAL] A1/A2 · lo que deja `haciaCero` (sin reservas por cuadro). */

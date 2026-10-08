@@ -1,0 +1,24 @@
+PULIDO 2 — QUÉ MIRAR, EN ORDEN
+================================
+
+Dónde:
+  local  http://localhost:3000/v3
+  LAN    http://192.168.1.116:3000/v3   (el teléfono y la tablet, en la misma red; con el servidor de desarrollo levantado)
+
+Las banderas van sueltas en la URL (/v3?cta=capas) o juntas con ?pruebas= (/v3?pruebas=cta=capas,velo=escena). Sin
+bandera es el producto.
+
+Lo que va EN CELULAR REAL (por la LAN): 1, 3 y 5.
+
+
+1 · El encastre detrás del pie (teléfono y tablet)
+   URL: /v3 en el teléfono (vertical y apaisado) y la tablet. Bajá hasta el final: la página termina en el pie (ya no hay
+   una pantalla de más después). Ahí corre la cinemática DETRÁS de los elementos del pie, que quedan donde están: el logo
+   y su hueco caen en el lugar libre más grande entre ellos (en un teléfono común, entre los contactos y «El recorrido»; en
+   uno chico, detrás de los enlaces; en la tablet, abajo; en un teléfono apaisado chico, detrás del vidrio del formulario).
+   Probá:
+   - tocar un enlace del pie mientras corre (viaja) y tocar un campo del formulario (se enfoca, se abre el teclado);
+   - con el teclado abierto, el final no avanza ni rebobina; al cerrarlo sigue donde estaba;
+   - el dedo hacia abajo rebobina sin mover la página (como antes);
+   - los textos del pie se leen sobre la cinemática en todo momento (al fondo pasan a la tinta con un halo claro).
+   Imagen: p1-encuadre-detras-del-pie.png (los cinco tamaños, con el final entero).

@@ -1,0 +1,138 @@
+# SPRINT PULIDO 2 — feedback del humano sobre PULIDO 1
+
+Rama `rediseno/home`, worktree `C:\rediseno-home\logic-core-v3`, ruta `/v3`. Fuente de verdad del sprint: este archivo
+(el plan arriba, el log abajo). Un commit por punto, con push después de cada uno. Invariante nuevo:
+`npm run test:s53-pulido-2` (una sección por punto, con su control positivo). Entregables:
+`docs/rediseno/entregas/pulido-2/` (`mirar.txt`, `LEEME.txt`, las hojas de 3, 4 y 5 y la matriz de viajes de 2).
+
+Aprobados de PULIDO 1 (no se tocan; sus aserciones siguen verdes): P2 (el rebobinado), P6 (el logo «ángel»), P18 (el
+formulario de vidrio) y P17-A (la cámara del CTA). Rechazados (se BORRA su código y su bandera, no quedan muertos):
+`?encastre=desvanece`, `?vuelta=corta`, `?cta=a|b|c|d` (Losa, Haz, Bloques, Portal) y `?brillo=`.
+
+## 0 · Dónde vive cada punto (leído antes de proponer)
+
+| Punto | Qué | Dónde vive hoy |
+|---|---|---|
+| 1 | El encastre DETRÁS del pie abajo de 1024 | El escenario de P22: un `div` de `100svh` después del pie en `_secciones/Home.tsx` (`--escenario-del-encastre` en `_estilos/pie.css`); el disparo del final en `escena/final/cuadroDelFinal.ts` (`s.fondo` = `scrollHeight − innerHeight`, `alFondo`); los gestos retenidos con el escenario a la vista en `final/FinalDelPie.tsx`; el encuadre angosto en `recorridoDelFinal.ts` (`distanciaDelFinalAngosto`); la otra lectura `encastre=desvanece` en `cuadroDelFinal.ts` (`desvanecerElPie`), `FinalDelPie.tsx`, `pie.css` y `entorno.ts` |
+| 2 | Los viajes del menú, más rápidos | La duración en `_componentes/deslizamiento.ts` (`duracionDelViaje`: `VIAJE_CON_TOPE` de NOCTURNO FINAL A2, 4,5 pantallas/s, entre 2,6 y 7 s) y el efecto en `useDeslizamientoDelCta.ts` (Lenis `scrollTo` o `viajeSinLenis.ts`); el plan de la luz en `escena/planDelViaje.ts` y `escena/viaje.ts`; la vuelta del final en un viaje en `recorridoDelFinal.ts` (`VIAJE_DEL_FINAL`, `vueltaEnElViaje`, `?vuelta=corta`); el túnel estirado en `escena/tramoEstirado.ts`; el ≠ de Quiénes somos en `_secciones/quienes-somos/` |
+| 3 | El velo de P12 sin rectángulo | `_estilos/banda.css` (§4, abajo de 1024: `--velo-sobre-la-escena` y `--sombra-del-velo`, un fondo con sombra de caja detrás de la bajada de Trabajos) |
+| 4 | El brillo del piso, de abajo y por las juntas | `escena/final/enElPiso.ts` (`BRILLO_EN_EL_PISO`, zonas blancas sobre las TAPAS, `?brillo=`), su reloj en `cuadroDelFinal.ts` y el oscurecimiento en `OrbitRig.tsx`; los bloques instanciados en `escena/piso/` (`PisoVivo.tsx`, `bloques.ts`) |
+| 5 | El CTA final: transformación desde «Seis razones» | La frase en `_secciones/por-que-develop/` (`FRASE` en `contenido.ts`, el escenario en `PorQueDevelop.tsx`); el CTA de hoy (`data-pieza="cta-del-final"`); las variantes rechazadas en `escena/ctaDelFinal/*`, `_componentes/ctaDelFinal/CtaDelFinal.tsx` y sus costuras (`ProbeStage.tsx`, `PisoVivo.tsx`, `MoireScreen.tsx`, `apertura.ts`, `placa.ts`, `PlacaDelContacto.tsx`, `banda.css`); la fuente del titular del hero en `_secciones/hero/contenido.ts` (registro 1: Archivo condensado 700; registro 2: Chivo Light itálica); los títulos 3D en `escena/titulos3d/` |
+| 6 | Pendientes de PULIDO 1 | La sombra del logo en `escena/sombra/delLogo.ts` y `LuzDelLogo.tsx`; el rótulo «CONTACTO» a 768 en `_secciones/cierre/` |
+
+## 1 · El plan (en el orden pedido)
+
+1. **El encastre detrás del pie** — sacar el escenario y `encastre=desvanece`; el final corre al fondo (como en
+   escritorio) detrás de los elementos del pie, con un encuadre angosto que deja leer el logo y el hueco entre ellos y a
+   través del vidrio; con el foco en un campo, el final no arranca ni rebobina y el cambio de viewport del teclado no lo
+   dispara; AA de los textos del pie medido con la cinemática en movimiento; el scroll máximo igual al de antes de
+   `857af5c7` (medido en el código de ese commit).
+2. **Los viajes** — medir la matriz (NVIDIA), encontrar la causa en la historia (sólo lectura), duración = f(distancia)
+   con saturación (vecinas ~1,2 s, el más largo ≤ 2,5 s, desde el encastre el mismo presupuesto), el rebobinado de P2
+   comprimido en el primer ~1 s con la cámara en el mismo reloj, sin perder calidad; el ≠ de Quiénes somos con los demás.
+3. **El velo** — default: un pseudo-elemento con `radial-gradient` (`closest-side`) que se desvanece muy por fuera del
+   texto; `?velo=escena`: el sombreador del logo baja su luminancia en una elipse de pantalla. Medir las dos, AA.
+4. **El brillo de abajo** — la luz sale por las juntas desde debajo del piso, en el sombreador instanciado: sectores que
+   nacen, se propagan, respiran y se retiran; los bloques se separan y quedan a alturas distintas; caras con degradé
+   desde la base; la sala se oscurece gradual (también en el rebobinado); sin bloom; `?chispas=si` apagado.
+5. **El CTA** — la fuente del titular, extruida por el pipeline 3D; variantes `?cta=capas|relevo|giro|cruce|tipo`, cada
+   una pura del scroll; sin bandera, el CTA de hoy; movimiento reducido = el estado final sin tapar el logo.
+6. **Pendientes** — la sombra del logo entra con fundido; «CONTACTO» a 768 en AA.
+
+## 2 · Gate por punto
+
+Lint limpio en lo tocado; `tsc --noEmit` sin errores nuevos; s47–s53 verdes; `verificar` con los mismos 8 grupos rojos
+heredados; capturas de reposo a 1440 y 390 (y 768 en 1, 3 y 5). Las animaciones las aprueba el humano.
+
+## 3 · Log
+
+**El banco y la placa** (antes de medir nada, pedido del sprint): el Chrome del banco es
+`C:\Program Files\Google\Chrome\Application\chrome.exe` (`scripts-b4/cdp.ts`, `CHROME`) y la página lee
+`ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)`, con y sin `BANCO_GPU=alta`. Es la
+NVIDIA: se puede medir. Las sondas y las hojas, en `~/.cache/b4-medicion/pulido-2/`.
+
+**`visual-qa`:** como en PULIDO 1, en este entorno no captura; las capturas de reposo y las hojas son del banco del repo
+(`scripts-3d-sonido/banco.ts`, un Chrome propio por CDP), con la placa leída en la página.
+
+### 1 · El encastre DETRÁS del pie (teléfono y tablet)
+
+**Antes:** P22 corría la cinemática en un escenario de una pantalla después del pie (`Home.tsx`, `pie.css`): la página
+scrolleaba 844 px de más a 390 (el documento, 23111 px en lugar de 22267). La otra lectura, `encastre=desvanece`, se
+rechazó con él.
+
+**Qué cambió:**
+- **Sin escenario.** Se borraron el `div` de `Home.tsx`, su hoja (`pie.css`), su token (`--escenario-del-encastre`), la
+  bandera (`entorno.ts`) y la otra lectura (`desvanecerElPie` en `cuadroDelFinal.ts`, el efecto en `FinalDelPie.tsx`). El
+  final corre al fondo, como en escritorio (el mismo disparo: `scrollY` al fondo con el pie entero), DETRÁS de los
+  elementos del pie, que quedan donde estaban.
+- **El encuadre entre los elementos** (`escena/final/encuadreDelPie.ts`, nuevo): con las cajas del pie tal como quedan al
+  fondo (el titular, los contactos, los enlaces, los campos, los íconos, la caja de vidrio, más el botón del menú y los
+  controles de las esquinas), se busca el rectángulo libre más grande con la forma de la huella del logo (la misma del
+  hueco), centrado en el eje cuando entra (cede hasta un 15 % de tamaño para quedar centrado). Si ningún hueco da un logo
+  legible (30 % de la dimensión que lo limita), se busca entre lo pesado (el titular, el vidrio y lo fijo): el logo queda
+  detrás del texto chico, que se lee encima. Si tampoco, detrás del vidrio, que lo deja ver desenfocado. La cámara de arriba
+  se corre en su propio plano, sin girar, hasta poner el logo en ese punto (`camaraDelFinal`, parámetro `corrimiento`), a la
+  distancia que le da ese ancho (`distanciaParaElAncho`); así queda ahí también cuando el quieto se aleja. Se mide al
+  montarse, al asomarse el pie (el pie lejos todavía no tiene su layout final), con cualquier cambio de tamaño adentro del
+  pie y con las fuentes; nunca por cuadro y nunca con el teclado abierto.
+- **El teclado** (`escena/final/teclado.ts`, nuevo; sólo abajo de 1024): con el foco en un campo que abre teclado, el reloj
+  del final y el quieto quedan donde están y un gesto no rebobina ni se retiene (la página se mueve normal). Lo que el
+  teclado le hace a la página (la vista que se achica, el scroll con que el navegador acomoda el campo, la vista que vuelve)
+  no cambia el fondo que vale: al salir del campo la página sigue «al fondo» o «no al fondo» como estaba al entrar, hasta que
+  el visitante la mueva (un gesto desde que entró al campo, o un scroll con la vista quieta 0,6 s) o la vista diga lo mismo.
+- **Los toques**: la escena está detrás (el lienzo no recibe toques); el escucha que retiene el dedo es el de siempre
+  (`touchstart` pasivo, `touchmove` sólo cancela un arrastre), y sólo está puesto con el pie a la vista.
+- **El AA del pie sobre la cinemática** (`banda.css` §7, token `--halo-del-pie`): la mezcla del pie (`difference`) da gris
+  sobre los grises que la cinemática atraviesa. Al fondo y mientras el final corre, el pie lleva `data-final-del-pie` (lo pone
+  la escena, `marcarElPie`) y sale sin mezcla: la tinta con un halo denso del papel (la receta de D2), también en las
+  etiquetas del vidrio y la fila de abajo.
+- Para el banco: `__finalFijoDelBanco(fin)` clava el reloj (el contraste en un cuadro quieto) y `__finalDelBanco()` informa
+  el encuadre y el estado del teclado.
+
+**El scroll máximo (REGLA DE ALTURAS):** a 390 × 844, 21423 px, el mismo que se midió en el código de antes de 857af5c7
+(PULIDO 1, `pulido-1/p22/alturas/`: documento 22267 − 844); con el escenario era 22267. A 768 × 1024, 26881 (con el
+escenario, 27905). El pie mide una pantalla y la página termina en él (`pulido-2/p1/pie/`).
+
+**Medido** (`pulido-2/p1/`, NVIDIA):
+- El encuadre al fondo (`final/hueco-*`): 390 × 844, en el hueco entre los contactos y los enlaces, en el eje (162 px de
+  ancho); 375 × 667, entre lo pesado, detrás de los enlaces (232 px); 768 × 1024, en el hueco de abajo (476 px, su tope);
+  844 × 390, a la izquierda del formulario (313 px); 667 × 375, detrás del vidrio (no hay hueco: el formulario ocupa todo).
+- El teclado (`teclado-390x844.json`; el teclado de hoy se emula achicando sólo la vista visual): al fondo con el final a
+  0,48, el foco y el scroll del navegador (−150 px) lo dejan en 0,476; al salir sigue (0,76 a los 1,8 s). Arrastrando la
+  página mientras se escribe, al salir vale el fondo medido (sale: 0,97 → 0,11). Fuera del fondo (final en 0), el teclado y
+  el navegador lo dejan al fondo y el final queda en 0, también al irse el teclado; con el primer gesto, arranca (0,24). Con
+  el teclado viejo (el que achica el documento) también queda quieto mientras se escribe.
+- Los toques durante la cinemática: un toque en «Trabajos» viaja (`data-v3-deslizando`, fase `viaje`); un toque en un campo
+  lo enfoca.
+- El contraste de los textos del pie con el reloj clavado en 0,05 … 1 (núcleo de las letras, percentil 10;
+  `contraste/halo2-*`). Antes del arreglo, a 390: «Quiénes somos» 1,07:1 y «Servicios» 1,14:1 a fin 0,2 (el logo
+  inclinado, gris, detrás); las etiquetas del vidrio hasta 2,7. Después, el peor de la cinemática por tamaño: 390 —
+  «Servicios» 4,56 (fin 0,05); 375 — «Servicios» 4,52 (0,3); 768 — «Mensaje» 5,7; 844 — «©» 6,38; 667 — «Por qué develOP»
+  5,67. Al fondo con el final en cero (parado después de un rebobinado), a 375: 5,46 o más. «Enviar» (un botón opaco) da 3,4
+  a 390 y 4,6–4,9 en los demás, igual con y sin final: es el borde de sus letras, la escena no lo toca.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-pulido-1` · las banderas | entre las pedidas, `encastre=desvanece` | sin ella | La bandera se borró por pedido; las demás siguen con el mismo control |
+| `s52-pulido-1` · P22, el escenario | hay un escenario de una pantalla después del pie (dos controles) | la página termina en el pie: nada después de las secciones, ni la hoja del escenario (un control) | PULIDO 2 pide sacarlo; la aserción sigue fijando la estructura (cualquier cosa después de las secciones la pone roja) y `s53-pulido-2` fija lo nuevo |
+| `s52-pulido-1` · P22, el montaje | (el texto) «con el escenario a la vista» | «con el pie a la vista» | La misma expresión regular; sólo el texto |
+| `s52-pulido-1` · P22, el encuadre | la distancia angosta en la línea `const distancia = s.angosto && … ? distanciaDelFinalAngosto(` | la misma función, en su línea nueva (`: encuadre === null ? distanciaDelFinalAngosto(…) :`) | La misma prueba en los cinco tamaños; es el encuadre hasta que se mide el pie; el medido lo fija `s53-pulido-2` |
+| `s52-pulido-1` · P22, la otra lectura | existe `encastre=desvanece` | no existe (ni el pie que se desvanece ni su marca), con control | Borrada por pedido |
+| `s50-encastre` · las piezas de frente | `camaraDelFinal(…, distancia)` en la viva y en la sin el mouse | lo mismo con `, corrimiento` | Más estricta: fija también el corrimiento, el mismo en las dos |
+| `s51-retoque-encastre` · el cableado | el reloj con `alFondo: window.scrollY >= s.fondo - AL_FONDO_PX` | la misma medida (`alFondoMedido`), que en escritorio va derecho (`sinTeclado`) y abajo de 1024 pasa por el teclado | Más estricta: la medida sigue siendo la misma y además fija el camino del teclado |
+
+`s53-pulido-2` §1: la página termina en el pie (y nada del escenario en ningún archivo); el encuadre con las cajas medidas en
+los cinco tamaños (el lugar esperado, sin tocar lo que corresponde, entero y dentro del tope; a 390, en el eje); la cámara
+pone el logo en el punto y el ancho pedidos; el teclado en cuatro escenas (A, A2, B y B2); el cableado; el AA del pie.
+Controles: el escenario, el encuadre de P22, la cámara sin corrimiento, dos teclados que le creen al fondo medido, un reloj
+que avanza escribiendo y el pie con la mezcla.
+
+**Gate:** lint limpio en lo tocado; `tsc --noEmit` 0 errores; s47–s53 verdes; `verificar`: los 8 grupos rojos de la base (s1,
+s2, s3, s4, s5, s7, s8, s17) con las mismas 14 invariantes; reposo capturado a 1440, 390 y 768 (`pulido-2/reposo/p1-*`), sin
+errores en la consola (sólo el aviso de movimiento reducido del banco). Escritorio: el final igual que antes.
+
+## 4 · Lo que no quedó bien (o no pude resolver)
+
+(se completa al cerrar)
