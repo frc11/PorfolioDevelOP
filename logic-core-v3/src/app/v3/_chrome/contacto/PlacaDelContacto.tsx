@@ -5,8 +5,7 @@ import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { useContacto } from './apertura'
-import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, useParalaje, viajeDesdeElFondo, viajeDesdeElPunto } from './placa'
+import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, useParalaje, viajeDesdeElFondo } from './placa'
 
 /**
  * [CIERRE] 2B · LA PLACA DEL CONTACTO — el bloque de CSS 3D alrededor de la hoja (el frente): el escenario con la
@@ -34,29 +33,7 @@ const CARAS = [
 export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
   const [llego, setLlego] = useState(false)
   const paralaje = useParalaje(activa, llego)
-  // [PULIDO 1] P17-B · d · desde el CTA del portal, la placa sale del punto del clic (px desde el centro); si no, del centro.
-  const { punto } = useContacto()
-  const [corrimiento] = useState(() => (punto === null ? null : viajeDesdeElPunto({ x: punto.x - window.innerWidth / 2, y: punto.y - window.innerHeight / 2 })))
   if (!activa) return <>{children}</>
-  const viaje = (
-    <motion.div
-      data-parte="viaje-de-la-placa"
-      className="w-full max-w-[calc(var(--spacing-20)*11+2*var(--pad-lateral-compacto))]"
-      style={{ transformStyle: 'preserve-3d', transformOrigin: 'center bottom' }}
-      initial={{ z: VIAJE[0], rotateX: 0 }}
-      animate={{ z: [...VIAJE], rotateX: 0 }}
-      exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}
-      transition={TRANSICIONES.viaje}
-      onAnimationComplete={() => setLlego(true)}
-    >
-      <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
-        {children}
-        {CARAS.map((c) => (
-          <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className)} style={c.style} />
-        ))}
-      </motion.div>
-    </motion.div>
-  )
   return (
     <motion.div
       data-parte="escenario-de-la-placa"
@@ -65,21 +42,23 @@ export function PlacaDelContacto({ activa, children }: { readonly activa: boolea
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { ...TRANSICIONES.acostarse, duration: TRANSICIONES.acostarse.duration * 0.35, delay: TRANSICIONES.acostarse.duration * 0.65 } }}
     >
-      {corrimiento === null ? (
-        viaje
-      ) : (
-        // El corrimiento por fuera del viaje, en el mismo espacio 3D (con la perspectiva, se ve como si viajara desde el punto).
-        <motion.div
-          data-parte="punto-de-la-placa"
-          className="grid w-full place-items-center"
-          style={{ transformStyle: 'preserve-3d' }}
-          initial={{ x: corrimiento.x[0], y: corrimiento.y[0] }}
-          animate={{ x: [...corrimiento.x], y: [...corrimiento.y] }}
-          transition={TRANSICIONES.viaje}
-        >
-          {viaje}
+      <motion.div
+        data-parte="viaje-de-la-placa"
+        className="w-full max-w-[calc(var(--spacing-20)*11+2*var(--pad-lateral-compacto))]"
+        style={{ transformStyle: 'preserve-3d', transformOrigin: 'center bottom' }}
+        initial={{ z: VIAJE[0], rotateX: 0 }}
+        animate={{ z: [...VIAJE], rotateX: 0 }}
+        exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}
+        transition={TRANSICIONES.viaje}
+        onAnimationComplete={() => setLlego(true)}
+      >
+        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
+          {children}
+          {CARAS.map((c) => (
+            <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className)} style={c.style} />
+          ))}
         </motion.div>
-      )}
+      </motion.div>
     </motion.div>
   )
 }

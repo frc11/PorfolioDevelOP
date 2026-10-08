@@ -192,23 +192,6 @@
     background-color: var(--color-fondo);
   }
 
-  /* [PULIDO 1] P17-B · a · dentro de la losa (la prueba del CTA del final), la tinta sobre el papel de la placa y sin mezcla:
-     la placa aísla su grupo y la diferencia contra su propio papel lavaba el texto. Después de las del amanecer, a su altura. */
-  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] .max-escritorio\:mix-blend-difference {
-    color: var(--color-tinta);
-    mix-blend-mode: normal;
-    text-shadow: none;
-  }
-
-  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] {
-    color: var(--color-tinta);
-  }
-
-  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::before,
-  [data-v3] [data-parte='lista-del-final'] [data-pieza='cta-del-final'] [data-cta-variante='a'] [data-pieza='cta'][data-mezcla] [data-parte='subrayado']::after {
-    background-color: var(--color-tinta);
-  }
-
   /* ── 7 · [PULIDO 2] 1 · EL PIE MIENTRAS CORRE EL FINAL ──
    * Desde que el final corre detrás del pie, sus textos pasan sobre la cinemática, y la mezcla pinta gris sobre los grises
    * que atraviesa (la tapa del logo inclinado, su sombra, el borde del hueco: los enlaces hasta 1,1:1, medido). Mientras

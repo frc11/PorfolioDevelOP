@@ -100,9 +100,10 @@ titulo('B6 · La frase de Por qué develOP, sin salida')
 
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [RONDA 2] F2: la frase vuelve a irse con la levantada, función del scroll (s43 · F2).
-const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*llegadaDe="por-que-develop" \/>/.test(c) && (c.match(/salida: levantada/g) ?? []).length === 2
+// [PULIDO 2] 5 · sin bandera `relevada` es falsa (con `?cta=`, salvo `capas`, la frase la toma la transformación).
+const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*llegadaDe="por-que-develop" \/>/.test(c) && (c.match(/salida: relevada \? null : levantada/g) ?? []).length === 2
 afirmar(sinSalida(porQue), 'las dos mitades se van con la levantada otra vez (sin `queda`), con la llegada y la salida función del scroll')
-controlPositivo('el detector VE la frase que se queda', porQue.replace(/salida: levantada, /g, ''), sinSalida)
+controlPositivo('el detector VE la frase que se queda', porQue.replace(/salida: relevada \? null : levantada, /g, ''), sinSalida)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D4 · Las fotos del equipo, como antes')

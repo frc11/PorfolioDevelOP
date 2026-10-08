@@ -338,6 +338,103 @@ el bloom; un plano a ras del piso); nace en un punto, se propaga, contiguo y org
 (control: un sector de tamaño fijo; un círculo); respira y la sala gradual (control: radio fijo; de golpe); las chispas
 (control: una nube; en el producto).
 
+### 5 · El CTA del final desde «Seis razones» (P17-B, de cero)
+
+**La fuente.** «tu sitio vendiendo las 24hs» es el titular del hero, «TU NEGOCIO VENDIENDO / LAS 24 HS», y tiene dos caras:
+el registro 1 en **Archivo** (`_fuentes/archivo-display-latin.woff2`, declarada en `layout.tsx` como `--font-v3-archivo`,
+la clase `font-display` de `TIPOGRAFIA_DEL_TITULAR` en `_secciones/hero/geometria.ts`; en volumen, `archivo-700-titulos.json`)
+y el registro 2 en Chivo Light itálica. El CTA va en **Archivo, en mayúsculas**: es la cara que distingue al titular (la
+Chivo es la de todo el resto). Sólo la fuente, no su llegada.
+
+**Qué es el CTA.** «HABLANOS» (la acción: el botón de hoy) en volumen, por las piezas del pipeline de los títulos (el
+volumen y el bisel de `titulos3d/geometria.ts`; el material de `armado.ts`: el negro satinado, el costado de día, el filo del
+dibujo de noche y el amanecer, `ctaDelFinal/material.ts`). El texto que lo acompaña («Este sitio empezó con una charla. El
+tuyo también.») sigue en el DOM y llega al final, con el CTA ya en su lugar.
+
+**Cómo está hecho** (`_lib/escena/ctaDelFinal/`; el DOM, en `_componentes/ctaDelFinal/` y `por-que-develop/CtaTransformado.tsx`):
+- **Cada variante es una función pura del progreso** (`variantes.ts`), y el progreso es función del scroll: en el escenario,
+  la ventana del pin del fin de los valores a la llegada del CTA (la misma pantalla que hoy ocupan la levantada y el CTA); en
+  la lista, el recorrido del bloque del CTA. Reversible, igual a cualquier velocidad y en cualquier dirección.
+- **Letra por letra** (`letras.ts`, `armadoDelCta.ts`): cada letra en el em de su renglón (el filo de noche sigue leyendo el
+  contorno del renglón) y girando sobre su centro.
+- **En un plano frente a la cámara** (px de la pantalla): entre los valores y el CTA la cámara gira de un contrapicado a
+  mirar desde arriba (P17-A, sin tocar); con las letras fijas en el mundo esa vuelta las deformaba. El plano arranca fijo en
+  el mundo donde el título de volumen deja la frase (la misma cuenta que el título: el arranque no salta) y en el primer tramo
+  se pega a la pantalla, con la cámara viva, para llegar exacto al lugar del CTA en el DOM (medido: 0 px de diferencia), un
+  poco más cerca de la cámara que el logo (lo que vuela pasa por delante del logo y no lo atraviesa).
+- **La frase de volumen queda relevada** mientras la transformación la dibuja (`RELEVO_DE_LOS_TITULOS` en el registro de los
+  títulos); en `capas` se va como hoy.
+
+**Las variantes** (las hojas: `entregas/pulido-2/p5-<variante>.png`, cinco cuadros —0, 25, 50, 75 y 100 % de la
+transformación— a 1440 y a 390; el humano pidió recortarlas a eso: las variantes se juzgan en vivo):
+- `?cta=capas` — los seis valores se pliegan en el DOM hasta quedar de canto y de cada pliegue sale, de canto y del ancho del
+  valor, una capa del CTA que se abre mientras vuela; se apilan (con aire que se cierra), la pila gira un poco para mostrar
+  que su espesor son las seis capas, y baja al lugar del CTA. La pila se arma arriba (a la altura de la frase): en la mitad de
+  la ventana el logo todavía está en el centro y las letras negras sobre el logo negro no se leían.
+- `?cta=relevo` — cada letra gira 180° sobre X en cascada de izquierda a derecha; en su cara de atrás está la del CTA (las
+  ocho más cercanas al CTA: las últimas de «razones» y las primeras de «para»), que vuelan a su lugar; las que sobran se
+  acuestan hacia atrás sobre su base y se van.
+- `?cta=giro` — las dos mitades se juntan arriba en un cartel de dos renglones del ancho del CTA; el cartel gira sobre Y (en
+  la mitad sólo se ve el canto: una línea, con el espesor del cartel) y del otro lado está el CTA, que baja a su lugar.
+- `?cta=cruce` — la frase se extruye hacia la cámara (su espesor crece hasta seis veces, con un tope en la pantalla) y se
+  agranda alrededor de la contraforma de la «o» hasta que la cubre entera: el CTA se ve por la «o» y queda del otro lado.
+- `?cta=tipo` — **la fuente es variable** (Archivo y Chivo, `wght` de 100 a 900): los dos pesos de cada glifo tienen los
+  mismos contornos (verificado en los JSON), así que cada letra lleva su peso 100 como objetivo de deformación con la misma
+  triangulación. Cada letra se afina hasta el hilo mientras viaja, se cambia por la del CTA con las dos en el hilo y la del
+  CTA engorda hasta su peso. (`scripts-retoque/fuentes-3d.py` genera `archivo-100-cta.json` y `chivo-100-cta.json`, y suma
+  «HABLANOS» a `archivo-700-titulos.json`.)
+- No sumé una sexta: las cinco cubren los gestos pedidos y ninguna idea mía mejoraba a la más sobria de ellas (`giro`).
+
+**El clic, el hover, el teléfono, el movimiento reducido:**
+- El CTA es un enlace con `data-abre-contacto="panel"`: abre Contacto con la transición de siempre. Se puede tocar recién
+  cuando llegó (desde 0,97); el hover (sólo con el mouse) lo levanta apenas hacia la cámara; con el dedo no hay hover.
+- **En el teléfono y la tablet** (la lista) el bloque del CTA mide dos pantallas y su contenido queda clavado mientras
+  corre la transformación: centrado, con la copia de «Seis razones» que la escena transforma (para el lector no existe: la
+  frase está arriba de la lista). Medido a 390 × 844: al principio del recorrido la cámara todavía muestra el logo grande en
+  el centro (baja entre el 30 y el 45 %), así que la copia aparece recién con el logo abajo y la transformación corre en la
+  segunda mitad. Ese texto va en tinta, sin la mezcla: la mezcla (texto blanco con `difference`) se corta adentro de lo
+  clavado y el texto no se vería; acá no pasa sobre el logo.
+- **Con movimiento reducido**, el estado final directo (el progreso es 1, sin recorrido). En escritorio la sección sigue
+  midiendo su escenario entero y la lista quedaba arriba, con la cámara en la frase y el logo en el centro: el CTA quedaba
+  encima del logo (el pendiente de PULIDO 1). Con la variante, el CTA va en la última pantalla de la sección, donde la cámara
+  ya está en la pose del CTA: con el logo abajo, no lo pisa. (Sin bandera el CTA de hoy no cambió: ver «Lo que no quedó bien».)
+- **Sin bandera, el CTA de hoy** (su botón va al pie, como antes) y la escena no monta nada: el módulo del CTA es perezoso y
+  sólo se descarga con `?cta=`.
+
+**P17-B, borrado entero:** `escena/ctaDelFinal/{PiezaDelCta.tsx, enElPiso.ts, estado.ts, portal.ts}`, el `CtaDelFinal.tsx`
+de entonces (reescrito desde cero), el bloque de la losa en `banda.css` y las costuras en `ProbeStage.tsx`, `PisoVivo.tsx`,
+`MoireScreen.tsx`, `apertura.ts`, `placa.ts`, `PlacaDelContacto.tsx` y `PorQueDevelop.tsx` (los compartidos quedaron
+idénticos a antes de su commit, `4b588ec0~1`).
+
+**Dos tropiezos del banco:** el servidor de desarrollo dejó de ver la carpeta `ctaDelFinal/` cuando la borré y la volví a
+crear (siguió sirviendo la primera versión hasta reiniciarlo: tres corridas iguales que parecían «el arreglo no anda»); y el
+sistema lo cortó por memoria al final de las capturas (ver «Lo que no quedó bien»).
+
+**Gate:** lint limpio en lo tocado; `tsc --noEmit` 0 errores; s36, s40–s44 y s47–s53 verdes (`s53`: 79 afirmaciones, 0 fallas);
+`verificar`: los mismos 8 grupos rojos de la base (las mismas 14 invariantes); reposo a 1440 y 390 con el banco (la NVIDIA,
+RTX 5050), la consola sin errores (sólo el aviso de motion de siempre). El humano recortó el cierre: hojas de cinco cuadros
+a 1440 y 390 y el reposo sin 768 (las variantes las juzga en vivo).
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-pulido-1` P17-B/C | ocho aserciones sobre las cuatro variantes de PULIDO 1 (la losa, el haz, el escalón, el portal, el cableado) con sus controles | se borraron con el código | Las variantes se rechazaron y se borraron (sin código muerto); la que fijaba «sin bandera, el CTA de hoy» pasó a `s53` §5, más estricta (las dos ramas, el botón al pie y el montaje de la escena) |
+| `s52-pulido-1` · las banderas y la URL | `cta=a\|b\|c\|d`, `?cta=a` | `cta=capas\|relevo\|giro\|cruce\|tipo`, `?cta=relevo` | El mismo control; `s53` §5 suma que `?cta=a` ya es el producto |
+| `s40-3d-sonido` · el módulo perezoso | `if (… \|\| !escritorio) return null` | `if (… \|\| (!escritorio && !conElCta)) return null` y los títulos montados sólo `escritorio &&` | Más estricta: además fija que los títulos siguen sólo desde 1024 y que el CTA se monta sólo con su bandera |
+| `s44-pie` · el pie plano abajo de 1025 | el mismo `return null` y `{conElPie && (` | el `return null` nuevo y `{escritorio && conElPie && (` | La misma condición (el pie 3D sólo desde 1024) |
+| `s41-retoque-3d` · la frase sube con la levantada | `llegada: frase, salida: levantada, corrida` ×2 | `salida: relevada ? null : levantada, corrida: relevada ? null : corrida` ×2 y `relevada` falsa sin bandera | Sin bandera, lo mismo; con `?cta=` la transformación toma la frase |
+| `s41-retoque-3d` · el valor con su tramo | `<ValorEnVolumen …><PiezaDeValor` | la pieza adentro de su llegada, con el pliegue sólo en `capas` | Sin bandera, la pieza tal cual |
+| `s42-cierre-retoque` y `s43-ronda2` · la frase se va con la levantada | `salida: levantada` ×2 | `salida: relevada ? null : levantada` ×2 | Ídem |
+| `s36-escena10` T3 · el módulo perezoso y la frase | el `return null` de antes; la frase con `salida: levantada, corrida` | el `return null` nuevo con los títulos montados sólo desde 1024; la frase con `relevada` | Las mismas dos condiciones (como `s40` y `s41`) |
+
+`s53-pulido-2` §5: puras y reversibles (control: con memoria); los extremos (control: el CTA corrido); sin saltos (control:
+un salto a la mitad); el texto con el CTA en su lugar (control: todavía vuela); relevo (control: las dos caras a la vez);
+giro (control: se funde); cruce (control: el CTA antes de la «o»); tipo y la fuente variable (control: el cambio en el peso
+grueso); capas y la pila (control: capas antes del pliegue); la fuente y el material (control: la Chivo); el clic y el hover
+(control: hover con el dedo); el CTA de hoy sin bandera (control: la escena montada siempre); el teléfono y el movimiento
+reducido (control: el estado final animado); sin P17-B (control: un archivo que quedó).
+
 ## 4 · Lo que no quedó bien (o no pude resolver)
 
 (se completa al cerrar)

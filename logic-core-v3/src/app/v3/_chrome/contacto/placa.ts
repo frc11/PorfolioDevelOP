@@ -62,19 +62,6 @@ export function viajeDesdeElFondo(pasos = 16): readonly number[] {
 }
 
 /**
- * [PULIDO 1] P17-B · d · EL VIAJE DESDE UN PUNTO (el clic en el CTA del portal): el corrimiento en `x` e `y` (px) de cada paso
- * del viaje para que la placa se vea en el punto (`desde`, px desde el centro del cuadro) al nacer y en el centro al llegar,
- * con el corrimiento aparente bajando parejo. Con perspectiva, una caja en `z` se ve `d / (d − z)` veces y su corrimiento
- * también: para verse corrida `c`, se la corre `c · (d − z) / d`. Sin punto, ninguno (el viaje de siempre).
- */
-export function viajeDesdeElPunto(desde: { readonly x: number; readonly y: number } | null, pasos = 16): { readonly x: readonly number[]; readonly y: readonly number[] } {
-  const d = PERSPECTIVA_DE_LA_PLACA
-  const zs = viajeDesdeElFondo(pasos)
-  const corrido = (c: number): number[] => zs.map((z, i) => (desde === null || i === pasos ? 0 : (c * (1 - i / pasos) * (d - z)) / d))
-  return { x: corrido(desde?.x ?? 0), y: corrido(desde?.y ?? 0) }
-}
-
-/**
  * La cámara para un puntero en `x`, `y` (fracciones del cuadro, 0 a 1): el giro de la placa, el punto de vista (%) y
  * ([EL ENCASTRE] 1D) el corrimiento al revés del mouse (fracción del cuadro).
  */

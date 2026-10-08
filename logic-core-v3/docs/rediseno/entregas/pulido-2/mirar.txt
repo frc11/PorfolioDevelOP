@@ -47,3 +47,15 @@ Lo que va EN CELULAR REAL (por la LAN): 1, 3 y 5.
    mientras está prendido y vuelve cuando se apaga. Rebobiná (rueda o dedo hacia arriba): se va en varios cuadros.
    Con chispas (las de la referencia): /v3?chispas=si.
    Hoja: p4-luz-de-abajo-refs-y-capturas.png (las tres referencias y tus capturas: naciendo, plena y retirándose, a 1440 y 390).
+
+5 · El CTA del final desde «Seis razones» (escritorio, teléfono y tablet)
+   URLs: /v3?cta=capas · /v3?cta=relevo · /v3?cta=giro · /v3?cta=cruce · /v3?cta=tipo  (sin bandera, el CTA de hoy)
+   En escritorio: en «Por qué develOP», después de los seis valores, seguí bajando: la frase se transforma en «HABLANOS» (en
+   la fuente del titular del hero, en volumen) y al final llega el texto «Este sitio empezó con una charla. El tuyo también.».
+   Subí y bajá a distintas velocidades y frená a la mitad: es función del scroll (vuelve igual para atrás).
+   Probá: pasar el mouse por el CTA (se levanta apenas) y el clic (abre Contacto); con Tab, el foco lleva al CTA ya llegado.
+   EN CELULAR REAL (y la tablet): el bloque del CTA queda clavado una pantalla mientras corre la transformación; la copia de
+   «Seis razones» aparece cuando el logo ya bajó. Con el dedo no hay hover; el toque abre Contacto.
+   Con movimiento reducido (del sistema): el CTA directo en su estado final, arriba del logo.
+   Hojas: p5-capas.png, p5-relevo.png, p5-giro.png, p5-cruce.png, p5-tipo.png (0, 25, 50, 75 y 100 % de la
+   transformación, a 1440 y a 390).

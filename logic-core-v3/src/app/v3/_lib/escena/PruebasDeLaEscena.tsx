@@ -6,6 +6,7 @@ import type * as THREE from 'three'
 import { CONSULTA_ESCENARIO } from '../compuerta'
 import { useAnchoMinimo } from '../useAnchoMinimo'
 
+import { varianteDelCta } from './ctaDelFinal/enVivo'
 import { entornoDeLaEscena } from './entorno'
 import type { ProbeRigStore, ProbeStatsStore } from './probeStore'
 
@@ -14,10 +15,12 @@ import type { ProbeRigStore, ProbeStatsStore } from './probeStore'
  * aparte y se descarga sólo si hace falta. [ESCENA 10] T3: los títulos de volumen, en su módulo (la geometría de la Chivo
  * y su fuente). [3D Y SONIDO] T1: pasaron al producto (`Entorno.titulos`, el negro; `titulos=blanco` para comparar,
  * `titulos=no` los apaga): el módulo sigue perezoso, llega después del primer cuadro. [RETOQUE DEL PIE] P2: el pie de
- * volumen, en el suyo (con los títulos; `?pruebas=pie=antes` lo cambia por el de antes, que es del DOM).
+ * volumen, en el suyo (con los títulos; `?pruebas=pie=antes` lo cambia por el de antes, que es del DOM). [PULIDO 2] 5: el CTA
+ * del final con su transformación (`?cta=`), en el suyo y en cualquier ancho (abajo de 1025 también hay CTA).
  */
 const TitulosDeVolumen = lazy(() => import('./titulos3d/TitulosDeVolumen'))
 const PieDeVolumen = lazy(() => import('./pie3d/PieDeVolumen'))
+const EscenaDelCta = lazy(() => import('./ctaDelFinal/EscenaDelCta'))
 
 interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
@@ -29,16 +32,24 @@ interface Props {
 export function PruebasDeLaEscena(props: Props) {
   // Abajo de 1025 las secciones no tienen escenario: ningún título se anota y el módulo no se descarga.
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
-  if (entornoDeLaEscena().titulos === 'no' || !escritorio) return null
+  const conElCta = varianteDelCta() !== null
+  if (entornoDeLaEscena().titulos === 'no' || (!escritorio && !conElCta)) return null
   const conElPie = entornoDeLaEscena().pruebas.pie !== 'antes'
   return (
     <>
-      <Suspense fallback={null}>
-        <TitulosDeVolumen {...props} />
-      </Suspense>
-      {conElPie && (
+      {escritorio && (
+        <Suspense fallback={null}>
+          <TitulosDeVolumen {...props} />
+        </Suspense>
+      )}
+      {escritorio && conElPie && (
         <Suspense fallback={null}>
           <PieDeVolumen keyLightRef={props.keyLightRef} />
+        </Suspense>
+      )}
+      {conElCta && (
+        <Suspense fallback={null}>
+          <EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} />
         </Suspense>
       )}
     </>

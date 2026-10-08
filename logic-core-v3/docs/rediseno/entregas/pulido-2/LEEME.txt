@@ -41,3 +41,16 @@ Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=
   prendido. Costo en la NVIDIA: en el ruido a 1440, +0,05 ms a 375.
   Archivos: escena/final/luzDeAbajo.ts, planoDeLaLuz.ts y chispasDeLaLuz.ts (nuevos), enElPiso.ts, cuadroDelFinal.ts,
   FinalDelPie.tsx; escena/piso/PisoVivo.tsx; escena/entorno.ts.  Bandera: chispas=si (apagada).  Se borró brillo=.
+
+5 · El CTA del final desde «Seis razones» (P17-B, de cero)
+  Qué: el CTA («HABLANOS») en la fuente del registro 1 del hero (Archivo, variable, en mayúsculas), en volumen con el material
+  de los títulos; cinco transformaciones desde la frase, cada una función pura del scroll: capas (los valores se pliegan y
+  cada uno da una capa de la extrusión del CTA), relevo (cada letra gira sobre X y en su dorso está la del CTA), giro (un
+  cartel de dos caras que gira sobre Y), cruce (la cámara entra por la «o»), tipo (el peso se afina hasta 100 mientras las
+  letras se cambian: la fuente es variable). El clic abre Contacto; en el teléfono el bloque queda clavado mientras corre;
+  con movimiento reducido, el estado final sin pisar el logo. Sin bandera, el CTA de hoy. P17-B (a|b|c|d), borrado entero.
+  Archivos: escena/ctaDelFinal/ (enVivo, variantes, letras, material, armadoDelCta, EscenaDelCta; todos nuevos),
+  _componentes/ctaDelFinal/CtaDelFinal.tsx (de cero), _secciones/por-que-develop/CtaTransformado.tsx (nuevo), PorQueDevelop.tsx
+  y geometria.ts; escena/PruebasDeLaEscena.tsx, titulos3d/TitulosDeVolumen.tsx y armado.ts, _lib/titulos3d/registro.ts,
+  escena/entorno.ts; _fuentes/ (archivo-700 con HABLANOS, archivo-100-cta y chivo-100-cta) y scripts-retoque/fuentes-3d.py.
+  Bandera: cta=capas|relevo|giro|cruce|tipo.  Default: el CTA de hoy hasta que el humano elija.

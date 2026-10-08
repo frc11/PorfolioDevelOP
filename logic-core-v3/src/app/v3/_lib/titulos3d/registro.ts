@@ -91,6 +91,12 @@ export interface TituloDeVolumen {
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
 
 /**
+ * [PULIDO 2] 5 · los títulos que otra pieza de la escena dibuja en su lugar (el CTA del final con `?cta=`: desde que su
+ * transformación arranca, la frase de Por qué develOP la mueve él): mientras tanto no se dibujan. Sin eso, ninguno.
+ */
+export const RELEVO_DE_LOS_TITULOS: { relevado: (id: string) => boolean } = { relevado: () => false }
+
+/**
  * [AJUSTES FINALES] A1 · DÓNDE TERMINA DE LLEGAR PORTFOLIO (progreso de la tabla de hoy) y con qué cámara se coloca su
  * título. En ESCENA 10 (la llegada que Valentino eligió: e10) la ventana de la máscara terminaba en 0,4426 y el título se
  * colocaba con la cámara de 0,4718: la cámara seguía orbitando hacia Números (8° de azimut y 1,8 de altura entre las dos)

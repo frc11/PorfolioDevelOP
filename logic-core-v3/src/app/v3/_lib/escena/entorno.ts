@@ -90,8 +90,11 @@ export interface Pruebas {
   readonly angel: 'asentado' | 'no'
   /** [PULIDO 2] 4 · `chispas=si`: las chispas de la luz que sale de abajo del piso (apagadas en el producto). */
   readonly chispas: 'si' | 'no'
-  /** [PULIDO 1] P17 · las variantes del CTA del final para elegir (`no`: el de hoy, el producto). */
-  readonly cta: 'a' | 'b' | 'c' | 'd' | 'no'
+  /**
+   * [PULIDO 2] 5 · cómo se llega al CTA del final desde «Seis razones» (`no`: el de hoy, el producto). Las de PULIDO 1
+   * (`a|b|c|d`) se borraron, rechazadas.
+   */
+  readonly cta: VarianteDelCta | 'no'
   /** [PULIDO 2] 3 · `velo=escena`: el velo del texto de Trabajos en el sombreador del logo (sin capa del DOM); el producto, la elipse del DOM. */
   readonly velo: 'escena' | 'no'
 }
@@ -113,6 +116,10 @@ export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: '
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
 export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'chispas', 'cta', 'velo'] as const
 
+/** [PULIDO 2] 5 · las transformaciones del CTA del final (`ctaDelFinal/variantes.ts`), cada una función pura del scroll. */
+export const VARIANTES_DEL_CTA = ['capas', 'relevo', 'giro', 'cruce', 'tipo'] as const
+export type VarianteDelCta = (typeof VARIANTES_DEL_CTA)[number]
+
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
   return opciones.find((o) => o === v) ?? 'no'
@@ -125,7 +132,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     chispas: unoDe<'si'>(['si'], valor('chispas')),
-    cta: unoDe<'a' | 'b' | 'c' | 'd'>(['a', 'b', 'c', 'd'], valor('cta')),
+    cta: unoDe<VarianteDelCta>(VARIANTES_DEL_CTA, valor('cta')),
     velo: unoDe<'escena'>(['escena'], valor('velo')),
   }
 }

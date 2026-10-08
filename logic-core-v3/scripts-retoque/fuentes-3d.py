@@ -12,7 +12,10 @@ la licencia permite convertirlas y redistribuirlas con la fuente.
                                    «Nosotros», el título de la foto (NOCTURNO FINAL, D1)
   chivo-700-titulos.json           [RETOQUE PANEL] T4 · lo subrayado del titular de Quiénes somos: «algo distinto,»
   chivo-300-titulos.json           [RETOQUE PANEL] T4 · lo tachado: «lo mismo de siempre»
-  archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»
+  archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»;
+                                   [PULIDO 2] 5 · y el CTA del final con `?cta=`: «HABLANOS»
+  archivo-100-cta.json             [PULIDO 2] 5 · `?cta=tipo`: «HABLANOS» en el peso 100 (el de 700, deformado hasta acá)
+  chivo-100-cta.json               [PULIDO 2] 5 · `?cta=tipo`: «Seis razones para elegirnos» en el peso 100 (ídem, desde 400)
   chivo-300-italica-titulos.json   el registro 2 del hero: «LAS 24 HS»
   chivo-{400,500,600}-pie.json     [RETOQUE DEL PIE] P2 · los textos del pie en 3D, cada uno con su peso
 
@@ -37,7 +40,13 @@ PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 300, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': ['lo mismo de siempre'], 'destino': 'chivo-300-titulos.json'},
     {'origen': 'archivo-display-latin.woff2', 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
-     'textos': ['TU NEGOCIO VENDIENDO'], 'destino': 'archivo-700-titulos.json'},
+     'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS'], 'destino': 'archivo-700-titulos.json'},
+    # [PULIDO 2] 5 · `?cta=tipo`: el CTA y la frase de Por qué develOP en el peso más fino del eje, con los mismos contornos
+    # (la fuente es variable: cada glifo tiene los mismos puntos en todo el eje) para deformar el peso de uno al otro.
+    {'origen': 'archivo-display-latin.woff2', 'peso': 100, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
+     'textos': ['HABLANOS'], 'destino': 'archivo-100-cta.json'},
+    {'origen': 'chivo-latin.woff2', 'peso': 100, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
+     'textos': ['Seis razones', 'para elegirnos'], 'destino': 'chivo-100-cta.json'},
     {'origen': 'chivo-italic-latin.woff2', 'peso': 300, 'familia': 'Chivo Italic', 'licencia': 'OFL-chivo.txt',
      'textos': ['LAS 24 HS'], 'destino': 'chivo-300-italica-titulos.json'},
     # [RETOQUE DEL PIE] P2 · el pie en 3D, con el peso con que el DOM pinta cada texto (los de `_secciones/cierre/contenido.ts`

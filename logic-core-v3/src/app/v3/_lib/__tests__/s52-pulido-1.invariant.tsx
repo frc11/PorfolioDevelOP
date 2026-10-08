@@ -3,7 +3,7 @@
  *
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   P12 · el texto de Trabajos sobre el logo de noche, en el teléfono y la tablet: halo denso + velo detrás de la bajada.
- *   Las banderas del sprint (apagadas en el producto; en la URL, con `?pruebas=` o sueltas: `?cta=a`).
+ *   Las banderas del sprint (apagadas en el producto; en la URL, con `?pruebas=` o sueltas: `?cta=relevo`).
  *   P2  · el rebobinado del encastre: proporcional a lo avanzado, con tope de 1,6 s y curva in-out; el quieto vuelve con él.
  *   P6  · el logo del intro baja con el titular: de su primera letra a la última, a velocidad constante (`?angel=asentado`).
  *   P18 · el formulario del pie abajo de 1024: vidrio líquido (el material del menú, compartido), en AA de día y de noche.
@@ -13,25 +13,19 @@
  *         se borraron en PULIDO 2 · 1: el final corre detrás del pie; lo fija `s53-pulido-2`.)
  *   P5  · un viaje del menú con el encastre avanzado: dura lo mismo que cualquiera; el final vuelve en paralelo, sin saltos.
  *   P17 · el CTA del final: A, la cámara sin el techo del domo en ningún aspecto (desde arriba, con un dolly-in leve por tiempo).
- *         B/C, las variantes de prueba (`?cta=a|b|c|d`): sin bandera el CTA de hoy; cada una con entrada, hover (toque) y salida.
+ *         B/C, las variantes de prueba (`?cta=a|b|c|d`), se borraron en PULIDO 2 · 5 (rechazadas): las nuevas, en `s53-pulido-2`.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-1.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-1/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
-
-import { renderToStaticMarkup } from 'react-dom/server'
 
 import * as THREE from 'three'
 
 import { aimWithFraming } from '../escena/cameraFraming'
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { estadoQuieto, poderSuave } from '../escena/final/cuadroDelFinal'
-import { ANCLAS_DEL_HUECO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { ANCLAS_DEL_HUECO, conElFinalEnElPiso } from '../escena/final/enElPiso'
 import { LUZ_DE_ABAJO, SECTOR_DE_LA_LUZ_GLSL, prendidoDeLaLuz, zonasDeLaLuz, type ZonaDeLaLuz } from '../escena/final/luzDeAbajo'
-import { CTA_EN_EL_PISO, conElEscalonEnLaSimulacion } from '../escena/ctaDelFinal/enElPiso'
-import { CTA_DEL_FINAL, alturaDelEscalon, filoEn, gestoDelToque, hazDelCta, inclinacionDeLaLosa, letraDelHaz } from '../escena/ctaDelFinal/estado'
-import { PORTAL_EN_VIVO } from '../escena/ctaDelFinal/portal'
-import { SIMULACION_GLSL } from '../escena/piso/bloques'
-import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
+import { ANCLAS_DEL_DIBUJO } from '../escena/piso/ondaDirigida'
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { MOUSE_HEIGHT_FACTOR } from '../escena/choreographyPhysics'
@@ -65,8 +59,6 @@ import { CAIDA_DEL_LOGO, altoDesdeElBorde, alturaDeLaCaida, pasoDeLaBajada } fro
 import { persigue } from '../escena/titulos3d/llegada'
 import { LLEGADA_DEL_TITULAR_S } from '../titulos3d/titular'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
-import { CtaDelFinal, LetrasDelCta } from '../../_componentes/ctaDelFinal/CtaDelFinal'
-import { PERSPECTIVA_DE_LA_PLACA, viajeDesdeElFondo, viajeDesdeElPunto } from '../../_chrome/contacto/placa'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -130,30 +122,30 @@ afirmar(!/velo-sobre-la-escena|sombra-del-velo|degrade-del-velo|alcance-del-velo
 titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; sin él, en la URL (`?pruebas=` o sueltas)')
 
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
-// `angel=asentado`, P17 `cta=a|b|c|d`. (P22 `encastre=desvanece`, P5 `vuelta=corta` y P1 `brillo=suave|fuerte` se borraron en
+// `angel=asentado`; PULIDO 2 · 5, `cta=capas|relevo|giro|cruce|tipo` (las de P17, `cta=a|b|c|d`, se borraron). (P22 `encastre=desvanece`, P5 `vuelta=corta` y P1 `brillo=suave|fuerte` se borraron en
 // PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], chispas: ['si'], cta: ['a', 'b', 'c', 'd'], velo: ['escena'] }
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], chispas: ['si'], cta: ['capas', 'relevo', 'giro', 'cruce', 'tipo'], velo: ['escena'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
   const pedidas = PRUEBAS_SUELTAS.every((k) => PEDIDAS[k].every((v) => f(`producto,${k}=${v}`).pruebas[k] === v))
   const otras = PRUEBAS_SUELTAS.every((k) => f(`producto,${k}=cualquiera`).pruebas[k] === 'no')
-  const juntas = f('producto,cta=b,chispas=si,angel=asentado').pruebas
-  return apagadas && pedidas && otras && juntas.cta === 'b' && juntas.chispas === 'si' && juntas.angel === 'asentado' && f('producto,cta=b').E1 === ENTORNO.E1
+  const juntas = f('producto,cta=giro,chispas=si,angel=asentado').pruebas
+  return apagadas && pedidas && otras && juntas.cta === 'giro' && juntas.chispas === 'si' && juntas.angel === 'asentado' && f('producto,cta=giro').E1 === ENTORNO.E1
 }
 afirmar(banderasBien(entornoPedido), 'cada prueba del sprint se pide por su nombre y vale sólo sus valores (otro valor es el producto); van juntas; en el producto están todas apagadas', PRUEBAS_SUELTAS.join(' · '))
 controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedido: string) => {
   const e = entornoPedido(pedido)
   const cta = /cta=(\w+)/.exec(pedido)
-  return cta === null ? e : { ...e, pruebas: { ...e.pruebas, cta: cta[1] as 'a' } }
+  return cta === null ? e : { ...e, pruebas: { ...e.pruebas, cta: cta[1] as 'relevo' } }
 }) as Traductor, banderasBien)
 type DeLaUrl = typeof pedidoDeLaUrl
 const urlBien = (f: DeLaUrl): boolean => {
-  const sueltas = f('?cta=a&chispas=si')
+  const sueltas = f('?cta=relevo&chispas=si')
   const ambas = f('?pruebas=pie=antes&angel=asentado')
-  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'a' && entornoPedido(sueltas).pruebas.chispas === 'si' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
+  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'relevo' && entornoPedido(sueltas).pruebas.chispas === 'si' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
 }
-afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=a`, `/v3?chispas=si`) y con `?pruebas=`; sin nada, el producto')
+afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=relevo`, `/v3?chispas=si`) y con `?pruebas=`; sin nada, el producto')
 controlPositivo('el detector VE una URL que sólo lee `?pruebas=` (las sueltas no llegarían)', ((b: string) => {
   const v = new URLSearchParams(b).get('pruebas')
   return v === null ? null : `producto,${v}`
@@ -785,91 +777,5 @@ const dollyBien = (paso: PasoDelDolly): boolean => {
 const rigP17 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
 afirmar(dollyBien(pasoDelDolly) && rigP17.includes('scratch.dolly.k = pasoDelDolly(scratch.dolly.k, physics && enElSostenDelCta(rigValues.progress), delta)') && rigP17.includes('distance -= dollyDelCta(scratch.dolly.k)'), '  al llegar, un dolly-in leve por tiempo (menos del 5 % de la distancia, en 1,6 s, con curva suave; fuera del sostén vuelve), sólo con movimiento', `ojo ${Math.hypot(C.distance, C.height).toFixed(2)} → ${(Math.hypot(C.distance, C.height) - DOLLY_DEL_CTA.u).toFixed(2)}`)
 controlPositivo('  el detector VE un dolly de golpe (en un cuadro)', ((k: number, en: boolean) => (en ? 1 : 0)) as PasoDelDolly, dollyBien)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('P17-B/C · Las variantes del CTA (`?cta=a|b|c|d`): sin bandera, el CTA de hoy; cada una con su entrada, su hover (su toque) y su salida')
-
-// Sin bandera no hay variante y nada cambia: el envoltorio devuelve sus hijos tal cual y las letras, su texto (el primer
-// render del cliente es también ése: la bandera se lee después de hidratar).
-const sinVariante = renderToStaticMarkup(
-  <CtaDelFinal llegada={null}>
-    <p data-pieza="x">
-      <LetrasDelCta texto="Hablanos" />
-    </p>
-  </CtaDelFinal>,
-)
-const porQueP17 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-const defaultBien = (html: string, f: string): boolean =>
-  html === '<p data-pieza="x">Hablanos</p>' && ENTORNO.pruebas.cta === 'no' && f.includes("abreElContacto={variante === null ? undefined : 'panel'}") && (f.match(/<CtaDelFinal /g) ?? []).length === 2
-afirmar(defaultBien(sinVariante, porQueP17), 'sin `?cta=` el CTA es el de hoy: el envoltorio devuelve sus hijos tal cual, las letras su texto y el botón no abre el panel (va al pie, como antes); con una variante, abre Contacto', sinVariante)
-controlPositivo('el detector VE un envoltorio que agrega una caja aun sin variante', renderToStaticMarkup(<div data-cta-variante="no"><p data-pieza="x">Hablanos</p></div>), (html: string) => defaultBien(html, porQueP17))
-
-// Las cuatro, por sus cuentas puras (las mismas que usan el DOM y la escena).
-const L = CTA_DEL_FINAL.losa
-const losaBien = (f: typeof inclinacionDeLaLosa): boolean => {
-  const sube = [0, 0.25, 0.5, 0.75, 1].map((l) => f(l, 0))
-  const baja = [0, 0.5, 1].map((s) => f(1, s))
-  return sube[0] === L.acostada && sube[4] === 0 && sube.every((g, i) => i === 0 || g <= sube[i - 1]) && baja[0] === 0 && baja[2] === L.acostada && baja[1] > 0
-}
-afirmar(losaBien(inclinacionDeLaLosa) && filoEn(0) === 0 && Math.abs(filoEn(L.vueltaDelFiloS * 0.5) - 0.5) < 1e-9 && Math.abs(filoEn(L.vueltaDelFiloS * 1.25) - 0.25) < 1e-9, '  a · la losa nace acostada (90°), se levanta con la llegada y vuelve a acostarse al abrir Contacto; el filo da una vuelta por el borde cada 1,4 s')
-controlPositivo('  el detector VE una losa que no se acuesta al abrir Contacto', ((l: number) => L.acostada * (1 - l)) as typeof inclinacionDeLaLosa, losaBien)
-
-const H = CTA_DEL_FINAL.haz
-const hazBien = (haz: typeof hazDelCta, letra: typeof letraDelHaz): boolean => {
-  // El haz: baja en `bajaS`; su luz parpadea (falla antes de prender) y queda prendida.
-  const luces = Array.from({ length: 200 }, (_, i) => haz((i / 200) * H.guionS * 1.2).luz)
-  let apagones = 0
-  for (let i = 1; i < luces.length; i += 1) if (luces[i] < 0.05 && luces[i - 1] >= 0.05) apagones += 1
-  const bajo = haz(H.bajaS).baja === 1 && haz(H.bajaS * 0.5).baja < 1 && haz(0).baja === 0
-  // Las letras: apagadas antes, se encienden EN SECUENCIA (cada una después de la anterior) y quedan prendidas.
-  const prende = (i: number): number => {
-    for (let s = 0; s < 6; s += 0.005) if (letra(i, s) >= 0.95) return s
-    return Number.POSITIVE_INFINITY
-  }
-  const orden = [0, 5, 10, 20, 40].map(prende)
-  return bajo && apagones >= 2 && luces[luces.length - 1] === 1 && letra(0, 0) === H.apagada && orden.every((s, i) => Number.isFinite(s) && (i === 0 || s > orden[i - 1])) && letra(40, 6) === 1
-}
-afirmar(hazBien(hazDelCta, letraDelHaz), '  b · el haz baja sobre el CTA con el parpadeo de su encendido (falla antes de prender) y las letras se encienden en secuencia, una después de la otra, y quedan prendidas')
-controlPositivo('  el detector VE todas las letras a la vez', hazDelCta, (h: typeof hazDelCta) => hazBien(h, (i: number, s: number) => letraDelHaz(0, s)))
-
-const escalonBien = (f: typeof alturaDelEscalon): boolean =>
-  f(0, 0) === 0 && f(1, 0) === CTA_DEL_FINAL.bloques.alto && f(1, 1) === CTA_DEL_FINAL.bloques.alto && f(0.4, 0) > f(0.4, 1) && f(0.4, 1) >= 0
-afirmar(escalonBien(alturaDelEscalon) && gestoDelToque(0) === 0 && gestoDelToque(CTA_DEL_FINAL.toqueS * 0.5) > 0.99 && gestoDelToque(CTA_DEL_FINAL.toqueS * 1.01) === 0, '  c · el escalón se arma del centro a los bordes hasta su alto; el toque con el dedo es un gesto que sube y baja en 0,7 s')
-controlPositivo('  el detector VE un escalón que sube entero de una vez', ((a: number) => CTA_DEL_FINAL.bloques.alto * a) as typeof alturaDelEscalon, escalonBien)
-
-// d · la placa de Contacto sale del punto del clic: su viaje desde el fondo con un corrimiento que se ve en el punto al nacer
-// y en el centro al llegar, sin pasarse (el corrimiento aparente baja parejo); sin punto, el de siempre (ninguno).
-const portalBien = (f: typeof viajeDesdeElPunto): boolean => {
-  const sin = f(null)
-  const con = f({ x: 300, y: -120 })
-  const VIAJE_P17 = viajeDesdeElFondo()
-  const escala = VIAJE_P17.map((z) => PERSPECTIVA_DE_LA_PLACA / (PERSPECTIVA_DE_LA_PLACA - z))
-  const aparente = con.x.map((x, i) => x * escala[i])
-  return sin.x.every((x) => x === 0) && sin.y.every((y) => y === 0) && Math.abs(aparente[0] - 300) < 1e-6 && Math.abs(con.y[0] * escala[0] + 120) < 1e-6 && aparente[aparente.length - 1] === 0 && aparente.every((a, i) => i === 0 || a <= aparente[i - 1] + 1e-9)
-}
-afirmar(portalBien(viajeDesdeElPunto), '  d · la placa de Contacto sale del punto del clic (se ve ahí al nacer y en el centro al llegar, sin pasarse); sin punto, el viaje de siempre')
-controlPositivo('  el detector VE un corrimiento lineal (con la perspectiva, la placa volaría fuera de la pantalla a mitad del viaje)', ((p: { readonly x: number; readonly y: number } | null) => {
-  const n = viajeDesdeElFondo().length
-  return { x: Array.from({ length: n }, (_, i) => (p === null ? 0 : p.x * (1 - i / (n - 1)) * 50)), y: Array.from({ length: n }, (_, i) => (p === null ? 0 : p.y * (1 - i / (n - 1)) * 50)) }
-}) as typeof viajeDesdeElPunto, portalBien)
-
-// El cableado: la escena monta lo suyo sólo con una variante; el piso y la trama se parchean sólo con la suya; la apertura
-// guarda el punto sólo desde el portal; el hover lo dan el puntero y el foco del teclado, y el toque, el dedo.
-const escenarioP17 = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
-const pisoP17 = sinComentarios(leer('_lib/escena/piso/PisoVivo.tsx'))
-const moireP17 = sinComentarios(leer('_lib/escena/MoireScreen.tsx'))
-const aperturaP17 = sinComentarios(leer('_chrome/contacto/apertura.ts'))
-const ctaP17 = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
-const cableadoP17 = (escenario: string): boolean =>
-  escenario.includes('{varianteDelCta() !== null && <PiezaDelCta quieto={reducedMotion} />}') &&
-  pisoP17.includes("const conEscalon = varianteDelCta() === 'c'") && pisoP17.includes('if (conEscalon) conElEscalonEnLaSimulacionDe(sim.material)') && pisoP17.includes('if (conEscalon) conElEscalonEnElPiso(material)') &&
-  moireP17.includes("if (varianteDelCta() === 'd') {") &&
-  aperturaP17.includes("objetivo.closest('[data-cta-desde-el-punto]') !== null ? puntoDelClic(e, objetivo) : null") && aperturaP17.includes('estado = { ...estado, abierto: true, precarga, origen, punto: puntoDelPedido }') &&
-  ctaP17.includes('onPointerDown={alApretar}') && ctaP17.includes("e.target.matches(':focus-visible')") && ctaP17.includes("if (e.pointerType === 'touch') return")
-afirmar(cableadoP17(escenarioP17), '  el cableado: la escena monta lo suyo sólo con una variante, el piso y la trama se parchean sólo con la suya, el punto del clic sólo desde el portal; hover con el puntero o el foco, y con el dedo un toque (sin hover)')
-controlPositivo('  el detector VE la pieza de la escena montada siempre', escenarioP17.replace('{varianteDelCta() !== null && <PiezaDelCta quieto={reducedMotion} />}', '<PiezaDelCta quieto={reducedMotion} />'), cableadoP17)
-// El piso y la trama con su parche: compilan contra el sombreador de verdad (las anclas existen) y, sin uniformes, no cambian nada.
-const simP17 = conElEscalonEnLaSimulacion(conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)))
-afirmar(simP17.includes('dibujo = max( dibujo, escalonDelCta( xz ) );') && simP17.includes('if ( uArmadoDelEscalon <= 0.0 ) return 0.0;') && CTA_EN_EL_PISO.uArmadoDelEscalon.value === 0 && PORTAL_EN_VIVO.uPortal.value.z === 0, '  el escalón entra en la simulación del piso de verdad (sin armar, no hace nada) y el tirón del moiré arranca en cero')
 
 cerrar('s52-pulido-1')

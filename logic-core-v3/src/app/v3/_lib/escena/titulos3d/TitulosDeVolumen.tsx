@@ -6,7 +6,7 @@ import * as THREE from 'three'
 
 import { acotar01 } from '../../acotar'
 import { cargaLista } from '../../carga'
-import { TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
+import { RELEVO_DE_LOS_TITULOS, TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { KEY_INTENSITY } from '../probeLighting'
@@ -247,6 +247,8 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     // destino) y sus rayas crecen con ella. Antes se dibujaba con cualquier raya empezada: desde el menú, en el viaje.
     if (a.sinLetras) a.uniforms.uTrazos.value.multiplyScalar(llegada * (1 - salida))
     a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1
+    // [PULIDO 2] 5 · relevado (el CTA del final lo dibuja en su lugar): no se dibuja, pero lo mostrado sigue al scroll.
+    if (RELEVO_DE_LOS_TITULOS.relevado(a.titulo.id)) a.malla.visible = false
     if (!a.malla.visible) {
       if (llegada <= 0) a.colocado = false
       continue

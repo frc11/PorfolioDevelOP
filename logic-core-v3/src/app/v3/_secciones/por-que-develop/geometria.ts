@@ -107,5 +107,11 @@ export const VENTANA_DEL_CTA: Ventana = { desde: progresoDelPin(valores.hasta + 
 /** El destacado y el botón, un poco después de la frase del CTA. */
 export const VENTANA_DEL_DESTACADO: Ventana = { desde: progresoDelPin(valores.hasta + 0.35), hasta: progresoDelPin(cta.llega) }
 
+/**
+ * [PULIDO 2] 5 · con `?cta=`, la transformación de «Seis razones» al CTA: del fin de los valores a la llegada del CTA (la
+ * misma pantalla que hoy ocupan la levantada y la llegada del CTA). Su progreso es función del pin (`ctaDelFinal/variantes.ts`).
+ */
+export const VENTANA_DE_LA_TRANSFORMACION: Ventana = { desde: progresoDelPin(valores.hasta), hasta: progresoDelPin(cta.llega) }
+
 /** Cuánto sube lo que se levanta, en `svh`. */
 export const SUBIDA_DE_LA_LEVANTADA_SVH = 12

@@ -21,14 +21,9 @@ export interface EstadoDelContacto {
   readonly modo: ModoDelChrome
   /** Para devolverle el foco al cerrar. */
   readonly origen: HTMLElement | null
-  /**
-   * [PULIDO 1] P17-B · d · el punto del clic (px de la ventana) cuando la placa sale de ahí: sólo desde el CTA del portal
-   * (`data-cta-desde-el-punto`, la prueba `?cta=d`). Sin él (todos los demás), la placa nace en el centro, como siempre.
-   */
-  readonly punto: { readonly x: number; readonly y: number } | null
 }
 
-let estado: EstadoDelContacto = { abierto: false, precarga: [], modo: 'barra', origen: null, punto: null }
+let estado: EstadoDelContacto = { abierto: false, precarga: [], modo: 'barra', origen: null }
 const oyentes = new Set<() => void>()
 const avisar = (): void => oyentes.forEach((f) => f())
 
@@ -44,9 +39,6 @@ export function anotarElMenuAbierto(cerrarYDespues: ((despues: () => void) => vo
   menuAbierto = cerrarYDespues
 }
 
-/** [PULIDO 1] P17-B · d · el punto del próximo pedido: lo anota la delegación justo antes de abrir y se consume al abrir. */
-let puntoDelPedido: EstadoDelContacto['punto'] = null
-
 export function abrirContacto(precarga: readonly Interes[] = [], origen: HTMLElement | null = null): void {
   if (menuAbierto !== null) {
     const cerrarElMenu = menuAbierto
@@ -54,8 +46,7 @@ export function abrirContacto(precarga: readonly Interes[] = [], origen: HTMLEle
     cerrarElMenu(() => abrirContacto(precarga, origen))
     return
   }
-  estado = { ...estado, abierto: true, precarga, origen, punto: puntoDelPedido }
-  puntoDelPedido = null
+  estado = { ...estado, abierto: true, precarga, origen }
   avisar()
 }
 
@@ -113,13 +104,6 @@ export function viajarAlContacto(selectorDeLosViajes: string): void {
   formulario?.focus({ preventScroll: true })
 }
 
-/** [PULIDO 1] P17-B · d · el punto del clic; con el teclado (sin puntero: `detail` 0), el centro del disparador. */
-export function puntoDelClic(e: MouseEvent, disparador: Element): { readonly x: number; readonly y: number } {
-  if (e.detail > 0) return { x: e.clientX, y: e.clientY }
-  const r = disparador.getBoundingClientRect()
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2 }
-}
-
 /** La precarga que pide el disparador: `data-precarga` es el id de un servicio. */
 export function precargaDe(disparador: Element): readonly Interes[] {
   const servicio = disparador.getAttribute('data-precarga')
@@ -136,8 +120,6 @@ export function useAperturaDelContacto(selectorDeLosViajes: string): void {
       const objetivo = e.target instanceof Element ? e.target.closest(SELECTOR_DE_APERTURA) : null
       if (objetivo === null) return
       e.preventDefault()
-      // [PULIDO 1] P17-B · d · desde el CTA del portal, la placa sale del punto del clic (se consume al abrir el panel).
-      puntoDelPedido = objetivo.getAttribute('data-abre-contacto') === ABRE_EL_PANEL && objetivo.closest('[data-cta-desde-el-punto]') !== null ? puntoDelClic(e, objetivo) : null
       if (objetivo.getAttribute('data-abre-contacto') === ABRE_EL_PANEL) abrirContacto(precargaDe(objetivo), objetivo instanceof HTMLElement ? objetivo : null)
       else viajarAlContacto(selectorDeLosViajes)
     }

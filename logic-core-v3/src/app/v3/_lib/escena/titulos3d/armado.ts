@@ -26,10 +26,10 @@ import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_NORMAL_
  * del blanco de DÍA (su color, lineal): sobre el cielo claro las tapas blancas casi no se separan del fondo; con el filo
  * oscuro, el mismo dibujo de la noche al revés, se leen. De noche lo reemplaza el filo claro.
  */
-const NOCHE_DEL_TITULO = { filo: 0.018, contorno: { alcance: 0.06, celda: 0.005 }, tapaDelBlanco: 0.86, filoDelBlancoDeDia: 0.06 } as const
+export const NOCHE_DEL_TITULO = { filo: 0.018, contorno: { alcance: 0.06, celda: 0.005 }, tapaDelBlanco: 0.86, filoDelBlancoDeDia: 0.06 } as const
 
 /** El filo oscuro del blanco de día: el albedo del borde de las tapas, apagado con la noche (la del logo, por la emisiva). */
-const FILO_DE_DIA_GLSL = /* glsl */ `
+export const FILO_DE_DIA_GLSL = /* glsl */ `
 	diffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${NOCHE_DEL_TITULO.filoDelBlancoDeDia.toFixed(3)} ), bordeDelLogoDeNoche() * ( 1.0 - clamp( emissive.r / ${EMISION_EN_LA_NOCHE.toFixed(3)}, 0.0, 1.0 ) ) );
 `
 

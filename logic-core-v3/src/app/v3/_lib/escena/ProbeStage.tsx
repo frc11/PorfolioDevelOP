@@ -17,8 +17,6 @@ import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
 import { FinalDelPie } from './final/FinalDelPie'
-import { PiezaDelCta } from './ctaDelFinal/PiezaDelCta'
-import { varianteDelCta } from './ctaDelFinal/estado'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
@@ -281,8 +279,6 @@ export default function ProbeStage({
         {/* [NOCTURNO FINAL] B1 · el logo cae al cargar y llega con el titular del hero (súper onda); con movimiento. */}
         {!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}
         {(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}
-        {/* [PULIDO 1] P17-B · lo que las variantes del CTA del final tienen en la escena (sólo con `?cta=`). */}
-        {varianteDelCta() !== null && <PiezaDelCta quieto={reducedMotion} />}
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}

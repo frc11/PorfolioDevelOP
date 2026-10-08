@@ -18,8 +18,6 @@ import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
 import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
-import { conElEscalonEnElPiso, conElEscalonEnLaSimulacionDe } from '../ctaDelFinal/enElPiso'
-import { varianteDelCta } from '../ctaDelFinal/estado'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, grillaDelPiso, type Grilla } from './bloques'
@@ -239,9 +237,6 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uLogoInverso: AIRE.uLogoInverso,
     uCamara: { value: new THREE.Vector3(0, 1e4, 0) },
   })
-  // [PULIDO 1] P17-B · c · con `?cta=c`, el escalón de bloques bajo el CTA (`ctaDelFinal/enElPiso.ts`); sin ella, igual.
-  const conEscalon = varianteDelCta() === 'c'
-  if (conEscalon) conElEscalonEnLaSimulacionDe(sim.material)
   uAlturas.value = sim.estado()[0]
   // [CALIDAD 1] B8: con dithering (ruido azul).
   const material = conPisoVivo(new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0, dithering: true }), {
@@ -266,7 +261,6 @@ function armar(grilla: Grilla, conContacto: boolean) {
   conElAmanecer(material, true)
   conLaOndaEnElPiso(material)
   conElFinalEnElPiso(material)
-  if (conEscalon) conElEscalonEnElPiso(material)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

@@ -119,9 +119,10 @@ const arribaDeLosValores = (): number => {
   return m === null ? NaN : 50 - SUBIDA_DE_LA_FRASE_SVH + Number(m[1])
 }
 afirmar(SUBIDA_DE_LA_FRASE_SVH === 33 && arribaDeLosValores() === 27, 'la frase sube 3 svh más y las columnas quedan donde estaban (27 svh): el aire entre los dos pasa de 7 a 10 svh', 'medido a 1440 × 900: de la «g» del 3D al ícono de «Calidad que se nota», 16 px → 43 px')
-const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, salida: levantada, corrida \}\}/g) ?? []).length === 2
+// [PULIDO 2] 5 · con `?cta=` (salvo `capas`) la frase la toma la transformación en su lugar (`relevada`); sin bandera, igual.
+const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, salida: relevada \? null : levantada, corrida: relevada \? null : corrida \}\}/g) ?? []).length === 2 && c.includes("const relevada = variante !== null && variante !== 'capas'")
 afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
-controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/llegada: frase, salida: levantada, corrida \}\}/g, 'llegada: frase, salida: levantada }}'), subeConLaLevantada)
+controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/, corrida: relevada \? null : corrida \}\}/g, ' }}'), subeConLaLevantada)
 afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -188,7 +189,8 @@ const lugares = new Set(DESDE_DONDE_LLEGAN.map((d) => `${String(d.x)},${String(d
 const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4, 5].every((i) => pose(1, i).transform === 'none' && pose(0, i).opacidad === 0 && /translate3d\(-?\d/.test(pose(0, i).transform)) && new Set([0, 1, 2, 3, 4, 5].map((i) => pose(0, i).transform)).size === 6
 afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
 controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
-afirmar(/<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor/.test(porQue) && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
+// [PULIDO 2] 5 · con `?cta=capas` el valor se pliega adentro de su llegada (`PliegueDelValor`); sin bandera, la pieza tal cual.
+afirmar(/const pieza = <PiezaDeValor [^>]*\/>\s*return \(\s*<li>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*\{pliegue === null \? pieza : <PliegueDelValor/.test(porQue) && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')
