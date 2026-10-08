@@ -243,7 +243,10 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
     // T4: el que no tiene letras (el ≠), sólo con alguna raya empezada.
     const conRaya = avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
     a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)
-    a.malla.visible = a.sinLetras ? conRaya : llegada > 0 && salida < 1
+    // [PULIDO 2] 2f · el que no tiene letras llega como los demás: con su llegada (en un viaje, desarmado; después, la del
+    // destino) y sus rayas crecen con ella. Antes se dibujaba con cualquier raya empezada: desde el menú, en el viaje.
+    if (a.sinLetras) a.uniforms.uTrazos.value.multiplyScalar(llegada * (1 - salida))
+    a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1
     if (!a.malla.visible) {
       if (llegada <= 0) a.colocado = false
       continue

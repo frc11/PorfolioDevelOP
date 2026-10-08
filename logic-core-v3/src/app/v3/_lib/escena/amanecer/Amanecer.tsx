@@ -9,9 +9,9 @@ import { ESCENAS_APARTE } from '../gpu/Precompilar'
 import { TRAMA_EN_VIVO, leerLaTrama } from '../estrellas/trama'
 import type { MoireHandle } from '../MoireScreen'
 import { DIA_DEL_FINAL, NOCHE_DEL_AMANECER, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from '../nocheDisparada'
-import { viajeEnCurso } from '../viaje'
+import { segundosDelViaje, viajeEnCurso } from '../viaje'
 import { DIA_DEL_TEXTO } from './diaDelTexto'
-import { AMANECER, PAUSA_S, avanceDelScroll, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer, type MomentoVivo } from './linea'
+import { AMANECER, PAUSA_S, avanceDelScroll, completoDelViaje, compuertaEnLaLlegada, diaParaElTexto, momentoEn, pasoDelAmanecer, type MomentoVivo } from './linea'
 import { armarLosHaces, dibujarLosHaces, mostrarLosHaces, type HacesDelAmanecer } from './haces'
 import { AMANECER_EN_VIVO, conElAmanecerEnElLogo, hayAmanecer } from './luz'
 
@@ -143,14 +143,23 @@ function AmanecerPrendido({ moireRef, logoMaterialRef, quieto }: PropsDelAmanece
     const luzDelViaje = viaje?.luz ?? null
     // [ESCENA 10] CIERRE: en uno que cambia de luz, quieto (la luz es la del reloj del viaje); al llegar, derecho al pedido.
     const cambiaDeLuz = viaje !== null && luzDelViaje === null
-    const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null ? medirElBloqueOpacoEn(document, window.innerHeight, m.bloque) : null
+    const bloque = DIA_DEL_FINAL.activo || luzDelViaje !== null || cambiaDeLuz ? medirElBloqueOpacoEn(document, window.innerHeight, m.bloque) : null
     const enLaLlegada = luzDelViaje !== null && bloque !== null ? compuertaEnLaLlegada(bloque.tuPanel.pie - (luzDelViaje.y1 - window.scrollY), bloque.alto) : null
-    const activo = !cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)
+    // [PULIDO 2] 2 · en uno que cambia de luz y LLEGA al amanecer (de la noche de Portfolio a «Por qué develOP»), el amanecer
+    // se completa ADENTRO del viaje, con su reloj (de cero al día entero, como llega el de día a día); antes quedaba quieto y,
+    // al terminar el viaje, saltaba de golpe a lo que pedía el scroll (0,85 a 390: un cuadro de cero a casi entero).
+    const y1 = viaje?.y1
+    const llegaAlAmanecer = cambiaDeLuz && y1 !== undefined && bloque !== null && compuertaEnLaLlegada(bloque.tuPanel.pie - (y1 - window.scrollY), bloque.alto)
+    const activo = (!cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)) || llegaAlAmanecer
     m.pedido = activo && bloque !== null ? avanceDelScroll(bloque.tuPanel.pie, bloque.alto) : 0
     const recien = activo && !m.activo
     m.activo = activo
     if (m.congelado !== null) m.avance = m.congelado / AMANECER.final
-    else if (!activo) {
+    else if (llegaAlAmanecer && viaje !== null && bloque !== null && y1 !== undefined) {
+      m.avance = completoDelViaje(segundosDelViaje(), viaje.duracionMs / 1000)
+      m.entero = true
+      m.pedidoAlLlegar = avanceDelScroll(bloque.tuPanel.pie - (y1 - window.scrollY), bloque.alto)
+    } else if (!activo) {
       m.avance = 0
       m.entero = false
     } else {

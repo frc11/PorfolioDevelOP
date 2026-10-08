@@ -275,7 +275,7 @@ const escena3d = (leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armad
 afirmar(/if \(variante === 'blanco'\) shader\.fragmentShader = shader\.fragmentShader\.replace\('#include <map_fragment>', `#include <map_fragment>\\n\$\{FILO_DE_DIA_GLSL\}`\)/.test((leer('titulos3d/TitulosDeVolumen.tsx') + leer('titulos3d/armado.ts'))), 'el blanco, de día, lleva un filo oscuro en el borde de las tapas (sobre el cielo claro se perdía); de noche lo reemplaza el claro')
 afirmar(/conLogoDeNoche\(material, contorno, variante === 'blanco' \? \{ ancho: NOCHE_DEL_TITULO\.filo, tapa: NOCHE_DEL_TITULO\.tapaDelBlanco \} : \{ ancho: NOCHE_DEL_TITULO\.filo \}\)/.test(escena3d) && /if \(logo !== null\) a\.material\.emissive\.copy\(logo\.emissive\)/.test(escena3d) && /conElAmanecer\(material\)/.test(escena3d), 'de noche se leen como el logo: su misma emisión en el mismo cuadro y su dibujo (costados negros, tapas claras con filo); el amanecer los oscurece como a la sala')
 const reglas = (c: string): boolean =>
-  /a\.malla\.visible = (a\.sinLetras \? conRaya : )?llegada > 0 && salida < 1/.test(c) &&
+  /a\.malla\.visible = (a\.sinLetras \? conRaya && llegada > 0 && salida < 1 : )?llegada > 0 && salida < 1/.test(c) &&
   /malla\.name = `titulo de volumen · \$\{titulo\.id\}`/.test(c) &&
   /dithering: true/.test(c) &&
   // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM. [PASADA FINAL] A1: por lote, en `sincronia.ts`.
@@ -283,7 +283,7 @@ const reglas = (c: string): boolean =>
   // [RETOQUE 3D] B1: la colocación se mudó a `colocarElArmado` (guarda el lugar para el que se queda).
   /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, a\.fuente\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
-controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = a.sinLetras ? conRaya : llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
+controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
 
 // ── CIERRE · el destello de un cuadro ─────────────────────────────────────
 // Con scroll real lo mide `npm run test:escena-destello` (pide el servidor); acá, el orden del cuadro y el viaje.
@@ -301,9 +301,10 @@ controlPositivo('el detector VE el paso del estado sin prioridad (después del r
 const eventosDeR3f = readdirSync(path.join(process.cwd(), 'node_modules/@react-three/fiber/dist')).find((f) => /^events-.*\.cjs\.dev\.js$/.test(f)) ?? ''
 const r3f = eventosDeR3f === '' ? '' : readFileSync(path.join(process.cwd(), 'node_modules/@react-three/fiber/dist', eventosDeR3f), 'utf8')
 afirmar(/internal\.priority = internal\.priority \+ \(priority > 0 \? 1 : 0\)/.test(r3f) && /internal\.subscribers\.sort\(\(a, b\) => a\.priority - b\.priority\)/.test(r3f), '  en r3f una prioridad negativa corre antes que las de 0 y no se lleva el dibujo (sólo una positiva lo toma)', eventosDeR3f)
-const viajeQuieto = (c: string): boolean => /const cambiaDeLuz = viaje !== null && luzDelViaje === null/.test(c) && /const activo = !cambiaDeLuz && \(enLaLlegada \?\? DIA_DEL_FINAL\.activo\)/.test(c) && /c\.viaje = viaje !== null \|\| m\.deUnViaje/.test(c) && /m\.deUnViaje = cambiaDeLuz/.test(c)
+// [PULIDO 2] 2 · salvo el que llega al amanecer: ahí se completa adentro del viaje con el reloj del viaje (no con el vuelo: s53).
+const viajeQuieto = (c: string): boolean => /const cambiaDeLuz = viaje !== null && luzDelViaje === null/.test(c) && /const activo = \(!cambiaDeLuz && \(enLaLlegada \?\? DIA_DEL_FINAL\.activo\)\) \|\| llegaAlAmanecer/.test(c) && /const llegaAlAmanecer = cambiaDeLuz && y1 !== undefined && bloque !== null && compuertaEnLaLlegada\(/.test(c) && /c\.viaje = viaje !== null \|\| m\.deUnViaje/.test(c) && /m\.deUnViaje = cambiaDeLuz/.test(c)
 const alLlegar = avanceDelCuadro(0, 0.97, 1 / 75, { recien: true, carga: false, quieto: false, viaje: true, oculto: false, pie: false })
 afirmar(viajeQuieto(amanecer) && alLlegar === 0.97, 'en un viaje del menú que cambia de luz el amanecer no corre (la sala la mueve el reloj del viaje) y al llegar va derecho al pedido; corría a la velocidad del vuelo', `al llegar: ${String(alLlegar)}`)
-controlPositivo('el detector VE el amanecer que corre en el viaje', amanecer.replace('const activo = !cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)', 'const activo = enLaLlegada ?? DIA_DEL_FINAL.activo'), viajeQuieto)
+controlPositivo('el detector VE el amanecer que corre en el viaje', amanecer.replace('const activo = (!cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)) || llegaAlAmanecer', 'const activo = enLaLlegada ?? DIA_DEL_FINAL.activo'), viajeQuieto)
 
 cerrar('s36-escena10')

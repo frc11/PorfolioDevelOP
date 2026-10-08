@@ -131,7 +131,7 @@ afirmar(compuertaEnLaLlegada(-200, ALTO) && !compuertaEnLaLlegada(ALTO * 2.5, AL
 const componente = leer('amanecer/Amanecer.tsx')
 afirmar(/const luzDelViaje = viaje\?\.luz \?\? null/.test(componente) && /compuertaEnLaLlegada\(bloque\.tuPanel\.pie - \(luzDelViaje\.y1 - window\.scrollY\), bloque\.alto\)/.test(componente) && /pasoDelAmanecer\(m, enLaLlegada !== null,/.test(componente), '  el componente la usa: la compuerta del destino con Tu panel corrido allá, sólo en los viajes que llevan luz (de día a día)')
 // [ESCENA 10] CIERRE: los que cambian de luz ya no siguen la regla de antes (corría a la velocidad del vuelo): quieto, y al llegar derecho al pedido (s36).
-afirmar(/c\.viaje = viaje !== null \|\| m\.deUnViaje/.test(componente) && /const activo = !cambiaDeLuz && /.test(componente), '  los viajes que cambian de luz: [ESCENA 10] quieto durante el viaje y, al llegar, derecho al pedido (s36, CIERRE)')
+afirmar(/c\.viaje = viaje !== null \|\| m\.deUnViaje/.test(componente) && /const activo = \(!cambiaDeLuz && \(enLaLlegada \?\? DIA_DEL_FINAL\.activo\)\) \|\| llegaAlAmanecer/.test(componente) && /m\.avance = completoDelViaje\(segundosDelViaje\(\), viaje\.duracionMs \/ 1000\)/.test(componente), '  los viajes que cambian de luz: [ESCENA 10] no corren a la velocidad del vuelo: quietos y, al llegar, derecho al pedido; [PULIDO 2] 2 · salvo los que llegan al amanecer, que se completa adentro del viaje con su reloj (s36, s53)')
 
 // ── A2 · el cielo de día: pintado celeste ─────────────────────────────────
 titulo('A2 · el cielo de día: el pintado celeste, encendido')

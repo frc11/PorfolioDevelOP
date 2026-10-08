@@ -26,7 +26,7 @@ import { readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
-import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, VIAJE_CON_TOPE, duracionDelViaje } from '../../_componentes/deslizamiento'
+import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, PRELUDIO_MS, duracionDelViaje } from '../../_componentes/deslizamiento'
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
 import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, GOLPE_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
@@ -297,17 +297,23 @@ const sinEsperaBien = (ef: string): boolean =>
 afirmar(sinEsperaBien(efecto), '  el viaje desde el pie con la cinemática avanzada NO espera a la escena ([PULIDO 1] P5): sale como cualquiera, y la escena sabe cuánto dura para deshacerla adentro')
 controlPositivo('  el detector VE la espera de A2 (no mover el scroll hasta el final en reposo)', efecto.replace('if (lenis === null) {', 'if (!FINAL_EN_REPOSO.valor) { relojDeArranque = window.setTimeout(arrancar, 50); return } if (lenis === null) {'), sinEsperaBien)
 
-// La velocidad con tope: el mínimo de siempre para los cortos; los largos tardan más, sin pasar 4,5 pantallas por segundo.
-const velocidadBien = (f: typeof duracionDelViaje): boolean => {
-  const alto = 900
-  const distancias = Array.from({ length: 60 }, (_, i) => 300 + i * 600)
-  const duraciones = distancias.map((d) => f(d, alto))
-  const monotona = duraciones.every((d, i) => i === 0 || d >= duraciones[i - 1])
-  const conTope = distancias.every((d, i) => duraciones[i] >= VIAJE_CON_TOPE.maximoMs - 1e-9 || d / alto / (duraciones[i] / 1000) <= VIAJE_CON_TOPE.pantallasPorS + 1e-9)
-  return f(900, alto) === DURACION_DEL_VIAJE_MS && f(-900, alto) === DURACION_DEL_VIAJE_MS && monotona && conTope && f(31_000, alto) > DURACION_DEL_VIAJE_MS && duraciones.every((d) => d <= VIAJE_CON_TOPE.maximoMs)
+// [PULIDO 2] 2 · la velocidad con tope de A2 (a lo sumo 4,5 pantallas por segundo, hasta 7 s: «Inicio → Por qué develOP» en
+// 7,7 s, medido) se reemplazó por pedido: la duración es función de la distancia (en pantallas de la escena) con saturación.
+// Del click a la llegada: una pantalla o menos, 1,2 s; crece con la distancia, cada vez menos (cóncava); ninguna pasa 2,5 s;
+// la más larga del sitio (≈ 34,5 pantallas: «Inicio» desde el pie) entre 2,2 y 2,5 s; desde el encastre, la misma (la
+// duración no mira el final: sale de la distancia).
+const totalDe = (f: typeof duracionDelViaje, pantallas: number): number => f(pantallas) + PRELUDIO_MS
+const duracionBien = (f: typeof duracionDelViaje): boolean => {
+  const distancias = Array.from({ length: 80 }, (_, i) => i * 0.5)
+  const totales = distancias.map((d) => totalDe(f, d))
+  const monotona = totales.every((t, i) => i === 0 || t >= totales[i - 1] - 1e-9)
+  const concava = totales.every((t, i) => i < 2 || distancias[i - 2] < 1 || t - totales[i - 1] <= totales[i - 1] - totales[i - 2] + 1e-9)
+  return monotona && concava && Math.abs(totalDe(f, 1) - 1200) < 1 && Math.abs(totalDe(f, 0.3) - 1200) < 1 && totalDe(f, -3) === totalDe(f, 3) &&
+    totalDe(f, 3) <= 1350 && totales.every((t) => t <= 2500 + 1e-9) && totalDe(f, 34.5) >= 2200 && totalDe(f, 34.5) <= 2500 && totalDe(f, 200) <= 2500
 }
-afirmar(velocidadBien(duracionDelViaje), 'la velocidad con tope: los viajes cortos duran lo de siempre; los largos, más (a lo sumo 4,5 pantallas por segundo en promedio), hasta 7 s', `«Inicio» desde el pie a 1440×900: ${(duracionDelViaje(31_070, 900) / 1000).toFixed(1)} s`)
-controlPositivo('  el detector VE la duración fija de antes (31.000 px en 2,6 s: 13 pantallas por segundo)', (() => DURACION_DEL_VIAJE_MS) as typeof duracionDelViaje, velocidadBien)
+afirmar(duracionBien(duracionDelViaje), 'la duración de un viaje es función de la distancia con saturación: las vecinas en ~1,2 s, creciendo cada vez menos, ninguna más de 2,5 s', `1 pantalla: ${String(Math.round(totalDe(duracionDelViaje, 1)))} ms · 8: ${String(Math.round(totalDe(duracionDelViaje, 8)))} ms · 34,5 («Inicio» desde el pie a 1440): ${String(Math.round(totalDe(duracionDelViaje, 34.5)))} ms`)
+controlPositivo('  el detector VE la velocidad con tope de A2 (4,5 pantallas por segundo, hasta 7 s)', ((p: number) => Math.min(7000, Math.max(2600, (Math.abs(p) / 4.5) * 1000))) as typeof duracionDelViaje, duracionBien)
+controlPositivo('  y la duración fija de antes de A2 (2,6 s para todo)', (() => DURACION_DEL_VIAJE_MS + 400) as typeof duracionDelViaje, duracionBien)
 
 // Un cuadro largo no hace saltar el viaje: el reloj avanza a lo sumo `TOPE_DEL_CUADRO_DEL_VIAJE_MS` por cuadro.
 /** El paso de scroll más grande de un cuadro normal y el del cuadro largo (un tirón de 120 ms a mitad de camino). */
@@ -364,13 +370,16 @@ const deParedSinTope: typeof viajarSinLenis = (destino, duracionMs, curva, alTer
 }
 controlPositivo('  el detector VE el reloj de pared sin tope (el tirón saltaba 800 px de página y 17° de cámara)', deParedSinTope, tironBien)
 // Y lo mismo con Lenis (su reloj, en el viaje) y en la inercia de la cámara.
+// [PULIDO 2] 2 · Lenis lee el reloj del viaje (`relojDelCuadro`, el mismo que el final y el motor sin Lenis), que es el de
+// pared con este tope por cuadro en un viaje (lo retenido se devuelve después, a lo sumo el tope por cuadro).
 const scrollSuave = sinComentarios(leer('_componentes/ScrollSuaveDeV3.tsx'))
+const relojDelViaje = sinComentarios(leer('_lib/escena/viaje.ts'))
 const rig = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
 const topesBien = (ss: string, rg: string): boolean =>
-  ss.includes('reloj = reloj < 0 ? tiempo : reloj + (viajeEnCurso() === null ? tiempo - tReal : Math.min(tiempo - tReal, TOPE_DEL_CUADRO_DEL_VIAJE_MS))') && ss.includes('lenis.raf(reloj)') &&
+  ss.includes('lenis.raf(relojDelCuadro(tiempo))') && relojDelViaje.includes('const paso = actual === null && RELOJ.motores === 0 ? debe : Math.min(debe, TOPE_DEL_CUADRO_DEL_VIAJE_MS)') &&
   rg.includes('const pasoDeLaInercia = Math.min(delta, TOPE_DEL_CUADRO_DEL_VIAJE_MS / 1000)') && /SETTLE_EPSILON\[channel\],\s*pasoDeLaInercia/.test(rg)
 afirmar(topesBien(scrollSuave, rig), '  con Lenis, su reloj en un viaje avanza con el mismo tope; y la inercia de la cámara también (con 100 ms de delta recuperaba de golpe lo que venía atrás)')
-controlPositivo('  el detector VE a Lenis con el reloj de pared', [scrollSuave.replace('lenis.raf(reloj)', 'lenis.raf(tiempo)'), rig] as const, ([ss, rg]: readonly [string, string]) => topesBien(ss, rg))
+controlPositivo('  el detector VE a Lenis con el reloj de pared', [scrollSuave.replace('lenis.raf(relojDelCuadro(tiempo))', 'lenis.raf(tiempo)'), rig] as const, ([ss, rg]: readonly [string, string]) => topesBien(ss, rg))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A3 · Portfolio desde el menú: nada de las Demos al llegar (su aparición no persigue al scroll en un viaje)')

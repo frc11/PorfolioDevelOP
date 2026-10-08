@@ -52,6 +52,9 @@ import { elevacionDe } from './lightArc'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
+
+/** [PULIDO 2] 2 · un cuadro que llega después de esto (s) viene de la escena suspendida (no de un tirón: esos duran décimas). */
+const REANUDA_S = 0.5
 import { crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
 import {
   applyLightRig,
@@ -362,6 +365,10 @@ export function OrbitRig({
       // [NOCTURNO FINAL] A2 · con el paso acotado: un cuadro largo (un tirón) no deja que la cámara recupere de golpe todo
       // lo que venía atrás del progreso (en un viaje eran 17° en un cuadro). Es el tope del cuadro del viaje.
       const pasoDeLaInercia = Math.min(delta, TOPE_DEL_CUADRO_DEL_VIAJE_MS / 1000)
+      // [PULIDO 2] 2 · al volver de estar suspendida (sin cuadros: una sección opaca, como Tu panel), la cámara quedó a mitad de
+      // su asiento y nada se vio mientras tanto: va derecho a su pose. Antes la alcanzaba de a un tope por cuadro, y un viaje
+      // que salía de Tu panel giraba hasta 30° en su primer cuadro (medido a 1440, con los viajes cortos de PULIDO 2).
+      if (physics && delta > REANUDA_S) for (const channel of CHOREO_CHANNELS) live[channel] = target[channel]
       for (const channel of CHOREO_CHANNELS) {
         live[channel] = physics
           ? dampTowards(

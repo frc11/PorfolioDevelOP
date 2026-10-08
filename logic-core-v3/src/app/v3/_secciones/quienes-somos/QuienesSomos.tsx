@@ -143,9 +143,11 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
           </Bloque>
 
           {/* El ≠ lleva la tipografía del titular sin escribir texto: de ahí salen su `em` y su medida, y con ellas el alto y el centrado. */}
+          {/* [PULIDO 2] 2f · y llega con la MISMA función que el titular (su entrada: P1 con el rango de la máscara, pura del
+              scroll); antes no tenía llegada y, desde el menú, aparecía en el viaje, antes que todo lo demás. */}
           <Bloque
             patron="P1"
-            rango="ventana-del-trazo"
+            rango={GEOMETRIA.rangoDeLaMascara}
             className={cn(
               GEOMETRIA.reparto.signo,
               GEOMETRIA.tipografiaDelTitular,
@@ -153,7 +155,11 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
             style={GEOMETRIA.estilos.titular}
           >
-            {(progresoDelSigno) => <SignoDeVolumen progreso={progresoDelSigno} />}
+            {(entradaDelSigno) => (
+              <Bloque patron="P1" rango="ventana-del-trazo">
+                {(progresoDelSigno) => <SignoDeVolumen progreso={progresoDelSigno} entrada={entradaDelSigno} />}
+              </Bloque>
+            )}
           </Bloque>
 
           <Bloque

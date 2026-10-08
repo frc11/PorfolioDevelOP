@@ -5,7 +5,8 @@ import { useEffect, type RefObject } from 'react'
 
 import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
 
-import { planDelViaje } from '../_lib/escena/planDelViaje'
+import { pantallasDelViaje, planDelViaje } from '../_lib/escena/planDelViaje'
+import { curvaDelViaje } from '../_lib/escena/repartoDelViaje'
 import { retenerLosGestos } from '../_lib/gestosDelScroll'
 import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
 
@@ -45,7 +46,7 @@ const MARGEN_DEL_RELOJ_MS = 500
 
 /**
  * El total del reloj: el del deslizamiento más el margen. Derivado. [NOCTURNO FINAL] A2 · ya no es una constante: el
- * recorrido dura según la distancia (`duracionDelViaje`, con tope de velocidad). [PULIDO 1] P5 · y ya no hay espera del
+ * recorrido dura según la distancia (`duracionDelViaje`: [PULIDO 2] 2, con saturación). [PULIDO 1] P5 · y ya no hay espera del
  * final del pie (vuelve en paralelo con el recorrido): el reloj cubre las tres de nuevo.
  */
 const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracionMs + MARGEN_DEL_RELOJ_MS
@@ -302,7 +303,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).
       const destinoEnPx = destinoDelViaje(seccion)
       // [NOCTURNO FINAL] A2 · la velocidad con tope: un viaje largo tarda más (`deslizamiento.ts`).
-      const duracionMs = duracionDelViaje(destinoEnPx - window.scrollY, window.innerHeight)
+      // [PULIDO 2] 2 · ahora función de la distancia de la escena, con saturación: de 1,2 s a 2,5 s del click a la llegada.
+      const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))
+      // [PULIDO 2] 2 · y su curva, repartida por lo que se ve cambiar (la cámara que gira cuesta tiempo: `repartoDelViaje.ts`).
+      const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)
       window.clearTimeout(relojDeLaEscena)
       // [PULIDO 1] P5 · y cuánto dura, del click al frenazo: el final del pie vuelve a cero adentro de esto, en paralelo.
       empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
@@ -374,7 +378,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
           cancelarElViaje = viajarSinLenis(
             destinoEnPx,
             duracionMs,
-            CURVA_DEL_VIAJE,
+            curva,
             () => terminar(true),
           )
           return
@@ -386,9 +390,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
            * develOP, importada. La rueda sigue con la del sitio, que es la que
            * `OPCIONES_DE_LENIS` declara y este sprint no toca. El costo de tener
            * dos está declarado en `deslizamiento.ts` y numerado en
-           * `DIRECCION-ESCENA.md` §7.74.
+           * `DIRECCION-ESCENA.md` §7.74. [PULIDO 2] 2 · repartida por lo que se ve
+           * cambiar (`curvaDelViaje`, con esta de base).
            */
-          easing: CURVA_DEL_VIAJE,
+          easing: curva,
           // ⚠ Va explícito aunque sea el default. [RETOQUE DEL ENCASTRE] 2C · ya no es
           // lo que hace al viaje cancelable (no lo es: la rueda no le llega a Lenis
           // mientras viaja, la retiene `gestosDelScroll.ts`); Lenis no encierra nada

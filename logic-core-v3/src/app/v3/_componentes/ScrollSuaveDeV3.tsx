@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
-import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from '../_lib/escena/viaje'
+import { relojDelCuadro } from '../_lib/escena/viaje'
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
 import { VELOCIDAD_DEL_SCROLL, velocidadDelCuadro } from '../_lib/velocidadDelScroll'
@@ -83,11 +83,9 @@ export default function ScrollSuaveDeV3(): null {
     let [yAnterior, tAnterior] = [lenis.animatedScroll, 0]
     // [NOCTURNO FINAL] A2 · el reloj que ve Lenis: en un viaje del menú, un cuadro largo avanza a lo sumo
     // `TOPE_DEL_CUADRO_DEL_VIAJE_MS` (un tirón no hace saltar la página); fuera de un viaje, el de siempre.
-    let [reloj, tReal] = [-1, 0]
+    // [PULIDO 2] 2 · es el reloj del viaje (`relojDelCuadro`), el mismo que lee el final: lo retenido se devuelve después.
     let pedido = requestAnimationFrame(function cuadro(tiempo: number) {
-      reloj = reloj < 0 ? tiempo : reloj + (viajeEnCurso() === null ? tiempo - tReal : Math.min(tiempo - tReal, TOPE_DEL_CUADRO_DEL_VIAJE_MS))
-      tReal = tiempo
-      lenis.raf(reloj)
+      lenis.raf(relojDelCuadro(tiempo))
       const y = lenis.animatedScroll
       VELOCIDAD_DEL_SCROLL.pxPorSegundo = tAnterior === 0 ? 0 : velocidadDelCuadro(yAnterior, y, tiempo - tAnterior)
       yAnterior = y

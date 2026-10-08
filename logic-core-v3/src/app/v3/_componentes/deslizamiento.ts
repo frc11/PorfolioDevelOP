@@ -88,8 +88,11 @@ export const DURACION_DE_DESAPARICION_MS = 180
 /** Quieto en la escena, ya sin texto, antes de arrancar el recorrido. */
 export const PAUSA_MS = 120
 
-/** El recorrido: del hero a Trabajos. */
-export const DURACION_DEL_VIAJE_MS = 2600
+/**
+ * El recorrido: del hero a Trabajos. [PULIDO 2] 2 · el del viaje MÁS LARGO (cualquier viaje del menú: la duración es función
+ * de la distancia, `duracionDelViaje`): con el preludio, a lo sumo 2,5 s del click a la llegada.
+ */
+export const DURACION_DEL_VIAJE_MS = 2200
 
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -103,17 +106,24 @@ export const DURACION_DEL_DESLIZAMIENTO_S = DURACION_DEL_VIAJE_MS / 1000
 export const TOTAL_DEL_DESLIZAMIENTO_MS = PRELUDIO_MS + DURACION_DEL_VIAJE_MS
 
 /**
- * [NOCTURNO FINAL] A2 · LA VELOCIDAD CON TOPE. El recorrido duraba siempre `DURACION_DEL_VIAJE_MS`, fuera de una pantalla
- * o de treinta y cinco: «Inicio» desde el pie cruzaba 31.000 px en 2,6 s y la cámara volaba (hasta 7° por cuadro en el
- * medio). Ahora `DURACION_DEL_VIAJE_MS` es el MÍNIMO: un viaje largo no pasa de `pantallasPorS` pantallas por segundo
- * en promedio (la curva del viaje llega al doble en su mitad), así que tarda más, hasta `maximoMs`.
+ * [PULIDO 2] 2 · LA DURACIÓN, FUNCIÓN DE LA DISTANCIA CON SATURACIÓN. Reemplaza la velocidad con tope de NOCTURNO FINAL A2
+ * (a lo sumo 4,5 pantallas por segundo, entre 2,6 y 7 s de recorrido), que llevaba «Inicio → Por qué develOP» a 7,7 s del
+ * click a la llegada (medido a 1440). Ahora, del click a la llegada: `minimoMs` para un viaje de una pantalla o menos (las
+ * vecinas), creciendo con la distancia cada vez menos (`1 − e^(−(d − 1)/pantallas)`) hasta el total del viaje más largo
+ * (`TOTAL_DEL_DESLIZAMIENTO_MS`, 2,5 s). La distancia es la de la escena, sin el estiramiento del túnel (los px que el túnel
+ * agrega no son recorrido de la sala: con la velocidad con tope, hacían cada viaje que lo cruzaba ~0,9 s más largo).
  */
-export const VIAJE_CON_TOPE = { pantallasPorS: 4.5, maximoMs: 7000 } as const
+export const DURACION_DE_LOS_VIAJES = { minimoMs: 1200, pantallas: 20 } as const
 
-/** [NOCTURNO FINAL] A2 · cuánto dura el recorrido de `distanciaPx` con una ventana de `altoPx`: crece con la distancia, con tope. */
-export function duracionDelViaje(distanciaPx: number, altoPx: number): number {
-  const porVelocidad = (Math.abs(distanciaPx) / Math.max(1, altoPx) / VIAJE_CON_TOPE.pantallasPorS) * 1000
-  return Math.min(VIAJE_CON_TOPE.maximoMs, Math.max(DURACION_DEL_VIAJE_MS, porVelocidad))
+/** [PULIDO 2] 2 · del click a la llegada (ms), para un viaje de `pantallas` (de la escena, sin el túnel estirado). */
+export function duracionTotalDelViaje(pantallas: number): number {
+  const { minimoMs, pantallas: escala } = DURACION_DE_LOS_VIAJES
+  return minimoMs + (TOTAL_DEL_DESLIZAMIENTO_MS - minimoMs) * (1 - Math.exp(-Math.max(0, Math.abs(pantallas) - 1) / escala))
+}
+
+/** [PULIDO 2] 2 · el recorrido de ese viaje (ms): el total menos el preludio (lo que Lenis o el motor sin Lenis animan). */
+export function duracionDelViaje(pantallas: number): number {
+  return duracionTotalDelViaje(pantallas) - PRELUDIO_MS
 }
 
 /**

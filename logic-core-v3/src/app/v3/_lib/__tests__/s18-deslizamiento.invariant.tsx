@@ -362,12 +362,14 @@ afirmarIgual(
 const FUENTE_DEL_EFECTO = quitarComentarios(leer(EFECTO))
 // [NOCTURNO FINAL] A2 · cambió por pedido (velocidad con tope): la duración ya no es una sola; la calcula el módulo para
 // cada viaje (`duracionDelViaje`, con `DURACION_DEL_VIAJE_MS` como mínimo) y el efecto la pasa en segundos (s52 A2).
+// [PULIDO 2] 2 · ahora de la distancia de la escena (`pantallasDelViaje`), con saturación; y la curva del viaje va de base
+// de la curva repartida por lo que se ve cambiar (`curvaDelViaje`): sigue explícita.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const duracionMs = duracionDelViaje(destinoEnPx - window.scrollY, window.innerHeight)') && FUENTE_DEL_EFECTO.includes('duration: duracionMs / 1000'),
+  FUENTE_DEL_EFECTO.includes('const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))') && FUENTE_DEL_EFECTO.includes('duration: duracionMs / 1000'),
   '  el efecto la consume del módulo (`duracionDelViaje`, por viaje), no escribe un 4',
 )
 afirmar(
-  FUENTE_DEL_EFECTO.includes('easing: CURVA_DEL_VIAJE'),
+  FUENTE_DEL_EFECTO.includes('const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)') && FUENTE_DEL_EFECTO.includes('easing: curva'),
   '  y le pasa la curva del viaje EXPLÍCITA: sin eso `scrollTo` volvería a heredar la de la rueda',
 )
 /**

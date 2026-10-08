@@ -35,6 +35,20 @@ function luzDe(superficie: DefinicionSuperficie, nivel: number): Luz {
 
 const verLaSala = (s: DefinicionSuperficie): boolean => s.dejaVerElCanvas && !s.invertida
 
+/**
+ * [PULIDO 2] 2 · cuántas pantallas recorre la escena en el viaje hasta `y1` (px del documento): sin el tramo estirado del
+ * túnel, como la luz (la duración del viaje sale de esto, `duracionDelViaje`).
+ */
+export function pantallasDelViaje(y1: number): number {
+  const v = window.innerHeight
+  const y0 = window.scrollY
+  const secciones = medirLasSecciones(document, y0)
+  if (secciones === null || !(v > 0)) return Math.abs(y1 - y0) / Math.max(1, v)
+  const desde = medidaSinElEstiramiento(y0, secciones.abajo, y0, v, { y: 0, abajo: 0 }).y
+  const hasta = medidaSinElEstiramiento(y1, secciones.abajo, y0, v, { y: 0, abajo: 0 }).y
+  return Math.abs(hasta - desde) / v
+}
+
 export function planDelViaje(destino: string, y1: number): PlanDelViaje {
   const v = window.innerHeight
   const y0 = window.scrollY
@@ -56,7 +70,7 @@ export function planDelViaje(destino: string, y1: number): PlanDelViaje {
   const nivelDeSalida = verLaSala(salida) ? NIVEL_NATURAL.valor : null
   const nivelDeLlegada = verLaSala(llegada) ? nivelDelArcoEn(y1) : null
   const clase = claseDelViaje(luzDe(salida, NIVEL_NATURAL.valor), luzDe(llegada, nivelDeLlegada ?? 1))
-  if (clase !== 'dia-a-dia') return { destino, clase, luz: null }
+  if (clase !== 'dia-a-dia') return { destino, clase, luz: null, y1 }
   const desde = nivelDeSalida ?? nivelDeLlegada ?? 1
-  return { destino, clase, luz: { desde, hasta: nivelDeLlegada ?? desde, y0, y1 } }
+  return { destino, clase, luz: { desde, hasta: nivelDeLlegada ?? desde, y0, y1 }, y1 }
 }

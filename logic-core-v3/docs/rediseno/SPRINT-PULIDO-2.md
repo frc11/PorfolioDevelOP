@@ -133,6 +133,90 @@ que avanza escribiendo y el pie con la mezcla.
 s2, s3, s4, s5, s7, s8, s17) con las mismas 14 invariantes; reposo capturado a 1440, 390 y 768 (`pulido-2/reposo/p1-*`), sin
 errores en la consola (sólo el aviso de movimiento reducido del banco). Escritorio: el final igual que antes.
 
+### 2 · Los viajes del menú: más rápidos sin perder calidad
+
+**a) La matriz, antes** (`entregas/pulido-2/p2-matriz-de-viajes.txt`; NVIDIA, del click a la llegada): a 1440, las vecinas en
+2,9–3,0 s y los largos hasta 7,7 s («Inicio → Por qué develOP» 7.657 ms; «Inicio» desde el pie 7.437 ms); desde el encastre
+avanzado, lo mismo que desde el pie en reposo (eso ya lo había dejado P5). A 390, de 2,9 a 6,0 s.
+
+**b) Por qué se ralentizó** (leído en la historia, sin checkout: `git log -p` de `deslizamiento.ts` y `git show <tag>:…` en
+`navbar-v3`, `retoque-encastre`, `nocturno-parcial`, `nocturno-final` y `pulido-1`):
+- Hasta `retoque-encastre` todo viaje duraba 2,6 s de recorrido (`DURACION_DEL_VIAJE_MS`), fuera de una pantalla o de 35.
+- **La causa: NOCTURNO FINAL A2** (`fa0a9ca5`, desde `nocturno-parcial`): la duración pasó a ser una VELOCIDAD CON TOPE (a lo
+  sumo 4,5 pantallas por segundo, entre 2,6 y 7 s). «Inicio → Por qué develOP» son 31 pantallas: ~7 s.
+- **El túnel estirado lo agrandaba** (sospecha confirmada): la distancia se contaba en px crudos, con los del túnel de
+  escritorio estirado (k = 1,8): ~3.500 px más en cada viaje que lo cruza, ~0,9 s más con esa velocidad.
+- **El tope por cuadro sin devolución** (sospecha confirmada en parte): A2 hizo que ningún cuadro avanzara el viaje más de
+  34 ms y lo que se perdía no se devolvía: cada cuadro largo alargaba el viaje (en la NVIDIA, 0 a 3 por viaje: poco; en un
+  teléfono, más). Y el final del pie se deshacía con OTRO reloj (el `delta` de su cuadro), así que con cuadros largos la
+  cámara del recorrido y la vuelta del final iban a ritmos distintos.
+- **La espera a `FINAL_EN_REPOSO`** (descartada): la sacó PULIDO 1 P5.
+- **El tope de velocidad del amanecer** (descartado como causa de la lentitud; sí era un defecto): no alarga el viaje, pero
+  en un viaje que cambia de luz el amanecer quedaba quieto y saltaba al terminar (ver e).
+
+**c) La duración nueva** (`deslizamiento.ts`): del click a la llegada, `1,2 s + 1,3 s · (1 − e^(−(d − 1)/20))`, con `d` las
+pantallas que recorre la ESCENA (sin el túnel estirado: `pantallasDelViaje`): una pantalla o menos, 1,2 s; ocho, 1,6 s;
+la más larga del sitio (34,5), 2,26 s; nunca más de 2,5 s. Se fue `VIAJE_CON_TOPE`. Desde el encastre avanzado, la misma (la
+duración no mira el final).
+
+**d) Desde el encastre**: la vuelta del final ES el rebobinado de P2, comprimido (`duracionDeLaVuelta`): la misma curva y el
+mismo reparto (todo es función de `fin`), con la duración de P2 escalada para que desde el final entero termine en 1 s (P2:
+1,6 s; desde la mitad, 0,5 s). Se fueron el reparto del tiempo por pesos (cámara, logo, piso), el techo en el 56 % del viaje y
+`vuelta=corta`. Y corre con **el reloj del viaje** (`relojDelCuadro`/`segundosDelViaje` en `escena/viaje.ts`), el mismo que
+mueven Lenis y el motor sin Lenis: la cámara del recorrido no se adelanta a la vuelta. Ese reloj es el de pared con el tope de
+A2 por cuadro, pero lo retenido se devuelve en los cuadros siguientes (a lo sumo el tope por cuadro): un viaje dura lo que pidió
+aunque haya tirones. El brillo del piso ya no se apaga de un cuadro al otro en la vuelta (ni en el rebobinado de P2): el poder
+del piso baja con inercia (`poderSuave`, 0,3 s).
+
+**e) Sin perder calidad:**
+- **El reparto por lo que se ve cambiar** (`escena/repartoDelViaje.ts`, nuevo): con 1,2–2,5 s, la curva del viaje pareja en el
+  scroll dejaba los tramos donde la cámara gira (el hero, la entrada al túnel, Servicios → Tu panel) en pocos cuadros. Ahora la
+  curva del viaje se aplica al COSTO de cada tramo: lo que recorre la escena más lo que gira la cámara de la coreografía (con su
+  encuadre; 30° cuestan como una pantalla). Donde gira, más tiempo; donde la sala apenas cambia, menos. Mismo destino, misma
+  duración, puntas quietas.
+- **La cámara al salir de una sección opaca** (`OrbitRig.tsx`): con la escena suspendida (Tu panel), la cámara quedaba a mitad
+  de su asiento y, al arrancar el viaje, lo alcanzaba de a un tope por cuadro (hasta 30° en un cuadro). Ahora, al volver de la
+  suspensión, va derecho a su pose (nada se vio mientras tanto): un solo cambio de 8° detrás del velo, a los 40 ms del click.
+- **El amanecer se completa adentro del viaje** (`amanecer/Amanecer.tsx`, `linea.ts`): en un viaje que cambia de luz y llega al
+  amanecer (de la noche de Portfolio a «Por qué develOP») quedaba quieto y, al terminar el viaje, saltaba de golpe a lo que
+  pedía el scroll (a 390, de 0 a 0,85 en un cuadro, medido). Ahora va de cero al día entero con el reloj del viaje (después del
+  preludio, con la curva simétrica) y queda entero al llegar, como el de día a día. Medido a 390: 0 → 1 en el viaje.
+- Las secciones se siguen viendo pasar (el scroll es continuo, el túnel comprimido) y durante el viaje no se puede scrollear
+  (sin cambios: `retenerLosGestos`).
+
+**f) El ≠ de Quiénes somos** (`QuienesSomos.tsx`, `titular3d.tsx`, `titulos3d/TitulosDeVolumen.tsx`): no tenía llegada y se
+dibujaba con cualquier raya empezada; desde el menú aparecía en el viaje, ~0,5 s antes que el titular (screencast:
+`pulido-2/p2/signo-antes-1440.png`). Ahora llega con la misma función que el titular (su entrada: P1 con el rango de la
+máscara, pura del scroll): en un viaje se desarma como los demás y sus rayas crecen con la llegada (`signo-despues-1440.png`:
+aparece con «Queremos hacer algo distinto»).
+
+**Medido después** (la matriz entera en el entregable): a 1440, de 1,23 a 2,37 s; a 390, de 1,22 a 2,21 s; desde el encastre
+avanzado lo mismo que desde el pie en reposo (± 50 ms). La vuelta del final desde el entero: 1,02 s. Lo más que gira la cámara
+en un cuadro: ver «Lo que no quedó bien».
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-nocturno-final` A2 · la velocidad | la velocidad con tope (cortos 2,6 s; largos a lo sumo 4,5 pantallas/s, hasta 7 s), con control de la duración fija | la duración por la distancia con saturación (1 pantalla: 1,2 s; cóncava; nunca más de 2,5 s; la más larga entre 2,2 y 2,5 s), con dos controles (A2 y la fija) | Lo pide PULIDO 2; fija la función con más condiciones que antes |
+| `s52-nocturno-final` A2 · Lenis con tope | el literal del reloj de Lenis con el tope | Lenis con `relojDelCuadro`, y el tope en `viaje.ts` | La misma garantía (un tirón avanza a lo sumo el tope; el tirón simulado sigue verde) y además fija que es el reloj compartido |
+| `s52-pulido-1` P5 · la vuelta | a la velocidad de P2, ≤ 56 % del viaje y ≤ 1,6 s; nada cambia por cuadro más que en P2; el brillo en varios cuadros; tres controles | el rebobinado de P2 comprimido a 1 s: cuadro a cuadro la MISMA curva que P2 a 1,6×, adentro del viaje, monótona; nada cambia por cuadro más que P2 × 1,6; el brillo en varios cuadros (ahora con la inercia del poder, en P2 y en el viaje); tres controles | Lo pide PULIDO 2 (comprimido en ~1 s); la curva queda fijada exacta, y el brillo con el mismo umbral que antes |
+| `s52-pulido-1` P5 · `?vuelta=corta` | existe y vale el 35 % | no existe | Borrada por pedido |
+| `s52-pulido-1` P5 · el cableado | `viajeS: … / 1000 }, dt)` | lo mismo con `enElViajeS: enElViaje()` | Más estricta: fija el reloj del viaje |
+| `s52-pulido-1` · las banderas | con `vuelta=corta` | sin ella | Borrada por pedido |
+| `s51-retoque-encastre` · el cableado | el literal del reloj | con `enElViajeS: enElViaje()` | Más estricta |
+| `s18-deslizamiento` §4d | `duracionDelViaje(destinoEnPx - window.scrollY, window.innerHeight)` y `easing: CURVA_DEL_VIAJE` | `duracionDelViaje(pantallasDelViaje(destinoEnPx))` y la curva repartida con `CURVA_DEL_VIAJE` de base | El efecto sigue consumiendo la duración del módulo y pasando una curva explícita |
+| `s46-retoque-panel` · el ≠ en volumen | `<SignoDeVolumen progreso={progresoDelSigno} />` | con `entrada={entradaDelSigno}` | Más estricta: fija también la llegada |
+| `s34-calidad1` · los viajes que cambian de luz | `const activo = !cambiaDeLuz && …`: quieto todo el viaje | lo mismo, salvo el que llega al amanecer, que se completa con el reloj del viaje (`completoDelViaje(segundosDelViaje(), …)`) | Lo pide PULIDO 2 («el amanecer se completa dentro del viaje»); sigue fijando que no corre a la velocidad del vuelo |
+| `s36-escena10` · el amanecer en el viaje | el literal de `activo` (quieto) | el literal nuevo, con `llegaAlAmanecer` medido en el destino | Ídem; el control (el amanecer que corre en el viaje) sigue cazando |
+| `s36-escena10` · las reglas de §4 | `a.sinLetras ? conRaya : …` | `a.sinLetras ? conRaya && llegada > 0 && salida < 1 : …` | Más estricta: el sin letras también se dibuja sólo con su llegada |
+
+`s53-pulido-2` §2: la duración por la distancia de la escena (control: los px crudos); el reloj con lo retenido devuelto y la
+pausa que no es deuda (control: el reloj de A2); los tres que lo leen (control: el final con su `delta`); el reparto (control:
+sin repartir); el amanecer adentro del viaje (control: quieto y salto); el ≠ con la llegada del titular (control: sin llegada).
+
+**Gate:** lint limpio en lo tocado (en `QuienesSomos.tsx` quedan dos avisos de imports sin usar que ya estaban: no los toqué); `tsc --noEmit` 0 errores; s47–s53 verdes (más s18, s27, s34, s36 y s46, que tocaba); `verificar`: los 8 grupos rojos de la base con sus 14 invariantes, más s34 y s36, que fijaban el amanecer quieto en los viajes que cambian de luz y la regla vieja del ≠: ajustados (tabla) y corridos de nuevo, verdes; reposo a 1440 y 390 (`pulido-2/reposo/p2-*`) sin errores en la consola.
+
 ## 4 · Lo que no quedó bien (o no pude resolver)
 
 (se completa al cerrar)

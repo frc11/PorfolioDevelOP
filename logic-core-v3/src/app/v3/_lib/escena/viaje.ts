@@ -38,6 +38,8 @@ export interface PlanDelViaje {
   readonly clase: ClaseDelViaje
   /** Sólo en los de día a día. */
   readonly luz: LuzDelViaje | null
+  /** [PULIDO 2] 2 · el destino (px del documento): en uno que cambia de luz, el amanecer mira si llega a él. */
+  readonly y1?: number
 }
 
 export interface ViajeEnCurso extends PlanDelViaje {
@@ -63,6 +65,10 @@ let actual: ViajeEnCurso | null = null
 const oyentes = new Set<() => void>()
 
 export function empezarElViaje(viaje: ViajeEnCurso): void {
+  // [PULIDO 2] 2 · el reloj del viaje arranca en el click (el preludio también es del viaje), al día con la pared: lo que pasó
+  // sin cuadros antes (abajo de 1024 nadie lo avanza con la escena suspendida) no es deuda del viaje (lo apuraba al doble).
+  RELOJ.alEmpezar = relojDelCuadro(performance.now())
+  RELOJ.deuda = 0
   actual = viaje
   oyentes.forEach((f) => f())
 }
@@ -93,3 +99,46 @@ export function suscribirAlViaje(f: () => void): () => void {
  * dispositivo a 30 cuadros no pierde tiempo (34 ms por cuadro), uno más lento, un poco.
  */
 export const TOPE_DEL_CUADRO_DEL_VIAJE_MS = 34
+
+/**
+ * [PULIDO 2] 2 · EL RELOJ DEL VIAJE, UNO SOLO. El scroll (Lenis o el motor sin Lenis) y el final del pie que se deshace en un
+ * viaje leen el MISMO reloj, así la cámara del recorrido no se adelanta a la vuelta del final (antes el scroll iba con el
+ * reloj de Lenis y el final con el `delta` de su cuadro: con cuadros largos, cada uno a su ritmo). Es el de pared con el tope
+ * de A2 por cuadro (un tirón se ve como un tirón, no como un salto), pero lo que el tope retiene se DEVUELVE en los cuadros
+ * siguientes, a lo sumo el tope por cuadro: antes cada cuadro de más de 34 ms alargaba el viaje para siempre. Lo avanza
+ * cualquiera que lo lea con la marca de tiempo de su cuadro (`requestAnimationFrame` o `document.timeline`), una vez por cuadro.
+ */
+const RELOJ = { real: -1, suave: 0, deuda: 0, alEmpezar: 0, motores: 0 }
+
+/** El motor sin Lenis lo sostiene mientras mueve el scroll (también fuera de un viaje anotado). Devuelve cómo soltarlo. */
+export function sostenerElReloj(): () => void {
+  RELOJ.motores += 1
+  let suelto = false
+  return () => {
+    if (suelto) return
+    suelto = true
+    RELOJ.motores = Math.max(0, RELOJ.motores - 1)
+  }
+}
+
+/** El reloj (ms) para el cuadro de `tiempoMs`: fuera de un viaje, el de pared; en un viaje, con el tope y lo retenido devuelto. */
+export function relojDelCuadro(tiempoMs: number): number {
+  // La primera lectura, o una base de tiempo nueva (un reloj que vuelve atrás más de un segundo): se toma de ahí.
+  if (RELOJ.real < 0 || tiempoMs + 1000 < RELOJ.real) {
+    if (RELOJ.real < 0) RELOJ.suave = tiempoMs
+    RELOJ.real = tiempoMs
+    return RELOJ.suave
+  }
+  if (!(tiempoMs > RELOJ.real)) return RELOJ.suave
+  const debe = tiempoMs - RELOJ.real + RELOJ.deuda
+  RELOJ.real = tiempoMs
+  const paso = actual === null && RELOJ.motores === 0 ? debe : Math.min(debe, TOPE_DEL_CUADRO_DEL_VIAJE_MS)
+  RELOJ.deuda = debe - paso
+  RELOJ.suave += paso
+  return RELOJ.suave
+}
+
+/** Cuánto lleva el viaje en curso (s), en ese reloj; 0 sin viaje. */
+export function segundosDelViaje(): number {
+  return actual === null ? 0 : Math.max(0, RELOJ.suave - RELOJ.alEmpezar) / 1000
+}

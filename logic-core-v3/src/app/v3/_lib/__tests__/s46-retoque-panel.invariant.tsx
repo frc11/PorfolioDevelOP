@@ -103,7 +103,7 @@ afirmar(/uniform vec4 uTrazos;/.test(LLEGADA_PARS_GLSL) && /transformed \+= esTr
 const QUIENES = sinComentarios(leer('_secciones/quienes-somos/QuienesSomos.tsx'))
 const EQUIPO = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
 const TITULAR = sinComentarios(leer('_secciones/quienes-somos/titular3d.tsx'))
-afirmar(/<RenglonDeVolumen renglon=\{TRAMOS_DEL_TITULAR\[indice\]\}/.test(QUIENES) && /<SignoDeVolumen progreso=\{progresoDelSigno\} \/>/.test(QUIENES) && (TITULAR.match(/useTextoDeVolumen</g) ?? []).length === 3, 'el titular (dos títulos por renglón) y el ≠ van en volumen, desde 1024 (`useTextoDeVolumen` sólo se anota en escritorio)')
+afirmar(/<RenglonDeVolumen renglon=\{TRAMOS_DEL_TITULAR\[indice\]\}/.test(QUIENES) && /<SignoDeVolumen progreso=\{progresoDelSigno\} entrada=\{entradaDelSigno\} \/>/.test(QUIENES) && (TITULAR.match(/useTextoDeVolumen</g) ?? []).length === 3, 'el titular (dos títulos por renglón) y el ≠ van en volumen, desde 1024 (`useTextoDeVolumen` sólo se anota en escritorio)')
 const enElPlano = (f: string, id: string): boolean => new RegExp(`useAcompananteDelTitulo<HTMLDivElement>\\('${id}'\\)`).test(f) && /<div ref=\{enElPlano\}/.test(f)
 // [NOCTURNO FINAL] D1 · la foto de «Nosotros» también va en el plano de su título (otro `enElPlano` en el archivo): el
 // chequeo del equipo mira el cuerpo de `ElEquipo`.

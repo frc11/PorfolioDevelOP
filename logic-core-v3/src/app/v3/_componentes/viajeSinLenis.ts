@@ -1,6 +1,6 @@
 import type { Curva } from '../_lib/motion/curvas'
 
-import { TOPE_DEL_CUADRO_DEL_VIAJE_MS } from '../_lib/escena/viaje'
+import { relojDelCuadro, sostenerElReloj } from '../_lib/escena/viaje'
 
 /**
  * EL VIAJE CUANDO NO HAY LENIS — abajo del umbral de 1025.
@@ -67,6 +67,10 @@ export function destinoDelAncla(seccion: HTMLElement): number {
  * cuadro largo (un tirón) avanza a lo sumo eso. Sin el tope, el tirón era un salto
  * de la página (y de la cámara); a 30 cuadros por segundo no cambia nada.
  *
+ * [PULIDO 2] 2 · el reloj es el del viaje (`relojDelCuadro`, el mismo que lee el
+ * final del pie): con el mismo tope, pero lo retenido se devuelve en los cuadros
+ * siguientes (el viaje dura lo que pidió aunque haya cuadros largos).
+ *
  * ── Y por qué `window.scrollTo` y no `scrollBy` ──────────────────────────
  *
  * Porque `scrollTo` es absoluto: si algo más mueve el scroll a mitad de vuelo
@@ -83,17 +87,14 @@ export function viajarSinLenis(
 ): () => void {
   const salida = window.scrollY
   const recorrido = destino - salida
-  let antes = performance.now()
-  let reloj = 0
+  const soltarElReloj = sostenerElReloj()
+  const inicio = relojDelCuadro(performance.now())
   let pedido = 0
   let vivo = true
 
-  const cuadro = (): void => {
+  const cuadro = (tiempo: number): void => {
     if (!vivo) return
-    const ahora = performance.now()
-    reloj += Math.min(ahora - antes, TOPE_DEL_CUADRO_DEL_VIAJE_MS)
-    antes = ahora
-    const t = Math.min(1, reloj / duracionMs)
+    const t = Math.min(1, (relojDelCuadro(tiempo) - inicio) / duracionMs)
     window.scrollTo(0, salida + recorrido * curva(t))
     if (t < 1) {
       pedido = requestAnimationFrame(cuadro)
@@ -101,6 +102,7 @@ export function viajarSinLenis(
     }
     vivo = false
     pedido = 0
+    soltarElReloj()
     alTerminar()
   }
 
@@ -109,6 +111,7 @@ export function viajarSinLenis(
   return () => {
     if (!vivo) return
     vivo = false
+    soltarElReloj()
     if (pedido !== 0) cancelAnimationFrame(pedido)
     pedido = 0
   }

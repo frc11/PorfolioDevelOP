@@ -1,0 +1,61 @@
+PULIDO 2 · 2 — LA MATRIZ DE LOS VIAJES DEL MENÚ, ANTES Y DESPUÉS
+==================================================================
+
+Del click a la llegada (el <main> vuelve), en ms. Medido con el banco (Chrome propio por CDP) en la NVIDIA (RTX 5050),
+a 1440 x 900 (la barra; «Inicio» no está en la barra: va por el enlace del pie, el mismo gesto) y a 390 x 844 (el menú
+del teléfono). Filas: desde; columnas: hasta. «Pie (encastre)»: desde el pie con la cinemática entera; «Pie (reposo)»:
+rebobinada y parada. Antes: el código de pulido-1 (4b588ec0) con el punto 1. Después: el commit del punto 2.
+Después, entre paréntesis: lo más que giró la cámara en un cuadro (grados; el banco corre a ~75 cuadros por segundo).
+
+1440x900 · ANTES
+desde / hasta           Inicio       Quiénes     Portfolio     Servicios         Panel       Por qué
+Inicio                       —          2932          2933          3559          5359          7657
+Quiénes                   2927             —          2972          3363          5152          7171
+Portfolio                 2919          2961             —          2977          4159          6098
+Servicios                 3552          3453          2982             —          3003          4116
+Panel                     5332          5152          4129          3024             —          3259
+Por qué                   7381          7134          6069          4130          2990             —
+Pie (reposo)              7437          7414          6833          4835          3050          2979
+Pie (encastre)            7382          7382          6830          4849          3061          2969
+
+1440x900 · DESPUÉS
+desde / hasta           Inicio       Quiénes     Portfolio     Servicios         Panel       Por qué
+Inicio                       —      1235 (1)      1506 (4)      1813 (8)     2073 (10)      2250 (9)
+Quiénes               1231 (1)             —      1517 (3)      1830 (7)      2073 (8)      2281 (8)
+Portfolio             1500 (3)      1519 (2)             —      1630 (1)      1949 (5)      2181 (5)
+Servicios             1811 (4)      1833 (4)      1642 (1)             —      1680 (4)      2463 (0)
+Panel                 2064 (7)      2069 (6)      1964 (5)      2126 (4)             —      1676 (1)
+Por qué               2266 (8)      2238 (7)      2177 (6)      1971 (5)      1058 (0)             —
+Pie (reposo)          2341 (8)      2341 (7)      2317 (6)      2123 (5)      1885 (1)      1406 (1)
+Pie (encastre)        2328 (8)      2401 (8)      2260 (6)      2079 (6)      1878 (6)      1401 (6)
+
+1440x900: antes, de 2919 a 7657 ms; después, de 1058 a 2463 ms.
+  Giro más grande en un cuadro: antes 9.1°, después 9.6°.
+
+390x844 · ANTES
+desde / hasta           Inicio       Quiénes     Portfolio     Servicios         Panel       Por qué
+Inicio                       —          2929          3102          3726          4193          5647
+Quiénes                   2922             —          2957          3532          3967          5267
+Portfolio                 2918          2958             —          2943          2963          4122
+Servicios                 3727          3516          2949             —          2945          2939
+Panel                     4170          3971          2943          2954             —          3025
+Por qué                   5470          5255          4147          2943          2940             —
+Pie (reposo)              5997          5774          4639          2965          2973          2941
+Pie (encastre)            5995          5769          4635          2950          2957          2962
+
+390x844 · DESPUÉS
+desde / hasta           Inicio       Quiénes     Portfolio     Servicios         Panel       Por qué
+Inicio                       —      1233 (4)      1524 (6)     1887 (10)     1947 (10)      2106 (9)
+Quiénes               1217 (2)             —      1501 (5)      1876 (8)      1924 (8)      2087 (8)
+Portfolio             1507 (4)      1474 (2)             —      1689 (4)      1755 (4)      1968 (5)
+Servicios             1895 (8)      1889 (7)      1687 (4)             —      1302 (0)      1608 (0)
+Panel                 1954 (9)      1951 (8)      1756 (5)      1316 (0)             —      1547 (0)
+Por qué               2100 (9)      2087 (8)      1955 (5)      1608 (0)      1515 (0)             —
+Pie (reposo)         2160 (10)      2141 (8)      2049 (5)      1732 (1)      1635 (1)      1331 (1)
+Pie (encastre)       2175 (10)      2147 (7)      2034 (6)      1728 (6)      1632 (6)      1329 (6)
+
+390x844: antes, de 2918 a 5997 ms; después, de 1217 a 2175 ms.
+  Giro más grande en un cuadro: antes 5.6°, después 10.2°.
+
+El giro de 30° a 1440 (Panel → Inicio) es el primer cuadro del viaje, con la escena volviendo de estar suspendida: en
+tres repeticiones aisladas dio 8,4°, 8,4° y 17° (este, después de un tirón en frío). Ver «Lo que no quedó bien».

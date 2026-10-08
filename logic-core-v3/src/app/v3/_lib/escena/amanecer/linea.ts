@@ -260,3 +260,17 @@ export function pasoDelAmanecer(m: MemoriaDelAmanecer, deDiaADia: boolean, pedid
   m.entero = false
   m.avance = avanceDelCuadro(m.avance, pedido, dt, c)
 }
+
+/**
+ * [PULIDO 2] 2 · EL AMANECER EN UN VIAJE QUE CAMBIA DE LUZ Y LLEGA A ÉL: cuánto, a los `s` de un viaje de `duraS` (del click
+ * al frenazo, en el reloj del viaje). Arranca después del preludio (con el `<main>` ya ido), crece con la curva simétrica
+ * (arranca y llega quieto) y está entero al llegar: el día de la llegada, como en un viaje de día a día.
+ */
+export const AMANECER_EN_EL_VIAJE = { desdeS: 0.3 } as const
+
+export function completoDelViaje(s: number, duraS: number): number {
+  const largo = duraS - AMANECER_EN_EL_VIAJE.desdeS
+  if (!(largo > 0)) return 1
+  const u = Math.min(1, Math.max(0, (s - AMANECER_EN_EL_VIAJE.desdeS) / largo))
+  return u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)
+}

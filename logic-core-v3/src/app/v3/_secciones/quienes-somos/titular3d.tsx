@@ -56,7 +56,8 @@ export function RenglonDeVolumen({ renglon, indice, entrada, trazo }: { readonly
 }
 
 /** El ≠ en volumen: un título sin letras con sus cuatro trazos (las dos barras con el subrayado, la diagonal con el tachado). */
-export function SignoDeVolumen({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
+// [PULIDO 2] 2f · con la llegada del titular (`entrada`): en un viaje se desarma como los demás y llega con ellos.
+export function SignoDeVolumen({ progreso, entrada }: { readonly progreso: Progreso; readonly entrada: Progreso }): React.JSX.Element {
   const avances = useTransform(progreso ?? DIBUJADO, (p) => avancesDelSigno(p))
   const arriba = useTransform(avances, (a) => a[0])
   const abajo = useTransform(avances, (a) => a[1])
@@ -70,7 +71,7 @@ export function SignoDeVolumen({ progreso }: { readonly progreso: Progreso }): R
     ],
     [arriba, abajo, diagonal],
   )
-  const { lugar, listo } = useTextoDeVolumen<HTMLDivElement>({ id: 'agencia-signo', texto: '', fuente: 'chivo-400', gesto: 'letras', llegada: null, queda: false, trazos })
+  const { lugar, listo } = useTextoDeVolumen<HTMLDivElement>({ id: 'agencia-signo', texto: '', fuente: 'chivo-400', gesto: 'letras', llegada: entrada, queda: false, trazos })
   return (
     <div ref={lugar} className={cn(listo && TEXTO_REEMPLAZADO)}>
       <SignoDistinto progreso={progreso} className={MEZCLA_SOBRE_LA_ESCENA} />

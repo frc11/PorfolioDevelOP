@@ -4,6 +4,8 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   1 · el encastre DETRÁS del pie abajo de 1024: sin escenario (la página termina en el pie), el logo en el hueco más grande
  *       entre los elementos del pie, el teclado que no lo dispara, y el pie en AA mientras corre.
+ *   2 · los viajes del menú: la duración por la distancia con saturación, un solo reloj (con lo retenido devuelto), el
+ *       reparto por lo que se ve cambiar, el amanecer que se completa en el viaje y el ≠ que llega con el titular.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-2.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-2/mirar.txt`.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -11,10 +13,14 @@ import { join } from 'node:path'
 
 import * as THREE from 'three'
 
+import type { Curva } from '../motion/curvas'
+import { AMANECER_EN_EL_VIAJE, completoDelViaje } from '../escena/amanecer/linea'
 import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPantalla } from '../escena/final/encuadreDelPie'
 import { camaraDelFinal, distanciaParaElAncho } from '../escena/final/recorridoDelFinal'
 import { TECLADO, pasoDelTeclado, tecladoQuieto, type EstadoDelTeclado, type LecturaDelTeclado } from '../escena/final/teclado'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
+import { curvaRepartida, type MuestrasDelViaje } from '../escena/repartoDelViaje'
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, empezarElViaje, relojDelCuadro, segundosDelViaje, sostenerElReloj, terminarElViaje } from '../escena/viaje'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -177,5 +183,145 @@ const haloDelPie = (css: string): boolean => {
 }
 afirmar(haloDelPie(banda), '  al fondo y mientras corre (abajo de 1024), el pie sin mezcla: la tinta con un halo denso del papel; las etiquetas del vidrio y la fila de abajo con el halo')
 controlPositivo('  el detector VE el pie con la mezcla también mientras corre', banda.replace('[data-final-del-pie] .max-escritorio\\:mix-blend-difference {\n    mix-blend-mode: normal;', '[data-final-del-pie] .max-escritorio\\:mix-blend-difference {'), haloDelPie)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2 · Los viajes del menú: más rápidos sin perder calidad (la distancia con saturación, un solo reloj, el reparto, el amanecer, el ≠)')
+
+// LA MATRIZ (medida en la NVIDIA, del click a la llegada; `docs/rediseno/entregas/pulido-2/p2-matriz-de-viajes.txt`): antes,
+// a 1440, de 2,9 s (vecinas) a 7,7 s («Inicio → Por qué develOP»); después, de 1,2 a 2,4 s, y desde el encastre avanzado lo
+// mismo que desde el pie en reposo. La causa (leída en la historia): NOCTURNO FINAL A2 (fa0a9ca5) cambió la duración fija
+// de 2,6 s por una velocidad con tope (4,5 pantallas por segundo, hasta 7 s), contada en px crudos (el túnel estirado de
+// escritorio suma ~0,9 s a cada viaje que lo cruza), y un tope por cuadro sin devolución.
+const efectoP2 = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
+const planP2 = sinComentarios(leer('_lib/escena/planDelViaje.ts'))
+const distanciaBien = (ef: string, pl: string): boolean =>
+  ef.includes('const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))') && /export function pantallasDelViaje\(y1: number\): number \{[\s\S]*?medidaSinElEstiramiento\(y0,[\s\S]*?medidaSinElEstiramiento\(y1,/.test(pl) &&
+  !/fin|final/i.test(ef.slice(ef.indexOf('const duracionMs ='), ef.indexOf('const duracionMs =') + 80))
+afirmar(distanciaBien(efectoP2, planP2), 'la duración sale de la distancia de la escena (sin el túnel estirado), la misma desde el pie en reposo que desde el encastre avanzado')
+controlPositivo('el detector VE la distancia en px crudos (con el túnel estirado)', [efectoP2.replace('duracionDelViaje(pantallasDelViaje(destinoEnPx))', 'duracionDelViaje((destinoEnPx - window.scrollY) / window.innerHeight)'), planP2] as const, ([ef, pl]: readonly [string, string]) => distanciaBien(ef, pl))
+
+// UN SOLO RELOJ: el scroll (Lenis o el motor sin Lenis) y la vuelta del final leen el mismo (`relojDelCuadro`): el de pared,
+// con el tope de A2 por cuadro en un viaje (un tirón no salta), pero lo retenido se devuelve después: el viaje dura lo que
+// pidió aunque haya cuadros largos. Se simula un viaje de 2 s a 60 cuadros con dos tirones de 120 ms.
+type RelojP2 = (t: number) => number
+const conTirones = (reloj: RelojP2): { final: number; pasoMax: number } => {
+  let t = 1_000_000
+  reloj(t)
+  const inicio = reloj(t)
+  let [antes, pasoMax] = [inicio, 0]
+  for (let i = 1; i <= 140; i += 1) {
+    t += i === 30 || i === 70 ? 120 : 1000 / 60
+    const r = reloj(t)
+    pasoMax = Math.max(pasoMax, r - antes)
+    antes = r
+  }
+  return { final: antes - inicio, pasoMax }
+}
+const relojBien = (reloj: RelojP2, pared: number): boolean => {
+  const r = conTirones(reloj)
+  return Math.abs(r.final - pared) < 1 && r.pasoMax <= TOPE_DEL_CUADRO_DEL_VIAJE_MS + 1e-9
+}
+const PARED_P2 = 138 * (1000 / 60) + 2 * 120
+const soltarP2 = sostenerElReloj()
+const relojP2 = conTirones(relojDelCuadro)
+afirmar(relojBien(relojDelCuadro, PARED_P2), '  el reloj del viaje: un tirón avanza a lo sumo el tope y lo retenido se devuelve; al final, el de pared', `${relojP2.final.toFixed(0)} ms de ${PARED_P2.toFixed(0)} · el paso más largo ${relojP2.pasoMax.toFixed(0)} ms`)
+let paredA2 = -1
+let [suaveA2] = [0]
+const relojDeA2: RelojP2 = (t) => {
+  if (paredA2 < 0) {
+    paredA2 = t
+    suaveA2 = t
+    return t
+  }
+  suaveA2 += Math.min(t - paredA2, TOPE_DEL_CUADRO_DEL_VIAJE_MS)
+  paredA2 = t
+  return suaveA2
+}
+controlPositivo('  el detector VE el reloj de A2 (sin devolver: cada tirón alarga el viaje)', relojDeA2, (r: RelojP2) => relojBien(r, PARED_P2))
+soltarP2()
+// Lo que pasó sin cuadros antes del viaje (abajo de 1024, con la escena suspendida, nadie avanza el reloj) no es deuda del
+// viaje: medido a 390, los viajes desde Tu panel duraban la mitad (de 0,7 a 1 s) hasta que el click alcanzó la pared.
+const pausaBien = (): boolean => {
+  const ahoraReal = performance.now
+  let t = 2_000_000
+  Object.defineProperty(performance, 'now', { value: () => t, configurable: true })
+  try {
+    relojDelCuadro(t)
+    t += 5000
+    empezarElViaje({ destino: 'hero', clase: 'dia-a-dia', luz: null, duracionMs: 2000 })
+    for (let i = 0; i < 60; i += 1) {
+      t += 1000 / 60
+      relojDelCuadro(t)
+    }
+    const s = segundosDelViaje()
+    terminarElViaje()
+    return Math.abs(s - 1) < 0.02
+  } finally {
+    Object.defineProperty(performance, 'now', { value: ahoraReal, configurable: true })
+  }
+}
+afirmar(pausaBien(), '  una pausa sin cuadros antes del click no es deuda: un segundo de viaje dura un segundo')
+
+const cuadroP2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
+const lenisP2 = sinComentarios(leer('_componentes/ScrollSuaveDeV3.tsx'))
+const sinLenisP2 = sinComentarios(leer('_componentes/viajeSinLenis.ts'))
+const unRelojBien = (c: string): boolean =>
+  c.includes('enElViajeS: enElViaje() }, dt)') && /function enElViaje\(\): number \{\s*const marca = document\.timeline\.currentTime\s*relojDelCuadro\(typeof marca === 'number' \? marca : performance\.now\(\)\)\s*return segundosDelViaje\(\)/.test(c) &&
+  lenisP2.includes('lenis.raf(relojDelCuadro(tiempo))') && sinLenisP2.includes('const t = Math.min(1, (relojDelCuadro(tiempo) - inicio) / duracionMs)')
+afirmar(unRelojBien(cuadroP2), '  y lo leen los tres: Lenis, el motor sin Lenis y la vuelta del final (la cámara del recorrido no se adelanta)')
+controlPositivo('  el detector VE el final con el `delta` de su cuadro (su propio reloj)', cuadroP2.replace('enElViajeS: enElViaje() }, dt)', '}, dt)'), unRelojBien)
+
+// EL REPARTO: la curva del viaje se aplica al COSTO (lo que recorre la escena más lo que gira la cámara de la coreografía), no
+// a los px: donde la cámara gira, más tiempo; donde la sala apenas cambia, menos. Mismas puntas, monótona. Medido a 1440: el
+// giro más grande por cuadro bajó de 16° a 9,6° (los viajes desde Tu panel); el costo, hasta 1,5 pantallas por cuadro en los
+// tramos quietos de los viajes más largos.
+const MUESTRAS_P2: MuestrasDelViaje = { pantallas: Array.from({ length: 10 }, () => 1), grados: [0, 0, 0, 60, 60, 0, 0, 0, 0, 0] }
+const tiempoEnElGiro = (curva: Curva): number => {
+  // La fracción del tiempo que pasa entre el 30 % y el 50 % de la distancia (donde gira).
+  let [entra, sale] = [-1, -1]
+  for (let i = 0; i <= 1000; i += 1) {
+    const f = curva(i / 1000)
+    if (entra < 0 && f >= 0.3) entra = i / 1000
+    if (sale < 0 && f >= 0.5) sale = i / 1000
+  }
+  return sale - entra
+}
+const repartoBien = (f: typeof curvaRepartida): boolean => {
+  const base: Curva = (t) => t
+  const c = f(MUESTRAS_P2, base)
+  let monotona = true
+  for (let i = 1; i <= 100; i += 1) if (c(i / 100) < c((i - 1) / 100) - 1e-12) monotona = false
+  return c(0) === 0 && c(1) === 1 && monotona && tiempoEnElGiro(c) > 0.2 + 0.1 && f({ pantallas: [1, 1], grados: [0, 0] }, base)(0.5) === 0.5
+}
+afirmar(repartoBien(curvaRepartida), '  el viaje se reparte por lo que se ve cambiar: donde la cámara gira, más tiempo (con la curva del viaje encima, las mismas puntas)', `en el giro: ${(tiempoEnElGiro(curvaRepartida(MUESTRAS_P2, (t) => t)) * 100).toFixed(0)} % del tiempo para el 20 % del camino`)
+controlPositivo('  el detector VE la curva sin repartir (el giro en su 20 % del tiempo)', ((_m: MuestrasDelViaje, base: Curva) => base) as typeof curvaRepartida, repartoBien)
+afirmar(efectoP2.includes('const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)') && efectoP2.includes('easing: curva') && /viajarSinLenis\(\s*destinoEnPx,\s*duracionMs,\s*curva,/.test(efectoP2), '  y la usan los dos motores (Lenis y el sin Lenis)')
+
+// EL AMANECER: en un viaje que cambia de luz y llega a él (de la noche de Portfolio a «Por qué develOP»), se completa ADENTRO
+// del viaje, con su reloj (de cero al día entero, como el de día a día); antes quedaba quieto y saltaba al terminar (a 390, de
+// 0 a 0,85 en un cuadro, medido). Medido después: 0 → 1 en el viaje, entero al llegar y sostenido.
+const amanecerBien = (f: typeof completoDelViaje): boolean => {
+  const dura = 2
+  let monotona = true
+  for (let i = 1; i <= 100; i += 1) if (f((i * dura) / 100, dura) < f(((i - 1) * dura) / 100, dura) - 1e-12) monotona = false
+  return f(0, dura) === 0 && f(AMANECER_EN_EL_VIAJE.desdeS, dura) === 0 && f(dura, dura) === 1 && f(dura + 1, dura) === 1 && monotona && f(dura / 2 + AMANECER_EN_EL_VIAJE.desdeS / 2, dura) > 0.4
+}
+const amanecerTsx = sinComentarios(leer('_lib/escena/amanecer/Amanecer.tsx'))
+afirmar(amanecerBien(completoDelViaje) && amanecerTsx.includes('const activo = (!cambiaDeLuz && (enLaLlegada ?? DIA_DEL_FINAL.activo)) || llegaAlAmanecer') && amanecerTsx.includes('m.avance = completoDelViaje(segundosDelViaje(), viaje.duracionMs / 1000)') && amanecerTsx.includes('m.entero = true'),
+  '  el amanecer de un viaje que cambia de luz y llega a él se completa adentro del viaje (después del preludio, con la curva simétrica) y queda entero al llegar')
+controlPositivo('  el detector VE el amanecer quieto durante el viaje (el salto al terminar)', ((s: number, d: number) => (s >= d ? 1 : 0)) as typeof completoDelViaje, amanecerBien)
+
+// EL ≠ DE QUIÉNES SOMOS: llega con la misma función que el titular (su entrada, P1 con el rango de la máscara, pura del
+// scroll): en un viaje se desarma como los demás y sus rayas crecen con la llegada. Antes no tenía llegada y se dibujaba con
+// cualquier raya empezada: desde el menú aparecía en el viaje, ~0,5 s antes que el titular (medido por screencast).
+const quienes = sinComentarios(leer('_secciones/quienes-somos/QuienesSomos.tsx'))
+const signo3d = sinComentarios(leer('_secciones/quienes-somos/titular3d.tsx'))
+const titulos3d = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
+const signoBien = (q: string, t3: string, tv: string): boolean =>
+  /rango=\{GEOMETRIA\.rangoDeLaMascara\}[\s\S]{0,260}\{\(entradaDelSigno\) => \(\s*<Bloque patron="P1" rango="ventana-del-trazo">\s*\{\(progresoDelSigno\) => <SignoDeVolumen progreso=\{progresoDelSigno\} entrada=\{entradaDelSigno\} \/>\}/.test(q) &&
+  t3.includes("id: 'agencia-signo', texto: '', fuente: 'chivo-400', gesto: 'letras', llegada: entrada,") &&
+  tv.includes('if (a.sinLetras) a.uniforms.uTrazos.value.multiplyScalar(llegada * (1 - salida))') && tv.includes('a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1')
+afirmar(signoBien(quienes, signo3d, titulos3d), '  el ≠ llega con el titular (su misma función de llegada, pura del scroll) y en un viaje se desarma como los demás')
+controlPositivo('  el detector VE el ≠ sin llegada (el de antes: aparecía en el viaje)', [quienes, signo3d.replace("gesto: 'letras', llegada: entrada,", "gesto: 'letras', llegada: null,"), titulos3d] as const, ([q, t3, tv]: readonly [string, string, string]) => signoBien(q, t3, tv))
 
 cerrar('s53-pulido-2')

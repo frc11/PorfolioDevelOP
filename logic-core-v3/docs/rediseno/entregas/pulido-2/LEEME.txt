@@ -14,3 +14,14 @@ Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=
   halo del papel) para que se lea sobre la cinemática (medido: 4,5:1 o más en los cinco tamaños).
   Archivos: escena/final/encuadreDelPie.ts y teclado.ts (nuevos), cuadroDelFinal.ts, FinalDelPie.tsx, recorridoDelFinal.ts,
   _secciones/Home.tsx, _estilos/pie.css y banda.css, escena/entorno.ts.  Sin bandera.
+
+2 · Los viajes del menú, más rápidos sin perder calidad
+  Qué: la duración es función de la distancia de la escena con saturación (vecinas en ~1,2 s, la más larga en 2,4 s; antes
+  hasta 7,7 s por la velocidad con tope de NOCTURNO FINAL A2 y el túnel estirado); un solo reloj para el scroll y la vuelta
+  del final (con lo que el tope retiene devuelto); el viaje repartido por lo que se ve cambiar (la cámara que gira cuesta
+  tiempo); desde el encastre, el rebobinado de P2 comprimido en 1 s; el amanecer se completa en el viaje; el ≠ de Quiénes
+  somos llega con el titular.
+  Archivos: _componentes/deslizamiento.ts, useDeslizamientoDelCta.ts, viajeSinLenis.ts, ScrollSuaveDeV3.tsx; escena/viaje.ts,
+  planDelViaje.ts, repartoDelViaje.ts (nuevo), OrbitRig.tsx, final/recorridoDelFinal.ts y cuadroDelFinal.ts, amanecer/Amanecer.tsx
+  y linea.ts, titulos3d/TitulosDeVolumen.tsx; _secciones/quienes-somos/QuienesSomos.tsx y titular3d.tsx.  Sin bandera
+  (se borró vuelta=corta).

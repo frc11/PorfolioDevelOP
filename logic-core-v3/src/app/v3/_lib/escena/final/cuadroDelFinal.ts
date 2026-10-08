@@ -4,7 +4,7 @@ import { VIVO } from '../entorno/vivo'
 import { FLOOR_Y } from '../probeScene'
 import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
-import { viajeEnCurso } from '../viaje'
+import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
 import { crearElPozo } from './hueco'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
@@ -95,6 +95,8 @@ export interface EstadoDelFinal {
   readonly teclado: EstadoDelTeclado
   /** [PULIDO 2] 1 · el fondo que valió el último cuadro (abajo de 1024 lo decide el teclado; lo lee el gesto). */
   alFondo: boolean
+  /** [PULIDO 2] 2 · el poder del piso que se muestra (baja con inercia: `poderSuave`). */
+  poder: number
 }
 
 /** `formas`: las del logo en su plano (`hueco.ts`). */
@@ -130,6 +132,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     angosto,
     teclado: tecladoQuieto(),
     alFondo: false,
+    poder: 0,
   }
 }
 
@@ -145,6 +148,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uCalmaDelFinal.value = 0
   p.uSinMancha.value = 0
   p.uPoder.value = 0
+  s.poder = 0
   p.uOscuroDelBrillo.value = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
@@ -168,6 +172,22 @@ const OSCURECE = BRILLO_EN_EL_PISO.oscurece[intensidadDelBrillo()]
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
+
+/** [PULIDO 2] 2 · cuánto tarda el poder del piso en irse (s) cuando el final vuelve (sube de una: llega con el golpe). */
+export const BAJA_DEL_PODER_S = 0.3
+
+/** [PULIDO 2] 2 · el poder que se muestra: sube con el de `fin`; baja hacia él con inercia (sin el corte del golpe). */
+export function poderSuave(anterior: number, objetivo: number, dt: number): number {
+  if (!(objetivo < anterior)) return objetivo
+  return objetivo + (anterior - objetivo) * Math.exp(-Math.max(0, dt) / BAJA_DEL_PODER_S)
+}
+
+/** [PULIDO 2] 2 · cuánto lleva el viaje del menú en el reloj del viaje (el del scroll), avanzado con la marca de este cuadro. */
+function enElViaje(): number {
+  const marca = document.timeline.currentTime
+  relojDelCuadro(typeof marca === 'number' ? marca : performance.now())
+  return segundosDelViaje()
+}
 
 /**
  * [RETOQUE DEL ENCASTRE] 1D · un gesto de scroll (`gestosDelScroll.ts`): lo anota y dice si se retiene. [NOCTURNO FINAL] A1
@@ -223,7 +243,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     s.reloj.fin = FINAL_DEL_BANCO.fijo
     s.reloj.velocidad = 0
   } else if (s.estatico) estadoQuieto(s.reloj, teclado.alFondo && EN_VIVO.pieEntero && viajeEnCurso() === null)
-  else if (!teclado.congelado) pasoDelReloj(s.reloj, { alFondo: teclado.alFondo, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)
+  else if (!teclado.congelado) pasoDelReloj(s.reloj, { alFondo: teclado.alFondo, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000, enElViajeS: enElViaje() }, dt)
   EN_VIVO.fin = s.reloj.fin
   const fin = EN_VIVO.fin
   s.sinScrollS = window.scrollY === s.scroll ? s.sinScrollS + dt : 0
@@ -296,6 +316,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   }
   s.antes = fin
   piso.uPoder.value = poder(fin)
+  // [PULIDO 2] 2 · baja con inercia: en el rebobinado (y en la vuelta de un viaje, que es el mismo, comprimido) `poder` cae
+  // entero en el golpe y el brillo se apagaba de un cuadro al otro.
+  s.poder = poderSuave(s.poder, piso.uPoder.value, dt)
+  piso.uPoder.value = s.poder
   if (BRILLO_DEL_BANCO.apagado) piso.uPoder.value = 0
   // [PULIDO 1] P1 · el piso se oscurece parejo mientras corre el brillo (y vuelve al rebobinar: es función de `fin`).
   piso.uOscuroDelBrillo.value = OSCURECE * oscuroDelFinal(fin)

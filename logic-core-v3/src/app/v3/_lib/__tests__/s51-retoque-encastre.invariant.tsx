@@ -203,7 +203,7 @@ const cableado = (g: string): boolean =>
   // [PULIDO 1] P22 · en escritorio, al montarse (como antes); abajo de 1024, mientras se ve el escenario (o el pie, con la otra lectura).
   componenteDelFinal.includes('const retener = (): (() => void) => retenerLosGestos((g) => (m.current === null ? false : gestoDelFinal(m.current, g)))') && componenteDelFinal.includes('if (!angosto) return retener()') &&
   finalTs.includes('const alFondoMedido = window.scrollY >= s.fondo - AL_FONDO_PX') && finalTs.includes(': sinTeclado(alFondoMedido)') &&
-  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: teclado.alFondo, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)') &&
+  finalTs.includes('pasoDelReloj(s.reloj, { alFondo: teclado.alFondo, pieEntero: EN_VIVO.pieEntero, rebobinar, haciaAbajo, sinGestoS, viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000, enElViajeS: enElViaje() }, dt)') &&
   finalTs.includes('s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)') &&
   armadas.includes('EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)') && pieDeVolumen.includes('EN_VIVO.pieEntero = true')
 afirmar(cableado(gestos), '  el cableado: la rueda, el dedo y las teclas se ven en la captura de la ventana (antes que Lenis) y, retenidos, no le llegan a nadie; el final los pide al montarse; el reloj va con el fondo de la página, el pie entero (lo escribe el pie de volumen; sin él, no espera) y los gestos; un viaje del menú lo deshace (sus scroll no son gestos)')

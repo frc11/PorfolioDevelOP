@@ -23,7 +23,7 @@ import * as THREE from 'three'
 
 import { aimWithFraming } from '../escena/cameraFraming'
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
-import { estadoQuieto } from '../escena/final/cuadroDelFinal'
+import { estadoQuieto, poderSuave } from '../escena/final/cuadroDelFinal'
 import { ANCLAS_DEL_HUECO, BRILLO_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { CTA_EN_EL_PISO, conElEscalonEnLaSimulacion } from '../escena/ctaDelFinal/enElPiso'
 import { CTA_DEL_FINAL, alturaDelEscalon, filoEn, gestoDelToque, hazDelCta, inclinacionDeLaLosa, letraDelHaz } from '../escena/ctaDelFinal/estado'
@@ -55,7 +55,7 @@ import {
   quietoRebobinado,
   relojQuieto,
   subida,
-  vueltaEnElViaje,
+  duracionDeLaVuelta,
   type EntradaDelReloj,
   type RelojDelFinal,
 } from '../escena/final/recorridoDelFinal'
@@ -123,9 +123,9 @@ afirmar(!/velo-sobre-la-escena|sombra-del-velo/.test(fueraDeLaBanda), 'desde 102
 titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; sin él, en la URL (`?pruebas=` o sueltas)')
 
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
-// `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`. (P22 `encastre=desvanece` se borró en
-// PULIDO 2 · 1, rechazada.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'], vuelta: ['corta'] }
+// `angel=asentado`, P1 `brillo=suave|fuerte` (el producto es `medio`), P17 `cta=a|b|c|d`. (P22 `encastre=desvanece` y P5 `vuelta=corta` se
+// borraron en PULIDO 2 · 1 y 2, rechazadas.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], brillo: ['suave', 'fuerte'], cta: ['a', 'b', 'c', 'd'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
@@ -604,7 +604,7 @@ const vueltaDelViaje = (paso: PasoDelReloj, desde: number, viajeS: number): Vuel
   const p: PorCuadro = { grados: 0, logo: 0, oscuro: 0, energia: 0 }
   let [antes, camara, monotona] = [r.fin, camaraEnP5(r.fin), true]
   for (let i = 1; i <= 900; i += 1) {
-    paso(r, { ...AL_FONDO, viajeS }, DT)
+    paso(r, { ...AL_FONDO, viajeS, enElViajeS: i * DT }, DT)
     const ahora = camaraEnP5(r.fin)
     anotar(p, antes, r.fin, camara, ahora)
     if (r.fin > antes + 1e-9) monotona = false
@@ -630,43 +630,60 @@ const delRebobinado = ((): PorCuadro => {
   }
   return p
 })()
-// Del viaje más corto (preludio + recorrido mínimo: 2,9 s) al más largo (7,3 s), desde el final entero y desde la mitad.
-const VIAJES_P5 = [2.9, 4.75, 7.3] as const
+// [PULIDO 2] 2 · la vuelta de un viaje es EL REBOBINADO DE P2, comprimido en el primer `dentroS` (1 s desde el final entero) y
+// en el reloj del viaje: lo que se afirmaba acá (a la velocidad de P2, con techo en el 56 % del viaje, repartida por lo que se
+// ve, con `?vuelta=corta`) se reemplazó por pedido. Del viaje más corto (1,2 s) al más largo (2,5 s), desde el entero y desde
+// la mitad: adentro del viaje y del segundo, siempre hacia atrás, cuadro a cuadro LA MISMA curva que el rebobinado de P2 (a
+// `topeS / dentroS` de su velocidad), y la cámara, el logo y el oscurecimiento del piso no cambian por cuadro más que el
+// rebobinado de P2 por esa misma proporción.
+const VIAJES_P5 = [1.2, 1.8, 2.5] as const
+const COMPRIME = REBOBINADO.topeS / VIAJE_DEL_FINAL.dentroS
 const viajeBien = (paso: PasoDelReloj): boolean =>
   VIAJES_P5.every((viajeS) =>
     [1, 0.5].every((desde) => {
       const v = vueltaDelViaje(paso, desde, viajeS)
-      const tope = vueltaEnElViaje(desde, viajeS)
-      // Dentro del viaje (a lo sumo el 56 %, y 1,6 s), siempre hacia atrás, y nada cambia por cuadro más que en P2.
-      return v.s <= tope + 2 * DT && tope <= VIAJE_DEL_FINAL.fraccion * viajeS + 1e-9 && tope <= REBOBINADO.topeS && v.monotona &&
-        v.grados <= delRebobinado.grados && v.logo <= delRebobinado.logo + 1e-9 && v.oscuro <= delRebobinado.oscuro + 1e-9 && v.energia <= 0.2
+      const tope = duracionDeLaVuelta(desde)
+      // La misma curva que P2, comprimida: el `fin` de cada cuadro es el de P2 a `COMPRIME` veces ese tiempo.
+      const r: RelojDelFinal = { ...relojQuieto(), fin: desde, fase: 'corre' }
+      let igual = true
+      for (let i = 1; i <= 120 && r.fin > 0; i += 1) {
+        paso(r, { ...AL_FONDO, viajeS, enElViajeS: i * DT }, DT)
+        const comoP2 = desde * quedaDelRebobinado((i - 1) * DT * COMPRIME, duracionDelRebobinado(desde))
+        if (Math.abs(r.fin - comoP2) > 1e-9) igual = false
+      }
+      return igual && v.s <= tope + 2 * DT && tope <= VIAJE_DEL_FINAL.dentroS * desde + 1e-9 && v.s <= viajeS && v.monotona &&
+        v.grados <= delRebobinado.grados * COMPRIME * 1.02 && v.logo <= delRebobinado.logo * COMPRIME + 1e-9 && v.oscuro <= delRebobinado.oscuro * COMPRIME + 1e-9
     }),
   )
 const corto = vueltaDelViaje(pasoDelReloj, 1, VIAJES_P5[0])
-afirmar(viajeBien(pasoDelReloj), 'en un viaje el final vuelve a cero EN PARALELO, adentro del viaje (a lo sumo el 56 % y 1,6 s), siempre hacia atrás; la cámara, el logo y el oscurecimiento del piso no cambian por cuadro más que en el rebobinado de P2, y el brillo se va en varios cuadros (no de golpe)',
-  `viaje de 2,9 s: vuelve en ${corto.s.toFixed(2)} s · cámara ${corto.grados.toFixed(2)}°/cuadro (P2: ${delRebobinado.grados.toFixed(2)}) · logo ${corto.logo.toFixed(2)} u/cuadro (P2: ${delRebobinado.logo.toFixed(2)}) · brillo ${corto.energia.toFixed(2)}/cuadro como mucho`)
+afirmar(viajeBien(pasoDelReloj), 'en un viaje el final vuelve a cero EN PARALELO con el rebobinado de P2 comprimido en el primer segundo (desde el entero, 1 s; desde la mitad, la mitad), adentro del viaje, siempre hacia atrás y con su misma curva; nada cambia por cuadro más que P2 a esa velocidad',
+  `viaje de 1,2 s: vuelve en ${corto.s.toFixed(2)} s · cámara ${corto.grados.toFixed(2)}°/cuadro (P2: ${delRebobinado.grados.toFixed(2)}, ×${COMPRIME.toFixed(1)}) · logo ${corto.logo.toFixed(2)} u/cuadro (P2: ${delRebobinado.logo.toFixed(2)})`)
 const comoA2: PasoDelReloj = (r, e, dt) => pasoDelReloj(r, e.viajeS > 0 ? { ...e, viajeS: 0, alFondo: false } : e, dt)
 controlPositivo('el detector VE la vuelta de A2 (con tope, 2,2 s: el viaje esperaba a que terminara)', comoA2, viajeBien)
-const sinReparto: PasoDelReloj = (r, e, dt) => {
+const aLaDeP2: PasoDelReloj = (r, e, dt) => pasoDelReloj(r, e.enElViajeS === undefined ? e : { ...e, enElViajeS: e.enElViajeS / COMPRIME }, dt)
+controlPositivo('  y la de PULIDO 1, a la velocidad de P2 sin comprimir (1,6 s desde el entero: tarda)', aLaDeP2, viajeBien)
+const vueltaLineal: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
-  if (r.fase === 'viaje') r.fin = r.rebobinado.desde * quedaDelRebobinado(r.rebobinado.s, r.rebobinado.dura)
+  if (r.fase === 'viaje') r.fin = Math.max(0, r.rebobinado.desde * (1 - r.rebobinado.s / Math.max(1e-9, r.rebobinado.dura)))
 }
-controlPositivo('  y una del mismo largo con `fin` solo, sin repartir el tiempo (el brillo se apaga de un cuadro al otro)', sinReparto, viajeBien)
-// Sin la bajada del logo en el reparto: donde la cámara casi no se mueve (la caída y el encastre a presión), el logo saltaba
-// del hueco en cuatro cuadros (medido en la página: 4 u por cuadro).
-const medidaSinLogo = (f: number): number => f + VIAJE_DEL_FINAL.camara * subida(f) + VIAJE_DEL_FINAL.piso * (oscuroDelFinal(f) + energiaP5(f))
-const sinElLogo: PasoDelReloj = (r, e, dt) => {
-  pasoDelReloj(r, e, dt)
-  if (r.fase !== 'viaje') return
-  const meta = medidaSinLogo(r.rebobinado.desde) * quedaDelRebobinado(r.rebobinado.s, r.rebobinado.dura)
-  let [abajo, arriba] = [0, r.rebobinado.desde]
-  for (let i = 0; i < 40; i += 1) [abajo, arriba] = medidaSinLogo((abajo + arriba) / 2) < meta ? [(abajo + arriba) / 2, arriba] : [abajo, (abajo + arriba) / 2]
-  r.fin = meta <= 0 ? 0 : (abajo + arriba) / 2
+controlPositivo('  y una del mismo largo con otra curva (lineal: arranca de golpe)', vueltaLineal, viajeBien)
+// El brillo no se apaga de un cuadro al otro: en el golpe `poder` cae entero, y el que se muestra baja con inercia
+// (`poderSuave`). En el rebobinado de P2 y en la vuelta del viaje, lo más que baja en un cuadro.
+const bajaDelBrillo = (suave: typeof poderSuave, comprime: number): number => {
+  let [mostrado, maximo] = [Math.min(1, poder(1)), 0]
+  for (let i = 1; i <= 200; i += 1) {
+    const fin = quedaDelRebobinado(i * DT * comprime, duracionDelRebobinado(1))
+    const antes = mostrado
+    mostrado = suave(mostrado, Math.min(1, poder(fin)), DT)
+    maximo = Math.max(maximo, antes - mostrado)
+  }
+  return maximo
 }
-controlPositivo('  y una que reparte sin el logo (sale del hueco de golpe)', sinElLogo, viajeBien)
-// La otra lectura (`?vuelta=corta`): en el 35 % del viaje, ≈ 1 s en el más corto.
-const cortaBien = vueltaEnElViaje(1, 2.9, VIAJE_DEL_FINAL.corta) <= 0.35 * 2.9 + 1e-9 && vueltaEnElViaje(1, 2.9) >= REBOBINADO.topeS - 1e-9 && entornoPedido('producto,vuelta=corta').pruebas.vuelta === 'corta' && ENTORNO.pruebas.vuelta === 'no'
-afirmar(cortaBien, '  `?vuelta=corta`: la lectura literal del «~30 %» (en el 35 % del viaje); el producto, a la velocidad de P2', `corta: ${vueltaEnElViaje(1, 2.9, VIAJE_DEL_FINAL.corta).toFixed(2)} s · producto: ${vueltaEnElViaje(1, 2.9).toFixed(2)} s`)
+const brilloBien = (suave: typeof poderSuave): boolean => bajaDelBrillo(suave, 1) <= 0.2 && bajaDelBrillo(suave, COMPRIME) <= 0.2
+afirmar(brilloBien(poderSuave), '  el brillo se va en varios cuadros (no de golpe), en el rebobinado de P2 y en la vuelta del viaje', `lo más que baja en un cuadro: ${bajaDelBrillo(poderSuave, COMPRIME).toFixed(3)}`)
+controlPositivo('  el detector VE el poder sin inercia (se apaga de un cuadro al otro en el golpe)', ((_a: number, objetivo: number) => objetivo) as typeof poderSuave, brilloBien)
+// `?vuelta=corta` se borró (rechazada en PULIDO 1): no queda ni la prueba ni su lectura.
+afirmar(!('vuelta' in entornoPedido('producto,vuelta=corta').pruebas) && !('vuelta' in ENTORNO.pruebas), '  `?vuelta=corta` ya no existe')
 
 // Después del viaje, el reloj sale de su fase: al fondo con el pie entero vuelve a correr (como al llegar por scroll); fuera
 // del fondo, espera en cero. Y un viaje que empieza a mitad de un rebobinado sigue desde donde estaba (sin saltos).
@@ -697,7 +714,7 @@ controlPositivo('  el detector VE un reloj que se queda en la fase del viaje', c
 // si la fase cambia (un viaje a mitad de un rebobinado), se toma de nuevo desde donde quedó.
 const cuadroP5 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const cableadoP5 = (c: string): boolean =>
-  c.includes('viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000 }, dt)') && /if \(s\.reloj\.fase === 'rebobina' \|\| \(s\.reloj\.fase === 'viaje' && s\.reloj\.rebobinado\.dura > 0\)\) \{\s*if \(alRebobinar\.de !== s\.reloj\.fase\) \{\s*alRebobinar\.de = s\.reloj\.fase/.test(c) &&
+  c.includes('viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000, enElViajeS: enElViaje() }, dt)') && /if \(s\.reloj\.fase === 'rebobina' \|\| \(s\.reloj\.fase === 'viaje' && s\.reloj\.rebobinado\.dura > 0\)\) \{\s*if \(alRebobinar\.de !== s\.reloj\.fase\) \{\s*alRebobinar\.de = s\.reloj\.fase/.test(c) &&
   /quietoRebobinado\(alRebobinar, quedaDelRebobinado\(s\.reloj\.rebobinado\.s, s\.reloj\.rebobinado\.dura\), EN_VIVO\)/.test(c)
 afirmar(cableadoP5(cuadroP5), '  el cableado: la escena lee cuánto dura el viaje en curso y el giro y el alejamiento del quieto vuelven con el mismo reloj (tomados de nuevo si un viaje corta un rebobinado)')
 controlPositivo('  el detector VE un quieto que no se toma de nuevo (saltaría al giro del principio del rebobinado)', cuadroP5.replace('if (alRebobinar.de !== s.reloj.fase) {', 'if (alRebobinar.de === null) {'), cableadoP5)
