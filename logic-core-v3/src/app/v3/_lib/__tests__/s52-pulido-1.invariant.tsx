@@ -124,15 +124,15 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // Cada punto con una alternativa o con variantes para elegir las deja atrás de una prueba: P2 `rebobinado=minimo`, P6
 // `angel=asentado`; PULIDO 2 · 5, `cta=capas|relevo|giro|cruce|tipo` (las de P17, `cta=a|b|c|d`, se borraron). (P22 `encastre=desvanece`, P5 `vuelta=corta` y P1 `brillo=suave|fuerte` se borraron en
 // PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`; PULIDO 3 · A1 borra las dos y agrega
-// `energia=red|inestable`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['red', 'inestable'], cta: ['capas', 'relevo', 'giro', 'cruce', 'tipo'] }
+// `energia=red|inestable`; PULIDO 3B · B0 las funde en el producto y deja `energia=intensa`.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['intensa'], cta: ['capas', 'relevo', 'giro', 'cruce', 'tipo'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
   const pedidas = PRUEBAS_SUELTAS.every((k) => PEDIDAS[k].every((v) => f(`producto,${k}=${v}`).pruebas[k] === v))
   const otras = PRUEBAS_SUELTAS.every((k) => f(`producto,${k}=cualquiera`).pruebas[k] === 'no')
-  const juntas = f('producto,cta=giro,energia=red,angel=asentado').pruebas
-  return apagadas && pedidas && otras && juntas.cta === 'giro' && juntas.energia === 'red' && juntas.angel === 'asentado' && f('producto,cta=giro').E1 === ENTORNO.E1
+  const juntas = f('producto,cta=giro,energia=intensa,angel=asentado').pruebas
+  return apagadas && pedidas && otras && juntas.cta === 'giro' && juntas.energia === 'intensa' && juntas.angel === 'asentado' && f('producto,cta=giro').E1 === ENTORNO.E1
 }
 afirmar(banderasBien(entornoPedido), 'cada prueba del sprint se pide por su nombre y vale sólo sus valores (otro valor es el producto); van juntas; en el producto están todas apagadas', PRUEBAS_SUELTAS.join(' · '))
 controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedido: string) => {
@@ -142,11 +142,11 @@ controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedi
 }) as Traductor, banderasBien)
 type DeLaUrl = typeof pedidoDeLaUrl
 const urlBien = (f: DeLaUrl): boolean => {
-  const sueltas = f('?cta=relevo&energia=inestable')
+  const sueltas = f('?cta=relevo&energia=intensa')
   const ambas = f('?pruebas=pie=antes&angel=asentado')
-  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'relevo' && entornoPedido(sueltas).pruebas.energia === 'inestable' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
+  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.cta === 'relevo' && entornoPedido(sueltas).pruebas.energia === 'intensa' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
 }
-afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=relevo`, `/v3?energia=inestable`) y con `?pruebas=`; sin nada, el producto')
+afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?cta=relevo`, `/v3?energia=intensa`) y con `?pruebas=`; sin nada, el producto')
 controlPositivo('el detector VE una URL que sólo lee `?pruebas=` (las sueltas no llegarían)', ((b: string) => {
   const v = new URLSearchParams(b).get('pruebas')
   return v === null ? null : `producto,${v}`
@@ -479,7 +479,7 @@ const dibujoP1 = (() => {
 })()
 const brilloP1 = dibujoP1.slice(dibujoP1.indexOf('vec3 conLasJuntas('), dibujoP1.indexOf('vec2 mascaraDelHueco('))
 // Blanca y sin blanquear las tapas: la luz se SUMA en los costados (desde su base) y en los cantos, nunca la tapa entera.
-const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* junta \);/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
+const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* junta \* uBrilloDeLaLuz \);/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
 afirmar(blancoBien(brilloP1), 'la luz es BLANCA (cero rojo) y se suma por las juntas (los costados y los cantos): las tapas no se ponen blancas')
 controlPositivo('el detector VE las tapas blancas de P1 (rechazadas)', `${brilloP1}\nreturn mix( color, vec3( mix( 0.9, 1.0, vTapa ) ), k );`, blancoBien)
 // Cuantizado al bloque: la energía es UNA por bloque (cada bloque se prende entero), no en cada punto del piso. [PULIDO 3] A1 ·

@@ -30,13 +30,13 @@ export function LuzDelLogo(props: Props) {
     <>
       {e.materialDelLogo ? <ReflejosDelLogo {...props} /> : null}
       {e.sombraDelLogo && e.pisoVivo ? <SombraDelLogo {...props} /> : null}
-      {/* [PULIDO 3] A1 · `?energia=inestable`: la luz de abajo alcanza el canto del logo (`final/rimDeLaLuz.ts`). */}
-      {e.pruebas.energia === 'inestable' ? <RimDelLogo logoMaterialRef={props.logoMaterialRef} /> : null}
+      {/* [PULIDO 3B] B0 · el logo brilla con la energía: su filo y el pulso de cada onda (`final/rimDeLaLuz.ts`). */}
+      <RimDelLogo logoMaterialRef={props.logoMaterialRef} />
     </>
   )
 }
 
-/** [PULIDO 3] A1 · parchea el logo una vez (cuando su material existe) con el rim light desde abajo. */
+/** [PULIDO 3] A1 · parchea el logo una vez (cuando su material existe) con el brillo de la energía. */
 function RimDelLogo({ logoMaterialRef }: Pick<Props, 'logoMaterialRef'>) {
   const parcheado = useRef<THREE.MeshStandardMaterial | null>(null)
   useFrame(() => {

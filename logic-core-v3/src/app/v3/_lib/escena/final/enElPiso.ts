@@ -2,7 +2,8 @@ import * as THREE from 'three'
 
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
 import { HUECO } from './hueco'
-import { ENERGIA_EN_LA_SIMULACION_GLSL, INESTABLE, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RED_DE_LA_LUZ_GLSL, RUIDO_DE_LA_LUZ_GLSL, type VarianteDeLaEnergia } from './luzDeAbajo'
+import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
+import { BRILLO_DEL_LOGO, RIM_DE_LA_LUZ } from './rimDeLaLuz'
 
 /**
  * [CIERRE] 3 · EL FINAL EN EL PISO VIVO — lo que el final le suma al piso, inyectado al armarlo (como la onda dirigida de
@@ -143,22 +144,13 @@ float empujeDelRastro( vec2 p, float h ) {
 	return f;
 }
 // [PULIDO 2] 4 · con energía cada bloque queda a su alto (un azar por bloque entre \`alturas\`): el piso se desordena.
-// [PULIDO 3] A1 · la energía es la del campo (\`luzDeAbajo.ts\`); con \`?energia=inestable\`, además, donde está más alta los
-// bloques tiemblan apenas y cada tanto un pico levanta un racimo y lo suelta.
+// [PULIDO 3] A1 · la energía es la del campo (\`luzDeAbajo.ts\`). [PULIDO 3B] B0 · y los pistones suben su racimo (lo suma
+// \`main\`, con la altura de la luz): sin temblor.
 ${ENERGIA_EN_LA_SIMULACION_GLSL}
 float alturaDeLaLuz( vec2 xz, float e ) {
 	if ( e <= 0.0 ) return 0.0;
 	vec2 celda = floor( xz / uLado );
-	float h = min( e, 1.4 ) * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( celda + 0.37 ) );
-#ifdef ENERGIA_INESTABLE
-	h += ${f(INESTABLE.temblor)} * smoothstep( 0.6, 1.0, e ) * sin( uTiempo * 43.0 + 6.2832 * azarDeLaLuz( celda + 0.91 ) );
-	vec2 racimo = floor( xz / ( uLado * ${f(INESTABLE.racimo)} ) );
-	float ciclo = uTiempo / ${f(INESTABLE.cicloS)} + azarDeLaLuz( racimo + 2.3 );
-	float n = floor( ciclo );
-	float u = ( ciclo - n ) * ${f(INESTABLE.cicloS / INESTABLE.duraS)};
-	if ( u < 1.0 && azarDeLaLuz( racimo + n * 7.13 ) < ${f(INESTABLE.cuantos)} ) h += ${f(INESTABLE.levanta)} * smoothstep( 0.4, 0.9, e ) * sin( 3.14159 * u ) * ( 0.6 + 0.4 * azarDeLaLuz( celda + n ) );
-#endif
-	return h;
+	return min( e, 1.4 ) * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( celda + 0.37 ) );
 }
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z).
 float calmaDelFinal( vec2 xz ) {
@@ -167,21 +159,18 @@ float calmaDelFinal( vec2 xz ) {
 }
 `
 
-/** [PULIDO 3] A1 · lo que agrega cada variante de la energía (`?energia=`) al sombreador. */
-const DEFINE_DE_LA_VARIANTE: Readonly<Record<VarianteDeLaEnergia, string>> = { sobrecarga: '', red: '#define ENERGIA_RED\n', inestable: '#define ENERGIA_INESTABLE\n' }
-
 /** La simulación del piso con el final: el golpe, el rastro del mouse, la calma y [PULIDO 3] A1 la energía de cada bloque. */
-export function conElFinalEnLaSimulacion(glsl: string, variante: VarianteDeLaEnergia = 'sobrecarga'): string {
+export function conElFinalEnLaSimulacion(glsl: string): string {
   if (Object.values(ANCLAS_DEL_FINAL).some((ancla) => !glsl.includes(ancla)) || !ONDA_CON_TOPE.test(glsl)) {
     throw new Error('[CIERRE] 3 · la simulación del piso cambió: el final no encuentra dónde entrar')
   }
   return glsl
-    .replace(ANCLAS_DEL_FINAL.main, `${DEFINE_DE_LA_VARIANTE[variante]}${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
+    .replace(ANCLAS_DEL_FINAL.main, `${SIMULACION_GLSL}${ANCLAS_DEL_FINAL.main}`)
     .replace(
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat energiaAqui = energiaDeLaLuz( xz );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui );\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );`)
     .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
@@ -202,13 +191,13 @@ uniform float uPoder;
 // [PULIDO 2] 4 · LA LUZ DE ABAJO EN EL PISO (\`luzDeAbajo.ts\`): la energía del bloque (cada uno se prende entero; [PULIDO 3]
 // A1 · la de la simulación, que el vértice lee de la textura de alturas); la luz se SUMA en los costados (desde su base: más
 // fuerte abajo, se apaga hacia arriba) y en los cantos de la tapa que dan a una rendija. La tapa no se blanquea; lo que brilla
-// por las rendijas es el plano de abajo. Con \`?energia=red\`, además, las corrientes que corren por las juntas.
+// por las rendijas es el plano de abajo. [PULIDO 3B] B0 · y las corrientes que corren por las juntas, con el reloj de la luz.
 uniform float uOscuroDelBrillo;
+uniform float uRelojDeLaLuz;
+uniform float uBrilloDeLaLuz;
 varying float vEnergiaDelBloque;
 ${RUIDO_DE_LA_LUZ_GLSL}
-#ifdef ENERGIA_RED
-${RED_DE_LA_LUZ_GLSL}
-#endif
+${CORRIENTES_DE_LA_LUZ_GLSL}
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float s = vEnergiaDelBloque;
 	if ( s <= 0.0 ) return color;
@@ -221,11 +210,8 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 		// La tapa no se blanquea: la luz viene de abajo, así que en el sector queda apenas más en sombra.
 		color *= 1.0 - ${f(LUZ_DE_ABAJO.sombraDeLaTapa)} * min( s, 1.0 );
 	}
-	float junta = brilloDeLaJunta( vPiso.xz, uTiempo ) * s;
-#ifdef ENERGIA_RED
-	junta += redDeLaLuz( vPiso.xz, uLado );
-#endif
-	return color + vec3( luz * junta );
+	float junta = brilloDeLaJunta( vPiso.xz, uRelojDeLaLuz ) * s + corrientesDeLaLuz( vPiso.xz, uLado ) * ( 0.4 + min( s, 1.0 ) );
+	return color + vec3( luz * junta * uBrilloDeLaLuz );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
 vec2 mascaraDelHueco( vec2 xz ) {
@@ -237,6 +223,15 @@ bool enElHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return false;
 	vec2 m = mascaraDelHueco( xz );
 	return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;
+}
+// [PULIDO 3B] B0 · EL FILO DEL LOGO ENCENDIDO: un hilo de luz blanca justo afuera de su forma (entre el logo y su hueco), con
+// la energía y con el pulso de cada onda que larga. Desde arriba el bisel del logo no se ve: el filo se lee en el piso.
+uniform float uRimDeLaLuz;
+uniform float uPulsoDelLogo;
+float filoDelLogo( vec2 xz ) {
+	if ( uApertura <= 0.0 || uRimDeLaLuz + uPulsoDelLogo <= 0.0 ) return 0.0;
+	vec2 m = mascaraDelHueco( xz );
+	return ( uRimDeLaLuz + ${f(BRILLO_DEL_LOGO.pulsoEnElFilo)} * uPulsoDelLogo ) * smoothstep( 0.2, 0.45, m.g ) * ( 1.0 - smoothstep( 0.3, 0.6, m.r ) );
 }
 float labioDelHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return 0.0;
@@ -256,17 +251,17 @@ export const ANCLAS_DEL_HUECO = {
 } as const
 
 /** El dibujo del piso con el final: el hueco, su labio, el resplandor de las juntas (el poder, el pulso, el rastro) y la mancha que se va. */
-export function conElFinalEnElPiso<T extends THREE.Material>(material: T, variante: VarianteDeLaEnergia = 'sobrecarga'): T {
+export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
   const previo = material.onBeforeCompile.bind(material)
   const clavePrevia = material.customProgramCacheKey.bind(material)
-  material.customProgramCacheKey = () => `${clavePrevia()}|final-del-pie-${variante}`
+  material.customProgramCacheKey = () => `${clavePrevia()}|final-del-pie`
   material.onBeforeCompile = (shader, renderer) => {
     previo(shader, renderer)
     const anclas = [ANCLAS_DEL_DIBUJO.funcion, ...Object.values(ANCLAS_DEL_HUECO)]
     if (anclas.some((ancla) => !shader.fragmentShader.includes(ancla))) {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
-    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO)
+    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, RIM_DE_LA_LUZ)
     // [PULIDO 2] 4 · con energía los bloques se separan un poco (se achican sobre su centro): se abren las rendijas. [PULIDO 3]
     // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
@@ -274,11 +269,11 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T, varian
         .replace('#include <common>', `#include <common>\nvarying float vEnergiaDelBloque;\n${RUIDO_DE_LA_LUZ_GLSL}`)
         .replace(ANCLA_DEL_BLOQUE, `vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;\n\t\ttransformed.xz *= 1.0 - ${f(2 * LUZ_DE_ABAJO.separa)} * min( vEnergiaDelBloque, 1.6 ) * ( ${f(1 - LUZ_DE_ABAJO.variaLaSeparacion)} + ${f(LUZ_DE_ABAJO.variaLaSeparacion)} * azarDeLaLuz( floor( centro / uLado ) + 0.71 ) );\n\t\t${ANCLA_DEL_BLOQUE}`)
     }
-    shader.fragmentShader = `${DEFINE_DE_LA_VARIANTE[variante]}${shader.fragmentShader}`
+    shader.fragmentShader = shader.fragmentShader
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

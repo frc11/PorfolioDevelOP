@@ -9,44 +9,55 @@ import { PISO_VIVO } from '../piso/bloques'
  * y los cantos la atrapan. Las TAPAS no se ponen blancas.
  *
  * [PULIDO 3] A1 · DE UN SECTOR A TODA LA ESCENA («como si después de que se incruste el logo se volvió el caos y está a punto
- * de explotar todo por una sobrecarga de energía»). Ya no hay zonas que nacen y mueren: la energía de cada bloque la decide un
- * CAMPO de ruido continuo con domain warping que fluye en el tiempo (las zonas calientes viajan por todo el piso y nunca se
- * apaga: ~80 % de las juntas con algo de luz). Arranca en el golpe del logo y se expande desde el hueco (`expansionDeLaLuz`,
- * función de `fin`: al rebobinar se retira con la curva de P2); cada onda del logo pasa como un frente que la sube. El campo
- * se calcula UNA vez por bloque, en la simulación del piso (el canal libre de su textura: `ENERGIA_EN_LA_SIMULACION`); el
- * vértice (las rendijas), el dibujo (costados y cantos) y el plano de abajo lo leen de ahí.
+ * de explotar todo por una sobrecarga de energía»): la energía de cada bloque la decide un CAMPO de ruido continuo con domain
+ * warping que fluye; arranca en el golpe y se expande desde el hueco (`expansionDeLaLuz`, función de `fin`: al rebobinar se
+ * retira con la curva de P2); cada onda del logo pasa como un frente que la sube. Se calcula UNA vez por bloque, en la
+ * simulación del piso (el canal libre de su textura); el vértice, el dibujo y el plano de abajo la leen de ahí.
+ *
+ * [PULIDO 3B] B0 · LA VERSIÓN FINAL (las tres variantes del 3A, fundidas en una): más movimiento y más brillo (el campo corre
+ * más rápido y una capa fina por encima cambia todo el tiempo: además sostiene la cobertura, nunca menos del 65 %); las
+ * CORRIENTES que corren por las juntas, sin patrón (`CORRIENTES_DE_LA_LUZ_GLSL`); los PISTONES, racimos de bloques que suben y
+ * bajan a su ritmo y al subir abren las rendijas (`pistonDeLaLuz`, sin vibración); las ondas del logo, cada ~3,2 s con un
+ * corrimiento al azar (sin periodicidad), y el logo que las larga brillando (`rimDeLaLuz.ts`, con su pulso). Los cantos de las
+ * tapas, más fuertes: el frente se ve desde el golpe, también sobre la meseta de la súper onda.
  */
 export const LUZ_DE_ABAJO = {
   /** El campo: escala del ruido (1/u), cuánto lo tuerce el domain warping, cuánto cambia la torsión (1/s) y su deriva (u/s). */
-  campo: { escala: 0.11, tuerce: 2.2, cambia: 0.09, deriva: [0.55, -0.35] },
-  /** Desde qué valor del campo hay luz y desde cuál es entera (la cobertura: `COBERTURA_DE_LA_LUZ`). */
-  umbral: [0.375, 0.72],
+  campo: { escala: 0.17, tuerce: 2.2, cambia: 0.3, deriva: [1.6, -1.02] },
+  /** Desde qué valor del campo hay luz y desde cuál es entera. */
+  umbral: [0.33, 0.7],
+  /**
+   * [PULIDO 3B] B0 · la capa fina: un ruido chico que corre rápido (escala 1/u, velocidad u/s), con su umbral y su fuerza. Se
+   * suma al campo (el mayor de los dos): da el movimiento de cerca y sostiene la cobertura en cualquier momento y ancho.
+   */
+  fina: { escala: 0.55, corre: [1.3, -0.9], umbral: 0.5, fuerza: 0.35 },
   /** La expansión desde el hueco en el golpe: hasta dónde llega (u) y el ancho de su frente (u, que brilla al pasar). */
-  expansion: { hasta: 36, frente: 3.2, brillo: 0.7 },
+  expansion: { hasta: 36, frente: 3.2, brillo: 1.4 },
   /**
    * Las ondas del logo: cuánto suben la energía en su frente y su ancho (u). Durante el final el logo no larga los anillos del
-   * pulso (NOCTURNO FINAL B3: cruzaban el círculo quieto), así que larga los suyos sólo en la energía: uno cada `cadaS`, desde
-   * el borde del mar calmo (`desde`, u) a `velocidad` u/s; más el golpe (y los anillos del pulso, si los hubiera).
+   * pulso (NOCTURNO FINAL B3: cruzaban el círculo quieto), así que larga los suyos sólo en la energía: uno cada `cadaS` (corrido
+   * hasta `corre` del intervalo, al azar), desde el borde del mar calmo (`desde`, u) a `velocidad` u/s; más el golpe.
    */
-  ondas: { sube: 0.8, ancho: 1.8, cadaS: 3.2, velocidad: 12, desde: 7 },
+  ondas: { sube: 0.8, ancho: 1.8, cadaS: 3.2, corre: 0.35, velocidad: 12, desde: 7 },
   /** Cuánto más allá del círculo calmo del logo puede empezar (u). */
   margen: 1,
   /** Los bloques con energía: cuánto se separan (fracción del lado, por costado) y cuánto cambian de alto (u, de −a a +b). */
   separa: 0.045,
   alturas: [-0.12, 0.42],
   /** La luz: la del plano de abajo (por las rendijas), la de los costados desde su base (y su caída, u) y la de los cantos. */
-  plano: 1.6,
-  costado: 1.15,
+  plano: 2.2,
+  costado: 1.5,
   caeEn: 0.32,
-  canto: 0.32,
+  canto: 0.75,
   /** Cuánto más en sombra queda la tapa de un bloque con energía (la luz viene de abajo: la tapa no se blanquea). */
   sombraDeLaTapa: 0.12,
-  /** Cuánto varía la luz de una junta a otra (fracción) y a qué escala (1/u): no todas las rendijas brillan igual. */
+  /** Cuánto varía la luz de una junta a otra (fracción), a qué escala (1/u) y cuán rápido corre (u/s). */
   varia: 0.65,
   variaCada: 0.85,
+  variaCorre: [0.55, -0.4],
   /** Cuánto varía la separación de un bloque a otro (fracción de `separa`): las rendijas no son todas del mismo ancho. */
   variaLaSeparacion: 0.55,
-  /** Cuánto se oscurece la sala con la energía extendida (en el color que se ve). */
+  /** Cuánto se oscurece la sala con la energía extendida (en el color que se ve; el logo, no). */
   oscurece: 0.38,
   /**
    * LA MANCHA NEGRA: con energía, ninguna tapa baja hasta el plano de abajo (la súper onda dibujaba valles de ~1,4 u, más
@@ -55,22 +66,26 @@ export const LUZ_DE_ABAJO = {
   fondo: { desde: -0.45, hasta: -0.53 },
 } as const
 
-/** [PULIDO 3] A1 · las variantes (`?energia=`): `sobrecarga` es el producto (sin bandera). */
-export type VarianteDeLaEnergia = 'sobrecarga' | 'red' | 'inestable'
+/**
+ * [PULIDO 3B] B0 · LAS CORRIENTES: por cada junta (una línea de la grilla), unas pocas corrientes; cada una en su propio
+ * ciclo (de largo al azar), y en cada ciclo nace en un punto al azar de la línea, corre en un sentido al azar con su velocidad
+ * y su largo, y se apaga (o descansa ese ciclo). Lo que no hay: fuentes fijas, anillos, periodos comunes; ni siquiera el ciclo
+ * de una corriente dura siempre lo mismo (su reloj se tuerce con un ruido lento, `tuerce`, sin volver para atrás).
+ */
+export const CORRIENTES = { porJunta: 3, periodoS: [1.6, 4.4], tuerce: 0.7, descansa: 0.25, velocidad: [4, 13], largo: [1.5, 6], vive: 0.75, alcance: 45, fuerza: 1.6 } as const
 
-/** La variante de la bandera (`no`: la sobrecarga). */
-export function varianteDeLaEnergia(pedida: 'red' | 'inestable' | 'no'): VarianteDeLaEnergia {
-  return pedida === 'no' ? 'sobrecarga' : pedida
-}
+/**
+ * [PULIDO 3B] B0 · LOS PISTONES: racimos de bloques (de `racimo` de lado, corridos por fila: no se leen como grilla) que suben
+ * y bajan, cada uno a su ritmo; en cada ciclo, sólo algunos (`cuantos`), con su alto. Al subir abren sus rendijas (`abre`: más
+ * energía, más separación y más luz). Una subida lenta por ciclo: nada de vibración.
+ */
+export const PISTONES = { racimo: 3, periodoS: [1.4, 4], cuantos: 0.32, alto: [0.25, 0.75], abre: 1.2 } as const
 
-/** `red`: las corrientes por las juntas (cada cuántos bloques hay una fuente, su velocidad en bloques/s, el largo del trazo). */
-export const RED_DE_LA_LUZ = { cada: 9, velocidad: 6, trazo: 0.22, conduce: 0.45, fuerza: 1.4, anillo: 1.2 } as const
+/** [PULIDO 3B] B0 · `?energia=intensa`: más brillo y más velocidad (para comparar contra el producto). */
+export const INTENSA = { brillo: 1.4, ritmo: 1.6 } as const
 
 /** Con movimiento reducido, el campo quieto en este instante de su reloj (s). */
 export const CAMPO_QUIETO_EN = 23
-
-/** `inestable`: el temblor (u), los picos (cada racimo de bloques, su ciclo en s, cuántos, cuánto levantan y cuánto duran). */
-export const INESTABLE = { temblor: 0.035, racimo: 3, cicloS: 1.3, cuantos: 0.012, levanta: 0.6, duraS: 0.42, rim: 0.9 } as const
 
 const suave = (a: number, b: number, x: number): number => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
@@ -124,9 +139,16 @@ export function campoDeLaLuz(x: number, z: number, t: number): number {
   return fbm(px + C.tuerce * (qx - 0.5), py + C.tuerce * (qy - 0.5))
 }
 
-/** La energía de un bloque por el campo (0 a 1), antes de la expansión y las ondas. */
+/** La energía de un bloque por el campo (0 a 1), antes de la capa fina, la expansión y las ondas. */
 export function energiaDelCampo(campo: number): number {
   return suave(LUZ_DE_ABAJO.umbral[0], LUZ_DE_ABAJO.umbral[1], campo) ** 1.5
+}
+
+/** [PULIDO 3B] B0 · la energía de un bloque en (x, z) a los `t` s, sin la expansión ni las ondas: el campo y la capa fina. */
+export function energiaDeFondo(x: number, z: number, t: number): number {
+  const F = LUZ_DE_ABAJO.fina
+  const fina = F.fuerza * suave(F.umbral, F.umbral + 0.3, ruido(x * F.escala + t * F.corre[0] + 31.7, z * F.escala + t * F.corre[1] + 7.3))
+  return Math.max(energiaDelCampo(campoDeLaLuz(x, z, t)), fina)
 }
 
 /** El radio (u) hasta donde llegó la expansión con el progreso `p` (0 a 1): sale del hueco y se asienta al cubrir la escena. */
@@ -141,7 +163,44 @@ export function fondoDeLaLuz(alto: number): number {
   return alto >= desde ? alto : desde + (hasta - desde) * (1 - Math.exp((alto - desde) / (desde - hasta)))
 }
 
-/** Los uniformes de la luz de abajo; los comparten el piso, la simulación, el plano y las chispas. */
+/** [PULIDO 3B] B0 · cuándo nace la onda `n` del logo (en el reloj de la luz): en su intervalo, corrida al azar. */
+export function naceLaOnda(n: number): number {
+  const O = LUZ_DE_ABAJO.ondas
+  return (n + O.corre * azarDeLaLuz(n, 4.7)) * O.cadaS
+}
+
+/** [PULIDO 3B] B0 · cuánto hace que nació la última onda del logo a los `reloj` s (s; infinito si todavía ninguna). */
+export function desdeLaUltimaOnda(reloj: number): number {
+  const n = Math.floor(reloj / LUZ_DE_ABAJO.ondas.cadaS)
+  for (const m of [n, n - 1]) if (reloj >= naceLaOnda(m)) return reloj - naceLaOnda(m)
+  return Number.POSITIVE_INFINITY
+}
+
+/** [PULIDO 3B] B0 · la corriente en el punto `s` (bloques) de la junta `junta` del eje `eje` a los `t` s: la misma cuenta que `corrienteEnLaJunta`. */
+export function corrienteEnLaJunta(junta: number, s: number, eje: number, t: number): number {
+  let luz = 0
+  for (let j = 0; j < CORRIENTES.porJunta; j += 1) {
+    const [a, b] = [junta, eje * 7 + j * 13.1]
+    const periodo = CORRIENTES.periodoS[0] + (CORRIENTES.periodoS[1] - CORRIENTES.periodoS[0]) * azarDeLaLuz(a + 0.17, b + 0.17)
+    const ciclo = t / periodo + azarDeLaLuz(a + 0.53, b + 0.53) + CORRIENTES.tuerce * ruido(t / (2 * periodo), a * 0.37 + b)
+    const n = Math.floor(ciclo)
+    const [sa, sb] = [a + n * 1.37, b + n * 2.71]
+    const tau = (ciclo - n) * periodo
+    const vive = CORRIENTES.vive * periodo
+    if (tau > vive || azarDeLaLuz(sa + 0.9, sb + 0.9) < CORRIENTES.descansa) continue
+    const sentido = azarDeLaLuz(sa + 0.77, sb + 0.77) < 0.5 ? -1 : 1
+    const velocidad = CORRIENTES.velocidad[0] + (CORRIENTES.velocidad[1] - CORRIENTES.velocidad[0]) * azarDeLaLuz(sa + 0.11, sb + 0.11)
+    const cabeza = (azarDeLaLuz(sa + 0.31, sb + 0.31) - 0.5) * 2 * CORRIENTES.alcance + sentido * velocidad * tau
+    const largo = CORRIENTES.largo[0] + (CORRIENTES.largo[1] - CORRIENTES.largo[0]) * azarDeLaLuz(sa + 0.63, sb + 0.63)
+    const detras = (cabeza - s) * sentido
+    if (detras < 0 || detras > largo) continue
+    const cola = 1 - detras / largo
+    luz = Math.max(luz, cola * cola * suave(0, 0.15, tau) * (1 - suave(0.6 * vive, vive, tau)))
+  }
+  return luz
+}
+
+/** Los uniformes de la luz de abajo; los comparten el piso, la simulación y el plano. */
 export const LUZ_DE_ABAJO_EN_VIVO = {
   /** La energía (el poder del piso, con su inercia: 0 sin poder, 1 entero). */
   uEnergiaDeLaLuz: { value: 0 },
@@ -149,23 +208,19 @@ export const LUZ_DE_ABAJO_EN_VIVO = {
   uCalmaDeLaLuz: { value: new THREE.Vector3(0, 1, 0) },
   /** [PULIDO 3] A1 · la expansión desde el hueco: el radio (u) y el progreso (0 a 1). */
   uExpansionDeLaLuz: { value: new THREE.Vector2(0, 0) },
-  /** [PULIDO 3] A1 · el reloj del campo (s): el de la escena; quieto con movimiento reducido. */
+  /** [PULIDO 3] A1 · el reloj de la luz (s): el de la escena (más rápido con `?energia=intensa`); quieto con movimiento reducido. */
   uRelojDeLaLuz: { value: 0 },
-  /** [PULIDO 3] A1 · lo que se ve del piso: su centro (u) y su radio (u), donde nacen las chispas. */
-  uVistaDeLaLuz: { value: new THREE.Vector3(0, 0, 10) },
+  /** [PULIDO 3B] B0 · cuánto brilla la luz (1; más con `?energia=intensa`). */
+  uBrilloDeLaLuz: { value: 1 },
 }
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
-
-/** [PULIDO 3] A1 · las ondas que larga el logo en la energía (0 a 1 en su frente, a la distancia r): pide `uRelojDeLaLuz`. */
-export const ONDAS_DEL_LOGO_GLSL = /* glsl */ `
-uniform float uRelojDeLaLuz;
-float ondaDelLogo( float r, float ancho ) {
-	float fase = fract( uRelojDeLaLuz / ${f(LUZ_DE_ABAJO.ondas.cadaS)} );
-	float d = ( r - ${f(LUZ_DE_ABAJO.ondas.desde)} - fase * ${f(LUZ_DE_ABAJO.ondas.cadaS * LUZ_DE_ABAJO.ondas.velocidad)} ) / ancho;
-	return exp( - d * d ) * ( 1.0 - fase );
-}
-`
+const C = LUZ_DE_ABAJO.campo
+const F = LUZ_DE_ABAJO.fina
+const E = LUZ_DE_ABAJO.expansion
+const O = LUZ_DE_ABAJO.ondas
+const K = CORRIENTES
+const P = PISTONES
 
 /** El azar y el ruido de la luz (los usan la simulación, el dibujo y el plano). */
 export const RUIDO_DE_LA_LUZ_GLSL = /* glsl */ `
@@ -181,27 +236,40 @@ float ruidoDeLaLuz( vec2 p ) {
 	return mix( mix( azarDeLaLuz( i ), azarDeLaLuz( i + vec2( 1.0, 0.0 ) ), u.x ), mix( azarDeLaLuz( i + vec2( 0.0, 1.0 ) ), azarDeLaLuz( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
 }
 // Cuánta luz se escapa por la junta de este punto (0,35 a 1): no todas las rendijas por igual (un ruido a la escala de unos
-// bloques, que se corre despacio: la luz respira).
+// bloques que corre: la luz titila).
 float brilloDeLaJunta( vec2 xz, float t ) {
-	return ${f(1 - LUZ_DE_ABAJO.varia)} + ${f(LUZ_DE_ABAJO.varia)} * ruidoDeLaLuz( xz * ${f(LUZ_DE_ABAJO.variaCada)} + vec2( t * 0.13, - t * 0.09 ) );
+	return ${f(1 - LUZ_DE_ABAJO.varia)} + ${f(LUZ_DE_ABAJO.varia)} * ruidoDeLaLuz( xz * ${f(LUZ_DE_ABAJO.variaCada)} + vec2( t * ${f(LUZ_DE_ABAJO.variaCorre[0])}, t * ${f(LUZ_DE_ABAJO.variaCorre[1])} ) );
 }
 `
 
-const C = LUZ_DE_ABAJO.campo
-const E = LUZ_DE_ABAJO.expansion
-const O = LUZ_DE_ABAJO.ondas
+/** [PULIDO 3] A1 · las ondas que larga el logo en la energía (0 a 1 en su frente, a la distancia r): pide `uRelojDeLaLuz` y el azar. */
+export const ONDAS_DEL_LOGO_GLSL = /* glsl */ `
+float ondaDelLogo( float r, float ancho ) {
+	float n = floor( uRelojDeLaLuz / ${f(O.cadaS)} );
+	float s = 0.0;
+	for ( int k = 0; k < 2; k++ ) {
+		float m = n - float( k );
+		float tau = uRelojDeLaLuz - ( m + ${f(O.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${f(O.cadaS)};
+		if ( tau < 0.0 || tau > ${f(1.35 * O.cadaS)} ) continue;
+		float d = ( r - ${f(O.desde)} - tau * ${f(O.velocidad)} ) / ancho;
+		s += exp( - d * d ) * ( 1.0 - tau / ${f(1.35 * O.cadaS)} );
+	}
+	return s;
+}
+`
 
 /**
- * [PULIDO 3] A1 · LA ENERGÍA EN LA SIMULACIÓN DEL PISO (una vez por bloque y por paso): el campo, la expansión desde el
- * hueco (con su frente que brilla), las ondas del logo (los anillos del pulso, `uAnillos`, y el golpe, `uGolpe`), la energía
- * del poder y el mar calmo. Va al canal libre (`a`) de la textura de alturas. Pide `uTiempo`, `uAnillos` y `uGolpe`.
+ * [PULIDO 3] A1 · LA ENERGÍA EN LA SIMULACIÓN DEL PISO (una vez por bloque y por paso): el campo y [PULIDO 3B] B0 su capa fina,
+ * la expansión desde el hueco (con su frente que brilla), las ondas del logo (las suyas, los anillos del pulso, `uAnillos`, y el
+ * golpe, `uGolpe`), los pistones, la energía del poder y el mar calmo. Va al canal libre (`a`) de la textura de alturas.
  */
 export const ENERGIA_EN_LA_SIMULACION_GLSL = /* glsl */ `
 uniform float uEnergiaDeLaLuz;
 uniform vec3 uCalmaDeLaLuz;
 uniform vec2 uExpansionDeLaLuz;
-${ONDAS_DEL_LOGO_GLSL}
+uniform float uRelojDeLaLuz;
 ${RUIDO_DE_LA_LUZ_GLSL}
+${ONDAS_DEL_LOGO_GLSL}
 float fbmDeLaLuz( vec2 p ) {
 	float s = 0.0;
 	float a = 0.5;
@@ -217,6 +285,12 @@ float campoDeLaLuz( vec2 xz, float t ) {
 	vec2 p = ( xz + vec2( ${f(C.deriva[0])}, ${f(C.deriva[1])} ) * t ) * ${f(C.escala)};
 	vec2 q = vec2( fbmDeLaLuz( p + vec2( 0.0, t * ${f(C.cambia)} ) ), fbmDeLaLuz( p + vec2( 5.2 - t * ${f(C.cambia)}, 1.3 ) ) );
 	return fbmDeLaLuz( p + ${f(C.tuerce)} * ( q - 0.5 ) );
+}
+// [PULIDO 3B] B0 · el campo y la capa fina (el mayor de los dos).
+float fondoDeLaEnergia( vec2 xz, float t ) {
+	float campo = pow( smoothstep( ${f(LUZ_DE_ABAJO.umbral[0])}, ${f(LUZ_DE_ABAJO.umbral[1])}, campoDeLaLuz( xz, t ) ), 1.5 );
+	float fina = ${f(F.fuerza)} * smoothstep( ${f(F.umbral)}, ${f(F.umbral + 0.3)}, ruidoDeLaLuz( xz * ${f(F.escala)} + vec2( t * ${f(F.corre[0])} + 31.7, t * ${f(F.corre[1])} + 7.3 ) ) );
+	return max( campo, fina );
 }
 // El frente de una onda a la distancia r (u): las del logo, los anillos del pulso (nace, dura, alcance, amplitud) y el golpe.
 float ondaDeLaLuz( float r ) {
@@ -238,29 +312,44 @@ float ondaDeLaLuz( float r ) {
 	}
 	return s;
 }
-// La energía de este bloque (0 a ~1,8): el campo, hasta donde llegó la expansión (y su frente), más las ondas; por el poder y
-// nunca en el mar calmo del logo.
+// [PULIDO 3B] B0 · el pistón de este bloque (u): su racimo, en su ciclo, sube y baja una vez (o descansa).
+float pistonDeLaLuz( vec2 xz ) {
+	vec2 celda = floor( xz / uLado );
+	vec2 racimo = floor( vec2( celda.x + floor( celda.y / ${f(P.racimo)} ) * 1.7, celda.y ) / ${f(P.racimo)} );
+	float periodo = ${f(P.periodoS[0])} + ${f(P.periodoS[1] - P.periodoS[0])} * azarDeLaLuz( racimo + 4.1 );
+	float ciclo = uRelojDeLaLuz / periodo + azarDeLaLuz( racimo + 9.3 );
+	float n = floor( ciclo );
+	vec2 cn = racimo + n * vec2( 3.1, 1.7 );
+	if ( azarDeLaLuz( cn + 0.4 ) > ${f(P.cuantos)} ) return 0.0;
+	float sube = sin( 3.14159 * ( ciclo - n ) );
+	return ( ${f(P.alto[0])} + ${f(P.alto[1] - P.alto[0])} * azarDeLaLuz( cn + 0.8 ) ) * ( 0.75 + 0.25 * azarDeLaLuz( celda + 0.6 ) ) * sube * sube;
+}
 // [PULIDO 3] A1 · el piso blando de las tapas con energía (la mancha negra: \`fondoDeLaLuz\`).
 float fondoDeLaLuz( float alto ) {
 	return alto >= ${f(LUZ_DE_ABAJO.fondo.desde)} ? alto : ${f(LUZ_DE_ABAJO.fondo.desde)} + ${f(LUZ_DE_ABAJO.fondo.hasta - LUZ_DE_ABAJO.fondo.desde)} * ( 1.0 - exp( ( alto - ${f(LUZ_DE_ABAJO.fondo.desde)} ) / ${f(LUZ_DE_ABAJO.fondo.desde - LUZ_DE_ABAJO.fondo.hasta)} ) );
 }
-float energiaDeLaLuz( vec2 xz ) {
+// La energía de este bloque (0 a ~1,8): el fondo de la energía, hasta donde llegó la expansión (y su frente), más las ondas y
+// el pistón (que también devuelve, para la altura); por el poder y nunca en el mar calmo del logo.
+float energiaDeLaLuz( vec2 xz, out float piston ) {
+	piston = 0.0;
 	if ( uEnergiaDeLaLuz <= 0.0 || uExpansionDeLaLuz.x <= 0.0 ) return 0.0;
 	float r = length( xz );
 	float llego = 1.0 - smoothstep( uExpansionDeLaLuz.x - ${f(E.frente)}, uExpansionDeLaLuz.x, r );
 	if ( llego <= 0.0 ) return 0.0;
-	float frente = (r - uExpansionDeLaLuz.x) / ${f(E.frente)};
-	float e = pow( smoothstep( ${f(LUZ_DE_ABAJO.umbral[0])}, ${f(LUZ_DE_ABAJO.umbral[1])}, campoDeLaLuz( xz, uRelojDeLaLuz ) ), 1.5 );
+	float frente = ( r - uExpansionDeLaLuz.x ) / ${f(E.frente)};
+	float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, r ) );
+	piston = pistonDeLaLuz( xz ) * llego * ( 1.0 - calma ) * uEnergiaDeLaLuz;
+	float e = fondoDeLaEnergia( xz, uRelojDeLaLuz );
 	e = e * llego + ${f(E.brillo)} * exp( - frente * frente ) * ( 1.0 - uExpansionDeLaLuz.y );
 	e += ${f(O.sube)} * ondaDeLaLuz( r ) * llego * ( 0.35 + e );
-	float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, r ) );
+	e += ${f(P.abre)} * piston;
 	return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );
 }
 `
 
 /**
- * [PULIDO 3] A1 · LA ENERGÍA LEÍDA FUERA DE LA SIMULACIÓN (el plano de abajo, las chispas): el canal `a` de la textura de
- * alturas (`uPisoVivo`, `uGrillaDelPiso`: `piso/enVivo.ts`), interpolado entre los centros de los bloques.
+ * [PULIDO 3] A1 · LA ENERGÍA LEÍDA FUERA DE LA SIMULACIÓN (el plano de abajo): el canal `a` de la textura de alturas
+ * (`uPisoVivo`, `uGrillaDelPiso`: `piso/enVivo.ts`), interpolado entre los centros de los bloques.
  */
 export const LECTURA_DE_LA_LUZ_GLSL = /* glsl */ `
 uniform sampler2D uPisoVivo;
@@ -283,46 +372,37 @@ float energiaEnElPiso( vec2 xz ) {
 `
 
 /**
- * [PULIDO 3] A1 · `?energia=red`: CORRIENTES POR LAS JUNTAS. Cada `cada` bloques hay una fuente; de ella salen trazos que
- * corren por las líneas de la grilla (la distancia por las juntas, en L1: al llegar a un nodo siguen de frente y doblan en
- * ángulo recto, o sea, se bifurcan), y sólo por los tramos que conducen (un azar por tramo). Cada onda del logo recarga la
- * red: su anillo recorre TODAS las juntas al pasar. Pide `uTiempo`, `uAnillos`, `uGolpe` y el azar de la luz.
+ * [PULIDO 3B] B0 · LAS CORRIENTES POR LAS JUNTAS (`CORRIENTES`), en el dibujo (los costados) y en el plano de abajo (por las
+ * rendijas): en el punto `xz`, la de la junta vertical y la de la horizontal más cercanas. Pide `uRelojDeLaLuz` y el azar.
  */
-export const RED_DE_LA_LUZ_GLSL = /* glsl */ `
-${ONDAS_DEL_LOGO_GLSL}
-float redDeLaLuz( vec2 xz, float lado ) {
+export const CORRIENTES_DE_LA_LUZ_GLSL = /* glsl */ `
+float corrienteEnLaJunta( float junta, float s, float eje ) {
+	float luz = 0.0;
+	for ( int j = 0; j < ${String(K.porJunta)}; j++ ) {
+		vec2 semilla = vec2( junta, eje * 7.0 + float( j ) * 13.1 );
+		float periodo = ${f(K.periodoS[0])} + ${f(K.periodoS[1] - K.periodoS[0])} * azarDeLaLuz( semilla + 0.17 );
+		float ciclo = uRelojDeLaLuz / periodo + azarDeLaLuz( semilla + 0.53 ) + ${f(K.tuerce)} * ruidoDeLaLuz( vec2( uRelojDeLaLuz / ( 2.0 * periodo ), semilla.x * 0.37 + semilla.y ) );
+		float n = floor( ciclo );
+		vec2 sn = semilla + n * vec2( 1.37, 2.71 );
+		float tau = ( ciclo - n ) * periodo;
+		float vive = ${f(K.vive)} * periodo;
+		if ( tau > vive || azarDeLaLuz( sn + 0.9 ) < ${f(K.descansa)} ) continue;
+		float sentido = azarDeLaLuz( sn + 0.77 ) < 0.5 ? -1.0 : 1.0;
+		float cabeza = ( azarDeLaLuz( sn + 0.31 ) - 0.5 ) * ${f(2 * K.alcance)} + sentido * ( ${f(K.velocidad[0])} + ${f(K.velocidad[1] - K.velocidad[0])} * azarDeLaLuz( sn + 0.11 ) ) * tau;
+		float largo = ${f(K.largo[0])} + ${f(K.largo[1] - K.largo[0])} * azarDeLaLuz( sn + 0.63 );
+		float detras = ( cabeza - s ) * sentido;
+		if ( detras < 0.0 || detras > largo ) continue;
+		float cola = 1.0 - detras / largo;
+		luz = max( luz, cola * cola * smoothstep( 0.0, 0.15, tau ) * ( 1.0 - smoothstep( 0.6 * vive, vive, tau ) ) );
+	}
+	return luz;
+}
+float corrientesDeLaLuz( vec2 xz, float lado ) {
 	vec2 g = xz / lado;
-	vec2 i = floor( g );
-	vec2 f = g - i;
-	bool vertical = min( f.x, 1.0 - f.x ) < min( f.y, 1.0 - f.y );
-	vec2 nodo = floor( g + 0.5 );
-	vec2 tramo = vertical ? vec2( nodo.x, i.y ) : vec2( i.x, nodo.y );
-	float conduce = step( ${f(1 - RED_DE_LA_LUZ.conduce)}, azarDeLaLuz( tramo * vec2( 1.0, 1.7 ) + ( vertical ? 0.31 : 0.77 ) ) );
-	float corriente = 0.0;
-	vec2 sc = floor( g / ${f(RED_DE_LA_LUZ.cada)} - 0.5 );
-	for ( int k = 0; k < 4; k++ ) {
-		vec2 c = sc + vec2( float( k - 2 * ( k / 2 ) ), float( k / 2 ) );
-		vec2 fuente = floor( ( c + vec2( azarDeLaLuz( c + 3.1 ), azarDeLaLuz( c + 8.3 ) ) ) * ${f(RED_DE_LA_LUZ.cada)} );
-		float d = abs( g.x - fuente.x ) + abs( g.y - fuente.y );
-		float fase = fract( d / ${f(RED_DE_LA_LUZ.velocidad)} - uTiempo * ( 0.8 + 0.4 * azarDeLaLuz( c + 5.7 ) ) );
-		corriente = max( corriente, smoothstep( 0.0, 0.03, fase ) * ( 1.0 - smoothstep( 0.03, ${f(RED_DE_LA_LUZ.trazo)}, fase ) ) * ( 1.0 - smoothstep( 4.0, 9.0, d ) ) );
-	}
-	float r = length( xz );
-	float anillo = ondaDelLogo( r, 0.9 );
-	for ( int k = 0; k < 4; k++ ) {
-		vec4 a = uAnillos[ k ];
-		if ( a.w <= 0.0 ) continue;
-		float t = ( uTiempo - a.x ) / a.y;
-		if ( t < 0.0 || t > 1.0 ) continue;
-		float d = ( r - 3.6 - ( a.z - 3.6 ) * ( 1.0 - pow( 1.0 - t, 2.2 ) ) ) / 0.9;
-		anillo += exp( - d * d ) * pow( 1.0 - t, 1.2 );
-	}
-	if ( uGolpe.w > 0.0 ) {
-		float t = ( uTiempo - uGolpe.x ) / 2.6;
-		float d = ( r - 1.5 - 58.0 * ( 1.0 - pow( 1.0 - clamp( t, 0.0, 1.0 ), 2.2 ) ) ) / 0.9;
-		if ( t >= 0.0 && t <= 1.0 ) anillo += exp( - d * d ) * pow( 1.0 - t, 1.2 );
-	}
-	return ${f(RED_DE_LA_LUZ.fuerza)} * corriente * conduce + ${f(RED_DE_LA_LUZ.anillo)} * anillo;
+	vec2 cerca = abs( g - floor( g + 0.5 ) );
+	float v = corrienteEnLaJunta( floor( g.x + 0.5 ), g.y, 0.0 ) * ( 1.0 - smoothstep( 0.08, 0.2, cerca.x ) );
+	float h = corrienteEnLaJunta( floor( g.y + 0.5 ), g.x, 1.0 ) * ( 1.0 - smoothstep( 0.08, 0.2, cerca.y ) );
+	return ${f(K.fuerza)} * max( v, h );
 }
 `
 

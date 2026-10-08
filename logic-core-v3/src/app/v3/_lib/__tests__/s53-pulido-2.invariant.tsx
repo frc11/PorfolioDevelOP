@@ -50,7 +50,6 @@ import {
   type Pose,
   type PosesDeLaTransformacion,
 } from '../escena/ctaDelFinal/variantes'
-import { CHISPAS_DE_LA_LUZ, crearLasChispas } from '../escena/final/chispasDeLaLuz'
 import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPantalla } from '../escena/final/encuadreDelPie'
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { LUZ_DE_ABAJO } from '../escena/final/luzDeAbajo'
@@ -428,10 +427,10 @@ const tapaBien = (g: string): boolean => {
   const enElMedioDeLaTapa = Number(canto[1]) * Math.exp(-(LADO4 / 2) / Number(canto[2]))
   const unoMasArriba = Math.exp(-1 / Number(costado[2]))
   return enElMedioDeLaTapa < 0.01 && Number(canto[1]) < Number(costado[1]) && Number(costado[1]) >= 1 && unoMasArriba < 0.1 && Number(sombra[1]) > 0 && !/mix\( color, vec3\(/.test(g) &&
-    g.includes('float junta = brilloDeLaJunta( vPiso.xz, uTiempo ) * s;') && g.includes('return color + vec3( luz * junta );')
+    g.includes('float junta = brilloDeLaJunta( vPiso.xz, uRelojDeLaLuz ) * s + corrientesDeLaLuz( vPiso.xz, uLado ) * ( 0.4 + min( s, 1.0 ) );') && g.includes('return color + vec3( luz * junta * uBrilloDeLaLuz );')
 }
 afirmar(tapaBien(juntas4), 'las tapas no se blanquean: en la tapa sólo el canto que da a la rendija (en su medio, nada) y un poco más de sombra; los costados reciben la luz desde su base y se apagan hacia arriba', `canto ${String(L4.canto)} · costado ${String(L4.costado)} (cae en ${String(L4.caeEn)} u) · sombra de la tapa ${String(L4.sombraDeLaTapa)}`)
-controlPositivo('el detector VE las tapas blancas de PULIDO 1', juntas4.replace('return color + vec3( luz * junta );', 'return mix( color, vec3( 1.0 ), s );'), tapaBien)
+controlPositivo('el detector VE las tapas blancas de PULIDO 1', juntas4.replace('return color + vec3( luz * junta * uBrilloDeLaLuz );', 'return mix( color, vec3( 1.0 ), s );'), tapaBien)
 controlPositivo('  y un canto que ocupa la tapa entera', juntas4.replace(/(luz = [0-9.]+ \* exp\( - min\( borde\.x, borde\.y \) \/ )[0-9.]+( \);)/, '$10.5$2'), tapaBien)
 controlPositivo('  y un costado parejo (sin nacer en la base)', juntas4.replace(/(if \( vTapa < 0\.5 \) \{\s*luz = [0-9.]+ \* exp\( - max\( 0\.0, vAlto - vVecino \) \/ )[0-9.]+( \);)/, '$19.0$2'), tapaBien)
 
@@ -442,14 +441,14 @@ controlPositivo('  y un costado parejo (sin nacer en la base)', juntas4.replace(
 const sim4 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 const separaBien = (v: string, sim: string): boolean => {
   const achica = new RegExp(`transformed\\.xz \\*= 1\\.0 - ${f4(2 * L4.separa).replace('.', '\\.')} \\* min\\( vEnergiaDelBloque, 1\\.6 \\) \\* \\( ([0-9.]+) \\+ ([0-9.]+) \\* azarDeLaLuz\\( floor\\( centro / uLado \\) \\+ [0-9.]+ \\) \\);`).exec(v)
-  const alturas = /float h = min\( e, 1\.4 \) \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( celda \+ [0-9.]+ \) \);/.exec(sim)
+  const alturas = /return min\( e, 1\.4 \) \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( celda \+ [0-9.]+ \) \);/.exec(sim)
   if (achica === null || alturas === null) return false
   return L4.separa >= 0.02 && L4.separa <= 0.08 && Number(achica[1]) > 0.2 && Math.abs(Number(achica[1]) + Number(achica[2]) - 1) < 1e-9 && v.includes('vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;') &&
-    Number(alturas[1]) < 0 && Number(alturas[2]) > 0 && Number(alturas[2]) - Number(alturas[1]) >= 0.3 && sim.includes('dibujo += alturaDeLaLuz( xz, energiaAqui );')
+    Number(alturas[1]) < 0 && Number(alturas[2]) > 0 && Number(alturas[2]) - Number(alturas[1]) >= 0.3 && sim.includes('dibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;')
 }
 afirmar(separaBien(sombreadoresDelPiso4.vertice, sim4), '  con energía los bloques se separan un poco (cada rendija de su ancho) y quedan a alturas distintas (más abajo y más arriba que el resto)', `separa ${String(L4.separa)} del lado por costado · alturas ${String(L4.alturas[0])} a +${String(L4.alturas[1])} u`)
 controlPositivo('  el detector VE los bloques pegados', [sombreadoresDelPiso4.vertice.replace(/transformed\.xz \*= [^;]+;/, ''), sim4] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
-controlPositivo('  y todos a la misma altura', [sombreadoresDelPiso4.vertice, sim4.replace('dibujo += alturaDeLaLuz( xz, energiaAqui );', '')] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
+controlPositivo('  y todos a la misma altura', [sombreadoresDelPiso4.vertice, sim4.replace('dibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;', '')] as const, ([v, s]: readonly [string, string]) => separaBien(v, s))
 
 // El PLANO que brilla debajo: al pie de los bloques (apenas sobre el fondo del zócalo), blanco donde hay energía (donde no,
 // descartado: nada que tape); sin tono (el blanco llega blanco). Sin bloom en ningún archivo del final: el resplandor es falso
@@ -460,7 +459,7 @@ const finalDir4 = `${V3}/_lib/escena/final`
 const delFinal4 = readdirSync(finalDir4).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${finalDir4}/${a}`, 'utf8')))
 const planoBien = (p: THREE.Mesh, m: THREE.ShaderMaterial | null, fuentesDelFinal: readonly string[]): boolean =>
   m !== null && Math.abs(p.position.y - (FLOOR_Y - PISO_VIVO.zocalo + 0.02)) < 1e-9 && m.fragmentShader.includes('if ( luz <= 0.002 ) discard;') &&
-  m.fragmentShader.includes(`gl_FragColor = vec4( vec3( ${f4(L4.plano)} * luz ), 1.0 );`) && m.fragmentShader.includes('float e = energiaEnElPiso( vXZ );') && !m.toneMapped &&
+  m.fragmentShader.includes(`gl_FragColor = vec4( vec3( ${f4(L4.plano)} * luz * uBrilloDeLaLuz ), 1.0 );`) && m.fragmentShader.includes('float e = energiaEnElPiso( vXZ );') && !m.toneMapped &&
   fuentesDelFinal.every((s) => !/Bloom|EffectComposer|UnrealBloomPass/.test(s))
 afirmar(planoBien(plano4, materialDelPlano4, delFinal4), '  por las rendijas se ve un plano blanco al pie de los bloques, donde hay energía; sin bloom en el final', `a ${String(PISO_VIVO.zocalo - 0.02)} u bajo el ras`)
 controlPositivo('  el detector VE el bloom global', [plano4, materialDelPlano4, [...delFinal4, "import { Bloom } from '@react-three/postprocessing'"]] as const, ([p, m, fu]: readonly [THREE.Mesh, THREE.ShaderMaterial | null, readonly string[]]) => planoBien(p, m, fu))
@@ -474,22 +473,12 @@ materialDelPlano4?.dispose()
 // vive)» se borraron (no hay más zonas: «nada de ciclos de nacer y morir, y nunca se apaga»). Lo nuevo (el campo, la
 // cobertura, la expansión desde el hueco, las ondas, la sala gradual) lo fija `s54-pulido-3` A1.
 
-// Las CHISPAS de la referencia: [PULIDO 3] A1 · ahora de `?energia=inestable` (se borró `?chispas=si`; apagadas en el producto;
-// quietas con movimiento reducido, no se crean): chicas, blancas y sumadas, y sólo se prenden donde la energía está más alta
-// (son más puntos que antes, 140, porque la mayoría no se prende: la cuenta que se ve la pone la energía).
-const chispas4 = crearLasChispas()
-const materialDeLasChispas4 = chispas4.material instanceof THREE.ShaderMaterial ? chispas4.material : null
+// Las CHISPAS de la referencia: [PULIDO 3] A1 · fueron de `?energia=inestable`. [PULIDO 3B] B0 · cambió por pedido: «las
+// chispas también se van»: ni su archivo, ni su creación, ni ningún `Points` en el final.
 const finalDelPie4 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
-type Chispas4 = { readonly cuantas: number; readonly tamano: number; readonly desde: number }
-const chispasBien = (c: Chispas4, m: THREE.ShaderMaterial | null, componente: string): boolean =>
-  m !== null && c.cuantas <= 160 && c.tamano <= 4 && c.desde >= 0.8 && m.blending === THREE.AdditiveBlending && m.fragmentShader.includes('gl_FragColor = vec4( vec3( 1.0 ), ') &&
-  /vAlfa = smoothstep\( [0-9.]+, [0-9.]+, energiaEnElPiso\( xz \) \)/.test(m.vertexShader) &&
-  ENTORNO.pruebas.energia === 'no' && entornoPedido('producto,energia=inestable').pruebas.energia === 'inestable' && componente.includes("const chispas = energia === 'inestable' && !estatico ? crearLasChispas() : null")
-afirmar(chispasBien(CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4), '  las chispas, sólo con `?energia=inestable` (y nunca quietas): chicas, blancas, sumadas y sólo donde la energía está más alta', `${String(CHISPAS_DE_LA_LUZ.cuantas)} puntos de ${String(CHISPAS_DE_LA_LUZ.tamano)} px, desde la energía ${String(CHISPAS_DE_LA_LUZ.desde)}`)
-controlPositivo('  el detector VE una nube de partículas', [{ ...CHISPAS_DE_LA_LUZ, cuantas: 600 }, materialDeLasChispas4, finalDelPie4] as const, ([c, m, k]: readonly [Chispas4, THREE.ShaderMaterial | null, string]) => chispasBien(c, m, k))
-controlPositivo('  y las chispas en el producto', [CHISPAS_DE_LA_LUZ, materialDeLasChispas4, finalDelPie4.replace("energia === 'inestable' && !estatico ? crearLasChispas() : null", 'crearLasChispas()')] as const, ([c, m, k]: readonly [Chispas4, THREE.ShaderMaterial | null, string]) => chispasBien(c, m, k))
-chispas4.geometry.dispose()
-materialDeLasChispas4?.dispose()
+const sinChispas = (componente: string): boolean => !existsSync(`${V3}/_lib/escena/final/chispasDeLaLuz.ts`) && !componente.includes('crearLasChispas') && delFinal4.every((f) => !/THREE\.Points|PointsMaterial/.test(f))
+afirmar(sinChispas(finalDelPie4), '  las chispas se borraron (B0 de PULIDO 3B): ningún punto en el final')
+controlPositivo('  el detector VE las chispas de vuelta', `${finalDelPie4}\nconst chispas = crearLasChispas()`, sinChispas)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · El CTA del final desde «Seis razones» (`?cta=capas|relevo|giro|cruce|tipo`): cada una función pura del scroll')

@@ -17,7 +17,7 @@ import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
-import { LUZ_DE_ABAJO_EN_VIVO, varianteDeLaEnergia } from '../final/luzDeAbajo'
+import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
 import { PISO_VIVO, SIMULACION_GLSL, centroDeLaCelda, conPisoVivo, grillaDelPiso, type Grilla } from './bloques'
@@ -223,9 +223,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   const uLuzDelBisel = { value: new THREE.Vector2(-0.6, 0.8) }
   // [INTERFAZ 2] T1 · la simulación con la onda hacia lo señalado (`ondaDirigida.ts`, inyectada en `SIMULACION_GLSL`).
   // [CIERRE] 3 · y el final del pie: el golpe del encastre y [EL ENCASTRE] 2F el rastro del mouse (`final/enElPiso.ts`).
-  // [PULIDO 3] A1 · con la variante de la energía bajo el piso (`?energia=`).
-  const energia = varianteDeLaEnergia(entornoDeLaEscena().pruebas.energia)
-  const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL), energia), {
+  const sim = crearPingPong(grilla.n, grilla.n, 1, conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL)), {
     uOnda: ONDA_EN_VIVO.uOnda,
     uGolpe: FINAL_EN_EL_PISO.uGolpe,
     uRastro: FINAL_EN_EL_PISO.uRastro,
@@ -271,7 +269,7 @@ function armar(grilla: Grilla, conContacto: boolean) {
   // [ESCENA 7] T11: con la bandera, el amanecer y los cuadros de sol que entran por la trama.
   conElAmanecer(material, true)
   conLaOndaEnElPiso(material)
-  conElFinalEnElPiso(material, energia)
+  conElFinalEnElPiso(material)
   const geometria = geometriaDelBloque(grilla.lado)
   geometria.setAttribute('aCelda', new THREE.InstancedBufferAttribute(grilla.celdas, 2))
   const bloques = new THREE.InstancedMesh(geometria, material, grilla.cuantas)

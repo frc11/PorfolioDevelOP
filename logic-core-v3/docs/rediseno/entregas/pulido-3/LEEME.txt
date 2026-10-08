@@ -14,3 +14,11 @@ A2 · El contacto del pie a 768
   en columna hasta las redes. AA medido de día y con el oscuro forzado.
   Archivos: _secciones/cierre/Cierre.tsx, ColumnasDelPie.tsx, FormularioDelPie.tsx; _estilos/vidrio.css (y sus tokens en
   s3-registro-de-tokens.ts).  Hoja: a2-contacto-768.png (antes y después).
+
+B0 · La energía, versión final (PULIDO 3B)
+  Qué: una sola versión (se borraron ?energia=red|inestable, el temblor y las chispas): más movimiento y brillo, corrientes
+  por las juntas sin patrón, pistones, el logo que brilla (filo y pulso por onda), el frente desde el golpe, cobertura ≥ 65 %.
+  ?energia=intensa para comparar.
+  Archivos: escena/final/luzDeAbajo.ts, enElPiso.ts, planoDeLaLuz.ts, rimDeLaLuz.ts, cuadroDelFinal.ts, FinalDelPie.tsx;
+  escena/LuzDelLogo.tsx, entorno.ts, piso/PisoVivo.tsx. Borrado: escena/final/chispasDeLaLuz.ts.
+  Hojas: b0-energia-1440.png y b0-energia-390.png (6 cuadros desde el golpe y 6 en pleno).

@@ -7,15 +7,14 @@ import * as THREE from 'three'
 
 import { retenerLosGestos } from '../../gestosDelScroll'
 import type { NivelDeCalidad } from '../calidad'
-import { entornoDeLaEscena, hayBanco } from '../entorno'
+import { hayBanco } from '../entorno'
 import { PISO_VIVO } from '../piso/bloques'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
 import { FINAL_DEL_BANCO, alCuadroDelFinal, crearElEstado, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
-import { crearLasChispas } from './chispasDeLaLuz'
 import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
-import { LUZ_DE_ABAJO_EN_VIVO, varianteDeLaEnergia } from './luzDeAbajo'
+import { LUZ_DE_ABAJO_EN_VIVO } from './luzDeAbajo'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
 import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
@@ -71,22 +70,14 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
-    // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas) y, [PULIDO 3] A1 con `?energia=inestable`, las chispas.
-    const energia = entornoDeLaEscena().pruebas.energia
-    const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1, varianteDeLaEnergia(energia))
-    const chispas = energia === 'inestable' && !estatico ? crearLasChispas() : null
+    // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas). [PULIDO 3B] B0 · las chispas se borraron.
+    const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
     m.current = estado
     g.add(estado.pozo.grupo, plano)
-    if (chispas !== null) g.add(chispas)
     return () => {
       g.remove(estado.pozo.grupo, plano)
       plano.geometry.dispose()
       if (plano.material instanceof THREE.Material) plano.material.dispose()
-      if (chispas !== null) {
-        g.remove(chispas)
-        chispas.geometry.dispose()
-        if (chispas.material instanceof THREE.Material) chispas.material.dispose()
-      }
       soltarElFinal(estado, grupoDelLogo)
       EN_VIVO.fin = 0
       // [PULIDO 2] 6 · sin el final, la sombra del logo entera.

@@ -61,16 +61,17 @@ const FINAL = '_lib/escena/final'
 const delFinal = readdirSync(`${V3}/${FINAL}`).filter((a) => /\.tsx?$/.test(a))
 // [PULIDO 2] 4 · cambió por pedido: las chispas de la referencia (`chispasDeLaLuz.ts`, sus `Points`) existen, pero sólo con
 // `?chispas=si` (apagadas en el producto y quietas con movimiento reducido); al grupo se le suma también el plano de la luz.
-// [PULIDO 3] A1 · `?chispas=si` se borró: las chispas son de `?energia=inestable` (lo demás, igual).
+// [PULIDO 3] A1 · `?chispas=si` se borró: las chispas son de `?energia=inestable` (lo demás, igual). [PULIDO 3B] B0 · las chispas
+// se borraron: ningún `Points` en el final, sin excepción.
 const CHISPAS = 'chispasDeLaLuz.ts'
 const fuentesDelFinal = delFinal.filter((a) => a !== CHISPAS).map((a) => sinComentarios(leer(`${FINAL}/${a}`)))
 const componenteDelFinal = sinComentarios(leer(`${FINAL}/FinalDelPie.tsx`))
 const sinParticulas = (fuentes: readonly string[], componente: string): boolean =>
   !existsSync(`${V3}/${FINAL}/vapor.ts`) && !existsSync(`${V3}/${FINAL}/explosion.ts`) && fuentes.every((f) => !/THREE\.Points|PointsMaterial|\bvapor\b/i.test(f)) && componente.includes('g.add(estado.pozo.grupo, plano)') &&
-  componente.includes("const chispas = energia === 'inestable' && !estatico ? crearLasChispas() : null") && componente.includes('const energia = entornoDeLaEscena().pruebas.energia') && (componente.match(/crearLasChispas\(\)/g) ?? []).length === 1
-afirmar(sinParticulas(fuentesDelFinal, componenteDelFinal), 'en el final no hay partículas en el producto: ningún `Points` en `final/` (salvo las chispas, sólo con `?energia=inestable`), sin `vapor.ts` (ni la explosión de CIERRE); al grupo del final se le suman el pozo y el plano de la luz', `${String(delFinal.length)} archivos en final/`)
+  !existsSync(`${V3}/${FINAL}/${CHISPAS}`) && !componente.includes('crearLasChispas')
+afirmar(sinParticulas(fuentesDelFinal, componenteDelFinal), 'en el final no hay partículas: ningún `Points` en `final/` (las chispas se borraron), sin `vapor.ts` (ni la explosión de CIERRE); al grupo del final se le suman el pozo y el plano de la luz', `${String(delFinal.length)} archivos en final/`)
 controlPositivo('el detector VE el vapor de EL ENCASTRE (sus puntos en el grupo del final)', [fuentesDelFinal, componenteDelFinal.replace('g.add(estado.pozo.grupo, plano)', 'g.add(estado.vapor.puntos, estado.pozo.grupo, plano)')] as const, ([f, c]: readonly [readonly string[], string]) => sinParticulas([...f, c], c))
-controlPositivo('  y las chispas en el producto (sin su bandera)', componenteDelFinal.replace("energia === 'inestable' && !estatico ? crearLasChispas() : null", 'crearLasChispas()'), (c: string) => sinParticulas(fuentesDelFinal, c))
+controlPositivo('  y las chispas de vuelta', `${componenteDelFinal}\nconst chispas = crearLasChispas()`, (c: string) => sinParticulas(fuentesDelFinal, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1B · El hueco del tono del piso, un poco más sombreado adentro (no negro); el labio, apenas, y se va al quedar al ras')
@@ -285,7 +286,7 @@ const luzConElPoder = (j: string, sector: string, c: string): boolean => j.inclu
   c.includes('const CALMA_DE_LA_LUZ = [CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde, CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + LUZ_DE_ABAJO.margen] as const')
 afirmar(luzConElPoder(juntasDelPiso, ENERGIA_EN_LA_SIMULACION_GLSL, cuadroDeLaLuz) && ENERGIA_EN_LA_SIMULACION_GLSL.includes('uniform vec3 uCalmaDeLaLuz;'), 'el brillo del piso espera al encastre (con el poder liberado) y queda fuera del mar calmo del logo ([PULIDO 3] A1: la energía de cada bloque)')
 controlPositivo('el detector VE un brillo que no espera al encastre', [juntasDelPiso, ENERGIA_EN_LA_SIMULACION_GLSL, cuadroDeLaLuz.replace('Math.min(1, s.poder)', '1')] as const, ([j, g, c]: readonly [string, string, string]) => luzConElPoder(j, g, c))
-controlPositivo('  y una luz que entra al mar calmo', [juntasDelPiso, ENERGIA_EN_LA_SIMULACION_GLSL.replace('( 1.0 - calma )', '1.0'), cuadroDeLaLuz] as const, ([j, g, c]: readonly [string, string, string]) => luzConElPoder(j, g, c))
+controlPositivo('  y una luz que entra al mar calmo', [juntasDelPiso, ENERGIA_EN_LA_SIMULACION_GLSL.replace('return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );', 'return min( 1.8, e ) * uEnergiaDeLaLuz;'), cuadroDeLaLuz] as const, ([j, g, c]: readonly [string, string, string]) => luzConElPoder(j, g, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1G · El pie no recibe la luz de la cinemática: se ve como antes, en cualquier pose de la cámara')

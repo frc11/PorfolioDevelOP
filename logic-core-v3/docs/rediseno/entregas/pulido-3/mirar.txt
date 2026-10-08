@@ -11,3 +11,10 @@ A1 · La energía bajo el piso (escritorio y teléfono)
 A2 · El contacto del pie en la tablet (768, por la LAN)
    /v3, bajá al pie. El formulario va en columna (Nombre, Mail, Mensaje alto, Enviar abajo), llega hasta las redes y es de
    vidrio: se ve el piso desenfocado detrás. A 390 y en escritorio no cambia.
+
+PULIDO 3B
+B0 · La energía (versión final; escritorio y teléfono)
+   /v3, bajá hasta el pie. En el golpe, el logo larga un pulso de luz y la energía sale del hueco (el anillo de luz se ve
+   desde el primer momento). Después: el piso vivo todo el tiempo, corrientes que corren por las juntas y se cruzan,
+   racimos de bloques que suben y bajan (y dejan escapar más luz al subir), el filo del logo encendido y un pulso del logo
+   con cada onda. Para comparar: /v3?energia=intensa (más brillo y más velocidad).

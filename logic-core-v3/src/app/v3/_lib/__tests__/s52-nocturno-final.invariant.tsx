@@ -643,13 +643,15 @@ const tarjetaBien = (html: string): boolean => {
 afirmar(tarjetaBien(pieAngosto), 'abajo de 1024 el contacto va en UNA caja propia (desde PULIDO 1 P18, de vidrio) con su rótulo, sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
 controlPositivo('el detector VE la caja mezclando (los campos de antes)', pieAngosto.replace('<form id="contacto"', '<form data-x="max-escritorio:mix-blend-difference" id="contacto"'), tarjetaBien)
 const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+// [PULIDO 3] A2 · cambió por pedido: en la tablet (768 a 1023) el formulario va en columna (un campo por renglón, el mensaje
+// con el alto que sobra); en el teléfono, igual que antes (lado a lado). Lo fija `s54-pulido-3` A2.
 const grillaBien = (f: string): boolean =>
-  f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&
-  f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4' }") &&
+  f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&
+  f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[auto_1fr_auto]' }") &&
   f.includes('className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]"') &&
   /max-escritorio:bg-tinta max-escritorio:px-\[var\(--spacing-3\)\] max-escritorio:text-fondo/.test(f) &&
   /text-cuerpo max-escritorio:text-base leading-texto/.test(f)
-afirmar(grillaBien(formularioTsx), '  el formulario angosto: el nombre y el mail lado a lado, el mensaje y Enviar (lleno, de tinta) abajo; los campos a 16 px (Safari no agranda al tocar); en escritorio, una columna como antes')
+afirmar(grillaBien(formularioTsx), '  el formulario del teléfono: el nombre y el mail lado a lado, el mensaje y Enviar (lleno, de tinta) abajo (en la tablet, en columna); los campos a 16 px (Safari no agranda al tocar); en escritorio, una columna como antes')
 controlPositivo('  el detector VE los campos a 15 px en el teléfono', formularioTsx.replace('text-cuerpo max-escritorio:text-base leading-texto', 'text-cuerpo leading-texto'), grillaBien)
 const bandaC4 = leer('_estilos/banda.css')
 const enLaBandaC4 = bandaC4.slice(bandaC4.indexOf('@media (width < 1024px) {'), bandaC4.indexOf('/* ── HOVER DONDE HAY'))

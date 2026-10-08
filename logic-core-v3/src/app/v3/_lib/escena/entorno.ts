@@ -89,10 +89,10 @@ export interface Pruebas {
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
   /**
-   * [PULIDO 3] A1 · `energia=red|inestable`: la energía bajo el piso con corrientes por las juntas, o con tensión (temblor,
-   * picos, chispas y el canto del logo). Sin bandera, la sobrecarga (el producto). Absorbe `chispas=si`, que se borró.
+   * [PULIDO 3] A1 · `energia=red|inestable` (se borraron en [PULIDO 3B] B0: se fundieron en el producto). B0 · `energia=intensa`:
+   * la energía bajo el piso con más brillo y más velocidad, para comparar con el producto.
    */
-  readonly energia: 'red' | 'inestable' | 'no'
+  readonly energia: 'intensa' | 'no'
   /**
    * [PULIDO 2] 5 · cómo se llega al CTA del final desde «Seis razones» (`no`: el de hoy, el producto). Las de PULIDO 1
    * (`a|b|c|d`) se borraron, rechazadas.
@@ -133,7 +133,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    energia: unoDe<'red' | 'inestable'>(['red', 'inestable'], valor('energia')),
+    energia: unoDe<'intensa'>(['intensa'], valor('energia')),
     cta: unoDe<VarianteDelCta>(VARIANTES_DEL_CTA, valor('cta')),
   }
 }

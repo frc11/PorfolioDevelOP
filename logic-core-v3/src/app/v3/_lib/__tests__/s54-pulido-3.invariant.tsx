@@ -4,25 +4,35 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   A1 · la energía bajo el piso en TODA la escena: la mancha negra (ninguna tapa baja hasta el plano), el campo continuo
  *        (cobertura, fluye, nunca se apaga, sin ciclos), la expansión desde el hueco (función de `fin`: el rebobinado sin
- *        cortes), las ondas del logo, la sala gradual y las variantes `?energia=red|inestable`.
+ *        cortes), las ondas del logo y la sala gradual.
  *   A2 · el contacto del pie a 768: vidrio (el claro, más liviano) y en columna hasta las redes; sólo en la tablet.
+ *   B0 · [PULIDO 3B] la energía, versión final: una sola (sin `red` ni `inestable`; `?energia=intensa` para comparar), más
+ *        movimiento y más brillo, las corrientes sin patrón, los pistones sin vibración, el logo que brilla (fuera del
+ *        oscurecimiento, su filo y el pulso de cada onda), el frente desde el golpe y la cobertura nunca bajo el 65 %.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-3.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-3/mirar.txt`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import {
   ALTO_DEL_PLANO,
+  CORRIENTES,
+  CORRIENTES_DE_LA_LUZ_GLSL,
   ENERGIA_EN_LA_SIMULACION_GLSL,
-  INESTABLE,
+  INTENSA,
   LUZ_DE_ABAJO,
-  RED_DE_LA_LUZ_GLSL,
+  PISTONES,
   campoDeLaLuz,
+  corrienteEnLaJunta,
+  desdeLaUltimaOnda,
+  energiaDeFondo,
   energiaDelCampo,
   fondoDeLaLuz,
+  naceLaOnda,
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
+import { BRILLO_DEL_LOGO, BRILLO_DEL_LOGO_GLSL, pulsoDelLogo } from '../escena/final/rimDeLaLuz'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, duracionDelRebobinado, expansionDeLaLuz, quedaDelRebobinado } from '../escena/final/recorridoDelFinal'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -51,39 +61,42 @@ const manchaBien = (fondo: Fondo, s: string, plano: number): boolean => {
   const nuncaBajo = altos.every((a) => fondo(a) > plano + 0.02)
   const igualArriba = altos.filter((a) => a >= L.fondo.desde).every((a) => Math.abs(fondo(a) - a) < 1e-12)
   const continuo = altos.every((a, i) => i === 0 || Math.abs(fondo(a) - fondo(altos[i - 1])) <= 0.0100001)
-  return nuncaBajo && igualArriba && continuo && s.includes('dibujo += alturaDeLaLuz( xz, energiaAqui );\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );')
+  return nuncaBajo && igualArriba && continuo && s.includes('dibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );')
 }
 afirmar(manchaBien(fondoDeLaLuz, sim, ALTO_DEL_PLANO), 'la mancha negra: con energía ninguna tapa baja hasta el plano de abajo (un piso blando por encima de él, continuo, igual en el resto)', `piso blando ${String(L.fondo.desde)} → ${String(L.fondo.hasta)} u · plano a ${ALTO_DEL_PLANO.toFixed(2)} u`)
 controlPositivo('el detector VE las tapas que bajan hasta el plano (la súper onda de antes)', ((a: number) => a) as Fondo, (f: Fondo) => manchaBien(f, sim, ALTO_DEL_PLANO))
 controlPositivo('  y el piso blando sin aplicar en la simulación', sim.replace('\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );', ''), (s: string) => manchaBien(fondoDeLaLuz, s, ALTO_DEL_PLANO))
 
-// EL CAMPO: la gran mayoría del piso visible con algo de luz (~70–85 % de las juntas, con intensidad variable), en cualquier
-// momento (nunca se apaga), en lo que se ve a 1440 (56 × 24 u) y a 390 (18 × 36 u), fuera del mar calmo.
-type Campo = (x: number, z: number, t: number) => number
-const coberturas = (campo: Campo, X: number, Z: number): number[] => {
+// EL CAMPO: la gran mayoría del piso visible con algo de luz, con intensidad variable, en cualquier momento (nunca se apaga),
+// en lo que se ve a 1440 (56 × 24 u) y a 390 (18 × 36 u), fuera del mar calmo. [PULIDO 3B] B0 · cambió por pedido: con la
+// capa fina, nunca menos del 65 % (antes: media de 70 a 85 % y nunca menos del 40 %; a 390 bajaba al 50 %).
+type Energia = (x: number, z: number, t: number) => number
+const coberturas = (energia: Energia, X: number, Z: number): number[] => {
   const salida: number[] = []
-  for (let t = 0; t < 600; t += 13) {
+  for (let t = 0; t < 900; t += 7) {
     let [n, con] = [0, 0]
     for (let x = -X; x <= X; x += 0.8) {
       for (let z = -Z; z <= Z; z += 0.8) {
         if (Math.hypot(x, z) < 7) continue
         n += 1
-        if (energiaDelCampo(campo(x, z, t)) > 0.02) con += 1
+        if (energia(x, z, t) > 0.02) con += 1
       }
     }
     salida.push(con / n)
   }
   return salida
 }
-const coberturaBien = (campo: Campo): boolean => [[28, 12], [9, 18]].every(([X, Z]) => {
-  const c = coberturas(campo, X, Z)
+const coberturaBien = (energia: Energia): boolean => [[28, 12], [9, 18]].every(([X, Z]) => {
+  const c = coberturas(energia, X, Z)
   const media = c.reduce((a, b) => a + b, 0) / c.length
-  return media >= 0.7 && media <= 0.88 && Math.min(...c) >= 0.4
+  return media >= 0.75 && media <= 0.95 && Math.min(...c) >= 0.65
 })
-const c1440 = coberturas(campoDeLaLuz, 28, 12)
-afirmar(coberturaBien(campoDeLaLuz), '  la gran mayoría del piso con algo de luz (~70–85 % de los bloques, en promedio), y nunca se apaga', `a 1440: media ${(100 * c1440.reduce((a, b) => a + b, 0) / c1440.length).toFixed(0)} %, mínimo ${(100 * Math.min(...c1440)).toFixed(0)} %`)
-controlPositivo('  el detector VE un campo que se apaga casi entero (zonas sueltas)', ((x: number, z: number, t: number) => campoDeLaLuz(x, z, t) - 0.2) as Campo, coberturaBien)
+const c1440 = coberturas(energiaDeFondo, 28, 12)
+const c390 = coberturas(energiaDeFondo, 9, 18)
+afirmar(coberturaBien(energiaDeFondo), '  la gran mayoría del piso con algo de luz, y nunca menos del 65 % en ningún momento ni ancho', `a 1440: media ${(100 * c1440.reduce((a, b) => a + b, 0) / c1440.length).toFixed(0)} %, mínimo ${(100 * Math.min(...c1440)).toFixed(0)} % · a 390: mínimo ${(100 * Math.min(...c390)).toFixed(0)} %`)
+controlPositivo('  el detector VE el campo sin la capa fina (bajaba al 40 %)', ((x: number, z: number, t: number) => energiaDelCampo(campoDeLaLuz(x, z, t))) as Energia, coberturaBien)
 
+type Campo = (x: number, z: number, t: number) => number
 // FLUYE: un ruido con domain warping que se mueve en el tiempo: de un cuadro al otro casi igual (continuo) y, a los 20 s, otro
 // (las zonas calientes viajan por todo el entorno sin parar).
 const correlacion = (campo: Campo, dt: number): number => {
@@ -99,7 +112,7 @@ const correlacion = (campo: Campo, dt: number): number => {
   const vb = b.reduce((p, v) => p + (v - mb) ** 2, 0)
   return cov / Math.sqrt(Math.max(1e-12, va * vb))
 }
-const fluyeBien = (campo: Campo, glsl: string): boolean => correlacion(campo, 1 / 60) > 0.98 && correlacion(campo, 20) < 0.5 && /return fbmDeLaLuz\( p \+ [0-9.]+ \* \( q - 0\.5 \) \);/.test(glsl) && glsl.includes('campoDeLaLuz( xz, uRelojDeLaLuz )')
+const fluyeBien = (campo: Campo, glsl: string): boolean => correlacion(campo, 1 / 60) > 0.98 && correlacion(campo, 20) < 0.5 && /return fbmDeLaLuz\( p \+ [0-9.]+ \* \( q - 0\.5 \) \);/.test(glsl) && glsl.includes('campoDeLaLuz( xz, t )') && glsl.includes('float e = fondoDeLaEnergia( xz, uRelojDeLaLuz );')
 afirmar(fluyeBien(campoDeLaLuz, ENERGIA_EN_LA_SIMULACION_GLSL), '  el campo fluye (domain warping que se mueve): continuo de un cuadro al otro y otro a los 20 s', `correlación: un cuadro ${correlacion(campoDeLaLuz, 1 / 60).toFixed(3)} · 20 s ${correlacion(campoDeLaLuz, 20).toFixed(2)}`)
 controlPositivo('  el detector VE un campo quieto (las zonas no viajan)', ((x: number, z: number) => campoDeLaLuz(x, z, 0)) as Campo, (c: Campo) => fluyeBien(c, ENERGIA_EN_LA_SIMULACION_GLSL))
 
@@ -148,29 +161,7 @@ const salaBien = (o: Oscuro, c: string): boolean => {
 afirmar(salaBien(oscuroDe(expansionDeLaLuz), cuadro), '  la escena se oscurece gradualmente, acompañando la expansión')
 controlPositivo('  el detector VE una sala que se oscurece de golpe', ((fin: number) => (fin >= golpe ? L.oscurece : 0)) as Oscuro, (o: Oscuro) => salaBien(o, cuadro))
 
-// LAS VARIANTES (`?energia=`, 3 como máximo; sin bandera, la sobrecarga): `red` suma corrientes que corren POR las juntas (la
-// distancia por la grilla, L1: doblan en ángulo recto y se bifurcan; sólo por los tramos que conducen) y un anillo por las
-// juntas con cada onda; `inestable` suma el temblor donde la energía es más alta, los picos que levantan un racimo, las
-// chispas y el canto del logo. Se borraron `?chispas=si` y `?velo=escena` como banderas sueltas.
-const dibujoDe = (variante: 'sobrecarga' | 'red' | 'inestable'): string => {
-  const material = conElFinalEnElPiso(new THREE.MeshStandardMaterial(), variante)
-  const sombreador = { fragmentShader: ['float cuantoDelPulso( float r ) {', '#include <clipping_planes_fragment>', 'vec2 m = manchaDelContacto( vPiso.xz );', '#include <fog_fragment>'].join('\n'), vertexShader: '#include <common>\nvAlto = transformed.y;', uniforms: {} as Record<string, THREE.IUniform> }
-  material.onBeforeCompile(sombreador as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer)
-  material.dispose()
-  return sombreador.fragmentShader
-}
-const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
-const variantesBien = (red: string, simInestable: string, logo: string): boolean =>
-  ENTORNO.pruebas.energia === 'no' && entornoPedido('producto,energia=red').pruebas.energia === 'red' && entornoPedido('producto,energia=inestable').pruebas.energia === 'inestable' &&
-  entornoPedido('producto,energia=otra').pruebas.energia === 'no' && !PRUEBAS_SUELTAS.some((k: string) => k === 'chispas' || k === 'velo') && PRUEBAS_SUELTAS.some((k: string) => k === 'energia') &&
-  red.startsWith('#define ENERGIA_RED') && red.includes('float d = abs( g.x - fuente.x ) + abs( g.y - fuente.y );') && red.includes('float conduce = step(') && red.includes('junta += redDeLaLuz( vPiso.xz, uLado );') &&
-  RED_DE_LA_LUZ_GLSL.includes('float anillo = ondaDelLogo( r, 0.9 );') && !dibujoDe('sobrecarga').includes('#define ENERGIA_') &&
-  simInestable.indexOf('#define ENERGIA_INESTABLE\n') >= 0 && simInestable.indexOf('#define ENERGIA_INESTABLE') < simInestable.indexOf('#ifdef ENERGIA_INESTABLE') && simInestable.includes('h += ') && /if \( u < 1\.0 && azarDeLaLuz\( racimo \+ n \* 7\.13 \) < [0-9.]+ \)/.test(simInestable) &&
-  INESTABLE.temblor <= 0.05 && INESTABLE.cuantos <= 0.03 && logo.includes("e.pruebas.energia === 'inestable' ? <RimDelLogo logoMaterialRef={props.logoMaterialRef} /> : null")
-const simInestable = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL), 'inestable')
-afirmar(variantesBien(dibujoDe('red'), simInestable, luzDelLogo), '  `?energia=red` (corrientes por las juntas, en ángulo recto, que se bifurcan; el anillo de cada onda) e `?energia=inestable` (temblor, picos, chispas, el canto del logo); sin bandera, la sobrecarga')
-controlPositivo('  el detector VE corrientes en línea recta (sin la grilla)', [dibujoDe('red').replace('float d = abs( g.x - fuente.x ) + abs( g.y - fuente.y );', 'float d = length( g - fuente );'), simInestable, luzDelLogo] as const, ([r, s, l]: readonly [string, string, string]) => variantesBien(r, s, l))
-controlPositivo('  y el canto del logo en el producto', [dibujoDe('red'), simInestable, luzDelLogo.replace("e.pruebas.energia === 'inestable' ? <RimDelLogo logoMaterialRef={props.logoMaterialRef} /> : null", '<RimDelLogo logoMaterialRef={props.logoMaterialRef} />')] as const, ([r, s, l]: readonly [string, string, string]) => variantesBien(r, s, l))
+// [PULIDO 3B] B0 · cambió por pedido: las variantes `?energia=red|inestable` se fundieron en el producto (las fija B0, abajo).
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A2 · El contacto del pie a 768: vidrio y en columna, hasta las redes (390 y escritorio no cambian)')
@@ -217,5 +208,118 @@ const franjaBien = (css: string, tema: string): boolean => {
 }
 afirmar(franjaBien(vidrioA2, temaA2), '  la franja escrita en `vidrio.css` es la de las variantes (de `--breakpoint-tablet` a `--breakpoint-escritorio`)')
 controlPositivo('  el detector VE una franja corrida (hasta 1025)', vidrioA2.replace('(width < 1024px) {\n  [data-v3] [data-material="vidrio"]', '(width < 1025px) {\n  [data-v3] [data-material="vidrio"]'), (c: string) => franjaBien(c, temaA2))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B0 · La energía, versión final: una sola, viva, con corrientes y pistones, y el logo que brilla')
+
+// UNA VERSIÓN: sin las variantes del 3A (ni sus defines, ni su código, ni las chispas); una bandera, `?energia=intensa` (más
+// brillo y más velocidad), para comparar con el producto.
+const finalDir = `${V3}/_lib/escena/final`
+const delFinal = readdirSync(finalDir).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${finalDir}/${a}`, 'utf8'))).join('\n')
+const unaBien = (fuentes: string, c: string): boolean => !/ENERGIA_RED|ENERGIA_INESTABLE|redDeLaLuz|RED_DE_LA_LUZ|INESTABLE\b|crearLasChispas|VarianteDeLaEnergia/.test(fuentes) && !existsSync(`${finalDir}/chispasDeLaLuz.ts`) &&
+  ENTORNO.pruebas.energia === 'no' && entornoPedido('producto,energia=intensa').pruebas.energia === 'intensa' && entornoPedido('producto,energia=red').pruebas.energia === 'no' && entornoPedido('producto,energia=inestable').pruebas.energia === 'no' &&
+  PRUEBAS_SUELTAS.some((k: string) => k === 'energia') && INTENSA.brillo > 1 && INTENSA.ritmo > 1 &&
+  c.includes('LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t * (intensa ? INTENSA.ritmo : 1)') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uBrilloDeLaLuz.value = intensa ? INTENSA.brillo : 1')
+afirmar(unaBien(delFinal, cuadro), 'una sola versión (las variantes del 3A y las chispas se borraron); `?energia=intensa`, más brillo y más velocidad', `intensa: brillo ×${String(INTENSA.brillo)}, ritmo ×${String(INTENSA.ritmo)}`)
+controlPositivo('el detector VE la variante `red` de vuelta', `${delFinal}\n#define ENERGIA_RED`, (f: string) => unaBien(f, cuadro))
+
+// MÁS MOVIMIENTO Y MÁS BRILLO: el fondo de la energía cambia de un cuadro al otro casi nada (continuo) pero en medio segundo ya
+// es otro (no un mapa que cambia lento: en el 3A, medio segundo daba casi lo mismo); la luz, más fuerte que la del 3A (plano
+// 1,6, costado 1,15, canto 0,32) en las tres.
+const correlacionDe = (energia: Energia, dt: number): number => {
+  const [a, b]: [number[], number[]] = [[], []]
+  for (let x = -20; x <= 20; x += 0.8) for (let z = -12; z <= 12; z += 0.8) for (const t of [5, 50, 170]) {
+    a.push(energia(x, z, t))
+    b.push(energia(x, z, t + dt))
+  }
+  const m = (v: number[]): number => v.reduce((p, q) => p + q, 0) / v.length
+  const [ma, mb] = [m(a), m(b)]
+  const cov = a.reduce((p, v, i) => p + (v - ma) * (b[i] - mb), 0)
+  return cov / Math.sqrt(Math.max(1e-12, a.reduce((p, v) => p + (v - ma) ** 2, 0) * b.reduce((p, v) => p + (v - mb) ** 2, 0)))
+}
+const vivaBien = (energia: Energia): boolean => correlacionDe(energia, 1 / 60) > 0.97 && correlacionDe(energia, 0.5) < 0.85 && L.plano >= 2 && L.costado >= 1.4 && L.canto >= 0.6
+const del3A: Energia = (x, z, t) => energiaDeFondo(x, z, t * 0.3)
+afirmar(vivaBien(energiaDeFondo), '  más movimiento (en medio segundo el piso ya es otro, sin saltos de un cuadro al otro) y más brillo', `correlación: un cuadro ${correlacionDe(energiaDeFondo, 1 / 60).toFixed(3)} · medio segundo ${correlacionDe(energiaDeFondo, 0.5).toFixed(2)} (el ritmo del 3A: ${correlacionDe(del3A, 0.5).toFixed(2)}) · plano ${String(L.plano)}, costado ${String(L.costado)}, canto ${String(L.canto)}`)
+controlPositivo('  el detector VE el ritmo del 3A (un mapa que cambia lento)', del3A, vivaBien)
+
+// LAS CORRIENTES, SIN PATRÓN: por cada junta, corrientes que nacen en un punto al azar, en un sentido al azar, con su
+// velocidad y su largo, y se apagan; cada una con su propio período. Se mide con la misma cuenta del sombreador en una junta:
+// los puntos donde nacen cubren la escena, van para los dos lados, y lo que se ve en la junta no se repite (ninguna
+// correlación de lo que se ve consigo mismo corrido de 2 a 8 s, más que lo que dura una corriente, pasa de 0,5; una que se
+// repite cada 2 s da 1). Sin fuentes fijas ni anillos.
+type Corriente = (junta: number, s: number, eje: number, t: number) => number
+const serieDe = (c: Corriente, junta: number): number[] => {
+  const serie: number[] = []
+  for (let t = 0; t < 60; t += 1 / 30) {
+    let suma = 0
+    for (let s = -40; s <= 40; s += 0.5) suma += c(junta, s, 0, t)
+    serie.push(suma)
+  }
+  return serie
+}
+const autocorrelacion = (v: readonly number[], lag: number): number => {
+  const a = v.slice(0, v.length - lag)
+  const b = v.slice(lag)
+  const m = (x: readonly number[]): number => x.reduce((p, q) => p + q, 0) / x.length
+  const [ma, mb] = [m(a), m(b)]
+  const cov = a.reduce((p, x, i) => p + (x - ma) * (b[i] - mb), 0)
+  return cov / Math.sqrt(Math.max(1e-12, a.reduce((p, x) => p + (x - ma) ** 2, 0) * b.reduce((p, x) => p + (x - mb) ** 2, 0)))
+}
+const sinPatron = (c: Corriente, glsl: string): boolean => {
+  const repite = [3, 11, 27, 40, 55].map((junta) => {
+    const serie = serieDe(c, junta)
+    let maximo = 0
+    for (let lag = 60; lag <= 240; lag += 3) maximo = Math.max(maximo, autocorrelacion(serie, lag))
+    return maximo
+  })
+  return Math.max(...repite) < 0.5 && glsl.includes('float cabeza = ( azarDeLaLuz( sn + 0.31 ) - 0.5 ) * ') && glsl.includes('float sentido = azarDeLaLuz( sn + 0.77 ) < 0.5 ? -1.0 : 1.0;') &&
+    !/fuente|anillo|uAnillos|uGolpe/.test(glsl) && CORRIENTES.periodoS[1] - CORRIENTES.periodoS[0] >= 1.5
+}
+const periodica: Corriente = (junta, s, eje, t) => corrienteEnLaJunta(junta, s, eje, (t % 2) + 0.5)
+afirmar(sinPatron(corrienteEnLaJunta, CORRIENTES_DE_LA_LUZ_GLSL), '  las corrientes por las juntas nacen al azar (lugar, sentido, velocidad, largo y período) y no se repiten: ningún cuadro se adivina del anterior', `${String(CORRIENTES.porJunta)} por junta, de ${String(CORRIENTES.largo[0])} a ${String(CORRIENTES.largo[1])} bloques, a ${String(CORRIENTES.velocidad[0])}–${String(CORRIENTES.velocidad[1])} bloques/s`)
+controlPositivo('  el detector VE corrientes que se repiten cada 2 s', periodica, (c: Corriente) => sinPatron(c, CORRIENTES_DE_LA_LUZ_GLSL))
+
+// LOS PISTONES, SIN VIBRACIÓN: racimos que suben y bajan una vez por ciclo (de 1,4 s o más), sólo algunos en cada ciclo, y al
+// subir abren las rendijas (más energía); el temblor del 3A se borró.
+const pistonesBien = (g: string, s2: string): boolean => g.includes('float sube = sin( 3.14159 * ( ciclo - n ) );') && g.includes(`e += ${String(PISTONES.abre)} * piston;`) &&
+  s2.includes('dibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;') && !/sin\( uTiempo \* [0-9.]+/.test(g + s2) && PISTONES.periodoS[0] >= 1.2 && PISTONES.cuantos >= 0.15 && PISTONES.cuantos <= 0.5
+afirmar(pistonesBien(ENERGIA_EN_LA_SIMULACION_GLSL, sim), '  los pistones: racimos que suben y bajan a su ritmo, al azar, y al subir dejan escapar más luz; sin vibración', `ciclos de ${String(PISTONES.periodoS[0])} a ${String(PISTONES.periodoS[1])} s, ${String(100 * PISTONES.cuantos)} % de los racimos por ciclo, de ${String(PISTONES.alto[0])} a ${String(PISTONES.alto[1])} u`)
+controlPositivo('  el detector VE el temblor del 3A', [ENERGIA_EN_LA_SIMULACION_GLSL, `${sim}\nh += 0.035 * sin( uTiempo * 43.0 );`] as const, ([g, s2]: readonly [string, string]) => pistonesBien(g, s2))
+
+// EL LOGO BRILLA: fuera del oscurecimiento (que es del piso; la luz del logo se suma en su salida y el filo, en el piso,
+// después de oscurecerlo), su filo encendido en blanco con la energía y un pulso con cada onda que larga (que nacen corridas
+// al azar en su intervalo: sin periodicidad), sin volver a encender los anillos del pulso en el final.
+const dibujoB0 = (() => {
+  const material = conElFinalEnElPiso(new THREE.MeshStandardMaterial())
+  const sombreador = { fragmentShader: ['float cuantoDelPulso( float r ) {', '#include <clipping_planes_fragment>', 'vec2 m = manchaDelContacto( vPiso.xz );', '#include <fog_fragment>'].join('\n'), vertexShader: '#include <common>\nvAlto = transformed.y;', uniforms: {} as Record<string, THREE.IUniform> }
+  material.onBeforeCompile(sombreador as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer)
+  material.dispose()
+  return sombreador.fragmentShader
+})()
+const luzDelLogo = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
+const entornoDelPulso = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
+const logoBien = (g: string, logo: string, c: string): boolean => {
+  const oscurece = g.indexOf('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;')
+  const filo = g.indexOf('gl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );')
+  const nacimientos = Array.from({ length: 40 }, (_, n) => naceLaOnda(n))
+  const intervalos = nacimientos.slice(1).map((v, i) => v - nacimientos[i])
+  const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length
+  const desvio = Math.sqrt(intervalos.reduce((a, b) => a + (b - media) ** 2, 0) / intervalos.length)
+  const pulsa = nacimientos.slice(1, 30).every((t0) => pulsoDelLogo(desdeLaUltimaOnda(t0 + 0.01)) > 0.9 && pulsoDelLogo(desdeLaUltimaOnda(t0 + 1)) < 0.1)
+  return oscurece > 0 && filo > oscurece && logo.includes('<RimDelLogo logoMaterialRef={props.logoMaterialRef} />') && !/energia === 'inestable'/.test(logo) &&
+    BRILLO_DEL_LOGO_GLSL.startsWith('gl_FragColor.rgb += vec3( ( uRimDeLaLuz + ') && BRILLO_DEL_LOGO.filo >= 1 && pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
+    ENERGIA_EN_LA_SIMULACION_GLSL.includes(`float tau = uRelojDeLaLuz - ( m + ${String(L.ondas.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${String(L.ondas.cadaS)};`) &&
+    c.includes('RIM_DE_LA_LUZ.uPulsoDelLogo.value = s.estatico ? 0 : Math.max(pulsoDelLogo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)) * extendida, pulsoDelLogo(desdeElGolpe) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value)') &&
+    entornoDelPulso.includes('entradas.reducido = quieto || EN_VIVO.fin > 0')
+}
+afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  el logo brilla: fuera del oscurecimiento, su filo en blanco con la energía y un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `filo ${String(BRILLO_DEL_LOGO.filo)}, pulso ${String(BRILLO_DEL_LOGO.pulsoS)} s`)
+controlPositivo('  el detector VE el filo oscurecido con la sala', dibujoB0.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n\tgl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );', 'gl_FragColor.rgb += vec3( filoDelLogo( vPiso.xz ) );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );'), (g: string) => logoBien(g, luzDelLogo, cuadro))
+controlPositivo('  y un logo sin pulso', cuadro.replace('RIM_DE_LA_LUZ.uPulsoDelLogo.value = s.estatico ? 0 :', 'RIM_DE_LA_LUZ.uPulsoDelLogo.value = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
+
+// EL FRENTE DESDE EL GOLPE: la meseta de la súper onda tapaba las rendijas el primer segundo o dos; los cantos de las tapas (que
+// se ven desde arriba aunque la rendija sea honda) y el frente de la expansión brillan más: el frente se lee desde el golpe.
+const frenteBien = (canto: number, frente: number): boolean => canto >= 0.6 && frente >= 1.2
+afirmar(frenteBien(L.canto, L.expansion.brillo), '  el frente de luz se ve desde el golpe (cantos y frente más brillantes que la meseta)', `canto ${String(L.canto)} · frente ${String(L.expansion.brillo)}`)
+controlPositivo('  el detector VE los del 3A (canto 0,32, frente 0,7)', [0.32, 0.7] as const, ([c, f]: readonly [number, number]) => frenteBien(c, f))
 
 cerrar('s54-pulido-3')

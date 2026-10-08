@@ -101,3 +101,80 @@ ata `s54` A2 a `--breakpoint-tablet` y `--breakpoint-escritorio` (control: una f
 
 `s54-pulido-3` A2: el vidrio y la columna sólo en la tablet (controles: el tinte liviano también en el oscuro; la columna
 también en escritorio) y la franja atada al tema.
+
+
+# SPRINT PULIDO 3B — la energía final, el CTA «cruce», la cámara del pie con el mouse
+
+Aprobado: A2 (no se toca). Orden: B0, B1, B2, B3; un commit y push por punto; al final, un `verificar` completo con el
+Chrome del banco cerrado (los mismos 8 rojos) y `s8-chrome`.
+
+- **B0 · La energía, una versión final** (`escena/final/luzDeAbajo.ts`, `enElPiso.ts`, `planoDeLaLuz.ts`, `rimDeLaLuz.ts`,
+  `cuadroDelFinal.ts`): las tres variantes en una; más movimiento y brillo; corrientes por las juntas sin patrón; pistones sin
+  vibración; el logo que brilla (fuera del oscurecimiento, su filo y un pulso por onda); el frente visible desde el golpe;
+  cobertura ≥ 65 %. Se borran `red`, `inestable`, el temblor y las chispas; queda `?energia=intensa`.
+- **B1 · El CTA: gana «cruce»** (`escena/ctaDelFinal/`, `_componentes/ctaDelFinal/`, `por-que-develop/`): producto sin
+  bandera; todo en Archivo y en 3D; la metamorfosis de las seis razones en la primera frase; ~2,5–3× más recorrido; alturas,
+  viajes, teléfono y movimiento reducido.
+- **B2 · El pie: el mouse orbita la cámara** (`escena/final/`): ±15–20° y ±6°, sin el domo, amortiguado, atenuado en la
+  cinemática; sólo con puntero fino.
+- **B3 · El salto de cámara Panel → Inicio** (20 min como máximo).
+
+## Log del 3B
+
+### B0 · La energía, versión final
+
+**Una sola versión.** Lo de `red` y de `inestable` que se pidió quedó en el producto y el resto se borró: los defines y su
+código, el temblor, las chispas (archivo incluido) y las dos banderas. Queda `?energia=intensa` (brillo ×1,4, reloj ×1,6).
+
+**Más movimiento y más brillo.** El campo corre ~3 veces más rápido (deriva 1,6 u/s, la torsión 0,3/s, escala 0,17) y una capa
+fina por encima (un ruido chico que corre a ~1,6 u/s) cambia todo el tiempo. Medido con la cuenta del sombreador: entre dos
+cuadros la correlación es 1,000; a medio segundo, 0,82 (con el ritmo del 3A, 0,97). La luz: plano 2,2 (antes 1,6), costados
+1,5 (1,15) y cantos 0,75 (0,32).
+
+**Las corrientes.** Corren por las juntas. Hay 3 por línea de la grilla, cada una en su propio ciclo, y el reloj de cada una
+se tuerce con un ruido lento, así que los ciclos no duran siempre lo mismo. En cada ciclo nace en un punto al azar de la línea,
+va hacia un lado al azar (4–13 bloques/s), mide entre 1,5 y 6 bloques y se apaga. Algunos ciclos descansa. No hay fuentes fijas
+ni anillos. Lo que se ve en una junta, corrido de 2 a 8 s, no pasa de 0,4 de correlación; una corriente que se repite cada 2 s
+da 1,0.
+
+**Los pistones.** Racimos de 3 bloques (corridos por fila) que suben y bajan una vez por ciclo, de 1,4 a 4 s. En cada ciclo se
+mueve el 32 % de los racimos, entre 0,25 y 0,75 u. Al subir suman energía, así que se abren sus rendijas y escapa más luz.
+
+**El logo brilla.** El oscurecimiento sigue siendo sólo del piso, y la luz del logo se suma después. Su filo se enciende en
+blanco con la energía. Desde arriba el bisel casi no se ve (no apareció en ninguna captura del 3A), así que el filo también se
+dibuja en el piso: un hilo de luz justo afuera de la forma, con la máscara del hueco. Cada onda (una cada ~3,2 s, corrida al
+azar en su intervalo, y el golpe) nace con un pulso de 0,32 s: el filo se enciende más y el logo entero, apenas. Los anillos
+del pulso siguen apagados en el final (NOCTURNO FINAL B3).
+
+**Lo anotado en el 3A.** El frente se ve desde el golpe: los cantos de las tapas (se ven desde arriba aunque la rendija sea
+honda) y el frente de la expansión brillan más; en la secuencia, el anillo de luz se lee en el primer cuadro. La cobertura,
+con la capa fina: media 87 %, nunca menos del 76 % a 1440 ni del 68 % a 390 (900 s medidos con la cuenta del sombreador).
+
+**Costo** (una vez, RTX 5050, `p4-costo` de PULIDO 2, la energía prendida contra apagada): a 1440, el piso pasa de 0,75–0,83 a
+1,18–1,22 ms (total 2,0–2,2 contra 2,4–2,5 ms); a 390, de 0,17–0,19 a 0,31–0,39 ms.
+
+**Entregable:** `b0-energia-1440.png` y `b0-energia-390.png`, dos secuencias de 6 cuadros cada una: desde el golpe y en pleno.
+A 390 los cuadros salen cada 0,25 s. A 1440, cada ~0,36 s: capturar la página entera tarda más que 0,25 s.
+
+**Gate:** lint limpio en lo tocado; `tsc` 0 errores; `s53` 80/0 y `s54` 34/0. Además, porque leen lo tocado: s38, s40, s44,
+s47–s52 verdes.
+
+**Las aserciones viejas que cambiaron:**
+- s54 A1, la cobertura: «media de 70 a 85 %, nunca menos del 40 %» pasa a «media de 75 a 95 %, nunca menos del 65 %» (más
+  fuerte, por pedido). «Fluye» lee el campo dentro de `fondoDeLaEnergia`. El piso blando suma el pistón a la altura.
+- s54 A1, las variantes `red`/`inestable` → borrada; lo nuevo es B0.
+- s53 §4, las chispas «sólo con `?energia=inestable`» → «se borraron» (y s51, «salvo las chispas» → «ningún `Points`»).
+- s53 §4 / s52-pulido-1 P1 / s50: la luz que se suma es `luz * junta * uBrilloDeLaLuz`, y la junta lleva las corrientes y
+  el reloj de la luz. Las mismas condiciones. El alto de la luz en la simulación se lee en su `return`.
+- s51 1F: el control «una luz que entra al mar calmo» sacaba el primer `( 1.0 - calma )`, que ahora es el del pistón: saca
+  el del `return`. Sin eso, el control quedaba ciego.
+- s52-pulido-1, banderas: `energia=red|inestable` → `energia=intensa`.
+- s38 y s49: vuelven a la forma de antes del 3A (`conElFinalEnLaSimulacion(...)` y `conElFinalEnElPiso(material)` sin la
+  variante).
+- **De A2 (3A), que no vi en su gate:** s52-nocturno-final C4, «el formulario angosto: nombre y mail lado a lado», estaba
+  rojo desde A2 (el gate de A2 no corrió ese archivo). Ahora dice que en el teléfono siguen lado a lado y en la tablet van en
+  columna, con las clases de A2. La columna en la tablet la fija s54 A2.
+
+`s54-pulido-3` B0: una versión (control: `red` de vuelta), viva (control: el ritmo del 3A), corrientes sin patrón (control:
+una que se repite cada 2 s), pistones (control: el temblor), el logo (controles: el filo oscurecido con la sala; sin pulso),
+el frente (control: los valores del 3A).
