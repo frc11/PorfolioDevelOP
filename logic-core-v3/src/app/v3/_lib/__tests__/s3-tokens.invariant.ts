@@ -248,7 +248,10 @@ function mediasConLiteral(css: string): string[] {
 // [PASADA FINAL] A1 · `titular.css` también: los estados del texto 2D del titular del hero rigen desde 1024 y con
 // movimiento, y una variante `data-[…=…]` de Tailwind es un valor arbitrario que `hero.invariant` §4 rechaza. El literal
 // lo ata `s47-pasada-final` a `--breakpoint-escritorio`.
-const CON_MEDIA_DECLARADA: readonly string[] = ['banda.css', 'titular.css']
+// [PULIDO 3] A2 · `vidrio.css` también: el tinte del vidrio claro del contacto en la tablet (768 a 1023) pisa una regla de
+// atributos (`[data-v3] [data-material="vidrio"]`, 0-2-0) que una clase de Tailwind no alcanza. Sus dos literales los ata
+// `s54-pulido-3` A2 a `--breakpoint-tablet` y `--breakpoint-escritorio`.
+const CON_MEDIA_DECLARADA: readonly string[] = ['banda.css', 'titular.css', 'vidrio.css']
 
 const mediasSospechosas = ARCHIVOS_DE_ESTILO.filter(
   (a) => !CON_MEDIA_DECLARADA.includes(a.split('/').pop() ?? ''),

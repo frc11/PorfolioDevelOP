@@ -59,6 +59,9 @@
   --ejemplo-del-campo: color-mix(in srgb, currentColor 72%, transparent);
   /* [PULIDO 2] 6 · el especular del vidrio oscuro, más tenue: aclaraba el fondo de «CONTACTO» (3,8:1 a 768; así, 5:1). */
   --vidrio-reflejo-del-formulario: 10%;
+  /* [PULIDO 3] A2 · en la tablet, el tinte y el relleno de los campos (abajo, en su franja). */
+  --vidrio-tinte-de-la-tablet: 46%;
+  --campo-del-vidrio-en-la-tablet: 56%;
   position: relative;
   border-radius: var(--radius-medio);
   background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-del-formulario), transparent);
@@ -71,6 +74,20 @@
 [data-v3] [data-material="vidrio"] [data-foco="campo"]::placeholder {
   color: var(--ejemplo-del-campo);
   opacity: 1;
+}
+
+/* [PULIDO 3] A2 · EN LA TABLET EL VIDRIO SE VE: con el contacto alto, detrás queda el piso claro y parejo, que a través del
+   tinte del formulario se leía como una tarjeta opaca (el material es el mismo que a 390, donde la caja pisa el logo). Un
+   tinte y un relleno más livianos dejan ver el piso desenfocado (sólo el vidrio claro: el oscuro, sobre la noche, queda
+   como estaba); los rótulos y los campos siguen en AA. */
+@media (width >= 768px) and (width < 1024px) {
+  [data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) {
+    background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-de-la-tablet), transparent);
+  }
+
+  [data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) [data-foco="campo"] {
+    background-color: color-mix(in srgb, var(--color-fondo) var(--campo-del-vidrio-en-la-tablet), transparent);
+  }
 }
 
 /* En el vidrio oscuro la luz es el papel, que en la sala invertida es la tinta. */

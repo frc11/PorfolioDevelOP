@@ -8,3 +8,9 @@ A1 · La energía bajo el piso
   cuadroDelFinal.ts, FinalDelPie.tsx, recorridoDelFinal.ts; escena/piso/PisoVivo.tsx; escena/LuzDelLogo.tsx; escena/entorno.ts;
   _estilos/banda.css. Borrados: escena/VeloEnElLogo.tsx, escena/veloDelTexto.ts.
   Hojas: a1-energia-1440.png y a1-energia-390.png (arranque, pleno y rebobinando, por variante).
+
+A2 · El contacto del pie a 768
+  Qué: en la tablet (768 a 1023), el vidrio claro más liviano (46 % de tinte, campos al 56 %; el oscuro igual) y el formulario
+  en columna hasta las redes. AA medido de día y con el oscuro forzado.
+  Archivos: _secciones/cierre/Cierre.tsx, ColumnasDelPie.tsx, FormularioDelPie.tsx; _estilos/vidrio.css (y sus tokens en
+  s3-registro-de-tokens.ts).  Hoja: a2-contacto-768.png (antes y después).

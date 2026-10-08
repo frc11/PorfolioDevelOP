@@ -7,3 +7,7 @@ A1 · La energía bajo el piso (escritorio y teléfono)
    (rueda o dedo hacia arriba): se retira hacia el hueco. La mancha negra del arranque ya no tendría que aparecer.
    Variantes: /v3?energia=red (corrientes por las juntas)   ·   /v3?energia=inestable (temblor, picos, chispas, el canto
    del logo). Sin bandera: la sobrecarga.
+
+A2 · El contacto del pie en la tablet (768, por la LAN)
+   /v3, bajá al pie. El formulario va en columna (Nombre, Mail, Mensaje alto, Enviar abajo), llega hasta las redes y es de
+   vidrio: se ve el piso desenfocado detrás. A 390 y en escritorio no cambia.

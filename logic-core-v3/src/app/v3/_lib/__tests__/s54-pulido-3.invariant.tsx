@@ -5,6 +5,7 @@
  *   A1 · la energía bajo el piso en TODA la escena: la mancha negra (ninguna tapa baja hasta el plano), el campo continuo
  *        (cobertura, fluye, nunca se apaga, sin ciclos), la expansión desde el hueco (función de `fin`: el rebobinado sin
  *        cortes), las ondas del logo, la sala gradual y las variantes `?energia=red|inestable`.
+ *   A2 · el contacto del pie a 768: vidrio (el claro, más liviano) y en columna hasta las redes; sólo en la tablet.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-3.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-3/mirar.txt`.
  */
 import { readFileSync } from 'node:fs'
@@ -170,5 +171,51 @@ const simInestable = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL), 
 afirmar(variantesBien(dibujoDe('red'), simInestable, luzDelLogo), '  `?energia=red` (corrientes por las juntas, en ángulo recto, que se bifurcan; el anillo de cada onda) e `?energia=inestable` (temblor, picos, chispas, el canto del logo); sin bandera, la sobrecarga')
 controlPositivo('  el detector VE corrientes en línea recta (sin la grilla)', [dibujoDe('red').replace('float d = abs( g.x - fuente.x ) + abs( g.y - fuente.y );', 'float d = length( g - fuente );'), simInestable, luzDelLogo] as const, ([r, s, l]: readonly [string, string, string]) => variantesBien(r, s, l))
 controlPositivo('  y el canto del logo en el producto', [dibujoDe('red'), simInestable, luzDelLogo.replace("e.pruebas.energia === 'inestable' ? <RimDelLogo logoMaterialRef={props.logoMaterialRef} /> : null", '<RimDelLogo logoMaterialRef={props.logoMaterialRef} />')] as const, ([r, s, l]: readonly [string, string, string]) => variantesBien(r, s, l))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A2 · El contacto del pie a 768: vidrio y en columna, hasta las redes (390 y escritorio no cambian)')
+
+// A 768 caía «opaca» con el mismo material que a 390 (el tinte del papel al 66 %, el desenfoque, los campos al 72 %): detrás
+// sólo quedaba el piso claro y parejo (a 390 la caja pisa el logo negro). En la tablet (y sólo ahí: la franja de 768 a 1023,
+// con `tablet:max-escritorio:` en las clases y en la hoja) el vidrio claro lleva un tinte y un relleno más livianos (el oscuro,
+// sobre la noche, queda como estaba: con el especular de PULIDO 2 · 6 en AA); el formulario va en columna (un campo por
+// renglón, el mensaje con el alto que sobra, Enviar abajo) y la primera fila del pie toma lo que sobra: llega hasta las redes.
+const vidrioA2 = leer('_estilos/vidrio.css')
+const cierreA2 = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
+const columnasA2 = sinComentarios(leer('_secciones/cierre/ColumnasDelPie.tsx'))
+const formularioA2 = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+const FRANJA = '@media (width >= 768px) and (width < 1024px) {'
+const enLaFranja = (css: string): string => {
+  const i = css.indexOf(FRANJA)
+  return i < 0 ? '' : css.slice(i, css.indexOf('\n}\n', i))
+}
+type PieA2 = readonly [string, string, string, string]
+const contactoBien = ([css, cierre, columnas, formulario]: PieA2): boolean => {
+  const franja = enLaFranja(css)
+  const tinte = /--vidrio-tinte-de-la-tablet: ([0-9]+)%;/.exec(css)
+  const campo = /--campo-del-vidrio-en-la-tablet: ([0-9]+)%;/.exec(css)
+  return tinte !== null && campo !== null && Number(tinte[1]) < 66 && Number(campo[1]) < 72 &&
+    franja.includes('[data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) {\n    background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-de-la-tablet), transparent);') &&
+    franja.includes('[data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) [data-foco="campo"] {\n    background-color: color-mix(in srgb, var(--color-fondo) var(--campo-del-vidrio-en-la-tablet), transparent);') &&
+    cierre.includes('tablet:max-escritorio:grid-rows-[1fr_auto]') && columnas.includes('tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[auto_1fr]') &&
+    /const CAJA_DEL_CONTACTO = '[^']*tablet:max-escritorio:flex-1'/.test(columnas) &&
+    formulario.includes("'grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex") &&
+    formulario.includes("mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[auto_1fr_auto]'") && formulario.includes('tablet:max-escritorio:min-h-full') &&
+    !/(^|\s)tablet:(flex-1|grid-rows|h-full|min-h-full)/m.test(`${cierre}\n${columnas}\n${formulario}`)
+}
+afirmar(contactoBien([vidrioA2, cierreA2, columnasA2, formularioA2]), 'a 768 el contacto es de vidrio (el claro, más liviano; el oscuro, igual) y va en columna hasta las redes; sólo en la tablet', 'medido: de día los rótulos 16,8–17,3:1; con el oscuro forzado, «CONTACTO» 4,83:1 y los rótulos 5,2–6,2:1')
+controlPositivo('el detector VE el vidrio más liviano también en el oscuro (con el 46 %, los rótulos a ~3:1)', [vidrioA2.replace(/:not\(\[data-seccion="invertida"\]\)/g, ''), cierreA2, columnasA2, formularioA2] as PieA2, contactoBien)
+controlPositivo('  y la columna también en escritorio (la placa 3D se movería)', [vidrioA2, cierreA2, columnasA2, formularioA2.replace('tablet:max-escritorio:min-h-full', 'tablet:min-h-full')] as PieA2, contactoBien)
+// La franja escrita en la hoja (`s3-tokens` la enumera con motivo) es la de las variantes: `--breakpoint-tablet` y
+// `--breakpoint-escritorio` del tema.
+const temaA2 = readFileSync('src/app/theme-develop.css', 'utf8')
+const franjaBien = (css: string, tema: string): boolean => {
+  const tablet = /--breakpoint-tablet: ([0-9]+)px;/.exec(tema)
+  const escritorio = /--breakpoint-escritorio: ([0-9]+)px;/.exec(tema)
+  const escrita = /@media \(width >= ([0-9]+)px\) and \(width < ([0-9]+)px\) \{\n  \[data-v3\] \[data-material="vidrio"\]/.exec(css)
+  return tablet !== null && escritorio !== null && escrita !== null && escrita[1] === tablet[1] && escrita[2] === escritorio[1]
+}
+afirmar(franjaBien(vidrioA2, temaA2), '  la franja escrita en `vidrio.css` es la de las variantes (de `--breakpoint-tablet` a `--breakpoint-escritorio`)')
+controlPositivo('  el detector VE una franja corrida (hasta 1025)', vidrioA2.replace('(width < 1024px) {\n  [data-v3] [data-material="vidrio"]', '(width < 1025px) {\n  [data-v3] [data-material="vidrio"]'), (c: string) => franjaBien(c, temaA2))
 
 cerrar('s54-pulido-3')

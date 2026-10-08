@@ -38,7 +38,8 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
 const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
 const CAMPO ='block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo max-escritorio:text-base leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
 /** [NOCTURNO FINAL] C4 · el lugar de cada campo en la grilla de abajo de 1024 (de seis): el nombre y el mail, mitad y mitad. */
-const LUGAR_DEL_CAMPO: Readonly<Record<CampoDelPie, string>> = { nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4' }
+// [PULIDO 3] A2 · en la tablet, en columna: un campo por renglón y el mensaje con el alto que sobra.
+const LUGAR_DEL_CAMPO: Readonly<Record<CampoDelPie, string>> = { nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[auto_1fr_auto]' }
 const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
 const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
@@ -94,7 +95,7 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
+    <form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
       {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
         const f = campo(k)
         return (
@@ -104,7 +105,7 @@ export function FormularioDelPie(): React.JSX.Element {
             </label>
             <BloqueSolido forma="ranura" className="block w-full">
               {k === 'mensaje' ? (
-                <textarea id={f.id} name={k} rows={3} maxLength={MAXIMO_DE[k]} data-foco="campo" value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none max-escritorio:h-[calc(var(--spacing-12)+var(--spacing-6))]')} />
+                <textarea id={f.id} name={k} rows={3} maxLength={MAXIMO_DE[k]} data-foco="campo" value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none max-escritorio:h-[calc(var(--spacing-12)+var(--spacing-6))] tablet:max-escritorio:min-h-full')} />
               ) : (
                 <input
                   id={f.id}

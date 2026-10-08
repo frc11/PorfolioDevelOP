@@ -104,7 +104,7 @@ const CAJA_DE_LA_COLUMNA: Readonly<Record<ClaseDeColumna, string>> = {
 }
 
 /** [PULIDO 1] P18 · la caja del contacto: el rótulo y el formulario (el material, de `vidrio.css`). */
-const CAJA_DEL_CONTACTO = 'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] max-escritorio:p-[var(--spacing-3)]'
+const CAJA_DEL_CONTACTO = 'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)] max-escritorio:p-[var(--spacing-3)] tablet:max-escritorio:flex-1'
 
 /**
  * [PULIDO 1] P18 · EL CONTACTO DE VIDRIO, abajo de 1024: la tarjeta sólida de C4 era demasiado invasiva. Lleva el material
@@ -143,7 +143,8 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
   return (
     // SPRINT PANEL 3 · el newsletter se mudó a Tu Panel: dos columnas llenan el ancho que la grilla de tres dejaba con un hueco.
     // [FINAL 3] Abajo de 1024 queda sola la navegación: el contacto va con la frase.
-    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 escritorio:grid-cols-2">
+    // [PULIDO 3] A2 · en la tablet, el contacto toma el alto que le queda a la columna (hasta las redes).
+    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[auto_1fr] escritorio:grid-cols-2">
       {COLUMNAS.map((columna, indice) => (
         <CanalDePieza
           key={columna.id}

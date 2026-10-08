@@ -74,3 +74,30 @@ las capturas son las de después del arreglo.
 apaga), que fluye (control: quieto), sin ciclos (control: las zonas), la expansión (controles: de golpe; por el reloj), las
 ondas (control: sin ondas), la sala (control: de golpe) y las variantes (controles: corrientes rectas; el canto del logo en el
 producto).
+
+### A2 · El contacto del pie a 768
+
+**Por qué caía opaca.** No era el respaldo sin `backdrop-filter` ni otro corte de ancho: a 390 y a 768 el material es el mismo
+(medido en el banco: tinte del papel al 66 %, `blur(12px) saturate(1.8)`, campos al 72 %). A 390 la caja pisa el logo negro,
+que se transparenta; a 768 detrás sólo queda el piso claro y parejo, que a través de ese tinte se lee como una tarjeta.
+
+**Ahora** (sólo en la franja de 768 a 1023: `tablet:max-escritorio:` en las clases, y una media query en `vidrio.css`): el
+vidrio claro lleva un tinte del 46 % y campos al 56 % (`--vidrio-tinte-de-la-tablet`, `--campo-del-vidrio-en-la-tablet`,
+registrados). El oscuro, sobre la noche, queda como estaba. El formulario va en columna: Nombre, Mail, Mensaje con el alto que
+sobra y Enviar abajo. La primera fila del pie toma lo que sobra, así la caja llega hasta las redes. El logo del encastre se
+acomoda solo en el hueco que queda a la izquierda.
+
+**AA** (sonda de P18, `p6-contacto`): de día, rótulos 16,8–17,3:1, «CONTACTO» 16,2, escrito 17,4, ejemplo 7,4, error 11,1.
+Con el oscuro forzado (el peor caso de PULIDO 2): «CONTACTO» 4,83:1 (antes 4,98: la caja es más alta), rótulos 5,2–6,2.
+Con el tinte liviano también en el oscuro, los rótulos caían a ~3:1: de ahí que la regla sea sólo para el claro.
+
+**Gate:** lint limpio en lo tocado; `tsc` 0 errores; `s53` 81/0 y `s54` 24/0. Además, porque leen lo tocado: s3-tokens, s7,
+s8-cierre, s27, s37, s39, s41–s45 y s47 verdes. `s8-chrome` da 2 rojos que piden el build de producción («0 chunks»): no
+dependen de este cambio.
+
+**Las aserciones viejas que cambiaron:** `s3-tokens`, «los breakpoints entran por las variantes»: `vidrio.css` se suma a las
+hojas con media escrita, con motivo. El tinte pisa una regla de atributos (0-2-0) que una clase no alcanza. Sus literales los
+ata `s54` A2 a `--breakpoint-tablet` y `--breakpoint-escritorio` (control: una franja corrida a 1025).
+
+`s54-pulido-3` A2: el vidrio y la columna sólo en la tablet (controles: el tinte liviano también en el oscuro; la columna
+también en escritorio) y la franja atada al tema.
