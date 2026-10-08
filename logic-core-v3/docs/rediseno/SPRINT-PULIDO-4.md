@@ -187,3 +187,9 @@ grillas resuelven sus filas igual (786 + 70 px, 229 + 545 px y el campo del mens
 |---|---|---|---|
 | `s54` A2 · el contacto en columna | las tres filas escritas en la clase | las tres, por `var(--filas-…)` | La misma estructura, por token (C4); `s55` C4 fija los valores (con su control) |
 | `s52-nocturno-final` · el formulario del teléfono | el mensaje con sus filas escritas en la clase | por `var(--filas-del-mensaje-del-pie)` | Ídem |
+
+### Cierre · el `verificar` completo
+
+Una vez, al final, con el Chrome del banco cerrado: 62 pasos y **8 grupos rojos, los de la base** (s1, s2, s3, s4, s5, s7, s8 y
+s17, con sus 14 invariantes: los del build de producción y `s17-revelado`). `s6` (el rojo de A2) y `s7e` quedaron verdes;
+`s53`, `s54` y `s55`, verdes. No corrí el build de producción.
