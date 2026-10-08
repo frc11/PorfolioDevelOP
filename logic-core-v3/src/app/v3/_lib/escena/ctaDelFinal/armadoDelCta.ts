@@ -2,37 +2,32 @@ import * as THREE from 'three'
 import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
 import datosDeLaChivo from '../../../_fuentes/chivo-400-titulos.json'
-import datosDeLaChivoFina from '../../../_fuentes/chivo-100-cta.json'
 import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'
-import datosDeArchivoFina from '../../../_fuentes/archivo-100-cta.json'
-import type { VarianteDelCta } from '../entorno'
+import datosDeArchivoDeLaFrase from '../../../_fuentes/archivo-400-cta.json'
 import type { ContornoDelLogo } from '../logoDeNoche'
 import { ORBIT_TARGET_Y } from '../probeScene'
 import type { Variante } from '../titulos3d/armado'
 import { corrimiento, lineaDeBase, lugarDeLectura, pinDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from '../titulos3d/colocacion'
 import type { RenglonDelCta } from './enVivo'
-import { capasDelCta, letrasConDosPesos, letrasDelRenglon, soltarElRenglon, type RenglonArmado } from './letras'
+import { letrasDelRenglon, soltarElRenglon, type RenglonArmado } from './letras'
 import { contornoDelRenglon, materialDelCta, type MaterialDelCta } from './material'
-import { CAPAS_DEL_CTA, nuevaPose, type CajaEnPantalla, type LetraEnPantalla, type Pose, type PosesDeLaTransformacion } from './variantes'
+import { nuevaPose, type LetraEnPantalla, type Pose, type PosesDeLaTransformacion } from './transformacion'
 
 /**
  * [PULIDO 2] 5 · CÓMO SE ARMA EL CTA DEL FINAL EN LA ESCENA — los renglones del DOM (de dónde sale y adónde llega), letra por
  * letra con sus materiales, en un MARCO frente a la cámara: un plano a la profundidad del centro del logo (como los títulos
  * de `pantalla`), en px CSS de la pantalla. Así la transformación se mueve en la pantalla y el giro de la cámara entre los
  * valores y el CTA no la deforma; en el 0 la frase queda donde la deja el título de volumen (la misma cuenta: su lugar de
- * lectura y la línea de base de su fuente).
+ * lectura y la línea de base de su fuente). [PULIDO 3B] B1 · tres grupos: el origen («Seis razones para elegirnos»), la frase
+ * del CTA (dos renglones) y el CTA («HABLANOS»), los dos últimos en Archivo, en mayúsculas.
  */
 
-/** Las fuentes: la frase en la Chivo de los títulos y el CTA en Archivo (el registro 1 del hero); para `tipo`, su peso 100. */
+/** Las fuentes: el origen en la Chivo de los títulos; la frase y el CTA en Archivo (el registro 1 del hero): 400 y 700. */
 const FUENTES = {
   chivo: new Font(datosDeLaChivo as FontData),
-  chivoFina: new Font(datosDeLaChivoFina as FontData),
   archivo: new Font(datosDeArchivo as FontData),
-  archivoFina: new Font(datosDeArchivoFina as FontData),
+  archivoDeLaFrase: new Font(datosDeArchivoDeLaFrase as FontData),
 }
-
-/** `capas`: el espesor de la pila (em del CTA): tres veces el de un título, para que las seis capas se lean. */
-export const ESPESOR_DE_LAS_CAPAS = 0.42
 
 export interface Pieza {
   readonly grupo: THREE.Group
@@ -59,6 +54,8 @@ interface Bloque {
   readonly lugar: LugarEnElCuadro
   readonly pin: PinDelLugar
   readonly indice: number
+  /** [PULIDO 3B] B1 · sin texto propio en el DOM (el origen de la lista): centrado en la caja de `el`, con su ancho (em). */
+  readonly centrado: number | null
 }
 
 type LetraViva = { -readonly [K in keyof LetraEnPantalla]: LetraEnPantalla[K] }
@@ -66,10 +63,9 @@ type LetraViva = { -readonly [K in keyof LetraEnPantalla]: LetraEnPantalla[K] }
 export interface ArmadoDelCta {
   readonly marco: THREE.Group
   readonly origen: Bloque[]
+  readonly frase: Bloque[]
   readonly destino: Bloque
-  readonly conMorfo: boolean
-  readonly letras: { readonly origen: LetraViva[]; readonly destino: LetraViva[] }
-  readonly valores: CajaEnPantalla[]
+  readonly letras: { readonly origen: LetraViva[]; readonly frase: LetraViva[]; readonly destino: LetraViva[] }
   parejas: number[]
   readonly poses: PosesDeLaTransformacion
 }
@@ -82,7 +78,7 @@ function textoVisible(el: HTMLElement): string {
   return texto.trim()
 }
 
-function armarElBloque(renglon: RenglonArmado, fuente: Font, el: HTMLElement, subida: number, indice: number, color: Variante, marco: THREE.Group, vivo: boolean): Bloque {
+function armarElBloque(renglon: RenglonArmado, fuente: Font, el: HTMLElement, subida: number, indice: number, color: Variante, marco: THREE.Group, vivo: boolean, centrado: number | null = null): Bloque {
   const contorno = contornoDelRenglon(renglon.contornos)
   const piezas = renglon.letras.map((l) => {
     const material = materialDelCta(color, contorno)
@@ -96,42 +92,46 @@ function armarElBloque(renglon: RenglonArmado, fuente: Font, el: HTMLElement, su
     marco.add(grupo)
     return { grupo, malla, material, pivote: l.pivote, ancho: l.ancho, alto: l.alto, letra: l.letra }
   })
-  return { el, vivo, fuente, renglon, contorno, piezas, lugar: lugarDeLectura(el, subida), pin: pinDelLugar(el), indice }
+  return { el, vivo, fuente, renglon, contorno, piezas, lugar: lugarDeLectura(el, subida), pin: pinDelLugar(el), indice, centrado }
 }
+
+/** El ancho de un texto (em) con los avances de su fuente. */
+const anchoDe = (fuente: Font, texto: string): number => [...texto].reduce((a, c) => a + (fuente.data.glyphs[c]?.ha ?? 0) / fuente.data.resolution, 0)
 
 const letraViva = (): LetraViva => ({ x: 0, y: 0, cuerpo: 1, ancho: 0, alto: 0, renglon: 0, letra: '' })
 
-/** Arma el CTA de la variante `v`: la frase (salvo en `capas`, donde se va como hoy) y el CTA (en `capas`, sus seis capas). */
-export function armarElCta(v: VarianteDelCta, origen: readonly RenglonDelCta[], destino: HTMLElement, color: Variante, origenVivo: boolean): ArmadoDelCta {
+/**
+ * Arma el CTA: el origen (con su texto del DOM, o sin él, `texto`, centrado en la caja de su elemento), la frase del CTA (sus
+ * renglones del DOM: las dos mitades en 400 y el destacado en 700) y «HABLANOS» (700). Todo lo del CTA, en mayúsculas.
+ */
+export function armarElCta(origen: readonly RenglonDelCta[], frase: readonly HTMLElement[], destino: HTMLElement, color: Variante, origenVivo: boolean): ArmadoDelCta {
   const marco = new THREE.Group()
   marco.name = 'cta del final'
-  const conMorfo = v === 'tipo'
-  const bloquesDelOrigen = v === 'capas' ? [] : origen.map((r, k) => {
-    const texto = textoVisible(r.el)
-    const posiciones = posicionesDelDom(r.el)
-    const renglon = conMorfo ? letrasConDosPesos(FUENTES.chivo, FUENTES.chivoFina, texto, posiciones) : letrasDelRenglon(FUENTES.chivo, texto, posiciones)
-    return armarElBloque(renglon, FUENTES.chivo, r.el, r.subida, k, color, marco, origenVivo)
+  const bloquesDelOrigen = origen.map((r, k) => {
+    const texto = r.texto ?? textoVisible(r.el)
+    const renglon = letrasDelRenglon(FUENTES.chivo, texto, r.texto === undefined ? posicionesDelDom(r.el) : null)
+    return armarElBloque(renglon, FUENTES.chivo, r.el, r.subida, k, color, marco, origenVivo || r.texto !== undefined, r.texto === undefined ? null : anchoDe(FUENTES.chivo, texto))
   })
-  const texto = textoVisible(destino)
-  const posiciones = posicionesDelDom(destino)
-  const renglon = v === 'capas' ? capasDelCta(FUENTES.archivo, texto, posiciones, CAPAS_DEL_CTA, ESPESOR_DE_LAS_CAPAS) : conMorfo ? letrasConDosPesos(FUENTES.archivo, FUENTES.archivoFina, texto, posiciones) : letrasDelRenglon(FUENTES.archivo, texto, posiciones)
-  const bloqueDelDestino = armarElBloque(renglon, FUENTES.archivo, destino, 0, 0, color, marco, true)
-  const cuantasDelOrigen = bloquesDelOrigen.reduce((n, b) => n + b.piezas.length, 0)
-  const cuantasDelDestino = bloqueDelDestino.piezas.length
+  const bloquesDeLaFrase = frase.map((el, k) => {
+    const fuente = k < frase.length - 1 ? FUENTES.archivoDeLaFrase : FUENTES.archivo
+    return armarElBloque(letrasDelRenglon(fuente, textoVisible(el).toUpperCase(), posicionesDelDom(el)), fuente, el, 0, k, color, marco, true)
+  })
+  const bloqueDelDestino = armarElBloque(letrasDelRenglon(FUENTES.archivo, textoVisible(destino).toUpperCase(), posicionesDelDom(destino)), FUENTES.archivo, destino, 0, 0, color, marco, true)
+  const cuantas = (bloques: readonly Bloque[]): number => bloques.reduce((n, b) => n + b.piezas.length, 0)
+  const [enElOrigen, enLaFrase, enElDestino] = [cuantas(bloquesDelOrigen), cuantas(bloquesDeLaFrase), bloqueDelDestino.piezas.length]
   return {
     marco,
     origen: bloquesDelOrigen,
+    frase: bloquesDeLaFrase,
     destino: bloqueDelDestino,
-    conMorfo,
-    letras: { origen: Array.from({ length: cuantasDelOrigen }, letraViva), destino: Array.from({ length: cuantasDelDestino }, letraViva) },
-    valores: [],
+    letras: { origen: Array.from({ length: enElOrigen }, letraViva), frase: Array.from({ length: enLaFrase }, letraViva), destino: Array.from({ length: enElDestino }, letraViva) },
     parejas: [],
-    poses: { origen: Array.from({ length: cuantasDelOrigen }, nuevaPose), destino: Array.from({ length: cuantasDelDestino }, nuevaPose), capas: Array.from({ length: CAPAS_DEL_CTA }, nuevaPose) },
+    poses: { origen: Array.from({ length: enElOrigen }, nuevaPose), frase: Array.from({ length: enLaFrase }, nuevaPose), destino: Array.from({ length: enElDestino }, nuevaPose) },
   }
 }
 
 export function soltarElCta(a: ArmadoDelCta): void {
-  for (const b of [...a.origen, a.destino]) {
+  for (const b of [...a.origen, ...a.frase, a.destino]) {
     soltarElRenglon(b.renglon)
     for (const p of b.piezas) p.material.material.dispose()
     b.contorno.textura.dispose()
@@ -144,7 +144,7 @@ export function letrasEnLaPantalla(a: ArmadoDelCta, y: number): void {
     let i = 0
     for (const b of bloques) {
       const caja = b.vivo ? b.el.getBoundingClientRect() : null
-      const lugar = caja === null ? { ...b.lugar, arriba: b.lugar.arriba + corrimiento(b.pin, y) } : { ...b.lugar, izquierda: caja.left, arriba: caja.top }
+      const lugar = caja === null ? { ...b.lugar, arriba: b.lugar.arriba + corrimiento(b.pin, y) } : { ...b.lugar, izquierda: b.centrado === null ? caja.left : caja.left + (caja.width - b.centrado * b.lugar.cuerpo) / 2, arriba: caja.top }
       const base = lineaDeBase(lugar, b.fuente.data)
       const c = lugar.cuerpo
       for (const p of b.piezas) {
@@ -161,6 +161,7 @@ export function letrasEnLaPantalla(a: ArmadoDelCta, y: number): void {
     }
   }
   llenar(a.origen, a.letras.origen)
+  llenar(a.frase, a.letras.frase)
   llenar([a.destino], a.letras.destino)
 }
 
@@ -199,11 +200,11 @@ function enElPlano(camara: THREE.PerspectiveCamera, x: number, y: number, profun
 /**
  * El marco del cuadro, entre dos cámaras: con la del recorrido sin el mouse (`quieta`: fijo en el mundo como el título de
  * volumen, así en el arranque la frase no salta donde la dejó el título, con el paralaje del mouse incluido) y con la viva
- * (`viva`: pegado a la pantalla, así el CTA llega exacto a su lugar del DOM, al lado del texto que lo acompaña). `aViva`:
- * cuánto de la viva (0 a 1). Con la viva, además, más cerca de la cámara (`MARCO_DEL_CTA.cerca` de la profundidad del logo):
- * lo que vuela pasa por delante del logo en vez de atravesarlo (el tamaño en la pantalla es el mismo).
+ * (`viva`: pegado a la pantalla, así el CTA llega exacto a su lugar del DOM). `aViva`: cuánto de la viva (0 a 1). [PULIDO 3B]
+ * B1 · con la viva, un poco MÁS LEJOS que el logo (`MARCO_DEL_CTA.cerca` de la profundidad de su centro; antes, 0,8, delante):
+ * ninguna letra pasa por delante del logo negro (lo que se cruza con él queda detrás). El tamaño en la pantalla es el mismo.
  */
-export const MARCO_DEL_CTA = { cerca: 0.8 } as const
+export const MARCO_DEL_CTA = { cerca: 1.12 } as const
 
 export function ponerElMarco(marco: THREE.Group, quieta: THREE.PerspectiveCamera, viva: THREE.PerspectiveCamera, aViva: number, alto: number): void {
   marcoCon(quieta, alto, 1, CON_LA_QUIETA)
@@ -214,8 +215,14 @@ export function ponerElMarco(marco: THREE.Group, quieta: THREE.PerspectiveCamera
   marco.updateMatrixWorld(true)
 }
 
+/** [PULIDO 3B] B1 · la distancia del plano del marco a la cámara, en px del marco (para alejar las letras hacia atrás). */
+export function fondoDelMarco(marco: THREE.Group, camara: THREE.Camera): number {
+  camara.getWorldDirection(ADELANTE)
+  return ADELANTE.dot(CENTRO.copy(marco.position).sub(camara.position)) / Math.max(1e-6, marco.scale.x)
+}
+
 /** Una pieza en su pose: en px del marco (y hacia abajo), girada sobre su centro y del cuerpo de la pose. */
-export function ponerLaPieza(pieza: Pieza, pose: Pose, conMorfo: boolean): void {
+export function ponerLaPieza(pieza: Pieza, pose: Pose): void {
   const g = pieza.grupo
   g.visible = pose.aparece > 0.001
   if (!g.visible) return
@@ -223,9 +230,7 @@ export function ponerLaPieza(pieza: Pieza, pose: Pose, conMorfo: boolean): void 
   g.rotation.set(pose.rx, pose.ry, 0)
   g.scale.set(pose.escala, pose.escala, pose.escala * pose.profundidad)
   pieza.material.aparece.value = pose.aparece
-  const influencias = pieza.malla.morphTargetInfluences
-  if (conMorfo && influencias !== undefined) influencias[0] = pose.fino
 }
 
-/** Todas las piezas del armado, en orden: las de la frase y las del CTA (en `capas`, sus capas). */
-export const piezasDe = (a: ArmadoDelCta): Pieza[] => [...a.origen.flatMap((b) => b.piezas), ...a.destino.piezas]
+/** Todas las piezas del armado, en orden: las del origen, las de la frase y las del CTA. */
+export const piezasDe = (a: ArmadoDelCta): Pieza[] => [...a.origen.flatMap((b) => b.piezas), ...a.frase.flatMap((b) => b.piezas), ...a.destino.piezas]

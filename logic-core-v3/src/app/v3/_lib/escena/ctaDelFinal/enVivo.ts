@@ -1,16 +1,17 @@
-import { entornoDeLaEscena, type VarianteDelCta } from '../entorno'
-
 /**
- * [PULIDO 2] 5 · EL CTA DEL FINAL EN VIVO — con `?cta=capas|relevo|giro|cruce|tipo` se llega al CTA con una transformación
- * desde «Seis razones» (`variantes.ts`). Esto es lo que el DOM (`_componentes/ctaDelFinal/`) le dice a la escena
- * (`EscenaDelCta.tsx`) y lo que la escena le devuelve. Sin `three`: lo importa el DOM. Sin bandera nada de esto se usa: el
- * CTA de hoy, igual.
+ * [PULIDO 2] 5 · EL CTA DEL FINAL EN VIVO — se llega al CTA con una transformación desde «Seis razones» ([PULIDO 3B] B1: una
+ * sola, la del producto: `transformacion.ts`). Esto es lo que el DOM (`_componentes/ctaDelFinal/`) le dice a la escena
+ * (`EscenaDelCta.tsx`) y lo que la escena le devuelve. Sin `three`: lo importa el DOM.
  */
 
-/** Un renglón de texto del DOM que la escena reemplaza: su elemento y lo que sube su pieza en la lectura (fracción del cuadro). */
+/**
+ * Un renglón de texto del DOM que la escena reemplaza: su elemento y lo que sube su pieza en la lectura (fracción del cuadro).
+ * [PULIDO 3B] B1 · con `texto`, el elemento sólo da el lugar (el texto no está en el DOM ahí: el origen de la lista, sin copia).
+ */
 export interface RenglonDelCta {
   readonly el: HTMLElement
   readonly subida: number
+  readonly texto?: string
 }
 
 export const CTA_EN_VIVO = {
@@ -21,10 +22,10 @@ export const CTA_EN_VIVO = {
   progreso: 0,
   /** De dónde sale: los renglones de «Seis razones» (en el escenario, los de la frase de volumen; en la lista, su copia). */
   origen: (): readonly RenglonDelCta[] => [],
+  /** [PULIDO 3B] B1 · los renglones de la frase del CTA en el DOM (sus dos mitades y el destacado): ahí se arma la frase. */
+  frase: [null, null, null] as (HTMLElement | null)[],
   /** El texto del CTA en el DOM (en la fuente del registro 1 del hero): ahí termina la transformación. */
   destino: null as HTMLElement | null,
-  /** `capas`: los seis valores, que se pliegan en el DOM (la escena sigue desde el pliegue). */
-  valores: [] as (HTMLElement | null)[],
   /** La caja que el DOM mide en cada cuadro: la del escenario (pegajosa) o la de la lista (va con la página). */
   donde: 'escenario' as 'escenario' | 'lista',
   /** En la lista, cuánto se ve la frase antes de transformarse (`entradaEnLaLista`); en el escenario, 1. */
@@ -33,13 +34,7 @@ export const CTA_EN_VIVO = {
   hover: false,
 }
 
-/** La variante de esta carga, o `null` (el CTA de hoy). */
-export function varianteDelCta(): VarianteDelCta | null {
-  const v = entornoDeLaEscena().pruebas.cta
-  return v === 'no' ? null : v
-}
-
-/** Los títulos de volumen que la transformación reemplaza desde que arranca (la frase, salvo en `capas`, donde se va como hoy). */
+/** Los títulos de volumen que la transformación reemplaza desde que arranca: la frase. */
 export const FRASE_DE_VOLUMEN = ['frase-izquierda', 'frase-derecha'] as const
 
 /** La escena armó y compiló las letras del CTA: recién ahí el DOM esconde su texto (sin WebGL, se sigue leyendo el del DOM). */

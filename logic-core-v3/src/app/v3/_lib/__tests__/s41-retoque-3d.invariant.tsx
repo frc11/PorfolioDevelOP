@@ -120,9 +120,11 @@ const arribaDeLosValores = (): number => {
 }
 afirmar(SUBIDA_DE_LA_FRASE_SVH === 33 && arribaDeLosValores() === 27, 'la frase sube 3 svh más y las columnas quedan donde estaban (27 svh): el aire entre los dos pasa de 7 a 10 svh', 'medido a 1440 × 900: de la «g» del 3D al ícono de «Calidad que se nota», 16 px → 43 px')
 // [PULIDO 2] 5 · con `?cta=` (salvo `capas`) la frase la toma la transformación en su lugar (`relevada`); sin bandera, igual.
-const subeConLaLevantada = (c: string): boolean => /const corrida = useTransform\(levantada, \(u\) => \(-u \* SUBIDA_DE_LA_LEVANTADA_SVH\) \/ 100\)/.test(c) && (c.match(/llegada: frase, salida: relevada \? null : levantada, corrida: relevada \? null : corrida \}\}/g) ?? []).length === 2 && c.includes("const relevada = variante !== null && variante !== 'capas'")
-afirmar(subeConLaLevantada(porQue), '  el título de volumen de la frase sube con la levantada (la misma subida que su pieza del DOM): los valores ya no le pasan por encima')
-controlPositivo('el detector VE la frase clavada mientras suben los valores', porQue.replace(/, corrida: relevada \? null : corrida \}\}/g, ' }}'), subeConLaLevantada)
+// [PULIDO 3B] B1 · cambió por pedido: la transformación es del producto, así que la frase de volumen ya no se levanta (la toma
+// la transformación en su lugar: se va hacia atrás); los valores siguen subiendo con la levantada, y se van.
+const subeConLaLevantada = (c: string): boolean => !c.includes('const corrida = useTransform(levantada') && (c.match(/llegada: frase, salida: null, corrida: null \}\}/g) ?? []).length === 2 && c.includes('<motion.div className="absolute inset-0" style={{ y, opacity }}>')
+afirmar(subeConLaLevantada(porQue), '  la frase de volumen no se levanta: la toma la transformación al CTA en su lugar; los valores suben y se van con la levantada')
+controlPositivo('el detector VE la frase de volumen que se levanta y se va (la transformación no la tomaría en su lugar)', porQue.replace(/salida: null, corrida: null \}\}/g, 'salida: levantada, corrida: corrida }}'), subeConLaLevantada)
 afirmar(/a\.grupo\.position\.copy\(a\.base\)\.addScaledVector\(a\.arriba, -\(d \+ a\.titulo\.corrida \* alto\) \* a\.mundoPorPx\)/.test(escena), '  en la escena, la corrida se suma al corrimiento del escenario (el mismo paso para todos los títulos)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -190,7 +192,8 @@ const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4,
 afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
 controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
 // [PULIDO 2] 5 · con `?cta=capas` el valor se pliega adentro de su llegada (`PliegueDelValor`); sin bandera, la pieza tal cual.
-afirmar(/const pieza = <PiezaDeValor [^>]*\/>\s*return \(\s*<li>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*\{pliegue === null \? pieza : <PliegueDelValor/.test(porQue) && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
+// [PULIDO 3B] B1 · `capas` se borró: la pieza, tal cual.
+afirmar(/<li>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor /.test(porQue) && !porQue.includes('PliegueDelValor') && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')

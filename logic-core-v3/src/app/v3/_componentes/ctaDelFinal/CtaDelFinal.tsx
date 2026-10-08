@@ -5,23 +5,15 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { CTA_EN_VIVO, avisarDelLugar, ctaListo, suscribirAlCta, varianteDelCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
-import { ctaTocable, entradaEnLaLista, llegadaDelTexto, plegadoDelValor, progresoEnLaLista } from '../../_lib/escena/ctaDelFinal/variantes'
-import type { VarianteDelCta } from '../../_lib/escena/entorno'
+import { CTA_EN_VIVO, avisarDelLugar, ctaListo, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
+import { ctaTocable, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
 
 /**
- * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, DEL LADO DEL DOM (`?cta=capas|relevo|giro|cruce|tipo`; sin bandera
- * nada de esto se monta: el CTA de hoy, igual). El DOM le dice a la escena dónde está cada cosa y cuánto avanzó la
- * transformación (función del scroll); la escena dibuja las letras (`_lib/escena/ctaDelFinal/`). El texto del DOM sigue
- * entero para los lectores de pantalla y los buscadores, y se esconde recién cuando la escena avisa que armó sus letras: sin
- * WebGL se sigue leyendo (el CTA llega como el resto del texto).
+ * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, DEL LADO DEL DOM ([PULIDO 3B] B1: la del producto, sin bandera). El
+ * DOM le dice a la escena dónde está cada cosa y cuánto avanzó la transformación (función del scroll); la escena dibuja las
+ * letras (`_lib/escena/ctaDelFinal/`). El texto del DOM sigue entero para los lectores de pantalla y los buscadores, y se
+ * esconde recién cuando la escena avisa que armó sus letras: sin WebGL se sigue leyendo (el CTA llega como el resto del texto).
  */
-const sinCambios = (): (() => void) => () => undefined
-
-/** La variante de esta carga, después de hidratar (el servidor no la conoce: el primer render es el CTA de hoy). */
-export function useVarianteDelCta(): VarianteDelCta | null {
-  return useSyncExternalStore(sinCambios, varianteDelCta, () => null)
-}
 
 /** ¿La escena ya dibuja las letras del CTA? `false` en el servidor y en el primer render. */
 export function useCtaListo(): boolean {
@@ -73,6 +65,35 @@ export function MedirLaLista({ caja, progreso, entrada }: { readonly caja: RefOb
 const FUENTE_DEL_CTA = 'font-display font-fuerte uppercase tracking-display leading-titulo text-fluido-display-xl'
 
 /**
+ * [PULIDO 3B] B1 · la frase del CTA en la fuente del registro 1 del hero (Archivo, en mayúsculas: la fuente del sitio es la de
+ * ese registro, sin minúsculas): la escena la arma en 3D con las mismas letras, en su lugar.
+ */
+export const FUENTE_DE_LA_FRASE_DEL_CTA = 'font-[family-name:var(--font-v3-archivo)] uppercase'
+
+/**
+ * [PULIDO 3B] B1 · un renglón de la frase del CTA: le dice a la escena dónde está (ahí arma la frase) y se esconde cuando la
+ * escena ya dibuja sus letras (sin WebGL, se lee).
+ */
+export function RenglonDeLaFraseDelCta({ indice, children, className }: { readonly indice: number; readonly children: React.ReactNode; readonly className?: string }): React.JSX.Element {
+  const listo = useCtaListo()
+  const renglon = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const el = renglon.current
+    CTA_EN_VIVO.frase[indice] = el
+    avisarDelLugar()
+    return () => {
+      if (CTA_EN_VIVO.frase[indice] === el) CTA_EN_VIVO.frase[indice] = null
+      avisarDelLugar()
+    }
+  }, [indice])
+  return (
+    <span ref={renglon} className={cn('block', className, listo && 'opacity-0')}>
+      {children}
+    </span>
+  )
+}
+
+/**
  * EL CTA EN SU LUGAR: el texto en la fuente del registro 1 del hero, que la escena reemplaza con sus letras (y hasta entonces
  * llega con el resto del texto). Es un enlace que abre el panel de Contacto (con la transición de siempre, `data-abre-contacto`)
  * y se puede tocar recién cuando la transformación terminó. El hover (sólo con el mouse) levanta el CTA en la escena.
@@ -111,26 +132,5 @@ export function DestinoDelCta({ rotulo, destino, progreso, className }: { readon
         {rotulo.toUpperCase()}
       </motion.span>
     </motion.a>
-  )
-}
-
-/**
- * `capas`: el valor `k` se pliega sobre su eje horizontal hasta quedar de canto (y la escena sigue desde ahí con su capa del
- * CTA); al volver el scroll, se despliega. La escena lee su caja en cada cuadro.
- */
-export function PliegueDelValor({ indice, progreso, children }: { readonly indice: number; readonly progreso: MotionValue<number>; readonly children: React.ReactNode }): React.JSX.Element {
-  const caja = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = caja.current
-    if (el !== null) CTA_EN_VIVO.valores[indice] = el
-    return () => {
-      if (CTA_EN_VIVO.valores[indice] === el) CTA_EN_VIVO.valores[indice] = null
-    }
-  }, [indice])
-  const rotateX = useTransform(progreso, (p) => 90 * plegadoDelValor(indice, p))
-  return (
-    <motion.div ref={caja} style={{ rotateX, transformPerspective: 900 }}>
-      {children}
-    </motion.div>
   )
 }

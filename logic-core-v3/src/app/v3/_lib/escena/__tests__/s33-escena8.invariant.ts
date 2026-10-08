@@ -128,7 +128,8 @@ afirmar(diaParaElTexto(AMANECER.texto.frase[0], 'frase') === 0 && diaParaElTexto
 const clavado = avanceDelScroll(0, H)
 afirmar(diaParaElTexto(clavado, 'frase') === 1, '  con un scroll lento no cambia nada: cuando el escenario se clava (y llega la frase) el día ya está', `el avance con el escenario recién clavado: ${clavado.toFixed(2)}`)
 const final = readFileSync(path.join(process.cwd(), 'src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx'), 'utf8')
-afirmar(/useLlegadaDeDia\(pin, VENTANA_DE_LA_FRASE, 'frase'\)/.test(final) && /useLlegadaDeDia\(pin, ventanaDelValor\(indice\), 'abajo'\)/.test(final) && (final.match(/useLlegadaDeDia\(pin, VENTANA_DEL_(CTA|DESTACADO), 'abajo'\)/g) ?? []).length === 2, '  el escenario de Por qué develOP lo lee: la frase, cada valor, el CTA y su destacado')
+// [PULIDO 3B] B1 · el CTA de antes se fue: el del producto sale de la frase (que ya esperó al día) con la transformación.
+afirmar(/useLlegadaDeDia\(pin, VENTANA_DE_LA_FRASE, 'frase'\)/.test(final) && /useLlegadaDeDia\(pin, ventanaDelValor\(indice\), 'abajo'\)/.test(final) && !/VENTANA_DEL_(CTA|DESTACADO)/.test(final) && /useTramo\(pin, VENTANA_DE_LA_TRANSFORMACION\)/.test(final), '  el escenario de Por qué develOP lo lee: la frase y cada valor; el CTA sale de la frase con la transformación')
 afirmar(/Math\.min\(t, d\)/.test(final) && !/opacity: DIA_DEL_TEXTO/.test(final), '  como un tope de la llegada (la pieza llega con su gesto cuando hay día), no como una opacidad encima')
 const amanecer = leer('amanecer/Amanecer.tsx')
 afirmar(/DIA_DEL_TEXTO\.frase\.set\(m\.activo \? diaParaElTexto\(m\.avance, 'frase'\) : 1\)/.test(amanecer) && /quieto=\{reducedMotion\}/.test(leer('ProbeStage.tsx')), 'la escena lo escribe en cada cuadro (1 fuera del amanecer) y sabe si hay menos movimiento')

@@ -178,3 +178,80 @@ s47–s52 verdes.
 `s54-pulido-3` B0: una versión (control: `red` de vuelta), viva (control: el ritmo del 3A), corrientes sin patrón (control:
 una que se repite cada 2 s), pistones (control: el temblor), el logo (controles: el filo oscurecido con la sala; sin pulso),
 el frente (control: los valores del 3A).
+
+### B1 · El CTA: gana «cruce»
+
+**Una sola transformación, del producto.** Ya no hay `?cta=`: `capas`, `relevo`, `giro` y `tipo` se borraron con su código y
+sus fuentes finas, y también el CTA de antes (el que se veía sin bandera). La escena del CTA se monta siempre, en cualquier
+ancho (`ctaDelFinal/transformacion.ts`, que reemplaza a `variantes.ts`).
+
+**Todo en Archivo y en 3D.** La fuente del sitio para el registro 1 (`archivo-display-latin.woff2`) es un subconjunto **sólo
+en mayúsculas**, así que el CTA entero va en mayúsculas, como el registro 1: «ESTE SITIO EMPEZÓ CON UNA CHARLA.» en Archivo 400
+(`archivo-400-cta.json`, nuevo), y «EL TUYO TAMBIÉN.» y «HABLANOS» en 700 (sumados a `archivo-700-titulos.json`). El DOM va en la
+misma fuente (`FUENTE_DE_LA_FRASE_DEL_CTA`) y la escena lo reemplaza con sus letras. La frase va en dos mitades: en el teléfono,
+cada una en su renglón (a 390 la frase entera no entra en uno y la escena las encimaba); desde escritorio, en un renglón.
+
+**La metamorfosis.**
+1. «Seis razones para elegirnos» se va hacia atrás, en su lugar de la pantalla: cada renglón se achica entero, sin
+   separarse.
+2. Allá atrás, cada letra va a su letra de la frase (`parejasDeLaFrase`): primero sube o baja y después corre, sin cruzar en
+   diagonal. Si es la misma letra, se da vuelta sobre su eje horizontal (cambia de fuente). Si es otra, se da vuelta sobre el
+   vertical y del otro lado aparece la nueva. Las 24 letras del origen llevan a 24 de la frase; las 18 que nadie lleva se
+   despliegan de canto en su lugar.
+3. La frase vuelve adelante, en cascada.
+4. «HABLANOS» llega con el cruce: la cámara sale de adentro de la contraforma de su «O» y la palabra, extruida, se asienta.
+   Se solapa con el final de la frase.
+
+Todo es función pura del scroll. El plano del CTA va detrás del centro del logo (antes, delante): si una letra se cruza con
+el logo, queda detrás y no lo tapa.
+
+**Más lento y las alturas.** La transformación corre en tres pantallas (antes una): «Por qué develOP» pasa de 5 a 7 pantallas,
+la cámara llega a C donde llegaba (3,6) y la transformación termina en 5,6. Así la metamorfosis se arma con el logo ya abajo.
+En la lista, el bloque mide tres pantallas (antes dos) y la transformación corre en una (antes media). El logo baja en la
+primera mitad del recorrido, así que sólo llegué al doble y no al 2,5–3×. El ancla de la sección no cambia (0,8525, está
+declarada).
+
+**Teléfono y movimiento reducido.** Ya no hay copia de «Seis razones» en el DOM: la escena pone el origen centrado sobre cada
+mitad de la frase. Con movimiento reducido en escritorio, el CTA quieto va en la mitad de la pose C (`ARRIBA_DEL_CTA_QUIETO_SVH`,
+480 svh), arriba del logo. Antes iba en la última pantalla, la del alejamiento al pie, con el logo en el centro. Su rama se elige
+con `usePrefiereMenosMovimiento`: como el bloque ahora se arma en el servidor, `useReducedMotion` daba un error de hidratación.
+
+**Entregable:** `b1-cta-1440.png` y `b1-cta-390.png` (0, 25, 50, 75 y 100 %), y `b1-cta-reducido-1440.png`.
+
+**Gate:** lint limpio en lo tocado; `tsc` 0 errores; `s53` y `s54` verdes (s54 45/0). Corrí además los 60 invariantes que
+leen lo tocado: quedan rojos sólo `s8-chrome` y `bundle` (piden el build de producción) y `s17-revelado` (mira `EscenaDelHome`,
+que no se tocó): son de los de base.
+
+**Los viajes del menú.** Uno de ~40 pantallas hasta el pie pasa de 2315 a 2333 ms (`duracionTotalDelViaje`), debajo del tope
+aprobado (2500 ms). Los viajes a Por qué develOP no cambian: el arranque de la sección no se mueve.
+
+**Las aserciones viejas que cambiaron:**
+- s53 §5, las cinco variantes de PULIDO 2 (puras, sus gestos, la fuente, el clic, el teléfono, el movimiento reducido) pasan a
+  una sola aserción: ya no existen (control: `relevo` de vuelta). Lo que hace el CTA del producto lo fija s54 B1.
+- s52-pulido-1, banderas: se borró `cta=` (ya no hay variantes); las pruebas juntas y la URL se prueban con
+  `rebobinado`, `angel` y `energia`.
+- s47, «la sección declara las cinco pantallas» pasa a «las siete» (REGLA DE ALTURAS: más recorrido es más altura).
+- s7-por-que-develop: «el botón es el CTA del sitio (`data-pieza="cta"`)» pasa a «el CTA del final
+  (`data-pieza="cta-en-volumen"`)», el del producto. Las ventanas del CTA de antes (`VENTANA_DEL_CTA`, `_DEL_DESTACADO`)
+  se fueron con él: lo mismo se fija sobre la de la transformación, que termina antes de que la cámara se vaya.
+- La coreografía (`choreography.ts`): los seis keyframes del final son literales que `s23` ata a `finalDelRecorrido.ts`. Con
+  siete pantallas caen en otra parte de la recta: frase · sostén 0,8862, valores 0,9031 y 0,9073, cta 0,9284 y 0,9789, pie
+  0,9842 (antes 0,8997…0,9779). Sin eso, la pista quedaba fuera de orden y `s23` se caía. El ancla (0,8525) y las poses no
+  cambian.
+- s18, «el final tiene su propio `CtaEnlace`» pasa a «su propio CTA, `cta-en-volumen`». El deslizamiento sigue sin tomarlo.
+- s37, el foco del «Hablanos» lleva adonde llega: el mismo gesto, ahora en `CtaTransformado` (`alEnfocar`).
+- s40, s44 y s36, «el montaje no baja abajo de 1024»: el módulo del CTA del final se monta en cualquier ancho (es del
+  producto). Los títulos y el pie de volumen siguen sólo desde escritorio.
+- s41, s42 y s43, «la frase se va con la levantada»: la frase de volumen la toma la transformación en su lugar (es lo que se va
+  hacia atrás). Los controles se rehicieron para ver el error nuevo: la frase que se va con la levantada.
+- s33, «el escenario lee el día para el CTA y su destacado»: el CTA sale de la frase (que ya esperó al día) con la
+  transformación.
+- s47 D3, s52-nocturno-final D3 y s7: el CTA de la lista es el de la transformación (`CtaTransformado`): una pantalla
+  clavada, centrada y en tinta, sin la mezcla. «Mezcla 9 piezas» pasa a «7» (la frase y los seis valores; el CTA clavado ya
+  no mezclaba en PULIDO 2 · 5).
+- **De A2, que su gate no corrió:** ya está en el log de B0 (`s52-nocturno-final` C4).
+
+`s54-pulido-3` B1: el producto sin bandera (control: atrás de una bandera), Archivo en 3D (control: la frase en la Chivo),
+la metamorfosis con letras sintéticas (control: una frase que aparece de golpe sobre el origen), más lento (control: el ritmo
+de PULIDO 2) y el teléfono, el movimiento reducido y el plano detrás del logo (controles: el plano delante; el CTA quieto en la
+última pantalla).

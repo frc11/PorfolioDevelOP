@@ -9,6 +9,9 @@
  *   B0 · [PULIDO 3B] la energía, versión final: una sola (sin `red` ni `inestable`; `?energia=intensa` para comparar), más
  *        movimiento y más brillo, las corrientes sin patrón, los pistones sin vibración, el logo que brilla (fuera del
  *        oscurecimiento, su filo y el pulso de cada onda), el frente desde el golpe y la cobertura nunca bajo el 65 %.
+ *   B1 · el CTA: gana `cruce` (sin bandera); todo en Archivo y en 3D; la metamorfosis de «Seis razones» en la frase (atrás,
+ *        letra por letra, y vuelve adelante); «HABLANOS» con el cruce; tres veces más recorrido (las alturas); el teléfono
+ *        sin copia; el movimiento reducido sin el CTA encima del logo; ninguna letra delante del logo.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-3.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-3/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -33,6 +36,14 @@ import {
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
 import { BRILLO_DEL_LOGO, BRILLO_DEL_LOGO_GLSL, pulsoDelLogo } from '../escena/final/rimDeLaLuz'
+import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
+import { LISTA_DEL_CTA, TRANSFORMACION, nuevaPose, parejasDeLaFrase, posesDe, type EscenaDeLaTransformacion, type LetraEnPantalla, type PosesDeLaTransformacion } from '../escena/ctaDelFinal/transformacion'
+import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
+import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
+import { ARRIBA_DEL_CTA_QUIETO_SVH } from '../../_secciones/por-que-develop/geometria'
+import { CTA, FRASE } from '../../_secciones/por-que-develop/contenido'
+import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
+import ARCHIVO_400_CTA from '../../_fuentes/archivo-400-cta.json'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, duracionDelRebobinado, expansionDeLaLuz, quedaDelRebobinado } from '../escena/final/recorridoDelFinal'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -321,5 +332,99 @@ controlPositivo('  y un logo sin pulso', cuadro.replace('RIM_DE_LA_LUZ.uPulsoDel
 const frenteBien = (canto: number, frente: number): boolean => canto >= 0.6 && frente >= 1.2
 afirmar(frenteBien(L.canto, L.expansion.brillo), '  el frente de luz se ve desde el golpe (cantos y frente más brillantes que la meseta)', `canto ${String(L.canto)} · frente ${String(L.expansion.brillo)}`)
 controlPositivo('  el detector VE los del 3A (canto 0,32, frente 0,7)', [0.32, 0.7] as const, ([c, f]: readonly [number, number]) => frenteBien(c, f))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B1 · El CTA: gana «cruce»; todo en Archivo y en 3D; la metamorfosis de las seis razones; más lento')
+
+// GANA `cruce`, SIN BANDERA: la escena del CTA se monta siempre (en cualquier ancho) y «Por qué develOP» monta la
+// transformación en sus dos ramas (que las otras cuatro y el CTA de antes no dejan código lo fija `s53` §5).
+const pruebasDeLaEscena = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
+const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+const productoBien = (pruebas: string, pq: string): boolean => pruebas.includes('<EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} />') && !/conElCta\s*&&/.test(pruebas) &&
+  pq.includes('<CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />') && pq.includes('<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />') && !/variante/.test(pq)
+afirmar(productoBien(pruebasDeLaEscena, porQue), 'el CTA con su transformación es el producto: sin bandera, en el escenario y en la lista')
+controlPositivo('el detector VE el CTA atrás de una bandera', [pruebasDeLaEscena.replace('<EscenaDelCta keyLightRef', '{conElCta && <EscenaDelCta keyLightRef'), porQue] as const, ([a, b]: readonly [string, string]) => productoBien(a, b))
+
+// TODO EN ARCHIVO Y EN 3D: la frase (sus dos mitades en 400 y el destacado en 700) y «HABLANOS» (700), con las letras de la
+// fuente del registro 1 del hero (sólo mayúsculas: la fuente del sitio no tiene otras); el DOM, en la misma fuente.
+type Glifos = { readonly glyphs: Record<string, unknown> }
+const tieneTodo = (fuente: Glifos, texto: string): boolean => [...texto.toUpperCase()].every((c) => c.trim() === '' || fuente.glyphs[c] !== undefined)
+const armadoDelCta = sinComentarios(leer('_lib/escena/ctaDelFinal/armadoDelCta.ts'))
+const ctaTransformado = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
+const ctaDelFinal = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
+const archivoBien = (f400: Glifos, f700: Glifos, armado: string, dom: string): boolean =>
+  CTA.fraseEnDos.every((t) => tieneTodo(f400, t)) && tieneTodo(f700, CTA.destacado) && tieneTodo(f700, CTA.rotulo) && CTA.fraseEnDos.join(' ') === CTA.frase &&
+  armado.includes('const fuente = k < frase.length - 1 ? FUENTES.archivoDeLaFrase : FUENTES.archivo') && armado.includes('letrasDelRenglon(FUENTES.archivo, textoVisible(destino).toUpperCase(), posicionesDelDom(destino))') &&
+  dom.includes("FUENTE_DE_LA_FRASE_DEL_CTA = 'font-[family-name:var(--font-v3-archivo)] uppercase'") && (ctaTransformado.match(/<FraseDelCta/g) ?? []).length === 2
+afirmar(archivoBien(ARCHIVO_400_CTA as Glifos, ARCHIVO_700 as Glifos, armadoDelCta, ctaDelFinal), '  todo el CTA en Archivo (el registro 1 del hero) y en 3D: la frase en 400, el destacado y «HABLANOS» en 700; el DOM, en la misma fuente')
+controlPositivo('  el detector VE la frase en la Chivo de antes', [ARCHIVO_400_CTA as Glifos, ARCHIVO_700 as Glifos, armadoDelCta.replace('FUENTES.archivoDeLaFrase : FUENTES.archivo', 'FUENTES.chivo : FUENTES.archivo'), ctaDelFinal] as const, ([a, b, c, d]: readonly [Glifos, Glifos, string, string]) => archivoBien(a, b, c, d))
+
+// LA METAMORFOSIS (una función pura del progreso, con letras sintéticas: «Seis razones / para elegirnos» → la frase →
+// «HABLANOS»): en 0, el origen en su lugar y lo demás sin dibujar; las seis se van hacia atrás en su lugar de la pantalla;
+// allá cada letra va a su letra de la frase y se da vuelta (la misma letra, sobre el eje horizontal; otra, sobre el vertical:
+// del otro lado, la nueva), las que nadie lleva se despliegan de canto; la frase vuelve adelante; «HABLANOS» llega con el
+// cruce (agrandada alrededor de su «O»); en 1, todo en su lugar. Letras enteras (una pieza por letra) y reversible.
+const renglon = (texto: string, x0: number, y: number, cuerpo: number, r: number): LetraEnPantalla[] => [...texto].filter((c) => c.trim() !== '').map((c, i) => ({ x: x0 + i * 0.55 * cuerpo, y, cuerpo, ancho: 0.5 * cuerpo, alto: 0.7 * cuerpo, renglon: r, letra: c }))
+const ORIGEN = [...renglon(FRASE.izquierda, 200, 300, 60, 0), ...renglon(FRASE.derecha, 860, 300, 60, 1)]
+const FRASE_DEL_CTA = [...renglon(CTA.fraseEnDos[0].toUpperCase(), 380, 330, 50, 0), ...renglon(CTA.fraseEnDos[1].toUpperCase(), 760, 330, 50, 1), ...renglon(CTA.destacado.toUpperCase(), 560, 390, 50, 2)]
+const HABLANOS = renglon(CTA.rotulo.toUpperCase(), 600, 500, 90, 0)
+const escenaB1: EscenaDeLaTransformacion = { origen: ORIGEN, frase: FRASE_DEL_CTA, destino: HABLANOS, parejas: parejasDeLaFrase(ORIGEN, FRASE_DEL_CTA), pantalla: { ancho: 1440, alto: 900 }, fondo: 1600, fuga: { x: 720, y: 450 } }
+const posesB1 = (): PosesDeLaTransformacion => ({ origen: ORIGEN.map(nuevaPose), frase: FRASE_DEL_CTA.map(nuevaPose), destino: HABLANOS.map(nuevaPose) })
+type Poses = typeof posesDe
+const foto = (f: Poses, p: number, s: PosesDeLaTransformacion = posesB1()): string => {
+  f(p, escenaB1, s)
+  return JSON.stringify(s)
+}
+const metamorfosisBien = (f: Poses): boolean => {
+  const T = TRANSFORMACION
+  const s = posesB1()
+  f(0, escenaB1, s)
+  const enCero = s.origen.every((q, i) => q.aparece === 1 && q.z === 0 && Math.abs(q.x - ORIGEN[i].x) < 1e-6) && s.frase.every((q) => q.aparece === 0) && s.destino.every((q) => q.aparece === 0)
+  f(T.seVa[0] + T.seVa[1] + T.cascada + 0.001, escenaB1, s)
+  const atras = s.origen.every((q) => q.z < -0.5 * escenaB1.fondo && q.aparece === 1)
+  // A mitad del giro de cada pareja, la letra del origen y la de la frase están en el mismo lugar (una se da vuelta en la otra).
+  const pareja = escenaB1.parejas.findIndex((i) => i >= 0)
+  const i0 = escenaB1.parejas[pareja]
+  const mitad = T.cambia[0] + 0.06 * (i0 / Math.max(1, ORIGEN.length - 1)) + T.cambia[1] / 2
+  f(mitad, escenaB1, s)
+  const misma = (ORIGEN[i0].letra.normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase()) === (FRASE_DEL_CTA[pareja].letra.normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase())
+  const giran = Math.abs(s.origen[i0].x - s.frase[pareja].x) < 1e-6 && Math.abs(s.origen[i0].z - s.frase[pareja].z) < 1e-6 && (misma ? Math.abs(s.origen[i0].rx - s.frase[pareja].rx - Math.PI) < 1e-6 : Math.abs(s.origen[i0].ry - s.frase[pareja].ry - Math.PI) < 1e-6)
+  const sola = escenaB1.parejas.findIndex((i) => i < 0)
+  f(T.cambia[0] + T.cambia[1] * 0.6, escenaB1, s)
+  const despliega = sola < 0 || (s.frase[sola].rx > 0 && s.frase[sola].rx < Math.PI / 2)
+  f(T.cruce.desde + 0.02, escenaB1, s)
+  const cruce = s.destino.every((q, k) => q.aparece === 1 && q.escala > 2 * HABLANOS[k].cuerpo)
+  f(1, escenaB1, s)
+  const enUno = s.origen.every((q) => q.aparece === 0) && s.frase.every((q, j) => q.aparece === 1 && Math.abs(q.z) < 1e-6 && Math.abs(q.rx) < 1e-6 && Math.abs(q.ry) < 1e-6 && Math.abs(q.x - FRASE_DEL_CTA[j].x) < 1e-6) &&
+    s.destino.every((q, k) => q.aparece === 1 && Math.abs(q.x - HABLANOS[k].x) < 1e-6 && Math.abs(q.escala - HABLANOS[k].cuerpo) < 1e-6)
+  const pura = [0.1, 0.33, 0.5, 0.72, 0.9].every((p) => foto(f, p) === foto(f, p, (() => { const v = posesB1(); f(1 - p, escenaB1, v); return v })()))
+  const todas = escenaB1.parejas.filter((i) => i >= 0).length === ORIGEN.length && new Set(escenaB1.parejas.filter((i) => i >= 0)).size === ORIGEN.length
+  return enCero && atras && giran && despliega && cruce && enUno && pura && todas
+}
+afirmar(metamorfosisBien(posesDe), '  las seis razones se van atrás, allá se reordenan o se dan vuelta en la frase (las que nadie lleva se despliegan), la frase vuelve adelante y «HABLANOS» llega con el cruce; pura y reversible', `${String(escenaB1.parejas.filter((i) => i >= 0).length)} letras llevan a la frase, ${String(escenaB1.parejas.filter((i) => i < 0).length)} se despliegan`)
+controlPositivo('  el detector VE una frase que aparece de golpe sobre el origen (sin irse atrás ni darse vuelta)', ((p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
+  posesDe(p, e, s)
+  s.origen.forEach((q) => Object.assign(q, { z: 0, rx: 0, ry: 0, aparece: p < 0.5 ? 1 : 0 }))
+}) as Poses, metamorfosisBien)
+
+// MÁS LENTO («que se disfrute»): en el escenario la transformación corre en tres pantallas de scroll (antes, una); en la lista,
+// en una (antes, media: el bloque mide tres pantallas y el logo baja en la primera mitad de su recorrido). REGLA DE ALTURAS: la
+// sección declara siete pantallas (antes cinco) y la cámara llega a C donde llegaba (3,6).
+const lentoBien = (desde: number, hasta: number, pantallas: number, lista: { readonly desde: number }, bloque: string): boolean =>
+  hasta - desde >= 2.5 && pantallas === 7 && TIEMPOS_DEL_FINAL.cta.llega === 3.6 && hasta <= TIEMPOS_DEL_FINAL.cta.hasta && 2 * (1 - lista.desde) >= 0.9 && bloque.includes("'min-h-[calc(var(--alto-del-cta-en-lista)*3)]'")
+afirmar(lentoBien(TIEMPOS_DEL_FINAL.valores.hasta, TIEMPOS_DEL_FINAL.cta.armado, PANTALLAS_DE_POR_QUE_DEVELOP, LISTA_DEL_CTA, ctaTransformado), '  más lento: tres pantallas en el escenario (era una) y una en la lista (era media); la sección mide siete', `escenario: ${String(TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta)} pantallas · lista: ${String(2 * (1 - LISTA_DEL_CTA.desde))}`)
+controlPositivo('  el detector VE el ritmo de PULIDO 2 (una pantalla)', [2.6, 3.6, 5, { desde: 0.5 }, ctaTransformado.replace('*3)]', '*2)]')] as const, ([a, b, c, d, e]: readonly [number, number, number, { readonly desde: number }, string]) => lentoBien(a, b, c, d, e))
+
+// EL TELÉFONO, SIN COPIA: «Seis razones» no se repite en el DOM (la escena pone el origen centrado sobre cada renglón de la
+// frase del CTA, sin texto propio). EL MOVIMIENTO REDUCIDO: en escritorio el CTA quieto va en la mitad de la pose C (con el
+// logo abajo; antes, en la última pantalla, la del alejamiento, encima del logo), y la rama se elige sin el desfase de la
+// hidratación (el bloque se arma en el servidor). NINGUNA LETRA DELANTE DEL LOGO: el plano del CTA va detrás del centro del
+// logo (lo que se cruza con él, queda detrás).
+const telefonoBien = (t: string, arriba: number, cerca: number): boolean => !/\{FRASE\.(izquierda|derecha)\}/.test(t) && t.includes("texto: k === 0 ? FRASE.izquierda : FRASE.derecha") &&
+  t.includes('escritorio:top-[var(--arriba-del-cta-quieto)]') && t.includes('const quieto = usePrefiereMenosMovimiento()') &&
+  arriba >= 100 * TIEMPOS_DEL_FINAL.cta.llega && arriba + 100 <= 100 * TIEMPOS_DEL_FINAL.cta.hasta && cerca > 1
+afirmar(telefonoBien(ctaTransformado, ARRIBA_DEL_CTA_QUIETO_SVH, MARCO_DEL_CTA.cerca), '  sin «Seis razones» repetido en el DOM; con movimiento reducido, el CTA en la pose C (sin el logo encima); ninguna letra delante del logo', `CTA quieto a ${String(ARRIBA_DEL_CTA_QUIETO_SVH)} svh · el plano a ${String(MARCO_DEL_CTA.cerca)} de la distancia del logo`)
+controlPositivo('  el detector VE el plano de PULIDO 2 (delante del logo, 0,8)', [ctaTransformado, ARRIBA_DEL_CTA_QUIETO_SVH, 0.8] as const, ([t, a, c]: readonly [string, number, number]) => telefonoBien(t, a, c))
+controlPositivo('  y el CTA quieto en la última pantalla', [ctaTransformado.replace('escritorio:top-[var(--arriba-del-cta-quieto)]', 'escritorio:bottom-0'), ARRIBA_DEL_CTA_QUIETO_SVH, MARCO_DEL_CTA.cerca] as const, ([t, a, c]: readonly [string, number, number]) => telefonoBien(t, a, c))
 
 cerrar('s54-pulido-3')

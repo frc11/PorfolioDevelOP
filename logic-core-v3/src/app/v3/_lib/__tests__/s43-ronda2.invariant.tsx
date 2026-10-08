@@ -135,7 +135,8 @@ const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.ts
 afirmar(/const asentar = !enViaje && REPETICIONES\.activas === 0 && ahora - s\.scroll\.cuando > ASIENTO\.quietoMs/.test(escena3d) && (escena3d.match(/mostradoDelScroll\(/g) ?? []).length === 3 && !/m\.llegada > 0 \? 1 :/.test(escena3d), '  en la escena: Portfolio, la frase, El equipo y las demos (la llegada y la salida), sin «termina lo que empezó»; el asiento, sólo con el scroll quieto y sin un viaje ni una llegada repetida corriendo')
 const porQueDevelop = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [PULIDO 2] 5 · con `?cta=` (salvo `capas`) la transformación toma la frase (`relevada`); sin bandera, la misma regla.
-afirmar((porQueDevelop.match(/salida: relevada \? null : levantada, corrida: relevada \? null : corrida \}/g) ?? []).length === 2 && /salida=\{volumen\.salida\}/.test(porQueDevelop) && !/llegadaDe="por-que-develop" queda/.test(porQueDevelop), 'la frase de Por qué develOP vuelve a irse con la levantada (con la misma regla)')
+// [PULIDO 3B] B1 · cambió por pedido: la transformación es del producto y toma la frase (ya no se va con la levantada).
+afirmar((porQueDevelop.match(/salida: null, corrida: null \}/g) ?? []).length === 2 && /salida=\{volumen\.salida\}/.test(porQueDevelop) && !/llegadaDe="por-que-develop" queda/.test(porQueDevelop), 'la frase de Por qué develOP la toma la transformación al CTA (no se va con la levantada; con la misma regla de llegada)')
 const repetida = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
 afirmar(/REPETICIONES\.activas \+= 1/.test(repetida) && /repeticion\.set\(-1\)\s*terminar\(\)/.test(repetida), 'la llegada aislada después de un viaje (por tiempo) se puede interrumpir y converge: un pedido nuevo la reinicia, cortada vuelve al scroll; mientras corre, no se asienta')
 const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))

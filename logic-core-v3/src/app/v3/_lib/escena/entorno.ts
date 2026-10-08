@@ -93,11 +93,6 @@ export interface Pruebas {
    * la energía bajo el piso con más brillo y más velocidad, para comparar con el producto.
    */
   readonly energia: 'intensa' | 'no'
-  /**
-   * [PULIDO 2] 5 · cómo se llega al CTA del final desde «Seis razones» (`no`: el de hoy, el producto). Las de PULIDO 1
-   * (`a|b|c|d`) se borraron, rechazadas.
-   */
-  readonly cta: VarianteDelCta | 'no'
 }
 
 /**
@@ -111,16 +106,14 @@ export interface Pruebas {
  * `encastre=desvanece` se borró: abajo de 1024 el final corre detrás del pie, sin escenario (`escena/final/`). 2:
  * `vuelta=corta` se borró: en un viaje el final vuelve con el rebobinado de P2 comprimido (`recorridoDelFinal.ts`). 4:
  * `brillo=suave|fuerte` se borró: el brillo de P1 se rehízo como la luz que sale de abajo (`final/luzDeAbajo.ts`). [PULIDO 3]
- * A1: `velo=escena` se borró (el velo del DOM quedó aprobado) y `chispas=si` pasó a `energia=inestable`.
+ * A1: `velo=escena` se borró (el velo del DOM quedó aprobado) y `chispas=si` pasó a `energia=inestable`. [PULIDO 3B] B0:
+ * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
+ * borró: `cruce` es el producto.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', cta: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'cta'] as const
-
-/** [PULIDO 2] 5 · las transformaciones del CTA del final (`ctaDelFinal/variantes.ts`), cada una función pura del scroll. */
-export const VARIANTES_DEL_CTA = ['capas', 'relevo', 'giro', 'cruce', 'tipo'] as const
-export type VarianteDelCta = (typeof VARIANTES_DEL_CTA)[number]
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -134,7 +127,6 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     energia: unoDe<'intensa'>(['intensa'], valor('energia')),
-    cta: unoDe<VarianteDelCta>(VARIANTES_DEL_CTA, valor('cta')),
   }
 }
 

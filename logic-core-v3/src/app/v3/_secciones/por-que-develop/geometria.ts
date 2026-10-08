@@ -58,7 +58,13 @@ export const LUGAR_DEL_CTA_SVH = Math.round((ARRIBA_DEL_LOGO_EN_EL_CTA_SVH - 50 
  */
 // [NOCTURNO FINAL] D3 · una pantalla entera (era 70): el CTA queda solo y centrado en la pantalla cuando llega.
 export const ALTO_DEL_CTA_EN_LISTA_SVH = 100
-export const ESTILO_DE_LA_LISTA = { '--alto-del-cta-en-lista': `${String(ALTO_DEL_CTA_EN_LISTA_SVH)}svh` } as CSSProperties
+/**
+ * [PULIDO 3B] B1 · con movimiento reducido en escritorio, dónde va el CTA quieto en la sección (svh desde su arriba): en la
+ * mitad de la pose C (con la cámara en el CTA y el logo abajo; antes iba en la última pantalla, la del alejamiento al pie,
+ * con el logo en el centro: el CTA quedaba encima).
+ */
+export const ARRIBA_DEL_CTA_QUIETO_SVH = Math.round(50 * (TIEMPOS_DEL_FINAL.cta.llega + TIEMPOS_DEL_FINAL.cta.hasta))
+export const ESTILO_DE_LA_LISTA = { '--alto-del-cta-en-lista': `${String(ALTO_DEL_CTA_EN_LISTA_SVH)}svh`, '--arriba-del-cta-quieto': `${String(ARRIBA_DEL_CTA_QUIETO_SVH)}svh` } as CSSProperties
 
 /** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
 export const ESTILO_DEL_ESCENARIO = {
@@ -102,16 +108,12 @@ export const VENTANA_DE_LA_SUBIDA_DE_LA_FRASE: Ventana = { desde: progresoDelPin
 /** La frase y los valores se levantan juntos cuando la cámara empieza a subir a C. */
 export const VENTANA_DE_LA_LEVANTADA: Ventana = { desde: progresoDelPin(valores.hasta), hasta: progresoDelPin(valores.hasta + 0.4) }
 
-/** El CTA llega mientras se levantan, y queda armado antes de que la cámara termine de subir. */
-export const VENTANA_DEL_CTA: Ventana = { desde: progresoDelPin(valores.hasta + 0.2), hasta: progresoDelPin(cta.llega - 0.15) }
-/** El destacado y el botón, un poco después de la frase del CTA. */
-export const VENTANA_DEL_DESTACADO: Ventana = { desde: progresoDelPin(valores.hasta + 0.35), hasta: progresoDelPin(cta.llega) }
-
 /**
- * [PULIDO 2] 5 · con `?cta=`, la transformación de «Seis razones» al CTA: del fin de los valores a la llegada del CTA (la
- * misma pantalla que hoy ocupan la levantada y la llegada del CTA). Su progreso es función del pin (`ctaDelFinal/variantes.ts`).
+ * [PULIDO 2] 5 · la transformación de «Seis razones» al CTA: del fin de los valores a la llegada del CTA. Su progreso es
+ * función del pin (`ctaDelFinal/transformacion.ts`). [PULIDO 3B] B1 · del producto (las ventanas del CTA de antes se fueron
+ * con él) y en tres pantallas, no una: hasta `TIEMPOS_DEL_FINAL.cta.armado`.
  */
-export const VENTANA_DE_LA_TRANSFORMACION: Ventana = { desde: progresoDelPin(valores.hasta), hasta: progresoDelPin(cta.llega) }
+export const VENTANA_DE_LA_TRANSFORMACION: Ventana = { desde: progresoDelPin(valores.hasta), hasta: progresoDelPin(cta.armado) }
 
 /** Cuánto sube lo que se levanta, en `svh`. */
 export const SUBIDA_DE_LA_LEVANTADA_SVH = 12

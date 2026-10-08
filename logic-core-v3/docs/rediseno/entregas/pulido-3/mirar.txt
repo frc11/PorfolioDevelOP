@@ -18,3 +18,8 @@ B0 · La energía (versión final; escritorio y teléfono)
    desde el primer momento). Después: el piso vivo todo el tiempo, corrientes que corren por las juntas y se cruzan,
    racimos de bloques que suben y bajan (y dejan escapar más luz al subir), el filo del logo encendido y un pulso del logo
    con cada onda. Para comparar: /v3?energia=intensa (más brillo y más velocidad).
+
+B1 · El CTA del final («cruce», del producto; escritorio y teléfono)
+   /v3 → Por qué develOP. Después de los valores, «Seis razones para elegirnos» se va hacia atrás; allá se reordena y se da
+   vuelta en «ESTE SITIO EMPEZÓ CON UNA CHARLA. EL TUYO TAMBIÉN.», que vuelve adelante; después llega «HABLANOS» saliendo de
+   adentro de su «O». Más lento que antes (unos 5–6 gestos en escritorio). Ya no hay ?cta=.

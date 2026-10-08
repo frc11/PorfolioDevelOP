@@ -184,7 +184,8 @@ const bien = (t: ReturnType<typeof tramos>): boolean => t.armadaEsLaVentana && t
 const deAhora = tramos(T.frase, VENTANA_DE_LA_FRASE, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.desde, VENTANA_DE_LA_LEVANTADA)
 afirmar(bien(deAhora), 'la frase se arma en al menos media pantalla de scroll (su ventana ES `frase.armada`), queda quieta UNA pantalla entera y se va en al menos 0,4', `llegada ${deAhora.llegada.toFixed(2)} · quieta ${deAhora.quieta.toFixed(2)} · salida ${deAhora.salida.toFixed(2)} pantallas`)
 controlPositivo('el detector VE la de RETOQUE PANEL T3 (llegaba en 0,45 y quedaba quieta 0,55)', tramos({ armada: 0.45, hasta: 1 }, { hasta: 0.45 / PIN }, 1 / PIN, { desde: 2 / PIN, hasta: 2.4 / PIN }), bien)
-afirmar(PANTALLAS_DE_POR_QUE_DEVELOP === 5 && pantallasDe(seccionDe('por-que-develop').alto) === 5 && T.valores.llega - T.frase.hasta >= 0.8 - EPS, '  la sección declara las cinco pantallas (la tabla mueve la escena) y la cámara baja a los valores en no menos de 0,8 pantallas (el techo de velocidad de s23)', seccionDe('por-que-develop').alto)
+// [PULIDO 3B] B1 · cambió por pedido: siete pantallas (la transformación al CTA corre en tres, no en una; REGLA DE ALTURAS).
+afirmar(PANTALLAS_DE_POR_QUE_DEVELOP === 7 && pantallasDe(seccionDe('por-que-develop').alto) === 7 && T.valores.llega - T.frase.hasta >= 0.8 - EPS, '  la sección declara sus siete pantallas (la tabla mueve la escena) y la cámara baja a los valores en no menos de 0,8 pantallas (el techo de velocidad de s23)', seccionDe('por-que-develop').alto)
 // La cámara: quieta en A desde que la sección asoma hasta que la frase termina su tramo quieto.
 const k = (nombre: string): { readonly at: number; readonly pose: Record<string, number> } | undefined => CHOREO_KEYFRAMES.find((x) => x.name === nombre)
 const A = k('frase')
@@ -605,10 +606,13 @@ controlPositivo('el detector VE la escena que no escribe el despinte', escenaD2.
 
 // D3 · Por qué develOP sin valores escritos a mano (s6-tokens fallaba desde FINAL 3: un `70svh` y una grilla `auto 1fr`).
 const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-const sinAMano = (c: string): boolean => !/\b70svh\b|grid-rows-\[auto_1fr\]/.test(c) && /<div data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\} className="flex min-h-\[var\(--alto-del-cta-en-lista\)\]/.test(c) && (c.match(/<div className="@container min-h-0 flex-1">/g) ?? []).length === 2
+// [PULIDO 3B] B1 · el CTA de la lista es el de la transformación (`CtaTransformado.tsx`): su contenido, una pantalla clavada.
+const ctaD3 = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
+const sinAMano = (c: string): boolean => !/\b70svh\b|grid-rows-\[auto_1fr\]/.test(c) && /<div ref=\{caja\} data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\}/.test(ctaD3) && ctaD3.includes('<div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)]') && (c.match(/<div className="@container min-h-0 flex-1">/g) ?? []).length === 2
 // [NOCTURNO FINAL] D3 · cambió por pedido: el CTA de la lista ocupa una pantalla entera (era 70 svh), centrado.
 afirmar(sinAMano(porQueD3) && ALTO_DEL_CTA_EN_LISTA_SVH === 100, 'el alto del CTA de la lista sale de la geometría (una pantalla, desde NOCTURNO FINAL D3) y las columnas de valores son flex (el ancho de la frase arriba y el contenedor, el resto): s6-tokens vuelve a verde (medido: columnas de 626 px de alto con su contenedor entero a 1440; CTA de 590,8 px a 390×844)')
-controlPositivo('el detector VE el 70svh escrito a mano', porQueD3.replace('min-h-[var(--alto-del-cta-en-lista)]', 'min-h-[70svh]'), sinAMano)
+controlPositivo('el detector VE el 70svh escrito a mano', `${porQueD3}
+const escrito = 'min-h-[70svh]'`, sinAMano)
 
 
 // D4 · los libros de la biblioteca: el hover y el foco en la misma regla (la paridad de s3-foco), sin perder el foco sin hover.

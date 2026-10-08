@@ -334,8 +334,10 @@ export const PANTALLAS_DE_NUMEROS = 2
  * valores y el CTA (`escena/finalDelRecorrido.ts` reparte los tiempos sobre ellas).
  * [PASADA FINAL] A3 · eran tres de pin: la frase se arma en 0,6 pantallas y se queda quieta
  * UNA entera antes de subir, y lo demás corre una pantalla después.
+ * [PULIDO 3B] B1 · siete: la transformación al CTA corre en tres pantallas (era una: «que se disfrute»). REGLA DE ALTURAS:
+ * más recorrido es más altura; el ancla de la sección no cambia (`ANCLA_DE_POR_QUE_DEVELOP`, declarada).
  */
-export const PANTALLAS_DE_POR_QUE_DEVELOP = 5
+export const PANTALLAS_DE_POR_QUE_DEVELOP = 7
 
 /**
  * ⚠️ SERVICIOS SE ESTIRÓ: su alto ya NO es `pasos × 100svh`.

@@ -48,6 +48,8 @@ export const VALORES: readonly Valor[] = [
 /** El CTA del tiempo C. El destino queda en `#contacto` hasta que se defina. */
 export const CTA = {
   frase: 'Este sitio empezó con una charla.',
+  /** [PULIDO 3B] B1 · la frase en sus dos mitades (en el teléfono, dos renglones; desde escritorio, uno): la escena las arma en 3D. */
+  fraseEnDos: ['Este sitio empezó', 'con una charla.'],
   destacado: 'El tuyo también.',
   rotulo: 'Hablanos',
   destino: '#contacto',

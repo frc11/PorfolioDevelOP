@@ -3,8 +3,7 @@
 import { motion, useMotionValue, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-import { CtaEnlace } from '../../_componentes/chrome/Cta'
-import { MedirLaLista, PliegueDelValor, useVarianteDelCta } from '../../_componentes/ctaDelFinal/CtaDelFinal'
+import { MedirLaLista } from '../../_componentes/ctaDelFinal/CtaDelFinal'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
@@ -16,14 +15,11 @@ import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/core
 import { CanalDeUnaPieza, ConInercia } from '../_contrato/canales'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
 import { ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
-import { CTA, FRASE, NOMBRE_DE_SECCION, VALORES, type Valor } from './contenido'
+import { FRASE, NOMBRE_DE_SECCION, VALORES, type Valor } from './contenido'
 import {
   ESTILO_DEL_ESCENARIO,
-  ESTILO_DE_LA_LISTA,
   SUBIDA_DE_LA_FRASE_SVH,
   SUBIDA_DE_LA_LEVANTADA_SVH,
-  VENTANA_DEL_CTA,
-  VENTANA_DEL_DESTACADO,
   VENTANA_DE_LA_FRASE,
   VENTANA_DE_LA_TRANSFORMACION,
   VENTANA_DE_LA_LEVANTADA,
@@ -102,34 +98,29 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   const subeLaFrase = useTransform(useTramo(pin, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE), (u) => `${(-u * SUBIDA_DE_LA_FRASE_SVH).toFixed(3)}svh`)
   const levantada = useTramo(pin, VENTANA_DE_LA_LEVANTADA)
   const y = useTransform(levantada, (u) => `${(-u * SUBIDA_DE_LA_LEVANTADA_SVH).toFixed(3)}svh`)
-  // [RETOQUE 3D] B5 · la misma subida, para el título de volumen (fracción del cuadro): sube con los valores y no se cruzan.
-  const corrida = useTransform(levantada, (u) => (-u * SUBIDA_DE_LA_LEVANTADA_SVH) / 100)
   const opacity = useTransform(levantada, [0, 1], [1, 0])
   // [NOCTURNO] A1 · cada columna de valores va en el plano de su mitad de la frase de volumen.
   const valoresDeLaIzquierda = useAcompananteDelTitulo<HTMLDivElement>('frase-izquierda')
   const valoresDeLaDerecha = useAcompananteDelTitulo<HTMLDivElement>('frase-derecha')
-  // [PULIDO 2] 5 · con `?cta=`, la transformación al CTA (función del pin): la frase no se levanta (la transformación la toma
-  // en su lugar), salvo en `capas`, donde se va como hoy y lo que no se levanta son los valores (se pliegan).
-  const variante = useVarianteDelCta()
+  // [PULIDO 2] 5 · la transformación al CTA (función del pin): la frase no se levanta (la transformación la toma en su lugar).
+  // [PULIDO 3B] B1 · la del producto (sin bandera).
   const transformacion = useTramo(pin, VENTANA_DE_LA_TRANSFORMACION)
-  const relevada = variante !== null && variante !== 'capas'
-  const pliegue = variante === 'capas' ? transformacion : null
   return (
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
       <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
         {NOMBRE_DE_SECCION}
       </h2>
-      <motion.div className="absolute inset-0" style={pliegue === null ? { y, opacity } : undefined}>
+      <motion.div className="absolute inset-0" style={{ y, opacity }}>
         {/* La frase, partida a los dos lados del logo. Se anuncia entera y en orden. [INTERFAZ 1] T1: con la inercia de los títulos. */}
         <motion.p data-pieza="frase-del-final" className="absolute inset-0" style={{ y: subeLaFrase }}>
           <span className="absolute top-1/2 right-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: relevada ? null : levantada, corrida: relevada ? null : corrida }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.izquierda} volumen={{ id: 'frase-izquierda', llegada: frase, salida: null, corrida: null }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>{' '}
           <span className="absolute top-1/2 left-[calc(50%+var(--hueco-de-la-frase))] -translate-y-1/2">
             <CanalDeUnaPieza progreso={frase} patron="P5" como="span" className="block" llegadaDe="por-que-develop">
-              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: relevada ? null : levantada, corrida: relevada ? null : corrida }} /></ConInercia>
+              <ConInercia><FraseDelFinal texto={FRASE.derecha} volumen={{ id: 'frase-derecha', llegada: frase, salida: null, corrida: null }} /></ConInercia>
             </CanalDeUnaPieza>
           </span>
         </motion.p>
@@ -143,7 +134,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(0, 3).map((valor, i) => (
-                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} pliegue={pliegue} />
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
               ))}
             </ul>
           </div>
@@ -153,13 +144,13 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(3).map((valor, i) => (
-                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} pliegue={pliegue} />
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
               ))}
             </ul>
           </div>
         </div>
       </motion.div>
-      {variante === null ? <CtaEnElEscenario pin={pin} /> : <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />}
+      <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />
     </div>
   )
 }
@@ -183,15 +174,13 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
   )
 }
 
-function ValorEnElEscenario({ valor, pin, indice, pliegue }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number; readonly pliegue: MotionValue<number> | null }): React.JSX.Element {
+function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number }): React.JSX.Element {
   const tramo = useLlegadaDeDia(pin, ventanaDelValor(indice), 'abajo')
-  const pieza = <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" espesor />
   return (
     <li>
-      {/* [RETOQUE 3D] 3G · cada valor llega desde un lugar distinto de la sala (CSS 3D; antes, P5). [PULIDO 2] 5 · con
-          `?cta=capas`, se pliega hacia la escena. */}
+      {/* [RETOQUE 3D] 3G · cada valor llega desde un lugar distinto de la sala (CSS 3D; antes, P5). */}
       <ValorEnVolumen progreso={tramo} indice={indice}>
-        {pliegue === null ? pieza : <PliegueDelValor indice={indice} progreso={pliegue}>{pieza}</PliegueDelValor>}
+        <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" espesor />
       </ValorEnVolumen>
     </li>
   )
@@ -203,9 +192,6 @@ function ValorEnElEscenario({ valor, pin, indice, pliegue }: { readonly valor: V
  * aire y el botón (su caja mide ~1,8 veces su letra, con el subrayado): a 1440 × 900, 56 y 100 px; en una pantalla baja, menos.
  */
 const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)/5))]'
-/** [FINAL 3] «Hablanos» más grande: el mismo botón, con su tipografía redefinida. [NOCTURNO FINAL] D3 · al display. */
-const BOTON_GRANDE = '[--text-cuerpo:var(--text-fluido-display-xl)] escritorio:[--text-cuerpo:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'
-
 /**
  * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
  * al final del recorrido del escenario y al día): medido, el anillo se dibujaba alrededor de nada (1,0:1, sólo el cielo).
@@ -220,41 +206,6 @@ function llevarAlCta(cta: HTMLElement, llegada: number): void {
   window.scrollTo({ top: Math.round(fin), behavior: 'instant' })
 }
 
-function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
-  const frase = useLlegadaDeDia(pin, VENTANA_DEL_CTA, 'abajo')
-  const destacado = useLlegadaDeDia(pin, VENTANA_DEL_DESTACADO, 'abajo')
-  // Mientras no llegó, el botón no se puede tocar aunque esté en su lugar.
-  const pointerEvents = useTransform(destacado, (u) => (u > 0.5 ? 'auto' : 'none'))
-  return (
-    <motion.div
-      data-pieza="cta-del-final"
-      // [FINAL 2] Nunca encima del logo: de día es negro y no se leía. [NOCTURNO FINAL] D3 · centrado en la pantalla, con
-      // el logo abajo (la pose C).
-      className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
-      style={{ pointerEvents }}
-      onFocus={(e) => llevarAlCta(e.currentTarget, destacado.get())}
-    >
-      <CanalDeUnaPieza progreso={frase} patron="P5">
-        <Titular nivel="titulo-xl" como="p" className={TAMANO_DEL_CTA}>
-          {CTA.frase}
-        </Titular>
-      </CanalDeUnaPieza>
-      {/* Destacado por el peso, como el «let's create it» de nk. */}
-      <CanalDeUnaPieza progreso={destacado} patron="P5">
-        <Titular nivel="titulo-xl" como="p" peso="fuerte" className={TAMANO_DEL_CTA}>
-          {CTA.destacado}
-        </Titular>
-      </CanalDeUnaPieza>
-      {/* [BASE] El botón abajo, solo y más grande, sin fondo: sólo el texto y su subrayado, como el resto. */}
-      <CanalDeUnaPieza progreso={destacado} patron="P5" className="mt-[var(--spacing-6)]">
-        <div className={BOTON_GRANDE}>
-          <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />
-        </div>
-      </CanalDeUnaPieza>
-    </motion.div>
-  )
-}
-
 /**
  * LA RAMA SIN ESCENARIO: abajo de 1024, y con menos movimiento en cualquier ancho. La
  * frase en dos renglones, los valores en lista (dos columnas en tablet) y el CTA. Pide la
@@ -262,8 +213,7 @@ function CtaEnElEscenario({ pin }: { readonly pin: MotionValue<number> }): React
  * ventana visible; sin movimiento, queda quieta.
  */
 function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
-  // [PULIDO 2] 5 · con `?cta=`, la transformación al CTA: su progreso es la caja del CTA entrando en la pantalla.
-  const variante = useVarianteDelCta()
+  // [PULIDO 2] 5 · la transformación al CTA: su progreso es la caja del CTA entrando en la pantalla. [PULIDO 3B] B1 · del producto.
   const cajaDelCta = useRef<HTMLDivElement>(null)
   const transformacion = useMotionValue(0)
   const entrada = useMotionValue(0)
@@ -301,39 +251,15 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
             {VALORES.map((valor) => (
               <li key={valor.clave}>
                 <Llega>
-                  {variante === 'capas' ? (
-                    <PliegueDelValor indice={VALORES.indexOf(valor)} progreso={transformacion}>
-                      <PiezaDeValor valor={valor} />
-                    </PliegueDelValor>
-                  ) : (
-                    <PiezaDeValor valor={valor} />
-                  )}
+                  <PiezaDeValor valor={valor} />
                 </Llega>
               </li>
             ))}
           </ul>
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
-          {variante !== null && <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />}
-          {variante !== null ? (
-            <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} conFrase={variante !== 'capas'} />
-          ) : (
-            <div data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className="flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">
-              <Llega>
-                <Titular nivel="titulo-xl" como="p">
-                  {CTA.frase}
-                </Titular>
-                <Titular nivel="titulo-xl" como="p" peso="fuerte">
-                  {CTA.destacado}
-                </Titular>
-              </Llega>
-              <Llega>
-                <div className={BOTON_GRANDE}>
-                  <CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />
-                </div>
-              </Llega>
-            </div>
-          )}
+          <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
+          <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />
         </CoreografiaEnTodoAncho>
       </div>
     </ContenidoDeSeccion>

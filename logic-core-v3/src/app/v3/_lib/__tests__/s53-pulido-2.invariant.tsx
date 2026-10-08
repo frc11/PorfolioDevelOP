@@ -18,45 +18,17 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 import * as THREE from 'three'
-import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 
-import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
-import ARCHIVO_100 from '../../_fuentes/archivo-100-cta.json'
-import CHIVO_400 from '../../_fuentes/chivo-400-titulos.json'
-import CHIVO_100 from '../../_fuentes/chivo-100-cta.json'
-import { TIPOGRAFIA_DEL_TITULAR } from '../../_secciones/hero/geometria'
 
 import type { Curva } from '../motion/curvas'
 import { AMANECER_EN_EL_VIAJE, completoDelViaje } from '../escena/amanecer/linea'
-import { ESPESOR_DE_LAS_CAPAS } from '../escena/ctaDelFinal/armadoDelCta'
-import { capasDelCta, letrasConDosPesos } from '../escena/ctaDelFinal/letras'
-import {
-  CAPAS_DEL_CTA,
-  LISTA_DEL_CTA,
-  TRANSFORMACION,
-  cajaDe,
-  ctaTocable,
-  entradaEnLaLista,
-  llegadaDelTexto,
-  nuevaPose,
-  parejas,
-  plegadoDelValor,
-  posesDe,
-  progresoEnLaLista,
-  zoomDelCruce,
-  type CajaEnPantalla,
-  type EscenaDeLaTransformacion,
-  type LetraEnPantalla,
-  type Pose,
-  type PosesDeLaTransformacion,
-} from '../escena/ctaDelFinal/variantes'
 import { ENCUADRE_DEL_PIE, encuadreEntreLasCajas, type Caja, type EncuadreEnPantalla } from '../escena/final/encuadreDelPie'
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { LUZ_DE_ABAJO } from '../escena/final/luzDeAbajo'
 import { crearElPlanoDeLaLuz } from '../escena/final/planoDeLaLuz'
 import { SOMBRA_EN_LA_CAIDA, camaraDelFinal, distanciaParaElAncho, sombraConFundido, sombraDeLaPose } from '../escena/final/recorridoDelFinal'
 import { TECLADO, pasoDelTeclado, tecladoQuieto, type EstadoDelTeclado, type LecturaDelTeclado } from '../escena/final/teclado'
-import { ENTORNO, VARIANTES_DEL_CTA, entornoPedido, type VarianteDelCta } from '../escena/entorno'
+import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { PISO_VIVO, SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
@@ -481,283 +453,21 @@ afirmar(sinChispas(finalDelPie4), '  las chispas se borraron (B0 de PULIDO 3B): 
 controlPositivo('  el detector VE las chispas de vuelta', `${finalDelPie4}\nconst chispas = crearLasChispas()`, sinChispas)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · El CTA del final desde «Seis razones» (`?cta=capas|relevo|giro|cruce|tipo`): cada una función pura del scroll')
+titulo('5 · El CTA del final desde «Seis razones»: ganó `cruce` (PULIDO 3B · B1) y las otras cuatro se borraron')
 
-// La escena de prueba: los dos renglones de la frase a los dos lados del logo (escenario a 1440 × 900) y el CTA abajo, al
-// centro, en su cuerpo; los seis valores, tres a cada lado. Las cuentas son las de la escena (`ctaDelFinal/variantes.ts`).
-const letrasDe5 = (texto: string, x0: number, y: number, cuerpo: number, renglon: number): LetraEnPantalla[] => [...texto].map((c, i) => ({ x: x0 + i * 0.55 * cuerpo, y, cuerpo, ancho: 0.5 * cuerpo, alto: 0.7 * cuerpo, renglon, letra: c }))
-const ORIGEN5 = [...letrasDe5('Seisrazones', 150, 200, 64, 0), ...letrasDe5('paraelegirnos', 900, 200, 64, 1)]
-const DESTINO5 = letrasDe5('HABLANOS', 520, 520, 96, 0)
-const VALORES5: CajaEnPantalla[] = [0, 1, 2, 3, 4, 5].map((k) => ({ x: k < 3 ? 260 : 1180, y: 330 + (k % 3) * 160, ancho: 220, alto: 90 }))
-const ESCENA5: EscenaDeLaTransformacion = { origen: ORIGEN5, destino: DESTINO5, parejas: parejas(ORIGEN5, DESTINO5), valores: VALORES5, pantalla: { ancho: 1440, alto: 900 }, armado: 0.27 * 900 }
-const posesNuevas5 = (): PosesDeLaTransformacion => ({ origen: ORIGEN5.map(nuevaPose), destino: DESTINO5.map(nuevaPose), capas: Array.from({ length: CAPAS_DEL_CTA }, nuevaPose) })
-type Poses5 = typeof posesDe
-const foto5 = (f: Poses5, v: VarianteDelCta, p: number, s: PosesDeLaTransformacion = posesNuevas5()): string => {
-  f(v, p, ESCENA5, s)
-  return JSON.stringify([s.origen, s.destino, s.capas], (_, x: unknown) => (typeof x === 'number' ? Math.round(x * 1e4) / 1e4 : x))
-}
-const PASOS5 = Array.from({ length: 901 }, (_, i) => i / 900)
-
-// PURA Y REVERSIBLE: el mismo progreso da las mismas poses, vengan de donde vengan (una barrida hacia adelante y otra hacia
-// atrás con las MISMAS poses reusadas), y la misma llamada dos veces da lo mismo: nada guarda estado.
-const puraBien = (f: Poses5): boolean => VARIANTES_DEL_CTA.every((v) => {
-  const s = posesNuevas5()
-  const ida = PASOS5.map((p) => foto5(f, v, p, s))
-  const vuelta = [...PASOS5].reverse().map((p) => foto5(f, v, p, s)).reverse()
-  return ida.every((x, i) => x === vuelta[i] && x === foto5(f, v, PASOS5[i]))
-})
-afirmar(puraBien(posesDe), 'las cinco son funciones puras del progreso (que es función del scroll): reversibles, iguales a cualquier velocidad y en cualquier dirección (F2)', VARIANTES_DEL_CTA.join(' · '))
-let contador5 = 0
-controlPositivo('el detector VE una variante con memoria (el siguiente cuadro depende del anterior)', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  contador5 += 1
-  s.destino[0].x += contador5 % 2
-}) as Poses5, puraBien)
-
-// LOS EXTREMOS: en 0 la frase en su lugar (el título de volumen la deja ahí) y el CTA sin dibujar; en 1 el CTA en su lugar,
-// derecho y de su cuerpo, y la frase sin dibujar. En `capas` la frase se va como hoy (sus títulos) y el CTA es la pila.
-const enSuLugar5 = (q: Pose, l: LetraEnPantalla, conZ: boolean): boolean => Math.abs(q.x - l.x) < 0.5 && Math.abs(q.y - l.y) < 0.5 && (!conZ || Math.abs(q.z) < 0.5) && Math.abs(Math.sin(q.rx)) < 1e-6 && Math.abs(Math.cos(q.rx) - 1) < 1e-6 && Math.abs(Math.cos(q.ry) - 1) < 1e-6 && Math.abs(q.escala - l.cuerpo) < 1e-6 && q.aparece === 1 && q.fino === 0
-const extremosBien = (f: Poses5): boolean => VARIANTES_DEL_CTA.every((v) => {
-  const s0 = posesNuevas5()
-  f(v, 0, ESCENA5, s0)
-  const s1 = posesNuevas5()
-  f(v, 1, ESCENA5, s1)
-  const caja = cajaDe(DESTINO5)
-  if (v === 'capas') return s0.capas.every((q) => q.aparece === 0) && s0.origen.every((q) => q.aparece === 0) && s1.capas.every((q) => Math.abs(q.x - caja.x) < 0.5 && Math.abs(q.y - caja.y) < 0.5 && Math.abs(q.z) < 0.5 && q.rx === 0 && Math.abs(q.ry) < 1e-9 && q.aparece === 1)
-  return s0.origen.every((q, i) => enSuLugar5(q, ORIGEN5[i], true)) && s0.destino.every((q) => q.aparece === 0) && s1.destino.every((q, j) => enSuLugar5(q, DESTINO5[j], true)) && s1.origen.every((q) => q.aparece === 0)
-})
-afirmar(extremosBien(posesDe), '  en 0, la frase en su lugar y el CTA sin dibujar; en 1, el CTA en su lugar (derecho, de su cuerpo, en el peso de siempre) y la frase sin dibujar (en `capas`, la pila entera)')
-controlPositivo('  el detector VE un CTA que termina corrido', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  for (const q of s.destino) q.y += p >= 1 ? 30 : 0
-  for (const q of s.capas) q.y += p >= 1 ? 30 : 0
-}) as Poses5, extremosBien)
-
-// SIN SALTOS: de un px de scroll al siguiente (la ventana mide ~900 px), una pieza que se ve en los dos cuadros y está en la
-// pantalla no se mueve más que esto (px). (En `cruce`, lo que se agranda alrededor de la «o» sale de la pantalla rápido:
-// fuera de ella no cuenta.)
-const SALTO5 = 40
-const sinSaltos = (f: Poses5): boolean => VARIANTES_DEL_CTA.every((v) => {
-  let antes: PosesDeLaTransformacion | null = null
-  for (const p of PASOS5) {
-    const s = posesNuevas5()
-    f(v, p, ESCENA5, s)
-    if (antes !== null) {
-      const previo: PosesDeLaTransformacion = antes
-      for (const k of ['origen', 'destino', 'capas'] as const) {
-        const salto = s[k].some((q, i) => {
-          const a = previo[k][i]
-          const adentro = (r: Pose): boolean => r.x > 0 && r.x < 1440 && r.y > 0 && r.y < 900 && r.aparece > 0
-          return adentro(q) && adentro(a) && Math.hypot(q.x - a.x, q.y - a.y) > SALTO5
-        })
-        if (salto) return false
-      }
-    }
-    antes = s
-  }
-  return true
-})
-afirmar(sinSaltos(posesDe), '  sin saltos: de un px de scroll al siguiente ninguna pieza a la vista se mueve más de 40 px', `${String(SALTO5)} px`)
-controlPositivo('  el detector VE un CTA que salta a su lugar en la mitad', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  if (p > 0.5) for (const [j, q] of s.destino.entries()) Object.assign(q, { x: DESTINO5[j].x, y: DESTINO5[j].y })
-}) as Poses5, sinSaltos)
-
-// EL TEXTO QUE ACOMPAÑA AL CTA llega cuando el CTA ya está en su lugar (en las cinco, antes de 0,9): nada le pasa por encima.
-const textoBien = (f: Poses5): boolean => llegadaDelTexto(TRANSFORMACION.texto.desde) === 0 && llegadaDelTexto(1) === 1 && VARIANTES_DEL_CTA.every((v) => [TRANSFORMACION.texto.desde, 0.95].every((p) => {
-  const s = posesNuevas5()
-  f(v, p, ESCENA5, s)
-  const caja = cajaDe(DESTINO5)
-  return v === 'capas' ? s.capas.every((q) => Math.abs(q.y - caja.y) < 1) : s.destino.every((q, j) => Math.abs(q.x - DESTINO5[j].x) < 1 && Math.abs(q.y - DESTINO5[j].y) < 1 && q.aparece === 1)
-}))
-afirmar(textoBien(posesDe), '  el texto que acompaña al CTA («Este sitio empezó con una charla. El tuyo también.») llega recién con el CTA en su lugar', `desde ${String(TRANSFORMACION.texto.desde)}`)
-controlPositivo('  el detector VE un CTA que todavía vuela cuando llega el texto', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p * 0.9, e, s)
-}) as Poses5, textoBien)
-
-// RELEVO: un cartel de aeropuerto en 3D: cada letra de la frase gira sobre X (en cascada de izquierda a derecha) y su cara de
-// atrás es la del CTA (se ven una o la otra, nunca las dos, y el cambio es de canto); las que sobran se acuestan y se van.
-const relevoBien = (f: Poses5): boolean => {
-  const giraEn = ORIGEN5.map((_, i) => PASOS5.find((p) => {
-    const s = posesNuevas5()
-    f('relevo', p, ESCENA5, s)
-    return Math.abs(s.origen[i].rx) > 1e-4
-  }) ?? 2)
-  const enOrden = ORIGEN5.map((l, i) => [l.x, giraEn[i]] as const).sort((a, b) => a[0] - b[0]).every(([, t], i, arr) => i === 0 || t >= arr[i - 1][1])
-  const pareja = new Map(ESCENA5.parejas.map((i, j) => [i, j]))
-  let unaUOtra = true
-  let seAcuestan = true
-  for (const p of PASOS5) {
-    const s = posesNuevas5()
-    f('relevo', p, ESCENA5, s)
-    for (const [i, j] of pareja) {
-      const [o, d] = [s.origen[i], s.destino[j]]
-      if (o.aparece > 0 && d.aparece > 0) unaUOtra = false
-      if (d.aparece > 0 && p < 0.6 && Math.abs(Math.cos(d.rx)) > 0.999 && Math.cos(d.rx) < 0) unaUOtra = false
-    }
-    if (p === 1) seAcuestan = ORIGEN5.every((_, i) => pareja.has(i) || (Math.abs(s.origen[i].rx + Math.PI / 2) < 1e-6 && s.origen[i].aparece === 0))
-  }
-  return enOrden && unaUOtra && seAcuestan && new Set(ESCENA5.parejas).size === DESTINO5.length && ESCENA5.parejas.every((i) => i >= 0)
-}
-afirmar(relevoBien(posesDe), '  relevo · cada letra gira sobre X en cascada de izquierda a derecha y en su cara de atrás está la del CTA (una o la otra, el cambio de canto); las que sobran se acuestan y se van')
-controlPositivo('  el detector VE las dos caras a la vez (la del CTA aparece antes del canto)', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  for (const q of s.destino) if (p > 0.1) q.aparece = 1
-}) as Poses5, relevoBien)
-
-// GIRO: la frase se junta en un cartel de dos caras que gira sobre Y; en la mitad del giro todo está de canto (una línea:
-// cada letra en el eje del cartel) y del otro lado está el CTA.
-const giroBien = (f: Poses5): boolean => {
-  const G = TRANSFORMACION.giro
-  const medio = PASOS5.find((p) => p >= G.desde + G.gira / 2) ?? 1
-  const s = posesNuevas5()
-  f('giro', medio, ESCENA5, s)
-  const eje = cajaDe(DESTINO5).x
-  // La cara de atrás está corrida el espesor del cartel: de canto, las dos son la misma línea gruesa.
-  const deCanto = [...s.origen, ...s.destino].every((q) => Math.abs(Math.cos(q.ry)) < 0.04 && Math.abs(q.x - eje) < 8 + G.espesor * DESTINO5[0].cuerpo)
-  const s1 = posesNuevas5()
-  f('giro', G.desde + G.gira, ESCENA5, s1)
-  return deCanto && s1.destino.every((q) => q.aparece === 1 && Math.abs(Math.cos(q.ry) - 1) < 1e-6) && s1.origen.every((q) => q.aparece === 0)
-}
-afirmar(giroBien(posesDe), '  giro · la frase se junta en un cartel de dos caras que gira sobre Y: en la mitad del giro sólo se ve el canto (una línea) y del otro lado está el CTA')
-controlPositivo('  el detector VE un cartel que se funde en vez de girar', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  for (const q of [...s.origen, ...s.destino]) q.ry = 0
-}) as Poses5, giroBien)
-
-// CRUCE: la frase se extruye hacia la cámara (su espesor crece, con un tope en la pantalla) y se agranda alrededor de la
-// contraforma de la «o» hasta que la cubre entera; el CTA se ve recién cuando la contraforma lo contiene, y la frase se va
-// cuando la cámara pasó del otro lado.
-const cruceBien = (f: Poses5): boolean => {
-  const X = TRANSFORMACION.cruce
-  const o = ORIGEN5.findIndex((l) => l.letra === 'o')
-  const radio = X.contraforma * ORIGEN5[o].ancho
-  const caja = cajaDe(DESTINO5)
-  let monotono = true
-  let previo = 0
-  let revelaBien = true
-  let tope = true
-  for (const p of PASOS5) {
-    const s = posesNuevas5()
-    f('cruce', p, ESCENA5, s)
-    const zoom = s.origen[o].escala / ORIGEN5[o].cuerpo
-    if (zoom < previo - 1e-9) monotono = false
-    previo = zoom
-    if (s.destino.some((q) => q.aparece > 0) && radio * zoom < 0.8 * Math.hypot(caja.ancho, caja.alto) / 2) revelaBien = false
-    if (s.origen.some((q, i) => q.aparece > 0 && 0.14 * q.escala * q.profundidad > 0.14 * ORIGEN5[i].cuerpo * X.profundo * X.topeDelEspesor + 1e-6)) tope = false
-  }
-  const s15 = posesNuevas5()
-  f('cruce', X.extruye, ESCENA5, s15)
-  return monotono && revelaBien && tope && s15.origen.every((q) => q.profundidad >= X.profundo - 1e-6) && zoomDelCruce(1, radio, ESCENA5.pantalla) * radio >= X.cubre * Math.hypot(1440, 900)
-}
-afirmar(cruceBien(posesDe), '  cruce · la frase se extruye hacia la cámara y se agranda alrededor de la contraforma de la «o» hasta cubrir la pantalla; el CTA se ve recién cuando la contraforma lo contiene')
-controlPositivo('  el detector VE el CTA a la vista antes de que la «o» lo contenga', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  for (const q of s.destino) q.aparece = Math.max(q.aparece, p > 0.2 ? 1 : 0)
-}) as Poses5, cruceBien)
-
-// TIPO: la fuente ES variable (Archivo y Chivo, `wght` de 100 a 900): los dos pesos de cada glifo tienen los mismos
-// contornos (comandos iguales, verificado en sus JSON), así que la misma triangulación sirve para los dos y la escena
-// deforma el peso vértice a vértice. Cada letra se afina hasta el 100 mientras viaja, se cambia por la del CTA en ese peso
-// (el cambio, con las dos en el hilo) y la del CTA engorda hasta el suyo.
-const comandos5 = (datos: { readonly glyphs: Readonly<Record<string, { readonly o?: string } | undefined>> }, c: string): string => (datos.glyphs[c]?.o ?? '').split(' ').filter((x) => /^[a-z]$/.test(x)).join('')
-const mismosContornos = [...new Set('HABLANOS')].every((c) => comandos5(ARCHIVO_700, c) !== '' && comandos5(ARCHIVO_700, c) === comandos5(ARCHIVO_100, c)) && [...new Set('Seisrazonesparaelegirnos')].every((c) => comandos5(CHIVO_400, c) !== '' && comandos5(CHIVO_400, c) === comandos5(CHIVO_100, c))
-const conDosPesos = letrasConDosPesos(new Font(ARCHIVO_700 as FontData), new Font(ARCHIVO_100 as FontData), 'HABLANOS', null)
-const morfoBien = conDosPesos.letras.length === 8 && conDosPesos.letras.every((l) => l.geometria.morphAttributes.position?.[0]?.count === l.geometria.getAttribute('position').count)
-const tipoBien = (f: Poses5): boolean => {
-  let cambioFino = true
-  for (const p of PASOS5) {
-    const s = posesNuevas5()
-    f('tipo', p, ESCENA5, s)
-    ESCENA5.parejas.forEach((i, j) => {
-      const [o, d] = [s.origen[i], s.destino[j]]
-      if (o.aparece > 0.05 && o.aparece < 0.95 && (o.fino < 0.95 || d.fino < 0.95)) cambioFino = false
-    })
-  }
-  return cambioFino && mismosContornos && morfoBien
-}
-afirmar(tipoBien(posesDe), '  tipo · la fuente es variable: los dos pesos con los mismos contornos (la escena deforma el peso vértice a vértice); cada letra se afina hasta el 100, se cambia por la del CTA en ese peso y engorda hasta el suyo', `${String(conDosPesos.letras.length)} letras con su peso 100 como objetivo`)
-controlPositivo('  el detector VE el cambio de letra en el peso grueso (sin afinarse)', ((v: VarianteDelCta, p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
-  posesDe(v, p, e, s)
-  for (const q of [...s.origen, ...s.destino]) q.fino = 0
-}) as Poses5, tipoBien)
-for (const l of conDosPesos.letras) l.geometria.dispose()
-
-// CAPAS: los seis valores se pliegan en el DOM (hasta quedar de canto, 90° sobre X) y de cada pliegue sale una capa del CTA
-// (de canto, del ancho del valor) que vuela a la pila; apiladas, las seis capas SON la extrusión del CTA (sus espesores
-// cubren el espesor entero, sin solaparse).
-const capasDelCta5 = capasDelCta(new Font(ARCHIVO_700 as FontData), 'HABLANOS', null, CAPAS_DEL_CTA, ESPESOR_DE_LAS_CAPAS)
-const tramos5 = capasDelCta5.letras.map((l) => {
-  l.geometria.computeBoundingBox()
-  const b = l.geometria.boundingBox ?? new THREE.Box3()
-  return [b.min.z, b.max.z] as const
-})
-// (Con el bisel de cada capa, que asoma apenas por sus dos caras.)
-const pilaBien = tramos5.length === CAPAS_DEL_CTA && tramos5.every(([a, b], k) => Math.abs(b + (k * ESPESOR_DE_LAS_CAPAS) / CAPAS_DEL_CTA) < 0.008 && Math.abs(a + ((k + 1) * ESPESOR_DE_LAS_CAPAS) / CAPAS_DEL_CTA) < 0.008)
-for (const l of capasDelCta5.letras) l.geometria.dispose()
-const capasBien = (f: Poses5, plegado: typeof plegadoDelValor): boolean => {
-  let saleDelPliegue = true
-  const vista = VALORES5.map(() => false)
-  for (const p of PASOS5) {
-    const s = posesNuevas5()
-    f('capas', p, ESCENA5, s)
-    s.capas.forEach((q, k) => {
-      if (q.aparece > 0 && plegado(k, p) < 0.9) saleDelPliegue = false
-      // El primer cuadro en que se ve: de canto y en el lugar de su valor.
-      if (q.aparece > 0 && !vista[k] && (Math.abs(Math.cos(q.rx)) > 0.05 || Math.abs(q.x - VALORES5[k].x) > 1 || Math.abs(q.y - VALORES5[k].y) > 1)) saleDelPliegue = false
-      if (q.aparece > 0) vista[k] = true
-    })
-  }
-  return saleDelPliegue && plegado(0, 0) === 0 && plegado(5, 1) === 1 && pilaBien
-}
-afirmar(capasBien(posesDe, plegadoDelValor), '  capas · cada valor se pliega hasta quedar de canto y de su pliegue sale, de canto, una capa del CTA; apiladas, las seis capas son su extrusión (cubren el espesor sin solaparse)', `${String(CAPAS_DEL_CTA)} capas de ${String(ESPESOR_DE_LAS_CAPAS / CAPAS_DEL_CTA)} em`)
-controlPositivo('  el detector VE capas que salen antes de que su valor se pliegue', [posesDe, (k: number, p: number) => plegadoDelValor(k, p) * 0.5] as const, ([f, g]: readonly [Poses5, typeof plegadoDelValor]) => capasBien(f, g))
-
-// LA FUENTE Y EL MATERIAL: el CTA va en Archivo, la del registro 1 del hero (`font-display`, el mismo JSON de volumen que su
-// titular), extruido con el material de los títulos de volumen (el satinado, el costado de día y el filo del dibujo de noche).
-const armado5 = sinComentarios(leer('_lib/escena/ctaDelFinal/armadoDelCta.ts'))
-const material5 = sinComentarios(leer('_lib/escena/ctaDelFinal/material.ts'))
-const domDelCta5 = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
-const fuenteBien = (dom: string, armado: string, material: string): boolean =>
-  /const FUENTE_DEL_CTA = 'font-display font-fuerte uppercase/.test(dom) && TIPOGRAFIA_DEL_TITULAR.startsWith('font-display ') && TIPOGRAFIA_DEL_TITULAR.includes('font-fuerte uppercase') &&
-  armado.includes("import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'") && /letrasDelRenglon\(FUENTES\.archivo, texto, posiciones\)/.test(armado) && [...'HABLANOS'].every((c) => comandos5(ARCHIVO_700, c) !== '') &&
-  material.includes('roughness: SATINADO.roughness') && material.includes('costadoDeDiaGlsl(EMISION_EN_LA_NOCHE)') && material.includes('conLogoDeNoche(material, contorno') && material.includes('conElAmanecer(material)')
-afirmar(fuenteBien(domDelCta5, armado5, material5), '  el CTA en la fuente del registro 1 del hero (Archivo, en mayúsculas), extruido con el material de los títulos (satinado, costado de día, filo de noche)')
-controlPositivo('  el detector VE el CTA en la Chivo de la frase', [domDelCta5, armado5.replace('letrasDelRenglon(FUENTES.archivo, texto, posiciones)', 'letrasDelRenglon(FUENTES.chivo, texto, posiciones)'), material5] as const, ([d, a, m]: readonly [string, string, string]) => fuenteBien(d, a, m))
-
-// EL CLIC, EL HOVER Y SIN BANDERA: el CTA abre Contacto (la transición de siempre, por la delegación del chrome) y se toca
-// recién cuando llegó; el hover sólo con el mouse (con el dedo no hay hover). Sin `?cta=`, el CTA de hoy en las dos ramas,
-// la escena no monta nada y la frase de volumen no se releva.
-const porQue5 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-const perezoso5 = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
-const clicBien = (dom: string): boolean => dom.includes('data-abre-contacto="panel"') && dom.includes('href={destino}') && /ctaTocable\(p\) \? 'auto' : 'none'/.test(dom) && ctaTocable(0.96) === false && ctaTocable(0.97) && dom.includes("if (e.pointerType === 'mouse') CTA_EN_VIVO.hover = true")
-afirmar(clicBien(domDelCta5), '  el clic abre Contacto con su transición de siempre (y se toca recién cuando llegó); hover sólo con el mouse (con el dedo, no)')
-controlPositivo('  el detector VE un hover que también prende con el dedo', domDelCta5.replace("if (e.pointerType === 'mouse') CTA_EN_VIVO.hover = true", 'CTA_EN_VIVO.hover = true'), clicBien)
-const deHoyBien = (f: string, m: string): boolean =>
-  ENTORNO.pruebas.cta === 'no' && entornoPedido('producto,cta=a').pruebas.cta === 'no' && f.includes('{variante === null ? <CtaEnElEscenario pin={pin} /> : <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />}') &&
-  f.includes('<CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} />') && f.includes('<CtaEnlace href={CTA.destino} rotulo={CTA.rotulo} mezcla />') && f.includes('{variante !== null ? (') && !f.includes('abreElContacto={variante') &&
-  m.includes('const conElCta = varianteDelCta() !== null') && /\{conElCta && \(\s*<Suspense fallback=\{null\}>\s*<EscenaDelCta /.test(m)
-afirmar(deHoyBien(porQue5, perezoso5), '  sin `?cta=`, el CTA de hoy en las dos ramas (su botón va al pie, como antes) y la escena no monta nada; `?cta=a` (de PULIDO 1) ya no existe')
-controlPositivo('  el detector VE la escena del CTA montada siempre', perezoso5.replace(/\{conElCta && \(\s*<Suspense fallback=\{null\}>\s*<EscenaDelCta /, '{(\n<Suspense fallback={null}>\n<EscenaDelCta '), (m: string) => deHoyBien(porQue5, m))
-
-// EL TELÉFONO Y EL MOVIMIENTO REDUCIDO: en la lista el bloque del CTA mide dos pantallas con su contenido clavado; la copia
-// de la frase aparece cuando el logo ya bajó y la transformación corre en lo que queda (medido a 390 × 844). Con movimiento
-// reducido, el estado final directo (1, sin recorrido) y, en escritorio, en la última pantalla de la sección: con la cámara
-// en la del CTA, el logo queda abajo y no lo pisa.
-const ctaLista5 = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
-const listaBien = (dom: string, f: string): boolean =>
-  progresoEnLaLista(LISTA_DEL_CTA.desde) === 0 && progresoEnLaLista(1) === 1 && entradaEnLaLista(LISTA_DEL_CTA.desde) === 1 && entradaEnLaLista(0) === 0 &&
-  dom.includes("offset: ['start start', 'end end']") && dom.includes('progreso.set(quieto ? 1 : progresoEnLaLista(r))') &&
-  f.includes(['min-h-[calc(var(--alto-del-cta-en-lista)', '*2)]'].join('')) && f.includes('className="sticky top-0 flex') && f.includes(['escritorio:', 'absolute escritorio:', 'inset-x-0 escritorio:', 'bottom-0'].join('')) && f.includes('className={quieto ? CON_MOVIMIENTO_REDUCIDO')
-afirmar(listaBien(domDelCta5, ctaLista5), '  en el teléfono, clavado: la frase aparece con el logo ya abajo y se transforma en lo que queda; con movimiento reducido, el estado final directo, sin el CTA encima del logo')
-controlPositivo('  el detector VE el estado final animado con movimiento reducido', [domDelCta5.replace('progreso.set(quieto ? 1 : progresoEnLaLista(r))', 'progreso.set(progresoEnLaLista(r))'), ctaLista5] as const, ([d, f]: readonly [string, string]) => listaBien(d, f))
-
-// LO DE PULIDO 1 (`?cta=a|b|c|d`, rechazado) no queda: ni sus archivos, ni la placa que salía del punto del clic, ni el
-// escalón del piso, ni la trama del portal.
-const sinP17 = (f: (r: string) => boolean): boolean => ['_lib/escena/ctaDelFinal/PiezaDelCta.tsx', '_lib/escena/ctaDelFinal/enElPiso.ts', '_lib/escena/ctaDelFinal/estado.ts', '_lib/escena/ctaDelFinal/portal.ts'].every((r) => !f(r)) &&
-  [fuentes(V3).map((r) => readFileSync(r, 'utf8')).join('\n')].every((todo) => !/data-cta-desde-el-punto|viajeDesdeElPunto|conElEscalon|conElPortal|LetrasDelCta|data-cta-variante/.test(todo))
-afirmar(sinP17((r) => existsSync(`${V3}/${r}`)), '  las variantes de PULIDO 1 (`a|b|c|d`) no dejan código: ni sus archivos, ni la placa desde el punto del clic, ni el escalón del piso, ni el portal de la trama')
-controlPositivo('  el detector VE un archivo de PULIDO 1 que quedó', (r: string) => r.endsWith('estado.ts'), sinP17)
+// [PULIDO 3B] B1 · cambió por pedido: `?cta=cruce` pasó a ser el producto (sin bandera) y `capas`, `relevo`, `giro` y `tipo`
+// se BORRARON con su código y sus banderas. Las afirmaciones de PULIDO 2 sobre las cinco (funciones puras del scroll, sus
+// gestos, la fuente del hero con el material de los títulos, el clic a Contacto, el teléfono, el movimiento reducido) se
+// reemplazan por ésta, que fija que ya no existen; lo que el CTA del producto hace lo fija `s54-pulido-3` B1.
+const ctaDir5 = `${V3}/_lib/escena/ctaDelFinal`
+const delCta5 = readdirSync(ctaDir5).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${ctaDir5}/${a}`, 'utf8'))).join('\n')
+const delDom5 = ['_componentes/ctaDelFinal/CtaDelFinal.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/por-que-develop/CtaTransformado.tsx', '_lib/escena/entorno.ts'].map((r) => sinComentarios(leer(r))).join('\n')
+const sinVariantes = (escena: string, dom: string): boolean =>
+  !existsSync(`${ctaDir5}/variantes.ts`) && !existsSync(`${V3}/_fuentes/archivo-100-cta.json`) && !existsSync(`${V3}/_fuentes/chivo-100-cta.json`) &&
+  !/\bcapas\b|\brelevo\b|plegadoDelValor|PliegueDelValor|letrasConDosPesos|capasDelCta|VARIANTES_DEL_CTA|VarianteDelCta|varianteDelCta|useVarianteDelCta|CtaEnElEscenario/.test(`${escena}\n${dom}`) &&
+  !('cta' in ENTORNO.pruebas) && !('cta' in entornoPedido('producto,cta=giro').pruebas)
+afirmar(sinVariantes(delCta5, delDom5), 'las variantes `capas|relevo|giro|tipo` y el CTA de antes no dejan código (ni archivos, ni fuentes finas, ni banderas): el CTA es el del producto')
+controlPositivo('el detector VE la variante `relevo` de vuelta', [`${delCta5}\nfunction relevo() {}`, delDom5] as const, ([e, d]: readonly [string, string]) => sinVariantes(e, d))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · Pendientes de PULIDO 1: la sombra del logo entra con fundido al salir del hueco; «CONTACTO» a 768 en AA')

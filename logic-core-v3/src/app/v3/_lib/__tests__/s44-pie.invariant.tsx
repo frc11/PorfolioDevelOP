@@ -175,10 +175,11 @@ controlPositivo('el detector VE el DOM apagado antes de que el 3D esté', bloque
 const deTexto = ['_secciones/cierre/Cierre.tsx', '_secciones/cierre/ColumnasDelPie.tsx', '_secciones/cierre/PiezasDeContacto.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
 afirmar((deTexto.match(/<TextoDelPie/g) ?? []).length === 4 && /<TextoDelPie className="max-escritorio:hidden">\s*<Logotipo \/>/.test(deTexto), '  en 3D también el logotipo, el titular, los rótulos de columna y la línea legal (`TextoDelPie`)')
 
-// Abajo de 1025, el pie plano; el de antes, con su bandera.
+// Abajo de 1025, el pie plano; el de antes, con su bandera. [PULIDO 3B] B1 · el montaje ya no se corta abajo de 1025 (el CTA
+// del final va en todo ancho): el pie de volumen sigue sólo desde escritorio.
 const modo = sinComentarios(leer('_lib/pie3d/registro.ts'))
 const montaje = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
-afirmar(/return escritorio && delEntorno !== 'no' \? delEntorno : 'plano'/.test(modo) && /if \(entornoDeLaEscena\(\)\.titulos === 'no' \|\| \(!escritorio && !conElCta\)\) return null/.test(montaje) && /const conElPie = entornoDeLaEscena\(\)\.pruebas\.pie !== 'antes'/.test(montaje) && /\{escritorio && conElPie && \(/.test(montaje), '  abajo de 1025, el pie plano de siempre (el módulo 3D ni se descarga)')
+afirmar(/return escritorio && delEntorno !== 'no' \? delEntorno : 'plano'/.test(modo) && /if \(entornoDeLaEscena\(\)\.titulos === 'no'\) return null/.test(montaje) && /const conElPie = entornoDeLaEscena\(\)\.pruebas\.pie !== 'antes'/.test(montaje) && /\{escritorio && conElPie && \(/.test(montaje), '  abajo de 1025, el pie plano de siempre (el módulo 3D ni se descarga)')
 afirmar(PRUEBAS_APAGADAS.pie === 'no' && ENTORNO.pruebas.pie === 'no' && entornoPedido('producto,pie=antes').pruebas.pie === 'antes' && /if \(modo === 'antes'\) return <BloqueDeAntes/.test(bloque), '  `?pruebas=pie=antes`: el pie de antes de RONDA 2 (las teclas de CSS 3D), para comparar')
 const cierre = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
 afirmar(/const progreso = volumen \? null : deLaSeccion/.test(cierre) && /\{volumen && <RedesDelPie \/>\}/.test(cierre) && /\{volumen && <LineaLegal \/>\}/.test(cierre) && /\{!volumen && \(/.test(cierre), '  en 3D, las redes y la línea legal suben a la columna izquierda (más abajo que la base del logo quedarían bajo el piso) y el DOM no hace su llegada')

@@ -367,9 +367,10 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // Del ancla en adelante los keyframes caen donde dice `finalDelRecorrido.ts`, sobre la
   // recta del tramo `cierre`: cada tiempo llega a su pose y se SOSTIENE mientras la
   // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
-  // `s23-final` afirma que estos literales son los de ese archivo.
+  // `s23-final` afirma que estos literales son los de ese archivo. [PULIDO 3B] B1 · con siete pantallas (la transformación al
+  // CTA corre en tres): los mismos tiempos de la sección, en otra parte de la recta.
   {
-    at: 0.8997,
+    at: 0.8862,
     name: 'frase · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -377,14 +378,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
   {
     // B · más cerca y desde abajo: un contrapicado de 11° (el piso admite −3,584 a 16).
-    at: 0.9233,
+    at: 0.9031,
     name: 'valores',
     ease: 'shift',
     turn: 'literal',
     pose: { angleDeg: 360, height: -3.2, distance: 16, frameX: 0, frameY: 0 },
   },
   {
-    at: 0.9292,
+    at: 0.9073,
     name: 'valores · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -393,14 +394,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   {
     // C · la cámara sube hasta quedar derecha y frontal. [NOCTURNO FINAL] D3 · y se aleja con el logo abajo: el CTA, al centro.
     // [PULIDO 1] P17-A · desde arriba, sin el techo del domo en cuadro; el dolly-in leve al llegar va por tiempo (el rig).
-    at: 0.9587,
+    at: 0.9284,
     name: 'cta',
     ease: 'shift',
     turn: 'literal',
     pose: { angleDeg: 360, height: 4.5, distance: 31, frameX: 0, frameY: -1 },
   },
   {
-    at: 0.9705,
+    at: 0.9789,
     name: 'cta · sostén',
     ease: 'linear',
     turn: 'literal',
@@ -409,7 +410,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   {
     // D → E · el alejamiento de golpe, en un cuarto de pantalla, y el pie abierto: el logo
     // al 19 % del alto, centrado. Es la excepción con nombre al techo de velocidad.
-    at: 0.9779,
+    at: 0.9842,
     name: 'pie',
     ease: 'arrive',
     turn: 'literal',

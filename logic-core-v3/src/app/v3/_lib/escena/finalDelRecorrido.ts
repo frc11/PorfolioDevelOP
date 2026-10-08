@@ -47,7 +47,9 @@ export const TIEMPOS_DEL_FINAL = {
   // 1,6; [RETOQUE PANEL] T3 la dejaba hasta 1 con la llegada en 0,45). Los valores y el CTA corren detrás.
   frase: { llega: -1, armada: 0.6, hasta: 1.6 },
   valores: { llega: 2.4, hasta: 2.6 },
-  cta: { llega: 3.6, hasta: PANTALLAS_DE_POR_QUE_DEVELOP - 1 },
+  // [PULIDO 3B] B1 · la cámara llega a C donde llegaba (3,6); la transformación al CTA termina en `armado` (5,6): corre en
+  // tres pantallas (era una) y su mayor parte, con la cámara ya en C (el logo abajo: la frase se arma arriba de él).
+  cta: { llega: 3.6, armado: 5.6, hasta: PANTALLAS_DE_POR_QUE_DEVELOP - 1 },
   // El alejamiento D es el camino de `cta.hasta` a `pie.llega`: un cuarto de pantalla.
   pie: { llega: PANTALLAS_DE_POR_QUE_DEVELOP - 1 + 0.25, hasta: PANTALLAS_DE_POR_QUE_DEVELOP },
 } as const

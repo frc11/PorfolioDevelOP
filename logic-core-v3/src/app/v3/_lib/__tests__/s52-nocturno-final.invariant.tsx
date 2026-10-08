@@ -776,12 +776,15 @@ const igual = (a: PoseC, b: PoseC): boolean => a.distance === b.distance && a.he
 afirmar(logoAbajo(poseC, ARRIBA_DEL_LOGO_EN_EL_CTA_SVH) && ARRIBA_DEL_LOGO_EN_EL_CTA_SVH === arribaDelLogoEncuadrado(ojoDe(poseC), -1) && keyC.length === 2 && keyC.every((k) => igual(k, poseC)), 'en C la cámara se aleja (de 16 a más del doble; [PULIDO 1] P17-A: desde arriba, con un dolly-in leve por tiempo) y baja el logo contra el borde (`frameY` −1): el logo arranca abajo de la mitad, el lugar del CTA sale de donde el logo queda más grande y la coreografía dice lo mismo', `el logo arranca al ${String(ARRIBA_DEL_LOGO_EN_EL_CTA_SVH)} % del alto; antes, al 26`)
 controlPositivo('el detector VE el logo de antes (centrado, a 16)', { distance: 16, height: 0, frameY: 0 } as PoseC, (p) => logoAbajo(p, arribaDelLogoEncuadrado(p.distance, p.frameY)))
 const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
+// [PULIDO 3B] B1 · el CTA es el de la transformación (`CtaTransformado.tsx`): el mismo centro, el mismo tope del display y la
+// misma pantalla clavada en la lista.
+const ctaD3B = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
 const centrado = (f: string): boolean =>
   f.includes('className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"') &&
-  f.includes("const BOTON_GRANDE = '[--text-cuerpo:var(--text-fluido-display-xl)] escritorio:[--text-cuerpo:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'") &&
-  /<div data-pieza="cta-del-final" style=\{ESTILO_DE_LA_LISTA\} className="flex min-h-\[var\(--alto-del-cta-en-lista\)\] flex-col items-center justify-center gap-\[var\(--spacing-8\)\] text-center">/.test(f) &&
+  f.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'") &&
+  f.includes('<div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">') &&
   ALTO_DEL_CTA_EN_LISTA_SVH === 100 && LUGAR_DEL_CTA_SVH > 30
-afirmar(centrado(porQueD3), '  el CTA al centro de la pantalla en escritorio (en el lugar que deja el logo, que da el tamaño) y en la lista (una pantalla, centrado en todos los anchos); «Hablanos» al display', `lugar ${String(LUGAR_DEL_CTA_SVH)} svh`)
+afirmar(centrado(ctaD3B), '  el CTA al centro de la pantalla en escritorio (en el lugar que deja el logo, que da el tamaño) y en la lista (una pantalla, centrado en todos los anchos); «Hablanos» al display', `lugar ${String(LUGAR_DEL_CTA_SVH)} svh`)
 controlPositivo('  el detector VE el CTA de la lista alineado a la izquierda', porQueD3.replace('flex-col items-center justify-center gap-[var(--spacing-8)] text-center', 'flex-col items-start justify-center gap-[var(--spacing-8)] tablet:items-center tablet:text-center'), centrado)
 
 cerrar('s52-nocturno-final')

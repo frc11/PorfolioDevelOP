@@ -124,10 +124,14 @@ afirmarIgual(
   'trabajos',
   '  y ese ancla es una sección REAL de la tabla, no un destino inventado',
 )
-/** El `<a>` del CTA del final lleva el MISMO `data-pieza` y queda afuera por el ancestro. SPRINT FINAL: se mudó del Cierre a «Por qué develOP». */
+/**
+ * El `<a>` del CTA del final lleva el MISMO `data-pieza` y queda afuera por el ancestro. SPRINT FINAL: se mudó del Cierre a «Por
+ * qué develOP». [PULIDO 3B] B1 · el CTA del final es el de la transformación (`DestinoDelCta`, `data-pieza="cta-en-volumen"`),
+ * ya no un `CtaEnlace`: el deslizamiento tampoco lo toma (no es `data-pieza="cta"`).
+ */
 afirmar(
-  leer('src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx').includes('CtaEnlace'),
-  'el final tiene su propio `CtaEnlace`: el filtro tiene que ser el ancestro, no el `data-pieza`',
+  !leer('src/app/v3/_secciones/por-que-develop/PorQueDevelop.tsx').includes('CtaEnlace') && leer('src/app/v3/_componentes/ctaDelFinal/CtaDelFinal.tsx').includes('data-pieza="cta-en-volumen"'),
+  'el final tiene su propio CTA (el de la transformación, `cta-en-volumen`): no es un `data-pieza="cta"` y el deslizamiento no lo toma',
 )
 afirmar(
   SELECTOR_DEL_CTA_DEL_HERO.startsWith('[data-panel='),

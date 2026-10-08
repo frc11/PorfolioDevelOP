@@ -399,8 +399,10 @@ for (const etiqueta of ['h3', 'h4', 'svg', 'p']) {
   afirmar(EN_QUIENES_SOMOS.some((q) => q.startsWith(etiqueta)), `  y hay al menos un \`${etiqueta}\` adentro`)
 }
 // [FINAL 2] El final: la frase, los seis valores, el CTA y su botón; en el pie, el isotipo, la identidad y las columnas.
+// [PULIDO 3B] B1 · cambió por pedido: el CTA es el de la transformación, clavado y sin la mezcla (PULIDO 2 · 5): mezclan la frase
+// y los seis valores.
 const EN_POR_QUE = CON_MEZCLA(POR_QUE)
-afirmar(EN_POR_QUE.length >= 9, `«Por qué develOP» mezcla ${EN_POR_QUE.length} piezas: la frase, los seis valores, el CTA y su botón`, EN_POR_QUE.join(' · '))
+afirmar(EN_POR_QUE.length >= 7, `«Por qué develOP» mezcla ${EN_POR_QUE.length} piezas: la frase y los seis valores`, EN_POR_QUE.join(' · '))
 const EN_EL_PIE = CON_MEZCLA(PIE_DEL_FINAL)
 // [NOCTURNO FINAL] C4 · cambió por pedido: la columna del contacto ya no mezcla (la mezcla invertía también sus campos, que
 // desaparecían sobre el logo); abajo de 1024 es una tarjeta sólida. Lo afirma s52 C4, con su control.

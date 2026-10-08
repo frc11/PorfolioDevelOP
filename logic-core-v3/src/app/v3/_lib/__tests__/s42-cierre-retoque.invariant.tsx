@@ -101,9 +101,11 @@ titulo('B6 · La frase de Por qué develOP, sin salida')
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [RONDA 2] F2: la frase vuelve a irse con la levantada, función del scroll (s43 · F2).
 // [PULIDO 2] 5 · sin bandera `relevada` es falsa (con `?cta=`, salvo `capas`, la frase la toma la transformación).
-const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*llegadaDe="por-que-develop" \/>/.test(c) && (c.match(/salida: relevada \? null : levantada/g) ?? []).length === 2
-afirmar(sinSalida(porQue), 'las dos mitades se van con la levantada otra vez (sin `queda`), con la llegada y la salida función del scroll')
-controlPositivo('el detector VE la frase que se queda', porQue.replace(/salida: relevada \? null : levantada, /g, ''), sinSalida)
+// [PULIDO 3B] B1 · cambió por pedido: la transformación es del producto: las dos mitades no se van con la levantada, las toma
+// la transformación al CTA (sin `queda`; la llegada, función del scroll).
+const sinSalida = (c: string): boolean => /<TituloDeVolumen [^>]*salida=\{volumen\.salida\}[^>]*llegadaDe="por-que-develop" \/>/.test(c) && (c.match(/salida: null, corrida: null/g) ?? []).length === 2 && !/llegadaDe="por-que-develop" queda/.test(c)
+afirmar(sinSalida(porQue), 'las dos mitades no se van con la levantada: las toma la transformación al CTA (sin `queda`), con la llegada función del scroll')
+controlPositivo('el detector VE la frase que se va con la levantada (como antes del 3B)', porQue.replace(/salida: null, /g, 'salida: levantada, '), sinSalida)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D4 · Las fotos del equipo, como antes')

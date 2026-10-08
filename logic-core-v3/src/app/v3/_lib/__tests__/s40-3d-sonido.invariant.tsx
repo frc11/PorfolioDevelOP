@@ -105,7 +105,8 @@ afirmar(/activo: material !== 'no' && escritorio/.test(dom) && /const escritorio
 afirmar(/calentar\(t\.gl, t\.escena, t\.camara\)\s*for \(const a of nuevos\) if \(armados\.includes\(a\)\) marcarListo\(a\.titulo\.id, true\)/.test(escena3d) && /marcarListo\(a\.titulo\.id, false\)/.test(escena3d), '  la escena avisa «listo» recién compilado y calentado, y lo retira al soltarlo')
 const perezoso = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
 // [PULIDO 2] 5 · el montaje suma el CTA del final con `?cta=` (en cualquier ancho); los títulos siguen sólo desde 1024.
-afirmar(/const escritorio = useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(perezoso) && /if \(entornoDeLaEscena\(\)\.titulos === 'no' \|\| \(!escritorio && !conElCta\)\) return null/.test(perezoso) && /\{escritorio && \(\s*<Suspense fallback=\{null\}>\s*<TitulosDeVolumen \{\.\.\.props\} \/>/.test(perezoso) && /const conElCta = varianteDelCta\(\) !== null/.test(perezoso), '  y abajo de 1024 el módulo de los títulos ni se descarga')
+// [PULIDO 3B] B1 · el CTA del final es del producto: su módulo se monta en cualquier ancho, sin bandera; los títulos, igual.
+afirmar(/const escritorio = useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(perezoso) && /if \(entornoDeLaEscena\(\)\.titulos === 'no'\) return null/.test(perezoso) && /\{escritorio && \(\s*<Suspense fallback=\{null\}>\s*<TitulosDeVolumen \{\.\.\.props\} \/>/.test(perezoso) && /<Suspense fallback=\{null\}>\s*<EscenaDelCta /.test(perezoso), '  y abajo de 1024 el módulo de los títulos ni se descarga (el del CTA del final, sí: hay CTA en todo ancho)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T2 · El sonido: con bandera, apagado en el producto')

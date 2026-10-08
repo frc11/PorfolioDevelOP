@@ -22,9 +22,8 @@ import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
 import { CTA, FRASE, NOMBRE_DE_SECCION, PEDIDO, VALORES } from './contenido'
 import {
-  VENTANA_DEL_CTA,
-  VENTANA_DEL_DESTACADO,
   VENTANA_DE_LA_FRASE,
+  VENTANA_DE_LA_TRANSFORMACION,
   VENTANA_DE_LA_LEVANTADA,
   VENTANA_DE_LA_SUBIDA_DE_LA_FRASE,
   huecoDelLogo,
@@ -87,12 +86,13 @@ afirmarIgual((quieto.match(/<h2\b/g) ?? []).length, 1, '  un solo `h2` por rama'
 afirmarIgual([...quieto.matchAll(/style="[^"]*transform:[^"]*"/g)].length, 0, 'la rama quieta no escribe una sola transformada')
 afirmar([...movido.matchAll(/style="[^"]*transform:[^"]*"/g)].length > 0, '  (control: la del escenario sí, así que el detector no está ciego)')
 afirmar(!/MarcaDeSeccion|CabeceraDeSeccion/.test(FUENTE) && !/data-pieza="marca-de-seccion"/.test(quieto + movido), 'sin el punto azul: la sección ya no monta la marca (la pieza compartida no se borró)')
-afirmar(/href="#contacto"/.test(quieto) && /data-pieza="cta"/.test(quieto), 'el botón es el CTA del sitio, a #contacto')
+// [PULIDO 3B] B1 · el botón es el del CTA con su transformación (en la fuente del registro 1; el de antes se fue).
+afirmar(/href="#contacto"/.test(quieto) && /data-pieza="cta-en-volumen"/.test(quieto), 'el botón es el CTA del final, a #contacto')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Las piezas, sobre los mismos tiempos que la cámara')
 
-const adentro = [VENTANA_DE_LA_FRASE, ...VALORES.map((_, i) => ventanaDelValor(i)), VENTANA_DE_LA_LEVANTADA, VENTANA_DEL_CTA, VENTANA_DEL_DESTACADO]
+const adentro = [VENTANA_DE_LA_FRASE, ...VALORES.map((_, i) => ventanaDelValor(i)), VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_TRANSFORMACION]
 afirmar(adentro.every((v) => v.desde >= 0 && v.hasta <= 1 && v.hasta > v.desde), 'todas las ventanas caen adentro del pin')
 afirmar(VENTANA_DE_LA_FRASE.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.frase.hasta), 'la frase termina de llegar con la cámara quieta en A')
 afirmar(
@@ -110,8 +110,8 @@ afirmar(VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta <= Math.min(...VALORES.map((_, i)
 const enLista = VALORES.map((v) => quieto.indexOf(v.titulo))
 afirmar(enLista.every((x, i) => x > 0 && (i === 0 || x > enLista[i - 1])) && /rango="ventana-visible"/.test(FUENTE), 'abajo de 1024 la lista llega en orden normal, de arriba abajo: orden de lectura y ventana visible')
 afirmar(
-  VENTANA_DE_LA_LEVANTADA.desde === progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta) && VENTANA_DEL_DESTACADO.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.cta.llega),
-  '  la frase y los valores se levantan cuando la cámara empieza a subir, y el CTA queda armado cuando termina',
+  VENTANA_DE_LA_LEVANTADA.desde === progresoDelPin(TIEMPOS_DEL_FINAL.valores.hasta) && VENTANA_DE_LA_TRANSFORMACION.hasta <= progresoDelPin(TIEMPOS_DEL_FINAL.cta.armado) && TIEMPOS_DEL_FINAL.cta.armado <= TIEMPOS_DEL_FINAL.cta.hasta,
+  '  la frase y los valores se levantan cuando la cámara empieza a subir, y el CTA queda armado antes de que se vaya ([PULIDO 3B] B1: la transformación, en tres pantallas)',
 )
 const huecoA = huecoDelLogo(POSES_DEL_FINAL.frase.distance)
 const huecoB = huecoDelLogo(POSES_DEL_FINAL.valores.distance)
@@ -126,8 +126,10 @@ const sinColorPropio = (html: string): boolean => !/text-tinta(-media|-tenue)?\b
 afirmar(sinColorPropio(pieza), 'la pieza de valor no fija color: ni el ícono ni la línea (la línea en tinta media no pasaba AA sobre las sombras de la celosía)')
 controlPositivo('  el chequeo vería una línea en tinta media', '<p class="text-tinta-media">Sin plantillas</p>', sinColorPropio)
 const mezclados = (html: string): number => (html.match(/max-escritorio:mix-blend-difference/g) ?? []).length
-afirmar(mezclados(quieto) >= 9, `la lista (la rama de abajo de 1024) mezcla ${String(mezclados(quieto))} piezas: la frase, los seis valores, el CTA y su botón`)
-afirmar(/data-pieza="cta"[^>]*data-mezcla/.test(quieto) || /data-mezcla[^>]*data-pieza="cta"/.test(quieto), '  y el botón pide la tinta del papel (`data-mezcla`), como el del hero')
+// [PULIDO 3B] B1 · cambió por pedido: el CTA de la lista es el de la transformación, clavado y sin la mezcla (la mezcla se corta
+// adentro de lo clavado y ahí no pasa sobre el logo: PULIDO 2 · 5); mezclan la frase y los seis valores.
+afirmar(mezclados(quieto) >= 7, `la lista (la rama de abajo de 1024) mezcla ${String(mezclados(quieto))} piezas: la frase y los seis valores`)
+afirmar(/data-pieza="cta-en-volumen"/.test(quieto) && !/data-pieza="cta-en-volumen"[^>]*data-mezcla/.test(quieto), '  y el CTA, clavado y en tinta (sin la mezcla), es el de la transformación')
 afirmarIgual(mezclados(movido), 0, 'el escenario (desde 1024) no mezcla: ahí el texto va al costado del logo, sobre la sala clara')
 controlPositivo('  el conteo vería una lista sin mezcla', '<div class="flex">Seis razones</div>', (html: string) => mezclados(html) >= 9)
 
