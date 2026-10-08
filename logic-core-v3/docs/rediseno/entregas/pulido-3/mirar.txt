@@ -23,3 +23,8 @@ B1 · El CTA del final («cruce», del producto; escritorio y teléfono)
    /v3 → Por qué develOP. Después de los valores, «Seis razones para elegirnos» se va hacia atrás; allá se reordena y se da
    vuelta en «ESTE SITIO EMPEZÓ CON UNA CHARLA. EL TUYO TAMBIÉN.», que vuelve adelante; después llega «HABLANOS» saliendo de
    adentro de su «O». Más lento que antes (unos 5–6 gestos en escritorio). Ya no hay ?cta=.
+
+B2 · El pie con el mouse (sólo escritorio, con mouse)
+   /v3, bajá hasta el pie y dejá que termine el encastre. Mové el mouse a un costado: la cámara gira alrededor del logo y se
+   ve la escena en diagonal desde ese lado (unos 17°; arriba y abajo, menos). Sacá el mouse de la ventana: vuelve al centro.
+   Mientras el logo baja y encastra el giro casi no se nota; en el quieto, entero. En el teléfono y la tablet no hace nada.

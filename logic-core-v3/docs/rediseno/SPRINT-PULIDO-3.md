@@ -255,3 +255,36 @@ aprobado (2500 ms). Los viajes a Por qué develOP no cambian: el arranque de la 
 la metamorfosis con letras sintéticas (control: una frase que aparece de golpe sobre el origen), más lento (control: el ritmo
 de PULIDO 2) y el teléfono, el movimiento reducido y el plano detrás del logo (controles: el plano delante; el CTA quieto en la
 última pantalla).
+
+### B2 · El pie: el mouse deja ver la escena en diagonal
+
+**Qué hace.** En escritorio, con puntero fino (`pointer: fine`, y con la escena plena: el umbral de escritorio), al pie el mouse orbita la cámara alrededor
+del logo: ±17° a cada lado y ±6° arriba y abajo (`final/orbitaDelMouse.ts`). Como la cámara del final mira desde arriba, la
+órbita gira en el plano de la pantalla: con el mouse a un costado se ve la escena en diagonal desde ese lado (los costados de
+los bloques y el pie de volumen en perspectiva). Es rígida (la cámara sigue mirando al logo). Las piezas del pie se siguen
+colocando con la cámara sin el mouse: con la órbita se ven giradas, que es lo que se pide.
+
+**El gesto.** Amortiguada: en 0,3 s hace el 63 % del camino. Cuando el mouse sale de la ventana (o la ventana pierde el foco)
+vuelve al centro. El mouse se lee de la ventana y no de r3f: el puntero de r3f sólo se mueve sobre la caja del lienzo, y el pie
+del DOM va encima. Mientras corre la cinemática del encastre (o el rebobinado, o un viaje) se atenúa a 0,2, también con
+amortiguación, y en el quieto (`fin` ≥ 0,999 y el reloj corriendo) vuelve entera. Además va multiplicada por la subida de la
+cámara: al soltar el final no salta.
+
+**El techo del domo.** Extendí el invariante de P17-A a la órbita. Desde la cámara del rig al pie (con el mouse del rig en sus
+dos puntas), en toda la subida y con la órbita en sus nueve puntas, en 1440 × 900 y 1024 × 768, ningún rayo de ningún borde
+del cuadro toca la pared lejana por encima del techo, con aire. Lo más alto queda en 22,4 (el techo está a 40). Miro los cuatro
+bordes: con la órbita, cualquiera puede ser el que mira hacia arriba. Una órbita entera sin la subida llegaría a 28,0, y una de
+20° vertical pasaría el techo: ese es el control.
+
+**El techo de velocidad (s23).** Con el mouse de punta a punta (el peor salto) la órbita gira como mucho a 3,34 alturas de
+cuadro por segundo. El arranque del recorrido, medido como en s23 §3, va a 3,41 por pantalla de scroll. A una pantalla por
+segundo, queda debajo, aunque cerca. No choca.
+
+**El círculo del cuadro del centro** en las capturas es el cursor del sitio: el punto está justo en la posición del mouse
+(720, 450) y el anillo está centrado en él. A la izquierda se ve el mismo cursor, en x ≈ 10.
+
+**Entregable:** `b2-orbita-1440.png` (el mouse a la izquierda, al centro y a la derecha, con el final quieto).
+
+**Las aserciones viejas que cambiaron:** ninguna. Lo nuevo va en `s54-pulido-3` B2: el rango, la amortiguación, la vuelta al
+centro, la atenuación y la entrada sólo en escritorio, con el cableado del cuadro (controles: una órbita sin amortiguar; una de
+±40°). Debajo del techo de s23 (control: sin amortiguar). Sin el domo en cuadro (control: 20° vertical, entera).

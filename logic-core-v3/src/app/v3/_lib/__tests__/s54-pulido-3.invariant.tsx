@@ -12,6 +12,8 @@
  *   B1 · el CTA: gana `cruce` (sin bandera); todo en Archivo y en 3D; la metamorfosis de «Seis razones» en la frase (atrás,
  *        letra por letra, y vuelve adelante); «HABLANOS» con el cruce; tres veces más recorrido (las alturas); el teléfono
  *        sin copia; el movimiento reducido sin el CTA encima del logo; ninguna letra delante del logo.
+ *   B2 · el pie: el mouse orbita la cámara alrededor del logo (escritorio): su rango, amortiguada, de vuelta al centro,
+ *        atenuada en la cinemática, por debajo del techo de velocidad y sin el techo del domo en cuadro.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-3.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-3/mirar.txt`.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -39,6 +41,17 @@ import { BRILLO_DEL_LOGO, BRILLO_DEL_LOGO_GLSL, pulsoDelLogo } from '../escena/f
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA, TRANSFORMACION, nuevaPose, parejasDeLaFrase, posesDe, type EscenaDeLaTransformacion, type LetraEnPantalla, type PosesDeLaTransformacion } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
+import { ORBITA_DEL_MOUSE, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita } from '../escena/final/orbitaDelMouse'
+import { blancoDelFinal, camaraDelFinal, subida } from '../escena/final/recorridoDelFinal'
+import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
+import { aimWithFraming } from '../escena/cameraFraming'
+import { CHOREO_KEYFRAMES } from '../escena/choreography'
+import { MOUSE_HEIGHT_FACTOR } from '../escena/choreographyPhysics'
+import { buildTrack, sampleTrack } from '../escena/choreographySampler'
+import { RITMO_POR_SEGMENTO } from '../escena/recorrido'
+import { makeTrack, speedAt } from '@/app/probe-escena/__tests__/harness'
+import { HAZ } from '../escena/entorno/vivo'
+import { MOIRE_FAR_RADIUS } from '../escena/probeMoire'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { ARRIBA_DEL_CTA_QUIETO_SVH } from '../../_secciones/por-que-develop/geometria'
 import { CTA, FRASE } from '../../_secciones/por-que-develop/contenido'
@@ -426,5 +439,119 @@ const telefonoBien = (t: string, arriba: number, cerca: number): boolean => !/\{
 afirmar(telefonoBien(ctaTransformado, ARRIBA_DEL_CTA_QUIETO_SVH, MARCO_DEL_CTA.cerca), '  sin «Seis razones» repetido en el DOM; con movimiento reducido, el CTA en la pose C (sin el logo encima); ninguna letra delante del logo', `CTA quieto a ${String(ARRIBA_DEL_CTA_QUIETO_SVH)} svh · el plano a ${String(MARCO_DEL_CTA.cerca)} de la distancia del logo`)
 controlPositivo('  el detector VE el plano de PULIDO 2 (delante del logo, 0,8)', [ctaTransformado, ARRIBA_DEL_CTA_QUIETO_SVH, 0.8] as const, ([t, a, c]: readonly [string, number, number]) => telefonoBien(t, a, c))
 controlPositivo('  y el CTA quieto en la última pantalla', [ctaTransformado.replace('escritorio:top-[var(--arriba-del-cta-quieto)]', 'escritorio:bottom-0'), ARRIBA_DEL_CTA_QUIETO_SVH, MARCO_DEL_CTA.cerca] as const, ([t, a, c]: readonly [string, number, number]) => telefonoBien(t, a, c))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B2 · El pie: el mouse orbita la cámara alrededor del logo y deja ver la escena en diagonal (escritorio)')
+
+// EL RANGO Y EL GESTO: hasta 15–20° a cada lado y 6° arriba y abajo; amortiguada (~0,3 s: en ese tiempo hace ~63 % del camino);
+// con el mouse fuera de la ventana vuelve al centro; mientras corre la cinemática (o rebobina, o viaja) se atenúa a 0,2 y en el
+// quieto vuelve entera. En el teléfono y la tablet, nada (sólo con puntero fino y desde escritorio).
+type Paso = typeof pasoDeLaOrbita
+const orbitaBien = (paso: Paso, rango: { readonly horizontal: number; readonly vertical: number }, c: string): boolean => {
+  const o = { ...nuevaOrbita(), deja: 1 }
+  for (let t = 0; t < 0.3 - 1e-9; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
+  const aLos03 = o.h / rango.horizontal
+  for (let t = 0; t < 3; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
+  const llega = Math.abs(o.h - rango.horizontal) < 0.01 && Math.abs(o.v - rango.vertical) < 0.01
+  for (let t = 0; t < 1.5; t += 1 / 60) paso(o, null, true, 1 / 60)
+  const vuelve = Math.abs(o.h) < 0.01 * rango.horizontal && Math.abs(o.v) < 0.01 * rango.vertical
+  for (let t = 0; t < 3; t += 1 / 60) paso(o, { x: -1, y: 0 }, false, 1 / 60)
+  const atenuada = Math.abs(o.h) <= 0.21 * rango.horizontal
+  return rango.horizontal >= 15 && rango.horizontal <= 20 && rango.vertical > 0 && rango.vertical <= 6 && aLos03 > 0.55 && aLos03 < 0.7 && llega && vuelve && atenuada &&
+    c.includes("pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)") &&
+    c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * sube, s.orbita.v * sube)') &&
+    c.includes("conMouse: !angosto && !estatico && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches")
+}
+afirmar(orbitaBien(pasoDeLaOrbita, ORBITA_DEL_MOUSE, cuadro), 'la órbita del mouse: ±17° y ±6°, amortiguada (~0,3 s), al centro con el mouse afuera, atenuada en la cinemática y entera en el quieto; sólo en escritorio con puntero fino', `±${String(ORBITA_DEL_MOUSE.horizontal)}° · ±${String(ORBITA_DEL_MOUSE.vertical)}° · ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
+const sinAmortiguar: Paso = (o, puntero, entera) => {
+  o.deja = entera ? 1 : ORBITA_DEL_MOUSE.enLaCinematica
+  o.h = puntero === null ? 0 : puntero.x * ORBITA_DEL_MOUSE.horizontal * o.deja
+  o.v = puntero === null ? 0 : puntero.y * ORBITA_DEL_MOUSE.vertical * o.deja
+}
+controlPositivo('el detector VE una órbita sin amortiguar (salta al mouse)', sinAmortiguar, (p: Paso) => orbitaBien(p, ORBITA_DEL_MOUSE, cuadro))
+controlPositivo('  y una de ±40°', pasoDeLaOrbita, (p: Paso) => orbitaBien(p, { horizontal: 40, vertical: 6 }, cuadro))
+
+// EL TECHO DE VELOCIDAD (s23 §3): el recorrido no pasa la velocidad del arranque (su pico en el primer tramo, en alturas de
+// cuadro por pantalla de scroll, medido igual que allá); a una pantalla por segundo, eso por segundo. La órbita, con el mouse
+// de punta a punta (el peor salto), gira como mucho eso.
+const ARRANQUE_DE_S23 = ((): number => {
+  const pista = makeTrack(CHOREO_KEYFRAMES)
+  let m = 0
+  for (let p = 1.5e-3; p <= 0.125 - 1.5e-3; p += 0.125 / 800) {
+    let acumulado = 0
+    let ritmo = RITMO_POR_SEGMENTO[RITMO_POR_SEGMENTO.length - 1].porPantalla
+    for (const r of RITMO_POR_SEGMENTO) {
+      if (p < acumulado + r.progreso) {
+        ritmo = r.porPantalla
+        break
+      }
+      acumulado += r.progreso
+    }
+    m = Math.max(m, speedAt(pista, p) * ritmo)
+  }
+  return m
+})()
+const velocidadDeLaOrbita = (paso: Paso): number => {
+  const o = { ...nuevaOrbita(), deja: 1 }
+  for (let t = 0; t < 3; t += 1 / 60) paso(o, { x: -1, y: -1 }, true, 1 / 60)
+  let maximo = 0
+  for (let t = 0; t < 2; t += 1 / 60) {
+    const antes = { h: o.h, v: o.v }
+    paso(o, { x: 1, y: 1 }, true, 1 / 60)
+    maximo = Math.max(maximo, Math.hypot(o.h - antes.h, o.v - antes.v) * 60)
+  }
+  return maximo / CAMERA_FOV
+}
+afirmar(velocidadDeLaOrbita(pasoDeLaOrbita) <= ARRANQUE_DE_S23, '  y respeta el techo de velocidad de s23: de punta a punta, no gira más rápido que el arranque del recorrido', `${velocidadDeLaOrbita(pasoDeLaOrbita).toFixed(2)} alturas de cuadro por segundo (el techo, ${ARRANQUE_DE_S23.toFixed(2)} a una pantalla por segundo)`)
+controlPositivo('  el detector VE la órbita sin amortiguar (de punta a punta en un cuadro)', sinAmortiguar, (p: Paso) => velocidadDeLaOrbita(p) <= ARRANQUE_DE_S23)
+
+// EL DOMO: se extiende el invariante de P17-A (`s52-pulido-1`) a la órbita del pie. Desde la cámara del rig al pie (con el
+// mouse en sus dos puntas de altura), en toda la subida al cenit y con la órbita en cualquiera de sus puntas, en escritorio
+// (1440 × 900 y 1024 × 768), ningún rayo de NINGÚN borde del cuadro (girada, cualquiera puede ser el que mira arriba) toca la
+// pared lejana por encima del techo del domo, con aire. La órbita va con la subida (`* sube`, como en el cuadro).
+type Escala = (sube: number) => number
+const techoDeLaOrbita = (rango: { readonly horizontal: number; readonly vertical: number }, escala: Escala): number => {
+  const pose = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
+  sampleTrack(buildTrack(CHOREO_KEYFRAMES), 1, pose)
+  const blanco = new THREE.Vector3()
+  const rayo = new THREE.Vector3()
+  let peor = Number.NEGATIVE_INFINITY
+  for (const [ancho, alto] of [[1440, 900], [1024, 768]] as const) {
+    for (const mouse of [-1, 1]) {
+      for (const fin of [0.02, 0.1, 0.2, 0.35, 0.5, 0.7, 0.85, 1]) {
+        for (const h of [-rango.horizontal, 0, rango.horizontal]) {
+          for (const v of [-rango.vertical, 0, rango.vertical]) {
+            const c = new THREE.PerspectiveCamera(CAMERA_FOV, ancho / alto, 0.1, 400)
+            const az = THREE.MathUtils.degToRad(pose.angleDeg)
+            const altura = pose.height + mouse * MOUSE_HEIGHT_FACTOR * pose.distance
+            c.position.set(Math.sin(az) * pose.distance, altura, Math.cos(az) * pose.distance)
+            c.lookAt(0, ORBIT_TARGET_Y, 0)
+            if (pose.frameX !== 0 || pose.frameY !== 0) aimWithFraming(c, c.aspect, 6.86, 4.78, Math.hypot(pose.distance, altura - ORBIT_TARGET_Y), pose.frameX, pose.frameY)
+            c.updateMatrixWorld()
+            blancoDelFinal(fin, blanco)
+            const sube = subida(fin)
+            camaraDelFinal(c, sube, blanco, 0, 0, null)
+            ponerLaOrbita(c, blanco, h * escala(sube), v * escala(sube))
+            for (let i = 0; i <= 16; i += 1) {
+              for (const [x, y] of [[-1 + i / 8, 1], [-1 + i / 8, -1], [1, -1 + i / 8], [-1, -1 + i / 8]] as const) {
+                rayo.set(x, y, 0.5).unproject(c).sub(c.position).normalize()
+                const o = c.position
+                const a = rayo.x * rayo.x + rayo.z * rayo.z
+                const b = 2 * (o.x * rayo.x + o.z * rayo.z)
+                const k = o.x * o.x + o.z * o.z - MOIRE_FAR_RADIUS * MOIRE_FAR_RADIUS
+                peor = Math.max(peor, o.y + ((-b + Math.sqrt(b * b - 4 * a * k)) / (2 * a)) * rayo.y)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return peor
+}
+const conLaSubida: Escala = (sube) => sube
+const domoBien = (rango: { readonly horizontal: number; readonly vertical: number }, escala: Escala): boolean => techoDeLaOrbita(rango, escala) <= HAZ.arriba - 2
+afirmar(domoBien(ORBITA_DEL_MOUSE, conLaSubida), '  el techo del domo no entra en ningún punto del rango (ningún borde del cuadro, en escritorio, en toda la subida y con la órbita en sus puntas)', `lo más alto: ${techoDeLaOrbita(ORBITA_DEL_MOUSE, conLaSubida).toFixed(1)} (el techo, a ${String(HAZ.arriba)}); entera también al pie del rig: ${techoDeLaOrbita(ORBITA_DEL_MOUSE, () => 1).toFixed(1)}`)
+controlPositivo('  el detector VE una órbita de 20° arriba y abajo, entera desde el pie del rig', { horizontal: 17, vertical: 20 }, (r: { readonly horizontal: number; readonly vertical: number }) => domoBien(r, () => 1))
 
 cerrar('s54-pulido-3')

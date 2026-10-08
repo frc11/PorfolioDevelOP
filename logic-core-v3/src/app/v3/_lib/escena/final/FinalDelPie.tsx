@@ -20,6 +20,7 @@ import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { EN_VIVO } from './recorridoDelFinal'
+import { ORBITA_EN_VIVO } from './orbitaDelMouse'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE EN LA ESCENA — va justo después del rig (`OrbitRig` pone la cámara del recorrido en la pose
@@ -116,6 +117,33 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
       FINAL_DEL_BANCO.fijo = null
     }
   }, [logoGroupRef])
+
+  // [PULIDO 3B] B2 · el mouse para la órbita del pie (en escritorio): dónde está, de −1 a 1, y si salió de la ventana. Se lee de la
+  // ventana y no de r3f (su puntero sólo se mueve sobre la caja del lienzo, y el pie del DOM va encima).
+  useEffect(() => {
+    if (angosto || estatico) return undefined
+    const mover = (e: PointerEvent): void => {
+      if (e.pointerType !== 'mouse') return
+      ORBITA_EN_VIVO.x = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1
+      ORBITA_EN_VIVO.y = 1 - (e.clientY / Math.max(1, window.innerHeight)) * 2
+      ORBITA_EN_VIVO.fuera = false
+    }
+    const salir = (e: MouseEvent): void => {
+      if (e.relatedTarget === null) ORBITA_EN_VIVO.fuera = true
+    }
+    const perder = (): void => {
+      ORBITA_EN_VIVO.fuera = true
+    }
+    window.addEventListener('pointermove', mover, { passive: true })
+    document.addEventListener('mouseout', salir)
+    window.addEventListener('blur', perder)
+    return () => {
+      window.removeEventListener('pointermove', mover)
+      document.removeEventListener('mouseout', salir)
+      window.removeEventListener('blur', perder)
+      ORBITA_EN_VIVO.fuera = true
+    }
+  }, [angosto, estatico])
 
   // [RETOQUE DEL ENCASTRE] 1D · los gestos de scroll, antes que Lenis: hacia arriba al fondo rebobinan (`cuadroDelFinal.ts`).
   // [PULIDO 1] P22 · en el teléfono, sólo mientras se ve el pie (PULIDO 2 · 1: ya no hay escenario); quieto, nunca.

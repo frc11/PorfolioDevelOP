@@ -9,6 +9,7 @@ import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { entornoDeLaEscena } from '../entorno'
 import { CAMPO_QUIETO_EN, INTENSA, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
 import { BRILLO_DEL_LOGO, RIM_DE_LA_LUZ, pulsoDelLogo } from './rimDeLaLuz'
+import { ORBITA_EN_VIVO, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita, type EstadoDeLaOrbita } from './orbitaDelMouse'
 import { crearElPozo } from './hueco'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
@@ -97,6 +98,9 @@ export interface EstadoDelFinal {
   readonly estatico: boolean
   /** [PULIDO 1] P22 · abajo de 1024: el encuadre del final es el del teléfono (`distanciaDelFinalAngosto`). */
   readonly angosto: boolean
+  /** [PULIDO 3B] B2 · la órbita del mouse en el pie (en escritorio, con puntero fino: `conMouse`). */
+  readonly orbita: EstadoDeLaOrbita
+  readonly conMouse: boolean
   /** [PULIDO 2] 1 · abajo de 1024, el final con el formulario del pie encima: escribiendo, quieto (`teclado.ts`). */
   readonly teclado: EstadoDelTeclado
   /** [PULIDO 2] 1 · el fondo que valió el último cuadro (abajo de 1024 lo decide el teclado; lo lee el gesto). */
@@ -138,6 +142,8 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     rastro: rastroQuieto(),
     estatico,
     angosto,
+    orbita: nuevaOrbita(),
+    conMouse: !angosto && !estatico && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches,
     teclado: tecladoQuieto(),
     alFondo: false,
     poder: 0,
@@ -165,6 +171,7 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   RIM_DE_LA_LUZ.uPulsoDelLogo.value = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
+  Object.assign(s.orbita, nuevaOrbita())
 }
 
 export interface CuadroDeLaEscena {
@@ -368,6 +375,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const distancia = !s.angosto || !(state.camera instanceof THREE.PerspectiveCamera) ? null : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
   const corrimiento = encuadre === null ? null : { x: (2 * encuadre.cx) / vista.ancho - 1, y: 1 - (2 * encuadre.cy) / vista.alto }
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)
+  // [PULIDO 3B] B2 · en escritorio el mouse orbita la cámara alrededor del logo (atenuada mientras corre la cinemática, rebobina
+  // o viaja; entera en el quieto; al centro con el mouse fuera de la ventana: `orbitaDelMouse.ts`), con la subida: al soltar el final no salta.
+  pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)
+  ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * sube, s.orbita.v * sube)
   // [PULIDO 3] A1 · la sala se oscurece gradual con la expansión de la energía. [PULIDO 3B] B0 · lo que se veía del piso (donde
   // nacían las chispas) se fue con ellas.
   const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value

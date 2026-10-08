@@ -31,3 +31,10 @@ B1 · El CTA del final (PULIDO 3B)
   _secciones/por-que-develop/ (PorQueDevelop.tsx, CtaTransformado.tsx, geometria.ts, contenido.ts), escena/entorno.ts,
   escena/PruebasDeLaEscena.tsx, escena/finalDelRecorrido.ts, _lib/secciones.ts, _fuentes/ y scripts-retoque/fuentes-3d.py.
   Hojas: b1-cta-1440.png, b1-cta-390.png, b1-cta-reducido-1440.png.
+
+B2 · El pie: el mouse deja ver la escena en diagonal (PULIDO 3B)
+  Qué: en escritorio con puntero fino, el mouse orbita la cámara del final alrededor del logo (±17° y ±6°), amortiguada
+  (0,3 s), al centro con el mouse fuera de la ventana, atenuada (0,2) durante la cinemática y entera en el quieto. Sin el
+  techo del domo en ningún punto del rango; debajo del techo de velocidad de s23.
+  Archivos: escena/final/orbitaDelMouse.ts (nuevo), escena/final/cuadroDelFinal.ts, escena/final/FinalDelPie.tsx.
+  Hoja: b2-orbita-1440.png.
