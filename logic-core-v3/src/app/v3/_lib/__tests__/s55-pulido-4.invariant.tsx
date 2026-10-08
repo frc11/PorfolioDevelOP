@@ -9,6 +9,8 @@
  *        ninguna letra delante del logo.
  *   C2 · el encastre: el golpe suena (desde el mismo evento; `?golpe=a|b`; más fuerte que el pulso, sin saturar) y el brillo
  *        pasa del filo del logo al círculo quieto (fuera del oscurecimiento, pulsa con cada onda y fuerte en el golpe).
+ *   C3 · el mouse del pie: ±22° y hasta ±12°, con más ganancia por píxel en vertical; sin el techo del domo y debajo del tope
+ *        de s23 (lo miden `s54` B2, con el rango nuevo).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-4.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-4/mirar.txt`.
  */
 import { execFileSync } from 'node:child_process'
@@ -47,6 +49,7 @@ import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import { CALMA_EN_EL_PISO } from '../escena/final/enElPiso'
 import { CIRCULO_DE_LUZ, LUZ_DEL_CIRCULO_GLSL, pulsoDelCirculo } from '../escena/final/luzDelCirculo'
 import { CORTES_DEL_SPRITE } from '../sonido/sprite'
+import { ORBITA_DEL_MOUSE, gradosVerticales, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/orbitaDelMouse'
 import { SONIDOS } from '../sonido/catalogo'
 import { afirmar, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
 
@@ -314,5 +317,31 @@ const circuloBien = (radio: number, luz: typeof CIRCULO_DE_LUZ, logo: string, pi
 afirmar(circuloBien(CALMA_EN_EL_PISO.radio, CIRCULO_DE_LUZ, luzDelLogoC2, pisoC2, cuadroC2), 'la luz pasó del filo del logo (como era) a todo el círculo quieto: en blanco, con la energía, un pulso con cada onda y más fuerte en el golpe', `luz ${String(CIRCULO_DE_LUZ.base)}, onda +${String(CIRCULO_DE_LUZ.onda)} (${String(CIRCULO_DE_LUZ.ondaS)} s), golpe +${String(CIRCULO_DE_LUZ.golpe)} (${String(CIRCULO_DE_LUZ.golpeS)} s), radio ${String(CIRCULO_DE_LUZ.radio)} u`)
 controlPositivo('el detector VE el logo con el filo de B0', [CALMA_EN_EL_PISO.radio, CIRCULO_DE_LUZ, `${luzDelLogoC2}\n<RimDelLogo />`, pisoC2, cuadroC2] as const, ([a, b, c, d, e]: readonly [number, typeof CIRCULO_DE_LUZ, string, string, string]) => circuloBien(a, b, c, d, e))
 controlPositivo('y un círculo de otro radio que el quieto', [CALMA_EN_EL_PISO.radio + 1, CIRCULO_DE_LUZ, luzDelLogoC2, pisoC2, cuadroC2] as const, ([a, b, c, d, e]: readonly [number, typeof CIRCULO_DE_LUZ, string, string, string]) => circuloBien(a, b, c, d, e))
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C3 · El mouse del pie: más rango, sobre todo vertical')
+
+// EL RANGO: ~±22° a los costados y ±11–12° arriba y abajo. LA GANANCIA POR PÍXEL vertical, claramente mayor que la horizontal (a
+// propósito: la pantalla es más baja que ancha), en 16:10, 4:3 y 16:9; el tope vertical llega antes del borde. Lo escribe el DOM
+// (el alto sobre el ancho de la ventana). El techo del domo y el de velocidad, con este rango, los miden `s54` B2 (el domo desde
+// abajo tampoco entra: simétrico; la velocidad, con el amortiguado subido).
+const finalDelPieC3 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
+type Vertical = (y: number, aspecto: number) => number
+const rangoBien = (O: typeof ORBITA_DEL_MOUSE, vertical: Vertical, dom: string): boolean => {
+  const ganancias = [900 / 1440, 768 / 1024, 1080 / 1920].map((aspecto) => {
+    const dy = 0.02
+    const porPixelV = vertical(dy, aspecto) / (dy * aspecto)
+    const porPixelH = O.horizontal
+    return porPixelV / porPixelH
+  })
+  const o = { ...nuevaOrbita(), deja: 1 }
+  for (let t = 0; t < 10 * O.amortiguaS; t += 1 / 60) pasoDeLaOrbita(o, { x: 1, y: 0.75, aspecto: 900 / 1440 }, true, 1 / 60)
+  return O.horizontal >= 21 && O.horizontal <= 23 && O.vertical >= 11 && O.vertical <= 12 && ganancias.every((g) => g >= 1.4) && Math.abs(vertical(1, 0.625)) === O.vertical &&
+    Math.abs(o.h - O.horizontal) < 0.01 && Math.abs(o.v - O.vertical) < 0.01 && O.amortiguaS > 0.3 && dom.includes('ORBITA_EN_VIVO.aspecto = window.innerHeight / Math.max(1, window.innerWidth)')
+}
+const porPixel = (aspecto: number): string => (gradosVerticales(0.02, aspecto) / (0.02 * aspecto) / ORBITA_DEL_MOUSE.horizontal).toFixed(2)
+afirmar(rangoBien(ORBITA_DEL_MOUSE, gradosVerticales, finalDelPieC3), 'el mouse del pie: ±22° y hasta ±12°; la ganancia por píxel vertical, mayor que la horizontal (y el tope antes del borde); más amortiguada', `vertical/horizontal por píxel: ${porPixel(900 / 1440)} (16:10) · ${porPixel(768 / 1024)} (4:3) · amortiguada ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
+controlPositivo('el detector VE la ganancia de la proporción (la misma por píxel, ±11° en toda la altura)', [ORBITA_DEL_MOUSE, ((y: number, aspecto: number) => Math.max(-1, Math.min(1, y)) * aspecto * ORBITA_DEL_MOUSE.horizontal) as Vertical, finalDelPieC3] as const, ([a, b, c]: readonly [typeof ORBITA_DEL_MOUSE, Vertical, string]) => rangoBien(a, b, c))
 
 cerrar('s55-pulido-4')

@@ -8,8 +8,16 @@ import * as THREE from 'three'
  * Amortiguada (`amortiguaS`) y de vuelta al centro cuando el mouse sale de la ventana. Mientras corre la cinemática del
  * encastre (o el rebobinado, o un viaje) se atenúa (`enLaCinematica`): no pelea con la cámara; en el quieto vuelve entera. En
  * el teléfono y la tablet, nada. El techo del domo nunca entra en el rango (`s54` B2).
+ *
+ * [PULIDO 4] C3 · MÁS RANGO, SOBRE TODO VERTICAL: ±22° a los costados (era 17) y hasta ±12° arriba y abajo (era 6). A lo alto la
+ * pantalla es más corta: a propósito, la ganancia por píxel vertical es `gananciaVertical` veces la horizontal (llega a su tope
+ * antes de llegar al borde, en vez de repartir el rango en la altura). Simétrica: desde abajo el techo del domo tampoco entra
+ * (`s55` C3). Con más rango, más amortiguada (`amortiguaS`, era 0,3): de punta a punta sigue debajo del techo de s23.
  */
-export const ORBITA_DEL_MOUSE = { horizontal: 17, vertical: 6, amortiguaS: 0.3, enLaCinematica: 0.2 } as const
+export const ORBITA_DEL_MOUSE = { horizontal: 22, vertical: 12, gananciaVertical: 1.6, amortiguaS: 0.45, enLaCinematica: 0.2 } as const
+
+/** [PULIDO 4] C3 · el alto sobre el ancho de la ventana si el DOM todavía no lo escribió (el de 1440 × 900). */
+const ASPECTO_DE_SIEMPRE = 900 / 1440
 
 /** Lo que lleva la órbita: dónde va (grados), cuánto la deja la cinemática (0 a 1) y si el mouse salió de la ventana. */
 export interface EstadoDeLaOrbita {
@@ -20,19 +28,31 @@ export interface EstadoDeLaOrbita {
 
 export const nuevaOrbita = (): EstadoDeLaOrbita => ({ h: 0, v: 0, deja: 0 })
 
-/** [PULIDO 3B] B2 · lo que escribe el DOM: dónde está el mouse (de −1 a 1, como el cuadro) y si salió de la ventana (vuelve al centro). */
-export const ORBITA_EN_VIVO = { x: 0, y: 0, fuera: true }
+/**
+ * [PULIDO 3B] B2 · lo que escribe el DOM: dónde está el mouse (de −1 a 1, como el cuadro) y si salió de la ventana (vuelve al
+ * centro). [PULIDO 4] C3 · y el alto sobre el ancho de la ventana (para la ganancia por píxel).
+ */
+export const ORBITA_EN_VIVO = { x: 0, y: 0, fuera: true, aspecto: ASPECTO_DE_SIEMPRE }
+
+/**
+ * [PULIDO 4] C3 · los grados verticales para el mouse en `y` (de −1 a 1) en una ventana de `aspecto` (alto sobre ancho): la
+ * ganancia horizontal por píxel (`horizontal` en medio ancho) por `gananciaVertical`, hasta su tope.
+ */
+export function gradosVerticales(y: number, aspecto: number): number {
+  const O = ORBITA_DEL_MOUSE
+  return Math.max(-O.vertical, Math.min(O.vertical, Math.max(-1, Math.min(1, y)) * aspecto * O.horizontal * O.gananciaVertical))
+}
 
 /**
  * Un paso de la órbita: hacia el mouse (`puntero`, de −1 a 1 en los dos ejes; `null`: sin mouse o afuera, al centro), con la
  * cinemática (`entera`: el final entero, en el quieto; atenuada mientras corre, rebobina o viaja) y amortiguada en `dt` s.
  */
-export function pasoDeLaOrbita(o: EstadoDeLaOrbita, puntero: { readonly x: number; readonly y: number } | null, entera: boolean, dt: number): void {
+export function pasoDeLaOrbita(o: EstadoDeLaOrbita, puntero: { readonly x: number; readonly y: number; readonly aspecto?: number } | null, entera: boolean, dt: number): void {
   const O = ORBITA_DEL_MOUSE
   const a = 1 - Math.exp(-Math.max(0, dt) / O.amortiguaS)
   o.deja += ((entera ? 1 : O.enLaCinematica) - o.deja) * a
   const h = puntero === null ? 0 : Math.max(-1, Math.min(1, puntero.x)) * O.horizontal * o.deja
-  const v = puntero === null ? 0 : Math.max(-1, Math.min(1, puntero.y)) * O.vertical * o.deja
+  const v = puntero === null ? 0 : gradosVerticales(puntero.y, puntero.aspecto ?? ASPECTO_DE_SIEMPRE) * o.deja
   o.h += (h - o.h) * a
   o.v += (v - o.v) * a
 }

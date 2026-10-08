@@ -15,3 +15,8 @@ C2 · El golpe del encastre (escritorio y teléfono)
    ·  /v3?golpe=b (con la cola de la sala). Sueltos: /v3?sonidos=1.
    La luz: el logo ya no tiene el filo encendido; todo el círculo liso alrededor se ilumina en blanco, pulsa con cada onda y
    fuerte en el golpe. El logo se lee recortado contra la luz.
+
+C3 · El mouse en el pie (escritorio, con mouse)
+   /v3, bajá al pie y dejá que termine el encastre. Mové el mouse: a los costados gira hasta 22°; arriba y abajo hasta 12°, y
+   a lo alto llega a su tope bastante antes del borde (se mueve más por cada centímetro de mouse que a lo ancho). Un poco más
+   suave que antes (0,45 s).

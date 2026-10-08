@@ -145,3 +145,28 @@ s29–s36, s38, s40, s42–s44, s46–s52-nocturno-final, s6-tu-panel): verdes.
 | `s54` B0 · el logo brilla | el filo del logo encendido, fuera del oscurecimiento, y el pulso del logo con cada onda (dos controles) | lo mismo sobre el círculo quieto (la luz después del oscurecimiento, el pulso con cada onda) y el logo sin su parche (los mismos dos controles, sobre el círculo) | Por pedido (C2 · b): el brillo pasó del filo al círculo; lo nuevo (el golpe, el radio) lo fija `s55` C2 |
 | `s52-pulido-1` · las banderas | `energia` (`intensa`) | `golpe` (`a`, `b`) | La que se borró y la nueva, con el mismo control |
 | `s40` T2 · los sonidos | ocho en el sprite | diez (`golpe-a`, `golpe-b`) | Los nuevos, con su fila en `SONIDO.md` |
+
+### C3 · El mouse del pie: más rango, sobre todo vertical
+
+±22° a los costados (era 17) y hasta ±12° arriba y abajo (era 6) (`final/orbitaDelMouse.ts`). La ganancia por píxel vertical es
+1,6 veces la horizontal (a 1440 × 900: 0,031°/px a lo ancho y 0,049°/px a lo alto), así que el tope vertical llega a unos 245 px
+del centro y no en el borde: a lo alto, con menos pantalla, se mueve más de lo que daría la proporción. El DOM le escribe a la
+órbita el alto sobre el ancho de la ventana.
+
+**El domo.** Con el invariante de P17-A extendido (los cuatro bordes, toda la subida, las dos alturas del mouse del rig, 1440 ×
+900 y 1024 × 768): con la subida, lo más alto queda en 22,4 (el techo, a 40; el límite con aire, 38). Aun con la órbita
+entera desde el pie del rig: 34,0 mirando desde abajo (−12°) y 13,7 desde arriba. Simétrica: no hizo falta achicar el rango de
+abajo.
+
+**El techo de velocidad (s23).** Con el rango nuevo, de punta a punta la órbita giraba más rápido; el amortiguado pasó de 0,3 a
+0,45 s: 3,12 alturas de cuadro por segundo contra 3,41 del arranque del recorrido (antes, 3,34). s23 no se tocó.
+
+**Gate:** lint limpio; `tsc` 0; `s53` 54/0, `s54` 50/0, `s55` 28/0; s49, s51 y s52-pulido-1, verdes.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s54` B2 · el rango | 15–20° a los costados y hasta 6° arriba y abajo | 20–24° y 11–12° (la ganancia por píxel la fija `s55` C3, con su control) | Por pedido (C3) |
+| `s54` B2 · el gesto | a los 0,3 s, entre el 55 y el 70 % del camino; esperas de 3 y 1,5 s | a `amortiguaS` (0,45 s), lo mismo; esperas de 10 veces el amortiguado | El amortiguado subió por el techo de s23: la misma curva, en su tiempo |
+| `s54` B2 · los controles | la órbita sin amortiguar con el vertical lineal; «±40° y ±6°» | con el vertical nuevo (`gradosVerticales`); «±40° y ±12°» | Los mismos controles con la regla nueva |

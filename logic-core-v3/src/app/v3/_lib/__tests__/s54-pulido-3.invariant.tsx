@@ -40,7 +40,7 @@ import { CIRCULO_DE_LUZ, pulsoDelCirculo } from '../escena/final/luzDelCirculo'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
-import { ORBITA_DEL_MOUSE, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita } from '../escena/final/orbitaDelMouse'
+import { ORBITA_DEL_MOUSE, gradosVerticales, nuevaOrbita, pasoDeLaOrbita, ponerLaOrbita } from '../escena/final/orbitaDelMouse'
 import { blancoDelFinal, camaraDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { aimWithFraming } from '../escena/cameraFraming'
@@ -396,33 +396,35 @@ controlPositivo('  y el CTA quieto en la última pantalla', [ctaTransformado.rep
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B2 · El pie: el mouse orbita la cámara alrededor del logo y deja ver la escena en diagonal (escritorio)')
 
-// EL RANGO Y EL GESTO: hasta 15–20° a cada lado y 6° arriba y abajo; amortiguada (~0,3 s: en ese tiempo hace ~63 % del camino);
+// EL RANGO Y EL GESTO: hasta 15–20° a cada lado y 6° arriba y abajo ([PULIDO 4] C3 · cambió por pedido: ±22° y hasta ±12°, con
+// más ganancia por píxel en vertical, `s55` C3); amortiguada (~0,3 s: en ese tiempo hace ~63 % del camino; C3: 0,45 s);
 // con el mouse fuera de la ventana vuelve al centro; mientras corre la cinemática (o rebobina, o viaja) se atenúa a 0,2 y en el
 // quieto vuelve entera. En el teléfono y la tablet, nada (sólo con puntero fino y desde escritorio).
 type Paso = typeof pasoDeLaOrbita
 const orbitaBien = (paso: Paso, rango: { readonly horizontal: number; readonly vertical: number }, c: string): boolean => {
   const o = { ...nuevaOrbita(), deja: 1 }
-  for (let t = 0; t < 0.3 - 1e-9; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
+  for (let t = 0; t < ORBITA_DEL_MOUSE.amortiguaS - 1e-9; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
   const aLos03 = o.h / rango.horizontal
-  for (let t = 0; t < 3; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
+  // [PULIDO 4] C3 · las esperas, en tiempos del amortiguado (eran 3 s y 1,5 s, con el de 0,3 s).
+  for (let t = 0; t < 10 * ORBITA_DEL_MOUSE.amortiguaS; t += 1 / 60) paso(o, { x: 1, y: 1 }, true, 1 / 60)
   const llega = Math.abs(o.h - rango.horizontal) < 0.01 && Math.abs(o.v - rango.vertical) < 0.01
-  for (let t = 0; t < 1.5; t += 1 / 60) paso(o, null, true, 1 / 60)
+  for (let t = 0; t < 10 * ORBITA_DEL_MOUSE.amortiguaS; t += 1 / 60) paso(o, null, true, 1 / 60)
   const vuelve = Math.abs(o.h) < 0.01 * rango.horizontal && Math.abs(o.v) < 0.01 * rango.vertical
   for (let t = 0; t < 3; t += 1 / 60) paso(o, { x: -1, y: 0 }, false, 1 / 60)
   const atenuada = Math.abs(o.h) <= 0.21 * rango.horizontal
-  return rango.horizontal >= 15 && rango.horizontal <= 20 && rango.vertical > 0 && rango.vertical <= 6 && aLos03 > 0.55 && aLos03 < 0.7 && llega && vuelve && atenuada &&
+  return rango.horizontal >= 20 && rango.horizontal <= 24 && rango.vertical >= 11 && rango.vertical <= 12 && aLos03 > 0.55 && aLos03 < 0.7 && llega && vuelve && atenuada &&
     c.includes("pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)") &&
     c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * sube, s.orbita.v * sube)') &&
     c.includes("conMouse: !angosto && !estatico && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches")
 }
-afirmar(orbitaBien(pasoDeLaOrbita, ORBITA_DEL_MOUSE, cuadro), 'la órbita del mouse: ±17° y ±6°, amortiguada (~0,3 s), al centro con el mouse afuera, atenuada en la cinemática y entera en el quieto; sólo en escritorio con puntero fino', `±${String(ORBITA_DEL_MOUSE.horizontal)}° · ±${String(ORBITA_DEL_MOUSE.vertical)}° · ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
+afirmar(orbitaBien(pasoDeLaOrbita, ORBITA_DEL_MOUSE, cuadro), 'la órbita del mouse: [PULIDO 4] ±22° y hasta ±12°, amortiguada, al centro con el mouse afuera, atenuada en la cinemática y entera en el quieto; sólo en escritorio con puntero fino', `±${String(ORBITA_DEL_MOUSE.horizontal)}° · ±${String(ORBITA_DEL_MOUSE.vertical)}° · ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
 const sinAmortiguar: Paso = (o, puntero, entera) => {
   o.deja = entera ? 1 : ORBITA_DEL_MOUSE.enLaCinematica
   o.h = puntero === null ? 0 : puntero.x * ORBITA_DEL_MOUSE.horizontal * o.deja
-  o.v = puntero === null ? 0 : puntero.y * ORBITA_DEL_MOUSE.vertical * o.deja
+  o.v = puntero === null ? 0 : gradosVerticales(puntero.y, puntero.aspecto ?? 0.625) * o.deja
 }
 controlPositivo('el detector VE una órbita sin amortiguar (salta al mouse)', sinAmortiguar, (p: Paso) => orbitaBien(p, ORBITA_DEL_MOUSE, cuadro))
-controlPositivo('  y una de ±40°', pasoDeLaOrbita, (p: Paso) => orbitaBien(p, { horizontal: 40, vertical: 6 }, cuadro))
+controlPositivo('  y una de ±40°', pasoDeLaOrbita, (p: Paso) => orbitaBien(p, { horizontal: 40, vertical: 12 }, cuadro))
 
 // EL TECHO DE VELOCIDAD (s23 §3): el recorrido no pasa la velocidad del arranque (su pico en el primer tramo, en alturas de
 // cuadro por pantalla de scroll, medido igual que allá); a una pantalla por segundo, eso por segundo. La órbita, con el mouse

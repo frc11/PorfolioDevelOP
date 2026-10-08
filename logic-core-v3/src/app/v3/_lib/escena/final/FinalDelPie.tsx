@@ -126,6 +126,7 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
       if (e.pointerType !== 'mouse') return
       ORBITA_EN_VIVO.x = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1
       ORBITA_EN_VIVO.y = 1 - (e.clientY / Math.max(1, window.innerHeight)) * 2
+      ORBITA_EN_VIVO.aspecto = window.innerHeight / Math.max(1, window.innerWidth)
       ORBITA_EN_VIVO.fuera = false
     }
     const salir = (e: MouseEvent): void => {
