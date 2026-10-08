@@ -267,6 +267,77 @@ pasos en que el texto todavía aparece (pasa igual antes y en las dos variantes)
 `?velo=escena` (la prueba, el montaje, la hoja que saca la elipse, el velo al final del sombreador con la misma elipse;
 control: el velo puesto antes del color de noche).
 
+### 4 · La luz de abajo, por las juntas (P1 rehecho)
+
+**Antes (PULIDO 1, P1):** una o dos zonas de bloques con la TAPA a blanco (`BRILLO_EN_EL_PISO`, `?brillo=suave|fuerte`) y
+el piso entero 10–15 % más oscuro todo el final. El humano: «no entendiste mi concepto»; las tres referencias son bloques
+grises con luz blanca que se escapa por las rendijas, desde abajo.
+
+**Qué cambió** (`escena/final/luzDeAbajo.ts`, `planoDeLaLuz.ts`, `chispasDeLaLuz.ts`; el piso en `enElPiso.ts`; el reloj en
+`cuadroDelFinal.ts`):
+- **Las zonas las calcula una función por cuadro** (`zonasDeLaLuz`: dónde, de qué tamaño, cuánto vive cada una) y van al
+  sombreador como uniformes; el sombreador sólo dibuja la forma (`sectorDeLaLuz`, medida en el centro de cada bloque). Así
+  la escena sabe cuánto está prendido (para oscurecer la sala) y los invariantes leen la misma función, no una copia.
+- **El sector nace en un punto y se propaga bloque a bloque:** su borde es la vida de la zona (con la vida crece desde el
+  centro); orgánico (la distancia deformada por un ruido), mayormente contiguo; respira (el radio late ±8 %) y se retira; la
+  próxima aparece en otro lugar de lo que se ve. Dos a la vez como máximo, con huecos cortos.
+- **En el sector, los bloques se separan un poco** (en el vértice se achican sobre su centro, cada uno distinto: rendijas de
+  ancho variable) **y quedan a alturas distintas** (en la simulación, un azar por bloque entre −0,12 y +0,42 u).
+- **Por las rendijas se ve un plano que brilla** (`planoDeLaLuz.ts`): un disco blanco al pie de los bloques (apenas sobre el
+  fondo del zócalo: más hondo que el valle más hondo), que sólo existe en el sector y su resplandor; fuera, descartado. Es el
+  resplandor falso y local que pedía el punto: **sin bloom**.
+- **Los costados reciben la luz desde su base** (desde la altura del vecino, donde se abre la rendija, y se apaga hacia
+  arriba en ~0,3 u) y **los cantos de la tapa la atrapan** (en ~0,04 u: en el medio de la tapa, nada). **La tapa no se
+  blanquea**: en el sector queda apenas más en sombra (12 %). La luz de cada junta varía (no todas brillan igual) y se corre
+  despacio con el reloj.
+- **La sala se oscurece gradual** con lo prendido del sector (hasta 38 % con el sector entero; nunca de un cuadro al otro:
+  lo más que cambia en un cuadro a 60 por segundo es < 1 %) y se recupera entre zona y zona; con la energía del poder (con su
+  inercia de §2: en el rebobinado se va en varios cuadros).
+- **Nunca en el mar calmo del logo:** el sector se apaga con el mismo anillo que usaba el brillo de P1 (desde la mitad del
+  borde del mar calmo hasta su borde más el margen), ahora dentro del propio sector, así que vale para todo lo que lo usa: el
+  dibujo, las alturas, la separación y el plano. (Al cerrar el punto encontré que una zona grande podía entrar al mar calmo:
+  subía y separaba bloques junto al hueco del logo. Con la calma en el sector, las capturas quedan iguales y eso ya no puede
+  pasar.)
+- **`?chispas=si`** (apagadas en el producto): 56 chispas blancas, chicas y sumadas que nacen en el sector vivo y se apagan
+  subiendo; con movimiento reducido no se crean. `?brillo=` se borró.
+- **Quieto (movimiento reducido):** el sector queda en un instante con una zona prendida (`quietoEn`).
+
+**De día y de noche:** el final corre siempre de día (la noche es la de Trabajos y vuelve a ser de día antes del pie), así que
+no hay una noche del final para mirar: la luz quedó vista y ajustada sólo de día.
+
+**Costo** (NVIDIA RTX 5050, `__gpuDelBanco.medir`, el piso más el plano, con la luz prendida y apagada en el mismo cuadro,
+tres pares alternados): a 1440 × 900, 0,702 contra 0,711 ms (la diferencia queda en el ruido); a 375 × 667, 0,333 contra
+0,284 ms (+0,05 ms). Medido antes de la calma en el sector (un `smoothstep` más por fragmento).
+
+**Hoja** (`entregas/pulido-2/p4-luz-de-abajo-refs-y-capturas.png`): las tres referencias arriba; a 1440 los tres momentos del
+ciclo de una zona (naciendo, plena, retirándose) y el sector de cerca; a 390, los tres momentos.
+
+**Gate:** lint limpio en lo tocado; `tsc --noEmit` 0 errores; s47–s53 verdes (más s50, s51 y s52-nocturno-final, que leían el brillo de P1: ajustados, tabla); `verificar`: los 8 grupos rojos de la base con sus 14 invariantes; reposo a 1440 y 390 (`pulido-2/reposo/p4-*`) sin errores en la consola.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué no es más laxa |
+|---|---|---|---|
+| `s52-pulido-1` P1 · blanca | la tapa a blanco (`mix( color, vec3( mix( 0.9, 1.0, vTapa ) ), k )`), sin rojo; control: la lava | la luz se SUMA en las juntas (`color + vec3( luz * s )`), sin rojo y sin ningún `mix` hacia el blanco; control: las tapas blancas de P1 | Lo pide PULIDO 2 (las tapas no se blanquean); el mismo «sin rojo» |
+| `s52-pulido-1` P1 · por bloque | la zona medida en el centro del bloque (`b`) | el sector medido en el centro del bloque (`vCentroDelBloque`, que viene del vértice) | La misma condición y el mismo control |
+| `s52-pulido-1` P1 · orgánica | el ruido de `zonaDelBrillo` | el ruido de `sectorDeLaLuz` (≥ 0,3, sin damero ni `mod`) | La misma condición y el mismo control |
+| `s52-pulido-1` P1 · el ciclo | una COPIA en TS de la cuenta del sombreador; tres controles | la función de la escena (`zonasDeLaLuz`, la que manda los uniformes); las mismas condiciones (nace en 1,5–3 s, ≤ 2 a la vez, a veces una y a veces dos, huecos < 4 s, otro lugar cada ciclo); un control | Más estricta: prueba el código que corre y no una copia |
+| `s52-pulido-1` P1 · la sala | 10–15 % fijo todo el final, según `?brillo=` | hasta 40 % (0,38) con el sector entero, gradual con lo prendido y con el final; el rig sin el tinte cálido; control: el atardecer de antes | **El tope sube** (15 → 40 %) porque ahora el oscurecimiento sólo existe mientras el sector está prendido y crece con él (antes era fijo todo el final); 0,38 es el valor elegido mirando las capturas contra las referencias (piso oscuro alrededor de la luz). Lo gradual lo fija `s53` §4 |
+| `s52-pulido-1` P1 · intensidades | tres crecientes (`?brillo=suave|medio|fuerte`) | `?brillo=` no existe | Borrada por pedido (P1 rechazado) |
+| `s52-pulido-1` · las banderas y la URL | con `brillo=suave|fuerte` y `brillo=medio` es el producto | con `chispas=si` | Suma la prueba nueva al mismo control |
+| `s50-encastre` 2E · sin tinta | el literal de la energía en `conLasJuntas` | la luz sumada (`return color + vec3( luz * s );`), sin tinta ni la banda de CIERRE | La energía y la calma pasaron al sector: las fija `s51` 1F |
+| `s51-retoque-encastre` 1A · sin partículas | ningún `Points` en `final/`; al grupo sólo el pozo | ningún `Points` salvo `chispasDeLaLuz.ts`, que sólo se crea con `?chispas=si` (una sola llamada, con la bandera y sin movimiento reducido); al grupo, el pozo y el plano | Lo pide PULIDO 2 (las chispas detrás de una bandera); control nuevo: las chispas en el producto |
+| `s51-retoque-encastre` 1F · espera al encastre y fuera de la calma | `min( 1.0, uPoder ) * fueraDeLaCalma( xz )` en `conLasJuntas` | la energía (el poder con su inercia) y la calma (el mismo anillo) dentro de `sectorDeLaLuz` | Más estricta: alcanza también a las alturas, la separación y el plano; dos controles (no espera; entra al mar calmo) |
+| `s52-nocturno-final` B2 · el brillo | el mismo literal que 1F | el sector con la energía del poder | El mismo control (no espera al encastre) más el del mouse |
+| `s52-nocturno-final` B2 · la sala | `OSCURECE * oscuroDelFinal(fin)` | `LUZ_DE_ABAJO.oscurece * oscuroDelFinal(fin) * prendidoDeLaLuz(s.zonas)` | Sigue parejo (un número para el piso entero) y función de `fin` |
+| `s52-nocturno-final` B3 · el brillo empieza afuera | la línea de `fueraDeLaCalma` en el dibujo (borrada) | la calma dentro de `sectorDeLaLuz` | La misma condición, ahora para todo lo que usa el sector |
+
+`s53-pulido-2` §4: las tapas (control: las tapas blancas de P1; un canto que ocupa la tapa; un costado parejo); la separación
+y las alturas (control: bloques pegados; todos a la misma altura); el plano al pie, sólo en el sector y sin bloom (control:
+el bloom; un plano a ras del piso); nace en un punto, se propaga, contiguo y orgánico, con la fórmula leída del sombreador
+(control: un sector de tamaño fijo; un círculo); respira y la sala gradual (control: radio fijo; de golpe); las chispas
+(control: una nube; en el producto).
+
 ## 4 · Lo que no quedó bien (o no pude resolver)
 
 (se completa al cerrar)

@@ -17,6 +17,7 @@ import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
+import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 import { conElEscalonEnElPiso, conElEscalonEnLaSimulacionDe } from '../ctaDelFinal/enElPiso'
 import { varianteDelCta } from '../ctaDelFinal/estado'
 import { PISO_EN_VIVO } from './enVivo'
@@ -222,6 +223,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     // [EL ENCASTRE] 2D · el mar calmo alrededor del logo que se encastra (y sin el techo que lo esquivaba).
     uCalmaDelFinal: FINAL_EN_EL_PISO.uCalmaDelFinal,
     uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo,
+    // [PULIDO 2] 4 · el sector de la luz de abajo: sus bloques quedan a alturas distintas (`final/luzDeAbajo.ts`).
+    ...LUZ_DE_ABAJO_EN_VIVO,
     uDt: { value: PISO_VIVO.onda.paso },
     uC2: { value: 0 },
     uRadio: { value: grilla.radio / grilla.lado },

@@ -379,8 +379,10 @@ controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx
 // las ondas, el mar y el pulso del golpe (s51 1F). Sin tinta en el dibujo, y sin la banda oscura de CIERRE.
 // [NOCTURNO FINAL] B2 · cambió por pedido: lo que energiza el piso después del encastre es la lava del piso entero (s52 B2).
 // [PULIDO 1] P1 · cambió por pedido: la lava pasó a ser el brillo blanco por zonas (s52-pulido-1 P1); lo demás, igual.
-const sinTinta = (c: string): boolean => c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('float energia = min( 1.0, uPoder ) * fueraDeLaCalma( xz );') && c.includes('return conElBrillo( color, energia );') && !/vec3\( 0\.045 \)/.test(c) && !/GOLPE_EN_EL_PISO\.banda|\bbanda: 0\.55/.test(c)
-afirmar(sinTinta(enElPisoTs), 'el poder liberado no dibuja tinta: energiza el piso ([PULIDO 1] P1: el brillo blanco por zonas); la banda oscura de CIERRE, que se leía como una mancha, no vuelve')
+// [PULIDO 2] 4 · cambió por pedido: el brillo es la luz que sale de abajo, por las juntas (s53-pulido-2 §4): se SUMA (nunca
+// tinta) en los costados y los cantos del sector; la energía y la calma pasaron al sector (`luzDeAbajo.ts`, lo fija s51 1F).
+const sinTinta = (c: string): boolean => c.includes('gl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') && c.includes('return color + vec3( luz * s );') && !/vec3\( 0\.045 \)/.test(c) && !/GOLPE_EN_EL_PISO\.banda|\bbanda: 0\.55/.test(c)
+afirmar(sinTinta(enElPisoTs), 'el poder liberado no dibuja tinta: energiza el piso ([PULIDO 2] 4: la luz de abajo, sumada por las juntas); la banda oscura de CIERRE, que se leía como una mancha, no vuelve')
 controlPositivo('el detector VE la tinta de EL ENCASTRE', enElPisoTs + "\nreturn mix( color, vec3( 0.045 ), clamp( junta * r, 0.0, 0.96 ) );", sinTinta)
 
 // ═══════════════════════════════════════════════════════════════════════════

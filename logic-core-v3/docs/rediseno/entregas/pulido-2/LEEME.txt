@@ -33,3 +33,11 @@ Banderas que se borraron (rechazadas en PULIDO 1, sin código muerto): encastre=
   Archivos: _estilos/banda.css; escena/veloDelTexto.ts y VeloEnElLogo.tsx (nuevos), LuzDelLogo.tsx, entorno.ts.
   Bandera: velo=escena.  Default: la elipse.
 
+4 · La luz de abajo, por las juntas (P1 rehecho)
+  Qué: el brillo de P1 (las tapas a blanco) pasa a ser luz que sale de DEBAJO del piso: un sector de bloques que se separan
+  y quedan a alturas distintas, un plano blanco al pie de los bloques que se ve por las rendijas (resplandor falso y local,
+  sin bloom), los costados iluminados desde su base y los cantos; las tapas no se blanquean. El sector nace en un punto, se
+  propaga, respira y se retira; otro aparece en otro lado; nunca en el mar calmo del logo. La sala se oscurece gradual con lo
+  prendido. Costo en la NVIDIA: en el ruido a 1440, +0,05 ms a 375.
+  Archivos: escena/final/luzDeAbajo.ts, planoDeLaLuz.ts y chispasDeLaLuz.ts (nuevos), enElPiso.ts, cuadroDelFinal.ts,
+  FinalDelPie.tsx; escena/piso/PisoVivo.tsx; escena/entorno.ts.  Bandera: chispas=si (apagada).  Se borró brillo=.

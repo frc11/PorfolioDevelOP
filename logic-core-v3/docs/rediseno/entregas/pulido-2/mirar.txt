@@ -39,3 +39,11 @@ Lo que va EN CELULAR REAL (por la LAN): 1, 3 y 5.
    La otra lectura: /v3?velo=escena (sin capa: el logo mismo se oscurece detrás del texto).
    Hoja: p3-velo-antes-elipse-escena.png (antes con el rectángulo, la elipse y la de la escena, en los tres anchos).
 
+4 · La luz de abajo, por las juntas (el final, escritorio y teléfono)
+   URL: /v3. Bajá hasta el pie y dejá que termine el encastre. Después del golpe, un sector de bloques se enciende desde
+   ABAJO: los bloques se separan un poco y quedan a alturas distintas, y la luz blanca se escapa por las rendijas (los
+   costados se iluminan desde su base, los cantos la atrapan; las tapas no se ponen blancas). El sector nace en un punto,
+   crece bloque a bloque, respira, se retira, y otro nace en otro lado (uno o dos a la vez). La sala se oscurece de a poco
+   mientras está prendido y vuelve cuando se apaga. Rebobiná (rueda o dedo hacia arriba): se va en varios cuadros.
+   Con chispas (las de la referencia): /v3?chispas=si.
+   Hoja: p4-luz-de-abajo-refs-y-capturas.png (las tres referencias y tus capturas: naciendo, plena y retirándose, a 1440 y 390).

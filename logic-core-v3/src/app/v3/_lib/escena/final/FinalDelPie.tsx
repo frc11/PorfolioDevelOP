@@ -7,11 +7,14 @@ import * as THREE from 'three'
 
 import { retenerLosGestos } from '../../gestosDelScroll'
 import type { NivelDeCalidad } from '../calidad'
-import { hayBanco } from '../entorno'
+import { entornoDeLaEscena, hayBanco } from '../entorno'
+import { PISO_VIVO } from '../piso/bloques'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import type { ProbeStatsStore } from '../probeStore'
 import { FINAL_DEL_BANCO, alCuadroDelFinal, crearElEstado, gestoDelFinal, soltarElFinal, type EstadoDelFinal } from './cuadroDelFinal'
-import { BRILLO_DEL_BANCO, BRILLO_EN_EL_PISO, FINAL_EN_EL_PISO, intensidadDelBrillo } from './enElPiso'
+import { crearLasChispas } from './chispasDeLaLuz'
+import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
+import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
 import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
@@ -66,13 +69,21 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
-    // [PULIDO 1] P1 · la intensidad del brillo (`?brillo=`) y, quieto (movimiento reducido), el brillo quieto.
-    const intensidad = BRILLO_EN_EL_PISO.intensidad[intensidadDelBrillo()]
-    piso.uBrillo.value.set(intensidad.blanco, intensidad.halo, estatico ? 1 : 0)
+    // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas del sector) y, con `?chispas=si`, las chispas.
+    const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
+    const chispas = entornoDeLaEscena().pruebas.chispas === 'si' && !estatico ? crearLasChispas() : null
     m.current = estado
-    g.add(estado.pozo.grupo)
+    g.add(estado.pozo.grupo, plano)
+    if (chispas !== null) g.add(chispas)
     return () => {
-      g.remove(estado.pozo.grupo)
+      g.remove(estado.pozo.grupo, plano)
+      plano.geometry.dispose()
+      if (plano.material instanceof THREE.Material) plano.material.dispose()
+      if (chispas !== null) {
+        g.remove(chispas)
+        chispas.geometry.dispose()
+        if (chispas.material instanceof THREE.Material) chispas.material.dispose()
+      }
       soltarElFinal(estado, grupoDelLogo)
       EN_VIVO.fin = 0
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
@@ -88,12 +99,13 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
     ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value, encuadre: ENCUADRE_EN_VIVO.valor, teclado: m.current === null ? null : { ...m.current.teclado, alFondo: m.current.alFondo, ultimo: m.current.gestos.ultimo, ahora: performance.now() / 1000 } })
-    // [PULIDO 1] P1 · el brillo del piso apagado y prendido, para medir su costo por diferencia.
-    const conBrillo = ventana as Window & { __brilloDelBanco?: { apagar: (apagado: boolean) => void } }
-    conBrillo.__brilloDelBanco = {
-      apagar: (apagado) => {
-        BRILLO_DEL_BANCO.apagado = apagado
+    // [PULIDO 2] 4 · la luz de abajo apagada y prendida (su costo, por diferencia) y sus zonas de este cuadro.
+    const conLuz = ventana as Window & { __luzDelBanco?: { apagar: (apagada: boolean) => void; zonas: () => unknown } }
+    conLuz.__luzDelBanco = {
+      apagar: (apagada) => {
+        LUZ_DEL_BANCO.apagada = apagada
       },
+      zonas: () => m.current?.zonas.map((z) => ({ ...z })) ?? [],
     }
     // [PULIDO 2] 1 · el reloj clavado en un `fin` (el contraste del pie en un cuadro quieto); `null` lo suelta.
     const conFijo = ventana as Window & { __finalFijoDelBanco?: (fin: number | null) => void }
@@ -102,9 +114,9 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     }
     return () => {
       delete ventana.__finalDelBanco
-      delete conBrillo.__brilloDelBanco
+      delete conLuz.__luzDelBanco
       delete conFijo.__finalFijoDelBanco
-      BRILLO_DEL_BANCO.apagado = false
+      LUZ_DEL_BANCO.apagada = false
       FINAL_DEL_BANCO.fijo = null
     }
   }, [logoGroupRef])
