@@ -13,9 +13,15 @@ la licencia permite convertirlas y redistribuirlas con la fuente.
   chivo-700-titulos.json           [RETOQUE PANEL] T4 · lo subrayado del titular de Quiénes somos: «algo distinto,»
   chivo-300-titulos.json           [RETOQUE PANEL] T4 · lo tachado: «lo mismo de siempre»
   archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»;
-                                   [PULIDO 2] 5 · y el CTA del final: «HABLANOS»; [PULIDO 3B] B1 · y su destacado,
-                                   «EL TUYO TAMBIÉN.» (la fuente del sitio es la del registro 1: sólo mayúsculas)
-  archivo-400-cta.json             [PULIDO 3B] B1 · la frase del CTA del final en Archivo: «ESTE SITIO EMPEZÓ CON UNA CHARLA.»
+                                   [PULIDO 2] 5 · y el CTA del final: «HABLANOS»
+  archivo-400-cta.json             [PULIDO 4] C1 · la frase del CTA del final en Archivo, con su copy (minúsculas, acentos):
+                                   «Este sitio empezó con una charla.» El woff2 del sitio es un subconjunto de mayúsculas
+                                   (`scripts-titular/subsetear-fuentes.py`): ésta sale del TTF entero de Archivo (OFL) con el
+                                   mismo ancho pinchado (wdth 62), `scripts-titular/_upstream/pinchada-archivo-display.ttf`
+                                   (si no está, lo deja ese script), y sólo con las letras que pide
+  archivo-700-cta.json             [PULIDO 4] C1 · el destacado, del mismo TTF en 700: «El tuyo también.»
+  chivo-400-valores.json           [PULIDO 4] C1 · los seis valores de Por qué develOP (título y línea, los dos en 400 en el
+                                   DOM): la escena los arma para la metamorfosis al CTA
   chivo-300-italica-titulos.json   el registro 2 del hero: «LAS 24 HS»
   chivo-{400,500,600}-pie.json     [RETOQUE DEL PIE] P2 · los textos del pie en 3D, cada uno con su peso
 
@@ -30,6 +36,16 @@ import types
 
 RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 FUENTES = os.path.join(RAIZ, 'src', 'app', 'v3', '_fuentes')
+# [PULIDO 4] C1 · Archivo entera con el ancho del sitio pinchado (la deja `scripts-titular/subsetear-fuentes.py`; no se versiona).
+ARCHIVO_ENTERO = os.path.join(RAIZ, 'scripts-titular', '_upstream', 'pinchada-archivo-display.ttf')
+VALORES = [
+    'Hecho a medida', 'Sin plantillas: cada sitio se diseña para tu negocio.',
+    'Diseño que se destaca', 'Tu sitio no se parece al de tu competencia.',
+    'Rápido, sin atajos', 'Entregamos rápido sin recortar calidad.',
+    'Calidad que se nota', 'Carga rápido, se ve bien en cualquier pantalla y está bien construido por dentro.',
+    'Tu panel, tu control', 'Ves cómo va tu proyecto y pedís cambios sin esperar un mail.',
+    'Hablás con quien lo hace', 'Sin intermediarios: te atienden las personas que construyen tu sitio.',
+]
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
@@ -40,10 +56,15 @@ PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 300, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': ['lo mismo de siempre'], 'destino': 'chivo-300-titulos.json'},
     {'origen': 'archivo-display-latin.woff2', 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
-     'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS', 'EL TUYO TAMBIÉN.'], 'destino': 'archivo-700-titulos.json'},
-    # [PULIDO 3B] B1 · todo el CTA del final en la fuente del registro 1: la frase en 400 (el destacado y el botón, en 700).
-    {'origen': 'archivo-display-latin.woff2', 'peso': 400, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
-     'textos': ['ESTE SITIO EMPEZÓ CON UNA CHARLA.'], 'destino': 'archivo-400-cta.json'},
+     'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS'], 'destino': 'archivo-700-titulos.json'},
+    # [PULIDO 4] C1 · la frase del CTA del final en Archivo con su copy (minúsculas, acentos): del TTF entero con el ancho del sitio.
+    {'origen': ARCHIVO_ENTERO, 'peso': 400, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
+     'textos': ['Este sitio empezó con una charla.'], 'destino': 'archivo-400-cta.json'},
+    {'origen': ARCHIVO_ENTERO, 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
+     'textos': ['El tuyo también.'], 'destino': 'archivo-700-cta.json'},
+    # [PULIDO 4] C1 · los seis valores (título y línea, `_secciones/por-que-develop/contenido.ts`), en el peso del DOM.
+    {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
+     'textos': VALORES, 'destino': 'chivo-400-valores.json'},
     {'origen': 'chivo-italic-latin.woff2', 'peso': 300, 'familia': 'Chivo Italic', 'licencia': 'OFL-chivo.txt',
      'textos': ['LAS 24 HS'], 'destino': 'chivo-300-italica-titulos.json'},
     # [RETOQUE DEL PIE] P2 · el pie en 3D, con el peso con que el DOM pinta cada texto (los de `_secciones/cierre/contenido.ts`
@@ -94,7 +115,7 @@ class PenDeTypeface(BasePen):
 
 
 def armar(pedido):
-    fuente = TTFont(os.path.join(FUENTES, pedido['origen']))
+    fuente = TTFont(os.path.join(FUENTES, pedido['origen']))  # os.path.join deja entera una ruta absoluta (ARCHIVO_ENTERO)
     if 'fvar' in fuente:
         fuente = instancer.instantiateVariableFont(fuente, {'wght': pedido['peso']})
     mapa = fuente.getBestCmap()
@@ -119,7 +140,7 @@ def armar(pedido):
         'underlineThickness': post.underlineThickness,
         'boundingBox': {'xMin': cabeza.xMin, 'yMin': cabeza.yMin, 'xMax': cabeza.xMax, 'yMax': cabeza.yMax},
         'resolution': cabeza.unitsPerEm,
-        'original_font_information': {'fontFamily': pedido['familia'], 'fontSubfamily': f"wght {pedido['peso']}", 'license': f"SIL Open Font License 1.1 ({pedido['licencia']})", 'source': pedido['origen']},
+        'original_font_information': {'fontFamily': pedido['familia'], 'fontSubfamily': f"wght {pedido['peso']}", 'license': f"SIL Open Font License 1.1 ({pedido['licencia']})", 'source': os.path.basename(pedido['origen'])},
     }
     destino = os.path.join(FUENTES, pedido['destino'])
     with open(destino, 'w', encoding='utf-8', newline='\n') as f:

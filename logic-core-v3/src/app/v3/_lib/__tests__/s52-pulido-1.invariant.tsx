@@ -125,8 +125,8 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // `angel=asentado`; PULIDO 2 · 5, `cta=capas|relevo|giro|cruce|tipo` (las de P17, `cta=a|b|c|d`, se borraron). (P22 `encastre=desvanece`, P5 `vuelta=corta` y P1 `brillo=suave|fuerte` se borraron en
 // PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`; PULIDO 3 · A1 borra las dos y agrega
 // `energia=red|inestable`; PULIDO 3B · B0 las funde en el producto y deja `energia=intensa`; B1 borra `cta=` entera: `cruce`
-// es el producto.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['intensa'] }
+// es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['intensa'], meta: ['fusion', 'contorno'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')

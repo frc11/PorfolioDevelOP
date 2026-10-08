@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-import { MedirLaLista } from '../../_componentes/ctaDelFinal/CtaDelFinal'
+import { MedirLaLista, useCtaListo, useValorDeLaEscena } from '../../_componentes/ctaDelFinal/CtaDelFinal'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
 import { LENTOS } from '../../_lib/titulos3d/repeticiones'
@@ -97,13 +97,19 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   // columna le caía encima.
   const subeLaFrase = useTransform(useTramo(pin, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE), (u) => `${(-u * SUBIDA_DE_LA_FRASE_SVH).toFixed(3)}svh`)
   const levantada = useTramo(pin, VENTANA_DE_LA_LEVANTADA)
-  const y = useTransform(levantada, (u) => `${(-u * SUBIDA_DE_LA_LEVANTADA_SVH).toFixed(3)}svh`)
-  const opacity = useTransform(levantada, [0, 1], [1, 0])
+  // [PULIDO 4] C1 · con la escena lista, los valores no se levantan: la metamorfosis los toma en su lugar (y la frase de
+  // volumen, el cruce). Sin WebGL se van con la levantada, como antes. (Un valor, no una rama: si la escena se rearma a mitad
+  // del recorrido, nada queda corrido.)
+  const listo = useCtaListo()
+  const conLevantada = useMotionValue(listo ? 0 : 1)
+  useEffect(() => conLevantada.set(listo ? 0 : 1), [listo, conLevantada])
+  const y = useTransform(() => `${(-levantada.get() * conLevantada.get() * SUBIDA_DE_LA_LEVANTADA_SVH).toFixed(3)}svh`)
+  const opacity = useTransform(() => 1 - levantada.get() * conLevantada.get())
   // [NOCTURNO] A1 · cada columna de valores va en el plano de su mitad de la frase de volumen.
   const valoresDeLaIzquierda = useAcompananteDelTitulo<HTMLDivElement>('frase-izquierda')
   const valoresDeLaDerecha = useAcompananteDelTitulo<HTMLDivElement>('frase-derecha')
   // [PULIDO 2] 5 · la transformación al CTA (función del pin): la frase no se levanta (la transformación la toma en su lugar).
-  // [PULIDO 3B] B1 · la del producto (sin bandera).
+  // [PULIDO 4] C1 · el cruce de `2411371a` y la metamorfosis de los valores en la frase del CTA.
   const transformacion = useTramo(pin, VENTANA_DE_LA_TRANSFORMACION)
   return (
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
@@ -134,7 +140,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(0, 3).map((valor, i) => (
-                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} />
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i} transformacion={transformacion} />
               ))}
             </ul>
           </div>
@@ -144,7 +150,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           <div className="@container min-h-0 flex-1">
             <ul className={CLASE_DE_LA_COLUMNA}>
               {VALORES.slice(3).map((valor, i) => (
-                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} />
+                <ValorEnElEscenario key={valor.clave} valor={valor} pin={pin} indice={i + 3} transformacion={transformacion} />
               ))}
             </ul>
           </div>
@@ -174,10 +180,12 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
   )
 }
 
-function ValorEnElEscenario({ valor, pin, indice }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number }): React.JSX.Element {
+function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number; readonly transformacion: MotionValue<number> }): React.JSX.Element {
   const tramo = useLlegadaDeDia(pin, ventanaDelValor(indice), 'abajo')
+  // [PULIDO 4] C1 · la escena lo mide y, desde que arranca la transformación, lo dibuja ella (la metamorfosis).
+  const lugar = useValorDeLaEscena<HTMLLIElement>(indice, transformacion)
   return (
-    <li>
+    <li ref={lugar}>
       {/* [RETOQUE 3D] 3G · cada valor llega desde un lugar distinto de la sala (CSS 3D; antes, P5). */}
       <ValorEnVolumen progreso={tramo} indice={indice}>
         <PiezaDeValor valor={valor} className="@max-3xs:gap-[var(--spacing-1)]" espesor />
@@ -259,7 +267,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
           <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
-          <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />
+          <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
         </CoreografiaEnTodoAncho>
       </div>
     </ContenidoDeSeccion>

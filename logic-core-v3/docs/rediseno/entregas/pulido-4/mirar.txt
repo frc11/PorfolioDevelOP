@@ -1,0 +1,10 @@
+PULIDO 4 — qué mirar en vivo
+Local: http://localhost:3000/v3   ·   LAN (teléfono y tablet en la misma red): http://192.168.1.116:3000/v3
+
+C1 · El CTA (escritorio y teléfono)
+   /v3, bajá hasta «Por qué develOP» y seguí despacio después de los seis valores. «Seis razones» se extruye y se agranda por
+   su «o» (el cruce de antes); al mismo tiempo los seis valores se van un poco atrás, se derriten, fluyen arriba del centro y
+   de esa masa nace «Este sitio empezó con una charla. El tuyo también.», que vuelve adelante arriba de «HABLANOS». Los dos
+   terminan juntos. Volvé para arriba despacio, frenando a mitad: nada salta.
+   Variantes: /v3?meta=contorno (los contornos que se interpolan; pesa 8–11 ms por cuadro)   ·   sin bandera: fusion.
+   Un viaje del menú desde el pie a Inicio: el CTA no aparece.

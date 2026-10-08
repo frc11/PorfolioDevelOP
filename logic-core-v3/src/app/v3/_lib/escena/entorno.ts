@@ -62,6 +62,8 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
+import { VARIANTES_DE_LA_METAMORFOSIS, type VarianteDeLaMetamorfosis } from './ctaDelFinal/transformacion'
+
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
 export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
@@ -93,6 +95,11 @@ export interface Pruebas {
    * la energía bajo el piso con más brillo y más velocidad, para comparar con el producto.
    */
   readonly energia: 'intensa' | 'no'
+  /**
+   * [PULIDO 4] C1 · `meta=fusion|contorno`: la técnica de la metamorfosis de los seis valores en la frase del CTA del final
+   * (`ctaDelFinal/transformacion.ts`). Sin bandera, `fusion` (la del producto).
+   */
+  readonly meta: VarianteDeLaMetamorfosis | 'no'
 }
 
 /**
@@ -110,10 +117,10 @@ export interface Pruebas {
  * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
  * borró: `cruce` es el producto.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', meta: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'meta'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -127,6 +134,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     energia: unoDe<'intensa'>(['intensa'], valor('energia')),
+    meta: unoDe<VarianteDeLaMetamorfosis>(VARIANTES_DE_LA_METAMORFOSIS, valor('meta')),
   }
 }
 

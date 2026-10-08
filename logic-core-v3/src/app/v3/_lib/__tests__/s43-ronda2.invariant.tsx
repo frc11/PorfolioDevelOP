@@ -140,7 +140,8 @@ afirmar((porQueDevelop.match(/salida: null, corrida: null \}/g) ?? []).length ==
 const repetida = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
 afirmar(/REPETICIONES\.activas \+= 1/.test(repetida) && /repeticion\.set\(-1\)\s*terminar\(\)/.test(repetida), 'la llegada aislada después de un viaje (por tiempo) se puede interrumpir y converge: un pedido nuevo la reinicia, cortada vuelve al scroll; mientras corre, no se asienta')
 const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
-afirmar(/a\.reloj = window\.setTimeout\(\(\) => \{\s*a\.control = animate\(p, destino,/.test(valor) && /a\.control\?\.stop\(\)/.test(valor), 'los valores (CSS 3D): la pose, función de su tramo; quietos a mitad, se asientan; cualquier scroll lo interrumpe')
+// [PULIDO 4] C1 · 4 · el asiento parte de lo que se muestra (`asientoDelValor.ts`) y al volver el scroll lo sigue sin saltar.
+afirmar(/a\.reloj = window\.setTimeout\(\(\) => \{[\s\S]*?a\.control = animate\(s\.mostrado, destino,/.test(valor) && /a\.control\?\.stop\(\)/.test(valor) && /seguirAlScroll\(a\.seguidor, p\)\s*posar\(a\.seguidor\.mostrado\)/.test(valor), 'los valores (CSS 3D): la pose, función de su tramo; quietos a mitad, se asientan; cualquier scroll lo interrumpe (y lo sigue sin saltar)')
 
 // [RETOQUE DEL PIE] P1 · F4 se cerró: la b pasó al producto, la a, la c y la bandera se borraron (lo afirma s44-pie).
 

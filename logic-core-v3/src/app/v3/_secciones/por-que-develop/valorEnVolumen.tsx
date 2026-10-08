@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 
 import { useGiroDeLaMirada } from '../../_componentes/volumen/useGiroDeLaMirada'
 import { ASIENTO } from '../../_lib/titulos3d/repeticiones'
+import { destinoDelAsiento, nuevoSeguidor, seguirAlScroll } from './asientoDelValor'
 
 /**
  * [RETOQUE 3D] 3G · CADA VALOR LLEGA DESDE LA SALA — el bloque entero (el ícono, el título y el texto) con CSS 3D: sale
@@ -58,8 +59,9 @@ export function ValorEnVolumen({ progreso, indice, children }: { readonly progre
   const mirada = useRef<HTMLDivElement | null>(null)
   useGiroDeLaMirada(mirada)
   // [RONDA 2] F2 · la pose es función del progreso; con el scroll quieto, lo que quedó a mitad se asienta (llega o se va del
-  // todo); cualquier scroll lo interrumpe.
-  const asiento = useRef<{ reloj: number | undefined; control: ReturnType<typeof animate> | null }>({ reloj: undefined, control: null })
+  // todo). [PULIDO 4] C1 · 4 · al volver el scroll lo mostrado lo SIGUE sin saltar (`asientoDelValor.ts`): antes saltaba de lo
+  // asentado al lugar del scroll en un cuadro.
+  const asiento = useRef<{ seguidor: ReturnType<typeof nuevoSeguidor>; reloj: number | undefined; control: ReturnType<typeof animate> | null }>({ seguidor: nuevoSeguidor(progreso.get()), reloj: undefined, control: null })
   const posar = (p: number): void => {
     const el = pieza.current
     if (el === null) return
@@ -72,11 +74,16 @@ export function ValorEnVolumen({ progreso, indice, children }: { readonly progre
     a.control?.stop()
     a.control = null
     window.clearTimeout(a.reloj)
-    posar(p)
-    if (p <= 0 || p >= 1) return
-    const destino = p >= 0.5 ? 1 : 0
+    seguirAlScroll(a.seguidor, p)
+    posar(a.seguidor.mostrado)
     a.reloj = window.setTimeout(() => {
-      a.control = animate(p, destino, { duration: ASIENTO.s * Math.abs(destino - p), ease: 'easeOut', onUpdate: posar })
+      // El asiento parte de lo que se muestra (no del scroll) y va a su punta a la velocidad del asiento (`asentar`, lineal).
+      const s = a.seguidor
+      const destino = destinoDelAsiento(s)
+      a.control = animate(s.mostrado, destino, { duration: ASIENTO.s * Math.abs(destino - s.mostrado), ease: 'linear', onUpdate: (v) => {
+        s.mostrado = v
+        posar(v)
+      } })
     }, ASIENTO.quietoMs)
   })
   useEffect(

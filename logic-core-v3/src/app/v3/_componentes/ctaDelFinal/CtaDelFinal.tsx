@@ -5,8 +5,9 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { CTA_EN_VIVO, avisarDelLugar, ctaListo, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
-import { ctaTocable, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { CTA_EN_VIVO, avisarDelLugar, ctaListo, ctaVisibleEnElViaje, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
+import { apareceDeLosValores, ctaTocable, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, DEL LADO DEL DOM ([PULIDO 3B] B1: la del producto, sin bandera). El
@@ -65,14 +66,55 @@ export function MedirLaLista({ caja, progreso, entrada }: { readonly caja: RefOb
 const FUENTE_DEL_CTA = 'font-display font-fuerte uppercase tracking-display leading-titulo text-fluido-display-xl'
 
 /**
- * [PULIDO 3B] B1 · la frase del CTA en la fuente del registro 1 del hero (Archivo, en mayúsculas: la fuente del sitio es la de
- * ese registro, sin minúsculas): la escena la arma en 3D con las mismas letras, en su lugar.
+ * [PULIDO 4] C1 · 5 · ¿hay un viaje del menú en curso? Mientras dura, el CTA no se muestra (`ctaVisibleEnElViaje`): el
+ * recorrido sólo pasa por la sección. `false` en el servidor.
  */
-export const FUENTE_DE_LA_FRASE_DEL_CTA = 'font-[family-name:var(--font-v3-archivo)] uppercase'
+const viajando = (): boolean => viajeEnCurso() !== null
+export function useViajando(): boolean {
+  return useSyncExternalStore(suscribirAlViaje, viajando, () => false)
+}
+
+/** [PULIDO 4] C1 · 5 · el CTA entero (su DOM) sin verse durante un viaje. */
+export const ESCONDIDO_EN_EL_VIAJE = { visibility: 'hidden' } as const
+export const estiloEnElViaje = (enViaje: boolean): typeof ESCONDIDO_EN_EL_VIAJE | undefined => (ctaVisibleEnElViaje(enViaje) ? undefined : ESCONDIDO_EN_EL_VIAJE)
+
+/**
+ * [PULIDO 4] C1 · un valor que la escena transforma en la frase: le dice a la escena dónde está (su caja: ahí mide sus letras
+ * y su ícono, y lo sigue en cada cuadro) y, desde que arranca la transformación (con la escena lista), se esconde: lo dibuja
+ * la escena (con un relevo corto: se apaga mientras la escena lo prende). Sin WebGL, se queda (y se va con la levantada).
+ */
+export function useValorDeLaEscena<T extends HTMLElement>(indice: number, transformacion: MotionValue<number> | null): RefObject<T | null> {
+  const ref = useRef<T | null>(null)
+  const listo = useCtaListo()
+  useEffect(() => {
+    const el = ref.current
+    CTA_EN_VIVO.valores[indice] = el
+    avisarDelLugar()
+    return () => {
+      if (CTA_EN_VIVO.valores[indice] === el) CTA_EN_VIVO.valores[indice] = null
+      avisarDelLugar()
+    }
+  }, [indice])
+  useEffect(() => {
+    const el = ref.current
+    if (el === null || transformacion === null) return undefined
+    // El relevo con la escena: el DOM se apaga mientras la escena lo prende con su tramado (`RELEVO_DE_LOS_VALORES`).
+    const poner = (p: number): void => {
+      el.style.opacity = listo && p > 0 ? (1 - apareceDeLosValores(p)).toFixed(3) : ''
+    }
+    poner(transformacion.get())
+    const quitar = transformacion.on('change', poner)
+    return () => {
+      quitar()
+      el.style.opacity = ''
+    }
+  }, [listo, transformacion])
+  return ref
+}
 
 /**
  * [PULIDO 3B] B1 · un renglón de la frase del CTA: le dice a la escena dónde está (ahí arma la frase) y se esconde cuando la
- * escena ya dibuja sus letras (sin WebGL, se lee).
+ * escena ya dibuja sus letras (sin WebGL, se lee). [PULIDO 4] C1 · en la Chivo del DOM: la escena la arma en Archivo con su copy.
  */
 export function RenglonDeLaFraseDelCta({ indice, children, className }: { readonly indice: number; readonly children: React.ReactNode; readonly className?: string }): React.JSX.Element {
   const listo = useCtaListo()

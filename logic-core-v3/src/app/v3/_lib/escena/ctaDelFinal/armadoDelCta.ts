@@ -4,6 +4,8 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import datosDeLaChivo from '../../../_fuentes/chivo-400-titulos.json'
 import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'
 import datosDeArchivoDeLaFrase from '../../../_fuentes/archivo-400-cta.json'
+import datosDeArchivoDelDestacado from '../../../_fuentes/archivo-700-cta.json'
+import datosDeLosValores from '../../../_fuentes/chivo-400-valores.json'
 import type { ContornoDelLogo } from '../logoDeNoche'
 import { ORBIT_TARGET_Y } from '../probeScene'
 import type { Variante } from '../titulos3d/armado'
@@ -18,15 +20,25 @@ import { nuevaPose, type LetraEnPantalla, type Pose, type PosesDeLaTransformacio
  * letra con sus materiales, en un MARCO frente a la cámara: un plano a la profundidad del centro del logo (como los títulos
  * de `pantalla`), en px CSS de la pantalla. Así la transformación se mueve en la pantalla y el giro de la cámara entre los
  * valores y el CTA no la deforma; en el 0 la frase queda donde la deja el título de volumen (la misma cuenta: su lugar de
- * lectura y la línea de base de su fuente). [PULIDO 3B] B1 · tres grupos: el origen («Seis razones para elegirnos»), la frase
- * del CTA (dos renglones) y el CTA («HABLANOS»), los dos últimos en Archivo, en mayúsculas.
+ * lectura y la línea de base de su fuente). [PULIDO 4] C1 · el cruce de `2411371a`: el origen («Seis razones para
+ * elegirnos», en la Chivo de los títulos) y el CTA («HABLANOS», en Archivo). La metamorfosis de los valores en la frase va en
+ * su propio plano (`lienzo`), pegado a la pantalla desde el arranque: los valores son del DOM, que va en la pantalla.
  */
 
-/** Las fuentes: el origen en la Chivo de los títulos; la frase y el CTA en Archivo (el registro 1 del hero): 400 y 700. */
+/** Las fuentes: el origen en la Chivo de los títulos y el CTA en Archivo (el registro 1 del hero). */
 const FUENTES = {
   chivo: new Font(datosDeLaChivo as FontData),
   archivo: new Font(datosDeArchivo as FontData),
-  archivoDeLaFrase: new Font(datosDeArchivoDeLaFrase as FontData),
+}
+
+/**
+ * [PULIDO 4] C1 · las de la metamorfosis: los valores en la Chivo del DOM (400) y la frase en Archivo con su copy (minúsculas,
+ * acentos): 400 y el destacado en 700 (del TTF entero de Archivo: `scripts-retoque/fuentes-3d.py`).
+ */
+export const FUENTES_DE_LA_METAMORFOSIS = {
+  valores: new Font(datosDeLosValores as FontData),
+  frase: new Font(datosDeArchivoDeLaFrase as FontData),
+  fuerte: new Font(datosDeArchivoDelDestacado as FontData),
 }
 
 export interface Pieza {
@@ -54,19 +66,17 @@ interface Bloque {
   readonly lugar: LugarEnElCuadro
   readonly pin: PinDelLugar
   readonly indice: number
-  /** [PULIDO 3B] B1 · sin texto propio en el DOM (el origen de la lista): centrado en la caja de `el`, con su ancho (em). */
-  readonly centrado: number | null
 }
 
 type LetraViva = { -readonly [K in keyof LetraEnPantalla]: LetraEnPantalla[K] }
 
 export interface ArmadoDelCta {
   readonly marco: THREE.Group
+  /** [PULIDO 4] C1 · el plano de la metamorfosis: el del marco con la cámara viva, desde el arranque. */
+  readonly lienzo: THREE.Group
   readonly origen: Bloque[]
-  readonly frase: Bloque[]
   readonly destino: Bloque
-  readonly letras: { readonly origen: LetraViva[]; readonly frase: LetraViva[]; readonly destino: LetraViva[] }
-  parejas: number[]
+  readonly letras: { readonly origen: LetraViva[]; readonly destino: LetraViva[] }
   readonly poses: PosesDeLaTransformacion
 }
 
@@ -78,60 +88,46 @@ function textoVisible(el: HTMLElement): string {
   return texto.trim()
 }
 
-function armarElBloque(renglon: RenglonArmado, fuente: Font, el: HTMLElement, subida: number, indice: number, color: Variante, marco: THREE.Group, vivo: boolean, centrado: number | null = null): Bloque {
+function armarElBloque(renglon: RenglonArmado, fuente: Font, el: HTMLElement, subida: number, indice: number, color: Variante, marco: THREE.Group, vivo: boolean): Bloque {
   const contorno = contornoDelRenglon(renglon.contornos)
   const piezas = renglon.letras.map((l) => {
     const material = materialDelCta(color, contorno)
     const malla = new THREE.Mesh(l.geometria, material.material)
     malla.position.copy(l.pivote).negate()
     malla.frustumCulled = false
-    if (l.geometria.morphAttributes.position !== undefined) malla.updateMorphTargets()
     const grupo = new THREE.Group()
     grupo.add(malla)
     grupo.visible = false
     marco.add(grupo)
     return { grupo, malla, material, pivote: l.pivote, ancho: l.ancho, alto: l.alto, letra: l.letra }
   })
-  return { el, vivo, fuente, renglon, contorno, piezas, lugar: lugarDeLectura(el, subida), pin: pinDelLugar(el), indice, centrado }
+  return { el, vivo, fuente, renglon, contorno, piezas, lugar: lugarDeLectura(el, subida), pin: pinDelLugar(el), indice }
 }
-
-/** El ancho de un texto (em) con los avances de su fuente. */
-const anchoDe = (fuente: Font, texto: string): number => [...texto].reduce((a, c) => a + (fuente.data.glyphs[c]?.ha ?? 0) / fuente.data.resolution, 0)
 
 const letraViva = (): LetraViva => ({ x: 0, y: 0, cuerpo: 1, ancho: 0, alto: 0, renglon: 0, letra: '' })
 
-/**
- * Arma el CTA: el origen (con su texto del DOM, o sin él, `texto`, centrado en la caja de su elemento), la frase del CTA (sus
- * renglones del DOM: las dos mitades en 400 y el destacado en 700) y «HABLANOS» (700). Todo lo del CTA, en mayúsculas.
- */
-export function armarElCta(origen: readonly RenglonDelCta[], frase: readonly HTMLElement[], destino: HTMLElement, color: Variante, origenVivo: boolean): ArmadoDelCta {
+/** Arma el cruce: el origen («Seis razones», con sus renglones del DOM) y el CTA («HABLANOS», en su lugar del DOM). */
+export function armarElCta(origen: readonly RenglonDelCta[], destino: HTMLElement, color: Variante, origenVivo: boolean): ArmadoDelCta {
   const marco = new THREE.Group()
   marco.name = 'cta del final'
-  const bloquesDelOrigen = origen.map((r, k) => {
-    const texto = r.texto ?? textoVisible(r.el)
-    const renglon = letrasDelRenglon(FUENTES.chivo, texto, r.texto === undefined ? posicionesDelDom(r.el) : null)
-    return armarElBloque(renglon, FUENTES.chivo, r.el, r.subida, k, color, marco, origenVivo || r.texto !== undefined, r.texto === undefined ? null : anchoDe(FUENTES.chivo, texto))
-  })
-  const bloquesDeLaFrase = frase.map((el, k) => {
-    const fuente = k < frase.length - 1 ? FUENTES.archivoDeLaFrase : FUENTES.archivo
-    return armarElBloque(letrasDelRenglon(fuente, textoVisible(el).toUpperCase(), posicionesDelDom(el)), fuente, el, 0, k, color, marco, true)
-  })
-  const bloqueDelDestino = armarElBloque(letrasDelRenglon(FUENTES.archivo, textoVisible(destino).toUpperCase(), posicionesDelDom(destino)), FUENTES.archivo, destino, 0, 0, color, marco, true)
-  const cuantas = (bloques: readonly Bloque[]): number => bloques.reduce((n, b) => n + b.piezas.length, 0)
-  const [enElOrigen, enLaFrase, enElDestino] = [cuantas(bloquesDelOrigen), cuantas(bloquesDeLaFrase), bloqueDelDestino.piezas.length]
+  const lienzo = new THREE.Group()
+  lienzo.name = 'cta del final · la metamorfosis'
+  const bloquesDelOrigen = origen.map((r, k) => armarElBloque(letrasDelRenglon(FUENTES.chivo, textoVisible(r.el), posicionesDelDom(r.el)), FUENTES.chivo, r.el, r.subida, k, color, marco, origenVivo))
+  const bloqueDelDestino = armarElBloque(letrasDelRenglon(FUENTES.archivo, textoVisible(destino), posicionesDelDom(destino)), FUENTES.archivo, destino, 0, 0, color, marco, true)
+  const enElOrigen = bloquesDelOrigen.reduce((n, b) => n + b.piezas.length, 0)
+  const enElDestino = bloqueDelDestino.piezas.length
   return {
     marco,
+    lienzo,
     origen: bloquesDelOrigen,
-    frase: bloquesDeLaFrase,
     destino: bloqueDelDestino,
-    letras: { origen: Array.from({ length: enElOrigen }, letraViva), frase: Array.from({ length: enLaFrase }, letraViva), destino: Array.from({ length: enElDestino }, letraViva) },
-    parejas: [],
-    poses: { origen: Array.from({ length: enElOrigen }, nuevaPose), frase: Array.from({ length: enLaFrase }, nuevaPose), destino: Array.from({ length: enElDestino }, nuevaPose) },
+    letras: { origen: Array.from({ length: enElOrigen }, letraViva), destino: Array.from({ length: enElDestino }, letraViva) },
+    poses: { origen: Array.from({ length: enElOrigen }, nuevaPose), destino: Array.from({ length: enElDestino }, nuevaPose) },
   }
 }
 
 export function soltarElCta(a: ArmadoDelCta): void {
-  for (const b of [...a.origen, ...a.frase, a.destino]) {
+  for (const b of [...a.origen, a.destino]) {
     soltarElRenglon(b.renglon)
     for (const p of b.piezas) p.material.material.dispose()
     b.contorno.textura.dispose()
@@ -144,7 +140,7 @@ export function letrasEnLaPantalla(a: ArmadoDelCta, y: number): void {
     let i = 0
     for (const b of bloques) {
       const caja = b.vivo ? b.el.getBoundingClientRect() : null
-      const lugar = caja === null ? { ...b.lugar, arriba: b.lugar.arriba + corrimiento(b.pin, y) } : { ...b.lugar, izquierda: b.centrado === null ? caja.left : caja.left + (caja.width - b.centrado * b.lugar.cuerpo) / 2, arriba: caja.top }
+      const lugar = caja === null ? { ...b.lugar, arriba: b.lugar.arriba + corrimiento(b.pin, y) } : { ...b.lugar, izquierda: caja.left, arriba: caja.top }
       const base = lineaDeBase(lugar, b.fuente.data)
       const c = lugar.cuerpo
       for (const p of b.piezas) {
@@ -161,7 +157,6 @@ export function letrasEnLaPantalla(a: ArmadoDelCta, y: number): void {
     }
   }
   llenar(a.origen, a.letras.origen)
-  llenar(a.frase, a.letras.frase)
   llenar([a.destino], a.letras.destino)
 }
 
@@ -232,5 +227,5 @@ export function ponerLaPieza(pieza: Pieza, pose: Pose): void {
   pieza.material.aparece.value = pose.aparece
 }
 
-/** Todas las piezas del armado, en orden: las del origen, las de la frase y las del CTA. */
-export const piezasDe = (a: ArmadoDelCta): Pieza[] => [...a.origen.flatMap((b) => b.piezas), ...a.frase.flatMap((b) => b.piezas), ...a.destino.piezas]
+/** Todas las piezas del cruce, en orden: las del origen y las del CTA. */
+export const piezasDe = (a: ArmadoDelCta): Pieza[] => [...a.origen.flatMap((b) => b.piezas), ...a.destino.piezas]

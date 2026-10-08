@@ -1,0 +1,12 @@
+PULIDO 4 — entregables
+
+C1 · El CTA bien hecho
+  Qué: el cruce de 2411371a recuperado («Seis razones» → «HABLANOS») y la metamorfosis de los seis valores en la frase del
+  CTA (?meta=fusion, el producto; ?meta=contorno). Continuo en el scroll (la causa del salto de la reversa: el asiento de los
+  valores), sin el CTA en un viaje, la frase en Archivo con su copy.
+  Archivos: escena/ctaDelFinal/{transformacion,armadoDelCta,EscenaDelCta,enVivo,fusion,contorno,medidaDeLosValores,
+  piezasDeLaMetamorfosis}, _componentes/ctaDelFinal/CtaDelFinal, por-que-develop/{PorQueDevelop,CtaTransformado,
+  valorEnVolumen,asientoDelValor}, escena/entorno, _fuentes/{archivo-400-cta,archivo-700-cta,archivo-700-titulos,
+  chivo-400-valores}.json, scripts-retoque/fuentes-3d.py.
+  Hojas: c1-fusion-1440.png, c1-fusion-390.png, c1-contorno-1440.png, c1-contorno-390.png (0, 20, 32, 50, 70 y 100 %),
+  c1-reducido-1440.png, c1-reducido-390.png.

@@ -192,8 +192,8 @@ const cadaUnoDeUnLugar = (pose: typeof poseDelValor): boolean => [0, 1, 2, 3, 4,
 afirmar(cadaUnoDeUnLugar(poseDelValor) && lugares.size === 6 && DESDE_DONDE_LLEGAN.every((d) => d.z < 0) && DESDE_DONDE_LLEGAN.slice(0, 3).every((d) => d.x < 0) && DESDE_DONDE_LLEGAN.slice(3).every((d) => d.x > 0), 'los seis desde seis lugares distintos (de atrás; los de la izquierda desde la izquierda), girados y apagados, y se asientan sin transformada')
 controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) => poseDelValor(p, 0)) as typeof poseDelValor, cadaUnoDeUnLugar)
 // [PULIDO 2] 5 · con `?cta=capas` el valor se pliega adentro de su llegada (`PliegueDelValor`); sin bandera, la pieza tal cual.
-// [PULIDO 3B] B1 · `capas` se borró: la pieza, tal cual.
-afirmar(/<li>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor /.test(porQue) && !porQue.includes('PliegueDelValor') && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
+// [PULIDO 3B] B1 · `capas` se borró: la pieza, tal cual. [PULIDO 4] C1 · el `li` le da su caja a la escena (`useValorDeLaEscena`).
+afirmar(/<li ref=\{lugar\}>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor /.test(porQue) && !porQue.includes('PliegueDelValor') && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')

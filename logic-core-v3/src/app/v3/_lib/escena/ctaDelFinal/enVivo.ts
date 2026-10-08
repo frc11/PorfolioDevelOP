@@ -1,17 +1,16 @@
 /**
- * [PULIDO 2] 5 · EL CTA DEL FINAL EN VIVO — se llega al CTA con una transformación desde «Seis razones» ([PULIDO 3B] B1: una
- * sola, la del producto: `transformacion.ts`). Esto es lo que el DOM (`_componentes/ctaDelFinal/`) le dice a la escena
- * (`EscenaDelCta.tsx`) y lo que la escena le devuelve. Sin `three`: lo importa el DOM.
+ * [PULIDO 2] 5 · EL CTA DEL FINAL EN VIVO — se llega al CTA con una transformación desde «Seis razones» ([PULIDO 4] C1: la de
+ * `cruce`, recuperada, y la metamorfosis de los seis valores en la frase: `transformacion.ts`). Esto es lo que el DOM
+ * (`_componentes/ctaDelFinal/`) le dice a la escena (`EscenaDelCta.tsx`) y lo que la escena le devuelve. Sin `three`: lo
+ * importa el DOM.
  */
 
 /**
  * Un renglón de texto del DOM que la escena reemplaza: su elemento y lo que sube su pieza en la lectura (fracción del cuadro).
- * [PULIDO 3B] B1 · con `texto`, el elemento sólo da el lugar (el texto no está en el DOM ahí: el origen de la lista, sin copia).
  */
 export interface RenglonDelCta {
   readonly el: HTMLElement
   readonly subida: number
-  readonly texto?: string
 }
 
 export const CTA_EN_VIVO = {
@@ -20,15 +19,20 @@ export const CTA_EN_VIVO = {
    * la caja del CTA entrando en la pantalla. Con movimiento reducido, 1.
    */
   progreso: 0,
-  /** De dónde sale: los renglones de «Seis razones» (en el escenario, los de la frase de volumen; en la lista, su copia). */
+  /** De dónde sale el cruce: los renglones de «Seis razones» (en el escenario, los de la frase de volumen; en la lista, su copia). */
   origen: (): readonly RenglonDelCta[] => [],
+  /**
+   * [PULIDO 4] C1 · los seis valores que se transforman en la frase: en el escenario, la caja de cada valor (la escena mide
+   * sus letras y su ícono y los sigue en cada cuadro); en la lista, la copia de su título en el bloque clavado.
+   */
+  valores: [null, null, null, null, null, null] as (HTMLElement | null)[],
   /** [PULIDO 3B] B1 · los renglones de la frase del CTA en el DOM (sus dos mitades y el destacado): ahí se arma la frase. */
   frase: [null, null, null] as (HTMLElement | null)[],
-  /** El texto del CTA en el DOM (en la fuente del registro 1 del hero): ahí termina la transformación. */
+  /** El texto del CTA en el DOM (en la fuente del registro 1 del hero): ahí termina el cruce. */
   destino: null as HTMLElement | null,
   /** La caja que el DOM mide en cada cuadro: la del escenario (pegajosa) o la de la lista (va con la página). */
   donde: 'escenario' as 'escenario' | 'lista',
-  /** En la lista, cuánto se ve la frase antes de transformarse (`entradaEnLaLista`); en el escenario, 1. */
+  /** En la lista, cuánto se ve el origen antes de transformarse (`entradaEnLaLista`); en el escenario, 1. */
   entrada: 1,
   /** El puntero sobre el CTA (sólo con mouse: con el dedo no hay hover). */
   hover: false,
@@ -67,3 +71,10 @@ export function suscribirAlLugarDelCta(f: () => void): () => void {
     oyentesDelLugar.delete(f)
   }
 }
+
+/**
+ * [PULIDO 4] C1 · 5 · EL CTA NO SE VE EN UN VIAJE: durante un viaje del menú el recorrido pasa por la sección en un segundo
+ * (del pie a Inicio, por ejemplo) y el CTA aparecía y desaparecía. Mientras dura un viaje, nada del CTA se dibuja (ni la
+ * escena ni el DOM): ningún viaje termina adentro de la transformación (los del menú llegan al arranque de las secciones).
+ */
+export const ctaVisibleEnElViaje = (viajando: boolean): boolean => !viajando
