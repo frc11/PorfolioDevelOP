@@ -647,7 +647,7 @@ const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.ts
 // con el alto que sobra); en el teléfono, igual que antes (lado a lado). Lo fija `s54-pulido-3` A2.
 const grillaBien = (f: string): boolean =>
   f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&
-  f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[auto_1fr_auto]' }") &&
+  f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[var(--filas-del-mensaje-del-pie)]' }") &&
   f.includes('className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]"') &&
   /max-escritorio:bg-tinta max-escritorio:px-\[var\(--spacing-3\)\] max-escritorio:text-fondo/.test(f) &&
   /text-cuerpo max-escritorio:text-base leading-texto/.test(f)

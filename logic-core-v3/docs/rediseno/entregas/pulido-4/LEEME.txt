@@ -22,3 +22,7 @@ C3 · El mouse del pie: más rango
   Qué: ±22° y hasta ±12°, con 1,6 veces más ganancia por píxel en vertical; el domo afuera (simétrica); amortiguada 0,45 s
   (debajo del techo de s23: 3,12 contra 3,41).
   Archivos: escena/final/orbitaDelMouse.ts, escena/final/FinalDelPie.tsx.
+
+C4 · Las filas de la tablet del pie, por tokens
+  Qué: las tres grillas de A2 leen sus filas de propiedades del pie (pie.css), registradas; nada visible cambia.
+  Archivos: _estilos/pie.css, cierre/{Cierre,ColumnasDelPie,FormularioDelPie}.tsx, __tests__/s3-registro-de-tokens.ts.

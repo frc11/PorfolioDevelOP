@@ -144,7 +144,7 @@ export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Ele
     // SPRINT PANEL 3 · el newsletter se mudó a Tu Panel: dos columnas llenan el ancho que la grilla de tres dejaba con un hueco.
     // [FINAL 3] Abajo de 1024 queda sola la navegación: el contacto va con la frase.
     // [PULIDO 3] A2 · en la tablet, el contacto toma el alto que le queda a la columna (hasta las redes).
-    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[auto_1fr] escritorio:grid-cols-2">
+    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[var(--filas-de-la-navegacion-del-pie)] escritorio:grid-cols-2">
       {COLUMNAS.map((columna, indice) => (
         <CanalDePieza
           key={columna.id}

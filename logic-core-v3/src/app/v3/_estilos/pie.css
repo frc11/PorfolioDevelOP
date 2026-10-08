@@ -49,6 +49,10 @@
 [data-v3] [data-pieza="pie"] {
   padding-block: var(--spacing-20);
   color: var(--color-tinta);
+  /* [PULIDO 4] C4 · las filas de la tablet (PULIDO 3 · A2), como propiedades del pie: las clases las leen por var(). */
+  --filas-del-cierre: 1fr auto;
+  --filas-de-la-navegacion-del-pie: auto 1fr;
+  --filas-del-mensaje-del-pie: auto 1fr auto;
 }
 
 /* =========================================================================

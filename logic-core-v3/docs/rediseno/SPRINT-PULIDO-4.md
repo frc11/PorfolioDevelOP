@@ -170,3 +170,20 @@ abajo.
 | `s54` B2 · el rango | 15–20° a los costados y hasta 6° arriba y abajo | 20–24° y 11–12° (la ganancia por píxel la fija `s55` C3, con su control) | Por pedido (C3) |
 | `s54` B2 · el gesto | a los 0,3 s, entre el 55 y el 70 % del camino; esperas de 3 y 1,5 s | a `amortiguaS` (0,45 s), lo mismo; esperas de 10 veces el amortiguado | El amortiguado subió por el techo de s23: la misma curva, en su tiempo |
 | `s54` B2 · los controles | la órbita sin amortiguar con el vertical lineal; «±40° y ±6°» | con el vertical nuevo (`gradosVerticales`); «±40° y ±12°» | Los mismos controles con la regla nueva |
+
+### C4 · Las filas de la tablet del pie, por tokens
+
+Las tres grillas de A2 (en `Cierre.tsx`, `ColumnasDelPie.tsx` y `FormularioDelPie.tsx`) tenían sus filas escritas en la clase,
+y `s6-tokens` T5 no acepta un arbitrario sin `var()`. Ahora son propiedades del pie (`pie.css`, en el bloque del pie):
+`--filas-del-cierre` (la primera fila toma lo que sobra, la segunda lo suyo), `--filas-de-la-navegacion-del-pie` (el rótulo y
+lo que se estira) y `--filas-del-mensaje-del-pie` (el rótulo, el área que crece y su pie), con los mismos valores que A2,
+registradas en `s3-registro-de-tokens.ts`. Las clases las leen por `var()`. Nada visible cambia: medido a 768, las tres
+grillas resuelven sus filas igual (786 + 70 px, 229 + 545 px y el campo del mensaje con su área de 281 px). `s6-tokens` y
+`s3-tokens` verdes.
+
+**Las aserciones viejas que cambiaron:**
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s54` A2 · el contacto en columna | las tres filas escritas en la clase | las tres, por `var(--filas-…)` | La misma estructura, por token (C4); `s55` C4 fija los valores (con su control) |
+| `s52-nocturno-final` · el formulario del teléfono | el mensaje con sus filas escritas en la clase | por `var(--filas-del-mensaje-del-pie)` | Ídem |

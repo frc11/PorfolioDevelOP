@@ -11,6 +11,7 @@
  *        pasa del filo del logo al círculo quieto (fuera del oscurecimiento, pulsa con cada onda y fuerte en el golpe).
  *   C3 · el mouse del pie: ±22° y hasta ±12°, con más ganancia por píxel en vertical; sin el techo del domo y debajo del tope
  *        de s23 (lo miden `s54` B2, con el rango nuevo).
+ *   C4 · las filas de la tablet del pie (A2), por tokens registrados: `s6-tokens` T5 vuelve a verde.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-4.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-4/mirar.txt`.
  */
 import { execFileSync } from 'node:child_process'
@@ -343,5 +344,17 @@ const rangoBien = (O: typeof ORBITA_DEL_MOUSE, vertical: Vertical, dom: string):
 const porPixel = (aspecto: number): string => (gradosVerticales(0.02, aspecto) / (0.02 * aspecto) / ORBITA_DEL_MOUSE.horizontal).toFixed(2)
 afirmar(rangoBien(ORBITA_DEL_MOUSE, gradosVerticales, finalDelPieC3), 'el mouse del pie: ±22° y hasta ±12°; la ganancia por píxel vertical, mayor que la horizontal (y el tope antes del borde); más amortiguada', `vertical/horizontal por píxel: ${porPixel(900 / 1440)} (16:10) · ${porPixel(768 / 1024)} (4:3) · amortiguada ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
 controlPositivo('el detector VE la ganancia de la proporción (la misma por píxel, ±11° en toda la altura)', [ORBITA_DEL_MOUSE, ((y: number, aspecto: number) => Math.max(-1, Math.min(1, y)) * aspecto * ORBITA_DEL_MOUSE.horizontal) as Vertical, finalDelPieC3] as const, ([a, b, c]: readonly [typeof ORBITA_DEL_MOUSE, Vertical, string]) => rangoBien(a, b, c))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C4 · Las filas de la tablet del pie, por tokens (s6-tokens T5)')
+
+// Las tres grillas de A2 (`grid-rows` con valores escritos en la clase) pasan a propiedades del pie, registradas en el padrón de
+// `s3-tokens`, con EXACTAMENTE los valores de A2: nada visible cambia (medido a 768: las tres grillas resuelven sus filas).
+const pieCss = leer('_estilos/pie.css')
+const filasBien = (css: string, fuentes: string): boolean => css.includes('--filas-del-cierre: 1fr auto;') && css.includes('--filas-de-la-navegacion-del-pie: auto 1fr;') && css.includes('--filas-del-mensaje-del-pie: auto 1fr auto;') &&
+  !/grid-rows-\[(?!var\()/.test(fuentes) && (fuentes.match(/grid-rows-\[var\(--filas-/g) ?? []).length === 3
+const delPie = ['_secciones/cierre/Cierre.tsx', '_secciones/cierre/ColumnasDelPie.tsx', '_secciones/cierre/FormularioDelPie.tsx'].map((r) => leer(r)).join('\n')
+afirmar(filasBien(pieCss, delPie), 'las tres filas de A2, por tokens del pie con sus mismos valores (sin arbitrarios sin var())')
+controlPositivo('el detector VE una fila escrita en la clase', [pieCss, delPie.replace('grid-rows-[var(--filas-del-cierre)]', ['grid-rows-[1fr', 'auto]'].join('_'))] as const, ([a, b]: readonly [string, string]) => filasBien(a, b))
 
 cerrar('s55-pulido-4')

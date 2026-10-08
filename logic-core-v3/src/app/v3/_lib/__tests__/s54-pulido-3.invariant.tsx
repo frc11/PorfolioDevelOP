@@ -212,10 +212,10 @@ const contactoBien = ([css, cierre, columnas, formulario]: PieA2): boolean => {
   return tinte !== null && campo !== null && Number(tinte[1]) < 66 && Number(campo[1]) < 72 &&
     franja.includes('[data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) {\n    background-color: color-mix(in srgb, var(--color-fondo) var(--vidrio-tinte-de-la-tablet), transparent);') &&
     franja.includes('[data-v3] [data-material="vidrio"]:not([data-seccion="invertida"]) [data-foco="campo"] {\n    background-color: color-mix(in srgb, var(--color-fondo) var(--campo-del-vidrio-en-la-tablet), transparent);') &&
-    cierre.includes('tablet:max-escritorio:grid-rows-[1fr_auto]') && columnas.includes('tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[auto_1fr]') &&
+    cierre.includes('tablet:max-escritorio:grid-rows-[var(--filas-del-cierre)]') && columnas.includes('tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[var(--filas-de-la-navegacion-del-pie)]') &&
     /const CAJA_DEL_CONTACTO = '[^']*tablet:max-escritorio:flex-1'/.test(columnas) &&
     formulario.includes("'grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex") &&
-    formulario.includes("mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[auto_1fr_auto]'") && formulario.includes('tablet:max-escritorio:min-h-full') &&
+    formulario.includes("mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[var(--filas-del-mensaje-del-pie)]'") && formulario.includes('tablet:max-escritorio:min-h-full') &&
     !/(^|\s)tablet:(flex-1|grid-rows|h-full|min-h-full)/m.test(`${cierre}\n${columnas}\n${formulario}`)
 }
 afirmar(contactoBien([vidrioA2, cierreA2, columnasA2, formularioA2]), 'a 768 el contacto es de vidrio (el claro, más liviano; el oscuro, igual) y va en columna hasta las redes; sólo en la tablet', 'medido: de día los rótulos 16,8–17,3:1; con el oscuro forzado, «CONTACTO» 4,83:1 y los rótulos 5,2–6,2:1')
