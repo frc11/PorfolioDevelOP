@@ -367,8 +367,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // Del ancla en adelante los keyframes caen donde dice `finalDelRecorrido.ts`, sobre la
   // recta del tramo `cierre`: cada tiempo llega a su pose y se SOSTIENE mientras la
   // sección muestra lo suyo. El sostén es la misma pose, así que la cámara se clava.
-  // `s23-final` afirma que estos literales son los de ese archivo. [PULIDO 3B] B1 · con siete pantallas (la transformación al
-  // CTA corre en tres): los mismos tiempos de la sección, en otra parte de la recta.
+  // `s23-final` afirma que estos literales son los de ese archivo.
   {
     at: 0.8862,
     name: 'frase · sostén',

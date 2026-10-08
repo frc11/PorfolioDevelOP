@@ -304,3 +304,19 @@ la opacidad del `<main>`:
   alargar el viaje, y eso es el presupuesto aprobado: no lo toqué.
 
 Las tablas: `~/.cache/b4-medicion/pulido-3/b3/uno-tu-panel-hero-{1440,390}.tsv`.
+
+### Cierre de 3B · el `verificar` completo
+
+Lo corrí una vez al final, con el Chrome del banco cerrado: 61 pasos y **10 grupos rojos, no 8**. Los 8 de la base (s1, s2,
+s3, s4, s5, s7, s8 y s17, con sus 14 invariantes) más dos nuevos:
+- **s7e (`s7e-export-sprites`), de B1: arreglado.** El exportador del editor de la coreografía emite el bloque de
+  `CHOREO_KEYFRAMES` con sus comentarios, y tiene que dar el archivo byte por byte. En B1 le sumé dos renglones de comentario
+  al lado de los literales recalculados: daba 10632 bytes contra 10777. Volví el comentario al original (lo que decía ya está
+  en el log de B1). Quedó verde (11/0) y `s23` sigue verde.
+- **s6 (`s6-tokens` T5), de A2: no lo toqué.** A2 sumó tres valores arbitrarios que no consumen un token: `grid-rows-[1fr_auto]`
+  (`Cierre.tsx`), `grid-rows-[auto_1fr]` (`ColumnasDelPie.tsx`) y `grid-rows-[auto_1fr_auto]` (`FormularioDelPie.tsx`). El
+  gate de A2 no corrió `s6-tokens` (es el segundo que se le escapó: el primero está en el log de B0). A2 está aprobado y «no se
+  toca». Arreglarlo sin cambiar lo que se ve pide reemplazar esas filas por otra estructura (por ejemplo, una columna flex con
+  el hijo que llena) o por un token: queda para que decidas.
+
+`s8-chrome` corrió adentro de s8 sin el build de producción: sus 2 rojos piden el build («0 chunks»). No corrí el build.
