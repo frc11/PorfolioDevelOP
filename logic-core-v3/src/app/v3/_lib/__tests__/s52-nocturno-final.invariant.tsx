@@ -781,7 +781,8 @@ const porQueD3 = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.t
 const ctaD3B = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
 const centrado = (f: string): boolean =>
   f.includes('className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"') &&
-  f.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'") &&
+  // [PULIDO 5] D1 · «HABLANOS» en proporción con la frase, que creció: el lugar entre 2,8 (era entre 3,3); el mismo tope del display.
+  f.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/2.8))]'") &&
   f.includes('<div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">') &&
   ALTO_DEL_CTA_EN_LISTA_SVH === 100 && LUGAR_DEL_CTA_SVH > 30
 afirmar(centrado(ctaD3B), '  el CTA al centro de la pantalla en escritorio (en el lugar que deja el logo, que da el tamaño) y en la lista (una pantalla, centrado en todos los anchos); «Hablanos» al display', `lugar ${String(LUGAR_DEL_CTA_SVH)} svh`)

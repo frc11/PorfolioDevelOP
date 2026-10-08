@@ -3,6 +3,7 @@ import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 
 import { VOLUMEN_DEL_TITULO } from '../titulos3d/geometria'
+import { TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from './fuentesDelCta'
 import type { MetricasDeLaFuente, RenglonDeLaFrase } from './medidaDeLosValores'
 import { baseEnLaCaja } from './medidaDeLosValores'
 
@@ -24,22 +25,22 @@ export interface LetraDeLaFrase {
   readonly orden: number
 }
 
-const avance = (f: Font, c: string): number => (f.data.glyphs[c]?.ha ?? 0) / f.data.resolution
-
-/** Las letras de la frase, renglón por renglón, centradas en su caja del DOM y con la línea de base de su fuente. */
-export function letrasDeLaFrase(renglones: readonly RenglonDeLaFrase[], normal: Font, fuerte: Font): LetraDeLaFrase[] {
+/**
+ * Las letras de la frase, renglón por renglón, centradas en su caja del DOM y con la línea de base de su fuente. [PULIDO 5] D1 ·
+ * con el kerning de la fuente y el interletrado de display (`avancesDe`), y del cuerpo del DOM salvo que algún renglón no entre
+ * en `anchoMaximo` (px): entonces todos se achican juntos, centrados en su renglón.
+ */
+export function letrasDeLaFrase(renglones: readonly RenglonDeLaFrase[], normal: FuenteConKerning, fuerte: FuenteConKerning, anchoMaximo: number): LetraDeLaFrase[] {
+  const medidos = renglones.map((r) => ({ r, f: r.fuerte ? fuerte : normal, a: avancesDe(r.fuerte ? fuerte : normal, r.texto, r.fuerte ? TRACKING_DEL_CTA.fuerte : TRACKING_DEL_CTA.frase) }))
+  const k = Math.min(1, ...medidos.map(({ r, a }) => anchoMaximo / Math.max(1e-6, a.ancho * r.cuerpo)))
   const salida: { c: string; x: number; base: number; cuerpo: number; fuerte: boolean }[] = []
-  for (const r of renglones) {
-    const f = r.fuerte ? fuerte : normal
-    const ancho = [...r.texto].reduce((a, c) => a + avance(f, c), 0) * r.cuerpo
-    let x = r.izquierda + (r.ancho - ancho) / 2
-    const base = baseEnLaCaja(r.arriba, r.alto, r.cuerpo, f.data as MetricasDeLaFuente)
-    for (const c of r.texto) {
-      if (c.trim() !== '') salida.push({ c, x, base, cuerpo: r.cuerpo, fuerte: r.fuerte })
-      x += avance(f, c) * r.cuerpo
-    }
+  for (const { r, f, a } of medidos) {
+    const cuerpo = r.cuerpo * k
+    const x0 = r.izquierda + (r.ancho - a.ancho * cuerpo) / 2
+    const base = baseEnLaCaja(r.arriba, r.alto, cuerpo, f.fuente.data as MetricasDeLaFuente)
+    ;[...r.texto].filter((c) => c.trim() !== '').forEach((c, i) => salida.push({ c, x: x0 + a.x[i] * cuerpo, base, cuerpo, fuerte: r.fuerte }))
   }
-  return salida.map((l, k) => ({ ...l, orden: salida.length <= 1 ? 0 : k / (salida.length - 1) }))
+  return salida.map((l, i) => ({ ...l, orden: salida.length <= 1 ? 0 : i / (salida.length - 1) }))
 }
 
 /** Un contorno con sus tramos rectos partidos (ninguno más largo que `maximo`), sin repetir el primer punto al final. */

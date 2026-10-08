@@ -2,12 +2,12 @@
  * [PULIDO 4] C1 · LA TRANSFORMACIÓN AL CTA DEL FINAL — dos movimientos a la vez, sobre el mismo progreso (0 a 1, función del
  * scroll), que terminan juntos:
  *
- *   EL CRUCE (el de `?cta=cruce` de PULIDO 2, recuperado tal cual: `2411371a`) · «Seis razones para elegirnos» se extruye
- *     hacia la cámara y se agranda alrededor de la contraforma de su «o» hasta que la cubre entera: del otro lado está
- *     «HABLANOS», que se asienta en su lugar.
- *   LA METAMORFOSIS (lo nuevo) · los seis valores se van un poco hacia atrás, se desarman y se rearman en la frase del CTA
- *     («Este sitio empezó con una charla. El tuyo también.»), que vuelve adelante y se acomoda arriba de «HABLANOS».
- *     Dos técnicas, con `?meta=` (`fusion`, la del producto, y `contorno`): `fusion.ts` y `contorno.ts`. Acá, sus tiempos.
+ *   [PULIDO 5] D1 · EL GIRO (el de `?cta=giro` de PULIDO 2, recuperado de `2411371a`; reemplaza al cruce, que se borró) ·
+ *     «Seis razones para elegirnos» se junta en un cartel de dos caras, del ancho del CTA, que gira sobre Y: en el medio del
+ *     giro sólo se ve el canto y del otro lado está «HABLANOS», que se asienta en su lugar.
+ *   LA METAMORFOSIS · los seis valores se van un poco hacia atrás, se desarman y se rearman en la frase del CTA («Este sitio
+ *     empezó con una charla. El tuyo también.»), que vuelve adelante y se acomoda arriba de «HABLANOS». Dos técnicas, con
+ *     `?meta=` (`contorno`, la del producto desde PULIDO 5, y `fusion`): `contorno.ts` y `fusion.ts`. Acá, sus tiempos.
  *
  * FUNCIÓN PURA del progreso: reversible, igual a cualquier velocidad y en cualquier dirección (`s55` lo recorre en pasos
  * chicos, ida y vuelta). En px CSS de la pantalla (x a la derecha, y hacia abajo, z hacia la cámara) y en el cuerpo de cada
@@ -39,6 +39,11 @@ export interface EscenaDeLaTransformacion {
   /** «HABLANOS». */
   readonly destino: readonly LetraEnPantalla[]
   readonly pantalla: { readonly ancho: number; readonly alto: number }
+  /**
+   * Dónde se arma el cartel del giro (px de alto: su centro). [PULIDO 5] D1 · en las dos ramas, sobre el lugar del CTA
+   * (`armadoSobreElCta`; en `2411371a` el escenario lo armaba a 0,27 del alto y bajaba: hoy ahí se arma la frase).
+   */
+  readonly armado: number
 }
 
 /** Cómo está una pieza: dónde (px), cuánto gira sobre X y sobre Y (rad), su cuerpo, cuánto se estira su espesor y cuánto se ve. */
@@ -55,21 +60,19 @@ export interface Pose {
 
 export const nuevaPose = (): Pose => ({ x: 0, y: 0, z: 0, rx: 0, ry: 0, escala: 1, profundidad: 1, aparece: 0 })
 
-/** Lo que la escena dibuja del cruce en un cuadro: una pose por letra del origen y del destino. */
+/** Lo que la escena dibuja del giro en un cuadro: una pose por letra del origen y del destino. */
 export interface PosesDeLaTransformacion {
   readonly origen: Pose[]
   readonly destino: Pose[]
 }
 
 /**
- * Los tiempos del cruce (los de PULIDO 2, `2411371a`): la extrusión hacia la cámara (hasta cuántas veces su espesor), el viaje
- * por la «o», su contraforma (fracción del ancho de la «o»), cuándo la contraforma cubre la pantalla, el tope del espesor en
- * pantalla (cuerpos) y el asiento de «HABLANOS». [PULIDO 4] C1 · `seVa`: la frase se apaga (con el tramado) mientras su
- * contraforma pasa de cubrir el `seVa[0]` al `seVa[1]` de la diagonal: con la «o» centrada, ya no queda tinta en la pantalla
- * (antes se apagaba de golpe en el 0,5: el mismo cuadro, sin el salto que `s55` no deja).
+ * [PULIDO 5] D1 · los tiempos del GIRO (los de PULIDO 2, `2411371a`): lo que tarda en juntarse el cartel, cuándo gira y cuánto,
+ * cuánto tarda en asentarse la cara de atrás («HABLANOS», que llega de atrás del cartel), el espesor del cartel (cuerpos del
+ * CTA) y el interlineado de sus renglones. Lo único que cambió: `baja` dura 0,34 (era 0,18) y termina en 1, con la frase.
  */
 export const TRANSFORMACION = {
-  cruce: { extruye: 0.22, profundo: 6, desde: 0.16, dura: 0.54, contraforma: 0.3, seVa: [0.42, 0.5] as const, topeDelEspesor: 3, asienta: 0.3 },
+  giro: { junta: 0.28, desde: 0.28, gira: 0.4, baja: [0.66, 0.34] as const, espesor: 0.35, renglon: 1.12 },
 } as const
 
 const acotar = (x: number): number => Math.min(1, Math.max(0, x))
@@ -103,72 +106,88 @@ export function cajaDe(letras: readonly LetraEnPantalla[]): CajaEnPantalla {
   return { x: (x0 + x1) / 2, y: (y0 + y1) / 2, ancho: x1 - x0, alto: y1 - y0 }
 }
 
-/** La «o» por la que entra la cámara (la primera de la frase) y el radio de su contraforma (px). */
-function ojoDe(origen: readonly LetraEnPantalla[]): { readonly x: number; readonly y: number; readonly radio: number } {
-  const o = origen.find((l) => l.letra === 'o') ?? origen[Math.floor(origen.length / 2)]
-  return o === undefined ? { x: 0, y: 0, radio: 1 } : { x: o.x, y: o.y, radio: Math.max(1, TRANSFORMACION.cruce.contraforma * o.ancho) }
-}
-
-/** `cruce`: cuántas veces se agranda la frase (alrededor de la «o») con el progreso `p`: hasta que la contraforma cubre la pantalla. */
-export function zoomDelCruce(p: number, radio: number, pantalla: { readonly ancho: number; readonly alto: number }): number {
-  const X = TRANSFORMACION.cruce
-  const tope = Math.hypot(pantalla.ancho, pantalla.alto) / radio
-  return tope ** suave(tramo(p, X.desde, X.dura))
-}
-
 /**
- * Las poses del cruce con el progreso `p` (las escribe en `s`, sin reservar). En 0, el origen en su lugar y el destino sin
- * dibujar; en 1, el destino en su lugar y el origen sin dibujar.
+ * Las poses del giro con el progreso `p` (las escribe en `s`, sin reservar): la de `2411371a`. En 0, el origen en su lugar y el
+ * destino sin dibujar; en 1, el destino en su lugar y el origen sin dibujar.
  */
 export function posesDe(progreso: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion): void {
-  const X = TRANSFORMACION.cruce
+  const G = TRANSFORMACION.giro
   const p = acotar(progreso)
   const c = cajaDe(e.destino)
-  const ojo = ojoDe(e.origen)
-  const extruye = suave(tramo(p, 0, X.extruye))
-  const zoom = zoomDelCruce(p, ojo.radio, e.pantalla)
-  const viaje = suave(tramo(p, X.desde, X.dura))
-  const centro = { x: entre(ojo.x, c.x, viaje), y: entre(ojo.y, c.y, viaje) }
-  const hueco = ojo.radio * zoom
-  const diagonal = Math.hypot(e.pantalla.ancho, e.pantalla.alto)
-  // La frase se va cuando la contraforma ya cubre la pantalla entera (la cámara pasó del otro lado).
-  const queda = 1 - tramo(hueco / diagonal, X.seVa[0], X.seVa[1] - X.seVa[0])
-  const espesor = 1 + (X.profundo - 1) * extruye
+  // El cartel: los renglones del origen, uno abajo del otro y centrados en el CTA, del ancho del CTA.
+  const renglones = [...new Set(e.origen.map((l) => l.renglon))].sort((a, b) => a - b)
+  const cajas = renglones.map((r) => cajaDe(e.origen.filter((l) => l.renglon === r)))
+  const k = c.ancho / Math.max(1, ...cajas.map((b) => b.ancho))
+  const cuerpo = e.origen[0]?.cuerpo ?? 1
+  const alto = cuerpo * k * G.renglon
+  const junta = suave(tramo(p, 0, G.junta))
+  const angulo = Math.PI * suave(tramo(p, G.desde, G.gira))
+  const baja = suave(tramo(p, G.baja[0], G.baja[1]))
+  const [cos, sin] = [Math.cos(angulo), Math.sin(angulo)]
+  // El cartel se arma en `armado` y gira ahí; al final la cara de atrás se asienta (y, si se armó en otro lugar, baja al del CTA).
+  const corrido = (e.armado - c.y) * (1 - baja)
   e.origen.forEach((l, i) => {
-    const escala = l.cuerpo * zoom
-    // El espesor crece hacia la cámara (la cara de adelante se acerca), con un tope en pantalla: nunca llega a la cámara.
-    const profundidad = (espesor * Math.min(zoom, X.topeDelEspesor)) / zoom
-    const z = (espesor - 1) * 0.14 * l.cuerpo * Math.min(zoom, X.topeDelEspesor)
-    poner(s.origen[i], centro.x + (l.x - ojo.x) * zoom, centro.y + (l.y - ojo.y) * zoom, z, 0, 0, escala, profundidad, queda)
+    const r = renglones.indexOf(l.renglon)
+    const b = cajas[r]
+    const enElCartel = { x: c.x + (l.x - b.x) * k, y: e.armado + (r - (renglones.length - 1) / 2) * alto + (l.y - b.y) * k }
+    const dx = entre(l.x, enElCartel.x, junta) - c.x
+    poner(s.origen[i], c.x + dx * cos, entre(l.y, enElCartel.y, junta), -dx * sin, 0, angulo, entre(l.cuerpo, l.cuerpo * k, junta), 1, angulo < Math.PI / 2 ? 1 : 0)
   })
-  // El CTA, detrás: se ve recién cuando la contraforma lo contiene entero, y se asienta (viene un poco de atrás).
-  const radioDelCta = Math.hypot(c.ancho, c.alto) / 2
-  const revela = suave(acotar((hueco - 0.8 * radioDelCta) / (0.5 * radioDelCta)))
-  const asienta = frena(tramo(p, 1 - X.asienta, X.asienta))
+  // La cara de atrás: el CTA espejado y detrás del cartel; con el giro entero queda derecho y adelante.
   e.destino.forEach((d, j) => {
-    poner(s.destino[j], d.x, d.y, -(1 - asienta) * 1.2 * d.cuerpo, 0, 0, d.cuerpo * entre(0.86, 1, asienta), 1, revela)
+    const dx = -(d.x - c.x)
+    const dz = -G.espesor * d.cuerpo
+    poner(s.destino[j], c.x + dx * cos + dz * sin, d.y + corrido, (-dx * sin + dz * cos) * (1 - baja), 0, angulo + Math.PI, d.cuerpo, 1, angulo >= Math.PI / 2 ? 1 : 0)
   })
 }
 
 /**
- * [PULIDO 4] C1 · LA METAMORFOSIS, sus variantes (`?meta=`): `fusion` (la del producto) — las mallas de los valores se derriten
- * con ruido hacia la zona de la frase y la frase nace de ese estado deformado, con un disolvente de umbral de ruido entre las
- * dos (en el medio son una sola masa); `contorno` — los contornos de las letras de los valores se interpolan con turbulencia
- * hasta los de la frase (remuestreados a la misma cantidad de puntos) y la frase crece en espesor al asentarse.
+ * [PULIDO 5] D1 · dónde se arma el cartel (el `armado` del giro, px de alto): con su borde de abajo en el de «HABLANOS». El
+ * cartel tiene dos renglones del ancho del CTA y, centrado en él, su renglón de abajo pisaba en la pantalla la cabeza del logo
+ * (que en la pose C arranca debajo del lugar del CTA); al girar, la mitad que viene hacia la cámara le pasaba por delante.
+ * Así nada del cartel baja del CTA: «HABLANOS» aparece un poco más arriba y baja a su lugar con `baja` (el gesto de
+ * `2411371a` para el cartel armado en otro lugar).
  */
-export const VARIANTES_DE_LA_METAMORFOSIS = ['fusion', 'contorno'] as const
+export function armadoSobreElCta(origen: readonly LetraEnPantalla[], destino: readonly LetraEnPantalla[]): number {
+  const G = TRANSFORMACION.giro
+  const c = cajaDe(destino)
+  const renglones = [...new Set(origen.map((l) => l.renglon))].sort((a, b) => a - b)
+  const cajas = renglones.map((r) => cajaDe(origen.filter((l) => l.renglon === r)))
+  const k = c.ancho / Math.max(1, ...cajas.map((b) => b.ancho))
+  const alto = (origen[0]?.cuerpo ?? 1) * k * G.renglon
+  const ultimo = cajas[cajas.length - 1]
+  return c.y + c.alto / 2 - ((renglones.length - 1) / 2) * alto - ((ultimo?.alto ?? 0) * k) / 2
+}
+
+/** [PULIDO 5] D1 · los anchos de Archivo en la frase y el CTA (`?ancho=`): `normal` (wdth 100) y `expandido` (120). */
+export const ANCHOS_DEL_CTA = ['normal', 'expandido'] as const
+export type AnchoDelCta = (typeof ANCHOS_DEL_CTA)[number]
+/** El ancho sin bandera: el que mejor se lee como título (con el ancho de la pantalla de tope, `normal` deja el cuerpo más grande). */
+export const ANCHO_DEL_CTA: AnchoDelCta = 'normal'
+
+/**
+ * [PULIDO 4] C1 · LA METAMORFOSIS, sus variantes (`?meta=`): `contorno` (la del producto desde PULIDO 5) — los contornos de las
+ * letras de los valores se interpolan con turbulencia hasta los de la frase (remuestreados a la misma cantidad de puntos y
+ * apareados por posición y área) y la frase crece en espesor al asentarse; `fusion` — las mallas de los valores se derriten
+ * con ruido hacia la zona de la frase y la frase nace de ese estado deformado, con un disolvente de umbral de ruido entre las
+ * dos (en el medio son una sola masa).
+ */
+export const VARIANTES_DE_LA_METAMORFOSIS = ['contorno', 'fusion'] as const
 export type VarianteDeLaMetamorfosis = (typeof VARIANTES_DE_LA_METAMORFOSIS)[number]
 
 /**
  * Los tiempos de la metamorfosis (fracciones del progreso; `[desde, dura]`). Los valores se van atrás (`atras`, hasta `ATRAS`
  * de la distancia del plano: «poco»), cambian (`cambia`: se derriten o cambian de contorno), se cruzan con la frase (`corte`, el
  * disolvente de `fusion`), la frase se limpia (`limpia`) y vuelve adelante (`adelante`), y en `contorno` crece su espesor
- * (`espesor`). Lo último termina en 1, como «HABLANOS» (`TRANSFORMACION.cruce.asienta`): todo junto.
+ * (`espesor`). Lo último termina en 1, como «HABLANOS» (`TRANSFORMACION.giro.baja`): todo junto. [PULIDO 5] D1 · `contorno`: la
+ * turbulencia es una campana suave (`turbulencia`: sube y baja y es CERO exacto desde 0,6, antes de que termine el cambio);
+ * los agujeros de la frase se abren al llegar cada letra y, los que faltan, en `limpia`. Formada, la frase queda rígida: lo
+ * que sigue es venir adelante y crecer en espesor, sin ondular.
  */
 export const METAMORFOSIS = {
   atras: [0, 0.25],
   fusion: { derrite: [0.06, 0.16], cambia: [0.12, 0.36], corte: [0.32, 0.26], limpia: [0.44, 0.44], adelante: [0.6, 0.4] },
-  contorno: { cambia: [0.08, 0.56], limpia: [0.64, 0.24], adelante: [0.64, 0.36], espesor: [0.66, 0.34] },
+  contorno: { cambia: [0.06, 0.58], turbulencia: [0.08, 0.52], limpia: [0.6, 0.16], adelante: [0.62, 0.38], espesor: [0.64, 0.36] },
 } as const
 
 /**
@@ -216,7 +235,10 @@ export function estadoDeLaMetamorfosis(v: VarianteDeLaMetamorfosis, progreso: nu
   }
   const C = METAMORFOSIS.contorno
   const cambia = tramo(p, C.cambia[0], C.cambia[1])
-  return { atras, cambia, corte: cambia >= 1 ? 1 : 0, sucia: 1 - tramo(p, C.limpia[0], C.limpia[1]), adelante: frena(tramo(p, C.adelante[0], C.adelante[1])), espesor: suave(tramo(p, C.espesor[0], C.espesor[1])), turbulencia: cambia >= 1 ? 0 : Math.sin(Math.PI * cambia) }
+  // La campana: sin² sobre su tramo (sube y baja con derivada cero en las dos puntas) y cero exacto afuera.
+  const t = tramo(p, C.turbulencia[0], C.turbulencia[1])
+  const turbulencia = t <= 0 || t >= 1 ? 0 : Math.sin(Math.PI * t) ** 2
+  return { atras, cambia, corte: cambia >= 1 ? 1 : 0, sucia: 1 - suave(tramo(p, C.limpia[0], C.limpia[1])), adelante: frena(tramo(p, C.adelante[0], C.adelante[1])), espesor: suave(tramo(p, C.espesor[0], C.espesor[1])), turbulencia }
 }
 
 /**

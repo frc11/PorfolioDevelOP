@@ -48,8 +48,11 @@ function FraseDelCta({ claseDelTexto }: { readonly claseDelTexto?: string }): Re
   )
 }
 
-/** [PULIDO 2] 5 · el CTA en volumen, en la fuente del registro 1 del hero, al tamaño del botón grande (con el mismo tope). */
-const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.3))]'
+/**
+ * [PULIDO 2] 5 · el CTA en volumen, en la fuente del registro 1 del hero, al tamaño del botón grande (con el mismo tope).
+ * [PULIDO 5] D1 · en proporción con la frase, que creció: 1,3 veces su cuerpo (el lugar entre 2,8; era entre 3,3).
+ */
+const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/2.8))]'
 
 /**
  * [PULIDO 2] 5 · EL CTA CON SU TRANSFORMACIÓN, en el escenario: centrado; la escena dibuja la frase (desde los valores) y el CTA

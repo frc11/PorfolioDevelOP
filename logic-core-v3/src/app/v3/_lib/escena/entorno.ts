@@ -62,7 +62,7 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
-import { VARIANTES_DE_LA_METAMORFOSIS, type VarianteDeLaMetamorfosis } from './ctaDelFinal/transformacion'
+import { ANCHOS_DEL_CTA, VARIANTES_DE_LA_METAMORFOSIS, type AnchoDelCta, type VarianteDeLaMetamorfosis } from './ctaDelFinal/transformacion'
 
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
@@ -94,9 +94,12 @@ export interface Pruebas {
   readonly golpe: 'a' | 'b' | 'no'
   /**
    * [PULIDO 4] C1 · `meta=fusion|contorno`: la técnica de la metamorfosis de los seis valores en la frase del CTA del final
-   * (`ctaDelFinal/transformacion.ts`). Sin bandera, `fusion` (la del producto).
+   * (`ctaDelFinal/transformacion.ts`). Sin bandera, `fusion` (la del producto). [PULIDO 5] D1 · sin bandera, `contorno` (ganó;
+   * `fusion` queda con bandera hasta que se confirme).
    */
   readonly meta: VarianteDeLaMetamorfosis | 'no'
+  /** [PULIDO 5] D1 · `ancho=normal|expandido`: el ancho de Archivo en la frase y el CTA del final (wdth 100 o 120). */
+  readonly ancho: AnchoDelCta | 'no'
 }
 
 /**
@@ -114,10 +117,10 @@ export interface Pruebas {
  * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
  * borró: `cruce` es el producto. [PULIDO 4] C2: `energia=intensa` se borró (la energía de B0 es la del producto).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', golpe: 'no', meta: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', golpe: 'no', meta: 'no', ancho: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'golpe', 'meta'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'golpe', 'meta', 'ancho'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -132,6 +135,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     golpe: unoDe<'a' | 'b'>(['a', 'b'], valor('golpe')),
     meta: unoDe<VarianteDeLaMetamorfosis>(VARIANTES_DE_LA_METAMORFOSIS, valor('meta')),
+    ancho: unoDe<AnchoDelCta>(ANCHOS_DEL_CTA, valor('ancho')),
   }
 }
 

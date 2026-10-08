@@ -54,9 +54,8 @@ import { MOIRE_FAR_RADIUS } from '../escena/probeMoire'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { ARRIBA_DEL_CTA_QUIETO_SVH } from '../../_secciones/por-que-develop/geometria'
 import { CTA } from '../../_secciones/por-que-develop/contenido'
-import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
-import ARCHIVO_400_CTA from '../../_fuentes/archivo-400-cta.json'
-import ARCHIVO_700_CTA from '../../_fuentes/archivo-700-cta.json'
+import ARCHIVO_400_CTA from '../../_fuentes/archivo-expandido-cta.json'
+import ARCHIVO_700_CTA from '../../_fuentes/archivo-expandido-cta-fuerte.json'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, duracionDelRebobinado, expansionDeLaLuz, quedaDelRebobinado } from '../escena/final/recorridoDelFinal'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -355,7 +354,8 @@ titulo('B1 · El CTA: gana «cruce»; todo en Archivo y en 3D; la metamorfosis d
 // transformación en sus dos ramas (que las otras cuatro y el CTA de antes no dejan código lo fija `s53` §5).
 const pruebasDeLaEscena = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx'))
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
-const productoBien = (pruebas: string, pq: string): boolean => pruebas.includes('<EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} />') && !/conElCta\s*&&/.test(pruebas) &&
+// [PULIDO 5] D1 · la escena del CTA recibe además las medidas del logo (`stats`): con ellas arma la cámara del nudo `cta`.
+const productoBien = (pruebas: string, pq: string): boolean => pruebas.includes('<EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} stats={props.stats} />') && !/conElCta\s*&&/.test(pruebas) &&
   pq.includes('<CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />') && pq.includes('<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />') && !/variante/.test(pq)
 afirmar(productoBien(pruebasDeLaEscena, porQue), 'el CTA con su transformación es el producto: sin bandera, en el escenario y en la lista')
 controlPositivo('el detector VE el CTA atrás de una bandera', [pruebasDeLaEscena.replace('<EscenaDelCta keyLightRef', '{conElCta && <EscenaDelCta keyLightRef'), porQue] as const, ([a, b]: readonly [string, string]) => productoBien(a, b))
@@ -364,12 +364,14 @@ controlPositivo('el detector VE el CTA atrás de una bandera', [pruebasDeLaEscen
 // se reordenaban en la frase, todo en mayúsculas) se revirtió: vuelve el cruce de PULIDO 2 (`2411371a`) y la frase la arman
 // los seis valores. Lo que fijaban acá (el CTA en mayúsculas en Archivo y en el DOM; la metamorfosis letra por letra) lo
 // reemplaza `s55-pulido-4` C1 (el cruce, la metamorfosis, la fuente con su copy); lo que queda de B1: el CTA en Archivo y en 3D.
+// [PULIDO 5] D1 · las fuentes de la frase y del CTA son las del TTF variable (el ancho del producto: la frase en 600 y el
+// destacado y «HABLANOS» en 900, en el mismo JSON); los nombres de acá quedan por la historia.
 type Glifos = { readonly glyphs: Record<string, unknown> }
 const tieneTodo = (fuente: Glifos, texto: string): boolean => [...texto].every((c) => c.trim() === '' || fuente.glyphs[c] !== undefined)
 const ctaTransformado = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
 const archivoBien = (f400: Glifos, f700: Glifos, titulos: Glifos): boolean => tieneTodo(f400, CTA.frase) && tieneTodo(f700, CTA.destacado) && tieneTodo(titulos, CTA.rotulo.toUpperCase())
-afirmar(archivoBien(ARCHIVO_400_CTA as Glifos, ARCHIVO_700_CTA as Glifos, ARCHIVO_700 as Glifos), '  todo el CTA en Archivo y en 3D: la frase (400) y el destacado (700) con su copy, «HABLANOS» (700)')
-controlPositivo('  el detector VE la frase de B1 (sólo mayúsculas)', [{ glyphs: Object.fromEntries([...CTA.frase.toUpperCase()].map((c) => [c, 1])) }, ARCHIVO_700_CTA as Glifos, ARCHIVO_700 as Glifos] as const, ([a, b, c]: readonly [Glifos, Glifos, Glifos]) => archivoBien(a, b, c))
+afirmar(archivoBien(ARCHIVO_400_CTA as Glifos, ARCHIVO_700_CTA as Glifos, ARCHIVO_700_CTA as Glifos), '  todo el CTA en Archivo y en 3D: la frase (600) y el destacado (900) con su copy, «HABLANOS» (900)')
+controlPositivo('  el detector VE la frase de B1 (sólo mayúsculas)', [{ glyphs: Object.fromEntries([...CTA.frase.toUpperCase()].map((c) => [c, 1])) }, ARCHIVO_700_CTA as Glifos, ARCHIVO_700_CTA as Glifos] as const, ([a, b, c]: readonly [Glifos, Glifos, Glifos]) => archivoBien(a, b, c))
 
 // MÁS LENTO («que se disfrute»): en el escenario la transformación corre en tres pantallas de scroll (antes, una); en la lista,
 // en una (antes, media: el bloque mide tres pantallas y el logo baja en la primera mitad de su recorrido). REGLA DE ALTURAS: la

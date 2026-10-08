@@ -1,0 +1,13 @@
+PULIDO 5 · las entregas (el log: docs/rediseno/SPRINT-PULIDO-5.md; el invariante: npm run test:s56-pulido-5)
+
+D1 · El CTA
+  Qué: el giro de 2411371a en lugar del cruce; la frase y «HABLANOS» anclados en el mundo (el plano de la cámara del nudo cta)
+  con el enlace del DOM en su plano (A1); Archivo del TTF variable (wdth 100, ?ancho=expandido 120), la frase en 600 y el
+  destacado y «HABLANOS» en 900, con kerning, más grande; contorno de producto: emparejado por posición y área (método
+  húngaro), remuestreo equidistante con el arranque alineado, turbulencia en campana que llega a cero, topología fija con las
+  tapas por stencil y la malla exacta al final (0 ms de CPU por cuadro, era 8–11); fusion sin manchas al final.
+  Archivos: escena/ctaDelFinal/{transformacion,armadoDelCta,contorno,fusion,EscenaDelCta,piezasDeLaMetamorfosis}.ts(x),
+  nuevos fuentesDelCta.ts y planosDelCta.ts; escena/{entorno,PruebasDeLaEscena,configuracionDelCanvas}.ts(x);
+  _secciones/por-que-develop/{CtaTransformado,PorQueDevelop}.tsx; _fuentes/archivo-{normal,expandido}-cta(-fuerte).json (se
+  borran archivo-400-cta.json y archivo-700-cta.json); scripts-retoque/fuentes-3d.py.
+  Hojas: d1-contorno-1440.png, d1-contorno-390.png, d1-camara-mouse-1440.png, d1-camara-hacia-el-pie-1440.png, d1-anchos-1440.png.

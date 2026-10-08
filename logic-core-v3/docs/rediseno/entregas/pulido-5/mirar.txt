@@ -1,0 +1,17 @@
+PULIDO 5 · qué mirar (http://localhost:3000/v3, o por la IP en el teléfono)
+
+D1 · El CTA
+   /v3, bajá hasta «Por qué develOP» y seguí. Cuando terminan los seis valores:
+   - «Seis razones para elegirnos» se junta en un cartel y gira sobre sí mismo: en el medio se ve sólo el canto y del otro lado
+     está «HABLANOS», que baja a su lugar. Al mismo tiempo, los seis valores se van un poco atrás, se desarman (los que
+     sobran se cierran donde están) y sus contornos se rearman en «Este sitio empezó con una charla. El tuyo también.», que vuelve
+     adelante. Todo termina junto. Volvé para arriba: se deshace igual, sin saltos.
+   - Formada, la frase queda quieta: ninguna ondulación.
+   - Con todo armado, mové el mouse a las esquinas: la frase y «HABLANOS» se ven en perspectiva (están en la sala, no pegados a
+     la pantalla). Seguí bajando: se alejan con el logo. Pasá el mouse por «HABLANOS»: el área que se toca va con él.
+   - Mirá la «o» de «sitio» y la «e» y la «ó» de «empezó»: enteras, sin puntos.
+   Variantes:
+   - /v3?ancho=expandido   la frase y el CTA más anchos (wdth 120; el producto es wdth 100)
+   - /v3?meta=fusion       la otra técnica (hasta que la confirmes y se borre)
+   Hojas: d1-contorno-1440.png y d1-contorno-390.png (6 cuadros), d1-camara-mouse-1440.png y d1-camara-hacia-el-pie-1440.png
+   (la cámara corrida), d1-anchos-1440.png (normal contra expandido).

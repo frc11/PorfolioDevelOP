@@ -130,7 +130,8 @@ const VERTICE_DE_LA_FRASE = /* glsl */ `
 
 /** El disolvente: un ruido sobre el lugar en la masa; los valores se ven debajo del umbral y la frase arriba (complementarios). */
 const corteGlsl = (frase: boolean): string => /* glsl */ `
-	float corte = clamp( 0.5 + 0.75 * metaRuido( vec3( vMasa * 0.021, 5.3 ) ), 0.0, 1.0 );
+	// [PULIDO 5] D1 · abierto en las dos puntas: con 0 y 1 cerrados, lo que saturaba quedaba de más (manchas en la frase terminada).
+	float corte = clamp( 0.5 + 0.75 * metaRuido( vec3( vMasa * 0.021, 5.3 ) ), 0.001, 0.999 );
 	if ( ${frase ? 'corte >= uCorte' : 'corte < uCorte'} ) discard;
 	${frase ? '' : 'if ( uApareceDeLosValores < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= uApareceDeLosValores ) discard;'}
 `

@@ -199,7 +199,8 @@ function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly v
  * display), en el lugar que deja el logo (`--lugar-del-cta`). Los divisores reparten ese lugar entre los dos renglones, el
  * aire y el botón (su caja mide ~1,8 veces su letra, con el subrayado): a 1440 × 900, 56 y 100 px; en una pantalla baja, menos.
  */
-const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)/5))]'
+// [PULIDO 5] D1 · más grande: un tamaño de display (era el del título XL y un quinto del lugar), con el CTA en proporción.
+const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65))]'
 /**
  * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
  * al final del recorrido del escenario y al día): medido, el anillo se dibujaba alrededor de nada (1,0:1, sólo el cielo).
