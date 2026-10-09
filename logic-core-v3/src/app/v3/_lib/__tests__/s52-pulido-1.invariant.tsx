@@ -126,8 +126,8 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // PULIDO 2 · 1, 2 y 4, rechazadas; PULIDO 2 · 4 agrega `chispas=si` y 3, `velo=escena`; PULIDO 3 · A1 borra las dos y agrega
 // `energia=red|inestable`; PULIDO 3B · B0 las funde en el producto y deja `energia=intensa`; B1 borra `cta=` entera: `cruce`
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
-// `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], meta: ['fusion', 'contorno'], ancho: ['normal', 'expandido'], anillo: ['tubo', 'disco', 'filo', 'tubo+filo'] }
+// `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], anillo: ['tubo', 'disco', 'filo', 'tubo+filo'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')

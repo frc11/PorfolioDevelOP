@@ -18,18 +18,14 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { lugarDelMarco, nuevoLugarDelMarco, ponerElMarco, MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
-import { CONTORNO, armarElContorno, asignar, mejorGiro, pistasDeLaMetamorfosis, remuestrear } from '../escena/ctaDelFinal/contorno'
+import { CONTORNO, armarElContorno, asignar, mejorGiro, pistasDeLaMetamorfosis, remuestrear, type CuadroDeLaMetamorfosis } from '../escena/ctaDelFinal/contorno'
 import { FUENTES_DEL_CTA, TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from '../escena/ctaDelFinal/fuentesDelCta'
-import type { CuadroDeLaMetamorfosis } from '../escena/ctaDelFinal/fusion'
 import type { ValorMedido } from '../escena/ctaDelFinal/medidaDeLosValores'
 import { letrasDeLaFrase } from '../escena/ctaDelFinal/piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, LECTURA_DEL_CTA, correrElPlano, homografiaDelCta, nuevosPlanosDelCta } from '../escena/ctaDelFinal/planosDelCta'
 import {
-  ANCHO_DEL_CTA,
-  ANCHOS_DEL_CTA,
   METAMORFOSIS,
   TRANSFORMACION,
-  VARIANTES_DE_LA_METAMORFOSIS,
   armadoSobreElCta,
   estadoDeLaMetamorfosis,
   nuevaPose,
@@ -49,8 +45,6 @@ import { CTA, FRASE } from '../../_secciones/por-que-develop/contenido'
 import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import ARCHIVO_NORMAL_CTA from '../../_fuentes/archivo-normal-cta.json'
 import ARCHIVO_NORMAL_CTA_FUERTE from '../../_fuentes/archivo-normal-cta-fuerte.json'
-import ARCHIVO_EXPANDIDO_CTA from '../../_fuentes/archivo-expandido-cta.json'
-import ARCHIVO_EXPANDIDO_CTA_FUERTE from '../../_fuentes/archivo-expandido-cta-fuerte.json'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -185,10 +179,10 @@ controlPositivo('  el detector VE un CTA que se queda en la sala', (() => undefi
 // (la frase, de un quinto del lugar del CTA a 1/3,65, con el tope del display; el CTA en proporción).
 type Datos = FontData & { readonly kerning?: Readonly<Record<string, number>>; readonly original_font_information?: { readonly fontSubfamily?: string } }
 const subfamilia = (d: unknown): string => (d as Datos).original_font_information?.fontSubfamily ?? ''
-const anchosBien = (): boolean => [ANCHOS_DEL_CTA.join(), ANCHO_DEL_CTA].join('|') === 'normal,expandido|normal' && ENTORNO.pruebas.ancho === 'no' &&
-  entornoPedido('producto,ancho=normal').pruebas.ancho === 'normal' && entornoPedido('producto,ancho=otro').pruebas.ancho === 'no' &&
-  subfamilia(ARCHIVO_NORMAL_CTA) === 'wght 600 wdth 100' && subfamilia(ARCHIVO_NORMAL_CTA_FUERTE) === 'wght 900 wdth 100' && subfamilia(ARCHIVO_EXPANDIDO_CTA) === 'wght 600 wdth 120' && subfamilia(ARCHIVO_EXPANDIDO_CTA_FUERTE) === 'wght 900 wdth 120'
-afirmar(anchosBien(), '3 · Archivo más ancha (normal: wdth 100, sin bandera; expandido: 120), la frase en 600 y el destacado y «HABLANOS» en 900')
+// [PULIDO 6] E1 · un solo ancho: wdth 100 (`?ancho=expandido` y sus fuentes se borraron).
+const anchosBien = (): boolean => !('ancho' in ENTORNO.pruebas) && !('ancho' in entornoPedido('producto,ancho=expandido').pruebas) &&
+  subfamilia(ARCHIVO_NORMAL_CTA) === 'wght 600 wdth 100' && subfamilia(ARCHIVO_NORMAL_CTA_FUERTE) === 'wght 900 wdth 100'
+afirmar(anchosBien(), '3 · Archivo más ancha (wdth 100; el sitio pincha 62), la frase en 600 y el destacado y «HABLANOS» en 900')
 // El kerning: «empezó» lleva el par «zó» (−20 unidades): la «ó» queda más cerca de la «z» que sólo con los avances.
 const kerningBien = (f: FuenteConKerning): boolean => {
   const conKerning = avancesDe(f, 'empezó', 0)
@@ -198,8 +192,8 @@ const kerningBien = (f: FuenteConKerning): boolean => {
 const usaElKerning = (a: string, p: string): boolean => a.includes('const avances = avancesDe(fuerte, texto, TRACKING_DEL_CTA.fuerte)') && p.includes('avancesDe(r.fuerte ? fuerte : normal, r.texto, r.fuerte ? TRACKING_DEL_CTA.fuerte : TRACKING_DEL_CTA.frase)') && TRACKING_DEL_CTA.frase < 0 && TRACKING_DEL_CTA.fuerte < TRACKING_DEL_CTA.frase
 const armado = sinComentarios(leer('_lib/escena/ctaDelFinal/armadoDelCta.ts'))
 const piezas = sinComentarios(leer('_lib/escena/ctaDelFinal/piezasDeLaMetamorfosis.ts'))
-afirmar(ANCHOS_DEL_CTA.every((a) => kerningBien(FUENTES_DEL_CTA[a].frase)) && usaElKerning(armado, piezas), '  el kerning de la fuente (los pares del GPOS) en la frase y en «HABLANOS», con el interletrado de display', `«zó»: ${String(FUENTES_DEL_CTA.expandido.frase.kerning['zó'])} y «r.»: ${String(FUENTES_DEL_CTA.expandido.frase.kerning['r.'])} unidades; ${String(Object.keys(FUENTES_DEL_CTA.expandido.frase.kerning).length)} pares en la frase`)
-controlPositivo('  el detector VE la frase sólo con los avances (sin kerning)', { fuente: FUENTES_DEL_CTA.expandido.frase.fuente, kerning: {} }, kerningBien)
+afirmar(kerningBien(FUENTES_DEL_CTA.frase) && usaElKerning(armado, piezas), '  el kerning de la fuente (los pares del GPOS) en la frase y en «HABLANOS», con el interletrado de display', `«zó»: ${String(FUENTES_DEL_CTA.frase.kerning['zó'])} y «r.»: ${String(FUENTES_DEL_CTA.frase.kerning['r.'])} unidades; ${String(Object.keys(FUENTES_DEL_CTA.frase.kerning).length)} pares en la frase`)
+controlPositivo('  el detector VE la frase sólo con los avances (sin kerning)', { fuente: FUENTES_DEL_CTA.frase.fuente, kerning: {} }, kerningBien)
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const ctaDom = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
 const tamanosBien = (pq: string, dom: string): boolean => pq.includes("const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65))]'") && dom.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/2.8))]'")
@@ -208,8 +202,8 @@ controlPositivo('  el detector VE la frase del tamaño de antes', [porQue.replac
 // Que entre: si un renglón no entra en el ancho, todos se achican juntos (centrados en su renglón).
 const renglones = [{ texto: 'Este sitio empezó', fuerte: false, izquierda: 0, arriba: 100, ancho: 390, alto: 60, cuerpo: 60 }, { texto: 'El tuyo también.', fuerte: true, izquierda: 0, arriba: 160, ancho: 390, alto: 60, cuerpo: 60 }]
 const entraBien = (maximo: number): boolean => {
-  const letras = letrasDeLaFrase(renglones, FUENTES_DEL_CTA.expandido.frase, FUENTES_DEL_CTA.expandido.fuerte, maximo)
-  const derecha = Math.max(...letras.map((l) => l.x + ((FUENTES_DEL_CTA.expandido.fuerte.fuente.data.glyphs[l.c]?.ha ?? 0) / 1000) * l.cuerpo))
+  const letras = letrasDeLaFrase(renglones, FUENTES_DEL_CTA.frase, FUENTES_DEL_CTA.fuerte, maximo)
+  const derecha = Math.max(...letras.map((l) => l.x + ((FUENTES_DEL_CTA.fuerte.fuente.data.glyphs[l.c]?.ha ?? 0) / 1000) * l.cuerpo))
   const izquierda = Math.min(...letras.map((l) => l.x))
   return derecha - izquierda <= 350 + 1 && new Set(letras.map((l) => l.cuerpo.toFixed(4))).size === 1
 }
@@ -270,12 +264,12 @@ const agujerosBien = (fuentes: readonly unknown[]): { ok: boolean; conAgujero: n
   })
   return { ok, conAgujero }
 }
-const DEL_CTA = [ARCHIVO_NORMAL_CTA, ARCHIVO_NORMAL_CTA_FUERTE, ARCHIVO_EXPANDIDO_CTA, ARCHIVO_EXPANDIDO_CTA_FUERTE, CHIVO_400_VALORES]
+const DEL_CTA = [ARCHIVO_NORMAL_CTA, ARCHIVO_NORMAL_CTA_FUERTE, CHIVO_400_VALORES]
 const agujeros = agujerosBien(DEL_CTA)
 afirmar(agujeros.ok && agujeros.conAgujero >= 20 && leerDeLaRaiz('scripts-retoque/fuentes-3d.py').includes('vueltos = contornos_en_su_sentido(glifos[nombre], glifos, pen)'), '4 · cada glifo que lleva agujero lo tiene (la «o», la «e», la «ó»…): los agujeros de three son los del anidamiento, en las cinco fuentes de la metamorfosis', `${String(agujeros.conAgujero)} glifos con agujero`)
 // El control: la «o» de la frase con el agujero escrito en el sentido del borde (como lo dejaba una fuente dada vuelta).
 const conLaOVuelta = (): unknown => {
-  const d = JSON.parse(JSON.stringify(ARCHIVO_EXPANDIDO_CTA)) as { glyphs: Record<string, { o: string; _cachedOutline?: unknown }> }
+  const d = JSON.parse(JSON.stringify(ARCHIVO_NORMAL_CTA)) as { glyphs: Record<string, { o: string; _cachedOutline?: unknown }> }
   // three guarda en el glifo el contorno ya leído: la copia no lo lleva (si no, three ignora el contorno nuevo).
   for (const g of Object.values(d.glyphs)) delete g._cachedOutline
   const [borde, agujero] = contornosCrudos(d.glyphs.o.o)
@@ -284,15 +278,12 @@ const conLaOVuelta = (): unknown => {
   return d
 }
 controlPositivo('4 · el detector VE una «o» con el agujero en el sentido del borde', [conLaOVuelta()], (f: readonly unknown[]) => agujerosBien(f).ok)
-// Y el disolvente de `fusion`: abierto en las dos puntas (con 0 y 1 cerrados dejaba manchas en la frase terminada).
-const fusion = sinComentarios(leer('_lib/escena/ctaDelFinal/fusion.ts'))
-const disolventeBien = (f: string): boolean => f.includes('float corte = clamp( 0.5 + 0.75 * metaRuido( vec3( vMasa * 0.021, 5.3 ) ), 0.001, 0.999 );')
-afirmar(disolventeBien(fusion), '  `fusion`: el disolvente no deja manchas en la frase terminada (su umbral nunca toca 0 ni 1)')
-controlPositivo('  el detector VE el disolvente de antes', fusion.replace('0.001, 0.999 );', '0.0, 1.0 );'), disolventeBien)
+// Y el disolvente de `fusion` (abierto en las dos puntas): [PULIDO 6] E1 · `fusion` se borró entera (lo fija `s57` E1 · 5).
 
 // 5 · `contorno`, LA DEL PRODUCTO.
 const contorno = sinComentarios(leer('_lib/escena/ctaDelFinal/contorno.ts'))
-afirmar(VARIANTES_DE_LA_METAMORFOSIS[0] === 'contorno' && escena.includes("return pedida === 'no' ? 'contorno' : pedida") && VARIANTES_DE_LA_METAMORFOSIS.includes('fusion'), '5 · `contorno` es la del producto (sin bandera); `fusion` queda con `?meta=fusion`')
+// [PULIDO 6] E1 · `fusion` y `?meta=` se borraron: `contorno` es la única (lo fija `s57` E1 · 5).
+afirmar(escena.includes('const meta = armarElContorno(medidas.valores, inicio, medidas.letras,') && !escena.includes('fusion'), '5 · `contorno` es la del producto (y la única: `fusion` se borró en PULIDO 6)')
 
 // La asignación ÓPTIMA (el método húngaro): la misma suma que la mejor de todas las permutaciones, también rectangular.
 function mejorPorFuerza(m: readonly (readonly number[])[]): number {
@@ -327,7 +318,7 @@ controlPositivo('  el detector VE una asignación golosa (cada uno el más barat
 
 // Emparejadas por lugar: dos valores (una «o» a la izquierda, una «e» a la derecha) y la frase «oe»: la «o» de la frase recibe un
 // contorno del valor de la izquierda; lo que sobra se cierra (no viaja).
-const FUENTES = { valores: new Font(CHIVO_400_VALORES as FontData), frase: FUENTES_DEL_CTA.expandido.frase.fuente, fuerte: FUENTES_DEL_CTA.expandido.fuerte.fuente }
+const FUENTES = { valores: new Font(CHIVO_400_VALORES as FontData), frase: FUENTES_DEL_CTA.frase.fuente, fuerte: FUENTES_DEL_CTA.fuerte.fuente }
 const valor = (c: string): ValorMedido => ({ letras: [{ c, x: 0, base: 20, cuerpo: 24 }, { c: 'l', x: 14, base: 20, cuerpo: 24 }], iconos: [], ancho: 30, alto: 30, enLaRaiz: null })
 const VALORES_DE_PRUEBA = [valor('o'), null, null, valor('e'), null, null]
 const INICIO = [{ x: 100, y: 300, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 1200, y: 300, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 0, y: 0, escala: 1 }]
@@ -366,19 +357,19 @@ const turbulenciaBien = (f: typeof estadoDeLaMetamorfosis): boolean => {
   let paso = 0
   let anterior = 0
   for (let k = 0; k <= 10000; k += 1) {
-    const t = f('contorno', k / 10000).turbulencia
+    const t = f(k / 10000).turbulencia
     maximo = Math.max(maximo, t)
     paso = Math.max(paso, Math.abs(t - anterior))
     anterior = t
   }
-  const cero = [...Array(401).keys()].every((k) => f('contorno', fin + (k / 400) * (1 - fin)).turbulencia === 0)
+  const cero = [...Array(401).keys()].every((k) => f(fin + (k / 400) * (1 - fin)).turbulencia === 0)
   const terminaElCambio = METAMORFOSIS.contorno.cambia[0] + METAMORFOSIS.contorno.cambia[1]
-  const suaveEnLasPuntas = f('contorno', T[0] + 0.002).turbulencia < 0.001 && f('contorno', fin - 0.002).turbulencia < 0.001
+  const suaveEnLasPuntas = f(T[0] + 0.002).turbulencia < 0.001 && f(fin - 0.002).turbulencia < 0.001
   return maximo > 0.99 && paso < 0.002 && cero && fin < terminaElCambio && suaveEnLasPuntas
 }
 afirmar(turbulenciaBien(estadoDeLaMetamorfosis), '  la turbulencia sube y baja en campana (suave) y llega a CERO exacto antes del final del cambio: formada, la frase queda quieta', `cero desde ${String(METAMORFOSIS.contorno.turbulencia[0] + METAMORFOSIS.contorno.turbulencia[1])}; el cambio termina en ${String(METAMORFOSIS.contorno.cambia[0] + METAMORFOSIS.contorno.cambia[1])}`)
-controlPositivo('  el detector VE la turbulencia de antes (con el cambio, sin campana)', ((v, p) => {
-  const e = estadoDeLaMetamorfosis(v, p)
+controlPositivo('  el detector VE la turbulencia de antes (con el cambio, sin campana)', ((p: number) => {
+  const e = estadoDeLaMetamorfosis(p)
   const cambia = e.cambia
   return { ...e, turbulencia: cambia >= 1 ? 0 : Math.sin(Math.PI * cambia) }
 }) as typeof estadoDeLaMetamorfosis, turbulenciaBien)
@@ -391,11 +382,11 @@ const cuadro = (p: number): CuadroDeLaMetamorfosis => ({ items: INICIO.map((c) =
 const armada = armarElContorno(VALORES_DE_PRUEBA, INICIO, FRASE_DE_PRUEBA, FUENTES, 'negro')
 let peor = 0
 for (let k = 0; k <= 400; k += 1) {
-  armada.poner(estadoDeLaMetamorfosis('contorno', k / 400), cuadro(k / 400))
+  armada.poner(estadoDeLaMetamorfosis(k / 400), cuadro(k / 400))
   peor = Math.max(peor, armada.costo())
 }
 const visibles = (p: number): string[] => {
-  armada.poner(estadoDeLaMetamorfosis('contorno', p), cuadro(p))
+  armada.poner(estadoDeLaMetamorfosis(p), cuadro(p))
   return armada.objetos.filter((o) => o.visible).map((o) => o.name)
 }
 const [aMitad, alFinal] = [visibles(0.5), visibles(1)]

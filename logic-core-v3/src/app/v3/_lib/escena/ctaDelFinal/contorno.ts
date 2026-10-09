@@ -11,7 +11,6 @@ import { COSTADO_DE_DIA } from '../titulos3d/filo'
 import type { Variante } from '../titulos3d/armado'
 import { VOLUMEN_DEL_TITULO } from '../titulos3d/geometria'
 import type { MetamorfosisArmada } from './EscenaDelCta'
-import type { CuadroDeLaMetamorfosis } from './fusion'
 import type { ValorMedido } from './medidaDeLosValores'
 import { RUIDO_DE_LA_METAMORFOSIS_GLSL, contornosDeLaLetra, geometriaDeLaLetra, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ATRAS, type EstadoDeLaMetamorfosis } from './transformacion'
@@ -36,14 +35,39 @@ import { ATRAS, type EstadoDeLaMetamorfosis } from './transformacion'
  *     espaldas (la regla no-cero: un agujero resta, dos letras que se pisan se unen) y una cubierta con el mismo abanico pinta
  *     donde la cuenta no es cero y la vuelve a cero. Acepta cualquier polígono (cóncavo, con agujeros, que se cruza a mitad de
  *     camino) sin triangular. Necesita el búfer de stencil del lienzo (`configuracionDelCanvas.ts`).
+ *
+ * [PULIDO 6] E1 · EL ENTREMEDIO, TAN LIMPIO COMO EL FINAL — «cuando no se termina de formar queda muy feo». Medido: 17 de los 47
+ * pares, en el camino directo de su letra de los valores a la de la frase, se cruzaban a sí mismos (un contorno que se cruza
+ * da manchas, rulos y parpadeos con cualquier relleno). Ahora cada par va por un CAMINO CANÓNICO: su letra de los valores se
+ * redondea de a poco (`fotosDelFlujo`: el suavizado laplaciano del contorno, que es el acortamiento de curvas —una curva simple
+ * sigue simple y se vuelve redonda— con el área de siempre), viaja redonda y se desenrolla en la de la frase (las fotos de la
+ * frase, al revés). Los centros viajan como antes (la coreografía no cambió); lo que cambia es la forma de cada cuadro. Las
+ * fotos van en una textura y el vértice interpola entre las dos vecinas. Los demás contornos (los agujeros, los que sobran,
+ * los que nacen) sólo se escalan sobre un punto, que no cruza nada; la turbulencia es un campo suave cuyo gradiente no llega a
+ * 1 (no puede plegar). `s57` muestrea el progreso y afirma que ningún contorno se cruza. Y el cambio a la malla exacta es un
+ * fundido de tramado complementario en el último `fundido` del progreso (los dos dibujos no se suman: cada píxel es de uno).
  */
+
+/** Dónde están los valores y la frase en un cuadro (lo arma `EscenaDelCta.tsx`). */
+export interface CuadroDeLaMetamorfosis {
+  readonly items: readonly { readonly x: number; readonly y: number; readonly escala: number; readonly cuerpo: number; readonly cx: number; readonly cy: number }[]
+  readonly cajaDeLosValores: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }
+  readonly cajaDeLaFrase: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }
+  readonly corrimiento: { readonly x: number; readonly y: number }
+  readonly cuerpoDeLaFrase: number
+  readonly fuga: { readonly x: number; readonly y: number }
+  readonly fondo: number
+  readonly progreso: number
+  /** Cuánto se ven los valores de la escena: en el escenario, desde que arranca (antes es el DOM); en la lista, con su entrada. */
+  readonly apareceDeLosValores: number
+}
 
 export const CONTORNO = {
   /** Los puntos de cada contorno (los dos textos): con 40, la «o» de la frase a 80 px no muestra facetas. */
   puntos: 40,
   /** Cuánto demora cada contorno (fracción del cambio): por su orden de lectura y un poco al azar. */
   demora: 0.38,
-  /** La turbulencia (px, por el cuerpo de la frase) y la vida del flujo con el progreso. */
+  /** La turbulencia (px, por el cuerpo de la frase: [PULIDO 6] E1 · una deriva del contorno entero) y la vida del flujo con el progreso. */
   turbulencia: 0.4,
   vidaDelFlujo: 2.2,
   /** Los agujeros de los valores se cierran en esta fracción del cambio de su contorno. */
@@ -62,6 +86,16 @@ export const CONTORNO = {
   grosor: 0.05,
   /** El orden de dibujo: paredes, las dos cuentas del stencil y la cubierta. */
   orden: 10,
+  /**
+   * [PULIDO 6] E1 · el camino canónico de los pares: las fotos del flujo (iteraciones acumuladas del laplaciano: chicas al
+   * principio, donde la forma cambia más), el paso de cada iteración, y en qué parte del camino de cada contorno la letra de los
+   * valores termina de redondearse y la de la frase empieza a desenrollarse.
+   */
+  flujo: { fotos: [0, 2, 6, 14, 30, 60, 90], paso: 0.5, redondo: [0.42, 0.58] },
+  /** [PULIDO 6] E1 · el fundido con la malla exacta: la última fracción del progreso. */
+  fundido: 0.03,
+  /** [PULIDO 6] E1 · en qué parte de su camino el centro de cada contorno ya llegó a la altura de su destino. */
+  vertical: 0.6,
 } as const
 
 /** Un contorno en px (y hacia abajo), cerrado, sin repetir el primer punto. */
@@ -204,7 +238,7 @@ function azar(i: number, j: number, k: number): number {
 }
 
 /** Lo que hace cada pista en el vértice (`aPista.z`). */
-const TIPO = { par: 0, agujeroDeLosValores: 1, agujeroDeLaFrase: 2, sobra: 3, nace: 4 } as const
+export const TIPO = { par: 0, agujeroDeLosValores: 1, agujeroDeLaFrase: 2, sobra: 3, nace: 4 } as const
 
 /** Una pista: los N puntos de un contorno en los valores (px de la caja de su valor) y en la frase (px de la pantalla). */
 interface Pista {
@@ -217,6 +251,35 @@ interface Pista {
   readonly tipo: number
   /** El espesor de su valor (px de su caja). */
   readonly grosor: number
+  /** [PULIDO 6] E1 · los pares: las fotos del flujo de sus dos letras (la de los valores en px de su caja; la de la frase, de la pantalla). */
+  readonly fotos?: { readonly s: readonly (readonly THREE.Vector2[])[]; readonly t: readonly (readonly THREE.Vector2[])[] }
+}
+
+/**
+ * [PULIDO 6] E1 · EL FLUJO DE UN CONTORNO: el suavizado laplaciano (cada punto hacia el medio de sus vecinos, `paso`) en fotos
+ * a las iteraciones de `CONTORNO.flujo.fotos`, cada una vuelta a su área de origen (escalada sobre su centro, que el laplaciano
+ * no mueve): la primera es el contorno y la última, casi redonda. Es el acortamiento de curvas discreto: un contorno simple
+ * sigue simple en cada foto.
+ */
+export function fotosDelFlujo(contorno: readonly THREE.Vector2[]): THREE.Vector2[][] {
+  const { fotos, paso } = CONTORNO.flujo
+  const area0 = Math.abs(areaConSigno(contorno))
+  const salida: THREE.Vector2[][] = []
+  let c = contorno.map((q) => q.clone())
+  let hechas = 0
+  for (const meta of fotos) {
+    for (; hechas < meta; hechas += 1) {
+      const n = c.length
+      c = c.map((q, i) => {
+        const [a, b] = [c[(i - 1 + n) % n], c[(i + 1) % n]]
+        return new THREE.Vector2(q.x + paso * ((a.x + b.x) / 2 - q.x), q.y + paso * ((a.y + b.y) / 2 - q.y))
+      })
+    }
+    const k = Math.sqrt(area0 / Math.max(1e-9, Math.abs(areaConSigno(c))))
+    const m = centroDe(c)
+    salida.push(c.map((q) => new THREE.Vector2(m.x + (q.x - m.x) * k, m.y + (q.y - m.y) * k)))
+  }
+  return salida
 }
 
 const repetido = (p: THREE.Vector2, n: number): THREE.Vector2[] => Array.from({ length: n }, () => p)
@@ -293,7 +356,11 @@ export function pistasDeLaMetamorfosis(valores: readonly (ValorMedido | null)[],
       return
     }
     const s = deLosValores[i]
-    pistas.push({ s: girado(s.borde, mejorGiro(s.borde, t.borde)), t: t.borde, centros: [s.centro.x, s.centro.y, t.centro.x, t.centro.y], item: s.item, demora: s.demora, tipo: TIPO.par, grosor: s.grosor })
+    // [PULIDO 6] E1 · el camino canónico: las fotos del flujo de las dos letras, con el arranque alineado entre las redondas.
+    const [fs, ft] = [fotosDelFlujo(s.borde), fotosDelFlujo(t.borde)]
+    const giro = mejorGiro(fs[fs.length - 1], ft[ft.length - 1])
+    const fsg = fs.map((f) => girado(f, giro))
+    pistas.push({ s: fsg[0], t: t.borde, centros: [s.centro.x, s.centro.y, t.centro.x, t.centro.y], item: s.item, demora: s.demora, tipo: TIPO.par, grosor: s.grosor, fotos: { s: fsg, t: ft } })
     conSusAgujeros(s, t.centro)
     for (const h of t.agujeros) pistas.push({ s: repetido(s.centro, n), t: h, centros: [s.centro.x, s.centro.y, centroDe(h).x, centroDe(h).y], item: s.item, demora: s.demora, tipo: TIPO.agujeroDeLaFrase, grosor: 0 })
   })
@@ -326,6 +393,9 @@ interface UniformesDelContorno {
   readonly uAbre: { value: number }
   readonly uEspesorT: { value: number }
   readonly uAparece: { value: number }
+  /** [PULIDO 6] E1 · las fotos del flujo de los pares y el fundido con la malla exacta. */
+  readonly uFormas: { value: THREE.Texture | null }
+  readonly uFundido: { value: number }
 }
 
 /**
@@ -350,8 +420,20 @@ uniform float uTurbulencia;
 uniform float uTiempo;
 uniform float uAbre;
 uniform float uEspesorT;
+uniform sampler2D uFormas;
 varying float vTapa;
 ${RUIDO_DE_LA_METAMORFOSIS_GLSL}
+// [PULIDO 6] E1 · una foto del flujo de un par (lado 0: la letra de los valores; 1: la de la frase), punto i; y entre dos fotos.
+vec2 metaFoto( float fila, float lado, float foto, float i ) {
+	float col = ( lado * ${String(CONTORNO.flujo.fotos.length)}.0 + foto ) * ${String(CONTORNO.puntos / 2)}.0 + floor( i * 0.5 );
+	vec4 t = texelFetch( uFormas, ivec2( int( col + 0.5 ), int( fila + 0.5 ) ), 0 );
+	return mod( i, 2.0 ) < 0.5 ? t.xy : t.zw;
+}
+vec2 metaForma( float fila, float lado, float f, float i ) {
+	float f0 = floor( f );
+	float f1 = min( f0 + 1.0, ${String(CONTORNO.flujo.fotos.length - 1)}.0 );
+	return mix( metaFoto( fila, lado, f0, i ), metaFoto( fila, lado, f1, i ), f - f0 );
+}
 float metaCrudo( vec4 pista ) {
 	return ( uCambia - pista.y ) / ( 1.0 - ${CONTORNO.demora.toFixed(3)} );
 }
@@ -359,7 +441,7 @@ float metaSuave( float crudo ) {
 	float m = clamp( crudo, 0.0, 1.0 );
 	return m * m * ( 3.0 - 2.0 * m );
 }
-vec3 metaPunto( vec2 s, vec2 t, vec4 centros, vec4 pista ) {
+vec3 metaPunto( vec2 s, vec2 t, vec4 centros, vec4 pista, vec2 forma ) {
 	int item = int( pista.x + 0.5 );
 	vec4 caja = uItems[ item ];
 	vec2 cItem = uCentrosDeLosItems[ item ];
@@ -376,7 +458,24 @@ vec3 metaPunto( vec2 s, vec2 t, vec4 centros, vec4 pista ) {
 	if ( abs( pista.z - ${TIPO.agujeroDeLaFrase.toFixed(1)} ) < 0.5 ) tt = mix( centros.zw, t, max( smoothstep( 1.0, ${(1 + CONTORNO.abre).toFixed(3)}, crudo ), uAbre ) );
 	vec2 T = uMasa + ( tt + uCorrimiento - uMasa ) * uKF;
 	vec2 P = mix( S, T, u );
-	P += metaFlujo( P, uTiempo ) * uTurbulencia * sin( 3.14159265 * u );
+	vec2 cS = cItem + ( caja.xy + centros.xy * caja.z - cItem ) * uKS;
+	vec2 cT = uMasa + ( centros.zw + uCorrimiento - uMasa ) * uKF;
+	if ( forma.x >= 0.0 ) {
+		// [PULIDO 6] E1 · un par: su letra de los valores se redondea (las fotos de su flujo), viaja redonda y se desenrolla en la
+		// de la frase; los centros viajan con u (como antes) y las formas, relativas a ellos.
+		float redondoS = ${String(CONTORNO.flujo.fotos.length - 1)}.0 * clamp( u / ${CONTORNO.flujo.redondo[0].toFixed(3)}, 0.0, 1.0 );
+		float redondoT = ${String(CONTORNO.flujo.fotos.length - 1)}.0 * clamp( ( 1.0 - u ) / ${(1 - CONTORNO.flujo.redondo[1]).toFixed(3)}, 0.0, 1.0 );
+		vec2 fS = cItem + ( caja.xy + metaForma( forma.x, 0.0, redondoS, forma.y ) * caja.z - cItem ) * uKS;
+		vec2 fT = uMasa + ( metaForma( forma.x, 1.0, redondoT, forma.y ) + uCorrimiento - uMasa ) * uKF;
+		float w = smoothstep( ${CONTORNO.flujo.redondo[0].toFixed(3)}, ${CONTORNO.flujo.redondo[1].toFixed(3)}, u );
+		P = mix( cS, cT, u ) + mix( fS - cS, fT - cT, w );
+	}
+	// [PULIDO 6] E1 · el centro de cada contorno se ajusta primero en vertical (llega a la franja de la frase antes de acercarse de
+	// costado: no cruza la de «HABLANOS» ya formada la mitad); y la turbulencia lo lleva ENTERO con el flujo (la misma deriva
+	// para todos sus puntos: no lo deforma, no puede cruzarlo).
+	vec2 lineal = mix( cS, cT, u );
+	vec2 centro = vec2( lineal.x, mix( cS.y, cT.y, smoothstep( 0.0, ${CONTORNO.vertical.toFixed(3)}, u ) ) );
+	P += centro - lineal + metaFlujo( centro, uTiempo ) * uTurbulencia * sin( 3.14159265 * u );
 	return vec3( P, mix( uZS, uZF, u ) );
 }
 vec3 metaAlPlano( vec3 p ) {
@@ -389,20 +488,26 @@ float metaGrosor( vec4 pista ) {
 }
 `
 
-const ATRIBUTOS_DE_LA_TAPA = 'attribute vec2 aS;\nattribute vec2 aT;\nattribute vec4 aCentros;\nattribute vec4 aPista;\n'
-const ATRIBUTOS_DE_LA_PARED = 'attribute vec2 aEsquina;\nattribute vec4 iS;\nattribute vec4 iT;\nattribute vec4 iCentros;\nattribute vec4 iPista;\n'
+const ATRIBUTOS_DE_LA_TAPA = 'attribute vec2 aS;\nattribute vec2 aT;\nattribute vec4 aCentros;\nattribute vec4 aPista;\nattribute vec2 aForma;\n'
+const ATRIBUTOS_DE_LA_PARED = 'attribute vec2 aEsquina;\nattribute vec4 iS;\nattribute vec4 iT;\nattribute vec4 iCentros;\nattribute vec4 iPista;\nattribute vec4 iForma;\n'
 const NORMAL_DE_LA_TAPA = 'vec3 objectNormal = vec3( 0.0, 0.0, 1.0 );'
-const PUNTO_DE_LA_TAPA = 'vec3 transformed = metaAlPlano( metaPunto( aS, aT, aCentros, aPista ) );\n\tvTapa = 1.0;'
-const NORMAL_DE_LA_PARED = `vec3 metaA = metaAlPlano( metaPunto( iS.xy, iT.xy, iCentros, iPista ) );
-	vec3 metaB = metaAlPlano( metaPunto( iS.zw, iT.zw, iCentros, iPista ) );
+const PUNTO_DE_LA_TAPA = 'vec3 transformed = metaAlPlano( metaPunto( aS, aT, aCentros, aPista, aForma ) );\n\tvTapa = 1.0;'
+const NORMAL_DE_LA_PARED = `vec3 metaA = metaAlPlano( metaPunto( iS.xy, iT.xy, iCentros, iPista, iForma.xy ) );
+	vec3 metaB = metaAlPlano( metaPunto( iS.zw, iT.zw, iCentros, iPista, iForma.xz ) );
 	vec2 metaD = metaB.xy - metaA.xy;
 	vec3 objectNormal = length( metaD ) > 1e-4 ? normalize( vec3( metaD.y, -metaD.x, 0.0 ) ) : vec3( 0.0, 0.0, 1.0 );`
 const PUNTO_DE_LA_PARED = 'vec3 transformed = mix( metaA, metaB, aEsquina.x );\n\ttransformed.z -= metaGrosor( iPista ) * aEsquina.y;\n\tvTapa = 0.0;'
 
-/** El relevo con el DOM (el tramado fijo en la pantalla) y el costado de día: lo que comparten la cubierta, las paredes y la malla exacta. */
+/** El fundido con el DOM (el tramado fijo en la pantalla) y el costado de día: lo que comparten la cubierta, las paredes y la malla exacta. */
 const DIA = `( 1.0 - clamp( emissive.r / ${EMISION_EN_LA_NOCHE.toFixed(3)}, 0.0, 1.0 ) )`
+const TRAMADO_GLSL = 'fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) )'
 const APARECE_GLSL = /* glsl */ `
-	if ( uAparece < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= uAparece ) discard;
+	float metaTramado = ${TRAMADO_GLSL};
+	if ( ( uAparece < 0.999 && metaTramado >= uAparece ) || metaTramado < uFundido ) discard;
+`
+/** [PULIDO 6] E1 · la malla exacta, en el fundido: los píxeles que la que se mueve deja (el tramado complementario). */
+const FUNDIDO_DE_LA_EXACTA_GLSL = /* glsl */ `
+	if ( uFundido < 0.999 && ${TRAMADO_GLSL} >= uFundido ) discard;
 `
 const COSTADO_GLSL = `#include <map_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, mix( 1.0, vTapa, ${DIA} ) );`
 
@@ -423,8 +528,8 @@ function materialConLuz(color: Variante, u: UniformesDelContorno, pieza: Pieza):
         .replace('#include <begin_vertex>', pieza === 'tapa' ? PUNTO_DE_LA_TAPA : PUNTO_DE_LA_PARED)
     }
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vTapa;\nuniform float uAparece;')
-      .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${pieza === 'exacta' ? '' : APARECE_GLSL}`)
+      .replace('#include <common>', '#include <common>\nvarying float vTapa;\nuniform float uAparece;\nuniform float uFundido;')
+      .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${pieza === 'exacta' ? FUNDIDO_DE_LA_EXACTA_GLSL : APARECE_GLSL}`)
       .replace('#include <map_fragment>', COSTADO_GLSL)
     // La cubierta se dibuja de los dos lados (el abanico tiene triángulos de frente y de espaldas): su normal mira siempre a la cámara.
     if (pieza === 'tapa') shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n\tnormal = normalize( vNormal );')
@@ -447,7 +552,7 @@ function materialConLuz(color: Variante, u: UniformesDelContorno, pieza: Pieza):
 function cuentaDelStencil(u: UniformesDelContorno, suma: boolean): THREE.ShaderMaterial {
   const m = new THREE.ShaderMaterial({
     uniforms: u as unknown as Record<string, THREE.IUniform>,
-    vertexShader: `${ATRIBUTOS_DE_LA_TAPA}${VERTICE_GLSL}\nvoid main() {\n\tvec3 transformed = metaAlPlano( metaPunto( aS, aT, aCentros, aPista ) );\n\tvTapa = 1.0;\n\tgl_Position = projectionMatrix * modelViewMatrix * vec4( transformed, 1.0 );\n}\n`,
+    vertexShader: `${ATRIBUTOS_DE_LA_TAPA}${VERTICE_GLSL}\nvoid main() {\n\tvec3 transformed = metaAlPlano( metaPunto( aS, aT, aCentros, aPista, aForma ) );\n\tvTapa = 1.0;\n\tgl_Position = projectionMatrix * modelViewMatrix * vec4( transformed, 1.0 );\n}\n`,
     fragmentShader: 'void main() {\n\tgl_FragColor = vec4( 0.0 );\n}\n',
     side: suma ? THREE.FrontSide : THREE.BackSide,
     colorWrite: false,
@@ -481,13 +586,40 @@ function uniformes(): UniformesDelContorno {
     uAbre: { value: 0 },
     uEspesorT: { value: 0 },
     uAparece: { value: 1 },
+    uFormas: { value: null },
+    uFundido: { value: 0 },
   }
 }
 
+/**
+ * [PULIDO 6] E1 · LAS FOTOS DEL FLUJO EN UNA TEXTURA (RGBA de 32 bits, sin filtrar: dos puntos por texel): una fila por par; en
+ * cada fila, las fotos de su letra de los valores y después las de la de la frase, N/2 texeles por foto. Devuelve también la
+ * fila de cada pista (−1: no es un par).
+ */
+function texturaDeLasFormas(pistas: readonly Pista[], n: number): { readonly textura: THREE.DataTexture; readonly filas: number[] } {
+  const fotos = CONTORNO.flujo.fotos.length
+  const filas: number[] = []
+  let total = 0
+  for (const p of pistas) filas.push(p.fotos === undefined ? -1 : total++)
+  const ancho = 2 * fotos * (n / 2)
+  const alto = Math.max(1, total)
+  const datos = new Float32Array(ancho * alto * 4)
+  pistas.forEach((p, k) => {
+    if (p.fotos === undefined) return
+    const fila = filas[k]
+    ;[p.fotos.s, p.fotos.t].forEach((lado, l) => lado.forEach((foto, f) => foto.forEach((q, i) => datos.set([q.x, q.y], (fila * ancho + (l * fotos + f) * (n / 2) + Math.floor(i / 2)) * 4 + (i % 2) * 2))))
+  })
+  const textura = new THREE.DataTexture(datos, ancho, alto, THREE.RGBAFormat, THREE.FloatType)
+  textura.minFilter = THREE.NearestFilter
+  textura.magFilter = THREE.NearestFilter
+  textura.needsUpdate = true
+  return { textura, filas }
+}
+
 /** Las tapas: los N puntos de cada pista y su abanico (desde su primer punto). */
-function geometriaDeLasTapas(pistas: readonly Pista[], n: number): THREE.BufferGeometry {
+function geometriaDeLasTapas(pistas: readonly Pista[], n: number, filas: readonly number[]): THREE.BufferGeometry {
   const v = pistas.length * n
-  const [aS, aT, aCentros, aPista] = [new Float32Array(v * 2), new Float32Array(v * 2), new Float32Array(v * 4), new Float32Array(v * 4)]
+  const [aS, aT, aCentros, aPista, aForma] = [new Float32Array(v * 2), new Float32Array(v * 2), new Float32Array(v * 4), new Float32Array(v * 4), new Float32Array(v * 2)]
   const indices = new Uint32Array(pistas.length * (n - 2) * 3)
   let k = 0
   pistas.forEach((p, i) => {
@@ -498,6 +630,7 @@ function geometriaDeLasTapas(pistas: readonly Pista[], n: number): THREE.BufferG
       aT.set([p.t[j].x, p.t[j].y], w * 2)
       aCentros.set(p.centros, w * 4)
       aPista.set([p.item, p.demora, p.tipo, p.grosor], w * 4)
+      aForma.set([filas[i], j], w * 2)
     }
     for (let j = 1; j < n - 1; j += 1) {
       indices.set([base, base + j, base + j + 1], k)
@@ -510,14 +643,15 @@ function geometriaDeLasTapas(pistas: readonly Pista[], n: number): THREE.BufferG
   g.setAttribute('aT', new THREE.BufferAttribute(aT, 2))
   g.setAttribute('aCentros', new THREE.BufferAttribute(aCentros, 4))
   g.setAttribute('aPista', new THREE.BufferAttribute(aPista, 4))
+  g.setAttribute('aForma', new THREE.BufferAttribute(aForma, 2))
   g.setIndex(new THREE.BufferAttribute(indices, 1))
   return g
 }
 
 /** Las paredes: un rectángulo por tramo (instancias), con las dos puntas del tramo; la de adelante en el contorno y la de atrás, a su espesor. */
-function geometriaDeLasParedes(pistas: readonly Pista[], n: number): THREE.InstancedBufferGeometry {
+function geometriaDeLasParedes(pistas: readonly Pista[], n: number, filas: readonly number[]): THREE.InstancedBufferGeometry {
   const total = pistas.length * n
-  const [iS, iT, iCentros, iPista] = [new Float32Array(total * 4), new Float32Array(total * 4), new Float32Array(total * 4), new Float32Array(total * 4)]
+  const [iS, iT, iCentros, iPista, iForma] = [new Float32Array(total * 4), new Float32Array(total * 4), new Float32Array(total * 4), new Float32Array(total * 4), new Float32Array(total * 4)]
   pistas.forEach((p, i) => {
     for (let j = 0; j < n; j += 1) {
       const w = i * n + j
@@ -526,6 +660,7 @@ function geometriaDeLasParedes(pistas: readonly Pista[], n: number): THREE.Insta
       iT.set([p.t[j].x, p.t[j].y, p.t[q].x, p.t[q].y], w * 4)
       iCentros.set(p.centros, w * 4)
       iPista.set([p.item, p.demora, p.tipo, p.grosor], w * 4)
+      iForma.set([filas[i], j, q, 0], w * 4)
     }
   })
   const g = new THREE.InstancedBufferGeometry()
@@ -537,6 +672,7 @@ function geometriaDeLasParedes(pistas: readonly Pista[], n: number): THREE.Insta
   g.setAttribute('iT', new THREE.InstancedBufferAttribute(iT, 4))
   g.setAttribute('iCentros', new THREE.InstancedBufferAttribute(iCentros, 4))
   g.setAttribute('iPista', new THREE.InstancedBufferAttribute(iPista, 4))
+  g.setAttribute('iForma', new THREE.InstancedBufferAttribute(iForma, 4))
   g.instanceCount = total
   return g
 }
@@ -553,6 +689,63 @@ function geometriaExacta(frase: readonly LetraDeLaFrase[], fuentes: { readonly f
 }
 
 /**
+ * [PULIDO 6] E1 · LOS VALORES DE UN CUADRO, puros (los uniformes del vértice sin three): los escribe `poner` y con ellos el
+ * invariante rehace en la CPU la misma cuenta del vértice (que ningún contorno se cruce en ningún cuadro).
+ */
+export interface ValoresDelCuadro {
+  readonly items: readonly (readonly [number, number, number])[]
+  readonly centrosDeLosItems: readonly (readonly [number, number])[]
+  readonly masa: readonly [number, number]
+  readonly corrimiento: readonly [number, number]
+  readonly fuga: readonly [number, number]
+  readonly fondo: number
+  readonly zS: number
+  readonly zF: number
+  readonly kS: number
+  readonly kF: number
+  readonly cambia: number
+  readonly turbulencia: number
+  readonly tiempo: number
+  readonly abre: number
+  readonly espesorT: number
+  readonly aparece: number
+  readonly fundido: number
+}
+
+const suaveEntre = (u: number): number => {
+  const x = Math.min(1, Math.max(0, u))
+  return x * x * (3 - 2 * x)
+}
+
+export function valoresDelCuadro(e: EstadoDeLaMetamorfosis, c: CuadroDeLaMetamorfosis): ValoresDelCuadro {
+  const fondo = Math.max(1, c.fondo)
+  const zM = -ATRAS * fondo
+  const zS = zM * e.atras
+  const zF = zM * (1 - e.adelante)
+  const kF = fondo / (fondo - zF)
+  return {
+    items: c.items.map((it) => [it.x, it.y, it.escala] as const),
+    centrosDeLosItems: c.items.map((it) => [it.cx, it.cy] as const),
+    masa: [c.cajaDeLaFrase.x, c.cajaDeLaFrase.y],
+    corrimiento: [c.corrimiento.x, c.corrimiento.y],
+    fuga: [c.fuga.x, c.fuga.y],
+    fondo,
+    zS,
+    zF,
+    kS: fondo / (fondo - zS),
+    kF,
+    cambia: e.cambia,
+    turbulencia: CONTORNO.turbulencia * c.cuerpoDeLaFrase * e.turbulencia,
+    tiempo: CONTORNO.vidaDelFlujo * c.progreso,
+    abre: 1 - e.sucia,
+    espesorT: VOLUMEN_DEL_TITULO.profundidad * c.cuerpoDeLaFrase * kF * e.espesor,
+    aparece: c.apareceDeLosValores,
+    // [PULIDO 6] E1 · el fundido con la malla exacta, en el último `fundido` del progreso.
+    fundido: suaveEntre((c.progreso - (1 - CONTORNO.fundido)) / CONTORNO.fundido),
+  }
+}
+
+/**
  * Arma `contorno`: las pistas (una vez) y las cuatro piezas de la metamorfosis (paredes, las dos cuentas y la cubierta), más la
  * malla exacta de la frase. `inicio`: dónde empieza cada valor (px de la pantalla), para emparejar por lugar.
  */
@@ -560,8 +753,10 @@ export function armarElContorno(valores: readonly (ValorMedido | null)[], inicio
   const n = CONTORNO.puntos
   const pistas = pistasDeLaMetamorfosis(valores, inicio, frase, fuentes, n)
   const u = uniformes()
-  const tapas = geometriaDeLasTapas(pistas, n)
-  const paredes = geometriaDeLasParedes(pistas, n)
+  const formas = texturaDeLasFormas(pistas, n)
+  u.uFormas.value = formas.textura
+  const tapas = geometriaDeLasTapas(pistas, n, formas.filas)
+  const paredes = geometriaDeLasParedes(pistas, n, formas.filas)
   const materiales = { pared: materialConLuz(color, u, 'pared'), cubierta: materialConLuz(color, u, 'tapa'), exacta: materialConLuz(color, u, 'exacta') }
   const cuentas = [cuentaDelStencil(u, true), cuentaDelStencil(u, false)]
   const malla = (g: THREE.BufferGeometry, m: THREE.Material, nombre: string, orden: number): THREE.Mesh => {
@@ -579,34 +774,29 @@ export function armarElContorno(valores: readonly (ValorMedido | null)[], inicio
 
   const poner = (e: EstadoDeLaMetamorfosis, c: CuadroDeLaMetamorfosis): void => {
     const t0 = performance.now()
-    const fondo = Math.max(1, c.fondo)
-    const zM = -ATRAS * fondo
-    const zS = zM * e.atras
-    const zF = zM * (1 - e.adelante)
-    const kF = fondo / (fondo - zF)
-    u.uZS.value = zS
-    u.uZF.value = zF
-    u.uKS.value = fondo / (fondo - zS)
-    u.uKF.value = kF
-    c.items.forEach((it, k) => {
-      u.uItems.value[k]?.set(it.x, it.y, it.escala, 0)
-      u.uCentrosDeLosItems.value[k]?.set(it.cx, it.cy)
-    })
-    u.uMasa.value.set(c.cajaDeLaFrase.x, c.cajaDeLaFrase.y)
-    u.uCorrimiento.value.set(c.corrimiento.x, c.corrimiento.y)
-    u.uFuga.value.set(c.fuga.x, c.fuga.y)
-    u.uFondo.value = fondo
-    u.uCambia.value = e.cambia
-    u.uTurbulencia.value = CONTORNO.turbulencia * c.cuerpoDeLaFrase * e.turbulencia
-    u.uTiempo.value = CONTORNO.vidaDelFlujo * c.progreso
-    u.uAbre.value = 1 - e.sucia
-    u.uEspesorT.value = VOLUMEN_DEL_TITULO.profundidad * c.cuerpoDeLaFrase * kF * e.espesor
-    u.uAparece.value = c.apareceDeLosValores
-    // Terminada, la malla exacta (en su lugar, el mismo que el de las pistas en 1); antes, la que se mueve.
-    const terminada = c.progreso >= 1
-    for (const o of enMovimiento) o.visible = !terminada && c.apareceDeLosValores > 0
-    exacta.visible = terminada
-    exacta.position.set(c.corrimiento.x, -c.corrimiento.y, 0)
+    const v = valoresDelCuadro(e, c)
+    u.uZS.value = v.zS
+    u.uZF.value = v.zF
+    u.uKS.value = v.kS
+    u.uKF.value = v.kF
+    v.items.forEach(([x, y, escala], k) => u.uItems.value[k]?.set(x, y, escala, 0))
+    v.centrosDeLosItems.forEach(([x, y], k) => u.uCentrosDeLosItems.value[k]?.set(x, y))
+    u.uMasa.value.set(...v.masa)
+    u.uCorrimiento.value.set(...v.corrimiento)
+    u.uFuga.value.set(...v.fuga)
+    u.uFondo.value = v.fondo
+    u.uCambia.value = v.cambia
+    u.uTurbulencia.value = v.turbulencia
+    u.uTiempo.value = v.tiempo
+    u.uAbre.value = v.abre
+    u.uEspesorT.value = v.espesorT
+    u.uAparece.value = v.aparece
+    u.uFundido.value = v.fundido
+    // [PULIDO 6] E1 · al final, la malla exacta (en el mismo lugar que las pistas en 1) entra con el tramado complementario
+    // mientras la que se mueve sale: los dos dibujos se reparten los píxeles, sin sumarse.
+    for (const o of enMovimiento) o.visible = v.fundido < 1 && v.aparece > 0
+    exacta.visible = v.fundido > 0
+    exacta.position.set(v.corrimiento[0], -v.corrimiento[1], 0)
     costo = performance.now() - t0
   }
   return {
@@ -616,6 +806,7 @@ export function armarElContorno(valores: readonly (ValorMedido | null)[], inicio
     soltar: () => {
       tapas.dispose()
       paredes.dispose()
+      formas.textura.dispose()
       exacta.geometry.dispose()
       for (const m of [materiales.pared, materiales.cubierta, materiales.exacta, ...cuentas]) m.dispose()
     },

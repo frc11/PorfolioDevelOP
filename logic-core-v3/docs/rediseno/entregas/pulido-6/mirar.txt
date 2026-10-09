@@ -1,0 +1,10 @@
+PULIDO 6 · qué mirar (http://localhost:3000/v3, o por la IP en el teléfono)
+
+E1 · El CTA
+   /v3, bajá hasta «Por qué develOP» y seguí despacio por la transformación (y volvé para arriba):
+   - Ningún cuadro con manchas, rulos o parpadeos: cada letra de los valores se suaviza, viaja como una forma limpia y se
+     desenrolla en la letra de la frase; las que sobran se cierran donde están.
+   - «Seis razones para elegirnos» se junta en su cartel DEBAJO de la frase (en la franja de «HABLANOS»): no se pisan.
+   - Al terminar, el cambio a la letra definitiva no se nota (un fundido en el último tramo).
+   - Con el teclado: Tab hasta «HABLANOS» (el anillo de foco rodea la palabra 3D); Enter abre Contacto.
+   Hojas: e1-cta-1440.png (12 cuadros), e1-cta-390.png (6), e1-foco-1440.png y e1-foco-enter-1440.png.

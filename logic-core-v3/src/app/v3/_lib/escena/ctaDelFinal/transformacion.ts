@@ -6,8 +6,8 @@
  *     «Seis razones para elegirnos» se junta en un cartel de dos caras, del ancho del CTA, que gira sobre Y: en el medio del
  *     giro sólo se ve el canto y del otro lado está «HABLANOS», que se asienta en su lugar.
  *   LA METAMORFOSIS · los seis valores se van un poco hacia atrás, se desarman y se rearman en la frase del CTA («Este sitio
- *     empezó con una charla. El tuyo también.»), que vuelve adelante y se acomoda arriba de «HABLANOS». Dos técnicas, con
- *     `?meta=` (`contorno`, la del producto desde PULIDO 5, y `fusion`): `contorno.ts` y `fusion.ts`. Acá, sus tiempos.
+ *     empezó con una charla. El tuyo también.»), que vuelve adelante y se acomoda arriba de «HABLANOS» (`contorno.ts`; [PULIDO 6]
+ *     E1 · `fusion` y su bandera se borraron: `contorno` es el producto). Acá, sus tiempos.
  *
  * FUNCIÓN PURA del progreso: reversible, igual a cualquier velocidad y en cualquier dirección (`s55` lo recorre en pasos
  * chicos, ida y vuelta). En px CSS de la pantalla (x a la derecha, y hacia abajo, z hacia la cámara) y en el cuerpo de cada
@@ -44,6 +44,12 @@ export interface EscenaDeLaTransformacion {
    * (`armadoSobreElCta`; en `2411371a` el escenario lo armaba a 0,27 del alto y bajaba: hoy ahí se arma la frase).
    */
   readonly armado: number
+  /**
+   * [PULIDO 6] E1 · lo más alto que puede ser el cartel (px): la franja de «HABLANOS», debajo de la de la frase. Del ancho del
+   * CTA, sus dos renglones subían hasta la franja de la frase y, entre 0,3 y 0,5, el giro y la frase que se arma se pisaban.
+   * Sin él, el cartel es del ancho del CTA (el de `2411371a`).
+   */
+  readonly altoDelCartel?: number
 }
 
 /** Cómo está una pieza: dónde (px), cuánto gira sobre X y sobre Y (rad), su cuerpo, cuánto se estira su espesor y cuánto se ve. */
@@ -107,6 +113,24 @@ export function cajaDe(letras: readonly LetraEnPantalla[]): CajaEnPantalla {
 }
 
 /**
+ * [PULIDO 6] E1 · la escala del cartel (de los renglones del origen): del ancho del CTA y, con `altoDelCartel`, no más alta que
+ * esa franja (el renglón de arriba con su interlineado y el de abajo con su caja). La comparten el giro y `armadoSobreElCta`.
+ */
+function cartelDe(origen: readonly LetraEnPantalla[], destino: readonly LetraEnPantalla[], altoDelCartel: number | undefined): { readonly renglones: number[]; readonly cajas: CajaEnPantalla[]; readonly k: number; readonly alto: number } {
+  const G = TRANSFORMACION.giro
+  const c = cajaDe(destino)
+  const renglones = [...new Set(origen.map((l) => l.renglon))].sort((a, b) => a - b)
+  const cajas = renglones.map((r) => cajaDe(origen.filter((l) => l.renglon === r)))
+  const cuerpo = origen[0]?.cuerpo ?? 1
+  const porAncho = c.ancho / Math.max(1, ...cajas.map((b) => b.ancho))
+  const ultimo = cajas[cajas.length - 1]
+  // Alto del cartel con la escala `k`: (n − 1) interlineados y la caja del último renglón.
+  const altoCon = (k: number): number => ((renglones.length - 1) * cuerpo * G.renglon + (ultimo?.alto ?? 0)) * k
+  const k = altoDelCartel === undefined ? porAncho : Math.min(porAncho, altoDelCartel / Math.max(1e-6, altoCon(1)))
+  return { renglones, cajas, k, alto: cuerpo * k * G.renglon }
+}
+
+/**
  * Las poses del giro con el progreso `p` (las escribe en `s`, sin reservar): la de `2411371a`. En 0, el origen en su lugar y el
  * destino sin dibujar; en 1, el destino en su lugar y el origen sin dibujar.
  */
@@ -114,12 +138,9 @@ export function posesDe(progreso: number, e: EscenaDeLaTransformacion, s: PosesD
   const G = TRANSFORMACION.giro
   const p = acotar(progreso)
   const c = cajaDe(e.destino)
-  // El cartel: los renglones del origen, uno abajo del otro y centrados en el CTA, del ancho del CTA.
-  const renglones = [...new Set(e.origen.map((l) => l.renglon))].sort((a, b) => a - b)
-  const cajas = renglones.map((r) => cajaDe(e.origen.filter((l) => l.renglon === r)))
-  const k = c.ancho / Math.max(1, ...cajas.map((b) => b.ancho))
-  const cuerpo = e.origen[0]?.cuerpo ?? 1
-  const alto = cuerpo * k * G.renglon
+  // El cartel: los renglones del origen, uno abajo del otro y centrados en el CTA, del ancho del CTA ([PULIDO 6] E1 · y no más
+  // alto que su franja).
+  const { renglones, cajas, k, alto } = cartelDe(e.origen, e.destino, e.altoDelCartel)
   const junta = suave(tramo(p, 0, G.junta))
   const angulo = Math.PI * suave(tramo(p, G.desde, G.gira))
   const baja = suave(tramo(p, G.baja[0], G.baja[1]))
@@ -148,32 +169,17 @@ export function posesDe(progreso: number, e: EscenaDeLaTransformacion, s: PosesD
  * Así nada del cartel baja del CTA: «HABLANOS» aparece un poco más arriba y baja a su lugar con `baja` (el gesto de
  * `2411371a` para el cartel armado en otro lugar).
  */
-export function armadoSobreElCta(origen: readonly LetraEnPantalla[], destino: readonly LetraEnPantalla[]): number {
-  const G = TRANSFORMACION.giro
+export function armadoSobreElCta(origen: readonly LetraEnPantalla[], destino: readonly LetraEnPantalla[], altoDelCartel?: number): number {
   const c = cajaDe(destino)
-  const renglones = [...new Set(origen.map((l) => l.renglon))].sort((a, b) => a - b)
-  const cajas = renglones.map((r) => cajaDe(origen.filter((l) => l.renglon === r)))
-  const k = c.ancho / Math.max(1, ...cajas.map((b) => b.ancho))
-  const alto = (origen[0]?.cuerpo ?? 1) * k * G.renglon
+  const { renglones, cajas, k, alto } = cartelDe(origen, destino, altoDelCartel)
   const ultimo = cajas[cajas.length - 1]
   return c.y + c.alto / 2 - ((renglones.length - 1) / 2) * alto - ((ultimo?.alto ?? 0) * k) / 2
 }
 
-/** [PULIDO 5] D1 · los anchos de Archivo en la frase y el CTA (`?ancho=`): `normal` (wdth 100) y `expandido` (120). */
-export const ANCHOS_DEL_CTA = ['normal', 'expandido'] as const
-export type AnchoDelCta = (typeof ANCHOS_DEL_CTA)[number]
-/** El ancho sin bandera: el que mejor se lee como título (con el ancho de la pantalla de tope, `normal` deja el cuerpo más grande). */
-export const ANCHO_DEL_CTA: AnchoDelCta = 'normal'
-
 /**
- * [PULIDO 4] C1 · LA METAMORFOSIS, sus variantes (`?meta=`): `contorno` (la del producto desde PULIDO 5) — los contornos de las
- * letras de los valores se interpolan con turbulencia hasta los de la frase (remuestreados a la misma cantidad de puntos y
- * apareados por posición y área) y la frase crece en espesor al asentarse; `fusion` — las mallas de los valores se derriten
- * con ruido hacia la zona de la frase y la frase nace de ese estado deformado, con un disolvente de umbral de ruido entre las
- * dos (en el medio son una sola masa).
+ * [PULIDO 5] D1 · el ancho de Archivo en la frase y el CTA: wdth 100. [PULIDO 6] E1 · `?ancho=expandido` (120) se borró.
+ * [PULIDO 4] C1 · LA METAMORFOSIS: `contorno` (`contorno.ts`); [PULIDO 6] E1 · `fusion` y `?meta=` se borraron.
  */
-export const VARIANTES_DE_LA_METAMORFOSIS = ['contorno', 'fusion'] as const
-export type VarianteDeLaMetamorfosis = (typeof VARIANTES_DE_LA_METAMORFOSIS)[number]
 
 /**
  * Los tiempos de la metamorfosis (fracciones del progreso; `[desde, dura]`). Los valores se van atrás (`atras`, hasta `ATRAS`
@@ -186,7 +192,6 @@ export type VarianteDeLaMetamorfosis = (typeof VARIANTES_DE_LA_METAMORFOSIS)[num
  */
 export const METAMORFOSIS = {
   atras: [0, 0.25],
-  fusion: { derrite: [0.06, 0.16], cambia: [0.12, 0.36], corte: [0.32, 0.26], limpia: [0.44, 0.44], adelante: [0.6, 0.4] },
   contorno: { cambia: [0.06, 0.58], turbulencia: [0.08, 0.52], limpia: [0.6, 0.16], adelante: [0.62, 0.38], espesor: [0.64, 0.36] },
 } as const
 
@@ -207,13 +212,11 @@ export interface EstadoDeLaMetamorfosis {
   readonly atras: number
   /** Cuánto cambiaron (0 a 1; cada vértice o contorno con su demora). */
   readonly cambia: number
-  /** El umbral del disolvente (0: todo valores; 1: toda frase). En `contorno`, el cambio entero. */
-  readonly corte: number
   /** Cuánto le falta a la frase para quedar limpia (1: la masa; 0: limpia). */
   readonly sucia: number
   /** Cuánto volvió adelante la frase (0: allá atrás; 1: en su lugar). */
   readonly adelante: number
-  /** El espesor de la frase (0 a 1; en `fusion`, siempre 1). */
+  /** El espesor de la frase (0 a 1). */
   readonly espesor: number
   /** La turbulencia (0 a 1): sube y baja con el cambio. */
   readonly turbulencia: number
@@ -221,24 +224,16 @@ export interface EstadoDeLaMetamorfosis {
 
 const [ATRAS_DESDE, ATRAS_DURA] = METAMORFOSIS.atras
 
-/** El estado de la metamorfosis `v` con el progreso `p`. Pura y continua: en 0, los valores en su lugar; en 1, la frase limpia. */
-export function estadoDeLaMetamorfosis(v: VarianteDeLaMetamorfosis, progreso: number): EstadoDeLaMetamorfosis {
+/** El estado de la metamorfosis con el progreso `p`. Pura y continua: en 0, los valores en su lugar; en 1, la frase limpia. */
+export function estadoDeLaMetamorfosis(progreso: number): EstadoDeLaMetamorfosis {
   const p = acotar(progreso)
   const atras = suave(tramo(p, ATRAS_DESDE, ATRAS_DURA))
-  if (v === 'fusion') {
-    const F = METAMORFOSIS.fusion
-    const cambia = tramo(p, F.cambia[0], F.cambia[1])
-    const sucia = 1 - tramo(p, F.limpia[0], F.limpia[1])
-    // Se derriten en su lugar antes de irse y siguen derretidos hasta el cruce con la frase (la frase se limpia por su cuenta).
-    const derrite = suave(tramo(p, F.derrite[0], F.derrite[1])) * (1 - suave(tramo(p, F.corte[0], F.corte[1] + 0.1)))
-    return { atras, cambia, corte: suave(tramo(p, F.corte[0], F.corte[1])), sucia, adelante: frena(tramo(p, F.adelante[0], F.adelante[1])), espesor: 1, turbulencia: derrite }
-  }
   const C = METAMORFOSIS.contorno
   const cambia = tramo(p, C.cambia[0], C.cambia[1])
   // La campana: sin² sobre su tramo (sube y baja con derivada cero en las dos puntas) y cero exacto afuera.
   const t = tramo(p, C.turbulencia[0], C.turbulencia[1])
   const turbulencia = t <= 0 || t >= 1 ? 0 : Math.sin(Math.PI * t) ** 2
-  return { atras, cambia, corte: cambia >= 1 ? 1 : 0, sucia: 1 - suave(tramo(p, C.limpia[0], C.limpia[1])), adelante: frena(tramo(p, C.adelante[0], C.adelante[1])), espesor: suave(tramo(p, C.espesor[0], C.espesor[1])), turbulencia }
+  return { atras, cambia, sucia: 1 - suave(tramo(p, C.limpia[0], C.limpia[1])), adelante: frena(tramo(p, C.adelante[0], C.adelante[1])), espesor: suave(tramo(p, C.espesor[0], C.espesor[1])), turbulencia }
 }
 
 /**

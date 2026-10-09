@@ -30,7 +30,6 @@ import {
   METAMORFOSIS,
   RELEVO_DE_LOS_VALORES,
   TRANSFORMACION,
-  VARIANTES_DE_LA_METAMORFOSIS,
   apareceDeLosValores,
   estadoDeLaMetamorfosis,
   nuevaPose,
@@ -40,7 +39,6 @@ import {
   type EstadoDeLaMetamorfosis,
   type LetraEnPantalla,
   type PosesDeLaTransformacion,
-  type VarianteDeLaMetamorfosis,
 } from '../escena/ctaDelFinal/transformacion'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
@@ -49,8 +47,6 @@ import { asentar, nuevoSeguidor, seguirAlScroll, type SeguidorDelValor } from '.
 import { CTA, FRASE, VALORES } from '../../_secciones/por-que-develop/contenido'
 import ARCHIVO_NORMAL_CTA from '../../_fuentes/archivo-normal-cta.json'
 import ARCHIVO_NORMAL_CTA_FUERTE from '../../_fuentes/archivo-normal-cta-fuerte.json'
-import ARCHIVO_EXPANDIDO_CTA from '../../_fuentes/archivo-expandido-cta.json'
-import ARCHIVO_EXPANDIDO_CTA_FUERTE from '../../_fuentes/archivo-expandido-cta-fuerte.json'
 import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
 import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import { CALMA_EN_EL_PISO } from '../escena/final/enElPiso'
@@ -84,44 +80,42 @@ type Cruce = typeof posesDe
 // LA METAMORFOSIS: en 0, los valores en su lugar (nada cambió); se van atrás «poco» (ATRAS: a ~0,8 de su tamaño) y ANTES de
 // cambiar; en `fusion`, se derriten en su lugar antes de irse; el disolvente cruza a la frase en el medio; la frase se limpia y
 // vuelve adelante. TODO JUNTO: la frase termina en el mismo punto del scroll que «HABLANOS» (en 1, y no antes). [PULIDO 5] D1 ·
-// «HABLANOS» se asienta con el giro (`baja`).
+// «HABLANOS» se asienta con el giro (`baja`). [PULIDO 6] E1 · una sola técnica (`contorno`): `fusion` se borró.
 const asientaDelCta = (p: number): number => Math.min(1, Math.max(0, (p - TRANSFORMACION.giro.baja[0]) / TRANSFORMACION.giro.baja[1]))
-const metaBien = (f: (v: VarianteDeLaMetamorfosis, p: number) => EstadoDeLaMetamorfosis): boolean => VARIANTES_DE_LA_METAMORFOSIS.every((v) => {
-  const [a, b] = [f(v, 0), f(v, 1)]
-  const casi = f(v, 0.995)
-  const enCero = a.atras === 0 && a.cambia === 0 && a.corte === 0 && a.sucia === 1 && a.adelante === 0 && a.turbulencia === 0
-  const enUno = b.atras === 1 && b.cambia === 1 && b.corte === 1 && b.sucia === 0 && b.adelante === 1 && b.espesor === 1 && b.turbulencia === 0
+const metaBien = (f: (p: number) => EstadoDeLaMetamorfosis): boolean => ['contorno'].every(() => {
+  const [a, b] = [f(0), f(1)]
+  const casi = f(0.995)
+  const enCero = a.atras === 0 && a.cambia === 0 && a.sucia === 1 && a.adelante === 0 && a.turbulencia === 0
+  const enUno = b.atras === 1 && b.cambia === 1 && b.sucia === 0 && b.adelante === 1 && b.espesor === 1 && b.turbulencia === 0
   const juntos = casi.adelante < 1 && asientaDelCta(0.995) < 1 && Math.abs(casi.adelante - 1) < 0.01 && Math.abs(asientaDelCta(0.995) - 1) < 0.02
   // Primero atrás: cuando empieza a cambiar, ya se fueron; el cambio empieza con la mitad del alejamiento hecho, como mucho.
   const desde = (f2: (p: number) => number): number => [...Array(1001).keys()].map((k) => k / 1000).find((p) => f2(p) > 0) ?? 1
-  const primeroAtras = desde((p) => f(v, p).atras) < desde((p) => f(v, p).cambia)
+  const primeroAtras = desde((p) => f(p).atras) < desde((p) => f(p).cambia)
   return enCero && enUno && juntos && primeroAtras && ATRAS > 0 && ATRAS <= 0.3
 })
-afirmar(metaBien(estadoDeLaMetamorfosis), '  la metamorfosis (las dos técnicas): en 0 nada cambió; primero atrás («poco»), después cambian, se cruzan, la frase se limpia y vuelve; termina en el mismo punto que «HABLANOS»', `atrás ${String(ATRAS)} de la distancia (a ${(1 / (1 + ATRAS)).toFixed(2)} de su tamaño)`)
-controlPositivo('  el detector VE una frase que termina antes que «HABLANOS» (en 0,9)', ((v: VarianteDeLaMetamorfosis, p: number) => estadoDeLaMetamorfosis(v, Math.min(1, p / 0.9))) as typeof estadoDeLaMetamorfosis, metaBien)
+afirmar(metaBien(estadoDeLaMetamorfosis), '  la metamorfosis: en 0 nada cambió; primero atrás («poco»), después cambian, se cruzan, la frase se limpia y vuelve; termina en el mismo punto que «HABLANOS»', `atrás ${String(ATRAS)} de la distancia (a ${(1 / (1 + ATRAS)).toFixed(2)} de su tamaño)`)
+controlPositivo('  el detector VE una frase que termina antes que «HABLANOS» (en 0,9)', ((p: number) => estadoDeLaMetamorfosis(Math.min(1, p / 0.9))) as typeof estadoDeLaMetamorfosis, metaBien)
 
 // LAS DOS TÉCNICAS, en 3D y terminando en la frase limpia. `fusion`: las dos mallas con el mismo ruido y el mismo flujo; los
 // valores se derriten hacia la zona de la frase (desplazamiento en el vértice) y la frase nace de la masa y se des-deforma; el
 // disolvente con umbral de ruido es complementario (lo que no es valor es frase: una sola masa). `contorno`: los dos textos
 // remuestreados a LA MISMA cantidad de puntos, interpolados con turbulencia y el espesor que crece al asentarse. Sin partículas.
 // [PULIDO 5] D1 · `contorno` ya no rehace la geometría por cuadro: topología fija (las pistas, una vez), el vértice mueve los
-// puntos y las tapas van por stencil; el detalle lo fija `s56` D1 · 4.
-const fusion = sinComentarios(leer('_lib/escena/ctaDelFinal/fusion.ts'))
+// puntos y las tapas van por stencil; el detalle lo fija `s56` D1 · 4. [PULIDO 6] E1 · `fusion` se borró (su código): queda `contorno`.
 const contorno = sinComentarios(leer('_lib/escena/ctaDelFinal/contorno.ts'))
 const cuadrado: THREE.Vector2[] = [new THREE.Vector2(0, 0), new THREE.Vector2(10, 0), new THREE.Vector2(10, 10), new THREE.Vector2(0, 10)]
-const tecnicasBien = (fu: string, co: string): boolean =>
-  fu.includes("if ( ${frase ? 'corte >= uCorte' : 'corte < uCorte'} ) discard;") && (fu.match(/metaFlujo\(/g) ?? []).length >= 4 && fu.includes('vec2 centro = mix( c, cM, e );') && fu.includes('vec2 centro = mix( cM, c, e );') &&
+const tecnicasBien = (co: string): boolean =>
   co.includes('const pistas = pistasDeLaMetamorfosis(valores, inicio, frase, fuentes, n)') && co.includes('enSentido(remuestrear(borde, n), false)') && co.includes('costo = performance.now() - t0') &&
-  co.includes('VOLUMEN_DEL_TITULO.profundidad * c.cuerpoDeLaFrase * kF * e.espesor') && remuestrear(cuadrado, CONTORNO.puntos).length === CONTORNO.puntos && !/THREE\.Points\b|PointsMaterial|part[ií]cula/i.test(`${fu}\n${co}`)
-afirmar(tecnicasBien(fusion, contorno), '  `fusion`: dos mallas, el mismo flujo, la frase nace de la masa, el disolvente complementario; `contorno`: la misma cantidad de puntos, interpolados (en el vértice: topología fija), el espesor crece al asentarse')
-controlPositivo('  el detector VE un disolvente que no es complementario (los dos con el mismo lado)', [fusion.replace("'corte >= uCorte'", "'corte < uCorte'"), contorno] as const, ([a, b]: readonly [string, string]) => tecnicasBien(a, b))
+  co.includes('VOLUMEN_DEL_TITULO.profundidad * c.cuerpoDeLaFrase * kF * e.espesor') && remuestrear(cuadrado, CONTORNO.puntos).length === CONTORNO.puntos && !/THREE\.Points\b|PointsMaterial|part[ií]cula/i.test(co)
+afirmar(tecnicasBien(contorno), '  `contorno`: la misma cantidad de puntos, interpolados (en el vértice: topología fija), el espesor crece al asentarse; sin partículas')
+controlPositivo('  el detector VE una metamorfosis de partículas', `${contorno}\nnew THREE.Points()`, tecnicasBien)
 
 // LAS BANDERAS: `?meta=fusion|contorno` (sólo esas); sin bandera, `fusion` (la del producto). [PULIDO 5] D1 · sin bandera,
-// `contorno` (ganó).
-const banderasBien = (f: typeof entornoPedido): boolean => ENTORNO.pruebas.meta === 'no' && f('producto,meta=contorno').pruebas.meta === 'contorno' && f('producto,meta=fusion').pruebas.meta === 'fusion' && f('producto,meta=otra').pruebas.meta === 'no' &&
-  sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')).includes("return pedida === 'no' ? 'contorno' : pedida")
-afirmar(banderasBien(entornoPedido), '  `?meta=fusion|contorno`; sin bandera, `contorno`')
-controlPositivo('  el detector VE una bandera que acepta cualquier valor', ((p: string) => ({ ...entornoPedido(p), pruebas: { ...entornoPedido(p).pruebas, meta: 'contorno' } })) as unknown as typeof entornoPedido, banderasBien)
+// `contorno` (ganó). [PULIDO 6] E1 · `?meta=` se borró: `contorno` es la única.
+const banderasBien = (f: typeof entornoPedido): boolean => !('meta' in ENTORNO.pruebas) && !('meta' in f('producto,meta=fusion').pruebas) &&
+  sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')).includes('const meta = armarElContorno(medidas.valores, inicio, medidas.letras,')
+afirmar(banderasBien(entornoPedido), '  sin `?meta=`: `contorno` es la única técnica')
+controlPositivo('  el detector VE la bandera de antes todavía pedible', ((p: string) => ({ ...entornoPedido(p), pruebas: { ...entornoPedido(p).pruebas, meta: 'fusion' } })) as unknown as typeof entornoPedido, banderasBien)
 
 // 4 · CONTINUA EN EL SCROLL, EN LAS DOS DIRECCIONES. Se recorre el scroll en pasos de 2 px (a 900 px por pantalla), de antes de
 // que lleguen los valores hasta el final del CTA y de vuelta, con frenadas (un segundo quieto, a 60 cuadros: el asiento corre) cada
@@ -144,9 +138,9 @@ function recorrer(seguir: Seguir, cruce: Cruce, meta: typeof estadoDeLaMetamorfo
     const p = tramo(pin, VENTANA_DE_LA_TRANSFORMACION)
     const c = poses()
     cruce(p, ESCENA, c)
-    const e = meta('fusion', p)
-    const co = meta('contorno', p)
-    const m = [e.atras, e.cambia, e.corte, e.sucia, e.adelante, e.turbulencia, apareceDeLosValores(p), valoresAPlano(p), co.cambia, co.espesor, co.sucia, co.adelante, co.turbulencia]
+    const e = meta(p)
+    const co = meta(p)
+    const m = [e.atras, e.cambia, e.sucia, e.adelante, e.turbulencia, apareceDeLosValores(p), valoresAPlano(p), co.cambia, co.espesor, co.sucia, co.adelante, co.turbulencia]
     const ahora = { valores: seguidores.map((s) => s.mostrado), cruce: c, meta: m }
     if (antes !== null) {
       const a = antes
@@ -229,9 +223,10 @@ const fuenteBien = (frase: Glifos, fuerte: Glifos, valores: Glifos, script: stri
   exactas(frase, CTA.frase) && exactas(fuerte, `${CTA.destacado}${CTA.rotulo.toUpperCase()}`) && /[a-zñóé]/.test(Object.keys(frase.glyphs).join('')) && frase.original_font_information?.source === 'Archivo[wdth,wght].ttf' &&
   VALORES.every((v) => [...`${v.titulo}${v.linea}`].every((c) => c.trim() === '' || valores.glyphs[c] !== undefined)) && (ARCHIVO_700 as Glifos).glyphs.H !== undefined &&
   script.includes("*[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,") && script.includes("for peso, textos, sufijo in ((600, ['Este sitio empezó con una charla.'], ''), (900, ['El tuyo también.', 'HABLANOS'], '-fuerte'))],")
-const fuentesDelCtaBien = (script: string): boolean => [[ARCHIVO_NORMAL_CTA, ARCHIVO_NORMAL_CTA_FUERTE], [ARCHIVO_EXPANDIDO_CTA, ARCHIVO_EXPANDIDO_CTA_FUERTE]].every(([a, b]) => fuenteBien(a as Glifos, b as Glifos, CHIVO_400_VALORES as Glifos, script))
-afirmar(fuentesDelCtaBien(leerDeLaRaiz('scripts-retoque/fuentes-3d.py')), '6 · la frase en Archivo con su copy (minúsculas y acentos), del TTF entero, sólo con sus letras (en los dos anchos); los valores en la Chivo del DOM', `${String(Object.keys((ARCHIVO_EXPANDIDO_CTA as Glifos).glyphs).length)} y ${String(Object.keys((ARCHIVO_EXPANDIDO_CTA_FUERTE as Glifos).glyphs).length)} glifos`)
-controlPositivo('6 · el detector VE la frase de B1 (sólo mayúsculas)', [{ glyphs: Object.fromEntries([...letras(CTA.frase.toUpperCase())].map((c) => [c, 1])), original_font_information: { source: 'archivo-display-latin.woff2' } }, ARCHIVO_EXPANDIDO_CTA_FUERTE as Glifos, CHIVO_400_VALORES as Glifos, leerDeLaRaiz('scripts-retoque/fuentes-3d.py')] as const, ([a, b, c, d]: readonly [Glifos, Glifos, Glifos, string]) => fuenteBien(a, b, c, d))
+// [PULIDO 6] E1 · un solo ancho (wdth 100): `?ancho=expandido` y sus fuentes se borraron.
+const fuentesDelCtaBien = (script: string): boolean => [[ARCHIVO_NORMAL_CTA, ARCHIVO_NORMAL_CTA_FUERTE]].every(([a, b]) => fuenteBien(a as Glifos, b as Glifos, CHIVO_400_VALORES as Glifos, script))
+afirmar(fuentesDelCtaBien(leerDeLaRaiz('scripts-retoque/fuentes-3d.py')), '6 · la frase en Archivo con su copy (minúsculas y acentos), del TTF entero, sólo con sus letras; los valores en la Chivo del DOM', `${String(Object.keys((ARCHIVO_NORMAL_CTA as Glifos).glyphs).length)} y ${String(Object.keys((ARCHIVO_NORMAL_CTA_FUERTE as Glifos).glyphs).length)} glifos`)
+controlPositivo('6 · el detector VE la frase de B1 (sólo mayúsculas)', [{ glyphs: Object.fromEntries([...letras(CTA.frase.toUpperCase())].map((c) => [c, 1])), original_font_information: { source: 'archivo-display-latin.woff2' } }, ARCHIVO_NORMAL_CTA_FUERTE as Glifos, CHIVO_400_VALORES as Glifos, leerDeLaRaiz('scripts-retoque/fuentes-3d.py')] as const, ([a, b, c, d]: readonly [Glifos, Glifos, Glifos, string]) => fuenteBien(a, b, c, d))
 
 // 7 · SE MANTIENE: las siete pantallas (y la transformación en tres, terminando en `cta.armado`), el teléfono con el bloque
 // clavado, el movimiento reducido con el estado final y ninguna letra delante del logo: el plano del CTA detrás del centro del
@@ -239,7 +234,7 @@ controlPositivo('6 · el detector VE la frase de B1 (sólo mayúsculas)', [{ gly
 const listaDom = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
 const mantieneBien = (pantallas: number, cerca: number, atras: number): boolean => pantallas === 7 && Math.abs(TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta - 3) < 1e-9 &&
   ctaDom.includes('<div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)]') && listaDom.includes('progreso.set(quieto ? 1 : progresoEnLaLista(r))') && cerca > 1 && atras > 0 &&
-  escenaDelCta.includes('ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)') && fusion.includes('-uAtras * ( 1.0 - uAdelante )') && contorno.includes('const zF = zM * (1 - e.adelante)')
+  escenaDelCta.includes('ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)') && contorno.includes('const zF = zM * (1 - e.adelante)')
 afirmar(mantieneBien(PANTALLAS_DE_POR_QUE_DEVELOP, MARCO_DEL_CTA.cerca, ATRAS), '7 · las siete pantallas, el teléfono clavado, el movimiento reducido en el estado final y ninguna letra delante del logo (todo detrás del plano del CTA)', `el plano a ${String(MARCO_DEL_CTA.cerca)} de la distancia del logo · relevo de los valores en ${String(RELEVO_DE_LOS_VALORES.tramado)} del progreso`)
 controlPositivo('7 · el detector VE la frase delante del plano (z positivo)', [PANTALLAS_DE_POR_QUE_DEVELOP, MARCO_DEL_CTA.cerca, -0.2] as const, ([a, b, c]: readonly [number, number, number]) => mantieneBien(a, b, c))
 void METAMORFOSIS

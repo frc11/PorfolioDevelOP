@@ -11,7 +11,7 @@ import type { RenglonDelCta } from './enVivo'
 import { FUENTES_DEL_CTA, TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from './fuentesDelCta'
 import { letrasDelRenglon, soltarElRenglon, type RenglonArmado } from './letras'
 import { contornoDelRenglon, materialDelCta, type MaterialDelCta } from './material'
-import { nuevaPose, type AnchoDelCta, type LetraEnPantalla, type Pose, type PosesDeLaTransformacion } from './transformacion'
+import { nuevaPose, type LetraEnPantalla, type Pose, type PosesDeLaTransformacion } from './transformacion'
 
 /**
  * [PULIDO 2] 5 · CÓMO SE ARMA EL CTA DEL FINAL EN LA ESCENA — los renglones del DOM (de dónde sale y adónde llega), letra por
@@ -28,11 +28,11 @@ const CHIVO = new Font(datosDeLaChivo as FontData)
 
 /**
  * [PULIDO 4] C1 · las de la metamorfosis: los valores en la Chivo del DOM (400) y la frase en Archivo con su copy (minúsculas,
- * acentos). [PULIDO 5] D1 · del ancho de la carga: la frase en 600 y el destacado en 900, con su kerning (`fuentesDelCta.ts`).
+ * acentos). [PULIDO 5] D1 · la frase en 600 y el destacado en 900, con su kerning (`fuentesDelCta.ts`).
  */
 const VALORES = new Font(datosDeLosValores as FontData)
-export function fuentesDeLaMetamorfosis(ancho: AnchoDelCta): { readonly valores: Font; readonly frase: FuenteConKerning; readonly fuerte: FuenteConKerning } {
-  return { valores: VALORES, ...FUENTES_DEL_CTA[ancho] }
+export function fuentesDeLaMetamorfosis(): { readonly valores: Font; readonly frase: FuenteConKerning; readonly fuerte: FuenteConKerning } {
+  return { valores: VALORES, ...FUENTES_DEL_CTA }
 }
 
 export interface Pieza {

@@ -1,0 +1,10 @@
+PULIDO 6 · las entregas (el log: docs/rediseno/SPRINT-PULIDO-6.md; el invariante: npm run test:s57-pulido-6)
+
+E1 · El CTA: el entremedio
+  Qué: el camino canónico por flujo (cada letra se suaviza, viaja limpia y se desenrolla: ningún contorno se cruza en ningún
+  cuadro), la turbulencia como deriva del contorno entero, el cartel del giro en la franja de HABLANOS (no pisa la frase), el
+  fundido complementario con la malla exacta, el foco del teclado medido; ?meta=fusion (su código) y ?ancho=expandido (sus
+  fuentes) borrados.
+  Archivos: escena/ctaDelFinal/{contorno,transformacion,armadoDelCta,fuentesDelCta,piezasDeLaMetamorfosis,EscenaDelCta}.ts(x)
+  (se borra fusion.ts), escena/entorno.ts, scripts-retoque/fuentes-3d.py (se borran archivo-expandido-cta(-fuerte).json).
+  Hojas: e1-cta-1440.png, e1-cta-390.png, e1-foco-1440.png, e1-foco-enter-1440.png.

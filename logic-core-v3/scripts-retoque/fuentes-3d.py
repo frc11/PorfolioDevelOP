@@ -14,15 +14,15 @@ la licencia permite convertirlas y redistribuirlas con la fuente.
   chivo-300-titulos.json           [RETOQUE PANEL] T4 · lo tachado: «lo mismo de siempre»
   archivo-700-titulos.json         el registro 1 del hero, en mayúsculas (`uppercase` del DOM): «TU NEGOCIO VENDIENDO»;
                                    [PULIDO 2] 5 · y el CTA del final: «HABLANOS»
-  archivo-{normal,expandido}-cta.json
+  archivo-normal-cta.json
                                    [PULIDO 5] D1 · la frase del CTA del final en Archivo, con su copy (minúsculas, acentos):
                                    «Este sitio empezó con una charla.», en 600 (un peso de título). El woff2 del sitio es un
                                    subconjunto de mayúsculas (`scripts-titular/subsetear-fuentes.py`): ésta sale del TTF
                                    VARIABLE de Archivo (OFL, `scripts-titular/_upstream/Archivo[wdth,wght].ttf`; si no está, lo
-                                   baja ese script) con el ancho de la bandera `?ancho=` (normal: wdth 100; expandido: 120; el
-                                   sitio pincha 62, que en minúsculas se veía estirado), sólo con las letras que pide y con su
+                                   baja ese script) en wdth 100 ([PULIDO 6] E1 · `?ancho=expandido`, 120, se borró; el sitio
+                                   pincha 62, que en minúsculas se veía estirado), sólo con las letras que pide y con su
                                    kerning (`kerning`: los pares del GPOS, en unidades de la fuente)
-  archivo-{normal,expandido}-cta-fuerte.json
+  archivo-normal-cta-fuerte.json
                                    [PULIDO 5] D1 · el destacado y el CTA, del mismo TTF en 900 (el más pesado): «El tuyo
                                    también.» y «HABLANOS»
   chivo-400-valores.json           [PULIDO 4] C1 · los seis valores de Por qué develOP (título y línea, los dos en 400 en el
@@ -43,8 +43,8 @@ RAIZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 FUENTES = os.path.join(RAIZ, 'src', 'app', 'v3', '_fuentes')
 # [PULIDO 5] D1 · Archivo entera y variable (wdth y wght; la baja `scripts-titular/subsetear-fuentes.py`; no se versiona).
 ARCHIVO_VARIABLE = os.path.join(RAIZ, 'scripts-titular', '_upstream', 'Archivo[wdth,wght].ttf')
-# [PULIDO 5] D1 · los anchos de la frase del CTA (`?ancho=`): el eje wdth de Archivo va de 62 a 125.
-ANCHOS_DEL_CTA = {'normal': 100, 'expandido': 120}
+# [PULIDO 5] D1 · el ancho de la frase del CTA: el eje wdth de Archivo va de 62 a 125. [PULIDO 6] E1 · sólo wdth 100.
+ANCHOS_DEL_CTA = {'normal': 100}
 VALORES = [
     'Hecho a medida', 'Sin plantillas: cada sitio se diseña para tu negocio.',
     'Diseño que se destaca', 'Tu sitio no se parece al de tu competencia.',
@@ -64,7 +64,7 @@ PEDIDOS = [
      'textos': ['lo mismo de siempre'], 'destino': 'chivo-300-titulos.json'},
     {'origen': 'archivo-display-latin.woff2', 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
      'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS'], 'destino': 'archivo-700-titulos.json'},
-    # [PULIDO 5] D1 · la frase del CTA del final en Archivo con su copy (minúsculas, acentos), en cada ancho de `?ancho=`: la
+    # [PULIDO 5] D1 · la frase del CTA del final en Archivo con su copy (minúsculas, acentos), en wdth 100: la
     # frase en 600 y el destacado y el CTA en 900, del TTF variable entero, con su kerning.
     *[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,
        'textos': textos, 'destino': f'archivo-{nombre}-cta{sufijo}.json'}

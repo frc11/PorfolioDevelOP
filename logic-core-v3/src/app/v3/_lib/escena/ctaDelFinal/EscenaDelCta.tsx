@@ -15,14 +15,12 @@ import { corrimiento, pinDelLugar } from '../titulos3d/colocacion'
 import { EN_VIVO as EN_VIVO_DEL_FINAL } from '../final/recorridoDelFinal'
 import { viajeEnCurso } from '../viaje'
 import { armarElCta, fondoDelMarco, fuentesDeLaMetamorfosis, letrasEnLaPantalla, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
-import { armarElContorno, type CajaDelValor } from './contorno'
+import { armarElContorno, type CajaDelValor, type CuadroDeLaMetamorfosis } from './contorno'
 import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaListo, ctaVisibleEnElViaje, marcarElCtaListo, suscribirAlLugarDelCta, versionDelLugarDelCta } from './enVivo'
-import { anchoDeLaEscena } from './fuentesDelCta'
-import { armarLaFusion, ponerLaFusion, soltarLaFusion, type CuadroDeLaMetamorfosis } from './fusion'
 import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type MetricasDeLaFuente, type RenglonDeLaFrase, type ValorMedido } from './medidaDeLosValores'
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
-import { ATRAS, apareceDeLosValores, armadoSobreElCta, estadoDeLaMetamorfosis, posesDe, valoresAPlano, type VarianteDeLaMetamorfosis } from './transformacion'
+import { apareceDeLosValores, armadoSobreElCta, cajaDe, estadoDeLaMetamorfosis, posesDe, valoresAPlano } from './transformacion'
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL EN LA ESCENA (en su módulo, que se descarga aparte) — arma el giro letra por letra
@@ -31,7 +29,7 @@ import { ATRAS, apareceDeLosValores, armadoSobreElCta, estadoDeLaMetamorfosis, p
  * (función del scroll). En el escenario se dibuja desde que la transformación arranca (antes, la frase es el título de
  * volumen, que desde ahí queda relevado); en la lista, siempre que el CTA está en la pantalla. Su luz es la de los títulos:
  * la noche del logo y los reflejos con la luz de la sala. [PULIDO 4] C1 · y, a la vez, la metamorfosis de los seis valores
- * en la frase del CTA (`contorno.ts` o `fusion.ts`, con `?meta=`). En un viaje del menú, nada (`ctaVisibleEnElViaje`).
+ * en la frase del CTA (`contorno.ts`; [PULIDO 6] E1 · `fusion` se borró). En un viaje del menú, nada (`ctaVisibleEnElViaje`).
  * [PULIDO 5] D1 · el giro de `2411371a` (en lugar del cruce) y todo ANCLADO EN EL MUNDO (`planosDelCta.ts`): la frase y
  * «HABLANOS» quedan quietos en la sala y el enlace del DOM los sigue (A1).
  */
@@ -77,12 +75,6 @@ interface Medidas {
 
 type VentanaDelBanco = Window & { __ctaDelBanco?: () => unknown }
 
-/** La variante de la metamorfosis de esta carga (sin bandera, `contorno`). */
-const varianteDeLaMetamorfosis = (): VarianteDeLaMetamorfosis => {
-  const pedida = entornoDeLaEscena().pruebas.meta
-  return pedida === 'no' ? 'contorno' : pedida
-}
-
 /** El escenario de «Por qué develOP» (clavado en la pantalla): ahí se sigue a los valores. */
 const ESCENARIO = '[data-pieza="escenario-del-final"]'
 
@@ -99,10 +91,16 @@ function cajaDeLaFrase(letras: readonly LetraDeLaFrase[]): Medidas['caja'] {
   return { x: (x0 + x1) / 2, y: (y0 + y1) / 2, ancho: x1 - x0, alto: y1 - y0 }
 }
 
-function armarLaMetamorfosis(v: VarianteDeLaMetamorfosis, m: Medidas, inicio: readonly CajaDelValor[], fuentes: Parameters<typeof armarLaFusion>[2], color: Variante): MetamorfosisArmada {
-  if (v === 'contorno') return armarElContorno(m.valores, inicio, m.letras, fuentes, color)
-  const f = armarLaFusion(m.valores, m.letras, fuentes, color)
-  return { objetos: [f.valores, f.frase], materiales: f.materiales, poner: (e, c) => ponerLaFusion(f, e, c, ATRAS), soltar: () => soltarLaFusion(f), costo: () => 0 }
+/**
+ * [PULIDO 6] E1 · el aire entre la frase y el cartel del giro (por el cuerpo del CTA): el cartel no sube de la franja de «HABLANOS»
+ * (entre 0,3 y 0,5 se pisaba con la frase que se arma).
+ */
+const AIRE_ENTRE_LA_FRASE_Y_EL_GIRO = 0.12
+
+/** El alto que puede tener el cartel: del borde de abajo de la frase (más el aire) al de «HABLANOS». */
+function altoDelCartel(destino: ArmadoDelCta['letras']['destino'], frase: Medidas['caja']): number {
+  const c = cajaDe(destino)
+  return Math.max(1, c.y + c.alto / 2 - (frase.y + frase.alto / 2) - AIRE_ENTRE_LA_FRASE_Y_EL_GIRO * (destino[0]?.cuerpo ?? 0))
 }
 
 /** El enlace del CTA en el DOM (lo que se toca): el que se lleva al plano proyectado. */
@@ -153,7 +151,7 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         espera = window.setTimeout(intentar, 250)
         return
       }
-      const fuentes = fuentesDeLaMetamorfosis(anchoDeLaEscena())
+      const fuentes = fuentesDeLaMetamorfosis()
       const anchoMaximo = anchoMaximoDelCta()
       const a = armarElCta(origen, destino, color, CTA_EN_VIVO.donde === 'lista', fuentes.fuerte, anchoMaximo)
       // La metamorfosis: los valores medidos planos (en px de su caja) y la frase en sus renglones de LECTURA (con su escenario
@@ -169,7 +167,7 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
       const renglones = renglonesDeLaFrase(frase, [false, false, true]).map((r) => ({ ...r, arriba: r.arriba - corrido }))
       const letras = letrasDeLaFrase(renglones, fuentes.frase, fuentes.fuerte, anchoMaximo)
       const medidas: Medidas = { valores: medidos, renglones, letras, caja: cajaDeLaFrase(letras), cuerpo: Math.max(1, ...letras.map((l) => l.cuerpo)) }
-      const meta = armarLaMetamorfosis(varianteDeLaMetamorfosis(), medidas, inicio, { valores: fuentes.valores, frase: fuentes.frase.fuente, fuerte: fuentes.fuerte.fuente }, color)
+      const meta = armarElContorno(medidas.valores, inicio, medidas.letras, { valores: fuentes.valores, frase: fuentes.frase.fuente, fuerte: fuentes.fuerte.fuente }, color)
       const rt = estado.estudio
       for (const p of piezasDe(a)) if (rt !== null) p.material.material.envMap = rt.texture
       for (const mat of meta.materiales) if (rt !== null) mat.envMap = rt.texture
@@ -219,8 +217,6 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         progreso: CTA_EN_VIVO.progreso,
         donde: CTA_EN_VIVO.donde,
         listo: ctaListo(),
-        meta: varianteDeLaMetamorfosis(),
-        ancho: anchoDeLaEscena(),
         costoMs: s.meta?.costo() ?? 0,
         piezas: a === null ? 0 : piezasDe(a).length,
         visibles: a === null ? 0 : piezasDe(a).filter((p) => p.grupo.visible).length,
@@ -340,7 +336,9 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)
   letrasEnLaPantalla(a, window.scrollY)
   const destino = a.letras.destino
-  posesDe(p, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino) }, a.poses)
+  // [PULIDO 6] E1 · el cartel, en la franja de «HABLANOS» (no sube a la de la frase).
+  const alto = s.medidas === null ? undefined : altoDelCartel(destino, s.medidas.caja)
+  posesDe(p, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino, alto), altoDelCartel: alto }, a.poses)
   // El hover (con el mouse, ya llegado): el CTA se levanta apenas hacia la cámara.
   s.hover += ((CTA_EN_VIVO.hover && p >= 0.97 ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
   for (const pose of a.poses.destino) pose.z += s.hover * HOVER_DEL_CTA.levanta * (destino[0]?.cuerpo ?? 0)
@@ -352,7 +350,7 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   // [PULIDO 4] C1 · la metamorfosis de los valores en la frase, con el mismo progreso.
   if (s.meta !== null && s.medidas !== null) {
     s.cuadro = cuadroDeAhora(s, s.medidas, fondoDelMarco(a.lienzo, viva), tam, p)
-    s.meta.poner(estadoDeLaMetamorfosis(varianteDeLaMetamorfosis(), p), s.cuadro)
+    s.meta.poner(estadoDeLaMetamorfosis(p), s.cuadro)
   }
   // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano.
   const enlace = enlaceDelCta()

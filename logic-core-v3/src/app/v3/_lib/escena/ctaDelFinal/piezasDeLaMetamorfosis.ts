@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 
 import { VOLUMEN_DEL_TITULO } from '../titulos3d/geometria'
 import { TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from './fuentesDelCta'
@@ -92,50 +91,10 @@ export function geometriaDeLaLetra(fuente: Font, c: string, x: number, base: num
   return g
 }
 
-/** El trazo de Lucide (1,5 de 24): el mismo que el DOM. */
-const TRAZO_DEL_ICONO = 1.5
-
-/** Un ícono de Lucide (su SVG del DOM) en px del marco, en su caja (px de la pantalla, y hacia abajo): plano, de trazos. */
-export function geometriaDelIcono(svg: string, x: number, y: number, ancho: number): THREE.BufferGeometry | null {
-  const datos = new SVGLoader().parse(svg)
-  const vista = (/viewBox="([^"]+)"/.exec(svg)?.[1] ?? '0 0 24 24').split(/[\s,]+/).map(Number)
-  const k = ancho / (vista[2] > 0 ? vista[2] : 24)
-  const estilo = SVGLoader.getStrokeStyle(TRAZO_DEL_ICONO, '#000', 'round', 'round', 4)
-  const partes: THREE.BufferGeometry[] = []
-  for (const camino of datos.paths) {
-    for (const sub of camino.subPaths) {
-      const g = SVGLoader.pointsToStroke(sub.getPoints(), estilo)
-      if (g !== null) partes.push(g)
-    }
-  }
-  if (partes.length === 0) return null
-  const posiciones: number[] = []
-  for (const g of partes) {
-    const p = g.getAttribute('position')
-    // Con la y dada vuelta, cada triángulo cambia de sentido: se lo recorre al revés para que mire a la cámara.
-    for (let i = 0; i + 2 < p.count; i += 3) for (const j of [i, i + 2, i + 1]) posiciones.push(x + (p.getX(j) - vista[0]) * k, -(y + (p.getY(j) - vista[1]) * k), 0)
-    g.dispose()
-  }
-  const salida = new THREE.BufferGeometry()
-  salida.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3))
-  salida.setAttribute('normal', new THREE.Float32BufferAttribute(posiciones.map((_, i) => (i % 3 === 2 ? 1 : 0)), 3))
-  salida.setAttribute('uv', new THREE.Float32BufferAttribute(new Array<number>((posiciones.length / 3) * 2).fill(0), 2))
-  return salida
-}
-
-/** Le pone a cada vértice de `g` un atributo constante (`nombre`, de `valores.length` componentes). */
-export function conAtributo(g: THREE.BufferGeometry, nombre: string, valores: readonly number[]): THREE.BufferGeometry {
-  const n = g.getAttribute('position').count
-  const datos = new Float32Array(n * valores.length)
-  for (let i = 0; i < n; i += 1) for (let j = 0; j < valores.length; j += 1) datos[i * valores.length + j] = valores[j]
-  g.setAttribute(nombre, new THREE.BufferAttribute(datos, valores.length))
-  return g
-}
-
 /**
  * EL RUIDO DE LA METAMORFOSIS — el simplex 3D de Ian McEwan y Stefan Gustavson (Ashima Arts, MIT), con nombres propios para
  * no chocar con los de three: suave, sin direcciones de grilla. Lo leen el vértice (la deformación) y el fragmento (el
- * disolvente de `fusion`).
+ * disolvente de `fusion`; [PULIDO 6] E1 · `fusion` se borró).
  */
 export const RUIDO_DE_LA_METAMORFOSIS_GLSL = /* glsl */ `
 vec3 metaMod289( vec3 x ) { return x - floor( x * ( 1.0 / 289.0 ) ) * 289.0; }
@@ -187,12 +146,5 @@ float metaRuido( vec3 v ) {
 // El flujo: un campo de desplazamiento suave (dos ruidos), que cambia con el progreso (función del scroll).
 vec2 metaFlujo( vec2 p, float t ) {
 	return vec2( metaRuido( vec3( p * 0.0075, t ) ), metaRuido( vec3( p * 0.0075 + 19.3, t + 7.1 ) ) );
-}
-`
-
-/** El punto del cuadro a una profundidad: en el plano, corrido para que su grupo (centro `c`) se vea en su lugar de la pantalla. */
-export const EN_SU_LUGAR_GLSL = /* glsl */ `
-vec3 metaEnSuLugar( vec2 visto, vec2 c, float z, vec2 fuga, float fondo ) {
-	return vec3( visto - ( c - fuga ) * z / fondo, z );
 }
 `
