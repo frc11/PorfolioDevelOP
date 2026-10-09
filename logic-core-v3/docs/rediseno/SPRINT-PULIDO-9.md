@@ -148,3 +148,51 @@ Vuelve el formulario con todo lo escrito, el error a la vista en su región viva
 ### Las aserciones viejas
 
 Ninguna cambió. El copy `listo` del pie («¡Listo! Te escribimos pronto.») se borró: lo reemplaza la tarjeta.
+
+## H3 · Contacto (el panel): la carga 3D y «Gracias»
+
+- **Al enviar**, el contenido del panel se transforma en la carga, con la misma familia de transformación que el pie
+  (`transicionDeGracias`: volteo o hundido según `?gracias=`, fundido con movimiento reducido).
+  - La carga es un anillo que gira (`AnilloDeCarga.tsx`), en el material de la escena: el negro satinado (`SATINADO`), los
+    reflejos de su estudio (`crearElEstudio`) y un filo claro donde la superficie se pone de costado.
+  - Va en su propio lienzo, chico y transparente, sin compositor y con `dpr` [1, 1,5]. Se descarga aparte (`next/dynamic`) y
+    sólo está montado mientras carga. Con movimiento reducido, quieto.
+  - Lo escrito vive en la hoja: la carga no lo toca. La carga y la tarjeta guardan el alto del formulario, así que la placa no
+    se achica de golpe.
+- **Al llegar**, la carga se transforma en la tarjeta de gracias, la misma del pie, con el mismo copy.
+  - El resultado se anuncia en la región viva (`DESPUES_DEL_ENVIO` ahora es el texto de la tarjeta) y el foco va a la tarjeta.
+  - A los 3 s (`CIERRE_MS`) el panel se cierra solo, con su salida de siempre, y el foco vuelve a quien lo abrió.
+  - Mientras, una línea fina se consume. Anima el ancho, así que también corre con movimiento reducido.
+  - Esc y la X siguen cerrando.
+  - Reemplaza al «¡Gracias! Te escribimos pronto.» de texto suelto.
+- **Con error**, vuelve el formulario con todo lo escrito, el error a la vista y el foco en Enviar.
+- Mientras carga, el foco queda en la carga, dentro del diálogo; antes caía al `body`.
+
+### Medido en el banco (`h3-modal.ts`, a 1440 y a 390)
+
+| | 1440 | 390 |
+|---|---|---|
+| Enviando: la carga con su lienzo, el foco adentro | sí | sí |
+| Gracias: la tarjeta anunciada, el foco en ella | sí | sí |
+| La línea se consume (a +1,9 s y a +3,4 s del envío) | 766 → 291 px | 310 → 122 px |
+| Se cierra solo; el foco vuelve a quien lo abrió | sí | sí |
+| Error: lo escrito queda, el error se ve, el foco en Enviar | sí | sí |
+| Esc cierra | sí | sí |
+
+### El invariante (`s60` H3)
+
+1. Los estados del panel: la carga, la tarjeta, el cierre a los 3 s y la línea; con error, nada se borra.
+   Controles: un panel que no se cierra solo y el «¡Gracias!» de texto suelto.
+2. El anillo en el material de la escena, en un lienzo sin compositor y con el dpr de la regla.
+   Controles: dpr 2, y sin el filo.
+
+### Gate
+
+- Lint de lo tocado, limpio.
+- `tsc` 0.
+- s53 a s59, verdes. `s60` 29/0.
+- También verdes: s25, s37, s39, s42, s43, s47, s49 y s50, que leen el panel.
+
+### Las aserciones viejas
+
+Ninguna cambió. `DESPUES_DEL_ENVIO` cambió de texto, y `s25` (que nada diga «enviado») sigue verde.

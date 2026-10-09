@@ -2,11 +2,14 @@
 
 import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { Cta } from '../../_componentes/chrome/Cta'
+import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
+import { transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
@@ -36,6 +39,18 @@ import { PlacaDelContacto } from './PlacaDelContacto'
 const CURVA = [0.77, 0, 0.175, 1] as const
 export const MS_DE_LA_HOJA = 700
 export const MS_DEL_VELO = 400
+
+/**
+ * [PULIDO 9] H3 · ENVIANDO Y GRACIAS. Al enviar, el formulario se transforma en la carga 3D (`AnilloDeCarga`: un anillo en el
+ * material de la escena, en su propio lienzo, que se descarga aparte) y, al llegar, la carga en la tarjeta de gracias (la
+ * del pie, con la misma familia de transformación: `transicionDeGracias`). A los `CIERRE_MS` el panel se cierra solo, con
+ * su salida de siempre; mientras, una línea fina se consume. Esc y la X siguen cerrando; al cerrarse, el foco vuelve a quien
+ * lo abrió. Con error, el formulario vuelve con todo lo escrito y el error a la vista. Lo escrito vive en la hoja: la carga
+ * y la tarjeta no lo tocan.
+ */
+export const CIERRE_MS = 3000
+const AnilloDeCarga = dynamic(() => import('./AnilloDeCarga'), { ssr: false })
+const sinSuscripcion = (): (() => void) => () => undefined
 
 const VACIO: Omit<DatosDeContacto, 'intereses'> = { presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
 
@@ -70,9 +85,14 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [datos, setDatos] = useState<DatosDeContacto>({ intereses: precarga, ...VACIO })
   const [errores, setErrores] = useState<ErroresDeContacto>({})
   const [intento, setIntento] = useState(false)
-  // [RONDA 2] F1: mientras viaja, y si llegó.
-  const [enviando, setEnviando] = useState(false)
-  const [enviado, setEnviado] = useState(false)
+  // [RONDA 2] F1: mientras viaja, y si llegó. [PULIDO 9] H3 · cada una con su contenido en la placa.
+  const [fase, setFase] = useState<'formulario' | 'enviando' | 'gracias'>('formulario')
+  const enviando = fase === 'enviando'
+  const enviado = fase === 'gracias'
+  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'volteo' as const)
+  // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe).
+  const [alto, setAlto] = useState<number | undefined>(undefined)
+  const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)
   // UNA región de alerta: el resumen de los datos (sólo para el lector) o el error del servidor (a la vista).
   const [aviso, setAviso] = useState('')
   const [avisoALaVista, setAvisoALaVista] = useState(false)
@@ -93,13 +113,16 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     e.preventDefault()
     if (enviando) return
     setIntento(true)
-    setEnviado(false)
     setAvisoALaVista(false)
     const form = e.currentTarget
     const errores = validarContacto(datos)
-    if (Object.keys(errores).length === 0) setEnviando(true)
+    if (Object.keys(errores).length === 0) {
+      setAlto(form.offsetHeight)
+      pedirFoco.current = 'carga'
+      setFase('enviando')
+    }
     const r = await enviarContacto(datos)
-    setEnviando(false)
+    setFase('formulario')
     if (r.estado === 'invalido') {
       setErrores(r.errores)
       // [INTERFAZ 1] T3: un aviso, vaciado y vuelto a escribir para que un segundo intento también se anuncie.
@@ -114,15 +137,31 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     setErrores({})
     setAviso('')
     if (r.estado === 'error') {
-      // El error normal del formulario, a la vista (en la misma región viva).
+      // El error normal del formulario, a la vista (en la misma región viva); el foco, en Enviar al volver.
+      pedirFoco.current = 'enviar'
       setAvisoALaVista(true)
       requestAnimationFrame(() => setAviso(r.mensaje))
       return
     }
-    setEnviado(true)
+    pedirFoco.current = 'tarjeta'
+    setFase('gracias')
     setIntento(false)
     setDatos({ intereses: [], ...VACIO })
   }
+
+  // [PULIDO 9] H3 · con la tarjeta a la vista, se cierra solo (si antes no lo cerró Esc o la X).
+  useEffect(() => {
+    if (!enviado) return undefined
+    const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)
+    return () => window.clearTimeout(reloj)
+  }, [enviado])
+  const alLlegar = (el: HTMLElement | null): void => {
+    if (el === null || pedirFoco.current === null) return
+    const destino = pedirFoco.current === 'enviar' ? el.querySelector<HTMLElement>('button[type="submit"]') : el
+    pedirFoco.current = null
+    destino?.focus({ preventScroll: true })
+  }
+  const cambio = transicionDeGracias(variante, reducido)
 
   const desdeArriba = modo === 'barra'
   /**
@@ -200,7 +239,27 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             </button>
           </div>
 
-          <form noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
+          <div className="perspective-midrange">
+          <AnimatePresence mode="wait" initial={false}>
+          {enviando ? (
+            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} role="status" aria-label={ROTULO_ENVIANDO} data-parte="carga" className="flex flex-col items-center justify-center gap-[var(--spacing-3)] outline-none" style={{ minHeight: alto }}>
+              <div aria-hidden="true" className="size-[calc(var(--spacing-20)*1.5)]">
+                <AnilloDeCarga quieto={reducido} />
+              </div>
+              <p aria-hidden="true" className="text-caption leading-texto">
+                {ROTULO_ENVIANDO}
+              </p>
+            </motion.div>
+          ) : enviado ? (
+            <motion.div key="gracias" {...cambio} data-parte="gracias" className="flex flex-col justify-center gap-[var(--spacing-6)]" style={{ minHeight: alto }}>
+              <TarjetaDeGracias foco={alLlegar} />
+              {/* La cuenta del cierre: una línea fina que se consume (en ancho: con movimiento reducido también corre). */}
+              <div aria-hidden="true" className="bg-borde h-px w-full">
+                <motion.div className="bg-tinta h-px" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: CIERRE_MS / 1000, ease: 'linear' }} />
+              </div>
+            </motion.div>
+          ) : (
+          <motion.form key="formulario" ref={alLlegar} {...cambio} noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
             <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
             <div
               className={cn(
@@ -211,15 +270,18 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               <p className="text-caption leading-texto">{PIE}</p>
               <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
             </div>
-            {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
-                siempre se anuncia); lo que cambia es lo de adentro. */}
-            <p role="alert" className={avisoALaVista ? 'text-caption leading-texto' : 'sr-only'}>
-              {aviso}
-            </p>
-            <p role="status" className="text-caption leading-texto empty:hidden">
-              {enviado ? DESPUES_DEL_ENVIO : ''}
-            </p>
-          </form>
+          </motion.form>
+          )}
+          </AnimatePresence>
+          </div>
+          {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
+              siempre se anuncia); lo que cambia es lo de adentro. [PULIDO 9] H3 · fuera de lo que se transforma. */}
+          <p role="alert" className={avisoALaVista && !enviado ? 'text-caption leading-texto' : 'sr-only'}>
+            {aviso}
+          </p>
+          <p role="status" className="sr-only">
+            {enviado ? DESPUES_DEL_ENVIO : ''}
+          </p>
         </div>
       </motion.div>
       </PlacaDelContacto>

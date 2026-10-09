@@ -6,14 +6,17 @@
  *        y a los N s la altura media y la dispersión vuelven a las del polvo suspendido; reversible.
  *   H2 · el formulario del pie: enviando sin moverse de su placa (el orden del rearmado) y de sólo lectura; la placa se
  *        transforma en la tarjeta de gracias (volteo, hundido y el fundido) y vuelve; el error deja todo; las banderas.
+ *   H3 · Contacto: la carga 3D (un anillo en el material de la escena) y la tarjeta de gracias, que se cierra sola a los 3 s.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-9.md`.
  */
 import { readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
+import { DESPUES_DEL_ENVIO } from '../../_chrome/contacto/contenido'
+import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
-import { GRACIAS, varianteDeGracias, type VarianteDeGracias } from '../formularios/gracias'
+import { ANUNCIO_DE_GRACIAS, GRACIAS, varianteDeGracias, type VarianteDeGracias } from '../formularios/gracias'
 import { TRANSFORMACION_DEL_PIE, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, avanzarElPolvoEn, frenteInicial, polvoInicial, tomarElFrente, type EstadoDelPolvoVivo, type FrenteDelPolvo } from '../escena/polvo/posarse'
@@ -256,5 +259,33 @@ const enviar = sinComentarios(leer('_lib/formularios/enviar.ts'))
 const banderasBien = (f: typeof envioSimulado): boolean => f('?envio=lento', false) === 'lento' && f('?envio=error', false) === 'error' && f('?envio=otro', false) === null && f('', false) === null && f('?envio=lento', true) === null && f('?envio=error', true) === null && ENVIO_SIMULADO.demoraMs === 2500 && /return simulado === 'error' \? \{ ok: false, error: ERROR_DE_RED \} : \{ ok: true \}/.test(enviar)
 afirmar(banderasBien(envioSimulado), '4 · `?envio=lento` (2,5 s y llega) y `?envio=error` (2,5 s y el error), sólo en desarrollo; no tocan la ruta')
 controlPositivo('4 · el detector VE las banderas en producción', ((c: string) => envioSimulado(c, false)) as typeof envioSimulado, banderasBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('H3 · Contacto: la carga 3D y la tarjeta de gracias')
+
+// 1 · Los estados del panel: el formulario se transforma en la carga (el anillo), la carga en la tarjeta (la misma del pie, la
+// misma familia de transformación), y a los 3 s se cierra solo con una línea que se consume; con error, vuelve con todo.
+const panel = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
+const panelBien = (c: string): boolean =>
+  /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} role="status" aria-label=\{ROTULO_ENVIANDO\}/.test(c) && /<AnilloDeCarga quieto=\{reducido\} \/>/.test(c) &&
+  /<motion\.div key="gracias" \{\.\.\.cambio\}[^>]*>\s*<TarjetaDeGracias foco=\{alLlegar\} \/>/.test(c) && /const cambio = transicionDeGracias\(variante, reducido\)/.test(c) &&
+  /const reloj = window\.setTimeout\(cerrarContacto, CIERRE_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)/.test(c) &&
+  /initial=\{\{ width: '100%' \}\} animate=\{\{ width: '0%' \}\} transition=\{\{ duration: CIERRE_MS \/ 1000, ease: 'linear' \}\}/.test(c) &&
+  /if \(r\.estado === 'error'\) \{\s*pedirFoco\.current = 'enviar'/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&
+  /<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(c) && /<p role="status" className="sr-only">\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(c)
+afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_GRACIAS, '1 · enviar transforma el formulario en la carga 3D y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
+controlPositivo('1 · el detector VE un panel que no se cierra solo', panel.replace('const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)', 'const reloj = 0'), panelBien)
+controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace('<TarjetaDeGracias foco={alLlegar} />', '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
+
+// 2 · El anillo, en el material de la escena (el negro satinado con los reflejos de su estudio y el filo de costado), en su
+// propio lienzo chico y transparente: sin compositor y con el dpr de la regla; con movimiento reducido, quieto.
+const anillo = sinComentarios(leer('_chrome/contacto/AnilloDeCarga.tsx'))
+const anilloBien = (c: string): boolean =>
+  /new THREE\.MeshStandardMaterial\(\{ color: INK_COLOR, roughness: SATINADO\.roughness, metalness: 0\.15, envMap: reflejos\.texture/.test(c) && /const reflejos = crearElEstudio\(gl\)/.test(c) &&
+  /totalEmissiveRadiance \+= uColorDelFilo \* pow\( deCostado/.test(c) && /dpr=\{\[1, 1\.5\]\}/.test(c) && /gl=\{\{ alpha: true/.test(c) && !/EffectComposer|Bloom/.test(c) &&
+  /if \(m === null \|\| quieto\) return/.test(c) && /<torusGeometry/.test(c) && /dynamic\(\(\) => import\('\.\/AnilloDeCarga'\), \{ ssr: false \}\)/.test(panel)
+afirmar(anilloBien(anillo), '2 · la carga es un anillo 3D en el material de la escena (satinado, los reflejos del estudio y el filo), en un lienzo chico sin compositor, que se descarga aparte; quieto con movimiento reducido')
+controlPositivo('2 · el detector VE un lienzo con el dpr de 2', anillo.replace('dpr={[1, 1.5]}', 'dpr={2}'), anilloBien)
+controlPositivo('  y un anillo sin el filo', anillo.replace('totalEmissiveRadiance += uColorDelFilo', 'totalEmissiveRadiance *= uColorDelFilo'), anilloBien)
 
 cerrar('s60-pulido-9')
