@@ -209,3 +209,13 @@ Sonda: `e2-filo.ts`.
 | `s44` P1 · la bandera de los títulos | `!('filo' in pruebas)` | `pruebas.filo === 'no'` y `filo=a\|b\|c` no piden nada; los títulos no la leen | Ídem |
 
 `s55` no cambió. Prohíbe `filoDelLogo` en el piso (el filo encendido de B0): por eso el archivo nuevo se llama `filoConPoder.ts`.
+
+## Cierre · el `verificar` completo
+
+Lo corrí con el Chrome del banco cerrado y el dev server apagado.
+
+**Primera corrida: 9 grupos rojos.** Sobraba `s29`: su limpieza prohíbe la cadena «E2:» en `entorno.ts` (las ideas descartadas
+del entorno), y el comentario de la baja de `?anillo=` decía «E2: …». Pasó a «E2 ·».
+
+**Segunda corrida: 64 pasos y 8 grupos rojos, los de la base** (s1, s2, s3, s4, s5, s7, s8 y s17). Todo lo demás, verde,
+`s57` incluido. No corrí el build de producción.

@@ -113,7 +113,7 @@ export interface Pruebas {
  * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
  * borró: `cruce` es el producto. [PULIDO 4] C2: `energia=intensa` se borró (la energía de B0 es la del producto). [PULIDO 5]
  * D2: `golpe=a|b` se borró (el de la sala, `b`, es el producto). [PULIDO 6] E1: `meta=fusion` y `ancho=expandido` se borraron
- * (`contorno` y wdth 100 son el producto). E2: `anillo=tubo|disco|filo|tubo+filo` se borró (el filo es el producto, sin el
+ * (`contorno` y wdth 100 son el producto). E2 · `anillo=tubo|disco|filo|tubo+filo` se borró (el filo es el producto, sin el
  * anillo ni el círculo liso); entra `filo=corriente|pulso|descarga`.
  */
 export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', filo: 'no' }
