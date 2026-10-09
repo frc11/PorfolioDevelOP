@@ -70,3 +70,53 @@ sigue encendiendo entero en el mismo cuadro que suena, con su destello.
 | `s52-pulido-1` · las banderas | con `filo=corriente\|pulso\|descarga`: juntas con `filo=pulso`, control con `filo=`, URL con `?filo=descarga` | sin `filo=`: juntas con `rebobinado` y `angel`, control con `angel=`, URL con `?rebobinado=minimo` | `filo=` se borró. Lo que fija, igual: cada suelta se pide por su nombre, otro valor es el producto, la URL las pide |
 | `s54` · el logo brilla | lo que pulsa con cada onda es la corriente (más de 2 veces su velocidad recién nacida la onda, menos de 1,15 a 1,8 s; fase integrada); control: la velocidad fija | lo que pulsa es la ráfaga (sale recién nacida la onda y ya se fue a 1,8 s; la escribe el cuadro); control: una ráfaga apagada | La corriente se borró. Lo demás, igual: las ondas corridas al azar, el filo fuera del oscurecimiento y los anillos del pulso apagados |
 | `s57` E2 · 3 · las tres maneras | `?filo=corriente\|pulso\|descarga` (sin bandera, `corriente`); la corriente se acelera, el latido sale al piso, la descarga con su variante; controles: un filo que se prende de a poco y una corriente con la fase por el reloj | sin variantes ni `?filo=` (sin corriente ni latido en el código); el filo se enciende de golpe en el cuadro que suena, con su destello; la descarga en el producto, por las juntas y el plano; controles: un filo que se prende de a poco y una descarga apagada | Decisión: gana la descarga. Lo nuevo (lo liso, las juntas, la ráfaga) lo fija `s58` F1 |
+
+## F2 · El CTA: los seis valores se alinean y se voltean en vertical hasta la frase
+
+Reemplaza a la metamorfosis por contorno, que queda entera en `?meta=contorno` hasta que se apruebe el volteo. El giro de «Seis
+razones» a «HABLANOS» no se tocó.
+
+### La coreografía (`ctaDelFinal/volteo.ts`, función pura del progreso)
+
+1. **Se va lo demás** (0 a 0,10): la línea y el ícono de cada valor se desvanecen con el tramado. Queda sólo el título.
+2. **Se alinean** (0,22 a 0,30): cada título sale de su grilla y va sobre su **tramo** de la frase, escalado parejo (el mismo en x y
+   en y) para entrar en él: no más del 92 % de su ancho ni más del 62 % del cuerpo de la frase. Los 4 primeros valores van en el
+   primer renglón y los 2 últimos en el destacado. En el teléfono, en los renglones de ese ancho (2, 2 y 2).
+3. **Se voltean** (cada placa en 0,2 del progreso; en cascada, cada 0,035, en orden de lectura): cada valor es una placa de dos
+   caras que gira sobre X, con la parte de arriba hacia atrás. En el medio sólo se ve el canto. `?volteo=juntos`: todas a la vez.
+4. **La última termina en 0,68**, el mismo punto en que termina el giro de «HABLANOS» (`TRANSFORMACION.giro.desde + gira`). Desde ahí
+   la frase queda rígida y quieta, y «HABLANOS» se asienta como antes.
+
+Los tramos son por palabras: «Este sitio» / «empezó» / «con una» / «charla.» y «El tuyo» / «también.». La cara de atrás de cada
+placa es la **malla exacta** de su tramo (la de los títulos, con su bisel y el kerning del layout final), puesta relativa a la
+placa. Con la placa volteada queda exactamente donde la frase, así que al terminar **es** la frase: no hay cambio de malla.
+
+**Por qué la alineación arranca en 0,22:** el cartel del giro baja desde «Seis razones» hasta la franja de «HABLANOS» y cruza la de
+la frase (en el teléfono, también la lista de los valores) hasta ~0,21. Desde 0,04 se cruzaban (lo detecta el control de `s58`
+F2 · 4).
+
+Se mantiene:
+- Va en el lienzo del CTA (detrás del logo), anclado en el mundo con la frase y «HABLANOS».
+- El enlace sigue en el DOM (Tab y Enter).
+- No se dibuja en un viaje del menú.
+- Quieto, el progreso es 1: la frase directa.
+
+### Entregas
+
+- `f2-volteo-1440.png` y `f2-volteo-390.png`: 10 cuadros, de p = 0 a 1.
+- `f2-volteo-juntos-1440.png`: `?volteo=juntos`, de 0,30 a 0,68.
+
+### Gate
+
+- Lint de lo tocado, limpio.
+- `tsc` 0.
+- `s53` 54/0, `s54` 52/0, `s55` 27/0, `s56` 38/0, `s57` 22/0, `s58` 21/0.
+
+### Las aserciones viejas que cambiaron
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s55` · las banderas | (E1) sin `?meta=`: la clave no está y la escena arma `contorno` siempre | `?meta=contorno` (sólo ese valor; `meta=fusion` no pide nada); la escena arma `contorno` sólo con la bandera y, sin ella, el volteo | Pedido así: `contorno` queda en `?meta=contorno` hasta que se apruebe el volteo |
+| `s56` D1 · 5 | `contorno` es la del producto (`const meta = armarElContorno(…)`) | `contorno` sigue entero, en `?meta=contorno` | Ídem; lo del volteo lo fija `s58` F2 |
+| `s57` E1 · 5 · las decisiones | `meta` no está en las pruebas (ni en las sueltas) | `meta=fusion` no pide nada y en el producto `meta` es `no`; control: un traductor que acepta `meta=fusion` | Ídem. Lo de `fusion` y `?ancho=expandido` borrados, igual |
+| `s52-pulido-1` · las banderas | `rebobinado` y `angel` | más `meta=contorno` y `volteo=juntos` (cada una, sólo su valor) | Las banderas nuevas del sprint |

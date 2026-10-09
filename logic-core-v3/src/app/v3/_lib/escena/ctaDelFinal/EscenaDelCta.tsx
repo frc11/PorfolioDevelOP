@@ -21,6 +21,8 @@ import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type M
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
 import { apareceDeLosValores, armadoSobreElCta, cajaDe, estadoDeLaMetamorfosis, posesDe, valoresAPlano } from './transformacion'
+import { armarElVolteo } from './volteo'
+import { VALORES } from '../../../_secciones/por-que-develop/contenido'
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL EN LA ESCENA (en su módulo, que se descarga aparte) — arma el giro letra por letra
@@ -167,7 +169,10 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
       const renglones = renglonesDeLaFrase(frase, [false, false, true]).map((r) => ({ ...r, arriba: r.arriba - corrido }))
       const letras = letrasDeLaFrase(renglones, fuentes.frase, fuentes.fuerte, anchoMaximo)
       const medidas: Medidas = { valores: medidos, renglones, letras, caja: cajaDeLaFrase(letras), cuerpo: Math.max(1, ...letras.map((l) => l.cuerpo)) }
-      const meta = armarElContorno(medidas.valores, inicio, medidas.letras, { valores: fuentes.valores, frase: fuentes.frase.fuente, fuerte: fuentes.fuerte.fuente }, color)
+      // [PULIDO 7] F2 · el volteo (sin bandera) o la metamorfosis por contorno (`?meta=contorno`, hasta que se apruebe el volteo).
+      const deLasFuentes = { valores: fuentes.valores, frase: fuentes.frase.fuente, fuerte: fuentes.fuerte.fuente }
+      const pruebas = entornoDeLaEscena().pruebas
+      const meta = pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo(medidas.valores, renglones, medidas.letras, deLasFuentes, color, VALORES.map((v) => v.titulo), pruebas.volteo === 'juntos' ? 'juntos' : 'cascada')
       const rt = estado.estudio
       for (const p of piezasDe(a)) if (rt !== null) p.material.material.envMap = rt.texture
       for (const mat of meta.materiales) if (rt !== null) mat.envMap = rt.texture

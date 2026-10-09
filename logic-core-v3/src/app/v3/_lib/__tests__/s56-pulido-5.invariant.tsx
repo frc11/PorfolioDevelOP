@@ -280,8 +280,9 @@ controlPositivo('4 · el detector VE una «o» con el agujero en el sentido del 
 
 // 5 · `contorno`, LA DEL PRODUCTO.
 const contorno = sinComentarios(leer('_lib/escena/ctaDelFinal/contorno.ts'))
-// [PULIDO 6] E1 · `fusion` y `?meta=` se borraron: `contorno` es la única (lo fija `s57` E1 · 5).
-afirmar(escena.includes('const meta = armarElContorno(medidas.valores, inicio, medidas.letras,') && !escena.includes('fusion'), '5 · `contorno` es la del producto (y la única: `fusion` se borró en PULIDO 6)')
+// [PULIDO 6] E1 · `fusion` y `?meta=` se borraron: `contorno` es la única (lo fija `s57` E1 · 5). [PULIDO 7] F2 · `contorno` queda
+// en `?meta=contorno` (el producto es el volteo, que fija `s58` F2).
+afirmar(escena.includes("pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras,") && !escena.includes('fusion'), '5 · `contorno` sigue entero, en `?meta=contorno` (`fusion` se borró en PULIDO 6)')
 
 // La asignación ÓPTIMA (el método húngaro): la misma suma que la mejor de todas las permutaciones, también rectangular.
 function mejorPorFuerza(m: readonly (readonly number[])[]): number {

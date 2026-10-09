@@ -206,8 +206,8 @@ function conSusMedidas(borde: THREE.Vector2[], agujeros: THREE.Vector2[][], n: n
   return { borde: b, agujeros: agujeros.map((h) => enSentido(remuestrear(h, n), true)), centro: centroDe(b), area: Math.abs(areaConSigno(b)) }
 }
 
-/** Los trazos de un ícono como contornos (px de la caja del valor): cada trazo abierto, una banda; uno cerrado, un anillo. */
-function formasDelIcono(svg: string, x: number, y: number, ancho: number, n: number): FormaRemuestreada[] {
+/** Los trazos de un ícono como contornos (px de la caja del valor): cada trazo abierto, una banda; uno cerrado, un anillo. [PULIDO 7] F2 · lo usa también el volteo. */
+export function formasDelIcono(svg: string, x: number, y: number, ancho: number, n: number): FormaRemuestreada[] {
   const datos = new SVGLoader().parse(svg)
   const k = ancho / 24
   const medio = (1.5 * k) / 2

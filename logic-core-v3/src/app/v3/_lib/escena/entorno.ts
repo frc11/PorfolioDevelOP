@@ -88,6 +88,12 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
+  /**
+   * [PULIDO 7] F2 · `meta=contorno`: la metamorfosis por contorno (la de PULIDO 6), hasta que se apruebe el volteo; sin bandera,
+   * el volteo (`ctaDelFinal/volteo.ts`). Y `volteo=juntos`: las placas se voltean todas a la vez (sin bandera, en cascada).
+   */
+  readonly meta: 'contorno' | 'no'
+  readonly volteo: 'juntos' | 'no'
 }
 
 /**
@@ -107,12 +113,12 @@ export interface Pruebas {
  * D2: `golpe=a|b` se borró (el de la sala, `b`, es el producto). [PULIDO 6] E1: `meta=fusion` y `ancho=expandido` se borraron
  * (`contorno` y wdth 100 son el producto). E2 · `anillo=tubo|disco|filo|tubo+filo` se borró (el filo es el producto, sin el
  * anillo ni el círculo liso); entró `filo=corriente|pulso|descarga`. [PULIDO 7] F1 · `filo=` se borró: la descarga es el producto
- * (la corriente y el pulso se fueron con su código).
+ * (la corriente y el pulso se fueron con su código). F2 · entran `meta=contorno` (la de antes) y `volteo=juntos`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', meta: 'no', volteo: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'meta', 'volteo'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -125,6 +131,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
+    meta: unoDe<'contorno'>(['contorno'], valor('meta')),
+    volteo: unoDe<'juntos'>(['juntos'], valor('volteo')),
   }
 }
 

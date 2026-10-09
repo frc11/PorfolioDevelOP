@@ -327,12 +327,12 @@ afirmar(focoBien(dom, escena), '4 · el foco del teclado llega a «HABLANOS» tr
 controlPositivo('4 · el detector VE el enlace fuera del Tab', [dom.replace('<motion.a', '<motion.a tabIndex={-1}'), escena] as const, ([a, b]: readonly [string, string]) => focoBien(a, b))
 
 // 5 · LAS DECISIONES: `contorno` y el ancho normal son el producto; `fusion` (su código) y `?meta=`, `?ancho=expandido` (sus fuentes),
-// borrados.
+// borrados. [PULIDO 7] F2 · vuelve `?meta=contorno` (sólo ese valor, pedido así: el producto es el volteo); `fusion` sigue sin pedir nada.
 const decisionesBien = (pruebas: readonly string[], f: typeof entornoPedido): boolean => !existsSync(`${V3}/_lib/escena/ctaDelFinal/fusion.ts`) && !existsSync(`${V3}/_fuentes/archivo-expandido-cta.json`) && !existsSync(`${V3}/_fuentes/archivo-expandido-cta-fuerte.json`) &&
-  !pruebas.includes('meta') && !pruebas.includes('ancho') && !('meta' in f('producto,meta=fusion').pruebas) && !('ancho' in f('producto,ancho=expandido').pruebas) && !('meta' in ENTORNO.pruebas) &&
+  !pruebas.includes('ancho') && f('producto,meta=fusion').pruebas.meta === 'no' && !('ancho' in f('producto,ancho=expandido').pruebas) && ENTORNO.pruebas.meta === 'no' &&
   !/fusion/.test(escena) && !/expandido/.test(sinComentarios(leer('_lib/escena/ctaDelFinal/fuentesDelCta.ts')))
 afirmar(decisionesBien(PRUEBAS_SUELTAS, entornoPedido), '5 · `fusion` (su código) y `?meta=`, `?ancho=expandido` (y sus fuentes), borrados: `contorno` y el ancho normal, el producto')
-controlPositivo('5 · el detector VE la bandera `meta` todavía pedible', [...PRUEBAS_SUELTAS, 'meta'], (x: readonly string[]) => decisionesBien(x, entornoPedido))
+controlPositivo('5 · el detector VE `meta=fusion` todavía pedible', ((p: string) => ({ ...entornoPedido(p), pruebas: { ...entornoPedido(p).pruebas, meta: p.includes('meta=fusion') ? 'fusion' : 'no' } })) as unknown as typeof entornoPedido, (f: typeof entornoPedido) => decisionesBien(PRUEBAS_SUELTAS, f))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('E2 · El filo con poder')

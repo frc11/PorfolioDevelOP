@@ -111,10 +111,11 @@ afirmar(tecnicasBien(contorno), '  `contorno`: la misma cantidad de puntos, inte
 controlPositivo('  el detector VE una metamorfosis de partículas', `${contorno}\nnew THREE.Points()`, tecnicasBien)
 
 // LAS BANDERAS: `?meta=fusion|contorno` (sólo esas); sin bandera, `fusion` (la del producto). [PULIDO 5] D1 · sin bandera,
-// `contorno` (ganó). [PULIDO 6] E1 · `?meta=` se borró: `contorno` es la única.
-const banderasBien = (f: typeof entornoPedido): boolean => !('meta' in ENTORNO.pruebas) && !('meta' in f('producto,meta=fusion').pruebas) &&
-  sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')).includes('const meta = armarElContorno(medidas.valores, inicio, medidas.letras,')
-afirmar(banderasBien(entornoPedido), '  sin `?meta=`: `contorno` es la única técnica')
+// `contorno` (ganó). [PULIDO 6] E1 · `?meta=` se borró: `contorno` es la única. [PULIDO 7] F2 · vuelve `?meta=contorno` (sólo
+// ese valor), pedido así: sin bandera, el volteo; `fusion` sigue sin pedir nada.
+const banderasBien = (f: typeof entornoPedido): boolean => ENTORNO.pruebas.meta === 'no' && f('producto,meta=fusion').pruebas.meta === 'no' && f('producto,meta=contorno').pruebas.meta === 'contorno' &&
+  sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')).includes("const meta = pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo(")
+afirmar(banderasBien(entornoPedido), '  [PULIDO 7] `?meta=contorno` (sólo ese valor; `fusion` no pide nada); sin bandera, el volteo')
 controlPositivo('  el detector VE la bandera de antes todavía pedible', ((p: string) => ({ ...entornoPedido(p), pruebas: { ...entornoPedido(p).pruebas, meta: 'fusion' } })) as unknown as typeof entornoPedido, banderasBien)
 
 // 4 · CONTINUA EN EL SCROLL, EN LAS DOS DIRECCIONES. Se recorre el scroll en pasos de 2 px (a 900 px por pantalla), de antes de
