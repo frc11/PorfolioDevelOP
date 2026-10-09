@@ -4,6 +4,7 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import datos400 from '../../../_fuentes/chivo-400-pie.json'
 import datos500 from '../../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../../_fuentes/chivo-600-pie.json'
+import datosArchivo from '../../../_fuentes/archivo-700-titulos.json'
 import { homografia, matrix3dCss } from '../../pie3d/homografia'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
@@ -11,6 +12,7 @@ import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
 import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDelFinal'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
+import { varianteDeGracias, type VarianteDeGracias } from '../../formularios/gracias'
 import { viajeEnCurso } from '../viaje'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
@@ -18,6 +20,7 @@ import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
+import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
 
 /**
  * [RETOQUE DEL PIE] P2 · LAS PIEZAS ARMADAS DEL PIE Y SU CUADRO — sin React (el componente, `PieDeVolumen.tsx`, sólo
@@ -28,7 +31,8 @@ import { SOMBRAS_DEL_PIE } from './sombras'
  * pieza tiene su viaje (`viaje`, la pose de su llegada); el DOM se lleva con el viaje en cero (donde la pieza va a quedar)
  * y no recibe clics hasta que la pieza llegó.
  */
-const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData) }
+// [PULIDO 9] H2 · y Archivo, para el mensaje de la tarjeta de gracias.
+const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: new Font(datosArchivo as FontData) }
 
 /** Cuánto se hunde (px) y en cuánto tiempo (la constante, s). */
 export const HUNDIDA_DEL_PIE = { encima: 5, apretada: 12, tau: 0.05 } as const
@@ -61,6 +65,16 @@ export interface Armada {
   orden: number
   llego: number
   tocable: boolean
+  /** [PULIDO 9] H2 · el estado del formulario al medirlo (`data-estado`) y, si cambió, su transformación en curso. */
+  readonly estado: string | null
+  transformacion: TransformacionEnCurso | null
+}
+
+/** [PULIDO 9] H2 · la placa que estaba (sus mallas, en el grupo de la nueva) y cuánto va (0 a 1). */
+interface TransformacionEnCurso {
+  readonly variante: VarianteDeGracias
+  readonly saliente: Armada
+  t: number
 }
 
 export interface EstadoDelPie {
@@ -120,6 +134,7 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     a.grupo.updateMatrixWorld(true)
     if (a.pieza.forma !== 'texto') seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)
     llegar(a, s)
+    if (a.transformacion !== null) transformar(a, a.transformacion, s.quieto, dt)
     a.viaje.updateMatrixWorld(true)
   }
   // [NOCTURNO FINAL] A4 · las piezas del pie no proyectan sombra sobre la escena (eran sombras de contacto en el piso vivo).
@@ -175,8 +190,33 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
       ahora.push(vieja)
       continue
     }
-    const a = armar(p, medida, firma, estudio)
-    if (vieja !== undefined) a.hundido = vieja.hundido
+    // [PULIDO 9] H2 · la vieja se suelta ANTES de armar la nueva: `soltar` le devuelve al DOM su transformada y su origen, y
+    // después le borraba a la nueva el origen (`0 0`) de su homografía: con la cámara en perspectiva (la órbita del mouse en
+    // el final), el formulario quedaba corrido de su placa desde «Enviando…». La transformada se conserva hasta el cuadro.
+    // [PULIDO 9] H2 · si el formulario cambió de estado (a la tarjeta de gracias o de vuelta), la vieja se queda como la placa
+    // saliente de la transformación (sólo sus mallas: el DOM es de la nueva).
+    const estado = p.elemento.getAttribute('data-estado')
+    const transforma = vieja !== undefined && vieja.pieza.elemento === p.elemento && p.forma === 'formulario' && vieja.estado !== null && estado !== null && vieja.estado !== estado
+    if (vieja !== undefined) {
+      antes.delete(p.id)
+      raiz.remove(vieja.grupo)
+      if (transforma) soltarLasMallas(vieja.transformacion?.saliente)
+      else soltar(vieja)
+    }
+    const a = armar(p, medida, firma, estudio, estado)
+    if (vieja !== undefined) {
+      a.hundido = vieja.hundido
+      if (vieja.pieza.elemento === p.elemento && p.forma !== 'texto') {
+        a.css = vieja.css
+        p.elemento.style.transform = a.css
+      }
+      if (transforma) {
+        vieja.transformacion = null
+        a.grupo.add(vieja.viaje)
+        a.transformacion = { variante: varianteDeGracias(p.elemento.getAttribute('data-gracias')), saliente: vieja, t: 0 }
+        p.elemento.style.opacity = '0'
+      }
+    }
     raiz.add(a.grupo)
     ahora.push(a)
   }
@@ -195,7 +235,7 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
   s.armadas = ahora
 }
 
-function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estudio: THREE.Texture): Armada {
+function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estudio: THREE.Texture, estado: string | null = null): Armada {
   const { fija, hundible, espesor } = armarLaPieza(pieza.forma, medida, FUENTES)
   const uniformes = uniformesDelPie()
   uniformes.uCuerpoDelPie.value = medida.letras.reduce((m, l) => Math.max(m, l.cuerpo), 0)
@@ -226,18 +266,55 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
     if (malla.geometry.boundingBox !== null) caja.union(malla.geometry.boundingBox)
   }
   const delHundido = pieza.forma === 'placa' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null }
 }
 
 export function soltar(a: Armada): void {
-  a.grupo.removeFromParent()
-  for (const malla of a.mallas) malla.geometry.dispose()
-  a.material.dispose()
+  soltarLasMallas(a)
   if (a.pieza.forma !== 'texto') {
     a.pieza.elemento.style.transform = ''
     a.pieza.elemento.style.transformOrigin = ''
     a.pieza.elemento.style.pointerEvents = ''
+    a.pieza.elemento.style.opacity = ''
   }
+}
+
+/** [PULIDO 9] H2 · lo de three de una pieza (y de la saliente de su transformación), sin tocar el DOM. */
+function soltarLasMallas(a: Armada | undefined): void {
+  if (a === undefined) return
+  soltarLasMallas(a.transformacion?.saliente)
+  a.transformacion = null
+  a.grupo.removeFromParent()
+  a.viaje.removeFromParent()
+  for (const malla of a.mallas) malla.geometry.dispose()
+  a.material.dispose()
+}
+
+const POSE = new THREE.Matrix4()
+
+/**
+ * [PULIDO 9] H2 · un cuadro de la transformación (`transformacionDelPie.ts`): la entrante sobre su llegada y la saliente en su
+ * lugar; el DOM, apagado hasta que termina (lo nuevo ya está en él: el foco, el lector).
+ */
+function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: number): void {
+  x.t = Math.min(1, x.t + dt / duracionDeLaTransformacion(x.variante, quieto))
+  const caja = a.medida.caja
+  const vieja = x.saliente.medida.caja
+  const desde = { ancho: vieja.ancho, alto: vieja.alto, dx: vieja.x - caja.x, dy: vieja.y - caja.y }
+  const entra = poseDeLaTransformacion(x.variante, quieto, x.t, true, caja, desde, a.espesor, POSE)
+  a.viaje.matrix.multiply(POSE)
+  a.viaje.visible = entra.visible
+  a.uniformes.uApareceDelPie.value *= entra.aparece
+  const sale = poseDeLaTransformacion(x.variante, quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
+  x.saliente.viaje.visible = sale.visible
+  x.saliente.uniformes.uApareceDelPie.value = sale.aparece
+  x.saliente.material.envMapIntensity = a.material.envMapIntensity
+  x.saliente.viaje.updateMatrixWorld(true)
+  if (x.t < 1) return
+  soltarLasMallas(x.saliente)
+  a.transformacion = null
+  a.viaje.visible = true
+  a.pieza.elemento.style.opacity = ''
 }
 
 /** Lo interactivo, sobre la cara de su pieza como la ve la cámara viva (la placa, hundida con ella). */

@@ -49,7 +49,8 @@ export const COLORES_DEL_PIE = {
   pozo: new THREE.Color('#2b2b2b'),
 } as const
 
-export type FuentesDelPie = Readonly<Record<PesoDelPie, Font>>
+/** [PULIDO 9] H2 · y `archivo`: el título de la tarjeta de gracias. */
+export type FuentesDelPie = Readonly<Record<PesoDelPie, Font>> & { readonly archivo?: Font }
 
 /** Un rectángulo redondeado de la caja del DOM (px, y hacia abajo) en el plano de la pieza (y hacia arriba). */
 export function rectanguloRedondeado<T extends THREE.Path>(destino: T, c: Pick<CajaDelPie, 'x' | 'y' | 'ancho' | 'alto'>, radio: number): T {
@@ -120,7 +121,7 @@ function letras(ls: readonly LetraDelPie[], fuentes: FuentesDelPie, z: number, r
   const { profundidad, bisel } = VOLUMEN_DEL_PIE.texto
   const piezas: THREE.BufferGeometry[] = []
   for (const l of ls) {
-    const fuente = fuentes[l.peso]
+    const fuente = (l.archivo === true ? fuentes.archivo : undefined) ?? fuentes[l.peso]
     // Sin el glifo (un texto que cambió y no se regeneró la fuente): esa letra queda en el DOM... y el invariante lo caza.
     if (fuente.data.glyphs[l.ch] === undefined) continue
     const formas = fuente.generateShapes(l.ch, l.cuerpo)

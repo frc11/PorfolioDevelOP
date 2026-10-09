@@ -158,9 +158,8 @@ export const CONTACTO_DEL_FORMULARIO = {
   ejemploDeMail: 'nombre@dominio',
   mensaje: 'Mensaje',
   enviar: 'Enviar',
-  /** [RONDA 2] F1: mientras viaja y cuando llegó (sin carteles de «todavía no envía»). */
+  /** [RONDA 2] F1: mientras viaja (sin carteles de «todavía no envía»). [PULIDO 9] H2 · al llegar, la tarjeta de gracias (`_lib/formularios/gracias.ts`). */
   enviando: 'Enviando…',
-  listo: '¡Listo! Te escribimos pronto.',
 } as const
 
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */

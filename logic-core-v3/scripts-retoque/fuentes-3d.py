@@ -63,7 +63,8 @@ PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 300, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': ['lo mismo de siempre'], 'destino': 'chivo-300-titulos.json'},
     {'origen': 'archivo-display-latin.woff2', 'peso': 700, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt',
-     'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS'], 'destino': 'archivo-700-titulos.json'},
+     # [PULIDO 9] H2 · y el título de la tarjeta de gracias del pie (`uppercase` del DOM).
+     'textos': ['TU NEGOCIO VENDIENDO', 'HABLANOS', 'GRACIAS POR TU MENSAJE.'], 'destino': 'archivo-700-titulos.json'},
     # [PULIDO 5] D1 · la frase del CTA del final en Archivo con su copy (minúsculas, acentos), en wdth 100: la
     # frase en 600 y el destacado y el CTA en 900, del TTF variable entero, con su kerning.
     *[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,
@@ -79,11 +80,12 @@ PEDIDOS = [
     # y `contacto.ts`, y el logotipo): 400 el titular y la línea legal (con los dígitos, por el año); 500 los rótulos, en
     # mayúsculas (`uppercase` del DOM); 600 el logotipo, los enlaces, el mail, WhatsApp y Enviar.
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
-     'textos': ['Lo que sigue lo armamos con vos', '© 2026 develOP. Todos los derechos reservados.', '0123456789'], 'destino': 'chivo-400-pie.json'},
+     # [PULIDO 9] H2 · y la bajada de la tarjeta de gracias.
+     'textos': ['Lo que sigue lo armamos con vos', '© 2026 develOP. Todos los derechos reservados.', '0123456789', 'Te contestamos pronto.'], 'destino': 'chivo-400-pie.json'},
     {'origen': 'chivo-latin.woff2', 'peso': 500, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': ['EL RECORRIDO', 'CONTACTO', 'NOMBRE', 'MAIL', 'MENSAJE'], 'destino': 'chivo-500-pie.json'},
     {'origen': 'chivo-latin.woff2', 'peso': 600, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
-     'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Trabajos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…'], 'destino': 'chivo-600-pie.json'},
+     'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Trabajos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…', 'Enviar otro mensaje'], 'destino': 'chivo-600-pie.json'},
 ]
 
 try:

@@ -66,3 +66,85 @@ Quieto 14 s (todo en el piso), después 15 s de rueda (una muesca de 60 px y 500
 |---|---|---|---|
 | `s41` B3 · el estado recuerda de dónde salió el despertar | `p.remolino = despertar.delCursor ? 1 : 0` | `p.remolino = m.frente.delCursor ? 1 : 0`, y el frente copia `delCursor` del despertar (`f.delCursor = e.delCursor`) | El remolino es el del frente, que es ese despertar mientras no haya otro con polvo posado. Lo que fija, igual |
 | `s34` B4 · cada salida de la simulación escribe el modo con su peso | 9 escrituras de `salida0` | 11 | Las dos de la vuelta al aire de cerca de las caras. Las dos escriben el modo con su peso (`modoConPeso`), que es lo que fija |
+
+## H2 · Formulario del pie: «Enviando», «Gracias» y error
+
+### 1) La causa del desalineado en «Enviando…»
+
+Desde 1025 el formulario es una placa 3D y el DOM (los campos de verdad) va encima, llevado por una homografía que le escribe la
+escena en cada cuadro, con origen `0 0`. Al pasar el botón a «Enviando…» cambia la forma de la pieza y la escena la rearma:
+- armaba la nueva (que pone el origen `0 0` en el elemento) y DESPUÉS soltaba la vieja;
+- `soltar` le borra a ese mismo elemento la transformada y el origen.
+
+La homografía quedaba aplicada alrededor del centro. Con la cámara de frente casi no se nota (la transformada es casi la
+identidad). En el final, con la órbita del mouse, la transformada tiene perspectiva y los valores quedaban corridos de sus pozos,
+encima de los rótulos. Pasaba con cualquier rearmado: «Enviando…», los errores, el «listo».
+
+**El arreglo** (`pie3d/armadas.ts`): la vieja se suelta antes de armar la nueva, y la nueva conserva la transformada hasta el
+cuadro siguiente. Mientras viaja, los campos son de sólo lectura y nada cambia de lugar: el botón guarda el ancho del rótulo más
+largo y la ruedita va dentro de su aire (en el angosto no entra: sólo el rótulo).
+
+### 2) Gracias: la placa se transforma en una tarjeta
+
+- **El DOM** (`TarjetaDeGracias`, la misma que va a usar Contacto):
+  - «Gracias por tu mensaje.» / «Te contestamos pronto.» y el enlace «Enviar otro mensaje»;
+  - el resultado se anuncia en la región viva y el foco va a la tarjeta; de vuelta, al nombre.
+- **Desde 1025, la placa 3D** (`pie3d/transformacionDelPie.ts`, puro):
+  - el formulario marca su estado (`data-estado`) y la variante (`data-gracias`);
+  - el rearmado ve el cambio y deja la placa vieja como «saliente» mientras dura la transformación; el DOM se apaga hasta que
+    termina;
+  - el título de la tarjeta va en relieve en Archivo 700 (se regeneró `archivo-700-titulos.json` con su texto); la bajada y el
+    enlace, en Chivo, como el resto del pie.
+- **Variantes** (`?gracias=`):
+  - `volteo` (sin bandera, también): la placa gira sobre X en 0,9 s; de canto, la cambia la tarjeta, que termina el giro con el
+    mensaje en su cara.
+  - `hundido`: el relieve se hunde contra la cara hasta aplanarse (los pozos, la tecla y el espesor); la placa plana toma el
+    tamaño de la tarjeta y el mensaje sale en relieve desde la superficie (1,2 s).
+  - Con movimiento reducido: un fundido de 0,4 s (el disuelto de la llegada del pie).
+- **Abajo de 1025** (el form de vidrio, 390 y 768): el DOM con Motion. El volteo gira sobre X y el hundido baja los campos y sube
+  el mensaje; con movimiento reducido, fundido.
+- «Enviar otro mensaje» vuelve al formulario vacío con la transformación inversa.
+
+### 3) Error
+
+Vuelve el formulario con todo lo escrito, el error a la vista en su región viva y el foco en Enviar, para volver a probar.
+
+### Las banderas (sólo en desarrollo, `_lib/formularios/enviar.ts`)
+
+- `?envio=lento`: 2,5 s y llega.
+- `?envio=error`: 2,5 s y el error de red.
+- Ninguna toca la ruta. El límite de intentos de `/api/contacto` vive en la base (5 cada 15 min por IP) y los bancos lo
+  gastaban.
+
+### Medido en el banco (`h2-estados.ts`: escrito, enviando, transformando, gracias, otra vez y error)
+
+| | 1440 volteo | 1440 hundido | 1440 reducido | 390 volteo |
+|---|---|---|---|---|
+| Enviando: los valores en sus pozos (con la órbita del final) | sí | sí | sí (sin órbita) | sí (DOM) |
+| Enviando: campos de sólo lectura, el botón del mismo tamaño | sí | sí | sí | sí |
+| Gracias: anunciada, el foco en la tarjeta | sí | sí | sí | sí |
+| «Enviar otro mensaje»: vacío, el foco en el nombre | sí | sí | sí | sí |
+| Error: lo escrito queda y el error se ve | sí | sí | sí | sí |
+
+### El invariante (`s60` H2)
+
+1. El orden del rearmado (la vieja se suelta antes de armar la nueva). Control: el orden de antes.
+   Mientras viaja: sólo lectura, el ancho guardado y la ruedita en su aire. Control: los campos escribibles.
+2. Las poses de la transformación:
+   - volteo: se cambian de canto y la tarjeta termina en su lugar exacto. Control: cambio a los 45°;
+   - hundido: la plana toma el lugar y el tamaño de la saliente. Control: aparece en su tamaño;
+   - reducido: un fundido. Control: el volteo con movimiento reducido.
+3. Los estados del DOM: la tarjeta anunciada y con el foco, y el error que no borra nada. Control: un error que borra lo
+   escrito. La tarjeta enfocable. Control: sin `tabIndex`.
+4. Las banderas, sólo en desarrollo. Control: en producción.
+
+### Gate
+
+- Lint de lo tocado, limpio.
+- `tsc` 0.
+- s53 a s59, verdes. `s60` 23/0.
+- También verdes: s37, s38, s39, s41 a s52 y s3-cta.
+
+### Las aserciones viejas
+
+Ninguna cambió. El copy `listo` del pie («¡Listo! Te escribimos pronto.») se borró: lo reemplaza la tarjeta.

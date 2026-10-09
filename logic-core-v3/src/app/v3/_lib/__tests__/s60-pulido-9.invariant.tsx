@@ -4,10 +4,17 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   H1 · el polvo posado se vuelve a levantar: con la rueda (muescas con pausas cortas) el frente del despertar ya no se apaga,
  *        y a los N s la altura media y la dispersión vuelven a las del polvo suspendido; reversible.
+ *   H2 · el formulario del pie: enviando sin moverse de su placa (el orden del rearmado) y de sólo lectura; la placa se
+ *        transforma en la tarjeta de gracias (volteo, hundido y el fundido) y vuelve; el error deja todo; las banderas.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-9.md`.
  */
 import { readFileSync } from 'node:fs'
 
+import * as THREE from 'three'
+
+import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
+import { GRACIAS, varianteDeGracias, type VarianteDeGracias } from '../formularios/gracias'
+import { TRANSFORMACION_DEL_PIE, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, avanzarElPolvoEn, frenteInicial, polvoInicial, tomarElFrente, type EstadoDelPolvoVivo, type FrenteDelPolvo } from '../escena/polvo/posarse'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from '../escena/polvo/simulacion'
@@ -16,6 +23,7 @@ import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
+const sinComentarios = (s: string): string => s.replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('H1 · El polvo posado se vuelve a levantar')
@@ -164,5 +172,89 @@ const vuelveDeCerca = (c: string): boolean => {
 }
 afirmar(vuelveDeCerca(sim), '3 · la levantada de cerca de las caras vuelve al aire cuando llegó, apagándose (con la quietud se posa antes)', 'medido en Portfolio de noche después de 15 s de rueda: antes 5.125 de 14.000 seguían levantadas; ahora 0')
 controlPositivo('3 · el detector VE la levantada de cerca de las caras sin salida', sim.replace(/\t\tif \( llego \) \{[\s\S]*?\n\t\t\}\n\t\}/, '\t}'), vuelveDeCerca)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('H2 · El formulario del pie: enviando, gracias y error')
+
+// 1 · La causa del desalineado: al rearmar una pieza (el botón pasa a «Enviando…»), la vieja se soltaba DESPUÉS de armar la
+// nueva y `soltar` le borraba al mismo elemento el origen (`0 0`) que su homografía necesita. Ahora se suelta antes, y la
+// nueva conserva la transformada.
+const armadas = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
+const ordenBien = (c: string): boolean => {
+  const rearmar = c.slice(c.indexOf('export function rearmar'), c.indexOf('function armar('))
+  const suelta = rearmar.indexOf('else soltar(vieja)')
+  const arma = rearmar.indexOf('const a = armar(p, medida, firma, estudio, estado)')
+  const origen = c.slice(c.indexOf('function armar('), c.indexOf('export function soltar')).includes("pieza.elemento.style.transformOrigin = '0 0'")
+  return suelta > 0 && arma > suelta && origen && rearmar.includes('p.elemento.style.transform = a.css')
+}
+afirmar(ordenBien(armadas), '1 · al rearmar el formulario («Enviando…», los errores), la vieja se suelta antes de armar la nueva: el DOM conserva el origen de su homografía y sigue sobre su placa', 'medido en el final con la órbita del mouse: antes los valores quedaban corridos de sus pozos; ahora, adentro')
+controlPositivo('1 · el detector VE el orden de antes (armar y después soltar la vieja)', armadas.replace('      else soltar(vieja)\n', '\n').replace('    const a = armar(p, medida, firma, estudio, estado)\n', '    const a = armar(p, medida, firma, estudio, estado)\n    if (vieja !== undefined && !transforma) soltar(vieja)\n'), ordenBien)
+const pie = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
+const quietoAlEnviar = (c: string): boolean =>
+  (c.match(/readOnly=\{enviando\}/g) ?? []).length === 2 &&
+  /<span aria-hidden="true" className="invisible col-start-1 row-start-1">\s*\{enviando \? c\.enviar : c\.enviando\}/.test(c) &&
+  /className="absolute left-\[var\(--spacing-2\)\] size-\[var\(--spacing-4\)\] animate-spin/.test(c)
+afirmar(quietoAlEnviar(pie), '  mientras viaja: los campos, de sólo lectura; el botón guarda el ancho del rótulo más largo y la ruedita va en su aire (nada cambia de lugar)')
+controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace(/readOnly=\{enviando\} /, ''), quietoAlEnviar)
+
+// 2 · La transformación de la placa (pura): la saliente y la entrante se cambian donde no se ve el cambio; al final, la
+// entrante en su lugar exacto; de vuelta, igual.
+const CAJA = { ancho: 253, alto: 181 }
+const DESDE = { ancho: 253, alto: 400, dx: 0, dy: -63 }
+const ESPESOR = 30
+type Pose = (v: VarianteDeGracias, t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
+const pose: Pose = (v, t, entrante, quieto = false) => {
+  const m = new THREE.Matrix4()
+  const r = poseDeLaTransformacion(v, quieto, t, entrante, CAJA, DESDE, ESPESOR, m)
+  return { m, ...r }
+}
+const normal = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 1).transformDirection(m)
+const esquina = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 0).applyMatrix4(m)
+const MITAD = 0.5 - 1e-4
+const volteoBien = (p: Pose): boolean => {
+  const [s0, sMitad, eMitad, e1] = [p('volteo', 0, false), p('volteo', MITAD, false), p('volteo', 0.5, true), p('volteo', 1, true)]
+  const enSuLugar = esquina(s0.m).distanceTo(new THREE.Vector3(DESDE.dx, -DESDE.dy, 0)) < 1e-6 && normal(s0.m).z > 0.999
+  const deCanto = Math.abs(normal(sMitad.m).z) < 0.01 && Math.abs(normal(eMitad.m).z) < 0.01
+  const cambia = s0.visible && sMitad.visible && !p('volteo', 0.5, false).visible && eMitad.visible && !p('volteo', MITAD, true).visible
+  return enSuLugar && deCanto && cambia && e1.m.equals(new THREE.Matrix4()) && e1.visible
+}
+afirmar(volteoBien(pose), '2 · volteo: la placa gira sobre X desde su lugar; a los 90° (de canto) la entrante sigue el giro con el mensaje y termina en su lugar exacto', `${String(TRANSFORMACION_DEL_PIE.volteo.s)} s`)
+controlPositivo('2 · el detector VE un cambio de placa que no es de canto (a los 45°)', ((v, t, e, q) => pose(v, e ? Math.max(t, 0.75) : Math.min(t, 0.25), e, q)) as Pose, volteoBien)
+const H = TRANSFORMACION_DEL_PIE.hundido
+const hundidoBien = (p: Pose): boolean => {
+  const antesDeCambiar = p('hundido', H.aplana - 1e-4, false)
+  const alCambiar = p('hundido', H.aplana, true)
+  const plana = (m: THREE.Matrix4): boolean => new THREE.Vector3().setFromMatrixScale(m).z < H.plano + 0.01
+  const mismoLugar = esquina(antesDeCambiar.m).distanceTo(esquina(alCambiar.m)) < 0.5 && Math.abs(new THREE.Vector3().setFromMatrixScale(alCambiar.m).y * CAJA.alto - DESDE.alto) < 0.5
+  return plana(antesDeCambiar.m) && plana(alCambiar.m) && mismoLugar && p('hundido', 1, true).m.equals(new THREE.Matrix4()) && !p('hundido', H.aplana, false).visible
+}
+afirmar(hundidoBien(pose), '  hundido: el relieve se hunde hasta aplanarse, la plana toma el lugar y el tamaño de la saliente, se ajusta al suyo y el mensaje sale en relieve hasta su lugar exacto')
+controlPositivo('  el detector VE la entrante que aparece en su tamaño (salta)', ((v, t, e, q) => (e && t < 1 ? { m: new THREE.Matrix4().makeScale(1, 1, H.plano), visible: t >= H.aplana, aparece: 1 } : pose(v, t, e, q))) as Pose, hundidoBien)
+const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p('volteo', t, true, true).aparece + p('volteo', t, false, true).aparece - 1) < 1e-9) && p('hundido', 0.5, true, true).m.equals(new THREE.Matrix4()) && p('volteo', 1, false, true).aparece === 0
+afirmar(fundidoBien(pose), '  con movimiento reducido, un fundido: la saliente se va y la entrante aparece, quietas')
+controlPositivo('  el detector VE el volteo con movimiento reducido', ((v, t, e) => pose(v, t, e, false)) as Pose, fundidoBien)
+
+// 3 · El DOM: la tarjeta de gracias (la misma que Contacto), anunciada y con el foco; «Enviar otro mensaje» vuelve vacío;
+// el error deja todo lo escrito; desde 1025 lo transforma la escena (`data-estado` y `data-gracias`, que lee el rearmado).
+const estadosBien = (c: string, a: string): boolean =>
+  /data-estado=\{estado\.fase === 'gracias' \? 'gracias' : 'formulario'\} data-gracias=\{variante\}/.test(c) &&
+  /<TarjetaDeGracias foco=\{tomarElFoco\('tarjeta'\)\} enVolumen=\{enVolumen\} alOtro=\{otroMensaje\} \/>/.test(c) &&
+  /<p role="status" className="sr-only">\s*\{estado\.fase === 'gracias' \? ANUNCIO_DE_GRACIAS : ''\}/.test(c) &&
+  /if \(r\.ok\) \{\s*pedirFoco\.current = 'tarjeta'\s*setEstado\(\{ fase: 'gracias' \}\)\s*setDatos\(VACIO\)/.test(c) &&
+  /\} else \{\s*setEstado\(\{ fase: 'error', mensaje: r\.error \}\)/.test(c) && (c.match(/setDatos\(VACIO\)/g) ?? []).length === 1 &&
+  /<AnimatePresence mode="wait" initial=\{false\}>/.test(c) && /transicionDeGracias\(variante, reducido, enVolumen\)/.test(c) &&
+  a.includes("const estado = p.elemento.getAttribute('data-estado')") && a.includes("varianteDeGracias(p.elemento.getAttribute('data-gracias'))")
+afirmar(estadosBien(pie, armadas), '3 · al llegar, la tarjeta de gracias anunciada y con el foco (y «Enviar otro mensaje»); con error, lo escrito queda y el error a la vista; desde 1025 la placa 3D se transforma')
+controlPositivo('3 · el detector VE un error que borra lo escrito', pie.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (c: string) => estadosBien(c, armadas))
+const tarjeta = sinComentarios(leer('_componentes/formularios/TarjetaDeGracias.tsx'))
+const tarjetaBien = (c: string): boolean => /tabIndex=\{-1\} data-tarjeta="gracias"/.test(c) && /data-relieve="" data-fuente="archivo"/.test(c) && /\{GRACIAS\.titulo\}/.test(c) && /\{GRACIAS\.bajada\}/.test(c) && /onClick=\{alOtro\}/.test(c) && /py-\[var\(--spacing-2\)\]/.test(c)
+afirmar(tarjetaBien(tarjeta) && GRACIAS.titulo === 'Gracias por tu mensaje.' && GRACIAS.bajada === 'Te contestamos pronto.' && varianteDeGracias(null) === 'volteo' && varianteDeGracias('hundido') === 'hundido' && varianteDeGracias('otra') === 'volteo', '  la tarjeta: enfocable, con el título en Archivo en relieve, la bajada y el enlace (con aire para el dedo); `?gracias=` elige la variante')
+controlPositivo('  el detector VE una tarjeta que no recibe el foco', tarjeta.replace('tabIndex={-1} ', ''), tarjetaBien)
+
+// 4 · Las banderas para probar los estados: sólo en desarrollo, y no tocan la ruta (ni su límite de intentos).
+const enviar = sinComentarios(leer('_lib/formularios/enviar.ts'))
+const banderasBien = (f: typeof envioSimulado): boolean => f('?envio=lento', false) === 'lento' && f('?envio=error', false) === 'error' && f('?envio=otro', false) === null && f('', false) === null && f('?envio=lento', true) === null && f('?envio=error', true) === null && ENVIO_SIMULADO.demoraMs === 2500 && /return simulado === 'error' \? \{ ok: false, error: ERROR_DE_RED \} : \{ ok: true \}/.test(enviar)
+afirmar(banderasBien(envioSimulado), '4 · `?envio=lento` (2,5 s y llega) y `?envio=error` (2,5 s y el error), sólo en desarrollo; no tocan la ruta')
+controlPositivo('4 · el detector VE las banderas en producción', ((c: string) => envioSimulado(c, false)) as typeof envioSimulado, banderasBien)
 
 cerrar('s60-pulido-9')

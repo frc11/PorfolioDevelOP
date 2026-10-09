@@ -29,6 +29,8 @@ export interface LetraDelPie {
   readonly cuerpo: number
   readonly peso: PesoDelPie
   readonly enLaTecla: boolean
+  /** [PULIDO 9] H2 · en Archivo (el título de la tarjeta de gracias, `data-fuente="archivo"`); si no, en Chivo. */
+  readonly archivo?: boolean
 }
 
 export interface TrazoDelPie {
@@ -87,6 +89,7 @@ function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boo
     const cuerpo = parseFloat(estilo.fontSize)
     const peso = pesoDelPie(parseInt(estilo.fontWeight, 10) || 400)
     const enLaTecla = padre.closest(LA_TECLA) !== null
+    const archivo = padre.closest('[data-fuente="archivo"]') !== null
     for (let k = 0; k < n.length; k += 1) {
       const c = n.data[k]
       if (c.trim() === '') continue
@@ -94,7 +97,7 @@ function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boo
       rango.setEnd(n, k + 1)
       const r = rango.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
-      letras.push({ ch: mayusculas ? c.toLocaleUpperCase('es') : c, x: r.left - origen.left, arriba: r.top - origen.top, alto: r.height, cuerpo, peso, enLaTecla })
+      letras.push({ ch: mayusculas ? c.toLocaleUpperCase('es') : c, x: r.left - origen.left, arriba: r.top - origen.top, alto: r.height, cuerpo, peso, enLaTecla, archivo })
     }
   }
   return letras
@@ -124,7 +127,8 @@ export function medirLaPieza(el: HTMLElement, forma: FormaDeLaPieza): MedidaDeLa
   let medida: MedidaDeLaPieza
   if (forma === 'formulario') {
     // Del formulario, en 3D: los rótulos y la tecla; lo que se escribe, los errores y el resultado quedan en el DOM.
-    const deLaPlaca = (e: Element): boolean => e.closest(`label, ${LA_TECLA}`) !== null
+    // [PULIDO 9] H2 · y lo que va en relieve de la tarjeta de gracias (`data-relieve`).
+    const deLaPlaca = (e: Element): boolean => e.closest(`label, ${LA_TECLA}, [data-relieve]`) !== null
     const tecla = el.querySelector(LA_TECLA)
     medida = {
       caja,
@@ -145,7 +149,7 @@ export function firmaDeLaForma(m: MedidaDeLaPieza): string {
   const n = (v: number): string => v.toFixed(1)
   return [
     n(m.caja.ancho), n(m.caja.alto), n(m.caja.radio),
-    m.letras.map((l) => `${l.ch}${n(l.x)},${n(l.arriba)},${n(l.cuerpo)},${String(l.peso)}`).join(';'),
+    m.letras.map((l) => `${l.ch}${n(l.x)},${n(l.arriba)},${n(l.cuerpo)},${String(l.peso)}${l.archivo === true ? 'A' : ''}`).join(';'),
     m.trazos.map((t) => `${t.d.join('|')}@${n(t.x)},${n(t.y)},${n(t.escala)}`).join(';'),
     m.pozos.map((p) => `${n(p.x)},${n(p.y)},${n(p.ancho)},${n(p.alto)}`).join(';'),
     m.tecla === null ? '' : `${n(m.tecla.x)},${n(m.tecla.y)},${n(m.tecla.ancho)},${n(m.tecla.alto)}`,

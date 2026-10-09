@@ -1,12 +1,16 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { enviarAlServidor } from '../../_lib/formularios/enviar'
+import { ANUNCIO_DE_GRACIAS, transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
+import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
 import { CONTACTO_DEL_FORMULARIO } from './contenido'
@@ -34,6 +38,13 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * [NOCTURNO FINAL] C4 · abajo de 1024 va en la tarjeta sólida de su columna y en una grilla de seis: el nombre y el mail
  * lado a lado, el mensaje (de dos renglones) y Enviar (lleno, de tinta) en la fila de abajo. Los campos a 16 px: con menos,
  * Safari del iPhone agranda la página al tocarlos. Desde 1024, como estaba (una columna, sobre la placa 3D).
+ *
+ * [PULIDO 9] H2 · ENVIANDO, GRACIAS Y ERROR. Mientras viaja, los campos quedan de sólo lectura y nada cambia de lugar (el
+ * botón guarda el ancho del rótulo más largo y la ruedita va dentro de su aire). Al llegar, el formulario se TRANSFORMA en
+ * la tarjeta de gracias (`TarjetaDeGracias`, la misma del panel de Contacto): desde 1025 lo hace la placa 3D (`data-estado`
+ * y `data-gracias` los lee `pie3d/armadas.ts`); abajo, el DOM (`transicionDeGracias`). «Enviar otro mensaje» vuelve al
+ * formulario vacío con la transformación inversa. El resultado se anuncia en la región viva y el foco va a la tarjeta (de
+ * vuelta, al nombre). Con error, todo lo escrito queda y el error a la vista.
  */
 const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
 const CAMPO ='block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo max-escritorio:text-base leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
@@ -44,7 +55,9 @@ const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
 const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
 
-type Estado = { readonly fase: 'quieto' | 'enviando' | 'listo' } | { readonly fase: 'error'; readonly mensaje: string }
+type Estado = { readonly fase: 'quieto' | 'enviando' | 'gracias' } | { readonly fase: 'error'; readonly mensaje: string }
+
+const sinSuscripcion = (): (() => void) => () => undefined
 
 export function FormularioDelPie(): React.JSX.Element {
   const c = CONTACTO_DEL_FORMULARIO
@@ -58,13 +71,22 @@ export function FormularioDelPie(): React.JSX.Element {
   const enVolumen = volumen && listo
   const placa = useRef<HTMLFormElement | null>(null)
   usePiezaDelPie(placa, { id: 'formulario-del-pie', forma: 'formulario', activo: volumen })
+  const reducido = useMovimientoReducido()
+  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'volteo' as const)
+  // Adónde va el foco cuando lo nuevo aparece (la tarjeta, o el nombre de vuelta): lo toma el elemento al montarse.
+  const pedirFoco = useRef<'tarjeta' | 'nombre' | null>(null)
+  const tomarElFoco = (quien: 'tarjeta' | 'nombre') => (el: HTMLElement | null): void => {
+    if (el === null || pedirFoco.current !== quien) return
+    pedirFoco.current = null
+    el.focus({ preventScroll: true })
+  }
 
   const escribir = (campo: CampoDelPie, valor: string): void => {
     const siguiente = { ...datos, [campo]: valor }
     setDatos(siguiente)
     // Después del primer intento, los errores se corrigen mientras se escribe.
     if (intento) setErrores(validarElPie(siguiente))
-    if (estado.fase === 'listo' || estado.fase === 'error') setEstado({ fase: 'quieto' })
+    if (estado.fase === 'error') setEstado({ fase: 'quieto' })
   }
 
   const alEnviar = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -82,11 +104,22 @@ export function FormularioDelPie(): React.JSX.Element {
     setEstado({ fase: 'enviando' })
     const r = await enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() })
     if (r.ok) {
-      setEstado({ fase: 'listo' })
+      pedirFoco.current = 'tarjeta'
+      setEstado({ fase: 'gracias' })
       setDatos(VACIO)
       setIntento(false)
-    } else setEstado({ fase: 'error', mensaje: r.error })
+    } else {
+      setEstado({ fase: 'error', mensaje: r.error })
+      // El botón vuelve a estar: el foco, ahí, para volver a probar.
+      requestAnimationFrame(() => placa.current?.querySelector<HTMLElement>('button[type="submit"]')?.focus({ preventScroll: true }))
+    }
   }
+
+  const otroMensaje = (): void => {
+    pedirFoco.current = 'nombre'
+    setEstado({ fase: 'quieto' })
+  }
+  const transicion = transicionDeGracias(variante, reducido, enVolumen)
 
   const campo = (k: CampoDelPie): { readonly id: string; readonly invalido: boolean; readonly describe: string | undefined } => ({
     id: `contacto-${k}`,
@@ -95,7 +128,14 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} aria-label={c.nombreAccesible} onSubmit={(e) => void alEnviar(e)} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
+    <form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} data-estado={estado.fase === 'gracias' ? 'gracias' : 'formulario'} data-gracias={variante} aria-label={c.nombreAccesible} aria-busy={enviando || undefined} onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col gap-[var(--spacing-3)] perspective-midrange tablet:max-escritorio:flex-1', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
+      <AnimatePresence mode="wait" initial={false}>
+        {estado.fase === 'gracias' ? (
+          <motion.div key="gracias" {...transicion}>
+            <TarjetaDeGracias foco={tomarElFoco('tarjeta')} enVolumen={enVolumen} alOtro={otroMensaje} />
+          </motion.div>
+        ) : (
+          <motion.div key="formulario" {...transicion} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]')}>
       {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
         const f = campo(k)
         return (
@@ -105,15 +145,17 @@ export function FormularioDelPie(): React.JSX.Element {
             </label>
             <BloqueSolido forma="ranura" className="block w-full">
               {k === 'mensaje' ? (
-                <textarea id={f.id} name={k} rows={3} maxLength={MAXIMO_DE[k]} data-foco="campo" value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none max-escritorio:h-[calc(var(--spacing-12)+var(--spacing-6))] tablet:max-escritorio:min-h-full')} />
+                <textarea id={f.id} name={k} rows={3} maxLength={MAXIMO_DE[k]} readOnly={enviando} data-foco="campo" value={datos[k]} onChange={(e) => escribir(k, e.target.value)} aria-invalid={f.invalido || undefined} aria-describedby={f.describe} className={cn(CAMPO, 'resize-none max-escritorio:h-[calc(var(--spacing-12)+var(--spacing-6))] tablet:max-escritorio:min-h-full')} />
               ) : (
                 <input
                   id={f.id}
+                  ref={k === 'nombre' ? tomarElFoco('nombre') : undefined}
                   name={k}
                   type={k === 'mail' ? 'email' : 'text'}
                   autoComplete={k === 'mail' ? 'email' : 'name'}
                   required={k === 'mail'}
                   maxLength={MAXIMO_DE[k]}
+                  readOnly={enviando}
                   data-foco="campo"
                   placeholder={k === 'mail' ? c.ejemploDeMail : undefined}
                   value={datos[k]}
@@ -133,17 +175,26 @@ export function FormularioDelPie(): React.JSX.Element {
         )
       })}
       <BloqueSolido forma="principal" className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]">
-        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo">
-          {enviando && <Loader2 aria-hidden="true" strokeWidth={1.5} className="size-[var(--spacing-4)] animate-spin motion-reduce:animate-none" />}
-          {enviando ? c.enviando : c.enviar}
+        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="relative flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo">
+          {/* Sin cambiar de lugar nada: la ruedita en el aire del botón (en el angosto no entra: sólo el rótulo) y el ancho del rótulo más largo, guardado. */}
+          {enviando && <Loader2 aria-hidden="true" strokeWidth={1.5} className="absolute left-[var(--spacing-2)] size-[var(--spacing-4)] animate-spin motion-reduce:animate-none max-escritorio:hidden" />}
+          <span className="grid justify-items-center">
+            <span className="col-start-1 row-start-1">{enviando ? c.enviando : c.enviar}</span>
+            <span aria-hidden="true" className="invisible col-start-1 row-start-1">
+              {enviando ? c.enviar : c.enviando}
+            </span>
+          </span>
         </button>
       </BloqueSolido>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Las dos regiones vivas existen desde el principio (una que nace con su texto no siempre se anuncia). */}
-      <p role="alert" className={cn(ERROR, 'col-span-6', estado.fase !== 'error' && 'sr-only')}>
+      <p role="alert" className={cn(ERROR, estado.fase !== 'error' && 'sr-only')}>
         {estado.fase === 'error' ? estado.mensaje : ''}
       </p>
-      <p role="status" className={cn(ERROR, 'col-span-6 empty:hidden')}>
-        {estado.fase === 'listo' ? c.listo : ''}
+      <p role="status" className="sr-only">
+        {estado.fase === 'gracias' ? ANUNCIO_DE_GRACIAS : ''}
       </p>
     </form>
   )
