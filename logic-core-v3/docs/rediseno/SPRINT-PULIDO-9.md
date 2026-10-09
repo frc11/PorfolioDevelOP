@@ -196,3 +196,23 @@ Ninguna cambió. El copy `listo` del pie («¡Listo! Te escribimos pronto.») se
 ### Las aserciones viejas
 
 Ninguna cambió. `DESPUES_DEL_ENVIO` cambió de texto, y `s25` (que nada diga «enviado») sigue verde.
+
+## Verificar (al cierre)
+
+Con el protocolo de memoria:
+1. El Chrome del banco no estaba abierto.
+2. Con el dev server prendido había 3,02 GB libres; se apagó (su árbol, con `taskkill /T`) y quedaron 6,16 GB.
+3. `npm run verificar` completo.
+4. El dev server, de nuevo arriba: `/v3` responde 200.
+
+**Resultado: 67 pasos, 10 con falla.**
+- 8 son los rojos de la base de PULIDO 6: s1, s2, s3, s4, s5, s7, s8 y s17 (piden un build, que no se corre).
+- Los otros dos, `s6` y `s10`, eran de H2. Se arreglaron:
+  - `s6-render`, `s6-cierre` (`s8-cierre`), `s10-mobile` y `s10-banco` piden que el HTML del servidor de la rama quieta no
+    escriba ninguna transformada;
+  - el `motion.div` nuevo del formulario del pie escribía `opacity:1;transform:none`;
+  - ahora, hasta el primer cambio de estado, el formulario queda en reposo sin transformada (`huboCambio`) y escribe sólo la
+    opacidad;
+  - la salida y las transformaciones siguientes son las mismas (re-medido a 390: gira a la tarjeta y vuelve).
+- Después del arreglo, los agregados `s6` (628/0) y `s10` (240/0) vuelven a verde, y s53 a s60 también. El `verificar` completo
+  no se volvió a correr.

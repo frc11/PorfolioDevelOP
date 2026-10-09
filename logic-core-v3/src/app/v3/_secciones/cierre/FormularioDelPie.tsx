@@ -65,6 +65,8 @@ export function FormularioDelPie(): React.JSX.Element {
   const [errores, setErrores] = useState<ErroresDelPie>({})
   const [intento, setIntento] = useState(false)
   const [estado, setEstado] = useState<Estado>({ fase: 'quieto' })
+  // Hasta el primer cambio de estado, en reposo: sin transformada (el HTML del servidor, y la rama quieta, no escriben ninguna).
+  const [huboCambio, setHuboCambio] = useState(false)
   const enviando = estado.fase === 'enviando'
   const volumen = useModoDelPie() === 'volumen'
   const listo = usePieListo()
@@ -108,6 +110,7 @@ export function FormularioDelPie(): React.JSX.Element {
       setEstado({ fase: 'gracias' })
       setDatos(VACIO)
       setIntento(false)
+      setHuboCambio(true)
     } else {
       setEstado({ fase: 'error', mensaje: r.error })
       // El botón vuelve a estar: el foco, ahí, para volver a probar.
@@ -119,7 +122,8 @@ export function FormularioDelPie(): React.JSX.Element {
     pedirFoco.current = 'nombre'
     setEstado({ fase: 'quieto' })
   }
-  const transicion = transicionDeGracias(variante, reducido, enVolumen)
+  const cambio = transicionDeGracias(variante, reducido, enVolumen)
+  const transicion = huboCambio ? cambio : { ...cambio, animate: { opacity: 1 } }
 
   const campo = (k: CampoDelPie): { readonly id: string; readonly invalido: boolean; readonly describe: string | undefined } => ({
     id: `contacto-${k}`,
