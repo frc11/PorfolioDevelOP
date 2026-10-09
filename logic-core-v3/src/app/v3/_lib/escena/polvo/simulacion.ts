@@ -372,6 +372,19 @@ void main() {
 			salida1 = vec4( v, uReloj );
 			return;
 		}
+		// [PULIDO 9] H1 · la de cerca de las caras también vuelve cuando llegó: se apaga en su lugar hasta como el aire la dibuja
+		// ahí (el peso baja a 0) y recién entonces es del aire, sin salto. Antes seguía levantada mientras hubiera movimiento,
+		// más visible que el polvo suspendido (medido después de 15 s de rueda: 5.125 de 14.000).
+		if ( llego ) {
+			if ( peso <= dt / ${FISICA.fundido.saleS.toFixed(2)} ) {
+				salida0 = vec4( p - f, modoConPeso( 0.0, peso, dt ) );
+				salida1 = vec4( v, desde );
+				return;
+			}
+			salida0 = vec4( p, 5.0 + modoConPeso( 0.0, peso, dt ) );
+			salida1 = vec4( v, desde );
+			return;
+		}
 	}
 	salida0 = vec4( p, modoConPeso( 5.0, peso, dt ) );
 	salida1 = vec4( v, desde );

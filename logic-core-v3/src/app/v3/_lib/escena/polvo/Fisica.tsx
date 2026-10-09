@@ -13,7 +13,7 @@ import { EN_VIVO } from '../final/recorridoDelFinal'
 import { alPaso, armar, correr, hornearDeAPoco, mallasDelLogo, pasoInicial, publicar, type MedidaDelCampo } from './armadoDeLaFisica'
 import { AIRE } from './parche'
 import { CAMPO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo } from './campoDelLogo'
-import { POSARSE, avanzarElPolvoEn, polvoInicial, type EstadoDelPolvoVivo } from './posarse'
+import { POSARSE, avanzarElPolvoEn, frenteInicial, polvoInicial, tomarElFrente, type EstadoDelPolvoVivo } from './posarse'
 
 /**
  * [ESCENA 6] LA FÍSICA DEL POLVO — corre la simulación de `simulacion.ts` una vez por cuadro, después del
@@ -74,6 +74,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     adelante: new THREE.Vector3(),
     conchas: [] as THREE.Matrix4[],
     paso: pasoInicial(),
+    // [PULIDO 9] H1: el frente que levanta lo posado (`posarse.ts`).
+    frente: frenteInicial(),
   })
 
   // [ESCENA 8] T5: al desmontarse, el campo se libera y la simulación vuelve a no tener logo.
@@ -228,6 +230,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     const despertar = m.polvo
     // El remolino del despertar sólo si el polvo alcanzó a posarse antes de despertar.
     const conRemolino = despertar.desperto - despertar.antes > POSARSE.empiezaS
+    // [PULIDO 9] H1 · y ése es el frente que levanta lo posado hasta el próximo así: un despertar corto ya no lo apaga.
+    if (conRemolino) tomarElFrente(m.frente, despertar)
     const p = m.paso
     p.conchas = conchas
     p.camara = state.camera.position
@@ -236,10 +240,10 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     p.reloj = m.reloj
     p.posarse = posarse ? 1 : 0
     p.quieto = despertar.quieto
-    p.desperto = conRemolino ? despertar.desperto : -1e9
-    p.origen = despertar.origen
+    p.desperto = m.frente.desperto
+    p.origen = m.frente.origen
     // [RETOQUE 3D] B3 · el remolino, sólo en el despertar del cursor (donde se movió la mano); el del scroll, sólo el frente.
-    p.remolino = despertar.delCursor ? 1 : 0
+    p.remolino = m.frente.delCursor ? 1 : 0
     p.movimiento = m.movimiento
     alPaso(armado.sim.material.uniforms, p)
     if (dt > 0) correr(armado, gl)

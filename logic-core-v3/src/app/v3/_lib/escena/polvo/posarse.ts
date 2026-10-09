@@ -92,3 +92,31 @@ export function avanzarElPolvoEn(e: EstadoDelPolvoVivo, t: number, movimiento: r
   }
   if (e.quieto >= NUNCA && t - e.ultimoMovimiento > POSARSE.quietudS) e.quieto = e.ultimoMovimiento
 }
+
+/**
+ * [PULIDO 9] H1 · EL FRENTE QUE LEVANTA LO POSADO: el del último despertar que encontró el polvo posado (la quietud duró
+ * más que `empiezaS`), con su origen y si fue del cursor. Lo lee la simulación hasta el próximo despertar así.
+ *
+ * La causa del polvo que no se levantaba: la escena le pasaba a la simulación ese despertar sólo en el cuadro en que era el
+ * último, y si no un despertar de nunca (−1e9). Con la rueda, la muesca siguiente llega después de `quietudS` y antes de
+ * `empiezaS`: es un despertar nuevo, sin polvo posado, y apagaba el frente de la primera. Lo que ese frente todavía no había
+ * alcanzado quedaba en el piso hasta otra quietud larga (medido en Portfolio de noche, con 15 s de rueda: 11.810 de 14.000).
+ */
+export interface FrenteDelPolvo {
+  desperto: number
+  origen: [number, number, number]
+  delCursor: boolean
+}
+
+export function frenteInicial(): FrenteDelPolvo {
+  return { desperto: -NUNCA, origen: [0, 0, 0], delCursor: false }
+}
+
+/** Toma el despertar de `e` como el frente (escribe en `f`: copia el origen, no guarda la referencia). */
+export function tomarElFrente(f: FrenteDelPolvo, e: EstadoDelPolvo | EstadoDelPolvoVivo): void {
+  f.desperto = e.desperto
+  f.origen[0] = e.origen[0]
+  f.origen[1] = e.origen[1]
+  f.origen[2] = e.origen[2]
+  f.delCursor = e.delCursor
+}

@@ -359,7 +359,7 @@ afirmar(/vParejo \*= mix\( carasDelAire, 1\.0, modoDeLaFisica < 0\.5 \? min\( pe
 afirmar(/float lejos = distance\( mundo, cameraPosition \);\s*float pesoSuelta/.test(simB4), '  la cámara y la sala se cuentan donde se DIBUJA la mota (en el aire, con su corrimiento), no en su lugar de la caja')
 // El peso: en la parte fraccionaria del modo, escrito en cada salida, en segundos (no en cuadros).
 const escrituras = simB4.match(/salida0 = vec4\([^;]*\);/g) ?? []
-afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 9, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
+afirmar(escrituras.filter((e) => !e.includes('vec4( 0.0 )')).every((e) => e.includes('modoConPeso(')) && escrituras.length === 11, 'cada salida de la simulación escribe el modo con su peso', `${String(escrituras.length - 1)} salidas`)
 afirmar(PESO_EN_EL_MODO < 0.5 && [0, 1, 2, 3, 4, 5].every((m) => [0, 0.5, 1].every((w) => Math.round(m + PESO_EN_EL_MODO * w) === m)), '  el modo se sigue leyendo igual (redondeado) con cualquier peso', `el peso ocupa de 0 a ${String(PESO_EN_EL_MODO)}`)
 const pasosHasta = (hz: number, s: number): number => Math.ceil(s * hz) / hz
 afirmar(/peso \+ dt \/ \$\{FISICA\.fundido\.entraS\.toFixed\(2\)\}/.test(simB4) && /peso - dt \/ \$\{FISICA\.fundido\.saleS\.toFixed\(2\)\}/.test(simB4) && Math.abs(pasosHasta(60, FISICA.fundido.entraS) - pasosHasta(144, FISICA.fundido.entraS)) < 0.02, '  el peso avanza con dt: el mismo fundido a 60 y a 144 Hz', `aparece en ${String(FISICA.fundido.entraS)} s, se va en ${String(FISICA.fundido.saleS)} s`)
