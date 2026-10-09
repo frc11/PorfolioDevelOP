@@ -9,7 +9,8 @@
  *   D2 · la luz del encastre, marcada y sólida (`?anillo=tubo|disco|filo|tubo+filo`; el círculo difuso se borró), el logo como lo
  *        que más se ve (sin niebla, con menos reflejo y sin polvo encima) y un solo golpe (el de la sala). [PULIDO 6] E2 · la luz
  *        del encastre se borró (gana el filo, por afuera del logo: lo fija `s57`); queda lo del logo y el golpe.
- * El plan y el log: `docs/rediseno/SPRINT-PULIDO-5.md`.
+ * El plan y el log: `docs/rediseno/SPRINT-PULIDO-5.md`. [PULIDO 8] G1 · `contorno` se borró con su código (el volteo es el producto):
+ * D1 · 5 (emparejado, remuestreo, arranque, turbulencia, topología y stencil) se fue; que ya no existe lo fija `s59` G1.
  */
 import { readFileSync } from 'node:fs'
 
@@ -19,16 +20,12 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { lugarDelMarco, nuevoLugarDelMarco, ponerElMarco, MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
-import { CONTORNO, armarElContorno, asignar, mejorGiro, pistasDeLaMetamorfosis, remuestrear, type CuadroDeLaMetamorfosis } from '../escena/ctaDelFinal/contorno'
 import { FUENTES_DEL_CTA, TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from '../escena/ctaDelFinal/fuentesDelCta'
-import type { ValorMedido } from '../escena/ctaDelFinal/medidaDeLosValores'
 import { letrasDeLaFrase } from '../escena/ctaDelFinal/piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, LECTURA_DEL_CTA, correrElPlano, homografiaDelCta, nuevosPlanosDelCta } from '../escena/ctaDelFinal/planosDelCta'
 import {
-  METAMORFOSIS,
   TRANSFORMACION,
   armadoSobreElCta,
-  estadoDeLaMetamorfosis,
   nuevaPose,
   posesDe,
   type EscenaDeLaTransformacion,
@@ -278,125 +275,8 @@ const conLaOVuelta = (): unknown => {
 controlPositivo('4 · el detector VE una «o» con el agujero en el sentido del borde', [conLaOVuelta()], (f: readonly unknown[]) => agujerosBien(f).ok)
 // Y el disolvente de `fusion` (abierto en las dos puntas): [PULIDO 6] E1 · `fusion` se borró entera (lo fija `s57` E1 · 5).
 
-// 5 · `contorno`, LA DEL PRODUCTO.
-const contorno = sinComentarios(leer('_lib/escena/ctaDelFinal/contorno.ts'))
-// [PULIDO 6] E1 · `fusion` y `?meta=` se borraron: `contorno` es la única (lo fija `s57` E1 · 5). [PULIDO 7] F2 · `contorno` queda
-// en `?meta=contorno` (el producto es el volteo, que fija `s58` F2).
-afirmar(escena.includes("pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras,") && !escena.includes('fusion'), '5 · `contorno` sigue entero, en `?meta=contorno` (`fusion` se borró en PULIDO 6)')
-
-// La asignación ÓPTIMA (el método húngaro): la misma suma que la mejor de todas las permutaciones, también rectangular.
-function mejorPorFuerza(m: readonly (readonly number[])[]): number {
-  const n = m.length
-  const cols = m[0].length
-  let mejor = Infinity
-  const recorrer = (i: number, usadas: Set<number>, suma: number): void => {
-    if (i === n) return void (mejor = Math.min(mejor, suma))
-    for (let j = 0; j < cols; j += 1) if (!usadas.has(j)) recorrer(i + 1, new Set([...usadas, j]), suma + m[i][j])
-  }
-  recorrer(0, new Set(), 0)
-  return mejor
-}
-const azar = (k: number): number => {
-  const s = Math.sin(k * 12.9898) * 43758.5453
-  return s - Math.floor(s)
-}
-const MATRICES = [4, 5, 6].flatMap((n) => [n, n + 2].map((m) => Array.from({ length: n }, (_, i) => Array.from({ length: m }, (__, j) => azar(n * 100 + m * 10 + i * 7 + j)))))
-const optimaBien = (f: typeof asignar): boolean => MATRICES.every((m) => {
-  const fila = f(m)
-  return new Set(fila).size === m.length && Math.abs(fila.reduce((s, j, i) => s + m[i][j], 0) - mejorPorFuerza(m)) < 1e-9
-})
-afirmar(optimaBien(asignar), '  los contornos se emparejan por posición y área con la asignación ÓPTIMA (el método húngaro, contra la fuerza bruta)')
-controlPositivo('  el detector VE una asignación golosa (cada uno el más barato que queda)', ((m: readonly (readonly number[])[]) => {
-  const usadas = new Set<number>()
-  return m.map((fila) => {
-    const j = fila.map((v, k) => ({ v, k })).filter((x) => !usadas.has(x.k)).sort((a, b) => a.v - b.v)[0].k
-    usadas.add(j)
-    return j
-  })
-}) as typeof asignar, optimaBien)
-
-// Emparejadas por lugar: dos valores (una «o» a la izquierda, una «e» a la derecha) y la frase «oe»: la «o» de la frase recibe un
-// contorno del valor de la izquierda; lo que sobra se cierra (no viaja).
-const FUENTES = { valores: new Font(CHIVO_400_VALORES as FontData), frase: FUENTES_DEL_CTA.frase.fuente, fuerte: FUENTES_DEL_CTA.fuerte.fuente }
-const valor = (c: string): ValorMedido => ({ letras: [{ c, x: 0, base: 20, cuerpo: 24 }, { c: 'l', x: 14, base: 20, cuerpo: 24 }], iconos: [], ancho: 30, alto: 30, enLaRaiz: null })
-const VALORES_DE_PRUEBA = [valor('o'), null, null, valor('e'), null, null]
-const INICIO = [{ x: 100, y: 300, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 1200, y: 300, escala: 1 }, { x: 0, y: 0, escala: 1 }, { x: 0, y: 0, escala: 1 }]
-const FRASE_DE_PRUEBA = [{ c: 'o', x: 500, base: 400, cuerpo: 80, fuerte: false, orden: 0 }, { c: 'e', x: 800, base: 400, cuerpo: 80, fuerte: false, orden: 1 }]
-const pistas = pistasDeLaMetamorfosis(VALORES_DE_PRUEBA, INICIO, FRASE_DE_PRUEBA, FUENTES)
-const lugarBien = (ps: typeof pistas): boolean => {
-  const pares = ps.filter((p) => p.tipo === 0)
-  const deLaO = pares.find((p) => p.t[0].x < 700)
-  const deLaE = pares.find((p) => p.t[0].x > 700)
-  return pares.length === 2 && deLaO?.item === 0 && deLaE?.item === 3 && ps.some((p) => p.tipo === 3) && ps.every((p) => p.s.length === CONTORNO.puntos && p.t.length === CONTORNO.puntos) && ps.some((p) => p.tipo === 2)
-}
-afirmar(lugarBien(pistas), '  emparejadas por lugar en la composición: lo de la izquierda va a la izquierda; las que sobran se cierran; los agujeros de la frase se abren (todas de N puntos)', `${String(pistas.length)} pistas: ${String(pistas.filter((p) => p.tipo === 0).length)} pares, ${String(pistas.filter((p) => p.tipo === 3).length)} que sobran`)
-controlPositivo('  el detector VE el emparejamiento al revés', pistasDeLaMetamorfosis(VALORES_DE_PRUEBA, [INICIO[3], INICIO[1], INICIO[2], INICIO[0], INICIO[4], INICIO[5]], FRASE_DE_PRUEBA, FUENTES), lugarBien)
-
-// El remuestreo EQUIDISTANTE (por largo de arco) y el ARRANQUE ALINEADO (el giro de puntos con menos distancia).
-const rectangulo = [new THREE.Vector2(0, 0), new THREE.Vector2(100, 0), new THREE.Vector2(100, 20), new THREE.Vector2(0, 20), new THREE.Vector2(0, 10)]
-const equidistanteBien = (f: typeof remuestrear): boolean => {
-  const r = f(rectangulo, 24)
-  const tramos = r.map((p, k) => p.distanceTo(r[(k + 1) % r.length]))
-  return r.length === 24 && Math.max(...tramos) - Math.min(...tramos) < 0.02 * (240 / 24)
-}
-afirmar(equidistanteBien(remuestrear), '  el remuestreo es equidistante (por largo de arco)')
-controlPositivo('  el detector VE un remuestreo por índice', ((c: readonly THREE.Vector2[], n: number) => Array.from({ length: n }, (_, i) => c[Math.floor((i * c.length) / n)].clone().lerp(c[(Math.floor((i * c.length) / n) + 1) % c.length], ((i * c.length) / n) % 1))) as typeof remuestrear, equidistanteBien)
-const circulo = remuestrear(Array.from({ length: 64 }, (_, k) => new THREE.Vector2(Math.cos((k / 64) * Math.PI * 2) * 30, Math.sin((k / 64) * Math.PI * 2) * 30 + (k < 8 ? 6 : 0))), CONTORNO.puntos)
-const girado = circulo.map((_, i) => circulo[(i + 13) % circulo.length].clone().multiplyScalar(2).add(new THREE.Vector2(500, 50)))
-const arranqueBien = (f: typeof mejorGiro): boolean => girado.map((_, i) => girado[(i + f(girado, circulo)) % girado.length]).every((p, i) => p.distanceTo(circulo[i].clone().multiplyScalar(2).add(new THREE.Vector2(500, 50))) < 1e-6)
-afirmar(arranqueBien(mejorGiro), '  el punto de arranque de cada par, alineado (el giro de puntos con menos distancia, centrados y en su escala): no se retuerce')
-controlPositivo('  el detector VE un arranque sin alinear', (() => 0) as typeof mejorGiro, arranqueBien)
-
-// La TURBULENCIA en campana: sube y baja suave (sin saltos, empieza y termina con pendiente cero) y es CERO exacto desde antes de
-// que termine el cambio; después, la frase es rígida (nada ondula: lo que sigue es venir adelante y crecer en espesor).
-const turbulenciaBien = (f: typeof estadoDeLaMetamorfosis): boolean => {
-  const T = METAMORFOSIS.contorno.turbulencia
-  const fin = T[0] + T[1]
-  let maximo = 0
-  let paso = 0
-  let anterior = 0
-  for (let k = 0; k <= 10000; k += 1) {
-    const t = f(k / 10000).turbulencia
-    maximo = Math.max(maximo, t)
-    paso = Math.max(paso, Math.abs(t - anterior))
-    anterior = t
-  }
-  const cero = [...Array(401).keys()].every((k) => f(fin + (k / 400) * (1 - fin)).turbulencia === 0)
-  const terminaElCambio = METAMORFOSIS.contorno.cambia[0] + METAMORFOSIS.contorno.cambia[1]
-  const suaveEnLasPuntas = f(T[0] + 0.002).turbulencia < 0.001 && f(fin - 0.002).turbulencia < 0.001
-  return maximo > 0.99 && paso < 0.002 && cero && fin < terminaElCambio && suaveEnLasPuntas
-}
-afirmar(turbulenciaBien(estadoDeLaMetamorfosis), '  la turbulencia sube y baja en campana (suave) y llega a CERO exacto antes del final del cambio: formada, la frase queda quieta', `cero desde ${String(METAMORFOSIS.contorno.turbulencia[0] + METAMORFOSIS.contorno.turbulencia[1])}; el cambio termina en ${String(METAMORFOSIS.contorno.cambia[0] + METAMORFOSIS.contorno.cambia[1])}`)
-controlPositivo('  el detector VE la turbulencia de antes (con el cambio, sin campana)', ((p: number) => {
-  const e = estadoDeLaMetamorfosis(p)
-  const cambia = e.cambia
-  return { ...e, turbulencia: cambia >= 1 ? 0 : Math.sin(Math.PI * cambia) }
-}) as typeof estadoDeLaMetamorfosis, turbulenciaBien)
-
-// TOPOLOGÍA FIJA Y SU COSTO: las pistas se arman una vez; por cuadro sólo se escriben uniformes (nada de triangular ni de rehacer
-// geometría): medido en Node, el cuadro cuesta menos de 2 ms de CPU (era 8–11). Las tapas, por stencil (las cuentas +1 de frente
-// y −1 de espaldas: la regla no-cero; la cubierta pinta donde no es cero y la vuelve a cero), con el stencil del lienzo; al
-// terminar, la malla exacta de la frase.
-const cuadro = (p: number): CuadroDeLaMetamorfosis => ({ items: INICIO.map((c) => ({ ...c, cuerpo: 24, cx: c.x + 15, cy: c.y + 15, ancho: 30, alto: 30 })), cajaDeLosValores: { x: 650, y: 315, ancho: 1130, alto: 30 }, cajaDeLaFrase: { x: 700, y: 370, ancho: 400, alto: 90 }, corrimiento: { x: 0, y: 0 }, cuerpoDeLaFrase: 80, fuga: { x: 720, y: 450 }, fondo: 1600, progreso: p, apareceDeLosValores: 1 })
-const armada = armarElContorno(VALORES_DE_PRUEBA, INICIO, FRASE_DE_PRUEBA, FUENTES, 'negro')
-let peor = 0
-for (let k = 0; k <= 400; k += 1) {
-  armada.poner(estadoDeLaMetamorfosis(k / 400), cuadro(k / 400))
-  peor = Math.max(peor, armada.costo())
-}
-const visibles = (p: number): string[] => {
-  armada.poner(estadoDeLaMetamorfosis(p), cuadro(p))
-  return armada.objetos.filter((o) => o.visible).map((o) => o.name)
-}
-const [aMitad, alFinal] = [visibles(0.5), visibles(1)]
-const lienzo = sinComentarios(leer('_lib/escena/configuracionDelCanvas.ts'))
-const topologiaBien = (co: string, li: string, costo: number): boolean => costo < 2 && !/triangulateShape|new THREE\.BufferGeometry\(\)\s*\n[^]*?poner/.test(co.slice(co.indexOf('const poner ='))) && co.includes('m.stencilZPass = op') && co.includes('THREE.IncrementWrapStencilOp : THREE.DecrementWrapStencilOp') &&
-  co.includes('m.stencilFunc = THREE.NotEqualStencilFunc') && co.includes('m.stencilZPass = THREE.ZeroStencilOp') && co.includes('new THREE.InstancedBufferGeometry()') && li.includes('stencil: true,') &&
-  aMitad.length === 4 && alFinal.length === 1 && alFinal[0] === 'metamorfosis · la frase exacta'
-afirmar(topologiaBien(contorno, lienzo, peor), '  topología fija (por cuadro, sólo uniformes: menos de 2 ms de CPU), tapas por stencil con la regla no-cero y, al terminar, la malla exacta', `peor cuadro ${peor.toFixed(3)} ms (Node) · a mitad: ${String(aMitad.length)} piezas; al final: ${alFinal.join()}`)
-controlPositivo('  el detector VE el lienzo sin stencil', [contorno, lienzo.replace('stencil: true,', ''), peor] as const, ([a, b, c]: readonly [string, string, number]) => topologiaBien(a, b, c))
-controlPositivo('  y el costo de antes (re-triangular: 8 ms)', [contorno, lienzo, 8] as const, ([a, b, c]: readonly [string, string, number]) => topologiaBien(a, b, c))
-armada.soltar()
+// 5 · `contorno`, LA DEL PRODUCTO: [PULIDO 8] G1 · se borró con su código (y el stencil del lienzo, que era suyo). Sus aserciones y
+// controles se fueron; que ya no existe lo fija `s59` G1.
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('D2 · La luz del encastre: marcada y sólida; el logo, lo que más se ve')

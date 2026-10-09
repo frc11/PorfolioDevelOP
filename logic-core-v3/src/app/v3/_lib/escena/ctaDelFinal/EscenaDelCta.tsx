@@ -14,14 +14,13 @@ import type { Variante } from '../titulos3d/armado'
 import { corrimiento, pinDelLugar } from '../titulos3d/colocacion'
 import { EN_VIVO as EN_VIVO_DEL_FINAL } from '../final/recorridoDelFinal'
 import { viajeEnCurso } from '../viaje'
-import { armarElCta, fondoDelMarco, fuentesDeLaMetamorfosis, letrasEnLaPantalla, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
-import { armarElContorno, type CajaDelValor, type CuadroDeLaMetamorfosis } from './contorno'
+import { armarElCta, fuentesDeLaMetamorfosis, letrasEnLaPantalla, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
 import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaListo, ctaVisibleEnElViaje, marcarElCtaListo, suscribirAlLugarDelCta, versionDelLugarDelCta } from './enVivo'
 import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type MetricasDeLaFuente, type RenglonDeLaFrase, type ValorMedido } from './medidaDeLosValores'
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
-import { apareceDeLosValores, armadoSobreElCta, cajaDe, estadoDeLaMetamorfosis, posesDe, valoresAPlano } from './transformacion'
-import { armarElVolteo } from './volteo'
+import { apareceDeLosValores, armadoSobreElCta, cajaDe, posesDe, valoresAPlano } from './transformacion'
+import { armarElVolteo, type CuadroDelVolteo } from './volteo'
 import { VALORES } from '../../../_secciones/por-que-develop/contenido'
 
 /**
@@ -30,8 +29,8 @@ import { VALORES } from '../../../_secciones/por-que-develop/contenido'
  * su texto). En cada cuadro pone las letras en las poses del giro (`transformacion.ts`) con el progreso que escribe el DOM
  * (función del scroll). En el escenario se dibuja desde que la transformación arranca (antes, la frase es el título de
  * volumen, que desde ahí queda relevado); en la lista, siempre que el CTA está en la pantalla. Su luz es la de los títulos:
- * la noche del logo y los reflejos con la luz de la sala. [PULIDO 4] C1 · y, a la vez, la metamorfosis de los seis valores
- * en la frase del CTA (`contorno.ts`; [PULIDO 6] E1 · `fusion` se borró). En un viaje del menú, nada (`ctaVisibleEnElViaje`).
+ * la noche del logo y los reflejos con la luz de la sala. [PULIDO 4] C1 · y, a la vez, los seis valores se vuelven la frase del
+ * CTA ([PULIDO 8] G1 · el volteo, `volteo.ts`: `contorno` se borró). En un viaje del menú, nada (`ctaVisibleEnElViaje`).
  * [PULIDO 5] D1 · el giro de `2411371a` (en lugar del cruce) y todo ANCLADO EN EL MUNDO (`planosDelCta.ts`): la frase y
  * «HABLANOS» quedan quietos en la sala y el enlace del DOM los sigue (A1).
  */
@@ -57,11 +56,11 @@ const suaveEntre = (p: number, a: number, b: number): number => {
   return u * u * (3 - 2 * u)
 }
 
-/** [PULIDO 4] C1 · la metamorfosis armada, sea cual sea su técnica: lo que se agrega al lienzo, cómo se pone y cómo se suelta. */
+/** [PULIDO 4] C1 · los valores que se vuelven la frase, armados: lo que se agrega al lienzo, cómo se pone y cómo se suelta. */
 export interface MetamorfosisArmada {
   readonly objetos: readonly THREE.Object3D[]
   readonly materiales: readonly THREE.MeshStandardMaterial[]
-  poner(estado: ReturnType<typeof estadoDeLaMetamorfosis>, cuadro: CuadroDeLaMetamorfosis): void
+  poner(cuadro: CuadroDelVolteo): void
   soltar(): void
   /** Lo que costó el último cuadro en la CPU (ms). */
   readonly costo: () => number
@@ -156,23 +155,16 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
       const fuentes = fuentesDeLaMetamorfosis()
       const anchoMaximo = anchoMaximoDelCta()
       const a = armarElCta(origen, destino, color, CTA_EN_VIVO.donde === 'lista', fuentes.fuerte, anchoMaximo)
-      // La metamorfosis: los valores medidos planos (en px de su caja) y la frase en sus renglones de LECTURA (con su escenario
+      // El volteo: los valores medidos planos (en px de su caja) y la frase en sus renglones de LECTURA (con su escenario
       // clavado: quedan en el mundo, no van con la página).
       const medidos = valores.map((el) => (el === null ? null : medirElValor(el, fuentes.valores.data as MetricasDeLaFuente, el.closest(ESCENARIO))))
-      const inicio = valores.map((el, k): CajaDelValor => {
-        const medido = medidos[k]
-        const c: CajaDeAhora = { x: 0, y: 0, escala: 1 }
-        if (el !== null && medido !== null) cajaDeAhora(el, medido, el.closest(ESCENARIO), 1, c)
-        return c
-      })
       const corrido = corrimiento(pinDelLugar(frase[0]), window.scrollY)
       const renglones = renglonesDeLaFrase(frase, [false, false, true]).map((r) => ({ ...r, arriba: r.arriba - corrido }))
       const letras = letrasDeLaFrase(renglones, fuentes.frase, fuentes.fuerte, anchoMaximo)
       const medidas: Medidas = { valores: medidos, renglones, letras, caja: cajaDeLaFrase(letras), cuerpo: Math.max(1, ...letras.map((l) => l.cuerpo)) }
-      // [PULIDO 7] F2 · el volteo (sin bandera) o la metamorfosis por contorno (`?meta=contorno`, hasta que se apruebe el volteo).
+      // [PULIDO 8] G1 · el volteo, el único (`contorno` y la cascada se borraron).
       const deLasFuentes = { valores: fuentes.valores, frase: fuentes.frase.fuente, fuerte: fuentes.fuerte.fuente }
-      const pruebas = entornoDeLaEscena().pruebas
-      const meta = pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo(medidas.valores, renglones, medidas.letras, deLasFuentes, color, VALORES.map((v) => v.titulo), pruebas.volteo === 'juntos' ? 'juntos' : 'cascada')
+      const meta = armarElVolteo(medidas.valores, renglones, medidas.letras, deLasFuentes, color, VALORES.map((v) => v.titulo))
       const rt = estado.estudio
       for (const p of piezasDe(a)) if (rt !== null) p.material.material.envMap = rt.texture
       for (const mat of meta.materiales) if (rt !== null) mat.envMap = rt.texture
@@ -258,7 +250,7 @@ interface EstadoDeLaEscenaDelCta {
   estudio: THREE.WebGLRenderTarget | null
   hover: number
   readonly cajas: CajaDeAhora[]
-  cuadro: CuadroDeLaMetamorfosis | null
+  cuadro: CuadroDelVolteo | null
   readonly planos: PlanosDelCta
   /** La transformada que tiene el enlace (sólo se escribe si cambia). */
   enlace: string
@@ -283,37 +275,15 @@ function llevarElEnlace(s: EstadoDeLaEscenaDelCta, css: string): void {
   el.style.transform = css
 }
 
-/** [PULIDO 4] C1 · dónde están ahora los valores (sus cajas del DOM: en el escenario su columna va en el plano del título) y la frase. */
-function cuadroDeAhora(s: EstadoDeLaEscenaDelCta, medidas: Medidas, fondo: number, tam: { readonly width: number; readonly height: number }, p: number): CuadroDeLaMetamorfosis {
+/** [PULIDO 4] C1 · dónde están ahora los valores (sus cajas del DOM: en el escenario su columna va en el plano del título). */
+function cuadroDeAhora(s: EstadoDeLaEscenaDelCta, medidas: Medidas, p: number): CuadroDelVolteo {
   const items = CTA_EN_VIVO.valores.map((el, k) => {
     const medido = medidas.valores[k]
     const c = s.cajas[k]
     if (el !== null && medido !== null) cajaDeAhora(el, medido, el.closest(ESCENARIO), valoresAPlano(p), c)
-    const ancho = (medido?.ancho ?? 0) * c.escala
-    const alto = (medido?.alto ?? 0) * c.escala
-    const cuerpo = medido === null || medido.letras.length === 0 ? 16 : Math.max(...medido.letras.map((l) => l.cuerpo))
-    return { x: c.x, y: c.y, escala: c.escala, cuerpo, cx: c.x + ancho / 2, cy: c.y + alto / 2, ancho, alto }
+    return { x: c.x, y: c.y, escala: c.escala }
   })
-  let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity]
-  for (const it of items) {
-    x0 = Math.min(x0, it.x)
-    x1 = Math.max(x1, it.x + it.ancho)
-    y0 = Math.min(y0, it.y)
-    y1 = Math.max(y1, it.y + it.alto)
-  }
-  // [PULIDO 5] D1 · la frase va en su lugar de lectura (medido con el escenario clavado): no se corre con la página.
-  const corrimientoDeLaFrase = { x: 0, y: 0 }
-  return {
-    items,
-    cajaDeLosValores: { x: (x0 + x1) / 2, y: (y0 + y1) / 2, ancho: Math.max(1, x1 - x0), alto: Math.max(1, y1 - y0) },
-    cajaDeLaFrase: medidas.caja,
-    corrimiento: corrimientoDeLaFrase,
-    cuerpoDeLaFrase: medidas.cuerpo,
-    fuga: { x: tam.width / 2, y: tam.height / 2 },
-    fondo,
-    progreso: p,
-    apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : apareceDeLosValores(p),
-  }
+  return { items, progreso: p, apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : apareceDeLosValores(p) }
 }
 
 /** Un cuadro: los planos del mundo, las letras, las poses del giro, la metamorfosis, el enlace, el hover y la luz. */
@@ -352,10 +322,10 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   let i = 0
   for (const b of a.origen) for (const pieza of b.piezas) ponerLaPieza(pieza, a.poses.origen[i++])
   a.destino.piezas.forEach((pieza, k) => ponerLaPieza(pieza, a.poses.destino[k]))
-  // [PULIDO 4] C1 · la metamorfosis de los valores en la frase, con el mismo progreso.
+  // [PULIDO 4] C1 · los valores que se vuelven la frase, con el mismo progreso.
   if (s.meta !== null && s.medidas !== null) {
-    s.cuadro = cuadroDeAhora(s, s.medidas, fondoDelMarco(a.lienzo, viva), tam, p)
-    s.meta.poner(estadoDeLaMetamorfosis(p), s.cuadro)
+    s.cuadro = cuadroDeAhora(s, s.medidas, p)
+    s.meta.poner(s.cuadro)
   }
   // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano.
   const enlace = enlaceDelCta()

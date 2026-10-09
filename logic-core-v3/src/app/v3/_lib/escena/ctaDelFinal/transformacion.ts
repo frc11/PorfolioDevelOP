@@ -5,9 +5,8 @@
  *   [PULIDO 5] D1 · EL GIRO (el de `?cta=giro` de PULIDO 2, recuperado de `2411371a`; reemplaza al cruce, que se borró) ·
  *     «Seis razones para elegirnos» se junta en un cartel de dos caras, del ancho del CTA, que gira sobre Y: en el medio del
  *     giro sólo se ve el canto y del otro lado está «HABLANOS», que se asienta en su lugar.
- *   LA METAMORFOSIS · los seis valores se van un poco hacia atrás, se desarman y se rearman en la frase del CTA («Este sitio
- *     empezó con una charla. El tuyo también.»), que vuelve adelante y se acomoda arriba de «HABLANOS» (`contorno.ts`; [PULIDO 6]
- *     E1 · `fusion` y su bandera se borraron: `contorno` es el producto). Acá, sus tiempos.
+ *   LOS VALORES · los seis valores se vuelven la frase del CTA («Este sitio empezó con una charla. El tuyo también.»), arriba
+ *     de «HABLANOS» ([PULIDO 8] G1 · el volteo, `volteo.ts`; la metamorfosis `contorno` se borró con su código).
  *
  * FUNCIÓN PURA del progreso: reversible, igual a cualquier velocidad y en cualquier dirección (`s55` lo recorre en pasos
  * chicos, ida y vuelta). En px CSS de la pantalla (x a la derecha, y hacia abajo, z hacia la cámara) y en el cuerpo de cada
@@ -85,7 +84,6 @@ const acotar = (x: number): number => Math.min(1, Math.max(0, x))
 const tramo = (p: number, desde: number, dura: number): number => acotar((p - desde) / dura)
 /** De entrada y de salida, simétrica (cúbica): el gesto de la casa para un movimiento que arranca y frena quieto. */
 export const suave = (u: number): number => (u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2)
-const frena = (u: number): number => 1 - (1 - u) ** 3
 const entre = (a: number, b: number, u: number): number => a + (b - a) * u
 
 function poner(p: Pose, x: number, y: number, z: number, rx: number, ry: number, escala: number, profundidad: number, aparece: number): void {
@@ -176,24 +174,7 @@ export function armadoSobreElCta(origen: readonly LetraEnPantalla[], destino: re
   return c.y + c.alto / 2 - ((renglones.length - 1) / 2) * alto - ((ultimo?.alto ?? 0) * k) / 2
 }
 
-/**
- * [PULIDO 5] D1 · el ancho de Archivo en la frase y el CTA: wdth 100. [PULIDO 6] E1 · `?ancho=expandido` (120) se borró.
- * [PULIDO 4] C1 · LA METAMORFOSIS: `contorno` (`contorno.ts`); [PULIDO 6] E1 · `fusion` y `?meta=` se borraron.
- */
-
-/**
- * Los tiempos de la metamorfosis (fracciones del progreso; `[desde, dura]`). Los valores se van atrás (`atras`, hasta `ATRAS`
- * de la distancia del plano: «poco»), cambian (`cambia`: se derriten o cambian de contorno), se cruzan con la frase (`corte`, el
- * disolvente de `fusion`), la frase se limpia (`limpia`) y vuelve adelante (`adelante`), y en `contorno` crece su espesor
- * (`espesor`). Lo último termina en 1, como «HABLANOS» (`TRANSFORMACION.giro.baja`): todo junto. [PULIDO 5] D1 · `contorno`: la
- * turbulencia es una campana suave (`turbulencia`: sube y baja y es CERO exacto desde 0,6, antes de que termine el cambio);
- * los agujeros de la frase se abren al llegar cada letra y, los que faltan, en `limpia`. Formada, la frase queda rígida: lo
- * que sigue es venir adelante y crecer en espesor, sin ondular.
- */
-export const METAMORFOSIS = {
-  atras: [0, 0.25],
-  contorno: { cambia: [0.06, 0.58], turbulencia: [0.08, 0.52], limpia: [0.6, 0.16], adelante: [0.62, 0.38], espesor: [0.64, 0.36] },
-} as const
+/** [PULIDO 5] D1 · el ancho de Archivo en la frase y el CTA: wdth 100. [PULIDO 6] E1 · `?ancho=expandido` (120) se borró. */
 
 /**
  * El relevo de los valores (fracción del progreso): el DOM se apaga y la escena los prende con su tramado, en el mismo lugar
@@ -203,38 +184,6 @@ export const METAMORFOSIS = {
 export const RELEVO_DE_LOS_VALORES = { tramado: 0.03, aPlano: 0.18 } as const
 export const apareceDeLosValores = (p: number): number => tramo(p, 0, RELEVO_DE_LOS_VALORES.tramado)
 export const valoresAPlano = (p: number): number => suave(tramo(p, 0, RELEVO_DE_LOS_VALORES.aPlano))
-
-/** Hasta dónde se van atrás los valores (y dónde se arma la masa): fracción de la distancia del plano a la cámara. */
-export const ATRAS = 0.22
-
-export interface EstadoDeLaMetamorfosis {
-  /** Cuánto se fueron atrás los valores (0 a 1). */
-  readonly atras: number
-  /** Cuánto cambiaron (0 a 1; cada vértice o contorno con su demora). */
-  readonly cambia: number
-  /** Cuánto le falta a la frase para quedar limpia (1: la masa; 0: limpia). */
-  readonly sucia: number
-  /** Cuánto volvió adelante la frase (0: allá atrás; 1: en su lugar). */
-  readonly adelante: number
-  /** El espesor de la frase (0 a 1). */
-  readonly espesor: number
-  /** La turbulencia (0 a 1): sube y baja con el cambio. */
-  readonly turbulencia: number
-}
-
-const [ATRAS_DESDE, ATRAS_DURA] = METAMORFOSIS.atras
-
-/** El estado de la metamorfosis con el progreso `p`. Pura y continua: en 0, los valores en su lugar; en 1, la frase limpia. */
-export function estadoDeLaMetamorfosis(progreso: number): EstadoDeLaMetamorfosis {
-  const p = acotar(progreso)
-  const atras = suave(tramo(p, ATRAS_DESDE, ATRAS_DURA))
-  const C = METAMORFOSIS.contorno
-  const cambia = tramo(p, C.cambia[0], C.cambia[1])
-  // La campana: sin² sobre su tramo (sube y baja con derivada cero en las dos puntas) y cero exacto afuera.
-  const t = tramo(p, C.turbulencia[0], C.turbulencia[1])
-  const turbulencia = t <= 0 || t >= 1 ? 0 : Math.sin(Math.PI * t) ** 2
-  return { atras, cambia, sucia: 1 - suave(tramo(p, C.limpia[0], C.limpia[1])), adelante: frena(tramo(p, C.adelante[0], C.adelante[1])), espesor: suave(tramo(p, C.espesor[0], C.espesor[1])), turbulencia }
-}
 
 /**
  * En la lista, el recorrido del bloque clavado del CTA (0 a 1) no es todo transformación: al principio la cámara todavía

@@ -230,12 +230,6 @@ export function ponerElMarco(marco: THREE.Group, desde: LugarDelMarco, hasta: Lu
   marco.updateMatrixWorld(true)
 }
 
-/** [PULIDO 3B] B1 · la distancia del plano del marco a la cámara, en px del marco (para alejar las letras hacia atrás). */
-export function fondoDelMarco(marco: THREE.Group, camara: THREE.Camera): number {
-  camara.getWorldDirection(ADELANTE)
-  return ADELANTE.dot(CENTRO.copy(marco.position).sub(camara.position)) / Math.max(1e-6, marco.scale.x)
-}
-
 /** Una pieza en su pose: en px del marco (y hacia abajo), girada sobre su centro y del cuerpo de la pose. */
 export function ponerLaPieza(pieza: Pieza, pose: Pose): void {
   const g = pieza.grupo

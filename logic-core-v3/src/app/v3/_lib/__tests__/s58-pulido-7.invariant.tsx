@@ -5,9 +5,9 @@
  *   F1 · gana la descarga, sin energía adentro del logo: las contraformas (con sus ranuras) son lisas (ninguna muestra recibe
  *        energía, descargas ni pistones; el piso no tiene bloques ahí); la descarga va por las juntas (las abre) y nunca pinta
  *        las tapas; una ráfaga con cada onda y en el golpe.
- *   F2 · el CTA con volteo vertical: los seis valores se alinean en las filas de la frase y se voltean sobre X (en cascada) hasta
- *        sus tramos, que al terminar son la frase exacta; el último volteo termina con el giro de «HABLANOS»; sin saltos ida y
- *        vuelta, las placas no se cruzan con el giro; `?meta=contorno` (la de antes) y `?volteo=juntos`.
+ *   F2 · el CTA con volteo vertical: los seis valores se alinean en las filas de la frase y se voltean sobre X hasta sus tramos,
+ *        que al terminar son la frase exacta; el volteo termina con el giro de «HABLANOS»; sin saltos ida y vuelta, las placas no
+ *        se cruzan con el giro. [PULIDO 8] G1 · las placas a la vez (la cascada, `?volteo=` y `?meta=contorno`, borradas).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-7.md`.
  */
 import { readFileSync } from 'node:fs'
@@ -19,13 +19,11 @@ import { HUECO, distanciaAfuera, rellenoDelLogo } from '../escena/final/hueco'
 import { ENERGIA_EN_LA_SIMULACION_GLSL } from '../escena/final/luzDeAbajo'
 import { ABRE_LA_JUNTA_GLSL, DESCARGA_DEL_FILO_GLSL, FILO, rafagaDelFilo } from '../escena/final/filoConPoder'
 import { conElFinalEnElPiso } from '../escena/final/enElPiso'
-import { entornoPedido } from '../escena/entorno'
-import { CONTORNO, type CuadroDeLaMetamorfosis } from '../escena/ctaDelFinal/contorno'
 import { FUENTES_DEL_CTA, TRACKING_DEL_CTA, avancesDe } from '../escena/ctaDelFinal/fuentesDelCta'
 import type { ValorMedido } from '../escena/ctaDelFinal/medidaDeLosValores'
 import { geometriaDeLaLetra, letrasDeLaFrase, type LetraDeLaFrase } from '../escena/ctaDelFinal/piezasDeLaMetamorfosis'
-import { TRANSFORMACION, armadoSobreElCta, estadoDeLaMetamorfosis, nuevaPose, posesDe, suave, type EscenaDeLaTransformacion, type LetraEnPantalla, type PosesDeLaTransformacion } from '../escena/ctaDelFinal/transformacion'
-import { FIN_DEL_VOLTEO, VOLTEO, VOLTEOS, arrancaElVolteo, armarElVolteo, cajaDelTitulo, cajaDelTramo, caraEnLaPantalla, escalaDeLaCara, letrasDelTitulo, placaDelVolteo, tramosDeLaFrase, type Volteo } from '../escena/ctaDelFinal/volteo'
+import { TRANSFORMACION, armadoSobreElCta, nuevaPose, posesDe, suave, type EscenaDeLaTransformacion, type LetraEnPantalla, type PosesDeLaTransformacion } from '../escena/ctaDelFinal/transformacion'
+import { ARRANCA_EL_VOLTEO, FIN_DEL_VOLTEO, VOLTEO, armarElVolteo, cajaDelTitulo, cajaDelTramo, caraEnLaPantalla, escalaDeLaCara, letrasDelTitulo, placaDelVolteo, tramosDeLaFrase, type CuadroDelVolteo } from '../escena/ctaDelFinal/volteo'
 import { VOLUMEN_DEL_TITULO } from '../escena/titulos3d/geometria'
 import { CTA, FRASE, VALORES } from '../../_secciones/por-que-develop/contenido'
 import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
@@ -229,49 +227,43 @@ afirmar(tramosBien(tramosDeLaFrase), '1 · los tramos de la frase, por palabras 
 controlPositivo('1 · el detector VE tramos partidos por letras (no por palabras)', ((r: readonly { texto: string }[], l: readonly LetraDeLaFrase[]) => [0, 1, 2, 3, 4, 5].map((i) => l.slice(i * 7, i === 5 ? l.length : i * 7 + 7))) as Tramos, tramosBien)
 
 // 2 · LA COREOGRAFÍA, FUNCIÓN PURA DEL PROGRESO: lo que no es el título se desvanece primero, los títulos se alinean (escalados
-// parejo) y después las placas se voltean sobre X, en cascada en orden de lectura (`?volteo=juntos`: todas a la vez). Sin saltos,
-// ida y vuelta (pasos de 1/4000). Y SIMULTÁNEO: el último volteo termina en el mismo punto que el giro de «HABLANOS».
+// parejo) y después las placas se voltean sobre X, [PULIDO 8] G1 · todas a la vez (la cascada se borró). Sin saltos, ida y vuelta
+// (pasos de 1/4000). Y SIMULTÁNEO: el volteo termina en el mismo punto que el giro de «HABLANOS».
 type Placa = typeof placaDelVolteo
 const coreografiaBien = (placa: Placa): boolean => {
   let peor = 0
-  for (const volteo of VOLTEOS) {
-    for (let k = 0; k < 6; k += 1) {
-      let antes = placa(0, k, 6, volteo)
-      for (let i = 1; i <= 8000; i += 1) {
-        const p = i <= 4000 ? i / 4000 : (8000 - i) / 4000
-        const e = placa(p, k, 6, volteo)
-        peor = Math.max(peor, Math.abs(e.seVa - antes.seVa), Math.abs(e.alinea - antes.alinea), Math.abs(e.angulo - antes.angulo) / Math.PI)
-        antes = e
-      }
-    }
+  let antes = placa(0)
+  for (let i = 1; i <= 8000; i += 1) {
+    const p = i <= 4000 ? i / 4000 : (8000 - i) / 4000
+    const e = placa(p)
+    peor = Math.max(peor, Math.abs(e.seVa - antes.seVa), Math.abs(e.alinea - antes.alinea), Math.abs(e.angulo - antes.angulo) / Math.PI)
+    antes = e
   }
   const G = TRANSFORMACION.giro
   const fin = G.desde + G.gira
-  const arranques = [0, 1, 2, 3, 4, 5].map((k) => arrancaElVolteo(k, 6, 'cascada'))
-  const enCascada = arranques.every((a, k) => k === 0 || a > arranques[k - 1]) && [0, 1, 2, 3, 4, 5].every((k) => arrancaElVolteo(k, 6, 'juntos') === arrancaElVolteo(0, 6, 'juntos'))
-  const terminaConElGiro = VOLTEOS.every((v) => placa(fin, 5, 6, v).angulo > Math.PI - 1e-9 && placa(fin - 1e-3, 5, 6, v).angulo < Math.PI) && FIN_DEL_VOLTEO === fin
-  const enOrden = placa(VOLTEO.seVa[0] + VOLTEO.seVa[1], 0, 6, 'cascada').seVa === 1 && VOLTEO.seVa[0] + VOLTEO.seVa[1] <= VOLTEO.alinea[0] + VOLTEO.alinea[1] && VOLTEO.alinea[0] + VOLTEO.alinea[1] <= Math.min(...arranques) &&
-    placa(Math.min(...arranques), 0, 6, 'cascada').alinea === 1 && placa(1, 0, 6, 'cascada').angulo === Math.PI && placa(0, 0, 6, 'cascada').angulo === 0
-  return peor < 0.01 && enCascada && terminaConElGiro && enOrden
+  const terminaConElGiro = placa(fin).angulo > Math.PI - 1e-9 && placa(fin - 1e-3).angulo < Math.PI && FIN_DEL_VOLTEO === fin && ARRANCA_EL_VOLTEO === fin - VOLTEO.voltea.dura
+  const enOrden = placa(VOLTEO.seVa[0] + VOLTEO.seVa[1]).seVa === 1 && VOLTEO.seVa[0] + VOLTEO.seVa[1] <= VOLTEO.alinea[0] + VOLTEO.alinea[1] && VOLTEO.alinea[0] + VOLTEO.alinea[1] <= ARRANCA_EL_VOLTEO &&
+    placa(ARRANCA_EL_VOLTEO).alinea === 1 && placa(ARRANCA_EL_VOLTEO).angulo === 0 && placa(1).angulo === Math.PI && placa(0).angulo === 0
+  return peor < 0.01 && terminaConElGiro && enOrden
 }
-afirmar(coreografiaBien(placaDelVolteo), '2 · se va lo demás, se alinean los títulos y se voltean las placas (en cascada; `juntos`, a la vez), sin saltos ida y vuelta; el último volteo termina con el giro de «HABLANOS»', `fin en ${FIN_DEL_VOLTEO.toFixed(2)} del progreso · cascada cada ${String(VOLTEO.voltea.cada)}`)
-controlPositivo('2 · el detector VE un volteo que salta (sin la curva)', ((p: number, k: number, n: number, v: Volteo) => ({ ...placaDelVolteo(p, k, n, v), angulo: placaDelVolteo(p, k, n, v).angulo > Math.PI / 2 ? Math.PI : 0 })) as Placa, coreografiaBien)
-controlPositivo('2 · y uno que termina con el progreso (no con el giro)', ((p: number, k: number, n: number, v: Volteo) => ({ ...placaDelVolteo(p, k, n, v), angulo: Math.PI * Math.min(1, Math.max(0, (p - 0.5) / 0.5)) })) as Placa, coreografiaBien)
+afirmar(coreografiaBien(placaDelVolteo), '2 · se va lo demás, se alinean los títulos y se voltean las placas a la vez, sin saltos ida y vuelta; el volteo termina con el giro de «HABLANOS»', `de ${ARRANCA_EL_VOLTEO.toFixed(2)} a ${FIN_DEL_VOLTEO.toFixed(2)} del progreso`)
+controlPositivo('2 · el detector VE un volteo que salta (sin la curva)', ((p: number) => ({ ...placaDelVolteo(p), angulo: placaDelVolteo(p).angulo > Math.PI / 2 ? Math.PI : 0 })) as Placa, coreografiaBien)
+controlPositivo('2 · y uno que termina con el progreso (no con el giro)', ((p: number) => ({ ...placaDelVolteo(p), angulo: Math.PI * Math.min(1, Math.max(0, (p - 0.5) / 0.5)) })) as Placa, coreografiaBien)
 
 // 3 · LAS PLACAS EN LA ESCENA (armadas de verdad, con las fuentes del CTA): la cara de adelante, el título escalado PAREJO (ni
 // apretado ni estirado) que entra en su tramo; al terminar, la cara de atrás está EXACTAMENTE donde la frase (la malla de los
 // títulos, con su bisel y su kerning, en z = 0): no hay cambio de malla. Medido con las matrices de three en los dos anchos.
 type Armado = typeof armarElVolteo
 const placasBien = (armar: Armado): boolean => COMPOSICIONES.every((k) => {
-  const armada = armar(k.valores, k.renglones, k.frase, FUENTES, 'negro', TITULOS, 'cascada')
+  const armada = armar(k.valores, k.renglones, k.frase, FUENTES, 'negro', TITULOS)
   const tramos = tramosDeLaFrase(k.renglones, k.frase)
-  const cuadro = (p: number): CuadroDeLaMetamorfosis => ({ items: k.inicio.map((c) => ({ ...c, cuerpo: 20, cx: c.x, cy: c.y })), cajaDeLosValores: { x: 0, y: 0, ancho: 1, alto: 1 }, cajaDeLaFrase: { x: 0, y: 0, ancho: 1, alto: 1 }, corrimiento: { x: 0, y: 0 }, cuerpoDeLaFrase: 1, fuga: { x: 0, y: 0 }, fondo: 1000, progreso: p, apareceDeLosValores: 1 })
+  const cuadro = (p: number): CuadroDelVolteo => ({ items: k.inicio, progreso: p, apareceDeLosValores: 1 })
   const raiz = new THREE.Group()
   raiz.add(...armada.objetos)
   const placas = armada.objetos.filter((o) => o.name.startsWith('volteo · la placa'))
   let bien = placas.length === 6
   for (const p of [0, 0.25, 0.5, 0.7, 1]) {
-    armada.poner(estadoDeLaMetamorfosis(0), cuadro(p))
+    armada.poner(cuadro(p))
     raiz.updateMatrixWorld(true)
     for (const placa of placas) {
       const [cara, atras] = placa.children
@@ -279,21 +271,21 @@ const placasBien = (armar: Armado): boolean => COMPOSICIONES.every((k) => {
     }
   }
   // Alineado: el título entra en su tramo.
-  armada.poner(estadoDeLaMetamorfosis(0), cuadro(FIN_DEL_VOLTEO - VOLTEO.voltea.dura - 5 * VOLTEO.voltea.cada - 1e-4))
+  armada.poner(cuadro(ARRANCA_EL_VOLTEO - 1e-4))
   raiz.updateMatrixWorld(true)
   placas.forEach((placa, i) => {
     const caja = new THREE.Box3().setFromObject(placa.children[0])
     bien &&= caja.max.x - caja.min.x <= VOLTEO.cara.ancho * cajaDelTramo(tramos[i], FUENTES).ancho + 1e-6
   })
   // Terminado: cada letra del tramo, donde la de la frase exacta.
-  armada.poner(estadoDeLaMetamorfosis(0), cuadro(1))
+  armada.poner(cuadro(1))
   raiz.updateMatrixWorld(true)
   placas.forEach((placa, i) => {
     const malla = placa.children[1].children[0] as THREE.Mesh
     const vista = new THREE.Box3().setFromObject(malla)
     const exacta = new THREE.Box3()
     for (const l of tramos[i]) {
-      const g = geometriaDeLaLetra(l.fuerte ? FUENTES.fuerte : FUENTES.frase, l.c, l.x, l.base, l.cuerpo, VOLUMEN_DEL_TITULO.profundidad, true, CONTORNO.maximo)
+      const g = geometriaDeLaLetra(l.fuerte ? FUENTES.fuerte : FUENTES.frase, l.c, l.x, l.base, l.cuerpo, VOLUMEN_DEL_TITULO.profundidad, true, VOLTEO.maximo)
       g.computeBoundingBox()
       if (g.boundingBox !== null) exacta.union(g.boundingBox)
       g.dispose()
@@ -306,7 +298,7 @@ const placasBien = (armar: Armado): boolean => COMPOSICIONES.every((k) => {
 afirmar(placasBien(armarElVolteo), '3 · la cara de adelante, el título escalado parejo y dentro de su tramo; al terminar, la de atrás es la frase exacta en su lugar (sin cambio de malla), a 1440 y a 390')
 controlPositivo('3 · el detector VE una placa que no termina de voltearse', ((...a: Parameters<Armado>) => {
   const armada = armarElVolteo(...a)
-  return { ...armada, poner: (e: ReturnType<typeof estadoDeLaMetamorfosis>, c: CuadroDeLaMetamorfosis) => armada.poner(e, { ...c, progreso: Math.min(c.progreso, FIN_DEL_VOLTEO - 0.02) }) }
+  return { ...armada, poner: (c: CuadroDelVolteo) => armada.poner({ ...c, progreso: Math.min(c.progreso, FIN_DEL_VOLTEO - 0.02) }) }
 }) as Armado, placasBien)
 
 // 4 · EL GIRO Y LAS PLACAS NO SE SUPERPONEN: desde que los títulos salen de su grilla, la caja de cada placa (el título, o su tramo
@@ -339,7 +331,7 @@ function cruces(alinea: readonly [number, number]): number {
       k.valores.forEach((v, i) => {
         const placa = cajaDelTramo(tramos[i], FUENTES)
         const titulo = cajaDelTitulo(v, letrasDelTitulo(TITULOS[i]), CHIVO)
-        const estado = placaDelVolteo(p, i, 6, 'cascada')
+        const estado = placaDelVolteo(p)
         const b = estado.angulo >= Math.PI / 2 ? placa : caraEnLaPantalla(suave(Math.min(1, Math.max(0, (p - alinea[0]) / alinea[1]))), titulo, k.inicio[i], placa, escalaDeLaCara(titulo, 20, placa))
         const caja = { x0: b.x - b.ancho / 2, y0: b.y - b.alto / 2, x1: b.x + b.ancho / 2, y1: b.y + b.alto / 2 }
         if (giro.some((g) => seTocan(g, caja))) n += 1
@@ -351,15 +343,14 @@ function cruces(alinea: readonly [number, number]): number {
 afirmar(cruces(VOLTEO.alinea) === 0, '4 · desde que los títulos salen de su grilla, ninguna placa se cruza con el giro, a 1440 y a 390', `${String(cruces(VOLTEO.alinea))} cruces`)
 controlPositivo('4 · el detector VE una alineación más temprana (desde 0,04: se cruza con «Seis razones», que baja)', [0.04, 0.24] as const, (a: readonly [number, number]) => cruces(a) === 0)
 
-// 5 · LO QUE SE MANTIENE: el volteo es el producto (`?meta=contorno`, la de antes, hasta que se apruebe; `?volteo=juntos`), va en el
-// lienzo del CTA (detrás del logo, anclado en el mundo con la frase y «HABLANOS»), el enlace sigue en el DOM (Tab y Enter) y quieto
+// 5 · LO QUE SE MANTIENE: el volteo es el producto ([PULIDO 8] G1 · el único: `?meta=contorno` y `?volteo=juntos` se borraron, lo
+// fija `s59` G1), va en el lienzo del CTA (detrás del logo, anclado en el mundo con la frase y «HABLANOS»), el enlace sigue en el DOM (Tab y Enter) y quieto
 // llega al final (el progreso en 1).
 const escenaF2 = sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx'))
 const ctaDelFinal = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
-const productoBien = (escena: string, f: typeof entornoPedido): boolean => escena.includes("const meta = pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo(medidas.valores, renglones, medidas.letras, deLasFuentes, color, VALORES.map((v) => v.titulo), pruebas.volteo === 'juntos' ? 'juntos' : 'cascada')") &&
-  escena.includes('for (const o of meta.objetos) a.lienzo.add(o)') && f('producto').pruebas.meta === 'no' && f('producto').pruebas.volteo === 'no' && f('producto,volteo=juntos').pruebas.volteo === 'juntos' && f('producto,volteo=otro').pruebas.volteo === 'no' &&
-  f('producto,meta=contorno').pruebas.meta === 'contorno' && ctaDelFinal.includes('progreso.set(quieto ? 1 : progresoEnLaLista(r))') && VOLTEOS.join() === 'cascada,juntos'
-afirmar(productoBien(escenaF2, entornoPedido), '5 · el volteo es el producto (`?meta=contorno` y `?volteo=juntos`, pedibles), en el lienzo del CTA (detrás del logo); quieto, el final directo')
-controlPositivo('5 · el detector VE el volteo atrás de una bandera', escenaF2.replace(": armarElVolteo(", ": pruebas.volteo === 'no' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo("), (e: string) => productoBien(e, entornoPedido))
+const productoBien = (escena: string): boolean => escena.includes('const meta = armarElVolteo(medidas.valores, renglones, medidas.letras, deLasFuentes, color, VALORES.map((v) => v.titulo))') &&
+  escena.includes('for (const o of meta.objetos) a.lienzo.add(o)') && !/pruebas\.(volteo|meta)/.test(escena) && ctaDelFinal.includes('progreso.set(quieto ? 1 : progresoEnLaLista(r))')
+afirmar(productoBien(escenaF2), '5 · el volteo es el producto (sin bandera), en el lienzo del CTA (detrás del logo); quieto, el final directo')
+controlPositivo('5 · el detector VE el volteo atrás de una bandera', escenaF2.replace('const meta = armarElVolteo(', "const meta = pruebas.volteo === 'no' ? otro() : armarElVolteo("), productoBien)
 
 cerrar('s58-pulido-7')

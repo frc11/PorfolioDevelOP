@@ -55,8 +55,6 @@ const COMUN = {
   /** Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás. */
   alpha: false,
   powerPreference: 'high-performance' as const,
-  /** [PULIDO 5] D1 · el búfer de stencil: las tapas de la metamorfosis del CTA se pintan con la regla no-cero (`ctaDelFinal/contorno.ts`). */
-  stencil: true,
   /**
    * r3f pone ACES por default. Hasta ESCENA 9 fue Neutral (Khronos PBR Neutral):
    * conserva el blanco del papel y el matiz de la luz de color.

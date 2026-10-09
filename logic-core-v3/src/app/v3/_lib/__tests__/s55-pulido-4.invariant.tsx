@@ -15,31 +15,28 @@
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-4.md`. Lo que se mira en vivo: `docs/rediseno/entregas/pulido-4/mirar.txt`.
  * [PULIDO 5] D1 · el cruce se borró (el pedido era el giro de `2411371a`, que fija `s56` D1 con su control); lo que acá seguía
  * fijado del cruce pasa al giro y `contorno` (la del producto) se arma una vez con topología fija. El log de cada aserción que
- * cambió: `docs/rediseno/SPRINT-PULIDO-5.md`.
+ * cambió: `docs/rediseno/SPRINT-PULIDO-5.md`. [PULIDO 8] G1 · la metamorfosis `contorno` se borró con su código: lo que acá la
+ * fijaba se fue (que ya no existe lo fija `s59` G1) y lo continuo y lo de atrás del logo pasan al volteo (`docs/rediseno/SPRINT-PULIDO-8.md`).
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 
-import { ENTORNO, entornoPedido } from '../escena/entorno'
+import { ENTORNO } from '../escena/entorno'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { ctaVisibleEnElViaje } from '../escena/ctaDelFinal/enVivo'
-import { CONTORNO, remuestrear } from '../escena/ctaDelFinal/contorno'
 import { avancesDe, FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
 import {
-  ATRAS,
-  METAMORFOSIS,
   RELEVO_DE_LOS_VALORES,
   TRANSFORMACION,
   apareceDeLosValores,
-  estadoDeLaMetamorfosis,
   nuevaPose,
   posesDe,
   valoresAPlano,
   type EscenaDeLaTransformacion,
-  type EstadoDeLaMetamorfosis,
   type LetraEnPantalla,
   type PosesDeLaTransformacion,
 } from '../escena/ctaDelFinal/transformacion'
+import { VOLTEO, placaDelVolteo } from '../escena/ctaDelFinal/volteo'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
 import { VENTANA_DE_LA_TRANSFORMACION, ventanaDelValor } from '../../_secciones/por-que-develop/geometria'
@@ -54,8 +51,6 @@ import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { ORBITA_DEL_MOUSE, gradosVerticales, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/orbitaDelMouse'
 import { SONIDOS } from '../sonido/catalogo'
 import { afirmar, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
-
-import * as THREE from 'three'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -77,59 +72,27 @@ type Cruce = typeof posesDe
 // [PULIDO 5] D1 · EL CRUCE SE BORRÓ (el pedido era el giro): su aserción («el cruce de `2411371a`, recuperado») y su control
 // se fueron; el giro, tal como estaba en `2411371a`, lo fija `s56` D1 · 1 con su control.
 
-// LA METAMORFOSIS: en 0, los valores en su lugar (nada cambió); se van atrás «poco» (ATRAS: a ~0,8 de su tamaño) y ANTES de
-// cambiar; en `fusion`, se derriten en su lugar antes de irse; el disolvente cruza a la frase en el medio; la frase se limpia y
-// vuelve adelante. TODO JUNTO: la frase termina en el mismo punto del scroll que «HABLANOS» (en 1, y no antes). [PULIDO 5] D1 ·
-// «HABLANOS» se asienta con el giro (`baja`). [PULIDO 6] E1 · una sola técnica (`contorno`): `fusion` se borró.
-const asientaDelCta = (p: number): number => Math.min(1, Math.max(0, (p - TRANSFORMACION.giro.baja[0]) / TRANSFORMACION.giro.baja[1]))
-const metaBien = (f: (p: number) => EstadoDeLaMetamorfosis): boolean => ['contorno'].every(() => {
-  const [a, b] = [f(0), f(1)]
-  const casi = f(0.995)
-  const enCero = a.atras === 0 && a.cambia === 0 && a.sucia === 1 && a.adelante === 0 && a.turbulencia === 0
-  const enUno = b.atras === 1 && b.cambia === 1 && b.sucia === 0 && b.adelante === 1 && b.espesor === 1 && b.turbulencia === 0
-  const juntos = casi.adelante < 1 && asientaDelCta(0.995) < 1 && Math.abs(casi.adelante - 1) < 0.01 && Math.abs(asientaDelCta(0.995) - 1) < 0.02
-  // Primero atrás: cuando empieza a cambiar, ya se fueron; el cambio empieza con la mitad del alejamiento hecho, como mucho.
-  const desde = (f2: (p: number) => number): number => [...Array(1001).keys()].map((k) => k / 1000).find((p) => f2(p) > 0) ?? 1
-  const primeroAtras = desde((p) => f(p).atras) < desde((p) => f(p).cambia)
-  return enCero && enUno && juntos && primeroAtras && ATRAS > 0 && ATRAS <= 0.3
-})
-afirmar(metaBien(estadoDeLaMetamorfosis), '  la metamorfosis: en 0 nada cambió; primero atrás («poco»), después cambian, se cruzan, la frase se limpia y vuelve; termina en el mismo punto que «HABLANOS»', `atrás ${String(ATRAS)} de la distancia (a ${(1 / (1 + ATRAS)).toFixed(2)} de su tamaño)`)
-controlPositivo('  el detector VE una frase que termina antes que «HABLANOS» (en 0,9)', ((p: number) => estadoDeLaMetamorfosis(Math.min(1, p / 0.9))) as typeof estadoDeLaMetamorfosis, metaBien)
-
-// LAS DOS TÉCNICAS, en 3D y terminando en la frase limpia. `fusion`: las dos mallas con el mismo ruido y el mismo flujo; los
-// valores se derriten hacia la zona de la frase (desplazamiento en el vértice) y la frase nace de la masa y se des-deforma; el
-// disolvente con umbral de ruido es complementario (lo que no es valor es frase: una sola masa). `contorno`: los dos textos
-// remuestreados a LA MISMA cantidad de puntos, interpolados con turbulencia y el espesor que crece al asentarse. Sin partículas.
-// [PULIDO 5] D1 · `contorno` ya no rehace la geometría por cuadro: topología fija (las pistas, una vez), el vértice mueve los
-// puntos y las tapas van por stencil; el detalle lo fija `s56` D1 · 4. [PULIDO 6] E1 · `fusion` se borró (su código): queda `contorno`.
-const contorno = sinComentarios(leer('_lib/escena/ctaDelFinal/contorno.ts'))
-const cuadrado: THREE.Vector2[] = [new THREE.Vector2(0, 0), new THREE.Vector2(10, 0), new THREE.Vector2(10, 10), new THREE.Vector2(0, 10)]
-const tecnicasBien = (co: string): boolean =>
-  co.includes('const pistas = pistasDeLaMetamorfosis(valores, inicio, frase, fuentes, n)') && co.includes('enSentido(remuestrear(borde, n), false)') && co.includes('costo = performance.now() - t0') &&
-  co.includes('VOLUMEN_DEL_TITULO.profundidad * c.cuerpoDeLaFrase * kF * e.espesor') && remuestrear(cuadrado, CONTORNO.puntos).length === CONTORNO.puntos && !/THREE\.Points\b|PointsMaterial|part[ií]cula/i.test(co)
-afirmar(tecnicasBien(contorno), '  `contorno`: la misma cantidad de puntos, interpolados (en el vértice: topología fija), el espesor crece al asentarse; sin partículas')
-controlPositivo('  el detector VE una metamorfosis de partículas', `${contorno}\nnew THREE.Points()`, tecnicasBien)
-
-// LAS BANDERAS: `?meta=fusion|contorno` (sólo esas); sin bandera, `fusion` (la del producto). [PULIDO 5] D1 · sin bandera,
-// `contorno` (ganó). [PULIDO 6] E1 · `?meta=` se borró: `contorno` es la única. [PULIDO 7] F2 · vuelve `?meta=contorno` (sólo
-// ese valor), pedido así: sin bandera, el volteo; `fusion` sigue sin pedir nada.
-const banderasBien = (f: typeof entornoPedido): boolean => ENTORNO.pruebas.meta === 'no' && f('producto,meta=fusion').pruebas.meta === 'no' && f('producto,meta=contorno').pruebas.meta === 'contorno' &&
-  sinComentarios(leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')).includes("const meta = pruebas.meta === 'contorno' ? armarElContorno(medidas.valores, inicio, medidas.letras, deLasFuentes, color) : armarElVolteo(")
-afirmar(banderasBien(entornoPedido), '  [PULIDO 7] `?meta=contorno` (sólo ese valor; `fusion` no pide nada); sin bandera, el volteo')
-controlPositivo('  el detector VE la bandera de antes todavía pedible', ((p: string) => ({ ...entornoPedido(p), pruebas: { ...entornoPedido(p).pruebas, meta: 'fusion' } })) as unknown as typeof entornoPedido, banderasBien)
+// LA METAMORFOSIS, LAS DOS TÉCNICAS Y LAS BANDERAS: [PULIDO 8] G1 · `contorno` se borró con su código (el volteo es el
+// producto): sus tres aserciones y sus controles se fueron; que ya no existen (ni `?meta=`) lo fija `s59` G1, y el volteo, `s58` F2.
 
 // 4 · CONTINUA EN EL SCROLL, EN LAS DOS DIRECCIONES. Se recorre el scroll en pasos de 2 px (a 900 px por pantalla), de antes de
 // que lleguen los valores hasta el final del CTA y de vuelta, con frenadas (un segundo quieto, a 60 cuadros: el asiento corre) cada
 // 60 pasos. En cada paso y en cada cuadro: ningún valor del DOM salta en su tramo más de `SALTO.valor` (el defecto: de lo
 // asentado al lugar del scroll de golpe, 0,57 medido), ninguna letra del cruce que esté en la pantalla se mueve más de
 // `SALTO.px` ni cambia cuánto se ve más de `SALTO.aparece`, y nada de lo que la metamorfosis le da a la escena (su estado, el
-// relevo y el lugar de los valores) cambia más de `SALTO.estado`.
+// relevo y el lugar de los valores) cambia más de `SALTO.estado`. [PULIDO 8] G1 · el estado es el del volteo (lo que se va, lo
+// alineado y el ángulo por π): el de `contorno` se borró.
 const SALTO = { valor: 0.12, px: 60, aparece: 0.2, estado: 0.05 } as const
 const ALTO = 900
 const PIN = (PANTALLAS_DE_POR_QUE_DEVELOP - 1) * ALTO
 type Seguir = (s: SeguidorDelValor, p: number) => void
 interface Medida { readonly peor: { valor: number; px: number; aparece: number; estado: number }; readonly pasos: number }
-function recorrer(seguir: Seguir, cruce: Cruce, meta: typeof estadoDeLaMetamorfosis): Medida {
+type Meta = (p: number) => readonly number[]
+const delVolteo: Meta = (p) => {
+  const e = placaDelVolteo(p)
+  return [e.seVa, e.alinea, e.angulo / Math.PI]
+}
+function recorrer(seguir: Seguir, cruce: Cruce, meta: Meta): Medida {
   const peor = { valor: 0, px: 0, aparece: 0, estado: 0 }
   const seguidores = VALORES.map((_, i) => nuevoSeguidor(tramo(1.5 * ALTO / PIN, ventanaDelValor(i))))
   let antes: { valores: number[]; cruce: PosesDeLaTransformacion; meta: number[] } | null = null
@@ -139,9 +102,7 @@ function recorrer(seguir: Seguir, cruce: Cruce, meta: typeof estadoDeLaMetamorfo
     const p = tramo(pin, VENTANA_DE_LA_TRANSFORMACION)
     const c = poses()
     cruce(p, ESCENA, c)
-    const e = meta(p)
-    const co = meta(p)
-    const m = [e.atras, e.cambia, e.sucia, e.adelante, e.turbulencia, apareceDeLosValores(p), valoresAPlano(p), co.cambia, co.espesor, co.sucia, co.adelante, co.turbulencia]
+    const m = [...meta(p), apareceDeLosValores(p), valoresAPlano(p)]
     const ahora = { valores: seguidores.map((s) => s.mostrado), cruce: c, meta: m }
     if (antes !== null) {
       const a = antes
@@ -188,18 +149,18 @@ function recorrer(seguir: Seguir, cruce: Cruce, meta: typeof estadoDeLaMetamorfo
   return { peor, pasos }
 }
 const continuoBien = (m: Medida): boolean => m.peor.valor <= SALTO.valor && m.peor.px <= SALTO.px && m.peor.aparece <= SALTO.aparece && m.peor.estado <= SALTO.estado
-const recorrido = recorrer(seguirAlScroll, posesDe, estadoDeLaMetamorfosis)
+const recorrido = recorrer(seguirAlScroll, posesDe, delVolteo)
 afirmar(continuoBien(recorrido), '4 · todo es continuo en el scroll, ida y vuelta, con frenadas: los valores (con su asiento), el giro y la metamorfosis no saltan en ningún paso', `${String(recorrido.pasos)} pasos y cuadros · lo peor: valor ${recorrido.peor.valor.toFixed(3)} del tramo, giro ${recorrido.peor.px.toFixed(1)} px y ${recorrido.peor.aparece.toFixed(3)} de tramado, estado ${recorrido.peor.estado.toFixed(4)}`)
 // El defecto que se arregló: al volver el scroll, lo mostrado saltaba al lugar del scroll (después de un asiento).
 const conElSaltoDeAntes: Seguir = (s, p) => {
   s.scroll = p
   s.mostrado = p
 }
-controlPositivo('  el detector VE el salto de antes (lo asentado vuelve de golpe al lugar del scroll)', recorrer(conElSaltoDeAntes, posesDe, estadoDeLaMetamorfosis), continuoBien)
+controlPositivo('  el detector VE el salto de antes (lo asentado vuelve de golpe al lugar del scroll)', recorrer(conElSaltoDeAntes, posesDe, delVolteo), continuoBien)
 controlPositivo('  y un giro con un salto («HABLANOS» que aparece de golpe, como en B1)', recorrer(seguirAlScroll, ((p: number, e: EscenaDeLaTransformacion, s: PosesDeLaTransformacion) => {
   posesDe(p, e, s)
   s.destino.forEach((q) => Object.assign(q, { aparece: p >= TRANSFORMACION.giro.desde + 0.05 ? 1 : 0 }))
-}) as Cruce, estadoDeLaMetamorfosis), continuoBien)
+}) as Cruce, delVolteo), continuoBien)
 // La causa, en el componente: el valor sigue al scroll con `seguirAlScroll` y el asiento parte de lo mostrado.
 const valor = sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))
 afirmar(/seguirAlScroll\(a\.seguidor, p\)\s*posar\(a\.seguidor\.mostrado\)/.test(valor) && valor.includes('a.control = animate(s.mostrado, destino, { duration: ASIENTO.s * Math.abs(destino - s.mostrado), ease: \'linear\'') && !/posar\(p\)/.test(valor), '  la causa, en el valor: lo mostrado sigue al scroll (no se pone el del scroll) y el asiento parte de lo mostrado, a la velocidad de `asentar`')
@@ -231,14 +192,15 @@ controlPositivo('6 · el detector VE la frase de B1 (sólo mayúsculas)', [{ gly
 
 // 7 · SE MANTIENE: las siete pantallas (y la transformación en tres, terminando en `cta.armado`), el teléfono con el bloque
 // clavado, el movimiento reducido con el estado final y ninguna letra delante del logo: el plano del CTA detrás del centro del
-// logo, y la metamorfosis sólo va hacia atrás (los valores y la masa a `−ATRAS`, la frase de ahí a 0).
+// logo, y la metamorfosis sólo va hacia atrás (los valores y la masa a `−ATRAS`, la frase de ahí a 0). [PULIDO 8] G1 · `contorno` se
+// borró: el volteo, en el lienzo del CTA, con el centro de cada placa medio espesor atrás (cada cara queda en z = 0).
+const volteo = sinComentarios(leer('_lib/escena/ctaDelFinal/volteo.ts'))
 const listaDom = sinComentarios(leer('_componentes/ctaDelFinal/CtaDelFinal.tsx'))
 const mantieneBien = (pantallas: number, cerca: number, atras: number): boolean => pantallas === 7 && Math.abs(TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta - 3) < 1e-9 &&
   ctaDom.includes('<div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)]') && listaDom.includes('progreso.set(quieto ? 1 : progresoEnLaLista(r))') && cerca > 1 && atras > 0 &&
-  escenaDelCta.includes('ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)') && contorno.includes('const zF = zM * (1 - e.adelante)')
-afirmar(mantieneBien(PANTALLAS_DE_POR_QUE_DEVELOP, MARCO_DEL_CTA.cerca, ATRAS), '7 · las siete pantallas, el teléfono clavado, el movimiento reducido en el estado final y ninguna letra delante del logo (todo detrás del plano del CTA)', `el plano a ${String(MARCO_DEL_CTA.cerca)} de la distancia del logo · relevo de los valores en ${String(RELEVO_DE_LOS_VALORES.tramado)} del progreso`)
+  escenaDelCta.includes('ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)') && volteo.includes('pz.grupo.position.set(pz.placa.x, -pz.placa.y, -pz.espesor / 2)')
+afirmar(mantieneBien(PANTALLAS_DE_POR_QUE_DEVELOP, MARCO_DEL_CTA.cerca, VOLTEO.espesor), '7 · las siete pantallas, el teléfono clavado, el movimiento reducido en el estado final y ninguna letra delante del logo (todo detrás del plano del CTA)', `el plano a ${String(MARCO_DEL_CTA.cerca)} de la distancia del logo · relevo de los valores en ${String(RELEVO_DE_LOS_VALORES.tramado)} del progreso`)
 controlPositivo('7 · el detector VE la frase delante del plano (z positivo)', [PANTALLAS_DE_POR_QUE_DEVELOP, MARCO_DEL_CTA.cerca, -0.2] as const, ([a, b, c]: readonly [number, number, number]) => mantieneBien(a, b, c))
-void METAMORFOSIS
 void avancesDe
 void FUENTES_DEL_CTA
 

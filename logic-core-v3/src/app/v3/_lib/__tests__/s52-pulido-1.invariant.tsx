@@ -127,8 +127,8 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // `energia=red|inestable`; PULIDO 3B · B0 las funde en el producto y deja `energia=intensa`; B1 borra `cta=` entera: `cruce`
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
 // `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`; E2 borra `anillo=` y agrega
-// `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`; F2 agrega `meta=contorno` y `volteo=juntos`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], meta: ['contorno'], volteo: ['juntos'] }
+// `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`; F2 agrega `meta=contorno` y `volteo=juntos`. PULIDO 8 · G1 borra las dos.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
