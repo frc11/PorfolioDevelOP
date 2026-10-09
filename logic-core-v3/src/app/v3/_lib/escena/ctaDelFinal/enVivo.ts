@@ -36,6 +36,8 @@ export const CTA_EN_VIVO = {
   entrada: 1,
   /** El puntero sobre el CTA (sólo con mouse: con el dedo no hay hover). */
   hover: false,
+  /** [PULIDO 8] G2 · el foco del teclado sobre el CTA, visible (`:focus-visible`): dibuja el subrayado como el hover. */
+  foco: false,
 }
 
 /** Los títulos de volumen que la transformación reemplaza desde que arranca: la frase. */

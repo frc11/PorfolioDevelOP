@@ -56,7 +56,8 @@ const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido
 
 /**
  * [PULIDO 2] 5 · EL CTA CON SU TRANSFORMACIÓN, en el escenario: centrado; la escena dibuja la frase (desde los valores) y el CTA
- * (desde «Seis razones»); sin la escena, llegan al final. El foco del teclado lleva al final.
+ * (desde «Seis razones»); sin la escena, llegan al final. El foco del teclado lleva al final ([PULIDO 8] G2 · sólo el del teclado: el
+ * clic, que ya puede caer a mitad del giro, no mueve la página).
  */
 export function CtaTransformado({ progreso, claseDelTexto, alEnfocar }: { readonly progreso: MotionValue<number>; readonly claseDelTexto: string; readonly alEnfocar: (cta: HTMLElement, llegada: number) => void }): React.JSX.Element {
   useProgresoDelCta(progreso, 'escenario', origenDeLaFrase)
@@ -67,7 +68,7 @@ export function CtaTransformado({ progreso, claseDelTexto, alEnfocar }: { readon
       data-pieza="cta-del-final"
       className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
       style={estiloEnElViaje(enViaje)}
-      onFocus={(e) => alEnfocar(e.currentTarget, progreso.get())}
+      onFocus={(e) => e.target.matches(':focus-visible') && alEnfocar(e.currentTarget, progreso.get())}
     >
       <CanalDeUnaPieza progreso={texto} patron="P5">
         <FraseDelCta claseDelTexto={claseDelTexto} />

@@ -230,6 +230,12 @@ export function ponerElMarco(marco: THREE.Group, desde: LugarDelMarco, hasta: Lu
   marco.updateMatrixWorld(true)
 }
 
+/** [PULIDO 8] G2 · la línea de base de «HABLANOS» en su lugar fijo (px de la pantalla): dónde empieza, su altura, su cuerpo y su ancho. */
+export function lineaDelCta(a: ArmadoDelCta): { readonly izquierda: number; readonly base: number; readonly cuerpo: number; readonly ancho: number } | null {
+  const f = a.destino.fijo
+  return f === null ? null : { izquierda: f.lugar.izquierda + f.dx, base: lineaDeBase(f.lugar, a.destino.fuente.data), cuerpo: f.lugar.cuerpo, ancho: f.ancho }
+}
+
 /** Una pieza en su pose: en px del marco (y hacia abajo), girada sobre su centro y del cuerpo de la pose. */
 export function ponerLaPieza(pieza: Pieza, pose: Pose): void {
   const g = pieza.grupo

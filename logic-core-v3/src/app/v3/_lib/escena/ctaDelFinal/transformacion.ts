@@ -141,10 +141,8 @@ export function posesDe(progreso: number, e: EscenaDeLaTransformacion, s: PosesD
   const { renglones, cajas, k, alto } = cartelDe(e.origen, e.destino, e.altoDelCartel)
   const junta = suave(tramo(p, 0, G.junta))
   const angulo = Math.PI * suave(tramo(p, G.desde, G.gira))
-  const baja = suave(tramo(p, G.baja[0], G.baja[1]))
   const [cos, sin] = [Math.cos(angulo), Math.sin(angulo)]
   // El cartel se arma en `armado` y gira ahí; al final la cara de atrás se asienta (y, si se armó en otro lugar, baja al del CTA).
-  const corrido = (e.armado - c.y) * (1 - baja)
   e.origen.forEach((l, i) => {
     const r = renglones.indexOf(l.renglon)
     const b = cajas[r]
@@ -154,10 +152,28 @@ export function posesDe(progreso: number, e: EscenaDeLaTransformacion, s: PosesD
   })
   // La cara de atrás: el CTA espejado y detrás del cartel; con el giro entero queda derecho y adelante.
   e.destino.forEach((d, j) => {
-    const dx = -(d.x - c.x)
-    const dz = -G.espesor * d.cuerpo
-    poner(s.destino[j], c.x + dx * cos + dz * sin, d.y + corrido, (-dx * sin + dz * cos) * (1 - baja), 0, angulo + Math.PI, d.cuerpo, 1, angulo >= Math.PI / 2 ? 1 : 0)
+    enLaCaraDelCta(p, c, e.armado, d, d.cuerpo, PUNTO)
+    poner(s.destino[j], PUNTO.x, PUNTO.y, PUNTO.z, 0, angulo + Math.PI, d.cuerpo, 1, angulo >= Math.PI / 2 ? 1 : 0)
   })
+}
+
+const PUNTO = { x: 0, y: 0, z: 0 }
+
+/**
+ * [PULIDO 8] G2 · DÓNDE VA UN PUNTO DE LA CARA DE «HABLANOS» con el giro (px; y hacia abajo, z hacia la cámara): `d` es su lugar
+ * final, `c` la caja del CTA y `cuerpo` el suyo. La misma cuenta para sus letras, su subrayado y las esquinas del enlace del DOM.
+ */
+export function enLaCaraDelCta(progreso: number, c: CajaEnPantalla, armado: number, d: { readonly x: number; readonly y: number }, cuerpo: number, salida: { x: number; y: number; z: number }): void {
+  const G = TRANSFORMACION.giro
+  const p = acotar(progreso)
+  const angulo = Math.PI * suave(tramo(p, G.desde, G.gira))
+  const baja = suave(tramo(p, G.baja[0], G.baja[1]))
+  const [cos, sin] = [Math.cos(angulo), Math.sin(angulo)]
+  const dx = -(d.x - c.x)
+  const dz = -G.espesor * cuerpo
+  salida.x = c.x + dx * cos + dz * sin
+  salida.y = d.y + (armado - c.y) * (1 - baja)
+  salida.z = (-dx * sin + dz * cos) * (1 - baja)
 }
 
 /**
@@ -204,5 +220,11 @@ export function llegadaDelTexto(p: number): number {
   return suave(tramo(p, 0.86, 0.14))
 }
 
-/** El CTA se puede tocar recién cuando llegó (antes, el botón está en su lugar pero la transformación no terminó). */
-export const ctaTocable = (p: number): boolean => p >= 0.97
+/** [PULIDO 8] G2 · cuánto de su ancho le muestra a la cámara la cara de «HABLANOS» en el giro (−1, de espaldas; 0, de canto; 1, de frente). */
+export const caraDelCta = (p: number): number => -Math.cos(Math.PI * suave(tramo(acotar(p), TRANSFORMACION.giro.desde, TRANSFORMACION.giro.gira)))
+
+/** [PULIDO 8] G2 · desde cuánto de su ancho se lee: pasó el canto y mira a la cámara. */
+export const CARA_LEGIBLE = 0.3
+
+/** El CTA se puede tocar apenas su cara se lee en el giro, aunque todavía se mueva ([PULIDO 8] G2; era recién al llegar, en 0,97). */
+export const ctaTocable = (p: number): boolean => caraDelCta(p) >= CARA_LEGIBLE

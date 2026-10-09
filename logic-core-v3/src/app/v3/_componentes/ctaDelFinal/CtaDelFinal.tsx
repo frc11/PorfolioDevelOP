@@ -138,7 +138,9 @@ export function RenglonDeLaFraseDelCta({ indice, children, className }: { readon
 /**
  * EL CTA EN SU LUGAR: el texto en la fuente del registro 1 del hero, que la escena reemplaza con sus letras (y hasta entonces
  * llega con el resto del texto). Es un enlace que abre el panel de Contacto (con la transición de siempre, `data-abre-contacto`)
- * y se puede tocar recién cuando la transformación terminó. El hover (sólo con el mouse) levanta el CTA en la escena.
+ * y se puede tocar recién cuando la transformación terminó. El hover (sólo con el mouse) levanta el CTA en la escena. [PULIDO 8]
+ * G2 · tocable desde que su cara se lee en el giro (`ctaTocable`; la escena lleva el enlace a su pose en cada cuadro), con el
+ * cursor de un enlace; el hover y el foco visible dibujan su subrayado en la escena; antes de leerse, Enter no lo abre.
  */
 export function DestinoDelCta({ rotulo, destino, progreso, className }: { readonly rotulo: string; readonly destino: string; readonly progreso: MotionValue<number>; readonly className?: string }): React.JSX.Element {
   const listo = useCtaListo()
@@ -150,6 +152,7 @@ export function DestinoDelCta({ rotulo, destino, progreso, className }: { readon
     return () => {
       if (CTA_EN_VIVO.destino === el) CTA_EN_VIVO.destino = null
       CTA_EN_VIVO.hover = false
+      CTA_EN_VIVO.foco = false
       avisarDelLugar()
     }
   }, [])
@@ -162,12 +165,21 @@ export function DestinoDelCta({ rotulo, destino, progreso, className }: { readon
       data-abre-contacto="panel"
       aria-label={rotulo}
       style={{ pointerEvents }}
-      className="inline-block no-underline"
+      className="inline-block cursor-pointer no-underline"
       onPointerEnter={(e) => {
         if (e.pointerType === 'mouse') CTA_EN_VIVO.hover = true
       }}
       onPointerLeave={() => {
         CTA_EN_VIVO.hover = false
+      }}
+      onFocus={(e) => {
+        CTA_EN_VIVO.foco = e.currentTarget.matches(':focus-visible')
+      }}
+      onBlur={() => {
+        CTA_EN_VIVO.foco = false
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !ctaTocable(progreso.get())) e.preventDefault()
       }}
     >
       <motion.span ref={texto} aria-hidden="true" style={{ opacity: listo ? 0 : llegada }} className={cn('block', FUENTE_DEL_CTA, className)}>

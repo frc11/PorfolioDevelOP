@@ -14,12 +14,14 @@ import type { Variante } from '../titulos3d/armado'
 import { corrimiento, pinDelLugar } from '../titulos3d/colocacion'
 import { EN_VIVO as EN_VIVO_DEL_FINAL } from '../final/recorridoDelFinal'
 import { viajeEnCurso } from '../viaje'
-import { armarElCta, fuentesDeLaMetamorfosis, letrasEnLaPantalla, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
+import { armarElCta, fuentesDeLaMetamorfosis, letrasEnLaPantalla, lineaDelCta, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
 import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaListo, ctaVisibleEnElViaje, marcarElCtaListo, suscribirAlLugarDelCta, versionDelLugarDelCta } from './enVivo'
 import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type MetricasDeLaFuente, type RenglonDeLaFrase, type ValorMedido } from './medidaDeLosValores'
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
-import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
-import { apareceDeLosValores, armadoSobreElCta, cajaDe, posesDe, valoresAPlano } from './transformacion'
+import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, esquinasEnElGiro, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
+import { armarElSubrayado, ponerElSubrayado, soltarElSubrayado, type SubrayadoDelCta } from './subrayado'
+import { apareceDeLosValores, armadoSobreElCta, cajaDe, ctaTocable, posesDe, valoresAPlano } from './transformacion'
+import { usePrefiereMenosMovimiento } from '../../usePrefiereMenosMovimiento'
 import { armarElVolteo, type CuadroDelVolteo } from './volteo'
 import { VALORES } from '../../../_secciones/por-que-develop/contenido'
 
@@ -114,7 +116,20 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
   const version = useSyncExternalStore(suscribirAlLugarDelCta, versionDelLugarDelCta, versionDelLugarDelCta)
-  const m = useRef<EstadoDeLaEscenaDelCta>({ armado: null, meta: null, medidas: null, estudio: null, hover: 0, cajas: Array.from({ length: 6 }, () => ({ x: 0, y: 0, escala: 1 })), cuadro: null, planos: nuevosPlanosDelCta(), enlace: '' })
+  const m = useRef<EstadoDeLaEscenaDelCta>({ armado: null, meta: null, subrayado: null, medidas: null, estudio: null, hover: 0, cajas: Array.from({ length: 6 }, () => ({ x: 0, y: 0, escala: 1 })), cuadro: null, planos: nuevosPlanosDelCta(), enlace: '', quieto: false, tactil: false })
+  // [PULIDO 8] G2 · el subrayado aparece sin animación con movimiento reducido; con el dedo (sin hover) se dibuja al formarse.
+  const quieto = usePrefiereMenosMovimiento()
+  useEffect(() => {
+    const estado = m.current
+    const sinHover = window.matchMedia('(hover: none)')
+    const poner = (): void => {
+      estado.tactil = sinHover.matches
+    }
+    estado.quieto = quieto
+    poner()
+    sinHover.addEventListener('change', poner)
+    return () => sinHover.removeEventListener('change', poner)
+  }, [quieto])
 
   useEffect(() => {
     const estado = m.current
@@ -169,6 +184,13 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
       for (const p of piezasDe(a)) if (rt !== null) p.material.material.envMap = rt.texture
       for (const mat of meta.materiales) if (rt !== null) mat.envMap = rt.texture
       for (const o of meta.objetos) a.lienzo.add(o)
+      const linea = lineaDelCta(a)
+      const subrayado = linea === null ? null : armarElSubrayado(linea.ancho / Math.max(1e-6, linea.cuerpo), color)
+      if (subrayado !== null) {
+        if (rt !== null) subrayado.material.material.envMap = rt.texture
+        a.marco.add(subrayado.grupo)
+      }
+      estado.subrayado = subrayado
       g.add(a.marco)
       g.add(a.lienzo)
       estado.armado = a
@@ -191,8 +213,10 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         soltarElCta(a)
       }
       estado.meta?.soltar()
+      if (estado.subrayado !== null) soltarElSubrayado(estado.subrayado)
       estado.armado = null
       estado.meta = null
+      estado.subrayado = null
       estado.medidas = null
       llevarElEnlace(estado, '')
     }
@@ -225,6 +249,8 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         letrasDeLosValores: s.medidas?.valores.reduce((n, x) => n + (x?.letras.length ?? 0), 0) ?? 0,
         iconos: s.medidas?.valores.reduce((n, x) => n + (x?.iconos.length ?? 0), 0) ?? 0,
         enlace: s.enlace,
+        tocable: ctaTocable(CTA_EN_VIVO.progreso),
+        subrayado: s.subrayado === null ? null : { dibujado: s.subrayado.dibujado, visible: s.subrayado.grupo.visible, x: s.subrayado.grupo.scale.x },
         corrido: a?.destino.fijo ? corrimiento(a.destino.fijo.pin, window.scrollY) : null,
         pin: a?.destino.fijo?.pin ?? null,
         scroll: window.scrollY,
@@ -246,6 +272,7 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
 interface EstadoDeLaEscenaDelCta {
   armado: ArmadoDelCta | null
   meta: MetamorfosisArmada | null
+  subrayado: SubrayadoDelCta | null
   medidas: Medidas | null
   estudio: THREE.WebGLRenderTarget | null
   hover: number
@@ -254,6 +281,9 @@ interface EstadoDeLaEscenaDelCta {
   readonly planos: PlanosDelCta
   /** La transformada que tiene el enlace (sólo se escribe si cambia). */
   enlace: string
+  /** [PULIDO 8] G2 · movimiento reducido y sin hover (el dedo). */
+  quieto: boolean
+  tactil: boolean
 }
 
 /**
@@ -314,9 +344,10 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   // [PULIDO 6] E1 · el cartel, en la franja de «HABLANOS» (no sube a la de la frase).
   const alto = s.medidas === null ? undefined : altoDelCartel(destino, s.medidas.caja)
   posesDe(p, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino, alto), altoDelCartel: alto }, a.poses)
-  // El hover (con el mouse, ya llegado): el CTA se levanta apenas hacia la cámara.
-  s.hover += ((CTA_EN_VIVO.hover && p >= 0.97 ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
-  for (const pose of a.poses.destino) pose.z += s.hover * HOVER_DEL_CTA.levanta * (destino[0]?.cuerpo ?? 0)
+  // El hover (con el mouse, ya tocable: [PULIDO 8] G2 · desde que su cara se lee): el CTA se levanta apenas hacia la cámara.
+  s.hover += ((CTA_EN_VIVO.hover && ctaTocable(p) ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
+  const levanta = s.hover * HOVER_DEL_CTA.levanta * (destino[0]?.cuerpo ?? 0)
+  for (const pose of a.poses.destino) pose.z += levanta
   // En la lista el origen aparece antes de transformarse (cuando el logo ya bajó).
   for (const pose of a.poses.origen) pose.aparece *= CTA_EN_VIVO.entrada
   let i = 0
@@ -327,11 +358,19 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
     s.cuadro = cuadroDeAhora(s, s.medidas, p)
     s.meta.poner(s.cuadro)
   }
-  // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano.
+  // [PULIDO 8] G2 · el subrayado, con el giro (el lugar de su comienzo en la cara de «HABLANOS») y el levante del hover.
+  const cajaDelCta = cajaDe(destino)
+  const armado = armadoSobreElCta(a.letras.origen, destino, alto)
+  const pose = a.poses.destino[0]
+  if (s.subrayado !== null) ponerElSubrayado(s.subrayado, lineaDelCta(a), { c: cajaDelCta, armado, p, giro: pose?.ry ?? 0, seVe: pose !== undefined && pose.aparece > 0, levanta }, { hover: CTA_EN_VIVO.hover, foco: CTA_EN_VIVO.foco, tactil: s.tactil }, s.quieto, dt)
+  // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano. [PULIDO 8]
+  // G2 · tocable desde que su cara se lee, todavía en el giro: sus esquinas, donde están ahora (y en su lugar, antes).
   const enlace = enlaceDelCta()
   if (caja !== null && enlace !== null) {
     const dom = { x: caja.lugar.izquierda, y: caja.lugar.arriba + corrimiento(caja.pin, window.scrollY), ancho: enlace.offsetWidth, alto: enlace.offsetHeight }
-    llevarElEnlace(s, homografiaDelCta(s.planos.cta, { x: caja.lugar.izquierda + caja.dx, y: caja.lugar.arriba, ancho: caja.ancho, alto: caja.lugar.linea }, dom, viva, { ancho: tam.width, alto: tam.height }))
+    const delCta = { x: caja.lugar.izquierda + caja.dx, y: caja.lugar.arriba, ancho: caja.ancho, alto: caja.lugar.linea }
+    const esquinas = ctaTocable(p) ? esquinasEnElGiro(delCta, cajaDelCta, armado, p, destino[0]?.cuerpo ?? 0, levanta) : undefined
+    llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }, esquinas))
   }
   // La luz de los títulos: la noche del logo (su emisiva, en el mismo cuadro) y los reflejos con la luz de la sala.
   const nivel = luz === null ? 1 : Math.min(1, luz.intensity / KEY_INTENSITY)
@@ -339,7 +378,7 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
     if (logo !== null) pieza.material.material.emissive.copy(logo.emissive)
     pieza.material.material.envMapIntensity = nivel
   }
-  for (const mat of s.meta?.materiales ?? []) {
+  for (const mat of [...(s.meta?.materiales ?? []), ...(s.subrayado === null ? [] : [s.subrayado.material.material])]) {
     if (logo !== null) mat.emissive.copy(logo.emissive)
     mat.envMapIntensity = nivel
   }

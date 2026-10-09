@@ -4,6 +4,7 @@ import { homografia, matrix3dCss } from '../../pie3d/homografia'
 import { LECTURA } from '../../titulos3d/registro'
 import { camaraDeLaLectura } from '../titulos3d/colocacion'
 import { MARCO_DEL_CTA, lugarDelMarco, nuevoLugarDelMarco, type LugarDelMarco } from './armadoDelCta'
+import { enLaCaraDelCta, type CajaEnPantalla } from './transformacion'
 
 /**
  * [PULIDO 5] D1 · EL CTA ANCLADO EN EL MUNDO — la frase del CTA y «HABLANOS» quedan quietos en la sala, como los títulos de
@@ -76,16 +77,17 @@ const PUNTO = new THREE.Vector3()
 const HACIA = new THREE.Vector3()
 const DESDE = new THREE.Vector3()
 const ADELANTE = new THREE.Vector3()
-const ESQUINAS = [0, 0, 1, 0, 1, 1, 0, 1] as const
+export const ESQUINAS = [0, 0, 1, 0, 1, 1, 0, 1] as const
 const CUADRILATERO: number[] = []
 const MATRIZ: number[] = []
 
 /**
  * La transformada del enlace (`matrix3d` con el origen en 0 0): lleva su caja de ahora (`dom`, sin transformar) al cuadrilátero
  * donde la cámara viva ve `caja` (la de «HABLANOS», px de su plano) puesta en el plano `cta`. `''`: si algo queda detrás de la
- * cámara o el cuadrilátero no sirve (el enlace, en su lugar).
+ * cámara o el cuadrilátero no sirve (el enlace, en su lugar). [PULIDO 8] G2 · con `esquinas` (las de `caja` en el orden de
+ * `ESQUINAS`, px del plano con su z), donde están ahora: en el giro, el enlace sigue a «HABLANOS» en cada cuadro.
  */
-export function homografiaDelCta(cta: LugarDelMarco, caja: Caja, dom: Caja, viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }): string {
+export function homografiaDelCta(cta: LugarDelMarco, caja: Caja, dom: Caja, viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, esquinas?: readonly { readonly x: number; readonly y: number; readonly z: number }[]): string {
   PLANO.position.copy(cta.posicion)
   PLANO.quaternion.copy(cta.giro)
   PLANO.scale.setScalar(cta.escala)
@@ -94,11 +96,23 @@ export function homografiaDelCta(cta: LugarDelMarco, caja: Caja, dom: Caja, viva
   viva.getWorldDirection(ADELANTE)
   CUADRILATERO.length = 8
   for (let k = 0; k < 4; k += 1) {
-    PUNTO.set(caja.x + ESQUINAS[2 * k] * caja.ancho, -(caja.y + ESQUINAS[2 * k + 1] * caja.alto), 0).applyMatrix4(PLANO.matrixWorld)
+    const e = esquinas?.[k]
+    PUNTO.set(e?.x ?? caja.x + ESQUINAS[2 * k] * caja.ancho, -(e?.y ?? caja.y + ESQUINAS[2 * k + 1] * caja.alto), e?.z ?? 0).applyMatrix4(PLANO.matrixWorld)
     if (HACIA.copy(PUNTO).sub(DESDE).dot(ADELANTE) <= 0.05) return ''
     PUNTO.project(viva)
     CUADRILATERO[2 * k] = ((PUNTO.x + 1) / 2) * cuadro.ancho - dom.x
     CUADRILATERO[2 * k + 1] = ((1 - PUNTO.y) / 2) * cuadro.alto - dom.y
   }
   return homografia(dom.ancho, dom.alto, CUADRILATERO, MATRIZ) ? matrix3dCss(MATRIZ) : ''
+}
+
+const ESQUINAS_EN_EL_GIRO = [0, 1, 2, 3].map(() => ({ x: 0, y: 0, z: 0 }))
+
+/** [PULIDO 8] G2 · las esquinas de la caja de «HABLANOS» (px de su plano) donde las lleva el giro ahora, con el levante del hover. */
+export function esquinasEnElGiro(caja: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }, c: CajaEnPantalla, armado: number, p: number, cuerpo: number, levanta: number): readonly { x: number; y: number; z: number }[] {
+  ESQUINAS_EN_EL_GIRO.forEach((e, k) => {
+    enLaCaraDelCta(p, c, armado, { x: caja.x + ESQUINAS[2 * k] * caja.ancho, y: caja.y + ESQUINAS[2 * k + 1] * caja.alto }, cuerpo, e)
+    e.z += levanta
+  })
+  return ESQUINAS_EN_EL_GIRO
 }
