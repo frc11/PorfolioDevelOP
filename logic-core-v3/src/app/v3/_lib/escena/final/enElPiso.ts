@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
 import { DISTANCIA_AL_LOGO_GLSL, HUECO } from './hueco'
 import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
-import { DERRAME_DEL_FILO, DESCARGA_DEL_FILO_GLSL, FILO, FILO_EN_VIVO, LATIDO_DEL_FILO_GLSL } from './filoConPoder'
+import { ABRE_LA_JUNTA_GLSL, DESCARGA_DEL_FILO_GLSL, FILO, FILO_EN_VIVO } from './filoConPoder'
 
 /**
  * [CIERRE] 3 · EL FINAL EN EL PISO VIVO — lo que el final le suma al piso, inyectado al armarlo (como la onda dirigida de
@@ -214,44 +214,42 @@ ${RUIDO_DE_LA_LUZ_GLSL}
 ${CORRIENTES_DE_LA_LUZ_GLSL}
 ${DISTANCIA_AL_LOGO_GLSL}
 ${DESCARGA_DEL_FILO_GLSL}
-${LATIDO_DEL_FILO_GLSL}
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float s = vEnergiaDelBloque;
 	if ( s <= 0.0 ) return color;
-	// [PULIDO 6] E2 · el latido y la descarga del filo (\`?filo=pulso|descarga\`): las juntas alrededor ya brillan enteras con la
-	// energía de B0, así que por donde pasan la luz de la junta se derrama más ancha sobre la tapa (la junta se ve más gruesa).
-	float latido = min( latidoDelFilo( distanciaAlLogo( vPiso.xz ) ), ${f(DERRAME_DEL_FILO.tope)} );
-	float descarga = min( descargaDelFilo( vPiso.xz, uLado ), ${f(DERRAME_DEL_FILO.tope)} );
+	// [PULIDO 6] E2 · la descarga del filo, en la luz de la junta. [PULIDO 7] F1 · sin derramarse sobre la tapa (dejaba manchas
+	// blancas): por donde pasa, la junta se abre (\`ABRE_LA_JUNTA_GLSL\`, en el vértice) y se ve la luz de abajo.
+	float descarga = descargaDelFilo( vPiso.xz, uLado );
 	float luz;
 	if ( vTapa < 0.5 ) {
 		luz = ${f(LUZ_DE_ABAJO.costado)} * exp( - max( 0.0, vAlto - vVecino ) / ${f(LUZ_DE_ABAJO.caeEn)} );
 	} else {
 		vec2 borde = min( vEnElBloque, 1.0 - vEnElBloque ) * uLado;
 		luz = ${f(LUZ_DE_ABAJO.canto)} * exp( - min( borde.x, borde.y ) / ${f(0.04)} );
-		luz = max( luz, ${f(LUZ_DE_ABAJO.canto)} * max( latido * exp( - min( borde.x, borde.y ) / ${f(DERRAME_DEL_FILO.latido)} ), descarga * exp( - min( borde.x, borde.y ) / ${f(DERRAME_DEL_FILO.descarga)} ) ) );
 		// La tapa no se blanquea: la luz viene de abajo, así que en el sector queda apenas más en sombra.
 		color *= 1.0 - ${f(LUZ_DE_ABAJO.sombraDeLaTapa)} * min( s, 1.0 );
 	}
 	float junta = brilloDeLaJunta( vPiso.xz, uRelojDeLaLuz ) * s + corrientesDeLaLuz( vPiso.xz, uLado ) * ( 0.4 + min( s, 1.0 ) );
-	junta += ( latido + descarga ) * ( 0.4 + min( s, 1.0 ) );
+	junta += descarga * ( 0.4 + min( s, 1.0 ) );
 	return color + vec3( luz * junta * uBrilloDeLaLuz );
 }
-// [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
-vec2 mascaraDelHueco( vec2 xz ) {
+// [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho; [PULIDO 7] B, las contraformas.
+vec3 mascaraDelHueco( vec2 xz ) {
 	vec2 uv = ( vec2( xz.x, - xz.y ) - uMarcoDelHueco.xy ) / uMarcoDelHueco.zw;
-	if ( any( lessThan( uv, vec2( 0.0 ) ) ) || any( greaterThan( uv, vec2( 1.0 ) ) ) ) return vec2( 0.0 );
-	return texture2D( uHueco, uv ).rg;
+	if ( any( lessThan( uv, vec2( 0.0 ) ) ) || any( greaterThan( uv, vec2( 1.0 ) ) ) ) return vec3( 0.0 );
+	return texture2D( uHueco, uv ).rgb;
 }
+// [PULIDO 7] F1 · y con el hueco abierto entero, las contraformas: ahí va lo liso (\`liso.ts\`), sin bloques ni juntas.
 bool enElHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return false;
-	vec2 m = mascaraDelHueco( xz );
-	return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;
+	vec3 m = mascaraDelHueco( xz );
+	return ( m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95 ) || ( uApertura >= 1.0 && m.b > 0.5 );
 }
 // [PULIDO 4] C2 · el filo del logo encendido (PULIDO 3B · B0) se fue. [PULIDO 5] D2 · y el círculo difuso de PULIDO 4 también:
 // la luz era el anillo (o el disco) de anilloDeLuz.ts. [PULIDO 6] E2 · se borró: la luz es el filo (\`filoConPoder.ts\`, su malla).
 float labioDelHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return 0.0;
-	vec2 m = mascaraDelHueco( xz );
+	vec3 m = mascaraDelHueco( xz );
 	return uApertura * ( 1.0 - min( 1.0, uPoder ) ) * smoothstep( 0.12, 0.45, m.g ) * ( 1.0 - smoothstep( 0.3, 0.6, m.r ) );
 }
 `
@@ -282,8 +280,8 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
     // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
       shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', `#include <common>\nvarying float vEnergiaDelBloque;\n${RUIDO_DE_LA_LUZ_GLSL}`)
-        .replace(ANCLA_DEL_BLOQUE, `vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;\n\t\ttransformed.xz *= 1.0 - ${f(2 * LUZ_DE_ABAJO.separa)} * min( vEnergiaDelBloque, 1.6 ) * ( ${f(1 - LUZ_DE_ABAJO.variaLaSeparacion)} + ${f(LUZ_DE_ABAJO.variaLaSeparacion)} * azarDeLaLuz( floor( centro / uLado ) + 0.71 ) );\n\t\t${ANCLA_DEL_BLOQUE}`)
+        .replace('#include <common>', `#include <common>\nvarying float vEnergiaDelBloque;\n${RUIDO_DE_LA_LUZ_GLSL}\nuniform vec2 uCajaDelLogo;\nuniform float uRelojDeLaLuz;\n${DISTANCIA_AL_LOGO_GLSL}\n${DESCARGA_DEL_FILO_GLSL}`)
+        .replace(ANCLA_DEL_BLOQUE, `vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;\n\t\ttransformed.xz *= 1.0 - ${f(2 * LUZ_DE_ABAJO.separa)} * min( vEnergiaDelBloque, 1.6 ) * ( ${f(1 - LUZ_DE_ABAJO.variaLaSeparacion)} + ${f(LUZ_DE_ABAJO.variaLaSeparacion)} * azarDeLaLuz( floor( centro / uLado ) + 0.71 ) );\n${ABRE_LA_JUNTA_GLSL}\n\t\t${ANCLA_DEL_BLOQUE}`)
     }
     shader.fragmentShader = shader.fragmentShader
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)

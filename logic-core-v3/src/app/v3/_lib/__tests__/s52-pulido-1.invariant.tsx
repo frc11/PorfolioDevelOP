@@ -127,31 +127,31 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // `energia=red|inestable`; PULIDO 3B · B0 las funde en el producto y deja `energia=intensa`; B1 borra `cta=` entera: `cruce`
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
 // `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`; E2 borra `anillo=` y agrega
-// `filo=corriente|pulso|descarga`.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], filo: ['corriente', 'pulso', 'descarga'] }
+// `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`.)
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'] }
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
   const pedidas = PRUEBAS_SUELTAS.every((k) => PEDIDAS[k].every((v) => f(`producto,${k}=${v}`).pruebas[k] === v))
   const otras = PRUEBAS_SUELTAS.every((k) => f(`producto,${k}=cualquiera`).pruebas[k] === 'no')
-  const juntas = f('producto,rebobinado=minimo,filo=pulso,angel=asentado').pruebas
-  return apagadas && pedidas && otras && juntas.rebobinado === 'minimo' && juntas.filo === 'pulso' && juntas.angel === 'asentado' && f('producto,filo=pulso').E1 === ENTORNO.E1
+  const juntas = f('producto,rebobinado=minimo,angel=asentado').pruebas
+  return apagadas && pedidas && otras && juntas.rebobinado === 'minimo' && juntas.angel === 'asentado' && f('producto,angel=asentado').E1 === ENTORNO.E1
 }
 afirmar(banderasBien(entornoPedido), 'cada prueba del sprint se pide por su nombre y vale sólo sus valores (otro valor es el producto); van juntas; en el producto están todas apagadas', PRUEBAS_SUELTAS.join(' · '))
 controlPositivo('el detector VE un traductor que acepta cualquier valor', ((pedido: string) => {
   const e = entornoPedido(pedido)
-  const filo = /filo=(\w+)/.exec(pedido)
-  return filo === null ? e : { ...e, pruebas: { ...e.pruebas, filo: filo[1] as 'pulso' } }
+  const angel = /angel=(\w+)/.exec(pedido)
+  return angel === null ? e : { ...e, pruebas: { ...e.pruebas, angel: angel[1] as 'asentado' } }
 }) as Traductor, banderasBien)
 type DeLaUrl = typeof pedidoDeLaUrl
 const urlBien = (f: DeLaUrl): boolean => {
-  const sueltas = f('?angel=asentado&filo=descarga')
+  const sueltas = f('?angel=asentado&rebobinado=minimo')
   // [PULIDO 5] D2 · en la URL el «+» llegaba como espacio (`?anillo=tubo+filo`). [PULIDO 6] E2 · `anillo=` se borró y ningún
-  // valor de `filo=` lleva «+».
+  // valor de `filo=` lleva «+». [PULIDO 7] F1 · `filo=` se borró: la segunda suelta es `rebobinado=`.
   const ambas = f('?pruebas=pie=antes&angel=asentado')
-  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.angel === 'asentado' && entornoPedido(sueltas).pruebas.filo === 'descarga' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
+  return f('') === null && f('?otra=1') === null && sueltas !== null && entornoPedido(sueltas).pruebas.angel === 'asentado' && entornoPedido(sueltas).pruebas.rebobinado === 'minimo' && ambas !== null && entornoPedido(ambas).pruebas.pie === 'antes' && entornoPedido(ambas).pruebas.angel === 'asentado' && PRUEBAS_SUELTAS.every((k) => f(`?${k}=${PEDIDAS[k][0]}`) !== null)
 }
-afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?angel=asentado`, `/v3?filo=descarga`) y con `?pruebas=`; sin nada, el producto')
+afirmar(urlBien(pedidoDeLaUrl) && /pedidoDeLaUrl\(window\.location\.search\)/.test(leer('_lib/escena/entorno.ts')), 'sin banco, la URL las pide también sueltas (`/v3?angel=asentado`, `/v3?rebobinado=minimo`) y con `?pruebas=`; sin nada, el producto')
 controlPositivo('el detector VE una URL que sólo lee `?pruebas=` (las sueltas no llegarían)', ((b: string) => {
   const v = new URLSearchParams(b).get('pruebas')
   return v === null ? null : `producto,${v}`

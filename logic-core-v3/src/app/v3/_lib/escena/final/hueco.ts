@@ -37,6 +37,13 @@ export const HUECO = {
    * se redondean al alejarse. Fuera del campo, la distancia a la caja (con un fundido: sin escalón).
    */
   campo: { margen: 10, lado: 512 },
+  /**
+   * [PULIDO 7] F1 · EL LOGO LLENO: la silueta con sus contraformas rellenas (los bucles de la C y de la P, que se abren al
+   * exterior por una ranura de ~0,28 u entre el trazo y la diagonal). `cierre` (u): cuánto se cierra la silueta para tapar esas
+   * ranuras antes de rellenar (el doble tiene que pasar la ranura más ancha); `liso` (u): de ahí para adentro de la distancia
+   * al logo lleno no hay energía, descargas ni pistones (`luzDeAbajo.ts`, `filoConPoder.ts`).
+   */
+  relleno: { cierre: 0.2, liso: 0.01 },
   /** Cuándo se abre (s del reloj): el logo cae a los 2,2 s y toca a los 2,76. */
   abre: { desdeS: 1.6, hastaS: 2.4 },
   /** La profundidad del pozo, en espesores del logo (un pelo más: el fondo no toca la cara de abajo). */
@@ -67,7 +74,7 @@ export function formasDelLogo(svg: SvgDelLogo): { readonly formas: readonly THRE
   return { formas, caja }
 }
 
-/** La máscara: la textura (R la forma con holgura, G el campo ancho) y su marco en el plano del logo (min x, min y, ancho, alto). */
+/** La máscara: la textura (R la forma con holgura, G el campo ancho, [PULIDO 7] B las contraformas) y su marco en el plano del logo (min x, min y, ancho, alto). */
 export interface MascaraDelLogo {
   readonly textura: THREE.DataTexture
   readonly marco: THREE.Vector4
@@ -122,10 +129,13 @@ export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2,
   const n = resolucion
   const nitida = dibujar(formas, marco, n, 0, -(HUECO.solape / lado) * n)
   const ancha = dibujar(formas, marco, n, HUECO.desenfoque, 0)
+  // [PULIDO 7] F1 · B: las contraformas (el logo lleno menos la forma: entra también bajo el borde que pisa el piso).
+  const lleno = rellenoDelLogo(adentroDe(dibujar(formas, marco, n, 0, 0), n), n, (HUECO.relleno.cierre / lado) * n)
   const datos = new Uint8Array(n * n * 4)
   for (let i = 0; i < n * n; i += 1) {
     datos[i * 4] = nitida[i * 4]
     datos[i * 4 + 1] = ancha[i * 4]
+    datos[i * 4 + 2] = lleno[i] === 1 && nitida[i * 4] <= 127 ? 255 : 0
     datos[i * 4 + 3] = 255
   }
   const textura = new THREE.DataTexture(datos, n, n, THREE.RGBAFormat)
@@ -175,21 +185,53 @@ export function distanciaAfuera(dentro: Uint8Array, lado: number): Float32Array 
   return Float32Array.from(d2, (x) => Math.sqrt(x))
 }
 
+/** Lo «adentro» de un dibujo (R pasa la mitad): 1 o 0 por píxel. */
+const adentroDe = (dibujo: Uint8ClampedArray, n: number): Uint8Array => Uint8Array.from({ length: n * n }, (_, i) => (dibujo[i * 4] > 127 ? 1 : 0))
+
+/**
+ * [PULIDO 7] F1 · EL LOGO LLENO (`dentro`: 1 en el negro): el exterior es lo que se alcanza desde el borde del cuadro sin acercarse
+ * a menos de `cierrePx` del negro (por las ranuras no se pasa); lleno es el negro y lo que queda a más de `cierrePx` de ese exterior
+ * (el cierre se devuelve: la silueta de afuera no crece, salvo un redondeo en las esquinas de adentro). Pura (la usa el invariante).
+ */
+export function rellenoDelLogo(dentro: Uint8Array, lado: number, cierrePx: number): Uint8Array {
+  const d = distanciaAfuera(dentro, lado)
+  const exterior = new Uint8Array(lado * lado)
+  const pila: number[] = []
+  const entrar = (i: number): void => {
+    if (exterior[i] === 0 && d[i] > cierrePx) {
+      exterior[i] = 1
+      pila.push(i)
+    }
+  }
+  for (let k = 0; k < lado; k += 1) [k, (lado - 1) * lado + k, k * lado, k * lado + lado - 1].forEach(entrar)
+  for (let i = pila.pop(); i !== undefined; i = pila.pop()) {
+    const x = i % lado
+    if (x > 0) entrar(i - 1)
+    if (x < lado - 1) entrar(i + 1)
+    if (i >= lado) entrar(i - lado)
+    if (i < lado * (lado - 1)) entrar(i + lado)
+  }
+  const alExterior = distanciaAfuera(exterior, lado)
+  return Uint8Array.from(alExterior, (v, i) => (dentro[i] === 1 || v > cierrePx ? 1 : 0))
+}
+
 /** [PULIDO 6] E2 · el campo de distancia al logo: la textura (R, u, en media precisión) y su marco en el plano del logo. */
 export interface DistanciaDelLogo {
   readonly textura: THREE.DataTexture
   readonly marco: THREE.Vector4
 }
 
-/** [PULIDO 6] E2 · arma el campo una vez (necesita el DOM: un lienzo 2D): las formas, dibujadas, y su distancia afuera. */
+/**
+ * [PULIDO 6] E2 · arma el campo una vez (necesita el DOM: un lienzo 2D): las formas, dibujadas, y su distancia afuera. [PULIDO 7]
+ * F1 · la distancia al logo LLENO: adentro de las contraformas vale 0, como en el negro.
+ */
 export function distanciaDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2, resolucion: number = HUECO.campo.lado): DistanciaDelLogo {
   const m = HUECO.campo.margen
   const lado = Math.max(caja.max.x - caja.min.x, caja.max.y - caja.min.y) + 2 * m
   const centro = caja.getCenter(new THREE.Vector2())
   const marco = new THREE.Vector4(centro.x - lado / 2, centro.y - lado / 2, lado, lado)
   const n = resolucion
-  const dibujo = dibujar(formas, marco, n, 0, 0)
-  const afuera = distanciaAfuera(Uint8Array.from({ length: n * n }, (_, i) => (dibujo[i * 4] > 127 ? 1 : 0)), n)
+  const afuera = distanciaAfuera(rellenoDelLogo(adentroDe(dibujar(formas, marco, n, 0, 0), n), n, (HUECO.relleno.cierre / lado) * n), n)
   const porPixel = lado / n
   const textura = new THREE.DataTexture(Uint16Array.from(afuera, (d) => THREE.DataUtils.toHalfFloat(d * porPixel)), n, n, THREE.RedFormat, THREE.HalfFloatType)
   textura.magFilter = THREE.LinearFilter

@@ -7,7 +7,8 @@
  *        complementario, el foco del teclado llega a «HABLANOS» transformado; `?meta=fusion` y `?ancho=expandido`, borrados.
  *   E2 · el filo con poder: por AFUERA del logo (el negro entero), sin el círculo liso (la energía llega hasta el logo, los
  *        bloques pegados al ras, las ondas nacen en el filo), tres maneras de hacer luz (`?filo=corriente|pulso|descarga`) y el
- *        filo que se enciende de golpe con el golpe; el anillo, el disco y el filo de adentro, borrados.
+ *        filo que se enciende de golpe con el golpe; el anillo, el disco y el filo de adentro, borrados. [PULIDO 7] F1 · ganó la
+ *        descarga (la corriente, el pulso y `?filo=`, borrados: la sección 3 fija lo que queda; lo nuevo, `s58`).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-6.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -25,7 +26,7 @@ import CHIVO_400_VALORES from '../../_fuentes/chivo-400-valores.json'
 import { CALMA_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { HUECO, distanciaAfuera } from '../escena/final/hueco'
 import { ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, radioDeLaExpansion } from '../escena/final/luzDeAbajo'
-import { FILO, FILOS_DEL_LOGO, FILO_DEL_PRODUCTO, bandaDelFilo, contornosDelLogo, creceDelFilo, enElNegro, luzDelFilo, velocidadDeLaCorriente } from '../escena/final/filoConPoder'
+import { FILO, bandaDelFilo, contornosDelLogo, creceDelFilo, enElNegro, luzDelFilo } from '../escena/final/filoConPoder'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL } from '../escena/final/recorridoDelFinal'
@@ -425,32 +426,27 @@ controlPositivo('2 · el detector VE una distancia de a cuadras (no la exacta)',
 controlPositivo('2 · y el círculo de antes (la calma medida con el radio)', simE2.replace('distanciaAlLogo( xz ) ) );', 'length( xz ) ) );'), (sim: string) => sinCirculoBien(sim, ENERGIA_EN_LA_SIMULACION_GLSL))
 controlPositivo('2 · y la luz que se apaga contra la calma', ENERGIA_EN_LA_SIMULACION_GLSL.replace('return min( 1.8, e ) * uEnergiaDeLaLuz;', 'return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calmaDelFinal( xz ) );'), (e: string) => sinCirculoBien(simE2, e))
 
-// 3 · LAS TRES MANERAS (`?filo=`; sin bandera, `corriente`) y EL GOLPE: el filo se enciende entero en el cuadro en que `fin` pasa
-// el golpe (el mismo que suena), con un destello que lo ensancha; la corriente se acelera con cada onda y con el golpe, su fase
-// integrada (no salta); el latido late y sale al piso (en la energía y en las juntas); la descarga corre hacia afuera desde el filo
-// por las juntas (en el dibujo y en el plano de abajo). Sin partículas. El anillo, el disco y `?anillo=`, borrados.
+// 3 · LAS TRES MANERAS (`?filo=`; sin bandera, `corriente`) y EL GOLPE. [PULIDO 7] F1 · ganó la descarga: la corriente, el pulso y
+// `?filo=` se borraron con su código (lo nuevo de la descarga lo fija `s58` F1). Lo que queda fijo acá: el filo se enciende entero
+// en el cuadro en que `fin` pasa el golpe (el mismo que suena), con un destello que lo ensancha; la descarga corre hacia afuera
+// desde el filo por las juntas (en el dibujo y en el plano de abajo), en el producto. Sin partículas. El anillo, el disco y
+// `?anillo=`, borrados.
 const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
 const pisoE2 = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
 const planoE2 = sinComentarios(leer('_lib/escena/final/planoDeLaLuz.ts'))
 type Luz = typeof luzDelFilo
 const manerasBien = (luz: Luz, c: string): boolean => {
-  const v = FILO.corriente.velocidad
-  const variantes = FILOS_DEL_LOGO.join() === 'corriente,pulso,descarga' && FILO_DEL_PRODUCTO === 'corriente' && ENTORNO.pruebas.filo === 'no' &&
-    FILOS_DEL_LOGO.every((x) => entornoPedido(`producto,filo=${x}`).pruebas.filo === x) && entornoPedido('producto,filo=otro').pruebas.filo === 'no' && PRUEBAS_SUELTAS.includes('filo') &&
+  const sinVariantes = !('filo' in ENTORNO.pruebas) && !/corriente|latido|FiloDelLogo/i.test(filoFuente.replace(/corrientes del piso/g, '')) &&
     !('anillo' in ENTORNO.pruebas) && !existsSync(`${V3}/_lib/escena/final/anilloDeLuz.ts`) && !pisoE2.includes('conElAnillo')
   const deGolpe = luz(golpe - 1e-6, golpe) === 0 && luz(golpe, golpe) === 1 && luz(1, golpe) === 1 && c.includes('const luz = luzDelFilo(fin, golpe)') &&
-    /if \(!s\.estatico && s\.antes < golpe && fin >= golpe\) \{[\s\S]*?sonar\('golpe'\)/.test(c) && FILOS_DEL_LOGO.every((x) => creceDelFilo(x, 0, Infinity) === FILO.golpe.crece)
-  const corriente = velocidadDeLaCorriente(Infinity, Infinity) === v && Math.abs(velocidadDeLaCorriente(0, Infinity) - v * (1 + FILO.corriente.onda)) < 1e-9 && Math.abs(velocidadDeLaCorriente(Infinity, 0) - v * (1 + FILO.corriente.golpe)) < 1e-9 &&
-    c.includes('s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt') && c.includes("F.uCorrienteDelFilo.value = variante === 'corriente' && !s.estatico ? luz : 0")
-  const latido = creceDelFilo('pulso', Infinity, 0) === FILO.pulso.crece && creceDelFilo('corriente', Infinity, 0) === 0 && ENERGIA_EN_LA_SIMULACION_GLSL.includes(`e += ${String(FILO.pulso.sube)} * latidoDelFilo( r );`) &&
-    pisoE2.includes('float latido = min( latidoDelFilo( distanciaAlLogo( vPiso.xz ) ),') && c.includes("variante === 'pulso' && Number.isFinite(latido)")
-  const descarga = filoFuente.includes('float detras = cabeza - r;') && pisoE2.includes('float descarga = min( descargaDelFilo( vPiso.xz, uLado ),') && planoE2.includes('descargaDelFilo( vXZ, uGrillaDelPiso.y )') &&
-    c.includes("F.uDescargaDelFilo.value = variante === 'descarga' && !s.estatico ? luz : 0") && !/THREE\.Points|PointsMaterial/.test(filoFuente)
-  return variantes && deGolpe && corriente && latido && descarga && FILO.blanco >= 0.9 && filoFuente.includes('toneMapped: false')
+    /if \(!s\.estatico && s\.antes < golpe && fin >= golpe\) \{[\s\S]*?sonar\('golpe'\)/.test(c) && creceDelFilo(0) === FILO.golpe.crece && creceDelFilo(Infinity) === 0
+  const descarga = filoFuente.includes('float detras = cabeza - r;') && pisoE2.includes('float descarga = descargaDelFilo( vPiso.xz, uLado );') && planoE2.includes('descargaDelFilo( vXZ, uGrillaDelPiso.y )') &&
+    c.includes('F.uDescargaDelFilo.value = s.estatico ? 0 : luz') && !/THREE\.Points|PointsMaterial/.test(filoFuente)
+  return sinVariantes && deGolpe && descarga && FILO.blanco >= 0.9 && filoFuente.includes('toneMapped: false')
 }
-afirmar(manerasBien(luzDelFilo, cuadroE2), '3 · `?filo=corriente|pulso|descarga` (sin bandera, `corriente`): la corriente se acelera con cada onda y en el golpe, el latido sale al piso, la descarga corre por las juntas; en el golpe el filo se enciende entero, en el cuadro que suena; `?anillo=` borrado', `corriente ${String(FILO.corriente.velocidad)} u/s · latido ${String(FILO.pulso.velocidad)} u/s · descarga hasta ${String(FILO.descarga.alcance)} u`)
+afirmar(manerasBien(luzDelFilo, cuadroE2), '3 · [PULIDO 7] la descarga (la corriente, el pulso y `?filo=`, borrados) corre por las juntas; en el golpe el filo se enciende entero, en el cuadro que suena; `?anillo=` borrado', `descarga hasta ${String(FILO.descarga.alcance)} u`)
 controlPositivo('3 · el detector VE un filo que se prende de a poco (no de golpe)', ((fin: number, g: number) => Math.min(1, Math.max(0, (fin - g + 0.05) / 0.05))) as Luz, (l: Luz) => manerasBien(l, cuadroE2))
-controlPositivo('3 · y una corriente con la fase por el reloj (salta al acelerarse)', cuadroE2.replace('s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt', 's.filo.fase = t * velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo)'), (c2: string) => manerasBien(luzDelFilo, c2))
+controlPositivo('3 · y una descarga apagada en el producto', cuadroE2.replace('F.uDescargaDelFilo.value = s.estatico ? 0 : luz', 'F.uDescargaDelFilo.value = 0'), (c2: string) => manerasBien(luzDelFilo, c2))
 
 // 4 · EN EL TELÉFONO Y LA TABLET: el mismo filo (sin rama por ancho) y el campo de distancia a la mitad de resolución (se arma una
 // vez); la energía se expande más allá de la pantalla (36 u: la vista del teléfono no pasa de ~20). Medido en las capturas a 390

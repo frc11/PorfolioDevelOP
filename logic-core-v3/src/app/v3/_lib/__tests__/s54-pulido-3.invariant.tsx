@@ -36,7 +36,7 @@ import {
   naceLaOnda,
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
-import { FILO, velocidadDeLaCorriente } from '../escena/final/filoConPoder'
+import { FILO, rafagaDelFilo } from '../escena/final/filoConPoder'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
@@ -329,23 +329,25 @@ const entornoDelPulso = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 // [PULIDO 6] E2 · el anillo se borró (gana el filo): la luz del encastre es el filo, una malla aparte por afuera del logo
 // (`filoConPoder.ts`), así que queda fuera del oscurecimiento de la sala por construcción; y lo que pulsa con cada onda es su
 // corriente, que se acelera (la del producto). Lo demás, igual: las ondas corridas al azar y los anillos del pulso apagados.
+// [PULIDO 7] F1 · la corriente se borró (ganó la descarga): lo que pulsa con cada onda es la RÁFAGA de descargas que sale del
+// filo por las juntas (y se va al pasar el alcance). Lo demás, igual.
 const filoConPoder = sinComentarios(leer('_lib/escena/final/filoConPoder.ts'))
 const logoBien = (filo: string, logo: string, c: string): boolean => {
   const nacimientos = Array.from({ length: 40 }, (_, n) => naceLaOnda(n))
   const intervalos = nacimientos.slice(1).map((v, i) => v - nacimientos[i])
   const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length
   const desvio = Math.sqrt(intervalos.reduce((a, b) => a + (b - media) ** 2, 0) / intervalos.length)
-  const v = FILO.corriente.velocidad
-  const pulsa = nacimientos.slice(1, 30).every((t0) => velocidadDeLaCorriente(desdeLaUltimaOnda(t0 + 0.01), Number.POSITIVE_INFINITY) > 2 * v && velocidadDeLaCorriente(desdeLaUltimaOnda(t0 + 1.8), Number.POSITIVE_INFINITY) < 1.15 * v)
+  const recien = (t: number): readonly [number, number] => rafagaDelFilo(desdeLaUltimaOnda(t), Number.POSITIVE_INFINITY)
+  const pulsa = nacimientos.slice(1, 30).every((t0) => recien(t0 + 0.01)[1] > 0 && recien(t0 + 0.01)[0] < 0.05 && recien(t0 + 1.8)[1] === 0)
   return !filo.includes('uOscuroDelBrillo') && !/fog:\s*true/.test(filo) && !logo.includes('RimDelLogo') && !/energia === 'inestable'/.test(logo) &&
     pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
     ENERGIA_EN_LA_SIMULACION_GLSL.includes(`float tau = uRelojDeLaLuz - ( m + ${String(L.ondas.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${String(L.ondas.cadaS)};`) &&
-    c.includes('const desdeLaOnda = s.estatico ? Number.POSITIVE_INFINITY : desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)') && c.includes('s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt') &&
+    c.includes('const desdeLaOnda = s.estatico ? Number.POSITIVE_INFINITY : desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)') && c.includes('F.uRafagaDelFilo.value.set(...rafagaDelFilo(desdeLaOnda, desdeElGolpeVivo))') &&
     entornoDelPulso.includes('entradas.reducido = quieto || EN_VIVO.fin > 0')
 }
-afirmar(logoBien(filoConPoder, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era); [PULIDO 5] en el anillo; [PULIDO 6] en el filo: fuera del oscurecimiento, con una corriente que se acelera con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `corriente ${String(FILO.corriente.velocidad)} u/s, ×${String(1 + FILO.corriente.onda)} con la onda`)
+afirmar(logoBien(filoConPoder, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era); [PULIDO 5] en el anillo; [PULIDO 6] en el filo: fuera del oscurecimiento, [PULIDO 7] con una ráfaga de descargas con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `ráfaga en el ${String(100 * FILO.descarga.rafaga.onda)} % de las juntas con la onda`)
 controlPositivo('  el detector VE la luz del filo oscurecida con la sala', `${filoConPoder}\nuniform float uOscuroDelBrillo;`, (f: string) => logoBien(f, luzDelLogo, cuadro))
-controlPositivo('  y un filo sin pulso', cuadro.replace('velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo)', 'FILO.corriente.velocidad'), (c: string) => logoBien(filoConPoder, luzDelLogo, c))
+controlPositivo('  y un filo sin pulso', cuadro.replace('F.uRafagaDelFilo.value.set(...rafagaDelFilo(desdeLaOnda, desdeElGolpeVivo))', 'F.uRafagaDelFilo.value.set(0, 0)'), (c: string) => logoBien(filoConPoder, luzDelLogo, c))
 const sinAnillo = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && !g.includes('conElAnillo') && !g.includes('uLuzDelAnillo')
 afirmar(sinAnillo(dibujoB0), '  [PULIDO 6] y el piso ya no dibuja el anillo (se borró con el círculo liso)')
 controlPositivo('  el detector VE el anillo de antes en el piso', `${dibujoB0}

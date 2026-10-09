@@ -17,6 +17,7 @@ import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
 import { LUZ_DE_ABAJO_EN_VIVO } from './luzDeAbajo'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
 import { HUECO, distanciaDelLogo, formasDelLogo, mascaraDelLogo } from './hueco'
+import { crearLoLiso, soltarLoLiso } from './liso'
 import { escribiendoEnUnCampo } from './teclado'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { EN_VIVO } from './recorridoDelFinal'
@@ -70,11 +71,14 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     const piso = FINAL_EN_EL_PISO
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
-    // [PULIDO 6] E2 · la distancia al logo (la calma, la energía, el golpe y las ondas se miden desde el filo).
+    // [PULIDO 6] E2 · la distancia al logo (la calma, la energía, el golpe y las ondas se miden desde el filo). [PULIDO 7] F1 · al
+    // logo lleno (con sus contraformas); y adentro de ellas, lo liso (con el pozo: se ve con el hueco).
     const distancia = distanciaDelLogo(logo.formas, logo.caja, angosto ? HUECO.campo.lado / 2 : HUECO.campo.lado)
     piso.uDistanciaAlLogo.value = distancia.textura
     piso.uMarcoDeLaDistancia.value.copy(distancia.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
+    const liso = crearLoLiso(mascara.marco)
+    estado.pozo.grupo.add(liso)
     // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas). [PULIDO 3B] B0 · las chispas se borraron.
     const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
     m.current = estado
@@ -92,6 +96,8 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
       piso.uGolpe.value.w = 0
       piso.uHueco.value = null
       piso.uDistanciaAlLogo.value = null
+      estado.pozo.grupo.remove(liso)
+      soltarLoLiso(liso)
       estado.pozo.soltar()
       estado.filo.soltar()
       mascara.textura.dispose()

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { PISO_VIVO } from '../piso/bloques'
-import { FILO, LATIDO_DEL_FILO_GLSL } from './filoConPoder'
+import { HUECO } from './hueco'
 
 /**
  * [PULIDO 2] 4 · LA LUZ QUE SALE DE ABAJO, POR LAS JUNTAS (las referencias del humano: bloques grises con luz blanca que se
@@ -260,8 +260,9 @@ float ondaDelLogo( float r, float ancho ) {
  * la expansión desde el hueco (con su frente que brilla), las ondas del logo (las suyas, los anillos del pulso, `uAnillos`, y el
  * golpe, `uGolpe`), los pistones, la energía del poder y el mar calmo. Va al canal libre (`a`) de la textura de alturas.
  * [PULIDO 6] E2 · todo se mide desde el filo (`distanciaAlLogo`, de `hueco.ts`) y la luz no se calma: llega hasta el borde
- * mismo del logo (la calma aplana los bloques pegados, en la simulación: `calmaDelFinal`, que también apaga sus pistones). Más
- * el latido del filo (`?filo=pulso`). Pide `distanciaAlLogo` y `calmaDelFinal` (`enElPiso.ts`).
+ * mismo del logo (la calma aplana los bloques pegados, en la simulación: `calmaDelFinal`, que también apaga sus pistones).
+ * [PULIDO 7] F1 · el latido del filo se borró con el pulso; y adentro del logo LLENO (el negro y sus contraformas: la distancia
+ * vale 0) no hay energía ni pistones (`HUECO.relleno.liso`). Pide `distanciaAlLogo` y `calmaDelFinal` (`enElPiso.ts`).
  */
 export const ENERGIA_EN_LA_SIMULACION_GLSL = /* glsl */ `
 uniform float uEnergiaDeLaLuz;
@@ -269,7 +270,6 @@ uniform vec2 uExpansionDeLaLuz;
 uniform float uRelojDeLaLuz;
 ${RUIDO_DE_LA_LUZ_GLSL}
 ${ONDAS_DEL_LOGO_GLSL}
-${LATIDO_DEL_FILO_GLSL}
 float fbmDeLaLuz( vec2 p ) {
 	float s = 0.0;
 	float a = 0.5;
@@ -331,11 +331,12 @@ float fondoDeLaLuz( float alto ) {
 }
 // La energía de este bloque (0 a ~1,8): el fondo de la energía, hasta donde llegó la expansión (y su frente), más las ondas y
 // el pistón (que también devuelve, para la altura); por el poder. [PULIDO 6] E2 · desde el filo (r) y hasta el borde mismo
-// del logo: la calma sólo apaga el pistón (y las alturas, en \`alturaDeLaLuz\`); más el latido del filo.
+// del logo: la calma sólo apaga el pistón (y las alturas, en \`alturaDeLaLuz\`). [PULIDO 7] F1 · adentro del logo lleno, nada.
 float energiaDeLaLuz( vec2 xz, out float piston ) {
 	piston = 0.0;
 	if ( uEnergiaDeLaLuz <= 0.0 || uExpansionDeLaLuz.x <= 0.0 ) return 0.0;
 	float r = distanciaAlLogo( xz );
+	if ( r < ${f(HUECO.relleno.liso)} ) return 0.0;
 	float llego = 1.0 - smoothstep( uExpansionDeLaLuz.x - ${f(E.frente)}, uExpansionDeLaLuz.x, r );
 	if ( llego <= 0.0 ) return 0.0;
 	float frente = ( r - uExpansionDeLaLuz.x ) / ${f(E.frente)};
@@ -343,7 +344,6 @@ float energiaDeLaLuz( vec2 xz, out float piston ) {
 	float e = fondoDeLaEnergia( xz, uRelojDeLaLuz );
 	e = e * llego + ${f(E.brillo)} * exp( - frente * frente ) * ( 1.0 - uExpansionDeLaLuz.y );
 	e += ${f(O.sube)} * ondaDeLaLuz( r ) * llego * ( 0.35 + e );
-	e += ${f(FILO.pulso.sube)} * latidoDelFilo( r );
 	e += ${f(P.abre)} * piston;
 	return min( 1.8, e ) * uEnergiaDeLaLuz;
 }

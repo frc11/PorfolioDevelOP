@@ -6,9 +6,8 @@ import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
-import { entornoDeLaEscena } from '../entorno'
 import { CAMPO_QUIETO_EN, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
-import { FILO_DEL_PRODUCTO, FILO_EN_VIVO, crearElFilo, creceDelFilo, luzDelFilo, seguirAlLogo, velocidadDeLaCorriente, type FiloArmado, type FiloDelLogo } from './filoConPoder'
+import { FILO_EN_VIVO, crearElFilo, creceDelFilo, luzDelFilo, rafagaDelFilo, seguirAlLogo, type FiloArmado } from './filoConPoder'
 import { LOGO_DEL_FINAL, LOGO_DEL_FINAL_EN_VIVO } from './logoDelFinal'
 import { AIRE } from '../polvo/parche'
 import { sonar } from '../../sonido/bus'
@@ -194,17 +193,13 @@ export const FINAL_DEL_BANCO: { fijo: number | null } = { fijo: null }
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
-/** [PULIDO 6] E2 · la variante del filo de esta carga (`?filo=`; sin bandera, `corriente`), leída una vez. */
-let varianteDelFilo: FiloDelLogo | null = null
-
 /** [PULIDO 6] E2 · el filo apagado (sin el final, o al soltarlo). */
 function apagarElFilo(filo: FiloArmado): void {
   const F = FILO_EN_VIVO
   F.uLuzDelFilo.value = 0
   F.uCreceDelFilo.value = 0
-  F.uCorrienteDelFilo.value = 0
-  F.uLatidoDelFilo.value.set(0, 0)
   F.uDescargaDelFilo.value = 0
+  F.uRafagaDelFilo.value.set(0, 0)
   filo.malla.visible = false
 }
 
@@ -405,21 +400,16 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida
   // [PULIDO 5] D2 · la luz del encastre (el anillo, el disco). [PULIDO 6] E2 · se borró con el círculo liso: la luz es EL FILO
   // (`filoConPoder.ts`), por afuera del logo. Se enciende de golpe en el golpe (en el mismo cuadro que suena; al rebobinar se
-  // apaga al pasarlo para atrás) y hace luz a su manera (`?filo=`; sin bandera, `corriente`): la corriente corre (se acelera con
-  // cada onda y en el golpe), el latido late y sale al piso, la descarga sale por las juntas. Quieto: encendido, sin moverse.
-  const variante = (varianteDelFilo ??= ((v: FiloDelLogo | 'no'): FiloDelLogo => (v === 'no' ? FILO_DEL_PRODUCTO : v))(entornoDeLaEscena().pruebas.filo))
+  // apaga al pasarlo para atrás). [PULIDO 7] F1 · gana la descarga: sale por las juntas, con una ráfaga con cada onda y en el
+  // golpe (la corriente, el pulso y `?filo=` se borraron). Quieto: encendido, sin descargas.
   const luz = luzDelFilo(fin, golpe)
   const desdeLaOnda = s.estatico ? Number.POSITIVE_INFINITY : desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)
   const desdeElGolpeVivo = s.estatico || !Number.isFinite(desdeElGolpe) ? Number.POSITIVE_INFINITY : desdeElGolpe
-  if (!s.estatico && luz > 0) s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt
   const F = FILO_EN_VIVO
   F.uLuzDelFilo.value = luz
-  F.uCreceDelFilo.value = luz * creceDelFilo(variante, desdeElGolpeVivo, desdeLaOnda)
-  F.uFaseDelFilo.value = s.filo.fase
-  F.uCorrienteDelFilo.value = variante === 'corriente' && !s.estatico ? luz : 0
-  const latido = Math.min(desdeLaOnda, desdeElGolpeVivo)
-  F.uLatidoDelFilo.value.set(Number.isFinite(latido) ? latido : 0, variante === 'pulso' && Number.isFinite(latido) ? luz * (desdeElGolpeVivo <= desdeLaOnda ? 1.5 : 1) : 0)
-  F.uDescargaDelFilo.value = variante === 'descarga' && !s.estatico ? luz : 0
+  F.uCreceDelFilo.value = luz * creceDelFilo(desdeElGolpeVivo)
+  F.uDescargaDelFilo.value = s.estatico ? 0 : luz
+  F.uRafagaDelFilo.value.set(...rafagaDelFilo(desdeLaOnda, desdeElGolpeVivo))
   s.filo.malla.visible = luz > 0
   // [PULIDO 5] D2 · el logo, lo que más se ve (`logoDelFinal.ts`): con la cámara que sube, sin niebla, con menos reflejo y sin
   // polvo encima.
