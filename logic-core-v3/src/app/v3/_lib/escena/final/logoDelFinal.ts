@@ -10,31 +10,25 @@ import type * as THREE from 'three'
  *   · sin polvo encima (el polvo se apaga en un cilindro sobre el logo y su círculo: `polvo/parche.ts`);
  *   · y, en las variantes `filo` y `tubo+filo` (`anilloDeLuz.ts`), su filo blanco bien marcado: el borde de las tapas del
  *     logo de noche (`logoDeNoche.ts`, `bordeDelLogoDeNoche`) encendido en blanco, sin la noche (`uFiloDelFinal`).
+ *     [PULIDO 6] E2 · ese filo le comía el negro al logo (iba por adentro): se borró. El filo es una banda por AFUERA del
+ *     contorno (`filoConPoder.ts`): el logo conserva su silueta y su negro enteros.
  * El oscurecimiento de la sala es del piso (`uOscuroDelBrillo`): el logo nunca lo tuvo. Los uniformes los escribe
  * `cuadroDelFinal.ts`; los reflejos, `LuzDelLogo.tsx`.
  */
 export const LOGO_DEL_FINAL = {
   /** Cuánto del reflejo del estudio queda en el final (1: el de siempre). */
   reflejo: 0.2,
-  /** El valor en pantalla del filo (0 = negro): casi blanco. */
-  filo: 0.97,
-  /** Cuántas veces el ancho del filo del logo de noche (el campo de su contorno llega a 4 veces): bien marcado. */
-  anchoDelFilo: 2.2,
-  /** El radio del cilindro sin polvo sobre el logo (u): el de la zona lisa y el anillo, con aire. */
+  /** El radio del cilindro sin polvo sobre el logo (u): el logo (media diagonal, 4,2) y su filo, con aire. */
   sinPolvo: 4.6,
 } as const
 
 export const LOGO_DEL_FINAL_EN_VIVO = {
   /** 0 a 1: cuánto del final tiene el logo (la cámara que sube a mirarlo desde arriba). */
   uLogoDelFinal: { value: 0 },
-  /** 0 a 1: cuánto se ve su filo blanco (las variantes con filo). */
-  uFiloDelFinal: { value: 0 },
 }
 
 /** El reflejo del estudio del logo con `final` (0 a 1) del final: el de la sala por lo que queda en el final. */
 export const reflejoDelLogo = (nivel: number, final: number): number => nivel * (1 - (1 - LOGO_DEL_FINAL.reflejo) * Math.min(1, Math.max(0, final)))
-
-const radiancia = (pantalla: number): string => `pow( ${pantalla.toFixed(3)}, 2.2 )`
 
 /** La niebla del logo, apagada con el final (la de three, con su factor por lo que queda). */
 const NIEBLA_GLSL = /* glsl */ `
@@ -48,22 +42,6 @@ const NIEBLA_GLSL = /* glsl */ `
 #endif
 `
 
-/**
- * El filo: el borde de las tapas del logo de noche (su campo de distancia al contorno), más ancho y en blanco (si el material
- * tiene el dibujo de noche).
- */
-const FILO_GLSL = /* glsl */ `
-	#ifdef LOGO_DE_NOCHE_CON_BORDE
-		if ( uFiloDelFinal > 0.0 ) {
-			float dDelFilo = texture2D( uContornoDelLogo, ( vPlanoDelLogo - uCajaDelContorno.xy ) * uCajaDelContorno.zw ).r * uAlcanceDelContorno;
-			float aaDelFilo = max( fwidth( dDelFilo ) * 0.75, uAlcanceDelContorno * 0.00125 );
-			float anchoDelFilo = uAnchoDelBorde * ${LOGO_DEL_FINAL.anchoDelFilo.toFixed(2)};
-			float filo = vTapaDelLogo * ( 1.0 - smoothstep( anchoDelFilo - aaDelFilo, anchoDelFilo + aaDelFilo, dDelFilo ) );
-			totalEmissiveRadiance = mix( totalEmissiveRadiance, vec3( ${radiancia(LOGO_DEL_FINAL.filo)} ), filo * uFiloDelFinal );
-		}
-	#endif
-`
-
 type Shader = Parameters<THREE.Material['onBeforeCompile']>[0]
 
 /** Instala el parche en el material del logo (encadena el `onBeforeCompile` que ya tenga: el del logo de noche, antes). */
@@ -74,8 +52,7 @@ export function conElLogoDelFinal(material: THREE.MeshStandardMaterial): void {
     previo(shader, renderer)
     Object.assign(shader.uniforms, LOGO_DEL_FINAL_EN_VIVO)
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform float uLogoDelFinal;\nuniform float uFiloDelFinal;')
-      .replace('#include <emissivemap_fragment>', `${FILO_GLSL}\n#include <emissivemap_fragment>`)
+      .replace('#include <common>', '#include <common>\nuniform float uLogoDelFinal;')
       .replace('#include <fog_fragment>', NIEBLA_GLSL)
   }
   material.customProgramCacheKey = () => `${clavePrevia()}|logo-del-final`

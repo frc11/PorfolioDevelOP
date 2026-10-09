@@ -8,3 +8,13 @@ E1 · El CTA
    - Al terminar, el cambio a la letra definitiva no se nota (un fundido en el último tramo).
    - Con el teclado: Tab hasta «HABLANOS» (el anillo de foco rodea la palabra 3D); Enter abre Contacto.
    Hojas: e1-cta-1440.png (12 cuadros), e1-cta-390.png (6), e1-foco-1440.png y e1-foco-enter-1440.png.
+
+E2 · El filo
+   /v3 (corriente), /v3?filo=pulso, /v3?filo=descarga: bajá hasta el pie y esperá el encastre.
+   - El logo entero, negro, con un filo blanco por afuera (no le come el borde); en el golpe el filo se enciende de golpe,
+     junto con el sonido.
+   - Sin el círculo liso: la energía del piso llega hasta el logo; los bloques pegados al hueco quedan al ras y la luz sale
+     por sus juntas hasta el filo. El golpe y las ondas salen con la forma del logo.
+   - corriente: un tramo más ancho recorre el filo y se acelera con cada onda. pulso: el filo late y sale un anillo de luz
+     por las juntas. descarga: trazos de luz que salen del filo por las juntas cercanas.
+   Hojas: e2-filo-1440.png, e2-filo-390.png, e2-filo-820.png.

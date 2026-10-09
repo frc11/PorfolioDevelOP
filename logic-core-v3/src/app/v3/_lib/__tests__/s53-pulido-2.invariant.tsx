@@ -409,11 +409,12 @@ controlPositivo('  y un costado parejo (sin nacer en la base)', juntas4.replace(
 // Los bloques con energía SE SEPARAN un poco (en el vértice: se achican sobre su centro, cada uno distinto: las rendijas no
 // son todas iguales) y quedan A ALTURAS DISTINTAS (en la simulación: un azar por bloque, de abajo y de arriba del resto). Sin
 // energía, nada cambia: los bloques siguen pegados y tapan el plano. [PULIDO 3] A1 · la energía del bloque la lee el vértice
-// de la simulación (el canal libre de su textura), y con las ondas pasa de 1 (la separación, hasta 1,6).
+// de la simulación (el canal libre de su textura), y con las ondas pasa de 1 (la separación, hasta 1,6). [PULIDO 6] E2 · las
+// alturas, por lo que queda de la calma: los bloques pegados al hueco quedan al ras (la luz, no).
 const sim4 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 const separaBien = (v: string, sim: string): boolean => {
   const achica = new RegExp(`transformed\\.xz \\*= 1\\.0 - ${f4(2 * L4.separa).replace('.', '\\.')} \\* min\\( vEnergiaDelBloque, 1\\.6 \\) \\* \\( ([0-9.]+) \\+ ([0-9.]+) \\* azarDeLaLuz\\( floor\\( centro / uLado \\) \\+ [0-9.]+ \\) \\);`).exec(v)
-  const alturas = /return min\( e, 1\.4 \) \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( celda \+ [0-9.]+ \) \);/.exec(sim)
+  const alturas = /return min\( e, 1\.4 \) \* mix\( (-?[0-9.]+), (-?[0-9.]+), azarDeLaLuz\( celda \+ [0-9.]+ \) \) \* \( 1\.0 - calmaDelFinal\( xz \) \);/.exec(sim)
   if (achica === null || alturas === null) return false
   return L4.separa >= 0.02 && L4.separa <= 0.08 && Number(achica[1]) > 0.2 && Math.abs(Number(achica[1]) + Number(achica[2]) - 1) < 1e-9 && v.includes('vEnergiaDelBloque = texelFetch( uAlturas, celda, 0 ).a;') &&
     Number(alturas[1]) < 0 && Number(alturas[2]) > 0 && Number(alturas[2]) - Number(alturas[1]) >= 0.3 && sim.includes('dibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;')

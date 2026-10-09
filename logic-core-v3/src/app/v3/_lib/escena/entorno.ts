@@ -62,7 +62,7 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
-import { ANILLOS_DEL_ENCASTRE, type AnilloDelEncastre } from './final/anilloDeLuz'
+import { FILOS_DEL_LOGO, type FiloDelLogo } from './final/filoConPoder'
 
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
@@ -91,10 +91,11 @@ export interface Pruebas {
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
   /**
-   * [PULIDO 5] D2 · `anillo=tubo|disco|filo|tubo+filo`: la luz del encastre (`final/anilloDeLuz.ts`). Sin bandera, `tubo`. En
-   * la URL el «+» llega como espacio: se acepta igual.
+   * [PULIDO 5] D2 · `anillo=tubo|disco|filo|tubo+filo`: la luz del encastre. [PULIDO 6] E2 · se borró (ganó el filo, sin el
+   * círculo liso): `filo=corriente|pulso|descarga`, cómo hace luz el filo del logo (`final/filoConPoder.ts`). Sin bandera,
+   * `corriente`.
    */
-  readonly anillo: AnilloDelEncastre | 'no'
+  readonly filo: FiloDelLogo | 'no'
 }
 
 /**
@@ -112,12 +113,13 @@ export interface Pruebas {
  * `energia=red|inestable` se fundieron en el producto (queda `energia=intensa`); B1: `cta=capas|relevo|giro|cruce|tipo` se
  * borró: `cruce` es el producto. [PULIDO 4] C2: `energia=intensa` se borró (la energía de B0 es la del producto). [PULIDO 5]
  * D2: `golpe=a|b` se borró (el de la sala, `b`, es el producto). [PULIDO 6] E1: `meta=fusion` y `ancho=expandido` se borraron
- * (`contorno` y wdth 100 son el producto).
+ * (`contorno` y wdth 100 son el producto). E2: `anillo=tubo|disco|filo|tubo+filo` se borró (el filo es el producto, sin el
+ * anillo ni el círculo liso); entra `filo=corriente|pulso|descarga`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', anillo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', filo: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'anillo'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'filo'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -130,7 +132,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    anillo: unoDe<AnilloDelEncastre>(ANILLOS_DEL_ENCASTRE, valor('anillo')?.replace(' ', '+')),
+    filo: unoDe<FiloDelLogo>(FILOS_DEL_LOGO, valor('filo')),
   }
 }
 

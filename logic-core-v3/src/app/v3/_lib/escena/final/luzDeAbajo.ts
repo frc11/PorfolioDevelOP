@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { PISO_VIVO } from '../piso/bloques'
+import { FILO, LATIDO_DEL_FILO_GLSL } from './filoConPoder'
 
 /**
  * [PULIDO 2] 4 · LA LUZ QUE SALE DE ABAJO, POR LAS JUNTAS (las referencias del humano: bloques grises con luz blanca que se
@@ -37,10 +38,10 @@ export const LUZ_DE_ABAJO = {
    * Las ondas del logo: cuánto suben la energía en su frente y su ancho (u). Durante el final el logo no larga los anillos del
    * pulso (NOCTURNO FINAL B3: cruzaban el círculo quieto), así que larga los suyos sólo en la energía: uno cada `cadaS` (corrido
    * hasta `corre` del intervalo, al azar), desde el borde del mar calmo (`desde`, u) a `velocidad` u/s; más el golpe.
+   * [PULIDO 6] E2 · el círculo calmo ya no existe: las ondas (y el golpe, y la expansión) nacen en el filo (`desde` 0 en la
+   * distancia al contorno del logo, `hueco.ts`) y la luz llega hasta él (el margen de antes, más allá del círculo, se fue).
    */
-  ondas: { sube: 0.8, ancho: 1.8, cadaS: 3.2, corre: 0.35, velocidad: 12, desde: 7 },
-  /** Cuánto más allá del círculo calmo del logo puede empezar (u). */
-  margen: 1,
+  ondas: { sube: 0.8, ancho: 1.8, cadaS: 3.2, corre: 0.35, velocidad: 12, desde: 0 },
   /** Los bloques con energía: cuánto se separan (fracción del lado, por costado) y cuánto cambian de alto (u, de −a a +b). */
   separa: 0.045,
   alturas: [-0.12, 0.42],
@@ -202,8 +203,6 @@ export function corrienteEnLaJunta(junta: number, s: number, eje: number, t: num
 export const LUZ_DE_ABAJO_EN_VIVO = {
   /** La energía (el poder del piso, con su inercia: 0 sin poder, 1 entero). */
   uEnergiaDeLaLuz: { value: 0 },
-  /** El mar calmo del logo, donde la luz no entra: desde y hasta dónde se apaga (u) y cuánto está calmo (0 a 1). */
-  uCalmaDeLaLuz: { value: new THREE.Vector3(0, 1, 0) },
   /** [PULIDO 3] A1 · la expansión desde el hueco: el radio (u) y el progreso (0 a 1). */
   uExpansionDeLaLuz: { value: new THREE.Vector2(0, 0) },
   /** [PULIDO 3] A1 · el reloj de la luz (s): el de la escena; quieto con movimiento reducido. */
@@ -260,14 +259,17 @@ float ondaDelLogo( float r, float ancho ) {
  * [PULIDO 3] A1 · LA ENERGÍA EN LA SIMULACIÓN DEL PISO (una vez por bloque y por paso): el campo y [PULIDO 3B] B0 su capa fina,
  * la expansión desde el hueco (con su frente que brilla), las ondas del logo (las suyas, los anillos del pulso, `uAnillos`, y el
  * golpe, `uGolpe`), los pistones, la energía del poder y el mar calmo. Va al canal libre (`a`) de la textura de alturas.
+ * [PULIDO 6] E2 · todo se mide desde el filo (`distanciaAlLogo`, de `hueco.ts`) y la luz no se calma: llega hasta el borde
+ * mismo del logo (la calma aplana los bloques pegados, en la simulación: `calmaDelFinal`, que también apaga sus pistones). Más
+ * el latido del filo (`?filo=pulso`). Pide `distanciaAlLogo` y `calmaDelFinal` (`enElPiso.ts`).
  */
 export const ENERGIA_EN_LA_SIMULACION_GLSL = /* glsl */ `
 uniform float uEnergiaDeLaLuz;
-uniform vec3 uCalmaDeLaLuz;
 uniform vec2 uExpansionDeLaLuz;
 uniform float uRelojDeLaLuz;
 ${RUIDO_DE_LA_LUZ_GLSL}
 ${ONDAS_DEL_LOGO_GLSL}
+${LATIDO_DEL_FILO_GLSL}
 float fbmDeLaLuz( vec2 p ) {
 	float s = 0.0;
 	float a = 0.5;
@@ -291,6 +293,7 @@ float fondoDeLaEnergia( vec2 xz, float t ) {
 	return max( campo, fina );
 }
 // El frente de una onda a la distancia r (u): las del logo, los anillos del pulso (nace, dura, alcance, amplitud) y el golpe.
+// [PULIDO 6] E2 · r es la distancia al filo: todas nacen en él (los anillos, que el final apaga, corren lo mismo que antes).
 float ondaDeLaLuz( float r ) {
 	float s = ondaDelLogo( r, ${f(O.ancho)} );
 	for ( int i = 0; i < 4; i++ ) {
@@ -298,13 +301,13 @@ float ondaDeLaLuz( float r ) {
 		if ( a.w <= 0.0 ) continue;
 		float t = ( uTiempo - a.x ) / a.y;
 		if ( t < 0.0 || t > 1.0 ) continue;
-		float d = ( r - 3.6 - ( a.z - 3.6 ) * ( 1.0 - pow( 1.0 - t, 2.2 ) ) ) / ${f(O.ancho)};
+		float d = ( r - ( a.z - 3.6 ) * ( 1.0 - pow( 1.0 - t, 2.2 ) ) ) / ${f(O.ancho)};
 		s += exp( - d * d ) * pow( 1.0 - t, 1.2 );
 	}
 	if ( uGolpe.w > 0.0 ) {
 		float t = ( uTiempo - uGolpe.x ) / 2.6;
 		if ( t >= 0.0 && t <= 1.0 ) {
-			float d = ( r - 1.5 - 58.0 * ( 1.0 - pow( 1.0 - t, 2.2 ) ) ) / ${f(O.ancho)};
+			float d = ( r - 58.0 * ( 1.0 - pow( 1.0 - t, 2.2 ) ) ) / ${f(O.ancho)};
 			s += 1.5 * exp( - d * d ) * pow( 1.0 - t, 1.2 );
 		}
 	}
@@ -327,21 +330,22 @@ float fondoDeLaLuz( float alto ) {
 	return alto >= ${f(LUZ_DE_ABAJO.fondo.desde)} ? alto : ${f(LUZ_DE_ABAJO.fondo.desde)} + ${f(LUZ_DE_ABAJO.fondo.hasta - LUZ_DE_ABAJO.fondo.desde)} * ( 1.0 - exp( ( alto - ${f(LUZ_DE_ABAJO.fondo.desde)} ) / ${f(LUZ_DE_ABAJO.fondo.desde - LUZ_DE_ABAJO.fondo.hasta)} ) );
 }
 // La energía de este bloque (0 a ~1,8): el fondo de la energía, hasta donde llegó la expansión (y su frente), más las ondas y
-// el pistón (que también devuelve, para la altura); por el poder y nunca en el mar calmo del logo.
+// el pistón (que también devuelve, para la altura); por el poder. [PULIDO 6] E2 · desde el filo (r) y hasta el borde mismo
+// del logo: la calma sólo apaga el pistón (y las alturas, en \`alturaDeLaLuz\`); más el latido del filo.
 float energiaDeLaLuz( vec2 xz, out float piston ) {
 	piston = 0.0;
 	if ( uEnergiaDeLaLuz <= 0.0 || uExpansionDeLaLuz.x <= 0.0 ) return 0.0;
-	float r = length( xz );
+	float r = distanciaAlLogo( xz );
 	float llego = 1.0 - smoothstep( uExpansionDeLaLuz.x - ${f(E.frente)}, uExpansionDeLaLuz.x, r );
 	if ( llego <= 0.0 ) return 0.0;
 	float frente = ( r - uExpansionDeLaLuz.x ) / ${f(E.frente)};
-	float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, r ) );
-	piston = pistonDeLaLuz( xz ) * llego * ( 1.0 - calma ) * uEnergiaDeLaLuz;
+	piston = pistonDeLaLuz( xz ) * llego * ( 1.0 - calmaDelFinal( xz ) ) * uEnergiaDeLaLuz;
 	float e = fondoDeLaEnergia( xz, uRelojDeLaLuz );
 	e = e * llego + ${f(E.brillo)} * exp( - frente * frente ) * ( 1.0 - uExpansionDeLaLuz.y );
 	e += ${f(O.sube)} * ondaDeLaLuz( r ) * llego * ( 0.35 + e );
+	e += ${f(FILO.pulso.sube)} * latidoDelFilo( r );
 	e += ${f(P.abre)} * piston;
-	return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );
+	return min( 1.8, e ) * uEnergiaDeLaLuz;
 }
 `
 

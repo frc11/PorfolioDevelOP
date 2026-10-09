@@ -53,8 +53,10 @@ const enTodos = (c: string): boolean =>
   /customProgramCacheKey = \(\) => `titulo-de-volumen-\$\{variante\}`/.test(c)
 afirmar(enTodos(material), '  en todos los títulos negros (el hero, El equipo, Portfolio, la frase, las demos): sin condición; el blanco sigue con su filo oscuro')
 controlPositivo('el detector VE la b todavía con bandera', material.replace("else shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>'", "else if (filo !== 'no') shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>'"), enTodos)
-const sinBandera = (e: typeof ENTORNO, codigo: string): boolean => !('filo' in e.pruebas) && !/pruebas\.filo|filoDeDiaGlsl|FILO_DE_DIA\b/.test(codigo)
-afirmar(sinBandera(ENTORNO, material) && !('filo' in PRUEBAS_APAGADAS) && !('filo' in entornoPedido('producto,filo=a').pruebas), '  la a, la c y la bandera se borraron: `?pruebas=filo=a` ya no pide nada')
+// [PULIDO 6] E2 · el nombre `filo=` volvió con otro sentido (el filo del logo: `corriente|pulso|descarga`, pedido así): la de los
+// títulos sigue borrada si los títulos no la leen y sus valores (`a|b|c`) ya no piden nada.
+const sinBandera = (e: typeof ENTORNO, codigo: string): boolean => e.pruebas.filo === 'no' && !/pruebas\.filo|filoDeDiaGlsl|FILO_DE_DIA\b/.test(codigo)
+afirmar(sinBandera(ENTORNO, material) && PRUEBAS_APAGADAS.filo === 'no' && ['a', 'b', 'c'].every((v) => entornoPedido(`producto,filo=${v}`).pruebas.filo === 'no'), '  la a, la c y la bandera se borraron: `?pruebas=filo=a` ya no pide nada')
 controlPositivo('el detector VE la bandera', { ...ENTORNO, pruebas: { filo: 'a' } } as unknown as typeof ENTORNO, (e) => sinBandera(e, material))
 const delLogo = ['_lib/escena/logoDeNoche.ts', '_lib/escena/logoEmision.ts'].map(leer).join('\n')
 afirmar(!/filo'|costadoDeDiaGlsl/.test(delLogo), '  el logo no se toca')

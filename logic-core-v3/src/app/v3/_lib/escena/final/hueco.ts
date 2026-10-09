@@ -31,6 +31,12 @@ export const HUECO = {
   /** [RETOQUE DEL ENCASTRE] 1C · cuánto debajo de la cara del logo al ras quedan el piso calmo y el borde del pozo (u). */
   bajoElRas: 0.005,
   desenfoque: 14,
+  /**
+   * [PULIDO 6] E2 · EL CAMPO DE DISTANCIA AL LOGO: su margen alrededor de la caja (u) y su lado (px). La usan la calma del piso,
+   * la energía, el golpe y las ondas, que se miden desde el filo y no desde el centro: los frentes salen con la forma del logo y
+   * se redondean al alejarse. Fuera del campo, la distancia a la caja (con un fundido: sin escalón).
+   */
+  campo: { margen: 10, lado: 512 },
   /** Cuándo se abre (s del reloj): el logo cae a los 2,2 s y toca a los 2,76. */
   abre: { desdeS: 1.6, hastaS: 2.4 },
   /** La profundidad del pozo, en espesores del logo (un pelo más: el fondo no toca la cara de abajo). */
@@ -128,6 +134,88 @@ export function mascaraDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2,
   textura.needsUpdate = true
   return { textura, marco }
 }
+
+/**
+ * [PULIDO 6] E2 · la distancia (px) de cada píxel de un lado × lado al píxel «adentro» (1) más cercano; 0 adentro. La
+ * transformada exacta de Felzenszwalb y Huttenlocher (las parábolas de abajo), por columnas y después por filas. Pura (la usa el
+ * invariante).
+ */
+export function distanciaAfuera(dentro: Uint8Array, lado: number): Float32Array {
+  const LEJOS = 1e20
+  const d2 = Float64Array.from(dentro, (v) => (v === 1 ? 0 : LEJOS))
+  const linea = new Float64Array(lado)
+  const v = new Int32Array(lado)
+  const z = new Float64Array(lado + 1)
+  const corte = (q: number, k: number): number => (linea[q] + q * q - (linea[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k])
+  const pasada = (desde: number, paso: number): void => {
+    for (let q = 0; q < lado; q += 1) linea[q] = d2[desde + q * paso]
+    let k = 0
+    v[0] = 0
+    z[0] = -LEJOS
+    z[1] = LEJOS
+    for (let q = 1; q < lado; q += 1) {
+      let s = corte(q, k)
+      while (s <= z[k]) {
+        k -= 1
+        s = corte(q, k)
+      }
+      k += 1
+      v[k] = q
+      z[k] = s
+      z[k + 1] = LEJOS
+    }
+    k = 0
+    for (let q = 0; q < lado; q += 1) {
+      while (z[k + 1] < q) k += 1
+      d2[desde + q * paso] = (q - v[k]) * (q - v[k]) + linea[v[k]]
+    }
+  }
+  for (let x = 0; x < lado; x += 1) pasada(x, lado)
+  for (let y = 0; y < lado; y += 1) pasada(y * lado, 1)
+  return Float32Array.from(d2, (x) => Math.sqrt(x))
+}
+
+/** [PULIDO 6] E2 · el campo de distancia al logo: la textura (R, u, en media precisión) y su marco en el plano del logo. */
+export interface DistanciaDelLogo {
+  readonly textura: THREE.DataTexture
+  readonly marco: THREE.Vector4
+}
+
+/** [PULIDO 6] E2 · arma el campo una vez (necesita el DOM: un lienzo 2D): las formas, dibujadas, y su distancia afuera. */
+export function distanciaDelLogo(formas: readonly THREE.Shape[], caja: THREE.Box2, resolucion: number = HUECO.campo.lado): DistanciaDelLogo {
+  const m = HUECO.campo.margen
+  const lado = Math.max(caja.max.x - caja.min.x, caja.max.y - caja.min.y) + 2 * m
+  const centro = caja.getCenter(new THREE.Vector2())
+  const marco = new THREE.Vector4(centro.x - lado / 2, centro.y - lado / 2, lado, lado)
+  const n = resolucion
+  const dibujo = dibujar(formas, marco, n, 0, 0)
+  const afuera = distanciaAfuera(Uint8Array.from({ length: n * n }, (_, i) => (dibujo[i * 4] > 127 ? 1 : 0)), n)
+  const porPixel = lado / n
+  const textura = new THREE.DataTexture(Uint16Array.from(afuera, (d) => THREE.DataUtils.toHalfFloat(d * porPixel)), n, n, THREE.RedFormat, THREE.HalfFloatType)
+  textura.magFilter = THREE.LinearFilter
+  textura.minFilter = THREE.LinearFilter
+  textura.needsUpdate = true
+  return { textura, marco }
+}
+
+/**
+ * [PULIDO 6] E2 · LA DISTANCIA AL LOGO (u) de un punto del piso (x, z): la del campo (0 sobre el logo); al acercarse al borde del
+ * campo se funde con la de la caja del logo, que vale afuera. Pide `uCajaDelLogo` (la media caja). Sin el final no cuenta: la
+ * calma y la energía valen 0.
+ */
+export const DISTANCIA_AL_LOGO_GLSL = /* glsl */ `
+uniform sampler2D uDistanciaAlLogo;
+uniform vec4 uMarcoDeLaDistancia;
+float distanciaAlLogo( vec2 xz ) {
+	vec2 p = vec2( xz.x, - xz.y );
+	float caja = length( max( abs( p - uMarcoDeLaDistancia.xy - 0.5 * uMarcoDeLaDistancia.zw ) - uCajaDelLogo, 0.0 ) );
+	vec2 uv = ( p - uMarcoDeLaDistancia.xy ) / uMarcoDeLaDistancia.zw;
+	vec2 alBorde = min( uv, 1.0 - uv );
+	float adentro = smoothstep( 0.0, 0.06, min( alBorde.x, alBorde.y ) );
+	if ( adentro <= 0.0 ) return caja;
+	return mix( caja, texture2D( uDistanciaAlLogo, uv ).r, adentro );
+}
+`
 
 /** El pozo: las paredes y el fondo, debajo del hueco (el grupo, acostado, con el tope apenas debajo del piso). Invisible al armarse. */
 export function crearElPozo(formas: readonly THREE.Shape[], espesor: number): { readonly grupo: THREE.Group; readonly soltar: () => void } {

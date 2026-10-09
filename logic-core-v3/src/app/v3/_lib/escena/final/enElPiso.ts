@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
-import { HUECO } from './hueco'
+import { DISTANCIA_AL_LOGO_GLSL, HUECO } from './hueco'
 import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
-import { LUZ_DEL_ANILLO, LUZ_DEL_ANILLO_GLSL } from './anilloDeLuz'
+import { DERRAME_DEL_FILO, DESCARGA_DEL_FILO_GLSL, FILO, FILO_EN_VIVO, LATIDO_DEL_FILO_GLSL } from './filoConPoder'
 
 /**
  * [CIERRE] 3 · EL FINAL EN EL PISO VIVO — lo que el final le suma al piso, inyectado al armarlo (como la onda dirigida de
@@ -63,8 +63,13 @@ export const RASTRO_EN_EL_PISO = { puntos: 8, cada: 0.55, apagaS: 0.9, radio: 1.
  * (u: el logo y un margen) y con un borde ancho y suave (`borde`, u: cinco bloques), sin escalones; y es de verdad quieto:
  * adentro los bloques se asientan (la onda se amortigua, `amortigua` 1/s más) y no reaccionan al mouse, al pulso, al golpe
  * ni a las ondas (sus empujes se apagan con la calma). El orden en medio del caos.
+ * [PULIDO 6] E2 · SIN EL CÍRCULO LISO («que haya poder alrededor suyo»): la calma es un MARGEN pegado al hueco, medido con la
+ * distancia al contorno del logo (`distanciaAlLogo`), no con el radio. Al ras quedan los bloques que tocan el filo entero (el
+ * centro de un bloque a menos de media diagonal más `margen`, u: el filo en su ancho mayor y un aire); en `borde` (u) vuelven al
+ * caos. Los bloques pegados no tapan ni cortan el logo ni el hueco, y la luz igual sale por sus juntas hasta el borde mismo: la
+ * calma aplana las alturas, no la energía (`luzDeAbajo.ts`).
  */
-export const CALMA_EN_EL_PISO = { radio: 4.2, borde: 4, amortigua: 30, labio: 0.1 } as const
+export const CALMA_EN_EL_PISO = { margen: FILO.desde + FILO.ancho * (1 + FILO.crece) + 0.04, borde: 1, amortigua: 30, labio: 0.1 } as const
 
 /**
  * [PULIDO 1] P1 · el brillo del piso (zonas blancas sobre las tapas) se rehízo en [PULIDO 2] 4: la luz sale de ABAJO, por las
@@ -82,6 +87,9 @@ export const FINAL_EN_EL_PISO = {
   /** [EL ENCASTRE] 2D · la máscara del logo acostado (R: la forma; G: el campo ancho) y su marco en el plano del logo. */
   uHueco: { value: null as THREE.Texture | null },
   uMarcoDelHueco: { value: new THREE.Vector4(0, 0, 1, 1) },
+  /** [PULIDO 6] E2 · el campo de distancia al logo (u) y su marco en el plano del logo (`hueco.ts`). */
+  uDistanciaAlLogo: { value: null as THREE.Texture | null },
+  uMarcoDeLaDistancia: { value: new THREE.Vector4(0, 0, 1, 1) },
   /** 0 a 1: cuánto se abrió el hueco. */
   uApertura: { value: 0 },
   /** 0 a 1: cuánto se calmó el mar alrededor del logo; la media caja del logo en su plano (u). */
@@ -116,6 +124,8 @@ uniform vec4 uGolpe;
 uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform float uCalmaDelFinal;
 uniform vec2 uCajaDelLogo;
+// [PULIDO 6] E2 · la distancia al logo, para medir desde el filo (\`hueco.ts\`).
+${DISTANCIA_AL_LOGO_GLSL}
 // [NOCTURNO FINAL] B1 · el tope del dibujo de la onda, más alto mientras dura la súper onda.
 float topeConElGolpe( float tope ) {
 	if ( uGolpe.w <= 0.0 ) return tope;
@@ -128,7 +138,9 @@ float empujeDelGolpe( vec2 xz ) {
 	float t = ( uTiempo - uGolpe.x ) / ${f(GOLPE_EN_EL_PISO.duracionS)};
 	if ( t < 0.0 || t > 1.0 ) return 0.0;
 	float frente = 1.5 + ${f(GOLPE_EN_EL_PISO.alcance)} * ( 1.0 - pow( 1.0 - t, 2.2 ) );
-	float d = ( length( xz - uGolpe.yz ) - frente ) / ${f(GOLPE_EN_EL_PISO.ancho)};
+	// [PULIDO 6] E2 · el del encastre nace en el filo (la distancia al logo); el de la llegada del logo, en su punto.
+	float desde = uCalmaDelFinal > 0.0 ? distanciaAlLogo( xz ) + 1.5 : length( xz - uGolpe.yz );
+	float d = ( desde - frente ) / ${f(GOLPE_EN_EL_PISO.ancho)};
 	return uGolpe.w * ${f(GOLPE_EN_EL_PISO.fuerza)} * exp( - d * d ) * pow( 1.0 - t, 1.5 ) * smoothstep( 0.0, 0.04, t );
 }
 // [EL ENCASTRE] 2F · el rastro del mouse levanta un poco los bloques (un resorte hacia una loma bajo cada punto).
@@ -143,19 +155,21 @@ float empujeDelRastro( vec2 p, float h ) {
 	}
 	return f;
 }
+// [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z). [PULIDO 6] E2 · un margen pegado
+// al hueco (la distancia al logo desde el centro del bloque: media diagonal y el margen, al ras; en el borde, al caos).
+float calmaDelFinal( vec2 xz ) {
+	if ( uCalmaDelFinal <= 0.0 ) return 0.0;
+	float alRas = 0.7072 * uLado + ${CALMA_EN_EL_PISO.margen.toFixed(3)};
+	return uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${f(CALMA_EN_EL_PISO.borde)}, distanciaAlLogo( xz ) ) );
+}
 // [PULIDO 2] 4 · con energía cada bloque queda a su alto (un azar por bloque entre \`alturas\`): el piso se desordena.
 // [PULIDO 3] A1 · la energía es la del campo (\`luzDeAbajo.ts\`). [PULIDO 3B] B0 · y los pistones suben su racimo (lo suma
-// \`main\`, con la altura de la luz): sin temblor.
+// \`main\`, con la altura de la luz): sin temblor. [PULIDO 6] E2 · los bloques pegados al hueco quedan al ras (la calma).
 ${ENERGIA_EN_LA_SIMULACION_GLSL}
 float alturaDeLaLuz( vec2 xz, float e ) {
 	if ( e <= 0.0 ) return 0.0;
 	vec2 celda = floor( xz / uLado );
-	return min( e, 1.4 ) * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( celda + 0.37 ) );
-}
-// [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z).
-float calmaDelFinal( vec2 xz ) {
-	if ( uCalmaDelFinal <= 0.0 ) return 0.0;
-	return uCalmaDelFinal * ( 1.0 - smoothstep( ${f(CALMA_EN_EL_PISO.radio)}, ${f(CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde)}, length( xz ) ) );
+	return min( e, 1.4 ) * mix( ${f(LUZ_DE_ABAJO.alturas[0])}, ${f(LUZ_DE_ABAJO.alturas[1])}, azarDeLaLuz( celda + 0.37 ) ) * ( 1.0 - calmaDelFinal( xz ) );
 }
 `
 
@@ -198,19 +212,28 @@ uniform float uBrilloDeLaLuz;
 varying float vEnergiaDelBloque;
 ${RUIDO_DE_LA_LUZ_GLSL}
 ${CORRIENTES_DE_LA_LUZ_GLSL}
+${DISTANCIA_AL_LOGO_GLSL}
+${DESCARGA_DEL_FILO_GLSL}
+${LATIDO_DEL_FILO_GLSL}
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float s = vEnergiaDelBloque;
 	if ( s <= 0.0 ) return color;
+	// [PULIDO 6] E2 · el latido y la descarga del filo (\`?filo=pulso|descarga\`): las juntas alrededor ya brillan enteras con la
+	// energía de B0, así que por donde pasan la luz de la junta se derrama más ancha sobre la tapa (la junta se ve más gruesa).
+	float latido = min( latidoDelFilo( distanciaAlLogo( vPiso.xz ) ), ${f(DERRAME_DEL_FILO.tope)} );
+	float descarga = min( descargaDelFilo( vPiso.xz, uLado ), ${f(DERRAME_DEL_FILO.tope)} );
 	float luz;
 	if ( vTapa < 0.5 ) {
 		luz = ${f(LUZ_DE_ABAJO.costado)} * exp( - max( 0.0, vAlto - vVecino ) / ${f(LUZ_DE_ABAJO.caeEn)} );
 	} else {
 		vec2 borde = min( vEnElBloque, 1.0 - vEnElBloque ) * uLado;
 		luz = ${f(LUZ_DE_ABAJO.canto)} * exp( - min( borde.x, borde.y ) / ${f(0.04)} );
+		luz = max( luz, ${f(LUZ_DE_ABAJO.canto)} * max( latido * exp( - min( borde.x, borde.y ) / ${f(DERRAME_DEL_FILO.latido)} ), descarga * exp( - min( borde.x, borde.y ) / ${f(DERRAME_DEL_FILO.descarga)} ) ) );
 		// La tapa no se blanquea: la luz viene de abajo, así que en el sector queda apenas más en sombra.
 		color *= 1.0 - ${f(LUZ_DE_ABAJO.sombraDeLaTapa)} * min( s, 1.0 );
 	}
 	float junta = brilloDeLaJunta( vPiso.xz, uRelojDeLaLuz ) * s + corrientesDeLaLuz( vPiso.xz, uLado ) * ( 0.4 + min( s, 1.0 ) );
+	junta += ( latido + descarga ) * ( 0.4 + min( s, 1.0 ) );
 	return color + vec3( luz * junta * uBrilloDeLaLuz );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho.
@@ -225,8 +248,7 @@ bool enElHueco( vec2 xz ) {
 	return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;
 }
 // [PULIDO 4] C2 · el filo del logo encendido (PULIDO 3B · B0) se fue. [PULIDO 5] D2 · y el círculo difuso de PULIDO 4 también:
-// la luz es el anillo (o el disco) de anilloDeLuz.ts, nítido, encima de todo lo del piso (después de la niebla).
-${LUZ_DEL_ANILLO_GLSL}
+// la luz era el anillo (o el disco) de anilloDeLuz.ts. [PULIDO 6] E2 · se borró: la luz es el filo (\`filoConPoder.ts\`, su malla).
 float labioDelHueco( vec2 xz ) {
 	if ( uApertura <= 0.0 ) return 0.0;
 	vec2 m = mascaraDelHueco( xz );
@@ -255,7 +277,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
     if (anclas.some((ancla) => !shader.fragmentShader.includes(ancla))) {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
-    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, LUZ_DEL_ANILLO)
+    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, FILO_EN_VIVO)
     // [PULIDO 2] 4 · con energía los bloques se separan un poco (se achican sobre su centro): se abren las rendijas. [PULIDO 3]
     // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
@@ -267,7 +289,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}\n\tgl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

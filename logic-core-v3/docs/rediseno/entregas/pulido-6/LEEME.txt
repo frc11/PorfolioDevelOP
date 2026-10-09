@@ -8,3 +8,13 @@ E1 · El CTA: el entremedio
   Archivos: escena/ctaDelFinal/{contorno,transformacion,armadoDelCta,fuentesDelCta,piezasDeLaMetamorfosis,EscenaDelCta}.ts(x)
   (se borra fusion.ts), escena/entorno.ts, scripts-retoque/fuentes-3d.py (se borran archivo-expandido-cta(-fuerte).json).
   Hojas: e1-cta-1440.png, e1-cta-390.png, e1-foco-1440.png, e1-foco-enter-1440.png.
+
+E2 · El filo con poder
+  Qué: el filo por AFUERA del logo (una banda que nace en su silueta: el negro queda entero); sin el círculo liso (la calma es
+  un margen pegado al hueco, medido con la distancia al logo; la luz llega hasta el borde; las ondas, la expansión y el golpe
+  nacen en el filo); ?filo=corriente|pulso|descarga (sin bandera, corriente); el filo se enciende de golpe con el golpe. El
+  anillo, el disco, el filo de las tapas y ?anillo=, borrados.
+  Archivos: escena/final/{filoConPoder (nuevo), hueco, enElPiso, luzDeAbajo, planoDeLaLuz, cuadroDelFinal, logoDelFinal,
+  FinalDelPie}.ts(x), escena/piso/PisoVivo.tsx, escena/entorno.ts (se borra final/anilloDeLuz.ts).
+  Hojas: e2-filo-1440.png (columnas corriente, pulso, descarga; filas golpe y quieto), e2-filo-390.png (los seis cuadros en
+  ese orden), e2-filo-820.png (corriente en la tablet: golpe y quieto).

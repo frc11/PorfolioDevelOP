@@ -30,6 +30,7 @@ import { CURVA_DEL_VIAJE, DURACION_DEL_VIAJE_MS, PRELUDIO_MS, duracionDelViaje }
 import { viajarSinLenis } from '../../_componentes/viajeSinLenis'
 import { aimWithFraming } from '../escena/cameraFraming'
 import { ANCLAS_DEL_HUECO, CALMA_EN_EL_PISO, GOLPE_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
+import { FILO } from '../escena/final/filoConPoder'
 import { CAIDA_DEL_LOGO, alturaDeLaCaida } from '../escena/intro/caida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
@@ -511,13 +512,14 @@ const dibujoDelPisoB2 = (() => {
 // oscurece es la sala entera (el rig de luz, nunca un sector), función de `fin` (al rebobinar, vuelve).
 // [PULIDO 2] 4 · el brillo es la luz que sale de abajo, por las juntas (s53-pulido-2 §4): la energía (el poder) y la calma
 // están en su sector (`sectorDeLaLuz`); lo que fija esto sigue igual. [PULIDO 3] A1 · en la energía de cada bloque, que calcula
-// la simulación (`energiaDeLaLuz`) y el dibujo lee por el vértice; lo que fija esto sigue igual.
+// la simulación (`energiaDeLaLuz`) y el dibujo lee por el vértice; lo que fija esto sigue igual. [PULIDO 6] E2 · sin el mar
+// calmo de la luz: llega hasta el borde del logo (la calma pegada al hueco aplana los bloques, no la luz).
 const cuadroDeLaLuzB2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const brilloBien = (g: string, c: string): boolean => {
   const juntas = g.slice(g.indexOf('vec3 conLasJuntas( vec3 color, vec2 xz ) {'))
-  return juntas.includes('float s = vEnergiaDelBloque;') && ENERGIA_EN_LA_SIMULACION_GLSL.includes('return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
+  return juntas.includes('float s = vEnergiaDelBloque;') && ENERGIA_EN_LA_SIMULACION_GLSL.includes('return min( 1.8, e ) * uEnergiaDeLaLuz;') && c.includes('LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = LUZ_DEL_BANCO.apagada ? 0 : Math.min(1, s.poder)') && !g.includes('uRastro') && !g.includes('resplandorDelRastro')
 }
-afirmar(brilloBien(dibujoDelPisoB2, cuadroDeLaLuzB2), 'después del encastre (con el poder) y fuera del mar calmo, el brillo del piso ([PULIDO 2] 4: la luz de abajo, por las juntas); el mouse ya no hace brillo (sólo levanta los bloques)')
+afirmar(brilloBien(dibujoDelPisoB2, cuadroDeLaLuzB2), 'después del encastre (con el poder) y [PULIDO 6] hasta el borde del logo, el brillo del piso ([PULIDO 2] 4: la luz de abajo, por las juntas); el mouse ya no hace brillo (sólo levanta los bloques)')
 controlPositivo('el detector VE un brillo que no espera al encastre', cuadroDeLaLuzB2.replace('Math.min(1, s.poder)', '1'), (c: string) => brilloBien(dibujoDelPisoB2, c))
 controlPositivo('  y el brillo bajo el mouse de antes', `${dibujoDelPisoB2}\nvec2 resplandorDelRastro( vec2 xz ) { return vec2( 0.0 ); }`, (g: string) => brilloBien(g, cuadroDeLaLuzB2))
 // La sala ENTERA (el nivel del rig de luz: las luces, el ambiente, la niebla, el fondo) baja después del encastre; función
@@ -542,21 +544,27 @@ titulo('B3 · El círculo estable: alrededor del logo, liso y quieto, sin bordes
 // onda se amortigua; y el logo no larga anillos durante el final.
 // [PULIDO 2] 4 · «el brillo empieza afuera» se lee ahora en el sector de la luz de abajo (`sectorDeLaLuz`, con su calma:
 // el mismo anillo, que le pasa `cuadroDelFinal.ts`; lo fija s51 1F); antes, en `fueraDeLaCalma` del dibujo, que se borró.
+// [PULIDO 6] E2 · SIN EL CÍRCULO LISO (decisión: «gana el filo: se borran el anillo y el círculo liso»; «que haya poder
+// alrededor suyo»): la calma es un MARGEN pegado al hueco, medido con la distancia al logo (no con el radio): al ras quedan los
+// bloques que tocan el filo entero (media diagonal de bloque más el margen, que cubre el filo en su ancho mayor) y en un borde de
+// al menos un bloque vuelven al caos; adentro, quieto de verdad como antes (los empujes se apagan y la onda se amortigua). La
+// luz ya no se calma (llega hasta el borde mismo del logo): la calma apaga los pistones y las alturas.
 const C = CALMA_EN_EL_PISO
-const mitadDelLogo = 6.86 / 2
 const simB3 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
-type Calma = { readonly radio: number; readonly borde: number; readonly amortigua: number }
-const circuloBien = (sim: string, dib: string, c: Calma): boolean =>
-  sim.includes(`return uCalmaDelFinal * ( 1.0 - smoothstep( ${c.radio.toFixed(1)}, ${(c.radio + c.borde).toFixed(1)}, length( xz ) ) );`) &&
+type Calma = { readonly margen: number; readonly borde: number; readonly amortigua: number }
+const margenBien = (sim: string, dib: string, c: Calma): boolean =>
+  sim.includes(`float alRas = 0.7072 * uLado + ${c.margen.toFixed(3)};`) && sim.includes(`return uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${c.borde.toFixed(1)}, distanciaAlLogo( xz ) ) );`) &&
   /float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/.test(sim) && sim.includes('dibujo *= 1.0 - calmaDelFinal( xz );') &&
-  dib.includes('float calma = uCalmaDeLaLuz.z * ( 1.0 - smoothstep( uCalmaDeLaLuz.x, uCalmaDeLaLuz.y, r ) );') && dib.includes('return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calma );') &&
-  c.radio > mitadDelLogo && c.radio < 1.6 * mitadDelLogo && c.borde >= 4 * 0.8 && c.amortigua >= 10
-// [PULIDO 3] A1 · la calma de la luz se lee en la energía de la simulación (`ENERGIA_EN_LA_SIMULACION_GLSL`), no en el dibujo.
-afirmar(circuloBien(simB3, ENERGIA_EN_LA_SIMULACION_GLSL, C), 'una vez encastrado, alrededor del logo un CÍRCULO liso y quieto (de radio acorde: el logo y un margen) con un borde ancho y suave (sin escalones ni el rectángulo hundido): adentro los empujes del mouse, del pulso, del golpe y de las ondas se apagan y los bloques se asientan; el brillo empieza afuera', `radio ${String(C.radio)} u · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
-controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
-controlPositivo('  y un borde angosto (escalones de bloque)', [simB3, ENERGIA_EN_LA_SIMULACION_GLSL, { radio: C.radio, borde: 1.6, amortigua: C.amortigua }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => circuloBien(si, di, c))
+  dib.includes('piston = pistonDeLaLuz( xz ) * llego * ( 1.0 - calmaDelFinal( xz ) ) * uEnergiaDeLaLuz;') && dib.includes('return min( 1.8, e ) * uEnergiaDeLaLuz;') &&
+  c.margen >= FILO.desde + FILO.ancho * (1 + FILO.crece) && 0.7072 * 0.8 + c.margen + c.borde < 2.5 && c.borde >= 0.8 && c.amortigua >= 10
+afirmar(margenBien(simB3, ENERGIA_EN_LA_SIMULACION_GLSL, C), 'una vez encastrado, alrededor del logo un MARGEN al ras pegado al hueco (no el círculo de antes: la energía llega hasta el logo): los bloques que tocan el filo quedan al ras y quietos (los empujes del mouse, del pulso, del golpe y de las ondas se apagan); la luz sale por sus juntas hasta el borde', `al ras hasta ${(0.7072 * 0.8 + C.margen).toFixed(2)} u del logo (desde el centro del bloque) · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
+controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
+controlPositivo('  y el círculo liso de antes (medido con el radio)', [simB3.replace('distanciaAlLogo( xz ) ) );', 'length( xz ) ) );'), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
+controlPositivo('  y un margen que no cubre el filo (un bloque pegado lo taparía)', [simB3.replace(`+ ${C.margen.toFixed(3)};`, '+ 0.050;'), ENERGIA_EN_LA_SIMULACION_GLSL, { ...C, margen: 0.05 }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
 const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
-afirmar(entornoB3.includes('entradas.reducido = quieto || EN_VIVO.fin > 0'), '  y durante el final el logo no larga anillos del pulso (cruzaban el círculo quieto: anillos y ondas en escalones)')
+// [PULIDO 6] E2 · la regla se revisó: el círculo ya no existe; los anillos del pulso siguen apagados en el final porque sus ondas
+// son las del logo, que ahora nacen en el filo (en la energía y en la física del golpe: `luzDeAbajo.ts`, `enElPiso.ts`).
+afirmar(entornoB3.includes('entradas.reducido = quieto || EN_VIVO.fin > 0'), '  y durante el final el logo no larga anillos del pulso: sus ondas son las del logo, que nacen en el filo (antes cruzaban el círculo quieto)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B4 · El polvo en el pie: en la cinemática no se posa; el que cae no atraviesa las piezas del pie (un cupo se apoya)')

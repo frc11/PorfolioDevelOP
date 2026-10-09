@@ -5,10 +5,10 @@ import { FLOOR_Y } from '../probeScene'
 import type { GestoDeScroll } from '../../gestosDelScroll'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
-import { CALMA_EN_EL_PISO, FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
+import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { entornoDeLaEscena } from '../entorno'
 import { CAMPO_QUIETO_EN, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
-import { ANILLO_DE_LUZ, ANILLO_DEL_PRODUCTO, LUZ_DEL_ANILLO, partesDelAnillo, pulsoDelAnillo } from './anilloDeLuz'
+import { FILO_DEL_PRODUCTO, FILO_EN_VIVO, crearElFilo, creceDelFilo, luzDelFilo, seguirAlLogo, velocidadDeLaCorriente, type FiloArmado, type FiloDelLogo } from './filoConPoder'
 import { LOGO_DEL_FINAL, LOGO_DEL_FINAL_EN_VIVO } from './logoDelFinal'
 import { AIRE } from '../polvo/parche'
 import { sonar } from '../../sonido/bus'
@@ -95,6 +95,8 @@ export interface EstadoDelFinal {
   haz: THREE.Object3D | null
   /** [EL ENCASTRE] 2D · el pozo debajo del hueco. */
   readonly pozo: ReturnType<typeof crearElPozo>
+  /** [PULIDO 6] E2 · el filo por afuera del logo (`filoConPoder.ts`). */
+  readonly filo: FiloArmado
   /** [EL ENCASTRE] 2F · el rastro del mouse en el piso. */
   readonly rastro: EstadoDelRastro
   /** [PULIDO 1] P22 · con movimiento reducido (abajo de 1024): sin cinemática, el estado final quieto al llegar al fondo. */
@@ -142,6 +144,7 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     temblor: new THREE.Vector3(),
     haz: null,
     pozo: crearElPozo(formas, espesor),
+    filo: crearElFilo(formas, espesor),
     rastro: rastroQuieto(),
     estatico,
     angosto,
@@ -170,11 +173,8 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uOscuroDelBrillo.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(0, 0)
-  LUZ_DEL_ANILLO.uLuzDelAnillo.value = 0
-  LUZ_DEL_ANILLO.uEnsambleDelAnillo.value = 0
-  LUZ_DEL_ANILLO.uLuzDelDisco.value = 0
+  apagarElFilo(s.filo)
   LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value = 0
-  LOGO_DEL_FINAL_EN_VIVO.uFiloDelFinal.value = 0
   AIRE.uSinPolvoSobreElLogo.value.w = 0
   s.pozo.grupo.visible = false
   s.aplicado = false
@@ -190,17 +190,22 @@ export interface CuadroDeLaEscena {
 const AL_FONDO_PX = 2
 /** [PULIDO 2] 1 · sólo para el banco: el reloj clavado en un `fin` (para medir el contraste del pie en un cuadro quieto). */
 export const FINAL_DEL_BANCO: { fijo: number | null } = { fijo: null }
-/** [PULIDO 2] 4 · dónde la luz se apaga contra el mar calmo (u, desde y hasta: el anillo de su borde, más el margen). */
-const CALMA_DE_LA_LUZ = [CALMA_EN_EL_PISO.radio + 0.5 * CALMA_EN_EL_PISO.borde, CALMA_EN_EL_PISO.radio + CALMA_EN_EL_PISO.borde + LUZ_DE_ABAJO.margen] as const
 /** [PULIDO 1] P22 · el ancho del logo (u) si la escena todavía no lo publicó: el del SVG a su escala. */
 const ANCHO_DEL_LOGO = 6.9
 const ANTES_DEL_FINAL = new THREE.Quaternion()
 const ahoraS = (): number => performance.now() / 1000
-/** [PULIDO 5] D2 · la variante de la luz del encastre de esta carga (`?anillo=`; sin bandera, `tubo`), leída una vez. */
-let partesDeLaLuz: ReturnType<typeof partesDelAnillo> | null = null
-const suave = (u: number): number => {
-  const x = Math.min(1, Math.max(0, u))
-  return x * x * (3 - 2 * x)
+/** [PULIDO 6] E2 · la variante del filo de esta carga (`?filo=`; sin bandera, `corriente`), leída una vez. */
+let varianteDelFilo: FiloDelLogo | null = null
+
+/** [PULIDO 6] E2 · el filo apagado (sin el final, o al soltarlo). */
+function apagarElFilo(filo: FiloArmado): void {
+  const F = FILO_EN_VIVO
+  F.uLuzDelFilo.value = 0
+  F.uCreceDelFilo.value = 0
+  F.uCorrienteDelFilo.value = 0
+  F.uLatidoDelFilo.value.set(0, 0)
+  F.uDescargaDelFilo.value = 0
+  filo.malla.visible = false
 }
 
 /** [PULIDO 2] 2 · cuánto tarda el poder del piso en irse (s) cuando el final vuelve (sube de una: llega con el golpe). */
@@ -328,12 +333,13 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     logo.rotation.x = logo.rotation.x * (1 - k) + s.pose.rotacionX
     logo.rotation.y *= 1 - k
     logo.updateMatrixWorld()
+    // [PULIDO 6] E2 · el filo va con el logo (en el grupo del final: la caja del logo no cambia).
+    seguirAlLogo(s.filo.malla, logo)
   }
   // [EL ENCASTRE] 2D · el hueco se abre cuando el logo está por llegar; el mar se calma a su alrededor; la mancha se va.
   const piso = FINAL_EN_EL_PISO
   piso.uApertura.value = apertura(fin)
   piso.uCalmaDelFinal.value = calma(fin)
-  LUZ_DE_ABAJO_EN_VIVO.uCalmaDeLaLuz.value.set(CALMA_DE_LA_LUZ[0], CALMA_DE_LA_LUZ[1], piso.uCalmaDelFinal.value)
   piso.uSinMancha.value = EN_VIVO.camara
   s.pozo.grupo.visible = piso.uApertura.value > 0
 
@@ -364,7 +370,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const expansion = expansionDeLaLuz(fin)
   // [PULIDO 4] C2 · `?energia=intensa` se borró: la energía es la del producto (B0).
   LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t
-  LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(expansion > 0 ? radioDeLaExpansion(expansion, CALMA_DE_LA_LUZ[0]) : 0, expansion)
+  // [PULIDO 6] E2 · desde el filo (sin el círculo liso, la energía llega hasta el logo).
+  LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(expansion > 0 ? radioDeLaExpansion(expansion, 0) : 0, expansion)
   const desdeElGolpe = t - s.golpeEn
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
@@ -396,20 +403,27 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // nacían las chispas) se fue con ellas.
   const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
   piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida
-  // [PULIDO 5] D2 · la luz del encastre (`anilloDeLuz.ts`; era el círculo difuso de PULIDO 4): aparece mientras el logo presiona
-  // (de que toca el piso al golpe), en el golpe el anillo se ensambla (sus huecos se cierran) y desde ahí queda sólido; pulsa con
-  // cada onda y con el golpe. Función de `fin` (al rebobinar se desarma igual); quieto, ensamblado y sin pulsos.
-  const pedido = entornoDeLaEscena().pruebas.anillo
-  const partes = (partesDeLaLuz ??= partesDelAnillo(pedido === 'no' ? ANILLO_DEL_PRODUCTO : pedido))
-  const conLuz = s.estatico ? (fin >= golpe ? 1 : 0) : suave((fin - aterriza) / Math.max(1e-6, golpe - aterriza))
-  const pulso = s.estatico ? 0 : Math.max(ANILLO_DE_LUZ.onda * pulsoDelAnillo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), ANILLO_DE_LUZ.ondaS) * extendida, ANILLO_DE_LUZ.golpe * pulsoDelAnillo(desdeElGolpe, ANILLO_DE_LUZ.golpeS))
-  LUZ_DEL_ANILLO.uLuzDelAnillo.value = partes.tubo ? conLuz * (ANILLO_DE_LUZ.base + pulso) : 0
-  LUZ_DEL_ANILLO.uEnsambleDelAnillo.value = s.estatico ? 1 : suave((fin - golpe) / (ANILLO_DE_LUZ.ensambleS / RELOJ_DEL_FINAL.duracionS))
-  LUZ_DEL_ANILLO.uLuzDelDisco.value = partes.disco ? conLuz * (ANILLO_DE_LUZ.disco + pulso) : 0
+  // [PULIDO 5] D2 · la luz del encastre (el anillo, el disco). [PULIDO 6] E2 · se borró con el círculo liso: la luz es EL FILO
+  // (`filoConPoder.ts`), por afuera del logo. Se enciende de golpe en el golpe (en el mismo cuadro que suena; al rebobinar se
+  // apaga al pasarlo para atrás) y hace luz a su manera (`?filo=`; sin bandera, `corriente`): la corriente corre (se acelera con
+  // cada onda y en el golpe), el latido late y sale al piso, la descarga sale por las juntas. Quieto: encendido, sin moverse.
+  const variante = (varianteDelFilo ??= ((v: FiloDelLogo | 'no'): FiloDelLogo => (v === 'no' ? FILO_DEL_PRODUCTO : v))(entornoDeLaEscena().pruebas.filo))
+  const luz = luzDelFilo(fin, golpe)
+  const desdeLaOnda = s.estatico ? Number.POSITIVE_INFINITY : desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)
+  const desdeElGolpeVivo = s.estatico || !Number.isFinite(desdeElGolpe) ? Number.POSITIVE_INFINITY : desdeElGolpe
+  if (!s.estatico && luz > 0) s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt
+  const F = FILO_EN_VIVO
+  F.uLuzDelFilo.value = luz
+  F.uCreceDelFilo.value = luz * creceDelFilo(variante, desdeElGolpeVivo, desdeLaOnda)
+  F.uFaseDelFilo.value = s.filo.fase
+  F.uCorrienteDelFilo.value = variante === 'corriente' && !s.estatico ? luz : 0
+  const latido = Math.min(desdeLaOnda, desdeElGolpeVivo)
+  F.uLatidoDelFilo.value.set(Number.isFinite(latido) ? latido : 0, variante === 'pulso' && Number.isFinite(latido) ? luz * (desdeElGolpeVivo <= desdeLaOnda ? 1.5 : 1) : 0)
+  F.uDescargaDelFilo.value = variante === 'descarga' && !s.estatico ? luz : 0
+  s.filo.malla.visible = luz > 0
   // [PULIDO 5] D2 · el logo, lo que más se ve (`logoDelFinal.ts`): con la cámara que sube, sin niebla, con menos reflejo y sin
-  // polvo encima; con filo, su borde blanco (con la luz del encastre).
+  // polvo encima.
   LOGO_DEL_FINAL_EN_VIVO.uLogoDelFinal.value = sube
-  LOGO_DEL_FINAL_EN_VIVO.uFiloDelFinal.value = partes.filo ? conLuz : 0
   AIRE.uSinPolvoSobreElLogo.value.set(logo?.position.x ?? 0, logo?.position.z ?? 0, LOGO_DEL_FINAL.sinPolvo, sube)
   // [RETOQUE DEL ENCASTRE] 1G · y el giro que le dio el final (de ahora a antes): el pie ve la luz como antes.
   ANTES_DEL_FINAL.copy(CAMARA_SIN_EL_MOUSE.quaternion)

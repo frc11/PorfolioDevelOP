@@ -36,7 +36,7 @@ import {
   naceLaOnda,
   radioDeLaExpansion,
 } from '../escena/final/luzDeAbajo'
-import { ANILLO_DE_LUZ as CIRCULO_DE_LUZ, pulsoDelAnillo as pulsoDelCirculo } from '../escena/final/anilloDeLuz'
+import { FILO, velocidadDeLaCorriente } from '../escena/final/filoConPoder'
 import { MARCO_DEL_CTA } from '../escena/ctaDelFinal/armadoDelCta'
 import { LISTA_DEL_CTA } from '../escena/ctaDelFinal/transformacion'
 import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
@@ -150,16 +150,17 @@ controlPositivo('  el detector VE las zonas de PULIDO 2', `${luzTs}\nexport func
 type Expansion = (fin: number) => number
 const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
 const enS = (s: number): number => s / RELOJ_DEL_FINAL.duracionS
+// [PULIDO 6] E2 · la expansión sale del filo (desde 0 en la distancia al logo; antes, del borde del círculo calmo, 6,2 u).
 const expansionBien = (e: Expansion, c: string): boolean => {
   const finDelRebobinado = (s: number, dura: number): number => 0.35 + 0.65 * quedaDelRebobinado(s, dura)
   const dura = duracionDelRebobinado(1)
   let [salto, radio] = [0, 0]
   for (let s = 1 / 60; s <= dura; s += 1 / 60) {
     salto = Math.max(salto, Math.abs(e(finDelRebobinado(s, dura)) - e(finDelRebobinado(s - 1 / 60, dura))))
-    radio = Math.max(radio, Math.abs(radioDeLaExpansion(e(finDelRebobinado(s, dura)), 6.2) - radioDeLaExpansion(e(finDelRebobinado(s - 1 / 60, dura)), 6.2)))
+    radio = Math.max(radio, Math.abs(radioDeLaExpansion(e(finDelRebobinado(s, dura)), 0) - radioDeLaExpansion(e(finDelRebobinado(s - 1 / 60, dura)), 0)))
   }
   return e(golpe) === 0 && e(golpe - 0.01) === 0 && Math.abs(e(golpe + enS(0.75)) - 0.5) < 0.05 && e(golpe + enS(1.5)) === 1 && e(1) === 1 &&
-    radioDeLaExpansion(1, 6.2) >= 30 && salto < 0.2 && radio < 6 && c.includes('const expansion = expansionDeLaLuz(fin)') &&
+    radioDeLaExpansion(1, 0) >= 30 && salto < 0.2 && radio < 6 && c.includes('const expansion = expansionDeLaLuz(fin)') &&
     ENERGIA_EN_LA_SIMULACION_GLSL.includes('float llego = 1.0 - smoothstep( uExpansionDeLaLuz.x - ')
 }
 afirmar(expansionBien(expansionDeLaLuz, cuadro), '  arranca con el encastre: se expande desde el hueco en ~1,5 s hasta cubrir la escena; al rebobinar se retira con la curva de P2, sin cortes', `hasta ${String(L.expansion.hasta)} u`)
@@ -325,23 +326,30 @@ const entornoDelPulso = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 // con la energía y un pulso con cada onda (corridas al azar), sin volver a encender los anillos del pulso en el final.
 // [PULIDO 5] D2 · el círculo difuso se borró por pedido: la luz es el anillo (`anilloDeLuz.ts`, que fija `s56` D2), con las mismas
 // condiciones: después del oscurecimiento (y ahora también de la niebla), con un pulso con cada onda.
-const logoBien = (g: string, logo: string, c: string): boolean => {
-  const oscurece = g.indexOf('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;')
-  const filo = g.indexOf('gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );')
+// [PULIDO 6] E2 · el anillo se borró (gana el filo): la luz del encastre es el filo, una malla aparte por afuera del logo
+// (`filoConPoder.ts`), así que queda fuera del oscurecimiento de la sala por construcción; y lo que pulsa con cada onda es su
+// corriente, que se acelera (la del producto). Lo demás, igual: las ondas corridas al azar y los anillos del pulso apagados.
+const filoConPoder = sinComentarios(leer('_lib/escena/final/filoConPoder.ts'))
+const logoBien = (filo: string, logo: string, c: string): boolean => {
   const nacimientos = Array.from({ length: 40 }, (_, n) => naceLaOnda(n))
   const intervalos = nacimientos.slice(1).map((v, i) => v - nacimientos[i])
   const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length
   const desvio = Math.sqrt(intervalos.reduce((a, b) => a + (b - media) ** 2, 0) / intervalos.length)
-  const pulsa = nacimientos.slice(1, 30).every((t0) => pulsoDelCirculo(desdeLaUltimaOnda(t0 + 0.01), CIRCULO_DE_LUZ.ondaS) > 0.9 && pulsoDelCirculo(desdeLaUltimaOnda(t0 + 1), CIRCULO_DE_LUZ.ondaS) < 0.1)
-  return oscurece > 0 && filo > oscurece && !logo.includes('RimDelLogo') && !/energia === 'inestable'/.test(logo) &&
-    CIRCULO_DE_LUZ.base > 0.5 && pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
+  const v = FILO.corriente.velocidad
+  const pulsa = nacimientos.slice(1, 30).every((t0) => velocidadDeLaCorriente(desdeLaUltimaOnda(t0 + 0.01), Number.POSITIVE_INFINITY) > 2 * v && velocidadDeLaCorriente(desdeLaUltimaOnda(t0 + 1.8), Number.POSITIVE_INFINITY) < 1.15 * v)
+  return !filo.includes('uOscuroDelBrillo') && !/fog:\s*true/.test(filo) && !logo.includes('RimDelLogo') && !/energia === 'inestable'/.test(logo) &&
+    pulsa && desvio > 0.2 && Math.abs(media - L.ondas.cadaS) < 0.3 &&
     ENERGIA_EN_LA_SIMULACION_GLSL.includes(`float tau = uRelojDeLaLuz - ( m + ${String(L.ondas.corre)} * azarDeLaLuz( vec2( m, 4.7 ) ) ) * ${String(L.ondas.cadaS)};`) &&
-    c.includes('const pulso = s.estatico ? 0 : Math.max(ANILLO_DE_LUZ.onda * pulsoDelAnillo(desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value), ANILLO_DE_LUZ.ondaS) * extendida, ANILLO_DE_LUZ.golpe * pulsoDelAnillo(desdeElGolpe, ANILLO_DE_LUZ.golpeS))') &&
+    c.includes('const desdeLaOnda = s.estatico ? Number.POSITIVE_INFINITY : desdeLaUltimaOnda(LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value)') && c.includes('s.filo.fase += velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo) * dt') &&
     entornoDelPulso.includes('entradas.reducido = quieto || EN_VIVO.fin > 0')
 }
-afirmar(logoBien(dibujoB0, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era); [PULIDO 5] en el anillo: fuera del oscurecimiento, con un pulso con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `luz ${String(CIRCULO_DE_LUZ.base)}, pulso ${String(CIRCULO_DE_LUZ.ondaS)} s`)
-controlPositivo('  el detector VE la luz del anillo oscurecida con la sala', ['gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );\n\t', dibujoB0.replace('\n\tgl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );', '')].reduce((anillo, g) => g.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;', `${anillo}gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;`)), (g: string) => logoBien(g, luzDelLogo, cuadro))
-controlPositivo('  y un anillo sin pulso', cuadro.replace('const pulso = s.estatico ? 0 :', 'const pulso = 0 && '), (c: string) => logoBien(dibujoB0, luzDelLogo, c))
+afirmar(logoBien(filoConPoder, luzDelLogo, cuadro), '  [PULIDO 4] el brillo, en el círculo quieto (el logo como era); [PULIDO 5] en el anillo; [PULIDO 6] en el filo: fuera del oscurecimiento, con una corriente que se acelera con cada onda que larga (corridas al azar); los anillos del pulso siguen apagados en el final', `corriente ${String(FILO.corriente.velocidad)} u/s, ×${String(1 + FILO.corriente.onda)} con la onda`)
+controlPositivo('  el detector VE la luz del filo oscurecida con la sala', `${filoConPoder}\nuniform float uOscuroDelBrillo;`, (f: string) => logoBien(f, luzDelLogo, cuadro))
+controlPositivo('  y un filo sin pulso', cuadro.replace('velocidadDeLaCorriente(desdeLaOnda, desdeElGolpeVivo)', 'FILO.corriente.velocidad'), (c: string) => logoBien(filoConPoder, luzDelLogo, c))
+const sinAnillo = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && !g.includes('conElAnillo') && !g.includes('uLuzDelAnillo')
+afirmar(sinAnillo(dibujoB0), '  [PULIDO 6] y el piso ya no dibuja el anillo (se borró con el círculo liso)')
+controlPositivo('  el detector VE el anillo de antes en el piso', `${dibujoB0}
+gl_FragColor.rgb = conElAnillo( gl_FragColor.rgb, vPiso.xz );`, sinAnillo)
 
 // EL FRENTE DESDE EL GOLPE: la meseta de la súper onda tapaba las rendijas el primer segundo o dos; los cantos de las tapas (que
 // se ven desde arriba aunque la rendija sea honda) y el frente de la expansión brillan más: el frente se lee desde el golpe.

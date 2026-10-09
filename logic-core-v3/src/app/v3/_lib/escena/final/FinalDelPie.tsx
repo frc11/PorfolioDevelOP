@@ -16,7 +16,7 @@ import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { crearElPlanoDeLaLuz } from './planoDeLaLuz'
 import { LUZ_DE_ABAJO_EN_VIVO } from './luzDeAbajo'
 import { ENCUADRE_EN_VIVO, marcarElPie, medirElEncuadreDelPie } from './encuadreDelPie'
-import { HUECO, formasDelLogo, mascaraDelLogo } from './hueco'
+import { HUECO, distanciaDelLogo, formasDelLogo, mascaraDelLogo } from './hueco'
 import { escribiendoEnUnCampo } from './teclado'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { EN_VIVO } from './recorridoDelFinal'
@@ -70,13 +70,18 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
     const piso = FINAL_EN_EL_PISO
     piso.uHueco.value = mascara.textura
     piso.uMarcoDelHueco.value.copy(mascara.marco)
+    // [PULIDO 6] E2 · la distancia al logo (la calma, la energía, el golpe y las ondas se miden desde el filo).
+    const distancia = distanciaDelLogo(logo.formas, logo.caja, angosto ? HUECO.campo.lado / 2 : HUECO.campo.lado)
+    piso.uDistanciaAlLogo.value = distancia.textura
+    piso.uMarcoDeLaDistancia.value.copy(distancia.marco)
     logo.caja.getSize(piso.uCajaDelLogo.value).multiplyScalar(0.5)
     // [PULIDO 2] 4 · el plano que brilla debajo del piso (se ve por las rendijas). [PULIDO 3B] B0 · las chispas se borraron.
     const plano = crearElPlanoDeLaLuz(PISO_VIVO.radioDeReferencia - 1)
     m.current = estado
-    g.add(estado.pozo.grupo, plano)
+    // [PULIDO 6] E2 · y el filo por afuera del logo (con la matriz del logo en cada cuadro: `filoConPoder.ts`).
+    g.add(estado.pozo.grupo, estado.filo.malla, plano)
     return () => {
-      g.remove(estado.pozo.grupo, plano)
+      g.remove(estado.pozo.grupo, estado.filo.malla, plano)
       plano.geometry.dispose()
       if (plano.material instanceof THREE.Material) plano.material.dispose()
       soltarElFinal(estado, grupoDelLogo)
@@ -86,8 +91,11 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
       EN_VIVO.pegadoDesde = Number.POSITIVE_INFINITY
       piso.uGolpe.value.w = 0
       piso.uHueco.value = null
+      piso.uDistanciaAlLogo.value = null
       estado.pozo.soltar()
+      estado.filo.soltar()
       mascara.textura.dispose()
+      distancia.textura.dispose()
       m.current = null
     }
   }, [logo, logoGroupRef, angosto, estatico])
