@@ -343,9 +343,10 @@ afirmar(Math.abs(alRas.centro.y + TAM.espesor / 2 - FLOOR_Y) < 1e-9, '  al final
 // Se abre cuando el logo está por llegar (cerrado mientras se acuesta, abierto antes de que caiga adentro).
 afirmar(aperturaDelHueco(1.5 / RELOJ_DEL_FINAL.duracionS) === 0 && aperturaDelHueco(HUECO.abre.hastaS / RELOJ_DEL_FINAL.duracionS) === 1 && HUECO.abre.hastaS < aterrizaje(TAM) && HUECO.abre.desdeS > FINAL_DEL_PIE.caida.desdeS - 1, 'el hueco se abre cuando el logo está por llegar: arranca en el último tramo del acostarse y está abierto antes de que el logo toque', `de ${String(HUECO.abre.desdeS)} a ${String(HUECO.abre.hastaS)} s · toca a los ${aterrizaje(TAM).toFixed(2)} s`)
 // En el piso: descarta sus tapas y costados donde la máscara (en el plano del logo: x, −z) dice adentro y la apertura deja.
+// [PULIDO 8] G3 · y, con el hueco abierto entero, en las contraformas (canal B: lo liso de PULIDO 7 F1).
 const enElPisoTs = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
 const huecoEnElPiso = (c: string): boolean =>
-  c.includes('vec2 uv = ( vec2( xz.x, - xz.y ) - uMarcoDelHueco.xy ) / uMarcoDelHueco.zw;') && c.includes('return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;') && c.includes('\\n\\tif ( enElHueco( vPiso.xz ) ) discard;') &&
+  c.includes('vec2 uv = ( vec2( xz.x, - xz.y ) - uMarcoDelHueco.xy ) / uMarcoDelHueco.zw;') && c.includes('return ( m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95 ) || ( uApertura >= 1.0 && m.b > 0.5 );') && c.includes('\\n\\tif ( enElHueco( vPiso.xz ) ) discard;') &&
   c.includes("'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );'") && c.includes("'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {'") && c.includes('dibujo *= 1.0 - calmaDelFinal( xz );')
 afirmar(huecoEnElPiso(enElPisoTs), '  en el piso: las tapas y los costados se descartan donde la máscara del logo acostado dice adentro (y la apertura deja: se abre desde el medio de los trazos hasta el borde exacto); alrededor el mar se calma y el techo que esquivaba al logo se apaga (entra en el piso); la mancha de contacto se va con la cámara')
 controlPositivo('el detector VE un hueco que no se abre (sin descarte)', enElPisoTs.replace('\\n\\tif ( enElHueco( vPiso.xz ) ) discard;', ''), huecoEnElPiso)

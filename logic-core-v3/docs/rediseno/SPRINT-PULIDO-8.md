@@ -106,3 +106,24 @@ Aprobados por el humano: el pie entero (la descarga y las contraformas lisas) y 
 | Dónde | Antes | Ahora | Por qué |
 |---|---|---|---|
 | `s37` T3 · 2 · el «Hablanos» del final | `onFocus={(e) => alEnfocar(e.currentTarget, progreso.get())}` | el mismo llamado, sólo si `e.target.matches(':focus-visible')` | El clic ya cae a mitad del giro: con el foco del mouse, la página saltaba al final debajo de Contacto. Lo que fija, igual: el foco del teclado lleva al final |
+
+## G3 · El verificar pendiente
+
+Se corrió con el protocolo de memoria:
+1. El Chrome del banco no estaba abierto.
+2. Con el dev server prendido había 2,72 GB libres; se apagó (su árbol, con `taskkill /T`) y quedaron 5,15 GB.
+3. `npm run verificar` completo.
+4. El dev server, de nuevo arriba: `/v3` responde 200.
+
+**Resultado: 66 pasos, 9 con falla.**
+- 8 son los rojos de la base de PULIDO 6: s1, s2, s3, s4, s5, s7, s8 y s17 (piden un build, que no se corre).
+- El noveno era `s50`. Se arregló:
+  - venía de PULIDO 7 F1: la condición del hueco en el piso sumó las contraformas (canal B), y `s50` fija el texto exacto de la
+    condición anterior;
+  - no se había visto porque el verificar de PULIDO 7 se cortó y `s50` no estaba en su gate;
+  - ahora `s50` da 61/0.
+- s53 a s59, verdes.
+
+| Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|
+| `s50` · en el piso, el hueco | `return m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95;` | `return ( m.r > 0.5 && m.g > ( 1.0 - uApertura ) * 0.95 ) \|\| ( uApertura >= 1.0 && m.b > 0.5 );` | PULIDO 7 F1: con el hueco abierto entero, las contraformas también se descartan (ahí va lo liso). La condición de antes sigue entera adentro |
