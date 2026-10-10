@@ -125,8 +125,33 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   Chrome, una página): se redimensionaban entre sí. Regla: con una tanda en marcha, ningún otro script contra el banco.
 - Los cuadros del viaje: el registro de rAF arrancaba un lazo nuevo en cada parada (los cuadros salían repetidos): uno solo.
 
+- HECHO · la matriz (primera corrida y la de confirmación, con todos los arreglos), 12 anchos, de día y de noche (bajando: día
+  hasta Portfolio, noche después; subiendo: la otra luz), con los viajes del menú (Demos incluido) como camino a cada reposo y
+  las entradas barridas de a un tercio de cuadro bajando y subiendo:
+
+  | Ancho | Reposo: texto×texto | Reposo: texto×logo (≥1024) | Desborde | Consola | Entradas: lo que queda |
+  |---|---|---|---|---|---|
+  | 320 · 375 | 0 | — | 0 | 0 | la frase final de Portfolio contada debajo del panel de Demos (no se ve: mirado) |
+  | 390 · 414 · 768 · 820 | 0 | — | 0 | 0 | ídem (1–4 paradas) |
+  | 1024–2560 | 2 (los dos renglones inclinados del titular del hero: cajas proyectadas, la tinta no se toca: mirado) | 0 | 0 | 0 | Quiénes somos: 0 (antes, toda la salida); lo demás, mirado en las capturas: la copia del rollover de los títulos de Por qué, las palabras gigantes y tenues de fondo de Tu panel, el cartel de Portfolio que no se ve, las placas del CTA |
+
+  Abajo de 1024 el logo va detrás del texto por diseño (la mezcla): no se cuenta.
+- Los forms en todos sus estados: ver la sección 1 (pie y panel, `?envio=lento|error`, las dos variantes del volteo, a 1440, 1024,
+  768 y 390, con Reintentar, Enviar otro y el autocompletado): ningún cuadro de más de 20 ms en corridas tibias.
+- La caída del logo, las dos variantes, cuadro a cuadro (12 momentos con el reloj clavado y la corrida en vivo): sin saltos ni
+  interpenetración; el golpe en el contacto.
+- `?hilos=si` a 1440 y 390: 13,34 ms por cuadro con y sin hilos (p95 13,7; ninguno de más de 20 ms), sin errores de consola. De
+  noche los hilos cruzan el texto de Portfolio (finos, por encima): es la exploración detrás de la bandera; anotado, no tocado.
+
 ### 5 · Loop y verificar final
-- PENDIENTE.
+- Siete defectos encontrados, arreglados y re-verificados (tabla de arriba). La matriz de confirmación no mostró ningún ancho
+  roto por un arreglo.
+- Los viajes del menú (sin capturas ni traza, `v-todos.ts`, todos los destinos bajando y subiendo, dos vueltas, a 1440 y 390):
+  siguen perdiendo uno o dos cuadros (27–40 ms a 75 Hz) al arrancar y al llegar. El recálculo de la página entera por las clases
+  de Lenis (22 ms) ya no está; lo que queda está repartido (el perfil de un viaje contra 2 s quietos: las lecturas del DOM por
+  cuadro de los lazos de la escena —el amanecer y la noche del final miden Servicios y Tu panel, el `useScroll` de Framer—,
+  el trabajo de React al arrancar el viaje). Arreglarlo es rehacer cómo mide la escena (cachear las posiciones en el documento,
+  como `esquivaDelLogo`): un cambio de arquitectura en lazos aprobados, no un arreglo puntual. Anotado en «Lo que no quedó bien».
 
 ## Defectos encontrados
 
@@ -149,11 +174,36 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | Tanda B (los formularios y C1) · al empezar | 6358 MB | 807 MB | Chrome del banco relanzado una vez (para borrar el caché de sombreadores: el diagnóstico) |
 | Tanda B · al terminar | 3876 MB | 856 MB | +49 MB de no paginado en la tanda |
 | Tanda C · al empezar | 4484 MB | 812 MB | |
+| Tanda C · al terminar | 3584 MB | 823 MB | El más bajo del sprint: se cerró el banco y el servidor para compilar (volvió a 6587) |
+| Tandas D, E, H (rotación, cruces, cabecera) | 5379–7336 MB | 788–838 MB | |
+| Primera matriz (G, 12 anchos) | 5565–6340 MB | 797–863 MB | |
+| Tanda I (entradas de escritorio) | 5465–5932 MB | 830–839 MB | |
+| Seis compilaciones más (la salida de Quiénes somos, Lenis): cada una con el banco cerrado y relanzado | 7437–7990 MB | 754–804 MB | |
+| Matriz de confirmación · al empezar | 6862 MB | 801 MB | |
+
+El no paginado se movió entre 754 y 875 MB en todo el sprint: ninguna tanda lo subió más de 60 MB (lejos de los 300 que pedían
+anotarse). El driver nuevo no muestra la fuga de PULIDO 10.
 
 ## VERIFICAR TRAS REINICIO
 
-(vacío por ahora)
+Nada pendiente del banco: todo lo de PULIDO 11 y PULIDO 12 se corrió y se miró. Para el próximo sprint de rendimiento:
+`~/.cache/b4-medicion/pulido-11/_scripts/v-todos.ts 1440 900 2` y `v-perfil.ts 1440 900 "#servicios" "#tu-panel"` (el estado de hoy).
 
 ## Lo que no quedó bien
 
-(se completa al cierre)
+- Los viajes del menú pierden 1–2 cuadros (27–40 ms) al arrancar y al llegar (sección 5): queda para un sprint de rendimiento
+  de la escena (medir una vez por tamaño y leer `scrollY`, como `esquivaDelLogo`). La causa de fondo de los recálculos enteros
+  (las reglas globales de `@tailwindcss/typography` con `[class~="not-prose"] *`) está en `globals.css`, compartido: no se tocó.
+- Quiénes somos: quien se queda leyendo 30–40 px pasado el reposo no ve el cuerpo (se fue porque ahí ya cruza el logo) hasta
+  volver un poco o tocar «Quiénes somos» en el menú.
+- La tarjeta del resultado recuperada tras girar una tablet vuelve a caer (y suena el pestillo) una vez; y en el pie de volumen
+  toma su alto natural (463 en vez de 400 a 1024 × 768): su esquina de abajo a la derecha pasa debajo del parlante y el progreso.
+- C1 a 2560: «El recorrido» a lo ancho deja ~250 px entre sus dos columnas (es la geometría pedida; a la vista pueden leerse
+  como dos listas).
+- Los cuadros largos de la PRIMERA vez que se ve cada cosa (53–880 ms) son el caché de sombreadores vacío tras el driver nuevo
+  (Skia en el proceso de la GPU): los usuarios con el caché vacío los van a ver una vez; no se arregla desde la página sin sacar
+  los filtros (gusto).
+- `?hilos=si`: de noche los hilos pasan por encima del texto de Portfolio; de día casi no se ven en las capturas chicas.
+- El instrumento de solapes sigue sin poder ver algunas cosas tapadas por un fondo en degradé o una máscara (la frase final de
+  Portfolio debajo de Demos a 320/375): esos se miraron en las capturas.
+- El giroscopio (F) sigue sin probarse en un teléfono (hace falta HTTPS y un aparato).
