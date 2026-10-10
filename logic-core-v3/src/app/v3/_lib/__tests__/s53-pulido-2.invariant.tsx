@@ -484,7 +484,7 @@ const finas6 = Array.from({ length: 1001 }, (_, k) => k / 1000)
 const poseBien6 = (f: (fin: number) => number): boolean =>
   f(0) === 1 && f(0.05) === 1 && f(0.3) > 0.9 && f(0.68) === 0 && f(0.734) === 0 && f(1) === 0 && finas6.every((x, k) => f(x) >= 0 && f(x) <= 1 && (k === 0 || f(x) <= f(finas6[k - 1]) + 1e-9))
 const enArco6 = (f: (fin: number) => number): boolean => f(0) === 1 && f(1) === 0 && finas6.every((x, k) => k === 0 || f(x) <= f(finas6[k - 1]) + 1e-9)
-afirmar(poseBien6((x) => sombraDeLaPose(x, TAMANO6, 'lenta')) && enArco6((x) => sombraDeLaPose(x, TAMANO6, 'angulo')), '  la pose: entera en el aire y parado en el piso, nada en el hueco, y se va de a poco mientras cae (nunca vuelve sola, ni en el rebote); en arco, igual')
+afirmar(poseBien6((x) => sombraDeLaPose(x, TAMANO6)) && enArco6((x) => sombraDeLaPose(x, TAMANO6)), '  la pose: entera en el aire y parado en el piso, nada en el hueco, y se va de a poco mientras cae (nunca vuelve sola, ni en el rebote)')
 controlPositivo('  el detector VE una sombra que no se va al apoyarse', (x: number) => (x < 0.2 ? 1 : 0.4), poseBien6)
 // El fundido, en el rebobinado a 60 cuadros por segundo: la pose pide la sombra entera de golpe.
 const fundidoBien6 = (f: (a: number, o: number, dt: number) => number): boolean => {
@@ -503,7 +503,7 @@ const luzDelLogo6 = sinComentarios(leer('_lib/escena/LuzDelLogo.tsx'))
 const componenteDelFinal6 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
 const LINEA_DEL_FUNDIDO = 'SOMBRA_EN_EL_FINAL.fundido = s.sombra'
 const cableadoBien6 = (c: string): boolean =>
-  c.includes('s.sombra = s.estatico ? sombraDeLaPose(fin, tamano, s.caida) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano, s.caida), dt)') && c.indexOf(LINEA_DEL_FUNDIDO) > 0 && c.indexOf(LINEA_DEL_FUNDIDO) < c.indexOf('if (!activo) {') &&
+  c.includes('s.sombra = s.estatico ? sombraDeLaPose(fin, tamano) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano), dt)') && c.indexOf(LINEA_DEL_FUNDIDO) > 0 && c.indexOf(LINEA_DEL_FUNDIDO) < c.indexOf('if (!activo) {') &&
   luzDelLogo6.includes('* (1 - enElAire) * SOMBRA_EN_EL_FINAL.fundido') && componenteDelFinal6.includes('SOMBRA_EN_EL_FINAL.fundido = 1')
 afirmar(cableadoBien6(finalDelPie6), '  el cableado: el final la lleva en cada cuadro (también después de soltarse, así el fundido termina), la sombra la multiplica y al irse el final queda entera; quieto, sin fundido')
 controlPositivo('  el detector VE el fundido que se corta al soltar el final', `${finalDelPie6.replace(LINEA_DEL_FUNDIDO, '')}\n${LINEA_DEL_FUNDIDO}`, cableadoBien6)

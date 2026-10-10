@@ -2,23 +2,24 @@
 
 import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
+import { PrecalentarElResultado } from '../../_componentes/formularios/PrecalentarElResultado'
 import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
 import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
-import { transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
+import { transicionDelVolteo } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
 import { CamposDelContacto } from './CamposDelContacto'
 import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, TITULO, avisoDeErrores, type Interes } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from './enviarContacto'
-import { DESENFOQUE_DEL_FONDO_PX, TRANSICIONES } from './placa'
+import { DESENFOQUE_DEL_FONDO_PX, ENTRADA_DEL_PARALAJE, TRANSICIONES } from './placa'
 import { PlacaDelContacto } from './PlacaDelContacto'
 
 /**
@@ -50,13 +51,12 @@ export const MS_DEL_VELO = 400
  * lo abrió. Con error, el formulario vuelve con todo lo escrito y el error a la vista. Lo escrito vive en la hoja: la carga
  * y la tarjeta no lo tocan.
  *
- * [PULIDO 11] B · el panel también VOLTEA (el hundido se borró; `?volteo=centrado|columpio`): el formulario, la carga y la
+ * [PULIDO 11] B · el panel también VOLTEA (el hundido se borró; [PULIDO 13] · sobre el eje del medio): el formulario, la carga y la
  * tarjeta del resultado (`TarjetaDeResultado`, del alto del formulario: comparten el eje). Con el error, la tarjeta que no encaja
  * y «Reintentar», que vuelve al formulario con todo lo escrito; con el éxito, la que encaja, y la cuenta del cierre arranca
  * cuando su texto ya está.
  */
 export const CIERRE_MS = 3000
-const sinSuscripcion = (): (() => void) => () => undefined
 
 const VACIO: Omit<DatosDeContacto, 'intereses'> = { presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
 
@@ -97,7 +97,6 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const enviando = fase === 'enviando'
   const enviado = fase === 'exito'
   // [PULIDO 11] B1 · el volteo, como el pie; y la tarjeta ya se ve (terminó de entrar): arranca el encastre.
-  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'centrado' as const)
   const [seVe, setSeVe] = useState(false)
   // [PULIDO 11] B2 · con el éxito, el panel se cierra solo `CIERRE_MS` después de que su texto está.
   const [textoListo, setTextoListo] = useState(false)
@@ -107,6 +106,13 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)
   // UNA región de alerta: el resumen de los datos o el error del servidor (para el lector: el error se ve en su tarjeta).
   const [aviso, setAviso] = useState('')
+  // [PULIDO 13] K2 · con la placa ya llegada y el paralaje ya entrado (quieta), se precalienta la tarjeta del resultado: la primera
+  // vez no traba (el GPU compila sus sombreadores ahora, no cuando aparece).
+  const [precalentar, setPrecalentar] = useState(false)
+  useEffect(() => {
+    const llega = window.setTimeout(() => setPrecalentar(true), (TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000 + 100)
+    return () => window.clearTimeout(llega)
+  }, [])
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -182,7 +188,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     pedirFoco.current = null
     destino?.focus({ preventScroll: true })
   }
-  const cambio = transicionDelVolteo(variante, reducido)
+  const cambio = transicionDelVolteo(reducido)
   // [PULIDO 11] B4 · Enviar (el error vive en su tarjeta); mientras viaja el formulario ya se fue volteando.
   const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO
 
@@ -264,6 +270,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           </div>
 
           <div className="perspective-midrange">
+          <PrecalentarElResultado activo={precalentar && fase === 'formulario'} compacto={compacto} />
           <AnimatePresence mode="wait" initial={false}>
           {enviando ? (
             // [PULIDO 10] J3 · la carga de develOP (el trazo del logo, o el giro con `?carga=giro`) y su estado; reemplaza al anillo.

@@ -17,7 +17,7 @@ import { DESPUES_DEL_ENVIO } from '../../_chrome/contacto/contenido'
 import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
 import { ANUNCIO_DE_EXITO, RESULTADO } from '../formularios/gracias'
-import { VOLTEO, varianteDelVolteo, type VarianteDelVolteo } from '../formularios/volteo'
+import { VOLTEO } from '../formularios/volteo'
 import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, frenteInicial, polvoInicial, quietoConHisteresis, tomarElFrente, type EstadoDelPolvoVivo } from '../escena/polvo/posarse'
@@ -117,46 +117,46 @@ controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace
 const CAJA = { ancho: 253, alto: 181 }
 const DESDE = { ancho: 253, alto: 400, dx: 0, dy: -63 }
 const ESPESOR = 30
-type Pose = (v: VarianteDelVolteo, t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
-const pose: Pose = (v, t, entrante, quieto = false) => {
+// [PULIDO 13] · un solo volteo (el centrado): el columpio se borró.
+type Pose = (t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
+const pose: Pose = (t, entrante, quieto = false) => {
   const m = new THREE.Matrix4()
-  const r = poseDeLaTransformacion(v, quieto, t, entrante, CAJA, DESDE, ESPESOR, m)
+  const r = poseDeLaTransformacion(quieto, t, entrante, CAJA, DESDE, ESPESOR, m)
   return { m, ...r }
 }
 const normal = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 1).transformDirection(m)
 const esquina = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 0).applyMatrix4(m)
 const MITAD = 0.5 - 1e-4
 const volteoBien = (p: Pose): boolean => {
-  // [PULIDO 11] B1 · el volteo es `centrado` (la misma cuenta); el columpio, en s62.
-  const [s0, sMitad, eMitad, e1] = [p('centrado', 0, false), p('centrado', MITAD, false), p('centrado', 0.5, true), p('centrado', 1, true)]
+  const [s0, sMitad, eMitad, e1] = [p(0, false), p(MITAD, false), p(0.5, true), p(1, true)]
   const enSuLugar = esquina(s0.m).distanceTo(new THREE.Vector3(DESDE.dx, -DESDE.dy, 0)) < 1e-6 && normal(s0.m).z > 0.999
   const deCanto = Math.abs(normal(sMitad.m).z) < 0.01 && Math.abs(normal(eMitad.m).z) < 0.01
-  const cambia = s0.visible && sMitad.visible && !p('centrado', 0.5, false).visible && eMitad.visible && !p('centrado', MITAD, true).visible
+  const cambia = s0.visible && sMitad.visible && !p(0.5, false).visible && eMitad.visible && !p(MITAD, true).visible
   return enSuLugar && deCanto && cambia && e1.m.equals(new THREE.Matrix4()) && e1.visible
 }
 afirmar(volteoBien(pose), '2 · volteo: la placa gira sobre X desde su lugar; a los 90° (de canto) la entrante sigue el giro con el mensaje y termina en su lugar exacto', `${String(VOLTEO.centrado.s)} s`)
-controlPositivo('2 · el detector VE un cambio de placa que no es de canto (a los 45°)', ((v, t, e, q) => pose(v, e ? Math.max(t, 0.75) : Math.min(t, 0.25), e, q)) as Pose, volteoBien)
+controlPositivo('2 · el detector VE un cambio de placa que no es de canto (a los 45°)', ((t, e, q) => pose(e ? Math.max(t, 0.75) : Math.min(t, 0.25), e, q)) as Pose, volteoBien)
 // [PULIDO 11] B1 · el hundido se borró (el humano eligió el volteo para los dos formularios).
-const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p('centrado', t, true, true).aparece + p('centrado', t, false, true).aparece - 1) < 1e-9) && p('columpio', 0.5, true, true).m.equals(new THREE.Matrix4()) && p('centrado', 1, false, true).aparece === 0
+const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p(t, true, true).aparece + p(t, false, true).aparece - 1) < 1e-9) && p(0.5, true, true).m.equals(new THREE.Matrix4()) && p(1, false, true).aparece === 0
 afirmar(fundidoBien(pose), '  con movimiento reducido, un fundido: la saliente se va y la entrante aparece, quietas')
-controlPositivo('  el detector VE el volteo con movimiento reducido', ((v, t, e) => pose(v, t, e, false)) as Pose, fundidoBien)
+controlPositivo('  el detector VE el volteo con movimiento reducido', ((t, e) => pose(t, e, false)) as Pose, fundidoBien)
 
 // 3 · El DOM: la tarjeta de gracias (la misma que Contacto), anunciada y con el foco; «Enviar otro mensaje» vuelve vacío;
 // el error deja todo lo escrito; desde 1025 lo transforma la escena (`data-estado` y `data-gracias`, que lee el rearmado).
 // [PULIDO 11] B · el resultado es la tarjeta del tamaño de la placa (éxito o error); Reintentar vuelve con todo lo escrito.
 const estadosBien = (c: string, a: string): boolean =>
-  /data-estado=\{resultado \? 'resultado' : 'formulario'\} data-volteo=\{variante\}/.test(c) &&
+  /data-estado=\{resultado \? 'resultado' : 'formulario'\} aria-label/.test(c) &&
   /<TarjetaDeResultado[\s\S]*?tipo=\{estado\.fase === 'exito' \? 'exito' : 'error'\}[\s\S]*?alReintentar=\{reintentar\}[\s\S]*?alOtro=\{otroMensaje\}/.test(c) &&
   /<p role="status" className="sr-only">\s*\{estado\.fase === 'exito' \? ANUNCIO_DE_EXITO : ''\}/.test(c) &&
   /if \(r\.ok\) \{[\s\S]{0,240}?setEstado\(\{ fase: 'exito' \}\)\s*setDatos\(VACIO\)/.test(c) &&
   /\} else \{[\s\S]{0,160}?setEstado\(\{ fase: 'error', mensaje: r\.error \}\)/.test(c) && (c.match(/setDatos\(VACIO\)/g) ?? []).length === 1 &&
-  /<AnimatePresence mode="wait" initial=\{false\}>/.test(c) && /transicionDelVolteo\(variante, reducido, enVolumen\)/.test(c) &&
-  a.includes("const estado = p.elemento.getAttribute('data-estado')") && a.includes("varianteDelVolteo(p.elemento.getAttribute('data-volteo'))")
+  /<AnimatePresence mode="wait" initial=\{false\}>/.test(c) && /transicionDelVolteo\(reducido, enVolumen\)/.test(c) &&
+  a.includes("const estado = p.elemento.getAttribute('data-estado')") && a.includes('a.transformacion = { saliente: vieja, t: 0, lista: false, cuadros: 0, compilando: false }')
 afirmar(estadosBien(pie, armadas), '3 · al llegar, la tarjeta del resultado anunciada y con el foco (y «Enviar otro mensaje»); con error, lo escrito queda y el error en su tarjeta, con Reintentar; desde 1025 la placa 3D voltea')
 controlPositivo('3 · el detector VE un error que borra lo escrito', pie.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (c: string) => estadosBien(c, armadas))
 const tarjeta = sinComentarios(leer('_componentes/formularios/TarjetaDeResultado.tsx'))
 const tarjetaBien = (c: string): boolean => /ref=\{lasDos\(foco, raiz\)\}\s*tabIndex=\{-1\}\s*data-tarjeta="resultado"/.test(c) && /data-sin-volumen=""/.test(c) && /RESULTADO\.exito\.titulo/.test(c) && /RESULTADO\.exito\.bajada/.test(c) && /onClick=\{alOtro\}/.test(c) && /onClick=\{alReintentar\}/.test(c) && /py-\[var\(--spacing-2\)\]/.test(c)
-afirmar(tarjetaBien(tarjeta) && RESULTADO.exito.titulo === 'Recibido.' && RESULTADO.exito.bajada === 'Te contestamos pronto.' && varianteDelVolteo(null) === 'centrado' && varianteDelVolteo('columpio') === 'columpio' && varianteDelVolteo('hundido') === 'centrado', '  la tarjeta del resultado: enfocable, con el encastre, el título, la bajada y sus botones (con aire para el dedo); `?volteo=` elige la estrategia')
+afirmar(tarjetaBien(tarjeta) && RESULTADO.exito.titulo === 'Recibido.' && RESULTADO.exito.bajada === 'Te contestamos pronto.', '  la tarjeta del resultado: enfocable, con el encastre, el título, la bajada y sus botones (con aire para el dedo)')
 controlPositivo('  el detector VE una tarjeta que no recibe el foco', tarjeta.replace(/tabIndex=\{-1\}\s*/, ''), tarjetaBien)
 
 // 4 · Las banderas para probar los estados: sólo en desarrollo, y no tocan la ruta (ni su límite de intentos).
@@ -175,7 +175,7 @@ const panelBien = (c: string): boolean =>
   // [PULIDO 10] J3 · la carga es la de develOP (el anillo se fue); su estado lo anuncia ella (`role="status"`).
   /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} data-parte="carga"/.test(c) && c.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
   // [PULIDO 11] B · la tarjeta del resultado (éxito o error), con el volteo; la cuenta del cierre, desde que su texto está.
-  /<motion\.div key="resultado" \{\.\.\.cambio\}[\s\S]{0,200}?<TarjetaDeResultado tipo=\{enviado \? 'exito' : 'error'\}/.test(c) && /const cambio = transicionDelVolteo\(variante, reducido\)/.test(c) &&
+  /<motion\.div key="resultado" \{\.\.\.cambio\}[\s\S]{0,200}?<TarjetaDeResultado tipo=\{enviado \? 'exito' : 'error'\}/.test(c) && /const cambio = transicionDelVolteo\(reducido\)/.test(c) &&
   /const reloj = window\.setTimeout\(cerrarContacto, CIERRE_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)/.test(c) &&
   /animate=\{\{ width: textoListo \? '0%' : '100%' \}\} transition=\{\{ duration: textoListo \? CIERRE_MS \/ 1000 : 0, ease: 'linear' \}\}/.test(c) &&
   /if \(r\.estado === 'error'\) \{[\s\S]{0,240}?setFase\('error'\)/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&

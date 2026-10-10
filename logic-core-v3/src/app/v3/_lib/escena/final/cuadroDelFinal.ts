@@ -17,8 +17,7 @@ import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
 import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
-import { fueraDeSuLugar, sinElRig, varianteDeLaCaida, type VarianteDeLaCaida } from './caidaAlHueco'
-import { entornoDeLaEscena } from '../entorno'
+import { fueraDeSuLugar, sinElRig } from './caidaAlHueco'
 import {
   EN_VIVO,
   FINAL_DEL_PIE,
@@ -90,8 +89,6 @@ export interface EstadoDelFinal {
   readonly punto: THREE.Vector3
   readonly pose: { centro: THREE.Vector3; rotacionX: number }
   readonly sacudon: THREE.Vector3
-  /** [PULIDO 11] D · cómo cae el logo (`?caida=angulo`; si no, la lenta). */
-  readonly caida: VarianteDeLaCaida
   haz: THREE.Object3D | null
   /** [EL ENCASTRE] 2D · el pozo debajo del hueco. */
   readonly pozo: ReturnType<typeof crearElPozo>
@@ -140,7 +137,6 @@ export function crearElEstado(formas: readonly THREE.Shape[], espesor: number, e
     punto: new THREE.Vector3(),
     pose: { centro: new THREE.Vector3(), rotacionX: 0 },
     sacudon: new THREE.Vector3(),
-    caida: varianteDeLaCaida(entornoDeLaEscena().pruebas.caida),
     haz: null,
     pozo: crearElPozo(formas, espesor),
     filo: crearElFilo(formas, espesor),
@@ -305,7 +301,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
     if (!teclado.congelado) s.quietoS = s.estatico ? 0 : relojDelQuieto(s.quietoS, fin > 0.995, Math.min(s.sinScrollS, s.enteroS, sinGestoS), dt, EN_VIVO)
   }
   // [PULIDO 2] 6 · la sombra del logo se va al apoyarse y vuelve con un fundido (también después de soltar el final).
-  s.sombra = s.estatico ? sombraDeLaPose(fin, tamano, s.caida) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano, s.caida), dt)
+  s.sombra = s.estatico ? sombraDeLaPose(fin, tamano) : sombraConFundido(s.sombra, sombraDeLaPose(fin, tamano), dt)
   SOMBRA_EN_EL_FINAL.fundido = s.sombra
   const activo = fin > 0 || EN_VIVO.giro !== 0 || EN_VIVO.aleja !== 0
   if (!activo) {
@@ -319,10 +315,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   s.haz ??= state.scene.getObjectByName('haz') ?? null
   if (s.haz !== null) s.haz.visible = false
 
-  // 2 · El logo: [PULIDO 11] D · cae (`caidaAlHueco.ts`): baja parado y cae hacia atrás sobre su canto (o en arco, `?caida=angulo`)
+  // 2 · El logo: [PULIDO 11] D · cae (`caidaAlHueco.ts`): baja parado y cae hacia atrás sobre su canto
   // hasta quedar al ras en su hueco, y rebota apenas. El balanceo del rig se apaga antes de que la física arranque.
-  const k = sinElRig(s.caida, tamano, segundosDelFinal(fin))
-  poseDelLogo(fin, tamano, s.caida, s.pose)
+  const k = sinElRig(tamano, segundosDelFinal(fin))
+  poseDelLogo(fin, tamano, s.pose)
   if (logo !== null) {
     logo.position.copy(s.pose.centro)
     logo.rotation.x = logo.rotation.x * (1 - k) + s.pose.rotacionX
@@ -334,17 +330,17 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [EL ENCASTRE] 2D · el hueco se abre cuando el logo está por llegar ([PULIDO 11] D · con la caída: entero justo antes del
   // contacto); el mar se calma a su alrededor; la mancha se va.
   const piso = FINAL_EN_EL_PISO
-  piso.uApertura.value = apertura(fin, tamano, s.caida)
+  piso.uApertura.value = apertura(fin, tamano)
   piso.uCalmaDelFinal.value = calma(fin)
   // [PULIDO 11] D · y con el logo que deja su lugar (la lenta baja parada adelante del hueco: la mancha no se queda atrás).
-  piso.uSinMancha.value = Math.max(EN_VIVO.camara, fueraDeSuLugar(s.caida, tamano, segundosDelFinal(fin)))
+  piso.uSinMancha.value = Math.max(EN_VIVO.camara, fueraDeSuLugar(tamano, segundosDelFinal(fin)))
   s.pozo.grupo.visible = piso.uApertura.value > 0
 
   // 3 · [EL ENCASTRE] 2E · El golpe: al quedar al ras (una vez por bajada) se libera el poder: su pulso corre por el piso,
   // centrado en el logo, y las juntas de alrededor se encienden. [PULIDO 11] D · el golpe ES el contacto de la caída (el mismo
   // cuadro); al volver a tocar después del primer rebote, sólo un golpecito.
   const golpe = golpeDelFinal() / RELOJ_DEL_FINAL.duracionS
-  const [retoque] = toquesDespuesDelGolpe(tamano, s.caida)
+  const [retoque] = toquesDespuesDelGolpe(tamano)
   const aterriza = retoque === undefined ? Number.POSITIVE_INFINITY : retoque / RELOJ_DEL_FINAL.duracionS
   // [PULIDO 1] P22 · quieto, sin el golpecito ni la súper onda (son movimiento).
   if (!s.estatico && s.antes < aterriza && fin >= aterriza) s.tocoEn = t

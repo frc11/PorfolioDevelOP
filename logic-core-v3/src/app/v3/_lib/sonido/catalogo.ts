@@ -34,6 +34,9 @@ export const SONIDOS: Readonly<Record<Sonido, DelSonido>> = {
   // [PULIDO 4] C2 · el golpe del encastre (el logo conecta y nace la súper onda): por encima del pulso, sin saturar. [PULIDO 5] D2 ·
   // uno solo: el de la sala (era `golpe-b`; `golpe-a` se borró).
   golpe: { que: 'El golpe del encastre: el pulso más grave con un sub-golpe debajo y una cola corta de la sala', volumen: 1, separacionMs: 1500, exclusivo: false },
+  // [PULIDO 13] K3 · el resultado de los formularios, en el contacto de la pieza: ~7 dB debajo del pulso y ~11 del golpe (LUFS).
+  exito: { que: 'El envío llegó (la pieza encaja): dos notas claras que suben, cortas', volumen: 0.3, separacionMs: 800, exclusivo: false },
+  error: { que: 'El envío falló (la pieza no entra): dos notas graves y suaves que bajan', volumen: 0.3, separacionMs: 800, exclusivo: false },
 }
 
 /** Lo que pide el sitio: un sonido del sprite. */

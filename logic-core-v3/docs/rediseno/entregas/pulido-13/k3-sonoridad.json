@@ -1,0 +1,10 @@
+{
+ "que": "K3 · la sonoridad momentanea maxima (EBU R128, ffmpeg ebur128) de cada corte del sprite, en LUFS, sin el volumen del catalogo",
+ "lufs": {
+  "golpe": -13.4,
+  "pulso": -16.8,
+  "pestillo": -25.1,
+  "exito": -13.6,
+  "error": -14.2
+ }
+}

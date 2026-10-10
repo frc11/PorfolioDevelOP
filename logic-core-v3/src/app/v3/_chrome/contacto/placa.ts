@@ -48,17 +48,27 @@ export const ENTRADA_DEL_PARALAJE = { duration: 0.8, ease: [0.45, 0, 0.55, 1] } 
 const CURVA = [0.77, 0, 0.175, 1] as const
 
 /**
- * EL VIAJE DESDE EL FONDO: las posiciones en `z` (px, con la perspectiva de la placa) para que su tamaño aparente crezca de
- * `ESCALA_AL_NACER` a 1 casi en recta (1 − (1 − t)^1,35: el túnel crece en recta y su resorte lo asienta), en `pasos`
- * tramos iguales de tiempo. Con perspectiva `d`, una caja en `z` se ve `d / (d − z)` veces: para verse `s`, `z = d − d / s`.
+ * EL VIAJE DESDE EL FONDO: el tamaño aparente de la placa en la fracción `t` del viaje (0 a 1): de `ESCALA_AL_NACER` a 1 casi en
+ * recta (1 − (1 − t)^1,35: el túnel crece en recta y su resorte lo asienta).
+ */
+export function escalaDelViaje(t: number): number {
+  const u = Math.min(1, Math.max(0, t))
+  return ESCALA_AL_NACER + (1 - ESCALA_AL_NACER) * (1 - (1 - u) ** 1.35)
+}
+
+/** La `z` (px, con la perspectiva de la placa) en que una caja se ve `s` veces: con perspectiva `d` se ve `d / (d − z)`, o sea `z = d − d / s`. */
+export function zDeLaEscala(s: number): number {
+  const d = PERSPECTIVA_DE_LA_PLACA
+  return s >= 1 ? 0 : d - d / s
+}
+
+/**
+ * Las posiciones en `z` del viaje, en `pasos` tramos iguales de tiempo (para el invariante). [PULIDO 13] K2 · la placa ya no las
+ * usa como cuadros clave: entre dos, Motion interpolaba `z` en recta y el tamaño (`d / (d − z)`) no crecía casi nada y después
+ * se disparaba (19 → 98 px en 4 cuadros al arrancar). Ahora se anima la fracción y `z` sale de `escalaDelViaje` en cada cuadro.
  */
 export function viajeDesdeElFondo(pasos = 16): readonly number[] {
-  const d = PERSPECTIVA_DE_LA_PLACA
-  return Array.from({ length: pasos + 1 }, (_, i) => {
-    const t = i / pasos
-    const s = ESCALA_AL_NACER + (1 - ESCALA_AL_NACER) * (1 - (1 - t) ** 1.35)
-    return i === pasos ? 0 : d - d / s
-  })
+  return Array.from({ length: pasos + 1 }, (_, i) => zDeLaEscala(escalaDelViaje(i / pasos)))
 }
 
 /**

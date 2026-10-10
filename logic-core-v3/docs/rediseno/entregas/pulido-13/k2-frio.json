@@ -1,0 +1,84 @@
+{
+ "que": "K2 d e · los cuadros de mas de 20 ms (ms desde Enter, ms) del envio del panel de Contacto la PRIMERA vez: banco en frio (sin la cache de sombreadores del perfil), 1440 x 900, NVIDIA",
+ "antes": {
+  "error": [
+   [
+    3077,
+    66.8
+   ],
+   [
+    3104,
+    27.3
+   ],
+   [
+    3544,
+    40
+   ],
+   [
+    3570,
+    26.6
+   ],
+   [
+    3837,
+    213.5
+   ],
+   [
+    5051,
+    106.7
+   ]
+  ],
+  "exito": [
+   [
+    3091,
+    66.7
+   ]
+  ]
+ },
+ "despues": {
+  "error": [],
+  "exito": []
+ },
+ "precalentadoDelPanel": {
+  "apertura": [
+   [
+    138,
+    26.8
+   ],
+   [
+    205,
+    26.7
+   ],
+   [
+    2472,
+    119.7
+   ]
+  ]
+ },
+ "pie": {
+  "que": "el pie (exito, en frio, 3 s de tipeo): con el precalentado el primer hover de Enviar trababa; sin el, la tarjeta. Queda sin precalentar.",
+  "conPrecalentado": [
+   [
+    317,
+    318.2
+   ]
+  ],
+  "sinPrecalentado": [
+   [
+    3595,
+    40.1
+   ],
+   [
+    3635,
+    26.7
+   ],
+   [
+    3701,
+    40
+   ],
+   [
+    3875,
+    133.5
+   ]
+  ]
+ }
+}

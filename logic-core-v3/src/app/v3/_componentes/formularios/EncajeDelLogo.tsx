@@ -12,9 +12,11 @@ import { sonar } from '../../_lib/sonido/bus'
  * la tarjeta hay una RANURA con la forma del logo y una PIEZA del logo que baja.
  *
  *   · `encaja` (el éxito): la pieza cae (arranca quieta y acelera: la gravedad), entra al ras con un rebote mínimo y suena el
- *     pestillo; de la ranura sale una onda de luz blanca y el borde se enciende un instante. Dice «llegó» sin decirlo.
+ *     éxito; la pieza, que cae APAGADA, se ENCIENDE (sube hasta el claro y se asienta un poco abajo, adentro de su forma). Dice
+ *     «llegó» sin decirlo. [PULIDO 13] K2 · sin la luz que salía de los bordes (la onda que se abría, el resplandor y el destello
+ *     del borde).
  *   · `no-encaja` (el error): la pieza cae torcida, choca con el borde de la ranura (no entra), el borde se enciende en ROJO, la
- *     pieza rebota y queda afuera, apoyada y torcida; suena un golpe grave corto (el pulso).
+ *     pieza rebota y queda afuera, apoyada y torcida; suena el error ([PULIDO 13] K3 · dos notas graves que bajan).
  *
  * Arranca con `empieza` (cuando la tarjeta ya se ve: terminado el volteo) y avisa con `alTerminar`. Con movimiento reducido, el
  * estado final directo (y el sonido igual: no es movimiento). Los tiempos, en `ENCAJE`. SVG con Motion: sin lienzo propio.
@@ -27,8 +29,11 @@ export const ENCAJE = {
   exito: { s: 0.95, contacto: 0.62, rebote: 22, termina: 1.05 },
   /** Error: dónde choca (unidades sobre la ranura), cuánto rebota, dónde queda y torcida cuánto (grados). */
   error: { s: 1.35, contacto: 0.5, choca: -96, rebota: -300, queda: -170, corre: 130, torcida: -13, tumbada: -24, termina: 1.45 },
-  /** La onda de luz del éxito: cuánto se abre y cuánto dura (s). */
-  onda: { escala: 1.42, s: 0.75 },
+  /**
+   * [PULIDO 13] K2 · la luz de la pieza con el éxito, dicha por lo que la apaga (el pozo encima, en opacidad): cae `apagada`, al
+   * encajar sube hasta 0 (el claro entero) y se asienta en `queda`; cuánto tarda (s).
+   */
+  luz: { apagada: 0.5, queda: 0.1, s: 0.8 },
 } as const
 
 const V = LOGO_INK_VIEWBOX
@@ -45,9 +50,11 @@ interface Props {
   readonly empieza: boolean
   readonly quieto: boolean
   readonly alTerminar: () => void
+  /** [PULIDO 13] K2 · el dibujo de precalentar (`PrecalentarElResultado`): todo encendido desde el principio, sin sonar ni avisar. */
+  readonly precalentar?: boolean
 }
 
-export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar }: Props): React.JSX.Element {
+export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar, precalentar = false }: Props): React.JSX.Element {
   const id = useId().replace(/:/g, '')
   const [tocado, setTocado] = useState(false)
   // Un solo sonido por encastre (en desarrollo React corre los efectos dos veces).
@@ -59,18 +66,18 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar }: Props)
   const exito = resultado === 'encaja'
   const T = exito ? ENCAJE.exito : ENCAJE.error
   // Con movimiento reducido, el contacto es el estado final directo (no espera a nadie).
-  const contacto = tocado || (empieza && quieto)
+  const contacto = tocado || (empieza && quieto) || precalentar
   useEffect(() => {
-    if (!empieza) return undefined
+    if (!empieza || precalentar) return undefined
     if (quieto) {
-      if (!sono.current) sonar(exito ? 'pestillo' : 'pulso')
+      if (!sono.current) sonar(exito ? 'exito' : 'error')
       sono.current = true
       avisar.current()
       return undefined
     }
     const toca = window.setTimeout(() => {
       setTocado(true)
-      if (!sono.current) sonar(exito ? 'pestillo' : 'pulso')
+      if (!sono.current) sonar(exito ? 'exito' : 'error')
       sono.current = true
     }, T.s * T.contacto * 1000)
     const termina = window.setTimeout(() => avisar.current(), T.termina * 1000)
@@ -78,7 +85,7 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar }: Props)
       window.clearTimeout(toca)
       window.clearTimeout(termina)
     }
-  }, [empieza, quieto, exito, T])
+  }, [empieza, quieto, exito, T, precalentar])
 
   const E = ENCAJE.error
   // La pieza: arriba y más cerca, invisible, hasta que empieza; con movimiento reducido, donde termina.
@@ -99,34 +106,17 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar }: Props)
         <filter id={`desenfoque-${id}`} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="16" />
         </filter>
-        <radialGradient id={`luz-${id}`}>
-          <stop offset="0%" stopColor="var(--resultado-luz)" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="var(--resultado-luz)" stopOpacity="0" />
-        </radialGradient>
       </defs>
       {/* La ranura: un pozo con la forma del logo, con la sombra de su borde de arriba adentro (se lee hundida). */}
       <path d={LOGO_PATH_D} fill="var(--resultado-pozo)" />
       <g clipPath={`url(#ranura-${id})`}>
         <path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-sombra)" strokeWidth={46} filter={`url(#desenfoque-${id})`} transform="translate(0 16)" />
       </g>
-      {/* El borde, tenue; con el contacto se enciende encima (blanco al encajar; rojo al chocar): sólo cambia la opacidad (Motion no
-          interpola un color hecho con color-mix). */}
+      {/* El borde, tenue; con el error, al chocar se enciende encima en ROJO: sólo cambia la opacidad (Motion no interpola un color
+          hecho con color-mix). [PULIDO 13] K2 · con el éxito el borde no se enciende: la luz es de la pieza. */}
       <path d={LOGO_PATH_D} fill="none" strokeWidth={exito ? 7 : 10} stroke="var(--resultado-borde)" />
-      <motion.path
-        d={LOGO_PATH_D}
-        fill="none"
-        strokeWidth={exito ? 7 : 10}
-        stroke={exito ? 'var(--resultado-luz)' : 'var(--rojo-del-error)'}
-        initial={false}
-        animate={{ opacity: !contacto ? 0 : exito ? (quieto ? 0.35 : [0.9, 0.35]) : quieto ? 0.85 : [1, 0.85] }}
-        transition={{ duration: quieto ? 0 : exito ? 0.6 : 0.35 }}
-      />
-      {/* La onda de luz del éxito: el contorno que se abre desde la ranura y un resplandor. */}
-      {exito && contacto && !quieto && (
-        <>
-          <motion.ellipse cx={V.x + V.width / 2} cy={V.y + V.height / 2} rx={V.width * 0.55} ry={V.height * 0.6} fill={`url(#luz-${id})`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: [0, 0.75, 0], scale: [0.7, 1.05, 1.25] }} transition={{ duration: ENCAJE.onda.s, ease: 'easeOut' }} />
-          <motion.path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-luz)" strokeWidth={9} initial={{ opacity: 0.95, scale: 1 }} animate={{ opacity: 0, scale: ENCAJE.onda.escala }} transition={{ duration: ENCAJE.onda.s, ease: 'easeOut' }} />
-        </>
+      {!exito && (
+        <motion.path d={LOGO_PATH_D} fill="none" strokeWidth={10} stroke="var(--rojo-del-error)" initial={false} animate={{ opacity: !contacto ? 0 : quieto ? 0.85 : [1, 0.85] }} transition={{ duration: quieto ? 0 : 0.35 }} />
       )}
       {/* El error: el resplandor rojo del borde. */}
       {!exito && contacto && !quieto && (
@@ -141,9 +131,13 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar }: Props)
         animate={!empieza ? { opacity: 0, scale: 1.15, x: 0 } : quieto ? { opacity: exito ? 0 : 0.3, scale: 1, x: exito ? 0 : E.corre * 0.5 } : { opacity: exito ? [0, 0.45, 0] : [0, 0.4, 0.3], scale: [1.15, 1, 1], x: exito ? 0 : [0, E.corre * 0.4, E.corre * 0.5] }}
         transition={{ duration: quieto ? 0 : T.s * (exito ? 0.75 : 1), ease: 'easeIn' }}
       />
-      {/* La pieza: el logo lleno, con un filo claro (el canto que toma la luz). */}
+      {/* La pieza: el logo lleno, con un filo claro (el canto que toma la luz). [PULIDO 13] K2 · con el éxito cae apagada y al encajar
+          se ENCIENDE: lo que la apaga es su misma forma con el pozo encima (no sale de los bordes), que se va y vuelve un poco. */}
       <motion.g initial={false} animate={pieza} transition={quieto || !empieza ? { duration: 0 } : { duration: T.s, times: tiempos, ease: [...curvas] }}>
         <path d={LOGO_PATH_D} fill="var(--resultado-tinta)" />
+        {exito && (
+          <motion.path d={LOGO_PATH_D} fill="var(--resultado-pozo)" data-luz-de-la-pieza="" initial={false} animate={{ opacity: !contacto ? ENCAJE.luz.apagada : quieto ? ENCAJE.luz.queda : [ENCAJE.luz.apagada, 0, ENCAJE.luz.queda] }} transition={{ duration: quieto ? 0 : ENCAJE.luz.s, times: [0, 0.3, 1], ease: 'easeOut' }} />
+        )}
         <path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-filo)" strokeWidth={6} />
       </motion.g>
     </svg>

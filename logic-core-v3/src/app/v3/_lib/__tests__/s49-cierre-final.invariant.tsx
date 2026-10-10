@@ -285,12 +285,17 @@ const desdeUnPunto = (zs: readonly number[]): boolean => {
 }
 afirmar(desdeUnPunto(viajeDesdeElFondo()) && ESCALA_AL_NACER === 0.02 && TRANSICIONES.viaje.ease === 'linear', 'llega desde un punto del fondo (al 2 % de su tamaño, no al tercio) y viaja hasta adelante: su tamaño aparente crece casi en recta y se asienta al final', `z al nacer ${viajeDesdeElFondo()[0].toFixed(0)} px`)
 controlPositivo('el detector VE la llegada de AJUSTES FINALES (nacía a un tercio: dos focos atrás)', [-2 * d, -d, 0], desdeUnPunto)
-const viajeCableado = /animate=\{\{ z: \[\.\.\.VIAJE\], rotateX: 0 \}\}/.test(placaDelContacto) && /initial=\{\{ z: VIAJE\[0\], rotateX: 0 \}\}/.test(placaDelContacto) && placaDelContacto.includes('transition={TRANSICIONES.viaje}')
-afirmar(viajeCableado, '  y el viaje es ése: de `z` en `z`, en tramos iguales de tiempo, después de que el fondo empezó a desenfocarse')
+// [PULIDO 13] K2 · se anima la fracción del viaje y la `z` de cada cuadro sale de su escala (ya no hay cuadros clave de `z`: entre
+// dos, el tamaño casi no crecía y después saltaba); el escenario se ve recién cuando el viaje arranca.
+const viajeCableado =
+  placaDelContacto.includes('const z = useTransform(progreso, (t) => zDeLaEscala(escalaDelViaje(t)))') && placaDelContacto.includes('const viaje = animate(progreso, 1, TRANSICIONES.viaje)') &&
+  placaDelContacto.includes("style={{ transformStyle: 'preserve-3d', transformOrigin: 'center bottom', z }}") && placaDelContacto.includes('animate={{ opacity: 1, transition: { duration: 0.1, delay: TRANSICIONES.viaje.delay } }}') &&
+  !/z: \[\.\.\.VIAJE\]/.test(placaDelContacto)
+afirmar(viajeCableado, '  y el viaje es ése: la fracción en recta y su escala en cada cuadro, después de que el fondo empezó a desenfocarse (antes, a la vista sólo cuando arranca)')
 
 // La salida: primero la placa se acuesta hacia atrás sobre su base (como los títulos y los libros) y recién después se va el desenfoque.
 const sale = (placa: string, form: string, t: typeof TRANSICIONES): boolean =>
-  placa.includes("transformOrigin: 'center bottom'") && placa.includes('exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}') &&
+  placa.includes("transformOrigin: 'center bottom'") && placa.includes('exit={{ rotateX: 90, transition: TRANSICIONES.acostarse }}') &&
   form.includes("exit={placa ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}") &&
   t.fondoAlCerrar.delay >= t.acostarse.duration && t.acostarse.duration === MS_DE_LA_SALIDA_DE_LA_PLACA / 1000
 afirmar(sale(placaDelContacto, formulario, TRANSICIONES), 'al cerrar (Esc, la cruz, el velo), primero la placa se acuesta hacia atrás sobre su base y RECIÉN DESPUÉS se va el desenfoque del fondo', `${String(MS_DE_LA_SALIDA_DE_LA_PLACA)} ms la placa, después ${String(TRANSICIONES.fondoAlCerrar.duration * 1000)} ms el fondo`)
@@ -331,9 +336,9 @@ afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj: al fondo con el 
 // levanta unos grados); lo que sube sin volver es la cámara. Con `fin` 0 sigue siendo el de hoy y al final, acostado al ras.
 const tam = { alto: 4.78, espesor: 0.56 }
 const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
-poseDelLogo(0, tam, 'lenta', pose)
+poseDelLogo(0, tam, pose)
 const deHoy = pose.centro.length() < 1e-12 && pose.rotacionX === 0
-poseDelLogo(1, tam, 'lenta', pose)
+poseDelLogo(1, tam, pose)
 const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && pose.centro.x === 0 && Math.abs(pose.centro.z) < 1e-9 && pose.centro.y < FLOOR_Y + tam.espesor / 2 + 1e-9
 let monotono = true
 for (let f = 0; f < 1; f += 0.005) if (subida(f + 0.005) < subida(f)) monotono = false

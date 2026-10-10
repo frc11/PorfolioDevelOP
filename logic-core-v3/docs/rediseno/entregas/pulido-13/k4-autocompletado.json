@@ -1,0 +1,145 @@
+{
+ "que": "K4 b · el autocompletado del pie (CDP Autofill.trigger): recien autocompletado, lejos del pie y de vuelta, 1440 x 900",
+ "antes": {
+  "autocompletado": [
+   {
+    "id": "contacto-nombre",
+    "valor": "Ana Prueba",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "ana@ejemplo.com",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ],
+  "lejos": [
+   {
+    "id": "contacto-nombre",
+    "valor": "Ana Prueba",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "ana@ejemplo.com",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ],
+  "deVuelta": [
+   {
+    "id": "contacto-nombre",
+    "valor": "Ana Prueba",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "ana@ejemplo.com",
+    "autofill": true,
+    "fondo": "rgb(232, 240, 254)",
+    "color": "rgb(0, 0, 0)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ]
+ },
+ "despues": {
+  "autocompletado": [
+   {
+    "id": "contacto-nombre",
+    "valor": "Ana Prueba",
+    "autofill": true,
+    "fondo": "rgba(232, 240, 254, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "ana@ejemplo.com",
+    "autofill": true,
+    "fondo": "rgba(232, 240, 254, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ],
+  "lejos": [
+   {
+    "id": "contacto-nombre",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ],
+  "deVuelta": [
+   {
+    "id": "contacto-nombre",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mail",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   },
+   {
+    "id": "contacto-mensaje",
+    "valor": "",
+    "autofill": false,
+    "fondo": "rgba(0, 0, 0, 0)",
+    "color": "rgb(247, 247, 245)"
+   }
+  ]
+ }
+}

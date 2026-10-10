@@ -21,7 +21,6 @@
   --resultado-sombra: black;
   --resultado-borde: color-mix(in srgb, var(--resultado-claro) 24%, transparent);
   --resultado-filo: color-mix(in srgb, var(--resultado-claro) 45%, transparent);
-  --resultado-luz: var(--resultado-claro);
   --rojo-del-error: var(--color-error);
   --texto-del-error: var(--color-error-texto);
 }

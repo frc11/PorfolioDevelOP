@@ -204,6 +204,16 @@
   transition-timing-function: var(--ease-salida);
 }
 
+/* [PULIDO 13] K4 · EL AUTOCOMPLETADO NO CAMBIA EL CAMPO. El navegador le pone al campo autocompletado su fondo celeste y su
+ * color de texto con `!important` (no se pisan): el truco es demorar ese cambio para siempre con una transición. La regla de
+ * arriba (sin capa) le ganaba a la del formulario del pie (una utilidad, en su capa): el celeste y el texto entraban en media
+ * duración rápida y en el pie de volumen los campos quedaban a la vista, sueltos de su placa. Acá la demora la pone el foco
+ * mismo, con más especificidad; el borde y el anillo siguen con la suya. */
+[data-v3] [data-foco="campo"]:autofill {
+  --demora-del-autocompletado: 100000s;
+  transition-duration: var(--demora-del-autocompletado), var(--demora-del-autocompletado), calc(var(--duracion-rapida) / 2), calc(var(--duracion-rapida) / 2);
+}
+
 [data-v3] [data-foco="pastilla"]:has(:focus-visible) {
   border-color: var(--color-tinta);
   box-shadow: inset 0 0 0 var(--border-hairline) var(--color-tinta);

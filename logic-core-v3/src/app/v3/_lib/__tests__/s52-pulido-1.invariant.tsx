@@ -129,7 +129,7 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
 // `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`; E2 borra `anillo=` y agrega
 // `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`; F2 agrega `meta=contorno` y `volteo=juntos`. PULIDO 8 · G1 borra las dos.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], caida: ['angulo'], hilos: ['si'] } /* [PULIDO 11] D · y la caída en arco; E · y los hilos */
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], hilos: ['si'] } /* [PULIDO 11] D · y la caída en arco; E · y los hilos */
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
@@ -550,7 +550,7 @@ const energiaP5 = (fin: number): number => Math.min(1, poder(fin))
 const TAM_P5 = { alto: 4.78, espesor: 0.56 } as const
 const POSE_P5 = { centro: new THREE.Vector3(), rotacionX: 0 }
 const alturaDelLogoP5 = (fin: number): number => {
-  poseDelLogo(fin, TAM_P5, 'lenta', POSE_P5)
+  poseDelLogo(fin, TAM_P5, POSE_P5)
   return POSE_P5.centro.y
 }
 /** Lo más que cambia en un cuadro: el giro de la cámara (grados), la altura del logo (u), el oscurecimiento del piso y la energía del brillo. */

@@ -1,0 +1,180 @@
+/**
+ * PULIDO 13 — el invariante: npm run test:s64-pulido-13
+ *
+ * Lo que pidió el humano sobre PULIDO 11 y 12, cada cosa con su control positivo (el detector ve el estado de antes). Los recibos
+ * medidos, en `docs/rediseno/entregas/pulido-13/`; el log, `docs/rediseno/SPRINT-PULIDO-13.md`.
+ *   0 · lo que se borró con su código: el volteo «columpio», la carga «trazo» y la caída «ángulo» (ganaron el centrado, el giro y
+ *       la caída de siempre).
+ *   K2 a · la placa de Contacto crece pareja desde el primer cuadro (ni congelada ni a saltos).
+ *   K2 b · la carga es UNA pieza que gira sobre el eje del palito de la P: sin perspectiva, el eje en el medio del espesor, capas
+ *          sin rendijas y, de canto, las secciones de adentro (sin rayas).
+ *   K2 c · el éxito encaja y SE ENCIENDE adentro de su forma: nada de luz que salga de los bordes.
+ *   K2 d e · el envío del panel la primera vez, sin cuadros trabados (la tarjeta se precalienta con la placa quieta).
+ *   K3 · el sonido del éxito y el del error, calibrados contra el pulso y el golpe.
+ *   K4 b · el mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve.
+ */
+import { readFileSync } from 'node:fs'
+
+import { CARGA, EJE_DEL_PALITO, capasDelGiro, type TamanoDeLaCarga } from '../../_componentes/carga/Carga'
+import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
+import { PRECALENTAR } from '../../_componentes/formularios/PrecalentarElResultado'
+import { ENTRADA_DEL_PARALAJE, ESCALA_AL_NACER, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, escalaDelViaje, viajeDesdeElFondo } from '../../_chrome/contacto/placa'
+import { SONIDOS } from '../sonido/catalogo'
+import { CORTES_DEL_SPRITE } from '../sonido/sprite'
+import { PRUEBAS_SUELTAS } from '../escena/entorno'
+import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+
+const V3 = 'src/app/v3'
+const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
+const recibo = <T,>(nombre: string): T => JSON.parse(readFileSync(`docs/rediseno/entregas/pulido-13/${nombre}`, 'utf8')) as T
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('0 · Lo que se borró con su código')
+// Sin los comentarios: la historia (qué se borró y por qué) queda escrita.
+const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const VOLTEO = sinComentarios(leer('_lib/formularios/volteo.ts'))
+const CARGA_TSX = leer('_componentes/carga/Carga.tsx')
+const CAIDA = sinComentarios(leer('_lib/escena/final/caidaAlHueco.ts'))
+const borrados = (volteo: string, carga: string, caida: string, sueltas: readonly string[]): boolean =>
+  !/columpio|varianteDeLaPagina/.test(volteo) && !/function Trazo|varianteDeLaCarga|carga=/.test(sinComentarios(carga)) && !/VarianteDeLaCaida|varianteDeLaCaida|'angulo'/.test(caida) && !sueltas.includes('caida')
+afirmar(borrados(VOLTEO, CARGA_TSX, CAIDA, PRUEBAS_SUELTAS), '0 · sin `?volteo=columpio`, sin `?carga=trazo` (con movimiento reducido, el logo quieto) y sin `?caida=angulo`: ni la bandera ni su código')
+controlPositivo('0 · el detector VE la caída con su variante', `${CAIDA}\nexport type VarianteDeLaCaida = 'lenta' | 'angulo'`, (c: string) => borrados(VOLTEO, CARGA_TSX, c, PRUEBAS_SUELTAS))
+controlPositivo('  y la bandera que sigue suelta', [...PRUEBAS_SUELTAS, 'caida'], (s: readonly string[]) => borrados(VOLTEO, CARGA_TSX, CAIDA, s))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K2 a · La placa de Contacto crece pareja desde el primer cuadro')
+
+// El modelo: el ancho aparente en cada cuadro de 75 Hz (la pantalla del banco) a lo largo del viaje. Parejo = siempre crece, nunca
+// se queda quieto y ningún cuadro crece más de 1,5 veces lo que creció el anterior (un salto). Antes, los cuadros clave de `z` en
+// recta: entre dos, el tamaño (d / (d − z)) casi no crecía y después se disparaba.
+const CUADRO_S = 1 / 75
+const anchosDe = (escalaEn: (t: number) => number): number[] => Array.from({ length: Math.ceil(TRANSICIONES.viaje.duration / CUADRO_S) + 1 }, (_, k) => escalaEn(Math.min(1, (k * CUADRO_S) / TRANSICIONES.viaje.duration)))
+const parejo = (anchos: readonly number[]): boolean => {
+  const pasos = anchos.slice(1).map((a, i) => a - anchos[i])
+  const hastaElFinal = pasos.slice(0, -1)
+  return hastaElFinal.every((p) => p > 0) && hastaElFinal.every((p, i) => i === 0 || p <= 1.5 * hastaElFinal[i - 1] + 1e-9)
+}
+const d = PERSPECTIVA_DE_LA_PLACA
+const conCuadrosClave = (t: number): number => {
+  const zs = viajeDesdeElFondo(16)
+  const x = t * 16
+  const i = Math.min(15, Math.floor(x))
+  const z = zs[i] + (zs[i + 1] - zs[i]) * (x - i)
+  return d / (d - z)
+}
+afirmar(parejo(anchosDe(escalaDelViaje)) && escalaDelViaje(0) === ESCALA_AL_NACER && escalaDelViaje(1) === 1, 'K2 a · el modelo: a 75 Hz el tamaño aparente crece en cada cuadro, sin quedarse quieto y sin saltos (ningún cuadro más de 1,5 veces el anterior)')
+controlPositivo('K2 a · el detector VE el viaje de antes (cuadros clave de z en recta)', conCuadrosClave, (f: (t: number) => number) => parejo(anchosDe(f)))
+
+// El código: se anima la fracción y `z` sale de la escala en cada cuadro; mientras espera al fondo, la placa no se ve.
+const PLACA_TSX = leer('_chrome/contacto/PlacaDelContacto.tsx')
+const cableado = (p: string): boolean =>
+  p.includes('const z = useTransform(progreso, (t) => zDeLaEscala(escalaDelViaje(t)))') && p.includes('const viaje = animate(progreso, 1, TRANSICIONES.viaje)') &&
+  p.includes('initial={{ opacity: 0 }}') && p.includes('animate={{ opacity: 1, transition: { duration: 0.1, delay: TRANSICIONES.viaje.delay } }}') && !/z: \[\.\.\./.test(p)
+afirmar(cableado(PLACA_TSX), '  el código: la fracción en recta, su escala en cada cuadro, y el escenario a la vista recién cuando el viaje arranca')
+controlPositivo('  el detector VE el punto quieto a la vista durante la espera', PLACA_TSX.replace('initial={{ opacity: 0 }}', 'initial={{ opacity: 1 }}'), cableado)
+
+// Medido (1440 × 900): el ancho de la placa cuadro a cuadro. Ningún salto (antes, de 19 a 98 px en 4 cuadros: «5 veces más grande»).
+type Ancho = readonly [number, number, number]
+const APERTURA = recibo<{ antes: Ancho[]; despues: Ancho[] }>('k2-apertura.json')
+const sinSaltos = (anchos: readonly Ancho[]): boolean => {
+  // Desde el último cuadro de la espera (el punto, todavía invisible) en adelante.
+  const k0 = anchos.findIndex(([, , w]) => w !== anchos[0][2])
+  const vivos = anchos.slice(Math.max(0, k0 - 1)).map(([, , w]) => w)
+  const pasos = vivos.slice(1).map((w, i) => w - vivos[i]).filter((p) => p > 0)
+  const mediana = [...pasos].sort((a, b) => a - b)[Math.floor(pasos.length / 2)]
+  return pasos.length > 30 && pasos.every((p) => p <= 1.5 * mediana)
+}
+afirmar(sinSaltos(APERTURA.despues), `  medido: ningún cuadro crece más de 1,5 veces la mediana (${String(APERTURA.despues.length)} cuadros)`)
+controlPositivo('  el detector VE la apertura de antes', APERTURA.antes, sinSaltos)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K2 b · La carga es UNA pieza que gira sobre el eje del palito')
+const TAMANOS: readonly TamanoDeLaCarga[] = ['chico', 'medio', 'grande']
+const unaPieza = (c: string, capas: (t: TamanoDeLaCarga) => number): boolean =>
+  // Sin perspectiva: de frente la cara de atrás queda exactamente detrás de la de adelante (no asoma un contorno corrido).
+  !/perspective/.test(c.slice(c.indexOf('function Giro('))) &&
+  // El eje: el palito de la P, en el medio del espesor (sobre la cara de adelante el cuerpo giraba de costado).
+  c.includes('transformOrigin: `${eje} 50% calc(${lado} * ${String(-espesor / 2)})`') &&
+  // Las capas sin rendijas: a lo sumo `separacionPx` entre dos, en cada tamaño.
+  TAMANOS.every((t) => (CARGA.giro.espesor * CARGA.ladoPx[t]) / (capas(t) - 1) <= CARGA.giro.separacionPx) &&
+  // De canto: las secciones de adentro, giradas 90° y centradas en el espesor, en todo el ancho de la tinta y en el eje.
+  c.includes('{[...CARGA.secciones, EJE_DEL_PALITO].map((f) => (') && c.includes('rotateY(90deg)`') && c.includes('preserveAspectRatio="none"')
+const repartidas = (s: readonly number[]): boolean => s.length >= 6 && s[0] <= 0.1 && s[s.length - 1] >= 0.85 && s.every((x, i) => i === 0 || x - s[i - 1] <= 0.15)
+afirmar(unaPieza(CARGA_TSX, capasDelGiro) && repartidas(CARGA.secciones) && Math.abs(EJE_DEL_PALITO - 0.5877) < 0.01, `K2 b · sin perspectiva, el eje en el palito y en el medio del espesor, ${TAMANOS.map((t) => `${String(capasDelGiro(t))} capas`).join(' / ')} (≤ ${String(CARGA.giro.separacionPx)} px entre dos) y ${String(CARGA.secciones.length + 1)} secciones de canto`)
+controlPositivo('K2 b · el detector VE el giro de antes (9 capas para todos los tamaños)', () => 9, (f: (t: TamanoDeLaCarga) => number) => unaPieza(CARGA_TSX, f))
+controlPositivo('  el eje sobre la cara de adelante', CARGA_TSX.replace('transformOrigin: `${eje} 50% calc(${lado} * ${String(-espesor / 2)})`', 'transformOrigin: `${eje} 50%`'), (c: string) => unaPieza(c, capasDelGiro))
+controlPositivo('  y sin las secciones (de canto, rayas)', CARGA_TSX.replace('{[...CARGA.secciones, EJE_DEL_PALITO].map((f) => (', '{[].map((f) => ('), (c: string) => unaPieza(c, capasDelGiro))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K2 c · El éxito encaja y se enciende: nada de luz afuera de los bordes')
+const ENCAJE_TSX = leer('_componentes/formularios/EncajeDelLogo.tsx')
+const sinLuzAfuera = (e: string): boolean => {
+  const pieza = e.slice(e.indexOf('<motion.g initial={false} animate={pieza}'), e.indexOf('</motion.g>'))
+  return (
+    // Nada que se abra ni resplandezca alrededor: ni la onda (un contorno que crece), ni la elipse, ni un degradé.
+    !/ellipse|radialGradient|ENCAJE\.onda/.test(e) &&
+    // El borde que se enciende es sólo el del error (el rojo).
+    e.includes('{!exito && (\n        <motion.path d={LOGO_PATH_D} fill="none" strokeWidth={10} stroke="var(--rojo-del-error)"') &&
+    // La luz del éxito vive ADENTRO de la pieza (su misma forma): cae apagada, sube al claro y se asienta.
+    pieza.includes('data-luz-de-la-pieza=""') && ENCAJE.luz.apagada > ENCAJE.luz.queda && ENCAJE.luz.queda > 0 && ENCAJE.luz.queda < 0.2
+  )
+}
+afirmar(sinLuzAfuera(ENCAJE_TSX), `K2 c · sin la onda, el resplandor ni el borde que se enciende; la pieza cae apagada (${String(ENCAJE.luz.apagada)}), se enciende y queda en ${String(ENCAJE.luz.queda)}`)
+controlPositivo('K2 c · el detector VE la onda de luz de antes', ENCAJE_TSX.replace('<motion.g initial={false} animate={pieza}', '<motion.ellipse fill={`url(#luz-${id})`} />\n      <motion.g initial={false} animate={pieza}'), sinLuzAfuera)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K2 d e · El envío del panel, la primera vez, sin cuadros trabados')
+type Cuadros = readonly (readonly [number, number])[]
+const FRIO = recibo<{ antes: { error: Cuadros; exito: Cuadros }; despues: { error: Cuadros; exito: Cuadros }; precalentadoDelPanel: { apertura: Cuadros } }>('k2-frio.json')
+const fluido = (r: { error: Cuadros; exito: Cuadros }): boolean => [...r.error, ...r.exito].every(([, ms]) => ms <= 20)
+// El precalentado: las dos tarjetas, del tamaño de la de verdad, con la placa ya quieta (llegó y entró el paralaje).
+const FORM_TSX = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const precalienta = (f: string): boolean =>
+  f.includes('(TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000 + 100') && f.includes("<PrecalentarElResultado activo={precalentar && fase === 'formulario'} compacto={compacto} />") &&
+  PRECALENTAR.opacidad > 0 && PRECALENTAR.opacidad <= 0.02 && PRECALENTAR.ms >= 1000 && ENTRADA_DEL_PARALAJE.duration > 0
+afirmar(fluido(FRIO.despues) && precalienta(FORM_TSX), 'K2 d e · medido en frío (sin la caché de sombreadores): el error y el éxito del panel sin un cuadro de más de 20 ms; la tarjeta se precalienta con la placa quieta')
+controlPositivo('K2 d e · el detector VE el frío de antes (67, 213 y 107 ms con el error)', FRIO.antes, fluido)
+afirmar(FRIO.precalentadoDelPanel.apertura.every(([t, ms]) => ms <= 20 || t < TRANSICIONES.viaje.delay * 1000 + 150 || t > (TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000), '  y lo que cuesta precalentar cae con la placa quieta (no en su viaje ni en la entrada del paralaje)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K3 · El sonido del éxito y el del error')
+const SONIDO_MD = readFileSync('docs/rediseno/SONIDO.md', 'utf8')
+const SONORIDAD = recibo<{ lufs: Record<'golpe' | 'pulso' | 'pestillo' | 'exito' | 'error', number> }>('k3-sonoridad.json')
+const efectiva = (s: 'golpe' | 'pulso' | 'pestillo' | 'exito' | 'error', vol: number): number => SONORIDAD.lufs[s] + 20 * Math.log10(vol)
+const calibrados = (volExito: number, volError: number): boolean => {
+  const [ex, er] = [efectiva('exito', volExito), efectiva('error', volError)]
+  // Debajo del pulso y del golpe (son la respuesta de un formulario, no un momento de la escena), arriba de los clics.
+  return [ex, er].every((v) => v < efectiva('pulso', SONIDOS.pulso.volumen) - 4 && v < efectiva('golpe', SONIDOS.golpe.volumen) - 8 && v > efectiva('pestillo', SONIDOS.pestillo.volumen) + 6)
+}
+const enSuLugar = (e: string, md: string): boolean =>
+  'exito' in CORTES_DEL_SPRITE && 'error' in CORTES_DEL_SPRITE && e.includes("sonar(exito ? 'exito' : 'error')") && md.includes('| `exito` |') && md.includes('| `error` |') && md.includes('no imita ningún sonido de marca')
+afirmar(calibrados(SONIDOS.exito.volumen, SONIDOS.error.volumen) && enSuLugar(ENCAJE_TSX, SONIDO_MD), `K3 · en el sprite y en el contacto de la pieza; ${efectiva('exito', SONIDOS.exito.volumen).toFixed(1)} y ${efectiva('error', SONIDOS.error.volumen).toFixed(1)} LUFS contra el pulso (${efectiva('pulso', 1).toFixed(1)}) y el golpe (${efectiva('golpe', 1).toFixed(1)})`)
+controlPositivo('K3 · el detector VE un éxito a todo volumen (más fuerte que el pulso)', 1, (v: number) => calibrados(v, SONIDOS.error.volumen))
+controlPositivo('  y el pestillo y el pulso de antes en el contacto', ENCAJE_TSX.replaceAll("sonar(exito ? 'exito' : 'error')", "sonar(exito ? 'pestillo' : 'pulso')"), (e: string) => enSuLugar(e, SONIDO_MD))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K4 b · El mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve')
+const PIE_TSX = leer('_secciones/cierre/FormularioDelPie.tsx')
+const FOCO_CSS = leer('_estilos/foco.css')
+const sinEjemplo = (p: string): boolean => !/placeholder=/.test(p) && !leer('_secciones/cierre/contenido.ts').includes('ejemploDeMail')
+afirmar(sinEjemplo(PIE_TSX), 'K4 b · el mail del pie, vacío (sin «nombre@dominio»)')
+controlPositivo('K4 b · el detector VE el ejemplo de antes', PIE_TSX.replace('data-foco="campo"', "data-foco=\"campo\"\n                  placeholder={k === 'mail' ? c.ejemploDeMail : undefined}"), sinEjemplo)
+// La causa: la regla del foco de los campos (sin capa) le ganaba a la demora del autocompletado (una utilidad, en su capa) y el
+// celeste del navegador entraba en media duración rápida. La regla del autocompletado, con más especificidad, lo demora para siempre.
+const demora = (css: string): boolean => {
+  const i = css.indexOf('[data-v3] [data-foco="campo"]:autofill {')
+  const regla = i < 0 ? '' : css.slice(i, css.indexOf('}', i))
+  return regla.includes('transition-duration: var(--demora-del-autocompletado), var(--demora-del-autocompletado),') && css.indexOf('transition-property: color, background-color, border-color, box-shadow;') >= 0
+}
+const AUTO = recibo<{ antes: { autocompletado: { fondo: string; autofill: boolean }[] }; despues: { autocompletado: { fondo: string; autofill: boolean; valor: string }[]; lejos: { valor: string; autofill: boolean }[]; deVuelta: { valor: string; autofill: boolean }[] } }>('k4-autocompletado.json')
+const transparente = (campos: readonly { fondo: string; autofill: boolean }[]): boolean => campos.filter((c) => c.autofill).length >= 2 && campos.filter((c) => c.autofill).every((c) => /rgba\(.*, 0\)$/.test(c.fondo))
+afirmar(demora(FOCO_CSS) && transparente(AUTO.despues.autocompletado), 'K4 b · la causa: el campo autocompletado conserva su fondo (medido: transparente, antes el celeste del navegador)')
+controlPositivo('K4 b · el detector VE el celeste de antes', AUTO.antes.autocompletado, transparente)
+controlPositivo('  y la regla del foco sin la del autocompletado', FOCO_CSS.replace('[data-v3] [data-foco="campo"]:autofill {', '[data-v3] [data-foco="campo"]:hover {'), demora)
+const noVuelve = (p: string, r: typeof AUTO.despues): boolean =>
+  p.includes('const mirar = new IntersectionObserver(([e]) => {') && p.includes("el.querySelector(`#contacto-${k}`)?.matches(':autofill') === true") && p.includes('setVuelta((v) => v + 1)') &&
+  r.lejos.every((c) => !c.autofill && c.valor === '') && r.deVuelta.every((c) => !c.autofill && c.valor === '')
+afirmar(noVuelve(PIE_TSX, AUTO.despues), '  y al irse del pie lo autocompletado se vacía y los campos se vuelven a montar: al volver, vacíos y sin el estado (medido)')
+controlPositivo('  el detector VE los campos de antes al volver (con lo autocompletado)', { ...AUTO.despues, deVuelta: AUTO.antes.autocompletado.map((c) => ({ ...c, valor: 'Ana Prueba' })) }, (r: typeof AUTO.despues) => noVuelve(PIE_TSX, r))
+
+cerrar('s64-pulido-13')

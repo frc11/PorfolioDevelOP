@@ -39,7 +39,8 @@ una reverb de Schroeder. Escribe:
 
 - **El sprite**, mono a 48 kHz, en Opus (32 kbit/s, WebM: Chrome, Firefox, Edge) y en AAC (40 kbit/s, M4A: Safari):
   **46 KB** y **45 KB** (9,9 s: los siete de siempre y el pestillo). [PULIDO 4] C2 · con el golpe del encastre (sus dos
-  variantes): **64 KB** y **67 KB** (14,4 s). [PULIDO 5] D2 · con un solo golpe (el de la sala): **56 KB** y **59 KB** (12,6 s).
+  variantes): **64 KB** y **67 KB** (14,4 s). [PULIDO 5] D2 · con un solo golpe (el de la sala): **56 KB** y **59 KB** (12,6 s). [PULIDO 13] K3 · con el éxito y el error
+  de los formularios: **67 KB** y **69 KB** (14,9 s).
 - Los cortes, en `src/app/v3/_lib/sonido/sprite.ts`.
 - [CIERRE RETOQUE 3D] Ya no escribe ambientes: el ambiente es generativo, en el navegador.
 
@@ -57,6 +58,8 @@ Volver a correrlo da los mismos archivos.
 | `foto` | El hover de las fotos del equipo (el mouse, el foco, el toque) | Un roce: ruido agudo granulado | 170 ms | 0,1 |
 | `pestillo` | **El clic de la barra** (la pastilla, la esquina y el menú del teléfono) **y el de los CTA** (los del sistema, la ventana del final del túnel, «Clickeá acá», los de Servicios) | Dos golpes mecánicos a 18 ms (ruido en 3,4 kHz y en 1,7 kHz), el segundo más grave, con un cuerpo de 190 Hz: un cerrojo que encaja | 80 ms | 0,15 |
 | `golpe` | [PULIDO 4] C2 · **El golpe del encastre**: en el instante en que el logo conecta y nace la súper onda (el mismo evento del código, `cuadroDelFinal.ts`); otra vez en el reinicio automático, nunca en el rebobinado. [PULIDO 5] D2 · el de la sala (era `golpe-b`; el seco, `golpe-a`, «se escucha saturado», se borró) | El pulso más grave (un seno que cae de 62 a 34 Hz, más largo), un sub-golpe de 27 Hz debajo y el «toc» del contacto (ruido grave muy corto), con una saturación suave, y una cola corta de la sala (una reverb de Schroeder: cuatro peines amortiguados y dos pasatodos, 0,9 s, húmeda al 30 %): ~3 dB más que el pulso (RMS), pico a −0,5 dB (−0,4 dB después de codificar: no satura) | 2,4 s | 1 |
+| `exito` | [PULIDO 13] K3 · **El envío llegó**: en el contacto de la pieza que encaja en su ranura (la tarjeta del resultado, en el panel de Contacto y en el pie) | Dos notas claras que suben una quinta (Si 5 y Fa♯ 6, la segunda a 95 ms y más larga), cada una un seno con su octava y una parcial inarmónica (×2,9) que se apaga antes —una campana chica—, con un poco de sala (0,5 s, húmeda al 16 %). Obra de este repo: no imita ningún sonido de marca (ni las notas, ni el intervalo, ni el timbre) | 700 ms | 0,3 |
+| `error` | [PULIDO 13] K3 · **El envío falló**: en el choque de la pieza que no entra (la misma tarjeta) | Dos notas cortas y graves que bajan una tercera menor (Re 4 y Si 3, la segunda a 150 ms), con un pasabajos a 1,4 kHz: suaves, sin nada agudo | 550 ms | 0,3 |
 
 Se borraron: `tunel` (el soplido del túnel), `amanecer` (el crescendo), `dia` · `noche` (los dos ambientes) y
 [CIERRE RETOQUE 3D] los otros siete candidatos de clic (`barra-a` a `barra-c`, `cta-a` a `cta-d`).
@@ -87,3 +90,10 @@ la pestaña oculta (deja de programar notas). No cambia con el día y la noche.
   prueba los mueve y los guarda en el navegador; el sitio usa esos.
 - **Un sprite con carga diferida**; el ambiente no se descarga: se arma en el navegador recién cuando tiene que sonar.
 - **Con movimiento reducido, sin ambiente.**
+
+
+**[PULIDO 13] K3 · cómo se calibraron el éxito y el error.** Con la sonoridad momentánea máxima (EBU R128, `ffmpeg ebur128`)
+de cada corte del sprite por su volumen: el golpe da −13,4 LUFS, el pulso −16,8, el éxito −24,1, el error −24,7 y el pestillo −41,6.
+O sea, ~7 dB debajo del pulso y ~11 debajo del golpe (son la respuesta de un formulario, no un momento de la escena), y bien
+por encima de los clics. Respetan lo de siempre: suenan sólo con el parlante prendido y después de un gesto (los suelta el
+mismo `sonar` del bus), y en `/v3?sonidos=1` se escuchan solos.

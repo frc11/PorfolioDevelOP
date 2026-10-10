@@ -150,7 +150,6 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--resultado-sombra', valor: 'black', evidencia: 'decidido', procedencia: '[PULIDO 11] B2 · la sombra del borde de arriba adentro de la ranura y la de la pieza que baja' },
   { nombre: '--resultado-borde', valor: 'color-mix(in srgb, var(--resultado-claro) 24%, transparent)', evidencia: 'decidido', procedencia: '[PULIDO 11] B2 · el borde de la ranura en reposo (el canto que toma la luz)' },
   { nombre: '--resultado-filo', valor: 'color-mix(in srgb, var(--resultado-claro) 45%, transparent)', evidencia: 'decidido', procedencia: '[PULIDO 11] B2 · el filo de la pieza del logo' },
-  { nombre: '--resultado-luz', valor: 'var(--resultado-claro)', evidencia: 'decidido', procedencia: '[PULIDO 11] B2 · la onda de luz blanca que sale de la ranura cuando la pieza encaja' },
   { nombre: '--rojo-del-error', valor: 'var(--color-error)', evidencia: 'medido', procedencia: '[PULIDO 11] B3 · el único color fuera del monocromo: el borde de la ranura que se enciende cuando la pieza no entra; un carmín frío, 4,82:1 sobre la tinta y 4,93:1 sobre el fondo invertido (un elemento gráfico: más que 3:1)' },
   { nombre: '--texto-del-error', valor: 'var(--color-error-texto)', evidencia: 'medido', procedencia: '[PULIDO 11] B3 · el título del error, la versión clara del rojo: 8,96:1 sobre la tinta y 9,16:1 sobre el fondo invertido (AA de texto)' },
   { nombre: '--alcance-del-velo-de-noche', valor: '-60% -20%', evidencia: 'medido', procedencia: '[PULIDO 11] A4 · J9 b · la caja del velo de noche detrás de los textos de Quiénes somos (abajo de 1024): 2,2 veces el alto del bloque y 1,4 su ancho (los bloques son anchos y bajos), así el degradé se desvanece por fuera del texto' },
@@ -217,6 +216,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   // [AJUSTES FINALES] A4 · el velo de carga.
   { nombre: '--velo-fundido', valor: '800ms', evidencia: 'decidido', procedencia: 'el fundido con que todo aparece junto (~0,8 s, pedido); el mismo CARGA.fundidoMs de `_lib/carga.ts` (s48 los ata)' },
   { nombre: '--velo-espera', valor: '4000ms', evidencia: 'decidido', procedencia: 'el plazo desde el arranque en que el fundido arranca igual aunque no esté todo (~4 s, pedido); el mismo CARGA.plazoMs de `_lib/carga.ts` (s48 los ata)' },
+  // [PULIDO 13] K4 · el autocompletado del pie.
+  { nombre: '--demora-del-autocompletado', valor: '100000s', evidencia: 'decidido', procedencia: 'la transición que demora para siempre el fondo celeste y el color del texto que el navegador le pone al campo autocompletado (con !important: no se pisan): así el campo se queda como estaba (en el pie de volumen, transparente sobre su placa)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

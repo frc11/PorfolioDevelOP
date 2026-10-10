@@ -88,8 +88,6 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
-  /** [PULIDO 11] D · `caida=angulo`: el logo del final gira 90° en arco desde donde está (el producto: la lenta, `caida=lenta`). */
-  readonly caida: 'angulo' | 'no'
   /** [PULIDO 11] E · `hilos=si`: hilos de energía en lugar del polvo (exploración; el producto, el polvo). */
   readonly hilos: 'si' | 'no'
 }
@@ -114,11 +112,12 @@ export interface Pruebas {
  * (la corriente y el pulso se fueron con su código). F2 · entran `meta=contorno` (la de antes) y `volteo=juntos`. [PULIDO 8] G1 · se borraron las dos: el volteo
  * con las placas a la vez es el producto (`contorno` y la cascada se fueron con su código). [PULIDO 11] D · entra `caida=angulo`
  * (la caída del logo en el final: la lenta, como una ficha de dominó, es el producto). E · entra `hilos=si` (los hilos de energía).
+ * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', caida: 'no', hilos: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', hilos: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'caida', 'hilos'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'hilos'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -131,7 +130,6 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    caida: unoDe<'angulo'>(['angulo'], valor('caida')),
     hilos: unoDe<'si'>(['si'], valor('hilos')),
   }
 }

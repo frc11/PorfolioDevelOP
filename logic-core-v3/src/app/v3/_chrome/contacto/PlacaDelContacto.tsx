@@ -1,11 +1,11 @@
 'use client'
 
-import { motion } from 'motion/react'
-import { useState } from 'react'
+import { animate, motion, useMotionValue, useTransform } from 'motion/react'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, useParalaje, viajeDesdeElFondo } from './placa'
+import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, escalaDelViaje, useParalaje, zDeLaEscala } from './placa'
 
 /**
  * [CIERRE] 2B · LA PLACA DEL CONTACTO — el bloque de CSS 3D alrededor de la hoja (el frente): el escenario con la
@@ -18,8 +18,11 @@ import { ESPESOR_DE_LA_PLACA_PX, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, useParal
  *
  * [EL ENCASTRE] 1D · el paralaje recién cuando el viaje terminó (`llego`, al completarse su animación: cada apertura monta
  * la placa de nuevo) y el bloque se corre al revés del mouse.
+ *
+ * [PULIDO 13] K2 · el viaje anima la FRACCIÓN (`progreso`, en recta) y la `z` de cada cuadro sale de la escala que le toca: el
+ * tamaño aparente crece parejo desde el primer cuadro. Con cuadros clave de `z` crecía a saltos (dentro de cada tramo, casi
+ * nada y después de golpe) y, durante el retardo, el punto del fondo quedaba quieto a la vista: ahora se ve recién al arrancar.
  */
-const VIAJE = viajeDesdeElFondo()
 const E = ESPESOR_DE_LA_PLACA_PX
 /** Las caras de detrás del frente: los cuatro costados (corridos lo que redondea el frente) y la de atrás. */
 const CARAS = [
@@ -36,24 +39,30 @@ const CARAS = [
 export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
   const [llego, setLlego] = useState(false)
   const paralaje = useParalaje(activa, llego)
+  const progreso = useMotionValue(0)
+  const z = useTransform(progreso, (t) => zDeLaEscala(escalaDelViaje(t)))
+  useEffect(() => {
+    if (!activa) return undefined
+    const viaje = animate(progreso, 1, TRANSICIONES.viaje)
+    void viaje.finished.then(() => setLlego(true))
+    return () => viaje.stop()
+  }, [activa, progreso])
   if (!activa) return <>{children}</>
   return (
     <motion.div
       data-parte="escenario-de-la-placa"
       className="pointer-events-none absolute inset-0 grid place-items-center p-[var(--pad-lateral-compacto)]"
       style={{ perspective: PERSPECTIVA_DE_LA_PLACA, perspectiveOrigin: paralaje.origen }}
-      initial={{ opacity: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.1, delay: TRANSICIONES.viaje.delay } }}
       exit={{ opacity: 0, transition: { ...TRANSICIONES.acostarse, duration: TRANSICIONES.acostarse.duration * 0.35, delay: TRANSICIONES.acostarse.duration * 0.65 } }}
     >
       <motion.div
         data-parte="viaje-de-la-placa"
         className="w-full max-w-[calc(var(--spacing-20)*11+2*var(--pad-lateral-compacto))]"
-        style={{ transformStyle: 'preserve-3d', transformOrigin: 'center bottom' }}
-        initial={{ z: VIAJE[0], rotateX: 0 }}
-        animate={{ z: [...VIAJE], rotateX: 0 }}
-        exit={{ rotateX: 90, z: 0, transition: TRANSICIONES.acostarse }}
-        transition={TRANSICIONES.viaje}
-        onAnimationComplete={() => setLlego(true)}
+        style={{ transformStyle: 'preserve-3d', transformOrigin: 'center bottom', z }}
+        initial={{ rotateX: 0 }}
+        exit={{ rotateX: 90, transition: TRANSICIONES.acostarse }}
       >
         <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
           {children}

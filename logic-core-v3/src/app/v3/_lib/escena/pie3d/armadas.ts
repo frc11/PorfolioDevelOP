@@ -11,7 +11,7 @@ import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
 import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDelFinal'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
-import { VOLTEO_TERMINADO, varianteDelVolteo, type VarianteDelVolteo } from '../../formularios/volteo'
+import { VOLTEO_TERMINADO } from '../../formularios/volteo'
 import { viajeEnCurso } from '../viaje'
 import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
@@ -80,7 +80,6 @@ export interface Armada {
 
 /** [PULIDO 9] H2 · la placa que estaba (sus mallas, en el grupo de la nueva) y cuánto va (0 a 1). */
 interface TransformacionEnCurso {
-  readonly variante: VarianteDelVolteo
   readonly saliente: Armada
   t: number
   /** [PULIDO 10] J4 · lista para arrancar: el programa de la entrante, compilado (`PieDeVolumen`), y un cuadro entero ya dibujado. */
@@ -248,7 +247,7 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
       if (transforma) {
         vieja.transformacion = null
         a.grupo.add(vieja.viaje)
-        a.transformacion = { variante: varianteDelVolteo(p.elemento.getAttribute('data-volteo')), saliente: vieja, t: 0, lista: false, cuadros: 0, compilando: false }
+        a.transformacion = { saliente: vieja, t: 0, lista: false, cuadros: 0, compilando: false }
         // [PULIDO 11] B1 · el DOM se apaga mientras voltea, en las dos direcciones (lo nuevo flotaría sobre la placa que gira: los
         // campos, o el encastre de la tarjeta, que arranca recién cuando la escena avisa que terminó: `VOLTEO_TERMINADO`).
         p.elemento.style.opacity = '0'
@@ -364,15 +363,15 @@ function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: n
   // [PULIDO 10] J4 · arranca recién con la entrante compilada y después de un cuadro entero (el del rearmado es largo: armar la
   // geometría; su `dt` adelantaría el giro de un salto). Mientras, la entrante se dibuja disuelta: sus búferes ya suben.
   if (x.lista) x.cuadros += 1
-  if (x.cuadros > 1) x.t = Math.min(1, x.t + dt / duracionDeLaTransformacion(x.variante, quieto))
+  if (x.cuadros > 1) x.t = Math.min(1, x.t + dt / duracionDeLaTransformacion(quieto))
   const caja = a.medida.caja
   const vieja = x.saliente.medida.caja
   const desde = { ancho: vieja.ancho, alto: vieja.alto, dx: vieja.x - caja.x, dy: vieja.y - caja.y }
-  const entra = poseDeLaTransformacion(x.variante, quieto, x.t, true, caja, desde, a.espesor, POSE)
+  const entra = poseDeLaTransformacion(quieto, x.t, true, caja, desde, a.espesor, POSE)
   a.viaje.matrix.multiply(POSE)
   a.viaje.visible = true
   a.uniformes.uApareceDelPie.value *= entra.visible ? entra.aparece : 0
-  const sale = poseDeLaTransformacion(x.variante, quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
+  const sale = poseDeLaTransformacion(quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
   x.saliente.viaje.visible = sale.visible
   x.saliente.uniformes.uApareceDelPie.value = sale.aparece
   x.saliente.material.envMapIntensity = a.material.envMapIntensity

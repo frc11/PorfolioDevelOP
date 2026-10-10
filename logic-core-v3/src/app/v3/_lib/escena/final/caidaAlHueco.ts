@@ -13,14 +13,11 @@ import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
  * sobre su base no vuelca sola: primero se inclina hacia atrás hasta pasar apenas su equilibrio (`inclinaS`, el trayecto de
  * mínimo tirón: termina quieta, así la física arranca del reposo sin salto) y ahí la gravedad se la lleva: duda y después se va,
  * cada vez más rápido. Al tocar, rebota: la velocidad angular se da vuelta y se achica por la restitución, la gravedad lo vuelve
- * a bajar y, cuando el rebote ya no levanta nada, queda asentado. Dos variantes (`?caida=`):
+ * a bajar y, cuando el rebote ya no levanta nada, queda asentado. El logo baja PARADO hasta el piso, con el canto en el borde del
+ * hueco (también con el trayecto de mínimo tirón: el de una mano que apoya algo), se inclina y cae hacia atrás como una ficha de
+ * dominó. [PULIDO 13] · la otra variante (`?caida=angulo`, en arco desde el aire) se borró: ganó esta.
  *
- *   · `lenta` (la del producto): el logo baja PARADO hasta el piso, con el canto en el borde del hueco (también con el trayecto de
- *     mínimo tirón: el de una mano que apoya algo), se inclina y cae hacia atrás como una ficha de dominó.
- *   · `angulo`: desde donde está (en el aire), se inclina y cae girando 90° hacia atrás mientras su canto baja en arco hasta el
- *     borde del hueco (llega a los `llegaGrados` de la caída: el giro es el del vuelco y el canto lo acompaña).
- *
- * En las dos el canto queda en el borde del hueco y, en los últimos grados (con el hueco ya abierto), baja por la pared del pozo:
+ * El canto queda en el borde del hueco y, en los últimos grados (con el hueco ya abierto), baja por la pared del pozo:
  * termina al ras, centrado. Nada atraviesa el piso: toda la placa queda por encima de su canto mientras gira. El contacto (el
  * logo al ras en el pozo) cae siempre en `golpeS` del reloj: la caída arranca lo que dura antes. Ese cuadro es el del golpe de
  * siempre (el sonido, la súper onda, el filo, el poder). El hueco se abre con el ángulo (sincronizado con la caída) y termina de
@@ -29,12 +26,6 @@ import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
  * Coordenadas: (y, z) del mundo, con la cámara en +z; el logo, una placa de `alto` × `espesor` centrada en su grupo; el ángulo
  * del cuerpo `a` va de 0 (parado) a π/2 (acostado, con la cabeza al fondo): su `rotation.x` es −a.
  */
-export type VarianteDeLaCaida = 'lenta' | 'angulo'
-
-export function varianteDeLaCaida(valor: string | null | undefined): VarianteDeLaCaida {
-  return valor === 'angulo' ? 'angulo' : 'lenta'
-}
-
 export const CAIDA_AL_HUECO = {
   /** El contacto: el golpe (s del reloj). */
   golpeS: 3.5,
@@ -42,10 +33,8 @@ export const CAIDA_AL_HUECO = {
   gravedad: 26,
   /** Cuánto tarda en inclinarse hasta pasar su equilibrio (s). */
   inclinaS: 0.5,
-  /** `lenta`: cuánto tarda en bajar parado (s) y cuánto pasado su equilibrio arranca a caer (grados). */
+  /** Cuánto tarda en bajar parado (s) y cuánto pasado su equilibrio arranca a caer (grados). */
   lenta: { bajaS: 1.2, pasadoGrados: 1.2 },
-  /** `angulo`: cuánto pasado su equilibrio arranca a caer (grados) y a qué ángulo de la caída su canto llega al borde del hueco. */
-  angulo: { pasadoGrados: 4, llegaGrados: 60 },
   /** La restitución de cada toque (la velocidad angular que le queda, dada vuelta) y debajo de qué velocidad queda asentado (rad/s). */
   rebote: { restitucion: 0.26, asienta: 0.35 },
   /**
@@ -78,11 +67,11 @@ export interface CaidaIntegrada {
 }
 
 /** La dinámica del vuelco: κ, α (θ'' = κ·sen(θ − α)) y el ángulo de arranque (apenas pasado α). */
-export function dinamicaDe(v: VarianteDeLaCaida, p: PlacaDelLogo): { readonly kappa: number; readonly alfa: number; readonly desde: number } {
+export function dinamicaDe(p: PlacaDelLogo): { readonly kappa: number; readonly alfa: number; readonly desde: number } {
   const k2 = (p.alto * p.alto + p.espesor * p.espesor) / 12
   const d = Math.hypot(p.alto, p.espesor) / 2
   const alfa = Math.atan2(p.espesor, p.alto)
-  const pasado = v === 'lenta' ? CAIDA_AL_HUECO.lenta.pasadoGrados : CAIDA_AL_HUECO.angulo.pasadoGrados
+  const pasado = CAIDA_AL_HUECO.lenta.pasadoGrados
   return { kappa: (CAIDA_AL_HUECO.gravedad * d) / (k2 + d * d), alfa, desde: alfa + THREE.MathUtils.degToRad(pasado) }
 }
 
@@ -93,23 +82,23 @@ export function centroAlRas(p: PlacaDelLogo): number {
 
 const CACHE = new Map<string, CaidaIntegrada>()
 /** El último pedido (el de cada cuadro): sin armar la clave de texto. */
-const ULTIMA = { v: '' as VarianteDeLaCaida | '', alto: Number.NaN, espesor: Number.NaN, caida: null as CaidaIntegrada | null }
+const ULTIMA = { alto: Number.NaN, espesor: Number.NaN, caida: null as CaidaIntegrada | null }
 
 /**
- * La caída, integrada con RK4 desde el reposo en `desde` hasta asentada (memorizada por variante y tamaño). En cada toque
+ * La caída, integrada con RK4 desde el reposo en `desde` hasta asentada (memorizada por tamaño). En cada toque
  * (a = π/2) la velocidad angular se da vuelta por la restitución; si ya no alcanza para levantarlo, queda en π/2.
  */
-export function caidaIntegrada(v: VarianteDeLaCaida, p: PlacaDelLogo): CaidaIntegrada {
-  if (ULTIMA.caida !== null && ULTIMA.v === v && ULTIMA.alto === p.alto && ULTIMA.espesor === p.espesor) return ULTIMA.caida
-  const clave = `${v}|${p.alto.toFixed(4)}|${p.espesor.toFixed(4)}`
-  const hecha = CACHE.get(clave) ?? integrar(v, p)
+export function caidaIntegrada(p: PlacaDelLogo): CaidaIntegrada {
+  if (ULTIMA.caida !== null && ULTIMA.alto === p.alto && ULTIMA.espesor === p.espesor) return ULTIMA.caida
+  const clave = `${p.alto.toFixed(4)}|${p.espesor.toFixed(4)}`
+  const hecha = CACHE.get(clave) ?? integrar(p)
   CACHE.set(clave, hecha)
-  Object.assign(ULTIMA, { v, alto: p.alto, espesor: p.espesor, caida: hecha })
+  Object.assign(ULTIMA, { alto: p.alto, espesor: p.espesor, caida: hecha })
   return hecha
 }
 
-function integrar(v: VarianteDeLaCaida, p: PlacaDelLogo): CaidaIntegrada {
-  const { kappa, alfa, desde } = dinamicaDe(v, p)
+function integrar(p: PlacaDelLogo): CaidaIntegrada {
+  const { kappa, alfa, desde } = dinamicaDe(p)
   const h = CAIDA_AL_HUECO.paso
   const { restitucion, asienta } = CAIDA_AL_HUECO.rebote
   const tope = Math.PI / 2
@@ -164,20 +153,20 @@ export function anguloDeLaCaida(c: CaidaIntegrada, u: number): number {
 
 /**
  * Cuándo arranca la física (s del reloj): lo que dura antes del golpe. SIEMPRE: el contacto es el golpe para cualquier tamaño
- * del logo. Lo que se adapta es lo de antes (la bajada de la lenta: `bajadaDe`; la espera en el aire de `angulo`).
+ * del logo. Lo que se adapta es lo de antes (la bajada: `bajadaDe`).
  */
-export function arranqueDeLaCaida(v: VarianteDeLaCaida, p: PlacaDelLogo): number {
-  return Math.max(CAIDA_AL_HUECO.inclinaS, CAIDA_AL_HUECO.golpeS - caidaIntegrada(v, p).contactoS)
+export function arranqueDeLaCaida(p: PlacaDelLogo): number {
+  return Math.max(CAIDA_AL_HUECO.inclinaS, CAIDA_AL_HUECO.golpeS - caidaIntegrada(p).contactoS)
 }
 
 /** Cuándo toca (s del reloj): el golpe. */
-export function contactoDeLaCaida(v: VarianteDeLaCaida, p: PlacaDelLogo): number {
-  return arranqueDeLaCaida(v, p) + caidaIntegrada(v, p).contactoS
+export function contactoDeLaCaida(p: PlacaDelLogo): number {
+  return arranqueDeLaCaida(p) + caidaIntegrada(p).contactoS
 }
 
-/** Cuánto tarda la lenta en bajar (s): `lenta.bajaS`, o menos si un logo más grande tarda más en caer (nunca menos de 0,5). */
+/** Cuánto tarda en bajar (s): `lenta.bajaS`, o menos si un logo más grande tarda más en caer (nunca menos de 0,5). */
 export function bajadaDe(p: PlacaDelLogo): number {
-  return Math.max(0.5, Math.min(CAIDA_AL_HUECO.lenta.bajaS, arranqueDeLaCaida('lenta', p) - CAIDA_AL_HUECO.inclinaS))
+  return Math.max(0.5, Math.min(CAIDA_AL_HUECO.lenta.bajaS, arranqueDeLaCaida(p) - CAIDA_AL_HUECO.inclinaS))
 }
 
 const suave = (x: number): number => {
@@ -189,9 +178,9 @@ const suave = (x: number): number => {
 const EN_EL_RELOJ = { a: 0, toco: false, cayendo: false }
 
 /** El ángulo del cuerpo a los `s` del reloj (antes, la inclinación; después, la física) y si ya tocó. */
-export function anguloEnElReloj(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number): { readonly a: number; readonly toco: boolean; readonly cayendo: boolean } {
-  const c = caidaIntegrada(v, p)
-  const u = s - arranqueDeLaCaida(v, p)
+export function anguloEnElReloj(p: PlacaDelLogo, s: number): { readonly a: number; readonly toco: boolean; readonly cayendo: boolean } {
+  const c = caidaIntegrada(p)
+  const u = s - arranqueDeLaCaida(p)
   EN_EL_RELOJ.cayendo = u > 0
   EN_EL_RELOJ.toco = u >= c.contactoS
   EN_EL_RELOJ.a = u <= 0 ? c.desde * suave((u + CAIDA_AL_HUECO.inclinaS) / CAIDA_AL_HUECO.inclinaS) : anguloDeLaCaida(c, u)
@@ -211,28 +200,18 @@ function girar(y: number, z: number, a: number): THREE.Vector2 {
   return GIRO.set(y * Math.cos(a) + z * Math.sin(a), -y * Math.sin(a) + z * Math.cos(a))
 }
 
-/**
- * El canto (y, z) a los `s` del reloj, sin lo que baja por la pared: en la lenta, donde lo deja la bajada (al final, en el borde
- * del hueco: z = alto/2, en el piso); en ángulo, desde donde está (el canto del logo parado en el origen) hasta el borde, con la
- * caída.
- */
-function cantoEn(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number, a: number, cayendo: boolean): THREE.Vector2 {
+/** El canto (y, z) a los `s` del reloj, sin lo que baja por la pared: donde lo deja la bajada (al final, en el borde del hueco: z = alto/2, en el piso). */
+function cantoEn(p: PlacaDelLogo, s: number): THREE.Vector2 {
   const { alto: h, espesor: e } = p
-  if (v === 'lenta') {
-    const b = suave(s / bajadaDe(p))
-    return CANTO.set(ORBIT_TARGET_Y - h / 2 + (FLOOR_Y - ORBIT_TARGET_Y + h / 2) * b, -e / 2 + (h / 2 + e / 2) * b)
-  }
-  const c = caidaIntegrada(v, p)
-  const llega = THREE.MathUtils.degToRad(CAIDA_AL_HUECO.angulo.llegaGrados)
-  const b = cayendo ? suave((a - c.desde) / (llega - c.desde)) : 0
+  const b = suave(s / bajadaDe(p))
   return CANTO.set(ORBIT_TARGET_Y - h / 2 + (FLOOR_Y - ORBIT_TARGET_Y + h / 2) * b, -e / 2 + (h / 2 + e / 2) * b)
 }
 const CANTO = new THREE.Vector2()
 
 /** La pose del logo a los `s` del reloj: el centro (y, z; x = 0) y el ángulo del cuerpo (`rotation.x` = −a). */
-export function poseDeLaCaida(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number, destino: { centro: THREE.Vector3; rotacionX: number }): void {
-  const { a, toco, cayendo } = anguloEnElReloj(v, p, s)
-  const canto = cantoEn(v, p, s, a, cayendo)
+export function poseDeLaCaida(p: PlacaDelLogo, s: number, destino: { centro: THREE.Vector3; rotacionX: number }): void {
+  const { a, toco } = anguloEnElReloj(p, s)
+  const canto = cantoEn(p, s)
   const [y, z] = [canto.x - p.espesor * hundidoDelCanto(a, toco), canto.y]
   // El centro está a (alto/2, espesor/2) del canto de abajo y de atrás, girado con la placa.
   const r = girar(p.alto / 2, p.espesor / 2, a)
@@ -240,30 +219,27 @@ export function poseDeLaCaida(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number, 
   destino.rotacionX = -a
 }
 
-/** Cuánto se apaga el movimiento propio del logo (0 a 1): del todo antes de inclinarse (en la lenta, mientras baja). */
-export function sinElRig(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number): number {
-  const hasta = v === 'lenta' ? bajadaDe(p) * 0.7 : Math.max(0.4, arranqueDeLaCaida(v, p) - CAIDA_AL_HUECO.inclinaS)
-  return suave(s / hasta)
+/** Cuánto se apaga el movimiento propio del logo (0 a 1): del todo antes de inclinarse (mientras baja). */
+export function sinElRig(p: PlacaDelLogo, s: number): number {
+  return suave(s / (bajadaDe(p) * 0.7))
 }
 
 /**
- * Cuánto se fue el logo de su lugar de siempre (0 a 1: el centro de la sala, donde está la mancha de contacto del piso): en la
- * lenta, con la bajada; en `angulo`, con la caída. Con eso la mancha se va con él (no queda una sombra donde ya no está).
+ * Cuánto se fue el logo de su lugar de siempre (0 a 1: el centro de la sala, donde está la mancha de contacto del piso): con la
+ * bajada. Con eso la mancha se va con él (no queda una sombra donde ya no está).
  */
-export function fueraDeSuLugar(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number): number {
-  if (v === 'lenta') return suave(s / bajadaDe(p))
-  const { a, cayendo } = anguloEnElReloj(v, p, s)
-  return cayendo ? suave(a / (Math.PI / 2)) : 0
+export function fueraDeSuLugar(p: PlacaDelLogo, s: number): number {
+  return suave(s / bajadaDe(p))
 }
 
 /** La sombra que pide la pose (0 a 1): entera en el aire y parado (la del logo sigue al logo), se va mientras cae (hasta los 60°). */
-export function sombraDeLaCaida(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number): number {
-  return 1 - suave(anguloEnElReloj(v, p, s).a / (Math.PI / 3))
+export function sombraDeLaCaida(p: PlacaDelLogo, s: number): number {
+  return 1 - suave(anguloEnElReloj(p, s).a / (Math.PI / 3))
 }
 
 /** Cuánto se abrió el hueco (0 a 1): con el ángulo de la caída, desde `hueco.desdeGrados` hasta `hastaGrados` (antes del toque). */
-export function aperturaDelHueco(v: VarianteDeLaCaida, p: PlacaDelLogo, s: number): number {
-  const { a, toco, cayendo } = anguloEnElReloj(v, p, s)
+export function aperturaDelHueco(p: PlacaDelLogo, s: number): number {
+  const { a, toco, cayendo } = anguloEnElReloj(p, s)
   if (!cayendo) return 0
   if (toco) return 1
   const { desdeGrados, hastaGrados } = CAIDA_AL_HUECO.hueco

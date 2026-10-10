@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
-import { useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -12,7 +12,7 @@ import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
 import { TEXTOS_DE_ENVIO, enviarAlServidor, type ResultadoDelEnvio } from '../../_lib/formularios/enviar'
 import { ANUNCIO_DE_EXITO } from '../../_lib/formularios/gracias'
 import { anotarElPedido, recuperarAlMontar, useRecordar, useRespuestaEnViaje } from '../../_lib/formularios/memoriaDelFormulario'
-import { VOLTEO_TERMINADO, duracionDelVolteo, transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
+import { VOLTEO_TERMINADO, duracionDelVolteo, transicionDelVolteo } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
@@ -49,11 +49,11 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * formulario vacío con la transformación inversa. El resultado se anuncia en la región viva y el foco va a la tarjeta (de
  * vuelta, al nombre). Con error, todo lo escrito queda y el error a la vista.
  *
- * [PULIDO 11] B · EL RESULTADO ES UNA TARJETA. Al llegar la respuesta, la placa VOLTEA (`?volteo=centrado|columpio`) y del
+ * [PULIDO 11] B · EL RESULTADO ES UNA TARJETA. Al llegar la respuesta, la placa VOLTEA ([PULIDO 13] · sobre el eje del medio) y del
  * otro lado está la tarjeta del resultado, del tamaño del formulario (`TarjetaDeResultado`): con el éxito, el logo que encaja;
  * con el error, el que no encaja, el error y «Reintentar», que vuelve al formulario con todo lo escrito. Al terminar el éxito
- * los campos se limpian y se vuelven a montar (sin el estado del autocompletado). Desde 1025 voltea la placa 3D (`data-estado`,
- * `data-volteo`) y el encastre arranca cuando la escena avisa que terminó (`VOLTEO_TERMINADO`); abajo, el DOM. El rótulo del
+ * los campos se limpian y se vuelven a montar (sin el estado del autocompletado). Desde 1025 voltea la placa 3D (`data-estado`)
+ * y el encastre arranca cuando la escena avisa que terminó (`VOLTEO_TERMINADO`); abajo, el DOM. El rótulo del
  * botón y la carga se suceden: nunca los dos a la vez (en 3D, el rótulo en relieve lo apaga el sombreador en el mismo cuadro).
  */
 const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
@@ -81,7 +81,6 @@ interface Memoria {
 }
 const MEMORIA = 'formulario-del-pie'
 
-const sinSuscripcion = (): (() => void) => () => undefined
 /** [PULIDO 11] B1 · cuánto más que el volteo espera el respaldo antes de mostrar lo nuevo igual (s: la placa compila y se rearma). */
 const RESPALDO_DEL_VOLTEO_S = 2.5
 
@@ -111,7 +110,6 @@ export function FormularioDelPie(): React.JSX.Element {
   const placa = useRef<HTMLFormElement | null>(null)
   usePiezaDelPie(placa, { id: 'formulario-del-pie', forma: 'formulario', activo: volumen })
   const reducido = useMovimientoReducido()
-  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'centrado' as const)
   // [PULIDO 11] B1 · en 3D la placa voltea en la escena. Al cambiar de estado el DOM se apaga en este mismo cuadro (la placa se
   // rearma un momento después y recién ahí empieza a voltear: sin esto, lo nuevo se veía un instante sobre la placa vieja); la
   // escena lo vuelve a prender al terminar y avisa con el estado que quedó (el encastre arranca sólo con el resultado). Si el
@@ -126,7 +124,7 @@ export function FormularioDelPie(): React.JSX.Element {
         el.style.opacity = ''
         setSeVe(true)
       },
-      (duracionDelVolteo(variante, reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
+      (duracionDelVolteo(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
     )
     const termino = (e: Event): void => {
       if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return
@@ -138,7 +136,25 @@ export function FormularioDelPie(): React.JSX.Element {
       window.clearTimeout(respaldo)
       el.removeEventListener(VOLTEO_TERMINADO, termino)
     }
-  }, [estadoALaVista, enVolumen, huboCambio, variante, reducido])
+  }, [estadoALaVista, enVolumen, huboCambio, reducido])
+  // [PULIDO 13] K4 · lo autocompletado no vuelve: al irse del pie, los campos que el navegador llenó (y siguen así: escribir en uno
+  // le saca el estado) se vacían y se vuelven a montar (uno nuevo no trae el autocompletado). Lo escrito a mano se queda.
+  const fase = estado.fase
+  useEffect(() => {
+    const el = placa.current
+    if (el === null || fase !== 'quieto') return undefined
+    const mirar = new IntersectionObserver(([e]) => {
+      if (e === undefined || e.isIntersecting) return
+      const llenos = (['nombre', 'mail', 'mensaje'] as const).filter((k) => el.querySelector(`#contacto-${k}`)?.matches(':autofill') === true)
+      if (llenos.length === 0) return
+      setDatos((d) => ({ nombre: llenos.includes('nombre') ? '' : d.nombre, mail: llenos.includes('mail') ? '' : d.mail, mensaje: llenos.includes('mensaje') ? '' : d.mensaje }))
+      setErrores({})
+      setIntento(false)
+      setVuelta((v) => v + 1)
+    })
+    mirar.observe(el)
+    return () => mirar.disconnect()
+  }, [fase])
   // Adónde va el foco cuando lo nuevo aparece (la tarjeta, el nombre o el botón de vuelta): lo toma el elemento al montarse.
   const pedirFoco = useRef<'tarjeta' | 'nombre' | 'enviar' | null>(null)
   const tomarElFoco = (quien: 'tarjeta' | 'nombre' | 'enviar') => (el: HTMLElement | null): void => {
@@ -203,7 +219,7 @@ export function FormularioDelPie(): React.JSX.Element {
     pedirFoco.current = 'enviar'
     setEstado({ fase: 'quieto' })
   }
-  const cambio = transicionDelVolteo(variante, reducido, enVolumen)
+  const cambio = transicionDelVolteo(reducido, enVolumen)
   // [PULIDO 11] B4 · el rótulo del botón: Enviar, siempre (el error vive en su tarjeta); mientras viaja, la carga en su lugar.
   const rotulo = c.enviar
   const transicion = huboCambio ? cambio : { ...cambio, animate: { opacity: 1 } }
@@ -215,7 +231,7 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <motion.form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} data-estado={resultado ? 'resultado' : 'formulario'} data-volteo={variante} aria-label={c.nombreAccesible} aria-busy={enviando || undefined} onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col gap-[var(--spacing-3)] perspective-midrange tablet:max-escritorio:flex-1', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
+    <motion.form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} data-estado={resultado ? 'resultado' : 'formulario'} aria-label={c.nombreAccesible} aria-busy={enviando || undefined} onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col gap-[var(--spacing-3)] perspective-midrange tablet:max-escritorio:flex-1', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
       <AnimatePresence mode="wait" initial={false}>
         {resultado ? (
           <motion.div key="resultado" {...transicion} onAnimationComplete={() => !enVolumen && setSeVe(true)}>
@@ -254,7 +270,6 @@ export function FormularioDelPie(): React.JSX.Element {
                   maxLength={MAXIMO_DE[k]}
                   readOnly={enviando}
                   data-foco="campo"
-                  placeholder={k === 'mail' ? c.ejemploDeMail : undefined}
                   value={datos[k]}
                   onChange={(e) => escribir(k, e.target.value)}
                   aria-invalid={f.invalido || undefined}

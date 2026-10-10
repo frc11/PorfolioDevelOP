@@ -38,6 +38,8 @@ interface Props {
   readonly alOtro?: () => void
   /** El texto ya está (el panel cuenta desde acá para cerrarse solo). */
   readonly alTerminar?: () => void
+  /** [PULIDO 13] K2 · la copia de precalentar (`PrecalentarElResultado`): el texto a la vista y el encastre mudo. */
+  readonly precalentar?: boolean
 }
 
 /** Una ref de afuera (función u objeto) y la propia, en el mismo elemento. */
@@ -49,7 +51,7 @@ function lasDos(de: Ref<HTMLDivElement> | undefined, propia: { current: HTMLDivE
   }
 }
 
-export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = false, compacto = false, foco, alReintentar, alOtro, alTerminar }: Props): React.JSX.Element {
+export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = false, compacto = false, foco, alReintentar, alOtro, alTerminar, precalentar = false }: Props): React.JSX.Element {
   const reducido = useMovimientoReducido()
   const [listo, setListo] = useState(false)
   const raiz = useRef<HTMLDivElement | null>(null)
@@ -83,10 +85,10 @@ export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = f
           vista no recorta). */}
       <div className={cn('flex min-h-[calc(var(--spacing-20)*1.1)] w-full flex-1 items-center justify-center', compacto ? 'pt-[var(--spacing-6)]' : 'pt-[var(--spacing-12)]')}>
         <div className={cn('h-full w-full', compacto ? 'max-w-[calc(var(--spacing-20)*1.6)]' : 'max-w-[calc(var(--spacing-20)*2.2)]')} style={{ maxHeight: `calc(var(--spacing-20) * ${String(compacto ? 1.6 : 2.2)} / ${PROPORCION_DEL_ENCAJE.toFixed(4)})` }}>
-          <EncajeDelLogo resultado={exito ? 'encaja' : 'no-encaja'} empieza={empieza} quieto={reducido} alTerminar={() => setListo(true)} />
+          <EncajeDelLogo resultado={exito ? 'encaja' : 'no-encaja'} empieza={empieza} quieto={reducido} alTerminar={() => setListo(true)} precalentar={precalentar} />
         </div>
       </div>
-      <motion.div className="flex flex-col items-center gap-[var(--spacing-2)]" initial={false} animate={listo ? { opacity: 1, y: 0 } : { opacity: 0, y: reducido ? 0 : 8 }} transition={{ duration: reducido ? 0 : 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
+      <motion.div className="flex flex-col items-center gap-[var(--spacing-2)]" initial={false} animate={listo || precalentar ? { opacity: 1, y: 0 } : { opacity: 0, y: reducido ? 0 : 8 }} transition={{ duration: reducido ? 0 : 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
         <p className={cn('font-display font-fuerte tracking-display leading-titulo uppercase', compacto ? 'text-fluido-titulo-s' : 'text-fluido-titulo-m', !exito && 'text-[var(--texto-del-error)]')}>{exito ? RESULTADO.exito.titulo : RESULTADO.error.titulo}</p>
         <p className="text-cuerpo leading-texto max-w-[42ch]">{exito ? RESULTADO.exito.bajada : mensaje}</p>
         {!exito && alReintentar !== undefined && (

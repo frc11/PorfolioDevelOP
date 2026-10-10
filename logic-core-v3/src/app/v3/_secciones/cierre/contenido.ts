@@ -159,8 +159,8 @@ export const CONTACTO_DEL_PIE = {
 export const CONTACTO_DEL_FORMULARIO = {
   nombreAccesible: 'Contacto',
   nombre: 'Nombre',
+  // [PULIDO 13] K4 · el mail sin ejemplo (cargaba antes que el formulario y confundía): vacío.
   mail: 'Mail',
-  ejemploDeMail: 'nombre@dominio',
   mensaje: 'Mensaje',
   enviar: 'Enviar',
   /** [RONDA 2] F1: mientras viaja (sin carteles de «todavía no envía»). [PULIDO 9] H2 · al llegar, la tarjeta de gracias (`_lib/formularios/gracias.ts`). */

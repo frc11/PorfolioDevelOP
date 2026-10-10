@@ -14,6 +14,7 @@
  *     [CIERRE RETOQUE 3D] S1 · el clic de la barra y el de los CTA son el pestillo (era el candidato `barra-d`); los otros
  *     siete candidatos se borraron. S2 · los ambientes ya no son archivos: el ambiente es generativo, en el navegador
  *     (`src/app/v3/_lib/sonido/ambienteGenerativo.ts`); los bucles de antes se borraron (código y archivos).
+ *     [PULIDO 13] K3 · y el resultado de los formularios: `exito` (la pieza encaja) y `error` (no entra).
  *   · Los cortes (`src/app/v3/_lib/sonido/sprite.ts`).
  */
 import { execFileSync } from 'node:child_process'
@@ -268,6 +269,41 @@ function golpeConSala(): Float32Array {
   return bordes(pico(sumar([seco, 1], [humedo, 0.3]), -0.5), 0.001, 0.25)
 }
 
+// ── [PULIDO 13] K3 · El resultado de un formulario: el éxito (la pieza encaja) y el error (no entra) ─────────────
+
+/**
+ * Una nota con cuerpo de campana chica: el seno, la octava y una parcial inarmónica (×2,9) que se apaga antes, con un ataque de
+ * `ataqueS` y la caída de `caeS`. Empieza en `desdeS` adentro de un búfer de `n` muestras.
+ */
+function nota(n: number, desdeS: number, f: number, ataqueS: number, caeS: number, brillo: number): Float32Array {
+  const env = (t: number): number => (t < desdeS ? 0 : (1 - exp(t - desdeS, ataqueS)) * exp(t - desdeS, caeS))
+  const fundamental = por(seno(n, () => f), env)
+  const octava = por(seno(n, () => 2 * f), (t) => env(t) * exp(Math.max(0, t - desdeS), caeS * 0.5))
+  const parcial = por(seno(n, () => 2.9 * f), (t) => env(t) * exp(Math.max(0, t - desdeS), caeS * 0.18))
+  return sumar([fundamental, 1], [octava, 0.3 * brillo], [parcial, 0.12 * brillo])
+}
+
+/**
+ * El éxito: dos notas claras que suben una quinta (Si 5 y Fa♯ 6), la segunda a 95 ms y más larga, con un poco de sala: corto,
+ * limpio, «listo». Obra de este archivo (no imita ningún sonido de marca: ni sus notas, ni su intervalo, ni su timbre).
+ */
+function exito(): Float32Array {
+  const n = muestras(0.7)
+  const primera = nota(n, 0, 987.77, 0.002, 0.07, 1)
+  const segunda = nota(n, 0.095, 1479.98, 0.002, 0.2, 0.8)
+  const seco = filtrar(sumar([primera, 0.8], [segunda, 1]), 'pasabajos', () => 7000, 0.7)
+  const largo = n + muestras(0.4)
+  return bordes(pico(sumar([seco, 1], [sala(seco, 0.5, largo), 0.16]), -5), 0.0005, 0.12)
+}
+
+/** El error: dos notas cortas y graves que bajan una tercera menor (Re 4 y Si 3), suaves (sin brillo: un pasabajos a 1,4 kHz). */
+function error(): Float32Array {
+  const n = muestras(0.55)
+  const primera = nota(n, 0, 293.66, 0.006, 0.07, 0.6)
+  const segunda = nota(n, 0.15, 246.94, 0.006, 0.14, 0.5)
+  return bordes(pico(filtrar(sumar([primera, 0.9], [segunda, 1]), 'pasabajos', () => 1400, 0.7), -4), 0.001, 0.1)
+}
+
 // ── Los archivos ────────────────────────────────────────────────────────────
 
 const HUECO_S = 0.3
@@ -318,6 +354,8 @@ function principal(): void {
     ['foto', foto()],
     ['pestillo', pestillo()],
     ['golpe', golpeConSala()],
+    ['exito', exito()],
+    ['error', error()],
   ]
   const trozos: Float32Array[] = []
   const cortes: Record<string, readonly [number, number]> = {}

@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
 import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
-import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida, type VarianteDeLaCaida } from './caidaAlHueco'
+import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -33,7 +33,7 @@ import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, po
  * [NOCTURNO FINAL] A1 · UN gesto hacia arriba la rebobina entera, sola; A2 · al salir o en un viaje se deshace con tope.
  *
  * [PULIDO 11] D · 1 y 2 son UNA CAÍDA DE VERDAD (`caidaAlHueco.ts`): el logo baja parado hasta el piso y cae hacia atrás como una
- * ficha de dominó (o, con `?caida=angulo`, gira 90° en arco desde donde está), con la física de un cuerpo rígido, entra al ras
+ * ficha de dominó, con la física de un cuerpo rígido, entra al ras
  * en su hueco (que se abre con la caída) y rebota apenas hasta asentarse. El contacto es el golpe, a los `CAIDA_AL_HUECO.golpeS`
  * del reloj. Se fueron el acostarse en su lugar, la caída derecha y la presión (con su temblor y sus sacudones).
  */
@@ -373,18 +373,18 @@ export function golpeDelFinal(): number {
 
 const TOQUES = { caida: null as ReturnType<typeof caidaIntegrada> | null, toques: [] as readonly number[] }
 /** [PULIDO 11] D · los toques de la caída después del golpe (s del reloj): cada vez que vuelve a apoyarse después de un rebote. */
-export function toquesDespuesDelGolpe(t: TamanoDelLogo, v: VarianteDeLaCaida): readonly number[] {
-  const caida = caidaIntegrada(v, t)
+export function toquesDespuesDelGolpe(t: TamanoDelLogo): readonly number[] {
+  const caida = caidaIntegrada(t)
   if (TOQUES.caida === caida) return TOQUES.toques
-  const desde = arranqueDeLaCaida(v, t)
+  const desde = arranqueDeLaCaida(t)
   TOQUES.caida = caida
   TOQUES.toques = caida.toques.slice(1).map((u) => desde + u)
   return TOQUES.toques
 }
 
 /** [EL ENCASTRE] 2D · cuánto se abrió el hueco (0 a 1). [PULIDO 11] D · con el ángulo de la caída, y entero justo antes del contacto. */
-export function apertura(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida): number {
-  return aperturaDelHueco(v, t, segundosDelFinal(fin))
+export function apertura(fin: number, t: TamanoDelLogo): number {
+  return aperturaDelHueco(t, segundosDelFinal(fin))
 }
 
 /** Cuánto se calmó el mar alrededor del logo (0 a 1). */
@@ -397,8 +397,8 @@ export function calma(fin: number): number {
  * La pose del logo en el final: [PULIDO 11] D · la de la caída (`caidaAlHueco.ts`): el centro (en el mundo, x = 0) y el giro
  * (`rotacionX`, de 0 a −90°: la cabeza va al fondo). Con `fin` 0, el logo de siempre (centro en el origen, sin giro).
  */
-export function poseDelLogo(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida, destino: { centro: THREE.Vector3; rotacionX: number }): void {
-  poseDeLaCaida(v, t, segundosDelFinal(fin), destino)
+export function poseDelLogo(fin: number, t: TamanoDelLogo, destino: { centro: THREE.Vector3; rotacionX: number }): void {
+  poseDeLaCaida(t, segundosDelFinal(fin), destino)
 }
 
 /** [PULIDO 2] 6 · la sombra del logo en el final: se va en el último tramo antes de apoyarse (u) y vuelve con un fundido (s). */
@@ -409,8 +409,8 @@ export const SOMBRA_EN_LA_CAIDA = { tramo: 1.5, entraS: 0.3 } as const
  * [PULIDO 11] D · la de la caída: entera en el aire y parado en el piso (la sombra sigue al logo: parado, la tiene al pie), se va
  * mientras cae al hueco. Sin final, entera (sin cuentas: corre en cada cuadro de todo el sitio).
  */
-export function sombraDeLaPose(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida): number {
-  return fin <= 0 ? 1 : sombraDeLaCaida(v, t, segundosDelFinal(fin))
+export function sombraDeLaPose(fin: number, t: TamanoDelLogo): number {
+  return fin <= 0 ? 1 : sombraDeLaCaida(t, segundosDelFinal(fin))
 }
 
 /** [PULIDO 2] 6 · la sombra que se muestra: baja con la pose; sube hacia ella con un fundido (nunca de un cuadro al otro). */

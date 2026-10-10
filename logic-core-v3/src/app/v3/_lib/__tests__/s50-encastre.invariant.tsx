@@ -33,7 +33,7 @@ import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, apertura as aperturaDelHueco, blancoDelFinal, poder as poderDelFinal, poseDelLogo, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
-import { CAIDA_AL_HUECO, type VarianteDeLaCaida } from '../escena/final/caidaAlHueco'
+import { CAIDA_AL_HUECO } from '../escena/final/caidaAlHueco'
 import { FLOOR_Y } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
 import { RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
@@ -192,7 +192,7 @@ const placaTs = sinComentarios(leer('_chrome/contacto/placa.ts'))
 const placaTsx = sinComentarios(leer('_chrome/contacto/PlacaDelContacto.tsx'))
 const quietaAlViajar = (ts: string, tsx: string): boolean =>
   ts.includes('rotateY.set(p.rotateY * g)') && ts.includes('origenX.set(50 + (p.origenX - 50) * g)') && ts.includes('x.set(p.corrimientoX * g * window.innerWidth)') && /if \(!activo \|\| !llego\) \{\s*ganancia\.set\(0\)/.test(ts) && ts.includes('animate(ganancia, 1, ENTRADA_DEL_PARALAJE)') && ts.includes("ganancia.on('change', aplicar)") &&
-  tsx.includes('const paralaje = useParalaje(activa, llego)') && tsx.includes('onAnimationComplete={() => setLlego(true)}') && tsx.includes('x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY') /* [PULIDO 11] B3 · sin la profundidad del rechazo (el error es una tarjeta) */
+  tsx.includes('const paralaje = useParalaje(activa, llego)') && tsx.includes('void viaje.finished.then(() => setLlego(true))') /* [PULIDO 13] K2 · llega cuando termina el viaje de la fracción */ && tsx.includes('x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY') /* [PULIDO 11] B3 · sin la profundidad del rechazo (el error es una tarjeta) */
 afirmar(quietaAlViajar(placaTs, placaTsx) && ENTRADA_DEL_PARALAJE.duration >= 0.5, 'mientras viaja desde el fondo no responde (ganancia 0: sin giro, sin corrimiento y con el punto de vista en el centro); cuando el viaje termina la ganancia sube a 1 en 0,8 s con el último puntero (entra suave, desde quieta); cada apertura monta la placa de nuevo', `${String(ENTRADA_DEL_PARALAJE.duration)} s`)
 controlPositivo('el detector VE la placa de CIERRE (respondía desde el primer cuadro del viaje)', placaTs.replace('rotateY.set(p.rotateY * g)', 'rotateY.set(p.rotateY)'), (ts: string) => quietaAlViajar(ts, placaTsx))
 
@@ -264,25 +264,24 @@ afirmar(RELOJ_DEL_FINAL.duracionS === CAIDA_AL_HUECO.golpeS + 1.7 && finalTsx.in
 titulo('2B · El logo se acuesta en su lugar (sobre su centro), cae derecho al piso; la cámara sube en paralelo, centrada en el logo')
 
 // [PULIDO 11] D · cambió por pedido: el logo ya no se acuesta en su lugar ni cae derecho: CAE (baja parado y cae hacia atrás como
-// una ficha de dominó; con `?caida=angulo`, en arco desde donde está) con la física de un cuerpo rígido. La física, el hueco que se
+// una ficha de dominó; [PULIDO 13] · el arco de `?caida=angulo` se borró) con la física de un cuerpo rígido. La física, el hueco que se
 // abre con ella, el contacto que es el golpe, el rebote y el asiento: s62 D. Acá queda lo que no cambió: termina acostado al ras,
 // en su lugar y sobre el eje (x = 0), y la cámara sube en paralelo con él y mira siempre al eje.
 const TAM = { alto: 4.78, espesor: 0.56 } as const
-type Pose = (fin: number, t: typeof TAM, v: VarianteDeLaCaida, destino: { centro: THREE.Vector3; rotacionX: number }) => void
-const terminaEnSuLugar = (pose: Pose): boolean =>
-  (['lenta', 'angulo'] as const).every((v) => {
-    const p = { centro: new THREE.Vector3(), rotacionX: 0 }
-    let sobreElEje = true
-    for (let i = 0; i <= 640; i += 1) {
-      pose(i / 640, TAM, v, p)
-      if (p.centro.x !== 0) sobreElEje = false
-    }
-    pose(1, TAM, v, p)
-    return sobreElEje && Math.abs(p.centro.y - (FLOOR_Y - TAM.espesor / 2)) < 1e-6 && Math.abs(p.centro.z) < 1e-6 && Math.abs(p.rotacionX + Math.PI / 2) < 1e-6
-  })
-afirmar(terminaEnSuLugar(poseDelLogo), 'las dos caídas terminan con el logo acostado (−90°, la cabeza al fondo) al ras en su hueco, centrado, y nunca se corren del eje')
-const apoyadoEnElPiso: Pose = (fin, t, v, d) => {
-  poseDelLogo(fin, t, v, d)
+type Pose = (fin: number, t: typeof TAM, destino: { centro: THREE.Vector3; rotacionX: number }) => void
+const terminaEnSuLugar = (pose: Pose): boolean => {
+  const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+  let sobreElEje = true
+  for (let i = 0; i <= 640; i += 1) {
+    pose(i / 640, TAM, p)
+    if (p.centro.x !== 0) sobreElEje = false
+  }
+  pose(1, TAM, p)
+  return sobreElEje && Math.abs(p.centro.y - (FLOOR_Y - TAM.espesor / 2)) < 1e-6 && Math.abs(p.centro.z) < 1e-6 && Math.abs(p.rotacionX + Math.PI / 2) < 1e-6
+}
+afirmar(terminaEnSuLugar(poseDelLogo), 'la caída termina con el logo acostado (−90°, la cabeza al fondo) al ras en su hueco, centrado, y nunca se corre del eje')
+const apoyadoEnElPiso: Pose = (fin, t, d) => {
+  poseDelLogo(fin, t, d)
   if (fin >= 1) d.centro.y = FLOOR_Y + t.espesor / 2
 }
 controlPositivo('el detector VE un logo que termina apoyado sobre el piso (no en su hueco)', apoyadoEnElPiso, terminaEnSuLugar)
@@ -310,10 +309,10 @@ titulo('2D · El hueco exacto: se abre cuando el logo está por llegar, el logo 
 // [PULIDO 11] D · cambió por pedido: sin la presión (entraba a presión, en tramos que resistían y cedían): el logo entra al ras
 // con la caída y rebota apenas hasta asentarse (s62 D). Queda: al final, al ras; el hueco abierto antes de que toque.
 const alRas = { centro: new THREE.Vector3(), rotacionX: 0 }
-poseDelLogo(1, TAM, 'lenta', alRas)
+poseDelLogo(1, TAM, alRas)
 afirmar(Math.abs(alRas.centro.y + TAM.espesor / 2 - FLOOR_Y) < 1e-9, '  al final, al ras: la cara de arriba del logo en el piso')
 // Se abre cuando el logo está por llegar: cerrado al empezar, entero un momento antes del contacto (con la caída: s62 D).
-const huecoAntes = (['lenta', 'angulo'] as const).every((v) => aperturaDelHueco(0, TAM, v) === 0 && aperturaDelHueco((CAIDA_AL_HUECO.golpeS - 0.01) / RELOJ_DEL_FINAL.duracionS, TAM, v) === 1)
+const huecoAntes = aperturaDelHueco(0, TAM) === 0 && aperturaDelHueco((CAIDA_AL_HUECO.golpeS - 0.01) / RELOJ_DEL_FINAL.duracionS, TAM) === 1
 afirmar(huecoAntes, 'el hueco se abre cuando el logo está por llegar: cerrado al empezar y abierto entero antes de que el logo toque')
 // En el piso: descarta sus tapas y costados donde la máscara (en el plano del logo: x, −z) dice adentro y la apertura deja.
 // [PULIDO 8] G3 · y, con el hueco abierto entero, en las contraformas (canal B: lo liso de PULIDO 7 F1).
