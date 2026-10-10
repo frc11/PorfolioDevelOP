@@ -91,7 +91,9 @@ function seVe(n: Node, raiz: Element): boolean {
   // [PULIDO 10] J3 · ni lo que se queda vivo en el DOM sobre la pieza (la carga del botón: `data-sin-volumen`).
   if (padre === null || padre.closest('.sr-only') !== null || padre.closest('[data-sin-volumen]') !== null) return false
   const mudo = padre.closest('[aria-hidden="true"]')
-  return mudo === null || !raiz.contains(mudo)
+  // [PULIDO 11] B4 · el rótulo de la tecla se mide aunque esté mudo (ocupado, el botón lo calla): la placa no se rearma por eso;
+  // el sombreador lo apaga mientras el botón está ocupado.
+  return mudo === null || !raiz.contains(mudo) || mudo.hasAttribute('data-rotulo-de-la-tecla')
 }
 
 function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boolean) | null): LetraDelPie[] {

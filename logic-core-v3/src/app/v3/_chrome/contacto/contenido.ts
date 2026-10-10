@@ -6,7 +6,7 @@
  * F1: el envío va a `/api/contacto` (sin `mailto`); WhatsApp volvió al pie, pero acá, en el formulario, no está.
  */
 
-import { ANUNCIO_DE_GRACIAS } from '../../_lib/formularios/gracias'
+import { ANUNCIO_DE_EXITO } from '../../_lib/formularios/gracias'
 import { HREF_DEL_MAIL, MAIL } from '../../_secciones/cierre/contacto'
 
 export const TITULO = 'Armemos algo juntos.'
@@ -55,7 +55,7 @@ export const ROTULO_DEL_ENVIO = 'Enviar'
 export const ROTULO_ENVIANDO = 'Enviando…'
 
 /** Lo que se dice cuando el servidor contestó que llegó. [PULIDO 9] H3 · lo de la tarjeta de gracias, la misma del pie. */
-export const DESPUES_DEL_ENVIO = ANUNCIO_DE_GRACIAS
+export const DESPUES_DEL_ENVIO = ANUNCIO_DE_EXITO
 
 export const ROTULO_DE_CERRAR = 'Cerrar el formulario de contacto'
 

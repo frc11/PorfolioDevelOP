@@ -1,17 +1,16 @@
 'use client'
 
-import { AnimatePresence, animate, motion, useMotionValue } from 'motion/react'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
-import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
+import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { TEXTOS_DE_ENVIO, enviarAlServidor } from '../../_lib/formularios/enviar'
-import { ANUNCIO_DE_GRACIAS, transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
-import { RECHAZO, REINTENTAR, cuadrosDelRechazo } from '../../_lib/formularios/rechazo'
-import { sonar } from '../../_lib/sonido/bus'
+import { ANUNCIO_DE_EXITO } from '../../_lib/formularios/gracias'
+import { VOLTEO_TERMINADO, duracionDelVolteo, transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
@@ -47,6 +46,13 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * y `data-gracias` los lee `pie3d/armadas.ts`); abajo, el DOM (`transicionDeGracias`). «Enviar otro mensaje» vuelve al
  * formulario vacío con la transformación inversa. El resultado se anuncia en la región viva y el foco va a la tarjeta (de
  * vuelta, al nombre). Con error, todo lo escrito queda y el error a la vista.
+ *
+ * [PULIDO 11] B · EL RESULTADO ES UNA TARJETA. Al llegar la respuesta, la placa VOLTEA (`?volteo=centrado|columpio`) y del
+ * otro lado está la tarjeta del resultado, del tamaño del formulario (`TarjetaDeResultado`): con el éxito, el logo que encaja;
+ * con el error, el que no encaja, el error y «Reintentar», que vuelve al formulario con todo lo escrito. Al terminar el éxito
+ * los campos se limpian y se vuelven a montar (sin el estado del autocompletado). Desde 1025 voltea la placa 3D (`data-estado`,
+ * `data-volteo`) y el encastre arranca cuando la escena avisa que terminó (`VOLTEO_TERMINADO`); abajo, el DOM. El rótulo del
+ * botón y la carga se suceden: nunca los dos a la vez (en 3D, el rótulo en relieve lo apaga el sombreador en el mismo cuadro).
  */
 const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
 // [PULIDO 10] J6 · el autocompletado del navegador, con la piel del formulario: Chrome pinta el campo autocompletado con su fondo
@@ -62,9 +68,11 @@ const ROTULO = 'text-micro leading-micro tracking-micro font-medio uppercase'
 const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
 
-type Estado = { readonly fase: 'quieto' | 'enviando' | 'gracias' } | { readonly fase: 'error'; readonly mensaje: string }
+type Estado = { readonly fase: 'quieto' | 'enviando' | 'exito' } | { readonly fase: 'error'; readonly mensaje: string }
 
 const sinSuscripcion = (): (() => void) => () => undefined
+/** [PULIDO 11] B1 · cuánto más que el volteo espera el respaldo antes de mostrar lo nuevo igual (s: la placa compila y se rearma). */
+const RESPALDO_DEL_VOLTEO_S = 2.5
 
 export function FormularioDelPie(): React.JSX.Element {
   const c = CONTACTO_DEL_FORMULARIO
@@ -74,28 +82,52 @@ export function FormularioDelPie(): React.JSX.Element {
   const [estado, setEstado] = useState<Estado>({ fase: 'quieto' })
   // Hasta el primer cambio de estado, en reposo: sin transformada (el HTML del servidor, y la rama quieta, no escriben ninguna).
   const [huboCambio, setHuboCambio] = useState(false)
-  // [PULIDO 10] J5 · cuántas veces rechazó (cada error, un rechazo: la placa 3D lo lee de `data-rechazo`).
-  const [rechazos, setRechazos] = useState(0)
+  // [PULIDO 11] B6 · cada vuelta al formulario después de un envío bueno, campos nuevos (sin el estado del autocompletado).
+  const [vuelta, setVuelta] = useState(0)
+  // [PULIDO 11] B1 · el alto de los campos al enviar: la tarjeta lo guarda (la placa no cambia de caja y el volteo comparte el eje).
+  const [alto, setAlto] = useState<number | undefined>(undefined)
+  // [PULIDO 11] B2 · la tarjeta ya se ve (terminó de entrar, o la escena terminó de voltear): arranca el encastre.
+  const [seVe, setSeVe] = useState(false)
+  const campos = useRef<HTMLDivElement | null>(null)
   const enviando = estado.fase === 'enviando'
+  const resultado = estado.fase === 'exito' || estado.fase === 'error'
   const volumen = useModoDelPie() === 'volumen'
   const listo = usePieListo()
   const enVolumen = volumen && listo
   const placa = useRef<HTMLFormElement | null>(null)
   usePiezaDelPie(placa, { id: 'formulario-del-pie', forma: 'formulario', activo: volumen })
   const reducido = useMovimientoReducido()
-  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'volteo' as const)
-  // [PULIDO 10] J5 · el rechazo en el DOM plano (abajo de 1025 o sin volumen): se achica un poco y vuelve con el resorte; en 3D lo
-  // hace la placa (`pie3d/armadas.ts`) y el DOM no lleva escala: su transformada la escribe la escena (la homografía de la placa).
-  // Con movimiento reducido, nada.
-  const escalaDelRechazo = useMotionValue(1)
-  useEffect(() => {
-    if (rechazos === 0 || reducido || volumen) return undefined
-    const resorte = animate(escalaDelRechazo, cuadrosDelRechazo(RECHAZO.escala).map((v) => 1 - v), { duration: RECHAZO.s, ease: 'linear' })
-    return () => resorte.stop()
-  }, [rechazos, reducido, volumen, escalaDelRechazo])
-  // Adónde va el foco cuando lo nuevo aparece (la tarjeta, o el nombre de vuelta): lo toma el elemento al montarse.
-  const pedirFoco = useRef<'tarjeta' | 'nombre' | null>(null)
-  const tomarElFoco = (quien: 'tarjeta' | 'nombre') => (el: HTMLElement | null): void => {
+  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'centrado' as const)
+  // [PULIDO 11] B1 · en 3D la placa voltea en la escena. Al cambiar de estado el DOM se apaga en este mismo cuadro (la placa se
+  // rearma un momento después y recién ahí empieza a voltear: sin esto, lo nuevo se veía un instante sobre la placa vieja); la
+  // escena lo vuelve a prender al terminar y avisa con el estado que quedó (el encastre arranca sólo con el resultado). Si el
+  // aviso no llega (la placa no se rearmó), un respaldo lo muestra igual.
+  const estadoALaVista = resultado ? 'resultado' : 'formulario'
+  useLayoutEffect(() => {
+    const el = placa.current
+    if (el === null || !enVolumen || !huboCambio) return undefined
+    el.style.opacity = '0'
+    const respaldo = window.setTimeout(
+      () => {
+        el.style.opacity = ''
+        setSeVe(true)
+      },
+      (duracionDelVolteo(variante, reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
+    )
+    const termino = (e: Event): void => {
+      if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return
+      window.clearTimeout(respaldo)
+      if (estadoALaVista === 'resultado') setSeVe(true)
+    }
+    el.addEventListener(VOLTEO_TERMINADO, termino)
+    return () => {
+      window.clearTimeout(respaldo)
+      el.removeEventListener(VOLTEO_TERMINADO, termino)
+    }
+  }, [estadoALaVista, enVolumen, huboCambio, variante, reducido])
+  // Adónde va el foco cuando lo nuevo aparece (la tarjeta, el nombre o el botón de vuelta): lo toma el elemento al montarse.
+  const pedirFoco = useRef<'tarjeta' | 'nombre' | 'enviar' | null>(null)
+  const tomarElFoco = (quien: 'tarjeta' | 'nombre' | 'enviar') => (el: HTMLElement | null): void => {
     if (el === null || pedirFoco.current !== quien) return
     pedirFoco.current = null
     el.focus({ preventScroll: true })
@@ -121,22 +153,22 @@ export function FormularioDelPie(): React.JSX.Element {
       requestAnimationFrame(() => form.querySelector<HTMLElement>(`#contacto-${primero}`)?.focus())
       return
     }
+    setAlto(campos.current?.offsetHeight)
     setEstado({ fase: 'enviando' })
     // [PULIDO 10] J3 · con la espera mínima de la carga: aunque la respuesta llegue antes, se ve trabajar (no parpadea).
     const r = await conDuracionMinima(enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() }))
+    pedirFoco.current = 'tarjeta'
+    setSeVe(false)
+    setHuboCambio(true)
     if (r.ok) {
-      pedirFoco.current = 'tarjeta'
-      setEstado({ fase: 'gracias' })
+      // [PULIDO 11] B6 · el éxito: lo escrito se va (y los campos se vuelven a montar al volver: sin autocompletado viejo).
+      setEstado({ fase: 'exito' })
       setDatos(VACIO)
       setIntento(false)
-      setHuboCambio(true)
+      setVuelta((n) => n + 1)
     } else {
+      // [PULIDO 11] B3 · el error: la tarjeta que no encaja; lo escrito se queda para Reintentar.
       setEstado({ fase: 'error', mensaje: r.error })
-      // [PULIDO 10] J5 · el rechazo: la placa se hunde y vuelve, Enviar pasa a Reintentar con un giro chico y suena el pulso.
-      setRechazos((n) => n + 1)
-      sonar('pulso')
-      // El botón vuelve a estar: el foco, ahí, para volver a probar.
-      requestAnimationFrame(() => placa.current?.querySelector<HTMLElement>('button[type="submit"]')?.focus({ preventScroll: true }))
     }
   }
 
@@ -144,11 +176,14 @@ export function FormularioDelPie(): React.JSX.Element {
     pedirFoco.current = 'nombre'
     setEstado({ fase: 'quieto' })
   }
-  const cambio = transicionDeGracias(variante, reducido, enVolumen)
-  // [PULIDO 10] J5 · el rótulo del botón (y los otros dos, invisibles: el botón guarda el ancho del más largo); Reintentar entra
-  // girando desde canto (en 3D gira la tecla de la placa).
-  const rotulo = enviando ? c.enviando : estado.fase === 'error' ? REINTENTAR : c.enviar
-  const giraElRotulo = !reducido && !enVolumen && rotulo === REINTENTAR
+  // [PULIDO 11] B3 · Reintentar: de vuelta al formulario, con todo lo escrito; el foco, en Enviar.
+  const reintentar = (): void => {
+    pedirFoco.current = 'enviar'
+    setEstado({ fase: 'quieto' })
+  }
+  const cambio = transicionDelVolteo(variante, reducido, enVolumen)
+  // [PULIDO 11] B4 · el rótulo del botón: Enviar, siempre (el error vive en su tarjeta); mientras viaja, la carga en su lugar.
+  const rotulo = c.enviar
   const transicion = huboCambio ? cambio : { ...cambio, animate: { opacity: 1 } }
 
   const campo = (k: CampoDelPie): { readonly id: string; readonly invalido: boolean; readonly describe: string | undefined } => ({
@@ -158,14 +193,24 @@ export function FormularioDelPie(): React.JSX.Element {
   })
 
   return (
-    <motion.form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} data-estado={estado.fase === 'gracias' ? 'gracias' : 'formulario'} data-gracias={variante} data-rechazo={rechazos} aria-label={c.nombreAccesible} aria-busy={enviando || undefined} onSubmit={(e) => void alEnviar(e)} style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }} className={cn('flex flex-col gap-[var(--spacing-3)] perspective-midrange tablet:max-escritorio:flex-1', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
+    <motion.form id="contacto" ref={placa} tabIndex={-1} noValidate data-pieza="contacto-del-pie" data-seccion={enVolumen ? 'invertida' : undefined} data-estado={resultado ? 'resultado' : 'formulario'} data-volteo={variante} aria-label={c.nombreAccesible} aria-busy={enviando || undefined} onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col gap-[var(--spacing-3)] perspective-midrange tablet:max-escritorio:flex-1', volumen && 'escritorio:p-[var(--spacing-5)]', enVolumen && 'text-tinta')}>
       <AnimatePresence mode="wait" initial={false}>
-        {estado.fase === 'gracias' ? (
-          <motion.div key="gracias" {...transicion}>
-            <TarjetaDeGracias foco={tomarElFoco('tarjeta')} enVolumen={enVolumen} alOtro={otroMensaje} />
+        {resultado ? (
+          <motion.div key="resultado" {...transicion} onAnimationComplete={() => !enVolumen && setSeVe(true)}>
+            <TarjetaDeResultado
+              tipo={estado.fase === 'exito' ? 'exito' : 'error'}
+              mensaje={estado.fase === 'error' ? estado.mensaje : undefined}
+              alto={alto}
+              empieza={seVe}
+              enVolumen={enVolumen}
+              compacto={!enVolumen}
+              foco={tomarElFoco('tarjeta')}
+              alReintentar={reintentar}
+              alOtro={otroMensaje}
+            />
           </motion.div>
         ) : (
-          <motion.div key="formulario" {...transicion} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]')}>
+          <motion.div key={`formulario-${String(vuelta)}`} ref={campos} {...transicion} className={cn('grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]')}>
       {(['nombre', 'mail', 'mensaje'] as const).map((k) => {
         const f = campo(k)
         return (
@@ -205,44 +250,27 @@ export function FormularioDelPie(): React.JSX.Element {
         )
       })}
       <BloqueSolido forma="principal" className="z-10 self-start max-escritorio:col-span-6 max-escritorio:self-stretch escritorio:mt-[var(--spacing-2)]">
-        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="relative flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo [--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]">
+        <button type="submit" ref={tomarElFoco('enviar')} disabled={enviando} aria-busy={enviando || undefined} className="relative flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo [--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]">
           {/* [PULIDO 10] J3 · enviando, el botón es la carga chica (el trazo del logo y su estado, vivos en el DOM sobre la tecla); el
               rótulo se queda invisible guardando el ancho del más largo: nada cambia de lugar. */}
+          {/* [PULIDO 11] B4 · se suceden: con el botón ocupado, la carga y el rótulo invisible (guarda el ancho; en 3D su relieve lo
+              apaga el sombreador en el mismo cuadro: `data-rotulo-de-la-tecla`, que se mide aunque esté mudo); si no, sólo el rótulo. */}
           {enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}
-          <span aria-hidden={enviando || undefined} className={cn('grid justify-items-center perspective-midrange', enviando && 'invisible')}>
-            {/* Sin transformada mientras no gira: la rama quieta no escribe ninguna. */}
-            {giraElRotulo ? (
-              <motion.span key={rotulo} className="col-start-1 row-start-1" initial={{ rotateX: -90 }} animate={{ rotateX: 0 }} transition={{ duration: RECHAZO.giroS, ease: [0.25, 0.46, 0.45, 0.94] }}>
-                {rotulo}
-              </motion.span>
-            ) : (
-              <span key={rotulo} className="col-start-1 row-start-1">
-                {rotulo}
-              </span>
-            )}
-            {[c.enviar, c.enviando, REINTENTAR].filter((r) => r !== rotulo).map((r) => (
-              <span key={r} aria-hidden="true" className="invisible col-start-1 row-start-1">
-                {r}
-              </span>
-            ))}
+          <span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>
+            <span className="col-start-1 row-start-1">{rotulo}</span>
           </span>
         </button>
       </BloqueSolido>
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Las dos regiones vivas existen desde el principio (una que nace con su texto no siempre se anuncia). */}
-      {/* [PULIDO 10] J5 · el error sale de atrás del botón, en su renglón: el texto sube desde el borde de arriba de su caja (que
-          recorta), sin tapar el botón. */}
-      <p role="alert" className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}>
-        {estado.fase === 'error' && (
-          <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
-            {estado.mensaje}
-          </motion.span>
-        )}
+      {/* Las dos regiones vivas existen desde el principio (una que nace con su texto no siempre se anuncia). [PULIDO 11] B3 · el
+          error se ve en su tarjeta; acá, para el lector. */}
+      <p role="alert" className="sr-only">
+        {estado.fase === 'error' ? estado.mensaje : ''}
       </p>
       <p role="status" className="sr-only">
-        {estado.fase === 'gracias' ? ANUNCIO_DE_GRACIAS : ''}
+        {estado.fase === 'exito' ? ANUNCIO_DE_EXITO : ''}
       </p>
     </motion.form>
   )

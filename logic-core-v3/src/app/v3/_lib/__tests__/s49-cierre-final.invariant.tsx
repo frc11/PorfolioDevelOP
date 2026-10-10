@@ -249,7 +249,7 @@ titulo('2B · El contacto como placa, al producto: espesor de verdad, desde un p
 // La prueba se fue con el fundido a blanco: desde la barra y con movimiento, la placa; si no, la hoja de siempre.
 const formulario = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 const placaDelContacto = sinComentarios(leer('_chrome/contacto/PlacaDelContacto.tsx'))
-const alProducto = (f: string): boolean => f.includes('const placa = desdeArriba && !reducido') && !/contactofondo|useFondoDeLaPrueba|'blanco'|fondo === /.test(f) && f.includes('<PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>') /* [PULIDO 10] J5 · y el resorte del rechazo */
+const alProducto = (f: string): boolean => f.includes('const placa = desdeArriba && !reducido') && !/contactofondo|useFondoDeLaPrueba|'blanco'|fondo === /.test(f) && f.includes('<PlacaDelContacto activa={placa}>') /* [PULIDO 11] B3 · sin el resorte del rechazo (el error es una tarjeta) */
 afirmar(alProducto(formulario) && !('contactofondo' in PRUEBAS_APAGADAS) && !('contactofondo' in entornoPedido('producto,contactofondo=blanco').pruebas) && placaDelContacto.includes('if (!activa) return <>{children}</>'), 'la placa pasó al producto (desde la barra y con movimiento) con el fondo desenfocado; `?pruebas=contactofondo=` y el fundido a blanco se borraron; apagada (el teléfono, con el menú, y con movimiento reducido) la placa no envuelve nada: la hoja de siempre')
 controlPositivo('el detector VE la prueba de AJUSTES FINALES (la placa sólo con la bandera)', formulario.replace('const placa = desdeArriba && !reducido', "const placa = fondo !== 'no' && desdeArriba && !reducido"), alProducto)
 

@@ -100,6 +100,15 @@ function conSuLetra(g: THREE.BufferGeometry, orden: number): THREE.BufferGeometr
   return g
 }
 
+/** [PULIDO 11] B4 · el rótulo de la tecla: w = −1 (el sombreador no lo dibuja con el botón ocupado: `coreografia.ts`). */
+function deRotulo(g: THREE.BufferGeometry): THREE.BufferGeometry {
+  const n = g.getAttribute('position').count
+  const datos = new Float32Array(n * 4)
+  for (let k = 0; k < n; k += 1) datos[k * 4 + 3] = -1
+  g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(datos, 4))
+  return g
+}
+
 /** Lo que llega entero: sin letra (el atributo en cero, para que todas las piezas compartan el programa). */
 function sinLetra(g: THREE.BufferGeometry): THREE.BufferGeometry {
   g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 4), 4))
@@ -295,7 +304,7 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
   if (m.tecla === null) return { fija, hundible: null, espesor: v.formulario }
   // La tecla: sale `tecla` px de la cara (y entra 4 en la placa, para que hundida no deje luz); su texto, en su cara.
   const tecla = pintar(solido(rectanguloRedondeado(new THREE.Shape(), m.tecla, m.tecla.radio > 0 ? m.tecla.radio : v.radio), v.tecla + 4, v.bisel, v.tecla), COLORES_DEL_PIE.negro)
-  return { fija, hundible: sinLetra(unir([tecla, ...relieveDe(m, fuentes, true, v.tecla)])), espesor: v.formulario }
+  return { fija, hundible: unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), espesor: v.formulario }
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */

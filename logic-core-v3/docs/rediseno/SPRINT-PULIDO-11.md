@@ -69,12 +69,66 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   subida real es un poco más lenta). Recibo `entregas/pulido-11/polvo-con-un-toque.json`; `s62` A5
 
 ### Fase B · los forms definitivos (pie y modal): volteo, éxito y error
-- PENDIENTE: B1 · el salto del volteo (`?volteo=centrado|columpio`), geometría al montar, cuadros < 20 ms
-- PENDIENTE: B2 · éxito: ENCAJA (`?exito=`)
-- PENDIENTE: B3 · error: NO ENCAJA, el rojo como token con AA, Reintentar con todo intacto, el logo de carga en el error
-- PENDIENTE: B4 · los rótulos del botón se suceden (invariante)
-- PENDIENTE: B5 · el loader gira sobre el palito de la P; sin cuadrado negro ni parpadeo
-- PENDIENTE: B6 · autocompletado (simulado) y el form limpio al terminar el éxito
+- CÓDIGO HECHO · BANCO PENDIENTE (memoria: ver «VERIFICAR TRAS REINICIO»). Los seis van en un commit: tocan los mismos archivos
+  (los dos formularios, la placa 3D del pie y la tarjeta nueva). Gate: lint de los tocados, tsc, s53–s62 y las suites de los tests
+  que cambiaron (s1-tokens, s3-tokens, s6-tokens, s39, s44, s49, s50): verdes. s62: 50 afirmaciones (23 de B).
+
+**El diagnóstico (medido antes, con el build viejo, `b-formulario.ts` a 1440):** en el pie, el éxito no tenía cuadros de más de
+20 ms (el más largo, 13,9); el error, dos de 200 y 213 ms: la placa 3D se rearmaba dos veces, por el texto del error en relieve y
+por el rótulo nuevo de la tecla («Reintentar»). La tarjeta de gracias era más chica que el formulario y su columna se recentraba:
+la nueva aparecía corrida al cambiar de canto (el salto), y su título no entraba («mensa e»). Y la tecla 3D tiene el rótulo en
+RELIEVE en la geometría: mientras viajaba, la carga del DOM convivía con el relieve hasta el rearme (B4).
+
+- B1 · el volteo (`_lib/formularios/volteo.ts`, las mismas curvas en el DOM y en la placa 3D): la tarjeta del resultado guarda la
+  caja del formulario (`alto`, medido al enviar), así que las dos comparten el eje. `?volteo=centrado` (el de siempre: 180° en un
+  movimiento sobre el eje del medio, 0,9 s) y `?volteo=columpio` (bisagra en el borde de arriba: la que estaba cae 90° hacia
+  adentro en 0,42 s, acelerando —cúbica de entrada—; de canto se cambian y la nueva vuelve 90° saliendo y se asienta con un
+  resorte subamortiguado, ζ 0,62 y ω 11 rad/s: un rebote de 7,5° y el segundo de 0,6°, 0,95 s). El hundido y `?gracias=` se
+  borraron. En 3D el DOM se apaga mientras voltea (en las dos direcciones) y la escena avisa al terminar (`VOLTEO_TERMINADO`).
+  La tarjeta no se extruye (`data-sin-volumen`): la placa del resultado es lisa (sin texto en relieve que armar) — ésa es la
+  geometría «al montar» de J4·a. Los cuadros de más de 20 ms: PENDIENTE de banco.
+- B2 · el éxito ENCAJA (`_componentes/formularios/EncajeDelLogo.tsx`, SVG con Motion, sin lienzo propio): una ranura con la forma
+  del logo (un pozo con la sombra de su borde adentro) y la pieza que baja desde más cerca (arranca quieta y acelera), entra al
+  ras con un rebote mínimo, suena el pestillo en el contacto, la onda de luz clara sale de la ranura (el contorno que se abre y
+  un resplandor) y el borde se enciende; después, el texto: «Recibido. Te contestamos pronto.» (el copy pedido, tal cual). La
+  alternativa `?exito=` no se hizo: el encaje cubre lo pedido y una segunda versión no la pidió nadie todavía.
+- B3 · el error NO ENCAJA: la pieza cae torcida, choca arriba de la ranura (no entra), el borde se enciende en ROJO con un
+  resplandor, rebota y queda afuera, corrida y apoyada; suena el pulso (el golpe grave del logo: no se agregó un sonido nuevo al
+  sprite). El rojo, primer color fuera del monocromo, es token del tema: `--color-error: #E5484D` (el borde: 4,82:1 sobre la
+  tarjeta clara #111111 y 4,93:1 sobre la invertida #0E0E0E) y `--color-error-texto: #FF9592` (el título: 8,96:1 y 9,16:1).
+  La tarjeta lleva el error del envío y «Reintentar», que vuelve al formulario con TODO lo escrito (ni el error ni Reintentar
+  vacían o remontan los campos) y deja el foco en Enviar. El rechazo de J5 (el resorte de la placa y Reintentar girando en la
+  tecla) se fue con `rechazo.ts`. «El logo de carga en el camino del error»: lo medido fue el relieve del rótulo conviviendo con
+  la carga hasta el rearme (B4: ahora se apaga en el mismo cuadro); que no quede otra causa, PENDIENTE de banco.
+- B4 · los rótulos se suceden: en el DOM del pie, la carga sólo con el botón ocupado y el rótulo invisible y mudo (guarda el
+  ancho); «Reintentar» vive en la tarjeta del error, otra rama de la presencia (`mode="wait"`). En 3D las letras del rótulo llevan
+  w = −1 (`geometria.ts`) y el sombreador las descarta con el botón ocupado (`uSinRotuloDelPie`, leído de `aria-busy` cada
+  cuadro): el mismo cuadro, sin rearmar (el rótulo se sigue midiendo aunque esté mudo: `data-rotulo-de-la-tecla`). En el panel,
+  la carga y la tarjeta son estados distintos de la misma presencia. Invariante: s62 B4.
+- B5 · la carga: el giro es la de siempre (el trazo, de respaldo: `?carga=trazo`, sin WebGL, o con movimiento reducido, quieto) y
+  gira sobre el eje del PALITO de la P (x 532–658 del trazado, sacado del `d` en s62), con el palito en el medio del área (el
+  logo se corre lo que falta). «Sin cuadrado negro ni parpadeo»: PENDIENTE de banco.
+- B6 · con el éxito los valores se vacían y al volver los campos son NUEVOS (la clave del grupo cambia: React los monta de cero,
+  sin el estado del autocompletado, que no se borra cambiando el valor). El panel vacía sus datos y se cierra solo. El estilo y la
+  posición del autocompletado (J6) y su simulación: PENDIENTE de banco (`b6-autocompletado.ts`, con `Autofill.trigger`).
+
+**La revisión adversaria antes del commit** (un agente aparte, sólo lectura, sobre el diff entero). Encontró y se arregló:
+1. un rearme de la placa 3D por otra cosa (la ventana cambió de tamaño, el zoom) en medio del volteo lo cortaba sin avisar: la
+   tarjeta esperaba para siempre su encastre (sin texto ni botones). Ahora el corte avisa (`avisarQueTermino`);
+2. un aviso viejo (el volteo de vuelta, después de Reintentar) podía arrancar el encastre de la tarjeta nueva escondido: el aviso
+   lleva el estado que quedó a la vista y el formulario ignora el que no es el suyo;
+3. la tarjeta podía ser más alta que el formulario (en el teléfono ~400 contra ~300 px; en 3D, hasta ~45 px): ahora mide
+   EXACTAMENTE su alto; el lugar del encastre toma lo que sobra del texto y el logo se achica para entrar;
+4. «Reintentar» tomaba el foco aunque la persona se hubiera ido a otra parte: ahora sólo si sigue en la tarjeta;
+5. en los ~80 ms entre el cambio de estado y el rearme, lo nuevo del DOM (la ranura) se veía sobre la placa vieja: se apaga en el
+   mismo cuadro (con un respaldo que lo prende si el aviso no llega);
+6. menores: el borde de la ranura ya no anima un color hecho con `color-mix` (Motion no lo interpola: saltaba) — se enciende
+   otro trazo encima, sólo con opacidad; el sonido del encastre, uno solo aunque React corra el efecto dos veces.
+Revisado y descartado por el agente (con su motivo): la salida de la presencia, el orden del oyente, el cambio de `enVolumen` a
+mitad, la pestaña oculta, el movimiento reducido, las claves, el cierre del panel, los relojes, el cableado del sombreador y la
+fusión de geometrías, la firma de `medida.ts`, las referencias al rechazo, el eje de la carga y los tokens. Queda (no se tocó):
+el `alto` medido al enviar no se vuelve a medir si el teléfono gira con la tarjeta a la vista; la tecla 3D saliente se ve sin
+rótulo durante la primera mitad del volteo (el relieve apagado por «ocupado»): se ve como una tecla lisa que se va.
 
 ### Fase C · el pie simétrico y la cabecera mobile
 - PENDIENTE: C1 · columnas del mismo ancho, distancias iguales al logo, «El recorrido» en una grilla, «Por qué develOP» a 1024
@@ -97,6 +151,20 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | Punto | Dónde | Antes | Ahora | Por qué |
 |---|---|---|---|---|
 | A4e | `s54` B1 · el CTA es el producto | `<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />` | sin `entrada` | Las copias de «Seis razones» ya no aparecen: el componente no la usa. Lo afirmado (montado en la lista, sin bandera) no cambió |
+| B | `s1-tokens` · las líneas que entraron al tema | 51 líneas previstas | 53: + `--color-error` y `--color-error-texto` | El rojo del error es token del tema (B3), con su motivo en `padron-de-tokens.AGREGADOS` |
+| B | `s55` · la fuente de la frase | la frase + «Gracias por tu mensaje.» | sólo la frase (y el script sin el título de gracias) | La tarjeta del resultado va en el DOM: ya no hay un título de gracias en relieve en Archivo |
+| B | `s60` H2 2 · el volteo | `p('volteo', …)` y la duración de `TRANSFORMACION_DEL_PIE` | `p('centrado', …)` y `VOLTEO.centrado.s` | La misma cuenta con el nombre nuevo; el columpio se afirma en s62 B1 |
+| B | `s60` H2 · el hundido | la afirmación del hundido y su control | borradas | El humano eligió el volteo para los dos formularios: el hundido se borró |
+| B | `s60` H2 3 · los estados | `data-gracias`, `TarjetaDeGracias`, `ANUNCIO_DE_GRACIAS`, el error en el formulario | `data-volteo`, `TarjetaDeResultado` con `alReintentar` y `alOtro`, `ANUNCIO_DE_EXITO`, el error en su tarjeta | Lo afirmado (anunciado, con el foco; con error lo escrito queda) no cambió: cambió dónde se ve el error |
+| B | `s60` H2 · la tarjeta enfocable | `ref={foco}` | `ref={lasDos(foco, raiz)}` | La tarjeta necesita su propia ref (Reintentar toma el foco sólo si sigue en ella); lo afirmado (enfocable, `tabIndex={-1}`) no cambió |
+| B | `s60` H3 · el panel | `TarjetaDeGracias`, la cuenta del cierre desde que llega | `TarjetaDeResultado`, la cuenta desde que su texto está | El texto aparece después del encastre: el cierre cuenta desde ahí |
+| B | `s61` J3 A/D · la variante de la carga | sin pedir: el trazo | sin pedir: el giro; `?carga=trazo`, el trazo; reducido: el trazo quieto | Lo pidió el humano (B5: «el giro, default») |
+| B | `s61` J3 C · el rótulo del pie | tres rótulos (Enviar, Enviando…, Reintentar) | uno (Enviar) con `data-rotulo-de-la-tecla` | B4: Reintentar vive en la tarjeta del error |
+| B | `s61` J4 · J5 | las transformaciones de gracias (volteo y hundido) y el rechazo | una sección «reemplazados en PULIDO 11 (B)» con cinco afirmaciones y sus controles: los dos voltean, la tarjeta lisa, el foco, la placa en su lugar, el rechazo se fue | Lo de antes no quedó colgado; lo nuevo, en s62 B |
+| B | `s39` · el rótulo del envío | `enviando ? ROTULO_ENVIANDO : avisoALaVista ? REINTENTAR : ROTULO_DEL_ENVIO` | `enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO` | B3: Reintentar vive en la tarjeta del error |
+| B | `s44` · ninguna pieza gira | ninguna, salvo la tecla con Reintentar | ninguna (otra vez) | El giro de la tecla se fue con el rechazo |
+| B | `s49` · la placa del panel | `<PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>` | `<PlacaDelContacto activa={placa}>` | El resorte del rechazo se fue |
+| B | `s50` · el paralaje de la placa | `z: rechazo` | sin `z` | ídem |
 | A4e | `s59` 1 · tocable apenas se lee | `ctaTocable(p)` en `pointerEvents` y en Enter | `tocable(p)`, con `tocable = enLaLista ? tocableEnLaLista : ctaTocable` | En el escenario sigue siendo `ctaTocable` (lo de siempre); en la lista no hay giro: tocable al 90 % del deslizamiento |
 
 ## Memoria (antes de cada fase: disponible y no paginado)
@@ -104,10 +172,42 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | Cuándo | Disponible | No paginado | Nota |
 |---|---|---|---|
 | Al empezar (PC recién reiniciada, sin dev server) | 4437 MB | 653 MB | Commit 10,5 / 27,0 GB |
+| Fase A · el banco contra un build de PRODUCCIÓN (`next start`, ~0,3 GB) en vez del dev server (~2,5–3,7 GB) | 7401 MB | 683 MB | El build de medición va a `.next-probe` (ignorado) con un worker y 4 GB de heap (~2,3 min); el `prebuild` se deja pasar con `MEDIR_CON_LA_LLAVE_PRENDIDA=1` (la salida de emergencia documentada, sólo para medir). Todo pedido a `/api/` lo intercepta el banco (`Fetch`) y nunca llega a la ruta |
+| Fase A · un Chrome por tanda (lanzado una vez, cada script se pega a su página) | 6054–7900 MB | 683–774 MB | Cuatro tandas (cerrado durante cada build): el no paginado no pasó de 0,8 GB |
+| Fase B · antes de compilar para el banco (Chrome del banco y `next start` cerrados) | 2896 MB | 824 MB | < 3 GB: el banco NO se abre |
+| Fase B · al volver a mirar | 755 MB | 871 MB | Abiertos en la PC: Discord, Spotify, una app de Java, Acrobat, Epic, Chrome. No se cierra nada del usuario: B queda en «VERIFICAR TRAS REINICIO» |
 
 ## VERIFICAR TRAS REINICIO
 
-(vacío)
+Con ≥ 3 GB disponibles (`npx tsx banco11.ts memoria`). Los scripts, en `~/.cache/b4-medicion/pulido-11/_scripts/`; el scratchpad de
+la sesión tiene `compilar.sh` y `servir.sh` (si se perdió: `CIRCLE_NODE_TOTAL=1 NODE_OPTIONS=--max-old-space-size=4096
+MEDIR_CON_LA_LLAVE_PRENDIDA=1 E2E_DIST_DIR=.next-probe npx next build` y `E2E_DIST_DIR=.next-probe npx next start -p 3000`).
+
+**Fase B (los formularios).** Compilar, servir y `npx tsx banco11.ts lanzar`; después, en orden (cada uno escribe su carpeta en
+`pulido-11/b/` con la hoja de 8 cuadros del recorrido y un `.json` con el cuadro más largo y los de más de 20 ms):
+
+```
+npx tsx b-formulario.ts 1440 900 pie lento b1 ; npx tsx b-formulario.ts 1440 900 pie error b1
+OTRO=1 npx tsx b-formulario.ts 1440 900 pie lento b6 ; REINTENTAR=1 npx tsx b-formulario.ts 1440 900 pie error b3
+npx tsx b-formulario.ts 1440 900 pie lento col "volteo=columpio" ; REINTENTAR=1 npx tsx b-formulario.ts 1440 900 pie error col "volteo=columpio"
+npx tsx b-formulario.ts 1024 768 pie lento b1 ; REINTENTAR=1 npx tsx b-formulario.ts 1024 768 pie error b3
+npx tsx b-formulario.ts 768 1024 pie lento b1 ; REINTENTAR=1 npx tsx b-formulario.ts 768 1024 pie error b3
+npx tsx b-formulario.ts 390 844 pie lento b1 ; REINTENTAR=1 npx tsx b-formulario.ts 390 844 pie error b3
+npx tsx b-formulario.ts 1440 900 modal lento b1 ; REINTENTAR=1 npx tsx b-formulario.ts 1440 900 modal error b3
+npx tsx b-formulario.ts 1024 768 modal lento b1 ; npx tsx b-formulario.ts 768 1024 modal lento b1 ; REINTENTAR=1 npx tsx b-formulario.ts 390 844 modal error b3
+npx tsx b-formulario.ts 1440 900 modal lento col "volteo=columpio" ; npx tsx b-formulario.ts 390 844 modal error col "volteo=columpio"
+npx tsx b6-autocompletado.ts 1440 900 ; npx tsx b6-autocompletado.ts 390 844
+npx tsx banco11.ts cerrar
+```
+
+Qué mirar: en cada hoja, el volteo sin salto (la tarjeta del tamaño del formulario, en su lugar), el encastre (éxito: la pieza al
+ras y la onda; error: el choque, el borde rojo y la pieza afuera), el texto entero (sin «mensa e»), la carga girando sobre el
+palito sin cuadrado negro ni parpadeo, y nunca la carga con un rótulo encima; en el `.json`: `mayoresDe20EnTodo` vacío (si el
+retorno al formulario rearma caro, cachear la geometría de la forma en `armadas.ts`), `trasReintentar` con los tres valores,
+`focoTrasReintentar` = Enviar, `trasOtro` vacío; en el de autocompletado, `autocompletado: true` en el nombre y el mail (si
+`simulado` dice NO, el CDP de este Chrome no lo soporta: anotarlo y mirarlo a mano), la captura con el campo sobre su pozo, y
+después de «Enviar otro», `autocompletado: false` y los valores vacíos. Después, el recibo a `docs/rediseno/entregas/pulido-11/`
+y su afirmación en s62 B1 (los cuadros).
 
 ## Lo que no quedó bien
 

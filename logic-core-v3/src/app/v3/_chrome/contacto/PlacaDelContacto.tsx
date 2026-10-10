@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, type MotionValue } from 'motion/react'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -32,8 +32,8 @@ const CARAS = [
   { cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-fondo', style: { transform: `translateZ(-${String(E)}px)` } },
 ] as const
 
-// [PULIDO 10] J5 · `rechazo`: cuánto se hunde el bloque entero (px, en profundidad) cuando el envío falla (lo anima el formulario).
-export function PlacaDelContacto({ activa, rechazo, children }: { readonly activa: boolean; readonly rechazo?: MotionValue<number>; readonly children: React.ReactNode }): React.JSX.Element {
+// [PULIDO 11] B3 · sin el hundido del rechazo (J5): el error es la tarjeta que no encaja, del otro lado del volteo.
+export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
   const [llego, setLlego] = useState(false)
   const paralaje = useParalaje(activa, llego)
   if (!activa) return <>{children}</>
@@ -55,7 +55,7 @@ export function PlacaDelContacto({ activa, rechazo, children }: { readonly activ
         transition={TRANSICIONES.viaje}
         onAnimationComplete={() => setLlego(true)}
       >
-        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, z: rechazo, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
+        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
           {children}
           {/* [PULIDO 11] A1 · las caras se ven recién con el viaje terminado: en el viaje la placa va de frente (no aportan nada)
               y, antes de que la hoja se rasterice, la de atrás asomaba como un rectángulo en el medio (medido con los cuadros del

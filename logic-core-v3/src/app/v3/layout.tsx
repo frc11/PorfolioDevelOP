@@ -35,6 +35,7 @@ import './_estilos/rollover.css' // [INTERFAZ 1] T2 · el rollover de dos copias
 import './_estilos/cursor-sala.css' // [INTERFAZ 1] T2 · el cursor de la sala
 import './_estilos/titular.css' // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D (el seguro sin JS)
 import './_estilos/carga.css' // [AJUSTES FINALES] A4 · el velo de carga (el seguro sin JS)
+import './_estilos/resultado.css' // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.

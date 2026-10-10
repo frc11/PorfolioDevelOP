@@ -1,0 +1,32 @@
+/* =========================================================================
+ * [PULIDO 11] B2 · B3 · LA TARJETA DEL RESULTADO DE LOS FORMULARIOS
+ * =========================================================================
+ * La cara de atrás de la placa (`_componentes/formularios/TarjetaDeResultado.tsx`): siempre un fondo oscuro con la tinta
+ * clara, en cualquier sección. En la sección clara lo oscuro es la tinta y lo claro el papel; en la invertida (el pie de
+ * volumen) es al revés: por eso la tarjeta no usa los dos tokens de base directo sino estos dos, que se dan vuelta acá.
+ *
+ * Cada propiedad tiene UN valor (`s3-tokens`): lo de la sección invertida entra por un respaldo (`--resultado-*-invertido`).
+ *
+ * EL ROJO, el único color fuera del monocromo (el error: la ranura que no deja entrar la pieza), es un token del tema
+ * (`--color-error`, `--color-error-texto`: los números, ahí). Las propiedades están registradas en `s3-registro-de-tokens.ts`.
+ * ========================================================================= */
+
+[data-v3] [data-tarjeta='resultado'] {
+  --resultado-oscuro: var(--resultado-oscuro-invertido, var(--color-tinta));
+  --resultado-claro: var(--resultado-claro-invertido, var(--color-fondo));
+  --resultado-fondo: var(--resultado-oscuro);
+  --resultado-fondo-solido: var(--resultado-oscuro);
+  --resultado-tinta: var(--resultado-claro);
+  --resultado-pozo: color-mix(in srgb, var(--resultado-oscuro) 45%, black);
+  --resultado-sombra: black;
+  --resultado-borde: color-mix(in srgb, var(--resultado-claro) 24%, transparent);
+  --resultado-filo: color-mix(in srgb, var(--resultado-claro) 45%, transparent);
+  --resultado-luz: var(--resultado-claro);
+  --rojo-del-error: var(--color-error);
+  --texto-del-error: var(--color-error-texto);
+}
+
+[data-v3] [data-seccion='invertida'] [data-tarjeta='resultado'] {
+  --resultado-oscuro-invertido: var(--color-fondo);
+  --resultado-claro-invertido: var(--color-tinta);
+}

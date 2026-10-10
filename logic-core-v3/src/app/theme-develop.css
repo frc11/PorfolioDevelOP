@@ -285,6 +285,14 @@
   --color-borde: rgba(17, 17, 17, 0.10);        /* separador decorativo — sin mínimo */
   --color-borde-fuerte: rgba(17, 17, 17, 0.47); /* límite de componente — peor caso 3,01:1 */
 
+  /* [PULIDO 11] B3 · EL ROJO DEL ERROR — el único color fuera del monocromo (lo pidió Valentino: el formulario cuyo envío falla).
+   * Refinado, no de alarma: un carmín frío para el borde que se enciende en la tarjeta del error (un elemento gráfico, sobre la
+   * tinta: 4,82:1; sobre el fondo invertido, 4,93:1 — más que el 3:1 de un límite) y su versión clara para el título del error
+   * (texto sobre la tinta: 8,96:1; sobre el fondo invertido, 9,16:1 — AA). La tarjeta es siempre oscura, en las dos secciones:
+   * por eso no se redefinen en la invertida. [decidido] */
+  --color-error: #E5484D;
+  --color-error-texto: #FF9592;
+
   /* Anillo de foco. [decidido]
    * NO es un color propio: es la tinta, POR REFERENCIA. Dos razones.
    * La primera es la de Franco y no cambia: el acento cambia por página y no

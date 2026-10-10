@@ -42,7 +42,6 @@ import { TIEMPOS_DEL_FINAL } from '../escena/finalDelRecorrido'
 import { VENTANA_DE_LA_TRANSFORMACION, ventanaDelValor } from '../../_secciones/por-que-develop/geometria'
 import { asentar, nuevoSeguidor, seguirAlScroll, type SeguidorDelValor } from '../../_secciones/por-que-develop/asientoDelValor'
 import { CTA, FRASE, VALORES } from '../../_secciones/por-que-develop/contenido'
-import { GRACIAS } from '../formularios/gracias'
 import ARCHIVO_NORMAL_CTA from '../../_fuentes/archivo-normal-cta.json'
 import ARCHIVO_NORMAL_CTA_FUERTE from '../../_fuentes/archivo-normal-cta-fuerte.json'
 import ARCHIVO_700 from '../../_fuentes/archivo-700-titulos.json'
@@ -183,10 +182,11 @@ type Glifos = { readonly glyphs: Record<string, unknown>; readonly original_font
 const letras = (t: string): Set<string> => new Set([...t].filter((c) => c.trim() !== ''))
 const exactas = (f: Glifos, t: string): boolean => Object.keys(f.glyphs).filter((c) => c.trim() !== '').length === letras(t).size && [...letras(t)].every((c) => f.glyphs[c] !== undefined)
 const fuenteBien = (frase: Glifos, fuerte: Glifos, valores: Glifos, script: string): boolean =>
-  // [PULIDO 10] J4 · la de la frase sirve también al título de la tarjeta de gracias del pie en 3D (en minúsculas): sus letras, y nada más.
-  exactas(frase, `${CTA.frase}${GRACIAS.titulo}`) && exactas(fuerte, `${CTA.destacado}${CTA.rotulo.toUpperCase()}`) && /[a-zñóé]/.test(Object.keys(frase.glyphs).join('')) && frase.original_font_information?.source === 'Archivo[wdth,wght].ttf' &&
+  // [PULIDO 10] J4 · servía también al título de gracias del pie en 3D; [PULIDO 11] B · ese título se fue (la tarjeta del resultado va
+  // en el DOM): otra vez sólo las letras de la frase.
+  exactas(frase, CTA.frase) && exactas(fuerte, `${CTA.destacado}${CTA.rotulo.toUpperCase()}`) && /[a-zñóé]/.test(Object.keys(frase.glyphs).join('')) && frase.original_font_information?.source === 'Archivo[wdth,wght].ttf' &&
   VALORES.every((v) => [...`${v.titulo}${v.linea}`].every((c) => c.trim() === '' || valores.glyphs[c] !== undefined)) && (ARCHIVO_700 as Glifos).glyphs.H !== undefined &&
-  script.includes("*[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,") && script.includes("for peso, textos, sufijo in ((600, ['Este sitio empezó con una charla.', 'Gracias por tu mensaje.'], ''), (900, ['El tuyo también.', 'HABLANOS'], '-fuerte'))],")
+  script.includes("*[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,") && script.includes("for peso, textos, sufijo in ((600, ['Este sitio empezó con una charla.'], ''), (900, ['El tuyo también.', 'HABLANOS'], '-fuerte'))],")
 // [PULIDO 6] E1 · un solo ancho (wdth 100): `?ancho=expandido` y sus fuentes se borraron.
 const fuentesDelCtaBien = (script: string): boolean => [[ARCHIVO_NORMAL_CTA, ARCHIVO_NORMAL_CTA_FUERTE]].every(([a, b]) => fuenteBien(a as Glifos, b as Glifos, CHIVO_400_VALORES as Glifos, script))
 afirmar(fuentesDelCtaBien(leerDeLaRaiz('scripts-retoque/fuentes-3d.py')), '6 · la frase en Archivo con su copy (minúsculas y acentos), del TTF entero, sólo con sus letras; los valores en la Chivo del DOM', `${String(Object.keys((ARCHIVO_NORMAL_CTA as Glifos).glyphs).length)} y ${String(Object.keys((ARCHIVO_NORMAL_CTA_FUERTE as Glifos).glyphs).length)} glifos`)

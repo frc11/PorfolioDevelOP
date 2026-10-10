@@ -1,18 +1,16 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { AnimatePresence, animate, motion, useMotionValue } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
-import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
+import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
-import { transicionDeGracias, varianteDelPanel } from '../../_lib/formularios/gracias'
-import { RECHAZO, REINTENTAR, cuadrosDelRechazo } from '../../_lib/formularios/rechazo'
-import { sonar } from '../../_lib/sonido/bus'
+import { transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
@@ -50,6 +48,11 @@ export const MS_DEL_VELO = 400
  * su salida de siempre; mientras, una línea fina se consume. Esc y la X siguen cerrando; al cerrarse, el foco vuelve a quien
  * lo abrió. Con error, el formulario vuelve con todo lo escrito y el error a la vista. Lo escrito vive en la hoja: la carga
  * y la tarjeta no lo tocan.
+ *
+ * [PULIDO 11] B · el panel también VOLTEA (el hundido se borró; `?volteo=centrado|columpio`): el formulario, la carga y la
+ * tarjeta del resultado (`TarjetaDeResultado`, del alto del formulario: comparten el eje). Con el error, la tarjeta que no encaja
+ * y «Reintentar», que vuelve al formulario con todo lo escrito; con el éxito, la que encaja, y la cuenta del cierre arranca
+ * cuando su texto ya está.
  */
 export const CIERRE_MS = 3000
 const sinSuscripcion = (): (() => void) => () => undefined
@@ -87,22 +90,21 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [datos, setDatos] = useState<DatosDeContacto>({ intereses: precarga, ...VACIO })
   const [errores, setErrores] = useState<ErroresDeContacto>({})
   const [intento, setIntento] = useState(false)
-  // [RONDA 2] F1: mientras viaja, y si llegó. [PULIDO 9] H3 · cada una con su contenido en la placa.
-  const [fase, setFase] = useState<'formulario' | 'enviando' | 'gracias'>('formulario')
+  // [RONDA 2] F1: mientras viaja, y si llegó. [PULIDO 9] H3 · cada una con su contenido en la placa. [PULIDO 11] B3 · y el error.
+  const [fase, setFase] = useState<'formulario' | 'enviando' | 'exito' | 'error'>('formulario')
+  const [mensajeDelError, setMensajeDelError] = useState('')
   const enviando = fase === 'enviando'
-  const enviado = fase === 'gracias'
-  // [PULIDO 10] J4 · el panel, con el hundido (el pie, con el volteo); `?gracias=` cambia los dos.
-  const variante = useSyncExternalStore(sinSuscripcion, varianteDelPanel, () => 'hundido' as const)
+  const enviado = fase === 'exito'
+  // [PULIDO 11] B1 · el volteo, como el pie; y la tarjeta ya se ve (terminó de entrar): arranca el encastre.
+  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'centrado' as const)
+  const [seVe, setSeVe] = useState(false)
+  // [PULIDO 11] B2 · con el éxito, el panel se cierra solo `CIERRE_MS` después de que su texto está.
+  const [textoListo, setTextoListo] = useState(false)
   // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe).
   const [alto, setAlto] = useState<number | undefined>(undefined)
   const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)
-  // UNA región de alerta: el resumen de los datos (sólo para el lector) o el error del servidor (a la vista).
+  // UNA región de alerta: el resumen de los datos o el error del servidor (para el lector: el error se ve en su tarjeta).
   const [aviso, setAviso] = useState('')
-  const [avisoALaVista, setAvisoALaVista] = useState(false)
-  // [PULIDO 10] J5 · cada error, un rechazo: la placa se hunde y vuelve (en la hoja del teléfono, se achica y vuelve).
-  const [rechazos, setRechazos] = useState(0)
-  const hundidoDelRechazo = useMotionValue(0)
-  const escalaDelRechazo = useMotionValue(1)
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -120,7 +122,6 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     e.preventDefault()
     if (enviando) return
     setIntento(true)
-    setAvisoALaVista(false)
     const form = e.currentTarget
     const errores = validarContacto(datos)
     const valido = Object.keys(errores).length === 0
@@ -145,38 +146,43 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     }
     setErrores({})
     setAviso('')
+    setSeVe(false)
+    setTextoListo(false)
+    pedirFoco.current = 'tarjeta'
     if (r.estado === 'error') {
-      // El error normal del formulario, a la vista (en la misma región viva); el foco, en Enviar al volver.
-      pedirFoco.current = 'enviar'
-      setAvisoALaVista(true)
+      // [PULIDO 11] B3 · la tarjeta que no encaja: el error a la vista en ella (y en la región viva); lo escrito se queda.
+      setMensajeDelError(r.mensaje)
+      setFase('error')
       requestAnimationFrame(() => setAviso(r.mensaje))
-      // [PULIDO 10] J5 · el rechazo y el pulso (el foco va a Reintentar con `pedirFoco`).
-      setRechazos((n) => n + 1)
-      sonar('pulso')
       return
     }
-    pedirFoco.current = 'tarjeta'
-    setFase('gracias')
+    setFase('exito')
     setIntento(false)
     setDatos({ intereses: [], ...VACIO })
   }
 
-  // [PULIDO 9] H3 · con la tarjeta a la vista, se cierra solo (si antes no lo cerró Esc o la X).
+  // [PULIDO 11] B3 · Reintentar: de vuelta al formulario con todo lo escrito; el foco, en Enviar.
+  const reintentar = (): void => {
+    pedirFoco.current = 'enviar'
+    setAviso('')
+    setFase('formulario')
+  }
+
+  // [PULIDO 9] H3 · con la tarjeta a la vista, se cierra solo (si antes no lo cerró Esc o la X). [PULIDO 11] B2 · desde que su texto está.
   useEffect(() => {
-    if (!enviado) return undefined
+    if (!enviado || !textoListo) return undefined
     const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)
     return () => window.clearTimeout(reloj)
-  }, [enviado])
+  }, [enviado, textoListo])
   const alLlegar = (el: HTMLElement | null): void => {
     if (el === null || pedirFoco.current === null) return
     const destino = pedirFoco.current === 'enviar' ? el.querySelector<HTMLElement>('button[type="submit"]') : el
     pedirFoco.current = null
     destino?.focus({ preventScroll: true })
   }
-  const cambio = transicionDeGracias(variante, reducido)
-  // [PULIDO 10] J5 · Enviar pasa a Reintentar (entra girando desde canto); el resorte del rechazo, con la misma curva que el pie.
-  const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : avisoALaVista ? REINTENTAR : ROTULO_DEL_ENVIO
-  const giraElRotulo = !reducido && rotuloDelEnvio === REINTENTAR
+  const cambio = transicionDelVolteo(variante, reducido)
+  // [PULIDO 11] B4 · Enviar (el error vive en su tarjeta); mientras viaja el formulario ya se fue volteando.
+  const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO
 
   const desdeArriba = modo === 'barra'
   /**
@@ -191,13 +197,6 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
   // [CIERRE] 2B · desde la barra y con movimiento: el fondo se desenfoca en 0,5 s y la hoja llega como una placa (`placa.ts`).
   const placa = desdeArriba && !reducido
-  useEffect(() => {
-    if (rechazos === 0 || reducido) return undefined
-    const resorte = placa
-      ? animate(hundidoDelRechazo, cuadrosDelRechazo(-RECHAZO.hondoPx * 2), { duration: RECHAZO.s, ease: 'linear' })
-      : animate(escalaDelRechazo, cuadrosDelRechazo(RECHAZO.escala).map((v) => 1 - v), { duration: RECHAZO.s, ease: 'linear' })
-    return () => resorte.stop()
-  }, [rechazos, reducido, placa, hundidoDelRechazo, escalaDelRechazo])
 
   return (
     <div ref={raiz} data-pieza="contacto" data-modo={modo} data-placa={placa ? '' : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
@@ -213,7 +212,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         transition={placa ? TRANSICIONES.fondo : velo}
       />
       {/* [CIERRE] 2B · desde la barra la hoja es el frente de una PLACA con espesor (`PlacaDelContacto.tsx`). */}
-      <PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>
+      <PlacaDelContacto activa={placa}>
       <motion.div
         ref={caja}
         role="dialog"
@@ -231,7 +230,6 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         animate={placa ? undefined : { y: 0 }}
         exit={placa ? undefined : { y: fuera }}
         transition={placa ? undefined : hoja}
-        style={placa ? undefined : { scale: escalaDelRechazo }}
       >
         <div
           className={cn(
@@ -267,16 +265,18 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           <AnimatePresence mode="wait" initial={false}>
           {enviando ? (
             // [PULIDO 10] J3 · la carga de develOP (el trazo del logo, o el giro con `?carga=giro`) y su estado; reemplaza al anillo.
-            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} data-parte="carga" className="flex flex-col items-center justify-center outline-none" style={{ minHeight: alto }}>
+            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} data-parte="carga" className="flex flex-col items-center justify-center outline-none" style={{ ...cambio.style, minHeight: alto }}>
               <Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />
             </motion.div>
-          ) : enviado ? (
-            <motion.div key="gracias" {...cambio} data-parte="gracias" className="flex flex-col justify-center gap-[var(--spacing-6)]" style={{ minHeight: alto }}>
-              <TarjetaDeGracias foco={alLlegar} />
+          ) : enviado || fase === 'error' ? (
+            <motion.div key="resultado" {...cambio} data-parte="resultado" className="flex flex-col justify-center gap-[var(--spacing-4)]" onAnimationComplete={() => setSeVe(true)}>
+              <TarjetaDeResultado tipo={enviado ? 'exito' : 'error'} mensaje={mensajeDelError} alto={alto} empieza={seVe} compacto={compacto} foco={alLlegar} alReintentar={reintentar} alTerminar={() => setTextoListo(true)} />
               {/* La cuenta del cierre: una línea fina que se consume (en ancho: con movimiento reducido también corre). */}
-              <div aria-hidden="true" className="bg-borde h-px w-full">
-                <motion.div className="bg-tinta h-px" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: CIERRE_MS / 1000, ease: 'linear' }} />
-              </div>
+              {enviado && (
+                <div aria-hidden="true" className="bg-borde h-px w-full">
+                  <motion.div className="bg-tinta h-px" initial={{ width: '100%' }} animate={{ width: textoListo ? '0%' : '100%' }} transition={{ duration: textoListo ? CIERRE_MS / 1000 : 0, ease: 'linear' }} />
+                </div>
+              )}
             </motion.div>
           ) : (
           <motion.form key="formulario" ref={alLlegar} {...cambio} noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
@@ -288,13 +288,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
               )}
             >
               <p className="text-caption leading-texto">{PIE}</p>
-              {giraElRotulo ? (
-                <motion.span key={rotuloDelEnvio} className={cn('inline-block', compacto && 'shrink-0')} initial={{ rotateX: -90 }} animate={{ rotateX: 0 }} transition={{ duration: RECHAZO.giroS, ease: [0.25, 0.46, 0.45, 0.94] }}>
-                  <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
-                </motion.span>
-              ) : (
-                <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
-              )}
+              <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
             </div>
           </motion.form>
           )}
@@ -302,15 +296,9 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           </div>
           {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
               siempre se anuncia); lo que cambia es lo de adentro. [PULIDO 9] H3 · fuera de lo que se transforma. */}
-          {/* [PULIDO 10] J5 · el error sale de atrás del botón, en su renglón (sube desde el borde de su caja, que recorta). */}
-          <p role="alert" className={avisoALaVista && !enviado ? 'overflow-hidden text-caption leading-texto' : 'sr-only'}>
-            {rechazos === 0 ? (
-              aviso
-            ) : (
-              <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
-                {aviso}
-              </motion.span>
-            )}
+          {/* [PULIDO 11] B3 · el error se ve en su tarjeta; acá, para el lector (con el resumen de los datos). */}
+          <p role="alert" className="sr-only">
+            {aviso}
           </p>
           <p role="status" className="sr-only">
             {enviado ? DESPUES_DEL_ENVIO : ''}

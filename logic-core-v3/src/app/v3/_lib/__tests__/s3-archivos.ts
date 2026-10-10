@@ -57,6 +57,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/titular.css`,
   // [AJUSTES FINALES] A4 · el velo de carga: la página arranca blanca y todo aparece junto (el seguro sin JS).
   `${V3}/_estilos/carga.css`,
+  // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios (sus tintas, que se dan vuelta, y el rojo del error).
+  `${V3}/_estilos/resultado.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

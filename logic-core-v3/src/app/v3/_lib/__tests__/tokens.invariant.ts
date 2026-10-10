@@ -178,6 +178,10 @@ async function principal(): Promise<void> {
     '--color-semaforo-rojo: #FF5F57;',
     '--color-semaforo-amarillo: #FEBC2E;',
     '--color-semaforo-verde: #28C840;',
+    // ⚠ AGREGADOS POR PULIDO 11 (B3): el rojo del error, el primer color fuera del monocromo, y su versión clara para el texto.
+    // Su motivo entero está en `padron-de-tokens.AGREGADOS`; su contraste, en el comentario del tema.
+    '--color-error: #E5484D;',
+    '--color-error-texto: #FF9592;',
     // ⚠ AGREGADO POR TEXTO-3: el cuarto breakpoint, y el primero que se usa
     // hacia abajo. Mismo número que `--fluido-piso` —el ancho más angosto al
     // que se midió el sistema—. Su motivo entero está en

@@ -11,11 +11,21 @@
  *   A4e · el CTA abajo de 1024: la frase desde la izquierda y HABLANOS desde la derecha, en volumen y anclados, función del
  *         scroll, terminando juntos; sin «Seis razones» que reaparezcan, sin volteo ni giro.
  *   A5 · J10 medido en el banco: con un solo toque el polvo termina de subir y queda en el aire antes de volver a posarse.
+ *   B1 · el volteo de los dos formularios: lo nuevo comparte el eje de lo que estaba (`?volteo=centrado|columpio`).
+ *   B2 · el éxito ENCAJA: la pieza del logo cae en su ranura, el pestillo, la onda de luz y después el texto.
+ *   B3 · el error NO ENCAJA: el rojo (el primer color fuera del monocromo) como token y en AA; Reintentar con todo intacto.
+ *   B4 · los rótulos del botón se suceden: la carga y «Reintentar» nunca a la vez (tampoco el relieve de la tecla 3D).
+ *   B5 · la carga gira sobre el palito de la P, con el palito en el medio (el trazo, de respaldo).
+ *   B6 · terminado el éxito, el formulario se limpia (los valores y el estado del autocompletado).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
+import { MotionConfig } from 'motion/react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import * as THREE from 'three'
+
+import { LOGO_INK_VIEWBOX, LOGO_PATH_D } from '@/components/ui/LogoMark'
 
 import { PlacaDelContacto } from '../../_chrome/contacto/PlacaDelContacto'
 import { pedidoQueEsquiva, seCruzan, type Caja } from '../escena/titulos3d/esquivaDelLogo'
@@ -24,6 +34,12 @@ import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../../_seccion
 import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_secciones/trabajos/angosto'
 import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_secciones/trabajos/tunel'
 import { DESLIZAMIENTO_EN_LA_LISTA, LISTA_DEL_CTA, deslizadoEnLaLista, progresoEnLaLista, tocableEnLaLista } from '../escena/ctaDelFinal/transformacion'
+import { anguloDelColumpio, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
+import { VOLTEO, caidaDelColumpio, transicionDelVolteo, type TransicionDelVolteo, type VarianteDelVolteo } from '../formularios/volteo'
+import { RESULTADO } from '../formularios/gracias'
+import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
+import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
+import { EJE_DEL_PALITO, PALITO_DE_LA_P } from '../../_componentes/carga/Carga'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -191,5 +207,294 @@ const conHisteresis = (serie: Cuadro[]): boolean => {
 }
 afirmar(polvo.posado[2] > 13500 && conHisteresis(polvo.toque), 'A5 · con un toque: todas suben antes de que caiga ninguna, quedan ≥ 5 s en el aire y después se vuelven a posar')
 controlPositivo('A5 · el detector VE el polvo de antes (a los 4 s vuelve a bajar antes de terminar de subir)', polvo.toque.map((c) => (c.s > 4 && c.s < 6 ? { s: c.s, modos: [c.modos[0], 900, c.modos[2], c.modos[3], c.modos[4], c.modos[5]] } : c)), conHisteresis)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B1 · El volteo: lo nuevo comparte el eje de lo que estaba (`?volteo=centrado|columpio`)')
+
+// El salto de PULIDO 10: la tarjeta de gracias era más chica que el formulario y su columna se recentraba, así que al cambiar de
+// canto la nueva aparecía corrida. Ahora la tarjeta guarda la caja del formulario (`alto`) y las dos giran sobre EL MISMO eje en
+// todo el volteo: `centrado`, el horizontal del medio; `columpio`, la bisagra del borde de arriba. Con la pose pura de la placa 3D
+// (`transformacionDelPie.ts`, px de la pieza: y hacia arriba, la cara en z = 0, la cámara en +z) y con la del DOM (Motion).
+const CAJA_B1 = { ancho: 420, alto: 380 }
+const ESPESOR_B1 = 30
+type Pose = typeof poseDeLaTransformacion
+const enLaPose = (pose: Pose, v: VarianteDelVolteo, t: number, entrante: boolean, p: THREE.Vector3): THREE.Vector3 => {
+  const m = new THREE.Matrix4()
+  pose(v, false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, m)
+  return p.clone().applyMatrix4(m)
+}
+const MUESTRAS_B1 = Array.from({ length: 81 }, (_, k) => k / 80)
+// El eje: sus dos puntas (en el medio del espesor).
+const ejeDe = (v: VarianteDelVolteo): THREE.Vector3[] => {
+  const y = v === 'centrado' ? -CAJA_B1.alto / 2 : 0
+  return [new THREE.Vector3(0, y, -ESPESOR_B1 / 2), new THREE.Vector3(CAJA_B1.ancho, y, -ESPESOR_B1 / 2)]
+}
+const compartenElEje = (pose: Pose): boolean =>
+  (['centrado', 'columpio'] as const).every((v) => MUESTRAS_B1.every((t) => [false, true].every((entrante) => ejeDe(v).every((p) => enLaPose(pose, v, t, entrante, p).distanceTo(p) < 1e-6))))
+afirmar(compartenElEje(poseDeLaTransformacion), 'B1 · en las dos estrategias, la que estaba y la nueva giran sobre el mismo eje en todo el volteo (centrado: el del medio; columpio: la bisagra de arriba)')
+const conSalto: Pose = (v, q, t, e, c, d, esp, m) => {
+  const r = poseDeLaTransformacion(v, q, t, e, c, d, esp, m)
+  if (e) m.premultiply(new THREE.Matrix4().makeTranslation(0, -63, 0))
+  return r
+}
+controlPositivo('B1 · el detector VE el salto de antes (la nueva corrida 63 px, la columna recentrada)', conSalto, compartenElEje)
+
+// Se cambian DE CANTO: la que estaba se deja de ver y la nueva aparece justo cuando las dos están a 90° (la normal de la cara, de
+// costado). El corte del columpio es el final de su caída.
+const normalZ = (v: VarianteDelVolteo, t: number, entrante: boolean): number => {
+  const m = new THREE.Matrix4()
+  poseDeLaTransformacion(v, false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, m)
+  return new THREE.Vector3(0, 0, 1).transformDirection(m).z
+}
+const CORTE = { centrado: 0.5, columpio: VOLTEO.columpio.cae / (VOLTEO.columpio.cae + VOLTEO.columpio.asienta) } as const
+const seVeDe = (v: VarianteDelVolteo, t: number, entrante: boolean): boolean => poseDeLaTransformacion(v, false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, new THREE.Matrix4()).visible
+const deCanto = (corte: Readonly<Record<VarianteDelVolteo, number>>): boolean =>
+  (['centrado', 'columpio'] as const).every((v) => {
+    const c = corte[v]
+    return Math.abs(normalZ(v, c - 1e-6, false)) < 1e-3 && Math.abs(normalZ(v, c, true)) < 1e-3 && seVeDe(v, c - 1e-6, false) && !seVeDe(v, c, false) && !seVeDe(v, c - 1e-6, true) && seVeDe(v, c, true)
+  })
+afirmar(deCanto(CORTE), '  las dos se cambian de canto (a 90°): una deja de verse en el mismo instante en que la otra aparece')
+controlPositivo('  el detector VE un cambio a destiempo (el columpio cambiando a la mitad del tiempo, no al final de la caída)', { ...CORTE, columpio: 0.5 }, deCanto)
+
+// El columpio: la que estaba gira hacia ADENTRO (su borde de abajo se va al fondo, z < 0) y cae como un cuerpo (arranca quieta y
+// acelera); la nueva vuelve SALIENDO (su borde de abajo viene de la cámara, z > 0) y se asienta con el resorte amortiguado: pasa
+// de largo un rebote chico (de 3° a 12°), el segundo es casi nada y termina en su lugar exacto.
+const BORDE_DE_ABAJO = new THREE.Vector3(CAJA_B1.ancho / 2, -CAJA_B1.alto, 0)
+const ASIENTO_B1 = Array.from({ length: 600 }, (_, k) => CORTE.columpio + ((1 - CORTE.columpio) * k) / 599)
+const columpioBien = (angulo: typeof anguloDelColumpio, pose: Pose): boolean => {
+  const grados = ASIENTO_B1.map((t) => (angulo(t, true) * 180) / Math.PI)
+  const primero = Math.max(...grados)
+  const cruce = grados.findIndex((g) => g > 0)
+  const despues = grados.slice(cruce)
+  const segundo = -Math.min(...despues.slice(despues.findIndex((g) => g < 0)))
+  return (
+    enLaPose(pose, 'columpio', CORTE.columpio * 0.9, false, BORDE_DE_ABAJO).z < -CAJA_B1.alto * 0.5 &&
+    enLaPose(pose, 'columpio', CORTE.columpio + 0.01, true, BORDE_DE_ABAJO).z > CAJA_B1.alto * 0.5 &&
+    caidaDelColumpio(0.2) < 0.2 * 0.2 && caidaDelColumpio(0.5) < 0.5 * 0.5 && caidaDelColumpio(1) === 1 &&
+    primero >= 3 && primero <= 12 && segundo < primero / 4 && angulo(1, true) === 0 && Math.abs(grados[grados.length - 2]) < 0.5
+  )
+}
+afirmar(columpioBien(anguloDelColumpio, poseDeLaTransformacion), '  columpio: la que estaba cae hacia adentro (acelerando); la nueva vuelve saliendo y se asienta con un rebote chico y amortiguado')
+controlPositivo('  el detector VE un asiento sin rebote (una curva suave que llega y se clava: no es un resorte)', ((t: number, e: boolean) => (e ? -(Math.PI / 2) * (1 - Math.min(1, Math.max(0, (t - CORTE.columpio) / (1 - CORTE.columpio)))) : anguloDelColumpio(t, e))) as typeof anguloDelColumpio, (f: typeof anguloDelColumpio) => columpioBien(f, poseDeLaTransformacion))
+
+// El DOM (abajo de 1025 y el panel de Contacto), las mismas curvas: en CSS la y va hacia abajo y la z hacia quien mira, así que
+// con el origen arriba `rotateX(−90°)` manda el borde de abajo al fondo (z = alto·sen(−90°)) y `rotateX(90°)` lo trae hacia afuera.
+const grado = (x: TargetAndTransitionLike | false): unknown => (x === false ? undefined : x.rotateX)
+type TargetAndTransitionLike = { readonly rotateX?: unknown }
+const domBien = (d: TransicionDelVolteo, c: TransicionDelVolteo): boolean => {
+  const asiento = grado(d.animate as TargetAndTransitionLike)
+  return (
+    d.style.transformOrigin === '50% 0%' && grado(d.exit as TargetAndTransitionLike) === -90 && grado(d.initial as TargetAndTransitionLike | false) === 90 &&
+    Array.isArray(asiento) && asiento[asiento.length - 1] === 0 && Math.min(...(asiento as number[])) <= -3 && Math.min(...(asiento as number[])) >= -12 &&
+    c.style.transformOrigin === '50% 50%' && grado(c.exit as TargetAndTransitionLike) === 90 && grado(c.initial as TargetAndTransitionLike | false) === -90
+  )
+}
+afirmar(domBien(transicionDelVolteo('columpio', false), transicionDelVolteo('centrado', false)), '  en el DOM, lo mismo: el columpio con la bisagra arriba (sale hacia adentro, entra desde afuera y rebota); el centrado, por el medio')
+controlPositivo('  el detector VE el columpio con la bisagra en el medio', { ...transicionDelVolteo('columpio', false), style: { transformOrigin: '50% 50%' } }, (d: TransicionDelVolteo) => domBien(d, transicionDelVolteo('centrado', false)))
+
+// La revisión adversaria de B (antes del commit) encontró cuatro maneras de que el volteo saliera mal; las cuatro, cerradas:
+//   · un rearme de la placa por otra cosa (la ventana cambió de tamaño) en medio del volteo lo cortaba sin avisar: la tarjeta
+//     esperaba para siempre su encastre (sin texto ni botones). Ahora el corte avisa, y el aviso lleva el estado que quedó a la
+//     vista (uno de vuelta al formulario no arranca el encastre de la tarjeta nueva);
+//   · en los ~80 ms entre el cambio de estado y el rearme, lo nuevo del DOM se veía sobre la placa vieja: ahora se apaga en el
+//     mismo cuadro (y un respaldo lo prende si el aviso no llega);
+//   · la tarjeta podía ser más alta que el formulario (en el teléfono, ~400 contra ~300 px): ahora mide EXACTAMENTE su alto (el
+//     lugar del encastre toma lo que sobra y el logo se achica para entrar);
+//   · «Reintentar» tomaba el foco aunque la persona ya se hubiera ido a otra parte: ahora sólo si sigue en la tarjeta.
+const PIE_R = leer('_secciones/cierre/FormularioDelPie.tsx')
+const ARMADAS_R = leer('_lib/escena/pie3d/armadas.ts')
+const TARJETA_R = leer('_componentes/formularios/TarjetaDeResultado.tsx')
+const revisionBien = (pie: string, a: string, t: string, html: string): boolean =>
+  a.includes('const cortado = vieja !== undefined && !transforma && vieja.transformacion !== null') && a.includes('if (cortado) avisarQueTermino(a)') &&
+  a.includes('new CustomEvent(VOLTEO_TERMINADO, { detail: a.estado })') && !a.includes('new CustomEvent(VOLTEO_TERMINADO))') &&
+  pie.includes("if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return") && pie.includes("el.style.opacity = '0'") && pie.includes('(duracionDelVolteo(variante, reducido) + RESPALDO_DEL_VOLTEO_S) * 1000') && /useLayoutEffect\(\(\) => \{\s*const el = placa\.current/.test(pie) &&
+  t.includes('raiz.current.contains(document.activeElement)) reintentar.current?.focus') &&
+  /data-tarjeta="resultado"[^>]*style="height:300px"/.test(html) && !html.includes('min-height:300px')
+const conAlto = renderToStaticMarkup(
+  <MotionConfig reducedMotion="never">
+    <TarjetaDeResultado tipo="error" mensaje="x" alto={300} empieza={false} alReintentar={() => undefined} />
+  </MotionConfig>,
+)
+afirmar(revisionBien(PIE_R, ARMADAS_R, TARJETA_R, conAlto), '  la revisión: un volteo cortado avisa (con su estado), lo nuevo se apaga en el mismo cuadro (con respaldo), la tarjeta mide el alto exacto del formulario y Reintentar no roba el foco')
+controlPositivo('  el detector VE el corte mudo de antes (el rearme suelta el volteo sin avisar)', ARMADAS_R.replace('if (cortado) avisarQueTermino(a)', ''), (a: string) => revisionBien(PIE_R, a, TARJETA_R, conAlto))
+controlPositivo('  y la tarjeta con el alto como piso (más alta que el formulario)', conAlto.replace('style="height:300px"', 'style="min-height:300px"'), (h: string) => revisionBien(PIE_R, ARMADAS_R, TARJETA_R, h))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B2 · El éxito ENCAJA: la pieza cae en su ranura, el pestillo, la onda de luz y después el texto')
+
+// La tarjeta del resultado (`TarjetaDeResultado`) lleva el encastre del logo en chico (`EncajeDelLogo`): una ranura con la forma
+// del logo y la pieza que baja. Con el éxito entra al ras (un rebote mínimo), suena el pestillo en el contacto, sale la onda de
+// luz (el claro de la tarjeta: casi blanco sobre la tinta) y recién entonces aparece el texto. El copy: «Recibido. Te contestamos
+// pronto.». Lo que se ve, renderizado (sin navegador) y con el código del encastre.
+const ENCAJE_TSX = leer('_componentes/formularios/EncajeDelLogo.tsx')
+const TARJETA_TSX = leer('_componentes/formularios/TarjetaDeResultado.tsx')
+const RESULTADO_CSS = leer('_estilos/resultado.css')
+const tarjeta = (tipo: 'exito' | 'error', empieza: boolean, reducido: boolean): string =>
+  renderToStaticMarkup(
+    <MotionConfig reducedMotion={reducido ? 'always' : 'never'}>
+      <TarjetaDeResultado tipo={tipo} mensaje="No pudimos enviarlo. Probá de nuevo en un rato." empieza={empieza} alReintentar={() => undefined} alOtro={() => undefined} />
+    </MotionConfig>,
+  )
+const exitoBien = (e: string, t: string, css: string, html: string): boolean =>
+  RESULTADO.exito.titulo === 'Recibido.' && RESULTADO.exito.bajada === 'Te contestamos pronto.' &&
+  // La pieza entra al ras (termina en y = 0) con el contacto en su caída y el texto después de que termina.
+  ENCAJE.exito.contacto > 0.4 && ENCAJE.exito.contacto < 0.8 && ENCAJE.exito.termina > ENCAJE.exito.s && ENCAJE.exito.rebote > 0 && ENCAJE.exito.rebote < 40 &&
+  e.includes('{ y: [-ENCAJE.caida, 0, -ENCAJE.exito.rebote, 0]') && e.includes("sonar(exito ? 'pestillo' : 'pulso')") &&
+  e.includes('stroke="var(--resultado-luz)"') && css.includes('--resultado-luz: var(--resultado-claro);') &&
+  t.includes('animate={listo ? { opacity: 1, y: 0 }') && t.includes('alTerminar={() => setListo(true)}') &&
+  html.includes('data-encaje="encaja"') && html.includes('Recibido.') && html.includes('Te contestamos pronto.') && !html.includes(RESULTADO.reintentar)
+afirmar(exitoBien(ENCAJE_TSX, TARJETA_TSX, RESULTADO_CSS, tarjeta('exito', false, false)), 'B2 · el éxito: la pieza encaja al ras con el pestillo, la onda de luz clara, y el texto «Recibido. Te contestamos pronto.» después')
+controlPositivo('B2 · el detector VE el texto a la vista desde el principio (sin esperar el encastre)', TARJETA_TSX.replace('animate={listo ? { opacity: 1, y: 0 }', 'animate={true ? { opacity: 1, y: 0 }'), (t: string) => exitoBien(ENCAJE_TSX, t, RESULTADO_CSS, tarjeta('exito', false, false)))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B3 · El error NO ENCAJA: el rojo como token y en AA; «Reintentar» con todo lo escrito')
+
+// El rojo es el primer color fuera del monocromo: dos tokens del tema (`--color-error`, el borde y el resplandor de la ranura que
+// no deja entrar la pieza; `--color-error-texto`, el título del error) que la tarjeta toma por `resultado.css`. La tarjeta es
+// siempre de tinta: en la sección clara, #111111; en la invertida (el pie de volumen), #0E0E0E. Los dos en AA de texto (4,5:1).
+const TEMA = readFileSync('src/app/theme-develop.css', 'utf8')
+const hexDelTema = (nombre: string, desde = 0): string => {
+  const m = new RegExp(`${nombre}:\\s*(#[0-9A-Fa-f]{6})`).exec(TEMA.slice(desde))
+  return m === null ? '' : m[1]
+}
+const INVERTIDA = TEMA.indexOf('[data-seccion="invertida"] {')
+const luminancia = (hex: string): number => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+const contraste = (a: string, b: string): number => {
+  const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p)
+  return (x + 0.05) / (y + 0.05)
+}
+const FONDOS_DE_LA_TARJETA = [hexDelTema('--color-tinta'), hexDelTema('--color-fondo', INVERTIDA)]
+const rojoBien = (rojo: string, texto: string, fondos: readonly string[], css: string, t: string): boolean =>
+  rojo !== '' && texto !== '' && fondos.length === 2 && fondos.every((f) => f !== '' && contraste(rojo, f) >= 4.5 && contraste(texto, f) >= 4.5) &&
+  css.includes('--rojo-del-error: var(--color-error);') && css.includes('--texto-del-error: var(--color-error-texto);') &&
+  t.includes("!exito && 'text-[var(--texto-del-error)]'")
+afirmar(rojoBien(hexDelTema('--color-error'), hexDelTema('--color-error-texto'), FONDOS_DE_LA_TARJETA, RESULTADO_CSS, TARJETA_TSX), `B3 · el rojo es token del tema y pasa AA sobre la tarjeta (borde ${contraste(hexDelTema('--color-error'), FONDOS_DE_LA_TARJETA[0]).toFixed(2)}:1, texto ${contraste(hexDelTema('--color-error-texto'), FONDOS_DE_LA_TARJETA[0]).toFixed(2)}:1 en la clara)`)
+controlPositivo('B3 · el detector VE un rojo oscuro de manual (#B00020: 2,4:1 sobre la tinta)', '#B00020', (r: string) => rojoBien(r, hexDelTema('--color-error-texto'), FONDOS_DE_LA_TARJETA, RESULTADO_CSS, TARJETA_TSX))
+
+// NO ENCAJA: la pieza cae torcida, choca ARRIBA de la ranura (no entra), el borde se enciende en rojo, rebota y queda afuera,
+// corrida y apoyada; suena un golpe grave (el pulso del logo). Y la tarjeta del error lleva «Reintentar».
+const noEncajaBien = (e: string, html: string): boolean =>
+  ENCAJE.error.choca < 0 && ENCAJE.error.rebota < ENCAJE.error.choca && ENCAJE.error.queda < 0 && ENCAJE.error.queda > ENCAJE.error.rebota && Math.abs(ENCAJE.error.corre) > 60 &&
+  e.includes("stroke={exito ? 'var(--resultado-luz)' : 'var(--rojo-del-error)'}") && e.includes("sonar(exito ? 'pestillo' : 'pulso')") &&
+  html.includes('data-encaje="no-encaja"') && html.includes(RESULTADO.error.titulo) && html.includes(`>${RESULTADO.reintentar}</button>`)
+afirmar(noEncajaBien(ENCAJE_TSX, tarjeta('error', false, false)), '  el error: la pieza choca arriba de la ranura, el borde en rojo, rebota y queda afuera; la tarjeta con «Reintentar»')
+controlPositivo('  el detector VE la tarjeta del error con la pieza que encaja', ENCAJE_TSX, (e: string) => noEncajaBien(e, tarjeta('error', false, false).replace('data-encaje="no-encaja"', 'data-encaje="encaja"')))
+
+// «Reintentar» vuelve al formulario con TODO lo escrito: en el error nada vacía los datos ni vuelve a montar los campos (los dos
+// formularios); el foco va a Enviar.
+const PIE_B = leer('_secciones/cierre/FormularioDelPie.tsx')
+const PANEL_B = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const ramaDelError = (f: string, desde: string, hasta: string): string => {
+  const i = f.indexOf(desde)
+  return i < 0 ? '' : f.slice(i, f.indexOf(hasta, i))
+}
+const intactoBien = (pie: string, panel: string): boolean => {
+  const errorDelPie = ramaDelError(pie, "// [PULIDO 11] B3 · el error: la tarjeta que no encaja", '\n  }\n')
+  const reintentarDelPie = ramaDelError(pie, 'const reintentar = (): void => {', '\n  }\n')
+  const errorDelPanel = ramaDelError(panel, "if (r.estado === 'error') {", '\n    }\n')
+  const reintentarDelPanel = ramaDelError(panel, 'const reintentar = (): void => {', '\n  }\n')
+  return (
+    [errorDelPie, reintentarDelPie, errorDelPanel, reintentarDelPanel].every((r) => r !== '' && !/setDatos|setVuelta|reset\(/.test(r)) &&
+    reintentarDelPie.includes("pedirFoco.current = 'enviar'") && reintentarDelPanel.includes("pedirFoco.current = 'enviar'") &&
+    pie.includes('key={`formulario-${String(vuelta)}`}')
+  )
+}
+afirmar(intactoBien(PIE_B, PANEL_B), '  «Reintentar» vuelve al formulario con todo lo escrito (ni el error ni Reintentar vacían o remontan los campos); el foco, en Enviar')
+controlPositivo('  el detector VE un error que vacía el formulario del pie', PIE_B.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (p: string) => intactoBien(p, PANEL_B))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B4 · Los rótulos del botón se suceden: la carga y «Reintentar» nunca a la vez')
+
+// Lo que se veía (PULIDO 10, medido en el banco): en el pie de volumen el rótulo de la tecla está en RELIEVE en la geometría, así que
+// con el botón ocupado la carga del DOM convivía con el relieve («Enviar» o «Reintentar») hasta que la placa se rearmaba. Ahora:
+//   · en el DOM, la carga sólo con el botón ocupado y el rótulo, invisible y mudo mientras tanto (guarda el ancho); «Reintentar»
+//     vive en la tarjeta del error, que es OTRA rama de la presencia (`mode="wait"`: la que sale termina antes de que entre la otra);
+//   · en 3D, las letras del rótulo llevan w = −1 y el sombreador las descarta con el botón ocupado (`aria-busy`, leído cada cuadro):
+//     el mismo cuadro, sin rearmar (el rótulo se sigue midiendo aunque esté mudo, así la firma de la placa no cambia);
+//   · en el panel de Contacto, la carga es un estado entero (el formulario se fue) y la tarjeta del error, otro.
+const ARMADAS_B = leer('_lib/escena/pie3d/armadas.ts')
+const COREO_B = leer('_lib/escena/pie3d/coreografia.ts')
+const GEOM_B = leer('_lib/escena/pie3d/geometria.ts')
+const MEDIDA_B = leer('_lib/pie3d/medida.ts')
+const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, m: string, html: string): boolean =>
+  // DOM del pie: la carga con el botón ocupado; el rótulo, invisible y mudo; la tarjeta en la otra rama, en espera.
+  pie.includes('{enviando && <Carga ') && pie.includes("aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}") &&
+  pie.includes('<AnimatePresence mode="wait" initial={false}>') && pie.indexOf('<TarjetaDeResultado') < pie.indexOf('<Carga ') && !/Reintentar|REINTENTAR/.test(pie.slice(pie.indexOf('<Carga '))) &&
+  // 3D: el relieve del rótulo marcado, descartado con el botón ocupado, leído cada cuadro; medido aunque esté mudo.
+  g.includes('relieveDe(m, fuentes, true, v.tecla).map(deRotulo)') && c.includes('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;') &&
+  a.includes("a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0") && m.includes("mudo.hasAttribute('data-rotulo-de-la-tecla')") &&
+  // El panel: la carga y la tarjeta son estados distintos de la misma presencia.
+  /\{enviando \? \([\s\S]*?<Carga [\s\S]*?\) : enviado \|\| fase === 'error' \? \([\s\S]*?<TarjetaDeResultado/.test(panel) &&
+  // La tarjeta del error: «Reintentar» y ninguna carga.
+  html.includes(RESULTADO.reintentar) && !html.includes('data-pieza="carga"')
+afirmar(sucesivos(PIE_B, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)), 'B4 · la carga, el rótulo y «Reintentar» se suceden: en el DOM, en la tecla 3D (el relieve se apaga en el mismo cuadro) y en el panel')
+controlPositivo('B4 · el detector VE la tecla 3D de antes (el relieve dibujado con el botón ocupado)', COREO_B.replace('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;', ''), (c: string) => sucesivos(PIE_B, PANEL_B, ARMADAS_B, c, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
+controlPositivo('  y el rótulo a la vista encima de la carga', PIE_B.replace("enviando && 'invisible')", "false && 'invisible')"), (p: string) => sucesivos(p, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B5 · La carga gira sobre el palito de la P, con el palito en el medio')
+
+// El giro es la carga de siempre (el trazo, de respaldo: `?carga=trazo`, sin WebGL o con movimiento reducido, quieto). Giraba sobre
+// el centro de la tinta, que no es el del logo (la P está a la derecha): el logo parecía bambolearse. Ahora el eje es el del palito
+// de la P, sacado del trazado (`LOGO_PATH_D`: sus dos bordes verticales), y el logo se corre lo que falta para que el palito
+// quede en el medio del área.
+const puntosDelTrazado = (d: string): Array<readonly [number, number]> => {
+  const fichas = d.match(/[A-Za-z]|-?(?:\d+\.?\d*|\.\d+)/g) ?? []
+  const n: Record<string, number> = { M: 2, L: 2, T: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, A: 7, Z: 0 }
+  const puntos: Array<readonly [number, number]> = []
+  let [x, y, x0, y0, k] = [0, 0, 0, 0, 0]
+  let orden = 'M'
+  while (k < fichas.length) {
+    if (/[A-Za-z]/.test(fichas[k])) orden = fichas[k++]
+    const O = orden.toUpperCase()
+    const rel = orden !== O
+    if (O === 'Z') {
+      ;[x, y] = [x0, y0]
+      continue
+    }
+    const a = fichas.slice(k, k + n[O]).map(Number)
+    k += n[O]
+    if (O === 'H') x = a[0] + (rel ? x : 0)
+    else if (O === 'V') y = a[0] + (rel ? y : 0)
+    else [x, y] = rel ? [x + a[a.length - 2], y + a[a.length - 1]] : [a[a.length - 2], a[a.length - 1]]
+    if (O === 'M') {
+      ;[x0, y0] = [x, y]
+      orden = rel ? 'l' : 'L'
+    }
+    puntos.push([x, y])
+  }
+  return puntos
+}
+// El palito: los puntos de abajo de la P (y > 690, a la derecha de x = 500) que forman sus dos bordes verticales.
+const DEL_PALITO = puntosDelTrazado(LOGO_PATH_D).filter(([x, y]) => y > 690 && x > 500)
+const BORDE_IZQUIERDO = Math.min(...DEL_PALITO.map(([x]) => x))
+const BORDE_DERECHO = Math.max(...DEL_PALITO.filter(([, y]) => y > 800 && y < 880).map(([x]) => x))
+const palitoBien = (eje: number, carga: string): boolean => {
+  const x = LOGO_INK_VIEWBOX.x + eje * LOGO_INK_VIEWBOX.width
+  return (
+    Math.abs(BORDE_IZQUIERDO - PALITO_DE_LA_P.izquierda) < 2 && Math.abs(BORDE_DERECHO - PALITO_DE_LA_P.derecha) < 2 && Math.abs(x - (BORDE_IZQUIERDO + BORDE_DERECHO) / 2) < 2 &&
+    carga.includes("transformOrigin: `${eje} 50%`") && carga.includes('translateX(${((0.5 - EJE_DEL_PALITO) * 100).toFixed(2)}%)') && carga.includes("variante === 'giro' && !reducido ? <Giro")
+  )
+}
+const CARGA_B = leer('_componentes/carga/Carga.tsx')
+afirmar(palitoBien(EJE_DEL_PALITO, CARGA_B), `B5 · el giro sobre el eje del palito de la P (x ${String(BORDE_IZQUIERDO)}–${String(BORDE_DERECHO)} del trazado), con el palito centrado; con movimiento reducido, el trazo quieto`)
+controlPositivo('B5 · el detector VE el giro de antes (sobre el centro de la tinta)', 0.5, (e: number) => palitoBien(e, CARGA_B))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B6 · Terminado el éxito, el formulario se limpia')
+
+// Con el éxito, lo escrito se va (los valores, el intento) y al volver («Enviar otro mensaje») los campos son NUEVOS: la clave del
+// grupo cambia y React los monta de cero, sin el estado del autocompletado del navegador (que no se borra cambiando el valor).
+// El panel de Contacto vacía sus datos y se cierra solo (al reabrirse, se monta de nuevo). El estilo del autocompletado es el de
+// J6 (s61); su posición sobre la placa, en el banco.
+const limpioBien = (pie: string, panel: string): boolean => {
+  const exito = ramaDelError(pie, '// [PULIDO 11] B6 · el éxito: lo escrito se va', '} else {')
+  return exito.includes('setDatos(VACIO)') && exito.includes('setIntento(false)') && exito.includes('setVuelta((n) => n + 1)') && pie.includes('key={`formulario-${String(vuelta)}`}') && /setFase\('exito'\)\n\s+setIntento\(false\)\n\s+setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/.test(panel)
+}
+afirmar(limpioBien(PIE_B, PANEL_B), 'B6 · el éxito limpia el formulario: los valores se vacían y los campos se vuelven a montar (sin el autocompletado viejo)')
+controlPositivo('B6 · el detector VE campos que no se vuelven a montar (el autocompletado viejo se queda)', PIE_B.replace('setVuelta((n) => n + 1)', ''), (p: string) => limpioBien(p, PANEL_B))
 
 cerrar('s62-pulido-11')

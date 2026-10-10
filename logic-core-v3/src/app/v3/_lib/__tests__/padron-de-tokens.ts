@@ -256,6 +256,18 @@ export const AGREGADOS: readonly Agregado[] = [
     sprint: 'CARTEL',
     motivo: 'El tercero de los tres del semáforo. Mismo motivo y mismas condiciones que `--color-semaforo-rojo`.',
   },
+  {
+    token: '--color-error',
+    sprint: 'PULIDO 11',
+    motivo:
+      'B3 · el rojo del error, el primer color fuera del monocromo: lo pidió Valentino para la tarjeta del formulario cuyo envío falla («un rojo refinado y estético, registrado como token, con AA»). Un carmín frío, 4,82:1 sobre la tinta (un elemento gráfico).',
+  },
+  {
+    token: '--color-error-texto',
+    sprint: 'PULIDO 11',
+    motivo:
+      'B3 · la versión clara del rojo, para el título del error sobre la tarjeta oscura: 8,96:1 sobre la tinta (AA de texto).',
+  },
 ]
 
 /** Los tokens que declara el original de S0, leídos del archivo. */

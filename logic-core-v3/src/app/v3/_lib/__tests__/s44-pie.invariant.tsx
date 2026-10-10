@@ -106,12 +106,11 @@ g.updateMatrixWorld(true)
 const enSuLugar = new THREE.Vector3(100, -50, 0).applyMatrix4(g.matrixWorld).project(camara)
 afirmar(cerca([((enSuLugar.x + 1) / 2) * 1440, ((1 - enSuLugar.y) / 2) * 900], [1000, 350], 0.05) && g.quaternion.angleTo(camara.quaternion) < 1e-6 && mpp > 0, '  la cámara de la pose la ve en su lugar del DOM y de su tamaño (un px de la pieza, un px del cuadro), mirando al frente')
 const escenaEntera = ['_lib/escena/pie3d/PieDeVolumen.tsx', '_lib/escena/pie3d/armadas.ts'].map((r) => sinComentarios(leer(r))).join('\n')
-// [PULIDO 10] J5 · la única pieza que gira es la tecla con «Reintentar» (entra girando desde canto, por tiempo, y termina de frente):
-// se la saca de la búsqueda de giros y se afirma aparte que no lee el mouse. Antes: ningún giro en todo el archivo.
-const GIRO_DE_LA_TECLA = /function girarLaTecla\([\s\S]*?\n\}\n/
-const escena = escenaEntera.replace(GIRO_DE_LA_TECLA, '')
-const giroDeLaTecla = GIRO_DE_LA_TECLA.exec(escenaEntera)?.[0] ?? ''
-afirmar(giroDeLaTecla.includes('a.giroDeLaTecla += dt') && giroDeLaTecla.includes('a.cuerpo.rotation.x = u >= 1 ? 0 : angulo') && !/puntero|mirada|mouse/i.test(giroDeLaTecla), '  [PULIDO 10] J5 · la tecla de Reintentar gira por tiempo (desde canto hasta de frente) y no lee el mouse')
+// [PULIDO 10] J5 · la tecla con «Reintentar» giraba; [PULIDO 11] B3 · se fue (el error es la tarjeta que no encaja): otra vez ninguna
+// pieza gira en la escena del pie (la placa voltea entera en su transformación, por tiempo, sin leer el mouse).
+const escena = escenaEntera
+const giroDeLaTecla = ''
+afirmar(!escenaEntera.includes('girarLaTecla') && !/puntero|mirada|mouse/i.test(giroDeLaTecla), '  [PULIDO 10] J5 · la tecla de Reintentar gira por tiempo (desde canto hasta de frente) y no lee el mouse')
 const fijaEnElMundo = (c: string): boolean => /colocarLaPieza\(a\.grupo, CAMARA_SIN_EL_MOUSE, /.test(c) && /profundidadDeLaPieza\(CAMARA_SIN_EL_MOUSE, /.test(c) && !/suscribirALaMirada|puntero|rotation\.|rotate[XYZ]\(/.test(c)
 afirmar(fijaEnElMundo(escena), '  fija en el mundo: se coloca con la cámara SIN el mouse (lo único que se mueve es la cámara); ninguna pieza gira con el mouse ni lo lee ([PASADA FINAL] C2: su llegada por columnas va aparte, en `coreografia.ts`)')
 controlPositivo('el detector VE una pieza que gira con el mouse', `${escena}\na.grupo.rotation.y = puntero.x`, fijaEnElMundo)

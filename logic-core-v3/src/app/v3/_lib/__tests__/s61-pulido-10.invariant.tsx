@@ -29,9 +29,8 @@ import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
 import { progresoAbajo } from '../../_chrome/recorrido/InfinitoDelRecorrido'
 import { opacidadDeLaLlegada, recorteDeLaLlegada } from '../../_secciones/trabajos/piezas'
-import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
-import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
-import { FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
+import { RESULTADO } from '../formularios/gracias'
+import { varianteDelVolteo } from '../formularios/volteo'
 import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { CARGA, varianteDeLaCarga } from '../../_componentes/carga/Carga'
 import { TEXTOS_DE_ENVIO } from '../formularios/enviar'
@@ -170,7 +169,8 @@ titulo('J3 · La carga de develOP: el trazo (o el giro), sus textos, la espera m
 // `-webkit-text-fill-color` (sobre la tecla del pie de volumen el `color` es transparente), y sin WebGL: ningún lienzo aparte.
 const CARGA_TSX = leer('_componentes/carga/Carga.tsx')
 const apiBien = (minimo: number, variante: typeof varianteDeLaCarga, c: string): boolean =>
-  minimo === 1400 && variante('giro') === 'giro' && variante(null) === 'trazo' && variante('anillo') === 'trazo' &&
+  // [PULIDO 11] B5 · el giro es el de siempre (sin pedir u otro valor); `?carga=trazo`, el trazo (el respaldo).
+  minimo === 1400 && variante('trazo') === 'trazo' && variante(null) === 'giro' && variante('anillo') === 'giro' &&
   Object.keys(CARGA.lados).join() === 'chico,medio,grande' && c.includes('role="status"') && c.includes('data-sin-volumen=""') &&
   c.includes("const color = `var(--carga-tinta, ${tinta === 'filo' ? 'var(--color-fondo)' : 'var(--color-tinta)'})`") &&
   c.includes('style={{ WebkitTextFillColor: color }}') && c.includes('const [resultado] = await Promise.all([promesa, new Promise((listo) => window.setTimeout(listo, ms))])') &&
@@ -195,7 +195,8 @@ const lugaresBien = (p: string, m: string): boolean =>
   TEXTOS_DE_ENVIO.join() === 'Enviando…,Casi…' &&
   p.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
   p.includes('[--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]') &&
-  p.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center perspective-midrange', enviando && 'invisible')}>") &&
+  // [PULIDO 11] B4 · el rótulo, uno (Enviar) y medido para la tecla 3D aunque esté mudo (`data-rotulo-de-la-tecla`).
+  p.includes(`<span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>`) &&
   p.includes('const r = await conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
   m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
   m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
@@ -203,105 +204,53 @@ afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica
 controlPositivo('C · el detector VE el panel esperando 1,4 s también con el formulario inválido', PANEL.replace('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)', 'const r = await conDuracionMinima(enviarContacto(datos))'), (m: string) => lugaresBien(PIE_FORM, m))
 
 // D · Con movimiento reducido, el logo quieto (relleno, sin trazo ni giro) y el texto.
-const reducidaBien = (c: string): boolean => /\{quieto \? \(\s*<path d=\{LOGO_PATH_D\} fill=\{color\} \/>/.test(c) && c.includes('animate={quieto ? undefined : { rotateY: 360 }}') && c.includes('Array.from({ length: quieto ? 1 : capas }')
+// [PULIDO 11] B5 · con movimiento reducido el giro no se monta: el trazo quieto (el logo relleno) en su lugar.
+const reducidaBien = (c: string): boolean => /\{quieto \? \(\s*<path d=\{LOGO_PATH_D\} fill=\{color\} \/>/.test(c) && c.includes("{variante === 'giro' && !reducido ? <Giro tamano={tamano} color={color} /> : <Trazo tamano={tamano} color={color} quieto={reducido} />}")
 afirmar(reducidaBien(CARGA_TSX), 'D · con movimiento reducido, el logo quieto (ni trazo ni giro) y el texto')
-controlPositivo('D · el detector VE un giro que gira igual con movimiento reducido', CARGA_TSX.replace('animate={quieto ? undefined : { rotateY: 360 }}', 'animate={{ rotateY: 360 }}'), reducidaBien)
+controlPositivo('D · el detector VE un giro que gira igual con movimiento reducido', CARGA_TSX.replace("variante === 'giro' && !reducido ?", "variante === 'giro' ?"), reducidaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('J4 · Las transformaciones de gracias: cada formulario la suya, el título en Archivo, el foco y la placa en su lugar')
+titulo('J4 · J5 · Las transformaciones y el error, reemplazados en PULIDO 11 (B): el volteo de los dos y la tarjeta del resultado')
 
-// A · El pie con el volteo y el panel de Contacto con el hundido; `?gracias=` cambia los dos.
+// [PULIDO 11] B · el humano eligió el VOLTEO para los dos formularios (el hundido y `?gracias=` se borraron), el resultado es una
+// tarjeta del tamaño de la placa (el éxito encaja; el error no encaja, con «Reintentar») y el rechazo de J5 (el resorte de la placa
+// y Reintentar girando en la tecla) se fue con él. Lo nuevo se fija en s62 B; acá, que lo de antes no quedó colgado.
 const PANEL_J4 = leer('_chrome/contacto/FormularioDeContacto.tsx')
-const variantesBien = (f: typeof varianteDeGracias, panel: string): boolean =>
-  f(null) === 'volteo' && f(null, 'hundido') === 'hundido' && f('volteo', 'hundido') === 'volteo' && f('hundido') === 'hundido' && f('otra', 'hundido') === 'hundido' &&
-  panel.includes("const variante = useSyncExternalStore(sinSuscripcion, varianteDelPanel, () => 'hundido' as const)")
-afirmar(variantesBien(varianteDeGracias, PANEL_J4), 'A · el pie con el volteo y el panel de Contacto con el hundido; `?gracias=` elige en los dos')
-controlPositivo('A · el detector VE un panel que sigue con el volteo', ((v: string | null | undefined) => (v === 'hundido' ? 'hundido' : 'volteo')) as typeof varianteDeGracias, (f: typeof varianteDeGracias) => variantesBien(f, PANEL_J4))
-
-// B · El título de la tarjeta en 3D: en Archivo con minúsculas, compuesto como la frase del CTA (los avances y el kerning de la
-// fuente, desde donde el DOM empieza el renglón), no con las cajas del DOM (su cara de display no trae minúsculas).
-const FUENTES_J4: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: FUENTES_DEL_CTA.frase }
-const RENGLON = { texto: GRACIAS.titulo, x: 20, arriba: 20, alto: 40, cuerpo: 32, enLaTecla: false }
-const conTitulo = { caja: { x: 0, y: 0, ancho: 300, alto: 140, radio: 12 }, letras: [], trazos: [], pozos: [], tecla: null, archivo: [RENGLON] }
-const sinTitulo = { ...conTitulo, archivo: [] }
-const vertices = (f: FuentesDelPie, m: typeof conTitulo): number => armarLaPieza('formulario', m, f).fija?.getAttribute('position').count ?? 0
-const tituloBien = (f: FuentesDelPie): boolean =>
-  [...GRACIAS.titulo].every((c) => c.trim() === '' || FUENTES_DEL_CTA.frase.fuente.data.glyphs[c] !== undefined) && vertices(f, conTitulo) > vertices(f, sinTitulo) &&
-  leer('_lib/pie3d/medida.ts').includes('archivo: renglonesArchivoDe(el, r, deLaPlaca),') && leer('_lib/escena/pie3d/geometria.ts').includes('const { x } = avancesDe(f, r.texto, TRACKING_DEL_CTA.frase)') &&
-  leer('_componentes/formularios/TarjetaDeGracias.tsx').includes("enVolumen ? 'text-transparent' : 'uppercase'")
-afirmar(tituloBien(FUENTES_J4), 'B · el título de la tarjeta en 3D: Archivo en minúsculas (la fuente de la frase del CTA trae sus letras), compuesto con sus avances y su kerning; en el DOM plano, las mayúsculas aprobadas')
-controlPositivo('B · el detector VE el título sin su Archivo (no se dibuja)', { ...FUENTES_J4, archivo: undefined }, tituloBien)
-
-// C · El foco no desaparece en la transformación: el DOM se apaga sólo de vuelta al formulario, y la tarjeta muestra su anillo.
+const PIE_J4 = leer('_secciones/cierre/FormularioDelPie.tsx')
 const ARMADAS_J4 = leer('_lib/escena/pie3d/armadas.ts')
-const focoBien = (a: string, t: string): boolean => a.includes("if (estado !== 'gracias') p.elemento.style.opacity = '0'") && !t.includes('outline-none')
-afirmar(focoBien(ARMADAS_J4, leer('_componentes/formularios/TarjetaDeGracias.tsx')), 'C · el foco no desaparece: hacia la tarjeta el DOM sigue (transparente) y la tarjeta muestra el anillo del foco')
-controlPositivo('C · el detector VE el DOM apagado también hacia la tarjeta', ARMADAS_J4.replace("if (estado !== 'gracias') p.elemento.style.opacity = '0'", "p.elemento.style.opacity = '0'"), (a: string) => focoBien(a, leer('_componentes/formularios/TarjetaDeGracias.tsx')))
-
-// D · La placa en su lugar (y la etiqueta «Contacto» pegada a su borde): con la columna de techo fijo (J8) la tarjeta empieza
-// donde empezaba el formulario, y el hundido lleva la entrante con su borde de arriba quieto en todos los cuadros. Antes, la
-// columna se recentraba (la tarjeta bajaba 63 px) y el borde se corría.
-const bordeQuieto = (dy: number): boolean => {
-  const caja = { ancho: 300, alto: 140 }
+const TARJETA_J4 = leer('_componentes/formularios/TarjetaDeResultado.tsx')
+// A · Los dos voltean, con la misma variante de la página; ninguno pide el hundido.
+const losDosVoltean = (panel: string, pie: string): boolean =>
+  [panel, pie].every((f) => f.includes("useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'centrado' as const)") && f.includes('transicionDelVolteo(variante, reducido') && !/hundido|gracias=/.test(f.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, ''))) &&
+  varianteDelVolteo('hundido') === 'centrado'
+afirmar(losDosVoltean(PANEL_J4, PIE_J4), 'A · los dos formularios voltean (`?volteo=centrado|columpio`); el hundido y `?gracias=` se borraron')
+controlPositivo('A · el detector VE el panel de antes (con el hundido)', [PANEL_J4.replace("varianteDeLaPagina, () => 'centrado' as const", "varianteDelPanel, () => 'hundido' as const"), PIE_J4] as const, ([a, b]: readonly [string, string]) => losDosVoltean(a, b))
+// B · La tarjeta no se mide para la placa 3D (ni su texto ni su encastre: la placa es lisa y se arma al toque) y su texto se lee en
+// el DOM (ya no hay un título de relieve en Archivo: ni el de gracias, ni sus letras en la fuente).
+const tarjetaLisa = (t: string): boolean => t.includes('data-sin-volumen=""') && !t.includes('data-relieve') && RESULTADO.exito.titulo === 'Recibido.'
+afirmar(tarjetaLisa(TARJETA_J4), 'B · la tarjeta del resultado no se extruye en la placa (`data-sin-volumen`): su texto y su encastre van en el DOM')
+controlPositivo('B · el detector VE la tarjeta de antes (el título en relieve)', TARJETA_J4.replace('data-sin-volumen=""', 'data-relieve=""'), tarjetaLisa)
+// C · El foco no desaparece: la tarjeta recibe el foco con el anillo de siempre (sin quitarle el contorno); en 3D el DOM se apaga
+// sólo mientras voltea (en las dos direcciones) y vuelve al terminar.
+const focoBien = (a: string, t: string): boolean => a.includes("p.elemento.style.opacity = '0'") && a.includes("a.pieza.elemento.style.opacity = ''") && !t.includes('outline-none') && t.includes('tabIndex={-1}')
+afirmar(focoBien(ARMADAS_J4, TARJETA_J4), 'C · el foco no desaparece: la tarjeta lo recibe con el anillo de siempre; en 3D el DOM se apaga sólo mientras voltea')
+controlPositivo('C · el detector VE una tarjeta sin el anillo', [ARMADAS_J4, TARJETA_J4.replace("'flex w-full flex-col", "'outline-none flex w-full flex-col")] as const, ([a, t]: readonly [string, string]) => focoBien(a, t))
+// D · La placa en su lugar: la tarjeta guarda la caja del formulario, así que el volteo termina con ella en su lugar exacto (las dos
+// estrategias) y se cambian de canto en el mismo eje.
+const enSuLugar = (dy: number): boolean => {
+  const caja = { ancho: 300, alto: 360 }
   const m = new THREE.Matrix4()
-  return [0.42, 0.5, 0.6, 0.7, 0.85, 1].every((t) => {
-    poseDeLaTransformacion('hundido', false, t, true, caja, { ancho: 300, alto: 360, dx: 0, dy }, 30, m)
-    return Math.abs(new THREE.Vector3(0, 0, 0).applyMatrix4(m).y) < 1e-6
+  return (['centrado', 'columpio'] as const).every((v) => {
+    poseDeLaTransformacion(v, false, 1, true, caja, { ancho: 300, alto: 360, dx: 0, dy }, 30, m)
+    return new THREE.Vector3(0, 0, 0).applyMatrix4(m).length() < 1e-6 && Math.abs(dy) < 1e-9
   })
 }
-afirmar(bordeQuieto(0), 'D · con el techo fijo, el hundido lleva la tarjeta con el borde de arriba quieto en cada cuadro (la etiqueta «Contacto» no se despega)')
-controlPositivo('D · el detector VE la columna recentrada de antes (la tarjeta baja 63 px en la transformación)', 63, (dy: number) => bordeQuieto(dy))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('J5 · El error en los dos formularios: la placa rechaza, Reintentar gira y el error sale de atrás del botón')
-
-// A · El resorte (una curva para los dos formularios): baja rápido hasta el fondo, vuelve pasándose apenas y se asienta.
-const resorteBien = (f: (u: number) => number): boolean => {
-  const muestras = Array.from({ length: 101 }, (_, k) => f(k / 100))
-  const fondo = muestras.indexOf(Math.max(...muestras))
-  return f(0) === 0 && Math.abs(Math.max(...muestras) - 1) < 0.02 && fondo > 0 && fondo < 20 && Math.min(...muestras.slice(20, 70)) < -0.05 && Math.abs(f(0.95)) < 0.06 && f(1) === 0
-}
-afirmar(resorteBien(hundidoDelRechazo) && cuadrosDelRechazo(10).length === 25 && Math.abs(Math.max(...cuadrosDelRechazo(10)) - 10) < 0.3, 'A · el resorte del rechazo: al fondo antes del 20 % del tiempo, se pasa apenas (vuelve más allá de la cara) y se asienta')
-controlPositivo('A · el detector VE un resorte sin amortiguar (no se asienta)', (u: number) => (u <= 0 || u >= 1 ? 0 : Math.sin(2 * Math.PI * 1.6 * u)), resorteBien)
-
-// B · El pie: cada error, un rechazo (`data-rechazo`, para la placa 3D), el pulso, el foco en Reintentar, Reintentar girando en el
-// DOM plano (en 3D gira la tecla), el error en su renglón saliendo de atrás del botón y, en el DOM plano, la escala del resorte
-// (en 3D no: la transformada del formulario la escribe la escena).
-const PIE_J5 = leer('_secciones/cierre/FormularioDelPie.tsx')
-const pieRechazaBien = (p: string): boolean =>
-  p.includes('setRechazos((n) => n + 1)') && p.includes("sonar('pulso')") && p.includes('data-rechazo={rechazos}') &&
-  p.includes("placa.current?.querySelector<HTMLElement>('button[type=\"submit\"]')?.focus({ preventScroll: true })") &&
-  p.includes("const rotulo = enviando ? c.enviando : estado.fase === 'error' ? REINTENTAR : c.enviar") &&
-  p.includes('const giraElRotulo = !reducido && !enVolumen && rotulo === REINTENTAR') &&
-  p.includes("className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}") && p.includes("initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }}") &&
-  p.includes('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}') && p.includes('if (rechazos === 0 || reducido || volumen) return undefined')
-afirmar(pieRechazaBien(PIE_J5), 'B · el pie: el rechazo, el pulso, el foco en Reintentar (que gira), el error saliendo de atrás del botón y el resorte del DOM plano; con movimiento reducido, sin resorte ni giro')
-controlPositivo('B · el detector VE la escala del resorte sobre el formulario de volumen (pisaría su homografía)', PIE_J5.replace('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}', 'style={{ scale: escalaDelRechazo }}'), pieRechazaBien)
-
-// C · La placa 3D del pie: un rechazo nuevo (otro `data-rechazo` en el mismo formulario) arranca el resorte (la placa entera se
-// hunde en profundidad) y el giro de la tecla; con movimiento reducido, ninguno.
-const ARMADAS_J5 = leer('_lib/escena/pie3d/armadas.ts')
-const placaRechazaBien = (a: string): boolean =>
-  a.includes('vieja.marcaDelRechazo !== null && rechazo !== null && rechazo !== vieja.marcaDelRechazo') && a.includes('if (rechazoNuevo) [a.rechazo, a.giroDeLaTecla] = [0, 0]') &&
-  a.includes('a.viaje.matrix.multiply(HUNDIMIENTO.makeTranslation(0, 0, -RECHAZO.hondoPx * hundidoDelRechazo(u)))') && a.includes('if (quieto || a.rechazo === null) {') &&
-  a.includes('if (a.giroDeLaTecla === null || t === null || quieto) {')
-afirmar(placaRechazaBien(ARMADAS_J5), 'C · la placa 3D del pie se hunde en profundidad con el resorte y la tecla de Reintentar gira; con movimiento reducido, nada')
-controlPositivo('C · el detector VE un resorte que corre también con movimiento reducido', ARMADAS_J5.replace('if (quieto || a.rechazo === null) {', 'if (a.rechazo === null) {'), placaRechazaBien)
-
-// D · El panel de Contacto: el mismo resorte (el bloque de la placa en profundidad; la hoja del teléfono, en escala), el pulso,
-// Reintentar girando y el error saliendo de atrás del botón; el foco, en Reintentar.
-const panelRechazaBien = (m: string, placa: string): boolean =>
-  m.includes('setRechazos((n) => n + 1)') && m.includes("sonar('pulso')") && m.includes("pedirFoco.current = 'enviar'") &&
-  m.includes('const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : avisoALaVista ? REINTENTAR : ROTULO_DEL_ENVIO') && m.includes('<PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>') &&
-  m.includes('style={placa ? undefined : { scale: escalaDelRechazo }}') && m.includes('if (rechazos === 0 || reducido) return undefined') &&
-  placa.includes('z: rechazo,')
-afirmar(panelRechazaBien(PANEL_J4, leer('_chrome/contacto/PlacaDelContacto.tsx')), 'D · el panel: la placa se hunde y vuelve (la hoja del teléfono, en escala), el pulso, Reintentar girando y el error de atrás del botón; el foco en Reintentar')
-controlPositivo('D · el detector VE un panel que rechaza en silencio', PANEL_J4.replace("sonar('pulso')", ''), (m: string) => panelRechazaBien(m, leer('_chrome/contacto/PlacaDelContacto.tsx')))
-
-// E · «Reintentar» en la tecla de la placa 3D: la Chivo 600 del pie trae sus letras.
-const reintentarBien = (f: FontData): boolean => [...REINTENTAR].every((c) => (f.glyphs as Record<string, unknown>)[c] !== undefined)
-afirmar(reintentarBien(datos600 as FontData), 'E · la Chivo 600 del pie trae las letras de «Reintentar» (la tecla en 3D)')
-controlPositivo('E · el detector VE una fuente sin la R', { ...(datos600 as FontData), glyphs: Object.fromEntries(Object.entries((datos600 as FontData).glyphs).filter(([c]) => c !== 'R')) } as FontData, reintentarBien)
+afirmar(enSuLugar(0), 'D · con la caja del formulario, el volteo (centrado y columpio) termina con la tarjeta en su lugar exacto')
+controlPositivo('D · el detector VE una tarjeta corrida 63 px (la columna recentrada de antes)', 63, (dy: number) => enSuLugar(dy))
+// E · El rechazo de J5 se fue: ni `data-rechazo`, ni el resorte de la placa, ni Reintentar en el botón (vive en la tarjeta del error).
+const sinRechazo = (pie: string, panel: string, a: string): boolean => [pie, panel, a].every((f) => !/data-rechazo|cuadrosDelRechazo|hundidoDelRechazo|girarLaTecla|REINTENTAR/.test(f)) && pie.includes('alReintentar={reintentar}') && panel.includes('alReintentar={reintentar}')
+afirmar(sinRechazo(PIE_J4, PANEL_J4, ARMADAS_J4), 'E · el rechazo de J5 se fue: el error es la tarjeta que no encaja, con «Reintentar», en los dos formularios')
+controlPositivo('E · el detector VE el pie de antes (el rechazo en el formulario)', [PIE_J4 + '\ndata-rechazo={rechazos}', PANEL_J4, ARMADAS_J4] as const, ([a, b, c]: readonly [string, string, string]) => sinRechazo(a, b, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J6 · El autocompletado del pie con la piel del formulario')

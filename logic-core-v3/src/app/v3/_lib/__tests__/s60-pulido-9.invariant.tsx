@@ -16,8 +16,9 @@ import * as THREE from 'three'
 import { DESPUES_DEL_ENVIO } from '../../_chrome/contacto/contenido'
 import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
-import { ANUNCIO_DE_GRACIAS, GRACIAS, varianteDeGracias, type VarianteDeGracias } from '../formularios/gracias'
-import { TRANSFORMACION_DEL_PIE, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
+import { ANUNCIO_DE_EXITO, RESULTADO } from '../formularios/gracias'
+import { VOLTEO, varianteDelVolteo, type VarianteDelVolteo } from '../formularios/volteo'
+import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, frenteInicial, polvoInicial, quietoConHisteresis, tomarElFrente, type EstadoDelPolvoVivo } from '../escena/polvo/posarse'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from '../escena/polvo/simulacion'
@@ -104,11 +105,10 @@ controlPositivo('1 · el detector VE el orden de antes (armar y después soltar 
 const pie = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 const quietoAlEnviar = (c: string): boolean =>
   (c.match(/readOnly=\{enviando\}/g) ?? []).length === 2 &&
-  // [PULIDO 10] J5 · tres rótulos (Enviar, Enviando… y Reintentar): el visible y los otros dos invisibles, guardando el ancho del más largo.
-  c.includes('{[c.enviar, c.enviando, REINTENTAR].filter((r) => r !== rotulo).map((r) => (') && c.includes('<span key={r} aria-hidden="true" className="invisible col-start-1 row-start-1">') &&
-  // [PULIDO 10] J3 · la ruedita se fue: el botón es la carga chica, encima del rótulo, que se queda invisible guardando el ancho.
+  // [PULIDO 11] B4 · un rótulo (Enviar: el error vive en su tarjeta). Mientras viaja, invisible guardando su ancho (y medido para la
+  // tecla 3D, que lo apaga en el sombreador), con la carga chica encima: nada cambia de lugar.
   c.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
-  c.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center perspective-midrange', enviando && 'invisible')}>")
+  c.includes(`<span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>`)
 afirmar(quietoAlEnviar(pie), '  mientras viaja: los campos, de sólo lectura; el botón guarda el ancho del rótulo más largo (invisible) y la carga va encima (nada cambia de lugar)')
 controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace(/readOnly=\{enviando\} /, ''), quietoAlEnviar)
 
@@ -117,7 +117,7 @@ controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace
 const CAJA = { ancho: 253, alto: 181 }
 const DESDE = { ancho: 253, alto: 400, dx: 0, dy: -63 }
 const ESPESOR = 30
-type Pose = (v: VarianteDeGracias, t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
+type Pose = (v: VarianteDelVolteo, t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
 const pose: Pose = (v, t, entrante, quieto = false) => {
   const m = new THREE.Matrix4()
   const r = poseDeLaTransformacion(v, quieto, t, entrante, CAJA, DESDE, ESPESOR, m)
@@ -127,44 +127,37 @@ const normal = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 1).t
 const esquina = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 0).applyMatrix4(m)
 const MITAD = 0.5 - 1e-4
 const volteoBien = (p: Pose): boolean => {
-  const [s0, sMitad, eMitad, e1] = [p('volteo', 0, false), p('volteo', MITAD, false), p('volteo', 0.5, true), p('volteo', 1, true)]
+  // [PULIDO 11] B1 · el volteo es `centrado` (la misma cuenta); el columpio, en s62.
+  const [s0, sMitad, eMitad, e1] = [p('centrado', 0, false), p('centrado', MITAD, false), p('centrado', 0.5, true), p('centrado', 1, true)]
   const enSuLugar = esquina(s0.m).distanceTo(new THREE.Vector3(DESDE.dx, -DESDE.dy, 0)) < 1e-6 && normal(s0.m).z > 0.999
   const deCanto = Math.abs(normal(sMitad.m).z) < 0.01 && Math.abs(normal(eMitad.m).z) < 0.01
-  const cambia = s0.visible && sMitad.visible && !p('volteo', 0.5, false).visible && eMitad.visible && !p('volteo', MITAD, true).visible
+  const cambia = s0.visible && sMitad.visible && !p('centrado', 0.5, false).visible && eMitad.visible && !p('centrado', MITAD, true).visible
   return enSuLugar && deCanto && cambia && e1.m.equals(new THREE.Matrix4()) && e1.visible
 }
-afirmar(volteoBien(pose), '2 · volteo: la placa gira sobre X desde su lugar; a los 90° (de canto) la entrante sigue el giro con el mensaje y termina en su lugar exacto', `${String(TRANSFORMACION_DEL_PIE.volteo.s)} s`)
+afirmar(volteoBien(pose), '2 · volteo: la placa gira sobre X desde su lugar; a los 90° (de canto) la entrante sigue el giro con el mensaje y termina en su lugar exacto', `${String(VOLTEO.centrado.s)} s`)
 controlPositivo('2 · el detector VE un cambio de placa que no es de canto (a los 45°)', ((v, t, e, q) => pose(v, e ? Math.max(t, 0.75) : Math.min(t, 0.25), e, q)) as Pose, volteoBien)
-const H = TRANSFORMACION_DEL_PIE.hundido
-const hundidoBien = (p: Pose): boolean => {
-  const antesDeCambiar = p('hundido', H.aplana - 1e-4, false)
-  const alCambiar = p('hundido', H.aplana, true)
-  const plana = (m: THREE.Matrix4): boolean => new THREE.Vector3().setFromMatrixScale(m).z < H.plano + 0.01
-  const mismoLugar = esquina(antesDeCambiar.m).distanceTo(esquina(alCambiar.m)) < 0.5 && Math.abs(new THREE.Vector3().setFromMatrixScale(alCambiar.m).y * CAJA.alto - DESDE.alto) < 0.5
-  return plana(antesDeCambiar.m) && plana(alCambiar.m) && mismoLugar && p('hundido', 1, true).m.equals(new THREE.Matrix4()) && !p('hundido', H.aplana, false).visible
-}
-afirmar(hundidoBien(pose), '  hundido: el relieve se hunde hasta aplanarse, la plana toma el lugar y el tamaño de la saliente, se ajusta al suyo y el mensaje sale en relieve hasta su lugar exacto')
-controlPositivo('  el detector VE la entrante que aparece en su tamaño (salta)', ((v, t, e, q) => (e && t < 1 ? { m: new THREE.Matrix4().makeScale(1, 1, H.plano), visible: t >= H.aplana, aparece: 1 } : pose(v, t, e, q))) as Pose, hundidoBien)
-const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p('volteo', t, true, true).aparece + p('volteo', t, false, true).aparece - 1) < 1e-9) && p('hundido', 0.5, true, true).m.equals(new THREE.Matrix4()) && p('volteo', 1, false, true).aparece === 0
+// [PULIDO 11] B1 · el hundido se borró (el humano eligió el volteo para los dos formularios).
+const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p('centrado', t, true, true).aparece + p('centrado', t, false, true).aparece - 1) < 1e-9) && p('columpio', 0.5, true, true).m.equals(new THREE.Matrix4()) && p('centrado', 1, false, true).aparece === 0
 afirmar(fundidoBien(pose), '  con movimiento reducido, un fundido: la saliente se va y la entrante aparece, quietas')
 controlPositivo('  el detector VE el volteo con movimiento reducido', ((v, t, e) => pose(v, t, e, false)) as Pose, fundidoBien)
 
 // 3 · El DOM: la tarjeta de gracias (la misma que Contacto), anunciada y con el foco; «Enviar otro mensaje» vuelve vacío;
 // el error deja todo lo escrito; desde 1025 lo transforma la escena (`data-estado` y `data-gracias`, que lee el rearmado).
+// [PULIDO 11] B · el resultado es la tarjeta del tamaño de la placa (éxito o error); Reintentar vuelve con todo lo escrito.
 const estadosBien = (c: string, a: string): boolean =>
-  /data-estado=\{estado\.fase === 'gracias' \? 'gracias' : 'formulario'\} data-gracias=\{variante\}/.test(c) &&
-  /<TarjetaDeGracias foco=\{tomarElFoco\('tarjeta'\)\} enVolumen=\{enVolumen\} alOtro=\{otroMensaje\} \/>/.test(c) &&
-  /<p role="status" className="sr-only">\s*\{estado\.fase === 'gracias' \? ANUNCIO_DE_GRACIAS : ''\}/.test(c) &&
-  /if \(r\.ok\) \{\s*pedirFoco\.current = 'tarjeta'\s*setEstado\(\{ fase: 'gracias' \}\)\s*setDatos\(VACIO\)/.test(c) &&
-  /\} else \{\s*setEstado\(\{ fase: 'error', mensaje: r\.error \}\)/.test(c) && (c.match(/setDatos\(VACIO\)/g) ?? []).length === 1 &&
-  /<AnimatePresence mode="wait" initial=\{false\}>/.test(c) && /transicionDeGracias\(variante, reducido, enVolumen\)/.test(c) &&
-  a.includes("const estado = p.elemento.getAttribute('data-estado')") && a.includes("varianteDeGracias(p.elemento.getAttribute('data-gracias'))")
-afirmar(estadosBien(pie, armadas), '3 · al llegar, la tarjeta de gracias anunciada y con el foco (y «Enviar otro mensaje»); con error, lo escrito queda y el error a la vista; desde 1025 la placa 3D se transforma')
+  /data-estado=\{resultado \? 'resultado' : 'formulario'\} data-volteo=\{variante\}/.test(c) &&
+  /<TarjetaDeResultado[\s\S]*?tipo=\{estado\.fase === 'exito' \? 'exito' : 'error'\}[\s\S]*?alReintentar=\{reintentar\}[\s\S]*?alOtro=\{otroMensaje\}/.test(c) &&
+  /<p role="status" className="sr-only">\s*\{estado\.fase === 'exito' \? ANUNCIO_DE_EXITO : ''\}/.test(c) &&
+  /if \(r\.ok\) \{[\s\S]{0,240}?setEstado\(\{ fase: 'exito' \}\)\s*setDatos\(VACIO\)/.test(c) &&
+  /\} else \{[\s\S]{0,160}?setEstado\(\{ fase: 'error', mensaje: r\.error \}\)/.test(c) && (c.match(/setDatos\(VACIO\)/g) ?? []).length === 1 &&
+  /<AnimatePresence mode="wait" initial=\{false\}>/.test(c) && /transicionDelVolteo\(variante, reducido, enVolumen\)/.test(c) &&
+  a.includes("const estado = p.elemento.getAttribute('data-estado')") && a.includes("varianteDelVolteo(p.elemento.getAttribute('data-volteo'))")
+afirmar(estadosBien(pie, armadas), '3 · al llegar, la tarjeta del resultado anunciada y con el foco (y «Enviar otro mensaje»); con error, lo escrito queda y el error en su tarjeta, con Reintentar; desde 1025 la placa 3D voltea')
 controlPositivo('3 · el detector VE un error que borra lo escrito', pie.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (c: string) => estadosBien(c, armadas))
-const tarjeta = sinComentarios(leer('_componentes/formularios/TarjetaDeGracias.tsx'))
-const tarjetaBien = (c: string): boolean => /tabIndex=\{-1\} data-tarjeta="gracias"/.test(c) && /data-relieve="" data-fuente="archivo"/.test(c) && /\{GRACIAS\.titulo\}/.test(c) && /\{GRACIAS\.bajada\}/.test(c) && /onClick=\{alOtro\}/.test(c) && /py-\[var\(--spacing-2\)\]/.test(c)
-afirmar(tarjetaBien(tarjeta) && GRACIAS.titulo === 'Gracias por tu mensaje.' && GRACIAS.bajada === 'Te contestamos pronto.' && varianteDeGracias(null) === 'volteo' && varianteDeGracias('hundido') === 'hundido' && varianteDeGracias('otra') === 'volteo', '  la tarjeta: enfocable, con el título en Archivo en relieve, la bajada y el enlace (con aire para el dedo); `?gracias=` elige la variante')
-controlPositivo('  el detector VE una tarjeta que no recibe el foco', tarjeta.replace('tabIndex={-1} ', ''), tarjetaBien)
+const tarjeta = sinComentarios(leer('_componentes/formularios/TarjetaDeResultado.tsx'))
+const tarjetaBien = (c: string): boolean => /ref=\{lasDos\(foco, raiz\)\}\s*tabIndex=\{-1\}\s*data-tarjeta="resultado"/.test(c) && /data-sin-volumen=""/.test(c) && /RESULTADO\.exito\.titulo/.test(c) && /RESULTADO\.exito\.bajada/.test(c) && /onClick=\{alOtro\}/.test(c) && /onClick=\{alReintentar\}/.test(c) && /py-\[var\(--spacing-2\)\]/.test(c)
+afirmar(tarjetaBien(tarjeta) && RESULTADO.exito.titulo === 'Recibido.' && RESULTADO.exito.bajada === 'Te contestamos pronto.' && varianteDelVolteo(null) === 'centrado' && varianteDelVolteo('columpio') === 'columpio' && varianteDelVolteo('hundido') === 'centrado', '  la tarjeta del resultado: enfocable, con el encastre, el título, la bajada y sus botones (con aire para el dedo); `?volteo=` elige la estrategia')
+controlPositivo('  el detector VE una tarjeta que no recibe el foco', tarjeta.replace(/tabIndex=\{-1\}\s*/, ''), tarjetaBien)
 
 // 4 · Las banderas para probar los estados: sólo en desarrollo, y no tocan la ruta (ni su límite de intentos).
 const enviar = sinComentarios(leer('_lib/formularios/enviar.ts'))
@@ -181,14 +174,15 @@ const panel = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 const panelBien = (c: string): boolean =>
   // [PULIDO 10] J3 · la carga es la de develOP (el anillo se fue); su estado lo anuncia ella (`role="status"`).
   /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} data-parte="carga"/.test(c) && c.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
-  /<motion\.div key="gracias" \{\.\.\.cambio\}[^>]*>\s*<TarjetaDeGracias foco=\{alLlegar\} \/>/.test(c) && /const cambio = transicionDeGracias\(variante, reducido\)/.test(c) &&
+  // [PULIDO 11] B · la tarjeta del resultado (éxito o error), con el volteo; la cuenta del cierre, desde que su texto está.
+  /<motion\.div key="resultado" \{\.\.\.cambio\}[\s\S]{0,200}?<TarjetaDeResultado tipo=\{enviado \? 'exito' : 'error'\}/.test(c) && /const cambio = transicionDelVolteo\(variante, reducido\)/.test(c) &&
   /const reloj = window\.setTimeout\(cerrarContacto, CIERRE_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)/.test(c) &&
-  /initial=\{\{ width: '100%' \}\} animate=\{\{ width: '0%' \}\} transition=\{\{ duration: CIERRE_MS \/ 1000, ease: 'linear' \}\}/.test(c) &&
-  /if \(r\.estado === 'error'\) \{\s*pedirFoco\.current = 'enviar'/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&
+  /animate=\{\{ width: textoListo \? '0%' : '100%' \}\} transition=\{\{ duration: textoListo \? CIERRE_MS \/ 1000 : 0, ease: 'linear' \}\}/.test(c) &&
+  /if \(r\.estado === 'error'\) \{[\s\S]{0,240}?setFase\('error'\)/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&
   /<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(c) && /<p role="status" className="sr-only">\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(c)
-afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_GRACIAS, '1 · enviar transforma el formulario en la carga y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
+afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_EXITO, '1 · enviar transforma el formulario en la carga y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
 controlPositivo('1 · el detector VE un panel que no se cierra solo', panel.replace('const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)', 'const reloj = 0'), panelBien)
-controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace('<TarjetaDeGracias foco={alLlegar} />', '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
+controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace(/<TarjetaDeResultado [^\n]*\/>/, '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
 
 // 2 · [PULIDO 10] J3 · El anillo se fue (lo reemplazó la carga de develOP, como pidió J3): el panel ya no carga un lienzo aparte
 // ni un componente de three, y la carga tampoco (es SVG). Antes: el anillo 3D en su propio lienzo, con el material de la escena.
