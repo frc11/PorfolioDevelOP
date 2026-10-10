@@ -36,7 +36,7 @@ import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
 import { ENERGIA_EN_LA_SIMULACION_GLSL } from '../escena/final/luzDeAbajo'
-import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, expansionDeLaLuz, decidirElGesto, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, expansionDeLaLuz, decidirElGesto, golpeDelFinal, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
@@ -531,7 +531,8 @@ const cuadroB2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 // [PULIDO 2] 4 · sigue parejo (un número para el piso entero); ahora además gradual con lo prendido de la luz (s52-pulido-1 P1).
 // [PULIDO 3] A1 · gradual con la expansión de la energía (función de `fin`: `expansionDeLaLuz`), en vez de lo prendido.
 const oscuroBien = (g: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;') && cuadroB2.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida') && cuadroB2.includes('const expansion = expansionDeLaLuz(fin)') && !/arc\.kelvin \+=/.test(rigB2)
-const alRas = FINAL_DEL_PIE.presion.hastaS / R.duracionS
+// [PULIDO 11] D · el golpe es el contacto de la caída (era el ras de la presión).
+const alRas = golpeDelFinal() / R.duracionS
 afirmar(oscuroBien(dibujoDelPisoB2) && expansionDeLaLuz(0) === 0 && expansionDeLaLuz(alRas - 0.01) === 0 && expansionDeLaLuz(1) === 1, '  para que se lea, el piso entero se oscurece parejo después del encastre (nunca un sector) y vuelve al rebobinar')
 controlPositivo('  el detector VE un oscurecimiento que no está en el piso', dibujoDelPisoB2.replace('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;', ''), oscuroBien)
 

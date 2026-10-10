@@ -56,7 +56,7 @@ import { ARRIBA_DEL_CTA_QUIETO_SVH } from '../../_secciones/por-que-develop/geom
 import { CTA } from '../../_secciones/por-que-develop/contenido'
 import ARCHIVO_400_CTA from '../../_fuentes/archivo-normal-cta.json'
 import ARCHIVO_700_CTA from '../../_fuentes/archivo-normal-cta-fuerte.json'
-import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, duracionDelRebobinado, expansionDeLaLuz, quedaDelRebobinado } from '../escena/final/recorridoDelFinal'
+import { RELOJ_DEL_FINAL, duracionDelRebobinado, expansionDeLaLuz, golpeDelFinal, quedaDelRebobinado } from '../escena/final/recorridoDelFinal'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -148,7 +148,8 @@ controlPositivo('  el detector VE las zonas de PULIDO 2', `${luzTs}\nexport func
 // LA EXPANSIÓN: en el golpe la energía sale del hueco y cubre la escena en ~1,5 s (y llega más allá de lo que se ve); es
 // función de `fin`, así que al rebobinar se retira hacia el hueco con la curva de P2, sin cortes de un cuadro al otro.
 type Expansion = (fin: number) => number
-const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
+// [PULIDO 11] D · el golpe es el contacto de la caída (era el ras de la presión).
+const golpe = golpeDelFinal() / RELOJ_DEL_FINAL.duracionS
 const enS = (s: number): number => s / RELOJ_DEL_FINAL.duracionS
 // [PULIDO 6] E2 · la expansión sale del filo (desde 0 en la distancia al logo; antes, del borde del círculo calmo, 6,2 u).
 const expansionBien = (e: Expansion, c: string): boolean => {

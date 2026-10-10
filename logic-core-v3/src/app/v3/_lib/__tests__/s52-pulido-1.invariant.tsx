@@ -44,6 +44,7 @@ import {
   duracionDelRebobinado,
   haciaCero,
   expansionDeLaLuz,
+  golpeDelFinal,
   pasoDelReloj,
   poder,
   poseDelLogo,
@@ -128,7 +129,7 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
 // `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`; E2 borra `anillo=` y agrega
 // `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`; F2 agrega `meta=contorno` y `volteo=juntos`. PULIDO 8 · G1 borra las dos.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'] }
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], caida: ['angulo'] } /* [PULIDO 11] D · y la caída en arco */
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')
@@ -508,7 +509,8 @@ controlPositivo('  el detector VE un ruido sin torcer', ENERGIA_EN_LA_SIMULACION
 const LA = LUZ_DE_ABAJO
 const cuadroP1 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const rigP1 = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
-const alRasP1 = FINAL_DEL_PIE.presion.hastaS / R.duracionS
+// [PULIDO 11] D · el golpe es el contacto de la caída (era el ras de la presión).
+const alRasP1 = golpeDelFinal() / R.duracionS
 const oscuroBienP1 = (g: string, c: string): boolean => g.includes('gl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );') &&
   c.includes('piso.uOscuroDelBrillo.value = LUZ_DE_ABAJO.oscurece * extendida') && c.includes('const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value') &&
   LA.oscurece >= 0.1 && LA.oscurece <= 0.4 && expansionDeLaLuz(0) === 0 && expansionDeLaLuz(alRasP1 - 0.01) === 0 && expansionDeLaLuz(1) === 1 && expansionDeLaLuz(alRasP1 + 0.05) < 1 && !/arc\.kelvin \+=/.test(rigP1)
@@ -548,7 +550,7 @@ const energiaP5 = (fin: number): number => Math.min(1, poder(fin))
 const TAM_P5 = { alto: 4.78, espesor: 0.56 } as const
 const POSE_P5 = { centro: new THREE.Vector3(), rotacionX: 0 }
 const alturaDelLogoP5 = (fin: number): number => {
-  poseDelLogo(fin, TAM_P5, POSE_P5)
+  poseDelLogo(fin, TAM_P5, 'lenta', POSE_P5)
   return POSE_P5.centro.y
 }
 /** Lo más que cambia en un cuadro: el giro de la cámara (grados), la altura del logo (u), el oscurecimiento del piso y la energía del brillo. */
@@ -598,6 +600,8 @@ const delRebobinado = ((): PorCuadro => {
 // la mitad: adentro del viaje y del segundo, siempre hacia atrás, cuadro a cuadro LA MISMA curva que el rebobinado de P2 (a
 // `topeS / dentroS` de su velocidad), y la cámara, el logo y el oscurecimiento del piso no cambian por cuadro más que el
 // rebobinado de P2 por esa misma proporción.
+// [PULIDO 11] D · el oscurecimiento, con la misma tolerancia de muestreo que la cámara (2 %): con el golpe a los 3,5 s (era 4,7) el
+// quiebre de la expansión cae entre cuadros distintos en P2 y en el viaje (lo más por cuadro: 0,0905 contra una vara de 0,0903).
 const VIAJES_P5 = [1.2, 1.8, 2.5] as const
 const COMPRIME = REBOBINADO.topeS / VIAJE_DEL_FINAL.dentroS
 const viajeBien = (paso: PasoDelReloj): boolean =>
@@ -614,7 +618,7 @@ const viajeBien = (paso: PasoDelReloj): boolean =>
         if (Math.abs(r.fin - comoP2) > 1e-9) igual = false
       }
       return igual && v.s <= tope + 2 * DT && tope <= VIAJE_DEL_FINAL.dentroS * desde + 1e-9 && v.s <= viajeS && v.monotona &&
-        v.grados <= delRebobinado.grados * COMPRIME * 1.02 && v.logo <= delRebobinado.logo * COMPRIME + 1e-9 && v.oscuro <= delRebobinado.oscuro * COMPRIME + 1e-9
+        v.grados <= delRebobinado.grados * COMPRIME * 1.02 && v.logo <= delRebobinado.logo * COMPRIME + 1e-9 && v.oscuro <= delRebobinado.oscuro * COMPRIME * 1.02
     }),
   )
 const corto = vueltaDelViaje(pasoDelReloj, 1, VIAJES_P5[0])

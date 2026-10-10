@@ -24,7 +24,7 @@ import { ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, radioDeLaExpansion } from 
 import { FILO, bandaDelFilo, contornosDelLogo, creceDelFilo, enElNegro, luzDelFilo } from '../escena/final/filoConPoder'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
-import { FINAL_DEL_PIE, RELOJ_DEL_FINAL } from '../escena/final/recorridoDelFinal'
+import { RELOJ_DEL_FINAL, golpeDelFinal } from '../escena/final/recorridoDelFinal'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../escena/probeScene'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -154,7 +154,8 @@ controlPositivo('2 · y la luz que se apaga contra la calma', ENERGIA_EN_LA_SIMU
 // en el cuadro en que `fin` pasa el golpe (el mismo que suena), con un destello que lo ensancha; la descarga corre hacia afuera
 // desde el filo por las juntas (en el dibujo y en el plano de abajo), en el producto. Sin partículas. El anillo, el disco y
 // `?anillo=`, borrados.
-const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS
+// [PULIDO 11] D · el golpe es el contacto de la caída (era el ras de la presión).
+const golpe = golpeDelFinal() / RELOJ_DEL_FINAL.duracionS
 const pisoE2 = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
 const planoE2 = sinComentarios(leer('_lib/escena/final/planoDeLaLuz.ts'))
 type Luz = typeof luzDelFilo

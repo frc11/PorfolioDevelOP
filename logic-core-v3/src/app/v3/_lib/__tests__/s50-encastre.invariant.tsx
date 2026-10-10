@@ -32,7 +32,8 @@ import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../..
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
 import { validarElPie } from '../formularios/validar'
-import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, acostado, apertura as aperturaDelHueco, aterrizaje, blancoDelFinal, hundido, poder as poderDelFinal, poseDelLogo, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, apertura as aperturaDelHueco, blancoDelFinal, poder as poderDelFinal, poseDelLogo, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
+import { CAIDA_AL_HUECO, type VarianteDeLaCaida } from '../escena/final/caidaAlHueco'
 import { FLOOR_Y } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
 import { RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
@@ -255,52 +256,48 @@ titulo('2A · El final del pie arranca solo al llegar al pie; el scroll lo adela
 // como control positivo, lo afirma s51 1D.
 // [2D] el cuadro del final vive en `cuadroDelFinal.ts` (el componente lo llama).
 const finalTsx = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
-afirmar(RELOJ_DEL_FINAL.duracionS === 6.4 && finalTsx.includes('EN_VIVO.fin = s.reloj.fin') && finalTsx.includes('pasoDelReloj(s.reloj, {'), 'la secuencia dura 6,4 s a su ritmo y `fin` es el de su reloj (cómo arranca, se rebobina y se deshace: s51 1D)')
+// [PULIDO 11] D · cambió por pedido: el golpe es el contacto de la caída, a los 3,5 s (era el ras de la presión, a los 4,7); lo de
+// después del golpe dura lo mismo (1,7 s): la secuencia, 5,2 s (era 6,4).
+afirmar(RELOJ_DEL_FINAL.duracionS === CAIDA_AL_HUECO.golpeS + 1.7 && finalTsx.includes('EN_VIVO.fin = s.reloj.fin') && finalTsx.includes('pasoDelReloj(s.reloj, {'), `la secuencia dura ${String(RELOJ_DEL_FINAL.duracionS)} s a su ritmo (el golpe y 1,7 s después) y \`fin\` es el de su reloj (cómo arranca, se rebobina y se deshace: s51 1D)`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2B · El logo se acuesta en su lugar (sobre su centro), cae derecho al piso; la cámara sube en paralelo, centrada en el logo')
 
+// [PULIDO 11] D · cambió por pedido: el logo ya no se acuesta en su lugar ni cae derecho: CAE (baja parado y cae hacia atrás como
+// una ficha de dominó; con `?caida=angulo`, en arco desde donde está) con la física de un cuerpo rígido. La física, el hueco que se
+// abre con ella, el contacto que es el golpe, el rebote y el asiento: s62 D. Acá queda lo que no cambió: termina acostado al ras,
+// en su lugar y sobre el eje (x = 0), y la cámara sube en paralelo con él y mira siempre al eje.
 const TAM = { alto: 4.78, espesor: 0.56 } as const
-type Pose = (fin: number, t: typeof TAM, destino: { centro: THREE.Vector3; rotacionX: number }) => void
-const recorrerLaPose = (pose: Pose): { readonly enSuLugar: boolean; readonly quietoAlAcostarse: boolean; readonly acostadoA: number; readonly cae: boolean; readonly enElPiso: number } => {
-  const p = { centro: new THREE.Vector3(), rotacionX: 0 }
-  let [enSuLugar, quietoAlAcostarse, cae, antesY] = [true, true, true, Number.POSITIVE_INFINITY]
-  let acostadoA = Number.NaN
-  for (let i = 0; i <= 640; i += 1) {
-    const fin = i / 640
-    const s = segundosDelFinal(fin)
-    pose(fin, TAM, p)
-    if (Math.abs(p.centro.x) > 1e-9 || Math.abs(p.centro.z) > 1e-9) enSuLugar = false
-    if (s <= FINAL_DEL_PIE.acostarseS && Math.abs(p.centro.y) > 1e-9) quietoAlAcostarse = false
-    if (Number.isNaN(acostadoA) && Math.abs(p.rotacionX + Math.PI / 2) < 1e-6) acostadoA = s
-    if (s >= FINAL_DEL_PIE.caida.desdeS && s <= aterrizaje(TAM) && p.centro.y > antesY + 1e-9) cae = false
-    antesY = p.centro.y
-  }
-  return { enSuLugar, quietoAlAcostarse, acostadoA, cae, enElPiso: antesY }
+type Pose = (fin: number, t: typeof TAM, v: VarianteDeLaCaida, destino: { centro: THREE.Vector3; rotacionX: number }) => void
+const terminaEnSuLugar = (pose: Pose): boolean =>
+  (['lenta', 'angulo'] as const).every((v) => {
+    const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+    let sobreElEje = true
+    for (let i = 0; i <= 640; i += 1) {
+      pose(i / 640, TAM, v, p)
+      if (p.centro.x !== 0) sobreElEje = false
+    }
+    pose(1, TAM, v, p)
+    return sobreElEje && Math.abs(p.centro.y - (FLOOR_Y - TAM.espesor / 2)) < 1e-6 && Math.abs(p.centro.z) < 1e-6 && Math.abs(p.rotacionX + Math.PI / 2) < 1e-6
+  })
+afirmar(terminaEnSuLugar(poseDelLogo), 'las dos caídas terminan con el logo acostado (−90°, la cabeza al fondo) al ras en su hueco, centrado, y nunca se corren del eje')
+const apoyadoEnElPiso: Pose = (fin, t, v, d) => {
+  poseDelLogo(fin, t, v, d)
+  if (fin >= 1) d.centro.y = FLOOR_Y + t.espesor / 2
 }
-const laPose = recorrerLaPose(poseDelLogo)
-afirmar(laPose.enSuLugar && laPose.quietoAlAcostarse && Math.abs(laPose.acostadoA - FINAL_DEL_PIE.acostarseS) < 0.02 && laPose.cae && laPose.enElPiso < FLOOR_Y + TAM.espesor / 2, 'se acuesta EN SU LUGAR: gira sobre su propio centro (el centro quieto, sobre el eje) hasta −90° y recién ahí cae derecho al piso, con gravedad', `acostado a los ${laPose.acostadoA.toFixed(2)} s · toca el piso a los ${aterrizaje(TAM).toFixed(2)} s`)
-// El control: la pose de CIERRE (giraba sobre su base: el centro se corría hacia el fondo la mitad del alto).
-const poseDeCierre: Pose = (fin, t, d) => {
-  const k = acostado(fin)
-  const tita = (-Math.PI / 2) * k
-  d.centro.set(0, -t.alto / 2 + (t.alto / 2) * Math.cos(tita), (t.alto / 2) * Math.sin(tita))
-  d.rotacionX = tita
-}
-controlPositivo('el detector VE la pose de CIERRE (sobre su base: el logo se corría)', poseDeCierre, (p: Pose) => recorrerLaPose(p).enSuLugar)
-// La cámara: sube en paralelo con el logo que se acuesta; su blanco es el centro del logo y con la caída baja al piso, centrado.
+controlPositivo('el detector VE un logo que termina apoyado sobre el piso (no en su hueco)', apoyadoEnElPiso, terminaEnSuLugar)
+// La cámara: sube en paralelo con la caída; su blanco baja al piso, siempre sobre el eje.
 const blanco = new THREE.Vector3()
 let blancoBien = true
 for (let i = 0; i <= 64; i += 1) {
   const fin = i / 64
   blancoDelFinal(fin, blanco)
-  if (blanco.x !== 0 || blanco.z !== 0 || (segundosDelFinal(fin) <= FINAL_DEL_PIE.caida.desdeS && blanco.y !== 0)) blancoBien = false
+  if (blanco.x !== 0 || blanco.z !== 0 || (segundosDelFinal(fin) <= FINAL_DEL_PIE.blanco.desdeS && blanco.y !== 0)) blancoBien = false
 }
 blancoDelFinal(1, blanco)
-// [2D] El 80 % de la subida va en paralelo con el logo (justo lo que se acostó, por 0,8) y el resto mientras se encastra:
-// desde el cenit el logo acostado tapaba su propio hueco.
-const enParalelo = [0.25, 0.5, 0.75, 1].every((u) => Math.abs(subida((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS) - FINAL_DEL_PIE.subida.conElLogo * acostado((u * FINAL_DEL_PIE.acostarseS) / RELOJ_DEL_FINAL.duracionS)) < 1e-9)
-afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo && subida(FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS) === 1, 'la cámara sube en paralelo con el logo (el 80 % de su camino mientras se acuesta; el resto, mientras se encastra) y mira siempre al eje: el centro del logo mientras se acuesta y, con la caída, el piso donde se encastra')
+const golpeEnFin = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
+const enParalelo = subida(golpeEnFin) > FINAL_DEL_PIE.subida.conElLogo && subida(golpeEnFin) < 1 && subida((CAIDA_AL_HUECO.golpeS + FINAL_DEL_PIE.subida.terminaTrasElGolpeS) / RELOJ_DEL_FINAL.duracionS) === 1
+afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo, 'la cámara sube en paralelo con la caída (el 80 % de su camino con el logo todavía de pie; el resto, mientras cae y se asienta) y mira siempre al eje: con la caída, el piso donde se encastra')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2C · El vapor: [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: se fue entero (sin partículas; lo afirma s51 1A)')
@@ -310,38 +307,14 @@ afirmar(!existsSync(`${V3}/_lib/escena/final/vapor.ts`) && !existsSync(`${V3}/_l
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2D · El hueco exacto: se abre cuando el logo está por llegar, el logo cae justo ahí y se hunde lento, a presión, hasta el ras')
 
-// El hundimiento: de la cara de abajo al ras del borde (0) al ras del piso (1), en tramos que resisten y ceden.
-type Hundido = (fin: number, t: typeof TAM) => number
-const presionDe = (h: Hundido): { readonly sube: boolean; readonly completo: boolean; readonly lento: boolean; readonly cedeDeGolpe: boolean; readonly duraS: number } => {
-  const t0 = aterrizaje(TAM)
-  const t1 = FINAL_DEL_PIE.presion.hastaS
-  const muestras = Array.from({ length: 2001 }, (_, i) => t0 + ((t1 - t0) * i) / 2000).map((s) => h(s / RELOJ_DEL_FINAL.duracionS, TAM))
-  const sube = muestras.every((v, i) => i === 0 || v >= muestras[i - 1] - 1e-12)
-  const completo = muestras[0] === 0 && h(t1 / RELOJ_DEL_FINAL.duracionS, TAM) === 1 && h(1, TAM) === 1
-  // Lento: en ningún momento baja más rápido que un espesor en 0,4 s (una caída libre lo haría en centésimas).
-  const paso = (t1 - t0) / 2000
-  const velocidades = muestras.slice(1).map((v, i) => (v - muestras[i]) / paso)
-  const lento = Math.max(...velocidades) < 1 / 0.12
-  // A presión: hay momentos de casi nada (resiste) y momentos de mucho (cede), no una bajada pareja.
-  const quietos = velocidades.filter((v) => v < 0.2).length / velocidades.length
-  const cedeDeGolpe = quietos > 0.4 && Math.max(...velocidades) > 3 * (1 / (t1 - t0))
-  return { sube, completo, lento, cedeDeGolpe, duraS: t1 - t0 }
-}
-const aPresion = (p: ReturnType<typeof presionDe>): boolean => p.sube && p.completo && p.lento && p.cedeDeGolpe && p.duraS > 1.5
-const medidaLaPresion = presionDe(hundido)
-afirmar(aPresion(medidaLaPresion), 'cae justo en el hueco y se hunde LENTO y a presión hasta quedar al ras: en tramos que resisten (casi no baja, tiembla) y ceden de a poco, sin volver nunca para arriba', `${medidaLaPresion.duraS.toFixed(2)} s, en ${String(FINAL_DEL_PIE.presion.tramos.length)} tramos`)
-const conRebote: Hundido = (fin, t) => {
-  const u = Math.min(1, Math.max(0, (segundosDelFinal(fin) - aterrizaje(t)) / 1.2))
-  return u <= 0 ? 0 : 1 - Math.exp(-5 * u) * Math.cos(10 * u)
-}
-controlPositivo('el detector VE el encastre de CIERRE (un rebote rápido)', conRebote, (h: Hundido) => aPresion(presionDe(h)))
-const parejo: Hundido = (fin, t) => Math.min(1, Math.max(0, (segundosDelFinal(fin) - aterrizaje(t)) / (FINAL_DEL_PIE.presion.hastaS - aterrizaje(t))))
-controlPositivo('  y uno parejo (sin presión: baja siempre igual)', parejo, (h: Hundido) => aPresion(presionDe(h)))
+// [PULIDO 11] D · cambió por pedido: sin la presión (entraba a presión, en tramos que resistían y cedían): el logo entra al ras
+// con la caída y rebota apenas hasta asentarse (s62 D). Queda: al final, al ras; el hueco abierto antes de que toque.
 const alRas = { centro: new THREE.Vector3(), rotacionX: 0 }
-poseDelLogo(1, TAM, alRas)
+poseDelLogo(1, TAM, 'lenta', alRas)
 afirmar(Math.abs(alRas.centro.y + TAM.espesor / 2 - FLOOR_Y) < 1e-9, '  al final, al ras: la cara de arriba del logo en el piso')
-// Se abre cuando el logo está por llegar (cerrado mientras se acuesta, abierto antes de que caiga adentro).
-afirmar(aperturaDelHueco(1.5 / RELOJ_DEL_FINAL.duracionS) === 0 && aperturaDelHueco(HUECO.abre.hastaS / RELOJ_DEL_FINAL.duracionS) === 1 && HUECO.abre.hastaS < aterrizaje(TAM) && HUECO.abre.desdeS > FINAL_DEL_PIE.caida.desdeS - 1, 'el hueco se abre cuando el logo está por llegar: arranca en el último tramo del acostarse y está abierto antes de que el logo toque', `de ${String(HUECO.abre.desdeS)} a ${String(HUECO.abre.hastaS)} s · toca a los ${aterrizaje(TAM).toFixed(2)} s`)
+// Se abre cuando el logo está por llegar: cerrado al empezar, entero un momento antes del contacto (con la caída: s62 D).
+const huecoAntes = (['lenta', 'angulo'] as const).every((v) => aperturaDelHueco(0, TAM, v) === 0 && aperturaDelHueco((CAIDA_AL_HUECO.golpeS - 0.01) / RELOJ_DEL_FINAL.duracionS, TAM, v) === 1)
+afirmar(huecoAntes, 'el hueco se abre cuando el logo está por llegar: cerrado al empezar y abierto entero antes de que el logo toque')
 // En el piso: descarta sus tapas y costados donde la máscara (en el plano del logo: x, −z) dice adentro y la apertura deja.
 // [PULIDO 8] G3 · y, con el hueco abierto entero, en las contraformas (canal B: lo liso de PULIDO 7 F1).
 const enElPisoTs = sinComentarios(leer('_lib/escena/final/enElPiso.ts'))
@@ -366,15 +339,17 @@ afirmar(pozoBien, '  el pozo: las paredes (sin las tapas de la extrusión: la de
 titulo('2E · El poder: al quedar al ras, un pulso centrado en el logo; [RETOQUE DEL ENCASTRE] 1F · energiza el piso (luz, no tinta)')
 
 // El poder: 0 hasta quedar al ras; un destello y después entero; función de `fin` (al revertir se apaga).
-const alRasS = FINAL_DEL_PIE.presion.hastaS
+// [PULIDO 11] D · al ras = el contacto de la caída (el golpe).
+const alRasS = CAIDA_AL_HUECO.golpeS
 const enS = (s: number): number => poderDelFinal(s / RELOJ_DEL_FINAL.duracionS)
 const pico = Math.max(...Array.from({ length: 60 }, (_, i) => enS(alRasS + (i * 0.6) / 60)))
 const poderBien = enS(alRasS - 0.01) === 0 && enS(alRasS - 1) === 0 && pico > 1.3 && Math.abs(enS(RELOJ_DEL_FINAL.duracionS) - 1) < 1e-9 && enS(alRasS + 0.05) > 0
 afirmar(poderBien, 'el poder se libera cuando el logo queda al ras (ni antes): un destello y se asienta entero; es función de `fin`, así que al revertir se apaga', `destello ${pico.toFixed(2)} · al ras a los ${String(alRasS)} s`)
-// El golpe (su pulso) cae al quedar al ras y nace en el centro del logo; al tocar el piso, sólo un golpecito.
-const golpeBien = (c: string): boolean => c.includes('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (!s.estatico && s.antes < aterriza && fin >= aterriza) s.tocoEn = t') && c.includes('if (!s.estatico && s.antes < golpe && fin >= golpe) {')
-afirmar(golpeBien(finalTsx), '  el pulso nace en el centro del logo al quedar al ras (una vez por bajada) y corre por el piso con su física; al tocar el piso, sólo un golpecito de la cámara')
-controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx.replace('const golpe = FINAL_DEL_PIE.presion.hastaS / RELOJ_DEL_FINAL.duracionS', 'const golpe = aterrizaje(tamano) / RELOJ_DEL_FINAL.duracionS'), golpeBien)
+// El golpe (su pulso) cae al quedar al ras y nace en el centro del logo; [PULIDO 11] D · al volver a tocar después del primer
+// rebote, sólo un golpecito.
+const golpeBien = (c: string): boolean => c.includes('const golpe = golpeDelFinal() / RELOJ_DEL_FINAL.duracionS') && c.includes('piso.uGolpe.value.set(t, 0, 0, 1)') && c.includes('piso.uPoder.value = poder(fin)') && c.includes('if (!s.estatico && s.antes < aterriza && fin >= aterriza) s.tocoEn = t') && c.includes('if (!s.estatico && s.antes < golpe && fin >= golpe) {')
+afirmar(golpeBien(finalTsx), '  el pulso nace en el centro del logo al quedar al ras (una vez por bajada) y corre por el piso con su física; al volver a tocar después de rebotar, sólo un golpecito de la cámara')
+controlPositivo('el detector VE el golpe de CIERRE (al tocar el piso)', finalTsx.replace('const golpe = golpeDelFinal() / RELOJ_DEL_FINAL.duracionS', 'const golpe = aterriza'), golpeBien)
 // El dibujo: [RETOQUE DEL ENCASTRE] 1F · cambió por pedido: el resplandor de tinta alrededor del logo (núcleo negro en la
 // junta, halo y aura) se fue: después del encastre el piso entero queda energizado y la luz sale por las rendijas que abren
 // las ondas, el mar y el pulso del golpe (s51 1F). Sin tinta en el dibujo, y sin la banda oscura de CIERRE.

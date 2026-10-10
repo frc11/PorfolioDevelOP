@@ -19,6 +19,8 @@
  *   B6 · terminado el éxito, el formulario se limpia (los valores y el estado del autocompletado).
  *   C2 · la cabecera abajo de 1024: el parlante a la izquierda, el menú al centro y el progreso a la derecha, del mismo tamaño,
  *        en el mismo eje y adentro de la zona segura.
+ *   D · el logo del final se CAE y encastra: física de cuerpo rígido (θ'' = κ·sen(θ − α)), el hueco que se abre con la caída,
+ *       el contacto en el cuadro del golpe, un rebote chico que se asienta, sin saltos ni atravesar el piso (`?caida=angulo`).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -42,6 +44,10 @@ import { RESULTADO } from '../formularios/gracias'
 import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
 import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { EJE_DEL_PALITO, PALITO_DE_LA_P } from '../../_componentes/carga/Carga'
+import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, bajadaDe, caidaIntegrada, contactoDeLaCaida, fueraDeSuLugar, poseDeLaCaida, sombraDeLaCaida, varianteDeLaCaida, type PlacaDelLogo, type VarianteDeLaCaida } from '../escena/final/caidaAlHueco'
+import { FINAL_DEL_PIE, calma as calmaDelFinal, golpeDelFinal, segundosDelFinal } from '../escena/final/recorridoDelFinal'
+import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
+import { FLOOR_Y } from '../escena/probeScene'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -529,5 +535,210 @@ const cabeceraBien = (esquina: string, sonido: string, menu: string): boolean =>
 afirmar(cabeceraBien(ESQUINA_C2, SONIDO_C2, MENU_C2), 'C2 · abajo de 1024: el parlante arriba a la izquierda, el menú al centro y el progreso arriba a la derecha, los tres discos de 48 px en el mismo eje y la zona segura')
 controlPositivo('C2 · el detector VE la cabecera de antes (el parlante en fila con el progreso, chico)', SONIDO_C2.replace(`!abajo && '${DISCO}'`, "!abajo && ''"), (so: string) => cabeceraBien(ESQUINA_C2, so, MENU_C2))
 controlPositivo('  y un menú fuera del eje (sin la zona segura)', MENU_C2.replace(ARRIBA, 'top-[var(--spacing-4)]'), (m: string) => cabeceraBien(ESQUINA_C2, SONIDO_C2, m))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('D · El logo se CAE y encastra: física de cuerpo rígido, el hueco con la caída, el golpe en el contacto, el rebote')
+
+// Antes se acostaba EN SU LUGAR con una curva, caía derecho y se hundía a presión. Ahora (`final/caidaAlHueco.ts`) vuelca sobre su
+// canto de abajo y de atrás con la ecuación del vuelco, θ'' = κ·sen(θ − α), integrada con RK4: la lenta baja parada hasta el borde
+// del hueco y cae como una ficha de dominó; `?caida=angulo` cae desde donde está mientras su canto baja en arco hasta el borde.
+// Todo es función de `fin` (el rebobinado la recorre al revés; el reinicio la vuelve a correr).
+const TAM_D: PlacaDelLogo = { alto: 4.78, espesor: 0.56 }
+const VARIANTES_D = ['lenta', 'angulo'] as const
+const H_D = CAIDA_AL_HUECO.paso
+// 1 · Es la física: entre toques, la segunda diferencia de los ángulos integrados ES κ·sen(θ − α) (no una curva de animación).
+const residuoDeLaFisica = (angulos: ArrayLike<number>, v: VarianteDeLaCaida): number => {
+  const c = caidaIntegrada(v, TAM_D)
+  const cerca = (i: number): boolean => c.toques.some((t) => Math.abs(i * H_D - t) < 3 * H_D)
+  let peor = 0
+  for (let i = 1; i < angulos.length - 1; i += 1) {
+    if (cerca(i) || angulos[i + 1] >= Math.PI / 2 - 1e-12) continue
+    const segunda = (angulos[i + 1] - 2 * angulos[i] + angulos[i - 1]) / (H_D * H_D)
+    peor = Math.max(peor, Math.abs(segunda - c.kappa * Math.sin(angulos[i] - c.alfa)))
+  }
+  return peor / caidaIntegrada(v, TAM_D).kappa
+}
+const esFisica = (f: (v: VarianteDeLaCaida) => ArrayLike<number>): boolean => VARIANTES_D.every((v) => residuoDeLaFisica(f(v), v) < 1e-3)
+afirmar(esFisica((v) => caidaIntegrada(v, TAM_D).angulos), `D1 · la caída es la física del vuelco: θ'' = κ·sen(θ − α) en cada paso (κ ${caidaIntegrada('lenta', TAM_D).kappa.toFixed(2)} s⁻², g ${String(CAIDA_AL_HUECO.gravedad)} u/s²), en las dos variantes`)
+const conCurva = (v: VarianteDeLaCaida): number[] => {
+  const c = caidaIntegrada(v, TAM_D)
+  const n = Math.round(c.contactoS / H_D)
+  return Array.from({ length: n }, (_, i) => {
+    const u = i / n
+    return c.desde + (Math.PI / 2 - c.desde) * u * u * u * (u * (u * 6 - 15) + 10)
+  })
+}
+controlPositivo('D1 · el detector VE una caída con una curva de animación (suave, del mismo largo)', conCurva, esFisica)
+
+// 2 · El contacto ES el golpe: toca (por primera vez) exactamente en el cuadro del golpe de siempre, al ras y acostado; antes, nunca.
+// Para cualquier tamaño del logo (lo publica la escena): lo que se adapta es lo de antes (la bajada, la espera), no el golpe.
+const TAMANOS_D: readonly PlacaDelLogo[] = [{ alto: 4, espesor: 0.5 }, TAM_D, { alto: 5.5, espesor: 0.6 }, { alto: 6.5, espesor: 0.56 }]
+const contactoBien = (golpe: number): boolean =>
+  TAMANOS_D.every((t) =>
+    VARIANTES_D.every((v) => {
+      const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
+      poseDeLaCaida(v, t, golpe, pose)
+      let antes = true
+      for (let x = 0; x < golpe - 1e-3; x += 1 / 480) if (anguloEnElReloj(v, t, x).a >= Math.PI / 2 - 1e-9) antes = false
+      return Math.abs(contactoDeLaCaida(v, t) - golpe) < 1e-9 && Math.abs(pose.centro.y - (FLOOR_Y - t.espesor / 2)) < 1e-9 && Math.abs(pose.rotacionX + Math.PI / 2) < 1e-9 && antes && arranqueDeLaCaida(v, t) === CAIDA_AL_HUECO.golpeS - caidaIntegrada(v, t).contactoS
+    }),
+  )
+afirmar(contactoBien(golpeDelFinal()), `D2 · el contacto es el golpe: las dos caídas tocan al ras, acostadas, a los ${String(golpeDelFinal())} s del reloj (el cuadro en que suena, nace la súper onda y se enciende el filo), y no antes; con logos de 4 a 6,5 u de alto, igual (lo que se adapta es la bajada: ${bajadaDe({ alto: 6.5, espesor: 0.56 }).toFixed(2)} s con el más alto)`)
+controlPositivo('D2 · el detector VE un golpe que no es el contacto (el ras de la presión de antes, a los 4,7 s)', 4.7, contactoBien)
+
+// 3 · El rebote: chico (de 2° a 8° el primero), cada uno mucho menor que el anterior y asentado enseguida, en su lugar exacto.
+const levantadas = (v: VarianteDeLaCaida): number[] => {
+  const c = caidaIntegrada(v, TAM_D)
+  return c.toques.slice(0, -1).map((t, k) => {
+    let menor = Math.PI / 2
+    for (let i = Math.ceil(t / H_D); i * H_D < c.toques[k + 1]; i += 1) menor = Math.min(menor, c.angulos[i])
+    return THREE.MathUtils.radToDeg(Math.PI / 2 - menor)
+  })
+}
+const reboteBien = (f: (v: VarianteDeLaCaida) => number[]): boolean =>
+  VARIANTES_D.every((v) => {
+    const l = f(v)
+    const c = caidaIntegrada(v, TAM_D)
+    return l.length >= 1 && l[0] >= 2 && l[0] <= 8 && l.every((x, k) => k === 0 || x < l[k - 1] / 4) && c.asentadaS - c.contactoS < 0.6 && c.angulos[c.angulos.length - 1] === Math.PI / 2
+  })
+afirmar(reboteBien(levantadas), `D3 · rebota apenas (${levantadas('lenta').map((x) => x.toFixed(1)).join(', ')}° la lenta; ${levantadas('angulo').map((x) => x.toFixed(1)).join(', ')}° en ángulo), amortiguado, y se asienta en su lugar exacto en menos de 0,6 s`)
+controlPositivo('D3 · el detector VE un rebote de pelota (casi sin perder: 30°, 25°, 20°)', () => [30, 25, 20], reboteBien)
+
+// 4 · El hueco se abre con la caída: cerrado hasta que empieza a caer, nunca se cierra mientras cae, a medio abrir con el logo a
+// medio caer, y entero un momento antes del contacto (entre 10 y 250 ms).
+const huecoBien = (ap: (v: VarianteDeLaCaida, x: number) => number): boolean =>
+  VARIANTES_D.every((v) => {
+    const desde = arranqueDeLaCaida(v, TAM_D)
+    const golpe = contactoDeLaCaida(v, TAM_D)
+    let [sube, entero] = [true, Number.NaN]
+    let antes = 0
+    for (let x = desde; x <= golpe; x += 1 / 2000) {
+      const a = ap(v, x)
+      if (a < antes - 1e-12) sube = false
+      if (Number.isNaN(entero) && a >= 1) entero = golpe - x
+      antes = a
+    }
+    let medio = Number.NaN
+    for (let x = desde; x <= golpe && Number.isNaN(medio); x += 1 / 2000) if (anguloEnElReloj(v, TAM_D, x).a >= Math.PI / 4) medio = ap(v, x)
+    return ap(v, desde - 0.01) === 0 && sube && entero >= 0.01 && entero <= 0.25 && medio > 0.05 && medio < 0.95
+  })
+afirmar(huecoBien((v, x) => aperturaDelHueco(v, TAM_D, x)), 'D4 · el hueco se abre con la caída (sincronizado con el ángulo): cerrado hasta que cae, a medio abrir a los 45° y entero justo antes del contacto')
+controlPositivo('D4 · el detector VE el hueco de antes (por reloj: abierto mucho antes de que el logo llegue)', (v: VarianteDeLaCaida, x: number) => Math.min(1, Math.max(0, (x - (arranqueDeLaCaida(v, TAM_D) - 1)) / 0.8)), huecoBien)
+
+// 5 · Sin saltos (cada 1/240 s, el logo se mueve menos de 0,25 u y gira menos de 0,06 rad: la física arranca del reposo, después
+// de inclinarse) y sin atravesar el piso (lo que queda debajo del piso antes del contacto está adentro del hueco ya abierto, y
+// nada pasa el fondo del pozo). La lenta llega PARADA al borde del hueco; en ángulo cae desde donde está, sin tocar el piso antes.
+const continuaYLimpia = (pose: typeof poseDeLaCaida): boolean =>
+  VARIANTES_D.every((v) => {
+    const golpe = contactoDeLaCaida(v, TAM_D)
+    const [p, q] = [{ centro: new THREE.Vector3(), rotacionX: 0 }, { centro: new THREE.Vector3(), rotacionX: 0 }]
+    pose(v, TAM_D, 0, q)
+    let bien = true
+    for (let x = 1 / 240; x <= golpe + 1; x += 1 / 240) {
+      pose(v, TAM_D, x, p)
+      if (p.centro.distanceTo(q.centro) > 0.25 || Math.abs(p.rotacionX - q.rotacionX) > 0.06) bien = false
+      q.centro.copy(p.centro)
+      q.rotacionX = p.rotacionX
+    }
+    for (let x = 0; x < golpe; x += 1 / 2000) {
+      pose(v, TAM_D, x, p)
+      const a = -p.rotacionX
+      for (let k = 0; k <= 24; k += 1)
+        for (const zl of [-TAM_D.espesor / 2, TAM_D.espesor / 2]) {
+          const yl = -TAM_D.alto / 2 + (TAM_D.alto * k) / 24
+          const y = p.centro.y + yl * Math.cos(a) + zl * Math.sin(a)
+          const z = p.centro.z - yl * Math.sin(a) + zl * Math.cos(a)
+          if (y < FLOOR_Y - TAM_D.espesor * 1.06 - 1e-6) bien = false
+          if (y < FLOOR_Y - 0.005 && (Math.abs(z) > TAM_D.alto / 2 + 0.07 || aperturaDelHueco(v, TAM_D, x) < 0.999)) bien = false
+        }
+    }
+    return bien
+  })
+const paradaEnElBorde = ((): boolean => {
+  const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+  poseDeLaCaida('lenta', TAM_D, CAIDA_AL_HUECO.lenta.bajaS, p)
+  const parada = p.rotacionX === 0 && Math.abs(p.centro.y - TAM_D.alto / 2 - FLOOR_Y) < 1e-9 && Math.abs(p.centro.z - (TAM_D.alto + TAM_D.espesor) / 2) < 1e-9
+  poseDeLaCaida('angulo', TAM_D, arranqueDeLaCaida('angulo', TAM_D) - CAIDA_AL_HUECO.inclinaS, p)
+  return parada && p.centro.length() < 1e-9 && p.rotacionX === 0
+})()
+afirmar(continuaYLimpia(poseDeLaCaida) && paradaEnElBorde, 'D5 · sin saltos ni atravesar el piso (debajo de él, sólo adentro del hueco abierto y nunca más hondo que el pozo); la lenta llega parada al borde del hueco y en ángulo arranca desde donde está')
+// El canto baja por la pared del pozo (un espesor) desde que el hueco está entero hasta el contacto: en al menos 0,1 s (la revisión
+// encontró que en los últimos 6° se metía en 28 ms: un salto de 0,47 u en un cuadro). Y cada cuadro de 60 Hz baja menos de 0,3 u.
+const ventanaDelCanto = (hastaGrados: number, v: VarianteDeLaCaida): number => {
+  const golpe = contactoDeLaCaida(v, TAM_D)
+  for (let x = arranqueDeLaCaida(v, TAM_D); x < golpe; x += 1 / 4000) if (anguloEnElReloj(v, TAM_D, x).a >= THREE.MathUtils.degToRad(hastaGrados)) return golpe - x
+  return 0
+}
+const sinMeterseDeGolpe = (hastaGrados: number): boolean =>
+  VARIANTES_D.every((v) => {
+    const golpe = contactoDeLaCaida(v, TAM_D)
+    const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+    let [antes, peor] = [Number.NaN, 0]
+    for (let x = golpe - 0.3; x <= golpe + 1e-6; x += 1 / 60) {
+      poseDeLaCaida(v, TAM_D, x, p)
+      if (!Number.isNaN(antes)) peor = Math.max(peor, antes - p.centro.y)
+      antes = p.centro.y
+    }
+    return ventanaDelCanto(hastaGrados, v) >= 0.1 && peor < 0.3
+  })
+afirmar(sinMeterseDeGolpe(CAIDA_AL_HUECO.hueco.hastaGrados), `  y no se mete de golpe: el canto baja por la pared en ${(ventanaDelCanto(CAIDA_AL_HUECO.hueco.hastaGrados, 'lenta') * 1000).toFixed(0)} ms (con el hueco ya entero) y ningún cuadro baja más de 0,3 u`)
+controlPositivo('  el detector VE el canto de la primera versión (desde los 84°: 28 ms)', 84, sinMeterseDeGolpe)
+const conSaltoD: typeof poseDeLaCaida = (v, t, x, d) => {
+  poseDeLaCaida(v, t, x, d)
+  const arranca = arranqueDeLaCaida(v, t)
+  if (x < arranca && x > arranca - CAIDA_AL_HUECO.inclinaS) d.rotacionX = 0
+}
+controlPositivo('D5 · el detector VE la caída que arranca de golpe inclinada (sin inclinarse antes: el salto de 7,9°)', conSaltoD, continuaYLimpia)
+
+// 6 · La variante se pide por la URL (`?caida=angulo`; sin pedir u otro valor, la lenta) y el cuadro del final la lee una vez.
+const CUADRO_D = leer('_lib/escena/final/cuadroDelFinal.ts')
+const varianteBien = (sueltas: readonly string[]): boolean =>
+  varianteDeLaCaida('angulo') === 'angulo' && varianteDeLaCaida('lenta') === 'lenta' && varianteDeLaCaida(null) === 'lenta' && sueltas.includes('caida') &&
+  entornoPedido('producto,caida=angulo').pruebas.caida === 'angulo' && entornoPedido('producto').pruebas.caida === 'no' &&
+  CUADRO_D.includes('caida: varianteDeLaCaida(entornoDeLaEscena().pruebas.caida),') && CUADRO_D.includes('poseDelLogo(fin, tamano, s.caida, s.pose)')
+afirmar(varianteBien(PRUEBAS_SUELTAS), 'D6 · `?caida=angulo` (y `?caida=lenta`, la del producto); el final la lee una vez y la pose es función de `fin` (el rebobinado la recorre al revés)')
+controlPositivo('D6 · el detector VE la bandera sin registrar', PRUEBAS_SUELTAS.filter((k) => k !== 'caida'), varianteBien)
+
+// 7 · El piso deja de esquivar al logo con la calma (su techo se apaga): eso tiene que pasar con el logo LEJOS del piso, y el mar
+// tiene que estar calmo antes de que el logo llegue a él (la revisión: en la lenta el techo se apagaba con el pie a 0,4 u y los
+// bloques saltaban). Y la sombra y la mancha de contacto van con el logo: parado en el piso tiene su sombra al pie; la mancha del
+// centro se va cuando él se va de ahí.
+const piso = (v: VarianteDeLaCaida, x: number): number => {
+  const p = { centro: new THREE.Vector3(), rotacionX: 0 }
+  poseDeLaCaida(v, TAM_D, x, p)
+  const a = -p.rotacionX
+  let menor = Number.POSITIVE_INFINITY
+  for (const yl of [-TAM_D.alto / 2, TAM_D.alto / 2]) for (const zl of [-TAM_D.espesor / 2, TAM_D.espesor / 2]) menor = Math.min(menor, p.centro.y + yl * Math.cos(a) + zl * Math.sin(a))
+  return menor - FLOOR_Y
+}
+const D_DUR = golpeDelFinal() + 1.7
+// El techo del piso alcanza 0,69 u y el mar se mueve ±0,35 u: el techo se apaga con el logo a más de 0,99 u, y lo que queda del mar
+// ((1 − calma) × 0,35) nunca llega a lo más bajo del logo mientras está arriba del piso.
+const calmaBien = (calma: (fin: number) => number): boolean =>
+  VARIANTES_D.every((v) => {
+    let [bien, empezo] = [true, false]
+    for (let x = 0; x < golpeDelFinal(); x += 1 / 240) {
+      const c = calma(x / D_DUR)
+      const d = piso(v, x)
+      if (c > 0 && !empezo) {
+        empezo = true
+        if (d < 0.99) bien = false
+      }
+      if (d >= 0 && (1 - c) * 0.35 > d + 0.005) bien = false
+    }
+    return bien && empezo
+  })
+afirmar(calmaBien(calmaDelFinal), `D7 · la calma (y el techo del piso que se apaga con ella) arranca con el logo lejos del piso y el mar ya no lo alcanza (de ${String(FINAL_DEL_PIE.calma.desdeS)} a ${String(FINAL_DEL_PIE.calma.hastaS)} s)`)
+controlPositivo('D7 · el detector VE la calma de la primera versión (de 0,8 a 1,8 s: el pie de la lenta ya estaba a 0,4 u)', (fin: number) => {
+  const u = Math.min(1, Math.max(0, (fin * D_DUR - 0.8) / 1))
+  return u * u * u * (u * (u * 6 - 15) + 10)
+}, calmaBien)
+const conElLogo = (sombra: typeof sombraDeLaCaida, fuera: typeof fueraDeSuLugar): boolean => {
+  const parada = bajadaDe(TAM_D) + 0.02
+  return sombra('lenta', TAM_D, parada) === 1 && sombra('lenta', TAM_D, golpeDelFinal()) === 0 && fuera('lenta', TAM_D, parada) === 1 && fuera('lenta', TAM_D, 0) === 0 && fuera('angulo', TAM_D, 1) === 0 && fuera('angulo', TAM_D, golpeDelFinal()) === 1 &&
+    CUADRO_D.includes('piso.uSinMancha.value = Math.max(EN_VIVO.camara, fueraDeSuLugar(s.caida, tamano, segundosDelFinal(fin)))') && segundosDelFinal(1) === D_DUR
+}
+afirmar(conElLogo(sombraDeLaCaida, fueraDeSuLugar), '  parado en el piso, el logo tiene su sombra al pie (se va mientras cae al hueco) y la mancha de contacto del centro se va con él')
+controlPositivo('  el detector VE la sombra de la primera versión (ninguna, parado en el piso)', ((v: VarianteDeLaCaida, t: PlacaDelLogo, x: number) => (x >= bajadaDe(t) ? 0 : 1)) as typeof sombraDeLaCaida, (f: typeof sombraDeLaCaida) => conElLogo(f, fueraDeSuLugar))
 
 cerrar('s62-pulido-11')

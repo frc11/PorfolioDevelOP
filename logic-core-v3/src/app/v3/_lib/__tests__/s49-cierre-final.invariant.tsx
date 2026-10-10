@@ -35,7 +35,7 @@ import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, prog
 import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
 import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
 import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
-import { FINAL_DEL_PIE, acostado, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto } from '../escena/final/recorridoDelFinal'
+import { FINAL_DEL_PIE, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, subida } from '../escena/final/recorridoDelFinal'
 import { conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { FLOOR_Y } from '../escena/probeScene'
@@ -327,15 +327,17 @@ afirmar(solo > 0.1 && reloj.fin === 0, '  `fin` tiene su reloj: al fondo con el 
 // La secuencia, en función de `fin`: se acuesta (y la cámara sube) y se encastra. Con `fin` 0, el logo de hoy.
 // [EL ENCASTRE] 2B · cambió por pedido: se acuesta EN SU LUGAR (antes, sobre su base: el centro se corría al fondo) y cae
 // derecho al piso; cómo se encastra lo afirma s50 (2B, y 2D el hundimiento a presión que reemplaza al rebote).
+// [PULIDO 11] D · cambió por pedido: CAE (`caidaAlHueco.ts`, s62 D) y rebota apenas: el giro ya no es monótono (el rebote lo
+// levanta unos grados); lo que sube sin volver es la cámara. Con `fin` 0 sigue siendo el de hoy y al final, acostado al ras.
 const tam = { alto: 4.78, espesor: 0.56 }
 const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
-poseDelLogo(0, tam, pose)
+poseDelLogo(0, tam, 'lenta', pose)
 const deHoy = pose.centro.length() < 1e-12 && pose.rotacionX === 0
-poseDelLogo(1, tam, pose)
-const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && pose.centro.x === 0 && pose.centro.z === 0 && pose.centro.y < FLOOR_Y + tam.espesor / 2 + 1e-9
+poseDelLogo(1, tam, 'lenta', pose)
+const alFinal = Math.abs(pose.rotacionX + Math.PI / 2) < 1e-12 && pose.centro.x === 0 && Math.abs(pose.centro.z) < 1e-9 && pose.centro.y < FLOOR_Y + tam.espesor / 2 + 1e-9
 let monotono = true
-for (let f = 0; f < 1; f += 0.005) if (acostado(f + 0.005) < acostado(f)) monotono = false
-afirmar(deHoy && alFinal && monotono && acostado(1) === 1, 'el logo: con `fin` 0 es el de hoy (sin saltos al engancharse en la pose E); al final está acostado hacia atrás (−90°), sobre el eje (no se corrió) y encastrado en el piso (EL ENCASTRE 2B)')
+for (let f = 0; f < 1; f += 0.005) if (subida(f + 0.005) < subida(f)) monotono = false
+afirmar(deHoy && alFinal && monotono && subida(1) === 1, 'el logo: con `fin` 0 es el de hoy (sin saltos al engancharse en la pose E); al final está acostado hacia atrás (−90°), sobre el eje (no se corrió) y encastrado en el piso; la cámara sube sin volver (EL ENCASTRE 2B; [PULIDO 11] D)')
 
 // La cámara: sin final, intacta; al final, mirando el logo desde arriba (el cenit), sin vuelco; el paso es continuo.
 const camara = (): THREE.PerspectiveCamera => {

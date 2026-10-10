@@ -44,8 +44,7 @@ export const HUECO = {
    * al logo lleno no hay energía, descargas ni pistones (`luzDeAbajo.ts`, `filoConPoder.ts`).
    */
   relleno: { cierre: 0.2, liso: 0.01 },
-  /** Cuándo se abre (s del reloj): el logo cae a los 2,2 s y toca a los 2,76. */
-  abre: { desdeS: 1.6, hastaS: 2.4 },
+  /** [PULIDO 11] D · cuándo se abre ya no va por reloj: con el ángulo de la caída (`caidaAlHueco.ts`, `CAIDA_AL_HUECO.hueco`). */
   /** La profundidad del pozo, en espesores del logo (un pelo más: el fondo no toca la cara de abajo). */
   hondo: 1.06,
   /** [RETOQUE DEL ENCASTRE] 1B · el color de las paredes y del fondo del pozo: el papel del piso, un poco más sombreado adentro. */

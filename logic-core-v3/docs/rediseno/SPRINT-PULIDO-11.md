@@ -142,7 +142,55 @@ rótulo durante la primera mitad del volteo (el relieve apagado por «ocupado»)
   progreso arriba a la derecha podría chocar con su esquina de Contacto y Login — J9 ya lo ponía ahí; a medir).
 
 ### Fase D · el logo se cae y encastra
-- PENDIENTE: D · `?caida=lenta|angulo`, física de cuerpo rígido, hueco sincronizado, impacto = golpe, rebobinado, reinicio
+- CÓDIGO HECHO · BANCO PENDIENTE: D · `?caida=lenta|angulo`, física de cuerpo rígido, hueco sincronizado, impacto = golpe,
+  rebobinado, reinicio (`_lib/escena/final/caidaAlHueco.ts`; invariante s62 D, 12 afirmaciones con sus controles).
+
+**El sistema.** El logo vuelca sobre su canto de abajo y de atrás con la ecuación del vuelco de un cuerpo rígido, θ'' = κ·sen(θ − α)
+(α = atan(espesor/alto) = 6,7°: parado, el centro de masa queda adelante del canto; κ = g·d/(k² + d²) = 8,1 s⁻² con la gravedad de
+la escena, 26 u/s², la de la caída de antes), integrada con Runge-Kutta 4 en pasos de 0,5 ms y guardada en una tabla (función del
+tiempo: el reloj del final la lee con `fin`, así el rebobinado la recorre al revés y el reinicio la vuelve a correr). Una placa
+parada sobre su base no vuelca sola: primero se inclina hasta pasar 1,2° su equilibrio (0,5 s, trayecto de mínimo tirón: termina
+quieta, la física arranca del reposo sin salto) y ahí la gravedad se la lleva: duda y después se va. Al tocar, rebota con
+restitución 0,26 (la velocidad angular, dada vuelta) y la gravedad lo vuelve a bajar: un rebote de 3,5° y el segundo ya no
+levanta (debajo de 0,35 rad/s queda asentado: 0,25 s después del golpe). El canto queda en el borde del hueco y, en los últimos 6°
+(con el hueco ya abierto), baja por la pared del pozo: termina al ras y centrado; nada atraviesa el piso (medido cada 0,5 ms: 0 u).
+- `?caida=lenta` (sin pedir, la del producto): baja PARADO hasta el piso delante del hueco (1,2 s), se inclina y cae como una
+  ficha de dominó (1,75 s desde que la física arranca).
+- `?caida=angulo`: desde donde está, se inclina en el aire y cae girando mientras su canto baja en arco hasta el borde del hueco
+  (llega a los 60° de la caída; 1,33 s).
+- El contacto es el golpe: la caída arranca lo que dura antes de `golpeS` (3,5 s del reloj; era el ras de la presión, 4,7), así
+  toca exactamente en el cuadro en que suena el golpe, nace la súper onda y se enciende el filo (el código del golpe no cambió:
+  cruza `fin` hacia adelante, una vez, nunca rebobinando). Lo de después dura lo mismo (1,7 s): la secuencia, 5,2 s (era 6,4).
+  Al volver a tocar después del primer rebote, el golpecito de la cámara (era al tocar el piso, antes de la presión).
+- El hueco se abre con el ÁNGULO de la caída (de 28° a 84°): cerrado hasta que cae, a medio abrir a los 45° y entero 0,03 s antes
+  del contacto. El mar se calma antes de que empiece a caer (0,8–1,8 s). La cámara: el 80 % de su subida con el logo todavía de pie
+  (hasta 2,6 s) y el resto mientras cae y se asienta (hasta 0,4 s después del golpe); su blanco baja al piso con el logo.
+- Se fueron: el acostarse en su lugar, la caída derecha, la presión con su temblor y sus sacudones, `HUECO.abre`.
+
+**Dos defectos que encontré antes del banco** (los dos, cerrados y con invariante): (1) la física arrancaba inclinada (7,9°: una
+placa sobre su base tiene que pasar su equilibrio para volcar) y el logo saltaba de 0° a 7,9° en un cuadro — ahora se inclina antes
+(s62 D5, con ese salto como control positivo); (2) la primera versión de `angulo` giraba sobre un eje fijo a media altura (el único
+que lleva al logo parado a su lugar con un giro puro) y atravesaba el piso hasta 0,56 u durante 180 ms detrás del hueco — ahora
+vuelca sobre su canto mientras el canto baja en arco (0 u).
+
+**La revisión adversaria antes del commit** (un agente aparte, sólo lectura, con barridos en `tsx` contra los módulos). Encontró y
+se arregló:
+1. con la calma el piso deja de esquivar al logo (su techo se apaga de golpe con `calma > 0`); la calma arrancaba a los 0,8 s, con
+   el pie de la lenta ya a 0,4 u del piso: los bloques de abajo saltaban ~0,29 u en un cuadro (y al revés en cada rebobinado), y
+   el mar todavía se movía cuando el logo se apoyaba. Ahora la calma va de 0 a 0,7 s: arranca con el logo a 1,9 u y termina antes
+   de que el pie llegue a 0,7 u (s62 D7, con la calma de antes como control);
+2. el canto bajaba el espesor entero en los últimos 6° (28 ms: 0,47 u en un cuadro, un salto): ahora el hueco está entero a los
+   62° y el canto baja por la pared en 0,15 s (ningún cuadro baja más de 0,3 u: s62 D5, con los 84° como control);
+3. el golpe era fijo (3,5 s) y el arranque se acotaba: con un logo más alto el contacto llegaba después del golpe. Ahora el arranque
+   es siempre `golpeS − la caída` y lo que se adapta es la bajada de la lenta (o la espera en el aire): contacto = golpe para logos
+   de 4 a 6,5 u (s62 D2);
+4. reservas por cuadro en un camino que corre en todo el sitio (claves de texto, arreglos, un objeto nuevo por llamada): ahora el
+   último pedido se recuerda, el estado del reloj es un objeto reusado y sin final la sombra no hace cuentas;
+5. parado en el piso el logo no tenía sombra (se apagaba al apoyarse) y la mancha de contacto quedaba en el centro, detrás de él:
+   ahora la sombra va con el giro de la caída (parado la tiene al pie; se va mientras cae) y la mancha se va cuando el logo deja
+   su lugar (s62 D7).
+Queda a confirmar en el banco (no se tocó): la lenta trae al logo hasta 1,6 u por delante del plano donde se ponen las piezas 3D
+del pie (antes, 0,6) a los ~0,8 s: si alguna se superpone en pantalla con el logo en ese momento, se cruzarían.
 
 ### Fase E · hilos de energía (`?hilos=si`)
 - PENDIENTE
@@ -175,6 +223,16 @@ rótulo durante la primera mitad del volteo (el relieve apagado por «ocupado»)
 | C2 | `s61` J9 d · el progreso del teléfono | `top-[var(--spacing-4)]` … `flex-row` (el parlante en fila a su izquierda) | `top-[max(var(--spacing-4),env(safe-area-inset-top))]`, `right-[max(…)]`, sin `flex-row` | El humano pidió el parlante arriba a la izquierda y la zona segura; lo de J9 (arriba, `?progreso=abajo` el de antes) sigue |
 | C2 | `s47` C1 · el cartel del parlante | la clase literal `absolute bottom-full …` | la misma base, con la rama de `abajo` (`cn(…)`): en la cabecera, debajo | Encima se salía del cuadro con el parlante arriba |
 | C2 | `s47` D10 · el botón del menú (16 + 48) | `top-[var(--spacing-4)]` | `top-[max(var(--spacing-4),env(safe-area-inset-top))]` | La zona segura; sin recorte (o sin `viewport-fit=cover`, que el sitio no pide) vale 16 |
+| D | `s50` 2A · la duración | `RELOJ_DEL_FINAL.duracionS === 6.4` | `=== CAIDA_AL_HUECO.golpeS + 1.7` (5,2) | El golpe es el contacto de la caída (3,5 s); lo de después, igual |
+| D | `s50` 2B · se acuesta en su lugar | la pose de CIERRE como control; el centro quieto mientras se acuesta; cae derecho | termina acostado al ras, centrado y sobre el eje (las dos caídas); la cámara sube en paralelo y mira al eje | Cambió por pedido: la física, en s62 D |
+| D | `s50` 2D · la presión | hundimiento en tramos que resisten y ceden (+ 2 controles) | borrado; queda: al ras al final y el hueco entero antes del contacto | Cambió por pedido: entra al ras con la caída y rebota (s62 D3) |
+| D | `s50` 2E · el golpe | `FINAL_DEL_PIE.presion.hastaS` | `golpeDelFinal()` (= `CAIDA_AL_HUECO.golpeS`) | El golpe es el contacto |
+| D | `s49` · el logo con `fin` | `acostado` monótono | `subida` (la cámara) monótona; el logo rebota (no es monótono) | La caída rebota por diseño |
+| D | `s52-nocturno` B2 · `s52-pulido-1` P1 · `s54` · `s57` | `FINAL_DEL_PIE.presion.hastaS` | `golpeDelFinal()` | Ídem |
+| D | `s52-pulido-1` P5 · el oscurecimiento por cuadro en un viaje | `≤ P2 × 1,6` exacto | `≤ P2 × 1,6 × 1,02` (la misma tolerancia de muestreo que ya tenía la cámara) | Con el golpe a 3,5 s el quiebre de la expansión cae entre cuadros distintos en P2 y en el viaje: 0,0905 contra 0,0903 |
+| D | `s52-pulido-1` · las banderas sueltas | `rebobinado`, `angel` | + `caida: ['angulo']` | La bandera nueva |
+| D | `s53` 6 · la sombra en la pose | entera a `fin` 0,3, nada a 0,45 | entera a 0,05, casi entera a 0,3 (parado), nada a 0,68 (el golpe); y en arco, monótona | La sombra va con el giro de la caída: parado en el piso la tiene al pie |
+| D | `s51` 1C · al ras | `poseDelLogo(1, TAM, alRas)` | `poseDelLogo(1, TAM, 'lenta', alRas)` | La firma lleva la variante |
 | A4e | `s59` 1 · tocable apenas se lee | `ctaTocable(p)` en `pointerEvents` y en Enter | `tocable(p)`, con `tocable = enLaLista ? tocableEnLaLista : ctaTocable` | En el escenario sigue siendo `ctaTocable` (lo de siempre); en la lista no hay giro: tocable al 90 % del deslizamiento |
 
 ## Memoria (antes de cada fase: disponible y no paginado)
@@ -218,6 +276,19 @@ retorno al formulario rearma caro, cachear la geometría de la forma en `armadas
 `simulado` dice NO, el CDP de este Chrome no lo soporta: anotarlo y mirarlo a mano), la captura con el campo sobre su pozo, y
 después de «Enviar otro», `autocompletado: false` y los valores vacíos. Después, el recibo a `docs/rediseno/entregas/pulido-11/`
 y su afirmación en s62 B1 (los cuadros).
+
+**Fase C (el pie y la cabecera).** `npx tsx c1-pie.ts 1024 768 ; npx tsx c1-pie.ts 1280 800 ; npx tsx c1-pie.ts 1440 900 ; npx tsx
+c1-pie.ts 1920 1080` (las distancias columna–logo y logo–formulario, el centro del logo, las filas de «El recorrido», «Por qué
+develOP» contra su columna; C1 se diseña con esos números). Para C2, `a4-movil.ts` no alcanza: capturas arriba de la página a 320,
+375, 390, 414, 768 y 820, día y noche (con `?progreso=abajo` también), y a 900 y 1000 (la barra en modo pastilla: ¿choca su esquina
+con el progreso?).
+
+**Fase D (la caída).** `npx tsx d-caida.ts 1440 900 lenta ; npx tsx d-caida.ts 1440 900 angulo ; npx tsx d-caida.ts 390 844 lenta ;
+npx tsx d-caida.ts 390 844 angulo` — la corrida en vivo (hoja de 12 cuadros, `golpe` con la pose del logo justo antes y en el golpe,
+`mayoresDe20`), el rebobinado y el reinicio (hoja de 12) y la hoja con el reloj clavado en los 12 momentos. Mirar: que llega parado
+y vuelca sin salto, el hueco abriéndose con la caída, el golpe en el contacto, el rebote chico, nada atraviesa el piso, el
+rebobinado al revés y el reinicio entero.
+
 
 ## Lo que no quedó bien
 

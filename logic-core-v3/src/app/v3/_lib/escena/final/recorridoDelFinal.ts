@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
 import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
-import { HUECO } from './hueco'
+import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida, type VarianteDeLaCaida } from './caidaAlHueco'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -31,29 +31,31 @@ import { HUECO } from './hueco'
  * [RETOQUE DEL ENCASTRE] 1D · la cola se fue: la página termina en el pie, la secuencia arranca cuando el pie llegó
  * entero, no se adelanta con el scroll y un gesto hacia arriba la rebobina (`RELOJ_DEL_FINAL`).
  * [NOCTURNO FINAL] A1 · UN gesto hacia arriba la rebobina entera, sola; A2 · al salir o en un viaje se deshace con tope.
+ *
+ * [PULIDO 11] D · 1 y 2 son UNA CAÍDA DE VERDAD (`caidaAlHueco.ts`): el logo baja parado hasta el piso y cae hacia atrás como una
+ * ficha de dominó (o, con `?caida=angulo`, gira 90° en arco desde donde está), con la física de un cuerpo rígido, entra al ras
+ * en su hueco (que se abre con la caída) y rebota apenas hasta asentarse. El contacto es el golpe, a los `CAIDA_AL_HUECO.golpeS`
+ * del reloj. Se fueron el acostarse en su lugar, la caída derecha y la presión (con su temblor y sus sacudones).
  */
 export const FINAL_DEL_PIE = {
   /**
-   * [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). Se acuesta EN SU LUGAR:
-   * gira sobre su propio centro (no se corre) hasta `acostarseS`; la cámara sube en paralelo: [2D] el `conElLogo` de su
-   * camino mientras se acuesta (desde el cenit el logo acostado tapaba su hueco) y el resto mientras se encastra.
+   * [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). [PULIDO 11] D · la cámara sube
+   * en paralelo con la caída: `conElLogo` de su camino hasta `hastaS` (el logo todavía de pie: se lo ve caer) y el resto hasta
+   * `terminaTrasElGolpeS` después del golpe (mientras rebota y se asienta).
    */
-  acostarseS: 2.2,
-  subida: { conElLogo: 0.8 },
-  /** Y cae derecho al piso, con gravedad (u/s²), desde `desdeS`; el blanco de la cámara baja al piso en `blancoS`. */
-  caida: { desdeS: 2.2, gravedad: 26, blancoS: 0.9 },
+  subida: { conElLogo: 0.8, hastaS: 2.6, terminaTrasElGolpeS: 0.4 },
+  /** [PULIDO 11] D · el blanco de la cámara baja al piso (s del reloj): con el logo que baja y cae. */
+  blanco: { desdeS: 0.4, hastaS: 2.8 },
   /**
-   * [EL ENCASTRE] 2D · cae justo en el hueco (la cara de abajo al ras del borde) y se hunde A PRESIÓN hasta quedar al ras
-   * (un espesor) a los `hastaS`: en tramos que ceden de a poco (`tramos`, fracciones del espesor, cada uno más chico);
-   * en cada tramo resiste temblando (`resiste` del tramo, apenas cede: `cedeAlResistir`) y después cede de golpe.
+   * El mar alrededor del logo se calma antes de que caiga (s del reloj). [PULIDO 11] D · desde que arranca: con la calma el piso
+   * deja de esquivar al logo (su techo se apaga), así que tiene que pasar con el logo lejos (al arrancar está a 1,9 u del piso) y
+   * terminar antes de que la lenta, que baja parada, se acerque al mar (a los 0,7 s su pie está a 0,7 u).
    */
-  presion: { hastaS: 4.7, tramos: [0.34, 0.27, 0.22, 0.17], resiste: 0.55, cedeAlResistir: 0.06, temblor: 0.006, sacudon: 0.022 },
-  /** El mar alrededor del logo se calma antes de que caiga (s del reloj). */
-  calma: { desdeS: 1.4, hastaS: 2.4 },
+  calma: { desdeS: 0, hastaS: 0.7 },
   /**
-   * [EL ENCASTRE] 2E · EL PODER: al quedar al ras (`presion.hastaS`) se libera: un destello (sube a `destello` en
-   * `subeS`) que se asienta en el poder entero en `asientaS`. El golpe (su pulso) cae ahí; al tocar el piso, sólo un
-   * golpecito (`golpecito`, u, de la cámara).
+   * [EL ENCASTRE] 2E · EL PODER: al quedar al ras (el golpe) se libera: un destello (sube a `destello` en `subeS`) que se
+   * asienta en el poder entero en `asientaS`. El golpe (su pulso) cae ahí. [PULIDO 11] D · el `golpecito` (u, de la cámara),
+   * cuando vuelve a tocar después del primer rebote.
    */
   poder: { destello: 1.45, subeS: 0.12, asientaS: 0.9, golpecito: 0.03 },
   /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
@@ -91,7 +93,8 @@ export const FINAL_DEL_PIE = {
  * persigue con una inercia corta (`inerciaS`): ningún cambio de sentido es de golpe. [PULIDO 1] P5 · eso queda para salir
  * del fondo; en un viaje del menú el final vuelve en paralelo con el recorrido (`VIAJE_DEL_FINAL`).
  */
-export const RELOJ_DEL_FINAL = { duracionS: 6.4, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
+// [PULIDO 11] D · `duracionS`: el golpe y lo que viene después de él (el destello, la expansión: 1,7 s, como antes del 4,7 al 6,4).
+export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + 1.7, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
 
 /**
  * [PULIDO 1] P2 · EL REBOBINADO, MÁS RÁPIDO. El mecanismo de A1 (un gesto, solo, hasta el logo parado; el reinicio a los
@@ -344,19 +347,6 @@ export function segundosDelFinal(fin: number): number {
   return fin * RELOJ_DEL_FINAL.duracionS
 }
 
-/** Cuánto se acostó el logo, de 0 a 1 (gira sobre su propio centro). */
-export function acostado(fin: number): number {
-  return suave(segundosDelFinal(fin) / FINAL_DEL_PIE.acostarseS)
-}
-
-/** Cuánto subió la cámara, de 0 a 1: en paralelo con el logo que se acuesta. */
-export function subida(fin: number): number {
-  const s = segundosDelFinal(fin)
-  const { conElLogo } = FINAL_DEL_PIE.subida
-  const desde = FINAL_DEL_PIE.caida.desdeS
-  return conElLogo * suave(s / FINAL_DEL_PIE.acostarseS) + (1 - conElLogo) * suave((s - desde) / (FINAL_DEL_PIE.presion.hastaS - desde))
-}
-
 /** El tamaño del logo (u): su alto de tinta y su espesor. Lo publica `ProbeLogo` en las estadísticas. */
 export interface TamanoDelLogo {
   readonly alto: number
@@ -365,68 +355,36 @@ export interface TamanoDelLogo {
   readonly ancho?: number
 }
 
-/** La altura del centro del logo acostado sobre el piso (u) y cuándo llega ahí (s del reloj). */
-function caidaDe(t: TamanoDelLogo): { readonly enElPiso: number; readonly aterrizaS: number } {
-  const enElPiso = FLOOR_Y + t.espesor / 2
-  return { enElPiso, aterrizaS: FINAL_DEL_PIE.caida.desdeS + Math.sqrt((2 * (ORBIT_TARGET_Y - enElPiso)) / FINAL_DEL_PIE.caida.gravedad) }
-}
-
-/** Cuándo toca el piso (s del reloj): ahí cae el golpe. */
-export function aterrizaje(t: TamanoDelLogo): number {
-  return caidaDe(t).aterrizaS
-}
-
-/** [EL ENCASTRE] 2D · en qué tramo de la presión está y cuánto lleva de él (0 a 1); `null` fuera de la presión. */
-function tramoDeLaPresion(fin: number, t: TamanoDelLogo): { readonly i: number; readonly u: number; readonly antes: number } | null {
-  const p = FINAL_DEL_PIE.presion
-  const s = segundosDelFinal(fin)
-  const t0 = caidaDe(t).aterrizaS
-  if (s <= t0 || s >= p.hastaS) return null
-  const x = ((s - t0) / (p.hastaS - t0)) * p.tramos.length
-  const i = Math.min(p.tramos.length - 1, Math.floor(x))
-  return { i, u: x - i, antes: p.tramos.slice(0, i).reduce((a, b) => a + b, 0) }
-}
-
 /**
- * Cuánto se hundió en el hueco (fracción del espesor, de 0 con la cara de abajo al ras del borde a 1 al ras del piso): a
- * presión, tramo a tramo. En cada uno resiste (apenas cede) y después cede de golpe (frena al final: 1 − (1 − v)³).
+ * Cuánto subió la cámara, de 0 a 1: en paralelo con la caída. [PULIDO 11] D · `conElLogo` hasta `subida.hastaS` y el resto hasta
+ * un momento después del golpe.
  */
-export function hundido(fin: number, t: TamanoDelLogo): number {
-  const p = FINAL_DEL_PIE.presion
+export function subida(fin: number): number {
   const s = segundosDelFinal(fin)
-  if (s >= p.hastaS) return 1
-  const tramo = tramoDeLaPresion(fin, t)
-  if (tramo === null) return 0
-  const v = (tramo.u - p.resiste) / (1 - p.resiste)
-  const dentro = tramo.u < p.resiste ? p.cedeAlResistir * (tramo.u / p.resiste) : p.cedeAlResistir + (1 - p.cedeAlResistir) * (1 - (1 - v) ** 3)
-  return tramo.antes + p.tramos[tramo.i] * dentro
+  const { conElLogo, hastaS, terminaTrasElGolpeS } = FINAL_DEL_PIE.subida
+  const termina = CAIDA_AL_HUECO.golpeS + terminaTrasElGolpeS
+  return conElLogo * suave(s / hastaS) + (1 - conElLogo) * suave((s - hastaS) / (termina - hastaS))
 }
 
-/** Mientras resiste, el logo tiembla en su lugar (u, en el piso): el temblor de la presión. Fuera de eso, nada. */
-export function temblorDelLogo(fin: number, t: TamanoDelLogo, destino: THREE.Vector3): THREE.Vector3 {
-  const tramo = tramoDeLaPresion(fin, t)
-  const p = FINAL_DEL_PIE.presion
-  if (tramo === null || tramo.u >= p.resiste) return destino.set(0, 0, 0)
-  const s = segundosDelFinal(fin)
-  const a = p.temblor * Math.sin((Math.PI * tramo.u) / p.resiste)
-  return destino.set(a * Math.sin(s * 211), 0, a * Math.sin(s * 173 + 1))
+/** [PULIDO 11] D · el golpe (s del reloj): el contacto de la caída. Siempre el mismo (la caída arranca lo que dura antes). */
+export function golpeDelFinal(): number {
+  return CAIDA_AL_HUECO.golpeS
 }
 
-/** El sacudón chico de la cámara cada vez que cede (u): uno por tramo, que se apaga en una décima. */
-export function sacudonDeLaPresion(fin: number, t: TamanoDelLogo, destino: THREE.Vector3): THREE.Vector3 {
-  const tramo = tramoDeLaPresion(fin, t)
-  const p = FINAL_DEL_PIE.presion
-  if (tramo === null || tramo.u < p.resiste) return destino.set(0, 0, 0)
-  // Los segundos desde que empezó a ceder en este tramo.
-  const desde = (tramo.u - p.resiste) * ((p.hastaS - caidaDe(t).aterrizaS) / p.tramos.length)
-  const a = p.sacudon * Math.exp(-desde / 0.1)
-  const s = segundosDelFinal(fin)
-  return destino.set(Math.sin(s * 97) * a, Math.sin(s * 83 + 2) * a, Math.sin(s * 71 + 1) * a)
+const TOQUES = { caida: null as ReturnType<typeof caidaIntegrada> | null, toques: [] as readonly number[] }
+/** [PULIDO 11] D · los toques de la caída después del golpe (s del reloj): cada vez que vuelve a apoyarse después de un rebote. */
+export function toquesDespuesDelGolpe(t: TamanoDelLogo, v: VarianteDeLaCaida): readonly number[] {
+  const caida = caidaIntegrada(v, t)
+  if (TOQUES.caida === caida) return TOQUES.toques
+  const desde = arranqueDeLaCaida(v, t)
+  TOQUES.caida = caida
+  TOQUES.toques = caida.toques.slice(1).map((u) => desde + u)
+  return TOQUES.toques
 }
 
-/** [EL ENCASTRE] 2D · cuánto se abrió el hueco (0 a 1): desde el medio de los trazos hasta el borde exacto. */
-export function apertura(fin: number): number {
-  return suave((segundosDelFinal(fin) - HUECO.abre.desdeS) / (HUECO.abre.hastaS - HUECO.abre.desdeS))
+/** [EL ENCASTRE] 2D · cuánto se abrió el hueco (0 a 1). [PULIDO 11] D · con el ángulo de la caída, y entero justo antes del contacto. */
+export function apertura(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida): number {
+  return aperturaDelHueco(v, t, segundosDelFinal(fin))
 }
 
 /** Cuánto se calmó el mar alrededor del logo (0 a 1). */
@@ -436,27 +394,23 @@ export function calma(fin: number): number {
 }
 
 /**
- * La pose del logo en el final: gira EN SU LUGAR, sobre su propio centro, hacia atrás (`rotacionX`, de 0 a −90°: la cabeza
- * va al fondo), y después cae derecho al piso con gravedad y se hunde. Devuelve el centro (`centro`, en el mundo: siempre
- * sobre el eje, x = z = 0) y el giro; con `fin` 0, el logo de siempre (centro en el origen).
+ * La pose del logo en el final: [PULIDO 11] D · la de la caída (`caidaAlHueco.ts`): el centro (en el mundo, x = 0) y el giro
+ * (`rotacionX`, de 0 a −90°: la cabeza va al fondo). Con `fin` 0, el logo de siempre (centro en el origen, sin giro).
  */
-export function poseDelLogo(fin: number, t: TamanoDelLogo, destino: { centro: THREE.Vector3; rotacionX: number }, conRebote = true): void {
-  destino.centro.set(0, alturaDeLaCaida(fin, t) - (conRebote ? hundido(fin, t) * t.espesor : 0), 0)
-  destino.rotacionX = (-Math.PI / 2) * acostado(fin)
+export function poseDelLogo(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida, destino: { centro: THREE.Vector3; rotacionX: number }): void {
+  poseDeLaCaida(v, t, segundosDelFinal(fin), destino)
 }
 
-/** La altura del centro del logo en la caída (u), sin lo que se hunde: con gravedad, hasta quedar apoyado. */
-function alturaDeLaCaida(fin: number, t: TamanoDelLogo): number {
-  const c = Math.max(0, segundosDelFinal(fin) - FINAL_DEL_PIE.caida.desdeS)
-  return Math.max(caidaDe(t).enElPiso, ORBIT_TARGET_Y - 0.5 * FINAL_DEL_PIE.caida.gravedad * c * c)
-}
-
-/** [PULIDO 2] 6 · la sombra del logo en el final: se va en el último tramo de la caída (u) y vuelve con un fundido (s). */
+/** [PULIDO 2] 6 · la sombra del logo en el final: se va en el último tramo antes de apoyarse (u) y vuelve con un fundido (s). */
 export const SOMBRA_EN_LA_CAIDA = { tramo: 1.5, entraS: 0.3 } as const
 
-/** [PULIDO 2] 6 · cuánta sombra pide la pose (0 apoyado o en el hueco, 1 en el aire); la que se ve la lleva `sombraConFundido`. */
-export function sombraDeLaPose(fin: number, t: TamanoDelLogo): number {
-  return suave((alturaDeLaCaida(fin, t) - caidaDe(t).enElPiso) / SOMBRA_EN_LA_CAIDA.tramo)
+/**
+ * [PULIDO 2] 6 · cuánta sombra pide la pose (0 apoyado o en el hueco, 1 en el aire); la que se ve la lleva `sombraConFundido`.
+ * [PULIDO 11] D · la de la caída: entera en el aire y parado en el piso (la sombra sigue al logo: parado, la tiene al pie), se va
+ * mientras cae al hueco. Sin final, entera (sin cuentas: corre en cada cuadro de todo el sitio).
+ */
+export function sombraDeLaPose(fin: number, t: TamanoDelLogo, v: VarianteDeLaCaida): number {
+  return fin <= 0 ? 1 : sombraDeLaCaida(v, t, segundosDelFinal(fin))
 }
 
 /** [PULIDO 2] 6 · la sombra que se muestra: baja con la pose; sube hacia ella con un fundido (nunca de un cuadro al otro). */
@@ -465,9 +419,10 @@ export function sombraConFundido(anterior: number, objetivo: number, dt: number)
   return objetivo + (anterior - objetivo) * Math.exp(-Math.max(0, dt) / SOMBRA_EN_LA_CAIDA.entraS)
 }
 
-/** El blanco de la cámara: el centro del logo mientras se acuesta; con la caída baja al piso, un poco después que él. */
+/** El blanco de la cámara: el centro de la escena; [PULIDO 11] D · baja al piso con el logo que baja y cae. */
 export function blancoDelFinal(fin: number, destino: THREE.Vector3): THREE.Vector3 {
-  const b = suave((segundosDelFinal(fin) - FINAL_DEL_PIE.caida.desdeS) / FINAL_DEL_PIE.caida.blancoS)
+  const { desdeS, hastaS } = FINAL_DEL_PIE.blanco
+  const b = suave((segundosDelFinal(fin) - desdeS) / (hastaS - desdeS))
   return destino.set(0, ORBIT_TARGET_Y + (FLOOR_Y - ORBIT_TARGET_Y) * b, 0)
 }
 
@@ -610,13 +565,13 @@ export const EXPANSION_DE_LA_LUZ = { duraS: 1.5 } as const
 
 /** [PULIDO 3] A1 · cuánto se expandió la energía (0 a 1) desde el golpe. */
 export function expansionDeLaLuz(fin: number): number {
-  return Math.min(1, Math.max(0, (segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS) / EXPANSION_DE_LA_LUZ.duraS))
+  return Math.min(1, Math.max(0, (segundosDelFinal(fin) - golpeDelFinal()) / EXPANSION_DE_LA_LUZ.duraS))
 }
 
 /** [EL ENCASTRE] 2E · el poder liberado (0 hasta quedar al ras; un destello y después 1). Función de `fin`: se deshace al revertir. */
 export function poder(fin: number): number {
   const p = FINAL_DEL_PIE.poder
-  const s = segundosDelFinal(fin) - FINAL_DEL_PIE.presion.hastaS
+  const s = segundosDelFinal(fin) - golpeDelFinal()
   if (s <= 0) return 0
   if (s < p.subeS) return p.destello * suave(s / p.subeS)
   return 1 + (p.destello - 1) * (1 - suave((s - p.subeS) / p.asientaS))

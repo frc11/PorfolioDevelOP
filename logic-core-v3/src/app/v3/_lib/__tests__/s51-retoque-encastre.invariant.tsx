@@ -110,7 +110,7 @@ controlPositivo('el detector VE la holgura de EL ENCASTRE (0,035 u por afuera: l
 // Y la cara del logo al ras queda encima: el piso calmo y el borde del pozo, un pelo más abajo (sin pelear en el solape).
 const simulacion = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 const alRas = { centro: new THREE.Vector3(), rotacionX: 0 }
-poseDelLogo(1, TAM, alRas)
+poseDelLogo(1, TAM, 'lenta', alRas)
 const caraDelLogo = alRas.centro.y + TAM.espesor / 2
 const pozoAlRas = crearElPozo([cuadrado], TAM.espesor)
 const bordeDelPozo = new THREE.Box3().setFromObject(pozoAlRas.grupo).max.y
