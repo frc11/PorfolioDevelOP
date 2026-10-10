@@ -12,7 +12,7 @@ import { SATINADO } from '../estudio'
 import { conLogoDeNoche, hornearContornos, type ContornoDelLogo } from '../logoDeNoche'
 import { EMISION_EN_LA_NOCHE } from '../logoEmision'
 import { INK_COLOR, PAPER_COLOR } from '../probeScene'
-import { enEmDelLugar, posicionesDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
+import { enEmDelLugar, letrasDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { costadoDeDiaGlsl } from './filo'
 import { armarElTitulo, type RayaEnEm } from './geometria'
 import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada } from './llegada'
@@ -72,6 +72,8 @@ export interface Armado {
   pin: PinDelLugar
   /** [RETOQUE 3D] El de `pantalla`, en cada cuadro: su lugar de ahora en el cuadro. */
   readonly ahora: LugarVivo
+  /** [PULIDO 10] J1 · en cuántos renglones lo compuso el DOM al armarlo (el origen va en el primero). */
+  readonly renglones: number
 }
 
 export function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRenderTarget): void {
@@ -80,9 +82,9 @@ export function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.W
 }
 
 /** [RETOQUE PANEL] T4 · las rayas del título, medidas en el DOM una vez (px de su caja) y pasadas a em desde su origen. */
-function rayasDe(titulo: TituloDeVolumen, fuente: Font): RayaEnEm[] {
+function rayasDe(titulo: TituloDeVolumen, fuente: Font, renglones = 1): RayaEnEm[] {
   if (titulo.trazos.length === 0) return []
-  const enEm = enEmDelLugar(titulo.lugar, fuente.data)
+  const enEm = enEmDelLugar(titulo.lugar, fuente.data, renglones)
   const cuerpo = parseFloat(getComputedStyle(titulo.lugar).fontSize)
   return titulo.trazos.flatMap((t, indice) => {
     const s = t.medir(titulo.lugar)
@@ -122,7 +124,11 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   const forma = titulo.forma ?? FORMA_DE_LAS_LETRAS
   const propia = !mismaLlegada(forma, FORMA_DE_LAS_LETRAS)
   const glsl = propia ? { pars: llegadaParsGlsl(forma), normal: llegadaNormalGlsl(forma), posicion: llegadaPosicionGlsl(forma) } : { pars: LLEGADA_PARS_GLSL, normal: LLEGADA_NORMAL_GLSL, posicion: LLEGADA_POSICION_GLSL }
-  const { geometria, contornos, cajaDeLasLetras, letras } = armarElTitulo(fuente, titulo.texto, posicionesDelDom(titulo.lugar), titulo.gesto, rayasDe(titulo, fuente), forma)
+  // [PULIDO 10] J1 · las letras en sus renglones (con el texto partido, cada una baja al suyo).
+  const dom = letrasDelDom(titulo.lugar)
+  const renglones = dom?.renglones ?? 1
+  const bajadas = dom === null || renglones <= 1 ? null : dom.renglon.map((r) => r * dom.paso)
+  const { geometria, contornos, cajaDeLasLetras, letras } = armarElTitulo(fuente, titulo.texto, dom?.x ?? null, titulo.gesto, rayasDe(titulo, fuente, renglones), forma, bajadas)
   const material = new THREE.MeshStandardMaterial({ color: variante === 'negro' ? INK_COLOR : PAPER_COLOR, roughness: SATINADO.roughness, metalness: 0, dithering: true })
   // [RETOQUE 3D] `levanta`: el pie de atrás de la palabra (el más bajo y el más atrás de sus LETRAS, em) es el eje del giro y la línea.
   // [RETOQUE PANEL] T4 · sin letras (el ≠), en 0: la caja vacía es infinita y el sombreador daría NaN aunque no se levante.
@@ -154,7 +160,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   malla.visible = false
   const grupo = new THREE.Group()
   grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 } }
+  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 }, renglones }
 }
 
 export function soltar(a: Armado): void {

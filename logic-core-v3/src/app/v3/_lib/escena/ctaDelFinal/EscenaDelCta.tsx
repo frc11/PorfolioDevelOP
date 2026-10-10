@@ -257,6 +257,31 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
         camara: CAMARA_SIN_EL_MOUSE.position.toArray().map((x) => Math.round(x * 100) / 100),
         camaraDelCta: camaraDelCta().position.toArray().map((x) => Math.round(x * 100) / 100),
         delCta,
+        // [PULIDO 10] J1 · las cajas en el cuadro (px) de lo que dibuja la escena del CTA (las placas, la frase, HABLANOS), por grupo:
+        // el instrumento de solapes no las ve en el DOM (lo que reemplaza está apagado).
+        cajas: () => {
+          const cajas: { id: string; grupo: string; x: number; y: number; ancho: number; alto: number }[] = [] // banco
+          raiz.current?.updateMatrixWorld(true)
+          raiz.current?.traverseVisible((o) => {
+            if (!(o instanceof THREE.Mesh) || !(o.geometry instanceof THREE.BufferGeometry)) return
+            o.geometry.computeBoundingBox()
+            const b = o.geometry.boundingBox
+            if (b === null || b.isEmpty()) return
+            let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity]
+            for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
+              v.set(x, y, z).applyMatrix4(o.matrixWorld).project(camara)
+              const [px, py] = [((v.x + 1) / 2) * tam.width, ((1 - v.y) / 2) * tam.height]
+              ;[x0, y0, x1, y1] = [Math.min(x0, px), Math.min(y0, py), Math.max(x1, px), Math.max(y1, py)]
+            }
+            // El bloque de texto: HABLANOS (letras y subrayado) es uno, la frase (sus tramos, en placas distintas) es otra, y
+            // cada placa con su título es la suya; los renglones de un mismo bloque no se cuentan entre sí.
+            let grupo = o.name.startsWith('volteo · el tramo') ? 'la frase' : ''
+            for (let p = o.parent; grupo === '' && p !== null && p !== raiz.current; p = p.parent) if (p.name === 'cta del final' || p.name.startsWith('volteo · la placa')) grupo = p.name
+            if (grupo === '') grupo = o.parent?.name || (o.parent?.uuid ?? o.uuid)
+            cajas.push({ id: `cta3d: ${o.name || grupo}`, grupo: `cta3d:${grupo}`, x: x0, y: y0, ancho: x1 - x0, alto: y1 - y0 })
+          })
+          return cajas
+        },
       }
     }
     return () => {

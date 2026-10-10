@@ -58,7 +58,9 @@ export function aimWithFraming(
   // cualquier ventana, y no un desplazamiento fijo en unidades de mundo. La
   // magnitud —y por qué es `abs` y no `max(0, …)`— está en `encuadre.ts`,
   // que es el único lugar donde vive esa aritmética.
-  const halfHeight = Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV) / 2) * eyeDistance
+  // [PULIDO 10] J1 · con el campo de visión de la cámara (la banda portátil lo abre), no el de siempre.
+  const fov = camera instanceof THREE.PerspectiveCamera ? camera.fov : CAMERA_FOV
+  const halfHeight = Math.tan(THREE.MathUtils.degToRad(fov) / 2) * eyeDistance
   const halfWidth = halfHeight * aspect
 
   const travelX = recorridoDeEncuadre(halfWidth, logoWidth)

@@ -200,7 +200,8 @@ function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly v
  * aire y el botón (su caja mide ~1,8 veces su letra, con el subrayado): a 1440 × 900, 56 y 100 px; en una pantalla baja, menos.
  */
 // [PULIDO 5] D1 · más grande: un tamaño de display (era el del título XL y un quinto del lugar), con el CTA en proporción.
-const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65))]'
+// [PULIDO 10] J1 · y nunca más ancha que la pantalla: la frase en volumen (Archivo 600) mide 14,93 em en un renglón.
+const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65),calc((100vw-2*var(--pad-lateral-compacto))/15.4))]'
 /**
  * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
  * al final del recorrido del escenario y al día): medido, el anillo se dibujaba alrededor de nada (1,0:1, sólo el cielo).

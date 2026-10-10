@@ -27,6 +27,8 @@ export interface TituloConPlano {
   readonly lugar: LugarEnElCuadro | null
   /** [AJUSTES FINALES] A4 · cuánto llegó (lo mostrado): el acompañante del que llega una vez por carga aparece con sus letras. */
   readonly mostrado: { readonly llegada: number }
+  /** [PULIDO 10] J1 · en cuántos renglones lo compuso el DOM (el origen va en el primero). */
+  readonly renglones?: number
 }
 
 /** [AJUSTES FINALES] A4 · en qué parte de la llegada del título su acompañante termina de aparecer (las letras se disuelven hasta 0,35). */
@@ -141,7 +143,7 @@ function planoDe(el: HTMLElement, ac: Acompanante, a: TituloConPlano, cuadro: { 
   if (viejo !== undefined && viejo.cuadro === firma && viejo.delArmado === a.lugar) return viejo
   const t = a.titulo
   if (!t.lugar.isConnected || !el.isConnected) return null
-  const lugar = lugarDeLectura(t.lugar, t.subida)
+  const lugar = lugarDeLectura(t.lugar, t.subida, a.renglones ?? 1)
   const pin = t.queda || t.colocacion === 'pantalla' ? pinDelLugar(t.lugar) : { inicio: scrollY, fin: scrollY }
   const [delTitulo, delAcompanante] = [desplazamiento(t.lugar), desplazamiento(el)]
   const caja = { x: lugar.izquierda + delAcompanante.x - delTitulo.x, y: lugar.arriba + t.subida * innerHeight + delAcompanante.y - delTitulo.y, ancho: el.offsetWidth, alto: el.offsetHeight }

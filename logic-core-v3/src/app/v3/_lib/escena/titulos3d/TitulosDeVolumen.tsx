@@ -300,7 +300,7 @@ function correr(a: Armado, d: number): void {
  */
 function colocarElArmado(a: Armado, camara: THREE.PerspectiveCamera, aspecto: number, stats: ProbeStatsStore, viva: THREE.Camera): void {
   const nudo = a.titulo.colocacion === 'pantalla' && viva instanceof THREE.PerspectiveCamera ? viva : camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, camara)
-  const lugar = lugarDeLectura(a.titulo.lugar, a.titulo.subida)
+  const lugar = lugarDeLectura(a.titulo.lugar, a.titulo.subida, a.renglones)
   a.mundoPorPx = colocar(a.grupo, nudo, lugar, a.fuente.data) // una vez por llegada
   a.lugar = lugar
   Object.assign(a.ahora, lugar)

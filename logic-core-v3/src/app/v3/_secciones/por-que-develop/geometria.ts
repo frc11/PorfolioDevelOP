@@ -14,6 +14,7 @@
 
 import type { CSSProperties } from 'react'
 
+import { enUnidadesDelLogo } from '../../_lib/escena/banda'
 import { AIRE_DEL_LOGO_SVH, DOLLY_DEL_CTA, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, arribaDelLogoEncuadrado, huecoDelLogo, progresoDelPin } from '../../_lib/escena/finalDelRecorrido'
 
 export { huecoDelLogo }
@@ -67,11 +68,15 @@ export const ARRIBA_DEL_CTA_QUIETO_SVH = Math.round(50 * (TIEMPOS_DEL_FINAL.cta.
 export const ESTILO_DE_LA_LISTA = { '--alto-del-cta-en-lista': `${String(ALTO_DEL_CTA_EN_LISTA_SVH)}svh`, '--arriba-del-cta-quieto': `${String(ARRIBA_DEL_CTA_QUIETO_SVH)}svh` } as CSSProperties
 
 /** Las variables que leen las clases: los huecos del logo en A y en B, el techo de las columnas y el lugar del CTA. */
+// [PULIDO 10] J1 · lo que mide el logo, con la banda portátil (`banda.ts`): en una pantalla más angosta que 1,6 el logo se ve
+// más chico y el hueco y el lugar del CTA, también. El lugar del CTA, con el logo abajo contra el borde (`frameY` −1): su
+// arriba es 100 menos su alto, así que el lugar es (50 − aire − alto) × 2, con el alto en unidades del logo.
+const ALTO_DEL_LOGO_EN_EL_CTA_SVH = 100 - ARRIBA_DEL_LOGO_EN_EL_CTA_SVH
 export const ESTILO_DEL_ESCENARIO = {
-  '--lugar-del-cta': `${LUGAR_DEL_CTA_SVH.toFixed(1)}svh`,
+  '--lugar-del-cta': `calc((${String(50 - AIRE_SVH)}svh - ${enUnidadesDelLogo(ALTO_DEL_LOGO_EN_EL_CTA_SVH)}) * 2)`,
   // [FINAL 3] La frase usa el hueco de B (el más ancho): así cada mitad arranca donde arranca su columna de valores.
-  '--hueco-de-la-frase': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
-  '--hueco-de-los-valores': `${huecoDelLogo(POSES_DEL_FINAL.valores.distance).toFixed(1)}svh`,
+  '--hueco-de-la-frase': enUnidadesDelLogo(huecoDelLogo(POSES_DEL_FINAL.valores.distance)),
+  '--hueco-de-los-valores': enUnidadesDelLogo(huecoDelLogo(POSES_DEL_FINAL.valores.distance)),
   '--arriba-de-los-valores': `${String(ARRIBA_DE_LOS_VALORES_SVH)}svh`,
   '--abajo-de-los-valores': `${String(AIRE_SVH)}svh`,
 } as CSSProperties

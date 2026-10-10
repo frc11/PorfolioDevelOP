@@ -252,8 +252,12 @@
  * composición no se toca. Nació estirada hasta 1024 porque el tema no tenía corte
  * en 768 inclusive; ahora lo tiene y los dos bordes son tokens:
  * `--breakpoint-movil` (426) abre y `--breakpoint-hasta-tablet` (769) cierra.
- * `s7-mezcla` §8 ata los dos literales. */
-@media (width >= 426px) and (width < 769px) {
+ * `s7-mezcla` §8 ata los dos literales.
+ *
+ * [PULIDO 10] J1 · y desde 1024, por lo mismo: en el reposo de Quiénes somos el ≠ centrado caía sobre el arco del logo
+ * (a 1024 y a 1440, medido con el banco de solapes); pegado al margen, se alinea con el titular. El 1024 lo ata `s61` a
+ * `--breakpoint-escritorio`. */
+@media (width >= 426px) and (width < 769px), (width >= 1024px) {
   [data-v3] [data-signo='distinto'] {
     margin-inline: 0;
   }

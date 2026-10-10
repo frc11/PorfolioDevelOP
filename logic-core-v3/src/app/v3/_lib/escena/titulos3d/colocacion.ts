@@ -4,6 +4,7 @@ import { aimWithFraming } from '../cameraFraming'
 import { CHOREO_KEYFRAMES } from '../choreography'
 import { buildTrack, sampleTrack, type ChoreoTrack } from '../choreographySampler'
 import type { ChoreoPose } from '../choreographyTypes'
+import { BANDA_EN_VIVO, fovConFactor } from '../banda'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, ORBIT_TARGET_Y } from '../probeScene'
 
 /**
@@ -66,7 +67,8 @@ export function poseDeLaLectura(lectura: Lectura): ChoreoPose {
 export function camaraDeLaLectura(lectura: Lectura, aspecto: number, logoW: number, logoH: number, destino: THREE.PerspectiveCamera): THREE.PerspectiveCamera {
   const { angleDeg, height, distance, frameX, frameY } = poseDeLaLectura(lectura)
   const c = destino
-  c.fov = CAMERA_FOV
+  // [PULIDO 10] J1 · con la banda portátil, como la cámara viva (los títulos existen sólo desde 1024).
+  c.fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)
   c.near = CAMERA_NEAR
   c.far = CAMERA_FAR
   c.aspect = aspecto
@@ -108,9 +110,10 @@ export function lineaDeBase(l: LugarEnElCuadro, f: MedidasDeLaFuente): number {
  * [RETOQUE PANEL] T4 · un punto de la caja de un lugar (px CSS desde su esquina de arriba a la izquierda, sin
  * transformaciones), en em desde el origen del título (el comienzo de la línea de base): la cuenta con que se coloca.
  */
-export function enEmDelLugar(el: HTMLElement, fuente: MedidasDeLaFuente): (x: number, y: number) => readonly [number, number] {
+export function enEmDelLugar(el: HTMLElement, fuente: MedidasDeLaFuente, renglones = 1): (x: number, y: number) => readonly [number, number] {
   const cuerpo = parseFloat(getComputedStyle(el).fontSize)
-  const base = lineaDeBase({ izquierda: 0, arriba: 0, linea: el.offsetHeight, cuerpo, ancho: 0, alto: 0 }, fuente)
+  // [PULIDO 10] J1 · la línea de base es la del PRIMER renglón (el alto de uno, no el de la caja entera).
+  const base = lineaDeBase({ izquierda: 0, arriba: 0, linea: el.offsetHeight / Math.max(1, renglones), cuerpo, ancho: 0, alto: 0 }, fuente)
   return (x, y) => [x / cuerpo, (base - y) / cuerpo]
 }
 
@@ -175,9 +178,10 @@ export function corrimiento(pin: PinDelLugar, y: number): number {
  * es lo que la pieza sube en su lectura por una transformación de más arriba (la frase de Por qué develOP, con los
  * valores). Sin escenario, su caja de ahora.
  */
-export function lugarDeLectura(el: HTMLElement, subida: number): LugarEnElCuadro {
+export function lugarDeLectura(el: HTMLElement, subida: number, renglones = 1): LugarEnElCuadro {
   const cuerpo = parseFloat(getComputedStyle(el).fontSize)
-  const linea = el.offsetHeight
+  // [PULIDO 10] J1 · el alto de UN renglón: con el texto partido, el origen del título va en el primero.
+  const linea = el.offsetHeight / Math.max(1, renglones)
   let [x, y] = [0, 0]
   let e: HTMLElement | null = el
   while (e !== null && getComputedStyle(e).position !== 'sticky') {
@@ -199,6 +203,23 @@ export function lugarDeLectura(el: HTMLElement, subida: number): LugarEnElCuadro
  * compuso, con el interletrado y el kerning. Relativa a la caja del elemento, así que una escala de la pieza no la cambia.
  */
 export function posicionesDelDom(el: HTMLElement): number[] | null {
+  return letrasDelDom(el)?.x ?? null
+}
+
+/**
+ * [PULIDO 10] J1 · LAS LETRAS DEL DOM EN SUS RENGLONES: la x de cada una (em, desde la caja), en qué renglón está (0 el primero),
+ * cuántos renglones hay y cuánto baja cada uno (em). Antes el título leía sólo la x y ponía todo en UNA línea de base: con el
+ * texto partido (el registro 1 del hero a 1024), los renglones se encimaban («VINEGOOO»). Un renglón nuevo empieza cuando la
+ * letra baja más de medio cuerpo.
+ */
+export interface LetrasDelDom {
+  readonly x: number[]
+  readonly renglon: number[]
+  readonly renglones: number
+  readonly paso: number
+}
+
+export function letrasDelDom(el: HTMLElement): LetrasDelDom | null {
   // [RETOQUE 3D] Todos los nodos de texto que se ven, en orden (el registro 1 del hero son dos palabras en dos `span` y un
   // espacio; «El equipo» va partido por el canal del texto, con su copia para el lector): las letras, sin los espacios.
   const recorrido = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement?.closest('.sr-only') === null ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) })
@@ -207,14 +228,22 @@ export function posicionesDelDom(el: HTMLElement): number[] | null {
   const cuerpo = parseFloat(getComputedStyle(el).fontSize)
   const rango = document.createRange()
   const x: number[] = []
+  const renglon: number[] = []
+  const arribas: number[] = []
   for (let nodo = recorrido.nextNode(); nodo !== null; nodo = recorrido.nextNode()) {
     if (!(nodo instanceof Text)) continue
     for (let k = 0; k < nodo.length; k += 1) {
       if (nodo.data[k].trim() === '') continue
       rango.setStart(nodo, k)
       rango.setEnd(nodo, k + 1)
-      x.push((rango.getBoundingClientRect().left - caja.left) / escala / cuerpo)
+      const r = rango.getBoundingClientRect()
+      x.push((r.left - caja.left) / escala / cuerpo)
+      const arriba = (r.top - caja.top) / escala / cuerpo
+      if (arribas.length === 0 || arriba > arribas[arribas.length - 1] + 0.5) arribas.push(arriba)
+      renglon.push(arribas.length - 1)
     }
   }
-  return x.length === 0 ? null : x
+  if (x.length === 0) return null
+  const renglones = arribas.length
+  return { x, renglon, renglones, paso: renglones > 1 ? (arribas[renglones - 1] - arribas[0]) / (renglones - 1) : 0 }
 }

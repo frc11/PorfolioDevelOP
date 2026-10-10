@@ -182,12 +182,17 @@ export const GEOMETRIA = {
      * porque es una medida de ESTA composición, igual que `--medida-movil`.
      */
     titular: {
-      '--titular-tamano-escritorio': '38px',
+      // [PULIDO 10] J1 · y nunca más que lo que entra en su columna (col-span-6: medida, 0,5·vw − 118 px de 1024 a 1440): el
+      // tramo más largo, «Queremos hacer algo distinto,», mide 13,74 em. A 1024 la columna es de 394 px y el titular se partía en
+      // cuatro renglones (el cuarto, «lo mismo de siempre», contra el logo); ahora, dos, como a 1440.
+      '--titular-tamano-escritorio': 'min(38px, calc((50vw - 118px) / 14))',
       '--titular-medida': '23ch',
       '--titular-interlineado': '1.25',
       /** El alto del ≠: tres renglones del titular, derivado de su propio cuerpo. */
       '--signo-alto': 'calc(3em * var(--titular-interlineado))',
     } as React.CSSProperties,
+    /** [PULIDO 10] J1 · los bordes de la primera pantalla desde 1024 (`repartoDeLaAgencia`). */
+    agencia: { '--agencia-arriba': '13svh', '--agencia-abajo': '12svh' } as React.CSSProperties,
     bajada: {
       '--agencia-medida': 'min(30rem, 42vw)',
       '--cuerpo-tamano': '1.0625rem',
@@ -266,7 +271,8 @@ export const GEOMETRIA = {
     // La fila 4 se fue con «Tucumán, Argentina»: el bloque del equipo arranca antes.
     titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
     /** El ≠ en su PROPIA fila: `content-evenly` le da el mismo aire arriba y abajo, que es el centrado vertical pedido. */
-    signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
+    // [PULIDO 10] J1 · desde 1024 su fila es la que crece (`repartoDeLaAgencia`) y el ≠ va centrado en ella.
+    signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 escritorio:self-center',
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-4',
   },
   /**
@@ -293,6 +299,15 @@ export const GEOMETRIA = {
    * dejaba el titular en 552 de 704.
    */
   claseDeLaColumnaLateral: 'tablet:grid-cols-1 escritorio:grid-cols-[var(--columna-lateral)_minmax(0,1fr)]',
+  /**
+   * [PULIDO 10] J1 · EL REPARTO DE LA PRIMERA PANTALLA, DESDE 1024: el titular arriba, el cuerpo abajo y la fila del ≠ en el
+   * medio, la que crece. Con el hueco parejo (`content-evenly`) el tramo del titular al cuerpo medía 650 px a 1440 × 900 y el
+   * logo, en el reposo de la sección, 424: no entraba entre los dos y les pasaba por encima (el banco de solapes, a 1024 y
+   * a 1440). Así el logo queda entre el titular y el cuerpo, y el ≠ a su izquierda. La pantalla sigue midiendo lo mismo.
+   * Los dos bordes (`estilos.agencia`) salen del banco a 1440 × 900, en el reposo del viaje: el titular, a 45 px de la barra y
+   * 38 px arriba del logo; el cuerpo —que se ve en su plano, 83 px más abajo que su caja— 20 px debajo del logo y entero.
+   */
+  repartoDeLaAgencia: 'escritorio:content-stretch escritorio:grid-rows-[0_auto_1fr_auto] escritorio:pt-[var(--agencia-arriba)] escritorio:pb-[var(--agencia-abajo)]',
   /** Cuántos renglones promete el titular. Dos a 1440 y a 1920, cortando después de «distinto,». */
   lineasDelTitular: 2,
 } as const

@@ -88,7 +88,7 @@ function desdeDe(llegada: LlegadaDelTitulo, letras: number, comun: readonly [num
 }
 
 /** Arma el título: cada letra extruida en su lugar; después, todas en una malla con su orden, su centro y de dónde sale. */
-export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras', rayas: readonly RayaEnEm[] = [], forma: FormaDeLaLlegada = FORMA_DE_LAS_LETRAS): TituloArmado {
+export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly number[] | null = null, llegada: LlegadaDelTitulo = 'letras', rayas: readonly RayaEnEm[] = [], forma: FormaDeLaLlegada = FORMA_DE_LAS_LETRAS, bajadas: readonly number[] | null = null): TituloArmado {
   const { profundidad, bisel, curvas } = VOLUMEN_DEL_TITULO
   const equis = equisDe(fuente, texto, posiciones)
   const caracteres = [...texto]
@@ -102,8 +102,9 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     if (fuente.data.glyphs[c] === undefined) throw new Error(`la fuente de los títulos no tiene «${c}»`)
     const formas = fuente.generateShapes(c, 1)
     const pieza = new THREE.ExtrudeGeometry(formas, { depth: profundidad, curveSegments: curvas, bevelEnabled: true, bevelThickness: bisel.grosor, bevelSize: bisel.tamano, bevelOffset: -bisel.tamano, bevelSegments: bisel.segmentos })
-    // La extrusión crece hacia +z desde la cara de atrás: la de adelante, a z = 0.
-    pieza.translate(equis[k], 0, -profundidad)
+    // La extrusión crece hacia +z desde la cara de atrás: la de adelante, a z = 0. [PULIDO 10] J1 · y baja a su renglón (em).
+    const baja = bajadas?.[orden] ?? 0
+    pieza.translate(equis[k], -baja, -profundidad)
     pieza.computeBoundingBox()
     const centro = (pieza.boundingBox ?? new THREE.Box3()).getCenter(new THREE.Vector3())
     const n = pieza.getAttribute('position').count
@@ -121,7 +122,7 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     piezas.push(pieza)
     for (const f of formas) {
       const { shape, holes } = f.extractPoints(curvas)
-      for (const contorno of [shape, ...holes]) contornos.push(contorno.map((p) => new THREE.Vector2(p.x + equis[k], p.y)))
+      for (const contorno of [shape, ...holes]) contornos.push(contorno.map((p) => new THREE.Vector2(p.x + equis[k], p.y - baja)))
     }
     orden += 1
   })

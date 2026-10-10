@@ -42,7 +42,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
       >
         {/* Modo pulido: se pidió sacar el cuadrado de acento de esta pantalla. La columna se queda (B11/Rotulo.tsx), como en ElEquipo. */}
         <div />
-        <div data-composicion="agencia" className={CLASES_DEL_REPARTO}>
+        <div data-composicion="agencia" className={cn(CLASES_DEL_REPARTO, GEOMETRIA.repartoDeLaAgencia)} style={GEOMETRIA.estilos.agencia}>
           {/* ⚠️ B12: el rótulo y su celda se fueron; el titular NO se mueve. */}          {/* ⚠️ EL TITULAR DEJÓ `TextoPorLineas`, por el mismo motivo que el del Hero: ese
               divisor reparte UNA cadena con UNA métrica y acá hay dos tramos con raya
               propia. El patrón no cambia —sigue siendo P1, con su ancla y sus claves—,

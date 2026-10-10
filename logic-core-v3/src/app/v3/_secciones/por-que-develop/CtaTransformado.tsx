@@ -3,6 +3,8 @@
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useCallback, useRef } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { DestinoDelCta, RenglonDeLaFraseDelCta, estiloEnElViaje, useCtaListo, useProgresoDelCta, useValorDeLaEscena, useViajando } from '../../_componentes/ctaDelFinal/CtaDelFinal'
@@ -37,7 +39,8 @@ function origenDeLaFrase(): readonly RenglonDelCta[] {
 function FraseDelCta({ claseDelTexto }: { readonly claseDelTexto?: string }): React.JSX.Element {
   return (
     <>
-      <Titular nivel="titulo-xl" como="p" className={claseDelTexto}>
+      {/* [PULIDO 10] J1 · desde 1024 la frase va en UN renglón, como su volumen: partida, empujaba «El tuyo también.» hacia abajo. */}
+      <Titular nivel="titulo-xl" como="p" className={cn(claseDelTexto, 'escritorio:whitespace-nowrap')}>
         <RenglonDeLaFraseDelCta indice={0} className="escritorio:inline">{CTA.fraseEnDos[0]}</RenglonDeLaFraseDelCta>{' '}
         <RenglonDeLaFraseDelCta indice={1} className="escritorio:inline">{CTA.fraseEnDos[1]}</RenglonDeLaFraseDelCta>
       </Titular>

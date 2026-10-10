@@ -830,8 +830,11 @@ export const CORRIMIENTO_DEL_ROCE_EN_768_PX = 6
  * son niveles de la escala como COLOR, y el día que alguien escriba una tinta
  * al lado desaparece uno, en silencio.
  */
+// [PULIDO 10] J1 · desde 1024 el renglón no se parte nunca y la letra no pasa del ancho de su caja (el `h1` es el contenedor):
+// «TU NEGOCIO VENDIENDO» mide 8,19 em en la Archivo 700 del sitio (con su interletrado), más un margen. A 1024 la caja mide
+// ~300 px y el fluido pedía ~408: el DOM lo partía y el título 3D, de un renglón, los encimaba.
 export const TIPOGRAFIA_DEL_TITULAR =
-  'font-display text-fluido-display max-tablet:text-display-r1-papel max-angosto:text-display-r1-papel-angosto tablet:text-display-r1-portatil escritorio:text-fluido-display leading-titulo tracking-display font-fuerte uppercase'
+  'font-display text-fluido-display max-tablet:text-display-r1-papel max-angosto:text-display-r1-papel-angosto tablet:text-display-r1-portatil escritorio:text-[length:min(var(--text-fluido-display),calc(100cqw/8.4))] escritorio:whitespace-nowrap leading-titulo tracking-display font-fuerte uppercase'
 
 /**
  * LA TIPOGRAFÍA DEL REGISTRO 2 — Chivo Light itálica, y el nivel MÁS GRANDE.

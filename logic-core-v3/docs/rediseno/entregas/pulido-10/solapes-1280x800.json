@@ -1,0 +1,44 @@
+{
+ "ancho": 1280,
+ "alto": 800,
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "fecha": "2026-10-10T03:07:06.865Z",
+ "momentos": {
+  "hero": {
+   "y": 0,
+   "cajas": 6,
+   "celdasDelLogo": 822,
+   "solapes": []
+  },
+  "quienes": {
+   "y": 800,
+   "cajas": 10,
+   "celdasDelLogo": 1071,
+   "solapes": []
+  },
+  "portfolio": {
+   "y": 4515,
+   "cajas": 4,
+   "celdasDelLogo": 846,
+   "solapes": []
+  },
+  "razones": {
+   "y": 25068,
+   "cajas": 2,
+   "celdasDelLogo": 845,
+   "solapes": []
+  },
+  "cta": {
+   "y": 28426,
+   "cajas": 14,
+   "celdasDelLogo": 341,
+   "solapes": []
+  },
+  "pie": {
+   "y": 29228,
+   "cajas": 13,
+   "celdasDelLogo": 153,
+   "solapes": []
+  }
+ }
+}

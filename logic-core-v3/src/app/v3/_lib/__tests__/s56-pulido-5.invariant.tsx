@@ -191,9 +191,9 @@ afirmar(kerningBien(FUENTES_DEL_CTA.frase) && usaElKerning(armado, piezas), '  e
 controlPositivo('  el detector VE la frase sólo con los avances (sin kerning)', { fuente: FUENTES_DEL_CTA.frase.fuente, kerning: {} }, kerningBien)
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const ctaDom = sinComentarios(leer('_secciones/por-que-develop/CtaTransformado.tsx'))
-const tamanosBien = (pq: string, dom: string): boolean => pq.includes("const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65))]'") && dom.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/2.8))]'")
-afirmar(tamanosBien(porQue, ctaDom), '  más grande: la frase con el tope del display y un 1/3,65 del lugar del CTA (era el título XL y 1/5); «HABLANOS», 1,3 veces')
-controlPositivo('  el detector VE la frase del tamaño de antes', [porQue.replace('min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65))', ['min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)', '/5))'].join('')), ctaDom] as const, ([a, b]: readonly [string, string]) => tamanosBien(a, b))
+const tamanosBien = (pq: string, dom: string): boolean => pq.includes("const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65),calc((100vw-2*var(--pad-lateral-compacto))/15.4))]'") && dom.includes("const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/2.8))]'")
+afirmar(tamanosBien(porQue, ctaDom), '  más grande: la frase con el tope del display y un 1/3,65 del lugar del CTA (era el título XL y 1/5); «HABLANOS», 1,3 veces; [PULIDO 10] J1 · y nunca más que 1/15,4 del ancho útil (un renglón desde 1024)')
+controlPositivo('  el detector VE la frase del tamaño de antes', [porQue.replace('min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65)', ['min(var(--text-fluido-titulo-xl),calc(var(--lugar-del-cta)', '/5)'].join('')), ctaDom] as const, ([a, b]: readonly [string, string]) => tamanosBien(a, b))
 // Que entre: si un renglón no entra en el ancho, todos se achican juntos (centrados en su renglón).
 const renglones = [{ texto: 'Este sitio empezó', fuerte: false, izquierda: 0, arriba: 100, ancho: 390, alto: 60, cuerpo: 60 }, { texto: 'El tuyo también.', fuerte: true, izquierda: 0, arriba: 160, ancho: 390, alto: 60, cuerpo: 60 }]
 const entraBien = (maximo: number): boolean => {

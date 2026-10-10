@@ -5,6 +5,7 @@ import { useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { progresoDeLaCamara } from './camaraDeEntonces'
+import { BANDA_EN_VIVO, factorDeLaBanda, fovConFactor } from './banda'
 import { aimWithFraming } from './cameraFraming'
 import {
   BOKEH_BOB_AMPLITUDE,
@@ -72,7 +73,7 @@ import { giroDeLaInterfaz, nivelConLaInterfaz } from './interfaz/respuesta'
 import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
-import { AUTO_ORBIT_DEG_PER_S, ORBIT_TARGET_Y } from './probeScene'
+import { AUTO_ORBIT_DEG_PER_S, CAMERA_FOV, ORBIT_TARGET_Y } from './probeScene'
 import type {
   ProbeMode,
   ProbeParamsStore,
@@ -477,6 +478,17 @@ export function OrbitRig({
     sinElMouse.height = height
     angleDeg += desplazamiento.angleDeg + giroDeLaVista
     height += desplazamiento.height
+
+    // 2b · [PULIDO 10] J1 · la banda portátil: el campo de visión vertical, abierto en las pantallas más angostas que 1,6 para
+    // que el logo ocupe del ancho lo mismo que a 1440 × 900 (`banda.ts`). La cámara no se mueve.
+    BANDA_EN_VIVO.factor = factorDeLaBanda(state.size.width, state.size.height)
+    if (state.camera instanceof THREE.PerspectiveCamera) {
+      const fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)
+      if (state.camera.fov !== fov) {
+        state.camera.fov = fov
+        state.camera.updateProjectionMatrix()
+      }
+    }
 
     // 3 · Cámara sobre la órbita. Ángulo 0° = de frente al logo (se lee bien);
     // 90° y 270° son los perfiles; 180° es de atrás, con el logo espejado.

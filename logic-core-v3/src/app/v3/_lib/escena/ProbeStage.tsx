@@ -26,6 +26,7 @@ import { MoireVivo } from './moire/MoireVivo'
 import { PisoVivo } from './piso/PisoVivo'
 import { Aire } from './polvo/Aire'
 import { Fisica } from './polvo/Fisica'
+import { SiluetaDelBanco } from './SiluetaDelBanco'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
 import { FOG_COLOR, FOG_FAR, FOG_NEAR } from './probeAtmosphere'
@@ -285,6 +286,8 @@ export default function ProbeStage({
         <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />
+        {/* [PULIDO 10] J1 · sólo con banco: la silueta del logo en el cuadro (el instrumento de solapes). */}
+        <SiluetaDelBanco logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
         <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
         {/* [ESCENA 8] T4 · el cielo de día (detrás de la formación y de la trama); [CALIDAD 1] A2: el pintado celeste, encendido. */}

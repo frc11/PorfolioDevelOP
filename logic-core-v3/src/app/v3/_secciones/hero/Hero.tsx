@@ -485,7 +485,8 @@ function TitularDelHero({ seccion, progreso }: PropsDeSeccion & { readonly progr
       // La mezcla va en el `h1` y no por renglon: asi el titular
       // entero compone como UN grupo y despues mezcla, que es lo
       // que da el borde duro parejo en las dos filas.
-      className={cn('flex flex-col items-start', MEZCLA_SOBRE_LA_ESCENA)}
+      // [PULIDO 10] J1 · y es el contenedor del registro 1: su letra se mide contra el ancho de la caja.
+      className={cn('@container flex flex-col items-start', MEZCLA_SOBRE_LA_ESCENA)}
     >
       {/* ⚠️ **EL REGISTRO 1 ES LA PIEZA QUIETA, Y NO PASA POR
           UN CANAL.** Sin coreografía de entrada, presente en
