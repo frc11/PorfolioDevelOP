@@ -203,7 +203,8 @@ function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progres
   }, [enElPlano])
   const hastaElPie = useTransform(progreso ?? CERO, (p) => llegadaHastaElPie(p, alto.current, ENTRADA_EN_CUADRO_PX, DESCANSO_ANTES_DE_SALIR_PX))
   return (
-    <div ref={enElPlano}>
+    // [PULIDO 12] · al salir, se va si cruza el logo (subía a través de él): `esquivaAlSalir.ts`.
+    <div ref={enElPlano} data-esquiva-al-salir="">
       <CanalDeTexto progreso={progreso === null ? null : hastaElPie} tipo="parrafo" texto={CONTENIDO.bajada}>
         {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
       </CanalDeTexto>

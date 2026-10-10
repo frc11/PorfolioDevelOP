@@ -7,6 +7,8 @@
  *       la derecha (se pisaba con Login, 27 × 32 px): vuelve a la esquina de abajo.
  *   C1 · el pie simétrico: la columna izquierda llega hasta donde llega el formulario del otro lado (las letras, a la misma
  *        distancia del logo que el formulario), el logo centrado, y a 1024 nada de la izquierda se sale de su columna.
+ *   2 · Quiénes somos al salir (desde 1024): el cuerpo, que en el reposo queda justo debajo del logo, subía a través de él en toda
+ *       la salida; ahora se va si su caja cruza la del logo y vuelve en el reposo.
  *   1 · la caída del logo contra las piezas 3D del pie: no se cruzan (margen mínimo de más de 4 u), con el gancho del banco.
  *   3 · la tarjeta del resultado y el teléfono que rota: el alto guardado se suelta si cambia el ancho (la tarjeta del panel de
  *       Contacto quedaba más alta que la pantalla y «Reintentar» afuera), y el formulario del pie que se vuelve a montar al cruzar
@@ -17,6 +19,7 @@ import { readFileSync } from 'node:fs'
 
 import { VIGENCIA_MS, anotar, recuperar, recuperarAlMontar, anotarElPedido, pedidoEnCurso } from '../formularios/memoriaDelFormulario'
 import { sigueValiendo } from '../formularios/altoGuardado'
+import { ESQUIVA_AL_SALIR, pedidoAlSalir } from '../escena/titulos3d/esquivaAlSalir'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -142,5 +145,40 @@ const sinCruces = (c: Record<string, Corrida>): boolean =>
   ['lenta-1024', 'angulo-1024', 'lenta-1440', 'angulo-1440', 'lenta-1920', 'angulo-2560'].every((k) => c[k] !== undefined && c[k].momentos >= 100 && c[k].piezas > 0 && c[k].conCruce === 0 && c[k].margenMinimo > 1)
 afirmar(sinCruces(CRUCES) && SILUETA.includes("o.name.startsWith('pie de volumen · ')"), `1 · el logo que cae no atraviesa ninguna pieza del pie (margen mínimo ${String(Math.min(...Object.values(CRUCES).map((c) => c.margenMinimo)))} u)`)
 controlPositivo('1 · el detector VE un cruce', { ...CRUCES, 'lenta-1440': { ...CRUCES['lenta-1440'], conCruce: 3, margenMinimo: 0 } }, sinCruces)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2 · Quiénes somos al salir: el cuerpo no cruza el logo')
+interface Fila {
+  readonly dy: number
+  readonly cruce: number
+  readonly opacidad: number
+}
+const SALIDA = recibo<{ antes: Record<string, Fila[]>; despues: Record<string, Fila[]> }>('quienes-salida.json')
+// Pasado el reposo más de `saleDesdePx` (la medida toca el pie de la P ya en el reposo: es gruesa, de 8 px), ninguna fila con el cuerpo visible (opacidad > 0,05) y cruzando la silueta del logo; en el reposo,
+// entero (A2: el reposo no se toca). En los seis anchos de escritorio.
+const salidaLimpia = (r: Record<string, Fila[]>): boolean =>
+  ['1024x768', '1280x800', '1366x768', '1440x900', '1920x1080', '2560x1440'].every((w) => r[w] !== undefined && r[w].length >= 20 && r[w][0].dy === 0 && r[w][0].opacidad === 1 && r[w].every((f) => f.dy <= ESQUIVA_AL_SALIR.saleDesdePx || f.cruce === 0 || f.opacidad <= 0.05))
+const QUIENES = leer('_secciones/quienes-somos/QuienesSomos.tsx')
+const TITULOS = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
+const enganchado = (q: string, t: string): boolean => q.includes('<div ref={enElPlano} data-esquiva-al-salir="">') && t.includes('esquivarAlSalir(() => (m.current.logo === null ? null : cajaHolgadaDelLogo(m.current.logo, state.camera, tam.width, tam.height))')
+afirmar(salidaLimpia(SALIDA.despues) && enganchado(QUIENES, TITULOS), `2 · al salir de Quiénes somos el cuerpo se va antes de cruzar el logo (con la cámara de verdad) y en el reposo está entero, a ${Object.keys(SALIDA.despues).join(', ')}`)
+controlPositivo('2 · el detector VE la salida de antes (el cuerpo visible a través del logo de 24 a ~600 px)', { ...SALIDA.despues, ...SALIDA.antes }, salidaLimpia)
+// La regla (con `pasado`: px de scroll después del reposo de la sección, el del viaje del menú): en el reposo nunca esquiva; se va
+// recién pasados `saleDesdePx` y si cruza, y no vuelve hasta estar a menos de `vuelveHastaPx` del reposo (dos marcas: no titila).
+const LOGO_Q = { izquierda: 400, arriba: 200, derecha: 900, abajo: 700 }
+const ABAJO = { izquierda: 100, arriba: 720, derecha: 600, abajo: 900 }
+const CRUZA = { izquierda: 100, arriba: 600, derecha: 600, abajo: 800 }
+const ARRIBA = { izquierda: 100, arriba: 20, derecha: 600, abajo: 150 }
+const { saleDesdePx, vuelveHastaPx } = ESQUIVA_AL_SALIR
+const reglaBien = (f: typeof pedidoAlSalir): boolean =>
+  vuelveHastaPx < saleDesdePx &&
+  f(0, CRUZA, LOGO_Q, false).pedido === 1 && f(vuelveHastaPx, CRUZA, LOGO_Q, true).pedido === 1 && f(saleDesdePx, CRUZA, LOGO_Q, false).pedido === 1 &&
+  f(saleDesdePx + 16, ABAJO, LOGO_Q, false).pedido === 1 && f(saleDesdePx + 16, CRUZA, LOGO_Q, false).pedido === 0 &&
+  f(vuelveHastaPx + 4, ARRIBA, LOGO_Q, true).pedido === 0 && f(400, ARRIBA, LOGO_Q, true).pedido === 0 && f(400, ARRIBA, LOGO_Q, false).pedido === 1
+afirmar(reglaBien(pedidoAlSalir), `  en el reposo no esquiva; se va pasados ${String(saleDesdePx)} px si cruza y vuelve recién a menos de ${String(vuelveHastaPx)} px del reposo`)
+controlPositivo('  el detector VE una regla que vuelve apenas deja de cruzar', ((pasado: number, caja: Parameters<typeof pedidoAlSalir>[1], logo: Parameters<typeof pedidoAlSalir>[2]) => pedidoAlSalir(pasado, caja, logo, false)) as typeof pedidoAlSalir, reglaBien)
+controlPositivo('  y una que se va apenas pasa el reposo (la primera versión: un empujón de 9 px lo borraba)', ((pasado: number, caja: Parameters<typeof pedidoAlSalir>[1], logo: Parameters<typeof pedidoAlSalir>[2], seFue: boolean) => (pasado > vuelveHastaPx ? { pedido: 0 as const, seFue: true } : pedidoAlSalir(pasado, caja, logo, seFue))) as typeof pedidoAlSalir, reglaBien)
+const TITULOS_LIMPIA = TITULOS.includes('useEffect(() => soltarLosQueEsquivan, [])')
+afirmar(TITULOS_LIMPIA, '  al desmontarse la escena de los títulos, lo marcado vuelve a la vista (sin opacidad ni estado viejo)')
 
 cerrar('s63-pulido-12')

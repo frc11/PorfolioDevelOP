@@ -22,6 +22,7 @@ import { llevarLosAcompanantes } from './acompanantes'
 import { sincronizar, soltarTodos } from './sincronia'
 import { SombraDeLosTitulos } from './SombraDeLosTitulos'
 import { cajaDelLogo, llegadaQueEsquiva, remedir, type Caja } from './esquivaDelLogo'
+import { cajaHolgadaDelLogo, esquivarAlSalir, soltarLosQueEsquivan } from './esquivaAlSalir'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -122,6 +123,9 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   // Al cambiar el tamaño del cuadro, cada título se vuelve a colocar en su próxima llegada (o ya, si está a la vista).
   useEffect(() => descolocar(m.current.armados, tam.width), [tam.width, tam.height])
 
+  // [PULIDO 12] · al desmontarse (abajo de 1024 o al irse), lo que esquivaba el logo al salir queda a la vista y sin estado viejo.
+  useEffect(() => soltarLosQueEsquivan, [])
+
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
@@ -167,6 +171,8 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     m.current.cuadro.ancho = tam.width
     m.current.cuadro.alto = tam.height
     alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE)
+    // [PULIDO 12] · el texto del DOM que esquiva el logo al salir (`esquivaAlSalir.ts`), con la cámara de verdad: lo que se ve.
+    esquivarAlSalir(() => (m.current.logo === null ? null : cajaHolgadaDelLogo(m.current.logo, state.camera, tam.width, tam.height)), m.current.quieto, Math.min(delta, 0.1))
     llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
   })
 

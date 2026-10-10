@@ -83,6 +83,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   `innerWidth` (el zoom de dos dedos del iPhone lo cambia); (d) lo escrito no queda en memoria: se borra 1,1 s después de
   que el formulario se fue; (e) el gancho del banco contaba la raíz del pie como una pieza más.
 
+### Defecto 6 · Quiénes somos al salir (y su revisión)
+- `_lib/escena/titulos3d/esquivaAlSalir.ts`: el cuerpo (`data-esquiva-al-salir`) se va si, pasado el reposo del viaje de su
+  sección más de 24 px, su caja (la que se ve) cruza la del logo (esquinas de la caja de cada malla, con la cámara de verdad), y
+  vuelve recién a menos de 8 px del reposo. Tres vueltas medidas: con la caja del documento (sin transformadas) y la cámara sin
+  el mouse no actuaba a 1920 (el mouse del banco corre la cámara: lo que se ve es con la cámara viva); con el muestreo de vértices
+  se escapaban unos px del pie de la P.
+- Revisión adversaria: la primera versión se iba a los 9 px (un empujón de la rueda la borraba) y comparaba con el tope del panel
+  y no con el reposo del viaje → dos marcas (24/8) y `destinoDelViaje` (medido una vez por tamaño); el estado y la opacidad se
+  sueltan al desmontarse la escena de los títulos; la caja y el logo se miden sólo cuando pueden cambiar algo.
+- Queda (anotado en «Lo que no quedó bien»): quien se queda leyendo 30–40 px pasado el reposo no ve el cuerpo hasta volver un poco.
+
 ### 4 · La matriz completa
 - El instrumento de cajas (`cajas.ts`) contaba texto que NO se ve: el DOM transparente que marca dónde va el 3D (la frase
   del CTA estando en Demos), lo que un ancestro recorta (los mensajes adentro de la ventana de la demo de Tu panel, las
@@ -91,6 +102,14 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   primera versión trataba `rgb(0, 0, 0)` como transparente (el control lo vio).
 - Abajo de 1024 el logo va DETRÁS del texto por diseño (la mezcla de la bajada, V3/B13): ahí el solape texto × logo no es un
   defecto; cuentan texto × texto, desbordes y consola.
+- Segunda corrección del instrumento (las entradas a 320–390 marcaban texto × texto que no se ve: la frase del CTA de
+  Portfolio debajo del panel oscuro de Demos; las tarjetas de Servicios que se apilan; mirado en las capturas): un texto TAPADO
+  no cuenta — en el centro de su caja, `elementsFromPoint` (con los eventos del puntero prendidos en todo mientras se mide)
+  encuentra encima algo opaco que no es su ancestro (fondo con alfa ≥ 0,9, imagen, video o iframe). Controles: el párrafo
+  inyectado encima de un texto se detecta; el mismo, tapado por un bloque opaco inyectado, no (a 375 y 1440).
+- La primera corrida de la matriz se tiró: el banco de controles corrió A LA VEZ que la matriz sobre la misma página (un solo
+  Chrome, una página): se redimensionaban entre sí. Regla: con una tanda en marcha, ningún otro script contra el banco.
+- Los cuadros del viaje: el registro de rAF arrancaba un lazo nuevo en cada parada (los cuadros salían repetidos): uno solo.
 
 ### 5 · Loop y verificar final
 - PENDIENTE.
@@ -99,11 +118,12 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 
 | # | Dónde | Ancho | Causa | Commit | Re-verificado |
 |---|---|---|---|---|---|
-| 1 | La tarjeta del resultado del panel de Contacto al rotar | 390 × 844 → 844 × 390 | El alto del formulario guardado al enviar no se soltaba: la tarjeta seguía de 498 px en un cuadro de 390 y «Reintentar» quedaba afuera (379–420) | (pendiente) | sí: 318 px, «Reintentar» en 306–346 |
-| 2 | La cabecera: Login contra el disco del progreso | 1000 y 1023 (desde que la barra entra, ~980) | C2 ponía el progreso arriba a la derecha por el ANCHO (< 1024) y no por el modo: con la barra a la vista su esquina (Contacto y Login) está ahí. Choque de 27 × 32 px | (pendiente) | sí: 0 choques de 390 a 1023 |
-| 3 | El pie: la columna izquierda se salía de la suya | 1024 | Un cuarto (240 px) no alcanzaba: WhatsApp +13, «Por qué develOP» +7, Facebook +16 | (pendiente) | sí: columna de 264, nada visible afuera |
-| 4 | El pie no era simétrico a la vista | 1280–2560 | Las letras de la izquierda no llegaban al borde de su columna (+8 a +117 px más lejos del logo que el formulario) | (pendiente) | sí: iguales ±1 px en los seis anchos |
-| 5 | El formulario del pie pierde la tarjeta y lo escrito al rotar una tablet | 768 × 1024 → 1024 × 768 (cruza 1024) | `CanalDePieza` cambia de tipo con el modo del pie (con progreso / sin él): React desmonta el formulario | (pendiente) | (tanda E) |
+| 1 | La tarjeta del resultado del panel de Contacto al rotar | 390 × 844 → 844 × 390 | El alto del formulario guardado al enviar no se soltaba: la tarjeta seguía de 498 px en un cuadro de 390 y «Reintentar» quedaba afuera (379–420) | 036b0c48 | sí: 318 px, «Reintentar» en 306–346 |
+| 2 | La cabecera: Login contra el disco del progreso | 1000 y 1023 (desde que la barra entra, ~980) | C2 ponía el progreso arriba a la derecha por el ANCHO (< 1024) y no por el modo: con la barra a la vista su esquina (Contacto y Login) está ahí. Choque de 27 × 32 px | 631d4e71 | sí: 0 choques de 390 a 1023 |
+| 3 | El pie: la columna izquierda se salía de la suya | 1024 | Un cuarto (240 px) no alcanzaba: WhatsApp +13, «Por qué develOP» +7, Facebook +16 | dd484243 | sí: columna de 264, nada visible afuera |
+| 4 | El pie no era simétrico a la vista | 1280–2560 | Las letras de la izquierda no llegaban al borde de su columna (+8 a +117 px más lejos del logo que el formulario) | dd484243 | sí: iguales ±1 px en los seis anchos |
+| 5 | El formulario del pie pierde la tarjeta y lo escrito al rotar una tablet | 768 × 1024 → 1024 × 768 (cruza 1024) | `CanalDePieza` cambia de tipo con el modo del pie (con progreso / sin él): React desmonta el formulario | 036b0c48 | sí: la tarjeta sigue (rotada y de vuelta) |
+| 6 | Quiénes somos al salir: el cuerpo sube a través del logo | 1024–2560 (y 1093 × 570) | En el reposo el cuerpo queda justo debajo del logo y no tiene salida propia: al seguir bajando cruza su silueta de ~24 a ~600 px después del reposo (el instrumento de J1 medía sólo el reposo; A2 arregló la ENTRADA) | (este commit) | sí: oculto desde 48 px pasado el reposo en los siete cuadros; en el reposo, entero; vuelve al volver al reposo y al llegar por el menú |
 
 ## Memoria (antes de cada tanda: disponible y no paginado)
 
