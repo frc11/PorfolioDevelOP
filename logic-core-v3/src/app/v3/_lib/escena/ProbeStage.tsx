@@ -160,7 +160,9 @@ export default function ProbeStage({
   /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
   // [PULIDO 11] E · `?hilos=si`: los hilos de energía en lugar del polvo y del bokeh (sus grupos quedan: el rig los deriva).
-  const hilos = entornoDeLaEscena().pruebas.hilos === 'si'
+  // [PULIDO 13] K6 · `?hilos=color`: los mismos, en azul frío.
+  const pedidoDeHilos = entornoDeLaEscena().pruebas.hilos
+  const hilos = pedidoDeHilos !== 'no'
 
   return (
     <Canvas
@@ -255,7 +257,7 @@ export default function ProbeStage({
         <group ref={bokehGroupRef} name="bokeh">
           {!hilos && <BokehParticles />}
         </group>
-        {hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} />}
+        {hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} color={pedidoDeHilos === 'color'} />}
 
         <OrbitRig
           store={store}

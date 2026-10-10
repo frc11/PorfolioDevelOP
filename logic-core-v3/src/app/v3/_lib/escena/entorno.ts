@@ -88,8 +88,9 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
-  /** [PULIDO 11] E · `hilos=si`: hilos de energía en lugar del polvo (exploración; el producto, el polvo). */
-  readonly hilos: 'si' | 'no'
+  /** [PULIDO 11] E · `hilos=si`: hilos de energía en lugar del polvo (exploración; el producto, el polvo). [PULIDO 13] K6 · y
+   * `hilos=color`: los mismos, en un azul frío (para comparar con el monocromo). */
+  readonly hilos: 'si' | 'color' | 'no'
 }
 
 /**
@@ -112,7 +113,7 @@ export interface Pruebas {
  * (la corriente y el pulso se fueron con su código). F2 · entran `meta=contorno` (la de antes) y `volteo=juntos`. [PULIDO 8] G1 · se borraron las dos: el volteo
  * con las placas a la vez es el producto (`contorno` y la cascada se fueron con su código). [PULIDO 11] D · entra `caida=angulo`
  * (la caída del logo en el final: la lenta, como una ficha de dominó, es el producto). E · entra `hilos=si` (los hilos de energía).
- * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto).
+ * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío).
  */
 export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', hilos: 'no' }
 
@@ -130,7 +131,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    hilos: unoDe<'si'>(['si'], valor('hilos')),
+    hilos: unoDe<'si' | 'color'>(['si', 'color'], valor('hilos')),
   }
 }
 

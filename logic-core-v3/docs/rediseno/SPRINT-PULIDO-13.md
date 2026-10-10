@@ -84,7 +84,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   columna (el orden del escritorio): dos listas prolijas.
 
 ### K6 · Los hilos con volumen (`?hilos=si`)
-- PENDIENTE.
+- HECHO · VISTO sí (banco `pulido-13/_scripts/k6-hilos.ts`; hojas en `~/.cache/b4-medicion/pulido-13/k6/hilos-{si,color}-1440/`:
+  `hoja-dia-noche.png` —3 de día y 3 de noche—, `hoja-mouse-noche.png` y `hoja-mouse.png` —con el mouse—). Siguen detrás de la
+  bandera (el polvo es el de fábrica). Ya no son cintas sueltas: 16 HACES de 16 fibras finas cada uno; las de un haz comparten su
+  espina (la cabeza de antes: órbita y curl) y corren alrededor de ella en 3D, en hélice, como una cinta aplanada que se tuerce y
+  respira (haces finos y anchos). Donde se juntan, la luz se suma: núcleo brillante y halo (de noche); de día, tinta. Estelas
+  largas (4,5 s), más brillantes cuanto más rápido corre el haz; lejos, tenues y difusas. Chispas en pocas fibras. El texto: las
+  cajas del texto a la vista (las 8 más grandes, con aire; los títulos 3D por su marca en el DOM; enlaces y botones también) los
+  apagan: pasan por detrás (antes cruzaban el texto de Portfolio de noche). El puntero: los rodea, vibra y los enciende, con más
+  alcance. `?hilos=color`: cian frío de noche, azul de tinta de día. En la GPU, una llamada: con o sin hilos, 13,3 ms de media (el
+  vsync de 75 Hz), p95 ≤ 13,8 y ningún cuadro de más de 20 ms, a 1440 y a 390 (recibo `k6-hilos.json`; el rAF no separa el costo
+  del GPU dentro del cuadro: no se ve por diferencia).
 
 ### Final · la matriz y verificar
 - PENDIENTE.
@@ -96,6 +106,11 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | Al empezar (con el servidor de desarrollo del humano andando) | 4201 MB | 856 MB | |
 | Lote 1 (K2/K4b), con el servidor de desarrollo del humano parado (3,9 GB) para el build del banco | 6713 MB | 841 MB | se vuelve a levantar al final |
 | Lotes en frío (K2 d e), Chrome relanzado en cada uno | 6676–6716 MB | 842–844 MB | |
+
+**Disco lleno (durante K6).** C: quedó con 10 MB libres: los cuadros sueltos del screencast de los bancos de K2 y K4 (4,3 GB, en
+`~/.cache/b4-medicion/pulido-13/`) se borraron, quedan los informes y las hojas. La escritura de este log en ese momento lo dejó en
+0 bytes: se recuperó de git (`git show HEAD:…`) y se volvió a escribir la sección de K6. Las 3 fallas de s10e de ese momento eran
+del disco (corridas de nuevo: verdes).
 
 ## VERIFICAR TRAS REINICIO
 

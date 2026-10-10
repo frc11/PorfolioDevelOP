@@ -1,0 +1,70 @@
+{
+ "que": "K6 · los ms por cuadro (rAF: media, p95 y los de mas de 20 ms) en el hero de dia y en Portfolio de noche, NVIDIA, con los hilos (mono y color) y con el polvo de siempre (no): el costo, por diferencia",
+ "corridas": {
+  "hilos-si-1440": {
+   "dia": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "hilos-color-1440": {
+   "dia": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "polvo-1440": {
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "hilos-si-390": {
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.6,
+    "mayoresDe20": 0
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "polvo-390": {
+   "dia": {
+    "media": 13.34,
+    "p95": 13.6,
+    "mayoresDe20": 0
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  }
+ }
+}

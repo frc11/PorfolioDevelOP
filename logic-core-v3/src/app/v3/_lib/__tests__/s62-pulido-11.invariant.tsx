@@ -714,9 +714,10 @@ titulo('E · Los hilos de energía (`?hilos=si`): en lugar del polvo, en la GPU,
 const ESCENARIO_E = leer('_lib/escena/ProbeStage.tsx')
 const HILOS_TSX = leer('_lib/escena/hilos/HilosDeEnergia.tsx')
 const montadoBien = (e: string, sueltas: readonly string[]): boolean =>
-  e.includes("const hilos = entornoDeLaEscena().pruebas.hilos === 'si'") && e.includes('{!hilos && <DepthParticles store={store} />}') && e.includes('{!hilos && <BokehParticles />}') &&
-  e.includes('{hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} />}') && sueltas.includes('hilos') &&
-  entornoPedido('producto').pruebas.hilos === 'no' && entornoPedido('producto,hilos=si').pruebas.hilos === 'si'
+  // [PULIDO 13] K6 · y `?hilos=color` (los mismos, en azul frío).
+  e.includes("const hilos = pedidoDeHilos !== 'no'") && e.includes('{!hilos && <DepthParticles store={store} />}') && e.includes('{!hilos && <BokehParticles />}') &&
+  e.includes("{hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} color={pedidoDeHilos === 'color'} />}") && sueltas.includes('hilos') &&
+  entornoPedido('producto').pruebas.hilos === 'no' && entornoPedido('producto,hilos=si').pruebas.hilos === 'si' && entornoPedido('producto,hilos=color').pruebas.hilos === 'color'
 afirmar(montadoBien(ESCENARIO_E, PRUEBAS_SUELTAS), 'E1 · `?hilos=si` monta los hilos EN LUGAR del polvo y del bokeh; sin la bandera, el polvo de siempre')
 controlPositivo('E1 · el detector VE los hilos montados junto al polvo', ESCENARIO_E.replace('{!hilos && <DepthParticles store={store} />}', '<DepthParticles store={store} />'), (e: string) => montadoBien(e, PRUEBAS_SUELTAS))
 

@@ -16,6 +16,8 @@
  *   K4 b · el mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve.
  *   K5 · en el teléfono, nada queda debajo de los controles fijos en el reposo de ninguna sección: la zona de la cabecera (el pie
  *        entra entero en una pantalla de 320 × 824; Demos arranca debajo) y, al fondo de una pantalla baja, los controles se retiran.
+ *   K6 · los hilos de energía (`?hilos=si|color`) con volumen: haces de fibras en hélice alrededor de una espina, la luz que se suma
+ *        en el medio, la lejanía, la velocidad, chispas sobrias, por detrás del texto; en la GPU, dentro del cuadro.
  */
 import { readFileSync } from 'node:fs'
 
@@ -31,6 +33,7 @@ import { PRUEBAS_SUELTAS } from '../escena/entorno'
 import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
 import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, blancoDelFinal, camaraDelFinal, elevacionDe, orbitaDelFinal, poseDelLogo, quedaDelQuieto, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { retiradaAlFondo } from '../../_chrome/recorrido/cabeceraAlFondo'
+import { FRAGMENTOS_DE_LOS_HILOS, HILOS, VERTICES_DE_LOS_HILOS, semillasDeLosHilos } from '../escena/hilos/hilos'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -266,5 +269,48 @@ const zonaBien = (banda: string, barra: string, retira: typeof retiradaAlFondo):
   retira(1000, 600, 1600, -40) && !retira(1000, 600, 1600, 10) && !retira(800, 600, 1600, -400)
 afirmar(zonaBien(BANDA, BARRA_CSS, retiradaAlFondo), '  el código: la zona de la cabecera (los controles más un aire, con el inset seguro) arriba del pie y de Demos, y el retiro sólo al fondo con el pie cortado')
 controlPositivo('  el detector VE un retiro que se queda retirado lejos del fondo', ((s: number, a: number, t: number, arriba: number) => arriba < 0 || s + a >= t) as typeof retiradaAlFondo, (f: typeof retiradaAlFondo) => zonaBien(BANDA, BARRA_CSS, f))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K6 · Los hilos con volumen')
+// Haces de fibras: las fibras de un mismo haz comparten su espina (la órbita y el campo) y cada una va a su distancia y su ángulo;
+// unos haces finos y otros anchos; más fibras cerca de la espina (el núcleo).
+const SEMILLAS = semillasDeLosHilos()
+const conVolumen = (sem: ReturnType<typeof semillasDeLosHilos>): boolean => {
+  const F = HILOS.fibras
+  let comparten = true
+  let distintas = 0
+  const aberturas: number[] = []
+  for (let h = 0; h < HILOS.haces; h += 1) {
+    for (let j = 1; j < F; j += 1) {
+      for (let c = 0; c < 4; c += 1) if (sem.a[(h * F + j) * 4 + c] !== sem.a[h * F * 4 + c] || sem.b[(h * F + j) * 4 + c] !== sem.b[h * F * 4 + c]) comparten = false
+      if (sem.c[(h * F + j) * 4] !== sem.c[h * F * 4] || sem.c[(h * F + j) * 4 + 1] !== sem.c[h * F * 4 + 1]) distintas += 1
+    }
+    aberturas.push(sem.b[h * F * 4 + 3])
+  }
+  const centrales = Array.from({ length: HILOS.cantidad }, (_, i) => sem.c[i * 4]).filter((r) => r < 0.5).length
+  return HILOS.cantidad === HILOS.haces * HILOS.fibras && HILOS.fibras >= 8 && comparten && distintas === HILOS.haces * (F - 1) && Math.min(...aberturas) < 0.4 && Math.max(...aberturas) > 1 && centrales > HILOS.cantidad * 0.55
+}
+afirmar(conVolumen(SEMILLAS), `K6 · ${String(HILOS.haces)} haces de ${String(HILOS.fibras)} fibras: las de un haz comparten su espina y cada una va a su lugar; haces finos y anchos; más fibras en el medio`)
+controlPositivo('K6 · el detector VE los hilos de antes (cintas sueltas: cada una su propia órbita)', { a: SEMILLAS.a.map((x, i) => x + (i % (HILOS.fibras * 4) === 0 ? 0 : i * 1e-3)), b: SEMILLAS.b, c: SEMILLAS.c }, conVolumen)
+// El sombreador: la fibra alrededor de la espina en hélice y aplanada (una cinta de fibras), la lejanía (más tenue y difusa), la
+// velocidad (estelas más brillantes), chispas sólo en algunas fibras y, detrás de una caja de texto, apagadas.
+const sombreadorBien = (v: string, fr: string): boolean =>
+  v.includes('vec3 e0 = cabeza( t );') && v.includes('aSemillaC.z * 6.2831853 * k') && v.includes(`* ${String(HILOS.plano)} ) * aSemillaC.x * abre`) &&
+  v.includes('vTexto = adentroDelTexto( sp );') && v.includes(`uniform vec4 uTextos[ ${String(HILOS.texto.cajas)} ];`) && v.includes('float lejos = clamp(') &&
+  fr.includes(`( 1.0 - ${String(HILOS.texto.apaga)} * vTexto )`) && fr.includes('vCuenta < 0.0 ? 0.0') && fr.includes('vRapido') && fr.includes('vCentro') && HILOS.texto.apaga >= 0.9
+afirmar(sombreadorBien(VERTICES_DE_LOS_HILOS, FRAGMENTOS_DE_LOS_HILOS), '  el sombreador: la fibra en hélice alrededor de la espina, una cinta; lejos, tenue y difusa; rápida, más brillo; chispas en pocas fibras; detrás del texto, apagada')
+controlPositivo('  el detector VE hilos que cruzan el texto', FRAGMENTOS_DE_LOS_HILOS.replace(`( 1.0 - ${String(HILOS.texto.apaga)} * vTexto )`, '1.0'), (fr: string) => sombreadorBien(VERTICES_DE_LOS_HILOS, fr))
+// El color: monocromo de fábrica (tinta y papel); `?hilos=color`, un azul frío hecho de tono, saturación y luz (sin hex).
+const HILOS_TSX = leer('_lib/escena/hilos/HilosDeEnergia.tsx')
+const colorBien = (t: string): boolean => t.includes('uColorDia: { value: enSrgb(INK_COLOR) }') && t.includes('noche: new THREE.Color().setHSL(0.55,') && t.includes('if (!color) return undefined') && !/#[0-9a-fA-F]{6}/.test(t)
+afirmar(colorBien(HILOS_TSX), '  el color: tinta y papel de fábrica; con `?hilos=color`, el azul frío (y de vuelta al desmontarse)')
+// Medido (NVIDIA, 1440 y 390): con los hilos, ningún cuadro de más de 20 ms y la media del polvo de siempre (dentro del cuadro).
+type Corrida = { dia: { media: number; p95: number; mayoresDe20: number }; noche: { media: number; p95: number; mayoresDe20: number } }
+const COSTO = recibo<{ corridas: Record<string, Corrida> }>('k6-hilos.json')
+const dentroDelCuadro = (r: Record<string, Corrida>): boolean =>
+  ['hilos-si-1440', 'hilos-color-1440', 'hilos-si-390'].every((k) => r[k] !== undefined && [r[k].dia, r[k].noche].every((x) => x.mayoresDe20 === 0 && x.p95 < 16.7)) &&
+  ['1440', '390'].every((a) => Math.abs(r[`hilos-si-${a}`].noche.media - r[`polvo-${a}`].noche.media) < 0.5)
+afirmar(dentroDelCuadro(COSTO.corridas), `  medido: con los hilos, la media de siempre (${String(COSTO.corridas['hilos-si-1440'].noche.media)} ms a 1440, ${String(COSTO.corridas['hilos-si-390'].noche.media)} a 390) y ningún cuadro de más de 20 ms`)
+controlPositivo('  el detector VE una corrida con cuadros largos', { ...COSTO.corridas, 'hilos-si-390': { ...COSTO.corridas['hilos-si-390'], noche: { ...COSTO.corridas['hilos-si-390'].noche, mayoresDe20: 4 } } }, dentroDelCuadro)
 
 cerrar('s64-pulido-13')
