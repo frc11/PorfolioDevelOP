@@ -61,8 +61,11 @@ export function poseDeLaTransformacion(variante: VarianteDeGracias, quieto: bool
   else m.makeTranslation(desde.dx, -desde.dy, 0)
   if (quieto) return { visible: entrante ? t > 0 : t < 1, aparece: entrante ? suave(t) : 1 - suave(t) }
   if (variante === 'volteo') {
-    // La saliente de 0 a 90° y la entrante de −90° a 0: el mismo sentido de giro, alrededor del centro de cada placa.
-    const angulo = entrante ? -(Math.PI / 2) * (1 - suave((t - 0.5) / 0.5)) : (Math.PI / 2) * suave(t / 0.5)
+    // [PULIDO 10] J4 · 180° en UN movimiento: una sola curva para todo el giro (antes, una por mitad: a los 90° la velocidad
+    // llegaba a cero y el giro se veía pararse «a cargar algo»). La saliente muestra el ángulo hasta 90°; la entrante, el mismo
+    // menos 180° (de −90° a 0), alrededor del centro de cada placa: misma velocidad en el cambio.
+    const giro = Math.PI * suave(t)
+    const angulo = entrante ? giro - Math.PI : giro
     const c = entrante ? caja : desde
     PIVOTE.makeTranslation(c.ancho / 2, -c.alto / 2, -espesor / 2)
     m.multiply(PIVOTE).multiply(GIRO.makeRotationX(angulo)).multiply(PIVOTE.invert())

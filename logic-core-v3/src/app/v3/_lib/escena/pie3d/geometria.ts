@@ -3,7 +3,8 @@ import type { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
-import type { CajaDelPie, LetraDelPie, MedidaDeLaPieza, PesoDelPie, TrazoDelPie } from '../../pie3d/medida'
+import type { CajaDelPie, LetraDelPie, MedidaDeLaPieza, PesoDelPie, RenglonArchivo, TrazoDelPie } from '../../pie3d/medida'
+import { TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from '../ctaDelFinal/fuentesDelCta'
 import type { FormaDeLaPieza } from '../../pie3d/registro'
 import { INK_COLOR } from '../probeScene'
 
@@ -52,8 +53,8 @@ export const COLORES_DEL_PIE = {
   pozo: new THREE.Color('#2b2b2b'),
 } as const
 
-/** [PULIDO 9] H2 · y `archivo`: el título de la tarjeta de gracias. */
-export type FuentesDelPie = Readonly<Record<PesoDelPie, Font>> & { readonly archivo?: Font }
+/** [PULIDO 9] H2 · y `archivo`: el título de la tarjeta de gracias. [PULIDO 10] J4 · la de la frase del CTA, con su kerning. */
+export type FuentesDelPie = Readonly<Record<PesoDelPie, Font>> & { readonly archivo?: FuenteConKerning }
 
 /** Un rectángulo redondeado de la caja del DOM (px, y hacia abajo) en el plano de la pieza (y hacia arriba). */
 export function rectanguloRedondeado<T extends THREE.Path>(destino: T, c: Pick<CajaDelPie, 'x' | 'y' | 'ancho' | 'alto'>, radio: number): T {
@@ -124,7 +125,7 @@ function letras(ls: readonly LetraDelPie[], fuentes: FuentesDelPie, z: number, r
   const { profundidad, bisel } = VOLUMEN_DEL_PIE.texto
   const piezas: THREE.BufferGeometry[] = []
   for (const l of ls) {
-    const fuente = (l.archivo === true ? fuentes.archivo : undefined) ?? fuentes[l.peso]
+    const fuente = (l.archivo === true ? fuentes.archivo?.fuente : undefined) ?? fuentes[l.peso]
     // Sin el glifo (un texto que cambió y no se regeneró la fuente): esa letra queda en el DOM... y el invariante lo caza.
     if (fuente.data.glyphs[l.ch] === undefined) continue
     const formas = fuente.generateShapes(l.ch, l.cuerpo)
@@ -138,6 +139,32 @@ function letras(ls: readonly LetraDelPie[], fuentes: FuentesDelPie, z: number, r
       const [d, bg, bt] = [profundidad * l.cuerpo, bisel.grosor * l.cuerpo, bisel.tamano * l.cuerpo]
       const g = new THREE.ExtrudeGeometry(formas, { depth: d, curveSegments: VOLUMEN_DEL_PIE.curvas, bevelEnabled: true, bevelThickness: bg, bevelSize: bt, bevelOffset: -bt, bevelSegments: bisel.segmentos })
       g.translate(l.x, -base, z - d)
+      piezas.push(g)
+    }
+  }
+  return piezas
+}
+
+/**
+ * [PULIDO 10] J4 · LOS RENGLONES EN ARCHIVO, en relieve: como la frase del CTA, cada letra en su avance más el kerning del par con
+ * la anterior y el interletrado de display (`avancesDe`), desde donde el DOM empieza el renglón y sobre su línea de base.
+ */
+function renglonesArchivo(rs: readonly RenglonArchivo[], f: FuenteConKerning | undefined, z: number, relieve: number): THREE.BufferGeometry[] {
+  const piezas: THREE.BufferGeometry[] = []
+  if (f === undefined) return piezas
+  for (const r of rs) {
+    const { x } = avancesDe(f, r.texto, TRACKING_DEL_CTA.frase)
+    const base = baseDeLaLetra({ arriba: r.arriba, alto: r.alto, cuerpo: r.cuerpo }, f.fuente.data)
+    const alto = Math.max(relieve, VOLUMEN_DEL_PIE.relieve.em * r.cuerpo)
+    let k = 0
+    for (const c of r.texto) {
+      if (c.trim() === '') continue
+      const enEm = x[k]
+      k += 1
+      // Sin el glifo (un texto que cambió y no se regeneró la fuente): esa letra no va... y el invariante lo caza.
+      if (f.fuente.data.glyphs[c] === undefined) continue
+      const g = new THREE.ExtrudeGeometry(f.fuente.generateShapes(c, r.cuerpo), { depth: alto, curveSegments: VOLUMEN_DEL_PIE.curvas, bevelEnabled: false })
+      g.translate(r.x + enEm * r.cuerpo, -base, z)
       piezas.push(g)
     }
   }
@@ -195,6 +222,7 @@ function relieveDe(m: MedidaDeLaPieza, fuentes: FuentesDelPie, enLaTecla: boolea
     const g = trazo(t, z, px)
     if (g !== null) geos.push(g)
   }
+  geos.push(...renglonesArchivo((m.archivo ?? []).filter((r) => r.enLaTecla === enLaTecla), fuentes.archivo, z, px))
   return geos.map((g) => pintar(g, COLORES_DEL_PIE.claro))
 }
 
@@ -222,7 +250,7 @@ export interface PiezaArmada {
 function anchoDeLasLetras(ls: readonly LetraDelPie[], fuentes: FuentesDelPie): { readonly izquierda: number; readonly derecha: number } {
   let [izquierda, derecha] = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
   for (const l of ls) {
-    const f = (l.archivo === true ? fuentes.archivo : undefined) ?? fuentes[l.peso]
+    const f = (l.archivo === true ? fuentes.archivo?.fuente : undefined) ?? fuentes[l.peso]
     const glifo = f.data.glyphs[l.ch]
     izquierda = Math.min(izquierda, l.x)
     derecha = Math.max(derecha, l.x + (glifo === undefined ? 0.6 : glifo.ha / f.data.resolution) * l.cuerpo)
@@ -247,7 +275,7 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
     if (geos.length === 0) return { fija: null, hundible: null, espesor: 0 }
     const { izquierda, derecha } = anchoDeLasLetras(m.letras, fuentes)
     const primera = m.letras[0]
-    const fuente = (primera.archivo === true ? fuentes.archivo : undefined) ?? fuentes[primera.peso]
+    const fuente = (primera.archivo === true ? fuentes.archivo?.fuente : undefined) ?? fuentes[primera.peso]
     const arriba = baseDeLaLetra(primera, fuente.data) + v.subrayado.bajo * cuerpo
     const d = v.texto.profundidad * cuerpo
     const barra = new THREE.BoxGeometry(derecha - izquierda, v.subrayado.alto, d)

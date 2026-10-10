@@ -5,6 +5,8 @@
  *   J1  · 1024 y «Portátil L»: el texto 3D en renglones, la banda portátil (el campo de visión y las medidas del logo en el
  *         DOM) y los solapes (el detector y los recibos del banco a 1024, 1280 y 1440).
  *   J3  · la carga de develOP: el trazo (o el giro, `?carga=giro`), los textos, la espera mínima, el botón del pie y el panel.
+ *   J4  · las transformaciones de gracias: el pie con el volteo y el panel con el hundido, el título en Archivo (minúsculas), el
+ *         foco que no desaparece y la placa en su lugar.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
@@ -18,6 +20,9 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
+import { FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
+import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { CARGA, varianteDeLaCarga } from '../../_componentes/carga/Carga'
 import { TEXTOS_DE_ENVIO } from '../formularios/enviar'
 import datos400 from '../../_fuentes/chivo-400-pie.json'
@@ -176,6 +181,51 @@ controlPositivo('C · el detector VE el panel esperando 1,4 s también con el fo
 const reducidaBien = (c: string): boolean => /\{quieto \? \(\s*<path d=\{LOGO_PATH_D\} fill=\{color\} \/>/.test(c) && c.includes('animate={quieto ? undefined : { rotateY: 360 }}') && c.includes('Array.from({ length: quieto ? 1 : capas }')
 afirmar(reducidaBien(CARGA_TSX), 'D · con movimiento reducido, el logo quieto (ni trazo ni giro) y el texto')
 controlPositivo('D · el detector VE un giro que gira igual con movimiento reducido', CARGA_TSX.replace('animate={quieto ? undefined : { rotateY: 360 }}', 'animate={{ rotateY: 360 }}'), reducidaBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J4 · Las transformaciones de gracias: cada formulario la suya, el título en Archivo, el foco y la placa en su lugar')
+
+// A · El pie con el volteo y el panel de Contacto con el hundido; `?gracias=` cambia los dos.
+const PANEL_J4 = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const variantesBien = (f: typeof varianteDeGracias, panel: string): boolean =>
+  f(null) === 'volteo' && f(null, 'hundido') === 'hundido' && f('volteo', 'hundido') === 'volteo' && f('hundido') === 'hundido' && f('otra', 'hundido') === 'hundido' &&
+  panel.includes("const variante = useSyncExternalStore(sinSuscripcion, varianteDelPanel, () => 'hundido' as const)")
+afirmar(variantesBien(varianteDeGracias, PANEL_J4), 'A · el pie con el volteo y el panel de Contacto con el hundido; `?gracias=` elige en los dos')
+controlPositivo('A · el detector VE un panel que sigue con el volteo', ((v: string | null | undefined) => (v === 'hundido' ? 'hundido' : 'volteo')) as typeof varianteDeGracias, (f: typeof varianteDeGracias) => variantesBien(f, PANEL_J4))
+
+// B · El título de la tarjeta en 3D: en Archivo con minúsculas, compuesto como la frase del CTA (los avances y el kerning de la
+// fuente, desde donde el DOM empieza el renglón), no con las cajas del DOM (su cara de display no trae minúsculas).
+const FUENTES_J4: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: FUENTES_DEL_CTA.frase }
+const RENGLON = { texto: GRACIAS.titulo, x: 20, arriba: 20, alto: 40, cuerpo: 32, enLaTecla: false }
+const conTitulo = { caja: { x: 0, y: 0, ancho: 300, alto: 140, radio: 12 }, letras: [], trazos: [], pozos: [], tecla: null, archivo: [RENGLON] }
+const sinTitulo = { ...conTitulo, archivo: [] }
+const vertices = (f: FuentesDelPie, m: typeof conTitulo): number => armarLaPieza('formulario', m, f).fija?.getAttribute('position').count ?? 0
+const tituloBien = (f: FuentesDelPie): boolean =>
+  [...GRACIAS.titulo].every((c) => c.trim() === '' || FUENTES_DEL_CTA.frase.fuente.data.glyphs[c] !== undefined) && vertices(f, conTitulo) > vertices(f, sinTitulo) &&
+  leer('_lib/pie3d/medida.ts').includes('archivo: renglonesArchivoDe(el, r, deLaPlaca),') && leer('_lib/escena/pie3d/geometria.ts').includes('const { x } = avancesDe(f, r.texto, TRACKING_DEL_CTA.frase)') &&
+  leer('_componentes/formularios/TarjetaDeGracias.tsx').includes("enVolumen ? 'text-transparent' : 'uppercase'")
+afirmar(tituloBien(FUENTES_J4), 'B · el título de la tarjeta en 3D: Archivo en minúsculas (la fuente de la frase del CTA trae sus letras), compuesto con sus avances y su kerning; en el DOM plano, las mayúsculas aprobadas')
+controlPositivo('B · el detector VE el título sin su Archivo (no se dibuja)', { ...FUENTES_J4, archivo: undefined }, tituloBien)
+
+// C · El foco no desaparece en la transformación: el DOM se apaga sólo de vuelta al formulario, y la tarjeta muestra su anillo.
+const ARMADAS_J4 = leer('_lib/escena/pie3d/armadas.ts')
+const focoBien = (a: string, t: string): boolean => a.includes("if (estado !== 'gracias') p.elemento.style.opacity = '0'") && !t.includes('outline-none')
+afirmar(focoBien(ARMADAS_J4, leer('_componentes/formularios/TarjetaDeGracias.tsx')), 'C · el foco no desaparece: hacia la tarjeta el DOM sigue (transparente) y la tarjeta muestra el anillo del foco')
+controlPositivo('C · el detector VE el DOM apagado también hacia la tarjeta', ARMADAS_J4.replace("if (estado !== 'gracias') p.elemento.style.opacity = '0'", "p.elemento.style.opacity = '0'"), (a: string) => focoBien(a, leer('_componentes/formularios/TarjetaDeGracias.tsx')))
+
+// D · La placa en su lugar (y la etiqueta «Contacto» pegada a su borde): con la columna de techo fijo (J8) la tarjeta empieza
+// donde empezaba el formulario, y el hundido lleva la entrante con su borde de arriba quieto en todos los cuadros. Antes, la
+// columna se recentraba (la tarjeta bajaba 63 px) y el borde se corría.
+const bordeQuieto = (dy: number): boolean => {
+  const caja = { ancho: 300, alto: 140 }
+  const m = new THREE.Matrix4()
+  return [0.42, 0.5, 0.6, 0.7, 0.85, 1].every((t) => {
+    poseDeLaTransformacion('hundido', false, t, true, caja, { ancho: 300, alto: 360, dx: 0, dy }, 30, m)
+    return Math.abs(new THREE.Vector3(0, 0, 0).applyMatrix4(m).y) < 1e-6
+  })
+}
+afirmar(bordeQuieto(0), 'D · con el techo fijo, el hundido lleva la tarjeta con el borde de arriba quieto en cada cuadro (la etiqueta «Contacto» no se despega)')
+controlPositivo('D · el detector VE la columna recentrada de antes (la tarjeta baja 63 px en la transformación)', 63, (dy: number) => bordeQuieto(dy))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')

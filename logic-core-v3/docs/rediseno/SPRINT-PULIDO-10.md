@@ -15,12 +15,15 @@ el volteo y el hundido como concepto (J4).
   y el foco ya se midieron; la llegada vieja se pasaba 108 px y asomaba la sección de abajo)
 - J10 · la histéresis: escrita, `s61` J10 verde (el modelo); falta medirla en el banco
 - HECHO: J3 · la carga de develOP (el trazo; `?carga=giro`, el giro), en el botón del pie y en el panel de Contacto (en lugar
-  del anillo), con la espera mínima (commit «pulido 10 · J3»). Pendiente del banco: verla (sin memoria para abrirlo)
+  del anillo), con la espera mínima (66f39394). Pendiente del banco: verla (sin memoria para abrirlo)
 - J2 · primera ráfaga (1440, desde el hero, con la barra): ningún cuadro oscuro ajeno; faltan 390, desde la noche y la
   segunda apertura
-- J4 · a (el volteo en un movimiento, la entrante compilada antes), c (el título en Archivo en minúsculas, compuesto como la
-  frase del CTA), d (la tarjeta en su lugar: el techo fijo de J8), e (el foco no desaparece) y f (el panel con el hundido):
-  escritos; b debería quedar resuelto por el techo fijo (la placa no se corre); falta medir todo en el banco
+- HECHO: J4 · a (el volteo en un movimiento, la entrante compilada antes de girar), b y d (la tarjeta en su lugar y la etiqueta
+  pegada: el techo fijo de J8, y el hundido lleva el borde de arriba quieto; `s61` J4 D), c (el título en Archivo en
+  minúsculas, compuesto como la frase del CTA), e (el foco no desaparece) y f (el panel con el hundido) (commit «pulido 10 ·
+  J4»). No se hizo: armar la geometría de la tarjeta al montar (el programa se compila antes de girar, pero la geometría se
+  arma cuando llega la respuesta). Pendiente del banco: medir los cuadros del volteo (ninguno de más de 20 ms) y ver las dos
+  variantes en los dos formularios
 - J9 · a (las leyendas de las fotos): escrito; falta verlo en el banco
 - EN CURSO: J5 · la animación de error de los dos formularios
 

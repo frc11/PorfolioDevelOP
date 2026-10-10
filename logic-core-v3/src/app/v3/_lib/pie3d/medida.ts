@@ -33,6 +33,20 @@ export interface LetraDelPie {
   readonly archivo?: boolean
 }
 
+/**
+ * [PULIDO 10] J4 · UN RENGLÓN EN ARCHIVO (el título de la tarjeta de gracias, `data-fuente="archivo"`): el texto entero del renglón
+ * y dónde empieza. La escena lo compone con los avances y el kerning de la fuente, como la frase del CTA: no con las cajas del DOM,
+ * que pinta las minúsculas con otra cara (la de display del DOM trae sólo mayúsculas).
+ */
+export interface RenglonArchivo {
+  readonly texto: string
+  readonly x: number
+  readonly arriba: number
+  readonly alto: number
+  readonly cuerpo: number
+  readonly enLaTecla: boolean
+}
+
 export interface TrazoDelPie {
   readonly d: readonly string[]
   readonly x: number
@@ -49,6 +63,8 @@ export interface MedidaDeLaPieza {
   readonly trazos: readonly TrazoDelPie[]
   readonly pozos: readonly CajaDelPie[]
   readonly tecla: CajaDelPie | null
+  /** [PULIDO 10] J4 · los renglones en Archivo (los compone la escena). */
+  readonly archivo?: readonly RenglonArchivo[]
 }
 
 const PESOS: readonly PesoDelPie[] = [400, 500, 600]
@@ -91,6 +107,8 @@ function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boo
     const peso = pesoDelPie(parseInt(estilo.fontWeight, 10) || 400)
     const enLaTecla = padre.closest(LA_TECLA) !== null
     const archivo = padre.closest('[data-fuente="archivo"]') !== null
+    // [PULIDO 10] J4 · lo que va en Archivo no va por letra: por renglón (`renglonesArchivoDe`).
+    if (archivo) continue
     for (let k = 0; k < n.length; k += 1) {
       const c = n.data[k]
       if (c.trim() === '') continue
@@ -102,6 +120,38 @@ function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boo
     }
   }
   return letras
+}
+
+/** [PULIDO 10] J4 · los renglones de lo que va en Archivo: el texto de cada renglón que pintó el DOM y la caja de su primera letra. */
+function renglonesArchivoDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boolean) | null): RenglonArchivo[] {
+  const renglones: RenglonArchivo[] = []
+  const rango = document.createRange()
+  const recorrido = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT)
+  for (let n = recorrido.nextNode(); n !== null; n = recorrido.nextNode()) {
+    const padre = n.parentElement
+    if (!(n instanceof Text) || padre === null || !seVe(n, raiz) || (solo !== null && !solo(padre)) || padre.closest('[data-fuente="archivo"]') === null) continue
+    const cuerpo = parseFloat(getComputedStyle(padre).fontSize)
+    const enLaTecla = padre.closest(LA_TECLA) !== null
+    let actual: { texto: string; x: number; arriba: number; alto: number } | null = null
+    for (let k = 0; k < n.length; k += 1) {
+      rango.setStart(n, k)
+      rango.setEnd(n, k + 1)
+      const r = rango.getBoundingClientRect()
+      const c = n.data[k]
+      if (c.trim() === '' || (r.width === 0 && r.height === 0)) {
+        if (actual !== null) actual.texto += c
+        continue
+      }
+      // Un renglón nuevo cuando la letra baja más de medio cuerpo.
+      if (actual === null || r.top - origen.top > actual.arriba + cuerpo / 2) {
+        if (actual !== null) renglones.push({ ...actual, texto: actual.texto.trim(), cuerpo, enLaTecla })
+        actual = { texto: '', x: r.left - origen.left, arriba: r.top - origen.top, alto: r.height }
+      }
+      actual.texto += c
+    }
+    if (actual !== null) renglones.push({ ...actual, texto: actual.texto.trim(), cuerpo, enLaTecla })
+  }
+  return renglones
 }
 
 function trazosDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boolean) | null): TrazoDelPie[] {
@@ -137,6 +187,7 @@ export function medirLaPieza(el: HTMLElement, forma: FormaDeLaPieza): MedidaDeLa
       trazos: trazosDe(el, r, (e) => e.closest(LA_TECLA) !== null),
       pozos: [...el.querySelectorAll('input, textarea')].map((c) => cajaRelativa(c, r, radioDe(c))),
       tecla: tecla === null ? null : cajaRelativa(tecla, r, radioDe(tecla.firstElementChild)),
+      archivo: renglonesArchivoDe(el, r, deLaPlaca),
     }
   } else {
     medida = { caja, letras: letrasDe(el, r, null), trazos: forma === 'placa' ? trazosDe(el, r, null) : [], pozos: [], tecla: null }
@@ -154,5 +205,6 @@ export function firmaDeLaForma(m: MedidaDeLaPieza): string {
     m.trazos.map((t) => `${t.d.join('|')}@${n(t.x)},${n(t.y)},${n(t.escala)}`).join(';'),
     m.pozos.map((p) => `${n(p.x)},${n(p.y)},${n(p.ancho)},${n(p.alto)}`).join(';'),
     m.tecla === null ? '' : `${n(m.tecla.x)},${n(m.tecla.y)},${n(m.tecla.ancho)},${n(m.tecla.alto)}`,
+    (m.archivo ?? []).map((r) => `${r.texto}@${n(r.x)},${n(r.arriba)},${n(r.cuerpo)}`).join(';'),
   ].join('/')
 }

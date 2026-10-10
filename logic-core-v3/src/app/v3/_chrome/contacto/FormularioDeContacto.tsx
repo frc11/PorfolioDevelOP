@@ -10,7 +10,7 @@ import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
 import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
 import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
-import { transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
+import { transicionDeGracias, varianteDelPanel } from '../../_lib/formularios/gracias'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
@@ -89,7 +89,8 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [fase, setFase] = useState<'formulario' | 'enviando' | 'gracias'>('formulario')
   const enviando = fase === 'enviando'
   const enviado = fase === 'gracias'
-  const variante = useSyncExternalStore(sinSuscripcion, varianteDeLaPagina, () => 'volteo' as const)
+  // [PULIDO 10] J4 · el panel, con el hundido (el pie, con el volteo); `?gracias=` cambia los dos.
+  const variante = useSyncExternalStore(sinSuscripcion, varianteDelPanel, () => 'hundido' as const)
   // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe).
   const [alto, setAlto] = useState<number | undefined>(undefined)
   const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)

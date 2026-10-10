@@ -22,8 +22,10 @@ interface Props {
 
 export function TarjetaDeGracias({ foco, enVolumen = false, alOtro, className }: Props): React.JSX.Element {
   return (
-    <div ref={foco} tabIndex={-1} data-tarjeta="gracias" className={cn('flex flex-col gap-[var(--spacing-2)] outline-none', className)}>
-      <p data-relieve="" data-fuente="archivo" className={cn('font-display font-fuerte uppercase tracking-display leading-titulo text-fluido-titulo-m', enVolumen && 'text-transparent')}>
+    // [PULIDO 10] J4 · el foco se ve (el anillo de siempre: ya no se le quita el contorno); en 3D el título va en minúsculas (lo compone la
+    // escena en Archivo, como la frase del CTA); en el DOM plano, las mayúsculas (la cara de display del DOM no trae minúsculas).
+    <div ref={foco} tabIndex={-1} data-tarjeta="gracias" className={cn('flex flex-col gap-[var(--spacing-2)]', className)}>
+      <p data-relieve="" data-fuente="archivo" className={cn('font-display font-fuerte tracking-display leading-titulo text-fluido-titulo-m', enVolumen ? 'text-transparent' : 'uppercase')}>
         {GRACIAS.titulo}
       </p>
       <p data-relieve="" className={cn('text-cuerpo leading-texto', enVolumen && 'text-transparent')}>

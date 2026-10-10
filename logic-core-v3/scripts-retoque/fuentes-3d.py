@@ -70,7 +70,8 @@ PEDIDOS = [
     *[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,
        'textos': textos, 'destino': f'archivo-{nombre}-cta{sufijo}.json'}
       for nombre, wdth in ANCHOS_DEL_CTA.items()
-      for peso, textos, sufijo in ((600, ['Este sitio empezó con una charla.'], ''), (900, ['El tuyo también.', 'HABLANOS'], '-fuerte'))],
+      # [PULIDO 10] J4 · y el título de la tarjeta de gracias del pie en 3D (en minúsculas: se compone como la frase).
+      for peso, textos, sufijo in ((600, ['Este sitio empezó con una charla.', 'Gracias por tu mensaje.'], ''), (900, ['El tuyo también.', 'HABLANOS'], '-fuerte'))],
     # [PULIDO 4] C1 · los seis valores (título y línea, `_secciones/por-que-develop/contenido.ts`), en el peso del DOM.
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': VALORES, 'destino': 'chivo-400-valores.json'},

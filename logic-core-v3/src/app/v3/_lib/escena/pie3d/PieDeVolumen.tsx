@@ -10,7 +10,7 @@ import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
 import { EN_VIVO } from '../final/recorridoDelFinal'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
-import { alCuadro, rearmar, soltar, type EstadoDelPie } from './armadas'
+import { alCuadro, prepararLasTransformaciones, rearmar, soltar, type EstadoDelPie } from './armadas'
 import { CAJAS_DEL_PIE } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
@@ -91,6 +91,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     const armarYa = (): void => {
       if (!vivo || !s.fuentes || s.estudio === null) return
       rearmar(s, g, s.estudio)
+      // [PULIDO 10] J4 · la placa de una transformación (la tarjeta de gracias), compilada antes de girar.
+      prepararLasTransformaciones(s, gl, escena, camara)
       if (s.listo || s.compilando || s.armadas.length === 0) return
       s.compilando = true
       void gl.compileAsync(escena, camara).then(() => {

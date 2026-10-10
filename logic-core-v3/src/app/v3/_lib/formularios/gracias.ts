@@ -14,14 +14,22 @@ export const ANUNCIO_DE_GRACIAS = `${GRACIAS.titulo} ${GRACIAS.bajada}`
 
 export type VarianteDeGracias = 'volteo' | 'hundido'
 
-/** La variante pedida en `?gracias=` (sin pedir, o con otro valor: el volteo). */
-export function varianteDeGracias(valor: string | null | undefined): VarianteDeGracias {
-  return valor === 'hundido' ? 'hundido' : 'volteo'
+/**
+ * La variante pedida en `?gracias=` (sin pedir, o con otro valor: la del formulario). [PULIDO 10] J4 · el pie va con el volteo y el
+ * panel de Contacto con el hundido; `?gracias=` cambia los dos.
+ */
+export function varianteDeGracias(valor: string | null | undefined, porDefecto: VarianteDeGracias = 'volteo'): VarianteDeGracias {
+  return valor === 'hundido' || valor === 'volteo' ? valor : porDefecto
 }
 
-/** La variante de la consulta de la página. */
+/** La variante de la consulta de la página (la del pie: el volteo). */
 export function varianteDeLaPagina(): VarianteDeGracias {
   return typeof window === 'undefined' ? 'volteo' : varianteDeGracias(new URLSearchParams(window.location.search).get('gracias'))
+}
+
+/** [PULIDO 10] J4 · la del panel de Contacto: el hundido. */
+export function varianteDelPanel(): VarianteDeGracias {
+  return typeof window === 'undefined' ? 'hundido' : varianteDeGracias(new URLSearchParams(window.location.search).get('gracias'), 'hundido')
 }
 
 const CURVA = [0.25, 0.46, 0.45, 0.94] as const

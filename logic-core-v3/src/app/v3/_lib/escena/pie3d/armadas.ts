@@ -4,7 +4,6 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import datos400 from '../../../_fuentes/chivo-400-pie.json'
 import datos500 from '../../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../../_fuentes/chivo-600-pie.json'
-import datosArchivo from '../../../_fuentes/archivo-700-titulos.json'
 import { homografia, matrix3dCss } from '../../pie3d/homografia'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
@@ -14,6 +13,7 @@ import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDe
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { varianteDeGracias, type VarianteDeGracias } from '../../formularios/gracias'
 import { viajeEnCurso } from '../viaje'
+import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
@@ -32,8 +32,9 @@ import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transforma
  * pieza tiene su viaje (`viaje`, la pose de su llegada); el DOM se lleva con el viaje en cero (donde la pieza va a quedar)
  * y no recibe clics hasta que la pieza llegó.
  */
-// [PULIDO 9] H2 · y Archivo, para el mensaje de la tarjeta de gracias.
-const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: new Font(datosArchivo as FontData) }
+// [PULIDO 9] H2 · y Archivo, para el mensaje de la tarjeta de gracias. [PULIDO 10] J4 · la de la frase del CTA (minúsculas, acentos y
+// kerning): el título se compone como ella.
+const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: FUENTES_DEL_CTA.frase }
 
 /** Cuánto se hunde (px) y en cuánto tiempo (la constante, s). */
 export const HUNDIDA_DEL_PIE = { encima: 5, apretada: 12, tau: 0.05 } as const
@@ -80,6 +81,10 @@ interface TransformacionEnCurso {
   readonly variante: VarianteDeGracias
   readonly saliente: Armada
   t: number
+  /** [PULIDO 10] J4 · lista para arrancar: el programa de la entrante, compilado (`PieDeVolumen`), y un cuadro entero ya dibujado. */
+  lista: boolean
+  cuadros: number
+  compilando: boolean
 }
 
 export interface EstadoDelPie {
@@ -236,8 +241,10 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
       if (transforma) {
         vieja.transformacion = null
         a.grupo.add(vieja.viaje)
-        a.transformacion = { variante: varianteDeGracias(p.elemento.getAttribute('data-gracias')), saliente: vieja, t: 0 }
-        p.elemento.style.opacity = '0'
+        a.transformacion = { variante: varianteDeGracias(p.elemento.getAttribute('data-gracias')), saliente: vieja, t: 0, lista: false, cuadros: 0, compilando: false }
+        // [PULIDO 10] J4 · el DOM se apaga sólo de vuelta al formulario (sus campos flotarían sobre la placa que gira); hacia la
+        // tarjeta, no: es transparente y el anillo de su foco no desaparece en la transformación.
+        if (estado !== 'gracias') p.elemento.style.opacity = '0'
       }
     }
     raiz.add(a.grupo)
@@ -319,18 +326,43 @@ function soltarLasMallas(a: Armada | undefined): void {
 const POSE = new THREE.Matrix4()
 
 /**
+ * [PULIDO 10] J4 · compila la entrante de cada transformación nueva ANTES de que gire, con las luces de la escena (`compile`
+ * recorre sólo lo visible: se la prende un momento). Sin esto, el programa o los búferes podían llegar a mitad del giro.
+ */
+export function prepararLasTransformaciones(s: EstadoDelPie, gl: THREE.WebGLRenderer, escena: THREE.Scene, camara: THREE.Camera): void {
+  for (const a of s.armadas) {
+    const x = a.transformacion
+    if (x === null || x.lista || x.compilando) continue
+    x.compilando = true
+    const [grupo, viaje] = [a.grupo.visible, a.viaje.visible]
+    a.grupo.visible = true
+    a.viaje.visible = true
+    const compilado = gl.compileAsync(a.grupo, camara, escena)
+    a.grupo.visible = grupo
+    a.viaje.visible = viaje
+    const listo = (): void => {
+      x.lista = true
+    }
+    void compilado.then(listo, listo)
+  }
+}
+
+/**
  * [PULIDO 9] H2 · un cuadro de la transformación (`transformacionDelPie.ts`): la entrante sobre su llegada y la saliente en su
  * lugar; el DOM, apagado hasta que termina (lo nuevo ya está en él: el foco, el lector).
  */
 function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: number): void {
-  x.t = Math.min(1, x.t + dt / duracionDeLaTransformacion(x.variante, quieto))
+  // [PULIDO 10] J4 · arranca recién con la entrante compilada y después de un cuadro entero (el del rearmado es largo: armar la
+  // geometría; su `dt` adelantaría el giro de un salto). Mientras, la entrante se dibuja disuelta: sus búferes ya suben.
+  if (x.lista) x.cuadros += 1
+  if (x.cuadros > 1) x.t = Math.min(1, x.t + dt / duracionDeLaTransformacion(x.variante, quieto))
   const caja = a.medida.caja
   const vieja = x.saliente.medida.caja
   const desde = { ancho: vieja.ancho, alto: vieja.alto, dx: vieja.x - caja.x, dy: vieja.y - caja.y }
   const entra = poseDeLaTransformacion(x.variante, quieto, x.t, true, caja, desde, a.espesor, POSE)
   a.viaje.matrix.multiply(POSE)
-  a.viaje.visible = entra.visible
-  a.uniformes.uApareceDelPie.value *= entra.aparece
+  a.viaje.visible = true
+  a.uniformes.uApareceDelPie.value *= entra.visible ? entra.aparece : 0
   const sale = poseDeLaTransformacion(x.variante, quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
   x.saliente.viaje.visible = sale.visible
   x.saliente.uniformes.uApareceDelPie.value = sale.aparece
