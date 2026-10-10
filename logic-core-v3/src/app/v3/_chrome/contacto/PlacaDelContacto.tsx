@@ -57,8 +57,11 @@ export function PlacaDelContacto({ activa, rechazo, children }: { readonly activ
       >
         <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, z: rechazo, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
           {children}
+          {/* [PULIDO 11] A1 · las caras se ven recién con el viaje terminado: en el viaje la placa va de frente (no aportan nada)
+              y, antes de que la hoja se rasterice, la de atrás asomaba como un rectángulo en el medio (medido con los cuadros del
+              compositor: `pulido-11/_scripts/a1-contacto.ts`). Al irse siguen (se acuesta sobre su base). */}
           {CARAS.map((c) => (
-            <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className)} style={c.style} />
+            <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className, !llego && 'invisible')} style={c.style} />
           ))}
         </motion.div>
       </motion.div>
