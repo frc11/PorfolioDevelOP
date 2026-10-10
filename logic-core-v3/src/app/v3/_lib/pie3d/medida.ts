@@ -72,7 +72,8 @@ function cajaRelativa(el: Element, origen: DOMRect, radio: number): CajaDelPie {
 /** ¿Este texto se ve? Ni el del lector (`sr-only`) ni la copia muda del rollover (`aria-hidden`). */
 function seVe(n: Node, raiz: Element): boolean {
   const padre = n.parentElement
-  if (padre === null || padre.closest('.sr-only') !== null) return false
+  // [PULIDO 10] J3 · ni lo que se queda vivo en el DOM sobre la pieza (la carga del botón: `data-sin-volumen`).
+  if (padre === null || padre.closest('.sr-only') !== null || padre.closest('[data-sin-volumen]') !== null) return false
   const mudo = padre.closest('[aria-hidden="true"]')
   return mudo === null || !raiz.contains(mudo)
 }
@@ -106,7 +107,7 @@ function letrasDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boo
 function trazosDe(raiz: HTMLElement, origen: DOMRect, solo: ((e: Element) => boolean) | null): TrazoDelPie[] {
   const trazos: TrazoDelPie[] = []
   for (const svg of raiz.querySelectorAll('svg')) {
-    if ((solo !== null && !solo(svg)) || svg.classList.contains('animate-spin')) continue
+    if ((solo !== null && !solo(svg)) || svg.classList.contains('animate-spin') || svg.closest('[data-sin-volumen]') !== null) continue
     const r = svg.getBoundingClientRect()
     const caja = svg.viewBox.baseVal
     const lado = caja !== null && caja.width > 0 ? caja.width : 24

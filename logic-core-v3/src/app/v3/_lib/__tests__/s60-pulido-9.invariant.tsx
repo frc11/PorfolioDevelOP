@@ -196,8 +196,10 @@ const pie = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 const quietoAlEnviar = (c: string): boolean =>
   (c.match(/readOnly=\{enviando\}/g) ?? []).length === 2 &&
   /<span aria-hidden="true" className="invisible col-start-1 row-start-1">\s*\{enviando \? c\.enviar : c\.enviando\}/.test(c) &&
-  /className="absolute left-\[var\(--spacing-2\)\] size-\[var\(--spacing-4\)\] animate-spin/.test(c)
-afirmar(quietoAlEnviar(pie), '  mientras viaja: los campos, de sólo lectura; el botón guarda el ancho del rótulo más largo y la ruedita va en su aire (nada cambia de lugar)')
+  // [PULIDO 10] J3 · la ruedita se fue: el botón es la carga chica, encima del rótulo, que se queda invisible guardando el ancho.
+  c.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
+  c.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>")
+afirmar(quietoAlEnviar(pie), '  mientras viaja: los campos, de sólo lectura; el botón guarda el ancho del rótulo más largo (invisible) y la carga va encima (nada cambia de lugar)')
 controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace(/readOnly=\{enviando\} /, ''), quietoAlEnviar)
 
 // 2 · La transformación de la placa (pura): la saliente y la entrante se cambian donde no se ve el cambio; al final, la
@@ -267,25 +269,23 @@ titulo('H3 · Contacto: la carga 3D y la tarjeta de gracias')
 // misma familia de transformación), y a los 3 s se cierra solo con una línea que se consume; con error, vuelve con todo.
 const panel = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 const panelBien = (c: string): boolean =>
-  /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} role="status" aria-label=\{ROTULO_ENVIANDO\}/.test(c) && /<AnilloDeCarga quieto=\{reducido\} \/>/.test(c) &&
+  // [PULIDO 10] J3 · la carga es la de develOP (el anillo se fue); su estado lo anuncia ella (`role="status"`).
+  /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} data-parte="carga"/.test(c) && c.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
   /<motion\.div key="gracias" \{\.\.\.cambio\}[^>]*>\s*<TarjetaDeGracias foco=\{alLlegar\} \/>/.test(c) && /const cambio = transicionDeGracias\(variante, reducido\)/.test(c) &&
   /const reloj = window\.setTimeout\(cerrarContacto, CIERRE_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)/.test(c) &&
   /initial=\{\{ width: '100%' \}\} animate=\{\{ width: '0%' \}\} transition=\{\{ duration: CIERRE_MS \/ 1000, ease: 'linear' \}\}/.test(c) &&
   /if \(r\.estado === 'error'\) \{\s*pedirFoco\.current = 'enviar'/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&
   /<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(c) && /<p role="status" className="sr-only">\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(c)
-afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_GRACIAS, '1 · enviar transforma el formulario en la carga 3D y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
+afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_GRACIAS, '1 · enviar transforma el formulario en la carga y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
 controlPositivo('1 · el detector VE un panel que no se cierra solo', panel.replace('const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)', 'const reloj = 0'), panelBien)
 controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace('<TarjetaDeGracias foco={alLlegar} />', '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
 
-// 2 · El anillo, en el material de la escena (el negro satinado con los reflejos de su estudio y el filo de costado), en su
-// propio lienzo chico y transparente: sin compositor y con el dpr de la regla; con movimiento reducido, quieto.
-const anillo = sinComentarios(leer('_chrome/contacto/AnilloDeCarga.tsx'))
-const anilloBien = (c: string): boolean =>
-  /new THREE\.MeshStandardMaterial\(\{ color: INK_COLOR, roughness: SATINADO\.roughness, metalness: 0\.15, envMap: reflejos\.texture/.test(c) && /const reflejos = crearElEstudio\(gl\)/.test(c) &&
-  /totalEmissiveRadiance \+= uColorDelFilo \* pow\( deCostado/.test(c) && /dpr=\{\[1, 1\.5\]\}/.test(c) && /gl=\{\{ alpha: true/.test(c) && !/EffectComposer|Bloom/.test(c) &&
-  /if \(m === null \|\| quieto\) return/.test(c) && /<torusGeometry/.test(c) && /dynamic\(\(\) => import\('\.\/AnilloDeCarga'\), \{ ssr: false \}\)/.test(panel)
-afirmar(anilloBien(anillo), '2 · la carga es un anillo 3D en el material de la escena (satinado, los reflejos del estudio y el filo), en un lienzo chico sin compositor, que se descarga aparte; quieto con movimiento reducido')
-controlPositivo('2 · el detector VE un lienzo con el dpr de 2', anillo.replace('dpr={[1, 1.5]}', 'dpr={2}'), anilloBien)
-controlPositivo('  y un anillo sin el filo', anillo.replace('totalEmissiveRadiance += uColorDelFilo', 'totalEmissiveRadiance *= uColorDelFilo'), anilloBien)
+// 2 · [PULIDO 10] J3 · El anillo se fue (lo reemplazó la carga de develOP, como pidió J3): el panel ya no carga un lienzo aparte
+// ni un componente de three, y la carga tampoco (es SVG). Antes: el anillo 3D en su propio lienzo, con el material de la escena.
+const carga = sinComentarios(leer('_componentes/carga/Carga.tsx'))
+const sinLienzo = (p: string, c: string): boolean => !/AnilloDeCarga|dynamic\(|<Canvas|@react-three/.test(p) && !/<canvas|<Canvas|@react-three|from 'three'/.test(c)
+afirmar(sinLienzo(panel, carga), '2 · la carga del panel es la de develOP, sin lienzo propio (ni el panel ni la carga traen WebGL)')
+controlPositivo('2 · el detector VE el panel de antes (el anillo en su lienzo)', `${panel}
+const AnilloDeCarga = dynamic(() => import('./AnilloDeCarga'), { ssr: false })`, (p: string) => sinLienzo(p, carga))
 
 cerrar('s60-pulido-9')

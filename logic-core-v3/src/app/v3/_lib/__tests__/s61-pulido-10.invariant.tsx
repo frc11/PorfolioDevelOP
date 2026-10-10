@@ -4,6 +4,7 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   J1  · 1024 y «Portátil L»: el texto 3D en renglones, la banda portátil (el campo de visión y las medidas del logo en el
  *         DOM) y los solapes (el detector y los recibos del banco a 1024, 1280 y 1440).
+ *   J3  · la carga de develOP: el trazo (o el giro, `?carga=giro`), los textos, la espera mínima, el botón del pie y el panel.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
@@ -17,6 +18,8 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import { CARGA, varianteDeLaCarga } from '../../_componentes/carga/Carga'
+import { TEXTOS_DE_ENVIO } from '../formularios/enviar'
 import datos400 from '../../_fuentes/chivo-400-pie.json'
 import datos500 from '../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../_fuentes/chivo-600-pie.json'
@@ -128,6 +131,51 @@ const recibosBien = recibos.every(({ ruta }) => {
   return ['hero', 'quienes', 'portfolio', 'razones', 'cta', 'pie'].every((m) => r.momentos[m] !== undefined && r.momentos[m].solapes.length === 0)
 })
 afirmar(recibosBien, '  los recibos del banco a 1024 × 824, 1280 × 800 y 1440 × 900: en el reposo del hero, Quiénes somos, Portfolio, Seis razones, el CTA y el pie, cero solapes', recibos.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J3 · La carga de develOP: el trazo (o el giro), sus textos, la espera mínima y los dos lugares donde va')
+
+// A · La API: tres tamaños, la tinta según el fondo (o la de quien la contiene, `--carga-tinta`), los textos en un estado vivo y
+// la espera mínima de 1,4 s; `?carga=giro`, el giro (cualquier otra cosa, el trazo). Se pinta con `fill`/`stroke` y el texto con
+// `-webkit-text-fill-color` (sobre la tecla del pie de volumen el `color` es transparente), y sin WebGL: ningún lienzo aparte.
+const CARGA_TSX = leer('_componentes/carga/Carga.tsx')
+const apiBien = (minimo: number, variante: typeof varianteDeLaCarga, c: string): boolean =>
+  minimo === 1400 && variante('giro') === 'giro' && variante(null) === 'trazo' && variante('anillo') === 'trazo' &&
+  Object.keys(CARGA.lados).join() === 'chico,medio,grande' && c.includes('role="status"') && c.includes('data-sin-volumen=""') &&
+  c.includes("const color = `var(--carga-tinta, ${tinta === 'filo' ? 'var(--color-fondo)' : 'var(--color-tinta)'})`") &&
+  c.includes('style={{ WebkitTextFillColor: color }}') && c.includes('const [resultado] = await Promise.all([promesa, new Promise((listo) => window.setTimeout(listo, ms))])') &&
+  !/<canvas|<Canvas|@react-three|from 'three'/.test(c)
+afirmar(apiBien(CARGA.minimoMs, varianteDeLaCarga, CARGA_TSX), 'A · la carga: tres tamaños, la tinta del fondo (o la de quien la contiene), el estado vivo, la espera mínima de 1,4 s y `?carga=giro`; pintada con fill y text-fill (se ve sobre la tecla), sin WebGL')
+controlPositivo('A · el detector VE una carga con el texto pintado por `color` (sobre la tecla quedaría transparente)', CARGA_TSX.replace(' style={{ WebkitTextFillColor: color }}', ''), (c: string) => apiBien(CARGA.minimoMs, varianteDeLaCarga, c))
+controlPositivo('  y una variante que no se lee', ((v: string | null | undefined) => (v === 'trazo' ? 'trazo' : 'trazo')) as typeof varianteDeLaCarga, (f: typeof varianteDeLaCarga) => apiBien(CARGA.minimoMs, f, CARGA_TSX))
+
+// B · El pie de volumen no la mide (`data-sin-volumen`): ni sus letras ni su trazo van a la placa (se queda viva en el DOM, sobre
+// la tecla) y su estado al cambiar no rearma la geometría (la firma no cambia).
+const MEDIDA = leer('_lib/pie3d/medida.ts')
+const sinVolumenBien = (m: string): boolean => m.includes("padre.closest('[data-sin-volumen]') !== null) return false") && m.includes("svg.closest('[data-sin-volumen]') !== null) continue")
+afirmar(sinVolumenBien(MEDIDA), 'B · lo que lleva `data-sin-volumen` (la carga) no se extruye: ni sus letras ni su trazo')
+controlPositivo('B · el detector VE la carga medida como un ícono de la tecla', MEDIDA.replace(" || svg.closest('[data-sin-volumen]') !== null", ''), sinVolumenBien)
+
+// C · Los dos lugares: en el botón del pie (la carga chica encima del rótulo, que se queda invisible guardando el ancho; clara
+// sobre la tecla y sobre el botón lleno del angosto) y en el panel de Contacto (la grande, en lugar del anillo); los dos con la
+// espera mínima (el panel, sólo si de verdad viaja: un formulario inválido responde al toque). Los textos: «Enviando…» y «Casi…».
+const PIE_FORM = leer('_secciones/cierre/FormularioDelPie.tsx')
+const PANEL = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const lugaresBien = (p: string, m: string): boolean =>
+  TEXTOS_DE_ENVIO.join() === 'Enviando…,Casi…' &&
+  p.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
+  p.includes('[--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]') &&
+  p.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>") &&
+  p.includes('const r = await conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
+  m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
+  m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
+afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, en lugar del anillo), con la espera mínima')
+controlPositivo('C · el detector VE el panel esperando 1,4 s también con el formulario inválido', PANEL.replace('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)', 'const r = await conDuracionMinima(enviarContacto(datos))'), (m: string) => lugaresBien(PIE_FORM, m))
+
+// D · Con movimiento reducido, el logo quieto (relleno, sin trazo ni giro) y el texto.
+const reducidaBien = (c: string): boolean => /\{quieto \? \(\s*<path d=\{LOGO_PATH_D\} fill=\{color\} \/>/.test(c) && c.includes('animate={quieto ? undefined : { rotateY: 360 }}') && c.includes('Array.from({ length: quieto ? 1 : capas }')
+afirmar(reducidaBien(CARGA_TSX), 'D · con movimiento reducido, el logo quieto (ni trazo ni giro) y el texto')
+controlPositivo('D · el detector VE un giro que gira igual con movimiento reducido', CARGA_TSX.replace('animate={quieto ? undefined : { rotateY: 360 }}', 'animate={{ rotateY: 360 }}'), reducidaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')

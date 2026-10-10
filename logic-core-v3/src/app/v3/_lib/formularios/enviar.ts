@@ -5,6 +5,9 @@
  */
 export type ResultadoDelEnvio = { readonly ok: true } | { readonly ok: false; readonly error: string }
 
+/** [PULIDO 10] J3 · el estado de la carga mientras viaja un envío (los dos formularios): uno y después el otro. */
+export const TEXTOS_DE_ENVIO = ['Enviando…', 'Casi…'] as const
+
 export const ERROR_DE_RED = 'No pudimos enviarlo. Revisá tu conexión y probá de nuevo.'
 const ESPERA_MS = 15000
 

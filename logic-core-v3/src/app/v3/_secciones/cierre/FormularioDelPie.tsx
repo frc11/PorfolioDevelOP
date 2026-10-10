@@ -1,14 +1,14 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
-import { enviarAlServidor } from '../../_lib/formularios/enviar'
+import { TEXTOS_DE_ENVIO, enviarAlServidor } from '../../_lib/formularios/enviar'
 import { ANUNCIO_DE_GRACIAS, transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
@@ -104,7 +104,8 @@ export function FormularioDelPie(): React.JSX.Element {
       return
     }
     setEstado({ fase: 'enviando' })
-    const r = await enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() })
+    // [PULIDO 10] J3 · con la espera mínima de la carga: aunque la respuesta llegue antes, se ve trabajar (no parpadea).
+    const r = await conDuracionMinima(enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() }))
     if (r.ok) {
       pedirFoco.current = 'tarjeta'
       setEstado({ fase: 'gracias' })
@@ -179,10 +180,11 @@ export function FormularioDelPie(): React.JSX.Element {
         )
       })}
       <BloqueSolido forma="principal" className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]">
-        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="relative flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo">
-          {/* Sin cambiar de lugar nada: la ruedita en el aire del botón (en el angosto no entra: sólo el rótulo) y el ancho del rótulo más largo, guardado. */}
-          {enviando && <Loader2 aria-hidden="true" strokeWidth={1.5} className="absolute left-[var(--spacing-2)] size-[var(--spacing-4)] animate-spin motion-reduce:animate-none max-escritorio:hidden" />}
-          <span className="grid justify-items-center">
+        <button type="submit" disabled={enviando} aria-busy={enviando || undefined} className="relative flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte escritorio:border-transparent px-[var(--spacing-5)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-8)] escritorio:py-[var(--spacing-3)] text-cuerpo font-semi disabled:cursor-wait max-escritorio:w-full max-escritorio:justify-center max-escritorio:border-transparent max-escritorio:bg-tinta max-escritorio:px-[var(--spacing-3)] max-escritorio:text-fondo [--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]">
+          {/* [PULIDO 10] J3 · enviando, el botón es la carga chica (el trazo del logo y su estado, vivos en el DOM sobre la tecla); el
+              rótulo se queda invisible guardando el ancho del más largo: nada cambia de lugar. */}
+          {enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}
+          <span aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>
             <span className="col-start-1 row-start-1">{enviando ? c.enviando : c.enviar}</span>
             <span aria-hidden="true" className="invisible col-start-1 row-start-1">
               {enviando ? c.enviar : c.enviando}

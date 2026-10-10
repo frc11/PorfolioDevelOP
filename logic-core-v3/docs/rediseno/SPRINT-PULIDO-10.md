@@ -11,12 +11,11 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J1 · la banda portátil, el texto 3D en renglones, Quiénes somos desde 1024 y los solapes en cero a 1024, 1280 y
   1440 (f590e17a)
 - HECHO: J8 · el pie nuevo (25/50/25, el recorrido en texto 3D con el subrayado del sitio, Demos, `?pie=columna2` y
-  `?pie=menu-abajo`), visto en el banco a 1024, 1280, 1440 y 1920 en las tres disposiciones (commit «pulido 10 · J8»; el hash,
-  en el próximo). Pendiente del banco: la llegada a Demos con el destino corregido (el clic, el viaje, el activo de la barra
+  `?pie=menu-abajo`), visto en el banco a 1024, 1280, 1440 y 1920 en las tres disposiciones (b0a2c184). Pendiente del banco: la llegada a Demos con el destino corregido (el clic, el viaje, el activo de la barra
   y el foco ya se midieron; la llegada vieja se pasaba 108 px y asomaba la sección de abajo)
 - J10 · la histéresis: escrita, `s61` J10 verde (el modelo); falta medirla en el banco
-- J3 · la carga: escrita y conectada (el botón del pie y el panel de Contacto, con la espera mínima; `?carga=giro`); `s61` J3
-  verde; falta verla en el banco (sin memoria)
+- HECHO: J3 · la carga de develOP (el trazo; `?carga=giro`, el giro), en el botón del pie y en el panel de Contacto (en lugar
+  del anillo), con la espera mínima (commit «pulido 10 · J3»). Pendiente del banco: verla (sin memoria para abrirlo)
 - J2 · primera ráfaga (1440, desde el hero, con la barra): ningún cuadro oscuro ajeno; faltan 390, desde la noche y la
   segunda apertura
 - J4 · a (el volteo en un movimiento, la entrante compilada antes), c (el título en Archivo en minúsculas, compuesto como la
@@ -146,5 +145,12 @@ pie nuevo de J8.
 | J8 | `s8-cierre` §1 · las columnas dejan libre el hueco del logo | dos veces el ancho «medio cuadro menos el hueco» en la fuente | una clase para las dos columnas: en el pie plano, la de antes; con el de volumen, un cuarto (25/50/25), con la cuenta de que un cuarto deja libre más que el hueco en cinco cuadros desde 1024 | El 25/50/25 de J8 |
 | J8 | `s8-cierre` §1 · la navegación del pie | Inicio, Quiénes somos, Trabajos, Servicios, Tu panel, Por qué develOP | Inicio, Quiénes somos, Portfolio, Demos, Servicios, Tu panel, Por qué develOP | El menú que pidió J8 |
 | J8 | `s27` · los dos motores van al mismo píxel | `destinoDelViaje(seccion)` | `destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)` | Un subdestino (Demos) viaja a su propio nudo; las secciones, al de siempre |
+| J3 | `s60` H2 §1 · el botón del pie mientras viaja | la ruedita (`Loader2`, que gira) en el aire del botón | la carga chica encima del rótulo, que se queda invisible guardando el ancho | J3: el botón se vuelve la carga |
+| J3 | `s60` H3 §1 · los estados del panel | `<AnilloDeCarga quieto={reducido} />` con el estado en el envoltorio | `<Carga tamano="grande" …/>` (el estado lo anuncia la carga) | J3: la carga de develOP reemplaza al anillo |
+| J3 | `s60` H3 §2 · la carga del panel | el anillo 3D en el material de la escena, en su propio lienzo, sin compositor | ni el panel ni la carga traen un lienzo ni three (control: el panel con el anillo) | El anillo se fue con J3 |
+| J4 | `s55` §6 · la fuente de la frase del CTA | sólo con las letras de la frase | con las de la frase y las del título de la tarjeta de gracias (y nada más) | J4 · c: el título en 3D se compone como la frase, con su fuente |
+| J5 | `s60` H2 §1 · los rótulos del botón | dos (Enviar, Enviando…) | tres (y Reintentar), con `perspective-midrange` en su grilla (el giro) | J5: Enviar pasa a Reintentar girando |
+| J5 | `s44` · ninguna pieza gira; la tecla se hunde sin girar | ningún giro en todo `armadas.ts` | ninguno salvo `girarLaTecla` (Reintentar entra desde canto, por tiempo, y termina de frente), con una afirmación nueva: gira por tiempo y no lee el mouse | J5 pidió el giro de Reintentar |
+| J5 | `s52` C4 · el lugar del botón del pie | `self-start …` | `z-10 self-start …` | El error sale de atrás del botón |
 | J9 | `s5-quienes-somos` · las clases `hover:` de la sección | 33 | 36 | La leyenda corta de la foto del equipo abajo de 1024 («El equipo detrás de develOP») lleva el mismo texto del revelado que las otras (3) |
 | J10 | `s60` H1 · el modelo del polvo | adentro de `s60` | en `modeloDelPolvo.ts`, compartido con `s61`. El cableado de hoy le pasa además la quietud con la histéresis; el de antes, la de siempre | Las mismas afirmaciones y los mismos controles, ahora contra el código de hoy (con J10) |

@@ -2,13 +2,14 @@
 
 import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
 import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
+import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
 import { transicionDeGracias, varianteDeLaPagina } from '../../_lib/formularios/gracias'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
@@ -41,15 +42,14 @@ export const MS_DE_LA_HOJA = 700
 export const MS_DEL_VELO = 400
 
 /**
- * [PULIDO 9] H3 · ENVIANDO Y GRACIAS. Al enviar, el formulario se transforma en la carga 3D (`AnilloDeCarga`: un anillo en el
- * material de la escena, en su propio lienzo, que se descarga aparte) y, al llegar, la carga en la tarjeta de gracias (la
+ * [PULIDO 9] H3 · ENVIANDO Y GRACIAS. Al enviar, el formulario se transforma en la carga ([PULIDO 10] J3 · la de develOP,
+ * `Carga`: el trazo del logo en SVG, sin lienzo; era un anillo 3D en su propio lienzo) y, al llegar, la carga en la tarjeta de gracias (la
  * del pie, con la misma familia de transformación: `transicionDeGracias`). A los `CIERRE_MS` el panel se cierra solo, con
  * su salida de siempre; mientras, una línea fina se consume. Esc y la X siguen cerrando; al cerrarse, el foco vuelve a quien
  * lo abrió. Con error, el formulario vuelve con todo lo escrito y el error a la vista. Lo escrito vive en la hoja: la carga
  * y la tarjeta no lo tocan.
  */
 export const CIERRE_MS = 3000
-const AnilloDeCarga = dynamic(() => import('./AnilloDeCarga'), { ssr: false })
 const sinSuscripcion = (): (() => void) => () => undefined
 
 const VACIO: Omit<DatosDeContacto, 'intereses'> = { presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
@@ -116,12 +116,14 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     setAvisoALaVista(false)
     const form = e.currentTarget
     const errores = validarContacto(datos)
-    if (Object.keys(errores).length === 0) {
+    const valido = Object.keys(errores).length === 0
+    if (valido) {
       setAlto(form.offsetHeight)
       pedirFoco.current = 'carga'
       setFase('enviando')
     }
-    const r = await enviarContacto(datos)
+    // [PULIDO 10] J3 · lo que viaja, con la espera mínima de la carga (no parpadea); un formulario inválido responde al toque.
+    const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)
     setFase('formulario')
     if (r.estado === 'invalido') {
       setErrores(r.errores)
@@ -242,13 +244,9 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           <div className="perspective-midrange">
           <AnimatePresence mode="wait" initial={false}>
           {enviando ? (
-            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} role="status" aria-label={ROTULO_ENVIANDO} data-parte="carga" className="flex flex-col items-center justify-center gap-[var(--spacing-3)] outline-none" style={{ minHeight: alto }}>
-              <div aria-hidden="true" className="size-[calc(var(--spacing-20)*1.5)]">
-                <AnilloDeCarga quieto={reducido} />
-              </div>
-              <p aria-hidden="true" className="text-caption leading-texto">
-                {ROTULO_ENVIANDO}
-              </p>
+            // [PULIDO 10] J3 · la carga de develOP (el trazo del logo, o el giro con `?carga=giro`) y su estado; reemplaza al anillo.
+            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} data-parte="carga" className="flex flex-col items-center justify-center outline-none" style={{ minHeight: alto }}>
+              <Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />
             </motion.div>
           ) : enviado ? (
             <motion.div key="gracias" {...cambio} data-parte="gracias" className="flex flex-col justify-center gap-[var(--spacing-6)]" style={{ minHeight: alto }}>
