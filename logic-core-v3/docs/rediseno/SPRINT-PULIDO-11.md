@@ -63,7 +63,10 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 - A4 · «Seis razones» punteado en mobile — NO REPRODUCIDO. A 390 (DPR 1 y 3) mientras amanece la lista va con el halo denso
   (NOCTURNO FINAL D2) y los ítems que llegan se ven tenues; no hay un tramado en el DOM abajo de 1024. Lo más parecido a
   «punteado» son las motas del polvo delante del texto. Queda para la matriz (G) y para que el humano diga dónde lo vio.
-- PENDIENTE: A5 · J10, el polvo con un toque, en el banco
+- HECHO: A5 · J10, el polvo con un toque, en el banco — VISTO sí (1440 × 900, NVIDIA, `a5-polvo.ts`): posado del todo, UNA
+  muesca de la rueda (100 px, de verdad) y los modos cada 250 ms: todas en el aire a los 9,3 s (ninguna cae antes), la primera
+  cae a los 15,7 s (6,4 s en el aire) y a los ~22 s están posadas otra vez. Cumple J10 (el modelo de s61 decía 7,0 y 15,6: la
+  subida real es un poco más lenta). Recibo `entregas/pulido-11/polvo-con-un-toque.json`; `s62` A5
 
 ### Fase B · los forms definitivos (pie y modal): volteo, éxito y error
 - PENDIENTE: B1 · el salto del volteo (`?volteo=centrado|columpio`), geometría al montar, cuadros < 20 ms

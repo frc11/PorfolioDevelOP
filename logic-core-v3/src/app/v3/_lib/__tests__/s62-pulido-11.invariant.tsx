@@ -10,6 +10,7 @@
  *   A4b · Quiénes somos de noche (abajo de 1024): el velo detrás de los textos que cruzan el logo, sin cortar la mezcla, en AA.
  *   A4e · el CTA abajo de 1024: la frase desde la izquierda y HABLANOS desde la derecha, en volumen y anclados, función del
  *         scroll, terminando juntos; sin «Seis razones» que reaparezcan, sin volteo ni giro.
+ *   A5 · J10 medido en el banco: con un solo toque el polvo termina de subir y queda en el aire antes de volver a posarse.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -172,5 +173,23 @@ const sinGiro = (e: string, l: string): boolean =>
   (l.match(/className="pointer-events-none invisible absolute/g) ?? []).length === 2 && !/opacity: listo \? 0 : copia/.test(l) && /<DestinoDelCta rotulo=\{CTA\.rotulo\} destino=\{CTA\.destino\} progreso=\{progreso\} enLaLista \/>/.test(l)
 afirmar(sinGiro(escenaDelCta, ctaEnLaLista), '  en la escena: poses y frase ya formadas en la lista; el marco a la derecha y el lienzo a la izquierda con el mismo avance (terminan juntos); el enlace va con HABLANOS; las copias, invisibles')
 controlPositivo('  el detector VE la lista de antes (el giro y el volteo con el progreso)', [escenaDelCta.replace('posesDe(formado, ', 'posesDe(p, '), ctaEnLaLista] as const, ([e, l]: readonly [string, string]) => sinGiro(e, l))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A5 · J10 en el banco: el polvo con un solo toque')
+
+// El recibo (`a5-polvo.ts`, 1440 × 900, NVIDIA): posado del todo, UNA muesca de la rueda y los modos cada 250 ms. Lo que J10
+// pidió: una vez despertado termina de subir (ninguna cae antes de que estén todas en el aire) y pasa un tiempo en el aire
+// (~6 s) antes de volver a evaluar si se posa. Medido: todas en el aire a los 9,3 s; la primera cae a los 15,7 s (6,4 s
+// después); a los 26 s, posadas otra vez (el modelo de s61 decía 7,0 y 15,6: la subida real es un poco más lenta).
+type Cuadro = { s: number; modos: number[] }
+const polvo = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-11/polvo-con-un-toque.json', 'utf8')) as { posado: number[]; toque: Cuadro[] }
+const conHisteresis = (serie: Cuadro[]): boolean => {
+  const lleno = serie.find((c) => c.modos[0] === 14000)
+  const cae = serie.find((c) => c.s > 0.5 && c.modos[1] > 0)
+  if (lleno === undefined || cae === undefined) return false
+  return cae.s > lleno.s && cae.s - lleno.s >= 5 && serie.filter((c) => c.s < lleno.s && c.modos[1] > 0).length === 0 && serie[serie.length - 1].modos[2] > 13500
+}
+afirmar(polvo.posado[2] > 13500 && conHisteresis(polvo.toque), 'A5 · con un toque: todas suben antes de que caiga ninguna, quedan ≥ 5 s en el aire y después se vuelven a posar')
+controlPositivo('A5 · el detector VE el polvo de antes (a los 4 s vuelve a bajar antes de terminar de subir)', polvo.toque.map((c) => (c.s > 4 && c.s < 6 ? { s: c.s, modos: [c.modos[0], 900, c.modos[2], c.modos[3], c.modos[4], c.modos[5]] } : c)), conHisteresis)
 
 cerrar('s62-pulido-11')
