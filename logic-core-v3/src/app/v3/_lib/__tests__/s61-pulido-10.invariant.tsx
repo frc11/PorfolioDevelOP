@@ -13,6 +13,7 @@
  *   J7  · el cartel de Portfolio llega entero (o invisible) después de un viaje.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
+ *   J9  · móvil y tablet: las leyendas de Quiénes somos, el panel de Contacto angosto, el progreso arriba y el formulario del pie.
  *   J10 · el polvo con un solo toque: una vez despertado, termina de subir y pasa un tiempo mínimo en el aire antes de volver a
  *         evaluar si se posa (la histéresis).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
@@ -26,6 +27,7 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import { progresoAbajo } from '../../_chrome/recorrido/InfinitoDelRecorrido'
 import { opacidadDeLaLlegada, recorteDeLaLlegada } from '../../_secciones/trabajos/piezas'
 import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
 import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
@@ -433,6 +435,48 @@ type ReciboDelPie = Record<string, { enlaces: { renglones: number }[]; fuera: un
 const pieBien = (r: ReciboDelPie): boolean => ['producto', 'columna2', 'menu-abajo'].every((d) => r[d] !== undefined && r[d].enlaces.length === 7 && r[d].enlaces.every((e) => e.renglones === 1) && r[d].fuera.length === 0 && r[d].listo === true)
 afirmar(RECIBOS_DEL_PIE.every(({ ruta }) => existsSync(ruta) && pieBien(JSON.parse(readFileSync(ruta, 'utf8')) as ReciboDelPie)), 'G · los recibos del pie a 1024, 1280, 1440 y 1920: en las tres disposiciones, los siete enlaces en un renglón y nada afuera del cuadro', RECIBOS_DEL_PIE.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
 controlPositivo('G · el detector VE un enlace partido en dos renglones', { producto: { enlaces: [{ renglones: 2 }], fuera: [], listo: true } } as ReciboDelPie, pieBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J9 · Móvil y tablet: las leyendas de Quiénes somos, el panel de Contacto angosto, el progreso arriba y el formulario del pie')
+
+// a · Abajo de 1024 la leyenda de cada persona es sólo su rol (el nombre ya está arriba, en el título) y la foto de las dos
+// personas dice «El equipo detrás de develOP» (dictado por el humano).
+const MARCO_J9 = leer('_secciones/quienes-somos/marco.tsx')
+const leyendasBien = (m: string, e: string, c: string): boolean =>
+  m.includes("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">") &&
+  m.includes("<p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte=\"revelado-texto\">") &&
+  m.includes("<p className={cn(REVELADO.ventana, 'escritorio:hidden')} data-parte=\"revelado-texto-movil\">") &&
+  e.includes('textoEnMovil={CONTENIDO.equipo.leyendaEnMovil}') && c.includes("leyendaEnMovil: 'El equipo detrás de develOP',")
+afirmar(leyendasBien(MARCO_J9, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')), 'a · abajo de 1024: el rol solo en la leyenda de cada persona y «El equipo detrás de develOP» en la foto del equipo')
+controlPositivo('a · el detector VE el nombre repetido en la leyenda del teléfono', MARCO_J9.replace("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">", '<p className={REVELADO.ventana} data-parte="revelado-nombre">'), (m: string) => leyendasBien(m, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')))
+
+// c · El panel de Contacto en el teléfono: el contenido centrado en el alto de la hoja; el mensaje crece con lo que se escribe (de
+// dos a ocho renglones, `field-sizing`) y en el angosto su rótulo va en su renglón.
+const CAMPOS_J9 = leer('_chrome/contacto/CamposDelContacto.tsx')
+const panelAngostoBien = (cm: string, p: string): boolean =>
+  cm.includes("'items-start rounded-[var(--radius-fuerte)] max-movil:flex-col max-movil:items-stretch'") && cm.includes('[field-sizing:content] min-h-[2lh] max-h-[8lh]') &&
+  p.includes("compacto ? 'min-h-full justify-center gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]'")
+afirmar(panelAngostoBien(CAMPOS_J9, leer('_chrome/contacto/FormularioDeContacto.tsx')), 'c · el panel en el teléfono: centrado en el alto, el mensaje que crece (con tope) y su rótulo en su renglón en el angosto')
+controlPositivo('c · el detector VE el mensaje de alto fijo', CAMPOS_J9.replace(' [field-sizing:content] min-h-[2lh] max-h-[8lh]', ''), (cm: string) => panelAngostoBien(cm, leer('_chrome/contacto/FormularioDeContacto.tsx')))
+
+// d · El progreso en el teléfono: arriba a la derecha, con el parlante a su izquierda (el botón del menú va arriba al centro);
+// `?progreso=abajo`, la esquina de abajo de antes. En escritorio, como estaba.
+const ESQUINA_J9 = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
+const progresoArribaBien = (f: typeof progresoAbajo, c: string): boolean =>
+  f('?progreso=abajo') && !f('') && !f('?progreso=arriba') &&
+  c.includes('max-escritorio:not-data-abajo:top-[var(--spacing-4)] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto max-escritorio:not-data-abajo:flex-row') &&
+  c.includes("data-abajo={abajo ? '' : undefined}")
+afirmar(progresoArribaBien(progresoAbajo, ESQUINA_J9), 'd · el progreso del teléfono arriba a la derecha con el parlante a su izquierda; `?progreso=abajo`, el de antes')
+controlPositivo('d · el detector VE una bandera que no se lee', ((c: string) => c === 'abajo') as typeof progresoAbajo, (f: typeof progresoAbajo) => progresoArribaBien(f, ESQUINA_J9))
+
+// f · El formulario del pie en el teléfono: un campo por renglón (el nombre y el mail enteros), el mensaje entero y Enviar abajo a
+// todo el ancho (sin el hueco al lado del mensaje). En la tablet ya iba en columna.
+const PIE_J9 = leer('_secciones/cierre/FormularioDelPie.tsx')
+const pieAngostoBien = (p: string): boolean =>
+  p.includes("{ nombre: 'col-span-6', mail: 'col-span-6', mensaje: 'col-span-6 tablet:max-escritorio:grid") &&
+  p.includes('className="z-10 self-start max-escritorio:col-span-6 max-escritorio:self-stretch escritorio:mt-[var(--spacing-2)]"')
+afirmar(pieAngostoBien(PIE_J9), 'f · el formulario del pie en el teléfono: un campo por renglón, el mensaje entero y Enviar abajo a todo el ancho')
+controlPositivo('f · el detector VE el nombre y el mail lado a lado de antes', PIE_J9.replace("{ nombre: 'col-span-6', mail: 'col-span-6',", "{ nombre: 'col-span-3', mail: 'col-span-3',"), pieAngostoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J10 · El polvo con un solo toque: termina de subir y se queda en el aire')

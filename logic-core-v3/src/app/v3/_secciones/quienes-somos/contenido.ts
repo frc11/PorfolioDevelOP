@@ -171,6 +171,8 @@ export const CONTENIDO = {
      */
     seria: { leyenda: 'Franco y Valentino, de remera blanca, en un jardín de noche', fuente: '/recursos/equipo/nosotros.webp', encuadre: 'medio' },
     suelta: { leyenda: 'Franco y Valentino en un boliche, entre luces de colores', fuente: '/recursos/equipo/nosotros-descontracturado.webp', encuadre: 'medio' },
+    /** [PULIDO 10] J9 · lo que dice la foto al tocarla abajo de 1024 (dictado por el humano): la frase larga ya se lee arriba. */
+    leyendaEnMovil: 'El equipo detrás de develOP',
     /**
      * ⚠️ **B12 §4.3 · EL PLACEHOLDER, no la foto.** Es un archivo PROPIO
      * —generado por `scripts-b12/placeholders.ts`, rayado y grano en escala de

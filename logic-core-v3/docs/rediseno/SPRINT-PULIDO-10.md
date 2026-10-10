@@ -29,7 +29,6 @@ el volteo y el hundido como concepto (J4).
   minúsculas, compuesto como la frase del CTA), e (el foco no desaparece) y f (el panel con el hundido) (2b5b200e). No se hizo: armar la geometría de la tarjeta al montar (el programa se compila antes de girar, pero la geometría se
   arma cuando llega la respuesta). Pendiente del banco: medir los cuadros del volteo (ninguno de más de 20 ms) y ver las dos
   variantes en los dos formularios
-- J9 · a (las leyendas de las fotos): escrito; falta verlo en el banco
 - HECHO: J5 · el error en los dos formularios: la placa rechaza con un resorte amortiguado (la 3D del pie en profundidad; el
   panel, su bloque; la hoja del teléfono y el pie plano, en escala), Reintentar entra girando (en 3D, la tecla), el error sale
   de atrás del botón en su renglón, el foco en Reintentar, el pulso; con movimiento reducido, sin resorte ni giro (02e78e36). Pendiente del banco: verlo con `?envio=error` a 1440 y a 390
@@ -42,9 +41,18 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J7 · el cartel de Portfolio después de un viaje: al llegar, el título repite su llegada (vuelve a 0 con el velo y
   llega después) y P2 lo sube desde el 60 % de su alto adentro de la ventana que recorta, así que el primer cuadro a la vista
   era el titular cortado. Mientras se repite, la ventana no recorta y el titular arranca invisible (`useRepeticionDeLaLlegada`):
-  entero o invisible, nunca cortado (commit «pulido 10 · J7»). Pendiente del banco: verlo a 375 y en escritorio, desde el
+  entero o invisible, nunca cortado (760bfd2c). Pendiente del banco: verlo a 375 y en escritorio, desde el
   CTA y desde el menú
-- EN CURSO: J9 · móvil y tablet (a, escrito; b a g)
+- HECHO (en parte): J9 · a (abajo de 1024, el rol solo en la leyenda de cada persona y «El equipo detrás de develOP» en la
+  foto), c (el panel de Contacto en el teléfono: centrado en el alto, el mensaje que crece de dos a ocho renglones y su rótulo
+  en su renglón en el angosto), d (el progreso arriba a la derecha con el parlante a su izquierda; `?progreso=abajo`) y f (el
+  formulario del pie: un campo por renglón y Enviar abajo a todo el ancho) (commit «pulido 10 · J9»). Sin hacer, porque
+  piden el banco: b (el velo elíptico de noche en Quiénes somos con el AA medido: la bajada de abajo de 1025 va con
+  `mix-blend-mode` y un velo detrás la puede cortar sin error; hay que medirlo), e (el CTA en 3D abajo de 1024: la frase desde
+  la izquierda y HABLANOS desde la derecha) y g (WhatsApp cortado a 375: la cuenta dice que entra —303 de 343 px—, hay que
+  verlo para saber qué lo corta)
+- EN CURSO: la verificación final (la matriz, los solapes en todos los anchos, los estados de los formularios): espera
+  memoria para el banco
 
 ## Memoria
 
@@ -174,5 +182,7 @@ pie nuevo de J8.
 | J5 | `s60` H2 §1 · los rótulos del botón | dos (Enviar, Enviando…) | tres (y Reintentar), con `perspective-midrange` en su grilla (el giro) | J5: Enviar pasa a Reintentar girando |
 | J5 | `s44` · ninguna pieza gira; la tecla se hunde sin girar | ningún giro en todo `armadas.ts` | ninguno salvo `girarLaTecla` (Reintentar entra desde canto, por tiempo, y termina de frente), con una afirmación nueva: gira por tiempo y no lee el mouse | J5 pidió el giro de Reintentar |
 | J5 | `s52` C4 · el lugar del botón del pie | `self-start …` | `z-10 self-start …` | El error sale de atrás del botón |
+| J9 | `s52` C4 · el formulario del pie en el teléfono | el nombre y el mail lado a lado (`col-span-3`), el mensaje en cuatro y Enviar al lado (`col-span-2`, abajo a la derecha) | todo en `col-span-6`: un campo por renglón y Enviar abajo a todo el ancho | J9 · f |
+| J9 | `s54` A2 · el formulario en la tablet | el mensaje `col-span-4` (en el teléfono) | `col-span-6`; lo de la tablet, igual | J9 · f (la aserción mira la tablet; sólo cambió el ancho del teléfono) |
 | J9 | `s5-quienes-somos` · las clases `hover:` de la sección | 33 | 36 | La leyenda corta de la foto del equipo abajo de 1024 («El equipo detrás de develOP») lleva el mismo texto del revelado que las otras (3) |
 | J10 | `s60` H1 · el modelo del polvo | adentro de `s60` | en `modeloDelPolvo.ts`, compartido con `s61`. El cableado de hoy le pasa además la quietud con la histéresis; el de antes, la de siempre | Las mismas afirmaciones y los mismos controles, ahora contra el código de hoy (con J10) |

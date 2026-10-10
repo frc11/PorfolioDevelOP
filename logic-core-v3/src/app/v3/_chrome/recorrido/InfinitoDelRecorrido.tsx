@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from 'motion/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
@@ -48,7 +48,15 @@ function escribirElNumero(el: HTMLSpanElement | null, p: number): void {
   if (el !== null && el.textContent !== texto) el.textContent = texto
 }
 
+/** [PULIDO 10] J9 · `?progreso=abajo`: en el teléfono, la esquina de abajo de antes (para comparar). */
+export function progresoAbajo(consulta: string): boolean {
+  return new URLSearchParams(consulta).get('progreso') === 'abajo'
+}
+const sinCambios = (): (() => void) => () => undefined
+const abajoEnLaPagina = (): boolean => progresoAbajo(window.location.search)
+
 export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: React.ReactNode }): React.JSX.Element {
+  const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)
   const caja = useRef<HTMLDivElement>(null)
   const numero = useRef<HTMLSpanElement>(null)
   const reducido = useMovimientoReducido()
@@ -97,9 +105,11 @@ export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: Reac
 
   return (
     // [RETOQUE 3D] N2 · 1,3 veces más grande (48 → 62 px en el teléfono, 64 → 83 en escritorio); el trazo crece con él.
-    <div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]">
+    // [PULIDO 10] J9 · en el teléfono, arriba a la derecha y en fila: el parlante a su izquierda (el botón del menú va arriba al
+    // centro); con `?progreso=abajo`, la columna de abajo de antes. En escritorio, como estaba.
+    <div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] max-escritorio:not-data-abajo:top-[var(--spacing-4)] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto max-escritorio:not-data-abajo:flex-row max-escritorio:not-data-abajo:gap-[var(--spacing-2)] escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]" data-abajo={abajo ? '' : undefined}>
       {encima}
-      <div ref={caja} data-pieza="infinito-del-recorrido" aria-hidden="true" className="text-tinta flex w-full flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)]">
+      <div ref={caja} data-pieza="infinito-del-recorrido" aria-hidden="true" className="text-tinta flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:w-full">
         <svg viewBox={CAJA_DEL_INFINITO} className="block h-auto w-full overflow-visible">
           {/* El borde del tono contrario, debajo de todo: se lee sobre cualquier fondo (los dos tonos del anillo de foco). */}
           <path d={TRAZO_DEL_INFINITO} fill="none" stroke="var(--color-fondo)" strokeWidth={GRUESO_DEL_INFINITO + 2} strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />

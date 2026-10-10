@@ -161,7 +161,9 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir, c
             <Pildora campo="empresa" datos={datos} errores={errores} escribir={escribir} compacto={compacto} />
           </div>
           <div className="flex flex-col gap-[var(--spacing-1)]">
-            <label data-foco="pastilla" className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)]', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
+            {/* [PULIDO 10] J9 · en el teléfono angosto el rótulo va en su renglón (al lado, el mensaje quedaba en una columna flaca) y
+                el mensaje crece con lo que se escribe, de dos a ocho renglones (`field-sizing`; sin él, los renglones de siempre). */}
+            <label data-foco="pastilla" className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)] max-movil:flex-col max-movil:items-stretch', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
               <span className="text-caption shrink-0 font-medio">{CAMPOS.mensaje.rotulo}</span>
               <textarea
                 name="mensaje"
@@ -173,7 +175,7 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir, c
                 placeholder={CAMPOS.mensaje.ejemplo}
                 aria-invalid={errores.mensaje !== undefined || undefined}
                 aria-describedby={errores.mensaje === undefined ? undefined : idDelError('mensaje')}
-                className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent"
+                className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent [field-sizing:content] min-h-[2lh] max-h-[8lh]"
               />
             </label>
             <Error campo="mensaje" errores={errores} />

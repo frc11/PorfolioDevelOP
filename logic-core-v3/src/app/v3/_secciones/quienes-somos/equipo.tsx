@@ -263,6 +263,7 @@ export function LaFoto(): React.JSX.Element {
                         seria={CONTENIDO.equipo.seria}
                         suelta={CONTENIDO.equipo.suelta}
                         texto={CONTENIDO.equipo.descripcion}
+                        textoEnMovil={CONTENIDO.equipo.leyendaEnMovil}
                         registro="cuerpo"
                         relacion={CLASE_DE_RELACION.foto}
                         ancho={GEOMETRIA.foto.ancho}

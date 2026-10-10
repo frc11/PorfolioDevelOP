@@ -236,7 +236,8 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         <div
           className={cn(
             'mx-auto flex w-full max-w-[min(100%,calc(var(--spacing-20)*14))] flex-col',
-            compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]',
+            // [PULIDO 10] J9 · en la hoja del teléfono, el contenido centrado en el alto (si no entra, se scrollea como siempre).
+            compacto ? 'min-h-full justify-center gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]',
           )}
         >
           <div className={cn('flex items-start justify-between', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-6)]')}>

@@ -217,6 +217,7 @@ export function MarcoDeDosTomas({
   proporcion,
   relacion,
   descripcionYaVisible,
+  textoEnMovil,
 }: {
   readonly seria: Toma
   readonly suelta: Toma
@@ -224,6 +225,8 @@ export function MarcoDeDosTomas({
   readonly nombre?: string
   /** Lo que aparece en el hover. En los retratos es el puesto; en la foto del equipo, su frase. */
   readonly texto: string
+  /** [PULIDO 10] J9 · abajo de 1024, en lugar de `texto` (la foto del equipo: su leyenda corta; la frase ya se lee arriba). */
+  readonly textoEnMovil?: string
   readonly registro: 'rotulo' | 'cuerpo'
   readonly ancho: number
   readonly alto: number
@@ -340,14 +343,15 @@ export function MarcoDeDosTomas({
             {/* `data-parte="revelado-texto"` es lo que `banda.css` apaga en la banda
                 móvil cuando la descripción YA está afuera de la foto (§2 del pedido):
                 el intercambio de imagen y el velo se quedan, sale sólo el texto. */}
+            {/* [PULIDO 10] J9 · abajo de 1024 el nombre ya está arriba, en el título: la leyenda es sólo el rol. */}
             {nombre !== undefined && (
-              <p className={REVELADO.ventana} data-parte="revelado-nombre">
+              <p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte="revelado-nombre">
                 <span className={cn(REVELADO.texto, REVELADO.nombre)} style={ESCALON.primero}>
                   {nombre}
                 </span>
               </p>
             )}
-            <p className={REVELADO.ventana} data-parte="revelado-texto">
+            <p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte="revelado-texto">
               <span
                 className={cn(REVELADO.texto, registro === 'rotulo' ? REVELADO.rotulo : REVELADO.cuerpo)}
                 style={nombre === undefined ? ESCALON.solo : ESCALON.segundo}
@@ -355,6 +359,13 @@ export function MarcoDeDosTomas({
                 {texto}
               </span>
             </p>
+            {textoEnMovil !== undefined && (
+              <p className={cn(REVELADO.ventana, 'escritorio:hidden')} data-parte="revelado-texto-movil">
+                <span className={cn(REVELADO.texto, REVELADO.rotulo)} style={ESCALON.solo}>
+                  {textoEnMovil}
+                </span>
+              </p>
+            )}
           </div>
         </div>
 

@@ -214,10 +214,11 @@ afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su ge
 // y lo único que el disparador le cambia es la opacidad — una clase donde había tres.
 // Ocho por marco: acercamiento 2, suelta 2, velo 1, texto 3. 8 × 3 marcos.
 // [NAVBAR] La máscara recuperada (opacidad, recorte y transición) y el nombre de los retratos como renglón propio.
+// [PULIDO 10] J9 · y la leyenda corta de la foto del equipo abajo de 1024 (su texto, como el de todo revelado: 3).
 afirmarIgual(
   hovers,
-  33,
-  '  y en esta sección son 33: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres, y 3 por el nombre de cada retrato',
+  36,
+  '  y en esta sección son 36: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres, 3 por el nombre de cada retrato y 3 por la leyenda corta de la foto del equipo',
 )
 // Modo pulido: TRES botones, uno por marco. Son el control del toque de abajo de
 // 1025. Están en el marcado en los dos lados —el corte es `escritorio:hidden` y no
