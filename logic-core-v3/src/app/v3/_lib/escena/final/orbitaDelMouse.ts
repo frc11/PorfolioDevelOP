@@ -13,8 +13,11 @@ import * as THREE from 'three'
  * pantalla es más corta: a propósito, la ganancia por píxel vertical es `gananciaVertical` veces la horizontal (llega a su tope
  * antes de llegar al borde, en vez de repartir el rango en la altura). Simétrica: desde abajo el techo del domo tampoco entra
  * (`s55` C3). Con más rango, más amortiguada (`amortiguaS`, era 0,3): de punta a punta sigue debajo del techo de s23.
+ *
+ * [PULIDO 13] K4 · mientras cae, el logo mira la cámara de frente: en la cinemática la órbita se apaga del todo (`enLaCinematica`
+ * 0, era 0,2: torcía la mirada hasta 4,4°), amortiguada igual; vuelve entera en el quieto, después de la caída.
  */
-export const ORBITA_DEL_MOUSE = { horizontal: 22, vertical: 12, gananciaVertical: 1.6, amortiguaS: 0.45, enLaCinematica: 0.2 } as const
+export const ORBITA_DEL_MOUSE = { horizontal: 22, vertical: 12, gananciaVertical: 1.6, amortiguaS: 0.45, enLaCinematica: 0 } as const
 
 /** [PULIDO 4] C3 · el alto sobre el ancho de la ventana si el DOM todavía no lo escribió (el de 1440 × 900). */
 const ASPECTO_DE_SIEMPRE = 900 / 1440

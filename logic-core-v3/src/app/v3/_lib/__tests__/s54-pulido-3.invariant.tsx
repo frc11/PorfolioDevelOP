@@ -430,7 +430,8 @@ const orbitaBien = (paso: Paso, rango: { readonly horizontal: number; readonly v
   const atenuada = Math.abs(o.h) <= 0.21 * rango.horizontal
   return rango.horizontal >= 20 && rango.horizontal <= 24 && rango.vertical >= 11 && rango.vertical <= 12 && aLos03 > 0.55 && aLos03 < 0.7 && llega && vuelve && atenuada &&
     c.includes("pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)") &&
-    c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * sube, s.orbita.v * sube)') &&
+    // [PULIDO 13] K4 · sólo con el logo acostado (s64 K4 a): hacia adelante entra igual, con el final entero.
+    c.includes('const orbita = orbitaDelFinal(fin)') && c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)') &&
     c.includes("conMouse: !angosto && !estatico && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches")
 }
 afirmar(orbitaBien(pasoDeLaOrbita, ORBITA_DEL_MOUSE, cuadro), 'la órbita del mouse: [PULIDO 4] ±22° y hasta ±12°, amortiguada, al centro con el mouse afuera, atenuada en la cinemática y entera en el quieto; sólo en escritorio con puntero fino', `±${String(ORBITA_DEL_MOUSE.horizontal)}° · ±${String(ORBITA_DEL_MOUSE.vertical)}° · ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)

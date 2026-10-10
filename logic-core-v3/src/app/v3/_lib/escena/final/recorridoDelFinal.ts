@@ -2,8 +2,8 @@ import * as THREE from 'three'
 
 import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
 import { entornoDeLaEscena } from '../entorno'
-import { FLOOR_Y, ORBIT_TARGET_Y } from '../probeScene'
-import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
+import { FLOOR_Y, ORBIT_TARGET_Y, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
+import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -38,12 +38,8 @@ import { CAIDA_AL_HUECO, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, po
  * del reloj. Se fueron el acostarse en su lugar, la caída derecha y la presión (con su temblor y sus sacudones).
  */
 export const FINAL_DEL_PIE = {
-  /**
-   * [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). [PULIDO 11] D · la cámara sube
-   * en paralelo con la caída: `conElLogo` de su camino hasta `hastaS` (el logo todavía de pie: se lo ve caer) y el resto hasta
-   * `terminaTrasElGolpeS` después del golpe (mientras rebota y se asienta).
-   */
-  subida: { conElLogo: 0.8, hastaS: 2.6, terminaTrasElGolpeS: 0.4 },
+  // [EL ENCASTRE] 2B · los tiempos van en segundos del reloj (`fin × RELOJ_DEL_FINAL.duracionS`). [PULIDO 13] K4 · la subida de la
+  // cámara ya no tiene tiempos: la lleva el ángulo de la caída (`subida`).
   /** [PULIDO 11] D · el blanco de la cámara baja al piso (s del reloj): con el logo que baja y cae. */
   blanco: { desdeS: 0.4, hastaS: 2.8 },
   /**
@@ -95,6 +91,9 @@ export const FINAL_DEL_PIE = {
  */
 // [PULIDO 11] D · `duracionS`: el golpe y lo que viene después de él (el destello, la expansión: 1,7 s, como antes del 4,7 al 6,4).
 export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + 1.7, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
+
+/** [PULIDO 13] K4 · `fin` del golpe: de ahí para arriba el logo está acostado y la cámara en el cenit. */
+export const FIN_DEL_GOLPE = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
 
 /**
  * [PULIDO 1] P2 · EL REBOBINADO, MÁS RÁPIDO. El mecanismo de A1 (un gesto, solo, hasta el logo parado; el reinicio a los
@@ -210,10 +209,16 @@ function pendienteDeLaSubida(fin: number): number {
  */
 export function velocidadDeSalida(fin: number): number {
   const { finS, camaraS, mira } = RELOJ_DEL_FINAL.salida
-  let pendiente = 0
-  for (let i = 0; i <= 6; i += 1) pendiente = Math.max(pendiente, pendienteDeLaSubida(Math.max(0, fin - (mira * i) / 6)))
+  let pendiente = pendienteDeLaSubida(fin)
+  // [PULIDO 13] K4 · las secantes de tramos contiguos (cubren la ventana entera): la subida atada al ángulo de la caída es empinada
+  // y angosta al final (el logo llega rápido al hueco) y los puntos sueltos de antes la salteaban.
+  for (let i = 0; i < TRAMOS_DE_LA_MIRADA; i += 1) {
+    const [a, b] = [Math.max(0, fin - (mira * (i + 1)) / TRAMOS_DE_LA_MIRADA), Math.max(0, fin - (mira * i) / TRAMOS_DE_LA_MIRADA)]
+    if (b > a) pendiente = Math.max(pendiente, Math.abs(subida(b) - subida(a)) / (b - a))
+  }
   return Math.min(1 / finS, 1 / (camaraS * Math.max(1e-6, pendiente)))
 }
+const TRAMOS_DE_LA_MIRADA = 24
 
 /** Un cuadro del reloj (escribe en `r`). */
 export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): void {
@@ -355,15 +360,57 @@ export interface TamanoDelLogo {
   readonly ancho?: number
 }
 
+/** [PULIDO 13] K4 · el logo de siempre (el de `FinalDelPie` mientras sus medidas no llegan): para quien no tiene el tamaño. */
+export const LOGO_DE_SIEMPRE: TamanoDelLogo = { alto: 4.78, espesor: (PROBE_EXTRUDE.depth + 2 * PROBE_EXTRUDE.bevelThickness) * PROBE_SVG_SCALE }
+
 /**
- * Cuánto subió la cámara, de 0 a 1: en paralelo con la caída. [PULIDO 11] D · `conElLogo` hasta `subida.hastaS` y el resto hasta
- * un momento después del golpe.
+ * Cuánto subió la cámara, de 0 a 1. [PULIDO 13] K4 · ATADA AL ÁNGULO DE LA CAÍDA: el logo mira siempre de frente a la cámara. La
+ * cámara sube en elevación de `e0` (la de la pose E, radianes) hasta `camara.elevacion`, y la normal de la cara del logo es
+ * (0, sen a, cos a), con `a` su ángulo (0 parado, 90° acostado): la subida es la que deja la elevación de la cámara en `a`. Hasta
+ * que el logo pasa la elevación de la cámara, nada se mueve (tampoco su blanco); tocado el hueco, arriba (los rebotes no la
+ * sacuden). Es función de `fin`: el rebobinado deshace la cámara y la caída con el mismo vínculo. Antes subía con un reloj propio
+ * desde el arranque, con el logo todavía de pie (lo seguía tarde).
  */
-export function subida(fin: number): number {
-  const s = segundosDelFinal(fin)
-  const { conElLogo, hastaS, terminaTrasElGolpeS } = FINAL_DEL_PIE.subida
-  const termina = CAIDA_AL_HUECO.golpeS + terminaTrasElGolpeS
-  return conElLogo * suave(s / hastaS) + (1 - conElLogo) * suave((s - hastaS) / (termina - hastaS))
+export function subida(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e0 = 0): number {
+  if (fin <= 0) return 0
+  const { a, toco } = anguloEnElReloj(t, segundosDelFinal(fin))
+  const tope = THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion)
+  const desde = Math.min(Math.max(0, e0), tope - 0.01)
+  return toco ? 1 : acotar01((a - desde) / (tope - desde))
+}
+
+/**
+ * [PULIDO 13] K4 · cuánto se fue el paralaje del mouse del recorrido de la cámara viva (0 a 1): mientras el logo se inclina hasta la
+ * elevación de la cámara (`e0`); desde ahí, la cámara sube sin él (con el mouse a un costado torcía la mirada ~5°). Antes de que
+ * el logo se incline, nada.
+ */
+export function sinElParalaje(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e0 = 0): number {
+  if (fin <= 0) return 0
+  const { a, toco } = anguloEnElReloj(t, segundosDelFinal(fin))
+  return toco ? 1 : acotar01(a / Math.max(1e-3, e0))
+}
+
+/**
+ * [PULIDO 13] K4 · cuánto va de la órbita del mouse (0 a 1): sólo con el logo acostado, del golpe al final entero (hacia adelante
+ * la órbita entra recién con el final entero, como antes). Rebobinando o volviendo, se va justo cuando el logo se levanta: mientras
+ * se levanta, la cámara lo mira de frente.
+ */
+export function orbitaDelFinal(fin: number): number {
+  return acotar01((fin - FIN_DEL_GOLPE) / (1 - FIN_DEL_GOLPE))
+}
+
+/**
+ * [PULIDO 13] K4 · cuánto queda del giro y del alejamiento del quieto al rebobinar desde `desde` (1 a 0): vuelven con el rebobinado
+ * (su mismo reloj y su misma curva: `fin`) y terminan cuando el logo se levanta (en el golpe). Antes terminaban con el
+ * rebobinado entero y el giro que quedaba torcía la mirada mientras el logo se levantaba (hasta 19°).
+ */
+export function quedaDelQuieto(fin: number, desde: number): number {
+  return desde <= FIN_DEL_GOLPE ? 0 : acotar01((fin - FIN_DEL_GOLPE) / (desde - FIN_DEL_GOLPE))
+}
+
+/** [PULIDO 13] K4 · la elevación de una cámara sobre el centro de la órbita (radianes): la de la pose E, al arrancar el cuadro. */
+export function elevacionDe(posicion: THREE.Vector3): number {
+  return Math.atan2(posicion.y - ORBIT_TARGET_Y, Math.hypot(posicion.x, posicion.z))
 }
 
 /** [PULIDO 11] D · el golpe (s del reloj): el contacto de la caída. Siempre el mismo (la caída arranca lo que dura antes). */

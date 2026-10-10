@@ -11,9 +11,13 @@
  *   K2 c · el éxito encaja y SE ENCIENDE adentro de su forma: nada de luz que salga de los bordes.
  *   K2 d e · el envío del panel la primera vez, sin cuadros trabados (la tarjeta se precalienta con la placa quieta).
  *   K3 · el sonido del éxito y el del error, calibrados contra el pulso y el golpe.
+ *   K4 a · la cámara de la caída: quieta hasta que el logo se inclina a su altura y desde ahí, atada al ángulo, lo mira de frente
+ *          (también al rebobinar: el giro del quieto y la órbita se van antes de que el logo se levante).
  *   K4 b · el mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve.
  */
 import { readFileSync } from 'node:fs'
+
+import * as THREE from 'three'
 
 import { CARGA, EJE_DEL_PALITO, capasDelGiro, type TamanoDeLaCarga } from '../../_componentes/carga/Carga'
 import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
@@ -22,6 +26,8 @@ import { ENTRADA_DEL_PARALAJE, ESCALA_AL_NACER, PERSPECTIVA_DE_LA_PLACA, TRANSIC
 import { SONIDOS } from '../sonido/catalogo'
 import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { PRUEBAS_SUELTAS } from '../escena/entorno'
+import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
+import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, blancoDelFinal, camaraDelFinal, elevacionDe, orbitaDelFinal, poseDelLogo, quedaDelQuieto, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -151,6 +157,63 @@ const enSuLugar = (e: string, md: string): boolean =>
 afirmar(calibrados(SONIDOS.exito.volumen, SONIDOS.error.volumen) && enSuLugar(ENCAJE_TSX, SONIDO_MD), `K3 · en el sprite y en el contacto de la pieza; ${efectiva('exito', SONIDOS.exito.volumen).toFixed(1)} y ${efectiva('error', SONIDOS.error.volumen).toFixed(1)} LUFS contra el pulso (${efectiva('pulso', 1).toFixed(1)}) y el golpe (${efectiva('golpe', 1).toFixed(1)})`)
 controlPositivo('K3 · el detector VE un éxito a todo volumen (más fuerte que el pulso)', 1, (v: number) => calibrados(v, SONIDOS.error.volumen))
 controlPositivo('  y el pestillo y el pulso de antes en el contacto', ENCAJE_TSX.replaceAll("sonar(exito ? 'exito' : 'error')", "sonar(exito ? 'pestillo' : 'pulso')"), (e: string) => enSuLugar(e, SONIDO_MD))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K4 a · La cámara de la caída: el logo la mira de frente')
+
+// El modelo: la pose E (la cámara del recorrido al llegar al pie, sin el mouse: (0, 5, 40) mirando al centro de la órbita, medida en
+// el banco), la cámara del final y la pose del logo en cada 1/240 del reloj. El ángulo entre el eje de la cámara y la normal de la
+// cara (0, sen a, cos a). Mientras el logo no llegó a la altura de la cámara (`e0`), la cámara no se mueve; desde ahí, de frente.
+const POSE_E = new THREE.Vector3(0, 5, 40)
+const e0 = elevacionDe(POSE_E)
+const camara = new THREE.PerspectiveCamera(32, 1440 / 900, 0.1, 400)
+const blanco = new THREE.Vector3()
+const pose = { centro: new THREE.Vector3(), rotacionX: 0 }
+const adelante = new THREE.Vector3()
+interface Recorrida { readonly quietaHastaLaAltura: boolean; readonly peorDesdeLaAltura: number; readonly peorAntes: number }
+const recorrer = (sube: (fin: number) => number): Recorrida => {
+  let [quieta, peor, antes] = [true, 0, 0]
+  for (let s = 0; s <= CAIDA_AL_HUECO.golpeS; s += 1 / 240) {
+    const fin = s / RELOJ_DEL_FINAL.duracionS
+    camara.position.copy(POSE_E)
+    camara.lookAt(0, 0, 0)
+    camaraDelFinal(camara, sube(fin), blancoDelFinal(fin, blanco), 0, 0, null)
+    poseDelLogo(fin, LOGO_DE_SIEMPRE, pose)
+    const a = -pose.rotacionX
+    adelante.set(0, 0, -1).applyQuaternion(camara.quaternion)
+    const angulo = THREE.MathUtils.radToDeg(Math.acos(Math.min(1, -(adelante.y * Math.sin(a) + adelante.z * Math.cos(a)))))
+    const { toco } = anguloEnElReloj(LOGO_DE_SIEMPRE, s)
+    if (a < e0) {
+      if (camara.position.distanceTo(POSE_E) > 1e-6) quieta = false
+      antes = Math.max(antes, angulo)
+    } else if (!toco) peor = Math.max(peor, angulo)
+  }
+  return { quietaHastaLaAltura: quieta, peorDesdeLaAltura: peor, peorAntes: antes }
+}
+const deFrente = (r: Recorrida): boolean => r.quietaHastaLaAltura && r.peorDesdeLaAltura < 1 && r.peorAntes <= THREE.MathUtils.radToDeg(e0) + 0.1
+const conLaCaida = recorrer((fin) => subida(fin, LOGO_DE_SIEMPRE, e0))
+afirmar(deFrente(conLaCaida), `K4 a · el modelo: la cámara quieta hasta que el logo se inclina a su altura (${THREE.MathUtils.radToDeg(e0).toFixed(1)}°) y desde ahí hasta el golpe, de frente (peor ${conLaCaida.peorDesdeLaAltura.toFixed(2)}°)`)
+// La subida de antes: un reloj propio desde el arranque (el 80 % con el logo todavía de pie y el resto hasta 0,4 s después del golpe).
+const suavePaso = (x: number): number => { const u = Math.min(1, Math.max(0, x)); return u * u * u * (u * (u * 6 - 15) + 10) }
+const subidaDeAntes = (fin: number): number => { const s = segundosDelFinal(fin); return 0.8 * suavePaso(s / 2.6) + 0.2 * suavePaso((s - 2.6) / (CAIDA_AL_HUECO.golpeS + 0.4 - 2.6)) }
+controlPositivo('K4 a · el detector VE la cámara de antes (subía con el logo de pie y lo seguía tarde)', recorrer(subidaDeAntes), deFrente)
+
+// El rebobinado: el giro del quieto y la órbita del mouse terminan en el golpe (después, el logo se levanta y la cámara lo sigue).
+const CUADRO_FINAL = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
+const alRebobinar = (queda: (fin: number, desde: number) => number, orbita: (fin: number) => number, c: string): boolean =>
+  queda(FIN_DEL_GOLPE, 1) === 0 && queda(1, 1) === 1 && queda(0.9, 1) > 0 && orbita(FIN_DEL_GOLPE) === 0 && orbita(1) === 1 &&
+  c.includes('quietoRebobinado(alRebobinar, quedaDelQuieto(fin, s.reloj.rebobinado.desde), EN_VIVO)') && c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)') &&
+  c.includes('const sinMouse = sinElParalaje(fin, tamano, elevacion)') && c.includes('const sube = subida(fin, tamano, elevacion)')
+afirmar(alRebobinar(quedaDelQuieto, orbitaDelFinal, CUADRO_FINAL), '  y al rebobinar: el giro del quieto y la órbita se van del todo antes de que el logo se levante; la cámara viva, sin el paralaje del recorrido mientras sube')
+controlPositivo('  el detector VE el quieto que volvía con el rebobinado entero', (fin: number, desde: number) => fin / desde, (q: (fin: number, desde: number) => number) => alRebobinar(q, orbitaDelFinal, CUADRO_FINAL))
+
+// Medido (1440 × 900, el mouse a un costado): con el reloj clavado y en vivo, de frente desde la altura de la cámara; al rebobinar.
+const CAIDA_MEDIDA = recibo<{ clavados: [number, number, number][]; cayendo: [number, number][]; rebobinado: { antes: number; despues: number } }>('k4-caida.json')
+const medidoDeFrente = (r: typeof CAIDA_MEDIDA): boolean =>
+  r.clavados.filter(([s, a]) => a >= 7.5 && s < CAIDA_AL_HUECO.golpeS).every(([, , g]) => g < 1) && r.clavados.filter(([s, a]) => a >= 7.5 && s < CAIDA_AL_HUECO.golpeS).length >= 8 &&
+  r.cayendo.filter(([a]) => a >= 7.5 && a < 89).every(([, g]) => g < 1) && r.rebobinado.despues < 4
+afirmar(medidoDeFrente(CAIDA_MEDIDA), `  medido: de frente (< 1°) en todo el vuelco desde la altura de la cámara; al rebobinar, a lo sumo ${String(CAIDA_MEDIDA.rebobinado.despues)}° (era ${String(CAIDA_MEDIDA.rebobinado.antes)}°)`)
+controlPositivo('  el detector VE el rebobinado de antes', { ...CAIDA_MEDIDA, rebobinado: { ...CAIDA_MEDIDA.rebobinado, despues: CAIDA_MEDIDA.rebobinado.antes } }, medidoDeFrente)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('K4 b · El mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve')

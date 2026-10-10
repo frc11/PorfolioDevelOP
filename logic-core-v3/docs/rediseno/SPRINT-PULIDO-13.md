@@ -50,7 +50,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   (`k3-sonoridad.json`). Suenan en el contacto de la pieza (el mismo instante del encaje y del choque), con el parlante prendido.
 
 ### K4 · El pie (la cámara de la caída, el form)
-- **a · la cámara de la caída** — PENDIENTE.
+- **a · la cámara de la caída** — HECHO · VISTO sí (banco: `pulido-13/_scripts/k4-caida.ts`, en vivo y con el reloj clavado).
+  `subida` ya no es un reloj propio: es el ÁNGULO del logo. La cámara sube en elevación desde la de la pose E (e0 = 7,1°: la
+  cámara del recorrido en (0, 5, 40)) y la subida es la que deja su elevación en el ángulo `a` del logo (la normal de la cara es
+  (0, sen a, cos a)): hasta que el logo se inclina a la altura de la cámara no se mueve nada (tampoco su blanco); desde ahí, de
+  frente; tocado el hueco, arriba (los rebotes no la sacuden). Además, mientras el logo se inclina hasta esa altura, la cámara
+  viva deja el paralaje del mouse del recorrido (torcía ~5° con el mouse a un costado) y la órbita del mouse del final se apaga en
+  la cinemática (era 0,2: hasta 4,4°); vuelve entera en el quieto, como antes. Al rebobinar, el giro del quieto y la órbita se
+  van antes de que el logo se levante (`quedaDelQuieto`, `orbitaDelFinal`): la cámara se deshace con el mismo vínculo. La salida
+  del fondo frena con secantes en vez de puntos sueltos (la subida nueva es empinada y angosta al final de la caída).
+  Medido con el mouse a un costado: en reposo 9,8° (la pose del recorrido, quieta); desde los 7,5° de vuelco hasta el golpe,
+  0,0°; al tocar, 0,8° (la cámara para en 89,2°); al rebobinar, a lo sumo 3,2° (era 19,3°). Recibo `k4-caida.json`.
 - **b · el formulario** — HECHO · VISTO sí (banco). El éxito, el de K2 c (es el mismo componente). El mail sin «nombre@dominio». El
   autocompletado: la causa era `foco.css` (la regla del foco de los campos, sin capa, le ganaba a la demora del autocompletado, que
   es una utilidad en su capa): el celeste y el texto del navegador entraban en media duración rápida y, con la placa del pie todavía

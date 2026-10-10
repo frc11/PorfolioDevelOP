@@ -295,8 +295,10 @@ for (let i = 0; i <= 64; i += 1) {
 }
 blancoDelFinal(1, blanco)
 const golpeEnFin = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
-const enParalelo = subida(golpeEnFin) > FINAL_DEL_PIE.subida.conElLogo && subida(golpeEnFin) < 1 && subida((CAIDA_AL_HUECO.golpeS + FINAL_DEL_PIE.subida.terminaTrasElGolpeS) / RELOJ_DEL_FINAL.duracionS) === 1
-afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo, 'la cámara sube en paralelo con la caída (el 80 % de su camino con el logo todavía de pie; el resto, mientras cae y se asienta) y mira siempre al eje: con la caída, el piso donde se encastra')
+// [PULIDO 13] K4 · la cámara sube con el ÁNGULO de la caída (el logo la mira de frente: s64 K4 a): quieta mientras el logo baja
+// parado y arriba en el golpe (antes subía el 80 % de su camino con el logo todavía de pie).
+const enParalelo = [0.1, 0.5, 1].every((s) => subida(s / RELOJ_DEL_FINAL.duracionS) === 0) && subida(golpeEnFin) === 1
+afirmar(blancoBien && Math.abs(blanco.y - FLOOR_Y) < 1e-9 && enParalelo, 'la cámara sube con la caída (quieta mientras el logo baja parado, arriba en el golpe) y mira siempre al eje: con la caída, el piso donde se encastra')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2C · El vapor: [RETOQUE DEL ENCASTRE] 1A · cambió por pedido: se fue entero (sin partículas; lo afirma s51 1A)')

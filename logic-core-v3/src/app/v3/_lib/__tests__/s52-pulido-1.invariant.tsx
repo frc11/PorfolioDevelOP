@@ -681,7 +681,8 @@ controlPositivo('  el detector VE un reloj que se queda en la fase del viaje', c
 const cuadroP5 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const cableadoP5 = (c: string): boolean =>
   c.includes('viajeS: (viajeEnCurso()?.duracionMs ?? 0) / 1000, enElViajeS: enElViaje() }, dt)') && /if \(s\.reloj\.fase === 'rebobina' \|\| \(s\.reloj\.fase === 'viaje' && s\.reloj\.rebobinado\.dura > 0\)\) \{\s*if \(alRebobinar\.de !== s\.reloj\.fase\) \{\s*alRebobinar\.de = s\.reloj\.fase/.test(c) &&
-  /quietoRebobinado\(alRebobinar, quedaDelRebobinado\(s\.reloj\.rebobinado\.s, s\.reloj\.rebobinado\.dura\), EN_VIVO\)/.test(c)
+  // [PULIDO 13] K4 · con el mismo reloj (`fin`, que es el del rebobinado), pero hasta el golpe (s64 K4 a).
+  /quietoRebobinado\(alRebobinar, quedaDelQuieto\(fin, s\.reloj\.rebobinado\.desde\), EN_VIVO\)/.test(c)
 afirmar(cableadoP5(cuadroP5), '  el cableado: la escena lee cuánto dura el viaje en curso y el giro y el alejamiento del quieto vuelven con el mismo reloj (tomados de nuevo si un viaje corta un rebobinado)')
 controlPositivo('  el detector VE un quieto que no se toma de nuevo (saltaría al giro del principio del rebobinado)', cuadroP5.replace('if (alRebobinar.de !== s.reloj.fase) {', 'if (alRebobinar.de === null) {'), cableadoP5)
 

@@ -29,16 +29,19 @@ import {
   decidirElGesto,
   distanciaDelFinalAngosto,
   distanciaParaElAncho,
+  elevacionDe,
   pasoDelReloj,
   expansionDeLaLuz,
   golpeDelFinal,
   poder,
   poseDelLogo,
-  quedaDelRebobinado,
+  orbitaDelFinal,
+  quedaDelQuieto,
   quietoRebobinado,
   relojDelQuieto,
   relojQuieto,
   segundosDelFinal,
+  sinElParalaje,
   sombraConFundido,
   sombraDeLaPose,
   subida,
@@ -288,7 +291,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
       alRebobinar.giro = ((((EN_VIVO.giro + 180) % 360) + 360) % 360) - 180
       alRebobinar.aleja = EN_VIVO.aleja
     }
-    quietoRebobinado(alRebobinar, quedaDelRebobinado(s.reloj.rebobinado.s, s.reloj.rebobinado.dura), EN_VIVO)
+    // [PULIDO 13] K4 · con el mismo reloj (es `fin`), pero hasta el golpe: el logo se levanta ya sin el giro.
+    quietoRebobinado(alRebobinar, quedaDelQuieto(fin, s.reloj.rebobinado.desde), EN_VIVO)
     s.quietoS = 0
   } else {
     if (alRebobinar.de !== null) {
@@ -371,7 +375,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
 
   // 4 · La cámara (la viva y la de sin el mouse, con la que se colocan las piezas del pie): sube en paralelo hasta mirarlo
   // desde arriba, centrada en el logo (su blanco baja al piso con la caída). [PULIDO 11] D · sin la presión, sin sus sacudones.
-  const sube = subida(fin)
+  // [PULIDO 13] K4 · atada al ángulo de la caída (el logo la mira de frente): desde la elevación de la pose E (la del recorrido,
+  // sin el mouse: la misma en cada cuadro).
+  const elevacion = elevacionDe(CAMARA_SIN_EL_MOUSE.position)
+  const sube = subida(fin, tamano, elevacion)
   EN_VIVO.camara = sube
   blancoDelFinal(fin, EN_VIVO.blanco)
   s.sacudon.set(0, 0, 0)
@@ -389,11 +396,20 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const vista = ENCUADRE_EN_VIVO.vista
   const distancia = !s.angosto || !(state.camera instanceof THREE.PerspectiveCamera) ? null : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
   const corrimiento = encuadre === null ? null : { x: (2 * encuadre.cx) / vista.ancho - 1, y: 1 - (2 * encuadre.cy) / vista.alto }
+  // [PULIDO 13] K4 · sin el paralaje del mouse del recorrido (torcía la mirada ~5° con el mouse a un costado): la cámara viva va
+  // hacia la de sin el mouse mientras el logo se inclina hasta la elevación de la cámara. Arriba manda la órbita del final.
+  const sinMouse = sinElParalaje(fin, tamano, elevacion)
+  if (sinMouse > 0) {
+    state.camera.position.lerp(CAMARA_SIN_EL_MOUSE.position, sinMouse)
+    state.camera.quaternion.slerp(CAMARA_SIN_EL_MOUSE.quaternion, sinMouse)
+  }
   camaraDelFinal(state.camera, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)
   // [PULIDO 3B] B2 · en escritorio el mouse orbita la cámara alrededor del logo (atenuada mientras corre la cinemática, rebobina
   // o viaja; entera en el quieto; al centro con el mouse fuera de la ventana: `orbitaDelMouse.ts`), con la subida: al soltar el final no salta.
   pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)
-  ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * sube, s.orbita.v * sube)
+  // [PULIDO 13] K4 · sólo con el logo acostado (al rebobinar se va antes de que se levante).
+  const orbita = orbitaDelFinal(fin)
+  ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)
   // [PULIDO 3] A1 · la sala se oscurece gradual con la expansión de la energía. [PULIDO 3B] B0 · lo que se veía del piso (donde
   // nacían las chispas) se fue con ellas.
   const extendida = (1 - (1 - expansion) * (1 - expansion)) * LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value
