@@ -38,8 +38,17 @@ export function repetirLaLlegadaDelTitulo(id: string, demoraMs: number): boolean
 
 /** El progreso del título: el del scroll, o el de la llegada repetida mientras corre. */
 export function useLlegadaDelTitulo(id: string, progreso: MotionValue<number>): MotionValue<number> {
+  const repeticion = useRepeticionDeLaLlegada(id)
+  return useTransform([progreso, repeticion], ([p, r]: number[]) => (r < 0 ? p : Math.min(p, r)))
+}
+
+/**
+ * [PULIDO 10] J7 · la repetición sola: −1 sin repetir; de 0 a 1 mientras se repite la llegada (0 desde el pedido, con el velo
+ * puesto, y por tiempo después de la demora). Para lo que acompaña al título en su llegada (el cartel de Portfolio la usa para
+ * no recortarlo: `trabajos/piezas.tsx`).
+ */
+export function useRepeticionDeLaLlegada(id: string): MotionValue<number> {
   const repeticion = useMotionValue(-1)
-  const combinado = useTransform([progreso, repeticion], ([p, r]: number[]) => (r < 0 ? p : Math.min(p, r)))
   useEffect(() => {
     let control: ReturnType<typeof animate> | null = null
     let reloj: number | undefined
@@ -77,5 +86,5 @@ export function useLlegadaDelTitulo(id: string, progreso: MotionValue<number>): 
       terminar()
     }
   }, [id, repeticion])
-  return combinado
+  return repeticion
 }

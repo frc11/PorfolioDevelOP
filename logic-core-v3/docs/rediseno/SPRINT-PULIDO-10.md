@@ -36,10 +36,15 @@ el volteo y el hundido como concepto (J4).
 - HECHO (en parte): J6 · el autocompletado del pie con la piel del formulario: Chrome pinta el campo autocompletado con su
   fondo (que una regla no pisa) y en 3D esa caja quedaba a la vista sobre la cara de la placa, despegada de su pozo (que está
   9 px más hondo): ésa es la «inputs que se despegan» más probable. El fondo de siempre se queda (su cambio se demora para
-  siempre) y el texto y el cursor van en la tinta del formulario (commit «pulido 10 · J6»). Sin hacer: simularlo en el banco
+  siempre) y el texto y el cursor van en la tinta del formulario (61662509). Sin hacer: simularlo en el banco
   (CDP `Autofill`) y el rectángulo blanco detrás de «El recorrido»: en el código no hay un fondo ahí y con J8 el recorrido
   se mudó de columna; hay que verlo en el banco para saber si sigue
-- EN CURSO: J7 · el cartel de Portfolio después de un viaje
+- HECHO: J7 · el cartel de Portfolio después de un viaje: al llegar, el título repite su llegada (vuelve a 0 con el velo y
+  llega después) y P2 lo sube desde el 60 % de su alto adentro de la ventana que recorta, así que el primer cuadro a la vista
+  era el titular cortado. Mientras se repite, la ventana no recorta y el titular arranca invisible (`useRepeticionDeLaLlegada`):
+  entero o invisible, nunca cortado (commit «pulido 10 · J7»). Pendiente del banco: verlo a 375 y en escritorio, desde el
+  CTA y desde el menú
+- EN CURSO: J9 · móvil y tablet (a, escrito; b a g)
 
 ## Memoria
 

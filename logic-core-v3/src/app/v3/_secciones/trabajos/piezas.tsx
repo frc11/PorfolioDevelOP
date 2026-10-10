@@ -1,9 +1,10 @@
 'use client'
 
-import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/react'
+import { motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from 'motion/react'
 import { Fragment, useRef, useState } from 'react'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
+import { useRepeticionDeLaLlegada } from '../../_componentes/llegadaDelTitulo'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { TituloDeVolumen } from '../../_componentes/titulos3d/TituloDeVolumen'
 import { LECTURA } from '../../_lib/titulos3d/registro'
@@ -106,6 +107,20 @@ import { estiloDelLugar, huidaConHisteresis, poseDeLaHuida, transformDeLaPose } 
  * escribe a mano es la SALIDA —el vuelo hacia adelante en z—, porque no hay
  * patrón del sistema para irse hacia el espectador y el que había iba al revés.
  */
+/**
+ * [PULIDO 10] J7 · LA LLEGADA DE UN VIAJE, SIN RECORTE. P2 sube el titular desde el 60 % de su alto, adentro de la ventana que
+ * recorta: con el scroll se lee como una aparición, pero en la llegada repetida de un viaje (el título vuelve a 0 con el velo
+ * puesto y llega después) el primer cuadro a la vista era el titular cortado por la ventana. Mientras se repite, la ventana no
+ * recorta y el titular arranca invisible y aparece en el primer tramo de su subida: entero o invisible, nunca cortado.
+ */
+export const FUNDIDO_DE_LA_LLEGADA = 0.35
+
+/** La opacidad del titular según la repetición de la llegada (−1, sin repetir: entero). */
+export const opacidadDeLaLlegada = (r: number): number => (r < 0 ? 1 : Math.min(1, r / FUNDIDO_DE_LA_LLEGADA))
+
+/** Si la ventana recorta según la repetición de la llegada (sólo sin repetir). */
+export const recorteDeLaLlegada = (r: number): 'hidden' | 'visible' => (r < 0 ? 'hidden' : 'visible')
+
 export function PortadaDeTrabajos({
   seccion,
   progreso,
@@ -135,6 +150,10 @@ export function PortadaDeTrabajos({
    * La huida del cartel es del DOM: al título de volumen no lo mueve.
    */
   const salidaDelTitulo = useMotionValue(primeraFotoTapa(progreso.get()) ? 1 : 0)
+  // [PULIDO 10] J7 · la llegada de un viaje: el titular entero o invisible (`opacidadDeLaLlegada`, `recorteDeLaLlegada`).
+  const repeticion = useRepeticionDeLaLlegada(seccion.id)
+  const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
+  const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
 
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
@@ -198,15 +217,17 @@ export function PortadaDeTrabajos({
       <div id={idDelTitularDeSeccion(seccion.id)}>
         <Bloque patron="P2" rango="ventana-de-la-mascara" className="block w-full">
           {(progresoDeLaMascara) => (
-            <span className={VENTANA_QUE_RECORTA}>
+            <motion.span className={VENTANA_QUE_RECORTA} style={{ overflow: recorteDelTitular }}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
-                <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-                  <ConInercia>
-                    <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} queda />
-                  </ConInercia>
-                </Titular>
+                <motion.span className="block" style={{ opacity: opacidadDelTitular }}>
+                  <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
+                    <ConInercia>
+                      <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara} salida={salidaDelTitulo} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} queda />
+                    </ConInercia>
+                  </Titular>
+                </motion.span>
               </CanalDeUnaPieza>
-            </span>
+            </motion.span>
           )}
         </Bloque>
       </div>

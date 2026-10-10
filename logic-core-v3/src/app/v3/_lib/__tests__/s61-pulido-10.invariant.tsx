@@ -10,6 +10,7 @@
  *         foco que no desaparece y la placa en su lugar.
  *   J5  · el error: la placa rechaza (el resorte), Reintentar gira, el error sale de atrás del botón, el pulso; los dos formularios.
  *   J6  · el autocompletado del pie con la piel del formulario.
+ *   J7  · el cartel de Portfolio llega entero (o invisible) después de un viaje.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  *   J10 · el polvo con un solo toque: una vez despertado, termina de subir y pasa un tiempo mínimo en el aire antes de volver a
@@ -25,6 +26,7 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import { opacidadDeLaLlegada, recorteDeLaLlegada } from '../../_secciones/trabajos/piezas'
 import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
 import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
 import { FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
@@ -308,6 +310,21 @@ const PIE_J6 = leer('_secciones/cierre/FormularioDelPie.tsx')
 const autocompletadoBien = (p: string): boolean => /const CAMPO ='[^']*autofill:\[transition:background-color_100000s_0s,color_100000s_0s\] autofill:\[-webkit-text-fill-color:currentColor\] autofill:\[caret-color:currentColor\]'/.test(p)
 afirmar(autocompletadoBien(PIE_J6), 'J6 · el campo autocompletado del pie se queda con su fondo y su tinta (no asoma la caja del navegador sobre la placa)')
 controlPositivo('J6 · el detector VE los campos sin la regla del autocompletado', PIE_J6.replace(' autofill:[transition:background-color_100000s_0s,color_100000s_0s] autofill:[-webkit-text-fill-color:currentColor] autofill:[caret-color:currentColor]', ''), autocompletadoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J7 · El cartel de Portfolio llega entero (o invisible) después de un viaje')
+
+// Al llegar con un viaje, el título repite su llegada (vuelve a 0 con el velo puesto y llega después). P2 lo sube desde el 60 % de
+// su alto adentro de la ventana que recorta: el primer cuadro a la vista era el titular cortado. Mientras se repite, la ventana no
+// recorta y el titular arranca invisible: el primer cuadro visible tiene las letras enteras o la opacidad en 0.
+const PIEZAS_J7 = leer('_secciones/trabajos/piezas.tsx')
+const llegadaBien = (opacidad: (r: number) => number, recorte: (r: number) => string, c: string): boolean =>
+  opacidad(0) === 0 && recorte(0) === 'visible' && recorte(0.5) === 'visible' && opacidad(1) === 1 && opacidad(-1) === 1 && recorte(-1) === 'hidden' &&
+  [0, 0.05, 0.2, 0.5].every((r) => opacidad(r) === 0 || recorte(r) === 'visible') &&
+  c.includes('const repeticion = useRepeticionDeLaLlegada(seccion.id)') && c.includes('<motion.span className={VENTANA_QUE_RECORTA} style={{ overflow: recorteDelTitular }}>') &&
+  c.includes('<motion.span className="block" style={{ opacity: opacidadDelTitular }}>')
+afirmar(llegadaBien(opacidadDeLaLlegada, recorteDeLaLlegada, PIEZAS_J7), 'J7 · en la llegada de un viaje el titular de Portfolio arranca invisible y sube sin recortarse: el primer cuadro visible, entero')
+controlPositivo('J7 · el detector VE la llegada de antes (entera de entrada y recortada por la ventana)', [() => 1, () => 'hidden'] as const, ([o, r]: readonly [(r: number) => number, (r: number) => string]) => llegadaBien(o, r, PIEZAS_J7))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')
