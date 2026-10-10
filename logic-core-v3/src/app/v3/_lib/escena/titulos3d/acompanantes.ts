@@ -5,6 +5,7 @@ import { ACOMPANANTES, type Acompanante } from '../../titulos3d/acompanantes'
 import type { TituloDeVolumen } from '../../titulos3d/registro'
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { camaraDeLaLectura, colocar, corrimiento, lineaDeBase, lugarDeLectura, pinDelLugar, type LugarEnElCuadro, type MedidasDeLaFuente, type PinDelLugar } from './colocacion'
+import { DETRAS_DEL_LOGO, recorteDetrasDelLogo } from './detrasDelLogo'
 
 /**
  * [NOCTURNO] A1 · EL TEXTO 2D EN EL PLANO DE SU TÍTULO, en la escena — cada acompañante (`titulos3d/acompanantes.ts`, del
@@ -18,6 +19,9 @@ import { camaraDeLaLectura, colocar, corrimiento, lineaDeBase, lugarDeLectura, p
  * cambiar el cuadro o al volver a colocarse el título; por cuadro, sólo cuentas. Lo que se escribe es una `matrix3d` con
  * `transform-origin` en 0 0 (`homografia.ts`, la del pie), sólo si cambió. Fuera del cuadro, o con el plano detrás de la
  * cámara, en su lugar.
+ *
+ * [PULIDO 13] K1 · el que va detrás del logo (`data-detras-del-logo`: el cuerpo de Quiénes somos), recortado por la silueta de su
+ * cara de adelante (`detrasDelLogo.ts`): el logo lo tapa, nunca lo atraviesa.
  */
 
 /** Lo que la cuenta lee de un título armado (`TitulosDeVolumen.tsx`): su anotación, su fuente y su último lugar. */
@@ -68,9 +72,11 @@ const AHORA: { -readonly [K in keyof LugarEnElCuadro]: LugarEnElCuadro[K] } = { 
 const ESQUINAS = [0, 0, 1, 0, 1, 1, 0, 1] as const
 const CUADRILATERO: number[] = []
 const MATRIZ: number[] = []
+/** [PULIDO 13] K1 · lo último que midió `enSuPlano` (el origen del plano en px, px por em y la caja): para el recorte. */
+const ULTIMO = { ancla: { x: 0, y: 0 }, cuerpo: 0, caja: { x: 0, y: 0, ancho: 0, alto: 0 } }
 
 /** Un cuadro: cada acompañante, en el plano de su título como lo ve la cámara viva. */
-export function llevarLosAcompanantes(armados: readonly TituloConPlano[], viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, logo: { readonly logoW: number; readonly logoH: number }): void {
+export function llevarLosAcompanantes(armados: readonly TituloConPlano[], viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, logo: { readonly logoW: number; readonly logoH: number }, grupoDelLogo: THREE.Object3D | null = null): void {
   if (ACOMPANANTES.size === 0) return
   viva.updateMatrixWorld()
   for (const [el, ac] of ACOMPANANTES) {
@@ -81,6 +87,12 @@ export function llevarLosAcompanantes(armados: readonly TituloConPlano[], viva: 
       el.style.opacity = opacidad
     }
     const css = a === undefined ? '' : enSuPlano(el, ac, a, viva, cuadro, logo)
+    // [PULIDO 13] K1 · detrás del logo: sin lo que tapa su cara de adelante (en el mismo plano, con la misma cámara).
+    const recorte = css !== '' && el.hasAttribute(DETRAS_DEL_LOGO.atributo) ? recorteDetrasDelLogo(PLANO, ULTIMO.ancla, ULTIMO.cuerpo, ULTIMO.caja, viva, grupoDelLogo) : ''
+    if (recorte !== ac.recorte) {
+      ac.recorte = recorte
+      el.style.clipPath = recorte
+    }
     if (css === ac.css) continue
     ac.css = css
     el.style.transformOrigin = css === '' ? '' : '0 0'
@@ -110,6 +122,9 @@ function enSuPlano(el: HTMLElement, ac: Acompanante, a: TituloConPlano, viva: TH
   }
   // El comienzo de la línea de base del título (px, ahora): el origen del plano.
   const ancla = { x: p.lugar.izquierda, y: lineaDeBase(p.lugar, a.fuente.data) + d }
+  Object.assign(ULTIMO.ancla, ancla)
+  Object.assign(ULTIMO.caja, { x, y, ancho, alto })
+  ULTIMO.cuerpo = p.lugar.cuerpo
   if (!cuadrilateroEnElPlano(PLANO, ancla, p.lugar.cuerpo, { x, y, ancho, alto }, viva, cuadro, CUADRILATERO)) return ''
   return homografia(ancho, alto, CUADRILATERO, MATRIZ) ? matrix3dCss(MATRIZ) : ''
 }

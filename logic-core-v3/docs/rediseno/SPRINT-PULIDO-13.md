@@ -22,7 +22,21 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   sin `caida` en las pruebas. Los invariantes que las nombraban (s49–s53, s60–s62), adaptados a una sola variante.
 
 ### K1 · Quiénes somos: el cuerpo nunca atraviesa el logo
-- PENDIENTE.
+- HECHO · VISTO sí (banco `pulido-13/_scripts/k1-detras.ts`: desde el reposo y de a 24 px en la salida, por cada letra visible del
+  cuerpo, un rayo desde la cámara al logo dice si el logo está delante del plano del texto). Se deshizo el esquive de PULIDO 12
+  (#6: el cuerpo se iba al cruzar; `esquivaAlSalir.ts` borrado, su sección de s63 también): el cuerpo no se esconde.
+- La decisión, por la profundidad de verdad: el cuerpo va en el plano de su título (`acompanantes.ts`), que está a la profundidad
+  del CENTRO del logo; lo que del logo queda delante de ese plano lo TAPA, como un objeto adelante (`detrasDelLogo.ts`). Cada
+  cuadro, el contorno del logo a seis profundidades del sólido (de la cara de atrás a la de adelante) se recorta con el plano del
+  texto (el logo está girado respecto de él: en la salida se le ve el costado), se proyecta desde la cámara viva sobre el plano y
+  se pasa a los píxeles del cuerpo (la inversa exacta de su homografía); en renglones de 2 px, la unión de lo tapado, y el cuerpo
+  se recorta con `clip-path: path(evenodd, caja + rectángulos)`. Por los agujeros del logo el texto se ve (el plano pasa por su
+  centro). Sólo mientras se cruzan.
+- Medido de 1024 a 1920 (reposo y salida): el logo tapa lo que tiene delante (333 a 549 letras tapadas a lo largo de la salida
+  a 1024–1440; a 1920 no se cruzan); visibles con el logo delante, a lo sumo 4 de ~230 en una posición (letras de borde: su
+  centro sobre el contorno); tapadas sin nada delante, a lo sumo 1. Un primer intento con «la mitad de adelante por el eje del
+  logo» tapaba de más (hasta 45 letras): el plano no es el del logo. El costo: en los cuadros recortados, ninguno de más de 20 ms
+  (recibo `k1-detras.json`). Mobile no cambia (abajo de 1024 el cuerpo no va en el plano del título).
 
 ### K2 · El modal de Contacto (apertura, loader, éxito, error)
 - **a · la apertura** — HECHO · VISTO sí (banco). La causa, medida cuadro a cuadro (`pulido-13/_scripts/k2-modal.ts`): la placa quedaba

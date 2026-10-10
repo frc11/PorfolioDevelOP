@@ -5,6 +5,8 @@
  * medidos, en `docs/rediseno/entregas/pulido-13/`; el log, `docs/rediseno/SPRINT-PULIDO-13.md`.
  *   0 · lo que se borró con su código: el volteo «columpio», la carga «trazo» y la caída «ángulo» (ganaron el centrado, el giro y
  *       la caída de siempre).
+ *   K1 · Quiénes somos: el cuerpo no se esconde (se fue el esquive de PULIDO 12) y nunca atraviesa el logo: está en el plano del
+ *        centro del logo, así que lo que del logo queda delante de ese plano lo TAPA (recortado con su silueta, cuadro a cuadro).
  *   K2 a · la placa de Contacto crece pareja desde el primer cuadro (ni congelada ni a saltos).
  *   K2 b · la carga es UNA pieza que gira sobre el eje del palito de la P: sin perspectiva, el eje en el medio del espesor, capas
  *          sin rendijas y, de canto, las secciones de adentro (sin rayas).
@@ -19,7 +21,7 @@
  *   K6 · los hilos de energía (`?hilos=si|color`) con volumen: haces de fibras en hélice alrededor de una espina, la luz que se suma
  *        en el medio, la lejanía, la velocidad, chispas sobrias, por detrás del texto; en la GPU, dentro del cuadro.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
@@ -33,6 +35,7 @@ import { PRUEBAS_SUELTAS } from '../escena/entorno'
 import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
 import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, blancoDelFinal, camaraDelFinal, elevacionDe, orbitaDelFinal, poseDelLogo, quedaDelQuieto, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { retiradaAlFondo } from '../../_chrome/recorrido/cabeceraAlFondo'
+import { DETRAS_DEL_LOGO, intervalosDelRenglon, recorteDeContornos, unirIntervalos } from '../escena/titulos3d/detrasDelLogo'
 import { FRAGMENTOS_DE_LOS_HILOS, HILOS, VERTICES_DE_LOS_HILOS, semillasDeLosHilos } from '../escena/hilos/hilos'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -52,6 +55,47 @@ const borrados = (volteo: string, carga: string, caida: string, sueltas: readonl
 afirmar(borrados(VOLTEO, CARGA_TSX, CAIDA, PRUEBAS_SUELTAS), '0 · sin `?volteo=columpio`, sin `?carga=trazo` (con movimiento reducido, el logo quieto) y sin `?caida=angulo`: ni la bandera ni su código')
 controlPositivo('0 · el detector VE la caída con su variante', `${CAIDA}\nexport type VarianteDeLaCaida = 'lenta' | 'angulo'`, (c: string) => borrados(VOLTEO, CARGA_TSX, c, PRUEBAS_SUELTAS))
 controlPositivo('  y la bandera que sigue suelta', [...PRUEBAS_SUELTAS, 'caida'], (s: readonly string[]) => borrados(VOLTEO, CARGA_TSX, CAIDA, s))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K1 · Quiénes somos: el cuerpo nunca atraviesa el logo (el logo, delante, lo tapa)')
+// El cálculo, sin navegador: los intervalos de un renglón (par-impar: el agujero queda afuera), su unión entre profundidades (lo
+// que tapa una pared y lo que tapa la cara), y el recorte: la caja (evenodd) más los rectángulos de lo tapado, fundidos en vertical.
+const cuadrado = (x0: number, y0: number, x1: number, y1: number): Float32Array => Float32Array.from([x0, y0, x1, y0, x1, y1, x0, y1])
+const calculoBien = (unir: typeof unirIntervalos): boolean => {
+  const conAgujero = [cuadrado(10, 10, 110, 110), cuadrado(40, 40, 80, 80)]
+  const fila: number[] = []
+  intervalosDelRenglon(conAgujero, 60, fila)
+  const union = unir([10, 50, 30, 90, 120, 130], 125)
+  const r = recorteDeContornos([[cuadrado(-20, 20, 50, 60)], [cuadrado(40, 20, 70, 60)]], 100, 40)
+  const lejos = recorteDeContornos([[cuadrado(200, 200, 260, 260)]], 100, 40)
+  return fila.join(',') === '10,40,80,110' && union.join(',') === '10,90,120,125' && r.startsWith('path(evenodd, "M0 0H100.0V40.0H0Z') && r.includes('M0.0 20.0H70.0V40.0H0.0Z') && lejos === ''
+}
+afirmar(calculoBien(unirIntervalos), 'K1 · el cálculo: renglón par-impar (el agujero se ve), unión entre profundidades, la caja menos lo tapado (y sin cruce, sin recorte)')
+controlPositivo('K1 · el detector VE una unión que se queda con el primero (sin las paredes)', ((pares: readonly number[], ancho: number) => [Math.max(0, pares[0]), Math.min(ancho, pares[1])]) as typeof unirIntervalos, calculoBien)
+// El código: el cuerpo lo pide, el acompañante lo recorta con el plano y la cámara con que se coloca, con el logo; el sólido de la
+// cara de atrás a la de adelante (lo que queda delante del plano: el logo está girado respecto de él). Y el esquive se fue.
+const ACOMP = leer('_lib/escena/titulos3d/acompanantes.ts')
+const QUIENES_TSX = leer('_secciones/quienes-somos/QuienesSomos.tsx')
+const TITULOS_TSX = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
+const DETRAS_TS = leer('_lib/escena/titulos3d/detrasDelLogo.ts')
+const cableadoK1 = (q: string, a: string, t: string, d: string): boolean =>
+  q.includes('<div ref={enElPlano} data-detras-del-logo="">') && !q.includes('data-esquiva-al-salir') &&
+  a.includes("el.hasAttribute(DETRAS_DEL_LOGO.atributo) ? recorteDetrasDelLogo(PLANO, ULTIMO.ancla, ULTIMO.cuerpo, ULTIMO.caja, viva, grupoDelLogo) : ''") &&
+  t.includes('llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current, m.current.logo)') && !t.includes('esquivarAlSalir') &&
+  !existsSync('src/app/v3/_lib/escena/titulos3d/esquivaAlSalir.ts') &&
+  Math.min(...DETRAS_DEL_LOGO.profundidades) === -1 && Math.max(...DETRAS_DEL_LOGO.profundidades) === 1 && DETRAS_DEL_LOGO.profundidades.length >= 5 &&
+  d.includes('if (DISTANCIA[i] >= 0 !== DISTANCIA[j] >= 0) llevar(CORTE.copy(MUNDO[i]).lerp(MUNDO[j], DISTANCIA[i] / (DISTANCIA[i] - DISTANCIA[j])))')
+afirmar(cableadoK1(QUIENES_TSX, ACOMP, TITULOS_TSX, DETRAS_TS), '  el código: el cuerpo pide ir detrás del logo; el acompañante lo recorta con su plano, la cámara viva y el logo; el sólido entero recortado con el plano; el esquive de PULIDO 12, borrado')
+controlPositivo('  el detector VE el cuerpo que todavía se esconde al salir', QUIENES_TSX.replace('<div ref={enElPlano} data-detras-del-logo="">', '<div ref={enElPlano} data-esquiva-al-salir="">'), (q: string) => cableadoK1(q, ACOMP, TITULOS_TSX, DETRAS_TS))
+// Medido (con un rayo al logo por letra): de 1024 a 1920, en el reposo y en la salida, el logo tapa lo que tiene delante; las letras
+// visibles con el logo delante son de borde (a lo sumo 4 de ~230 en una posición) y las tapadas sin nada delante, a lo sumo 1.
+interface FilaK1 { readonly dy: number; readonly letras: number; readonly tapadas: number; readonly atraviesa: number; readonly deMas: number }
+const K1 = recibo<{ antes: Record<string, FilaK1[]>; despues: Record<string, FilaK1[]> }>('k1-detras.json')
+const detrasBien = (r: Record<string, FilaK1[] | null>): boolean =>
+  ['1024x768', '1280x800', '1440x900', '1920x1080'].every((c) => (r[c] ?? []).length >= 30 && (r[c] ?? []).every((f) => f.atraviesa <= 4 && f.deMas <= 1)) &&
+  ['1024x768', '1280x800', '1440x900'].every((c) => (r[c] ?? []).reduce((a, f) => a + f.tapadas, 0) > 100)
+afirmar(detrasBien(K1.despues), `  medido: de 1024 a 1920, en el reposo y en la salida, el logo tapa lo que tiene delante (${String(K1.despues['1440x900'].reduce((a, f) => a + f.tapadas, 0))} letras tapadas a 1440 en la salida); de borde, a lo sumo 4`)
+controlPositivo('  el detector VE el recorte de antes (la mitad del logo por su eje: tapaba de más)', { ...K1.despues, '1440x900': K1.antes['1440x900'] }, detrasBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('K2 a · La placa de Contacto crece pareja desde el primer cuadro')
