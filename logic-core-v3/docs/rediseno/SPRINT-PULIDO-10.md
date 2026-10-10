@@ -13,7 +13,9 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J8 · el pie nuevo (25/50/25, el recorrido en texto 3D con el subrayado del sitio, Demos, `?pie=columna2` y
   `?pie=menu-abajo`), visto en el banco a 1024, 1280, 1440 y 1920 en las tres disposiciones (b0a2c184). Pendiente del banco: la llegada a Demos con el destino corregido (el clic, el viaje, el activo de la barra
   y el foco ya se midieron; la llegada vieja se pasaba 108 px y asomaba la sección de abajo)
-- J10 · la histéresis: escrita, `s61` J10 verde (el modelo); falta medirla en el banco
+- HECHO: J10 · la histéresis del polvo: despertado, termina de subir y queda ~6 s en el aire antes de volver a evaluar si se posa
+  (`quietoConHisteresis`; el modelo de `s60`, compartido en `modeloDelPolvo.ts`: con un toque, todas en el aire a los 7,0 s y
+  la primera cae a los 15,6) (commit «pulido 10 · J10»). Pendiente del banco: los modos en el tiempo
 - HECHO: J3 · la carga de develOP (el trazo; `?carga=giro`, el giro), en el botón del pie y en el panel de Contacto (en lugar
   del anillo), con la espera mínima (66f39394). Pendiente del banco: verla (sin memoria para abrirlo)
 - J2 · primera ráfaga (1440, desde el hero, con la barra): ningún cuadro oscuro ajeno; faltan 390, desde la noche y la
@@ -26,9 +28,8 @@ el volteo y el hundido como concepto (J4).
 - J9 · a (las leyendas de las fotos): escrito; falta verlo en el banco
 - HECHO: J5 · el error en los dos formularios: la placa rechaza con un resorte amortiguado (la 3D del pie en profundidad; el
   panel, su bloque; la hoja del teléfono y el pie plano, en escala), Reintentar entra girando (en 3D, la tecla), el error sale
-  de atrás del botón en su renglón, el foco en Reintentar, el pulso; con movimiento reducido, sin resorte ni giro (commit
-  «pulido 10 · J5»). Pendiente del banco: verlo con `?envio=error` a 1440 y a 390
-- EN CURSO: J10 · su commit (la histéresis ya escrita y verde en el modelo)
+  de atrás del botón en su renglón, el foco en Reintentar, el pulso; con movimiento reducido, sin resorte ni giro (02e78e36). Pendiente del banco: verlo con `?envio=error` a 1440 y a 390
+- EN CURSO: J2 · el cuadro negro al abrir Contacto
 
 ## Memoria
 

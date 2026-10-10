@@ -13,7 +13,7 @@ import { EN_VIVO } from '../final/recorridoDelFinal'
 import { alPaso, armar, correr, hornearDeAPoco, mallasDelLogo, pasoInicial, publicar, type MedidaDelCampo } from './armadoDeLaFisica'
 import { AIRE } from './parche'
 import { CAMPO_EN_VIVO, campoDeAPoco, contornoDeLaMalla, publicarElCampo } from './campoDelLogo'
-import { POSARSE, avanzarElPolvoEn, frenteInicial, polvoInicial, tomarElFrente, type EstadoDelPolvoVivo } from './posarse'
+import { POSARSE, avanzarElPolvoEn, frenteInicial, polvoInicial, quietoConHisteresis, tomarElFrente, type EstadoDelPolvoVivo } from './posarse'
 
 /**
  * [ESCENA 6] LA FÍSICA DEL POLVO — corre la simulación de `simulacion.ts` una vez por cuadro, después del
@@ -239,7 +239,8 @@ function FisicaPrendida({ rig, quieto, dustGroupRef, logoGroupRef }: PropsDeLaFi
     p.dt = dt
     p.reloj = m.reloj
     p.posarse = posarse ? 1 : 0
-    p.quieto = despertar.quieto
+    // [PULIDO 10] J10 · con la histéresis: después de un despertar, termina de subir y pasa un rato en el aire antes de posarse.
+    p.quieto = quietoConHisteresis(despertar.quieto, m.frente)
     p.desperto = m.frente.desperto
     p.origen = m.frente.origen
     // [RETOQUE 3D] B3 · el remolino, sólo en el despertar del cursor (donde se movió la mano); el del scroll, sólo el frente.

@@ -120,3 +120,16 @@ export function tomarElFrente(f: FrenteDelPolvo, e: EstadoDelPolvo | EstadoDelPo
   f.origen[2] = e.origen[2]
   f.delCursor = e.delCursor
 }
+
+/**
+ * [PULIDO 10] J10 · LA HISTÉRESIS: una vez despertado lo posado, termina de subir (`subidaS`, medido en H1: con la rueda, las
+ * 14.000 en el aire a los 8,5–9 s) y pasa `enElAireS` en el aire antes de volver a evaluar si se posa. Sin esto, con un solo
+ * toque de scroll subía y a los 4 s de quietud volvía a bajar antes de terminar de subir. La quietud que lee la simulación no
+ * empieza antes de `desperto + subidaS + enElAireS − empiezaS` (la caída arranca `empiezaS` después de ella).
+ */
+export const HISTERESIS = { subidaS: 9.5, enElAireS: 6 } as const
+
+export function quietoConHisteresis(quieto: number, frente: FrenteDelPolvo): number {
+  if (quieto >= NUNCA) return quieto
+  return Math.max(quieto, frente.desperto + HISTERESIS.subidaS + HISTERESIS.enElAireS - POSARSE.empiezaS)
+}

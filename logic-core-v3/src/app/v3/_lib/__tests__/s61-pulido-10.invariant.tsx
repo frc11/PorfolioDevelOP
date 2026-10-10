@@ -10,6 +10,8 @@
  *   J5  · el error: la placa rechaza (el resorte), Reintentar gira, el error sale de atrás del botón, el pulso; los dos formularios.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
+ *   J10 · el polvo con un solo toque: una vez despertado, termina de subir y pasa un tiempo mínimo en el aire antes de volver a
+ *         evaluar si se posa (la histéresis).
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -21,8 +23,8 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
-import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
 import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
+import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
 import { FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
 import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { CARGA, varianteDeLaCarga } from '../../_componentes/carga/Carga'
@@ -40,6 +42,8 @@ import { CORRIMIENTO_DE_LA_COLUMNA_2, disposicionDelPie } from '../pie3d/disposi
 import type { LetraDelPie } from '../pie3d/medida'
 import { NodoFalso, conDomFalso } from './s27-dom-falso'
 import { valorDeToken } from './s10-css'
+import { HISTERESIS, POSARSE, quietoConHisteresis, tomarElFrente } from '../escena/polvo/posarse'
+import { DT, N, QUIETO, SUSPENDIDO, simular, type Cableado, type Tramo } from './modeloDelPolvo'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -387,5 +391,51 @@ type ReciboDelPie = Record<string, { enlaces: { renglones: number }[]; fuera: un
 const pieBien = (r: ReciboDelPie): boolean => ['producto', 'columna2', 'menu-abajo'].every((d) => r[d] !== undefined && r[d].enlaces.length === 7 && r[d].enlaces.every((e) => e.renglones === 1) && r[d].fuera.length === 0 && r[d].listo === true)
 afirmar(RECIBOS_DEL_PIE.every(({ ruta }) => existsSync(ruta) && pieBien(JSON.parse(readFileSync(ruta, 'utf8')) as ReciboDelPie)), 'G · los recibos del pie a 1024, 1280, 1440 y 1920: en las tres disposiciones, los siete enlaces en un renglón y nada afuera del cuadro', RECIBOS_DEL_PIE.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
 controlPositivo('G · el detector VE un enlace partido en dos renglones', { producto: { enlaces: [{ renglones: 2 }], fuera: [], listo: true } } as ReciboDelPie, pieBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J10 · El polvo con un solo toque: termina de subir y se queda en el aire')
+
+// Posado (15 s quieto), UN toque de scroll (un décimo de segundo) y la página quieta 30 s. Se mira, cuadro a cuadro, cuándo
+// están todas las motas en el aire y cuándo empieza a caer la primera: entre una y otra, por lo menos `enElAireS`. Y al
+// caer la primera, la altura media y la dispersión son las del polvo suspendido (terminó de subir).
+const cableadoDeHoy: Cableado = (e, f) => {
+  if (e.desperto - e.antes > POSARSE.empiezaS) tomarElFrente(f, e)
+  return { desperto: f.desperto, origen: f.origen, quieto: quietoConHisteresis(e.quieto, f) }
+}
+/** El de antes (PULIDO 9): la quietud desde el último movimiento, sin histéresis. */
+const cableadoDeAntes: Cableado = (e, f) => {
+  if (e.desperto - e.antes > POSARSE.empiezaS) tomarElFrente(f, e)
+  return { desperto: f.desperto, origen: f.origen, quieto: e.quieto }
+}
+const TOQUE: Tramo = { s: 30, mueve: (t) => t < 0.1 }
+interface Medida {
+  readonly todasEnElAire: number
+  readonly primeraCae: number
+  readonly alCaer: { readonly media: number; readonly dispersion: number } | null
+}
+const medir = (c: Cableado): Medida => {
+  const desdeElToque = QUIETO.s
+  let [todasEnElAire, primeraCae] = [Number.NaN, Number.NaN]
+  simular(c, [QUIETO, TOQUE], (reloj, modo) => {
+    if (reloj <= desdeElToque + 0.2) return
+    if (Number.isNaN(todasEnElAire) && modo.every((m) => m === 0)) todasEnElAire = reloj - desdeElToque
+    if (Number.isNaN(primeraCae) && modo.some((m) => m === 1)) primeraCae = reloj - desdeElToque
+  })
+  // Al caer la primera: la estadística en ese instante (corriendo el mismo guion hasta ahí).
+  const alCaer = Number.isNaN(primeraCae) ? null : simular(c, [QUIETO, { s: primeraCae, mueve: TOQUE.mueve }])[1]
+  return { todasEnElAire, primeraCae, alCaer }
+}
+const histeresisBien = (m: Medida): boolean =>
+  Number.isFinite(m.todasEnElAire) && Number.isFinite(m.primeraCae) && m.primeraCae - m.todasEnElAire >= HISTERESIS.enElAireS - DT &&
+  m.alCaer !== null && Math.abs(m.alCaer.media - SUSPENDIDO.media) < 0.3 && Math.abs(m.alCaer.dispersion - SUSPENDIDO.dispersion) < 0.3
+const hoy = medir(cableadoDeHoy)
+afirmar(histeresisBien(hoy), `1 · con un solo toque, todas vuelven al aire y recién ${String(HISTERESIS.enElAireS)} s después empieza a caer la primera, con la altura y la dispersión del polvo suspendido`, `en el aire a los ${hoy.todasEnElAire.toFixed(1)} s; cae la primera a los ${hoy.primeraCae.toFixed(1)} s; ${String(N)} motas`)
+controlPositivo('1 · el detector VE el código de antes: a los 4 s de quietud vuelve a bajar antes de terminar de subir', medir(cableadoDeAntes), histeresisBien)
+
+// 2 · La escena le pasa esa quietud a la simulación (la del rig, con la histéresis), y la regla sigue: sin despertar, la de siempre.
+const fisica = leer('_lib/escena/polvo/Fisica.tsx')
+const cableado = (c: string): boolean => c.includes('p.quieto = quietoConHisteresis(despertar.quieto, m.frente)\n') && !/p\.quieto = despertar\.quieto\b/.test(c)
+afirmar(cableado(fisica) && quietoConHisteresis(5, { desperto: -1e9, origen: [0, 0, 0], delCursor: false }) === 5 && quietoConHisteresis(1e9, { desperto: 3, origen: [0, 0, 0], delCursor: false }) === 1e9, '2 · la escena le pasa a la simulación la quietud con la histéresis; sin despertar, o con movimiento, la de siempre')
+controlPositivo('2 · el detector VE el cableado de antes', fisica.replace('p.quieto = quietoConHisteresis(despertar.quieto, m.frente)\n', 'p.quieto = despertar.quieto\n'), cableado)
 
 cerrar('s61-pulido-10')
