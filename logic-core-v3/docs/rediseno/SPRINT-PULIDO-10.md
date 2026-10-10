@@ -21,7 +21,7 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J2 · el cuadrado negro al abrir Contacto: la placa del panel llega desde el fondo con cinco caras detrás del frente y
   la de atrás era de tinta; nunca se ve (el frente la tapa) salvo en los cuadros en que la hoja —una capa grande, con todo el
   formulario— todavía no se rasterizó mientras el fondo se desenfoca (0,5 s): ahí asomaba un cuadrado negro del tamaño de la
-  placa. Ahora es del papel (commit «pulido 10 · J2»). ⚠ Es la hipótesis más fundada, no una causa medida: la primera
+  placa. Ahora es del papel (4e592abb). ⚠ Es la hipótesis más fundada, no una causa medida: la primera
   ráfaga (con `captureScreenshot`, que rasteriza todo antes de devolver) no podía verla; la de los cuadros del compositor
   (`Page.startScreencast`, ya escrita: `_scripts/j2-screencast.ts`) quedó sin correr por la memoria
 - HECHO: J4 · a (el volteo en un movimiento, la entrante compilada antes de girar), b y d (la tarjeta en su lugar y la etiqueta
@@ -33,7 +33,13 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J5 · el error en los dos formularios: la placa rechaza con un resorte amortiguado (la 3D del pie en profundidad; el
   panel, su bloque; la hoja del teléfono y el pie plano, en escala), Reintentar entra girando (en 3D, la tecla), el error sale
   de atrás del botón en su renglón, el foco en Reintentar, el pulso; con movimiento reducido, sin resorte ni giro (02e78e36). Pendiente del banco: verlo con `?envio=error` a 1440 y a 390
-- EN CURSO: J6 · el autocompletado del pie
+- HECHO (en parte): J6 · el autocompletado del pie con la piel del formulario: Chrome pinta el campo autocompletado con su
+  fondo (que una regla no pisa) y en 3D esa caja quedaba a la vista sobre la cara de la placa, despegada de su pozo (que está
+  9 px más hondo): ésa es la «inputs que se despegan» más probable. El fondo de siempre se queda (su cambio se demora para
+  siempre) y el texto y el cursor van en la tinta del formulario (commit «pulido 10 · J6»). Sin hacer: simularlo en el banco
+  (CDP `Autofill`) y el rectángulo blanco detrás de «El recorrido»: en el código no hay un fondo ahí y con J8 el recorrido
+  se mudó de columna; hay que verlo en el banco para saber si sigue
+- EN CURSO: J7 · el cartel de Portfolio después de un viaje
 
 ## Memoria
 

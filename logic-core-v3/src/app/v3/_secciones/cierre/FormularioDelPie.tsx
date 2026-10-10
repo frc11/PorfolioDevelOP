@@ -49,7 +49,10 @@ import { CONTACTO_DEL_FORMULARIO } from './contenido'
  * vuelta, al nombre). Con error, todo lo escrito queda y el error a la vista.
  */
 const MAXIMO_DE: Record<CampoDelPie, number> = { nombre: MAXIMOS.nombre, mail: MAXIMOS.contacto, mensaje: MAXIMOS.mensaje }
-const CAMPO ='block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo max-escritorio:text-base leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current'
+// [PULIDO 10] J6 · el autocompletado del navegador, con la piel del formulario: Chrome pinta el campo autocompletado con su fondo
+// (que una regla no pisa) y en 3D esa caja quedaba a la vista sobre la cara de la placa, despegada de su pozo (que está más
+// hondo): el fondo de siempre se queda (su cambio se demora para siempre) y el texto y el cursor, en la tinta del formulario.
+const CAMPO ='block w-full rounded-[var(--radius-sutil)] border border-borde-fuerte escritorio:border-transparent bg-transparent px-[var(--spacing-3)] py-[var(--spacing-2)] escritorio:px-[var(--spacing-4)] escritorio:py-[var(--spacing-3)] text-cuerpo max-escritorio:text-base leading-texto tracking-texto placeholder:opacity-60 aria-invalid:border-current autofill:[transition:background-color_100000s_0s,color_100000s_0s] autofill:[-webkit-text-fill-color:currentColor] autofill:[caret-color:currentColor]'
 /** [NOCTURNO FINAL] C4 · el lugar de cada campo en la grilla de abajo de 1024 (de seis): el nombre y el mail, mitad y mitad. */
 // [PULIDO 3] A2 · en la tablet, en columna: un campo por renglón y el mensaje con el alto que sobra.
 const LUGAR_DEL_CAMPO: Readonly<Record<CampoDelPie, string>> = { nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[var(--filas-del-mensaje-del-pie)]' }

@@ -9,6 +9,7 @@
  *   J4  · las transformaciones de gracias: el pie con el volteo y el panel con el hundido, el título en Archivo (minúsculas), el
  *         foco que no desaparece y la placa en su lugar.
  *   J5  · el error: la placa rechaza (el resorte), Reintentar gira, el error sale de atrás del botón, el pulso; los dos formularios.
+ *   J6  · el autocompletado del pie con la piel del formulario.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  *   J10 · el polvo con un solo toque: una vez despertado, termina de subir y pasa un tiempo mínimo en el aire antes de volver a
@@ -296,6 +297,17 @@ controlPositivo('D · el detector VE un panel que rechaza en silencio', PANEL_J4
 const reintentarBien = (f: FontData): boolean => [...REINTENTAR].every((c) => (f.glyphs as Record<string, unknown>)[c] !== undefined)
 afirmar(reintentarBien(datos600 as FontData), 'E · la Chivo 600 del pie trae las letras de «Reintentar» (la tecla en 3D)')
 controlPositivo('E · el detector VE una fuente sin la R', { ...(datos600 as FontData), glyphs: Object.fromEntries(Object.entries((datos600 as FontData).glyphs).filter(([c]) => c !== 'R')) } as FontData, reintentarBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J6 · El autocompletado del pie con la piel del formulario')
+
+// Chrome pinta el campo autocompletado con su fondo (que una regla no pisa) y su color de texto: en 3D esa caja quedaba a la vista
+// sobre la cara de la placa, despegada de su pozo (más hondo). El fondo de siempre se queda (el cambio se demora para siempre) y el
+// texto y el cursor van en la tinta del formulario.
+const PIE_J6 = leer('_secciones/cierre/FormularioDelPie.tsx')
+const autocompletadoBien = (p: string): boolean => /const CAMPO ='[^']*autofill:\[transition:background-color_100000s_0s,color_100000s_0s\] autofill:\[-webkit-text-fill-color:currentColor\] autofill:\[caret-color:currentColor\]'/.test(p)
+afirmar(autocompletadoBien(PIE_J6), 'J6 · el campo autocompletado del pie se queda con su fondo y su tinta (no asoma la caja del navegador sobre la placa)')
+controlPositivo('J6 · el detector VE los campos sin la regla del autocompletado', PIE_J6.replace(' autofill:[transition:background-color_100000s_0s,color_100000s_0s] autofill:[-webkit-text-fill-color:currentColor] autofill:[caret-color:currentColor]', ''), autocompletadoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')
