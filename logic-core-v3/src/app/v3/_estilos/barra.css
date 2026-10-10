@@ -149,3 +149,29 @@
 [data-v3] [data-pieza="barra-login"]:is(:hover, :focus-visible) {
   opacity: var(--opacity-casi);
 }
+
+/* =========================================================================
+ * [PULIDO 13] K5 · LA ZONA DE LA CABECERA DEL TELÉFONO
+ * =========================================================================
+ * Abajo de 1024 los controles fijos (el parlante, el menú y el progreso) son discos de `--spacing-12` a
+ * `max(--spacing-4, safe-area-inset-top)` del borde de arriba: la zona va de ahí hasta su borde de abajo más un aire. Lo que
+ * tiene que verse en el reposo de una sección arranca debajo (el relleno de arriba del pie, el de Demos).
+ */
+[data-v3] {
+  --zona-de-la-cabecera: calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4));
+}
+
+/* Al fondo, si el pie no entra en la pantalla, lo de arriba del pie (cortado por el borde) quedaría debajo de los controles: se
+   retiran hacia arriba (el pie ya trae el recorrido y el contacto) y vuelven al subir (`cabeceraAlFondo.ts`). La transición
+   repite la de los colores de cada uno (una sola lista por elemento). */
+[data-v3] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {
+  transition-property: color, background-color, border-color, translate, opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {
+  translate: 0 calc(-1 * var(--zona-de-la-cabecera));
+  opacity: 0;
+  pointer-events: none;
+}

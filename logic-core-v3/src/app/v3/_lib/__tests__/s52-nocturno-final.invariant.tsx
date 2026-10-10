@@ -667,8 +667,10 @@ afirmar(grillaBien(formularioTsx), '  el formulario del teléfono: el nombre, el
 controlPositivo('  el detector VE los campos a 15 px en el teléfono', formularioTsx.replace('text-cuerpo max-escritorio:text-base leading-texto', 'text-cuerpo leading-texto'), grillaBien)
 const bandaC4 = leer('_estilos/banda.css')
 const enLaBandaC4 = bandaC4.slice(bandaC4.indexOf('@media (width < 1024px) {'), bandaC4.indexOf('/* ── HOVER DONDE HAY'))
-const rellenoBien = (c: string): boolean => /\[data-v3\] \[data-panel='cierre'\] \[data-pieza='pie'\] \{\s*padding-block: calc\(var\(--spacing-12\) \+ var\(--spacing-6\)\) var\(--spacing-12\);/.test(c)
-afirmar(rellenoBien(enLaBandaC4), '  el relleno del pie angosto: 72 px arriba (el botón del menú termina a 64) y 48 abajo (la esquina del recorrido queda a la derecha)')
+// [PULIDO 13] K5 · arriba, la zona de la cabecera (los controles fijos más un aire, con el inset seguro) y abajo, `spacing-4`: el pie
+// entra entero en una pantalla de 320 × 824 (s64 K5).
+const rellenoBien = (c: string): boolean => /\[data-v3\] \[data-panel='cierre'\] \[data-pieza='pie'\] \{\s*padding-block: var\(--zona-de-la-cabecera\) var\(--spacing-4\);/.test(c)
+afirmar(rellenoBien(enLaBandaC4), '  el relleno del pie angosto: arriba la zona de la cabecera (no pisa los controles fijos) y abajo lo justo')
 controlPositivo('  el detector VE el relleno de escritorio (80 y 80)', enLaBandaC4.replace("[data-v3] [data-panel='cierre'] [data-pieza='pie'] {", '[data-v3] [data-x] {'), rellenoBien)
 type Rotulos = { readonly rotulo: string; readonly corto: string }
 const corto = (w: Rotulos, html: string): boolean => w.rotulo.includes(w.corto) && w.corto.length < w.rotulo.length && html.includes(`<span class="max-tablet:hidden">`) && html.includes(`<span class="tablet:hidden">`)

@@ -83,7 +83,8 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
       // [FINAL 3] Móvil: una columna. Tablet: frase y contacto | navegación, y abajo a todo el ancho. Sin logo chico: el 3D está detrás.
       // [NOCTURNO FINAL] C4 · en el teléfono, los bloques más juntos: el pie entero entra en una pantalla.
       // [PULIDO 3] A2 · en la tablet la primera fila toma lo que sobra: el contacto llega hasta las redes.
-      claseDeContenido="relative grid content-between gap-[var(--spacing-4)] tablet:grid-cols-2 tablet:gap-[var(--spacing-12)] tablet:max-escritorio:grid-rows-[var(--filas-del-cierre)] escritorio:block"
+      // [PULIDO 13] K5 · en el teléfono, los bloques un poco más juntos (con el relleno de `banda.css`, el pie entra en una pantalla).
+      claseDeContenido="relative grid content-between gap-[var(--spacing-4)] max-tablet:gap-[var(--spacing-2)] tablet:grid-cols-2 tablet:gap-[var(--spacing-12)] tablet:max-escritorio:grid-rows-[var(--filas-del-cierre)] escritorio:block"
     >
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}

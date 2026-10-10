@@ -14,6 +14,8 @@
  *   K4 a · la cámara de la caída: quieta hasta que el logo se inclina a su altura y desde ahí, atada al ángulo, lo mira de frente
  *          (también al rebobinar: el giro del quieto y la órbita se van antes de que el logo se levante).
  *   K4 b · el mail del pie sin ejemplo; el autocompletado no cambia el campo y no vuelve.
+ *   K5 · en el teléfono, nada queda debajo de los controles fijos en el reposo de ninguna sección: la zona de la cabecera (el pie
+ *        entra entero en una pantalla de 320 × 824; Demos arranca debajo) y, al fondo de una pantalla baja, los controles se retiran.
  */
 import { readFileSync } from 'node:fs'
 
@@ -28,6 +30,7 @@ import { CORTES_DEL_SPRITE } from '../sonido/sprite'
 import { PRUEBAS_SUELTAS } from '../escena/entorno'
 import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
 import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, blancoDelFinal, camaraDelFinal, elevacionDe, orbitaDelFinal, poseDelLogo, quedaDelQuieto, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
+import { retiradaAlFondo } from '../../_chrome/recorrido/cabeceraAlFondo'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -239,5 +242,29 @@ const noVuelve = (p: string, r: typeof AUTO.despues): boolean =>
   r.lejos.every((c) => !c.autofill && c.valor === '') && r.deVuelta.every((c) => !c.autofill && c.valor === '')
 afirmar(noVuelve(PIE_TSX, AUTO.despues), '  y al irse del pie lo autocompletado se vacía y los campos se vuelven a montar: al volver, vacíos y sin el estado (medido)')
 controlPositivo('  el detector VE los campos de antes al volver (con lo autocompletado)', { ...AUTO.despues, deVuelta: AUTO.antes.autocompletado.map((c) => ({ ...c, valor: 'Ana Prueba' })) }, (r: typeof AUTO.despues) => noVuelve(PIE_TSX, r))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('K5 · En el teléfono, nada debajo de los controles fijos')
+interface ParadaK5 { readonly cuadro: string; readonly destino: string; readonly controles: readonly string[]; readonly cruces: readonly unknown[] }
+const K5 = recibo<{ antes: ParadaK5[]; despues: ParadaK5[] }>('k5-controles.json')
+// Medido: en el reposo de cada sección (los 7 destinos del recorrido) y al fondo, de 320 a 820, ningún control fijo pisa contenido.
+const sinCruces = (r: readonly ParadaK5[]): boolean => r.length >= 56 && r.every((p) => p.cruces.length === 0) && ['320x824', '320x568', '375x667', '390x844', '414x896', '768x1024', '820x1180'].every((c) => r.some((p) => p.cuadro === c))
+afirmar(sinCruces(K5.despues), `K5 · medido: ${String(K5.despues.length)} paradas (7 secciones y el fondo, en 8 cuadros de 320 a 820): ningún cruce entre los controles fijos y el contenido`)
+controlPositivo('K5 · el detector VE los cruces de antes (el titular del pie a 320 × 824, Demos a 320, el mail y WhatsApp a 375)', K5.antes, sinCruces)
+// Y al fondo de 320 × 824 (el del humano) los controles se QUEDAN: el pie entra entero; se retiran sólo donde no entra.
+const fondoBien = (r: readonly ParadaK5[]): boolean => r.some((p) => p.cuadro === '320x824' && p.destino === 'fondo' && p.controles.length === 3) && r.some((p) => p.cuadro === '375x667' && p.destino === 'fondo' && p.controles.length === 0)
+afirmar(fondoBien(K5.despues), '  al fondo de 320 × 824 los controles se quedan (el pie entra entero); en una pantalla baja (375 × 667), se retiran')
+// El código: la zona de la cabecera (el pie y Demos) y el retiro al fondo (sólo al fondo y con el pie más alto que la pantalla).
+const BANDA = leer('_estilos/banda.css')
+const BARRA_CSS = leer('_estilos/barra.css')
+const zonaBien = (banda: string, barra: string, retira: typeof retiradaAlFondo): boolean =>
+  barra.includes('--zona-de-la-cabecera: calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4));') &&
+  /\[data-v3\] \[data-panel='cierre'\] \[data-pieza='pie'\] \{\s*padding-block: var\(--zona-de-la-cabecera\) var\(--spacing-4\);/.test(banda) &&
+  leer('_secciones/trabajos/demos/CapaDeDemos.tsx').includes('max-escritorio:content-center max-escritorio:pt-[var(--zona-de-la-cabecera)]') &&
+  barra.includes('[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {') &&
+  // Al fondo con el pie más alto que la pantalla, sí; al fondo con el pie entero, o lejos del fondo, no.
+  retira(1000, 600, 1600, -40) && !retira(1000, 600, 1600, 10) && !retira(800, 600, 1600, -400)
+afirmar(zonaBien(BANDA, BARRA_CSS, retiradaAlFondo), '  el código: la zona de la cabecera (los controles más un aire, con el inset seguro) arriba del pie y de Demos, y el retiro sólo al fondo con el pie cortado')
+controlPositivo('  el detector VE un retiro que se queda retirado lejos del fondo', ((s: number, a: number, t: number, arriba: number) => arriba < 0 || s + a >= t) as typeof retiradaAlFondo, (f: typeof retiradaAlFondo) => zonaBien(BANDA, BARRA_CSS, f))
 
 cerrar('s64-pulido-13')

@@ -1,0 +1,1244 @@
+{
+ "que": "K5 · los controles fijos del telefono (menu, parlante, progreso) contra el contenido (texto del DOM, titulos 3D, silueta del logo) en el reposo de cada seccion (llegando por su viaje) y al fondo. cruces: [control, contenido, area px2]",
+ "antes": [
+  {
+   "cuadro": "320x824",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": [
+    {
+     "control": "menu",
+     "con": "titular: Lo que sigue lo",
+     "area": 974
+    },
+    {
+     "control": "parlante",
+     "con": "titular: Lo que sigue lo",
+     "area": 650
+    }
+   ]
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": [
+    {
+     "control": "menu",
+     "con": "titular: Demos",
+     "area": 48
+    },
+    {
+     "control": "parlante",
+     "con": "titular: Demos",
+     "area": 32
+    }
+   ]
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": [
+    {
+     "control": "parlante",
+     "con": "pie-enlace-icono: Portfolio",
+     "area": 53
+    },
+    {
+     "control": "parlante",
+     "con": "pie-enlace-icono: Servicios",
+     "area": 101
+    }
+   ]
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": [
+    {
+     "control": "menu",
+     "con": "bloque-solido: contacto@develop.com.ar",
+     "area": 605
+    },
+    {
+     "control": "parlante",
+     "con": "bloque-solido: contacto@develop.com.ar",
+     "area": 403
+    },
+    {
+     "control": "progreso",
+     "con": "whatsapp: WhatsApp",
+     "area": 282
+    }
+   ]
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  }
+ ],
+ "despues": [
+  {
+   "cuadro": "320x824",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x824",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "320x568",
+   "destino": "fondo",
+   "controles": [],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "360x740",
+   "destino": "fondo",
+   "controles": [],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "375x667",
+   "destino": "fondo",
+   "controles": [],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "390x844",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "414x896",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "768x1024",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#hero",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#quienes-somos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#trabajos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#demos",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#servicios",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#tu-panel",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "#por-que-develop",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  },
+  {
+   "cuadro": "820x1180",
+   "destino": "fondo",
+   "controles": [
+    "menu",
+    "parlante",
+    "progreso"
+   ],
+   "cruces": []
+  }
+ ]
+}

@@ -69,7 +69,19 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   queda): al volver, vacíos y sin el estado (`k4-autocompletado.json`, `pulido-13/_scripts/k4-autocompletado.ts`).
 
 ### K5 · Mobile: los controles fijos no tapan contenido
-- PENDIENTE.
+- HECHO · VISTO sí (banco `pulido-13/_scripts/k5-controles.ts`: el reposo de cada sección llegando por su viaje y el fondo, con
+  las cajas del texto del DOM, los títulos 3D y la silueta del logo contra las del menú, el parlante y el progreso). Antes: el
+  titular del pie a 320 × 824 (el de la captura), Demos a 320, dos enlaces del recorrido a 320 × 568 y el mail y WhatsApp a 375.
+  La solución: (1) la ZONA DE LA CABECERA (`--zona-de-la-cabecera`: los controles más un aire, con el inset seguro de los
+  teléfonos con muesca) como relleno de arriba del pie angosto (`banda.css`, el de NOCTURNO FINAL C4: era 72 px) y de Demos; el
+  pie con menos aire abajo y sus tres bloques un poco más juntos, para que entre entero en 320 × 824 (medía 858 px); (2) donde el
+  pie igual no entra (pantallas bajas: 320 × 568, 360 × 740, 375 × 667), lo de arriba del pie queda cortado por el borde al
+  fondo y ningún relleno lo arregla: ahí los tres controles se retiran hacia arriba (`cabeceraAlFondo.ts`, `data-cabecera-retirada`
+  en la raíz) y vuelven al subir; el pie ya trae el recorrido y el contacto. Después: 64 paradas en 8 cuadros (320 a 820), cero
+  cruces; a 320 × 824 los controles se quedan. Recibo `k5-controles.json`.
+- A 320, «Quiénes somos» y «Por qué develOP» se parten en dos renglones (no entran ni con las separaciones al mínimo; sí con la
+  letra de 12 px, que es mucho achicar): en filas dejaban un hueco al lado del enlace vecino. Abajo de 375 el recorrido fluye por
+  columna (el orden del escritorio): dos listas prolijas.
 
 ### K6 · Los hilos con volumen (`?hilos=si`)
 - PENDIENTE.

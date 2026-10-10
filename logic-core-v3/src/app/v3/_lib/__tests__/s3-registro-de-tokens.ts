@@ -216,6 +216,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   // [AJUSTES FINALES] A4 · el velo de carga.
   { nombre: '--velo-fundido', valor: '800ms', evidencia: 'decidido', procedencia: 'el fundido con que todo aparece junto (~0,8 s, pedido); el mismo CARGA.fundidoMs de `_lib/carga.ts` (s48 los ata)' },
   { nombre: '--velo-espera', valor: '4000ms', evidencia: 'decidido', procedencia: 'el plazo desde el arranque en que el fundido arranca igual aunque no esté todo (~4 s, pedido); el mismo CARGA.plazoMs de `_lib/carga.ts` (s48 los ata)' },
+  // [PULIDO 13] K5 · la zona de la cabecera del teléfono.
+  { nombre: '--zona-de-la-cabecera', valor: 'calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4))', evidencia: 'derivado', procedencia: 'abajo de 1024, de arriba hasta el borde de abajo de los controles fijos (discos de 48 px a max(16 px, el inset seguro) del borde) más un aire: lo que se ve en el reposo de una sección arranca debajo' },
   // [PULIDO 13] K4 · el autocompletado del pie.
   { nombre: '--demora-del-autocompletado', valor: '100000s', evidencia: 'decidido', procedencia: 'la transición que demora para siempre el fondo celeste y el color del texto que el navegador le pone al campo autocompletado (con !important: no se pisan): así el campo se queda como estaba (en el pie de volumen, transparente sobre su placa)' },
 ]

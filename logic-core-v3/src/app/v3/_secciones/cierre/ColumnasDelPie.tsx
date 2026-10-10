@@ -208,10 +208,12 @@ function ColumnaDeContacto(): React.JSX.Element {
  */
 function ColumnaDelRecorrido(): React.JSX.Element {
   return (
-    // [FINAL 3] En móvil, dos columnas compactas. [NOCTURNO FINAL] C4 · más juntas en el teléfono.
-    <ul data-pieza="destinos-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)] tablet:grid-cols-1 tablet:gap-y-[var(--spacing-2)] escritorio:gap-y-[var(--spacing-4)]">
+    // [FINAL 3] En móvil, dos columnas compactas. [NOCTURNO FINAL] C4 · más juntas en el teléfono. [PULIDO 13] K5 · abajo de 375
+    // «Quiénes somos» y «Por qué develOP» se parten: ahí fluyen por columna (el orden del escritorio) y un enlace partido sólo
+    // empuja su columna (en filas, dejaba un hueco al lado del de al lado).
+    <ul data-pieza="destinos-del-pie" className="grid grid-cols-2 gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)] max-angosto:block max-angosto:columns-2 tablet:grid-cols-1 tablet:gap-y-[var(--spacing-2)] escritorio:gap-y-[var(--spacing-4)]">
       {DESTINOS_DE_LA_RUTA.map((destino) => (
-        <li key={destino.ancla}>
+        <li key={destino.ancla} className="max-angosto:mb-[var(--spacing-1)] max-angosto:break-inside-avoid">
           {/* [CIERRE RETOQUE 3D] D5 · cada enlace, un bloque sólido que flota (desde 1025). */}
           <BloqueSolido>
             <EnlaceDelPieConIcono

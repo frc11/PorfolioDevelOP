@@ -10,6 +10,7 @@ import { useLaBarraSeVe } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { CAJA_DEL_INFINITO, TRAZO_DEL_INFINITO, textoDelPorcentaje } from './recorrido'
+import { useCabeceraAlFondo } from './cabeceraAlFondo'
 
 /**
  * [INTERFAZ 2] T4 · EL INFINITO DEL RECORRIDO — [Cierre de INTERFAZ 2] el indicador que quedó: un infinito (no el logo)
@@ -64,6 +65,8 @@ export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: Reac
   // vuelve a la esquina de abajo, como con `?progreso=abajo` (arriba se pisaba con Login). El parlante sigue arriba a la izquierda.
   const conLaBarra = useLaBarraSeVe()
   const alPie = abajo || conLaBarra
+  // [PULIDO 13] K5 · con la cabecera del teléfono, al fondo y con el pie más alto que la pantalla, los controles se retiran.
+  useCabeceraAlFondo(!alPie)
   const caja = useRef<HTMLDivElement>(null)
   const numero = useRef<HTMLSpanElement>(null)
   const reducido = useMovimientoReducido()

@@ -203,7 +203,7 @@ export function CapaDeDemos({
          fondo de la ventana del CTA (medido: el agujero se veía claro). */
       className={cn(className, 'max-escritorio:[--demos-entrada:rigida] max-escritorio:[transform:scale(var(--demos-escala,0))]')}
     >
-      <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center">
+      <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center max-escritorio:pt-[var(--zona-de-la-cabecera)]">
         {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. Abajo de 1024 no hay columna. */}
         <div aria-hidden="true" className="max-escritorio:hidden" />
         <div className="flex flex-col gap-8 max-movil:gap-5">
