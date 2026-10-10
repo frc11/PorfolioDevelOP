@@ -153,6 +153,13 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   el trabajo de React al arrancar el viaje). Arreglarlo es rehacer cómo mide la escena (cachear las posiciones en el documento,
   como `esquivaDelLogo`): un cambio de arquitectura en lazos aprobados, no un arreglo puntual. Anotado en «Lo que no quedó bien».
 
+### Verificar final (sin banco ni servidor)
+- Primera corrida: 70 pasos, 9 rojos — los 8 de la base y `s6-tokens`: el `25%` suelto de la clase de C1 (la regla admite sólo
+  `100%`, `50%`, `-50%`). Arreglado como `calc(50%/2)` (a81b8310; la misma medida, re-medida en el banco: 264 px a 1024, 140/140 y
+  316/316).
+- Segunda corrida: 70 pasos, exactamente los 8 rojos de la base (s1, s2, s3, s4, s5, s7, s8, s17) y ni uno más. Después, el
+  servidor de desarrollo de nuevo.
+
 ## Defectos encontrados
 
 | # | Dónde | Ancho | Causa | Commit | Re-verificado |
