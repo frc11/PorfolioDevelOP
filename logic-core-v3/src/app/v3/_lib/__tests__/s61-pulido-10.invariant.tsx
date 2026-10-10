@@ -416,7 +416,7 @@ const ESQUINA_J9 = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
 const progresoArribaBien = (f: typeof progresoAbajo, c: string): boolean =>
   f('?progreso=abajo') && !f('') && !f('?progreso=arriba') &&
   c.includes('max-escritorio:not-data-abajo:top-[max(var(--spacing-4),env(safe-area-inset-top))] max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto') &&
-  c.includes("data-abajo={abajo ? '' : undefined}")
+  c.includes('const alPie = abajo || conLaBarra') && c.includes("data-abajo={alPie ? '' : undefined}")
 afirmar(progresoArribaBien(progresoAbajo, ESQUINA_J9), 'd · el progreso del teléfono arriba a la derecha ([PULIDO 11] C2 · el parlante, arriba a la izquierda); `?progreso=abajo`, el de antes')
 controlPositivo('d · el detector VE una bandera que no se lee', ((c: string) => c === 'abajo') as typeof progresoAbajo, (f: typeof progresoAbajo) => progresoArribaBien(f, ESQUINA_J9))
 

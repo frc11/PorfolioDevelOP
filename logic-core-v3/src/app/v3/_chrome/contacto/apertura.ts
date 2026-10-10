@@ -63,8 +63,16 @@ export function devolverElFoco(): void {
   requestAnimationFrame(() => origen?.focus({ preventScroll: true }))
 }
 
+/** [PULIDO 12] 1 · si la barra ya midió el modo (hasta entonces el de arranque, `barra`, no dice nada del ancho). */
+let modoMedido = false
+
 export function fijarModoDelChrome(modo: ModoDelChrome): void {
-  if (estado.modo === modo) return
+  const primero = !modoMedido
+  modoMedido = true
+  if (estado.modo === modo) {
+    if (primero) avisar()
+    return
+  }
   estado = { ...estado, modo }
   avisar()
 }
@@ -74,6 +82,12 @@ function suscribir(f: () => void): () => void {
   return () => oyentes.delete(f)
 }
 const leer = (): EstadoDelContacto => estado
+const conLaBarra = (): boolean => modoMedido && estado.modo === 'barra'
+
+/** [PULIDO 12] 1 · la barra a la vista (no el menú del teléfono), ya medida. En el servidor, no: abajo de 1024 lo común es el menú. */
+export function useLaBarraSeVe(): boolean {
+  return useSyncExternalStore(suscribir, conLaBarra, () => false)
+}
 
 export function useContacto(): EstadoDelContacto {
   return useSyncExternalStore(suscribir, leer, leer)

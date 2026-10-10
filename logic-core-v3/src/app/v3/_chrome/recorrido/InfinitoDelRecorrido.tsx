@@ -6,6 +6,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { cn } from '@/lib/utils'
 
 import { Micro } from '../../_componentes/tipografia/Textos'
+import { useLaBarraSeVe } from '../contacto/apertura'
 import { nocheQueSeVe, tonoBajo } from '../cursor/estado'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { CAJA_DEL_INFINITO, TRAZO_DEL_INFINITO, textoDelPorcentaje } from './recorrido'
@@ -59,6 +60,10 @@ const abajoEnLaPagina = (): boolean => progresoAbajo(window.location.search)
 
 export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: React.ReactNode }): React.JSX.Element {
   const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)
+  // [PULIDO 12] 1 · de 860 a 1023 la barra puede entrar (y su esquina, Contacto y Login, va arriba a la derecha): ahí el progreso
+  // vuelve a la esquina de abajo, como con `?progreso=abajo` (arriba se pisaba con Login). El parlante sigue arriba a la izquierda.
+  const conLaBarra = useLaBarraSeVe()
+  const alPie = abajo || conLaBarra
   const caja = useRef<HTMLDivElement>(null)
   const numero = useRef<HTMLSpanElement>(null)
   const reducido = useMovimientoReducido()
@@ -109,15 +114,15 @@ export function InfinitoDelRecorrido({ encima = null }: { readonly encima?: Reac
     // [RETOQUE 3D] N2 · 1,3 veces más grande (48 → 62 px en el teléfono, 64 → 83 en escritorio); el trazo crece con él.
     // [PULIDO 10] J9 · en el teléfono, arriba a la derecha (el botón del menú va arriba al centro); con `?progreso=abajo`, la
     // columna de abajo de antes. En escritorio, como estaba.
-    // [PULIDO 11] C2 · abajo de 1024, la cabecera: el parlante arriba a la left-[max(var(--spacing-4),env(safe-area-inset-left))] (lo que va encima se ubica solo), el menú al
-    // centro y el progreso arriba a la right-[max(var(--spacing-4),env(safe-area-inset-right))]; los tres del tamaño del botón del menú (un disco de 48 px, con su fondo, su borde
+    // [PULIDO 11] C2 · abajo de 1024, la cabecera: el parlante arriba a la izquierda (lo que va encima se ubica solo), el menú al
+    // centro y el progreso arriba a la derecha; los tres del tamaño del botón del menú (un disco de 48 px, con su fondo, su borde
     // y su sombra), en el mismo eje y adentro de la zona segura (`env(safe-area-inset-*)`, con el aire de siempre como mínimo).
-    <div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] max-escritorio:not-data-abajo:top-[max(var(--spacing-4),env(safe-area-inset-top))] max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]" data-abajo={abajo ? '' : undefined}>
+    <div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)] z-[var(--z-cabecera)] flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] max-escritorio:not-data-abajo:top-[max(var(--spacing-4),env(safe-area-inset-top))] max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)] escritorio:w-[calc(var(--spacing-8)*2.6)]" data-abajo={alPie ? '' : undefined}>
       <div data-parte="lugar-del-parlante" className={cn(!abajo && 'max-escritorio:fixed max-escritorio:top-[max(var(--spacing-4),env(safe-area-inset-top))] max-escritorio:left-[max(var(--spacing-4),env(safe-area-inset-left))]')}>
         {encima}
       </div>
-      <div ref={caja} data-pieza="infinito-del-recorrido" aria-hidden="true" className={cn('text-tinta flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:w-full', !abajo && 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)] max-escritorio:justify-center max-escritorio:gap-0')}>
-        <svg viewBox={CAJA_DEL_INFINITO} className={cn('block h-auto w-full overflow-visible', !abajo && 'max-escritorio:w-[70%]')}>
+      <div ref={caja} data-pieza="infinito-del-recorrido" aria-hidden="true" className={cn('text-tinta flex w-[calc(var(--spacing-12)*1.3)] flex-col items-center gap-[var(--spacing-1)] transition-colors duration-[var(--duracion-media)] escritorio:w-full', !alPie && 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)] max-escritorio:justify-center max-escritorio:gap-0')}>
+        <svg viewBox={CAJA_DEL_INFINITO} className={cn('block h-auto w-full overflow-visible', !alPie && 'max-escritorio:w-[70%]')}>
           {/* El borde del tono contrario, debajo de todo: se lee sobre cualquier fondo (los dos tonos del anillo de foco). */}
           <path d={TRAZO_DEL_INFINITO} fill="none" stroke="var(--color-fondo)" strokeWidth={GRUESO_DEL_INFINITO + 2} strokeLinecap="round" strokeLinejoin="round" opacity={0.35} />
           {/* La pista: el infinito entero, tenue. */}

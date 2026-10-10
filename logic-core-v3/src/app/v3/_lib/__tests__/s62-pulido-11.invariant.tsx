@@ -530,7 +530,8 @@ const cabeceraBien = (esquina: string, sonido: string, menu: string): boolean =>
     delMenu.split(' ').includes(ARRIBA) && delMenu.includes('inset-x-0') && delMenu.includes('mx-auto') && delMenu.includes('size-[var(--spacing-12)]') && delMenu.includes('rounded-full') &&
     // El progreso: arriba a la derecha (zona segura) y su caja, el mismo disco.
     esquina.includes(`max-escritorio:not-data-abajo:${ARRIBA} max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))]`) &&
-    esquina.includes(`!abajo && '${DISCO} max-escritorio:justify-center max-escritorio:gap-0'`) &&
+    // [PULIDO 12] 1 · con la barra a la vista (de 860 a 1023), el progreso vuelve abajo (`alPie`): s63.
+    esquina.includes(`!alPie && '${DISCO} max-escritorio:justify-center max-escritorio:gap-0'`) &&
     // El parlante: su lugar fijo arriba a la izquierda (zona segura) y su botón, el mismo disco; el cartel, debajo (arriba se saldría).
     esquina.includes(`<div data-parte="lugar-del-parlante" className={cn(!abajo && 'max-escritorio:fixed max-escritorio:${ARRIBA} max-escritorio:left-[max(var(--spacing-4),env(safe-area-inset-left))]')}>`) &&
     sonido.includes(`!abajo && '${DISCO}'`) && sonido.includes("'max-escritorio:top-full max-escritorio:bottom-auto max-escritorio:left-0") &&
