@@ -229,7 +229,12 @@ energía (laten). Afinan hacia la cola.
   tocar `tocar`, que s47 fija, y sigue adentro del gesto). Invariante: s62 F.
 
 ### Fase G · verificación exhaustiva
-- PENDIENTE
+- G6 (adelantado, sin banco ni dev server, sobre el árbol commiteado hasta F): `npm run verificar` → 69 pasos, tsc limpio y **los 8
+  rojos de la base y ni uno más** (s1, s2, s3, s4, s5, s7, s8, s17: por adentro, s1-bundle, s2-bundle, s2-css, s3-peso, s5-peso,
+  s7-compuerta, s8-tres, s8-chrome y s8-peso piden el build en `.next`; s4-cobertura, s4-heredado, s5-compacto —«encuadre: medio»
+  en Quiénes somos—, s8-montaje y s17-revelado son de antes del sprint). s62: 86 afirmaciones, 44 controles, 0 fallas. Hay que
+  volver a correrlo AL FINAL, después de C1 y de lo que el banco obligue a tocar.
+- G1–G5: PENDIENTES (banco cerrado por memoria; ver «VERIFICAR TRAS REINICIO»).
 
 ## Las aserciones viejas que cambiaron
 
@@ -275,6 +280,8 @@ energía (laten). Afinan hacia la cola.
 | Fase A · un Chrome por tanda (lanzado una vez, cada script se pega a su página) | 6054–7900 MB | 683–774 MB | Cuatro tandas (cerrado durante cada build): el no paginado no pasó de 0,8 GB |
 | Fase B · antes de compilar para el banco (Chrome del banco y `next start` cerrados) | 2896 MB | 824 MB | < 3 GB: el banco NO se abre |
 | Fase B · al volver a mirar | 755 MB | 871 MB | Abiertos en la PC: Discord, Spotify, una app de Java, Acrobat, Epic, Chrome. No se cierra nada del usuario: B queda en «VERIFICAR TRAS REINICIO» |
+| Fases C–F (código, sin banco): cuatro lecturas | 672 · 923 · 1743 · 1923 MB | 830–899 MB | Siempre < 3 GB (la PC en uso: Spotify, Java, Discord, Chrome). El banco no se abrió |
+| Después de F | 2907 MB | 889 MB | Todavía < 3 GB: se corre `verificar` (sin banco ni servidor) |
 
 ## VERIFICAR TRAS REINICIO
 
