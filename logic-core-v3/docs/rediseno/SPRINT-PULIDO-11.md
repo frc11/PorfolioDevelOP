@@ -193,7 +193,25 @@ Queda a confirmar en el banco (no se tocó): la lenta trae al logo hasta 1,6 u p
 del pie (antes, 0,6) a los ~0,8 s: si alguna se superpone en pantalla con el logo en ese momento, se cruzarían.
 
 ### Fase E · hilos de energía (`?hilos=si`)
-- PENDIENTE
+- CÓDIGO HECHO · BANCO PENDIENTE (`_lib/escena/hilos/`; invariante s62 E, 4 afirmaciones con sus controles).
+
+**Qué son.** Con `?hilos=si` (sin la bandera, el polvo de siempre: ni un hilo montado) el polvo y el bokeh no se montan y en su
+lugar hay 36 hilos alrededor del logo. Cada hilo es una cinta: su cabeza sigue una órbita inclinada desviada por un campo de CURL
+(el rotor de un potencial de senos en tres octavas: sin divergencia, así se tuercen alrededor de vórtices y se cruzan sin
+amontonarse; medido, divergencia ≤ 3·10⁻⁷) y la estela es la misma cabeza en el pasado (1,5 s). Por la estela corren cuentas de
+energía (laten). Afinan hacia la cola.
+- **Todo en la GPU, una llamada de dibujo**: una malla instanciada (una cinta por instancia, 64 pares de vértices) sin simulación
+  ni texturas; la cabeza es una función analítica del tiempo, así cada vértice calcula su punto y el siguiente (la tangente) y se
+  abre de costado en píxeles de pantalla (10 px en la cabeza, 3 en la cola, con el resplandor).
+- **Monocromo, día y noche**: premultiplicado; de noche suman luz (blancos, con resplandor), de día son tinta sobre el papel. Sin
+  el rojo del error.
+- **El puntero (mouse o dedo)**: los hilos cerca lo RODEAN (giran alrededor de él en la pantalla y se aprietan hacia un anillo),
+  vibran y se encienden (más luz y más ancho); prenden en ~0,2 s y se sueltan despacio (1,4 s). El puntero se lee de la ventana:
+  el cursor de la escena no empuja con el dedo.
+- **No compiten con el pie**: se apagan con la cámara que sube en el final (la energía del piso manda). **No tapar textos**: van
+  detrás del DOM, finos y con opacidad moderada (0,42 de día, 0,85 de noche); que no bajen el contraste de un texto, en el banco.
+- Pendiente de banco: la secuencia de 6 cuadros de día y de noche y 3 con el mouse, los ms por cuadro a 1440 y 390 en la NVIDIA
+  (con y sin la bandera), y que no tapen textos (`e-hilos.ts`, en «VERIFICAR TRAS REINICIO»).
 
 ### Fase F · giroscopio (`docs/rediseno/GIROSCOPIO.md` + `?giroscopio=si`)
 - PENDIENTE
@@ -233,6 +251,7 @@ del pie (antes, 0,6) a los ~0,8 s: si alguna se superpone en pantalla con el log
 | D | `s52-pulido-1` · las banderas sueltas | `rebobinado`, `angel` | + `caida: ['angulo']` | La bandera nueva |
 | D | `s53` 6 · la sombra en la pose | entera a `fin` 0,3, nada a 0,45 | entera a 0,05, casi entera a 0,3 (parado), nada a 0,68 (el golpe); y en arco, monótona | La sombra va con el giro de la caída: parado en el piso la tiene al pie |
 | D | `s51` 1C · al ras | `poseDelLogo(1, TAM, alRas)` | `poseDelLogo(1, TAM, 'lenta', alRas)` | La firma lleva la variante |
+| E | `s52-pulido-1` · las banderas sueltas | `rebobinado`, `angel`, `caida` | + `hilos: ['si']` | La bandera nueva |
 | A4e | `s59` 1 · tocable apenas se lee | `ctaTocable(p)` en `pointerEvents` y en Enter | `tocable(p)`, con `tocable = enLaLista ? tocableEnLaLista : ctaTocable` | En el escenario sigue siendo `ctaTocable` (lo de siempre); en la lista no hay giro: tocable al 90 % del deslizamiento |
 
 ## Memoria (antes de cada fase: disponible y no paginado)
@@ -282,6 +301,10 @@ c1-pie.ts 1920 1080` (las distancias columna–logo y logo–formulario, el cent
 develOP» contra su columna; C1 se diseña con esos números). Para C2, `a4-movil.ts` no alcanza: capturas arriba de la página a 320,
 375, 390, 414, 768 y 820, día y noche (con `?progreso=abajo` también), y a 900 y 1000 (la barra en modo pastilla: ¿choca su esquina
 con el progreso?).
+
+**Fase E (los hilos).** `npx tsx e-hilos.ts 1440 900 si ; npx tsx e-hilos.ts 1440 900 no ; npx tsx e-hilos.ts 390 844 si ; npx tsx
+e-hilos.ts 390 844 no` — la hoja de 6 + 6 cuadros (día y noche), la de 3 con el mouse y los ms por cuadro (media, p95, de más de 20
+ms) con y sin los hilos: el costo es la diferencia. Mirar también que no tapen textos (el titular del hero, Quiénes somos).
 
 **Fase D (la caída).** `npx tsx d-caida.ts 1440 900 lenta ; npx tsx d-caida.ts 1440 900 angulo ; npx tsx d-caida.ts 390 844 lenta ;
 npx tsx d-caida.ts 390 844 angulo` — la corrida en vivo (hoja de 12 cuadros, `golpe` con la pose del logo justo antes y en el golpe,

@@ -16,6 +16,7 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
+import { HilosDeEnergia } from './hilos/HilosDeEnergia'
 import { FinalDelPie } from './final/FinalDelPie'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
@@ -158,6 +159,8 @@ export default function ProbeStage({
   const bokehGroupRef = useRef<THREE.Group>(null)
   /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
+  // [PULIDO 11] E · `?hilos=si`: los hilos de energía en lugar del polvo y del bokeh (sus grupos quedan: el rig los deriva).
+  const hilos = entornoDeLaEscena().pruebas.hilos === 'si'
 
   return (
     <Canvas
@@ -247,11 +250,12 @@ export default function ProbeStage({
           `choreographyPhysics.ts`.
         */}
         <group ref={dustGroupRef} name="polvo">
-          <DepthParticles store={store} />
+          {!hilos && <DepthParticles store={store} />}
         </group>
         <group ref={bokehGroupRef} name="bokeh">
-          <BokehParticles />
+          {!hilos && <BokehParticles />}
         </group>
+        {hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} />}
 
         <OrbitRig
           store={store}

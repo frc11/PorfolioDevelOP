@@ -21,6 +21,8 @@
  *        en el mismo eje y adentro de la zona segura.
  *   D · el logo del final se CAE y encastra: física de cuerpo rígido (θ'' = κ·sen(θ − α)), el hueco que se abre con la caída,
  *       el contacto en el cuadro del golpe, un rebote chico que se asienta, sin saltos ni atravesar el piso (`?caida=angulo`).
+ *   E · los hilos de energía (`?hilos=si`, exploración): en lugar del polvo, en la GPU, monocromos, con el puntero; sin la bandera,
+ *       el polvo de siempre.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -48,6 +50,7 @@ import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, b
 import { FINAL_DEL_PIE, calma as calmaDelFinal, golpeDelFinal, segundosDelFinal } from '../escena/final/recorridoDelFinal'
 import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { FLOOR_Y } from '../escena/probeScene'
+import { HILOS, activacionDelPuntero, semillasDeLosHilos, VERTICES_DE_LOS_HILOS, FRAGMENTOS_DE_LOS_HILOS, CURL_GLSL } from '../escena/hilos/hilos'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -740,5 +743,77 @@ const conElLogo = (sombra: typeof sombraDeLaCaida, fuera: typeof fueraDeSuLugar)
 }
 afirmar(conElLogo(sombraDeLaCaida, fueraDeSuLugar), '  parado en el piso, el logo tiene su sombra al pie (se va mientras cae al hueco) y la mancha de contacto del centro se va con él')
 controlPositivo('  el detector VE la sombra de la primera versión (ninguna, parado en el piso)', ((v: VarianteDeLaCaida, t: PlacaDelLogo, x: number) => (x >= bajadaDe(t) ? 0 : 1)) as typeof sombraDeLaCaida, (f: typeof sombraDeLaCaida) => conElLogo(f, fueraDeSuLugar))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('E · Los hilos de energía (`?hilos=si`): en lugar del polvo, en la GPU, monocromos, con el puntero')
+
+// Exploración: sin la bandera el polvo de siempre (ni un hilo montado); con ella, los hilos EN LUGAR del polvo (las partículas no
+// se montan; sus grupos quedan para el rig). Lo que se ve, los ms por cuadro a 1440 y 390 en la NVIDIA y que no tapen textos: en
+// el banco.
+const ESCENARIO_E = leer('_lib/escena/ProbeStage.tsx')
+const HILOS_TSX = leer('_lib/escena/hilos/HilosDeEnergia.tsx')
+const montadoBien = (e: string, sueltas: readonly string[]): boolean =>
+  e.includes("const hilos = entornoDeLaEscena().pruebas.hilos === 'si'") && e.includes('{!hilos && <DepthParticles store={store} />}') && e.includes('{!hilos && <BokehParticles />}') &&
+  e.includes('{hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} />}') && sueltas.includes('hilos') &&
+  entornoPedido('producto').pruebas.hilos === 'no' && entornoPedido('producto,hilos=si').pruebas.hilos === 'si'
+afirmar(montadoBien(ESCENARIO_E, PRUEBAS_SUELTAS), 'E1 · `?hilos=si` monta los hilos EN LUGAR del polvo y del bokeh; sin la bandera, el polvo de siempre')
+controlPositivo('E1 · el detector VE los hilos montados junto al polvo', ESCENARIO_E.replace('{!hilos && <DepthParticles store={store} />}', '<DepthParticles store={store} />'), (e: string) => montadoBien(e, PRUEBAS_SUELTAS))
+
+// El campo: el curl de un potencial (el mismo que el sombreador, acá en números) no tiene divergencia: los hilos se tuercen
+// alrededor de remolinos sin amontonarse ni vaciarse.
+const curlE = (x: number, y: number, z: number): [number, number, number] => {
+  let [cx, cy, cz, a] = [0, 0, 0, 1]
+  let p = [x, y, z]
+  for (let o = 0; o < 3; o += 1) {
+    const k = 1.3 + o * 0.37
+    const q = [p[0] + 1.7 * o, p[1] + 9.2 * o, p[2] + 3.4 * o]
+    const [axY, axZ] = [Math.cos(q[1] + q[2] * k), k * Math.cos(q[1] + q[2] * k)]
+    const [ayZ, ayX] = [Math.cos(q[2] + q[0] * k), k * Math.cos(q[2] + q[0] * k)]
+    const [azX, azY] = [Math.cos(q[0] + q[1] * k), k * Math.cos(q[0] + q[1] * k)]
+    cx += a * (azY - ayZ)
+    cy += a * (axZ - azX)
+    cz += a * (ayX - axY)
+    p = p.map((v) => v * 2.03)
+    a *= 0.5
+  }
+  return [cx / 1.75, cy / 1.75, cz / 1.75]
+}
+const divergenciaMaxima = (campo: typeof curlE): number => {
+  const h = 1e-4
+  let peor = 0
+  for (let i = 0; i < 300; i += 1) {
+    const [x, y, z] = [Math.sin(i * 1.3) * 4, Math.cos(i * 0.7) * 4, Math.sin(i * 2.1 + 1) * 4]
+    const d = (campo(x + h, y, z)[0] - campo(x - h, y, z)[0] + campo(x, y + h, z)[1] - campo(x, y - h, z)[1] + campo(x, y, z + h)[2] - campo(x, y, z - h)[2]) / (2 * h)
+    peor = Math.max(peor, Math.abs(d))
+  }
+  return peor
+}
+const campoBien = (campo: typeof curlE, glsl: string): boolean =>
+  divergenciaMaxima(campo) < 1e-5 && glsl.includes('c += a * vec3( az_y - ay_z, ax_z - az_x, ay_x - ax_y );') && glsl.includes('float k = 1.3 + float( o ) * 0.37;') && glsl.includes('p *= 2.03;')
+afirmar(campoBien(curlE, CURL_GLSL), `E2 · el campo es un curl: sin divergencia (lo más, ${divergenciaMaxima(curlE).toExponential(1)}), y el sombreador lleva la misma cuenta`)
+controlPositivo('E2 · el detector VE un campo de ruido común (con divergencia: los hilos se juntarían en sumideros)', (x: number, y: number, z: number): [number, number, number] => [Math.sin(x * 1.3), Math.sin(y * 1.1), Math.cos(z * 0.9)], (c: typeof curlE) => campoBien(c, CURL_GLSL))
+
+// Todo en la GPU: una llamada de dibujo (una cinta por instancia), sin simulación ni texturas; monocromos (tinta de día, papel de
+// noche: sin el rojo del error), de noche suman luz y de día tapan con tinta (premultiplicado); en el final del pie se apagan.
+const gpuBien = (t: string, v: string, fr: string): boolean =>
+  t.includes('new THREE.InstancedBufferGeometry()') && t.includes('g.instanceCount = HILOS.cantidad') && !/DataTexture|WebGLRenderTarget|useFBO/.test(t) &&
+  t.includes('uColorDia: { value: enSrgb(INK_COLOR) }') && t.includes('uColorNoche: { value: enSrgb(PAPER_COLOR) }') && !/error|rojo/i.test(t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')) &&
+  t.includes('blendSrc: THREE.OneFactor') && t.includes('blendDst: THREE.OneMinusSrcAlphaFactor') && fr.includes('gl_FragColor = vec4( color * a, a * ( 1.0 - uNoche ) );') &&
+  t.includes('u.uApagado.value = EN_VIVO.camara') && fr.includes('( 1.0 - uApagado )') && v.includes('cabeza( t - ') && semillasDeLosHilos(3).a.length === 12
+afirmar(gpuBien(HILOS_TSX, VERTICES_DE_LOS_HILOS, FRAGMENTOS_DE_LOS_HILOS), `E3 · ${String(HILOS.cantidad)} hilos de ${String(HILOS.puntos)} puntos en UNA llamada (sin simulación ni texturas), monocromos, luz que suma de noche y tinta de día; se apagan con la cámara del final`)
+controlPositivo('E3 · el detector VE hilos con mezcla aditiva también de día (blancos sobre el papel)', HILOS_TSX.replace('blendDst: THREE.OneMinusSrcAlphaFactor', 'blendDst: THREE.OneFactor'), (t: string) => gpuBien(t, VERTICES_DE_LOS_HILOS, FRAGMENTOS_DE_LOS_HILOS))
+
+// El puntero: los hilos cerca de él lo rodean (giran alrededor en la pantalla y se aprietan a un anillo), vibran y se encienden;
+// la activación sube rápido y se suelta despacio (suave).
+const punteroBien = (act: typeof activacionDelPuntero, v: string): boolean => {
+  let x = 0
+  for (let i = 0; i < 12; i += 1) x = act(x, HILOS.activacion.empujeEntero, 1 / 60)
+  const tomada = x
+  let y = 1
+  for (let i = 0; i < 30; i += 1) y = act(y, 0, 1 / 60)
+  return tomada > 0.75 && y > 0.6 && y < 1 && v.includes('mat2( cos( giro ), sin( giro ), - sin( giro ), cos( giro ) ) * rel') && v.includes('vibra') && v.includes('float cerca = uActivo * exp(')
+}
+afirmar(punteroBien(activacionDelPuntero, VERTICES_DE_LOS_HILOS), 'E4 · con el puntero (mouse o dedo) lo rodean, vibran y se encienden: se prenden en ~0,2 s y se sueltan despacio (a los 0,5 s, todavía más de la mitad)')
+controlPositivo('E4 · el detector VE una suelta de golpe', ((a: number, e: number) => (e > 0 ? 1 : 0)) as typeof activacionDelPuntero, (f: typeof activacionDelPuntero) => punteroBien(f, VERTICES_DE_LOS_HILOS))
 
 cerrar('s62-pulido-11')
