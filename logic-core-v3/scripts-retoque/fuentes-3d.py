@@ -87,7 +87,7 @@ PEDIDOS = [
      'textos': ['EL RECORRIDO', 'CONTACTO', 'NOMBRE', 'MAIL', 'MENSAJE'], 'destino': 'chivo-500-pie.json'},
     {'origen': 'chivo-latin.woff2', 'peso': 600, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      # [PULIDO 10] J8 · «Portfolio» y «Demos» en el recorrido (era «Trabajos»).
-     'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Portfolio', 'Demos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…', 'Enviar otro mensaje'], 'destino': 'chivo-600-pie.json'},
+     'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Portfolio', 'Demos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…', 'Enviar otro mensaje', 'Reintentar'], 'destino': 'chivo-600-pie.json'},  # [PULIDO 10] J5 · y Reintentar
 ]
 
 try:

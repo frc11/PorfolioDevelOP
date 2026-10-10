@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { motion, type MotionValue } from 'motion/react'
 import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -30,7 +30,8 @@ const CARAS = [
   { cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-tinta', style: { transform: `translateZ(-${String(E)}px)` } },
 ] as const
 
-export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
+// [PULIDO 10] J5 · `rechazo`: cuánto se hunde el bloque entero (px, en profundidad) cuando el envío falla (lo anima el formulario).
+export function PlacaDelContacto({ activa, rechazo, children }: { readonly activa: boolean; readonly rechazo?: MotionValue<number>; readonly children: React.ReactNode }): React.JSX.Element {
   const [llego, setLlego] = useState(false)
   const paralaje = useParalaje(activa, llego)
   if (!activa) return <>{children}</>
@@ -52,7 +53,7 @@ export function PlacaDelContacto({ activa, children }: { readonly activa: boolea
         transition={TRANSICIONES.viaje}
         onAnimationComplete={() => setLlego(true)}
       >
-        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
+        <motion.div data-parte="bloque-de-la-placa" className="pointer-events-auto relative" style={{ transformStyle: 'preserve-3d', x: paralaje.x, y: paralaje.y, z: rechazo, rotateX: paralaje.rotateX, rotateY: paralaje.rotateY }}>
           {children}
           {CARAS.map((c) => (
             <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className)} style={c.style} />

@@ -195,10 +195,11 @@ controlPositivo('1 · el detector VE el orden de antes (armar y después soltar 
 const pie = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 const quietoAlEnviar = (c: string): boolean =>
   (c.match(/readOnly=\{enviando\}/g) ?? []).length === 2 &&
-  /<span aria-hidden="true" className="invisible col-start-1 row-start-1">\s*\{enviando \? c\.enviar : c\.enviando\}/.test(c) &&
+  // [PULIDO 10] J5 · tres rótulos (Enviar, Enviando… y Reintentar): el visible y los otros dos invisibles, guardando el ancho del más largo.
+  c.includes('{[c.enviar, c.enviando, REINTENTAR].filter((r) => r !== rotulo).map((r) => (') && c.includes('<span key={r} aria-hidden="true" className="invisible col-start-1 row-start-1">') &&
   // [PULIDO 10] J3 · la ruedita se fue: el botón es la carga chica, encima del rótulo, que se queda invisible guardando el ancho.
   c.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
-  c.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>")
+  c.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center perspective-midrange', enviando && 'invisible')}>")
 afirmar(quietoAlEnviar(pie), '  mientras viaja: los campos, de sólo lectura; el botón guarda el ancho del rótulo más largo (invisible) y la carga va encima (nada cambia de lugar)')
 controlPositivo('  el detector VE los campos escribibles al enviar', pie.replace(/readOnly=\{enviando\} /, ''), quietoAlEnviar)
 

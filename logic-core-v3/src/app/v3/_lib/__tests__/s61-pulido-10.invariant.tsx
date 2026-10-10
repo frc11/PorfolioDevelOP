@@ -7,6 +7,7 @@
  *   J3  · la carga de develOP: el trazo (o el giro, `?carga=giro`), los textos, la espera mínima, el botón del pie y el panel.
  *   J4  · las transformaciones de gracias: el pie con el volteo y el panel con el hundido, el título en Archivo (minúsculas), el
  *         foco que no desaparece y la placa en su lugar.
+ *   J5  · el error: la placa rechaza (el resorte), Reintentar gira, el error sale de atrás del botón, el pulso; los dos formularios.
  *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
  *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
@@ -20,6 +21,7 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import { REINTENTAR, cuadrosDelRechazo, hundidoDelRechazo } from '../formularios/rechazo'
 import { varianteDeGracias, GRACIAS } from '../formularios/gracias'
 import { FUENTES_DEL_CTA } from '../escena/ctaDelFinal/fuentesDelCta'
 import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
@@ -170,7 +172,7 @@ const lugaresBien = (p: string, m: string): boolean =>
   TEXTOS_DE_ENVIO.join() === 'Enviando…,Casi…' &&
   p.includes('{enviando && <Carga tamano="chico" textos={TEXTOS_DE_ENVIO} enLinea className="absolute inset-0 justify-center" />}') &&
   p.includes('[--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]') &&
-  p.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>") &&
+  p.includes("<span aria-hidden={enviando || undefined} className={cn('grid justify-items-center perspective-midrange', enviando && 'invisible')}>") &&
   p.includes('const r = await conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
   m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
   m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
@@ -226,6 +228,57 @@ const bordeQuieto = (dy: number): boolean => {
 }
 afirmar(bordeQuieto(0), 'D · con el techo fijo, el hundido lleva la tarjeta con el borde de arriba quieto en cada cuadro (la etiqueta «Contacto» no se despega)')
 controlPositivo('D · el detector VE la columna recentrada de antes (la tarjeta baja 63 px en la transformación)', 63, (dy: number) => bordeQuieto(dy))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J5 · El error en los dos formularios: la placa rechaza, Reintentar gira y el error sale de atrás del botón')
+
+// A · El resorte (una curva para los dos formularios): baja rápido hasta el fondo, vuelve pasándose apenas y se asienta.
+const resorteBien = (f: (u: number) => number): boolean => {
+  const muestras = Array.from({ length: 101 }, (_, k) => f(k / 100))
+  const fondo = muestras.indexOf(Math.max(...muestras))
+  return f(0) === 0 && Math.abs(Math.max(...muestras) - 1) < 0.02 && fondo > 0 && fondo < 20 && Math.min(...muestras.slice(20, 70)) < -0.05 && Math.abs(f(0.95)) < 0.06 && f(1) === 0
+}
+afirmar(resorteBien(hundidoDelRechazo) && cuadrosDelRechazo(10).length === 25 && Math.abs(Math.max(...cuadrosDelRechazo(10)) - 10) < 0.3, 'A · el resorte del rechazo: al fondo antes del 20 % del tiempo, se pasa apenas (vuelve más allá de la cara) y se asienta')
+controlPositivo('A · el detector VE un resorte sin amortiguar (no se asienta)', (u: number) => (u <= 0 || u >= 1 ? 0 : Math.sin(2 * Math.PI * 1.6 * u)), resorteBien)
+
+// B · El pie: cada error, un rechazo (`data-rechazo`, para la placa 3D), el pulso, el foco en Reintentar, Reintentar girando en el
+// DOM plano (en 3D gira la tecla), el error en su renglón saliendo de atrás del botón y, en el DOM plano, la escala del resorte
+// (en 3D no: la transformada del formulario la escribe la escena).
+const PIE_J5 = leer('_secciones/cierre/FormularioDelPie.tsx')
+const pieRechazaBien = (p: string): boolean =>
+  p.includes('setRechazos((n) => n + 1)') && p.includes("sonar('pulso')") && p.includes('data-rechazo={rechazos}') &&
+  p.includes("placa.current?.querySelector<HTMLElement>('button[type=\"submit\"]')?.focus({ preventScroll: true })") &&
+  p.includes("const rotulo = enviando ? c.enviando : estado.fase === 'error' ? REINTENTAR : c.enviar") &&
+  p.includes('const giraElRotulo = !reducido && !enVolumen && rotulo === REINTENTAR') &&
+  p.includes("className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}") && p.includes("initial={reducido ? { opacity: 0 } : { opacity: 0, y: '-100%' }}") &&
+  p.includes('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}') && p.includes('if (rechazos === 0 || reducido || volumen) return undefined')
+afirmar(pieRechazaBien(PIE_J5), 'B · el pie: el rechazo, el pulso, el foco en Reintentar (que gira), el error saliendo de atrás del botón y el resorte del DOM plano; con movimiento reducido, sin resorte ni giro')
+controlPositivo('B · el detector VE la escala del resorte sobre el formulario de volumen (pisaría su homografía)', PIE_J5.replace('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}', 'style={{ scale: escalaDelRechazo }}'), pieRechazaBien)
+
+// C · La placa 3D del pie: un rechazo nuevo (otro `data-rechazo` en el mismo formulario) arranca el resorte (la placa entera se
+// hunde en profundidad) y el giro de la tecla; con movimiento reducido, ninguno.
+const ARMADAS_J5 = leer('_lib/escena/pie3d/armadas.ts')
+const placaRechazaBien = (a: string): boolean =>
+  a.includes('vieja.marcaDelRechazo !== null && rechazo !== null && rechazo !== vieja.marcaDelRechazo') && a.includes('if (rechazoNuevo) [a.rechazo, a.giroDeLaTecla] = [0, 0]') &&
+  a.includes('a.viaje.matrix.multiply(HUNDIMIENTO.makeTranslation(0, 0, -RECHAZO.hondoPx * hundidoDelRechazo(u)))') && a.includes('if (quieto || a.rechazo === null) {') &&
+  a.includes('if (a.giroDeLaTecla === null || t === null || quieto) {')
+afirmar(placaRechazaBien(ARMADAS_J5), 'C · la placa 3D del pie se hunde en profundidad con el resorte y la tecla de Reintentar gira; con movimiento reducido, nada')
+controlPositivo('C · el detector VE un resorte que corre también con movimiento reducido', ARMADAS_J5.replace('if (quieto || a.rechazo === null) {', 'if (a.rechazo === null) {'), placaRechazaBien)
+
+// D · El panel de Contacto: el mismo resorte (el bloque de la placa en profundidad; la hoja del teléfono, en escala), el pulso,
+// Reintentar girando y el error saliendo de atrás del botón; el foco, en Reintentar.
+const panelRechazaBien = (m: string, placa: string): boolean =>
+  m.includes('setRechazos((n) => n + 1)') && m.includes("sonar('pulso')") && m.includes("pedirFoco.current = 'enviar'") &&
+  m.includes('const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : avisoALaVista ? REINTENTAR : ROTULO_DEL_ENVIO') && m.includes('<PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>') &&
+  m.includes('style={placa ? undefined : { scale: escalaDelRechazo }}') && m.includes('if (rechazos === 0 || reducido) return undefined') &&
+  placa.includes('z: rechazo,')
+afirmar(panelRechazaBien(PANEL_J4, leer('_chrome/contacto/PlacaDelContacto.tsx')), 'D · el panel: la placa se hunde y vuelve (la hoja del teléfono, en escala), el pulso, Reintentar girando y el error de atrás del botón; el foco en Reintentar')
+controlPositivo('D · el detector VE un panel que rechaza en silencio', PANEL_J4.replace("sonar('pulso')", ''), (m: string) => panelRechazaBien(m, leer('_chrome/contacto/PlacaDelContacto.tsx')))
+
+// E · «Reintentar» en la tecla de la placa 3D: la Chivo 600 del pie trae sus letras.
+const reintentarBien = (f: FontData): boolean => [...REINTENTAR].every((c) => (f.glyphs as Record<string, unknown>)[c] !== undefined)
+afirmar(reintentarBien(datos600 as FontData), 'E · la Chivo 600 del pie trae las letras de «Reintentar» (la tecla en 3D)')
+controlPositivo('E · el detector VE una fuente sin la R', { ...(datos600 as FontData), glyphs: Object.fromEntries(Object.entries((datos600 as FontData).glyphs).filter(([c]) => c !== 'R')) } as FontData, reintentarBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')

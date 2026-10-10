@@ -15,9 +15,10 @@ import { varianteDeGracias, type VarianteDeGracias } from '../../formularios/gra
 import { viajeEnCurso } from '../viaje'
 import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
+import { RECHAZO, hundidoDelRechazo } from '../../formularios/rechazo'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
-import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
+import { VOLUMEN_DEL_PIE, armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
@@ -74,6 +75,10 @@ export interface Armada {
   /** [PULIDO 9] H2 · el estado del formulario al medirlo (`data-estado`) y, si cambió, su transformación en curso. */
   readonly estado: string | null
   transformacion: TransformacionEnCurso | null
+  /** [PULIDO 10] J5 · el rechazo del formulario al medirlo (`data-rechazo`) y, si cambió, cuánto lleva el resorte y el giro de la tecla (s). */
+  readonly marcaDelRechazo: string | null
+  rechazo: number | null
+  giroDeLaTecla: number | null
 }
 
 /** [PULIDO 9] H2 · la placa que estaba (sus mallas, en el grupo de la nueva) y cuánto va (0 a 1). */
@@ -141,12 +146,14 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
       const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
       a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
       a.cuerpo.position.z = -a.hundido
+      girarLaTecla(a, s.quieto, dt)
     }
     // El DOM, donde la pieza va a quedar (el viaje en cero); después, la pieza en camino.
     a.viaje.matrix.identity()
     a.grupo.updateMatrixWorld(true)
     if (a.pieza.forma !== 'texto') seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)
     llegar(a, s)
+    if (a.rechazo !== null) rechazar(a, s.quieto, dt)
     if (a.transformacion !== null) transformar(a, a.transformacion, s.quieto, dt)
     a.viaje.updateMatrixWorld(true)
   }
@@ -172,6 +179,42 @@ function dibujarElSubrayado(a: Armada, quieto: boolean, dt: number): void {
   const dibujado = cubicBezierEase(SUBRAYADO_DEL_PIE.curva, a.hundido)
   a.cuerpo.scale.x = Math.max(1e-4, dibujado)
   a.cuerpo.visible = dibujado > 1e-3
+}
+
+const HUNDIMIENTO = new THREE.Matrix4()
+
+/**
+ * [PULIDO 10] J5 · el rechazo: la placa entera se hunde en profundidad y vuelve con el resorte amortiguado (`formularios/rechazo.ts`,
+ * la misma curva del panel de Contacto). El DOM no se mueve (va con el lugar de la pieza, no con su viaje). Con movimiento
+ * reducido, nada.
+ */
+function rechazar(a: Armada, quieto: boolean, dt: number): void {
+  if (quieto || a.rechazo === null) {
+    a.rechazo = null
+    return
+  }
+  a.rechazo += dt
+  const u = a.rechazo / RECHAZO.s
+  a.viaje.matrix.multiply(HUNDIMIENTO.makeTranslation(0, 0, -RECHAZO.hondoPx * hundidoDelRechazo(u)))
+  if (u >= 1) a.rechazo = null
+}
+
+/** [PULIDO 10] J5 · la tecla con «Reintentar» entra girando desde canto (−90° sobre su eje horizontal, por su centro). */
+function girarLaTecla(a: Armada, quieto: boolean, dt: number): void {
+  const t = a.medida.tecla
+  if (a.giroDeLaTecla === null || t === null || quieto) {
+    a.giroDeLaTecla = null
+    return
+  }
+  a.giroDeLaTecla += dt
+  const u = Math.min(1, a.giroDeLaTecla / RECHAZO.giroS)
+  const angulo = (-Math.PI / 2) * (1 - cubicBezierEase([0.25, 0.46, 0.45, 0.94], u))
+  const [cy, cz] = [-(t.y + t.alto / 2), VOLUMEN_DEL_PIE.tecla / 2]
+  const [c, s] = [Math.cos(angulo), Math.sin(angulo)]
+  a.cuerpo.rotation.x = u >= 1 ? 0 : angulo
+  a.cuerpo.position.y = u >= 1 ? 0 : cy - (c * cy - s * cz)
+  if (u < 1) a.cuerpo.position.z += cz - (s * cy + c * cz)
+  else a.giroDeLaTecla = null
 }
 
 /** [PASADA FINAL] C2 · lo mostrado persigue al scroll por tramos (en un viaje del menú, desarmado); con el scroll quieto, se asienta. */
@@ -224,6 +267,9 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
     // [PULIDO 9] H2 · si el formulario cambió de estado (a la tarjeta de gracias o de vuelta), la vieja se queda como la placa
     // saliente de la transformación (sólo sus mallas: el DOM es de la nueva).
     const estado = p.elemento.getAttribute('data-estado')
+    // [PULIDO 10] J5 · y si rechazó otra vez (un error nuevo): el resorte de la placa y el giro de la tecla.
+    const rechazo = p.elemento.getAttribute('data-rechazo')
+    const rechazoNuevo = vieja !== undefined && vieja.pieza.elemento === p.elemento && p.forma === 'formulario' && vieja.marcaDelRechazo !== null && rechazo !== null && rechazo !== vieja.marcaDelRechazo
     const transforma = vieja !== undefined && vieja.pieza.elemento === p.elemento && p.forma === 'formulario' && vieja.estado !== null && estado !== null && vieja.estado !== estado
     if (vieja !== undefined) {
       antes.delete(p.id)
@@ -232,6 +278,7 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
       else soltar(vieja)
     }
     const a = armar(p, medida, firma, estudio, estado)
+    if (rechazoNuevo) [a.rechazo, a.giroDeLaTecla] = [0, 0]
     if (vieja !== undefined) {
       a.hundido = vieja.hundido
       if (vieja.pieza.elemento === p.elemento && p.forma !== 'texto') {
@@ -299,7 +346,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
     if (malla.geometry.boundingBox !== null) caja.union(malla.geometry.boundingBox)
   }
   const delHundido = pieza.forma === 'placa' || pieza.forma === 'enlace' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, marcaDelRechazo: pieza.elemento.getAttribute('data-rechazo'), rechazo: null, giroDeLaTecla: null }
 }
 
 export function soltar(a: Armada): void {

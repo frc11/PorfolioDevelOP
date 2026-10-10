@@ -657,7 +657,8 @@ const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.ts
 const grillaBien = (f: string): boolean =>
   f.includes("'grid grid-cols-6 gap-[var(--spacing-3)] tablet:max-escritorio:flex tablet:max-escritorio:flex-1 tablet:max-escritorio:flex-col escritorio:flex escritorio:flex-col escritorio:gap-[var(--spacing-5)]'") &&
   f.includes("{ nombre: 'col-span-3', mail: 'col-span-3', mensaje: 'col-span-4 tablet:max-escritorio:grid tablet:max-escritorio:flex-1 tablet:max-escritorio:grid-rows-[var(--filas-del-mensaje-del-pie)]' }") &&
-  f.includes('className="self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]"') &&
+  // [PULIDO 10] J5 · y por encima del error (`z-10`: el error sale de atrás del botón).
+  f.includes('className="z-10 self-start max-escritorio:col-span-2 max-escritorio:self-end escritorio:mt-[var(--spacing-2)]"') &&
   /max-escritorio:bg-tinta max-escritorio:px-\[var\(--spacing-3\)\] max-escritorio:text-fondo/.test(f) &&
   /text-cuerpo max-escritorio:text-base leading-texto/.test(f)
 afirmar(grillaBien(formularioTsx), '  el formulario del teléfono: el nombre y el mail lado a lado, el mensaje y Enviar (lleno, de tinta) abajo (en la tablet, en columna); los campos a 16 px (Safari no agranda al tocar); en escritorio, una columna como antes')

@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, animate, motion, useMotionValue } from 'motion/react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -11,6 +11,8 @@ import { Cta } from '../../_componentes/chrome/Cta'
 import { TarjetaDeGracias } from '../../_componentes/formularios/TarjetaDeGracias'
 import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
 import { transicionDeGracias, varianteDelPanel } from '../../_lib/formularios/gracias'
+import { RECHAZO, REINTENTAR, cuadrosDelRechazo } from '../../_lib/formularios/rechazo'
+import { sonar } from '../../_lib/sonido/bus'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
@@ -97,6 +99,10 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   // UNA región de alerta: el resumen de los datos (sólo para el lector) o el error del servidor (a la vista).
   const [aviso, setAviso] = useState('')
   const [avisoALaVista, setAvisoALaVista] = useState(false)
+  // [PULIDO 10] J5 · cada error, un rechazo: la placa se hunde y vuelve (en la hoja del teléfono, se achica y vuelve).
+  const [rechazos, setRechazos] = useState(0)
+  const hundidoDelRechazo = useMotionValue(0)
+  const escalaDelRechazo = useMotionValue(1)
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -144,6 +150,9 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
       pedirFoco.current = 'enviar'
       setAvisoALaVista(true)
       requestAnimationFrame(() => setAviso(r.mensaje))
+      // [PULIDO 10] J5 · el rechazo y el pulso (el foco va a Reintentar con `pedirFoco`).
+      setRechazos((n) => n + 1)
+      sonar('pulso')
       return
     }
     pedirFoco.current = 'tarjeta'
@@ -165,6 +174,9 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     destino?.focus({ preventScroll: true })
   }
   const cambio = transicionDeGracias(variante, reducido)
+  // [PULIDO 10] J5 · Enviar pasa a Reintentar (entra girando desde canto); el resorte del rechazo, con la misma curva que el pie.
+  const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : avisoALaVista ? REINTENTAR : ROTULO_DEL_ENVIO
+  const giraElRotulo = !reducido && rotuloDelEnvio === REINTENTAR
 
   const desdeArriba = modo === 'barra'
   /**
@@ -179,6 +191,13 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
   // [CIERRE] 2B · desde la barra y con movimiento: el fondo se desenfoca en 0,5 s y la hoja llega como una placa (`placa.ts`).
   const placa = desdeArriba && !reducido
+  useEffect(() => {
+    if (rechazos === 0 || reducido) return undefined
+    const resorte = placa
+      ? animate(hundidoDelRechazo, cuadrosDelRechazo(-RECHAZO.hondoPx * 2), { duration: RECHAZO.s, ease: 'linear' })
+      : animate(escalaDelRechazo, cuadrosDelRechazo(RECHAZO.escala).map((v) => 1 - v), { duration: RECHAZO.s, ease: 'linear' })
+    return () => resorte.stop()
+  }, [rechazos, reducido, placa, hundidoDelRechazo, escalaDelRechazo])
 
   return (
     <div ref={raiz} data-pieza="contacto" data-modo={modo} data-placa={placa ? '' : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
@@ -194,7 +213,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         transition={placa ? TRANSICIONES.fondo : velo}
       />
       {/* [CIERRE] 2B · desde la barra la hoja es el frente de una PLACA con espesor (`PlacaDelContacto.tsx`). */}
-      <PlacaDelContacto activa={placa}>
+      <PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>
       <motion.div
         ref={caja}
         role="dialog"
@@ -212,6 +231,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         animate={placa ? undefined : { y: 0 }}
         exit={placa ? undefined : { y: fuera }}
         transition={placa ? undefined : hoja}
+        style={placa ? undefined : { scale: escalaDelRechazo }}
       >
         <div
           className={cn(
@@ -262,12 +282,18 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
             <div
               className={cn(
-                'border-borde flex border-t',
+                'border-borde flex border-t perspective-midrange',
                 compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]' : 'flex-col gap-[var(--spacing-4)] pt-[var(--spacing-6)] tablet:flex-row tablet:items-center tablet:justify-between',
               )}
             >
               <p className="text-caption leading-texto">{PIE}</p>
-              <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
+              {giraElRotulo ? (
+                <motion.span key={rotuloDelEnvio} className={cn('inline-block', compacto && 'shrink-0')} initial={{ rotateX: -90 }} animate={{ rotateX: 0 }} transition={{ duration: RECHAZO.giroS, ease: [0.25, 0.46, 0.45, 0.94] }}>
+                  <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
+                </motion.span>
+              ) : (
+                <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
+              )}
             </div>
           </motion.form>
           )}
@@ -275,8 +301,15 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
           </div>
           {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
               siempre se anuncia); lo que cambia es lo de adentro. [PULIDO 9] H3 · fuera de lo que se transforma. */}
-          <p role="alert" className={avisoALaVista && !enviado ? 'text-caption leading-texto' : 'sr-only'}>
-            {aviso}
+          {/* [PULIDO 10] J5 · el error sale de atrás del botón, en su renglón (sube desde el borde de su caja, que recorta). */}
+          <p role="alert" className={avisoALaVista && !enviado ? 'overflow-hidden text-caption leading-texto' : 'sr-only'}>
+            {rechazos === 0 ? (
+              aviso
+            ) : (
+              <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: '-100%' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
+                {aviso}
+              </motion.span>
+            )}
           </p>
           <p role="status" className="sr-only">
             {enviado ? DESPUES_DEL_ENVIO : ''}
