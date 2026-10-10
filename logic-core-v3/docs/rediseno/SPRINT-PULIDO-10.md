@@ -15,11 +15,15 @@ el volteo y el hundido como concepto (J4).
   y el foco ya se midieron; la llegada vieja se pasaba 108 px y asomaba la sección de abajo)
 - HECHO: J10 · la histéresis del polvo: despertado, termina de subir y queda ~6 s en el aire antes de volver a evaluar si se posa
   (`quietoConHisteresis`; el modelo de `s60`, compartido en `modeloDelPolvo.ts`: con un toque, todas en el aire a los 7,0 s y
-  la primera cae a los 15,6) (commit «pulido 10 · J10»). Pendiente del banco: los modos en el tiempo
+  la primera cae a los 15,6) (9a45ea1f). Pendiente del banco: los modos en el tiempo
 - HECHO: J3 · la carga de develOP (el trazo; `?carga=giro`, el giro), en el botón del pie y en el panel de Contacto (en lugar
   del anillo), con la espera mínima (66f39394). Pendiente del banco: verla (sin memoria para abrirlo)
-- J2 · primera ráfaga (1440, desde el hero, con la barra): ningún cuadro oscuro ajeno; faltan 390, desde la noche y la
-  segunda apertura
+- HECHO: J2 · el cuadrado negro al abrir Contacto: la placa del panel llega desde el fondo con cinco caras detrás del frente y
+  la de atrás era de tinta; nunca se ve (el frente la tapa) salvo en los cuadros en que la hoja —una capa grande, con todo el
+  formulario— todavía no se rasterizó mientras el fondo se desenfoca (0,5 s): ahí asomaba un cuadrado negro del tamaño de la
+  placa. Ahora es del papel (commit «pulido 10 · J2»). ⚠ Es la hipótesis más fundada, no una causa medida: la primera
+  ráfaga (con `captureScreenshot`, que rasteriza todo antes de devolver) no podía verla; la de los cuadros del compositor
+  (`Page.startScreencast`, ya escrita: `_scripts/j2-screencast.ts`) quedó sin correr por la memoria
 - HECHO: J4 · a (el volteo en un movimiento, la entrante compilada antes de girar), b y d (la tarjeta en su lugar y la etiqueta
   pegada: el techo fijo de J8, y el hundido lleva el borde de arriba quieto; `s61` J4 D), c (el título en Archivo en
   minúsculas, compuesto como la frase del CTA), e (el foco no desaparece) y f (el panel con el hundido) (2b5b200e). No se hizo: armar la geometría de la tarjeta al montar (el programa se compila antes de girar, pero la geometría se
@@ -29,7 +33,7 @@ el volteo y el hundido como concepto (J4).
 - HECHO: J5 · el error en los dos formularios: la placa rechaza con un resorte amortiguado (la 3D del pie en profundidad; el
   panel, su bloque; la hoja del teléfono y el pie plano, en escala), Reintentar entra girando (en 3D, la tecla), el error sale
   de atrás del botón en su renglón, el foco en Reintentar, el pulso; con movimiento reducido, sin resorte ni giro (02e78e36). Pendiente del banco: verlo con `?envio=error` a 1440 y a 390
-- EN CURSO: J2 · el cuadro negro al abrir Contacto
+- EN CURSO: J6 · el autocompletado del pie
 
 ## Memoria
 

@@ -4,6 +4,7 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   J1  · 1024 y «Portátil L»: el texto 3D en renglones, la banda portátil (el campo de visión y las medidas del logo en el
  *         DOM) y los solapes (el detector y los recibos del banco a 1024, 1280 y 1440).
+ *   J2  · abrir Contacto sin el cuadrado negro (la cara de atrás de la placa, del papel).
  *   J3  · la carga de develOP: el trazo (o el giro, `?carga=giro`), los textos, la espera mínima, el botón del pie y el panel.
  *   J4  · las transformaciones de gracias: el pie con el volteo y el panel con el hundido, el título en Archivo (minúsculas), el
  *         foco que no desaparece y la placa en su lugar.
@@ -142,6 +143,18 @@ const recibosBien = recibos.every(({ ruta }) => {
   return ['hero', 'quienes', 'portfolio', 'razones', 'cta', 'pie'].every((m) => r.momentos[m] !== undefined && r.momentos[m].solapes.length === 0)
 })
 afirmar(recibosBien, '  los recibos del banco a 1024 × 824, 1280 × 800 y 1440 × 900: en el reposo del hero, Quiénes somos, Portfolio, Seis razones, el CTA y el pie, cero solapes', recibos.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J2 · Abrir Contacto sin el cuadrado negro')
+
+// La placa del panel llega desde el fondo con cinco caras detrás del frente (la hoja). La de atrás era de tinta: nunca se ve —el
+// frente la tapa—, salvo en los cuadros en que la hoja (una capa grande, con todo el formulario) todavía no se rasterizó mientras
+// el fondo se desenfoca: ahí se veía un cuadrado negro del tamaño de la placa. Ahora es del papel de la hoja. Hipótesis sin la
+// ráfaga del banco (sin memoria para abrirlo): ver el log.
+const PLACA_J2 = leer('_chrome/contacto/PlacaDelContacto.tsx')
+const atrasDelPapel = (p: string): boolean => p.includes("{ cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-fondo', style: { transform: `translateZ(-${String(E)}px)` } },")
+afirmar(atrasDelPapel(PLACA_J2), 'J2 · la cara de atrás de la placa de Contacto es del papel de la hoja: si la hoja tarda en pintarse, no asoma un cuadrado negro')
+controlPositivo('J2 · el detector VE la cara de atrás de tinta', PLACA_J2.replace("rounded-[var(--radius-medio)] bg-fondo', style: { transform: `translateZ", "rounded-[var(--radius-medio)] bg-tinta', style: { transform: `translateZ"), atrasDelPapel)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J3 · La carga de develOP: el trazo (o el giro), sus textos, la espera mínima y los dos lugares donde va')

@@ -27,7 +27,9 @@ const CARAS = [
   { cara: 'derecha', className: 'inset-y-[var(--radius-medio)] right-0 bg-[color-mix(in_srgb,var(--color-tinta)_86%,var(--color-fondo))]', style: { width: E, transformOrigin: 'right center', transform: 'rotateY(-90deg)' } },
   { cara: 'arriba', className: 'inset-x-[var(--radius-medio)] top-0 bg-[color-mix(in_srgb,var(--color-tinta)_78%,var(--color-fondo))]', style: { height: E, transformOrigin: 'center top', transform: 'rotateX(-90deg)' } },
   { cara: 'abajo', className: 'inset-x-[var(--radius-medio)] bottom-0 bg-tinta', style: { height: E, transformOrigin: 'center bottom', transform: 'rotateX(90deg)' } },
-  { cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-tinta', style: { transform: `translateZ(-${String(E)}px)` } },
+  // [PULIDO 10] J2 · la de atrás, del papel de la hoja (era de tinta): nunca se ve —el frente la tapa—, salvo los cuadros en que la
+  // hoja todavía no se pintó (una capa grande que se rasteriza mientras el fondo se desenfoca): ahí se veía un cuadrado negro.
+  { cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-fondo', style: { transform: `translateZ(-${String(E)}px)` } },
 ] as const
 
 // [PULIDO 10] J5 · `rechazo`: cuánto se hunde el bloque entero (px, en profundidad) cuando el envío falla (lo anima el formulario).
