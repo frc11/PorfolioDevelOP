@@ -17,6 +17,8 @@
  *   B4 · los rótulos del botón se suceden: la carga y «Reintentar» nunca a la vez (tampoco el relieve de la tecla 3D).
  *   B5 · la carga gira sobre el palito de la P, con el palito en el medio (el trazo, de respaldo).
  *   B6 · terminado el éxito, el formulario se limpia (los valores y el estado del autocompletado).
+ *   C2 · la cabecera abajo de 1024: el parlante a la izquierda, el menú al centro y el progreso a la derecha, del mismo tamaño,
+ *        en el mismo eje y adentro de la zona segura.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -496,5 +498,36 @@ const limpioBien = (pie: string, panel: string): boolean => {
 }
 afirmar(limpioBien(PIE_B, PANEL_B), 'B6 · el éxito limpia el formulario: los valores se vacían y los campos se vuelven a montar (sin el autocompletado viejo)')
 controlPositivo('B6 · el detector VE campos que no se vuelven a montar (el autocompletado viejo se queda)', PIE_B.replace('setVuelta((n) => n + 1)', ''), (p: string) => limpioBien(p, PANEL_B))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('C2 · La cabecera abajo de 1024: parlante, menú y progreso del mismo tamaño y en el mismo eje')
+
+// Lo pedido: el SONIDO arriba a la izquierda, el MENÚ al centro y el PROGRESO (el infinito) arriba a la derecha, los tres del
+// tamaño del botón del menú (un disco de 48 px: fondo, borde y sombra), en el mismo eje horizontal y adentro de la zona segura.
+// Antes (J9) el parlante iba en fila a la izquierda del progreso, chico (32 px) y sin disco. El parlante sigue montado por el
+// infinito (s47: no se ubica solo en escritorio); abajo de 1024, su lugar es fijo arriba a la izquierda. Con `?progreso=abajo`, la
+// columna de abajo de antes. Lo que se ve (y que no tape nada a 320, 375 y 390), en el banco.
+const ARRIBA = 'top-[max(var(--spacing-4),env(safe-area-inset-top))]'
+const DISCO = 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)]'
+const ESQUINA_C2 = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
+const SONIDO_C2 = leer('_chrome/sonido/ControlDelSonido.tsx')
+const MENU_C2 = leer('_chrome/menu/MenuMovil.tsx')
+const cabeceraBien = (esquina: string, sonido: string, menu: string): boolean => {
+  const delMenu = /data-parte="boton-del-menu"[\s\S]*?className="([^"]*)"/.exec(menu)?.[1] ?? ''
+  return (
+    // El menú: el disco de 48 px, al centro, en el eje.
+    delMenu.split(' ').includes(ARRIBA) && delMenu.includes('inset-x-0') && delMenu.includes('mx-auto') && delMenu.includes('size-[var(--spacing-12)]') && delMenu.includes('rounded-full') &&
+    // El progreso: arriba a la derecha (zona segura) y su caja, el mismo disco.
+    esquina.includes(`max-escritorio:not-data-abajo:${ARRIBA} max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))]`) &&
+    esquina.includes(`!abajo && '${DISCO} max-escritorio:justify-center max-escritorio:gap-0'`) &&
+    // El parlante: su lugar fijo arriba a la izquierda (zona segura) y su botón, el mismo disco; el cartel, debajo (arriba se saldría).
+    esquina.includes(`<div data-parte="lugar-del-parlante" className={cn(!abajo && 'max-escritorio:fixed max-escritorio:${ARRIBA} max-escritorio:left-[max(var(--spacing-4),env(safe-area-inset-left))]')}>`) &&
+    sonido.includes(`!abajo && '${DISCO}'`) && sonido.includes("'max-escritorio:top-full max-escritorio:bottom-auto max-escritorio:left-0") &&
+    sonido.includes('const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)')
+  )
+}
+afirmar(cabeceraBien(ESQUINA_C2, SONIDO_C2, MENU_C2), 'C2 · abajo de 1024: el parlante arriba a la izquierda, el menú al centro y el progreso arriba a la derecha, los tres discos de 48 px en el mismo eje y la zona segura')
+controlPositivo('C2 · el detector VE la cabecera de antes (el parlante en fila con el progreso, chico)', SONIDO_C2.replace(`!abajo && '${DISCO}'`, "!abajo && ''"), (so: string) => cabeceraBien(ESQUINA_C2, so, MENU_C2))
+controlPositivo('  y un menú fuera del eje (sin la zona segura)', MENU_C2.replace(ARRIBA, 'top-[var(--spacing-4)]'), (m: string) => cabeceraBien(ESQUINA_C2, SONIDO_C2, m))
 
 cerrar('s62-pulido-11')

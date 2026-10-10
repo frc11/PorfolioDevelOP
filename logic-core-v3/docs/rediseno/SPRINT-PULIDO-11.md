@@ -132,7 +132,14 @@ rótulo durante la primera mitad del volteo (el relieve apagado por «ocupado»)
 
 ### Fase C · el pie simétrico y la cabecera mobile
 - PENDIENTE: C1 · columnas del mismo ancho, distancias iguales al logo, «El recorrido» en una grilla, «Por qué develOP» a 1024
-- PENDIENTE: C2 · la cabecera mobile: sonido izquierda, menú centro, progreso derecha, mismo tamaño y eje
+- CÓDIGO HECHO · BANCO PENDIENTE: C2 · la cabecera mobile: sonido izquierda, menú centro, progreso derecha, mismo tamaño y eje.
+  Abajo de 1024 (salvo `?progreso=abajo`) los tres son discos de 48 px (el tamaño del botón del menú: su fondo, su borde y su
+  sombra) arriba, en `max(16 px, env(safe-area-inset-*))`: el parlante a la izquierda (su lugar es fijo; lo sigue montando el
+  infinito, así en escritorio queda encima de él como siempre), el menú al centro y el progreso a la derecha (el infinito al 70 %
+  del disco, con su porcentaje debajo). El cartel del parlante, en la cabecera, va debajo y apoyado a su izquierda (encima se
+  salía del cuadro: con J9 ya pasaba). Invariante: s62 C2. Sin banco: falta mirar 320, 375, 390, 414, 768 y 820, día y noche, que
+  no tape nada (el titular del hero a 320, sobre todo) y la franja 860–1023 (ahí la barra puede estar en modo pastilla: el
+  progreso arriba a la derecha podría chocar con su esquina de Contacto y Login — J9 ya lo ponía ahí; a medir).
 
 ### Fase D · el logo se cae y encastra
 - PENDIENTE: D · `?caida=lenta|angulo`, física de cuerpo rígido, hueco sincronizado, impacto = golpe, rebobinado, reinicio
@@ -165,6 +172,9 @@ rótulo durante la primera mitad del volteo (el relieve apagado por «ocupado»)
 | B | `s44` · ninguna pieza gira | ninguna, salvo la tecla con Reintentar | ninguna (otra vez) | El giro de la tecla se fue con el rechazo |
 | B | `s49` · la placa del panel | `<PlacaDelContacto activa={placa} rechazo={hundidoDelRechazo}>` | `<PlacaDelContacto activa={placa}>` | El resorte del rechazo se fue |
 | B | `s50` · el paralaje de la placa | `z: rechazo` | sin `z` | ídem |
+| C2 | `s61` J9 d · el progreso del teléfono | `top-[var(--spacing-4)]` … `flex-row` (el parlante en fila a su izquierda) | `top-[max(var(--spacing-4),env(safe-area-inset-top))]`, `right-[max(…)]`, sin `flex-row` | El humano pidió el parlante arriba a la izquierda y la zona segura; lo de J9 (arriba, `?progreso=abajo` el de antes) sigue |
+| C2 | `s47` C1 · el cartel del parlante | la clase literal `absolute bottom-full …` | la misma base, con la rama de `abajo` (`cn(…)`): en la cabecera, debajo | Encima se salía del cuadro con el parlante arriba |
+| C2 | `s47` D10 · el botón del menú (16 + 48) | `top-[var(--spacing-4)]` | `top-[max(var(--spacing-4),env(safe-area-inset-top))]` | La zona segura; sin recorte (o sin `viewport-fit=cover`, que el sitio no pide) vale 16 |
 | A4e | `s59` 1 · tocable apenas se lee | `ctaTocable(p)` en `pointerEvents` y en Enter | `tocable(p)`, con `tocable = enLaLista ? tocableEnLaLista : ctaTocable` | En el escenario sigue siendo `ctaTocable` (lo de siempre); en la lista no hay giro: tocable al 90 % del deslizamiento |
 
 ## Memoria (antes de cada fase: disponible y no paginado)

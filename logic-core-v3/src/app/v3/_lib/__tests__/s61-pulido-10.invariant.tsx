@@ -410,13 +410,14 @@ afirmar(panelAngostoBien(CAMPOS_J9, leer('_chrome/contacto/FormularioDeContacto.
 controlPositivo('c · el detector VE el mensaje de alto fijo', CAMPOS_J9.replace(' [field-sizing:content] min-h-[2lh] max-h-[8lh]', ''), (cm: string) => panelAngostoBien(cm, leer('_chrome/contacto/FormularioDeContacto.tsx')))
 
 // d · El progreso en el teléfono: arriba a la derecha, con el parlante a su izquierda (el botón del menú va arriba al centro);
-// `?progreso=abajo`, la esquina de abajo de antes. En escritorio, como estaba.
+// `?progreso=abajo`, la esquina de abajo de antes. En escritorio, como estaba. [PULIDO 11] C2 · el parlante se fue arriba a la
+// IZQUIERDA (ya no en fila con el progreso) y los tres van en el eje de la cabecera, adentro de la zona segura: s62 C2.
 const ESQUINA_J9 = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
 const progresoArribaBien = (f: typeof progresoAbajo, c: string): boolean =>
   f('?progreso=abajo') && !f('') && !f('?progreso=arriba') &&
-  c.includes('max-escritorio:not-data-abajo:top-[var(--spacing-4)] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto max-escritorio:not-data-abajo:flex-row') &&
+  c.includes('max-escritorio:not-data-abajo:top-[max(var(--spacing-4),env(safe-area-inset-top))] max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))] max-escritorio:not-data-abajo:bottom-auto max-escritorio:not-data-abajo:w-auto') &&
   c.includes("data-abajo={abajo ? '' : undefined}")
-afirmar(progresoArribaBien(progresoAbajo, ESQUINA_J9), 'd · el progreso del teléfono arriba a la derecha con el parlante a su izquierda; `?progreso=abajo`, el de antes')
+afirmar(progresoArribaBien(progresoAbajo, ESQUINA_J9), 'd · el progreso del teléfono arriba a la derecha ([PULIDO 11] C2 · el parlante, arriba a la izquierda); `?progreso=abajo`, el de antes')
 controlPositivo('d · el detector VE una bandera que no se lee', ((c: string) => c === 'abajo') as typeof progresoAbajo, (f: typeof progresoAbajo) => progresoArribaBien(f, ESQUINA_J9))
 
 // f · El formulario del pie en el teléfono: un campo por renglón (el nombre y el mail enteros), el mensaje entero y Enviar abajo a

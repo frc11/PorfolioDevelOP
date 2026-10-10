@@ -123,7 +123,8 @@ export function MenuMovil(): React.JSX.Element | null {
           salaDetrasDelMenu(true)
           startTransition(() => setAbierto(true))
         }}
-        className="bg-fondo text-tinta border-borde fixed inset-x-0 top-[var(--spacing-4)] mx-auto grid size-[var(--spacing-12)] place-items-center rounded-full border shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)]"
+        // [PULIDO 11] C2 · en el eje de la cabecera (el parlante y el progreso, del mismo tamaño), adentro de la zona segura.
+        className="bg-fondo text-tinta border-borde fixed inset-x-0 top-[max(var(--spacing-4),env(safe-area-inset-top))] mx-auto grid size-[var(--spacing-12)] place-items-center rounded-full border shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)]"
       >
         {/* [NOCTURNO FINAL] C5 · las tres barras (era el logo): el tono por zona es el del botón (`data-seccion`), como antes. */}
         {TRES_BARRAS}

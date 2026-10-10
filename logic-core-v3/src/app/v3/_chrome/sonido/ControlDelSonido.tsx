@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { CURVAS } from '../../_lib/motion/curvas'
 import { sonar } from '../../_lib/sonido/bus'
@@ -10,6 +12,7 @@ import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
+import { progresoAbajo } from '../recorrido/InfinitoDelRecorrido'
 import { IconoDelParlante } from './IconoDelParlante'
 import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from './motorCompartido'
 
@@ -48,6 +51,8 @@ const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 /** Cuánto se queda el cartel después de tocar el parlante (ms), y su salida: corta, así el cambio de texto no se arrastra. */
 export const CARTEL_MS = 1800
 const SALIDA_DEL_CARTEL = { duration: 0.14, ease: CURVAS.principal } as const
+const sinCambios = (): (() => void) => () => undefined
+const abajoEnLaPagina = (): boolean => progresoAbajo(window.location.search)
 
 export default function ControlDelSonido(): React.JSX.Element {
   const raiz = useRef<HTMLDivElement>(null)
@@ -59,6 +64,8 @@ export default function ControlDelSonido(): React.JSX.Element {
   // [PASADA FINAL] C1 · el cartel (se ve) y el anuncio (se oye): los escribe el toque, no la carga.
   const [cartel, setCartel] = useState(false)
   const [anuncio, setAnuncio] = useState('')
+  // [PULIDO 11] C2 · abajo de 1024 (salvo `?progreso=abajo`) es el disco de arriba a la izquierda de la cabecera.
+  const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)
 
   // El tono: el del infinito, que ya lo lee de lo que hay debajo (los dos están en la misma esquina).
   useEffect(() => {
@@ -181,8 +188,9 @@ export default function ControlDelSonido(): React.JSX.Element {
       <span role="status" data-pieza="anuncio-del-sonido" className="sr-only">
         {anuncio}
       </span>
-      {/* El cartel: centrado sobre el parlante en escritorio; en el teléfono, apoyado a su derecha (no se sale del cuadro). */}
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-full left-1/2 mb-[var(--spacing-2)] -translate-x-1/2 max-escritorio:right-0 max-escritorio:left-auto max-escritorio:translate-x-0">
+      {/* El cartel: centrado sobre el parlante en escritorio; en el teléfono, apoyado a su derecha (no se sale del cuadro). [PULIDO
+          11] C2 · en la cabecera, debajo y apoyado a su izquierda (arriba se saldría del cuadro). */}
+      <div aria-hidden="true" className={cn('pointer-events-none absolute bottom-full left-1/2 mb-[var(--spacing-2)] -translate-x-1/2 max-escritorio:translate-x-0', abajo ? 'max-escritorio:right-0 max-escritorio:left-auto' : 'max-escritorio:top-full max-escritorio:bottom-auto max-escritorio:left-0 max-escritorio:mt-[var(--spacing-2)] max-escritorio:mb-0')}>
         <AnimatePresence mode="wait">
           {cartel && (
             <motion.div
@@ -211,7 +219,7 @@ export default function ControlDelSonido(): React.JSX.Element {
         aria-pressed={prendido}
         aria-label="Sonido"
         onClick={tocar}
-        className="flex h-[var(--spacing-8)] w-[var(--spacing-8)] cursor-pointer items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)]"
+        className={cn('flex h-[var(--spacing-8)] w-[var(--spacing-8)] cursor-pointer items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)]', !abajo && 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)]')}
       >
         <IconoDelParlante prendido={prendido} suena={estadoReal === 'listo'} reducido={reducido} />
       </button>

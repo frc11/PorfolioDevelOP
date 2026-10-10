@@ -301,8 +301,10 @@ afirmar(sinDibujo(icono(false, false, true)) && fuenteDelIcono.includes('transit
 controlPositivo('el detector VE el dibujo con movimiento reducido', icono(false, false, false), sinDibujo)
 
 // El cartel: dos líneas encima, cambia con su animación y se va solo; lo que se ve no se anuncia, se anuncia aparte.
+// [PULIDO 11] C2 · encima en escritorio (y con `?progreso=abajo`); en la cabecera de abajo de 1024 el parlante está arriba a la
+// izquierda y el cartel va debajo (encima se saldría del cuadro): la clase elige con `abajo`.
 const cartelMs = Number(/export const CARTEL_MS = (\d+)/.exec(control)?.[1] ?? 'NaN')
-const conCartel = (c: string): boolean => /<AnimatePresence mode="wait">\s*\{cartel && \(\s*<motion\.div\s+key=\{prendido \? 'activado' : 'desactivado'\}\s+data-pieza="cartel-del-sonido"/.test(c) && /<Micro como="span"[^>]*>\s*Sonido\s*<\/Micro>\s*<Micro como="span"[^>]*>\s*\{prendido \? 'activado' : 'desactivado'\}\s*<\/Micro>/.test(c) && /<div aria-hidden="true" className="pointer-events-none absolute bottom-full [^"]*">\s*<AnimatePresence/.test(c) && /const reloj = window\.setTimeout\(\(\) => setCartel\(false\), CARTEL_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)\s*\}, \[cartel, prendido\]\)/.test(c)
+const conCartel = (c: string): boolean => /<AnimatePresence mode="wait">\s*\{cartel && \(\s*<motion\.div\s+key=\{prendido \? 'activado' : 'desactivado'\}\s+data-pieza="cartel-del-sonido"/.test(c) && /<Micro como="span"[^>]*>\s*Sonido\s*<\/Micro>\s*<Micro como="span"[^>]*>\s*\{prendido \? 'activado' : 'desactivado'\}\s*<\/Micro>/.test(c) && /<div aria-hidden="true" className=\{cn\('pointer-events-none absolute bottom-full [^']*', abajo \? '[^']*' : '[^']*'\)\}>\s*<AnimatePresence/.test(c) && /const reloj = window\.setTimeout\(\(\) => setCartel\(false\), CARTEL_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)\s*\}, \[cartel, prendido\]\)/.test(c)
 afirmar(conCartel(control) && cartelMs >= 1200 && cartelMs <= 2500, 'al tocarlo, un cartel encima en dos líneas, «Sonido» y «activado» o «desactivado»: cambia con su animación (sale uno y entra el otro) y se va solo; otro toque lo renueva', `${String(cartelMs)} ms`)
 controlPositivo('el detector VE un cartel que no se va', control.replace('const reloj = window.setTimeout(() => setCartel(false), CARTEL_MS)', 'const reloj = 0'), conCartel)
 const conSusMovimientos = (c: string): boolean => /initial=\{reducido \? \{ opacity: 0 \} : \{ opacity: 0, y: 6, scale: 0\.96 \}\}/.test(c) && /exit=\{reducido \? \{ opacity: 0, transition: SALIDA_DEL_CARTEL \} : \{ opacity: 0, y: -4, scale: 0\.98, transition: SALIDA_DEL_CARTEL \}\}/.test(c) && /transition=\{\{ type: 'spring', stiffness: 380, damping: 38, mass: 0\.9 \}\}/.test(c) && /const SALIDA_DEL_CARTEL = \{ duration: 0\.14, ease: CURVAS\.principal \} as const/.test(c)
@@ -664,9 +666,11 @@ controlPositivo('el detector VE el piso con la geometría de vuelta adentro', `$
 
 // D10 · la cabeza fija de Servicios (abajo de 1024) y el menú: iba con bandera; [AJUSTES FINALES] A5 la aprobó y la pasó al
 // producto (s48 A5 la fija). Acá queda que los tokens de la barra que la cabeza despeja siguen siendo los mismos.
+// [PULIDO 11] C2 · el botón del menú, con la zona segura como piso (`max(16 px, env(safe-area-inset-top))`): sin recorte del
+// teléfono (o sin `viewport-fit=cover`, que el sitio no pide) vale los mismos 16.
 const barraD10 = leer('_estilos/barra.css')
 const menuD10 = leer('_chrome/menu/MenuMovil.tsx')
-const delMenu = (b: string, m: string): boolean => b.includes('--barra-reposo: var(--spacing-6);') && b.includes('--barra-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));') && /fixed inset-x-0 top-\[var\(--spacing-4\)\] mx-auto grid size-\[var\(--spacing-12\)\]/.test(m)
+const delMenu = (b: string, m: string): boolean => b.includes('--barra-reposo: var(--spacing-6);') && b.includes('--barra-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));') && /fixed inset-x-0 top-\[max\(var\(--spacing-4\),env\(safe-area-inset-top\)\)\] mx-auto grid size-\[var\(--spacing-12\)\]/.test(m)
 afirmar(delMenu(barraD10, menuD10), 'D10 · la barra (24 de reposo + 48 de alto) y el botón del menú del teléfono (16 + 48) miden lo que la cabeza de Servicios despeja (A5)')
 controlPositivo('el detector VE la barra que cambió de alto (el relleno dejaría de despejarla)', barraD10.replace('--barra-alto: calc(var(--spacing-3) * 2', '--barra-alto: calc(var(--spacing-4) * 2'), (b: string) => delMenu(b, menuD10))
 
