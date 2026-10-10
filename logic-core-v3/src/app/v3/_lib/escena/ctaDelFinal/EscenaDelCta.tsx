@@ -20,7 +20,8 @@ import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type M
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, esquinasEnElGiro, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
 import { armarElSubrayado, ponerElSubrayado, soltarElSubrayado, type SubrayadoDelCta } from './subrayado'
-import { apareceDeLosValores, armadoSobreElCta, cajaDe, ctaTocable, posesDe, valoresAPlano } from './transformacion'
+import { apareceDeLosValores, armadoSobreElCta, cajaDe, ctaTocable, deslizadoEnLaLista, posesDe, tocableEnLaLista, valoresAPlano } from './transformacion'
+import type { LugarDelMarco } from './armadoDelCta'
 import { usePrefiereMenosMovimiento } from '../../usePrefiereMenosMovimiento'
 import { armarElVolteo, type CuadroDelVolteo } from './volteo'
 import { VALORES } from '../../../_secciones/por-que-develop/contenido'
@@ -320,6 +321,23 @@ function seFue(a: ArmadoDelCta, alto: number): boolean {
   return EN_VIVO_DEL_FINAL.camara > 0 || (caja !== null && corrimiento(caja.pin, window.scrollY) < -alto)
 }
 
+/** [PULIDO 11] A4 · J9 e · la derecha de un marco o de un lugar, en el mundo. */
+const DERECHA = new THREE.Vector3()
+
+/** [PULIDO 11] A4 · J9 e · corre un marco `px` px de la pantalla hacia su derecha (negativo, a la izquierda), en su plano. */
+function correrDeCostado(marco: THREE.Group, px: number): void {
+  if (px === 0) return
+  DERECHA.set(1, 0, 0).applyQuaternion(marco.quaternion)
+  marco.position.addScaledVector(DERECHA, px * marco.scale.x)
+  marco.updateMatrixWorld(true)
+}
+
+/** [PULIDO 11] A4 · J9 e · corre un lugar del marco `px` px de la pantalla hacia su derecha. */
+function correrElLugarDeCostado(lugar: LugarDelMarco, px: number): void {
+  DERECHA.set(1, 0, 0).applyQuaternion(lugar.giro)
+  lugar.posicion.addScaledVector(DERECHA, px * lugar.escala)
+}
+
 /** [PULIDO 5] D1 · A1 · la transformada del enlace del CTA (sólo si cambió). */
 function llevarElEnlace(s: EstadoDeLaEscenaDelCta, css: string): void {
   if (css === s.enlace) return
@@ -346,6 +364,9 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   const a = s.armado
   if (a === null) return
   const p = CTA_EN_VIVO.progreso
+  // [PULIDO 11] A4 · J9 e · en la lista no hay giro ni volteo: las piezas ya formadas (las poses de 1) y se deslizan.
+  const enLaLista = CTA_EN_VIVO.donde === 'lista'
+  const formado = enLaLista ? 1 : p
   // [PULIDO 4] C1 · 5 · en un viaje del menú el CTA no se dibuja (el recorrido sólo pasa por la sección). [PULIDO 5] D1 · y,
   // anclado en el mundo, tampoco cuando ya se fue (`seFue`): su escenario se soltó más de una pantalla o la cámara del final subió.
   const enPantalla = ctaVisibleEnElViaje(viajeEnCurso() !== null) && (CTA_EN_VIVO.donde === 'lista' || p > 0) && !seFue(a, tam.height)
@@ -364,13 +385,22 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   const anclado = suaveEntre(p, ANCLAJE_DEL_CTA.desde, ANCLAJE_DEL_CTA.hasta)
   ponerElMarco(a.marco, CTA_EN_VIVO.donde === 'lista' ? s.planos.pantalla : s.planos.frase, s.planos.cta, anclado)
   ponerElMarco(a.lienzo, s.planos.pantalla, s.planos.cta, anclado)
+  // [PULIDO 11] A4 · J9 e · «HABLANOS» (el marco) desde la derecha y la frase (el lienzo) desde la izquierda.
+  const fuera = enLaLista ? 1 - deslizadoEnLaLista(p) : 0
+  if (enLaLista) {
+    correrDeCostado(a.marco, fuera * tam.width)
+    correrDeCostado(a.lienzo, -fuera * tam.width)
+    // El enlace del DOM va con «HABLANOS»: el lugar del CTA (se rehace en cada cuadro), corrido lo mismo.
+    correrElLugarDeCostado(s.planos.cta, fuera * tam.width)
+  }
   letrasEnLaPantalla(a, window.scrollY)
   const destino = a.letras.destino
   // [PULIDO 6] E1 · el cartel, en la franja de «HABLANOS» (no sube a la de la frase).
   const alto = s.medidas === null ? undefined : altoDelCartel(destino, s.medidas.caja)
-  posesDe(p, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino, alto), altoDelCartel: alto }, a.poses)
+  posesDe(formado, { origen: a.letras.origen, destino, pantalla: { ancho: tam.width, alto: tam.height }, armado: armadoSobreElCta(a.letras.origen, destino, alto), altoDelCartel: alto }, a.poses)
   // El hover (con el mouse, ya tocable: [PULIDO 8] G2 · desde que su cara se lee): el CTA se levanta apenas hacia la cámara.
-  s.hover += ((CTA_EN_VIVO.hover && ctaTocable(p) ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
+  const tocable = enLaLista ? tocableEnLaLista(p) : ctaTocable(p)
+  s.hover += ((CTA_EN_VIVO.hover && tocable ? 1 : 0) - s.hover) * (1 - Math.exp(-dt / HOVER_DEL_CTA.s))
   const levanta = s.hover * HOVER_DEL_CTA.levanta * (destino[0]?.cuerpo ?? 0)
   for (const pose of a.poses.destino) pose.z += levanta
   // En la lista el origen aparece antes de transformarse (cuando el logo ya bajó).
@@ -380,22 +410,26 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   a.destino.piezas.forEach((pieza, k) => ponerLaPieza(pieza, a.poses.destino[k]))
   // [PULIDO 4] C1 · los valores que se vuelven la frase, con el mismo progreso.
   if (s.meta !== null && s.medidas !== null) {
-    s.cuadro = cuadroDeAhora(s, s.medidas, p)
+    s.cuadro = cuadroDeAhora(s, s.medidas, formado)
     s.meta.poner(s.cuadro)
   }
   // [PULIDO 8] G2 · el subrayado, con el giro (el lugar de su comienzo en la cara de «HABLANOS») y el levante del hover.
   const cajaDelCta = cajaDe(destino)
   const armado = armadoSobreElCta(a.letras.origen, destino, alto)
   const pose = a.poses.destino[0]
-  if (s.subrayado !== null) ponerElSubrayado(s.subrayado, lineaDelCta(a), { c: cajaDelCta, armado, p, giro: pose?.ry ?? 0, seVe: pose !== undefined && pose.aparece > 0, levanta }, { hover: CTA_EN_VIVO.hover, foco: CTA_EN_VIVO.foco, tactil: s.tactil }, s.quieto, dt)
+  if (s.subrayado !== null) ponerElSubrayado(s.subrayado, lineaDelCta(a), { c: cajaDelCta, armado, p: formado, giro: pose?.ry ?? 0, seVe: pose !== undefined && pose.aparece > 0, levanta }, { hover: CTA_EN_VIVO.hover, foco: CTA_EN_VIVO.foco, tactil: s.tactil }, s.quieto, dt)
   // [PULIDO 5] D1 · A1 · el enlace del DOM, al cuadrilátero donde la cámara viva ve la caja de «HABLANOS» en su plano. [PULIDO 8]
   // G2 · tocable desde que su cara se lee, todavía en el giro: sus esquinas, donde están ahora (y en su lugar, antes).
   const enlace = enlaceDelCta()
   if (caja !== null && enlace !== null) {
     const dom = { x: caja.lugar.izquierda, y: caja.lugar.arriba + corrimiento(caja.pin, window.scrollY), ancho: enlace.offsetWidth, alto: enlace.offsetHeight }
     const delCta = { x: caja.lugar.izquierda + caja.dx, y: caja.lugar.arriba, ancho: caja.ancho, alto: caja.lugar.linea }
-    const esquinas = ctaTocable(p) ? esquinasEnElGiro(delCta, cajaDelCta, armado, p, destino[0]?.cuerpo ?? 0, levanta) : undefined
-    llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }, esquinas))
+    // [PULIDO 11] A4 · J9 e · en la lista no hay giro: el enlace, en el plano del CTA (ya corrido con «HABLANOS»).
+    if (enLaLista) llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }))
+    else {
+      const esquinas = ctaTocable(p) ? esquinasEnElGiro(delCta, cajaDelCta, armado, p, destino[0]?.cuerpo ?? 0, levanta) : undefined
+      llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }, esquinas))
+    }
   }
   // La luz de los títulos: la noche del logo (su emisiva, en el mismo cuadro) y los reflejos con la luz de la sala.
   const nivel = luz === null ? 1 : Math.min(1, luz.intensity / KEY_INTENSITY)

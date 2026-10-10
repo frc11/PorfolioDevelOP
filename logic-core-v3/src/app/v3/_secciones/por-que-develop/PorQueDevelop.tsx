@@ -269,7 +269,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
           <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
-          <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
+          <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />
         </CoreografiaEnTodoAncho>
       </div>
     </ContenidoDeSeccion>

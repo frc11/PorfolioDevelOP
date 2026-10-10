@@ -369,7 +369,7 @@ const pruebasDeLaEscena = sinComentarios(leer('_lib/escena/PruebasDeLaEscena.tsx
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [PULIDO 5] D1 · la escena del CTA recibe además las medidas del logo (`stats`): con ellas arma la cámara del nudo `cta`.
 const productoBien = (pruebas: string, pq: string): boolean => pruebas.includes('<EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} stats={props.stats} />') && !/conElCta\s*&&/.test(pruebas) &&
-  pq.includes('<CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />') && pq.includes('<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />') && !/variante/.test(pq)
+  pq.includes('<CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />') && pq.includes('<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />') /* [PULIDO 11] A4 · J9 e · sin `entrada`: las copias ya no aparecen */ && !/variante/.test(pq)
 afirmar(productoBien(pruebasDeLaEscena, porQue), 'el CTA con su transformación es el producto: sin bandera, en el escenario y en la lista')
 controlPositivo('el detector VE el CTA atrás de una bandera', [pruebasDeLaEscena.replace('<EscenaDelCta keyLightRef', '{conElCta && <EscenaDelCta keyLightRef'), porQue] as const, ([a, b]: readonly [string, string]) => productoBien(a, b))
 

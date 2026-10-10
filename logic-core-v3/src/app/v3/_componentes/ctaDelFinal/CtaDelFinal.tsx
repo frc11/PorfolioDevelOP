@@ -6,7 +6,7 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import { cn } from '@/lib/utils'
 
 import { CTA_EN_VIVO, avisarDelLugar, ctaListo, ctaVisibleEnElViaje, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
-import { apareceDeLosValores, ctaTocable, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { apareceDeLosValores, ctaTocable, deslizadoEnLaLista, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista, tocableEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
 import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 
 /**
@@ -142,7 +142,8 @@ export function RenglonDeLaFraseDelCta({ indice, children, className }: { readon
  * G2 · tocable desde que su cara se lee en el giro (`ctaTocable`; la escena lleva el enlace a su pose en cada cuadro), con el
  * cursor de un enlace; el hover y el foco visible dibujan su subrayado en la escena; antes de leerse, Enter no lo abre.
  */
-export function DestinoDelCta({ rotulo, destino, progreso, className }: { readonly rotulo: string; readonly destino: string; readonly progreso: MotionValue<number>; readonly className?: string }): React.JSX.Element {
+// [PULIDO 11] A4 · J9 e · `enLaLista`: tocable apenas se lee el deslizamiento, y sin la escena llega con él (no con el giro).
+export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista = false }: { readonly rotulo: string; readonly destino: string; readonly progreso: MotionValue<number>; readonly className?: string; readonly enLaLista?: boolean }): React.JSX.Element {
   const listo = useCtaListo()
   const texto = useRef<HTMLSpanElement>(null)
   useEffect(() => {
@@ -156,8 +157,9 @@ export function DestinoDelCta({ rotulo, destino, progreso, className }: { readon
       avisarDelLugar()
     }
   }, [])
-  const pointerEvents = useTransform(progreso, (p) => (ctaTocable(p) ? 'auto' : 'none'))
-  const llegada = useTransform(progreso, llegadaDelTexto)
+  const tocable = enLaLista ? tocableEnLaLista : ctaTocable
+  const pointerEvents = useTransform(progreso, (p) => (tocable(p) ? 'auto' : 'none'))
+  const llegada = useTransform(progreso, enLaLista ? deslizadoEnLaLista : llegadaDelTexto)
   return (
     <motion.a
       href={destino}
@@ -179,7 +181,7 @@ export function DestinoDelCta({ rotulo, destino, progreso, className }: { readon
         CTA_EN_VIVO.foco = false
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && !ctaTocable(progreso.get())) e.preventDefault()
+        if (e.key === 'Enter' && !tocable(progreso.get())) e.preventDefault()
       }}
     >
       <motion.span ref={texto} aria-hidden="true" style={{ opacity: listo ? 0 : llegada }} className={cn('block', FUENTE_DEL_CTA, className)}>

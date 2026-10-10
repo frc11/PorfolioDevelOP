@@ -8,6 +8,8 @@
  *        1280, 1366, 1440 y 1920) y el cuerpo llega entero al reposo (su último renglón ya no queda a media máscara).
  *   A3 · mobile, el cartel de Portfolio: abajo de 1024 se desvanece en la huida antes de que el agrandamiento lo corte.
  *   A4b · Quiénes somos de noche (abajo de 1024): el velo detrás de los textos que cruzan el logo, sin cortar la mezcla, en AA.
+ *   A4e · el CTA abajo de 1024: la frase desde la izquierda y HABLANOS desde la derecha, en volumen y anclados, función del
+ *         scroll, terminando juntos; sin «Seis razones» que reaparezcan, sin volteo ni giro.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -20,6 +22,7 @@ import { llegadaHastaElPie } from '../../_secciones/quienes-somos/geometria'
 import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../../_secciones/_contrato/asentamiento'
 import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_secciones/trabajos/angosto'
 import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_secciones/trabajos/tunel'
+import { DESLIZAMIENTO_EN_LA_LISTA, LISTA_DEL_CTA, deslizadoEnLaLista, progresoEnLaLista, tocableEnLaLista } from '../escena/ctaDelFinal/transformacion'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -139,5 +142,35 @@ const reciboDelVelo = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-11/
 const enAA = (r: Medida[]): boolean => r.length >= 3 && r.every((m) => m.contraste >= 4.5)
 afirmar(enAA(reciboDelVelo.conVelo92), '  con el velo, los tres bloques en AA (≥ 4,5:1) con la noche puesta', reciboDelVelo.conVelo92.map((m) => `${m.bloque} ${String(m.contraste)}`).join(' · '))
 controlPositivo('  el detector VE los de sin velo (por debajo de AA)', [...reciboDelVelo.sinVelo, { bloque: '-', contraste: 9 }], enAA)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4e · El CTA abajo de 1024: la frase desde la izquierda y HABLANOS desde la derecha')
+
+// Antes, en la lista, las copias de «Seis razones» y de los seis valores reaparecían en el medio del bloque clavado y se
+// volteaban en la frase (y «Seis razones» giraba en HABLANOS): «de la nada». Ahora las copias no se ven (sólo le dan a la escena
+// de dónde medir), las piezas en volumen están ya formadas (las poses de 1) y se deslizan, cada grupo en su plano anclado en la
+// sala: el lienzo (la frase) desde la izquierda y el marco (HABLANOS y su subrayado) desde la derecha, con el MISMO avance.
+const recorrido = (r: number): number => deslizadoEnLaLista(progresoEnLaLista(r))
+const deslizaBien = (f: (r: number) => number): boolean => {
+  let antes = -1
+  for (let r = 0; r <= 1.0001; r += 0.01) {
+    const d = f(r)
+    if (d < antes - 1e-9) return false
+    antes = d
+  }
+  return f(LISTA_DEL_CTA.desde) === 0 && f(0.6) === 1 && f(1) === 1 && f(0.4) > 0.2 && f(0.4) < 0.8
+}
+afirmar(deslizaBien(recorrido), 'A4e · el deslizamiento es función del scroll (reversible, monótono): arranca a 0,2 del bloque clavado (el logo ya abajo) y termina a 0,6')
+controlPositivo('A4e · el detector VE un salto (aparece de golpe)', (r: number) => (r >= 0.5 ? 1 : 0), deslizaBien)
+afirmar(!tocableEnLaLista(DESLIZAMIENTO_EN_LA_LISTA.hasta * 0.6) && tocableEnLaLista(DESLIZAMIENTO_EN_LA_LISTA.hasta), '  HABLANOS se puede tocar apenas se lee (al 90 % del deslizamiento), no antes')
+const escenaDelCta = leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')
+const ctaEnLaLista = leer('_secciones/por-que-develop/CtaTransformado.tsx')
+const sinGiro = (e: string, l: string): boolean =>
+  e.includes("const formado = enLaLista ? 1 : p") && /posesDe\(formado, /.test(e) && e.includes('s.cuadro = cuadroDeAhora(s, s.medidas, formado)') &&
+  e.includes('const fuera = enLaLista ? 1 - deslizadoEnLaLista(p) : 0') && e.includes('correrDeCostado(a.marco, fuera * tam.width)') && e.includes('correrDeCostado(a.lienzo, -fuera * tam.width)') &&
+  e.includes('correrElLugarDeCostado(s.planos.cta, fuera * tam.width)') &&
+  (l.match(/className="pointer-events-none invisible absolute/g) ?? []).length === 2 && !/opacity: listo \? 0 : copia/.test(l) && /<DestinoDelCta rotulo=\{CTA\.rotulo\} destino=\{CTA\.destino\} progreso=\{progreso\} enLaLista \/>/.test(l)
+afirmar(sinGiro(escenaDelCta, ctaEnLaLista), '  en la escena: poses y frase ya formadas en la lista; el marco a la derecha y el lienzo a la izquierda con el mismo avance (terminan juntos); el enlace va con HABLANOS; las copias, invisibles')
+controlPositivo('  el detector VE la lista de antes (el giro y el volteo con el progreso)', [escenaDelCta.replace('posesDe(formado, ', 'posesDe(p, '), ctaEnLaLista] as const, ([e, l]: readonly [string, string]) => sinGiro(e, l))
 
 cerrar('s62-pulido-11')

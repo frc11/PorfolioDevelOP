@@ -50,7 +50,19 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   ni se esfuma: la cadena de la mezcla sigue entera; s7-mezcla verde), detrás (z −1), con la tinta de la noche que se ve
   (`--noche-de-la-sala`, la escribe la sección mientras está a la vista). Con 80 % daba 4,91 y 4,82 (justo); con 92 %, 5,65,
   5,51 y 5,19:1 (`entregas/pulido-11/velo-de-noche.json`). `s62` A4b
-- PENDIENTE: A4 · g (WhatsApp a 375), e (el CTA abajo de 1024 en 3D, función del scroll) y «Seis razones» punteado en mobile
+- HECHO: A4 · e · el CTA abajo de 1024 — VISTO sí (390 y 768). Antes, en la lista, las copias de «Seis razones» y de los seis
+  valores aparecían en el medio del bloque clavado y se volteaban en la frase («de la nada»). Ahora las copias no se ven (sólo
+  le dan a la escena de dónde medir); las piezas en volumen están ya formadas y se deslizan, cada grupo en su plano anclado en la
+  sala: la frase desde la izquierda y HABLANOS (con su subrayado) desde la derecha, con el mismo avance (terminan juntos), función
+  del scroll y reversibles, sin volteo ni giro. El enlace del DOM va con HABLANOS y se puede tocar al 90 % del deslizamiento. El
+  tramo arranca a 0,2 del bloque (era 0,5: una pantalla de scroll con el logo solo; medido: el logo ya está abajo a r ≈ 0,1) y
+  termina a 0,6. Sin WebGL, el texto del DOM llega con el mismo tramo. En escritorio no cambió nada. `s62` A4e
+- HECHO (sin cambio de código): A4 · g · WhatsApp a 375 — VISTO sí: no se corta. El mail y WhatsApp (su rótulo corto) entran en
+  una fila con 5 px de aire (de 32 a 338 en una columna que termina en 343), a DPR 1 y 3; si no entraran, la fila ya está con
+  `flex-wrap` y WhatsApp pasa a su renglón (lo dejó así NOCTURNO FINAL C4 y lo fija s52). No se reprodujo el corte del humano.
+- A4 · «Seis razones» punteado en mobile — NO REPRODUCIDO. A 390 (DPR 1 y 3) mientras amanece la lista va con el halo denso
+  (NOCTURNO FINAL D2) y los ítems que llegan se ven tenues; no hay un tramado en el DOM abajo de 1024. Lo más parecido a
+  «punteado» son las motas del polvo delante del texto. Queda para la matriz (G) y para que el humano diga dónde lo vio.
 - PENDIENTE: A5 · J10, el polvo con un toque, en el banco
 
 ### Fase B · los forms definitivos (pie y modal): volteo, éxito y error
@@ -76,6 +88,13 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 
 ### Fase G · verificación exhaustiva
 - PENDIENTE
+
+## Las aserciones viejas que cambiaron
+
+| Punto | Dónde | Antes | Ahora | Por qué |
+|---|---|---|---|---|
+| A4e | `s54` B1 · el CTA es el producto | `<CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />` | sin `entrada` | Las copias de «Seis razones» ya no aparecen: el componente no la usa. Lo afirmado (montado en la lista, sin bandera) no cambió |
+| A4e | `s59` 1 · tocable apenas se lee | `ctaTocable(p)` en `pointerEvents` y en Enter | `tocable(p)`, con `tocable = enLaLista ? tocableEnLaLista : ctaTocable` | En el escenario sigue siendo `ctaTocable` (lo de siempre); en la lista no hay giro: tocable al 90 % del deslizamiento |
 
 ## Memoria (antes de cada fase: disponible y no paginado)
 

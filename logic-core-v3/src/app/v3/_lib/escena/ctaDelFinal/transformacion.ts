@@ -206,8 +206,10 @@ export const valoresAPlano = (p: number): number => suave(tramo(p, 0, RELEVO_DE_
  * muestra el logo grande en el centro de la pantalla y las letras negras sobre el logo negro no se leen. El origen aparece
  * cuando el logo ya bajó (`aparece`) y la transformación corre en lo que queda (`desde`). [PULIDO 3B] B1 · con el bloque de
  * tres pantallas (dos de recorrido) el logo termina de bajar en la mitad: la transformación corre en la otra mitad.
+ * [PULIDO 11] A4 · J9 e · sin la transformación (el deslizamiento): el logo ya está abajo a r ≈ 0,1 (medido a 390 y a 768), así
+ * que el tramo arranca en 0,2 (era 0,5: una pantalla de scroll con el logo solo) y el deslizamiento corre de 0,2 a 0,6.
  */
-export const LISTA_DEL_CTA = { aparece: [0.42, 0.08] as const, desde: 0.5 } as const
+export const LISTA_DEL_CTA = { aparece: [0.12, 0.08] as const, desde: 0.2 } as const
 
 /** La transformación con el recorrido `r` de la lista. */
 export const progresoEnLaLista = (r: number): number => tramo(r, LISTA_DEL_CTA.desde, 1 - LISTA_DEL_CTA.desde)
@@ -222,6 +224,17 @@ export function llegadaDelTexto(p: number): number {
 
 /** [PULIDO 8] G2 · cuánto de su ancho le muestra a la cámara la cara de «HABLANOS» en el giro (−1, de espaldas; 0, de canto; 1, de frente). */
 export const caraDelCta = (p: number): number => -Math.cos(Math.PI * suave(tramo(acotar(p), TRANSFORMACION.giro.desde, TRANSFORMACION.giro.gira)))
+
+/**
+ * [PULIDO 11] A4 · J9 e · ABAJO DE 1024 (la lista) EL CTA SE DESLIZA: sin «Seis razones» que reaparezcan, sin volteo y sin giro.
+ * La frase («Este sitio empezó con una charla. El tuyo también.») entra desde la izquierda y «HABLANOS» desde la derecha, en
+ * volumen, ya formados y anclados en la sala; en el mismo tramo del recorrido (terminan juntos: el progreso de la lista hasta
+ * `hasta`, de 0,2 a 0,6 del recorrido del bloque clavado), función del scroll y reversibles. «HABLANOS» se puede tocar apenas
+ * se lee (`tocable` del deslizamiento).
+ */
+export const DESLIZAMIENTO_EN_LA_LISTA = { hasta: 0.5, tocable: 0.9 } as const
+export const deslizadoEnLaLista = (p: number): number => suave(tramo(acotar(p), 0, DESLIZAMIENTO_EN_LA_LISTA.hasta))
+export const tocableEnLaLista = (p: number): boolean => deslizadoEnLaLista(p) >= DESLIZAMIENTO_EN_LA_LISTA.tocable
 
 /** [PULIDO 8] G2 · desde cuánto de su ancho se lee: pasó el canto y mira a la cámara. */
 export const CARA_LEGIBLE = 0.3

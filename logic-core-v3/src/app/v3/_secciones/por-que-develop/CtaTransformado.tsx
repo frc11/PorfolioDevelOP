@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils'
 
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
-import { DestinoDelCta, RenglonDeLaFraseDelCta, estiloEnElViaje, useCtaListo, useProgresoDelCta, useValorDeLaEscena, useViajando } from '../../_componentes/ctaDelFinal/CtaDelFinal'
+import { DestinoDelCta, RenglonDeLaFraseDelCta, estiloEnElViaje, useProgresoDelCta, useValorDeLaEscena, useViajando } from '../../_componentes/ctaDelFinal/CtaDelFinal'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { FRASE_DE_VOLUMEN, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
-import { llegadaDelTexto } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { deslizadoEnLaLista, llegadaDelTexto } from '../../_lib/escena/ctaDelFinal/transformacion'
 import { TITULOS_DE_VOLUMEN } from '../../_lib/titulos3d/registro'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CTA, FRASE, VALORES } from './contenido'
@@ -104,17 +104,18 @@ function CopiaDelValor({ indice, titulo }: { readonly indice: number; readonly t
  * CTA que queda (la frase y el botón) es el que se centra. Con movimiento reducido no hay recorrido: una pantalla, el estado
  * final; en escritorio la sección sigue midiendo su escenario entero, así que el CTA va en la mitad de la pose C
  * (`ARRIBA_DEL_CTA_QUIETO_SVH`), donde la cámara ya está en la del CTA: con el logo abajo, no lo pisa.
+ * [PULIDO 11] A4 · J9 e · las copias ya no se ven (sólo le dan a la escena de dónde medir) y no hay giro: la escena desliza la
+ * frase desde la izquierda y «HABLANOS» desde la derecha (`deslizadoEnLaLista`); sin la escena, el texto llega con ese tramo.
  */
 const CON_MOVIMIENTO_REDUCIDO = 'min-h-[var(--alto-del-cta-en-lista)] escritorio:absolute escritorio:inset-x-0 escritorio:top-[var(--arriba-del-cta-quieto)]'
 
-export function CtaTransformadoEnLaLista({ caja, progreso, entrada }: { readonly caja: React.RefObject<HTMLDivElement | null>; readonly progreso: MotionValue<number>; readonly entrada: MotionValue<number> }): React.JSX.Element {
+export function CtaTransformadoEnLaLista({ caja, progreso }: { readonly caja: React.RefObject<HTMLDivElement | null>; readonly progreso: MotionValue<number> }): React.JSX.Element {
   const primero = useRef<HTMLSpanElement>(null)
   const segundo = useRef<HTMLSpanElement>(null)
   const origen = useCallback((): readonly RenglonDelCta[] => [primero.current, segundo.current].flatMap((el) => (el === null ? [] : [{ el, subida: 0 }])), [])
   useProgresoDelCta(progreso, 'lista', origen)
-  const listo = useCtaListo()
-  const texto = useTransform(progreso, llegadaDelTexto)
-  const copia = useTransform(() => entrada.get() * (1 - texto.get()))
+  // [PULIDO 11] A4 · J9 e · sin la escena, la frase llega con el deslizamiento (la escena la desliza en volumen).
+  const texto = useTransform(progreso, deslizadoEnLaLista)
   const enViaje = useViajando()
   // Con el servidor (sin preferencia) y después la del navegador: sin el desfase de la hidratación (el bloque se arma en el servidor).
   const quieto = usePrefiereMenosMovimiento()
@@ -124,24 +125,26 @@ export function CtaTransformadoEnLaLista({ caja, progreso, entrada }: { readonly
         {/* En un viaje, sin verse: el envoltorio no tiene caja (`contents`), el bloque se arma igual. */}
         <div className="contents" style={estiloEnElViaje(enViaje)}>
           <div className="relative">
-            <motion.p aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 bottom-full mb-[var(--spacing-8)]">
+            {/* [PULIDO 11] A4 · J9 e · las copias de «Seis razones» y de los valores ya no se ven (ni sin la escena): sólo le dan a la
+                escena de dónde medir. Reaparecían de la nada antes del CTA. */}
+            <p aria-hidden="true" className="pointer-events-none invisible absolute inset-x-0 bottom-full mb-[var(--spacing-8)]">
               <Titular nivel="titulo-xl" como="span" className="block">
                 <span ref={primero} className="block">{FRASE.izquierda}</span>
               </Titular>
               <Titular nivel="titulo-xl" como="span" className="block">
                 <span ref={segundo} className="block">{FRASE.derecha}</span>
               </Titular>
-            </motion.p>
-            <motion.ul aria-hidden="true" style={{ opacity: listo ? 0 : copia }} className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center gap-[var(--spacing-1)]">
+            </p>
+            <ul aria-hidden="true" className="pointer-events-none invisible absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center gap-[var(--spacing-1)]">
               {VALORES.map((v, k) => (
                 <CopiaDelValor key={v.clave} indice={k} titulo={v.titulo} />
               ))}
-            </motion.ul>
+            </ul>
             <motion.div style={{ opacity: texto }}>
               <FraseDelCta />
             </motion.div>
           </div>
-          <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} />
+          <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} enLaLista />
         </div>
       </div>
     </div>
