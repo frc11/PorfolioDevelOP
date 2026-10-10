@@ -1,0 +1,110 @@
+{
+ "fuente": "pulido-12/tanda-b.log (build de antes) y tanda-d.log (build con C1); c1-pie.ts: al fondo, el final clavado en 0",
+ "antes": {
+  "1024": {
+   "columnaIzquierdaLogo": 157,
+   "logoFormulario": 164,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 265,
+   "anchoFormulario": 240
+  },
+  "1280": {
+   "columnaIzquierdaLogo": 216,
+   "logoFormulario": 208,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 314,
+   "anchoFormulario": 304
+  },
+  "1366": {
+   "columnaIzquierdaLogo": 247,
+   "logoFormulario": 225,
+   "centroDelLogo": 1,
+   "anchoLetrasIzquierda": 323,
+   "anchoFormulario": 325
+  },
+  "1440": {
+   "columnaIzquierdaLogo": 251,
+   "logoFormulario": 220,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 331,
+   "anchoFormulario": 344
+  },
+  "1920": {
+   "columnaIzquierdaLogo": 417,
+   "logoFormulario": 316,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 381,
+   "anchoFormulario": 464
+  },
+  "2560": {
+   "columnaIzquierdaLogo": 401,
+   "logoFormulario": 284,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 381,
+   "anchoFormulario": 480
+  }
+ },
+ "despues": {
+  "1024": {
+   "columnaIzquierdaLogo": 140,
+   "logoFormulario": 140,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 282,
+   "anchoFormulario": 264
+  },
+  "1280": {
+   "columnaIzquierdaLogo": 208,
+   "logoFormulario": 208,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 322,
+   "anchoFormulario": 304
+  },
+  "1366": {
+   "columnaIzquierdaLogo": 226,
+   "logoFormulario": 225,
+   "centroDelLogo": 1,
+   "anchoLetrasIzquierda": 344,
+   "anchoFormulario": 325
+  },
+  "1440": {
+   "columnaIzquierdaLogo": 220,
+   "logoFormulario": 220,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 362,
+   "anchoFormulario": 344
+  },
+  "1920": {
+   "columnaIzquierdaLogo": 316,
+   "logoFormulario": 316,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 482,
+   "anchoFormulario": 464
+  },
+  "2560": {
+   "columnaIzquierdaLogo": 284,
+   "logoFormulario": 284,
+   "centroDelLogo": 0,
+   "anchoLetrasIzquierda": 498,
+   "anchoFormulario": 480
+  }
+ },
+ "bordesDespues1024": {
+  "columna": [
+   32,
+   296
+  ],
+  "letrasDerecha": 296,
+  "fueraVisible": []
+ },
+ "bordesAntes1024": {
+  "columna": [
+   32,
+   272
+  ],
+  "fuera": [
+   "WhatsApp 32..285",
+   "Por qué develOP 164..279",
+   "Facebook 248..288"
+  ]
+ }
+}

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
 import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
+import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
 import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
 import { transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
@@ -100,8 +101,9 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
   const [seVe, setSeVe] = useState(false)
   // [PULIDO 11] B2 · con el éxito, el panel se cierra solo `CIERRE_MS` después de que su texto está.
   const [textoListo, setTextoListo] = useState(false)
-  // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe).
-  const [alto, setAlto] = useState<number | undefined>(undefined)
+  // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe). [PULIDO 12] 3 · si el
+  // teléfono rota, se suelta (`altoGuardado.ts`).
+  const [alto, setAlto] = useAltoGuardado()
   const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)
   // UNA región de alerta: el resumen de los datos o el error del servidor (para el lector: el error se ve en su tarjeta).
   const [aviso, setAviso] = useState('')

@@ -1,0 +1,639 @@
+{
+ "fuente": "r-rotar.ts (envío con error: la tarjeta se queda; rota sin recargar y vuelve) · despues: el build con altoGuardado.ts y memoriaDelFormulario.ts",
+ "antes": {
+  "390 844 pie": {
+   "ancho": 390,
+   "alto": 844,
+   "donde": "pie",
+   "formulario": [
+    405,
+    281
+   ],
+   "antes": {
+    "caja": [
+     44,
+     405,
+     302,
+     281
+    ],
+    "alto": "281px",
+    "contenidoMin": 287,
+    "desbordaAbajo": 0,
+    "scrollH": 281,
+    "clientH": 281,
+    "titulo": [
+     529,
+     548
+    ],
+    "boton": [
+     624,
+     665
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "rotado": {
+    "caja": [
+     458,
+     -69,
+     342,
+     281
+    ],
+    "alto": "281px",
+    "contenidoMin": 288,
+    "desbordaAbajo": 0,
+    "scrollH": 281,
+    "clientH": 281,
+    "titulo": [
+     56,
+     76
+    ],
+    "boton": [
+     152,
+     192
+    ],
+    "ventana": [
+     844,
+     390
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     44,
+     405,
+     302,
+     281
+    ],
+    "alto": "281px",
+    "contenidoMin": 287,
+    "desbordaAbajo": 0,
+    "scrollH": 281,
+    "clientH": 281,
+    "titulo": [
+     529,
+     548
+    ],
+    "boton": [
+     624,
+     665
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "errores": []
+  },
+  "390 844 modal": {
+   "ancho": 390,
+   "alto": 844,
+   "donde": "modal",
+   "formulario": [
+    222,
+    498
+   ],
+   "antes": {
+    "caja": [
+     20,
+     222,
+     350,
+     498
+    ],
+    "alto": "498px",
+    "contenidoMin": 498,
+    "desbordaAbajo": 0,
+    "scrollH": 498,
+    "clientH": 498,
+    "titulo": [
+     561,
+     579
+    ],
+    "boton": [
+     655,
+     696
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "rotado": {
+    "caja": [
+     20,
+     -54,
+     804,
+     498
+    ],
+    "alto": "498px",
+    "contenidoMin": 498,
+    "desbordaAbajo": 0,
+    "scrollH": 498,
+    "clientH": 498,
+    "titulo": [
+     283,
+     303
+    ],
+    "boton": [
+     379,
+     420
+    ],
+    "ventana": [
+     844,
+     390
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     20,
+     222,
+     350,
+     498
+    ],
+    "alto": "498px",
+    "contenidoMin": 498,
+    "desbordaAbajo": 0,
+    "scrollH": 498,
+    "clientH": 498,
+    "titulo": [
+     561,
+     579
+    ],
+    "boton": [
+     655,
+     696
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "errores": []
+  },
+  "768 1024 pie": {
+   "ancho": 768,
+   "alto": 1024,
+   "donde": "pie",
+   "formulario": [
+    387,
+    459
+   ],
+   "antes": {
+    "caja": [
+     420,
+     387,
+     304,
+     459
+    ],
+    "alto": "459px",
+    "contenidoMin": 459,
+    "desbordaAbajo": 0,
+    "scrollH": 459,
+    "clientH": 459,
+    "titulo": [
+     686,
+     706
+    ],
+    "boton": [
+     782,
+     822
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "rotado": null,
+   "deVuelta": null,
+   "errores": []
+  },
+  "768 1024 modal": {
+   "ancho": 768,
+   "alto": 1024,
+   "donde": "modal",
+   "formulario": [
+    334,
+    440
+   ],
+   "antes": {
+    "caja": [
+     20,
+     334,
+     728,
+     440
+    ],
+    "alto": "440px",
+    "contenidoMin": 440,
+    "desbordaAbajo": 0,
+    "scrollH": 440,
+    "clientH": 440,
+    "titulo": [
+     614,
+     633
+    ],
+    "boton": [
+     709,
+     750
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "rotado": {
+    "caja": [
+     72,
+     226,
+     880,
+     440
+    ],
+    "alto": "440px",
+    "contenidoMin": 440,
+    "desbordaAbajo": 0,
+    "scrollH": 440,
+    "clientH": 440,
+    "titulo": [
+     489,
+     518
+    ],
+    "boton": [
+     594,
+     634
+    ],
+    "ventana": [
+     1024,
+     768
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     20,
+     334,
+     728,
+     440
+    ],
+    "alto": "440px",
+    "contenidoMin": 440,
+    "desbordaAbajo": 0,
+    "scrollH": 440,
+    "clientH": 440,
+    "titulo": [
+     614,
+     633
+    ],
+    "boton": [
+     709,
+     750
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "errores": []
+  }
+ },
+ "despues": {
+  "390 844 pie": {
+   "ancho": 390,
+   "alto": 844,
+   "donde": "pie",
+   "formulario": [
+    405,
+    281
+   ],
+   "antes": {
+    "caja": [
+     44,
+     405,
+     302,
+     281
+    ],
+    "alto": "281px",
+    "contenidoMin": 287,
+    "desbordaAbajo": 0,
+    "scrollH": 281,
+    "clientH": 281,
+    "titulo": [
+     529,
+     548
+    ],
+    "boton": [
+     624,
+     665
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "rotado": {
+    "caja": [
+     458,
+     -106,
+     342,
+     318
+    ],
+    "alto": "",
+    "contenidoMin": 318,
+    "desbordaAbajo": 0,
+    "scrollH": 318,
+    "clientH": 318,
+    "titulo": [
+     52,
+     72
+    ],
+    "boton": [
+     148,
+     188
+    ],
+    "ventana": [
+     844,
+     390
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     44,
+     387,
+     302,
+     316
+    ],
+    "alto": "",
+    "contenidoMin": 316,
+    "desbordaAbajo": 0,
+    "scrollH": 316,
+    "clientH": 316,
+    "titulo": [
+     544,
+     563
+    ],
+    "boton": [
+     639,
+     679
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "errores": []
+  },
+  "390 844 modal": {
+   "ancho": 390,
+   "alto": 844,
+   "donde": "modal",
+   "formulario": [
+    222,
+    498
+   ],
+   "antes": {
+    "caja": [
+     20,
+     222,
+     350,
+     498
+    ],
+    "alto": "498px",
+    "contenidoMin": 498,
+    "desbordaAbajo": 0,
+    "scrollH": 498,
+    "clientH": 498,
+    "titulo": [
+     561,
+     579
+    ],
+    "boton": [
+     655,
+     696
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "rotado": {
+    "caja": [
+     20,
+     53,
+     804,
+     318
+    ],
+    "alto": "",
+    "contenidoMin": 318,
+    "desbordaAbajo": 0,
+    "scrollH": 318,
+    "clientH": 318,
+    "titulo": [
+     210,
+     230
+    ],
+    "boton": [
+     306,
+     346
+    ],
+    "ventana": [
+     844,
+     390
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     20,
+     313,
+     350,
+     316
+    ],
+    "alto": "",
+    "contenidoMin": 316,
+    "desbordaAbajo": 0,
+    "scrollH": 316,
+    "clientH": 316,
+    "titulo": [
+     470,
+     488
+    ],
+    "boton": [
+     564,
+     605
+    ],
+    "ventana": [
+     390,
+     844
+    ]
+   },
+   "errores": []
+  },
+  "768 1024 pie": {
+   "ancho": 768,
+   "alto": 1024,
+   "donde": "pie",
+   "formulario": [
+    387,
+    459
+   ],
+   "antes": {
+    "caja": [
+     420,
+     387,
+     304,
+     459
+    ],
+    "alto": "459px",
+    "contenidoMin": 459,
+    "desbordaAbajo": 0,
+    "scrollH": 459,
+    "clientH": 459,
+    "titulo": [
+     686,
+     706
+    ],
+    "boton": [
+     782,
+     822
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "rotado": {
+    "caja": [
+     748,
+     227,
+     224,
+     463
+    ],
+    "alto": "",
+    "contenidoMin": 463,
+    "desbordaAbajo": 0,
+    "scrollH": 463,
+    "clientH": 463,
+    "titulo": [
+     459,
+     517
+    ],
+    "boton": [
+     617,
+     658
+    ],
+    "ventana": [
+     1024,
+     768
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     420,
+     389,
+     304,
+     318
+    ],
+    "alto": "",
+    "contenidoMin": 318,
+    "desbordaAbajo": 0,
+    "scrollH": 318,
+    "clientH": 318,
+    "titulo": [
+     546,
+     566
+    ],
+    "boton": [
+     642,
+     683
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "errores": []
+  },
+  "768 1024 modal": {
+   "ancho": 768,
+   "alto": 1024,
+   "donde": "modal",
+   "formulario": [
+    334,
+    440
+   ],
+   "antes": {
+    "caja": [
+     20,
+     334,
+     728,
+     440
+    ],
+    "alto": "440px",
+    "contenidoMin": 440,
+    "desbordaAbajo": 0,
+    "scrollH": 440,
+    "clientH": 440,
+    "titulo": [
+     614,
+     633
+    ],
+    "boton": [
+     709,
+     750
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "rotado": {
+    "caja": [
+     72,
+     243,
+     880,
+     410
+    ],
+    "alto": "",
+    "contenidoMin": 410,
+    "desbordaAbajo": 0,
+    "scrollH": 410,
+    "clientH": 410,
+    "titulo": [
+     475,
+     504
+    ],
+    "boton": [
+     580,
+     621
+    ],
+    "ventana": [
+     1024,
+     768
+    ]
+   },
+   "deVuelta": {
+    "caja": [
+     20,
+     395,
+     728,
+     318
+    ],
+    "alto": "",
+    "contenidoMin": 318,
+    "desbordaAbajo": 0,
+    "scrollH": 318,
+    "clientH": 318,
+    "titulo": [
+     552,
+     572
+    ],
+    "boton": [
+     648,
+     689
+    ],
+    "ventana": [
+     768,
+     1024
+    ]
+   },
+   "errores": []
+  }
+ }
+}

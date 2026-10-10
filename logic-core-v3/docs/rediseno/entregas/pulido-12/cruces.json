@@ -1,0 +1,47 @@
+{
+ "fuente": "d-cruces.ts: el reloj del final clavado cada 0,05 s; __crucesDelBanco(4): puntos de la superficie del logo adentro de la caja de cada malla de cada pieza del pie (dentro) y la distancia minima en el mundo (cerca, u)",
+ "corridas": {
+  "angulo-1024": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 4.701,
+   "pantallaMax": 0
+  },
+  "angulo-1440": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 5.229,
+   "pantallaMax": 0
+  },
+  "angulo-2560": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 4.26,
+   "pantallaMax": 0
+  },
+  "lenta-1024": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 4.302,
+   "pantallaMax": 0
+  },
+  "lenta-1440": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 4.768,
+   "pantallaMax": 0
+  },
+  "lenta-1920": {
+   "momentos": 105,
+   "piezas": 20,
+   "conCruce": 0,
+   "margenMinimo": 5.958,
+   "pantallaMax": 0
+  }
+ }
+}

@@ -8,8 +8,10 @@ import { cn } from '@/lib/utils'
 import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
-import { TEXTOS_DE_ENVIO, enviarAlServidor } from '../../_lib/formularios/enviar'
+import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
+import { TEXTOS_DE_ENVIO, enviarAlServidor, type ResultadoDelEnvio } from '../../_lib/formularios/enviar'
 import { ANUNCIO_DE_EXITO } from '../../_lib/formularios/gracias'
+import { anotarElPedido, recuperarAlMontar, useRecordar, useRespuestaEnViaje } from '../../_lib/formularios/memoriaDelFormulario'
 import { VOLTEO_TERMINADO, duracionDelVolteo, transicionDelVolteo, varianteDeLaPagina } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
@@ -69,6 +71,15 @@ const ERROR = 'text-micro leading-micro tracking-micro'
 const VACIO: DatosDelPie = { nombre: '', mail: '', mensaje: '' }
 
 type Estado = { readonly fase: 'quieto' | 'enviando' | 'exito' } | { readonly fase: 'error'; readonly mensaje: string }
+/** [PULIDO 12] 3 · lo que sobrevive a un montaje nuevo (`memoriaDelFormulario.ts`). */
+interface Memoria {
+  readonly datos: DatosDelPie
+  readonly errores: ErroresDelPie
+  readonly intento: boolean
+  readonly estado: Estado
+  readonly vuelta: number
+}
+const MEMORIA = 'formulario-del-pie'
 
 const sinSuscripcion = (): (() => void) => () => undefined
 /** [PULIDO 11] B1 · cuánto más que el volteo espera el respaldo antes de mostrar lo nuevo igual (s: la placa compila y se rearma). */
@@ -76,18 +87,21 @@ const RESPALDO_DEL_VOLTEO_S = 2.5
 
 export function FormularioDelPie(): React.JSX.Element {
   const c = CONTACTO_DEL_FORMULARIO
-  const [datos, setDatos] = useState<DatosDelPie>(VACIO)
-  const [errores, setErrores] = useState<ErroresDelPie>({})
-  const [intento, setIntento] = useState(false)
-  const [estado, setEstado] = useState<Estado>({ fase: 'quieto' })
+  // [PULIDO 12] 3 · si se vuelve a montar (al girar una tablet el pie cruza 1024 y su árbol cambia), arranca donde estaba.
+  const [antes] = useState(() => recuperarAlMontar<Memoria>(MEMORIA, { fase: 'quieto' }))
+  const [datos, setDatos] = useState<DatosDelPie>(antes?.datos ?? VACIO)
+  const [errores, setErrores] = useState<ErroresDelPie>(antes?.errores ?? {})
+  const [intento, setIntento] = useState(antes?.intento ?? false)
+  const [estado, setEstado] = useState<Estado>(antes?.estado ?? { fase: 'quieto' })
   // Hasta el primer cambio de estado, en reposo: sin transformada (el HTML del servidor, y la rama quieta, no escriben ninguna).
   const [huboCambio, setHuboCambio] = useState(false)
   // [PULIDO 11] B6 · cada vuelta al formulario después de un envío bueno, campos nuevos (sin el estado del autocompletado).
-  const [vuelta, setVuelta] = useState(0)
+  const [vuelta, setVuelta] = useState(antes?.vuelta ?? 0)
   // [PULIDO 11] B1 · el alto de los campos al enviar: la tarjeta lo guarda (la placa no cambia de caja y el volteo comparte el eje).
-  const [alto, setAlto] = useState<number | undefined>(undefined)
+  // [PULIDO 12] 3 · si el teléfono rota, se suelta (`altoGuardado.ts`).
+  const [alto, setAlto] = useAltoGuardado()
   // [PULIDO 11] B2 · la tarjeta ya se ve (terminó de entrar, o la escena terminó de voltear): arranca el encastre.
-  const [seVe, setSeVe] = useState(false)
+  const [seVe, setSeVe] = useState(antes?.estado.fase === 'exito' || antes?.estado.fase === 'error')
   const campos = useRef<HTMLDivElement | null>(null)
   const enviando = estado.fase === 'enviando'
   const resultado = estado.fase === 'exito' || estado.fase === 'error'
@@ -156,7 +170,11 @@ export function FormularioDelPie(): React.JSX.Element {
     setAlto(campos.current?.offsetHeight)
     setEstado({ fase: 'enviando' })
     // [PULIDO 10] J3 · con la espera mínima de la carga: aunque la respuesta llegue antes, se ve trabajar (no parpadea).
-    const r = await conDuracionMinima(enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() }))
+    // [PULIDO 12] 3 · anotado: si el formulario se vuelve a montar mientras viaja, el nuevo recibe la respuesta.
+    llego(await anotarElPedido(MEMORIA, conDuracionMinima(enviarAlServidor('/api/contacto', { origen: 'pie', nombre: datos.nombre.trim(), mail: datos.mail.trim(), mensaje: datos.mensaje.trim() }))))
+  }
+
+  const llego = (r: ResultadoDelEnvio): void => {
     pedirFoco.current = 'tarjeta'
     setSeVe(false)
     setHuboCambio(true)
@@ -171,6 +189,10 @@ export function FormularioDelPie(): React.JSX.Element {
       setEstado({ fase: 'error', mensaje: r.error })
     }
   }
+
+  useRecordar(MEMORIA, { datos, errores, intento, estado, vuelta } satisfies Memoria)
+  // [PULIDO 12] 3 · montado de nuevo con un envío en viaje: su respuesta llega acá.
+  useRespuestaEnViaje(MEMORIA, antes?.estado.fase === 'enviando', llego)
 
   const otroMensaje = (): void => {
     pedirFoco.current = 'nombre'

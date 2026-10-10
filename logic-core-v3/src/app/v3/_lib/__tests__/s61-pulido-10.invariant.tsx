@@ -197,7 +197,7 @@ const lugaresBien = (p: string, m: string): boolean =>
   p.includes('[--carga-tinta:var(--color-tinta)] max-escritorio:[--carga-tinta:var(--color-fondo)]') &&
   // [PULIDO 11] B4 · el rótulo, uno (Enviar) y medido para la tecla 3D aunque esté mudo (`data-rotulo-de-la-tecla`).
   p.includes(`<span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>`) &&
-  p.includes('const r = await conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
+  p.includes('llego(await anotarElPedido(MEMORIA, conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
   m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
   m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
 afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, en lugar del anillo), con la espera mínima')

@@ -311,6 +311,8 @@
     "test:s61": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s61",
     "test:s62-pulido-11": "npx tsx src/app/v3/_lib/__tests__/s62-pulido-11.invariant.tsx",
     "test:s62": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s62",
+    "test:s63-pulido-12": "npx tsx src/app/v3/_lib/__tests__/s63-pulido-12.invariant.tsx",
+    "test:s63": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s63",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",

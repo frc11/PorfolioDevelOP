@@ -1,0 +1,379 @@
+{
+ "fuente": "c2-cabecera.ts (controles fijos: pastilla, Contacto, Login, menú, parlante, progreso) · despues: el build final (con la revisión), de 320 a 1023",
+ "antes": [
+  {
+   "ancho": 320,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 320,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 320,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 1000,
+   "y": 0,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  },
+  {
+   "ancho": 1000,
+   "y": 1400,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  },
+  {
+   "ancho": 1000,
+   "y": 4200,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  },
+  {
+   "ancho": 1023,
+   "y": 0,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  },
+  {
+   "ancho": 1023,
+   "y": 1400,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  },
+  {
+   "ancho": 1023,
+   "y": 4200,
+   "choques": [
+    "login × progreso (27×32)"
+   ]
+  }
+ ],
+ "despues": [
+  {
+   "ancho": 320,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 320,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 320,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 375,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 390,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 414,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 600,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 768,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 820,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 860,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 900,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 960,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 1000,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 1000,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 1000,
+   "y": 4200,
+   "choques": []
+  },
+  {
+   "ancho": 1023,
+   "y": 0,
+   "choques": []
+  },
+  {
+   "ancho": 1023,
+   "y": 1400,
+   "choques": []
+  },
+  {
+   "ancho": 1023,
+   "y": 4200,
+   "choques": []
+  }
+ ]
+}
