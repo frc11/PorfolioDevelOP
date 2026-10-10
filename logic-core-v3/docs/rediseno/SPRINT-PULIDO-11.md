@@ -214,7 +214,19 @@ energía (laten). Afinan hacia la cola.
   (con y sin la bandera), y que no tapen textos (`e-hilos.ts`, en «VERIFICAR TRAS REINICIO»).
 
 ### Fase F · giroscopio (`docs/rediseno/GIROSCOPIO.md` + `?giroscopio=si`)
-- PENDIENTE
+- HECHO (el documento) · PROTOTIPO SIN PROBAR EN UN TELÉFONO (hace falta HTTPS y un aparato: «VERIFICAR TRAS REINICIO»).
+  `docs/rediseno/GIROSCOPIO.md`: la API (`beta`/`gamma`; en iOS 13+ `requestPermission()` sólo desde un gesto; Android sin
+  permiso; los dos sólo con HTTPS; si se niega, Safari lo recuerda y no se insiste), cómo probarlo (la IP de la red no sirve en
+  iOS; deploy preview, túnel o `next dev --experimental-https` con el certificado de mkcert en el teléfono; recomiendo el deploy
+  preview para decidir y el túnel para afinar), la experiencia (el preloader está apagado y hoy no existe un «Click para activar»
+  del sonido —busqué en el código y en la historia—: propongo que el parlante sea «Activar experiencia», un toque prende sonido y
+  movimiento; negado, todo igual sin insistir), el efecto (la cámara se inclina con el teléfono por el mismo caño que el mouse:
+  su suavizado, sus topes —el techo del domo no entra— y su apagado con movimiento reducido; calibrado al cero de cuando se
+  activó; en pausa con la pestaña oculta) y los riesgos (mareo, batería, accesibilidad, orientación).
+- El prototipo (apagado por defecto): `_lib/escena/giroscopio.ts` (el permiso desde el gesto, el cero, los ejes según la
+  pantalla, la pausa), una línea en `OrbitRig.tsx` (la inclinación es el puntero cuando está prendido) y un oyente de clic en
+  `ControlDelSonido.tsx` (con la bandera, el toque del parlante prende o apaga el giroscopio; va en el clic del documento para no
+  tocar `tocar`, que s47 fija, y sigue adentro del gesto). Invariante: s62 F.
 
 ### Fase G · verificación exhaustiva
 - PENDIENTE
@@ -305,6 +317,10 @@ con el progreso?).
 **Fase E (los hilos).** `npx tsx e-hilos.ts 1440 900 si ; npx tsx e-hilos.ts 1440 900 no ; npx tsx e-hilos.ts 390 844 si ; npx tsx
 e-hilos.ts 390 844 no` — la hoja de 6 + 6 cuadros (día y noche), la de 3 con el mouse y los ms por cuadro (media, p95, de más de 20
 ms) con y sin los hilos: el costo es la diferencia. Mirar también que no tapen textos (el titular del hero, Quiénes somos).
+
+**Fase F (el giroscopio).** En un iPhone y en un Android, por un deploy preview (HTTPS): ver la lista de `GIROSCOPIO.md`
+(«VERIFICAR EN UN TELÉFONO»). En el banco, a 390 con el puntero clavado en (0, 1) y (±1, 1) en cada sección: el techo del domo no
+entra.
 
 **Fase D (la caída).** `npx tsx d-caida.ts 1440 900 lenta ; npx tsx d-caida.ts 1440 900 angulo ; npx tsx d-caida.ts 390 844 lenta ;
 npx tsx d-caida.ts 390 844 angulo` — la corrida en vivo (hoja de 12 cuadros, `golpe` con la pose del logo justo antes y en el golpe,
