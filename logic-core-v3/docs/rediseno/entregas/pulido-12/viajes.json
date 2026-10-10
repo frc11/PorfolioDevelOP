@@ -1,0 +1,7 @@
+{
+ "fuente": "p-raiz.ts / p-raiz3.ts (1440 x 900, en Servicios): costo del recálculo de estilo forzado tras cambiar una clase o un atributo de <html>, <body> y una hoja (promedio de 6); v-viaje.ts: traza del navegador durante el viaje Servicios -> Tu panel; v-cuadros.ts: cuadros de rAF de viajes de ida y vuelta",
+ "costoMs": { "claseEnHtml": 6.2, "claseLenisScrolling": 6.4, "claseEnBody": 5.7, "claseEnUnaHoja": 0, "atributoDataEnHtml": 0, "claseEnHtmlSinLasReglasConNot": 0 },
+ "causa": "las reglas de @tailwindcss/typography (globales) terminan en :not(:where([class~=\"not-prose\"], [class~=\"not-prose\"] *)): un atributo class con descendiente universal; con eso cualquier cambio de clase de un ancestro invalida el subárbol entero",
+ "antes": { "viajeServiciosTuPanel1440": { "cuadrosLargos": [[36, 27], [1624, 27]], "tareaMasLarga": { "ms": 29, "estiloMs": 22.5, "en": "el rAF de Lenis (lenis.raf -> updateClassName)" } } },
+ "despues": { "viajeServiciosTuPanel1440": [ { "cuadrosLargos": [], "tareaMasLargaMs": 19 }, { "cuadrosLargos": [], "tareaMasLargaMs": 16 } ], "ruedaEnHtml": { "clasesDeHtml": "lenis (sin lenis-scrolling ni lenis-smooth)", "mutaciones": [["V3", "data-scroll-suave-en-curso", ""], ["V3", "data-scroll-suave-en-curso", null]] } }
+}

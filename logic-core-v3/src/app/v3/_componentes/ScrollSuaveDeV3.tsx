@@ -10,6 +10,7 @@ import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
 import { VELOCIDAD_DEL_SCROLL, velocidadDelCuadro } from '../_lib/velocidadDelScroll'
 import { ponerElModoDeNk } from './lenisDeNk'
+import { ATRIBUTO_DEL_SCROLL_EN_CURSO, sinClasesDeScroll } from './lenisSinClasesDeScroll'
 import { useDeslizamientoDelCta } from './useDeslizamientoDelCta'
 
 /**
@@ -76,6 +77,8 @@ export default function ScrollSuaveDeV3(): null {
     const lenis = new Lenis({ ...OPCIONES_DE_LENIS })
     // [ESCENA 10] T1 · el modo de nk (era la prueba `lenis=nk` de ESCENA 9): las opciones de la instancia, no su construcción.
     ponerElModoDeNk(lenis)
+    // [PULIDO 12] · el estado del scroll en un atributo de `[data-v3]` y no en una clase de `<html>` (recalculaba la página entera).
+    sinClasesDeScroll(lenis)
     instancia.current = lenis
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
@@ -100,6 +103,7 @@ export default function ScrollSuaveDeV3(): null {
       cancelAnimationFrame(pedido)
       VELOCIDAD_DEL_SCROLL.pxPorSegundo = 0
       lenis.destroy()
+      document.querySelector('[data-v3]')?.removeAttribute(ATRIBUTO_DEL_SCROLL_EN_CURSO)
       instancia.current = null
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)
     }

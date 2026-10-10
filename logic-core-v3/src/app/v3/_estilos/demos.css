@@ -308,3 +308,9 @@
   border-radius: var(--radius-sutil);
   pointer-events: none;
 }
+
+/* [PULIDO 12] · mientras el scroll suave corre, los iframes no toman la rueda (era la regla de la hoja del motor de scroll
+   sobre su clase de scroll suave, que en /v3 ya no se escribe: `_componentes/lenisSinClasesDeScroll.ts`). */
+[data-v3][data-scroll-suave-en-curso] iframe {
+  pointer-events: none;
+}

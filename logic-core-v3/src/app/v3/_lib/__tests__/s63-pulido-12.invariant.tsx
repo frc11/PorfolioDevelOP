@@ -9,6 +9,8 @@
  *        distancia del logo que el formulario), el logo centrado, y a 1024 nada de la izquierda se sale de su columna.
  *   2 · Quiénes somos al salir (desde 1024): el cuerpo, que en el reposo queda justo debajo del logo, subía a través de él en toda
  *       la salida; ahora se va si su caja cruza la del logo y vuelve en el reposo.
+ *   5 · los viajes y el scroll sin el cuadro largo del principio y del final: Lenis ya no escribe su estado del scroll como clase de
+ *       `<html>` (cada clase recalculaba el estilo de la página entera), sino como atributo de la raíz de /v3.
  *   1 · la caída del logo contra las piezas 3D del pie: no se cruzan (margen mínimo de más de 4 u), con el gancho del banco.
  *   3 · la tarjeta del resultado y el teléfono que rota: el alto guardado se suelta si cambia el ancho (la tarjeta del panel de
  *       Contacto quedaba más alta que la pantalla y «Reintentar» afuera), y el formulario del pie que se vuelve a montar al cruzar
@@ -20,6 +22,7 @@ import { readFileSync } from 'node:fs'
 import { VIGENCIA_MS, anotar, recuperar, recuperarAlMontar, anotarElPedido, pedidoEnCurso } from '../formularios/memoriaDelFormulario'
 import { sigueValiendo } from '../formularios/altoGuardado'
 import { ESQUIVA_AL_SALIR, pedidoAlSalir } from '../escena/titulos3d/esquivaAlSalir'
+import { ATRIBUTO_DEL_SCROLL_EN_CURSO, clasesQuietas } from '../../_componentes/lenisSinClasesDeScroll'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -180,5 +183,22 @@ controlPositivo('  el detector VE una regla que vuelve apenas deja de cruzar', (
 controlPositivo('  y una que se va apenas pasa el reposo (la primera versión: un empujón de 9 px lo borraba)', ((pasado: number, caja: Parameters<typeof pedidoAlSalir>[1], logo: Parameters<typeof pedidoAlSalir>[2], seFue: boolean) => (pasado > vuelveHastaPx ? { pedido: 0 as const, seFue: true } : pedidoAlSalir(pasado, caja, logo, seFue))) as typeof pedidoAlSalir, reglaBien)
 const TITULOS_LIMPIA = TITULOS.includes('useEffect(() => soltarLosQueEsquivan, [])')
 afirmar(TITULOS_LIMPIA, '  al desmontarse la escena de los títulos, lo marcado vuelve a la vista (sin opacidad ni estado viejo)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · Los viajes sin el cuadro largo: el estado del scroll de Lenis no es una clase de <html>')
+const VIAJES = recibo<{ costoMs: Record<string, number>; antes: { viajeServiciosTuPanel1440: { cuadrosLargos: number[][] } }; despues: { viajeServiciosTuPanel1440: { cuadrosLargos: number[][]; tareaMasLargaMs: number }[] } }>('viajes.json')
+const LENIS_V3 = leer('_componentes/ScrollSuaveDeV3.tsx')
+const DEMOS_CSS = leer('_estilos/demos.css')
+const sinClaseDeScroll = (f: typeof clasesQuietas): boolean =>
+  [false, true].every((parado) => [false, true].every((trabado) => {
+    const c = f({ isStopped: parado, isLocked: trabado })
+    return c.includes('lenis') && c.includes('lenis-stopped') === parado && c.includes('lenis-locked') === trabado && !c.includes('lenis-scrolling') && !c.includes('lenis-smooth')
+  })) &&
+  LENIS_V3.includes('sinClasesDeScroll(lenis)') && DEMOS_CSS.includes(`[data-v3][${ATRIBUTO_DEL_SCROLL_EN_CURSO}] iframe {`)
+afirmar(sinClaseDeScroll(clasesQuietas) && VIAJES.costoMs.claseEnHtml > 3 && VIAJES.costoMs.atributoDataEnHtml < 0.5, `5 · el estado del scroll va en \`${ATRIBUTO_DEL_SCROLL_EN_CURSO}\` (una clase en <html> costaba ${String(VIAJES.costoMs.claseEnHtml)} ms de estilo; un atributo, ${String(VIAJES.costoMs.atributoDataEnHtml)}) y los iframes siguen sin puntero mientras corre`)
+controlPositivo('5 · el detector VE las clases de Lenis de siempre (lenis-scrolling y lenis-smooth)', ((e: { readonly isStopped: boolean; readonly isLocked: boolean }) => [...clasesQuietas(e), 'lenis-scrolling', 'lenis-smooth']) as typeof clasesQuietas, sinClaseDeScroll)
+const viajeLimpio = (d: { cuadrosLargos: number[][] }[]): boolean => d.length >= 2 && d.every((x) => x.cuadrosLargos.length === 0)
+afirmar(viajeLimpio(VIAJES.despues.viajeServiciosTuPanel1440), '  el viaje Servicios → Tu panel a 1440 sin cuadros de más de 20 ms (dos corridas con la traza)')
+controlPositivo('  el detector VE el viaje de antes (27 ms al arrancar y al terminar)', [VIAJES.antes.viajeServiciosTuPanel1440, VIAJES.antes.viajeServiciosTuPanel1440], viajeLimpio)
 
 cerrar('s63-pulido-12')

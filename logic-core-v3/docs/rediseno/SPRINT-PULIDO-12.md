@@ -94,6 +94,20 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   sueltan al desmontarse la escena de los títulos; la caja y el logo se miden sólo cuando pueden cambiar algo.
 - Queda (anotado en «Lo que no quedó bien»): quien se queda leyendo 30–40 px pasado el reposo no ve el cuerpo hasta volver un poco.
 
+### Defecto 7 · los viajes y el scroll: el cuadro largo del principio y del final
+- Hallado en la matriz (cada viaje tenía un cuadro de 27–40 ms a los ~40 ms y otro al llegar). Diagnóstico con la traza del
+  navegador: una tarea de 29 ms con 22,5 ms de recálculo de estilo dentro del rAF de Lenis. Medido aparte (`p-raiz*.ts`):
+  cambiar CUALQUIER clase de `<html>` o `<body>` cuesta 6–8 ms (una clase en una hoja: 0; un atributo `data-` en `<html>`: 0); sin
+  las 173 reglas con `:not(` cuesta 0: son las de `@tailwindcss/typography` (`[class~="not-prose"] *`), globales (las usa el
+  chatbot: no se tocan desde este sprint).
+- Arreglo en /v3: `_componentes/lenisSinClasesDeScroll.ts` — la instancia de /v3 deja en `<html>` sólo las clases que cambian
+  poco (`lenis`, `lenis-stopped`, `lenis-locked`) y el scroll suave en curso va en `data-scroll-suave-en-curso` de `[data-v3]`; la
+  regla de los iframes sin puntero mientras corre, en `demos.css` con el atributo. Revisión adversaria: sin defectos (Lenis no
+  lee sus clases; el único iframe de /v3 está adentro de `[data-v3]`); aplicados dos detalles (el comentario y
+  `lenis-autoToggle` si algún día se prende).
+- Queda (anotado): la causa de fondo está en la hoja global (typography); cualquier otra clase que se cambie en `<html>` o
+  `<body>` en /v3 sigue costando la página entera.
+
 ### 4 · La matriz completa
 - El instrumento de cajas (`cajas.ts`) contaba texto que NO se ve: el DOM transparente que marca dónde va el 3D (la frase
   del CTA estando en Demos), lo que un ancestro recorta (los mensajes adentro de la ventana de la demo de Tu panel, las
@@ -123,7 +137,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | 3 | El pie: la columna izquierda se salía de la suya | 1024 | Un cuarto (240 px) no alcanzaba: WhatsApp +13, «Por qué develOP» +7, Facebook +16 | dd484243 | sí: columna de 264, nada visible afuera |
 | 4 | El pie no era simétrico a la vista | 1280–2560 | Las letras de la izquierda no llegaban al borde de su columna (+8 a +117 px más lejos del logo que el formulario) | dd484243 | sí: iguales ±1 px en los seis anchos |
 | 5 | El formulario del pie pierde la tarjeta y lo escrito al rotar una tablet | 768 × 1024 → 1024 × 768 (cruza 1024) | `CanalDePieza` cambia de tipo con el modo del pie (con progreso / sin él): React desmonta el formulario | 036b0c48 | sí: la tarjeta sigue (rotada y de vuelta) |
-| 6 | Quiénes somos al salir: el cuerpo sube a través del logo | 1024–2560 (y 1093 × 570) | En el reposo el cuerpo queda justo debajo del logo y no tiene salida propia: al seguir bajando cruza su silueta de ~24 a ~600 px después del reposo (el instrumento de J1 medía sólo el reposo; A2 arregló la ENTRADA) | (este commit) | sí: oculto desde 48 px pasado el reposo en los siete cuadros; en el reposo, entero; vuelve al volver al reposo y al llegar por el menú |
+| 7 | Un cuadro de 27–40 ms al arrancar y al terminar cada viaje del menú (y cada gesto de la rueda) | todos (medido a 1440 y 390) | Lenis escribe `lenis-scrolling`/`lenis-smooth` en `<html>` al arrancar y parar; cualquier clase de `<html>` recalcula el estilo de la página entera (6–8 ms; 22 ms en un viaje) porque las reglas globales de `@tailwindcss/typography` terminan en `:not(:where([class~="not-prose"], [class~="not-prose"] *))` | (este commit) | sí: el viaje Servicios → Tu panel sin cuadros de más de 20 ms (dos trazas; antes 27 y 27) |
+| 6 | Quiénes somos al salir: el cuerpo sube a través del logo | 1024–2560 (y 1093 × 570) | En el reposo el cuerpo queda justo debajo del logo y no tiene salida propia: al seguir bajando cruza su silueta de ~24 a ~600 px después del reposo (el instrumento de J1 medía sólo el reposo; A2 arregló la ENTRADA) | 14f677f2 | sí: oculto desde 48 px pasado el reposo en los siete cuadros; en el reposo, entero; vuelve al volver al reposo y al llegar por el menú |
 
 ## Memoria (antes de cada tanda: disponible y no paginado)
 
