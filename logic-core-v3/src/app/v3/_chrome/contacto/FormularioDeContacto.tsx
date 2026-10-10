@@ -307,7 +307,7 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             {rechazos === 0 ? (
               aviso
             ) : (
-              <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: '-100%' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
+              <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
                 {aviso}
               </motion.span>
             )}

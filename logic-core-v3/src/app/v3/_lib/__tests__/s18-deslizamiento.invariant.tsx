@@ -417,7 +417,7 @@ afirmar(
 titulo('5 · El destino es un NUDO de la coreografía, medido en el click — no un literal, no `router.push`')
 
 afirmar(
-  quitarComentarios(leer(EFECTO)).includes('lenis.scrollTo(destinoEnPx, {') && quitarComentarios(leer(EFECTO)).includes('const destinoEnPx = destinoDelViaje(seccion)'),
+  quitarComentarios(leer(EFECTO)).includes('lenis.scrollTo(destinoEnPx, {') && quitarComentarios(leer(EFECTO)).includes('const destinoEnPx = destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)'), // [PULIDO 10] J8 · y el subdestino (Demos)
   '`scrollTo` recibe el nudo de la sección, el mismo píxel que el motor de abajo',
 )
 afirmar(!/router\.push|useRouter/.test(FUENTE_DEL_SPRINT), '  y no hay `router.push` ni `useRouter` en el sprint')

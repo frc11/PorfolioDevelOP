@@ -162,7 +162,7 @@ titulo('D5 · El pie: bloques sólidos que flotan')
 const delPie = ['_secciones/cierre/FormularioDelPie.tsx', '_secciones/cierre/PiezasDeContacto.tsx', '_secciones/cierre/ColumnasDelPie.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
 const cuantos = (c: string, re: RegExp): number => (c.match(re) ?? []).length
 // [RONDA 2] F1: los campos van en un `map` y volvió WhatsApp; el aviso y su mail se fueron. F5: los campos, en ranura; Enviar, la principal.
-const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) >= 6 && /<BloqueSolido forma="ranura" className="block w-full">\s*\{k === 'mensaje' \? \(/.test(c) && /<BloqueSolido forma="principal" className="self-start[^"]*">\s*<button type="submit"/.test(c) && /<BloqueSolido>\s*<a\s+href=\{WHATSAPP\.href\}/.test(c) && /<BloqueSolido>\s*<EnlaceDelPieConIcono/.test(c)
+const todoEsUnBloque = (c: string): boolean => cuantos(c, /<BloqueSolido/g) >= 6 && /<BloqueSolido forma="ranura" className="block w-full">\s*\{k === 'mensaje' \? \(/.test(c) && /<BloqueSolido forma="principal" className="z-10 self-start[^"]*">\s*<button type="submit"/.test(c) && /<BloqueSolido>\s*<a\s+href=\{WHATSAPP\.href\}/.test(c) && /<BloqueSolido>\s*<EnlaceDelPieConIcono/.test(c)
 afirmar(todoEsUnBloque(delPie), 'cada enlace (el mail, WhatsApp, el recorrido, las redes), cada campo (nombre, mail, mensaje) y el botón son un bloque sólido, con el elemento de verdad adentro (se enfoca, se escribe)')
 controlPositivo('el detector VE un campo sin su bloque', delPie.replace('<BloqueSolido forma="ranura" className="block w-full">', '<div>'), todoEsUnBloque)
 const cierreTsx = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))

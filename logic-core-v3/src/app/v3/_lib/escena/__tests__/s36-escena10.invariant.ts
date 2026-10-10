@@ -284,7 +284,8 @@ const reglas = (c: string): boolean =>
   // [3D Y SONIDO] T1: compilado y calentado, y recién ahí listo para el DOM. [PASADA FINAL] A1: por lote, en `sincronia.ts`.
   /void Promise\.all\(nuevos\.map\(\(a\) => t\.gl\.compileAsync\(a\.grupo, t\.camara, t\.escena\)\)\)\.then\(\(\) => \{\s*if \(!vivo\(\)\) return\s*calentar\(t\.gl, t\.escena, t\.camara\)/.test(c) &&
   // [RETOQUE 3D] B1: la colocación se mudó a `colocarElArmado` (guarda el lugar para el que se queda).
-  /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, a\.fuente\.data\) \/\/ una vez por llegada/.test(c)
+  // [PULIDO 10] J1 · con los renglones del título (el texto 3D en renglones).
+  /const lugar = lugarDeLectura\(a\.titulo\.lugar, a\.titulo\.subida, a\.renglones\)\s*a\.mundoPorPx = colocar\(a\.grupo, nudo, lugar, a\.fuente\.data\) \/\/ una vez por llegada/.test(c)
 afirmar(reglas(escena3d), 'las reglas de §4: sin letras en camino no se dibuja (5), con nombre (6), con dithering (8), compilado y calentado al armarse (2), y el DOM se lee una vez por llegada, no por cuadro (3)')
 controlPositivo('el detector VE un título que se dibuja siempre', escena3d.replace('a.malla.visible = a.sinLetras ? conRaya && llegada > 0 && salida < 1 : llegada > 0 && salida < 1', 'a.malla.visible = true'), reglas)
 

@@ -27,7 +27,7 @@ export function RecorridoDelPie({ enFila = false, className }: { readonly enFila
         data-pieza="destinos-del-pie"
         className={cn(
           'text-cuerpo leading-texto tracking-texto font-semi',
-          enFila ? 'flex flex-wrap justify-center gap-x-[var(--spacing-8)] gap-y-[var(--spacing-2)]' : 'grid grid-flow-col grid-cols-[auto_auto] grid-rows-4 justify-start gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)]',
+          enFila ? 'flex flex-wrap justify-center gap-x-[var(--spacing-8)] gap-y-[var(--spacing-2)]' : 'grid grid-flow-col auto-cols-max grid-rows-4 justify-start gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)]',
         )}
       >
         {DESTINOS_DE_LA_RUTA.map((destino) => (

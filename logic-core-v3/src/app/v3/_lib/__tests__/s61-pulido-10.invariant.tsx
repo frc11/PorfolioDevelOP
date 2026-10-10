@@ -123,8 +123,9 @@ const evaluarCss = (expr: string, w: number, h: number): number => {
 const unidadesBien = (f: typeof enUnidadesDelLogo): boolean => [[1024, 824], [1280, 800], [1440, 900], [1024, 1366], [2560, 1080]].every(([w, h]) => Math.abs(evaluarCss(f(30), w, h) - (30 * h) / 100 / Math.min(BANDA.tope, Math.max(1, (BANDA.aspecto * h) / w))) < 0.01)
 afirmar(fovBien && unidadesBien(enUnidadesDelLogo), '  el campo de visión achica por el factor, y las medidas del logo en el DOM (CSS) son su medida dividida el factor del aspecto')
 controlPositivo('  el detector VE una medida sin el tope (un retrato la achicaba de más)', ((q: number) => `min(${String(q)}svh,${String(q / BANDA.aspecto)}vw)`) as typeof enUnidadesDelLogo, unidadesBien)
-const rig = leer('_lib/escena/OrbitRig.tsx')
-const cableadoDeLaBanda = (r: string, c: string): boolean => r.includes('BANDA_EN_VIVO.factor = factorDeLaBanda(state.size.width, state.size.height)') && r.includes('const fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)') && c.includes('c.fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)') && leer('_lib/escena/cameraFraming.ts').includes('const fov = camera instanceof THREE.PerspectiveCamera ? camera.fov : CAMERA_FOV')
+// El campo de visión de la cámara viva vive en `campoDeVision.ts` (lo llama `OrbitRig` en cada cuadro: salió de ahí para que no engorde).
+const rig = leer('_lib/escena/campoDeVision.ts') + leer('_lib/escena/OrbitRig.tsx')
+const cableadoDeLaBanda = (r: string, c: string): boolean => r.includes('BANDA_EN_VIVO.factor = factorDeLaBanda(ancho, alto)') && r.includes('const fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)') && r.includes('ponerElCampoDeVision(state.camera, state.size.width, state.size.height)') && c.includes('c.fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)') && leer('_lib/escena/cameraFraming.ts').includes('const fov = camera instanceof THREE.PerspectiveCamera ? camera.fov : CAMERA_FOV')
 afirmar(cableadoDeLaBanda(rig, colocacion), '  la cámara viva, la de la lectura de los títulos (y los planos del CTA) y el encuadre usan el mismo campo de visión')
 controlPositivo('  el detector VE la cámara de los títulos con el campo de siempre', [rig, colocacion.replace('c.fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)', 'c.fov = CAMERA_FOV')], ([r, c]: string[]) => cableadoDeLaBanda(r, c))
 
@@ -272,7 +273,7 @@ const pieRechazaBien = (p: string): boolean =>
   p.includes("placa.current?.querySelector<HTMLElement>('button[type=\"submit\"]')?.focus({ preventScroll: true })") &&
   p.includes("const rotulo = enviando ? c.enviando : estado.fase === 'error' ? REINTENTAR : c.enviar") &&
   p.includes('const giraElRotulo = !reducido && !enVolumen && rotulo === REINTENTAR') &&
-  p.includes("className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}") && p.includes("initial={reducido ? { opacity: 0 } : { opacity: 0, y: '-100%' }}") &&
+  p.includes("className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}") && p.includes("initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }}") &&
   p.includes('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}') && p.includes('if (rechazos === 0 || reducido || volumen) return undefined')
 afirmar(pieRechazaBien(PIE_J5), 'B · el pie: el rechazo, el pulso, el foco en Reintentar (que gira), el error saliendo de atrás del botón y el resorte del DOM plano; con movimiento reducido, sin resorte ni giro')
 controlPositivo('B · el detector VE la escala del resorte sobre el formulario de volumen (pisaría su homografía)', PIE_J5.replace('style={volumen || rechazos === 0 ? undefined : { scale: escalaDelRechazo }}', 'style={{ scale: escalaDelRechazo }}'), pieRechazaBien)
@@ -381,7 +382,7 @@ controlPositivo('B · el detector VE un subrayado con otro tiempo', { ...SUBRAYA
 const RECORRIDO_DEL_PIE = leer('_secciones/cierre/RecorridoDelPie.tsx')
 const recorridoBien = (r: string, selector: string): boolean =>
   DESTINOS_DE_LA_RUTA.length === 7 &&
-  r.includes("'grid grid-flow-col grid-cols-[auto_auto] grid-rows-4 justify-start") &&
+  r.includes("'grid grid-flow-col auto-cols-max grid-rows-4 justify-start") &&
   /<ul\s+data-pieza="destinos-del-pie"[\s\S]{0,900}<EnlaceDeTexto href=\{destino\.ancla\}/.test(r) &&
   selector.split(', ').includes('[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace"]')
 afirmar(recorridoBien(RECORRIDO_DEL_PIE, SELECTOR_DE_LOS_VIAJES), 'C · el recorrido: siete destinos en dos columnas (cuatro y tres), enlaces de texto que viajan como los del menú')
@@ -404,12 +405,12 @@ controlPositivo('D · el detector VE una disposición que no se lee', ((v: strin
 
 // E · `?pie=columna2`: la cámara corre el encuadre (`setViewOffset`) del centro al de la segunda de cuatro columnas, y la cámara
 // sin el mouse copia la proyección (el pie de volumen se coloca con ella: sigue sobre su DOM).
-const RIG = leer('_lib/escena/OrbitRig.tsx')
+const RIG = leer('_lib/escena/campoDeVision.ts')
 const SIN_EL_MOUSE = leer('_lib/escena/sinElMouse.ts')
 const corrimientoBien = (k: number, rig: string): boolean =>
   Math.abs(0.5 - k - 1.5 / 4) < 1e-9 &&
-  rig.includes("disposicionDeLaPagina() === 'columna2' ? Math.round(CORRIMIENTO_DE_LA_COLUMNA_2 * llegadaDelCorrimiento(PROGRESO_DEL_PIE.valor?.get() ?? 0) * anchoDelCuadro) : 0") &&
-  rig.includes('state.camera.setViewOffset(anchoDelCuadro, altoDelCuadro, corrimiento, 0, anchoDelCuadro, altoDelCuadro)') &&
+  rig.includes("disposicionDeLaPagina() === 'columna2' ? Math.round(CORRIMIENTO_DE_LA_COLUMNA_2 * llegadaDelCorrimiento(PROGRESO_DEL_PIE.valor?.get() ?? 0) * ancho) : 0") &&
+  rig.includes('camara.setViewOffset(ancho, alto, corrimiento, 0, ancho, alto)') &&
   SIN_EL_MOUSE.includes('c.projectionMatrix.copy(viva.projectionMatrix)')
 afirmar(corrimientoBien(CORRIMIENTO_DE_LA_COLUMNA_2, RIG), 'E · `?pie=columna2`: el encuadre corrido un octavo del ancho (el logo, en el centro de la segunda columna) a medida que el pie llega; la cámara sin el mouse lo copia')
 controlPositivo('E · el detector VE un corrimiento de un cuarto (el logo en el borde de la columna)', 0.25, (k: number) => corrimientoBien(k, RIG))

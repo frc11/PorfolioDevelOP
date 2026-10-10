@@ -51,8 +51,10 @@ el volteo y el hundido como concepto (J4).
   `mix-blend-mode` y un velo detrás la puede cortar sin error; hay que medirlo), e (el CTA en 3D abajo de 1024: la frase desde
   la izquierda y HABLANOS desde la derecha) y g (WhatsApp cortado a 375: la cuenta dice que entra —303 de 343 px—, hay que
   verlo para saber qué lo corta)
-- EN CURSO: la verificación final (la matriz, los solapes en todos los anchos, los estados de los formularios): espera
-  memoria para el banco
+- HECHO: `verificar` al cierre: los 8 rojos de la base y ninguno más (commit «pulido 10 · verificar»)
+- PENDIENTE (sin memoria para el banco): la verificación visual final —la matriz de 8 anchos de día y de noche, los solapes en
+  todos los anchos, los estados de los formularios con `?envio=lento|error` y el autocompletado— y lo que cada punto dejó
+  anotado como «pendiente del banco»
 
 ## Memoria
 
@@ -150,6 +152,28 @@ pie nuevo de J8.
   CTA en volumen salen de la escena (`__ctaDelBanco().cajas()`); el ratón, en el centro (la cámara lo sigue). Los recibos se
   tomaron con el pie de J8 ya en el árbol (el momento «pie»).
 
+## Verificar (al cierre)
+
+Con el protocolo de memoria (el Chrome del banco cerrado, el dev server apagado; 5,2 GB libres), `npm run verificar` completo.
+
+**Primera corrida: 18 agregados en rojo.** Los 8 de la base (s1, s2, s3, s4, s5, s7, s8 y s17: piden un build) y 10 de este
+sprint, todos aserciones que fijaban el código de antes o valores que la regla no deja:
+- s10, s18 (J8: la parada de Demos y el viaje al subdestino); s36 (J1: los renglones en la colocación); s39, s41, s42, s49 y
+  s50 (J5 y J9: el formulario de Motion, el botón sobre el error, el resorte en la placa, la hoja centrada): se actualizaron y
+  quedaron en la tabla de arriba;
+- s6 (`s6-tokens`): dos valores sueltos que puse yo: `'-100%'` en el error que sale de atrás del botón (ahora
+  `calc(-1 * var(--spacing-5))`) y `grid-cols-[auto_auto]` en el recorrido (ahora `auto-cols-max`, de Tailwind);
+- s6 y s9: `OrbitRig.tsx` engordó contra su línea de base (665 contra 651, con J1 y J8): el campo de visión se mudó a
+  `campoDeVision.ts` y el rig volvió a 639 renglones.
+
+**Segunda corrida, con los arreglos: 68 pasos, 8 con falla: los 8 de la base** (s1, s17, s2, s3, s4, s5, s7, s8). Y
+`npm run test:frontera` (va antes del commit): 0 fallas.
+
+Adentro de los agregados de la base hay dos fallas que NO son de este sprint, comprobadas corriéndolas en el árbol de PULIDO 9
+(5c3b66a8, en un worktree aparte): `s5-compacto` (las cadenas «encuadre: arriba/medio» de Quiénes somos no están en el marcado:
+en PULIDO 9 faltaban seis; hoy cuatro, porque «arriba» aparece por casualidad en `--agencia-arriba`) y `s4-cobertura` (las
+suites s23–s39 sin su `test:<suite>` apuntando al corredor: la misma lista).
+
 ## Hallazgos fuera de alcance (anotados, no implementados)
 
 - J1 · **El lente de Portfolio no sigue la banda.** `_lib/motion/lente.ts` espeja el campo de visión de la cámara en la
@@ -184,5 +208,13 @@ pie nuevo de J8.
 | J5 | `s52` C4 · el lugar del botón del pie | `self-start …` | `z-10 self-start …` | El error sale de atrás del botón |
 | J9 | `s52` C4 · el formulario del pie en el teléfono | el nombre y el mail lado a lado (`col-span-3`), el mensaje en cuatro y Enviar al lado (`col-span-2`, abajo a la derecha) | todo en `col-span-6`: un campo por renglón y Enviar abajo a todo el ancho | J9 · f |
 | J9 | `s54` A2 · el formulario en la tablet | el mensaje `col-span-4` (en el teléfono) | `col-span-6`; lo de la tablet, igual | J9 · f (la aserción mira la tablet; sólo cambió el ancho del teléfono) |
+| verificar (J8) | `s10-acceso` · las paradas de teclado del home | la suma de los deltas (62) | más `DELTA_DEL_PULIDO_10` (+1: Demos en el recorrido del pie) = 63 | Un destino nuevo es una parada nueva; el delta queda declarado con su razón |
+| verificar (J8) | `s18` §5 · `scrollTo` recibe el nudo | `destinoDelViaje(seccion)` | `destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)` | El subdestino (Demos); como `s27` |
+| verificar (J1) | `s36` §4 · la colocación una vez por llegada | `lugarDeLectura(a.titulo.lugar, a.titulo.subida)` | `…, a.renglones)` | El texto 3D en renglones (J1 · A) |
+| verificar (J9, J5) | `s39` T4 · la hoja del teléfono y su botón | la clase sin centrado; `rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO}` | con `min-h-full justify-center`; `rotulo={rotuloDelEnvio}` y su definición (con Reintentar) | J9 · c y J5 |
+| verificar (J5) | `s41` 3I · el contacto es un formulario de verdad | `<form id="contacto"` | `<form` o `<motion.form` | La escala del rechazo en el DOM plano: sigue siendo un `<form>` |
+| verificar (J5) | `s42` D5 · Enviar es un bloque sólido | `className="self-start…"` | `className="z-10 self-start…"` | El error sale de atrás del botón |
+| verificar (J5) | `s49` 2B · la placa al producto | `<PlacaDelContacto activa={placa}>` | `… rechazo={hundidoDelRechazo}>` | El resorte del rechazo en profundidad |
+| verificar (J5) | `s50` 1D · la placa quieta al viajar | el estilo del bloque sin `z` | con `z: rechazo` | Lo mismo |
 | J9 | `s5-quienes-somos` · las clases `hover:` de la sección | 33 | 36 | La leyenda corta de la foto del equipo abajo de 1024 («El equipo detrás de develOP») lleva el mismo texto del revelado que las otras (3) |
 | J10 | `s60` H1 · el modelo del polvo | adentro de `s60` | en `modeloDelPolvo.ts`, compartido con `s61`. El cableado de hoy le pasa además la quietud con la histéresis; el de antes, la de siempre | Las mismas afirmaciones y los mismos controles, ahora contra el código de hoy (con J10) |

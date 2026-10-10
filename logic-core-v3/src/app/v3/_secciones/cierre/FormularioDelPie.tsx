@@ -236,7 +236,7 @@ export function FormularioDelPie(): React.JSX.Element {
           recorta), sin tapar el botón. */}
       <p role="alert" className={cn(ERROR, 'overflow-hidden', estado.fase !== 'error' && 'sr-only')}>
         {estado.fase === 'error' && (
-          <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: '-100%' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
+          <motion.span key={rechazos} className="block" initial={reducido ? { opacity: 0 } : { opacity: 0, y: 'calc(-1 * var(--spacing-5))' }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}>
             {estado.mensaje}
           </motion.span>
         )}

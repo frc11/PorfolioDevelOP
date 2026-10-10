@@ -221,7 +221,8 @@ titulo('3I · El pie en volumen, con el contacto de verdad')
 // [CIERRE RETOQUE 3D] D5: el pie ya no es una sala alrededor del logo (paredes y piso): bloques sólidos, s42 · D5.
 const formulario = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 // [RONDA 2] F1: el formulario envía (al endpoint propio, sin aviso): s43 · F1.
-afirmar(/<form id="contacto"/.test(formulario) && ['nombre', 'mail', 'mensaje'].every((c) => formulario.includes(`'${c}'`)), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo)')
+// [PULIDO 10] J5 · el formulario es de Motion (la escala del rechazo en el DOM plano): sigue siendo un `<form>` de verdad.
+afirmar(/<(motion\.)?form id="contacto"/.test(formulario) && ['nombre', 'mail', 'mensaje'].every((c) => formulario.includes(`'${c}'`)), 'el contacto es un formulario de verdad (nombre, mail y mensaje, cada campo con su rótulo)')
 const piezasDeContacto = sinComentarios(leer('_secciones/cierre/PiezasDeContacto.tsx'))
 // [CIERRE RETOQUE 3D] N1: la hoja vuelve (sin WhatsApp, por mail): s42 · N1.
 // [RONDA 2] F1: WhatsApp volvió al pie (sólo queda fuera del formulario de contacto): s43 · F1.
