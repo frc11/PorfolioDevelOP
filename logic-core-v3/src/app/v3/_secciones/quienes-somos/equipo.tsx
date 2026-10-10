@@ -96,7 +96,9 @@ export function ElEquipo(): React.JSX.Element {
             const aLaDerecha = indice === 1
             return (
               <div key={persona.nombre} data-pieza-a="persona" className={GEOMETRIA.fila.caja}>
+                {/* [PULIDO 11] A4 · J9 b · el velo de noche detrás del nombre y su párrafo (abajo de 1024, `banda.css`). */}
                 <div
+                  data-velo-de-noche=""
                   className={cn(
                     GEOMETRIA.fila.texto,
                     aLaDerecha ? GEOMETRIA.fila.textoADerecha : GEOMETRIA.fila.textoAIzquierda,
@@ -227,7 +229,8 @@ export function LaFoto(): React.JSX.Element {
               la jerarquía: son los tres rótulos de una persona o de un grupo. El
               `figcaption` es su lugar semántico —nombra la figura— y de paso deja
               de estar debajo, que es donde estaba el epígrafe que se fue. */}
-          <figcaption>
+          {/* [PULIDO 11] A4 · J9 b · el velo de noche detrás de «Nosotros» y de su párrafo (abajo de 1024, `banda.css`). */}
+          <figcaption data-velo-de-noche="">
             <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="w-full">
               {(progreso) => <TituloDeLaFoto progreso={progreso} />}
             </Bloque>
@@ -243,16 +246,18 @@ export function LaFoto(): React.JSX.Element {
                 el gesto tiene sentido y donde el texto entra adentro con holgura
                 —medido: 121 px de sobra a 425 y 203 a 768—. En los dos casos el
                 marcado la trae: quien no puede hacer clic la tiene siempre. */}
-            <Cuerpo
-              como="p"
-              className={cn(
-                'sr-only max-movil:not-sr-only',
-                GEOMETRIA.medidaMovilDelCuerpo,
-                MEZCLA_SOBRE_LA_ESCENA,
-              )}
-            >
-              {CONTENIDO.equipo.descripcion}
-            </Cuerpo>
+            <div data-velo-de-noche="">
+              <Cuerpo
+                como="p"
+                className={cn(
+                  'sr-only max-movil:not-sr-only',
+                  GEOMETRIA.medidaMovilDelCuerpo,
+                  MEZCLA_SOBRE_LA_ESCENA,
+                )}
+              >
+                {CONTENIDO.equipo.descripcion}
+              </Cuerpo>
+            </div>
 
             <Bloque patron="P2" rango="llegada-de-la-foto" className="w-full">
               {(progreso) => (

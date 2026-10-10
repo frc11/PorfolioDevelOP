@@ -1,0 +1,16 @@
+{
+ "que": "PULIDO 11 · A4 · J9 b · el contraste de los textos de Quiénes somos con la noche puesta (subiendo de Portfolio), a 390 × 844 y 375 × 812, NVIDIA. Por bloque: Otsu sobre la luminancia de su caja; el texto (mediana del grupo claro) contra el fondo (p90 del oscuro). Instrumento: pulido-11/_scripts/a4d-contraste.ts y a4e-recontar.ts",
+ "sinVelo": [
+  { "bloque": "Valentino", "ancho": 390, "contraste": 4.04 },
+  { "bloque": "Nosotros", "ancho": 390, "contraste": 3.52 }
+ ],
+ "conVelo92": [
+  { "bloque": "Valentino", "ancho": 390, "contraste": 5.65 },
+  { "bloque": "Nosotros", "ancho": 390, "contraste": 5.51 },
+  { "bloque": "Franco", "ancho": 375, "contraste": 5.19 }
+ ],
+ "conVelo80": [
+  { "bloque": "Valentino", "ancho": 390, "contraste": 4.91 },
+  { "bloque": "Nosotros", "ancho": 390, "contraste": 4.82 }
+ ]
+}

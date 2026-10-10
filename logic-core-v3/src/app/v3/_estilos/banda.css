@@ -130,6 +130,33 @@
     background: var(--degrade-del-velo);
   }
 
+  /* ── 4b · [PULIDO 11] A4 · J9 b · QUIÉNES SOMOS DE NOCHE ──
+   * Entrando a Portfolio o volviendo de él (la noche se retira con su curva), «Franco», «Valentino», «Nosotros» y sus
+   * párrafos pasan sobre el logo de noche (gris, con su filo blanco) y la mezcla (`difference`) pinta ahí gris sobre gris: se
+   * leían justo. Es la receta del velo de Portfolio (el degradé radial del color de la noche, detrás del texto) con una
+   * diferencia que impone la mezcla: el velo NO puede ir en el texto que mezcla (quedaría adentro del grupo que se mezcla y no
+   * oscurecería nada); va en su caja (`data-velo-de-noche`, que no mezcla, no transforma ni se esfuma: la cadena de la mezcla
+   * sigue entera) y oscurece el logo sólo alrededor del texto, que entonces se invierte a claro. Su tinta crece con la noche
+   * que se ve (`--noche-de-la-sala`, la escribe la sección): de día no hay velo. */
+  [data-v3] [data-panel='quienes-somos'] {
+    --alcance-del-velo-de-noche: -60% -20%;
+    --velo-de-noche: color-mix(in srgb, var(--color-tinta) calc(var(--noche-de-la-sala, 0) * 92%), transparent);
+    --degrade-del-velo-de-noche: radial-gradient(closest-side, var(--velo-de-noche) 55%, transparent);
+  }
+
+  [data-v3] [data-panel='quienes-somos'] [data-velo-de-noche] {
+    position: relative;
+  }
+
+  [data-v3] [data-panel='quienes-somos'] [data-velo-de-noche]::before {
+    content: '';
+    position: absolute;
+    inset: var(--alcance-del-velo-de-noche);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--degrade-del-velo-de-noche);
+  }
+
   /* ── 5 · [NOCTURNO FINAL] C4 · EL PIE ANGOSTO ENTRA EN UNA PANTALLA ──
    * Arriba, lo justo para no pisar el botón del menú (termina a 64 px del borde); abajo, menos: la esquina del recorrido
    * queda a la derecha y la última fila del pie arranca a la izquierda. Pisa el relleno de pie.css (0-3-0 contra 0-2-0). */

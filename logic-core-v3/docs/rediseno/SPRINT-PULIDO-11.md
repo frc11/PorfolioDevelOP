@@ -43,8 +43,14 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   a ~1,2× («ortfolio», «ada uno de estos…») la opacidad todavía era ~0,7. Abajo de 1024 se desvanece al ritmo de su
   agrandamiento (0 justo cuando tocaría el borde); la pose del túnel no cambió (el túnel no se toca). Después, a 390: con el
   borde en [−1, 391] la opacidad ya es 0. `s62` A3
-- PENDIENTE: A4 · J9 b (el velo de noche en Quiénes somos, medido), g (WhatsApp a 375), e (el CTA abajo de 1024 en 3D,
-  función del scroll) y «Seis razones» punteado en mobile
+- HECHO: A4 · b · el velo de noche en Quiénes somos (abajo de 1024) — VISTO sí. Reproducido: subiendo de Portfolio la noche
+  se retira con su curva (~0,3 s con un salto) y «Franco», «Valentino», «Nosotros» y sus párrafos quedan sobre el logo de noche
+  (gris): la mezcla da gris sobre gris (sin velo, 4,04 y 3,52:1). Medido en el banco y no a ciegas: el velo NO puede ir en el
+  texto que mezcla (quedaría adentro del grupo que se mezcla); va en su caja (`data-velo-de-noche`, que no mezcla, no transforma
+  ni se esfuma: la cadena de la mezcla sigue entera; s7-mezcla verde), detrás (z −1), con la tinta de la noche que se ve
+  (`--noche-de-la-sala`, la escribe la sección mientras está a la vista). Con 80 % daba 4,91 y 4,82 (justo); con 92 %, 5,65,
+  5,51 y 5,19:1 (`entregas/pulido-11/velo-de-noche.json`). `s62` A4b
+- PENDIENTE: A4 · g (WhatsApp a 375), e (el CTA abajo de 1024 en 3D, función del scroll) y «Seis razones» punteado en mobile
 - PENDIENTE: A5 · J10, el polvo con un toque, en el banco
 
 ### Fase B · los forms definitivos (pie y modal): volteo, éxito y error

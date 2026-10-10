@@ -15,6 +15,8 @@ import { CanalDePieza, CanalDeTexto, ConInercia, Trazo } from '../_contrato/cana
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
+import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
+import { BRILLO_DE_LA_NOCHE } from '../../_lib/escena/particleGlow'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
 import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from './contenido'
@@ -209,7 +211,40 @@ function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progres
   )
 }
 
+/**
+ * [PULIDO 11] A4 · J9 b · QUIÉNES SOMOS DE NOCHE: mientras la sección está a la vista, la noche que se ve (la de la gota o la
+ * del arco, la mayor) va a `--noche-de-la-sala` en la sección. Abajo de 1024 la lee el velo de los textos que cruzan el logo
+ * (`banda.css`); arriba no la lee nadie. Sólo escribe cuando cambia.
+ */
+function useNocheEnLaSeccion(id: string): void {
+  useEffect(() => {
+    const el = document.querySelector<HTMLElement>(`[data-panel="${id}"]`)
+    if (el === null) return undefined
+    let cuadro = 0
+    let escrita = -1
+    const leer = (): void => {
+      const noche = Math.max(nocheEfectiva(), BRILLO_DE_LA_NOCHE.uNoche.value)
+      if (Math.abs(noche - escrita) > 0.004) {
+        el.style.setProperty('--noche-de-la-sala', noche.toFixed(3))
+        escrita = noche
+      }
+      cuadro = requestAnimationFrame(leer)
+    }
+    const observador = new IntersectionObserver(([e]) => {
+      cancelAnimationFrame(cuadro)
+      if (e?.isIntersecting === true) cuadro = requestAnimationFrame(leer)
+    })
+    observador.observe(el)
+    return () => {
+      observador.disconnect()
+      cancelAnimationFrame(cuadro)
+      el.style.removeProperty('--noche-de-la-sala')
+    }
+  }, [id])
+}
+
 export function QuienesSomos({ seccion }: PropsDeSeccion): React.JSX.Element {
+  useNocheEnLaSeccion(seccion.id)
   return (
     <Seccion seccion={seccion}>
       {/* `--medida-movil` se declara acá arriba: la consumen la bajada y las

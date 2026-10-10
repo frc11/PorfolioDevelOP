@@ -7,6 +7,7 @@
  *   A2 · Quiénes somos: el titular no cruza el logo en la ENTRADA (esquiva con la caja del bloque; recibos de la entrada a 1024,
  *        1280, 1366, 1440 y 1920) y el cuerpo llega entero al reposo (su último renglón ya no queda a media máscara).
  *   A3 · mobile, el cartel de Portfolio: abajo de 1024 se desvanece en la huida antes de que el agrandamiento lo corte.
+ *   A4b · Quiénes somos de noche (abajo de 1024): el velo detrás de los textos que cruzan el logo, sin cortar la mezcla, en AA.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -113,5 +114,30 @@ const piezasA3 = leer('_secciones/trabajos/piezas.tsx')
 const enElCartel = (f: string): boolean => f.includes("el.style.setProperty('opacity', opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el)).toFixed(4))") && f.includes('const angostoDe = useAngostoDelCartel()')
 afirmar(enElCartel(piezasA3), '  el cartel lo usa en cada cuadro de la huida (con las medidas del angosto: margen, mitad y foco de su escenario)')
 controlPositivo('  el detector VE el cartel de antes', piezasA3.replace('opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el))', 'pose.opacidad'), enElCartel)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4b · Quiénes somos de noche: el velo detrás de los textos (abajo de 1024), en AA y sin cortar la mezcla')
+
+// Los textos de la sección abajo de 1024 mezclan (`difference`) y sobre el logo de noche (gris) daban gris sobre gris. El velo
+// (la receta de Portfolio) va en la CAJA del texto, no en el texto que mezcla (adentro del grupo que se mezcla no oscurecería
+// nada), y crece con la noche que se ve (`--noche-de-la-sala`, la escribe la sección). Medido con la noche puesta (subiendo de
+// Portfolio): sin velo 4,04 y 3,52:1; con el velo al 92 %, 5,65 / 5,51 / 5,19:1.
+const banda = leer('_estilos/banda.css')
+const equipo = leer('_secciones/quienes-somos/equipo.tsx')
+const velo = (css: string, eq: string, q: string): boolean => {
+  const angosto = css.slice(css.indexOf('@media (width < 1024px)'))
+  const marcas = [...eq.matchAll(/<(div|figcaption)\s+data-velo-de-noche=""([^>]*)>/g)]
+  return /\[data-panel='quienes-somos'\] \[data-velo-de-noche\]::before \{[^}]*z-index: -1;[^}]*background: var\(--degrade-del-velo-de-noche\);/.test(angosto) &&
+    /--velo-de-noche: color-mix\(in srgb, var\(--color-tinta\) calc\(var\(--noche-de-la-sala, 0\) \* 92%\), transparent\);/.test(angosto) &&
+    marcas.length === 3 && marcas.every((m) => !m[2].includes('MEZCLA_SOBRE_LA_ESCENA')) &&
+    q.includes("el.style.setProperty('--noche-de-la-sala', noche.toFixed(3))") && q.includes('useNocheEnLaSeccion(seccion.id)')
+}
+afirmar(velo(banda, equipo, quienes), 'A4b · el velo de noche abajo de 1024: detrás (z −1) de la caja de Franco, Valentino y Nosotros (nunca en el texto que mezcla), con la tinta de la noche que se ve')
+controlPositivo('A4b · el detector VE el velo puesto EN el texto que mezcla (adentro del grupo: no oscurece nada)', [banda, equipo.replace('<div data-velo-de-noche="">', '<div data-velo-de-noche="" className={MEZCLA_SOBRE_LA_ESCENA}>'), quienes] as const, ([c, e, q]: readonly [string, string, string]) => velo(c, e, q))
+type Medida = { bloque: string; contraste: number }
+const reciboDelVelo = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-11/velo-de-noche.json', 'utf8')) as { sinVelo: Medida[]; conVelo92: Medida[] }
+const enAA = (r: Medida[]): boolean => r.length >= 3 && r.every((m) => m.contraste >= 4.5)
+afirmar(enAA(reciboDelVelo.conVelo92), '  con el velo, los tres bloques en AA (≥ 4,5:1) con la noche puesta', reciboDelVelo.conVelo92.map((m) => `${m.bloque} ${String(m.contraste)}`).join(' · '))
+controlPositivo('  el detector VE los de sin velo (por debajo de AA)', [...reciboDelVelo.sinVelo, { bloque: '-', contraste: 9 }], enAA)
 
 cerrar('s62-pulido-11')
