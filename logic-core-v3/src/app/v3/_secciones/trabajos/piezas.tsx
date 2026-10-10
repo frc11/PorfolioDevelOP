@@ -28,6 +28,7 @@ import {
   CLASE_DEL_TITULAR_DEL_CARTEL,
   ESTILO_DE_LA_CAJA_DE_LA_VENTANA,
   ESTILO_DEL_CARTEL_ANGOSTO,
+  opacidadDeLaHuidaAngosta, useAngostoDelCartel,
 } from './angosto'
 import {
   CONVERSION_DE_LA_CAJA_DEL_CTA,
@@ -155,6 +156,9 @@ export function PortadaDeTrabajos({
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
 
+  // [PULIDO 11] A3 · el cartel de margen a margen (abajo de 1024): se desvanece antes de que la huida lo corte por los costados.
+  const angostoDe = useAngostoDelCartel()
+
   useMotionValueEvent(mostrado, 'change', (p) => {
     const el = cartel.current
     if (el === null) return
@@ -166,7 +170,7 @@ export function PortadaDeTrabajos({
       return
     }
     el.style.setProperty('visibility', 'visible')
-    el.style.setProperty('opacity', pose.opacidad.toFixed(4))
+    el.style.setProperty('opacity', opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el)).toFixed(4))
     el.style.setProperty('transform', transformDeLaPose(pose))
   })
 

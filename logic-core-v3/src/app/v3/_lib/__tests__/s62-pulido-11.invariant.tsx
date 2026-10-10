@@ -6,6 +6,7 @@
  *        los cuadros del compositor: la cara de atrás asomaba antes de que la hoja se rasterizara).
  *   A2 · Quiénes somos: el titular no cruza el logo en la ENTRADA (esquiva con la caja del bloque; recibos de la entrada a 1024,
  *        1280, 1366, 1440 y 1920) y el cuerpo llega entero al reposo (su último renglón ya no queda a media máscara).
+ *   A3 · mobile, el cartel de Portfolio: abajo de 1024 se desvanece en la huida antes de que el agrandamiento lo corte.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -16,6 +17,8 @@ import { PlacaDelContacto } from '../../_chrome/contacto/PlacaDelContacto'
 import { pedidoQueEsquiva, seCruzan, type Caja } from '../escena/titulos3d/esquivaDelLogo'
 import { llegadaHastaElPie } from '../../_secciones/quienes-somos/geometria'
 import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../../_secciones/_contrato/asentamiento'
+import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_secciones/trabajos/angosto'
+import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_secciones/trabajos/tunel'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -85,5 +88,30 @@ const enElReposo = (alto: number, aire: number): number => (alto + aire - ENTRAD
 const entero = (f: (p: number, alto: number) => number): boolean => [[231, 36], [211, 34], [150, 30], [300, 20]].every(([h, a]) => f(enElReposo(h, a), h) >= 1) && f(0, 231) === 0
 afirmar(entero((p, h) => llegadaHastaElPie(p, h, ENTRADA_EN_CUADRO_PX, DESCANSO_ANTES_DE_SALIR_PX)) && /<CanalDeTexto progreso=\{progreso === null \? null : hastaElPie\} tipo="parrafo" texto=\{CONTENIDO\.bajada\}>/.test(quienes), '  el cuerpo llega entero al reposo (en el reposo de 1024 a 1920 su llegada ya terminó) y sigue arrancando en 0')
 controlPositivo('  el detector VE la llegada de antes (la ventana visible tal cual)', (p: number) => p, entero)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A3 · Mobile: el cartel de Portfolio no se corta en la huida')
+
+// Medido (`a3-portfolio.ts`, `a3c-huida.ts`, a 375 y 390): llegando por scroll, por el menú y desde el CTA del hero el cartel
+// llega entero (sin desborde de costado: `a3b-desborde.ts`). Lo «corrido y cortado» era la HUIDA hacia el túnel: el cartel va de
+// margen a margen y la `translateZ` lo agranda desde el centro del cuadro; a ~1,2× («ortfolio», «ada uno de estos…») la opacidad
+// todavía era ~0,7. Abajo de 1024 se desvanece al ritmo de su agrandamiento: 0 justo cuando su borde tocaría el del cuadro.
+const A_390: AngostoDelCartel = { margen: 32, mitad: 195, foco: 844 * 1.5857 }
+const borde = (a: AngostoDelCartel): number => a.foco * (1 - (a.mitad - a.margen) / a.mitad) // la z en que el borde toca el del cuadro
+const noCorta = (f: typeof opacidadDeLaHuidaAngosta): boolean => {
+  for (let t = 0; t <= 1; t += 0.01) {
+    const pose = poseDeLaHuida(t)
+    if (pose === null) continue
+    if (pose.z >= borde(A_390) && f(pose.opacidad, pose.z, A_390) > 0.001) return false
+  }
+  return f(0.8, 10, null) === 0.8 && f(1, 0, A_390) === 1
+}
+afirmar(noCorta(opacidadDeLaHuidaAngosta) && DISTANCIA_DEL_VUELO > borde(A_390), 'A3 · abajo de 1024 el cartel ya es invisible cuando la huida lo agranda hasta el borde del cuadro; en escritorio (sin angosto) la de siempre')
+const sinAngosto: typeof opacidadDeLaHuidaAngosta = (o) => o
+controlPositivo('A3 · el detector VE la huida de antes (a ~1,2× todavía se veía, cortado)', sinAngosto, noCorta)
+const piezasA3 = leer('_secciones/trabajos/piezas.tsx')
+const enElCartel = (f: string): boolean => f.includes("el.style.setProperty('opacity', opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el)).toFixed(4))") && f.includes('const angostoDe = useAngostoDelCartel()')
+afirmar(enElCartel(piezasA3), '  el cartel lo usa en cada cuadro de la huida (con las medidas del angosto: margen, mitad y foco de su escenario)')
+controlPositivo('  el detector VE el cartel de antes', piezasA3.replace('opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el))', 'pose.opacidad'), enElCartel)
 
 cerrar('s62-pulido-11')

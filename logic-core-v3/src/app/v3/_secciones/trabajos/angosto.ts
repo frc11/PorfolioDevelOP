@@ -9,7 +9,7 @@
  * una sola de estas líneas.
  */
 
-import type { CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, type CSSProperties } from 'react'
 
 import { ANCHO_DEL_CTA, RELACION_DEL_CTA } from './tunel'
 
@@ -73,3 +73,51 @@ export const CLASE_DEL_CUERPO_DE_DEMOS = 'max-escritorio:text-[length:var(--text
 
 /** La frase del CTA en el iPhone: un cartel de tres o cuatro renglones, no uno por palabra. */
 export const CLASE_DE_LA_FRASE_ANGOSTA = 'max-movil:text-[calc(var(--text-fluido-titulo-xl)*1.3)]'
+
+/**
+ * [PULIDO 11] A3 · LA HUIDA DEL CARTEL ABAJO DE 1024. El cartel huye hacia la cámara (`translateZ` bajo la `perspective` de
+ * su escenario): se agranda desde el centro del cuadro. En escritorio la caja es angosta y se apaga antes de llegar a los
+ * bordes; abajo de 1024 va de margen a margen y a ~1,2× ya se cortaba por los costados («ortfolio», «ada uno de estos…»)
+ * con la opacidad todavía en ~0,7. Ahí se desvanece al ritmo de su agrandamiento: 0 justo cuando su borde tocaría el del
+ * cuadro. La pose (la tabla del túnel) no cambia.
+ */
+export interface AngostoDelCartel {
+  /** Del borde del cuadro al del cartel (px), la mitad del cuadro (px) y el foco de su escenario (la `perspective`, px). */
+  readonly margen: number
+  readonly mitad: number
+  readonly foco: number
+}
+
+export function opacidadDeLaHuidaAngosta(opacidad: number, z: number, angosto: AngostoDelCartel | null): number {
+  if (angosto === null || angosto.margen <= 0) return opacidad
+  const escala = angosto.foco / Math.max(1, angosto.foco - z)
+  const tope = angosto.mitad / Math.max(1, angosto.mitad - angosto.margen)
+  return Math.min(opacidad, Math.max(0, 1 - (escala - 1) / (tope - 1)))
+}
+
+/** El cartel de margen a margen: su margen, la mitad del cuadro y el foco de su escenario (la `perspective` de un ancestro); si no, `null`. */
+function medirElAngosto(el: HTMLElement): AngostoDelCartel | null {
+  const margen = el.offsetLeft
+  if (Math.abs(margen + el.offsetWidth + margen - window.innerWidth) > 2) return null
+  for (let a = el.parentElement; a !== null; a = a.parentElement) {
+    const foco = parseFloat(getComputedStyle(a).perspective)
+    if (foco > 0) return { margen, mitad: window.innerWidth / 2, foco }
+  }
+  return null
+}
+
+/** Las medidas del angosto, tomadas la primera vez que se piden y de nuevo después de cada cambio de tamaño. */
+export function useAngostoDelCartel(): (el: HTMLElement) => AngostoDelCartel | null {
+  const medidas = useRef<AngostoDelCartel | null | undefined>(undefined)
+  useEffect(() => {
+    const olvidar = (): void => {
+      medidas.current = undefined
+    }
+    window.addEventListener('resize', olvidar)
+    return () => window.removeEventListener('resize', olvidar)
+  }, [])
+  return useCallback((el: HTMLElement) => {
+    if (medidas.current === undefined) medidas.current = medirElAngosto(el)
+    return medidas.current
+  }, [])
+}

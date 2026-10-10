@@ -36,7 +36,13 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   - Recibos: `docs/rediseno/entregas/pulido-11/solapes-entrada-*.json` (cinco cuadros, NVIDIA): cero solapes de que la sección
     asoma al reposo. `s62` A2.
   - Fuera de alcance, anotado: en la SALIDA (camino a «El equipo», de +38 a +422 px a 1024) el logo de canto cruza el cuerpo.
-- PENDIENTE: A3 · mobile, el cartel de Portfolio corrido y cortado (J7 a 375 y 390: por scroll, por menú, desde el CTA)
+- HECHO: A3 · mobile, el cartel de Portfolio corrido y cortado — VISTO sí. J7 se verificó a 375 y 390 llegando por scroll, por
+  el menú y desde el CTA del hero (`a3-portfolio.ts`, cuadros del compositor): el cartel llega entero, sin recorte, y la página
+  no se puede correr de costado (`a3b-desborde.ts`: scrollWidth = ancho en 13 alturas). Lo «corrido a la izquierda y cortado»
+  era la HUIDA hacia el túnel (pasado el reposo): el cartel va de margen a margen y su `translateZ` lo agranda desde el centro;
+  a ~1,2× («ortfolio», «ada uno de estos…») la opacidad todavía era ~0,7. Abajo de 1024 se desvanece al ritmo de su
+  agrandamiento (0 justo cuando tocaría el borde); la pose del túnel no cambió (el túnel no se toca). Después, a 390: con el
+  borde en [−1, 391] la opacidad ya es 0. `s62` A3
 - PENDIENTE: A4 · J9 b (el velo de noche en Quiénes somos, medido), g (WhatsApp a 375), e (el CTA abajo de 1024 en 3D,
   función del scroll) y «Seis razones» punteado en mobile
 - PENDIENTE: A5 · J10, el polvo con un toque, en el banco
