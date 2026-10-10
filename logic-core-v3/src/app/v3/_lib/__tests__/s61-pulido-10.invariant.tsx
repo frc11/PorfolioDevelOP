@@ -4,6 +4,8 @@
  * Cada comportamiento nuevo del sprint queda FIJADO acá, con su control positivo. Una sección por punto:
  *   J1  · 1024 y «Portátil L»: el texto 3D en renglones, la banda portátil (el campo de visión y las medidas del logo en el
  *         DOM) y los solapes (el detector y los recibos del banco a 1024, 1280 y 1440).
+ *   J8  · el pie nuevo: 25/50/25 con el recorrido en texto (el subrayado del sitio, en 3D y en el plano), Demos con su propio
+ *         destino adentro de Trabajos, `?pie=columna2` (el encuadre corrido) y `?pie=menu-abajo`, y los recibos del pie.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-10.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -15,8 +17,20 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
+import datos400 from '../../_fuentes/chivo-400-pie.json'
+import datos500 from '../../_fuentes/chivo-500-pie.json'
+import datos600 from '../../_fuentes/chivo-600-pie.json'
+import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
+import { destinoDelViaje } from '../../_componentes/destinosDelViaje'
+import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
+import { MARCA_COREOGRAFIA_DEL_HOME } from '../../_secciones/_contrato/marcaCoreografia'
+import { SUBRAYADO_DEL_PIE } from '../escena/pie3d/armadas'
+import { VOLUMEN_DEL_PIE, armarLaPieza, baseDeLaLetra, type FuentesDelPie } from '../escena/pie3d/geometria'
+import { CORRIMIENTO_DE_LA_COLUMNA_2, disposicionDelPie } from '../pie3d/disposicion'
+import type { LetraDelPie } from '../pie3d/medida'
+import { NodoFalso, conDomFalso } from './s27-dom-falso'
 import { valorDeToken } from './s10-css'
-import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -114,5 +128,113 @@ const recibosBien = recibos.every(({ ruta }) => {
   return ['hero', 'quienes', 'portfolio', 'razones', 'cta', 'pie'].every((m) => r.momentos[m] !== undefined && r.momentos[m].solapes.length === 0)
 })
 afirmar(recibosBien, '  los recibos del banco a 1024 × 824, 1280 × 800 y 1440 × 900: en el reposo del hero, Quiénes somos, Portfolio, Seis razones, el CTA y el pie, cero solapes', recibos.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')
+
+// A · El enlace de texto en volumen: sus letras extruidas (como el texto suelto) y, aparte —lo que se escala—, su subrayado:
+// una barra de la primera letra a donde termina la última, debajo de la línea de base, con el grosor del subrayado del sitio
+// y la profundidad de las letras, que crece desde su izquierda (`origen`).
+const FUENTES_DEL_PIE: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData) }
+const CHIVO_600 = FUENTES_DEL_PIE[600].data
+const avanceDe = (ch: string, cuerpo: number): number => ((CHIVO_600.glyphs[ch]?.ha ?? 0) / CHIVO_600.resolution) * cuerpo
+const letrasDelEnlace = (texto: string, desde: number, cuerpo: number): LetraDelPie[] => {
+  let x = desde
+  return [...texto].map((ch) => {
+    const l: LetraDelPie = { ch, x, arriba: 2, alto: cuerpo * 1.5, cuerpo, peso: 600, enLaTecla: false }
+    x += avanceDe(ch, cuerpo)
+    return l
+  })
+}
+const PORTFOLIO_EN_EL_PIE = letrasDelEnlace('Portfolio', 3, 15)
+const enlaceBien = (armar: typeof armarLaPieza): boolean => {
+  const p = armar('enlace', { caja: { x: 0, y: 0, ancho: 90, alto: 30, radio: 0 }, letras: PORTFOLIO_EN_EL_PIE, trazos: [], pozos: [], tecla: null }, FUENTES_DEL_PIE)
+  if (p.fija === null || p.hundible === null) return false
+  p.hundible.computeBoundingBox()
+  const b = p.hundible.boundingBox ?? new THREE.Box3()
+  const [primera, ultima] = [PORTFOLIO_EN_EL_PIE[0], PORTFOLIO_EN_EL_PIE[PORTFOLIO_EN_EL_PIE.length - 1]]
+  const ancho = ultima.x + avanceDe(ultima.ch, ultima.cuerpo) - primera.x
+  const arriba = -(baseDeLaLetra(primera, CHIVO_600) + VOLUMEN_DEL_PIE.subrayado.bajo * primera.cuerpo)
+  const cerca = (a: number, c: number): boolean => Math.abs(a - c) < 1e-4
+  return p.origen === primera.x && cerca(b.min.x, 0) && cerca(b.max.x, ancho) && cerca(b.max.y, arriba) && cerca(b.max.y - b.min.y, VOLUMEN_DEL_PIE.subrayado.alto) && cerca(b.max.z, 0) && cerca(b.min.z, -VOLUMEN_DEL_PIE.texto.profundidad * primera.cuerpo)
+}
+afirmar(enlaceBien(armarLaPieza), 'A · el enlace de texto en volumen: las letras y, aparte, su subrayado (de la primera a la última letra, debajo de la base, tres filetes de grosor, la profundidad de las letras) que crece desde la primera letra')
+controlPositivo('A · el detector VE un enlace sin subrayado (armado como el texto suelto)', ((forma, m, f) => armarLaPieza(forma === 'enlace' ? 'texto' : forma, m, f)) as typeof armarLaPieza, enlaceBien)
+
+// B · El subrayado es el del sitio (el del CTA: `--duracion-muy-lenta` y `--ease-principal`), en 3D y en el pie plano; crece con
+// el mouse encima o el foco (el mismo `HUNDIDOS` de las placas) y, con movimiento reducido, de golpe.
+const ARMADAS_DEL_PIE = leer('_lib/escena/pie3d/armadas.ts')
+const ENLACE_DE_TEXTO = leer('_componentes/volumen/EnlaceDeTexto.tsx')
+const subrayadoBien = (sub: { readonly s: number; readonly curva: readonly number[] }, armadas: string, enlace: string): boolean =>
+  sub.s * 1000 === parseFloat(valorDeToken('--duracion-muy-lenta')) &&
+  `cubic-bezier(${sub.curva.join(', ')})` === valorDeToken('--ease-principal').replace(/\s+/g, ' ') &&
+  armadas.includes("if (a.pieza.forma === 'enlace') dibujarElSubrayado(a, s.quieto, dt)") &&
+  armadas.includes('const pide = h !== undefined && (h.encima || h.foco) ? 1 : 0') &&
+  armadas.includes('a.hundido = quieto ? pide : pide > a.hundido ? Math.min(pide, a.hundido + paso) : Math.max(pide, a.hundido - paso)') &&
+  armadas.includes('a.cuerpo.scale.x = Math.max(1e-4, dibujado)') &&
+  enlace.includes("usePiezaDelPie(raiz, { id, forma: 'enlace', activo: volumen })") && enlace.includes('useHundido(raiz, volumen)') &&
+  enlace.includes('duration-[var(--duracion-muy-lenta)] ease-[var(--ease-principal)]')
+afirmar(subrayadoBien(SUBRAYADO_DEL_PIE, ARMADAS_DEL_PIE, ENLACE_DE_TEXTO), 'B · el subrayado del sitio: el tiempo y la curva del CTA en 3D y en el pie plano; con el mouse encima o el foco, y de golpe con movimiento reducido', `${String(SUBRAYADO_DEL_PIE.s)} s`)
+controlPositivo('B · el detector VE un subrayado con otro tiempo', { ...SUBRAYADO_DEL_PIE, s: 0.6 }, (sub: { readonly s: number; readonly curva: readonly number[] }) => subrayadoBien(sub, ARMADAS_DEL_PIE, ENLACE_DE_TEXTO))
+
+// C · El recorrido: siete destinos (con Portfolio y Demos), en dos columnas de cuatro y tres, como enlaces de texto, y viajan
+// como los del menú.
+const RECORRIDO_DEL_PIE = leer('_secciones/cierre/RecorridoDelPie.tsx')
+const recorridoBien = (r: string, selector: string): boolean =>
+  DESTINOS_DE_LA_RUTA.length === 7 &&
+  r.includes("'grid grid-flow-col grid-cols-[auto_auto] grid-rows-4 justify-start") &&
+  /<ul\s+data-pieza="destinos-del-pie"[\s\S]{0,900}<EnlaceDeTexto href=\{destino\.ancla\}/.test(r) &&
+  selector.split(', ').includes('[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace"]')
+afirmar(recorridoBien(RECORRIDO_DEL_PIE, SELECTOR_DE_LOS_VIAJES), 'C · el recorrido: siete destinos en dos columnas (cuatro y tres), enlaces de texto que viajan como los del menú')
+controlPositivo('C · el detector VE los enlaces de texto afuera del viaje', SELECTOR_DE_LOS_VIAJES.replace(', [data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace"]', ''), (sel: string) => recorridoBien(RECORRIDO_DEL_PIE, sel))
+
+// D · 25/50/25 con el pie de volumen (un cuarto por columna; el formulario con su techo fijo) y las dos disposiciones de la
+// consulta (`?pie=columna2`, `?pie=menu-abajo`; cualquier otra cosa, el producto).
+const CIERRE = leer('_secciones/cierre/Cierre.tsx')
+const ARRIBA_FIJO = leer('_secciones/cierre/useArribaFijo.ts')
+const cierreBien = (c: string, a: string): boolean =>
+  c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-1/4' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") &&
+  c.includes("{volumen && disposicion === 'producto' && <RecorridoDelPie") && c.includes("{volumen && disposicion === 'columna2' && (") &&
+  c.includes("{volumen && disposicion === 'menu-abajo' && (") && c.includes('<ColumnasDelPie progreso={p} sinRecorrido={volumen} />') &&
+  c.includes('useArribaFijo(columnaDelFormulario, volumen)') &&
+  a.includes('el.style.top = `${String(Math.round((padre.clientHeight - el.offsetHeight) / 2))}px`') && a.includes("el.style.translate = 'none'")
+const disposicionBien = (f: typeof disposicionDelPie): boolean => f('columna2') === 'columna2' && f('menu-abajo') === 'menu-abajo' && f(null) === 'producto' && f('antes') === 'producto'
+afirmar(cierreBien(CIERRE, ARRIBA_FIJO) && disposicionBien(disposicionDelPie), 'D · 25/50/25 con el pie de volumen (el formulario con su techo fijo: la tarjeta de gracias no baja) y las dos disposiciones de `?pie=`')
+controlPositivo('D · el detector VE el formulario centrado con la transformada (se recentra)', ARRIBA_FIJO.replace("el.style.translate = 'none'", "el.style.translate = ''"), (a: string) => cierreBien(CIERRE, a))
+controlPositivo('D · el detector VE una disposición que no se lee', ((v: string | null | undefined) => (v === 'columna2' ? 'columna2' : 'producto')) as typeof disposicionDelPie, disposicionBien)
+
+// E · `?pie=columna2`: la cámara corre el encuadre (`setViewOffset`) del centro al de la segunda de cuatro columnas, y la cámara
+// sin el mouse copia la proyección (el pie de volumen se coloca con ella: sigue sobre su DOM).
+const RIG = leer('_lib/escena/OrbitRig.tsx')
+const SIN_EL_MOUSE = leer('_lib/escena/sinElMouse.ts')
+const corrimientoBien = (k: number, rig: string): boolean =>
+  Math.abs(0.5 - k - 1.5 / 4) < 1e-9 &&
+  rig.includes("disposicionDeLaPagina() === 'columna2' ? Math.round(CORRIMIENTO_DE_LA_COLUMNA_2 * llegadaDelCorrimiento(PROGRESO_DEL_PIE.valor?.get() ?? 0) * anchoDelCuadro) : 0") &&
+  rig.includes('state.camera.setViewOffset(anchoDelCuadro, altoDelCuadro, corrimiento, 0, anchoDelCuadro, altoDelCuadro)') &&
+  SIN_EL_MOUSE.includes('c.projectionMatrix.copy(viva.projectionMatrix)')
+afirmar(corrimientoBien(CORRIMIENTO_DE_LA_COLUMNA_2, RIG), 'E · `?pie=columna2`: el encuadre corrido un octavo del ancho (el logo, en el centro de la segunda columna) a medida que el pie llega; la cámara sin el mouse lo copia')
+controlPositivo('E · el detector VE un corrimiento de un cuarto (el logo en el borde de la columna)', 0.25, (k: number) => corrimientoBien(k, RIG))
+
+// F · Demos viaja a SU destino adentro de Trabajos (el final del pin, que abarca la sección: las demos ya llegaron y la de abajo
+// no asoma); sin coreografía, a su ancla. El hijo pegado que lo contiene mide una pantalla: no es el pin (el banco lo midió).
+const BLOQUE_ANIMADO = `[data-arbol="${MARCA_COREOGRAFIA_DEL_HOME}"]`
+conDomFalso(900, 72, () => {
+  const trabajos = new NodoFalso({ tope: 5073, alto: 7997 }, { 'data-panel': 'trabajos' })
+  const pegado = new NodoFalso({ tope: 5073, alto: 900 })
+  const demos = Object.assign(new NodoFalso({ tope: 5250, alto: 300 }).cercano('[data-panel]', trabajos).cercano(BLOQUE_ANIMADO, pegado), { id: 'demos' })
+  const esperado = Math.floor(5073 + 7997 - 900 - 2)
+  afirmarIgual(destinoDelViaje(trabajos as unknown as HTMLElement, demos as unknown as HTMLElement), esperado, 'F · Demos: el final del pin de Trabajos (la sección menos una pantalla), dos píxeles antes, con el viaje de siempre')
+  const sinPin = Object.assign(new NodoFalso({ tope: 9000, alto: 300 }).cercano('[data-panel]', trabajos), { id: 'demos' })
+  afirmarIgual(destinoDelViaje(trabajos as unknown as HTMLElement, sinPin as unknown as HTMLElement), 9000 - 72, '  sin coreografía (la rama quieta), su ancla debajo de la barra')
+  controlPositivo('F · el detector VE Demos viajando al nudo de Trabajos (sin su ancla)', destinoDelViaje(trabajos as unknown as HTMLElement), (d: number) => d === esperado)
+})
+
+// G · Los recibos del banco (`pie-<cuadro>.json`): en las tres disposiciones, a 1024, 1280, 1440 y 1920, los siete enlaces en
+// un renglón, nada afuera del cuadro y el pie de volumen listo.
+const RECIBOS_DEL_PIE = ['1024x824', '1280x800', '1440x900', '1920x1080'].map((t) => ({ t, ruta: `${RECIBOS}/pie-${t}.json` }))
+type ReciboDelPie = Record<string, { enlaces: { renglones: number }[]; fuera: unknown[]; listo: boolean | null }>
+const pieBien = (r: ReciboDelPie): boolean => ['producto', 'columna2', 'menu-abajo'].every((d) => r[d] !== undefined && r[d].enlaces.length === 7 && r[d].enlaces.every((e) => e.renglones === 1) && r[d].fuera.length === 0 && r[d].listo === true)
+afirmar(RECIBOS_DEL_PIE.every(({ ruta }) => existsSync(ruta) && pieBien(JSON.parse(readFileSync(ruta, 'utf8')) as ReciboDelPie)), 'G · los recibos del pie a 1024, 1280, 1440 y 1920: en las tres disposiciones, los siete enlaces en un renglón y nada afuera del cuadro', RECIBOS_DEL_PIE.map(({ t, ruta }) => `${t}: ${existsSync(ruta) ? 'medido' : 'falta'}`).join(' · '))
+controlPositivo('G · el detector VE un enlace partido en dos renglones', { producto: { enlaces: [{ renglones: 2 }], fuera: [], listo: true } } as ReciboDelPie, pieBien)
 
 cerrar('s61-pulido-10')

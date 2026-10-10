@@ -6,6 +6,8 @@ import * as THREE from 'three'
 
 import { progresoDeLaCamara } from './camaraDeEntonces'
 import { BANDA_EN_VIVO, factorDeLaBanda, fovConFactor } from './banda'
+import { CORRIMIENTO_DE_LA_COLUMNA_2, disposicionDeLaPagina } from '../pie3d/disposicion'
+import { PROGRESO_DEL_PIE } from '../pie3d/registro'
 import { aimWithFraming } from './cameraFraming'
 import {
   BOKEH_BOB_AMPLITUDE,
@@ -482,10 +484,20 @@ export function OrbitRig({
     // 2b · [PULIDO 10] J1 · la banda portátil: el campo de visión vertical, abierto en las pantallas más angostas que 1,6 para
     // que el logo ocupe del ancho lo mismo que a 1440 × 900 (`banda.ts`). La cámara no se mueve.
     BANDA_EN_VIVO.factor = factorDeLaBanda(state.size.width, state.size.height)
+    // 2c · [PULIDO 10] J8 · `?pie=columna2`: en el pie, el encuadre corrido (`setViewOffset`) hasta dejar el logo en el centro de
+    //      la segunda de cuatro columnas, a medida que el pie llega. La escena no se mueve; la cámara sin el mouse copia la
+    //      proyección (`sinElMouse.ts`) y el pie de volumen se coloca con ella, así que sigue sobre su DOM.
+    const [anchoDelCuadro, altoDelCuadro] = [state.size.width, state.size.height]
+    const corrimiento = disposicionDeLaPagina() === 'columna2' ? Math.round(CORRIMIENTO_DE_LA_COLUMNA_2 * llegadaDelCorrimiento(PROGRESO_DEL_PIE.valor?.get() ?? 0) * anchoDelCuadro) : 0
     if (state.camera instanceof THREE.PerspectiveCamera) {
       const fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)
-      if (state.camera.fov !== fov) {
+      const vista = state.camera.view
+      const corrido = vista !== null && vista.enabled
+      const otroCuadro = corrido && (vista.fullWidth !== anchoDelCuadro || vista.fullHeight !== altoDelCuadro)
+      if (state.camera.fov !== fov || (corrido ? vista.offsetX : 0) !== corrimiento || otroCuadro) {
         state.camera.fov = fov
+        if (corrimiento !== 0) state.camera.setViewOffset(anchoDelCuadro, altoDelCuadro, corrimiento, 0, anchoDelCuadro, altoDelCuadro)
+        else if (corrido) state.camera.clearViewOffset()
         state.camera.updateProjectionMatrix()
       }
     }
@@ -644,4 +656,10 @@ export function OrbitRig({
   })
 
   return null
+}
+
+/** [PULIDO 10] J8 · cuánto del corrimiento de `?pie=columna2` va puesto: nada hasta que el pie asoma, entero con el pie llegado. */
+function llegadaDelCorrimiento(progresoDelPie: number): number {
+  const t = Math.min(1, Math.max(0, (progresoDelPie - 0.25) / 0.5))
+  return t * t * (3 - 2 * t)
 }

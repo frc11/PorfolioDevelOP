@@ -46,7 +46,8 @@ export function TextoDeDemos({
   // [NOCTURNO] A1 · el párrafo va en el plano del título de volumen (la cámara lo corre con él).
   const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos')
   return (
-    <div className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
+    // [PULIDO 10] J8 · `#demos`: el destino del pie («Demos»), con el viaje de siempre (`destinosDelViaje.ts`); el foco llega acá.
+    <div id="demos" className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
       <TituloDeDemos progreso={progresoDelTitulo} />
       <div ref={enElPlano}>
         <div ref={refDelParrafo}>

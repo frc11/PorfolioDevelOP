@@ -9,15 +9,21 @@ el volteo y el hundido como concepto (J4).
 ## Estado (fuente de verdad: si la sesión se corta, se retoma desde acá)
 
 - HECHO: J1 · la banda portátil, el texto 3D en renglones, Quiénes somos desde 1024 y los solapes en cero a 1024, 1280 y
-  1440 (commit «pulido 10 · J1»; el hash, en el próximo)
+  1440 (f590e17a)
+- HECHO: J8 · el pie nuevo (25/50/25, el recorrido en texto 3D con el subrayado del sitio, Demos, `?pie=columna2` y
+  `?pie=menu-abajo`), visto en el banco a 1024, 1280, 1440 y 1920 en las tres disposiciones (commit «pulido 10 · J8»; el hash,
+  en el próximo). Pendiente del banco: la llegada a Demos con el destino corregido (el clic, el viaje, el activo de la barra
+  y el foco ya se midieron; la llegada vieja se pasaba 108 px y asomaba la sección de abajo)
 - J10 · la histéresis: escrita, `s61` J10 verde (el modelo); falta medirla en el banco
-- J3 · el componente `Carga` (trazo SVG, textos, espera mínima): escrito; falta conectarlo (modal y botón del pie) y verlo
+- J3 · la carga: escrita y conectada (el botón del pie y el panel de Contacto, con la espera mínima; `?carga=giro`); `s61` J3
+  verde; falta verla en el banco (sin memoria)
 - J2 · primera ráfaga (1440, desde el hero, con la barra): ningún cuadro oscuro ajeno; faltan 390, desde la noche y la
   segunda apertura
-- J4 · a (el volteo en un movimiento, la entrante compilada antes): escrito; falta medirlo
+- J4 · a (el volteo en un movimiento, la entrante compilada antes), c (el título en Archivo en minúsculas, compuesto como la
+  frase del CTA), d (la tarjeta en su lugar: el techo fijo de J8), e (el foco no desaparece) y f (el panel con el hundido):
+  escritos; b debería quedar resuelto por el techo fijo (la placa no se corre); falta medir todo en el banco
 - J9 · a (las leyendas de las fotos): escrito; falta verlo en el banco
-- EN CURSO: J8 · el pie nuevo: escrito y visto en el banco a 1024, 1280, 1440 y 1920 en las tres disposiciones; falta su
-  commit
+- EN CURSO: J5 · la animación de error de los dos formularios
 
 ## Memoria
 
@@ -33,6 +39,12 @@ el volteo y el hundido como concepto (J4).
 - ⚠ El primer portero falló: Windows da la memoria con coma decimal y su comparación dio error; dejó correr una tanda (la
   primera del instrumento de solapes, a 1024) con 1,98 GB. Se rehízo comparando MB enteros.
 - J1 · Quiénes somos: después de tres corridas del banco de solapes bajó a 2,8 GB; se cerró, se reinicia el dev server (2,5 GB) y se sigue con J8 en el código hasta tener 3 GB.
+- J8 · al cerrar J1 y J8: Windows corre su tarea de puntos de restauración (`SrTasks`, ~0,7 GB y disco) y con el dev server recién reiniciado quedan 0,8 GB. No se abre el banco: el viaje a Demos corregido queda sin medir y J8 sin commit; se sigue con J3 en el código.
+- El portero pasa de 3072 MB a 3000 MB: «3 GB» como lo escribe la regla (y como lo redondea el administrador de tareas). Con 3007–3039 MB disponibles el de 3072 no abría nada.
+- Cada cambio de código recompila y el dev server crece (de 2,6 a 3,7 GB): el banco se corre en tandas, con el dev server reiniciado justo antes y apagado mientras se escribe código (el código no necesita el banco).
+- `tsc --noEmit` con el heap de siempre (2 GB) se quedó sin memoria después de que el dev server escribió mal sus tipos generados (`.next/dev/types`, colas de una versión vieja sin truncar): se borraron y se regeneraron, y una pasada entera con `--max-old-space-size=3072` (2,45 GB usados, 0 errores) rehízo el estado incremental; las siguientes vuelven a entrar en los 2 GB.
+- Un tope de heap en el dev server (`--max-old-space-size`) lo hace reiniciarse solo en medio de la compilación (Next lo vigila: «approaching the used memory threshold»): la tanda del banco vio páginas a medio servir (un documento de 99.000 px). Se sacó el tope; esa tanda no cuenta.
+- Después de las tandas, el pool no paginado del sistema quedó en 2,4 GB (lo normal es menos de medio): con cualquier dev server (webpack 3,2 GB; se probó Turbopack y quedó en 2,8) quedan 2,2–2,7 GB y el portero no abre. Se sigue con el código (J4, J5…) con el dev server apagado y el banco queda para cuando vuelva a haber 3 GB. Lo que no se pudo medir va a «Lo que no quedó bien».
 
 ## J1 · 1024 y «Portátil L»
 

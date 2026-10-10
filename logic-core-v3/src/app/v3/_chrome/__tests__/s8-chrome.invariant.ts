@@ -22,6 +22,7 @@ import { ENLACES_DE_MUESTRA } from '../../_lib/navegacion'
 import { SECCIONES } from '../../_lib/secciones'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { DIST, conjuntoInicial, contiene, kib, pesar, todosLosChunks } from '../../_lib/__tests__/s3-bundle'
+import { SUBDESTINOS } from '../../_componentes/destinosDelViaje'
 import { Cierre } from '../../_secciones/cierre/Cierre'
 import { ANCLAS_QUE_EXISTEN, CONTACTO_DEL_PIE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { seccionDe } from '../../_secciones/_contrato/forma'
@@ -49,14 +50,22 @@ afirmarIgual(ANCLAS_QUE_EXISTEN.length, SECCIONES.length, `las anclas que existe
 // no se monta) y el hero se llama «Inicio»; los externos son el mail, WhatsApp y las redes; `#contacto` abre el formulario.
 const SIN_ENLACE_EN_EL_PIE = ['cierre', 'numeros']
 const ENLAZADAS = SECCIONES.filter((s) => !SIN_ENLACE_EN_EL_PIE.includes(s.id))
-afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.ancla), ENLAZADAS.map((s) => `#${s.id}`), `el pie ofrece ${DESTINOS_DE_LA_RUTA.length}, en el ORDEN DEL RECORRIDO y derivadas de la tabla: todas menos el Cierre y Números`)
-afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ENLAZADAS.map((s) => (s.id === 'hero' ? 'Inicio' : s.nombre)), '  con los rótulos de la misma fila, salvo el hero, que en el pie se llama «Inicio»')
+// [PULIDO 10] J8 · y Demos después de Portfolio: un subdestino ADENTRO de Trabajos (`SUBDESTINOS`, con su propio nudo); Trabajos se
+// llama «Portfolio», como en la barra.
+const SUBDESTINO_DEL_PIE: Readonly<Record<string, { readonly ancla: string; readonly rotulo: string }>> = { trabajos: { ancla: '#demos', rotulo: 'Demos' } }
+const ROTULO_EN_EL_PIE: Readonly<Record<string, string>> = { hero: 'Inicio', trabajos: 'Portfolio' }
+const ESPERADOS = ENLAZADAS.flatMap((s) => [{ ancla: `#${s.id}`, rotulo: ROTULO_EN_EL_PIE[s.id] ?? s.nombre }, ...(SUBDESTINO_DEL_PIE[s.id] === undefined ? [] : [SUBDESTINO_DEL_PIE[s.id]])])
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.ancla), ESPERADOS.map((d) => d.ancla), `el pie ofrece ${DESTINOS_DE_LA_RUTA.length}, en el ORDEN DEL RECORRIDO y derivadas de la tabla: todas menos el Cierre y Números, y Demos adentro de Trabajos`)
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ESPERADOS.map((d) => d.rotulo), '  con los rótulos de la misma fila, salvo el hero («Inicio») y Trabajos («Portfolio»); y «Demos»')
+// Un subdestino existe si su `id` está en el marcado de su sección (el de Demos, en el texto de las demos).
+const SUBANCLAS_QUE_EXISTEN = SUBDESTINOS.filter((id) => S.leer('src/app/v3/_secciones/trabajos/demos/TextoDeDemos.tsx').includes(`id="${id}"`)).map((id) => `#${id}`)
+afirmarIgual(SUBANCLAS_QUE_EXISTEN, SUBDESTINOS.map((id) => `#${id}`), '  y cada subdestino tiene su ancla en el marcado (`id="demos"`, en el texto de las demos)')
 const HREFS_DEL_PIE = S.hrefsDe(PIE)
 const esExterno = (h: string): boolean => /^(mailto:|https:\/\/)/.test(h)
 const HREFS_INTERNOS = HREFS_DEL_PIE.filter((h) => !esExterno(h) && h !== CONTACTO_DEL_PIE.destino)
 // [RETOQUE 3D] 3I: el pie ya no ENLAZA al contacto: lo ES (el formulario `#contacto`, destino de todo lo que lleva a contacto).
 afirmarIgual(HREFS_DEL_PIE.filter((h) => h === CONTACTO_DEL_PIE.destino).length, 0, 'el pie no enlaza al contacto: el formulario de contacto está en el pie')
-afirmarIgual(S.aLaNada(HREFS_INTERNOS, ANCLAS_QUE_EXISTEN), [], `los ${HREFS_INTERNOS.length} enlaces internos del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp y las redes)`)
+afirmarIgual(S.aLaNada(HREFS_INTERNOS, [...ANCLAS_QUE_EXISTEN, ...SUBANCLAS_QUE_EXISTEN]), [], `los ${HREFS_INTERNOS.length} enlaces internos del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp y las redes)`)
 afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino).filter((d) => d !== '#contacto'), ANCLAS_QUE_EXISTEN), [], `y los de la pastilla también; «Contacto» abre el formulario`)
 afirmar(ENLACES_DE_MUESTRA.at(-1)?.destino === '#contacto' && ENLACES_DE_MUESTRA.at(-1)?.rotulo === 'Contacto', '  «Contacto» de la pastilla va a `#contacto`, que el chrome intercepta para abrir el formulario')
 controlPositivo('el detector ve un href a la nada', S.HREFS_A_LA_NADA, (l: readonly string[]) => S.aLaNada(l, ANCLAS_QUE_EXISTEN).length === 0)

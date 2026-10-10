@@ -1,6 +1,7 @@
 'use client'
 
 import { useMotionValue, useTransform, type MotionValue } from 'motion/react'
+import { useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -14,10 +15,13 @@ import { CanalDeTexto, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
+import { useDisposicionDelPie } from '../../_lib/pie3d/disposicion'
 import { LlegadaDelPie, useModoDelPie, useProgresoDelPie } from '../../_lib/pie3d/registro'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { TITULAR_DE_CIERRE } from './contenido'
 import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
+import { RecorridoDelPie } from './RecorridoDelPie'
+import { useArribaFijo } from './useArribaFijo'
 
 /**
  * 08 · CIERRE — el pie, armado alrededor del logo. **[FINAL]**
@@ -61,6 +65,11 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
   // es el 3D; lo interactivo queda quieto en su lugar, donde la escena lo lleva sobre su pieza), y con la fila de abajo
   // en la columna izquierda: a la profundidad del logo, lo que está más abajo que su base queda bajo el piso.
   const volumen = useModoDelPie() === 'volumen'
+  // [PULIDO 10] J8 · con el pie de volumen, 25/50/25 (o lo que pida `?pie=`: `_lib/pie3d/disposicion.ts`).
+  const disposicion = useDisposicionDelPie()
+  const anchoDeLaColumna = volumen ? 'escritorio:w-1/4' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'
+  const columnaDelFormulario = useRef<HTMLDivElement>(null)
+  useArribaFijo(columnaDelFormulario, volumen)
   const progreso = volumen ? null : deLaSeccion
   // [PASADA FINAL] C2 · en 3D llega por columnas (`escena/pie3d/coreografia.ts`), con el progreso de esta pantalla.
   useProgresoDelPie(volumen ? deLaSeccion : null)
@@ -77,7 +86,7 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
     >
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}
-      <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
+      <div className={cn('escritorio:absolute escritorio:top-1/2 escritorio:left-0 escritorio:-translate-y-1/2', anchoDeLaColumna)}>
         <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-3)] tablet:gap-[var(--spacing-6)]">
           <TextoDelPie className="max-escritorio:hidden">
             <Logotipo />
@@ -99,15 +108,29 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
             </div>
             <ContactoDelPie />
           </LlegadaDelPie>
+          {volumen && disposicion === 'producto' && <RecorridoDelPie className="escritorio:mt-[var(--spacing-4)]" />}
           {volumen && <RedesDelPie />}
           {volumen && <LineaLegal />}
         </Llega>
       </div>
-      <div className="escritorio:absolute escritorio:top-1/2 escritorio:right-0 escritorio:w-[calc(50%-var(--hueco-del-pie))] escritorio:-translate-y-1/2">
+      {/* [PULIDO 10] J8 · `?pie=columna2`: el recorrido en la tercera de cuatro columnas (el logo, en la segunda). */}
+      {volumen && disposicion === 'columna2' && (
+        <div className="escritorio:absolute escritorio:top-1/2 escritorio:left-1/2 escritorio:w-1/4 escritorio:-translate-y-1/2 escritorio:pl-[var(--spacing-8)]">
+          <RecorridoDelPie />
+        </div>
+      )}
+      {/* [PULIDO 10] J8 · el formulario, con su techo fijo (`useArribaFijo`): la tarjeta de gracias y un error no lo corren. */}
+      <div ref={columnaDelFormulario} className={cn('escritorio:absolute escritorio:top-1/2 escritorio:right-0 escritorio:-translate-y-1/2', anchoDeLaColumna)}>
         <LlegaConProgreso progreso={progreso} ventana={LLEGADAS_DEL_PIE.derecha}>
-          {(p) => <ColumnasDelPie progreso={p} />}
+          {(p) => <ColumnasDelPie progreso={p} sinRecorrido={volumen} />}
         </LlegaConProgreso>
       </div>
+      {/* [PULIDO 10] J8 · `?pie=menu-abajo`: el recorrido en una fila, abajo, de lado a lado. */}
+      {volumen && disposicion === 'menu-abajo' && (
+        <div className="escritorio:absolute escritorio:inset-x-0 escritorio:bottom-[var(--spacing-8)]">
+          <RecorridoDelPie enFila className="items-center" />
+        </div>
+      )}
       {!volumen && (
         <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
           <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">

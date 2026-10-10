@@ -301,7 +301,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       enVuelo = true
       // [VIAJES] El destino es un nudo de la coreografía (`destinosDelViaje.ts`), medido en el click; y
       // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).
-      const destinoEnPx = destinoDelViaje(seccion)
+      // [PULIDO 10] J8 · un ancla con destino propio adentro de su sección (Demos, en Trabajos) viaja a ése.
+      const destinoEnPx = destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)
       // [NOCTURNO FINAL] A2 · la velocidad con tope: un viaje largo tarda más (`deslizamiento.ts`).
       // [PULIDO 2] 2 · ahora función de la distancia de la escena, con saturación: de 1,2 s a 2,5 s del click a la llegada.
       const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))

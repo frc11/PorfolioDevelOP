@@ -166,10 +166,33 @@ const NUDOS: Readonly<Record<string, (panel: HTMLElement, v: number) => number |
 /** Las secciones a las que se puede viajar: las que tienen nudo. */
 export const DESTINOS_CON_NUDO: readonly string[] = Object.keys(NUDOS)
 
-/** EL DESTINO DEL VIAJE, en píxeles enteros de scroll: el nudo de la sección, dentro del documento. */
-export function destinoDelViaje(seccion: HTMLElement): number {
+/**
+ * [PULIDO 10] J8 · LOS DESTINOS QUE VIVEN ADENTRO DE UNA SECCIÓN (el ancla, no su sección): Demos, al final del pin de Trabajos,
+ * con las demos ya llegadas (la ventana de las demos se cuenta desde el final del pin y su llegada termina una muesca antes
+ * del despineado: `trabajos/geometria.ts`). El pin abarca la sección entera (el hijo pegado mide una pantalla), así que el
+ * final es el de la sección menos una pantalla, dos píxeles antes (todavía clavada: la de abajo no asoma). Sin coreografía
+ * (la rama quieta), el tope del ancla.
+ */
+const SUBNUDOS: Readonly<Record<string, (ancla: HTMLElement, v: number) => number | null>> = {
+  demos: (ancla, v) => {
+    const seccion = ancla.closest<HTMLElement>('[data-panel]')
+    if (seccion === null || ancla.closest(SELECTOR_DEL_BLOQUE_ANIMADO) === null) return null
+    const alto = seccion.getBoundingClientRect().height
+    return alto <= v ? null : Math.floor(topeSinPegar(seccion) + alto - v - 2)
+  },
+}
+
+/** Los anclas con destino propio adentro de su sección. */
+export const SUBDESTINOS: readonly string[] = Object.keys(SUBNUDOS)
+
+/**
+ * EL DESTINO DEL VIAJE, en píxeles enteros de scroll: el nudo de la sección, dentro del documento. [PULIDO 10] J8 · con
+ * `ancla` (un ancla adentro de la sección), su subnudo si lo tiene.
+ */
+export function destinoDelViaje(seccion: HTMLElement, ancla: HTMLElement | null = null): number {
   const id = seccion.getAttribute('data-panel') ?? ''
-  const nudo = NUDOS[id]?.(seccion, window.innerHeight) ?? null
+  const sub = ancla === null ? undefined : SUBNUDOS[ancla.id]
+  const nudo = sub !== undefined && ancla !== null ? (sub(ancla, window.innerHeight) ?? Math.round(destinoDelAncla(ancla))) : (NUDOS[id]?.(seccion, window.innerHeight) ?? null)
   if (nudo === null) return Math.round(destinoDelAncla(seccion))
   const maximo = Math.floor(Math.max(0, document.documentElement.scrollHeight - window.innerHeight))
   return Math.min(Math.max(nudo, 0), maximo)

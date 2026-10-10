@@ -4,6 +4,8 @@ import { ArrowUpRight } from 'lucide-react'
 import type { MotionValue } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { BloqueDeColumnasDelPie } from '../../_componentes/chrome/Pie'
 import { EnlaceDelPieConIcono } from '../../_componentes/chrome/PiePiezas'
 import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
@@ -137,20 +139,23 @@ function CajaDeVidrio({ children }: { readonly children: ReactNode }): React.JSX
 export interface ColumnasDelPieProps {
   /** El progreso del bloque de P2. `null` cuando no hay coreografía. */
   readonly progreso: MotionValue<number> | null
+  /** [PULIDO 10] J8 · con el pie de volumen el recorrido va en texto a la izquierda (`RecorridoDelPie`): acá queda el contacto. */
+  readonly sinRecorrido?: boolean
 }
 
-export function ColumnasDelPie({ progreso }: ColumnasDelPieProps): React.JSX.Element {
+export function ColumnasDelPie({ progreso, sinRecorrido = false }: ColumnasDelPieProps): React.JSX.Element {
+  const columnas = sinRecorrido ? COLUMNAS.filter((c) => c.clase !== 'recorrido') : COLUMNAS
   return (
     // SPRINT PANEL 3 · el newsletter se mudó a Tu Panel: dos columnas llenan el ancho que la grilla de tres dejaba con un hueco.
     // [FINAL 3] Abajo de 1024 queda sola la navegación: el contacto va con la frase.
     // [PULIDO 3] A2 · en la tablet, el contacto toma el alto que le queda a la columna (hasta las redes).
-    <BloqueDeColumnasDelPie className="tablet:grid-cols-1 tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[var(--filas-de-la-navegacion-del-pie)] escritorio:grid-cols-2">
-      {COLUMNAS.map((columna, indice) => (
+    <BloqueDeColumnasDelPie className={cn('tablet:grid-cols-1 tablet:max-escritorio:h-full tablet:max-escritorio:grid-rows-[var(--filas-de-la-navegacion-del-pie)]', sinRecorrido ? 'escritorio:grid-cols-1' : 'escritorio:grid-cols-2')}>
+      {columnas.map((columna, indice) => (
         <CanalDePieza
           key={columna.id}
           progreso={progreso}
           patron="P2"
-          cantidad={COLUMNAS.length}
+          cantidad={columnas.length}
           indice={indice}
           // [FINAL 2] El recorrido mezcla abajo de 1024; sus enlaces toman la tinta del papel en `banda.css`. El contacto, tarjeta.
           className={CAJA_DE_LA_COLUMNA[columna.clase]}

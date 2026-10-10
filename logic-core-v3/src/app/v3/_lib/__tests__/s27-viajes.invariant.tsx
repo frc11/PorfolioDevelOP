@@ -185,7 +185,8 @@ const DESTINOS = quitarComentarios(leer('src/app/v3/_componentes/destinosDelViaj
 const sinPixeles = (f: string): boolean => !/[^\w.]\d{2,}/.test(f)
 afirmar(sinPixeles(DESTINOS), 'y ningún destino está escrito en píxeles: el módulo no tiene un solo número de dos cifras')
 controlPositivo('  el detector vería un destino escrito a mano', 'trabajos: () => 5072,', sinPixeles)
-afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion)') && EFECTO.includes('lenis.scrollTo(destinoEnPx, {') && EFECTO.includes('destinoEnPx,'), 'los dos motores y el salto van al MISMO píxel, medido en el click')
+// [PULIDO 10] J8 · con el ancla, si es un subdestino adentro de su sección (Demos, en Trabajos): el mismo píxel para los dos motores.
+afirmar(EFECTO.includes('const destinoEnPx = destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)') && EFECTO.includes('lenis.scrollTo(destinoEnPx, {') && EFECTO.includes('destinoEnPx,'), 'los dos motores y el salto van al MISMO píxel, medido en el click')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · La noche durante el viaje')

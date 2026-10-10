@@ -104,10 +104,15 @@ const SECCIONES_QUE_EL_PIE_ENLAZA: readonly string[] = IDS_DE_SECCION
  */
 /** [FINAL 3] Sin Números (no se monta) y con «Inicio» en lugar de «Hero». */
 const SIN_ENLACE_EN_EL_PIE: readonly string[] = ['cierre', 'numeros']
-const ROTULO_EN_EL_PIE: Readonly<Record<string, string>> = { hero: 'Inicio' }
+// [PULIDO 10] J8 · «Portfolio» (no «Trabajos»: el nombre de la sección en la barra).
+const ROTULO_EN_EL_PIE: Readonly<Record<string, string>> = { hero: 'Inicio', trabajos: 'Portfolio' }
 export const DESTINOS_DE_LA_RUTA: readonly DestinoDeLaRuta[] = SECCIONES_QUE_EL_PIE_ENLAZA.filter(
   (id) => !SIN_ENLACE_EN_EL_PIE.includes(id),
-).map((id) => ({ ancla: `#${id}`, rotulo: ROTULO_EN_EL_PIE[id] ?? seccionDe(id).nombre }))
+).flatMap((id) => [
+  { ancla: `#${id}`, rotulo: ROTULO_EN_EL_PIE[id] ?? seccionDe(id).nombre },
+  // [PULIDO 10] J8 · y Demos, después de Portfolio: un ancla ADENTRO de Trabajos, con su propio destino de viaje.
+  ...(id === 'trabajos' ? [{ ancla: '#demos', rotulo: 'Demos' }] : []),
+])
 
 /**
  * El CTA. Va en TINTA por instrucción —nunca acento— y lleva a un destino que

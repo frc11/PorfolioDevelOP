@@ -259,6 +259,8 @@ export const SELECTOR_DE_LOS_VIAJES = [
   '[data-pieza="barra"] a[data-pieza="barra-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
   '[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace-icono"]',
+  // [PULIDO 10] J8 · el recorrido del pie como texto.
+  '[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace"]',
 ].join(', ')
 
 /** [VIAJES] Con movimiento reducido no hay viaje: un salto al mismo destino, tapado por un fundido corto. */

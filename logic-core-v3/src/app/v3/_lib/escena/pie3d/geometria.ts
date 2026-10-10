@@ -4,6 +4,7 @@ import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 import type { CajaDelPie, LetraDelPie, MedidaDeLaPieza, PesoDelPie, TrazoDelPie } from '../../pie3d/medida'
+import type { FormaDeLaPieza } from '../../pie3d/registro'
 import { INK_COLOR } from '../probeScene'
 
 /**
@@ -34,6 +35,8 @@ export const VOLUMEN_DEL_PIE = {
   relieve: { px: 2.5, em: 0.18 },
   /** El texto suelto, como los títulos (em). */
   texto: { profundidad: 0.14, bisel: { grosor: 0.012, tamano: 0.008, segmentos: 2 } },
+  /** [PULIDO 10] J8 · el subrayado de un enlace de texto: el del sitio (tres filetes: `--cta-subrayado-alto`), a 0,16 em de la base. */
+  subrayado: { alto: 3, bajo: 0.16 },
   curvas: 4,
   /** El radio de una placa cuyo elemento no tiene (px). */
   radio: 6,
@@ -211,16 +214,45 @@ export interface PiezaArmada {
   readonly hundible: THREE.BufferGeometry | null
   /** El espesor de la pieza (px), para su sombra. */
   readonly espesor: number
+  /** [PULIDO 10] J8 · de dónde crece lo que se hunde (px desde la izquierda de la caja): el subrayado de un enlace, desde su primera letra. */
+  readonly origen?: number
+}
+
+/** [PULIDO 10] J8 · lo que ocupan las letras a lo ancho (px): de la primera a donde termina la última (su avance, de la fuente). */
+function anchoDeLasLetras(ls: readonly LetraDelPie[], fuentes: FuentesDelPie): { readonly izquierda: number; readonly derecha: number } {
+  let [izquierda, derecha] = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
+  for (const l of ls) {
+    const f = (l.archivo === true ? fuentes.archivo : undefined) ?? fuentes[l.peso]
+    const glifo = f.data.glyphs[l.ch]
+    izquierda = Math.min(izquierda, l.x)
+    derecha = Math.max(derecha, l.x + (glifo === undefined ? 0.6 : glifo.ha / f.data.resolution) * l.cuerpo)
+  }
+  return { izquierda, derecha }
 }
 
 /** Arma la geometría de una pieza con lo que se midió del DOM. */
-export function armarLaPieza(forma: 'texto' | 'placa' | 'formulario', m: MedidaDeLaPieza, fuentes: FuentesDelPie): PiezaArmada {
+export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes: FuentesDelPie): PiezaArmada {
   const v = VOLUMEN_DEL_PIE
   const cara = { x: 0, y: 0, ancho: m.caja.ancho, alto: m.caja.alto }
   if (forma === 'texto') {
     const geos = letras(m.letras, fuentes, 0, null).map((g, k, todas) => conSuLetra(pintar(g, COLORES_DEL_PIE.negro), todas.length > 1 ? k / (todas.length - 1) : 0))
     const cuerpo = m.letras.reduce((a, l) => Math.max(a, l.cuerpo), 0)
     return { fija: geos.length === 0 ? null : unir(geos), hundible: null, espesor: v.texto.profundidad * cuerpo }
+  }
+  // [PULIDO 10] J8 · el enlace de texto: las letras como el texto suelto (llegan enteras) y, aparte, su subrayado: una barra con
+  // la profundidad de las letras, de la primera a la última, que se dibuja escalándola desde su izquierda (`armadas.ts`).
+  if (forma === 'enlace') {
+    const geos = letras(m.letras, fuentes, 0, null).map((g) => sinLetra(pintar(g, COLORES_DEL_PIE.negro)))
+    const cuerpo = m.letras.reduce((a, l) => Math.max(a, l.cuerpo), 0)
+    if (geos.length === 0) return { fija: null, hundible: null, espesor: 0 }
+    const { izquierda, derecha } = anchoDeLasLetras(m.letras, fuentes)
+    const primera = m.letras[0]
+    const fuente = (primera.archivo === true ? fuentes.archivo : undefined) ?? fuentes[primera.peso]
+    const arriba = baseDeLaLetra(primera, fuente.data) + v.subrayado.bajo * cuerpo
+    const d = v.texto.profundidad * cuerpo
+    const barra = new THREE.BoxGeometry(derecha - izquierda, v.subrayado.alto, d)
+    barra.translate((derecha - izquierda) / 2, -(arriba + v.subrayado.alto / 2), -d / 2)
+    return { fija: unir(geos), hundible: sinLetra(pintar(barra, COLORES_DEL_PIE.negro)), espesor: d, origen: izquierda }
   }
   if (forma === 'placa') {
     const placa = pintar(solido(rectanguloRedondeado(new THREE.Shape(), cara, m.caja.radio > 0 ? m.caja.radio : v.radio), v.placa, v.bisel), COLORES_DEL_PIE.negro)
@@ -239,8 +271,8 @@ export function armarLaPieza(forma: 'texto' | 'placa' | 'formulario', m: MedidaD
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */
-export function contenidoDe(forma: 'texto' | 'placa' | 'formulario', m: MedidaDeLaPieza): { readonly izquierda: number; readonly derecha: number; readonly arriba: number; readonly abajo: number } {
-  if (forma !== 'texto' || m.letras.length === 0) return { izquierda: 0, derecha: m.caja.ancho, arriba: 0, abajo: m.caja.alto }
+export function contenidoDe(forma: FormaDeLaPieza, m: MedidaDeLaPieza): { readonly izquierda: number; readonly derecha: number; readonly arriba: number; readonly abajo: number } {
+  if ((forma !== 'texto' && forma !== 'enlace') || m.letras.length === 0) return { izquierda: 0, derecha: m.caja.ancho, arriba: 0, abajo: m.caja.alto }
   return {
     izquierda: Math.min(...m.letras.map((l) => l.x)),
     derecha: Math.max(...m.letras.map((l) => l.x + l.cuerpo * 0.6)),

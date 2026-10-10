@@ -14,6 +14,7 @@ import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDe
 import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { varianteDeGracias, type VarianteDeGracias } from '../../formularios/gracias'
 import { viajeEnCurso } from '../viaje'
+import { cubicBezierEase } from '../bezier'
 import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
@@ -37,6 +38,9 @@ const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new F
 /** Cuánto se hunde (px) y en cuánto tiempo (la constante, s). */
 export const HUNDIDA_DEL_PIE = { encima: 5, apretada: 12, tau: 0.05 } as const
 
+/** [PULIDO 10] J8 · el subrayado de un enlace de texto: el del sitio (`cta.css`: `--duracion-muy-lenta` y `--ease-principal`). */
+export const SUBRAYADO_DEL_PIE = { s: 0.7, curva: [0.77, 0, 0.175, 1] } as const
+
 /** Lo que se dibuja fuera del cuadro (px): una pieza que entra ya está. */
 const MARGEN = 120
 
@@ -49,7 +53,7 @@ export interface Armada {
   readonly viaje: THREE.Group
   /** [NOCTURNO FINAL] B4 · su caja en la pieza (px): para que el polvo que cae no la atraviese. */
   readonly caja: THREE.Box3
-  /** Lo que se hunde: la placa de un enlace; en el formulario, la tecla. */
+  /** Lo que se hunde: la placa de un enlace; en el formulario, la tecla. [PULIDO 10] J8 · en un enlace de texto, su subrayado. */
   readonly cuerpo: THREE.Group
   readonly mallas: readonly THREE.Mesh[]
   readonly material: THREE.MeshStandardMaterial
@@ -57,6 +61,7 @@ export interface Armada {
   readonly espesor: number
   readonly contenido: ReturnType<typeof contenidoDe>
   readonly delHundido: Element | null
+  /** Cuánto se hundió (px). [PULIDO 10] J8 · en un enlace de texto, cuánto se dibujó su subrayado (0 a 1). */
   hundido: number
   css: string
   d: number
@@ -126,9 +131,12 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     const arriba = a.medida.caja.y - sy
     a.d = d
     a.mundoPorPx = colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
-    const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
-    a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
-    a.cuerpo.position.z = -a.hundido
+    if (a.pieza.forma === 'enlace') dibujarElSubrayado(a, s.quieto, dt)
+    else {
+      const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
+      a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
+      a.cuerpo.position.z = -a.hundido
+    }
     // El DOM, donde la pieza va a quedar (el viaje en cero); después, la pieza en camino.
     a.viaje.matrix.identity()
     a.grupo.updateMatrixWorld(true)
@@ -141,9 +149,24 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
   // [NOCTURNO FINAL] B4 · y el polvo que cae no las atraviesa: sus cajas, para la simulación (`cajasDelPolvo.ts`).
   let cajas = 0
-  for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)
+  // [PULIDO 10] J8 · lo que son letras sueltas (el texto y los enlaces de texto) no frena el polvo: sólo las placas.
+  for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto' && a.pieza.forma !== 'enlace') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)
   CAJAS_DEL_PIE.uCuantasCajasDelPie.value = cajas
   EN_VIVO.pieEntero = s.coreografia.mostrado >= 0.999 && s.armadas.every((a) => !a.grupo.visible || a.llego >= 0.999)
+}
+
+/**
+ * [PULIDO 10] J8 · el subrayado de un enlace de texto: con el mouse encima o el foco del teclado crece desde la izquierda, en el
+ * tiempo y la curva del subrayado del sitio; al salir, vuelve igual. Con movimiento reducido, de golpe.
+ */
+function dibujarElSubrayado(a: Armada, quieto: boolean, dt: number): void {
+  const h = a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido)
+  const pide = h !== undefined && (h.encima || h.foco) ? 1 : 0
+  const paso = dt / SUBRAYADO_DEL_PIE.s
+  a.hundido = quieto ? pide : pide > a.hundido ? Math.min(pide, a.hundido + paso) : Math.max(pide, a.hundido - paso)
+  const dibujado = cubicBezierEase(SUBRAYADO_DEL_PIE.curva, a.hundido)
+  a.cuerpo.scale.x = Math.max(1e-4, dibujado)
+  a.cuerpo.visible = dibujado > 1e-3
 }
 
 /** [PASADA FINAL] C2 · lo mostrado persigue al scroll por tramos (en un viaje del menú, desarmado); con el scroll quieto, se asienta. */
@@ -236,7 +259,7 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
 }
 
 function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estudio: THREE.Texture, estado: string | null = null): Armada {
-  const { fija, hundible, espesor } = armarLaPieza(pieza.forma, medida, FUENTES)
+  const { fija, hundible, espesor, origen } = armarLaPieza(pieza.forma, medida, FUENTES)
   const uniformes = uniformesDelPie()
   uniformes.uCuerpoDelPie.value = medida.letras.reduce((m, l) => Math.max(m, l.cuerpo), 0)
   const material = materialDelPie(uniformes)
@@ -247,6 +270,9 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   const cuerpo = new THREE.Group()
   grupo.add(viaje)
   viaje.add(cuerpo)
+  // [PULIDO 10] J8 · el subrayado crece desde su primera letra (su geometría arranca en x = 0).
+  cuerpo.position.x = origen ?? 0
+  cuerpo.visible = pieza.forma !== 'enlace'
   grupo.name = `pie de volumen · ${pieza.forma}`
   const mallas: THREE.Mesh[] = []
   for (const [geo, padre] of [[fija, viaje], [hundible, cuerpo]] as const) {
@@ -265,7 +291,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
     malla.geometry.computeBoundingBox()
     if (malla.geometry.boundingBox !== null) caja.union(malla.geometry.boundingBox)
   }
-  const delHundido = pieza.forma === 'placa' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
+  const delHundido = pieza.forma === 'placa' || pieza.forma === 'enlace' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
   return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null }
 }
 

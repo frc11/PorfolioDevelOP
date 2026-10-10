@@ -35,7 +35,11 @@ titulo('1 · La composición: el centro libre para el logo')
 afirmar(/<footer[^>]*data-pieza="pie"/.test(quieto), 'el pie es el `<footer>` de la página, adentro de la sección de cierre')
 afirmarIgual(COLUMNAS.map((c) => c.titulo), ['El recorrido', 'Contacto'], 'a la derecha, las columnas de hoy: el recorrido y el contacto')
 afirmar(quieto.indexOf(TITULAR_DE_CIERRE) < quieto.indexOf('El recorrido') && quieto.indexOf('El recorrido') < quieto.indexOf(LINEA_LEGAL), '  en orden de lectura: la identidad y el contacto, la navegación y el pie de página')
-afirmar((FUENTE.match(/w-\[calc\(50%-var\(--hueco-del-pie\)\)\]/g) ?? []).length === 2, 'las dos columnas dejan libre el hueco del logo: medio cuadro menos el hueco, a cada lado')
+// [PULIDO 10] J8 · una sola clase para las dos (`anchoDeLaColumna`): en el pie plano, medio cuadro menos el hueco; con el de
+// volumen, un cuarto (25/50/25), que deja libre más que el hueco en todos los cuadros desde 1024 (también en el retrato).
+const HUECO_DEL_PIE = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
+const unCuartoDejaElHueco = [[1024, 824], [1280, 800], [1440, 900], [1920, 1080], [1024, 1366]].every(([w, h]) => 0.25 * w <= 0.5 * w - (HUECO_DEL_PIE * h) / 100)
+afirmar(FUENTE.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-1/4' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") && (FUENTE.match(/, anchoDeLaColumna\)\}/g) ?? []).length === 2 && unCuartoDejaElHueco, 'las dos columnas dejan libre el hueco del logo: en el pie plano, medio cuadro menos el hueco a cada lado; con el de volumen, un cuarto (25/50/25)', `hueco ${HUECO_DEL_PIE.toFixed(1)} svh`)
 const hueco = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
 afirmar(hueco > 10 && hueco < 25, `el hueco sale de la pose E (a ${String(POSES_DEL_FINAL.pie.distance)}): ${hueco.toFixed(1)} svh`)
 afirmar(!/CabeceraDeSeccion|MarcaDeSeccion|PrefijoDeServicio|Isotipo/.test(FUENTE) && !/data-pieza="(marca-de-seccion|prefijo-de-servicio|isotipo)"/.test(quieto + movido), 'sin el punto azul (ni la marca de sección ni el prefijo) y sin el logo chico: el 3D ya está detrás')
@@ -57,7 +61,8 @@ afirmar(WHATSAPP.href.startsWith('https://wa.me/5493814154708?text=') && quieto.
 afirmarIgual(REDES.map((r) => r.rotulo), ['Instagram', 'LinkedIn', 'TikTok', 'Facebook'], 'las cuatro redes, en orden')
 afirmar(REDES.every((r) => quieto.includes(`aria-label="${r.rotulo}"`)), '  cada una con su nombre accesible (son sólo íconos)')
 afirmar(textoVisible(quieto).includes(LINEA_LEGAL), `la línea legal: «${LINEA_LEGAL}»`)
-afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ['Inicio', 'Quiénes somos', 'Trabajos', 'Servicios', 'Tu panel', 'Por qué develOP'], 'la navegación: sin Números (no se monta) y con «Inicio» en lugar de «Hero»')
+// [PULIDO 10] J8 · «Portfolio» (el nombre de la barra) y Demos, un destino adentro de Trabajos.
+afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ['Inicio', 'Quiénes somos', 'Portfolio', 'Demos', 'Servicios', 'Tu panel', 'Por qué develOP'], 'la navegación: sin Números (no se monta), con «Inicio» en lugar de «Hero», «Portfolio» en lugar de «Trabajos» y Demos')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Llega después del alejamiento, y termina en el último píxel')

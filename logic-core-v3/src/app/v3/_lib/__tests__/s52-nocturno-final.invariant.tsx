@@ -581,7 +581,8 @@ const simB4 = sinComentarios(leer('_lib/escena/polvo/simulacion.ts'))
 const armadasB4 = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
 const choqueBien = (sim: string, ar: string, glsl: string): boolean =>
   /p \+= relajar\( v, objetivo, [^;]+;\s*chocarConElPie\( p, v, azar \);\s*if \( posarseEnElLogo\( p, antes \) \) \{/.test(sim) && sim.includes('${CAJAS_DEL_PIE_GLSL}') &&
-  ar.includes("for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)") &&
+  // [PULIDO 10] J8 · las placas frenan el polvo; las letras sueltas no (el texto y, ahora, los enlaces de texto del recorrido).
+  ar.includes("for (const a of s.armadas) if (a.grupo.visible && a.pieza.forma !== 'texto' && a.pieza.forma !== 'enlace') cajas = escribirLaCaja(cajas, a.viaje.matrixWorld, a.caja)") &&
   glsl.includes('if ( arriba && apoya && h < 0.25 * medida ) { k = j; menor = -1.0; break; }') && glsl.includes('if ( arriba ) continue;') && glsl.includes('if ( hondo.x <= 0.0 || hondo.y <= 0.0 || hondo.z <= 0.0 ) continue;')
 afirmar(choqueBien(simB4, armadasB4, CAJAS_DEL_PIE_GLSL) && POLVO_EN_EL_PIE.cupo <= 0.35 && POLVO_EN_EL_PIE.cajas >= 10, '  la mota que cae no atraviesa las piezas del pie (sale por la cara más cercana que no es la de arriba); por la de arriba se apoya sólo un cupo (no se acumula), y sólo si recién la cruzó; la apoyada queda frenada en su cara (si la pieza se mueve, la lleva)', `cupo ${String(POLVO_EN_EL_PIE.cupo * 100)} % · hasta ${String(POLVO_EN_EL_PIE.cajas)} piezas`)
 controlPositivo('  el detector VE un polvo que atraviesa las piezas', [simB4.replace(/chocarConElPie\( p, v, azar \);\s*/, ''), armadasB4, CAJAS_DEL_PIE_GLSL] as const, ([si, ar, gl]: readonly [string, string, string]) => choqueBien(si, ar, gl))

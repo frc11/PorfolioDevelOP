@@ -21,6 +21,7 @@ import path from 'node:path'
 import * as THREE from 'three'
 
 import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
+import { SUBDESTINOS } from '../../_componentes/destinosDelViaje'
 import { DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { preciosEncontrados } from '../../_secciones/_contrato/escaneo'
@@ -121,7 +122,8 @@ const viajan = (selector: string, fuente: string): boolean => selector.split(', 
 afirmar(viajan(SELECTOR_DE_LOS_VIAJES, columnas), 'los enlaces del recorrido del pie entran en el MISMO selector que la barra y el menú: el mismo escucha, el mismo plan de la escena (día y noche) y la misma llegada del título al terminar')
 controlPositivo('el detector VE los enlaces del pie afuera del viaje (el salto de antes)', SELECTOR_DE_LOS_VIAJES.replace(`, ${DEL_PIE}`, ''), (sel: string) => viajan(sel, columnas))
 const secciones = IDS_DE_SECCION as readonly string[]
-afirmar(DESTINOS_DE_LA_RUTA.length > 0 && DESTINOS_DE_LA_RUTA.every((d) => d.ancla.startsWith('#') && secciones.includes(d.ancla.slice(1))), '  cada destino es el ancla de una sección (el viaje la resuelve a su nudo); ninguno es `#contacto` (ése abre el panel)', DESTINOS_DE_LA_RUTA.map((d) => d.ancla).join(' '))
+// [PULIDO 10] J8 · o un subdestino declarado adentro de una sección (Demos, en Trabajos: `SUBDESTINOS`, con su propio nudo).
+afirmar(DESTINOS_DE_LA_RUTA.length > 0 && DESTINOS_DE_LA_RUTA.every((d) => d.ancla.startsWith('#') && (secciones.includes(d.ancla.slice(1)) || SUBDESTINOS.includes(d.ancla.slice(1)))), '  cada destino es el ancla de una sección (el viaje la resuelve a su nudo) o un subdestino declarado adentro de una (su subnudo); ninguno es `#contacto` (ése abre el panel)', DESTINOS_DE_LA_RUTA.map((d) => d.ancla).join(' '))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A1 · El texto 2D pegado a su título 3D')

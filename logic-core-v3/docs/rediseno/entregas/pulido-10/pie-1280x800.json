@@ -1,0 +1,284 @@
+{
+ "producto": {
+  "enlaces": [
+   {
+    "t": "Inicio",
+    "caja": [
+     32,
+     504,
+     72,
+     532
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Quiénes somos",
+    "caja": [
+     32,
+     536,
+     140,
+     564
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Portfolio",
+    "caja": [
+     32,
+     568,
+     95,
+     596
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Demos",
+    "caja": [
+     32,
+     600,
+     81,
+     628
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Servicios",
+    "caja": [
+     164,
+     504,
+     230,
+     532
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Tu panel",
+    "caja": [
+     164,
+     536,
+     223,
+     564
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Por qué develOP",
+    "caja": [
+     164,
+     568,
+     279,
+     596
+    ],
+    "renglones": 1
+   }
+  ],
+  "fuera": [],
+  "columnas": [
+   [
+    32,
+    72,
+    336,
+    727
+   ],
+   [
+    944,
+    187,
+    1248,
+    613
+   ]
+  ],
+  "listo": true
+ },
+ "columna2": {
+  "enlaces": [
+   {
+    "t": "Inicio",
+    "caja": [
+     672,
+     349,
+     712,
+     377
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Quiénes somos",
+    "caja": [
+     672,
+     381,
+     780,
+     409
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Portfolio",
+    "caja": [
+     672,
+     413,
+     735,
+     441
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Demos",
+    "caja": [
+     672,
+     445,
+     721,
+     473
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Servicios",
+    "caja": [
+     804,
+     349,
+     870,
+     377
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Tu panel",
+    "caja": [
+     804,
+     381,
+     863,
+     409
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Por qué develOP",
+    "caja": [
+     804,
+     413,
+     920,
+     441
+    ],
+    "renglones": 1
+   }
+  ],
+  "fuera": [],
+  "columnas": [
+   [
+    32,
+    166,
+    336,
+    633
+   ],
+   [
+    640,
+    326,
+    944,
+    473
+   ],
+   [
+    944,
+    187,
+    1248,
+    613
+   ]
+  ],
+  "listo": true
+ },
+ "menu-abajo": {
+  "enlaces": [
+   {
+    "t": "Inicio",
+    "caja": [
+     294,
+     660,
+     334,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Quiénes somos",
+    "caja": [
+     366,
+     660,
+     473,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Portfolio",
+    "caja": [
+     505,
+     660,
+     568,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Demos",
+    "caja": [
+     600,
+     660,
+     648,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Servicios",
+    "caja": [
+     680,
+     660,
+     747,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Tu panel",
+    "caja": [
+     779,
+     660,
+     839,
+     688
+    ],
+    "renglones": 1
+   },
+   {
+    "t": "Por qué develOP",
+    "caja": [
+     871,
+     660,
+     986,
+     688
+    ],
+    "renglones": 1
+   }
+  ],
+  "fuera": [],
+  "columnas": [
+   [
+    32,
+    166,
+    336,
+    633
+   ],
+   [
+    944,
+    187,
+    1248,
+    613
+   ],
+   [
+    32,
+    637,
+    1248,
+    688
+   ]
+  ],
+  "listo": true
+ }
+}

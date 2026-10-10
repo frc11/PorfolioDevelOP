@@ -17,6 +17,8 @@ import { useAnchoMinimo } from '../useAnchoMinimo'
  *   texto        un texto suelto (el logotipo, el titular, los rótulos de columna, la línea legal): extruido en el negro
  *   placa        un enlace o un botón (el recorrido, el mail, WhatsApp, las redes): una placa con su texto en relieve
  *   formulario   el formulario entero: una sola placa, con los campos en pozos de su cara y Enviar como tecla
+ *   enlace       [PULIDO 10] J8 · un enlace de texto (el recorrido): sus letras extruidas, sin placa, y el subrayado del
+ *                sitio, que crece desde la izquierda con el mouse encima o el foco
  *
  * El estado de cada pieza que se hunde (el mouse encima, el foco del teclado, apretada) lo escriben sus escuchas acá y
  * la escena lo lee en su cuadro: ningún `setState` por cuadro.
@@ -25,7 +27,7 @@ import { useAnchoMinimo } from '../useAnchoMinimo'
  * `LlegadaDelPie` alrededor de cada grupo; sin él, `fundido`) y el pie anota el progreso de su última pantalla
  * (`useProgresoDelPie`): la escena arma con eso la coreografía (`escena/pie3d/coreografia.ts`).
  */
-export type FormaDeLaPieza = 'texto' | 'placa' | 'formulario'
+export type FormaDeLaPieza = 'texto' | 'placa' | 'formulario' | 'enlace'
 
 /** [PASADA FINAL] C2 · `atras`: desde atrás y abajo, como las letras de Portfolio; `tapa`: se levanta; `fundido`: aparece. */
 export type LlegadaDeLaPieza = 'atras' | 'tapa' | 'fundido'
